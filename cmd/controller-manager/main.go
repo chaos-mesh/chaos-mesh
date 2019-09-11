@@ -22,6 +22,7 @@ import (
 
 	"github.com/cwen0/chaos-operator/pkg/client/clientset/versioned"
 	informers "github.com/cwen0/chaos-operator/pkg/client/informers/externalversions"
+	"github.com/cwen0/chaos-operator/pkg/controller"
 	"github.com/cwen0/chaos-operator/pkg/controller/podchaos"
 	"github.com/cwen0/chaos-operator/pkg/signals"
 	"github.com/cwen0/chaos-operator/pkg/version"
@@ -42,6 +43,7 @@ var (
 func init() {
 	flag.BoolVarP(&printVersion, "version", "V", false, "print version information and exit")
 	flag.StringVar(&pprofPort, "pprof", "", "controller manager pprof port")
+	flag.DurationVar(&controller.ResyncDuration, "resync-duration", time.Duration(30*time.Second), "resync time of informer")
 
 	flag.Parse()
 }
@@ -74,8 +76,8 @@ func main() {
 		glog.Fatalf("failed to create Clientset: %v", err)
 	}
 
-	kubeInformerFactory := kubeinformers.NewSharedInformerFactory(kubeCli, time.Second*30)
-	informerFactory := informers.NewSharedInformerFactory(cli, time.Second*30)
+	kubeInformerFactory := kubeinformers.NewSharedInformerFactory(kubeCli, controller.ResyncDuration)
+	informerFactory := informers.NewSharedInformerFactory(cli, controller.ResyncDuration)
 
 	podChaosController := podchaos.NewController(
 		kubeCli, cli,
