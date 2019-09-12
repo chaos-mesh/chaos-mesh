@@ -54,10 +54,6 @@ type SelectorSpec struct {
 
 // SchedulerSpec defines information about schedule of the chaos experiment.
 type SchedulerSpec struct {
-	// Period two iterations of a specific chaos experiment.
-	// This rule will overwrite the cron rule.
-	Interval string `json:"interval"`
-
 	// Cron defines a cron job rule.
 	//
 	// Some rule examples:

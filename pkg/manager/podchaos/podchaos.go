@@ -13,13 +13,28 @@
 
 package podchaos
 
-import "github.com/cwen0/chaos-operator/pkg/apis/pingcap.com/v1alpha1"
+import (
+	"github.com/cwen0/chaos-operator/pkg/apis/pingcap.com/v1alpha1"
+	"github.com/cwen0/chaos-operator/pkg/manager"
+)
 
-// Manager manages the pod chaos job.
-type Manager struct {
+type podChaosManager struct {
+	base manager.ManagerBaseInterface
 }
 
-// Sync syncs
-func (m *Manager) Sync(_ *v1alpha1.PodChaos) error {
+func NewPodChaosManager() *podChaosManager {
+	return &podChaosManager{}
+}
+
+// Sync syncs the PodChaos resource to manager.
+func (m *podChaosManager) Sync(pc *v1alpha1.PodChaos) error {
+	runner := m.newRunner(pc)
+	m.base.AddRunner(runner)
 	return nil
+}
+
+func (m *podChaosManager) newRunner(pc *v1alpha1.PodChaos) manager.Runner {
+	return manager.Runner{
+		Job: podKillJob{},
+	}
 }

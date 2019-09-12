@@ -55,7 +55,7 @@ func (in *PodChaos) DeepCopyObject() runtime.Object {
 func (in *PodChaosList) DeepCopyInto(out *PodChaosList) {
 	*out = *in
 	out.TypeMeta = in.TypeMeta
-	in.ListMeta.DeepCopyInto(&out.ListMeta)
+	out.ListMeta = in.ListMeta
 	if in.Items != nil {
 		in, out := &in.Items, &out.Items
 		*out = make([]PodChaos, len(*in))
