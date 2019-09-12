@@ -38,12 +38,15 @@ import (
 var (
 	printVersion bool
 	pprofPort    string
+	workers      int
 )
 
 func init() {
 	flag.BoolVarP(&printVersion, "version", "V", false, "print version information and exit")
 	flag.StringVar(&pprofPort, "pprof", "", "controller manager pprof port")
 	flag.DurationVar(&controller.ResyncDuration, "resync-duration", time.Duration(30*time.Second), "resync time of informer")
+	flag.IntVar(&workers, "workers", 5, "the number of workers that are allowed to sync concurrently. "+
+		"Larger number = more responsive management, but more CPU (and network) load")
 
 	flag.Parse()
 }
@@ -87,7 +90,7 @@ func main() {
 	kubeInformerFactory.Start(stopCh)
 	informerFactory.Start(stopCh)
 
-	go podChaosController.Run()
+	go podChaosController.Run(workers, stopCh)
 
 	glog.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", pprofPort), nil))
 }

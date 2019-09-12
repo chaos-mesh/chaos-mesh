@@ -89,11 +89,10 @@ lint:
 tidy:
 	@echo "go mod tidy"
 	go mod tidy
-	git diff --quiet go.mod go.sum
 
 check-gosec:
 	@echo "security checking"
 	CGO_ENABLED=0 retool do gosec $$($(PACKAGE_DIRECTORIES))
 
 
-.PHONY: check check-all build
+.PHONY: check check-all build tidy

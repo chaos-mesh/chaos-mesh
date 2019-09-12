@@ -22,7 +22,7 @@ require (
 	gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/yaml.v2 v2.2.2 // indirect
-	k8s.io/api v0.0.0-20181128191700-6db15a15d2d3 // indirect
+	k8s.io/api v0.0.0-20181128191700-6db15a15d2d3
 	k8s.io/apimachinery v0.0.0-20181128191346-49ce2735e507
 	k8s.io/apiserver v0.0.0-20190118115647-a748535592ba
 	k8s.io/client-go v2.0.0-alpha.0.0.20190115164855-701b91367003+incompatible
