@@ -13,8 +13,19 @@
 
 package podchaos
 
+import (
+	"github.com/cwen0/chaos-operator/pkg/apis/pingcap.com/v1alpha1"
+
+	"k8s.io/client-go/kubernetes"
+	corelisters "k8s.io/client-go/listers/core/v1"
+)
+
 type podKillJob struct {
+	podChaos  *v1alpha1.PodChaos
+	kubeCli   kubernetes.Interface
+	podLister corelisters.PodLister
 }
 
 func (p podKillJob) Run() {
+
 }

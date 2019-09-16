@@ -13,12 +13,41 @@
 
 package manager
 
+import (
+	"fmt"
+
+	"github.com/robfig/cron/v3"
+)
+
 type Job interface {
 	Run()
 }
 
+// Runner is the base unit for performing chaos action.
 type Runner struct {
-	Name string
-	Rule string
-	Job  Job
+	Name    string
+	Rule    string
+	EntryID int
+	Job     Job
+}
+
+func (r *Runner) Validate() error {
+	if len(r.Name) == 0 {
+		return fmt.Errorf("runner name is empty")
+	}
+
+	if len(r.Rule) == 0 {
+		return fmt.Errorf("runner rule is empty")
+	}
+
+	if _, err := cron.NewParser(cron.Minute | cron.Hour | cron.Dom | cron.Month | cron.Dom).
+		Parse(r.Rule); err != nil {
+		return err
+	}
+
+	if r.Job == nil {
+		return fmt.Errorf("runner job is empty")
+	}
+
+	return nil
 }

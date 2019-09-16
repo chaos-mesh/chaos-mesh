@@ -45,8 +45,6 @@ func init() {
 	flag.BoolVarP(&printVersion, "version", "V", false, "print version information and exit")
 	flag.StringVar(&pprofPort, "pprof", "", "controller manager pprof port")
 	flag.DurationVar(&controller.ResyncDuration, "resync-duration", time.Duration(30*time.Second), "resync time of informer")
-	flag.IntVar(&workers, "workers", 5, "the number of workers that are allowed to sync concurrently. "+
-		"Larger number = more responsive management, but more CPU (and network) load")
 
 	flag.Parse()
 }
@@ -84,13 +82,14 @@ func main() {
 
 	podChaosController := podchaos.NewController(
 		kubeCli, cli,
-		kubeInformerFactory, informerFactory)
+		kubeInformerFactory,
+		informerFactory)
 
 	// Start method is non-blocking and runs all registered informers in a dedicated goroutine.
 	kubeInformerFactory.Start(stopCh)
 	informerFactory.Start(stopCh)
 
-	go podChaosController.Run(workers, stopCh)
+	go podChaosController.Run(stopCh)
 
 	glog.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", pprofPort), nil))
 }

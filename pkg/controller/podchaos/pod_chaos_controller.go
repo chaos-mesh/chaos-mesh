@@ -21,7 +21,9 @@ import (
 	"github.com/cwen0/chaos-operator/pkg/client/clientset/versioned"
 	informers "github.com/cwen0/chaos-operator/pkg/client/informers/externalversions"
 	listers "github.com/cwen0/chaos-operator/pkg/client/listers/pingcap.com/v1alpha1"
+	"github.com/cwen0/chaos-operator/pkg/manager"
 	"github.com/golang/glog"
+	"github.com/robfig/cron/v3"
 
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -30,6 +32,7 @@ import (
 	kubeinformers "k8s.io/client-go/informers"
 	"k8s.io/client-go/kubernetes"
 	eventv1 "k8s.io/client-go/kubernetes/typed/core/v1"
+	corelisters "k8s.io/client-go/listers/core/v1"
 	"k8s.io/client-go/tools/cache"
 	"k8s.io/client-go/tools/record"
 	"k8s.io/client-go/util/workqueue"
@@ -44,10 +47,11 @@ const (
 	MessageResourceSynced = "PodChaos synced successfully"
 )
 
-// ControlInterface implements the control logic for updating PodChaos
+// ControlInterface implements the control logic for controlling PodChaos
 // It is implemented as an interface to allow for extensions that provide different semantics.
 type ControlInterface interface {
 	UpdatePodChaos(podChaos *v1alpha1.PodChaos) error
+	DeletePodChaos(key string) error
 }
 
 // Controller is the controller implementation for pod chaos resources.
@@ -58,6 +62,10 @@ type Controller struct {
 	cli versioned.Interface
 	// control returns an interface capable of syncing a podchaos object.
 	control ControlInterface
+	// PodLister is able to list/get pod object from a shred informers's store
+	podLister corelisters.PodLister
+	// PcListerSynced returns true if the pod object shared informer has synced at least once.
+	podListerSynced cache.InformerSynced
 	// pcLister is able to list/get podchaos object from a shared informer's store.
 	pcLister listers.PodChaosLister
 	// PcListerSynced returns true if the podchaos object shared informer has synced at least once.
@@ -77,7 +85,7 @@ type Controller struct {
 func NewController(
 	kubeCli kubernetes.Interface,
 	cli versioned.Interface,
-	_ kubeinformers.SharedInformerFactory,
+	kubeInformerFactory kubeinformers.SharedInformerFactory,
 	informerFactory informers.SharedInformerFactory,
 ) *Controller {
 	// Create event broadcaster.
@@ -88,15 +96,25 @@ func NewController(
 	recorder := eventBroadcaster.NewRecorder(v1alpha1.Scheme, corev1.EventSource{Component: "podChaos"})
 
 	pcInformer := informerFactory.Pingcap().V1alpha1().PodChaoses()
+	podInformer := kubeInformerFactory.Core().V1().Pods()
+
 	controller := &Controller{
-		kubeCli:        kubeCli,
-		cli:            cli,
-		control:        NewPodChaosControl(),
-		pcLister:       pcInformer.Lister(),
-		pcListerSynced: pcInformer.Informer().HasSynced,
-		queue:          workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), "PodChaos"),
-		recorder:       recorder,
+		kubeCli:         kubeCli,
+		cli:             cli,
+		podLister:       podInformer.Lister(),
+		podListerSynced: podInformer.Informer().HasSynced,
+		pcLister:        pcInformer.Lister(),
+		pcListerSynced:  pcInformer.Informer().HasSynced,
+		queue:           workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), "PodChaos"),
+		recorder:        recorder,
 	}
+
+	controller.control = NewPodChaosControl(
+		kubeCli,
+		manager.NewManagerBase(cron.New()),
+		controller.podLister,
+		controller.pcLister,
+	)
 
 	glog.Info("Setting up pod chaos event handlers")
 
@@ -112,18 +130,23 @@ func NewController(
 }
 
 // Run runs the podchaos controller.
-func (c *Controller) Run(workers int, stopCh <-chan struct{}) {
+func (c *Controller) Run(stopCh <-chan struct{}) error {
 	defer utilruntime.HandleCrash()
 	defer c.queue.ShutDown()
 
 	glog.Info("Starting pod chaos controller")
-	defer glog.Info("Shutting pod chaos controller")
 
-	for i := 0; i < workers; i++ {
-		go wait.Until(c.worker, time.Second, stopCh)
+	glog.Info("Waiting fro informer caches to sync")
+	if ok := cache.WaitForCacheSync(stopCh, c.pcListerSynced, c.podListerSynced); ok {
+		return fmt.Errorf("failed to wait for caches to sysn")
 	}
 
+	go wait.Until(c.worker, time.Second, stopCh)
+
 	<-stopCh
+	glog.Info("Shutting pod chaos controller")
+
+	return nil
 }
 
 // worker runs a worker goroutine that invokes processNextWorkItem until the the controller's queue is closed
@@ -188,9 +211,10 @@ func (c *Controller) syncHandler(key string) error {
 	}
 
 	pc, err := c.pcLister.PodChaoses(ns).Get(name)
+	// The PodChaos may no longer exist, in which case we think the podChaos has been deleted.
 	if errors.IsNotFound(err) {
-		glog.Infof("PodChaos has been deleted %v", key)
-		return nil
+		utilruntime.HandleError(fmt.Errorf("podChaos '%s' in work queue no longer exists", key))
+		return c.control.DeletePodChaos(key)
 	}
 
 	if err != nil {

@@ -15,29 +15,42 @@ package podchaos
 
 import (
 	"github.com/cwen0/chaos-operator/pkg/apis/pingcap.com/v1alpha1"
+	listers "github.com/cwen0/chaos-operator/pkg/client/listers/pingcap.com/v1alpha1"
+	"github.com/cwen0/chaos-operator/pkg/manager"
+	"github.com/cwen0/chaos-operator/pkg/manager/podchaos"
 
 	apiequality "k8s.io/apimachinery/pkg/api/equality"
 	errorutils "k8s.io/apimachinery/pkg/util/errors"
+	"k8s.io/client-go/kubernetes"
+	corelisters "k8s.io/client-go/listers/core/v1"
 )
 
-// ManagerInterface defines manager functions to manager pod chaos job.
-type ManagerInterface interface {
+// PodChaosManagerInterface defines manager functions to manager pod chaos job.
+type PodChaosManagerInterface interface {
 	Sync(pc *v1alpha1.PodChaos) error
+	Delete(key string) error
 }
 
-// StatusUpdaterInterface defines a function to update PodChaos status.
-type StatusUpdaterInterface interface {
-	UpdateStatus() error
-}
+// // StatusUpdaterInterface defines a function to update PodChaos status.
+// type StatusUpdaterInterface interface {
+// 	UpdateStatus() error
+// }
 
 type podChaosControl struct {
-	statusUpdater StatusUpdaterInterface
-	mgr           ManagerInterface
+	// statusUpdater StatusUpdaterInterface
+	mgr PodChaosManagerInterface
 }
 
 // NewPodChaosControl returns a new instance of podChaosControl.
-func NewPodChaosControl() *podChaosControl {
-	return &podChaosControl{}
+func NewPodChaosControl(
+	kubeCli kubernetes.Interface,
+	mgr manager.ManagerBaseInterface,
+	podLister corelisters.PodLister,
+	lister listers.PodChaosLister,
+) *podChaosControl {
+	return &podChaosControl{
+		mgr: podchaos.NewPodChaosManager(kubeCli, mgr, podLister, lister),
+	}
 }
 
 // UpdatePodChaos executes the core logic loop for a PodChaos.
@@ -46,7 +59,7 @@ func (p *podChaosControl) UpdatePodChaos(pc *v1alpha1.PodChaos) error {
 	var errs []error
 	oldStatus := pc.Status.DeepCopy()
 
-	if err := p.sync(pc); err != nil {
+	if err := p.mgr.Sync(pc); err != nil {
 		errs = append(errs, err)
 	}
 
@@ -54,14 +67,13 @@ func (p *podChaosControl) UpdatePodChaos(pc *v1alpha1.PodChaos) error {
 		return errorutils.NewAggregate(errs)
 	}
 
-	if err := p.statusUpdater.UpdateStatus(); err != nil {
-		errs = append(errs, err)
-	}
+	// if err := p.statusUpdater.UpdateStatus(); err != nil {
+	// 	errs = append(errs, err)
+	// }
 
 	return errorutils.NewAggregate(errs)
 }
 
-// sync a PodChaos object to manager.
-func (p *podChaosControl) sync(pc *v1alpha1.PodChaos) error {
-	return p.mgr.Sync(pc)
+func (p *podChaosControl) DeletePodChaos(key string) error {
+	return p.mgr.Delete(key)
 }
