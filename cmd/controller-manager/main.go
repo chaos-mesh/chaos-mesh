@@ -38,7 +38,6 @@ import (
 var (
 	printVersion bool
 	pprofPort    string
-	workers      int
 )
 
 func init() {

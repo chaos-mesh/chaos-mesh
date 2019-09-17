@@ -112,7 +112,9 @@ func (m *ManagerBase) deleteRunnerAction(key string) error {
 }
 
 func (m *ManagerBase) updateRunnerAction(newRunner *Runner) error {
-	m.deleteRunnerAction(newRunner.Name)
+	if err := m.deleteRunnerAction(newRunner.Name); err != nil {
+		return err
+	}
 
 	return m.addRunnerAction(newRunner)
 }
