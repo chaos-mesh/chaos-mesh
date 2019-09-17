@@ -136,7 +136,7 @@ func (c *Controller) Run(stopCh <-chan struct{}) error {
 
 	glog.Info("Starting pod chaos controller")
 
-	glog.Info("Waiting fro informer caches to sync")
+	glog.Info("Waiting informer caches to sync")
 	if ok := cache.WaitForCacheSync(stopCh, c.pcListerSynced, c.podListerSynced); ok {
 		return fmt.Errorf("failed to wait for caches to sysn")
 	}

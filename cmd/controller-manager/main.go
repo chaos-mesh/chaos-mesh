@@ -14,6 +14,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"net/http"
 	_ "net/http/pprof"
@@ -27,7 +28,6 @@ import (
 	"github.com/cwen0/chaos-operator/pkg/signals"
 	"github.com/cwen0/chaos-operator/pkg/version"
 	"github.com/golang/glog"
-	flag "github.com/spf13/pflag"
 
 	"k8s.io/apiserver/pkg/util/logs"
 	kubeinformers "k8s.io/client-go/informers"
@@ -41,7 +41,7 @@ var (
 )
 
 func init() {
-	flag.BoolVarP(&printVersion, "version", "V", false, "print version information and exit")
+	flag.BoolVar(&printVersion, "version", false, "print version information and exit")
 	flag.StringVar(&pprofPort, "pprof", "10080", "controller manager pprof port")
 	flag.DurationVar(&controller.ResyncDuration, "resync-duration", time.Duration(30*time.Second), "resync time of informer")
 
