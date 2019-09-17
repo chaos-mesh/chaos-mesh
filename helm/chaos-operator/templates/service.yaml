@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "chaos-operator.fullname" . }}
+  labels:
+    app: {{ include "chaos-operator.name" . }}
+    chart: {{ include "chaos-operator.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    app: {{ include "chaos-operator.name" . }}
+    release: {{ .Release.Name }}

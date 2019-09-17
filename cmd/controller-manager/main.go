@@ -42,7 +42,7 @@ var (
 
 func init() {
 	flag.BoolVarP(&printVersion, "version", "V", false, "print version information and exit")
-	flag.StringVar(&pprofPort, "pprof", "", "controller manager pprof port")
+	flag.StringVar(&pprofPort, "pprof", "10080", "controller manager pprof port")
 	flag.DurationVar(&controller.ResyncDuration, "resync-duration", time.Duration(30*time.Second), "resync time of informer")
 
 	flag.Parse()

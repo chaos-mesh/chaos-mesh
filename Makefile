@@ -28,10 +28,10 @@ TEST_COVER_PACKAGES:=go list ./pkg/... | grep -vE "pkg/client" | grep -vE "pkg/a
 default: build
 
 docker-push: docker
-	docker push "${DOCKER_REGISTRY}/pingcap/chaos-operator:latest"
+	docker push "${DOCKER_REGISTRY}/cwen/chaos-operator:latest"
 
 docker: build
-	docker build --tag "${DOCKER_REGISTRY}/pingcap/chaos-operator:latest" images/chaos-operator
+	docker build --tag "${DOCKER_REGISTRY}/cwen/chaos-operator:latest" images/chaos-operator
 
 build: controller-manager
 
@@ -42,13 +42,13 @@ test:
 	@echo "Run unit tests"
 	@$(GOTEST) ./pkg/... -coverpkg=$$($(TEST_COVER_PACKAGES)) -coverprofile=coverage.txt -covermode=atomic && echo "\nUnit tests run successfully!"
 
-check-all: lint check-static check-shadow check-gosec staticcheck errcheck
+check-all: check tidy check-shadow check-gosec staticcheck
 
 check-setup:
 	@which retool >/dev/null 2>&1 || go get github.com/twitchtv/retool
 	@GO111MODULE=off retool sync
 
-check: check-setup lint tidy check-static
+check: check-setup lint check-static
 
 check-static:
 	@ # Not running vet and fmt through metalinter becauase it ends up looking at vendor
@@ -86,9 +86,11 @@ lint:
 	@echo "linting"
 	CGO_ENABLED=0 retool do revive -formatter friendly -config revive.toml $$($(PACKAGE_LIST))
 
+
 tidy:
 	@echo "go mod tidy"
-	go mod tidy
+	GO111MODULE=on go mod tidy
+	git diff --quiet go.mod go.sum
 
 check-gosec:
 	@echo "security checking"
