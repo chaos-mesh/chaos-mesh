@@ -13,7 +13,7 @@ metadata:
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
-  name: {{ .Release.Name }}:tidb-controller-manager
+  name: {{ .Release.Name }}:chaos-controller-manager
   labels:
     app.kubernetes.io/name: {{ template "chaos-operator.name" . }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
@@ -47,14 +47,7 @@ rules:
   verbs: ["*"]
 - apiGroups: ["pingcap.com"]
   resources:
-  - tidbclusters
-  - tidbclusters/finalizers
-  - backups
-  - backups/finalizers
-  - backupschedules
-  - backupschedules/finalizers
-  - restores
-  - restores/finalizers
+  - podchaos
   verbs: ["*"]
 {{- end }}
 - apiGroups: [""]
@@ -67,7 +60,7 @@ rules:
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
-  name: {{ .Release.Name }}:tidb-controller-manager
+  name: {{ .Release.Name }}:chaos-controller-manager
   labels:
     app.kubernetes.io/name: {{ template "chaos-operator.name" . }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
@@ -80,14 +73,14 @@ subjects:
   namespace: {{ .Release.Namespace }}
 roleRef:
   kind: ClusterRole
-  name: {{ .Release.Name }}:tidb-controller-manager
+  name: {{ .Release.Name }}:chaos-controller-manager
   apiGroup: rbac.authorization.k8s.io
 {{- if (not .Values.clusterScoped) }}
 ---
 kind: Role
 apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
-  name: {{ .Release.Name }}:tidb-controller-manager
+  name: {{ .Release.Name }}:chaos-controller-manager
   labels:
     app.kubernetes.io/name: {{ template "chaos-operator.name" . }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
@@ -120,20 +113,13 @@ rules:
   verbs: ["*"]
 - apiGroups: ["pingcap.com"]
   resources:
-  - tidbclusters
-  - tidbclusters/finalizers
-  - backups
-  - backups/finalizers
-  - backupschedules
-  - backupschedules/finalizers
-  - restores
-  - restores/finalizers
+  - podchaos
   verbs: ["*"]
 ---
 kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
-  name: {{ .Release.Name }}:tidb-controller-manager
+  name: {{ .Release.Name }}:chaos-controller-manager
   labels:
     app.kubernetes.io/name: {{ template "chaos-operator.name" . }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
@@ -145,7 +131,7 @@ subjects:
   name: {{ .Values.controllerManager.serviceAccount }}
 roleRef:
   kind: Role
-  name: {{ .Release.Name }}:tidb-controller-manager
+  name: {{ .Release.Name }}:chaos-controller-manager
   apiGroup: rbac.authorization.k8s.io
 {{- end }}
 {{- end }}

@@ -11,6 +11,8 @@ rbac:
   create: true
 
 controllerManager:
+  serviceAccount: chaos-controller-manager
+
   replicaCount: 1
 
   image: hub.pingcap.net/cwen/chaos-operator:latest
