@@ -64,7 +64,7 @@ type PodChaos struct {
 // PodChaosSpec defines the attributes that a user creates on a chaos experiment about pods.
 type PodChaosSpec struct {
 	// Selector is used to select pods that are used to inject chaos action.
-	Selector SelectorSpec `json:"Selector"`
+	Selector SelectorSpec `json:"selector"`
 
 	// Scheduler defines some schedule rules to
 	// control the running time of the chaos experiment about pods.
@@ -76,6 +76,7 @@ type PodChaosSpec struct {
 	Action PodChaosAction `json:"action"`
 
 	// Mode defines the mode to run chaos action.
+	// SUpported mode: one / all / fixed / fixed-percent / random-max-percent
 	Mode PodChaosMode `json:"mode"`
 
 	// Value is required when the mode is set to `FixedPodMode` / `FixedPercentPodMod` / `RandomMaxPercentPodMod`.

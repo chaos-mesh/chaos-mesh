@@ -1,0 +1,14 @@
+apiVersion: podchaoses.io/v1alpha1
+kind: PodChaos
+metadata:
+  name: pod-kill-example
+  namespace: chaos-testing
+spec:
+  appinfo:
+    action: pod-kill
+    mode: one
+    selector:
+      namespace:
+        - tidb-cluster-daemon
+      labelSelectors:
+        "app.kubernetes.io/component": "tikv"
