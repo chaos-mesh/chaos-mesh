@@ -63,12 +63,12 @@ type PodChaos struct {
 
 // PodChaosSpec defines the attributes that a user creates on a chaos experiment about pods.
 type PodChaosSpec struct {
-	// Selectors is used to select pods that are used to inject chaos action.
-	Selectors []SelectorSpec `json:"Selectors"`
+	// Selector is used to select pods that are used to inject chaos action.
+	Selector SelectorSpec `json:"Selector"`
 
-	// Schedulers defines some schedule rules to
+	// Scheduler defines some schedule rules to
 	// control the running time of the chaos experiment about pods.
-	Schedulers []SchedulerSpec `json:"schedulers"`
+	Scheduler SchedulerSpec `json:"scheduler"`
 
 	// Action defines the specific pod chaos action.
 	// Supported action: pod-kill / pod-failure
@@ -82,11 +82,18 @@ type PodChaosSpec struct {
 	// If `FixedPodMode`, provide an integer of pods to do chaos action.
 	// If `FixedPercentPodMod`, provide a number from 0-100 to specify the max % of pods the server can do chaos action.
 	// IF `RandomMaxPercentPodMod`,  provide a number from 0-100 to specify the % of pods to do chaos action
+	// +optional
 	Value string `json:"value"`
 
 	// Duration represents the duration of the chaos action.
 	// It is required when the action is `PodFailureAction`.
+	// +optional
 	Duration string `json:"duration"`
+
+	// The duration in seconds before the object should be deleted. Value must be non-negative integer.
+	// The value zero indicates delete immediately.
+	// +optional
+	GracePeriodSeconds int64 `json:"gracePeriodSeconds"`
 }
 
 // PodChaosStatus represents the current status of the chaos experiment about pods.

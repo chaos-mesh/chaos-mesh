@@ -11,6 +11,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package podchaos
+package label
 
-// TODO: support pod-failure action
+import (
+	"fmt"
+	"strings"
+)
+
+// Label is the label field in metadata
+type Label map[string]string
+
+// String converts label to a string
+func (l Label) String() string {
+	var arr []string
+
+	for k, v := range l {
+		arr = append(arr, fmt.Sprintf("%s=%s", k, v))
+	}
+
+	return strings.Join(arr, ",")
+}
