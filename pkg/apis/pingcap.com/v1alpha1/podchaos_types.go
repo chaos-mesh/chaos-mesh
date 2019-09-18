@@ -76,7 +76,7 @@ type PodChaosSpec struct {
 	Action PodChaosAction `json:"action"`
 
 	// Mode defines the mode to run chaos action.
-	// SUpported mode: one / all / fixed / fixed-percent / random-max-percent
+	// Supported mode: one / all / fixed / fixed-percent / random-max-percent
 	Mode PodChaosMode `json:"mode"`
 
 	// Value is required when the mode is set to `FixedPodMode` / `FixedPercentPodMod` / `RandomMaxPercentPodMod`.
