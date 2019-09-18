@@ -21,6 +21,7 @@ import (
 
 type Job interface {
 	Run()
+	Equal(job Job) bool
 }
 
 // Runner is the base unit for performing chaos action.
@@ -49,4 +50,16 @@ func (r *Runner) Validate() error {
 	}
 
 	return nil
+}
+
+func (r *Runner) Equal(rn *Runner) bool {
+	if r.Name != rn.Name || r.Rule != rn.Rule {
+		return false
+	}
+
+	if !r.Job.Equal(rn.Job) {
+		return false
+	}
+
+	return true
 }

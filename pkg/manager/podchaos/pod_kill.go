@@ -28,13 +28,13 @@ import (
 	corelisters "k8s.io/client-go/listers/core/v1"
 )
 
-type podKillJob struct {
+type PodKillJob struct {
 	podChaos  *v1alpha1.PodChaos
 	kubeCli   kubernetes.Interface
 	podLister corelisters.PodLister
 }
 
-func (p podKillJob) Run() {
+func (p PodKillJob) Run() {
 	var err error
 
 	// TODO: support more modes
@@ -49,7 +49,20 @@ func (p podKillJob) Run() {
 	utilruntime.HandleError(err)
 }
 
-func (p *podKillJob) deleteRandomPod() error {
+func (p PodKillJob) Equal(job manager.Job) bool {
+	pjob, ok := job.(PodKillJob)
+	if !ok {
+		return false
+	}
+
+	if p.podChaos.ResourceVersion != pjob.podChaos.ResourceVersion {
+		return false
+	}
+
+	return true
+}
+
+func (p *PodKillJob) deleteRandomPod() error {
 	pods, err := manager.SelectPods(p.podChaos.Spec.Selector, p.podLister, p.kubeCli)
 	if err != nil {
 		return err
@@ -63,7 +76,7 @@ func (p *podKillJob) deleteRandomPod() error {
 	return p.deletePod(pods[index])
 }
 
-func (p *podKillJob) deletePod(pod v1.Pod) error {
+func (p *PodKillJob) deletePod(pod v1.Pod) error {
 	glog.Infof("Try to delete pod %s/%s", pod.Namespace, pod.Name)
 
 	deleteOpts := p.getDeleteOptsForPod(pod)
@@ -73,7 +86,7 @@ func (p *podKillJob) deletePod(pod v1.Pod) error {
 
 // Creates the DeleteOptions object for the pod. Grace period is calculated as the higher
 // of configured grace period and termination grace period set on the pod
-func (p *podKillJob) getDeleteOptsForPod(pod v1.Pod) *metav1.DeleteOptions {
+func (p *PodKillJob) getDeleteOptsForPod(pod v1.Pod) *metav1.DeleteOptions {
 	gracePeriodSec := &p.podChaos.Spec.GracePeriodSeconds
 
 	if pod.Spec.TerminationGracePeriodSeconds != nil &&

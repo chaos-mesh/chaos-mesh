@@ -75,7 +75,7 @@ func (m *ManagerBase) UpdateRunner(runner *Runner) error {
 	}
 	oldRunner := val.(*Runner)
 
-	if runner.Rule == oldRunner.Rule {
+	if oldRunner.Equal(runner) {
 		return nil
 	}
 
