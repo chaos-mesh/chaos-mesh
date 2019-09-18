@@ -25,9 +25,13 @@ import (
 	informers "github.com/cwen0/chaos-operator/pkg/client/informers/externalversions"
 	"github.com/cwen0/chaos-operator/pkg/controller"
 	"github.com/cwen0/chaos-operator/pkg/controller/podchaos"
+	"github.com/cwen0/chaos-operator/pkg/manager"
 	"github.com/cwen0/chaos-operator/pkg/signals"
 	"github.com/cwen0/chaos-operator/pkg/version"
 	"github.com/golang/glog"
+	"github.com/robfig/cron/v3"
+
+	"golang.org/x/sync/errgroup"
 
 	"k8s.io/apiserver/pkg/util/logs"
 	kubeinformers "k8s.io/client-go/informers"
@@ -79,16 +83,33 @@ func main() {
 	kubeInformerFactory := kubeinformers.NewSharedInformerFactory(kubeCli, controller.ResyncDuration)
 	informerFactory := informers.NewSharedInformerFactory(cli, controller.ResyncDuration)
 
+	glog.Info("Starting cron engine")
+	cronEngine := cron.New()
+	cronEngine.Start()
+
+	managerBase := manager.NewManagerBase(cronEngine)
+
 	podChaosController := podchaos.NewController(
 		kubeCli, cli,
 		kubeInformerFactory,
-		informerFactory)
+		informerFactory,
+		managerBase)
 
 	// Start method is non-blocking and runs all registered informers in a dedicated goroutine.
 	kubeInformerFactory.Start(stopCh)
 	informerFactory.Start(stopCh)
 
-	go podChaosController.Run(stopCh)
+	g := errgroup.Group{}
 
-	glog.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", pprofPort), nil))
+	g.Go(func() error {
+		return podChaosController.Run(stopCh)
+	})
+
+	g.Go(func() error {
+		return http.ListenAndServe(fmt.Sprintf(":%s", pprofPort), nil)
+	})
+
+	if err := g.Wait(); err != nil {
+		glog.Fatal(err)
+	}
 }

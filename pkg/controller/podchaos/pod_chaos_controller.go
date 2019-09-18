@@ -23,7 +23,6 @@ import (
 	listers "github.com/cwen0/chaos-operator/pkg/client/listers/pingcap.com/v1alpha1"
 	"github.com/cwen0/chaos-operator/pkg/manager"
 	"github.com/golang/glog"
-	"github.com/robfig/cron/v3"
 
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -64,12 +63,12 @@ type Controller struct {
 	control ControlInterface
 	// PodLister is able to list/get pod object from a shred informers's store
 	podLister corelisters.PodLister
-	// PcListerSynced returns true if the pod object shared informer has synced at least once.
-	podListerSynced cache.InformerSynced
+	// podsSynced returns true if the pod object shared informer has synced at least once.
+	podsSynced cache.InformerSynced
 	// pcLister is able to list/get podchaos object from a shared informer's store.
 	pcLister listers.PodChaosLister
-	// PcListerSynced returns true if the podchaos object shared informer has synced at least once.
-	pcListerSynced cache.InformerSynced
+	// pcsSynced returns true if the podchaos object shared informer has synced at least once.
+	pcsSynced cache.InformerSynced
 	// queue is a rate limited work queue. This is used to queue work to be
 	// processed instead of performing it as soon as a change happens. This
 	// means we can ensure we only process a fixed amount of resources at a
@@ -87,6 +86,7 @@ func NewController(
 	cli versioned.Interface,
 	kubeInformerFactory kubeinformers.SharedInformerFactory,
 	informerFactory informers.SharedInformerFactory,
+	managerBase manager.ManagerBaseInterface,
 ) *Controller {
 	// Create event broadcaster.
 	eventBroadcaster := record.NewBroadcaster()
@@ -99,19 +99,19 @@ func NewController(
 	podInformer := kubeInformerFactory.Core().V1().Pods()
 
 	controller := &Controller{
-		kubeCli:         kubeCli,
-		cli:             cli,
-		podLister:       podInformer.Lister(),
-		podListerSynced: podInformer.Informer().HasSynced,
-		pcLister:        pcInformer.Lister(),
-		pcListerSynced:  pcInformer.Informer().HasSynced,
-		queue:           workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), "PodChaos"),
-		recorder:        recorder,
+		kubeCli:    kubeCli,
+		cli:        cli,
+		podLister:  podInformer.Lister(),
+		podsSynced: podInformer.Informer().HasSynced,
+		pcLister:   pcInformer.Lister(),
+		pcsSynced:  pcInformer.Informer().HasSynced,
+		queue:      workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), "PodChaos"),
+		recorder:   recorder,
 	}
 
 	controller.control = NewPodChaosControl(
 		kubeCli,
-		manager.NewManagerBase(cron.New()),
+		managerBase,
 		controller.podLister,
 		controller.pcLister,
 	)
@@ -137,7 +137,7 @@ func (c *Controller) Run(stopCh <-chan struct{}) error {
 	glog.Info("Starting pod chaos controller")
 
 	glog.Info("Waiting informer caches to sync")
-	if ok := cache.WaitForCacheSync(stopCh, c.pcListerSynced, c.podListerSynced); ok {
+	if ok := cache.WaitForCacheSync(stopCh, c.pcsSynced, c.podsSynced); !ok {
 		return fmt.Errorf("failed to wait for caches to sysn")
 	}
 

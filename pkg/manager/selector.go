@@ -14,12 +14,16 @@
 package manager
 
 import (
+	"fmt"
+	"strings"
+
 	"github.com/cwen0/chaos-operator/pkg/apis/pingcap.com/v1alpha1"
 	"github.com/cwen0/chaos-operator/pkg/label"
 
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
+	"k8s.io/apimachinery/pkg/selection"
 	"k8s.io/client-go/kubernetes"
 	corelisters "k8s.io/client-go/listers/core/v1"
 )
@@ -31,8 +35,8 @@ func SelectPods(
 	selector v1alpha1.SelectorSpec,
 	podLister corelisters.PodLister,
 	kubeCli kubernetes.Interface,
-) ([]*v1.Pod, error) {
-	var pods []*v1.Pod
+) ([]v1.Pod, error) {
+	var pods []v1.Pod
 
 	// pods are specifically specified
 	if len(selector.Pods) > 0 {
@@ -43,7 +47,7 @@ func SelectPods(
 					return nil, err
 				}
 
-				pods = append(pods, pod)
+				pods = append(pods, *pod)
 			}
 		}
 
@@ -61,7 +65,17 @@ func SelectPods(
 	}
 
 	for _, pod := range podList.Items {
-		pods = append(pods, &pod)
+		pods = append(pods, pod)
+	}
+
+	namespaceSelector, err := parseSelector(strings.Join(selector.Namespaces, ","))
+	if err != nil {
+		return nil, err
+	}
+
+	pods, err = filterByNamespaces(pods, namespaceSelector)
+	if err != nil {
+		return nil, err
 	}
 
 	annotationsSelector, err := parseSelector(label.Label(selector.AnnotationSelectors).String())
@@ -69,19 +83,20 @@ func SelectPods(
 		return nil, err
 	}
 	pods = filterByAnnotations(pods, annotationsSelector)
+
 	pods = filterByPhase(pods, v1.PodRunning)
 
 	return pods, nil
 }
 
 // filterByAnnotations filters a list of pods by a given annotation selector.
-func filterByAnnotations(pods []*v1.Pod, annotations labels.Selector) []*v1.Pod {
+func filterByAnnotations(pods []v1.Pod, annotations labels.Selector) []v1.Pod {
 	// empty filter returns original list
 	if annotations.Empty() {
 		return pods
 	}
 
-	var filteredList []*v1.Pod
+	var filteredList []v1.Pod
 
 	for _, pod := range pods {
 		// convert the pod's annotations to an equivalent label selector
@@ -97,8 +112,8 @@ func filterByAnnotations(pods []*v1.Pod, annotations labels.Selector) []*v1.Pod 
 }
 
 // filterByPhase filters a list of pods by a given PodPhase, e.g. Running.
-func filterByPhase(pods []*v1.Pod, phase v1.PodPhase) []*v1.Pod {
-	var filteredList []*v1.Pod
+func filterByPhase(pods []v1.Pod, phase v1.PodPhase) []v1.Pod {
+	var filteredList []v1.Pod
 
 	for _, pod := range pods {
 		if pod.Status.Phase == phase {
@@ -107,6 +122,65 @@ func filterByPhase(pods []*v1.Pod, phase v1.PodPhase) []*v1.Pod {
 	}
 
 	return filteredList
+}
+
+// filterByNamespaces filters a list of pods by a given namespace selector.
+func filterByNamespaces(pods []v1.Pod, namespaces labels.Selector) ([]v1.Pod, error) {
+	// empty filter returns original list
+	if namespaces.Empty() {
+		return pods, nil
+	}
+
+	// split requirements into including and excluding groups
+	reqs, _ := namespaces.Requirements()
+
+	var (
+		reqIncl []labels.Requirement
+		reqExcl []labels.Requirement
+
+		filteredList []v1.Pod
+	)
+
+	for _, req := range reqs {
+		switch req.Operator() {
+		case selection.Exists:
+			reqIncl = append(reqIncl, req)
+		case selection.DoesNotExist:
+			reqExcl = append(reqExcl, req)
+		default:
+			return nil, fmt.Errorf("unsupported operator: %s", req.Operator())
+		}
+	}
+
+	for _, pod := range pods {
+		// if there aren't any including requirements, we're in by default
+		included := len(reqIncl) == 0
+
+		// convert the pod's namespace to an equivalent label selector
+		selector := labels.Set{pod.Namespace: ""}
+
+		// include pod if one including requirement matches
+		for _, req := range reqIncl {
+			if req.Matches(selector) {
+				included = true
+				break
+			}
+		}
+
+		// exclude pod if it is filtered out by at least one excluding requirement
+		for _, req := range reqExcl {
+			if !req.Matches(selector) {
+				included = false
+				break
+			}
+		}
+
+		if included {
+			filteredList = append(filteredList, pod)
+		}
+	}
+
+	return filteredList, nil
 }
 
 func parseSelector(str string) (labels.Selector, error) {

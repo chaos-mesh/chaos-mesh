@@ -1,14 +1,15 @@
-apiVersion: podchaoses.io/v1alpha1
+apiVersion: pingcap.com/v1alpha1
 kind: PodChaos
 metadata:
   name: pod-kill-example
   namespace: chaos-testing
 spec:
-  appinfo:
-    action: pod-kill
-    mode: one
-    selector:
-      namespace:
-        - tidb-cluster-daemon
-      labelSelectors:
-        "app.kubernetes.io/component": "tikv"
+  action: pod-kill
+  mode: one
+  selector:
+    namespaces:
+      - tidb-cluster-demo
+    labelSelectors:
+      "app.kubernetes.io/component": "tikv"
+  scheduler:
+    cron: "@every 1m"

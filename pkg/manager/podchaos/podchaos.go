@@ -19,6 +19,7 @@ import (
 	"github.com/cwen0/chaos-operator/pkg/apis/pingcap.com/v1alpha1"
 	listers "github.com/cwen0/chaos-operator/pkg/client/listers/pingcap.com/v1alpha1"
 	"github.com/cwen0/chaos-operator/pkg/manager"
+	"github.com/golang/glog"
 
 	"k8s.io/client-go/kubernetes"
 	corelisters "k8s.io/client-go/listers/core/v1"
@@ -61,13 +62,16 @@ func (m *podChaosManager) Sync(pc *v1alpha1.PodChaos) error {
 	}
 
 	if m.base.IsExist(key) {
+		glog.Infof("Sync the runner %s", key)
 		return m.base.UpdateRunner(runner)
 	}
 
+	glog.Infof("Add a new runner for %s", key)
 	return m.base.AddRunner(runner)
 }
 
 func (m *podChaosManager) Delete(key string) error {
+	glog.Infof("Delete the runner %s", key)
 	return m.base.DeleteRunner(key)
 }
 
@@ -87,7 +91,14 @@ func (m *podChaosManager) newRunner(pc *v1alpha1.PodChaos) (*manager.Runner, err
 		return nil, fmt.Errorf("PodChaos action %s not supported", pc.Spec.Action)
 	}
 
+	name, err := cache.MetaNamespaceKeyFunc(pc)
+	if err != nil {
+		return nil, err
+	}
+
 	return &manager.Runner{
-		Job: job,
+		Name: name,
+		Rule: pc.Spec.Scheduler.Cron,
+		Job:  job,
 	}, nil
 }

@@ -40,9 +40,8 @@ func (r *Runner) Validate() error {
 		return fmt.Errorf("runner rule is empty")
 	}
 
-	if _, err := cron.NewParser(cron.Minute | cron.Hour | cron.Dom | cron.Month | cron.Dom).
-		Parse(r.Rule); err != nil {
-		return err
+	if _, err := cron.ParseStandard(r.Rule); err != nil {
+		return fmt.Errorf("fail to parse runner rule %s, %v", r.Rule, err)
 	}
 
 	if r.Job == nil {

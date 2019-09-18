@@ -19,6 +19,7 @@ import (
 
 	"github.com/cwen0/chaos-operator/pkg/apis/pingcap.com/v1alpha1"
 	"github.com/cwen0/chaos-operator/pkg/manager"
+	"github.com/golang/glog"
 
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -39,6 +40,7 @@ func (p podKillJob) Run() {
 	// TODO: support more modes
 	switch p.podChaos.Spec.Mode {
 	case v1alpha1.OnePodMode:
+		glog.Info("Try to select one pod to do pod-kill job randomly")
 		err = p.deleteRandomPod()
 	default:
 		err = fmt.Errorf("pod-kill mode %s not supported", p.podChaos.Spec.Mode)
@@ -54,15 +56,16 @@ func (p *podKillJob) deleteRandomPod() error {
 	}
 
 	if len(pods) == 0 {
-		return fmt.Errorf("selected pods is empty")
+		return fmt.Errorf("no pod is selected")
 	}
 
 	index := rand.Intn(len(pods))
-
 	return p.deletePod(pods[index])
 }
 
-func (p *podKillJob) deletePod(pod *v1.Pod) error {
+func (p *podKillJob) deletePod(pod v1.Pod) error {
+	glog.Infof("Try to delete pod %s/%s", pod.Namespace, pod.Name)
+
 	deleteOpts := p.getDeleteOptsForPod(pod)
 
 	return p.kubeCli.CoreV1().Pods(pod.Namespace).Delete(pod.Name, deleteOpts)
@@ -70,7 +73,7 @@ func (p *podKillJob) deletePod(pod *v1.Pod) error {
 
 // Creates the DeleteOptions object for the pod. Grace period is calculated as the higher
 // of configured grace period and termination grace period set on the pod
-func (p *podKillJob) getDeleteOptsForPod(pod *v1.Pod) *metav1.DeleteOptions {
+func (p *podKillJob) getDeleteOptsForPod(pod v1.Pod) *metav1.DeleteOptions {
 	gracePeriodSec := &p.podChaos.Spec.GracePeriodSeconds
 
 	if pod.Spec.TerminationGracePeriodSeconds != nil &&

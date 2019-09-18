@@ -88,9 +88,9 @@ func (m *ManagerBase) IsExist(key string) bool {
 }
 
 func (m *ManagerBase) addRunnerAction(runner *Runner) error {
-	entryID, err := m.cronEngine.AddJob(runner.Name, runner.Job)
+	entryID, err := m.cronEngine.AddJob(runner.Rule, runner.Job)
 	if err != nil {
-		return err
+		return fmt.Errorf("fail to add runner to cronEngine, %v", err)
 	}
 
 	runner.EntryID = int(entryID)
