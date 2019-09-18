@@ -1,8 +1,8 @@
 # Chaos Operator
-The Chaos Operator is a powerful chaos engineering tool for kubernetes. 
+Chaos Operator is a powerful chaos engineering tool for kubernetes. 
 It is used to inject chaos into the applications and Kubernetes infrastructure in a managed fashion. 
 
-The Chaos Operator is a Kubernetes Operator, which provides easy definitions for chaos experiments and 
+Chaos Operator is a Kubernetes Operator, which provides easy definitions for chaos experiments and 
 automates the execution of chaos experiments.
 
 ## Deploy 
