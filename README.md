@@ -97,5 +97,5 @@ $ kubectl apply -f pod-kill-example.yaml
 #### Delete a chaos experiment
 
 ```bash
-$ kubectl delete -d pod-kill-exampler.yaml
+$ kubectl delete -f pod-kill-exampler.yaml
 ```
