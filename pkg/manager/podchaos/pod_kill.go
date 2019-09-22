@@ -23,7 +23,6 @@ import (
 
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/client-go/kubernetes"
 	corelisters "k8s.io/client-go/listers/core/v1"
 )
@@ -37,16 +36,32 @@ type PodKillJob struct {
 func (p PodKillJob) Run() {
 	var err error
 
+	pods, err := manager.SelectPods(p.podChaos.Spec.Selector, p.podLister, p.kubeCli)
+	if err != nil {
+		glog.Errorf("%s, fail to get selected pods, %v", p.logPrefix(), err)
+		return
+	}
+
+	if len(pods) == 0 {
+		glog.Errorf("%s, no pod is selected", p.logPrefix())
+		return
+	}
+
 	// TODO: support more modes
 	switch p.podChaos.Spec.Mode {
 	case v1alpha1.OnePodMode:
-		glog.Info("Try to select one pod to do pod-kill job randomly")
-		err = p.deleteRandomPod()
+		glog.Infof("%s, Try to select one pod to do pod-kill job randomly", p.logPrefix())
+		err = p.deleteRandomPod(pods)
+	case v1alpha1.AllPodMode:
+		glog.Infof("%s, Try to do pod-kill action on all filtered pods", p.logPrefix())
+
 	default:
 		err = fmt.Errorf("pod-kill mode %s not supported", p.podChaos.Spec.Mode)
 	}
 
-	utilruntime.HandleError(err)
+	if err != nil {
+		glog.Errorf("%s, fail to run action, %v", p.logPrefix(), err)
+	}
 }
 
 func (p PodKillJob) Equal(job manager.Job) bool {
@@ -62,22 +77,23 @@ func (p PodKillJob) Equal(job manager.Job) bool {
 	return true
 }
 
-func (p *PodKillJob) deleteRandomPod() error {
-	pods, err := manager.SelectPods(p.podChaos.Spec.Selector, p.podLister, p.kubeCli)
-	if err != nil {
-		return err
+func (p *PodKillJob) deleteAllPods(pods []v1.Pod) error {
+	for _, pod := range pods {
+		if err := p.deletePod(pod); err != nil {
+			return err
+		}
 	}
 
-	if len(pods) == 0 {
-		return fmt.Errorf("no pod is selected")
-	}
+	return nil
+}
 
+func (p *PodKillJob) deleteRandomPod(pods []v1.Pod) error {
 	index := rand.Intn(len(pods))
 	return p.deletePod(pods[index])
 }
 
 func (p *PodKillJob) deletePod(pod v1.Pod) error {
-	glog.Infof("Try to delete pod %s/%s", pod.Namespace, pod.Name)
+	glog.Infof("%s, Try to delete pod %s/%s", p.logPrefix(), pod.Namespace, pod.Name)
 
 	deleteOpts := p.getDeleteOptsForPod(pod)
 
@@ -97,4 +113,8 @@ func (p *PodKillJob) getDeleteOptsForPod(pod v1.Pod) *metav1.DeleteOptions {
 	return &metav1.DeleteOptions{
 		GracePeriodSeconds: gracePeriodSec,
 	}
+}
+
+func (p *PodKillJob) logPrefix() string {
+	return fmt.Sprintf("[%s/%s] [action:%s]", p.podChaos.Namespace, p.podChaos.Name, p.podChaos.Spec.Action)
 }
