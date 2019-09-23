@@ -14,10 +14,10 @@
 package podchaos
 
 import (
-	"github.com/cwen0/chaos-operator/pkg/apis/pingcap.com/v1alpha1"
-	listers "github.com/cwen0/chaos-operator/pkg/client/listers/pingcap.com/v1alpha1"
-	"github.com/cwen0/chaos-operator/pkg/manager"
-	"github.com/cwen0/chaos-operator/pkg/manager/podchaos"
+	"github.com/pingcap/chaos-operator/pkg/apis/pingcap.com/v1alpha1"
+	listers "github.com/pingcap/chaos-operator/pkg/client/listers/pingcap.com/v1alpha1"
+	"github.com/pingcap/chaos-operator/pkg/manager"
+	"github.com/pingcap/chaos-operator/pkg/manager/podchaos"
 
 	apiequality "k8s.io/apimachinery/pkg/api/equality"
 	errorutils "k8s.io/apimachinery/pkg/util/errors"

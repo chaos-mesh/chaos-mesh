@@ -18,8 +18,8 @@ limitations under the License.
 package pingcap
 
 import (
-	internalinterfaces "github.com/cwen0/chaos-operator/pkg/client/informers/externalversions/internalinterfaces"
-	v1alpha1 "github.com/cwen0/chaos-operator/pkg/client/informers/externalversions/pingcap.com/v1alpha1"
+	internalinterfaces "github.com/pingcap/chaos-operator/pkg/client/informers/externalversions/internalinterfaces"
+	v1alpha1 "github.com/pingcap/chaos-operator/pkg/client/informers/externalversions/pingcap.com/v1alpha1"
 )
 
 // Interface provides access to each of this group's versions.

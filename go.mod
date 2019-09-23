@@ -1,6 +1,7 @@
-module github.com/cwen0/chaos-operator
+module github.com/pingcap/chaos-operator
 
 require (
+	github.com/Masterminds/semver v1.5.0 // indirect
 	github.com/gogo/protobuf v1.2.2-0.20190723190241-65acae22fc9d // indirect
 	github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b
 	github.com/golang/groupcache v0.0.0-20190702054246-869f871628b6 // indirect
@@ -11,8 +12,10 @@ require (
 	github.com/kr/pretty v0.1.0 // indirect
 	github.com/modern-go/reflect2 v1.0.1 // indirect
 	github.com/peterbourgon/diskv v2.0.1+incompatible // indirect
+	github.com/pkg/errors v0.8.1 // indirect
 	github.com/robfig/cron/v3 v3.0.0
 	github.com/spf13/pflag v1.0.3 // indirect
+	github.com/twitchtv/retool v1.3.7 // indirect
 	golang.org/x/crypto v0.0.0-20190611184440-5c40567a22f8 // indirect
 	golang.org/x/net v0.0.0-20190620200207-3b0461eec859 // indirect
 	golang.org/x/oauth2 v0.0.0-20190604053449-0f29369cfe45 // indirect

@@ -20,10 +20,10 @@ package v1alpha1
 import (
 	time "time"
 
-	pingcapcomv1alpha1 "github.com/cwen0/chaos-operator/pkg/apis/pingcap.com/v1alpha1"
-	versioned "github.com/cwen0/chaos-operator/pkg/client/clientset/versioned"
-	internalinterfaces "github.com/cwen0/chaos-operator/pkg/client/informers/externalversions/internalinterfaces"
-	v1alpha1 "github.com/cwen0/chaos-operator/pkg/client/listers/pingcap.com/v1alpha1"
+	pingcapcomv1alpha1 "github.com/pingcap/chaos-operator/pkg/apis/pingcap.com/v1alpha1"
+	versioned "github.com/pingcap/chaos-operator/pkg/client/clientset/versioned"
+	internalinterfaces "github.com/pingcap/chaos-operator/pkg/client/informers/externalversions/internalinterfaces"
+	v1alpha1 "github.com/pingcap/chaos-operator/pkg/client/listers/pingcap.com/v1alpha1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
 	watch "k8s.io/apimachinery/pkg/watch"

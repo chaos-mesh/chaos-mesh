@@ -17,9 +17,9 @@ import (
 	"fmt"
 	"math/rand"
 
-	"github.com/cwen0/chaos-operator/pkg/apis/pingcap.com/v1alpha1"
-	"github.com/cwen0/chaos-operator/pkg/manager"
 	"github.com/golang/glog"
+	"github.com/pingcap/chaos-operator/pkg/apis/pingcap.com/v1alpha1"
+	"github.com/pingcap/chaos-operator/pkg/manager"
 
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"

@@ -22,9 +22,9 @@ import (
 	sync "sync"
 	time "time"
 
-	versioned "github.com/cwen0/chaos-operator/pkg/client/clientset/versioned"
-	internalinterfaces "github.com/cwen0/chaos-operator/pkg/client/informers/externalversions/internalinterfaces"
-	pingcapcom "github.com/cwen0/chaos-operator/pkg/client/informers/externalversions/pingcap.com"
+	versioned "github.com/pingcap/chaos-operator/pkg/client/clientset/versioned"
+	internalinterfaces "github.com/pingcap/chaos-operator/pkg/client/informers/externalversions/internalinterfaces"
+	pingcapcom "github.com/pingcap/chaos-operator/pkg/client/informers/externalversions/pingcap.com"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
 	schema "k8s.io/apimachinery/pkg/runtime/schema"

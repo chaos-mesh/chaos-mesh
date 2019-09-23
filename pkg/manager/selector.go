@@ -17,8 +17,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/cwen0/chaos-operator/pkg/apis/pingcap.com/v1alpha1"
-	"github.com/cwen0/chaos-operator/pkg/label"
+	"github.com/pingcap/chaos-operator/pkg/apis/pingcap.com/v1alpha1"
+	"github.com/pingcap/chaos-operator/pkg/label"
 
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"

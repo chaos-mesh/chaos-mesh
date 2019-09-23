@@ -17,12 +17,12 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/cwen0/chaos-operator/pkg/apis/pingcap.com/v1alpha1"
-	"github.com/cwen0/chaos-operator/pkg/client/clientset/versioned"
-	informers "github.com/cwen0/chaos-operator/pkg/client/informers/externalversions"
-	listers "github.com/cwen0/chaos-operator/pkg/client/listers/pingcap.com/v1alpha1"
-	"github.com/cwen0/chaos-operator/pkg/manager"
 	"github.com/golang/glog"
+	"github.com/pingcap/chaos-operator/pkg/apis/pingcap.com/v1alpha1"
+	"github.com/pingcap/chaos-operator/pkg/client/clientset/versioned"
+	informers "github.com/pingcap/chaos-operator/pkg/client/informers/externalversions"
+	listers "github.com/pingcap/chaos-operator/pkg/client/listers/pingcap.com/v1alpha1"
+	"github.com/pingcap/chaos-operator/pkg/manager"
 
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"

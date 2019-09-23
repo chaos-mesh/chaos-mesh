@@ -17,6 +17,6 @@ scriptdir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 GO111MODULE=on ${scriptdir}/generate-groups.sh \
   deepcopy,client,lister,informer \
-  github.com/cwen0/chaos-operator/pkg/client \
-  github.com/cwen0/chaos-operator/pkg/apis \
+  github.com/pingcap/chaos-operator/pkg/client \
+  github.com/pingcap/chaos-operator/pkg/apis \
   "pingcap.com:v1alpha1"

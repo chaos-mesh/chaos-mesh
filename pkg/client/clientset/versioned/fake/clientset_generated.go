@@ -18,9 +18,9 @@ limitations under the License.
 package fake
 
 import (
-	clientset "github.com/cwen0/chaos-operator/pkg/client/clientset/versioned"
-	pingcapv1alpha1 "github.com/cwen0/chaos-operator/pkg/client/clientset/versioned/typed/pingcap.com/v1alpha1"
-	fakepingcapv1alpha1 "github.com/cwen0/chaos-operator/pkg/client/clientset/versioned/typed/pingcap.com/v1alpha1/fake"
+	clientset "github.com/pingcap/chaos-operator/pkg/client/clientset/versioned"
+	pingcapv1alpha1 "github.com/pingcap/chaos-operator/pkg/client/clientset/versioned/typed/pingcap.com/v1alpha1"
+	fakepingcapv1alpha1 "github.com/pingcap/chaos-operator/pkg/client/clientset/versioned/typed/pingcap.com/v1alpha1/fake"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/discovery"
