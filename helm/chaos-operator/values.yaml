@@ -59,4 +59,6 @@ apiServer:
       cpu: 250m
       memory: 512Mi
 
+  mysql:
+    datasource: root:@(10.233.51.254:4000)/schrodinger_test
 
