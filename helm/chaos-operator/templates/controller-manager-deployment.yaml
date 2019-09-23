@@ -40,6 +40,13 @@ spec:
                 fieldPath: metadata.namespace
           - name: TZ
             value: {{ .Values.timezone | default "UTC" }}
+      - name: api-server
+        image: {{ .Values.apiServer.image  }}
+        imagePullPolicy: {{ .Values.apiServer.imagePullPolicy | default "IfNotPresent" }}
+        resources:
+{{ toYaml .Values.controllerManager.resources | indent 12 }}
+        command:
+          - /usr/local/bin/chaos-api-server
     {{- with .Values.controllerManager.nodeSelector }}
       nodeSelector:
 {{ toYaml . | indent 8 }}

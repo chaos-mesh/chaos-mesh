@@ -38,6 +38,9 @@ build: controller-manager
 controller-manager:
 	$(GO) -ldflags '$(LDFLAGS)' -o images/chaos-operator/bin/chaos-controller-manager cmd/controller-manager/main.go
 
+api-server:
+	$(GO) -ldflags '$(LDFLAGS)' -o images/chaos-operator/bin/chaos-api-server cmd/api-server/main.go
+
 test:
 	@echo "Run unit tests"
 	@$(GOTEST) ./pkg/... -coverpkg=$$($(TEST_COVER_PACKAGES)) -coverprofile=coverage.txt -covermode=atomic && echo "\nUnit tests run successfully!"
