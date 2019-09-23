@@ -54,7 +54,7 @@ func (p PodKillJob) Run() {
 		err = p.deleteRandomPod(pods)
 	case v1alpha1.AllPodMode:
 		glog.Infof("%s, Try to do pod-kill action on all filtered pods", p.logPrefix())
-
+		err = p.deleteAllPods(pods)
 	default:
 		err = fmt.Errorf("pod-kill mode %s not supported", p.podChaos.Spec.Mode)
 	}
