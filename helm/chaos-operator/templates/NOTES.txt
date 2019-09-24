@@ -1,5 +1,5 @@
 1. Make sure chaos-operator components are running
    kubectl get pods --namespace {{ .Release.Namespace }} -l app.kubernetes.io/instance={{ .Release.Name }}
 2. Install CRD
-   kubectl apply -f https://raw.githubusercontent.com/cwen0/chaos-operator/master/manifests/crds/pod-chaos.yaml
+   kubectl apply -f https://raw.githubusercontent.com/pingcap/chaos-operator/master/manifests/crds/pod-chaos.yaml
    kubectl get customresourcedefinitions

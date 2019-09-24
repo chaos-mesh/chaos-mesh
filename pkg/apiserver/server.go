@@ -7,12 +7,12 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/cwen0/chaos-operator/pkg/apiserver/filter"
-	"github.com/cwen0/chaos-operator/pkg/apiserver/storage"
-	"github.com/cwen0/chaos-operator/pkg/apiserver/types"
 	"github.com/gorilla/mux"
 	"github.com/juju/errors"
 	"github.com/ngaut/log"
+	"github.com/pingcap/chaos-operator/pkg/apiserver/filter"
+	"github.com/pingcap/chaos-operator/pkg/apiserver/storage"
+	"github.com/pingcap/chaos-operator/pkg/apiserver/types"
 	"github.com/unrolled/render"
 )
 

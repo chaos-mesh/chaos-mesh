@@ -20,7 +20,7 @@ Before deploying Chaos Operator, make sure the following items are installed on 
 #### Get the Helm files
 
 ```bash
-$ git clone https://github.com/cwen0/chaos-operator.git
+$ git clone https://github.com/pingcap/chaos-operator.git
 $ cd chaos-operator/
 ```
 
@@ -78,7 +78,7 @@ PodChaos designs for the chaos experiments about pods.
 More cron rule info: https://godoc.org/github.com/robfig/cron
 
 
-more examples: [https://github.com/cwen0/chaos-operator/tree/master/examples](https://github.com/cwen0/chaos-operator/tree/master/examples) 
+more examples: [https://github.com/pingcap/chaos-operator/tree/master/examples](https://github.com/pingcap/chaos-operator/tree/master/examples) 
 
 #### Create a chaos experiment
 

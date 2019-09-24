@@ -17,9 +17,9 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/cwen0/chaos-operator/pkg/apiserver"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/ngaut/log"
+	"github.com/pingcap/chaos-operator/pkg/apiserver"
 )
 
 func main() {

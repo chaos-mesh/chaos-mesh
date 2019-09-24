@@ -20,10 +20,10 @@ GO     := $(GOENV) go build
 GOTEST := CGO_ENABLED=0 go test -v -cover
 
 PACKAGE_LIST := go list ./... | grep -vE "pkg/client" | grep -vE "zz_generated"
-PACKAGE_DIRECTORIES := $(PACKAGE_LIST) | sed 's|github.com/cwen0/chaos-operator/||'
+PACKAGE_DIRECTORIES := $(PACKAGE_LIST) | sed 's|github.com/pingcap/chaos-operator/||'
 FILES := $$(find $$($(PACKAGE_DIRECTORIES)) -name "*.go")
 FAIL_ON_STDOUT := awk '{ print } END { if (NR > 0) { exit 1 } }'
-TEST_COVER_PACKAGES:=go list ./pkg/... | grep -vE "pkg/client" | grep -vE "pkg/apis" | sed 's|github.com/cwen0/chaos-operator/|./|' | tr '\n' ','
+TEST_COVER_PACKAGES:=go list ./pkg/... | grep -vE "pkg/client" | grep -vE "pkg/apis" | sed 's|github.com/pingcap/chaos-operator/|./|' | tr '\n' ','
 
 default: build
 

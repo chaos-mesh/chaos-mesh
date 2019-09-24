@@ -18,7 +18,7 @@ limitations under the License.
 package versioned
 
 import (
-	pingcapv1alpha1 "github.com/cwen0/chaos-operator/pkg/client/clientset/versioned/typed/pingcap.com/v1alpha1"
+	pingcapv1alpha1 "github.com/pingcap/chaos-operator/pkg/client/clientset/versioned/typed/pingcap.com/v1alpha1"
 	discovery "k8s.io/client-go/discovery"
 	rest "k8s.io/client-go/rest"
 	flowcontrol "k8s.io/client-go/util/flowcontrol"

@@ -15,10 +15,11 @@ package manager
 
 import (
 	"fmt"
+	"math/rand"
 	"strings"
 
-	"github.com/cwen0/chaos-operator/pkg/apis/pingcap.com/v1alpha1"
-	"github.com/cwen0/chaos-operator/pkg/label"
+	"github.com/pingcap/chaos-operator/pkg/apis/pingcap.com/v1alpha1"
+	"github.com/pingcap/chaos-operator/pkg/label"
 
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -87,6 +88,35 @@ func SelectPods(
 	pods = filterByPhase(pods, v1.PodRunning)
 
 	return pods, nil
+}
+
+// RandomFixedIndexes returns the `count` random indexes between `start` and `end`.
+func RandomFixedIndexes(start, end, count int) []int {
+	var indexes []int
+	m := make(map[int]int, count)
+
+	if count > end-start {
+		for i := start; i < end; i++ {
+			indexes = append(indexes, i)
+		}
+
+		return indexes
+	}
+
+	for i := 0; i < count; {
+		index := rand.Intn(end-start) + start
+
+		_, exist := m[index]
+		if exist {
+			continue
+		}
+
+		m[index] = index
+		indexes = append(indexes, index)
+		i++
+	}
+
+	return indexes
 }
 
 // filterByAnnotations filters a list of pods by a given annotation selector.

@@ -15,11 +15,15 @@ package podchaos
 
 import (
 	"fmt"
+	"math"
 	"math/rand"
+	"strconv"
 
-	"github.com/cwen0/chaos-operator/pkg/apis/pingcap.com/v1alpha1"
-	"github.com/cwen0/chaos-operator/pkg/manager"
 	"github.com/golang/glog"
+	"github.com/pingcap/chaos-operator/pkg/apis/pingcap.com/v1alpha1"
+	"github.com/pingcap/chaos-operator/pkg/manager"
+
+	"golang.org/x/sync/errgroup"
 
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -54,7 +58,16 @@ func (p PodKillJob) Run() {
 		err = p.deleteRandomPod(pods)
 	case v1alpha1.AllPodMode:
 		glog.Infof("%s, Try to do pod-kill action on all filtered pods", p.logPrefix())
-
+		err = p.deleteAllPods(pods)
+	case v1alpha1.FixedPodMode:
+		glog.Infof("%s, Try to do pod-kill action on %s pods", p.logPrefix(), p.podChaos.Spec.Value)
+		err = p.deleteFixedPods(pods)
+	case v1alpha1.FixedPercentPodMode:
+		glog.Infof("%s, Try to do pod-kill action on %s%% pods", p.logPrefix(), p.podChaos.Spec.Value)
+		err = p.deleteFixedPercentagePods(pods)
+	case v1alpha1.RandomMaxPercentPodMode:
+		glog.Infof("%s, Try to do pod-kill action on max %s%% pods", p.logPrefix(), p.podChaos.Spec.Value)
+		err = p.deleteMaxPercentagePods(pods)
 	default:
 		err = fmt.Errorf("pod-kill mode %s not supported", p.podChaos.Spec.Mode)
 	}
@@ -78,13 +91,72 @@ func (p PodKillJob) Equal(job manager.Job) bool {
 }
 
 func (p *PodKillJob) deleteAllPods(pods []v1.Pod) error {
+	g := errgroup.Group{}
 	for _, pod := range pods {
-		if err := p.deletePod(pod); err != nil {
-			return err
-		}
+		g.Go(func() error {
+			return p.deletePod(pod)
+		})
 	}
 
-	return nil
+	return g.Wait()
+}
+
+func (p *PodKillJob) deleteFixedPods(pods []v1.Pod) error {
+	killNum, err := strconv.Atoi(p.podChaos.Spec.Value)
+	if err != nil {
+		return err
+	}
+
+	glog.Infof("%s, Try to delete %d pods", p.logPrefix(), killNum)
+
+	if len(pods) < killNum {
+		return fmt.Errorf("fixed number is less the count of the selected pods")
+	}
+
+	return p.concurrentDeletePods(pods, killNum)
+}
+
+func (p *PodKillJob) deleteFixedPercentagePods(pods []v1.Pod) error {
+	killPercentage, err := strconv.Atoi(p.podChaos.Spec.Value)
+	if err != nil {
+		return err
+	}
+
+	if killPercentage == 0 {
+		glog.V(6).Infof("%s, Not terminating any pods to do pod-kill action as fixed percentage is 0",
+			p.logPrefix())
+		return nil
+	}
+
+	if killPercentage < 0 || killPercentage > 100 {
+		return fmt.Errorf("fixed percentage value of %d is invalid, Must be [0-100]", killPercentage)
+	}
+
+	killNum := int(math.Floor(float64(len(pods)) * float64(killPercentage) / 100))
+
+	return p.concurrentDeletePods(pods, killNum)
+}
+
+func (p *PodKillJob) deleteMaxPercentagePods(pods []v1.Pod) error {
+	maxPercentage, err := strconv.Atoi(p.podChaos.Spec.Value)
+	if err != nil {
+		return err
+	}
+
+	if maxPercentage == 0 {
+		glog.V(6).Infof("%s, Not terminating any pods to do pod-kill action as fixed percentage is 0",
+			p.logPrefix())
+		return nil
+	}
+
+	if maxPercentage < 0 || maxPercentage > 100 {
+		return fmt.Errorf("fixed percentage value of %d is invalid, Must be [0-100]", maxPercentage)
+	}
+
+	killPercentage := rand.Intn(maxPercentage + 1) // + 1 because Intn works with half open interval [0,n) and we want [0,n]
+	killNum := int(math.Floor(float64(len(pods)) * float64(killPercentage) / 100))
+
+	return p.concurrentDeletePods(pods, killNum)
 }
 
 func (p *PodKillJob) deleteRandomPod(pods []v1.Pod) error {
@@ -98,6 +170,19 @@ func (p *PodKillJob) deletePod(pod v1.Pod) error {
 	deleteOpts := p.getDeleteOptsForPod(pod)
 
 	return p.kubeCli.CoreV1().Pods(pod.Namespace).Delete(pod.Name, deleteOpts)
+}
+
+func (p *PodKillJob) concurrentDeletePods(pods []v1.Pod, killNum int) error {
+	killIndexes := manager.RandomFixedIndexes(0, len(pods), killNum)
+
+	g := errgroup.Group{}
+	for _, index := range killIndexes {
+		g.Go(func() error {
+			return p.deletePod(pods[index])
+		})
+	}
+
+	return g.Wait()
 }
 
 // Creates the DeleteOptions object for the pod. Grace period is calculated as the higher
