@@ -3,8 +3,10 @@ package apiserver
 import "fmt"
 
 const (
-	statusOK         = 200
-	statusOtherError = 1
+	// StatusOK represents OK status code
+	StatusOK = 200
+	// StatusOtherError represents Error status code
+	StatusOtherError = 1
 )
 
 // Response is the body part of HTTP Response
@@ -16,14 +18,14 @@ type Response struct {
 
 func errResponsef(format string, args ...interface{}) *Response {
 	return &Response{
-		Code:    statusOtherError,
+		Code:    StatusOtherError,
 		Message: fmt.Sprintf(format, args...),
 	}
 }
 
 func successResponse(data interface{}) *Response {
 	return &Response{
-		Code: statusOK,
+		Code: StatusOK,
 		Data: data,
 	}
 }
