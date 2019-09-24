@@ -1,4 +1,4 @@
-package apiserver
+package storage
 
 import (
 	"encoding/json"
@@ -6,6 +6,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/cwen0/chaos-operator/pkg/apiserver/filter"
+	"github.com/cwen0/chaos-operator/pkg/apiserver/types"
 	"github.com/cwen0/chaos-operator/util"
 	"github.com/jmoiron/sqlx"
 	"github.com/juju/errors"
@@ -31,7 +33,8 @@ func NewMysqlClient(dataSource string) (*MysqlClient, error) {
 	}, nil
 }
 
-func (m *MysqlClient) createJob(job *Job) error {
+// CreateJob will insert a job into database
+func (m *MysqlClient) CreateJob(job *types.Job) error {
 	t := time.Now().Format(util.TimeFormat)
 	job.Ctime = t
 
@@ -65,7 +68,7 @@ func (m *MysqlClient) createJob(job *Job) error {
 		return errors.Trace(err)
 	}
 
-	_, err = tx.NamedExec(jobPodInsert, job.getPodRelation())
+	_, err = tx.NamedExec(jobPodInsert, generatePodRelation(job))
 	if err != nil {
 		tx.Rollback()
 		log.Error(err)
@@ -80,8 +83,9 @@ func (m *MysqlClient) createJob(job *Job) error {
 	return nil
 }
 
-func (m *MysqlClient) getJobs(fs *Filters) ([]*Job, error) {
-	filtersSQL, err := GenSQL(fs)
+// GetJobs will select jobs from database
+func (m *MysqlClient) GetJobs(fs *filter.Filters) ([]*types.Job, error) {
+	filtersSQL, err := filter.GenSQL(fs)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
@@ -92,9 +96,9 @@ func (m *MysqlClient) getJobs(fs *Filters) ([]*Job, error) {
 		return nil, errors.Trace(err)
 	}
 
-	var jobs []*Job
+	var jobs []*types.Job
 	for rows.Next() {
-		job := new(JobPodJoinSelect)
+		job := new(types.JobPodJoinSelect)
 		rows.StructScan(&job)
 
 		resource, ok := job.Resource.([]byte)
@@ -110,11 +114,11 @@ func (m *MysqlClient) getJobs(fs *Filters) ([]*Job, error) {
 	return jobs, nil
 }
 
-func (job *Job) getPodRelation() []JobPodRelation {
-	var list []JobPodRelation
+func generatePodRelation(job *types.Job) []types.JobPodRelation {
+	var list []types.JobPodRelation
 
 	for _, pod := range job.Pods {
-		list = append(list, JobPodRelation{
+		list = append(list, types.JobPodRelation{
 			JobID: job.ID,
 			Pod:   pod,
 		})

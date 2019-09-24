@@ -1,4 +1,4 @@
-package apiserver
+package types
 
 import (
 	"github.com/juju/errors"

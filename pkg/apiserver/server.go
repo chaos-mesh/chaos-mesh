@@ -7,6 +7,9 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/cwen0/chaos-operator/pkg/apiserver/filter"
+	"github.com/cwen0/chaos-operator/pkg/apiserver/storage"
+	"github.com/cwen0/chaos-operator/pkg/apiserver/types"
 	"github.com/gorilla/mux"
 	"github.com/juju/errors"
 	"github.com/ngaut/log"
@@ -27,13 +30,13 @@ func readJSON(r io.ReadCloser, data interface{}) error {
 // Server represents API Server
 type Server struct {
 	rdr     *render.Render
-	storage *MysqlClient
+	storage *storage.MysqlClient
 }
 
 // NewServer will create a Server
 func NewServer(dataSource string) (*Server, error) {
 	rdr := render.New()
-	storage, err := NewMysqlClient(dataSource)
+	storage, err := storage.NewMysqlClient(dataSource)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
@@ -49,7 +52,7 @@ func (s *Server) CreateRouter() http.Handler {
 	router := mux.NewRouter()
 
 	router.HandleFunc("/job", func(w http.ResponseWriter, r *http.Request) {
-		job := new(Job)
+		job := new(types.Job)
 
 		if err := readJSON(r.Body, job); err != nil {
 			s.rdr.JSON(w, http.StatusOK, errResponsef("read json body error %v", err))
@@ -61,7 +64,7 @@ func (s *Server) CreateRouter() http.Handler {
 			return
 		}
 
-		if err := s.storage.createJob(job); err != nil {
+		if err := s.storage.CreateJob(job); err != nil {
 			s.rdr.JSON(w, http.StatusOK, errResponsef("create job %+v error %v", job, err))
 			return
 		}
@@ -72,12 +75,12 @@ func (s *Server) CreateRouter() http.Handler {
 	router.HandleFunc("/jobs", func(w http.ResponseWriter, r *http.Request) {
 		filters, ok := r.URL.Query()["filters"]
 
-		var fs Filters
+		var fs filter.Filters
 		if ok && len(filters) > 0 {
 			json.Unmarshal([]byte(filters[0]), &fs)
 		}
 
-		jobs, err := s.storage.getJobs(&fs)
+		jobs, err := s.storage.GetJobs(&fs)
 		if err != nil {
 			s.rdr.JSON(w, http.StatusOK, errResponsef("select jobs %+v error %v", fs, err))
 		}
