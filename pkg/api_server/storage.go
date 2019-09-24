@@ -49,6 +49,7 @@ func (m *mysqlClient) createJob(job *Job) error {
 		"event_type":  job.EventType,
 		"resource":    string(resource),
 		"create_time": job.Ctime,
+		"job_type":    job.JobType,
 	})
 	if err != nil {
 		tx.Rollback()
@@ -125,10 +126,12 @@ const jobInsert = `
 	INSERT INTO job (
 		event_type,
 		resource,
+		job_type,
 		create_time
 	) VALUES (
 		:event_type,
 		:resource,
+		:job_type,
 		:create_time
 	)
 `
@@ -144,5 +147,5 @@ const jobPodInsert = `
 `
 
 const jobSelect = `
-  SELECT id,event_type,resource,create_time,GROUP_CONCAT(pod separator ',') AS pods_str FROM job JOIN job_pod ON id=job_id %s GROUP BY id
+  SELECT id,event_type,resource,job_type,create_time,GROUP_CONCAT(pod separator ',') AS pods_str FROM job JOIN job_pod ON id=job_id %s GROUP BY id
 `
