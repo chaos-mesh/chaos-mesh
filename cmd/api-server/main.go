@@ -14,9 +14,22 @@
 package main
 
 import (
-	"github.com/gorilla/mux"
+	"net/http"
+	"os"
+
+	"github.com/cwen0/chaos-operator/pkg/api_server"
+	"github.com/ngaut/log"
 )
 
 func main() {
+	address := os.Getenv("ADDRESS")
+	dataSource := os.Getenv("DATASOURCE")
 
+	server, err := api_server.NewServer(dataSource)
+	if err != nil {
+		log.Errorf("Error while creating server: %s", err)
+		return
+	}
+
+	http.ListenAndServe(address, server.CreateRouter())
 }
