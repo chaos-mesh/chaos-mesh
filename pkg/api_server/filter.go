@@ -7,13 +7,16 @@ import (
 	"github.com/juju/errors"
 )
 
+// Filters is a slice of Filter
 type Filters = []Filter
 
+// Filter represent a filter
 type Filter struct {
 	FilterType string      `json:"filterType"`
 	Content    interface{} `json:"content"`
 }
 
+// GenSQL will generate sql for Filters (concat with AND)
 func GenSQL(fs *Filters) (string, error) {
 	if fs == nil {
 		return "TRUE", nil
@@ -34,7 +37,9 @@ func GenSQL(fs *Filters) (string, error) {
 	return strings.Join(filterSQLs, " AND "), nil
 }
 
+// GenSQL will generate sql for filter
 func (filter *Filter) GenSQL() (string, error) {
+	// FIXME: There are SQL Injection bugs here.
 	switch filter.FilterType {
 	case "pods":
 		pods, ok := filter.Content.([]interface{})

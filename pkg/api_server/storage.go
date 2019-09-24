@@ -7,17 +7,18 @@ import (
 	"time"
 
 	"github.com/cwen0/chaos-operator/util"
-	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
 	"github.com/juju/errors"
 	"github.com/ngaut/log"
 )
 
-type mysqlClient struct {
+// MysqlClient is a client for querying mysql
+type MysqlClient struct {
 	db *sqlx.DB
 }
 
-func NewMysqlClient(dataSource string) (*mysqlClient, error) {
+// NewMysqlClient will create a mysql client
+func NewMysqlClient(dataSource string) (*MysqlClient, error) {
 	log.Infof("connecting to %s", dataSource)
 	db, err := sqlx.Open("mysql", dataSource)
 	if err != nil {
@@ -25,12 +26,12 @@ func NewMysqlClient(dataSource string) (*mysqlClient, error) {
 	}
 	log.Info("database connected")
 
-	return &mysqlClient{
+	return &MysqlClient{
 		db,
 	}, nil
 }
 
-func (m *mysqlClient) createJob(job *Job) error {
+func (m *MysqlClient) createJob(job *Job) error {
 	t := time.Now().Format(util.TimeFormat)
 	job.Ctime = t
 
@@ -79,7 +80,7 @@ func (m *mysqlClient) createJob(job *Job) error {
 	return nil
 }
 
-func (m *mysqlClient) getJobs(fs *Filters) ([]*Job, error) {
+func (m *MysqlClient) getJobs(fs *Filters) ([]*Job, error) {
 	filtersSQL, err := GenSQL(fs)
 	if err != nil {
 		return nil, errors.Trace(err)

@@ -7,6 +7,7 @@ const (
 	statusOtherError = 1
 )
 
+// Response is the body part of HTTP Response
 type Response struct {
 	Code    int         `json:"code"`
 	Message string      `json:"message"`

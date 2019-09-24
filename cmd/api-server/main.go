@@ -18,6 +18,7 @@ import (
 	"os"
 
 	"github.com/cwen0/chaos-operator/pkg/api_server"
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/ngaut/log"
 )
 

@@ -24,11 +24,13 @@ func readJSON(r io.ReadCloser, data interface{}) error {
 	return errors.Trace(err)
 }
 
+// Server represents API Server
 type Server struct {
 	rdr     *render.Render
-	storage *mysqlClient
+	storage *MysqlClient
 }
 
+// NewServer will create a Server
 func NewServer(dataSource string) (*Server, error) {
 	rdr := render.New()
 	storage, err := NewMysqlClient(dataSource)
@@ -42,6 +44,7 @@ func NewServer(dataSource string) (*Server, error) {
 	}, nil
 }
 
+// CreateRouter will create router for Server
 func (s *Server) CreateRouter() http.Handler {
 	router := mux.NewRouter()
 
