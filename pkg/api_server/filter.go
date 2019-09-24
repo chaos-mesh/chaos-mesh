@@ -1,6 +1,7 @@
 package api_server
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/juju/errors"
@@ -34,5 +35,23 @@ func GenSQL(fs *Filters) (string, error) {
 }
 
 func (filter *Filter) GenSQL() (string, error) {
-	return "TRUE", nil
+	switch filter.FilterType {
+	case "pods":
+		pods, ok := filter.Content.([]interface{})
+		if !ok {
+			return "", errors.New("content of pods filter is not []interface{}")
+		}
+
+		existSQL := []string{"TRUE"}
+		for _, pod := range pods {
+			existSQL = append(existSQL, fmt.Sprintf(existPodSQL, pod))
+		}
+
+		return strings.Join(existSQL, " AND "), nil
+
+	default:
+		return "", errors.New(fmt.Sprintf("unsupported filter type: %s", filter.FilterType))
+	}
 }
+
+const existPodSQL = `EXISTS (SELECT 1 FROM job_pod WHERE job_id=id AND pod="%s")`

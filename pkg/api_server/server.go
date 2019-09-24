@@ -67,12 +67,11 @@ func (s *Server) CreateRouter() http.Handler {
 	}).Methods("PUT")
 
 	router.HandleFunc("/jobs", func(w http.ResponseWriter, r *http.Request) {
-		vars := mux.Vars(r)
-		filters, ok := vars["filters"]
+		filters, ok := r.URL.Query()["filters"]
 
 		var fs Filters
-		if ok {
-			json.Unmarshal([]byte(filters), &fs)
+		if ok && len(filters) > 0 {
+			json.Unmarshal([]byte(filters[0]), &fs)
 		}
 
 		jobs, err := s.storage.getJobs(&fs)
