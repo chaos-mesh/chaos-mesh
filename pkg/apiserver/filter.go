@@ -1,4 +1,4 @@
-package api_server
+package apiserver
 
 import (
 	"fmt"

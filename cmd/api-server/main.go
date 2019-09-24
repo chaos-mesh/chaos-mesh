@@ -17,7 +17,7 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/cwen0/chaos-operator/pkg/api_server"
+	"github.com/cwen0/chaos-operator/pkg/apiserver"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/ngaut/log"
 )
@@ -26,7 +26,7 @@ func main() {
 	address := os.Getenv("ADDRESS")
 	dataSource := os.Getenv("DATASOURCE")
 
-	server, err := api_server.NewServer(dataSource)
+	server, err := apiserver.NewServer(dataSource)
 	if err != nil {
 		log.Errorf("Error while creating server: %s", err)
 		return
