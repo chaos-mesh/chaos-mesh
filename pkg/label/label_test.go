@@ -14,24 +14,20 @@
 package label
 
 import (
-	"fmt"
-	"strings"
+	"testing"
+
+	. "github.com/onsi/gomega"
 )
 
-// Label is the label field in metadata
-type Label map[string]string
+func TestLabelString(t *testing.T) {
+	g := NewGomegaWithT(t)
 
-// String converts label to a string
-func (l Label) String() string {
-	var arr []string
+	la := Label(make(map[string]string))
+	la["test-label-1"] = "t1"
+	la["test-label-2"] = "t2"
 
-	for k, v := range l {
-		if len(k) == 0 {
-			continue
-		}
+	g.Expect(la.String()).To(Equal("test-label-1=t1,test-label-2=t2"))
 
-		arr = append(arr, fmt.Sprintf("%s=%s", k, v))
-	}
-
-	return strings.Join(arr, ",")
+	la[""] = "t3"
+	g.Expect(la.String()).To(Equal("test-label-1=t1,test-label-2=t2"))
 }

@@ -26,7 +26,7 @@ type ManagerBaseInterface interface {
 	AddRunner(runner *Runner) error
 	DeleteRunner(key string) error
 	UpdateRunner(runner *Runner) error
-	IsExist(key string) bool
+	GetRunner(key string) (*Runner, bool)
 }
 
 // ManagerBase is the ManagerBaseInterface implementation.
@@ -82,9 +82,13 @@ func (m *ManagerBase) UpdateRunner(runner *Runner) error {
 	return m.updateRunnerAction(runner)
 }
 
-func (m *ManagerBase) IsExist(key string) bool {
-	_, ok := m.runners.Load(key)
-	return ok
+func (m *ManagerBase) GetRunner(key string) (*Runner, bool) {
+	runner, ok := m.runners.Load(key)
+	if !ok {
+		return nil, false
+	}
+
+	return runner.(*Runner), true
 }
 
 func (m *ManagerBase) addRunnerAction(runner *Runner) error {
