@@ -22,55 +22,135 @@ import (
 func TestRunnerEqual(t *testing.T) {
 	g := NewGomegaWithT(t)
 
-	r1 := &Runner{
-		Name: "t1",
-		Rule: "* * * 1 *",
-		Job:  fakeJob2{},
-	}
-	r2 := &Runner{
-		Name: "t1",
-		Rule: "* * * 1 *",
-		Job:  fakeJob2{},
+	type TestCase struct {
+		name          string
+		orignRunner   *Runner
+		newRunner     *Runner
+		expectedValue bool
 	}
 
-	g.Expect(r1.Equal(r2)).To(Equal(true))
+	tcs := []TestCase{
+		{
+			name: "same runner",
+			orignRunner: &Runner{
+				Name: "t1",
+				Rule: "* * * 1 *",
+				Job:  fakeJob2{},
+			},
+			newRunner: &Runner{
+				Name: "t1",
+				Rule: "* * * 1 *",
+				Job:  fakeJob2{},
+			},
+			expectedValue: true,
+		},
+		{
+			name: "different rule",
+			orignRunner: &Runner{
+				Name: "t1",
+				Rule: "* * * 1 *",
+				Job:  fakeJob2{},
+			},
+			newRunner: &Runner{
+				Name: "t1",
+				Rule: "@every 2m",
+				Job:  fakeJob2{},
+			},
+			expectedValue: false,
+		},
+		{
+			name: "different name",
+			orignRunner: &Runner{
+				Name: "t1",
+				Rule: "* * * 1 *",
+				Job:  fakeJob2{},
+			},
+			newRunner: &Runner{
+				Name: "t2",
+				Rule: "* * * 1 *",
+				Job:  fakeJob2{},
+			},
+			expectedValue: false,
+		},
+		{
+			name: "different job",
+			orignRunner: &Runner{
+				Name: "t1",
+				Rule: "* * * 1 *",
+				Job:  fakeJob{},
+			},
+			newRunner: &Runner{
+				Name: "t1",
+				Rule: "* * * 1 *",
+				Job:  fakeJob2{},
+			},
+			expectedValue: false,
+		},
+	}
 
-	r2.Name = "t2"
-	g.Expect(r1.Equal(r2)).To(Equal(false))
-
-	r2.Name = "t1"
-	r2.Rule = "* * 1 * *"
-	g.Expect(r1.Equal(r2)).To(Equal(false))
-
-	r2.Name = "t1"
-	r2.Rule = "* * * 1 *"
-	g.Expect(r1.Equal(r2)).To(Equal(true))
-
-	r1.Job = fakeJob{}
-	g.Expect(r1.Equal(r2)).To(Equal(false))
+	for _, tc := range tcs {
+		g.Expect(tc.orignRunner.Equal(tc.newRunner)).To(Equal(tc.expectedValue), tc.name)
+	}
 }
 
 func TestRunnerValidate(t *testing.T) {
 	g := NewGomegaWithT(t)
 
-	r1 := &Runner{
-		Rule: "* * * 1 *",
-		Job:  fakeJob2{},
+	type TestCase struct {
+		name           string
+		runner         *Runner
+		expectedResult resultF
 	}
-	g.Expect(r1.Validate()).Should(HaveOccurred())
 
-	r1.Name = "t1"
-	g.Expect(r1.Validate()).ShouldNot(HaveOccurred())
+	tcs := []TestCase{
+		{
+			name: "valid",
+			runner: &Runner{
+				Name: "t1",
+				Rule: "* 1 * * *",
+				Job:  fakeJob{},
+			},
+			expectedResult: Succeed,
+		},
+		{
+			name: "no name",
+			runner: &Runner{
+				Name: "",
+				Rule: "* 1 * * *",
+				Job:  fakeJob{},
+			},
+			expectedResult: HaveOccurred,
+		},
+		{
+			name: "no rule",
+			runner: &Runner{
+				Name: "t1",
+				Rule: "",
+				Job:  fakeJob{},
+			},
+			expectedResult: HaveOccurred,
+		},
+		{
+			name: "no job",
+			runner: &Runner{
+				Name: "t1",
+				Rule: "",
+				Job:  nil,
+			},
+			expectedResult: HaveOccurred,
+		},
+		{
+			name: "invalid rule",
+			runner: &Runner{
+				Name: "t1",
+				Rule: "* 1 * * * *",
+				Job:  nil,
+			},
+			expectedResult: HaveOccurred,
+		},
+	}
 
-	r1.Rule = ""
-	g.Expect(r1.Validate()).Should(HaveOccurred())
-
-	r1.Rule = "* * * * * *"
-	g.Expect(r1.Validate()).Should(HaveOccurred())
-
-	r1.Rule = "* * 3 * *"
-	g.Expect(r1.Validate()).ShouldNot(HaveOccurred())
-
-	r1.Job = nil
-	g.Expect(r1.Validate()).Should(HaveOccurred())
+	for _, tc := range tcs {
+		g.Expect(tc.runner.Validate()).Should(tc.expectedResult(), tc.name)
+	}
 }

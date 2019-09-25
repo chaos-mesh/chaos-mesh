@@ -14,6 +14,7 @@
 package podchaos
 
 import (
+	"fmt"
 	"testing"
 
 	. "github.com/onsi/gomega"
@@ -29,55 +30,133 @@ import (
 	"k8s.io/client-go/tools/cache"
 )
 
-func TestPodChaosManager(t *testing.T) {
+func TestPodChaosManagerSync(t *testing.T) {
 	g := NewGomegaWithT(t)
 
 	pcManager := newFakePodChaosManager()
 
-	pcKill := &v1alpha1.PodChaos{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       "PodChaos",
-			APIVersion: "pingcap.com/v1alpha1",
+	type TestCase struct {
+		name           string
+		podchaos       *v1alpha1.PodChaos
+		expectedResult resultF
+		isChange       bool
+	}
+
+	tcsNew := []TestCase{
+		{
+			name:           "new podchaos 1",
+			podchaos:       newPodChaos2("pod-chaos-1", "@every 2m", "1"),
+			expectedResult: Succeed,
 		},
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "pod-kill-test",
-			Namespace: metav1.NamespaceDefault,
-		},
-		Spec: v1alpha1.PodChaosSpec{
-			Selector: v1alpha1.SelectorSpec{
-				Namespaces: []string{"chaos-testing"},
-			},
-			Scheduler: v1alpha1.SchedulerSpec{
-				Cron: "@every 1m",
-			},
-			Action: v1alpha1.PodKillAction,
-			Mode:   v1alpha1.OnePodMode,
+		{
+			name:           "new podchaos 2",
+			podchaos:       newPodChaos2("pod-chaos-2", "@every 2m", "1"),
+			expectedResult: Succeed,
 		},
 	}
 
-	g.Expect(pcManager.Sync(pcKill)).Should(Succeed())
-	key, err := cache.MetaNamespaceKeyFunc(pcKill)
-	g.Expect(err).ShouldNot(HaveOccurred())
+	for _, tc := range tcsNew {
+		key, err := cache.MetaNamespaceKeyFunc(tc.podchaos)
+		g.Expect(err).ShouldNot(HaveOccurred(), tc.name)
 
-	getRn, exist := pcManager.base.GetRunner(key)
-	g.Expect(exist).To(Equal(true))
-	g.Expect(getRn.EntryID).NotTo(Equal(0))
+		_, exist := pcManager.base.GetRunner(key)
+		g.Expect(exist).To(Equal(false), tc.name)
 
-	pcKillCopy := pcKill.DeepCopy()
-	g.Expect(pcManager.Sync(pcKillCopy)).Should(Succeed())
-	getRn2, exist := pcManager.base.GetRunner(key)
-	g.Expect(exist).To(Equal(true))
-	g.Expect(getRn2.EntryID).To(Equal(getRn.EntryID))
+		g.Expect(pcManager.Sync(tc.podchaos)).Should(tc.expectedResult(), tc.name)
 
-	pcKillCopy.Spec.Scheduler.Cron = "@every 2m"
-	g.Expect(pcManager.Sync(pcKillCopy)).Should(Succeed())
-	getRn3, exist := pcManager.base.GetRunner(key)
-	g.Expect(exist).To(Equal(true))
-	g.Expect(getRn3.EntryID).NotTo(Equal(getRn.EntryID))
+		_, exist = pcManager.base.GetRunner(key)
+		g.Expect(exist).To(Equal(true), tc.name)
+	}
 
-	g.Expect(pcManager.Delete(key)).Should(Succeed())
-	_, exist = pcManager.base.GetRunner(key)
-	g.Expect(exist).To(Equal(false))
+	tcsUpdate := []TestCase{
+		{
+			name:           "same pochaos",
+			podchaos:       newPodChaos2("pod-chaos-1", "@every 2m", "1"),
+			expectedResult: Succeed,
+			isChange:       false,
+		},
+		{
+			name:           "different rule",
+			podchaos:       newPodChaos2("pod-chaos-1", "@every 4m", "1"),
+			expectedResult: Succeed,
+			isChange:       true,
+		},
+		{
+			name:           "different version",
+			podchaos:       newPodChaos2("pod-chaos-2", "@every 2m", "2"),
+			expectedResult: Succeed,
+			isChange:       true,
+		},
+	}
+
+	for _, tc := range tcsUpdate {
+		key, err := cache.MetaNamespaceKeyFunc(tc.podchaos)
+		g.Expect(err).ShouldNot(HaveOccurred(), tc.name)
+
+		expectedID, exist := pcManager.base.GetRunner(key)
+		g.Expect(exist).To(Equal(true), tc.name)
+
+		g.Expect(pcManager.Sync(tc.podchaos)).Should(tc.expectedResult(), tc.name)
+
+		getID, exist := pcManager.base.GetRunner(key)
+		g.Expect(exist).To(Equal(true), tc.name)
+
+		if tc.isChange {
+			g.Expect(getID).NotTo(Equal(expectedID), tc.name)
+		} else {
+			g.Expect(getID).To(Equal(expectedID), tc.name)
+		}
+	}
+}
+
+func TestPodChaosManagerDelete(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	pcManager := newFakePodChaosManager()
+
+	pcs := []*v1alpha1.PodChaos{newPodChaos("pc-1"), newPodChaos("pc-2"), newPodChaos("pc-3")}
+
+	for _, pc := range pcs {
+		g.Expect(pcManager.Sync(pc)).Should(Succeed(), pc.Name)
+	}
+
+	type TestCase struct {
+		name           string
+		key            string
+		expectedResult resultF
+		isExist        bool
+	}
+
+	tcsNew := []TestCase{
+		{
+			name:           "delete pc-1",
+			isExist:        true,
+			key:            fmt.Sprintf("%s/pc-1", metav1.NamespaceDefault),
+			expectedResult: Succeed,
+		},
+		{
+			name:           "delete pc-2",
+			isExist:        true,
+			key:            fmt.Sprintf("%s/pc-2", metav1.NamespaceDefault),
+			expectedResult: Succeed,
+		},
+		{
+			name:           "podchaos not exist",
+			isExist:        false,
+			key:            fmt.Sprintf("%s/pc-not-exist", metav1.NamespaceDefault),
+			expectedResult: Succeed,
+		},
+	}
+
+	for _, tc := range tcsNew {
+		_, exist := pcManager.base.GetRunner(tc.key)
+		g.Expect(exist).To(Equal(tc.isExist), tc.name)
+
+		g.Expect(pcManager.Delete(tc.key)).Should(tc.expectedResult(), tc.name)
+
+		_, exist = pcManager.base.GetRunner(tc.key)
+		g.Expect(exist).To(Equal(false), tc.name)
+	}
 }
 
 func newFakePodChaosManager() *podChaosManager {
@@ -96,4 +175,27 @@ func newFakePodChaosManager() *podChaosManager {
 	pcManager := NewPodChaosManager(kubeCli, managerBase, podLister, pcLister)
 
 	return pcManager
+}
+
+func newPodChaos2(name string, rule string, version string) *v1alpha1.PodChaos {
+	return &v1alpha1.PodChaos{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "PodChaos",
+			APIVersion: "pingcap.com/v1alpha1",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Name:            name,
+			Namespace:       metav1.NamespaceDefault,
+			ResourceVersion: version,
+		},
+		Spec: v1alpha1.PodChaosSpec{
+			Selector: v1alpha1.SelectorSpec{
+				Namespaces: []string{"chaos-testing"},
+			},
+			Scheduler: v1alpha1.SchedulerSpec{
+				Cron: rule,
+			},
+			Action: v1alpha1.PodKillAction,
+		},
+	}
 }

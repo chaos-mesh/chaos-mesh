@@ -14,92 +14,261 @@
 package manager
 
 import (
+	"strconv"
+	"sync"
 	"testing"
 
 	. "github.com/onsi/gomega"
+	gtype "github.com/onsi/gomega/types"
 	"github.com/robfig/cron/v3"
 )
 
-func TestManagerBase(t *testing.T) {
-	g := NewGomegaWithT(t)
-
+func newFakeManagerBase() *ManagerBase {
 	cronEngine := cron.New()
 	cronEngine.Start()
 
-	mgr := NewManagerBase(cronEngine)
+	return NewManagerBase(cronEngine)
+}
 
-	r1 := &Runner{
-		Name: "test1",
-		Rule: "* * 3 * *",
-		Job:  fakeJob{},
+type resultF func() gtype.GomegaMatcher
+
+func TestManagerBaseAddRunner(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	mgr := newFakeManagerBase()
+
+	type TestCase struct {
+		name           string
+		newRunner      *Runner
+		expectedResult resultF
 	}
 
-	g.Expect(mgr.AddRunner(r1)).Should(Succeed())
-
-	getR, ok := mgr.runners.Load(r1.Name)
-	g.Expect(ok).To(Equal(true))
-	g.Expect(getR.(*Runner).EntryID).NotTo(Equal(0))
-	g.Expect(getR.(*Runner).Name).To(Equal(r1.Name))
-
-	r2 := &Runner{
-		Name: "test2",
-		Rule: "@every 2m",
-		Job:  fakeJob2{},
+	tcs := []TestCase{
+		{
+			name: "runner is valid",
+			newRunner: &Runner{
+				Name: "test1",
+				Rule: "* * 3 * *",
+				Job:  fakeJob{},
+			},
+			expectedResult: Succeed,
+		},
+		{
+			name: "runner is valid",
+			newRunner: &Runner{
+				Name: "test2",
+				Rule: "@every 2m",
+				Job:  fakeJob{},
+			},
+			expectedResult: Succeed,
+		},
+		{
+			name: "name is empty",
+			newRunner: &Runner{
+				Name: "",
+				Rule: "* * 3 * *",
+				Job:  fakeJob{},
+			},
+			expectedResult: HaveOccurred,
+		},
+		{
+			name: "rule is empty",
+			newRunner: &Runner{
+				Name: "test1",
+				Rule: "",
+				Job:  fakeJob{},
+			},
+			expectedResult: HaveOccurred,
+		},
+		{
+			name: "rule is invalid",
+			newRunner: &Runner{
+				Name: "test1",
+				Rule: "* * * * 1 *",
+				Job:  fakeJob{},
+			},
+			expectedResult: HaveOccurred,
+		},
 	}
-	g.Expect(mgr.AddRunner(r2)).Should(Succeed())
 
-	lenF := func() int {
-		le := 0
-		mgr.runners.Range(func(k, v interface{}) bool {
-			le++
-			return true
-		})
-		return le
+	for _, tc := range tcs {
+		g.Expect(mgr.AddRunner(tc.newRunner)).Should(tc.expectedResult(), tc.name)
 	}
 
-	g.Expect(lenF()).To(Equal(2))
+	g.Expect(lenSyncMap(&mgr.runners)).To(Equal(2))
+}
 
-	getR2, ok := mgr.runners.Load(r2.Name)
-	g.Expect(ok).To(Equal(true))
+func lenSyncMap(m *sync.Map) int {
+	le := 0
+	m.Range(func(k, v interface{}) bool {
+		le++
+		return true
+	})
+	return le
+}
 
-	getR2ID := getR2.(*Runner).EntryID
-	g.Expect(getR2ID).NotTo(Equal(0))
+func TestManagerBaseDeleteRunner(t *testing.T) {
+	g := NewGomegaWithT(t)
 
-	g.Expect(mgr.UpdateRunner(r2)).Should(Succeed())
-	getR2s, ok := mgr.runners.Load(r2.Name)
-	g.Expect(ok).To(Equal(true))
-	g.Expect(getR2s.(*Runner).EntryID).To(Equal(getR2ID))
+	mgr := newFakeManagerBase()
 
-	r3 := &Runner{
-		Name: r2.Name,
-		Rule: "@every 3m",
-		Job:  r2.Job,
+	for i := 0; i < 5; i++ {
+		r := &Runner{
+			Name: "test-" + strconv.Itoa(i),
+			Rule: "* * 3 * *",
+			Job:  fakeJob{},
+		}
+
+		g.Expect(mgr.AddRunner(r)).Should(Succeed())
 	}
-	g.Expect(mgr.UpdateRunner(r3)).Should(Succeed())
-	getR3, ok := mgr.runners.Load(r3.Name)
 
-	g.Expect(ok).To(Equal(true))
-	g.Expect(getR3.(*Runner).EntryID).NotTo(Equal(0))
-	g.Expect(getR3.(*Runner).EntryID).NotTo(Equal(getR2ID))
+	g.Expect(lenSyncMap(&mgr.runners)).To(Equal(5))
 
-	g.Expect(lenF()).To(Equal(2))
+	type TestCase struct {
+		name              string
+		key               string
+		expectedResult    resultF
+		expectedPodsCount int
+	}
 
-	_, exist := mgr.GetRunner(r1.Name)
-	g.Expect(exist).To(Equal(true))
+	tcs := []TestCase{
+		{
+			name:              "delete test-2",
+			key:               "test-2",
+			expectedResult:    Succeed,
+			expectedPodsCount: 4,
+		},
+		{
+			name:              "delete test-4",
+			key:               "test-4",
+			expectedResult:    Succeed,
+			expectedPodsCount: 3,
+		},
+		{
+			name:              "delete test-4 again",
+			key:               "test-4",
+			expectedResult:    Succeed,
+			expectedPodsCount: 3,
+		},
+		{
+			name:              "delete test-10",
+			key:               "test-10",
+			expectedResult:    Succeed,
+			expectedPodsCount: 3,
+		},
+	}
 
-	_, exist = mgr.GetRunner(r2.Name)
-	g.Expect(exist).To(Equal(true))
+	for _, tc := range tcs {
+		g.Expect(mgr.DeleteRunner(tc.key)).Should(tc.expectedResult(), tc.name)
+		g.Expect(lenSyncMap(&mgr.runners)).To(Equal(tc.expectedPodsCount), tc.name)
+	}
+}
 
-	_, exist = mgr.GetRunner("test-no")
-	g.Expect(exist).To(Equal(false))
+func TestManagerBaseUpdateRunner(t *testing.T) {
+	g := NewGomegaWithT(t)
 
-	g.Expect(mgr.DeleteRunner(r1.Name)).Should(Succeed())
-	g.Expect(lenF()).To(Equal(1))
-	_, exist = mgr.GetRunner(r1.Name)
-	g.Expect(exist).To(Equal(false))
+	mgr := newFakeManagerBase()
 
-	_, exist = mgr.GetRunner(r2.Name)
-	g.Expect(exist).To(Equal(true))
+	type TestCase struct {
+		name           string
+		addRunner      *Runner
+		updateRunner   *Runner
+		expectedResult resultF
+		updated        bool
+		isChange       bool
+	}
+
+	tcs := []TestCase{
+		{
+			name: "update same runner",
+			addRunner: &Runner{
+				Name: "test-1",
+				Rule: "* * 3 * *",
+				Job:  fakeJob2{},
+			},
+			updateRunner: &Runner{
+				Name: "test-1",
+				Rule: "* * 3 * *",
+				Job:  fakeJob2{},
+			},
+			expectedResult: Succeed,
+			updated:        true,
+			isChange:       false,
+		},
+		{
+			name: "runner not exist",
+			updateRunner: &Runner{
+				Name: "test-no-found",
+				Rule: "* * 3 * *",
+				Job:  fakeJob2{},
+			},
+			expectedResult: HaveOccurred,
+			updated:        false,
+			isChange:       false,
+		},
+		{
+			name: "different runner rule",
+			addRunner: &Runner{
+				Name: "test-2",
+				Rule: "* * 3 * *",
+				Job:  fakeJob2{},
+			},
+			updateRunner: &Runner{
+				Name: "test-2",
+				Rule: "@every 2m",
+				Job:  fakeJob2{},
+			},
+			expectedResult: Succeed,
+			updated:        true,
+			isChange:       true,
+		},
+		{
+			name: "different Job",
+			addRunner: &Runner{
+				Name: "test-3",
+				Rule: "* * 3 * *",
+				Job:  fakeJob{},
+			},
+			updateRunner: &Runner{
+				Name: "test-3",
+				Rule: "@every 2m",
+				Job:  fakeJob2{},
+			},
+			expectedResult: Succeed,
+			updated:        true,
+			isChange:       true,
+		},
+	}
+
+	for _, tc := range tcs {
+		var expectedID int
+		if tc.addRunner != nil {
+			g.Expect(mgr.AddRunner(tc.addRunner)).Should(Succeed(), tc.name)
+
+			getRunner, ok := mgr.runners.Load(tc.addRunner.Name)
+			g.Expect(ok).To(Equal(true), tc.name)
+
+			expectedID = getRunner.(*Runner).EntryID
+		}
+
+		g.Expect(mgr.UpdateRunner(tc.updateRunner)).Should(tc.expectedResult(), tc.name)
+
+		if !tc.updated {
+			continue
+		}
+
+		getRunner, ok := mgr.runners.Load(tc.updateRunner.Name)
+		g.Expect(ok).To(Equal(true), tc.name)
+
+		newID := getRunner.(*Runner).EntryID
+		if tc.isChange {
+			g.Expect(newID).NotTo(Equal(expectedID), tc.name)
+		} else {
+			g.Expect(newID).To(Equal(expectedID), tc.name)
+		}
+	}
+
+	g.Expect(lenSyncMap(&mgr.runners)).To(Equal(3))
 }
 
 type fakeJob struct{}

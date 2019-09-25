@@ -22,7 +22,6 @@ import (
 	informers "github.com/pingcap/chaos-operator/pkg/client/informers/externalversions"
 	"github.com/pingcap/chaos-operator/pkg/manager"
 
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	kubeinformers "k8s.io/client-go/informers"
 	kubefake "k8s.io/client-go/kubernetes/fake"
 )
@@ -62,29 +61,6 @@ func newFakePodChaosControl() *podChaosControl {
 	control.mgr = &fakePodChaosManager{base: &fakeManagerBase{}}
 
 	return control
-}
-
-func newPodChaos(name string) *v1alpha1.PodChaos {
-	return &v1alpha1.PodChaos{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       "PodChaos",
-			APIVersion: "pingcap.com/v1alpha1",
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: metav1.NamespaceDefault,
-		},
-		Spec: v1alpha1.PodChaosSpec{
-			Selector: v1alpha1.SelectorSpec{
-				Namespaces: []string{"chaos-testing"},
-			},
-			Scheduler: v1alpha1.SchedulerSpec{
-				Cron: "@every 1m",
-			},
-			Action: v1alpha1.PodKillAction,
-			Mode:   v1alpha1.OnePodMode,
-		},
-	}
 }
 
 type fakeManagerBase struct{}
