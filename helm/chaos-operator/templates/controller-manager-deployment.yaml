@@ -40,38 +40,6 @@ spec:
                 fieldPath: metadata.namespace
           - name: TZ
             value: {{ .Values.timezone | default "UTC" }}
-      - name: api-server
-        image: {{ .Values.apiServer.image  }}
-        imagePullPolicy: {{ .Values.apiServer.imagePullPolicy | default "IfNotPresent" }}
-        resources:
-{{ toYaml .Values.controllerManager.resources | indent 12 }}
-        command:
-          - /usr/local/bin/chaos-api-server
-        env:
-          - name: NAMESPACE
-            valueFrom:
-              fieldRef:
-                fieldPath: metadata.namespace
-          {{- if .Values.apiServer.mysql.datasource }}
-          - name: MYSQL_DATASOURCE
-            value: {{ .Values.apiServer.mysql.datasource }}
-          {{- else}}
-          - name: MYSQL_DATASOURCE
-            value: root:@localhost:3306/chaos-operator
-          {{- end}}
-
-      # Use internal mysql database if no mysql datasource is provided
-      {{- if not .Values.apiServer.mysql.datasource }}
-      - name: api-server-mysql
-        image: mysql
-        env:
-          - name: MYSQL_DATABASE
-            value: chaos-operator
-          - name: MYSQL_USER
-            value: root
-          - name: MYSQL_ALLOW_EMPTY_PASSWORD
-            value: true
-      {{- end}}
     {{- with .Values.controllerManager.nodeSelector }}
       nodeSelector:
 {{ toYaml . | indent 8 }}
