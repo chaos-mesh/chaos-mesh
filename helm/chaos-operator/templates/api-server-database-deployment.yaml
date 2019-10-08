@@ -1,0 +1,69 @@
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: chaos-api-server-database
+  labels:
+    app.kubernetes.io/name: {{ template "chaos-operator.name" . }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/component: api-server
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+"  "_" }}
+spec:
+  replicas: {{ .Values.apiServer.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ template "chaos-operator.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+      app.kubernetes.io/component: api-server-database
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ template "chaos-operator.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        app.kubernetes.io/component: api-server-database
+    spec:
+    {{- if .Values.apiServer.serviceAccount }}
+      serviceAccount: {{ .Values.apiServer.serviceAccount }}
+    {{- end }}
+      containers:
+      - name: api-server-mysql
+        image: mysql
+        env:
+          - name: MYSQL_DATABASE
+            value: chaos-operator
+          - name: MYSQL_USER
+            value: root
+          - name: MYSQL_ALLOW_EMPTY_PASSWORD
+            value: "true"
+        volumeMounts:
+        - name: mysql-initdb
+          mountPath: /docker-entrypoint-initdb.d
+      volumes:
+      - name: mysql-initdb
+        configMap:
+          name: mysql-initdb-config
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mysql-initdb-config
+data:
+  initdb.sql: |
+    CREATE DATABASE chaos_operator;
+    use chaos_operator;
+
+    CREATE TABLE IF NOT EXISTS job (
+      id INT NOT NULL AUTO_INCREMENT, 
+      event_type VARCHAR(20) NOT NULL,
+      job_type VARCHAR(255) NOT NULL,
+      resource TEXT,
+      create_time DATETIME,
+      PRIMARY KEY(id),
+      KEY(job_type)
+    );
+    
+    CREATE TABLE IF NOT EXISTS job_pod (
+      job_id INT NOT NULL,
+      pod   VARCHAR(255) NOT NULL,
+      FOREIGN KEY (job_id) references job(id)
+    );

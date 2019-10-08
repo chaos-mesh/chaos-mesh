@@ -14,6 +14,7 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 	"os"
 
@@ -23,14 +24,14 @@ import (
 )
 
 func main() {
-	address := os.Getenv("ADDRESS")
-	dataSource := os.Getenv("DATASOURCE")
+	databaseHost := os.Getenv("CHAOS_API_SERVER_DATABASE_SERVICE_HOST")
+	databasePort := os.Getenv("CHAOS_API_SERVER_DATABASE_SERVICE_PORT")
 
-	server, err := apiserver.NewServer(dataSource)
+	server, err := apiserver.NewServer(fmt.Sprintf("root:@(%s:%s)/chaos_operator", databaseHost, databasePort))
 	if err != nil {
 		log.Errorf("Error while creating server: %s", err)
 		return
 	}
 
-	http.ListenAndServe(address, server.CreateRouter())
+	http.ListenAndServe("0.0.0.0:80", server.CreateRouter())
 }
