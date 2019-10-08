@@ -33,11 +33,4 @@ spec:
 {{ toYaml .Values.controllerManager.resources | indent 12 }}
         command:
           - /usr/local/bin/chaos-api-server
-        env:
-          - name: NAMESPACE
-            valueFrom:
-              fieldRef:
-                fieldPath: metadata.namespace
-          - name: MYSQL_DATASOURCE
-            value: root:@localhost:3306/chaos-operator
 
