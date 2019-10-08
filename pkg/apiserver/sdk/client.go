@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"os"
 
 	"github.com/juju/errors"
 	"github.com/ngaut/log"
@@ -78,4 +79,17 @@ func (c *Client) GetJob(filter []*filter.Filter) ([]types.Job, error) {
 	}
 
 	return jobs, nil
+}
+
+// NewClientFromEnv will create a client with discovering services
+func NewClientInK8s() *Client {
+	clientHost := os.Getenv("CHAOS_API_SERVER_SERVICE_HOST")
+	clientPort := os.Getenv("CHAOS_API_SERVER_SERVICE_PORT")
+
+	// TODO: check error here
+	client := Client{
+		address: fmt.Sprintf("http://%s:%s", clientHost, clientPort),
+	}
+
+	return &client
 }
