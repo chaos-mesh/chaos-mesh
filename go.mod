@@ -20,8 +20,8 @@ require (
 	github.com/mattn/go-sqlite3 v1.11.0 // indirect
 	github.com/modern-go/reflect2 v1.0.1 // indirect
 	github.com/ngaut/log v0.0.0-20180314031856-b8e36e7ba5ac
+	github.com/onsi/gomega v1.7.0
 	github.com/peterbourgon/diskv v2.0.1+incompatible // indirect
-	github.com/pkg/errors v0.8.1 // indirect
 	github.com/robfig/cron/v3 v3.0.0
 	github.com/spf13/pflag v1.0.3 // indirect
 	github.com/twitchtv/retool v1.3.7 // indirect
@@ -41,6 +41,5 @@ require (
 	k8s.io/apimachinery v0.0.0-20181128191346-49ce2735e507
 	k8s.io/apiserver v0.0.0-20190118115647-a748535592ba
 	k8s.io/client-go v2.0.0-alpha.0.0.20190115164855-701b91367003+incompatible
-	k8s.io/code-generator v0.0.0-20181128191024-b1289fc74931 // indirect
 	k8s.io/kube-openapi v0.0.0-20190709113604-33be087ad058 // indirect
 )

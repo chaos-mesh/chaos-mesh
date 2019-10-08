@@ -91,9 +91,14 @@ func SelectPods(
 }
 
 // RandomFixedIndexes returns the `count` random indexes between `start` and `end`.
-func RandomFixedIndexes(start, end, count int) []int {
-	var indexes []int
-	m := make(map[int]int, count)
+// [start, end)
+func RandomFixedIndexes(start, end, count uint) []uint {
+	var indexes []uint
+	m := make(map[uint]uint, count)
+
+	if end-start < 0 {
+		return indexes
+	}
 
 	if count > end-start {
 		for i := start; i < end; i++ {
@@ -103,8 +108,8 @@ func RandomFixedIndexes(start, end, count int) []int {
 		return indexes
 	}
 
-	for i := 0; i < count; {
-		index := rand.Intn(end-start) + start
+	for i := 0; i < int(count); {
+		index := uint(rand.Intn(int(end-start))) + start
 
 		_, exist := m[index]
 		if exist {

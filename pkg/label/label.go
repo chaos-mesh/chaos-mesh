@@ -26,6 +26,10 @@ func (l Label) String() string {
 	var arr []string
 
 	for k, v := range l {
+		if len(k) == 0 {
+			continue
+		}
+
 		arr = append(arr, fmt.Sprintf("%s=%s", k, v))
 	}
 

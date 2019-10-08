@@ -46,12 +46,11 @@ func (p PodKillJob) Run() {
 		return
 	}
 
-	if len(pods) == 0 {
+	if pods == nil || len(pods) == 0 {
 		glog.Errorf("%s, no pod is selected", p.logPrefix())
 		return
 	}
 
-	// TODO: support more modes
 	switch p.podChaos.Spec.Mode {
 	case v1alpha1.OnePodMode:
 		glog.Infof("%s, Try to select one pod to do pod-kill job randomly", p.logPrefix())
@@ -83,6 +82,11 @@ func (p PodKillJob) Equal(job manager.Job) bool {
 		return false
 	}
 
+	if p.podChaos.Name != pjob.podChaos.Name ||
+		p.podChaos.Namespace != pjob.podChaos.Namespace {
+		return false
+	}
+
 	if p.podChaos.ResourceVersion != pjob.podChaos.ResourceVersion {
 		return false
 	}
@@ -93,6 +97,7 @@ func (p PodKillJob) Equal(job manager.Job) bool {
 func (p *PodKillJob) deleteAllPods(pods []v1.Pod) error {
 	g := errgroup.Group{}
 	for _, pod := range pods {
+		pod := pod
 		g.Go(func() error {
 			return p.deletePod(pod)
 		})
@@ -110,7 +115,8 @@ func (p *PodKillJob) deleteFixedPods(pods []v1.Pod) error {
 	glog.Infof("%s, Try to delete %d pods", p.logPrefix(), killNum)
 
 	if len(pods) < killNum {
-		return fmt.Errorf("fixed number is less the count of the selected pods")
+		glog.Infof("%s, fixed number is less the count of the selected pods", p.logPrefix())
+		killNum = len(pods)
 	}
 
 	return p.concurrentDeletePods(pods, killNum)
@@ -160,6 +166,10 @@ func (p *PodKillJob) deleteMaxPercentagePods(pods []v1.Pod) error {
 }
 
 func (p *PodKillJob) deleteRandomPod(pods []v1.Pod) error {
+	if len(pods) == 0 {
+		return nil
+	}
+
 	index := rand.Intn(len(pods))
 	return p.deletePod(pods[index])
 }
@@ -173,10 +183,15 @@ func (p *PodKillJob) deletePod(pod v1.Pod) error {
 }
 
 func (p *PodKillJob) concurrentDeletePods(pods []v1.Pod, killNum int) error {
-	killIndexes := manager.RandomFixedIndexes(0, len(pods), killNum)
+	if killNum < 0 {
+		return nil
+	}
+
+	killIndexes := manager.RandomFixedIndexes(0, uint(len(pods)), uint(killNum))
 
 	g := errgroup.Group{}
 	for _, index := range killIndexes {
+		index := index
 		g.Go(func() error {
 			return p.deletePod(pods[index])
 		})

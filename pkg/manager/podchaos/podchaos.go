@@ -61,8 +61,12 @@ func (m *podChaosManager) Sync(pc *v1alpha1.PodChaos) error {
 		return err
 	}
 
-	if m.base.IsExist(key) {
-		glog.Infof("Sync the runner %s", key)
+	if rn, exist := m.base.GetRunner(key); exist {
+		if rn.Equal(runner) {
+			return nil
+		}
+
+		glog.Infof("Update the runner %s", key)
 		return m.base.UpdateRunner(runner)
 	}
 
