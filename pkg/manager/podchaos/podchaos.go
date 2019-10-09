@@ -84,7 +84,7 @@ func (m *podChaosManager) newRunner(pc *v1alpha1.PodChaos) (*manager.Runner, err
 
 	switch pc.Spec.Action {
 	case v1alpha1.PodKillAction:
-		job = PodKillJob{
+		job = &PodKillJob{
 			podChaos:  pc,
 			kubeCli:   m.kubeCli,
 			podLister: m.podLister,

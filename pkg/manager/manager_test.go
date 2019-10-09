@@ -49,7 +49,7 @@ func TestManagerBaseAddRunner(t *testing.T) {
 			newRunner: &Runner{
 				Name: "test1",
 				Rule: "* * 3 * *",
-				Job:  fakeJob{},
+				Job:  &fakeJob{},
 			},
 			expectedResult: Succeed,
 		},
@@ -58,7 +58,7 @@ func TestManagerBaseAddRunner(t *testing.T) {
 			newRunner: &Runner{
 				Name: "test2",
 				Rule: "@every 2m",
-				Job:  fakeJob{},
+				Job:  &fakeJob{},
 			},
 			expectedResult: Succeed,
 		},
@@ -67,7 +67,7 @@ func TestManagerBaseAddRunner(t *testing.T) {
 			newRunner: &Runner{
 				Name: "",
 				Rule: "* * 3 * *",
-				Job:  fakeJob{},
+				Job:  &fakeJob{},
 			},
 			expectedResult: HaveOccurred,
 		},
@@ -76,7 +76,7 @@ func TestManagerBaseAddRunner(t *testing.T) {
 			newRunner: &Runner{
 				Name: "test1",
 				Rule: "",
-				Job:  fakeJob{},
+				Job:  &fakeJob{},
 			},
 			expectedResult: HaveOccurred,
 		},
@@ -85,7 +85,7 @@ func TestManagerBaseAddRunner(t *testing.T) {
 			newRunner: &Runner{
 				Name: "test1",
 				Rule: "* * * * 1 *",
-				Job:  fakeJob{},
+				Job:  &fakeJob{},
 			},
 			expectedResult: HaveOccurred,
 		},
@@ -116,7 +116,7 @@ func TestManagerBaseDeleteRunner(t *testing.T) {
 		r := &Runner{
 			Name: "test-" + strconv.Itoa(i),
 			Rule: "* * 3 * *",
-			Job:  fakeJob{},
+			Job:  &fakeJob{},
 		}
 
 		g.Expect(mgr.AddRunner(r)).Should(Succeed())
@@ -184,12 +184,12 @@ func TestManagerBaseUpdateRunner(t *testing.T) {
 			addRunner: &Runner{
 				Name: "test-1",
 				Rule: "* * 3 * *",
-				Job:  fakeJob2{},
+				Job:  &fakeJob2{},
 			},
 			updateRunner: &Runner{
 				Name: "test-1",
 				Rule: "* * 3 * *",
-				Job:  fakeJob2{},
+				Job:  &fakeJob2{},
 			},
 			expectedResult: Succeed,
 			updated:        true,
@@ -200,7 +200,7 @@ func TestManagerBaseUpdateRunner(t *testing.T) {
 			updateRunner: &Runner{
 				Name: "test-no-found",
 				Rule: "* * 3 * *",
-				Job:  fakeJob2{},
+				Job:  &fakeJob2{},
 			},
 			expectedResult: HaveOccurred,
 			updated:        false,
@@ -211,12 +211,12 @@ func TestManagerBaseUpdateRunner(t *testing.T) {
 			addRunner: &Runner{
 				Name: "test-2",
 				Rule: "* * 3 * *",
-				Job:  fakeJob2{},
+				Job:  &fakeJob2{},
 			},
 			updateRunner: &Runner{
 				Name: "test-2",
 				Rule: "@every 2m",
-				Job:  fakeJob2{},
+				Job:  &fakeJob2{},
 			},
 			expectedResult: Succeed,
 			updated:        true,
@@ -227,12 +227,12 @@ func TestManagerBaseUpdateRunner(t *testing.T) {
 			addRunner: &Runner{
 				Name: "test-3",
 				Rule: "* * 3 * *",
-				Job:  fakeJob{},
+				Job:  &fakeJob{},
 			},
 			updateRunner: &Runner{
 				Name: "test-3",
 				Rule: "@every 2m",
-				Job:  fakeJob2{},
+				Job:  &fakeJob2{},
 			},
 			expectedResult: Succeed,
 			updated:        true,
@@ -273,12 +273,16 @@ func TestManagerBaseUpdateRunner(t *testing.T) {
 
 type fakeJob struct{}
 
-func (j fakeJob) Run() {}
+func (j *fakeJob) Run() {}
 
-func (j fakeJob) Equal(_ Job) bool { return false }
+func (j *fakeJob) Equal(_ Job) bool { return false }
+
+func (j *fakeJob) Close() error { return nil }
 
 type fakeJob2 struct{}
 
-func (j fakeJob2) Run() {}
+func (j *fakeJob2) Run() {}
 
-func (j fakeJob2) Equal(_ Job) bool { return true }
+func (j *fakeJob2) Equal(_ Job) bool { return true }
+
+func (j *fakeJob2) Close() error { return nil }

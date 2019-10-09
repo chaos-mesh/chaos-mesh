@@ -21,6 +21,7 @@ import (
 
 type Job interface {
 	Run()
+	Close() error
 	Equal(job Job) bool
 }
 
@@ -62,4 +63,8 @@ func (r *Runner) Equal(rn *Runner) bool {
 	}
 
 	return true
+}
+
+func (r *Runner) Close() error {
+	return r.Job.Close()
 }

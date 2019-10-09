@@ -31,13 +31,15 @@ import (
 	corelisters "k8s.io/client-go/listers/core/v1"
 )
 
+// PodKillJob defines a job to do pod-kill chaos experiment.
 type PodKillJob struct {
 	podChaos  *v1alpha1.PodChaos
 	kubeCli   kubernetes.Interface
 	podLister corelisters.PodLister
 }
 
-func (p PodKillJob) Run() {
+// Run is the core logic to execute pod-kill chaos experiment.
+func (p *PodKillJob) Run() {
 	var err error
 
 	pods, err := manager.SelectPods(p.podChaos.Spec.Selector, p.podLister, p.kubeCli)
@@ -76,8 +78,10 @@ func (p PodKillJob) Run() {
 	}
 }
 
-func (p PodKillJob) Equal(job manager.Job) bool {
-	pjob, ok := job.(PodKillJob)
+// Equal returns true when the two jobs have same PodChaos.
+// It can be used to judge if the job need to update this job.
+func (p *PodKillJob) Equal(job manager.Job) bool {
+	pjob, ok := job.(*PodKillJob)
 	if !ok {
 		return false
 	}
@@ -87,12 +91,19 @@ func (p PodKillJob) Equal(job manager.Job) bool {
 		return false
 	}
 
+	// judge ResourceVersion,
+	// If them are same, we can think that the PodChaos resource has not changed.
 	if p.podChaos.ResourceVersion != pjob.podChaos.ResourceVersion {
 		return false
 	}
 
 	return true
 }
+
+// Stop stops pod-kill job, because pod-kill is a transient operation
+// and the pod will be maintained by kubernetes,
+// so we don't need clean anything.
+func (p *PodKillJob) Close() error { return nil }
 
 func (p *PodKillJob) deleteAllPods(pods []v1.Pod) error {
 	g := errgroup.Group{}
