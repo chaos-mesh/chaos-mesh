@@ -16,16 +16,17 @@ package podchaos
 import (
 	"context"
 	"fmt"
-	"github.com/golang/glog"
-	"github.com/pingcap/chaos-operator/pkg/apis/pingcap.com/v1alpha1"
-	"github.com/pingcap/chaos-operator/pkg/client/clientset/versioned"
-	"github.com/pingcap/chaos-operator/pkg/manager"
-	"github.com/pingcap/chaos-operator/pkg/util"
 	"math/rand"
 	"reflect"
 	"sync"
 	"sync/atomic"
 	"time"
+
+	"github.com/golang/glog"
+	"github.com/pingcap/chaos-operator/pkg/apis/pingcap.com/v1alpha1"
+	"github.com/pingcap/chaos-operator/pkg/client/clientset/versioned"
+	"github.com/pingcap/chaos-operator/pkg/manager"
+	"github.com/pingcap/chaos-operator/pkg/util"
 
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
