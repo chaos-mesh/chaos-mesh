@@ -72,7 +72,7 @@ func (filter *Filter) GenSQL() (string, error) {
 			return "", errors.New("content of and filter is not []interface{}")
 		}
 
-		sqls := []string{"TRUE"}
+		sqls := []string{}
 		fs, err := checkAndConvertListOfFilter(filters)
 		if err != nil {
 			return "", errors.New("parse content of \"and\" filter failed")
