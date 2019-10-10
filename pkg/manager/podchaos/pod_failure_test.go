@@ -305,10 +305,11 @@ func TestPodFailureJobRecoverPod(t *testing.T) {
 	g := NewGomegaWithT(t)
 
 	type TestCase struct {
-		name           string
-		pod            v1.Pod
-		expectedPod    v1.Pod
-		expectedResult resultF
+		name string
+		pod  v1.Pod
+		// expectedPod    v1.Pod
+		expectedResult       resultF
+		expectedGetPodResult resultF
 	}
 
 	tcs := []TestCase{
@@ -328,21 +329,8 @@ func TestPodFailureJobRecoverPod(t *testing.T) {
 					Containers: []v1.Container{{Image: fakeImage, Name: "t1"}},
 				},
 			},
-			expectedPod: v1.Pod{
-				TypeMeta: metav1.TypeMeta{
-					Kind:       "Pod",
-					APIVersion: "v1",
-				},
-				ObjectMeta: metav1.ObjectMeta{
-					Name:        "t1",
-					Namespace:   NAMESPACE,
-					Annotations: make(map[string]string),
-				},
-				Spec: v1.PodSpec{
-					Containers: []v1.Container{{Image: "pingcap.com/image1", Name: "t1"}},
-				},
-			},
-			expectedResult: Succeed,
+			expectedResult:       Succeed,
+			expectedGetPodResult: HaveOccurred,
 		},
 		{
 			name: "two containers",
@@ -363,21 +351,8 @@ func TestPodFailureJobRecoverPod(t *testing.T) {
 					Containers: []v1.Container{{Image: fakeImage, Name: "t1"}, {Image: fakeImage, Name: "t2"}},
 				},
 			},
-			expectedPod: v1.Pod{
-				TypeMeta: metav1.TypeMeta{
-					Kind:       "Pod",
-					APIVersion: "v1",
-				},
-				ObjectMeta: metav1.ObjectMeta{
-					Name:        "t1",
-					Namespace:   NAMESPACE,
-					Annotations: make(map[string]string),
-				},
-				Spec: v1.PodSpec{
-					Containers: []v1.Container{{Image: "pingcap.com/image1", Name: "t1"}, {Image: "pingcap.com/image2", Name: "t2"}},
-				},
-			},
-			expectedResult: Succeed,
+			expectedResult:       Succeed,
+			expectedGetPodResult: HaveOccurred,
 		},
 		{
 			name: "annotation already exist",
@@ -395,31 +370,16 @@ func TestPodFailureJobRecoverPod(t *testing.T) {
 					Containers: []v1.Container{{Image: fakeImage, Name: "t1"}},
 				},
 			},
-			expectedPod: v1.Pod{
-				TypeMeta: metav1.TypeMeta{
-					Kind:       "Pod",
-					APIVersion: "v1",
-				},
-				ObjectMeta: metav1.ObjectMeta{
-					Name:        "t1",
-					Namespace:   NAMESPACE,
-					Annotations: make(map[string]string),
-				},
-				Spec: v1.PodSpec{
-					Containers: []v1.Container{{Image: fakeImage, Name: "t1"}},
-				},
-			},
-			expectedResult: Succeed,
+			expectedResult:       Succeed,
+			expectedGetPodResult: HaveOccurred,
 		},
 	}
 
 	for _, tc := range tcs {
 		job := newPodFailureJob(newPodFailurePodChaos("test"), &tc.pod)
 		g.Expect(job.recoverPod(tc.pod)).Should(tc.expectedResult(), tc.name)
-		pod, err := job.kubeCli.CoreV1().Pods(tc.pod.Namespace).Get(tc.pod.Name, metav1.GetOptions{})
-		g.Expect(err).ShouldNot(HaveOccurred(), tc.name)
-		g.Expect(pod.Annotations).To(Equal(tc.expectedPod.Annotations), tc.name)
-		g.Expect(pod.Spec.Containers).To(Equal(tc.expectedPod.Spec.Containers), tc.name)
+		_, err := job.kubeCli.CoreV1().Pods(tc.pod.Namespace).Get(tc.pod.Name, metav1.GetOptions{})
+		g.Expect(err).Should(tc.expectedGetPodResult(), tc.name)
 	}
 }
 

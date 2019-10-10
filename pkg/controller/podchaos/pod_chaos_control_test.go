@@ -54,6 +54,7 @@ func newFakePodChaosControl() *podChaosControl {
 
 	control := NewPodChaosControl(
 		kubeCli,
+		cli,
 		nil,
 		podLister,
 		pcLister)

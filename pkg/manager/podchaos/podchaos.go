@@ -18,6 +18,7 @@ import (
 
 	"github.com/golang/glog"
 	"github.com/pingcap/chaos-operator/pkg/apis/pingcap.com/v1alpha1"
+	"github.com/pingcap/chaos-operator/pkg/client/clientset/versioned"
 	listers "github.com/pingcap/chaos-operator/pkg/client/listers/pingcap.com/v1alpha1"
 	"github.com/pingcap/chaos-operator/pkg/manager"
 
@@ -29,6 +30,7 @@ import (
 type podChaosManager struct {
 	base      manager.ManagerBaseInterface
 	kubeCli   kubernetes.Interface
+	cli       versioned.Interface
 	podLister corelisters.PodLister
 	pcLister  listers.PodChaosLister
 }
@@ -37,12 +39,14 @@ type podChaosManager struct {
 // This manager will manage all PodChaos task.
 func NewPodChaosManager(
 	kubeCli kubernetes.Interface,
+	cli versioned.Interface,
 	base manager.ManagerBaseInterface,
 	podLister corelisters.PodLister,
 	lister listers.PodChaosLister,
 ) *podChaosManager {
 	return &podChaosManager{
 		kubeCli:   kubeCli,
+		cli:       cli,
 		base:      base,
 		podLister: podLister,
 		pcLister:  lister,
@@ -90,7 +94,12 @@ func (m *podChaosManager) newRunner(pc *v1alpha1.PodChaos) (*manager.Runner, err
 			podLister: m.podLister,
 		}
 	case v1alpha1.PodFailureAction:
-		fallthrough
+		job = &PodFailureJob{
+			podChaos:  pc,
+			kubeCli:   m.kubeCli,
+			cli:       m.cli,
+			podLister: m.podLister,
+		}
 	default:
 		return nil, fmt.Errorf("PodChaos action %s not supported", pc.Spec.Action)
 	}

@@ -46,8 +46,8 @@ const (
 // It can be used to make certain pods fail for a while.
 type PodFailureJob struct {
 	podChaos  *v1alpha1.PodChaos
-	cli       versioned.Interface
 	kubeCli   kubernetes.Interface
+	cli       versioned.Interface
 	podLister corelisters.PodLister
 
 	cancel *context.CancelFunc
@@ -286,16 +286,15 @@ func (p *PodFailureJob) recoverPod(pod v1.Pod) error {
 				nPod.Annotations = make(map[string]string)
 			}
 
-			originImage, ok := nPod.Annotations[annotationKey]
+			_, ok := nPod.Annotations[annotationKey]
 			if !ok {
 				continue
 			}
-
-			nPod.Spec.Containers[index].Image = originImage
-			delete(nPod.Annotations, annotationKey)
 		}
-		_, err = p.kubeCli.CoreV1().Pods(pod.Namespace).Update(nPod)
-		return err
+
+		return p.kubeCli.CoreV1().Pods(pod.Namespace).Delete(nPod.Name, &metav1.DeleteOptions{
+			GracePeriodSeconds: new(int64),
+		})
 	})
 }
 

@@ -111,6 +111,7 @@ func NewController(
 
 	controller.control = NewPodChaosControl(
 		kubeCli,
+		cli,
 		managerBase,
 		controller.podLister,
 		controller.pcLister,
