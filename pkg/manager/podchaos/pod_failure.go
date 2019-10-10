@@ -16,8 +16,10 @@ package podchaos
 import (
 	"context"
 	"fmt"
+	"math"
 	"math/rand"
 	"reflect"
+	"strconv"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -27,6 +29,8 @@ import (
 	"github.com/pingcap/chaos-operator/pkg/client/clientset/versioned"
 	"github.com/pingcap/chaos-operator/pkg/manager"
 	"github.com/pingcap/chaos-operator/pkg/util"
+
+	"golang.org/x/sync/errgroup"
 
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -89,15 +93,24 @@ func (p *PodFailureJob) Run() {
 	switch p.podChaos.Spec.Mode {
 	case v1alpha1.OnePodMode:
 		glog.Infof("%s, Try to select one pod to do pod-failure job randomly", p.logPrefix())
+		p.wg.Add(1)
 		err = p.failRandomPod(ctx, pods)
 	case v1alpha1.AllPodMode:
 		glog.Infof("%s, Try to do pod-failure action on all filtered pods", p.logPrefix())
+		p.wg.Add(1)
+		err = p.failAllPod(ctx, pods)
 	case v1alpha1.FixedPodMode:
 		glog.Infof("%s, Try to do pod-failure action on %s pods", p.logPrefix(), p.podChaos.Spec.Value)
+		p.wg.Add(1)
+		err = p.failFixedPods(ctx, pods)
 	case v1alpha1.FixedPercentPodMode:
 		glog.Infof("%s, Try to do pod-failure action on %s%% pods", p.logPrefix(), p.podChaos.Spec.Value)
+		p.wg.Add(1)
+		err = p.failFixedPercentagePods(ctx, pods)
 	case v1alpha1.RandomMaxPercentPodMode:
 		glog.Infof("%s, Try to do pod-failure action on max %s%% pods", p.logPrefix(), p.podChaos.Spec.Value)
+		p.wg.Add(1)
+		err = p.failMaxPercentagePods(ctx, pods)
 	default:
 		err = fmt.Errorf("pod-failure mode %s not supported", p.podChaos.Spec.Mode)
 	}
@@ -141,16 +154,162 @@ func (p *PodFailureJob) Close() error {
 	return p.cleanFinalizersAndRecover()
 }
 
-func (p *PodFailureJob) failRandomPod(ctx context.Context, pods []v1.Pod) error {
-	if len(pods) == 0 {
+func (p *PodFailureJob) failAllPod(ctx context.Context, pods []v1.Pod) error {
+	defer p.wg.Done()
+
+	duration, err := time.ParseDuration(p.podChaos.Spec.Duration)
+	if err != nil {
+		return err
+	}
+
+	glog.Infof("%s, Try to inject failure to %d pods", p.logPrefix(), len(pods))
+
+	g := errgroup.Group{}
+	for _, pod := range pods {
+		pod := pod
+		g.Go(func() error {
+			if err := p.addPodFinalizer(pod); err != nil {
+				return err
+			}
+
+			return p.failPod(pod)
+		})
+	}
+
+	if err := g.Wait(); err != nil {
+		return err
+	}
+
+	util.Sleep(ctx, duration)
+
+	return nil
+}
+
+func (p *PodFailureJob) failFixedPods(ctx context.Context, pods []v1.Pod) error {
+	defer p.wg.Done()
+
+	duration, err := time.ParseDuration(p.podChaos.Spec.Duration)
+	if err != nil {
+		return err
+	}
+
+	failNum, err := strconv.Atoi(p.podChaos.Spec.Value)
+	if err != nil {
+		return err
+	}
+
+	if len(pods) < failNum {
+		glog.Infof("%s, Fixed number %d is less the count of the selected pods, set failNum to %d",
+			p.logPrefix(), failNum, len(pods))
+		failNum = len(pods)
+	}
+
+	glog.Infof("%s, Try to inject failure to %d pods", p.logPrefix(), failNum)
+
+	if err := p.concurrentFailPods(pods, failNum); err != nil {
+		return err
+	}
+
+	util.Sleep(ctx, duration)
+
+	return nil
+}
+
+func (p *PodFailureJob) failFixedPercentagePods(ctx context.Context, pods []v1.Pod) error {
+	defer p.wg.Done()
+
+	duration, err := time.ParseDuration(p.podChaos.Spec.Duration)
+	if err != nil {
+		return err
+	}
+
+	failPercentage, err := strconv.Atoi(p.podChaos.Spec.Value)
+	if err != nil {
+		return err
+	}
+
+	if failPercentage == 0 {
+		glog.V(6).Infof("%s, Not injecting failure to any pods as fixed percentage is 0", p.logPrefix())
 		return nil
 	}
 
-	if p.wg != nil {
-		p.wg.Add(1)
-
-		defer p.wg.Done()
+	if failPercentage < 0 || failPercentage > 100 {
+		return fmt.Errorf("fixed percentage value of %d is invalid, Must be [0-100]", failPercentage)
 	}
+
+	failNum := int(math.Floor(float64(len(pods)) * float64(failPercentage) / 100))
+
+	glog.Infof("%s, Try to inject failure to %d pods", p.logPrefix(), failNum)
+
+	if err := p.concurrentFailPods(pods, failNum); err != nil {
+		return err
+	}
+
+	util.Sleep(ctx, duration)
+
+	return nil
+}
+
+func (p *PodFailureJob) failMaxPercentagePods(ctx context.Context, pods []v1.Pod) error {
+	defer p.wg.Done()
+
+	duration, err := time.ParseDuration(p.podChaos.Spec.Duration)
+	if err != nil {
+		return err
+	}
+
+	maxPercentage, err := strconv.Atoi(p.podChaos.Spec.Value)
+	if err != nil {
+		return err
+	}
+
+	if maxPercentage == 0 {
+		glog.V(6).Infof("%s, Not injecting failure to any pods as fixed percentage is 0", p.logPrefix())
+		return nil
+	}
+
+	if maxPercentage < 0 || maxPercentage > 100 {
+		return fmt.Errorf("fixed percentage value of %d is invalid, Must be [0-100]", maxPercentage)
+	}
+
+	failPercentage := rand.Intn(maxPercentage + 1) // + 1 because Intn works with half open interval [0,n) and we want [0,n]
+	failNum := int(math.Floor(float64(len(pods)) * float64(failPercentage) / 100))
+
+	glog.Infof("%s, Try to inject failure to %d pods", p.logPrefix(), failNum)
+
+	if err := p.concurrentFailPods(pods, failNum); err != nil {
+		return err
+	}
+
+	util.Sleep(ctx, duration)
+
+	return nil
+}
+
+func (p *PodFailureJob) concurrentFailPods(pods []v1.Pod, failNum int) error {
+	if failNum <= 0 {
+		return nil
+	}
+
+	failIndexes := manager.RandomFixedIndexes(0, uint(len(pods)), uint(failNum))
+
+	g := errgroup.Group{}
+	for _, index := range failIndexes {
+		index := index
+		g.Go(func() error {
+			if err := p.addPodFinalizer(pods[index]); err != nil {
+				return err
+			}
+
+			return p.failPod(pods[index])
+		})
+	}
+
+	return g.Wait()
+}
+
+func (p *PodFailureJob) failRandomPod(ctx context.Context, pods []v1.Pod) error {
+	defer p.wg.Done()
 
 	index := rand.Intn(len(pods))
 	pod := pods[index]
@@ -235,6 +394,8 @@ func (p *PodFailureJob) cleanFinalizersAndRecover() error {
 // failPod updates the image of this pod with a non-existing image
 // and save the previous image in annotations of this pod for recovery.
 func (p *PodFailureJob) failPod(pod v1.Pod) error {
+	glog.Infof("%s, Try to inject failure to pod %s/%s", p.logPrefix(), pod.Namespace, pod.Name)
+
 	return retry.RetryOnConflict(retry.DefaultRetry, func() error {
 		nPod, err := p.kubeCli.CoreV1().Pods(pod.Namespace).Get(pod.Name, metav1.GetOptions{})
 		if err != nil {
@@ -268,6 +429,8 @@ func (p *PodFailureJob) failPod(pod v1.Pod) error {
 
 // recoverPod updates the images of pod with the previous image stored at annotation.
 func (p *PodFailureJob) recoverPod(pod v1.Pod) error {
+	glog.Infof("%s, Try to recover pod %s/%s", p.logPrefix(), pod.Namespace, pod.Name)
+
 	return retry.RetryOnConflict(retry.DefaultRetry, func() error {
 		nPod, err := p.kubeCli.CoreV1().Pods(pod.Namespace).Get(pod.Name, metav1.GetOptions{})
 		if err != nil {

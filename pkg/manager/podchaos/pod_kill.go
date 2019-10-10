@@ -106,6 +106,8 @@ func (p *PodKillJob) Equal(job manager.Job) bool {
 func (p *PodKillJob) Close() error { return nil }
 
 func (p *PodKillJob) deleteAllPods(pods []v1.Pod) error {
+	glog.Infof("%s, Try to delete %d pods", p.logPrefix(), len(pods))
+
 	g := errgroup.Group{}
 	for _, pod := range pods {
 		pod := pod
@@ -123,12 +125,13 @@ func (p *PodKillJob) deleteFixedPods(pods []v1.Pod) error {
 		return err
 	}
 
-	glog.Infof("%s, Try to delete %d pods", p.logPrefix(), killNum)
-
 	if len(pods) < killNum {
-		glog.Infof("%s, fixed number is less the count of the selected pods", p.logPrefix())
+		glog.Infof("%s, Fixed number %d is less the count of the selected pods, set killNum to %d",
+			p.logPrefix(), killNum, len(pods))
 		killNum = len(pods)
 	}
+
+	glog.Infof("%s, Try to delete %d pods", p.logPrefix(), killNum)
 
 	return p.concurrentDeletePods(pods, killNum)
 }
@@ -150,6 +153,8 @@ func (p *PodKillJob) deleteFixedPercentagePods(pods []v1.Pod) error {
 	}
 
 	killNum := int(math.Floor(float64(len(pods)) * float64(killPercentage) / 100))
+
+	glog.Infof("%s, Try to delete %d pods", p.logPrefix(), killNum)
 
 	return p.concurrentDeletePods(pods, killNum)
 }
@@ -173,6 +178,8 @@ func (p *PodKillJob) deleteMaxPercentagePods(pods []v1.Pod) error {
 	killPercentage := rand.Intn(maxPercentage + 1) // + 1 because Intn works with half open interval [0,n) and we want [0,n]
 	killNum := int(math.Floor(float64(len(pods)) * float64(killPercentage) / 100))
 
+	glog.Infof("%s, Try to delete %d pods", p.logPrefix(), killNum)
+
 	return p.concurrentDeletePods(pods, killNum)
 }
 
@@ -194,7 +201,7 @@ func (p *PodKillJob) deletePod(pod v1.Pod) error {
 }
 
 func (p *PodKillJob) concurrentDeletePods(pods []v1.Pod, killNum int) error {
-	if killNum < 0 {
+	if killNum <= 0 {
 		return nil
 	}
 
