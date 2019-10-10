@@ -22,7 +22,6 @@ import (
 	"github.com/golang/glog"
 	"github.com/pingcap/chaos-operator/pkg/apis/pingcap.com/v1alpha1"
 	apiSdk "github.com/pingcap/chaos-operator/pkg/apiserver/sdk"
-	apiTypes "github.com/pingcap/chaos-operator/pkg/apiserver/types"
 	"github.com/pingcap/chaos-operator/pkg/manager"
 
 	"golang.org/x/sync/errgroup"
@@ -48,17 +47,6 @@ func (p PodKillJob) Run() {
 		return
 	}
 
-	glog.Info("SENDING API REQUEST")
-	podsNames := []string{}
-	for _, pod := range pods {
-		podsNames = append(podsNames, pod.Name)
-	}
-	apiClient := apiSdk.NewClientInK8s()
-	err = apiClient.CreateJob(&apiTypes.Job{
-		Pods:      podsNames,
-		JobType:   "pod/kill",
-		EventType: "oneshot",
-	})
 	if err != nil {
 		glog.Errorf("Error while requesting api-server %s", err)
 	}
@@ -193,6 +181,10 @@ func (p *PodKillJob) deleteRandomPod(pods []v1.Pod) error {
 
 func (p *PodKillJob) deletePod(pod v1.Pod) error {
 	glog.Infof("%s, Try to delete pod %s/%s", p.logPrefix(), pod.Namespace, pod.Name)
+
+	glog.Infof("%s, Save event into api-server", p.logPrefix())
+	apiClient := apiSdk.NewClientInK8s()
+	apiClient.CreatePodsTask([]v1.Pod{pod}, "pod/kill", "oneshot", nil)
 
 	deleteOpts := p.getDeleteOptsForPod(pod)
 

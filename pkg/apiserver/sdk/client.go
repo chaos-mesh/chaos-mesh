@@ -13,6 +13,7 @@ import (
 	"github.com/pingcap/chaos-operator/pkg/apiserver"
 	"github.com/pingcap/chaos-operator/pkg/apiserver/filter"
 	"github.com/pingcap/chaos-operator/pkg/apiserver/types"
+	v1 "k8s.io/api/core/v1"
 )
 
 type Client struct {
@@ -59,11 +60,29 @@ func (c *Client) httpRequest(method string, path string, body interface{}, resp 
 	return nil
 }
 
-func (c *Client) CreateJob(job *types.Job) error {
-	return c.httpRequest("PUT", "/job", job, nil)
+func (c *Client) CreateTask(task *types.Task) error {
+	return c.httpRequest("PUT", "/task", task, nil)
 }
 
-func (c *Client) GetJob(filter []*filter.Filter) ([]types.Job, error) {
+func (c *Client) CreatePodsTask(pods []v1.Pod, taskType string, eventType string, resource interface{}) error {
+	podList := []types.Pod{}
+
+	for _, pod := range pods {
+		podList = append(podList, types.Pod{
+			Name:      pod.GetName(),
+			Namespace: pod.GetNamespace(),
+		})
+	}
+
+	return c.CreateTask(&types.Task{
+		Pods:      podList,
+		TaskType:  taskType,
+		EventType: eventType,
+		Resource:  resource,
+	})
+}
+
+func (c *Client) GetTask(filter *filter.Filter) ([]types.Task, error) {
 	encodedFilter, err := json.Marshal(filter)
 	if err != nil {
 		log.Error(err)
@@ -72,13 +91,13 @@ func (c *Client) GetJob(filter []*filter.Filter) ([]types.Job, error) {
 
 	queryFilter := url.QueryEscape(string(encodedFilter))
 
-	var jobs []types.Job
-	err = c.httpRequest("GET", fmt.Sprintf("/jobs?filters=%s", queryFilter), nil, &jobs)
+	var tasks []types.Task
+	err = c.httpRequest("GET", fmt.Sprintf("/tasks?filters=%s", queryFilter), nil, &tasks)
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
 
-	return jobs, nil
+	return tasks, nil
 }
 
 // NewClientFromEnv will create a client with discovering services
