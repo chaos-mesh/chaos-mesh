@@ -38,10 +38,15 @@ spec:
         volumeMounts:
         - name: mysql-initdb
           mountPath: /docker-entrypoint-initdb.d
+        - name: data
+          mountPath: /var/lib/mysql
       volumes:
       - name: mysql-initdb
         configMap:
           name: mysql-initdb-config
+      - name: data
+        persistentVolumeClaim:
+          claimName: api-server-mysql-pv-claim
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -68,3 +73,22 @@ data:
       pod_name VARCHAR(255) NOT NULL,
       FOREIGN KEY (task_id) references task(id)
     );
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: api-server-mysql-pv-claim
+spec:
+  {{- if .Values.apiServer.volume.storageClassName }}
+  storageClassName: {{ .Values.apiServer.volume.storageClassName }}
+  {{- end }}
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ .Values.apiServer.volume.storage }}
+  {{- if .Values.apiServer.volume.selector }}
+  selector:
+    {{ .Values.apiServer.volume.selector }}
+  {{- end }}
