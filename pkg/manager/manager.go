@@ -92,6 +92,10 @@ func (m *ManagerBase) GetRunner(key string) (*Runner, bool) {
 }
 
 func (m *ManagerBase) addRunnerAction(runner *Runner) error {
+	if err := runner.Close(); err != nil {
+		return err
+	}
+
 	entryID, err := m.cronEngine.AddJob(runner.Rule, runner.Job)
 	if err != nil {
 		return fmt.Errorf("fail to add runner to cronEngine, %v", err)
@@ -110,9 +114,15 @@ func (m *ManagerBase) deleteRunnerAction(key string) error {
 		return nil
 	}
 
-	m.cronEngine.Remove(cron.EntryID(runner.(*Runner).EntryID))
+	r, ok := runner.(*Runner)
+	if !ok {
+		return fmt.Errorf("key %s is not Runner type", key)
+	}
+
+	m.cronEngine.Remove(cron.EntryID(r.EntryID))
 	m.runners.Delete(key)
-	return nil
+
+	return r.Close()
 }
 
 func (m *ManagerBase) updateRunnerAction(newRunner *Runner) error {

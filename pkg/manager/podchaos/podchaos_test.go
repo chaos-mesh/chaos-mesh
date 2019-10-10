@@ -172,7 +172,7 @@ func newFakePodChaosManager() *podChaosManager {
 	cronEngine.Start()
 
 	managerBase := manager.NewManagerBase(cronEngine)
-	pcManager := NewPodChaosManager(kubeCli, managerBase, podLister, pcLister)
+	pcManager := NewPodChaosManager(kubeCli, cli, managerBase, podLister, pcLister)
 
 	return pcManager
 }

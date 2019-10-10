@@ -163,7 +163,7 @@ func TestPodKillJobEqual(t *testing.T) {
 		job2 := newPodKillJob(newPodChaos(tc.job2Name))
 		job2.podChaos.ResourceVersion = tc.job2Version
 
-		g.Expect(job1.Equal(job2)).To(Equal(tc.expectedValue), tc.name)
+		g.Expect(job1.Equal(&job2)).To(Equal(tc.expectedValue), tc.name)
 	}
 }
 

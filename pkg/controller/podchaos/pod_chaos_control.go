@@ -15,6 +15,7 @@ package podchaos
 
 import (
 	"github.com/pingcap/chaos-operator/pkg/apis/pingcap.com/v1alpha1"
+	"github.com/pingcap/chaos-operator/pkg/client/clientset/versioned"
 	listers "github.com/pingcap/chaos-operator/pkg/client/listers/pingcap.com/v1alpha1"
 	"github.com/pingcap/chaos-operator/pkg/manager"
 	"github.com/pingcap/chaos-operator/pkg/manager/podchaos"
@@ -44,12 +45,13 @@ type podChaosControl struct {
 // NewPodChaosControl returns a new instance of podChaosControl.
 func NewPodChaosControl(
 	kubeCli kubernetes.Interface,
+	cli versioned.Interface,
 	mgr manager.ManagerBaseInterface,
 	podLister corelisters.PodLister,
 	lister listers.PodChaosLister,
 ) *podChaosControl {
 	return &podChaosControl{
-		mgr: podchaos.NewPodChaosManager(kubeCli, mgr, podLister, lister),
+		mgr: podchaos.NewPodChaosManager(kubeCli, cli, mgr, podLister, lister),
 	}
 }
 

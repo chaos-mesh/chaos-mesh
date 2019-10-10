@@ -35,12 +35,12 @@ func TestRunnerEqual(t *testing.T) {
 			orignRunner: &Runner{
 				Name: "t1",
 				Rule: "* * * 1 *",
-				Job:  fakeJob2{},
+				Job:  &fakeJob2{},
 			},
 			newRunner: &Runner{
 				Name: "t1",
 				Rule: "* * * 1 *",
-				Job:  fakeJob2{},
+				Job:  &fakeJob2{},
 			},
 			expectedValue: true,
 		},
@@ -49,12 +49,12 @@ func TestRunnerEqual(t *testing.T) {
 			orignRunner: &Runner{
 				Name: "t1",
 				Rule: "* * * 1 *",
-				Job:  fakeJob2{},
+				Job:  &fakeJob2{},
 			},
 			newRunner: &Runner{
 				Name: "t1",
 				Rule: "@every 2m",
-				Job:  fakeJob2{},
+				Job:  &fakeJob2{},
 			},
 			expectedValue: false,
 		},
@@ -63,12 +63,12 @@ func TestRunnerEqual(t *testing.T) {
 			orignRunner: &Runner{
 				Name: "t1",
 				Rule: "* * * 1 *",
-				Job:  fakeJob2{},
+				Job:  &fakeJob2{},
 			},
 			newRunner: &Runner{
 				Name: "t2",
 				Rule: "* * * 1 *",
-				Job:  fakeJob2{},
+				Job:  &fakeJob2{},
 			},
 			expectedValue: false,
 		},
@@ -77,12 +77,12 @@ func TestRunnerEqual(t *testing.T) {
 			orignRunner: &Runner{
 				Name: "t1",
 				Rule: "* * * 1 *",
-				Job:  fakeJob{},
+				Job:  &fakeJob{},
 			},
 			newRunner: &Runner{
 				Name: "t1",
 				Rule: "* * * 1 *",
-				Job:  fakeJob2{},
+				Job:  &fakeJob2{},
 			},
 			expectedValue: false,
 		},
@@ -108,7 +108,7 @@ func TestRunnerValidate(t *testing.T) {
 			runner: &Runner{
 				Name: "t1",
 				Rule: "* 1 * * *",
-				Job:  fakeJob{},
+				Job:  &fakeJob{},
 			},
 			expectedResult: Succeed,
 		},
@@ -117,7 +117,7 @@ func TestRunnerValidate(t *testing.T) {
 			runner: &Runner{
 				Name: "",
 				Rule: "* 1 * * *",
-				Job:  fakeJob{},
+				Job:  &fakeJob{},
 			},
 			expectedResult: HaveOccurred,
 		},
@@ -126,7 +126,7 @@ func TestRunnerValidate(t *testing.T) {
 			runner: &Runner{
 				Name: "t1",
 				Rule: "",
-				Job:  fakeJob{},
+				Job:  &fakeJob{},
 			},
 			expectedResult: HaveOccurred,
 		},
