@@ -33,10 +33,10 @@ func NewMysqlClient(dataSource string) (*MysqlClient, error) {
 	}, nil
 }
 
-// CreateJob will insert a job into database
-func (m *MysqlClient) CreateJob(job *types.Job) error {
+// CreateTask will insert a task into database
+func (m *MysqlClient) CreateTask(task *types.Task) error {
 	t := time.Now().Format(util.TimeFormat)
-	job.Ctime = t
+	task.Ctime = t
 
 	tx, err := m.db.Beginx()
 	if err != nil {
@@ -44,16 +44,16 @@ func (m *MysqlClient) CreateJob(job *types.Job) error {
 		return errors.Trace(err)
 	}
 
-	resource, err := json.Marshal(job.Resource)
+	resource, err := json.Marshal(task.Resource)
 	if err != nil {
 		log.Error(err)
 		return errors.Trace(err)
 	}
-	result, err := tx.NamedExec(jobInsert, map[string]interface{}{
-		"event_type":  job.EventType,
+	result, err := tx.NamedExec(taskInsert, map[string]interface{}{
+		"event_type":  task.EventType,
 		"resource":    string(resource),
-		"create_time": job.Ctime,
-		"job_type":    job.JobType,
+		"create_time": task.Ctime,
+		"task_type":   task.TaskType,
 	})
 	if err != nil {
 		tx.Rollback()
@@ -61,14 +61,15 @@ func (m *MysqlClient) CreateJob(job *types.Job) error {
 		return errors.Trace(err)
 	}
 
-	job.ID, err = result.LastInsertId()
+	task.ID, err = result.LastInsertId()
 	if err != nil {
 		tx.Rollback()
 		log.Error(err)
 		return errors.Trace(err)
 	}
 
-	_, err = tx.NamedExec(jobPodInsert, generatePodRelation(job))
+	relation := generatePodRelation(task)
+	_, err = tx.NamedExec(taskPodInsert, relation)
 	if err != nil {
 		tx.Rollback()
 		log.Error(err)
@@ -83,74 +84,87 @@ func (m *MysqlClient) CreateJob(job *types.Job) error {
 	return nil
 }
 
-// GetJobs will select jobs from database
-func (m *MysqlClient) GetJobs(fs *filter.Filters) ([]*types.Job, error) {
-	filtersSQL, err := filter.GenSQL(fs)
+// GetTasks will select tasks from database
+func (m *MysqlClient) GetTasks(filter *filter.Filter) ([]*types.Task, error) {
+	filtersSQL, err := filter.GenSQL()
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
 
-	rows, err := m.db.Queryx(fmt.Sprintf(jobSelect, " WHERE "+filtersSQL))
+	rows, err := m.db.Queryx(fmt.Sprintf(taskSelect, " WHERE "+filtersSQL))
 	if err != nil {
 		log.Error(err)
 		return nil, errors.Trace(err)
 	}
 
-	var jobs []*types.Job
+	var tasks []*types.Task
 	for rows.Next() {
-		job := new(types.JobPodJoinSelect)
-		rows.StructScan(&job)
+		task := new(types.TaskPodJoinSelect)
+		rows.StructScan(&task)
 
-		resource, ok := job.Resource.([]byte)
+		resource, ok := task.Resource.([]byte)
 		if !ok {
 			return nil, errors.New("resource is not []byte")
 		}
-		json.Unmarshal(resource, &job.Resource)
+		json.Unmarshal(resource, &task.Resource)
 
-		job.Pods = strings.Split(job.PodsStr, ",")
-		jobs = append(jobs, &job.Job)
+		namespaces := strings.Split(task.PodsNamespaceStr, ",")
+		names := strings.Split(task.PodsNameStr, ",")
+		var pods []types.Pod
+		for index, namespace := range namespaces {
+			pods = append(pods, types.Pod{
+				Name:      names[index],
+				Namespace: namespace,
+			})
+		}
+
+		task.Pods = pods
+		tasks = append(tasks, &task.Task)
 	}
 
-	return jobs, nil
+	return tasks, nil
 }
 
-func generatePodRelation(job *types.Job) []types.JobPodRelation {
-	var list []types.JobPodRelation
+func generatePodRelation(task *types.Task) []types.TaskPodRelation {
+	var list []types.TaskPodRelation
 
-	for _, pod := range job.Pods {
-		list = append(list, types.JobPodRelation{
-			JobID: job.ID,
-			Pod:   pod,
+	for _, pod := range task.Pods {
+		list = append(list, types.TaskPodRelation{
+			TaskID:       task.ID,
+			PodName:      pod.Name,
+			PodNamespace: pod.Namespace,
 		})
 	}
 
 	return list
 }
 
-const jobInsert = `
-	INSERT INTO job (
+const taskInsert = `
+	INSERT INTO task (
 		event_type,
 		resource,
-		job_type,
+		task_type,
 		create_time
 	) VALUES (
 		:event_type,
 		:resource,
-		:job_type,
+		:task_type,
 		:create_time
 	)
 `
 
-const jobPodInsert = `
-	INSERT INTO job_pod (
-		job_id,
-		pod
+const taskPodInsert = `
+	INSERT INTO task_pod (
+		task_id,
+		pod_name,
+		pod_namespace
 	) VALUES (
-		:job_id,
-		:pod
+		:task_id,
+		:pod_name,
+		:pod_namespace
 	)
 `
 
-const jobSelect = `
-  SELECT id,event_type,resource,job_type,create_time,GROUP_CONCAT(pod separator ',') AS pods_str FROM job JOIN job_pod ON id=job_id %s GROUP BY id
+const taskSelect = `
+  SELECT id,event_type,resource,task_type,create_time,GROUP_CONCAT(pod_name separator ',') AS pods_name_str,GROUP_CONCAT(pod_namespace separator ',') AS pods_namespace_str FROM task JOIN task_pod ON id=task_id %s GROUP BY id
 `

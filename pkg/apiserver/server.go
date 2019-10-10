@@ -51,8 +51,8 @@ func NewServer(dataSource string) (*Server, error) {
 func (s *Server) CreateRouter() http.Handler {
 	router := mux.NewRouter()
 
-	router.HandleFunc("/job", func(w http.ResponseWriter, r *http.Request) {
-		job := new(types.Job)
+	router.HandleFunc("/task", func(w http.ResponseWriter, r *http.Request) {
+		job := new(types.Task)
 
 		if err := readJSON(r.Body, job); err != nil {
 			s.rdr.JSON(w, http.StatusOK, errResponsef("read json body error %v", err))
@@ -64,7 +64,7 @@ func (s *Server) CreateRouter() http.Handler {
 			return
 		}
 
-		if err := s.storage.CreateJob(job); err != nil {
+		if err := s.storage.CreateTask(job); err != nil {
 			s.rdr.JSON(w, http.StatusOK, errResponsef("create job %+v error %v", job, err))
 			return
 		}
@@ -72,17 +72,17 @@ func (s *Server) CreateRouter() http.Handler {
 		s.rdr.JSON(w, http.StatusOK, successResponse("ok"))
 	}).Methods("PUT")
 
-	router.HandleFunc("/jobs", func(w http.ResponseWriter, r *http.Request) {
+	router.HandleFunc("/tasks", func(w http.ResponseWriter, r *http.Request) {
 		filters, ok := r.URL.Query()["filters"]
 
-		var fs filter.Filters
+		var filter filter.Filter
 		if ok && len(filters) > 0 {
-			json.Unmarshal([]byte(filters[0]), &fs)
+			json.Unmarshal([]byte(filters[0]), &filter)
 		}
 
-		jobs, err := s.storage.GetJobs(&fs)
+		jobs, err := s.storage.GetTasks(&filter)
 		if err != nil {
-			s.rdr.JSON(w, http.StatusOK, errResponsef("select jobs %+v error %v", fs, err))
+			s.rdr.JSON(w, http.StatusOK, errResponsef("select jobs %+v error %v", filter, err))
 		}
 
 		s.rdr.JSON(w, http.StatusOK, successResponse(jobs))

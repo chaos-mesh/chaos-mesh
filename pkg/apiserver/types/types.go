@@ -4,33 +4,40 @@ import (
 	"github.com/juju/errors"
 )
 
-// Job represents a chaos job
-type Job struct {
+type Pod struct {
+	Name      string `json:"name"`
+	Namespace string `json:"namespace"`
+}
+
+// Task represents a chaos task
+type Task struct {
 	ID        int64       `json:"id" db:"id"`
-	Pods      []string    `json:"pods"`
-	JobType   string      `json:"jobType" db:"job_type"`
+	Pods      []Pod       `json:"pods"`
+	TaskType  string      `json:"taskType" db:"task_type"`
 	EventType string      `json:"eventType" db:"event_type"`
 	Resource  interface{} `json:"resource" db:"resource"`
 	Ctime     string      `json:"create_time" db:"create_time"`
 }
 
-// JobPodRelation represents a relation between job and pod in database
-type JobPodRelation struct {
-	JobID int64  `db:"job_id"`
-	Pod   string `db:"pod"`
+// TaskPodRelation represents a relation between task and pod in database
+type TaskPodRelation struct {
+	TaskID       int64  `db:"task_id"`
+	PodName      string `db:"pod_name"`
+	PodNamespace string `db:"pod_namespace"`
 }
 
-// JobPodJoinSelect represents a select result of job join job_pod
-type JobPodJoinSelect struct {
-	Job
-	PodsStr string `db:"pods_str"`
+// TaskPodJoinSelect represents a select result of task join task_pod
+type TaskPodJoinSelect struct {
+	Task
+	PodsNameStr      string `db:"pods_name_str"`
+	PodsNamespaceStr string `db:"pods_namespace_str"`
 }
 
-// Verify will verify whether a job is valid
-func (job *Job) Verify() error {
-	if job.EventType != "start" &&
-		job.EventType != "oneshot" &&
-		job.EventType != "end" {
+// Verify will verify whether a task is valid
+func (task *Task) Verify() error {
+	if task.EventType != "start" &&
+		task.EventType != "oneshot" &&
+		task.EventType != "end" {
 		return errors.New("unknown event type")
 	}
 

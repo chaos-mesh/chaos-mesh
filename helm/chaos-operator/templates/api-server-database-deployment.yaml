@@ -52,18 +52,19 @@ data:
     CREATE DATABASE chaos_operator;
     use chaos_operator;
 
-    CREATE TABLE IF NOT EXISTS job (
+    CREATE TABLE IF NOT EXISTS task (
       id INT NOT NULL AUTO_INCREMENT, 
       event_type VARCHAR(20) NOT NULL,
-      job_type VARCHAR(255) NOT NULL,
+      task_type VARCHAR(255) NOT NULL,
       resource TEXT,
       create_time DATETIME,
       PRIMARY KEY(id),
-      KEY(job_type)
+      KEY(task_type)
     );
     
-    CREATE TABLE IF NOT EXISTS job_pod (
-      job_id INT NOT NULL,
-      pod   VARCHAR(255) NOT NULL,
-      FOREIGN KEY (job_id) references job(id)
+    CREATE TABLE IF NOT EXISTS task_pod (
+      task_id INT NOT NULL,
+      pod_namespace VARCHAR(255) NOT NULL,
+      pod_name VARCHAR(255) NOT NULL,
+      FOREIGN KEY (task_id) references task(id)
     );
