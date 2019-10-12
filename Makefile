@@ -28,10 +28,10 @@ TEST_COVER_PACKAGES:=go list ./pkg/... | grep -vE "pkg/client" | grep -vE "pkg/a
 default: build
 
 docker-push: docker
-	docker push "${DOCKER_REGISTRY}/cwen/chaos-operator:latest"
+	docker push "${DOCKER_REGISTRY}/pingcap/chaos-operator:latest"
 
 docker: build
-	docker build --tag "${DOCKER_REGISTRY}/cwen/chaos-operator:latest" images/chaos-operator
+	docker build --tag "${DOCKER_REGISTRY}/pingcap/chaos-operator:latest" images/chaos-operator
 
 build: controller-manager
 

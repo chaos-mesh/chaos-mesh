@@ -15,7 +15,7 @@ controllerManager:
 
   replicaCount: 1
 
-  image: hub.pingcap.net/cwen/chaos-operator:latest
+  image: pingcap/chaos-operator:latest
   imagePullPolicy: Always
 
   nameOverride: ""
