@@ -99,8 +99,10 @@ func TestSelectPods(t *testing.T) {
 
 	for _, tc := range tcs {
 		filteredPods, err := SelectPods(tc.selector, podLister, kubeCli)
-		g.Expect(err).ShouldNot(HaveOccurred())
-		g.Expect(filteredPods).To(Equal(tc.expectedPods))
+		g.Expect(err).ShouldNot(HaveOccurred(), tc.name)
+		var fPods []v1.Pod
+		fPods = append(fPods, filteredPods...)
+		g.Expect(fPods).To(Equal(tc.expectedPods), tc.name)
 	}
 }
 

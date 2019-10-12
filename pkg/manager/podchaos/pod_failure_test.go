@@ -14,7 +14,9 @@
 package podchaos
 
 import (
+	"context"
 	"fmt"
+	"sync"
 	"testing"
 
 	. "github.com/onsi/gomega"
@@ -125,6 +127,30 @@ func newPodChaosDiffDuration(name string, duration string) *v1alpha1.PodChaos {
 			},
 			Duration: duration,
 			Action:   v1alpha1.PodFailureAction,
+		},
+	}
+}
+
+func newPodChaosWithFinalizers(name string, finalizers []string) *v1alpha1.PodChaos {
+	return &v1alpha1.PodChaos{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "PodChaos",
+			APIVersion: "pingcap.com/v1alpha1",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Name:       name,
+			Namespace:  metav1.NamespaceDefault,
+			Finalizers: finalizers,
+		},
+		Spec: v1alpha1.PodChaosSpec{
+			Selector: v1alpha1.SelectorSpec{
+				Namespaces: []string{"chaos-testing"},
+			},
+			Scheduler: v1alpha1.SchedulerSpec{
+				Cron: "@every 1m",
+			},
+			Action:   v1alpha1.PodFailureAction,
+			Duration: "30s",
 		},
 	}
 }
@@ -393,9 +419,6 @@ func TestPodFailureJobAddFinalizer(t *testing.T) {
 		expectedFinalizers []string
 	}
 
-	pc := newPodFailurePodChaos("t2")
-	pc.Finalizers = []string{"default/t1"}
-
 	tcs := []TestCase{
 		{
 			name:               "one finalizer",
@@ -406,7 +429,7 @@ func TestPodFailureJobAddFinalizer(t *testing.T) {
 		{
 			name:               "two finalizers",
 			pod:                newPod("t2", v1.PodRunning),
-			podChaos:           pc,
+			podChaos:           newPodChaosWithFinalizers("t2", []string{"default/t1"}),
 			expectedFinalizers: []string{"default/t1", fmt.Sprintf("%s/t2", NAMESPACE)},
 		},
 	}
@@ -420,4 +443,361 @@ func TestPodFailureJobAddFinalizer(t *testing.T) {
 		g.Expect(err).ShouldNot(HaveOccurred(), tc.name)
 		g.Expect(tpc.Finalizers).To(Equal(tc.expectedFinalizers), tc.name)
 	}
+}
+
+func TestPodFailureJobFailFixedPods(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	type TestCase struct {
+		name                  string
+		fixedValue            string
+		Duration              string
+		podsCount             int
+		expectedFinalizersLen int
+		expectedResultF       resultF
+	}
+
+	tcs := []TestCase{
+		{
+			name:                  "fixed 2, pods 5",
+			fixedValue:            "2",
+			Duration:              "1ms",
+			podsCount:             5,
+			expectedFinalizersLen: 2,
+			expectedResultF:       Succeed,
+		},
+		{
+			name:                  "fixed 3, pods 2",
+			fixedValue:            "3",
+			Duration:              "1ms",
+			podsCount:             2,
+			expectedFinalizersLen: 2,
+			expectedResultF:       Succeed,
+		},
+		{
+			name:                  "invalid duration",
+			fixedValue:            "3",
+			Duration:              "1",
+			podsCount:             2,
+			expectedFinalizersLen: 0,
+			expectedResultF:       HaveOccurred,
+		},
+	}
+
+	for _, tc := range tcs {
+		pc := newPodFailurePodChaos("pc-test")
+		pc.Spec.Value = tc.fixedValue
+		pc.Spec.Duration = tc.Duration
+		objects, pods := generateNRunningPods("pc-test", tc.podsCount)
+		job := newPodFailureJob(pc, objects...)
+		job.cli = fake.NewSimpleClientset(pc)
+		job.wg = new(sync.WaitGroup)
+		job.wg.Add(1)
+		g.Expect(job.failFixedPods(context.Background(), pods)).Should(tc.expectedResultF(), tc.name)
+		tpc, err := job.cli.PingcapV1alpha1().PodChaoses(pc.Namespace).Get(pc.Name, metav1.GetOptions{})
+		g.Expect(err).ShouldNot(HaveOccurred(), tc.name)
+		g.Expect(len(tpc.Finalizers)).To(Equal(tc.expectedFinalizersLen), tc.name)
+	}
+}
+
+func TestPodFailureJobFailFixedPercentagePods(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	type TestCase struct {
+		name                  string
+		fixedValue            string
+		Duration              string
+		podsCount             int
+		expectedFinalizersLen int
+		expectedResultF       resultF
+	}
+
+	tcs := []TestCase{
+		{
+			name:                  "fixed 0%%, pods 5",
+			fixedValue:            "0",
+			Duration:              "1ms",
+			podsCount:             5,
+			expectedFinalizersLen: 0,
+			expectedResultF:       Succeed,
+		},
+		{
+			name:                  "fixed 100%%, pods 5",
+			fixedValue:            "100",
+			Duration:              "1ms",
+			podsCount:             5,
+			expectedFinalizersLen: 5,
+			expectedResultF:       Succeed,
+		},
+		{
+			name:                  "fixed 100%%, pods 0",
+			fixedValue:            "100",
+			Duration:              "1ms",
+			podsCount:             0,
+			expectedFinalizersLen: 0,
+			expectedResultF:       Succeed,
+		},
+		{
+			name:                  "fixed 50%%, pods 5",
+			fixedValue:            "50",
+			Duration:              "1ms",
+			podsCount:             5,
+			expectedFinalizersLen: 2,
+			expectedResultF:       Succeed,
+		},
+		{
+			name:                  "fixed 200%%, pods 5",
+			fixedValue:            "200",
+			Duration:              "1ms",
+			podsCount:             5,
+			expectedFinalizersLen: 0,
+			expectedResultF:       HaveOccurred,
+		},
+		{
+			name:                  "fixed -100%%, pods 5",
+			fixedValue:            "-100",
+			Duration:              "1ms",
+			podsCount:             5,
+			expectedFinalizersLen: 0,
+			expectedResultF:       HaveOccurred,
+		},
+		{
+			name:                  "invalid duration",
+			fixedValue:            "3",
+			Duration:              "1",
+			podsCount:             2,
+			expectedFinalizersLen: 0,
+			expectedResultF:       HaveOccurred,
+		},
+	}
+
+	for _, tc := range tcs {
+		pc := newPodFailurePodChaos("pc-test")
+		pc.Spec.Value = tc.fixedValue
+		pc.Spec.Duration = tc.Duration
+		objects, pods := generateNRunningPods("pc-test", tc.podsCount)
+		job := newPodFailureJob(pc, objects...)
+		job.cli = fake.NewSimpleClientset(pc)
+		job.wg = new(sync.WaitGroup)
+		job.wg.Add(1)
+		g.Expect(job.failFixedPercentagePods(context.Background(), pods)).Should(tc.expectedResultF(), tc.name)
+		tpc, err := job.cli.PingcapV1alpha1().PodChaoses(pc.Namespace).Get(pc.Name, metav1.GetOptions{})
+		g.Expect(err).ShouldNot(HaveOccurred(), tc.name)
+		g.Expect(len(tpc.Finalizers)).To(Equal(tc.expectedFinalizersLen), tc.name)
+	}
+}
+
+func TestPodFailureJobFailMaxPercentagePods(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	type TestCase struct {
+		name                  string
+		fixedValue            string
+		Duration              string
+		podsCount             int
+		expectedFinalizersLen int
+		expectedResultF       resultF
+	}
+
+	tcs := []TestCase{
+		{
+			name:                  "fixed max 0%%, pods 5",
+			fixedValue:            "0",
+			Duration:              "1ms",
+			podsCount:             5,
+			expectedFinalizersLen: 0,
+			expectedResultF:       Succeed,
+		},
+		{
+			name:                  "fixed max 100%%, pods 5",
+			fixedValue:            "100",
+			Duration:              "1ms",
+			podsCount:             5,
+			expectedFinalizersLen: 5,
+			expectedResultF:       Succeed,
+		},
+		{
+			name:                  "fixed max 100%%, pods 0",
+			fixedValue:            "100",
+			Duration:              "1ms",
+			podsCount:             0,
+			expectedFinalizersLen: 0,
+			expectedResultF:       Succeed,
+		},
+		{
+			name:                  "fixed max 50%%, pods 5",
+			fixedValue:            "50",
+			Duration:              "1ms",
+			podsCount:             5,
+			expectedFinalizersLen: 2,
+			expectedResultF:       Succeed,
+		},
+		{
+			name:                  "fixed max 200%%, pods 5",
+			fixedValue:            "200",
+			Duration:              "1ms",
+			podsCount:             5,
+			expectedFinalizersLen: 0,
+			expectedResultF:       HaveOccurred,
+		},
+		{
+			name:                  "fixed max -100%%, pods 5",
+			fixedValue:            "-100",
+			Duration:              "1ms",
+			podsCount:             5,
+			expectedFinalizersLen: 0,
+			expectedResultF:       HaveOccurred,
+		},
+		{
+			name:                  "invalid duration",
+			fixedValue:            "3",
+			Duration:              "1",
+			podsCount:             2,
+			expectedFinalizersLen: 0,
+			expectedResultF:       HaveOccurred,
+		},
+	}
+
+	for _, tc := range tcs {
+		pc := newPodFailurePodChaos("pc-test")
+		pc.Spec.Value = tc.fixedValue
+		pc.Spec.Duration = tc.Duration
+		objects, pods := generateNRunningPods("pc-test", tc.podsCount)
+		job := newPodFailureJob(pc, objects...)
+		job.cli = fake.NewSimpleClientset(pc)
+		job.wg = new(sync.WaitGroup)
+		job.wg.Add(1)
+		g.Expect(job.failMaxPercentagePods(context.Background(), pods)).Should(tc.expectedResultF(), tc.name)
+		tpc, err := job.cli.PingcapV1alpha1().PodChaoses(pc.Namespace).Get(pc.Name, metav1.GetOptions{})
+		g.Expect(err).ShouldNot(HaveOccurred(), tc.name)
+		g.Expect(len(tpc.Finalizers)).Should(BeNumerically("<=", tc.expectedFinalizersLen), tc.name)
+	}
+}
+
+func TestPodFailureJobFailAllPods(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	type TestCase struct {
+		name                  string
+		podsCount             int
+		expectedFinalizersLen int
+		expectedResultF       resultF
+		Duration              string
+	}
+
+	tcs := []TestCase{
+		{
+			name:                  "5 pods",
+			podsCount:             5,
+			expectedFinalizersLen: 5,
+			Duration:              "1ms",
+			expectedResultF:       Succeed,
+		},
+		{
+			name:                  "0 pods",
+			podsCount:             0,
+			expectedFinalizersLen: 0,
+			Duration:              "1ms",
+			expectedResultF:       Succeed,
+		},
+		{
+			name:                  "invalid duration",
+			podsCount:             5,
+			expectedFinalizersLen: 0,
+			Duration:              "1",
+			expectedResultF:       HaveOccurred,
+		},
+	}
+
+	for _, tc := range tcs {
+		pc := newPodFailurePodChaos("pc-test")
+		pc.Spec.Duration = tc.Duration
+		objects, pods := generateNRunningPods("pc-test", tc.podsCount)
+		job := newPodFailureJob(pc, objects...)
+		job.cli = fake.NewSimpleClientset(pc)
+		job.wg = new(sync.WaitGroup)
+		job.wg.Add(1)
+		g.Expect(job.failAllPod(context.Background(), pods)).Should(tc.expectedResultF(), tc.name)
+		tpc, err := job.cli.PingcapV1alpha1().PodChaoses(pc.Namespace).Get(pc.Name, metav1.GetOptions{})
+		g.Expect(err).ShouldNot(HaveOccurred(), tc.name)
+		g.Expect(len(tpc.Finalizers)).To(Equal(tc.expectedFinalizersLen), tc.name)
+	}
+}
+
+func TestPodFailureJobCleanFinalizersAndRecover(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	type TestCase struct {
+		name              string
+		pods              []v1.Pod
+		podChaos          *v1alpha1.PodChaos
+		expectedPodsCount int
+	}
+
+	tcs := []TestCase{
+		{
+			name:              "zero finalizer",
+			pods:              newPodsWithFakImageAnnotations("t1", 1),
+			podChaos:          newPodChaosWithFinalizers("test", []string{}),
+			expectedPodsCount: 1,
+		},
+		{
+			name:              "one finalizer",
+			pods:              newPodsWithFakImageAnnotations("t2", 1),
+			podChaos:          newPodChaosWithFinalizers("test", []string{"default/t2-0"}),
+			expectedPodsCount: 0,
+		},
+		{
+			name:              "two finalizers, 2 pods",
+			pods:              newPodsWithFakImageAnnotations("t3", 2),
+			podChaos:          newPodChaosWithFinalizers("test", []string{"default/t3-0", "default/t3-1"}),
+			expectedPodsCount: 0,
+		},
+		{
+			name:              "two finalizers, 4 pods",
+			pods:              newPodsWithFakImageAnnotations("t4", 4),
+			podChaos:          newPodChaosWithFinalizers("test", []string{"default/t4-0", "default/t4-1"}),
+			expectedPodsCount: 2,
+		},
+	}
+
+	for _, tc := range tcs {
+		var objects []runtime.Object
+		for _, pod := range tc.pods {
+			pod := pod
+			objects = append(objects, &pod)
+		}
+
+		job := newPodFailureJob(tc.podChaos, objects...)
+		job.cli = fake.NewSimpleClientset(tc.podChaos)
+		g.Expect(job.cleanFinalizersAndRecover()).ShouldNot(HaveOccurred(), tc.name)
+
+		tpc, err := job.cli.PingcapV1alpha1().PodChaoses(tc.podChaos.Namespace).Get(tc.podChaos.Name, metav1.GetOptions{})
+		g.Expect(err).ShouldNot(HaveOccurred(), tc.name)
+		g.Expect(len(tpc.Finalizers)).To(Equal(0), tc.name)
+		g.Expect(len(getPodList(job.kubeCli).Items)).To(Equal(tc.expectedPodsCount), tc.name)
+	}
+}
+
+func newPodsWithFakImageAnnotations(prefix string, num int) []v1.Pod {
+	var pods []v1.Pod
+
+	for i := 0; i < num; i++ {
+		pods = append(pods, v1.Pod{
+			TypeMeta: metav1.TypeMeta{
+				Kind:       "Pod",
+				APIVersion: "v1",
+			},
+			ObjectMeta: metav1.ObjectMeta{
+				Name:        fmt.Sprintf("%s-%d", prefix, i),
+				Namespace:   NAMESPACE,
+				Annotations: map[string]string{GenAnnotationKeyForImage(newPodFailurePodChaos("test"), "t1"): "pingcap.com/image1"},
+			},
+			Spec: v1.PodSpec{
+				Containers: []v1.Container{{Image: fakeImage, Name: "t1"}},
+			},
+		})
+	}
+
+	return pods
 }

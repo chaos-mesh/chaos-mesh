@@ -48,6 +48,9 @@ func newPod(name string, status v1.PodPhase) v1.Pod {
 				"chaos-operator/identifier": IDENTIFIER,
 			},
 		},
+		Spec: v1.PodSpec{
+			Containers: []v1.Container{{Image: name, Name: name}},
+		},
 		Status: v1.PodStatus{
 			Phase: status,
 		},

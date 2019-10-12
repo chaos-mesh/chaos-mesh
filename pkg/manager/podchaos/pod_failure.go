@@ -164,14 +164,14 @@ func (p *PodFailureJob) failAllPod(ctx context.Context, pods []v1.Pod) error {
 
 	glog.Infof("%s, Try to inject failure to %d pods", p.logPrefix(), len(pods))
 
+	if err := p.addMultiPodsFinalizer(pods); err != nil {
+		return err
+	}
+
 	g := errgroup.Group{}
 	for _, pod := range pods {
 		pod := pod
 		g.Go(func() error {
-			if err := p.addPodFinalizer(pod); err != nil {
-				return err
-			}
-
 			return p.failPod(pod)
 		})
 	}
@@ -293,14 +293,18 @@ func (p *PodFailureJob) concurrentFailPods(pods []v1.Pod, failNum int) error {
 
 	failIndexes := manager.RandomFixedIndexes(0, uint(len(pods)), uint(failNum))
 
+	var failPods []v1.Pod
+	for _, index := range failIndexes {
+		failPods = append(failPods, pods[index])
+	}
+	if err := p.addMultiPodsFinalizer(failPods); err != nil {
+		return err
+	}
+
 	g := errgroup.Group{}
 	for _, index := range failIndexes {
 		index := index
 		g.Go(func() error {
-			if err := p.addPodFinalizer(pods[index]); err != nil {
-				return err
-			}
-
 			return p.failPod(pods[index])
 		})
 	}
@@ -330,6 +334,27 @@ func (p *PodFailureJob) failRandomPod(ctx context.Context, pods []v1.Pod) error 
 	util.Sleep(ctx, duration)
 
 	return nil
+}
+
+func (p *PodFailureJob) addMultiPodsFinalizer(pods []v1.Pod) error {
+	return retry.RetryOnConflict(retry.DefaultRetry, func() error {
+		pc, err := p.cli.PingcapV1alpha1().PodChaoses(p.podChaos.Namespace).Get(p.podChaos.Name, metav1.GetOptions{})
+		if err != nil {
+			return err
+		}
+		for _, pod := range pods {
+			key, err := cache.MetaNamespaceKeyFunc(&pod)
+			if err != nil {
+				return err
+			}
+
+			pc.Finalizers = append(pc.Finalizers, key)
+		}
+
+		_, err = p.cli.PingcapV1alpha1().PodChaoses(pc.Namespace).Update(pc)
+
+		return err
+	})
 }
 
 func (p *PodFailureJob) addPodFinalizer(pod v1.Pod) error {
