@@ -2,11 +2,7 @@ package tcdaemon
 
 import "github.com/vishvananda/netlink"
 
-type TcOperation interface {
-	Apply(containerId string) error
-	Cancel() error
-}
-
+// Netem represents a netem qdisc
 type Netem struct {
 	Time             uint32  `json:"time"`
 	Jitter           uint32  `json:"jitter"`
@@ -39,8 +35,4 @@ func (netem *Netem) getNetlinkNetemAttrs() netlink.NetemQdiscAttrs {
 		CorruptProb:   netem.CorruptProb,
 		CorruptCorr:   netem.CorruptCorr,
 	}
-}
-
-func (netem *Netem) Verify() error {
-	return nil
 }

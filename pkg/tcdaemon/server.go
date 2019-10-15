@@ -9,11 +9,13 @@ import (
 	"time"
 
 	"github.com/golang/glog"
+	"github.com/gorilla/context"
 	"github.com/gorilla/mux"
 	"github.com/juju/errors"
 	"github.com/unrolled/render"
 )
 
+// Server represents an HTTP server for tc daemon
 type Server struct {
 	rdr      *render.Render
 	crClient ContainerRuntimeInfoClient
@@ -42,32 +44,49 @@ func newServer() (*Server, error) {
 	}, nil
 }
 
-func (s *Server) CreateRouter() http.Handler {
-	router := mux.NewRouter()
-
-	router.HandleFunc("/{containerId}/netem", func(w http.ResponseWriter, r *http.Request) {
+func (s *Server) parseMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 		vars := mux.Vars(r)
 
-		containerId := vars["containerId"]
-		delay := new(Netem)
+		containerID := vars["containerID"]
+		netem := new(Netem)
 
-		if err := readJSON(r.Body, delay); err != nil {
+		if err := readJSON(r.Body, netem); err != nil {
 			s.rdr.JSON(w, http.StatusOK, errResponsef("read json body error %v", err))
 			return
 		}
+		context.Set(r, "netem", netem)
 
-		if err := delay.Verify(); err != nil {
-			s.rdr.JSON(w, http.StatusOK, errResponsef("verify delay %+v error %v", delay, err))
-			return
-		}
-
-		pid, err := s.crClient.GetPidFromContainerId(ctx, containerId)
+		pid, err := s.crClient.GetPidFromContainerID(ctx, containerID)
 		if err != nil {
-			s.rdr.JSON(w, http.StatusOK, errResponsef("get pid from containerId error: %v", err))
+			s.rdr.JSON(w, http.StatusOK, errResponsef("get pid from containerID error: %v", err))
 		}
+		context.Set(r, "pid", pid)
 
-		if err := delay.Apply(pid); err != nil {
+		next.ServeHTTP(w, r)
+	})
+}
+
+func (s *Server) logMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		glog.Infof("Request : %s - %s - %s", r.RemoteAddr, r.Method, r.URL)
+		start := time.Now()
+
+		next.ServeHTTP(w, r)
+		glog.Infof("Response: %s - %s - %s (%.3f sec)", r.RemoteAddr, r.Method, r.URL, time.Since(start).Seconds())
+	})
+}
+
+// CreateRouter will create a Handler for related Server
+func (s *Server) CreateRouter() http.Handler {
+	router := mux.NewRouter()
+
+	router.HandleFunc("/{containerID}/netem", func(w http.ResponseWriter, r *http.Request) {
+		netem := context.Get(r, "netem").(*Netem)
+		pid := context.Get(r, "pid").(int)
+
+		if err := netem.Apply(pid); err != nil {
 			s.rdr.JSON(w, http.StatusOK, errResponsef("delay apply error: %v", err))
 			return
 		}
@@ -75,29 +94,11 @@ func (s *Server) CreateRouter() http.Handler {
 		s.rdr.JSON(w, http.StatusOK, successResponse("ok"))
 	}).Methods("PUT")
 
-	router.HandleFunc("/{containerId}/netem", func(w http.ResponseWriter, r *http.Request) {
-		ctx := r.Context()
-		vars := mux.Vars(r)
+	router.HandleFunc("/{containerID}/netem", func(w http.ResponseWriter, r *http.Request) {
+		netem := context.Get(r, "netem").(*Netem)
+		pid := context.Get(r, "pid").(int)
 
-		containerId := vars["containerId"]
-		delay := new(Netem)
-
-		if err := readJSON(r.Body, delay); err != nil {
-			s.rdr.JSON(w, http.StatusOK, errResponsef("read json body error %v", err))
-			return
-		}
-
-		if err := delay.Verify(); err != nil {
-			s.rdr.JSON(w, http.StatusOK, errResponsef("verify delay %+v error %v", delay, err))
-			return
-		}
-
-		pid, err := s.crClient.GetPidFromContainerId(ctx, containerId)
-		if err != nil {
-			s.rdr.JSON(w, http.StatusOK, errResponsef("get pid from containerId error: %v", err))
-		}
-
-		if err := delay.Cancel(pid); err != nil {
+		if err := netem.Cancel(pid); err != nil {
 			s.rdr.JSON(w, http.StatusOK, errResponsef("delay apply error: %v", err))
 			return
 		}
@@ -105,15 +106,14 @@ func (s *Server) CreateRouter() http.Handler {
 		s.rdr.JSON(w, http.StatusOK, successResponse("ok"))
 	}).Methods("DELETE")
 
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		glog.Infof("Request : %s - %s - %s", r.RemoteAddr, r.Method, r.URL)
-		start := time.Now()
+	router.Use(s.parseMiddleware)
 
-		router.ServeHTTP(w, r)
-		glog.Infof("Response: %s - %s - %s (%.3f sec)", r.RemoteAddr, r.Method, r.URL, time.Since(start).Seconds())
-	})
+	router.Use(s.logMiddleware)
+
+	return router
 }
 
+// StartServer will start listening on newly created server
 func StartServer(host string, port int) {
 	server, err := newServer()
 

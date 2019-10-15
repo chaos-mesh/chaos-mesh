@@ -13,6 +13,7 @@ const (
 	defaultProcPrefix = "/mnt/proc"
 )
 
+//Apply will apply a netem on eth0 in pid related namespace
 func (netem *Netem) Apply(pid int) error {
 	glog.Infof("Apply netem on PID: %d", pid)
 	nsPath := fmt.Sprintf("%s/%d/ns/net", defaultProcPrefix, pid)
@@ -36,15 +37,17 @@ func (netem *Netem) Apply(pid int) error {
 	}, netem.getNetlinkNetemAttrs())
 
 	if err = handle.QdiscAdd(netemQdisc); err != nil {
-		glog.Error("error while adding Qdisc")
+		glog.Errorf("error while adding Qdisc")
 		return errors.Trace(err)
 	}
 
 	return nil
 }
 
-// WARN: This will delete all netem on this interface
+// Cancel will remove netem on eth0 in pid related namespace
 func (netem *Netem) Cancel(pid int) error {
+	// WARN: This will delete all netem on this interface
+
 	glog.Infof("Cancel netem on PID: %d", pid)
 
 	nsPath := fmt.Sprintf("%s/%d/ns/net", defaultProcPrefix, pid)

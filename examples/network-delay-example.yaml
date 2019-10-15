@@ -1,0 +1,15 @@
+apiVersion: pingcap.com/v1alpha1
+kind: NetworkChaos
+metadata:
+  name: network-delay-example
+  namespace: chaos-testing
+spec:
+  action: delay
+  selector:
+    namespaces:
+      - tidb-cluster-demo
+    labelSelectors:
+      "app.kubernetes.io/component": "tikv"
+  scheduler:
+    duration: 20
+    cron: "@every 30s"
