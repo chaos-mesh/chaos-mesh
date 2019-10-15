@@ -26,12 +26,17 @@ import (
 
 type PingcapV1alpha1Interface interface {
 	RESTClient() rest.Interface
+	NetworkChaosesGetter
 	PodChaosesGetter
 }
 
 // PingcapV1alpha1Client is used to interact with features provided by the pingcap.com group.
 type PingcapV1alpha1Client struct {
 	restClient rest.Interface
+}
+
+func (c *PingcapV1alpha1Client) NetworkChaoses(namespace string) NetworkChaosInterface {
+	return newNetworkChaoses(c, namespace)
 }
 
 func (c *PingcapV1alpha1Client) PodChaoses(namespace string) PodChaosInterface {

@@ -10,6 +10,10 @@ spec:
       - tidb-cluster-demo
     labelSelectors:
       "app.kubernetes.io/component": "tikv"
+  delay:
+    latency: 90000
+    correlation: 0.25
+    jitter: 90000
+  duration: "20s"
   scheduler:
-    duration: 20
     cron: "@every 30s"

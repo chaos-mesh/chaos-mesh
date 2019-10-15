@@ -27,6 +27,10 @@ type FakePingcapV1alpha1 struct {
 	*testing.Fake
 }
 
+func (c *FakePingcapV1alpha1) NetworkChaoses(namespace string) v1alpha1.NetworkChaosInterface {
+	return &FakeNetworkChaoses{c, namespace}
+}
+
 func (c *FakePingcapV1alpha1) PodChaoses(namespace string) v1alpha1.PodChaosInterface {
 	return &FakePodChaoses{c, namespace}
 }

@@ -23,6 +23,8 @@ import (
 
 // Interface provides access to all the informers in this group version.
 type Interface interface {
+	// NetworkChaoses returns a NetworkChaosInformer.
+	NetworkChaoses() NetworkChaosInformer
 	// PodChaoses returns a PodChaosInformer.
 	PodChaoses() PodChaosInformer
 }
@@ -36,6 +38,11 @@ type version struct {
 // New returns a new Interface.
 func New(f internalinterfaces.SharedInformerFactory, namespace string, tweakListOptions internalinterfaces.TweakListOptionsFunc) Interface {
 	return &version{factory: f, namespace: namespace, tweakListOptions: tweakListOptions}
+}
+
+// NetworkChaoses returns a NetworkChaosInformer.
+func (v *version) NetworkChaoses() NetworkChaosInformer {
+	return &networkChaosInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
 }
 
 // PodChaoses returns a PodChaosInformer.

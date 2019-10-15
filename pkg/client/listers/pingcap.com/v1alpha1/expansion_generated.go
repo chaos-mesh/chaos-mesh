@@ -17,6 +17,14 @@ limitations under the License.
 
 package v1alpha1
 
+// NetworkChaosListerExpansion allows custom methods to be added to
+// NetworkChaosLister.
+type NetworkChaosListerExpansion interface{}
+
+// NetworkChaosNamespaceListerExpansion allows custom methods to be added to
+// NetworkChaosNamespaceLister.
+type NetworkChaosNamespaceListerExpansion interface{}
+
 // PodChaosListerExpansion allows custom methods to be added to
 // PodChaosLister.
 type PodChaosListerExpansion interface{}
