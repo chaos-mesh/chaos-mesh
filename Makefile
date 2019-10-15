@@ -33,10 +33,13 @@ docker-push: docker
 docker: build
 	docker build --tag "${DOCKER_REGISTRY}/pingcap/chaos-operator:latest" images/chaos-operator
 
-build: controller-manager
+build: controller-manager tc-daemon
 
 controller-manager:
 	$(GO) -ldflags '$(LDFLAGS)' -o images/chaos-operator/bin/chaos-controller-manager cmd/controller-manager/main.go
+
+tc-daemon:
+	$(GO) -ldflags '$(LDFLAGS)' -o images/chaos-operator/bin/tc-daemon cmd/tc-daemon/main.go
 
 test:
 	@echo "Run unit tests"

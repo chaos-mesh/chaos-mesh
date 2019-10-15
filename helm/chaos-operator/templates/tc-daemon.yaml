@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: tc-daemon
+  labels:
+    app.kubernetes.io/name: {{ template "chaos-operator.name" . }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/component: tc-daemon
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+"  "_" }}
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ template "chaos-operator.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+      app.kubernetes.io/component: tc-daemon
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ template "chaos-operator.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        app.kubernetes.io/component: tc-daemon
+    spec:
+      containers:
+        - name: tc-daemon
+          image: {{ .Values.tcDaemon.image }}
+          imagePullPolicy: {{ .Values.tcDaemon.imagePullPolicy | default "IfNotPresent" }}
+          {{- if .Values.tcDaemon.resources }}
+          resources:
+{{ toYaml .Values.tcDaemon.resources | indent 12 }}
+          {{- end }}
+          command:
+            - /usr/local/bin/tc-daemon
+          env:
+            - name: PORT
+              value: !!str {{ .Values.tcDaemon.port }}
+          securityContext:
+            capabilities:
+              add:
+                - NET_ADMIN
+                - SYS_ADMIN
+          volumeMounts:
+            - name: proc
+              mountPath: /mnt/proc
+            - name: dockersock
+              mountPath: /var/run/docker.sock
+          ports:
+            - containerPort: {{ .Values.tcDaemon.port }}
+              hostPort: {{ .Values.tcDaemon.port }}
+      volumes:
+        - name: proc
+          hostPath: 
+            path: /proc
+        - name: dockersock
+          hostPath:
+            path: {{ .Values.tcDaemon.dockerSocketPath | default "/var/run/docker.sock" }}
