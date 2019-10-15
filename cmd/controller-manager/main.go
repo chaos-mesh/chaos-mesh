@@ -25,6 +25,7 @@ import (
 	"github.com/pingcap/chaos-operator/pkg/client/clientset/versioned"
 	informers "github.com/pingcap/chaos-operator/pkg/client/informers/externalversions"
 	"github.com/pingcap/chaos-operator/pkg/controller"
+	"github.com/pingcap/chaos-operator/pkg/controller/networkchaos"
 	"github.com/pingcap/chaos-operator/pkg/controller/podchaos"
 	"github.com/pingcap/chaos-operator/pkg/manager"
 	"github.com/pingcap/chaos-operator/pkg/signals"
@@ -95,6 +96,12 @@ func main() {
 		informerFactory,
 		managerBase)
 
+	networkChaosController := networkchaos.NewController(
+		kubeCli, cli,
+		kubeInformerFactory,
+		informerFactory,
+		managerBase)
+
 	// Start method is non-blocking and runs all registered informers in a dedicated goroutine.
 	kubeInformerFactory.Start(stopCh)
 	informerFactory.Start(stopCh)
@@ -103,6 +110,10 @@ func main() {
 
 	g.Go(func() error {
 		return podChaosController.Run(stopCh)
+	})
+
+	g.Go(func() error {
+		return networkChaosController.Run(stopCh)
 	})
 
 	g.Go(func() error {

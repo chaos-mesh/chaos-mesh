@@ -52,6 +52,8 @@ func addKnownTypes(scheme *runtime.Scheme) error {
 	scheme.AddKnownTypes(SchemeGroupVersion,
 		&PodChaos{},
 		&PodChaosList{},
+		&NetworkChaos{},
+		&NetworkChaosList{},
 	)
 
 	metav1.AddToGroupVersion(scheme, SchemeGroupVersion)
