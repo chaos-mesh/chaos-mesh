@@ -14,9 +14,7 @@
 package podchaos
 
 import (
-	"context"
 	"fmt"
-	"sync"
 	"testing"
 
 	. "github.com/onsi/gomega"
@@ -439,7 +437,8 @@ func TestPodFailureJobAddFinalizer(t *testing.T) {
 		job.cli = fake.NewSimpleClientset(tc.podChaos)
 		g.Expect(job.addPodFinalizer(tc.pod)).ShouldNot(HaveOccurred(), tc.name)
 
-		tpc, err := job.cli.PingcapV1alpha1().PodChaoses(tc.podChaos.Namespace).Get(tc.podChaos.Name, metav1.GetOptions{})
+		tpc, err := job.cli.PingcapV1alpha1().PodChaoses(tc.podChaos.Namespace).
+			Get(tc.podChaos.Name, metav1.GetOptions{})
 		g.Expect(err).ShouldNot(HaveOccurred(), tc.name)
 		g.Expect(tpc.Finalizers).To(Equal(tc.expectedFinalizers), tc.name)
 	}
@@ -453,6 +452,7 @@ func TestPodFailureJobFailFixedPods(t *testing.T) {
 		fixedValue            string
 		Duration              string
 		podsCount             int
+		record                *v1alpha1.PodChaosExperimentStatus
 		expectedFinalizersLen int
 		expectedResultF       resultF
 	}
@@ -462,6 +462,7 @@ func TestPodFailureJobFailFixedPods(t *testing.T) {
 			name:                  "fixed 2, pods 5",
 			fixedValue:            "2",
 			Duration:              "1ms",
+			record:                &v1alpha1.PodChaosExperimentStatus{},
 			podsCount:             5,
 			expectedFinalizersLen: 2,
 			expectedResultF:       Succeed,
@@ -470,6 +471,7 @@ func TestPodFailureJobFailFixedPods(t *testing.T) {
 			name:                  "fixed 3, pods 2",
 			fixedValue:            "3",
 			Duration:              "1ms",
+			record:                &v1alpha1.PodChaosExperimentStatus{},
 			podsCount:             2,
 			expectedFinalizersLen: 2,
 			expectedResultF:       Succeed,
@@ -478,6 +480,7 @@ func TestPodFailureJobFailFixedPods(t *testing.T) {
 			name:                  "invalid duration",
 			fixedValue:            "3",
 			Duration:              "1",
+			record:                &v1alpha1.PodChaosExperimentStatus{},
 			podsCount:             2,
 			expectedFinalizersLen: 0,
 			expectedResultF:       HaveOccurred,
@@ -491,12 +494,11 @@ func TestPodFailureJobFailFixedPods(t *testing.T) {
 		objects, pods := generateNRunningPods("pc-test", tc.podsCount)
 		job := newPodFailureJob(pc, objects...)
 		job.cli = fake.NewSimpleClientset(pc)
-		job.wg = new(sync.WaitGroup)
-		job.wg.Add(1)
-		g.Expect(job.failFixedPods(context.Background(), pods)).Should(tc.expectedResultF(), tc.name)
+		g.Expect(job.failFixedPods(pods, tc.record)).Should(tc.expectedResultF(), tc.name)
 		tpc, err := job.cli.PingcapV1alpha1().PodChaoses(pc.Namespace).Get(pc.Name, metav1.GetOptions{})
 		g.Expect(err).ShouldNot(HaveOccurred(), tc.name)
 		g.Expect(len(tpc.Finalizers)).To(Equal(tc.expectedFinalizersLen), tc.name)
+		g.Expect(len(tc.record.Pods)).To(Equal(tc.expectedFinalizersLen), tc.name)
 	}
 }
 
@@ -507,6 +509,7 @@ func TestPodFailureJobFailFixedPercentagePods(t *testing.T) {
 		name                  string
 		fixedValue            string
 		Duration              string
+		record                *v1alpha1.PodChaosExperimentStatus
 		podsCount             int
 		expectedFinalizersLen int
 		expectedResultF       resultF
@@ -517,6 +520,7 @@ func TestPodFailureJobFailFixedPercentagePods(t *testing.T) {
 			name:                  "fixed 0%%, pods 5",
 			fixedValue:            "0",
 			Duration:              "1ms",
+			record:                &v1alpha1.PodChaosExperimentStatus{},
 			podsCount:             5,
 			expectedFinalizersLen: 0,
 			expectedResultF:       Succeed,
@@ -525,6 +529,7 @@ func TestPodFailureJobFailFixedPercentagePods(t *testing.T) {
 			name:                  "fixed 100%%, pods 5",
 			fixedValue:            "100",
 			Duration:              "1ms",
+			record:                &v1alpha1.PodChaosExperimentStatus{},
 			podsCount:             5,
 			expectedFinalizersLen: 5,
 			expectedResultF:       Succeed,
@@ -533,6 +538,7 @@ func TestPodFailureJobFailFixedPercentagePods(t *testing.T) {
 			name:                  "fixed 100%%, pods 0",
 			fixedValue:            "100",
 			Duration:              "1ms",
+			record:                &v1alpha1.PodChaosExperimentStatus{},
 			podsCount:             0,
 			expectedFinalizersLen: 0,
 			expectedResultF:       Succeed,
@@ -541,6 +547,7 @@ func TestPodFailureJobFailFixedPercentagePods(t *testing.T) {
 			name:                  "fixed 50%%, pods 5",
 			fixedValue:            "50",
 			Duration:              "1ms",
+			record:                &v1alpha1.PodChaosExperimentStatus{},
 			podsCount:             5,
 			expectedFinalizersLen: 2,
 			expectedResultF:       Succeed,
@@ -549,6 +556,7 @@ func TestPodFailureJobFailFixedPercentagePods(t *testing.T) {
 			name:                  "fixed 200%%, pods 5",
 			fixedValue:            "200",
 			Duration:              "1ms",
+			record:                &v1alpha1.PodChaosExperimentStatus{},
 			podsCount:             5,
 			expectedFinalizersLen: 0,
 			expectedResultF:       HaveOccurred,
@@ -557,6 +565,7 @@ func TestPodFailureJobFailFixedPercentagePods(t *testing.T) {
 			name:                  "fixed -100%%, pods 5",
 			fixedValue:            "-100",
 			Duration:              "1ms",
+			record:                &v1alpha1.PodChaosExperimentStatus{},
 			podsCount:             5,
 			expectedFinalizersLen: 0,
 			expectedResultF:       HaveOccurred,
@@ -565,6 +574,7 @@ func TestPodFailureJobFailFixedPercentagePods(t *testing.T) {
 			name:                  "invalid duration",
 			fixedValue:            "3",
 			Duration:              "1",
+			record:                &v1alpha1.PodChaosExperimentStatus{},
 			podsCount:             2,
 			expectedFinalizersLen: 0,
 			expectedResultF:       HaveOccurred,
@@ -578,12 +588,11 @@ func TestPodFailureJobFailFixedPercentagePods(t *testing.T) {
 		objects, pods := generateNRunningPods("pc-test", tc.podsCount)
 		job := newPodFailureJob(pc, objects...)
 		job.cli = fake.NewSimpleClientset(pc)
-		job.wg = new(sync.WaitGroup)
-		job.wg.Add(1)
-		g.Expect(job.failFixedPercentagePods(context.Background(), pods)).Should(tc.expectedResultF(), tc.name)
+		g.Expect(job.failFixedPercentagePods(pods, tc.record)).Should(tc.expectedResultF(), tc.name)
 		tpc, err := job.cli.PingcapV1alpha1().PodChaoses(pc.Namespace).Get(pc.Name, metav1.GetOptions{})
 		g.Expect(err).ShouldNot(HaveOccurred(), tc.name)
 		g.Expect(len(tpc.Finalizers)).To(Equal(tc.expectedFinalizersLen), tc.name)
+		g.Expect(len(tc.record.Pods)).To(Equal(tc.expectedFinalizersLen), tc.name)
 	}
 }
 
@@ -594,6 +603,7 @@ func TestPodFailureJobFailMaxPercentagePods(t *testing.T) {
 		name                  string
 		fixedValue            string
 		Duration              string
+		record                *v1alpha1.PodChaosExperimentStatus
 		podsCount             int
 		expectedFinalizersLen int
 		expectedResultF       resultF
@@ -604,6 +614,7 @@ func TestPodFailureJobFailMaxPercentagePods(t *testing.T) {
 			name:                  "fixed max 0%%, pods 5",
 			fixedValue:            "0",
 			Duration:              "1ms",
+			record:                &v1alpha1.PodChaosExperimentStatus{},
 			podsCount:             5,
 			expectedFinalizersLen: 0,
 			expectedResultF:       Succeed,
@@ -612,6 +623,7 @@ func TestPodFailureJobFailMaxPercentagePods(t *testing.T) {
 			name:                  "fixed max 100%%, pods 5",
 			fixedValue:            "100",
 			Duration:              "1ms",
+			record:                &v1alpha1.PodChaosExperimentStatus{},
 			podsCount:             5,
 			expectedFinalizersLen: 5,
 			expectedResultF:       Succeed,
@@ -620,6 +632,7 @@ func TestPodFailureJobFailMaxPercentagePods(t *testing.T) {
 			name:                  "fixed max 100%%, pods 0",
 			fixedValue:            "100",
 			Duration:              "1ms",
+			record:                &v1alpha1.PodChaosExperimentStatus{},
 			podsCount:             0,
 			expectedFinalizersLen: 0,
 			expectedResultF:       Succeed,
@@ -628,6 +641,7 @@ func TestPodFailureJobFailMaxPercentagePods(t *testing.T) {
 			name:                  "fixed max 50%%, pods 5",
 			fixedValue:            "50",
 			Duration:              "1ms",
+			record:                &v1alpha1.PodChaosExperimentStatus{},
 			podsCount:             5,
 			expectedFinalizersLen: 2,
 			expectedResultF:       Succeed,
@@ -636,6 +650,7 @@ func TestPodFailureJobFailMaxPercentagePods(t *testing.T) {
 			name:                  "fixed max 200%%, pods 5",
 			fixedValue:            "200",
 			Duration:              "1ms",
+			record:                &v1alpha1.PodChaosExperimentStatus{},
 			podsCount:             5,
 			expectedFinalizersLen: 0,
 			expectedResultF:       HaveOccurred,
@@ -644,6 +659,7 @@ func TestPodFailureJobFailMaxPercentagePods(t *testing.T) {
 			name:                  "fixed max -100%%, pods 5",
 			fixedValue:            "-100",
 			Duration:              "1ms",
+			record:                &v1alpha1.PodChaosExperimentStatus{},
 			podsCount:             5,
 			expectedFinalizersLen: 0,
 			expectedResultF:       HaveOccurred,
@@ -652,6 +668,7 @@ func TestPodFailureJobFailMaxPercentagePods(t *testing.T) {
 			name:                  "invalid duration",
 			fixedValue:            "3",
 			Duration:              "1",
+			record:                &v1alpha1.PodChaosExperimentStatus{},
 			podsCount:             2,
 			expectedFinalizersLen: 0,
 			expectedResultF:       HaveOccurred,
@@ -665,12 +682,11 @@ func TestPodFailureJobFailMaxPercentagePods(t *testing.T) {
 		objects, pods := generateNRunningPods("pc-test", tc.podsCount)
 		job := newPodFailureJob(pc, objects...)
 		job.cli = fake.NewSimpleClientset(pc)
-		job.wg = new(sync.WaitGroup)
-		job.wg.Add(1)
-		g.Expect(job.failMaxPercentagePods(context.Background(), pods)).Should(tc.expectedResultF(), tc.name)
+		g.Expect(job.failMaxPercentagePods(pods, tc.record)).Should(tc.expectedResultF(), tc.name)
 		tpc, err := job.cli.PingcapV1alpha1().PodChaoses(pc.Namespace).Get(pc.Name, metav1.GetOptions{})
 		g.Expect(err).ShouldNot(HaveOccurred(), tc.name)
 		g.Expect(len(tpc.Finalizers)).Should(BeNumerically("<=", tc.expectedFinalizersLen), tc.name)
+		g.Expect(len(tc.record.Pods)).Should(BeNumerically("<=", tc.expectedFinalizersLen), tc.name)
 	}
 }
 
@@ -681,6 +697,7 @@ func TestPodFailureJobFailAllPods(t *testing.T) {
 		name                  string
 		podsCount             int
 		expectedFinalizersLen int
+		record                *v1alpha1.PodChaosExperimentStatus
 		expectedResultF       resultF
 		Duration              string
 	}
@@ -689,6 +706,7 @@ func TestPodFailureJobFailAllPods(t *testing.T) {
 		{
 			name:                  "5 pods",
 			podsCount:             5,
+			record:                &v1alpha1.PodChaosExperimentStatus{},
 			expectedFinalizersLen: 5,
 			Duration:              "1ms",
 			expectedResultF:       Succeed,
@@ -696,6 +714,7 @@ func TestPodFailureJobFailAllPods(t *testing.T) {
 		{
 			name:                  "0 pods",
 			podsCount:             0,
+			record:                &v1alpha1.PodChaosExperimentStatus{},
 			expectedFinalizersLen: 0,
 			Duration:              "1ms",
 			expectedResultF:       Succeed,
@@ -703,6 +722,7 @@ func TestPodFailureJobFailAllPods(t *testing.T) {
 		{
 			name:                  "invalid duration",
 			podsCount:             5,
+			record:                &v1alpha1.PodChaosExperimentStatus{},
 			expectedFinalizersLen: 0,
 			Duration:              "1",
 			expectedResultF:       HaveOccurred,
@@ -715,12 +735,11 @@ func TestPodFailureJobFailAllPods(t *testing.T) {
 		objects, pods := generateNRunningPods("pc-test", tc.podsCount)
 		job := newPodFailureJob(pc, objects...)
 		job.cli = fake.NewSimpleClientset(pc)
-		job.wg = new(sync.WaitGroup)
-		job.wg.Add(1)
-		g.Expect(job.failAllPod(context.Background(), pods)).Should(tc.expectedResultF(), tc.name)
+		g.Expect(job.failAllPod(pods, tc.record)).Should(tc.expectedResultF(), tc.name)
 		tpc, err := job.cli.PingcapV1alpha1().PodChaoses(pc.Namespace).Get(pc.Name, metav1.GetOptions{})
 		g.Expect(err).ShouldNot(HaveOccurred(), tc.name)
 		g.Expect(len(tpc.Finalizers)).To(Equal(tc.expectedFinalizersLen), tc.name)
+		g.Expect(len(tc.record.Pods)).To(Equal(tc.expectedFinalizersLen), tc.name)
 	}
 }
 
@@ -800,4 +819,84 @@ func newPodsWithFakImageAnnotations(prefix string, num int) []v1.Pod {
 	}
 
 	return pods
+}
+
+func TestPodFailureJobConcurrentFailPods(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	type TestCase struct {
+		name                  string
+		podsCount             int
+		expectedFinalizersLen int
+		failNum               int
+		record                *v1alpha1.PodChaosExperimentStatus
+		expectedResultF       resultF
+		Duration              string
+	}
+
+	tcs := []TestCase{
+		{
+			name:                  "5 pods, fail 5",
+			podsCount:             5,
+			failNum:               5,
+			record:                &v1alpha1.PodChaosExperimentStatus{},
+			expectedFinalizersLen: 5,
+			Duration:              "1ms",
+			expectedResultF:       Succeed,
+		},
+		{
+			name:                  "5 pods, fail 2",
+			podsCount:             5,
+			failNum:               2,
+			record:                &v1alpha1.PodChaosExperimentStatus{},
+			expectedFinalizersLen: 2,
+			Duration:              "1ms",
+			expectedResultF:       Succeed,
+		},
+		{
+			name:                  "5 pods, fail -1",
+			podsCount:             5,
+			failNum:               -1,
+			record:                &v1alpha1.PodChaosExperimentStatus{},
+			expectedFinalizersLen: 0,
+			Duration:              "1ms",
+			expectedResultF:       Succeed,
+		},
+		{
+			name:                  "0 pods, fail 1",
+			podsCount:             0,
+			failNum:               1,
+			record:                &v1alpha1.PodChaosExperimentStatus{},
+			expectedFinalizersLen: 0,
+			Duration:              "1ms",
+			expectedResultF:       Succeed,
+		},
+	}
+
+	for _, tc := range tcs {
+		pc := newPodFailurePodChaos("pc-test")
+		pc.Spec.Duration = tc.Duration
+		objects, pods := generateNRunningPods("pc-test", tc.podsCount)
+		job := newPodFailureJob(pc, objects...)
+		job.cli = fake.NewSimpleClientset(pc)
+		g.Expect(job.concurrentFailPods(pods, tc.failNum, tc.record)).Should(tc.expectedResultF(), tc.name)
+		tpc, err := job.cli.PingcapV1alpha1().PodChaoses(pc.Namespace).Get(pc.Name, metav1.GetOptions{})
+		g.Expect(err).ShouldNot(HaveOccurred(), tc.name)
+		g.Expect(len(tpc.Finalizers)).To(Equal(tc.expectedFinalizersLen), tc.name)
+		g.Expect(len(tc.record.Pods)).To(Equal(tc.expectedFinalizersLen), tc.name)
+	}
+}
+
+func TestPodFailureJobSetRecordPods(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	pc := newPodFailurePodChaos("pc-test")
+	objects, pods := generateNRunningPods("pc-test", 5)
+	job := newPodFailureJob(pc, objects...)
+	job.cli = fake.NewSimpleClientset(pc)
+	record := &v1alpha1.PodChaosExperimentStatus{}
+
+	job.setRecordPods(record, pods...)
+	g.Expect(string(record.Phase)).To(Equal(string(v1alpha1.ExperimentPhaseRunning)))
+	g.Expect(len(record.Pods)).To(Equal(5))
 }

@@ -14,10 +14,12 @@
 package v1alpha1
 
 import (
+	"time"
+
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// ChaosAction represents the chaos action about pods.
+// PodChaosAction represents the chaos action about pods.
 type PodChaosAction string
 
 const (
@@ -44,6 +46,11 @@ const (
 	FixedPercentPodMode PodChaosMode = "fixed-percent"
 	// RandomMaxPercentPodMode to specify a maximum % that can be inject chaos action.
 	RandomMaxPercentPodMode PodChaosMode = "random-max-percent"
+)
+
+const (
+	DefaultStatusRetentionTime = 1 * time.Hour
+	DefaultCleanStatusInterval = 5 * time.Minute
 )
 
 // +genclient
@@ -99,11 +106,14 @@ type PodChaosSpec struct {
 	// The value zero indicates delete immediately.
 	// +optional
 	GracePeriodSeconds int64 `json:"gracePeriodSeconds"`
-}
 
-// PodChaosStatus represents the current status of the chaos experiment about pods.
-type PodChaosStatus struct {
-	// TODO: add status
+	// StatusRetentionTime defines the retention time of experiment status.
+	// A statusRetentionTime string is a possibly signed sequence of
+	// decimal numbers, each with optional fraction and a unit suffix,
+	// such as "300ms", "-1.5h" or "2h45m".
+	// Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
+	// +optional
+	StatusRetentionTime string `json:"statusSavedTime"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
@@ -114,4 +124,92 @@ type PodChaosList struct {
 	metav1.ListMeta `json:"metadata"`
 
 	Items []PodChaos `json:"items"`
+}
+
+// PodChaosStatus represents the current status of the chaos experiment about pods.
+type PodChaosStatus struct {
+	// Phase is the chaos status.
+	Phase  ChaosPhase `json:"phase"`
+	Reason string     `json:"reason,omitempty"`
+
+	// Experiments records the experiment records of the most recent period of time.
+	// Keeping one hour of status record by default.
+	Experiments []PodChaosExperimentStatus `json:"experiments"`
+}
+
+func (ps *PodChaosStatus) SetExperimentRecord(record PodChaosExperimentStatus) {
+	for index, exp := range ps.Experiments {
+		if exp.Time == record.Time {
+			ps.Experiments[index] = record
+		}
+	}
+
+	ps.Experiments = append(ps.Experiments, record)
+}
+
+// CleanExpiredStatusRecords cleans the expired status records.
+func (ps *PodChaosStatus) CleanExpiredStatusRecords(retentionTime time.Duration) {
+	var experiments []PodChaosExperimentStatus
+
+	nowTime := time.Now()
+	for _, exp := range ps.Experiments {
+		if exp.Time.Add(retentionTime).After(nowTime) {
+			experiments = append(experiments, exp)
+		}
+	}
+
+	ps.Experiments = experiments
+}
+
+// ChaosPhase is the current status of chaos task.
+type ChaosPhase string
+
+const (
+	ChaosPhaseNone     ChaosPhase = ""
+	ChaosPhaseNormal              = "Normal"
+	ChaosPahseAbnormal            = "Abnormal"
+)
+
+// ExperimentPhase is the current status of chaos experiment.
+type ExperimentPhase string
+
+const (
+	ExperimentPhaseNone     ExperimentPhase = ""
+	ExperimentPhaseRunning                  = "Running"
+	ExperimentPhaseFailed                   = "Failed"
+	ExperimentPhaseFinished                 = "Finished"
+)
+
+// PodChaosExperimentStatus represents information about the status of the podchaos experiment.
+type PodChaosExperimentStatus struct {
+	Phase  ExperimentPhase `json:"phase"`
+	Reason string          `json:"reason"`
+	Time   metav1.Time     `json:"time"`
+	Pods   []PodStatus     `json:"podChaos"`
+}
+
+func (pe *PodChaosExperimentStatus) SetPods(pod PodStatus) {
+	for index, p := range pe.Pods {
+		if p.Namespace == pod.Namespace && p.Name == pod.Namespace {
+			pe.Pods[index] = pod
+		}
+	}
+
+	pe.Pods = append(pe.Pods, pod)
+}
+
+// PodStatus represents information about the status of a pod in chaos experiment.
+type PodStatus struct {
+	Namespace string      `json:"namespace"`
+	Name      string      `json:"name"`
+	Action    string      `json:"action"`
+	HostIP    string      `json:"hostIP"`
+	PodIP     string      `json:"podIP"`
+	StartTime metav1.Time `json:"startTime"`
+	EndTime   metav1.Time `json:"endTime"`
+
+	// A brief CamelCase message indicating details about the chaos action.
+	// e.g. "delete this pod" or "pause this pod duration 5m"
+	// +optional
+	Message string `json:"message"`
 }

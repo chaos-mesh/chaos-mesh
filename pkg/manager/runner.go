@@ -22,7 +22,9 @@ import (
 type Job interface {
 	Run()
 	Close() error
+	Clean() error
 	Equal(job Job) bool
+	Sync() error
 }
 
 // Runner is the base unit for performing chaos action.
@@ -67,4 +69,12 @@ func (r *Runner) Equal(rn *Runner) bool {
 
 func (r *Runner) Close() error {
 	return r.Job.Close()
+}
+
+func (r *Runner) Sync() error {
+	return r.Job.Sync()
+}
+
+func (r *Runner) Clean() error {
+	return r.Job.Clean()
 }

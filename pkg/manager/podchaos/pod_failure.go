@@ -14,13 +14,11 @@
 package podchaos
 
 import (
-	"context"
 	"fmt"
 	"math"
 	"math/rand"
 	"reflect"
 	"strconv"
-	"sync"
 	"sync/atomic"
 	"time"
 
@@ -44,6 +42,8 @@ import (
 const (
 	// fakeImage is a not-existing image.
 	fakeImage = "pingcap.com/fake-chaos-operator:latest"
+
+	podFailureActionMsg = "pause pod duration %s"
 )
 
 // PodFailureJob defines a job to do pod-failure chaos experiment.
@@ -54,10 +54,8 @@ type PodFailureJob struct {
 	cli       versioned.Interface
 	podLister corelisters.PodLister
 
-	cancel *context.CancelFunc
-	wg     *sync.WaitGroup
-
 	isRunning int32
+	stopC     chan struct{}
 }
 
 // Run is the core logic to execute pod-failure chaos experiment.
@@ -67,14 +65,35 @@ func (p *PodFailureJob) Run() {
 		return
 	}
 
+	var err error
+
+	record := &v1alpha1.PodChaosExperimentStatus{
+		Phase: v1alpha1.ExperimentPhaseNone,
+		Time:  metav1.Now(),
+	}
+
+	if err := setExperimentRecord(p.cli, p.podChaos, record); err != nil {
+		glog.Errorf("%s, fail to set experiment record, %v", p.logPrefix(), err)
+	}
+
 	defer func() {
 		if err := p.cleanFinalizersAndRecover(); err != nil {
 			glog.Errorf("%s, fail to clean finalizer, %v", p.logPrefix(), err)
 		}
+
+		record.Phase = v1alpha1.ExperimentPhaseFinished
+		if err != nil {
+			glog.Errorf("%s, fail to set experiment record, %v", p.logPrefix(), err)
+			record.Phase = v1alpha1.ExperimentPhaseFailed
+			record.Reason = err.Error()
+		}
+
+		if err := setExperimentRecord(p.cli, p.podChaos, record); err != nil {
+			glog.Errorf("%s, fail to set experiment record, %v", p.logPrefix(), err)
+		}
+
 		atomic.CompareAndSwapInt32(&p.isRunning, 1, 0)
 	}()
-
-	var err error
 
 	pods, err := manager.SelectPods(p.podChaos.Spec.Selector, p.podLister, p.kubeCli)
 	if err != nil {
@@ -86,37 +105,24 @@ func (p *PodFailureJob) Run() {
 		return
 	}
 
-	ctx, cancel := context.WithCancel(context.Background())
-	p.cancel = &cancel
-	p.wg = new(sync.WaitGroup)
-
 	switch p.podChaos.Spec.Mode {
 	case v1alpha1.OnePodMode:
 		glog.Infof("%s, Try to select one pod to do pod-failure job randomly", p.logPrefix())
-		p.wg.Add(1)
-		err = p.failRandomPod(ctx, pods)
+		err = p.failRandomPod(pods, record)
 	case v1alpha1.AllPodMode:
 		glog.Infof("%s, Try to do pod-failure action on all filtered pods", p.logPrefix())
-		p.wg.Add(1)
-		err = p.failAllPod(ctx, pods)
+		err = p.failAllPod(pods, record)
 	case v1alpha1.FixedPodMode:
 		glog.Infof("%s, Try to do pod-failure action on %s pods", p.logPrefix(), p.podChaos.Spec.Value)
-		p.wg.Add(1)
-		err = p.failFixedPods(ctx, pods)
+		err = p.failFixedPods(pods, record)
 	case v1alpha1.FixedPercentPodMode:
 		glog.Infof("%s, Try to do pod-failure action on %s%% pods", p.logPrefix(), p.podChaos.Spec.Value)
-		p.wg.Add(1)
-		err = p.failFixedPercentagePods(ctx, pods)
+		err = p.failFixedPercentagePods(pods, record)
 	case v1alpha1.RandomMaxPercentPodMode:
 		glog.Infof("%s, Try to do pod-failure action on max %s%% pods", p.logPrefix(), p.podChaos.Spec.Value)
-		p.wg.Add(1)
-		err = p.failMaxPercentagePods(ctx, pods)
+		err = p.failMaxPercentagePods(pods, record)
 	default:
 		err = fmt.Errorf("pod-failure mode %s not supported", p.podChaos.Spec.Mode)
-	}
-
-	if err != nil {
-		glog.Errorf("%s, fail to run action, %v", p.logPrefix(), err)
 	}
 }
 
@@ -143,26 +149,49 @@ func (p *PodFailureJob) Equal(job manager.Job) bool {
 // Close close the pod-failure job and cleans the residue actions.
 // It will check the finalizers of the PodChaos and cleans them.
 func (p *PodFailureJob) Close() error {
-	if p.cancel != nil {
-		(*p.cancel)()
-	}
-
-	if p.wg != nil {
-		p.wg.Wait()
-	}
+	close(p.stopC)
 
 	return p.cleanFinalizersAndRecover()
 }
 
-func (p *PodFailureJob) failAllPod(ctx context.Context, pods []v1.Pod) error {
-	defer p.wg.Done()
+// Clean is used to cleans the residue action.
+func (p *PodFailureJob) Clean() error {
+	return p.cleanFinalizersAndRecover()
+}
 
+// Sync sync the status of podChaos.
+// For PodFailure Job, it is used to clean up expired status records.
+func (p *PodFailureJob) Sync() error {
+	go p.cleanExpiredExperimentRecords()
+
+	return nil
+}
+
+func (p *PodFailureJob) cleanExpiredExperimentRecords() {
+	ticker := time.NewTicker(v1alpha1.DefaultCleanStatusInterval)
+	defer ticker.Stop()
+
+	for {
+		select {
+		case <-p.stopC:
+			return
+		case <-ticker.C:
+			if err := cleanExpiredExperimentRecords(p.cli, p.podChaos); err != nil {
+				glog.Errorf("%s, fail to clean expired status records, %v", p.logPrefix(), err)
+			}
+		}
+	}
+}
+
+func (p *PodFailureJob) failAllPod(pods []v1.Pod, record *v1alpha1.PodChaosExperimentStatus) error {
 	duration, err := time.ParseDuration(p.podChaos.Spec.Duration)
 	if err != nil {
 		return err
 	}
 
 	glog.Infof("%s, Try to inject failure to %d pods", p.logPrefix(), len(pods))
+
+	p.setRecordPods(record, pods...)
 
 	if err := p.addMultiPodsFinalizer(pods); err != nil {
 		return err
@@ -180,14 +209,12 @@ func (p *PodFailureJob) failAllPod(ctx context.Context, pods []v1.Pod) error {
 		return err
 	}
 
-	util.Sleep(ctx, duration)
+	util.Sleep(p.stopC, duration)
 
 	return nil
 }
 
-func (p *PodFailureJob) failFixedPods(ctx context.Context, pods []v1.Pod) error {
-	defer p.wg.Done()
-
+func (p *PodFailureJob) failFixedPods(pods []v1.Pod, record *v1alpha1.PodChaosExperimentStatus) error {
 	duration, err := time.ParseDuration(p.podChaos.Spec.Duration)
 	if err != nil {
 		return err
@@ -206,18 +233,16 @@ func (p *PodFailureJob) failFixedPods(ctx context.Context, pods []v1.Pod) error 
 
 	glog.Infof("%s, Try to inject failure to %d pods", p.logPrefix(), failNum)
 
-	if err := p.concurrentFailPods(pods, failNum); err != nil {
+	if err := p.concurrentFailPods(pods, failNum, record); err != nil {
 		return err
 	}
 
-	util.Sleep(ctx, duration)
+	util.Sleep(p.stopC, duration)
 
 	return nil
 }
 
-func (p *PodFailureJob) failFixedPercentagePods(ctx context.Context, pods []v1.Pod) error {
-	defer p.wg.Done()
-
+func (p *PodFailureJob) failFixedPercentagePods(pods []v1.Pod, record *v1alpha1.PodChaosExperimentStatus) error {
 	duration, err := time.ParseDuration(p.podChaos.Spec.Duration)
 	if err != nil {
 		return err
@@ -241,18 +266,16 @@ func (p *PodFailureJob) failFixedPercentagePods(ctx context.Context, pods []v1.P
 
 	glog.Infof("%s, Try to inject failure to %d pods", p.logPrefix(), failNum)
 
-	if err := p.concurrentFailPods(pods, failNum); err != nil {
+	if err := p.concurrentFailPods(pods, failNum, record); err != nil {
 		return err
 	}
 
-	util.Sleep(ctx, duration)
+	util.Sleep(p.stopC, duration)
 
 	return nil
 }
 
-func (p *PodFailureJob) failMaxPercentagePods(ctx context.Context, pods []v1.Pod) error {
-	defer p.wg.Done()
-
+func (p *PodFailureJob) failMaxPercentagePods(pods []v1.Pod, record *v1alpha1.PodChaosExperimentStatus) error {
 	duration, err := time.ParseDuration(p.podChaos.Spec.Duration)
 	if err != nil {
 		return err
@@ -277,17 +300,17 @@ func (p *PodFailureJob) failMaxPercentagePods(ctx context.Context, pods []v1.Pod
 
 	glog.Infof("%s, Try to inject failure to %d pods", p.logPrefix(), failNum)
 
-	if err := p.concurrentFailPods(pods, failNum); err != nil {
+	if err := p.concurrentFailPods(pods, failNum, record); err != nil {
 		return err
 	}
 
-	util.Sleep(ctx, duration)
+	util.Sleep(p.stopC, duration)
 
 	return nil
 }
 
-func (p *PodFailureJob) concurrentFailPods(pods []v1.Pod, failNum int) error {
-	if failNum <= 0 {
+func (p *PodFailureJob) concurrentFailPods(pods []v1.Pod, failNum int, record *v1alpha1.PodChaosExperimentStatus) error {
+	if failNum <= 0 || len(pods) <= 0 {
 		return nil
 	}
 
@@ -301,22 +324,36 @@ func (p *PodFailureJob) concurrentFailPods(pods []v1.Pod, failNum int) error {
 		return err
 	}
 
+	var filterPods []v1.Pod
+
 	g := errgroup.Group{}
 	for _, index := range failIndexes {
 		index := index
+		filterPods = append(filterPods, pods[index])
 		g.Go(func() error {
 			return p.failPod(pods[index])
 		})
 	}
 
+	p.setRecordPods(record, filterPods...)
+
 	return g.Wait()
 }
 
-func (p *PodFailureJob) failRandomPod(ctx context.Context, pods []v1.Pod) error {
-	defer p.wg.Done()
+func (p *PodFailureJob) setRecordPods(record *v1alpha1.PodChaosExperimentStatus, pods ...v1.Pod) {
+	msg := fmt.Sprintf(podFailureActionMsg, p.podChaos.Spec.Duration)
+	setRecordPods(record, p.podChaos.Spec.Action, msg, pods...)
+	record.Phase = v1alpha1.ExperimentPhaseRunning
+	if err := setExperimentRecord(p.cli, p.podChaos, record); err != nil {
+		glog.Errorf("%s, fail to set experiment record, %v", p.logPrefix(), err)
+	}
+}
 
+func (p *PodFailureJob) failRandomPod(pods []v1.Pod, record *v1alpha1.PodChaosExperimentStatus) error {
 	index := rand.Intn(len(pods))
 	pod := pods[index]
+
+	p.setRecordPods(record, pod)
 
 	duration, err := time.ParseDuration(p.podChaos.Spec.Duration)
 	if err != nil {
@@ -331,7 +368,7 @@ func (p *PodFailureJob) failRandomPod(ctx context.Context, pods []v1.Pod) error 
 		return err
 	}
 
-	util.Sleep(ctx, duration)
+	util.Sleep(p.stopC, duration)
 
 	return nil
 }

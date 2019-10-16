@@ -45,12 +45,12 @@ func TestPodChaosManagerSync(t *testing.T) {
 	tcsNew := []TestCase{
 		{
 			name:           "new podchaos 1",
-			podchaos:       newPodChaos2("pod-chaos-1", "@every 2m", "1"),
+			podchaos:       newPodChaos2("pod-chaos-1", "@every 2m", v1alpha1.SelectorSpec{Namespaces: []string{"chaos-testing"}}),
 			expectedResult: Succeed,
 		},
 		{
 			name:           "new podchaos 2",
-			podchaos:       newPodChaos2("pod-chaos-2", "@every 2m", "1"),
+			podchaos:       newPodChaos2("pod-chaos-2", "@every 2m", v1alpha1.SelectorSpec{Namespaces: []string{"chaos-testing"}}),
 			expectedResult: Succeed,
 		},
 	}
@@ -71,19 +71,19 @@ func TestPodChaosManagerSync(t *testing.T) {
 	tcsUpdate := []TestCase{
 		{
 			name:           "same pochaos",
-			podchaos:       newPodChaos2("pod-chaos-1", "@every 2m", "1"),
+			podchaos:       newPodChaos2("pod-chaos-1", "@every 2m", v1alpha1.SelectorSpec{Namespaces: []string{"chaos-testing"}}),
 			expectedResult: Succeed,
 			isChange:       false,
 		},
 		{
 			name:           "different rule",
-			podchaos:       newPodChaos2("pod-chaos-1", "@every 4m", "1"),
+			podchaos:       newPodChaos2("pod-chaos-1", "@every 4m", v1alpha1.SelectorSpec{Namespaces: []string{"chaos-testing"}}),
 			expectedResult: Succeed,
 			isChange:       true,
 		},
 		{
-			name:           "different version",
-			podchaos:       newPodChaos2("pod-chaos-2", "@every 2m", "2"),
+			name:           "different selector",
+			podchaos:       newPodChaos2("pod-chaos-2", "@every 2m", v1alpha1.SelectorSpec{Namespaces: []string{"chaos"}}),
 			expectedResult: Succeed,
 			isChange:       true,
 		},
@@ -177,21 +177,18 @@ func newFakePodChaosManager() *podChaosManager {
 	return pcManager
 }
 
-func newPodChaos2(name string, rule string, version string) *v1alpha1.PodChaos {
+func newPodChaos2(name string, rule string, selector v1alpha1.SelectorSpec) *v1alpha1.PodChaos {
 	return &v1alpha1.PodChaos{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "PodChaos",
 			APIVersion: "pingcap.com/v1alpha1",
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name:            name,
-			Namespace:       metav1.NamespaceDefault,
-			ResourceVersion: version,
+			Name:      name,
+			Namespace: metav1.NamespaceDefault,
 		},
 		Spec: v1alpha1.PodChaosSpec{
-			Selector: v1alpha1.SelectorSpec{
-				Namespaces: []string{"chaos-testing"},
-			},
+			Selector: selector,
 			Scheduler: v1alpha1.SchedulerSpec{
 				Cron: rule,
 			},

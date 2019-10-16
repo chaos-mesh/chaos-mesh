@@ -91,7 +91,9 @@ func (m *podChaosManager) newRunner(pc *v1alpha1.PodChaos) (*manager.Runner, err
 		job = &PodKillJob{
 			podChaos:  pc,
 			kubeCli:   m.kubeCli,
+			cli:       m.cli,
 			podLister: m.podLister,
+			stopC:     make(chan struct{}),
 		}
 	case v1alpha1.PodFailureAction:
 		job = &PodFailureJob{
@@ -99,6 +101,7 @@ func (m *podChaosManager) newRunner(pc *v1alpha1.PodChaos) (*manager.Runner, err
 			kubeCli:   m.kubeCli,
 			cli:       m.cli,
 			podLister: m.podLister,
+			stopC:     make(chan struct{}),
 		}
 	default:
 		return nil, fmt.Errorf("PodChaos action %s not supported", pc.Spec.Action)

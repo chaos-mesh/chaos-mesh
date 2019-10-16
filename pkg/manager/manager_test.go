@@ -279,6 +279,10 @@ func (j *fakeJob) Equal(_ Job) bool { return false }
 
 func (j *fakeJob) Close() error { return nil }
 
+func (j *fakeJob) Clean() error { return nil }
+
+func (j *fakeJob) Sync() error { return nil }
+
 type fakeJob2 struct{}
 
 func (j *fakeJob2) Run() {}
@@ -286,3 +290,7 @@ func (j *fakeJob2) Run() {}
 func (j *fakeJob2) Equal(_ Job) bool { return true }
 
 func (j *fakeJob2) Close() error { return nil }
+
+func (j *fakeJob2) Clean() error { return nil }
+
+func (j *fakeJob2) Sync() error { return nil }

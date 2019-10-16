@@ -118,54 +118,41 @@ func TestPodKillJobEqual(t *testing.T) {
 
 	type TestCase struct {
 		name          string
-		job1Name      string
-		job1Version   string
-		job2Name      string
-		job2Version   string
+		job1PodChaos  *v1alpha1.PodChaos
+		job2PodChaos  *v1alpha1.PodChaos
 		expectedValue bool
 	}
 
 	tcs := []TestCase{
 		{
-			name:          "same name and version",
-			job1Name:      "test-job",
-			job1Version:   "1",
-			job2Name:      "test-job",
-			job2Version:   "1",
+			name:          "same podChaos",
+			job1PodChaos:  newPodChaos("test"),
+			job2PodChaos:  newPodChaos("test"),
 			expectedValue: true,
 		},
 		{
-			name:          "same name, different version ",
-			job1Name:      "test-job",
-			job1Version:   "1",
-			job2Name:      "test-job",
-			job2Version:   "2",
+			name:          "diff name",
+			job1PodChaos:  newPodChaos("test-1"),
+			job2PodChaos:  newPodChaos("test-2"),
 			expectedValue: false,
 		},
 		{
-			name:          "different name, different version ",
-			job1Name:      "test-job-1",
-			job1Version:   "1",
-			job2Name:      "test-job-2",
-			job2Version:   "2",
+			name:          "diff selector",
+			job1PodChaos:  newPodChaosDiffSelector("job", v1alpha1.SelectorSpec{Namespaces: []string{"p1"}}),
+			job2PodChaos:  newPodChaosDiffSelector("job", v1alpha1.SelectorSpec{Namespaces: []string{"p2"}}),
 			expectedValue: false,
 		},
 		{
-			name:          "different name, same version ",
-			job1Name:      "test-job-1",
-			job1Version:   "1",
-			job2Name:      "test-job-2",
-			job2Version:   "1",
+			name:          "diff scheduler",
+			job1PodChaos:  newPodChaosDiffScheduler("job", v1alpha1.SchedulerSpec{Cron: "@every 1m"}),
+			job2PodChaos:  newPodChaosDiffScheduler("job", v1alpha1.SchedulerSpec{Cron: "@every 2m"}),
 			expectedValue: false,
 		},
 	}
 
 	for _, tc := range tcs {
-		job1 := newPodKillJob(newPodChaos(tc.job1Name))
-		job1.podChaos.ResourceVersion = tc.job1Version
-		job2 := newPodKillJob(newPodChaos(tc.job2Name))
-		job2.podChaos.ResourceVersion = tc.job2Version
-
+		job1 := newPodKillJob(tc.job1PodChaos)
+		job2 := newPodKillJob(tc.job2PodChaos)
 		g.Expect(job1.Equal(&job2)).To(Equal(tc.expectedValue), tc.name)
 	}
 }
@@ -255,6 +242,7 @@ func TestPodKillJobDeleteRandomPod(t *testing.T) {
 		name         string
 		lenPods      int
 		expectedPods int
+		record       *v1alpha1.PodChaosExperimentStatus
 	}
 
 	tcs := []TestCase{
@@ -262,24 +250,32 @@ func TestPodKillJobDeleteRandomPod(t *testing.T) {
 			name:         "3 pods",
 			lenPods:      3,
 			expectedPods: 2,
+			record:       &v1alpha1.PodChaosExperimentStatus{},
 		},
 		{
 			name:         "5 pods",
 			lenPods:      5,
 			expectedPods: 4,
+			record:       &v1alpha1.PodChaosExperimentStatus{},
 		},
 		{
 			name:         "0 pods",
 			lenPods:      0,
 			expectedPods: 0,
+			record:       &v1alpha1.PodChaosExperimentStatus{},
 		},
 	}
 
 	for _, tc := range tcs {
 		objects, pods := generateNRunningPods("pod-kill-", tc.lenPods)
 		job := newPodKillJob(newPodChaos(tc.name), objects...)
-		g.Expect(job.deleteRandomPod(pods)).Should(Succeed(), tc.name)
+		g.Expect(job.deleteRandomPod(pods, tc.record)).Should(Succeed(), tc.name)
 		g.Expect(len(getPodList(job.kubeCli).Items)).To(Equal(tc.expectedPods), tc.name)
+		if tc.expectedPods == 0 {
+			g.Expect(len(tc.record.Pods)).To(Equal(0), tc.name)
+		} else {
+			g.Expect(len(tc.record.Pods)).To(Equal(1), tc.name)
+		}
 	}
 }
 
@@ -289,6 +285,7 @@ func TestPodKillJobDeleteAllPods(t *testing.T) {
 	type TestCase struct {
 		name              string
 		podsCount         int
+		record            *v1alpha1.PodChaosExperimentStatus
 		expectedPodsCount int
 	}
 
@@ -296,16 +293,19 @@ func TestPodKillJobDeleteAllPods(t *testing.T) {
 		{
 			name:              "5 pods",
 			podsCount:         5,
+			record:            &v1alpha1.PodChaosExperimentStatus{},
 			expectedPodsCount: 0,
 		},
 		{
 			name:              "1 pods",
 			podsCount:         1,
+			record:            &v1alpha1.PodChaosExperimentStatus{},
 			expectedPodsCount: 0,
 		},
 		{
 			name:              "0 pods",
 			podsCount:         0,
+			record:            &v1alpha1.PodChaosExperimentStatus{},
 			expectedPodsCount: 0,
 		},
 	}
@@ -316,8 +316,9 @@ func TestPodKillJobDeleteAllPods(t *testing.T) {
 		job := newPodKillJob(newPodChaos("job"), objects...)
 
 		g.Expect(len(getPodList(job.kubeCli).Items)).To(Equal(tc.podsCount), tc.name)
-		g.Expect(job.deleteAllPods(pods)).Should(Succeed())
+		g.Expect(job.deleteAllPods(pods, tc.record)).Should(Succeed())
 		g.Expect(len(getPodList(job.kubeCli).Items)).To(Equal(tc.expectedPodsCount), tc.name)
+		g.Expect(len(tc.record.Pods)).To(Equal(tc.podsCount), tc.name)
 	}
 }
 
@@ -328,6 +329,7 @@ func TestPodKillJobDeleteFixedPods(t *testing.T) {
 		name              string
 		fixedValue        string
 		podsCount         int
+		record            *v1alpha1.PodChaosExperimentStatus
 		expectedPodsCount int
 	}
 
@@ -336,24 +338,28 @@ func TestPodKillJobDeleteFixedPods(t *testing.T) {
 			name:              "fixed 0 pod",
 			fixedValue:        "0",
 			podsCount:         5,
+			record:            &v1alpha1.PodChaosExperimentStatus{},
 			expectedPodsCount: 5,
 		},
 		{
 			name:              "fixed 5 pod",
 			fixedValue:        "5",
 			podsCount:         5,
+			record:            &v1alpha1.PodChaosExperimentStatus{},
 			expectedPodsCount: 0,
 		},
 		{
 			name:              "fixed 5 pod, create 0 pod",
 			fixedValue:        "5",
 			podsCount:         0,
+			record:            &v1alpha1.PodChaosExperimentStatus{},
 			expectedPodsCount: 0,
 		},
 		{
 			name:              "fixed 2 pod",
 			fixedValue:        "2",
 			podsCount:         5,
+			record:            &v1alpha1.PodChaosExperimentStatus{},
 			expectedPodsCount: 3,
 		},
 	}
@@ -367,8 +373,9 @@ func TestPodKillJobDeleteFixedPods(t *testing.T) {
 		job := newPodKillJob(pc, objects...)
 
 		g.Expect(len(getPodList(job.kubeCli).Items)).To(Equal(tc.podsCount), tc.name)
-		g.Expect(job.deleteFixedPods(pods)).Should(Succeed())
+		g.Expect(job.deleteFixedPods(pods, tc.record)).Should(Succeed())
 		g.Expect(len(getPodList(job.kubeCli).Items)).To(Equal(tc.expectedPodsCount), tc.name)
+		g.Expect(len(tc.record.Pods)).To(Equal(tc.podsCount-tc.expectedPodsCount), tc.name)
 	}
 }
 
@@ -381,6 +388,7 @@ func TestPodKillJobFixedPercentagePods(t *testing.T) {
 		name              string
 		fixedValue        string
 		podsCount         int
+		record            *v1alpha1.PodChaosExperimentStatus
 		expectedPodsCount int
 		expectedResult    resultF
 	}
@@ -390,6 +398,7 @@ func TestPodKillJobFixedPercentagePods(t *testing.T) {
 			name:              "fixed 0%% pod",
 			fixedValue:        "0",
 			podsCount:         10,
+			record:            &v1alpha1.PodChaosExperimentStatus{},
 			expectedPodsCount: 10,
 			expectedResult:    Succeed,
 		},
@@ -397,6 +406,7 @@ func TestPodKillJobFixedPercentagePods(t *testing.T) {
 			name:              "fixed 100%% pod",
 			fixedValue:        "100",
 			podsCount:         10,
+			record:            &v1alpha1.PodChaosExperimentStatus{},
 			expectedPodsCount: 0,
 			expectedResult:    Succeed,
 		},
@@ -404,6 +414,7 @@ func TestPodKillJobFixedPercentagePods(t *testing.T) {
 			name:              "fixed 100%% pod, create 0 pod",
 			fixedValue:        "5",
 			podsCount:         0,
+			record:            &v1alpha1.PodChaosExperimentStatus{},
 			expectedPodsCount: 0,
 			expectedResult:    Succeed,
 		},
@@ -411,6 +422,7 @@ func TestPodKillJobFixedPercentagePods(t *testing.T) {
 			name:              "fixed 50%% pod",
 			fixedValue:        "50",
 			podsCount:         10,
+			record:            &v1alpha1.PodChaosExperimentStatus{},
 			expectedPodsCount: 5,
 			expectedResult:    Succeed,
 		},
@@ -418,6 +430,7 @@ func TestPodKillJobFixedPercentagePods(t *testing.T) {
 			name:              "fixed 28%% pod",
 			fixedValue:        "28",
 			podsCount:         10,
+			record:            &v1alpha1.PodChaosExperimentStatus{},
 			expectedPodsCount: 8,
 			expectedResult:    Succeed,
 		},
@@ -425,6 +438,7 @@ func TestPodKillJobFixedPercentagePods(t *testing.T) {
 			name:              "fixed 200%% pod",
 			fixedValue:        "200",
 			podsCount:         10,
+			record:            &v1alpha1.PodChaosExperimentStatus{},
 			expectedPodsCount: 10,
 			expectedResult:    HaveOccurred,
 		},
@@ -432,6 +446,7 @@ func TestPodKillJobFixedPercentagePods(t *testing.T) {
 			name:              "fixed -10%% pod",
 			fixedValue:        "-10",
 			podsCount:         10,
+			record:            &v1alpha1.PodChaosExperimentStatus{},
 			expectedPodsCount: 10,
 			expectedResult:    HaveOccurred,
 		},
@@ -446,8 +461,9 @@ func TestPodKillJobFixedPercentagePods(t *testing.T) {
 		job := newPodKillJob(pc, objects...)
 
 		g.Expect(len(getPodList(job.kubeCli).Items)).To(Equal(tc.podsCount), tc.name)
-		g.Expect(job.deleteFixedPercentagePods(pods)).Should(tc.expectedResult())
+		g.Expect(job.deleteFixedPercentagePods(pods, tc.record)).Should(tc.expectedResult())
 		g.Expect(len(getPodList(job.kubeCli).Items)).To(Equal(tc.expectedPodsCount), tc.name)
+		g.Expect(len(tc.record.Pods)).To(Equal(tc.podsCount-tc.expectedPodsCount), tc.name)
 	}
 }
 
@@ -458,6 +474,7 @@ func TestPodKillJobMaxPercentagePods(t *testing.T) {
 		name              string
 		fixedValue        string
 		podsCount         int
+		record            *v1alpha1.PodChaosExperimentStatus
 		expectedPodsCount int
 		expectedResult    resultF
 	}
@@ -467,12 +484,14 @@ func TestPodKillJobMaxPercentagePods(t *testing.T) {
 			name:              "fixed max 0%% pod",
 			fixedValue:        "0",
 			podsCount:         10,
+			record:            &v1alpha1.PodChaosExperimentStatus{},
 			expectedPodsCount: 10,
 			expectedResult:    Succeed,
 		},
 		{
 			name:              "fixed max 100%% pod",
 			fixedValue:        "100",
+			record:            &v1alpha1.PodChaosExperimentStatus{},
 			podsCount:         10,
 			expectedPodsCount: 0,
 			expectedResult:    Succeed,
@@ -481,6 +500,7 @@ func TestPodKillJobMaxPercentagePods(t *testing.T) {
 			name:              "fixed max 100%% pod, create 0 pod",
 			fixedValue:        "5",
 			podsCount:         0,
+			record:            &v1alpha1.PodChaosExperimentStatus{},
 			expectedPodsCount: 0,
 			expectedResult:    Succeed,
 		},
@@ -488,6 +508,7 @@ func TestPodKillJobMaxPercentagePods(t *testing.T) {
 			name:              "fixed max 50%% pod",
 			fixedValue:        "50",
 			podsCount:         10,
+			record:            &v1alpha1.PodChaosExperimentStatus{},
 			expectedPodsCount: 5,
 			expectedResult:    Succeed,
 		},
@@ -495,6 +516,7 @@ func TestPodKillJobMaxPercentagePods(t *testing.T) {
 			name:              "fixed max 28%% pod",
 			fixedValue:        "28",
 			podsCount:         10,
+			record:            &v1alpha1.PodChaosExperimentStatus{},
 			expectedPodsCount: 8,
 			expectedResult:    Succeed,
 		},
@@ -502,6 +524,7 @@ func TestPodKillJobMaxPercentagePods(t *testing.T) {
 			name:              "fixed max 200%% pod",
 			fixedValue:        "200",
 			podsCount:         10,
+			record:            &v1alpha1.PodChaosExperimentStatus{},
 			expectedPodsCount: 10,
 			expectedResult:    HaveOccurred,
 		},
@@ -509,23 +532,77 @@ func TestPodKillJobMaxPercentagePods(t *testing.T) {
 			name:              "fixed max -10%% pod",
 			fixedValue:        "-10",
 			podsCount:         10,
+			record:            &v1alpha1.PodChaosExperimentStatus{},
 			expectedPodsCount: 10,
 			expectedResult:    HaveOccurred,
 		},
 	}
 
-	for i := 0; i < 5; i++ {
-		for _, tc := range tcs {
-			pc := newPodChaos("pc-test")
-			pc.Spec.Value = tc.fixedValue
+	for _, tc := range tcs {
+		pc := newPodChaos("pc-test")
+		pc.Spec.Value = tc.fixedValue
 
-			objects, pods := generateNRunningPods("pod-kill-", tc.podsCount)
+		objects, pods := generateNRunningPods("pod-kill-", tc.podsCount)
 
-			job := newPodKillJob(pc, objects...)
+		job := newPodKillJob(pc, objects...)
 
-			g.Expect(len(getPodList(job.kubeCli).Items)).To(Equal(tc.podsCount), tc.name)
-			g.Expect(job.deleteMaxPercentagePods(pods)).Should(tc.expectedResult())
-			g.Expect(len(getPodList(job.kubeCli).Items)).Should(BeNumerically(">=", tc.expectedPodsCount), tc.name)
-		}
+		g.Expect(len(getPodList(job.kubeCli).Items)).To(Equal(tc.podsCount), tc.name)
+		g.Expect(job.deleteMaxPercentagePods(pods, tc.record)).Should(tc.expectedResult())
+		g.Expect(len(getPodList(job.kubeCli).Items)).Should(BeNumerically(">=", tc.expectedPodsCount), tc.name)
+		g.Expect(len(tc.record.Pods)).Should(BeNumerically("<=", tc.podsCount-tc.expectedPodsCount), tc.name)
+	}
+}
+
+func TestPodKillJobConcurrentDeletePods(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	type TestCase struct {
+		name              string
+		podsCount         int
+		killNum           int
+		record            *v1alpha1.PodChaosExperimentStatus
+		expectedPodsCount int
+	}
+
+	tcs := []TestCase{
+		{
+			name:              "5 pods, kill 5",
+			podsCount:         5,
+			killNum:           5,
+			record:            &v1alpha1.PodChaosExperimentStatus{},
+			expectedPodsCount: 0,
+		},
+		{
+			name:              "5 pods, kill 3",
+			podsCount:         5,
+			killNum:           3,
+			record:            &v1alpha1.PodChaosExperimentStatus{},
+			expectedPodsCount: 2,
+		},
+		{
+			name:              "0 pods, kill 1",
+			podsCount:         0,
+			killNum:           1,
+			record:            &v1alpha1.PodChaosExperimentStatus{},
+			expectedPodsCount: 0,
+		},
+		{
+			name:              "5 pods, kill -1",
+			podsCount:         5,
+			killNum:           -1,
+			record:            &v1alpha1.PodChaosExperimentStatus{},
+			expectedPodsCount: 5,
+		},
+	}
+
+	for _, tc := range tcs {
+		objects, pods := generateNRunningPods("pod-kill-", tc.podsCount)
+
+		job := newPodKillJob(newPodChaos("job"), objects...)
+
+		g.Expect(len(getPodList(job.kubeCli).Items)).To(Equal(tc.podsCount), tc.name)
+		g.Expect(job.concurrentDeletePods(pods, tc.killNum, tc.record)).Should(Succeed())
+		g.Expect(len(getPodList(job.kubeCli).Items)).To(Equal(tc.expectedPodsCount), tc.name)
+		g.Expect(len(tc.record.Pods)).To(Equal(tc.podsCount-tc.expectedPodsCount), tc.name)
 	}
 }
