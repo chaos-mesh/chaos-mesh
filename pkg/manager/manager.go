@@ -96,10 +96,6 @@ func (m *ManagerBase) addRunnerAction(runner *Runner) error {
 		return err
 	}
 
-	if err := runner.Sync(); err != nil {
-		return err
-	}
-
 	entryID, err := m.cronEngine.AddJob(runner.Rule, runner.Job)
 	if err != nil {
 		return fmt.Errorf("fail to add runner to cronEngine, %v", err)

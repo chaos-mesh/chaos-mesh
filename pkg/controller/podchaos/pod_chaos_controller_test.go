@@ -39,7 +39,7 @@ var (
 	noResyncPeriodFunc = func() time.Duration { return 0 }
 )
 
-func TestCreatePodChaos(t *testing.T) {
+func TestControllerCreatePodChaos(t *testing.T) {
 	f := newFixture(t)
 
 	pc := newPodChaos("pod-kill-test")
@@ -47,7 +47,18 @@ func TestCreatePodChaos(t *testing.T) {
 	f.objects = append(f.objects, pc)
 
 	f.expectCreatePodChaosAction(pc)
-	f.run(getKey(pc, f.g))
+	f.runControllerForCreate(getKey(pc, f.g))
+}
+
+func TestControllerUpdatePodChaos(t *testing.T) {
+	f := newFixture(t)
+
+	pc := newPodChaos("pod-kill-test")
+	f.podChaosLister = append(f.podChaosLister, pc)
+	f.objects = append(f.objects, pc)
+
+	f.expectUpdatePodChaosAction(pc)
+	f.runControllerForCreate(getKey(pc, f.g))
 }
 
 func TestEnqueuePodChaos(t *testing.T) {
@@ -133,17 +144,43 @@ func (f *fixture) newController() (*Controller, informers.SharedInformerFactory,
 	return c, i, kubeI
 }
 
-func (f *fixture) run(pcName string) {
-	f.runController(pcName)
+func (f *fixture) newControllerForUpdate() (*Controller, informers.SharedInformerFactory, kubeinformers.SharedInformerFactory) {
+	f.client = fake.NewSimpleClientset(f.objects...)
+	f.kubeclient = kubefake.NewSimpleClientset()
+
+	i := informers.NewSharedInformerFactory(f.client, noResyncPeriodFunc())
+	kubeI := kubeinformers.NewSharedInformerFactory(f.kubeclient, noResyncPeriodFunc())
+
+	managerBase := &fakeManagerBaseForUpdate{}
+	c := NewController(f.kubeclient, f.client, kubeI, i, managerBase)
+
+	c.pcsSynced = alwaysReady
+	c.podsSynced = alwaysReady
+	c.recorder = &record.FakeRecorder{}
+
+	for _, f := range f.podChaosLister {
+		_ = i.Pingcap().V1alpha1().PodChaoses().Informer().GetIndexer().Add(f)
+	}
+
+	return c, i, kubeI
 }
 
-func (f *fixture) runExpectError(pcName string) {
-	f.runController(pcName)
-}
-
-func (f *fixture) runController(pcName string) {
+func (f *fixture) runControllerForUpdate(pcName string) {
 	c, i, kubeI := f.newController()
+	f.runController(pcName, c, i, kubeI)
+}
 
+func (f *fixture) runControllerForCreate(pcName string) {
+	c, i, kubeI := f.newControllerForUpdate()
+	f.runController(pcName, c, i, kubeI)
+}
+
+func (f *fixture) runController(
+	pcName string,
+	c *Controller,
+	i informers.SharedInformerFactory,
+	kubeI kubeinformers.SharedInformerFactory,
+) {
 	stopCh := make(chan struct{})
 	defer close(stopCh)
 
@@ -155,22 +192,24 @@ func (f *fixture) runController(pcName string) {
 
 	actions := filterInformerActions(f.client.Actions())
 	for i, action := range actions {
-		f.g.Expect(f.actions).Should(BeNumerically(">=", i+1))
-
+		f.g.Expect(len(f.actions)).Should(BeNumerically(">=", i+1))
 		expectAction := f.actions[i]
 		checkAction(expectAction, action, f.g)
 	}
-
-	// TODO: check update action
-	// f.g.Expect(len(f.actions)).Should(BeNumerically("<=", len(actions)))
 }
 
 func (f *fixture) expectCreatePodChaosAction(pc *v1alpha1.PodChaos) {
-	f.actions = append(f.actions, core.NewCreateAction(schema.GroupVersionResource{Resource: "podchaoses"}, pc.Namespace, pc))
+	f.actions = append(f.actions,
+		core.NewGetAction(schema.GroupVersionResource{Resource: "podchaoses"}, pc.Namespace, pc.Name))
+	f.actions = append(f.actions,
+		core.NewUpdateAction(schema.GroupVersionResource{Resource: "podchaoses"}, pc.Namespace, pc))
 }
 
 func (f *fixture) expectUpdatePodChaosAction(pc *v1alpha1.PodChaos) {
-	f.actions = append(f.actions, core.NewUpdateAction(schema.GroupVersionResource{Resource: "podchaoses"}, pc.Namespace, pc))
+	f.actions = append(f.actions,
+		core.NewGetAction(schema.GroupVersionResource{Resource: "podchaoses"}, pc.Namespace, pc.Name))
+	f.actions = append(f.actions,
+		core.NewUpdateAction(schema.GroupVersionResource{Resource: "podchaoses"}, pc.Namespace, pc))
 }
 
 // checkAction verifies that expected and actual actions are equal and both have

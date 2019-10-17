@@ -196,3 +196,27 @@ func newPodChaos2(name string, rule string, selector v1alpha1.SelectorSpec) *v1a
 		},
 	}
 }
+
+func TestUpdatePodChaosStatus(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	pc := newPodChaos("test")
+
+	pcm := newFakePodChaosManager()
+	pcm.cli = fake.NewSimpleClientset(pc)
+
+	pct := pc.DeepCopy()
+	pct.Status.Phase = v1alpha1.ChaosPhaseAbnormal
+	pct.Status.Reason = "t"
+	pct.Status.Experiment = v1alpha1.PodChaosExperimentStatus{
+		StartTime: metav1.Now(),
+	}
+
+	g.Expect(pcm.updatePodChaosStatus(pct)).ShouldNot(HaveOccurred())
+	getPc, err := pcm.cli.PingcapV1alpha1().PodChaoses(pct.Namespace).
+		Get(pct.Name, metav1.GetOptions{})
+	g.Expect(err).ShouldNot(HaveOccurred())
+	g.Expect(getPc.Status.Phase).To(Equal(pct.Status.Phase))
+	g.Expect(getPc.Status.Reason).To(Equal(pct.Status.Reason))
+	g.Expect(getPc.Status.Experiment).ToNot(Equal(pct.Status.Experiment))
+}

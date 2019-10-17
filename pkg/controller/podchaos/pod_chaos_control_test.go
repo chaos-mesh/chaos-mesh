@@ -81,3 +81,15 @@ type fakePodChaosManager struct {
 func (p *fakePodChaosManager) Sync(_ *v1alpha1.PodChaos) error { return nil }
 
 func (p *fakePodChaosManager) Delete(_ string) error { return nil }
+
+type fakeManagerBaseForUpdate struct{}
+
+func (m *fakeManagerBaseForUpdate) AddRunner(_ *manager.Runner) error { return nil }
+
+func (m *fakeManagerBaseForUpdate) DeleteRunner(_ string) error { return nil }
+
+func (m *fakeManagerBaseForUpdate) UpdateRunner(_ *manager.Runner) error { return nil }
+
+func (m *fakeManagerBaseForUpdate) GetRunner(_ string) (*manager.Runner, bool) {
+	return &manager.Runner{}, true
+}

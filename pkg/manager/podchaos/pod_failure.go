@@ -68,8 +68,8 @@ func (p *PodFailureJob) Run() {
 	var err error
 
 	record := &v1alpha1.PodChaosExperimentStatus{
-		Phase: v1alpha1.ExperimentPhaseNone,
-		Time:  metav1.Now(),
+		Phase:     v1alpha1.ExperimentPhaseRunning,
+		StartTime: metav1.Now(),
 	}
 
 	if err := setExperimentRecord(p.cli, p.podChaos, record); err != nil {
@@ -82,6 +82,7 @@ func (p *PodFailureJob) Run() {
 		}
 
 		record.Phase = v1alpha1.ExperimentPhaseFinished
+		record.EndTime = metav1.Now()
 		if err != nil {
 			glog.Errorf("%s, fail to set experiment record, %v", p.logPrefix(), err)
 			record.Phase = v1alpha1.ExperimentPhaseFailed
@@ -157,30 +158,6 @@ func (p *PodFailureJob) Close() error {
 // Clean is used to cleans the residue action.
 func (p *PodFailureJob) Clean() error {
 	return p.cleanFinalizersAndRecover()
-}
-
-// Sync sync the status of podChaos.
-// For PodFailure Job, it is used to clean up expired status records.
-func (p *PodFailureJob) Sync() error {
-	go p.cleanExpiredExperimentRecords()
-
-	return nil
-}
-
-func (p *PodFailureJob) cleanExpiredExperimentRecords() {
-	ticker := time.NewTicker(v1alpha1.DefaultCleanStatusInterval)
-	defer ticker.Stop()
-
-	for {
-		select {
-		case <-p.stopC:
-			return
-		case <-ticker.C:
-			if err := cleanExpiredExperimentRecords(p.cli, p.podChaos); err != nil {
-				glog.Errorf("%s, fail to clean expired status records, %v", p.logPrefix(), err)
-			}
-		}
-	}
 }
 
 func (p *PodFailureJob) failAllPod(pods []v1.Pod, record *v1alpha1.PodChaosExperimentStatus) error {

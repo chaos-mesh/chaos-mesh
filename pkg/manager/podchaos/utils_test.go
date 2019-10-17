@@ -33,42 +33,6 @@ func TestGenAnnotationKeyForImage(t *testing.T) {
 		To(Equal(fmt.Sprintf("%s-%s-%s-t-image", AnnotationPrefix, pc.Name, pc.Spec.Action)))
 }
 
-func TestCleanExpiredExperimentRecords(t *testing.T) {
-	g := NewGomegaWithT(t)
-
-	type TestCase struct {
-		name           string
-		retentionTime  string
-		expectedResult resultF
-	}
-
-	tcs := []TestCase{
-		{
-			name:           "invalid retention time",
-			retentionTime:  "1",
-			expectedResult: HaveOccurred,
-		},
-		{
-			name:           "all is ok",
-			retentionTime:  "1h",
-			expectedResult: Succeed,
-		},
-	}
-
-	for _, tc := range tcs {
-		pc := newPodChaos("test")
-		pc.Spec.StatusRetentionTime = tc.retentionTime
-
-		cli := fake.NewSimpleClientset(pc)
-
-		g.Expect(cleanExpiredExperimentRecords(cli, pc)).Should(tc.expectedResult(), tc.name)
-	}
-
-	cli := fake.NewSimpleClientset()
-	g.Expect(cleanExpiredExperimentRecords(cli, newPodChaos("test"))).
-		Should(HaveOccurred(), "podChaos not found")
-}
-
 func TestSetExperimentRecord(t *testing.T) {
 	g := NewGomegaWithT(t)
 
@@ -84,17 +48,17 @@ func TestSetExperimentRecord(t *testing.T) {
 			name:     "set failed record",
 			podChaos: newPodChaos("t1"),
 			record: &v1alpha1.PodChaosExperimentStatus{
-				Phase: v1alpha1.ExperimentPhaseFailed,
-				Time:  metav1.Now(),
+				Phase:     v1alpha1.ExperimentPhaseFailed,
+				StartTime: metav1.Now(),
 			},
-			expectedStatus: v1alpha1.ChaosPahseAbnormal,
+			expectedStatus: v1alpha1.ChaosPhaseAbnormal,
 		},
 		{
 			name:     "set running record",
 			podChaos: newPodChaos("t1"),
 			record: &v1alpha1.PodChaosExperimentStatus{
-				Phase: v1alpha1.ExperimentPhaseRunning,
-				Time:  metav1.Now(),
+				Phase:     v1alpha1.ExperimentPhaseRunning,
+				StartTime: metav1.Now(),
 			},
 			expectedStatus: v1alpha1.ChaosPhaseNormal,
 		},
@@ -102,8 +66,8 @@ func TestSetExperimentRecord(t *testing.T) {
 			name:     "set finished record",
 			podChaos: newPodChaos("t1"),
 			record: &v1alpha1.PodChaosExperimentStatus{
-				Phase: v1alpha1.ExperimentPhaseRunning,
-				Time:  metav1.Now(),
+				Phase:     v1alpha1.ExperimentPhaseRunning,
+				StartTime: metav1.Now(),
 			},
 			expectedStatus: v1alpha1.ChaosPhaseNormal,
 		},
@@ -117,7 +81,7 @@ func TestSetExperimentRecord(t *testing.T) {
 			Get(tc.podChaos.Name, metav1.GetOptions{})
 		g.Expect(err).ShouldNot(HaveOccurred(), tc.name)
 		g.Expect(tpc.Status.Phase).To(Equal(tc.expectedStatus), tc.name)
-		g.Expect(len(tpc.Status.Experiments)).To(Equal(1), tc.name)
+		g.Expect(tpc.Status.Experiment).To(Equal(*tc.record), tc.name)
 	}
 
 	cli := fake.NewSimpleClientset()
@@ -129,8 +93,8 @@ func TestSetRecordPods(t *testing.T) {
 	g := NewGomegaWithT(t)
 
 	record := &v1alpha1.PodChaosExperimentStatus{
-		Phase: v1alpha1.ExperimentPhaseRunning,
-		Time:  metav1.Now(),
+		Phase:     v1alpha1.ExperimentPhaseRunning,
+		StartTime: metav1.Now(),
 	}
 
 	_, pods := generateNPods("t", 5, v1.PodRunning)

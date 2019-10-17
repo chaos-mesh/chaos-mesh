@@ -15,6 +15,7 @@ package podchaos
 
 import (
 	"fmt"
+	"k8s.io/client-go/util/retry"
 
 	"github.com/golang/glog"
 	"github.com/pingcap/chaos-operator/pkg/apis/pingcap.com/v1alpha1"
@@ -22,6 +23,7 @@ import (
 	listers "github.com/pingcap/chaos-operator/pkg/client/listers/pingcap.com/v1alpha1"
 	"github.com/pingcap/chaos-operator/pkg/manager"
 
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	corelisters "k8s.io/client-go/listers/core/v1"
 	"k8s.io/client-go/tools/cache"
@@ -55,12 +57,34 @@ func NewPodChaosManager(
 
 // Sync syncs the PodChaos resource to manager.
 func (m *podChaosManager) Sync(pc *v1alpha1.PodChaos) error {
-	key, err := cache.MetaNamespaceKeyFunc(pc)
+	var (
+		err    error
+		key    string
+		runner *manager.Runner
+	)
+
+	defer func() {
+		if pc.Status.Phase == v1alpha1.ChaosPhaseNone {
+			pc.Status.Phase = v1alpha1.ChaosPhaseNormal
+			pc.Status.Reason = ""
+		}
+
+		if err != nil {
+			pc.Status.Phase = v1alpha1.ChaosPhaseAbnormal
+			pc.Status.Reason = err.Error()
+		}
+
+		if err := m.updatePodChaosStatus(pc); err != nil {
+			glog.Errorf("fail to update PodChaos %s status, %v", key, err)
+		}
+	}()
+
+	key, err = cache.MetaNamespaceKeyFunc(pc)
 	if err != nil {
 		return err
 	}
 
-	runner, err := m.newRunner(pc)
+	runner, err = m.newRunner(pc)
 	if err != nil {
 		return err
 	}
@@ -71,11 +95,13 @@ func (m *podChaosManager) Sync(pc *v1alpha1.PodChaos) error {
 		}
 
 		glog.Infof("Update the runner %s", key)
-		return m.base.UpdateRunner(runner)
+		err = m.base.UpdateRunner(runner)
+	} else {
+		glog.Infof("Add a new runner for %s", key)
+		err = m.base.AddRunner(runner)
 	}
 
-	glog.Infof("Add a new runner for %s", key)
-	return m.base.AddRunner(runner)
+	return err
 }
 
 func (m *podChaosManager) Delete(key string) error {
@@ -93,7 +119,6 @@ func (m *podChaosManager) newRunner(pc *v1alpha1.PodChaos) (*manager.Runner, err
 			kubeCli:   m.kubeCli,
 			cli:       m.cli,
 			podLister: m.podLister,
-			stopC:     make(chan struct{}),
 		}
 	case v1alpha1.PodFailureAction:
 		job = &PodFailureJob{
@@ -117,4 +142,20 @@ func (m *podChaosManager) newRunner(pc *v1alpha1.PodChaos) (*manager.Runner, err
 		Rule: pc.Spec.Scheduler.Cron,
 		Job:  job,
 	}, nil
+}
+
+func (m *podChaosManager) updatePodChaosStatus(pc *v1alpha1.PodChaos) error {
+	return retry.RetryOnConflict(retry.DefaultRetry, func() error {
+		npc, err := m.cli.PingcapV1alpha1().PodChaoses(pc.Namespace).
+			Get(pc.Name, metav1.GetOptions{})
+		if err != nil {
+			return err
+		}
+
+		npc.Status.Phase = pc.Status.Phase
+		npc.Status.Reason = pc.Status.Reason
+
+		_, err = m.cli.PingcapV1alpha1().PodChaoses(pc.Namespace).Update(npc)
+		return err
+	})
 }

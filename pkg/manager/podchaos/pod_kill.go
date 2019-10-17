@@ -15,16 +15,14 @@ package podchaos
 
 import (
 	"fmt"
-	"math"
-	"math/rand"
-	"reflect"
-	"strconv"
-	"time"
-
 	"github.com/golang/glog"
 	"github.com/pingcap/chaos-operator/pkg/apis/pingcap.com/v1alpha1"
 	"github.com/pingcap/chaos-operator/pkg/client/clientset/versioned"
 	"github.com/pingcap/chaos-operator/pkg/manager"
+	"math"
+	"math/rand"
+	"reflect"
+	"strconv"
 
 	"golang.org/x/sync/errgroup"
 
@@ -44,8 +42,6 @@ type PodKillJob struct {
 	kubeCli   kubernetes.Interface
 	cli       versioned.Interface
 	podLister corelisters.PodLister
-
-	stopC chan struct{}
 }
 
 // Run is the core logic to execute pod-kill chaos experiment.
@@ -53,8 +49,8 @@ func (p *PodKillJob) Run() {
 	var err error
 
 	record := &v1alpha1.PodChaosExperimentStatus{
-		Phase: v1alpha1.ExperimentPhaseNone,
-		Time:  metav1.Now(),
+		Phase:     v1alpha1.ExperimentPhaseRunning,
+		StartTime: metav1.Now(),
 	}
 
 	if err := setExperimentRecord(p.cli, p.podChaos, record); err != nil {
@@ -63,6 +59,7 @@ func (p *PodKillJob) Run() {
 
 	defer func() {
 		record.Phase = v1alpha1.ExperimentPhaseFinished
+		record.EndTime = metav1.Now()
 		if err != nil {
 			glog.Errorf("%s, fail to run action, %v", p.logPrefix(), err)
 			record.Phase = v1alpha1.ExperimentPhaseFailed
@@ -128,8 +125,6 @@ func (p *PodKillJob) Equal(job manager.Job) bool {
 
 // Stop stops pod-kill job.
 func (p *PodKillJob) Close() error {
-	close(p.stopC)
-
 	return nil
 }
 
@@ -138,30 +133,6 @@ func (p *PodKillJob) Close() error {
 // so we don't need clean anything.
 func (p *PodKillJob) Clean() error {
 	return nil
-}
-
-// Sync syncs the status of podChaos.
-// For PodKill Job, it is used to clean up the expired status records.
-func (p *PodKillJob) Sync() error {
-	go p.cleanExpiredExperimentRecords()
-
-	return nil
-}
-
-func (p *PodKillJob) cleanExpiredExperimentRecords() {
-	ticker := time.NewTicker(v1alpha1.DefaultCleanStatusInterval)
-	defer ticker.Stop()
-
-	for {
-		select {
-		case <-p.stopC:
-			return
-		case <-ticker.C:
-			if err := cleanExpiredExperimentRecords(p.cli, p.podChaos); err != nil {
-				glog.Errorf("%s, fail to clean expired status records, %v", p.logPrefix(), err)
-			}
-		}
-	}
 }
 
 func (p *PodKillJob) deleteAllPods(pods []v1.Pod, record *v1alpha1.PodChaosExperimentStatus) error {
