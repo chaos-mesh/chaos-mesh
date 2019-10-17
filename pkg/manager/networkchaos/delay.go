@@ -63,7 +63,7 @@ func (d *DelayJob) Run() {
 		g.Go(func() error {
 			err := d.DelayPod(pod)
 			if err != nil {
-				return err
+				glog.Errorf("error while delaying pod %v", err)
 			}
 
 			time.Sleep(duration)
@@ -150,7 +150,35 @@ func (d *DelayJob) Equal(job manager.Job) bool {
 
 // Close stops delay job, we need to clean up running delay job (by removing every netem)
 func (d *DelayJob) Close() error {
-	// TODO: clean up
+	var err error
+
+	pods, err := manager.SelectPods(d.networkChaos.Spec.Selector, d.podLister, d.kubeCli)
+	if err != nil {
+		glog.Errorf("%s, fail to get selected pods, %v", d.logPrefix(), err)
+		return err
+	}
+
+	if pods == nil || len(pods) == 0 {
+		glog.Errorf("%s, no pod is selected", d.logPrefix())
+		return err
+	}
+
+	glog.Infof("%s, Try to resume pod network", d.logPrefix())
+
+	g := errgroup.Group{}
+	for _, pod := range pods {
+		pod := pod
+		g.Go(func() error {
+			return d.ResumePod(pod)
+		})
+	}
+
+	err = g.Wait()
+	if err != nil {
+		glog.Errorf("%s, fail to run action, %v", d.logPrefix(), err)
+		return err
+	}
+
 	return nil
 }
 
