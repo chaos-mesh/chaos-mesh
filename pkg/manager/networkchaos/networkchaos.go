@@ -87,7 +87,11 @@ func (m *networkChaosManager) newRunner(nc *v1alpha1.NetworkChaos) (*manager.Run
 
 	switch nc.Spec.Action {
 	case v1alpha1.DelayAction:
-		job = &DelayJob{}
+		job = &DelayJob{
+			networkChaos: nc,
+			kubeCli:      m.kubeCli,
+			podLister:    m.podLister,
+		}
 	default:
 		return nil, fmt.Errorf("PodChaos action %s not supported", nc.Spec.Action)
 	}

@@ -47,9 +47,8 @@ func newServer() (*Server, error) {
 func (s *Server) parseMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
-		vars := mux.Vars(r)
 
-		containerID := vars["containerID"]
+		containerID := r.URL.Query().Get("containerID")
 		netem := new(Netem)
 
 		if err := readJSON(r.Body, netem); err != nil {
@@ -61,6 +60,7 @@ func (s *Server) parseMiddleware(next http.Handler) http.Handler {
 		pid, err := s.crClient.GetPidFromContainerID(ctx, containerID)
 		if err != nil {
 			s.rdr.JSON(w, http.StatusOK, errResponsef("get pid from containerID error: %v", err))
+			return
 		}
 		context.Set(r, "pid", pid)
 
@@ -82,7 +82,7 @@ func (s *Server) logMiddleware(next http.Handler) http.Handler {
 func (s *Server) CreateRouter() http.Handler {
 	router := mux.NewRouter()
 
-	router.HandleFunc("/{containerID}/netem", func(w http.ResponseWriter, r *http.Request) {
+	router.HandleFunc("/netem", func(w http.ResponseWriter, r *http.Request) {
 		netem := context.Get(r, "netem").(*Netem)
 		pid := context.Get(r, "pid").(int)
 
@@ -94,7 +94,7 @@ func (s *Server) CreateRouter() http.Handler {
 		s.rdr.JSON(w, http.StatusOK, successResponse("ok"))
 	}).Methods("PUT")
 
-	router.HandleFunc("/{containerID}/netem", func(w http.ResponseWriter, r *http.Request) {
+	router.HandleFunc("/netem", func(w http.ResponseWriter, r *http.Request) {
 		netem := context.Get(r, "netem").(*Netem)
 		pid := context.Get(r, "pid").(int)
 

@@ -47,6 +47,9 @@ type NetworkChaosSpec struct {
 	// Default action: delay
 	Action NetworkChaosAction `json:"action"`
 
+	// Selector is used to select pods that are used to inject chaos action.
+	Selector SelectorSpec `json:"selector"`
+
 	// Duration represents the duration of the chaos action
 	Duration string `json:"duration"`
 
@@ -54,7 +57,8 @@ type NetworkChaosSpec struct {
 	Scheduler SchedulerSpec `json:"scheduler"`
 
 	// Delay represetns the detail about delay action
-	Delay DelaySpec `json:"delay"`
+	// +optional
+	Delay *DelaySpec `json:"delay"`
 }
 
 // DelaySpec defines detail of a delay action

@@ -26,7 +26,7 @@ func (netem *Netem) Apply(pid int) error {
 	handle, err := netlink.NewHandleAt(ns)
 	link, err := handle.LinkByName("eth0") // TODO: check whether interface name is eth0
 	if err != nil {
-		glog.Error("error while finding eth0 interface")
+		glog.Errorf("error while finding eth0 interface %v", err)
 		return errors.Trace(err)
 	}
 
@@ -37,7 +37,7 @@ func (netem *Netem) Apply(pid int) error {
 	}, netem.getNetlinkNetemAttrs())
 
 	if err = handle.QdiscAdd(netemQdisc); err != nil {
-		glog.Errorf("error while adding Qdisc")
+		glog.Errorf("error while adding Qdisc %v", err)
 		return errors.Trace(err)
 	}
 
@@ -61,7 +61,7 @@ func (netem *Netem) Cancel(pid int) error {
 
 	link, err := handle.LinkByName("eth0") // TODO: check whether interface name is eth0
 	if err != nil {
-		glog.Error("error while finding eth0 interface")
+		glog.Errorf("error while finding eth0 interface %v", err)
 		return errors.Trace(err)
 	}
 
@@ -74,7 +74,7 @@ func (netem *Netem) Cancel(pid int) error {
 	}
 
 	if err = handle.QdiscDel(netemQdisc); err != nil {
-		glog.Error("error while removing Qdisc")
+		glog.Errorf("error while removing Qdisc %v", err)
 		return errors.Trace(err)
 	}
 
