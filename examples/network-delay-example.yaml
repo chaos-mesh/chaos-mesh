@@ -11,9 +11,9 @@ spec:
     labelSelectors:
       "app.kubernetes.io/component": "tikv"
   delay:
-    latency: 90000
+    latency: "90ms"
     correlation: 0.25
-    jitter: 90000
+    jitter: "90ms"
   duration: "20s"
   scheduler:
     cron: "@every 30s"

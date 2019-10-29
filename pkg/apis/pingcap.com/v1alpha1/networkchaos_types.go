@@ -63,9 +63,9 @@ type NetworkChaosSpec struct {
 
 // DelaySpec defines detail of a delay action
 type DelaySpec struct {
-	Latency     uint32  `json:"latency"` // TODO: use string to define latency
+	Latency     string  `json:"latency"`
 	Correlation float32 `json:"correlation"`
-	Jitter      uint32  `json:"jitter"`
+	Jitter      string  `json:"jitter"`
 }
 
 // NetworkChaosStatus represents the current status of the chaos experiment about network.

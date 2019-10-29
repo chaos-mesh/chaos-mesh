@@ -35,15 +35,16 @@ func main() {
 	defer logs.FlushLogs()
 
 	if rawPort == "" {
-		rawPort := os.Getenv("PORT")
-		if rawPort == "" {
-			rawPort = "8080"
-		}
+		rawPort = os.Getenv("PORT")
+	}
+
+	if rawPort == "" {
+		rawPort = "8080"
 	}
 
 	port, err := strconv.Atoi(rawPort)
 	if err != nil {
-		glog.Fatalf("Error while parsing PORT environment variable: {}", rawPort)
+		glog.Fatalf("Error while parsing PORT environment variable %s: %v", rawPort, err)
 	}
 	tcdaemon.StartServer("0.0.0.0", port)
 }

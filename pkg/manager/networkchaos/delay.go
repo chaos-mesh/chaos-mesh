@@ -57,6 +57,9 @@ func (d *DelayJob) Run() {
 	glog.Infof("%s, Try to delay pod network", d.logPrefix())
 
 	duration, err := time.ParseDuration(d.networkChaos.Spec.Duration)
+	if err != nil {
+		glog.Errorf("fail to parse duration %v", err)
+	}
 	g := errgroup.Group{}
 	for _, pod := range pods {
 		pod := pod
@@ -114,12 +117,21 @@ func (d *DelayJob) DelayPod(pod v1.Pod) error {
 
 	containerId := pod.Status.ContainerStatuses[0].ContainerID
 
+	delayTime, err := time.ParseDuration(delay.Latency)
+	if err != nil {
+		glog.Errorf("fail to parse delay time %v", err)
+	}
+	jitter, err := time.ParseDuration(delay.Jitter)
+	if err != nil {
+		glog.Errorf("fail to parse delay jitter %v", err)
+	}
+
 	_, err = client.SetNetem(context.Background(), &pb.NetemRequest{
 		ContainerId: containerId,
 		Netem: &pb.Netem{
-			Time:      delay.Latency,
+			Time:      uint32(delayTime.Nanoseconds() / 1e3),
 			DelayCorr: delay.Correlation,
-			Jitter:    delay.Jitter,
+			Jitter:    uint32(jitter.Nanoseconds() / 1e3),
 		},
 	})
 
