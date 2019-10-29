@@ -30,13 +30,13 @@ func readJSON(r io.ReadCloser, data interface{}) error {
 // Server represents API Server
 type Server struct {
 	rdr     *render.Render
-	storage *storage.MysqlClient
+	storage *storage.SqlClient
 }
 
 // NewServer will create a Server
-func NewServer(dataSource string) (*Server, error) {
+func NewServer() (*Server, error) {
 	rdr := render.New()
-	storage, err := storage.NewMysqlClient(dataSource)
+	storage, err := storage.NewSqlClient()
 	if err != nil {
 		return nil, errors.Trace(err)
 	}

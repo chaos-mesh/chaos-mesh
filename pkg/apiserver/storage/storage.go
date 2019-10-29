@@ -14,27 +14,46 @@ import (
 	"github.com/pingcap/chaos-operator/util"
 )
 
-// MysqlClient is a client for querying mysql
-type MysqlClient struct {
+// SqlClient is a client for querying mysql
+type SqlClient struct {
 	db *sqlx.DB
 }
 
+const databaseSchema = `
+CREATE TABLE IF NOT EXISTS task (
+  id INTEGER PRIMARY KEY ASC, 
+  event_type VARCHAR(20) NOT NULL,
+  task_type VARCHAR(255) NOT NULL,
+  resource TEXT,
+  create_time DATETIME
+);
+
+CREATE TABLE IF NOT EXISTS task_pod (
+  task_id INTEGER NOT NULL,
+  pod_namespace VARCHAR(255) NOT NULL,
+  pod_name VARCHAR(255) NOT NULL,
+  FOREIGN KEY (task_id) REFERENCES task(id)
+);
+`
+
 // NewMysqlClient will create a mysql client
-func NewMysqlClient(dataSource string) (*MysqlClient, error) {
-	log.Infof("connecting to %s", dataSource)
-	db, err := sqlx.Open("mysql", dataSource)
+func NewSqlClient() (*SqlClient, error) {
+	log.Infof("connecting to sqlite")
+	db, err := sqlx.Open("sqlite3", "/data/api-server.db")
+	db.MustExec(databaseSchema)
+
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
 	log.Info("database connected")
 
-	return &MysqlClient{
+	return &SqlClient{
 		db,
 	}, nil
 }
 
 // CreateTask will insert a task into database
-func (m *MysqlClient) CreateTask(task *types.Task) error {
+func (m *SqlClient) CreateTask(task *types.Task) error {
 	t := time.Now().Format(util.TimeFormat)
 	task.Ctime = t
 
@@ -85,7 +104,7 @@ func (m *MysqlClient) CreateTask(task *types.Task) error {
 }
 
 // GetTasks will select tasks from database
-func (m *MysqlClient) GetTasks(filter *filter.Filter) ([]*types.Task, error) {
+func (m *SqlClient) GetTasks(filter *filter.Filter) ([]*types.Task, error) {
 	filtersSQL, err := filter.GenSQL()
 	if err != nil {
 		return nil, errors.Trace(err)
@@ -102,11 +121,11 @@ func (m *MysqlClient) GetTasks(filter *filter.Filter) ([]*types.Task, error) {
 		task := new(types.TaskPodJoinSelect)
 		rows.StructScan(&task)
 
-		resource, ok := task.Resource.([]byte)
+		resource, ok := task.Resource.(string)
 		if !ok {
-			return nil, errors.New("resource is not []byte")
+			return nil, errors.Errorf("resource is not string but %T", task.Resource)
 		}
-		json.Unmarshal(resource, &task.Resource)
+		json.Unmarshal([]byte(resource), &task.Resource)
 
 		namespaces := strings.Split(task.PodsNamespaceStr, ",")
 		names := strings.Split(task.PodsNameStr, ",")
@@ -166,5 +185,5 @@ const taskPodInsert = `
 `
 
 const taskSelect = `
-  SELECT id,event_type,resource,task_type,create_time,GROUP_CONCAT(pod_name separator ',') AS pods_name_str,GROUP_CONCAT(pod_namespace separator ',') AS pods_namespace_str FROM task JOIN task_pod ON id=task_id %s GROUP BY id
+  SELECT id,event_type,resource,task_type,create_time,GROUP_CONCAT(pod_name) AS pods_name_str,GROUP_CONCAT(pod_namespace) AS pods_namespace_str FROM task JOIN task_pod ON id=task_id %s GROUP BY id
 `

@@ -14,20 +14,15 @@
 package main
 
 import (
-	"fmt"
 	"net/http"
-	"os"
 
-	_ "github.com/go-sql-driver/mysql"
+	_ "github.com/mattn/go-sqlite3"
 	"github.com/ngaut/log"
 	"github.com/pingcap/chaos-operator/pkg/apiserver"
 )
 
 func main() {
-	databaseHost := os.Getenv("CHAOS_API_SERVER_DATABASE_SERVICE_HOST")
-	databasePort := os.Getenv("CHAOS_API_SERVER_DATABASE_SERVICE_PORT")
-
-	server, err := apiserver.NewServer(fmt.Sprintf("root:@(%s:%s)/chaos_operator", databaseHost, databasePort))
+	server, err := apiserver.NewServer()
 	if err != nil {
 		log.Errorf("Error while creating server: %s", err)
 		return

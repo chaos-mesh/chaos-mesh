@@ -39,7 +39,7 @@ controller-manager:
 	$(GO) -ldflags '$(LDFLAGS)' -o images/chaos-operator/bin/chaos-controller-manager cmd/controller-manager/main.go
 
 api-server:
-	$(GO) -ldflags '$(LDFLAGS)' -o images/chaos-operator/bin/chaos-api-server cmd/api-server/main.go
+	$(GOENV) CGO_ENABLED=1 go build -ldflags '$(LDFLAGS)' -o images/chaos-operator/bin/chaos-api-server cmd/api-server/main.go
 
 test:
 	@echo "Run unit tests"

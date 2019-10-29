@@ -33,4 +33,30 @@ spec:
 {{ toYaml .Values.controllerManager.resources | indent 12 }}
         command:
           - /usr/local/bin/chaos-api-server
+        volumeMounts:
+        - name: data
+          mountPath: /data
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: api-server-sqlite-pv-claim
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: api-server-sqlite-pv-claim
+spec:
+  {{- if .Values.apiServer.volume.storageClassName }}
+  storageClassName: {{ .Values.apiServer.volume.storageClassName }}
+  {{- end }}
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ .Values.apiServer.volume.storage }}
+  {{- if .Values.apiServer.volume.selector }}
+  selector:
+    {{ .Values.apiServer.volume.selector }}
+  {{- end }}
 
