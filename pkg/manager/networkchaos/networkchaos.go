@@ -19,6 +19,7 @@ import (
 	"github.com/golang/glog"
 	"github.com/pingcap/chaos-operator/pkg/apis/pingcap.com/v1alpha1"
 	"github.com/pingcap/chaos-operator/pkg/client/clientset/versioned"
+
 	listers "github.com/pingcap/chaos-operator/pkg/client/listers/pingcap.com/v1alpha1"
 	"github.com/pingcap/chaos-operator/pkg/manager"
 	"k8s.io/client-go/kubernetes"
@@ -52,7 +53,7 @@ func NewNetworkChaosManager(
 	}
 }
 
-// Sync syncs the PodChaos resource to manager.
+// Sync syncs the NetworkChaos resource to manager.
 func (m *networkChaosManager) Sync(nc *v1alpha1.NetworkChaos) error {
 	key, err := cache.MetaNamespaceKeyFunc(nc)
 	if err != nil {
@@ -93,7 +94,7 @@ func (m *networkChaosManager) newRunner(nc *v1alpha1.NetworkChaos) (*manager.Run
 			podLister:    m.podLister,
 		}
 	default:
-		return nil, fmt.Errorf("PodChaos action %s not supported", nc.Spec.Action)
+		return nil, fmt.Errorf("NetworkChaos action %s not supported", nc.Spec.Action)
 	}
 
 	name, err := cache.MetaNamespaceKeyFunc(nc)

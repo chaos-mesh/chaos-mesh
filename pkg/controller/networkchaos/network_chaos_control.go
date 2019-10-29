@@ -21,6 +21,7 @@ import (
 	listers "github.com/pingcap/chaos-operator/pkg/client/listers/pingcap.com/v1alpha1"
 	"github.com/pingcap/chaos-operator/pkg/manager"
 	"github.com/pingcap/chaos-operator/pkg/manager/networkchaos"
+
 	apiequality "k8s.io/apimachinery/pkg/api/equality"
 	errorutils "k8s.io/apimachinery/pkg/util/errors"
 	"k8s.io/client-go/kubernetes"

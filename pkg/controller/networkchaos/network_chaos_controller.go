@@ -26,6 +26,7 @@ import (
 	informers "github.com/pingcap/chaos-operator/pkg/client/informers/externalversions"
 	listers "github.com/pingcap/chaos-operator/pkg/client/listers/pingcap.com/v1alpha1"
 	"github.com/pingcap/chaos-operator/pkg/manager"
+
 	corev1 "k8s.io/api/core/v1"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/apimachinery/pkg/util/wait"
@@ -54,7 +55,7 @@ type ControlInterface interface {
 	DeleteNetworkChaos(key string) error
 }
 
-// Controller is the controller implementation for pod chaos resources.
+// Controller is the controller implementation for network chaos resources.
 type Controller struct {
 	// kubernetes client interface
 	kubeCli kubernetes.Interface
@@ -118,7 +119,7 @@ func NewController(
 		controller.ncLister,
 	)
 
-	glog.Info("Setting up pod chaos event handlers")
+	glog.Info("Setting up network chaos event handlers")
 
 	ncInformer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
 		AddFunc: controller.enqueueNetworkChaos,

@@ -22,12 +22,13 @@ import (
 	"github.com/golang/glog"
 	"github.com/pingcap/chaos-operator/pkg/apis/pingcap.com/v1alpha1"
 	"github.com/pingcap/chaos-operator/pkg/manager"
+	pb "github.com/pingcap/chaos-operator/pkg/tcdaemon/pb"
+
 	"golang.org/x/sync/errgroup"
 	"google.golang.org/grpc"
+
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
-	pb "github.com/pingcap/chaos-operator/pkg/tcdaemon/pb"
 	"k8s.io/client-go/kubernetes"
 	corelisters "k8s.io/client-go/listers/core/v1"
 )
