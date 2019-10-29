@@ -20,7 +20,6 @@ import (
 	"time"
 
 	"github.com/golang/glog"
-	"github.com/juju/errors"
 	"github.com/pingcap/chaos-operator/pkg/apis/pingcap.com/v1alpha1"
 	"github.com/pingcap/chaos-operator/pkg/client/clientset/versioned"
 	informers "github.com/pingcap/chaos-operator/pkg/client/informers/externalversions"
@@ -28,6 +27,7 @@ import (
 	"github.com/pingcap/chaos-operator/pkg/manager"
 
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/errors"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/apimachinery/pkg/util/wait"
 	kubeinformers "k8s.io/client-go/informers"
