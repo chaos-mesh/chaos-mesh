@@ -14,14 +14,13 @@
 package util
 
 import (
-	"context"
 	"time"
 )
 
 // Sleep defines special `sleep` with context
-func Sleep(ctx context.Context, sleepTime time.Duration) {
+func Sleep(stopC chan struct{}, sleepTime time.Duration) {
 	select {
-	case <-ctx.Done():
+	case <-stopC:
 		return
 	case <-time.After(sleepTime):
 		return

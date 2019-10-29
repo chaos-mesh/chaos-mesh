@@ -15,13 +15,14 @@ package podchaos
 
 import (
 	"fmt"
-	"math"
-	"math/rand"
-	"strconv"
-
 	"github.com/golang/glog"
 	"github.com/pingcap/chaos-operator/pkg/apis/pingcap.com/v1alpha1"
+	"github.com/pingcap/chaos-operator/pkg/client/clientset/versioned"
 	"github.com/pingcap/chaos-operator/pkg/manager"
+	"math"
+	"math/rand"
+	"reflect"
+	"strconv"
 
 	"golang.org/x/sync/errgroup"
 
@@ -31,16 +32,44 @@ import (
 	corelisters "k8s.io/client-go/listers/core/v1"
 )
 
+const (
+	podKillActionMsg = "delete pod"
+)
+
 // PodKillJob defines a job to do pod-kill chaos experiment.
 type PodKillJob struct {
 	podChaos  *v1alpha1.PodChaos
 	kubeCli   kubernetes.Interface
+	cli       versioned.Interface
 	podLister corelisters.PodLister
 }
 
 // Run is the core logic to execute pod-kill chaos experiment.
 func (p *PodKillJob) Run() {
 	var err error
+
+	record := &v1alpha1.PodChaosExperimentStatus{
+		Phase:     v1alpha1.ExperimentPhaseRunning,
+		StartTime: metav1.Now(),
+	}
+
+	if err := setExperimentRecord(p.cli, p.podChaos, record); err != nil {
+		glog.Errorf("%s, fail to set experiment record, %v", p.logPrefix(), err)
+	}
+
+	defer func() {
+		record.Phase = v1alpha1.ExperimentPhaseFinished
+		record.EndTime = metav1.Now()
+		if err != nil {
+			glog.Errorf("%s, fail to run action, %v", p.logPrefix(), err)
+			record.Phase = v1alpha1.ExperimentPhaseFailed
+			record.Reason = err.Error()
+		}
+
+		if err := setExperimentRecord(p.cli, p.podChaos, record); err != nil {
+			glog.Errorf("%s, fail to set experiment record, %v", p.logPrefix(), err)
+		}
+	}()
 
 	pods, err := manager.SelectPods(p.podChaos.Spec.Selector, p.podLister, p.kubeCli)
 	if err != nil {
@@ -56,25 +85,21 @@ func (p *PodKillJob) Run() {
 	switch p.podChaos.Spec.Mode {
 	case v1alpha1.OnePodMode:
 		glog.Infof("%s, Try to select one pod to do pod-kill job randomly", p.logPrefix())
-		err = p.deleteRandomPod(pods)
+		err = p.deleteRandomPod(pods, record)
 	case v1alpha1.AllPodMode:
 		glog.Infof("%s, Try to do pod-kill action on all filtered pods", p.logPrefix())
-		err = p.deleteAllPods(pods)
+		err = p.deleteAllPods(pods, record)
 	case v1alpha1.FixedPodMode:
 		glog.Infof("%s, Try to do pod-kill action on %s pods", p.logPrefix(), p.podChaos.Spec.Value)
-		err = p.deleteFixedPods(pods)
+		err = p.deleteFixedPods(pods, record)
 	case v1alpha1.FixedPercentPodMode:
 		glog.Infof("%s, Try to do pod-kill action on %s%% pods", p.logPrefix(), p.podChaos.Spec.Value)
-		err = p.deleteFixedPercentagePods(pods)
+		err = p.deleteFixedPercentagePods(pods, record)
 	case v1alpha1.RandomMaxPercentPodMode:
 		glog.Infof("%s, Try to do pod-kill action on max %s%% pods", p.logPrefix(), p.podChaos.Spec.Value)
-		err = p.deleteMaxPercentagePods(pods)
+		err = p.deleteMaxPercentagePods(pods, record)
 	default:
 		err = fmt.Errorf("pod-kill mode %s not supported", p.podChaos.Spec.Mode)
-	}
-
-	if err != nil {
-		glog.Errorf("%s, fail to run action, %v", p.logPrefix(), err)
 	}
 }
 
@@ -91,22 +116,29 @@ func (p *PodKillJob) Equal(job manager.Job) bool {
 		return false
 	}
 
-	// judge ResourceVersion,
-	// If them are same, we can think that the PodChaos resource has not changed.
-	if p.podChaos.ResourceVersion != pjob.podChaos.ResourceVersion {
+	if !reflect.DeepEqual(p.podChaos.Spec, pjob.podChaos.Spec) {
 		return false
 	}
 
 	return true
 }
 
-// Stop stops pod-kill job, because pod-kill is a transient operation
-// and the pod will be maintained by kubernetes,
-// so we don't need clean anything.
-func (p *PodKillJob) Close() error { return nil }
+// Stop stops pod-kill job.
+func (p *PodKillJob) Close() error {
+	return nil
+}
 
-func (p *PodKillJob) deleteAllPods(pods []v1.Pod) error {
+// Clean is used to cleans the residue action.
+// Because pod-kill is a transient operation and the pod will be maintained by kubernetes,
+// so we don't need clean anything.
+func (p *PodKillJob) Clean() error {
+	return nil
+}
+
+func (p *PodKillJob) deleteAllPods(pods []v1.Pod, record *v1alpha1.PodChaosExperimentStatus) error {
 	glog.Infof("%s, Try to delete %d pods", p.logPrefix(), len(pods))
+
+	setRecordPods(record, p.podChaos.Spec.Action, podKillActionMsg, pods...)
 
 	g := errgroup.Group{}
 	for _, pod := range pods {
@@ -119,7 +151,7 @@ func (p *PodKillJob) deleteAllPods(pods []v1.Pod) error {
 	return g.Wait()
 }
 
-func (p *PodKillJob) deleteFixedPods(pods []v1.Pod) error {
+func (p *PodKillJob) deleteFixedPods(pods []v1.Pod, record *v1alpha1.PodChaosExperimentStatus) error {
 	killNum, err := strconv.Atoi(p.podChaos.Spec.Value)
 	if err != nil {
 		return err
@@ -133,10 +165,10 @@ func (p *PodKillJob) deleteFixedPods(pods []v1.Pod) error {
 
 	glog.Infof("%s, Try to delete %d pods", p.logPrefix(), killNum)
 
-	return p.concurrentDeletePods(pods, killNum)
+	return p.concurrentDeletePods(pods, killNum, record)
 }
 
-func (p *PodKillJob) deleteFixedPercentagePods(pods []v1.Pod) error {
+func (p *PodKillJob) deleteFixedPercentagePods(pods []v1.Pod, record *v1alpha1.PodChaosExperimentStatus) error {
 	killPercentage, err := strconv.Atoi(p.podChaos.Spec.Value)
 	if err != nil {
 		return err
@@ -156,10 +188,10 @@ func (p *PodKillJob) deleteFixedPercentagePods(pods []v1.Pod) error {
 
 	glog.Infof("%s, Try to delete %d pods", p.logPrefix(), killNum)
 
-	return p.concurrentDeletePods(pods, killNum)
+	return p.concurrentDeletePods(pods, killNum, record)
 }
 
-func (p *PodKillJob) deleteMaxPercentagePods(pods []v1.Pod) error {
+func (p *PodKillJob) deleteMaxPercentagePods(pods []v1.Pod, record *v1alpha1.PodChaosExperimentStatus) error {
 	maxPercentage, err := strconv.Atoi(p.podChaos.Spec.Value)
 	if err != nil {
 		return err
@@ -180,16 +212,20 @@ func (p *PodKillJob) deleteMaxPercentagePods(pods []v1.Pod) error {
 
 	glog.Infof("%s, Try to delete %d pods", p.logPrefix(), killNum)
 
-	return p.concurrentDeletePods(pods, killNum)
+	return p.concurrentDeletePods(pods, killNum, record)
 }
 
-func (p *PodKillJob) deleteRandomPod(pods []v1.Pod) error {
+func (p *PodKillJob) deleteRandomPod(pods []v1.Pod, record *v1alpha1.PodChaosExperimentStatus) error {
 	if len(pods) == 0 {
 		return nil
 	}
 
 	index := rand.Intn(len(pods))
-	return p.deletePod(pods[index])
+	pod := pods[index]
+
+	setRecordPods(record, p.podChaos.Spec.Action, podKillActionMsg, pod)
+
+	return p.deletePod(pod)
 }
 
 func (p *PodKillJob) deletePod(pod v1.Pod) error {
@@ -200,20 +236,25 @@ func (p *PodKillJob) deletePod(pod v1.Pod) error {
 	return p.kubeCli.CoreV1().Pods(pod.Namespace).Delete(pod.Name, deleteOpts)
 }
 
-func (p *PodKillJob) concurrentDeletePods(pods []v1.Pod, killNum int) error {
-	if killNum <= 0 {
+func (p *PodKillJob) concurrentDeletePods(pods []v1.Pod, killNum int, record *v1alpha1.PodChaosExperimentStatus) error {
+	if killNum <= 0 || len(pods) <= 0 {
 		return nil
 	}
 
 	killIndexes := manager.RandomFixedIndexes(0, uint(len(pods)), uint(killNum))
 
+	var filterPods []v1.Pod
+
 	g := errgroup.Group{}
 	for _, index := range killIndexes {
 		index := index
+		filterPods = append(filterPods, pods[index])
 		g.Go(func() error {
 			return p.deletePod(pods[index])
 		})
 	}
+
+	setRecordPods(record, p.podChaos.Spec.Action, podKillActionMsg, filterPods...)
 
 	return g.Wait()
 }

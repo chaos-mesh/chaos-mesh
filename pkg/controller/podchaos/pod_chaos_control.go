@@ -32,13 +32,7 @@ type PodChaosManagerInterface interface {
 	Delete(key string) error
 }
 
-// // StatusUpdaterInterface defines a function to update PodChaos status.
-// type StatusUpdaterInterface interface {
-// 	UpdateStatus() error
-// }
-
 type podChaosControl struct {
-	// statusUpdater StatusUpdaterInterface
 	mgr PodChaosManagerInterface
 }
 
@@ -68,10 +62,6 @@ func (p *podChaosControl) UpdatePodChaos(pc *v1alpha1.PodChaos) error {
 	if apiequality.Semantic.DeepEqual(&pc.Status, oldStatus) {
 		return errorutils.NewAggregate(errs)
 	}
-
-	// if err := p.statusUpdater.UpdateStatus(); err != nil {
-	// 	errs = append(errs, err)
-	// }
 
 	return errorutils.NewAggregate(errs)
 }

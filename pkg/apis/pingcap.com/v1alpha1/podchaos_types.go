@@ -17,7 +17,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// ChaosAction represents the chaos action about pods.
+// PodChaosAction represents the chaos action about pods.
 type PodChaosAction string
 
 const (
@@ -101,11 +101,6 @@ type PodChaosSpec struct {
 	GracePeriodSeconds int64 `json:"gracePeriodSeconds"`
 }
 
-// PodChaosStatus represents the current status of the chaos experiment about pods.
-type PodChaosStatus struct {
-	// TODO: add status
-}
-
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
 // PodChaosList is PodChaos list.
@@ -114,4 +109,65 @@ type PodChaosList struct {
 	metav1.ListMeta `json:"metadata"`
 
 	Items []PodChaos `json:"items"`
+}
+
+// PodChaosStatus represents the current status of the chaos experiment about pods.
+type PodChaosStatus struct {
+	// Phase is the chaos status.
+	Phase  ChaosPhase `json:"phase"`
+	Reason string     `json:"reason,omitempty"`
+
+	// Experiment records the last experiment state.
+	Experiment PodChaosExperimentStatus `json:"experiment"`
+}
+
+// ChaosPhase is the current status of chaos task.
+type ChaosPhase string
+
+const (
+	ChaosPhaseNone     ChaosPhase = ""
+	ChaosPhaseNormal              = "Normal"
+	ChaosPhaseAbnormal            = "Abnormal"
+)
+
+// ExperimentPhase is the current status of chaos experiment.
+type ExperimentPhase string
+
+const (
+	ExperimentPhaseRunning  ExperimentPhase = "Running"
+	ExperimentPhaseFailed                   = "Failed"
+	ExperimentPhaseFinished                 = "Finished"
+)
+
+// PodChaosExperimentStatus represents information about the status of the podchaos experiment.
+type PodChaosExperimentStatus struct {
+	Phase     ExperimentPhase `json:"phase"`
+	Reason    string          `json:"reason"`
+	StartTime metav1.Time     `json:"startTime"`
+	EndTime   metav1.Time     `json:"endTime"`
+	Pods      []PodStatus     `json:"podChaos"`
+}
+
+func (pe *PodChaosExperimentStatus) SetPods(pod PodStatus) {
+	for index, p := range pe.Pods {
+		if p.Namespace == pod.Namespace && p.Name == pod.Namespace {
+			pe.Pods[index] = pod
+		}
+	}
+
+	pe.Pods = append(pe.Pods, pod)
+}
+
+// PodStatus represents information about the status of a pod in chaos experiment.
+type PodStatus struct {
+	Namespace string `json:"namespace"`
+	Name      string `json:"name"`
+	Action    string `json:"action"`
+	HostIP    string `json:"hostIP"`
+	PodIP     string `json:"podIP"`
+
+	// A brief CamelCase message indicating details about the chaos action.
+	// e.g. "delete this pod" or "pause this pod duration 5m"
+	// +optional
+	Message string `json:"message"`
 }

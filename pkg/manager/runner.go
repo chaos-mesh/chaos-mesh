@@ -22,6 +22,7 @@ import (
 type Job interface {
 	Run()
 	Close() error
+	Clean() error
 	Equal(job Job) bool
 }
 
@@ -54,6 +55,10 @@ func (r *Runner) Validate() error {
 }
 
 func (r *Runner) Equal(rn *Runner) bool {
+	if rn == nil {
+		return false
+	}
+
 	if r.Name != rn.Name || r.Rule != rn.Rule {
 		return false
 	}
@@ -67,4 +72,8 @@ func (r *Runner) Equal(rn *Runner) bool {
 
 func (r *Runner) Close() error {
 	return r.Job.Close()
+}
+
+func (r *Runner) Clean() error {
+	return r.Job.Clean()
 }

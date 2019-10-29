@@ -92,7 +92,7 @@ func (m *ManagerBase) GetRunner(key string) (*Runner, bool) {
 }
 
 func (m *ManagerBase) addRunnerAction(runner *Runner) error {
-	if err := runner.Close(); err != nil {
+	if err := runner.Clean(); err != nil {
 		return err
 	}
 
