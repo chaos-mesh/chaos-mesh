@@ -1,35 +1,27 @@
 package tcdaemon
 
 import (
-	"encoding/json"
+	"context"
 	"fmt"
-	"io"
-	"io/ioutil"
-	"net/http"
-	"time"
+	"log"
+	"net"
 
 	"github.com/golang/glog"
-	"github.com/gorilla/context"
-	"github.com/gorilla/mux"
+	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/juju/errors"
-	"github.com/unrolled/render"
+	pb "github.com/pingcap/chaos-operator/pkg/tcdaemon/pb"
+	"google.golang.org/grpc"
+
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/reflection"
+	"google.golang.org/grpc/status"
 )
+
+//go:generate protoc -I pb pb/tcdaemon.proto --go_out=plugins=grpc:pb
 
 // Server represents an HTTP server for tc daemon
 type Server struct {
-	rdr      *render.Render
 	crClient ContainerRuntimeInfoClient
-}
-
-func readJSON(r io.ReadCloser, data interface{}) error {
-	defer r.Close()
-
-	b, err := ioutil.ReadAll(r)
-	if err == nil {
-		err = json.Unmarshal(b, data)
-	}
-
-	return errors.Trace(err)
 }
 
 func newServer() (*Server, error) {
@@ -39,87 +31,58 @@ func newServer() (*Server, error) {
 	}
 
 	return &Server{
-		rdr:      render.New(),
 		crClient: crClient,
 	}, nil
 }
 
-func (s *Server) parseMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		ctx := r.Context()
+func (s *Server) SetNetem(ctx context.Context, in *pb.NetemRequest) (*empty.Empty, error) {
+	glog.Infof("Request : SetNetem %v", in)
 
-		containerID := r.URL.Query().Get("containerID")
-		netem := new(Netem)
-
-		if err := readJSON(r.Body, netem); err != nil {
-			s.rdr.JSON(w, http.StatusOK, errResponsef("read json body error %v", err))
-			return
-		}
-		context.Set(r, "netem", netem)
-
-		pid, err := s.crClient.GetPidFromContainerID(ctx, containerID)
-		if err != nil {
-			s.rdr.JSON(w, http.StatusOK, errResponsef("get pid from containerID error: %v", err))
-			return
-		}
-		context.Set(r, "pid", pid)
-
-		next.ServeHTTP(w, r)
-	})
-}
-
-func (s *Server) logMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		glog.Infof("Request : %s - %s - %s", r.RemoteAddr, r.Method, r.URL)
-		start := time.Now()
-
-		next.ServeHTTP(w, r)
-		glog.Infof("Response: %s - %s - %s (%.3f sec)", r.RemoteAddr, r.Method, r.URL, time.Since(start).Seconds())
-	})
-}
-
-// CreateRouter will create a Handler for related Server
-func (s *Server) CreateRouter() http.Handler {
-	router := mux.NewRouter()
-
-	router.HandleFunc("/netem", func(w http.ResponseWriter, r *http.Request) {
-		netem := context.Get(r, "netem").(*Netem)
-		pid := context.Get(r, "pid").(int)
-
-		if err := netem.Apply(pid); err != nil {
-			s.rdr.JSON(w, http.StatusOK, errResponsef("delay apply error: %v", err))
-			return
-		}
-
-		s.rdr.JSON(w, http.StatusOK, successResponse("ok"))
-	}).Methods("PUT")
-
-	router.HandleFunc("/netem", func(w http.ResponseWriter, r *http.Request) {
-		netem := context.Get(r, "netem").(*Netem)
-		pid := context.Get(r, "pid").(int)
-
-		if err := netem.Cancel(pid); err != nil {
-			s.rdr.JSON(w, http.StatusOK, errResponsef("delay apply error: %v", err))
-			return
-		}
-
-		s.rdr.JSON(w, http.StatusOK, successResponse("ok"))
-	}).Methods("DELETE")
-
-	router.Use(s.parseMiddleware)
-
-	router.Use(s.logMiddleware)
-
-	return router
-}
-
-// StartServer will start listening on newly created server
-func StartServer(host string, port int) {
-	server, err := newServer()
+	pid, err := s.crClient.GetPidFromContainerID(ctx, in.ContainerId)
 
 	if err != nil {
-		glog.Errorf("Error while starting server: %v", err)
+		return nil, status.Errorf(codes.Internal, "get pid from containerID error: %v", err)
 	}
 
-	http.ListenAndServe(fmt.Sprintf("%s:%d", host, port), server.CreateRouter())
+	if err := Apply(in.Netem, pid); err != nil {
+		return nil, status.Errorf(codes.Internal, "netem apply error: %v", err)
+	}
+
+	return &empty.Empty{}, nil
+}
+
+func (s *Server) DeleteNetem(ctx context.Context, in *pb.NetemRequest) (*empty.Empty, error) {
+	glog.Infof("Request : DeleteNetem %v", in)
+
+	pid, err := s.crClient.GetPidFromContainerID(ctx, in.ContainerId)
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "get pid from containerID error: %v", err)
+	}
+
+	if err := Cancel(in.Netem, pid); err != nil {
+		return nil, status.Errorf(codes.Internal, "netem cancel error: %v", err)
+	}
+
+	return &empty.Empty{}, nil
+}
+
+func StartServer(host string, port int) {
+	lis, err := net.Listen("tcp", fmt.Sprintf("%s:%d", host, port))
+	if err != nil {
+		log.Fatalf("failed to listen: %v", err)
+	}
+
+	s := grpc.NewServer()
+	tcDaemonServer, err := newServer()
+	if err != nil {
+		log.Fatalf("failed to create server: %v", err)
+	}
+	pb.RegisterTcDaemonServer(s, tcDaemonServer)
+
+	reflection.Register(s)
+
+	if err := s.Serve(lis); err != nil {
+		log.Fatalf("failed to serve: %v", err)
+	}
 }

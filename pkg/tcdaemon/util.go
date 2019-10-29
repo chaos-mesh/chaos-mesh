@@ -14,7 +14,7 @@ const (
 
 // ContainerRuntimeInfoClient represents a struct which can give you information about container runtime
 type ContainerRuntimeInfoClient interface {
-	GetPidFromContainerID(ctx context.Context, containerID string) (int, error)
+	GetPidFromContainerID(ctx context.Context, containerID string) (uint32, error)
 }
 
 // DockerClient can get information from docker
@@ -23,7 +23,7 @@ type DockerClient struct {
 }
 
 // GetPidFromContainerID fetches PID according to container id
-func (c DockerClient) GetPidFromContainerID(ctx context.Context, containerID string) (int, error) {
+func (c DockerClient) GetPidFromContainerID(ctx context.Context, containerID string) (uint32, error) {
 	if containerID[0:len(dockerProtocolPrefix)] != dockerProtocolPrefix {
 		return 0, errors.Errorf("only docker protocol is supported but got %s", containerID[0:len(dockerProtocolPrefix)])
 	}
@@ -32,7 +32,7 @@ func (c DockerClient) GetPidFromContainerID(ctx context.Context, containerID str
 		return 0, errors.Trace(err)
 	}
 
-	return container.State.Pid, nil
+	return uint32(container.State.Pid), nil
 }
 
 // CreateContainerRuntimeInfoClient will create container runtime information getter

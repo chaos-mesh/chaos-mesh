@@ -39,7 +39,6 @@ controller-manager:
 	$(GO) -ldflags '$(LDFLAGS)' -o images/chaos-operator/bin/chaos-controller-manager cmd/controller-manager/main.go
 
 tc-daemon:
-	$(shell ./hack/grpc-install.sh)
 	cd pkg/tcdaemon && go generate && cd -
 	$(GO) -ldflags '$(LDFLAGS)' -o images/chaos-operator/bin/tc-daemon cmd/tc-daemon/main.go
 

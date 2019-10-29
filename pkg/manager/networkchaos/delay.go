@@ -14,20 +14,20 @@
 package networkchaos
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"time"
 
 	"github.com/golang/glog"
-	"github.com/juju/errors"
 	"github.com/pingcap/chaos-operator/pkg/apis/pingcap.com/v1alpha1"
 	"github.com/pingcap/chaos-operator/pkg/manager"
-	"github.com/pingcap/chaos-operator/pkg/tcdaemon"
-	"github.com/pingcap/chaos-operator/pkg/tcdaemon/client"
 	"golang.org/x/sync/errgroup"
+	"google.golang.org/grpc"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
+	pb "github.com/pingcap/chaos-operator/pkg/tcdaemon/pb"
 	"k8s.io/client-go/kubernetes"
 	corelisters "k8s.io/client-go/listers/core/v1"
 )
@@ -78,7 +78,7 @@ func (d *DelayJob) Run() {
 	}
 }
 
-func (d *DelayJob) createTcDaemonClient(pod v1.Pod) (*client.Client, error) {
+func (d *DelayJob) createGrpcConnection(pod v1.Pod) (*grpc.ClientConn, error) {
 	port := os.Getenv("TC_DAEMON_PORT")
 	if port == "" {
 		port = "8080"
@@ -88,10 +88,14 @@ func (d *DelayJob) createTcDaemonClient(pod v1.Pod) (*client.Client, error) {
 	glog.Infof("%s, Creating client to tcdaemon on %s", d.logPrefix(), nodeName)
 	node, err := d.kubeCli.CoreV1().Nodes().Get(nodeName, metav1.GetOptions{})
 	if err != nil {
-		return nil, errors.Trace(err)
+		return nil, err
 	}
 
-	return client.NewClient(node.Status.Addresses[0].Address, port), nil
+	conn, err := grpc.Dial(fmt.Sprintf("%s:%s", node.Status.Addresses[0].Address, port), grpc.WithInsecure())
+	if err != nil {
+		return nil, err
+	}
+	return conn, nil
 }
 
 // DelayPod will add a netem on container network interface to delay it
@@ -100,30 +104,47 @@ func (d *DelayJob) DelayPod(pod v1.Pod) error {
 
 	glog.Infof("%s, Try to delay pod %s/%s", d.logPrefix(), pod.Namespace, pod.Name)
 
-	c, err := d.createTcDaemonClient(pod)
+	c, err := d.createGrpcConnection(pod)
 	if err != nil {
 		return err
 	}
+	defer c.Close()
+
+	client := pb.NewTcDaemonClient(c)
 
 	containerId := pod.Status.ContainerStatuses[0].ContainerID
-	return c.AddNetem(containerId, &tcdaemon.Netem{
-		Time:      delay.Latency,
-		DelayCorr: delay.Correlation,
-		Jitter:    delay.Jitter,
+
+	_, err = client.SetNetem(context.Background(), &pb.NetemRequest{
+		ContainerId: containerId,
+		Netem: &pb.Netem{
+			Time:      delay.Latency,
+			DelayCorr: delay.Correlation,
+			Jitter:    delay.Jitter,
+		},
 	})
+
+	return err
 }
 
 // Resume will remove every netem from Pod
 func (d *DelayJob) ResumePod(pod v1.Pod) error {
 	glog.Infof("%s, Try to resume pod %s/%s", d.logPrefix(), pod.Namespace, pod.Name)
 
-	c, err := d.createTcDaemonClient(pod)
+	c, err := d.createGrpcConnection(pod)
 	if err != nil {
 		return err
 	}
+	defer c.Close()
+
+	client := pb.NewTcDaemonClient(c)
 
 	containerId := pod.Status.ContainerStatuses[0].ContainerID
-	return c.DeleteNetem(containerId)
+	_, err = client.DeleteNetem(context.Background(), &pb.NetemRequest{
+		ContainerId: containerId,
+		Netem:       nil,
+	})
+
+	return err
 }
 
 // Equal returns true when the two jobs have same NetworkChaos.
@@ -179,6 +200,11 @@ func (d *DelayJob) Close() error {
 		return err
 	}
 
+	return nil
+}
+
+// Clean does nothing
+func (d *DelayJob) Clean() error {
 	return nil
 }
 

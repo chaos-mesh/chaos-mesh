@@ -8,15 +8,18 @@ import (
 	"github.com/golang/glog"
 	"github.com/pingcap/chaos-operator/pkg/tcdaemon"
 	"github.com/pingcap/chaos-operator/pkg/version"
+
 	"k8s.io/apiserver/pkg/util/logs"
 )
 
 var (
 	printVersion bool
+	rawPort      string
 )
 
 func init() {
 	flag.BoolVar(&printVersion, "version", false, "print version information and exit")
+	flag.StringVar(&rawPort, "port", "", "the port which server listens on")
 
 	flag.Parse()
 }
@@ -31,14 +34,16 @@ func main() {
 	logs.InitLogs()
 	defer logs.FlushLogs()
 
-	raw_port := os.Getenv("PORT")
-	if raw_port == "" {
-		raw_port = "8080"
+	if rawPort == "" {
+		rawPort := os.Getenv("PORT")
+		if rawPort == "" {
+			rawPort = "8080"
+		}
 	}
 
-	port, err := strconv.Atoi(raw_port)
+	port, err := strconv.Atoi(rawPort)
 	if err != nil {
-		glog.Errorf("Error while parsing PORT environment variable: {}", raw_port)
+		glog.Fatalf("Error while parsing PORT environment variable: {}", rawPort)
 	}
 	tcdaemon.StartServer("0.0.0.0", port)
 }
