@@ -14,7 +14,7 @@ const (
 	defaultProcPrefix = "/mnt/proc"
 )
 
-//Apply applies a netem on eth0 in pid related namespace
+// Apply applies a netem on eth0 in pid related namespace
 func Apply(netem *pb.Netem, pid uint32) error {
 	glog.Infof("Apply netem on PID: %d", pid)
 	nsPath := fmt.Sprintf("%s/%d/ns/net", defaultProcPrefix, pid)

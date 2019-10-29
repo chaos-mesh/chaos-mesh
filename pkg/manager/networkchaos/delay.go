@@ -23,6 +23,7 @@ import (
 	"github.com/pingcap/chaos-operator/pkg/apis/pingcap.com/v1alpha1"
 	"github.com/pingcap/chaos-operator/pkg/manager"
 	pb "github.com/pingcap/chaos-operator/pkg/tcdaemon/pb"
+	"github.com/pingcap/chaos-operator/pkg/util"
 
 	"golang.org/x/sync/errgroup"
 	"google.golang.org/grpc"
@@ -38,6 +39,7 @@ type DelayJob struct {
 	networkChaos *v1alpha1.NetworkChaos
 	kubeCli      kubernetes.Interface
 	podLister    corelisters.PodLister
+	stopC        chan struct{}
 }
 
 // Run is the core logic to execute delay chaos experiment.
@@ -70,7 +72,7 @@ func (d *DelayJob) Run() {
 				glog.Errorf("error while delaying pod %v", err)
 			}
 
-			time.Sleep(duration)
+			util.Sleep(d.stopC, duration)
 
 			return d.ResumePod(pod)
 		})
@@ -185,6 +187,8 @@ func (d *DelayJob) Equal(job manager.Job) bool {
 // Close stops delay job, we need to clean up running delay job (by removing every netem)
 func (d *DelayJob) Close() error {
 	var err error
+
+	close(d.stopC)
 
 	pods, err := manager.SelectPods(d.networkChaos.Spec.Selector, d.podLister, d.kubeCli)
 	if err != nil {

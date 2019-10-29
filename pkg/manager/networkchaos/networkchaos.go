@@ -92,6 +92,7 @@ func (m *networkChaosManager) newRunner(nc *v1alpha1.NetworkChaos) (*manager.Run
 			networkChaos: nc,
 			kubeCli:      m.kubeCli,
 			podLister:    m.podLister,
+			stopC:        make(chan struct{}),
 		}
 	default:
 		return nil, fmt.Errorf("NetworkChaos action %s not supported", nc.Spec.Action)
