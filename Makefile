@@ -33,10 +33,13 @@ docker-push: docker
 docker: build
 	docker build --tag "${DOCKER_REGISTRY}/pingcap/chaos-operator:latest" images/chaos-operator
 
-build: controller-manager
+build: controller-manager admission-controller
 
 controller-manager:
-	$(GO) -ldflags '$(LDFLAGS)' -o images/chaos-operator/bin/chaos-controller-manager cmd/controller-manager/main.go
+	$(GO) -ldflags '$(LDFLAGS)' -o images/chaos-operator/bin/chaos-controller-manager cmd/controller-manager/*.go
+
+admission-controller:
+	$(GO) -ldflags '$(LDFLAGS)' -o images/chaos-operator/bin/chaos-admission-manager cmd/admission-controller/*.go
 
 test:
 	@echo "Run unit tests"
@@ -97,4 +100,4 @@ check-gosec:
 	CGO_ENABLED=0 retool do gosec $$($(PACKAGE_DIRECTORIES))
 
 
-.PHONY: check check-all build tidy
+.PHONY: check check-all build tidy admission-controller
