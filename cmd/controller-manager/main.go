@@ -41,23 +41,24 @@ import (
 
 var (
 	printVersion bool
-	pprofPort    string
+	pprofAddr    string
 )
 
 func init() {
 	flag.BoolVar(&printVersion, "version", false, "print version information and exit")
-	flag.StringVar(&pprofPort, "pprof", "10080", "controller manager pprof port")
+	flag.StringVar(&pprofAddr, "pprof", ":10080", "controller manager pprof port")
 	flag.DurationVar(&controller.ResyncDuration, "resync-duration", time.Duration(30*time.Second), "resync time of informer")
 
 	flag.Parse()
 }
 
 func main() {
-	version.PrintVersionInfo()
-
 	if printVersion {
+		version.PrintVersionInfo()
 		os.Exit(0)
 	}
+
+	version.LogVersionInfo()
 
 	logs.InitLogs()
 	defer logs.FlushLogs()
@@ -106,7 +107,7 @@ func main() {
 	})
 
 	g.Go(func() error {
-		return http.ListenAndServe(fmt.Sprintf(":%s", pprofPort), nil)
+		return http.ListenAndServe(fmt.Sprintf(":%s", pprofAddr), nil)
 	})
 
 	if err := g.Wait(); err != nil {

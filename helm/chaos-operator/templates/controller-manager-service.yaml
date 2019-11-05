@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: chaos-operator-controller-manager
+  labels:
+    app.kubernetes.io/name: {{ template "chaos-operator.name" . }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/component: controller-manager
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+"  "_" }}
+spec:
+  type: {{ .Values.controllerManager.service.type }}
+  ports:
+    - port: {{ .Values.controllerManager.service.port }}
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    app.kubernetes.io/component: controller-manager
+    app.kubernetes.io/instance: {{ .Release.Name }}
