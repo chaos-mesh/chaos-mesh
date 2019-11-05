@@ -1,0 +1,68 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: admission-controller-mw-job
+  labels:
+    app.kubernetes.io/name: {{ template "chaos-operator.name" . }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/component: admission-controller-mw-job
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+"  "_" }}
+  annotations:
+    # This is what defines this resource as a hook. Without this line, the
+    # job is considered part of the release.
+    "helm.sh/hook": post-install
+    "helm.sh/hook-weight": "-1"
+    "helm.sh/hook-delete-policy": hook-succeeded
+spec:
+  template:
+    metadata:
+      name: admission-controller-mw-job
+    spec:
+      restartPolicy: Never
+      serviceAccountName: {{ .Values.admissionController.serviceAccount }}
+      containers:
+        - name: "{{ .Release.Name }}-job-mw"
+          image: bitnami/kubectl:latest
+          imagePullPolicy: IfNotPresent
+          command:
+            - "sh"
+            - "-c"
+            - |
+              set -e
+              K8S_NAMESPACE={{ .Release.Namespace }}
+              CA_BUNDLE=$(kubectl get configmap -n kube-system extension-apiserver-authentication -o=jsonpath='{.data.client-ca-file}' | base64 | tr -d '\n')
+
+              if [ ${CA_BUNDLE} = '' ]; then
+                  echo "ERROR: CA_BUNDLE is empty!" >&2
+                  exit 1
+              fi
+
+              cat <<EOF | kubectl -n ${K8S_NAMESPACE} apply -f -
+              apiVersion: admissionregistration.k8s.io/v1beta1
+              kind: MutatingWebhookConfiguration
+              metadata:
+                name: chaos-operator-sidecar-injector
+                labels:
+                  app.kubernetes.io/name: {{ template "chaos-operator.name" . }}
+                  app.kubernetes.io/managed-by: {{ .Release.Service }}
+                  app.kubernetes.io/instance: {{ .Release.Name }}
+                  app.kubernetes.io/component: admission-webhook
+                  helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+"  "_" }}
+              webhooks:
+                - name: admission-webhook.pingcap.com
+                  clientConfig:
+                    service:
+                      name: chaos-operator-admission-controller
+                      namespace: ${K8S_NAMESPACE}
+                      path: "/inject"
+                    caBundle: "${CA_BUNDLE}"
+                  rules:
+                    - operations: [ "CREATE" ]
+                      apiGroups: [""]
+                      apiVersions: ["v1"]
+                      resources: ["pods"]
+                  namespaceSelector:
+                    matchLabels:
+                      admission-webhook: enabled
+              EOF
