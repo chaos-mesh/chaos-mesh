@@ -23,9 +23,8 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/golang/glog"
-
 	"github.com/ghodss/yaml"
+	"github.com/golang/glog"
 
 	corev1 "k8s.io/api/core/v1"
 )
