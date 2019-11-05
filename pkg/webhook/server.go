@@ -25,8 +25,6 @@ import (
 	"github.com/pingcap/chaos-operator/pkg/webhook/config"
 	"github.com/pingcap/chaos-operator/pkg/webhook/inject"
 
-	"gopkg.in/yaml.v2"
-
 	"k8s.io/api/admission/v1beta1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -67,10 +65,10 @@ func NewWebHookServer(param Parameters) *WebHookServer {
 }
 
 func (w *WebHookServer) router() {
-	h := http.NewServeMux()
-	http.HandleFunc("/inject", w.injectHandler)
+	mux := http.NewServeMux()
+	mux.HandleFunc("/inject", w.injectHandler)
 
-	w.server.Handler = h
+	w.server.Handler = mux
 }
 
 func (w *WebHookServer) Run(stopCh <-chan struct{}) error {
@@ -123,6 +121,8 @@ func (w *WebHookServer) serve(res http.ResponseWriter, req *http.Request, admit 
 		return
 	}
 
+	glog.V(6).Infof("response: %s", string(responseJSON))
+
 	if _, err := res.Write(responseJSON); err != nil {
 		glog.Errorf("failed to write response to res, %v", err)
 		http.Error(res, err.Error(), http.StatusInternalServerError)
@@ -144,13 +144,19 @@ func (w *WebHookServer) processReq(data []byte, admit admitFunc) *v1beta1.Admiss
 		return admissionReview
 	}
 	glog.Infof("received admission review request %s", admissionReview.Request.UID)
-	glog.V(4).Infof("admission request: %+v", admissionReview.Request)
+	glog.V(6).Infof("admission request: %+v", admissionReview.Request)
 
 	admissionResponse := admit(admissionReview.Request, w.cfg)
 
-	admissionReview.Response = admissionResponse
+	newAdmissionReview := &v1beta1.AdmissionReview{}
+	if admissionResponse != nil {
+		newAdmissionReview.Response = admissionResponse
+		if admissionReview.Request != nil {
+			newAdmissionReview.Response.UID = admissionReview.Request.UID
+		}
+	}
 
-	return admissionReview
+	return newAdmissionReview
 }
 
 func (w *WebHookServer) injectHandler(res http.ResponseWriter, req *http.Request) {
@@ -159,6 +165,6 @@ func (w *WebHookServer) injectHandler(res http.ResponseWriter, req *http.Request
 
 func decode(data []byte) (*v1beta1.AdmissionReview, error) {
 	var admissionReview v1beta1.AdmissionReview
-	err := yaml.Unmarshal(data, &admissionReview)
+	_, _, err := deserializer.Decode(data, nil, &admissionReview)
 	return &admissionReview, err
 }

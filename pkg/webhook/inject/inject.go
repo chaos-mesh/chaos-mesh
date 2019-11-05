@@ -47,12 +47,21 @@ func Inject(res *v1beta1.AdmissionRequest, cfg *config.Config) *v1beta1.Admissio
 		}
 	}
 
+	// Deal with potential empty fields, e.g., when the pod is created by a deployment
+	podName := potentialPodName(&pod.ObjectMeta)
+	if pod.ObjectMeta.Namespace == "" {
+		pod.ObjectMeta.Namespace = res.Namespace
+	}
+
 	glog.Infof("AdmissionReview for Kind=%s, Namespace=%s Name=%s (%s) UID=%s patchOperation=%s UserInfo=%s",
-		res.Kind, res.Namespace, res.Name, pod.Name, res.UID, res.Operation, res.UserInfo)
+		res.Kind, res.Namespace, res.Name, podName, res.UID, res.Operation, res.UserInfo)
+	glog.V(4).Infof("Object: %v", string(res.Object.Raw))
+	glog.V(4).Infof("OldObject: %v", string(res.OldObject.Raw))
+	glog.V(4).Infof("Pod: %v", pod)
 
 	requiredKey, ok := injectRequired(ignoredNamespaces, &pod.ObjectMeta, cfg)
 	if !ok {
-		glog.Infof("Skipping injection for %s/%s due to policy check", pod.Namespace, pod.Name)
+		glog.Infof("Skipping injection for %s/%s due to policy check", pod.ObjectMeta.Namespace, podName)
 		return &v1beta1.AdmissionResponse{
 			Allowed: true,
 		}
@@ -68,8 +77,8 @@ func Inject(res *v1beta1.AdmissionRequest, cfg *config.Config) *v1beta1.Admissio
 		}
 	}
 
-	annotations := map[string]string{}
-	annotations[cfg.StatusAnnotationKey()] = StatusInjected
+	annotations := map[string]string{cfg.StatusAnnotationKey(): StatusInjected}
+
 	patchBytes, err := createPatch(&pod, injectionConfig, annotations)
 	if err != nil {
 		return &v1beta1.AdmissionResponse{
@@ -99,6 +108,8 @@ func injectRequired(ignoredList []string, metadata *metav1.ObjectMeta, cfg *conf
 			return "", false
 		}
 	}
+
+	glog.V(4).Infof("meta %v", metadata)
 
 	annotations := metadata.GetAnnotations()
 	if annotations == nil {
@@ -197,6 +208,7 @@ func addContainers(target, added []corev1.Container, basePath string) (patch []p
 	var value interface{}
 	for _, add := range added {
 		value = add
+		glog.V(6).Infof("add container: %v", add)
 		path := basePath
 		if first {
 			first = false
@@ -360,7 +372,6 @@ func updateAnnotations(target map[string]string, added map[string]string) (patch
 }
 
 func updatePIDShare(value bool) (patch []patchOperation) {
-
 	op := "add"
 	patch = append(patch, patchOperation{
 		Op:    op,
@@ -368,4 +379,14 @@ func updatePIDShare(value bool) (patch []patchOperation) {
 		Value: value,
 	})
 	return patch
+}
+
+func potentialPodName(metadata *metav1.ObjectMeta) string {
+	if metadata.Name != "" {
+		return metadata.Name
+	}
+	if metadata.GenerateName != "" {
+		return metadata.GenerateName + "***** (actual name not yet known)"
+	}
+	return ""
 }

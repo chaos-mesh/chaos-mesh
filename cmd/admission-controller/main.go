@@ -36,11 +36,11 @@ func init() {
 	flag.BoolVar(&printVersion, "version", false, "print version information and exit")
 	flag.StringVar(&parameters.Addr, "addr", ":9443",
 		"address to serve on")
-	flag.StringVar(&parameters.CertFile, "tls-cert-file", "/etc/webhook/cert.pem",
+	flag.StringVar(&parameters.CertFile, "tls-cert-file", "/etc/webhook/certs/cert.pem",
 		"file containing the x509 Certificate for HTTPS.")
-	flag.StringVar(&parameters.KeyFile, "tls-key-file", "/etc/webhook/cert.key",
+	flag.StringVar(&parameters.KeyFile, "tls-key-file", "/etc/webhook/certs/cert.key",
 		"file containing the x509 private key to --tls-cert-file.")
-	flag.StringVar(&parameters.ConfigDirectory, "config-directory", "conf/",
+	flag.StringVar(&parameters.ConfigDirectory, "config-directory", "/etc/webhook/conf/",
 		"config directory (will load all .yaml files in this directory)")
 	flag.StringVar(&parameters.AnnotationNamespace, "annotation-namespace", "admission-webhook.pingcap.com",
 		"Override the AnnotationNamespace")

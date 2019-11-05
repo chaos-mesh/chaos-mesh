@@ -39,7 +39,7 @@ controller-manager:
 	$(GO) -ldflags '$(LDFLAGS)' -o images/chaos-operator/bin/chaos-controller-manager cmd/controller-manager/*.go
 
 admission-controller:
-	$(GO) -ldflags '$(LDFLAGS)' -o images/chaos-operator/bin/chaos-admission-manager cmd/admission-controller/*.go
+	$(GO) -ldflags '$(LDFLAGS)' -o images/chaos-operator/bin/chaos-admission-controller cmd/admission-controller/*.go
 
 test:
 	@echo "Run unit tests"

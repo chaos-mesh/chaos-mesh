@@ -25,7 +25,7 @@ import (
 
 	"github.com/golang/glog"
 
-	"gopkg.in/yaml.v2"
+	"github.com/ghodss/yaml"
 
 	corev1 "k8s.io/api/core/v1"
 )
@@ -43,14 +43,14 @@ const (
 
 // InjectionConfig is a specific instance of a injected config, for a given annotation
 type InjectionConfig struct {
-	Name                  string               `json:"name" yaml:"name"`
-	Containers            []corev1.Container   `json:"containers" yaml:"containers"`
-	Volumes               []corev1.Volume      `json:"volumes" yaml:"volumes"`
-	Environment           []corev1.EnvVar      `json:"env" yaml:"env"`
-	VolumeMounts          []corev1.VolumeMount `json:"volumeMounts" yaml:"volumeMounts"`
-	HostAliases           []corev1.HostAlias   `json:"hostAliases" yaml:"hostAliases"`
-	InitContainers        []corev1.Container   `json:"initContainers" yaml:"initContainers"`
-	ShareProcessNamespace bool                 `json:"shareProcessNamespace" yaml:"shareProcessNamespace"`
+	Name                  string               `json:"name"`
+	Containers            []corev1.Container   `json:"containers"`
+	Volumes               []corev1.Volume      `json:"volumes"`
+	Environment           []corev1.EnvVar      `json:"env"`
+	VolumeMounts          []corev1.VolumeMount `json:"volumeMounts"`
+	HostAliases           []corev1.HostAlias   `json:"hostAliases"`
+	InitContainers        []corev1.Container   `json:"initContainers"`
+	ShareProcessNamespace bool                 `json:"shareProcessNamespace"`
 }
 
 // Config is a struct indicating how a given injection should be configured
