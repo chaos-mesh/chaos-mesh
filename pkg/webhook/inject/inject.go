@@ -59,7 +59,7 @@ func Inject(res *v1beta1.AdmissionRequest, cfg *config.Config) *v1beta1.Admissio
 	glog.V(4).Infof("OldObject: %v", string(res.OldObject.Raw))
 	glog.V(4).Infof("Pod: %v", pod)
 
-	requiredKey, ok := injectRequired(ignoredNamespaces, &pod.ObjectMeta, cfg)
+	requiredKey, ok := injectRequired(&pod.ObjectMeta, cfg)
 	if !ok {
 		glog.Infof("Skipping injection for %s/%s due to policy check", pod.ObjectMeta.Namespace, podName)
 		return &v1beta1.AdmissionResponse{
@@ -100,9 +100,9 @@ func Inject(res *v1beta1.AdmissionRequest, cfg *config.Config) *v1beta1.Admissio
 }
 
 // Check whether the target resource need to be injected and return the required config name
-func injectRequired(ignoredList []string, metadata *metav1.ObjectMeta, cfg *config.Config) (string, bool) {
+func injectRequired(metadata *metav1.ObjectMeta, cfg *config.Config) (string, bool) {
 	// skip special kubernetes system namespaces
-	for _, namespace := range ignoredList {
+	for _, namespace := range ignoredNamespaces {
 		if metadata.Namespace == namespace {
 			glog.Infof("Skip mutation for %v for it' in special namespace:%v", metadata.Name, metadata.Namespace)
 			return "", false
@@ -140,24 +140,33 @@ func injectRequired(ignoredList []string, metadata *metav1.ObjectMeta, cfg *conf
 func createPatch(pod *corev1.Pod, inj *config.InjectionConfig, annotations map[string]string) ([]byte, error) {
 	var patch []patchOperation
 
+	// make sure any injected containers in our config get the EnvVars and VolumeMounts injected
+	// this mutates inj.Containers with our environment vars
 	mutatedInjectedContainers := mergeEnvVars(inj.Environment, inj.Containers)
 	mutatedInjectedContainers = mergeVolumeMounts(inj.VolumeMounts, mutatedInjectedContainers)
 
+	// make sure any injected init containers in our config get the EnvVars and VolumeMounts injected
+	// this mutates inj.InitContainers with our environment vars
 	mutatedInjectedInitContainers := mergeEnvVars(inj.Environment, inj.InitContainers)
 	mutatedInjectedInitContainers = mergeVolumeMounts(inj.VolumeMounts, mutatedInjectedInitContainers)
 
+	// patch containers with our injected containers
 	patch = append(patch, addContainers(pod.Spec.Containers, mutatedInjectedContainers, "/spec/containers")...)
 
+	// patch all existing containers with the env vars and volume mounts
 	patch = append(patch, setEnvironment(pod.Spec.Containers, inj.Environment)...)
 	patch = append(patch, addVolumeMounts(pod.Spec.Containers, inj.VolumeMounts)...)
 
+	// add initContainers, hostAliases and volumes
 	patch = append(patch, addContainers(pod.Spec.InitContainers, mutatedInjectedInitContainers, "/spec/initContainers")...)
 	patch = append(patch, addHostAliases(pod.Spec.HostAliases, inj.HostAliases, "/spec/hostAliases")...)
 	patch = append(patch, addVolumes(pod.Spec.Volumes, inj.Volumes, "/spec/volumes")...)
 
+	// set annotations
 	patch = append(patch, updateAnnotations(pod.Annotations, annotations)...)
 
-	patch = append(patch, updatePIDShare(inj.ShareProcessNamespace)...)
+	// set shareProcessNamespace
+	patch = append(patch, updateShareProcessNamespace(inj.ShareProcessNamespace)...)
 
 	return json.Marshal(patch)
 }
@@ -253,29 +262,18 @@ func addVolumeMounts(target []corev1.Container, addedVolumeMounts []corev1.Volum
 		first := len(container.VolumeMounts) == 0
 		for _, add := range addedVolumeMounts {
 			path := fmt.Sprintf("/spec/containers/%d/volumeMounts", containerIndex)
-			hasKey := false
-			// make sure we dont override any existing volume mounts; we only add, dont replace
-			for _, origVolumeMount := range container.VolumeMounts {
-				if origVolumeMount.Name == add.Name {
-					hasKey = true
-					break
-				}
+			value = add
+			if first {
+				first = false
+				value = []corev1.VolumeMount{add}
+			} else {
+				path = path + "/-"
 			}
-			if !hasKey {
-				// make a patch
-				value = add
-				if first {
-					first = false
-					value = []corev1.VolumeMount{add}
-				} else {
-					path = path + "/-"
-				}
-				patch = append(patch, patchOperation{
-					Op:    "add",
-					Path:  path,
-					Value: value,
-				})
-			}
+			patch = append(patch, patchOperation{
+				Op:    "add",
+				Path:  path,
+				Value: value,
+			})
 		}
 	}
 	return patch
@@ -371,7 +369,7 @@ func updateAnnotations(target map[string]string, added map[string]string) (patch
 	return patch
 }
 
-func updatePIDShare(value bool) (patch []patchOperation) {
+func updateShareProcessNamespace(value bool) (patch []patchOperation) {
 	op := "add"
 	patch = append(patch, patchOperation{
 		Op:    op,
