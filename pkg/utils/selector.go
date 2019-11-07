@@ -73,9 +73,7 @@ func SelectPods(ctx context.Context, c client.Client, selector v1alpha1.Selector
 		return nil, err
 	}
 
-	for _, pod := range podList.Items {
-		pods = append(pods, pod)
-	}
+	pods = append(pods, podList.Items...)
 
 	namespaceSelector, err := parseSelector(strings.Join(selector.Namespaces, ","))
 	if err != nil {
@@ -287,7 +285,7 @@ func RandomFixedIndexes(start, end, count uint) []uint {
 	var indexes []uint
 	m := make(map[uint]uint, count)
 
-	if end-start < 0 {
+	if end < start {
 		return indexes
 	}
 

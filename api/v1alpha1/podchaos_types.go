@@ -116,8 +116,8 @@ type ChaosPhase string
 
 const (
 	ChaosPhaseNone     ChaosPhase = ""
-	ChaosPhaseNormal              = "Normal"
-	ChaosPhaseAbnormal            = "Abnormal"
+	ChaosPhaseNormal   ChaosPhase = "Normal"
+	ChaosPhaseAbnormal ChaosPhase = "Abnormal"
 )
 
 // ExperimentPhase is the current status of chaos experiment.
@@ -125,8 +125,8 @@ type ExperimentPhase string
 
 const (
 	ExperimentPhaseRunning  ExperimentPhase = "Running"
-	ExperimentPhaseFailed                   = "Failed"
-	ExperimentPhaseFinished                 = "Finished"
+	ExperimentPhaseFailed   ExperimentPhase = "Failed"
+	ExperimentPhaseFinished ExperimentPhase = "Finished"
 )
 
 // PodChaosExperimentStatus represents information about the status of the apis experiment.

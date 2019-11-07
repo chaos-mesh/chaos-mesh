@@ -35,7 +35,9 @@ else
 GOBIN=$(shell go env GOBIN)
 endif
 
-all: yaml manager image
+all: yaml build image
+
+build: manager
 
 # Run tests
 test: generate fmt vet manifests
@@ -65,8 +67,16 @@ fmt:
 vet:
 	$(GO) vet ./...
 
+tidy:
+	@echo "go mod tidy"
+	GO111MODULE=on go mod tidy
+	git diff --quiet go.mod go.sum
+
 image:
 	docker build -t pingcap/chaos-operator images/chaos-operator
+
+docker-push: docker
+	docker push "${DOCKER_REGISTRY}/pingcap/chaos-operator:latest"
 
 # Generate code
 generate: controller-gen
@@ -84,3 +94,6 @@ endif
 
 yaml: manifests
 	kustomize build config/default > manifests/config.yaml
+
+lint:
+	goanalysis_metalinter: S1029: failed prerequisites:

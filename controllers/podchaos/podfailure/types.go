@@ -57,6 +57,9 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	}
 
 	duration, err := time.ParseDuration(podchaos.Spec.Duration)
+	if err != nil {
+		return ctrl.Result{}, err
+	}
 
 	if !podchaos.DeletionTimestamp.IsZero() {
 		// This chaos was deleted
@@ -76,7 +79,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 			return ctrl.Result{}, err
 		}
 
-		if pods == nil || len(pods) == 0 {
+		if len(pods) == 0 {
 			err = errors.New("no pod is selected")
 			r.Log.Error(err, "no pod is selected")
 			return ctrl.Result{}, err
@@ -102,6 +105,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		podchaos.Spec.NextRecover.Time = now.Add(duration)
 		podchaos.Status.Experiment.StartTime.Time = now
 		podchaos.Status.Experiment.Pods = []v1alpha1.PodStatus{}
+		podchaos.Status.Experiment.Phase = v1alpha1.ExperimentPhaseRunning
 		for _, pod := range pods {
 			ps := v1alpha1.PodStatus{
 				Namespace: pod.Namespace,
@@ -122,8 +126,9 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		if err != nil {
 			return ctrl.Result{Requeue: true}, err
 		}
-		podchaos.Status.Experiment.EndTime.Time = now
 		podchaos.Spec.NextRecover.Time = time.Time{}
+		podchaos.Status.Experiment.EndTime.Time = now
+		podchaos.Status.Experiment.Phase = v1alpha1.ExperimentPhaseFinished
 	} else {
 		nextTime := podchaos.Spec.NextStart.Time
 
@@ -254,10 +259,7 @@ func (r *Reconciler) recoverPod(ctx context.Context, pod *v1.Pod, podchaos *v1al
 			pod.Annotations = make(map[string]string)
 		}
 
-		_, ok := pod.Annotations[annotationKey]
-		if !ok {
-			continue // FIXME: this `continue` is absolutely useless. Check annotations and return error.
-		}
+		// FIXME: Check annotations and return error.
 	}
 
 	// chaos-operator don't support

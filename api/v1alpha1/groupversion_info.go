@@ -20,12 +20,10 @@ package v1alpha1
 
 import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
-	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 	"sigs.k8s.io/controller-runtime/pkg/scheme"
 )
 
 var (
-	log = logf.Log.WithName("apis-resource")
 	// GroupVersion is group version used to register these objects
 	GroupVersion = schema.GroupVersion{Group: "pingcap.com", Version: "v1alpha1"}
 
