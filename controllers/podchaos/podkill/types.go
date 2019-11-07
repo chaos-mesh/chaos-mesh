@@ -48,9 +48,9 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		return ctrl.Result{}, err
 	}
 
-	shouldAct := podchaos.Spec.NextAction.Time.Before(now)
+	shouldAct := podchaos.Spec.NextStart.Time.Before(now)
 	if !shouldAct {
-		return ctrl.Result{RequeueAfter: podchaos.Spec.NextAction.Sub(now)}, nil
+		return ctrl.Result{RequeueAfter: podchaos.Spec.NextStart.Sub(now)}, nil
 	} else {
 		pods, err := utils.SelectPods(ctx, r.Client, podchaos.Spec.Selector)
 		if err != nil {
@@ -75,9 +75,8 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 			g.Go(func() error {
 				r.Log.Info("Deleting", "namespace", pod.Namespace, "name", pod.Name)
 
-				periodSeconds := int64(0)
 				if err := r.Delete(ctx, &pod, &client.DeleteOptions{
-					GracePeriodSeconds: &periodSeconds, // PeriodSeconds has to be set specifically
+					GracePeriodSeconds: new(int64), // PeriodSeconds has to be set specifically
 				}); err != nil {
 					r.Log.Error(err, "unable to delete pod")
 					return err
@@ -95,7 +94,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 				return ctrl.Result{}, err
 			}
 
-			podchaos.Spec.NextAction.Time = *next
+			podchaos.Spec.NextStart.Time = *next
 
 			podchaos.Status.Experiment.StartTime.Time = now
 			podchaos.Status.Experiment.EndTime.Time = now

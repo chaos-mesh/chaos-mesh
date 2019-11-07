@@ -83,8 +83,12 @@ type PodChaosSpec struct {
 	GracePeriodSeconds int64 `json:"gracePeriodSeconds"`
 
 	// Next time when this action will be applied again
-	// +optional
-	NextAction metav1.Time `json:"nextAction,omitempty"`
+	// +nullable
+	NextStart metav1.Time `json:"nextStart,omitempty"`
+
+	// Next time when this action will be recovered
+	// +nullable
+	NextRecover metav1.Time `json:"nextRecover,omitempty"`
 }
 
 // +kubebuilder:object:root=true
@@ -127,11 +131,16 @@ const (
 
 // PodChaosExperimentStatus represents information about the status of the apis experiment.
 type PodChaosExperimentStatus struct {
-	Phase     ExperimentPhase `json:"phase"`
-	Reason    string          `json:"reason"`
-	StartTime metav1.Time     `json:"startTime"`
-	EndTime   metav1.Time     `json:"endTime"`
-	Pods      []PodStatus     `json:"podChaos"`
+	// +optional
+	Phase ExperimentPhase `json:"phase,omitempty"`
+	// +optional
+	Reason string `json:"reason,omitempty"`
+	// +nullable
+	StartTime metav1.Time `json:"startTime,omitempty"`
+	// +nullable
+	EndTime metav1.Time `json:"endTime,omitempty"`
+	// +optional
+	Pods []PodStatus `json:"podChaos,omitempty"`
 }
 
 func (pe *PodChaosExperimentStatus) SetPods(pod PodStatus) {

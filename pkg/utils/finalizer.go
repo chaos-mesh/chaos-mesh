@@ -14,5 +14,9 @@
 package utils
 
 func RemoveFromFinalizer(finalizers []string, index int) []string {
-	return append(finalizers[:index], finalizers[index+1:]...)
+	if index+1 < len(finalizers) {
+		return append(finalizers[:index], finalizers[index+1:]...)
+	} else {
+		return finalizers[:index]
+	}
 }

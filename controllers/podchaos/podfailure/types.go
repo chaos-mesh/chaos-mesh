@@ -15,8 +15,8 @@ package podfailure
 
 import (
 	"context"
-	"fmt"
 	"errors"
+	"fmt"
 	"golang.org/x/sync/errgroup"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -24,10 +24,10 @@ import (
 	"github.com/go-logr/logr"
 	"github.com/pingcap/chaos-operator/api/v1alpha1"
 	"github.com/pingcap/chaos-operator/pkg/utils"
-	ctrl "sigs.k8s.io/controller-runtime"
 	k8sError "k8s.io/apimachinery/pkg/api/errors"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 	"k8s.io/client-go/tools/cache"
+	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 	"time"
 )
 
@@ -47,7 +47,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	var err error
 	now := time.Now()
 
-	r.Log.Info("reconciling pod failure	")
+	r.Log.Info("reconciling pod failure")
 	ctx := context.Background()
 
 	var podchaos v1alpha1.PodChaos
@@ -60,12 +60,16 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 
 	if !podchaos.DeletionTimestamp.IsZero() {
 		// This chaos was deleted
+		r.Log.Info("Removing self")
+
 		err = r.cleanFinalizersAndRecover(ctx, &podchaos)
 		if err != nil {
 			return ctrl.Result{Requeue: true}, err
 		}
-	} else if podchaos.Spec.NextAction.Time.Before(now) {
+	} else if podchaos.Spec.NextStart.Time.Before(now) {
 		// Start failure action
+		r.Log.Info("Performing Action")
+
 		pods, err := utils.SelectPods(ctx, r.Client, podchaos.Spec.Selector)
 		if err != nil {
 			r.Log.Error(err, "fail to get selected pods")
@@ -85,7 +89,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		}
 
 		err = r.failAllPods(ctx, filteredPod, &podchaos)
-		if  err != nil  {
+		if err != nil {
 			return ctrl.Result{}, err
 		}
 
@@ -94,7 +98,8 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 			return ctrl.Result{}, err
 		}
 
-		podchaos.Spec.NextAction.Time = *next
+		podchaos.Spec.NextStart.Time = *next
+		podchaos.Spec.NextRecover.Time = now.Add(duration)
 		podchaos.Status.Experiment.StartTime.Time = now
 		podchaos.Status.Experiment.Pods = []v1alpha1.PodStatus{}
 		for _, pod := range pods {
@@ -109,15 +114,28 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 
 			podchaos.Status.Experiment.Pods = append(podchaos.Status.Experiment.Pods, ps)
 		}
-	} else if podchaos.Status.Experiment.StartTime.Add(duration).Before(now) {
+	} else if (!podchaos.Spec.NextRecover.IsZero()) && podchaos.Spec.NextRecover.Time.Before(now) {
 		// Start recover
+		r.Log.Info("Recovering")
+
 		err = r.cleanFinalizersAndRecover(ctx, &podchaos)
 		if err != nil {
 			return ctrl.Result{Requeue: true}, err
 		}
+		podchaos.Status.Experiment.EndTime.Time = now
+		podchaos.Spec.NextRecover.Time = time.Time{}
+	} else {
+		nextTime := podchaos.Spec.NextStart.Time
+
+		if !podchaos.Spec.NextRecover.IsZero() && podchaos.Spec.NextRecover.Time.Before(nextTime) {
+			nextTime = podchaos.Spec.NextRecover.Time
+		}
+		duration := nextTime.Sub(now)
+		r.Log.Info("requeue request", "after", duration)
+
+		return ctrl.Result{RequeueAfter: duration}, nil
 	}
 
-	podchaos.Status.Experiment.EndTime.Time = now
 	if err := r.Update(ctx, &podchaos); err != nil {
 		r.Log.Error(err, "unable to update chaosctl status")
 		return ctrl.Result{}, err
@@ -140,7 +158,7 @@ func (r *Reconciler) cleanFinalizersAndRecover(ctx context.Context, podchaos *v1
 		var pod v1.Pod
 		err = r.Get(ctx, types.NamespacedName{
 			Namespace: ns,
-			Name: name,
+			Name:      name,
 		}, &pod)
 
 		if err != nil {
@@ -148,7 +166,8 @@ func (r *Reconciler) cleanFinalizersAndRecover(ctx context.Context, podchaos *v1
 				return err
 			}
 
-			r.Log.Info("Pod not found", "namespace", pod.Namespace, "name", pod.Name)
+			r.Log.Info("Pod not found", "namespace", ns, "name", name)
+			podchaos.Finalizers = utils.RemoveFromFinalizer(podchaos.Finalizers, index)
 			continue
 		}
 
@@ -167,8 +186,6 @@ func (r *Reconciler) failAllPods(ctx context.Context, pods []v1.Pod, podchaos *v
 	g := errgroup.Group{}
 	for _, pod := range pods {
 		g.Go(func() error {
-			r.Log.Info("Failing", "namespace", pod.Namespace, "name", pod.Name)
-
 			key, err := cache.MetaNamespaceKeyFunc(&pod)
 			if err != nil {
 				return err
@@ -188,6 +205,8 @@ func (r *Reconciler) failAllPods(ctx context.Context, pods []v1.Pod, podchaos *v
 }
 
 func (r *Reconciler) failPod(ctx context.Context, pod *v1.Pod, podchaos *v1alpha1.PodChaos) error {
+	r.Log.Info("Failing", "namespace", pod.Namespace, "name", pod.Name)
+
 	// TODO: check the annotations or others in case that this pod is used by other chaos
 	for index := range pod.Spec.Containers {
 		originImage := pod.Spec.Containers[index].Image
@@ -201,7 +220,7 @@ func (r *Reconciler) failPod(ctx context.Context, pod *v1.Pod, podchaos *v1alpha
 		if _, ok := pod.Annotations[key]; ok {
 			return fmt.Errorf("annotation %s exist", key)
 		}
-		pod.Annotations[key] =originImage
+		pod.Annotations[key] = originImage
 		pod.Spec.Containers[index].Image = fakeImage
 	}
 
@@ -216,7 +235,7 @@ func (r *Reconciler) failPod(ctx context.Context, pod *v1.Pod, podchaos *v1alpha
 		HostIP:    pod.Status.HostIP,
 		PodIP:     pod.Status.PodIP,
 		Action:    string(podchaos.Spec.Action),
-		Message:   podFailureActionMsg,
+		Message:   fmt.Sprintf(podFailureActionMsg, podchaos.Spec.Duration),
 	}
 
 	podchaos.Status.Experiment.Pods = append(podchaos.Status.Experiment.Pods, ps)
@@ -225,6 +244,8 @@ func (r *Reconciler) failPod(ctx context.Context, pod *v1.Pod, podchaos *v1alpha
 }
 
 func (r *Reconciler) recoverPod(ctx context.Context, pod *v1.Pod, podchaos *v1alpha1.PodChaos) error {
+	r.Log.Info("Recovering", "namespace", pod.Namespace, "name", pod.Name)
+
 	for index := range pod.Spec.Containers {
 		name := pod.Spec.Containers[index].Name
 		annotationKey := utils.GenAnnotationKeyForImage(podchaos, name)
@@ -240,5 +261,7 @@ func (r *Reconciler) recoverPod(ctx context.Context, pod *v1.Pod, podchaos *v1al
 	}
 
 	// chaos-operator don't support
-	return r.Delete(ctx, pod)
+	return r.Delete(ctx, pod, &client.DeleteOptions{
+		GracePeriodSeconds: new(int64), // PeriodSeconds has to be set specifically
+	})
 }
