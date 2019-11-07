@@ -45,13 +45,13 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	case v1alpha1.PodKillAction:
 		reconciler := podkill.Reconciler{
 			Client: r.Client,
-			Log:    r.Log,
+			Log:    r.Log.WithValues("podkill", req.NamespacedName),
 		}
 		return reconciler.Reconcile(req)
 	case v1alpha1.PodFailureAction:
 		reconciler := podfailure.Reconciler{
 			Client: r.Client,
-			Log:    r.Log,
+			Log:    r.Log.WithValues("podfailure", req.NamespacedName),
 		}
 		return reconciler.Reconcile(req)
 	default:

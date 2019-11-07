@@ -39,13 +39,12 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	var err error
 	now := time.Now()
 
-	log := r.Log.WithValues("podkill", req.NamespacedName)
-	log.Info("reconciling chaos pod")
+	r.Log.Info("reconciling pod kill")
 	ctx := context.Background()
 
 	var podchaos v1alpha1.PodChaos
 	if err = r.Get(ctx, req.NamespacedName, &podchaos); err != nil {
-		log.Error(err, "unable to get podchaos")
+		r.Log.Error(err, "unable to get podchaos")
 		return ctrl.Result{}, err
 	}
 
@@ -55,32 +54,32 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	} else {
 		pods, err := utils.SelectPods(ctx, r.Client, podchaos.Spec.Selector)
 		if err != nil {
-			log.Error(err, "fail to get selected pods")
+			r.Log.Error(err, "fail to get selected pods")
 			return ctrl.Result{}, err
 		}
 
 		if pods == nil || len(pods) == 0 {
 			err = errors.New("no pod is selected")
-			log.Error(err, "no pod is selected")
+			r.Log.Error(err, "no pod is selected")
 			return ctrl.Result{}, err
 		}
 
 		filteredPod, err := utils.GeneratePods(pods, podchaos.Spec.Mode, podchaos.Spec.Value)
 		if err != nil {
-			log.Error(err, "fail to generate pods")
+			r.Log.Error(err, "fail to generate pods")
 			return ctrl.Result{}, err
 		}
 
 		g := errgroup.Group{}
 		for _, pod := range filteredPod {
 			g.Go(func() error {
-				log.Info("Deleting", "namespace", pod.Namespace, "name", pod.Name)
+				r.Log.Info("Deleting", "namespace", pod.Namespace, "name", pod.Name)
 
 				periodSeconds := int64(0)
 				if err := r.Delete(ctx, &pod, &client.DeleteOptions{
 					GracePeriodSeconds: &periodSeconds, // PeriodSeconds has to be set specifically
 				}); err != nil {
-					log.Error(err, "unable to delete pod")
+					r.Log.Error(err, "unable to delete pod")
 					return err
 				} else {
 					return nil
@@ -115,7 +114,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 				podchaos.Status.Experiment.Pods = append(podchaos.Status.Experiment.Pods, ps)
 			}
 			if err := r.Update(ctx, &podchaos); err != nil {
-				log.Error(err, "unable to update chaosctl status")
+				r.Log.Error(err, "unable to update chaosctl status")
 				return ctrl.Result{}, err
 			}
 
