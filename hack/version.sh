@@ -21,7 +21,7 @@ function chaos_operator::version::get_version_vars() {
         GIT_TREE_STATE="dirty"
       fi
     fi
-  
+
     # Use git describe to find the version based on tags.
     if [[ -n ${GIT_VERSION-} ]] || GIT_VERSION=$(git describe --tags --abbrev=14 "${GIT_COMMIT}^{commit}" 2>/dev/null); then
       # This translates the "git describe" to an actual semver.org

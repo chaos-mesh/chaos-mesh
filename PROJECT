@@ -1,0 +1,7 @@
+version: "2"
+domain: pingcap.com
+repo: github.com/pingcap/chaos-operator
+resources:
+- group: chaosoperator
+  version: v1alpha1
+  kind: PodChaos

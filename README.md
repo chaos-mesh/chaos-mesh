@@ -31,7 +31,7 @@ to extend Kubernetes. Therefore, to use Chaos Operator, you must first create th
 
 ```bash
 $ kubectl apply -f manifests/crds/
-$ kubectl get crd podchaoses.pingcap.com
+$ kubectl get crd podchaos.pingcap.com
 ```
 
 #### Install Chaos Operator

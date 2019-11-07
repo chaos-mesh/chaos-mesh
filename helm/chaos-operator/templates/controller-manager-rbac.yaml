@@ -47,7 +47,7 @@ rules:
   verbs: ["*"]
 - apiGroups: ["pingcap.com"]
   resources:
-  - podchaoses
+  - podchaos
   verbs: ["*"]
 {{- end }}
 - apiGroups: [""]
@@ -113,7 +113,7 @@ rules:
   verbs: ["*"]
 - apiGroups: ["pingcap.com"]
   resources:
-  - podchaoses
+  - podchaos
   verbs: ["*"]
 ---
 kind: RoleBinding
