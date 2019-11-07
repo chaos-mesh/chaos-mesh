@@ -45,11 +45,11 @@ test: generate fmt vet manifests
 
 # Build manager binary
 manager: generate fmt vet
-	$(GO) build -ldflags '$(LDFLAGS)' -o images/chaos-operator/bin/chaos-controller-manager main.go
+	$(GO) build -ldflags '$(LDFLAGS)' -o images/chaos-operator/bin/chaos-controller-manager ./cmd/controller-manager/main.go
 
 # Run against the configured Kubernetes cluster in ~/.kube/config
 run: generate fmt vet manifests
-	$(GO) run ./main.go
+	$(GO) run ./cmd/controller-manager/main.go
 
 # Install CRDs into a cluster
 install: manifests
@@ -94,6 +94,3 @@ endif
 
 yaml: manifests
 	kustomize build config/default > manifests/config.yaml
-
-lint:
-	goanalysis_metalinter: S1029: failed prerequisites:

@@ -253,7 +253,7 @@ func (r *Reconciler) recoverPod(ctx context.Context, pod *v1.Pod, podchaos *v1al
 
 	for index := range pod.Spec.Containers {
 		name := pod.Spec.Containers[index].Name
-		annotationKey := utils.GenAnnotationKeyForImage(podchaos, name)
+		_ = utils.GenAnnotationKeyForImage(podchaos, name)
 
 		if pod.Annotations == nil {
 			pod.Annotations = make(map[string]string)

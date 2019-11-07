@@ -2,7 +2,7 @@ namePrefix: chaos-operator-
 
 bases:
 - ../crd
-# TODO: setup webhook for chaos-operator
 #- ../webhook
+# TODO: Use kustomize to generate webhook
 
 vars:

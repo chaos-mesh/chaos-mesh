@@ -14,6 +14,7 @@ Before deploying Chaos Operator, make sure the following items are installed on 
 * Kubernetes >= v1.12
 * [RBAC](https://kubernetes.io/docs/admin/authorization/rbac) enabled (optional)
 * Helm version >= v2.8.2 and < v3.0.0
+* Protobuf version >= v3.6.1 and < v3.7.0 and go support
 
 ### Install Chaos Operator
 

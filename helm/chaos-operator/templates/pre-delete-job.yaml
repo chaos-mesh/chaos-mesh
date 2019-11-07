@@ -1,0 +1,34 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: webhook-del
+  labels:
+    app.kubernetes.io/name: {{ template "chaos-operator.name" . }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/component: webhook-del
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+"  "_" }}
+  annotations:
+    # This is what defines this resource as a hook. Without this line, the
+    # job is considered part of the release.
+    "helm.sh/hook": pre-delete
+    "helm.sh/hook-weight": "-1"
+    "helm.sh/hook-delete-policy": hook-succeeded,hook-failed
+spec:
+  template:
+    metadata:
+      name: webhook-del
+    spec:
+      restartPolicy: Never
+      serviceAccountName: {{ .Values.controllerManager.serviceAccount }}
+      containers:
+        - name: "{{.Release.Name}}-job-del"
+          image: bitnami/kubectl:latest
+          imagePullPolicy: IfNotPresent
+          command:
+            - "sh"
+            - "-c"
+            - |
+              set -e
+              kubectl delete mutatingwebhookconfigurations.admissionregistration.k8s.io chaos-operator-sidecar-injector || true // Auto Delete mutatingwebhookconfigurations
+              kubectl delete secrets -n {{ .Release.Namespace }} webhook-certs || true
