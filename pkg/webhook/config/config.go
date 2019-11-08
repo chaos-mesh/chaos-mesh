@@ -116,10 +116,11 @@ func (c *Config) GetRequestedConfig(key string) (*InjectionConfig, error) {
 // LoadInjectionConfigFromFilePath returns a InjectionConfig given a yaml file on disk
 func LoadInjectionConfigFromFilePath(configFile string) (*InjectionConfig, error) {
 	f, err := os.Open(configFile)
-	defer f.Close()
 	if err != nil {
 		return nil, fmt.Errorf("error loading injection config from file %s: %s", configFile, err.Error())
 	}
+	defer f.Close()
+	
 	log.V(3).Info("Loading injection config", "file", configFile)
 	return LoadInjectionConfig(f)
 }
