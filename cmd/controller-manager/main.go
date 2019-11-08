@@ -15,6 +15,7 @@ package main
 
 import (
 	"flag"
+	"github.com/pingcap/chaos-operator/pkg/webhook/config"
 	"os"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
 
@@ -72,8 +73,14 @@ func main() {
 
 	setupLog.Info("setting up webhook server")
 	hookServer := mgr.GetWebhookServer()
-	hookServer.CertDir = "/etc/webhook/certs" // TODO: customize cert dir
-	hookServer.Register("/inject-v1-pod", &webhook.Admission{Handler: &apiWebhook.PodInjector{}})
+	hookServer.CertDir = "/etc/webhook/certs"                             // TODO: customize cert dir
+	webhookConfig, err := config.LoadConfigDirectory("/etc/webhook/conf") // TODO: customize webhook config dir
+	if err != nil {
+		setupLog.Error(err, "load webhook config error")
+	}
+	hookServer.Register("/inject-v1-pod", &webhook.Admission{Handler: &apiWebhook.PodInjector{
+		Config: webhookConfig,
+	}})
 
 	// +kubebuilder:scaffold:builder
 

@@ -15,6 +15,8 @@ package webhook
 
 import (
 	"context"
+	"github.com/pingcap/chaos-operator/pkg/webhook/config"
+	"github.com/pingcap/chaos-operator/pkg/webhook/inject"
 	v1 "k8s.io/api/core/v1"
 	"net/http"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -29,6 +31,7 @@ var log = ctrl.Log.WithName("inject-webhook")
 type PodInjector struct {
 	client  client.Client
 	decoder *admission.Decoder
+	Config  *config.Config
 }
 
 func (v *PodInjector) Handle(ctx context.Context, req admission.Request) admission.Response {
@@ -39,9 +42,11 @@ func (v *PodInjector) Handle(ctx context.Context, req admission.Request) admissi
 		return admission.Errored(http.StatusBadRequest, err)
 	}
 
-	log.Info("webhook facing pod:", "pod", pod)
+	log.Info("get request from pod:", "pod", pod)
 
-	return admission.Allowed("")
+	return admission.Response{
+		AdmissionResponse: *inject.Inject(&req.AdmissionRequest, v.Config),
+	}
 }
 
 func (v *PodInjector) InjectClient(c client.Client) error {

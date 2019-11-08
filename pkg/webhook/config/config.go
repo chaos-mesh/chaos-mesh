@@ -20,14 +20,16 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	ctrl "sigs.k8s.io/controller-runtime"
 	"strings"
 	"sync"
 
 	"github.com/ghodss/yaml"
-	"github.com/golang/glog"
 
 	corev1 "k8s.io/api/core/v1"
 )
+
+var log = ctrl.Log.WithName("inject-webhook")
 
 var (
 	// ErrMissingName ..
@@ -72,7 +74,7 @@ func LoadConfigDirectory(path string) (*Config, error) {
 	for _, p := range matches {
 		c, err := LoadInjectionConfigFromFilePath(p)
 		if err != nil {
-			glog.Errorf("Error reading injection config from %s: %v", p, err)
+			log.Error(err, "Error reading injection config", "from", p)
 			return nil, err
 		}
 		cfg.Injections[c.Name] = c
@@ -86,7 +88,7 @@ func LoadConfigDirectory(path string) (*Config, error) {
 		cfg.AnnotationNamespace = annotationNamespaceDefault
 	}
 
-	glog.V(2).Infof("Loaded %d injection configs from %s", len(cfg.Injections), glob)
+	log.V(2).Info("Loaded injection configs", "len", len(cfg.Injections), "from", glob)
 
 	return &cfg, nil
 }
@@ -118,7 +120,7 @@ func LoadInjectionConfigFromFilePath(configFile string) (*InjectionConfig, error
 	if err != nil {
 		return nil, fmt.Errorf("error loading injection config from file %s: %s", configFile, err.Error())
 	}
-	glog.V(3).Infof("Loading injection config from file %s", configFile)
+	log.V(3).Info("Loading injection config", "file", configFile)
 	return LoadInjectionConfig(f)
 }
 
@@ -138,7 +140,7 @@ func LoadInjectionConfig(reader io.Reader) (*InjectionConfig, error) {
 		return nil, ErrMissingName
 	}
 
-	glog.V(3).Infof("Loaded injection config %s sha256sum=%x", cfg.Name, sha256.Sum256(data))
+	log.V(3).Info("Loaded injection configx", "name", cfg.Name, "sha256sum", sha256.Sum256(data))
 
 	return &cfg, nil
 }

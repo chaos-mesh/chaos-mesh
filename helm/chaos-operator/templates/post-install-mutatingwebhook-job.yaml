@@ -33,7 +33,7 @@ spec:
               K8S_NAMESPACE={{ .Release.Namespace }}
               CA_BUNDLE=$(kubectl get configmap -n kube-system extension-apiserver-authentication -o=jsonpath='{.data.client-ca-file}' | base64 | tr -d '\n')
 
-              if [ ${CA_BUNDLE} = '' ]; then
+              if [ ! $CA_BUNDLE ]; then
                   echo "ERROR: CA_BUNDLE is empty!" >&2
                   exit 1
               fi
