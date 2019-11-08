@@ -36,11 +36,11 @@ type NetworkChaosReconciler struct {
 
 func (r *NetworkChaosReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	_ = context.Background()
-	_ = r.Log.WithValues("networkchaos", req.NamespacedName)
+	logger := r.Log.WithValues("reconciler", "networkchaos")
 
 	reconciler := networkchaos.Reconciler{
 		Client: r.Client,
-		Log:    r.Log,
+		Log:    logger,
 	}
 
 	return reconciler.Reconcile(req)

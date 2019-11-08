@@ -63,6 +63,10 @@ func Cancel(netem *pb.Netem, pid uint32) error {
 	}
 
 	handle, err := netlink.NewHandleAt(ns)
+	if err != nil {
+		glog.Errorf("error while creating new handle at namespace %d %v", int(ns), err)
+		return errors.Trace(err)
+	}
 
 	link, err := handle.LinkByName("eth0") // TODO: check whether interface name is eth0
 	if err != nil {

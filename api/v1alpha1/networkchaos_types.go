@@ -17,6 +17,7 @@ package v1alpha1
 
 import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"time"
 )
 
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
@@ -88,6 +89,39 @@ type NetworkChaos struct {
 	// +optional
 	// Most recently observed status of the chaos experiment about pods
 	Status NetworkChaosStatus `json:"status"`
+}
+
+func (in *NetworkChaos) IsDeleted() bool {
+	return !in.DeletionTimestamp.IsZero()
+}
+
+func (in *NetworkChaos) GetDuration() (time.Duration, error) {
+	duration, err := time.ParseDuration(in.Spec.Duration)
+	if err != nil {
+		return time.Hour * 0, err
+	}
+
+	return duration, nil
+}
+
+func (in *NetworkChaos) GetNextStart() time.Time {
+	return in.Spec.NextStart.Time
+}
+
+func (in *NetworkChaos) SetNextStart(t time.Time) {
+	in.Spec.NextStart.Time = t
+}
+
+func (in *NetworkChaos) GetNextRecover() time.Time {
+	return in.Spec.NextRecover.Time
+}
+
+func (in *NetworkChaos) SetNextRecover(t time.Time) {
+	in.Spec.NextRecover.Time = t
+}
+
+func (in *NetworkChaos) GetScheduler() SchedulerSpec {
+	return in.Spec.Scheduler
 }
 
 // DelaySpec defines detail of a delay action

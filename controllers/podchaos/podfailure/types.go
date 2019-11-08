@@ -17,6 +17,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/pingcap/chaos-operator/controllers/twophase"
 	"golang.org/x/sync/errgroup"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -38,115 +39,91 @@ const (
 	podFailureActionMsg = "pause pod duration %s"
 )
 
+func NewConciler(c client.Client, log logr.Logger, req ctrl.Request) twophase.Reconciler {
+	return twophase.Reconciler{
+		InnerReconciler: &Reconciler{
+			Client: c,
+			Log:    log,
+		},
+		Client: c,
+		Log:    log,
+	}
+}
+
 type Reconciler struct {
 	client.Client
 	Log logr.Logger
 }
 
-func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
-	var err error
-	now := time.Now()
+func (r *Reconciler) Object() twophase.InnerObject {
+	return &v1alpha1.PodChaos{}
+}
 
-	r.Log.Info("reconciling pod failure")
-	ctx := context.Background()
-
-	var podchaos v1alpha1.PodChaos
-	if err = r.Get(ctx, req.NamespacedName, &podchaos); err != nil {
-		r.Log.Error(err, "unable to get podchaos")
-		return ctrl.Result{}, err
+func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos twophase.InnerObject) error {
+	podchaos, ok := chaos.(*v1alpha1.PodChaos)
+	if !ok {
+		err := errors.New("chaos is not PodChaos")
+		r.Log.Error(err, "chaos is not PodChaos", "chaos", chaos)
 	}
 
-	duration, err := time.ParseDuration(podchaos.Spec.Duration)
+	pods, err := utils.SelectPods(ctx, r.Client, podchaos.Spec.Selector)
 	if err != nil {
-		return ctrl.Result{}, err
+		r.Log.Error(err, "fail to get selected pods")
+		return err
 	}
 
-	if !podchaos.DeletionTimestamp.IsZero() {
-		// This chaos was deleted
-		r.Log.Info("Removing self")
-
-		err = r.cleanFinalizersAndRecover(ctx, &podchaos)
-		if err != nil {
-			return ctrl.Result{Requeue: true}, err
-		}
-	} else if podchaos.Spec.NextStart.Time.Before(now) {
-		// Start failure action
-		r.Log.Info("Performing Action")
-
-		pods, err := utils.SelectPods(ctx, r.Client, podchaos.Spec.Selector)
-		if err != nil {
-			r.Log.Error(err, "fail to get selected pods")
-			return ctrl.Result{}, err
-		}
-
-		if len(pods) == 0 {
-			err = errors.New("no pod is selected")
-			r.Log.Error(err, "no pod is selected")
-			return ctrl.Result{}, err
-		}
-
-		filteredPod, err := utils.GeneratePods(pods, podchaos.Spec.Mode, podchaos.Spec.Value)
-		if err != nil {
-			r.Log.Error(err, "fail to generate pods")
-			return ctrl.Result{}, err
-		}
-
-		err = r.failAllPods(ctx, filteredPod, &podchaos)
-		if err != nil {
-			return ctrl.Result{}, err
-		}
-
-		next, err := utils.NextTime(podchaos.Spec.Scheduler, now)
-		if err != nil {
-			return ctrl.Result{}, err
-		}
-
-		podchaos.Spec.NextStart.Time = *next
-		podchaos.Spec.NextRecover.Time = now.Add(duration)
-		podchaos.Status.Experiment.StartTime.Time = now
-		podchaos.Status.Experiment.Pods = []v1alpha1.PodStatus{}
-		podchaos.Status.Experiment.Phase = v1alpha1.ExperimentPhaseRunning
-		for _, pod := range pods {
-			ps := v1alpha1.PodStatus{
-				Namespace: pod.Namespace,
-				Name:      pod.Name,
-				HostIP:    pod.Status.HostIP,
-				PodIP:     pod.Status.PodIP,
-				Action:    string(podchaos.Spec.Action),
-				Message:   fmt.Sprintf(podFailureActionMsg, podchaos.Spec.Duration),
-			}
-
-			podchaos.Status.Experiment.Pods = append(podchaos.Status.Experiment.Pods, ps)
-		}
-	} else if (!podchaos.Spec.NextRecover.IsZero()) && podchaos.Spec.NextRecover.Time.Before(now) {
-		// Start recover
-		r.Log.Info("Recovering")
-
-		err = r.cleanFinalizersAndRecover(ctx, &podchaos)
-		if err != nil {
-			return ctrl.Result{Requeue: true}, err
-		}
-		podchaos.Spec.NextRecover.Time = time.Time{}
-		podchaos.Status.Experiment.EndTime.Time = now
-		podchaos.Status.Experiment.Phase = v1alpha1.ExperimentPhaseFinished
-	} else {
-		nextTime := podchaos.Spec.NextStart.Time
-
-		if !podchaos.Spec.NextRecover.IsZero() && podchaos.Spec.NextRecover.Time.Before(nextTime) {
-			nextTime = podchaos.Spec.NextRecover.Time
-		}
-		duration := nextTime.Sub(now)
-		r.Log.Info("requeue request", "after", duration)
-
-		return ctrl.Result{RequeueAfter: duration}, nil
+	if len(pods) == 0 {
+		err = errors.New("no pod is selected")
+		r.Log.Error(err, "no pod is selected")
+		return err
 	}
 
-	if err := r.Update(ctx, &podchaos); err != nil {
-		r.Log.Error(err, "unable to update chaosctl status")
-		return ctrl.Result{}, err
+	filteredPod, err := utils.GeneratePods(pods, podchaos.Spec.Mode, podchaos.Spec.Value)
+	if err != nil {
+		r.Log.Error(err, "fail to generate pods")
+		return err
 	}
 
-	return ctrl.Result{}, nil
+	err = r.failAllPods(ctx, filteredPod, podchaos)
+	if err != nil {
+		return err
+	}
+
+	podchaos.Status.Experiment.StartTime.Time = time.Now()
+	podchaos.Status.Experiment.Pods = []v1alpha1.PodStatus{}
+	podchaos.Status.Experiment.Phase = v1alpha1.ExperimentPhaseRunning
+
+	for _, pod := range pods {
+		ps := v1alpha1.PodStatus{
+			Namespace: pod.Namespace,
+			Name:      pod.Name,
+			HostIP:    pod.Status.HostIP,
+			PodIP:     pod.Status.PodIP,
+			Action:    string(podchaos.Spec.Action),
+			Message:   fmt.Sprintf(podFailureActionMsg, podchaos.Spec.Duration),
+		}
+
+		podchaos.Status.Experiment.Pods = append(podchaos.Status.Experiment.Pods, ps)
+	}
+
+	return nil
+}
+
+func (r *Reconciler) Recover(ctx context.Context, req ctrl.Request, chaos twophase.InnerObject) error {
+	podchaos, ok := chaos.(*v1alpha1.PodChaos)
+	if !ok {
+		err := errors.New("chaos is not PodChaos")
+		r.Log.Error(err, "chaos is not PodChaos", "chaos", chaos)
+	}
+
+	err := r.cleanFinalizersAndRecover(ctx, podchaos)
+	if err != nil {
+		return err
+	}
+	podchaos.Status.Experiment.EndTime.Time = time.Now()
+	podchaos.Status.Experiment.Phase = v1alpha1.ExperimentPhaseFinished
+
+	return nil
 }
 
 func (r *Reconciler) cleanFinalizersAndRecover(ctx context.Context, podchaos *v1alpha1.PodChaos) error {

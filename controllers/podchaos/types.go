@@ -31,13 +31,12 @@ type Reconciler struct {
 }
 
 func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
-	log := r.Log.WithValues("podchaos", req.NamespacedName)
-	log.Info("reconciling podchaos")
+	r.Log.Info("reconciling podchaos")
 	ctx := context.Background()
 
 	var podchaos v1alpha1.PodChaos
 	if err := r.Get(ctx, req.NamespacedName, &podchaos); err != nil {
-		log.Error(err, "unable to get podchaos")
+		r.Log.Error(err, "unable to get podchaos")
 		return ctrl.Result{}, err
 	}
 
@@ -45,18 +44,15 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	case v1alpha1.PodKillAction:
 		reconciler := podkill.Reconciler{
 			Client: r.Client,
-			Log:    r.Log.WithValues("podkill", req.NamespacedName),
+			Log:    r.Log.WithValues("reconciler", "pod-kill"),
 		}
 		return reconciler.Reconcile(req)
 	case v1alpha1.PodFailureAction:
-		reconciler := podfailure.Reconciler{
-			Client: r.Client,
-			Log:    r.Log.WithValues("podfailure", req.NamespacedName),
-		}
+		reconciler := podfailure.NewConciler(r.Client, r.Log.WithValues("reconciler", "pod-failure"), req)
 		return reconciler.Reconcile(req)
 	default:
 		err := fmt.Errorf("unknown action %s", string(podchaos.Spec.Action))
-		log.Error(err, "unknown action %s", string(podchaos.Spec.Action))
+		r.Log.Error(err, "unknown action %s", string(podchaos.Spec.Action))
 
 		return ctrl.Result{}, err
 	}

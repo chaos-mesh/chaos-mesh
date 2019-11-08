@@ -37,11 +37,11 @@ type PodChaosReconciler struct {
 
 func (r *PodChaosReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	_ = context.Background()
-	_ = r.Log.WithValues("podchaos", req.NamespacedName)
+	logger := r.Log.WithValues("reconciler", "podchaos")
 
 	reconciler := podchaos.Reconciler{
 		Client: r.Client,
-		Log:    r.Log,
+		Log:    logger,
 	}
 
 	return reconciler.Reconcile(req)

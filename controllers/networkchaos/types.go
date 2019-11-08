@@ -30,26 +30,22 @@ type Reconciler struct {
 }
 
 func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
-	log := r.Log.WithValues("networkchaos", req.NamespacedName)
-	log.Info("reconciling networkchaos")
+	r.Log.Info("reconciling networkchaos")
 	ctx := context.Background()
 
 	var networkchaos v1alpha1.NetworkChaos
 	if err := r.Get(ctx, req.NamespacedName, &networkchaos); err != nil {
-		log.Error(err, "unable to get networkchaos")
+		r.Log.Error(err, "unable to get networkchaos")
 		return ctrl.Result{}, err
 	}
 
 	switch networkchaos.Spec.Action {
 	case v1alpha1.DelayAction:
-		reconciler := delay.Reconciler{
-			Client: r.Client,
-			Log:    r.Log.WithValues("delay", req.NamespacedName),
-		}
+		reconciler := delay.NewConciler(r.Client, r.Log.WithValues("reconciler", "delay"), req)
 		return reconciler.Reconcile(req)
 	default:
 		err := fmt.Errorf("unknown action %s", string(networkchaos.Spec.Action))
-		log.Error(err, "unknown action %s", string(networkchaos.Spec.Action))
+		r.Log.Error(err, "unknown action %s", string(networkchaos.Spec.Action))
 
 		return ctrl.Result{}, err
 	}

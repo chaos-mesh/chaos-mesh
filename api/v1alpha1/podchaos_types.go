@@ -15,6 +15,7 @@ package v1alpha1
 
 import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"time"
 )
 
 // PodChaosAction represents the chaos action about pods.
@@ -41,6 +42,39 @@ type PodChaos struct {
 	// +optional
 	// Most recently observed status of the chaos experiment about pods
 	Status PodChaosStatus `json:"status"`
+}
+
+func (in *PodChaos) IsDeleted() bool {
+	return !in.DeletionTimestamp.IsZero()
+}
+
+func (in *PodChaos) GetDuration() (time.Duration, error) {
+	duration, err := time.ParseDuration(in.Spec.Duration)
+	if err != nil {
+		return time.Hour * 0, err
+	}
+
+	return duration, nil
+}
+
+func (in *PodChaos) GetNextStart() time.Time {
+	return in.Spec.NextStart.Time
+}
+
+func (in *PodChaos) SetNextStart(t time.Time) {
+	in.Spec.NextStart.Time = t
+}
+
+func (in *PodChaos) GetNextRecover() time.Time {
+	return in.Spec.NextRecover.Time
+}
+
+func (in *PodChaos) SetNextRecover(t time.Time) {
+	in.Spec.NextRecover.Time = t
+}
+
+func (in *PodChaos) GetScheduler() SchedulerSpec {
+	return in.Spec.Scheduler
 }
 
 // PodChaosSpec defines the attributes that a user creates on a chaos experiment about pods.

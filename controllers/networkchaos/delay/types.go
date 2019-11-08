@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"github.com/go-logr/logr"
 	"github.com/pingcap/chaos-operator/api/v1alpha1"
+	"github.com/pingcap/chaos-operator/controllers/twophase"
 	pb "github.com/pingcap/chaos-operator/pkg/tcdaemon/pb"
 	"github.com/pingcap/chaos-operator/pkg/utils"
 	"golang.org/x/sync/errgroup"
@@ -38,115 +39,92 @@ const (
 	networkDelayActionMsg = "delay network for %s"
 )
 
+func NewConciler(c client.Client, log logr.Logger, req ctrl.Request) twophase.Reconciler {
+	return twophase.Reconciler{
+		InnerReconciler: &Reconciler{
+			Client: c,
+			Log:    log,
+		},
+		Client: c,
+		Log:    log,
+	}
+}
+
 type Reconciler struct {
 	client.Client
 	Log logr.Logger
 }
 
-func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
-	var err error
-	now := time.Now()
+func (r *Reconciler) Object() twophase.InnerObject {
+	return &v1alpha1.NetworkChaos{}
+}
 
-	r.Log.Info("reconciling delay chaos")
-	ctx := context.Background()
-
-	var networkchaos v1alpha1.NetworkChaos
-	if err = r.Get(ctx, req.NamespacedName, &networkchaos); err != nil {
-		r.Log.Error(err, "unable to get networkchaos")
-		return ctrl.Result{}, err
+func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos twophase.InnerObject) error {
+	networkchaos, ok := chaos.(*v1alpha1.NetworkChaos)
+	if !ok {
+		err := errors.New("chaos is not NetworkChaos")
+		r.Log.Error(err, "chaos is not NetworkChaos", "chaos", chaos)
 	}
 
-	duration, err := time.ParseDuration(networkchaos.Spec.Duration)
+	pods, err := utils.SelectPods(ctx, r.Client, networkchaos.Spec.Selector)
 	if err != nil {
-		return ctrl.Result{}, err
+		r.Log.Error(err, "fail to get selected pods")
+		return err
 	}
 
-	if !networkchaos.DeletionTimestamp.IsZero() {
-		// This chaos was deleted
-		r.Log.Info("Removing self")
-
-		err = r.cleanFinalizersAndRecover(ctx, &networkchaos)
-		if err != nil {
-			return ctrl.Result{Requeue: true}, err
-		}
-	} else if networkchaos.Spec.NextStart.Time.Before(now) {
-		// Start failure action
-		r.Log.Info("Performing Action")
-
-		pods, err := utils.SelectPods(ctx, r.Client, networkchaos.Spec.Selector)
-		if err != nil {
-			r.Log.Error(err, "fail to get selected pods")
-			return ctrl.Result{}, err
-		}
-
-		if len(pods) == 0 {
-			err = errors.New("no pod is selected")
-			r.Log.Error(err, "no pod is selected")
-			return ctrl.Result{}, err
-		}
-
-		filteredPod, err := utils.GeneratePods(pods, networkchaos.Spec.Mode, networkchaos.Spec.Value)
-		if err != nil {
-			r.Log.Error(err, "fail to generate pods")
-			return ctrl.Result{}, err
-		}
-
-		err = r.delayAllPods(ctx, filteredPod, &networkchaos)
-		if err != nil {
-			return ctrl.Result{}, err
-		}
-
-		next, err := utils.NextTime(networkchaos.Spec.Scheduler, now)
-		if err != nil {
-			return ctrl.Result{}, err
-		}
-
-		networkchaos.Spec.NextStart.Time = *next
-		networkchaos.Spec.NextRecover.Time = now.Add(duration)
-		networkchaos.Status.Experiment.StartTime.Time = now
-		networkchaos.Status.Experiment.Pods = []v1alpha1.PodStatus{}
-		networkchaos.Status.Experiment.Phase = v1alpha1.ExperimentPhaseRunning
-		for _, pod := range pods {
-			ps := v1alpha1.PodStatus{
-				Namespace: pod.Namespace,
-				Name:      pod.Name,
-				HostIP:    pod.Status.HostIP,
-				PodIP:     pod.Status.PodIP,
-				Action:    string(networkchaos.Spec.Action),
-				Message:   fmt.Sprintf(networkDelayActionMsg, networkchaos.Spec.Duration),
-			}
-
-			networkchaos.Status.Experiment.Pods = append(networkchaos.Status.Experiment.Pods, ps)
-		}
-	} else if (!networkchaos.Spec.NextRecover.IsZero()) && networkchaos.Spec.NextRecover.Time.Before(now) {
-		// Start recover
-		r.Log.Info("Recovering")
-
-		err = r.cleanFinalizersAndRecover(ctx, &networkchaos)
-		if err != nil {
-			return ctrl.Result{Requeue: true}, err
-		}
-		networkchaos.Spec.NextRecover.Time = time.Time{}
-		networkchaos.Status.Experiment.EndTime.Time = now
-		networkchaos.Status.Experiment.Phase = v1alpha1.ExperimentPhaseFinished
-	} else {
-		nextTime := networkchaos.Spec.NextStart.Time
-
-		if !networkchaos.Spec.NextRecover.IsZero() && networkchaos.Spec.NextRecover.Time.Before(nextTime) {
-			nextTime = networkchaos.Spec.NextRecover.Time
-		}
-		duration := nextTime.Sub(now)
-		r.Log.Info("requeue request", "after", duration)
-
-		return ctrl.Result{RequeueAfter: duration}, nil
+	if len(pods) == 0 {
+		err = errors.New("no pod is selected")
+		r.Log.Error(err, "no pod is selected")
+		return err
 	}
 
-	if err := r.Update(ctx, &networkchaos); err != nil {
-		r.Log.Error(err, "unable to update chaosctl status")
-		return ctrl.Result{}, err
+	filteredPod, err := utils.GeneratePods(pods, networkchaos.Spec.Mode, networkchaos.Spec.Value)
+	if err != nil {
+		r.Log.Error(err, "fail to generate pods")
+		return err
 	}
 
-	return ctrl.Result{}, nil
+	err = r.delayAllPods(ctx, filteredPod, networkchaos)
+	if err != nil {
+		return err
+	}
+
+	networkchaos.Status.Experiment.StartTime.Time = time.Now()
+	networkchaos.Status.Experiment.Pods = []v1alpha1.PodStatus{}
+	networkchaos.Status.Experiment.Phase = v1alpha1.ExperimentPhaseRunning
+
+	for _, pod := range pods {
+		ps := v1alpha1.PodStatus{
+			Namespace: pod.Namespace,
+			Name:      pod.Name,
+			HostIP:    pod.Status.HostIP,
+			PodIP:     pod.Status.PodIP,
+			Action:    string(networkchaos.Spec.Action),
+			Message:   fmt.Sprintf(networkDelayActionMsg, networkchaos.Spec.Duration),
+		}
+
+		networkchaos.Status.Experiment.Pods = append(networkchaos.Status.Experiment.Pods, ps)
+	}
+
+	return nil
+}
+
+func (r *Reconciler) Recover(ctx context.Context, req ctrl.Request, chaos twophase.InnerObject) error {
+	networkchaos, ok := chaos.(*v1alpha1.NetworkChaos)
+	if !ok {
+		err := errors.New("chaos is not NetworkChaos")
+		r.Log.Error(err, "chaos is not NetworkChaos", "chaos", chaos)
+	}
+
+	err := r.cleanFinalizersAndRecover(ctx, networkchaos)
+	if err != nil {
+		return err
+	}
+
+	networkchaos.Status.Experiment.EndTime.Time = time.Now()
+	networkchaos.Status.Experiment.Phase = v1alpha1.ExperimentPhaseFinished
+
+	return nil
 }
 
 func (r *Reconciler) cleanFinalizersAndRecover(ctx context.Context, networkchaos *v1alpha1.NetworkChaos) error {
