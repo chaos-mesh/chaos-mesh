@@ -120,7 +120,7 @@ func LoadInjectionConfigFromFilePath(configFile string) (*InjectionConfig, error
 		return nil, fmt.Errorf("error loading injection config from file %s: %s", configFile, err.Error())
 	}
 	defer f.Close()
-	
+
 	log.V(3).Info("Loading injection config", "file", configFile)
 	return LoadInjectionConfig(f)
 }
