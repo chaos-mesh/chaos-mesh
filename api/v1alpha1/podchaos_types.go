@@ -103,54 +103,7 @@ type PodChaosList struct {
 
 // PodChaosStatus represents the current status of the chaos experiment about pods.
 type PodChaosStatus struct {
-	// Phase is the chaos status.
-	Phase  ChaosPhase `json:"phase"`
-	Reason string     `json:"reason,omitempty"`
-
-	// Experiment records the last experiment state.
-	Experiment PodChaosExperimentStatus `json:"experiment"`
-}
-
-// ChaosPhase is the current status of chaos task.
-type ChaosPhase string
-
-const (
-	ChaosPhaseNone     ChaosPhase = ""
-	ChaosPhaseNormal   ChaosPhase = "Normal"
-	ChaosPhaseAbnormal ChaosPhase = "Abnormal"
-)
-
-// ExperimentPhase is the current status of chaos experiment.
-type ExperimentPhase string
-
-const (
-	ExperimentPhaseRunning  ExperimentPhase = "Running"
-	ExperimentPhaseFailed   ExperimentPhase = "Failed"
-	ExperimentPhaseFinished ExperimentPhase = "Finished"
-)
-
-// PodChaosExperimentStatus represents information about the status of the apis experiment.
-type PodChaosExperimentStatus struct {
-	// +optional
-	Phase ExperimentPhase `json:"phase,omitempty"`
-	// +optional
-	Reason string `json:"reason,omitempty"`
-	// +nullable
-	StartTime metav1.Time `json:"startTime,omitempty"`
-	// +nullable
-	EndTime metav1.Time `json:"endTime,omitempty"`
-	// +optional
-	Pods []PodStatus `json:"podChaos,omitempty"`
-}
-
-func (pe *PodChaosExperimentStatus) SetPods(pod PodStatus) {
-	for index, p := range pe.Pods {
-		if p.Namespace == pod.Namespace && p.Name == pod.Namespace {
-			pe.Pods[index] = pod
-		}
-	}
-
-	pe.Pods = append(pe.Pods, pod)
+	ChaosStatus `json:",inline"`
 }
 
 // PodStatus represents information about the status of a pod in chaos experiment.
@@ -165,4 +118,8 @@ type PodStatus struct {
 	// e.g. "delete this pod" or "pause this pod duration 5m"
 	// +optional
 	Message string `json:"message"`
+}
+
+func init() {
+	SchemeBuilder.Register(&PodChaos{}, &PodChaosList{})
 }

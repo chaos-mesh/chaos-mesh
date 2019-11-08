@@ -13,6 +13,10 @@
 
 package v1alpha1
 
+import (
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+)
+
 // SelectorSpec defines the some selectors to select objects.
 // If the all selectors are empty, all objects will be used in chaos experiment.
 type SelectorSpec struct {
@@ -82,3 +86,43 @@ const (
 	// RandomMaxPercentPodMode to specify a maximum % that can be inject chaos action.
 	RandomMaxPercentPodMode PodMode = "random-max-percent"
 )
+
+// ChaosPhase is the current status of chaos task.
+type ChaosPhase string
+
+const (
+	ChaosPhaseNone     ChaosPhase = ""
+	ChaosPhaseNormal   ChaosPhase = "Normal"
+	ChaosPhaseAbnormal ChaosPhase = "Abnormal"
+)
+
+type ChaosStatus struct {
+	// Phase is the chaos status.
+	Phase  ChaosPhase `json:"phase"`
+	Reason string     `json:"reason,omitempty"`
+
+	// Experiment records the last experiment state.
+	Experiment ExperimentStatus `json:"experiment"`
+}
+
+// ExperimentPhase is the current status of chaos experiment.
+type ExperimentPhase string
+
+const (
+	ExperimentPhaseRunning  ExperimentPhase = "Running"
+	ExperimentPhaseFailed   ExperimentPhase = "Failed"
+	ExperimentPhaseFinished ExperimentPhase = "Finished"
+)
+
+type ExperimentStatus struct {
+	// +optional
+	Phase ExperimentPhase `json:"phase,omitempty"`
+	// +optional
+	Reason string `json:"reason,omitempty"`
+	// +nullable
+	StartTime metav1.Time `json:"startTime,omitempty"`
+	// +nullable
+	EndTime metav1.Time `json:"endTime,omitempty"`
+	// +optional
+	Pods []PodStatus `json:"podChaos,omitempty"`
+}

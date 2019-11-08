@@ -71,6 +71,14 @@ func main() {
 		os.Exit(1)
 	}
 
+	if err = (&controllers.NetworkChaosReconciler{
+		Client: mgr.GetClient(),
+		Log:    ctrl.Log.WithName("controllers").WithName("NetworkChaos"),
+	}).SetupWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create controller", "controller", "NetworkChaos")
+		os.Exit(1)
+	}
+
 	setupLog.Info("setting up webhook server")
 	hookServer := mgr.GetWebhookServer()
 	hookServer.CertDir = "/etc/webhook/certs"                             // TODO: customize cert dir

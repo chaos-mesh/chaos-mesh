@@ -9,6 +9,26 @@ rules:
 - apiGroups:
   - pingcap.com
   resources:
+  - networkchaos
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - pingcap.com
+  resources:
+  - networkchaos/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - pingcap.com
+  resources:
   - podchaos
   verbs:
   - create

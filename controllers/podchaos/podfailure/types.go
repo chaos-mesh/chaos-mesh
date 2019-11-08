@@ -113,7 +113,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 				HostIP:    pod.Status.HostIP,
 				PodIP:     pod.Status.PodIP,
 				Action:    string(podchaos.Spec.Action),
-				Message:   podFailureActionMsg,
+				Message:   fmt.Sprintf(podFailureActionMsg, podchaos.Spec.Duration),
 			}
 
 			podchaos.Status.Experiment.Pods = append(podchaos.Status.Experiment.Pods, ps)
@@ -195,7 +195,7 @@ func (r *Reconciler) failAllPods(ctx context.Context, pods []v1.Pod, podchaos *v
 			if err != nil {
 				return err
 			}
-			podchaos.Finalizers = append(podchaos.Finalizers, key)
+			podchaos.Finalizers = utils.InsertFinalizer(podchaos.Finalizers, key)
 
 			if err := r.Update(ctx, podchaos); err != nil {
 				r.Log.Error(err, "unable to update podchaos finalizers")

@@ -37,11 +37,15 @@ endif
 
 all: yaml build image
 
-build: manager
+build: tcdaemon manager
 
 # Run tests
 test: generate fmt vet manifests
 	$(GO) test ./... -coverprofile cover.out
+
+# Build tc-daemon binary
+tcdaemon: generate fmt vet
+	$(GO) build -ldflags '$(LDFLAGS)' -o images/chaos-operator/bin/tc-daemon ./cmd/tc-daemon/main.go
 
 # Build manager binary
 manager: generate fmt vet
@@ -77,6 +81,10 @@ image:
 
 docker-push: docker
 	docker push "${DOCKER_REGISTRY}/pingcap/chaos-operator:latest"
+
+lint:
+	@echo "linting"
+	CGO_ENABLED=0 retool do revive -formatter friendly -config revive.toml $$($(PACKAGE_LIST))
 
 # Generate code
 generate: controller-gen

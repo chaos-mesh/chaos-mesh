@@ -20,3 +20,19 @@ func RemoveFromFinalizer(finalizers []string, index int) []string {
 		return finalizers[:index]
 	}
 }
+
+func InsertFinalizer(finalizers []string, finalizer string) []string {
+	exist := false
+
+	for _, f := range finalizers {
+		if f == finalizer {
+			exist = true
+		}
+	}
+
+	if exist {
+		return finalizers
+	} else {
+		return append(finalizers, finalizer)
+	}
+}
