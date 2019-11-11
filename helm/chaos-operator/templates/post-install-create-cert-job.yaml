@@ -1,12 +1,12 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: admission-controller-certs-job
+  name: webhook-certs-job
   labels:
     app.kubernetes.io/name: {{ template "chaos-operator.name" . }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     app.kubernetes.io/instance: {{ .Release.Name }}
-    app.kubernetes.io/component: admission-controller-certs-job
+    app.kubernetes.io/component: webhook-certs-job
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+"  "_" }}
   annotations:
     # This is what defines this resource as a hook. Without this line, the
@@ -17,10 +17,10 @@ metadata:
 spec:
   template:
     metadata:
-      name: admission-controller-certs-job
+      name: webhook-certs-job
     spec:
       restartPolicy: Never
-      serviceAccountName: {{ .Values.admissionController.serviceAccount }}
+      serviceAccountName: {{ .Values.controllerManager.serviceAccount }}
       containers:
         - name: "{{ .Release.Name }}-job-certs"
           image: bitnami/kubectl:latest
@@ -30,8 +30,8 @@ spec:
             - "-c"
             - |
               set -e
-              K8S_SERVICE=chaos-operator-admission-controller
-              K8S_SECRET=admission-controller-certs
+              K8S_SERVICE=chaos-operator-controller-manager
+              K8S_SECRET=webhook-certs
               K8S_NAMESPACE={{ .Release.Namespace }}
 
               # test if secret already exists
@@ -112,7 +112,7 @@ spec:
 
               # create the secret with CA cert and server cert/key
               kubectl create secret generic ${K8S_SECRET} \
-                      --from-file=key.pem=${tmpdir}/server-key.pem \
-                      --from-file=cert.pem=${tmpdir}/server-cert.pem \
+                      --from-file=tls.key=${tmpdir}/server-key.pem \
+                      --from-file=tls.crt=${tmpdir}/server-cert.pem \
                       --dry-run -o yaml |
                   kubectl -n ${K8S_NAMESPACE} apply -f -

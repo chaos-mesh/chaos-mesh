@@ -1,12 +1,12 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: admission-controller-del
+  name: webhook-del
   labels:
     app.kubernetes.io/name: {{ template "chaos-operator.name" . }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     app.kubernetes.io/instance: {{ .Release.Name }}
-    app.kubernetes.io/component: admission-controller-del
+    app.kubernetes.io/component: webhook-del
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+"  "_" }}
   annotations:
     # This is what defines this resource as a hook. Without this line, the
@@ -17,10 +17,10 @@ metadata:
 spec:
   template:
     metadata:
-      name: admission-controller-del
+      name: webhook-del
     spec:
       restartPolicy: Never
-      serviceAccountName: {{ .Values.admissionController.serviceAccount }}
+      serviceAccountName: {{ .Values.controllerManager.serviceAccount }}
       containers:
         - name: "{{.Release.Name}}-job-del"
           image: bitnami/kubectl:latest
@@ -30,5 +30,5 @@ spec:
             - "-c"
             - |
               set -e
-              kubectl delete mutatingwebhookconfigurations.admissionregistration.k8s.io chaos-operator-sidecar-injector || true
-              kubectl delete secrets -n {{ .Release.Namespace }} admission-controller-certs || true
+              kubectl delete mutatingwebhookconfigurations.admissionregistration.k8s.io chaos-operator-sidecar-injector || true // Auto Delete mutatingwebhookconfigurations
+              kubectl delete secrets -n {{ .Release.Namespace }} webhook-certs || true

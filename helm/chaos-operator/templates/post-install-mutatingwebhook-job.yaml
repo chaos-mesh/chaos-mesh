@@ -1,12 +1,12 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: admission-controller-mw-job
+  name: webhook-mw-job
   labels:
     app.kubernetes.io/name: {{ template "chaos-operator.name" . }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     app.kubernetes.io/instance: {{ .Release.Name }}
-    app.kubernetes.io/component: admission-controller-mw-job
+    app.kubernetes.io/component: webhook-mw-job
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+"  "_" }}
   annotations:
     # This is what defines this resource as a hook. Without this line, the
@@ -17,10 +17,10 @@ metadata:
 spec:
   template:
     metadata:
-      name: admission-controller-mw-job
+      name: webhook-mw-job
     spec:
       restartPolicy: Never
-      serviceAccountName: {{ .Values.admissionController.serviceAccount }}
+      serviceAccountName: {{ .Values.controllerManager.serviceAccount }}
       containers:
         - name: "{{ .Release.Name }}-job-mw"
           image: bitnami/kubectl:latest
@@ -33,7 +33,7 @@ spec:
               K8S_NAMESPACE={{ .Release.Namespace }}
               CA_BUNDLE=$(kubectl get configmap -n kube-system extension-apiserver-authentication -o=jsonpath='{.data.client-ca-file}' | base64 | tr -d '\n')
 
-              if [ ${CA_BUNDLE} = '' ]; then
+              if [ ! $CA_BUNDLE ]; then
                   echo "ERROR: CA_BUNDLE is empty!" >&2
                   exit 1
               fi
@@ -53,9 +53,9 @@ spec:
                 - name: admission-webhook.pingcap.com
                   clientConfig:
                     service:
-                      name: chaos-operator-admission-controller
+                      name: chaos-operator-controller-manager
                       namespace: ${K8S_NAMESPACE}
-                      path: "/inject"
+                      path: "/inject-v1-pod"
                     caBundle: "${CA_BUNDLE}"
                   rules:
                     - operations: [ "CREATE" ]
