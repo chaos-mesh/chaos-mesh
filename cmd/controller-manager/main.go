@@ -17,19 +17,18 @@ import (
 	"flag"
 	"os"
 
-	"sigs.k8s.io/controller-runtime/pkg/webhook"
-
+	chaosoperatorv1alpha1 "github.com/pingcap/chaos-operator/api/v1alpha1"
+	apiWebhook "github.com/pingcap/chaos-operator/api/webhook"
+	"github.com/pingcap/chaos-operator/controllers"
 	"github.com/pingcap/chaos-operator/pkg/webhook/config"
 
 	"k8s.io/apimachinery/pkg/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
+
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
-
-	chaosoperatorv1alpha1 "github.com/pingcap/chaos-operator/api/v1alpha1"
-	apiWebhook "github.com/pingcap/chaos-operator/api/webhook"
-	"github.com/pingcap/chaos-operator/controllers"
+	"sigs.k8s.io/controller-runtime/pkg/webhook"
 	// +kubebuilder:scaffold:imports
 )
 

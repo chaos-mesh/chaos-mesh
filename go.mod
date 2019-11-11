@@ -2,6 +2,7 @@ module github.com/pingcap/chaos-operator
 
 require (
 	cloud.google.com/go v0.38.0 // indirect
+	github.com/Microsoft/go-winio v0.4.14 // indirect
 	github.com/docker/distribution v2.7.1+incompatible // indirect
 	github.com/docker/docker v0.7.3-0.20190327010347-be7ac8be2ae0
 	github.com/docker/go-connections v0.4.0 // indirect
@@ -39,3 +40,5 @@ require (
 	k8s.io/kube-openapi v0.0.0-20190709113604-33be087ad058 // indirect
 	sigs.k8s.io/controller-runtime v0.3.0
 )
+
+go 1.13

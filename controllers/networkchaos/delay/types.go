@@ -22,20 +22,24 @@ import (
 	"time"
 
 	"github.com/go-logr/logr"
+
 	"golang.org/x/sync/errgroup"
+
 	"google.golang.org/grpc"
-	v1 "k8s.io/api/core/v1"
-	k8sError "k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/types"
-	"k8s.io/client-go/tools/cache"
-	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/pingcap/chaos-operator/api/v1alpha1"
 	"github.com/pingcap/chaos-operator/controllers/twophase"
 	pb "github.com/pingcap/chaos-operator/pkg/tcdaemon/pb"
 	"github.com/pingcap/chaos-operator/pkg/utils"
+
+	v1 "k8s.io/api/core/v1"
+	k8sError "k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/client-go/tools/cache"
+
+	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 const (
