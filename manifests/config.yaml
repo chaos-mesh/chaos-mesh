@@ -58,12 +58,10 @@ spec:
             nextRecover:
               description: Next time when this action will be recovered
               format: date-time
-              nullable: true
               type: string
             nextStart:
               description: Next time when this action will be applied again
               format: date-time
-              nullable: true
               type: string
             scheduler:
               description: Scheduler defines some schedule rules to control the running
@@ -152,7 +150,6 @@ spec:
               properties:
                 endTime:
                   format: date-time
-                  nullable: true
                   type: string
                 phase:
                   description: ExperimentPhase is the current status of chaos experiment.
@@ -189,7 +186,6 @@ spec:
                   type: string
                 startTime:
                   format: date-time
-                  nullable: true
                   type: string
               type: object
             phase:
@@ -272,12 +268,10 @@ spec:
             nextRecover:
               description: Next time when this action will be recovered
               format: date-time
-              nullable: true
               type: string
             nextStart:
               description: Next time when this action will be applied again
               format: date-time
-              nullable: true
               type: string
             scheduler:
               description: Scheduler defines some schedule rules to control the running
@@ -365,7 +359,6 @@ spec:
               properties:
                 endTime:
                   format: date-time
-                  nullable: true
                   type: string
                 phase:
                   description: ExperimentPhase is the current status of chaos experiment.
@@ -402,7 +395,6 @@ spec:
                   type: string
                 startTime:
                   format: date-time
-                  nullable: true
                   type: string
               type: object
             phase:

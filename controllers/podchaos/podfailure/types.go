@@ -17,15 +17,15 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/pingcap/chaos-operator/controllers/twophase"
-	"golang.org/x/sync/errgroup"
-	v1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/types"
-
 	"github.com/go-logr/logr"
 	"github.com/pingcap/chaos-operator/api/v1alpha1"
+	"github.com/pingcap/chaos-operator/controllers/twophase"
 	"github.com/pingcap/chaos-operator/pkg/utils"
+	"golang.org/x/sync/errgroup"
+	v1 "k8s.io/api/core/v1"
 	k8sError "k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/tools/cache"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -66,30 +66,20 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos twophase
 		r.Log.Error(err, "chaos is not PodChaos", "chaos", chaos)
 	}
 
-	pods, err := utils.SelectPods(ctx, r.Client, podchaos.Spec.Selector)
+	pods, err := utils.SelectAndGeneratePods(ctx, r.Client, &podchaos.Spec)
 	if err != nil {
-		r.Log.Error(err, "fail to get selected pods")
+		r.Log.Error(err, "fail to select and generate pods")
 		return err
 	}
 
-	if len(pods) == 0 {
-		err = errors.New("no pod is selected")
-		r.Log.Error(err, "no pod is selected")
-		return err
-	}
-
-	filteredPod, err := utils.GeneratePods(pods, podchaos.Spec.Mode, podchaos.Spec.Value)
-	if err != nil {
-		r.Log.Error(err, "fail to generate pods")
-		return err
-	}
-
-	err = r.failAllPods(ctx, filteredPod, podchaos)
+	err = r.failAllPods(ctx, pods, podchaos)
 	if err != nil {
 		return err
 	}
 
-	podchaos.Status.Experiment.StartTime.Time = time.Now()
+	podchaos.Status.Experiment.StartTime = &metav1.Time{
+		Time: time.Now(),
+	}
 	podchaos.Status.Experiment.Pods = []v1alpha1.PodStatus{}
 	podchaos.Status.Experiment.Phase = v1alpha1.ExperimentPhaseRunning
 
@@ -120,7 +110,9 @@ func (r *Reconciler) Recover(ctx context.Context, req ctrl.Request, chaos twopha
 	if err != nil {
 		return err
 	}
-	podchaos.Status.Experiment.EndTime.Time = time.Now()
+	podchaos.Status.Experiment.EndTime = &metav1.Time{
+		Time: time.Now(),
+	}
 	podchaos.Status.Experiment.Phase = v1alpha1.ExperimentPhaseFinished
 
 	return nil

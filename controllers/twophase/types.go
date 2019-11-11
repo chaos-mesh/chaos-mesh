@@ -93,6 +93,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		// Start failure action
 		r.Log.Info("Performing Action")
 
+		r.Log.Info("now chaos:", "chaos", chaos)
 		err = r.Apply(ctx, req, chaos)
 		if err != nil {
 			return ctrl.Result{}, err

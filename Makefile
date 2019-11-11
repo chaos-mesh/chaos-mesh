@@ -57,7 +57,8 @@ run: generate fmt vet manifests
 
 # Install CRDs into a cluster
 install: manifests
-	kustomize build config/crd | kubectl apply -f -
+	kubectl apply -f manifests/
+	helm install helm/chaos-operator --name=chaos-operator --namespace=chaos-testing
 
 # Generate manifests e.g. CRD, RBAC etc.
 manifests: controller-gen

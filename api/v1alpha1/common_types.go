@@ -119,10 +119,10 @@ type ExperimentStatus struct {
 	Phase ExperimentPhase `json:"phase,omitempty"`
 	// +optional
 	Reason string `json:"reason,omitempty"`
-	// +nullable
-	StartTime metav1.Time `json:"startTime,omitempty"`
-	// +nullable
-	EndTime metav1.Time `json:"endTime,omitempty"`
+	// +optional
+	StartTime *metav1.Time `json:"startTime,omitempty"`
+	// +optional
+	EndTime *metav1.Time `json:"endTime,omitempty"`
 	// +optional
 	Pods []PodStatus `json:"podChaos,omitempty"`
 }

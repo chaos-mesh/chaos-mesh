@@ -32,6 +32,35 @@ import (
 	"strings"
 )
 
+type SelectSpec interface {
+	GetSelector() v1alpha1.SelectorSpec
+	GetMode() v1alpha1.PodMode
+	GetValue() string
+}
+
+func SelectAndGeneratePods(ctx context.Context, c client.Client, spec SelectSpec) ([]v1.Pod, error) {
+	selector := spec.GetSelector()
+	mode := spec.GetMode()
+	value := spec.GetValue()
+
+	pods, err := SelectPods(ctx, c, selector)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(pods) == 0 {
+		err = errors.New("no pod is selected")
+		return nil, err
+	}
+
+	filteredPod, err := GeneratePods(pods, mode, value)
+	if err != nil {
+		return nil, err
+	}
+
+	return filteredPod, nil
+}
+
 // SelectPods returns the list of pods that are available for pod chaos action.
 // It returns all pods that match the configured label, annotation and namespace selectors.
 // If pods are specifically specified by `selector.Pods`, it just returns the selector.Pods.
@@ -96,6 +125,7 @@ func SelectPods(ctx context.Context, c client.Client, selector v1alpha1.Selector
 	return pods, nil
 }
 
+// GeneratePods generate pods according to mode from pod list
 func GeneratePods(pods []v1.Pod, mode v1alpha1.PodMode, value string) ([]v1.Pod, error) {
 	if len(pods) == 0 {
 		return nil, errors.New("cannot generate pods from empty list")

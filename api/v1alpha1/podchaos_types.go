@@ -58,18 +58,40 @@ func (in *PodChaos) GetDuration() (time.Duration, error) {
 }
 
 func (in *PodChaos) GetNextStart() time.Time {
+	if in.Spec.NextStart == nil {
+		return time.Time{}
+	}
 	return in.Spec.NextStart.Time
 }
 
 func (in *PodChaos) SetNextStart(t time.Time) {
+	if t.IsZero() {
+		in.Spec.NextStart = nil
+		return
+	}
+
+	if in.Spec.NextStart == nil {
+		in.Spec.NextStart = &metav1.Time{}
+	}
 	in.Spec.NextStart.Time = t
 }
 
 func (in *PodChaos) GetNextRecover() time.Time {
+	if in.Spec.NextRecover == nil {
+		return time.Time{}
+	}
 	return in.Spec.NextRecover.Time
 }
 
 func (in *PodChaos) SetNextRecover(t time.Time) {
+	if t.IsZero() {
+		in.Spec.NextRecover = nil
+		return
+	}
+
+	if in.Spec.NextRecover == nil {
+		in.Spec.NextRecover = &metav1.Time{}
+	}
 	in.Spec.NextRecover.Time = t
 }
 
@@ -117,12 +139,24 @@ type PodChaosSpec struct {
 	GracePeriodSeconds int64 `json:"gracePeriodSeconds"`
 
 	// Next time when this action will be applied again
-	// +nullable
-	NextStart metav1.Time `json:"nextStart,omitempty"`
+	// +optional
+	NextStart *metav1.Time `json:"nextStart,omitempty"`
 
 	// Next time when this action will be recovered
-	// +nullable
-	NextRecover metav1.Time `json:"nextRecover,omitempty"`
+	// +optional
+	NextRecover *metav1.Time `json:"nextRecover,omitempty"`
+}
+
+func (in *PodChaosSpec) GetSelector() SelectorSpec {
+	return in.Selector
+}
+
+func (in *PodChaosSpec) GetMode() PodMode {
+	return in.Mode
+}
+
+func (in *PodChaosSpec) GetValue() string {
+	return in.Value
 }
 
 // +kubebuilder:object:root=true

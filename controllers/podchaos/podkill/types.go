@@ -22,6 +22,7 @@ import (
 	"github.com/pingcap/chaos-operator/api/v1alpha1"
 	"github.com/pingcap/chaos-operator/pkg/utils"
 	"golang.org/x/sync/errgroup"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
@@ -48,9 +49,9 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		return ctrl.Result{}, err
 	}
 
-	shouldAct := podchaos.Spec.NextStart.Time.Before(now)
+	shouldAct := podchaos.GetNextStart().Before(now)
 	if !shouldAct {
-		return ctrl.Result{RequeueAfter: podchaos.Spec.NextStart.Sub(now)}, nil
+		return ctrl.Result{RequeueAfter: podchaos.GetNextStart().Sub(now)}, nil
 	} else {
 		pods, err := utils.SelectPods(ctx, r.Client, podchaos.Spec.Selector)
 		if err != nil {
@@ -94,10 +95,14 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 				return ctrl.Result{}, err
 			}
 
-			podchaos.Spec.NextStart.Time = *next
+			podchaos.SetNextStart(*next)
 
-			podchaos.Status.Experiment.StartTime.Time = now
-			podchaos.Status.Experiment.EndTime.Time = now
+			podchaos.Status.Experiment.StartTime = &metav1.Time{
+				Time: now,
+			}
+			podchaos.Status.Experiment.EndTime = &metav1.Time{
+				Time: now,
+			}
 
 			podchaos.Status.Experiment.Pods = []v1alpha1.PodStatus{}
 			for _, pod := range pods {

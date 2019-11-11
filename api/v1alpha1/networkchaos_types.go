@@ -63,12 +63,24 @@ type NetworkChaosSpec struct {
 	Delay *DelaySpec `json:"delay"`
 
 	// Next time when this action will be applied again
-	// +nullable
-	NextStart metav1.Time `json:"nextStart,omitempty"`
+	// +optional
+	NextStart *metav1.Time `json:"nextStart,omitempty"`
 
 	// Next time when this action will be recovered
-	// +nullable
-	NextRecover metav1.Time `json:"nextRecover,omitempty"`
+	// +optional
+	NextRecover *metav1.Time `json:"nextRecover,omitempty"`
+}
+
+func (in *NetworkChaosSpec) GetSelector() SelectorSpec {
+	return in.Selector
+}
+
+func (in *NetworkChaosSpec) GetMode() PodMode {
+	return in.Mode
+}
+
+func (in *NetworkChaosSpec) GetValue() string {
+	return in.Value
 }
 
 // NetworkChaosStatus defines the observed state of NetworkChaos
@@ -105,18 +117,40 @@ func (in *NetworkChaos) GetDuration() (time.Duration, error) {
 }
 
 func (in *NetworkChaos) GetNextStart() time.Time {
+	if in.Spec.NextStart == nil {
+		return time.Time{}
+	}
 	return in.Spec.NextStart.Time
 }
 
 func (in *NetworkChaos) SetNextStart(t time.Time) {
+	if t.IsZero() {
+		in.Spec.NextStart = nil
+		return
+	}
+
+	if in.Spec.NextStart == nil {
+		in.Spec.NextStart = &metav1.Time{}
+	}
 	in.Spec.NextStart.Time = t
 }
 
 func (in *NetworkChaos) GetNextRecover() time.Time {
+	if in.Spec.NextRecover == nil {
+		return time.Time{}
+	}
 	return in.Spec.NextRecover.Time
 }
 
 func (in *NetworkChaos) SetNextRecover(t time.Time) {
+	if t.IsZero() {
+		in.Spec.NextRecover = nil
+		return
+	}
+
+	if in.Spec.NextRecover == nil {
+		in.Spec.NextRecover = &metav1.Time{}
+	}
 	in.Spec.NextRecover.Time = t
 }
 

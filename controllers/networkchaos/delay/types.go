@@ -26,6 +26,7 @@ import (
 	"google.golang.org/grpc"
 	v1 "k8s.io/api/core/v1"
 	k8sError "k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/tools/cache"
 	"os"
@@ -66,30 +67,21 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos twophase
 		r.Log.Error(err, "chaos is not NetworkChaos", "chaos", chaos)
 	}
 
-	pods, err := utils.SelectPods(ctx, r.Client, networkchaos.Spec.Selector)
+	pods, err := utils.SelectAndGeneratePods(ctx, r.Client, &networkchaos.Spec)
+
 	if err != nil {
-		r.Log.Error(err, "fail to get selected pods")
+		r.Log.Error(err, "fail to select and generate pods")
 		return err
 	}
 
-	if len(pods) == 0 {
-		err = errors.New("no pod is selected")
-		r.Log.Error(err, "no pod is selected")
-		return err
-	}
-
-	filteredPod, err := utils.GeneratePods(pods, networkchaos.Spec.Mode, networkchaos.Spec.Value)
-	if err != nil {
-		r.Log.Error(err, "fail to generate pods")
-		return err
-	}
-
-	err = r.delayAllPods(ctx, filteredPod, networkchaos)
+	err = r.delayAllPods(ctx, pods, networkchaos)
 	if err != nil {
 		return err
 	}
 
-	networkchaos.Status.Experiment.StartTime.Time = time.Now()
+	networkchaos.Status.Experiment.StartTime = &metav1.Time{
+		Time: time.Now(),
+	}
 	networkchaos.Status.Experiment.Pods = []v1alpha1.PodStatus{}
 	networkchaos.Status.Experiment.Phase = v1alpha1.ExperimentPhaseRunning
 
@@ -121,7 +113,9 @@ func (r *Reconciler) Recover(ctx context.Context, req ctrl.Request, chaos twopha
 		return err
 	}
 
-	networkchaos.Status.Experiment.EndTime.Time = time.Now()
+	networkchaos.Status.Experiment.EndTime = &metav1.Time{
+		Time: time.Now(),
+	}
 	networkchaos.Status.Experiment.Phase = v1alpha1.ExperimentPhaseFinished
 
 	return nil
