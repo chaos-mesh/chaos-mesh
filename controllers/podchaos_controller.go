@@ -18,13 +18,13 @@ package controllers
 import (
 	"context"
 
-	"github.com/pingcap/chaos-operator/controllers/podchaos"
-
 	"github.com/go-logr/logr"
-	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	chaosoperatorv1alpha1 "github.com/pingcap/chaos-operator/api/v1alpha1"
+	"github.com/pingcap/chaos-operator/controllers/podchaos"
+
+	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 // PodChaosReconciler reconciles a PodChaos object

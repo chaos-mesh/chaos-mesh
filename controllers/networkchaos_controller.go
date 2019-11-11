@@ -19,12 +19,12 @@ import (
 	"context"
 
 	"github.com/go-logr/logr"
-	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/client"
-
-	"github.com/pingcap/chaos-operator/controllers/networkchaos"
 
 	chaosoperatorv1alpha1 "github.com/pingcap/chaos-operator/api/v1alpha1"
+	"github.com/pingcap/chaos-operator/controllers/networkchaos"
+
+	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 // NetworkChaosReconciler reconciles a NetworkChaos object
