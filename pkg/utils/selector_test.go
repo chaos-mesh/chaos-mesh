@@ -16,10 +16,12 @@ package utils
 import (
 	"context"
 	"fmt"
+	"testing"
+
 	. "github.com/onsi/gomega"
+
 	"github.com/pingcap/chaos-operator/api/v1alpha1"
 	"github.com/pingcap/chaos-operator/pkg/label"
-	"testing"
 
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"

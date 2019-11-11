@@ -5,9 +5,10 @@ import (
 
 	"github.com/golang/glog"
 	"github.com/juju/errors"
-	pb "github.com/pingcap/chaos-operator/pkg/tcdaemon/pb"
 	"github.com/vishvananda/netlink"
 	"github.com/vishvananda/netns"
+
+	pb "github.com/pingcap/chaos-operator/pkg/tcdaemon/pb"
 )
 
 const (

@@ -15,6 +15,7 @@ package utils
 
 import (
 	"fmt"
+
 	"github.com/pingcap/chaos-operator/api/v1alpha1"
 )
 

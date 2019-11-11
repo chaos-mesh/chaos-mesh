@@ -16,12 +16,13 @@ package networkchaos
 import (
 	"context"
 	"fmt"
+
 	"github.com/go-logr/logr"
-	"github.com/pingcap/chaos-operator/api/v1alpha1"
-	"github.com/pingcap/chaos-operator/controllers/networkchaos/delay"
+	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	ctrl "sigs.k8s.io/controller-runtime"
+	"github.com/pingcap/chaos-operator/api/v1alpha1"
+	"github.com/pingcap/chaos-operator/controllers/networkchaos/delay"
 )
 
 type Reconciler struct {

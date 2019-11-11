@@ -9,8 +9,9 @@ import (
 	"github.com/golang/glog"
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/juju/errors"
-	pb "github.com/pingcap/chaos-operator/pkg/tcdaemon/pb"
 	"google.golang.org/grpc"
+
+	pb "github.com/pingcap/chaos-operator/pkg/tcdaemon/pb"
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/reflection"

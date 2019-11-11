@@ -15,13 +15,15 @@ package twophase
 
 import (
 	"context"
+	"time"
+
 	"github.com/go-logr/logr"
-	"github.com/pingcap/chaos-operator/api/v1alpha1"
-	"github.com/pingcap/chaos-operator/pkg/utils"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"time"
+
+	"github.com/pingcap/chaos-operator/api/v1alpha1"
+	"github.com/pingcap/chaos-operator/pkg/utils"
 )
 
 type InnerObject interface {

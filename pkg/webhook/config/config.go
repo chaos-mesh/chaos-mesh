@@ -20,9 +20,10 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
-	ctrl "sigs.k8s.io/controller-runtime"
 	"strings"
 	"sync"
+
+	ctrl "sigs.k8s.io/controller-runtime"
 
 	"github.com/ghodss/yaml"
 

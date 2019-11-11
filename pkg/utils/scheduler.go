@@ -15,9 +15,11 @@ package utils
 
 import (
 	"fmt"
-	"github.com/pingcap/chaos-operator/api/v1alpha1"
-	cron "github.com/robfig/cron/v3"
 	"time"
+
+	cron "github.com/robfig/cron/v3"
+
+	"github.com/pingcap/chaos-operator/api/v1alpha1"
 )
 
 func NextTime(spec v1alpha1.SchedulerSpec, now time.Time) (*time.Time, error) {

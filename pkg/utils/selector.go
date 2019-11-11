@@ -17,19 +17,22 @@ import (
 	"context"
 	"errors"
 	"fmt"
+
 	"k8s.io/apimachinery/pkg/fields"
 
-	"github.com/pingcap/chaos-operator/api/v1alpha1"
-	"github.com/pingcap/chaos-operator/pkg/label"
+	"math"
+	"math/rand"
+	"strconv"
+	"strings"
+
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/selection"
 	"k8s.io/apimachinery/pkg/types"
-	"math"
-	"math/rand"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"strconv"
-	"strings"
+
+	"github.com/pingcap/chaos-operator/api/v1alpha1"
+	"github.com/pingcap/chaos-operator/pkg/label"
 )
 
 type SelectSpec interface {

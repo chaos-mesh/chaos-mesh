@@ -15,13 +15,15 @@ package webhook
 
 import (
 	"context"
-	"github.com/pingcap/chaos-operator/pkg/webhook/config"
-	"github.com/pingcap/chaos-operator/pkg/webhook/inject"
-	v1 "k8s.io/api/core/v1"
 	"net/http"
+
+	v1 "k8s.io/api/core/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
+
+	"github.com/pingcap/chaos-operator/pkg/webhook/config"
+	"github.com/pingcap/chaos-operator/pkg/webhook/inject"
 )
 
 var log = ctrl.Log.WithName("inject-webhook")

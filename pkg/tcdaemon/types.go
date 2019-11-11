@@ -1,8 +1,9 @@
 package tcdaemon
 
 import (
-	pb "github.com/pingcap/chaos-operator/pkg/tcdaemon/pb"
 	"github.com/vishvananda/netlink"
+
+	pb "github.com/pingcap/chaos-operator/pkg/tcdaemon/pb"
 )
 
 func ToNetlinkNetemAttrs(netem *pb.Netem) netlink.NetemQdiscAttrs {

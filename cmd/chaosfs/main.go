@@ -11,6 +11,7 @@ import (
 
 	"github.com/ethercflow/hookfs/hookfs"
 	"github.com/golang/glog"
+
 	"github.com/pingcap/chaos-operator/pkg/chaosfs"
 	"github.com/pingcap/chaos-operator/pkg/signals"
 	"github.com/pingcap/chaos-operator/pkg/version"

@@ -16,11 +16,13 @@ package podchaos
 import (
 	"context"
 	"fmt"
+
 	"github.com/go-logr/logr"
+	"sigs.k8s.io/controller-runtime/pkg/client"
+
 	"github.com/pingcap/chaos-operator/api/v1alpha1"
 	"github.com/pingcap/chaos-operator/controllers/podchaos/podfailure"
 	"github.com/pingcap/chaos-operator/controllers/podchaos/podkill"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	ctrl "sigs.k8s.io/controller-runtime"
 )
