@@ -18,13 +18,15 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/golang/glog"
 	"github.com/pingcap/chaos-operator/pkg/webhook/config"
 
 	"k8s.io/api/admission/v1beta1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	ctrl "sigs.k8s.io/controller-runtime"
 )
+
+var log = ctrl.Log.WithName("inject-webhook")
 
 var ignoredNamespaces = []string{
 	metav1.NamespaceSystem,
@@ -39,7 +41,7 @@ const (
 func Inject(res *v1beta1.AdmissionRequest, cfg *config.Config) *v1beta1.AdmissionResponse {
 	var pod corev1.Pod
 	if err := json.Unmarshal(res.Object.Raw, &pod); err != nil {
-		glog.Errorf("Could not unmarshal raw object: %v", err)
+		log.Error(err, "Could not unmarshal raw object")
 		return &v1beta1.AdmissionResponse{
 			Result: &metav1.Status{
 				Message: err.Error(),
@@ -53,15 +55,15 @@ func Inject(res *v1beta1.AdmissionRequest, cfg *config.Config) *v1beta1.Admissio
 		pod.ObjectMeta.Namespace = res.Namespace
 	}
 
-	glog.Infof("AdmissionReview for Kind=%s, Namespace=%s Name=%s (%s) UID=%s patchOperation=%s UserInfo=%s",
-		res.Kind, res.Namespace, res.Name, podName, res.UID, res.Operation, res.UserInfo)
-	glog.V(4).Infof("Object: %v", string(res.Object.Raw))
-	glog.V(4).Infof("OldObject: %v", string(res.OldObject.Raw))
-	glog.V(4).Infof("Pod: %v", pod)
+	log.Info("AdmissionReview for",
+		"Kind", res.Kind, "Namespace", res.Namespace, "Name", res.Name, "podName", podName, "UID", res.UID, "patchOperation", res.Operation, "UserInfo", res.UserInfo)
+	log.V(4).Info("Object", "Object", string(res.Object.Raw))
+	log.V(4).Info("OldObject", "OldObject", string(res.OldObject.Raw))
+	log.V(4).Info("Pod", "Pod", pod)
 
 	requiredKey, ok := injectRequired(&pod.ObjectMeta, cfg)
 	if !ok {
-		glog.Infof("Skipping injection for %s/%s due to policy check", pod.ObjectMeta.Namespace, podName)
+		log.Info("Skipping injection due to policy check", "namespace", pod.ObjectMeta.Namespace, "name", podName)
 		return &v1beta1.AdmissionResponse{
 			Allowed: true,
 		}
@@ -69,8 +71,8 @@ func Inject(res *v1beta1.AdmissionRequest, cfg *config.Config) *v1beta1.Admissio
 
 	injectionConfig, err := cfg.GetRequestedConfig(requiredKey)
 	if err != nil {
-		glog.Errorf("Error getting injection config %v, permitting launch of pod with no sidecar injected: %s",
-			injectionConfig, err)
+		log.Error(err, "Error getting injection config, permitting launch of pod with no sidecar injected", "injectionConfig",
+			injectionConfig)
 		// dont prevent pods from launching! just return allowed
 		return &v1beta1.AdmissionResponse{
 			Allowed: true,
@@ -88,7 +90,7 @@ func Inject(res *v1beta1.AdmissionRequest, cfg *config.Config) *v1beta1.Admissio
 		}
 	}
 
-	glog.Infof("AdmissionResponse: patch=%v\n", string(patchBytes))
+	log.Info("AdmissionResponse: patch", "patchBytes", string(patchBytes))
 	return &v1beta1.AdmissionResponse{
 		Allowed: true,
 		Patch:   patchBytes,
@@ -104,12 +106,12 @@ func injectRequired(metadata *metav1.ObjectMeta, cfg *config.Config) (string, bo
 	// skip special kubernetes system namespaces
 	for _, namespace := range ignoredNamespaces {
 		if metadata.Namespace == namespace {
-			glog.Infof("Skip mutation for %v for it' in special namespace:%v", metadata.Name, metadata.Namespace)
+			log.Info("Skip mutation for it' in special namespace", "name", metadata.Name, "namespace", metadata.Namespace)
 			return "", false
 		}
 	}
 
-	glog.V(4).Infof("meta %v", metadata)
+	log.V(4).Info("meta", "meta", metadata)
 
 	annotations := metadata.GetAnnotations()
 	if annotations == nil {
@@ -118,21 +120,21 @@ func injectRequired(metadata *metav1.ObjectMeta, cfg *config.Config) (string, bo
 
 	status, ok := annotations[cfg.StatusAnnotationKey()]
 	if ok && strings.ToLower(status) == StatusInjected {
-		glog.Infof("Pod %s/%s annotation %s=%s indicates injection already satisfied, skipping",
-			metadata.Namespace, metadata.Name, cfg.StatusAnnotationKey(), status)
+		log.Info("Pod annotation indicates injection already satisfied, skipping",
+			"namespace", metadata.Namespace, "name", metadata.Name, "annotationKey", cfg.StatusAnnotationKey(), "value", status)
 		return "", false
 	}
 
 	required, ok := annotations[cfg.RequestAnnotationKey()]
 	if !ok {
-		glog.Infof("Pod %s/%s annotation %s is missing, skipping injection",
-			metadata.Namespace, metadata.Name, cfg.RequestAnnotationKey())
+		log.Info("Pod annotation is missing, skipping injection",
+			"namespace", metadata.Namespace, "name", metadata.Name, "annotation", cfg.RequestAnnotationKey())
 		return "", false
 	}
 
 	requiredConfig := strings.ToLower(required)
-	glog.Infof("Pod %s/%s annotation %s=%s requesting sidecar config %s",
-		metadata.Namespace, metadata.Name, cfg.RequestAnnotationKey(), required, requiredConfig)
+	log.Info("Pod annotation requesting sidecar config",
+		"namespace", metadata.Namespace, "name", metadata.Name, "annotation", cfg.RequestAnnotationKey(), "required", required, "requiredConfig", requiredConfig)
 	return requiredConfig, true
 }
 
@@ -217,7 +219,7 @@ func addContainers(target, added []corev1.Container, basePath string) (patch []p
 	var value interface{}
 	for _, add := range added {
 		value = add
-		glog.V(6).Infof("add container: %v", add)
+		log.V(6).Info("add container", "add", add)
 		path := basePath
 		if first {
 			first = false

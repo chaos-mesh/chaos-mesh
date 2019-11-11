@@ -31,8 +31,8 @@ Chaos Operator uses [CRD (Custom Resource Definition)](https://kubernetes.io/doc
 to extend Kubernetes. Therefore, to use Chaos Operator, you must first create the related custom resource type.
 
 ```bash
-$ kubectl apply -f manifests/crds/
-$ kubectl get crd podchaoses.pingcap.com
+$ kubectl apply -f manifests/
+$ kubectl get crd podchaos.pingcap.com
 ```
 
 #### Install Chaos Operator

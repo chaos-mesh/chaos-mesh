@@ -40,6 +40,24 @@ spec:
                 fieldPath: metadata.namespace
           - name: TZ
             value: {{ .Values.timezone | default "UTC" }}
+          - name: TC_DAEMON_PORT
+            value: !!str {{ .Values.tcDaemon.port }}
+        volumeMounts:
+          - name: webhook-certs
+            mountPath: /etc/webhook/certs
+            readOnly: true
+          - name: webhook-config
+            mountPath: /etc/webhook/conf
+        ports:
+          - name: webhook-api
+            containerPort: 9443 # Customize containerPort
+      volumes:
+        - name: webhook-certs
+          secret:
+            secretName: webhook-certs
+        - name: webhook-config
+          configMap:
+            name: webhook-configmaps
     {{- with .Values.controllerManager.nodeSelector }}
       nodeSelector:
 {{ toYaml . | indent 8 }}

@@ -11,10 +11,14 @@ metadata:
 spec:
   type: {{ .Values.controllerManager.service.type }}
   ports:
-    - port: {{ .Values.controllerManager.service.port }}
-      targetPort: http
+#    - port: {{ .Values.controllerManager.service.port }}
+#      targetPort: http
+#      protocol: TCP
+#      name: http
+    - port: 443
+      targetPort: 9443
       protocol: TCP
-      name: http
+      name: webhook
   selector:
     app.kubernetes.io/component: controller-manager
     app.kubernetes.io/instance: {{ .Release.Name }}

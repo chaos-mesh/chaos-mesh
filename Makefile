@@ -16,7 +16,7 @@ export GO111MODULE := on
 GOOS := $(if $(GOOS),$(GOOS),linux)
 GOARCH := $(if $(GOARCH),$(GOARCH),amd64)
 GOENV  := GO15VENDOREXPERIMENT="1" CGO_ENABLED=0 GOOS=$(GOOS) GOARCH=$(GOARCH)
-GO     := $(GOENV) go build
+GO     := $(GOENV) go
 GOTEST := CGO_ENABLED=0 go test -v -cover
 
 PACKAGE_LIST := go list ./... | grep -vE "pkg/client" | grep -vE "zz_generated"
@@ -25,83 +25,81 @@ FILES := $$(find $$($(PACKAGE_DIRECTORIES)) -name "*.go")
 FAIL_ON_STDOUT := awk '{ print } END { if (NR > 0) { exit 1 } }'
 TEST_COVER_PACKAGES:=go list ./pkg/... | grep -vE "pkg/client" | grep -vE "pkg/apis" | sed 's|github.com/pingcap/chaos-operator/|./|' | tr '\n' ','
 
-default: build
+# Produce CRDs that work back to Kubernetes 1.11 (no version conversion)
+CRD_OPTIONS ?= "crd:trivialVersions=true"
 
-docker-push: docker
-	docker push "${DOCKER_REGISTRY}/pingcap/chaos-operator:latest"
+# Get the currently used golang install path (in GOPATH/bin, unless GOBIN is set)
+ifeq (,$(shell go env GOBIN))
+GOBIN=$(shell go env GOPATH)/bin
+else
+GOBIN=$(shell go env GOBIN)
+endif
 
-docker: build
-	docker build --tag "${DOCKER_REGISTRY}/pingcap/chaos-operator:latest" images/chaos-operator
+all: yaml build image
 
-build: controller-manager admission-controller chaosfs
+build: tcdaemon manager
 
-controller-manager:
-	$(GO) -ldflags '$(LDFLAGS)' -o images/chaos-operator/bin/chaos-controller-manager cmd/controller-manager/*.go
+# Run tests
+test: generate fmt vet manifests
+	$(GO) test ./... -coverprofile cover.out
 
-admission-controller:
-	$(GO) -ldflags '$(LDFLAGS)' -o images/chaos-operator/bin/chaos-admission-controller cmd/admission-controller/*.go
+# Build tc-daemon binary
+tcdaemon: generate fmt vet
+	$(GO) build -ldflags '$(LDFLAGS)' -o images/chaos-operator/bin/tc-daemon ./cmd/tc-daemon/main.go
 
-chaosfs:
-	cd pkg/chaosfs && go generate && cd -
-	$(GO) -ldflags '$(LDFLAGS)' -o images/chaos-operator/bin/chaosfs cmd/chaosfs/main.go
+# Build manager binary
+manager: generate fmt vet
+	$(GO) build -ldflags '$(LDFLAGS)' -o images/chaos-operator/bin/chaos-controller-manager ./cmd/controller-manager/main.go
 
-test:
-	@echo "Run unit tests"
-	@$(GOTEST) ./pkg/... -coverpkg=$$($(TEST_COVER_PACKAGES)) -coverprofile=coverage.txt -covermode=atomic && echo "\nUnit tests run successfully!"
+# Run against the configured Kubernetes cluster in ~/.kube/config
+run: generate fmt vet manifests
+	$(GO) run ./cmd/controller-manager/main.go
 
-check-all: check tidy check-shadow check-gosec staticcheck
+# Install CRDs into a cluster
+install: manifests
+	kubectl apply -f manifests/
+	helm install helm/chaos-operator --name=chaos-operator --namespace=chaos-testing
 
-check-setup:
-	@which retool >/dev/null 2>&1 || go get github.com/twitchtv/retool
-	@GO111MODULE=off retool sync
+# Generate manifests e.g. CRD, RBAC etc.
+manifests: controller-gen
+	$(CONTROLLER_GEN) $(CRD_OPTIONS) rbac:roleName=manager-role webhook paths="./..." output:crd:artifacts:config=config/crd/bases
 
-check: check-setup lint check-static
+# Run go fmt against code
+fmt:
+	$(GO) fmt ./...
 
-check-static:
-	@ # Not running vet and fmt through metalinter becauase it ends up looking at vendor
-	@echo "gofmt checking"
-	gofmt -s -l -w $(FILES) 2>&1| $(FAIL_ON_STDOUT)
-	@echo "go vet check"
-	@go vet -all $$($(PACKAGE_LIST)) 2>&1
-	@echo "mispell and ineffassign checking"
-	CGO_ENABLED=0 retool do gometalinter.v2 --disable-all \
-	  --enable misspell \
-	  --enable ineffassign \
-	  $$($(PACKAGE_DIRECTORIES))
-
-# TODO: staticcheck is too slow currently
-staticcheck:
-	@echo "gometalinter staticcheck"
-	CGO_ENABLED=0 retool do gometalinter.v2 --disable-all --deadline 120s \
-	  --enable staticcheck \
-	  $$($(PACKAGE_DIRECTORIES))
-
-# TODO: errcheck is too slow currently
-errcheck:
-	@echo "gometalinter errcheck"
-	CGO_ENABLED=0 retool do gometalinter.v2 --disable-all --deadline 120s \
-	  --enable errcheck \
-	  $$($(PACKAGE_DIRECTORIES))
-
-# TODO: shadow check fails at the moment
-check-shadow:
-	@echo "go vet shadow checking"
-	go install golang.org/x/tools/go/analysis/passes/shadow/cmd/shadow
-	@go vet -vettool=$(which shadow) $$($(PACKAGE_LIST))
-
-lint:
-	@echo "linting"
-	CGO_ENABLED=0 retool do revive -formatter friendly -config revive.toml $$($(PACKAGE_LIST))
-
+# Run go vet against code
+vet:
+	$(GO) vet ./...
 
 tidy:
 	@echo "go mod tidy"
 	GO111MODULE=on go mod tidy
 	git diff --quiet go.mod go.sum
 
-check-gosec:
-	@echo "security checking"
-	CGO_ENABLED=0 retool do gosec $$($(PACKAGE_DIRECTORIES))
+image:
+	docker build -t pingcap/chaos-operator images/chaos-operator
 
+docker-push: docker
+	docker push "${DOCKER_REGISTRY}/pingcap/chaos-operator:latest"
 
-.PHONY: check check-all build tidy admission-controller chaosfs
+lint:
+	@echo "linting"
+	CGO_ENABLED=0 retool do revive -formatter friendly -config revive.toml $$($(PACKAGE_LIST))
+
+# Generate code
+generate: controller-gen
+	$(CONTROLLER_GEN) object:headerFile=./hack/boilerplate.go.txt paths="./..."
+
+# find or download controller-gen
+# download controller-gen if necessary
+controller-gen:
+ifeq (, $(shell which controller-gen))
+	$(GO) get sigs.k8s.io/controller-tools/cmd/controller-gen@v0.2.1
+CONTROLLER_GEN=$(GOBIN)/controller-gen
+else
+CONTROLLER_GEN=$(shell which controller-gen)
+endif
+
+yaml: manifests
+	kustomize build config/default > manifests/config.yaml

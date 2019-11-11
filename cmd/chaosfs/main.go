@@ -11,6 +11,7 @@ import (
 
 	"github.com/ethercflow/hookfs/hookfs"
 	"github.com/golang/glog"
+
 	"github.com/pingcap/chaos-operator/pkg/chaosfs"
 	"github.com/pingcap/chaos-operator/pkg/signals"
 	"github.com/pingcap/chaos-operator/pkg/version"
@@ -52,7 +53,8 @@ func main() {
 			fmt.Print("\nWait 10s for closed, force exit\n")
 		}
 
-		ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
 		err := exec.CommandContext(ctx, "fusermount", "-u", *mountpoint).Run()
 		if err != nil {
 			if err1 := exec.CommandContext(ctx, "umount", "-l", *mountpoint).Run(); err1 != nil {
