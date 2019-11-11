@@ -66,6 +66,7 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos twophase
 	if !ok {
 		err := errors.New("chaos is not PodChaos")
 		r.Log.Error(err, "chaos is not PodChaos", "chaos", chaos)
+		return err
 	}
 
 	pods, err := utils.SelectAndGeneratePods(ctx, r.Client, &podchaos.Spec)
