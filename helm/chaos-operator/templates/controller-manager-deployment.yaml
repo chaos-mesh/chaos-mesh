@@ -40,8 +40,8 @@ spec:
                 fieldPath: metadata.namespace
           - name: TZ
             value: {{ .Values.timezone | default "UTC" }}
-          - name: TC_DAEMON_PORT
-            value: !!str {{ .Values.tcDaemon.port }}
+          - name: CHAOS_DAEMON_PORT
+            value: !!str {{ .Values.chaosDaemon.port }}
         volumeMounts:
           - name: webhook-certs
             mountPath: /etc/webhook/certs
