@@ -5,13 +5,13 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/pingcap/chaos-operator/pkg/tcdaemon"
+	"github.com/pingcap/chaos-operator/pkg/chaosdaemon"
 	"github.com/pingcap/chaos-operator/pkg/version"
 
 	ctrl "sigs.k8s.io/controller-runtime"
 )
 
-var log = ctrl.Log.WithName("tcdaemon")
+var log = ctrl.Log.WithName("chaosdaemon")
 
 var (
 	printVersion bool
@@ -44,5 +44,5 @@ func main() {
 	if err != nil {
 		log.Error(err, "Error while parsing PORT environment variable", "port", rawPort)
 	}
-	tcdaemon.StartServer("0.0.0.0", port)
+	chaosdaemon.StartServer("0.0.0.0", port)
 }

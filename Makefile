@@ -37,15 +37,15 @@ endif
 
 all: yaml build image
 
-build: tcdaemon manager
+build: chaosdaemon manager
 
 # Run tests
 test: generate fmt vet manifests
 	$(GO) test ./... -coverprofile cover.out
 
-# Build tc-daemon binary
-tcdaemon: generate fmt vet
-	$(GO) build -ldflags '$(LDFLAGS)' -o images/chaos-operator/bin/tc-daemon ./cmd/tc-daemon/main.go
+# Build chaos-daemon binary
+chaosdaemon: generate fmt vet
+	$(GO) build -ldflags '$(LDFLAGS)' -o images/chaos-operator/bin/chaos-daemon ./cmd/chaos-daemon/main.go
 
 # Build manager binary
 manager: generate fmt vet

@@ -29,7 +29,7 @@ import (
 
 	"github.com/pingcap/chaos-operator/api/v1alpha1"
 	"github.com/pingcap/chaos-operator/controllers/twophase"
-	pb "github.com/pingcap/chaos-operator/pkg/tcdaemon/pb"
+	pb "github.com/pingcap/chaos-operator/pkg/chaosdaemon/pb"
 	"github.com/pingcap/chaos-operator/pkg/utils"
 
 	v1 "k8s.io/api/core/v1"
@@ -174,7 +174,7 @@ func (r *Reconciler) recoverPod(ctx context.Context, pod *v1.Pod, networkchaos *
 	}
 	defer c.Close()
 
-	pbClient := pb.NewTcDaemonClient(c)
+	pbClient := pb.NewChaosDaemonClient(c)
 
 	containerId := pod.Status.ContainerStatuses[0].ContainerID
 	_, err = pbClient.DeleteNetem(context.Background(), &pb.NetemRequest{
@@ -218,7 +218,7 @@ func (r *Reconciler) delayPod(ctx context.Context, pod *v1.Pod, networkchaos *v1
 	}
 	defer c.Close()
 
-	pbClient := pb.NewTcDaemonClient(c)
+	pbClient := pb.NewChaosDaemonClient(c)
 
 	containerId := pod.Status.ContainerStatuses[0].ContainerID
 
@@ -248,13 +248,13 @@ func (r *Reconciler) delayPod(ctx context.Context, pod *v1.Pod, networkchaos *v1
 }
 
 func (r *Reconciler) createGrpcConnection(ctx context.Context, pod *v1.Pod) (*grpc.ClientConn, error) {
-	port := os.Getenv("TC_DAEMON_PORT")
+	port := os.Getenv("CHAOS_DAEMON_PORT")
 	if port == "" {
 		port = "8080"
 	}
 
 	nodeName := pod.Spec.NodeName
-	r.Log.Info("Creating client to tcdaemon", "node", nodeName)
+	r.Log.Info("Creating client to chaosdaemon", "node", nodeName)
 
 	var node v1.Node
 	err := r.Get(ctx, types.NamespacedName{

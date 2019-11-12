@@ -1,4 +1,4 @@
-package tcdaemon
+package chaosdaemon
 
 import (
 	"context"
