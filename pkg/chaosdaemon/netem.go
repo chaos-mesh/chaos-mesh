@@ -1,4 +1,4 @@
-package tcdaemon
+package chaosdaemon
 
 import (
 	"fmt"
@@ -8,7 +8,7 @@ import (
 	"github.com/vishvananda/netlink"
 	"github.com/vishvananda/netns"
 
-	pb "github.com/pingcap/chaos-operator/pkg/tcdaemon/pb"
+	pb "github.com/pingcap/chaos-operator/pkg/chaosdaemon/pb"
 )
 
 const (
