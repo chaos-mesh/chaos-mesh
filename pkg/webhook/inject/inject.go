@@ -14,17 +14,21 @@
 package inject
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"strings"
 
+	"github.com/pingcap/chaos-operator/pkg/utils"
 	"github.com/pingcap/chaos-operator/pkg/webhook/config"
+
+	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"k8s.io/api/admission/v1beta1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
-	ctrl "sigs.k8s.io/controller-runtime"
+	"k8s.io/apimachinery/pkg/types"
 )
 
 var log = ctrl.Log.WithName("inject-webhook")
@@ -39,7 +43,7 @@ const (
 	StatusInjected = "injected"
 )
 
-func Inject(res *v1beta1.AdmissionRequest, cfg *config.Config) *v1beta1.AdmissionResponse {
+func Inject(res *v1beta1.AdmissionRequest, cli client.Client, cfg *config.Config) *v1beta1.AdmissionResponse {
 	var pod corev1.Pod
 	if err := json.Unmarshal(res.Object.Raw, &pod); err != nil {
 		log.Error(err, "Could not unmarshal raw object")
@@ -62,7 +66,7 @@ func Inject(res *v1beta1.AdmissionRequest, cfg *config.Config) *v1beta1.Admissio
 	log.V(4).Info("OldObject", "OldObject", string(res.OldObject.Raw))
 	log.V(4).Info("Pod", "Pod", pod)
 
-	requiredKey, ok := injectRequired(&pod.ObjectMeta, cfg)
+	requiredKey, ok := injectRequired(&pod.ObjectMeta, cli, cfg)
 	if !ok {
 		log.Info("Skipping injection due to policy check", "namespace", pod.ObjectMeta.Namespace, "name", podName)
 		return &v1beta1.AdmissionResponse{
@@ -103,7 +107,7 @@ func Inject(res *v1beta1.AdmissionRequest, cfg *config.Config) *v1beta1.Admissio
 }
 
 // Check whether the target resource need to be injected and return the required config name
-func injectRequired(metadata *metav1.ObjectMeta, cfg *config.Config) (string, bool) {
+func injectRequired(metadata *metav1.ObjectMeta, cli client.Client, cfg *config.Config) (string, bool) {
 	// skip special kubernetes system namespaces
 	for _, namespace := range ignoredNamespaces {
 		if metadata.Namespace == namespace {
@@ -114,16 +118,72 @@ func injectRequired(metadata *metav1.ObjectMeta, cfg *config.Config) (string, bo
 
 	log.V(4).Info("meta", "meta", metadata)
 
+	if checkInjectStatus(metadata, cfg) {
+		log.Info("Pod annotation indicates injection already satisfied, skipping",
+			"namespace", metadata.Namespace, "name", metadata.Name,
+			"annotationKey", cfg.StatusAnnotationKey(), "value", StatusInjected)
+		return "", false
+	}
+
+	requiredConfig, ok := injectByPodRequired(metadata, cfg)
+	if ok {
+		log.Info("Pod annotation requesting sidecar config",
+			"namespace", metadata.Namespace, "name", metadata.Name,
+			"annotation", cfg.RequestAnnotationKey(), "requiredConfig", requiredConfig)
+		return requiredConfig, true
+	}
+
+	requiredConfig, ok = injectByNamespaceRequired(metadata, cli, cfg)
+	if ok {
+		log.Info("Pod annotation requesting sidecar config",
+			"namespace", metadata.Namespace, "name", metadata.Name,
+			"annotation", cfg.RequestAnnotationKey(), "requiredConfig", requiredConfig)
+		return requiredConfig, true
+	}
+
+	return "", false
+}
+
+func checkInjectStatus(metadata *metav1.ObjectMeta, cfg *config.Config) bool {
 	annotations := metadata.GetAnnotations()
 	if annotations == nil {
-		annotations = map[string]string{}
+		annotations = make(map[string]string)
 	}
 
 	status, ok := annotations[cfg.StatusAnnotationKey()]
 	if ok && strings.ToLower(status) == StatusInjected {
-		log.Info("Pod annotation indicates injection already satisfied, skipping",
-			"namespace", metadata.Namespace, "name", metadata.Name, "annotationKey", cfg.StatusAnnotationKey(), "value", status)
+		return true
+	}
+
+	return false
+}
+
+func injectByNamespaceRequired(metadata *metav1.ObjectMeta, cli client.Client, cfg *config.Config) (string, bool) {
+	var ns corev1.Namespace
+	if err := cli.Get(context.Background(), types.NamespacedName{Name: metadata.Namespace}, &ns); err != nil {
+		log.Error(err, "failed to get namespace", "namespace", metadata.Namespace)
 		return "", false
+	}
+
+	annotations := ns.GetAnnotations()
+	if annotations == nil {
+		annotations = make(map[string]string)
+	}
+
+	required, ok := annotations[utils.GenAnnotationKeyForWebhook(cfg.RequestAnnotationKey(), metadata.Name)]
+	if ok {
+		log.Info("Get sidecar config from namespace annotations",
+			"namespace", metadata.Namespace, "pod", metadata.Name, "config", required)
+		return strings.ToLower(required), true
+	}
+
+	return "", false
+}
+
+func injectByPodRequired(metadata *metav1.ObjectMeta, cfg *config.Config) (string, bool) {
+	annotations := metadata.GetAnnotations()
+	if annotations == nil {
+		annotations = make(map[string]string)
 	}
 
 	required, ok := annotations[cfg.RequestAnnotationKey()]
@@ -133,10 +193,9 @@ func injectRequired(metadata *metav1.ObjectMeta, cfg *config.Config) (string, bo
 		return "", false
 	}
 
-	requiredConfig := strings.ToLower(required)
-	log.Info("Pod annotation requesting sidecar config",
-		"namespace", metadata.Namespace, "name", metadata.Name, "annotation", cfg.RequestAnnotationKey(), "required", required, "requiredConfig", requiredConfig)
-	return requiredConfig, true
+	log.Info("Get sidecar config from pod annotations",
+		"namespace", metadata.Namespace, "pod", metadata.Name, "config", required)
+	return strings.ToLower(required), true
 }
 
 // create mutation patch for resource

@@ -7,6 +7,26 @@ metadata:
   name: manager-role
 rules:
 - apiGroups:
+  - chaosoperator.pingcap.com
+  resources:
+  - iochaos
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - chaosoperator.pingcap.com
+  resources:
+  - iochaos/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
   - pingcap.com
   resources:
   - networkchaos

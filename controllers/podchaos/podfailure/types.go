@@ -27,14 +27,15 @@ import (
 	"github.com/pingcap/chaos-operator/controllers/twophase"
 	"github.com/pingcap/chaos-operator/pkg/utils"
 
+	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/client"
+
 	v1 "k8s.io/api/core/v1"
-	k8sError "k8s.io/apimachinery/pkg/api/errors"
+	k8serror "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/tools/cache"
-
-	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/client"
+	"k8s.io/client-go/util/retry"
 )
 
 const (
@@ -110,6 +111,7 @@ func (r *Reconciler) Recover(ctx context.Context, req ctrl.Request, chaos twopha
 	if !ok {
 		err := errors.New("chaos is not PodChaos")
 		r.Log.Error(err, "chaos is not PodChaos", "chaos", chaos)
+		return err
 	}
 
 	err := r.cleanFinalizersAndRecover(ctx, podchaos)
@@ -142,7 +144,7 @@ func (r *Reconciler) cleanFinalizersAndRecover(ctx context.Context, podchaos *v1
 		}, &pod)
 
 		if err != nil {
-			if !k8sError.IsNotFound(err) {
+			if !k8serror.IsNotFound(err) {
 				return err
 			}
 
@@ -166,18 +168,26 @@ func (r *Reconciler) failAllPods(ctx context.Context, pods []v1.Pod, podchaos *v
 	g := errgroup.Group{}
 	for _, pod := range pods {
 		g.Go(func() error {
-			key, err := cache.MetaNamespaceKeyFunc(&pod)
-			if err != nil {
-				return err
-			}
-			podchaos.Finalizers = utils.InsertFinalizer(podchaos.Finalizers, key)
+			err := retry.RetryOnConflict(retry.DefaultRetry, func() error {
+				key, err := cache.MetaNamespaceKeyFunc(&pod)
+				if err != nil {
+					return err
+				}
+				podchaos.Finalizers = utils.InsertFinalizer(podchaos.Finalizers, key)
 
-			if err := r.Update(ctx, podchaos); err != nil {
-				r.Log.Error(err, "unable to update podchaos finalizers")
-				return err
+				if err := r.Update(ctx, podchaos); err != nil {
+					r.Log.Error(err, "unable to update podchaos finalizers")
+					return err
+				}
+
+				return nil
+			})
+
+			if err == nil {
+				return r.failPod(ctx, &pod, podchaos)
 			}
 
-			return r.failPod(ctx, &pod, podchaos)
+			return err
 		})
 	}
 
@@ -185,7 +195,7 @@ func (r *Reconciler) failAllPods(ctx context.Context, pods []v1.Pod, podchaos *v
 }
 
 func (r *Reconciler) failPod(ctx context.Context, pod *v1.Pod, podchaos *v1alpha1.PodChaos) error {
-	r.Log.Info("Failing", "namespace", pod.Namespace, "name", pod.Name)
+	r.Log.Info("Try to resume pod", "namespace", pod.Namespace, "name", pod.Name)
 
 	// TODO: check the annotations or others in case that this pod is used by other chaos
 	for index := range pod.Spec.Containers {

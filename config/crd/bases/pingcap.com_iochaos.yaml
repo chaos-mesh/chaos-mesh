@@ -6,18 +6,18 @@ metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.2.2
   creationTimestamp: null
-  name: podchaos.pingcap.com
+  name: iochaos.pingcap.com
 spec:
   group: pingcap.com
   names:
-    kind: PodChaos
-    listKind: PodChaosList
-    plural: podchaos
-    singular: podchaos
+    kind: IoChaos
+    listKind: IoChaosList
+    plural: iochaos
+    singular: iochaos
   scope: ""
   validation:
     openAPIV3Schema:
-      description: PodChaos is the control script`s spec.
+      description: IoChaos is the Schema for the iochaos API
       properties:
         apiVersion:
           description: 'APIVersion defines the versioned schema of this representation
@@ -32,11 +32,23 @@ spec:
         metadata:
           type: object
         spec:
-          description: Spec defines the behavior of a pod chaos experiment
+          description: IoChaosSpec defines the desired state of IoChaos
           properties:
             action:
               description: 'Action defines the specific pod chaos action. Supported
-                action: pod-kill / pod-failure Default action: pod-kill'
+                action: delay / errno / mixed Default action: delay'
+              type: string
+            configName:
+              description: ConfigName defines the config name which used to inject
+                pod.
+              type: string
+            delay:
+              description: "Delay defines the value of I/O chaos action delay. It
+                is required when the action is `PodFailureAction`. A delay string
+                is a possibly signed sequence of decimal numbers, each with optional
+                fraction and a unit suffix, such as \"300ms\". Valid time units are
+                \"ns\", \"us\" (or \"µs\"), \"ms\", \"s\", \"m\", \"h\". \n If `Delay`
+                is empty, the operator will generate a value for it randomly."
               type: string
             duration:
               description: Duration represents the duration of the chaos action. It
@@ -45,12 +57,16 @@ spec:
                 fraction and a unit suffix, such as "300ms", "-1.5h" or "2h45m". Valid
                 time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
               type: string
-            gracePeriodSeconds:
-              description: The duration in seconds before the object should be deleted.
-                Value must be non-negative integer. The value zero indicates delete
-                immediately.
-              format: int64
-              type: integer
+            errno:
+              description: "Errno defines the error code that returned by I/O action.
+                refer to: https://www-numi.fnal.gov/offline_software/srt_public_context/WebDocs/Errors/unix_system_errors.html
+                \n If `Errno` is empty, the operator will generate a error code for
+                it randomly."
+              type: string
+            layer:
+              description: 'Layer represents the layer of the I/O action. Supported
+                value: fs / errno / mixed. Default layer: fs'
+              type: string
             mode:
               description: 'Mode defines the mode to run chaos action. Supported mode:
                 one / all / fixed / fixed-percent / random-max-percent'
@@ -62,6 +78,15 @@ spec:
             nextStart:
               description: Next time when this action will be applied again
               format: date-time
+              type: string
+            path:
+              description: Path defines the path of files for injecting I/O chaos
+                action.
+              type: string
+            percent:
+              description: Percent defines the percentage of injection errors and
+                provides a number from 0-100. If `Percent` is empty, the operator
+                will generate a value for it randomly.
               type: string
             scheduler:
               description: Scheduler defines some schedule rules to control the running
@@ -136,13 +161,13 @@ spec:
               type: string
           required:
           - action
+          - layer
           - mode
           - scheduler
           - selector
           type: object
         status:
-          description: Most recently observed status of the chaos experiment about
-            pods
+          description: IoChaosStatus defines the observed state of IoChaos
           properties:
             experiment:
               description: Experiment records the last experiment state.
@@ -196,8 +221,6 @@ spec:
           - experiment
           - phase
           type: object
-      required:
-      - spec
       type: object
   version: v1alpha1
   versions:

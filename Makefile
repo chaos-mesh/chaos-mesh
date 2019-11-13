@@ -37,7 +37,7 @@ endif
 
 all: yaml build image
 
-build: tcdaemon manager
+build: manager tcdaemon chaosfs
 
 # Run tests
 test: generate fmt vet manifests
@@ -45,11 +45,14 @@ test: generate fmt vet manifests
 
 # Build tc-daemon binary
 tcdaemon: generate fmt vet
-	$(GO) build -ldflags '$(LDFLAGS)' -o images/chaos-operator/bin/tc-daemon ./cmd/tc-daemon/main.go
+	$(GO) build -ldflags '$(LDFLAGS)' -o images/chaos-operator/bin/tc-daemon ./cmd/tc-daemon/*.go
 
 # Build manager binary
 manager: generate fmt vet
-	$(GO) build -ldflags '$(LDFLAGS)' -o images/chaos-operator/bin/chaos-controller-manager ./cmd/controller-manager/main.go
+	$(GO) build -ldflags '$(LDFLAGS)' -o images/chaos-operator/bin/chaos-controller-manager ./cmd/controller-manager/*.go
+
+chaosfs: generate fmt vet
+	$(GO) build -ldflags '$(LDFLAGS)' -o images/chaosfs/bin/chaosfs ./cmd/chaosfs/*.go
 
 # Run against the configured Kubernetes cluster in ~/.kube/config
 run: generate fmt vet manifests
@@ -79,9 +82,11 @@ tidy:
 
 image:
 	docker build -t pingcap/chaos-operator images/chaos-operator
+	docker build -t pingcap/chaos-fs images/chaosfs
 
 docker-push: docker
 	docker push "${DOCKER_REGISTRY}/pingcap/chaos-operator:latest"
+	docker push "${DOCKER_REGISTRY}/pingcap/chaos-fs:latest
 
 lint:
 	@echo "linting"

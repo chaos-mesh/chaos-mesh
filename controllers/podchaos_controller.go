@@ -16,8 +16,6 @@ limitations under the License.
 package controllers
 
 import (
-	"context"
-
 	"github.com/go-logr/logr"
 
 	chaosoperatorv1alpha1 "github.com/pingcap/chaos-operator/api/v1alpha1"
@@ -37,7 +35,6 @@ type PodChaosReconciler struct {
 // +kubebuilder:rbac:groups=pingcap.com,resources=podchaos/status,verbs=get;update;patch
 
 func (r *PodChaosReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
-	_ = context.Background()
 	logger := r.Log.WithValues("reconciler", "podchaos")
 
 	reconciler := podchaos.Reconciler{

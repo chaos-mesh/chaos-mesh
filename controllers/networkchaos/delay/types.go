@@ -32,14 +32,15 @@ import (
 	pb "github.com/pingcap/chaos-operator/pkg/tcdaemon/pb"
 	"github.com/pingcap/chaos-operator/pkg/utils"
 
+	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/client"
+
 	v1 "k8s.io/api/core/v1"
-	k8sError "k8s.io/apimachinery/pkg/api/errors"
+	k8serror "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/tools/cache"
-
-	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/client"
+	"k8s.io/client-go/util/retry"
 )
 
 const (
@@ -71,6 +72,7 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos twophase
 	if !ok {
 		err := errors.New("chaos is not NetworkChaos")
 		r.Log.Error(err, "chaos is not NetworkChaos", "chaos", chaos)
+		return err
 	}
 
 	pods, err := utils.SelectAndGeneratePods(ctx, r.Client, &networkchaos.Spec)
@@ -112,6 +114,7 @@ func (r *Reconciler) Recover(ctx context.Context, req ctrl.Request, chaos twopha
 	if !ok {
 		err := errors.New("chaos is not NetworkChaos")
 		r.Log.Error(err, "chaos is not NetworkChaos", "chaos", chaos)
+		return err
 	}
 
 	err := r.cleanFinalizersAndRecover(ctx, networkchaos)
@@ -145,7 +148,7 @@ func (r *Reconciler) cleanFinalizersAndRecover(ctx context.Context, networkchaos
 		}, &pod)
 
 		if err != nil {
-			if !k8sError.IsNotFound(err) {
+			if !k8serror.IsNotFound(err) {
 				return err
 			}
 
@@ -189,18 +192,26 @@ func (r *Reconciler) delayAllPods(ctx context.Context, pods []v1.Pod, networkcha
 	g := errgroup.Group{}
 	for _, pod := range pods {
 		g.Go(func() error {
-			key, err := cache.MetaNamespaceKeyFunc(&pod)
-			if err != nil {
-				return err
-			}
-			networkchaos.Finalizers = utils.InsertFinalizer(networkchaos.Finalizers, key)
+			err := retry.RetryOnConflict(retry.DefaultRetry, func() error {
+				key, err := cache.MetaNamespaceKeyFunc(&pod)
+				if err != nil {
+					return err
+				}
+				networkchaos.Finalizers = utils.InsertFinalizer(networkchaos.Finalizers, key)
 
-			if err := r.Update(ctx, networkchaos); err != nil {
-				r.Log.Error(err, "unable to update podchaos finalizers")
-				return err
+				if err := r.Update(ctx, networkchaos); err != nil {
+					r.Log.Error(err, "unable to update podchaos finalizers")
+					return err
+				}
+
+				return nil
+			})
+
+			if err == nil {
+				return r.delayPod(ctx, &pod, networkchaos)
 			}
 
-			return r.delayPod(ctx, &pod, networkchaos)
+			return err
 		})
 	}
 
@@ -225,15 +236,18 @@ func (r *Reconciler) delayPod(ctx context.Context, pod *v1.Pod, networkchaos *v1
 	delayTime, err := time.ParseDuration(delay.Latency)
 	if err != nil {
 		r.Log.Error(err, "fail to parse delay time")
+		return err
 	}
 	jitter, err := time.ParseDuration(delay.Jitter)
 	if err != nil {
 		r.Log.Error(err, "fail to parse delay jitter")
+		return err
 	}
 
 	delayCorr, err := strconv.ParseFloat(delay.Correlation, 32)
 	if err != nil {
 		r.Log.Error(err, "fail to parse delay correlation")
+		return err
 	}
 	_, err = pbClient.SetNetem(context.Background(), &pb.NetemRequest{
 		ContainerId: containerId,

@@ -10,19 +10,47 @@ metadata:
     app.kubernetes.io/component: webhook
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+"  "_" }}
 data:
-  sidecar.yaml: |
-    name: sidecar
-    env:
-      - name: HELLO
-        value: world
-      - name: TEST
-        value: test_that
+  chaosfs-tikv.yaml: |
+    name: chaosfs-tikv
     containers:
-    - name: sidecar-nginx
-      image: nginx:1.12.2
-      imagePullPolicy: IfNotPresent
+    - name: chaosfs
+      image: pingcap/chaosfs:latest
+      imagePullpolicy: Always
       ports:
-      - containerPort: 80
-      env:
-        - name: ENV_IN_SIDECAR
-          value: test-in-sidecar
+      - containerPort: 65534
+      securityContext:
+        privileged: true
+        capabilities:
+          add:
+            - SYS_ADMIN
+      command:
+        - /usr/local/bin/chaosfs
+        - -addr=":65534"
+        - -original="/var/lib/tikv/data"
+        - -mountpoint="/var/lib/tikv/fuse-data"
+    volumeMounts:
+    - name: tikv
+      mountPath: /var/lib/tikv
+      mountPropagation: HostToContainer
+  chaosfs-pd.yaml: |
+    name: chaosfs-pd
+    containers:
+    - name: chaosfs
+      image: pingcap/chaosfs:latest
+      imagePullpolicy: Always
+      ports:
+      - containerPort: 65534
+      securityContext:
+        privileged: true
+        capabilities:
+          add:
+            - SYS_ADMIN
+      command:
+        - /usr/local/bin/chaosfs
+        - -addr=":65534"
+        - -original="/var/lib/pd/data"
+        - -mountpoint="/var/lib/pd/fuse-data"
+    volumeMounts:
+    - name: pd
+      mountPath: /var/lib/pd
+      mountPropagation: HostToContainer

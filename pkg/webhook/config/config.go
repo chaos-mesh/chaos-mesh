@@ -25,9 +25,9 @@ import (
 
 	"github.com/ghodss/yaml"
 
-	corev1 "k8s.io/api/core/v1"
-
 	ctrl "sigs.k8s.io/controller-runtime"
+
+	corev1 "k8s.io/api/core/v1"
 )
 
 var log = ctrl.Log.WithName("inject-webhook")

@@ -27,3 +27,7 @@ const (
 func GenAnnotationKeyForImage(pc *v1alpha1.PodChaos, containerName string) string {
 	return fmt.Sprintf("%s-%s-%s-%s-image", AnnotationPrefix, pc.Name, pc.Spec.Action, containerName)
 }
+
+func GenAnnotationKeyForWebhook(prefix string, podName string) string {
+	return fmt.Sprintf("%s/%s", prefix, podName)
+}
