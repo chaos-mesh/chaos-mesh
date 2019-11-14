@@ -39,8 +39,12 @@ data:
       mountPropagation: HostToContainer
     - name: scripts
       mountPath: /tmp/scripts
+    - name: fuse
+      mountPath: /tmp/fuse
     volumes:
     - name: scripts
+      emptyDir: {}
+    - name: fuse
       emptyDir: {}
     postStart:
       tikv:
@@ -48,6 +52,11 @@ data:
           - /tmp/scripts/wait-fuse.sh
   chaosfs-pd.yaml: |
     name: chaosfs-pd
+    initContainers:
+    - name: inject-scripts
+      image: pingcap/chaos-scripts:latest
+      imagePullpolicy: Always
+      command: ["sh", "-c", "mkdir -p /tmp/scripts; cp -R /scripts/* /tmp/scripts/"]
     containers:
     - name: chaosfs
       image: pingcap/chaosfs:latest
@@ -68,3 +77,16 @@ data:
     - name: pd
       mountPath: /var/lib/pd
       mountPropagation: HostToContainer
+    - name: scripts
+      mountPath: /tmp/scripts
+    - name: fuse
+      mountPath: /tmp/fuse
+    volumes:
+    - name: scripts
+      emptyDir: {}
+    - name: fuse
+      emptyDir: {}
+    postStart:
+      pd:
+        command:
+          - /tmp/scripts/wait-fuse.sh
