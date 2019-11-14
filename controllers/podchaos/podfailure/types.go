@@ -110,6 +110,8 @@ func (r *Reconciler) Recover(ctx context.Context, req ctrl.Request, chaos twopha
 	if !ok {
 		err := errors.New("chaos is not PodChaos")
 		r.Log.Error(err, "chaos is not PodChaos", "chaos", chaos)
+
+		return err
 	}
 
 	err := r.cleanFinalizersAndRecover(ctx, podchaos)
@@ -165,6 +167,7 @@ func (r *Reconciler) cleanFinalizersAndRecover(ctx context.Context, podchaos *v1
 func (r *Reconciler) failAllPods(ctx context.Context, pods []v1.Pod, podchaos *v1alpha1.PodChaos) error {
 	g := errgroup.Group{}
 	for _, pod := range pods {
+		pod := pod
 		g.Go(func() error {
 			key, err := cache.MetaNamespaceKeyFunc(&pod)
 			if err != nil {

@@ -1,0 +1,24 @@
+apiVersion: pingcap.com/v1alpha1
+kind: NetworkChaos
+metadata:
+  name: network-delay-example
+  namespace: chaos-testing
+spec:
+  action: delay
+  mode: one
+  selector:
+    namespaces:
+      - default
+    labelSelectors:
+      "app": "ubuntu1"
+  direction: to
+  target:
+    selector:
+      namespaces:
+        - default
+      labelSelectors:
+        "app": "ubuntu2"
+    mode: one
+  duration: "10s"
+  scheduler:
+    cron: "@every 15s"

@@ -17,15 +17,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"os"
 	"strconv"
 	"time"
 
 	"github.com/go-logr/logr"
 
 	"golang.org/x/sync/errgroup"
-
-	"google.golang.org/grpc"
 
 	"github.com/pingcap/chaos-operator/api/v1alpha1"
 	"github.com/pingcap/chaos-operator/controllers/twophase"
@@ -71,6 +68,8 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos twophase
 	if !ok {
 		err := errors.New("chaos is not NetworkChaos")
 		r.Log.Error(err, "chaos is not NetworkChaos", "chaos", chaos)
+
+		return err
 	}
 
 	pods, err := utils.SelectAndGeneratePods(ctx, r.Client, &networkchaos.Spec)
@@ -112,6 +111,8 @@ func (r *Reconciler) Recover(ctx context.Context, req ctrl.Request, chaos twopha
 	if !ok {
 		err := errors.New("chaos is not NetworkChaos")
 		r.Log.Error(err, "chaos is not NetworkChaos", "chaos", chaos)
+
+		return err
 	}
 
 	err := r.cleanFinalizersAndRecover(ctx, networkchaos)
@@ -168,7 +169,7 @@ func (r *Reconciler) cleanFinalizersAndRecover(ctx context.Context, networkchaos
 func (r *Reconciler) recoverPod(ctx context.Context, pod *v1.Pod, networkchaos *v1alpha1.NetworkChaos) error {
 	r.Log.Info("Try to resume pod", "namespace", pod.Namespace, "name", pod.Name)
 
-	c, err := r.createGrpcConnection(ctx, pod)
+	c, err := utils.CreateGrpcConnection(ctx, r.Client, pod)
 	if err != nil {
 		return err
 	}
@@ -188,6 +189,7 @@ func (r *Reconciler) recoverPod(ctx context.Context, pod *v1.Pod, networkchaos *
 func (r *Reconciler) delayAllPods(ctx context.Context, pods []v1.Pod, networkchaos *v1alpha1.NetworkChaos) error {
 	g := errgroup.Group{}
 	for _, pod := range pods {
+		pod := pod
 		g.Go(func() error {
 			key, err := cache.MetaNamespaceKeyFunc(&pod)
 			if err != nil {
@@ -212,7 +214,7 @@ func (r *Reconciler) delayPod(ctx context.Context, pod *v1.Pod, networkchaos *v1
 
 	r.Log.Info("Try to delay pod", "namespace", pod.Namespace, "name", pod.Name)
 
-	c, err := r.createGrpcConnection(ctx, pod)
+	c, err := utils.CreateGrpcConnection(ctx, r.Client, pod)
 	if err != nil {
 		return err
 	}
@@ -245,28 +247,4 @@ func (r *Reconciler) delayPod(ctx context.Context, pod *v1.Pod, networkchaos *v1
 	})
 
 	return err
-}
-
-func (r *Reconciler) createGrpcConnection(ctx context.Context, pod *v1.Pod) (*grpc.ClientConn, error) {
-	port := os.Getenv("CHAOS_DAEMON_PORT")
-	if port == "" {
-		port = "8080"
-	}
-
-	nodeName := pod.Spec.NodeName
-	r.Log.Info("Creating client to chaosdaemon", "node", nodeName)
-
-	var node v1.Node
-	err := r.Get(ctx, types.NamespacedName{
-		Name: nodeName,
-	}, &node)
-	if err != nil {
-		return nil, err
-	}
-
-	conn, err := grpc.Dial(fmt.Sprintf("%s:%s", node.Status.Addresses[0].Address, port), grpc.WithInsecure())
-	if err != nil {
-		return nil, err
-	}
-	return conn, nil
 }

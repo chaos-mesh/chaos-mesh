@@ -45,7 +45,7 @@ test: generate fmt vet manifests
 
 # Build chaos-daemon binary
 chaosdaemon: generate fmt vet
-	$(GO) build -ldflags '$(LDFLAGS)' -o images/chaos-operator/bin/chaos-daemon ./cmd/chaos-daemon/main.go
+	$(GO) build -ldflags '$(LDFLAGS)' -o images/chaos-daemon/bin/chaos-daemon ./cmd/chaos-daemon/main.go
 
 # Build manager binary
 manager: generate fmt vet
@@ -79,6 +79,7 @@ tidy:
 
 image:
 	docker build -t pingcap/chaos-operator images/chaos-operator
+	docker build -t pingcap/chaos-daemon images/chaos-daemon
 
 docker-push: docker
 	docker push "${DOCKER_REGISTRY}/pingcap/chaos-operator:latest"

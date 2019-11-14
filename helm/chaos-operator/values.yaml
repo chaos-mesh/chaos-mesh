@@ -44,6 +44,6 @@ controllerManager:
   affinity: {}
 
 chaosDaemon:
-  image: pingcap/chaos-operator:latest
+  image: pingcap/chaos-daemon:latest
   # imagePullPolicy: Always
   port: 31767

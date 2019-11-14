@@ -30,7 +30,48 @@ type NetworkChaosAction string
 const (
 	// DelayAction represents the chaos action of adding delay on pods.
 	DelayAction NetworkChaosAction = "delay"
+
+	// PartitionAction represents the chaos action of network partition of pods.
+	PartitionAction NetworkChaosAction = "partition"
 )
+
+// PartitionDirection represents the block direciton from source to target
+type PartitionDirection string
+
+const (
+	// To represents block network packet from source to target
+	To PartitionDirection = "to"
+
+	// From represents block network packet to source from target
+	From PartitionDirection = "from"
+)
+
+type PartitionTarget struct {
+	// TargetSelector defines the partition target selector
+	TargetSelector SelectorSpec `json:"selector"`
+
+	// TargetMode defines the partition target selector mode
+	TargetMode PodMode `json:"mode"`
+
+	// TargetValue is required when the mode is set to `FixedPodMode` / `FixedPercentPodMod` / `RandomMaxPercentPodMod`.
+	// If `FixedPodMode`, provide an integer of pods to do chaos action.
+	// If `FixedPercentPodMod`, provide a number from 0-100 to specify the max % of pods the server can do chaos action.
+	// IF `RandomMaxPercentPodMod`,  provide a number from 0-100 to specify the % of pods to do chaos action
+	// +optional
+	TargetValue string `json:"value"`
+}
+
+func (t *PartitionTarget) GetSelector() SelectorSpec {
+	return t.TargetSelector
+}
+
+func (t *PartitionTarget) GetMode() PodMode {
+	return t.TargetMode
+}
+
+func (t *PartitionTarget) GetValue() string {
+	return t.TargetValue
+}
 
 // NetworkChaosSpec defines the desired state of NetworkChaos
 type NetworkChaosSpec struct {
@@ -61,7 +102,15 @@ type NetworkChaosSpec struct {
 
 	// Delay represetns the detail about delay action
 	// +optional
-	Delay *DelaySpec `json:"delay"`
+	Delay *DelaySpec `json:"delay,omitempty"`
+
+	// Direction represents the partition direction
+	// +optional
+	Direction PartitionDirection `json:"direction"`
+
+	// Target represents network partition target
+	// +optional
+	Target PartitionTarget `json:"target"`
 
 	// Next time when this action will be applied again
 	// +optional

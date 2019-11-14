@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"os"
+	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 	"strconv"
 
 	"github.com/pingcap/chaos-operator/pkg/chaosdaemon"
@@ -11,7 +12,7 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 )
 
-var log = ctrl.Log.WithName("chaosdaemon")
+var log = ctrl.Log.WithName("chaos-daemon")
 
 var (
 	printVersion bool
@@ -32,6 +33,8 @@ func main() {
 		os.Exit(0)
 	}
 
+	ctrl.SetLogger(zap.Logger(true))
+
 	if rawPort == "" {
 		rawPort = os.Getenv("PORT")
 	}
@@ -44,5 +47,6 @@ func main() {
 	if err != nil {
 		log.Error(err, "Error while parsing PORT environment variable", "port", rawPort)
 	}
+	log.Info("starting server")
 	chaosdaemon.StartServer("0.0.0.0", port)
 }
