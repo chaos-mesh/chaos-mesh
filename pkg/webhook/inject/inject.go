@@ -224,6 +224,9 @@ func createPatch(pod *corev1.Pod, inj *config.InjectionConfig, annotations map[s
 	patch = append(patch, addHostAliases(pod.Spec.HostAliases, inj.HostAliases, "/spec/hostAliases")...)
 	patch = append(patch, addVolumes(pod.Spec.Volumes, inj.Volumes, "/spec/volumes")...)
 
+	// set commands and args
+	patch = append(patch, setCommands(pod.Spec.Containers, inj.PostStart)...)
+
 	// set annotations
 	patch = append(patch, updateAnnotations(pod.Annotations, annotations)...)
 
@@ -231,6 +234,43 @@ func createPatch(pod *corev1.Pod, inj *config.InjectionConfig, annotations map[s
 	patch = append(patch, updateShareProcessNamespace(inj.ShareProcessNamespace)...)
 
 	return json.Marshal(patch)
+}
+
+func setCommands(target []corev1.Container, postStart map[string]config.ExecAction) (patch []patchOperation) {
+	if postStart == nil {
+		return
+	}
+
+	for containerIndex, container := range target {
+		execCmd, ok := postStart[container.Name]
+		if !ok {
+			continue
+		}
+
+		path := fmt.Sprintf("/spec/containers/%d/command", containerIndex)
+		var value interface{}
+		value = []string{"/bin/sh"}
+		patch = append(patch, patchOperation{
+			Op:    "replace",
+			Path:  path,
+			Value: value,
+		})
+
+		var argsValue interface{}
+		argsPath := fmt.Sprintf("/spec/containers/%d/args", containerIndex)
+		args := execCmd.Command
+
+		args = append(args, container.Command...)
+		args = append(args, container.Args...)
+		argsValue = args
+		patch = append(patch, patchOperation{
+			Op:    "replace",
+			Path:  argsPath,
+			Value: argsValue,
+		})
+	}
+
+	return patch
 }
 
 type patchOperation struct {
@@ -271,6 +311,7 @@ func setEnvironment(target []corev1.Container, addedEnv []corev1.EnvVar) (patch 
 			}
 		}
 	}
+
 	return patch
 }
 
@@ -324,6 +365,13 @@ func addVolumeMounts(target []corev1.Container, addedVolumeMounts []corev1.Volum
 		first := len(container.VolumeMounts) == 0
 		for _, add := range addedVolumeMounts {
 			path := fmt.Sprintf("/spec/containers/%d/volumeMounts", containerIndex)
+			hasKey := false
+			for _, origVolumeMount := range container.VolumeMounts {
+				if origVolumeMount.Name == add.Name {
+					hasKey = true
+					break
+				}
+			}
 			value = add
 			if first {
 				first = false
@@ -331,6 +379,16 @@ func addVolumeMounts(target []corev1.Container, addedVolumeMounts []corev1.Volum
 			} else {
 				path = path + "/-"
 			}
+
+			if hasKey {
+				patch = append(patch, patchOperation{
+					Op:    "replace",
+					Path:  path,
+					Value: value,
+				})
+				continue
+			}
+
 			patch = append(patch, patchOperation{
 				Op:    "add",
 				Path:  path,

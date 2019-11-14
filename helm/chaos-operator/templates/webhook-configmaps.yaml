@@ -12,6 +12,11 @@ metadata:
 data:
   chaosfs-tikv.yaml: |
     name: chaosfs-tikv
+    initContainers:
+    - name: inject-scripts
+      image: pingcap/chaos-scripts:latest
+      imagePullpolicy: Always
+      command: ["sh", "-c", "mkdir -p /tmp/scripts; cp -R /scripts/* /tmp/scripts/"]
     containers:
     - name: chaosfs
       image: pingcap/chaosfs:latest
@@ -32,6 +37,15 @@ data:
     - name: tikv
       mountPath: /var/lib/tikv
       mountPropagation: HostToContainer
+    - name: scripts
+      mountPath: /tmp/scripts
+    volumes:
+    - name: scripts
+      emptyDir: {}
+    postStart:
+      tikv:
+        command:
+          - /tmp/scripts/wait-fuse.sh
   chaosfs-pd.yaml: |
     name: chaosfs-pd
     containers:

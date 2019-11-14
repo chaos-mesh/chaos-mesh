@@ -43,6 +43,17 @@ const (
 	annotationNamespaceDefault = "admission-webhook.pingcap.com"
 )
 
+// ExecAction describes a "run in container" action.
+type ExecAction struct {
+	// Command is the command line to execute inside the container, the working directory for the
+	// command  is root ('/') in the container's filesystem. The command is simply exec'd, it is
+	// not run inside a shell, so traditional shell instructions ('|', etc) won't work. To use
+	// a shell, you need to explicitly call out to that shell.
+	// Exit status of 0 is treated as live/healthy and non-zero is unhealthy.
+	// +optional
+	Command []string `json:"command,omitempty"`
+}
+
 // InjectionConfig is a specific instance of a injected config, for a given annotation
 type InjectionConfig struct {
 	Name                  string               `json:"name"`
@@ -53,6 +64,12 @@ type InjectionConfig struct {
 	HostAliases           []corev1.HostAlias   `json:"hostAliases"`
 	InitContainers        []corev1.Container   `json:"initContainers"`
 	ShareProcessNamespace bool                 `json:"shareProcessNamespace"`
+	// PostStart is called after a container is created first.
+	// If the handler fails, the containers will failed.
+	// Key defines for the name of deployment container.
+	// Value defines for the Commands for stating container.
+	// +optional
+	PostStart map[string]ExecAction `json:"postStart,omitempty"`
 }
 
 // Config is a struct indicating how a given injection should be configured
