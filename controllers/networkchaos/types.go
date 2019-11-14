@@ -16,6 +16,7 @@ package networkchaos
 import (
 	"context"
 	"fmt"
+
 	"github.com/pingcap/chaos-operator/controllers/networkchaos/partition"
 
 	"github.com/go-logr/logr"

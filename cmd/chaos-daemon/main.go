@@ -3,8 +3,9 @@ package main
 import (
 	"flag"
 	"os"
-	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 	"strconv"
+
+	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
 	"github.com/pingcap/chaos-operator/pkg/chaosdaemon"
 	"github.com/pingcap/chaos-operator/pkg/version"

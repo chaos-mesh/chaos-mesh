@@ -2,9 +2,10 @@ package chaosdaemon
 
 import (
 	"fmt"
-	"github.com/juju/errors"
 	"net"
 	"sync"
+
+	"github.com/juju/errors"
 
 	pb "github.com/pingcap/chaos-operator/pkg/chaosdaemon/pb"
 

@@ -2,6 +2,7 @@ package chaosdaemon
 
 import (
 	"context"
+
 	"github.com/golang/glog"
 	"github.com/golang/protobuf/ptypes/empty"
 	"google.golang.org/grpc/codes"

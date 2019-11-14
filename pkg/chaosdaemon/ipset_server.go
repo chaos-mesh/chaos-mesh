@@ -3,10 +3,11 @@ package chaosdaemon
 import (
 	"context"
 	"fmt"
-	"github.com/golang/protobuf/ptypes/empty"
-	"github.com/vishvananda/netns"
 	"os/exec"
 	"strings"
+
+	"github.com/golang/protobuf/ptypes/empty"
+	"github.com/vishvananda/netns"
 
 	pb "github.com/pingcap/chaos-operator/pkg/chaosdaemon/pb"
 )

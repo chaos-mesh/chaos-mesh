@@ -3,10 +3,11 @@ package chaosdaemon
 import (
 	"context"
 	"fmt"
-	"github.com/golang/protobuf/ptypes/empty"
-	"github.com/vishvananda/netns"
 	"os/exec"
 	"strings"
+
+	"github.com/golang/protobuf/ptypes/empty"
+	"github.com/vishvananda/netns"
 
 	pb "github.com/pingcap/chaos-operator/pkg/chaosdaemon/pb"
 )
@@ -63,8 +64,11 @@ func (s *Server) FlushIptables(ctx context.Context, req *pb.IpTablesRequest) (*e
 	cmd := exec.CommandContext(ctx, iptablesCmd, strings.Split(command, " ")...)
 	out, err := cmd.CombinedOutput()
 	if err != nil {
-		log.Info("run command failed", "command", fmt.Sprintf("%s %s", iptablesCmd, command), "stdout", string(out))
-		return nil, err
+		output := string(out)
+		if (!strings.Contains(output, "Bad rule (does a matching rule exist in that chain?)")) && rule.Action == pb.Rule_DELETE {
+			log.Info("run command failed", "command", fmt.Sprintf("%s %s", iptablesCmd, command), "stdout", string(out))
+			return nil, err
+		}
 	}
 
 	return &empty.Empty{}, nil
