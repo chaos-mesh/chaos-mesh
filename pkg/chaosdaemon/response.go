@@ -1,4 +1,4 @@
-package tcdaemon
+package chaosdaemon
 
 const (
 	// StatusOK represents OK status code

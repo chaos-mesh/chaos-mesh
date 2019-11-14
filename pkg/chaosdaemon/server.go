@@ -1,4 +1,4 @@
-package tcdaemon
+package chaosdaemon
 
 import (
 	"context"
@@ -10,7 +10,7 @@ import (
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/juju/errors"
 
-	pb "github.com/pingcap/chaos-operator/pkg/tcdaemon/pb"
+	pb "github.com/pingcap/chaos-operator/pkg/chaosdaemon/pb"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -18,7 +18,7 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-//go:generate protoc -I pb pb/tcdaemon.proto --go_out=plugins=grpc:pb
+//go:generate protoc -I pb pb/chaosdaemon.proto --go_out=plugins=grpc:pb
 
 // Server represents an HTTP server for tc daemon
 type Server struct {
@@ -75,11 +75,11 @@ func StartServer(host string, port int) {
 	}
 
 	s := grpc.NewServer()
-	tcDaemonServer, err := newServer()
+	chaosDaemonServer, err := newServer()
 	if err != nil {
 		log.Fatalf("failed to create server: %v", err)
 	}
-	pb.RegisterTcDaemonServer(s, tcDaemonServer)
+	pb.RegisterChaosDaemonServer(s, chaosDaemonServer)
 
 	reflection.Register(s)
 

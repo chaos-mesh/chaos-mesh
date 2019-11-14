@@ -37,15 +37,15 @@ endif
 
 all: yaml build image
 
-build: manager tcdaemon chaosfs
+build: chaosdaemon manager chaosfs
 
 # Run tests
 test: generate fmt vet manifests
 	$(GO) test ./... -coverprofile cover.out
 
-# Build tc-daemon binary
-tcdaemon: generate fmt vet
-	$(GO) build -ldflags '$(LDFLAGS)' -o images/chaos-operator/bin/tc-daemon ./cmd/tc-daemon/*.go
+# Build chaos-daemon binary
+chaosdaemon: generate fmt vet
+	$(GO) build -ldflags '$(LDFLAGS)' -o images/chaos-operator/bin/chaos-daemon ./cmd/chaos-daemon/main.go
 
 # Build manager binary
 manager: generate fmt vet
@@ -83,10 +83,14 @@ tidy:
 image:
 	docker build -t pingcap/chaos-operator images/chaos-operator
 	docker build -t pingcap/chaos-fs images/chaosfs
+	cp -R hack images/chaos-scripts
+	docker build -t pingcap/chaos-scripts images/chaos-scripts
+	rm -rf images/hack
 
-docker-push: docker
+docker-push:
 	docker push "${DOCKER_REGISTRY}/pingcap/chaos-operator:latest"
-	docker push "${DOCKER_REGISTRY}/pingcap/chaos-fs:latest
+	docker push "${DOCKER_REGISTRY}/pingcap/chaos-fs:latest"
+	docker push "${DOCKER_REGISTRY}/pingcap/chaos-scripts:latest"
 
 lint:
 	@echo "linting"
@@ -108,3 +112,8 @@ endif
 
 yaml: manifests
 	kustomize build config/default > manifests/config.yaml
+
+
+.PHONY: all build test install manifests fmt vet tidy image \
+	docker-push lint generate controller-gen yaml \
+	manager chaosfs chaosdaemon

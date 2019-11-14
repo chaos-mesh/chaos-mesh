@@ -1,10 +1,10 @@
 syntax = "proto3";
 
-package tcdaemon;
+package chaosdaemon;
 
 import "google/protobuf/empty.proto";
 
-service TcDaemon {
+service ChaosDaemon {
   rpc SetNetem(NetemRequest) returns (google.protobuf.Empty) {}
   rpc DeleteNetem(NetemRequest) returns (google.protobuf.Empty) {}
 }
