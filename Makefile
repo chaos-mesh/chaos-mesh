@@ -111,7 +111,7 @@ CONTROLLER_GEN=$(shell which controller-gen)
 endif
 
 yaml: manifests
-	kustomize build config/default > manifests/config.yaml
+	kustomize build config/default > manifests/crd.yaml
 
 
 .PHONY: all build test install manifests fmt vet tidy image \
