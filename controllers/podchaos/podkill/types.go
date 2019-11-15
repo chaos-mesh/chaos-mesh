@@ -77,11 +77,11 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 
 		g := errgroup.Group{}
 		for index := range filteredPod {
-			pod := filteredPod[index]
+			pod := &filteredPod[index]
 			g.Go(func() error {
 				r.Log.Info("Deleting", "namespace", pod.Namespace, "name", pod.Name)
 
-				if err := r.Delete(ctx, &pod, &client.DeleteOptions{
+				if err := r.Delete(ctx, pod, &client.DeleteOptions{
 					GracePeriodSeconds: new(int64), // PeriodSeconds has to be set specifically
 				}); err != nil {
 					r.Log.Error(err, "unable to delete pod")
