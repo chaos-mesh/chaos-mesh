@@ -190,10 +190,11 @@ func (r *Reconciler) recoverPod(ctx context.Context, pod *v1.Pod, networkchaos *
 
 func (r *Reconciler) delayAllPods(ctx context.Context, pods []v1.Pod, networkchaos *v1alpha1.NetworkChaos) error {
 	g := errgroup.Group{}
-	for _, pod := range pods {
+	for index := range pods {
+		pod := &pods[index]
 		g.Go(func() error {
 			err := retry.RetryOnConflict(retry.DefaultRetry, func() error {
-				key, err := cache.MetaNamespaceKeyFunc(&pod)
+				key, err := cache.MetaNamespaceKeyFunc(pod)
 				if err != nil {
 					return err
 				}
@@ -208,7 +209,7 @@ func (r *Reconciler) delayAllPods(ctx context.Context, pods []v1.Pod, networkcha
 			})
 
 			if err == nil {
-				return r.delayPod(ctx, &pod, networkchaos)
+				return r.delayPod(ctx, pod, networkchaos)
 			}
 
 			return err
