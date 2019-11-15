@@ -61,11 +61,21 @@ func (s *Server) FlushIptables(ctx context.Context, req *pb.IpTablesRequest) (*e
 
 	command := fmt.Sprintf(format, action, rule.Set)
 
-	cmd := exec.CommandContext(ctx, iptablesCmd, strings.Split(command, " ")...)
-	out, err := cmd.CombinedOutput()
-	if err != nil {
-		output := string(out)
-		if !(rule.Action == pb.Rule_DELETE) { // TODO: handle error more carefully
+	if rule.Action == pb.Rule_DELETE {
+		output := ""
+
+		for !strings.Contains(output, "Bad rule (does a matching rule exist in that chain?).") { // delete until all equal rules are deleted
+			cmd := exec.CommandContext(ctx, iptablesCmd, strings.Split(command, " ")...)
+			out, err := cmd.CombinedOutput()
+			if err != nil {
+				output = string(out)
+			}
+		}
+	} else {
+		cmd := exec.CommandContext(ctx, iptablesCmd, strings.Split(command, " ")...)
+		out, err := cmd.CombinedOutput()
+		if err != nil {
+			output := string(out)
 			log.Info("run command failed", "command", fmt.Sprintf("%s %s", iptablesCmd, command), "stdout", output)
 			return nil, err
 		}
