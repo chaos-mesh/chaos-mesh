@@ -165,6 +165,7 @@ func (r *Reconciler) cleanFinalizersAndRecover(ctx context.Context, podchaos *v1
 func (r *Reconciler) failAllPods(ctx context.Context, pods []v1.Pod, podchaos *v1alpha1.PodChaos) error {
 	g := errgroup.Group{}
 	for _, pod := range pods {
+		pod := pod
 		g.Go(func() error {
 			key, err := cache.MetaNamespaceKeyFunc(&pod)
 			if err != nil {

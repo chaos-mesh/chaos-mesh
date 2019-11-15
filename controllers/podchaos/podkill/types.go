@@ -77,6 +77,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 
 		g := errgroup.Group{}
 		for _, pod := range filteredPod {
+			pod := pod
 			g.Go(func() error {
 				r.Log.Info("Deleting", "namespace", pod.Namespace, "name", pod.Name)
 
