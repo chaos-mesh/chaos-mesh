@@ -68,7 +68,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	chaos := r.Object()
 	if err = r.Get(ctx, req.NamespacedName, chaos); err != nil {
 		r.Log.Error(err, "unable to get chaos")
-		return ctrl.Result{}, err
+		return ctrl.Result{}, utils.IgnoreNotFound(err)
 	}
 
 	duration, err := chaos.GetDuration()
