@@ -131,7 +131,7 @@ func (r *Reconciler) cleanFinalizersAndRecover(ctx context.Context, podchaos *v1
 		return nil
 	}
 
-	for index, key := range podchaos.Finalizers {
+	for _, key := range podchaos.Finalizers {
 		ns, name, err := cache.SplitMetaNamespaceKey(key)
 		if err != nil {
 			return err
@@ -149,7 +149,7 @@ func (r *Reconciler) cleanFinalizersAndRecover(ctx context.Context, podchaos *v1
 			}
 
 			r.Log.Info("Pod not found", "namespace", ns, "name", name)
-			podchaos.Finalizers = utils.RemoveFromFinalizer(podchaos.Finalizers, index)
+			podchaos.Finalizers = utils.RemoveFromFinalizer(podchaos.Finalizers, key)
 			continue
 		}
 
@@ -158,7 +158,7 @@ func (r *Reconciler) cleanFinalizersAndRecover(ctx context.Context, podchaos *v1
 			return err
 		}
 
-		podchaos.Finalizers = utils.RemoveFromFinalizer(podchaos.Finalizers, index)
+		podchaos.Finalizers = utils.RemoveFromFinalizer(podchaos.Finalizers, key)
 	}
 
 	return nil

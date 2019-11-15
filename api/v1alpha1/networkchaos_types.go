@@ -44,6 +44,9 @@ const (
 
 	// From represents block network packet to source from target
 	From PartitionDirection = "from"
+
+	// Both represents block both directions
+	Both PartitionDirection = "both"
 )
 
 type PartitionTarget struct {

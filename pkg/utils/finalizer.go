@@ -13,12 +13,15 @@
 
 package utils
 
-func RemoveFromFinalizer(finalizers []string, index int) []string {
-	if index+1 < len(finalizers) {
-		return append(finalizers[:index], finalizers[index+1:]...)
-	} else {
-		return finalizers[:index]
+func RemoveFromFinalizer(finalizers []string, key string) []string {
+	slice := make([]string, 0, len(finalizers))
+	for _, f := range finalizers {
+		if f != key {
+			slice = append(slice, f)
+		}
 	}
+
+	return slice
 }
 
 func InsertFinalizer(finalizers []string, finalizer string) []string {
