@@ -190,7 +190,7 @@ func (r *Reconciler) delayAllPods(ctx context.Context, pods []v1.Pod, networkcha
 	for index := range pods {
 		pod := &pods[index]
 		g.Go(func() error {
-			key, err := cache.MetaNamespaceKeyFunc(&pod)
+			key, err := cache.MetaNamespaceKeyFunc(pod)
 			if err != nil {
 				return err
 			}
