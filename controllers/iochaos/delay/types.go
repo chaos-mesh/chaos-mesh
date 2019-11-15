@@ -175,6 +175,7 @@ func (r *Reconciler) delayAllPods(ctx context.Context, pods []v1.Pod, iochaos *v
 	g := errgroup.Group{}
 
 	for _, pod := range pods {
+		pod := pod
 		g.Go(func() error {
 			err := retry.RetryOnConflict(retry.DefaultRetry, func() error {
 				key, err := cache.MetaNamespaceKeyFunc(&pod)
