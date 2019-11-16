@@ -67,7 +67,7 @@ func main() {
 			}
 		}
 
-		ctx, cancel := context.WithTimeout(context.Background(), 5 * time.Second)
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
 		err := exec.CommandContext(ctx, "fusermount", "-u", *mountpoint).Run()
 		if err != nil {
@@ -86,7 +86,7 @@ func main() {
 
 	pf, err := pidfile.New(*pidFile)
 	if err != nil {
-			glog.Fatalln("Create pidfile failed: ", err)
+		glog.Fatalln("Create pidfile failed: ", err)
 	}
 	defer func() {
 		if err := pf.Remove(); err != nil {
