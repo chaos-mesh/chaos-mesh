@@ -131,7 +131,7 @@ func (r *Reconciler) cleanFinalizersAndRecover(ctx context.Context, podchaos *v1
 		return nil
 	}
 
-	for index, key := range podchaos.Finalizers {
+	for _, key := range podchaos.Finalizers {
 		ns, name, err := cache.SplitMetaNamespaceKey(key)
 		if err != nil {
 			return err
@@ -149,7 +149,7 @@ func (r *Reconciler) cleanFinalizersAndRecover(ctx context.Context, podchaos *v1
 			}
 
 			r.Log.Info("Pod not found", "namespace", ns, "name", name)
-			podchaos.Finalizers = utils.RemoveFromFinalizer(podchaos.Finalizers, index)
+			podchaos.Finalizers = utils.RemoveFromFinalizer(podchaos.Finalizers, key)
 			continue
 		}
 
@@ -158,7 +158,7 @@ func (r *Reconciler) cleanFinalizersAndRecover(ctx context.Context, podchaos *v1
 			return err
 		}
 
-		podchaos.Finalizers = utils.RemoveFromFinalizer(podchaos.Finalizers, index)
+		podchaos.Finalizers = utils.RemoveFromFinalizer(podchaos.Finalizers, key)
 	}
 
 	return nil
@@ -168,28 +168,24 @@ func (r *Reconciler) failAllPods(ctx context.Context, pods []v1.Pod, podchaos *v
 	g := errgroup.Group{}
 	for index := range pods {
 		pod := &pods[index]
-		g.Go(func() error {
-			err := retry.RetryOnConflict(retry.DefaultRetry, func() error {
-				key, err := cache.MetaNamespaceKeyFunc(pod)
-				if err != nil {
-					return err
-				}
-				podchaos.Finalizers = utils.InsertFinalizer(podchaos.Finalizers, key)
 
-				if err := r.Update(ctx, podchaos); err != nil {
-					r.Log.Error(err, "unable to update podchaos finalizers")
-					return err
-				}
-
-				return nil
-			})
-
-			if err == nil {
-				return r.failPod(ctx, pod, podchaos)
-			}
-
+		key, err := cache.MetaNamespaceKeyFunc(pod)
+		if err != nil {
 			return err
+		}
+		podchaos.Finalizers = utils.InsertFinalizer(podchaos.Finalizers, key)
+
+		g.Go(func() error {
+			return r.failPod(ctx, pod, podchaos)
 		})
+	}
+
+	err := retry.RetryOnConflict(retry.DefaultRetry, func() error {
+		return r.Update(ctx, podchaos)
+	})
+	if err != nil {
+		r.Log.Error(err, "unable to update podchaos finalizers")
+		return err
 	}
 
 	return g.Wait()

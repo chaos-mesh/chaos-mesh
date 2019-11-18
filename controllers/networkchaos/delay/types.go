@@ -135,7 +135,7 @@ func (r *Reconciler) cleanFinalizersAndRecover(ctx context.Context, networkchaos
 		return nil
 	}
 
-	for index, key := range networkchaos.Finalizers {
+	for _, key := range networkchaos.Finalizers {
 		ns, name, err := cache.SplitMetaNamespaceKey(key)
 		if err != nil {
 			return err
@@ -153,7 +153,7 @@ func (r *Reconciler) cleanFinalizersAndRecover(ctx context.Context, networkchaos
 			}
 
 			r.Log.Info("Pod not found", "namespace", ns, "name", name)
-			networkchaos.Finalizers = utils.RemoveFromFinalizer(networkchaos.Finalizers, index)
+			networkchaos.Finalizers = utils.RemoveFromFinalizer(networkchaos.Finalizers, key)
 			continue
 		}
 
@@ -162,7 +162,7 @@ func (r *Reconciler) cleanFinalizersAndRecover(ctx context.Context, networkchaos
 			return err
 		}
 
-		networkchaos.Finalizers = utils.RemoveFromFinalizer(networkchaos.Finalizers, index)
+		networkchaos.Finalizers = utils.RemoveFromFinalizer(networkchaos.Finalizers, key)
 	}
 
 	return nil
@@ -192,28 +192,24 @@ func (r *Reconciler) delayAllPods(ctx context.Context, pods []v1.Pod, networkcha
 	g := errgroup.Group{}
 	for index := range pods {
 		pod := &pods[index]
-		g.Go(func() error {
-			err := retry.RetryOnConflict(retry.DefaultRetry, func() error {
-				key, err := cache.MetaNamespaceKeyFunc(pod)
-				if err != nil {
-					return err
-				}
-				networkchaos.Finalizers = utils.InsertFinalizer(networkchaos.Finalizers, key)
 
-				if err := r.Update(ctx, networkchaos); err != nil {
-					r.Log.Error(err, "unable to update podchaos finalizers")
-					return err
-				}
-
-				return nil
-			})
-
-			if err == nil {
-				return r.delayPod(ctx, pod, networkchaos)
-			}
-
+		key, err := cache.MetaNamespaceKeyFunc(pod)
+		if err != nil {
 			return err
+		}
+		networkchaos.Finalizers = utils.InsertFinalizer(networkchaos.Finalizers, key)
+
+		g.Go(func() error {
+			return r.delayPod(ctx, pod, networkchaos)
 		})
+	}
+
+	err := retry.RetryOnConflict(retry.DefaultRetry, func() error {
+		return r.Update(ctx, networkchaos)
+	})
+	if err != nil {
+		r.Log.Error(err, "unable to update networkchaos finalizers")
+		return err
 	}
 
 	return g.Wait()

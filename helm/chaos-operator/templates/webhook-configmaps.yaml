@@ -14,7 +14,7 @@ data:
     name: chaosfs-tikv
     initContainers:
     - name: inject-scripts
-      image: pingcap/chaos-scripts:latest
+      image: localhost:5000/pingcap/chaos-scripts:latest
       imagePullpolicy: Always
       command: ["sh", "-c", "mkdir -p /tmp/scripts; cp -R /scripts/* /tmp/scripts/"]
     containers:
@@ -54,7 +54,7 @@ data:
     name: chaosfs-pd
     initContainers:
     - name: inject-scripts
-      image: pingcap/chaos-scripts:latest
+      image: localhost:5000/pingcap/chaos-scripts:latest
       imagePullpolicy: Always
       command: ["sh", "-c", "mkdir -p /tmp/scripts; cp -R /scripts/* /tmp/scripts/"]
     containers:

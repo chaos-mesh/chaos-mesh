@@ -17,6 +17,8 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/pingcap/chaos-operator/pkg/utils"
+
 	"github.com/go-logr/logr"
 
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -38,7 +40,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	var networkchaos v1alpha1.NetworkChaos
 	if err := r.Get(ctx, req.NamespacedName, &networkchaos); err != nil {
 		r.Log.Error(err, "unable to get networkchaos")
-		return ctrl.Result{}, err
+		return ctrl.Result{}, utils.IgnoreNotFound(err)
 	}
 
 	switch networkchaos.Spec.Action {

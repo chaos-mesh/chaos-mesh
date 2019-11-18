@@ -13,29 +13,13 @@
 
 package utils
 
-func RemoveFromFinalizer(finalizers []string, key string) []string {
-	slice := make([]string, 0, len(finalizers))
-	for _, f := range finalizers {
-		if f != key {
-			slice = append(slice, f)
-		}
+import (
+	apierrs "k8s.io/apimachinery/pkg/api/errors"
+)
+
+func IgnoreNotFound(err error) error {
+	if apierrs.IsNotFound(err) {
+		return nil
 	}
-
-	return slice
-}
-
-func InsertFinalizer(finalizers []string, finalizer string) []string {
-	exist := false
-
-	for _, f := range finalizers {
-		if f == finalizer {
-			exist = true
-		}
-	}
-
-	if exist {
-		return finalizers
-	} else {
-		return append(finalizers, finalizer)
-	}
+	return err
 }

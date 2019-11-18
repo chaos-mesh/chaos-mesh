@@ -11,31 +11,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package utils
+package watcher
 
-func RemoveFromFinalizer(finalizers []string, key string) []string {
-	slice := make([]string, 0, len(finalizers))
-	for _, f := range finalizers {
-		if f != key {
-			slice = append(slice, f)
-		}
-	}
+import (
+	"github.com/pingcap/chaos-operator/pkg/webhook/config"
+)
 
-	return slice
+// Message is a message that describes a change and payload to a sidecar configuration
+type Message struct {
+	Event           Event
+	InjectionConfig config.InjectionConfig
 }
 
-func InsertFinalizer(finalizers []string, finalizer string) []string {
-	exist := false
+// Event is what happened to the config (add/delete/update)
+type Event uint8
 
-	for _, f := range finalizers {
-		if f == finalizer {
-			exist = true
-		}
-	}
-
-	if exist {
-		return finalizers
-	} else {
-		return append(finalizers, finalizer)
-	}
-}
+const (
+	// EventAdd is a new ConfigMap
+	EventAdd Event = iota
+	// EventUpdate is an Updated ConfigMap
+	EventUpdate
+	// EventDelete is a deleted ConfigMap
+	EventDelete
+)

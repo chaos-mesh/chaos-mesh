@@ -11,31 +11,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package utils
+package watcher
 
-func RemoveFromFinalizer(finalizers []string, key string) []string {
-	slice := make([]string, 0, len(finalizers))
-	for _, f := range finalizers {
-		if f != key {
-			slice = append(slice, f)
-		}
-	}
-
-	return slice
+// Config is a configuration struct for the Watcher type
+type Config struct {
+	Namespace       string
+	ConfigMapLabels map[string]string
+	MasterURL       string
+	Kubeconfig      string
 }
 
-func InsertFinalizer(finalizers []string, finalizer string) []string {
-	exist := false
-
-	for _, f := range finalizers {
-		if f == finalizer {
-			exist = true
-		}
-	}
-
-	if exist {
-		return finalizers
-	} else {
-		return append(finalizers, finalizer)
+// NewConfig returns a new initialized Config
+func NewConfig() *Config {
+	return &Config{
+		Namespace:       "",
+		ConfigMapLabels: map[string]string{},
+		MasterURL:       "",
+		Kubeconfig:      "",
 	}
 }

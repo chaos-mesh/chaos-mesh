@@ -41,6 +41,7 @@ var (
 
 const (
 	annotationNamespaceDefault = "admission-webhook.pingcap.com"
+	defaultVersion             = "latest"
 )
 
 // ExecAction describes a "run in container" action.
@@ -64,12 +65,34 @@ type InjectionConfig struct {
 	HostAliases           []corev1.HostAlias   `json:"hostAliases"`
 	InitContainers        []corev1.Container   `json:"initContainers"`
 	ShareProcessNamespace bool                 `json:"shareProcessNamespace"`
+	version               string
 	// PostStart is called after a container is created first.
 	// If the handler fails, the containers will failed.
 	// Key defines for the name of deployment container.
 	// Value defines for the Commands for stating container.
 	// +optional
 	PostStart map[string]ExecAction `json:"postStart,omitempty"`
+}
+
+// FullName returns the full identifier of this sidecar - both the Name, and the Version(), formatted like
+// "${.Name}:${.Version}"
+func (c *InjectionConfig) FullName() string {
+	return canonicalizeConfigName(c.Name, c.Version())
+}
+
+func canonicalizeConfigName(name, version string) string {
+	return strings.ToLower(fmt.Sprintf("%s:%s", name, version))
+}
+
+// Version returns the parsed version of this injection config. If no version is specified,
+// "latest" is returned. The version is extracted from the request annotation, i.e.
+// admission-webhook.pingcap.com/request: my-sidecar:1.2, where "1.2" is the version.
+func (c *InjectionConfig) Version() string {
+	if c.version == "" {
+		return defaultVersion
+	}
+
+	return c.version
 }
 
 // Config is a struct indicating how a given injection should be configured
@@ -95,7 +118,7 @@ func LoadConfigDirectory(path string) (*Config, error) {
 			log.Error(err, "Error reading injection config", "from", p)
 			return nil, err
 		}
-		cfg.Injections[c.Name] = c
+		cfg.Injections[c.FullName()] = c
 	}
 
 	if len(cfg.Injections) == 0 {
@@ -123,11 +146,19 @@ func (c *Config) StatusAnnotationKey() string {
 func (c *Config) GetRequestedConfig(key string) (*InjectionConfig, error) {
 	c.RLock()
 	defer c.RUnlock()
-	k := strings.ToLower(key)
-	i, ok := c.Injections[k]
-	if !ok {
-		return nil, fmt.Errorf("no required config found for annotation %s", key)
+
+	name, version, err := configNameFields(key)
+	if err != nil {
+		return nil, err
 	}
+
+	fullKey := canonicalizeConfigName(name, version)
+
+	i, ok := c.Injections[fullKey]
+	if !ok {
+		return nil, fmt.Errorf("no injection config found for annotation %s", fullKey)
+	}
+
 	return i, nil
 }
 
@@ -159,7 +190,44 @@ func LoadInjectionConfig(reader io.Reader) (*InjectionConfig, error) {
 		return nil, ErrMissingName
 	}
 
+	// we need to split the Name field apart into a Name and Version component
+	cfg.Name, cfg.version, err = configNameFields(cfg.Name)
+	if err != nil {
+		return nil, err
+	}
+
 	log.V(3).Info("Loaded injection configx", "name", cfg.Name, "sha256sum", sha256.Sum256(data))
 
 	return &cfg, nil
+}
+
+// given a name of a config, extract the name and version. Format is "name[:version]" where :version
+// is optional, and is assumed to be "latest" if omitted.
+func configNameFields(shortName string) (name, version string, err error) {
+	substrings := strings.Split(shortName, ":")
+
+	switch len(substrings) {
+	case 1:
+		return substrings[0], defaultVersion, nil
+	case 2:
+		if substrings[1] == "" {
+			return substrings[0], defaultVersion, nil
+		}
+
+		return substrings[0], substrings[1], nil
+	default:
+		return "", "", fmt.Errorf(`not a valid name or name:version format`)
+	}
+}
+
+// ReplaceInjectionConfigs will take a list of new InjectionConfigs, and replace the current configuration with them.
+// this blocks waiting on being able to update the configs in place.
+func (c *Config) ReplaceInjectionConfigs(replacementConfigs []*InjectionConfig) {
+	c.Lock()
+	defer c.Unlock()
+	c.Injections = map[string]*InjectionConfig{}
+
+	for _, r := range replacementConfigs {
+		c.Injections[r.FullName()] = r
+	}
 }

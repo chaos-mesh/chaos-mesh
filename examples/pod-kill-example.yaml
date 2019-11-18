@@ -8,7 +8,7 @@ spec:
   mode: one
   selector:
     namespaces:
-      - tidb-cluster-demo
+      - demo
     labelSelectors:
       "app.kubernetes.io/component": "tikv"
   scheduler:

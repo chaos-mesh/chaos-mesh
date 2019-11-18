@@ -60,7 +60,7 @@ run: generate fmt vet manifests
 
 # Install CRDs into a cluster
 install: manifests
-	kubectl apply -f manifests/
+	kubectl apply -f manifests/crd.yaml
 	helm install helm/chaos-operator --name=chaos-operator --namespace=chaos-testing
 
 # Generate manifests e.g. CRD, RBAC etc.
@@ -81,10 +81,10 @@ tidy:
 	git diff --quiet go.mod go.sum
 
 image:
-	docker build -t pingcap/chaos-operator images/chaos-operator
-	docker build -t pingcap/chaos-fs images/chaosfs
+	docker build -t ${DOCKER_REGISTRY}/pingcap/chaos-operator images/chaos-operator
+	docker build -t ${DOCKER_REGISTRY}/pingcap/chaos-fs images/chaosfs
 	cp -R hack images/chaos-scripts
-	docker build -t pingcap/chaos-scripts images/chaos-scripts
+	docker build -t ${DOCKER_REGISTRY}/pingcap/chaos-scripts images/chaos-scripts
 	rm -rf images/hack
 
 docker-push:

@@ -1,4 +1,4 @@
-// Copyright 2019 PingCAP, Inc.time.Now(),
+// Copyright 2019 PingCAP, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import (
 	"github.com/pingcap/chaos-operator/api/v1alpha1"
 	"github.com/pingcap/chaos-operator/controllers/podchaos/podfailure"
 	"github.com/pingcap/chaos-operator/controllers/podchaos/podkill"
+	"github.com/pingcap/chaos-operator/pkg/utils"
 
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -39,7 +40,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	var podchaos v1alpha1.PodChaos
 	if err := r.Get(ctx, req.NamespacedName, &podchaos); err != nil {
 		r.Log.Error(err, "unable to get podchaos")
-		return ctrl.Result{}, err
+		return ctrl.Result{}, utils.IgnoreNotFound(err)
 	}
 
 	switch podchaos.Spec.Action {

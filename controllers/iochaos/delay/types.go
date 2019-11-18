@@ -125,7 +125,7 @@ func (r *Reconciler) cleanFinalizersAndRecover(ctx context.Context, iochaos *v1a
 		return nil
 	}
 
-	for index, key := range iochaos.Finalizers {
+	for _, key := range iochaos.Finalizers {
 		ns, name, err := cache.SplitMetaNamespaceKey(key)
 		if err != nil {
 			return err
@@ -143,7 +143,7 @@ func (r *Reconciler) cleanFinalizersAndRecover(ctx context.Context, iochaos *v1a
 			}
 
 			r.Log.Info("Pod not found", "namespace", ns, "names", name)
-			iochaos.Finalizers = utils.RemoveFromFinalizer(iochaos.Finalizers, index)
+			iochaos.Finalizers = utils.RemoveFromFinalizer(iochaos.Finalizers, key)
 			continue
 		}
 
@@ -151,7 +151,7 @@ func (r *Reconciler) cleanFinalizersAndRecover(ctx context.Context, iochaos *v1a
 			return err
 		}
 
-		iochaos.Finalizers = utils.RemoveFromFinalizer(iochaos.Finalizers, index)
+		iochaos.Finalizers = utils.RemoveFromFinalizer(iochaos.Finalizers, key)
 	}
 
 	return nil
@@ -176,29 +176,27 @@ func (r *Reconciler) delayAllPods(ctx context.Context, pods []v1.Pod, iochaos *v
 
 	for index := range pods {
 		pod := &pods[index]
-		g.Go(func() error {
-			err := retry.RetryOnConflict(retry.DefaultRetry, func() error {
-				key, err := cache.MetaNamespaceKeyFunc(pod)
-				if err != nil {
-					return err
-				}
 
-				iochaos.Finalizers = utils.InsertFinalizer(iochaos.Finalizers, key)
-
-				if err := r.Update(ctx, iochaos); err != nil {
-					r.Log.Error(err, "unable to update iochaos finalizers")
-					return err
-				}
-
-				return nil
-			})
-
-			if err == nil {
-				return r.delayPod(ctx, pod, iochaos)
-			}
-
+		key, err := cache.MetaNamespaceKeyFunc(pod)
+		if err != nil {
 			return err
+		}
+
+		iochaos.Finalizers = utils.InsertFinalizer(iochaos.Finalizers, key)
+
+		g.Go(func() error {
+			return r.delayPod(ctx, pod, iochaos)
 		})
+
+		return err
+	}
+
+	err := retry.RetryOnConflict(retry.DefaultRetry, func() error {
+		return r.Update(ctx, iochaos)
+	})
+	if err != nil {
+		r.Log.Error(err, "unable to update iochaos finalizers")
+		return err
 	}
 
 	return g.Wait()

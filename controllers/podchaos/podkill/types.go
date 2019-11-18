@@ -50,7 +50,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	var podchaos v1alpha1.PodChaos
 	if err = r.Get(ctx, req.NamespacedName, &podchaos); err != nil {
 		r.Log.Error(err, "unable to get podchaos")
-		return ctrl.Result{}, err
+		return ctrl.Result{}, utils.IgnoreNotFound(err)
 	}
 
 	shouldAct := podchaos.GetNextStart().Before(now)
