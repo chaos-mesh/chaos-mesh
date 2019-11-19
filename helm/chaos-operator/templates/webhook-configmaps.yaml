@@ -16,10 +16,10 @@ data:
     - name: inject-scripts
       image: localhost:5000/pingcap/chaos-scripts:latest
       imagePullpolicy: Always
-      command: ["sh", "-c", "mkdir -p /tmp/scripts; cp -R /scripts/* /tmp/scripts/"]
+      command: ["sh", "-c", "mkdir -p /tmp/scripts; cp -R /scripts/* /tmp/scripts/; mkdir -p /var/lib/tikv/fuse-data"]
     containers:
     - name: chaosfs
-      image: pingcap/chaosfs:latest
+      image: localhost:5000/pingcap/chaos-fs
       imagePullpolicy: Always
       ports:
       - containerPort: 65534
@@ -30,9 +30,14 @@ data:
             - SYS_ADMIN
       command:
         - /usr/local/bin/chaosfs
-        - -addr=":65534"
-        - -original="/var/lib/tikv/data"
-        - -mountpoint="/var/lib/tikv/fuse-data"
+        - -addr=:65534
+        - -pidfile=/tmp/fuse/pid
+        - -original=/var/lib/tikv/data
+        - -mountpoint=/var/lib/tikv/fuse-data
+      volumeMounts:
+        - name: tikv
+          mountPath: /var/lib/tikv
+          mountPropagation: Bidirectional
     volumeMounts:
     - name: tikv
       mountPath: /var/lib/tikv
@@ -56,10 +61,10 @@ data:
     - name: inject-scripts
       image: localhost:5000/pingcap/chaos-scripts:latest
       imagePullpolicy: Always
-      command: ["sh", "-c", "mkdir -p /tmp/scripts; cp -R /scripts/* /tmp/scripts/"]
+      command: ["sh", "-c", "mkdir -p /tmp/scripts; cp -R /scripts/* /tmp/scripts/; mkdir -p /var/lib/tikv/fuse-data"]
     containers:
     - name: chaosfs
-      image: pingcap/chaosfs:latest
+      image: localhost:5000/pingcap/chaos-fs
       imagePullpolicy: Always
       ports:
       - containerPort: 65534
@@ -70,9 +75,14 @@ data:
             - SYS_ADMIN
       command:
         - /usr/local/bin/chaosfs
-        - -addr=":65534"
-        - -original="/var/lib/pd/data"
-        - -mountpoint="/var/lib/pd/fuse-data"
+        - -addr=:65534
+        - -pidfile=/tmp/fuse/pid
+        - -original=/var/lib/pd/data
+        - -mountpoint=/var/lib/pd/fuse-data
+      volumeMounts:
+        - name: tikv
+          mountPath: /var/lib/tikv
+          mountPropagation: Bidirectional
     volumeMounts:
     - name: pd
       mountPath: /var/lib/pd

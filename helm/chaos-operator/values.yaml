@@ -16,7 +16,7 @@ controllerManager:
   replicaCount: 1
 
   image: localhost:5000/pingcap/chaos-operator:latest
-#  imagePullPolicy: Always
+  imagePullPolicy: Always
 
   nameOverride: ""
   fullnameOverride: ""

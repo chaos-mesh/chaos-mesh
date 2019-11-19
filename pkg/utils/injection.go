@@ -68,7 +68,7 @@ func UnsetIoInjection(ctx context.Context, c client.Client, pod *v1.Pod, iochaos
 
 		annotations := ns.GetAnnotations()
 		if annotations == nil {
-			annotations = make(map[string]string)
+			return nil
 		}
 
 		delete(annotations, GenAnnotationKeyForWebhook(v1alpha1.WebhookPodAnnotationKey, pod.Name))
@@ -80,7 +80,7 @@ func UnsetIoInjection(ctx context.Context, c client.Client, pod *v1.Pod, iochaos
 		}
 
 		if len(annotations) == 0 {
-			delete(annotations, v1alpha1.WebhookPodAnnotationKey)
+			delete(labels, v1alpha1.WebhookNamespaceLabelKey)
 			ns.SetLabels(labels)
 		}
 

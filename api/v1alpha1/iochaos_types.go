@@ -114,7 +114,7 @@ type IoChaosSpec struct {
 	Path string `json:"path,omitempty"`
 
 	// ConfigName defines the config name which used to inject pod.
-	// +optional
+	// +required
 	ConfigName string `json:"configName"`
 
 	// Next time when this action will be applied again

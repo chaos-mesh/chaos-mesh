@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/sh
 
 set -eo pipefail
 #set -x # For debugging
@@ -43,8 +43,9 @@ wait_for() {
 
     while [ -z "$coord_done" ]; do
         if [ -f "${file}" ]; then
-            sleep 2
+            echo "fuse server is started"
             coord_done=1
+            sleep 2
         elif [ ${count} -eq ${retry} ]; then
             echo "waiting for fuse server ready timeout"
             exit 1

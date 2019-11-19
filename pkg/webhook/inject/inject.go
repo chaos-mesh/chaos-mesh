@@ -171,13 +171,15 @@ func injectByNamespaceRequired(metadata *metav1.ObjectMeta, cli client.Client, c
 	}
 
 	required, ok := annotations[utils.GenAnnotationKeyForWebhook(cfg.RequestAnnotationKey(), metadata.Name)]
-	if ok {
-		log.Info("Get sidecar config from namespace annotations",
+	if !ok {
+		log.Info("Pod annotation by namespace is missing, skipping injection",
 			"namespace", metadata.Namespace, "pod", metadata.Name, "config", required)
-		return strings.ToLower(required), true
+		return "", false
 	}
 
-	return "", false
+	log.Info("Get sidecar config from namespace annotations",
+		"namespace", metadata.Namespace, "pod", metadata.Name, "config", required)
+	return strings.ToLower(required), true
 }
 
 func injectByPodRequired(metadata *metav1.ObjectMeta, cfg *config.Config) (string, bool) {
@@ -212,26 +214,26 @@ func createPatch(pod *corev1.Pod, inj *config.InjectionConfig, annotations map[s
 	mutatedInjectedInitContainers := mergeEnvVars(inj.Environment, inj.InitContainers)
 	mutatedInjectedInitContainers = mergeVolumeMounts(inj.VolumeMounts, mutatedInjectedInitContainers)
 
+	// patch all existing containers with the env vars and volume mounts
+	// patch = append(patch, setEnvironment(pod.Spec.Containers, inj.Environment)...)
+	patch = append(patch, setVolumeMounts(pod.Spec.Containers, inj.VolumeMounts, "/spec/containers")...)
+
 	// patch containers with our injected containers
 	patch = append(patch, addContainers(pod.Spec.Containers, mutatedInjectedContainers, "/spec/containers")...)
-
-	// patch all existing containers with the env vars and volume mounts
-	patch = append(patch, setEnvironment(pod.Spec.Containers, inj.Environment)...)
-	patch = append(patch, addVolumeMounts(pod.Spec.Containers, inj.VolumeMounts)...)
 
 	// add initContainers, hostAliases and volumes
 	patch = append(patch, addContainers(pod.Spec.InitContainers, mutatedInjectedInitContainers, "/spec/initContainers")...)
 	patch = append(patch, addHostAliases(pod.Spec.HostAliases, inj.HostAliases, "/spec/hostAliases")...)
 	patch = append(patch, addVolumes(pod.Spec.Volumes, inj.Volumes, "/spec/volumes")...)
 
-	// set commands and args
-	patch = append(patch, setCommands(pod.Spec.Containers, inj.PostStart)...)
-
 	// set annotations
 	patch = append(patch, updateAnnotations(pod.Annotations, annotations)...)
 
 	// set shareProcessNamespace
 	patch = append(patch, updateShareProcessNamespace(inj.ShareProcessNamespace)...)
+
+	// set commands and args
+	patch = append(patch, setCommands(pod.Spec.Containers, inj.PostStart)...)
 
 	return json.Marshal(patch)
 }
@@ -258,10 +260,21 @@ func setCommands(target []corev1.Container, postStart map[string]config.ExecActi
 
 		var argsValue interface{}
 		argsPath := fmt.Sprintf("/spec/containers/%d/args", containerIndex)
-		args := execCmd.Command
 
-		args = append(args, container.Command...)
-		args = append(args, container.Args...)
+		args := []string{"-c"}
+
+		var scripts string
+		scripts = strings.Join(execCmd.Command, " ")
+		scripts += ";"
+
+		scripts += strings.Join(container.Command, " ")
+		scripts += " "
+		scripts += strings.Join(container.Args, " ")
+
+		args = append(args, scripts)
+
+		log.Info("Inject args", "args", args)
+
 		argsValue = args
 		patch = append(patch, patchOperation{
 			Op:    "replace",
@@ -279,41 +292,41 @@ type patchOperation struct {
 	Value interface{} `json:"value,omitempty"`
 }
 
-func setEnvironment(target []corev1.Container, addedEnv []corev1.EnvVar) (patch []patchOperation) {
-	var value interface{}
-	for containerIndex, container := range target {
-		// for each container in the spec, determine if we want to patch with any env vars
-		first := len(container.Env) == 0
-		for _, add := range addedEnv {
-			path := fmt.Sprintf("/spec/containers/%d/env", containerIndex)
-			hasKey := false
-			// make sure we dont override any existing env vars; we only add, dont replace
-			for _, origEnv := range container.Env {
-				if origEnv.Name == add.Name {
-					hasKey = true
-					break
-				}
-			}
-			if !hasKey {
-				// make a patch
-				value = add
-				if first {
-					first = false
-					value = []corev1.EnvVar{add}
-				} else {
-					path = path + "/-"
-				}
-				patch = append(patch, patchOperation{
-					Op:    "add",
-					Path:  path,
-					Value: value,
-				})
-			}
-		}
-	}
-
-	return patch
-}
+// func setEnvironment(target []corev1.Container, addedEnv []corev1.EnvVar) (patch []patchOperation) {
+// 	var value interface{}
+// 	for containerIndex, container := range target {
+// 		// for each container in the spec, determine if we want to patch with any env vars
+// 		first := len(container.Env) == 0
+// 		for _, add := range addedEnv {
+// 			path := fmt.Sprintf("/spec/containers/%d/env", containerIndex)
+// 			hasKey := false
+// 			// make sure we dont override any existing env vars; we only add, dont replace
+// 			for _, origEnv := range container.Env {
+// 				if origEnv.Name == add.Name {
+// 					hasKey = true
+// 					break
+// 				}
+// 			}
+// 			if !hasKey {
+// 				// make a patch
+// 				value = add
+// 				if first {
+// 					first = false
+// 					value = []corev1.EnvVar{add}
+// 				} else {
+// 					path = path + "/-"
+// 				}
+// 				patch = append(patch, patchOperation{
+// 					Op:    "add",
+// 					Path:  path,
+// 					Value: value,
+// 				})
+// 			}
+// 		}
+// 	}
+//
+// 	return patch
+// }
 
 func addContainers(target, added []corev1.Container, basePath string) (patch []patchOperation) {
 	first := len(target) == 0
@@ -358,44 +371,30 @@ func addVolumes(target, added []corev1.Volume, basePath string) (patch []patchOp
 	return patch
 }
 
-func addVolumeMounts(target []corev1.Container, addedVolumeMounts []corev1.VolumeMount) (patch []patchOperation) {
-	var value interface{}
-	for containerIndex, container := range target {
-		// for each container in the spec, determine if we want to patch with any volume mounts
-		first := len(container.VolumeMounts) == 0
-		for _, add := range addedVolumeMounts {
-			path := fmt.Sprintf("/spec/containers/%d/volumeMounts", containerIndex)
-			hasKey := false
-			for _, origVolumeMount := range container.VolumeMounts {
-				if origVolumeMount.Name == add.Name {
-					hasKey = true
-					break
-				}
-			}
-			value = add
-			if first {
-				first = false
-				value = []corev1.VolumeMount{add}
-			} else {
-				path = path + "/-"
-			}
-
-			if hasKey {
-				patch = append(patch, patchOperation{
-					Op:    "replace",
-					Path:  path,
-					Value: value,
-				})
-				continue
-			}
-
-			patch = append(patch, patchOperation{
-				Op:    "add",
-				Path:  path,
-				Value: value,
-			})
+func setVolumeMounts(target []corev1.Container, addedVolumeMounts []corev1.VolumeMount, basePath string) (patch []patchOperation) {
+	for index, c := range target {
+		volumeMounts := map[string]corev1.VolumeMount{}
+		for _, vm := range c.VolumeMounts {
+			volumeMounts[vm.Name] = vm
 		}
+		for _, added := range addedVolumeMounts {
+			log.Info("volumeMount", "add", added)
+			volumeMounts[added.Name] = added
+		}
+
+		vs := []corev1.VolumeMount{}
+		for _, vm := range volumeMounts {
+			vs = append(vs, vm)
+		}
+		target[index].VolumeMounts = vs
 	}
+
+	patch = append(patch, patchOperation{
+		Op:    "replace",
+		Path:  basePath,
+		Value: target,
+	})
+
 	return patch
 }
 

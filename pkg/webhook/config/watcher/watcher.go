@@ -32,7 +32,6 @@ import (
 	"k8s.io/client-go/kubernetes"
 	k8sv1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	"k8s.io/client-go/rest"
-	"k8s.io/client-go/tools/clientcmd"
 )
 
 var log = ctrl.Log.WithName("inject-webhook")
@@ -66,24 +65,13 @@ func New(cfg Config) (*K8sConfigMapWatcher, error) {
 				"namespace", c.Namespace, "filepath", serviceAccountNamespaceFilePath)
 		}
 	}
-	var (
-		err       error
-		k8sConfig *rest.Config
-	)
-	if c.Kubeconfig != "" || c.MasterURL != "" {
-		log.Info("Creating Kubernetes client",
-			"kubeconfig", c.Kubeconfig, "master url", c.MasterURL)
-		k8sConfig, err = clientcmd.BuildConfigFromFlags(c.MasterURL, c.Kubeconfig)
-		if err != nil {
-			return nil, err
-		}
-	} else {
-		log.Info("Creating Kubernetes client from in-cluster discovery")
-		k8sConfig, err = rest.InClusterConfig()
-		if err != nil {
-			return nil, err
-		}
+
+	log.Info("Creating Kubernetes client from in-cluster discovery")
+	k8sConfig, err := rest.InClusterConfig()
+	if err != nil {
+		return nil, err
 	}
+
 	clientset, err := kubernetes.NewForConfig(k8sConfig)
 	if err != nil {
 		return nil, err
@@ -175,7 +163,12 @@ func (c *K8sConfigMapWatcher) Get() (cfgs []*config.InjectionConfig, err error) 
 	if err != nil {
 		return cfgs, err
 	}
-	log.Info("Fetched ConfigMaps", len(clist.Items))
+
+	if clist == nil {
+		return cfgs, nil
+	}
+
+	log.Info("Fetched ConfigMaps", "configmap count", len(clist.Items))
 	for _, cm := range clist.Items {
 		injectionConfigsForCM, err := InjectionConfigsFromConfigMap(cm)
 		if err != nil {

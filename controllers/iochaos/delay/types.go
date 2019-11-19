@@ -111,6 +111,10 @@ func (r *Reconciler) Recover(ctx context.Context, req ctrl.Request, chaos twopha
 		return err
 	}
 
+	if err := r.cleanFinalizersAndRecover(ctx, iochaos); err != nil {
+		return err
+	}
+
 	iochaos.Status.Experiment.EndTime = &metav1.Time{
 		Time: time.Now(),
 	}
@@ -212,6 +216,7 @@ func (r *Reconciler) delayPod(ctx context.Context, pod *v1.Pod, iochaos *v1alpha
 	}
 
 	// need to recreate pod when to inject sidecar
+	time.Sleep(2 * time.Second)
 	return r.Delete(ctx, pod, &client.DeleteOptions{
 		GracePeriodSeconds: new(int64),
 	})

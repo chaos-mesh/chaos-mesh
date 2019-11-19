@@ -1,16 +1,20 @@
 apiVersion: pingcap.com/v1alpha1
-kind: PodChaos
+kind: IoChaos
 metadata:
-  name: pod-failure-example
+  name: io-delay-example
   namespace: chaos-testing
 spec:
-  action: pod-failure
+  action: delay
   mode: one
-  duration: "30s"
+  duration: "400s"
+  configName: "chaosfs-tikv"
+  path: ""
   selector:
     namespaces:
       - demo
     labelSelectors:
       "app.kubernetes.io/component": "tikv"
+  layer: "fs"
+  delay: "1ms"
   scheduler:
-    cron: "@every 2m"
+    cron: "@every 10m"

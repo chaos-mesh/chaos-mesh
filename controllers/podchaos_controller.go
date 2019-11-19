@@ -46,20 +46,7 @@ func (r *PodChaosReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 }
 
 func (r *PodChaosReconciler) SetupWithManager(mgr ctrl.Manager) error {
-	err := ctrl.NewControllerManagedBy(mgr).
+	return ctrl.NewControllerManagedBy(mgr).
 		For(&chaosoperatorv1alpha1.PodChaos{}).
 		Complete(r)
-	if err != nil {
-		return err
-	}
-
-	return r.SetupWebhookWithManager(mgr)
-}
-
-func (r *PodChaosReconciler) SetupWebhookWithManager(mgr ctrl.Manager) error {
-	return nil
-	// TODO: setup Webhook
-	//return ctrl.NewWebhookManagedBy(mgr).
-	//	For(&chaosoperatorv1alpha1.PodChaos{}).
-	//	Complete()
 }

@@ -33,13 +33,13 @@ spec:
 {{ toYaml .Values.controllerManager.resources | indent 12 }}
         command:
           - /usr/local/bin/chaos-controller-manager
+          - -configmap-labels=app.kubernetes.io/component=webhook
+          - -conf=/etc/webhook/conf
         env:
           - name: NAMESPACE
             valueFrom:
               fieldRef:
                 fieldPath: metadata.namespace
-          # - name: "CONFIG_DIR"
-          #     value: "/etc/webhook/conf"
           - name: TZ
             value: {{ .Values.timezone | default "UTC" }}
           - name: CHAOS_DAEMON_PORT

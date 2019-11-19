@@ -35,8 +35,6 @@ var log = ctrl.Log.WithName("inject-webhook")
 var (
 	// ErrMissingName ..
 	ErrMissingName = fmt.Errorf(`name field is required for an injection config`)
-	// ErrNoConfigurationLoaded ..
-	ErrNoConfigurationLoaded = fmt.Errorf(`at least one config must be present in the --config-directory`)
 )
 
 const (
@@ -104,25 +102,22 @@ type Config struct {
 
 // LoadConfigDirectory loads all configs in a directory and returns the Config
 func LoadConfigDirectory(path string) (*Config, error) {
-	cfg := Config{
+	cfg := &Config{
 		Injections: map[string]*InjectionConfig{},
 	}
 	glob := filepath.Join(path, "*.yaml")
 	matches, err := filepath.Glob(glob)
 	if err != nil {
-		return nil, err
+		return cfg, err
 	}
+
 	for _, p := range matches {
 		c, err := LoadInjectionConfigFromFilePath(p)
 		if err != nil {
 			log.Error(err, "Error reading injection config", "from", p)
-			return nil, err
+			return cfg, err
 		}
 		cfg.Injections[c.FullName()] = c
-	}
-
-	if len(cfg.Injections) == 0 {
-		return nil, ErrNoConfigurationLoaded
 	}
 
 	if cfg.AnnotationNamespace == "" {
@@ -131,7 +126,7 @@ func LoadConfigDirectory(path string) (*Config, error) {
 
 	log.V(2).Info("Loaded injection configs", "len", len(cfg.Injections), "from", glob)
 
-	return &cfg, nil
+	return cfg, nil
 }
 
 func (c *Config) RequestAnnotationKey() string {

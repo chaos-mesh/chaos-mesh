@@ -26,6 +26,7 @@ rules:
   resources:
   - services
   - events
+  - namespaces
   verbs: ["*"]
 - apiGroups: [""]
   resources: ["endpoints"]
@@ -44,12 +45,6 @@ rules:
   verbs: ["get", "list", "watch","update", "delete"]
 - apiGroups: ["apps"]
   resources: ["statefulsets"]
-  verbs: ["*"]
-- apiGroups: ["pingcap.com"]
-  resources:
-  - podchaos
-  - networkchaos
-  - iochaos
   verbs: ["*"]
 {{- end }}
 - apiGroups: [""]
@@ -70,6 +65,12 @@ rules:
 - apiGroups: ["admissionregistration.k8s.io"]
   resources: ["mutatingwebhookconfigurations"]
   verbs: ["get", "create", "delete", "update", "patch"]
+- apiGroups: ["pingcap.com"]
+  resources:
+    - podchaos
+    - networkchaos
+    - iochaos
+  verbs: ["*"]
 ---
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1beta1
@@ -106,6 +107,7 @@ rules:
   resources:
     - services
     - events
+    - namespaces
   verbs: ["*"]
 - apiGroups: [""]
   resources: ["endpoints"]

@@ -67,10 +67,6 @@ func init() {
 		"Namespace to search for ConfigMaps to load Injection Configs from (default: current namespace)")
 	flag.Var(&cmWatcherLabels, "configmap-labels",
 		"Label pairs used to discover ConfigMaps in Kubernetes. These should be key1=value[,key2=val2,...]")
-	flag.StringVar(&watcherConfig.MasterURL, "master-url", "",
-		"Kubernetes master URL (used for running outside of the cluster)")
-	flag.StringVar(&watcherConfig.Kubeconfig, "kubeconfig", "",
-		"Kubernetes kubeconfig (used only for running outside of the cluster)")
 
 	flag.Parse()
 
@@ -123,6 +119,7 @@ func main() {
 	webhookConfig, err := config.LoadConfigDirectory(configDir)
 	if err != nil {
 		setupLog.Error(err, "load webhook config error")
+		os.Exit(1)
 	}
 
 	watchConfig(context.Background(), webhookConfig)
@@ -133,7 +130,7 @@ func main() {
 
 	// +kubebuilder:scaffold:builder
 
-	setupLog.Info("starting manager")
+	setupLog.Info("Starting manager")
 	if err := mgr.Start(ctrl.SetupSignalHandler()); err != nil {
 		setupLog.Error(err, "problem running manager")
 		os.Exit(1)
@@ -161,7 +158,7 @@ func watchConfig(ctx context.Context, cfg *config.Config) {
 
 		go func() {
 			for {
-				setupLog.Info("launching watcher for ConfigMaps")
+				setupLog.Info("Launching watcher for ConfigMaps")
 				err := configWatcher.Watch(ctx, sigChan)
 				if err != nil {
 					switch err {
@@ -177,13 +174,19 @@ func watchConfig(ctx context.Context, cfg *config.Config) {
 		for {
 			select {
 			case <-eventsCh:
-				setupLog.Info("triggering ConfigMap reconciliation")
+				setupLog.Info("Triggering ConfigMap reconciliation")
 				updatedInjectionConfigs, err := configWatcher.Get()
 				if err != nil {
 					setupLog.Error(err, "unable to get ConfigMaps")
 					continue
 				}
-				setupLog.Info("got updated InjectionConfigs from reconciliation",
+
+				if len(updatedInjectionConfigs) == 0 {
+					setupLog.Info("No updated injection configs")
+					continue
+				}
+
+				setupLog.Info("Got updated InjectionConfigs from reconciliation",
 					"updated config count", len(updatedInjectionConfigs))
 
 				newInjectionConfigs := make([]*config.InjectionConfig, len(updatedInjectionConfigs)+len(cfg.Injections))
@@ -198,10 +201,10 @@ func watchConfig(ctx context.Context, cfg *config.Config) {
 					}
 				}
 
-				setupLog.Info("updating server with newly loaded configurations",
+				setupLog.Info("Updating server with newly loaded configurations",
 					"origin configs count", len(cfg.Injections), "updated configs count", len(updatedInjectionConfigs))
 				cfg.ReplaceInjectionConfigs(newInjectionConfigs)
-				setupLog.Info("configuration replaced")
+				setupLog.Info("Configuration replaced")
 			}
 		}
 
