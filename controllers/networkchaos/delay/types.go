@@ -188,22 +188,23 @@ func (r *Reconciler) recoverPod(ctx context.Context, pod *v1.Pod, networkchaos *
 
 func (r *Reconciler) delayAllPods(ctx context.Context, pods []v1.Pod, networkchaos *v1alpha1.NetworkChaos) error {
 	g := errgroup.Group{}
-	for _, pod := range pods {
-		pod := pod
+	for index := range pods {
+		pod := &pods[index]
+
+		key, err := cache.MetaNamespaceKeyFunc(pod)
+		if err != nil {
+			return err
+		}
+		networkchaos.Finalizers = utils.InsertFinalizer(networkchaos.Finalizers, key)
+
 		g.Go(func() error {
-			key, err := cache.MetaNamespaceKeyFunc(&pod)
-			if err != nil {
-				return err
-			}
-			networkchaos.Finalizers = utils.InsertFinalizer(networkchaos.Finalizers, key)
-
-			if err := r.Update(ctx, networkchaos); err != nil {
-				r.Log.Error(err, "unable to update podchaos finalizers")
-				return err
-			}
-
-			return r.delayPod(ctx, &pod, networkchaos)
+			return r.delayPod(ctx, pod, networkchaos)
 		})
+	}
+
+	if err := r.Update(ctx, networkchaos); err != nil {
+		r.Log.Error(err, "unable to update podchaos finalizers")
+		return err
 	}
 
 	return g.Wait()

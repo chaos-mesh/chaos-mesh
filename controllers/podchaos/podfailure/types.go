@@ -166,22 +166,23 @@ func (r *Reconciler) cleanFinalizersAndRecover(ctx context.Context, podchaos *v1
 
 func (r *Reconciler) failAllPods(ctx context.Context, pods []v1.Pod, podchaos *v1alpha1.PodChaos) error {
 	g := errgroup.Group{}
-	for _, pod := range pods {
-		pod := pod
+	for index := range pods {
+		pod := &pods[index]
+
+		key, err := cache.MetaNamespaceKeyFunc(pod)
+		if err != nil {
+			return err
+		}
+		podchaos.Finalizers = utils.InsertFinalizer(podchaos.Finalizers, key)
+
 		g.Go(func() error {
-			key, err := cache.MetaNamespaceKeyFunc(&pod)
-			if err != nil {
-				return err
-			}
-			podchaos.Finalizers = utils.InsertFinalizer(podchaos.Finalizers, key)
-
-			if err := r.Update(ctx, podchaos); err != nil {
-				r.Log.Error(err, "unable to update podchaos finalizers")
-				return err
-			}
-
-			return r.failPod(ctx, &pod, podchaos)
+			return r.failPod(ctx, pod, podchaos)
 		})
+	}
+
+	if err := r.Update(ctx, podchaos); err != nil {
+		r.Log.Error(err, "unable to update podchaos finalizers")
+		return err
 	}
 
 	return g.Wait()

@@ -2,6 +2,7 @@ package chaosdaemon
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/golang/glog"
 	"github.com/juju/errors"
@@ -43,8 +44,10 @@ func Apply(netem *pb.Netem, pid uint32) error {
 	}, ToNetlinkNetemAttrs(netem))
 
 	if err = handle.QdiscAdd(netemQdisc); err != nil {
-		glog.Errorf("error while adding Qdisc %v", err)
-		return errors.Trace(err)
+		if !strings.Contains(err.Error(), "file exists") {
+			glog.Errorf("error while adding Qdisc %v", err)
+			return errors.Trace(err)
+		}
 	}
 
 	return nil

@@ -17,6 +17,8 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/pingcap/chaos-operator/pkg/utils"
+
 	"github.com/go-logr/logr"
 
 	"github.com/pingcap/chaos-operator/api/v1alpha1"
@@ -39,18 +41,18 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	var podchaos v1alpha1.PodChaos
 	if err := r.Get(ctx, req.NamespacedName, &podchaos); err != nil {
 		r.Log.Error(err, "unable to get podchaos")
-		return ctrl.Result{}, err
+		return ctrl.Result{}, utils.IgnoreNotFound(err)
 	}
 
 	switch podchaos.Spec.Action {
 	case v1alpha1.PodKillAction:
 		reconciler := podkill.Reconciler{
 			Client: r.Client,
-			Log:    r.Log.WithValues("reconciler", "pod-kill"),
+			Log:    r.Log.WithValues("action", "pod-kill"),
 		}
 		return reconciler.Reconcile(req)
 	case v1alpha1.PodFailureAction:
-		reconciler := podfailure.NewConciler(r.Client, r.Log.WithValues("reconciler", "pod-failure"), req)
+		reconciler := podfailure.NewConciler(r.Client, r.Log.WithValues("action", "pod-failure"), req)
 		return reconciler.Reconcile(req)
 	default:
 		err := fmt.Errorf("unknown action %s", string(podchaos.Spec.Action))
