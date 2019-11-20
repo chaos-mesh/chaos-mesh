@@ -14,7 +14,6 @@
 package watcher
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	"io/ioutil"
@@ -104,7 +103,7 @@ func validate(c *K8sConfigMapWatcher) error {
 }
 
 // Watch watches for events impacting watched ConfigMaps and emits their events across a channel
-func (c *K8sConfigMapWatcher) Watch(ctx context.Context, notifyMe chan<- interface{}) error {
+func (c *K8sConfigMapWatcher) Watch(notifyMe chan<- interface{}, stopCh <-chan struct{}) error {
 	log.Info("Watching for ConfigMaps for changes",
 		"namespace", c.Namespace, "labels", c.ConfigMapLabels)
 	watcher, err := c.client.ConfigMaps(c.Namespace).Watch(metav1.ListOptions{
@@ -141,7 +140,7 @@ func (c *K8sConfigMapWatcher) Watch(ctx context.Context, notifyMe chan<- interfa
 				log.Error(nil, "got unsupported event! skipping", "type", e.Type, "kind", e.Object.GetObjectKind())
 			}
 			// events! yay!
-		case <-ctx.Done():
+		case <-stopCh:
 			log.V(2).Info("stopping configmap watcher, context indicated we are done")
 			// clean up, we cancelled the context, so stop the watch
 			return nil

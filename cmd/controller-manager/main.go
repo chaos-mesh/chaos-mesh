@@ -14,7 +14,6 @@
 package main
 
 import (
-	"context"
 	"flag"
 	"os"
 	"time"
@@ -56,6 +55,13 @@ var (
 )
 
 func init() {
+	_ = clientgoscheme.AddToScheme(scheme)
+
+	_ = chaosoperatorv1alpha1.AddToScheme(scheme)
+	// +kubebuilder:scaffold:scheme
+}
+
+func parseFlags() {
 	flag.StringVar(&metricsAddr, "metrics-addr", ":8080", "The address the metric endpoint binds to.")
 	flag.BoolVar(&enableLeaderElection, "enable-leader-election", false,
 		"Enable leader election for controller manager. Enabling this will ensure there is only one active controller manager.")
@@ -69,13 +75,11 @@ func init() {
 		"Label pairs used to discover ConfigMaps in Kubernetes. These should be key1=value[,key2=val2,...]")
 
 	flag.Parse()
-
-	_ = clientgoscheme.AddToScheme(scheme)
-	_ = chaosoperatorv1alpha1.AddToScheme(scheme)
-	// +kubebuilder:scaffold:scheme
 }
 
 func main() {
+	parseFlags()
+
 	ctrl.SetLogger(zap.Logger(true))
 
 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
@@ -122,7 +126,9 @@ func main() {
 		os.Exit(1)
 	}
 
-	watchConfig(context.Background(), webhookConfig)
+	stopCh := ctrl.SetupSignalHandler()
+
+	watchConfig(webhookConfig, stopCh)
 
 	hookServer.Register("/inject-v1-pod", &webhook.Admission{Handler: &apiWebhook.PodInjector{
 		Config: webhookConfig,
@@ -131,13 +137,13 @@ func main() {
 	// +kubebuilder:scaffold:builder
 
 	setupLog.Info("Starting manager")
-	if err := mgr.Start(ctrl.SetupSignalHandler()); err != nil {
+	if err := mgr.Start(stopCh); err != nil {
 		setupLog.Error(err, "problem running manager")
 		os.Exit(1)
 	}
 }
 
-func watchConfig(ctx context.Context, cfg *config.Config) {
+func watchConfig(cfg *config.Config, stopCh <-chan struct{}) {
 	watcherConfig.ConfigMapLabels = cmWatcherLabels.ToMapStringString()
 	// start up the watcher, and get the first batch of ConfigMaps
 	// to set in the config.
@@ -154,12 +160,12 @@ func watchConfig(ctx context.Context, cfg *config.Config) {
 		//debouncedChan := make(chan interface{}, 10)
 
 		// debounce events from sigChan, so we dont hammer apiserver on reconciliation
-		eventsCh := utils.Coalesce(ctx, EventCoalesceWindow, sigChan)
+		eventsCh := utils.Coalescer(EventCoalesceWindow, sigChan, stopCh)
 
 		go func() {
 			for {
 				setupLog.Info("Launching watcher for ConfigMaps")
-				err := configWatcher.Watch(ctx, sigChan)
+				err := configWatcher.Watch(sigChan, stopCh)
 				if err != nil {
 					switch err {
 					case watcher.ErrWatchChannelClosed:
@@ -167,6 +173,12 @@ func watchConfig(ctx context.Context, cfg *config.Config) {
 					default:
 						setupLog.Error(err, "unable to watch new ConfigMaps")
 					}
+				}
+
+				select {
+				case <-stopCh:
+					close(sigChan)
+					return
 				}
 			}
 		}()
@@ -205,6 +217,8 @@ func watchConfig(ctx context.Context, cfg *config.Config) {
 					"origin configs count", len(cfg.Injections), "updated configs count", len(updatedInjectionConfigs))
 				cfg.ReplaceInjectionConfigs(newInjectionConfigs)
 				setupLog.Info("Configuration replaced")
+			case <-stopCh:
+				break
 			}
 		}
 

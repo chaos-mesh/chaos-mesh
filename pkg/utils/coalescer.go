@@ -1,7 +1,6 @@
 package utils
 
 import (
-	"context"
 	"time"
 
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -9,9 +8,9 @@ import (
 
 var log = ctrl.Log.WithName("util")
 
-// Coalesce takes an input chan, and coalesced inputs with a timebound of interval, after which
+// Coalescer takes an input chan, and coalesced inputs with a timebound of interval, after which
 // it signals on output chan with the last value from input chan
-func Coalesce(ctx context.Context, interval time.Duration, input chan interface{}) <-chan interface{} {
+func Coalescer(interval time.Duration, input chan interface{}, stopCh <-chan struct{}) <-chan interface{} {
 	output := make(chan interface{})
 	go func() {
 		var (
@@ -21,12 +20,8 @@ func Coalesce(ctx context.Context, interval time.Duration, input chan interface{
 		log.V(2).Info("debouncing reconciliation signals with window",
 			"interval", interval.String())
 		for {
-			doneCh := ctx.Done()
 			select {
-			case <-doneCh:
-				if signalled {
-					output <- struct{}{}
-				}
+			case <-stopCh:
 				return
 			case <-time.After(interval):
 				if signalled {
@@ -42,12 +37,8 @@ func Coalesce(ctx context.Context, interval time.Duration, input chan interface{
 			}
 			// stop running the Coalescer only when all input+output channels are closed!
 			if !inputOpen {
-				// input is closed, so lets signal one last time if we have any pending unsignalled events
-				if signalled {
-					// send final event, so we dont miss the trailing event after input chan close
-					output <- struct{}{}
-				}
 				log.Info("coalesce routine terminated, input channel is closed")
+				close(output)
 				return
 			}
 		}
