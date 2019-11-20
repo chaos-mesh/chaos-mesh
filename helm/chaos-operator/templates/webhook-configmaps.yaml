@@ -14,12 +14,12 @@ data:
     name: chaosfs-tikv
     initContainers:
     - name: inject-scripts
-      image: localhost:5000/pingcap/chaos-scripts:latest
+      image: pingcap/chaos-scripts:latest
       imagePullpolicy: Always
       command: ["sh", "-c", "mkdir -p /tmp/scripts; cp -R /scripts/* /tmp/scripts/; mkdir -p /var/lib/tikv/fuse-data"]
     containers:
     - name: chaosfs
-      image: localhost:5000/pingcap/chaos-fs
+      image: pingcap/chaos-fs
       imagePullpolicy: Always
       ports:
       - containerPort: 65534
@@ -59,12 +59,12 @@ data:
     name: chaosfs-pd
     initContainers:
     - name: inject-scripts
-      image: localhost:5000/pingcap/chaos-scripts:latest
+      image: pingcap/chaos-scripts:latest
       imagePullpolicy: Always
       command: ["sh", "-c", "mkdir -p /tmp/scripts; cp -R /scripts/* /tmp/scripts/; mkdir -p /var/lib/tikv/fuse-data"]
     containers:
     - name: chaosfs
-      image: localhost:5000/pingcap/chaos-fs
+      image: pingcap/chaos-fs
       imagePullpolicy: Always
       ports:
       - containerPort: 65534

@@ -47,6 +47,10 @@ const (
 	DeviceLayer     = "device"
 )
 
+const (
+	DefaultChaosfsAddr = ":65534"
+)
+
 // IoChaosSpec defines the desired state of IoChaos
 type IoChaosSpec struct {
 	// Selector is used to select pods that are used to inject chaos action.
@@ -110,8 +114,17 @@ type IoChaosSpec struct {
 	Percent string `json:"percent,omitempty"`
 
 	// Path defines the path of files for injecting I/O chaos action.
-	// +required
+	// +optional
 	Path string `json:"path,omitempty"`
+
+	// Methods defines the I/O methods for injecting I/O chaos action.
+	// default: all I/O methods.
+	// +optional
+	Methods []string `json:"methods,omitempty"`
+
+	// Addr defines the address for sidecar container.
+	// +optional
+	Addr string `json:"addr,omitempty"`
 
 	// ConfigName defines the config name which used to inject pod.
 	// +required

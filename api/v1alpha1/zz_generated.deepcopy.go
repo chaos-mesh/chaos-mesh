@@ -146,6 +146,11 @@ func (in *IoChaosSpec) DeepCopyInto(out *IoChaosSpec) {
 	*out = *in
 	in.Selector.DeepCopyInto(&out.Selector)
 	out.Scheduler = in.Scheduler
+	if in.Methods != nil {
+		in, out := &in.Methods, &out.Methods
+		*out = make([]string, len(*in))
+		copy(*out, *in)
+	}
 	if in.NextStart != nil {
 		in, out := &in.NextStart, &out.NextStart
 		*out = (*in).DeepCopy()

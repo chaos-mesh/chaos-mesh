@@ -25,6 +25,8 @@ import (
 
 	"github.com/pingcap/chaos-operator/api/v1alpha1"
 	"github.com/pingcap/chaos-operator/controllers/twophase"
+	fscli "github.com/pingcap/chaos-operator/pkg/chaosfs/client"
+	fspb "github.com/pingcap/chaos-operator/pkg/chaosfs/pb"
 	"github.com/pingcap/chaos-operator/pkg/utils"
 
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -34,6 +36,7 @@ import (
 	k8serror "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/tools/cache"
 	"k8s.io/client-go/util/retry"
 )
@@ -217,7 +220,82 @@ func (r *Reconciler) delayPod(ctx context.Context, pod *v1.Pod, iochaos *v1alpha
 
 	// need to recreate pod when to inject sidecar
 	time.Sleep(2 * time.Second)
-	return r.Delete(ctx, pod, &client.DeleteOptions{
+	err := r.Delete(ctx, pod, &client.DeleteOptions{
 		GracePeriodSeconds: new(int64),
 	})
+
+	if err != nil {
+		return err
+	}
+
+	// TODO: optimize inject delay
+	go func() {
+		cctx, cancel := context.WithTimeout(ctx, 5*time.Minute)
+		defer cancel()
+		err = wait.PollUntil(1*time.Second, func() (bool, error) {
+			var npod v1.Pod
+			err := r.Client.Get(ctx, types.NamespacedName{
+				Namespace: pod.Namespace,
+				Name:      pod.Name,
+			}, &npod)
+			if err != nil {
+				r.Log.Error(err, "failed to get pod", "namespace", pod.Namespace, "name", pod.Name)
+				return false, nil
+			}
+
+			if err := r.injectDelay(ctx, &npod, iochaos); err != nil {
+				if utils.IsCaredNetError(err) {
+					r.Log.Info("Inject delay action, network is not ok, retrying...",
+						"namespace", pod.Namespace, "name", pod.Name)
+					return false, nil
+				}
+
+				return false, err
+			}
+
+			return true, nil
+		}, cctx.Done())
+		if err != nil {
+			r.Log.Error(err, "failed to inject delay",
+				"namespace", pod.Namespace, "name", pod.Name)
+		}
+	}()
+
+	return nil
+}
+
+func (r *Reconciler) injectDelay(ctx context.Context, pod *v1.Pod, iochaos *v1alpha1.IoChaos) error {
+	// TODO: move to api repo
+	addr := iochaos.Spec.Addr
+	if addr == "" {
+		addr = v1alpha1.DefaultChaosfsAddr
+	}
+
+	addr = fmt.Sprintf("%s%s", pod.Status.PodIP, addr)
+
+	cli, err := fscli.NewClient(addr)
+	if err != nil {
+		return err
+	}
+
+	delay, err := time.ParseDuration(iochaos.Spec.Delay)
+	if err != nil {
+		return err
+	}
+
+	req := &fspb.Request{
+		Errno:  0,
+		Random: false,
+		Path:   iochaos.Spec.Path,
+		Delay:  uint32(delay.Nanoseconds() / 1000),
+	}
+
+	if len(iochaos.Spec.Methods) > 0 {
+		req.Methods = iochaos.Spec.Methods
+		_, err := cli.SetFault(ctx, req)
+		return err
+	}
+
+	_, err = cli.SetFaultAll(ctx, req)
+	return err
 }

@@ -11,35 +11,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package utils
+package client
 
 import (
-	"strings"
+	chaosfs "github.com/pingcap/chaos-operator/pkg/chaosfs/pb"
 
-	apierrs "k8s.io/apimachinery/pkg/api/errors"
+	"google.golang.org/grpc"
 )
 
-func IgnoreNotFound(err error) error {
-	if apierrs.IsNotFound(err) {
-		return nil
-	}
-	return err
-}
-
-func IsCaredNetError(err error) bool {
-	if err == nil {
-		return false
+func NewClient(addr string) (chaosfs.InjureClient, error) {
+	conn, err := grpc.Dial(addr, grpc.WithInsecure())
+	if err != nil {
+		return nil, err
 	}
 
-	errString := strings.ToLower(err.Error())
-
-	if strings.Contains(errString, "i/o timeout") {
-		return true
-	}
-
-	if strings.Contains(errString, "connection refused") {
-		return true
-	}
-
-	return false
+	return chaosfs.NewInjureClient(conn), nil
 }
