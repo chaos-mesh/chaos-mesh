@@ -38,6 +38,9 @@ spec:
               description: 'Action defines the specific pod chaos action. Supported
                 action: delay / errno / mixed Default action: delay'
               type: string
+            addr:
+              description: Addr defines the address for sidecar container.
+              type: string
             configName:
               description: ConfigName defines the config name which used to inject
                 pod.
@@ -67,6 +70,12 @@ spec:
               description: 'Layer represents the layer of the I/O action. Supported
                 value: fs / errno / mixed. Default layer: fs'
               type: string
+            methods:
+              description: 'Methods defines the I/O methods for injecting I/O chaos
+                action. default: all I/O methods.'
+              items:
+                type: string
+              type: array
             mode:
               description: 'Mode defines the mode to run chaos action. Supported mode:
                 one / all / fixed / fixed-percent / random-max-percent'
@@ -161,6 +170,7 @@ spec:
               type: string
           required:
           - action
+          - configName
           - layer
           - mode
           - scheduler

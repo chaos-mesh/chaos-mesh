@@ -215,8 +215,10 @@ func createPatch(pod *corev1.Pod, inj *config.InjectionConfig, annotations map[s
 	mutatedInjectedInitContainers = mergeVolumeMounts(inj.VolumeMounts, mutatedInjectedInitContainers)
 
 	// patch all existing containers with the env vars and volume mounts
-	// patch = append(patch, setEnvironment(pod.Spec.Containers, inj.Environment)...)
 	patch = append(patch, setVolumeMounts(pod.Spec.Containers, inj.VolumeMounts, "/spec/containers")...)
+	// TODO: fix set env
+	// setEnvironment may not work, because we replace the whole container in `setVolumeMounts`
+	patch = append(patch, setEnvironment(pod.Spec.Containers, inj.Environment)...)
 
 	// patch containers with our injected containers
 	patch = append(patch, addContainers(pod.Spec.Containers, mutatedInjectedContainers, "/spec/containers")...)
@@ -292,41 +294,41 @@ type patchOperation struct {
 	Value interface{} `json:"value,omitempty"`
 }
 
-// func setEnvironment(target []corev1.Container, addedEnv []corev1.EnvVar) (patch []patchOperation) {
-// 	var value interface{}
-// 	for containerIndex, container := range target {
-// 		// for each container in the spec, determine if we want to patch with any env vars
-// 		first := len(container.Env) == 0
-// 		for _, add := range addedEnv {
-// 			path := fmt.Sprintf("/spec/containers/%d/env", containerIndex)
-// 			hasKey := false
-// 			// make sure we dont override any existing env vars; we only add, dont replace
-// 			for _, origEnv := range container.Env {
-// 				if origEnv.Name == add.Name {
-// 					hasKey = true
-// 					break
-// 				}
-// 			}
-// 			if !hasKey {
-// 				// make a patch
-// 				value = add
-// 				if first {
-// 					first = false
-// 					value = []corev1.EnvVar{add}
-// 				} else {
-// 					path = path + "/-"
-// 				}
-// 				patch = append(patch, patchOperation{
-// 					Op:    "add",
-// 					Path:  path,
-// 					Value: value,
-// 				})
-// 			}
-// 		}
-// 	}
-//
-// 	return patch
-// }
+func setEnvironment(target []corev1.Container, addedEnv []corev1.EnvVar) (patch []patchOperation) {
+	var value interface{}
+	for containerIndex, container := range target {
+		// for each container in the spec, determine if we want to patch with any env vars
+		first := len(container.Env) == 0
+		for _, add := range addedEnv {
+			path := fmt.Sprintf("/spec/containers/%d/env", containerIndex)
+			hasKey := false
+			// make sure we dont override any existing env vars; we only add, dont replace
+			for _, origEnv := range container.Env {
+				if origEnv.Name == add.Name {
+					hasKey = true
+					break
+				}
+			}
+			if !hasKey {
+				// make a patch
+				value = add
+				if first {
+					first = false
+					value = []corev1.EnvVar{add}
+				} else {
+					path = path + "/-"
+				}
+				patch = append(patch, patchOperation{
+					Op:    "add",
+					Path:  path,
+					Value: value,
+				})
+			}
+		}
+	}
+
+	return patch
+}
 
 func addContainers(target, added []corev1.Container, basePath string) (patch []patchOperation) {
 	first := len(target) == 0
