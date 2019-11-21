@@ -8,16 +8,16 @@ spec:
   mode: one
   selector:
     namespaces:
-      - default
+      - tidb-cluster-demo
     labelSelectors:
-      "app": "ubuntu1"
+      "app.kubernetes.io/component": "tikv"
   direction: to
   target:
     selector:
       namespaces:
-        - default
+        - tidb-cluster-demo
       labelSelectors:
-        "app": "ubuntu2"
+        "app.kubernetes.io/component": "tikv"
     mode: one
   duration: "10s"
   scheduler:

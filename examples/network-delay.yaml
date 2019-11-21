@@ -8,7 +8,9 @@ spec:
   mode: one
   selector:
     namespaces:
-      - default
+      - tidb-cluster-demo
+    labelSelectors:
+      "app.kubernetes.io/component": "tikv"
   delay:
     latency: "90ms"
     correlation: "0.25"

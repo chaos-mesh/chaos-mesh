@@ -14,8 +14,9 @@
 package utils
 
 import (
-	. "github.com/onsi/gomega"
 	"testing"
+
+	. "github.com/onsi/gomega"
 )
 
 func TestRemoveFromFinalizer(t *testing.T) {

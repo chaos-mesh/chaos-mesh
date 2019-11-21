@@ -93,8 +93,8 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos twophase
 
 	// Set up ipset in every related pods
 	g := errgroup.Group{}
-	for _, pod := range allPods {
-		pod := pod
+	for index := range allPods {
+		pod := allPods[index]
 		r.Log.Info("PODS", "name", pod.Name, "namespace", pod.Namespace)
 		g.Go(func() error {
 			err := r.flushPodIpSet(ctx, &pod, sourceSet, networkchaos)
@@ -162,10 +162,10 @@ func (r *Reconciler) BlockSet(ctx context.Context, pods []v1.Pod, set pb.IpSet, 
 	g := errgroup.Group{}
 	sourceRule := r.generateIpTables(pb.Rule_ADD, direction, set.Name)
 
-	for _, pod := range pods {
-		pod := pod
+	for index := range pods {
+		pod := &pods[index]
 		g.Go(func() error {
-			key, err := cache.MetaNamespaceKeyFunc(&pod)
+			key, err := cache.MetaNamespaceKeyFunc(pod)
 			if err != nil {
 				return err
 			}
@@ -176,7 +176,7 @@ func (r *Reconciler) BlockSet(ctx context.Context, pods []v1.Pod, set pb.IpSet, 
 			case pb.Rule_OUTPUT:
 				networkchaos.Finalizers = utils.InsertFinalizer(networkchaos.Finalizers, "output"+key)
 			}
-			return r.sendIpTables(ctx, &pod, sourceRule, networkchaos)
+			return r.sendIpTables(ctx, pod, sourceRule, networkchaos)
 		})
 	}
 	return g.Wait()
