@@ -95,15 +95,6 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		}
 		chaos.SetNextRecover(time.Time{})
 	} else if chaos.GetNextStart().Before(now) {
-		// Start failure action
-		r.Log.Info("Performing Action")
-
-		r.Log.Info("now chaos:", "chaos", chaos)
-		err = r.Apply(ctx, req, chaos)
-		if err != nil {
-			return ctrl.Result{}, err
-		}
-
 		nextStart, err := utils.NextTime(chaos.GetScheduler(), now)
 		if err != nil {
 			return ctrl.Result{}, err
@@ -113,6 +104,14 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		if nextStart.Before(nextRecover) {
 			err := fmt.Errorf("nextRecover shouldn't be later than nextStart")
 			r.Log.Error(err, "nextRecover is later than nextStart. Then recover can never be reached", "nextRecover", nextRecover, "nextStart", nextStart)
+			return ctrl.Result{}, err
+		}
+
+		// Start failure action
+		r.Log.Info("Performing Action")
+
+		err = r.Apply(ctx, req, chaos)
+		if err != nil {
 			return ctrl.Result{}, err
 		}
 
