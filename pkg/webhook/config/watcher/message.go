@@ -11,23 +11,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package utils
+package watcher
 
 import (
-	"fmt"
-
-	"github.com/pingcap/chaos-operator/api/v1alpha1"
+	"github.com/pingcap/chaos-operator/pkg/webhook/config"
 )
+
+// Message is a message that describes a change and payload to a sidecar configuration
+type Message struct {
+	Event           Event
+	InjectionConfig config.InjectionConfig
+}
+
+// Event is what happened to the config (add/delete/update)
+type Event uint8
 
 const (
-	// AnnotationPrefix defines the prefix of annotation key for chaos-operator.
-	AnnotationPrefix = "chaos-operator"
+	// EventAdd is a new ConfigMap
+	EventAdd Event = iota
+	// EventUpdate is an Updated ConfigMap
+	EventUpdate
+	// EventDelete is a deleted ConfigMap
+	EventDelete
 )
-
-func GenAnnotationKeyForImage(pc *v1alpha1.PodChaos, containerName string) string {
-	return fmt.Sprintf("%s-%s-%s-%s-image", AnnotationPrefix, pc.Name, pc.Spec.Action, containerName)
-}
-
-func GenAnnotationKeyForWebhook(prefix string, podName string) string {
-	return fmt.Sprintf("%s-%s", prefix, podName)
-}

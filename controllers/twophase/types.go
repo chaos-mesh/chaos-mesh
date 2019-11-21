@@ -23,10 +23,10 @@ import (
 	"github.com/pingcap/chaos-operator/api/v1alpha1"
 	"github.com/pingcap/chaos-operator/pkg/utils"
 
-	"k8s.io/apimachinery/pkg/runtime"
-
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+
+	"k8s.io/apimachinery/pkg/runtime"
 )
 
 type InnerObject interface {
@@ -96,16 +96,14 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		chaos.SetNextRecover(time.Time{})
 	} else if chaos.GetNextStart().Before(now) {
 		nextStart, err := utils.NextTime(chaos.GetScheduler(), now)
-		if err != nil {
-			return ctrl.Result{}, err
-		}
-
 		nextRecover := now.Add(duration)
 		if nextStart.Before(nextRecover) {
 			err := fmt.Errorf("nextRecover shouldn't be later than nextStart")
 			r.Log.Error(err, "nextRecover is later than nextStart. Then recover can never be reached", "nextRecover", nextRecover, "nextStart", nextStart)
 			return ctrl.Result{}, err
 		}
+
+		r.Log.Info("now chaos action:", "chaos", chaos)
 
 		// Start failure action
 		r.Log.Info("Performing Action")

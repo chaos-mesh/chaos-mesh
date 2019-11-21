@@ -138,6 +138,7 @@ func (s *server) Methods(ctx context.Context, in *empty.Empty) (*pb.Response, er
 }
 
 func (s *server) RecoverAll(ctx context.Context, in *empty.Empty) (*empty.Empty, error) {
+	glog.Info("recover all fault")
 	faultMap.Range(func(k, v interface{}) bool {
 		faultMap.Delete(k)
 		return true
@@ -161,6 +162,8 @@ func (s *server) setFault(ms []string, f *faultContext) {
 
 func (s *server) SetFault(ctx context.Context, in *pb.Request) (*empty.Empty, error) {
 	// TODO: use Errno(0), and hanle Errno(0) in Hook interfaces
+	glog.Infof("set fault: %+v", in)
+
 	var errno error = nil
 	if in.Errno != 0 {
 		errno = syscall.Errno(in.Errno)
@@ -172,12 +175,15 @@ func (s *server) SetFault(ctx context.Context, in *pb.Request) (*empty.Empty, er
 		path:   in.Path,
 		delay:  time.Duration(in.Delay) * time.Microsecond,
 	}
+
 	s.setFault(in.Methods, f)
 	return &empty.Empty{}, nil
 }
 
 func (s *server) SetFaultAll(ctx context.Context, in *pb.Request) (*empty.Empty, error) {
 	// TODO: use Errno(0), and hanle Errno(0) in Hook interfaces
+	glog.Infof("set fault all: %+v", in)
+
 	var errno error = nil
 	if in.Errno != 0 {
 		errno = syscall.Errno(in.Errno)
@@ -189,6 +195,7 @@ func (s *server) SetFaultAll(ctx context.Context, in *pb.Request) (*empty.Empty,
 		path:   in.Path,
 		delay:  time.Duration(in.Delay) * time.Microsecond,
 	}
+
 	s.setFault(s.methods(), f)
 	return &empty.Empty{}, nil
 }

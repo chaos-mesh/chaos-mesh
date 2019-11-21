@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package podchaos
+package iochaos
 
 import (
 	"context"
@@ -20,8 +20,7 @@ import (
 	"github.com/go-logr/logr"
 
 	"github.com/pingcap/chaos-operator/api/v1alpha1"
-	"github.com/pingcap/chaos-operator/controllers/podchaos/podfailure"
-	"github.com/pingcap/chaos-operator/controllers/podchaos/podkill"
+	"github.com/pingcap/chaos-operator/controllers/iochaos/delay"
 	"github.com/pingcap/chaos-operator/pkg/utils"
 
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -34,28 +33,22 @@ type Reconciler struct {
 }
 
 func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
-	r.Log.Info("reconciling podchaos")
+	r.Log.Info("reconciling iochaos")
 	ctx := context.Background()
 
-	var podchaos v1alpha1.PodChaos
-	if err := r.Get(ctx, req.NamespacedName, &podchaos); err != nil {
-		r.Log.Error(err, "unable to get podchaos")
+	var iochaos v1alpha1.IoChaos
+	if err := r.Get(ctx, req.NamespacedName, &iochaos); err != nil {
+		r.Log.Error(err, "unable to get iochaos")
 		return ctrl.Result{}, utils.IgnoreNotFound(err)
 	}
 
-	switch podchaos.Spec.Action {
-	case v1alpha1.PodKillAction:
-		reconciler := podkill.Reconciler{
-			Client: r.Client,
-			Log:    r.Log.WithValues("action", "pod-kill"),
-		}
-		return reconciler.Reconcile(req)
-	case v1alpha1.PodFailureAction:
-		reconciler := podfailure.NewReconciler(r.Client, r.Log.WithValues("action", "pod-failure"), req)
+	switch iochaos.Spec.Action {
+	case v1alpha1.IODelayAction:
+		reconciler := delay.NewConciler(r.Client, r.Log.WithValues("reconciler", "delay"), req)
 		return reconciler.Reconcile(req)
 	default:
-		err := fmt.Errorf("unknown action %s", string(podchaos.Spec.Action))
-		r.Log.Error(err, "unknown action %s", string(podchaos.Spec.Action))
+		err := fmt.Errorf("unknown action %s", string(iochaos.Spec.Action))
+		r.Log.Error(err, "unknown action %s", string(iochaos.Spec.Action))
 
 		return ctrl.Result{}, err
 	}

@@ -21,13 +21,8 @@ import (
 	"google.golang.org/grpc"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
-	ctrl "sigs.k8s.io/controller-runtime"
 
 	"sigs.k8s.io/controller-runtime/pkg/client"
-)
-
-var (
-	log = ctrl.Log.WithValues("utils", "grpc")
 )
 
 func CreateGrpcConnection(ctx context.Context, c client.Client, pod *v1.Pod) (*grpc.ClientConn, error) {

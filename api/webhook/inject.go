@@ -17,13 +17,14 @@ import (
 	"context"
 	"net/http"
 
-	v1 "k8s.io/api/core/v1"
+	"github.com/pingcap/chaos-operator/pkg/webhook/config"
+	"github.com/pingcap/chaos-operator/pkg/webhook/inject"
+
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 
-	"github.com/pingcap/chaos-operator/pkg/webhook/config"
-	"github.com/pingcap/chaos-operator/pkg/webhook/inject"
+	v1 "k8s.io/api/core/v1"
 )
 
 var log = ctrl.Log.WithName("inject-webhook")
@@ -47,7 +48,7 @@ func (v *PodInjector) Handle(ctx context.Context, req admission.Request) admissi
 	log.Info("get request from pod:", "pod", pod)
 
 	return admission.Response{
-		AdmissionResponse: *inject.Inject(&req.AdmissionRequest, v.Config),
+		AdmissionResponse: *inject.Inject(&req.AdmissionRequest, v.client, v.Config),
 	}
 }
 
