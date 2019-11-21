@@ -47,11 +47,11 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	case v1alpha1.PodKillAction:
 		reconciler := podkill.Reconciler{
 			Client: r.Client,
-			Log:    r.Log.WithValues("reconciler", "pod-kill"),
+			Log:    r.Log.WithValues("action", "pod-kill"),
 		}
 		return reconciler.Reconcile(req)
 	case v1alpha1.PodFailureAction:
-		reconciler := podfailure.NewConciler(r.Client, r.Log.WithValues("reconciler", "pod-failure"), req)
+		reconciler := podfailure.NewReconciler(r.Client, r.Log.WithValues("action", "pod-failure"), req)
 		return reconciler.Reconcile(req)
 	default:
 		err := fmt.Errorf("unknown action %s", string(podchaos.Spec.Action))

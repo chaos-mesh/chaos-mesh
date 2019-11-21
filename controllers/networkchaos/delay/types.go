@@ -17,15 +17,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"os"
 	"strconv"
 	"time"
 
 	"github.com/go-logr/logr"
 
 	"golang.org/x/sync/errgroup"
-
-	"google.golang.org/grpc"
 
 	"github.com/pingcap/chaos-operator/api/v1alpha1"
 	"github.com/pingcap/chaos-operator/controllers/twophase"
@@ -47,7 +44,7 @@ const (
 	networkDelayActionMsg = "delay network for %s"
 )
 
-func NewConciler(c client.Client, log logr.Logger, req ctrl.Request) twophase.Reconciler {
+func NewReconciler(c client.Client, log logr.Logger, req ctrl.Request) twophase.Reconciler {
 	return twophase.Reconciler{
 		InnerReconciler: &Reconciler{
 			Client: c,
@@ -171,7 +168,7 @@ func (r *Reconciler) cleanFinalizersAndRecover(ctx context.Context, networkchaos
 func (r *Reconciler) recoverPod(ctx context.Context, pod *v1.Pod, networkchaos *v1alpha1.NetworkChaos) error {
 	r.Log.Info("Try to resume pod", "namespace", pod.Namespace, "name", pod.Name)
 
-	c, err := r.createGrpcConnection(ctx, pod)
+	c, err := utils.CreateGrpcConnection(ctx, r.Client, pod)
 	if err != nil {
 		return err
 	}
@@ -220,7 +217,7 @@ func (r *Reconciler) delayPod(ctx context.Context, pod *v1.Pod, networkchaos *v1
 
 	r.Log.Info("Try to delay pod", "namespace", pod.Namespace, "name", pod.Name)
 
-	c, err := r.createGrpcConnection(ctx, pod)
+	c, err := utils.CreateGrpcConnection(ctx, r.Client, pod)
 	if err != nil {
 		return err
 	}
@@ -256,28 +253,4 @@ func (r *Reconciler) delayPod(ctx context.Context, pod *v1.Pod, networkchaos *v1
 	})
 
 	return err
-}
-
-func (r *Reconciler) createGrpcConnection(ctx context.Context, pod *v1.Pod) (*grpc.ClientConn, error) {
-	port := os.Getenv("CHAOS_DAEMON_PORT")
-	if port == "" {
-		port = "8080"
-	}
-
-	nodeName := pod.Spec.NodeName
-	r.Log.Info("Creating client to chaosdaemon", "node", nodeName)
-
-	var node v1.Node
-	err := r.Get(ctx, types.NamespacedName{
-		Name: nodeName,
-	}, &node)
-	if err != nil {
-		return nil, err
-	}
-
-	conn, err := grpc.Dial(fmt.Sprintf("%s:%s", node.Status.Addresses[0].Address, port), grpc.WithInsecure())
-	if err != nil {
-		return nil, err
-	}
-	return conn, nil
 }

@@ -18,6 +18,7 @@ import (
 	"fmt"
 
 	"github.com/go-logr/logr"
+	"github.com/pingcap/chaos-operator/controllers/networkchaos/partition"
 
 	"github.com/pingcap/chaos-operator/api/v1alpha1"
 	"github.com/pingcap/chaos-operator/controllers/networkchaos/delay"
@@ -44,7 +45,10 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 
 	switch networkchaos.Spec.Action {
 	case v1alpha1.DelayAction:
-		reconciler := delay.NewConciler(r.Client, r.Log.WithValues("reconciler", "delay"), req)
+		reconciler := delay.NewReconciler(r.Client, r.Log.WithValues("action", "delay"), req)
+		return reconciler.Reconcile(req)
+	case v1alpha1.PartitionAction:
+		reconciler := partition.NewReconciler(r.Client, r.Log.WithValues("action", "partition"), req)
 		return reconciler.Reconcile(req)
 	default:
 		err := fmt.Errorf("unknown action %s", string(networkchaos.Spec.Action))

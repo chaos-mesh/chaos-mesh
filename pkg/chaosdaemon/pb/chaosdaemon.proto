@@ -7,6 +7,9 @@ import "google/protobuf/empty.proto";
 service ChaosDaemon {
   rpc SetNetem(NetemRequest) returns (google.protobuf.Empty) {}
   rpc DeleteNetem(NetemRequest) returns (google.protobuf.Empty) {}
+
+  rpc FlushIpSet(IpSetRequest) returns (google.protobuf.Empty) {}
+  rpc FlushIptables(IpTablesRequest) returns (google.protobuf.Empty) {}
 }
 
 message NetemRequest {
@@ -28,4 +31,33 @@ message Netem {
   float reorder_corr = 11;
   float corrupt = 12;
   float corrupt_corr = 13;
+}
+
+message IpSetRequest {
+  IpSet ipset = 1;
+  string container_id = 2;
+}
+
+message IpSet {
+  string name = 1;
+  repeated string ips = 2;
+}
+
+message IpTablesRequest {
+  Rule rule = 1;
+  string container_id = 2;
+}
+
+message Rule {
+  enum Action {
+    ADD = 0;
+    DELETE = 1;
+  }
+  Action action = 1;
+  enum Direction {
+    INPUT = 0;
+    OUTPUT = 1;
+  }
+  Direction direction = 2;
+  string set = 3;
 }

@@ -3,8 +3,6 @@
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
-  annotations:
-    controller-gen.kubebuilder.io/version: v0.2.2
   creationTimestamp: null
   name: networkchaos.pingcap.com
 spec:
@@ -39,7 +37,7 @@ spec:
                 action: delay Default action: delay'
               type: string
             delay:
-              description: Delay represetns the detail about delay action
+              description: Delay represents the detail about delay action
               properties:
                 correlation:
                   type: string
@@ -52,6 +50,9 @@ spec:
               - jitter
               - latency
               type: object
+            direction:
+              description: Direction represents the partition direction
+              type: string
             duration:
               description: Duration represents the duration of the chaos action
               type: string
@@ -130,12 +131,80 @@ spec:
                     belong, and the each values is a set of pod names.
                   type: object
               type: object
+            target:
+              description: Target represents network partition target
+              properties:
+                mode:
+                  description: TargetMode defines the partition target selector mode
+                  type: string
+                selector:
+                  description: TargetSelector defines the partition target selector
+                  properties:
+                    annotationSelectors:
+                      additionalProperties:
+                        type: string
+                      description: Map of string keys and values that can be used
+                        to select objects. A selector based on annotations.
+                      type: object
+                    fieldSelectors:
+                      additionalProperties:
+                        type: string
+                      description: Map of string keys and values that can be used
+                        to select objects. A selector based on fields.
+                      type: object
+                    labelSelectors:
+                      additionalProperties:
+                        type: string
+                      description: Map of string keys and values that can be used
+                        to select objects. A selector based on labels.
+                      type: object
+                    namespaces:
+                      description: Namespaces is a set of namespace to which objects
+                        belong.
+                      items:
+                        type: string
+                      type: array
+                    nodeSelectors:
+                      additionalProperties:
+                        type: string
+                      description: Map of string keys and values that can be used
+                        to select nodes. Selector which must match a node's labels,
+                        and objects must belong to these selected nodes.
+                      type: object
+                    nodes:
+                      description: Nodes is a set of node name and objects must belong
+                        to these nodes.
+                      items:
+                        type: string
+                      type: array
+                    pods:
+                      additionalProperties:
+                        items:
+                          type: string
+                        type: array
+                      description: Pods is a map of string keys and a set values that
+                        used to select pods. The key defines the namespace which pods
+                        belong, and the each values is a set of pod names.
+                      type: object
+                  type: object
+                value:
+                  description: TargetValue is required when the mode is set to `FixedPodMode`
+                    / `FixedPercentPodMod` / `RandomMaxPercentPodMod`. If `FixedPodMode`,
+                    provide an integer of pods to do chaos action. If `FixedPercentPodMod`,
+                    provide a number from 0-100 to specify the max % of pods the server
+                    can do chaos action. If `RandomMaxPercentPodMod`,  provide a number
+                    from 0-100 to specify the % of pods to do chaos action
+                  type: string
+              required:
+              - mode
+              - selector
+              type: object
             value:
               description: Value is required when the mode is set to `FixedPodMode`
                 / `FixedPercentPodMod` / `RandomMaxPercentPodMod`. If `FixedPodMode`,
                 provide an integer of pods to do chaos action. If `FixedPercentPodMod`,
                 provide a number from 0-100 to specify the max % of pods the server
-                can do chaos action. IF `RandomMaxPercentPodMod`,  provide a number
+                can do chaos action. If `RandomMaxPercentPodMod`,  provide a number
                 from 0-100 to specify the % of pods to do chaos action
               type: string
           required:
