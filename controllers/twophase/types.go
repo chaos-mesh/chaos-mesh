@@ -15,6 +15,7 @@ package twophase
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/go-logr/logr"
@@ -103,13 +104,20 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 			return ctrl.Result{}, err
 		}
 
-		next, err := utils.NextTime(chaos.GetScheduler(), now)
+		nextStart, err := utils.NextTime(chaos.GetScheduler(), now)
 		if err != nil {
 			return ctrl.Result{}, err
 		}
 
-		chaos.SetNextStart(*next)
-		chaos.SetNextRecover(now.Add(duration))
+		nextRecover := now.Add(duration)
+		if nextStart.Before(nextRecover) {
+			err := fmt.Errorf("nextRecover shouldn't be later than nextStart")
+			r.Log.Error(err, "nextRecover is later than nextStart. Then recover can never be reached", "nextRecover", nextRecover, "nextStart", nextStart)
+			return ctrl.Result{}, err
+		}
+
+		chaos.SetNextStart(*nextStart)
+		chaos.SetNextRecover(nextRecover)
 	} else {
 		nextTime := chaos.GetNextStart()
 
