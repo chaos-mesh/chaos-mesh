@@ -10,19 +10,93 @@ metadata:
     app.kubernetes.io/component: webhook
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+"  "_" }}
 data:
-  sidecar.yaml: |
-    name: sidecar
-    env:
-      - name: HELLO
-        value: world
-      - name: TEST
-        value: test_that
+  chaosfs-tikv.yaml: |
+    name: chaosfs-tikv
+    initContainers:
+    - name: inject-scripts
+      image: pingcap/chaos-scripts:latest
+      imagePullpolicy: Always
+      command: ["sh", "-c", "mkdir -p /tmp/scripts; cp -R /scripts/* /tmp/scripts/; mkdir -p /var/lib/tikv/fuse-data"]
     containers:
-    - name: sidecar-nginx
-      image: nginx:1.12.2
-      imagePullPolicy: IfNotPresent
+    - name: chaosfs
+      image: pingcap/chaos-fs
+      imagePullpolicy: Always
       ports:
-      - containerPort: 80
-      env:
-        - name: ENV_IN_SIDECAR
-          value: test-in-sidecar
+      - containerPort: 65534
+      securityContext:
+        privileged: true
+        capabilities:
+          add:
+            - SYS_ADMIN
+      command:
+        - /usr/local/bin/chaosfs
+        - -addr=:65534
+        - -pidfile=/tmp/fuse/pid
+        - -original=/var/lib/tikv/data
+        - -mountpoint=/var/lib/tikv/fuse-data
+      volumeMounts:
+        - name: tikv
+          mountPath: /var/lib/tikv
+          mountPropagation: Bidirectional
+    volumeMounts:
+    - name: tikv
+      mountPath: /var/lib/tikv
+      mountPropagation: HostToContainer
+    - name: scripts
+      mountPath: /tmp/scripts
+    - name: fuse
+      mountPath: /tmp/fuse
+    volumes:
+    - name: scripts
+      emptyDir: {}
+    - name: fuse
+      emptyDir: {}
+    postStart:
+      tikv:
+        command:
+          - /tmp/scripts/wait-fuse.sh
+  chaosfs-pd.yaml: |
+    name: chaosfs-pd
+    initContainers:
+    - name: inject-scripts
+      image: pingcap/chaos-scripts:latest
+      imagePullpolicy: Always
+      command: ["sh", "-c", "mkdir -p /tmp/scripts; cp -R /scripts/* /tmp/scripts/; mkdir -p /var/lib/tikv/fuse-data"]
+    containers:
+    - name: chaosfs
+      image: pingcap/chaos-fs
+      imagePullpolicy: Always
+      ports:
+      - containerPort: 65534
+      securityContext:
+        privileged: true
+        capabilities:
+          add:
+            - SYS_ADMIN
+      command:
+        - /usr/local/bin/chaosfs
+        - -addr=:65534
+        - -pidfile=/tmp/fuse/pid
+        - -original=/var/lib/pd/data
+        - -mountpoint=/var/lib/pd/fuse-data
+      volumeMounts:
+        - name: tikv
+          mountPath: /var/lib/tikv
+          mountPropagation: Bidirectional
+    volumeMounts:
+    - name: pd
+      mountPath: /var/lib/pd
+      mountPropagation: HostToContainer
+    - name: scripts
+      mountPath: /tmp/scripts
+    - name: fuse
+      mountPath: /tmp/fuse
+    volumes:
+    - name: scripts
+      emptyDir: {}
+    - name: fuse
+      emptyDir: {}
+    postStart:
+      pd:
+        command:
+          - /tmp/scripts/wait-fuse.sh

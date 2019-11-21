@@ -16,7 +16,7 @@ controllerManager:
   replicaCount: 1
 
   image: pingcap/chaos-operator:latest
-#  imagePullPolicy: Always
+  imagePullPolicy: Always
 
   nameOverride: ""
   fullnameOverride: ""
@@ -45,5 +45,5 @@ controllerManager:
 
 chaosDaemon:
   image: pingcap/chaos-operator:latest
-  # imagePullPolicy: Always
+  imagePullPolicy: Always
   port: 31767

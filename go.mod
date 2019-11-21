@@ -41,5 +41,3 @@ require (
 	k8s.io/kube-openapi v0.0.0-20190709113604-33be087ad058 // indirect
 	sigs.k8s.io/controller-runtime v0.3.0
 )
-
-go 1.13

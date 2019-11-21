@@ -22,10 +22,10 @@ import (
 	"github.com/pingcap/chaos-operator/api/v1alpha1"
 	"github.com/pingcap/chaos-operator/pkg/utils"
 
-	"k8s.io/apimachinery/pkg/runtime"
-
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+
+	"k8s.io/apimachinery/pkg/runtime"
 )
 
 type InnerObject interface {
@@ -97,7 +97,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		// Start failure action
 		r.Log.Info("Performing Action")
 
-		r.Log.Info("now chaos:", "chaos", chaos)
+		r.Log.Info("now chaos action:", "chaos", chaos)
 		err = r.Apply(ctx, req, chaos)
 		if err != nil {
 			return ctrl.Result{}, err

@@ -8,3 +8,6 @@ resources:
 - group: chaosoperator
   version: v1alpha1
   kind: NetworkChaos
+- group: chaosoperator
+  version: v1alpha1
+  kind: IoChaos

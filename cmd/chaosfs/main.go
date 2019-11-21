@@ -34,8 +34,9 @@ func init() {
 }
 
 func main() {
+	fmt.Printf("ChaosFS verion: %#v\n", version.Get())
+
 	if *printVersion {
-		fmt.Printf("ChaosFS verion: %#v\n", version.Get())
 		os.Exit(0)
 	}
 
@@ -94,6 +95,7 @@ func main() {
 		}
 	}()
 
+	glog.Info("starting chaosfs server...")
 	if err = fs.Serve(); err != nil {
 		glog.Error(err)
 	}
