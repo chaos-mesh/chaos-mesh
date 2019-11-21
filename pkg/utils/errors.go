@@ -14,6 +14,8 @@
 package utils
 
 import (
+	"strings"
+
 	apierrs "k8s.io/apimachinery/pkg/api/errors"
 )
 
@@ -22,4 +24,22 @@ func IgnoreNotFound(err error) error {
 		return nil
 	}
 	return err
+}
+
+func IsCaredNetError(err error) bool {
+	if err == nil {
+		return false
+	}
+
+	errString := strings.ToLower(err.Error())
+
+	if strings.Contains(errString, "i/o timeout") {
+		return true
+	}
+
+	if strings.Contains(errString, "connection refused") {
+		return true
+	}
+
+	return false
 }

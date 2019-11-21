@@ -11,23 +11,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package utils
+package watcher
 
-import (
-	"fmt"
-
-	"github.com/pingcap/chaos-operator/api/v1alpha1"
-)
-
-const (
-	// AnnotationPrefix defines the prefix of annotation key for chaos-operator.
-	AnnotationPrefix = "chaos-operator"
-)
-
-func GenAnnotationKeyForImage(pc *v1alpha1.PodChaos, containerName string) string {
-	return fmt.Sprintf("%s-%s-%s-%s-image", AnnotationPrefix, pc.Name, pc.Spec.Action, containerName)
+// Config is a configuration struct for the Watcher type
+type Config struct {
+	Namespace       string
+	ConfigMapLabels map[string]string
 }
 
-func GenAnnotationKeyForWebhook(prefix string, podName string) string {
-	return fmt.Sprintf("%s-%s", prefix, podName)
+// NewConfig returns a new initialized Config
+func NewConfig() *Config {
+	return &Config{
+		Namespace:       "",
+		ConfigMapLabels: map[string]string{},
+	}
 }

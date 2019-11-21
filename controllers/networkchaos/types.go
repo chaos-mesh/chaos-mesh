@@ -17,15 +17,14 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/pingcap/chaos-operator/pkg/utils"
-
 	"github.com/go-logr/logr"
-
-	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/pingcap/chaos-operator/api/v1alpha1"
 	"github.com/pingcap/chaos-operator/controllers/networkchaos/delay"
+	"github.com/pingcap/chaos-operator/pkg/utils"
+
+	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 type Reconciler struct {

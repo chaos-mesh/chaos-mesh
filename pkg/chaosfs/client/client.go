@@ -11,23 +11,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package utils
+package client
 
 import (
-	"fmt"
+	chaosfs "github.com/pingcap/chaos-operator/pkg/chaosfs/pb"
 
-	"github.com/pingcap/chaos-operator/api/v1alpha1"
+	"google.golang.org/grpc"
 )
 
-const (
-	// AnnotationPrefix defines the prefix of annotation key for chaos-operator.
-	AnnotationPrefix = "chaos-operator"
-)
+func NewClient(addr string) (chaosfs.InjureClient, error) {
+	conn, err := grpc.Dial(addr, grpc.WithInsecure())
+	if err != nil {
+		return nil, err
+	}
 
-func GenAnnotationKeyForImage(pc *v1alpha1.PodChaos, containerName string) string {
-	return fmt.Sprintf("%s-%s-%s-%s-image", AnnotationPrefix, pc.Name, pc.Spec.Action, containerName)
-}
-
-func GenAnnotationKeyForWebhook(prefix string, podName string) string {
-	return fmt.Sprintf("%s-%s", prefix, podName)
+	return chaosfs.NewInjureClient(conn), nil
 }

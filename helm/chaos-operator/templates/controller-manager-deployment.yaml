@@ -33,6 +33,8 @@ spec:
 {{ toYaml .Values.controllerManager.resources | indent 12 }}
         command:
           - /usr/local/bin/chaos-controller-manager
+          - -configmap-labels=app.kubernetes.io/component=webhook
+          - -conf=/etc/webhook/conf
         env:
           - name: NAMESPACE
             valueFrom:
@@ -46,8 +48,6 @@ spec:
           - name: webhook-certs
             mountPath: /etc/webhook/certs
             readOnly: true
-          - name: webhook-config
-            mountPath: /etc/webhook/conf
         ports:
           - name: webhook-api
             containerPort: 9443 # Customize containerPort
@@ -55,9 +55,6 @@ spec:
         - name: webhook-certs
           secret:
             secretName: webhook-certs
-        - name: webhook-config
-          configMap:
-            name: webhook-configmaps
     {{- with .Values.controllerManager.nodeSelector }}
       nodeSelector:
 {{ toYaml . | indent 8 }}
