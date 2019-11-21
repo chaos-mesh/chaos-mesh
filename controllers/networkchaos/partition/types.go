@@ -16,6 +16,7 @@ package partition
 import (
 	"context"
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/go-logr/logr"
@@ -39,7 +40,7 @@ const (
 	networkPartitionActionMsg = "part network for %s"
 )
 
-func NewConciler(c client.Client, log logr.Logger, req ctrl.Request) twophase.Reconciler {
+func NewReconciler(c client.Client, log logr.Logger, req ctrl.Request) twophase.Reconciler {
 	return twophase.Reconciler{
 		InnerReconciler: &Reconciler{
 			Client: c,
@@ -59,6 +60,7 @@ func (r *Reconciler) Object() twophase.InnerObject {
 	return &v1alpha1.NetworkChaos{}
 }
 
+// Apply is a functions used to apply partition chaos.
 func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos twophase.InnerObject) error {
 	r.Log.Info("applying network partition")
 
@@ -89,29 +91,28 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos twophase
 
 	allPods := append(sources, targets...)
 
-	{
-		g := errgroup.Group{}
-		for _, pod := range allPods {
-			pod := pod
-			r.Log.Info("PODS", "name", pod.Name, "namespace", pod.Namespace)
-			g.Go(func() error {
-				err := r.flushPodIpSet(ctx, &pod, sourceSet, networkchaos)
-				if err != nil {
-					return err
-				}
+	// Set up ipset in every related pods
+	g := errgroup.Group{}
+	for _, pod := range allPods {
+		pod := pod
+		r.Log.Info("PODS", "name", pod.Name, "namespace", pod.Namespace)
+		g.Go(func() error {
+			err := r.flushPodIpSet(ctx, &pod, sourceSet, networkchaos)
+			if err != nil {
+				return err
+			}
 
-				r.Log.Info("flush ipset on pod", "name", pod.Name, "namespace", pod.Namespace)
-				return r.flushPodIpSet(ctx, &pod, targetSet, networkchaos)
-			})
-		}
-
-		if err = g.Wait(); err != nil {
-			r.Log.Error(err, "flush pod ipset error")
-			return err
-		}
+			r.Log.Info("flush ipset on pod", "name", pod.Name, "namespace", pod.Namespace)
+			return r.flushPodIpSet(ctx, &pod, targetSet, networkchaos)
+		})
 	}
 
-	if networkchaos.Spec.Direction != v1alpha1.From {
+	if err = g.Wait(); err != nil {
+		r.Log.Error(err, "flush pod ipset error")
+		return err
+	}
+
+	if networkchaos.Spec.Direction == v1alpha1.To || networkchaos.Spec.Direction == v1alpha1.Both {
 		if err := r.BlockSet(ctx, sources, targetSet, pb.Rule_OUTPUT, networkchaos); err != nil {
 			r.Log.Error(err, "set source iptables failed")
 			return err
@@ -123,7 +124,7 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos twophase
 		}
 	}
 
-	if networkchaos.Spec.Direction != v1alpha1.To {
+	if networkchaos.Spec.Direction == v1alpha1.From || networkchaos.Spec.Direction == v1alpha1.Both {
 		if err := r.BlockSet(ctx, sources, targetSet, pb.Rule_INPUT, networkchaos); err != nil {
 			r.Log.Error(err, "set source iptables failed")
 			return err
@@ -133,6 +134,25 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos twophase
 			r.Log.Error(err, "set target iptables failed")
 			return err
 		}
+	}
+
+	networkchaos.Status.Experiment.StartTime = &metav1.Time{
+		Time: time.Now(),
+	}
+	networkchaos.Status.Experiment.Pods = []v1alpha1.PodStatus{}
+	networkchaos.Status.Experiment.Phase = v1alpha1.ExperimentPhaseRunning
+
+	for _, pod := range allPods {
+		ps := v1alpha1.PodStatus{
+			Namespace: pod.Namespace,
+			Name:      pod.Name,
+			HostIP:    pod.Status.HostIP,
+			PodIP:     pod.Status.PodIP,
+			Action:    string(networkchaos.Spec.Action),
+			Message:   fmt.Sprintf(networkPartitionActionMsg, networkchaos.Spec.Duration),
+		}
+
+		networkchaos.Status.Experiment.Pods = append(networkchaos.Status.Experiment.Pods, ps)
 	}
 
 	return nil

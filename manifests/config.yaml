@@ -35,7 +35,7 @@ spec:
                 action: delay Default action: delay'
               type: string
             delay:
-              description: Delay represetns the detail about delay action
+              description: Delay represents the detail about delay action
               properties:
                 correlation:
                   type: string
@@ -190,7 +190,7 @@ spec:
                     / `FixedPercentPodMod` / `RandomMaxPercentPodMod`. If `FixedPodMode`,
                     provide an integer of pods to do chaos action. If `FixedPercentPodMod`,
                     provide a number from 0-100 to specify the max % of pods the server
-                    can do chaos action. IF `RandomMaxPercentPodMod`,  provide a number
+                    can do chaos action. If `RandomMaxPercentPodMod`,  provide a number
                     from 0-100 to specify the % of pods to do chaos action
                   type: string
               required:
@@ -202,7 +202,7 @@ spec:
                 / `FixedPercentPodMod` / `RandomMaxPercentPodMod`. If `FixedPodMode`,
                 provide an integer of pods to do chaos action. If `FixedPercentPodMod`,
                 provide a number from 0-100 to specify the max % of pods the server
-                can do chaos action. IF `RandomMaxPercentPodMod`,  provide a number
+                can do chaos action. If `RandomMaxPercentPodMod`,  provide a number
                 from 0-100 to specify the % of pods to do chaos action
               type: string
           required:

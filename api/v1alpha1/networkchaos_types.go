@@ -35,7 +35,7 @@ const (
 	PartitionAction NetworkChaosAction = "partition"
 )
 
-// PartitionDirection represents the block direciton from source to target
+// PartitionDirection represents the block direction from source to target
 type PartitionDirection string
 
 const (
@@ -59,19 +59,22 @@ type PartitionTarget struct {
 	// TargetValue is required when the mode is set to `FixedPodMode` / `FixedPercentPodMod` / `RandomMaxPercentPodMod`.
 	// If `FixedPodMode`, provide an integer of pods to do chaos action.
 	// If `FixedPercentPodMod`, provide a number from 0-100 to specify the max % of pods the server can do chaos action.
-	// IF `RandomMaxPercentPodMod`,  provide a number from 0-100 to specify the % of pods to do chaos action
+	// If `RandomMaxPercentPodMod`,  provide a number from 0-100 to specify the % of pods to do chaos action
 	// +optional
 	TargetValue string `json:"value"`
 }
 
+// GetSelector is a getter for Selector (for implementing SelectSpec)
 func (t *PartitionTarget) GetSelector() SelectorSpec {
 	return t.TargetSelector
 }
 
+// GetMode is a getter for Mode (for implementing SelectSpec)
 func (t *PartitionTarget) GetMode() PodMode {
 	return t.TargetMode
 }
 
+// GetValue is a getter for Value (for implementing SelectSpec)
 func (t *PartitionTarget) GetValue() string {
 	return t.TargetValue
 }
@@ -90,7 +93,7 @@ type NetworkChaosSpec struct {
 	// Value is required when the mode is set to `FixedPodMode` / `FixedPercentPodMod` / `RandomMaxPercentPodMod`.
 	// If `FixedPodMode`, provide an integer of pods to do chaos action.
 	// If `FixedPercentPodMod`, provide a number from 0-100 to specify the max % of pods the server can do chaos action.
-	// IF `RandomMaxPercentPodMod`,  provide a number from 0-100 to specify the % of pods to do chaos action
+	// If `RandomMaxPercentPodMod`,  provide a number from 0-100 to specify the % of pods to do chaos action
 	// +optional
 	Value string `json:"value"`
 
@@ -103,7 +106,7 @@ type NetworkChaosSpec struct {
 	// Scheduler defines some schedule rules to control the running time of the chaos experiment about network.
 	Scheduler SchedulerSpec `json:"scheduler"`
 
-	// Delay represetns the detail about delay action
+	// Delay represents the detail about delay action
 	// +optional
 	Delay *DelaySpec `json:"delay,omitempty"`
 
@@ -124,14 +127,17 @@ type NetworkChaosSpec struct {
 	NextRecover *metav1.Time `json:"nextRecover,omitempty"`
 }
 
+// GetSelector is a getter for Selector (for implementing SelectSpec)
 func (in *NetworkChaosSpec) GetSelector() SelectorSpec {
 	return in.Selector
 }
 
+// GetMode is a getter for Mode (for implementing SelectSpec)
 func (in *NetworkChaosSpec) GetMode() PodMode {
 	return in.Mode
 }
 
+// GetValue is a getter for Value (for implementing SelectSpec)
 func (in *NetworkChaosSpec) GetValue() string {
 	return in.Value
 }
