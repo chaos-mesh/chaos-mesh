@@ -45,7 +45,7 @@ const (
 	podFailureActionMsg = "pause pod duration %s"
 )
 
-func NewConciler(c client.Client, log logr.Logger, req ctrl.Request) twophase.Reconciler {
+func NewReconciler(c client.Client, log logr.Logger, req ctrl.Request) twophase.Reconciler {
 	return twophase.Reconciler{
 		InnerReconciler: &Reconciler{
 			Client: c,
