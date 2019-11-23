@@ -91,6 +91,7 @@ image:
 docker-push:
 	docker push "${DOCKER_REGISTRY}/pingcap/chaos-operator:latest"
 	docker push "${DOCKER_REGISTRY}/pingcap/chaos-fs:latest"
+	docker push "${DOCKER_REGISTRY}/pingcap/chaos-daemon:latest"
 	docker push "${DOCKER_REGISTRY}/pingcap/chaos-scripts:latest"
 
 lint:
