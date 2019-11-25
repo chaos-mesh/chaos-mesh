@@ -40,7 +40,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	var podchaos v1alpha1.PodChaos
 	if err := r.Get(ctx, req.NamespacedName, &podchaos); err != nil {
 		r.Log.Error(err, "unable to get podchaos")
-		return ctrl.Result{}, utils.IgnoreNotFound(err)
+		return utils.HandleError(false, err)
 	}
 
 	switch podchaos.Spec.Action {
@@ -57,6 +57,6 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		err := fmt.Errorf("unknown action %s", string(podchaos.Spec.Action))
 		r.Log.Error(err, "unknown action %s", string(podchaos.Spec.Action))
 
-		return ctrl.Result{}, err
+		return utils.HandleError(false, err)
 	}
 }

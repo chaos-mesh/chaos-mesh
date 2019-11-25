@@ -16,6 +16,8 @@ package utils
 import (
 	"strings"
 
+	ctrl "sigs.k8s.io/controller-runtime"
+
 	apierrs "k8s.io/apimachinery/pkg/api/errors"
 )
 
@@ -42,4 +44,22 @@ func IsCaredNetError(err error) bool {
 	}
 
 	return false
+}
+
+func HandleError(requeue bool, err error) (ctrl.Result, error) {
+	req := ctrl.Result{
+		Requeue: requeue,
+	}
+
+	if err == nil {
+		req.Requeue = false
+		return req, nil
+	}
+
+	if IsCaredNetError(err) {
+		req.Requeue = true
+		return req, nil
+	}
+
+	return req, nil
 }

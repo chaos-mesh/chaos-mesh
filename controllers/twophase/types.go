@@ -69,12 +69,13 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	chaos := r.Object()
 	if err = r.Get(ctx, req.NamespacedName, chaos); err != nil {
 		r.Log.Error(err, "unable to get chaos")
-		return ctrl.Result{}, utils.IgnoreNotFound(err)
+		return utils.HandleError(false, err)
 	}
 
 	duration, err := chaos.GetDuration()
 	if err != nil {
-		return ctrl.Result{}, err
+		r.Log.Error(err, "failed to get chaos duration")
+		return utils.HandleError(false, err)
 	}
 
 	ctx = context.Background()
@@ -83,7 +84,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		r.Log.Info("Removing self")
 		err = r.Recover(ctx, req, chaos)
 		if err != nil {
-			return ctrl.Result{Requeue: true}, err
+			return utils.HandleError(true, err)
 		}
 	} else if !chaos.GetNextRecover().IsZero() && chaos.GetNextRecover().Before(now) {
 		// Start recover
@@ -91,7 +92,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 
 		err = r.Recover(ctx, req, chaos)
 		if err != nil {
-			return ctrl.Result{Requeue: true}, err
+			return utils.HandleError(true, err)
 		}
 		chaos.SetNextRecover(time.Time{})
 	} else if chaos.GetNextStart().Before(now) {
@@ -99,8 +100,9 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		nextRecover := now.Add(duration)
 		if nextStart.Before(nextRecover) {
 			err := fmt.Errorf("nextRecover shouldn't be later than nextStart")
-			r.Log.Error(err, "nextRecover is later than nextStart. Then recover can never be reached", "nextRecover", nextRecover, "nextStart", nextStart)
-			return ctrl.Result{}, err
+			r.Log.Error(err, "nextRecover is later than nextStart. Then recover can never be reached",
+				"nextRecover", nextRecover, "nextStart", nextStart)
+			return utils.HandleError(false, err)
 		}
 
 		r.Log.Info("now chaos action:", "chaos", chaos)
@@ -110,7 +112,13 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 
 		err = r.Apply(ctx, req, chaos)
 		if err != nil {
-			return ctrl.Result{}, err
+			go func() {
+				if err := r.Recover(ctx, req, chaos); err != nil {
+					r.Log.Error(err, "failed to recover chaos")
+				}
+			}()
+
+			return utils.HandleError(false, err)
 		}
 
 		chaos.SetNextStart(*nextStart)
@@ -129,8 +137,8 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 
 	if err := r.Update(ctx, chaos); err != nil {
 		r.Log.Error(err, "unable to update chaosctl status")
-		return ctrl.Result{}, err
+		return utils.HandleError(false, err)
 	}
 
-	return ctrl.Result{}, nil
+	return utils.HandleError(false, err)
 }

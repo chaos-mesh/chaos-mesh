@@ -50,7 +50,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	var podchaos v1alpha1.PodChaos
 	if err = r.Get(ctx, req.NamespacedName, &podchaos); err != nil {
 		r.Log.Error(err, "unable to get podchaos")
-		return ctrl.Result{}, utils.IgnoreNotFound(err)
+		return utils.HandleError(false, err)
 	}
 
 	shouldAct := podchaos.GetNextStart().Before(now)
@@ -60,19 +60,19 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		pods, err := utils.SelectPods(ctx, r.Client, podchaos.Spec.Selector)
 		if err != nil {
 			r.Log.Error(err, "fail to get selected pods")
-			return ctrl.Result{}, err
+			return utils.HandleError(false, err)
 		}
 
 		if len(pods) == 0 {
 			err = errors.New("no pod is selected")
 			r.Log.Error(err, "no pod is selected")
-			return ctrl.Result{}, err
+			return utils.HandleError(false, err)
 		}
 
 		filteredPod, err := utils.GeneratePods(pods, podchaos.Spec.Mode, podchaos.Spec.Value)
 		if err != nil {
 			r.Log.Error(err, "fail to generate pods")
-			return ctrl.Result{}, err
+			return utils.HandleError(false, err)
 		}
 
 		g := errgroup.Group{}
@@ -93,11 +93,11 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		}
 
 		if err := g.Wait(); err != nil {
-			return ctrl.Result{}, err
+			return utils.HandleError(false, err)
 		} else {
 			next, err := utils.NextTime(podchaos.Spec.Scheduler, now)
 			if err != nil {
-				return ctrl.Result{}, err
+				return utils.HandleError(false, err)
 			}
 
 			podchaos.SetNextStart(*next)
@@ -124,7 +124,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 			}
 			if err := r.Update(ctx, &podchaos); err != nil {
 				r.Log.Error(err, "unable to update chaosctl status")
-				return ctrl.Result{}, err
+				return utils.HandleError(false, err)
 			}
 
 			return ctrl.Result{}, nil

@@ -39,7 +39,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	var iochaos v1alpha1.IoChaos
 	if err := r.Get(ctx, req.NamespacedName, &iochaos); err != nil {
 		r.Log.Error(err, "unable to get iochaos")
-		return ctrl.Result{}, utils.IgnoreNotFound(err)
+		return utils.HandleError(false, err)
 	}
 
 	switch iochaos.Spec.Action {
@@ -50,6 +50,6 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		err := fmt.Errorf("unknown action %s", string(iochaos.Spec.Action))
 		r.Log.Error(err, "unknown action %s", string(iochaos.Spec.Action))
 
-		return ctrl.Result{}, err
+		return utils.HandleError(false, err)
 	}
 }

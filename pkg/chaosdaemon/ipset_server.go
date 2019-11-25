@@ -20,10 +20,9 @@ func (s *Server) FlushIpSet(ctx context.Context, req *pb.IpSetRequest) (*empty.E
 			return nil, err
 		}
 
-		nsPath := fmt.Sprintf("%s/%d/ns/net", defaultProcPrefix, pid)
-		ns, err := netns.GetFromPath(nsPath)
+		ns, err := netns.GetFromPid(int(pid))
 		if err != nil {
-			log.Error(err, "error while finding network namespace", "nsPath", nsPath)
+			log.Error(err, "error while finding network namespace", "pid", pid)
 			return nil, err
 		}
 

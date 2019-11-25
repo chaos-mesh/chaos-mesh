@@ -40,7 +40,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	var networkchaos v1alpha1.NetworkChaos
 	if err := r.Get(ctx, req.NamespacedName, &networkchaos); err != nil {
 		r.Log.Error(err, "unable to get networkchaos")
-		return ctrl.Result{}, utils.IgnoreNotFound(err)
+		return utils.HandleError(false, err)
 	}
 
 	switch networkchaos.Spec.Action {
@@ -54,6 +54,6 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		err := fmt.Errorf("unknown action %s", string(networkchaos.Spec.Action))
 		r.Log.Error(err, "unknown action %s", string(networkchaos.Spec.Action))
 
-		return ctrl.Result{}, err
+		return utils.HandleError(false, err)
 	}
 }
