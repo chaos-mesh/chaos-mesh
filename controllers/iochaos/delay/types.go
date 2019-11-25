@@ -232,7 +232,7 @@ func (r *Reconciler) delayPod(ctx context.Context, pod *v1.Pod, iochaos *v1alpha
 	go func() {
 		cctx, cancel := context.WithTimeout(ctx, 5*time.Minute)
 		defer cancel()
-		err = wait.PollUntil(1*time.Second, func() (bool, error) {
+		err = wait.PollUntil(2*time.Second, func() (bool, error) {
 			var npod v1.Pod
 			err := r.Client.Get(ctx, types.NamespacedName{
 				Namespace: pod.Namespace,
@@ -252,6 +252,8 @@ func (r *Reconciler) delayPod(ctx context.Context, pod *v1.Pod, iochaos *v1alpha
 
 				return false, err
 			}
+
+			r.Log.Info("Inject delay action successfully")
 
 			return true, nil
 		}, cctx.Done())

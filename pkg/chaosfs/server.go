@@ -4,19 +4,23 @@ import (
 	"context"
 	"math/rand"
 	"net"
+	"os"
 	"regexp"
 	"sync"
 	"syscall"
 	"time"
 
-	"github.com/golang/glog"
 	"github.com/golang/protobuf/ptypes/empty"
 
 	pb "github.com/pingcap/chaos-operator/pkg/chaosfs/pb"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
+
+	ctrl "sigs.k8s.io/controller-runtime"
 )
+
+var log = ctrl.Log.WithName("fuse-server")
 
 //go:generate protoc -I pb pb/injure.proto --go_out=plugins=grpc:pb
 
@@ -97,7 +101,7 @@ func faultInject(path, method string) error {
 	if len(fc.path) > 0 {
 		re, err := regexp.Compile(fc.path)
 		if err != nil {
-			glog.Warningln("invalid path: ", fc.path)
+			log.Error(err, "failed to parse path", "path: ", fc.path)
 			return nil
 		}
 		if !re.MatchString(path) {
@@ -105,8 +109,8 @@ func faultInject(path, method string) error {
 		}
 	}
 
-	glog.V(6).Infof("Debug fault-injection info method: %s, path: %s", method, path)
-	glog.V(6).Infoln("Debug fault-injection info fc: ", fc)
+	log.Info("Inject fault", "method", method, "path", path)
+	log.Info("Inject fault", "context", fc)
 
 	var errno error = nil
 	if fc.errno != nil {
@@ -138,7 +142,7 @@ func (s *server) Methods(ctx context.Context, in *empty.Empty) (*pb.Response, er
 }
 
 func (s *server) RecoverAll(ctx context.Context, in *empty.Empty) (*empty.Empty, error) {
-	glog.Info("recover all fault")
+	log.Info("recover all fault")
 	faultMap.Range(func(k, v interface{}) bool {
 		faultMap.Delete(k)
 		return true
@@ -162,7 +166,7 @@ func (s *server) setFault(ms []string, f *faultContext) {
 
 func (s *server) SetFault(ctx context.Context, in *pb.Request) (*empty.Empty, error) {
 	// TODO: use Errno(0), and hanle Errno(0) in Hook interfaces
-	glog.Infof("set fault: %+v", in)
+	log.Info("Set fault", "request", in)
 
 	var errno error = nil
 	if in.Errno != 0 {
@@ -182,7 +186,7 @@ func (s *server) SetFault(ctx context.Context, in *pb.Request) (*empty.Empty, er
 
 func (s *server) SetFaultAll(ctx context.Context, in *pb.Request) (*empty.Empty, error) {
 	// TODO: use Errno(0), and hanle Errno(0) in Hook interfaces
-	glog.Infof("set fault all: %+v", in)
+	log.Info("Set fault", "request", in)
 
 	var errno error = nil
 	if in.Errno != 0 {
@@ -203,7 +207,8 @@ func (s *server) SetFaultAll(ctx context.Context, in *pb.Request) (*empty.Empty,
 func StartServer(addr string) {
 	lis, err := net.Listen("tcp", addr)
 	if err != nil {
-		glog.Fatalf("failed to listen: %v", err)
+		log.Error(err, "failed to listen tcp server", "address", addr)
+		os.Exit(1)
 	}
 	s := grpc.NewServer()
 	pb.RegisterInjureServer(s, &server{})
@@ -211,7 +216,8 @@ func StartServer(addr string) {
 	reflection.Register(s)
 	go func() {
 		if err := s.Serve(lis); err != nil {
-			glog.Fatalf("failed to serve: %v", err)
+			log.Error(err, "failed to start serve")
+			os.Exit(1)
 		}
 	}()
 }
