@@ -41,7 +41,7 @@ spec:
                 - SYS_ADMIN
           volumeMounts:
             - name: proc
-              mountPath: /mnt/proc
+              mountPath: /proc
             - name: dockersock
               mountPath: /var/run/docker.sock
           ports:

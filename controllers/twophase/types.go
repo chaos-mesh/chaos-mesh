@@ -84,6 +84,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		r.Log.Info("Removing self")
 		err = r.Recover(ctx, req, chaos)
 		if err != nil {
+			r.Log.Error(err, "failed to recover chaos")
 			return utils.HandleError(true, err)
 		}
 	} else if !chaos.GetNextRecover().IsZero() && chaos.GetNextRecover().Before(now) {
@@ -92,6 +93,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 
 		err = r.Recover(ctx, req, chaos)
 		if err != nil {
+			r.Log.Error(err, "failed to recover chaos")
 			return utils.HandleError(true, err)
 		}
 		chaos.SetNextRecover(time.Time{})
@@ -112,6 +114,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 
 		err = r.Apply(ctx, req, chaos)
 		if err != nil {
+			r.Log.Error(err, "failed to apply chaos action")
 			go func() {
 				if err := r.Recover(ctx, req, chaos); err != nil {
 					r.Log.Error(err, "failed to recover chaos")
