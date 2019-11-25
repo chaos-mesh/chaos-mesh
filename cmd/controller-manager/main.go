@@ -23,6 +23,7 @@ import (
 	"github.com/pingcap/chaos-operator/controllers"
 	"github.com/pingcap/chaos-operator/pkg/flags"
 	"github.com/pingcap/chaos-operator/pkg/utils"
+	"github.com/pingcap/chaos-operator/pkg/version"
 	"github.com/pingcap/chaos-operator/pkg/webhook/config"
 	"github.com/pingcap/chaos-operator/pkg/webhook/config/watcher"
 
@@ -49,6 +50,7 @@ var (
 	enableLeaderElection bool
 	certsDir             string
 	configDir            string
+	printVersion         bool
 
 	cmWatcherLabels = flags.NewMapStringStringFlag()
 	watcherConfig   = watcher.NewConfig()
@@ -73,12 +75,18 @@ func parseFlags() {
 		"Namespace to search for ConfigMaps to load Injection Configs from (default: current namespace)")
 	flag.Var(&cmWatcherLabels, "configmap-labels",
 		"Label pairs used to discover ConfigMaps in Kubernetes. These should be key1=value[,key2=val2,...]")
+	flag.BoolVar(&printVersion, "version", false, "print version information and exit")
 
 	flag.Parse()
 }
 
 func main() {
 	parseFlags()
+
+	version.PrintVersionInfo("Controller manager")
+	if printVersion {
+		os.Exit(0)
+	}
 
 	ctrl.SetLogger(zap.Logger(true))
 
