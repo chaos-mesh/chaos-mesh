@@ -16,8 +16,6 @@ package version
 import (
 	"fmt"
 	"runtime"
-
-	"github.com/golang/glog"
 )
 
 var (
@@ -29,14 +27,8 @@ var (
 )
 
 // PrintVersionInfo show version info to Stdout
-func PrintVersionInfo() {
-	fmt.Printf("Chaos Operator Version: %#v\n", Get())
-}
-
-// LogVersionInfo print version info at startup
-func LogVersionInfo() {
-	glog.Infof("Welcome to Chaos Operator.")
-	glog.Infof("Chaos Operator Version: %#v", Get())
+func PrintVersionInfo(name string) {
+	fmt.Printf("%s Version: %#v\n", name, Get())
 }
 
 // Get returns the overall codebase version. It's for detecting
