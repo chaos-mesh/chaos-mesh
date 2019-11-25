@@ -21,8 +21,6 @@ import (
 
 	"github.com/pingcap/chaos-operator/api/v1alpha1"
 	"github.com/pingcap/chaos-operator/controllers/iochaos/delay"
-	"github.com/pingcap/chaos-operator/pkg/utils"
-
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
@@ -39,7 +37,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	var iochaos v1alpha1.IoChaos
 	if err := r.Get(ctx, req.NamespacedName, &iochaos); err != nil {
 		r.Log.Error(err, "unable to get iochaos")
-		return utils.HandleError(false, err)
+		return ctrl.Result{}, nil
 	}
 
 	switch iochaos.Spec.Action {
@@ -50,6 +48,6 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		err := fmt.Errorf("unknown action %s", string(iochaos.Spec.Action))
 		r.Log.Error(err, "unknown action %s", string(iochaos.Spec.Action))
 
-		return utils.HandleError(false, err)
+		return ctrl.Result{}, nil
 	}
 }

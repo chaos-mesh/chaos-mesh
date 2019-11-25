@@ -38,7 +38,7 @@ spec:
             privileged: true
           volumeMounts:
             - name: proc
-              mountPath: /proc
+              mountPath: /mnt/proc
             - name: dockersock
               mountPath: /var/run/docker.sock
           ports:

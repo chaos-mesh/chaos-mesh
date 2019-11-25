@@ -69,13 +69,13 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	chaos := r.Object()
 	if err = r.Get(ctx, req.NamespacedName, chaos); err != nil {
 		r.Log.Error(err, "unable to get chaos")
-		return utils.HandleError(false, err)
+		return ctrl.Result{}, nil
 	}
 
 	duration, err := chaos.GetDuration()
 	if err != nil {
 		r.Log.Error(err, "failed to get chaos duration")
-		return utils.HandleError(false, err)
+		return ctrl.Result{}, nil
 	}
 
 	ctx = context.Background()
@@ -85,7 +85,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		err = r.Recover(ctx, req, chaos)
 		if err != nil {
 			r.Log.Error(err, "failed to recover chaos")
-			return utils.HandleError(true, err)
+			return ctrl.Result{}, nil
 		}
 	} else if !chaos.GetNextRecover().IsZero() && chaos.GetNextRecover().Before(now) {
 		// Start recover
@@ -94,7 +94,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		err = r.Recover(ctx, req, chaos)
 		if err != nil {
 			r.Log.Error(err, "failed to recover chaos")
-			return utils.HandleError(true, err)
+			return ctrl.Result{}, nil
 		}
 		chaos.SetNextRecover(time.Time{})
 	} else if chaos.GetNextStart().Before(now) {
@@ -104,7 +104,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 			err := fmt.Errorf("nextRecover shouldn't be later than nextStart")
 			r.Log.Error(err, "nextRecover is later than nextStart. Then recover can never be reached",
 				"nextRecover", nextRecover, "nextStart", nextStart)
-			return utils.HandleError(false, err)
+			return ctrl.Result{}, nil
 		}
 
 		r.Log.Info("now chaos action:", "chaos", chaos)
@@ -121,7 +121,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 				}
 			}()
 
-			return utils.HandleError(false, err)
+			return ctrl.Result{}, nil
 		}
 
 		chaos.SetNextStart(*nextStart)
@@ -140,8 +140,8 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 
 	if err := r.Update(ctx, chaos); err != nil {
 		r.Log.Error(err, "unable to update chaosctl status")
-		return utils.HandleError(false, err)
+		return ctrl.Result{}, nil
 	}
 
-	return utils.HandleError(false, err)
+	return ctrl.Result{}, nil
 }

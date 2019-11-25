@@ -14,7 +14,7 @@ import (
 func Apply(netem *pb.Netem, pid uint32) error {
 	log.Info("Apply netem on PID", "pid", pid)
 
-	ns, err := netns.GetFromPid(int(pid))
+	ns, err := netns.GetFromPath(GenNetnsPath(pid))
 	if err != nil {
 		log.Error(err, "failed to find network namespace", "pid", pid)
 		return errors.Trace(err)
@@ -54,7 +54,7 @@ func Cancel(netem *pb.Netem, pid uint32) error {
 	// WARN: This will delete all netem on this interface
 	log.Info("Cancel netem on PID", "pid", pid)
 
-	ns, err := netns.GetFromPid(int(pid))
+	ns, err := netns.GetFromPath(GenNetnsPath(pid))
 	if err != nil {
 		log.Error(err, "failed to find network namespace", "pid", pid)
 		return errors.Trace(err)
