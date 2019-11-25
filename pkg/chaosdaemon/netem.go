@@ -12,11 +12,15 @@ import (
 	pb "github.com/pingcap/chaos-operator/pkg/chaosdaemon/pb"
 )
 
+const (
+	defaultProcPrefix = "/mnt/proc"
+)
+
 // Apply applies a netem on eth0 in pid related namespace
 func Apply(netem *pb.Netem, pid uint32) error {
 	glog.Infof("Apply netem on PID: %d", pid)
-
-	ns, err := netns.GetFromPid(int(pid))
+	nsPath := fmt.Sprintf("%s/%d/ns/net", defaultProcPrefix, pid)
+	ns, err := netns.GetFromPath(nsPath)
 	if err != nil {
 		glog.Errorf("error while finding network namespace %s", nsPath)
 		return errors.Trace(err)
