@@ -19,6 +19,7 @@ func Apply(netem *pb.Netem, pid uint32) error {
 		log.Error(err, "failed to find network namespace", "pid", pid)
 		return errors.Trace(err)
 	}
+	defer ns.Close()
 
 	handle, err := netlink.NewHandleAt(ns)
 	if err != nil {
@@ -58,6 +59,7 @@ func Cancel(netem *pb.Netem, pid uint32) error {
 		log.Error(err, "failed to find network namespace", "pid", pid)
 		return errors.Trace(err)
 	}
+	defer ns.Close()
 
 	handle, err := netlink.NewHandleAt(ns)
 	if err != nil {

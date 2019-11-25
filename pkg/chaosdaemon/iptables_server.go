@@ -27,6 +27,7 @@ func (s *Server) FlushIptables(ctx context.Context, req *pb.IpTablesRequest) (*e
 			log.Error(err, "error while finding network namespace", "pid", pid)
 			return nil, err
 		}
+		defer ns.Close()
 
 		s.networkNamespaceLock.Lock()
 		defer s.networkNamespaceLock.Unlock()
