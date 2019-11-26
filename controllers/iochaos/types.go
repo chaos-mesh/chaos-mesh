@@ -40,12 +40,12 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		return ctrl.Result{}, nil
 	}
 
-	switch iochaos.Spec.Action {
+	switch iochaos.Spec.Layer {
 	case v1alpha1.FileSystemLayer:
 		reconciler := fs.NewConciler(r.Client, r.Log.WithValues("reconciler", "chaosfs"), req)
 		return reconciler.Reconcile(req)
 	default:
-		r.Log.Error(nil, "unknown file system I/O layer %s", string(iochaos.Spec.Layer))
+		r.Log.Error(nil, "unknown file system I/O layer", "I/O layer", string(iochaos.Spec.Layer))
 
 		return ctrl.Result{}, nil
 	}

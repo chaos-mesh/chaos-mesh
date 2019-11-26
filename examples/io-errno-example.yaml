@@ -4,7 +4,7 @@ metadata:
   name: io-delay-example
   namespace: chaos-testing
 spec:
-  action: delay
+  action: errno
   mode: one
   duration: "400s"
   configName: "chaosfs-tikv"
@@ -15,6 +15,6 @@ spec:
     labelSelectors:
       "app.kubernetes.io/component": "tikv"
   layer: "fs"
-  delay: "1ms"
+  percent: "50"
   scheduler:
     cron: "@every 10m"
