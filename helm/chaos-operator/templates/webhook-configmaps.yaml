@@ -25,9 +25,6 @@ data:
       - containerPort: 65534
       securityContext:
         privileged: true
-        capabilities:
-          add:
-            - SYS_ADMIN
       command:
         - /usr/local/bin/chaosfs
         - -addr=:65534
@@ -70,9 +67,6 @@ data:
       - containerPort: 65534
       securityContext:
         privileged: true
-        capabilities:
-          add:
-            - SYS_ADMIN
       command:
         - /usr/local/bin/chaosfs
         - -addr=:65534

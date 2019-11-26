@@ -1,10 +1,8 @@
 package chaosdaemon
 
 import (
-	"fmt"
 	"strings"
 
-	"github.com/golang/glog"
 	"github.com/juju/errors"
 	"github.com/vishvananda/netlink"
 	"github.com/vishvananda/netns"
@@ -12,28 +10,26 @@ import (
 	pb "github.com/pingcap/chaos-operator/pkg/chaosdaemon/pb"
 )
 
-const (
-	defaultProcPrefix = "/mnt/proc"
-)
-
 // Apply applies a netem on eth0 in pid related namespace
 func Apply(netem *pb.Netem, pid uint32) error {
-	glog.Infof("Apply netem on PID: %d", pid)
-	nsPath := fmt.Sprintf("%s/%d/ns/net", defaultProcPrefix, pid)
-	ns, err := netns.GetFromPath(nsPath)
+	log.Info("Apply netem on PID", "pid", pid)
+
+	ns, err := netns.GetFromPath(GenNetnsPath(pid))
 	if err != nil {
-		glog.Errorf("error while finding network namespace %s", nsPath)
+		log.Error(err, "failed to find network namespace", "pid", pid)
 		return errors.Trace(err)
 	}
+	defer ns.Close()
 
 	handle, err := netlink.NewHandleAt(ns)
 	if err != nil {
-		glog.Errorf("error while getting handle at netns %v: %v", ns, err)
+		log.Error(err, "failed to get handle at network namespace", "network namespace", ns)
+		return err
 	}
 
 	link, err := handle.LinkByName("eth0") // TODO: check whether interface name is eth0
 	if err != nil {
-		glog.Errorf("error while finding eth0 interface %v", err)
+		log.Error(err, "failed to find eth0 interface")
 		return errors.Trace(err)
 	}
 
@@ -45,7 +41,7 @@ func Apply(netem *pb.Netem, pid uint32) error {
 
 	if err = handle.QdiscAdd(netemQdisc); err != nil {
 		if !strings.Contains(err.Error(), "file exists") {
-			glog.Errorf("error while adding Qdisc %v", err)
+			log.Error(err, "failed to add Qdisc")
 			return errors.Trace(err)
 		}
 	}
@@ -56,25 +52,24 @@ func Apply(netem *pb.Netem, pid uint32) error {
 // Cancel will remove netem on eth0 in pid related namespace
 func Cancel(netem *pb.Netem, pid uint32) error {
 	// WARN: This will delete all netem on this interface
+	log.Info("Cancel netem on PID", "pid", pid)
 
-	glog.Infof("Cancel netem on PID: %d", pid)
-
-	nsPath := fmt.Sprintf("%s/%d/ns/net", defaultProcPrefix, pid)
-	ns, err := netns.GetFromPath(nsPath)
+	ns, err := netns.GetFromPath(GenNetnsPath(pid))
 	if err != nil {
-		glog.Errorf("error while finding network namespace %s", nsPath)
+		log.Error(err, "failed to find network namespace", "pid", pid)
 		return errors.Trace(err)
 	}
+	defer ns.Close()
 
 	handle, err := netlink.NewHandleAt(ns)
 	if err != nil {
-		glog.Errorf("error while creating new handle at namespace %d %v", int(ns), err)
+		log.Error(err, "failed to create new handle at network namespace", "network namespace", ns)
 		return errors.Trace(err)
 	}
 
 	link, err := handle.LinkByName("eth0") // TODO: check whether interface name is eth0
 	if err != nil {
-		glog.Errorf("error while finding eth0 interface %v", err)
+		log.Error(err, "failed to find eth0 interface")
 		return errors.Trace(err)
 	}
 
@@ -87,7 +82,7 @@ func Cancel(netem *pb.Netem, pid uint32) error {
 	}
 
 	if err = handle.QdiscDel(netemQdisc); err != nil {
-		glog.Errorf("error while removing Qdisc %v", err)
+		log.Error(err, "failed to remove Qdisc")
 		return errors.Trace(err)
 	}
 

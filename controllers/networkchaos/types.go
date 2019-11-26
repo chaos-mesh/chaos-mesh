@@ -22,8 +22,6 @@ import (
 
 	"github.com/pingcap/chaos-operator/api/v1alpha1"
 	"github.com/pingcap/chaos-operator/controllers/networkchaos/delay"
-	"github.com/pingcap/chaos-operator/pkg/utils"
-
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
@@ -40,7 +38,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	var networkchaos v1alpha1.NetworkChaos
 	if err := r.Get(ctx, req.NamespacedName, &networkchaos); err != nil {
 		r.Log.Error(err, "unable to get networkchaos")
-		return ctrl.Result{}, utils.IgnoreNotFound(err)
+		return ctrl.Result{}, nil
 	}
 
 	switch networkchaos.Spec.Action {
@@ -54,6 +52,6 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		err := fmt.Errorf("unknown action %s", string(networkchaos.Spec.Action))
 		r.Log.Error(err, "unknown action %s", string(networkchaos.Spec.Action))
 
-		return ctrl.Result{}, err
+		return ctrl.Result{}, nil
 	}
 }

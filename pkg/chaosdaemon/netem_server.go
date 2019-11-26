@@ -3,7 +3,6 @@ package chaosdaemon
 import (
 	"context"
 
-	"github.com/golang/glog"
 	"github.com/golang/protobuf/ptypes/empty"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -12,7 +11,7 @@ import (
 )
 
 func (s *Server) SetNetem(ctx context.Context, in *pb.NetemRequest) (*empty.Empty, error) {
-	glog.Infof("Request : SetNetem %v", in)
+	log.Info("Set netem", "Request", in)
 
 	pid, err := s.crClient.GetPidFromContainerID(ctx, in.ContainerId)
 
@@ -28,7 +27,7 @@ func (s *Server) SetNetem(ctx context.Context, in *pb.NetemRequest) (*empty.Empt
 }
 
 func (s *Server) DeleteNetem(ctx context.Context, in *pb.NetemRequest) (*empty.Empty, error) {
-	glog.Infof("Request : DeleteNetem %v", in)
+	log.Info("Delete netem", "Request", in)
 
 	pid, err := s.crClient.GetPidFromContainerID(ctx, in.ContainerId)
 
