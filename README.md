@@ -5,6 +5,8 @@ It is used to inject chaos into the applications and Kubernetes infrastructure i
 Chaos Operator is a Kubernetes Operator, which provides easy definitions for chaos experiments and 
 automates the execution of chaos experiments.
 
+![Chaos Operator](./static/chaos-operator-overview.png)
+
 ## Deploy 
 
 ### Prerequisites 
@@ -72,8 +74,8 @@ spec:
 
 PodChaos designs for the chaos experiments about pods.
 
-* **action** defines the specific pod chaos action, supported action: pod-kill
-* **mode** defines the mode to run chaos action, supported mode: one 
+* **action** defines the specific pod chaos action, supported action: pod-kill / pod-failure
+* **mode** defines the mode to run chaos action, supported mode: one / all / fixed / fixed-percent / random-max-percent
 * **selector** is used to select pods that are used to inject chaos action.
 * **scheduler** defines some scheduler rules to the running time of the chaos experiment about pods. 
 More cron rule info: https://godoc.org/github.com/robfig/cron
@@ -85,7 +87,7 @@ more examples: [https://github.com/pingcap/chaos-operator/tree/master/examples](
 
 ```bash
 $ kubectl apply -f pod-kill-example.yaml
-$ kubectl get pdc --namespace=chaos-testing
+$ kubectl get podchaos --namespace=chaos-testing
 ```
 
 #### Update a chaos experiment
