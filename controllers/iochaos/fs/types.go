@@ -37,7 +37,6 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/tools/cache"
-	"k8s.io/client-go/util/retry"
 )
 
 type Reconciler struct {
@@ -190,14 +189,6 @@ func (r *Reconciler) injectAllPods(ctx context.Context, pods []v1.Pod, iochaos *
 			return r.injectPod(ctx, pod, iochaos)
 		})
 
-		return err
-	}
-
-	err := retry.RetryOnConflict(retry.DefaultRetry, func() error {
-		return r.Update(ctx, iochaos)
-	})
-	if err != nil {
-		r.Log.Error(err, "unable to update iochaos finalizers")
 		return err
 	}
 
