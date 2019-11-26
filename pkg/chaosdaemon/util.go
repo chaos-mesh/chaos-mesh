@@ -2,6 +2,7 @@ package chaosdaemon
 
 import (
 	"context"
+	"fmt"
 
 	dockerclient "github.com/docker/docker/client"
 	"github.com/juju/errors"
@@ -10,6 +11,8 @@ import (
 const (
 	defaultDockerSocket  = "unix:///var/run/docker.sock"
 	dockerProtocolPrefix = "docker://"
+
+	defaultProcPrefix = "/mnt/proc"
 )
 
 // ContainerRuntimeInfoClient represents a struct which can give you information about container runtime
@@ -48,4 +51,9 @@ func CreateContainerRuntimeInfoClient() (ContainerRuntimeInfoClient, error) {
 	return DockerClient{
 		client: client,
 	}, nil
+}
+
+// GetNetnsPath returns network namespace path
+func GenNetnsPath(pid uint32) string {
+	return fmt.Sprintf("%s/%d/ns/net", defaultProcPrefix, pid)
 }

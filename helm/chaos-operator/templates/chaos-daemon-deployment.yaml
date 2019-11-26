@@ -35,10 +35,7 @@ spec:
             - name: PORT
               value: !!str {{ .Values.chaosDaemon.port }}
           securityContext:
-            capabilities:
-              add:
-                - NET_ADMIN
-                - SYS_ADMIN
+            privileged: true
           volumeMounts:
             - name: proc
               mountPath: /mnt/proc

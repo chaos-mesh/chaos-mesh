@@ -166,7 +166,7 @@ func (r *Reconciler) cleanFinalizersAndRecover(ctx context.Context, networkchaos
 }
 
 func (r *Reconciler) recoverPod(ctx context.Context, pod *v1.Pod, networkchaos *v1alpha1.NetworkChaos) error {
-	r.Log.Info("Try to resume pod", "namespace", pod.Namespace, "name", pod.Name)
+	r.Log.Info("Try to recover pod", "namespace", pod.Namespace, "name", pod.Name)
 
 	c, err := utils.CreateGrpcConnection(ctx, r.Client, pod)
 	if err != nil {
