@@ -43,15 +43,12 @@ func genMessage(iochaos *v1alpha1.IoChaos) string {
 
 func genChaosfsRequest(iochaos *v1alpha1.IoChaos) (*fspb.Request, error) {
 	req := &fspb.Request{
-		Pct: 100,
-	}
-
-	if iochaos.Spec.Path == "" {
-		return nil, fmt.Errorf("iochaos %s/%s path is required", iochaos.Namespace, iochaos.Name)
+		Pct:  100,
+		Path: iochaos.Spec.Path,
 	}
 
 	if iochaos.Spec.Percent != "" {
-		percent, err := strconv.Atoi(iochaos.Spec.Delay)
+		percent, err := strconv.Atoi(iochaos.Spec.Percent)
 		if err != nil {
 			return nil, err
 		}
@@ -65,8 +62,6 @@ func genChaosfsRequest(iochaos *v1alpha1.IoChaos) (*fspb.Request, error) {
 	if len(iochaos.Spec.Methods) > 0 {
 		req.Methods = iochaos.Spec.Methods
 	}
-
-	req.Path = iochaos.Spec.Path
 
 	if iochaos.Spec.Action == v1alpha1.IODelayAction || iochaos.Spec.Action == v1alpha1.IOMixedAction {
 		delay, err := time.ParseDuration(iochaos.Spec.Delay)
