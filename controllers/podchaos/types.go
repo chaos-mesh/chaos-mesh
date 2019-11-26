@@ -19,11 +19,12 @@ import (
 
 	"github.com/go-logr/logr"
 
+	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/client"
+
 	"github.com/pingcap/chaos-operator/api/v1alpha1"
 	"github.com/pingcap/chaos-operator/controllers/podchaos/podfailure"
 	"github.com/pingcap/chaos-operator/controllers/podchaos/podkill"
-	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 type Reconciler struct {
