@@ -16,6 +16,7 @@ package twophase
 import (
 	"context"
 	"fmt"
+	"k8s.io/client-go/util/retry"
 	"time"
 
 	"github.com/go-logr/logr"
@@ -85,7 +86,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		err = r.Recover(ctx, req, chaos)
 		if err != nil {
 			r.Log.Error(err, "failed to recover chaos")
-			return ctrl.Result{}, nil
+			return ctrl.Result{Requeue: true}, nil
 		}
 	} else if !chaos.GetNextRecover().IsZero() && chaos.GetNextRecover().Before(now) {
 		// Start recover
@@ -94,7 +95,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		err = r.Recover(ctx, req, chaos)
 		if err != nil {
 			r.Log.Error(err, "failed to recover chaos")
-			return ctrl.Result{}, nil
+			return ctrl.Result{Requeue: true}, nil
 		}
 		chaos.SetNextRecover(time.Time{})
 	} else if chaos.GetNextStart().Before(now) {
@@ -115,13 +116,15 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		err = r.Apply(ctx, req, chaos)
 		if err != nil {
 			r.Log.Error(err, "failed to apply chaos action")
-			go func() {
-				if err := r.Recover(ctx, req, chaos); err != nil {
-					r.Log.Error(err, "failed to recover chaos")
-				}
-			}()
 
-			return ctrl.Result{}, nil
+			updateError := retry.RetryOnConflict(retry.DefaultRetry, func() error {
+				return r.Update(ctx, chaos)
+			})
+			if updateError != nil {
+				r.Log.Error(updateError, "unable to update chaos finalizers")
+			}
+
+			return ctrl.Result{Requeue: true}, nil
 		}
 
 		chaos.SetNextStart(*nextStart)

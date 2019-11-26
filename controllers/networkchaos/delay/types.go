@@ -37,7 +37,6 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/tools/cache"
-	"k8s.io/client-go/util/retry"
 )
 
 const (
@@ -166,7 +165,7 @@ func (r *Reconciler) cleanFinalizersAndRecover(ctx context.Context, networkchaos
 }
 
 func (r *Reconciler) recoverPod(ctx context.Context, pod *v1.Pod, networkchaos *v1alpha1.NetworkChaos) error {
-	r.Log.Info("Try to recover pod", "namespace", pod.Namespace, "name", pod.Name)
+	r.Log.Info("try to recover pod", "namespace", pod.Namespace, "name", pod.Name)
 
 	c, err := utils.CreateGrpcConnection(ctx, r.Client, pod)
 	if err != nil {
@@ -181,6 +180,12 @@ func (r *Reconciler) recoverPod(ctx context.Context, pod *v1.Pod, networkchaos *
 		ContainerId: containerId,
 		Netem:       nil,
 	})
+
+	if err != nil {
+		r.Log.Error(err, "recover pod error", "namespace", pod.Namespace, "name", pod.Name)
+	} else {
+		r.Log.Info("recover pod finished", "namespace", pod.Namespace, "name", pod.Name)
+	}
 
 	return err
 }
@@ -199,14 +204,6 @@ func (r *Reconciler) delayAllPods(ctx context.Context, pods []v1.Pod, networkcha
 		g.Go(func() error {
 			return r.delayPod(ctx, pod, networkchaos)
 		})
-	}
-
-	err := retry.RetryOnConflict(retry.DefaultRetry, func() error {
-		return r.Update(ctx, networkchaos)
-	})
-	if err != nil {
-		r.Log.Error(err, "unable to update networkchaos finalizers")
-		return err
 	}
 
 	return g.Wait()
