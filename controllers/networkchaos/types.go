@@ -18,12 +18,13 @@ import (
 	"fmt"
 
 	"github.com/go-logr/logr"
-	"github.com/pingcap/chaos-operator/controllers/networkchaos/partition"
+
+	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/pingcap/chaos-operator/api/v1alpha1"
 	"github.com/pingcap/chaos-operator/controllers/networkchaos/delay"
-	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/client"
+	"github.com/pingcap/chaos-operator/controllers/networkchaos/partition"
 )
 
 type Reconciler struct {
