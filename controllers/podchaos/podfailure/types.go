@@ -35,7 +35,6 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/tools/cache"
-	"k8s.io/client-go/util/retry"
 )
 
 const (
@@ -178,14 +177,6 @@ func (r *Reconciler) failAllPods(ctx context.Context, pods []v1.Pod, podchaos *v
 		g.Go(func() error {
 			return r.failPod(ctx, pod, podchaos)
 		})
-	}
-
-	err := retry.RetryOnConflict(retry.DefaultRetry, func() error {
-		return r.Update(ctx, podchaos)
-	})
-	if err != nil {
-		r.Log.Error(err, "unable to update podchaos finalizers")
-		return err
 	}
 
 	return g.Wait()

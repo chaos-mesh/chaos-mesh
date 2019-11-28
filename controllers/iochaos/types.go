@@ -15,12 +15,12 @@ package iochaos
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/go-logr/logr"
 
 	"github.com/pingcap/chaos-operator/api/v1alpha1"
-	"github.com/pingcap/chaos-operator/controllers/iochaos/delay"
+	"github.com/pingcap/chaos-operator/controllers/iochaos/fs"
+
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
@@ -40,13 +40,12 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		return ctrl.Result{}, nil
 	}
 
-	switch iochaos.Spec.Action {
-	case v1alpha1.IODelayAction:
-		reconciler := delay.NewConciler(r.Client, r.Log.WithValues("reconciler", "delay"), req)
+	switch iochaos.Spec.Layer {
+	case v1alpha1.FileSystemLayer:
+		reconciler := fs.NewConciler(r.Client, r.Log.WithValues("reconciler", "chaosfs"), req)
 		return reconciler.Reconcile(req)
 	default:
-		err := fmt.Errorf("unknown action %s", string(iochaos.Spec.Action))
-		r.Log.Error(err, "unknown action %s", string(iochaos.Spec.Action))
+		r.Log.Error(nil, "unknown file system I/O layer", "I/O layer", string(iochaos.Spec.Layer))
 
 		return ctrl.Result{}, nil
 	}

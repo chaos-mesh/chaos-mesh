@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package delay
+package fs
 
 import (
 	"context"
@@ -26,7 +26,6 @@ import (
 	"github.com/pingcap/chaos-operator/api/v1alpha1"
 	"github.com/pingcap/chaos-operator/controllers/twophase"
 	fscli "github.com/pingcap/chaos-operator/pkg/chaosfs/client"
-	fspb "github.com/pingcap/chaos-operator/pkg/chaosfs/pb"
 	"github.com/pingcap/chaos-operator/pkg/utils"
 
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -38,12 +37,12 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/tools/cache"
-	"k8s.io/client-go/util/retry"
 )
 
-const (
-	ioChaosDelayActionMsg = "delay file system io for %s"
-)
+type Reconciler struct {
+	client.Client
+	Log logr.Logger
+}
 
 func NewConciler(c client.Client, log logr.Logger, req ctrl.Request) twophase.Reconciler {
 	return twophase.Reconciler{
@@ -54,11 +53,6 @@ func NewConciler(c client.Client, log logr.Logger, req ctrl.Request) twophase.Re
 		Client: c,
 		Log:    log,
 	}
-}
-
-type Reconciler struct {
-	client.Client
-	Log logr.Logger
 }
 
 func (r *Reconciler) Object() twophase.InnerObject {
@@ -79,7 +73,7 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos twophase
 		return err
 	}
 
-	if err := r.delayAllPods(ctx, pods, iochaos); err != nil {
+	if err := r.injectAllPods(ctx, pods, iochaos); err != nil {
 		return err
 	}
 
@@ -97,7 +91,7 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos twophase
 			HostIP:    pod.Status.HostIP,
 			PodIP:     pod.Status.PodIP,
 			Action:    string(iochaos.Spec.Action),
-			Message:   fmt.Sprintf(ioChaosDelayActionMsg, iochaos.Spec.Duration),
+			Message:   genMessage(iochaos),
 		}
 
 		iochaos.Status.Experiment.Pods = append(iochaos.Status.Experiment.Pods, ps)
@@ -178,7 +172,7 @@ func (r *Reconciler) recoverPod(ctx context.Context, pod *v1.Pod, iochaos *v1alp
 	})
 }
 
-func (r *Reconciler) delayAllPods(ctx context.Context, pods []v1.Pod, iochaos *v1alpha1.IoChaos) error {
+func (r *Reconciler) injectAllPods(ctx context.Context, pods []v1.Pod, iochaos *v1alpha1.IoChaos) error {
 	g := errgroup.Group{}
 
 	for index := range pods {
@@ -192,25 +186,17 @@ func (r *Reconciler) delayAllPods(ctx context.Context, pods []v1.Pod, iochaos *v
 		iochaos.Finalizers = utils.InsertFinalizer(iochaos.Finalizers, key)
 
 		g.Go(func() error {
-			return r.delayPod(ctx, pod, iochaos)
+			return r.injectPod(ctx, pod, iochaos)
 		})
 
-		return err
-	}
-
-	err := retry.RetryOnConflict(retry.DefaultRetry, func() error {
-		return r.Update(ctx, iochaos)
-	})
-	if err != nil {
-		r.Log.Error(err, "unable to update iochaos finalizers")
 		return err
 	}
 
 	return g.Wait()
 }
 
-func (r *Reconciler) delayPod(ctx context.Context, pod *v1.Pod, iochaos *v1alpha1.IoChaos) error {
-	r.Log.Info("Failing", "namespace", pod.Namespace, "name", pod.Name)
+func (r *Reconciler) injectPod(ctx context.Context, pod *v1.Pod, iochaos *v1alpha1.IoChaos) error {
+	r.Log.Info("Inject I/O chaos action", "namespace", pod.Namespace, "name", pod.Name)
 
 	if err := utils.SetIoInjection(ctx, r.Client, pod, iochaos); err != nil {
 		r.Log.Error(err, "failed to set I/O injection",
@@ -219,7 +205,7 @@ func (r *Reconciler) delayPod(ctx context.Context, pod *v1.Pod, iochaos *v1alpha
 	}
 
 	// need to recreate pod when to inject sidecar
-	time.Sleep(2 * time.Second)
+	time.Sleep(1 * time.Second)
 	err := r.Delete(ctx, pod, &client.DeleteOptions{
 		GracePeriodSeconds: new(int64),
 	})
@@ -228,7 +214,7 @@ func (r *Reconciler) delayPod(ctx context.Context, pod *v1.Pod, iochaos *v1alpha
 		return err
 	}
 
-	// TODO: optimize inject delay
+	// TODO: optimize inject action
 	go func() {
 		cctx, cancel := context.WithTimeout(ctx, 5*time.Minute)
 		defer cancel()
@@ -243,9 +229,9 @@ func (r *Reconciler) delayPod(ctx context.Context, pod *v1.Pod, iochaos *v1alpha
 				return false, nil
 			}
 
-			if err := r.injectDelay(ctx, &npod, iochaos); err != nil {
+			if err := r.injectAction(ctx, &npod, iochaos); err != nil {
 				if utils.IsCaredNetError(err) {
-					r.Log.Info("Inject delay action, network is not ok, retrying...",
+					r.Log.Info("Inject I/O chaos action, network is not ok, retrying...",
 						"namespace", pod.Namespace, "name", pod.Name)
 					return false, nil
 				}
@@ -253,12 +239,12 @@ func (r *Reconciler) delayPod(ctx context.Context, pod *v1.Pod, iochaos *v1alpha
 				return false, err
 			}
 
-			r.Log.Info("Inject delay action successfully")
+			r.Log.Info("Inject I/O chaos action successfully")
 
 			return true, nil
 		}, cctx.Done())
 		if err != nil {
-			r.Log.Error(err, "failed to inject delay",
+			r.Log.Error(err, "failed to inject I/O chaos action",
 				"namespace", pod.Namespace, "name", pod.Name)
 		}
 	}()
@@ -266,7 +252,7 @@ func (r *Reconciler) delayPod(ctx context.Context, pod *v1.Pod, iochaos *v1alpha
 	return nil
 }
 
-func (r *Reconciler) injectDelay(ctx context.Context, pod *v1.Pod, iochaos *v1alpha1.IoChaos) error {
+func (r *Reconciler) injectAction(ctx context.Context, pod *v1.Pod, iochaos *v1alpha1.IoChaos) error {
 	// TODO: move to api repo
 	addr := iochaos.Spec.Addr
 	if addr == "" {
@@ -280,24 +266,11 @@ func (r *Reconciler) injectDelay(ctx context.Context, pod *v1.Pod, iochaos *v1al
 		return err
 	}
 
-	delay, err := time.ParseDuration(iochaos.Spec.Delay)
+	req, err := genChaosfsRequest(iochaos)
 	if err != nil {
 		return err
 	}
 
-	req := &fspb.Request{
-		Errno:  0,
-		Random: false,
-		Path:   iochaos.Spec.Path,
-		Delay:  uint32(delay.Nanoseconds() / 1000),
-	}
-
-	if len(iochaos.Spec.Methods) > 0 {
-		req.Methods = iochaos.Spec.Methods
-		_, err := cli.SetFault(ctx, req)
-		return err
-	}
-
-	_, err = cli.SetFaultAll(ctx, req)
+	_, err = cli.SetFault(ctx, req)
 	return err
 }

@@ -23,10 +23,10 @@ import (
 	"github.com/pingcap/chaos-operator/api/v1alpha1"
 	"github.com/pingcap/chaos-operator/pkg/utils"
 
+	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/client-go/util/retry"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-
-	"k8s.io/apimachinery/pkg/runtime"
 )
 
 type InnerObject interface {
@@ -85,7 +85,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		err = r.Recover(ctx, req, chaos)
 		if err != nil {
 			r.Log.Error(err, "failed to recover chaos")
-			return ctrl.Result{}, nil
+			return ctrl.Result{Requeue: true}, nil
 		}
 	} else if !chaos.GetNextRecover().IsZero() && chaos.GetNextRecover().Before(now) {
 		// Start recover
@@ -94,7 +94,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		err = r.Recover(ctx, req, chaos)
 		if err != nil {
 			r.Log.Error(err, "failed to recover chaos")
-			return ctrl.Result{}, nil
+			return ctrl.Result{Requeue: true}, nil
 		}
 		chaos.SetNextRecover(time.Time{})
 	} else if chaos.GetNextStart().Before(now) {
@@ -115,13 +115,15 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		err = r.Apply(ctx, req, chaos)
 		if err != nil {
 			r.Log.Error(err, "failed to apply chaos action")
-			go func() {
-				if err := r.Recover(ctx, req, chaos); err != nil {
-					r.Log.Error(err, "failed to recover chaos")
-				}
-			}()
 
-			return ctrl.Result{}, nil
+			updateError := retry.RetryOnConflict(retry.DefaultRetry, func() error {
+				return r.Update(ctx, chaos)
+			})
+			if updateError != nil {
+				r.Log.Error(updateError, "unable to update chaos finalizers")
+			}
+
+			return ctrl.Result{Requeue: true}, nil
 		}
 
 		chaos.SetNextStart(*nextStart)
