@@ -109,7 +109,7 @@ type IoChaosSpec struct {
 	Errno string `json:"errno,omitempty"`
 
 	// Percent defines the percentage of injection errors and provides a number from 0-100.
-	// If `Percent` is empty, the operator will generate a value for it randomly.
+	// default: 100.
 	// +optional
 	Percent string `json:"percent,omitempty"`
 

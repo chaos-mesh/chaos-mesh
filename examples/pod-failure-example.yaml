@@ -9,7 +9,7 @@ spec:
   duration: "30s"
   selector:
     namespaces:
-      - demo
+      - tidb-cluster-demo
     labelSelectors:
       "app.kubernetes.io/component": "tikv"
   scheduler:
