@@ -91,9 +91,8 @@ spec:
                 action.
               type: string
             percent:
-              description: Percent defines the percentage of injection errors and
-                provides a number from 0-100. If `Percent` is empty, the operator
-                will generate a value for it randomly.
+              description: 'Percent defines the percentage of injection errors and
+                provides a number from 0-100. default: 100.'
               type: string
             scheduler:
               description: Scheduler defines some schedule rules to control the running
