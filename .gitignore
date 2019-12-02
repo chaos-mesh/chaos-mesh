@@ -8,11 +8,11 @@ tags
 vendor
 .DS_Store
 
-# ginkgo test coverage
-*.coverprofile
+# Output of the go coverage tool, specifically when used with LiteIDE
+/cover.*
+/cover/
 
-coverage.txt
-coverage.out
+.env
 
 # retool. We could check this in like a vendor
 # But it is just tools that can be installed with make setup
