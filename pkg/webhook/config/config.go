@@ -137,6 +137,10 @@ func (c *Config) StatusAnnotationKey() string {
 	return c.AnnotationNamespace + "/status"
 }
 
+func (c *Config) RequestInitAnnotationKey() string {
+	return c.AnnotationNamespace + "/init-request"
+}
+
 // GetRequestedConfig returns the InjectionConfig given a requested key
 func (c *Config) GetRequestedConfig(key string) (*InjectionConfig, error) {
 	c.RLock()

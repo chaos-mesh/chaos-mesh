@@ -161,6 +161,20 @@ func (r *Reconciler) cleanFinalizersAndRecover(ctx context.Context, iochaos *v1a
 func (r *Reconciler) recoverPod(ctx context.Context, pod *v1.Pod, iochaos *v1alpha1.IoChaos) error {
 	r.Log.Info("Recovering", "namespace", pod.Namespace, "name", pod.Name)
 
+	var ns v1.Namespace
+	if err := r.Get(ctx, types.NamespacedName{Name: pod.Namespace}, &ns); err != nil {
+		return err
+	}
+
+	annotations := ns.GetAnnotations()
+	if annotations == nil {
+		annotations = make(map[string]string)
+	}
+
+	if _, ok := annotations[v1alpha1.WebhookInitPodAnnotationKey]; ok {
+		return r.recoverInjectAction(ctx, pod, iochaos)
+	}
+
 	if err := utils.UnsetIoInjection(ctx, r.Client, pod, iochaos); err != nil {
 		r.Log.Error(err, "failed to unset I/O injection",
 			"namespace", pod.Namespace, "name", pod.Name)
@@ -204,21 +218,32 @@ func (r *Reconciler) injectPod(ctx context.Context, pod *v1.Pod, iochaos *v1alph
 		return err
 	}
 
-	// need to recreate pod when to inject sidecar
-	time.Sleep(1 * time.Second)
-	err := r.Delete(ctx, pod, &client.DeleteOptions{
-		GracePeriodSeconds: new(int64),
-	})
-
-	if err != nil {
+	var ns v1.Namespace
+	if err := r.Get(ctx, types.NamespacedName{Name: pod.Namespace}, &ns); err != nil {
 		return err
+	}
+
+	annotations := ns.GetAnnotations()
+	if annotations == nil {
+		annotations = make(map[string]string)
+	}
+
+	if _, ok := annotations[v1alpha1.WebhookInitPodAnnotationKey]; !ok {
+		// need to recreate pod when to inject sidecar
+		time.Sleep(1 * time.Second)
+		err := r.Delete(ctx, pod, &client.DeleteOptions{
+			GracePeriodSeconds: new(int64),
+		})
+		if err != nil {
+			return err
+		}
 	}
 
 	// TODO: optimize inject action
 	go func() {
 		cctx, cancel := context.WithTimeout(ctx, 5*time.Minute)
 		defer cancel()
-		err = wait.PollUntil(2*time.Second, func() (bool, error) {
+		err := wait.PollUntil(2*time.Second, func() (bool, error) {
 			var npod v1.Pod
 			err := r.Client.Get(ctx, types.NamespacedName{
 				Namespace: pod.Namespace,
@@ -272,5 +297,22 @@ func (r *Reconciler) injectAction(ctx context.Context, pod *v1.Pod, iochaos *v1a
 	}
 
 	_, err = cli.SetFault(ctx, req)
+	return err
+}
+
+func (r *Reconciler) recoverInjectAction(ctx context.Context, pod *v1.Pod, iochaos *v1alpha1.IoChaos) error {
+	addr := iochaos.Spec.Addr
+	if addr == "" {
+		addr = v1alpha1.DefaultChaosfsAddr
+	}
+
+	addr = fmt.Sprintf("%s%s", pod.Status.PodIP, addr)
+
+	cli, err := fscli.NewClient(addr)
+	if err != nil {
+		return err
+	}
+
+	_, err = cli.RecoverAll(ctx, nil)
 	return err
 }

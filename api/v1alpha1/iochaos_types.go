@@ -33,9 +33,10 @@ const (
 
 const (
 	// TODO: add config file
-	WebhookNamespaceLabelKey   = "admission-webhook"
-	WebhookNamespaceLabelValue = "enabled"
-	WebhookPodAnnotationKey    = "admission-webhook.pingcap.com/request"
+	WebhookNamespaceLabelKey    = "admission-webhook"
+	WebhookNamespaceLabelValue  = "enabled"
+	WebhookPodAnnotationKey     = "admission-webhook.pingcap.com/request"
+	WebhookInitPodAnnotationKey = "admission-webhook.pingcap.com/init-request"
 )
 
 // IOLayer represents the layer of I/O system.
