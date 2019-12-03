@@ -48,8 +48,10 @@ func SetIoInjection(ctx context.Context, c client.Client, pod *v1.Pod, ioChaos *
 			annotations = make(map[string]string)
 		}
 
-		annotations[GenAnnotationKeyForWebhook(v1alpha1.WebhookPodAnnotationKey, pod.Name)] = ioChaos.Spec.ConfigName
-		ns.SetAnnotations(annotations)
+		if _, ok := annotations[v1alpha1.WebhookInitPodAnnotationKey]; !ok {
+			annotations[GenAnnotationKeyForWebhook(v1alpha1.WebhookPodAnnotationKey, pod.Name)] = ioChaos.Spec.ConfigName
+			ns.SetAnnotations(annotations)
+		}
 
 		if err := c.Update(ctx, &ns); err != nil {
 			return err
@@ -68,6 +70,10 @@ func UnsetIoInjection(ctx context.Context, c client.Client, pod *v1.Pod, iochaos
 
 		annotations := ns.GetAnnotations()
 		if annotations == nil {
+			return nil
+		}
+
+		if _, ok := annotations[v1alpha1.WebhookInitPodAnnotationKey]; ok {
 			return nil
 		}
 

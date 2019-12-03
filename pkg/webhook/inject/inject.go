@@ -141,6 +141,14 @@ func injectRequired(metadata *metav1.ObjectMeta, cli client.Client, cfg *config.
 		return requiredConfig, true
 	}
 
+	requiredConfig, ok = injectByNamespaceInitRequired(metadata, cli, cfg)
+	if ok {
+		log.Info("Pod annotation init requesting sidecar config",
+			"namespace", metadata.Namespace, "name", metadata.Name,
+			"annotation", cfg.RequestAnnotationKey(), "requiredConfig", requiredConfig)
+		return requiredConfig, true
+	}
+
 	return "", false
 }
 
@@ -171,6 +179,30 @@ func injectByNamespaceRequired(metadata *metav1.ObjectMeta, cli client.Client, c
 	}
 
 	required, ok := annotations[utils.GenAnnotationKeyForWebhook(cfg.RequestAnnotationKey(), metadata.Name)]
+	if !ok {
+		log.Info("Pod annotation by namespace is missing, skipping injection",
+			"namespace", metadata.Namespace, "pod", metadata.Name, "config", required)
+		return "", false
+	}
+
+	log.Info("Get sidecar config from namespace annotations",
+		"namespace", metadata.Namespace, "pod", metadata.Name, "config", required)
+	return strings.ToLower(required), true
+}
+
+func injectByNamespaceInitRequired(metadata *metav1.ObjectMeta, cli client.Client, cfg *config.Config) (string, bool) {
+	var ns corev1.Namespace
+	if err := cli.Get(context.Background(), types.NamespacedName{Name: metadata.Namespace}, &ns); err != nil {
+		log.Error(err, "failed to get namespace", "namespace", metadata.Namespace)
+		return "", false
+	}
+
+	annotations := ns.GetAnnotations()
+	if annotations == nil {
+		annotations = make(map[string]string)
+	}
+
+	required, ok := annotations[cfg.RequestInitAnnotationKey()]
 	if !ok {
 		log.Info("Pod annotation by namespace is missing, skipping injection",
 			"namespace", metadata.Namespace, "pod", metadata.Name, "config", required)
