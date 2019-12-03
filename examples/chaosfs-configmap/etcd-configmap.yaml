@@ -1,0 +1,50 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: chaosfs-etcd
+  labels:
+    app.kubernetes.io/component: webhook
+data:
+  chaosfs-etcd.yaml: |
+    name: chaosfs-pd
+    initContainers:
+    - name: inject-scripts
+      image: pingcap/chaos-scripts:latest
+      imagePullpolicy: Always
+      command: ["sh", "-c", "mkdir -p /tmp/scripts; cp -R /scripts/* /tmp/scripts/; mkdir -p /var/run/etcd/fuse-data"]
+    containers:
+    - name: chaosfs
+      image: pingcap/chaos-fs
+      imagePullpolicy: Always
+      ports:
+      - containerPort: 65534
+      securityContext:
+        privileged: true
+      command:
+        - /usr/local/bin/chaosfs
+        - -addr=:65534
+        - -pidfile=/tmp/fuse/pid
+        - -original=/var/run/etcd/default.etcd
+        - -mountpoint=/var/run/etcd/fuse-data
+      volumeMounts:
+        - name: datadir
+          mountPath: /var/run/etcd
+          mountPropagation: Bidirectional
+    volumeMounts:
+    - name: datadir
+      mountPath: /var/run/etcd
+      mountPropagation: HostToContainer
+    - name: scripts
+      mountPath: /tmp/scripts
+    - name: fuse
+      mountPath: /tmp/fuse
+    volumes:
+    - name: scripts
+      emptyDir: {}
+    - name: fuse
+      emptyDir: {}
+    postStart:
+      pd:
+        command:
+          - /tmp/scripts/wait-fuse.sh
