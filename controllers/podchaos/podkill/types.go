@@ -60,19 +60,19 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		pods, err := utils.SelectPods(ctx, r.Client, podchaos.Spec.Selector)
 		if err != nil {
 			r.Log.Error(err, "fail to get selected pods")
-			return ctrl.Result{}, nil
+			return ctrl.Result{requeue: true}, nil
 		}
 
 		if len(pods) == 0 {
 			err = errors.New("no pod is selected")
 			r.Log.Error(err, "no pod is selected")
-			return ctrl.Result{}, nil
+			return ctrl.Result{requeue: true}, nil
 		}
 
 		filteredPod, err := utils.GeneratePods(pods, podchaos.Spec.Mode, podchaos.Spec.Value)
 		if err != nil {
 			r.Log.Error(err, "fail to generate pods")
-			return ctrl.Result{}, nil
+			return ctrl.Result{requeue: true}, nil
 		}
 
 		g := errgroup.Group{}
