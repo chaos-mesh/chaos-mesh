@@ -135,7 +135,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 			nextTime = chaos.GetNextRecover()
 		}
 		duration := nextTime.Sub(now)
-		r.Log.Info("requeue request", "after", duration)
+		r.Log.Info("Requeue request", "after", duration)
 
 		return ctrl.Result{RequeueAfter: duration}, nil
 	}
