@@ -3,38 +3,20 @@ package chaosdaemon
 import (
 	"context"
 	"fmt"
-	"os/exec"
 	"strings"
 
 	"github.com/golang/protobuf/ptypes/empty"
-	"github.com/vishvananda/netns"
-
 	pb "github.com/pingcap/chaos-operator/pkg/chaosdaemon/pb"
 )
 
 func (s *Server) FlushIpSet(ctx context.Context, req *pb.IpSetRequest) (*empty.Empty, error) {
-	{
-		pid, err := s.crClient.GetPidFromContainerID(ctx, req.ContainerId)
-		if err != nil {
-			log.Error(err, "error while getting PID")
-			return nil, err
-		}
-
-		ns, err := netns.GetFromPath(GenNetnsPath(pid))
-		if err != nil {
-			log.Error(err, "error while finding network namespace", "pid", pid)
-			return nil, err
-		}
-		defer ns.Close()
-
-		s.networkNamespaceLock.Lock()
-		defer s.networkNamespaceLock.Unlock()
-		err = netns.Set(ns)
-		if err != nil {
-			log.Error(err, "fail to set network namespace")
-			return nil, err
-		}
+	pid, err := s.crClient.GetPidFromContainerID(ctx, req.ContainerId)
+	if err != nil {
+		log.Error(err, "error while getting PID")
+		return nil, err
 	}
+
+	nsPath := GenNetnsPath(pid)
 
 	// TODO: lock every ipset when working on it
 
@@ -44,7 +26,7 @@ func (s *Server) FlushIpSet(ctx context.Context, req *pb.IpSetRequest) (*empty.E
 
 	{
 		// TODO: Hash and get a stable short name (as ipset name cannot be longer than 31 byte)
-		cmd := exec.CommandContext(ctx, "ipset", "create", name+"old", "hash:ip")
+		cmd := withNetNS(ctx, nsPath, "ipset", "create", name+"old", "hash:ip")
 		out, err := cmd.CombinedOutput()
 		if err != nil {
 			output := string(out)
@@ -53,7 +35,7 @@ func (s *Server) FlushIpSet(ctx context.Context, req *pb.IpSetRequest) (*empty.E
 				return nil, err
 			}
 
-			cmd := exec.CommandContext(ctx, "ipset", "flush", name+"old")
+			cmd := withNetNS(ctx, nsPath, "ipset", "flush", name+"old")
 			out, err := cmd.CombinedOutput()
 			if err != nil {
 				log.Error(err, "ipset flush error", "command", fmt.Sprintf("ipset flush %s", name+"old"), "output", string(out))
@@ -63,7 +45,7 @@ func (s *Server) FlushIpSet(ctx context.Context, req *pb.IpSetRequest) (*empty.E
 	}
 
 	for _, ip := range set.Ips {
-		cmd := exec.CommandContext(ctx, "ipset", "add", name+"old", ip)
+		cmd := withNetNS(ctx, nsPath, "ipset", "add", name+"old", ip)
 		out, err := cmd.CombinedOutput()
 		if err != nil {
 			output := string(out)
@@ -75,7 +57,7 @@ func (s *Server) FlushIpSet(ctx context.Context, req *pb.IpSetRequest) (*empty.E
 	}
 
 	{
-		cmd := exec.CommandContext(ctx, "ipset", "rename", name+"old", name)
+		cmd := withNetNS(ctx, nsPath, "ipset", "rename", name+"old", name)
 		out, err := cmd.CombinedOutput()
 		if err != nil {
 			output := string(out)
@@ -84,7 +66,7 @@ func (s *Server) FlushIpSet(ctx context.Context, req *pb.IpSetRequest) (*empty.E
 				return nil, err
 			}
 
-			cmd := exec.CommandContext(ctx, "ipset", "swap", name+"old", name)
+			cmd := withNetNS(ctx, nsPath, "ipset", "swap", name+"old", name)
 			out, err := cmd.CombinedOutput()
 			if err != nil {
 				log.Error(err, "swap ipset failed", "output", string(out))

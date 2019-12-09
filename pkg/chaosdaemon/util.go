@@ -3,6 +3,7 @@ package chaosdaemon
 import (
 	"context"
 	"fmt"
+	"os/exec"
 
 	dockerclient "github.com/docker/docker/client"
 	"github.com/juju/errors"
@@ -56,4 +57,11 @@ func CreateContainerRuntimeInfoClient() (ContainerRuntimeInfoClient, error) {
 // GetNetnsPath returns network namespace path
 func GenNetnsPath(pid uint32) string {
 	return fmt.Sprintf("%s/%d/ns/net", defaultProcPrefix, pid)
+}
+
+func withNetNS(ctx context.Context, nsPath string, cmd string, args ...string) *exec.Cmd {
+	// BusyBox's nsenter is very confusing. This usage is found by several attempts
+	args = append([]string{"-n" + nsPath, "--", cmd}, args...)
+
+	return exec.CommandContext(ctx, "nsenter", args...)
 }

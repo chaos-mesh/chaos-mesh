@@ -3,40 +3,22 @@ package chaosdaemon
 import (
 	"context"
 	"fmt"
-	"os/exec"
 	"strings"
 
 	"github.com/golang/protobuf/ptypes/empty"
-	"github.com/vishvananda/netns"
-
 	pb "github.com/pingcap/chaos-operator/pkg/chaosdaemon/pb"
 )
 
 const iptablesCmd = "iptables"
 
 func (s *Server) FlushIptables(ctx context.Context, req *pb.IpTablesRequest) (*empty.Empty, error) {
-	{
-		pid, err := s.crClient.GetPidFromContainerID(ctx, req.ContainerId)
-		if err != nil {
-			log.Error(err, "error while getting PID")
-			return nil, err
-		}
-
-		ns, err := netns.GetFromPath(GenNetnsPath(pid))
-		if err != nil {
-			log.Error(err, "error while finding network namespace", "pid", pid)
-			return nil, err
-		}
-		defer ns.Close()
-
-		s.networkNamespaceLock.Lock()
-		defer s.networkNamespaceLock.Unlock()
-		err = netns.Set(ns)
-		if err != nil {
-			log.Error(err, "fail to set network namespace")
-			return nil, err
-		}
+	pid, err := s.crClient.GetPidFromContainerID(ctx, req.ContainerId)
+	if err != nil {
+		log.Error(err, "error while getting PID")
+		return nil, err
 	}
+
+	nsPath := GenNetnsPath(pid)
 
 	rule := req.Rule
 
@@ -44,9 +26,9 @@ func (s *Server) FlushIptables(ctx context.Context, req *pb.IpTablesRequest) (*e
 
 	switch rule.Direction {
 	case pb.Rule_INPUT:
-		format = "%s INPUT -m set --match-set %s src -j DROP"
+		format = "%s INPUT -m set --match-set %s src -j DROP -w 5"
 	case pb.Rule_OUTPUT:
-		format = "%s OUTPUT -m set --match-set %s dst -j DROP"
+		format = "%s OUTPUT -m set --match-set %s dst -j DROP -w 5"
 	default:
 		return nil, fmt.Errorf("unknown rule direction")
 	}
@@ -65,14 +47,14 @@ func (s *Server) FlushIptables(ctx context.Context, req *pb.IpTablesRequest) (*e
 		output := ""
 
 		for !strings.Contains(output, "Bad rule (does a matching rule exist in that chain?).") { // delete until all equal rules are deleted
-			cmd := exec.CommandContext(ctx, iptablesCmd, strings.Split(command, " ")...)
+			cmd := withNetNS(ctx, nsPath, iptablesCmd, strings.Split(command, " ")...)
 			out, err := cmd.CombinedOutput()
 			if err != nil {
 				output = string(out)
 			}
 		}
 	} else {
-		cmd := exec.CommandContext(ctx, iptablesCmd, strings.Split(command, " ")...)
+		cmd := withNetNS(ctx, nsPath, iptablesCmd, strings.Split(command, " ")...)
 		out, err := cmd.CombinedOutput()
 		if err != nil {
 			output := string(out)
