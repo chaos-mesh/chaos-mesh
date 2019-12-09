@@ -2,10 +2,8 @@ package chaosdaemon
 
 import (
 	"fmt"
-	"net"
-	"sync"
-
 	"github.com/juju/errors"
+	"net"
 
 	pb "github.com/pingcap/chaos-operator/pkg/chaosdaemon/pb"
 
@@ -21,8 +19,7 @@ var log = ctrl.Log.WithName("chaos-daemon-server")
 
 // Server represents an HTTP server for tc daemon
 type Server struct {
-	crClient             ContainerRuntimeInfoClient
-	networkNamespaceLock sync.Mutex
+	crClient ContainerRuntimeInfoClient
 }
 
 func newServer() (*Server, error) {
