@@ -15,8 +15,6 @@ package networkchaos
 
 import (
 	"context"
-	"fmt"
-
 	"github.com/go-logr/logr"
 
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -50,8 +48,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		reconciler := partition.NewReconciler(r.Client, r.Log.WithValues("action", "partition"), req)
 		return reconciler.Reconcile(req)
 	default:
-		err := fmt.Errorf("unknown action %s", string(networkchaos.Spec.Action))
-		r.Log.Error(err, "unknown action %s", string(networkchaos.Spec.Action))
+		r.Log.Error(nil, "networkchaos action is invalid", "action", networkchaos.Spec.Action)
 
 		return ctrl.Result{}, nil
 	}

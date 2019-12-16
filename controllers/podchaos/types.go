@@ -15,8 +15,6 @@ package podchaos
 
 import (
 	"context"
-	"fmt"
-
 	"github.com/go-logr/logr"
 
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -53,8 +51,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		reconciler := podfailure.NewReconciler(r.Client, r.Log.WithValues("action", "pod-failure"), req)
 		return reconciler.Reconcile(req)
 	default:
-		err := fmt.Errorf("unknown action %s", string(podchaos.Spec.Action))
-		r.Log.Error(err, "unknown action %s", string(podchaos.Spec.Action))
+		r.Log.Error(nil, "podchaos action is invalid", "action", podchaos.Spec.Action)
 
 		return ctrl.Result{}, nil
 	}
