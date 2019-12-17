@@ -183,9 +183,25 @@ func (r *Reconciler) failAllPods(ctx context.Context, pods []v1.Pod, podchaos *v
 }
 
 func (r *Reconciler) failPod(ctx context.Context, pod *v1.Pod, podchaos *v1alpha1.PodChaos) error {
-	r.Log.Info("Try to recover pod", "namespace", pod.Namespace, "name", pod.Name)
+	r.Log.Info("Try to inject pod-failure", "namespace", pod.Namespace, "name", pod.Name)
 
 	// TODO: check the annotations or others in case that this pod is used by other chaos
+	for index := range pod.Spec.InitContainers {
+		originImage := pod.Spec.InitContainers[index].Image
+		name := pod.Spec.InitContainers[index].Name
+
+		key := utils.GenAnnotationKeyForImage(podchaos, name)
+		if pod.Annotations == nil {
+			pod.Annotations = make(map[string]string)
+		}
+
+		if _, ok := pod.Annotations[key]; ok {
+			return fmt.Errorf("annotation %s exist", key)
+		}
+		pod.Annotations[key] = originImage
+		pod.Spec.InitContainers[index].Image = fakeImage
+	}
+
 	for index := range pod.Spec.Containers {
 		originImage := pod.Spec.Containers[index].Image
 		name := pod.Spec.Containers[index].Name
