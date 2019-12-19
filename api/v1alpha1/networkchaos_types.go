@@ -14,6 +14,8 @@
 package v1alpha1
 
 import (
+	chaosdaemon "github.com/pingcap/chaos-operator/pkg/chaosdaemon/pb"
+	"strconv"
 	"time"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -28,6 +30,15 @@ type NetworkChaosAction string
 const (
 	// DelayAction represents the chaos action of adding delay on pods.
 	DelayAction NetworkChaosAction = "delay"
+
+	// LossAction represents the chaos action of lossing packets on pods.
+	LossAction NetworkChaosAction = "loss"
+
+	// DuplicateAction represents the chaos action of duplicating packets on pods.
+	DuplicateAction NetworkChaosAction = "duplicate"
+
+	// CorruptAction represents the chaos action of corrupting packets on pods.
+	CorruptAction NetworkChaosAction = "corrupt"
 
 	// PartitionAction represents the chaos action of network partition of pods.
 	PartitionAction NetworkChaosAction = "partition"
@@ -107,6 +118,15 @@ type NetworkChaosSpec struct {
 	// Delay represents the detail about delay action
 	// +optional
 	Delay *DelaySpec `json:"delay,omitempty"`
+
+	// Loss represents the detail about loss action
+	Loss *LossSpec `json:"loss,omitempty"`
+
+	// DuplicateSpec represents the detail about loss action
+	Duplicate *DuplicateSpec `json:"duplicate,omitempty"`
+
+	// Corrupt represents the detail about loss action
+	Corrupt *CorruptSpec `json:"corrupt,omitempty"`
 
 	// Direction represents the partition direction
 	// +optional
@@ -220,6 +240,97 @@ type DelaySpec struct {
 	Latency     string `json:"latency"`
 	Correlation string `json:"correlation"`
 	Jitter      string `json:"jitter"`
+}
+
+func (delay *DelaySpec) ToNetem() (*chaosdaemon.Netem, error) {
+	delayTime, err := time.ParseDuration(delay.Latency)
+	if err != nil {
+		return nil, err
+	}
+	jitter, err := time.ParseDuration(delay.Jitter)
+	if err != nil {
+		return nil, err
+	}
+
+	corr, err := strconv.ParseFloat(delay.Correlation, 32)
+	if err != nil {
+		return nil, err
+	}
+
+	return &chaosdaemon.Netem{
+		Time:      uint32(delayTime.Nanoseconds() / 1e3),
+		DelayCorr: float32(corr),
+		Jitter:    uint32(jitter.Nanoseconds() / 1e3),
+	}, nil
+}
+
+// LossSpec defines detail of a loss action
+type LossSpec struct {
+	Loss        string `json:"loss"`
+	Correlation string `json:"correlation"`
+}
+
+func (loss *LossSpec) ToNetem() (*chaosdaemon.Netem, error) {
+	lossPercentage, err := strconv.ParseFloat(loss.Loss, 32)
+	if err != nil {
+		return nil, err
+	}
+
+	corr, err := strconv.ParseFloat(loss.Correlation, 32)
+	if err != nil {
+		return nil, err
+	}
+
+	return &chaosdaemon.Netem{
+		Loss:     float32(lossPercentage),
+		LossCorr: float32(corr),
+	}, nil
+}
+
+// DuplicateSpec defines detail of a duplicate action
+type DuplicateSpec struct {
+	Duplicate   string `json:"duplicate"`
+	Correlation string `json:"correlation"`
+}
+
+func (duplicate *DuplicateSpec) ToNetem() (*chaosdaemon.Netem, error) {
+	duplicatePercentage, err := strconv.ParseFloat(duplicate.Duplicate, 32)
+	if err != nil {
+		return nil, err
+	}
+
+	corr, err := strconv.ParseFloat(duplicate.Correlation, 32)
+	if err != nil {
+		return nil, err
+	}
+
+	return &chaosdaemon.Netem{
+		Duplicate:     float32(duplicatePercentage),
+		DuplicateCorr: float32(corr),
+	}, nil
+}
+
+// CorruptSpec defines detail of a corrupt action
+type CorruptSpec struct {
+	Corrupt     string `json:"corrupt"`
+	Correlation string `json:"correlation"`
+}
+
+func (corrupt *CorruptSpec) ToNetem() (*chaosdaemon.Netem, error) {
+	corruptPercentage, err := strconv.ParseFloat(corrupt.Corrupt, 32)
+	if err != nil {
+		return nil, err
+	}
+
+	corr, err := strconv.ParseFloat(corrupt.Correlation, 32)
+	if err != nil {
+		return nil, err
+	}
+
+	return &chaosdaemon.Netem{
+		Corrupt:     float32(corruptPercentage),
+		CorruptCorr: float32(corr),
+	}, nil
 }
 
 // +kubebuilder:object:root=true
