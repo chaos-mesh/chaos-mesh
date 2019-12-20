@@ -21,7 +21,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/pingcap/chaos-operator/api/v1alpha1"
-	"github.com/pingcap/chaos-operator/controllers/networkchaos/delay"
+	"github.com/pingcap/chaos-operator/controllers/networkchaos/netem"
 	"github.com/pingcap/chaos-operator/controllers/networkchaos/partition"
 )
 
@@ -41,8 +41,8 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	}
 
 	switch networkchaos.Spec.Action {
-	case v1alpha1.DelayAction:
-		reconciler := delay.NewReconciler(r.Client, r.Log.WithValues("action", "delay"), req)
+	case v1alpha1.DelayAction, v1alpha1.DuplicateAction, v1alpha1.CorruptAction, v1alpha1.LossAction:
+		reconciler := netem.NewReconciler(r.Client, r.Log.WithValues("action", "netem"), req)
 		return reconciler.Reconcile(req)
 	case v1alpha1.PartitionAction:
 		reconciler := partition.NewReconciler(r.Client, r.Log.WithValues("action", "partition"), req)
