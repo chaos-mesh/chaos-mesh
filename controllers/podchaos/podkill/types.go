@@ -93,6 +93,14 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		}
 
 		if err := g.Wait(); err != nil {
+			podchaos.Status.Experiment.Phase = v1alpha1.ExperimentPhaseFailed
+			podchaos.Status.Experiment.Reason = err.Error()
+
+			if err := r.Update(ctx, &podchaos); err != nil {
+				r.Log.Error(err, "unable to update chaosctl status")
+				return ctrl.Result{}, nil
+			}
+
 			return ctrl.Result{}, nil
 		} else {
 			next, err := utils.NextTime(podchaos.Spec.Scheduler, now)
@@ -103,6 +111,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 
 			podchaos.SetNextStart(*next)
 
+			podchaos.Status.Experiment.Phase = v1alpha1.ExperimentPhaseFinished
 			podchaos.Status.Experiment.StartTime = &metav1.Time{
 				Time: now,
 			}

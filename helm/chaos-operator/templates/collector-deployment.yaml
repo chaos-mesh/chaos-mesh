@@ -1,40 +1,38 @@
 apiVersion: apps/v1beta1
 kind: Deployment
 metadata:
-  name: chaos-controller-manager
+  name: chaos-collector
   labels:
     app.kubernetes.io/name: {{ template "chaos-operator.name" . }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     app.kubernetes.io/instance: {{ .Release.Name }}
-    app.kubernetes.io/component: controller-manager
+    app.kubernetes.io/component: collector
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+"  "_" }}
 spec:
-  replicas: {{ .Values.controllerManager.replicaCount }}
+  replicas: {{ .Values.collector.replicaCount }}
   selector:
     matchLabels:
       app.kubernetes.io/name: {{ template "chaos-operator.name" . }}
       app.kubernetes.io/instance: {{ .Release.Name }}
-      app.kubernetes.io/component: controller-manager
+      app.kubernetes.io/component: collector
   template:
     metadata:
       labels:
         app.kubernetes.io/name: {{ template "chaos-operator.name" . }}
         app.kubernetes.io/instance: {{ .Release.Name }}
-        app.kubernetes.io/component: controller-manager
+        app.kubernetes.io/component: collector
     spec:
     {{- if .Values.controllerManager.serviceAccount }}
       serviceAccount: {{ .Values.controllerManager.serviceAccount }}
     {{- end }}
       containers:
-      - name: chaos-operator
-        image: {{ .Values.controllerManager.image }}
-        imagePullPolicy: {{ .Values.controllerManager.imagePullPolicy | default "IfNotPresent" }}
+      - name: chaos-collector
+        image: {{ .Values.collector.image }}
+        imagePullPolicy: {{ .Values.collector.imagePullPolicy | default "IfNotPresent" }}
         resources:
-{{ toYaml .Values.controllerManager.resources | indent 12 }}
+{{ toYaml .Values.collector.resources | indent 12 }}
         command:
-          - /usr/local/bin/chaos-controller-manager
-          - -configmap-labels=app.kubernetes.io/component=webhook
-          - -conf=/etc/webhook/conf
+          - /usr/local/bin/chaos-collector
         env:
           - name: NAMESPACE
             valueFrom:
@@ -42,28 +40,15 @@ spec:
                 fieldPath: metadata.namespace
           - name: TZ
             value: {{ .Values.timezone | default "UTC" }}
-          - name: CHAOS_DAEMON_PORT
-            value: !!str {{ .Values.chaosDaemon.port }}
-        volumeMounts:
-          - name: webhook-certs
-            mountPath: /etc/webhook/certs
-            readOnly: true
-        ports:
-          - name: webhook-api
-            containerPort: 9443 # Customize containerPort
-      volumes:
-        - name: webhook-certs
-          secret:
-            secretName: webhook-certs
     {{- with .Values.controllerManager.nodeSelector }}
-      nodeSelector:
+    nodeSelector:
 {{ toYaml . | indent 8 }}
     {{- end }}
-    {{- with .Values.controllerManager.affinity }}
-      affinity:
+    {{- with .Values.collector.affinity }}
+    affinity:
 {{ toYaml . | indent 8 }}
     {{- end }}
-    {{- with .Values.controllerManager.tolerations }}
-      tolerations:
+    {{- with .Values.collector.tolerations }}
+    tolerations:
 {{ toYaml . | indent 8 }}
     {{- end }}
