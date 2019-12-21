@@ -53,21 +53,14 @@ data:
   initdb.sql: |
     use chaos_operator;
 
-    CREATE TABLE IF NOT EXISTS chaos (
-      id INT NOT NULL AUTO_INCREMENT,
-      name VARCHAR(255) NOT NULL,
-      namespace VARCHAR(255) NOT NULL,
-      create_time DATETIME,
-      PRIMARY KEY(id)
-    );
-
     CREATE TABLE IF NOT EXISTS events (
       id INT NOT NULL AUTO_INCREMENT,
       name VARCHAR(255) NOT NULL,
       namespace VARCHAR(255) NOT NULL,
       start_time DATETIME,
       end_time DATETIME,
-      PRIMARY KEY(id)
+      PRIMARY KEY(id),
+      INDEX(namespace, name),
     );
 ---
 apiVersion: v1
