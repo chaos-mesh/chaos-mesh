@@ -19,8 +19,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/pingcap/chaos-operator/pkg/utils"
-	"github.com/pingcap/chaos-operator/pkg/webhook/config"
+	"github.com/pingcap/chaos-mesh/pkg/utils"
+	"github.com/pingcap/chaos-mesh/pkg/webhook/config"
 
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"

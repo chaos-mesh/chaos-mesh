@@ -5,8 +5,8 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/pingcap/chaos-operator/pkg/chaosdaemon"
-	"github.com/pingcap/chaos-operator/pkg/version"
+	"github.com/pingcap/chaos-mesh/pkg/chaosdaemon"
+	"github.com/pingcap/chaos-mesh/pkg/version"
 
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"

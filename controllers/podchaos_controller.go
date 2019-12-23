@@ -16,8 +16,8 @@ package controllers
 import (
 	"github.com/go-logr/logr"
 
-	chaosoperatorv1alpha1 "github.com/pingcap/chaos-operator/api/v1alpha1"
-	"github.com/pingcap/chaos-operator/controllers/podchaos"
+	chaosmeshv1alpha1 "github.com/pingcap/chaos-mesh/api/v1alpha1"
+	"github.com/pingcap/chaos-mesh/controllers/podchaos"
 
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -45,6 +45,6 @@ func (r *PodChaosReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 
 func (r *PodChaosReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
-		For(&chaosoperatorv1alpha1.PodChaos{}).
+		For(&chaosmeshv1alpha1.PodChaos{}).
 		Complete(r)
 }

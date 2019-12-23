@@ -7,7 +7,7 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	pb "github.com/pingcap/chaos-operator/pkg/chaosdaemon/pb"
+	pb "github.com/pingcap/chaos-mesh/pkg/chaosdaemon/pb"
 )
 
 func (s *Server) SetNetem(ctx context.Context, in *pb.NetemRequest) (*empty.Empty, error) {

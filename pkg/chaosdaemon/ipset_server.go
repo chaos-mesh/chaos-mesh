@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/golang/protobuf/ptypes/empty"
-	pb "github.com/pingcap/chaos-operator/pkg/chaosdaemon/pb"
+	pb "github.com/pingcap/chaos-mesh/pkg/chaosdaemon/pb"
 )
 
 func (s *Server) FlushIpSet(ctx context.Context, req *pb.IpSetRequest) (*empty.Empty, error) {

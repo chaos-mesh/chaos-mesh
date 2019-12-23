@@ -5,7 +5,7 @@ It is used to inject chaos into the applications and Kubernetes infrastructure i
 Chaos Operator is a Kubernetes Operator, which provides easy definitions for chaos experiments and 
 automates the execution of chaos experiments.
 
-![Chaos Operator](./static/chaos-operator-overview.png)
+![Chaos Operator](./static/chaos-mesh-overview.png)
 
 ## Deploy 
 
@@ -23,8 +23,8 @@ Before deploying Chaos Operator, make sure the following items are installed on 
 #### Get the Helm files
 
 ```bash
-$ git clone https://github.com/pingcap/chaos-operator.git
-$ cd chaos-operator/
+$ git clone https://github.com/pingcap/chaos-mesh.git
+$ cd chaos-mesh/
 ```
 
 #### Create custom resource type
@@ -40,8 +40,8 @@ $ kubectl get crd podchaos.pingcap.com
 #### Install Chaos Operator
 
 ```bash
-$ helm install helm/chaos-operator --name=chaos-operator --namespace=chaos-testing
-$ kubectl get pods --namespace chaos-testing -l app.kubernetes.io/instance=chaos-operator
+$ helm install helm/chaos-mesh --name=chaos-mesh --namespace=chaos-testing
+$ kubectl get pods --namespace chaos-testing -l app.kubernetes.io/instance=chaos-mesh
 ```
 
 ## Usage
@@ -81,7 +81,7 @@ PodChaos designs for the chaos experiments about pods.
 More cron rule info: https://godoc.org/github.com/robfig/cron
 
 
-more examples: [https://github.com/pingcap/chaos-operator/tree/master/examples](https://github.com/pingcap/chaos-operator/tree/master/examples) 
+more examples: [https://github.com/pingcap/chaos-mesh/tree/master/examples](https://github.com/pingcap/chaos-mesh/tree/master/examples) 
 
 #### Create a chaos experiment
 

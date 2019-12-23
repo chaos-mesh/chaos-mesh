@@ -20,7 +20,7 @@ GO     := $(GOENV) go
 GOTEST := TEST_USE_EXISTING_CLUSTER=false go test
 
 PACKAGE_LIST := go list ./... | grep -vE "pkg/client" | grep -vE "zz_generated"
-PACKAGE_DIRECTORIES := $(PACKAGE_LIST) | sed 's|github.com/pingcap/chaos-operator/||'
+PACKAGE_DIRECTORIES := $(PACKAGE_LIST) | sed 's|github.com/pingcap/chaos-mesh/||'
 FILES := $$(find $$($(PACKAGE_DIRECTORIES)) -name "*.go")
 FAIL_ON_STDOUT := awk '{ print } END { if (NR > 0) { exit 1 } }'
 
@@ -55,7 +55,7 @@ chaosdaemon: generate fmt vet
 
 # Build manager binary
 manager: generate fmt vet
-	$(GO) build -ldflags '$(LDFLAGS)' -o images/chaos-operator/bin/chaos-controller-manager ./cmd/controller-manager/*.go
+	$(GO) build -ldflags '$(LDFLAGS)' -o images/chaos-mesh/bin/chaos-controller-manager ./cmd/controller-manager/*.go
 
 chaosfs: generate fmt vet
 	$(GO) build -ldflags '$(LDFLAGS)' -o images/chaosfs/bin/chaosfs ./cmd/chaosfs/*.go
@@ -67,7 +67,7 @@ run: generate fmt vet manifests
 # Install CRDs into a cluster
 install: manifests
 	kubectl apply -f manifests/crd.yaml
-	helm install helm/chaos-operator --name=chaos-operator --namespace=chaos-testing
+	helm install helm/chaos-mesh --name=chaos-mesh --namespace=chaos-testing
 
 # Generate manifests e.g. CRD, RBAC etc.
 manifests: controller-gen
@@ -88,14 +88,14 @@ tidy:
 
 image:
 	docker build -t ${DOCKER_REGISTRY}/pingcap/chaos-daemon images/chaos-daemon
-	docker build -t ${DOCKER_REGISTRY}/pingcap/chaos-operator images/chaos-operator
+	docker build -t ${DOCKER_REGISTRY}/pingcap/chaos-mesh images/chaos-mesh
 	docker build -t ${DOCKER_REGISTRY}/pingcap/chaos-fs images/chaosfs
 	cp -R hack images/chaos-scripts
 	docker build -t ${DOCKER_REGISTRY}/pingcap/chaos-scripts images/chaos-scripts
 	rm -rf images/chaos-scripts/hack
 
 docker-push:
-	docker push "${DOCKER_REGISTRY}/pingcap/chaos-operator:latest"
+	docker push "${DOCKER_REGISTRY}/pingcap/chaos-mesh:latest"
 	docker push "${DOCKER_REGISTRY}/pingcap/chaos-fs:latest"
 	docker push "${DOCKER_REGISTRY}/pingcap/chaos-daemon:latest"
 	docker push "${DOCKER_REGISTRY}/pingcap/chaos-scripts:latest"
