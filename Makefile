@@ -36,7 +36,7 @@ endif
 
 all: yaml build image
 
-build: chaosdaemon manager chaosfs collector
+build: chaosdaemon manager chaosfs
 
 # Run tests
 test: generate fmt vet manifests
@@ -56,9 +56,6 @@ chaosdaemon: generate fmt vet
 # Build manager binary
 manager: generate fmt vet
 	$(GO) build -ldflags '$(LDFLAGS)' -o images/chaos-operator/bin/chaos-controller-manager ./cmd/controller-manager/*.go
-
-collector: generate fmt vet
-	$(GO) build -ldflags '$(LDFLAGS)' -o images/chaos-collector/bin/chaos-collector ./cmd/chaos-collector/*.go
 
 chaosfs: generate fmt vet
 	$(GO) build -ldflags '$(LDFLAGS)' -o images/chaosfs/bin/chaosfs ./cmd/chaosfs/*.go
@@ -96,8 +93,6 @@ image:
 	cp -R hack images/chaos-scripts
 	docker build -t ${DOCKER_REGISTRY}/pingcap/chaos-scripts images/chaos-scripts
 	rm -rf images/chaos-scripts/hack
-
-	docker build -t ${DOCKER_REGISTRY}/pingcap/chaos-collector images/chaos-collector
 
 docker-push:
 	docker push "${DOCKER_REGISTRY}/pingcap/chaos-operator:latest"
@@ -170,5 +165,5 @@ install-test-dependency:
 
 .PHONY: all build test install manifests fmt vet tidy image \
 	docker-push lint generate controller-gen yaml \
-	manager chaosfs chaosdaemon collector install-kind install-kubebuilder \
+	manager chaosfs chaosdaemon install-kind install-kubebuilder \
 	install-kustomize install-test-dependency
