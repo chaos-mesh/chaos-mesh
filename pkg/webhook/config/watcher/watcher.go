@@ -19,7 +19,7 @@ import (
 	"io/ioutil"
 	"strings"
 
-	"github.com/pingcap/chaos-operator/pkg/webhook/config"
+	"github.com/pingcap/chaos-mesh/pkg/webhook/config"
 
 	ctrl "sigs.k8s.io/controller-runtime"
 

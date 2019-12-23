@@ -3,7 +3,7 @@ kind: Job
 metadata:
   name: webhook-mw-job
   labels:
-    app.kubernetes.io/name: {{ template "chaos-operator.name" . }}
+    app.kubernetes.io/name: {{ template "chaos-mesh.name" . }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/component: webhook-mw-job
@@ -42,9 +42,9 @@ spec:
               apiVersion: admissionregistration.k8s.io/v1beta1
               kind: MutatingWebhookConfiguration
               metadata:
-                name: chaos-operator-sidecar-injector
+                name: chaos-mesh-sidecar-injector
                 labels:
-                  app.kubernetes.io/name: {{ template "chaos-operator.name" . }}
+                  app.kubernetes.io/name: {{ template "chaos-mesh.name" . }}
                   app.kubernetes.io/managed-by: {{ .Release.Service }}
                   app.kubernetes.io/instance: {{ .Release.Name }}
                   app.kubernetes.io/component: admission-webhook
@@ -53,7 +53,7 @@ spec:
                 - name: admission-webhook.pingcap.com
                   clientConfig:
                     service:
-                      name: chaos-operator-controller-manager
+                      name: chaos-mesh-controller-manager
                       namespace: ${K8S_NAMESPACE}
                       path: "/inject-v1-pod"
                     caBundle: "${CA_BUNDLE}"

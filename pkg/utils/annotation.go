@@ -16,12 +16,12 @@ package utils
 import (
 	"fmt"
 
-	"github.com/pingcap/chaos-operator/api/v1alpha1"
+	"github.com/pingcap/chaos-mesh/api/v1alpha1"
 )
 
 const (
-	// AnnotationPrefix defines the prefix of annotation key for chaos-operator.
-	AnnotationPrefix = "chaos-operator"
+	// AnnotationPrefix defines the prefix of annotation key for chaos-mesh.
+	AnnotationPrefix = "chaos-mesh"
 )
 
 func GenAnnotationKeyForImage(pc *v1alpha1.PodChaos, containerName string) string {

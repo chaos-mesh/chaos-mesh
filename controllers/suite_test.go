@@ -24,7 +24,7 @@ import (
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/gexec"
 
-	chaosoperatorv1alpha1 "github.com/pingcap/chaos-operator/api/v1alpha1"
+	chaosmeshv1alpha1 "github.com/pingcap/chaos-mesh/api/v1alpha1"
 
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -75,7 +75,7 @@ var _ = BeforeSuite(func(done Done) {
 	err = scheme.AddToScheme(scheme.Scheme)
 	Expect(err).NotTo(HaveOccurred())
 
-	err = chaosoperatorv1alpha1.AddToScheme(scheme.Scheme)
+	err = chaosmeshv1alpha1.AddToScheme(scheme.Scheme)
 	Expect(err).NotTo(HaveOccurred())
 
 	// +kubebuilder:scaffold:scheme

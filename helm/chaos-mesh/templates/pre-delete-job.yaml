@@ -3,7 +3,7 @@ kind: Job
 metadata:
   name: webhook-del
   labels:
-    app.kubernetes.io/name: {{ template "chaos-operator.name" . }}
+    app.kubernetes.io/name: {{ template "chaos-mesh.name" . }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/component: webhook-del
@@ -30,5 +30,5 @@ spec:
             - "-c"
             - |
               set -e
-              kubectl delete mutatingwebhookconfigurations.admissionregistration.k8s.io chaos-operator-sidecar-injector || true // Auto Delete mutatingwebhookconfigurations
+              kubectl delete mutatingwebhookconfigurations.admissionregistration.k8s.io chaos-mesh-sidecar-injector || true // Auto Delete mutatingwebhookconfigurations
               kubectl delete secrets -n {{ .Release.Namespace }} webhook-certs || true
