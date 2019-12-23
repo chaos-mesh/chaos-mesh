@@ -25,7 +25,7 @@ import (
 
 	"github.com/golang/protobuf/ptypes/empty"
 
-	pb "github.com/pingcap/chaos-operator/pkg/chaosfs/pb"
+	pb "github.com/pingcap/chaos-mesh/pkg/chaosfs/pb"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"

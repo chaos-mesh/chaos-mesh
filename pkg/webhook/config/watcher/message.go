@@ -14,7 +14,7 @@
 package watcher
 
 import (
-	"github.com/pingcap/chaos-operator/pkg/webhook/config"
+	"github.com/pingcap/chaos-mesh/pkg/webhook/config"
 )
 
 // Message is a message that describes a change and payload to a sidecar configuration

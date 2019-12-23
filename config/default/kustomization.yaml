@@ -1,4 +1,4 @@
-namePrefix: chaos-operator-
+namePrefix: chaos-mesh-
 
 bases:
 - ../crd

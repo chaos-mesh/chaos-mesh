@@ -17,8 +17,8 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/pingcap/chaos-operator/pkg/webhook/config"
-	"github.com/pingcap/chaos-operator/pkg/webhook/inject"
+	"github.com/pingcap/chaos-mesh/pkg/webhook/config"
+	"github.com/pingcap/chaos-mesh/pkg/webhook/inject"
 
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"

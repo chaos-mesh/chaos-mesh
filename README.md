@@ -1,47 +1,47 @@
-# Chaos Operator
-Chaos Operator is a powerful chaos engineering tool for kubernetes. 
+# Chaos Mesh 
+Chaos Mesh is a powerful chaos engineering tool for kubernetes. 
 It is used to inject chaos into the applications and Kubernetes infrastructure in a managed fashion. 
 
-Chaos Operator is a Kubernetes Operator, which provides easy definitions for chaos experiments and 
+Chaos Mesh includes a Kubernetes Operator, which provides easy definitions for chaos experiments and 
 automates the execution of chaos experiments.
 
-![Chaos Operator](./static/chaos-operator-overview.png)
+![Chaos Mesh](./static/chaos-mesh-overview.png)
 
 ## Deploy 
 
 ### Prerequisites 
 
-Before deploying Chaos Operator, make sure the following items are installed on your machine: 
+Before deploying Chaos Mesh, make sure the following items are installed on your machine: 
 
 * Kubernetes >= v1.12
 * [RBAC](https://kubernetes.io/docs/admin/authorization/rbac) enabled (optional)
 * Helm version >= v2.8.2 and < v3.0.0
 * Protobuf version >= v3.6.1 and < v3.7.0 and go support
 
-### Install Chaos Operator
+### Install Chaos Mesh 
 
 #### Get the Helm files
 
 ```bash
-$ git clone https://github.com/pingcap/chaos-operator.git
-$ cd chaos-operator/
+$ git clone https://github.com/pingcap/chaos-mesh.git
+$ cd chaos-mesh/
 ```
 
 #### Create custom resource type
 
-Chaos Operator uses [CRD (Custom Resource Definition)](https://kubernetes.io/docs/tasks/access-kubernetes-api/custom-resources/custom-resource-definitions/) 
-to extend Kubernetes. Therefore, to use Chaos Operator, you must first create the related custom resource type.
+Chaos Mesh uses [CRD (Custom Resource Definition)](https://kubernetes.io/docs/tasks/access-kubernetes-api/custom-resources/custom-resource-definitions/) 
+to extend Kubernetes. Therefore, to use Chaos Mesh, you must first create the related custom resource type.
 
 ```bash
 $ kubectl apply -f manifests/
 $ kubectl get crd podchaos.pingcap.com
 ```
 
-#### Install Chaos Operator
+#### Install Chaos Mesh 
 
 ```bash
-$ helm install helm/chaos-operator --name=chaos-operator --namespace=chaos-testing
-$ kubectl get pods --namespace chaos-testing -l app.kubernetes.io/instance=chaos-operator
+$ helm install helm/chaos-mesh --name=chaos-mesh --namespace=chaos-testing
+$ kubectl get pods --namespace chaos-testing -l app.kubernetes.io/instance=chaos-mesh
 ```
 
 ## Usage
@@ -81,7 +81,7 @@ PodChaos designs for the chaos experiments about pods.
 More cron rule info: https://godoc.org/github.com/robfig/cron
 
 
-more examples: [https://github.com/pingcap/chaos-operator/tree/master/examples](https://github.com/pingcap/chaos-operator/tree/master/examples) 
+more examples: [https://github.com/pingcap/chaos-mesh/tree/master/examples](https://github.com/pingcap/chaos-mesh/tree/master/examples) 
 
 #### Create a chaos experiment
 

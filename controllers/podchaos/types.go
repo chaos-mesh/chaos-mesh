@@ -20,9 +20,9 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/pingcap/chaos-operator/api/v1alpha1"
-	"github.com/pingcap/chaos-operator/controllers/podchaos/podfailure"
-	"github.com/pingcap/chaos-operator/controllers/podchaos/podkill"
+	"github.com/pingcap/chaos-mesh/api/v1alpha1"
+	"github.com/pingcap/chaos-mesh/controllers/podchaos/podfailure"
+	"github.com/pingcap/chaos-mesh/controllers/podchaos/podkill"
 )
 
 type Reconciler struct {

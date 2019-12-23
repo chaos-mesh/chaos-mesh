@@ -11,7 +11,7 @@ set -euo pipefail
 #        "dirty" indicates source code changes after the git commit id
 #        "archive" indicates the tree was produced by 'git archive'
 #    GIT_VERSION - "vX.Y" used to indicate the last release version.
-function chaos_operator::version::get_version_vars() {
+function chaos_mesh::version::get_version_vars() {
   if [[ -n ${GIT_COMMIT-} ]] || GIT_COMMIT=$(git rev-parse "HEAD^{commit}" 2>/dev/null); then
     if [[ -z ${GIT_TREE_STATE-} ]]; then
       # Check if the tree is dirty.  default to dirty
@@ -56,27 +56,27 @@ function chaos_operator::version::get_version_vars() {
   fi
 }
 
-function chaos_operator::version::ldflag() {
+function chaos_mesh::version::ldflag() {
   local key=${1}
   local val=${2}
 
-  echo "-X 'github.com/pingcap/chaos-operator/pkg/version.${key}=${val}'"
+  echo "-X 'github.com/pingcap/chaos-mesh/pkg/version.${key}=${val}'"
 }
 
 # Prints the value that needs to be passed to the -ldflags parameter of go build
-function chaos_operator::version::ldflags() {
-  chaos_operator::version::get_version_vars
+function chaos_mesh::version::ldflags() {
+  chaos_mesh::version::get_version_vars
 
   local buildDate=
   [[ -z ${SOURCE_DATE_EPOCH-} ]] || buildDate="--date=@${SOURCE_DATE_EPOCH}"
-  local -a ldflags=($(chaos_operator::version::ldflag "buildDate" "$(date ${buildDate} -u +'%Y-%m-%dT%H:%M:%SZ')"))
+  local -a ldflags=($(chaos_mesh::version::ldflag "buildDate" "$(date ${buildDate} -u +'%Y-%m-%dT%H:%M:%SZ')"))
   if [[ -n ${GIT_COMMIT-} ]]; then
-    ldflags+=($(chaos_operator::version::ldflag "gitCommit" "${GIT_COMMIT}"))
-    ldflags+=($(chaos_operator::version::ldflag "gitTreeState" "${GIT_TREE_STATE}"))
+    ldflags+=($(chaos_mesh::version::ldflag "gitCommit" "${GIT_COMMIT}"))
+    ldflags+=($(chaos_mesh::version::ldflag "gitTreeState" "${GIT_TREE_STATE}"))
   fi
 
   if [[ -n ${GIT_VERSION-} ]]; then
-    ldflags+=($(chaos_operator::version::ldflag "gitVersion" "${GIT_VERSION}"))
+    ldflags+=($(chaos_mesh::version::ldflag "gitVersion" "${GIT_VERSION}"))
   fi
 
   # The -ldflags parameter takes a single string, so join the output.
@@ -84,4 +84,4 @@ function chaos_operator::version::ldflags() {
 }
 
 # output -ldflags parameters
-chaos_operator::version::ldflags
+chaos_mesh::version::ldflags

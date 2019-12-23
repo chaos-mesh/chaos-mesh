@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: chaos-controller-manager
   labels:
-    app.kubernetes.io/name: {{ template "chaos-operator.name" . }}
+    app.kubernetes.io/name: {{ template "chaos-mesh.name" . }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/component: controller-manager
@@ -12,13 +12,13 @@ spec:
   replicas: {{ .Values.controllerManager.replicas }}
   selector:
     matchLabels:
-      app.kubernetes.io/name: {{ template "chaos-operator.name" . }}
+      app.kubernetes.io/name: {{ template "chaos-mesh.name" . }}
       app.kubernetes.io/instance: {{ .Release.Name }}
       app.kubernetes.io/component: controller-manager
   template:
     metadata:
       labels:
-        app.kubernetes.io/name: {{ template "chaos-operator.name" . }}
+        app.kubernetes.io/name: {{ template "chaos-mesh.name" . }}
         app.kubernetes.io/instance: {{ .Release.Name }}
         app.kubernetes.io/component: controller-manager
     spec:
@@ -26,7 +26,7 @@ spec:
       serviceAccount: {{ .Values.controllerManager.serviceAccount }}
     {{- end }}
       containers:
-      - name: chaos-operator
+      - name: chaos-mesh
         image: {{ .Values.controllerManager.image }}
         imagePullPolicy: {{ .Values.controllerManager.imagePullPolicy | default "IfNotPresent" }}
         resources:

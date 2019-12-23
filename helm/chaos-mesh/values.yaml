@@ -1,8 +1,8 @@
-# Default values for chaos-operator.
+# Default values for chaos-mesh.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
-# clusterScoped is whether chaos-operator should manage kubernetes cluster wide chaos
+# clusterScoped is whether chaos-mesh should manage kubernetes cluster wide chaos
 # Also see rbac.create and controllerManager.serviceAccount
 clusterScoped: true
 
@@ -15,7 +15,7 @@ controllerManager:
 
   replicaCount: 1
 
-  image: pingcap/chaos-operator:latest
+  image: pingcap/chaos-mesh:latest
   imagePullPolicy: Always
 
   nameOverride: ""

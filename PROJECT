@@ -1,13 +1,13 @@
 version: "2"
 domain: pingcap.com
-repo: github.com/pingcap/chaos-operator
+repo: github.com/pingcap/chaos-mesh
 resources:
-- group: chaosoperator
+- group: chaosmesh
   version: v1alpha1
   kind: PodChaos
-- group: chaosoperator
+- group: chaosmesh
   version: v1alpha1
   kind: NetworkChaos
-- group: chaosoperator
+- group: chaosmesh
   version: v1alpha1
   kind: IoChaos
