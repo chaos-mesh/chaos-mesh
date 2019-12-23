@@ -68,7 +68,7 @@ collector:
 
   volume:
     storage: 3Gi
-    storageClassName: default
+    storageClassName: standard
 
 chaosDaemon:
   image: pingcap/chaos-daemon:latest

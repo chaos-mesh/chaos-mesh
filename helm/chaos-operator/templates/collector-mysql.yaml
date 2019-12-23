@@ -57,10 +57,18 @@ data:
       id INT NOT NULL AUTO_INCREMENT,
       name VARCHAR(255) NOT NULL,
       namespace VARCHAR(255) NOT NULL,
+      type VARCHAR(255) NOT NULL,
       start_time DATETIME,
       end_time DATETIME,
       PRIMARY KEY(id),
-      INDEX(namespace, name),
+      INDEX(namespace, name, type)
+    );
+
+    CREATE TABLE IF NOT EXISTS affected_namespaces (
+      event_id INT NOT NULL,
+      namespace VARCHAR(255) NOT NULL,
+      INDEX(namespace),
+      INDEX(event_id)
     );
 ---
 apiVersion: v1

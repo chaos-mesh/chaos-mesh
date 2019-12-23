@@ -17,6 +17,8 @@ import (
 	"github.com/jmoiron/sqlx"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"time"
+
+	dsql "database/sql"
 )
 
 var (
@@ -29,10 +31,12 @@ type DatabaseClient struct {
 }
 
 type Event struct {
-	Name      string     `json:"name"`
-	Namespace string     `json:"namespace"`
-	StartTime *time.Time `json:"start_time"`
-	EndTime   *time.Time `json:"end_time"`
+	Name              string          `json:"name"`
+	Namespace         string          `json:"namespace"`
+	Type              string          `json:"type"`
+	AffectedNamespace map[string]bool `json:"affected_namespace"`
+	StartTime         *time.Time      `json:"start_time"`
+	EndTime           *time.Time      `json:"end_time"`
 }
 
 func NewDatabaseClient(dataSource string) (*DatabaseClient, error) {
@@ -48,10 +52,47 @@ func NewDatabaseClient(dataSource string) (*DatabaseClient, error) {
 	}, nil
 }
 
-func (client *DatabaseClient) WriteEvent(e Event) error {
-	_, err := client.db.Exec("INSERT INTO chaos_operator.events (name, namespace, start_time, end_time) VALUES (?, ?, ?, NULL)", e.Name, e.Namespace, e.StartTime) // Weired bug! I have to specify the database name
+func (client *DatabaseClient) WriteAffectedNamespace(e Event, id int64, tx *dsql.Tx) error {
+	for namespace := range e.AffectedNamespace {
+		_, err := tx.Exec("INSERT INTO chaos_operator.affected_namespaces (event_id, namespace) VALUES (?, ?)", id, namespace)
+		if err != nil {
+			if rb := tx.Rollback(); rb != nil {
+				databaseLog.Error(rb, "rollback error")
+			}
+			return err
+		}
+	}
 
-	return err
+	return nil
+}
+
+func (client *DatabaseClient) WriteEvent(e Event) error {
+	tx, err := client.db.Begin()
+	if err != nil {
+		return err
+	}
+
+	result, err := tx.Exec("INSERT INTO chaos_operator.events (name, namespace, type, start_time, end_time) VALUES (?, ?, ?, ?, NULL)", e.Name, e.Namespace, e.Type, e.StartTime) // Weired bug! I have to specify the database name
+	if err != nil {
+		if rb := tx.Rollback(); rb != nil {
+			databaseLog.Error(rb, "rollback error")
+		}
+		return err
+	}
+
+	id, err := result.LastInsertId()
+	if err != nil {
+		if rb := tx.Rollback(); rb != nil {
+			databaseLog.Error(rb, "rollback error")
+		}
+		return err
+	}
+	err = client.WriteAffectedNamespace(e, id, tx)
+	if err != nil {
+		return err
+	}
+
+	return tx.Commit()
 }
 
 func (client *DatabaseClient) UpdateEvent(e Event) error {
@@ -77,7 +118,19 @@ func (client *DatabaseClient) UpdateEvent(e Event) error {
 	}
 
 	if rows == 0 {
-		_, err := tx.Exec("INSERT INTO chaos_operator.events (name, namespace, start_time, end_time) VALUES (?, ?, ?, ?)", e.Name, e.Namespace, e.StartTime, e.EndTime)
+		result, err := tx.Exec("INSERT INTO chaos_operator.events (name, namespace, type, start_time, end_time) VALUES (?, ?, ?, ?, ?)", e.Name, e.Namespace, e.Type, e.StartTime, e.EndTime)
+		if err != nil {
+			return err
+		}
+
+		id, err := result.LastInsertId()
+		if err != nil {
+			if rb := tx.Rollback(); rb != nil {
+				databaseLog.Error(rb, "rollback error")
+			}
+			return err
+		}
+		err = client.WriteAffectedNamespace(e, id, tx)
 		if err != nil {
 			return err
 		}

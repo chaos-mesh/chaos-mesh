@@ -21,6 +21,7 @@ import (
 	"github.com/pingcap/chaos-operator/pkg/api_interface"
 	"k8s.io/apimachinery/pkg/runtime"
 	"os"
+	"reflect"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
@@ -66,12 +67,19 @@ func (r *ChaosCollector) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 
 	status := obj.GetStatus()
 
+	affected_namespace := make(map[string]bool)
+	for _, pod := range status.Experiment.Pods {
+		affected_namespace[pod.Namespace] = true
+	}
+
 	if status.Experiment.Phase == v1alpha1.ExperimentPhaseRunning {
 		event := Event{
-			Name:      req.Name,
-			Namespace: req.Namespace,
-			StartTime: &status.Experiment.StartTime.Time,
-			EndTime:   nil,
+			Name:              req.Name,
+			Namespace:         req.Namespace,
+			Type:              reflect.TypeOf(obj).Elem().Name(),
+			AffectedNamespace: affected_namespace,
+			StartTime:         &status.Experiment.StartTime.Time,
+			EndTime:           nil,
 		}
 		r.Log.Info("event started, save to database", "event", event)
 
@@ -82,10 +90,12 @@ func (r *ChaosCollector) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		}
 	} else if status.Experiment.Phase == v1alpha1.ExperimentPhaseFinished {
 		event := Event{
-			Name:      req.Name,
-			Namespace: req.Namespace,
-			StartTime: &status.Experiment.StartTime.Time,
-			EndTime:   &status.Experiment.EndTime.Time,
+			Name:              req.Name,
+			Namespace:         req.Namespace,
+			Type:              reflect.TypeOf(obj).Elem().Name(),
+			AffectedNamespace: affected_namespace,
+			StartTime:         &status.Experiment.StartTime.Time,
+			EndTime:           &status.Experiment.EndTime.Time,
 		}
 		r.Log.Info("event finished, save to database", "event", event)
 
