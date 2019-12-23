@@ -39,7 +39,7 @@ all: yaml build image
 build: chaosdaemon manager chaosfs
 
 # Run tests
-test: generate fmt vet manifests
+test: generate fmt vet lint manifests
 	rm -rf cover.* cover
 	mkdir -p cover
 	$(GOTEST) ./api/... ./controllers/... ./pkg/... -coverprofile cover.out.tmp
