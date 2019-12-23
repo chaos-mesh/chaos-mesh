@@ -102,7 +102,8 @@ docker-push:
 
 lint:
 	@echo "linting"
-	CGO_ENABLED=0 retool do revive -formatter friendly -config revive.toml $$($(PACKAGE_LIST))
+	go get github.com/twitchtv/retool
+	CGO_ENABLED=0 $(GOBIN)/retool do revive -formatter friendly -config revive.toml $$($(PACKAGE_LIST))
 
 # Generate code
 generate: controller-gen
