@@ -11,13 +11,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package delay
+package netem
 
 import (
 	"context"
 	"errors"
 	"fmt"
-	"strconv"
+	"reflect"
+	"strings"
 	"time"
 
 	"github.com/go-logr/logr"
@@ -41,6 +42,11 @@ import (
 const (
 	networkDelayActionMsg = "delay network for %s"
 )
+
+// NetemSpec defines the interface to convert to a Netem protobuf
+type NetemSpec interface {
+	ToNetem() (*pb.Netem, error)
+}
 
 func NewReconciler(c client.Client, log logr.Logger, req ctrl.Request) twophase.Reconciler {
 	return twophase.Reconciler{
@@ -77,7 +83,7 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos twophase
 		return err
 	}
 
-	err = r.delayAllPods(ctx, pods, networkchaos)
+	err = r.applyAllPods(ctx, pods, networkchaos)
 	if err != nil {
 		return err
 	}
@@ -180,7 +186,7 @@ func (r *Reconciler) recoverPod(ctx context.Context, pod *v1.Pod, networkchaos *
 	return err
 }
 
-func (r *Reconciler) delayAllPods(ctx context.Context, pods []v1.Pod, networkchaos *v1alpha1.NetworkChaos) error {
+func (r *Reconciler) applyAllPods(ctx context.Context, pods []v1.Pod, networkchaos *v1alpha1.NetworkChaos) error {
 	g := errgroup.Group{}
 	for index := range pods {
 		pod := &pods[index]
@@ -192,17 +198,23 @@ func (r *Reconciler) delayAllPods(ctx context.Context, pods []v1.Pod, networkcha
 		networkchaos.Finalizers = utils.InsertFinalizer(networkchaos.Finalizers, key)
 
 		g.Go(func() error {
-			return r.delayPod(ctx, pod, networkchaos)
+			return r.applyPod(ctx, pod, networkchaos)
 		})
 	}
 
 	return g.Wait()
 }
 
-func (r *Reconciler) delayPod(ctx context.Context, pod *v1.Pod, networkchaos *v1alpha1.NetworkChaos) error {
-	delay := networkchaos.Spec.Delay
+func (r *Reconciler) applyPod(ctx context.Context, pod *v1.Pod, networkchaos *v1alpha1.NetworkChaos) error {
+	r.Log.Info("Try to apply netem on pod", "namespace", pod.Namespace, "name", pod.Name)
 
-	r.Log.Info("Try to delay pod", "namespace", pod.Namespace, "name", pod.Name)
+	action := string(networkchaos.Spec.Action)
+	action = strings.Title(action)
+
+	spec, ok := reflect.Indirect(reflect.ValueOf(networkchaos.Spec)).FieldByName(action).Interface().(NetemSpec)
+	if !ok {
+		return fmt.Errorf("spec %s is not a NetemSpec", action)
+	}
 
 	c, err := utils.CreateGrpcConnection(ctx, r.Client, pod)
 	if err != nil {
@@ -214,29 +226,14 @@ func (r *Reconciler) delayPod(ctx context.Context, pod *v1.Pod, networkchaos *v1
 
 	containerId := pod.Status.ContainerStatuses[0].ContainerID
 
-	delayTime, err := time.ParseDuration(delay.Latency)
+	netem, err := spec.ToNetem()
 	if err != nil {
-		r.Log.Error(err, "fail to parse delay time")
-		return err
-	}
-	jitter, err := time.ParseDuration(delay.Jitter)
-	if err != nil {
-		r.Log.Error(err, "fail to parse delay jitter")
 		return err
 	}
 
-	delayCorr, err := strconv.ParseFloat(delay.Correlation, 32)
-	if err != nil {
-		r.Log.Error(err, "fail to parse delay correlation")
-		return err
-	}
-	_, err = pbClient.SetNetem(context.Background(), &pb.NetemRequest{
+	_, err = pbClient.SetNetem(ctx, &pb.NetemRequest{
 		ContainerId: containerId,
-		Netem: &pb.Netem{
-			Time:      uint32(delayTime.Nanoseconds() / 1e3),
-			DelayCorr: float32(delayCorr),
-			Jitter:    uint32(jitter.Nanoseconds() / 1e3),
-		},
+		Netem:       netem,
 	})
 
 	return err
