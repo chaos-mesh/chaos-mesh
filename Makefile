@@ -102,6 +102,7 @@ docker-push:
 
 lint:
 	@echo "linting"
+	go get github.com/twitchtv/retool
 	CGO_ENABLED=0 retool do revive -formatter friendly -config revive.toml $$($(PACKAGE_LIST))
 
 # Generate code
