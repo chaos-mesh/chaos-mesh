@@ -1,6 +1,7 @@
 # Set DEBUGGER=1 to build debug symbols
 LDFLAGS = $(if $(DEBUGGER),,-s -w) $(shell ./hack/version.sh)
 
+
 # SET DOCKER_REGISTRY to change the docker registry
 DOCKER_REGISTRY := $(if $(DOCKER_REGISTRY),$(DOCKER_REGISTRY),localhost:5000)
 
