@@ -100,9 +100,12 @@ docker-push:
 	docker push "${DOCKER_REGISTRY}/pingcap/chaos-daemon:latest"
 	docker push "${DOCKER_REGISTRY}/pingcap/chaos-scripts:latest"
 
-lint:
+bin/revive:
+	GO111MODULE="on" go build -o bin/revive github.com/mgechev/revive
+
+lint: bin/revive
 	@echo "linting"
-	CGO_ENABLED=0 retool do revive -formatter friendly -config revive.toml $$($(PACKAGE_LIST))
+	bin/revive -formatter friendly -config revive.toml $$($(PACKAGE_LIST))
 
 # Generate code
 generate: controller-gen
