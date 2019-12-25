@@ -99,6 +99,11 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		chaos.SetNextRecover(time.Time{})
 	} else if chaos.GetNextStart().Before(now) {
 		nextStart, err := utils.NextTime(chaos.GetScheduler(), now)
+		if err != nil {
+			r.Log.Error(err, "failed to get next start time")
+			return ctrl.Result{}, nil
+		}
+
 		nextRecover := now.Add(duration)
 		if nextStart.Before(nextRecover) {
 			err := fmt.Errorf("nextRecover shouldn't be later than nextStart")
