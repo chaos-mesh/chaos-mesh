@@ -14,9 +14,10 @@
 package v1alpha1
 
 import (
-	chaosdaemon "github.com/pingcap/chaos-operator/pkg/chaosdaemon/pb"
 	"strconv"
 	"time"
+
+	chaosdaemon "github.com/pingcap/chaos-operator/pkg/chaosdaemon/pb"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )

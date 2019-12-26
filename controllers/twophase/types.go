@@ -16,8 +16,9 @@ package twophase
 import (
 	"context"
 	"fmt"
-	"github.com/pingcap/chaos-operator/pkg/api_interface"
 	"time"
+
+	"github.com/pingcap/chaos-operator/pkg/api_interface"
 
 	"github.com/go-logr/logr"
 

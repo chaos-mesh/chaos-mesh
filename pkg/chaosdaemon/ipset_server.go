@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/golang/protobuf/ptypes/empty"
+
 	pb "github.com/pingcap/chaos-operator/pkg/chaosdaemon/pb"
 )
 
