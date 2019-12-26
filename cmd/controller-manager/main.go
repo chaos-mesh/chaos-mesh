@@ -18,14 +18,14 @@ import (
 	"os"
 	"time"
 
-	chaosoperatorv1alpha1 "github.com/pingcap/chaos-operator/api/v1alpha1"
-	apiWebhook "github.com/pingcap/chaos-operator/api/webhook"
-	"github.com/pingcap/chaos-operator/controllers"
-	"github.com/pingcap/chaos-operator/pkg/flags"
-	"github.com/pingcap/chaos-operator/pkg/utils"
-	"github.com/pingcap/chaos-operator/pkg/version"
-	"github.com/pingcap/chaos-operator/pkg/webhook/config"
-	"github.com/pingcap/chaos-operator/pkg/webhook/config/watcher"
+	chaosmeshv1alpha1 "github.com/pingcap/chaos-mesh/api/v1alpha1"
+	apiWebhook "github.com/pingcap/chaos-mesh/api/webhook"
+	"github.com/pingcap/chaos-mesh/controllers"
+	"github.com/pingcap/chaos-mesh/pkg/flags"
+	"github.com/pingcap/chaos-mesh/pkg/utils"
+	"github.com/pingcap/chaos-mesh/pkg/version"
+	"github.com/pingcap/chaos-mesh/pkg/webhook/config"
+	"github.com/pingcap/chaos-mesh/pkg/webhook/config/watcher"
 
 	"k8s.io/apimachinery/pkg/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
@@ -59,7 +59,7 @@ var (
 func init() {
 	_ = clientgoscheme.AddToScheme(scheme)
 
-	_ = chaosoperatorv1alpha1.AddToScheme(scheme)
+	_ = chaosmeshv1alpha1.AddToScheme(scheme)
 	// +kubebuilder:scaffold:scheme
 }
 

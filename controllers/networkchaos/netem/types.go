@@ -24,10 +24,10 @@ import (
 
 	"golang.org/x/sync/errgroup"
 
-	"github.com/pingcap/chaos-operator/api/v1alpha1"
-	"github.com/pingcap/chaos-operator/controllers/twophase"
-	pb "github.com/pingcap/chaos-operator/pkg/chaosdaemon/pb"
-	"github.com/pingcap/chaos-operator/pkg/utils"
+	"github.com/pingcap/chaos-mesh/api/v1alpha1"
+	"github.com/pingcap/chaos-mesh/controllers/twophase"
+	pb "github.com/pingcap/chaos-mesh/pkg/chaosdaemon/pb"
+	"github.com/pingcap/chaos-mesh/pkg/utils"
 
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"

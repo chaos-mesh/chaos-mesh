@@ -16,8 +16,8 @@ package controllers
 import (
 	"github.com/go-logr/logr"
 
-	chaosoperatorv1alpha1 "github.com/pingcap/chaos-operator/api/v1alpha1"
-	"github.com/pingcap/chaos-operator/controllers/iochaos"
+	chaosmeshv1alpha1 "github.com/pingcap/chaos-mesh/api/v1alpha1"
+	"github.com/pingcap/chaos-mesh/controllers/iochaos"
 
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -29,8 +29,8 @@ type IoChaosReconciler struct {
 	Log logr.Logger
 }
 
-// +kubebuilder:rbac:groups=chaosoperator.pingcap.com,resources=iochaos,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups=chaosoperator.pingcap.com,resources=iochaos/status,verbs=get;update;patch
+// +kubebuilder:rbac:groups=chaosmesh.pingcap.com,resources=iochaos,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=chaosmesh.pingcap.com,resources=iochaos/status,verbs=get;update;patch
 
 func (r *IoChaosReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	logger := r.Log.WithValues("iochaos", req.NamespacedName)
@@ -45,6 +45,6 @@ func (r *IoChaosReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 
 func (r *IoChaosReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
-		For(&chaosoperatorv1alpha1.IoChaos{}).
+		For(&chaosmeshv1alpha1.IoChaos{}).
 		Complete(r)
 }

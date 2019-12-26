@@ -1,4 +1,4 @@
-module github.com/pingcap/chaos-operator
+module github.com/pingcap/chaos-mesh
 
 require (
 	github.com/Microsoft/go-winio v0.4.14 // indirect

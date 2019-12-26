@@ -16,7 +16,7 @@ package utils
 import (
 	"context"
 
-	"github.com/pingcap/chaos-operator/api/v1alpha1"
+	"github.com/pingcap/chaos-mesh/api/v1alpha1"
 
 	"sigs.k8s.io/controller-runtime/pkg/client"
 

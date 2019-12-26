@@ -23,9 +23,9 @@ import (
 
 	"golang.org/x/sync/errgroup"
 
-	"github.com/pingcap/chaos-operator/api/v1alpha1"
-	"github.com/pingcap/chaos-operator/controllers/twophase"
-	"github.com/pingcap/chaos-operator/pkg/utils"
+	"github.com/pingcap/chaos-mesh/api/v1alpha1"
+	"github.com/pingcap/chaos-mesh/controllers/twophase"
+	"github.com/pingcap/chaos-mesh/pkg/utils"
 
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -39,7 +39,7 @@ import (
 
 const (
 	// fakeImage is a not-existing image.
-	fakeImage = "pingcap.com/fake-chaos-operator:latest"
+	fakeImage = "pingcap.com/fake-chaos-mesh:latest"
 
 	podFailureActionMsg = "pause pod duration %s"
 )
@@ -251,7 +251,7 @@ func (r *Reconciler) recoverPod(ctx context.Context, pod *v1.Pod, podchaos *v1al
 		// FIXME: Check annotations and return error.
 	}
 
-	// chaos-operator don't support
+	// chaos-mesh don't support
 	return r.Delete(ctx, pod, &client.DeleteOptions{
 		GracePeriodSeconds: new(int64), // PeriodSeconds has to be set specifically
 	})

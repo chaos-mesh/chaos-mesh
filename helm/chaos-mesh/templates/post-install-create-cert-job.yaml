@@ -3,7 +3,7 @@ kind: Job
 metadata:
   name: webhook-certs-job
   labels:
-    app.kubernetes.io/name: {{ template "chaos-operator.name" . }}
+    app.kubernetes.io/name: {{ template "chaos-mesh.name" . }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/component: webhook-certs-job
@@ -30,7 +30,7 @@ spec:
             - "-c"
             - |
               set -e
-              K8S_SERVICE=chaos-operator-controller-manager
+              K8S_SERVICE=chaos-mesh-controller-manager
               K8S_SECRET=webhook-certs
               K8S_NAMESPACE={{ .Release.Namespace }}
 

@@ -17,7 +17,7 @@ import (
 	"strconv"
 	"time"
 
-	chaosdaemon "github.com/pingcap/chaos-operator/pkg/chaosdaemon/pb"
+	chaosdaemon "github.com/pingcap/chaos-mesh/pkg/chaosdaemon/pb"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )

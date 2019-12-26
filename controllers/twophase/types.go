@@ -18,12 +18,12 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/pingcap/chaos-operator/pkg/api_interface"
+	"github.com/pingcap/chaos-mesh/pkg/api_interface"
 
 	"github.com/go-logr/logr"
 
-	"github.com/pingcap/chaos-operator/api/v1alpha1"
-	"github.com/pingcap/chaos-operator/pkg/utils"
+	"github.com/pingcap/chaos-mesh/api/v1alpha1"
+	"github.com/pingcap/chaos-mesh/pkg/utils"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/util/retry"
@@ -109,7 +109,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	} else if chaos.GetNextStart().Before(now) {
 		nextStart, err := utils.NextTime(chaos.GetScheduler(), now)
 		if err != nil {
-			r.Log.Error(err, "get nextStart failed")
+			r.Log.Error(err, "failed to get next start time")
 			return ctrl.Result{}, nil
 		}
 
