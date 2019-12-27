@@ -45,7 +45,7 @@ controllerManager:
 
 chaosDaemon:
   image: pingcap/chaos-daemon:latest
-#  imagePullPolicy: Always
+  imagePullPolicy: Always
   port: 31767
 
 dashboard:
@@ -54,7 +54,7 @@ dashboard:
   serviceAccount: chaos-dashboard
 
   image: pingcap/chaos-dashboard:latest
-  #  imagePullPolicy: Always
+  imagePullPolicy: Always
 
   nodeSelector: {}
 

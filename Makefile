@@ -99,8 +99,8 @@ image: dashboard-server-frontend
 	cp -R hack images/chaos-scripts
 	docker build -t ${DOCKER_REGISTRY}/pingcap/chaos-scripts images/chaos-scripts
 	rm -rf images/chaos-scripts/hack
-	docker build -t pingcap/chaos-grafana images/grafana
-	docker build -t pingcap/chaos-dashboard images/chaos-dashboard
+	docker build -t ${DOCKER_REGISTRY}/pingcap/chaos-grafana images/grafana
+	docker build -t ${DOCKER_REGISTRY}/pingcap/chaos-dashboard images/chaos-dashboard
 
 docker-push:
 	docker push "${DOCKER_REGISTRY}/pingcap/chaos-mesh:latest"
