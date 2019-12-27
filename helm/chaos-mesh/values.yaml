@@ -49,7 +49,7 @@ chaosDaemon:
   port: 31767
 
 dashboard:
-  create: true
+  create: false
 
   serviceAccount: chaos-dashboard
 
