@@ -1,15 +1,17 @@
 # Chaos Mesh 
-Chaos Mesh is a powerful chaos engineering tool for kubernetes. 
-It is used to inject chaos into the applications and Kubernetes infrastructure in a managed fashion. 
+Chaos Mesh is a powerful chaos engineering platform for kubernetes. Now it has two parts Chaos-Operator and Chaos-Dashboard
+Chaos-Operator is in use now. You can only install Chaos-operator to do chaos operations. Chaos-Dashboard is under development. It now can shows the impact of chaos to TiDB Cluster(other target such as etcd need some configure)
 
-Chaos Mesh includes a Kubernetes Operator, which provides easy definitions for chaos experiments and 
-automates the execution of chaos experiments.
 
-![Chaos Mesh](./static/chaos-mesh-overview.png)
+## Chaos Operator
 
-## Deploy 
+It is used to inject chaos into the applications and Kubernetes infrastructure in a managed fashion. Which provides easy definitions for chaos experiments and automates the execution of chaos experiments.
 
-### Prerequisites 
+![Chaos Operator](./static/chaos-mesh-overview.png)
+
+### Deploy 
+
+#### Prerequisites 
 
 Before deploying Chaos Mesh, make sure the following items are installed on your machine: 
 
@@ -18,16 +20,16 @@ Before deploying Chaos Mesh, make sure the following items are installed on your
 * Helm version >= v2.8.2 and < v3.0.0
 * Protobuf version >= v3.6.1 and < v3.7.0 and go support
 
-### Install Chaos Mesh 
+#### Install Chaos Operator 
 
-#### Get the Helm files
+##### Get the Helm files
 
 ```bash
 $ git clone https://github.com/pingcap/chaos-mesh.git
 $ cd chaos-mesh/
 ```
 
-#### Create custom resource type
+##### Create custom resource type
 
 Chaos Mesh uses [CRD (Custom Resource Definition)](https://kubernetes.io/docs/tasks/access-kubernetes-api/custom-resources/custom-resource-definitions/) 
 to extend Kubernetes. Therefore, to use Chaos Mesh, you must first create the related custom resource type.
@@ -37,16 +39,16 @@ $ kubectl apply -f manifests/
 $ kubectl get crd podchaos.pingcap.com
 ```
 
-#### Install Chaos Mesh 
+##### Install Chaos Operator 
 
 ```bash
 $ helm install helm/chaos-mesh --name=chaos-mesh --namespace=chaos-testing
 $ kubectl get pods --namespace chaos-testing -l app.kubernetes.io/instance=chaos-mesh
 ```
 
-## Usage
+### Usage
 
-#### Define chaos experiment config file 
+##### Define chaos experiment config file 
 
 eg: define a chaos experiment to kill one tikv pod randomly
 
