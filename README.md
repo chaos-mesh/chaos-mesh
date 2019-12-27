@@ -106,6 +106,7 @@ $ kubectl delete -f pod-kill-example.yaml
 ```
 
 ### additional
+
 There are now support such kind of chaos:
 * pod-kill, pod-kill only works on pods which created by deployment / statefulset, when this kind of pod kill, it will be restarted by kubenetes.
 * pod-fail, pod-fail means pod will fail but not death. Only the process will be kill, the pod is still there
@@ -118,6 +119,7 @@ There are now support such kind of chaos:
 Chaos dashboard can be used to visualize chaos events. However, it **only** supports tidb now (so it isn't installed by default).
 
 ### Deploy
+
 #### Prerequisites 
 
 Before deploying Chaos Mesh, make sure the following items are installed on your machine: 
