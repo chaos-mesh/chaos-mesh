@@ -65,7 +65,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	var err error
 	now := time.Now()
 
-	r.Log.Info("reconciling a two phase chaos")
+	r.Log.Info("reconciling a two phase chaos", "name", req.Name, "namespace", req.Namespace)
 	ctx := context.Background()
 
 	chaos := r.Object()
