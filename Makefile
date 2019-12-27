@@ -64,7 +64,7 @@ dashboard: fmt vet
 	$(GO) build -ldflags '$(LDFLAGS)' -o images/chaos-dashboard/bin/chaos-dashboard ./cmd/chaos-dashboard/*.go
 
 dashboard-server-frontend:
-	cd images/chaos-dashboard; yarn build
+	cd images/chaos-dashboard; yarn install; yarn build
 
 # Run against the configured Kubernetes cluster in ~/.kube/config
 run: generate fmt vet manifests
