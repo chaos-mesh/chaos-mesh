@@ -23,6 +23,7 @@ require (
 	github.com/onsi/gomega v1.7.0
 	github.com/opencontainers/go-digest v1.0.0-rc1 // indirect
 	github.com/opencontainers/image-spec v1.0.1 // indirect
+	github.com/pingcap/check v0.0.0-20191216031241-8a5a85928f12 // indirect
 	github.com/robfig/cron/v3 v3.0.0
 	github.com/unrolled/render v1.0.1
 	github.com/vishvananda/netlink v1.0.0
