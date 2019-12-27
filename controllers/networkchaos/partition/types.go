@@ -17,13 +17,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"time"
 
 	"github.com/go-logr/logr"
 	"golang.org/x/sync/errgroup"
 	v1 "k8s.io/api/core/v1"
 	k8sError "k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/tools/cache"
 
@@ -136,11 +134,7 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos twophase
 		}
 	}
 
-	networkchaos.Status.Experiment.StartTime = &metav1.Time{
-		Time: time.Now(),
-	}
 	networkchaos.Status.Experiment.Pods = []v1alpha1.PodStatus{}
-	networkchaos.Status.Experiment.Phase = v1alpha1.ExperimentPhaseRunning
 
 	for _, pod := range allPods {
 		ps := v1alpha1.PodStatus{
@@ -196,11 +190,6 @@ func (r *Reconciler) Recover(ctx context.Context, req ctrl.Request, chaos twopha
 		r.Log.Error(err, "cleanFinalizersAndRecover failed")
 		return err
 	}
-
-	networkchaos.Status.Experiment.EndTime = &metav1.Time{
-		Time: time.Now(),
-	}
-	networkchaos.Status.Experiment.Phase = v1alpha1.ExperimentPhaseFinished
 
 	return nil
 }

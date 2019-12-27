@@ -9,7 +9,7 @@ metadata:
     app.kubernetes.io/component: controller-manager
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+"  "_" }}
 spec:
-  replicas: {{ .Values.controllerManager.replicas }}
+  replicas: {{ .Values.controllerManager.replicaCount }}
   selector:
     matchLabels:
       app.kubernetes.io/name: {{ template "chaos-mesh.name" . }}

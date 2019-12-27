@@ -17,3 +17,6 @@ vendor
 # retool. We could check this in like a vendor
 # But it is just tools that can be installed with make setup
 /_tools/
+
+/images/chaos-dashboard/build
+node_modules

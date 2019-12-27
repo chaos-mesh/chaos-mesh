@@ -11,7 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-
 // Package pidfile provides structure and helper functions to create and remove
 // PID file. A PID file is usually a file used to store the process ID of a
 // running process.

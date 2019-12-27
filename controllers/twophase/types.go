@@ -18,20 +18,20 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/pingcap/chaos-mesh/pkg/api_interface"
+
 	"github.com/go-logr/logr"
 
 	"github.com/pingcap/chaos-mesh/api/v1alpha1"
 	"github.com/pingcap/chaos-mesh/pkg/utils"
 
-	"k8s.io/apimachinery/pkg/runtime"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/util/retry"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 type InnerObject interface {
-	runtime.Object
-
 	IsDeleted() bool
 
 	GetDuration() (time.Duration, error)
@@ -43,6 +43,8 @@ type InnerObject interface {
 	SetNextRecover(time.Time)
 
 	GetScheduler() v1alpha1.SchedulerSpec
+
+	api_interface.StatefulObject
 }
 
 type InnerReconciler interface {
@@ -91,12 +93,19 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		// Start recover
 		r.Log.Info("Recovering")
 
+		status := chaos.GetStatus()
+
 		err = r.Recover(ctx, req, chaos)
 		if err != nil {
 			r.Log.Error(err, "failed to recover chaos")
 			return ctrl.Result{Requeue: true}, nil
 		}
 		chaos.SetNextRecover(time.Time{})
+
+		status.Experiment.EndTime = &metav1.Time{
+			Time: time.Now(),
+		}
+		status.Experiment.Phase = v1alpha1.ExperimentPhaseFinished
 	} else if chaos.GetNextStart().Before(now) {
 		nextStart, err := utils.NextTime(chaos.GetScheduler(), now)
 		if err != nil {
@@ -117,6 +126,8 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		// Start failure action
 		r.Log.Info("Performing Action")
 
+		status := chaos.GetStatus()
+
 		err = r.Apply(ctx, req, chaos)
 		if err != nil {
 			r.Log.Error(err, "failed to apply chaos action")
@@ -130,6 +141,10 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 
 			return ctrl.Result{Requeue: true}, nil
 		}
+		status.Experiment.StartTime = &metav1.Time{
+			Time: time.Now(),
+		}
+		status.Experiment.Phase = v1alpha1.ExperimentPhaseRunning
 
 		chaos.SetNextStart(*nextStart)
 		chaos.SetNextRecover(nextRecover)
