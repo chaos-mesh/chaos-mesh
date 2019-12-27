@@ -15,6 +15,7 @@ package partition
 
 import (
 	"context"
+	"crypto/sha1"
 	"errors"
 	"fmt"
 
@@ -84,8 +85,8 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos twophase
 		return err
 	}
 
-	sourceSet := r.generateSet(sources, networkchaos, "source")
-	targetSet := r.generateSet(targets, networkchaos, "target")
+	sourceSet := r.generateSet(sources, networkchaos, "src")
+	targetSet := r.generateSet(targets, networkchaos, "tgt")
 
 	allPods := append(sources, targets...)
 
@@ -195,7 +196,14 @@ func (r *Reconciler) Recover(ctx context.Context, req ctrl.Request, chaos twopha
 }
 
 func (r *Reconciler) generateSetName(networkchaos *v1alpha1.NetworkChaos, namePostFix string) string {
-	return networkchaos.Name + "_" + namePostFix
+	namePrefix := networkchaos.Name[0:5]
+	nameRest := networkchaos.Name[5:]
+
+	hasher := sha1.New()
+	hasher.Write([]byte(nameRest))
+	hashValue := fmt.Sprintf("%x", hasher.Sum(nil))
+
+	return namePrefix + "_" + hashValue[0:17] + "_" + namePostFix
 }
 
 func (r *Reconciler) generateSet(pods []v1.Pod, networkchaos *v1alpha1.NetworkChaos, namePostFix string) pb.IpSet {
