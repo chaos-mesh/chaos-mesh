@@ -48,7 +48,7 @@ $ kubectl get pods --namespace chaos-testing -l app.kubernetes.io/instance=chaos
 
 ### Usage
 
-##### Define chaos experiment config file 
+#### Define chaos experiment config file 
 
 eg: define a chaos experiment to kill one tikv pod randomly
 
@@ -105,9 +105,22 @@ $ kubectl apply -f pod-kill-example.yaml
 $ kubectl delete -f pod-kill-example.yaml
 ```
 
-#### Chaos Dashboard
+## Chaos Dashboard
 
-Chaos dashboard can be used to visualize chaos events. However, it **only** supports tidb now (so it isn't installed by default). To install dashboard with `chaos-mesh`:
+Chaos dashboard can be used to visualize chaos events. However, it **only** supports tidb now (so it isn't installed by default).
+
+### Deploy
+#### Prerequisites 
+
+Before deploying Chaos Mesh, make sure the following items are installed on your machine: 
+
+* Kubernetes >= v1.12
+* [RBAC](https://kubernetes.io/docs/admin/authorization/rbac) enabled (optional)
+* Helm version >= v2.8.2 and < v3.0.0
+* Protobuf version >= v3.6.1 and < v3.7.0 and go support
+
+##### Install Chaos Dashboard
+To install dashboard with `chaos-mesh`:
 
 ```
 helm install helm/chaos-mesh --name=chaos-mesh --namespace=chaos-testing --set dashboard.create=true
