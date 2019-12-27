@@ -105,6 +105,14 @@ $ kubectl apply -f pod-kill-example.yaml
 $ kubectl delete -f pod-kill-example.yaml
 ```
 
+### additional
+There are now support such kind of chaos
+* pod-kill, pod-kill only works on pods which created by deployment / statefulset, when this kind of pod kill, it will be restarted by kubenetes.
+* pod-fail, pod-fail means pod will fail but not death. Only the process will be kill, the pod is still there
+* netem chaos, netem chaos contains some kind of chaos. such as delay, duplicate etc. you can find more in example
+* network partition, network partition can partition pod into differenet networks. If helpful for corss IDC's application
+* IO chaos, now IO chaos contains IO delay and IO errno. io delay means you can specify how slow the io will return. IO errno means you read/write IO operation will return error
+
 ## Chaos Dashboard
 
 Chaos dashboard can be used to visualize chaos events. However, it **only** supports tidb now (so it isn't installed by default).
@@ -119,7 +127,7 @@ Before deploying Chaos Mesh, make sure the following items are installed on your
 * Helm version >= v2.8.2 and < v3.0.0
 * Protobuf version >= v3.6.1 and < v3.7.0 and go support
 
-##### Install Chaos Dashboard
+#### Install Chaos Dashboard
 To install dashboard with `chaos-mesh`:
 
 ```
