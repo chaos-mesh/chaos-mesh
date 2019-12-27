@@ -45,6 +45,10 @@ type PodChaos struct {
 	Status PodChaosStatus `json:"status"`
 }
 
+func (in *PodChaos) GetStatus() *ChaosStatus {
+	return &in.Status.ChaosStatus
+}
+
 func (in *PodChaos) IsDeleted() bool {
 	return !in.DeletionTimestamp.IsZero()
 }

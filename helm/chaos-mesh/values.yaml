@@ -45,7 +45,7 @@ controllerManager:
 
 chaosDaemon:
   image: pingcap/chaos-daemon:latest
-  imagePullPolicy: Always
+#  imagePullPolicy: Always
   port: 31767
 
 dashboard:

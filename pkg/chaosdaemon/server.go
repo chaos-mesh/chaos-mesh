@@ -15,8 +15,9 @@ package chaosdaemon
 
 import (
 	"fmt"
-	"github.com/juju/errors"
 	"net"
+
+	"github.com/juju/errors"
 
 	pb "github.com/pingcap/chaos-mesh/pkg/chaosdaemon/pb"
 

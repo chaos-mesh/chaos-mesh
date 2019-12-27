@@ -181,6 +181,10 @@ type NetworkChaos struct {
 	Status NetworkChaosStatus `json:"status"`
 }
 
+func (in *NetworkChaos) GetStatus() *ChaosStatus {
+	return &in.Status.ChaosStatus
+}
+
 func (in *NetworkChaos) IsDeleted() bool {
 	return !in.DeletionTimestamp.IsZero()
 }

@@ -19,7 +19,6 @@ import (
 	"fmt"
 	"reflect"
 	"strings"
-	"time"
 
 	"github.com/go-logr/logr"
 
@@ -35,7 +34,6 @@ import (
 
 	v1 "k8s.io/api/core/v1"
 	k8serror "k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/tools/cache"
 )
@@ -89,11 +87,7 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos twophase
 		return err
 	}
 
-	networkchaos.Status.Experiment.StartTime = &metav1.Time{
-		Time: time.Now(),
-	}
 	networkchaos.Status.Experiment.Pods = []v1alpha1.PodStatus{}
-	networkchaos.Status.Experiment.Phase = v1alpha1.ExperimentPhaseRunning
 
 	for _, pod := range pods {
 		ps := v1alpha1.PodStatus{
@@ -123,11 +117,6 @@ func (r *Reconciler) Recover(ctx context.Context, req ctrl.Request, chaos twopha
 	if err != nil {
 		return err
 	}
-
-	networkchaos.Status.Experiment.EndTime = &metav1.Time{
-		Time: time.Now(),
-	}
-	networkchaos.Status.Experiment.Phase = v1alpha1.ExperimentPhaseFinished
 
 	return nil
 }
