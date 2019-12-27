@@ -106,7 +106,7 @@ $ kubectl delete -f pod-kill-example.yaml
 ```
 
 ### additional
-There are now support such kind of chaos
+There are now support such kind of chaos:
 * pod-kill, pod-kill only works on pods which created by deployment / statefulset, when this kind of pod kill, it will be restarted by kubenetes.
 * pod-fail, pod-fail means pod will fail but not death. Only the process will be kill, the pod is still there
 * netem chaos, netem chaos contains some kind of chaos. such as delay, duplicate etc. you can find more in example
