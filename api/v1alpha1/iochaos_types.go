@@ -168,6 +168,10 @@ type IoChaos struct {
 	Status IoChaosStatus `json:"status,omitempty"`
 }
 
+func (in *IoChaos) GetStatus() *ChaosStatus {
+	return &in.Status.ChaosStatus
+}
+
 func (in *IoChaos) IsDeleted() bool {
 	return !in.DeletionTimestamp.IsZero()
 }

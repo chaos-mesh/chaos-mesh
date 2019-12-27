@@ -1,0 +1,9 @@
+apiVersion: 1
+
+datasources:
+- name: events
+  type: mysql
+  access: proxy
+  url: ${CHAOS_EVENT_DS_URL}
+  user: ${CHAOS_EVENT_DS_USER}
+  database: ${CHAOS_EVENT_DS_DB}

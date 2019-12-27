@@ -1,0 +1,7 @@
+apiVersion: 1
+
+datasources:
+- name: metrics
+  type: prometheus
+  access: proxy
+  url: ${CHAOS_METRIC_DS_URL}
