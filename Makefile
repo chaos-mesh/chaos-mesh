@@ -36,7 +36,7 @@ endif
 
 all: yaml build image
 
-build: chaosdaemon manager chaosfs
+build: chaosdaemon manager chaosfs dashboard
 
 # Run tests
 test: generate fmt vet lint manifests
@@ -59,6 +59,12 @@ manager: generate fmt vet
 
 chaosfs: generate fmt vet
 	$(GO) build -ldflags '$(LDFLAGS)' -o images/chaosfs/bin/chaosfs ./cmd/chaosfs/*.go
+
+dashboard: fmt vet
+	$(GO) build -ldflags '$(LDFLAGS)' -o images/chaos-dashboard/bin/chaos-dashboard ./cmd/chaos-dashboard/*.go
+
+dashboard-server-frontend:
+	cd images/chaos-dashboard; yarn build
 
 # Run against the configured Kubernetes cluster in ~/.kube/config
 run: generate fmt vet manifests
@@ -86,13 +92,15 @@ tidy:
 	GO111MODULE=on go mod tidy
 	git diff --quiet go.mod go.sum
 
-image:
+image: dashboard-server-frontend
 	docker build -t ${DOCKER_REGISTRY}/pingcap/chaos-daemon images/chaos-daemon
 	docker build -t ${DOCKER_REGISTRY}/pingcap/chaos-mesh images/chaos-mesh
 	docker build -t ${DOCKER_REGISTRY}/pingcap/chaos-fs images/chaosfs
 	cp -R hack images/chaos-scripts
 	docker build -t ${DOCKER_REGISTRY}/pingcap/chaos-scripts images/chaos-scripts
 	rm -rf images/chaos-scripts/hack
+	docker build -t pingcap/chaos-grafana images/grafana
+	docker build -t pingcap/chaos-dashboard images/chaos-dashboard
 
 docker-push:
 	docker push "${DOCKER_REGISTRY}/pingcap/chaos-mesh:latest"
@@ -169,4 +177,4 @@ install-test-dependency:
 .PHONY: all build test install manifests fmt vet tidy image \
 	docker-push lint generate controller-gen yaml \
 	manager chaosfs chaosdaemon install-kind install-kubebuilder \
-	install-kustomize install-test-dependency
+	install-kustomize install-test-dependency dashboard dashboard-server-frontend
