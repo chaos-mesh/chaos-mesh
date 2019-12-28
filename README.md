@@ -1,11 +1,11 @@
 # Chaos Mesh 
-Chaos Mesh is a powerful chaos engineering platform for kubernetes. Now it has two parts Chaos-Operator and Chaos-Dashboard
-Chaos-Operator is in use now. You can only install Chaos-operator to do chaos operations. Chaos-Dashboard is under development. It now can shows the impact of chaos to TiDB Cluster(other target such as etcd need some configure)
+Chaos Mesh is a powerful chaos engineering platform for kubernetes. At present stage it has two parts Chaos-Operator and Chaos-Dashboard
+Chaos-Operator is available now. You can just install Chaos-operator to do chaos operations. Chaos-Dashboard is under development. It now can shows the impact of chaos to TiDB Cluster(other target such as etcd need some configure)
 
 
 ## Chaos Operator
 
-It is used to inject chaos into the applications and Kubernetes infrastructure in a managed fashion. Which provides easy definitions for chaos experiments and automates the execution of chaos experiments.
+It is used to inject chaos into the applications and Kubernetes infrastructure in a manageable way. Which provides easy definitions for chaos experiments and automates the execution of chaos experiments.
 
 ![Chaos Operator](./static/chaos-mesh-overview.png)
 
@@ -107,12 +107,12 @@ $ kubectl delete -f pod-kill-example.yaml
 
 ### additional
 
-There are now support such kind of chaos:
-* pod-kill, pod-kill only works on pods which created by deployment / statefulset, when this kind of pod kill, it will be restarted by kubenetes.
-* pod-fail, pod-fail means pod will fail but not death. Only the process will be kill, the pod is still there
-* netem chaos, netem chaos contains some kind of chaos. such as delay, duplicate etc. you can find more in example
-* network partition, network partition can partition pod into differenet networks. If helpful for corss IDC's application
-* IO chaos, now IO chaos contains IO delay and IO errno. io delay means you can specify how slow the io will return. IO errno means you read/write IO operation will return error
+There are multiple kinds of chaos supported now.
+* pod-kill, pod-kill will simply kill selected pods. To ensure pod will be restarted again, ReplicaSet (or something similar) may be needed to guard it.
+* pod-fail, pod-fail means the process will not be alive in a period of time but the pod still exists.
+* netem chaos, netem chaos contains some kind of chaos. such as delay, duplicate etc. You can find more in example
+* network partition, network partition can decompose pods into several independent subnets by blocking communication between them.
+* IO chaos, IO delay means you can specify the latency before the io operation will return. IO errno means your read/write IO operation will return error.
 
 ## Chaos Dashboard
 
