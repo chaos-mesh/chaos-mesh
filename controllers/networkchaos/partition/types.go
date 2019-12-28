@@ -18,17 +18,19 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/go-logr/logr"
 	"golang.org/x/sync/errgroup"
-	v1 "k8s.io/api/core/v1"
-	k8sError "k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/apimachinery/pkg/types"
-	"k8s.io/client-go/tools/cache"
+
+	"github.com/go-logr/logr"
 
 	"github.com/pingcap/chaos-mesh/api/v1alpha1"
 	"github.com/pingcap/chaos-mesh/controllers/twophase"
 	pb "github.com/pingcap/chaos-mesh/pkg/chaosdaemon/pb"
 	"github.com/pingcap/chaos-mesh/pkg/utils"
+
+	v1 "k8s.io/api/core/v1"
+	k8sError "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/client-go/tools/cache"
 
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -95,13 +97,13 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos twophase
 		pod := allPods[index]
 		r.Log.Info("PODS", "name", pod.Name, "namespace", pod.Namespace)
 		g.Go(func() error {
-			err := r.flushPodIpSet(ctx, &pod, sourceSet, networkchaos)
+			err := r.flushPodIPSet(ctx, &pod, sourceSet, networkchaos)
 			if err != nil {
 				return err
 			}
 
 			r.Log.Info("flush ipset on pod", "name", pod.Name, "namespace", pod.Namespace)
-			return r.flushPodIpSet(ctx, &pod, targetSet, networkchaos)
+			return r.flushPodIPSet(ctx, &pod, targetSet, networkchaos)
 		})
 	}
 
@@ -154,7 +156,7 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos twophase
 
 func (r *Reconciler) BlockSet(ctx context.Context, pods []v1.Pod, set pb.IpSet, direction pb.Rule_Direction, networkchaos *v1alpha1.NetworkChaos) error {
 	g := errgroup.Group{}
-	sourceRule := r.generateIpTables(pb.Rule_ADD, direction, set.Name)
+	sourceRule := r.generateIPTables(pb.Rule_ADD, direction, set.Name)
 
 	for index := range pods {
 		pod := &pods[index]
@@ -170,7 +172,7 @@ func (r *Reconciler) BlockSet(ctx context.Context, pods []v1.Pod, set pb.IpSet, 
 			case pb.Rule_OUTPUT:
 				networkchaos.Finalizers = utils.InsertFinalizer(networkchaos.Finalizers, "output"+key)
 			}
-			return r.sendIpTables(ctx, pod, sourceRule, networkchaos)
+			return r.sendIPTables(ctx, pod, sourceRule, networkchaos)
 		})
 	}
 	return g.Wait()
@@ -215,7 +217,7 @@ func (r *Reconciler) generateSet(pods []v1.Pod, networkchaos *v1alpha1.NetworkCh
 	}
 }
 
-func (r *Reconciler) generateIpTables(action pb.Rule_Action, direction pb.Rule_Direction, set string) pb.Rule {
+func (r *Reconciler) generateIPTables(action pb.Rule_Action, direction pb.Rule_Direction, set string) pb.Rule {
 	return pb.Rule{
 		Action:    action,
 		Direction: direction,
@@ -258,13 +260,13 @@ func (r *Reconciler) cleanFinalizersAndRecover(ctx context.Context, networkchaos
 			switch direction {
 			case "output":
 				set := r.generateSetName(networkchaos, "target")
-				rule = r.generateIpTables(pb.Rule_DELETE, pb.Rule_OUTPUT, set)
+				rule = r.generateIPTables(pb.Rule_DELETE, pb.Rule_OUTPUT, set)
 			case "input-":
 				set := r.generateSetName(networkchaos, "source")
-				rule = r.generateIpTables(pb.Rule_DELETE, pb.Rule_INPUT, set)
+				rule = r.generateIPTables(pb.Rule_DELETE, pb.Rule_INPUT, set)
 			}
 
-			err = r.sendIpTables(ctx, &pod, rule, networkchaos)
+			err = r.sendIPTables(ctx, &pod, rule, networkchaos)
 			if err != nil {
 				r.Log.Error(err, "error while deleting iptables rules")
 				return err
@@ -275,13 +277,13 @@ func (r *Reconciler) cleanFinalizersAndRecover(ctx context.Context, networkchaos
 			switch direction {
 			case "output":
 				set := r.generateSetName(networkchaos, "source")
-				rule = r.generateIpTables(pb.Rule_DELETE, pb.Rule_OUTPUT, set)
+				rule = r.generateIPTables(pb.Rule_DELETE, pb.Rule_OUTPUT, set)
 			case "input-":
 				set := r.generateSetName(networkchaos, "target")
-				rule = r.generateIpTables(pb.Rule_DELETE, pb.Rule_INPUT, set)
+				rule = r.generateIPTables(pb.Rule_DELETE, pb.Rule_INPUT, set)
 			}
 
-			err = r.sendIpTables(ctx, &pod, rule, networkchaos)
+			err = r.sendIPTables(ctx, &pod, rule, networkchaos)
 			if err != nil {
 				r.Log.Error(err, "error while deleting iptables rules")
 				return err
@@ -295,7 +297,7 @@ func (r *Reconciler) cleanFinalizersAndRecover(ctx context.Context, networkchaos
 	return nil
 }
 
-func (r *Reconciler) flushPodIpSet(ctx context.Context, pod *v1.Pod, ipset pb.IpSet, networkchaos *v1alpha1.NetworkChaos) error {
+func (r *Reconciler) flushPodIPSet(ctx context.Context, pod *v1.Pod, ipset pb.IpSet, networkchaos *v1alpha1.NetworkChaos) error {
 	c, err := utils.CreateGrpcConnection(ctx, r.Client, pod)
 	if err != nil {
 		return err
@@ -304,16 +306,16 @@ func (r *Reconciler) flushPodIpSet(ctx context.Context, pod *v1.Pod, ipset pb.Ip
 
 	pbClient := pb.NewChaosDaemonClient(c)
 
-	containerId := pod.Status.ContainerStatuses[0].ContainerID
+	containerID := pod.Status.ContainerStatuses[0].ContainerID
 
 	_, err = pbClient.FlushIpSet(ctx, &pb.IpSetRequest{
 		Ipset:       &ipset,
-		ContainerId: containerId,
+		ContainerId: containerID,
 	})
 	return err
 }
 
-func (r *Reconciler) sendIpTables(ctx context.Context, pod *v1.Pod, rule pb.Rule, networkchaos *v1alpha1.NetworkChaos) error {
+func (r *Reconciler) sendIPTables(ctx context.Context, pod *v1.Pod, rule pb.Rule, networkchaos *v1alpha1.NetworkChaos) error {
 	c, err := utils.CreateGrpcConnection(ctx, r.Client, pod)
 	if err != nil {
 		return err
@@ -322,11 +324,11 @@ func (r *Reconciler) sendIpTables(ctx context.Context, pod *v1.Pod, rule pb.Rule
 
 	pbClient := pb.NewChaosDaemonClient(c)
 
-	containerId := pod.Status.ContainerStatuses[0].ContainerID
+	containerID := pod.Status.ContainerStatuses[0].ContainerID
 
 	_, err = pbClient.FlushIptables(ctx, &pb.IpTablesRequest{
 		Rule:        &rule,
-		ContainerId: containerId,
+		ContainerId: containerID,
 	})
 	return err
 }

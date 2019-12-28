@@ -19,9 +19,9 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/go-logr/logr"
-
 	"golang.org/x/sync/errgroup"
+
+	"github.com/go-logr/logr"
 
 	"github.com/pingcap/chaos-mesh/api/v1alpha1"
 	"github.com/pingcap/chaos-mesh/controllers/twophase"

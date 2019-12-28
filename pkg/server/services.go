@@ -14,12 +14,14 @@
 package server
 
 import (
-	"github.com/pingcap/chaos-mesh/pkg/utils"
+	"net/http"
+
 	"github.com/unrolled/render"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/labels"
-	"net/http"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+
+	"github.com/pingcap/chaos-mesh/pkg/utils"
 )
 
 func (s *Server) services(w http.ResponseWriter, r *http.Request) {
@@ -41,10 +43,10 @@ func (s *Server) services(w http.ResponseWriter, r *http.Request) {
 
 	var names []string
 
-	tailing_len := len("-chaos-grafana")
+	tailingLen := len("-chaos-grafana")
 	for _, service := range services.Items {
-		if len(service.Name) > tailing_len {
-			names = append(names, service.Name[:len(service.Name)-tailing_len]) // remove tailing "-chaos-grafana"
+		if len(service.Name) > tailingLen {
+			names = append(names, service.Name[:len(service.Name)-tailingLen]) // remove tailing "-chaos-grafana"
 		}
 	}
 
