@@ -139,4 +139,4 @@ helm install helm/chaos-mesh --name=chaos-mesh --namespace=chaos-testing --set d
 Then `svc/chaos-dashboard` will be created under `chaos-testing` namespace and you can access `chaos-dashboard` throught it.
 
 #### Demo
-![Chaos Dashboard](./static/dashboard.mov)
+[![Watch the video](https://raw.github.com/GabLeRoux/WebMole/master/ressources/WebMole_Youtube_Video.png)](./static/dashboard.mov)
