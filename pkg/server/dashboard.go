@@ -31,7 +31,7 @@ func (s *Server) dashboard(w http.ResponseWriter, r *http.Request) {
 
 	u := "http://" + ss[2] + "-chaos-grafana:3000"
 
-	grafanaUrl, err := url.Parse(u)
+	grafanaURL, err := url.Parse(u)
 	if err != nil {
 		w.WriteHeader(400)
 		s.log.Error(err, "error in parsing url", "url", u)
@@ -41,11 +41,11 @@ func (s *Server) dashboard(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	r.URL.Host = grafanaUrl.Host
+	r.URL.Host = grafanaURL.Host
 	r.URL.Path = path.Join(ss[3:]...)
-	r.Host = grafanaUrl.Host
+	r.Host = grafanaURL.Host
 
-	proxy := httputil.NewSingleHostReverseProxy(grafanaUrl)
+	proxy := httputil.NewSingleHostReverseProxy(grafanaURL)
 	proxy.ModifyResponse = func(r *http.Response) error {
 		r.Header.Set("X-Frame-Options", "sameorigin")
 

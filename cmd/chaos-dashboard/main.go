@@ -15,11 +15,12 @@ package main
 
 import (
 	"flag"
+	"os"
+
 	chaosoperatorv1alpha1 "github.com/pingcap/chaos-mesh/api/v1alpha1"
 	"github.com/pingcap/chaos-mesh/pkg/collector"
 	"github.com/pingcap/chaos-mesh/pkg/server"
 	"github.com/pingcap/chaos-mesh/pkg/version"
-	"os"
 
 	"k8s.io/apimachinery/pkg/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"

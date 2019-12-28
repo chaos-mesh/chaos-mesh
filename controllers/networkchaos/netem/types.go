@@ -20,9 +20,9 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/go-logr/logr"
-
 	"golang.org/x/sync/errgroup"
+
+	"github.com/go-logr/logr"
 
 	"github.com/pingcap/chaos-mesh/api/v1alpha1"
 	"github.com/pingcap/chaos-mesh/controllers/twophase"
@@ -170,9 +170,9 @@ func (r *Reconciler) recoverPod(ctx context.Context, pod *v1.Pod, networkchaos *
 
 	pbClient := pb.NewChaosDaemonClient(c)
 
-	containerId := pod.Status.ContainerStatuses[0].ContainerID
+	containerID := pod.Status.ContainerStatuses[0].ContainerID
 	_, err = pbClient.DeleteNetem(context.Background(), &pb.NetemRequest{
-		ContainerId: containerId,
+		ContainerId: containerID,
 		Netem:       nil,
 	})
 
@@ -223,7 +223,7 @@ func (r *Reconciler) applyPod(ctx context.Context, pod *v1.Pod, networkchaos *v1
 
 	pbClient := pb.NewChaosDaemonClient(c)
 
-	containerId := pod.Status.ContainerStatuses[0].ContainerID
+	containerID := pod.Status.ContainerStatuses[0].ContainerID
 
 	netem, err := spec.ToNetem()
 	if err != nil {
@@ -231,7 +231,7 @@ func (r *Reconciler) applyPod(ctx context.Context, pod *v1.Pod, networkchaos *v1
 	}
 
 	_, err = pbClient.SetNetem(ctx, &pb.NetemRequest{
-		ContainerId: containerId,
+		ContainerId: containerID,
 		Netem:       netem,
 	})
 

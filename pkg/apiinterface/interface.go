@@ -14,8 +14,9 @@
 package apiinterface
 
 import (
-	"github.com/pingcap/chaos-mesh/api/v1alpha1"
 	"k8s.io/apimachinery/pkg/runtime"
+
+	"github.com/pingcap/chaos-mesh/api/v1alpha1"
 )
 
 type StatefulObject interface {

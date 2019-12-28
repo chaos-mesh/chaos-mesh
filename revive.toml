@@ -20,16 +20,16 @@ warningCode = 0
 [rule.modifies-parameter]
 
 # Add these once issues are fixed
-[rule.var-naming]
-  severity = "warning"
-[rule.confusing-naming]
-  severity = "warning"
+#[rule.var-naming]
+#  severity = "warning"
+#[rule.confusing-naming]
+#  severity = "warning"
 [rule.confusing-results]
   severity = "warning"
 [rule.flag-parameter]
   severity = "warning"
-[rule.unused-parameter]
-  severity = "warning"
+#[rule.unused-parameter]
+#  severity = "warning"
 
 # Decide whether we want these rules
 # [rule.exported]

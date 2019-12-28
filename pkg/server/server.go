@@ -14,8 +14,9 @@
 package server
 
 import (
-	"github.com/go-logr/logr"
 	"net/http"
+
+	"github.com/go-logr/logr"
 
 	"sigs.k8s.io/controller-runtime/pkg/client"
 

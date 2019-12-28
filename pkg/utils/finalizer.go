@@ -35,7 +35,6 @@ func InsertFinalizer(finalizers []string, finalizer string) []string {
 
 	if exist {
 		return finalizers
-	} else {
-		return append(finalizers, finalizer)
 	}
+	return append(finalizers, finalizer)
 }
