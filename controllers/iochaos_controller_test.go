@@ -27,6 +27,12 @@ import (
 )
 
 var _ = Describe("IoChaos Controller", func() {
+	supportingModes := []v1alpha1.IOChaosAction{
+		v1alpha1.IODelayAction,
+		v1alpha1.IOErrnoAction,
+		v1alpha1.IOErrnoAction,
+	}
+
 	BeforeEach(func() {
 		// Add any setup steps that needs to be executed before each test
 	})
@@ -41,39 +47,41 @@ var _ = Describe("IoChaos Controller", func() {
 	// test Kubernetes API server, which isn't the goal here.
 	Context("IoChaos Item", func() {
 		It("should create successfully", func() {
-			key := types.NamespacedName{
-				Name:      "t-iochaos" + "-" + randomStringWithCharset(10, charset),
-				Namespace: "default",
-			}
+			for _, actionTp := range supportingModes {
+				key := types.NamespacedName{
+					Name:      "t-iochaos" + "-" + randomStringWithCharset(10, charset),
+					Namespace: "default",
+				}
 
-			created := &v1alpha1.IoChaos{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      key.Name,
-					Namespace: key.Namespace,
-				},
-				Spec: v1alpha1.IoChaosSpec{
-					Selector: v1alpha1.SelectorSpec{
-						Namespaces: []string{"default"},
+				created := &v1alpha1.IoChaos{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      key.Name,
+						Namespace: key.Namespace,
 					},
-					Scheduler: v1alpha1.SchedulerSpec{
-						Cron: "@every 2m",
+					Spec: v1alpha1.IoChaosSpec{
+						Selector: v1alpha1.SelectorSpec{
+							Namespaces: []string{"default"},
+						},
+						Scheduler: v1alpha1.SchedulerSpec{
+							Cron: "@every 2m",
+						},
+						Action:     actionTp,
+						Mode:       v1alpha1.OnePodMode,
+						Duration:   "60s",
+						Layer:      v1alpha1.FileSystemLayer,
+						Delay:      "10ms",
+						ConfigName: "chaosfs-tikv",
 					},
-					Action:     v1alpha1.IODelayAction,
-					Mode:       v1alpha1.OnePodMode,
-					Duration:   "60s",
-					Layer:      v1alpha1.FileSystemLayer,
-					Delay:      "10ms",
-					ConfigName: "chaosfs-tikv",
-				},
+				}
+
+				By("creating an API obj")
+				Expect(k8sClient.Create(context.TODO(), created)).Should(Succeed())
+
+				By("deleting the created object")
+				Expect(k8sClient.Delete(context.TODO(), created)).To(Succeed())
+				time.Sleep(1 * time.Second)
+				Expect(k8sClient.Get(context.TODO(), key, created)).ToNot(Succeed())
 			}
-
-			By("creating an API obj")
-			Expect(k8sClient.Create(context.TODO(), created)).Should(Succeed())
-
-			By("deleting the created object")
-			Expect(k8sClient.Delete(context.TODO(), created)).To(Succeed())
-			time.Sleep(1 * time.Second)
-			Expect(k8sClient.Get(context.TODO(), key, created)).ToNot(Succeed())
 		})
 	})
 })
