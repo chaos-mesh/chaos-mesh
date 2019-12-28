@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package api_interface
+package apiinterface
 
 import (
 	"github.com/pingcap/chaos-mesh/api/v1alpha1"

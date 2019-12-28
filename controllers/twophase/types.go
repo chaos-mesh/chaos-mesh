@@ -18,7 +18,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/pingcap/chaos-mesh/pkg/api_interface"
+	"github.com/pingcap/chaos-mesh/pkg/apiinterface"
 
 	"github.com/go-logr/logr"
 
@@ -44,7 +44,7 @@ type InnerObject interface {
 
 	GetScheduler() v1alpha1.SchedulerSpec
 
-	api_interface.StatefulObject
+	apiinterface.StatefulObject
 }
 
 type InnerReconciler interface {
