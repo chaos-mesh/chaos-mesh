@@ -147,7 +147,7 @@ ifeq (,$(shell which kubebuilder))
 	curl -sL https://go.kubebuilder.io/dl/2.2.0/$(shell go env GOOS)/$(shell go env GOARCH) | tar -zx -C /tmp/
 	# move to a long-term location and put it on your path
 	# (you'll need to set the KUBEBUILDER_ASSETS env var if you put it somewhere else)
-	mv /tmp/kubebuilder_2.2.0_$(shell go env GOOS)_$(shell go env GOARCH) /usr/local/kubebuilder
+	sudo mv /tmp/kubebuilder_2.2.0_$(shell go env GOOS)_$(shell go env GOARCH) /usr/local/kubebuilder
 	export PATH=${PATH}:/usr/local/kubebuilder/bin
 else
 	@echo "kubebuilder has been installed"
@@ -159,7 +159,7 @@ ifeq (,$(shell which kustomize))
 	# download kustomize
 	curl -o /usr/local/kubebuilder/bin/kustomize -sL "https://go.kubebuilder.io/kustomize/$(shell go env GOOS)/$(shell go env GOARCH)"
 	# set permission
-	chmod a+x /usr/local/kubebuilder/bin/kustomize
+	sudo chmod a+x /usr/local/kubebuilder/bin/kustomize
 	$(shell which kustomize)
 else
 	@echo "kustomize has been installed"
