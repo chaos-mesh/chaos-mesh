@@ -14,11 +14,15 @@
 package server
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/unrolled/render"
-	v1 "k8s.io/api/core/v1"
+	"k8s.io/api/apps/v1"
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/labels"
+	"k8s.io/apimachinery/pkg/types"
+
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/pingcap/chaos-mesh/pkg/utils"
@@ -35,7 +39,8 @@ func (s *Server) services(w http.ResponseWriter, r *http.Request) {
 		"app.kubernetes.io/component": "grafana",
 	})
 
-	var services v1.ServiceList
+	var services corev1.ServiceList
+
 	err := s.client.List(ctx, &services, &listOptions)
 	if err != nil {
 		s.log.Error(err, "error while listing services")
@@ -43,10 +48,53 @@ func (s *Server) services(w http.ResponseWriter, r *http.Request) {
 
 	var names []string
 
-	tailingLen := len("-chaos-grafana")
+	tailLen := len("-chaos-grafana")
 	for _, service := range services.Items {
-		if len(service.Name) > tailingLen {
-			names = append(names, service.Name[:len(service.Name)-tailingLen]) // remove tailing "-chaos-grafana"
+		if len(service.Name) > tailLen {
+			name := service.Name[:len(service.Name)-tailLen]
+
+			// Check whether this namespace is still alive
+			var prometheusService corev1.Service
+			err := s.client.Get(ctx, types.NamespacedName{
+				Namespace: service.Labels["prometheus/namespace"],
+				Name:      service.Labels["prometheus/name"],
+			}, &prometheusService)
+
+			if err != nil {
+				s.log.Error(err, "cannot get prometheus", "labels", service.Labels)
+
+				s.log.Info("destroying namespace related grafana and service", "namespace", name)
+
+				var service corev1.Service
+				err := s.client.Get(ctx, types.NamespacedName{
+					Namespace: utils.DashboardNamespace,
+					Name:      fmt.Sprintf("%s-chaos-grafana", name),
+				}, &service)
+				if err != nil {
+					s.log.Error(err, "get service error")
+				}
+				err = s.client.Delete(ctx, &service)
+				if err != nil {
+					s.log.Error(err, "delete service error", "service", service)
+				}
+
+				var deployment v1.Deployment
+				err = s.client.Get(ctx, types.NamespacedName{
+					Namespace: utils.DashboardNamespace,
+					Name:      fmt.Sprintf("%s-chaos-grafana", name),
+				}, &deployment)
+				if err != nil {
+					s.log.Error(err, "get deployment error")
+				}
+				err = s.client.Delete(ctx, &deployment)
+				if err != nil {
+					s.log.Error(err, "delete deployment error", "deployment", deployment)
+				}
+			} else {
+				s.log.Info("namespace does exist", "namespace", name)
+
+				names = append(names, name) // remove tailing "-chaos-grafana"
+			}
 		}
 	}
 

@@ -15,6 +15,7 @@ package partition
 
 import (
 	"context"
+	"crypto/sha1"
 	"errors"
 	"fmt"
 
@@ -38,6 +39,9 @@ import (
 
 const (
 	networkPartitionActionMsg = "part network for %s"
+
+	sourceIpSetPostFix = "src"
+	targetIpSetPostFix = "tgt"
 )
 
 func NewReconciler(c client.Client, log logr.Logger, req ctrl.Request) twophase.Reconciler {
@@ -86,8 +90,8 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos twophase
 		return err
 	}
 
-	sourceSet := r.generateSet(sources, networkchaos, "source")
-	targetSet := r.generateSet(targets, networkchaos, "target")
+	sourceSet := r.generateSet(sources, networkchaos, sourceIpSetPostFix)
+	targetSet := r.generateSet(targets, networkchaos, targetIpSetPostFix)
 
 	allPods := append(sources, targets...)
 
@@ -197,7 +201,25 @@ func (r *Reconciler) Recover(ctx context.Context, req ctrl.Request, chaos twopha
 }
 
 func (r *Reconciler) generateSetName(networkchaos *v1alpha1.NetworkChaos, namePostFix string) string {
-	return networkchaos.Name + "_" + namePostFix
+	r.Log.Info("generating name for chaos", "name", networkchaos.Name)
+	originalName := networkchaos.Name
+
+	var ipsetName string
+	if len(originalName) < 6 {
+		ipsetName = originalName + "_" + namePostFix
+	} else {
+		namePrefix := originalName[0:5]
+		nameRest := originalName[5:]
+
+		hasher := sha1.New()
+		hasher.Write([]byte(nameRest))
+		hashValue := fmt.Sprintf("%x", hasher.Sum(nil))
+
+		ipsetName = namePrefix + "_" + hashValue[0:17] + "_" + namePostFix
+	}
+
+	r.Log.Info("name generated", "ipsetName", ipsetName)
+	return ipsetName
 }
 
 func (r *Reconciler) generateSet(pods []v1.Pod, networkchaos *v1alpha1.NetworkChaos, namePostFix string) pb.IpSet {
@@ -259,10 +281,10 @@ func (r *Reconciler) cleanFinalizersAndRecover(ctx context.Context, networkchaos
 		if networkchaos.Spec.Direction != v1alpha1.From {
 			switch direction {
 			case "output":
-				set := r.generateSetName(networkchaos, "target")
+				set := r.generateSetName(networkchaos, targetIpSetPostFix)
 				rule = r.generateIPTables(pb.Rule_DELETE, pb.Rule_OUTPUT, set)
 			case "input-":
-				set := r.generateSetName(networkchaos, "source")
+				set := r.generateSetName(networkchaos, sourceIpSetPostFix)
 				rule = r.generateIPTables(pb.Rule_DELETE, pb.Rule_INPUT, set)
 			}
 
@@ -276,10 +298,10 @@ func (r *Reconciler) cleanFinalizersAndRecover(ctx context.Context, networkchaos
 		if networkchaos.Spec.Direction != v1alpha1.To {
 			switch direction {
 			case "output":
-				set := r.generateSetName(networkchaos, "source")
+				set := r.generateSetName(networkchaos, sourceIpSetPostFix)
 				rule = r.generateIPTables(pb.Rule_DELETE, pb.Rule_OUTPUT, set)
 			case "input-":
-				set := r.generateSetName(networkchaos, "target")
+				set := r.generateSetName(networkchaos, targetIpSetPostFix)
 				rule = r.generateIPTables(pb.Rule_DELETE, pb.Rule_INPUT, set)
 			}
 

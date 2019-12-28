@@ -105,7 +105,7 @@ $ kubectl delete -f pod-kill-example.yaml
 
 #### Chaos Dashboard
 
-Chaos dashboard can be used to visualize chaos events. However, it **only** supports tidb now. To install dashboard with `chaos-mesh`:
+Chaos dashboard can be used to visualize chaos events. However, it **only** supports tidb now (so it isn't installed by default). To install dashboard with `chaos-mesh`:
 
 ```
 helm install helm/chaos-mesh --name=chaos-mesh --namespace=chaos-testing --set dashboard.create=true
