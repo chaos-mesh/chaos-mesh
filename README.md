@@ -1,5 +1,5 @@
 # Chaos Mesh 
-Chaos Mesh is a powerful chaos engineering tool for kubernetes. 
+Chaos Mesh is a powerful chaos engineering platform for kubernetes. 
 It is used to inject chaos into the applications and Kubernetes infrastructure in a managed fashion. 
 
 Chaos Mesh includes a Kubernetes Operator, which provides easy definitions for chaos experiments and 
