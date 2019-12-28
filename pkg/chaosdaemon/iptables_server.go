@@ -19,10 +19,15 @@ import (
 	"strings"
 
 	"github.com/golang/protobuf/ptypes/empty"
+
 	pb "github.com/pingcap/chaos-mesh/pkg/chaosdaemon/pb"
 )
 
-const iptablesCmd = "iptables"
+const (
+	iptablesCmd              = "iptables"
+	iptablesBadRuleErr       = "Bad rule (does a matching rule exist in that chain?)."
+	iptablesIpSetNotExistErr = "doesn't exist.\n\nTry `iptables -h' or 'iptables --help' for more information.\n"
+)
 
 func (s *Server) FlushIptables(ctx context.Context, req *pb.IpTablesRequest) (*empty.Empty, error) {
 	pid, err := s.crClient.GetPidFromContainerID(ctx, req.ContainerId)
@@ -57,13 +62,14 @@ func (s *Server) FlushIptables(ctx context.Context, req *pb.IpTablesRequest) (*e
 	command := fmt.Sprintf(format, action, rule.Set)
 
 	if rule.Action == pb.Rule_DELETE {
-		output := ""
-
-		for !strings.Contains(output, "Bad rule (does a matching rule exist in that chain?).") { // delete until all equal rules are deleted
-			cmd := withNetNS(ctx, nsPath, iptablesCmd, strings.Split(command, " ")...)
-			out, err := cmd.CombinedOutput()
-			if err != nil {
-				output = string(out)
+		log.Info("deleting iptables rules")
+		cmd := withNetNS(ctx, nsPath, iptablesCmd, strings.Split(command, " ")...)
+		out, err := cmd.CombinedOutput()
+		if err != nil {
+			output := string(out)
+			if !(strings.Contains(output, iptablesBadRuleErr) || strings.Contains(output, iptablesIpSetNotExistErr)) {
+				log.Error(err, "iptables error")
+				return nil, err
 			}
 		}
 	} else {
