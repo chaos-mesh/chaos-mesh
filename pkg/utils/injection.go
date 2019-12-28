@@ -53,11 +53,8 @@ func SetIoInjection(ctx context.Context, c client.Client, pod *v1.Pod, ioChaos *
 			ns.SetAnnotations(annotations)
 		}
 
-		if err := c.Update(ctx, &ns); err != nil {
-			return err
-		}
-
-		return nil
+		err := c.Update(ctx, &ns)
+		return err
 	})
 }
 
@@ -90,10 +87,7 @@ func UnsetIoInjection(ctx context.Context, c client.Client, pod *v1.Pod, iochaos
 			ns.SetLabels(labels)
 		}
 
-		if err := c.Update(ctx, &ns); err != nil {
-			return err
-		}
-
-		return nil
+		err := c.Update(ctx, &ns)
+		return err
 	})
 }

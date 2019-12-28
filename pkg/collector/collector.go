@@ -16,21 +16,24 @@ package collector
 import (
 	"context"
 	"fmt"
+
 	"github.com/go-logr/logr"
-	"github.com/pingcap/chaos-mesh/api/v1alpha1"
-	"github.com/pingcap/chaos-mesh/pkg/apiinterface"
-	"github.com/pingcap/chaos-mesh/pkg/utils"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/apimachinery/pkg/util/intstr"
 
-	"k8s.io/api/apps/v1"
-	"k8s.io/apimachinery/pkg/runtime"
+	"github.com/pingcap/chaos-mesh/api/v1alpha1"
+	"github.com/pingcap/chaos-mesh/pkg/apiinterface"
+	"github.com/pingcap/chaos-mesh/pkg/utils"
+
 	"reflect"
+	"strings"
+
+	v1 "k8s.io/api/apps/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"strings"
 )
 
 type ChaosCollector struct {
@@ -59,12 +62,12 @@ func (r *ChaosCollector) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 
 	status := obj.GetStatus()
 
-	affected_namespace := make(map[string]bool)
+	affectedNamespace := make(map[string]bool)
 	for _, pod := range status.Experiment.Pods {
-		affected_namespace[pod.Namespace] = true
+		affectedNamespace[pod.Namespace] = true
 	}
 
-	for namespace := range affected_namespace {
+	for namespace := range affectedNamespace {
 		err := r.EnsureTidbNamespaceHasGrafana(ctx, namespace)
 		if err != nil {
 			r.Log.Error(err, "check grafana for tidb cluster failed")
@@ -76,7 +79,7 @@ func (r *ChaosCollector) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 			Name:              req.Name,
 			Namespace:         req.Namespace,
 			Type:              reflect.TypeOf(obj).Elem().Name(),
-			AffectedNamespace: affected_namespace,
+			AffectedNamespace: affectedNamespace,
 			StartTime:         &status.Experiment.StartTime.Time,
 			EndTime:           nil,
 		}
@@ -92,7 +95,7 @@ func (r *ChaosCollector) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 			Name:              req.Name,
 			Namespace:         req.Namespace,
 			Type:              reflect.TypeOf(obj).Elem().Name(),
-			AffectedNamespace: affected_namespace,
+			AffectedNamespace: affectedNamespace,
 			StartTime:         &status.Experiment.StartTime.Time,
 			EndTime:           &status.Experiment.EndTime.Time,
 		}

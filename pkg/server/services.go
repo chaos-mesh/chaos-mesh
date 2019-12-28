@@ -15,14 +15,17 @@ package server
 
 import (
 	"fmt"
-	"github.com/pingcap/chaos-mesh/pkg/utils"
+	"net/http"
+
 	"github.com/unrolled/render"
 	"k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/types"
-	"net/http"
+
 	"sigs.k8s.io/controller-runtime/pkg/client"
+
+	"github.com/pingcap/chaos-mesh/pkg/utils"
 )
 
 func (s *Server) services(w http.ResponseWriter, r *http.Request) {
@@ -37,6 +40,7 @@ func (s *Server) services(w http.ResponseWriter, r *http.Request) {
 	})
 
 	var services corev1.ServiceList
+
 	err := s.client.List(ctx, &services, &listOptions)
 	if err != nil {
 		s.log.Error(err, "error while listing services")
@@ -91,7 +95,6 @@ func (s *Server) services(w http.ResponseWriter, r *http.Request) {
 
 				names = append(names, name) // remove tailing "-chaos-grafana"
 			}
-
 		}
 	}
 
