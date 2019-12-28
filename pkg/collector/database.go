@@ -14,9 +14,10 @@
 package collector
 
 import (
+	"time"
+
 	"github.com/jmoiron/sqlx"
 	ctrl "sigs.k8s.io/controller-runtime"
-	"time"
 
 	dsql "database/sql"
 )
