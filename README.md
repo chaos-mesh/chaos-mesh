@@ -1,15 +1,17 @@
 # Chaos Mesh 
-Chaos Mesh is a powerful chaos engineering tool for kubernetes. 
-It is used to inject chaos into the applications and Kubernetes infrastructure in a managed fashion. 
+Chaos Mesh is a powerful chaos engineering platform for kubernetes. At present stage it has two parts Chaos-Operator and Chaos-Dashboard
+Chaos-Operator is available now. You can just install Chaos-operator to do chaos operations. Chaos-Dashboard is under development. It now can shows the impact of chaos to TiDB Cluster(other target such as etcd need some configure)
 
-Chaos Mesh includes a Kubernetes Operator, which provides easy definitions for chaos experiments and 
-automates the execution of chaos experiments.
 
-![Chaos Mesh](./static/chaos-mesh-overview.png)
+## Chaos Operator
 
-## Deploy 
+It is used to inject chaos into the applications and Kubernetes infrastructure in a manageable way. Which provides easy definitions for chaos experiments and automates the execution of chaos experiments.
 
-### Prerequisites 
+![Chaos Operator](./static/chaos-mesh-overview.png)
+
+### Deploy 
+
+#### Prerequisites 
 
 Before deploying Chaos Mesh, make sure the following items are installed on your machine: 
 
@@ -18,16 +20,16 @@ Before deploying Chaos Mesh, make sure the following items are installed on your
 * Helm version >= v2.8.2 and < v3.0.0
 * Protobuf version >= v3.6.1 and < v3.7.0 and go support
 
-### Install Chaos Mesh 
+#### Install Chaos Operator 
 
-#### Get the Helm files
+##### Get the Helm files
 
 ```bash
 $ git clone https://github.com/pingcap/chaos-mesh.git
 $ cd chaos-mesh/
 ```
 
-#### Create custom resource type
+##### Create custom resource type
 
 Chaos Mesh uses [CRD (Custom Resource Definition)](https://kubernetes.io/docs/tasks/access-kubernetes-api/custom-resources/custom-resource-definitions/) 
 to extend Kubernetes. Therefore, to use Chaos Mesh, you must first create the related custom resource type.
@@ -37,14 +39,14 @@ $ kubectl apply -f manifests/
 $ kubectl get crd podchaos.pingcap.com
 ```
 
-#### Install Chaos Mesh 
+##### Install Chaos Operator 
 
 ```bash
 $ helm install helm/chaos-mesh --name=chaos-mesh --namespace=chaos-testing
 $ kubectl get pods --namespace chaos-testing -l app.kubernetes.io/instance=chaos-mesh
 ```
 
-## Usage
+### Usage
 
 #### Define chaos experiment config file 
 
@@ -103,12 +105,38 @@ $ kubectl apply -f pod-kill-example.yaml
 $ kubectl delete -f pod-kill-example.yaml
 ```
 
-#### Chaos Dashboard
+### additional
 
-Chaos dashboard can be used to visualize chaos events. However, it **only** supports tidb now (so it isn't installed by default). To install dashboard with `chaos-mesh`:
+There are multiple kinds of chaos supported now.
+* pod-kill, pod-kill will simply kill selected pods. To ensure pod will be restarted again, ReplicaSet (or something similar) may be needed to guard it.
+* pod-fail, pod-fail means the process will not be alive in a period of time but the pod still exists.
+* netem chaos, netem chaos contains some kind of chaos. such as delay, duplicate etc. You can find more in example
+* network partition, network partition can decompose pods into several independent subnets by blocking communication between them.
+* IO chaos, IO delay means you can specify the latency before the io operation will return. IO errno means your read/write IO operation will return error.
+
+## Chaos Dashboard
+
+Chaos dashboard can be used to visualize chaos events. However, it **only** supports tidb now (so it isn't installed by default).
+
+### Deploy
+
+#### Prerequisites 
+
+Before deploying Chaos Mesh, make sure the following items are installed on your machine: 
+
+* Kubernetes >= v1.12
+* [RBAC](https://kubernetes.io/docs/admin/authorization/rbac) enabled (optional)
+* Helm version >= v2.8.2 and < v3.0.0
+* Protobuf version >= v3.6.1 and < v3.7.0 and go support
+
+#### Install Chaos Dashboard
+To install dashboard with `chaos-mesh`:
 
 ```
 helm install helm/chaos-mesh --name=chaos-mesh --namespace=chaos-testing --set dashboard.create=true
 ```
 
 Then `svc/chaos-dashboard` will be created under `chaos-testing` namespace and you can access `chaos-dashboard` throught it.
+
+#### Demo
+[![Watch the video](./static/demo.png)](https://www.youtube.com/watch?v=yzhvKKL8uJk)
