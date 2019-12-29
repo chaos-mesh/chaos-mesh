@@ -46,6 +46,74 @@ $ helm install helm/chaos-mesh --name=chaos-mesh --namespace=chaos-testing
 $ kubectl get pods --namespace chaos-testing -l app.kubernetes.io/instance=chaos-mesh
 ```
 
+### Get Start With `kind` or `minikube`
+
+**This deployment is for testing only. DO NOT USE in production!**
+
+#### Deploy with `kind`
+
+1. Clone the code:
+
+   ```bash
+   git clone --depth=1 https://github.com/pingcap/chaos-mesh && \
+   cd chaos-mesh
+   ```
+
+2. Run the script and create a local Kubernetes cluster:
+
+   ```bash
+   hack/kind-cluster-build.sh
+   ```
+
+3. To connect the local Kubernetes cluster, set the default configuration file path of kubectl to `kube-config`.
+
+   ```bash
+   export KUBECONFIG="$(kind get kubeconfig-path)"
+   ```
+
+4. Verify whether the Kubernetes cluster is on and running:
+
+   ```bash
+   kubectl cluster-info
+   ```
+
+Then you can install `chaos-mesh` on `kind` kubernetes cluster as suggested above.
+
+#### Deploy with `minikube`
+
+1. Start a `minikube` kubernetes cluster
+
+   ```bash
+   minikube start
+   ```
+
+2. Install helm
+
+   ```bash
+   curl https://raw.githubusercontent.com/helm/helm/master/scripts/get | bash
+   helm init
+   ```
+
+3. Check whether helm tiller pod is running
+
+   ```bash
+   kubectl -n kube-system get pods -l app=helm
+   ```
+
+After helm tiller pod is running, you can install `chaos-operator` like suggested above.
+
+#### Warn
+
+There are still some restrictions for `chaos-operator` on `kind` and `minikube` clusters.
+
+1. Network related chaos is not supported on `kind` clusters.
+
+   This is because we use docker pkg to transform between container id and  pid, which is necessary to find network namespace for pods. `kind` uses `containerd` as CRI runtime and it's not supported yet.
+
+   More CRI runtime can be supported in the future. Wait for you contribution :)
+
+2. Network delay, loss, etc are not supported on `minikube` clusters. That's because `minikube` default virtual machine driver's image doesn't contain `sch_netem` kernel module. You can use `none` driver (if your host is Linux and has loaded `sch_netem` kernel module) to try these chaos on `minikube` or [build a image with `sch_netem` by yourself](https://minikube.sigs.k8s.io/docs/contributing/iso/)
+
 ### Usage
 
 #### Define chaos experiment config file 
