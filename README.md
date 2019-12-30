@@ -17,8 +17,7 @@ Before deploying Chaos Mesh, make sure the following items are installed on your
 
 * Kubernetes >= v1.12 and < v1.16
 * [RBAC](https://kubernetes.io/docs/admin/authorization/rbac) enabled (optional)
-* Helm version >= v2.8.2 and < v3.0.0
-* Protobuf version >= v3.6.1 and < v3.7.0 and go support
+* [Helm](https://helm.sh/) version >= v2.8.2 and < v3.0.0
 
 #### Install Chaos Operator 
 
@@ -185,17 +184,6 @@ There are multiple kinds of chaos supported now.
 ## Chaos Dashboard
 
 Chaos dashboard can be used to visualize chaos events. However, it **only** supports tidb now (so it isn't installed by default).
-
-### Deploy
-
-#### Prerequisites 
-
-Before deploying Chaos Mesh, make sure the following items are installed on your machine: 
-
-* Kubernetes >= v1.12
-* [RBAC](https://kubernetes.io/docs/admin/authorization/rbac) enabled (optional)
-* Helm version >= v2.8.2 and < v3.0.0
-* Protobuf version >= v3.6.1 and < v3.7.0 and go support
 
 #### Install Chaos Dashboard
 To install dashboard with `chaos-mesh`:
