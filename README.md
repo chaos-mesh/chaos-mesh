@@ -1,4 +1,4 @@
-<img src="static/logo.png" alt="chaos_logo" width="300"/>
+<img src="static/logo.png" alt="chaos_logo" width="450"/>
 
 # Chaos Mesh
 
