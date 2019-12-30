@@ -1,7 +1,5 @@
 <img src="static/logo.png" alt="chaos_logo" width="450"/>
 
-# Chaos Mesh
-
 Chaos Mesh is an open source project that provides powerful chaos engineering platform for kubernetes. 
 
 At present stage it has two parts: Chaos Operator and Chaos Dashboard. Chaos Operator is available now. You can just install Chaos Operator to implement chaos operations. Chaos Dashboard is under development. Now, it can show the impact of chaos to TiDB Cluster\(other targets such as etcd need some configurations\).
@@ -228,7 +226,7 @@ Then `svc/chaos-dashboard` will be created under `chaos-testing` namespace and y
 kubectl port-forward -n chaos-testing svc/chaos-dashboard 8080:80
 ```
 
-Then you can access [`chaos-dashboard`](http://localhost:8080) in browser.
+Then you can access [`http://localhost:8080`](http://localhost:8080) in browser.
 
 ### Deploy a TiDB cluster
 
@@ -241,4 +239,4 @@ You can follow these two document links to deploy a TiDB cluster.
 
 If you have installed Chaos Mesh and prepared a TiDB cluster, you can run a benchmark(eg: [sysbench](https://github.com/akopytov/sysbench)) and then refer to the [Usage](#Usage) part, try different kinds of chaos actions supported now.
 
-[![Watch the video](./static/demo.png)](https://www.youtube.com/watch?v=yzhvKKL8uJk)
+[![Watch the video](./static/demo.gif)](https://www.youtube.com/watch?v=ifZEwdJO868)
