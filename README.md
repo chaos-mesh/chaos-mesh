@@ -133,7 +133,7 @@ eg: define a chaos experiment to kill one tikv pod randomly
 create a chaos experiment file and name it `pod-kill-example.yaml`.
 
 > TiDB cluster named `tidb-cluster-demo` must be installed before applying this chaos experiment.   
-> For the installation of the TiDB cluster, see [deploy tidb cluster](#deploy-tidb-cluster)
+> For the installation of the TiDB cluster, see [deploy a tidb cluster](#deploy-a-tidb-cluster)
 
 ```yaml
 apiVersion: pingcap.com/v1alpha1
