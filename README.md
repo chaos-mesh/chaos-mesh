@@ -192,7 +192,14 @@ To install dashboard with `chaos-mesh`:
 helm install helm/chaos-mesh --name=chaos-mesh --namespace=chaos-testing --set dashboard.create=true
 ```
 
-Then `svc/chaos-dashboard` will be created under `chaos-testing` namespace and you can access `chaos-dashboard` throught it.
+Then `svc/chaos-dashboard` will be created under `chaos-testing` namespace and you can access `chaos-dashboard` through it. The typical way to access it is to use `kubectl port-forward`
+
+```bash
+kubectl port-forward -n chaos-testing svc/chaos-dashboard 8080:80
+```
+
+Then you can access [`chaos-dashboard`](http://localhost:8080) in browser.
 
 #### Demo
+
 [![Watch the video](./static/demo.png)](https://www.youtube.com/watch?v=yzhvKKL8uJk)
