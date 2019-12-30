@@ -1,11 +1,12 @@
 # Chaos Mesh
 
-Chaos Mesh is a powerful chaos engineering platform for kubernetes. At present stage it has two parts Chaos-Operator and Chaos-Dashboard
-Chaos-Operator is available now. You can just install Chaos-operator to do chaos operations. Chaos-Dashboard is under development. It now can shows the impact of chaos to TiDB Cluster(other target such as etcd need some configure)
+Chaos Mesh is an open source project that provides powerful chaos engineering platform for kubernetes. 
+
+At present stage it has two parts: Chaos Operator and Chaos Dashboard. Chaos Operator is available now. You can just install Chaos Operator to implement chaos operations. Chaos Dashboard is under development. Now, it can show the impact of chaos to TiDB Cluster\(other targets such as etcd need some configurations\).
 
 ## Chaos Operator
 
-It is used to inject chaos into the applications and Kubernetes infrastructure in a manageable way. Which provides easy definitions for chaos experiments and automates the execution of chaos experiments.
+Chaos Operator is used to inject chaos into the applications and Kubernetes infrastructure in a manageable way, which provides easy definitions for chaos experiments and automates the execution of chaos experiments.
 
 ![Chaos Operator](./static/chaos-mesh-overview.png)
 
@@ -129,7 +130,10 @@ There are still some restrictions for `chaos-operator` on `kind` and `minikube` 
 
 eg: define a chaos experiment to kill one tikv pod randomly
 
-create a chaos experiment file and name it pod-kill-example.yaml
+create a chaos experiment file and name it `pod-kill-example.yaml`.
+
+> TiDB cluster named `tidb-cluster-demo` must be installed before applying this chaos experiment.   
+> For the installation of the TiDB cluster, see [deploy a tidb cluster](#deploy-a-tidb-cluster)
 
 ```yaml
 apiVersion: pingcap.com/v1alpha1
@@ -146,7 +150,7 @@ spec:
     labelSelectors:
       "app.kubernetes.io/component": "tikv"
   scheduler:
-    cron: "@every 1m"
+    cron: "@every 2m"
 ```
 
 ##### PodChaos
@@ -168,6 +172,10 @@ kubectl apply -f pod-kill-example.yaml
 kubectl get podchaos --namespace=chaos-testing
 ```
 
+We can see the QPS performance affected by the chaos experiment from TiDB Grafana dashboard: 
+
+![tikv-pod-kilk](./static/tikv-pod-kill.png)
+
 #### Update a chaos experiment
 
 ```bash
@@ -185,11 +193,11 @@ kubectl delete -f pod-kill-example.yaml
 
 There are multiple kinds of chaos supported now.
 
-* pod-kill, pod-kill will simply kill selected pods. To ensure pod will be restarted again, ReplicaSet (or something similar) may be needed to guard it.
-* pod-fail, pod-fail means the process will not be alive in a period of time but the pod still exists.
-* netem chaos, netem chaos contains some kind of chaos. such as delay, duplicate etc. You can find more in example
-* network partition, network partition can decompose pods into several independent subnets by blocking communication between them.
-* IO chaos, IO delay means you can specify the latency before the io operation will return. IO errno means your read/write IO operation will return error.
+* `pod-kill`: pod-kill will simply kill selected pods. To ensure pod will be restarted again, ReplicaSet (or something similar) may be needed to guard it.
+* `pod-fail`: pod-fail means the process will not be alive in a period of time but the pod still exists.
+* `netem chaos`: netem chaos contains some kind of network chaos. such as delay, duplication etc. You can find more in [examples](./examples).
+* `network partition`: network partition can decompose pods into several independent subnets by blocking communication between them.
+* `IO chaos`: IO delay means you can specify the latency before the IO operation will return. IO errno means your read/write IO operation will return error.
 
 ## Chaos Dashboard
 
@@ -215,15 +223,15 @@ kubectl port-forward -n chaos-testing svc/chaos-dashboard 8080:80
 
 Then you can access [`chaos-dashboard`](http://localhost:8080) in browser.
 
-### Deploy TiDB cluster
+### Deploy a TiDB cluster
 
 You can follow these two document links to deploy a TiDB cluster.
 
 * [if use kind](https://pingcap.com/docs/stable/tidb-in-kubernetes/get-started/deploy-tidb-from-kubernetes-kind/)
 * [if use minikube](https://pingcap.com/docs/stable/tidb-in-kubernetes/get-started/deploy-tidb-from-kubernetes-minikube/)
 
-### Run a chaos testing on TiDB cluster
+### Run a chaos testing on a TiDB cluster
 
-You can refer to the [Usage](#Usage) part, try different kinds of chaos actions supported now.
+If you have installed Chaos Mesh and prepared a TiDB cluster, you can run a benchmark(eg: [sysbench](https://github.com/akopytov/sysbench)) and then refer to the [Usage](#Usage) part, try different kinds of chaos actions supported now.
 
 [![Watch the video](./static/demo.png)](https://www.youtube.com/watch?v=yzhvKKL8uJk)
