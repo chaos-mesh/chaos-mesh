@@ -62,26 +62,26 @@ You can try Chaos Mesh on you local K8s envirement deployed using `kind` or `min
 
 #### Deploy with `kind`
 
-1. Clone the code:
+1. Clone the code
 
    ```bash
    git clone --depth=1 https://github.com/pingcap/chaos-mesh && \
    cd chaos-mesh
    ```
 
-2. Run the script and create a local Kubernetes cluster:
+2. Run the script and create a local Kubernetes cluster
 
    ```bash
    hack/kind-cluster-build.sh
    ```
 
-3. To connect the local Kubernetes cluster, set the default configuration file path of kubectl to `kube-config`.
+3. To connect the local Kubernetes cluster, set the default configuration file path of kubectl to `kube-config`
 
    ```bash
    export KUBECONFIG="$(kind get kubeconfig-path)"
    ```
 
-4. Verify whether the Kubernetes cluster is on and running:
+4. Verify whether the Kubernetes cluster is on and running
 
    ```bash
    kubectl cluster-info
@@ -122,7 +122,9 @@ There are still some restrictions for `chaos-operator` on `kind` and `minikube` 
 
    More CRI runtime can be supported in the future. Wait for you contribution :)
 
-2. Network delay, loss, etc are not supported on `minikube` clusters. That's because `minikube` default virtual machine driver's image doesn't contain `sch_netem` kernel module. You can use `none` driver (if your host is Linux and has loaded `sch_netem` kernel module) to try these chaos on `minikube` or [build a image with `sch_netem` by yourself](https://minikube.sigs.k8s.io/docs/contributing/iso/)
+2. Network delay, loss, etc are not supported on `minikube` clusters. 
+
+   That's because `minikube` default virtual machine driver's image doesn't contain `sch_netem` kernel module. You can use `none` driver (if your host is Linux and has loaded `sch_netem` kernel module) to try these chaos on `minikube` or [build a image with `sch_netem` by yourself](https://minikube.sigs.k8s.io/docs/contributing/iso/)
 
 ### Usage
 
@@ -133,7 +135,7 @@ eg: define a chaos experiment to kill one tikv pod randomly
 create a chaos experiment file and name it `pod-kill-example.yaml`.
 
 > TiDB cluster named `tidb-cluster-demo` must be installed before applying this chaos experiment.   
-> For the installation of the TiDB cluster, see [deploy a tidb cluster](#deploy-a-tidb-cluster)
+> For the installation of the TiDB cluster, see [deploy a TiDB cluster](#deploy-a-tidb-cluster)
 
 ```yaml
 apiVersion: pingcap.com/v1alpha1
@@ -201,7 +203,7 @@ There are multiple kinds of chaos supported now.
 
 ## Chaos Dashboard
 
-Chaos dashboard can be used to visualize chaos events. However, it **only** supports tidb now (so it isn't installed by default).
+Chaos dashboard can be used to visualize chaos events. However, it **only** supports TiDB now (so it isn't installed by default).
 
 ### Install Chaos Dashboard
 
