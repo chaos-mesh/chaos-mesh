@@ -1,5 +1,2 @@
 1. Make sure chaos-mesh components are running
    kubectl get pods --namespace {{ .Release.Namespace }} -l app.kubernetes.io/instance={{ .Release.Name }}
-2. Install CRD
-   kubectl apply -f https://raw.githubusercontent.com/pingcap/chaos-mesh/master/manifests/crds/pod-chaos.yaml
-   kubectl get customresourcedefinitions
