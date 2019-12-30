@@ -214,8 +214,6 @@ kubectl port-forward -n chaos-testing svc/chaos-dashboard 8080:80
 
 Then you can access [`chaos-dashboard`](http://localhost:8080) in browser.
 
-Then `svc/chaos-dashboard` will be created under `chaos-testing` namespace and you can access `chaos-dashboard` throught it.
-
 #### Demo
 
 [![Watch the video](./static/demo.png)](https://www.youtube.com/watch?v=yzhvKKL8uJk)
