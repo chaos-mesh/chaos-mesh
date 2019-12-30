@@ -179,7 +179,7 @@ We can see the QPS performance affected by the chaos experiment from TiDB Grafan
 #### Update a chaos experiment
 
 ```bash
-vim pod-kill-example.yaml
+vim pod-kill-example.yaml  # modify pod-kill-example.yaml to what you want
 kubectl apply -f pod-kill-example.yaml
 ```
 
