@@ -216,7 +216,7 @@ Install
 helm install helm/chaos-mesh --name=chaos-mesh --namespace=chaos-testing --set dashboard.create=true
 ```
 
-If Chaos Operator was installed, we need to upgrade it:
+If Chaos Operator was installed, to upgrade older installations:
 
 ```bash
 helm upgrade chaos-mesh helm/chaos-mesh --namespace=chaos-testing --set dashboard.create=true
