@@ -223,15 +223,15 @@ kubectl port-forward -n chaos-testing svc/chaos-dashboard 8080:80
 
 Then you can access [`chaos-dashboard`](http://localhost:8080) in browser.
 
-### Deploy TiDB cluster
+### Deploy a TiDB cluster
 
 You can follow these two document links to deploy a TiDB cluster.
 
 * [if use kind](https://pingcap.com/docs/stable/tidb-in-kubernetes/get-started/deploy-tidb-from-kubernetes-kind/)
 * [if use minikube](https://pingcap.com/docs/stable/tidb-in-kubernetes/get-started/deploy-tidb-from-kubernetes-minikube/)
 
-### Run a chaos testing on TiDB cluster
+### Run a chaos testing on a TiDB cluster
 
-If you have installed Chaos Mesh and prepared a TiDB Cluster, you can run a benchmark(eg: [sysbench](https://github.com/akopytov/sysbench)) and then refer to the [Usage](#Usage) part, try different kinds of chaos actions supported now.
+If you have installed Chaos Mesh and prepared a TiDB cluster, you can run a benchmark(eg: [sysbench](https://github.com/akopytov/sysbench)) and then refer to the [Usage](#Usage) part, try different kinds of chaos actions supported now.
 
 [![Watch the video](./static/demo.png)](https://www.youtube.com/watch?v=yzhvKKL8uJk)
