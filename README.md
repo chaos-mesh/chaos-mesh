@@ -40,9 +40,18 @@ $ kubectl get crd podchaos.pingcap.com
 
 ##### Install Chaos Operator 
 
+`--set dashboard.create=true` used to control whether to install Chaos Dashboard.  
+
+Install Chaos Operator without Chaos Dashboard:
 ```bash
 $ helm install helm/chaos-mesh --name=chaos-mesh --namespace=chaos-testing
 $ kubectl get pods --namespace chaos-testing -l app.kubernetes.io/instance=chaos-mesh
+```
+
+Install Chaos Operator with Chaos Dashboard.
+
+```bash
+$ helm install helm/chaos-mesh --name=chaos-mesh --namespace=chaos-testing --set dashboard.create=true
 ```
 
 ### Get Start With `kind` or `minikube`
@@ -185,11 +194,16 @@ There are multiple kinds of chaos supported now.
 
 Chaos dashboard can be used to visualize chaos events. However, it **only** supports tidb now (so it isn't installed by default).
 
-#### Install Chaos Dashboard
-To install dashboard with `chaos-mesh`:
+#### Install Chaos Dashboard 
 
 ```
 helm install helm/chaos-mesh --name=chaos-mesh --namespace=chaos-testing --set dashboard.create=true
+```
+
+If Chaos operator was installed, we need to upgrade it:
+
+```
+helm upgrade helm/chaos-mesh --name=chaos-mesh --namespace=chaos-testing --set dashboard.create=true
 ```
 
 Then `svc/chaos-dashboard` will be created under `chaos-testing` namespace and you can access `chaos-dashboard` through it. The typical way to access it is to use `kubectl port-forward`
@@ -199,6 +213,8 @@ kubectl port-forward -n chaos-testing svc/chaos-dashboard 8080:80
 ```
 
 Then you can access [`chaos-dashboard`](http://localhost:8080) in browser.
+
+Then `svc/chaos-dashboard` will be created under `chaos-testing` namespace and you can access `chaos-dashboard` throught it.
 
 #### Demo
 
