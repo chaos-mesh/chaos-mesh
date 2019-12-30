@@ -53,9 +53,11 @@ kubectl get pods --namespace chaos-testing -l app.kubernetes.io/instance=chaos-m
 helm install helm/chaos-mesh --name=chaos-mesh --namespace=chaos-testing --set dashboard.create=true
 ```
 
-### Get Start With `kind` or `minikube`
+### Get Started on your local machine
 
 **This deployment is for testing only. DO NOT USE in production!**
+
+You can try Chaos Mesh on you local K8s envirement deployed using `kind` or `minikube`.
 
 #### Deploy with `kind`
 
