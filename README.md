@@ -193,11 +193,11 @@ kubectl delete -f pod-kill-example.yaml
 
 There are multiple kinds of chaos supported now.
 
-* pod-kill, pod-kill will simply kill selected pods. To ensure pod will be restarted again, ReplicaSet (or something similar) may be needed to guard it.
-* pod-fail, pod-fail means the process will not be alive in a period of time but the pod still exists.
-* netem chaos, netem chaos contains some kind of chaos. such as delay, duplicate etc. You can find more in example
-* network partition, network partition can decompose pods into several independent subnets by blocking communication between them.
-* IO chaos, IO delay means you can specify the latency before the io operation will return. IO errno means your read/write IO operation will return error.
+* `pod-kill`: pod-kill will simply kill selected pods. To ensure pod will be restarted again, ReplicaSet (or something similar) may be needed to guard it.
+* `pod-fail`: pod-fail means the process will not be alive in a period of time but the pod still exists.
+* `netem chaos`: netem chaos contains some kind of network chaos. such as delay, duplication etc. You can find more in [examples](./examples).
+* `network partition`: network partition can decompose pods into several independent subnets by blocking communication between them.
+* `IO chaos`: IO delay means you can specify the latency before the IO operation will return. IO errno means your read/write IO operation will return error.
 
 ## Chaos Dashboard
 
