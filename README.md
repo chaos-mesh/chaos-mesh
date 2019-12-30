@@ -1,6 +1,6 @@
-# Chaos Mesh
+<img src="static/logo.png" alt="chaos_logo" width="450"/>
 
-Chaos Mesh is an open source project that provides powerful chaos engineering platform for kubernetes. 
+Chaos Mesh is an open source project that provides powerful chaos engineering platform for kubernetes.
 
 At present stage it has two parts: Chaos Operator and Chaos Dashboard. Chaos Operator is available now. You can just install Chaos Operator to implement chaos operations. Chaos Dashboard is under development. Now, it can show the impact of chaos to TiDB Cluster\(other targets such as etcd need some configurations\).
 
@@ -14,7 +14,7 @@ Chaos Operator is used to inject chaos into the applications and Kubernetes infr
 
 #### Prerequisites
 
-Before deploying Chaos Mesh, make sure the following items are installed on your machine:
+Before deploying Chaos Mesh, make sure the following items have been installed. If you would like to have a try on your machine, you can refer to [get-started-on-your-local-machine](#get-started-on-your-local-machine) section.
 
 * Kubernetes >= v1.12 and < v1.16
 * [RBAC](https://kubernetes.io/docs/admin/authorization/rbac) enabled (optional)
@@ -62,26 +62,26 @@ You can try Chaos Mesh on you local K8s envirement deployed using `kind` or `min
 
 #### Deploy with `kind`
 
-1. Clone the code:
+1. Clone the code
 
    ```bash
    git clone --depth=1 https://github.com/pingcap/chaos-mesh && \
    cd chaos-mesh
    ```
 
-2. Run the script and create a local Kubernetes cluster:
+2. Run the script and create a local Kubernetes cluster
 
    ```bash
    hack/kind-cluster-build.sh
    ```
 
-3. To connect the local Kubernetes cluster, set the default configuration file path of kubectl to `kube-config`.
+3. To connect the local Kubernetes cluster, set the default configuration file path of kubectl to `kube-config`
 
    ```bash
    export KUBECONFIG="$(kind get kubeconfig-path)"
    ```
 
-4. Verify whether the Kubernetes cluster is on and running:
+4. Verify whether the Kubernetes cluster is on and running
 
    ```bash
    kubectl cluster-info
@@ -122,7 +122,9 @@ There are still some restrictions for `chaos-operator` on `kind` and `minikube` 
 
    More CRI runtime can be supported in the future. Wait for you contribution :)
 
-2. Network delay, loss, etc are not supported on `minikube` clusters. That's because `minikube` default virtual machine driver's image doesn't contain `sch_netem` kernel module. You can use `none` driver (if your host is Linux and has loaded `sch_netem` kernel module) to try these chaos on `minikube` or [build a image with `sch_netem` by yourself](https://minikube.sigs.k8s.io/docs/contributing/iso/)
+2. Network delay, loss, etc are not supported on `minikube` clusters. 
+
+   That's because `minikube` default virtual machine driver's image doesn't contain `sch_netem` kernel module. You can use `none` driver (if your host is Linux and has loaded `sch_netem` kernel module) to try these chaos on `minikube` or [build a image with `sch_netem` by yourself](https://minikube.sigs.k8s.io/docs/contributing/iso/)
 
 ### Usage
 
@@ -133,7 +135,7 @@ eg: define a chaos experiment to kill one tikv pod randomly
 create a chaos experiment file and name it `pod-kill-example.yaml`.
 
 > TiDB cluster named `tidb-cluster-demo` must be installed before applying this chaos experiment.   
-> For the installation of the TiDB cluster, see [deploy tidb cluster](#deploy-tidb-cluster)
+> For the installation of the TiDB cluster, see [deploy a TiDB cluster](#deploy-a-tidb-cluster)
 
 ```yaml
 apiVersion: pingcap.com/v1alpha1
@@ -179,7 +181,7 @@ We can see the QPS performance affected by the chaos experiment from TiDB Grafan
 #### Update a chaos experiment
 
 ```bash
-vim pod-kill-example.yaml
+vim pod-kill-example.yaml  # modify pod-kill-example.yaml to what you want
 kubectl apply -f pod-kill-example.yaml
 ```
 
@@ -201,18 +203,21 @@ There are multiple kinds of chaos supported now.
 
 ## Chaos Dashboard
 
-Chaos dashboard can be used to visualize chaos events. However, it **only** supports tidb now (so it isn't installed by default).
+Chaos dashboard can be used to visualize chaos events. However, it **only** supports TiDB now (so it isn't installed by default).
 
 ### Install Chaos Dashboard
+
+If Chaos Dashboard was installed, you can skip this step and directly go to [Deploy a TiDB cluster](#deploy-a-tidb-cluster).
+Install 
 
 ```bash
 helm install helm/chaos-mesh --name=chaos-mesh --namespace=chaos-testing --set dashboard.create=true
 ```
 
-If Chaos operator was installed, we need to upgrade it:
+If Chaos Operator was installed, we need to upgrade it:
 
 ```bash
-helm upgrade helm/chaos-mesh --name=chaos-mesh --namespace=chaos-testing --set dashboard.create=true
+helm upgrade chaos-mesh helm/chaos-mesh --namespace=chaos-testing --set dashboard.create=true
 ```
 
 Then `svc/chaos-dashboard` will be created under `chaos-testing` namespace and you can access `chaos-dashboard` through it. The typical way to access it is to use `kubectl port-forward`
@@ -221,17 +226,17 @@ Then `svc/chaos-dashboard` will be created under `chaos-testing` namespace and y
 kubectl port-forward -n chaos-testing svc/chaos-dashboard 8080:80
 ```
 
-Then you can access [`chaos-dashboard`](http://localhost:8080) in browser.
+Then you can access [`http://localhost:8080`](http://localhost:8080) in browser.
 
-### Deploy TiDB cluster
+### Deploy a TiDB cluster
 
 You can follow these two document links to deploy a TiDB cluster.
 
 * [if use kind](https://pingcap.com/docs/stable/tidb-in-kubernetes/get-started/deploy-tidb-from-kubernetes-kind/)
 * [if use minikube](https://pingcap.com/docs/stable/tidb-in-kubernetes/get-started/deploy-tidb-from-kubernetes-minikube/)
 
-### Run a chaos testing on TiDB cluster
+### Run a chaos testing on a TiDB cluster
 
-You can refer to the [Usage](#Usage) part, try different kinds of chaos actions supported now.
+If you have installed Chaos Mesh and prepared a TiDB cluster, you can run a benchmark(eg: [sysbench](https://github.com/akopytov/sysbench)) and then refer to the [Usage](#Usage) part, try different kinds of chaos actions supported now.
 
-[![Watch the video](./static/demo.png)](https://www.youtube.com/watch?v=yzhvKKL8uJk)
+[![Watch the video](./static/demo.gif)](https://www.youtube.com/watch?v=ifZEwdJO868)
