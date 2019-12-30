@@ -202,4 +202,4 @@ Then you can access [`chaos-dashboard`](http://localhost:8080) in browser.
 
 #### Demo
 
-[![Watch the video](./static/demo.png)](https://www.youtube.com/watch?v=yzhvKKL8uJk)
+[![Watch the video](./static/demo.png)](https://www.youtube.com/watch?v=uRB4oWcb0FI)
