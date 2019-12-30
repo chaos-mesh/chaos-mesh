@@ -205,14 +205,17 @@ Chaos dashboard can be used to visualize chaos events. However, it **only** supp
 
 ### Install Chaos Dashboard
 
+If Chaos Dashboard was installed, you can skip this step and directly go to [Deploy a TiDB cluster](#deploy-a-tidb-cluster).
+Install 
+
 ```bash
 helm install helm/chaos-mesh --name=chaos-mesh --namespace=chaos-testing --set dashboard.create=true
 ```
 
-If Chaos operator was installed, we need to upgrade it:
+If Chaos Operator was installed, we need to upgrade it:
 
 ```bash
-helm upgrade helm/chaos-mesh --name=chaos-mesh --namespace=chaos-testing --set dashboard.create=true
+helm upgrade chaos-mesh helm/chaos-mesh --namespace=chaos-testing --set dashboard.create=true
 ```
 
 Then `svc/chaos-dashboard` will be created under `chaos-testing` namespace and you can access `chaos-dashboard` through it. The typical way to access it is to use `kubectl port-forward`
