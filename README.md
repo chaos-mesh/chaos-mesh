@@ -216,4 +216,4 @@ Then you can access [`http://localhost:8080`](http://localhost:8080) in browser.
 
 #### Demo
 
-[![Watch the video](./static/demo.gif)](https://www.youtube.com/watch?v=uRB4oWcb0FI)
+[![Watch the video](./static/demo.gif)](https://www.youtube.com/watch?v=ifZEwdJO868)
