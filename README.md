@@ -133,7 +133,7 @@ eg: define a chaos experiment to kill one tikv pod randomly
 create a chaos experiment file and name it `pod-kill-example.yaml`.
 
 > TiDB cluster named `tidb-cluster-demo` must be installed before applying this chaos experiment.   
-> For the installation of the TiDB cluster, see [deploy tidb cluster](#deploy-tidb-cluster)
+> For the installation of the TiDB cluster, see [deploy a tidb cluster](#deploy-a-tidb-cluster)
 
 ```yaml
 apiVersion: pingcap.com/v1alpha1
@@ -223,15 +223,15 @@ kubectl port-forward -n chaos-testing svc/chaos-dashboard 8080:80
 
 Then you can access [`chaos-dashboard`](http://localhost:8080) in browser.
 
-### Deploy TiDB cluster
+### Deploy a TiDB cluster
 
 You can follow these two document links to deploy a TiDB cluster.
 
 * [if use kind](https://pingcap.com/docs/stable/tidb-in-kubernetes/get-started/deploy-tidb-from-kubernetes-kind/)
 * [if use minikube](https://pingcap.com/docs/stable/tidb-in-kubernetes/get-started/deploy-tidb-from-kubernetes-minikube/)
 
-### Run a chaos testing on TiDB cluster
+### Run a chaos testing on a TiDB cluster
 
-You can refer to the [Usage](#Usage) part, try different kinds of chaos actions supported now.
+If you have installed Chaos Mesh and prepared a TiDB cluster, you can run a benchmark(eg: [sysbench](https://github.com/akopytov/sysbench)) and then refer to the [Usage](#Usage) part, try different kinds of chaos actions supported now.
 
 [![Watch the video](./static/demo.png)](https://www.youtube.com/watch?v=yzhvKKL8uJk)
