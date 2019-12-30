@@ -1,31 +1,34 @@
-# Chaos Mesh 
-Chaos Mesh is a powerful chaos engineering platform for kubernetes. At present stage it has two parts Chaos-Operator and Chaos-Dashboard
-Chaos-Operator is available now. You can just install Chaos-operator to do chaos operations. Chaos-Dashboard is under development. It now can shows the impact of chaos to TiDB Cluster(other target such as etcd need some configure)
+<img src="static/logo.png" alt="chaos_logo" width="450"/>
 
+# Chaos Mesh
+
+Chaos Mesh is an open source project that provides powerful chaos engineering platform for kubernetes. 
+
+At present stage it has two parts: Chaos Operator and Chaos Dashboard. Chaos Operator is available now. You can just install Chaos Operator to implement chaos operations. Chaos Dashboard is under development. Now, it can show the impact of chaos to TiDB Cluster\(other targets such as etcd need some configurations\).
 
 ## Chaos Operator
 
-It is used to inject chaos into the applications and Kubernetes infrastructure in a manageable way. Which provides easy definitions for chaos experiments and automates the execution of chaos experiments.
+Chaos Operator is used to inject chaos into the applications and Kubernetes infrastructure in a manageable way, which provides easy definitions for chaos experiments and automates the execution of chaos experiments.
 
 ![Chaos Operator](./static/chaos-mesh-overview.png)
 
-### Deploy 
+### Deploy
 
-#### Prerequisites 
+#### Prerequisites
 
-Before deploying Chaos Mesh, make sure the following items are installed on your machine: 
+Before deploying Chaos Mesh, make sure the following items are installed on your machine:
 
 * Kubernetes >= v1.12 and < v1.16
 * [RBAC](https://kubernetes.io/docs/admin/authorization/rbac) enabled (optional)
 * [Helm](https://helm.sh/) version >= v2.8.2 and < v3.0.0
 
-#### Install Chaos Operator 
+#### Install
 
 ##### Get the Helm files
 
 ```bash
-$ git clone https://github.com/pingcap/chaos-mesh.git
-$ cd chaos-mesh/
+git clone https://github.com/pingcap/chaos-mesh.git
+cd chaos-mesh/
 ```
 
 ##### Create custom resource type
@@ -34,52 +37,53 @@ Chaos Mesh uses [CRD (Custom Resource Definition)](https://kubernetes.io/docs/ta
 to extend Kubernetes. Therefore, to use Chaos Mesh, you must first create the related custom resource type.
 
 ```bash
-$ kubectl apply -f manifests/
-$ kubectl get crd podchaos.pingcap.com
+kubectl apply -f manifests/
+kubectl get crd podchaos.pingcap.com
 ```
 
-##### Install Chaos Operator 
+##### Install Chaos Mesh
 
-`--set dashboard.create=true` used to control whether to install Chaos Dashboard.  
-
-Install Chaos Operator without Chaos Dashboard:
-```bash
-$ helm install helm/chaos-mesh --name=chaos-mesh --namespace=chaos-testing
-$ kubectl get pods --namespace chaos-testing -l app.kubernetes.io/instance=chaos-mesh
-```
-
-Install Chaos Operator with Chaos Dashboard.
+* Install Chaos Mesh with Chaos Operator only
 
 ```bash
-$ helm install helm/chaos-mesh --name=chaos-mesh --namespace=chaos-testing --set dashboard.create=true
+helm install helm/chaos-mesh --name=chaos-mesh --namespace=chaos-testing
+kubectl get pods --namespace chaos-testing -l app.kubernetes.io/instance=chaos-mesh
 ```
 
-### Get Start With `kind` or `minikube`
+* Install Chaos Mesh with Chaos Operator and Chaos Dashboard
+
+```bash
+helm install helm/chaos-mesh --name=chaos-mesh --namespace=chaos-testing --set dashboard.create=true
+```
+
+### Get Started on your local machine
 
 **This deployment is for testing only. DO NOT USE in production!**
 
+You can try Chaos Mesh on you local K8s envirement deployed using `kind` or `minikube`.
+
 #### Deploy with `kind`
 
-1. Clone the code:
+1. Clone the code
 
    ```bash
    git clone --depth=1 https://github.com/pingcap/chaos-mesh && \
    cd chaos-mesh
    ```
 
-2. Run the script and create a local Kubernetes cluster:
+2. Run the script and create a local Kubernetes cluster
 
    ```bash
    hack/kind-cluster-build.sh
    ```
 
-3. To connect the local Kubernetes cluster, set the default configuration file path of kubectl to `kube-config`.
+3. To connect the local Kubernetes cluster, set the default configuration file path of kubectl to `kube-config`
 
    ```bash
    export KUBECONFIG="$(kind get kubeconfig-path)"
    ```
 
-4. Verify whether the Kubernetes cluster is on and running:
+4. Verify whether the Kubernetes cluster is on and running
 
    ```bash
    kubectl cluster-info
@@ -92,7 +96,7 @@ Then you can install `chaos-mesh` on `kind` kubernetes cluster as suggested abov
 1. Start a `minikube` kubernetes cluster
 
    ```bash
-   minikube start --kubernetes-version v1.15.0
+   minikube start --kubernetes-version v1.15.0 --cpus 4 --memory "8192mb" // we recommend that you allocate enough RAM(better more than 8192 MiB) to VM
    ```
 
 2. Install helm
@@ -110,7 +114,7 @@ Then you can install `chaos-mesh` on `kind` kubernetes cluster as suggested abov
 
 After helm tiller pod is running, you can install `chaos-operator` like suggested above.
 
-#### Warn
+#### Warning
 
 There are still some restrictions for `chaos-operator` on `kind` and `minikube` clusters.
 
@@ -120,15 +124,20 @@ There are still some restrictions for `chaos-operator` on `kind` and `minikube` 
 
    More CRI runtime can be supported in the future. Wait for you contribution :)
 
-2. Network delay, loss, etc are not supported on `minikube` clusters. That's because `minikube` default virtual machine driver's image doesn't contain `sch_netem` kernel module. You can use `none` driver (if your host is Linux and has loaded `sch_netem` kernel module) to try these chaos on `minikube` or [build a image with `sch_netem` by yourself](https://minikube.sigs.k8s.io/docs/contributing/iso/)
+2. Network delay, loss, etc are not supported on `minikube` clusters. 
+
+   That's because `minikube` default virtual machine driver's image doesn't contain `sch_netem` kernel module. You can use `none` driver (if your host is Linux and has loaded `sch_netem` kernel module) to try these chaos on `minikube` or [build a image with `sch_netem` by yourself](https://minikube.sigs.k8s.io/docs/contributing/iso/)
 
 ### Usage
 
-#### Define chaos experiment config file 
+#### Define chaos experiment config file
 
 eg: define a chaos experiment to kill one tikv pod randomly
 
-create a chaos experiment file and name it pod-kill-example.yaml
+create a chaos experiment file and name it `pod-kill-example.yaml`.
+
+> TiDB cluster named `tidb-cluster-demo` must be installed before applying this chaos experiment.   
+> For the installation of the TiDB cluster, see [deploy a TiDB cluster](#deploy-a-tidb-cluster)
 
 ```yaml
 apiVersion: pingcap.com/v1alpha1
@@ -145,7 +154,7 @@ spec:
     labelSelectors:
       "app.kubernetes.io/component": "tikv"
   scheduler:
-    cron: "@every 1m"
+    cron: "@every 2m"
 ```
 
 ##### PodChaos
@@ -155,55 +164,62 @@ PodChaos designs for the chaos experiments about pods.
 * **action** defines the specific pod chaos action, supported action: pod-kill / pod-failure
 * **mode** defines the mode to run chaos action, supported mode: one / all / fixed / fixed-percent / random-max-percent
 * **selector** is used to select pods that are used to inject chaos action.
-* **scheduler** defines some scheduler rules to the running time of the chaos experiment about pods. 
+* **scheduler** defines some scheduler rules to the running time of the chaos experiment about pods.
 More cron rule info: https://godoc.org/github.com/robfig/cron
 
-
-more examples: [https://github.com/pingcap/chaos-mesh/tree/master/examples](https://github.com/pingcap/chaos-mesh/tree/master/examples) 
+more examples: [https://github.com/pingcap/chaos-mesh/tree/master/examples](https://github.com/pingcap/chaos-mesh/tree/master/examples)
 
 #### Create a chaos experiment
 
 ```bash
-$ kubectl apply -f pod-kill-example.yaml
-$ kubectl get podchaos --namespace=chaos-testing
+kubectl apply -f pod-kill-example.yaml
+kubectl get podchaos --namespace=chaos-testing
 ```
+
+We can see the QPS performance affected by the chaos experiment from TiDB Grafana dashboard: 
+
+![tikv-pod-kilk](./static/tikv-pod-kill.png)
 
 #### Update a chaos experiment
 
 ```bash
-$ vim pod-kill-example.yaml
-$ kubectl apply -f pod-kill-example.yaml
+vim pod-kill-example.yaml  # modify pod-kill-example.yaml to what you want
+kubectl apply -f pod-kill-example.yaml
 ```
 
 #### Delete a chaos experiment
 
 ```bash
-$ kubectl delete -f pod-kill-example.yaml
+kubectl delete -f pod-kill-example.yaml
 ```
 
-### additional
+### Additional
 
 There are multiple kinds of chaos supported now.
-* pod-kill, pod-kill will simply kill selected pods. To ensure pod will be restarted again, ReplicaSet (or something similar) may be needed to guard it.
-* pod-fail, pod-fail means the process will not be alive in a period of time but the pod still exists.
-* netem chaos, netem chaos contains some kind of chaos. such as delay, duplicate etc. You can find more in example
-* network partition, network partition can decompose pods into several independent subnets by blocking communication between them.
-* IO chaos, IO delay means you can specify the latency before the io operation will return. IO errno means your read/write IO operation will return error.
+
+* `pod-kill`: pod-kill will simply kill selected pods. To ensure pod will be restarted again, ReplicaSet (or something similar) may be needed to guard it.
+* `pod-fail`: pod-fail means the process will not be alive in a period of time but the pod still exists.
+* `netem chaos`: netem chaos contains some kind of network chaos. such as delay, duplication etc. You can find more in [examples](./examples).
+* `network partition`: network partition can decompose pods into several independent subnets by blocking communication between them.
+* `IO chaos`: IO delay means you can specify the latency before the IO operation will return. IO errno means your read/write IO operation will return error.
 
 ## Chaos Dashboard
 
-Chaos dashboard can be used to visualize chaos events. However, it **only** supports tidb now (so it isn't installed by default).
+Chaos dashboard can be used to visualize chaos events. However, it **only** supports TiDB now (so it isn't installed by default).
 
-#### Install Chaos Dashboard 
+### Install Chaos Dashboard
 
-```
+If Chaos Dashboard was installed, you can skip this step and directly go to [Deploy a TiDB cluster](#deploy-a-tidb-cluster).
+Install 
+
+```bash
 helm install helm/chaos-mesh --name=chaos-mesh --namespace=chaos-testing --set dashboard.create=true
 ```
 
-If Chaos operator was installed, we need to upgrade it:
+If Chaos Operator was installed, we need to upgrade it:
 
-```
-helm upgrade helm/chaos-mesh --name=chaos-mesh --namespace=chaos-testing --set dashboard.create=true
+```bash
+helm upgrade chaos-mesh helm/chaos-mesh --namespace=chaos-testing --set dashboard.create=true
 ```
 
 Then `svc/chaos-dashboard` will be created under `chaos-testing` namespace and you can access `chaos-dashboard` through it. The typical way to access it is to use `kubectl port-forward`
@@ -214,6 +230,15 @@ kubectl port-forward -n chaos-testing svc/chaos-dashboard 8080:80
 
 Then you can access [`http://localhost:8080`](http://localhost:8080) in browser.
 
-#### Demo
+### Deploy a TiDB cluster
+
+You can follow these two document links to deploy a TiDB cluster.
+
+* [if use kind](https://pingcap.com/docs/stable/tidb-in-kubernetes/get-started/deploy-tidb-from-kubernetes-kind/)
+* [if use minikube](https://pingcap.com/docs/stable/tidb-in-kubernetes/get-started/deploy-tidb-from-kubernetes-minikube/)
+
+### Run a chaos testing on a TiDB cluster
+
+If you have installed Chaos Mesh and prepared a TiDB cluster, you can run a benchmark(eg: [sysbench](https://github.com/akopytov/sysbench)) and then refer to the [Usage](#Usage) part, try different kinds of chaos actions supported now.
 
 [![Watch the video](./static/demo.gif)](https://www.youtube.com/watch?v=ifZEwdJO868)
