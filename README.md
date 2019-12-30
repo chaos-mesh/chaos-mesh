@@ -133,7 +133,7 @@ eg: define a chaos experiment to kill one tikv pod randomly
 create a chaos experiment file and name it `pod-kill-example.yaml`.
 
 > TiDB cluster named `tidb-cluster-demo` must be installed before applying this chaos experiment.   
-> For the installation of the TiDB cluster, see [deploy a tidb cluster](#deploy-a-tidb-cluster)
+> For the installation of the TiDB cluster, see [deploy a TiDB cluster](#deploy-a-tidb-cluster)
 
 ```yaml
 apiVersion: pingcap.com/v1alpha1
@@ -201,7 +201,7 @@ There are multiple kinds of chaos supported now.
 
 ## Chaos Dashboard
 
-Chaos dashboard can be used to visualize chaos events. However, it **only** supports tidb now (so it isn't installed by default).
+Chaos dashboard can be used to visualize chaos events. However, it **only** supports TiDB now (so it isn't installed by default).
 
 ### Install Chaos Dashboard
 
