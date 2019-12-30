@@ -54,9 +54,11 @@ kubectl get pods --namespace chaos-testing -l app.kubernetes.io/instance=chaos-m
 helm install helm/chaos-mesh --name=chaos-mesh --namespace=chaos-testing --set dashboard.create=true
 ```
 
-### Get Start With `kind` or `minikube`
+### Get Started on your local machine
 
 **This deployment is for testing only. DO NOT USE in production!**
+
+You can try Chaos Mesh on you local K8s envirement deployed using `kind` or `minikube`.
 
 #### Deploy with `kind`
 
@@ -128,7 +130,10 @@ There are still some restrictions for `chaos-operator` on `kind` and `minikube` 
 
 eg: define a chaos experiment to kill one tikv pod randomly
 
-create a chaos experiment file and name it pod-kill-example.yaml
+create a chaos experiment file and name it `pod-kill-example.yaml`.
+
+> TiDB cluster named `tidb-cluster-demo` must be installed before applying this chaos experiment.   
+> For the installation of the TiDB cluster, see [deploy tidb cluster](#deploy-tidb-cluster)
 
 ```yaml
 apiVersion: pingcap.com/v1alpha1
@@ -145,7 +150,7 @@ spec:
     labelSelectors:
       "app.kubernetes.io/component": "tikv"
   scheduler:
-    cron: "@every 1m"
+    cron: "@every 2m"
 ```
 
 ##### PodChaos
@@ -166,6 +171,10 @@ more examples: [https://github.com/pingcap/chaos-mesh/tree/master/examples](http
 kubectl apply -f pod-kill-example.yaml
 kubectl get podchaos --namespace=chaos-testing
 ```
+
+We can see the QPS performance affected by the chaos experiment from TiDB Grafana dashboard: 
+
+![tikv-pod-kilk](./static/tikv-pod-kill.png)
 
 #### Update a chaos experiment
 
