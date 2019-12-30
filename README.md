@@ -15,7 +15,7 @@ It is used to inject chaos into the applications and Kubernetes infrastructure i
 
 Before deploying Chaos Mesh, make sure the following items are installed on your machine: 
 
-* Kubernetes >= v1.12
+* Kubernetes >= v1.12 and < v1.16
 * [RBAC](https://kubernetes.io/docs/admin/authorization/rbac) enabled (optional)
 * Helm version >= v2.8.2 and < v3.0.0
 * Protobuf version >= v3.6.1 and < v3.7.0 and go support
