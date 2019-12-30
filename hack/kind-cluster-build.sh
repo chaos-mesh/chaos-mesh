@@ -209,6 +209,7 @@ spec:
 EOF
 kubectl apply -f ${registryFile}
 
+kubectl apply -f ${ROOT}/manifests/local-volume-provisioner.yaml
 kubectl apply -f ${ROOT}/manifests/tiller-rbac.yaml
 
 kubectl create ns chaos-testing
