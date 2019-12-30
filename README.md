@@ -101,7 +101,7 @@ Then you can install `chaos-mesh` on `kind` kubernetes cluster as suggested abov
 
 After helm tiller pod is running, you can install `chaos-operator` like suggested above.
 
-#### Warnning
+#### Warning
 
 There are still some restrictions for `chaos-operator` on `kind` and `minikube` clusters.
 
@@ -201,7 +201,7 @@ kubectl port-forward -n chaos-testing svc/chaos-dashboard 8080:80
 
 Then you can access [`chaos-dashboard`](http://localhost:8080) in browser.
 
-### Deploy TiDB
+### Deploy TiDB cluster
 
 You can follow these two document links to deploy a TiDB cluster.
 
