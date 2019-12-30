@@ -1,3 +1,5 @@
+<img src="static/logo.png" alt="chaos_logo" width="300"/>
+
 # Chaos Mesh
 
 Chaos Mesh is an open source project that provides powerful chaos engineering platform for kubernetes. 
