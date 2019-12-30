@@ -30,7 +30,7 @@ var _ = Describe("IoChaos Controller", func() {
 	supportingModes := []v1alpha1.IOChaosAction{
 		v1alpha1.IODelayAction,
 		v1alpha1.IOErrnoAction,
-		v1alpha1.IOErrnoAction,
+		v1alpha1.IOMixedAction,
 	}
 
 	BeforeEach(func() {
