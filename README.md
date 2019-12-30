@@ -130,9 +130,9 @@ There are still some restrictions for `chaos-operator` on `kind` and `minikube` 
 
 #### Define chaos experiment config file
 
-eg: define a chaos experiment to kill one tikv pod randomly
+For example, we define a chaos experiment to simulate the scenario where one TiKV node is down 
 
-create a chaos experiment file and name it `pod-kill-example.yaml`.
+create a chaos experiment file and name it `pod-failure-example.yaml`.
 
 > TiDB cluster named `tidb-cluster-demo` must be installed before applying this chaos experiment.   
 > For the installation of the TiDB cluster, see [deploy a TiDB cluster](#deploy-a-tidb-cluster)
@@ -141,18 +141,19 @@ create a chaos experiment file and name it `pod-kill-example.yaml`.
 apiVersion: pingcap.com/v1alpha1
 kind: PodChaos
 metadata:
-  name: pod-kill-example
+  name: pod-failure-example
   namespace: chaos-testing
 spec:
-  action: pod-kill
+  action: pod-failure
   mode: one
+  duration: "60s"
   selector:
     namespaces:
       - tidb-cluster-demo
     labelSelectors:
       "app.kubernetes.io/component": "tikv"
   scheduler:
-    cron: "@every 2m"
+    cron: "@every 5m"
 ```
 
 ##### PodChaos
@@ -161,6 +162,7 @@ PodChaos designs for the chaos experiments about pods.
 
 * **action** defines the specific pod chaos action, supported action: pod-kill / pod-failure
 * **mode** defines the mode to run chaos action, supported mode: one / all / fixed / fixed-percent / random-max-percent
+* **duration** define the duration time for each chaos experiment.
 * **selector** is used to select pods that are used to inject chaos action.
 * **scheduler** defines some scheduler rules to the running time of the chaos experiment about pods.
 More cron rule info: https://godoc.org/github.com/robfig/cron
@@ -170,25 +172,25 @@ more examples: [https://github.com/pingcap/chaos-mesh/tree/master/examples](http
 #### Create a chaos experiment
 
 ```bash
-kubectl apply -f pod-kill-example.yaml
+kubectl apply -f pod-failure-example.yaml
 kubectl get podchaos --namespace=chaos-testing
 ```
 
 We can see the QPS performance affected by the chaos experiment from TiDB Grafana dashboard: 
 
-![tikv-pod-kilk](./static/tikv-pod-kill.png)
+![tikv-pod-failure](./static/tikv-pod-failure.png)
 
 #### Update a chaos experiment
 
 ```bash
-vim pod-kill-example.yaml  # modify pod-kill-example.yaml to what you want
-kubectl apply -f pod-kill-example.yaml
+vim pod-failure-example.yaml # modify pod-failure-example.yaml to what you want
+kubectl apply -f pod-failure-example.yaml
 ```
 
 #### Delete a chaos experiment
 
 ```bash
-kubectl delete -f pod-kill-example.yaml
+kubectl delete -f pod-failure-example.yaml
 ```
 
 ### Additional
@@ -237,6 +239,6 @@ You can follow these two document links to deploy a TiDB cluster.
 
 ### Run a chaos testing on a TiDB cluster
 
-If you have installed Chaos Mesh and prepared a TiDB cluster, you can run a benchmark(eg: [sysbench](https://github.com/akopytov/sysbench)) and then refer to the [Usage](#Usage) part, try different kinds of chaos actions supported now.
+If you have installed Chaos Mesh and prepared a TiDB cluster, you can run a benchmark(eg: [sysbench](https://pingcap.com/docs-cn/stable/benchmark/how-to-run-sysbench/)) and then refer to the [Usage](#Usage) part, try different kinds of chaos actions supported now.
 
 [![Watch the video](./static/demo.gif)](https://www.youtube.com/watch?v=ifZEwdJO868)
