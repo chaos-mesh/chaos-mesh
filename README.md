@@ -1,6 +1,6 @@
 # Chaos Mesh
 
-Chaos Mesh is a an open source project that provides powerful chaos engineering platform for kubernetes. 
+Chaos Mesh is an open source project that provides powerful chaos engineering platform for kubernetes. 
 
 At present stage it has two parts: "Chaos Operator" and "Chaos Dashboard". Chaos Operator is available now. You can just install Chaos Operator to implement chaos operations. Chaos Dashboard is under development. Now, it can show the impact of chaos to TiDB Cluster\(other targets such as etcd need some configurations\).
 
