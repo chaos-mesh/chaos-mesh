@@ -84,7 +84,7 @@ Then you can install `chaos-mesh` on `kind` kubernetes cluster as suggested abov
 1. Start a `minikube` kubernetes cluster
 
    ```bash
-   minikube start
+   minikube start --kubernetes-version v1.15.0
    ```
 
 2. Install helm
