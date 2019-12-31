@@ -168,6 +168,7 @@ metadata:
 spec:
   action: pod-kill # the specific chaos action to inject; supported action: pod-kill/pod-failure
   mode: one # the mode to run chaos action; supported mode are one/all/fixed/fixed-percent/random-max-percent
+  duration: "60s"
   selector: # pods where to inject chaos actions
     namespaces:
       - tidb-cluster-demo
