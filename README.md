@@ -74,7 +74,9 @@ helm install helm/chaos-mesh --name=chaos-mesh --namespace=chaos-testing --set d
 
 ## Get started on your local machine
 
-**This deployment is for testing only. DO NOT USE in production!**
+> **Warning:**
+>
+>**This deployment is for testing only. DO NOT USE in production!**
 
 You can try Chaos Mesh on your local K8s environment deployed using `kind` or `minikube`.
 
@@ -132,7 +134,7 @@ You can try Chaos Mesh on your local K8s environment deployed using `kind` or `m
 
 4. Install `chaos-operator` as suggested in [Deploy Chaos Mesh](#deploy-chaos-mesh).
 
-**Notes**:
+**Note:**
 
 There are some known restrictions for Chaos Operator deployed on `kind` and `minikube` clusters:
 
