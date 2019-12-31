@@ -173,7 +173,7 @@ spec:
   duration: "60s" # duration for the injected chaos experiment
   selector: # pods where to inject chaos actions
     namespaces:
-      - tidb-cluster-demo
+      - tidb-cluster-demo  # the namespace of the TiDB cluster you've deployed 
     labelSelectors:
       "app.kubernetes.io/component": "tikv"
   scheduler: # scheduler rules for the running time of the chaos experiments about pods.
@@ -210,7 +210,7 @@ Chaos Dashboard is currently only available for TiDB clusters. Stay tuned for mo
 
 > **Note:**
 >
-> If Chaos Dashboard wasn't installed in your Chaos Mesh in your earlier, you need to install it by upgrading Chaos Mesh:
+> If Chaos Dashboard was not installed in your earlier deployment, you need to install it by upgrading Chaos Mesh:
 >
 > ```helm upgrade chaos-mesh helm/chaos-mesh --namespace=chaos-testing --set dashboard.create=true```
 
@@ -226,7 +226,7 @@ Then you can access [`http://localhost:8080`](http://localhost:8080) in browser.
 
 Please reach out for bugs, feature requests, and other issues via:
 
-- The #chaos-mesh channel in the [tidbcommunity](https://pingcap.com/tidbslack) slack workspace.
+- The #chaos-mesh channel in the [TiDB Community](https://pingcap.com/tidbslack) slack workspace.
 - Filing a issue or opening a PR against this repo.
 
 ## Roadmap
