@@ -93,7 +93,7 @@ You can try Chaos Mesh on your local K8s environment deployed using `kind` or `m
    cd chaos-mesh
    ```
 
-2. Run the script and create a local Kubernetes cluster. Make sure you have installed [kind](https://kind.sigs.k8s.io/), and run the script below to create a local Kubernetes cluster
+2. Run the script and create a local Kubernetes cluster. Make sure you have installed [kind](https://kind.sigs.k8s.io/), and run the script below to create a local Kubernetes cluster.
 
    ```bash
    hack/kind-cluster-build.sh
@@ -115,7 +115,7 @@ You can try Chaos Mesh on your local K8s environment deployed using `kind` or `m
 
 #### Deploy with `minikube`
 
-1. Start a `minikube` kubernetes cluster
+1. Start a `minikube` kubernetes cluster. Make sure you have installed [minikube](https://kubernetes.io/docs/tasks/tools/install-minikube/), and run the script below to start a local `minikube` cluster
 
    ```bash
    minikube start --kubernetes-version v1.15.0 --cpus 4 --memory "8192mb" # we recommend that you allocate enough RAM(better more than 8192 MiB) to VM
