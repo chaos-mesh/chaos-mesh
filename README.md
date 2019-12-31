@@ -6,18 +6,20 @@
 
 Chaos Mesh is a cloud-native Chaos Engineering toolset that orchestrates chaos on Kubernetes environment. At the current stage, it has the following components:
 
-- **Chaos Operator**: the core component for Chaos orchastration. Fully open sourced.
+- **Chaos Operator**: the core component for Chaos orchestration. Fully open sourced.
 - **Chaos Dashboard**: a visualized panel that shows the impacts of Chaos experiments on the online services of the system; under development; curently only supports chaos experiments on TiDB.
+
+See the following demo video for a quick view of Chaos Mesh:
 
 [![Watch the video](./static/demo.gif)](https://www.youtube.com/watch?v=ifZEwdJO868)
 
 ## Chaos Operator
 
-Chaos Operator injects chaos into the applications and Kubernetes infrastructure in a manageable way, which provides easy, custom definitions for chaos experiments and automatic orchastration. There are three components at play:
+Chaos Operator injects chaos into the applications and Kubernetes infrastructure in a manageable way, which provides easy, custom definitions for chaos experiments and automatic orchestration. There are three components at play:
 
 **Controller-manager**: used to schedule and manage the lifecycle of CRD objects
 
-**Chaos-daemon**: runs as daemonset with previleged system permissions over network, Cgroup, etc. on each node
+**Chaos-daemon**: runs as daemonset with privileged system permissions over network, Cgroup, etc. for a specifc node
 
 **Sidecar**: a special type of container that is dynamically injected into the target Pod by the webhook-server, which can be used for hacjacking I/O of the application container.
 
@@ -144,16 +146,16 @@ There are some known restrictions for Chaos Operator deployed on `kind` and `min
 
 - `netem chaos` is not supported for `minikube` clusters.
 
-    In `minikube`, the default virtual machine driver's image doesn't contain the `sch_netem` kernel module. You can use `none` driver (if your host is Linux with the `sch_netem` kernel module loaded) to try these chaos actions on `minikube` or [build a image with sch_netem by yourself](https://minikube.sigs.k8s.io/docs/contributing/iso/).
+    In `minikube`, the default virtual machine driver's image doesn't contain the `sch_netem` kernel module. You can use `none` driver (if your host is Linux with the `sch_netem` kernel module loaded) to try these chaos actions on `minikube` or [build an image with sch_netem by yourself](https://minikube.sigs.k8s.io/docs/contributing/iso/).
 
 ### Deploy target cluster
 
 After Chaos Mesh is deployed, we can deploy the target cluster to be tested, or where we want to inject faults. For illustration purposes, we use TiDB as our sample cluster.
 
-You can follow the instructions on the following two document to deploy a TiDB cluster:
+You can follow the instructions in the following two document to deploy a TiDB cluster:
 
-* [if use kind](https://pingcap.com/docs/stable/tidb-in-kubernetes/get-started/deploy-tidb-from-kubernetes-kind/)
-* [if use minikube](https://pingcap.com/docs/stable/tidb-in-kubernetes/get-started/deploy-tidb-from-kubernetes-minikube/)
+* [Deploy using kind](https://pingcap.com/docs/stable/tidb-in-kubernetes/get-started/deploy-tidb-from-kubernetes-kind/)
+* [Deoloy using minikube](https://pingcap.com/docs/stable/tidb-in-kubernetes/get-started/deploy-tidb-from-kubernetes-minikube/)
 
 ### Define chaos experiment config file
 
@@ -204,9 +206,13 @@ kubectl delete -f pod-failure-example.yaml
 
 #### Warch your chaos experiments in Dashboard
 
-Chaos Dashboard is currently only availble for TiDB clusters. Stay tuned for more supports or join us in making it happen.
+Chaos Dashboard is currently only available for TiDB clusters. Stay tuned for more supports or join us in making it happen.
 
-**Note:** Make sure you have used the [option](#install-chaos-mesh) to deploy Chaos Mesh with Chaos Dashboard.
+> **Note:**
+>
+> Make sure you have used the [option](#deploy-chaos-mesh) to deploy Chaos Mesh with Chaos Dashboard. If Chaos Dashboard wasn't installed in your Chaos Mesh, you need to install it by upgrading Chaos Mesh:
+>
+> ```helm upgrade chaos-mesh helm/chaos-mesh --namespace=chaos-testing --set dashboard.create=true```
 
 A typical way to access it is to use `kubectl port-forward`
 
