@@ -78,7 +78,6 @@ type IoChaosSpec struct {
 	Value string `json:"value"`
 
 	// Duration represents the duration of the chaos action.
-	// It is required when the action is `PodFailureAction`.
 	// A duration string is a possibly signed sequence of
 	// decimal numbers, each with optional fraction and a unit suffix,
 	// such as "300ms", "-1.5h" or "2h45m".
@@ -131,11 +130,11 @@ type IoChaosSpec struct {
 	// +required
 	ConfigName string `json:"configName"`
 
-	// Next time when this action will be applied again
+	// Next time when this action will be applied again.
 	// +optional
 	NextStart *metav1.Time `json:"nextStart,omitempty"`
 
-	// Next time when this action will be recovered
+	// Next time when this action will be recovered.
 	// +optional
 	NextRecover *metav1.Time `json:"nextRecover,omitempty"`
 }
