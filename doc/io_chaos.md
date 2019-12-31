@@ -83,8 +83,8 @@ If `delay` is not specified, it will be generate randomly.
 
 ```yaml
 spec:
-	action: errno
-	errno: "32"
+  action: errno
+  errno: "32"
 ```
 
 If `errno` is not specified, it will be generate randomly. 
@@ -93,9 +93,9 @@ If `errno` is not specified, it will be generate randomly.
 
 ````yaml
 spec:
-	action: mixed
-	delay: "1ms"
-	errno: "32"
+  action: mixed
+  delay: "1ms"
+  errno: "32"
 ````
 
 It is mix of **delay** and **errno**.
