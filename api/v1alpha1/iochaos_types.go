@@ -87,7 +87,7 @@ type IoChaosSpec struct {
 	Duration string `json:"duration"`
 
 	// Layer represents the layer of the I/O action.
-	// Supported value: fs / errno / mixed.
+	// Supported value: fs.
 	// Default layer: fs
 	Layer IOLayer `json:"layer"`
 

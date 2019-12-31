@@ -57,6 +57,7 @@ kubectl apply -f examples/io-mixed-sample.yaml
 * **methods**: defines the I/O methods for injecting I/O chaos action. It’s an array of string, which set the IO syscall like `open` `read` . You can see the [availiable methods](#availiable-methods) below.
 * **addr**: defines the sidecar HTTP server address for sidecar container, like `":8080"`.
 * **configName**: defines the config name which used to inject pod. You can refer to [examples/tikv-configmap.yaml](../examples/tikv-configmap.yaml) to define your config.
+* **layer**: represents the layer of the I/O action. Supported value: `fs` , and default is `fs`.
 
 ## IO Chaos Availiable Actions
 
