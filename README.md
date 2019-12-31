@@ -111,7 +111,7 @@ You can try Chaos Mesh on your local K8s environment deployed using `kind` or `m
    kubectl cluster-info
    ```
 
-5. Install `chaos-mesh` on `kind` kubernetes cluster as suggested in [Deploy Chaos Mesh](#deploy-chaos-mesh).
+5. Install `chaos-mesh` on `kind` kubernetes cluster as suggested in [Install Chaos Mesh](#install-chaos-mesh).
 
 #### Deploy with `minikube`
 
