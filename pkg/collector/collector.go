@@ -211,7 +211,7 @@ func (r *ChaosCollector) SetupGrafana(ctx context.Context, name string, namespac
 		BlockOwnerDeletion: &blockOwnerDeletion,
 		Name:               "chaos-dashboard",
 		Kind:               "Deployment",
-		APIVersion:         "apps/v1beta1",
+		APIVersion:         "apps/v1",
 		UID:                uid,
 	})
 
@@ -257,7 +257,7 @@ func (r *ChaosCollector) SetupGrafana(ctx context.Context, name string, namespac
 		BlockOwnerDeletion: &blockOwnerDeletion,
 		Name:               "chaos-dashboard",
 		Kind:               "Deployment",
-		APIVersion:         "apps/v1beta1",
+		APIVersion:         "apps/v1",
 		UID:                uid,
 	})
 	service.Spec.Selector = labels

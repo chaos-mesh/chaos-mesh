@@ -1,6 +1,6 @@
 {{- if .Values.dashboard.create }}
 
-apiVersion: apps/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: chaos-collector-database
