@@ -9,6 +9,8 @@ Chaos Mesh is a cloud-native Chaos Engineering tookset that orchestrates chaos o
 - **Chaos Operator**: the core component for Chaos orchastration. Fully open sourced.
 - **Chaos Dashboard**: a visualized panel that shows the impacts of Chaos experiments on the online services of the system; under development; curently only supports chaos experiments on TiDB.
 
+[![Watch the video](./static/demo.gif)](https://www.youtube.com/watch?v=ifZEwdJO868)
+
 ## Chaos Operator
 
 Chaos Operator injects chaos into the applications and Kubernetes infrastructure in a manageable way, which provides easy, custom definitions for chaos experiments and automatic orchastration. There are three components at play:
@@ -31,7 +33,7 @@ Chaos Operator uses [Custom Resource Definition (CRD)](https://kubernetes.io/doc
 
 ## Prerequisites
 
-Before deploying Chaos Mesh, make sure the following items are installed on your machine:
+Before deploying Chaos Mesh, make sure the following items have been installed. If you would like to have a try on your machine, you can refer to [get-started-on-your-local-machine](#get-started-on-your-local-machine) section.
 
 * Kubernetes >= v1.12 and < v1.16
 * [RBAC](https://kubernetes.io/docs/admin/authorization/rbac) enabled (optional)
@@ -80,14 +82,14 @@ You can try Chaos Mesh on your local K8s environment deployed using `kind` or `m
 
 #### Deploy with `kind`:
 
-1. Clone the code:
+1. Clone the code
 
    ```bash
    git clone --depth=1 https://github.com/pingcap/chaos-mesh && \
    cd chaos-mesh
    ```
 
-2. Run the script and create a local Kubernetes cluster:
+2. Run the script and create a local Kubernetes cluster
 
    ```bash
    hack/kind-cluster-build.sh
@@ -99,7 +101,7 @@ You can try Chaos Mesh on your local K8s environment deployed using `kind` or `m
    export KUBECONFIG="$(kind get kubeconfig-path)"
    ```
 
-4. Verify whether the Kubernetes cluster is on and running:
+4. Verify whether the Kubernetes cluster is on and running
 
    ```bash
    kubectl cluster-info
@@ -159,7 +161,7 @@ In this sample experiment config file, we will define a chaos experiment to kill
 apiVersion: pingcap.com/v1alpha1
 kind: PodChaos
 metadata:
-  name: pod-kill-example
+  name: pod-failure-example
   namespace: chaos-testing
 spec:
   action: pod-kill # the specific chaos action to inject; supported action: pod-kill/pod-failure
@@ -176,25 +178,25 @@ spec:
 ### Create a chaos experiment
 
 ```bash
-kubectl apply -f pod-kill-example.yaml
+kubectl apply -f pod-failure-example.yaml
 kubectl get podchaos --namespace=chaos-testing
 ```
 
 You can see the QPS performance affected by the chaos experiment from TiDB Grafana dashboard:
 
-![tikv-pod-kilk](./static/tikv-pod-kill.png)
+![tikv-pod-failure](./static/tikv-pod-failure.png)
 
 ### Update a chaos experiment
 
 ```bash
-vim pod-kill-example.yaml
-kubectl apply -f pod-kill-example.yaml
+vim pod-failure-example.yaml # modify pod-failure-example.yaml to what you want
+kubectl apply -f pod-failure-example.yaml
 ```
 
 #### Delete a chaos experiment
 
 ```bash
-kubectl delete -f pod-kill-example.yaml
+kubectl delete -f pod-failure-example.yaml
 ```
 
 #### Warch your chaos experiments in Dashboard
@@ -209,9 +211,7 @@ A typical way to access it is to use `kubectl port-forward`
 kubectl port-forward -n chaos-testing svc/chaos-dashboard 8080:80
 ```
 
-Then you can access [`chaos-dashboard`](http://localhost:8080) in browser.
-
-[![Watch the video](./static/demo.png)](https://www.youtube.com/watch?v=yzhvKKL8uJk)
+Then you can access [`http://localhost:8080`](http://localhost:8080) in browser.
 
 ## Roadmap
 
