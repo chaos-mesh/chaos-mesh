@@ -1,0 +1,94 @@
+# IO Chaos document
+
+This document will help user to build IO Chaos experiments. 
+
+IO Chaos can help user simulate file system falults such as I/O delay, read/write errors, etc. It can inject delay and errno when you using syscall about IO like `open`, `read`, `write`. 
+
+## Sample Config
+
+Sample IO chaos ducument:
+
+```yaml
+apiVersion: pingcap.com/v1alpha1
+kind: IoChaos
+metadata:
+  name: io-delay-example
+  namespace: chaos-testing
+spec:
+  action: mixed
+  mode: one
+  duration: "400s"
+  configName: "chaosfs-tikv"
+  path: ""
+  selector:
+    namespaces:
+      - tidb-cluster-demo
+    labelSelectors:
+      "app.kubernetes.io/component": "tikv"
+  layer: "fs"
+  percent: "50"
+  delay: "1ms"
+  scheduler:
+    cron: "@every 10m"	
+```
+
+The file can be find in [examples/io-mixed-sample.yaml](../examples/io-mixed-sample.yaml).
+
+## Usage
+
+Assuming you are using `examples/io-mixed-sample.yaml`, to create a chaos experiment:
+
+```bash
+kubectl apply -f examples/io-mixed-sample.yaml
+```
+
+## Spec Arguements
+
+* **action**: action represents the chaos action about IO action, now the following action is supported:
+* **delay**: IO delay action. In this mode read/write IO operation will return error.
+  * **errno**: IO errno action.You can specify the latency beore the IO operation will return. IO errno means your read/write IO operation will return error.
+  * **mixed**: Both delay and errno actions.
+* **mode**: Mode defines the mode to run chaos action. Supported mode: `one` / `all` / `fixed` / `fixed-percent` / `random-max-percent`.
+* **duration**: represents the duration of the chaos action. The duration is a possibly string with signed sequence of decimal numbers,  each with optional fraction and a unit suffix, such as `"300ms"`, `"-1.5h"` or `”2h45m"`.
+* **errno**: defines the error code that returned by IO action. This field should be set when you choose `errno`  or `mixed` action. If `errno` is empty, the operator will generate a error code for it randomly. You can set the `errno` refer to: https://www-numi.fnal.gov/offline_software/srt_public_context/WebDocs/Errors/unix_system_errors.html.
+* **percent**: Percent defines the percentage of injection errors and provides a number from 0-100. The defualt value is `100`.
+* **path**: defines the path of files for injecting I/O chaos action. It should be an regular expression for the path user want to inject errno or delay. If path is `""` or not defined, IO to all files will be injected.
+* **methods**: defines the I/O methods for injecting I/O chaos action. It’s an array of string, which set the IO syscall like `open` `read` . You can see the [availiable methods](#Availiable Methods) below.
+* **addr**: defines the sidecar HTTP server address for sidecar container, like `":8080"`.
+* **configName**: defines the config name which used to inject pod. You can refer to [examples/tikv-configmap.yaml](../examples/tikv-configmap.yaml) to define your config.
+
+### Availiable Methods
+
+Availiable methods are:
+
+* `open`
+* `read`
+* `write`
+* `mkdir`
+* `rmdir`
+* `opendir`
+* `fsync`
+* `flush`
+* `release`
+* `truncate`
+* `getattr`
+* `chown`
+* `chmod`
+* `utimens`
+* `allocate`
+* `getlk`
+* `setlk`
+* `setlkw`
+* `statfs`
+* `readlink`
+* `symlink`
+* `create`
+* `access`
+* `link`
+* `mknod`
+* `rename`
+* `unlink`
+* `getxattr`
+* `listxattr`
+* `removexattr`
+* `setxattr`
