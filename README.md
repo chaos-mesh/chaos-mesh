@@ -159,7 +159,7 @@ You can follow the instructions in the following two documents to deploy a TiDB 
 
 ### Define chaos experiment config file
 
-The chaos experiement configuration is defined in a .yaml file. The following sample file (`pod-kill-example.yaml`) defines a chaos experiment to kill one tikv pod randomly:
+The chaos experiement configuration is defined in a .yaml file. The following sample file (`pod-kill-example.yaml`) defines a chaos experiment to kill one tikv pod randomly every 60 seconds:
 
 ```yaml
 apiVersion: pingcap.com/v1alpha1
