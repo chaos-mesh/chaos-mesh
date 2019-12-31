@@ -7,7 +7,7 @@
 Chaos Mesh is a cloud-native Chaos Engineering toolset that orchestrates chaos on Kubernetes environment. At the current stage, it has the following components:
 
 - **Chaos Operator**: the core component for Chaos orchestration. Fully open sourced.
-- **Chaos Dashboard**: a visualized panel that shows the impacts of Chaos experiments on the online services of the system; under development; curently only supports chaos experiments on TiDB.
+- **Chaos Dashboard**: a visualized panel that shows the impacts of chaos experiments on the online services of the system; under development; curently only supports chaos experiments on TiDB.
 
 See the following demo video for a quick view of Chaos Mesh:
 
@@ -140,7 +140,7 @@ You can try Chaos Mesh on your local K8s environment deployed using `kind` or `m
 
 There are some known restrictions for Chaos Operator deployed on `kind` and `minikube` clusters:
 
-- All network related chaos is not supported for `Kind` cluster.
+- All network-related chaos is not supported for `kind` cluster.
 
      Chaos Operator uses docker pkg to transform between container id and pid, which is necessary to find network namespace for pods.`Kind` uses `containerd` as Introducing Container Runtime Interface (CRI) runtime and it's not supported in our implementation yet.
 
@@ -152,7 +152,7 @@ There are some known restrictions for Chaos Operator deployed on `kind` and `min
 
 After Chaos Mesh is deployed, we can deploy the target cluster to be tested, or where we want to inject faults. For illustration purposes, we use TiDB as our sample cluster.
 
-You can follow the instructions in the following two document to deploy a TiDB cluster:
+You can follow the instructions in the following two documents to deploy a TiDB cluster:
 
 * [Deploy using kind](https://pingcap.com/docs/stable/tidb-in-kubernetes/get-started/deploy-tidb-from-kubernetes-kind/)
 * [Deoloy using minikube](https://pingcap.com/docs/stable/tidb-in-kubernetes/get-started/deploy-tidb-from-kubernetes-minikube/)
@@ -168,7 +168,7 @@ metadata:
   name: pod-failure-example
   namespace: chaos-testing
 spec:
-  action: pod-kill # the specific chaos action to inject; supported action: pod-kill/pod-failure
+  action: pod-failure # the specific chaos action to inject; supported actions: pod-kill/pod-failure
   mode: one # the mode to run chaos action; supported mode are one/all/fixed/fixed-percent/random-max-percent
   duration: "60s" # duration for the injected chaos experiment
   selector: # pods where to inject chaos actions
