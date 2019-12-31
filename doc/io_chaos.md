@@ -32,7 +32,7 @@ spec:
     cron: "@every 10m"	
 ```
 
-The file can be find in [examples/io-mixed-sample.yaml](../examples/io-mixed-sample.yaml).
+User can find and edit the template refer to [examples/io-mixed-sample.yaml](../examples/io-mixed-sample.yaml).
 
 ## Usage
 
@@ -53,7 +53,7 @@ kubectl apply -f examples/io-mixed-sample.yaml
 * **errno**: defines the error code that returned by IO action. This field should be set when you choose `errno`  or `mixed` action. If `errno` is empty, the operator will generate a error code for it randomly. You can set the `errno` refer to: https://www-numi.fnal.gov/offline_software/srt_public_context/WebDocs/Errors/unix_system_errors.html.
 * **percent**: Percent defines the percentage of injection errors and provides a number from 0-100. The defualt value is `100`.
 * **path**: defines the path of files for injecting I/O chaos action. It should be an regular expression for the path user want to inject errno or delay. If path is `""` or not defined, IO to all files will be injected.
-* **methods**: defines the I/O methods for injecting I/O chaos action. It’s an array of string, which set the IO syscall like `open` `read` . You can see the [availiable methods](#Availiable Methods) below.
+* **methods**: defines the I/O methods for injecting I/O chaos action. It’s an array of string, which set the IO syscall like `open` `read` . You can see the [availiable methods](#availiable-methods) below.
 * **addr**: defines the sidecar HTTP server address for sidecar container, like `":8080"`.
 * **configName**: defines the config name which used to inject pod. You can refer to [examples/tikv-configmap.yaml](../examples/tikv-configmap.yaml) to define your config.
 
