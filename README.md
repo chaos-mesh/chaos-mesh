@@ -116,7 +116,7 @@ You can try Chaos Mesh on your local K8s environment deployed using `kind` or `m
 1. Start a `minikube` kubernetes cluster
 
    ```bash
-   minikube start --kubernetes-version v1.15.0 --cpus 4 --memory "8192mb" // we recommend that you allocate enough RAM(better more than 8192 MiB) to VM
+   minikube start --kubernetes-version v1.15.0 --cpus 4 --memory "8192mb" # we recommend that you allocate enough RAM(better more than 8192 MiB) to VM
    ```
 
 2. Install helm
@@ -168,14 +168,14 @@ metadata:
 spec:
   action: pod-kill # the specific chaos action to inject; supported action: pod-kill/pod-failure
   mode: one # the mode to run chaos action; supported mode are one/all/fixed/fixed-percent/random-max-percent
-  duration: "60s"
+  duration: "60s" # duration for the injected chaos experiment
   selector: # pods where to inject chaos actions
     namespaces:
       - tidb-cluster-demo
     labelSelectors:
       "app.kubernetes.io/component": "tikv"
   scheduler: #defines scheduler rules for the running time of the chaos experiments about pods.
-    cron: "@every 2m"
+    cron: "@every 5m"
 ```
 
 ### Create a chaos experiment
