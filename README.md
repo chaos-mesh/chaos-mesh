@@ -173,7 +173,7 @@ spec:
   duration: "60s" # duration for the injected chaos experiment
   selector: # pods where to inject chaos actions
     namespaces:
-      - tidb-cluster-demo  # the namespace of the TiDB cluster you've deployed 
+      - tidb-cluster-demo  # the namespace of the system under test (SUT) you've deployed 
     labelSelectors:
       "app.kubernetes.io/component": "tikv"
   scheduler: # scheduler rules for the running time of the chaos experiments about pods.
