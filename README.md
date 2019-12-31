@@ -6,7 +6,7 @@
 
 Chaos Mesh is a cloud-native Chaos Engineering toolset that orchestrates chaos on Kubernetes environment. At the current stage, it has the following components:
 
-- **Chaos Operator**: the core component for Chaos orchestration. Fully open sourced.
+- **Chaos Operator**: the core component for chaos orchestration. Fully open sourced.
 - **Chaos Dashboard**: a visualized panel that shows the impacts of chaos experiments on the online services of the system; under development; curently only supports chaos experiments on TiDB.
 
 See the following demo video for a quick view of Chaos Mesh:
@@ -93,7 +93,7 @@ You can try Chaos Mesh on your local K8s environment deployed using `kind` or `m
    cd chaos-mesh
    ```
 
-2. Run the script and create a local Kubernetes cluster
+2. Run the script and create a local Kubernetes cluster. Make sure you have installed [kind](https://kind.sigs.k8s.io/), and run the script below to create a local Kubernetes cluster
 
    ```bash
    hack/kind-cluster-build.sh
