@@ -4,7 +4,7 @@
 >
 > This readme and related documentation are a Work in Progress.
 
-Chaos Mesh is a cloud-native Chaos Engineering tookset that orchestrates chaos on Kubernetes enviroment. At the current stage, it has the following components:
+Chaos Mesh is a cloud-native Chaos Engineering toolset that orchestrates chaos on Kubernetes environment. At the current stage, it has the following components:
 
 - **Chaos Operator**: the core component for Chaos orchastration. Fully open sourced.
 - **Chaos Dashboard**: a visualized panel that shows the impacts of Chaos experiments on the online services of the system; under development; curently only supports chaos experiments on TiDB.
@@ -17,7 +17,7 @@ Chaos Operator injects chaos into the applications and Kubernetes infrastructure
 
 **Controller-manager**: used to schedule and manage the lifecycle of CRD objects
 
-**Chaos-daemon**: runs as daemonset with previleged system permissions over network, Cgroup, etc. for a specifc node
+**Chaos-daemon**: runs as daemonset with previleged system permissions over network, Cgroup, etc. on each node
 
 **Sidecar**: a special type of container that is dynamically injected into the target Pod by the webhook-server, which can be used for hacjacking I/O of the application container.
 
@@ -82,7 +82,7 @@ You can try Chaos Mesh on your local K8s environment deployed using `kind` or `m
 
 ### Deploy your local K8s environment
 
-#### Deploy with `kind`:
+#### Deploy with `kind`
 
 1. Clone the code
 
@@ -206,7 +206,7 @@ kubectl delete -f pod-failure-example.yaml
 
 Chaos Dashboard is currently only availble for TiDB clusters. Stay tuned for more supports or join us in making it happen.
 
-**Note:** Make sure you have used the [option](#deploy-chaos-mesh) to deploy Chaos Mesh with Chaos Dashboard.
+**Note:** Make sure you have used the [option](#install-chaos-mesh) to deploy Chaos Mesh with Chaos Dashboard.
 
 A typical way to access it is to use `kubectl port-forward`
 
