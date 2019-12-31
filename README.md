@@ -1,8 +1,8 @@
+<img src="static/logo.png" alt="chaos_logo" width="450"/>
+
 > **Note:**
 >
 > This readme and related documentation are a Work in Progress.
-
-# Chaos Mesh
 
 Chaos Mesh is a cloud-native Chaos Engineering tookset that orchestrates chaos on Kubernetes enviroment. At the current stage, it has the following components:
 
@@ -72,7 +72,7 @@ kubectl get pods --namespace chaos-testing -l app.kubernetes.io/instance=chaos-m
 helm install helm/chaos-mesh --name=chaos-mesh --namespace=chaos-testing --set dashboard.create=true
 ```
 
-## Get started with Chaos Mesh
+## Get started on your local machine
 
 **This deployment is for testing only. DO NOT USE in production!**
 
