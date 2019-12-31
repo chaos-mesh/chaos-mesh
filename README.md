@@ -2,7 +2,7 @@
 
 > **Note:**
 >
-> This readme and related documentation are a Work in Progress.
+> This readme and related documentation are Work in Progress.
 
 Chaos Mesh is a cloud-native Chaos Engineering toolset that orchestrates chaos on Kubernetes environment. At the current stage, it has the following components:
 
