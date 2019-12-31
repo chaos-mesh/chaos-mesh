@@ -8,8 +8,7 @@ Netem chaos contains some kinds of network chaos, such as delay, duplication, lo
 
 Network partition can decompose pods into several independent subnets by blocking communication between them.
 
-
-# Network Partition Action
+## Network Partition Action
 Sample network partition ducument:
 ```yaml
 apiVersion: pingcap.com/v1alpha1
@@ -47,7 +46,7 @@ User can find and edit the template refer to [examples/network-partition-example
 * **scheduler** defines some scheduler rules to the running time of the chaos experiment about pods. More rule info: https://godoc.org/github.com/robfig/cron
 
 
-# Netem Chaos Actions
+## Netem Chaos Actions
 
 There are 4 cases, loss, delay, duplicate and corrupt.
 
@@ -105,3 +104,4 @@ Network corrupt means packet corruption.
 >```
 >
 > Similar to the other cases described above, the parameter "corrupt" indicates the percentage of packet corruption.
+
