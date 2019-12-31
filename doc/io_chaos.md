@@ -46,7 +46,7 @@ kubectl apply -f examples/io-mixed-sample.yaml
 
 * **selector**: is used to select pods that are used to inject chaos action.
 
-* **action**: action represents the chaos action about IO action, now the **delay**, **errno**,  **mixed** action is supported. User can go to [*IO Chaos Availiable Actions*](IO Chaos Availiable Actions) for more details.
+* **action**: action represents the chaos action about IO action, now the **delay**, **errno**,  **mixed** action is supported. User can go to [*IO Chaos Availiable Actions*](#io-chaos-availiable-actions) for more details.
 * **mode**: Mode defines the mode to run chaos action. Supported mode: `one` / `all` / `fixed` / `fixed-percent` / `random-max-percent`.
 * **duration**: represents the duration of the chaos action. The duration is a possibly string with signed sequence of decimal numbers,  each with optional fraction and a unit suffix, such as `"300ms"`, `"-1.5h"` or `”2h45m"`.
 * **delay**: defines the value of I/O chaos action delay. The duration is a possibly string with signed sequence of decimal numbers,  each with optional fraction and a unit suffix, such as `"300ms"`, `"-1.5h"` or `”2h45m”`. Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
