@@ -175,7 +175,7 @@ spec:
     namespaces:
       - tidb-cluster-demo  # the namespace of the system under test (SUT) you've deployed 
     labelSelectors:
-      "app.kubernetes.io/component": "tikv"
+      "app.kubernetes.io/component": "tikv" # the label of the pod for chaos injection
   scheduler: # scheduler rules for the running time of the chaos experiments about pods.
     cron: "@every 5m"
 ```
