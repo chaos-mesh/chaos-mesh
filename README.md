@@ -37,9 +37,9 @@ Chaos Operator uses [Custom Resource Definition (CRD)](https://kubernetes.io/doc
 
 Before deploying Chaos Mesh, make sure the following items have been installed. If you would like to have a try on your machine, you can refer to [get-started-on-your-local-machine](#get-started-on-your-local-machine) section.
 
-* Kubernetes >= v1.12 and < v1.16
-* [RBAC](https://kubernetes.io/docs/admin/authorization/rbac) enabled (optional)
-* [Helm](https://helm.sh/) version >= v2.8.2 and < v3.0.0
+- Kubernetes >= v1.12
+- [RBAC](https://kubernetes.io/docs/admin/authorization/rbac) enabled (optional)
+- [Helm](https://helm.sh/) version >= v2.8.2 and < v3.0.0
 
 ## Deploy Chaos Mesh
 
