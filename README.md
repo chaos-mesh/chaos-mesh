@@ -93,7 +93,7 @@ You can try Chaos Mesh on your local K8s environment deployed using `kind` or `m
    cd chaos-mesh
    ```
 
-2. Run the script and create a local Kubernetes cluster. Make sure you have installed [kind](https://kind.sigs.k8s.io/), and run the script below to create a local Kubernetes cluster.
+2. Run the script and create a local Kubernetes cluster. Make sure you have installed [kind](https://kind.sigs.k8s.io/).
 
    ```bash
    hack/kind-cluster-build.sh
@@ -111,14 +111,14 @@ You can try Chaos Mesh on your local K8s environment deployed using `kind` or `m
    kubectl cluster-info
    ```
 
-5. Install `chaos-mesh` on `kind` kubernetes cluster as suggested in [Deploy Chaos Mesh](#deploy-chaos-mesh).
+5. Install `chaos-mesh` on `kind` kubernetes cluster as suggested in [Install Chaos Mesh](#install-chaos-mesh).
 
 #### Deploy with `minikube`
 
-1. Start a `minikube` kubernetes cluster. Make sure you have installed [minikube](https://kubernetes.io/docs/tasks/tools/install-minikube/), and run the script below to start a local `minikube` cluster
+1. Start a `minikube` kubernetes cluster. Make sure you have installed [minikube](https://kubernetes.io/docs/tasks/tools/install-minikube/).
 
    ```bash
-   minikube start --kubernetes-version v1.15.0 --cpus 4 --memory "8192mb" # we recommend that you allocate enough RAM(better more than 8192 MiB) to VM
+   minikube start --kubernetes-version v1.15.0 --cpus 4 --memory "8192mb" # we recommend that you allocate enough RAM (more than 8192 MiB) to the VM
    ```
 
 2. Install helm
@@ -134,7 +134,7 @@ You can try Chaos Mesh on your local K8s environment deployed using `kind` or `m
    kubectl -n kube-system get pods -l app=helm
    ```
 
-4. Install `chaos-operator` as suggested in [Deploy Chaos Mesh](#deploy-chaos-mesh).
+4. Install `chaos-mesh` on `minikube` kubernetes cluster as suggested in [Install Chaos Mesh](#install-chaos-mesh).
 
 **Note:**
 
@@ -159,7 +159,7 @@ You can follow the instructions in the following two documents to deploy a TiDB 
 
 ### Define chaos experiment config file
 
-In this sample experiment config file, we will define a chaos experiment to kill one tikv pod randomly:
+The chaos experiement configuration is defined in a .yaml file. The following sample file (`pod-kill-example.yaml`) defines a chaos experiment to kill one tikv pod randomly every 60 seconds:
 
 ```yaml
 apiVersion: pingcap.com/v1alpha1
@@ -169,14 +169,14 @@ metadata:
   namespace: chaos-testing
 spec:
   action: pod-failure # the specific chaos action to inject; supported actions: pod-kill/pod-failure
-  mode: one # the mode to run chaos action; supported mode are one/all/fixed/fixed-percent/random-max-percent
+  mode: one # the mode to run chaos action; supported modes are one/all/fixed/fixed-percent/random-max-percent
   duration: "60s" # duration for the injected chaos experiment
   selector: # pods where to inject chaos actions
     namespaces:
-      - tidb-cluster-demo
+      - tidb-cluster-demo  # the namespace of the system under test (SUT) you've deployed 
     labelSelectors:
-      "app.kubernetes.io/component": "tikv"
-  scheduler: #defines scheduler rules for the running time of the chaos experiments about pods.
+      "app.kubernetes.io/component": "tikv" # the label of the pod for chaos injection
+  scheduler: # scheduler rules for the running time of the chaos experiments about pods.
     cron: "@every 5m"
 ```
 
@@ -187,7 +187,7 @@ kubectl apply -f pod-failure-example.yaml
 kubectl get podchaos --namespace=chaos-testing
 ```
 
-You can see the QPS performance affected by the chaos experiment from TiDB Grafana dashboard:
+You can see the QPS performance (by [running a benchmark against the cluster](https://pingcap.com/docs/stable/benchmark/how-to-run-sysbench/) affected by the chaos experiment from TiDB Grafana dashboard:
 
 ![tikv-pod-failure](./static/tikv-pod-failure.png)
 
@@ -204,13 +204,13 @@ kubectl apply -f pod-failure-example.yaml
 kubectl delete -f pod-failure-example.yaml
 ```
 
-#### Warch your chaos experiments in Dashboard
+#### Watch your chaos experiments in Dashboard
 
 Chaos Dashboard is currently only available for TiDB clusters. Stay tuned for more supports or join us in making it happen.
 
 > **Note:**
 >
-> Make sure you have used the [option](#deploy-chaos-mesh) to deploy Chaos Mesh with Chaos Dashboard. If Chaos Dashboard wasn't installed in your Chaos Mesh, you need to install it by upgrading Chaos Mesh:
+> If Chaos Dashboard was not installed in your earlier deployment, you need to install it by upgrading Chaos Mesh:
 >
 > ```helm upgrade chaos-mesh helm/chaos-mesh --namespace=chaos-testing --set dashboard.create=true```
 
@@ -221,6 +221,13 @@ kubectl port-forward -n chaos-testing svc/chaos-dashboard 8080:80
 ```
 
 Then you can access [`http://localhost:8080`](http://localhost:8080) in browser.
+
+## Community
+
+Please reach out for bugs, feature requests, and other issues via:
+
+- The #chaos-mesh channel in the [TiDB Community](https://pingcap.com/tidbslack) slack workspace.
+- Filing a issue or opening a PR against this repo.
 
 ## Roadmap
 
