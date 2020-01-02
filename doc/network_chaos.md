@@ -1,6 +1,6 @@
 # Network Chaos Document
 
-This document whill help user to build Network Chaos experiments.
+This document describes how to add network chaos experiments in Chaos Mesh.
 
 Network chaos are mainly divided into two categories, namely **netem chaos** and **network partition**.
 
@@ -108,4 +108,3 @@ Network corrupt means packet corruption.
 >```
 >
 > Similar to the other cases described above, the parameter "corrupt" indicates the percentage of packet corruption.
-
