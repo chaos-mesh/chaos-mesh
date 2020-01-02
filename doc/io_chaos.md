@@ -2,7 +2,7 @@
 
 This document will help user to build IO Chaos experiments. 
 
-IO Chaos can help user simulate file system falults such as I/O delay, read/write errors, etc. It can inject delay and errno when you using syscall about IO like `open`, `read`, `write`. 
+IO Chaos can help user simulate file system faults such as I/O delay, read/write errors, etc. It can inject delay and errno when user using syscall about IO like `open`, `read`, `write`. 
 
 ## Sample Config
 
@@ -36,7 +36,19 @@ User can find and edit the template refer to [examples/io-mixed-sample.yaml](../
 
 ## Usage
 
-Assuming you are using `examples/io-mixed-sample.yaml`, to create a chaos experiment:
+### Config
+
+We use [Kubernetes annotations](https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/) to  attach metadata about IO chaos to objects. In [examples/io-mixed-sample.yaml](../examples/io-mixed-sample.yaml), user can find metadata below.
+
+```yaml
+metadata:
+  name: io-delay-example
+  namespace: chaos-testing
+```
+
+### Run
+
+Assuming user are using `examples/io-mixed-sample.yaml`, to create a chaos experiment:
 
 ```bash
 kubectl apply -f examples/io-mixed-sample.yaml
@@ -51,25 +63,25 @@ kubectl apply -f examples/io-mixed-sample.yaml
 * **duration**: represents the duration of the chaos action. The duration is a possibly string with signed sequence of decimal numbers,  each with optional fraction and a unit suffix, such as `"300ms"`, `"-1.5h"` or `”2h45m"`.
 * **delay**: defines the value of I/O chaos action delay. The duration is a possibly string with signed sequence of decimal numbers,  each with optional fraction and a unit suffix, such as `"300ms"`, `"-1.5h"` or `”2h45m”`. Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
   If `Delay` is empty, the operator will generate a value for it randomly.
-* **errno**: defines the error code that returned by IO action. It is a int32 string like `"32"`. This field should be set when you choose `errno`  or `mixed` action. If `errno` is empty, the operator will generate a error code for it randomly. You can set the `errno` refer to: https://www-numi.fnal.gov/offline_software/srt_public_context/WebDocs/Errors/unix_system_errors.html.
+* **errno**: defines the error code that returned by IO action. It is a int32 string like `"32"`. This field should be set when user choose `errno`  or `mixed` action. If `errno` is empty, the operator will generate a error code for it randomly. User can set the `errno` refer to: https://www-numi.fnal.gov/offline_software/srt_public_context/WebDocs/Errors/unix_system_errors.html.
 * **percent**: Percent defines the percentage of injection errors and provides a number from 0-100. The defualt value is `100`.
 * **path**: defines the path of files for injecting I/O chaos action. It should be an regular expression for the path user want to inject errno or delay. If path is `""` or not defined, IO to all files will be injected.
-* **methods**: defines the I/O methods for injecting I/O chaos action. It’s an array of string, which set the IO syscall like `open` `read` . You can see the [availiable methods](#availiable-methods) below.
+* **methods**: defines the I/O methods for injecting I/O chaos action. It’s an array of string, which set the IO syscall like `open` `read`. User can see the [availiable methods](#availiable-methods) below.
 * **addr**: defines the sidecar HTTP server address for sidecar container, like `":8080"`.
-* **configName**: defines the config name which used to inject pod. You can refer to [examples/tikv-configmap.yaml](../examples/tikv-configmap.yaml) to define your config.
+* **configName**: defines the config name which used to inject pod. User can refer to [examples/tikv-configmap.yaml](../../examples/tikv-configmap.yaml) to define user's config.
 * **layer**: represents the layer of the I/O action. Supported value: `fs` , and default is `fs`.
 
 ## IO Chaos Availiable Actions
 
 IO Chaos now support the actions below:
 
-* **delay**: IO delay action. In this mode read/write IO operation will return error.
-* **errno**: IO errno action.You can specify the latency beore the IO operation will return. IO errno means your read/write IO operation will return error.
-* **mixed**: Both delay and errno actions.
+* **delay**: IO delay action. User can specify the latency before the IO operation will return.
+* **errno**: IO errno action. In this mode read/write IO operation will return error.IO errno means user's read/write IO operations will return error.
+* **mixed**: Both **delay** and **errno** actions.
 
 ### delay
 
-If you are using delay mode, you may edit spec like:
+If user are using delay mode, user may edit spec like:
 
 ```yaml
 spec:
@@ -77,7 +89,7 @@ spec:
   delay: "1ms"
 ```
 
-If `delay` is not specified, it will be generate randomly.
+If `delay` is not specified, it will be generate randomly on runtime.
 
 ### errno
 
@@ -87,7 +99,7 @@ spec:
   errno: "32"
 ```
 
-If `errno` is not specified, it will be generate randomly. 
+If `errno` is not specified, it will be generate randomly on runtime. 
 
 ### mixed
 
