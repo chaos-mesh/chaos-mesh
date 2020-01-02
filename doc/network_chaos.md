@@ -67,7 +67,7 @@ A Network Loss action causes network packets to drop randomly. To add a Network 
 >   loss: "25"
 >   correlation: "25"
 > ```
-> loss defines the percentage of packet loss.
+> **loss** defines the percentage of packet loss.
 >
 > Network chaos variation isn't purely random, so to emulate that there is a correlation value as well.
 
@@ -99,7 +99,7 @@ A Network Duplicate action causes packet duplication. To add a Network Duplicate
 >    correlation: "25"
 >```
 >
->   **duplicate** indicates the percentage of packet duplication. In the above example, the duplication rate is 40%. 
+>  **duplicate** indicates the percentage of packet duplication. In the above example, the duplication rate is 40%. 
 
 ### Network Corrupt
 
