@@ -38,6 +38,8 @@ User can find and edit the template refer to [examples/io-mixed-sample.yaml](../
 
 ### Config
 
+#### Annotations
+
 We use [Kubernetes annotations](https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/) to  attach metadata about IO chaos to objects. In [examples/io-mixed-sample.yaml](../examples/io-mixed-sample.yaml), user can find metadata below.
 
 ```yaml
@@ -45,6 +47,12 @@ metadata:
   name: io-delay-example
   namespace: chaos-testing
 ```
+
+If you not attach annotation to namespace, it will modify the pod dynamically, and may restart the pod.
+
+#### Data
+
+The data directory of the component should be a subdirectory of `PersistentVolumes`.
 
 ### Run
 
