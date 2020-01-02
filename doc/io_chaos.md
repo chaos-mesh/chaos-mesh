@@ -1,12 +1,12 @@
-# IO Chaos document
+# IO Chaos Document
 
-This document will help user to build IO Chaos experiments. 
+This document helps you to build IO chaos experiments. 
 
-IO Chaos can help user simulate file system faults such as I/O delay, read/write errors, etc. It can inject delay and errno when user using syscall about IO like `open`, `read`, `write`. 
+IO chaos allows you to simulate file system faults such as I/O delay, read/write errors, etc. It can inject delay and errno when you use the I/O system calls such as `open`, `read` and `write`.
 
-## Sample Config
+## Sample config file
 
-Sample IO chaos ducument:
+Here is a sample YAML file of IO chaos:
 
 ```yaml
 apiVersion: pingcap.com/v1alpha1
@@ -32,15 +32,15 @@ spec:
     cron: "@every 10m"	
 ```
 
-User can find and edit the template refer to [examples/io-mixed-sample.yaml](../examples/io-mixed-sample.yaml).
+For more sample files, see [examples/io-mixed-example.yaml](../examples/io-mixed-example.yaml). You can edit them as needed. 
 
 ## Usage
 
-### Config
+### Configuration
 
 #### Annotations
 
-We use [Kubernetes annotations](https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/) to  attach metadata about IO chaos to objects. In [examples/io-mixed-sample.yaml](../examples/io-mixed-sample.yaml), user can find metadata below.
+We use [Kubernetes annotations](https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/) to attach IO chaos metadata to objects. In [examples/io-mixed-example.yaml](../examples/io-mixed-example.yaml), you can find the metadata as below.
 
 ```yaml
 metadata:
@@ -50,46 +50,46 @@ metadata:
 
 If you not attach annotation to namespace, it will modify the pod dynamically, and may restart the pod.
 
-#### Data
+#### Data directory
 
 The data directory of the component should be a subdirectory of `PersistentVolumes`.
 
-### Run
+### Create a chaos experiment
 
-Assuming user are using `examples/io-mixed-sample.yaml`, to create a chaos experiment:
+Assume that you are using `examples/io-mixed-example.yaml`, you can run the following command to create a chaos experiment:
 
 ```bash
-kubectl apply -f examples/io-mixed-sample.yaml
+kubectl apply -f examples/io-mixed-example.yaml
 ```
 
-## Spec Arguements
+## Spec arguments
 
-* **selector**: is used to select pods that are used to inject chaos action.
+* **selector**: is used to select pods that are used to inject chaos actions.
 
-* **action**: action represents the chaos action about IO action, now the **delay**, **errno**,  **mixed** action is supported. User can go to [*IO Chaos Availiable Actions*](#io-chaos-availiable-actions) for more details.
-* **mode**: Mode defines the mode to run chaos action. Supported mode: `one` / `all` / `fixed` / `fixed-percent` / `random-max-percent`.
-* **duration**: represents the duration of the chaos action. The duration is a possibly string with signed sequence of decimal numbers,  each with optional fraction and a unit suffix, such as `"300ms"`, `"-1.5h"` or `”2h45m"`.
+* **action**: represents the IO chaos actions. Currently the **delay**, **errno**, and **mixed** actions are supported. You can go to [*IO chaos available actions*](#io-chaos-available-actions) for more details.
+* **mode**: defines the mode to run chaos actions. Supported mode: `one` / `all` / `fixed` / `fixed-percent` / `random-max-percent`.
+* **duration**: represents the duration of a chaos action. The duration might be a string with the signed sequence of decimal numbers, each with optional fraction and a unit suffix, such as `"300ms"`, `"-1.5h"` or `”2h45m"`.
 * **delay**: defines the value of I/O chaos action delay. The duration is a possibly string with signed sequence of decimal numbers,  each with optional fraction and a unit suffix, such as `"300ms"`, `"-1.5h"` or `”2h45m”`. Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
   If `Delay` is empty, the operator will generate a value for it randomly.
-* **errno**: defines the error code that returned by IO action. It is a int32 string like `"32"`. This field should be set when user choose `errno`  or `mixed` action. If `errno` is empty, the operator will generate a error code for it randomly. User can set the `errno` refer to: https://www-numi.fnal.gov/offline_software/srt_public_context/WebDocs/Errors/unix_system_errors.html.
-* **percent**: Percent defines the percentage of injection errors and provides a number from 0-100. The defualt value is `100`.
-* **path**: defines the path of files for injecting I/O chaos action. It should be an regular expression for the path user want to inject errno or delay. If path is `""` or not defined, IO to all files will be injected.
-* **methods**: defines the I/O methods for injecting I/O chaos action. It’s an array of string, which set the IO syscall like `open` `read`. User can see the [availiable methods](#availiable-methods) below.
-* **addr**: defines the sidecar HTTP server address for sidecar container, like `":8080"`.
-* **configName**: defines the config name which used to inject pod. User can refer to [examples/tikv-configmap.yaml](../../examples/tikv-configmap.yaml) to define user's config.
-* **layer**: represents the layer of the I/O action. Supported value: `fs` , and default is `fs`.
+* **errno**: defines the error code that is returned by an IO action. It is an int32 string like `"32"`. This field need to be set when you choose an `errno` or `mixed` action. If `errno` is empty, the operator will randomly generate an error code for it. You can set the `errno` by referring to: https://www-numi.fnal.gov/offline_software/srt_public_context/WebDocs/Errors/unix_system_errors.html.
+* **percent**: defines the percentage of injection errors and provides a number from 0-100. The default value is `100`.
+* **path**: defines the path of files for injecting I/O chaos actions. It should be a regular expression for the path you want to inject errno or delay. If the path is `""` or not defined, IO to all files will be injected.
+* **methods**: defines the I/O methods for injecting I/O chaos actions. It’s an array of string, which sets the IO syscalls such as `open` and `read`. See the [available methods](#available-methods) for more details.
+* **addr**: defines the sidecar HTTP server address for a sidecar container, such as `":8080"`.
+* **configName**: defines the config name which is used to inject pods. You can refer to [examples/tikv-configmap.yaml](../../examples/tikv-configmap.yaml) to define your configuration.
+* **layer**: represents the layer of the I/O action. Supported value: `fs` (by default).
 
-## IO Chaos Availiable Actions
+## IO chaos available actions
 
-IO Chaos now support the actions below:
+IO chaos currently supports the following actions:
 
-* **delay**: IO delay action. User can specify the latency before the IO operation will return.
-* **errno**: IO errno action. In this mode read/write IO operation will return error.IO errno means user's read/write IO operations will return error.
+* **delay**: IO delay action. You can specify the latency before the IO operation returns a result.
+* **errno**: IO errno action. In this mode, read/write IO operations will return an error.
 * **mixed**: Both **delay** and **errno** actions.
 
 ### delay
 
-If user are using delay mode, user may edit spec like:
+If you are using the delay mode, you can edit spec as below:
 
 ```yaml
 spec:
@@ -97,9 +97,11 @@ spec:
   delay: "1ms"
 ```
 
-If `delay` is not specified, it will be generate randomly on runtime.
+If `delay` is not specified, it will be generated randomly on runtime.
 
 ### errno
+
+If you are using the errno mode, you can edit spec as below:
 
 ```yaml
 spec:
@@ -107,9 +109,11 @@ spec:
   errno: "32"
 ```
 
-If `errno` is not specified, it will be generate randomly on runtime. 
+If `errno` is not specified, it will be generated randomly on runtime. 
 
 ### mixed
+
+If you are using the mixed mode, you can edit spec as below:
 
 ````yaml
 spec:
@@ -118,11 +122,11 @@ spec:
   errno: "32"
 ````
 
-It is mix of **delay** and **errno**.
+The mix mode defines the **delay** and **errno** actions in one spec.
 
-## Availiable Methods
+## Available methods
 
-Availiable methods are:
+Available methods are as below:
 
 * `open`
 * `read`
