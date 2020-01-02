@@ -48,11 +48,11 @@ metadata:
   namespace: chaos-testing
 ```
 
-If you not attach annotation to namespace, it will modify the pod dynamically, and may restart the pod.
+Note that if you do not attach an annotation to the namespace,  the pod will be modified dynamically, and might be restarted.
 
 #### Data directory
 
-The data directory of the component should be a subdirectory of `PersistentVolumes`.
+The data directory of the component of the pod should be a subdirectory of `PersistentVolumes`.
 
 ### Create a chaos experiment
 
