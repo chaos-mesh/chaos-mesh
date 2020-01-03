@@ -7,7 +7,7 @@
 Chaos Mesh is a cloud-native Chaos Engineering platform that orchestrates chaos on Kubernetes environments. At the current stage, it has the following components:
 
 - **Chaos Operator**: the core component for chaos orchestration. Fully open sourced.
-- **Chaos Dashboard**: a visualized panel that shows the impacts of chaos experiments on the online services of the system; under development; curently only supports chaos experiments on TiDB.
+- **Chaos Dashboard**: a visualized panel that shows the impacts of chaos experiments on the online services of the system; under development; curently only supports chaos experiments on TiDB(https://github.com/pingcap/tidb).
 
 See the following demo video for a quick view of Chaos Mesh:
 
@@ -226,6 +226,7 @@ Then you can access [`http://localhost:8080`](http://localhost:8080) in browser.
 
 Please reach out for bugs, feature requests, and other issues via:
 
+- Following us on Twitter at [@chaos_mesh](https://twitter.com/chaos_mesh).
 - The #chaos-mesh channel in the [TiDB Community](https://pingcap.com/tidbslack) slack workspace.
 - Filing a issue or opening a PR against this repo.
 
