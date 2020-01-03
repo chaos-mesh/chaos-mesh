@@ -80,7 +80,7 @@ kubectl apply -f examples/io-mixed-example.yaml
 * **path**: defines the path of files for injecting IO chaos actions. It should be a regular expression for the path you want to inject errno or delay. If the path is `""` or not defined, IO chaos actions will be injected into all files.
 * **methods**: defines the IO methods for injecting IO chaos actions. It’s an array of string, which sets the IO syscalls such as `open` and `read`. See the [available methods](#available-methods) for more details.
 * **addr**: defines the sidecar HTTP server address for a sidecar container, such as `":8080"`.
-* **configName**: defines the config name which is used to inject chaos action into pods. You can refer to [examples/tikv-configmap.yaml](../examples/tikv-configmap.yaml) to define your configuration.
+* **configName**: defines the config name which is used to inject chaos action into pods. You can refer to [examples/tikv-configmap.yaml](../examples/chaosfs-configmap/tikv-configmap.yaml) to define your configuration.
 * **layer**: represents the layer of the IO action. Supported value: `fs` (by default).
 
 ## IO chaos available actions
