@@ -202,8 +202,6 @@ func (r *Reconciler) injectAllPods(ctx context.Context, pods []v1.Pod, iochaos *
 		g.Go(func() error {
 			return r.injectPod(ctx, pod, iochaos)
 		})
-
-		return err
 	}
 
 	return g.Wait()
