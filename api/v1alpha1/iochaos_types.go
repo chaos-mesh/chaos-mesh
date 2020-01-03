@@ -87,12 +87,11 @@ type IoChaosSpec struct {
 	Duration string `json:"duration"`
 
 	// Layer represents the layer of the I/O action.
-	// Supported value: fs / errno / mixed.
+	// Supported value: fs.
 	// Default layer: fs
 	Layer IOLayer `json:"layer"`
 
 	// Delay defines the value of I/O chaos action delay.
-	// It is required when the action is `PodFailureAction`.
 	// A delay string is a possibly signed sequence of
 	// decimal numbers, each with optional fraction and a unit suffix,
 	// such as "300ms".
@@ -131,11 +130,11 @@ type IoChaosSpec struct {
 	// +required
 	ConfigName string `json:"configName"`
 
-	// Next time when this action will be applied again
+	// Next time when this action will be applied again.
 	// +optional
 	NextStart *metav1.Time `json:"nextStart,omitempty"`
 
-	// Next time when this action will be recovered
+	// Next time when this action will be recovered.
 	// +optional
 	NextRecover *metav1.Time `json:"nextRecover,omitempty"`
 }
