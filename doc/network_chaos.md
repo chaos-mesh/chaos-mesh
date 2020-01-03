@@ -2,15 +2,15 @@
 
 This document describes how to add network chaos experiments in Chaos Mesh.
 
-Network chaos is mainly divided into the following two categories:
+Network Chaos actions are mainly divided into the following two categories:
 
-- **netem chaos** covers regular network faults, such as fault injections into network delay, duplication, loss, and corrupt.
+- **Network Partition** action separates pods into several independent subnets by blocking communication between them.
 
-- **network partition** separates pods into several independent subnets by blocking communication between them.
+- **Network Emulation (Netem) Chaos** actions cover regular network faults, such as network delay, duplication, loss, and corruption.
 
 ## Network Partition Action
 
-To add the network partition chaos experiment, locate and edit the corresponding template in [/examples](./examples/network-partition-example.yaml). Below is a sample network partition configuration file:
+To add the Network Partition chaos experiment, locate and edit the corresponding template in [/examples](./examples/network-partition-example.yaml). Below is a sample network partition configuration file:
 
 ```yaml
 apiVersion: pingcap.com/v1alpha1
