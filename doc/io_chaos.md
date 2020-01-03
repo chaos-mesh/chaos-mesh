@@ -54,6 +54,10 @@ Note that if you do not attach an annotation to the namespace,  the pod will be 
 
 The data directory of the component of the pod should be a subdirectory of `PersistentVolumes`.
 
+#### Addmission-webhook
+
+You should make sure admission-webhooks is turned on, refer: https://kubernetes.io/docs/reference/access-authn-authz/extensible-admission-controllers/#experimenting-with-admission-webhooks .
+
 ### Create a chaos experiment
 
 Assume that you are using `examples/io-mixed-example.yaml`, you can run the following command to create a chaos experiment:
@@ -68,10 +72,10 @@ kubectl apply -f examples/io-mixed-example.yaml
 
 * **action**: represents the IO chaos actions. Currently the **delay**, **errno**, and **mixed** actions are supported. You can go to [*IO chaos available actions*](#io-chaos-available-actions) for more details.
 * **mode**: defines the mode to run chaos actions. Supported mode: `one` / `all` / `fixed` / `fixed-percent` / `random-max-percent`.
-* **duration**: represents the duration of a chaos action. The duration might be a string with the signed sequence of decimal numbers, each with optional fraction and a unit suffix, such as `"300ms"`, `"-1.5h"` or `”2h45m"`.
+* **duration**: represents the duration of a chaos action. The duration might be a string with the signed sequence of decimal numbers, each with optional fraction and a unit suffix, such as `"300ms"`, `"-1.5h"` or `"2h45m"`.
 * **delay**: defines the value of IO chaos action delay. The duration might be a string with the signed sequence of decimal numbers, each with optional fraction and a unit suffix, such as `"300ms"`, `"-1.5h"` or `”2h45m”`. Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", and "h".
   If `Delay` is empty, the operator will generate a value for it randomly.
-* **errno**: defines the error code that is returned by an IO action. It is an int32 string like `"32"`. This field need to be set when you choose an `errno` or `mixed` action. If `errno` is empty, the operator will randomly generate an error code for it. You can set the `errno` by referring to: https://www-numi.fnal.gov/offline_software/srt_public_context/WebDocs/Errors/unix_system_errors.html.
+* **errno**: defines the error code that is returned by an IO action. It is an int32 string like `"32"`. This field need to be set when you choose an `errno` or `mixed` action. If `errno` is empty, the operator will randomly generate an error code for it. You can set the `errno` by referring to [Errors: Linux System Errors](https://www-numi.fnal.gov/offline_software/srt_public_context/WebDocs/Errors/unix_system_errors.html).
 * **percent**: defines the percentage of injection errors and provides a number from 0-100. The default value is `100`.
 * **path**: defines the path of files for injecting IO chaos actions. It should be a regular expression for the path you want to inject errno or delay. If the path is `""` or not defined, IO chaos actions will be injected into all files.
 * **methods**: defines the IO methods for injecting IO chaos actions. It’s an array of string, which sets the IO syscalls such as `open` and `read`. See the [available methods](#available-methods) for more details.
