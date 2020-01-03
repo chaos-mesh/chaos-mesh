@@ -127,6 +127,56 @@ func SelectPods(ctx context.Context, c client.Client, selector v1alpha1.Selector
 	return pods, nil
 }
 
+// CheckPodMeetSelector checks if this pod meets the selection criteria.
+func CheckPodMeetSelector(pod v1.Pod, selector v1alpha1.SelectorSpec) (bool, error) {
+	if len(selector.Pods) > 0 {
+		for ns, names := range selector.Pods {
+			if pod.Namespace != ns {
+				continue
+			}
+
+			for _, name := range names {
+				if pod.Name == name {
+					return true, nil
+				}
+			}
+		}
+	}
+
+	// check pod labels.
+	// TODO: check fieldSelector
+	if pod.Labels != nil && len(pod.Labels) > 0 && len(selector.LabelSelectors) > 0 {
+		labelSelector := labels.SelectorFromSet(selector.LabelSelectors)
+		podLabels := labels.Set(pod.Labels)
+		if labelSelector.Matches(podLabels) {
+			return true, nil
+		}
+	}
+
+	pods := []v1.Pod{pod}
+	namespaceSelector, err := parseSelector(strings.Join(selector.Namespaces, ","))
+	if err != nil {
+		return false, err
+	}
+
+	pods, err = filterByNamespaces(pods, namespaceSelector)
+	if err != nil {
+		return false, err
+	}
+
+	annotationsSelector, err := parseSelector(label.Label(selector.AnnotationSelectors).String())
+	if err != nil {
+		return false, err
+	}
+	pods = filterByAnnotations(pods, annotationsSelector)
+	pods = filterByPhase(pods, v1.PodRunning)
+	if len(pods) > 0 {
+		return true, nil
+	}
+
+	return false, nil
+}
+
 // GeneratePods generate pods according to mode from pod list
 func GeneratePods(pods []v1.Pod, mode v1alpha1.PodMode, value string) ([]v1.Pod, error) {
 	if len(pods) == 0 {

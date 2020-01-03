@@ -92,6 +92,42 @@ func TestSelectPods(t *testing.T) {
 	}
 }
 
+func TestCheckPodMeetSelector(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	type TestCase struct {
+		name          string
+		selector      v1alpha1.SelectorSpec
+		pod           v1.Pod
+		expectedValue bool
+	}
+
+	tcs := []TestCase{
+		{
+			name: "meet label",
+			pod:  newPod("t1", v1.PodRunning, metav1.NamespaceDefault, nil, map[string]string{"app": "tikv"}),
+			selector: v1alpha1.SelectorSpec{
+				LabelSelectors: map[string]string{"app": "tikv"},
+			},
+			expectedValue: true,
+		},
+		{
+			name: "not meet label",
+			pod:  newPod("t1", v1.PodRunning, metav1.NamespaceDefault, nil, map[string]string{"app": "tidb"}),
+			selector: v1alpha1.SelectorSpec{
+				LabelSelectors: map[string]string{"app": "tikv"},
+			},
+			expectedValue: false,
+		},
+	}
+
+	for _, tc := range tcs {
+		meet, err := CheckPodMeetSelector(tc.pod, tc.selector)
+		g.Expect(err).ShouldNot(HaveOccurred(), tc.name)
+		g.Expect(meet).To(Equal(tc.expectedValue), tc.name)
+	}
+}
+
 func TestRandomFixedIndexes(t *testing.T) {
 	g := NewGomegaWithT(t)
 

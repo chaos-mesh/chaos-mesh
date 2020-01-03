@@ -16,6 +16,7 @@ package config
 import (
 	"crypto/sha256"
 	"fmt"
+	"github.com/pingcap/chaos-mesh/api/v1alpha1"
 	"io"
 	"io/ioutil"
 	"os"
@@ -24,7 +25,6 @@ import (
 	"sync"
 
 	"github.com/ghodss/yaml"
-
 	ctrl "sigs.k8s.io/controller-runtime"
 
 	corev1 "k8s.io/api/core/v1"
@@ -70,6 +70,9 @@ type InjectionConfig struct {
 	// Value defines for the Commands for stating container.
 	// +optional
 	PostStart map[string]ExecAction `json:"postStart,omitempty"`
+
+	// Selector is used to select pods that are used to inject sidecar.
+	Selector *v1alpha1.SelectorSpec `json:"selector,omitempty"`
 }
 
 // FullName returns the full identifier of this sidecar - both the Name, and the Version(), formatted like
