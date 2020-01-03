@@ -10,7 +10,7 @@ Network Chaos actions are mainly divided into the following two categories:
 
 ## Network Partition Action
 
-To add the Network Partition chaos experiment, locate and edit the corresponding template in [/examples](./examples/network-partition-example.yaml). Below is a sample network partition configuration file:
+To add the Network Partition chaos experiment, locate and edit the corresponding template in [/examples](../examples/network-partition-example.yaml). Below is a sample network partition configuration file:
 
 ```yaml
 apiVersion: pingcap.com/v1alpha1
