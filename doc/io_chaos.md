@@ -40,7 +40,7 @@ For more sample files, see [examples/io-mixed-example.yaml](../examples/io-mixed
 
 #### Annotations
 
-We use [Kubernetes annotations](https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/) to attach IO chaos metadata to objects. In [examples/io-mixed-example.yaml](../examples/io-mixed-example.yaml), you can find the metadata as below.
+We use [Kubernetes annotations](https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/) to attach IO chaos metadata to objects. You should set annotations for namespace and name. In [examples/io-mixed-example.yaml](../examples/io-mixed-example.yaml), you can find the metadata as below.
 
 ```yaml
 metadata:
