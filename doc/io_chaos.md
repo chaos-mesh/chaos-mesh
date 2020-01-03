@@ -2,7 +2,7 @@
 
 This document helps you to build IO chaos experiments. 
 
-IO chaos allows you to simulate file system faults such as I/O delay, read/write errors, etc. It can inject delay and errno when you use the I/O system calls such as `open`, `read` and `write`.
+IO chaos allows you to simulate file system faults such as IO delay, read/write errors, etc. It can inject delay and errno when you use the IO system calls such as `open`, `read` and `write`.
 
 ## Sample config file
 
@@ -73,11 +73,11 @@ kubectl apply -f examples/io-mixed-example.yaml
   If `Delay` is empty, the operator will generate a value for it randomly.
 * **errno**: defines the error code that is returned by an IO action. It is an int32 string like `"32"`. This field need to be set when you choose an `errno` or `mixed` action. If `errno` is empty, the operator will randomly generate an error code for it. You can set the `errno` by referring to: https://www-numi.fnal.gov/offline_software/srt_public_context/WebDocs/Errors/unix_system_errors.html.
 * **percent**: defines the percentage of injection errors and provides a number from 0-100. The default value is `100`.
-* **path**: defines the path of files for injecting I/O chaos actions. It should be a regular expression for the path you want to inject errno or delay. If the path is `""` or not defined, IO to all files will be injected.
-* **methods**: defines the I/O methods for injecting I/O chaos actions. It’s an array of string, which sets the IO syscalls such as `open` and `read`. See the [available methods](#available-methods) for more details.
+* **path**: defines the path of files for injecting IO chaos actions. It should be a regular expression for the path you want to inject errno or delay. If the path is `""` or not defined, IO chaos actions will be injected into all files.
+* **methods**: defines the IO methods for injecting IO chaos actions. It’s an array of string, which sets the IO syscalls such as `open` and `read`. See the [available methods](#available-methods) for more details.
 * **addr**: defines the sidecar HTTP server address for a sidecar container, such as `":8080"`.
-* **configName**: defines the config name which is used to inject pods. You can refer to [examples/tikv-configmap.yaml](../../examples/tikv-configmap.yaml) to define your configuration.
-* **layer**: represents the layer of the I/O action. Supported value: `fs` (by default).
+* **configName**: defines the config name which is used to inject chaos action into pods. You can refer to [examples/tikv-configmap.yaml](../../examples/tikv-configmap.yaml) to define your configuration.
+* **layer**: represents the layer of the IO action. Supported value: `fs` (by default).
 
 ## IO chaos available actions
 
