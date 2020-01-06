@@ -128,6 +128,7 @@ func SelectPods(ctx context.Context, c client.Client, selector v1alpha1.Selector
 }
 
 // CheckPodMeetSelector checks if this pod meets the selection criteria.
+// TODO: support to check fieldsSelector
 func CheckPodMeetSelector(pod v1.Pod, selector v1alpha1.SelectorSpec) (bool, error) {
 	if len(selector.Pods) > 0 {
 		for ns, names := range selector.Pods {
@@ -144,12 +145,19 @@ func CheckPodMeetSelector(pod v1.Pod, selector v1alpha1.SelectorSpec) (bool, err
 	}
 
 	// check pod labels.
-	// TODO: check fieldSelector
-	if pod.Labels != nil && len(pod.Labels) > 0 && len(selector.LabelSelectors) > 0 {
-		labelSelector := labels.SelectorFromSet(selector.LabelSelectors)
-		podLabels := labels.Set(pod.Labels)
-		if labelSelector.Matches(podLabels) {
-			return true, nil
+	if pod.Labels == nil {
+		pod.Labels = make(map[string]string)
+	}
+
+	if selector.LabelSelectors == nil {
+		selector.LabelSelectors = make(map[string]string)
+	}
+
+	if len(selector.LabelSelectors) > 0 {
+		ls := labels.SelectorFromSet(pod.Labels)
+		labelsSelector := labels.Set(selector.LabelSelectors)
+		if len(pod.Labels) == 0 || !ls.Matches(labelsSelector) {
+			return false, nil
 		}
 	}
 

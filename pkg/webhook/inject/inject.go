@@ -88,6 +88,9 @@ func Inject(res *v1beta1.AdmissionRequest, cli client.Client, cfg *config.Config
 		meet, err := utils.CheckPodMeetSelector(pod, *injectionConfig.Selector)
 		if err != nil {
 			log.Error(err, "Failed to check pod selector", "namespace", pod.Namespace)
+			return &v1beta1.AdmissionResponse{
+				Allowed: true,
+			}
 		}
 
 		if !meet {

@@ -119,6 +119,78 @@ func TestCheckPodMeetSelector(t *testing.T) {
 			},
 			expectedValue: false,
 		},
+		{
+			name: "pod labels is empty",
+			pod:  newPod("t1", v1.PodRunning, metav1.NamespaceDefault, nil, nil),
+			selector: v1alpha1.SelectorSpec{
+				LabelSelectors: map[string]string{"app": "tikv"},
+			},
+			expectedValue: false,
+		},
+		{
+			name:          "selector is empty",
+			pod:           newPod("t1", v1.PodRunning, metav1.NamespaceDefault, nil, map[string]string{"app": "tidb"}),
+			selector:      v1alpha1.SelectorSpec{},
+			expectedValue: true,
+		},
+		{
+			name: "meet namespace",
+			pod:  newPod("t1", v1.PodRunning, metav1.NamespaceDefault, nil, nil),
+			selector: v1alpha1.SelectorSpec{
+				Namespaces: []string{metav1.NamespaceDefault},
+			},
+			expectedValue: true,
+		},
+		{
+			name: "meet namespace and meet labels",
+			pod:  newPod("t1", v1.PodRunning, metav1.NamespaceDefault, nil, map[string]string{"app": "tikv"}),
+			selector: v1alpha1.SelectorSpec{
+				Namespaces:     []string{metav1.NamespaceDefault},
+				LabelSelectors: map[string]string{"app": "tikv"},
+			},
+			expectedValue: true,
+		},
+		{
+			name: "meet namespace and not meet labels",
+			pod:  newPod("t1", v1.PodRunning, metav1.NamespaceDefault, nil, map[string]string{"app": "tidb"}),
+			selector: v1alpha1.SelectorSpec{
+				Namespaces:     []string{metav1.NamespaceDefault},
+				LabelSelectors: map[string]string{"app": "tikv"},
+			},
+			expectedValue: false,
+		},
+		{
+			name: "meet pods",
+			pod:  newPod("t1", v1.PodRunning, metav1.NamespaceDefault, nil, map[string]string{"app": "tidb"}),
+			selector: v1alpha1.SelectorSpec{
+				Pods: map[string][]string{
+					metav1.NamespaceDefault: []string{"t1"},
+				},
+			},
+			expectedValue: true,
+		},
+		{
+			name: "meet annotation",
+			pod:  newPod("t1", v1.PodRunning, metav1.NamespaceDefault, map[string]string{"an": "n1"}, map[string]string{"app": "tidb"}),
+			selector: v1alpha1.SelectorSpec{
+				Namespaces: []string{metav1.NamespaceDefault},
+				AnnotationSelectors: map[string]string{
+					"an": "n1",
+				},
+			},
+			expectedValue: true,
+		},
+		{
+			name: "not meet annotation",
+			pod:  newPod("t1", v1.PodRunning, metav1.NamespaceDefault, map[string]string{"an": "n1"}, map[string]string{"app": "tidb"}),
+			selector: v1alpha1.SelectorSpec{
+				Namespaces: []string{metav1.NamespaceDefault},
+				AnnotationSelectors: map[string]string{
+					"an": "n2",
+				},
+			},
+			expectedValue: false,
+		},
 	}
 
 	for _, tc := range tcs {
