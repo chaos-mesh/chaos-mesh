@@ -16,7 +16,6 @@ package config
 import (
 	"crypto/sha256"
 	"fmt"
-	"github.com/pingcap/chaos-mesh/api/v1alpha1"
 	"io"
 	"io/ioutil"
 	"os"
@@ -25,6 +24,8 @@ import (
 	"sync"
 
 	"github.com/ghodss/yaml"
+	"github.com/pingcap/chaos-mesh/api/v1alpha1"
+
 	ctrl "sigs.k8s.io/controller-runtime"
 
 	corev1 "k8s.io/api/core/v1"
