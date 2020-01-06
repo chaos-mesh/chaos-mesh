@@ -105,7 +105,7 @@ func TestCheckPodMeetSelector(t *testing.T) {
 	tcs := []TestCase{
 		{
 			name: "meet label",
-			pod:  newPod("t1", v1.PodRunning, metav1.NamespaceDefault, nil, map[string]string{"app": "tikv"}),
+			pod:  newPod("t1", v1.PodRunning, metav1.NamespaceDefault, nil, map[string]string{"app": "tikv", "ss": "t1"}),
 			selector: v1alpha1.SelectorSpec{
 				LabelSelectors: map[string]string{"app": "tikv"},
 			},
@@ -113,7 +113,7 @@ func TestCheckPodMeetSelector(t *testing.T) {
 		},
 		{
 			name: "not meet label",
-			pod:  newPod("t1", v1.PodRunning, metav1.NamespaceDefault, nil, map[string]string{"app": "tidb"}),
+			pod:  newPod("t1", v1.PodRunning, metav1.NamespaceDefault, nil, map[string]string{"app": "tidb", "ss": "t1"}),
 			selector: v1alpha1.SelectorSpec{
 				LabelSelectors: map[string]string{"app": "tikv"},
 			},
@@ -171,7 +171,7 @@ func TestCheckPodMeetSelector(t *testing.T) {
 		},
 		{
 			name: "meet annotation",
-			pod:  newPod("t1", v1.PodRunning, metav1.NamespaceDefault, map[string]string{"an": "n1"}, map[string]string{"app": "tidb"}),
+			pod:  newPod("t1", v1.PodRunning, metav1.NamespaceDefault, map[string]string{"an": "n1", "an2": "n2"}, map[string]string{"app": "tidb"}),
 			selector: v1alpha1.SelectorSpec{
 				Namespaces: []string{metav1.NamespaceDefault},
 				AnnotationSelectors: map[string]string{

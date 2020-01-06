@@ -154,9 +154,9 @@ func CheckPodMeetSelector(pod v1.Pod, selector v1alpha1.SelectorSpec) (bool, err
 	}
 
 	if len(selector.LabelSelectors) > 0 {
-		ls := labels.SelectorFromSet(pod.Labels)
-		labelsSelector := labels.Set(selector.LabelSelectors)
-		if len(pod.Labels) == 0 || !ls.Matches(labelsSelector) {
+		ls := labels.SelectorFromSet(selector.LabelSelectors)
+		podLabels := labels.Set(pod.Labels)
+		if len(pod.Labels) == 0 || !ls.Matches(podLabels) {
 			return false, nil
 		}
 	}
