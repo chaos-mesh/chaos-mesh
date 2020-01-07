@@ -170,9 +170,29 @@ kubectl apply -f app-configmap.yaml # app-configmap.yaml is the ConfigMap file
 
 In this situation, you can add an [annotation](https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/) to the application namespace:
 
-```yaml
+```bash
 admission-webhook.pingcap.com/init-request:chaosfs-tikv
 ```
+
+You can use the following commands to set annotations of the application namespace:
+
+```bash
+# If the application namespace does not exist. you can exec this command to create one,
+# otherwise ignore this command.
+kubectl create ns app-ns # "app-ns" is the application namespace
+
+# set annotation
+kubectl annotate ns app-ns admission-webhook.pingcap.com/init-request=chaosfs-tikv
+
+# install your application
+...
+```
+
+If the target application is a TiDB cluster, you can follow the instructions in the following two documents to deploy one:
+
+* [Deploy using kind](https://pingcap.com/docs/stable/tidb-in-kubernetes/get-started/deploy-tidb-from-kubernetes-kind/)
+* [Deoloy using minikube](https://pingcap.com/docs/stable/tidb-in-kubernetes/get-started/deploy-tidb-from-kubernetes-minikube/)
+
 
 Then, you can start your application and define your [IO Chaos](io_chaos.md) config to start your chaos experiment.
 
