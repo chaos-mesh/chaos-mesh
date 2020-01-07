@@ -23,7 +23,14 @@ import (
 	pb "github.com/pingcap/chaos-mesh/pkg/chaosdaemon/pb"
 )
 
+const (
+	ipsetExistErr        = "set with the same name already exists"
+	ipExistErr           = "it's already added"
+	ipsetNewNameExistErr = "a set with the new name already exists"
+)
+
 func (s *Server) FlushIpSet(ctx context.Context, req *pb.IpSetRequest) (*empty.Empty, error) {
+	log.Info("flush ipset", "request", req)
 	pid, err := s.crClient.GetPidFromContainerID(ctx, req.ContainerId)
 	if err != nil {
 		log.Error(err, "error while getting PID")
@@ -35,59 +42,102 @@ func (s *Server) FlushIpSet(ctx context.Context, req *pb.IpSetRequest) (*empty.E
 	// TODO: lock every ipset when working on it
 
 	set := req.Ipset
-
 	name := set.Name
+	tmpName := fmt.Sprintf("%s-tmp", name)
 
-	{
-		// TODO: Hash and get a stable short name (as ipset name cannot be longer than 31 byte)
-		cmd := withNetNS(ctx, nsPath, "ipset", "create", name+"old", "hash:ip")
-		out, err := cmd.CombinedOutput()
-		if err != nil {
-			output := string(out)
-			if !strings.Contains(output, "set with the same name already exists") {
-				log.Error(err, "ipset create error", "command", fmt.Sprintf("ipset create %s hash:ip", name+"old"), "output", output)
-				return nil, err
-			}
-
-			cmd := withNetNS(ctx, nsPath, "ipset", "flush", name+"old")
-			out, err := cmd.CombinedOutput()
-			if err != nil {
-				log.Error(err, "ipset flush error", "command", fmt.Sprintf("ipset flush %s", name+"old"), "output", string(out))
-				return nil, err
-			}
-		}
+	// the ipset while existing iptables rules are using them can not be deleted,.
+	// so we creates an temp ipset and swap it with existing one.
+	if err := s.createIpSet(ctx, nsPath, tmpName); err != nil {
+		return nil, err
 	}
 
-	for _, ip := range set.Ips {
-		cmd := withNetNS(ctx, nsPath, "ipset", "add", name+"old", ip)
-		out, err := cmd.CombinedOutput()
-		if err != nil {
-			output := string(out)
-			if !strings.Contains(output, "it's already added") {
-				log.Error(err, "ipset add error", "command", fmt.Sprintf("ipset add %s %s", name+"old", ip), "output", string(out))
-				return nil, err
-			}
-		}
+	// add ips to the temp ipset
+	if err := s.addIpsToIpSet(ctx, nsPath, tmpName, set.Ips); err != nil {
+		return nil, err
 	}
 
-	{
-		cmd := withNetNS(ctx, nsPath, "ipset", "rename", name+"old", name)
-		out, err := cmd.CombinedOutput()
-		if err != nil {
-			output := string(out)
-			if !strings.Contains(output, "a set with the new name already exists") {
-				log.Error(err, "rename ipset failed", "command", fmt.Sprintf("ipset rename %s %s", name+"old", name), "output", output)
-				return nil, err
-			}
-
-			cmd := withNetNS(ctx, nsPath, "ipset", "swap", name+"old", name)
-			out, err := cmd.CombinedOutput()
-			if err != nil {
-				log.Error(err, "swap ipset failed", "output", string(out))
-				return nil, err
-			}
-		}
+	// rename the ipset and swap the temp ipset and the new ipset if the the new ipset already exists.
+	if err := s.renameIpSet(ctx, nsPath, tmpName, name); err != nil {
+		return nil, err
 	}
 
 	return &empty.Empty{}, nil
+}
+
+func (s *Server) createIpSet(ctx context.Context, nsPath string, name string) error {
+	// ipset name cannot be longer than 31 byte
+	if len(name) > 31 {
+		name = name[:31]
+	}
+
+	cmd := withNetNS(ctx, nsPath, "ipset", "create", name, "hash:ip")
+
+	log.Info("create ipset", "command", cmd.String())
+
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		output := string(out)
+		if !strings.Contains(output, ipsetExistErr) {
+			log.Error(err, "ipset create error", "command", cmd.String(), "output", output)
+			return err
+		}
+
+		cmd := withNetNS(ctx, nsPath, "ipset", "flush", name)
+
+		log.Info("flush ipset", "command", cmd.String())
+
+		out, err := cmd.CombinedOutput()
+		if err != nil {
+			log.Error(err, "ipset flush error", "command", cmd.String(), "output", string(out))
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (s *Server) addIpsToIpSet(ctx context.Context, nsPath stirng, name string, ips []string) error {
+	for _, ip := range ips {
+		cmd := withNetNS(ctx, nsPath, "ipset", "add", name+"old", ip)
+
+		log.Info("add ip to ipset", "command", cmd.String())
+
+		out, err := cmd.CombinedOutput()
+		if err != nil {
+			output := string(out)
+			if !strings.Contains(output, ipExistErr) {
+				log.Error(err, "ipset add error", "command", cmd.String(), "output", output)
+				return err
+			}
+		}
+	}
+
+	return nil
+}
+
+func (s *Server) renameIpSet(ctx context.Context, nsPath string, oldName string, newName string) error {
+	cmd := withNetNS(ctx, nsPath, "ipset", "rename", oldName, newName)
+
+	log.Info("rename ipset", "command", cmd.String())
+
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		output := string(out)
+		if !strings.Contains(output, ipsetNewNameExistErr) {
+			log.Error(err, "rename ipset failed", "command", cmd.String(), "output", output)
+			return err
+		}
+
+		// swap the old ipset and the new ipset if the new ipset already exist.
+		cmd := withNetNS(ctx, nsPath, "ipset", "swap", oldName, name)
+
+		log.Info("swap ipset", "command", cmd.String())
+
+		out, err := cmd.CombinedOutput()
+		if err != nil {
+			log.Error(err, "swap ipset failed", "command", cmd.String(), "output", string(out))
+			return err
+		}
+	}
+	return nil
 }

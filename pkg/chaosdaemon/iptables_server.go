@@ -24,12 +24,15 @@ import (
 )
 
 const (
-	iptablesCmd              = "iptables"
+	iptablesCmd = "iptables"
+
 	iptablesBadRuleErr       = "Bad rule (does a matching rule exist in that chain?)."
 	iptablesIpSetNotExistErr = "doesn't exist.\n\nTry `iptables -h' or 'iptables --help' for more information.\n"
 )
 
 func (s *Server) FlushIptables(ctx context.Context, req *pb.IpTablesRequest) (*empty.Empty, error) {
+	log.Info("flush iptables rules", "request", req)
+
 	pid, err := s.crClient.GetPidFromContainerID(ctx, req.ContainerId)
 	if err != nil {
 		log.Error(err, "error while getting PID")
@@ -41,7 +44,6 @@ func (s *Server) FlushIptables(ctx context.Context, req *pb.IpTablesRequest) (*e
 	rule := req.Rule
 
 	format := ""
-
 	switch rule.Direction {
 	case pb.Rule_INPUT:
 		format = "%s INPUT -m set --match-set %s src -j DROP -w 5"
@@ -51,36 +53,51 @@ func (s *Server) FlushIptables(ctx context.Context, req *pb.IpTablesRequest) (*e
 		return nil, fmt.Errorf("unknown rule direction")
 	}
 
-	action := ""
 	switch rule.Action {
 	case pb.Rule_ADD:
-		action = "-A"
+		err = s.addIptablesRules(ctx, nsPath, format, rule)
 	case pb.Rule_DELETE:
-		action = "-D"
+		err = s.deleteIptablesRules(ctx, nsPath, format, rule)
+	default:
+		return nil, fmt.Errorf("unknown rule action")
 	}
 
-	command := fmt.Sprintf(format, action, rule.Set)
-
-	if rule.Action == pb.Rule_DELETE {
-		log.Info("deleting iptables rules")
-		cmd := withNetNS(ctx, nsPath, iptablesCmd, strings.Split(command, " ")...)
-		out, err := cmd.CombinedOutput()
-		if err != nil {
-			output := string(out)
-			if !(strings.Contains(output, iptablesBadRuleErr) || strings.Contains(output, iptablesIpSetNotExistErr)) {
-				log.Error(err, "iptables error")
-				return nil, err
-			}
-		}
-	} else {
-		cmd := withNetNS(ctx, nsPath, iptablesCmd, strings.Split(command, " ")...)
-		out, err := cmd.CombinedOutput()
-		if err != nil {
-			output := string(out)
-			log.Info("run command failed", "command", fmt.Sprintf("%s %s", iptablesCmd, command), "stdout", output)
-			return nil, err
-		}
+	if err != nil {
+		return nil, err
 	}
 
 	return &empty.Empty{}, nil
+}
+
+func (s *Server) addIptablesRules(ctx context.Context, nsPath string, format string, rule *pb.Rule) error {
+	command := fmt.Sprintf(format, "-A", rule.Set)
+	cmd := withNetNS(ctx, nsPath, iptablesCmd, strings.Split(command, " ")...)
+
+	log.Info("add iptables rules", "command", cmd.String())
+
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		log.Error(err, "failed to add iptables rules", "command", cmd.String(), "stdout", string(out))
+		return err
+	}
+
+	return nil
+}
+
+func (s *Server) deleteIptablesRules(ctx context.Context, nsPath string, format string, rule *pb.Rule) error {
+	command := fmt.Sprintf(format, "-D", rule.Set)
+	cmd := withNetNS(ctx, nsPath, iptablesCmd, strings.Split(command, " ")...)
+
+	log.Info("delete iptables rules", "command", cmd.String())
+
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		output := string(out)
+		if !(strings.Contains(output, iptablesBadRuleErr) || strings.Contains(output, iptablesIpSetNotExistErr)) {
+			log.Error(err, "failed to delete iptables rules", "command", cmd.String(), "output", output)
+			return err
+		}
+	}
+
+	return nil
 }
