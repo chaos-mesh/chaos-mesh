@@ -10,7 +10,7 @@ Network Chaos actions are mainly divided into the following two categories:
 
 ## Network Partition Action
 
-To add the Network Partition chaos experiment, locate and edit the corresponding template in [/examples](./examples/network-partition-example.yaml). Below is a sample network partition configuration file:
+Below is a sample network partition configuration file:
 
 ```yaml
 apiVersion: pingcap.com/v1alpha1
@@ -38,6 +38,9 @@ spec:
   scheduler:
     cron: "@every 15s"
 ```
+
+> For more sample files, see [examples](../examples). You can edit them as needed. 
+
 Description:
 
 * **action** defines the specific chaos action for the pod. In this case, it is network partition.
