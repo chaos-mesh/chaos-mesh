@@ -166,7 +166,7 @@ You can apply the ConfigMap defined for your application to Kubernetes cluster b
 kubectl apply -f app-configmap.yaml # app-configmap.yaml is the ConfigMap file 
 ```
 
-#### Before the application starts
+#### Before the application created
 
 In this situation, you can add an [annotation](https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/) to the application namespace:
 
@@ -184,7 +184,7 @@ kubectl create ns app-ns # "app-ns" is the application namespace
 # set annotation
 kubectl annotate ns app-ns admission-webhook.pingcap.com/init-request=chaosfs-tikv
 
-# install your application
+# create your application
 ...
 ```
 
