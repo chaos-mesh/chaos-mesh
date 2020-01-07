@@ -31,6 +31,7 @@ const (
 
 func (s *Server) FlushIpSet(ctx context.Context, req *pb.IpSetRequest) (*empty.Empty, error) {
 	log.Info("flush ipset", "request", req)
+
 	pid, err := s.crClient.GetPidFromContainerID(ctx, req.ContainerId)
 	if err != nil {
 		log.Error(err, "error while getting PID")
@@ -96,7 +97,7 @@ func (s *Server) createIpSet(ctx context.Context, nsPath string, name string) er
 	return nil
 }
 
-func (s *Server) addIpsToIpSet(ctx context.Context, nsPath stirng, name string, ips []string) error {
+func (s *Server) addIpsToIpSet(ctx context.Context, nsPath string, name string, ips []string) error {
 	for _, ip := range ips {
 		cmd := withNetNS(ctx, nsPath, "ipset", "add", name+"old", ip)
 
@@ -129,7 +130,7 @@ func (s *Server) renameIpSet(ctx context.Context, nsPath string, oldName string,
 		}
 
 		// swap the old ipset and the new ipset if the new ipset already exist.
-		cmd := withNetNS(ctx, nsPath, "ipset", "swap", oldName, name)
+		cmd := withNetNS(ctx, nsPath, "ipset", "swap", oldName, newName)
 
 		log.Info("swap ipset", "command", cmd.String())
 
