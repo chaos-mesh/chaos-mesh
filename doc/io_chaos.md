@@ -12,7 +12,7 @@ IO chaos needs to inject a sidecar container to user pods and the sidecar contai
 using a [mutating webhook admission controller](https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/) provided by Chaos Mesh.
 
 > While admission controllers are enabled by default, some Kubernetes distributions may disable them. 
-> If this is the case, follow the instructions to [turn on admission controllers](https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/#how-do-i-turn-on-an-admission-controller). 
+> If this is the case, follow the instructions to [turn on admission controllers](https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/#how-do-i-turn-on-an-admission-controller).     
 > [ValidatingAdmissionWebhooks](https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/#validatingadmissionwebhook) and [MutatingAdmissionWebhooks](https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/#mutatingadmissionwebhook) are required by IO chaos.
 
 #### Data directory
@@ -63,7 +63,7 @@ Then, you can start your application and define YAML file to start your chaos ex
 
 In this situation, you just need to define YAML file to start your chaos experiment. 
 
-> Note that if you are in this situation, the target pod will be modified dynamically and be restarted.
+> Note that if you are in this situation, the target pods will be modified dynamically and restarted.
 
 #### YAML file
 
