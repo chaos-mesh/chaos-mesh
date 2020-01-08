@@ -16,6 +16,7 @@ package chaosdaemon
 import (
 	"context"
 	"fmt"
+	"os/exec"
 	"strings"
 
 	"github.com/golang/protobuf/ptypes/empty"
@@ -40,7 +41,6 @@ func (s *Server) FlushIptables(ctx context.Context, req *pb.IpTablesRequest) (*e
 	}
 
 	nsPath := GenNetnsPath(pid)
-
 	rule := req.Rule
 
 	format := ""
@@ -55,9 +55,13 @@ func (s *Server) FlushIptables(ctx context.Context, req *pb.IpTablesRequest) (*e
 
 	switch rule.Action {
 	case pb.Rule_ADD:
-		err = s.addIptablesRules(ctx, nsPath, format, rule)
+		command := fmt.Sprintf(format, "-A", rule.Set)
+		cmd := withNetNS(ctx, nsPath, iptablesCmd, strings.Split(command, " ")...)
+		err = s.addIptablesRules(ctx, cmd)
 	case pb.Rule_DELETE:
-		err = s.deleteIptablesRules(ctx, nsPath, format, rule)
+		command := fmt.Sprintf(format, "-D", rule.Set)
+		cmd := withNetNS(ctx, nsPath, iptablesCmd, strings.Split(command, " ")...)
+		err = s.deleteIptablesRules(ctx, cmd)
 	default:
 		return nil, fmt.Errorf("unknown rule action")
 	}
@@ -69,10 +73,7 @@ func (s *Server) FlushIptables(ctx context.Context, req *pb.IpTablesRequest) (*e
 	return &empty.Empty{}, nil
 }
 
-func (s *Server) addIptablesRules(ctx context.Context, nsPath string, format string, rule *pb.Rule) error {
-	command := fmt.Sprintf(format, "-A", rule.Set)
-	cmd := withNetNS(ctx, nsPath, iptablesCmd, strings.Split(command, " ")...)
-
+func (s *Server) addIptablesRules(ctx context.Context, cmd *exec.Cmd) error {
 	log.Info("add iptables rules", "command", cmd.String())
 
 	out, err := cmd.CombinedOutput()
@@ -84,10 +85,7 @@ func (s *Server) addIptablesRules(ctx context.Context, nsPath string, format str
 	return nil
 }
 
-func (s *Server) deleteIptablesRules(ctx context.Context, nsPath string, format string, rule *pb.Rule) error {
-	command := fmt.Sprintf(format, "-D", rule.Set)
-	cmd := withNetNS(ctx, nsPath, iptablesCmd, strings.Split(command, " ")...)
-
+func (s *Server) deleteIptablesRules(ctx context.Context, cmd *exec.Cmd) error {
 	log.Info("delete iptables rules", "command", cmd.String())
 
 	out, err := cmd.CombinedOutput()
