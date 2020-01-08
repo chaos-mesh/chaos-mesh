@@ -91,7 +91,12 @@ and mounts the application's data directory. `chaosfs` will hijack all the file 
 
 The following config will inject `chaosfs` container to target pods and will start a `chaosfs` process in this container.
 In addition, `chaosfs` container should be run as `privileged` and the [mountPropagation](https://kubernetes.io/docs/concepts/storage/volumes/#mount-propagation) 
-field in `chaosfs` Container.volumeMounts should be set to `Bidirectional`. 
+field in `chaosfs` Container.volumeMounts should be set to `Bidirectional`.
+`chaosfs` will use `fusermount` to mount the data directory of the application container in `chaosfs` container. 
+If any Pod with `Bidirectional` mount propagation to the same volume mounts anything there, the Container with `HostToContainer` mount propagation will see it.
+This mode is equal to `rslave` mount propagation as described in the [Linux kernel documentation](https://www.kernel.org/doc/Documentation/filesystems/sharedsubtree.txt).
+
+> For more detail on `Mount propagation`, refer [here](https://kubernetes.io/docs/concepts/storage/volumes/#mount-propagation)
 
 ```yaml
 containers:

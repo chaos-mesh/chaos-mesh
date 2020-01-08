@@ -6,7 +6,7 @@ IO chaos allows you to simulate file system faults such as IO delay, read/write 
 
 ## Prerequisites
 
-#### Admission Controller
+### Admission Controller
 
 IO chaos needs to inject a sidecar container to user pods and the sidecar container can be added to applicable Kubernetes pods 
 using a [mutating webhook admission controller](https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/) provided by Chaos Mesh.
@@ -15,7 +15,7 @@ using a [mutating webhook admission controller](https://kubernetes.io/docs/refer
 > If this is the case, follow the instructions to [turn on admission controllers](https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/#how-do-i-turn-on-an-admission-controller).     
 > [ValidatingAdmissionWebhooks](https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/#validatingadmissionwebhook) and [MutatingAdmissionWebhooks](https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/#mutatingadmissionwebhook) are required by IO chaos.
 
-#### Data directory
+### Data directory
 
 The data directory of the application in the target pod should be a **subdirectory** of `PersistentVolumes`.
 
@@ -37,7 +37,7 @@ ARGS="--pd=${CLUSTER_NAME}-pd:2379 \
 
 ## Usage
 
-#### ConfigMap
+### Configure a ConfigMap 
 
 Chaos Mesh uses sidecar container to implement IO chaos and uses the [ConfigMap](https://kubernetes.io/docs/tasks/configure-pod-container/configure-pod-configmap/) to define the sidecar container. 
 You need to defines the specific ConfigMap for your application before using IO chaos.
@@ -49,23 +49,7 @@ You can apply the ConfigMap defined for your application to Kubernetes cluster b
 kubectl apply -f app-configmap.yaml # app-configmap.yaml is the ConfigMap file 
 ```
 
-#### Before the application starts
-
-In this situation, you can add an [annotation](https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/) to the application namespace:
-
-```yaml
-admission-webhook.pingcap.com/init-request:chaosfs-tikv
-```
-
-Then, you can start your application and define YAML file to start your chaos experiment.
-
-#### If the application is already running
-
-In this situation, you just need to define YAML file to start your chaos experiment. 
-
-> Note that if you are in this situation, the target pods will be modified dynamically and restarted.
-
-#### YAML file
+### Define the Chaos YAML file
 
 Below is a sample YAML file of IO chaos:
 
@@ -112,7 +96,25 @@ Description:
 * **configName**: defines the config name which is used to inject chaos action into pods. You can refer to [examples/tikv-configmap.yaml](../examples/chaosfs-configmap/tikv-configmap.yaml) to define your configuration.
 * **layer**: represents the layer of the IO action. Supported value: `fs` (by default).
 
-#### Create a chaos experiment
+### Create a chaos experiment
+
+#### Before the application starts
+
+In this situation, you can add an [annotation](https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/) to the application namespace:
+
+```yaml
+admission-webhook.pingcap.com/init-request:chaosfs-tikv
+```
+
+Then, you can start your application and define YAML file to start your chaos experiment.
+
+#### If the application is already running
+
+In this situation, you just need to define YAML file to start your chaos experiment. 
+
+> Note that if you are in this situation, the target pods will be modified dynamically and restarted.
+
+#### Start a chaos experiment
 
 Assume that you are using `examples/io-mixed-example.yaml`, you can run the following command to create a chaos experiment:
 
@@ -128,7 +130,7 @@ IO chaos currently supports the following actions:
 * **errno**: IO errno action. In this mode, read/write IO operations will return an error.
 * **mixed**: Both **delay** and **errno** actions.
 
-#### delay
+### delay
 
 If you are using the delay mode, you can edit spec as below:
 
@@ -140,7 +142,7 @@ spec:
 
 If `delay` is not specified, it will be generated randomly on runtime.
 
-#### errno
+### errno
 
 If you are using the errno mode, you can edit spec as below:
 
@@ -152,7 +154,7 @@ spec:
 
 If `errno` is not specified, it will be generated randomly on runtime. 
 
-#### mixed
+### mixed
 
 If you are using the mixed mode, you can edit spec as below:
 
