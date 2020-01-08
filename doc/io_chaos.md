@@ -39,9 +39,9 @@ ARGS="--pd=${CLUSTER_NAME}-pd:2379 \
 
 ### Configure a ConfigMap 
 
-Chaos Mesh uses sidecar container to implement IO chaos and uses the [ConfigMap](https://kubernetes.io/docs/tasks/configure-pod-container/configure-pod-configmap/) to define the sidecar container. 
-You need to defines the specific ConfigMap for your application before using IO chaos.
-You can refer this [document](sidecar_configmap.md) to define a ConfigMap for your application. 
+Chaos Mesh uses sidecar container to inject IO chaos, 
+to fulfill this chaos you need to configure this sidecar container using a [ConfigMap](https://kubernetes.io/docs/tasks/configure-pod-container/configure-pod-configmap/)
+You can refer this [document](sidecar_configmap.md) to define a specify ConfigMap for your application before starting your chaos experiment. 
 
 You can apply the ConfigMap defined for your application to Kubernetes cluster by using this command:
 
