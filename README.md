@@ -227,7 +227,7 @@ Then you can access [`http://localhost:8080`](http://localhost:8080) in browser.
 Please reach out for bugs, feature requests, and other issues via:
 
 - Following us on Twitter at [@chaos_mesh](https://twitter.com/chaos_mesh).
-- The #chaos-mesh channel in the [TiDB Community](https://pingcap.com/tidbslack) slack workspace.
+- The #sig-chaos-mesh channel in the [TiDB Community](https://pingcap.com/tidbslack) slack workspace.
 - Filing a issue or opening a PR against this repo.
 
 ## Roadmap
