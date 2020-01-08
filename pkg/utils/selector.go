@@ -132,7 +132,6 @@ func SelectPods(ctx context.Context, c client.Client, selector v1alpha1.Selector
 func CheckPodMeetSelector(pod v1.Pod, selector v1alpha1.SelectorSpec) (bool, error) {
 	if len(selector.Pods) > 0 {
 		meet := false
-	Loop:
 		for ns, names := range selector.Pods {
 			if pod.Namespace != ns {
 				continue
@@ -141,13 +140,12 @@ func CheckPodMeetSelector(pod v1.Pod, selector v1alpha1.SelectorSpec) (bool, err
 			for _, name := range names {
 				if pod.Name == name {
 					meet = true
-					break Loop
 				}
 			}
-		}
 
-		if !meet {
-			return false, nil
+			if !meet {
+				return false, nil
+			}
 		}
 	}
 
