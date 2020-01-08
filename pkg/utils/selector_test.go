@@ -191,6 +191,37 @@ func TestCheckPodMeetSelector(t *testing.T) {
 			},
 			expectedValue: false,
 		},
+		{
+			name: "meet pod selector",
+			pod:  newPod("t1", v1.PodRunning, metav1.NamespaceDefault, nil, map[string]string{"app": "tidb"}),
+			selector: v1alpha1.SelectorSpec{
+				Pods: map[string][]string{
+					metav1.NamespaceDefault: []string{"t1", "t2"},
+				},
+			},
+			expectedValue: true,
+		},
+		{
+			name: "not meet pod selector",
+			pod:  newPod("t1", v1.PodRunning, metav1.NamespaceDefault, nil, map[string]string{"app": "tidb"}),
+			selector: v1alpha1.SelectorSpec{
+				Pods: map[string][]string{
+					metav1.NamespaceDefault: []string{"t2"},
+				},
+			},
+			expectedValue: false,
+		},
+		{
+			name: "meet pod selector and not meet labels",
+			pod:  newPod("t1", v1.PodRunning, metav1.NamespaceDefault, nil, map[string]string{"app": "tidb"}),
+			selector: v1alpha1.SelectorSpec{
+				Pods: map[string][]string{
+					metav1.NamespaceDefault: []string{"t1", "t2"},
+				},
+				LabelSelectors: map[string]string{"app": "tikv"},
+			},
+			expectedValue: false,
+		},
 	}
 
 	for _, tc := range tcs {
