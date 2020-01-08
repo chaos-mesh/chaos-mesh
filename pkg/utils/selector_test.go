@@ -92,6 +92,145 @@ func TestSelectPods(t *testing.T) {
 	}
 }
 
+func TestCheckPodMeetSelector(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	type TestCase struct {
+		name          string
+		selector      v1alpha1.SelectorSpec
+		pod           v1.Pod
+		expectedValue bool
+	}
+
+	tcs := []TestCase{
+		{
+			name: "meet label",
+			pod:  newPod("t1", v1.PodRunning, metav1.NamespaceDefault, nil, map[string]string{"app": "tikv", "ss": "t1"}),
+			selector: v1alpha1.SelectorSpec{
+				LabelSelectors: map[string]string{"app": "tikv"},
+			},
+			expectedValue: true,
+		},
+		{
+			name: "not meet label",
+			pod:  newPod("t1", v1.PodRunning, metav1.NamespaceDefault, nil, map[string]string{"app": "tidb", "ss": "t1"}),
+			selector: v1alpha1.SelectorSpec{
+				LabelSelectors: map[string]string{"app": "tikv"},
+			},
+			expectedValue: false,
+		},
+		{
+			name: "pod labels is empty",
+			pod:  newPod("t1", v1.PodRunning, metav1.NamespaceDefault, nil, nil),
+			selector: v1alpha1.SelectorSpec{
+				LabelSelectors: map[string]string{"app": "tikv"},
+			},
+			expectedValue: false,
+		},
+		{
+			name:          "selector is empty",
+			pod:           newPod("t1", v1.PodRunning, metav1.NamespaceDefault, nil, map[string]string{"app": "tidb"}),
+			selector:      v1alpha1.SelectorSpec{},
+			expectedValue: true,
+		},
+		{
+			name: "meet namespace",
+			pod:  newPod("t1", v1.PodRunning, metav1.NamespaceDefault, nil, nil),
+			selector: v1alpha1.SelectorSpec{
+				Namespaces: []string{metav1.NamespaceDefault},
+			},
+			expectedValue: true,
+		},
+		{
+			name: "meet namespace and meet labels",
+			pod:  newPod("t1", v1.PodRunning, metav1.NamespaceDefault, nil, map[string]string{"app": "tikv"}),
+			selector: v1alpha1.SelectorSpec{
+				Namespaces:     []string{metav1.NamespaceDefault},
+				LabelSelectors: map[string]string{"app": "tikv"},
+			},
+			expectedValue: true,
+		},
+		{
+			name: "meet namespace and not meet labels",
+			pod:  newPod("t1", v1.PodRunning, metav1.NamespaceDefault, nil, map[string]string{"app": "tidb"}),
+			selector: v1alpha1.SelectorSpec{
+				Namespaces:     []string{metav1.NamespaceDefault},
+				LabelSelectors: map[string]string{"app": "tikv"},
+			},
+			expectedValue: false,
+		},
+		{
+			name: "meet pods",
+			pod:  newPod("t1", v1.PodRunning, metav1.NamespaceDefault, nil, map[string]string{"app": "tidb"}),
+			selector: v1alpha1.SelectorSpec{
+				Pods: map[string][]string{
+					metav1.NamespaceDefault: []string{"t1"},
+				},
+			},
+			expectedValue: true,
+		},
+		{
+			name: "meet annotation",
+			pod:  newPod("t1", v1.PodRunning, metav1.NamespaceDefault, map[string]string{"an": "n1", "an2": "n2"}, map[string]string{"app": "tidb"}),
+			selector: v1alpha1.SelectorSpec{
+				Namespaces: []string{metav1.NamespaceDefault},
+				AnnotationSelectors: map[string]string{
+					"an": "n1",
+				},
+			},
+			expectedValue: true,
+		},
+		{
+			name: "not meet annotation",
+			pod:  newPod("t1", v1.PodRunning, metav1.NamespaceDefault, map[string]string{"an": "n1"}, map[string]string{"app": "tidb"}),
+			selector: v1alpha1.SelectorSpec{
+				Namespaces: []string{metav1.NamespaceDefault},
+				AnnotationSelectors: map[string]string{
+					"an": "n2",
+				},
+			},
+			expectedValue: false,
+		},
+		{
+			name: "meet pod selector",
+			pod:  newPod("t1", v1.PodRunning, metav1.NamespaceDefault, nil, map[string]string{"app": "tidb"}),
+			selector: v1alpha1.SelectorSpec{
+				Pods: map[string][]string{
+					metav1.NamespaceDefault: []string{"t1", "t2"},
+				},
+			},
+			expectedValue: true,
+		},
+		{
+			name: "not meet pod selector",
+			pod:  newPod("t1", v1.PodRunning, metav1.NamespaceDefault, nil, map[string]string{"app": "tidb"}),
+			selector: v1alpha1.SelectorSpec{
+				Pods: map[string][]string{
+					metav1.NamespaceDefault: []string{"t2"},
+				},
+			},
+			expectedValue: false,
+		},
+		{
+			name: "meet pod selector and not meet labels",
+			pod:  newPod("t1", v1.PodRunning, metav1.NamespaceDefault, nil, map[string]string{"app": "tidb"}),
+			selector: v1alpha1.SelectorSpec{
+				Pods: map[string][]string{
+					metav1.NamespaceDefault: []string{"t1", "t2"},
+				},
+				LabelSelectors: map[string]string{"app": "tikv"},
+			},
+			expectedValue: false,
+		},
+	}
+
+	for _, tc := range tcs {
+		meet, err := CheckPodMeetSelector(tc.pod, tc.selector)
+		g.Expect(err).ShouldNot(HaveOccurred(), tc.name)
+		g.Expect(meet).To(Equal(tc.expectedValue), tc.name)
+	}
+}
+
 func TestRandomFixedIndexes(t *testing.T) {
 	g := NewGomegaWithT(t)
 

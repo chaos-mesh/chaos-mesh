@@ -24,6 +24,7 @@ import (
 	"sync"
 
 	"github.com/ghodss/yaml"
+	"github.com/pingcap/chaos-mesh/api/v1alpha1"
 
 	ctrl "sigs.k8s.io/controller-runtime"
 
@@ -70,6 +71,9 @@ type InjectionConfig struct {
 	// Value defines for the Commands for stating container.
 	// +optional
 	PostStart map[string]ExecAction `json:"postStart,omitempty"`
+
+	// Selector is used to select pods that are used to inject sidecar.
+	Selector *v1alpha1.SelectorSpec `json:"selector,omitempty"`
 }
 
 // FullName returns the full identifier of this sidecar - both the Name, and the Version(), formatted like
