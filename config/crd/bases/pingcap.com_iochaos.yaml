@@ -46,12 +46,12 @@ spec:
                 pod.
               type: string
             delay:
-              description: "Delay defines the value of I/O chaos action delay. It
-                is required when the action is `PodFailureAction`. A delay string
-                is a possibly signed sequence of decimal numbers, each with optional
-                fraction and a unit suffix, such as \"300ms\". Valid time units are
-                \"ns\", \"us\" (or \"µs\"), \"ms\", \"s\", \"m\", \"h\". \n If `Delay`
-                is empty, the operator will generate a value for it randomly."
+              description: "Delay defines the value of I/O chaos action delay. A delay
+                string is a possibly signed sequence of decimal numbers, each with
+                optional fraction and a unit suffix, such as \"300ms\". Valid time
+                units are \"ns\", \"us\" (or \"µs\"), \"ms\", \"s\", \"m\", \"h\".
+                \n If `Delay` is empty, the operator will generate a value for it
+                randomly."
               type: string
             duration:
               description: Duration represents the duration of the chaos action. It
@@ -68,7 +68,7 @@ spec:
               type: string
             layer:
               description: 'Layer represents the layer of the I/O action. Supported
-                value: fs / errno / mixed. Default layer: fs'
+                value: fs. Default layer: fs'
               type: string
             methods:
               description: 'Methods defines the I/O methods for injecting I/O chaos
@@ -81,11 +81,11 @@ spec:
                 one / all / fixed / fixed-percent / random-max-percent'
               type: string
             nextRecover:
-              description: Next time when this action will be recovered
+              description: Next time when this action will be recovered.
               format: date-time
               type: string
             nextStart:
-              description: Next time when this action will be applied again
+              description: Next time when this action will be applied again.
               format: date-time
               type: string
             path:
