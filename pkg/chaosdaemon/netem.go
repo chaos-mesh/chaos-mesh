@@ -16,7 +16,6 @@ package chaosdaemon
 import (
 	"strings"
 
-	"github.com/juju/errors"
 	"github.com/vishvananda/netlink"
 	"github.com/vishvananda/netns"
 
@@ -30,7 +29,7 @@ func Apply(netem *pb.Netem, pid uint32) error {
 	ns, err := netns.GetFromPath(GenNetnsPath(pid))
 	if err != nil {
 		log.Error(err, "failed to find network namespace", "pid", pid)
-		return errors.Trace(err)
+		return err
 	}
 	defer ns.Close()
 
@@ -43,7 +42,7 @@ func Apply(netem *pb.Netem, pid uint32) error {
 	link, err := handle.LinkByName("eth0") // TODO: check whether interface name is eth0
 	if err != nil {
 		log.Error(err, "failed to find eth0 interface")
-		return errors.Trace(err)
+		return err
 	}
 
 	netemQdisc := netlink.NewNetem(netlink.QdiscAttrs{
@@ -56,7 +55,7 @@ func Apply(netem *pb.Netem, pid uint32) error {
 	if err = handle.QdiscAdd(netemQdisc); err != nil {
 		if !strings.Contains(err.Error(), "file exists") {
 			log.Error(err, "failed to add Qdisc", "qdisc", netemQdisc)
-			return errors.Trace(err)
+			return err
 		}
 	}
 
@@ -71,20 +70,20 @@ func Cancel(netem *pb.Netem, pid uint32) error {
 	ns, err := netns.GetFromPath(GenNetnsPath(pid))
 	if err != nil {
 		log.Error(err, "failed to find network namespace", "pid", pid)
-		return errors.Trace(err)
+		return err
 	}
 	defer ns.Close()
 
 	handle, err := netlink.NewHandleAt(ns)
 	if err != nil {
 		log.Error(err, "failed to create new handle at network namespace", "network namespace", ns)
-		return errors.Trace(err)
+		return err
 	}
 
 	link, err := handle.LinkByName("eth0") // TODO: check whether interface name is eth0
 	if err != nil {
 		log.Error(err, "failed to find eth0 interface")
-		return errors.Trace(err)
+		return err
 	}
 
 	netemQdisc := &netlink.Netem{
@@ -95,11 +94,41 @@ func Cancel(netem *pb.Netem, pid uint32) error {
 		},
 	}
 
+	exist, err := qdiscExists(netemQdisc, handle, link)
+	if err != nil {
+		log.Error(err, "failed to check qdisc", "qdisc", netemQdisc, "link", link)
+		return err
+	}
+
+	if !exist {
+		log.Info("qdisc not exists", "qdisc", netemQdisc)
+		return nil
+	}
+
 	log.Info("remove qdisc", "qdisc", netemQdisc)
 	if err = handle.QdiscDel(netemQdisc); err != nil {
-		log.Error(err, "failed to remove Qdisc", "qdisc", netemQdisc)
-		return errors.Trace(err)
+		log.Error(err, "failed to remove qdisc", "qdisc", netemQdisc)
+
+		return err
 	}
 
 	return nil
+}
+
+func qdiscExists(qdisc netlink.Qdisc, handler *netlink.Handle, link netlink.Link) (bool, error) {
+	qds, err := handler.QdiscList(link)
+	if err != nil {
+		log.Error(err, "failed to list qdiscs", "link", link)
+		return false, err
+	}
+
+	for _, qd := range qds {
+		if qd.Attrs().LinkIndex == qdisc.Attrs().LinkIndex &&
+			qd.Attrs().Parent == qdisc.Attrs().Parent &&
+			qd.Attrs().Handle == qdisc.Attrs().Handle {
+			return true, nil
+		}
+	}
+
+	return false, nil
 }

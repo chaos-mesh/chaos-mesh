@@ -17,8 +17,6 @@ import (
 	"fmt"
 	"net"
 
-	"github.com/juju/errors"
-
 	pb "github.com/pingcap/chaos-mesh/pkg/chaosdaemon/pb"
 
 	"google.golang.org/grpc"
@@ -39,7 +37,7 @@ type Server struct {
 func newServer() (*Server, error) {
 	crClient, err := CreateContainerRuntimeInfoClient()
 	if err != nil {
-		return nil, errors.Trace(err)
+		return nil, err
 	}
 
 	return &Server{
