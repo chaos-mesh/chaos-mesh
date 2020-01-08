@@ -8,6 +8,9 @@ metadata:
 data:
   chaosfs-tikv.yaml: |
     name: chaosfs-tikv
+    selector:
+      labelSelectors:
+        "app.kubernetes.io/component": "tikv"
     initContainers:
     - name: inject-scripts
       image: pingcap/chaos-scripts:latest
