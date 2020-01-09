@@ -167,6 +167,7 @@ func CheckPodMeetSelector(pod v1.Pod, selector v1alpha1.SelectorSpec) (bool, err
 	}
 
 	pods := []v1.Pod{pod}
+
 	namespaceSelector, err := parseSelector(strings.Join(selector.Namespaces, ","))
 	if err != nil {
 		return false, err
@@ -181,8 +182,9 @@ func CheckPodMeetSelector(pod v1.Pod, selector v1alpha1.SelectorSpec) (bool, err
 	if err != nil {
 		return false, err
 	}
+
 	pods = filterByAnnotations(pods, annotationsSelector)
-	pods = filterByPhase(pods, v1.PodRunning)
+
 	if len(pods) > 0 {
 		return true, nil
 	}

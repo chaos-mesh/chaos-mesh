@@ -105,7 +105,7 @@ func TestCheckPodMeetSelector(t *testing.T) {
 	tcs := []TestCase{
 		{
 			name: "meet label",
-			pod:  newPod("t1", v1.PodRunning, metav1.NamespaceDefault, nil, map[string]string{"app": "tikv", "ss": "t1"}),
+			pod:  newPod("t1", v1.PodPending, metav1.NamespaceDefault, nil, map[string]string{"app": "tikv", "ss": "t1"}),
 			selector: v1alpha1.SelectorSpec{
 				LabelSelectors: map[string]string{"app": "tikv"},
 			},
