@@ -44,7 +44,9 @@ func (s *Server) FlushIpSet(ctx context.Context, req *pb.IpSetRequest) (*empty.E
 
 	set := req.Ipset
 	name := set.Name
-	tmpName := fmt.Sprintf("%s-tmp", name)
+
+	// If the ipset already exists, the ipset will be renamed to this temp name.
+	tmpName := fmt.Sprintf("%s_old", name)
 
 	// the ipset while existing iptables rules are using them can not be deleted,.
 	// so we creates an temp ipset and swap it with existing one.
@@ -57,7 +59,8 @@ func (s *Server) FlushIpSet(ctx context.Context, req *pb.IpSetRequest) (*empty.E
 		return nil, err
 	}
 
-	// rename the ipset and swap the temp ipset and the new ipset if the the new ipset already exists.
+	// rename the temp ipset with the target name of ipset if the taget ipset not exists,
+	// otherwise swap  them with each other.
 	if err := s.renameIpSet(ctx, nsPath, tmpName, name); err != nil {
 		return nil, err
 	}

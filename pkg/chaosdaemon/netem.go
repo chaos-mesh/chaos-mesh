@@ -101,7 +101,7 @@ func Cancel(netem *pb.Netem, pid uint32) error {
 	}
 
 	if !exist {
-		log.Info("qdisc not exists", "qdisc", netemQdisc)
+		log.Error(nil, "qdisc not exists", "qdisc", netemQdisc)
 		return nil
 	}
 

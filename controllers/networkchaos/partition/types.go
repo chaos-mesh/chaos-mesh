@@ -215,7 +215,7 @@ func (r *Reconciler) generateSetName(networkchaos *v1alpha1.NetworkChaos, namePo
 		hasher.Write([]byte(nameRest))
 		hashValue := fmt.Sprintf("%x", hasher.Sum(nil))
 
-		ipsetName = namePrefix + "_" + hashValue[0:17] + "_" + namePostFix
+		ipsetName = namePrefix + "_" + hashValue[0:16] + "_" + namePostFix
 	}
 
 	r.Log.Info("name generated", "ipsetName", ipsetName)
