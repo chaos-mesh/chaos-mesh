@@ -10,7 +10,7 @@ Pod chaos allows you to simulate pod faults, specifically `pod failure` and `pod
 
 ## Pod Failure Action
 
-Below is a sample network partition configuration file:
+Below is a sample pod failure configuration file:
 
 ```yaml
 apiVersion: pingcap.com/v1alpha1
