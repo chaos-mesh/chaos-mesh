@@ -116,4 +116,3 @@ A Network Corrupt action causes packet corruption. To add a Network Corrupt acti
 >```
 >
 > **corrupt** specifies the percentage of packet corruption.
-
