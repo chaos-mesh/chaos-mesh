@@ -45,6 +45,6 @@ data:
     - name: fuse
       emptyDir: {}
     postStart:
-      pd:
+      etcd:
         command:
           - /tmp/scripts/wait-fuse.sh

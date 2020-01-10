@@ -84,6 +84,24 @@ func Inject(res *v1beta1.AdmissionRequest, cli client.Client, cfg *config.Config
 		}
 	}
 
+	if injectionConfig.Selector != nil {
+		meet, err := utils.CheckPodMeetSelector(pod, *injectionConfig.Selector)
+		if err != nil {
+			log.Error(err, "Failed to check pod selector", "namespace", pod.Namespace)
+			return &v1beta1.AdmissionResponse{
+				Allowed: true,
+			}
+		}
+
+		if !meet {
+			log.Info("Skipping injection, this pod does not meet the selection criteria",
+				"namespace", pod.Namespace, "name", pod.Name)
+			return &v1beta1.AdmissionResponse{
+				Allowed: true,
+			}
+		}
+	}
+
 	annotations := map[string]string{cfg.StatusAnnotationKey(): StatusInjected}
 
 	patchBytes, err := createPatch(&pod, injectionConfig, annotations)

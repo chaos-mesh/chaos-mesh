@@ -165,7 +165,7 @@ else
 	@echo "kustomize has been installed"
 endif
 
-install-test-dependency:
+install-test-dependency: install-kubebuilder
 	go get -u github.com/jstemmer/go-junit-report \
 	&& go get github.com/axw/gocov/gocov \
 	&& go get github.com/AlekSi/gocov-xml \

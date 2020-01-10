@@ -198,13 +198,13 @@ vim pod-failure-example.yaml # modify pod-failure-example.yaml to what you want
 kubectl apply -f pod-failure-example.yaml
 ```
 
-#### Delete a chaos experiment
+### Delete a chaos experiment
 
 ```bash
 kubectl delete -f pod-failure-example.yaml
 ```
 
-#### Watch your chaos experiments in Dashboard
+### Watch your chaos experiments in Dashboard
 
 Chaos Dashboard is currently only available for TiDB clusters. Stay tuned for more supports or join us in making it happen.
 
@@ -227,7 +227,7 @@ Then you can access [`http://localhost:8080`](http://localhost:8080) in browser.
 Please reach out for bugs, feature requests, and other issues via:
 
 - Following us on Twitter at [@chaos_mesh](https://twitter.com/chaos_mesh).
-- The #chaos-mesh channel in the [TiDB Community](https://pingcap.com/tidbslack) slack workspace.
+- The #sig-chaos-mesh channel in the [TiDB Community](https://pingcap.com/tidbslack) slack workspace.
 - Filing a issue or opening a PR against this repo.
 
 ## Roadmap
