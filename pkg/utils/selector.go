@@ -110,7 +110,6 @@ func SelectPods(ctx context.Context, c client.Client, selector v1alpha1.Selector
 	if err != nil {
 		return nil, err
 	}
-
 	pods, err = filterByNamespaces(pods, namespaceSelector)
 	if err != nil {
 		return nil, err
@@ -122,7 +121,14 @@ func SelectPods(ctx context.Context, c client.Client, selector v1alpha1.Selector
 	}
 	pods = filterByAnnotations(pods, annotationsSelector)
 
-	pods = filterByPhase(pods, v1.PodRunning)
+	phaseSelector, err := parseSelector(strings.Join(selector.PodPhaseSelectors, ","))
+	if err != nil {
+		return nil, err
+	}
+	pods, err = filterByPhaseSelector(pods, phaseSelector)
+	if err != nil {
+		return nil, err
+	}
 
 	return pods, nil
 }
@@ -184,6 +190,15 @@ func CheckPodMeetSelector(pod v1.Pod, selector v1alpha1.SelectorSpec) (bool, err
 	}
 
 	pods = filterByAnnotations(pods, annotationsSelector)
+
+	phaseSelector, err := parseSelector(strings.Join(selector.PodPhaseSelectors, ","))
+	if err != nil {
+		return false, err
+	}
+	pods, err = filterByPhaseSelector(pods, phaseSelector)
+	if err != nil {
+		return false, err
+	}
 
 	if len(pods) > 0 {
 		return true, nil
@@ -283,17 +298,57 @@ func filterByAnnotations(pods []v1.Pod, annotations labels.Selector) []v1.Pod {
 	return filteredList
 }
 
-// filterByPhase filters a list of pods by a given PodPhase, e.g. Running.
-func filterByPhase(pods []v1.Pod, phase v1.PodPhase) []v1.Pod {
-	var filteredList []v1.Pod
+// filterByPhaseSet filters a list of pods by a given PodPhase selector.
+func filterByPhaseSelector(pods []v1.Pod, phases labels.Selector) ([]v1.Pod, error) {
+	if phases.Empty() {
+		return pods, nil
+	}
+
+	reqs, _ := phases.Requirements()
+	var (
+		reqIncl []labels.Requirement
+		reqExcl []labels.Requirement
+
+		filteredList []v1.Pod
+	)
+
+	for _, req := range reqs {
+		switch req.Operator() {
+		case selection.Exists:
+			reqIncl = append(reqIncl, req)
+		case selection.DoesNotExist:
+			reqExcl = append(reqExcl, req)
+		default:
+			return nil, fmt.Errorf("unsupported operator: %s", req.Operator())
+		}
+	}
 
 	for _, pod := range pods {
-		if pod.Status.Phase == phase {
+		included := len(reqIncl) == 0
+		selector := labels.Set{string(pod.Status.Phase): ""}
+
+		// include pod if one including requirement matches
+		for _, req := range reqIncl {
+			if req.Matches(selector) {
+				included = true
+				break
+			}
+		}
+
+		// exclude pod if it is filtered out by at least one excluding requirement
+		for _, req := range reqExcl {
+			if !req.Matches(selector) {
+				included = false
+				break
+			}
+		}
+
+		if included {
 			filteredList = append(filteredList, pod)
 		}
 	}
 
-	return filteredList
+	return filteredList, nil
 }
 
 // filterByNamespaces filters a list of pods by a given namespace selector.
