@@ -171,20 +171,21 @@ You can apply the ConfigMap defined for your application to Kubernetes cluster b
 kubectl apply -f app-configmap.yaml # app-configmap.yaml is the ConfigMap file 
 ```
 
-#### Before the application created
-
-In this situation, you can add an [annotation](https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/) to the application namespace:
+Before the application created, you need to make admission-webhook enable by label add an [annotation](https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/) to the application namespace:
 
 ```bash
 admission-webhook.pingcap.com/init-request:chaosfs-tikv
 ```
 
-You can use the following commands to set annotations of the application namespace:
+You can use the following commands to set labels and annotations of the application namespace:
 
 ```bash
 # If the application namespace does not exist. you can exec this command to create one,
 # otherwise ignore this command.
 kubectl create ns app-ns # "app-ns" is the application namespace
+
+# enable admission-webhook
+kubectl label ns app-ns admission-webhook=enabled
 
 # set annotation
 kubectl annotate ns app-ns admission-webhook.pingcap.com/init-request=chaosfs-tikv
@@ -201,8 +202,3 @@ If the target application is a TiDB cluster, you can follow the instructions in 
 
 Then, you can start your application and define your [IO Chaos](io_chaos.md) config to start your chaos experiment.
 
-#### If the application is already running
-
-In this situation, you just need to define your [IO Chaos](io_chaos.md) config to start your chaos experiment. 
-
-> Note that if you are in this situation, the target pods will be modified dynamically and restarted.

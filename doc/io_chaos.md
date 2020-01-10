@@ -2,7 +2,11 @@
 
 This document helps you to build IO chaos experiments. 
 
-IO chaos allows you to simulate file system faults such as IO delay, read/write errors, etc. It can inject delay and errno when you use the IO system calls such as `open`, `read` and `write`.
+IO chaos allows you to simulate file system faults such as IO delay, 
+read/write errors, etc. It can inject delay and errno when you use the IO system calls such as `open`, `read` and `write`.
+
+> Note: IO Chaos can only be used if the relevant labels and annotations are set before the application is created. 
+> More info refer [here](#-create-a-chaos-experiment)
 
 ## Prerequisites
 
@@ -98,21 +102,30 @@ Description:
 
 ### Create a chaos experiment
 
-#### Before the application starts
+Before the application created, you need to make admission-webhook enable by label add an [annotation](https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/) to the application namespace:
 
-In this situation, you can add an [annotation](https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/) to the application namespace:
-
-```yaml
+```bash
 admission-webhook.pingcap.com/init-request:chaosfs-tikv
 ```
 
+You can use the following commands to set labels and annotations of the application namespace:
+
+```bash
+# If the application namespace does not exist. you can exec this command to create one,
+# otherwise ignore this command.
+kubectl create ns app-ns # "app-ns" is the application namespace
+
+# enable admission-webhook
+kubectl label ns app-ns admission-webhook=enabled
+
+# set annotation
+kubectl annotate ns app-ns admission-webhook.pingcap.com/init-request=chaosfs-tikv
+
+# create your application
+...
+```
+
 Then, you can start your application and define YAML file to start your chaos experiment.
-
-#### If the application is already running
-
-In this situation, you just need to define YAML file to start your chaos experiment. 
-
-> Note that if you are in this situation, the target pods will be modified dynamically and restarted.
 
 #### Start a chaos experiment
 

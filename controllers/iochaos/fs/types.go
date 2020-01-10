@@ -22,6 +22,7 @@ import (
 	"golang.org/x/sync/errgroup"
 
 	"github.com/go-logr/logr"
+	"github.com/golang/protobuf/ptypes/empty"
 
 	"github.com/pingcap/chaos-mesh/api/v1alpha1"
 	"github.com/pingcap/chaos-mesh/controllers/twophase"
@@ -161,29 +162,31 @@ func (r *Reconciler) cleanFinalizersAndRecover(ctx context.Context, iochaos *v1a
 func (r *Reconciler) recoverPod(ctx context.Context, pod *v1.Pod, iochaos *v1alpha1.IoChaos) error {
 	r.Log.Info("Recovering", "namespace", pod.Namespace, "name", pod.Name)
 
-	var ns v1.Namespace
-	if err := r.Get(ctx, types.NamespacedName{Name: pod.Namespace}, &ns); err != nil {
-		return err
-	}
+	cctx, cancel := context.WithTimeout(ctx, 2*time.Minute)
+	defer cancel()
+	err := wait.PollUntil(2*time.Second, func() (bool, error) {
+		if err := r.recoverInjectAction(ctx, pod, iochaos); err != nil {
+			if utils.IsCaredNetError(err) {
+				r.Log.Info("Recover I/O chaos action, network is not ok, retrying...",
+					"namespace", pod.Namespace, "name", pod.Name)
+				return false, nil
+			}
 
-	annotations := ns.GetAnnotations()
-	if annotations == nil {
-		annotations = make(map[string]string)
-	}
+			return false, err
+		}
 
-	if _, ok := annotations[v1alpha1.WebhookInitPodAnnotationKey]; ok {
-		return r.recoverInjectAction(ctx, pod, iochaos)
-	}
+		r.Log.Info("Recover I/O chaos action successfully")
 
-	if err := utils.UnsetIoInjection(ctx, r.Client, pod, iochaos); err != nil {
-		r.Log.Error(err, "failed to unset I/O injection",
+		return true, nil
+	}, cctx.Done())
+
+	if err != nil {
+		r.Log.Error(err, "failed to recover I/O chaos action",
 			"namespace", pod.Namespace, "name", pod.Name)
 		return err
 	}
 
-	return r.Delete(ctx, pod, &client.DeleteOptions{
-		GracePeriodSeconds: new(int64),
-	})
+	return nil
 }
 
 func (r *Reconciler) injectAllPods(ctx context.Context, pods []v1.Pod, iochaos *v1alpha1.IoChaos) error {
@@ -210,67 +213,29 @@ func (r *Reconciler) injectAllPods(ctx context.Context, pods []v1.Pod, iochaos *
 func (r *Reconciler) injectPod(ctx context.Context, pod *v1.Pod, iochaos *v1alpha1.IoChaos) error {
 	r.Log.Info("Inject I/O chaos action", "namespace", pod.Namespace, "name", pod.Name)
 
-	if err := utils.SetIoInjection(ctx, r.Client, pod, iochaos); err != nil {
-		r.Log.Error(err, "failed to set I/O injection",
-			"namespace", pod.Namespace, "name", pod.Name)
-		return err
-	}
-
-	var ns v1.Namespace
-	if err := r.Get(ctx, types.NamespacedName{Name: pod.Namespace}, &ns); err != nil {
-		return err
-	}
-
-	annotations := ns.GetAnnotations()
-	if annotations == nil {
-		annotations = make(map[string]string)
-	}
-
-	if _, ok := annotations[v1alpha1.WebhookInitPodAnnotationKey]; !ok {
-		// need to recreate pod when to inject sidecar
-		time.Sleep(1 * time.Second)
-		err := r.Delete(ctx, pod, &client.DeleteOptions{
-			GracePeriodSeconds: new(int64),
-		})
-		if err != nil {
-			return err
-		}
-	}
-
-	// TODO: optimize inject action
-	go func() {
-		cctx, cancel := context.WithTimeout(ctx, 5*time.Minute)
-		defer cancel()
-		err := wait.PollUntil(2*time.Second, func() (bool, error) {
-			var npod v1.Pod
-			err := r.Client.Get(ctx, types.NamespacedName{
-				Namespace: pod.Namespace,
-				Name:      pod.Name,
-			}, &npod)
-			if err != nil {
-				r.Log.Error(err, "failed to get pod", "namespace", pod.Namespace, "name", pod.Name)
+	cctx, cancel := context.WithTimeout(ctx, 2*time.Minute)
+	defer cancel()
+	err := wait.PollUntil(2*time.Second, func() (bool, error) {
+		if err := r.injectAction(ctx, pod, iochaos); err != nil {
+			if utils.IsCaredNetError(err) {
+				r.Log.Info("Inject I/O chaos action, network is not ok, retrying...",
+					"namespace", pod.Namespace, "name", pod.Name)
 				return false, nil
 			}
 
-			if err := r.injectAction(ctx, &npod, iochaos); err != nil {
-				if utils.IsCaredNetError(err) {
-					r.Log.Info("Inject I/O chaos action, network is not ok, retrying...",
-						"namespace", pod.Namespace, "name", pod.Name)
-					return false, nil
-				}
-
-				return false, err
-			}
-
-			r.Log.Info("Inject I/O chaos action successfully")
-
-			return true, nil
-		}, cctx.Done())
-		if err != nil {
-			r.Log.Error(err, "failed to inject I/O chaos action",
-				"namespace", pod.Namespace, "name", pod.Name)
+			return false, err
 		}
-	}()
+
+		r.Log.Info("Inject I/O chaos action successfully")
+
+		return true, nil
+	}, cctx.Done())
+
+	if err != nil {
+		r.Log.Error(err, "failed to inject I/O chaos action",
+			"namespace", pod.Namespace, "name", pod.Name)
+		return err
+	}
 
 	return nil
 }
@@ -294,7 +259,13 @@ func (r *Reconciler) injectAction(ctx context.Context, pod *v1.Pod, iochaos *v1a
 		return err
 	}
 
-	_, err = cli.SetFault(ctx, req)
+	if len(req.Methods) > 0 {
+		_, err = cli.SetFault(ctx, req)
+		return err
+	}
+
+	// inject fault to all methods if the the methods is empty.
+	_, err = cli.SetFaultAll(ctx, req)
 	return err
 }
 
@@ -311,6 +282,6 @@ func (r *Reconciler) recoverInjectAction(ctx context.Context, pod *v1.Pod, iocha
 		return err
 	}
 
-	_, err = cli.RecoverAll(ctx, nil)
+	_, err = cli.RecoverAll(ctx, &empty.Empty{})
 	return err
 }

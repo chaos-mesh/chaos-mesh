@@ -96,9 +96,9 @@ image: dashboard-server-frontend
 	docker build -t ${DOCKER_REGISTRY}/pingcap/chaos-daemon images/chaos-daemon
 	docker build -t ${DOCKER_REGISTRY}/pingcap/chaos-mesh images/chaos-mesh
 	docker build -t ${DOCKER_REGISTRY}/pingcap/chaos-fs images/chaosfs
-	cp -R hack images/chaos-scripts
+	cp -R scripts images/chaos-scripts
 	docker build -t ${DOCKER_REGISTRY}/pingcap/chaos-scripts images/chaos-scripts
-	rm -rf images/chaos-scripts/hack
+	rm -rf images/chaos-scripts/scripts
 	docker build -t ${DOCKER_REGISTRY}/pingcap/chaos-grafana images/grafana
 	docker build -t ${DOCKER_REGISTRY}/pingcap/chaos-dashboard images/chaos-dashboard
 
@@ -107,6 +107,8 @@ docker-push:
 	docker push "${DOCKER_REGISTRY}/pingcap/chaos-fs:latest"
 	docker push "${DOCKER_REGISTRY}/pingcap/chaos-daemon:latest"
 	docker push "${DOCKER_REGISTRY}/pingcap/chaos-scripts:latest"
+	docker push "${DOCKER_REGISTRY}/pingcap/chaos-grafana:latest"
+	docker push "${DOCKER_REGISTRY}/pingcap/chaos-dashboard:latest"
 
 bin/revive:
 	GO111MODULE="on" go build -o bin/revive github.com/mgechev/revive

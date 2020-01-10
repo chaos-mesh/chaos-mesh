@@ -187,6 +187,7 @@ func watchConfig(cfg *config.Config, stopCh <-chan struct{}) {
 				case <-stopCh:
 					close(sigChan)
 					return
+				default:
 				}
 			}
 		}()
