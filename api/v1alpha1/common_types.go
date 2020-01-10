@@ -54,6 +54,10 @@ type SelectorSpec struct {
 	// A selector based on annotations.
 	// +optional
 	AnnotationSelectors map[string]string `json:"annotationSelectors,omitempty"`
+
+	// PodPhaseSelector is a set of condition of a pod at the current time.
+	// supported value: Pending / Running / Succeeded / Failed / Unknown
+	PodPhaseSelectors []string `json:"phaseSelector,omitempty"`
 }
 
 // SchedulerSpec defines information about schedule of the chaos experiment.
