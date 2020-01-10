@@ -6,7 +6,7 @@ IO chaos allows you to simulate file system faults such as IO delay,
 read/write errors, etc. It can inject delay and errno when you use the IO system calls such as `open`, `read` and `write`.
 
 > Note: IO Chaos can only be used if the relevant labels and annotations are set before the application is created. 
-> More info refer [here](#-create-a-chaos-experiment)
+> More info refer [here](#create-a-chaos-experiment)
 
 ## Prerequisites
 
