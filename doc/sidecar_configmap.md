@@ -18,6 +18,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: chaosfs-tikv
+  namespace: chaos-testing
   labels:
     app.kubernetes.io/component: webhook
 data:
@@ -31,10 +32,10 @@ data:
     - name: inject-scripts
       image: pingcap/chaos-scripts:latest
       imagePullpolicy: Always
-      command: ["sh", "-c", "mkdir -p /tmp/scripts; cp -R /scripts/* /tmp/scripts/; mkdir -p /var/lib/tikv/fuse-data"]
+      command: ["sh", "-c", "/scripts/init.sh -d /var/lib/tikv/data -f /var/lib/tikv/fuse-data"]
     containers:
     - name: chaosfs
-      image: pingcap/chaos-fs
+      image: pingcap/chaos-fs:latest
       imagePullpolicy: Always
       ports:
       - containerPort: 65534
@@ -44,8 +45,8 @@ data:
         - /usr/local/bin/chaosfs
         - -addr=:65534
         - -pidfile=/tmp/fuse/pid
-        - -original=/var/lib/tikv/data
-        - -mountpoint=/var/lib/tikv/fuse-data
+        - -original=/var/lib/tikv/fuse-data
+        - -mountpoint=/var/lib/tikv/data
       volumeMounts:
         - name: tikv
           mountPath: /var/lib/tikv
@@ -111,8 +112,8 @@ containers:
     - /usr/local/bin/chaosfs
     - -addr=:65534
     - -pidfile=/tmp/fuse/pid
-    - -original=/var/lib/tikv/data
-    - -mountpoint=/var/lib/tikv/fuse-data
+    - -original=/var/lib/tikv/fuse-data
+    - -mountpoint=/var/lib/tikv/data
   volumeMounts:
     - name: tikv
       mountPath: /var/lib/tikv
@@ -124,9 +125,9 @@ Description of `chaosfs`:
 * **addr**: defines the address of the grpc server, default value: ":65534".
 * **pidfile**: defines the pid file to record the pid of the `chaosfs` process.
 * **original**: defines the target directory that need to be injected file system IO fault.
-This value should be set to the data directory of the target application.
-* **mountpoint**: defines the mountpoint to mount original directory.
 This directory is usually set to the same level directory as the original directory.
+* **mountpoint**: defines the mountpoint to mount original directory.
+This value should be set to the data directory of the target application.
 
 #### chaos-scripts
 
@@ -134,20 +135,34 @@ This directory is usually set to the same level directory as the original direct
 `wait-fuse.sh` is used by application container to ensure that the fuse-daemon server is running normally before the application starts. 
 
 `chaos-scripts` is generally used as an initContainer to do some preparation. 
-The following config uses `chaos-scripts` container to inject scripts and moves the scripts to `/tmp/scripts` directory, 
+The following config uses `chaos-scripts` container to inject scripts and moves the scripts to `/tmp/scripts` directory using `init.sh`, 
 `/tmp/scripts` is an [emptyDir volume](https://kubernetes.io/docs/concepts/storage/volumes/#emptydir) to shares the scripts with all containers of the pod.
 So you can use `wait-fuse.sh` script in tikv container to ensure that the fuse-daemon server is running normally before the application starts.   
 
-In addition, this config created a directory named `fuse-data` in the [PersistentVolumes](https://kubernetes.io/docs/concepts/storage/persistent-volumes/) directory of the tikv 
-as the [mountpoint](https://www.kernel.org/doc/Documentation/filesystems/fuse.txt) for fuse-daemon server and the mountpoint directory is required.
-You should also create the mountpoint directory in the PersistentVolumes directory of the application.
+In addition, `init.sh` creates a directory named `fuse-data` in the [PersistentVolumes](https://kubernetes.io/docs/concepts/storage/persistent-volumes/) directory of the tikv 
+as the original directory for fuse-daemon server and the original directory is required.
+You should also create the original directory in the PersistentVolumes directory of the application.
 
 ```yaml
 initContainers:
   - name: inject-scripts
     image: pingcap/chaos-scripts:latest
     imagePullpolicy: Always
-    command: ["sh", "-c", "mkdir -p /tmp/scripts; cp -R /scripts/* /tmp/scripts/; mkdir -p /var/lib/tikv/fuse-data"]
+    command: ["sh", "-c", "/scripts/init.sh -d /var/lib/tikv/data -f /var/lib/tikv/fuse-data"]
+```
+
+The usage of `init.sh`:
+```bash
+$ ./scripts/init.sh -h 
+USAGE: ./scripts/init.sh [-d data directory] [-f fuse directory]
+Used to do some preparation
+OPTIONS:
+   -h                      Show this message
+   -d <data directory>     Data directory of the application
+   -f <fuse directory>     Data directory of the fuse original directory
+   -s <scripts directory>  Scripts directory
+EXAMPLES:
+   init.sh -d /var/lib/tikv/data -f /var/lib/tikv/fuse-data
 ```
 
 ### Tips
@@ -161,6 +176,21 @@ postStart:
   tikv:
     command:
       - /tmp/scripts/wait-fuse.sh
+```
+
+The usage of `wait-fuse.sh`:
+```bash
+$ ./scripts/wait-fuse.sh -h
+./scripts/wait-fuse.sh: option requires an argument -- h
+USAGE: ./scripts/wait-fuse.sh [-a <host>] [-p <port>]
+Waiting for fuse server ready
+OPTIONS:
+   -h                   Show this message
+   -f <host>            Set the target file
+   -d <delay>           Set the delay time
+   -r <retry>           Set the retry count
+EXAMPLES:
+   wait-fuse.sh -f /tmp/fuse/pid -d 5 -r 60
 ```
 
 ## How to use?
