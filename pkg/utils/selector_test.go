@@ -105,7 +105,7 @@ func TestCheckPodMeetSelector(t *testing.T) {
 	tcs := []TestCase{
 		{
 			name: "meet label",
-			pod:  newPod("t1", v1.PodRunning, metav1.NamespaceDefault, nil, map[string]string{"app": "tikv", "ss": "t1"}),
+			pod:  newPod("t1", v1.PodPending, metav1.NamespaceDefault, nil, map[string]string{"app": "tikv", "ss": "t1"}),
 			selector: v1alpha1.SelectorSpec{
 				LabelSelectors: map[string]string{"app": "tikv"},
 			},
@@ -277,14 +277,14 @@ func TestRandomFixedIndexes(t *testing.T) {
 	}
 }
 
-func TestFilterByPhase(t *testing.T) {
+func TestFilterByPhaseSelector(t *testing.T) {
 	g := NewGomegaWithT(t)
 
 	type TestCase struct {
-		name         string
-		pods         []v1.Pod
-		filterPhase  v1.PodPhase
-		filteredPods []v1.Pod
+		name           string
+		pods           []v1.Pod
+		filterSelector labels.Selector
+		filteredPods   []v1.Pod
 	}
 
 	pods := []v1.Pod{
@@ -294,35 +294,65 @@ func TestFilterByPhase(t *testing.T) {
 		newPod("p4", v1.PodFailed, metav1.NamespaceDefault, nil, nil),
 	}
 
-	tcs := []TestCase{
-		{
-			name:         "filter running pods",
-			pods:         pods,
-			filterPhase:  v1.PodRunning,
-			filteredPods: []v1.Pod{pods[0], pods[1]},
-		},
-		{
-			name:         "filter pending pods",
-			pods:         pods,
-			filterPhase:  v1.PodPending,
-			filteredPods: []v1.Pod{pods[2]},
-		},
-		{
-			name:         "no pods",
-			pods:         []v1.Pod{},
-			filterPhase:  v1.PodPending,
-			filteredPods: nil,
-		},
-		{
-			name:         "filter unknown pods",
-			pods:         pods,
-			filterPhase:  v1.PodUnknown,
-			filteredPods: nil,
-		},
-	}
+	var tcs []TestCase
+
+	runningSelector, err := parseSelector(string(pods[1].Status.Phase))
+	g.Expect(err).ShouldNot(HaveOccurred())
+
+	tcs = append(tcs, TestCase{
+		name:           "filter n2",
+		pods:           pods,
+		filterSelector: runningSelector,
+		filteredPods:   []v1.Pod{pods[0], pods[1]},
+	})
+
+	emptySelector, err := parseSelector("")
+	g.Expect(err).ShouldNot(HaveOccurred())
+	tcs = append(tcs, TestCase{
+		name:           "filter empty selector",
+		pods:           pods,
+		filterSelector: emptySelector,
+		filteredPods:   pods,
+	})
+
+	tcs = append(tcs, TestCase{
+		name:           "filter no pods",
+		pods:           []v1.Pod{},
+		filterSelector: runningSelector,
+		filteredPods:   nil,
+	})
+
+	runningAndPendingSelector, err := parseSelector("Running,Pending")
+	g.Expect(err).ShouldNot(HaveOccurred())
+
+	tcs = append(tcs, TestCase{
+		name:           "filter running and pending",
+		pods:           pods,
+		filterSelector: runningAndPendingSelector,
+		filteredPods:   []v1.Pod{pods[0], pods[1], pods[2]},
+	})
+
+	failedSelector, err := parseSelector("Failed")
+	g.Expect(err).ShouldNot(HaveOccurred())
+
+	tcs = append(tcs, TestCase{
+		name:           "filter failed",
+		pods:           pods,
+		filterSelector: failedSelector,
+		filteredPods:   []v1.Pod{pods[3]},
+	})
+
+	unknownSelector, err := parseSelector("Unknown")
+	g.Expect(err).ShouldNot(HaveOccurred())
+	tcs = append(tcs, TestCase{
+		name:           "filter Unknown",
+		pods:           pods,
+		filterSelector: unknownSelector,
+		filteredPods:   nil,
+	})
 
 	for _, tc := range tcs {
-		g.Expect(filterByPhase(tc.pods, tc.filterPhase)).To(Equal(tc.filteredPods), tc.name)
+		g.Expect(filterByPhaseSelector(tc.pods, tc.filterSelector)).To(Equal(tc.filteredPods), tc.name)
 	}
 }
 
