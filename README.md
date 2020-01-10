@@ -198,13 +198,13 @@ vim pod-failure-example.yaml # modify pod-failure-example.yaml to what you want
 kubectl apply -f pod-failure-example.yaml
 ```
 
-#### Delete a chaos experiment
+### Delete a chaos experiment
 
 ```bash
 kubectl delete -f pod-failure-example.yaml
 ```
 
-#### Watch your chaos experiments in Dashboard
+### Watch your chaos experiments in Dashboard
 
 Chaos Dashboard is currently only available for TiDB clusters. Stay tuned for more supports or join us in making it happen.
 
