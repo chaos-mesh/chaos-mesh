@@ -39,6 +39,10 @@ ARGS="--pd=${CLUSTER_NAME}-pd:2379 \
   --config=/etc/tikv/tikv.toml
 ```
 
+> Node: The default data directory of TiKV is not a subdirectory of `PersistentVolumes`.
+> If your application is TiDB cluster, you need to modify it at [_start_tikv.sh.tpl](https://github.com/pingcap/tidb-operator/blob/master/charts/tidb-cluster/templates/scripts/_start_tikv.sh.tpl). 
+> PD has the same issue with TiKV, you need to modity the data directory of pd at [_start_pd.sh.tpl](https://github.com/pingcap/tidb-operator/blob/master/charts/tidb-cluster/templates/scripts/_start_pd.sh.tpl).
+
 ## Usage
 
 ### Configure a ConfigMap 
