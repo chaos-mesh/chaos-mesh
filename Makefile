@@ -43,7 +43,7 @@ build: chaosdaemon manager chaosfs dashboard
 test: generate fmt vet lint manifests
 	rm -rf cover.* cover
 	mkdir -p cover
-	$(GOTEST) ./api/... ./controllers/... ./pkg/... -coverprofile cover.out.tmp
+	$(GOTEST) ./...  -coverprofile cover.out.tmp
 	cat cover.out.tmp | grep -v "_generated.deepcopy.go" > cover.out
 
 coverage:
