@@ -50,25 +50,25 @@ func (s *Server) FlushIpSet(ctx context.Context, req *pb.IpSetRequest) (*empty.E
 
 	// the ipset while existing iptables rules are using them can not be deleted,.
 	// so we creates an temp ipset and swap it with existing one.
-	if err := s.createIpSet(ctx, nsPath, tmpName); err != nil {
+	if err := s.createIPSet(ctx, nsPath, tmpName); err != nil {
 		return nil, err
 	}
 
 	// add ips to the temp ipset
-	if err := s.addIpsToIpSet(ctx, nsPath, tmpName, set.Ips); err != nil {
+	if err := s.addIpsToIPSet(ctx, nsPath, tmpName, set.Ips); err != nil {
 		return nil, err
 	}
 
 	// rename the temp ipset with the target name of ipset if the taget ipset not exists,
 	// otherwise swap  them with each other.
-	if err := s.renameIpSet(ctx, nsPath, tmpName, name); err != nil {
+	if err := s.renameIPSet(ctx, nsPath, tmpName, name); err != nil {
 		return nil, err
 	}
 
 	return &empty.Empty{}, nil
 }
 
-func (s *Server) createIpSet(ctx context.Context, nsPath string, name string) error {
+func (s *Server) createIPSet(ctx context.Context, nsPath string, name string) error {
 	// ipset name cannot be longer than 31 byte
 	if len(name) > 31 {
 		name = name[:31]
@@ -100,7 +100,7 @@ func (s *Server) createIpSet(ctx context.Context, nsPath string, name string) er
 	return nil
 }
 
-func (s *Server) addIpsToIpSet(ctx context.Context, nsPath string, name string, ips []string) error {
+func (s *Server) addIpsToIPSet(ctx context.Context, nsPath string, name string, ips []string) error {
 	for _, ip := range ips {
 		cmd := withNetNS(ctx, nsPath, "ipset", "add", name+"old", ip)
 
@@ -119,7 +119,7 @@ func (s *Server) addIpsToIpSet(ctx context.Context, nsPath string, name string, 
 	return nil
 }
 
-func (s *Server) renameIpSet(ctx context.Context, nsPath string, oldName string, newName string) error {
+func (s *Server) renameIPSet(ctx context.Context, nsPath string, oldName string, newName string) error {
 	cmd := withNetNS(ctx, nsPath, "ipset", "rename", oldName, newName)
 
 	log.Info("rename ipset", "command", cmd.String())
