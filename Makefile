@@ -18,6 +18,7 @@ GOARCH := $(if $(GOARCH),$(GOARCH),amd64)
 GOENV  := GO15VENDOREXPERIMENT="1" CGO_ENABLED=0 GOOS=$(GOOS) GOARCH=$(GOARCH)
 GO     := $(GOENV) go
 GOTEST := TEST_USE_EXISTING_CLUSTER=false go test
+SHELL    := /usr/bin/env bash
 
 PACKAGE_LIST := go list ./... | grep -vE "pkg/client" | grep -vE "zz_generated"
 PACKAGE_DIRECTORIES := $(PACKAGE_LIST) | sed 's|github.com/pingcap/chaos-mesh/||'
@@ -36,7 +37,7 @@ endif
 
 all: yaml build image
 
-build: chaosdaemon manager chaosfs dashboard
+build: chaosdaemon manager chaosfs dashboard dashboard-server-frontend
 
 # Run tests
 test: generate fmt vet lint manifests
@@ -44,10 +45,15 @@ test: generate fmt vet lint manifests
 	mkdir -p cover
 	$(GOTEST) ./api/... ./controllers/... ./pkg/... -coverprofile cover.out.tmp
 	cat cover.out.tmp | grep -v "_generated.deepcopy.go" > cover.out
+
+coverage:
+ifeq ("$(JenkinsCI)", "1")
+	@bash <(curl -s https://codecov.io/bash) -f cover.out -t $(CODECOV_TOKEN)
+else
 	gocov convert cover.out > cover.json
 	gocov-xml < cover.json > cover.xml
 	gocov-html < cover.json > cover/index.html
-	rm -rf cover.out cover.out.tmp cover.json
+endif
 
 # Build chaos-daemon binary
 chaosdaemon: generate fmt vet
@@ -92,7 +98,7 @@ tidy:
 	GO111MODULE=on go mod tidy
 	git diff --quiet go.mod go.sum
 
-image: dashboard-server-frontend
+image:
 	docker build -t ${DOCKER_REGISTRY}/pingcap/chaos-daemon images/chaos-daemon
 	docker build -t ${DOCKER_REGISTRY}/pingcap/chaos-mesh images/chaos-mesh
 	docker build -t ${DOCKER_REGISTRY}/pingcap/chaos-fs images/chaosfs
