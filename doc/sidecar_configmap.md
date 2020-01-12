@@ -124,9 +124,8 @@ Description of `chaosfs`:
 
 * **addr**: defines the address of the grpc server, default value: ":65534".
 * **pidfile**: defines the pid file to record the pid of the `chaosfs` process.
-* **original**: defines the target directory that need to be injected file system IO fault.
-This directory is usually set to the same level directory as the original directory.
-* **mountpoint**: defines the mountpoint to mount original directory.
+* **original**: defines the fuse directory. This directory is usually set to the same level directory as the application data directory.
+* **mountpoint**: defines the mountpoint to mount the original directory. 
 This value should be set to the data directory of the target application.
 
 #### chaos-scripts

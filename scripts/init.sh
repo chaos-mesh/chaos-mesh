@@ -50,7 +50,6 @@ mkdir_dir() {
 }
 
 copy_scripts() {
-  echo $1
   echo "mkdir -p ${1}"
   mkdir -p ${1}
 
