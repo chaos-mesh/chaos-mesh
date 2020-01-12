@@ -37,7 +37,7 @@ endif
 
 all: yaml build image
 
-build: chaosdaemon manager chaosfs dashboard
+build: chaosdaemon manager chaosfs dashboard dashboard-server-frontend
 
 # Run tests
 test: generate fmt vet lint manifests
@@ -98,7 +98,7 @@ tidy:
 	GO111MODULE=on go mod tidy
 	git diff --quiet go.mod go.sum
 
-image: dashboard-server-frontend
+image:
 	docker build -t ${DOCKER_REGISTRY}/pingcap/chaos-daemon images/chaos-daemon
 	docker build -t ${DOCKER_REGISTRY}/pingcap/chaos-mesh images/chaos-mesh
 	docker build -t ${DOCKER_REGISTRY}/pingcap/chaos-fs images/chaosfs
