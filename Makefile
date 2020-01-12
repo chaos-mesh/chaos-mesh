@@ -47,7 +47,7 @@ test: generate fmt vet lint manifests
 
 coverage:
 ifeq ("$(JenkinsCI)", "1")
-	@bash <(curl -s https://codecov.io/bash) -f $(TEST_DIR)/cover.out -t $(CODECOV_TOKEN)
+	@bash <(curl -s https://codecov.io/bash) -f cover.out -t $(CODECOV_TOKEN)
 else
 	gocov convert cover.out > cover.json
 	gocov-xml < cover.json > cover.xml
