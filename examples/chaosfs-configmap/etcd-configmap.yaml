@@ -3,6 +3,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: chaosfs-etcd
+  namespace: chaos-testing
   labels:
     app.kubernetes.io/component: webhook
 data:
@@ -45,6 +46,6 @@ data:
     - name: fuse
       emptyDir: {}
     postStart:
-      pd:
+      etcd:
         command:
           - /tmp/scripts/wait-fuse.sh
