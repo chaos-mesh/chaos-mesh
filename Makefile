@@ -44,16 +44,15 @@ test: generate fmt vet lint manifests
 	mkdir -p cover
 	$(GOTEST) ./api/... ./controllers/... ./pkg/... -coverprofile cover.out.tmp
 	cat cover.out.tmp | grep -v "_generated.deepcopy.go" > cover.out
+
+coverage:
 ifeq ("$(JenkinsCI)", "1")
-	set +x
-	@bash <(curl -s https://codecov.io/bash) -f $(TEST_DIR)/unit_test.out -t $(CODECOV_TOKEN)
-	set -x
+	@bash <(curl -s https://codecov.io/bash) -f $(TEST_DIR)/cover.out -t $(CODECOV_TOKEN)
 else
 	gocov convert cover.out > cover.json
 	gocov-xml < cover.json > cover.xml
 	gocov-html < cover.json > cover/index.html
 endif
-    rm -rf cover.out cover.out.tmp cover.json
 
 # Build chaos-daemon binary
 chaosdaemon: generate fmt vet
