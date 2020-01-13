@@ -21,8 +21,9 @@ import (
 
 var log = ctrl.Log.WithName("util")
 
-// Coalescer takes an input chan, and coalesced inputs with a timebound of interval, after which
-// it signals on output chan with the last value from input chan
+// Coalescer takes an input channel, and coalesced inputs with a timebound of interval.
+// If input channel is closed, coalescer will signal one last time if we have any pending unsignalled events
+// and close the output channel.
 func Coalescer(interval time.Duration, input chan interface{}, stopCh <-chan struct{}) <-chan interface{} {
 	output := make(chan interface{})
 	go func() {
@@ -50,8 +51,14 @@ func Coalescer(interval time.Duration, input chan interface{}, stopCh <-chan str
 			}
 			// stop running the Coalescer only when all input+output channels are closed!
 			if !inputOpen {
+				// input is closed, so lets signal one last time if we have any pending unsignalled events
+				if signalled {
+					// send final event, so we dont miss the trailing event after input chan close
+					output <- struct{}{}
+				}
 				log.Info("coalesce routine terminated, input channel is closed")
 				close(output)
+
 				return
 			}
 		}
