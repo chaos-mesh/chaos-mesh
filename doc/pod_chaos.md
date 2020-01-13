@@ -4,7 +4,7 @@ This document helps you to build pod chaos experiments.
 
 > **note:** 
 > 
-> Chaos mash does not currently support simulation injection of naked pods. And it only supports some specific pods, such as `deployment` 、`statefulset` 、`daemonset`. 
+> Chaos mesh does not currently support simulation injection of naked pods. And it only supports some specific pods, such as `deployment` 、`statefulset` 、`daemonset`. 
 
 Pod chaos allows you to simulate pod faults, specifically `pod failure` and `pod kill`.
 
@@ -41,7 +41,7 @@ Description:
 
 * **action** defines the specific chaos action for the pod. In this case, it is pod failure.
 * **mode** defines the mode to run chaos action. Supported mode: `one / all / fixed / fixed-percent / random-max-percent`.
-* **duration** defines the duration for each chaos experiment. In the sample file above, the pod failure lasts for 30 seconds.
+* **duration** defines the duration for each chaos experiment. The value of the `Duration` field is `30s`, which indicates that pod failure will last 30 seconds.
 * **selector** is used to select pods that are used to inject chaos actions.
 * **scheduler** defines the scheduler rules for the running time of the chaos experiment. For more rule information, see <https://godoc.org/github.com/robfig/cron>.
 
