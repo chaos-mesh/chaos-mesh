@@ -16,10 +16,10 @@ data:
     - name: inject-scripts
       image: pingcap/chaos-scripts:latest
       imagePullpolicy: Always
-      command: ["sh", "-c", "mkdir -p /tmp/scripts; cp -R /scripts/* /tmp/scripts/; mkdir -p /var/lib/tikv/fuse-data"]
+      command: ["sh", "-c", "/scripts/init.sh -d /var/lib/pd/data -f /var/lib/pd/fuse-data"]
     containers:
     - name: chaosfs
-      image: pingcap/chaos-fs
+      image: pingcap/chaos-fs:latest
       imagePullpolicy: Always
       ports:
       - containerPort: 65534
@@ -29,8 +29,8 @@ data:
         - /usr/local/bin/chaosfs
         - -addr=:65534
         - -pidfile=/tmp/fuse/pid
-        - -original=/var/lib/pd/data
-        - -mountpoint=/var/lib/pd/fuse-data
+        - -original=/var/lib/pd/fuse-data
+        - -mountpoint=/var/lib/pd/data
       volumeMounts:
         - name: tikv
           mountPath: /var/lib/tikv
