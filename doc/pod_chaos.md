@@ -2,11 +2,15 @@
 
 This document helps you to build pod chaos experiments. 
 
+> ** note ** 
+> 
+> Chaos mash does not currently support simulation injection of naked pods. And it only supports some specific pods, such as `deployment` 、`statefulset` 、`daemonset`. 
+
 Pod chaos allows you to simulate pod faults, specifically `pod failure` and `pod kill`.
 
-- **Pod Failure** action periodically pauses specific pods.
+- **Pod Failure** action periodically injects errors to pods. And it will cause the pod to not be created for a while.
 
-- **Pod Kill** action kills the specified pod and restarts immediately.
+- **Pod Kill** action kills the specified pod.
 
 ## Pod Failure Action
 
