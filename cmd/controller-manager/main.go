@@ -180,6 +180,7 @@ func watchConfig(cfg *config.Config, stopCh <-chan struct{}) {
 						setupLog.Error(err, "watcher got error, try to restart watcher")
 					default:
 						setupLog.Error(err, "unable to watch new ConfigMaps")
+						os.Exit(1)
 					}
 				}
 
@@ -188,6 +189,8 @@ func watchConfig(cfg *config.Config, stopCh <-chan struct{}) {
 					close(sigChan)
 					return
 				default:
+					// sleep 2 seconds to prevent excessive log due to infinite restart
+					time.Sleep(2 * time.Second)
 				}
 			}
 		}()
