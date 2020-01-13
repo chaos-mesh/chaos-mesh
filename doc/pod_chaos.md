@@ -2,7 +2,7 @@
 
 This document helps you to build pod chaos experiments. 
 
-> ** note ** 
+> **note:** 
 > 
 > Chaos mash does not currently support simulation injection of naked pods. And it only supports some specific pods, such as `deployment` 、`statefulset` 、`daemonset`. 
 
