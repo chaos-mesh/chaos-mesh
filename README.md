@@ -31,7 +31,7 @@ Chaos Operator uses [Custom Resource Definition (CRD)](https://kubernetes.io/doc
 - pod-failure: The selected pod will be unavailable in a specified period of time
 - netem chaos: Network chaos such as delay, duplication, etc.
 - network-partition: Simulate network partition
-- IO chaos: simulate file system falults such as I/O delay, read/write errors, etc.
+- IO chaos: Simulate file system falults such as I/O delay, read/write errors, etc.
 
 ## Prerequisites
 
