@@ -6,11 +6,11 @@ This document helps you to build pod chaos experiments.
 > 
 > Chaos mesh does not currently support simulation injection of naked pods. And it only supports some specific pods, such as `deployment` 、`statefulset` 、`daemonset`. 
 
-Pod chaos allows you to simulate pod faults, specifically `pod failure` and `pod kill`.
+Pod chaos allows you to simulate pod faults, specifically `pod failure` and `pod kill`. `pod failure` can be used to simulate a situation where a pod is down. And if you want to test if there are problems with scheduling, you can use `pod kill`.
 
-- **Pod Failure** action periodically injects errors to pods. And it will cause the pod to not be created for a while. In another word, the selected pod will be unavailable in a specified period of time. It can be used to simulate a situation where a pod is down.
+- **Pod Failure** action periodically injects errors to pods. And it will cause the pod to not be created for a while. In another word, the selected pod will be unavailable in a specified period of time.
 
-- **Pod Kill** action kills the specified pod (ReplicaSet or something similar may be needed to ensure the pod will be restarted). It can be used to test if there are problems with scheduling.
+- **Pod Kill** action kills the specified pod (ReplicaSet or something similar may be needed to ensure the pod will be restarted).
 
 ## Pod Failure Action
 
