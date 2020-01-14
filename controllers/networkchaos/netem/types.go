@@ -78,7 +78,7 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos twophase
 	pods, err := utils.SelectAndGeneratePods(ctx, r.Client, &networkchaos.Spec)
 
 	if err != nil {
-		r.Log.Error(err, "fail to select and generate pods")
+		r.Log.Error(err, "failed to select and generate pods")
 		return err
 	}
 
