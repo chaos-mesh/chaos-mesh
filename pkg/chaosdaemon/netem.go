@@ -101,7 +101,7 @@ func Cancel(netem *pb.Netem, pid uint32) error {
 	}
 
 	if !exist {
-		log.Error(nil, "qdisc not exists", "qdisc", netemQdisc)
+		log.Error(nil, "qdisc not exists, qdisc may be deleted by mistake or not injected successfully, there may be bugs here", "qdisc", netemQdisc)
 		return nil
 	}
 
