@@ -122,8 +122,8 @@ func faultInject(path, method string) error {
 		}
 	}
 
-	log.Info("Inject fault", "method", method, "path", path)
-	log.Info("Inject fault", "context", fc)
+	log.V(6).Info("Inject fault", "method", method, "path", path)
+	log.V(6).Info("Inject fault", "context", fc)
 
 	var errno error = nil
 	if fc.errno != nil {
@@ -199,7 +199,7 @@ func (s *server) SetFault(ctx context.Context, in *pb.Request) (*empty.Empty, er
 
 func (s *server) SetFaultAll(ctx context.Context, in *pb.Request) (*empty.Empty, error) {
 	// TODO: use Errno(0), and hanle Errno(0) in Hook interfaces
-	log.Info("Set fault", "request", in)
+	log.Info("Set fault all methods", "request", in)
 
 	var errno error = nil
 	if in.Errno != 0 {

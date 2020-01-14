@@ -13,10 +13,10 @@ data:
     - name: inject-scripts
       image: pingcap/chaos-scripts:latest
       imagePullpolicy: Always
-      command: ["sh", "-c", "mkdir -p /tmp/scripts; cp -R /scripts/* /tmp/scripts/; mkdir -p /var/run/etcd/fuse-data"]
+      command: ["sh", "-c", "/scripts/init.sh -d /var/run/etcd/default.etcd -f /var/run/etcd/fuse-data"]
     containers:
     - name: chaosfs
-      image: pingcap/chaos-fs
+      image: pingcap/chaos-fs:latest
       imagePullpolicy: Always
       ports:
       - containerPort: 65534
@@ -26,8 +26,8 @@ data:
         - /usr/local/bin/chaosfs
         - -addr=:65534
         - -pidfile=/tmp/fuse/pid
-        - -original=/var/run/etcd/default.etcd
-        - -mountpoint=/var/run/etcd/fuse-data
+        - -original=/var/run/etcd/fuse-data
+        - -mountpoint=/var/run/etcd/default.etcd
       volumeMounts:
         - name: datadir
           mountPath: /var/run/etcd
