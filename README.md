@@ -21,17 +21,17 @@ Chaos Operator injects chaos into the applications and Kubernetes infrastructure
 
 **Chaos-daemon**: runs as daemonset with privileged system permissions over network, Cgroup, etc. for a specifc node
 
-**Sidecar**: a special type of container that is dynamically injected into the target Pod by the webhook-server, which can be used for hacjacking I/O of the application container.
+**Sidecar**: a special type of container that is dynamically injected into the target Pod by the webhook-server, which can be used for hijacking I/O of the application container.
 
 ![Chaos Operator](./static/chaos-mesh-overview.png)
 
 Chaos Operator uses [Custom Resource Definition (CRD)](https://kubernetes.io/docs/tasks/access-kubernetes-api/custom-resources/custom-resource-definitions/) to define chaos objects. The current implementation supports three types of CRD objects for fault injection, namely PodChaos, NetworkChaos, and IOChaos, which correspond to the following major actions (experiments):
 
-- pod-kill: The selected pod is killed (ReplicaSet or something similar may be needed to ensure the pod will be restarted)
-- pod-failure: The selected pod will be unavailable in a specified period of time
+- pod-kill: The selected pod is killed (ReplicaSet or something similar may be needed to ensure the pod will be restarted).
+- pod-failure: The selected pod will be unavailable in a specified period of time.
 - netem chaos: Network chaos such as delay, duplication, etc.
-- network-partition: Simulate network partition
-- IO chaos: simulate file system falults such as I/O delay, read/write errors, etc.
+- network-partition: Simulate network partition.
+- IO chaos: Simulate file system falults such as I/O delay, read/write errors, etc.
 
 ## Prerequisites
 
