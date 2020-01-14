@@ -19,7 +19,6 @@ import (
 	"os/exec"
 
 	dockerclient "github.com/docker/docker/client"
-	"github.com/juju/errors"
 )
 
 const (
@@ -42,11 +41,11 @@ type DockerClient struct {
 // GetPidFromContainerID fetches PID according to container id
 func (c DockerClient) GetPidFromContainerID(ctx context.Context, containerID string) (uint32, error) {
 	if containerID[0:len(dockerProtocolPrefix)] != dockerProtocolPrefix {
-		return 0, errors.Errorf("only docker protocol is supported but got %s", containerID[0:len(dockerProtocolPrefix)])
+		return 0, fmt.Errorf("only docker protocol is supported but got %s", containerID[0:len(dockerProtocolPrefix)])
 	}
 	container, err := c.client.ContainerInspect(ctx, containerID[len(dockerProtocolPrefix):])
 	if err != nil {
-		return 0, errors.Trace(err)
+		return 0, err
 	}
 
 	return uint32(container.State.Pid), nil
@@ -59,7 +58,7 @@ func CreateContainerRuntimeInfoClient() (ContainerRuntimeInfoClient, error) {
 	client, err := dockerclient.NewClient(defaultDockerSocket, "", nil, nil)
 
 	if err != nil {
-		return nil, errors.Trace(err)
+		return nil, err
 	}
 
 	return DockerClient{

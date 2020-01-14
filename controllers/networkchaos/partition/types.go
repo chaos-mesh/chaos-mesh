@@ -79,14 +79,14 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos twophase
 	sources, err := utils.SelectAndGeneratePods(ctx, r.Client, &networkchaos.Spec)
 
 	if err != nil {
-		r.Log.Error(err, "fail to select and generate pods")
+		r.Log.Error(err, "failed to select and generate pods")
 		return err
 	}
 
 	targets, err := utils.SelectAndGeneratePods(ctx, r.Client, &networkchaos.Spec.Target)
 
 	if err != nil {
-		r.Log.Error(err, "fail to select and generate pods")
+		r.Log.Error(err, "failed to select and generate pods")
 		return err
 	}
 
@@ -215,6 +215,7 @@ func (r *Reconciler) generateSetName(networkchaos *v1alpha1.NetworkChaos, namePo
 		hasher.Write([]byte(nameRest))
 		hashValue := fmt.Sprintf("%x", hasher.Sum(nil))
 
+		// keep the length does not exceed 27
 		ipsetName = namePrefix + "_" + hashValue[0:17] + "_" + namePostFix
 	}
 
