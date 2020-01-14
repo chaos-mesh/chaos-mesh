@@ -46,7 +46,7 @@ func (s *Server) FlushIpSet(ctx context.Context, req *pb.IpSetRequest) (*empty.E
 	name := set.Name
 
 	// If the ipset already exists, the ipset will be renamed to this temp name.
-	tmpName := fmt.Sprintf("%s_old", name)
+	tmpName := fmt.Sprintf("%sold", name)
 
 	// the ipset while existing iptables rules are using them can not be deleted,.
 	// so we creates an temp ipset and swap it with existing one.
@@ -69,7 +69,7 @@ func (s *Server) FlushIpSet(ctx context.Context, req *pb.IpSetRequest) (*empty.E
 }
 
 func (s *Server) createIPSet(ctx context.Context, nsPath string, name string) error {
-	// ipset name cannot be longer than 31 byte
+	// ipset name cannot be longer than 31 bytes
 	if len(name) > 31 {
 		name = name[:31]
 	}
@@ -102,7 +102,7 @@ func (s *Server) createIPSet(ctx context.Context, nsPath string, name string) er
 
 func (s *Server) addIpsToIPSet(ctx context.Context, nsPath string, name string, ips []string) error {
 	for _, ip := range ips {
-		cmd := withNetNS(ctx, nsPath, "ipset", "add", name+"old", ip)
+		cmd := withNetNS(ctx, nsPath, "ipset", "add", name, ip)
 
 		log.Info("add ip to ipset", "command", cmd.String())
 
