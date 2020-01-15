@@ -96,7 +96,7 @@ Description:
 * **duration**: represents the duration of a chaos action. The duration might be a string with the signed sequence of decimal numbers, each with optional fraction and a unit suffix, such as `"300ms"`, `"-1.5h"` or `"2h45m"`.
 * **delay**: defines the value of IO chaos action delay. The duration might be a string with the signed sequence of decimal numbers, each with optional fraction and a unit suffix, such as `"300ms"`, `"-1.5h"` or `”2h45m”`. Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", and "h".
   If `Delay` is empty, the operator will generate a value for it randomly.
-* **errno**: defines the error code that is returned by an IO action. It and [errno](http://man7.org/linux/man-pages/man3/errno.3.html) defined by Linux system are consistent. It is an int32 string like `"2"`, `"2"` means `No such file or directory`. 
+* **errno**: defines the error code that is returned by an IO action. It and the [errno](http://man7.org/linux/man-pages/man3/errno.3.html) defined by Linux system are consistent. It is an int32 string like `"2"`, `"2"` means `No such file or directory`. 
 This field need to be set when you choose an `errno` or `mixed` action. If `errno` is empty, the operator will randomly generate an error code for it. 
 See the [common Linux system errors](#common-linux-system-errors) for more Linux system error codes.
 * **percent**: defines the percentage of injection errors and provides a number from 0-100. The default value is `100`.
@@ -201,6 +201,7 @@ The mix mode defines the **delay** and **errno** actions in one spec.
 * `24`: Too many open files
 * `28`: No space left on device
 
+> The number represents the errno the Linux system error. 
 > More Linux system errors refer to [Errors: Linux System Errors](https://www-numi.fnal.gov/offline_software/srt_public_context/WebDocs/Errors/unix_system_errors.html).
 
 ## Available methods
