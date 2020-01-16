@@ -132,7 +132,8 @@ done
 
 echo "start to create k8s cluster"
 kind create cluster --config ${configFile} --image kindest/node:${k8sVersion} --name=${clusterName}
-export KUBECONFIG="$(kind get kubeconfig-path --name=${clusterName})"
+kind get kubeconfig --name=${clusterName} > ${workDir}/config
+export KUBECONFIG=${workDir}/config
 
 echo "deploy docker registry in kind"
 registryNode=${clusterName}-control-plane
@@ -218,7 +219,7 @@ helm init --service-account=tiller --wait
 echo "############# success create cluster:[${clusterName}] #############"
 
 echo "To start using your cluster, run:"
-echo "    export KUBECONFIG=$(kind get kubeconfig-path --name=${clusterName})"
+echo "    export KUBECONFIG=${workDir}/config"
 echo ""
 echo <<EOF
 NOTE: In kind, nodes run docker network and cannot access host network.
