@@ -1,7 +1,7 @@
 apiVersion: pingcap.com/v1alpha1
 kind: IoChaos
 metadata:
-  name: io-delay-example
+  name: io-mixed-example
   namespace: chaos-testing
 spec:
   action: mixed
