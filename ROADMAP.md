@@ -8,3 +8,12 @@ This document defines the roadmap for Chaos Mesh development.
 - [ ] Add CPU chaos. Simulate CPU being busy.
 - [ ] Add memory chaos. Simulate memory allocation failure.
 - [ ] Make scheduler optional. Support single time chaos triggering.
+
+## Long-term
+
+- [x] chaos-operator
+- [ ] chaos-dashboard
+- [ ] chaos-verify
+- [ ] chaos-engine
+- [ ] chaos-admin
+- [ ] chaos-cloud
