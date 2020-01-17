@@ -232,12 +232,7 @@ Please reach out for bugs, feature requests, and other issues via:
 
 ## Roadmap
 
-- [x] chaos-operator
-- [ ] chaos-dashboard
-- [ ] chaos-verify
-- [ ] chaos-engine
-- [ ] chaos-admin
-- [ ] chaos-cloud
+See [ROADMAP](/ROADMAP.md)
 
 ## License
 
