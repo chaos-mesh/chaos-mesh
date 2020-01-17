@@ -7,3 +7,4 @@ This document defines the roadmap for Chaos Mesh development.
 - [ ] Add container kill/failure chaos
 - [ ] Add cpu chaos
 - [ ] Add memory chaos
+- [ ] Make scheduler optional
