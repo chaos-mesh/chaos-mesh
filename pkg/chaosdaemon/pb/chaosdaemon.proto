@@ -10,6 +10,9 @@ service ChaosDaemon {
 
   rpc FlushIpSet(IpSetRequest) returns (google.protobuf.Empty) {}
   rpc FlushIptables(IpTablesRequest) returns (google.protobuf.Empty) {}
+
+  rpc SetTimeOffset(TimeRequest) returns (google.protobuf.Empty) {}
+  rpc RecoverTimeOffset(TimeRequest) returns (google.protobuf.Empty) {}
 }
 
 message NetemRequest {
@@ -60,4 +63,10 @@ message Rule {
   }
   Direction direction = 2;
   string set = 3;
+}
+
+message TimeRequest {
+  string container_id = 1;
+  int32 sec = 2;
+  int32 usec = 3;
 }

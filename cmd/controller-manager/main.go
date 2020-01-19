@@ -125,6 +125,14 @@ func main() {
 		os.Exit(1)
 	}
 
+	if err = (&controllers.TimeChaosReconciler{
+		Client: mgr.GetClient(),
+		Log:    ctrl.Log.WithName("controllers").WithName("TimeChaos"),
+	}).SetupWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create controller", "controller", "TimeChaos")
+		os.Exit(1)
+	}
+
 	setupLog.Info("setting up webhook server")
 	hookServer := mgr.GetWebhookServer()
 	hookServer.CertDir = certsDir

@@ -50,6 +50,25 @@ spec:
           ports:
             - containerPort: {{ .Values.chaosDaemon.port }}
               hostPort: {{ .Values.chaosDaemon.port }}
+        - name: time-chaos
+          image: {{ .Values.timeChaos.image }}
+          imagePullPolicy: {{ .Values.timeChaos.imagePullPolicy | default "IfNotPresent" }}
+          command:
+            - /time-chaos
+            - -port 
+            - !!str {{ .Values.timeChaos.port }}
+          securityContext:
+            privileged: true
+          volumeMounts:
+            - name: modules
+              mountPath: /lib/modules
+            - name: sources
+              mountPath: /usr/src
+            - name: debug
+              mountPath: /sys/kernel/debug
+          ports:
+            - containerPort: {{ .Values.timeChaos.port }}
+              hostPort: {{ .Values.timeChaos.port }}
       volumes:
         - name: proc
           hostPath:
@@ -57,3 +76,12 @@ spec:
         - name: socket-path
           hostPath:
             path: {{ .Values.chaosDaemon.socketPath | default "/var/run/docker.sock" }}
+        - name: modules
+          hostPath:
+            path: /lib/modules
+        - name: sources
+          hostPath:
+            path: /usr/src
+        - name: debug
+          hostPath:
+            path: /sys/kernel/debug

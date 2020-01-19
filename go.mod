@@ -42,10 +42,9 @@ require (
 	go.uber.org/zap v1.12.0 // indirect
 	golang.org/x/net v0.0.0-20191004110552-13f9640d40b9
 	golang.org/x/sync v0.0.0-20190911185100-cd5d95a43a6e
-	golang.org/x/sys v0.0.0-20200120151820-655fe14d7479 // indirect
-	golang.org/x/tools v0.0.0-20200203023011-6f24f261dadb // indirect
-	google.golang.org/genproto v0.0.0-20200117163144-32f20d992d24 // indirect
-	google.golang.org/grpc v1.26.0
+	golang.org/x/tools v0.0.0-20200204074204-1cc6d1ef6c74 // indirect
+	google.golang.org/genproto v0.0.0-20191028173616-919d9bdd9fe6 // indirect
+	google.golang.org/grpc v1.27.0
 	k8s.io/api v0.0.0-20191121015604-11707872ac1c
 	k8s.io/apiextensions-apiserver v0.0.0-20191121021419-88daf26ec3b8 // indirect
 	k8s.io/apimachinery v0.0.0-20191121015412-41065c7a8c2a

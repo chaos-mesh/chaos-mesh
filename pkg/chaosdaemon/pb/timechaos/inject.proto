@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package timechaos;
+
+import "google/protobuf/empty.proto";
+
+service Inject {
+  rpc SetTimeval(Request) returns (google.protobuf.Empty) {}
+  rpc Recover(Request) returns (google.protobuf.Empty) {}
+}
+
+message Request {
+  uint32 pid = 1;
+  bool tid = 2;
+  int32 sec = 3;
+  int32 usec = 4;
+}
