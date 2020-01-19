@@ -10,7 +10,7 @@ about: Something isn't working as expected
 <!-- You can run `kubectl version` -->
 
 **What did you do?**
-<!-- If possible, provide a recipe for reproducing the error. How you installed tidb-operator and tidb-cluster. -->
+<!-- If possible, provide a recipe for reproducing the error. How you installed chaos-mesh. -->
 
 **What did you expect to see?**
 
