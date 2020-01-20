@@ -224,7 +224,7 @@ Then you can access [`http://localhost:8080`](http://localhost:8080) in browser.
 
 ## FAQs
 
-refer to: [doc/FAQs](/doc/faqs.md)
+Refer to [FAQs](/doc/faqs.md).
 
 ## Community
 
