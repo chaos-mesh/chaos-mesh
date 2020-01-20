@@ -222,6 +222,10 @@ kubectl port-forward -n chaos-testing svc/chaos-dashboard 8080:80
 
 Then you can access [`http://localhost:8080`](http://localhost:8080) in browser.
 
+## FAQs
+
+Refer to [FAQs](/doc/faqs.md).
+
 ## Community
 
 Please reach out for bugs, feature requests, and other issues via:
