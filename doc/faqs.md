@@ -12,7 +12,7 @@ The chaosfs sidecar container is continuously restarting, and you may see follow
 github.com/go-logr/zapr.(*zapLogger).Error
 ```
 
-* Cause: Chaos-mesh uses fuse to hijack I/O operations. It fails if you specify an existing directory as the source path for chaos. This often happens when you try to reuse a persistent volume (PV) with the `Retain` reclaim policy to request a PVC resource.
+* **Cause**: chaos-mesh uses fuse to hijack I/O operations. It fails if you specify an existing directory as the source path for chaos. This often happens when you try to reuse a persistent volume (PV) with the `Retain` reclaim policy to request a PersistentVolumeClaims (PVC) resource.
 * Solution: In this case, use the following command to change the reclaim policy to `Delete`:
 
 ```bash
