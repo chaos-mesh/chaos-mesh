@@ -10,7 +10,7 @@
 github.com/go-logr/zapr.(*zapLogger).Error
 ```
 
-* Cause: Chaos-mesh uses fuse to hijack I/O operations, it will fail if there already exists the directory which chosen as the source path. This often happens when reuses a `Retain` reclaim policy PV when request a PVC resource.
+* Cause: Chaos-mesh uses fuse to hijack I/O operations. It fails if you specify an existing directory as the source path for chaos. This often happens when you try to reuse a persistent volume (PV) with the `Retain` reclaim policy to request a PVC resource.
 * Solution: In this case, you could use below command to change the reclaim policy to `Delete`:
 
 ```bash
