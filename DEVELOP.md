@@ -1,5 +1,5 @@
-# Development Guide
-As you see, we currently have many types of chaos such as IoChaos, NetworkChaos, PodChaos .etc. This guide aims to introduce the way to add new chaos type for chaos-mesh, which includes setting up the development environment and adding a hello-world chaos type.
+# Chaos Mesh Development Guide
+Chaos Mesh currently have many types of chaos such as IOChaos, NetworkChaos, PodChaos. This guide aims to introduce the way to add new chaos type for Chaos Mesh, which includes setting up the development environment and adding a hello-world chaos type.
 
 ## Setting Up The Development Environment
 ### Requirements
@@ -7,6 +7,7 @@ You should have these components installed in your system:
 - golang (>= v1.13), if your golang version < v1.13, you can use golang version manager such as [gvm](https://github.com/moovweb/gvm) to switch to a newer one.
 - [yarn](https://yarnpkg.com/lang/en/) and [nodejs](https://nodejs.org/en/): for chaos-dashboard
 - docker
+- gcc
 - [kind](https://github.com/kubernetes-sigs/kind)
 
 ### Step By Step
@@ -23,6 +24,11 @@ make install-kustomize
 After this, you should add kubebuilder and kustomize to your PATH environment:
 ```
 export PATH=${PATH}:/usr/local/kubebuilder/bin
+```
+
+start docker service, if you are using centos, you can use the following command to start
+```
+service docker start
 ```
 Then we can test the toolchain
 ```
