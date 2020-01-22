@@ -39,8 +39,11 @@ spec:
           volumeMounts:
             - name: proc
               mountPath: /mnt/proc
-            - name: dockersock
+            - name: socket-path
+              {{ if eq .Values.chaosDaemon "docker" }}
               mountPath: /var/run/docker.sock
+              {{ else if eq .Values.chaosDaemon "containerd" }}
+              mountPath: /run/containerd/containerd.sock
           ports:
             - containerPort: {{ .Values.chaosDaemon.port }}
               hostPort: {{ .Values.chaosDaemon.port }}
@@ -48,6 +51,6 @@ spec:
         - name: proc
           hostPath:
             path: /proc
-        - name: dockersock
+        - name: socket-path
           hostPath:
-            path: {{ .Values.chaosDaemon.dockerSocketPath | default "/var/run/docker.sock" }}
+            path: {{ .Values.chaosDaemon.socketPath | default "/var/run/docker.sock" }}

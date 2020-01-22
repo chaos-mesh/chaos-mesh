@@ -36,7 +36,7 @@ var (
 func init() {
 	flag.BoolVar(&printVersion, "version", false, "print version information and exit")
 	flag.StringVar(&rawPort, "port", "", "the port which server listens on")
-	flag.StringVar(&containerRuntime, "runtime", "docker", "")
+	flag.StringVar(&containerRuntime, "runtime", "docker", "current container runtime")
 
 	flag.Parse()
 }

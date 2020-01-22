@@ -48,6 +48,13 @@ chaosDaemon:
   imagePullPolicy: Always
   port: 31767
 
+  # runtime specifies which container runtime to use. Currently
+  # we only supports docker and containerd.
+  runtime: docker
+
+  # socketPath specifies the container runtime socket.
+  socketPath: /var/run/docker.sock
+
 dashboard:
   create: false
 

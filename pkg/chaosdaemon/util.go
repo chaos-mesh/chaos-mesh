@@ -29,7 +29,7 @@ const (
 	defaultDockerSocket  = "unix:///var/run/docker.sock"
 	dockerProtocolPrefix = "docker://"
 
-	// TODO: make socket and ns configurable
+	// TODO(yeya24): make socket and ns configurable
 	defaultContainerdSocket  = "/run/containerd/containerd.sock"
 	containerdProtocolPrefix = "containerd://"
 	containerdDefaultNS      = "k8s.io"
@@ -81,7 +81,7 @@ func (c ContainerdClient) GetPidFromContainerID(ctx context.Context, containerID
 	return task.Pid(), nil
 }
 
-// CreateContainerRuntimeInfoClient will create container runtime information getter
+// CreateContainerRuntimeInfoClient creates a container runtime information client.
 func CreateContainerRuntimeInfoClient(containerRuntime string) (ContainerRuntimeInfoClient, error) {
 	// TODO: support more container runtime
 
@@ -95,7 +95,7 @@ func CreateContainerRuntimeInfoClient(containerRuntime string) (ContainerRuntime
 		cli = DockerClient{client}
 
 	case containerRuntimeContainerd:
-		// TODO: add more options?
+		// TODO(yeya24): add more options?
 		client, err := containerd.New(defaultContainerdSocket, containerd.WithDefaultNamespace(containerdDefaultNS))
 		if err != nil {
 			return nil, err
