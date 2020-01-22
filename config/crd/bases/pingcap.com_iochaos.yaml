@@ -179,7 +179,6 @@ spec:
           - configName
           - layer
           - mode
-          - scheduler
           - selector
           type: object
         status:

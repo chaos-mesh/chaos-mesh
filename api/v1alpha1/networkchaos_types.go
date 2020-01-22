@@ -111,10 +111,10 @@ type NetworkChaosSpec struct {
 	Selector SelectorSpec `json:"selector"`
 
 	// Duration represents the duration of the chaos action
-	Duration *string `json:"duration"`
+	Duration *string `json:"duration,omitempty"`
 
 	// Scheduler defines some schedule rules to control the running time of the chaos experiment about network.
-	Scheduler *SchedulerSpec `json:"scheduler"`
+	Scheduler *SchedulerSpec `json:"scheduler,omitempty"`
 
 	// Delay represents the detail about delay action
 	// +optional

@@ -115,7 +115,7 @@ type PodChaosSpec struct {
 
 	// Scheduler defines some schedule rules to
 	// control the running time of the chaos experiment about pods.
-	Scheduler *SchedulerSpec `json:"scheduler"`
+	Scheduler *SchedulerSpec `json:"scheduler,omitempty"`
 
 	// Action defines the specific pod chaos action.
 	// Supported action: pod-kill / pod-failure
@@ -140,7 +140,7 @@ type PodChaosSpec struct {
 	// such as "300ms", "-1.5h" or "2h45m".
 	// Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
 	// +optional
-	Duration *string `json:"duration"`
+	Duration *string `json:"duration,omitempty"`
 
 	// The duration in seconds before the object should be deleted. Value must be non-negative integer.
 	// The value zero indicates delete immediately.

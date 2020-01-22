@@ -15,7 +15,6 @@ require (
 	github.com/hanwen/go-fuse v0.0.0-20190111173210-425e8d5301f6
 	github.com/hashicorp/golang-lru v0.5.3 // indirect
 	github.com/jmoiron/sqlx v1.2.0
-	github.com/mgechev/revive v1.0.1 // indirect
 	github.com/morikuni/aec v1.0.0 // indirect
 	github.com/onsi/ginkgo v1.11.0
 	github.com/onsi/gomega v1.7.0
@@ -29,6 +28,8 @@ require (
 	go.uber.org/zap v1.12.0 // indirect
 	golang.org/x/net v0.0.0-20191004110552-13f9640d40b9
 	golang.org/x/sync v0.0.0-20190911185100-cd5d95a43a6e
+	golang.org/x/sys v0.0.0-20191026070338-33540a1f6037 // indirect
+	golang.org/x/tools v0.0.0-20200107184032-11e9d9cc0042 // indirect
 	google.golang.org/genproto v0.0.0-20191028173616-919d9bdd9fe6 // indirect
 	google.golang.org/grpc v1.24.0
 	k8s.io/api v0.0.0-20191121015604-11707872ac1c
@@ -36,7 +37,6 @@ require (
 	k8s.io/apimachinery v0.0.0-20191121015412-41065c7a8c2a
 	k8s.io/client-go v0.0.0-20191121015835-571c0ef67034
 	sigs.k8s.io/controller-runtime v0.4.0
-	sigs.k8s.io/controller-tools v0.2.4 // indirect
 )
 
 go 1.13

@@ -258,9 +258,7 @@ spec:
               type: string
           required:
           - action
-          - duration
           - mode
-          - scheduler
           - selector
           type: object
         status:

@@ -51,9 +51,8 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 
 	if chaos.GetScheduler() == nil {
 		return r.persistNetworkChaos(&networkchaos, req)
-	} else {
-		return r.scheduleNetworkChaos(&networkchaos, req)
 	}
+	return r.scheduleNetworkChaos(&networkchaos, req)
 }
 
 func (r *Reconciler) persistNetworkChaos(networkchaos *v1alpha1.NetworkChaos, req ctrl.Request) (ctrl.Result, error) {

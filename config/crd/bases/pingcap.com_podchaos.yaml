@@ -144,7 +144,6 @@ spec:
           required:
           - action
           - mode
-          - scheduler
           - selector
           type: object
         status:
