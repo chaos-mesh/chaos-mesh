@@ -39,7 +39,7 @@ Before deploying Chaos Mesh, make sure the following items have been installed. 
 
 - Kubernetes >= v1.12
 - [RBAC](https://kubernetes.io/docs/admin/authorization/rbac) enabled (optional)
-- [Helm](https://helm.sh/) version >= v2.8.2 and < v3.0.0
+- [Helm](https://helm.sh/) version >= v2.8.2
 
 ## Deploy Chaos Mesh
 
@@ -64,14 +64,23 @@ kubectl get crd podchaos.pingcap.com
 * Install Chaos Mesh with Chaos Operator only
 
 ```bash
+# create namespace chaos-testing 
+kubectl create ns chaos-testing
+# helm 2.X
 helm install helm/chaos-mesh --name=chaos-mesh --namespace=chaos-testing
+# helm 3.X
+helm install chaos-mesh helm/chaos-mesh --namespace=chaos-testing
+# check Chaos Mesh pods installed
 kubectl get pods --namespace chaos-testing -l app.kubernetes.io/instance=chaos-mesh
 ```
 
 * Install Chaos Mesh with Chaos Operator and Chaos Dashboard
 
 ```bash
+# helm 2.X
 helm install helm/chaos-mesh --name=chaos-mesh --namespace=chaos-testing --set dashboard.create=true
+# helm 3.X
+helm install chaos-mesh helm/chaos-mesh --namespace=chaos-testing --set dashboard.create=true
 ```
 
 ## Get started on your local machine
