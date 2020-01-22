@@ -42,7 +42,7 @@ type TwoPhaseReconciler struct {
 	*networkchaosNetem.Reconciler
 }
 
-// implement InnerReconciler.Apply
+//Apply implement InnerReconciler.Apply
 func (r *TwoPhaseReconciler) Apply(ctx context.Context, req ctrl.Request, chaos twophase.InnerObject) error {
 	networkchaos, ok := chaos.(*v1alpha1.NetworkChaos)
 	if !ok {
@@ -53,7 +53,7 @@ func (r *TwoPhaseReconciler) Apply(ctx context.Context, req ctrl.Request, chaos 
 	return r.Perform(ctx, req, networkchaos)
 }
 
-// implement InnerReconciler.Recover
+//Recover implement InnerReconciler.Recover
 func (r *TwoPhaseReconciler) Recover(ctx context.Context, req ctrl.Request, chaos twophase.InnerObject) error {
 	networkchaos, ok := chaos.(*v1alpha1.NetworkChaos)
 	if !ok {
@@ -64,7 +64,7 @@ func (r *TwoPhaseReconciler) Recover(ctx context.Context, req ctrl.Request, chao
 	return r.Clean(ctx, req, networkchaos)
 }
 
-// implement InnerReconciler.Object
+//Object implement InnerReconciler.Object
 func (r *TwoPhaseReconciler) Object() twophase.InnerObject {
 	return r.Instance()
 }

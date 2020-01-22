@@ -175,7 +175,7 @@ func (in *IoChaos) IsDeleted() bool {
 	return !in.DeletionTimestamp.IsZero()
 }
 
-// GetScheduler would return the duration of IoChaos
+//GetDuration would return the duration of IoChaos
 func (in *IoChaos) GetDuration() (*time.Duration, error) {
 	zeroHour := time.Hour * 0
 	if in.Spec.Duration == nil {
@@ -227,7 +227,7 @@ func (in *IoChaos) SetNextRecover(t time.Time) {
 	in.Spec.NextRecover.Time = t
 }
 
-// GetScheduler would return the scheduler of IoChaos
+//GetScheduler would return the scheduler of IoChaos
 func (in *IoChaos) GetScheduler() *SchedulerSpec {
 	return in.Spec.Scheduler
 }

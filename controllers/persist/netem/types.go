@@ -41,7 +41,7 @@ func NewPersistentReconciler(c client.Client, log logr.Logger, req ctrl.Request)
 	}
 }
 
-// implement persist.Apply
+//Apply implement persist.Apply
 func (r *PersistentReconciler) Apply(ctx context.Context, req ctrl.Request, chaos persist.InnerPersistObject) error {
 	networkchaos, ok := chaos.(*v1alpha1.NetworkChaos)
 	if !ok {
@@ -52,7 +52,7 @@ func (r *PersistentReconciler) Apply(ctx context.Context, req ctrl.Request, chao
 	return r.Perform(ctx, req, networkchaos)
 }
 
-// implement persist.Recover
+//Recover implement persist.Recover
 func (r *PersistentReconciler) Recover(ctx context.Context, req ctrl.Request, chaos persist.InnerPersistObject) error {
 	networkchaos, ok := chaos.(*v1alpha1.NetworkChaos)
 	if !ok {
@@ -63,7 +63,7 @@ func (r *PersistentReconciler) Recover(ctx context.Context, req ctrl.Request, ch
 	return r.Clean(ctx, req, networkchaos)
 }
 
-// implement persist.Object
+//Object implement persist.Object
 func (r *PersistentReconciler) Object() persist.InnerPersistObject {
 	return r.Instance()
 }
