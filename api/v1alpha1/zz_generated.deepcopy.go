@@ -175,7 +175,16 @@ func (in *IoChaosList) DeepCopyObject() runtime.Object {
 func (in *IoChaosSpec) DeepCopyInto(out *IoChaosSpec) {
 	*out = *in
 	in.Selector.DeepCopyInto(&out.Selector)
-	out.Scheduler = in.Scheduler
+	if in.Scheduler != nil {
+		in, out := &in.Scheduler, &out.Scheduler
+		*out = new(SchedulerSpec)
+		**out = **in
+	}
+	if in.Duration != nil {
+		in, out := &in.Duration, &out.Duration
+		*out = new(string)
+		**out = **in
+	}
 	if in.Methods != nil {
 		in, out := &in.Methods, &out.Methods
 		*out = make([]string, len(*in))
@@ -295,7 +304,16 @@ func (in *NetworkChaosList) DeepCopyObject() runtime.Object {
 func (in *NetworkChaosSpec) DeepCopyInto(out *NetworkChaosSpec) {
 	*out = *in
 	in.Selector.DeepCopyInto(&out.Selector)
-	out.Scheduler = in.Scheduler
+	if in.Duration != nil {
+		in, out := &in.Duration, &out.Duration
+		*out = new(string)
+		**out = **in
+	}
+	if in.Scheduler != nil {
+		in, out := &in.Scheduler, &out.Scheduler
+		*out = new(SchedulerSpec)
+		**out = **in
+	}
 	if in.Delay != nil {
 		in, out := &in.Delay, &out.Delay
 		*out = new(DelaySpec)
@@ -432,7 +450,16 @@ func (in *PodChaosList) DeepCopyObject() runtime.Object {
 func (in *PodChaosSpec) DeepCopyInto(out *PodChaosSpec) {
 	*out = *in
 	in.Selector.DeepCopyInto(&out.Selector)
-	out.Scheduler = in.Scheduler
+	if in.Scheduler != nil {
+		in, out := &in.Scheduler, &out.Scheduler
+		*out = new(SchedulerSpec)
+		**out = **in
+	}
+	if in.Duration != nil {
+		in, out := &in.Duration, &out.Duration
+		*out = new(string)
+		**out = **in
+	}
 	if in.NextStart != nil {
 		in, out := &in.NextStart, &out.NextStart
 		*out = (*in).DeepCopy()

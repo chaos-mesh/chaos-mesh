@@ -53,13 +53,17 @@ func (in *PodChaos) IsDeleted() bool {
 	return !in.DeletionTimestamp.IsZero()
 }
 
-func (in *PodChaos) GetDuration() (time.Duration, error) {
-	duration, err := time.ParseDuration(in.Spec.Duration)
+func (in *PodChaos) GetDuration() (*time.Duration, error) {
+	zeroHour := time.Hour * 0
+	if in.Spec.Duration == nil {
+		return &zeroHour, nil
+	}
+	duration, err := time.ParseDuration(*in.Spec.Duration)
 	if err != nil {
-		return time.Hour * 0, err
+		return &zeroHour, err
 	}
 
-	return duration, nil
+	return &duration, nil
 }
 
 func (in *PodChaos) GetNextStart() time.Time {
@@ -100,7 +104,7 @@ func (in *PodChaos) SetNextRecover(t time.Time) {
 	in.Spec.NextRecover.Time = t
 }
 
-func (in *PodChaos) GetScheduler() SchedulerSpec {
+func (in *PodChaos) GetScheduler() *SchedulerSpec {
 	return in.Spec.Scheduler
 }
 
@@ -111,7 +115,7 @@ type PodChaosSpec struct {
 
 	// Scheduler defines some schedule rules to
 	// control the running time of the chaos experiment about pods.
-	Scheduler SchedulerSpec `json:"scheduler"`
+	Scheduler *SchedulerSpec `json:"scheduler"`
 
 	// Action defines the specific pod chaos action.
 	// Supported action: pod-kill / pod-failure
@@ -136,7 +140,7 @@ type PodChaosSpec struct {
 	// such as "300ms", "-1.5h" or "2h45m".
 	// Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
 	// +optional
-	Duration string `json:"duration"`
+	Duration *string `json:"duration"`
 
 	// The duration in seconds before the object should be deleted. Value must be non-negative integer.
 	// The value zero indicates delete immediately.

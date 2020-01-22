@@ -55,7 +55,7 @@ var _ = Describe("PodChaos Controller", func() {
 					Selector: v1alpha1.SelectorSpec{
 						Namespaces: []string{"default"},
 					},
-					Scheduler: v1alpha1.SchedulerSpec{
+					Scheduler: &v1alpha1.SchedulerSpec{
 						Cron: "@every 2m",
 					},
 					Action: v1alpha1.PodKillAction,
@@ -77,7 +77,7 @@ var _ = Describe("PodChaos Controller", func() {
 				Name:      "podchaos-failure" + "-" + randomStringWithCharset(10, charset),
 				Namespace: "default",
 			}
-
+			duration := "60s"
 			created := &v1alpha1.PodChaos{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      key.Name,
@@ -87,13 +87,13 @@ var _ = Describe("PodChaos Controller", func() {
 					Selector: v1alpha1.SelectorSpec{
 						Namespaces: []string{"default"},
 					},
-					Scheduler: v1alpha1.SchedulerSpec{
+					Scheduler: &v1alpha1.SchedulerSpec{
 						Cron: "@every 2m",
 					},
 					Action:   v1alpha1.PodFailureAction,
 					Mode:     v1alpha1.FixedPodMode,
 					Value:    "2",
-					Duration: "60s",
+					Duration: &duration,
 				},
 			}
 

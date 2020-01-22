@@ -156,6 +156,13 @@ spec:
                   items:
                     type: string
                   type: array
+                phaseSelector:
+                  description: 'PodPhaseSelector is a set of condition of a pod at
+                    the current time. supported value: Pending / Running / Succeeded
+                    / Failed / Unknown'
+                  items:
+                    type: string
+                  type: array
                 pods:
                   additionalProperties:
                     items:
@@ -209,6 +216,13 @@ spec:
                     nodes:
                       description: Nodes is a set of node name and objects must belong
                         to these nodes.
+                      items:
+                        type: string
+                      type: array
+                    phaseSelector:
+                      description: 'PodPhaseSelector is a set of condition of a pod
+                        at the current time. supported value: Pending / Running /
+                        Succeeded / Failed / Unknown'
                       items:
                         type: string
                       type: array

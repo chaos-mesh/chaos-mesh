@@ -34,7 +34,7 @@ import (
 type InnerObject interface {
 	IsDeleted() bool
 
-	GetDuration() (time.Duration, error)
+	GetDuration() (*time.Duration, error)
 
 	GetNextStart() time.Time
 	SetNextStart(time.Time)
@@ -42,7 +42,7 @@ type InnerObject interface {
 	GetNextRecover() time.Time
 	SetNextRecover(time.Time)
 
-	GetScheduler() v1alpha1.SchedulerSpec
+	GetScheduler() *v1alpha1.SchedulerSpec
 
 	apiinterface.StatefulObject
 }
@@ -107,13 +107,13 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		}
 		status.Experiment.Phase = v1alpha1.ExperimentPhaseFinished
 	} else if chaos.GetNextStart().Before(now) {
-		nextStart, err := utils.NextTime(chaos.GetScheduler(), now)
+		nextStart, err := utils.NextTime(*chaos.GetScheduler(), now)
 		if err != nil {
 			r.Log.Error(err, "failed to get next start time")
 			return ctrl.Result{}, nil
 		}
 
-		nextRecover := now.Add(duration)
+		nextRecover := now.Add(*duration)
 		if nextStart.Before(nextRecover) {
 			err := fmt.Errorf("nextRecover shouldn't be later than nextStart")
 			r.Log.Error(err, "nextRecover is later than nextStart. Then recover can never be reached",

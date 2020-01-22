@@ -111,10 +111,10 @@ type NetworkChaosSpec struct {
 	Selector SelectorSpec `json:"selector"`
 
 	// Duration represents the duration of the chaos action
-	Duration string `json:"duration"`
+	Duration *string `json:"duration"`
 
 	// Scheduler defines some schedule rules to control the running time of the chaos experiment about network.
-	Scheduler SchedulerSpec `json:"scheduler"`
+	Scheduler *SchedulerSpec `json:"scheduler"`
 
 	// Delay represents the detail about delay action
 	// +optional
@@ -189,13 +189,17 @@ func (in *NetworkChaos) IsDeleted() bool {
 	return !in.DeletionTimestamp.IsZero()
 }
 
-func (in *NetworkChaos) GetDuration() (time.Duration, error) {
-	duration, err := time.ParseDuration(in.Spec.Duration)
+func (in *NetworkChaos) GetDuration() (*time.Duration, error) {
+	zeroHour := time.Hour * 0
+	if in.Spec.Duration == nil {
+		return &zeroHour, nil
+	}
+	duration, err := time.ParseDuration(*in.Spec.Duration)
 	if err != nil {
-		return time.Hour * 0, err
+		return &zeroHour, err
 	}
 
-	return duration, nil
+	return &duration, nil
 }
 
 func (in *NetworkChaos) GetNextStart() time.Time {
@@ -236,7 +240,7 @@ func (in *NetworkChaos) SetNextRecover(t time.Time) {
 	in.Spec.NextRecover.Time = t
 }
 
-func (in *NetworkChaos) GetScheduler() SchedulerSpec {
+func (in *NetworkChaos) GetScheduler() *SchedulerSpec {
 	return in.Spec.Scheduler
 }
 
