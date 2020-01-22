@@ -53,6 +53,7 @@ func (in *PodChaos) IsDeleted() bool {
 	return !in.DeletionTimestamp.IsZero()
 }
 
+// GetDuration would return the duration of the podChaos
 func (in *PodChaos) GetDuration() (*time.Duration, error) {
 	zeroHour := time.Hour * 0
 	if in.Spec.Duration == nil {
@@ -104,6 +105,7 @@ func (in *PodChaos) SetNextRecover(t time.Time) {
 	in.Spec.NextRecover.Time = t
 }
 
+// GetScheduler would return the scheduler of the podChaos
 func (in *PodChaos) GetScheduler() *SchedulerSpec {
 	return in.Spec.Scheduler
 }

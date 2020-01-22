@@ -26,6 +26,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
+// NewTwoPhaseReconciler would Create TwoPhaseReconciler
 func NewTwoPhaseReconciler(c client.Client, log logr.Logger, req ctrl.Request) *TwoPhaseReconciler {
 	r := &networkchaosNetem.Reconciler{
 		Client: c,
@@ -36,10 +37,12 @@ func NewTwoPhaseReconciler(c client.Client, log logr.Logger, req ctrl.Request) *
 	}
 }
 
+// TwoPhaseReconciler reconcile the networkchaos
 type TwoPhaseReconciler struct {
 	*networkchaosNetem.Reconciler
 }
 
+// implement InnerReconciler.Apply
 func (r *TwoPhaseReconciler) Apply(ctx context.Context, req ctrl.Request, chaos twophase.InnerObject) error {
 	networkchaos, ok := chaos.(*v1alpha1.NetworkChaos)
 	if !ok {
@@ -50,6 +53,7 @@ func (r *TwoPhaseReconciler) Apply(ctx context.Context, req ctrl.Request, chaos 
 	return r.Perform(ctx, req, networkchaos)
 }
 
+// implement InnerReconciler.Recover
 func (r *TwoPhaseReconciler) Recover(ctx context.Context, req ctrl.Request, chaos twophase.InnerObject) error {
 	networkchaos, ok := chaos.(*v1alpha1.NetworkChaos)
 	if !ok {
@@ -60,6 +64,7 @@ func (r *TwoPhaseReconciler) Recover(ctx context.Context, req ctrl.Request, chao
 	return r.Clean(ctx, req, networkchaos)
 }
 
+// implement InnerReconciler.Object
 func (r *TwoPhaseReconciler) Object() twophase.InnerObject {
 	return r.Instance()
 }

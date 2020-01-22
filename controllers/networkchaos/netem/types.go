@@ -45,6 +45,7 @@ type NetemSpec interface {
 	ToNetem() (*pb.Netem, error)
 }
 
+// NewReconciler would create netem reconciler
 func NewReconciler(c client.Client, log logr.Logger, req ctrl.Request) *Reconciler {
 	return &Reconciler{
 		Client: c,
@@ -52,15 +53,18 @@ func NewReconciler(c client.Client, log logr.Logger, req ctrl.Request) *Reconcil
 	}
 }
 
+// Reconciler for netem
 type Reconciler struct {
 	client.Client
 	Log logr.Logger
 }
 
+// Instance return the instance of networkChaos
 func (r *Reconciler) Instance() *v1alpha1.NetworkChaos {
 	return &v1alpha1.NetworkChaos{}
 }
 
+// Perform would perform the networkchaos for the selected pods
 func (r *Reconciler) Perform(ctx context.Context, req ctrl.Request, networkchaos *v1alpha1.NetworkChaos) error {
 
 	pods, err := utils.SelectAndGeneratePods(ctx, r.Client, &networkchaos.Spec)
@@ -93,6 +97,7 @@ func (r *Reconciler) Perform(ctx context.Context, req ctrl.Request, networkchaos
 	return nil
 }
 
+// Clean would recover the networkchaos for the selected pods
 func (r *Reconciler) Clean(ctx context.Context, req ctrl.Request, networkchaos *v1alpha1.NetworkChaos) error {
 
 	err := r.cleanFinalizersAndRecover(ctx, networkchaos)

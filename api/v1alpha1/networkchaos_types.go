@@ -189,6 +189,7 @@ func (in *NetworkChaos) IsDeleted() bool {
 	return !in.DeletionTimestamp.IsZero()
 }
 
+// GetDuration would return the scheduler of networkChaos
 func (in *NetworkChaos) GetDuration() (*time.Duration, error) {
 	zeroHour := time.Hour * 0
 	if in.Spec.Duration == nil {
@@ -240,6 +241,7 @@ func (in *NetworkChaos) SetNextRecover(t time.Time) {
 	in.Spec.NextRecover.Time = t
 }
 
+// GetScheduler would return the scheduler of networkChaos
 func (in *NetworkChaos) GetScheduler() *SchedulerSpec {
 	return in.Spec.Scheduler
 }

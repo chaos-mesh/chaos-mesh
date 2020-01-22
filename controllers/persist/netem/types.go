@@ -25,10 +25,12 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
+// PersistentReconciler is reconciler for netem
 type PersistentReconciler struct {
 	*networkchaosNetem.Reconciler
 }
 
+// NewPersistentReconciler would create PersistentReconciler
 func NewPersistentReconciler(c client.Client, log logr.Logger, req ctrl.Request) *PersistentReconciler {
 	r := &networkchaosNetem.Reconciler{
 		Client: c,
@@ -39,6 +41,7 @@ func NewPersistentReconciler(c client.Client, log logr.Logger, req ctrl.Request)
 	}
 }
 
+// implement persist.Apply
 func (r *PersistentReconciler) Apply(ctx context.Context, req ctrl.Request, chaos persist.InnerPersistObject) error {
 	networkchaos, ok := chaos.(*v1alpha1.NetworkChaos)
 	if !ok {
@@ -49,6 +52,7 @@ func (r *PersistentReconciler) Apply(ctx context.Context, req ctrl.Request, chao
 	return r.Perform(ctx, req, networkchaos)
 }
 
+// implement persist.Recover
 func (r *PersistentReconciler) Recover(ctx context.Context, req ctrl.Request, chaos persist.InnerPersistObject) error {
 	networkchaos, ok := chaos.(*v1alpha1.NetworkChaos)
 	if !ok {
@@ -59,6 +63,7 @@ func (r *PersistentReconciler) Recover(ctx context.Context, req ctrl.Request, ch
 	return r.Clean(ctx, req, networkchaos)
 }
 
+// implement persist.Object
 func (r *PersistentReconciler) Object() persist.InnerPersistObject {
 	return r.Instance()
 }

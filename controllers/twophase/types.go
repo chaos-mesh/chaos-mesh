@@ -61,6 +61,7 @@ type Reconciler struct {
 	Log logr.Logger
 }
 
+// NewReconciler woudl create a controller
 func NewReconciler(reconcile InnerReconciler, c client.Client, log logr.Logger) *Reconciler {
 	return &Reconciler{
 		InnerReconciler: reconcile,

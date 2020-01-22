@@ -26,11 +26,13 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
+// InnerPersistObject used in persist chaos reconcile
 type InnerPersistObject interface {
 	IsDeleted() bool
 	apiinterface.StatefulObject
 }
 
+// InnerPersistReconcile used in persist chaos reconcile
 type InnerPersistReconcile interface {
 	Apply(ctx context.Context, req ctrl.Request, chaos InnerPersistObject) error
 
@@ -39,12 +41,14 @@ type InnerPersistReconcile interface {
 	Object() InnerPersistObject
 }
 
+// Reconciler for persist chaos
 type Reconciler struct {
 	InnerPersistReconcile
 	client.Client
 	Log logr.Logger
 }
 
+// NewReconciler would create Reconciler for persist chaos
 func NewReconciler(reconcile InnerPersistReconcile, c client.Client, log logr.Logger) *Reconciler {
 	return &Reconciler{
 		InnerPersistReconcile: reconcile,
@@ -53,6 +57,7 @@ func NewReconciler(reconcile InnerPersistReconcile, c client.Client, log logr.Lo
 	}
 }
 
+// Reconcile the persist chaos
 func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	var err error
 
