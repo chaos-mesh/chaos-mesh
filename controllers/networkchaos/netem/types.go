@@ -15,7 +15,6 @@ package netem
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"reflect"
 	"strings"
@@ -25,7 +24,6 @@ import (
 	"github.com/go-logr/logr"
 
 	"github.com/pingcap/chaos-mesh/api/v1alpha1"
-	"github.com/pingcap/chaos-mesh/controllers/twophase"
 	pb "github.com/pingcap/chaos-mesh/pkg/chaosdaemon/pb"
 	"github.com/pingcap/chaos-mesh/pkg/utils"
 
@@ -47,12 +45,8 @@ type NetemSpec interface {
 	ToNetem() (*pb.Netem, error)
 }
 
-func NewReconciler(c client.Client, log logr.Logger, req ctrl.Request) twophase.Reconciler {
-	return twophase.Reconciler{
-		InnerReconciler: &Reconciler{
-			Client: c,
-			Log:    log,
-		},
+func NewReconciler(c client.Client, log logr.Logger, req ctrl.Request) *Reconciler {
+	return &Reconciler{
 		Client: c,
 		Log:    log,
 	}
@@ -63,17 +57,11 @@ type Reconciler struct {
 	Log logr.Logger
 }
 
-func (r *Reconciler) Object() twophase.InnerObject {
+func (r *Reconciler) Instance() *v1alpha1.NetworkChaos {
 	return &v1alpha1.NetworkChaos{}
 }
 
-func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos twophase.InnerObject) error {
-	networkchaos, ok := chaos.(*v1alpha1.NetworkChaos)
-	if !ok {
-		err := errors.New("chaos is not NetworkChaos")
-		r.Log.Error(err, "chaos is not NetworkChaos", "chaos", chaos)
-		return err
-	}
+func (r *Reconciler) Perform(ctx context.Context, req ctrl.Request, networkchaos *v1alpha1.NetworkChaos) error {
 
 	pods, err := utils.SelectAndGeneratePods(ctx, r.Client, &networkchaos.Spec)
 
@@ -105,13 +93,7 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos twophase
 	return nil
 }
 
-func (r *Reconciler) Recover(ctx context.Context, req ctrl.Request, chaos twophase.InnerObject) error {
-	networkchaos, ok := chaos.(*v1alpha1.NetworkChaos)
-	if !ok {
-		err := errors.New("chaos is not NetworkChaos")
-		r.Log.Error(err, "chaos is not NetworkChaos", "chaos", chaos)
-		return err
-	}
+func (r *Reconciler) Clean(ctx context.Context, req ctrl.Request, networkchaos *v1alpha1.NetworkChaos) error {
 
 	err := r.cleanFinalizersAndRecover(ctx, networkchaos)
 	if err != nil {

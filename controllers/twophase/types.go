@@ -61,6 +61,14 @@ type Reconciler struct {
 	Log logr.Logger
 }
 
+func NewReconciler(reconcile InnerReconciler, c client.Client, log logr.Logger) *Reconciler {
+	return &Reconciler{
+		InnerReconciler: reconcile,
+		Client:          c,
+		Log:             log,
+	}
+}
+
 func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	var err error
 	now := time.Now()
