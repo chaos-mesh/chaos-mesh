@@ -88,7 +88,9 @@ func (r *Reconciler) Perform(ctx context.Context, req ctrl.Request, networkchaos
 			HostIP:    pod.Status.HostIP,
 			PodIP:     pod.Status.PodIP,
 			Action:    string(networkchaos.Spec.Action),
-			Message:   fmt.Sprintf(networkDelayActionMsg, *networkchaos.Spec.Duration),
+		}
+		if networkchaos.Spec.Duration != nil {
+			ps.Message = fmt.Sprintf(networkDelayActionMsg, *networkchaos.Spec.Duration)
 		}
 
 		networkchaos.Status.Experiment.Pods = append(networkchaos.Status.Experiment.Pods, ps)
