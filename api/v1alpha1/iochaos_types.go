@@ -59,7 +59,7 @@ type IoChaosSpec struct {
 
 	// Scheduler defines some schedule rules to
 	// control the running time of the chaos experiment about pods.
-	Scheduler SchedulerSpec `json:"scheduler"`
+	Scheduler *SchedulerSpec `json:"scheduler,omitempty"`
 
 	// Action defines the specific pod chaos action.
 	// Supported action: delay / errno / mixed
@@ -84,7 +84,7 @@ type IoChaosSpec struct {
 	// such as "300ms", "-1.5h" or "2h45m".
 	// Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
 	// +optional
-	Duration string `json:"duration"`
+	Duration *string `json:"duration,omitempty"`
 
 	// Layer represents the layer of the I/O action.
 	// Supported value: fs.
@@ -175,13 +175,16 @@ func (in *IoChaos) IsDeleted() bool {
 	return !in.DeletionTimestamp.IsZero()
 }
 
-func (in *IoChaos) GetDuration() (time.Duration, error) {
-	duration, err := time.ParseDuration(in.Spec.Duration)
-	if err != nil {
-		return time.Hour * 0, err
+func (in *IoChaos) GetDuration() (*time.Duration, error) {
+	if in.Spec.Duration == nil {
+		return nil, nil
 	}
-
-	return duration, nil
+	zeroHour := 0 * time.Hour
+	duration, err := time.ParseDuration(*in.Spec.Duration)
+	if err != nil {
+		return &zeroHour, err
+	}
+	return &duration, nil
 }
 
 func (in *IoChaos) GetNextStart() time.Time {
@@ -222,7 +225,7 @@ func (in *IoChaos) SetNextRecover(t time.Time) {
 	in.Spec.NextRecover.Time = t
 }
 
-func (in *IoChaos) GetScheduler() SchedulerSpec {
+func (in *IoChaos) GetScheduler() *SchedulerSpec {
 	return in.Spec.Scheduler
 }
 

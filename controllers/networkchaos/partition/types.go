@@ -149,7 +149,7 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos twophase
 			HostIP:    pod.Status.HostIP,
 			PodIP:     pod.Status.PodIP,
 			Action:    string(networkchaos.Spec.Action),
-			Message:   fmt.Sprintf(networkPartitionActionMsg, networkchaos.Spec.Duration),
+			Message:   fmt.Sprintf(networkPartitionActionMsg, *networkchaos.Spec.Duration),
 		}
 
 		networkchaos.Status.Experiment.Pods = append(networkchaos.Status.Experiment.Pods, ps)
