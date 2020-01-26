@@ -63,6 +63,9 @@ func main() {
 		log.Error(err, "Error while parsing PORT environment variable", "port", rawPort)
 		os.Exit(1)
 	}
-	log.Info("starting server")
-	chaosdaemon.StartServer("0.0.0.0", port, containerRuntime)
+
+	if err := chaosdaemon.StartServer("0.0.0.0", port, containerRuntime); err != nil {
+		log.Error(err, "failed to start chaos-daemon server")
+		os.Exit(1)
+	}
 }
