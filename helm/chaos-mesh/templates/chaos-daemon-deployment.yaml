@@ -31,6 +31,8 @@ spec:
           {{- end }}
           command:
             - /usr/local/bin/chaos-daemon
+            - --runtime
+            - {{ .Values.chaosDaemon.runtime }}
           env:
             - name: PORT
               value: !!str {{ .Values.chaosDaemon.port }}
@@ -39,8 +41,12 @@ spec:
           volumeMounts:
             - name: proc
               mountPath: /mnt/proc
-            - name: dockersock
+            - name: socket-path
+              {{- if eq .Values.chaosDaemon.runtime "docker" }}
               mountPath: /var/run/docker.sock
+              {{- else if eq .Values.chaosDaemon.runtime "containerd" }}
+              mountPath: /run/containerd/containerd.sock
+              {{- end }}
           ports:
             - containerPort: {{ .Values.chaosDaemon.port }}
               hostPort: {{ .Values.chaosDaemon.port }}
@@ -48,6 +54,6 @@ spec:
         - name: proc
           hostPath:
             path: /proc
-        - name: dockersock
+        - name: socket-path
           hostPath:
-            path: {{ .Values.chaosDaemon.dockerSocketPath | default "/var/run/docker.sock" }}
+            path: {{ .Values.chaosDaemon.socketPath | default "/var/run/docker.sock" }}
