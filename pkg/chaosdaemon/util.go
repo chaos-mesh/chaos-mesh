@@ -18,12 +18,21 @@ import (
 	"fmt"
 	"os/exec"
 
+	"github.com/containerd/containerd"
 	dockerclient "github.com/docker/docker/client"
 )
 
 const (
+	containerRuntimeDocker     = "docker"
+	containerRuntimeContainerd = "containerd"
+
 	defaultDockerSocket  = "unix:///var/run/docker.sock"
 	dockerProtocolPrefix = "docker://"
+
+	// TODO(yeya24): make socket and ns configurable
+	defaultContainerdSocket  = "/run/containerd/containerd.sock"
+	containerdProtocolPrefix = "containerd://"
+	containerdDefaultNS      = "k8s.io"
 
 	defaultProcPrefix = "/mnt/proc"
 )
@@ -41,7 +50,7 @@ type DockerClient struct {
 // GetPidFromContainerID fetches PID according to container id
 func (c DockerClient) GetPidFromContainerID(ctx context.Context, containerID string) (uint32, error) {
 	if containerID[0:len(dockerProtocolPrefix)] != dockerProtocolPrefix {
-		return 0, fmt.Errorf("only docker protocol is supported but got %s", containerID[0:len(dockerProtocolPrefix)])
+		return 0, fmt.Errorf("expected %s but got %s", dockerProtocolPrefix, containerID[0:len(dockerProtocolPrefix)])
 	}
 	container, err := c.client.ContainerInspect(ctx, containerID[len(dockerProtocolPrefix):])
 	if err != nil {
@@ -51,19 +60,53 @@ func (c DockerClient) GetPidFromContainerID(ctx context.Context, containerID str
 	return uint32(container.State.Pid), nil
 }
 
-// CreateContainerRuntimeInfoClient will create container runtime information getter
-func CreateContainerRuntimeInfoClient() (ContainerRuntimeInfoClient, error) {
+// ContainerdClient can get information from containerd
+type ContainerdClient struct {
+	client *containerd.Client
+}
+
+// GetPidFromContainerID fetches PID according to container id
+func (c ContainerdClient) GetPidFromContainerID(ctx context.Context, containerID string) (uint32, error) {
+	if containerID[0:len(containerdProtocolPrefix)] != containerdProtocolPrefix {
+		return 0, fmt.Errorf("expected %s but got %s", containerdProtocolPrefix, containerID[0:len(dockerProtocolPrefix)])
+	}
+	container, err := c.client.LoadContainer(ctx, containerID[len(containerdProtocolPrefix):])
+	if err != nil {
+		return 0, err
+	}
+	task, err := container.Task(ctx, nil)
+	if err != nil {
+		return 0, err
+	}
+	return task.Pid(), nil
+}
+
+// CreateContainerRuntimeInfoClient creates a container runtime information client.
+func CreateContainerRuntimeInfoClient(containerRuntime string) (ContainerRuntimeInfoClient, error) {
 	// TODO: support more container runtime
 
-	client, err := dockerclient.NewClient(defaultDockerSocket, "", nil, nil)
+	var cli ContainerRuntimeInfoClient
+	switch containerRuntime {
+	case containerRuntimeDocker:
+		client, err := dockerclient.NewClient(defaultDockerSocket, "", nil, nil)
+		if err != nil {
+			return nil, err
+		}
+		cli = DockerClient{client}
 
-	if err != nil {
-		return nil, err
+	case containerRuntimeContainerd:
+		// TODO(yeya24): add more options?
+		client, err := containerd.New(defaultContainerdSocket, containerd.WithDefaultNamespace(containerdDefaultNS))
+		if err != nil {
+			return nil, err
+		}
+		cli = ContainerdClient{client}
+
+	default:
+		return nil, fmt.Errorf("only docker and containerd is supported, but got %s", containerRuntime)
 	}
 
-	return DockerClient{
-		client: client,
-	}, nil
+	return cli, nil
 }
 
 // GetNetnsPath returns network namespace path
