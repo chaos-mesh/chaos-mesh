@@ -34,8 +34,8 @@ type Server struct {
 	crClient ContainerRuntimeInfoClient
 }
 
-func newServer() (*Server, error) {
-	crClient, err := CreateContainerRuntimeInfoClient()
+func newServer(containerRuntime string) (*Server, error) {
+	crClient, err := CreateContainerRuntimeInfoClient(containerRuntime)
 	if err != nil {
 		return nil, err
 	}
@@ -45,22 +45,29 @@ func newServer() (*Server, error) {
 	}, nil
 }
 
-func StartServer(host string, port int) {
+// StartServer starts chaos-daemon.
+func StartServer(host string, port int, containerRuntime string) error {
 	lis, err := net.Listen("tcp", fmt.Sprintf("%s:%d", host, port))
 	if err != nil {
 		log.Error(err, "failed to listen")
+		return err
 	}
 
 	s := grpc.NewServer()
-	chaosDaemonServer, err := newServer()
+	chaosDaemonServer, err := newServer(containerRuntime)
 	if err != nil {
 		log.Error(err, "failed to create server")
+		return err
 	}
 	pb.RegisterChaosDaemonServer(s, chaosDaemonServer)
 
 	reflection.Register(s)
 
+	log.Info("starting server", "address", fmt.Sprintf("%s:%d", host, port), "runtime", containerRuntime)
 	if err := s.Serve(lis); err != nil {
 		log.Error(err, "failed to serve")
+		return err
 	}
+
+	return nil
 }

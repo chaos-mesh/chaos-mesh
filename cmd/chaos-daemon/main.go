@@ -28,13 +28,15 @@ import (
 var log = ctrl.Log.WithName("chaos-daemon")
 
 var (
-	printVersion bool
-	rawPort      string
+	printVersion     bool
+	rawPort          string
+	containerRuntime string
 )
 
 func init() {
 	flag.BoolVar(&printVersion, "version", false, "print version information and exit")
 	flag.StringVar(&rawPort, "port", "", "the port which server listens on")
+	flag.StringVar(&containerRuntime, "runtime", "docker", "current container runtime")
 
 	flag.Parse()
 }
@@ -61,6 +63,9 @@ func main() {
 		log.Error(err, "Error while parsing PORT environment variable", "port", rawPort)
 		os.Exit(1)
 	}
-	log.Info("starting server")
-	chaosdaemon.StartServer("0.0.0.0", port)
+
+	if err := chaosdaemon.StartServer("0.0.0.0", port, containerRuntime); err != nil {
+		log.Error(err, "failed to start chaos-daemon server")
+		os.Exit(1)
+	}
 }

@@ -61,7 +61,7 @@ kubectl get crd podchaos.pingcap.com
 
 ### Install Chaos Mesh
 
-* Install Chaos Mesh with Chaos Operator only
+* Install Chaos Mesh with Chaos Operator only in docker environment 
 
 ```bash
 # create namespace chaos-testing
@@ -70,6 +70,19 @@ kubectl create ns chaos-testing
 helm install helm/chaos-mesh --name=chaos-mesh --namespace=chaos-testing
 # helm 3.X
 helm install chaos-mesh helm/chaos-mesh --namespace=chaos-testing
+# check Chaos Mesh pods installed
+kubectl get pods --namespace chaos-testing -l app.kubernetes.io/instance=chaos-mesh
+```
+
+* Install Chaos Mesh with Chaos Operator only in containerd environment (Kind)
+
+```bash
+# create namespace chaos-testing
+kubectl create ns chaos-testing
+# helm 2.X
+helm install helm/chaos-mesh --name=chaos-mesh --namespace=chaos-testing --set chaosDaemon.runtime=containerd --set chaosDaemon.socketPath=/run/containerd/containerd.sock
+# helm 3.X
+helm install chaos-mesh helm/chaos-mesh --namespace=chaos-testing --set chaosDaemon.runtime=containerd --set chaosDaemon.socketPath=/run/containerd/containerd.sock
 # check Chaos Mesh pods installed
 kubectl get pods --namespace chaos-testing -l app.kubernetes.io/instance=chaos-mesh
 ```
@@ -147,11 +160,7 @@ You can try Chaos Mesh on your local K8s environment deployed using `kind` or `m
 
 **Note:**
 
-There are some known restrictions for Chaos Operator deployed on `kind` and `minikube` clusters:
-
-- All network-related chaos is not supported for `kind` cluster.
-
-     Chaos Operator uses docker pkg to transform between container id and pid, which is necessary to find network namespace for pods.`Kind` uses `containerd` as Introducing Container Runtime Interface (CRI) runtime and it's not supported in our implementation yet.
+There are some known restrictions for Chaos Operator deployed on `minikube` clusters:
 
 - `netem chaos` is not supported for `minikube` clusters.
 

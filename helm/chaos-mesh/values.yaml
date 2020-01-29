@@ -48,6 +48,18 @@ chaosDaemon:
   imagePullPolicy: Always
   port: 31767
 
+  # runtime specifies which container runtime to use. Currently
+  # we only supports docker and containerd.
+  runtime: docker
+
+  # socketPath specifies the container runtime socket.
+  socketPath: /var/run/docker.sock
+
+  # If you are using Kind or using containerd as CRI, you can use the
+  # config below to use containerd as the runtime in chaos-daemon.
+  # runtime: containerd
+  # socketPath: /run/containerd/containerd.sock
+
 dashboard:
   create: false
 
