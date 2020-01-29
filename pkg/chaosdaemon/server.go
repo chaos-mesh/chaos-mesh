@@ -15,7 +15,6 @@ package chaosdaemon
 
 import (
 	"fmt"
-	"github.com/pkg/errors"
 	"net"
 
 	pb "github.com/pingcap/chaos-mesh/pkg/chaosdaemon/pb"
@@ -50,13 +49,15 @@ func newServer(containerRuntime string) (*Server, error) {
 func StartServer(host string, port int, containerRuntime string) error {
 	lis, err := net.Listen("tcp", fmt.Sprintf("%s:%d", host, port))
 	if err != nil {
-		return errors.Wrap(err, "failed to listen")
+		log.Error(err, "failed to listen")
+		return err
 	}
 
 	s := grpc.NewServer()
 	chaosDaemonServer, err := newServer(containerRuntime)
 	if err != nil {
-		return errors.Wrap(err, "failed to create server")
+		log.Error(err, "failed to create server")
+		return err
 	}
 	pb.RegisterChaosDaemonServer(s, chaosDaemonServer)
 
@@ -64,7 +65,8 @@ func StartServer(host string, port int, containerRuntime string) error {
 
 	log.Info("starting server", "address", fmt.Sprintf("%s:%d", host, port), "runtime", containerRuntime)
 	if err := s.Serve(lis); err != nil {
-		return errors.Wrap(err, "failed to serve")
+		log.Error(err, "failed to serve")
+		return err
 	}
 
 	return nil
