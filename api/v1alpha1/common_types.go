@@ -55,7 +55,7 @@ type SelectorSpec struct {
 	// +optional
 	AnnotationSelectors map[string]string `json:"annotationSelectors,omitempty"`
 
-	// PhaseSelector is a set of condition of a pod at the current time.
+	// PodPhaseSelectors is a set of condition of a pod at the current time.
 	// supported value: Pending / Running / Succeeded / Failed / Unknown
 	PodPhaseSelectors []string `json:"phaseSelector,omitempty"`
 }
