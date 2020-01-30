@@ -180,10 +180,9 @@ func (in *IoChaos) GetDuration() (*time.Duration, error) {
 	if in.Spec.Duration == nil {
 		return nil, nil
 	}
-	zeroHour := 0 * time.Hour
 	duration, err := time.ParseDuration(*in.Spec.Duration)
 	if err != nil {
-		return &zeroHour, err
+		return nil, err
 	}
 	return &duration, nil
 }
