@@ -64,7 +64,7 @@ var _ = Describe("NetworkChaos Controller", func() {
 						Selector: v1alpha1.SelectorSpec{
 							Namespaces: []string{"default"},
 						},
-						Scheduler: v1alpha1.SchedulerSpec{
+						Scheduler: &v1alpha1.SchedulerSpec{
 							Cron: "@every 2m",
 						},
 						Action: action,
