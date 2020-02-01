@@ -9,6 +9,7 @@ The maintainers of Chaos Mesh, along with their email and focus area,
 
 Name | Email | Focus
 ----|---|---
-[Siddon Tang](https://github.com/siddontang) | [tl@pingcap.com](mailto:tl@pingcap.com) | Project Lead[Qiang Zhou](https://github.com/zhouqiang-cl) | [zhouqiang@pingcap.com](mailto:zhouqiang@pingcap.com) | Project Lead[CWen](https://github.com/cwen0) | [cwen@pingcap.com](mailto:cwen@pingcap.com) | Operator, Dashboard
+[Siddon Tang](https://github.com/siddontang) | [tl@pingcap.com](mailto:tl@pingcap.com) | Project Lead[Qiang Zhou](https://github.com/zhouqiang-cl) | [zhouqiang@pingcap.com](mailto:zhouqiang@pingcap.com) | Project Lead
+[CWen](https://github.com/cwen0) | [cwen@pingcap.com](mailto:cwen@pingcap.com) | Operator, Dashboard
 
 > *Please do not contact the maintainers listed above for any reason not directly related to the Chaos Mesh project. For issues, questions, or support, you are asked to **use the issue tracker whenever possible.***
