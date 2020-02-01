@@ -178,8 +178,9 @@ func (r *Reconciler) failPod(ctx context.Context, pod *v1.Pod, podchaos *v1alpha
 			pod.Annotations = make(map[string]string)
 		}
 
+		// If the annotation is already existed, we could skip the reconcile for this container
 		if _, ok := pod.Annotations[key]; ok {
-			return fmt.Errorf("annotation %s exist", key)
+			continue
 		}
 		pod.Annotations[key] = originImage
 		pod.Spec.InitContainers[index].Image = fakeImage
@@ -194,8 +195,9 @@ func (r *Reconciler) failPod(ctx context.Context, pod *v1.Pod, podchaos *v1alpha
 			pod.Annotations = make(map[string]string)
 		}
 
+		// If the annotation is already existed, we could skip the reconcile for this container
 		if _, ok := pod.Annotations[key]; ok {
-			return fmt.Errorf("annotation %s exist", key)
+			continue
 		}
 		pod.Annotations[key] = originImage
 		pod.Spec.Containers[index].Image = fakeImage
