@@ -30,6 +30,7 @@ type DurationReconciler struct {
 	*podfailure.Reconciler
 }
 
+// NewDurationReconciler would create reconciler for duration chaos
 func NewDurationReconciler(c client.Client, log logr.Logger, req ctrl.Request) *DurationReconciler {
 	r := &podfailure.Reconciler{
 		Client: c,
@@ -40,6 +41,7 @@ func NewDurationReconciler(c client.Client, log logr.Logger, req ctrl.Request) *
 	}
 }
 
+// Apply would perform duration chaos for podchaos
 func (r *DurationReconciler) Apply(ctx context.Context, req ctrl.Request, chaos duration.InnerDurationObject) error {
 	podChaos, ok := chaos.(*v1alpha1.PodChaos)
 	if !ok {
@@ -50,6 +52,7 @@ func (r *DurationReconciler) Apply(ctx context.Context, req ctrl.Request, chaos 
 	return r.Perform(ctx, req, podChaos)
 }
 
+// Recover would recover the duration chaos for podchaos
 func (r *DurationReconciler) Recover(ctx context.Context, req ctrl.Request, chaos duration.InnerDurationObject) error {
 	podChaos, ok := chaos.(*v1alpha1.PodChaos)
 	if !ok {

@@ -42,6 +42,7 @@ const (
 	podFailureActionMsg = "pause pod duration %s"
 )
 
+// NewReconciler would create new reconciler for podfailure chaos
 func NewReconciler(c client.Client, log logr.Logger, req ctrl.Request) *Reconciler {
 	return &Reconciler{
 		Client: c,
@@ -59,6 +60,7 @@ func (r *Reconciler) Instance() *v1alpha1.PodChaos {
 	return &v1alpha1.PodChaos{}
 }
 
+// Perform would perform the podfailure chaos for the selected pods
 func (r *Reconciler) Perform(ctx context.Context, req ctrl.Request, podchaos *v1alpha1.PodChaos) error {
 
 	pods, err := utils.SelectAndGeneratePods(ctx, r.Client, &podchaos.Spec)
