@@ -15,7 +15,6 @@ package podfailure
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"time"
 
@@ -24,7 +23,6 @@ import (
 	"github.com/go-logr/logr"
 
 	"github.com/pingcap/chaos-mesh/api/v1alpha1"
-	"github.com/pingcap/chaos-mesh/controllers/twophase"
 	"github.com/pingcap/chaos-mesh/pkg/utils"
 
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -44,12 +42,8 @@ const (
 	podFailureActionMsg = "pause pod duration %s"
 )
 
-func NewReconciler(c client.Client, log logr.Logger, req ctrl.Request) twophase.Reconciler {
-	return twophase.Reconciler{
-		InnerReconciler: &Reconciler{
-			Client: c,
-			Log:    log,
-		},
+func NewReconciler(c client.Client, log logr.Logger, req ctrl.Request) *Reconciler {
+	return &Reconciler{
 		Client: c,
 		Log:    log,
 	}
@@ -60,24 +54,18 @@ type Reconciler struct {
 	Log logr.Logger
 }
 
-func (r *Reconciler) Object() twophase.InnerObject {
+// Instance return the instance of PodChaos
+func (r *Reconciler) Instance() *v1alpha1.PodChaos {
 	return &v1alpha1.PodChaos{}
 }
 
-func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos twophase.InnerObject) error {
-	podchaos, ok := chaos.(*v1alpha1.PodChaos)
-	if !ok {
-		err := errors.New("chaos is not PodChaos")
-		r.Log.Error(err, "chaos is not PodChaos", "chaos", chaos)
-		return err
-	}
+func (r *Reconciler) Perform(ctx context.Context, req ctrl.Request, podchaos *v1alpha1.PodChaos) error {
 
 	pods, err := utils.SelectAndGeneratePods(ctx, r.Client, &podchaos.Spec)
 	if err != nil {
 		r.Log.Error(err, "failed to select and generate pods")
 		return err
 	}
-
 	err = r.failAllPods(ctx, pods, podchaos)
 	if err != nil {
 		return err
@@ -96,22 +84,17 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos twophase
 			HostIP:    pod.Status.HostIP,
 			PodIP:     pod.Status.PodIP,
 			Action:    string(podchaos.Spec.Action),
-			Message:   fmt.Sprintf(podFailureActionMsg, *podchaos.Spec.Duration),
 		}
-
+		if podchaos.Spec.Duration != nil {
+			ps.Message = fmt.Sprintf(podFailureActionMsg, *podchaos.Spec.Duration)
+		}
 		podchaos.Status.Experiment.Pods = append(podchaos.Status.Experiment.Pods, ps)
 	}
-
 	return nil
 }
 
-func (r *Reconciler) Recover(ctx context.Context, req ctrl.Request, chaos twophase.InnerObject) error {
-	podchaos, ok := chaos.(*v1alpha1.PodChaos)
-	if !ok {
-		err := errors.New("chaos is not PodChaos")
-		r.Log.Error(err, "chaos is not PodChaos", "chaos", chaos)
-		return err
-	}
+// Clean would recover the podchaos for the selected pods
+func (r *Reconciler) Clean(ctx context.Context, req ctrl.Request, podchaos *v1alpha1.PodChaos) error {
 
 	err := r.cleanFinalizersAndRecover(ctx, podchaos)
 	if err != nil {
@@ -229,7 +212,9 @@ func (r *Reconciler) failPod(ctx context.Context, pod *v1.Pod, podchaos *v1alpha
 		HostIP:    pod.Status.HostIP,
 		PodIP:     pod.Status.PodIP,
 		Action:    string(podchaos.Spec.Action),
-		Message:   fmt.Sprintf(podFailureActionMsg, *podchaos.Spec.Duration),
+	}
+	if podchaos.Spec.Duration != nil {
+		ps.Message = fmt.Sprintf(podFailureActionMsg, *podchaos.Spec.Duration)
 	}
 
 	podchaos.Status.Experiment.Pods = append(podchaos.Status.Experiment.Pods, ps)
