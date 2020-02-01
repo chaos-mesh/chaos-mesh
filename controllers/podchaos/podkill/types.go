@@ -94,7 +94,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	if err := g.Wait(); err != nil {
 		return ctrl.Result{}, nil
 	}
-	next, err := utils.NextTime(podchaos.Spec.Scheduler, now)
+	next, err := utils.NextTime(*podchaos.Spec.Scheduler, now)
 	if err != nil {
 		r.Log.Error(err, "failed to get next time")
 		return ctrl.Result{}, nil

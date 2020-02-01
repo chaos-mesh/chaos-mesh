@@ -31,11 +31,11 @@ const (
 func genMessage(iochaos *v1alpha1.IoChaos) string {
 	switch iochaos.Spec.Action {
 	case v1alpha1.IODelayAction:
-		return fmt.Sprintf(ioChaosDelayActionMsg, iochaos.Spec.Duration)
+		return fmt.Sprintf(ioChaosDelayActionMsg, *iochaos.Spec.Duration)
 	case v1alpha1.IOErrnoAction:
-		return fmt.Sprintf(ioChaosErrnoActionMsg, iochaos.Spec.Duration)
+		return fmt.Sprintf(ioChaosErrnoActionMsg, *iochaos.Spec.Duration)
 	case v1alpha1.IOMixedAction:
-		return fmt.Sprintf(ioChaosMixedChaosMsg, iochaos.Spec.Duration)
+		return fmt.Sprintf(ioChaosMixedChaosMsg, *iochaos.Spec.Duration)
 	default:
 		return ""
 	}

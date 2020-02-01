@@ -96,7 +96,7 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos twophase
 			HostIP:    pod.Status.HostIP,
 			PodIP:     pod.Status.PodIP,
 			Action:    string(podchaos.Spec.Action),
-			Message:   fmt.Sprintf(podFailureActionMsg, podchaos.Spec.Duration),
+			Message:   fmt.Sprintf(podFailureActionMsg, *podchaos.Spec.Duration),
 		}
 
 		podchaos.Status.Experiment.Pods = append(podchaos.Status.Experiment.Pods, ps)
@@ -229,7 +229,7 @@ func (r *Reconciler) failPod(ctx context.Context, pod *v1.Pod, podchaos *v1alpha
 		HostIP:    pod.Status.HostIP,
 		PodIP:     pod.Status.PodIP,
 		Action:    string(podchaos.Spec.Action),
-		Message:   fmt.Sprintf(podFailureActionMsg, podchaos.Spec.Duration),
+		Message:   fmt.Sprintf(podFailureActionMsg, *podchaos.Spec.Duration),
 	}
 
 	podchaos.Status.Experiment.Pods = append(podchaos.Status.Experiment.Pods, ps)
