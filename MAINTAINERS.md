@@ -1,4 +1,4 @@
-# The Chaos Mesh Maintainers
+# Maintainers
 
 This file lists who are the maintainers of the Chaos Mesh project.
 
