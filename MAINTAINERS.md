@@ -6,7 +6,6 @@ In short, maintainers are people who are in charge of the maintenance of the Cha
 
 The maintainers of Chaos Mesh, along with their email and focus area, are listed below:
 
-## Senior Maintainers
 
 Name | Email | Focus
 ----|---|---
