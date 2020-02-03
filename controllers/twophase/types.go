@@ -61,6 +61,15 @@ type Reconciler struct {
 	Log logr.Logger
 }
 
+// NewReconciler would create reconciler for twophase controller
+func NewReconciler(r InnerReconciler, client client.Client, log logr.Logger) *Reconciler {
+	return &Reconciler{
+		InnerReconciler: r,
+		Client:          client,
+		Log:             log,
+	}
+}
+
 func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	var err error
 	now := time.Now()

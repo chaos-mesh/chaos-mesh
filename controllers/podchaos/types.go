@@ -16,6 +16,7 @@ package podchaos
 import (
 	"context"
 	"fmt"
+
 	"github.com/pingcap/chaos-mesh/controllers/common"
 
 	"github.com/pingcap/chaos-mesh/controllers/twophase"
@@ -68,11 +69,7 @@ func (r *Reconciler) durationPodChaos(podchaos *v1alpha1.PodChaos, req ctrl.Requ
 		return r.notSupportedResponse(podchaos), nil
 	case v1alpha1.PodFailureAction:
 		r := commonPodfailure.NewCommonReconciler(r.Client, r.Log.WithValues("action", "pod-failure"), req)
-		reconciler := common.Reconciler{
-			InnerCommonReconcile: r,
-			Client:               r.Client,
-			Log:                  r.Log,
-		}
+		reconciler := common.NewReconciler(r, r.Client, r.Log)
 		return reconciler.Reconcile(req)
 	default:
 		return r.defaultResponse(podchaos), nil
@@ -89,11 +86,7 @@ func (r *Reconciler) schedulePodChaos(podchaos *v1alpha1.PodChaos, req ctrl.Requ
 		return reconciler.Reconcile(req)
 	case v1alpha1.PodFailureAction:
 		r := twophasePodfailure.NewTwoPhaseReconciler(r.Client, r.Log.WithValues("action", "pod-failure"), req)
-		reconciler := twophase.Reconciler{
-			InnerReconciler: r,
-			Client:          r.Client,
-			Log:             r.Log,
-		}
+		reconciler := twophase.NewReconciler(r, r.Client, r.Log)
 		return reconciler.Reconcile(req)
 	default:
 		return r.defaultResponse(podchaos), nil
