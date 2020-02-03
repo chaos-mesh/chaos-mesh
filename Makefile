@@ -96,6 +96,7 @@ install-goimports:
 ifeq (,$(shell which goimports))
 	@echo "installing goimports"
 	go get golang.org/x/tools/cmd/goimports
+endif
 
 # Run go vet against code
 vet:
