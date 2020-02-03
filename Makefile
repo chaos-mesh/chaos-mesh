@@ -89,8 +89,13 @@ manifests: controller-gen
 fmt: groupimports
 	$(GO) fmt ./...
 
-groupimports:
+groupimports: install-goimports
 	goimports -w -l -local github.com/pingcap/chaos-mesh ./
+
+install-goimports:
+ifeq (,$(shell which goimports))
+	@echo "installing goimports"
+	go get golang.org/x/tools/cmd/goimports
 
 # Run go vet against code
 vet:
