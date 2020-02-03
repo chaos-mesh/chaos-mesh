@@ -17,9 +17,9 @@ import (
 	"strings"
 
 	"github.com/vishvananda/netlink"
-	"github.com/vishvananda/netns"
 
 	pb "github.com/pingcap/chaos-mesh/pkg/chaosdaemon/pb"
+	"github.com/vishvananda/netns"
 )
 
 // Apply applies a netem on eth0 in pid related namespace

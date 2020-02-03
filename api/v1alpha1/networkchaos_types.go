@@ -41,7 +41,7 @@ const (
 	// CorruptAction represents the chaos action of corrupting packets on pods.
 	CorruptAction NetworkChaosAction = "corrupt"
 
-	// PartitionAction represents the chaos action of network partition of pods.
+	// PartitionAction rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrepresents the chaos action of network partition of pods.
 	PartitionAction NetworkChaosAction = "partition"
 )
 
