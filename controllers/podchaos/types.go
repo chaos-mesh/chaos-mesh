@@ -59,7 +59,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	}
 
 	// This should be ensured by admission webhook in the future
-	r.Log.Error(fmt.Errorf("podchaos[%s/%s] spec invaild", podchaos.Namespace, podchaos.Name), "scheduler and duration should be omiited or defined at the same time")
+	r.Log.Error(fmt.Errorf("podchaos[%s/%s] spec invalid", podchaos.Namespace, podchaos.Name), "scheduler and duration should be omitted or defined at the same time")
 	return ctrl.Result{}, nil
 }
 
