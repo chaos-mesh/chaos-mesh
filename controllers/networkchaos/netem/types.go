@@ -96,7 +96,7 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos twophase
 			HostIP:    pod.Status.HostIP,
 			PodIP:     pod.Status.PodIP,
 			Action:    string(networkchaos.Spec.Action),
-			Message:   fmt.Sprintf(networkDelayActionMsg, networkchaos.Spec.Duration),
+			Message:   fmt.Sprintf(networkDelayActionMsg, *networkchaos.Spec.Duration),
 		}
 
 		networkchaos.Status.Experiment.Pods = append(networkchaos.Status.Experiment.Pods, ps)
@@ -170,6 +170,10 @@ func (r *Reconciler) recoverPod(ctx context.Context, pod *v1.Pod, networkchaos *
 
 	pbClient := pb.NewChaosDaemonClient(c)
 
+	if len(pod.Status.ContainerStatuses) == 0 {
+		return fmt.Errorf("%s %s can't get the state of container", pod.Namespace, pod.Name)
+	}
+
 	containerID := pod.Status.ContainerStatuses[0].ContainerID
 	_, err = pbClient.DeleteNetem(context.Background(), &pb.NetemRequest{
 		ContainerId: containerID,
@@ -222,6 +226,10 @@ func (r *Reconciler) applyPod(ctx context.Context, pod *v1.Pod, networkchaos *v1
 	defer c.Close()
 
 	pbClient := pb.NewChaosDaemonClient(c)
+
+	if len(pod.Status.ContainerStatuses) == 0 {
+		return fmt.Errorf("%s %s can't get the state of container", pod.Namespace, pod.Name)
+	}
 
 	containerID := pod.Status.ContainerStatuses[0].ContainerID
 

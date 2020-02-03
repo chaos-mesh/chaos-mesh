@@ -149,7 +149,7 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos twophase
 			HostIP:    pod.Status.HostIP,
 			PodIP:     pod.Status.PodIP,
 			Action:    string(networkchaos.Spec.Action),
-			Message:   fmt.Sprintf(networkPartitionActionMsg, networkchaos.Spec.Duration),
+			Message:   fmt.Sprintf(networkPartitionActionMsg, *networkchaos.Spec.Duration),
 		}
 
 		networkchaos.Status.Experiment.Pods = append(networkchaos.Status.Experiment.Pods, ps)
@@ -331,6 +331,10 @@ func (r *Reconciler) flushPodIPSet(ctx context.Context, pod *v1.Pod, ipset pb.Ip
 
 	pbClient := pb.NewChaosDaemonClient(c)
 
+	if len(pod.Status.ContainerStatuses) == 0 {
+		return fmt.Errorf("%s %s can't get the state of container", pod.Namespace, pod.Name)
+	}
+
 	containerID := pod.Status.ContainerStatuses[0].ContainerID
 
 	_, err = pbClient.FlushIpSet(ctx, &pb.IpSetRequest{
@@ -348,6 +352,10 @@ func (r *Reconciler) sendIPTables(ctx context.Context, pod *v1.Pod, rule pb.Rule
 	defer c.Close()
 
 	pbClient := pb.NewChaosDaemonClient(c)
+
+	if len(pod.Status.ContainerStatuses) == 0 {
+		return fmt.Errorf("%s %s can't get the state of container", pod.Namespace, pod.Name)
+	}
 
 	containerID := pod.Status.ContainerStatuses[0].ContainerID
 

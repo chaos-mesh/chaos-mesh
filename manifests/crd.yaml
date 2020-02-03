@@ -147,8 +147,8 @@ spec:
                   items:
                     type: string
                   type: array
-                phaseSelector:
-                  description: 'PodPhaseSelector is a set of condition of a pod at
+                podPhaseSelectors:
+                  description: 'PodPhaseSelectors is a set of condition of a pod at
                     the current time. supported value: Pending / Running / Succeeded
                     / Failed / Unknown'
                   items:
@@ -177,7 +177,6 @@ spec:
           - configName
           - layer
           - mode
-          - scheduler
           - selector
           type: object
         status:
@@ -404,8 +403,8 @@ spec:
                   items:
                     type: string
                   type: array
-                phaseSelector:
-                  description: 'PodPhaseSelector is a set of condition of a pod at
+                podPhaseSelectors:
+                  description: 'PodPhaseSelectors is a set of condition of a pod at
                     the current time. supported value: Pending / Running / Succeeded
                     / Failed / Unknown'
                   items:
@@ -467,8 +466,8 @@ spec:
                       items:
                         type: string
                       type: array
-                    phaseSelector:
-                      description: 'PodPhaseSelector is a set of condition of a pod
+                    podPhaseSelectors:
+                      description: 'PodPhaseSelectors is a set of condition of a pod
                         at the current time. supported value: Pending / Running /
                         Succeeded / Failed / Unknown'
                       items:
@@ -506,9 +505,7 @@ spec:
               type: string
           required:
           - action
-          - duration
           - mode
-          - scheduler
           - selector
           type: object
         status:
@@ -698,8 +695,8 @@ spec:
                   items:
                     type: string
                   type: array
-                phaseSelector:
-                  description: 'PodPhaseSelector is a set of condition of a pod at
+                podPhaseSelectors:
+                  description: 'PodPhaseSelectors is a set of condition of a pod at
                     the current time. supported value: Pending / Running / Succeeded
                     / Failed / Unknown'
                   items:
@@ -726,7 +723,6 @@ spec:
           required:
           - action
           - mode
-          - scheduler
           - selector
           type: object
         status:
