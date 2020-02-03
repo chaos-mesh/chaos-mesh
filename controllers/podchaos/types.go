@@ -49,11 +49,11 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	scheduler := podchaos.GetScheduler()
 	duration, err := podchaos.GetDuration()
 	if err != nil {
-		r.Log.Error(err, "unable to get duration")
+		r.Log.Error(err, fmt.Sprintf("unable to get podchaos[%s/%s]'s duration", podchaos.Namespace, podchaos.Name))
 		return ctrl.Result{}, nil
 	}
 	if scheduler == nil && duration == nil {
-		return r.durationPodChaos(&podchaos, req)
+		return r.commonPodChaos(&podchaos, req)
 	} else if scheduler != nil && duration != nil {
 		return r.schedulePodChaos(&podchaos, req)
 	}
@@ -63,7 +63,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	return ctrl.Result{}, nil
 }
 
-func (r *Reconciler) durationPodChaos(podchaos *v1alpha1.PodChaos, req ctrl.Request) (ctrl.Result, error) {
+func (r *Reconciler) commonPodChaos(podchaos *v1alpha1.PodChaos, req ctrl.Request) (ctrl.Result, error) {
 	switch podchaos.Spec.Action {
 	case v1alpha1.PodKillAction:
 		return r.notSupportedResponse(podchaos), nil
