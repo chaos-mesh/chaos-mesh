@@ -19,7 +19,7 @@ import (
 
 	"github.com/go-logr/logr"
 	"github.com/pingcap/chaos-mesh/api/v1alpha1"
-	"github.com/pingcap/chaos-mesh/controllers/duration"
+	"github.com/pingcap/chaos-mesh/controllers/common"
 	"github.com/pingcap/chaos-mesh/controllers/podchaos/podfailure"
 	ctrl "sigs.k8s.io/controller-runtime"
 
@@ -43,7 +43,7 @@ func NewDurationReconciler(c client.Client, log logr.Logger, req ctrl.Request) *
 }
 
 // Apply would perform duration chaos for podchaos
-func (r *DurationReconciler) Apply(ctx context.Context, req ctrl.Request, chaos duration.InnerDurationObject) error {
+func (r *DurationReconciler) Apply(ctx context.Context, req ctrl.Request, chaos common.InnerCommonObject) error {
 	podChaos, ok := chaos.(*v1alpha1.PodChaos)
 	if !ok {
 		err := errors.New("chaos is not PodChaos")
@@ -54,7 +54,7 @@ func (r *DurationReconciler) Apply(ctx context.Context, req ctrl.Request, chaos 
 }
 
 // Recover would recover the duration chaos for podchaos
-func (r *DurationReconciler) Recover(ctx context.Context, req ctrl.Request, chaos duration.InnerDurationObject) error {
+func (r *DurationReconciler) Recover(ctx context.Context, req ctrl.Request, chaos common.InnerCommonObject) error {
 	podChaos, ok := chaos.(*v1alpha1.PodChaos)
 	if !ok {
 		err := errors.New("chaos is not PodChaos")
@@ -65,6 +65,6 @@ func (r *DurationReconciler) Recover(ctx context.Context, req ctrl.Request, chao
 }
 
 // Object implement duration.Object
-func (r *DurationReconciler) Object() duration.InnerDurationObject {
+func (r *DurationReconciler) Object() common.InnerCommonObject {
 	return r.Instance()
 }

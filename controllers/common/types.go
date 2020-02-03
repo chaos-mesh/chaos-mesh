@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package duration
+package common
 
 import (
 	"context"
@@ -27,34 +27,34 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-// InnerDurationObject used in duration chaos reconcile
-type InnerDurationObject interface {
+// InnerCommonObject used in duration chaos reconcile
+type InnerCommonObject interface {
 	IsDeleted() bool
 	apiinterface.StatefulObject
 }
 
-// InnerDurationReconcile used in duration chaos reconcile
-type InnerDurationReconcile interface {
-	Apply(ctx context.Context, req ctrl.Request, chaos InnerDurationObject) error
+// InnerCommonReconcile used in duration chaos reconcile
+type InnerCommonReconcile interface {
+	Apply(ctx context.Context, req ctrl.Request, chaos InnerCommonObject) error
 
-	Recover(ctx context.Context, req ctrl.Request, chaos InnerDurationObject) error
+	Recover(ctx context.Context, req ctrl.Request, chaos InnerCommonObject) error
 
-	Object() InnerDurationObject
+	Object() InnerCommonObject
 }
 
 // Reconciler for persist chaos
 type Reconciler struct {
-	InnerDurationReconcile
+	InnerCommonReconcile
 	client.Client
 	Log logr.Logger
 }
 
 // NewReconciler would create Reconciler for persist chaos
-func NewReconciler(reconcile InnerDurationReconcile, c client.Client, log logr.Logger) *Reconciler {
+func NewReconciler(reconcile InnerCommonReconcile, c client.Client, log logr.Logger) *Reconciler {
 	return &Reconciler{
-		InnerDurationReconcile: reconcile,
-		Client:                 c,
-		Log:                    log,
+		InnerCommonReconcile: reconcile,
+		Client:               c,
+		Log:                  log,
 	}
 }
 

@@ -16,8 +16,8 @@ package podchaos
 import (
 	"context"
 	"fmt"
+	"github.com/pingcap/chaos-mesh/controllers/common"
 
-	"github.com/pingcap/chaos-mesh/controllers/duration"
 	"github.com/pingcap/chaos-mesh/controllers/twophase"
 
 	"github.com/go-logr/logr"
@@ -26,7 +26,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/pingcap/chaos-mesh/api/v1alpha1"
-	durationPodfailure "github.com/pingcap/chaos-mesh/controllers/duration/podfailure"
+	durationPodfailure "github.com/pingcap/chaos-mesh/controllers/common/podfailure"
 	"github.com/pingcap/chaos-mesh/controllers/podchaos/podkill"
 	twophasePodfailure "github.com/pingcap/chaos-mesh/controllers/twophase/podfailure"
 )
@@ -68,10 +68,10 @@ func (r *Reconciler) durationPodChaos(podchaos *v1alpha1.PodChaos, req ctrl.Requ
 		return r.notSupportedResponse(podchaos), nil
 	case v1alpha1.PodFailureAction:
 		r := durationPodfailure.NewDurationReconciler(r.Client, r.Log.WithValues("action", "pod-failure"), req)
-		reconciler := duration.Reconciler{
-			InnerDurationReconcile: r,
-			Client:                 r.Client,
-			Log:                    r.Log,
+		reconciler := common.Reconciler{
+			InnerCommonReconcile: r,
+			Client:               r.Client,
+			Log:                  r.Log,
 		}
 		return reconciler.Reconcile(req)
 	default:
