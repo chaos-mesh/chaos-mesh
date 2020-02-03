@@ -58,7 +58,7 @@ type Reconciler struct {
 	Log logr.Logger
 }
 
-// Instance return the instance of PodChaos
+// Instance returns the instance of PodChaos
 func (r *Reconciler) Instance() *v1alpha1.PodChaos {
 	return &v1alpha1.PodChaos{}
 }
