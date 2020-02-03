@@ -19,14 +19,13 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/pingcap/chaos-mesh/pkg/apiinterface"
-
-	"golang.org/x/sync/errgroup"
-
 	"github.com/go-logr/logr"
+	"github.com/pingcap/chaos-mesh/pkg/apiinterface"
 
 	"github.com/pingcap/chaos-mesh/api/v1alpha1"
 	"github.com/pingcap/chaos-mesh/pkg/utils"
+
+	"golang.org/x/sync/errgroup"
 
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
