@@ -1,0 +1,27 @@
+# This is the official list of people who can contribute	
+# (and typically have contributed) code to the Chaos Mesh repository.	
+#	
+# Names should be added to this file like so:	
+#     Individual's name <submission email address>	
+#     Individual's name <submission email address> <email2> <emailN>	
+#
+# Please keep the list sorted.
+
+cwen <cwen@pingcap.com>
+Keao Yang <yangkeao@pingcap.com>
+Qiang Zhou <zhouqiang@pingcap.com>
+Xuwei Fu <fuxuwei@pingcap.com>
+Junpeng Man <manjunpeng@pingcap.com>
+Mu Tong <tongmu@pingcap.com>
+Yihao Fu <fuyihao@pingcap.com>
+Shuai Zhou <zhoushuai@pingcap.com>
+Hao Wen <wenghao@pingcap.com>
+yeya24 <yb532204897@gmail.com>
+Wenbo Zhang <zhangwenbo@pingcap.com>
+Song Gao <gaosong@pingcap.com>
+Queeny <jinkun@pingcap.com>
+Max Liu <liuqi@pingcap.com>
+endurancetest20380119
+Huaiyu Xu <xuhuaiyu@pingcap.com>
+
+
