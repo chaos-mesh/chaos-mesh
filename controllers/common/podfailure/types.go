@@ -26,24 +26,24 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-// DurationReconciler is reconciler for podfailure
-type DurationReconciler struct {
+// CommonReconciler is reconciler for podfailure
+type CommonReconciler struct {
 	*podfailure.Reconciler
 }
 
-// NewDurationReconciler would create reconciler for duration chaos
-func NewDurationReconciler(c client.Client, log logr.Logger, req ctrl.Request) *DurationReconciler {
+// NewCommonReconciler would create reconciler for common chaos
+func NewCommonReconciler(c client.Client, log logr.Logger, req ctrl.Request) *CommonReconciler {
 	r := &podfailure.Reconciler{
 		Client: c,
 		Log:    log,
 	}
-	return &DurationReconciler{
+	return &CommonReconciler{
 		Reconciler: r,
 	}
 }
 
-// Apply would perform duration chaos for podchaos
-func (r *DurationReconciler) Apply(ctx context.Context, req ctrl.Request, chaos common.InnerCommonObject) error {
+// Apply would perform common chaos for podchaos
+func (r *CommonReconciler) Apply(ctx context.Context, req ctrl.Request, chaos common.InnerCommonObject) error {
 	podChaos, ok := chaos.(*v1alpha1.PodChaos)
 	if !ok {
 		err := errors.New("chaos is not PodChaos")
@@ -53,8 +53,8 @@ func (r *DurationReconciler) Apply(ctx context.Context, req ctrl.Request, chaos 
 	return r.Perform(ctx, req, podChaos)
 }
 
-// Recover would recover the duration chaos for podchaos
-func (r *DurationReconciler) Recover(ctx context.Context, req ctrl.Request, chaos common.InnerCommonObject) error {
+// Recover would recover the common chaos for podchaos
+func (r *CommonReconciler) Recover(ctx context.Context, req ctrl.Request, chaos common.InnerCommonObject) error {
 	podChaos, ok := chaos.(*v1alpha1.PodChaos)
 	if !ok {
 		err := errors.New("chaos is not PodChaos")
@@ -64,7 +64,7 @@ func (r *DurationReconciler) Recover(ctx context.Context, req ctrl.Request, chao
 	return r.Clean(ctx, req, podChaos)
 }
 
-// Object implement duration.Object
-func (r *DurationReconciler) Object() common.InnerCommonObject {
+// Object implement common.Object
+func (r *CommonReconciler) Object() common.InnerCommonObject {
 	return r.Instance()
 }

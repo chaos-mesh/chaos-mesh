@@ -27,13 +27,13 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-// InnerCommonObject used in duration chaos reconcile
+// InnerCommonObject used in common chaos reconcile
 type InnerCommonObject interface {
 	IsDeleted() bool
 	apiinterface.StatefulObject
 }
 
-// InnerCommonReconcile used in duration chaos reconcile
+// InnerCommonReconcile used in common chaos reconcile
 type InnerCommonReconcile interface {
 	Apply(ctx context.Context, req ctrl.Request, chaos InnerCommonObject) error
 
@@ -42,14 +42,14 @@ type InnerCommonReconcile interface {
 	Object() InnerCommonObject
 }
 
-// Reconciler for persist chaos
+// Reconciler for common chaos
 type Reconciler struct {
 	InnerCommonReconcile
 	client.Client
 	Log logr.Logger
 }
 
-// NewReconciler would create Reconciler for persist chaos
+// NewReconciler would create Reconciler for common chaos
 func NewReconciler(reconcile InnerCommonReconcile, c client.Client, log logr.Logger) *Reconciler {
 	return &Reconciler{
 		InnerCommonReconcile: reconcile,
@@ -58,11 +58,11 @@ func NewReconciler(reconcile InnerCommonReconcile, c client.Client, log logr.Log
 	}
 }
 
-// Reconcile the persist chaos
+// Reconcile the common chaos
 func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	var err error
 
-	r.Log.Info("reconciling a persistent chaos", "name", req.Name, "namespace", req.Namespace)
+	r.Log.Info("reconciling a common chaos", "name", req.Name, "namespace", req.Namespace)
 	ctx := context.Background()
 
 	chaos := r.Object()

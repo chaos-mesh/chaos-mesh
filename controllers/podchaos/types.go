@@ -26,7 +26,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/pingcap/chaos-mesh/api/v1alpha1"
-	durationPodfailure "github.com/pingcap/chaos-mesh/controllers/common/podfailure"
+	commonPodfailure "github.com/pingcap/chaos-mesh/controllers/common/podfailure"
 	"github.com/pingcap/chaos-mesh/controllers/podchaos/podkill"
 	twophasePodfailure "github.com/pingcap/chaos-mesh/controllers/twophase/podfailure"
 )
@@ -67,7 +67,7 @@ func (r *Reconciler) durationPodChaos(podchaos *v1alpha1.PodChaos, req ctrl.Requ
 	case v1alpha1.PodKillAction:
 		return r.notSupportedResponse(podchaos), nil
 	case v1alpha1.PodFailureAction:
-		r := durationPodfailure.NewDurationReconciler(r.Client, r.Log.WithValues("action", "pod-failure"), req)
+		r := commonPodfailure.NewCommonReconciler(r.Client, r.Log.WithValues("action", "pod-failure"), req)
 		reconciler := common.Reconciler{
 			InnerCommonReconcile: r,
 			Client:               r.Client,
