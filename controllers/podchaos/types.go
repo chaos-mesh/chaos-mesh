@@ -54,7 +54,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	}
 	if scheduler == nil && duration == nil {
 		return r.commonPodChaos(&podchaos, req)
-	} else if scheduler != nil && duration != nil {
+	} else if scheduler != nil {
 		return r.schedulePodChaos(&podchaos, req)
 	}
 
@@ -85,6 +85,10 @@ func (r *Reconciler) schedulePodChaos(podchaos *v1alpha1.PodChaos, req ctrl.Requ
 		}
 		return reconciler.Reconcile(req)
 	case v1alpha1.PodFailureAction:
+		if podchaos.Spec.Duration == nil {
+			r.Log.Error(nil, "schedule podchaos should define duration", "action", podchaos.Spec.Action)
+			return ctrl.Result{}, nil
+		}
 		r := twophasePodfailure.NewTwoPhaseReconciler(r.Client, r.Log.WithValues("action", "pod-failure"), req)
 		reconciler := twophase.NewReconciler(r, r.Client, r.Log)
 		return reconciler.Reconcile(req)
