@@ -69,7 +69,7 @@ func (r *Reconciler) Perform(ctx context.Context, req ctrl.Request, obj apiinter
 	podchaos, ok := obj.(*v1alpha1.PodChaos)
 	if !ok {
 		err := errors.New("chaos is not PodChaos")
-		r.Log.Error(err, "chaos is not PodChaos", "chaos", podchaos)
+		r.Log.Error(err, "chaos is not PodChaos", "chaos", obj)
 		return err
 	}
 
