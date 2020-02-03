@@ -17,14 +17,16 @@ import (
 	"context"
 	"time"
 
-	"github.com/pingcap/chaos-mesh/api/v1alpha1"
 	"k8s.io/client-go/util/retry"
 
+	"github.com/pingcap/chaos-mesh/api/v1alpha1"
+
 	"github.com/go-logr/logr"
-	"github.com/pingcap/chaos-mesh/pkg/apiinterface"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+
+	"github.com/pingcap/chaos-mesh/pkg/apiinterface"
 )
 
 // InnerCommonObject used in common chaos reconcile
