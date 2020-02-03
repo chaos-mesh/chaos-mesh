@@ -15,8 +15,11 @@ package podfailure
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
+
+	"github.com/pingcap/chaos-mesh/pkg/apiinterface"
 
 	"golang.org/x/sync/errgroup"
 
@@ -61,7 +64,14 @@ func (r *Reconciler) Instance() *v1alpha1.PodChaos {
 }
 
 // Perform would perform the podfailure chaos for the selected pods
-func (r *Reconciler) Perform(ctx context.Context, req ctrl.Request, podchaos *v1alpha1.PodChaos) error {
+func (r *Reconciler) Perform(ctx context.Context, req ctrl.Request, obj apiinterface.StatefulObject) error {
+
+	podchaos, ok := obj.(*v1alpha1.PodChaos)
+	if !ok {
+		err := errors.New("chaos is not PodChaos")
+		r.Log.Error(err, "chaos is not PodChaos", "chaos", podchaos)
+		return err
+	}
 
 	pods, err := utils.SelectAndGeneratePods(ctx, r.Client, &podchaos.Spec)
 	if err != nil {
@@ -96,7 +106,14 @@ func (r *Reconciler) Perform(ctx context.Context, req ctrl.Request, podchaos *v1
 }
 
 // Clean would recover the podchaos for the selected pods
-func (r *Reconciler) Clean(ctx context.Context, req ctrl.Request, podchaos *v1alpha1.PodChaos) error {
+func (r *Reconciler) Clean(ctx context.Context, req ctrl.Request, obj apiinterface.StatefulObject) error {
+
+	podchaos, ok := obj.(*v1alpha1.PodChaos)
+	if !ok {
+		err := errors.New("chaos is not PodChaos")
+		r.Log.Error(err, "chaos is not PodChaos", "chaos", podchaos)
+		return err
+	}
 
 	err := r.cleanFinalizersAndRecover(ctx, podchaos)
 	if err != nil {

@@ -15,10 +15,7 @@ package podfailure
 
 import (
 	"context"
-	"errors"
-
 	"github.com/go-logr/logr"
-	"github.com/pingcap/chaos-mesh/api/v1alpha1"
 	"github.com/pingcap/chaos-mesh/controllers/podchaos/podfailure"
 	"github.com/pingcap/chaos-mesh/controllers/twophase"
 
@@ -45,24 +42,12 @@ type TwoPhaseReconciler struct {
 
 // Apply implement InnerReconciler.Apply
 func (r *TwoPhaseReconciler) Apply(ctx context.Context, req ctrl.Request, chaos twophase.InnerObject) error {
-	podchaos, ok := chaos.(*v1alpha1.PodChaos)
-	if !ok {
-		err := errors.New("chaos is not PodChaos")
-		r.Log.Error(err, "chaos is not PodChaos", "chaos", chaos)
-		return err
-	}
-	return r.Perform(ctx, req, podchaos)
+	return r.Perform(ctx, req, chaos)
 }
 
 // Recover implement InnerReconciler.Recover
 func (r *TwoPhaseReconciler) Recover(ctx context.Context, req ctrl.Request, chaos twophase.InnerObject) error {
-	podchaos, ok := chaos.(*v1alpha1.PodChaos)
-	if !ok {
-		err := errors.New("chaos is not PodChaos")
-		r.Log.Error(err, "chaos is not PodChaos", "chaos", chaos)
-		return err
-	}
-	return r.Clean(ctx, req, podchaos)
+	return r.Clean(ctx, req, chaos)
 }
 
 // Object implement InnerReconciler.Object

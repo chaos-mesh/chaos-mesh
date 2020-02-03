@@ -15,10 +15,7 @@ package podfailure
 
 import (
 	"context"
-	"errors"
-
 	"github.com/go-logr/logr"
-	"github.com/pingcap/chaos-mesh/api/v1alpha1"
 	"github.com/pingcap/chaos-mesh/controllers/common"
 	"github.com/pingcap/chaos-mesh/controllers/podchaos/podfailure"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -44,24 +41,12 @@ func NewCommonReconciler(c client.Client, log logr.Logger, req ctrl.Request) *Co
 
 // Apply would perform common chaos for podchaos
 func (r *CommonReconciler) Apply(ctx context.Context, req ctrl.Request, chaos common.InnerCommonObject) error {
-	podChaos, ok := chaos.(*v1alpha1.PodChaos)
-	if !ok {
-		err := errors.New("chaos is not PodChaos")
-		r.Log.Error(err, "chaos is not PodChaos", "chaos", chaos)
-		return err
-	}
-	return r.Perform(ctx, req, podChaos)
+	return r.Perform(ctx, req, chaos)
 }
 
 // Recover would recover the common chaos for podchaos
 func (r *CommonReconciler) Recover(ctx context.Context, req ctrl.Request, chaos common.InnerCommonObject) error {
-	podChaos, ok := chaos.(*v1alpha1.PodChaos)
-	if !ok {
-		err := errors.New("chaos is not PodChaos")
-		r.Log.Error(err, "chaos is not PodChaos", "chaos", chaos)
-		return err
-	}
-	return r.Clean(ctx, req, podChaos)
+	return r.Clean(ctx, req, chaos)
 }
 
 // Object implement common.Object
