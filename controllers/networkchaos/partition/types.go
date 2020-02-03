@@ -164,18 +164,20 @@ func (r *Reconciler) BlockSet(ctx context.Context, pods []v1.Pod, set pb.IpSet, 
 
 	for index := range pods {
 		pod := &pods[index]
-		g.Go(func() error {
-			key, err := cache.MetaNamespaceKeyFunc(pod)
-			if err != nil {
-				return err
-			}
 
-			switch direction {
-			case pb.Rule_INPUT:
-				networkchaos.Finalizers = utils.InsertFinalizer(networkchaos.Finalizers, "input-"+key)
-			case pb.Rule_OUTPUT:
-				networkchaos.Finalizers = utils.InsertFinalizer(networkchaos.Finalizers, "output"+key)
-			}
+		key, err := cache.MetaNamespaceKeyFunc(pod)
+		if err != nil {
+			return err
+		}
+
+		switch direction {
+		case pb.Rule_INPUT:
+			networkchaos.Finalizers = utils.InsertFinalizer(networkchaos.Finalizers, "input-"+key)
+		case pb.Rule_OUTPUT:
+			networkchaos.Finalizers = utils.InsertFinalizer(networkchaos.Finalizers, "output"+key)
+		}
+
+		g.Go(func() error {
 			return r.sendIPTables(ctx, pod, sourceRule, networkchaos)
 		})
 	}

@@ -116,6 +116,13 @@ spec:
                   items:
                     type: string
                   type: array
+                phaseSelector:
+                  description: 'PodPhaseSelector is a set of condition of a pod at
+                    the current time. supported value: Pending / Running / Succeeded
+                    / Failed / Unknown'
+                  items:
+                    type: string
+                  type: array
                 pods:
                   additionalProperties:
                     items:
