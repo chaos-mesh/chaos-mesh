@@ -507,19 +507,19 @@ func mergeVolumeMounts(volumeMounts []corev1.VolumeMount, containers []corev1.Co
 
 func updateAnnotations(target map[string]string, added map[string]string) (patch []patchOperation) {
 	for key, value := range added {
-		keyEscaped := strings.Replace(key, "/", "~1", -1)
-
 		if target == nil || target[key] == "" {
 			target = map[string]string{}
 			patch = append(patch, patchOperation{
-				Op:    "add",
-				Path:  "/metadata/annotations/" + keyEscaped,
-				Value: value,
+				Op:   "add",
+				Path: "/metadata/annotations",
+				Value: map[string]string{
+					key: value,
+				},
 			})
 		} else {
 			patch = append(patch, patchOperation{
 				Op:    "replace",
-				Path:  "/metadata/annotations/" + keyEscaped,
+				Path:  "/metadata/annotations/" + key,
 				Value: value,
 			})
 		}
