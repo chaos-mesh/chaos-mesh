@@ -20,7 +20,7 @@ GO     := $(GOENV) go
 GOTEST := TEST_USE_EXISTING_CLUSTER=false go test
 SHELL    := /usr/bin/env bash
 
-PACKAGE_LIST := go list ./... | grep -vE "pkg/client" | grep -vE "zz_generated"
+PACKAGE_LIST := go list ./... | grep -vE "pkg/client" | grep -vE "zz_generated" | grep -vE "vendor"
 PACKAGE_DIRECTORIES := $(PACKAGE_LIST) | sed 's|github.com/pingcap/chaos-mesh/||'
 FILES := $$(find $$($(PACKAGE_DIRECTORIES)) -name "*.go")
 FAIL_ON_STDOUT := awk '{ print } END { if (NR > 0) { exit 1 } }'
@@ -90,7 +90,8 @@ fmt: groupimports
 	$(GO) fmt ./...
 
 groupimports: install-goimports
-	goimports -w -l -local github.com/pingcap/chaos-mesh ./
+	goimports -w -l -local github.com/pingcap/chaos-mesh $$($(PACKAGE_DIRECTORIES))
+
 
 install-goimports:
 ifeq (,$(shell which goimports))
