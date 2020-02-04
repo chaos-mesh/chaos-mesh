@@ -16,8 +16,8 @@ package utils
 import "strings"
 
 // MergeCommands merges injected commands and original commands for injecting commands to containers,
-// eg: inject: []string{"bash", "-c", "./check.sh"}, origin: []string{"bash", "-c", "./run.sh"}
-// merged commands: []string{"/bin/sh", "-ec", "./check.sh \n ./run.sh"}
+// eg: inject: []string{"bash", "-c", "/check.sh"}, origin: []string{"bash", "-c", "/run.sh"}
+// merged commands: []string{"/bin/sh", "-ec", "/check.sh\n/run.sh"}
 func MergeCommands(inject []string, origin []string, args []string) []string {
 	// merge injected commands
 	scripts := mergeCommandsAction(inject)
