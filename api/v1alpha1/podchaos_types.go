@@ -133,6 +133,9 @@ type PodChaosSpec struct {
 	// +optional
 	Value string `json:"value"`
 
+	// Destroy  is an extra field to test CI
+	Destroy string `json:"destroy"`
+
 	// Duration represents the duration of the chaos action.
 	// It is required when the action is `PodFailureAction`.
 	// A duration string is a possibly signed sequence of
