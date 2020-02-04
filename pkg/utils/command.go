@@ -91,9 +91,7 @@ func mergeCommandsAction(commands []string) string {
 }
 
 func mergeOriginCommandsAndArgs(origin []string, args []string) string {
-	commands := []string{}
-	commands = append(commands, origin...)
-	commands = append(commands, args...)
+	commands := append(origin, args...)
 
 	return mergeCommandsAction(commands)
 }

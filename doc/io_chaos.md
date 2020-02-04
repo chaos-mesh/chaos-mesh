@@ -23,6 +23,12 @@ using a [mutating webhook admission controller](https://kubernetes.io/docs/refer
 
 The data directory of the application in the target pod should be a **subdirectory** of `PersistentVolumes`.
 
+### Notes
+
+Chaos Mesh uses [`wait-fush.sh`](https://github.com/pingcap/chaos-mesh/blob/master/doc/sidecar_configmap.md#tips) to ensure that the fuse-daemon server is running normally before the application starts. 
+so `wait-fush.sh` needs to be injected into the startup command of the container. If the application process is not stared by the [commands and args of the container](https://kubernetes.io/docs/tasks/inject-data-application/define-command-argument-container/), 
+IO chaos won't work properly. When Kubernetes natively supports [Sidecar Containers](https://github.com/kubernetes/enhancements/issues/753) in future versions, we will remove the `wait-fush.sh` dependency.
+
 example:
 ```yaml
 # the config about tikv PersistentVolumes 
