@@ -17,12 +17,14 @@ import (
 	pb "github.com/pingcap/chaos-mesh/pkg/chaosdaemon/pb"
 )
 
+// Apply applies a netem on eth0 in pid related namespace
 func Apply(netem *pb.Netem, pid uint32) error {
 	panic("unimplemented")
 
 	return nil
 }
 
+// Cancel will remove netem on eth0 in pid related namespace
 func Cancel(netem *pb.Netem, pid uint32) error {
 	panic("unimplemented")
 
