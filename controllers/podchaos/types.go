@@ -17,19 +17,17 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/pingcap/chaos-mesh/controllers/common"
-
-	"github.com/pingcap/chaos-mesh/controllers/twophase"
-
 	"github.com/go-logr/logr"
+
+	"github.com/pingcap/chaos-mesh/api/v1alpha1"
+	"github.com/pingcap/chaos-mesh/controllers/common"
+	commonPodfailure "github.com/pingcap/chaos-mesh/controllers/common/podfailure"
+	"github.com/pingcap/chaos-mesh/controllers/podchaos/podkill"
+	"github.com/pingcap/chaos-mesh/controllers/twophase"
+	twophasePodfailure "github.com/pingcap/chaos-mesh/controllers/twophase/podfailure"
 
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-
-	"github.com/pingcap/chaos-mesh/api/v1alpha1"
-	commonPodfailure "github.com/pingcap/chaos-mesh/controllers/common/podfailure"
-	"github.com/pingcap/chaos-mesh/controllers/podchaos/podkill"
-	twophasePodfailure "github.com/pingcap/chaos-mesh/controllers/twophase/podfailure"
 )
 
 type Reconciler struct {
