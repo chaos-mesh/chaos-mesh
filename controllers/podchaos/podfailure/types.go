@@ -19,23 +19,22 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/go-logr/logr"
-
-	"github.com/pingcap/chaos-mesh/pkg/apiinterface"
-
-	"github.com/pingcap/chaos-mesh/api/v1alpha1"
-	"github.com/pingcap/chaos-mesh/pkg/utils"
-
 	"golang.org/x/sync/errgroup"
 
-	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/client"
+	"github.com/go-logr/logr"
+
+	"github.com/pingcap/chaos-mesh/api/v1alpha1"
+	"github.com/pingcap/chaos-mesh/pkg/apiinterface"
+	"github.com/pingcap/chaos-mesh/pkg/utils"
 
 	v1 "k8s.io/api/core/v1"
 	k8serror "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/tools/cache"
+
+	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 const (
