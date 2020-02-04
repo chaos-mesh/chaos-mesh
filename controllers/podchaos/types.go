@@ -15,6 +15,11 @@ package podchaos
 
 import (
 	"context"
+	"fmt"
+
+	"github.com/pingcap/chaos-mesh/controllers/common"
+
+	"github.com/pingcap/chaos-mesh/controllers/twophase"
 
 	"github.com/go-logr/logr"
 
@@ -22,8 +27,9 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/pingcap/chaos-mesh/api/v1alpha1"
-	"github.com/pingcap/chaos-mesh/controllers/podchaos/podfailure"
+	commonPodfailure "github.com/pingcap/chaos-mesh/controllers/common/podfailure"
 	"github.com/pingcap/chaos-mesh/controllers/podchaos/podkill"
+	twophasePodfailure "github.com/pingcap/chaos-mesh/controllers/twophase/podfailure"
 )
 
 type Reconciler struct {
@@ -40,7 +46,37 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		r.Log.Error(err, "unable to get podchaos")
 		return ctrl.Result{}, nil
 	}
+	scheduler := podchaos.GetScheduler()
+	duration, err := podchaos.GetDuration()
+	if err != nil {
+		r.Log.Error(err, fmt.Sprintf("unable to get podchaos[%s/%s]'s duration", podchaos.Namespace, podchaos.Name))
+		return ctrl.Result{}, nil
+	}
+	if scheduler == nil && duration == nil {
+		return r.commonPodChaos(&podchaos, req)
+	} else if scheduler != nil {
+		return r.schedulePodChaos(&podchaos, req)
+	}
 
+	// This should be ensured by admission webhook in the future
+	r.Log.Error(fmt.Errorf("podchaos[%s/%s] spec invalid", podchaos.Namespace, podchaos.Name), "scheduler and duration should be omitted or defined at the same time")
+	return ctrl.Result{}, nil
+}
+
+func (r *Reconciler) commonPodChaos(podchaos *v1alpha1.PodChaos, req ctrl.Request) (ctrl.Result, error) {
+	switch podchaos.Spec.Action {
+	case v1alpha1.PodKillAction:
+		return r.notSupportedResponse(podchaos), nil
+	case v1alpha1.PodFailureAction:
+		r := commonPodfailure.NewCommonReconciler(r.Client, r.Log.WithValues("action", "pod-failure"), req)
+		reconciler := common.NewReconciler(r, r.Client, r.Log)
+		return reconciler.Reconcile(req)
+	default:
+		return r.defaultResponse(podchaos), nil
+	}
+}
+
+func (r *Reconciler) schedulePodChaos(podchaos *v1alpha1.PodChaos, req ctrl.Request) (ctrl.Result, error) {
 	switch podchaos.Spec.Action {
 	case v1alpha1.PodKillAction:
 		reconciler := podkill.Reconciler{
@@ -49,11 +85,24 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		}
 		return reconciler.Reconcile(req)
 	case v1alpha1.PodFailureAction:
-		reconciler := podfailure.NewReconciler(r.Client, r.Log.WithValues("action", "pod-failure"), req)
+		if podchaos.Spec.Duration == nil {
+			r.Log.Error(nil, "schedule podchaos should define duration", "action", podchaos.Spec.Action)
+			return ctrl.Result{}, nil
+		}
+		r := twophasePodfailure.NewTwoPhaseReconciler(r.Client, r.Log.WithValues("action", "pod-failure"), req)
+		reconciler := twophase.NewReconciler(r, r.Client, r.Log)
 		return reconciler.Reconcile(req)
 	default:
-		r.Log.Error(nil, "podchaos action is invalid", "action", podchaos.Spec.Action)
-
-		return ctrl.Result{}, nil
+		return r.defaultResponse(podchaos), nil
 	}
+}
+
+func (r *Reconciler) defaultResponse(podchaos *v1alpha1.PodChaos) ctrl.Result {
+	r.Log.Error(nil, "podchaos action is invalid", "action", podchaos.Spec.Action)
+	return ctrl.Result{}
+}
+
+func (r *Reconciler) notSupportedResponse(podchaos *v1alpha1.PodChaos) ctrl.Result {
+	r.Log.Error(nil, "podchaos action hasn't support duration chaos yet", "action", podchaos.Spec.Action)
+	return ctrl.Result{}
 }

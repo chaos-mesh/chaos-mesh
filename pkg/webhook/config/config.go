@@ -24,6 +24,7 @@ import (
 	"sync"
 
 	"github.com/ghodss/yaml"
+
 	"github.com/pingcap/chaos-mesh/api/v1alpha1"
 
 	ctrl "sigs.k8s.io/controller-runtime"
