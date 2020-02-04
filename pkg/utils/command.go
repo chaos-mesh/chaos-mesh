@@ -85,7 +85,6 @@ func mergeCommandsAction(commands []string) string {
 
 		scripts += cmd
 		scripts += "\n"
-		continue
 	}
 
 	return scripts
