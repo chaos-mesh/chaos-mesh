@@ -28,14 +28,6 @@ func MergeCommands(inject []string, origin []string, args []string) []string {
 	return []string{"/bin/sh", "-ec", scripts}
 }
 
-func mergeOriginCommandsAndArgs(origin []string, args []string) string {
-	commands := []string{}
-	commands = append(commands, origin...)
-	commands = append(commands, args...)
-
-	return mergeCommandsAction(commands)
-}
-
 func mergeCommandsAction(commands []string) string {
 	scripts := ""
 
@@ -99,15 +91,39 @@ func mergeCommandsAction(commands []string) string {
 	return scripts
 }
 
+func mergeOriginCommandsAndArgs(origin []string, args []string) string {
+	commands := []string{}
+	commands = append(commands, origin...)
+	commands = append(commands, args...)
+
+	return mergeCommandsAction(commands)
+}
+
 func isCommonScripts(cmd string) bool {
-	if cmd == "bash" || cmd == "sh" || cmd == "python" || cmd == "python3" ||
+	if isShellScripts(cmd) || isPythonScripts(cmd) {
+		return true
+	}
+
+	return false
+}
+
+func isShellScripts(cmd string) bool {
+	if cmd == "bash" || cmd == "sh" ||
 		strings.HasPrefix(cmd, "bash ") || strings.HasPrefix(cmd, "sh ") ||
-		strings.HasPrefix(cmd, "python ") || strings.HasPrefix(cmd, "python3 ") ||
 		strings.HasPrefix(cmd, "/bin/sh") || strings.HasPrefix(cmd, "/bin/bash") ||
-		strings.HasPrefix(cmd, "/bin/python") || strings.HasPrefix(cmd, "/bin/python3") ||
 		strings.HasPrefix(cmd, "/usr/bin/sh") || strings.HasPrefix(cmd, "/usr/bin/bash") ||
+		strings.HasPrefix(cmd, "/usr/share/bin/sh") || strings.HasPrefix(cmd, "/usr/share/bin/bash") {
+		return true
+	}
+
+	return false
+}
+
+func isPythonScripts(cmd string) bool {
+	if cmd == "python" || cmd == "python3" ||
+		strings.HasPrefix(cmd, "python ") || strings.HasPrefix(cmd, "python3 ") ||
+		strings.HasPrefix(cmd, "/bin/python") || strings.HasPrefix(cmd, "/bin/python3") ||
 		strings.HasPrefix(cmd, "/usr/bin/python") || strings.HasPrefix(cmd, "/usr/bin/python3") ||
-		strings.HasPrefix(cmd, "/usr/share/bin/sh") || strings.HasPrefix(cmd, "/usr/share/bin/bash") ||
 		strings.HasPrefix(cmd, "/usr/share/bin/python") || strings.HasPrefix(cmd, "/usr/share/bin/python3") {
 		return true
 	}

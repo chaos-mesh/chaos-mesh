@@ -76,6 +76,95 @@ func TestIsCommonScripts(t *testing.T) {
 	}
 }
 
+func TestIsShellScripts(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	type TestCase struct {
+		name          string
+		cmd           string
+		expectedValue bool
+	}
+
+	tcs := []TestCase{
+		{
+			name:          "bash",
+			cmd:           "bash",
+			expectedValue: true,
+		},
+		{
+			name:          "bash -c echo 1",
+			cmd:           "bash -c echo 1",
+			expectedValue: true,
+		},
+		{
+			name:          "/usr/bin/bash",
+			cmd:           "/usr/bin/bash",
+			expectedValue: true,
+		},
+		{
+			name:          "/usr/bin/echo",
+			cmd:           "/usr/bin/echo",
+			expectedValue: false,
+		},
+		{
+			name:          "/chaos-mesh",
+			cmd:           "/chaos-mesh",
+			expectedValue: false,
+		},
+	}
+
+	for _, tc := range tcs {
+		g.Expect(isShellScripts(tc.cmd)).To(Equal(tc.expectedValue), tc.name)
+	}
+}
+
+func TestIsPythonScripts(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	type TestCase struct {
+		name          string
+		cmd           string
+		expectedValue bool
+	}
+
+	tcs := []TestCase{
+		{
+			name:          "python",
+			cmd:           "python",
+			expectedValue: true,
+		},
+		{
+			name:          "bash -c echo 1",
+			cmd:           "bash -c echo 1",
+			expectedValue: false,
+		},
+		{
+			name:          "/bin/python",
+			cmd:           "/bin/python",
+			expectedValue: true,
+		},
+		{
+			name:          "/usr/bin/bash",
+			cmd:           "/usr/bin/bash",
+			expectedValue: false,
+		},
+		{
+			name:          "/usr/bin/echo",
+			cmd:           "/usr/bin/echo",
+			expectedValue: false,
+		},
+		{
+			name:          "/chaos-mesh",
+			cmd:           "/chaos-mesh",
+			expectedValue: false,
+		},
+	}
+
+	for _, tc := range tcs {
+		g.Expect(isPythonScripts(tc.cmd)).To(Equal(tc.expectedValue), tc.name)
+	}
+}
+
 func TestMergeCommandsAction(t *testing.T) {
 	g := NewGomegaWithT(t)
 
