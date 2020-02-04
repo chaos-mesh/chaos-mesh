@@ -86,8 +86,17 @@ manifests: controller-gen
 	$(CONTROLLER_GEN) $(CRD_OPTIONS) rbac:roleName=manager-role webhook paths="./..." output:crd:artifacts:config=config/crd/bases
 
 # Run go fmt against code
-fmt:
+fmt: groupimports
 	$(GO) fmt ./...
+
+groupimports: install-goimports
+	goimports -w -l -local github.com/pingcap/chaos-mesh ./
+
+install-goimports:
+ifeq (,$(shell which goimports))
+	@echo "installing goimports"
+	go get golang.org/x/tools/cmd/goimports
+endif
 
 # Run go vet against code
 vet:

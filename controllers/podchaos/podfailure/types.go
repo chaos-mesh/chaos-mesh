@@ -19,13 +19,14 @@ import (
 	"fmt"
 	"time"
 
-	"golang.org/x/sync/errgroup"
-
 	"github.com/go-logr/logr"
 
+	"github.com/pingcap/chaos-mesh/pkg/apiinterface"
+
 	"github.com/pingcap/chaos-mesh/api/v1alpha1"
-	"github.com/pingcap/chaos-mesh/controllers/twophase"
 	"github.com/pingcap/chaos-mesh/pkg/utils"
+
+	"golang.org/x/sync/errgroup"
 
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -44,12 +45,9 @@ const (
 	podFailureActionMsg = "pause pod duration %s"
 )
 
-func NewReconciler(c client.Client, log logr.Logger, req ctrl.Request) twophase.Reconciler {
-	return twophase.Reconciler{
-		InnerReconciler: &Reconciler{
-			Client: c,
-			Log:    log,
-		},
+// NewReconciler would create new reconciler for podfailure chaos
+func NewReconciler(c client.Client, log logr.Logger, req ctrl.Request) *Reconciler {
+	return &Reconciler{
 		Client: c,
 		Log:    log,
 	}
@@ -60,15 +58,18 @@ type Reconciler struct {
 	Log logr.Logger
 }
 
-func (r *Reconciler) Object() twophase.InnerObject {
+// Instance returns the instance of PodChaos
+func (r *Reconciler) Instance() *v1alpha1.PodChaos {
 	return &v1alpha1.PodChaos{}
 }
 
-func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos twophase.InnerObject) error {
-	podchaos, ok := chaos.(*v1alpha1.PodChaos)
+// Perform would perform the podfailure chaos for the selected pods
+func (r *Reconciler) Perform(ctx context.Context, req ctrl.Request, obj apiinterface.StatefulObject) error {
+
+	podchaos, ok := obj.(*v1alpha1.PodChaos)
 	if !ok {
 		err := errors.New("chaos is not PodChaos")
-		r.Log.Error(err, "chaos is not PodChaos", "chaos", chaos)
+		r.Log.Error(err, "chaos is not PodChaos", "chaos", obj)
 		return err
 	}
 
@@ -77,7 +78,6 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos twophase
 		r.Log.Error(err, "failed to select and generate pods")
 		return err
 	}
-
 	err = r.failAllPods(ctx, pods, podchaos)
 	if err != nil {
 		return err
@@ -96,20 +96,22 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos twophase
 			HostIP:    pod.Status.HostIP,
 			PodIP:     pod.Status.PodIP,
 			Action:    string(podchaos.Spec.Action),
-			Message:   fmt.Sprintf(podFailureActionMsg, *podchaos.Spec.Duration),
 		}
-
+		if podchaos.Spec.Duration != nil {
+			ps.Message = fmt.Sprintf(podFailureActionMsg, *podchaos.Spec.Duration)
+		}
 		podchaos.Status.Experiment.Pods = append(podchaos.Status.Experiment.Pods, ps)
 	}
-
 	return nil
 }
 
-func (r *Reconciler) Recover(ctx context.Context, req ctrl.Request, chaos twophase.InnerObject) error {
-	podchaos, ok := chaos.(*v1alpha1.PodChaos)
+// Clean would recover the podchaos for the selected pods
+func (r *Reconciler) Clean(ctx context.Context, req ctrl.Request, obj apiinterface.StatefulObject) error {
+
+	podchaos, ok := obj.(*v1alpha1.PodChaos)
 	if !ok {
 		err := errors.New("chaos is not PodChaos")
-		r.Log.Error(err, "chaos is not PodChaos", "chaos", chaos)
+		r.Log.Error(err, "chaos is not PodChaos", "chaos", obj)
 		return err
 	}
 
@@ -195,8 +197,9 @@ func (r *Reconciler) failPod(ctx context.Context, pod *v1.Pod, podchaos *v1alpha
 			pod.Annotations = make(map[string]string)
 		}
 
+		// If the annotation is already existed, we could skip the reconcile for this container
 		if _, ok := pod.Annotations[key]; ok {
-			return fmt.Errorf("annotation %s exist", key)
+			continue
 		}
 		pod.Annotations[key] = originImage
 		pod.Spec.InitContainers[index].Image = fakeImage
@@ -211,8 +214,9 @@ func (r *Reconciler) failPod(ctx context.Context, pod *v1.Pod, podchaos *v1alpha
 			pod.Annotations = make(map[string]string)
 		}
 
+		// If the annotation is already existed, we could skip the reconcile for this container
 		if _, ok := pod.Annotations[key]; ok {
-			return fmt.Errorf("annotation %s exist", key)
+			continue
 		}
 		pod.Annotations[key] = originImage
 		pod.Spec.Containers[index].Image = fakeImage
@@ -229,7 +233,9 @@ func (r *Reconciler) failPod(ctx context.Context, pod *v1.Pod, podchaos *v1alpha
 		HostIP:    pod.Status.HostIP,
 		PodIP:     pod.Status.PodIP,
 		Action:    string(podchaos.Spec.Action),
-		Message:   fmt.Sprintf(podFailureActionMsg, *podchaos.Spec.Duration),
+	}
+	if podchaos.Spec.Duration != nil {
+		ps.Message = fmt.Sprintf(podFailureActionMsg, *podchaos.Spec.Duration)
 	}
 
 	podchaos.Status.Experiment.Pods = append(podchaos.Status.Experiment.Pods, ps)
