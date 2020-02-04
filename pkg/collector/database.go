@@ -14,12 +14,12 @@
 package collector
 
 import (
+	"database/sql"
 	"time"
 
 	"github.com/jmoiron/sqlx"
-	ctrl "sigs.k8s.io/controller-runtime"
 
-	dsql "database/sql"
+	ctrl "sigs.k8s.io/controller-runtime"
 )
 
 var (
@@ -53,7 +53,7 @@ func NewDatabaseClient(dataSource string) (*DatabaseClient, error) {
 	}, nil
 }
 
-func (client *DatabaseClient) WriteAffectedNamespace(e Event, id int64, tx *dsql.Tx) error {
+func (client *DatabaseClient) WriteAffectedNamespace(e Event, id int64, tx *sql.Tx) error {
 	for namespace := range e.AffectedNamespace {
 		_, err := tx.Exec("INSERT INTO chaos_operator.affected_namespaces (event_id, namespace) VALUES (?, ?)", id, namespace)
 		if err != nil {
