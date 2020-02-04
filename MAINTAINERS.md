@@ -12,3 +12,4 @@ Name | Email | Focus
 [Siddon Tang](https://github.com/siddontang) | [tl@pingcap.com](mailto:tl@pingcap.com) | Project Lead
 [Qiang Zhou](https://github.com/zhouqiang-cl) | [zhouqiang@pingcap.com](mailto:zhouqiang@pingcap.com) | Project Lead
 [CWen](https://github.com/cwen0) | [cwen@pingcap.com](mailto:cwen@pingcap.com) | Operator, Dashboard
+[YangKeao](https://github.com/YangKeao) | [yangkeao@pingcap.com](mailto:yangkeao@pingcap.com) | Operator, Dashboard
