@@ -284,6 +284,7 @@ func createPatch(pod *corev1.Pod, inj *config.InjectionConfig, annotations map[s
 	// set shareProcessNamespace
 	patch = append(patch, updateShareProcessNamespace(inj.ShareProcessNamespace)...)
 
+	// TODO: remove injecting commands when sidecar container supported
 	// set commands and args
 	patch = append(patch, setCommands(pod.Spec.Containers, inj.PostStart)...)
 
@@ -302,36 +303,22 @@ func setCommands(target []corev1.Container, postStart map[string]config.ExecActi
 		}
 
 		path := fmt.Sprintf("/spec/containers/%d/command", containerIndex)
-		var value interface{}
-		value = []string{"/bin/sh"}
+
+		commands := utils.MergeCommands(execCmd.Command, container.Command, container.Args)
+
+		log.Info("Inject command", "command", commands)
+
 		patch = append(patch, patchOperation{
 			Op:    "replace",
 			Path:  path,
-			Value: value,
+			Value: commands,
 		})
 
-		var argsValue interface{}
 		argsPath := fmt.Sprintf("/spec/containers/%d/args", containerIndex)
-
-		args := []string{"-c"}
-
-		var scripts string
-		scripts = strings.Join(execCmd.Command, " ")
-		scripts += ";"
-
-		scripts += strings.Join(container.Command, " ")
-		scripts += " "
-		scripts += strings.Join(container.Args, " ")
-
-		args = append(args, scripts)
-
-		log.Info("Inject args", "args", args)
-
-		argsValue = args
 		patch = append(patch, patchOperation{
 			Op:    "replace",
 			Path:  argsPath,
-			Value: argsValue,
+			Value: []string{},
 		})
 	}
 
