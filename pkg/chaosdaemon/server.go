@@ -17,10 +17,10 @@ import (
 	"fmt"
 	"net"
 
-	pb "github.com/pingcap/chaos-mesh/pkg/chaosdaemon/pb"
-
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
+
+	pb "github.com/pingcap/chaos-mesh/pkg/chaosdaemon/pb"
 
 	ctrl "sigs.k8s.io/controller-runtime"
 )
