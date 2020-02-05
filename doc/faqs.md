@@ -7,7 +7,7 @@ You can following the steps to debug:
 - First using `kubectl describe` the chaos experiment resource. If see `NextStart`  and `NextRecover`  field in spec, then after `NextStart` the chaos will trigger.
 - Then use `kubectl logs -f -n chaos-testing chaos-controller-manager-xxxxx(replace this will controller-manager's pod name)`  to get controller-manager's log and see whether there are errors in it, If there are some related errors, please file an issue.
 - If not the above two cases, then you can use `kubectl get pods -n yourNamespace(using your namespace) --show-labels` to show the labels and check if it is meet selector.
-- If above can not resolv the problem, please contract us by file an issue or in slack channel
+- If above can not resolv the problem, please contract us by file an issue or direct message in slack channel
 
 ## IOChaos
 
