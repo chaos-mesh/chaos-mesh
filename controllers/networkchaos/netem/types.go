@@ -49,6 +49,7 @@ type NetemSpec interface {
 	ToNetem() (*pb.Netem, error)
 }
 
+// NewReconciler would create new reconciler for netwok chaos
 func NewReconciler(c client.Client, log logr.Logger, req ctrl.Request) *Reconciler {
 	return &Reconciler{
 		Client: c,
@@ -61,10 +62,12 @@ type Reconciler struct {
 	Log logr.Logger
 }
 
+// Instance returns the instance of NetworkChaos
 func (r *Reconciler) Instance() twophase.InnerObject {
 	return &v1alpha1.NetworkChaos{}
 }
 
+// Perform would perform the network chaos for the selected pods
 func (r *Reconciler) Perform(ctx context.Context, req ctrl.Request, chaos apiinterface.StatefulObject) error {
 	networkchaos, ok := chaos.(*v1alpha1.NetworkChaos)
 	if !ok {
@@ -105,6 +108,7 @@ func (r *Reconciler) Perform(ctx context.Context, req ctrl.Request, chaos apiint
 	return nil
 }
 
+// Clean would recover the network chaos for the selected pods
 func (r *Reconciler) Clean(ctx context.Context, req ctrl.Request, chaos apiinterface.StatefulObject) error {
 	networkchaos, ok := chaos.(*v1alpha1.NetworkChaos)
 	if !ok {

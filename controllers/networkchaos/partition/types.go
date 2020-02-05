@@ -46,6 +46,7 @@ const (
 	targetIpSetPostFix = "tgt"
 )
 
+// NewReconciler would create new reconciler for netwok chaos
 func NewReconciler(c client.Client, log logr.Logger, req ctrl.Request) *Reconciler {
 	return &Reconciler{
 		Client: c,
@@ -58,11 +59,12 @@ type Reconciler struct {
 	Log logr.Logger
 }
 
+// Instance returns the instance of PodChaos
 func (r *Reconciler) Instance() twophase.InnerObject {
 	return &v1alpha1.NetworkChaos{}
 }
 
-// Apply is a functions used to apply partition chaos.
+// Perform would perform the network chaos for the selected pods
 func (r *Reconciler) Perform(ctx context.Context, req ctrl.Request, chaos apiinterface.StatefulObject) error {
 	r.Log.Info("applying network partition")
 
@@ -183,6 +185,7 @@ func (r *Reconciler) BlockSet(ctx context.Context, pods []v1.Pod, set pb.IpSet, 
 	return g.Wait()
 }
 
+// Clean would recover the network chaos for the selected pods
 func (r *Reconciler) Clean(ctx context.Context, req ctrl.Request, chaos apiinterface.StatefulObject) error {
 	networkchaos, ok := chaos.(*v1alpha1.NetworkChaos)
 	if !ok {
