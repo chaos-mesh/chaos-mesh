@@ -340,7 +340,7 @@ func (r *Reconciler) flushPodIPSet(ctx context.Context, pod *v1.Pod, ipset pb.Ip
 	containerID := pod.Status.ContainerStatuses[0].ContainerID
 
 	ctx, cancel := context.WithTimeout(ctx,
-		time.Duration(controllers.RpcTimeout)*time.Millisecond)
+		time.Duration(controllers.RPCTimeout)*time.Millisecond)
 	defer cancel()
 
 	_, err = pbClient.FlushIpSet(ctx, &pb.IpSetRequest{
@@ -366,7 +366,7 @@ func (r *Reconciler) sendIPTables(ctx context.Context, pod *v1.Pod, rule pb.Rule
 	containerID := pod.Status.ContainerStatuses[0].ContainerID
 
 	ctx, cancel := context.WithTimeout(ctx,
-		time.Duration(controllers.RpcTimeout)*time.Millisecond)
+		time.Duration(controllers.RPCTimeout)*time.Millisecond)
 	defer cancel()
 
 	_, err = pbClient.FlushIptables(ctx, &pb.IpTablesRequest{

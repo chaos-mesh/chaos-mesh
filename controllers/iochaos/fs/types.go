@@ -261,7 +261,7 @@ func (r *Reconciler) injectAction(ctx context.Context, pod *v1.Pod, iochaos *v1a
 	}
 
 	ctx, cancel := context.WithTimeout(ctx,
-		time.Duration(controllers.RpcTimeout)*time.Millisecond)
+		time.Duration(controllers.RPCTimeout)*time.Millisecond)
 	defer cancel()
 
 	if len(req.Methods) > 0 {
@@ -288,7 +288,7 @@ func (r *Reconciler) recoverInjectAction(ctx context.Context, pod *v1.Pod, iocha
 	}
 
 	ctx, cancel := context.WithTimeout(ctx,
-		time.Duration(controllers.RpcTimeout)*time.Millisecond)
+		time.Duration(controllers.RPCTimeout)*time.Millisecond)
 	defer cancel()
 
 	_, err = cli.RecoverAll(ctx, &empty.Empty{})
