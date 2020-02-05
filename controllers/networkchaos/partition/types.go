@@ -18,6 +18,8 @@ import (
 	"crypto/sha1"
 	"errors"
 	"fmt"
+	"github.com/pingcap/chaos-mesh/controllers"
+	"time"
 
 	"golang.org/x/sync/errgroup"
 
@@ -337,6 +339,10 @@ func (r *Reconciler) flushPodIPSet(ctx context.Context, pod *v1.Pod, ipset pb.Ip
 
 	containerID := pod.Status.ContainerStatuses[0].ContainerID
 
+	ctx, cancel := context.WithTimeout(ctx,
+		time.Duration(controllers.RpcTimeout)*time.Millisecond)
+	defer cancel()
+
 	_, err = pbClient.FlushIpSet(ctx, &pb.IpSetRequest{
 		Ipset:       &ipset,
 		ContainerId: containerID,
@@ -358,6 +364,10 @@ func (r *Reconciler) sendIPTables(ctx context.Context, pod *v1.Pod, rule pb.Rule
 	}
 
 	containerID := pod.Status.ContainerStatuses[0].ContainerID
+
+	ctx, cancel := context.WithTimeout(ctx,
+		time.Duration(controllers.RpcTimeout)*time.Millisecond)
+	defer cancel()
 
 	_, err = pbClient.FlushIptables(ctx, &pb.IpTablesRequest{
 		Rule:        &rule,

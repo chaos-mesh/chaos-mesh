@@ -17,6 +17,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/pingcap/chaos-mesh/controllers"
 	"time"
 
 	"golang.org/x/sync/errgroup"
@@ -259,6 +260,10 @@ func (r *Reconciler) injectAction(ctx context.Context, pod *v1.Pod, iochaos *v1a
 		return err
 	}
 
+	ctx, cancel := context.WithTimeout(ctx,
+		time.Duration(controllers.RpcTimeout)*time.Millisecond)
+	defer cancel()
+
 	if len(req.Methods) > 0 {
 		_, err = cli.SetFault(ctx, req)
 		return err
@@ -281,6 +286,10 @@ func (r *Reconciler) recoverInjectAction(ctx context.Context, pod *v1.Pod, iocha
 	if err != nil {
 		return err
 	}
+
+	ctx, cancel := context.WithTimeout(ctx,
+		time.Duration(controllers.RpcTimeout)*time.Millisecond)
+	defer cancel()
 
 	_, err = cli.RecoverAll(ctx, &empty.Empty{})
 	return err
