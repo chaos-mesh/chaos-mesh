@@ -5,9 +5,9 @@
 ### Q: Experiment not working after apply chaos
 
 You can following the steps to debug:
-- First using `kubectl describe` the chaos experiment resource. If see `NextStart`  and `NextRecover`  field in spec, then after `NextStart` the chaos will trigger.
-- Then use `kubectl logs -n chaos-testing chaos-controller-manager-xxxxx(replace this will controller-manager's pod name) | grep "ERROR"`  to get controller-manager's log and see whether there are errors in it. If have the error message like `no pod is selected`, then you can can use `kubectl get pods -n yourNamespace(using your namespace) --show-labels` to show the labels and check if it is meet selector. If there are some other related errors in controller's log, please file an issue.
-- If above can not solve the problem, please contract us by file an issue or direct message in slack channel
+- First you can use `kubectl describe` to describe the specify chaos experiment resource. If there are `NextStart`  and `NextRecover`  field in `spec`, then after `NextStart` the chaos will be triggered.
+- If there are no `NextStart`  and `NextRecover`  field in `spec`, then use `kubectl logs -n chaos-testing chaos-controller-manager-xxxxx(replace this will controller-manager's pod name) | grep "ERROR"`  to get controller-manager's log and see whether there are errors in it. If controller-manager have the error message like `no pod is selected`, then you can can use `kubectl get pods -n yourNamespace(using your namespace) --show-labels` to show the labels and check if it is meet selector. If there are some other related errors in controller's log, please file an issue.
+- If above steps can not solve the problem, please contract us by file an issue or direct message in slack channel
 
 ## IOChaos
 
