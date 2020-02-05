@@ -151,10 +151,16 @@ func (s *server) methods() []string {
 }
 
 func (s *server) Methods(ctx context.Context, in *empty.Empty) (*pb.Response, error) {
+	if ctx.Err() != nil {
+		return nil, ctx.Err()
+	}
 	return &pb.Response{Methods: s.methods()}, nil
 }
 
 func (s *server) RecoverAll(ctx context.Context, in *empty.Empty) (*empty.Empty, error) {
+	if ctx.Err() != nil {
+		return nil, ctx.Err()
+	}
 	log.Info("recover all fault")
 	faultMap.Range(func(k, v interface{}) bool {
 		faultMap.Delete(k)
@@ -164,6 +170,9 @@ func (s *server) RecoverAll(ctx context.Context, in *empty.Empty) (*empty.Empty,
 }
 
 func (s *server) RecoverMethod(ctx context.Context, in *pb.Request) (*empty.Empty, error) {
+	if ctx.Err() != nil {
+		return nil, ctx.Err()
+	}
 	ms := in.GetMethods()
 	for _, v := range ms {
 		faultMap.Delete(v)
@@ -178,6 +187,9 @@ func (s *server) setFault(ms []string, f *faultContext) {
 }
 
 func (s *server) SetFault(ctx context.Context, in *pb.Request) (*empty.Empty, error) {
+	if ctx.Err() != nil {
+		return nil, ctx.Err()
+	}
 	// TODO: use Errno(0), and hanle Errno(0) in Hook interfaces
 	log.Info("Set fault", "request", in)
 
@@ -198,6 +210,9 @@ func (s *server) SetFault(ctx context.Context, in *pb.Request) (*empty.Empty, er
 }
 
 func (s *server) SetFaultAll(ctx context.Context, in *pb.Request) (*empty.Empty, error) {
+	if ctx.Err() != nil {
+		return nil, ctx.Err()
+	}
 	// TODO: use Errno(0), and hanle Errno(0) in Hook interfaces
 	log.Info("Set fault all methods", "request", in)
 

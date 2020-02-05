@@ -30,6 +30,9 @@ const (
 )
 
 func (s *Server) FlushIpSet(ctx context.Context, req *pb.IpSetRequest) (*empty.Empty, error) {
+	if ctx.Err() != nil{
+		return nil, ctx.Err()
+	}
 	log.Info("flush ipset", "request", req)
 
 	pid, err := s.crClient.GetPidFromContainerID(ctx, req.ContainerId)

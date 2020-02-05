@@ -25,6 +25,9 @@ import (
 )
 
 func (s *Server) SetNetem(ctx context.Context, in *pb.NetemRequest) (*empty.Empty, error) {
+	if ctx.Err() != nil{
+		return nil, ctx.Err()
+	}
 	log.Info("set netem", "Request", in)
 
 	pid, err := s.crClient.GetPidFromContainerID(ctx, in.ContainerId)
@@ -41,6 +44,9 @@ func (s *Server) SetNetem(ctx context.Context, in *pb.NetemRequest) (*empty.Empt
 }
 
 func (s *Server) DeleteNetem(ctx context.Context, in *pb.NetemRequest) (*empty.Empty, error) {
+	if ctx.Err() != nil{
+		return nil, ctx.Err()
+	}
 	log.Info("delete netem", "Request", in)
 
 	pid, err := s.crClient.GetPidFromContainerID(ctx, in.ContainerId)
