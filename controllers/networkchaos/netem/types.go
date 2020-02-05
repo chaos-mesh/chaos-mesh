@@ -20,6 +20,8 @@ import (
 	"reflect"
 	"strings"
 
+	"github.com/pingcap/chaos-mesh/pkg/apiinterface"
+
 	"golang.org/x/sync/errgroup"
 
 	"github.com/go-logr/logr"
@@ -47,12 +49,8 @@ type NetemSpec interface {
 	ToNetem() (*pb.Netem, error)
 }
 
-func NewReconciler(c client.Client, log logr.Logger, req ctrl.Request) twophase.Reconciler {
-	return twophase.Reconciler{
-		InnerReconciler: &Reconciler{
-			Client: c,
-			Log:    log,
-		},
+func NewReconciler(c client.Client, log logr.Logger, req ctrl.Request) *Reconciler {
+	return &Reconciler{
 		Client: c,
 		Log:    log,
 	}
@@ -63,11 +61,11 @@ type Reconciler struct {
 	Log logr.Logger
 }
 
-func (r *Reconciler) Object() twophase.InnerObject {
+func (r *Reconciler) Instance() twophase.InnerObject {
 	return &v1alpha1.NetworkChaos{}
 }
 
-func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos twophase.InnerObject) error {
+func (r *Reconciler) Perform(ctx context.Context, req ctrl.Request, chaos apiinterface.StatefulObject) error {
 	networkchaos, ok := chaos.(*v1alpha1.NetworkChaos)
 	if !ok {
 		err := errors.New("chaos is not NetworkChaos")
@@ -105,7 +103,7 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos twophase
 	return nil
 }
 
-func (r *Reconciler) Recover(ctx context.Context, req ctrl.Request, chaos twophase.InnerObject) error {
+func (r *Reconciler) Clean(ctx context.Context, req ctrl.Request, chaos apiinterface.StatefulObject) error {
 	networkchaos, ok := chaos.(*v1alpha1.NetworkChaos)
 	if !ok {
 		err := errors.New("chaos is not NetworkChaos")
