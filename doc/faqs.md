@@ -3,6 +3,7 @@
 ## Debug
 
 ### Q: Experiment not working after apply chaos
+
 You can following the steps to debug:
 - First using `kubectl describe` the chaos experiment resource. If see `NextStart`  and `NextRecover`  field in spec, then after `NextStart` the chaos will trigger.
 - Then use `kubectl logs -n chaos-testing chaos-controller-manager-xxxxx(replace this will controller-manager's pod name) | grep "ERROR"`  to get controller-manager's log and see whether there are errors in it. If have the error message like `no pod is selected`, then you can can use `kubectl get pods -n yourNamespace(using your namespace) --show-labels` to show the labels and check if it is meet selector. If there are some other related errors in controller's log, please file an issue.
