@@ -1,4 +1,4 @@
-// Copyright 2019 PingCAP, Inc.
+// Copyright 2020 PingCAP, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -11,15 +11,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package apiinterface
+package chaosdaemon
 
 import (
-	"github.com/pingcap/chaos-mesh/api/v1alpha1"
-
-	"k8s.io/apimachinery/pkg/runtime"
+	pb "github.com/pingcap/chaos-mesh/pkg/chaosdaemon/pb"
 )
 
-type StatefulObject interface {
-	runtime.Object
-	GetStatus() *v1alpha1.ChaosStatus
+// Apply applies a netem on eth0 in pid related namespace
+func Apply(netem *pb.Netem, pid uint32) error {
+	panic("unimplemented")
+
+	return nil
+}
+
+// Cancel will remove netem on eth0 in pid related namespace
+func Cancel(netem *pb.Netem, pid uint32) error {
+	panic("unimplemented")
+
+	return nil
 }
