@@ -26,8 +26,10 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
+const DefaultRPCTimeout = 60 * time.Second
+
 // RPCTimeout specifies timeout of RPC between controller and chaos-operator in milliseconds
-var RPCTimeout int = 60000
+var RPCTimeout = DefaultRPCTimeout
 
 func CreateGrpcConnection(ctx context.Context, c client.Client, pod *v1.Pod) (*grpc.ClientConn, error) {
 	port := os.Getenv("CHAOS_DAEMON_PORT")
