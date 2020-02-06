@@ -55,7 +55,7 @@ func CreateGrpcConnection(ctx context.Context, c client.Client, pod *v1.Pod) (*g
 	return conn, nil
 }
 
-// Wrap the RPC with a timeout.
+// TimeoutClientInterceptor wraps the RPC with a timeout.
 func TimeoutClientInterceptor(ctx context.Context, method string, req, reply interface{},
 	cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
 	ctx, cancel := context.WithTimeout(ctx, time.Duration(RPCTimeout)*time.Millisecond)
@@ -64,7 +64,8 @@ func TimeoutClientInterceptor(ctx context.Context, method string, req, reply int
 	return err
 }
 
-// Ensure the context is intact before handling over the request to application.
+// TimeoutServerInterceptor ensures the context is intact before handling over the
+// request to application.
 func TimeoutServerInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo,
 	handler grpc.UnaryHandler) (interface{}, error) {
 	if ctx.Err() != nil {
