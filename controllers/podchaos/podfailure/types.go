@@ -72,12 +72,12 @@ type Reconciler struct {
 	Log logr.Logger
 }
 
-// Instance returns the instance of PodChaos
+// Object implements the reconciler.InnerReconciler.Object
 func (r *Reconciler) Object() reconciler.InnerObject {
 	return &v1alpha1.PodChaos{}
 }
 
-// Perform would perform the podfailure chaos for the selected pods
+// Apply implements the reconciler.InnerReconciler.Apply
 func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, obj reconciler.InnerObject) error {
 
 	podchaos, ok := obj.(*v1alpha1.PodChaos)
@@ -119,7 +119,7 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, obj reconciler
 	return nil
 }
 
-// Clean would recover the podchaos for the selected pods
+// Recover implements the reconciler.InnerReconciler.Recover
 func (r *Reconciler) Recover(ctx context.Context, req ctrl.Request, obj reconciler.InnerObject) error {
 
 	podchaos, ok := obj.(*v1alpha1.PodChaos)

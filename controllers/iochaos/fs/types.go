@@ -57,10 +57,12 @@ func NewConciler(c client.Client, log logr.Logger, req ctrl.Request) twophase.Re
 	}
 }
 
+// Object implements the reconciler.InnerReconciler.Object
 func (r *Reconciler) Object() reconciler.InnerObject {
 	return &v1alpha1.IoChaos{}
 }
 
+// Apply implements the reconciler.InnerReconciler.Apply
 func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos reconciler.InnerObject) error {
 	iochaos, ok := chaos.(*v1alpha1.IoChaos)
 	if !ok {
@@ -102,6 +104,7 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos reconcil
 	return nil
 }
 
+// Recover implements the reconciler.InnerReconciler.Recover
 func (r *Reconciler) Recover(ctx context.Context, req ctrl.Request, chaos reconciler.InnerObject) error {
 	iochaos, ok := chaos.(*v1alpha1.IoChaos)
 	if !ok {

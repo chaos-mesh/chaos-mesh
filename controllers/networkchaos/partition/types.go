@@ -61,11 +61,12 @@ type Reconciler struct {
 	Log logr.Logger
 }
 
+// Object implements the reconciler.InnerReconciler.Object
 func (r *Reconciler) Object() reconciler.InnerObject {
 	return &v1alpha1.NetworkChaos{}
 }
 
-// Apply is a functions used to apply partition chaos.
+// Apply implements the reconciler.InnerReconciler.Apply
 func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos reconciler.InnerObject) error {
 	r.Log.Info("applying network partition")
 
@@ -185,6 +186,7 @@ func (r *Reconciler) BlockSet(ctx context.Context, pods []v1.Pod, set pb.IpSet, 
 	return g.Wait()
 }
 
+// Recover implements the reconciler.InnerReconciler.Recover
 func (r *Reconciler) Recover(ctx context.Context, req ctrl.Request, chaos reconciler.InnerObject) error {
 	networkchaos, ok := chaos.(*v1alpha1.NetworkChaos)
 	if !ok {
