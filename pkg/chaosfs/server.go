@@ -23,11 +23,10 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/pingcap/chaos-mesh/pkg/utils"
-
 	"github.com/golang/protobuf/ptypes/empty"
 
 	pb "github.com/pingcap/chaos-mesh/pkg/chaosfs/pb"
+	"github.com/pingcap/chaos-mesh/pkg/utils"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
