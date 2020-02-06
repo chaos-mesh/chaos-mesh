@@ -56,7 +56,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	}
 	if scheduler == nil && duration == nil {
 		return r.commonNetworkChaos(&networkchaos, req)
-	} else if scheduler != nil {
+	} else if scheduler != nil && duration != nil {
 		return r.scheduleNetworkChaos(&networkchaos, req)
 	}
 
