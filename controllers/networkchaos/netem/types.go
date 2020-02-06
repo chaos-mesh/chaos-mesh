@@ -175,7 +175,8 @@ func (r *Reconciler) recoverPod(ctx context.Context, pod *v1.Pod, networkchaos *
 	}
 
 	containerID := pod.Status.ContainerStatuses[0].ContainerID
-	_, err = pbClient.DeleteNetem(context.Background(), &pb.NetemRequest{
+
+	_, err = pbClient.DeleteNetem(ctx, &pb.NetemRequest{
 		ContainerId: containerID,
 		Netem:       nil,
 	})
