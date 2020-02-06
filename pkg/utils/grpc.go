@@ -60,8 +60,7 @@ func TimeoutClientInterceptor(ctx context.Context, method string, req, reply int
 	cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
 	ctx, cancel := context.WithTimeout(ctx, time.Duration(RPCTimeout)*time.Millisecond)
 	defer cancel()
-	err := invoker(ctx, method, req, reply, cc, opts...)
-	return err
+	return invoker(ctx, method, req, reply, cc, opts...)
 }
 
 // TimeoutServerInterceptor ensures the context is intact before handling over the
@@ -71,6 +70,5 @@ func TimeoutServerInterceptor(ctx context.Context, req interface{}, info *grpc.U
 	if ctx.Err() != nil {
 		return nil, ctx.Err()
 	}
-	m, err := handler(ctx, req)
-	return m, err
+	return handler(ctx, req)
 }
