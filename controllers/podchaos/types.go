@@ -69,7 +69,7 @@ func (r *Reconciler) commonPodChaos(podchaos *v1alpha1.PodChaos, req ctrl.Reques
 	case v1alpha1.PodFailureAction:
 		pr = podfailure.NewCommonReconciler(r.Client, r.Log.WithValues("action", "pod-failure"), req)
 	default:
-		return r.defaultResponse(podchaos), nil
+		return r.invalidActionResponse(podchaos), nil
 	}
 	reconciler := common.NewReconciler(pr, pr.Client, pr.Log)
 	return reconciler.Reconcile(req)
@@ -87,13 +87,13 @@ func (r *Reconciler) schedulePodChaos(podchaos *v1alpha1.PodChaos, req ctrl.Requ
 	case v1alpha1.PodFailureAction:
 		tr = podfailure.NewTwoPhaseReconciler(r.Client, r.Log.WithValues("action", "pod-kill"), req)
 	default:
-		return r.defaultResponse(podchaos), nil
+		return r.invalidActionResponse(podchaos), nil
 	}
 	reconciler := twophase.NewReconciler(tr, tr.Client, tr.Log)
 	return reconciler.Reconcile(req)
 }
 
-func (r *Reconciler) defaultResponse(podchaos *v1alpha1.PodChaos) ctrl.Result {
+func (r *Reconciler) invalidActionResponse(podchaos *v1alpha1.PodChaos) ctrl.Result {
 	r.Log.Error(nil, "podchaos action is invalid", "action", podchaos.Spec.Action)
 	return ctrl.Result{}
 }
