@@ -1,6 +1,6 @@
 # Development documentation
 
-This section of the documentation is intended to get you to develop Chaos Mesh project. We'll cover things you need to know, from setup environment to add some kind of chaos.  
+This tutorial will walk you through being a Chaos Mesh project developer from scratch, and cover something you're interested in.
 
 The tutorial is listed here
 - [ ] Set up your development environment
