@@ -5,5 +5,4 @@ This section of the documentation is intended to get you to develop Chaos Mesh p
 The tutorial is listed here
 - [ ] Set up your development environment
 - [ ] Develop a helloworld chaos
-- [ ] Internal design of each component
 - [ ] Add facilities to chaos daemon
