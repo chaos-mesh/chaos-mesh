@@ -65,6 +65,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 			r.Log.Error(err, "failed to recover chaos")
 			return ctrl.Result{Requeue: true}, nil
 		}
+		return ctrl.Result{}, nil
 	}
 
 	// Start failure action
