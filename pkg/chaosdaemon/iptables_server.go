@@ -32,9 +32,6 @@ const (
 )
 
 func (s *Server) FlushIptables(ctx context.Context, req *pb.IpTablesRequest) (*empty.Empty, error) {
-	if ctx.Err() != nil{
-		return nil, ctx.Err()
-	}
 	log.Info("flush iptables rules", "request", req)
 
 	pid, err := s.crClient.GetPidFromContainerID(ctx, req.ContainerId)

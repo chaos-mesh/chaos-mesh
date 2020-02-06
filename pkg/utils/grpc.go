@@ -17,6 +17,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"time"
 
 	"google.golang.org/grpc"
 	v1 "k8s.io/api/core/v1"
@@ -24,6 +25,9 @@ import (
 
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
+
+// RPCTimeout specifies timeout of RPC between controller and chaos-operator in milliseconds
+var RPCTimeout int = 60000
 
 func CreateGrpcConnection(ctx context.Context, c client.Client, pod *v1.Pod) (*grpc.ClientConn, error) {
 	port := os.Getenv("CHAOS_DAEMON_PORT")
@@ -42,9 +46,30 @@ func CreateGrpcConnection(ctx context.Context, c client.Client, pod *v1.Pod) (*g
 		return nil, err
 	}
 
-	conn, err := grpc.Dial(fmt.Sprintf("%s:%s", node.Status.Addresses[0].Address, port), grpc.WithInsecure())
+	conn, err := grpc.Dial(fmt.Sprintf("%s:%s", node.Status.Addresses[0].Address, port),
+		grpc.WithInsecure(),
+		grpc.WithUnaryInterceptor(TimeoutClientInterceptor))
 	if err != nil {
 		return nil, err
 	}
 	return conn, nil
+}
+
+// Wrap the RPC with a timeout.
+func TimeoutClientInterceptor(ctx context.Context, method string, req, reply interface{},
+	cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
+	ctx, cancel := context.WithTimeout(ctx, time.Duration(RPCTimeout)*time.Millisecond)
+	defer cancel()
+	err := invoker(ctx, method, req, reply, cc, opts...)
+	return err
+}
+
+// Ensure the context is intact before handling over the request to application.
+func TimeoutServerInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo,
+	handler grpc.UnaryHandler) (interface{}, error) {
+	if ctx.Err() != nil {
+		return nil, ctx.Err()
+	}
+	m, err := handler(ctx, req)
+	return m, err
 }

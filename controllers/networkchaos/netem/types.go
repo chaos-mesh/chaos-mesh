@@ -17,10 +17,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/pingcap/chaos-mesh/controllers"
 	"reflect"
 	"strings"
-	"time"
 
 	"golang.org/x/sync/errgroup"
 
@@ -177,9 +175,7 @@ func (r *Reconciler) recoverPod(ctx context.Context, pod *v1.Pod, networkchaos *
 	}
 
 	containerID := pod.Status.ContainerStatuses[0].ContainerID
-	ctx, cancel := context.WithTimeout(ctx,
-		time.Duration(controllers.RPCTimeout)*time.Millisecond)
-	defer cancel()
+
 	_, err = pbClient.DeleteNetem(ctx, &pb.NetemRequest{
 		ContainerId: containerID,
 		Netem:       nil,
@@ -242,10 +238,6 @@ func (r *Reconciler) applyPod(ctx context.Context, pod *v1.Pod, networkchaos *v1
 	if err != nil {
 		return err
 	}
-
-	ctx, cancel := context.WithTimeout(ctx,
-		time.Duration(controllers.RPCTimeout)*time.Millisecond)
-	defer cancel()
 
 	_, err = pbClient.SetNetem(ctx, &pb.NetemRequest{
 		ContainerId: containerID,
