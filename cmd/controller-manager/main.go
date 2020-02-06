@@ -76,6 +76,8 @@ func parseFlags() {
 	flag.Var(&cmWatcherLabels, "configmap-labels",
 		"Label pairs used to discover ConfigMaps in Kubernetes. These should be key1=value[,key2=val2,...]")
 	flag.BoolVar(&printVersion, "version", false, "print version information and exit")
+	flag.DurationVar(&utils.RPCTimeout, "rpc-timeout", utils.DefaultRPCTimeout,
+		"Specify timeout of RPC between controllers and chaos-operator.")
 
 	flag.Parse()
 }
