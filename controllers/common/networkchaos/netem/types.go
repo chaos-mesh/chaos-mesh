@@ -16,14 +16,12 @@ package netem
 import (
 	"context"
 
-	"github.com/pingcap/chaos-mesh/controllers/networkchaos/netem"
-
 	"github.com/go-logr/logr"
-
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/pingcap/chaos-mesh/controllers/common"
+	"github.com/pingcap/chaos-mesh/controllers/networkchaos/netem"
 )
 
 // CommonReconciler is reconciler for netem
