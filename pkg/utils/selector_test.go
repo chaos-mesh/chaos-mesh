@@ -164,7 +164,7 @@ func TestCheckPodMeetSelector(t *testing.T) {
 			pod:  newPod("t1", v1.PodRunning, metav1.NamespaceDefault, nil, map[string]string{"app": "tidb"}),
 			selector: v1alpha1.SelectorSpec{
 				Pods: map[string][]string{
-					metav1.NamespaceDefault: []string{"t1"},
+					metav1.NamespaceDefault: {"t1"},
 				},
 			},
 			expectedValue: true,
@@ -196,7 +196,7 @@ func TestCheckPodMeetSelector(t *testing.T) {
 			pod:  newPod("t1", v1.PodRunning, metav1.NamespaceDefault, nil, map[string]string{"app": "tidb"}),
 			selector: v1alpha1.SelectorSpec{
 				Pods: map[string][]string{
-					metav1.NamespaceDefault: []string{"t1", "t2"},
+					metav1.NamespaceDefault: {"t1", "t2"},
 				},
 			},
 			expectedValue: true,
@@ -206,7 +206,7 @@ func TestCheckPodMeetSelector(t *testing.T) {
 			pod:  newPod("t1", v1.PodRunning, metav1.NamespaceDefault, nil, map[string]string{"app": "tidb"}),
 			selector: v1alpha1.SelectorSpec{
 				Pods: map[string][]string{
-					metav1.NamespaceDefault: []string{"t2"},
+					metav1.NamespaceDefault: {"t2"},
 				},
 			},
 			expectedValue: false,
@@ -216,7 +216,7 @@ func TestCheckPodMeetSelector(t *testing.T) {
 			pod:  newPod("t1", v1.PodRunning, metav1.NamespaceDefault, nil, map[string]string{"app": "tidb"}),
 			selector: v1alpha1.SelectorSpec{
 				Pods: map[string][]string{
-					metav1.NamespaceDefault: []string{"t1", "t2"},
+					metav1.NamespaceDefault: {"t1", "t2"},
 				},
 				LabelSelectors: map[string]string{"app": "tikv"},
 			},

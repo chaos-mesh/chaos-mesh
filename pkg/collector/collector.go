@@ -220,23 +220,23 @@ func (r *ChaosCollector) SetupGrafana(ctx context.Context, name string, namespac
 	container.Image = "pingcap/chaos-grafana:latest"
 	container.ImagePullPolicy = corev1.PullIfNotPresent
 	container.Env = []corev1.EnvVar{
-		corev1.EnvVar{
+		{
 			Name:  "CHAOS_NS",
 			Value: namespace,
 		},
-		corev1.EnvVar{
+		{
 			Name:  "CHAOS_EVENT_DS_URL",
 			Value: fmt.Sprintf("chaos-collector-database.%s:3306", utils.DashboardNamespace),
 		},
-		corev1.EnvVar{
+		{
 			Name:  "CHAOS_EVENT_DS_DB",
 			Value: "chaos_operator",
 		},
-		corev1.EnvVar{
+		{
 			Name:  "CHAOS_EVENT_DS_USER",
 			Value: "root",
 		},
-		corev1.EnvVar{
+		{
 			Name:  "CHAOS_METRIC_DS_URL",
 			Value: fmt.Sprintf("http://%s.%s:%d", name, namespace, port),
 		},
@@ -262,7 +262,7 @@ func (r *ChaosCollector) SetupGrafana(ctx context.Context, name string, namespac
 	})
 	service.Spec.Selector = labels
 	service.Spec.Ports = []corev1.ServicePort{
-		corev1.ServicePort{
+		{
 			Protocol: corev1.ProtocolTCP,
 			Port:     3000,
 			TargetPort: intstr.IntOrString{
