@@ -21,15 +21,21 @@ import (
 	"github.com/pingcap/chaos-mesh/pkg/apiinterface"
 )
 
+// InnerObject is basic Object for the Reconciler
 type InnerObject interface {
 	IsDeleted() bool
 	apiinterface.StatefulObject
 }
 
+// InnerReconciler is interface for reconciler
 type InnerReconciler interface {
+
+	// Apply means the reconciler perform the chaos action
 	Apply(ctx context.Context, req ctrl.Request, chaos InnerObject) error
 
+	// Recover means the reonciler recover the chaos action
 	Recover(ctx context.Context, req ctrl.Request, chaos InnerObject) error
 
+	// Object would return the instance of chaos
 	Object() InnerObject
 }

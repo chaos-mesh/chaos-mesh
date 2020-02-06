@@ -32,6 +32,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
+// InnerSchedulerObject is the Object for the twophase reconcile
 type InnerSchedulerObject interface {
 	reconciler.InnerObject
 	GetDuration() (*time.Duration, error)
@@ -45,6 +46,7 @@ type InnerSchedulerObject interface {
 	GetScheduler() *v1alpha1.SchedulerSpec
 }
 
+// Reconciler for the twophase reconciler
 type Reconciler struct {
 	reconciler.InnerReconciler
 	client.Client
