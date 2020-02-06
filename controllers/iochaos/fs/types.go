@@ -25,6 +25,7 @@ import (
 	"github.com/golang/protobuf/ptypes/empty"
 
 	"github.com/pingcap/chaos-mesh/api/v1alpha1"
+	"github.com/pingcap/chaos-mesh/controllers/reconciler"
 	"github.com/pingcap/chaos-mesh/controllers/twophase"
 	fscli "github.com/pingcap/chaos-mesh/pkg/chaosfs/client"
 	"github.com/pingcap/chaos-mesh/pkg/utils"
@@ -56,11 +57,11 @@ func NewConciler(c client.Client, log logr.Logger, req ctrl.Request) twophase.Re
 	}
 }
 
-func (r *Reconciler) Object() twophase.InnerObject {
+func (r *Reconciler) Object() reconciler.InnerObject {
 	return &v1alpha1.IoChaos{}
 }
 
-func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos twophase.InnerObject) error {
+func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos reconciler.InnerObject) error {
 	iochaos, ok := chaos.(*v1alpha1.IoChaos)
 	if !ok {
 		err := errors.New("chaos is not IoChaos")
@@ -101,7 +102,7 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos twophase
 	return nil
 }
 
-func (r *Reconciler) Recover(ctx context.Context, req ctrl.Request, chaos twophase.InnerObject) error {
+func (r *Reconciler) Recover(ctx context.Context, req ctrl.Request, chaos reconciler.InnerObject) error {
 	iochaos, ok := chaos.(*v1alpha1.IoChaos)
 	if !ok {
 		err := errors.New("chaos is not IoChaos")
