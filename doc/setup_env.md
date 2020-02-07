@@ -1,5 +1,5 @@
 ## Setting Up The Development Environment
-### Requirements
+### Prerequisites
 You should have these components installed in your system:
 - golang (>= v1.13), if your golang version < v1.13, you can use golang version manager such as [gvm](https://github.com/moovweb/gvm) to switch to a newer one.
 - [yarn](https://yarnpkg.com/lang/en/) and [nodejs](https://nodejs.org/en/): for chaos-dashboard
