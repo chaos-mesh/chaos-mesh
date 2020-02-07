@@ -82,7 +82,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 				r.Log.Error(updateError, "unable to update chaos finalizers")
 			}
 
-			return ctrl.Result{Requeue: true}, nil
+			return ctrl.Result{}, nil
 		}
 		status.Experiment.StartTime = &metav1.Time{
 			Time: time.Now(),
