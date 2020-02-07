@@ -10,6 +10,12 @@ service ChaosDaemon {
 
   rpc FlushIpSet(IpSetRequest) returns (google.protobuf.Empty) {}
   rpc FlushIptables(IpTablesRequest) returns (google.protobuf.Empty) {}
+
+  rpc ContainerKill(ContainerRequest) returns (google.protobuf.Empty) {}
+}
+
+message ContainerRequest{
+  string container_id = 1;
 }
 
 message NetemRequest {
