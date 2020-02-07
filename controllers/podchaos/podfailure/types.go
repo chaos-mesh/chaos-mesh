@@ -19,16 +19,14 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/pingcap/chaos-mesh/controllers/common"
-	"github.com/pingcap/chaos-mesh/controllers/reconciler"
-
-	"github.com/pingcap/chaos-mesh/controllers/twophase"
-
 	"golang.org/x/sync/errgroup"
 
 	"github.com/go-logr/logr"
 
 	"github.com/pingcap/chaos-mesh/api/v1alpha1"
+	"github.com/pingcap/chaos-mesh/controllers/common"
+	"github.com/pingcap/chaos-mesh/controllers/reconciler"
+	"github.com/pingcap/chaos-mesh/controllers/twophase"
 	"github.com/pingcap/chaos-mesh/pkg/utils"
 
 	v1 "k8s.io/api/core/v1"
