@@ -1,5 +1,5 @@
 ## Develop A HelloWorldChaos
-After preparing the development environment, let's develop a new type of chaos, HelloWorldChaos, which only prints a "hello world" message to log.
+After [preparing the development environment](./setup_env.md), let's develop a new type of chaos, HelloWorldChaos, which only prints a "hello world" message to log.
 
 As we know, the chaos is managed by the controller manager, so we should do something with the controller manager to add our HelloWorldChaos. 
 
