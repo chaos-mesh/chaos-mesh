@@ -17,19 +17,15 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/pingcap/chaos-mesh/controllers/networkchaos/netem"
-	"github.com/pingcap/chaos-mesh/controllers/networkchaos/partition"
-
-	"github.com/pingcap/chaos-mesh/controllers/common"
-
-	"github.com/pingcap/chaos-mesh/controllers/twophase"
-
 	"github.com/go-logr/logr"
-
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/pingcap/chaos-mesh/api/v1alpha1"
+	"github.com/pingcap/chaos-mesh/controllers/common"
+	"github.com/pingcap/chaos-mesh/controllers/networkchaos/netem"
+	"github.com/pingcap/chaos-mesh/controllers/networkchaos/partition"
+	"github.com/pingcap/chaos-mesh/controllers/twophase"
 )
 
 type Reconciler struct {
