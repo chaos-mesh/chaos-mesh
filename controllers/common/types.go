@@ -20,7 +20,7 @@ import (
 	"github.com/go-logr/logr"
 
 	"github.com/pingcap/chaos-mesh/api/v1alpha1"
-	"github.com/pingcap/chaos-mesh/pkg/apiinterface"
+	"github.com/pingcap/chaos-mesh/controllers/reconciler"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/util/retry"
@@ -29,34 +29,19 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-// InnerCommonObject used in common chaos reconcile
-type InnerCommonObject interface {
-	IsDeleted() bool
-	apiinterface.StatefulObject
-}
-
-// InnerCommonReconcile used in common chaos reconcile
-type InnerCommonReconcile interface {
-	Apply(ctx context.Context, req ctrl.Request, chaos InnerCommonObject) error
-
-	Recover(ctx context.Context, req ctrl.Request, chaos InnerCommonObject) error
-
-	Object() InnerCommonObject
-}
-
 // Reconciler for common chaos
 type Reconciler struct {
-	InnerCommonReconcile
+	reconciler.InnerReconciler
 	client.Client
 	Log logr.Logger
 }
 
 // NewReconciler would create Reconciler for common chaos
-func NewReconciler(reconcile InnerCommonReconcile, c client.Client, log logr.Logger) *Reconciler {
+func NewReconciler(reconcile reconciler.InnerReconciler, c client.Client, log logr.Logger) *Reconciler {
 	return &Reconciler{
-		InnerCommonReconcile: reconcile,
-		Client:               c,
-		Log:                  log,
+		InnerReconciler: reconcile,
+		Client:          c,
+		Log:             log,
 	}
 }
 
@@ -80,6 +65,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 			r.Log.Error(err, "failed to recover chaos")
 			return ctrl.Result{Requeue: true}, nil
 		}
+		return ctrl.Result{}, nil
 	}
 
 	// Start failure action

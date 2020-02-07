@@ -24,6 +24,7 @@ import (
 	"github.com/go-logr/logr"
 
 	"github.com/pingcap/chaos-mesh/api/v1alpha1"
+	"github.com/pingcap/chaos-mesh/controllers/reconciler"
 	"github.com/pingcap/chaos-mesh/controllers/twophase"
 	pb "github.com/pingcap/chaos-mesh/pkg/chaosdaemon/pb"
 	"github.com/pingcap/chaos-mesh/pkg/utils"
@@ -60,12 +61,13 @@ type Reconciler struct {
 	Log logr.Logger
 }
 
-func (r *Reconciler) Object() twophase.InnerObject {
+// Object implements the reconciler.InnerReconciler.Object
+func (r *Reconciler) Object() reconciler.InnerObject {
 	return &v1alpha1.NetworkChaos{}
 }
 
-// Apply is a functions used to apply partition chaos.
-func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos twophase.InnerObject) error {
+// Apply implements the reconciler.InnerReconciler.Apply
+func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos reconciler.InnerObject) error {
 	r.Log.Info("applying network partition")
 
 	networkchaos, ok := chaos.(*v1alpha1.NetworkChaos)
@@ -184,7 +186,8 @@ func (r *Reconciler) BlockSet(ctx context.Context, pods []v1.Pod, set pb.IpSet, 
 	return g.Wait()
 }
 
-func (r *Reconciler) Recover(ctx context.Context, req ctrl.Request, chaos twophase.InnerObject) error {
+// Recover implements the reconciler.InnerReconciler.Recover
+func (r *Reconciler) Recover(ctx context.Context, req ctrl.Request, chaos reconciler.InnerObject) error {
 	networkchaos, ok := chaos.(*v1alpha1.NetworkChaos)
 	if !ok {
 		err := errors.New("chaos is not NetworkChaos")
