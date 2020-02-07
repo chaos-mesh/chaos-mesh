@@ -15,7 +15,7 @@ controllerManager:
 
   replicaCount: 1
 
-  image: localhost:5000/pingcap/chaos-mesh:latest
+  image: pingcap/chaos-mesh:latest
   imagePullPolicy: Always
 
   nameOverride: ""
@@ -44,7 +44,7 @@ controllerManager:
   affinity: {}
 
 chaosDaemon:
-  image: localhost:5000/pingcap/chaos-daemon:latest
+  image: pingcap/chaos-daemon:latest
   imagePullPolicy: Always
   port: 31767
 
@@ -65,7 +65,7 @@ dashboard:
 
   serviceAccount: chaos-dashboard
 
-  image: localhost:5000/pingcap/chaos-dashboard:latest
+  image: pingcap/chaos-dashboard:latest
   imagePullPolicy: Always
 
   nodeSelector: {}
