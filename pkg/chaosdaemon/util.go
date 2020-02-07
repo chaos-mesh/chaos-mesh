@@ -17,6 +17,7 @@ import (
 	"context"
 	"fmt"
 	"os/exec"
+	"strings"
 
 	"github.com/containerd/containerd"
 	dockerclient "github.com/docker/docker/client"
@@ -40,6 +41,7 @@ const (
 // ContainerRuntimeInfoClient represents a struct which can give you information about container runtime
 type ContainerRuntimeInfoClient interface {
 	GetPidFromContainerID(ctx context.Context, containerID string) (uint32, error)
+	ContainerKillByContainerID(ctx context.Context, containerID string) error
 }
 
 // DockerClient can get information from docker
@@ -119,4 +121,30 @@ func withNetNS(ctx context.Context, nsPath string, cmd string, args ...string) *
 	args = append([]string{"-n" + nsPath, "--", cmd}, args...)
 
 	return exec.CommandContext(ctx, "nsenter", args...)
+}
+
+// ContainerKillByContainerID kills container according to container id
+func (c DockerClient) ContainerKillByContainerID(ctx context.Context, containerID string) error {
+	err := c.client.ContainerKill(ctx, containerID[strings.Index(containerID, "//")+2:], "SIGKILL")
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// ContainerKillByContainerID kills container according to container id
+func (c ContainerdClient) ContainerKillByContainerID(ctx context.Context, containerID string) error {
+	containerID = containerID[len(containerdProtocolPrefix):]
+	container, err := c.client.LoadContainer(ctx, containerID)
+	if err != nil {
+		return err
+	}
+
+	err = container.Delete(ctx)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

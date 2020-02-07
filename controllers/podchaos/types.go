@@ -22,6 +22,7 @@ import (
 	"github.com/pingcap/chaos-mesh/api/v1alpha1"
 	"github.com/pingcap/chaos-mesh/controllers/common"
 	commonPodfailure "github.com/pingcap/chaos-mesh/controllers/common/podfailure"
+	"github.com/pingcap/chaos-mesh/controllers/podchaos/containerkill"
 	"github.com/pingcap/chaos-mesh/controllers/podchaos/podkill"
 	"github.com/pingcap/chaos-mesh/controllers/twophase"
 	twophasePodfailure "github.com/pingcap/chaos-mesh/controllers/twophase/podfailure"
@@ -65,6 +66,8 @@ func (r *Reconciler) commonPodChaos(podchaos *v1alpha1.PodChaos, req ctrl.Reques
 	switch podchaos.Spec.Action {
 	case v1alpha1.PodKillAction:
 		return r.notSupportedResponse(podchaos), nil
+	case v1alpha1.ContainerKillAction:
+		return r.notSupportedResponse(podchaos), nil
 	case v1alpha1.PodFailureAction:
 		r := commonPodfailure.NewCommonReconciler(r.Client, r.Log.WithValues("action", "pod-failure"), req)
 		reconciler := common.NewReconciler(r, r.Client, r.Log)
@@ -89,6 +92,12 @@ func (r *Reconciler) schedulePodChaos(podchaos *v1alpha1.PodChaos, req ctrl.Requ
 		}
 		r := twophasePodfailure.NewTwoPhaseReconciler(r.Client, r.Log.WithValues("action", "pod-failure"), req)
 		reconciler := twophase.NewReconciler(r, r.Client, r.Log)
+		return reconciler.Reconcile(req)
+	case v1alpha1.ContainerKillAction:
+		reconciler := containerkill.Reconciler{
+			Client: r.Client,
+			Log:    r.Log.WithValues("action", "container-kill"),
+		}
 		return reconciler.Reconcile(req)
 	default:
 		return r.defaultResponse(podchaos), nil
