@@ -6,11 +6,11 @@ metadata:
 spec:
   action: container-kill
   mode: one
-  containerName: "tidb"
+  containerName: "prometheus"
   selector:
     namespaces:
       - default
     labelSelectors:
-      "app.kubernetes.io/component": "tidb"
+      "app.kubernetes.io/component": "monitor"
   scheduler:
-    cron: "@every 1m"
+    cron: "@every 30s"
