@@ -19,13 +19,12 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/pingcap/chaos-mesh/pkg/apiinterface"
-
 	"golang.org/x/sync/errgroup"
 
 	"github.com/go-logr/logr"
 
 	"github.com/pingcap/chaos-mesh/api/v1alpha1"
+	"github.com/pingcap/chaos-mesh/controllers/reconciler"
 	"github.com/pingcap/chaos-mesh/controllers/twophase"
 	pb "github.com/pingcap/chaos-mesh/pkg/chaosdaemon/pb"
 	"github.com/pingcap/chaos-mesh/pkg/utils"
@@ -46,9 +45,12 @@ const (
 	targetIpSetPostFix = "tgt"
 )
 
-// NewReconciler would create new reconciler for netwok chaos
-func NewReconciler(c client.Client, log logr.Logger, req ctrl.Request) *Reconciler {
-	return &Reconciler{
+func NewReconciler(c client.Client, log logr.Logger, req ctrl.Request) twophase.Reconciler {
+	return twophase.Reconciler{
+		InnerReconciler: &Reconciler{
+			Client: c,
+			Log:    log,
+		},
 		Client: c,
 		Log:    log,
 	}
@@ -59,13 +61,13 @@ type Reconciler struct {
 	Log logr.Logger
 }
 
-// Instance returns the instance of PodChaos
-func (r *Reconciler) Instance() twophase.InnerObject {
+// Object implements the reconciler.InnerReconciler.Object
+func (r *Reconciler) Object() reconciler.InnerObject {
 	return &v1alpha1.NetworkChaos{}
 }
 
-// Perform would perform the network chaos for the selected pods
-func (r *Reconciler) Perform(ctx context.Context, req ctrl.Request, chaos apiinterface.StatefulObject) error {
+// Apply implements the reconciler.InnerReconciler.Apply
+func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos reconciler.InnerObject) error {
 	r.Log.Info("applying network partition")
 
 	networkchaos, ok := chaos.(*v1alpha1.NetworkChaos)
@@ -149,10 +151,9 @@ func (r *Reconciler) Perform(ctx context.Context, req ctrl.Request, chaos apiint
 			HostIP:    pod.Status.HostIP,
 			PodIP:     pod.Status.PodIP,
 			Action:    string(networkchaos.Spec.Action),
+			Message:   fmt.Sprintf(networkPartitionActionMsg, *networkchaos.Spec.Duration),
 		}
-		if networkchaos.Spec.Duration != nil {
-			ps.Message = fmt.Sprintf(networkPartitionActionMsg, *networkchaos.Spec.Duration)
-		}
+
 		networkchaos.Status.Experiment.Pods = append(networkchaos.Status.Experiment.Pods, ps)
 	}
 
@@ -185,8 +186,8 @@ func (r *Reconciler) BlockSet(ctx context.Context, pods []v1.Pod, set pb.IpSet, 
 	return g.Wait()
 }
 
-// Clean would recover the network chaos for the selected pods
-func (r *Reconciler) Clean(ctx context.Context, req ctrl.Request, chaos apiinterface.StatefulObject) error {
+// Recover implements the reconciler.InnerReconciler.Recover
+func (r *Reconciler) Recover(ctx context.Context, req ctrl.Request, chaos reconciler.InnerObject) error {
 	networkchaos, ok := chaos.(*v1alpha1.NetworkChaos)
 	if !ok {
 		err := errors.New("chaos is not NetworkChaos")
