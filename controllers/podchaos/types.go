@@ -17,17 +17,15 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/pingcap/chaos-mesh/controllers/podchaos/podfailure"
-
 	"github.com/go-logr/logr"
+	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/pingcap/chaos-mesh/api/v1alpha1"
 	"github.com/pingcap/chaos-mesh/controllers/common"
+	"github.com/pingcap/chaos-mesh/controllers/podchaos/podfailure"
 	"github.com/pingcap/chaos-mesh/controllers/podchaos/podkill"
 	"github.com/pingcap/chaos-mesh/controllers/twophase"
-
-	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 type Reconciler struct {
@@ -71,8 +69,7 @@ func (r *Reconciler) commonPodChaos(podchaos *v1alpha1.PodChaos, req ctrl.Reques
 	default:
 		return r.invalidActionResponse(podchaos), nil
 	}
-	reconciler := common.NewReconciler(pr, pr.Client, pr.Log)
-	return reconciler.Reconcile(req)
+	return pr.Reconcile(req)
 }
 
 func (r *Reconciler) schedulePodChaos(podchaos *v1alpha1.PodChaos, req ctrl.Request) (ctrl.Result, error) {
@@ -89,8 +86,7 @@ func (r *Reconciler) schedulePodChaos(podchaos *v1alpha1.PodChaos, req ctrl.Requ
 	default:
 		return r.invalidActionResponse(podchaos), nil
 	}
-	reconciler := twophase.NewReconciler(tr, tr.Client, tr.Log)
-	return reconciler.Reconcile(req)
+	return tr.Reconcile(req)
 }
 
 func (r *Reconciler) invalidActionResponse(podchaos *v1alpha1.PodChaos) ctrl.Result {
