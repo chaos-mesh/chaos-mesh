@@ -93,12 +93,6 @@ func (r *Reconciler) schedulePodChaos(podchaos *v1alpha1.PodChaos, req ctrl.Requ
 			Log:    r.Log.WithValues("action", "container-kill"),
 		}
 		return reconciler.Reconcile(req)
-	case v1alpha1.ContainerKillAction:
-		reconciler := containerkill.Reconciler{
-			Client: r.Client,
-			Log:    r.Log.WithValues("action", "container-kill"),
-		}
-		return reconciler.Reconcile(req)
 	default:
 		return r.invalidActionResponse(podchaos), nil
 	}
