@@ -1,4 +1,4 @@
-## Setting Up The Development Environment
+# Set up the development environment
 ### Prerequisites
 You should have these components installed in your system:
 - golang (>= v1.13), if your golang version < v1.13, you can use golang version manager such as [gvm](https://github.com/moovweb/gvm) to switch to a newer one.
