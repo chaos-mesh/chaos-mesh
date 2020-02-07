@@ -5,6 +5,5 @@ This guide prepares you for the development of Chaos Mesh from scratch. Before y
 - [README](./README.md)
 
 The development flow starts from [Set up your development environment]. After this, you can choose any of the following procedures to contribute:
-- [ ] Set up your development environment
 - [ ] Develop a helloworld chaos
 - [ ] Add facilities to chaos daemon
