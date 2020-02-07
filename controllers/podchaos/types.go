@@ -21,8 +21,8 @@ import (
 
 	"github.com/pingcap/chaos-mesh/api/v1alpha1"
 	"github.com/pingcap/chaos-mesh/controllers/common"
-	"github.com/pingcap/chaos-mesh/controllers/podchaos/podfailure"
 	"github.com/pingcap/chaos-mesh/controllers/podchaos/containerkill"
+	"github.com/pingcap/chaos-mesh/controllers/podchaos/podfailure"
 	"github.com/pingcap/chaos-mesh/controllers/podchaos/podkill"
 	"github.com/pingcap/chaos-mesh/controllers/twophase"
 
