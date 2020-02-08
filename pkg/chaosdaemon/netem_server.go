@@ -16,15 +16,16 @@ package chaosdaemon
 import (
 	"context"
 
-	"github.com/golang/protobuf/ptypes/empty"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+
+	"github.com/golang/protobuf/ptypes/empty"
 
 	pb "github.com/pingcap/chaos-mesh/pkg/chaosdaemon/pb"
 )
 
 func (s *Server) SetNetem(ctx context.Context, in *pb.NetemRequest) (*empty.Empty, error) {
-	log.Info("Set netem", "Request", in)
+	log.Info("set netem", "Request", in)
 
 	pid, err := s.crClient.GetPidFromContainerID(ctx, in.ContainerId)
 
@@ -40,7 +41,7 @@ func (s *Server) SetNetem(ctx context.Context, in *pb.NetemRequest) (*empty.Empt
 }
 
 func (s *Server) DeleteNetem(ctx context.Context, in *pb.NetemRequest) (*empty.Empty, error) {
-	log.Info("Delete netem", "Request", in)
+	log.Info("delete netem", "Request", in)
 
 	pid, err := s.crClient.GetPidFromContainerID(ctx, in.ContainerId)
 

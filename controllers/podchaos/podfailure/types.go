@@ -24,17 +24,19 @@ import (
 	"github.com/go-logr/logr"
 
 	"github.com/pingcap/chaos-mesh/api/v1alpha1"
+	"github.com/pingcap/chaos-mesh/controllers/common"
+	"github.com/pingcap/chaos-mesh/controllers/reconciler"
 	"github.com/pingcap/chaos-mesh/controllers/twophase"
 	"github.com/pingcap/chaos-mesh/pkg/utils"
-
-	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	v1 "k8s.io/api/core/v1"
 	k8serror "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/tools/cache"
+
+	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 const (
@@ -44,12 +46,20 @@ const (
 	podFailureActionMsg = "pause pod duration %s"
 )
 
-func NewReconciler(c client.Client, log logr.Logger, req ctrl.Request) twophase.Reconciler {
-	return twophase.Reconciler{
-		InnerReconciler: &Reconciler{
-			Client: c,
-			Log:    log,
-		},
+// NewTwoPhaseReconciler would create Reconciler for twophase package
+func NewTwoPhaseReconciler(c client.Client, log logr.Logger, req ctrl.Request) *twophase.Reconciler {
+	r := newReconciler(c, log, req)
+	return twophase.NewReconciler(r, r.Client, r.Log)
+}
+
+// NewCommonReconciler would create Reconciler for common package
+func NewCommonReconciler(c client.Client, log logr.Logger, req ctrl.Request) *common.Reconciler {
+	r := newReconciler(c, log, req)
+	return common.NewReconciler(r, r.Client, r.Log)
+}
+
+func newReconciler(c client.Client, log logr.Logger, req ctrl.Request) *Reconciler {
+	return &Reconciler{
 		Client: c,
 		Log:    log,
 	}
@@ -60,24 +70,26 @@ type Reconciler struct {
 	Log logr.Logger
 }
 
-func (r *Reconciler) Object() twophase.InnerObject {
+// Object implements the reconciler.InnerReconciler.Object
+func (r *Reconciler) Object() reconciler.InnerObject {
 	return &v1alpha1.PodChaos{}
 }
 
-func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos twophase.InnerObject) error {
-	podchaos, ok := chaos.(*v1alpha1.PodChaos)
+// Apply implements the reconciler.InnerReconciler.Apply
+func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, obj reconciler.InnerObject) error {
+
+	podchaos, ok := obj.(*v1alpha1.PodChaos)
 	if !ok {
 		err := errors.New("chaos is not PodChaos")
-		r.Log.Error(err, "chaos is not PodChaos", "chaos", chaos)
+		r.Log.Error(err, "chaos is not PodChaos", "chaos", obj)
 		return err
 	}
 
 	pods, err := utils.SelectAndGeneratePods(ctx, r.Client, &podchaos.Spec)
 	if err != nil {
-		r.Log.Error(err, "fail to select and generate pods")
+		r.Log.Error(err, "failed to select and generate pods")
 		return err
 	}
-
 	err = r.failAllPods(ctx, pods, podchaos)
 	if err != nil {
 		return err
@@ -96,20 +108,22 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos twophase
 			HostIP:    pod.Status.HostIP,
 			PodIP:     pod.Status.PodIP,
 			Action:    string(podchaos.Spec.Action),
-			Message:   fmt.Sprintf(podFailureActionMsg, podchaos.Spec.Duration),
 		}
-
+		if podchaos.Spec.Duration != nil {
+			ps.Message = fmt.Sprintf(podFailureActionMsg, *podchaos.Spec.Duration)
+		}
 		podchaos.Status.Experiment.Pods = append(podchaos.Status.Experiment.Pods, ps)
 	}
-
 	return nil
 }
 
-func (r *Reconciler) Recover(ctx context.Context, req ctrl.Request, chaos twophase.InnerObject) error {
-	podchaos, ok := chaos.(*v1alpha1.PodChaos)
+// Recover implements the reconciler.InnerReconciler.Recover
+func (r *Reconciler) Recover(ctx context.Context, req ctrl.Request, obj reconciler.InnerObject) error {
+
+	podchaos, ok := obj.(*v1alpha1.PodChaos)
 	if !ok {
 		err := errors.New("chaos is not PodChaos")
-		r.Log.Error(err, "chaos is not PodChaos", "chaos", chaos)
+		r.Log.Error(err, "chaos is not PodChaos", "chaos", obj)
 		return err
 	}
 
@@ -195,8 +209,9 @@ func (r *Reconciler) failPod(ctx context.Context, pod *v1.Pod, podchaos *v1alpha
 			pod.Annotations = make(map[string]string)
 		}
 
+		// If the annotation is already existed, we could skip the reconcile for this container
 		if _, ok := pod.Annotations[key]; ok {
-			return fmt.Errorf("annotation %s exist", key)
+			continue
 		}
 		pod.Annotations[key] = originImage
 		pod.Spec.InitContainers[index].Image = fakeImage
@@ -211,8 +226,9 @@ func (r *Reconciler) failPod(ctx context.Context, pod *v1.Pod, podchaos *v1alpha
 			pod.Annotations = make(map[string]string)
 		}
 
+		// If the annotation is already existed, we could skip the reconcile for this container
 		if _, ok := pod.Annotations[key]; ok {
-			return fmt.Errorf("annotation %s exist", key)
+			continue
 		}
 		pod.Annotations[key] = originImage
 		pod.Spec.Containers[index].Image = fakeImage
@@ -229,7 +245,9 @@ func (r *Reconciler) failPod(ctx context.Context, pod *v1.Pod, podchaos *v1alpha
 		HostIP:    pod.Status.HostIP,
 		PodIP:     pod.Status.PodIP,
 		Action:    string(podchaos.Spec.Action),
-		Message:   fmt.Sprintf(podFailureActionMsg, podchaos.Spec.Duration),
+	}
+	if podchaos.Spec.Duration != nil {
+		ps.Message = fmt.Sprintf(podFailureActionMsg, *podchaos.Spec.Duration)
 	}
 
 	podchaos.Status.Experiment.Pods = append(podchaos.Status.Experiment.Pods, ps)

@@ -20,26 +20,25 @@ import (
 	"reflect"
 	"strings"
 
-	"golang.org/x/sync/errgroup"
-
 	"github.com/go-logr/logr"
-
-	"github.com/pingcap/chaos-mesh/api/v1alpha1"
-	"github.com/pingcap/chaos-mesh/controllers/twophase"
-	pb "github.com/pingcap/chaos-mesh/pkg/chaosdaemon/pb"
-	"github.com/pingcap/chaos-mesh/pkg/utils"
-
-	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/client"
-
+	"golang.org/x/sync/errgroup"
 	v1 "k8s.io/api/core/v1"
 	k8serror "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/tools/cache"
+	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/client"
+
+	"github.com/pingcap/chaos-mesh/api/v1alpha1"
+	"github.com/pingcap/chaos-mesh/controllers/common"
+	"github.com/pingcap/chaos-mesh/controllers/reconciler"
+	"github.com/pingcap/chaos-mesh/controllers/twophase"
+	pb "github.com/pingcap/chaos-mesh/pkg/chaosdaemon/pb"
+	"github.com/pingcap/chaos-mesh/pkg/utils"
 )
 
 const (
-	networkDelayActionMsg = "delay network for %s"
+	networkNetemActionMsg = "network netem action duration %s"
 )
 
 // NetemSpec defines the interface to convert to a Netem protobuf
@@ -47,7 +46,7 @@ type NetemSpec interface {
 	ToNetem() (*pb.Netem, error)
 }
 
-func NewReconciler(c client.Client, log logr.Logger, req ctrl.Request) twophase.Reconciler {
+func newReconciler(c client.Client, log logr.Logger, req ctrl.Request) twophase.Reconciler {
 	return twophase.Reconciler{
 		InnerReconciler: &Reconciler{
 			Client: c,
@@ -58,16 +57,30 @@ func NewReconciler(c client.Client, log logr.Logger, req ctrl.Request) twophase.
 	}
 }
 
+// NewTwoPhaseReconciler would create Reconciler for twophase package
+func NewTwoPhaseReconciler(c client.Client, log logr.Logger, req ctrl.Request) *twophase.Reconciler {
+	r := newReconciler(c, log, req)
+	return twophase.NewReconciler(r, r.Client, r.Log)
+}
+
+// NewCommonReconciler would create Reconciler for common package
+func NewCommonReconciler(c client.Client, log logr.Logger, req ctrl.Request) *common.Reconciler {
+	r := newReconciler(c, log, req)
+	return common.NewReconciler(r, r.Client, r.Log)
+}
+
 type Reconciler struct {
 	client.Client
 	Log logr.Logger
 }
 
-func (r *Reconciler) Object() twophase.InnerObject {
+// Object implements the reconciler.InnerReconciler.Object
+func (r *Reconciler) Object() reconciler.InnerObject {
 	return &v1alpha1.NetworkChaos{}
 }
 
-func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos twophase.InnerObject) error {
+// Apply implements the reconciler.InnerReconciler.Apply
+func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos reconciler.InnerObject) error {
 	networkchaos, ok := chaos.(*v1alpha1.NetworkChaos)
 	if !ok {
 		err := errors.New("chaos is not NetworkChaos")
@@ -78,7 +91,7 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos twophase
 	pods, err := utils.SelectAndGeneratePods(ctx, r.Client, &networkchaos.Spec)
 
 	if err != nil {
-		r.Log.Error(err, "fail to select and generate pods")
+		r.Log.Error(err, "failed to select and generate pods")
 		return err
 	}
 
@@ -96,7 +109,10 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos twophase
 			HostIP:    pod.Status.HostIP,
 			PodIP:     pod.Status.PodIP,
 			Action:    string(networkchaos.Spec.Action),
-			Message:   fmt.Sprintf(networkDelayActionMsg, networkchaos.Spec.Duration),
+		}
+
+		if networkchaos.Spec.Duration != nil {
+			ps.Message = fmt.Sprintf(networkNetemActionMsg, *networkchaos.Spec.Duration)
 		}
 
 		networkchaos.Status.Experiment.Pods = append(networkchaos.Status.Experiment.Pods, ps)
@@ -105,7 +121,8 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos twophase
 	return nil
 }
 
-func (r *Reconciler) Recover(ctx context.Context, req ctrl.Request, chaos twophase.InnerObject) error {
+// Recover implements the reconciler.InnerReconciler.Recover
+func (r *Reconciler) Recover(ctx context.Context, req ctrl.Request, chaos reconciler.InnerObject) error {
 	networkchaos, ok := chaos.(*v1alpha1.NetworkChaos)
 	if !ok {
 		err := errors.New("chaos is not NetworkChaos")
@@ -170,8 +187,13 @@ func (r *Reconciler) recoverPod(ctx context.Context, pod *v1.Pod, networkchaos *
 
 	pbClient := pb.NewChaosDaemonClient(c)
 
+	if len(pod.Status.ContainerStatuses) == 0 {
+		return fmt.Errorf("%s %s can't get the state of container", pod.Namespace, pod.Name)
+	}
+
 	containerID := pod.Status.ContainerStatuses[0].ContainerID
-	_, err = pbClient.DeleteNetem(context.Background(), &pb.NetemRequest{
+
+	_, err = pbClient.DeleteNetem(ctx, &pb.NetemRequest{
 		ContainerId: containerID,
 		Netem:       nil,
 	})
@@ -222,6 +244,10 @@ func (r *Reconciler) applyPod(ctx context.Context, pod *v1.Pod, networkchaos *v1
 	defer c.Close()
 
 	pbClient := pb.NewChaosDaemonClient(c)
+
+	if len(pod.Status.ContainerStatuses) == 0 {
+		return fmt.Errorf("%s %s can't get the state of container", pod.Namespace, pod.Name)
+	}
 
 	containerID := pod.Status.ContainerStatuses[0].ContainerID
 

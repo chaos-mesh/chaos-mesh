@@ -20,7 +20,7 @@ GO     := $(GOENV) go
 GOTEST := TEST_USE_EXISTING_CLUSTER=false go test
 SHELL    := /usr/bin/env bash
 
-PACKAGE_LIST := go list ./... | grep -vE "pkg/client" | grep -vE "zz_generated"
+PACKAGE_LIST := go list ./... | grep -vE "pkg/client" | grep -vE "zz_generated" | grep -vE "vendor"
 PACKAGE_DIRECTORIES := $(PACKAGE_LIST) | sed 's|github.com/pingcap/chaos-mesh/||'
 FILES := $$(find $$($(PACKAGE_DIRECTORIES)) -name "*.go")
 FAIL_ON_STDOUT := awk '{ print } END { if (NR > 0) { exit 1 } }'
@@ -86,8 +86,18 @@ manifests: controller-gen
 	$(CONTROLLER_GEN) $(CRD_OPTIONS) rbac:roleName=manager-role webhook paths="./..." output:crd:artifacts:config=config/crd/bases
 
 # Run go fmt against code
-fmt:
+fmt: groupimports
 	$(GO) fmt ./...
+
+groupimports: install-goimports
+	goimports -w -l -local github.com/pingcap/chaos-mesh $$($(PACKAGE_DIRECTORIES))
+
+
+install-goimports:
+ifeq (,$(shell which goimports))
+	@echo "installing goimports"
+	go get golang.org/x/tools/cmd/goimports
+endif
 
 # Run go vet against code
 vet:

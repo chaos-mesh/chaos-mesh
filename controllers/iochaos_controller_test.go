@@ -53,6 +53,7 @@ var _ = Describe("IoChaos Controller", func() {
 					Namespace: "default",
 				}
 
+				duration := "60s"
 				created := &v1alpha1.IoChaos{
 					ObjectMeta: metav1.ObjectMeta{
 						Name:      key.Name,
@@ -62,12 +63,12 @@ var _ = Describe("IoChaos Controller", func() {
 						Selector: v1alpha1.SelectorSpec{
 							Namespaces: []string{"default"},
 						},
-						Scheduler: v1alpha1.SchedulerSpec{
+						Scheduler: &v1alpha1.SchedulerSpec{
 							Cron: "@every 2m",
 						},
 						Action:     actionTp,
 						Mode:       v1alpha1.OnePodMode,
-						Duration:   "60s",
+						Duration:   &duration,
 						Layer:      v1alpha1.FileSystemLayer,
 						Delay:      "10ms",
 						ConfigName: "chaosfs-tikv",

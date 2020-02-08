@@ -16,22 +16,22 @@ package collector
 import (
 	"context"
 	"fmt"
+	"reflect"
+	"strings"
 
 	"github.com/go-logr/logr"
-	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/types"
-	"k8s.io/apimachinery/pkg/util/intstr"
 
 	"github.com/pingcap/chaos-mesh/api/v1alpha1"
 	"github.com/pingcap/chaos-mesh/pkg/apiinterface"
 	"github.com/pingcap/chaos-mesh/pkg/utils"
 
-	"reflect"
-	"strings"
-
 	v1 "k8s.io/api/apps/v1"
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/apimachinery/pkg/util/intstr"
+
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
@@ -220,23 +220,23 @@ func (r *ChaosCollector) SetupGrafana(ctx context.Context, name string, namespac
 	container.Image = "pingcap/chaos-grafana:latest"
 	container.ImagePullPolicy = corev1.PullIfNotPresent
 	container.Env = []corev1.EnvVar{
-		corev1.EnvVar{
+		{
 			Name:  "CHAOS_NS",
 			Value: namespace,
 		},
-		corev1.EnvVar{
+		{
 			Name:  "CHAOS_EVENT_DS_URL",
 			Value: fmt.Sprintf("chaos-collector-database.%s:3306", utils.DashboardNamespace),
 		},
-		corev1.EnvVar{
+		{
 			Name:  "CHAOS_EVENT_DS_DB",
 			Value: "chaos_operator",
 		},
-		corev1.EnvVar{
+		{
 			Name:  "CHAOS_EVENT_DS_USER",
 			Value: "root",
 		},
-		corev1.EnvVar{
+		{
 			Name:  "CHAOS_METRIC_DS_URL",
 			Value: fmt.Sprintf("http://%s.%s:%d", name, namespace, port),
 		},
@@ -262,7 +262,7 @@ func (r *ChaosCollector) SetupGrafana(ctx context.Context, name string, namespac
 	})
 	service.Spec.Selector = labels
 	service.Spec.Ports = []corev1.ServicePort{
-		corev1.ServicePort{
+		{
 			Protocol: corev1.ProtocolTCP,
 			Port:     3000,
 			TargetPort: intstr.IntOrString{

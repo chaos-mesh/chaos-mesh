@@ -10,6 +10,12 @@ read/write errors, etc. It can inject delay and errno when you use the IO system
 
 ## Prerequisites
 
+### Commands and args for the application container
+
+Chaos Mesh uses [`wait-fush.sh`](https://github.com/pingcap/chaos-mesh/blob/master/doc/sidecar_configmap.md#tips) to ensure that the fuse-daemon server is running normally before the application starts. 
+so `wait-fush.sh` needs to be injected into the startup command of the container. If the application process is not started by the [commands and args of the container](https://kubernetes.io/docs/tasks/inject-data-application/define-command-argument-container/), 
+IO chaos won't work properly. When Kubernetes natively supports [Sidecar Containers](https://github.com/kubernetes/enhancements/issues/753) in future versions, we will remove the `wait-fush.sh` dependency.
+
 ### Admission Controller
 
 IO chaos needs to inject a sidecar container to user pods and the sidecar container can be added to applicable Kubernetes pods 
@@ -96,10 +102,13 @@ Description:
 * **duration**: represents the duration of a chaos action. The duration might be a string with the signed sequence of decimal numbers, each with optional fraction and a unit suffix, such as `"300ms"`, `"-1.5h"` or `"2h45m"`.
 * **delay**: defines the value of IO chaos action delay. The duration might be a string with the signed sequence of decimal numbers, each with optional fraction and a unit suffix, such as `"300ms"`, `"-1.5h"` or `”2h45m”`. Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", and "h".
   If `Delay` is empty, the operator will generate a value for it randomly.
-* **errno**: defines the error code that is returned by an IO action. It is an int32 string like `"32"`. This field need to be set when you choose an `errno` or `mixed` action. If `errno` is empty, the operator will randomly generate an error code for it. You can set the `errno` by referring to [Errors: Linux System Errors](https://www-numi.fnal.gov/offline_software/srt_public_context/WebDocs/Errors/unix_system_errors.html).
+* **errno**: defines the error code that is returned by an IO action. It and the [errno](http://man7.org/linux/man-pages/man3/errno.3.html) defined by Linux system are consistent. It is an int32 string like `"2"`, `"2"` means `No such file or directory`. 
+This field need to be set when you choose an `errno` or `mixed` action. If `errno` is empty, the operator will randomly generate an error code for it. 
+See the [common Linux system errors](#common-linux-system-errors) for more Linux system error codes.
 * **percent**: defines the percentage of injection errors and provides a number from 0-100. The default value is `100`.
 * **path**: defines the path of files for injecting IO chaos actions. It should be a regular expression for the path you want to inject errno or delay. If the path is `""` or not defined, IO chaos actions will be injected into all files.
-* **methods**: defines the IO methods for injecting IO chaos actions. It’s an array of string, which sets the IO syscalls such as `open` and `read`. See the [available methods](#available-methods) for more details.
+* **methods**: defines the IO methods for injecting IO chaos actions. It’s an array of string, which sets the IO syscalls such as `open` and `read`. 
+See the [available methods](#available-methods) for more details.
 * **addr**: defines the sidecar HTTP server address for a sidecar container, such as `":8080"`.
 * **configName**: defines the config name which is used to inject chaos action into pods. You can refer to [examples/tikv-configmap.yaml](../examples/chaosfs-configmap/tikv-configmap.yaml) to define your configuration.
 * **layer**: represents the layer of the IO action. Supported value: `fs` (by default).
@@ -183,6 +192,23 @@ spec:
 ````
 
 The mix mode defines the **delay** and **errno** actions in one spec.
+
+## Common Linux system errors
+
+* `1`: Operation not permitted
+* `2`: No such file or directory
+* `5`: I/O error
+* `6`: No such device or address
+* `12`: Out of memory
+* `16`: Device or resource busy
+* `17`: File exists
+* `20`: Not a directory
+* `22`: Invalid argument
+* `24`: Too many open files
+* `28`: No space left on device
+
+> The number represents the errno the Linux system error. 
+> More Linux system errors refer to [Errors: Linux System Errors](https://www-numi.fnal.gov/offline_software/srt_public_context/WebDocs/Errors/unix_system_errors.html).
 
 ## Available methods
 

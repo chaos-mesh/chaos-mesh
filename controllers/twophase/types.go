@@ -18,23 +18,23 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/pingcap/chaos-mesh/pkg/apiinterface"
-
 	"github.com/go-logr/logr"
 
 	"github.com/pingcap/chaos-mesh/api/v1alpha1"
+	"github.com/pingcap/chaos-mesh/controllers/reconciler"
 	"github.com/pingcap/chaos-mesh/pkg/utils"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/util/retry"
+
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-type InnerObject interface {
-	IsDeleted() bool
-
-	GetDuration() (time.Duration, error)
+// InnerSchedulerObject is the Object for the twophase reconcile
+type InnerSchedulerObject interface {
+	reconciler.InnerObject
+	GetDuration() (*time.Duration, error)
 
 	GetNextStart() time.Time
 	SetNextStart(time.Time)
@@ -42,23 +42,23 @@ type InnerObject interface {
 	GetNextRecover() time.Time
 	SetNextRecover(time.Time)
 
-	GetScheduler() v1alpha1.SchedulerSpec
-
-	apiinterface.StatefulObject
+	GetScheduler() *v1alpha1.SchedulerSpec
 }
 
-type InnerReconciler interface {
-	Apply(ctx context.Context, req ctrl.Request, chaos InnerObject) error
-
-	Recover(ctx context.Context, req ctrl.Request, chaos InnerObject) error
-
-	Object() InnerObject
-}
-
+// Reconciler for the twophase reconciler
 type Reconciler struct {
-	InnerReconciler
+	reconciler.InnerReconciler
 	client.Client
 	Log logr.Logger
+}
+
+// NewReconciler would create reconciler for twophase controller
+func NewReconciler(r reconciler.InnerReconciler, client client.Client, log logr.Logger) *Reconciler {
+	return &Reconciler{
+		InnerReconciler: r,
+		Client:          client,
+		Log:             log,
+	}
 }
 
 func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
@@ -66,13 +66,15 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	now := time.Now()
 
 	r.Log.Info("reconciling a two phase chaos", "name", req.Name, "namespace", req.Namespace)
-	ctx := context.Background()
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 
-	chaos := r.Object()
-	if err = r.Get(ctx, req.NamespacedName, chaos); err != nil {
+	_chaos := r.Object()
+	if err = r.Get(ctx, req.NamespacedName, _chaos); err != nil {
 		r.Log.Error(err, "unable to get chaos")
 		return ctrl.Result{}, nil
 	}
+	chaos := _chaos.(InnerSchedulerObject)
 
 	duration, err := chaos.GetDuration()
 	if err != nil {
@@ -80,7 +82,12 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		return ctrl.Result{}, nil
 	}
 
-	ctx = context.Background()
+	scheduler := chaos.GetScheduler()
+	if duration == nil || scheduler == nil {
+		r.Log.Info("scheduler and duration should be defined currently")
+		return ctrl.Result{}, nil
+	}
+
 	if chaos.IsDeleted() {
 		// This chaos was deleted
 		r.Log.Info("Removing self")
@@ -107,13 +114,13 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		}
 		status.Experiment.Phase = v1alpha1.ExperimentPhaseFinished
 	} else if chaos.GetNextStart().Before(now) {
-		nextStart, err := utils.NextTime(chaos.GetScheduler(), now)
+		nextStart, err := utils.NextTime(*chaos.GetScheduler(), now)
 		if err != nil {
 			r.Log.Error(err, "failed to get next start time")
 			return ctrl.Result{}, nil
 		}
 
-		nextRecover := now.Add(duration)
+		nextRecover := now.Add(*duration)
 		if nextStart.Before(nextRecover) {
 			err := fmt.Errorf("nextRecover shouldn't be later than nextStart")
 			r.Log.Error(err, "nextRecover is later than nextStart. Then recover can never be reached",

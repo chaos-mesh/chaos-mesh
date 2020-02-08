@@ -26,6 +26,7 @@ import (
 	"github.com/golang/protobuf/ptypes/empty"
 
 	pb "github.com/pingcap/chaos-mesh/pkg/chaosfs/pb"
+	"github.com/pingcap/chaos-mesh/pkg/utils"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
@@ -223,7 +224,7 @@ func StartServer(addr string) {
 		log.Error(err, "failed to listen tcp server", "address", addr)
 		os.Exit(1)
 	}
-	s := grpc.NewServer()
+	s := grpc.NewServer(grpc.UnaryInterceptor(utils.TimeoutServerInterceptor))
 	pb.RegisterInjureServer(s, &server{})
 	// Register reflection service on gRPC server.
 	reflection.Register(s)

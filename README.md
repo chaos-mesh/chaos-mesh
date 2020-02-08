@@ -1,5 +1,12 @@
 <img src="static/logo.png" alt="chaos_logo" width="450"/>
 
+[![Build Status](https://internal.pingcap.net/idc-jenkins/job/build_chaos_mesh_master/badge/icon)](https://internal.pingcap.net/idc-jenkins/view/chaos-mesh/job/build_chaos_mesh_master/)
+[![codecov](https://codecov.io/gh/pingcap/chaos-mesh/branch/master/graph/badge.svg)](https://codecov.io/gh/pingcap/chaos-mesh)
+[![LICENSE](https://img.shields.io/github/license/pingcap/chaos-mesh.svg)](https://github.com/pingcap/chaos-mesh/blob/master/LICENSE)
+[![Language](https://img.shields.io/badge/Language-Go-blue.svg)](https://golang.org/)
+[![Go Report Card](https://goreportcard.com/badge/github.com/pingcap/chaos-mesh)](https://goreportcard.com/report/github.com/pingcap/chaos-mesh)
+[![GoDoc](https://img.shields.io/badge/Godoc-reference-blue.svg)](https://godoc.org/github.com/pingcap/chaos-mesh)
+
 > **Note:**
 >
 > This readme and related documentation are Work in Progress.
@@ -21,17 +28,17 @@ Chaos Operator injects chaos into the applications and Kubernetes infrastructure
 
 **Chaos-daemon**: runs as daemonset with privileged system permissions over network, Cgroup, etc. for a specifc node
 
-**Sidecar**: a special type of container that is dynamically injected into the target Pod by the webhook-server, which can be used for hacjacking I/O of the application container.
+**Sidecar**: a special type of container that is dynamically injected into the target Pod by the webhook-server, which can be used for hijacking I/O of the application container.
 
 ![Chaos Operator](./static/chaos-mesh-overview.png)
 
 Chaos Operator uses [Custom Resource Definition (CRD)](https://kubernetes.io/docs/tasks/access-kubernetes-api/custom-resources/custom-resource-definitions/) to define chaos objects. The current implementation supports three types of CRD objects for fault injection, namely PodChaos, NetworkChaos, and IOChaos, which correspond to the following major actions (experiments):
 
-- pod-kill: The selected pod is killed (ReplicaSet or something similar may be needed to ensure the pod will be restarted)
-- pod-failure: The selected pod will be unavailable in a specified period of time
+- pod-kill: The selected pod is killed (ReplicaSet or something similar may be needed to ensure the pod will be restarted).
+- pod-failure: The selected pod will be unavailable in a specified period of time.
 - netem chaos: Network chaos such as delay, duplication, etc.
-- network-partition: Simulate network partition
-- IO chaos: simulate file system falults such as I/O delay, read/write errors, etc.
+- network-partition: Simulate network partition.
+- IO chaos: Simulate file system falults such as I/O delay, read/write errors, etc.
 
 ## Prerequisites
 
@@ -39,7 +46,7 @@ Before deploying Chaos Mesh, make sure the following items have been installed. 
 
 - Kubernetes >= v1.12
 - [RBAC](https://kubernetes.io/docs/admin/authorization/rbac) enabled (optional)
-- [Helm](https://helm.sh/) version >= v2.8.2 and < v3.0.0
+- [Helm](https://helm.sh/) version >= v2.8.2
 
 ## Deploy Chaos Mesh
 
@@ -61,17 +68,39 @@ kubectl get crd podchaos.pingcap.com
 
 ### Install Chaos Mesh
 
-* Install Chaos Mesh with Chaos Operator only
+* Install Chaos Mesh with Chaos Operator only in docker environment 
 
 ```bash
+# create namespace chaos-testing
+kubectl create ns chaos-testing
+# helm 2.X
 helm install helm/chaos-mesh --name=chaos-mesh --namespace=chaos-testing
+# helm 3.X
+helm install chaos-mesh helm/chaos-mesh --namespace=chaos-testing
+# check Chaos Mesh pods installed
+kubectl get pods --namespace chaos-testing -l app.kubernetes.io/instance=chaos-mesh
+```
+
+* Install Chaos Mesh with Chaos Operator only in containerd environment (Kind)
+
+```bash
+# create namespace chaos-testing
+kubectl create ns chaos-testing
+# helm 2.X
+helm install helm/chaos-mesh --name=chaos-mesh --namespace=chaos-testing --set chaosDaemon.runtime=containerd --set chaosDaemon.socketPath=/run/containerd/containerd.sock
+# helm 3.X
+helm install chaos-mesh helm/chaos-mesh --namespace=chaos-testing --set chaosDaemon.runtime=containerd --set chaosDaemon.socketPath=/run/containerd/containerd.sock
+# check Chaos Mesh pods installed
 kubectl get pods --namespace chaos-testing -l app.kubernetes.io/instance=chaos-mesh
 ```
 
 * Install Chaos Mesh with Chaos Operator and Chaos Dashboard
 
 ```bash
+# helm 2.X
 helm install helm/chaos-mesh --name=chaos-mesh --namespace=chaos-testing --set dashboard.create=true
+# helm 3.X
+helm install chaos-mesh helm/chaos-mesh --namespace=chaos-testing --set dashboard.create=true
 ```
 
 ## Get started on your local machine
@@ -138,11 +167,7 @@ You can try Chaos Mesh on your local K8s environment deployed using `kind` or `m
 
 **Note:**
 
-There are some known restrictions for Chaos Operator deployed on `kind` and `minikube` clusters:
-
-- All network-related chaos is not supported for `kind` cluster.
-
-     Chaos Operator uses docker pkg to transform between container id and pid, which is necessary to find network namespace for pods.`Kind` uses `containerd` as Introducing Container Runtime Interface (CRI) runtime and it's not supported in our implementation yet.
+There are some known restrictions for Chaos Operator deployed on `minikube` clusters:
 
 - `netem chaos` is not supported for `minikube` clusters.
 
@@ -222,6 +247,10 @@ kubectl port-forward -n chaos-testing svc/chaos-dashboard 8080:80
 
 Then you can access [`http://localhost:8080`](http://localhost:8080) in browser.
 
+## FAQs
+
+Refer to [FAQs](/doc/faqs.md).
+
 ## Community
 
 Please reach out for bugs, feature requests, and other issues via:
@@ -232,12 +261,7 @@ Please reach out for bugs, feature requests, and other issues via:
 
 ## Roadmap
 
-- [x] chaos-operator
-- [ ] chaos-dashboard
-- [ ] chaos-verify
-- [ ] chaos-engine
-- [ ] chaos-admin
-- [ ] chaos-cloud
+See [ROADMAP](/ROADMAP.md)
 
 ## License
 
