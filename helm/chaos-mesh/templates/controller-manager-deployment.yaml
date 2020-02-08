@@ -43,7 +43,7 @@ spec:
           - name: TZ
             value: {{ .Values.timezone | default "UTC" }}
           - name: CHAOS_DAEMON_PORT
-            value: !!str {{ .Values.chaosDaemon.port }}
+            value: !!str {{ .Values.chaosDaemon.grpcPort }}
         volumeMounts:
           - name: webhook-certs
             mountPath: /etc/webhook/certs

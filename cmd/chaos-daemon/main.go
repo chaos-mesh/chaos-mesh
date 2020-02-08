@@ -16,7 +16,8 @@ package main
 import (
 	"flag"
 	"os"
-	"strconv"
+
+	"github.com/prometheus/client_golang/prometheus"
 
 	"github.com/pingcap/chaos-mesh/pkg/chaosdaemon"
 	"github.com/pingcap/chaos-mesh/pkg/version"
@@ -25,18 +26,18 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 )
 
-var log = ctrl.Log.WithName("chaos-daemon")
-
 var (
-	printVersion     bool
-	rawPort          string
-	containerRuntime string
+	log  = ctrl.Log.WithName("chaos-daemon")
+	conf = &chaosdaemon.Config{Host: "0.0.0.0"}
+
+	printVersion bool
 )
 
 func init() {
 	flag.BoolVar(&printVersion, "version", false, "print version information and exit")
-	flag.StringVar(&rawPort, "port", "", "the port which server listens on")
-	flag.StringVar(&containerRuntime, "runtime", "docker", "current container runtime")
+	flag.IntVar(&conf.GRPCPort, "grpc-port", 8080, "the port which grpc server listens on")
+	flag.IntVar(&conf.HTTPPort, "http-port", 8081, "the port which http server listens on")
+	flag.StringVar(&conf.Runtime, "runtime", "docker", "current container runtime")
 
 	flag.Parse()
 }
@@ -50,21 +51,13 @@ func main() {
 
 	ctrl.SetLogger(zap.Logger(true))
 
-	if rawPort == "" {
-		rawPort = os.Getenv("PORT")
-	}
+	reg := prometheus.NewRegistry()
+	reg.MustRegister(
+		prometheus.NewGoCollector(),
+		prometheus.NewProcessCollector(prometheus.ProcessCollectorOpts{}),
+	)
 
-	if rawPort == "" {
-		rawPort = "8080"
-	}
-
-	port, err := strconv.Atoi(rawPort)
-	if err != nil {
-		log.Error(err, "Error while parsing PORT environment variable", "port", rawPort)
-		os.Exit(1)
-	}
-
-	if err := chaosdaemon.StartServer("0.0.0.0", port, containerRuntime); err != nil {
+	if err := chaosdaemon.StartServer(conf, reg); err != nil {
 		log.Error(err, "failed to start chaos-daemon server")
 		os.Exit(1)
 	}
