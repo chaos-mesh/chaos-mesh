@@ -23,12 +23,16 @@ import (
 )
 
 const (
-	ioChaosDelayActionMsg = "inject file system io delay for %s"
-	ioChaosErrnoActionMsg = "inject file system errno delay for %s"
-	ioChaosMixedChaosMsg  = "inject file system mixed chaos for %s"
+	ioChaosDelayActionMsg  = "inject file system io delay for %s"
+	ioChaosErrnoActionMsg  = "inject file system errno delay for %s"
+	ioChaosMixedChaosMsg   = "inject file system mixed chaos for %s"
+	ioChaosCommonActionMsg = "inject file system %s until recover by deleted"
 )
 
 func genMessage(iochaos *v1alpha1.IoChaos) string {
+	if iochaos.Spec.Duration == nil {
+		return fmt.Sprintf(ioChaosCommonActionMsg, iochaos.Spec.Action)
+	}
 	switch iochaos.Spec.Action {
 	case v1alpha1.IODelayAction:
 		return fmt.Sprintf(ioChaosDelayActionMsg, *iochaos.Spec.Duration)

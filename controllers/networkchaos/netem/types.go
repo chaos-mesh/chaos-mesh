@@ -38,7 +38,8 @@ import (
 )
 
 const (
-	networkDelayActionMsg = "delay network for %s"
+	networkDelaySchedulerActionMsg = "delay network for %s"
+	networkDelayCommonActionMsg    = "delay network perform until recover by deleted"
 )
 
 // NetemSpec defines the interface to convert to a Netem protobuf
@@ -109,7 +110,10 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos reconcil
 			HostIP:    pod.Status.HostIP,
 			PodIP:     pod.Status.PodIP,
 			Action:    string(networkchaos.Spec.Action),
-			Message:   fmt.Sprintf(networkDelayActionMsg, *networkchaos.Spec.Duration),
+			Message:   networkDelayCommonActionMsg,
+		}
+		if networkchaos.Spec.Duration != nil {
+			ps.Message = fmt.Sprintf(networkDelaySchedulerActionMsg, *networkchaos.Spec.Duration)
 		}
 
 		networkchaos.Status.Experiment.Pods = append(networkchaos.Status.Experiment.Pods, ps)

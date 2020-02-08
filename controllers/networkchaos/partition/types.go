@@ -37,10 +37,10 @@ import (
 )
 
 const (
-	networkPartitionActionMsg = "part network for %s"
-
-	sourceIpSetPostFix = "src"
-	targetIpSetPostFix = "tgt"
+	networkPartitionScheduleActionMsg = "part network for %s"
+	networkPartitionCommonActionMsg   = "part network perform until recover by deleted"
+	sourceIpSetPostFix                = "src"
+	targetIpSetPostFix                = "tgt"
 )
 
 func newReconciler(c client.Client, log logr.Logger, req ctrl.Request) twophase.Reconciler {
@@ -161,7 +161,10 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos reconcil
 			HostIP:    pod.Status.HostIP,
 			PodIP:     pod.Status.PodIP,
 			Action:    string(networkchaos.Spec.Action),
-			Message:   fmt.Sprintf(networkPartitionActionMsg, *networkchaos.Spec.Duration),
+			Message:   networkPartitionCommonActionMsg,
+		}
+		if networkchaos.Spec.Duration != nil {
+			ps.Message = fmt.Sprintf(networkPartitionScheduleActionMsg, *networkchaos.Spec.Duration)
 		}
 
 		networkchaos.Status.Experiment.Pods = append(networkchaos.Status.Experiment.Pods, ps)
