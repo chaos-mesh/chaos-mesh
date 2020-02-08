@@ -13,6 +13,37 @@
 
 package time
 
-func ModifyTime(pid int, delta_sec int64, delta_nsec int64) error {
+import (
+	"fmt"
 
+	"github.com/pingcap/chaos-mesh/pkg/mapreader"
+	"github.com/pingcap/chaos-mesh/pkg/ptrace"
+
+	ctrl "sigs.k8s.io/controller-runtime"
+)
+
+var log = ctrl.Log.WithName("time")
+
+func ModifyTime(pid int, delta_sec int64, delta_nsec int64) error {
+	program, err := ptrace.Trace(pid)
+	if err != nil {
+		return err
+	}
+
+	var entry *mapreader.Entry
+	for _, e := range *program.Entries {
+		e := e
+		if e.Path == "[vdso]" {
+			entry = &e
+		}
+	}
+
+	clockGettimeAddr, err := program.FindSymbolInEntry("clock_gettime", entry)
+	if err != nil {
+		return err
+	}
+	log.Info("get clock_gettime address", "addr", clockGettimeAddr)
+	fmt.Printf("get clock_gettime addr: %x", clockGettimeAddr)
+
+	return nil
 }

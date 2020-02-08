@@ -15,13 +15,18 @@ package main
 
 import (
 	"flag"
+	"fmt"
+	"os"
+
+	"github.com/pingcap/chaos-mesh/pkg/version"
+
 	"github.com/pingcap/chaos-mesh/pkg/time"
 )
 
 var (
-	pid int
-	sec_delta int64
-	nsec_delta int64
+	pid          int
+	sec_delta    int64
+	nsec_delta   int64
 	printVersion bool
 )
 
@@ -37,5 +42,15 @@ func initFlag() {
 func main() {
 	initFlag()
 
-	time.ModifyTime(pid, sec_delta, nsec_delta)
+	version.PrintVersionInfo("watchmaker")
+
+	if printVersion {
+		os.Exit(0)
+	}
+
+	err := time.ModifyTime(pid, sec_delta, nsec_delta)
+
+	if err != nil {
+		fmt.Printf("error while modifying time, pid: %d, sec_delta: %d, nsec_delta: %d\n Error: %s", pid, sec_delta, nsec_delta, err.Error())
+	}
 }

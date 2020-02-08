@@ -13,12 +13,30 @@
 
 package ptrace
 
-// #include <sys/wait.h>
+/*
+#define _GNU_SOURCE
+#include <sys/wait.h>
+#include <sys/uio.h>
+#include <errno.h>
+#include <stdint.h>
+#include <string.h>
+#include <stdlib.h>
+
+void* Uint64ToPointer(uint64_t addr) {
+	return (void*) addr;
+}
+*/
+import "C"
+
 import (
+	"bytes"
+	elf2 "debug/elf"
 	"encoding/binary"
 	"fmt"
 	"syscall"
-	"C"
+	"unsafe"
+
+	"github.com/pingcap/chaos-mesh/pkg/mapreader"
 )
 
 const waitPidErrorMessage = "waitpid ret value: %d, status: %d"
@@ -26,7 +44,8 @@ const waitPidErrorMessage = "waitpid ret value: %d, status: %d"
 const ptrSize = 4 << uintptr(^uintptr(0)>>63) // Here is a trick to get pointer size in bytes
 
 type TracedProgram struct {
-	pid int
+	pid     int
+	Entries *[]mapreader.Entry
 
 	backupRegs syscall.PtraceRegs
 	backupCode []byte
@@ -35,30 +54,36 @@ type TracedProgram struct {
 func waitPid(pid int) error {
 	status := 0
 
-	ret := int(C.waitpid(pid, &status, 0))
-	if ret == 0 {
+	ret := waitpid(pid, &status)
+	if ret != -1 {
 		return nil
 	} else {
 		return fmt.Errorf(waitPidErrorMessage, ret, status)
 	}
 }
 
-func Trace(pid int) (error, *TracedProgram) {
+func Trace(pid int) (*TracedProgram, error) {
 	err := syscall.PtraceAttach(pid)
 	if err != nil {
-		return err, nil
+		return nil, err
 	}
 
 	err = waitPid(pid)
 	if err != nil {
-		return err, nil
+		return nil, err
 	}
 
-	return nil, &TracedProgram {
-		pid: pid,
+	err, entries := mapreader.Read(pid)
+	if err != nil {
+		return nil, err
+	}
+
+	return &TracedProgram{
+		pid:        pid,
+		Entries:    entries,
 		backupRegs: syscall.PtraceRegs{},
 		backupCode: make([]byte, ptrSize),
-	}
+	}, nil
 }
 
 func (p *TracedProgram) Cont() error {
@@ -99,7 +124,7 @@ func (p *TracedProgram) Wait() error {
 	return waitPid(p.pid)
 }
 
-func (p *TracedProgram) Step()  error {
+func (p *TracedProgram) Step() error {
 	err := syscall.PtraceSingleStep(p.pid)
 	if err != nil {
 		return err
@@ -108,17 +133,17 @@ func (p *TracedProgram) Step()  error {
 	return p.Wait()
 }
 
-func (p *TracedProgram) Syscall(number uint64, args ...uint64) (error, uint64) {
+func (p *TracedProgram) Syscall(number uint64, args ...uint64) (uint64, error) {
 	err := p.Protect()
 	if err != nil {
-		return err, 0
+		return 0, err
 	}
 
 	var regs syscall.PtraceRegs
 
 	err = syscall.PtraceGetRegs(p.pid, &regs)
 	if err != nil {
-		return err, 0
+		return 0, err
 	}
 	regs.Rax = number
 	for index, arg := range args {
@@ -136,34 +161,131 @@ func (p *TracedProgram) Syscall(number uint64, args ...uint64) (error, uint64) {
 		} else if index == 5 {
 			regs.R9 = arg
 		} else {
-			return fmt.Errorf("too many arguments for a syscall"), 0
+			return 0, fmt.Errorf("too many arguments for a syscall")
 		}
 	}
 	err = syscall.PtraceSetRegs(p.pid, &regs)
 	if err != nil {
-		return err, 0
+		return 0, err
 	}
 
 	ip := make([]byte, ptrSize)
 	binary.LittleEndian.PutUint16(ip, 0x050f) // The endianness is hard coded here
 	_, err = syscall.PtracePokeData(p.pid, uintptr(p.backupRegs.Rip), ip)
 	if err != nil {
-		return err, 0
+		return 0, err
 	}
 
 	err = p.Step()
 	if err != nil {
-		return err, 0
+		return 0, err
 	}
 
 	err = syscall.PtraceGetRegs(p.pid, &regs)
 	if err != nil {
-		return err, 0
+		return 0, err
 	}
 
-	return p.Restore(), regs.Rax
+	return regs.Rax, p.Restore()
 }
 
-func (p *TracedProgram) Mmap(length uint64, fd uint64) (error, uint64) {
+func (p *TracedProgram) Mmap(length uint64, fd uint64) (uint64, error) {
 	return p.Syscall(9, 0, length, 7, 0x22, fd, 0)
+}
+
+func (p *TracedProgram) ReadSlice(addr uint64, size uint64) (*[]byte, error) {
+	buffer := make([]byte, size)
+
+	tmpBuffer := C.malloc(C.ulong(size))
+	defer C.free(tmpBuffer)
+	localIov := C.struct_iovec{
+		iov_base: unsafe.Pointer(tmpBuffer),
+		iov_len:  C.ulong(size),
+	}
+	remoteIov := C.struct_iovec{
+		iov_base: C.Uint64ToPointer(C.ulong(addr)),
+		iov_len:  C.ulong(size),
+	}
+
+	ret, err := C.process_vm_readv(C.int(p.pid),
+		(*C.struct_iovec)(unsafe.Pointer(&localIov)),
+		1,
+		(*C.struct_iovec)(unsafe.Pointer(&remoteIov)),
+		1,
+		0,
+	)
+	if ret == -1 {
+		return nil, err
+	}
+	// TODO: check size and warn
+	C.memcpy(unsafe.Pointer(&buffer[0]), tmpBuffer, C.ulong(size))
+
+	return &buffer, nil
+}
+
+func (p *TracedProgram) WriteSlice(addr uint64, buffer []byte) error {
+	size := len(buffer)
+
+	tmpBuffer := C.malloc(C.ulong(size))
+	defer C.free(tmpBuffer)
+	C.memcpy(tmpBuffer, unsafe.Pointer(&buffer[0]), C.ulong(size))
+
+	localIov := C.struct_iovec{
+		iov_base: tmpBuffer,
+		iov_len:  C.ulong(size),
+	}
+	remoteIov := C.struct_iovec{
+		iov_base: C.Uint64ToPointer(C.ulong(addr)),
+		iov_len:  C.ulong(size),
+	}
+
+	ret, err := C.process_vm_writev(C.int(p.pid),
+		(*C.struct_iovec)(unsafe.Pointer(&localIov)),
+		1,
+		(*C.struct_iovec)(unsafe.Pointer(&remoteIov)),
+		1,
+		0,
+	)
+	if ret == -1 {
+		return err
+	}
+	// TODO: check size and warn
+
+	return nil
+}
+
+func (p *TracedProgram) GetLibBuffer(entry *mapreader.Entry) (*[]byte, error) {
+	if entry.PaddingSize > 0 {
+		return nil, fmt.Errorf("entry with padding size is not supported")
+	}
+
+	size := entry.EndAddress - entry.StatAddress
+
+	return p.ReadSlice(entry.StatAddress, size)
+}
+
+func (p *TracedProgram) FindSymbolInEntry(symbolName string, entry *mapreader.Entry) (uint64, error) {
+	libBuffer, err := p.GetLibBuffer(entry)
+	if err != nil {
+		return 0, err
+	}
+
+	reader := bytes.NewReader(*libBuffer)
+	elf, err := elf2.NewFile(reader)
+	if err != nil {
+		return 0, err
+	}
+
+	symbols, err := elf.DynamicSymbols()
+	if err != nil {
+		return 0, err
+	}
+	for _, symbol := range symbols {
+		if symbol.Name == symbolName {
+			offset := symbol.Value
+
+			return entry.StatAddress + offset, nil
+		}
+	}
+	return 0, fmt.Errorf("cannot find symbol")
 }

@@ -69,6 +69,9 @@ chaosfs: generate fmt vet
 dashboard: fmt vet
 	$(GO) build -ldflags '$(LDFLAGS)' -o images/chaos-dashboard/bin/chaos-dashboard ./cmd/chaos-dashboard/*.go
 
+watchmacker: fmt vet
+	$(GOENV) CGO_ENABLED=1 go build -ldflags '$(LDFLAGS)' -o bin/watchmaker ./cmd/watchmaker/*.go
+
 dashboard-server-frontend:
 	cd images/chaos-dashboard; yarn install; yarn build
 
@@ -87,7 +90,7 @@ manifests: controller-gen
 
 # Run go fmt against code
 fmt: groupimports
-	$(GO) fmt ./...
+	$(GOENV) CGO_ENABLED=1 go fmt ./...
 
 groupimports: install-goimports
 	goimports -w -l -local github.com/pingcap/chaos-mesh $$($(PACKAGE_DIRECTORIES))
@@ -101,7 +104,7 @@ endif
 
 # Run go vet against code
 vet:
-	$(GO) vet ./...
+	$(GOENV) CGO_ENABLED=1 go vet ./...
 
 tidy:
 	@echo "go mod tidy"
