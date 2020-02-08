@@ -21,10 +21,9 @@ import (
 
 	"github.com/pingcap/chaos-mesh/api/v1alpha1"
 	"github.com/pingcap/chaos-mesh/controllers/common"
-	commonPodfailure "github.com/pingcap/chaos-mesh/controllers/common/podfailure"
+	"github.com/pingcap/chaos-mesh/controllers/podchaos/podfailure"
 	"github.com/pingcap/chaos-mesh/controllers/podchaos/podkill"
 	"github.com/pingcap/chaos-mesh/controllers/twophase"
-	twophasePodfailure "github.com/pingcap/chaos-mesh/controllers/twophase/podfailure"
 
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -62,19 +61,20 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 }
 
 func (r *Reconciler) commonPodChaos(podchaos *v1alpha1.PodChaos, req ctrl.Request) (ctrl.Result, error) {
+	var pr *common.Reconciler
 	switch podchaos.Spec.Action {
 	case v1alpha1.PodKillAction:
 		return r.notSupportedResponse(podchaos), nil
 	case v1alpha1.PodFailureAction:
-		r := commonPodfailure.NewCommonReconciler(r.Client, r.Log.WithValues("action", "pod-failure"), req)
-		reconciler := common.NewReconciler(r, r.Client, r.Log)
-		return reconciler.Reconcile(req)
+		pr = podfailure.NewCommonReconciler(r.Client, r.Log.WithValues("action", "pod-failure"), req)
 	default:
-		return r.defaultResponse(podchaos), nil
+		return r.invalidActionResponse(podchaos), nil
 	}
+	return pr.Reconcile(req)
 }
 
 func (r *Reconciler) schedulePodChaos(podchaos *v1alpha1.PodChaos, req ctrl.Request) (ctrl.Result, error) {
+	var tr *twophase.Reconciler
 	switch podchaos.Spec.Action {
 	case v1alpha1.PodKillAction:
 		reconciler := podkill.Reconciler{
@@ -83,19 +83,14 @@ func (r *Reconciler) schedulePodChaos(podchaos *v1alpha1.PodChaos, req ctrl.Requ
 		}
 		return reconciler.Reconcile(req)
 	case v1alpha1.PodFailureAction:
-		if podchaos.Spec.Duration == nil {
-			r.Log.Error(nil, "schedule podchaos should define duration", "action", podchaos.Spec.Action)
-			return ctrl.Result{}, nil
-		}
-		r := twophasePodfailure.NewTwoPhaseReconciler(r.Client, r.Log.WithValues("action", "pod-failure"), req)
-		reconciler := twophase.NewReconciler(r, r.Client, r.Log)
-		return reconciler.Reconcile(req)
+		tr = podfailure.NewTwoPhaseReconciler(r.Client, r.Log.WithValues("action", "pod-kill"), req)
 	default:
-		return r.defaultResponse(podchaos), nil
+		return r.invalidActionResponse(podchaos), nil
 	}
+	return tr.Reconcile(req)
 }
 
-func (r *Reconciler) defaultResponse(podchaos *v1alpha1.PodChaos) ctrl.Result {
+func (r *Reconciler) invalidActionResponse(podchaos *v1alpha1.PodChaos) ctrl.Result {
 	r.Log.Error(nil, "podchaos action is invalid", "action", podchaos.Spec.Action)
 	return ctrl.Result{}
 }

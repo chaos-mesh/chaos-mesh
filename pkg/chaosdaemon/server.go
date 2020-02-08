@@ -21,6 +21,7 @@ import (
 	"google.golang.org/grpc/reflection"
 
 	pb "github.com/pingcap/chaos-mesh/pkg/chaosdaemon/pb"
+	"github.com/pingcap/chaos-mesh/pkg/utils"
 
 	ctrl "sigs.k8s.io/controller-runtime"
 )
@@ -53,7 +54,7 @@ func StartServer(host string, port int, containerRuntime string) error {
 		return err
 	}
 
-	s := grpc.NewServer()
+	s := grpc.NewServer(grpc.UnaryInterceptor(utils.TimeoutServerInterceptor))
 	chaosDaemonServer, err := newServer(containerRuntime)
 	if err != nil {
 		log.Error(err, "failed to create server")
