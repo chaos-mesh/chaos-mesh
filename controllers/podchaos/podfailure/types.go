@@ -43,7 +43,8 @@ const (
 	// fakeImage is a not-existing image.
 	fakeImage = "pingcap.com/fake-chaos-mesh:latest"
 
-	podFailureActionMsg = "pause pod duration %s"
+	podFailureSchedulerActionMsg = "pause pod duration %s"
+	podFailureCommonActionMsg    = "pause pod until recover by deleted"
 )
 
 // NewTwoPhaseReconciler would create Reconciler for twophase package
@@ -108,9 +109,10 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, obj reconciler
 			HostIP:    pod.Status.HostIP,
 			PodIP:     pod.Status.PodIP,
 			Action:    string(podchaos.Spec.Action),
+			Message:   podFailureCommonActionMsg,
 		}
 		if podchaos.Spec.Duration != nil {
-			ps.Message = fmt.Sprintf(podFailureActionMsg, *podchaos.Spec.Duration)
+			ps.Message = fmt.Sprintf(podFailureSchedulerActionMsg, *podchaos.Spec.Duration)
 		}
 		podchaos.Status.Experiment.Pods = append(podchaos.Status.Experiment.Pods, ps)
 	}
