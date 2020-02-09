@@ -18,6 +18,10 @@ spec:
   template:
     metadata:
       name: webhook-mw-job
+    {{- with .Values.postJobs.podAnnotations }}
+      annotations:
+{{ toYaml . | indent 8 }}
+    {{- end }}
     spec:
       restartPolicy: Never
       serviceAccountName: {{ .Values.controllerManager.serviceAccount }}
