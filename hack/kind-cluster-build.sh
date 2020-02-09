@@ -215,7 +215,8 @@ kubectl apply -f ${ROOT}/manifests/local-volume-provisioner.yaml
 kubectl apply -f ${ROOT}/manifests/tiller-rbac.yaml
 
 kubectl create ns chaos-testing
-helm init --service-account=tiller --wait
+
+if [[ $(helm version --client --short) == "Client: v2"* ]]; then helm init --service-account=tiller --wait; fi
 
 echo "############# success create cluster:[${clusterName}] #############"
 
