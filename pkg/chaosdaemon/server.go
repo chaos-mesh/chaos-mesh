@@ -24,11 +24,10 @@ import (
 	"golang.org/x/sync/errgroup"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
+	ctrl "sigs.k8s.io/controller-runtime"
 
 	pb "github.com/pingcap/chaos-mesh/pkg/chaosdaemon/pb"
 	"github.com/pingcap/chaos-mesh/pkg/utils"
-
-	ctrl "sigs.k8s.io/controller-runtime"
 )
 
 var log = ctrl.Log.WithName("chaos-daemon-server")
@@ -67,14 +66,14 @@ func newGRPCServer(containerRuntime string, reg *prometheus.Registry) (*grpc.Ser
 
 	grpcMetrics := grpc_prometheus.NewServerMetrics()
 	grpcMetrics.EnableHandlingTimeHistogram(
-		grpc_prometheus.WithHistogramBuckets([]float64{0.001, 0.01, 0.1, 0.3, 0.6, 1, 3, 6, 9, 20}),
+		grpc_prometheus.WithHistogramBuckets([]float64{0.001, 0.01, 0.1, 0.3, 0.6, 1, 3, 6, 10}),
 	)
 	reg.MustRegister(grpcMetrics)
 
 	grpcOpts := []grpc.ServerOption{
 		grpc_middleware.WithUnaryServerChain(
-			grpcMetrics.UnaryServerInterceptor(),
 			utils.TimeoutServerInterceptor,
+			grpcMetrics.UnaryServerInterceptor(),
 		),
 	}
 
