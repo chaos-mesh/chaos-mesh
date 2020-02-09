@@ -18,6 +18,10 @@ spec:
   template:
     metadata:
       name: webhook-del
+    {{- with .Values.preJobs.podAnnotations }}
+      annotations:
+{{ toYaml . | indent 8 }}
+    {{- end }}
     spec:
       restartPolicy: Never
       serviceAccountName: {{ .Values.controllerManager.serviceAccount }}
