@@ -1,5 +1,12 @@
 <img src="static/logo.png" alt="chaos_logo" width="450"/>
 
+[![Build Status](https://internal.pingcap.net/idc-jenkins/job/build_chaos_mesh_master/badge/icon)](https://internal.pingcap.net/idc-jenkins/view/chaos-mesh/job/build_chaos_mesh_master/)
+[![codecov](https://codecov.io/gh/pingcap/chaos-mesh/branch/master/graph/badge.svg)](https://codecov.io/gh/pingcap/chaos-mesh)
+[![LICENSE](https://img.shields.io/github/license/pingcap/chaos-mesh.svg)](https://github.com/pingcap/chaos-mesh/blob/master/LICENSE)
+[![Language](https://img.shields.io/badge/Language-Go-blue.svg)](https://golang.org/)
+[![Go Report Card](https://goreportcard.com/badge/github.com/pingcap/chaos-mesh)](https://goreportcard.com/report/github.com/pingcap/chaos-mesh)
+[![GoDoc](https://img.shields.io/badge/Godoc-reference-blue.svg)](https://godoc.org/github.com/pingcap/chaos-mesh)
+
 > **Note:**
 >
 > This readme and related documentation are Work in Progress.
@@ -31,7 +38,7 @@ Chaos Operator uses [Custom Resource Definition (CRD)](https://kubernetes.io/doc
 - pod-failure: The selected pod will be unavailable in a specified period of time.
 - netem chaos: Network chaos such as delay, duplication, etc.
 - network-partition: Simulate network partition.
-- IO chaos: Simulate file system falults such as I/O delay, read/write errors, etc.
+- IO chaos: Simulate file system faults such as I/O delay, read/write errors, etc.
 
 ## Prerequisites
 
@@ -61,7 +68,7 @@ kubectl get crd podchaos.pingcap.com
 
 ### Install Chaos Mesh
 
-* Install Chaos Mesh with Chaos Operator only in docker environment 
+* Install Chaos Mesh with Chaos Operator only in docker environment
 
 ```bash
 # create namespace chaos-testing
@@ -173,7 +180,7 @@ After Chaos Mesh is deployed, we can deploy the target cluster to be tested, or 
 You can follow the instructions in the following two documents to deploy a TiDB cluster:
 
 * [Deploy using kind](https://pingcap.com/docs/stable/tidb-in-kubernetes/get-started/deploy-tidb-from-kubernetes-kind/)
-* [Deoloy using minikube](https://pingcap.com/docs/stable/tidb-in-kubernetes/get-started/deploy-tidb-from-kubernetes-minikube/)
+* [Deploy using minikube](https://pingcap.com/docs/stable/tidb-in-kubernetes/get-started/deploy-tidb-from-kubernetes-minikube/)
 
 ### Define chaos experiment config file
 
@@ -191,7 +198,7 @@ spec:
   duration: "60s" # duration for the injected chaos experiment
   selector: # pods where to inject chaos actions
     namespaces:
-      - tidb-cluster-demo  # the namespace of the system under test (SUT) you've deployed 
+      - tidb-cluster-demo  # the namespace of the system under test (SUT) you've deployed
     labelSelectors:
       "app.kubernetes.io/component": "tikv" # the label of the pod for chaos injection
   scheduler: # scheduler rules for the running time of the chaos experiments about pods.

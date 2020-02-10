@@ -20,6 +20,10 @@ spec:
         app.kubernetes.io/name: {{ template "chaos-mesh.name" . }}
         app.kubernetes.io/instance: {{ .Release.Name }}
         app.kubernetes.io/component: chaos-daemon
+    {{- with .Values.chaosDaemon.podAnnotations }}
+      annotations:
+{{ toYaml . | indent 8 }}
+    {{- end }}
     spec:
       containers:
         - name: chaos-daemon
@@ -33,9 +37,10 @@ spec:
             - /usr/local/bin/chaos-daemon
             - --runtime
             - {{ .Values.chaosDaemon.runtime }}
-          env:
-            - name: PORT
-              value: !!str {{ .Values.chaosDaemon.port }}
+            - --http-port
+            - !!str {{ .Values.chaosDaemon.httpPort }}
+            - --grpc-port
+            - !!str {{ .Values.chaosDaemon.grpcPort }}
           securityContext:
             privileged: true
           volumeMounts:
@@ -48,8 +53,11 @@ spec:
               mountPath: /run/containerd/containerd.sock
               {{- end }}
           ports:
-            - containerPort: {{ .Values.chaosDaemon.port }}
-              hostPort: {{ .Values.chaosDaemon.port }}
+            - name: grpc
+              containerPort: {{ .Values.chaosDaemon.grpcPort }}
+              hostPort: {{ .Values.chaosDaemon.grpcPort }}
+            - name: http
+              containerPort: {{ .Values.chaosDaemon.httpPort }}
         - name: time-chaos
           image: {{ .Values.timeChaos.image }}
           imagePullPolicy: {{ .Values.timeChaos.imagePullPolicy | default "IfNotPresent" }}

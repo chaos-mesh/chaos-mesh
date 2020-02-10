@@ -15,15 +15,17 @@ package networkchaos
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/go-logr/logr"
-
-	"github.com/pingcap/chaos-mesh/api/v1alpha1"
-	"github.com/pingcap/chaos-mesh/controllers/networkchaos/netem"
-	"github.com/pingcap/chaos-mesh/controllers/networkchaos/partition"
-
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+
+	"github.com/pingcap/chaos-mesh/api/v1alpha1"
+	"github.com/pingcap/chaos-mesh/controllers/common"
+	"github.com/pingcap/chaos-mesh/controllers/networkchaos/netem"
+	"github.com/pingcap/chaos-mesh/controllers/networkchaos/partition"
+	"github.com/pingcap/chaos-mesh/controllers/twophase"
 )
 
 type Reconciler struct {
@@ -41,16 +43,50 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		return ctrl.Result{}, nil
 	}
 
-	switch networkchaos.Spec.Action {
-	case v1alpha1.DelayAction, v1alpha1.DuplicateAction, v1alpha1.CorruptAction, v1alpha1.LossAction:
-		reconciler := netem.NewReconciler(r.Client, r.Log.WithValues("action", "netem"), req)
-		return reconciler.Reconcile(req)
-	case v1alpha1.PartitionAction:
-		reconciler := partition.NewReconciler(r.Client, r.Log.WithValues("action", "partition"), req)
-		return reconciler.Reconcile(req)
-	default:
-		r.Log.Error(nil, "networkchaos action is invalid", "action", networkchaos.Spec.Action)
-
+	scheduler := networkchaos.GetScheduler()
+	duration, err := networkchaos.GetDuration()
+	if err != nil {
+		r.Log.Error(err, fmt.Sprintf("unable to get podchaos[%s/%s]'s duration", networkchaos.Namespace, networkchaos.Name))
 		return ctrl.Result{}, nil
 	}
+	if scheduler == nil && duration == nil {
+		return r.commonNetworkChaos(&networkchaos, req)
+	} else if scheduler != nil && duration != nil {
+		return r.scheduleNetworkChaos(&networkchaos, req)
+	}
+
+	// This should be ensured by admission webhook in the future
+	r.Log.Error(fmt.Errorf("networkchaos[%s/%s] spec invalid", networkchaos.Namespace, networkchaos.Name), "scheduler and duration should be omitted or defined at the same time")
+	return ctrl.Result{}, nil
+}
+
+func (r *Reconciler) commonNetworkChaos(networkchaos *v1alpha1.NetworkChaos, req ctrl.Request) (ctrl.Result, error) {
+	var cr *common.Reconciler
+	switch networkchaos.Spec.Action {
+	case v1alpha1.DelayAction, v1alpha1.DuplicateAction, v1alpha1.CorruptAction, v1alpha1.LossAction:
+		cr = netem.NewCommonReconciler(r.Client, r.Log.WithValues("action", "netem"), req)
+	case v1alpha1.PartitionAction:
+		cr = partition.NewCommonReconciler(r.Client, r.Log.WithValues("action", "partition"), req)
+	default:
+		return r.invalidActionResponse(networkchaos), nil
+	}
+	return cr.Reconcile(req)
+}
+
+func (r *Reconciler) scheduleNetworkChaos(networkchaos *v1alpha1.NetworkChaos, req ctrl.Request) (ctrl.Result, error) {
+	var sr *twophase.Reconciler
+	switch networkchaos.Spec.Action {
+	case v1alpha1.DelayAction, v1alpha1.DuplicateAction, v1alpha1.CorruptAction, v1alpha1.LossAction:
+		sr = netem.NewTwoPhaseReconciler(r.Client, r.Log.WithValues("action", "netem"), req)
+	case v1alpha1.PartitionAction:
+		sr = partition.NewTwoPhaseReconciler(r.Client, r.Log.WithValues("action", "partition"), req)
+	default:
+		return r.invalidActionResponse(networkchaos), nil
+	}
+	return sr.Reconcile(req)
+}
+
+func (r *Reconciler) invalidActionResponse(networkchaos *v1alpha1.NetworkChaos) ctrl.Result {
+	r.Log.Error(nil, "networkchaos action is invalid", "action", networkchaos.Spec.Action)
+	return ctrl.Result{}
 }

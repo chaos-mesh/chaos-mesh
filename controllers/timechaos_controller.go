@@ -32,6 +32,7 @@ type TimeChaosReconciler struct {
 // +kubebuilder:rbac:groups=pingcap.com,resources=timechaos,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=pingcap.com,resources=timechaos/status,verbs=get;update;patch
 
+// Reconcile will be called by controller when TimeChaos is scheduled
 func (r *TimeChaosReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	logger := r.Log.WithValues("reconciler", "timechaos")
 
@@ -40,6 +41,7 @@ func (r *TimeChaosReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	return reconciler.Reconcile(req)
 }
 
+// SetupWithManager registry TimeChaos
 func (r *TimeChaosReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&chaosmeshv1alpha1.TimeChaos{}).

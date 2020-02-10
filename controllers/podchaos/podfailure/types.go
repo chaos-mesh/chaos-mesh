@@ -24,7 +24,9 @@ import (
 	"github.com/go-logr/logr"
 
 	"github.com/pingcap/chaos-mesh/api/v1alpha1"
-	"github.com/pingcap/chaos-mesh/pkg/apiinterface"
+	"github.com/pingcap/chaos-mesh/controllers/common"
+	"github.com/pingcap/chaos-mesh/controllers/reconciler"
+	"github.com/pingcap/chaos-mesh/controllers/twophase"
 	"github.com/pingcap/chaos-mesh/pkg/utils"
 
 	v1 "k8s.io/api/core/v1"
@@ -44,8 +46,19 @@ const (
 	podFailureActionMsg = "pause pod duration %s"
 )
 
-// NewReconciler would create new reconciler for podfailure chaos
-func NewReconciler(c client.Client, log logr.Logger, req ctrl.Request) *Reconciler {
+// NewTwoPhaseReconciler would create Reconciler for twophase package
+func NewTwoPhaseReconciler(c client.Client, log logr.Logger, req ctrl.Request) *twophase.Reconciler {
+	r := newReconciler(c, log, req)
+	return twophase.NewReconciler(r, r.Client, r.Log)
+}
+
+// NewCommonReconciler would create Reconciler for common package
+func NewCommonReconciler(c client.Client, log logr.Logger, req ctrl.Request) *common.Reconciler {
+	r := newReconciler(c, log, req)
+	return common.NewReconciler(r, r.Client, r.Log)
+}
+
+func newReconciler(c client.Client, log logr.Logger, req ctrl.Request) *Reconciler {
 	return &Reconciler{
 		Client: c,
 		Log:    log,
@@ -57,13 +70,13 @@ type Reconciler struct {
 	Log logr.Logger
 }
 
-// Instance returns the instance of PodChaos
-func (r *Reconciler) Instance() *v1alpha1.PodChaos {
+// Object implements the reconciler.InnerReconciler.Object
+func (r *Reconciler) Object() reconciler.InnerObject {
 	return &v1alpha1.PodChaos{}
 }
 
-// Perform would perform the podfailure chaos for the selected pods
-func (r *Reconciler) Perform(ctx context.Context, req ctrl.Request, obj apiinterface.StatefulObject) error {
+// Apply implements the reconciler.InnerReconciler.Apply
+func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, obj reconciler.InnerObject) error {
 
 	podchaos, ok := obj.(*v1alpha1.PodChaos)
 	if !ok {
@@ -104,8 +117,8 @@ func (r *Reconciler) Perform(ctx context.Context, req ctrl.Request, obj apiinter
 	return nil
 }
 
-// Clean would recover the podchaos for the selected pods
-func (r *Reconciler) Clean(ctx context.Context, req ctrl.Request, obj apiinterface.StatefulObject) error {
+// Recover implements the reconciler.InnerReconciler.Recover
+func (r *Reconciler) Recover(ctx context.Context, req ctrl.Request, obj reconciler.InnerObject) error {
 
 	podchaos, ok := obj.(*v1alpha1.PodChaos)
 	if !ok {

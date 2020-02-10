@@ -21,7 +21,7 @@ import (
 	"github.com/go-logr/logr"
 
 	"github.com/pingcap/chaos-mesh/api/v1alpha1"
-	"github.com/pingcap/chaos-mesh/pkg/apiinterface"
+	"github.com/pingcap/chaos-mesh/controllers/reconciler"
 	"github.com/pingcap/chaos-mesh/pkg/utils"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -31,9 +31,9 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-type InnerObject interface {
-	IsDeleted() bool
-
+// InnerSchedulerObject is the Object for the twophase reconcile
+type InnerSchedulerObject interface {
+	reconciler.InnerObject
 	GetDuration() (*time.Duration, error)
 
 	GetNextStart() time.Time
@@ -43,26 +43,17 @@ type InnerObject interface {
 	SetNextRecover(time.Time)
 
 	GetScheduler() *v1alpha1.SchedulerSpec
-
-	apiinterface.StatefulObject
 }
 
-type InnerReconciler interface {
-	Apply(ctx context.Context, req ctrl.Request, chaos InnerObject) error
-
-	Recover(ctx context.Context, req ctrl.Request, chaos InnerObject) error
-
-	Object() InnerObject
-}
-
+// Reconciler for the twophase reconciler
 type Reconciler struct {
-	InnerReconciler
+	reconciler.InnerReconciler
 	client.Client
 	Log logr.Logger
 }
 
 // NewReconciler would create reconciler for twophase controller
-func NewReconciler(r InnerReconciler, client client.Client, log logr.Logger) *Reconciler {
+func NewReconciler(r reconciler.InnerReconciler, client client.Client, log logr.Logger) *Reconciler {
 	return &Reconciler{
 		InnerReconciler: r,
 		Client:          client,
@@ -75,13 +66,15 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	now := time.Now()
 
 	r.Log.Info("reconciling a two phase chaos", "name", req.Name, "namespace", req.Namespace)
-	ctx := context.Background()
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 
-	chaos := r.Object()
-	if err = r.Get(ctx, req.NamespacedName, chaos); err != nil {
+	_chaos := r.Object()
+	if err = r.Get(ctx, req.NamespacedName, _chaos); err != nil {
 		r.Log.Error(err, "unable to get chaos")
 		return ctrl.Result{}, nil
 	}
+	chaos := _chaos.(InnerSchedulerObject)
 
 	duration, err := chaos.GetDuration()
 	if err != nil {
@@ -95,7 +88,6 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		return ctrl.Result{}, nil
 	}
 
-	ctx = context.Background()
 	if chaos.IsDeleted() {
 		// This chaos was deleted
 		r.Log.Info("Removing self")
