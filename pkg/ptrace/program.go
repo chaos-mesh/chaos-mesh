@@ -247,7 +247,6 @@ func (p *TracedProgram) WriteSlice(addr uint64, buffer []byte) error {
 		0,
 	)
 	if ret == -1 {
-		fmt.Printf("remote addr %x\n", C.Uint64ToPointer(C.ulong(addr)))
 		return err
 	}
 	// TODO: check size and warn
@@ -321,7 +320,6 @@ func (p *TracedProgram) FindSymbolInEntry(symbolName string, entry *mapreader.En
 	for _, symbol := range symbols {
 		if symbol.Name == symbolName {
 			offset := symbol.Value
-			fmt.Printf("offset: %x\n", offset)
 
 			return entry.StatAddress + offset, nil
 		}
@@ -334,7 +332,6 @@ func (p *TracedProgram) WriteUint64ToAddr(addr uint64, value uint64) error {
 	binary.LittleEndian.PutUint64(valueSlice, uint64(value))
 	err := p.WriteSlice(addr, valueSlice)
 	if err != nil {
-		fmt.Println("HERE2")
 		return err
 	}
 

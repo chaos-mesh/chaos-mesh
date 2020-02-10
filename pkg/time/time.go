@@ -14,8 +14,6 @@
 package time
 
 import (
-	"fmt"
-
 	"github.com/pingcap/chaos-mesh/pkg/mapreader"
 
 	"github.com/pingcap/chaos-mesh/pkg/ptrace"
@@ -79,8 +77,6 @@ func ModifyTime(pid int, delta_sec int64, delta_nsec int64, fake_image_path stri
 	if err != nil {
 		return err
 	}
-
-	fmt.Printf("%x %x \n", originAddr, fakeAddr)
 
 	err = program.JumpToFakeFunc(originAddr, fakeAddr, "clock_gettime")
 	if err != nil {
