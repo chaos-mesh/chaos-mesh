@@ -69,7 +69,7 @@ chaosfs: generate fmt vet
 dashboard: fmt vet
 	$(GO) build -ldflags '$(LDFLAGS)' -o images/chaos-dashboard/bin/chaos-dashboard ./cmd/chaos-dashboard/*.go
 
-watchmacker: fmt vet
+watchmaker: fmt vet
 	$(GOENV) CGO_ENABLED=1 go build -ldflags '$(LDFLAGS)' -o bin/watchmaker ./cmd/watchmaker/*.go
 
 dashboard-server-frontend:
