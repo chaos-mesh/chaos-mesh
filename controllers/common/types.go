@@ -65,31 +65,30 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 			r.Log.Error(err, "failed to recover chaos")
 			return ctrl.Result{Requeue: true}, nil
 		}
-		return ctrl.Result{}, nil
-	}
+	} else {
+		// Start failure action
+		r.Log.Info("Performing Action")
 
-	// Start failure action
-	r.Log.Info("Performing Action")
+		status := chaos.GetStatus()
 
-	status := chaos.GetStatus()
+		err = r.Apply(ctx, req, chaos)
+		if err != nil {
+			r.Log.Error(err, "failed to apply chaos action")
 
-	err = r.Apply(ctx, req, chaos)
-	if err != nil {
-		r.Log.Error(err, "failed to apply chaos action")
+			updateError := retry.RetryOnConflict(retry.DefaultRetry, func() error {
+				return r.Update(ctx, chaos)
+			})
+			if updateError != nil {
+				r.Log.Error(updateError, "unable to update chaos finalizers")
+			}
 
-		updateError := retry.RetryOnConflict(retry.DefaultRetry, func() error {
-			return r.Update(ctx, chaos)
-		})
-		if updateError != nil {
-			r.Log.Error(updateError, "unable to update chaos finalizers")
+			return ctrl.Result{Requeue: true}, nil
 		}
-
-		return ctrl.Result{Requeue: true}, nil
+		status.Experiment.StartTime = &metav1.Time{
+			Time: time.Now(),
+		}
+		status.Experiment.Phase = v1alpha1.ExperimentPhaseRunning
 	}
-	status.Experiment.StartTime = &metav1.Time{
-		Time: time.Now(),
-	}
-	status.Experiment.Phase = v1alpha1.ExperimentPhaseRunning
 
 	if err := r.Update(ctx, chaos); err != nil {
 		r.Log.Error(err, "unable to update chaosctl status")

@@ -43,10 +43,15 @@ controllerManager:
 
   affinity: {}
 
+  podAnnotations: {}
+
 chaosDaemon:
   image: pingcap/chaos-daemon:latest
   imagePullPolicy: Always
-  port: 31767
+  grpcPort: 31767
+  httpPort: 31766
+
+  podAnnotations: {}
 
   # runtime specifies which container runtime to use. Currently
   # we only supports docker and containerd.
@@ -74,6 +79,8 @@ dashboard:
 
   affinity: {}
 
+  podAnnotations: {}
+
   resources:
     # We usually recommend not to specify default resources and to leave this as a conscious
     # choice for the user. This also increases chances charts run on environments with little
@@ -89,3 +96,9 @@ dashboard:
   volume:
     storage: 3Gi
     storageClassName: standard
+
+preJobs:
+  podAnnotations: {}
+
+postJobs:
+  podAnnotations: {}

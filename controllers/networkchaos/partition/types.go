@@ -19,33 +19,31 @@ import (
 	"errors"
 	"fmt"
 
-	"golang.org/x/sync/errgroup"
-
 	"github.com/go-logr/logr"
-
-	"github.com/pingcap/chaos-mesh/api/v1alpha1"
-	"github.com/pingcap/chaos-mesh/controllers/reconciler"
-	"github.com/pingcap/chaos-mesh/controllers/twophase"
-	pb "github.com/pingcap/chaos-mesh/pkg/chaosdaemon/pb"
-	"github.com/pingcap/chaos-mesh/pkg/utils"
-
+	"golang.org/x/sync/errgroup"
 	v1 "k8s.io/api/core/v1"
 	k8sError "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/tools/cache"
-
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+
+	"github.com/pingcap/chaos-mesh/api/v1alpha1"
+	"github.com/pingcap/chaos-mesh/controllers/common"
+	"github.com/pingcap/chaos-mesh/controllers/reconciler"
+	"github.com/pingcap/chaos-mesh/controllers/twophase"
+	pb "github.com/pingcap/chaos-mesh/pkg/chaosdaemon/pb"
+	"github.com/pingcap/chaos-mesh/pkg/utils"
 )
 
 const (
-	networkPartitionActionMsg = "part network for %s"
+	networkPartitionActionMsg = "partition network duration %s"
 
 	sourceIpSetPostFix = "src"
 	targetIpSetPostFix = "tgt"
 )
 
-func NewReconciler(c client.Client, log logr.Logger, req ctrl.Request) twophase.Reconciler {
+func newReconciler(c client.Client, log logr.Logger, req ctrl.Request) twophase.Reconciler {
 	return twophase.Reconciler{
 		InnerReconciler: &Reconciler{
 			Client: c,
@@ -54,6 +52,18 @@ func NewReconciler(c client.Client, log logr.Logger, req ctrl.Request) twophase.
 		Client: c,
 		Log:    log,
 	}
+}
+
+// NewTwoPhaseReconciler would create Reconciler for twophase package
+func NewTwoPhaseReconciler(c client.Client, log logr.Logger, req ctrl.Request) *twophase.Reconciler {
+	r := newReconciler(c, log, req)
+	return twophase.NewReconciler(r, r.Client, r.Log)
+}
+
+// NewCommonReconciler would create Reconciler for common package
+func NewCommonReconciler(c client.Client, log logr.Logger, req ctrl.Request) *common.Reconciler {
+	r := newReconciler(c, log, req)
+	return common.NewReconciler(r, r.Client, r.Log)
 }
 
 type Reconciler struct {
@@ -151,7 +161,10 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos reconcil
 			HostIP:    pod.Status.HostIP,
 			PodIP:     pod.Status.PodIP,
 			Action:    string(networkchaos.Spec.Action),
-			Message:   fmt.Sprintf(networkPartitionActionMsg, *networkchaos.Spec.Duration),
+		}
+
+		if networkchaos.Spec.Duration != nil {
+			ps.Message = fmt.Sprintf(networkPartitionActionMsg, *networkchaos.Spec.Duration)
 		}
 
 		networkchaos.Status.Experiment.Pods = append(networkchaos.Status.Experiment.Pods, ps)

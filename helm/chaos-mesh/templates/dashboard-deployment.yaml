@@ -23,6 +23,10 @@ spec:
         app.kubernetes.io/name: {{ template "chaos-mesh.name" . }}
         app.kubernetes.io/instance: {{ .Release.Name }}
         app.kubernetes.io/component: dashboard
+    {{- with .Values.dashboard.podAnnotations }}
+      annotations:
+{{ toYaml . | indent 8 }}
+    {{- end }}
     spec:
       {{- if .Values.dashboard.serviceAccount }}
       serviceAccount: {{ .Values.dashboard.serviceAccount }}
