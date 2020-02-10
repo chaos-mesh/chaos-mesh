@@ -10,8 +10,9 @@ set -e
 usage() {
     cat << EOF
 This script is used to install chaos-mesh.
-Before run this script, please ensure that:
+Before running this script, please ensure that:
 * have installed docker if you run chaos-mesh in local.
+* have installed Kubernetes if you run chaos-mesh in normal Kubernetes cluster
 USAGE:
     install.sh [FLAGS] [OPTIONS]
 FLAGS:
@@ -108,6 +109,11 @@ main() {
                 ;;
         esac
     done
+
+    if [ "${local_kube}" != "" ] || [ "${local_kube}" != "kind" ]; then
+		printf "local Kubernetes by %s is not supported" "${local_kube}"
+		exit 1
+    fi
 
 	need_cmd "sed"
 	need_cmd "tr"
