@@ -42,7 +42,7 @@ var fakeImage = []byte{
 	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, //TV_NSEC_DELTA
 }
 
-func ModifyTime(pid int, delta_sec int64, delta_nsec int64, fake_image_path string) error {
+func ModifyTime(pid int, delta_sec int64, delta_nsec int64) error {
 	program, err := ptrace.Trace(pid)
 	if err != nil {
 		return err
