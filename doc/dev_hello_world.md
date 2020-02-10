@@ -1,5 +1,5 @@
-## Develop A HelloWorldChaos
-After [preparing the development environment](./setup_env.md), let's develop a new type of chaos, HelloWorldChaos, which only prints a "hello world" message to log.
+# Develop a chaos type
+After [preparing the development environment](./setup_env.md), it's time we started hacking on Chaos Mesh. In this tutorial, we will walk you through how to develop a new chaos type, HelloWorldChaos, which only prints a "hello world" message to log.
 
 As we know, the chaos is managed by the controller manager, so we should do something with the controller manager to add our HelloWorldChaos. 
 
@@ -176,7 +176,7 @@ Install Chaos Mesh:
 helm install helm/chaos-mesh --name=chaos-mesh --namespace=chaos-testing --set chaosDaemon.runtime=containerd --set chaosDaemon.socketPath=/run/containerd/containerd.sock
 kubectl get pods --namespace chaos-testing -l app.kubernetes.io/instance=chaos-mesh
 ```
-The arguments `--set chaosDaemon.runtime=containerd --set chaosDaemon.socketPath=/run/containerd/containerd.sock` is used to to support network chaos on kind.
+The arguments `--set chaosDaemon.runtime=containerd --set chaosDaemon.socketPath=/run/containerd/containerd.sock` is used to support network chaos on kind.
 
 Create chaos.yaml with content:
 ```yaml
