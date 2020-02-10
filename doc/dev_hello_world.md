@@ -29,7 +29,8 @@ Check out the [main.go](https://github.com/pingcap/chaos-mesh/blob/master/cmd/co
 		os.Exit(1)
 	}
 ```
-There are PodChaos, NetworkChaos and IoChaos. Let's add HelloWorldChaos:
+There are PodChaos, NetworkChaos and IoChaos .etc. They register the corresponding reconciler to the controller manager so the controller manager know which reconciler to call on a specific CRD.
+Let's add HelloWorldChaos:
 ```golang
 	if err = (&controllers.HelloWorldChaosReconciler{
 		Client: mgr.GetClient(),
