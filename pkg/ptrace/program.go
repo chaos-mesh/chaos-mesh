@@ -30,7 +30,7 @@ import "C"
 
 import (
 	"bytes"
-	elf2 "debug/elf"
+	"debug/elf"
 	"encoding/binary"
 	"fmt"
 	"syscall"
@@ -247,9 +247,25 @@ func (p *TracedProgram) WriteSlice(addr uint64, buffer []byte) error {
 		0,
 	)
 	if ret == -1 {
+		fmt.Printf("remote addr %x\n", C.Uint64ToPointer(C.ulong(addr)))
 		return err
 	}
 	// TODO: check size and warn
+
+	return nil
+}
+
+func (p *TracedProgram) PtraceWriteSlice(addr uint64, buffer []byte) error {
+	wroteSize := 0
+
+	for wroteSize < len(buffer) {
+		_, err := syscall.PtracePokeData(p.pid, uintptr(addr+uint64(wroteSize)), buffer[wroteSize:wroteSize+ptrSize])
+		if err != nil {
+			return err
+		}
+
+		wroteSize += ptrSize
+	}
 
 	return nil
 }
@@ -264,6 +280,28 @@ func (p *TracedProgram) GetLibBuffer(entry *mapreader.Entry) (*[]byte, error) {
 	return p.ReadSlice(entry.StatAddress, size)
 }
 
+func (p *TracedProgram) MmapSlice(slice []byte) (*mapreader.Entry, error) {
+	size := uint64(len(slice))
+
+	addr, err := p.Mmap(size, 0)
+	if err != nil {
+		return nil, err
+	}
+
+	err = p.WriteSlice(addr, slice)
+	if err != nil {
+		return nil, err
+	}
+
+	return &mapreader.Entry{
+		StatAddress: addr,
+		EndAddress:  addr + size,
+		Privilege:   "rwxp",
+		PaddingSize: 0,
+		Path:        "",
+	}, nil
+}
+
 func (p *TracedProgram) FindSymbolInEntry(symbolName string, entry *mapreader.Entry) (uint64, error) {
 	libBuffer, err := p.GetLibBuffer(entry)
 	if err != nil {
@@ -271,7 +309,7 @@ func (p *TracedProgram) FindSymbolInEntry(symbolName string, entry *mapreader.En
 	}
 
 	reader := bytes.NewReader(*libBuffer)
-	elf, err := elf2.NewFile(reader)
+	elf, err := elf.NewFile(reader)
 	if err != nil {
 		return 0, err
 	}
@@ -283,9 +321,36 @@ func (p *TracedProgram) FindSymbolInEntry(symbolName string, entry *mapreader.En
 	for _, symbol := range symbols {
 		if symbol.Name == symbolName {
 			offset := symbol.Value
+			fmt.Printf("offset: %x\n", offset)
 
 			return entry.StatAddress + offset, nil
 		}
 	}
 	return 0, fmt.Errorf("cannot find symbol")
+}
+
+func (p *TracedProgram) WriteUint64ToAddr(addr uint64, value uint64) error {
+	valueSlice := make([]byte, 8)
+	binary.LittleEndian.PutUint64(valueSlice, uint64(value))
+	err := p.WriteSlice(addr, valueSlice)
+	if err != nil {
+		fmt.Println("HERE2")
+		return err
+	}
+
+	return nil
+}
+
+func (p *TracedProgram) JumpToFakeFunc(originAddr uint64, targetAddr uint64, symbolName string) error {
+	instructions := make([]byte, 16)
+
+	// mov rax, targetAddr;
+	// jmp rax ;
+	instructions[0] = 0x48
+	instructions[1] = 0xb8
+	binary.LittleEndian.PutUint64(instructions[2:10], targetAddr)
+	instructions[10] = 0xff
+	instructions[11] = 0xe0
+
+	return p.PtraceWriteSlice(originAddr, instructions)
 }

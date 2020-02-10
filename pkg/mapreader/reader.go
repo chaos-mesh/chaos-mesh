@@ -39,35 +39,42 @@ func Read(pid int) (error, *[]Entry) {
 	var entries []Entry
 	for _, line := range lines {
 		sections := strings.Split(line, " ")
+		if len(sections) < 3 {
+			continue
+		}
+
+		var path string
 
 		if len(sections) > 5 {
-			addresses := strings.Split(sections[0], "-")
-
-			startAddress, err := strconv.ParseUint(addresses[0], 16, 64)
-			if err != nil {
-				return err, nil
-			}
-			endAddresses, err := strconv.ParseUint(addresses[1], 16, 64)
-			if err != nil {
-				return err, nil
-			}
-
-			privilege := sections[1]
-
-			paddingSize, err := strconv.ParseUint(sections[2], 16, 64)
-			if err != nil {
-				return err, nil
-			}
-
-			path := sections[len(sections)-1]
-			entries = append(entries, Entry{
-				startAddress,
-				endAddresses,
-				privilege,
-				paddingSize,
-				path,
-			})
+			path = sections[len(sections)-1]
+		} else {
+			path = ""
 		}
+
+		addresses := strings.Split(sections[0], "-")
+		startAddress, err := strconv.ParseUint(addresses[0], 16, 64)
+		if err != nil {
+			return err, nil
+		}
+		endAddresses, err := strconv.ParseUint(addresses[1], 16, 64)
+		if err != nil {
+			return err, nil
+		}
+
+		privilege := sections[1]
+
+		paddingSize, err := strconv.ParseUint(sections[2], 16, 64)
+		if err != nil {
+			return err, nil
+		}
+
+		entries = append(entries, Entry{
+			startAddress,
+			endAddresses,
+			privilege,
+			paddingSize,
+			path,
+		})
 	}
 
 	return nil, &entries

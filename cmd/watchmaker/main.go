@@ -24,10 +24,11 @@ import (
 )
 
 var (
-	pid          int
-	sec_delta    int64
-	nsec_delta   int64
-	printVersion bool
+	pid             int
+	sec_delta       int64
+	nsec_delta      int64
+	fake_image_path string
+	printVersion    bool
 )
 
 func initFlag() {
@@ -48,7 +49,7 @@ func main() {
 		os.Exit(0)
 	}
 
-	err := time.ModifyTime(pid, sec_delta, nsec_delta)
+	err := time.ModifyTime(pid, sec_delta, nsec_delta, fake_image_path)
 
 	if err != nil {
 		fmt.Printf("error while modifying time, pid: %d, sec_delta: %d, nsec_delta: %d\n Error: %s", pid, sec_delta, nsec_delta, err.Error())
