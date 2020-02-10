@@ -41,9 +41,6 @@ spec:
             - !!str {{ .Values.chaosDaemon.httpPort }}
             - --grpc-port
             - !!str {{ .Values.chaosDaemon.grpcPort }}
-          env:
-            - name: PORT
-              value: !!str {{ .Values.chaosDaemon.port }}
           securityContext:
             privileged: true
           volumeMounts:
