@@ -24,7 +24,7 @@ import (
 	pb "github.com/pingcap/chaos-mesh/pkg/chaosdaemon/pb"
 )
 
-func (s *Server) SetNetem(ctx context.Context, in *pb.NetemRequest) (*empty.Empty, error) {
+func (s *daemonServer) SetNetem(ctx context.Context, in *pb.NetemRequest) (*empty.Empty, error) {
 	log.Info("set netem", "Request", in)
 
 	pid, err := s.crClient.GetPidFromContainerID(ctx, in.ContainerId)
@@ -40,7 +40,7 @@ func (s *Server) SetNetem(ctx context.Context, in *pb.NetemRequest) (*empty.Empt
 	return &empty.Empty{}, nil
 }
 
-func (s *Server) DeleteNetem(ctx context.Context, in *pb.NetemRequest) (*empty.Empty, error) {
+func (s *daemonServer) DeleteNetem(ctx context.Context, in *pb.NetemRequest) (*empty.Empty, error) {
 	log.Info("delete netem", "Request", in)
 
 	pid, err := s.crClient.GetPidFromContainerID(ctx, in.ContainerId)
