@@ -31,7 +31,7 @@ const (
 	iptablesIpSetNotExistErr = "doesn't exist.\n\nTry `iptables -h' or 'iptables --help' for more information.\n"
 )
 
-func (s *Server) FlushIptables(ctx context.Context, req *pb.IpTablesRequest) (*empty.Empty, error) {
+func (s *daemonServer) FlushIptables(ctx context.Context, req *pb.IpTablesRequest) (*empty.Empty, error) {
 	log.Info("flush iptables rules", "request", req)
 
 	pid, err := s.crClient.GetPidFromContainerID(ctx, req.ContainerId)
@@ -73,7 +73,7 @@ func (s *Server) FlushIptables(ctx context.Context, req *pb.IpTablesRequest) (*e
 	return &empty.Empty{}, nil
 }
 
-func (s *Server) addIptablesRules(ctx context.Context, cmd *exec.Cmd) error {
+func (s *daemonServer) addIptablesRules(ctx context.Context, cmd *exec.Cmd) error {
 	log.Info("add iptables rules", "command", cmd.String())
 
 	out, err := cmd.CombinedOutput()
@@ -85,7 +85,7 @@ func (s *Server) addIptablesRules(ctx context.Context, cmd *exec.Cmd) error {
 	return nil
 }
 
-func (s *Server) deleteIptablesRules(ctx context.Context, cmd *exec.Cmd) error {
+func (s *daemonServer) deleteIptablesRules(ctx context.Context, cmd *exec.Cmd) error {
 	log.Info("delete iptables rules", "command", cmd.String())
 
 	out, err := cmd.CombinedOutput()
