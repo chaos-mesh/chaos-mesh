@@ -35,8 +35,8 @@ var (
 
 func init() {
 	flag.BoolVar(&printVersion, "version", false, "print version information and exit")
-	flag.IntVar(&conf.GRPCPort, "grpc-port", 8080, "the port which grpc server listens on")
-	flag.IntVar(&conf.HTTPPort, "http-port", 8081, "the port which http server listens on")
+	flag.IntVar(&conf.GRPCPort, "grpc-port", 31767, "the port which grpc server listens on")
+	flag.IntVar(&conf.HTTPPort, "http-port", 31766, "the port which http server listens on")
 	flag.StringVar(&conf.Runtime, "runtime", "docker", "current container runtime")
 
 	flag.Parse()
