@@ -15,7 +15,7 @@ package chaosdaemon
 
 import (
 	"context"
-	//testyihaofu
+
 	"github.com/golang/protobuf/ptypes/empty"
 
 	pb "github.com/pingcap/chaos-mesh/pkg/chaosdaemon/pb"

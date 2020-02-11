@@ -17,7 +17,7 @@ import (
 	"context"
 	"fmt"
 	"os/exec"
-	"strings"
+	"syscall"
 
 	"github.com/containerd/containerd"
 	dockerclient "github.com/docker/docker/client"
@@ -125,7 +125,10 @@ func withNetNS(ctx context.Context, nsPath string, cmd string, args ...string) *
 
 // ContainerKillByContainerID kills container according to container id
 func (c DockerClient) ContainerKillByContainerID(ctx context.Context, containerID string) error {
-	err := c.client.ContainerKill(ctx, containerID[strings.Index(containerID, "//")+2:], "SIGKILL")
+	if containerID[0:len(dockerProtocolPrefix)] != dockerProtocolPrefix {
+		return fmt.Errorf("expected %s but got %s", dockerProtocolPrefix, containerID[0:len(dockerProtocolPrefix)])
+	}
+	err := c.client.ContainerKill(ctx, containerID[len(dockerProtocolPrefix):], "SIGKILL")
 	if err != nil {
 		return err
 	}
@@ -135,16 +138,21 @@ func (c DockerClient) ContainerKillByContainerID(ctx context.Context, containerI
 
 // ContainerKillByContainerID kills container according to container id
 func (c ContainerdClient) ContainerKillByContainerID(ctx context.Context, containerID string) error {
+	if containerID[0:len(containerdProtocolPrefix)] != containerdProtocolPrefix {
+		return fmt.Errorf("expected %s but got %s", containerdProtocolPrefix, containerID[0:len(containerdProtocolPrefix)])
+	}
 	containerID = containerID[len(containerdProtocolPrefix):]
 	container, err := c.client.LoadContainer(ctx, containerID)
 	if err != nil {
 		return err
 	}
-
-	err = container.Delete(ctx)
+	task, err := container.Task(ctx, nil)
 	if err != nil {
 		return err
 	}
-
+	err = task.Kill(ctx, syscall.SIGKILL)
+	if err != nil {
+		return err
+	}
 	return nil
 }

@@ -46,7 +46,7 @@ controllerManager:
   podAnnotations: {}
 
 chaosDaemon:
-  image: pingcap/chaos-daemon:latest
+  image: 5000/pingcap/chaos-daemon:latest
   imagePullPolicy: Always
   grpcPort: 31767
   httpPort: 31766

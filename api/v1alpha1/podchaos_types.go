@@ -27,7 +27,8 @@ const (
 	PodKillAction PodChaosAction = "pod-kill"
 	// PodFailureAction represents the chaos action of injecting errors to pods.
 	// This action will cause the pod to not be created for a while.
-	PodFailureAction    PodChaosAction = "pod-failure"
+	PodFailureAction PodChaosAction = "pod-failure"
+	// ContainerKillAction represents the chaos action of killing the container
 	ContainerKillAction PodChaosAction = "container-kill"
 )
 
