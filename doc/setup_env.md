@@ -1,39 +1,56 @@
 # Set up the development environment
 
-### Prerequisites
-You should have these components installed in your system:
-- golang (>= v1.13), if your golang version < v1.13, you can use golang version manager such as [gvm](https://github.com/moovweb/gvm) to switch to a newer one.
-- [yarn](https://yarnpkg.com/lang/en/) and [nodejs](https://nodejs.org/en/): for chaos-dashboard
-- docker
-- gcc
-- helm
-- [kind](https://github.com/kubernetes-sigs/kind)
+This document walks you through the environment setup process for Chaos Mesh development.
 
-### Step By Step
-Firstly, clone the repo
+## Prerequisites
+
+- [golang](https://golang.org/dl/) (>= v1.13)
+- [docker](https://www.docker.com/)
+- [gcc](https://gcc.gnu.org/)
+- [Helm](https://helm.sh/) >= v2.8.2
+- [kind](https://github.com/kubernetes-sigs/kind)
+- [yarn](https://yarnpkg.com/lang/en/) and [nodejs](https://nodejs.org/en/) (for chaos-dashboard)
+
+## Prepare the toolchain
+
+Make sure you have the above prerequisites met. Now follow the steps below to prepare the toolchain for compiling Chaos Mesh:
+
+1. clone the chaos-mesh repo to your local.
+
 ```
 git clone https://github.com/pingcap/chaos-mesh.git
 cd chaos-mesh
 ```
-Then, install [kubebuilder](https://github.com/kubernetes-sigs/kubebuilder) and [kustomize](https://github.com/kubernetes-sigs/kustomize)
+
+2. Install the K8s API development framework - [kubebuilder](https://github.com/kubernetes-sigs/kubebuilder) and [kustomize](https://github.com/kubernetes-sigs/kustomize).
+
 ```
 make install-kubebuilder
 make install-kustomize
 ```
-Install [docker](https://docs.docker.com/install/) and start docker service.
 
-Then we can test the toolchain
+3. Start the docker service. Most Linux distributions use `systemctl` to start services. If you do not have `systemctl`, use the service command.
+
+
+Now you can test the toolchain by running:
+
 ```
 make
 ```
-It should work. But it's not enough yet, we need to set up a local Kubernetes cluster, which needs [kind](https://github.com/kubernetes-sigs/kind)
-```
-curl -Lo ./kind "https://github.com/kubernetes-sigs/kind/releases/download/v0.7.0/kind-$(uname)-amd64"
-chmod +x ./kind
-mv kind /usr/local/bin/
-```
-Then we can set up the k8s cluster with the script
+
+If there is no error in the output, the compiling toolchain is successfully configured.
+
+## Prepare the deployment environment
+
+With the toolchain ready, we still need a local Kubernetes cluster as the deployment environment. As we already have kind installed, we can now set up the K8s cluster directly:
+
 ```
 hack/kind-cluster-build.sh
 ```
-Now we have our environment done!
+
+## Next steps
+
+Congratulations. You are now all set up for Chaos Mesh development. Try the following tasks:
+
+- [Develop a New Chaos Type](./dev_hello_world.md)
+- [ ] [Add facilities to chaos daemon]
