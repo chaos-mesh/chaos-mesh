@@ -64,11 +64,11 @@ func (p *TracedProgram) Pid() int {
 
 func waitPid(pid int) error {
 	ret := waitpid(pid)
-	if ret != -1 {
+	if ret == pid {
 		return nil
-	} else {
-		return fmt.Errorf(waitPidErrorMessage, ret)
 	}
+
+	return fmt.Errorf(waitPidErrorMessage, ret)
 }
 
 func constructPartialProgram(pid int, tidMap map[int]bool) *TracedProgram {
@@ -131,7 +131,7 @@ func Trace(pid int) (*TracedProgram, error) {
 		tids = append(tids, key)
 	}
 
-	err, entries := mapreader.Read(pid)
+	entries, err := mapreader.Read(pid)
 	if err != nil {
 		return constructPartialProgram(pid, tidMap), err
 	}

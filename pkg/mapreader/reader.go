@@ -28,10 +28,10 @@ type Entry struct {
 	Path        string
 }
 
-func Read(pid int) (error, *[]Entry) {
+func Read(pid int) (*[]Entry, error) {
 	data, err := ioutil.ReadFile(fmt.Sprintf("/proc/%d/maps", pid))
 	if err != nil {
-		return err, nil
+		return nil, err
 	}
 
 	lines := strings.Split(string(data), "\n")
@@ -54,18 +54,18 @@ func Read(pid int) (error, *[]Entry) {
 		addresses := strings.Split(sections[0], "-")
 		startAddress, err := strconv.ParseUint(addresses[0], 16, 64)
 		if err != nil {
-			return err, nil
+			return nil, err
 		}
 		endAddresses, err := strconv.ParseUint(addresses[1], 16, 64)
 		if err != nil {
-			return err, nil
+			return nil, err
 		}
 
 		privilege := sections[1]
 
 		paddingSize, err := strconv.ParseUint(sections[2], 16, 64)
 		if err != nil {
-			return err, nil
+			return nil, err
 		}
 
 		entries = append(entries, Entry{
@@ -77,5 +77,5 @@ func Read(pid int) (error, *[]Entry) {
 		})
 	}
 
-	return nil, &entries
+	return &entries, nil
 }

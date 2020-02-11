@@ -14,9 +14,9 @@
 package time
 
 import (
-	"github.com/pingcap/chaos-mesh/pkg/mapreader"
 	"runtime"
 
+	"github.com/pingcap/chaos-mesh/pkg/mapreader"
 	"github.com/pingcap/chaos-mesh/pkg/ptrace"
 
 	ctrl "sigs.k8s.io/controller-runtime"
