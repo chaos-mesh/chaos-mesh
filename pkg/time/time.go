@@ -44,20 +44,15 @@ var fakeImage = []byte{
 
 func ModifyTime(pid int, delta_sec int64, delta_nsec int64) error {
 	program, err := ptrace.Trace(pid)
+	defer func() {
+		err = program.Detach()
+		if err != nil {
+			log.Error(err, "fail to detach program", "pid", program.Pid())
+		}
+	}()
 	if err != nil {
 		return err
 	}
-	defer func() {
-		err := program.Cont()
-		if err != nil {
-			log.Error(err, "fail to continue program")
-		}
-
-		err = program.Detach()
-		if err != nil {
-			log.Error(err, "fail to detach program")
-		}
-	}()
 
 	var vdsoEntry *mapreader.Entry
 	for _, e := range *program.Entries {

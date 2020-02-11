@@ -20,8 +20,7 @@ package ptrace
 #include <errno.h>
 */
 import "C"
-import "unsafe"
 
-func waitpid(pid int, status *int) int {
-	return int(C.waitpid(C.int(pid), (*C.int)(unsafe.Pointer(&status)), 0))
+func waitpid(pid int) int {
+	return int(C.waitpid(C.int(pid), nil, C.__WALL))
 }

@@ -33,13 +33,18 @@ import (
 	"debug/elf"
 	"encoding/binary"
 	"fmt"
+	"runtime"
 	"syscall"
 	"unsafe"
+
+	ctrl "sigs.k8s.io/controller-runtime"
 
 	"github.com/pingcap/chaos-mesh/pkg/mapreader"
 )
 
-const waitPidErrorMessage = "waitpid ret value: %d, status: %d"
+var log = ctrl.Log.WithName("ptrace")
+
+const waitPidErrorMessage = "waitpid ret value: %d"
 
 const ptrSize = 4 << uintptr(^uintptr(0)>>63) // Here is a trick to get pointer size in bytes
 
@@ -51,14 +56,16 @@ type TracedProgram struct {
 	backupCode []byte
 }
 
-func waitPid(pid int) error {
-	status := 0
+func (p *TracedProgram) Pid() int {
+	return p.pid
+}
 
-	ret := waitpid(pid, &status)
+func waitPid(pid int) error {
+	ret := waitpid(pid)
 	if ret != -1 {
 		return nil
 	} else {
-		return fmt.Errorf(waitPidErrorMessage, ret, status)
+		return fmt.Errorf(waitPidErrorMessage, ret)
 	}
 }
 
@@ -78,12 +85,17 @@ func Trace(pid int) (*TracedProgram, error) {
 		return nil, err
 	}
 
-	return &TracedProgram{
+	program := &TracedProgram{
 		pid:        pid,
 		Entries:    entries,
 		backupRegs: syscall.PtraceRegs{},
 		backupCode: make([]byte, ptrSize),
-	}, nil
+	}
+	runtime.SetFinalizer(program, func(p *TracedProgram) {
+		_ = p.Detach()
+	})
+
+	return program, nil
 }
 
 func (p *TracedProgram) Cont() error {
@@ -91,7 +103,14 @@ func (p *TracedProgram) Cont() error {
 }
 
 func (p *TracedProgram) Detach() error {
-	return syscall.PtraceDetach(p.pid)
+	err := syscall.PtraceDetach(p.pid)
+
+	if err != nil {
+		return err
+	}
+
+	log.Info("Successfully detach and rerun process", "pid", p.pid)
+	return nil
 }
 
 // Protect will backup regs and rip into fields
