@@ -1,36 +1,21 @@
-# Develop a chaos type
-After [preparing the development environment](./setup_env.md), it's time we started hacking on Chaos Mesh. In this tutorial, we will walk you through how to develop a new chaos type, HelloWorldChaos, which only prints a "hello world" message to log.
+# Develop a New Chaos
 
-As we know, the chaos is managed by the controller manager, so we should do something with the controller manager to add our HelloWorldChaos. 
+After [preparing the development environment](./setup_env.md), let's develop a new type of chaos, HelloWorldChaos, which only prints a "hello world" message to log. Generally, to add a new chaos type for Chaos Mesh, you need the following steps:
 
-Check out the [main.go](https://github.com/pingcap/chaos-mesh/blob/master/cmd/controller-manager/main.go#L104) of controller manager we can see there are already some types of chaos:
-```golang
-	if err = (&controllers.PodChaosReconciler{
-		Client: mgr.GetClient(),
-		Log:    ctrl.Log.WithName("controllers").WithName("PodChaos"),
-	}).SetupWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create controller", "controller", "PodChaos")
-		os.Exit(1)
-	}
+1. [Add the chaos object in controller](#add-the-chaos-object-in-controller)
+2. [Register the CRD](#register-the-crd)
+3. [Implement the schema type](implement-the-schema-type)
+4. [Make the docker image](#make-the-docker-image)
+5. [Run-chaos](#run-chaos)
 
-	if err = (&controllers.NetworkChaosReconciler{
-		Client: mgr.GetClient(),
-		Log:    ctrl.Log.WithName("controllers").WithName("NetworkChaos"),
-	}).SetupWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create controller", "controller", "NetworkChaos")
-		os.Exit(1)
-	}
+## Add the chaos object in controller
 
-	if err = (&controllers.IoChaosReconciler{
-		Client: mgr.GetClient(),
-		Log:    ctrl.Log.WithName("controllers").WithName("IoChaos"),
-	}).SetupWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create controller", "controller", "IoChaos")
-		os.Exit(1)
-	}
-```
-There are PodChaos, NetworkChaos and IoChaos .etc. They register the corresponding reconciler to the controller manager so the controller manager know which reconciler to call on a specific CRD.
-Let's add HelloWorldChaos:
+In Chaos Mesh, all chaos types are managed by the controller manager. To add a new chaos type, you need to start from adding the corresponding reconciler type in the controller, as instructed in the following steps:
+
+1. Add the HelloWorldChaos object in the controler manager [main.go](https://github.com/pingcap/chaos-mesh/blob/master/cmd/controller-manager/main.go#L104),
+
+**Note:** You will notice existing chaos types such as PodChaos, NetworkChaos and IoChaos. Add the new type below them.
+
 ```golang
 	if err = (&controllers.HelloWorldChaosReconciler{
 		Client: mgr.GetClient(),
@@ -40,9 +25,10 @@ Let's add HelloWorldChaos:
 		os.Exit(1)
 	}
 ```
-Of course this won't work since we didn't implement HelloWorldChaosReconciler yet, we should implement it in [controllers](https://github.com/pingcap/chaos-mesh/tree/master/controllers).
 
-Add a new file helloworldchaos_controller.go:
+1. Under [controllers](https://github.com/pingcap/chaos-mesh/tree/master/controllers), create a `helloworldchaos_controller.go` file and edit it as below:
+
+
 ```golang
 package controllers
 
@@ -67,7 +53,7 @@ type HelloWorldChaosReconciler struct {
 func (r *HelloWorldChaosReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	logger := r.Log.WithValues("reconciler", "helloworldchaos")
 
-        // This is what we want to do
+        //  the main logic of `HelloWorldChaos`, it prints a log `Hello World!` and returns nothing.
 	logger.Info("Hello World!")
 
 	return ctrl.Result{}, nil
@@ -75,25 +61,20 @@ func (r *HelloWorldChaosReconciler) Reconcile(req ctrl.Request) (ctrl.Result, er
 
 func (r *HelloWorldChaosReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
+	//exports `HelloWorldChaos` object, which represents the yaml schema content the user applies.
 		For(&chaosmeshv1alpha1.HelloWorldChaos{}).
 		Complete(r)
 }
 ```
-We implement a reconciler in this file, it has only two methods:
-- `Reconcile`: the main logic of `HelloWorldChaos`, it prints a log `Hello World!` and returns nothing.
-- `SetupWithManager`: as you see in [main.go](https://github.com/pingcap/chaos-mesh/blob/master/cmd/controller-manager/main.go#L104), this method is used to export `HelloWorldChaos` object, which represents the yaml schema content the user applies.
 
-The comment `// +kubebuilder:rbac:groups=pingcap.com...` is an authority control mechanism that decides which account can access this reconciler. To make it be accessible by dashboard and chaos-controller-manager we should modify [collector-rbac.yaml](https://github.com/pingcap/chaos-mesh/blob/master/helm/chaos-mesh/templates/collector-rbac.yaml) and [controller-manager-rbac.yaml](https://github.com/pingcap/chaos-mesh/blob/master/helm/chaos-mesh/templates/controller-manager-rbac.yaml), adding helloworldchaos to resources of all "pingcap.com" apiGroup:
-```yaml
-  - apiGroups: ["pingcap.com"]
-    resources:
-      - podchaos
-      - networkchaos
-      - iochaos
-      - helloworldchaos    # Add this line in all pingcap.com group
-    verbs: ["*"]
-```
-HelloWorldChaos is a CRD in k8s, so we should register it, to do this, we can modify [kustomization.yaml](https://github.com/pingcap/chaos-mesh/blob/master/config/crd/kustomization.yaml), adding one line in resources section:
+> **Note:**
+>
+> The comment `// +kubebuilder:rbac:groups=pingcap.com...` is an authority control mechanism that decides which account can access this reconciler. To make it be accessible by dashboard and chaos-controller-manager, we need to modify  [collector-rbac.yaml](https://github.com/pingcap/chaos-mesh/blob/master/helm/chaos-mesh/templates/collector-rbac.yaml) and [controller-manager-rbac.yaml](https://github.com/pingcap/chaos-mesh/blob/master/helm/chaos-mesh/templates/controller-manager-rbac.yaml) accordingly.
+
+## Register the CRD
+
+The HelloWorldChaos object is a customer resource object in k8s. This means you need to register the corresponding CRD in the K8s API. To do this, modify [kustomization.yaml](https://github.com/pingcap/chaos-mesh/blob/master/config/crd/kustomization.yaml) by adding the corresponding line as shown below:
+
 ```yaml
 resources:
 - bases/pingcap.com_podchaos.yaml
@@ -102,7 +83,11 @@ resources:
 - bases/pingcap.com_helloworldchaos.yaml  # this is the new line
 ```
 
-The last step is to implement the schema type in [api directory](https://github.com/pingcap/chaos-mesh/tree/master/api/v1alpha1). Add helloworldchaos_types.go:
+## Implement the schema type
+
+To implement the schema type for the new chaos object, add `helloworldchaos_types.go` in the [api directory](https://github.com/pingcap/chaos-mesh/tree/master/api/v1alpha1) and modify it as below:
+
+
 ```golang
 package v1alpha1
 
@@ -131,7 +116,9 @@ func init() {
 	SchemeBuilder.Register(&HelloWorldChaos{}, &HelloWorldChaosList{})
 }
 ```
-The `HelloWorldChaos` type represents the yaml content:
+
+With this file added, the `HelloWorldChaos` schema type is defined and can be called by the following yaml lines:
+
 ```yaml
 apiVersion: pingcap.com/v1alpha1
 kind: HelloWorldChaos
@@ -140,14 +127,25 @@ metadata:
   namespace: <ns-of-this-resource>
 ```
 
-Having all these done, we can make images now:
+## Make the image
+
+Having the object successfully added, we can make docker image and push it to your registry:
+
 ```
 make
 make docker-push
 ```
-Note that the default `DOCKER_REGISTRY` is `localhost:5000`, which is set up by `hack/kind-cluster-build.sh`, you can overwrite it to any registry you have access permission, for development, this is enough.
 
-Before we install or upgrade chaos-mesh, we should modify [values.yaml](https://github.com/pingcap/chaos-mesh/blob/master/helm/chaos-mesh/values.yaml) of helm template, replacing the image to what we have pushed. For example, the template using `pingcap/chaos-mesh:latest` as the target image, but what we have developed is `localhost:5000/pingcap/chaos-mesh:latest`, so we should correct this:
+Please note that the default `DOCKER_REGISTRY` is `localhost:5000`, which is preset in `hack/kind-cluster-build.sh`. You can overwrite it to any registry to which you have access permission.
+
+## Run Chaos
+
+You are almost there. In this step, we will pull the image and apply it for testing.
+
+**Note:**
+
+Before you pull any image for chaos-mesh (using `helm install` or `helm upgrade`), modify [values.yaml](https://github.com/pingcap/chaos-mesh/blob/master/helm/chaos-mesh/values.yaml) of helm template to replace the default image with what you just pushed to your local registry. In the case, the template uses `pingcap/chaos-mesh:latest` as the default target registry, so we need to replace it with `localhost:5000`, as shown below:
+
 ```yaml
 clusterScoped: true
 
@@ -167,19 +165,26 @@ dashboard:
   image: localhost:5000/pingcap/chaos-dashboard:latest
   ...
 ```
-Now we can create the related custom resource type for chaos-mesh:
+
+Now take the following steps to run chaos:
+
+1. Get the related custom resource type for chaos-mesh:
+
 ```
 kubectl apply -f manifests/
 kubectl get crd podchaos.pingcap.com
 ```
-Install Chaos Mesh:
+
+3. Install Chaos Mesh:
+
 ```
 helm install helm/chaos-mesh --name=chaos-mesh --namespace=chaos-testing --set chaosDaemon.runtime=containerd --set chaosDaemon.socketPath=/run/containerd/containerd.sock
 kubectl get pods --namespace chaos-testing -l app.kubernetes.io/instance=chaos-mesh
 ```
-The arguments `--set chaosDaemon.runtime=containerd --set chaosDaemon.socketPath=/run/containerd/containerd.sock` is used to support network chaos on kind.
+The arguments `--set chaosDaemon.runtime=containerd --set chaosDaemon.socketPath=/run/containerd/containerd.sock` is used to to support network chaos on kind.
 
-Create chaos.yaml with content:
+4. Create chaos.yaml with the lines below:
+
 ```yaml
 apiVersion: pingcap.com/v1alpha1
 kind: HelloWorldChaos
@@ -187,15 +192,21 @@ metadata:
   name: hello-world
   namespace: chaos-testing
 ```
-And apply it:
+
+5. Apply the chaos.
+
 ```
 kubectl apply -f chaos.yaml
 kubectl get HelloWorldChaos -n chaos-testing
 ```
-And try to check out the `Hello World!` result:
+
+Now you should be able to check the `Hello World!` result in the log:
+
 ```
 kubectl logs chaos-controller-manager-{pod-post-fix} -n chaos-testing
+# {pod-post-fix} is a random string generated by k8s
 ```
-The `pod-post-fix` is the random string generated by k8s, my pod name is `chaos-controller-manager-7fcc54c658-gnkjk`, you can check out yours by `kubectl get pods --namespace chaos-testing|grep chaos-controller-manager`.
 
-With the command `kubectl logs ...`, you should see the `Hello World!`.
+## Next steps
+
+Congratulations! You have just added a chaos type for Chaos Mesh successfully. Let us know if you run into any issues during the process. If you feel like doing other type of contributions , refer to [Add facilities to chaos daemon].
