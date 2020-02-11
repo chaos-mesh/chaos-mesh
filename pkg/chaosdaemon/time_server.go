@@ -19,7 +19,7 @@ func (s *Server) SetTimeOffset(ctx context.Context, req *pb.TimeRequest) (*empty
 
 	err = time.ModifyTime(int(pid), int64(req.Sec), int64(req.Nsec))
 	if err != nil {
-		log.Error(err, "error while modifying time")
+		log.Error(err, "error while modifying time", "pid", pid)
 		return nil, err
 	}
 	return &empty.Empty{}, nil
@@ -34,7 +34,7 @@ func (s *Server) RecoverTimeOffset(ctx context.Context, req *pb.TimeRequest) (*e
 
 	err = time.ModifyTime(int(pid), int64(0), int64(0))
 	if err != nil {
-		log.Error(err, "error while modifying time")
+		log.Error(err, "error while recovering", "pid", pid)
 		return nil, err
 	}
 	return &empty.Empty{}, nil

@@ -33,7 +33,8 @@ import (
 	"debug/elf"
 	"encoding/binary"
 	"fmt"
-	"runtime"
+	"io/ioutil"
+	"strconv"
 	"syscall"
 	"unsafe"
 
@@ -50,9 +51,10 @@ const ptrSize = 4 << uintptr(^uintptr(0)>>63) // Here is a trick to get pointer 
 
 type TracedProgram struct {
 	pid     int
+	tids    []int
 	Entries *[]mapreader.Entry
 
-	backupRegs syscall.PtraceRegs
+	backupRegs *syscall.PtraceRegs
 	backupCode []byte
 }
 
@@ -69,31 +71,78 @@ func waitPid(pid int) error {
 	}
 }
 
-func Trace(pid int) (*TracedProgram, error) {
-	err := syscall.PtraceAttach(pid)
-	if err != nil {
-		return nil, err
+func constructPartialProgram(pid int, tidMap map[int]bool) *TracedProgram {
+	var tids []int
+	for key := range tidMap {
+		tids = append(tids, key)
 	}
 
-	err = waitPid(pid)
-	if err != nil {
-		return nil, err
+	return &TracedProgram{
+		pid:        pid,
+		tids:       tids,
+		Entries:    nil,
+		backupRegs: nil,
+		backupCode: nil,
+	}
+}
+
+func Trace(pid int) (*TracedProgram, error) {
+	tidMap := make(map[int]bool)
+	for {
+		threads, err := ioutil.ReadDir(fmt.Sprintf("/proc/%d/task", pid))
+		if err != nil {
+			log.Error(err, "read failed", "pid", pid)
+			return constructPartialProgram(pid, tidMap), err
+		}
+
+		if len(threads) == len(tidMap) {
+			break
+		}
+
+		for _, thread := range threads {
+			tid64, err := strconv.ParseInt(thread.Name(), 10, 32)
+			if err != nil {
+				return constructPartialProgram(pid, tidMap), err
+			}
+			tid := int(tid64)
+
+			_, ok := tidMap[tid]
+			if ok {
+				continue
+			}
+
+			err = syscall.PtraceAttach(tid)
+			if err != nil {
+				log.Error(err, "attach failed", "tid", tid)
+				return constructPartialProgram(pid, tidMap), err
+			}
+			log.Info("attach successfully", "tid", tid)
+
+			err = waitPid(tid)
+			if err != nil {
+				return constructPartialProgram(pid, tidMap), err
+			}
+			tidMap[tid] = true
+		}
+	}
+
+	var tids []int
+	for key := range tidMap {
+		tids = append(tids, key)
 	}
 
 	err, entries := mapreader.Read(pid)
 	if err != nil {
-		return nil, err
+		return constructPartialProgram(pid, tidMap), err
 	}
 
 	program := &TracedProgram{
 		pid:        pid,
+		tids:       tids,
 		Entries:    entries,
-		backupRegs: syscall.PtraceRegs{},
+		backupRegs: &syscall.PtraceRegs{},
 		backupCode: make([]byte, ptrSize),
 	}
-	runtime.SetFinalizer(program, func(p *TracedProgram) {
-		_ = p.Detach()
-	})
 
 	return program, nil
 }
@@ -103,10 +152,13 @@ func (p *TracedProgram) Cont() error {
 }
 
 func (p *TracedProgram) Detach() error {
-	err := syscall.PtraceDetach(p.pid)
+	for _, tid := range p.tids {
+		err := syscall.PtraceDetach(tid)
 
-	if err != nil {
-		return err
+		if err != nil {
+			log.Error(err, "detach failed", "tid", tid)
+			return err
+		}
 	}
 
 	log.Info("Successfully detach and rerun process", "pid", p.pid)
@@ -115,7 +167,7 @@ func (p *TracedProgram) Detach() error {
 
 // Protect will backup regs and rip into fields
 func (p *TracedProgram) Protect() error {
-	err := syscall.PtraceGetRegs(p.pid, &p.backupRegs)
+	err := syscall.PtraceGetRegs(p.pid, p.backupRegs)
 	if err != nil {
 		return err
 	}
@@ -130,7 +182,7 @@ func (p *TracedProgram) Protect() error {
 
 // Restore will restore regs and rip from fields
 func (p *TracedProgram) Restore() error {
-	err := syscall.PtraceSetRegs(p.pid, &p.backupRegs)
+	err := syscall.PtraceSetRegs(p.pid, p.backupRegs)
 	if err != nil {
 		return err
 	}

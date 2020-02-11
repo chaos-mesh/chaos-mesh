@@ -15,6 +15,7 @@ package time
 
 import (
 	"github.com/pingcap/chaos-mesh/pkg/mapreader"
+	"runtime"
 
 	"github.com/pingcap/chaos-mesh/pkg/ptrace"
 
@@ -23,7 +24,7 @@ import (
 
 var log = ctrl.Log.WithName("time")
 
-// These codes are generated with gcc
+// TODO: auto generate these codes
 var fakeImage = []byte{
 	0xb8, 0xe4, 0x00, 0x00, 0x00, //mov    $0xe4,%eax
 	0x0f, 0x05, // syscall
@@ -43,12 +44,16 @@ var fakeImage = []byte{
 }
 
 func ModifyTime(pid int, delta_sec int64, delta_nsec int64) error {
+	runtime.LockOSThread()
+
 	program, err := ptrace.Trace(pid)
 	defer func() {
 		err = program.Detach()
 		if err != nil {
 			log.Error(err, "fail to detach program", "pid", program.Pid())
 		}
+
+		runtime.UnlockOSThread()
 	}()
 	if err != nil {
 		return err
