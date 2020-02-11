@@ -59,8 +59,8 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	}
 
 	if podchaos.Spec.ContainerName == "" {
-		err = errors.New("ContainerName is empty")
-		r.Log.Error(err, "ContainerName is empty")
+		err = errors.New("the ContainerName is empty")
+		r.Log.Error(err, "the ContainerName is empty")
 		return ctrl.Result{Requeue: true}, nil
 	}
 

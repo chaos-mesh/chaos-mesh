@@ -157,8 +157,8 @@ type PodChaosSpec struct {
 	// +optional
 	NextRecover *metav1.Time `json:"nextRecover,omitempty"`
 
+	// ContainerName Indicates the name of the container.
 	// Needed in container-kill.
-	// Indicates the name of the container
 	// +optional
 	ContainerName string `json:"containerName"`
 }

@@ -21,7 +21,8 @@ import (
 	pb "github.com/pingcap/chaos-mesh/pkg/chaosdaemon/pb"
 )
 
-func (s *Server) ContainerKill(ctx context.Context, req *pb.ContainerRequest) (*empty.Empty, error) {
+// ContainerKill kills container according to container id in the req
+func (s *daemonServer) ContainerKill(ctx context.Context, req *pb.ContainerRequest) (*empty.Empty, error) {
 	log.Info("container Kill")
 
 	err := s.crClient.ContainerKillByContainerID(ctx, req.ContainerId)
