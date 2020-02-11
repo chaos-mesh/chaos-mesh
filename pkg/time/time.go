@@ -57,6 +57,7 @@ func ModifyTime(pid int, delta_sec int64, delta_nsec int64) error {
 		}
 	}
 
+	// TODO: Check whether entry has been loaded before mmap it.
 	fakeEntry, err := program.MmapSlice(fakeImage)
 	if err != nil {
 		return err

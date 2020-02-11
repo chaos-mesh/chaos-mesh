@@ -24,17 +24,16 @@ import (
 )
 
 var (
-	pid             int
-	sec_delta       int64
-	nsec_delta      int64
-	fake_image_path string
-	printVersion    bool
+	pid          int
+	secDelta     int64
+	nsecDelta    int64
+	printVersion bool
 )
 
 func initFlag() {
 	flag.IntVar(&pid, "pid", 0, "pid of target program")
-	flag.Int64Var(&sec_delta, "sec_delta", 0, "delta time of sec field")
-	flag.Int64Var(&nsec_delta, "nsec_delta", 0, "delta time of nsec field")
+	flag.Int64Var(&secDelta, "sec_delta", 0, "delta time of sec field")
+	flag.Int64Var(&nsecDelta, "nsec_delta", 0, "delta time of nsec field")
 	flag.BoolVar(&printVersion, "version", false, "print version information and exit")
 
 	flag.Parse()
@@ -49,9 +48,9 @@ func main() {
 		os.Exit(0)
 	}
 
-	err := time.ModifyTime(pid, sec_delta, nsec_delta, fake_image_path)
+	err := time.ModifyTime(pid, secDelta, nsecDelta)
 
 	if err != nil {
-		fmt.Printf("error while modifying time, pid: %d, sec_delta: %d, nsec_delta: %d\n Error: %s", pid, sec_delta, nsec_delta, err.Error())
+		fmt.Printf("error while modifying time, pid: %d, sec_delta: %d, nsec_delta: %d\n Error: %s", pid, secDelta, nsecDelta, err.Error())
 	}
 }
