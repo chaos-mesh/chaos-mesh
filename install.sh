@@ -110,7 +110,7 @@ main() {
         esac
     done
 
-    if [ "${local_kube}" != "" ] || [ "${local_kube}" != "kind" ]; then
+    if [ "${local_kube}" != "" ] && [ "${local_kube}" != "kind" ]; then
 		printf "local Kubernetes by %s is not supported" "${local_kube}"
 		exit 1
     fi
