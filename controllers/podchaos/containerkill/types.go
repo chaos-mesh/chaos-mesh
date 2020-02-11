@@ -163,7 +163,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 
 func (r *Reconciler) KillContainer(ctx context.Context, pod *v1.Pod, containerID string) error {
 
-	r.Log.Info("try to kill container")
+	r.Log.Info("try to kill container","namespace", pod.Namespace, "podName", pod.Name, "containerID", containerID)
 
 	c, err := utils.CreateGrpcConnection(ctx, r.Client, pod)
 	if err != nil {
@@ -177,11 +177,10 @@ func (r *Reconciler) KillContainer(ctx context.Context, pod *v1.Pod, containerID
 		return fmt.Errorf("%s %s can't get the state of container", pod.Namespace, pod.Name)
 	}
 
-	_, err = pbClient.ContainerKill(ctx, &pb.ContainerRequest{
+	if _, err = pbClient.ContainerKill(ctx, &pb.ContainerRequest{
 		ContainerId: containerID,
-	})
-	if err != nil {
-		r.Log.Error(err, "kill container error")
+	}); err != nil{
+		r.Log.Error(err, "kill container error","namespace", pod.Namespace, "podName", pod.Name, "containerID", containerID)
 	}
 
 	return err
