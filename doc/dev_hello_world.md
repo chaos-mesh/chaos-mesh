@@ -26,7 +26,7 @@ In Chaos Mesh, all chaos types are managed by the controller manager. To add a n
 	}
 ```
 
-1. Under [controllers](https://github.com/pingcap/chaos-mesh/tree/master/controllers), create a `helloworldchaos_controller.go` file and edit it as below:
+2. Under [controllers](https://github.com/pingcap/chaos-mesh/tree/master/controllers), create a `helloworldchaos_controller.go` file and edit it as below:
 
 
 ```golang
