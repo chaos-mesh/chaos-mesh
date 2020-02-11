@@ -47,7 +47,17 @@ func ModifyTime(pid int, delta_sec int64, delta_nsec int64) error {
 	if err != nil {
 		return err
 	}
-	defer program.Cont()
+	defer func() {
+		err := program.Cont()
+		if err != nil {
+			log.Error(err, "fail to continue program")
+		}
+
+		err = program.Detach()
+		if err != nil {
+			log.Error(err, "fail to detach program")
+		}
+	}()
 
 	var vdsoEntry *mapreader.Entry
 	for _, e := range *program.Entries {

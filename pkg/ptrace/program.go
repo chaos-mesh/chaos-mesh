@@ -90,6 +90,10 @@ func (p *TracedProgram) Cont() error {
 	return syscall.PtraceCont(p.pid, 0)
 }
 
+func (p *TracedProgram) Detach() error {
+	return syscall.PtraceDetach(p.pid)
+}
+
 // Protect will backup regs and rip into fields
 func (p *TracedProgram) Protect() error {
 	err := syscall.PtraceGetRegs(p.pid, &p.backupRegs)

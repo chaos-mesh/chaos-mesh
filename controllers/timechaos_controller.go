@@ -34,7 +34,7 @@ type TimeChaosReconciler struct {
 // +kubebuilder:rbac:groups=pingcap.com,resources=timechaos/status,verbs=get;update;patch
 
 func (r *TimeChaosReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
-	logger := r.Log.WithValues("reconciler", "networkchaos")
+	logger := r.Log.WithValues("reconciler", "timechaos")
 
 	reconciler := timechaos.Reconciler{
 		Client: r.Client,

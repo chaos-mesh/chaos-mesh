@@ -37,7 +37,7 @@ endif
 
 all: yaml build image
 
-build: chaosdaemon manager chaosfs dashboard dashboard-server-frontend
+build: manager chaosfs dashboard dashboard-server-frontend
 
 # Run tests
 test: generate fmt vet lint manifests
@@ -57,7 +57,7 @@ endif
 
 # Build chaos-daemon binary
 chaosdaemon: generate fmt vet
-	$(GOENV) CGO_ENABLED=1 go build -ldflags '$(LDFLAGS)' -o images/chaos-daemon/bin/chaos-daemon ./cmd/chaos-daemon/main.go
+	$(GOENV) CGO_ENABLED=1 go build -ldflags '$(LDFLAGS)' -o bin/chaos-daemon ./cmd/chaos-daemon/main.go
 
 # Build manager binary
 manager: generate fmt vet
@@ -112,7 +112,10 @@ tidy:
 	git diff --quiet go.mod go.sum
 
 image:
+	mkdir -p images/chaos-daemon/src
+	cp -r hack api cmd controllers pkg go.mod go.sum Makefile images/chaos-daemon/src
 	docker build -t ${DOCKER_REGISTRY}/pingcap/chaos-daemon images/chaos-daemon
+	rm -rf images/chaos-daemon/src
 	docker build -t ${DOCKER_REGISTRY}/pingcap/chaos-mesh images/chaos-mesh
 	docker build -t ${DOCKER_REGISTRY}/pingcap/chaos-fs images/chaosfs
 	cp -R scripts images/chaos-scripts

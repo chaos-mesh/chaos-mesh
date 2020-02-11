@@ -1,6 +1,20 @@
-FROM alpine:3.5
+FROM golang:alpine3.10 AS build
 
-RUN apk add tzdata --no-cache
-RUN apk add iptables --no-cache
-RUN apk add ipset --no-cache
-ADD bin/chaos-daemon /usr/local/bin/chaos-daemon
+RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.ustc.edu.cn/g' /etc/apk/repositories
+RUN apk update
+RUN apk add gcc g++ make bash
+ADD src /src
+WORKDIR /src
+ENV GOPATH /go
+ENV HTTP_PROXY http://192.168.50.173:8000
+ENV HTTPS_PROXY http://192.168.50.173:8000
+RUN make chaosdaemon
+
+FROM alpine:3.10
+
+RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.ustc.edu.cn/g' /etc/apk/repositories
+RUN apk update
+RUN apk add tzdata
+RUN apk add iptables
+RUN apk add ipset
+COPY --from=build /src/bin/chaos-daemon /usr/local/bin/chaos-daemon

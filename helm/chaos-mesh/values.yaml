@@ -15,8 +15,8 @@ controllerManager:
 
   replicaCount: 1
 
-  image: registry.tnthub.com/pingcap/chaos-mesh:latest
-  imagePullPolicy: Always
+  image: pingcap/chaos-mesh:latest
+  imagePullPolicy: Never
 
   nameOverride: ""
   fullnameOverride: ""
@@ -44,8 +44,8 @@ controllerManager:
   affinity: {}
 
 chaosDaemon:
-  image: registry.tnthub.com/pingcap/chaos-daemon:latest
-  imagePullPolicy: Always
+  image: pingcap/chaos-daemon:latest
+  imagePullPolicy: Never
   port: 31767
 
   # runtime specifies which container runtime to use. Currently
@@ -60,19 +60,13 @@ chaosDaemon:
   # runtime: containerd
   # socketPath: /run/containerd/containerd.sock
 
-
-timeChaos:
-  image: registry.tnthub.com/time-chaos:latest
-  imagePullPolicy: Always
-  port: 50051
-
 dashboard:
   create: false
 
   serviceAccount: chaos-dashboard
 
-  image: registry.tnthub.com/pingcap/chaos-dashboard:latest
-  imagePullPolicy: Always
+  image: pingcap/chaos-dashboard:latest
+  imagePullPolicy: Never
 
   nodeSelector: {}
 
