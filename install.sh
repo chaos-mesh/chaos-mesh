@@ -46,27 +46,27 @@ main() {
 
 	while [[ $# -gt 0 ]]
 	do
-	key="$1"
-        case "$key" in
-            -h|--help)
-                usage
-                exit 0
-                ;;
-            -l|--local)
-                local_kube="$2"
-                shift
-                shift
-                ;;
-            -v|--version)
-                cm_version="$2"
-                shift
-                shift
-                ;;
-            -n|--name)
-                kind_name="$2"
-                shift
-                shift
-                ;;
+		key="$1"
+		case "$key" in
+			-h|--help)
+				usage
+				exit 0
+				;;
+			-l|--local)
+				local_kube="$2"
+				shift
+				shift
+				;;
+			-v|--version)
+				cm_version="$2"
+				shift
+				shift
+				;;
+			-n|--name)
+				kind_name="$2"
+				shift
+				shift
+				;;
 			--kind-version)
 				kind_version="$2"
 				shift
