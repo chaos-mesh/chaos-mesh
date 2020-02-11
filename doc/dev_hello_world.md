@@ -184,7 +184,7 @@ kubectl apply -f manifests/
 kubectl get crd podchaos.pingcap.com
 ```
 
-3. Install Chaos Mesh:
+2. Install Chaos Mesh:
 
 ```
 helm install helm/chaos-mesh --name=chaos-mesh --namespace=chaos-testing --set chaosDaemon.runtime=containerd --set chaosDaemon.socketPath=/run/containerd/containerd.sock
@@ -192,7 +192,7 @@ kubectl get pods --namespace chaos-testing -l app.kubernetes.io/instance=chaos-m
 ```
 The arguments `--set chaosDaemon.runtime=containerd --set chaosDaemon.socketPath=/run/containerd/containerd.sock` is used to to support network chaos on kind.
 
-4. Create chaos.yaml with the lines below:
+3. Create chaos.yaml with the lines below:
 
 ```yaml
 apiVersion: pingcap.com/v1alpha1
@@ -202,7 +202,7 @@ metadata:
   namespace: chaos-testing
 ```
 
-5. Apply the chaos.
+4. Apply the chaos.
 
 ```
 kubectl apply -f chaos.yaml
