@@ -94,6 +94,7 @@ type TimeChaosStatus struct {
 	ChaosStatus `json:",inline"`
 }
 
+// GetDuration gets the duration of TimeChaos
 func (in *TimeChaos) GetDuration() (*time.Duration, error) {
 	if in.Spec.Duration == nil {
 		return nil, nil
@@ -105,6 +106,7 @@ func (in *TimeChaos) GetDuration() (*time.Duration, error) {
 	return &duration, nil
 }
 
+// GetNextStart gets NextStart field of TimeChaos
 func (in *TimeChaos) GetNextStart() time.Time {
 	if in.Spec.NextStart == nil {
 		return time.Time{}
@@ -112,6 +114,7 @@ func (in *TimeChaos) GetNextStart() time.Time {
 	return in.Spec.NextStart.Time
 }
 
+// SetNextStart sets NextStart field of TimeChaos
 func (in *TimeChaos) SetNextStart(t time.Time) {
 	if t.IsZero() {
 		in.Spec.NextStart = nil
@@ -124,6 +127,7 @@ func (in *TimeChaos) SetNextStart(t time.Time) {
 	in.Spec.NextStart.Time = t
 }
 
+// GetNextRecover get NextRecover field of TimeChaos
 func (in *TimeChaos) GetNextRecover() time.Time {
 	if in.Spec.NextRecover == nil {
 		return time.Time{}
@@ -131,6 +135,7 @@ func (in *TimeChaos) GetNextRecover() time.Time {
 	return in.Spec.NextRecover.Time
 }
 
+// SetNextRecover sets NextRecover field of TimeChaos
 func (in *TimeChaos) SetNextRecover(t time.Time) {
 	if t.IsZero() {
 		in.Spec.NextRecover = nil
@@ -143,14 +148,17 @@ func (in *TimeChaos) SetNextRecover(t time.Time) {
 	in.Spec.NextRecover.Time = t
 }
 
+// GetScheduler returns the scheduler of TimeChaos
 func (in *TimeChaos) GetScheduler() *SchedulerSpec {
 	return in.Spec.Scheduler
 }
 
+// GetStatus returns the status of TimeChaos
 func (in *TimeChaos) GetStatus() *ChaosStatus {
 	return &in.Status.ChaosStatus
 }
 
+// IsDeleted returns whether this resource has been deleted
 func (in *TimeChaos) IsDeleted() bool {
 	return !in.DeletionTimestamp.IsZero()
 }

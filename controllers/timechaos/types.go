@@ -39,11 +39,13 @@ import (
 
 const timeChaosMsg = "time is shifted with %v"
 
+// Reconciler is time-chaos reconciler
 type Reconciler struct {
 	client.Client
 	Log logr.Logger
 }
 
+// Reconcile reconcile a request from controller
 func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	r.Log.Info("reconciling timechaos")
 	ctx := context.Background()
@@ -81,6 +83,7 @@ func (r *Reconciler) scheduleTimeChaos(timechaos *v1alpha1.TimeChaos, req ctrl.R
 	return sr.Reconcile(req)
 }
 
+// Apply applies time-chaos
 func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos reconciler.InnerObject) error {
 	timechaos, ok := chaos.(*v1alpha1.TimeChaos)
 	if !ok {

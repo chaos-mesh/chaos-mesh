@@ -20,6 +20,7 @@ import (
 	"strings"
 )
 
+// Entry is one line in /proc/pid/maps
 type Entry struct {
 	StatAddress uint64
 	EndAddress  uint64
@@ -28,6 +29,7 @@ type Entry struct {
 	Path        string
 }
 
+// Read parse /proc/pid/maps and return a list of entry
 func Read(pid int) (*[]Entry, error) {
 	data, err := ioutil.ReadFile(fmt.Sprintf("/proc/%d/maps", pid))
 	if err != nil {

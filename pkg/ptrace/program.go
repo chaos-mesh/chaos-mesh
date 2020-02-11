@@ -49,6 +49,7 @@ const waitPidErrorMessage = "waitpid ret value: %d"
 
 const ptrSize = 4 << uintptr(^uintptr(0)>>63) // Here is a trick to get pointer size in bytes
 
+// TracedProgram is a program traced by ptrace
 type TracedProgram struct {
 	pid     int
 	tids    []int
@@ -58,6 +59,7 @@ type TracedProgram struct {
 	backupCode []byte
 }
 
+// Pid return the pid of traced program
 func (p *TracedProgram) Pid() int {
 	return p.pid
 }
