@@ -69,7 +69,16 @@ func (r *HelloWorldChaosReconciler) SetupWithManager(mgr ctrl.Manager) error {
 
 > **Note:**
 >
-> The comment `// +kubebuilder:rbac:groups=pingcap.com...` is an authority control mechanism that decides which account can access this reconciler. To make it be accessible by dashboard and chaos-controller-manager, we need to modify  [collector-rbac.yaml](https://github.com/pingcap/chaos-mesh/blob/master/helm/chaos-mesh/templates/collector-rbac.yaml) and [controller-manager-rbac.yaml](https://github.com/pingcap/chaos-mesh/blob/master/helm/chaos-mesh/templates/controller-manager-rbac.yaml) accordingly.
+> The comment `// +kubebuilder:rbac:groups=pingcap.com...` is an authority control mechanism that decides which account can access this reconciler. To make it be accessible by dashboard and chaos-controller-manager, we need to modify  [collector-rbac.yaml](https://github.com/pingcap/chaos-mesh/blob/master/helm/chaos-mesh/templates/collector-rbac.yaml) and [controller-manager-rbac.yaml](https://github.com/pingcap/chaos-mesh/blob/master/helm/chaos-mesh/templates/controller-manager-rbac.yaml) accordingly:
+```yaml
+  - apiGroups: ["pingcap.com"]
+    resources:
+      - podchaos
+      - networkchaos
+      - iochaos
+      - helloworldchaos    # Add this line in all pingcap.com group
+    verbs: ["*"]
+```
 
 ## Register the CRD
 
