@@ -129,7 +129,7 @@ main() {
 		install_kubernetes_by_kind "${kind_name}" "${k8s_version}" "${node_num}" "${volume_num}"
 	fi
 
-	install_chaos_mesh "${release_name}" "${namespace}"
+	install_chaos_mesh "${release_name}" "${namespace}" "${local-kube}"
 }
 
 prepare_env() {
@@ -407,6 +407,7 @@ install_chaos_mesh() {
 
 	local release_name=$1
 	local namespace=$2
+	local local_kube=$3
 	if check_chaos_mesh_installed "${release_name}"; then
 		printf "Chaos Mesh %s had been installed" "${release_name}"
 		return
@@ -420,9 +421,17 @@ install_chaos_mesh() {
 	fi
 
 	if [[ $(helm version --client --short) == "Client: v2"* ]]; then
-		helm install helm/chaos-mesh --name="${release_name}" --namespace="${namespace}" --set chaosDaemon.runtime=containerd --set chaosDaemon.socketPath=/run/containerd/containerd.sock
+		if [ "${local_kube}" == "kind" ]; then
+			helm install helm/chaos-mesh --name="${release_name}" --namespace="${namespace}" --set chaosDaemon.runtime=containerd --set chaosDaemon.socketPath=/run/containerd/containerd.sock
+		else
+			helm install helm/chaos-mesh --name="${release_name}" --namespace="${namespace}"
+		fi
 	else
-		helm install "${release_name}" helm/chaos-mesh --namespace="${namespace}" --set chaosDaemon.runtime=containerd --set chaosDaemon.socketPath=/run/containerd/containerd.sock
+		if [ "${local_kube}" == "kind" ]; then
+			helm install "${release_name}" helm/chaos-mesh --namespace="${namespace}" --set chaosDaemon.runtime=containerd --set chaosDaemon.socketPath=/run/containerd/containerd.sock
+		else
+			helm install "${release_name}" helm/chaos-mesh --namespace="${namespace}"
+		fi
 	fi
 
 	printf "Chaos Mesh %s installed successfully" "${release_name}"
