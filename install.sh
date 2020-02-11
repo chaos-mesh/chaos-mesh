@@ -111,7 +111,7 @@ main() {
     done
 
     if [ "${local_kube}" != "" ] && [ "${local_kube}" != "kind" ]; then
-		printf "local Kubernetes by %s is not supported" "${local_kube}"
+		printf "local Kubernetes by %s is not supported\n" "${local_kube}"
 		exit 1
     fi
 
@@ -176,7 +176,7 @@ install_kubernetes_by_kind() {
 	for c in $clusters
 	do
 		if [ "$c" == "$cluster_name" ]; then
-			printf "Kind cluster %s had been installed" "$cluster_name"
+			printf "Kind cluster %s has been installed\n" "$cluster_name"
 			cluster_exist=true
 			break
 		fi
@@ -337,7 +337,7 @@ install_kind() {
 		if version_lt "$v" "${target_version}"; then
 			printf "Chaos Mesh requires Kind version %s or later\n" "${target_version}"
 		else
-			printf "Kind Version %s had installed\n" "$v"
+			printf "Kind Version %s has been installed\n" "$v"
 			return
 		fi
 	fi
@@ -359,7 +359,7 @@ install_helm() {
 		if version_lt "$v" "${target_version}"; then
 			printf "Chaos Mesh requires Helm version %s or later\n" "${target_version}"
 		else
-			printf "Helm Version %s had installed\n" "$v"
+			printf "Helm Version %s has been installed\n" "$v"
 			return
 		fi
 	fi
@@ -409,7 +409,7 @@ install_chaos_mesh() {
 	local namespace=$2
 	local local_kube=$3
 	if check_chaos_mesh_installed "${release_name}"; then
-		printf "Chaos Mesh %s had been installed" "${release_name}"
+		printf "Chaos Mesh %s has been installed\n" "${release_name}"
 		return
 	fi
 
@@ -434,7 +434,7 @@ install_chaos_mesh() {
 		fi
 	fi
 
-	printf "Chaos Mesh %s installed successfully" "${release_name}"
+	printf "Chaos Mesh %s is installed successfully\n" "${release_name}"
 }
 
 function version_le() {
