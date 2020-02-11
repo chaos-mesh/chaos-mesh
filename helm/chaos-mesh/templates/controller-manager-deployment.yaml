@@ -21,6 +21,10 @@ spec:
         app.kubernetes.io/name: {{ template "chaos-mesh.name" . }}
         app.kubernetes.io/instance: {{ .Release.Name }}
         app.kubernetes.io/component: controller-manager
+    {{- with .Values.controllerManager.podAnnotations }}
+      annotations:
+{{ toYaml . | indent 8 }}
+    {{- end }}
     spec:
     {{- if .Values.controllerManager.serviceAccount }}
       serviceAccount: {{ .Values.controllerManager.serviceAccount }}
@@ -43,7 +47,7 @@ spec:
           - name: TZ
             value: {{ .Values.timezone | default "UTC" }}
           - name: CHAOS_DAEMON_PORT
-            value: !!str {{ .Values.chaosDaemon.port }}
+            value: !!str {{ .Values.chaosDaemon.grpcPort }}
         volumeMounts:
           - name: webhook-certs
             mountPath: /etc/webhook/certs

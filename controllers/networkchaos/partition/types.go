@@ -37,7 +37,7 @@ import (
 )
 
 const (
-	networkPartitionActionMsg = "part network for %s"
+	networkPartitionActionMsg = "partition network duration %s"
 
 	sourceIpSetPostFix = "src"
 	targetIpSetPostFix = "tgt"
@@ -161,7 +161,10 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos reconcil
 			HostIP:    pod.Status.HostIP,
 			PodIP:     pod.Status.PodIP,
 			Action:    string(networkchaos.Spec.Action),
-			Message:   fmt.Sprintf(networkPartitionActionMsg, *networkchaos.Spec.Duration),
+		}
+
+		if networkchaos.Spec.Duration != nil {
+			ps.Message = fmt.Sprintf(networkPartitionActionMsg, *networkchaos.Spec.Duration)
 		}
 
 		networkchaos.Status.Experiment.Pods = append(networkchaos.Status.Experiment.Pods, ps)

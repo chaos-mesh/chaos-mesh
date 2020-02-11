@@ -10,7 +10,9 @@ import (
 	pb "github.com/pingcap/chaos-mesh/pkg/chaosdaemon/pb"
 )
 
-func (s *Server) SetTimeOffset(ctx context.Context, req *pb.TimeRequest) (*empty.Empty, error) {
+func (s *daemonServer) SetTimeOffset(ctx context.Context, req *pb.TimeRequest) (*empty.Empty, error) {
+	log.Info("shift time", "Request", req)
+
 	pid, err := s.crClient.GetPidFromContainerID(ctx, req.ContainerId)
 	if err != nil {
 		log.Error(err, "error while getting PID")
@@ -25,7 +27,9 @@ func (s *Server) SetTimeOffset(ctx context.Context, req *pb.TimeRequest) (*empty
 	return &empty.Empty{}, nil
 }
 
-func (s *Server) RecoverTimeOffset(ctx context.Context, req *pb.TimeRequest) (*empty.Empty, error) {
+func (s *daemonServer) RecoverTimeOffset(ctx context.Context, req *pb.TimeRequest) (*empty.Empty, error) {
+	log.Info("recover time", "Request", req)
+
 	pid, err := s.crClient.GetPidFromContainerID(ctx, req.ContainerId)
 	if err != nil {
 		log.Error(err, "error while getting PID")
