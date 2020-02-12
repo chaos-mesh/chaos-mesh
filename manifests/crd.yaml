@@ -618,7 +618,8 @@ spec:
                 action: pod-kill / pod-failure Default action: pod-kill'
               type: string
             containerName:
-              description: Needed in container-kill. Indicates the name of the container
+              description: ContainerName Indicates the name of the container. Needed
+                in container-kill.
               type: string
             duration:
               description: Duration represents the duration of the chaos action. It
