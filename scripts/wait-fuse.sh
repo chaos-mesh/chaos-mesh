@@ -1,6 +1,6 @@
 #!/bin/sh
 
-set -eo pipefail
+#set -eo pipefail
 #set -x # For debugging
 
 FUSE_PID_FILE="/tmp/fuse/pid"
@@ -52,7 +52,7 @@ wait_for() {
         else
             echo "fuse server not running, ${file} not found, retry..."
             sleep ${delay}
-            let count=$count+1
+            count=$count+1
         fi
     done
 }
