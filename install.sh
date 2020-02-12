@@ -383,7 +383,7 @@ install_kind() {
 
     printf "Install Kind tool\n"
 
-	err_msg=$(kind version 2>&1 1>/dev/null)
+    err_msg=$(kind version 2>&1 1>/dev/null)
     if [ "$err_msg" == "" ]; then
         v=$(kind version | awk '{print $2}' | sed s/v//g)
         target_version=$(echo "${kind_version}" | sed s/v//g)
