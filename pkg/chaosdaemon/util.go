@@ -147,6 +147,7 @@ func (c ContainerdClient) ContainerKillByContainerID(ctx context.Context, contai
 	if err != nil {
 		return err
 	}
+
 	err = task.Kill(ctx, syscall.SIGKILL)
 
 	return err
