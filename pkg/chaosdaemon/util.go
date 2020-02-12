@@ -128,9 +128,11 @@ func (c DockerClient) ContainerKillByContainerID(ctx context.Context, containerI
 	if containerID[0:len(dockerProtocolPrefix)] != dockerProtocolPrefix {
 		return fmt.Errorf("expected %s but got %s", dockerProtocolPrefix, containerID[0:len(dockerProtocolPrefix)])
 	}
-	err := c.client.ContainerKill(ctx, containerID[len(dockerProtocolPrefix):], "SIGKILL")
+	if err := c.client.ContainerKill(ctx, containerID[len(dockerProtocolPrefix):], "SIGKILL"); err != nil {
+		return err
+	}
 
-	return err
+	return nil
 }
 
 // ContainerKillByContainerID kills container according to container id
@@ -147,7 +149,9 @@ func (c ContainerdClient) ContainerKillByContainerID(ctx context.Context, contai
 	if err != nil {
 		return err
 	}
-	err = task.Kill(ctx, syscall.SIGKILL)
+	if err = task.Kill(ctx, syscall.SIGKILL);  err != nil {
+		return err
+	}
 
-	return err
+	return nil
 }

@@ -17,11 +17,14 @@ import (
 	"context"
 	"errors"
 	"fmt"
+
+	v1 "k8s.io/api/core/v1"
+
 	"time"
 
-	"golang.org/x/sync/errgroup"
-
 	"github.com/go-logr/logr"
+
+	"golang.org/x/sync/errgroup"
 
 	"github.com/pingcap/chaos-mesh/api/v1alpha1"
 	pb "github.com/pingcap/chaos-mesh/pkg/chaosdaemon/pb"
@@ -30,7 +33,6 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -90,9 +92,11 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	for index := range filteredPod {
 		pod := &filteredPod[index]
 
+		//for index := range pod.Spec.Containers {
 		for index := range pod.Status.ContainerStatuses {
 			containerName := pod.Status.ContainerStatuses[index].Name
 			containerID := pod.Status.ContainerStatuses[index].ContainerID
+			//container := pod.Spec.Containers[index]
 
 			if containerName == podchaos.Spec.ContainerName {
 				haveSelected = true
@@ -121,38 +125,6 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	if err := g.Wait(); err != nil {
 		return ctrl.Result{}, nil
 	}
-
-	return r.updatePodchaos(ctx, podchaos, pods, now)
-}
-
-// KillContainer kills container according to containerID
-// Use client in chaos-daemon
-func (r *Reconciler) KillContainer(ctx context.Context, pod *v1.Pod, containerID string) error {
-
-	r.Log.Info("try to kill container", "namespace", pod.Namespace, "podName", pod.Name, "containerID", containerID)
-
-	c, err := utils.CreateGrpcConnection(ctx, r.Client, pod)
-	if err != nil {
-		return err
-	}
-	defer c.Close()
-
-	pbClient := pb.NewChaosDaemonClient(c)
-
-	if len(pod.Status.ContainerStatuses) == 0 {
-		return fmt.Errorf("%s %s can't get the state of container", pod.Namespace, pod.Name)
-	}
-
-	if _, err = pbClient.ContainerKill(ctx, &pb.ContainerRequest{
-		ContainerId: containerID,
-	}); err != nil {
-		r.Log.Error(err, "kill container error", "namespace", pod.Namespace, "podName", pod.Name, "containerID", containerID)
-	}
-
-	return err
-}
-
-func (r *Reconciler) updatePodchaos(ctx context.Context, podchaos v1alpha1.PodChaos, pods []v1.Pod, now time.Time) (ctrl.Result, error) {
 	next, err := utils.NextTime(*podchaos.Spec.Scheduler, now)
 	if err != nil {
 		r.Log.Error(err, "failed to get next time")
@@ -187,4 +159,29 @@ func (r *Reconciler) updatePodchaos(ctx context.Context, podchaos v1alpha1.PodCh
 	}
 
 	return ctrl.Result{}, nil
+}
+
+func (r *Reconciler) KillContainer(ctx context.Context, pod *v1.Pod, containerID string) error {
+
+	r.Log.Info("try to kill container","namespace", pod.Namespace, "podName", pod.Name, "containerID", containerID)
+
+	c, err := utils.CreateGrpcConnection(ctx, r.Client, pod)
+	if err != nil {
+		return err
+	}
+	defer c.Close()
+
+	pbClient := pb.NewChaosDaemonClient(c)
+
+	if len(pod.Status.ContainerStatuses) == 0 {
+		return fmt.Errorf("%s %s can't get the state of container", pod.Namespace, pod.Name)
+	}
+
+	if _, err = pbClient.ContainerKill(ctx, &pb.ContainerRequest{
+		ContainerId: containerID,
+	}); err != nil{
+		r.Log.Error(err, "kill container error","namespace", pod.Namespace, "podName", pod.Name, "containerID", containerID)
+	}
+
+	return err
 }
