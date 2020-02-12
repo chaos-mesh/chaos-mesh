@@ -38,7 +38,7 @@ Chaos Operator uses [Custom Resource Definition (CRD)](https://kubernetes.io/doc
 - pod-failure: The selected pod will be unavailable in a specified period of time.
 - netem chaos: Network chaos such as delay, duplication, etc.
 - network-partition: Simulate network partition.
-- IO chaos: Simulate file system falults such as I/O delay, read/write errors, etc.
+- IO chaos: Simulate file system faults such as I/O delay, read/write errors, etc.
 
 ## Prerequisites
 
@@ -68,7 +68,7 @@ kubectl get crd podchaos.pingcap.com
 
 ### Install Chaos Mesh
 
-* Install Chaos Mesh with Chaos Operator only in docker environment 
+* Install Chaos Mesh with Chaos Operator only in docker environment
 
 ```bash
 # create namespace chaos-testing
@@ -180,7 +180,7 @@ After Chaos Mesh is deployed, we can deploy the target cluster to be tested, or 
 You can follow the instructions in the following two documents to deploy a TiDB cluster:
 
 * [Deploy using kind](https://pingcap.com/docs/stable/tidb-in-kubernetes/get-started/deploy-tidb-from-kubernetes-kind/)
-* [Deoloy using minikube](https://pingcap.com/docs/stable/tidb-in-kubernetes/get-started/deploy-tidb-from-kubernetes-minikube/)
+* [Deploy using minikube](https://pingcap.com/docs/stable/tidb-in-kubernetes/get-started/deploy-tidb-from-kubernetes-minikube/)
 
 ### Define chaos experiment config file
 
@@ -198,7 +198,7 @@ spec:
   duration: "60s" # duration for the injected chaos experiment
   selector: # pods where to inject chaos actions
     namespaces:
-      - tidb-cluster-demo  # the namespace of the system under test (SUT) you've deployed 
+      - tidb-cluster-demo  # the namespace of the system under test (SUT) you've deployed
     labelSelectors:
       "app.kubernetes.io/component": "tikv" # the label of the pod for chaos injection
   scheduler: # scheduler rules for the running time of the chaos experiments about pods.

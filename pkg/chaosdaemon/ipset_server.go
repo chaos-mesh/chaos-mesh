@@ -29,7 +29,7 @@ const (
 	ipsetNewNameExistErr = "a set with the new name already exists"
 )
 
-func (s *Server) FlushIpSet(ctx context.Context, req *pb.IpSetRequest) (*empty.Empty, error) {
+func (s *daemonServer) FlushIpSet(ctx context.Context, req *pb.IpSetRequest) (*empty.Empty, error) {
 	log.Info("flush ipset", "request", req)
 
 	pid, err := s.crClient.GetPidFromContainerID(ctx, req.ContainerId)
@@ -68,7 +68,7 @@ func (s *Server) FlushIpSet(ctx context.Context, req *pb.IpSetRequest) (*empty.E
 	return &empty.Empty{}, nil
 }
 
-func (s *Server) createIPSet(ctx context.Context, nsPath string, name string) error {
+func (s *daemonServer) createIPSet(ctx context.Context, nsPath string, name string) error {
 	// ipset name cannot be longer than 31 bytes
 	if len(name) > 31 {
 		name = name[:31]
@@ -100,7 +100,7 @@ func (s *Server) createIPSet(ctx context.Context, nsPath string, name string) er
 	return nil
 }
 
-func (s *Server) addIpsToIPSet(ctx context.Context, nsPath string, name string, ips []string) error {
+func (s *daemonServer) addIpsToIPSet(ctx context.Context, nsPath string, name string, ips []string) error {
 	for _, ip := range ips {
 		cmd := withNetNS(ctx, nsPath, "ipset", "add", name, ip)
 
@@ -119,7 +119,7 @@ func (s *Server) addIpsToIPSet(ctx context.Context, nsPath string, name string, 
 	return nil
 }
 
-func (s *Server) renameIPSet(ctx context.Context, nsPath string, oldName string, newName string) error {
+func (s *daemonServer) renameIPSet(ctx context.Context, nsPath string, oldName string, newName string) error {
 	cmd := withNetNS(ctx, nsPath, "ipset", "rename", oldName, newName)
 
 	log.Info("rename ipset", "command", cmd.String())
