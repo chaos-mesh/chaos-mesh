@@ -17,6 +17,11 @@ USAGE:
     install.sh [FLAGS] [OPTIONS]
 FLAGS:
     -h, --help              Prints help information
+        --force             Force reinstall all components if they are already installed, include: helm, kind, local-kube, chaos-mesh
+        --force-chaos-mesh  Force reinstall chaos-mesh if it is already installed
+        --force-kube        Force reinstall local Kubernetes cluster if it is already installed
+        --force-kind        Force reinstall Kind if it is already installed
+        --force-helm        Force reinstall Helm if it is already installed
 OPTIONS:
     -v, --version           Version of chaos-mesh, default value: latest
     -l, --local [kind]      Choose a way to run a local kubernetes cluster, supported value: kind,
@@ -43,6 +48,10 @@ main() {
     local helm_version="v2.16.1"
     local release_name="chaos-mesh"
     local namespace="chaos-testing"
+    local force_chaos_mesh=false
+    local force_kube=false
+    local force_kind=false
+    local force_helm=false
 
     while [[ $# -gt 0 ]]
     do
@@ -65,6 +74,25 @@ main() {
             -n|--name)
                 kind_name="$2"
                 shift
+                shift
+                ;;
+            --force)
+                force_chaos_mesh=true
+                force_kube=true
+                force_kind=true
+                force_helm=true
+                shift
+                ;;
+            --force-kube)
+                force_kube=true
+                shift
+                ;;
+            --force-kind)
+                force_kind=true
+                shift
+                ;;
+            --force-helm)
+                force_helm=true
                 shift
                 ;;
             --kind-version)
@@ -119,30 +147,35 @@ main() {
     need_cmd "tr"
     prepare_env
 
-    install_helm "${helm_version}"
+    install_helm "${helm_version}" ${force_helm}
 
     if [ "${local_kube}" == "" ]; then
         check_kubernetes
     else
         check_docker
-        install_kind "${kind_version}"
-        install_kubernetes_by_kind "${kind_name}" "${k8s_version}" "${node_num}" "${volume_num}"
+        install_kind "${kind_version}" ${force_kind}
+        install_kubernetes_by_kind "${kind_name}" "${k8s_version}" "${node_num}" "${volume_num}" ${force_kind}
     fi
 
-    install_chaos_mesh "${release_name}" "${namespace}" "${local-kube}"
+    install_chaos_mesh "${release_name}" "${namespace}" "${local-kube}" ${force_chaos_mesh}
 }
 
 prepare_env() {
-    mkdir -p ~/local/bin
-    export PTAH=~/local/bin:$PATH
+    mkdir -p "$HOME/local/bin"
+    local set_path="export PTAH=$HOME/local/bin:$PATH"
+    local env_file="$HOME/.bash_profile"
+    if [[ ! -e "${env_file}" ]]; then
+        touch "${env_file}"
+    fi
+    grep -qF -- "${set_path}" "${env_file}" || echo "${set_path}" >> "${env_file}"
+    source "${env_file}"
 }
 
 check_kubernetes() {
     need_cmd "kubectl"
     kubectl_err_msg=$(kubectl version 2>&1 1>/dev/null)
     if [ "$kubectl_err_msg" != "" ]; then
-        printf "check Kubernetes failed:\n"
-        printf "%s" "$kubectl_err_msg"
+        printf "check Kubernetes failed, error: %s\n" "${kubectl_err_msg}"
         exit 1
     fi
 
@@ -162,11 +195,13 @@ check_kubernetes_version() {
 }
 
 install_kubernetes_by_kind() {
-    echo "install kubernetes"
     local cluster_name=$1
     local cluster_version=$2
     local node_num=$3
     local volume_num=$4
+    local force_install=$5
+
+    printf "Install local Kubernetes %s\n" "${cluster_name}"
 
     work_dir=${HOME}/kind/${cluster_name}
     kubeconfig_path=${work_dir}/config
@@ -176,22 +211,36 @@ install_kubernetes_by_kind() {
     for c in $clusters
     do
         if [ "$c" == "$cluster_name" ]; then
-            printf "Kind cluster %s has been installed\n" "$cluster_name"
+            printf "Kind cluster %s has been installed\n" "${cluster_name}"
             cluster_exist=true
             break
         fi
     done
 
-    if ! $cluster_exist; then
-        mkdir -p "${work_dir}"
-
-        echo "clean data dir: ${data_dir}"
-        if [ -d "${data_dir}" ]; then
-        	rm -rf "${data_dir}"
+    if [ "$cluster_exist" == "true" ]; then
+        if [ "$force_install" == "true" ]; then
+            printf "Delete Kind Kubernetes cluster %s\n" "${cluster_name}"
+            kind delete cluster --name="${cluster_name}"
+            status=$?
+            if [ $status -ne 0 ]; then
+                printf "Delete Kind Kubernetes cluster %s failed\n" "${cluster_name}"
+                exit 1
+            fi
+        else
+            kind get kubeconfig --name="${cluster_name}" > "${kubeconfig_path}"
+            return
         fi
+    fi
 
-        config_file=${work_dir}/kind-config.yaml
-        cat <<EOF > "${config_file}"
+    mkdir -p "${work_dir}"
+
+    printf "Clean data dir: %s\n" "${data_dir}"
+    if [ -d "${data_dir}" ]; then
+        rm -rf "${data_dir}"
+    fi
+
+    config_file=${work_dir}/kind-config.yaml
+    cat <<EOF > "${config_file}"
 kind: Cluster
 apiVersion: kind.sigs.k8s.io/v1alpha3
 kubeadmConfigPatches:
@@ -211,37 +260,38 @@ nodes:
     protocol: TCP
 EOF
 
-        for ((i=0;i<"${node_num}";i++))
-        do
-            mkdir -p "${data_dir}/worker${i}"
-            cat <<EOF >>  "${config_file}"
+    for ((i=0;i<"${node_num}";i++))
+    do
+        mkdir -p "${data_dir}/worker${i}"
+        cat <<EOF >>  "${config_file}"
 - role: worker
   extraMounts:
 EOF
-            for ((k=1;k<="${volume_num}";k++))
-            do
-                mkdir -p "${data_dir}/worker${i}/vol${k}"
-                cat <<EOF  >>  "${config_file}"
+        for ((k=1;k<="${volume_num}";k++))
+        do
+            mkdir -p "${data_dir}/worker${i}/vol${k}"
+            cat <<EOF  >>  "${config_file}"
   - containerPath: /mnt/disks/vol${k}
     hostPath: ${data_dir}/worker${i}/vol${k}
 EOF
-            done
         done
+    done
 
-        printf "start to create kubernetes cluster %s" "${cluster_name}"
-        kind create cluster --config "${config_file}" --image kindest/node:${cluster_version} --name=${cluster_name}
-        kind get kubeconfig --name="${cluster_name}" > "${kubeconfig_path}"
-        export KUBECONFIG="${kubeconfig_path}"
+    printf "start to create kubernetes cluster %s" "${cluster_name}"
+    kind create cluster --config "${config_file}" --image kindest/node:${cluster_version} --name=${cluster_name}
+    kind get kubeconfig --name="${cluster_name}" > "${kubeconfig_path}"
+    export KUBECONFIG="${kubeconfig_path}"
 
-        deploy_registry "${cluster_name}" "${data_dir}"
-        init_helm "${data_dir}"
-    fi
+    deploy_registry "${cluster_name}" "${data_dir}"
+    init_helm "${data_dir}"
 }
 
 deploy_registry() {
     local cluster_name=$1
     local data_dir=$2
-    echo "deploy docker registry in kind"
+
+    printf "Deploy docker registry in kind\n"
+
     registry_node=${cluster_name}-control-plane
     registry_node_ip=$(kubectl get nodes "${registry_node}" -o template --template='{{range.status.addresses}}{{if eq .type "InternalIP"}}{{.address}}{{end}}{{end}}')
     registry_file=${data_dir}/registry.yaml
@@ -328,17 +378,22 @@ deploy_volume_provisioner() {
 }
 
 install_kind() {
-    echo "install kind"
+    local kind_version=$1
+    local force_install=$2
+
+    printf "Install Kind tool\n"
 
 	err_msg=$(kind version 2>&1 1>/dev/null)
     if [ "$err_msg" == "" ]; then
         v=$(kind version | awk '{print $2}' | sed s/v//g)
-        target_version=$(echo "$1" | sed s/v//g)
+        target_version=$(echo "${kind_version}" | sed s/v//g)
         if version_lt "$v" "${target_version}"; then
             printf "Chaos Mesh requires Kind version %s or later\n" "${target_version}"
         else
             printf "Kind Version %s has been installed\n" "$v"
-            return
+            if [ "$force_install" != "true" ]; then
+                return
+            fi
         fi
     fi
 
@@ -350,17 +405,22 @@ install_kind() {
 }
 
 install_helm() {
-    echo "install helm"
+    local helm_version=$1
+    local force_install=$2
+
+    printf "Install Helm tool\n"
 
     err_msg=$(helm version --client 2>&1 1>/dev/null)
     if [ "$err_msg" == "" ]; then
         v=$(helm version --client | sed 's/.*SemVer:\"v\([0-9.]*\).*/\1/g')
-        target_version=$(echo "$1" | sed s/v//g)
+        target_version=$(echo "${helm_version}" | sed s/v//g)
         if version_lt "$v" "${target_version}"; then
             printf "Chaos Mesh requires Helm version %s or later\n" "${target_version}"
         else
             printf "Helm Version %s has been installed\n" "$v"
-            return
+            if [ "$force_install" != "true" ]; then
+                return
+            fi
         fi
     fi
 
@@ -403,14 +463,26 @@ check_chaos_mesh_installed() {
 }
 
 install_chaos_mesh() {
-    echo "install chaos mesh"
-
     local release_name=$1
     local namespace=$2
     local local_kube=$3
+    local force_install=$4
+
+    printf "Install Chaos Mesh %s\n" "${release_name}"
+
     if check_chaos_mesh_installed "${release_name}"; then
         printf "Chaos Mesh %s has been installed\n" "${release_name}"
-        return
+
+        if [ "$force_install" != "true" ]; then
+            return
+        fi
+
+        printf "Delete Chaos Mesh %s\n"  "${release_name}"
+        err_msg=$(helm delete --purge "${relase_name}")
+        if [ "$err_msg" != "" ] && [[ "$err_msg" != *"not found" ]]; then
+            printf "Delete Chaos Mesh %s failed, error: %s" "${release_name}" "${err_msg}"
+            exit 1
+        fi
     fi
 
     kubectl apply -f manifests/crd.yaml
