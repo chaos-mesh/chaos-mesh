@@ -70,16 +70,17 @@ func ModifyTime(pid int, deltaSec int64, deltaNsec int64) error {
 		}
 	}
 
+	constImageLen := len(fakeImage) - 16
 	var fakeEntry *mapreader.Entry
 	for _, e := range *program.Entries {
 		e := e
 
-		image, err := program.ReadSlice(e.StartAddress, uint64(len(fakeImage)))
+		image, err := program.ReadSlice(e.StartAddress, uint64(constImageLen))
 		if err != nil {
 			continue
 		}
 
-		if bytes.Equal(*image, fakeImage) {
+		if bytes.Equal(*image, fakeImage[0:constImageLen]) {
 			fakeEntry = &e
 			log.Info("found injected image", "addr", fakeEntry.StartAddress)
 			break
