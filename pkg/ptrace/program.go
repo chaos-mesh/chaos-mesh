@@ -369,7 +369,7 @@ func (p *TracedProgram) GetLibBuffer(entry *mapreader.Entry) (*[]byte, error) {
 // MmapSlice mmaps a slice and return it's addr
 func (p *TracedProgram) MmapSlice(slice []byte) (*mapreader.Entry, error) {
 	size := uint64(len(slice))
- s
+
 	addr, err := p.Mmap(size, 0)
 	if err != nil {
 		return nil, err
