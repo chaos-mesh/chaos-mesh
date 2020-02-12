@@ -6,7 +6,7 @@ After [preparing the development environment](./setup_env.md), let's develop a n
 2. [Register the CRD](#register-the-crd)
 3. [Implement the schema type](implement-the-schema-type)
 4. [Make the docker image](#make-the-docker-image)
-5. [Run-chaos](#run-chaos)
+5. [Run chaos](#run-chaos)
 
 ## Add the chaos object in controller
 
