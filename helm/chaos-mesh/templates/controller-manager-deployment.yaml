@@ -53,8 +53,10 @@ spec:
             mountPath: /etc/webhook/certs
             readOnly: true
         ports:
-          - name: webhook-api
+          - name: webhook
             containerPort: 9443 # Customize containerPort
+          - name: http
+            containerPort: 8080
       volumes:
         - name: webhook-certs
           secret:
