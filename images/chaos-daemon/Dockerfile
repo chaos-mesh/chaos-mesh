@@ -1,16 +1,8 @@
-FROM golang:alpine3.10 AS build
-
-RUN apk update
-RUN apk add gcc g++ make bash
-ADD src /src
-WORKDIR /src
-ENV GOPATH /go
-RUN make chaosdaemon
-
 FROM alpine:3.10
 
-RUN apk update
-RUN apk add tzdata
-RUN apk add iptables
-RUN apk add ipset
-COPY --from=build /src/bin/chaos-daemon /usr/local/bin/chaos-daemon
+ARG HTTPS_PROXY
+ARG HTTP_PROXY
+
+RUN apk add --no-cache tzdata iptables ipset
+
+COPY --from=pingcap/binary /src/bin/chaos-daemon /usr/local/bin/chaos-daemon
