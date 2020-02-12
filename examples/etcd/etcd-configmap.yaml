@@ -8,7 +8,7 @@ metadata:
     app.kubernetes.io/component: webhook
 data:
   chaosfs-etcd.yaml: |
-    name: chaosfs-pd
+    name: chaosfs-etcd
     initContainers:
     - name: inject-scripts
       image: pingcap/chaos-scripts:latest
