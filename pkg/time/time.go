@@ -45,6 +45,7 @@ var fakeImage = []byte{
 	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, //TV_NSEC_DELTA
 }
 
+// ModifyTime modifies time of target process
 func ModifyTime(pid int, deltaSec int64, deltaNsec int64) error {
 	runtime.LockOSThread()
 
