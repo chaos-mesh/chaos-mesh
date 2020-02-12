@@ -1,0 +1,19 @@
+apiVersion: pingcap.com/v1alpha1
+kind: IoChaos
+metadata:
+  name: io-delay-example
+spec:
+  action: delay
+  mode: one
+  duration: "400s"
+  configName: "chaosfs-etcd"
+  path: ""
+  selector:
+    namespaces:
+      - chaos-testing
+    labelSelectors:
+      app: etcd
+  layer: "fs"
+  delay: "100ms"
+  scheduler:
+    cron: "@every 10m"
