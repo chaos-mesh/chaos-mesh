@@ -25,6 +25,7 @@ import (
 
 var log = ctrl.Log.WithName("time")
 
+// TODO: support more cpu architecture
 // TODO: auto generate these codes
 var fakeImage = []byte{
 	0xb8, 0xe4, 0x00, 0x00, 0x00, //mov    $0xe4,%eax
