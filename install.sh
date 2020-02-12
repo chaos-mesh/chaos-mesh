@@ -188,7 +188,7 @@ check_kubernetes_version() {
     for v in $version_info
     do
         if version_lt "$v" "1.12.0"; then
-            printf "Chaos Mesh requires Kubernetes cluster running 1.12 or later"
+            printf "Chaos Mesh requires Kubernetes cluster running 1.12 or later\n"
             exit 1
         fi
     done
