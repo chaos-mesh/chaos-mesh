@@ -1,0 +1,39 @@
+---
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: etcd
+  namespace: chaos-testing
+  labels:
+    app: etcd
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: etcd
+  template:
+    metadata:
+      labels:
+        app: etcd
+    spec:
+      containers:
+        - name: etcd
+          imagePullPolicy: IfNotPresent
+          image: k8s.gcr.io/etcd:3.4.3-0
+          args:
+            - /usr/local/bin/etcd
+            - -name=etcd
+            - -advertise-client-urls=http://0.0.0.0:2379
+            - -initial-advertise-peer-urls=http://0.0.0.0:2380
+            - -listen-client-urls=http://0.0.0.0:2379
+            - -listen-peer-urls=http://0.0.0.0:2380
+            - -initial-cluster=etcd=http://0.0.0.0:2380
+            - --data-dir=/var/run/etcd/default.etcd
+            - -initial-cluster-state=new
+            - -initial-cluster-token=etcd-cluster
+          volumeMounts:
+          - mountPath: /var/run/etcd
+            name: datadir
+      volumes:
+        - emptyDir: {}
+          name: datadir
