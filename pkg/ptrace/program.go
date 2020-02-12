@@ -88,6 +88,7 @@ func constructPartialProgram(pid int, tidMap map[int]bool) *TracedProgram {
 	}
 }
 
+// Trace ptrace all threads of a process
 func Trace(pid int) (*TracedProgram, error) {
 	tidMap := make(map[int]bool)
 	for {
@@ -149,10 +150,7 @@ func Trace(pid int) (*TracedProgram, error) {
 	return program, nil
 }
 
-func (p *TracedProgram) Cont() error {
-	return syscall.PtraceCont(p.pid, 0)
-}
-
+// Detach detaches from all threads of the processs
 func (p *TracedProgram) Detach() error {
 	for _, tid := range p.tids {
 		err := syscall.PtraceDetach(tid)
@@ -197,10 +195,12 @@ func (p *TracedProgram) Restore() error {
 	return nil
 }
 
+// Wait waits until the process stops
 func (p *TracedProgram) Wait() error {
 	return waitPid(p.pid)
 }
 
+// Step moves one step forward
 func (p *TracedProgram) Step() error {
 	err := syscall.PtraceSingleStep(p.pid)
 	if err != nil {
@@ -210,6 +210,7 @@ func (p *TracedProgram) Step() error {
 	return p.Wait()
 }
 
+// Syscall runs a syscall at main thread of process
 func (p *TracedProgram) Syscall(number uint64, args ...uint64) (uint64, error) {
 	err := p.Protect()
 	if err != nil {
@@ -266,10 +267,12 @@ func (p *TracedProgram) Syscall(number uint64, args ...uint64) (uint64, error) {
 	return regs.Rax, p.Restore()
 }
 
+// Mmap runs mmap syscall
 func (p *TracedProgram) Mmap(length uint64, fd uint64) (uint64, error) {
 	return p.Syscall(9, 0, length, 7, 0x22, fd, 0)
 }
 
+// ReadSlice reads from addr and return a slice
 func (p *TracedProgram) ReadSlice(addr uint64, size uint64) (*[]byte, error) {
 	buffer := make([]byte, size)
 
@@ -302,6 +305,7 @@ func (p *TracedProgram) ReadSlice(addr uint64, size uint64) (*[]byte, error) {
 	return &buffer, nil
 }
 
+// WriteSlice writes a buffer into addr
 func (p *TracedProgram) WriteSlice(addr uint64, buffer []byte) error {
 	size := len(buffer)
 
@@ -335,6 +339,7 @@ func (p *TracedProgram) WriteSlice(addr uint64, buffer []byte) error {
 	return nil
 }
 
+// PtraceWriteSlice uses ptrace rather than process_vm_write to write a buffer into addr
 func (p *TracedProgram) PtraceWriteSlice(addr uint64, buffer []byte) error {
 	wroteSize := 0
 
@@ -350,6 +355,7 @@ func (p *TracedProgram) PtraceWriteSlice(addr uint64, buffer []byte) error {
 	return nil
 }
 
+// GetLibBuffer reads an entry
 func (p *TracedProgram) GetLibBuffer(entry *mapreader.Entry) (*[]byte, error) {
 	if entry.PaddingSize > 0 {
 		return nil, fmt.Errorf("entry with padding size is not supported")
@@ -360,9 +366,10 @@ func (p *TracedProgram) GetLibBuffer(entry *mapreader.Entry) (*[]byte, error) {
 	return p.ReadSlice(entry.StartAddress, size)
 }
 
+// MmapSlice mmaps a slice and return it's addr
 func (p *TracedProgram) MmapSlice(slice []byte) (*mapreader.Entry, error) {
 	size := uint64(len(slice))
-
+ s
 	addr, err := p.Mmap(size, 0)
 	if err != nil {
 		return nil, err
@@ -382,6 +389,7 @@ func (p *TracedProgram) MmapSlice(slice []byte) (*mapreader.Entry, error) {
 	}, nil
 }
 
+// FindSymbolInEntry finds symbol in entry through parsing elf
 func (p *TracedProgram) FindSymbolInEntry(symbolName string, entry *mapreader.Entry) (uint64, error) {
 	libBuffer, err := p.GetLibBuffer(entry)
 	if err != nil {
@@ -408,6 +416,7 @@ func (p *TracedProgram) FindSymbolInEntry(symbolName string, entry *mapreader.En
 	return 0, fmt.Errorf("cannot find symbol")
 }
 
+// WriteUint64ToAddr writes uint64 to addr
 func (p *TracedProgram) WriteUint64ToAddr(addr uint64, value uint64) error {
 	valueSlice := make([]byte, 8)
 	binary.LittleEndian.PutUint64(valueSlice, uint64(value))
@@ -419,6 +428,7 @@ func (p *TracedProgram) WriteUint64ToAddr(addr uint64, value uint64) error {
 	return nil
 }
 
+// JumpToFakeFunc writes jmp instruction to jump to fake function
 func (p *TracedProgram) JumpToFakeFunc(originAddr uint64, targetAddr uint64, symbolName string) error {
 	instructions := make([]byte, 16)
 

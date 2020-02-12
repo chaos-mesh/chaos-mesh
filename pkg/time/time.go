@@ -44,7 +44,7 @@ var fakeImage = []byte{
 	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, //TV_NSEC_DELTA
 }
 
-func ModifyTime(pid int, delta_sec int64, delta_nsec int64) error {
+func ModifyTime(pid int, deltaSec int64, deltaNsec int64) error {
 	runtime.LockOSThread()
 
 	program, err := ptrace.Trace(pid)
@@ -91,12 +91,12 @@ func ModifyTime(pid int, delta_sec int64, delta_nsec int64) error {
 	}
 	fakeAddr := fakeEntry.StartAddress
 
-	err = program.WriteUint64ToAddr(fakeAddr+44, uint64(delta_sec))
+	err = program.WriteUint64ToAddr(fakeAddr+44, uint64(deltaSec))
 	if err != nil {
 		return err
 	}
 
-	err = program.WriteUint64ToAddr(fakeAddr+52, uint64(delta_nsec))
+	err = program.WriteUint64ToAddr(fakeAddr+52, uint64(deltaNsec))
 	if err != nil {
 		return err
 	}
