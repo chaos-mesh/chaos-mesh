@@ -22,11 +22,11 @@ import (
 
 // Entry is one line in /proc/pid/maps
 type Entry struct {
-	StatAddress uint64
-	EndAddress  uint64
-	Privilege   string
-	PaddingSize uint64
-	Path        string
+	StartAddress uint64
+	EndAddress   uint64
+	Privilege    string
+	PaddingSize  uint64
+	Path         string
 }
 
 // Read parse /proc/pid/maps and return a list of entry

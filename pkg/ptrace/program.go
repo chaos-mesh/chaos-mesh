@@ -279,15 +279,17 @@ func (p *TracedProgram) ReadSlice(addr uint64, size uint64) (*[]byte, error) {
 		iov_base: unsafe.Pointer(tmpBuffer),
 		iov_len:  C.ulong(size),
 	}
-	remoteIov := C.struct_iovec{
-		iov_base: C.Uint64ToPointer(C.ulong(addr)),
-		iov_len:  C.ulong(size),
-	}
+
+	remoteIovBuf := C.malloc(C.sizeof_struct_iovec)
+	defer C.free(remoteIovBuf)
+	remoteIov := (*C.struct_iovec)(remoteIovBuf)
+	remoteIov.iov_base = C.Uint64ToPointer(C.ulong(addr))
+	remoteIov.iov_len = C.ulong(size)
 
 	ret, err := C.process_vm_readv(C.int(p.pid),
 		(*C.struct_iovec)(unsafe.Pointer(&localIov)),
 		1,
-		(*C.struct_iovec)(unsafe.Pointer(&remoteIov)),
+		remoteIov,
 		1,
 		0,
 	)
@@ -311,15 +313,17 @@ func (p *TracedProgram) WriteSlice(addr uint64, buffer []byte) error {
 		iov_base: tmpBuffer,
 		iov_len:  C.ulong(size),
 	}
-	remoteIov := C.struct_iovec{
-		iov_base: C.Uint64ToPointer(C.ulong(addr)),
-		iov_len:  C.ulong(size),
-	}
+
+	remoteIovBuf := C.malloc(C.sizeof_struct_iovec)
+	defer C.free(remoteIovBuf)
+	remoteIov := (*C.struct_iovec)(remoteIovBuf)
+	remoteIov.iov_base = C.Uint64ToPointer(C.ulong(addr))
+	remoteIov.iov_len = C.ulong(size)
 
 	ret, err := C.process_vm_writev(C.int(p.pid),
 		(*C.struct_iovec)(unsafe.Pointer(&localIov)),
 		1,
-		(*C.struct_iovec)(unsafe.Pointer(&remoteIov)),
+		remoteIov,
 		1,
 		0,
 	)
@@ -351,9 +355,9 @@ func (p *TracedProgram) GetLibBuffer(entry *mapreader.Entry) (*[]byte, error) {
 		return nil, fmt.Errorf("entry with padding size is not supported")
 	}
 
-	size := entry.EndAddress - entry.StatAddress
+	size := entry.EndAddress - entry.StartAddress
 
-	return p.ReadSlice(entry.StatAddress, size)
+	return p.ReadSlice(entry.StartAddress, size)
 }
 
 func (p *TracedProgram) MmapSlice(slice []byte) (*mapreader.Entry, error) {
@@ -370,11 +374,11 @@ func (p *TracedProgram) MmapSlice(slice []byte) (*mapreader.Entry, error) {
 	}
 
 	return &mapreader.Entry{
-		StatAddress: addr,
-		EndAddress:  addr + size,
-		Privilege:   "rwxp",
-		PaddingSize: 0,
-		Path:        "",
+		StartAddress: addr,
+		EndAddress:   addr + size,
+		Privilege:    "rwxp",
+		PaddingSize:  0,
+		Path:         "",
 	}, nil
 }
 
@@ -398,7 +402,7 @@ func (p *TracedProgram) FindSymbolInEntry(symbolName string, entry *mapreader.En
 		if symbol.Name == symbolName {
 			offset := symbol.Value
 
-			return entry.StatAddress + offset, nil
+			return entry.StartAddress + offset, nil
 		}
 	}
 	return 0, fmt.Errorf("cannot find symbol")

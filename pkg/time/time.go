@@ -14,6 +14,7 @@
 package time
 
 import (
+	"bytes"
 	"runtime"
 
 	"github.com/pingcap/chaos-mesh/pkg/mapreader"
@@ -67,12 +68,28 @@ func ModifyTime(pid int, delta_sec int64, delta_nsec int64) error {
 		}
 	}
 
-	// TODO: Check whether entry has been loaded before mmap it.
-	fakeEntry, err := program.MmapSlice(fakeImage)
-	if err != nil {
-		return err
+	var fakeEntry *mapreader.Entry
+	for _, e := range *program.Entries {
+		e := e
+
+		image, err := program.ReadSlice(e.StartAddress, uint64(len(fakeImage)))
+		if err != nil {
+			continue
+		}
+
+		if bytes.Equal(*image, fakeImage) {
+			fakeEntry = &e
+			log.Info("found injected image", "addr", fakeEntry.StartAddress)
+			break
+		}
 	}
-	fakeAddr := fakeEntry.StatAddress
+	if fakeEntry == nil {
+		fakeEntry, err = program.MmapSlice(fakeImage)
+		if err != nil {
+			return err
+		}
+	}
+	fakeAddr := fakeEntry.StartAddress
 
 	err = program.WriteUint64ToAddr(fakeAddr+44, uint64(delta_sec))
 	if err != nil {
