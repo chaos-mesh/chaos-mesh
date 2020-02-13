@@ -451,6 +451,7 @@ func (p *TracedProgram) WriteUint64ToAddr(addr uint64, value uint64) error {
 	return nil
 }
 
+// Mprotect runs mprotect syscall
 func (p *TracedProgram) Mprotect(addr uint64, len uint64, prot uint64) (uint64, error) {
 	return p.Syscall(10, addr, len, prot)
 }
