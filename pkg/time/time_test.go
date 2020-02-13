@@ -65,38 +65,38 @@ var _ = Describe("ModifyTime", func() {
 			Expect(t).NotTo(BeNil())
 
 			now, err := t.GetTime()
-			Expect(err).ShouldNot(HaveOccurred())
+			Expect(err).ShouldNot(HaveOccurred(), "error: %+v", err)
 
 			sec := now.Unix()
 
 			err = ModifyTime(t.Pid(), 10000, 100000000)
-			Expect(err).ShouldNot(HaveOccurred())
+			Expect(err).ShouldNot(HaveOccurred(), "error: %+v", err)
 
 			newTime, err := t.GetTime()
-			Expect(err).ShouldNot(HaveOccurred())
+			Expect(err).ShouldNot(HaveOccurred(), "error: %+v", err)
 
 			newSec := newTime.Unix()
 
-			Expect(newSec - sec).Should(BeNumerically("==", 10000))
+			Expect(newSec-sec).Should(BeNumerically(">=", 10000), "sec %d newSec %d", sec, newSec)
 		})
 
 		It("should move backward successfully", func() {
 			Expect(t).NotTo(BeNil())
 
 			now, err := t.GetTime()
-			Expect(err).ShouldNot(HaveOccurred())
+			Expect(err).ShouldNot(HaveOccurred(), "error: %+v", err)
 
 			sec := now.Unix()
 
 			err = ModifyTime(t.Pid(), -10000, -100000000)
-			Expect(err).ShouldNot(HaveOccurred())
+			Expect(err).ShouldNot(HaveOccurred(), "error: %+v", err)
 
 			newTime, err := t.GetTime()
-			Expect(err).ShouldNot(HaveOccurred())
+			Expect(err).ShouldNot(HaveOccurred(), "error: %+v", err)
 
 			newSec := newTime.Unix()
 
-			Expect(sec - newSec).Should(BeNumerically("==", 10000))
+			Expect(10000-(sec-newSec)).Should(BeNumerically("<=", 1), "sec %d newSec %d", sec, newSec)
 		})
 	})
 })
