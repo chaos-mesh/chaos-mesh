@@ -31,7 +31,8 @@ type Entry struct {
 	Path         string
 }
 
-// Read parse /proc/pid/maps and return a list of entry
+// Read parse /proc/[pid]/maps and return a list of entry
+// The format of /proc/[pid]/maps can be found in `man proc`.
 func Read(pid int) (*[]Entry, error) {
 	data, err := ioutil.ReadFile(fmt.Sprintf("/proc/%d/maps", pid))
 	if err != nil {

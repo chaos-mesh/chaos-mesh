@@ -26,11 +26,11 @@ type TimeChaos struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	// Spec defines the behavior of a pod chaos experiment
+	// Spec defines the behavior of a time chaos experiment
 	Spec TimeChaosSpec `json:"spec"`
 
 	// +optional
-	// Most recently observed status of the chaos experiment about pods
+	// Most recently observed status of the time chaos experiment
 	Status TimeChaosStatus `json:"status"`
 }
 
@@ -84,6 +84,9 @@ func (in *TimeChaosSpec) GetValue() string {
 }
 
 // TimeOffset defines the delta time of injected program
+// As `clock_gettime` return a struct contains two field: `tv_sec` and `tv_nsec`.
+// `Sec` is the offset of seconds, corresponding to `tv_sec` field.
+// `NSec` is the offset of nanoseconds, corresponding to `tv_nsec` field.
 type TimeOffset struct {
 	Sec  int64 `json:"sec"`
 	NSec int64 `json:"nsec"`

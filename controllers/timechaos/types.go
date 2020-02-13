@@ -1,4 +1,4 @@
-// Copyright 2019 PingCAP, Inc.
+// Copyright 2020 PingCAP, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -45,7 +45,7 @@ type Reconciler struct {
 	Log logr.Logger
 }
 
-// Reconcile reconcile a request from controller
+// Reconcile reconciles a request from controller
 func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	r.Log.Info("reconciling timechaos")
 	ctx := context.Background()

@@ -49,7 +49,10 @@ var log = ctrl.Log.WithName("ptrace")
 
 const waitPidErrorMessage = "waitpid ret value: %d"
 
-const ptrSize = 4 << uintptr(^uintptr(0)>>63) // Here is a trick to get pointer size in bytes
+// If it's on 64-bit platform, `^uintptr(0)` will get a 64-bit number full of one.
+// After shifting right for 63-bit, only 1 will be left. Than we got 8 here.
+// If it's on 32-bit platform, After shifting nothing will be left. Than we got 4 here.
+const ptrSize = 4 << uintptr(^uintptr(0)>>63)
 
 // TracedProgram is a program traced by ptrace
 type TracedProgram struct {
@@ -97,7 +100,7 @@ func Trace(pid int) (*TracedProgram, error) {
 		threads, err := ioutil.ReadDir(fmt.Sprintf("/proc/%d/task", pid))
 		if err != nil {
 			log.Error(err, "read failed", "pid", pid)
-			return constructPartialProgram(pid, tidMap), errors.WithStack(err)
+			return nil, errors.WithStack(err)
 		}
 
 		if len(threads) == len(tidMap) {
@@ -250,7 +253,9 @@ func (p *TracedProgram) Syscall(number uint64, args ...uint64) (uint64, error) {
 	}
 
 	ip := make([]byte, ptrSize)
-	binary.LittleEndian.PutUint16(ip, 0x050f) // The endianness is hard coded here
+
+	// We only support x86-64 platform now, so using hard coded `LittleEndian` here is ok.
+	binary.LittleEndian.PutUint16(ip, 0x050f)
 	_, err = syscall.PtracePokeData(p.pid, uintptr(p.backupRegs.Rip), ip)
 	if err != nil {
 		return 0, err
