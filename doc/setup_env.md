@@ -31,6 +31,9 @@ make install-kustomize
 
 3. Start the docker service. Most Linux distributions use `systemctl` to start services. If you do not have `systemctl`, use the service command.
 
+4. Make sure `${GOPATH}/bin` is in your `PATH`:
+execute `echo 'export PATH=$(go env GOPATH)/bin:${PATH}' >> ~/.bash_profile` and relogin your bash shell.
+
 
 Now you can test the toolchain by running:
 
