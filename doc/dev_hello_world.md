@@ -220,4 +220,4 @@ kubectl logs chaos-controller-manager-{pod-post-fix} -n chaos-testing
 
 ## Next steps
 
-Congratulations! You have just added a chaos type for Chaos Mesh successfully. Let us know if you run into any issues during the process. If you feel like doing other type of contributions , refer to [Add facilities to chaos daemon (WIP)].
+Congratulations! You have just added a chaos type for Chaos Mesh successfully. Let us know if you run into any issues during the process. If you feel like doing other types of contributions, refer to [Add facilities to chaos daemon (WIP)].
