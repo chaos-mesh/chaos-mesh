@@ -63,7 +63,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	}
 
 	if len(pods) == 0 {
-		r.Log.Error(nil, "no pod is selected","name", req.Name, "namespace", req.Namespace)
+		r.Log.Error(nil, "no pod is selected", "name", req.Name, "namespace", req.Namespace)
 		return ctrl.Result{Requeue: true}, nil
 	}
 
