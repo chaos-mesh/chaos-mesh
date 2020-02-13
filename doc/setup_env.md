@@ -31,10 +31,10 @@ make install-kustomize
 
 3. Start the docker service. Most Linux distributions use `systemctl` to start services. If you do not have `systemctl`, use the service command.
 
-4. Make sure `${GOPATH}/bin` is in your `PATH`:
-execute `echo 'export PATH=$(go env GOPATH)/bin:${PATH}' >> ~/.bash_profile` and `source ~/. bash_profile`.
+4. Make sure `${GOPATH}/bin` is in your `PATH` by executing:
+ `echo 'export PATH=$(go env GOPATH)/bin:${PATH}' >> ~/.bash_profile` and `source ~/. bash_profile`.
 
-***Note***: If your yarn is new installed, you may need reload terminal to make it available.
+***Note***: If your yarn is newly installed, you may need to restart the terminal to make it available.
 
 
 Now you can test the toolchain by running:
@@ -47,7 +47,7 @@ If there is no error in the output, the compiling toolchain is successfully conf
 
 ## Prepare the deployment environment
 
-With the toolchain ready, we still need a local Kubernetes cluster as the deployment environment. As we already have kind installed, we can now set up the K8s cluster directly:
+With the toolchain ready, you still need a local Kubernetes cluster as the deployment environment. Because kind is already installed in your local, you can now set up the K8s cluster directly:
 
 ```
 hack/kind-cluster-build.sh
@@ -55,7 +55,7 @@ hack/kind-cluster-build.sh
 
 ## Next steps
 
-Congratulations. You are now all set up for Chaos Mesh development. Try the following tasks:
+Congratulations! You are now all set up for Chaos Mesh development. Try the following tasks:
 
 - [Develop a New Chaos Type](./dev_hello_world.md)
 - [ ] [Add facilities to chaos daemon]
