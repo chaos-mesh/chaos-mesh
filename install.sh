@@ -162,7 +162,7 @@ main() {
 
 prepare_env() {
     mkdir -p "$HOME/local/bin"
-    local set_path="export PTAH=$HOME/local/bin:$PATH"
+    local set_path="export PATH=$HOME/local/bin:\$PATH"
     local env_file="$HOME/.bash_profile"
     if [[ ! -e "${env_file}" ]]; then
         touch "${env_file}"
@@ -202,6 +202,8 @@ install_kubernetes_by_kind() {
     local force_install=$5
 
     printf "Install local Kubernetes %s\n" "${cluster_name}"
+
+    need_cmd "kind"
 
     work_dir=${HOME}/kind/${cluster_name}
     kubeconfig_path=${work_dir}/config
@@ -291,6 +293,8 @@ deploy_registry() {
     local data_dir=$2
 
     printf "Deploy docker registry in kind\n"
+
+    need_cmd "kubectl"
 
     registry_node=${cluster_name}-control-plane
     registry_node_ip=$(kubectl get nodes "${registry_node}" -o template --template='{{range.status.addresses}}{{if eq .type "InternalIP"}}{{.address}}{{end}}{{end}}')
@@ -444,6 +448,7 @@ init_helm() {
     local rbac_config=${data_dir}/tiller-rbac.yaml
     local rbac_config_url="https://raw.githubusercontent.com/pingcap/chaos-mesh/master/manifests/tiller-rbac.yaml"
 
+    need_cmd "helm"
     rm -rf "${rbac_config}"
     wget -O "${rbac_config}" "$rbac_config_url"
     kubectl apply -f "${rbac_config}"
