@@ -32,7 +32,7 @@ spec:
         metadata:
           type: object
         spec:
-          description: Spec defines the behavior of a pod chaos experiment
+          description: Spec defines the behavior of a time chaos experiment
           properties:
             duration:
               description: Duration represents the duration of the chaos action
@@ -148,8 +148,7 @@ spec:
           - timeOffset
           type: object
         status:
-          description: Most recently observed status of the chaos experiment about
-            pods
+          description: Most recently observed status of the time chaos experiment
           properties:
             experiment:
               description: Experiment records the last experiment state.
