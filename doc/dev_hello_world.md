@@ -206,7 +206,7 @@ metadata:
 4. Apply the chaos.
 
 ```
-kubectl apply -f chaos.yaml
+kubectl apply -f /path/to/chaos.yaml
 kubectl get HelloWorldChaos -n chaos-testing
 ```
 
