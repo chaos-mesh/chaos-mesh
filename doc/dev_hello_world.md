@@ -152,7 +152,6 @@ Please note that the default `DOCKER_REGISTRY` is `localhost:5000`, which is pre
 
 You are almost there. In this step, you will pull the image and apply it for testing.
 
-**Note:**
 
 Note that before you pull any image for chaos-mesh (using `helm install` or `helm upgrade`), modify [values.yaml](https://github.com/pingcap/chaos-mesh/blob/master/helm/chaos-mesh/values.yaml) of helm template to replace the default image with what you just pushed to your local registry. 
 
