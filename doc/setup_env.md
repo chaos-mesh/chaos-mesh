@@ -15,7 +15,7 @@ This document walks you through the environment setup process for Chaos Mesh dev
 
 Make sure you have the above prerequisites met. Now follow the steps below to prepare the toolchain for compiling Chaos Mesh:
 
-1. clone the chaos-mesh repo to your local.
+1. Clone the chaos-mesh repo to your local machine.
 
 ```
 git clone https://github.com/pingcap/chaos-mesh.git
