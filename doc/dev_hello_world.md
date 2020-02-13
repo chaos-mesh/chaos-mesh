@@ -150,7 +150,7 @@ Please note that the default `DOCKER_REGISTRY` is `localhost:5000`, which is pre
 
 ## Run Chaos
 
-You are almost there. In this step, we will pull the image and apply it for testing.
+You are almost there. In this step, you will pull the image and apply it for testing.
 
 **Note:**
 
