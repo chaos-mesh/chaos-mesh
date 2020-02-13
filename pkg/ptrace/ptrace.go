@@ -451,6 +451,10 @@ func (p *TracedProgram) WriteUint64ToAddr(addr uint64, value uint64) error {
 	return nil
 }
 
+func (p *TracedProgram) Mprotect(addr uint64, len uint64, prot uint64) (uint64, error) {
+	return p.Syscall(10, addr, len, prot)
+}
+
 // JumpToFakeFunc writes jmp instruction to jump to fake function
 func (p *TracedProgram) JumpToFakeFunc(originAddr uint64, targetAddr uint64, symbolName string) error {
 	instructions := make([]byte, 16)
@@ -463,5 +467,5 @@ func (p *TracedProgram) JumpToFakeFunc(originAddr uint64, targetAddr uint64, sym
 	instructions[10] = 0xff
 	instructions[11] = 0xe0
 
-	return p.PtraceWriteSlice(originAddr, instructions)
+	return p.WriteSlice(originAddr, instructions)
 }

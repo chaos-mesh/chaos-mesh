@@ -15,6 +15,7 @@ package time
 
 import (
 	"bytes"
+	"errors"
 	"runtime"
 
 	"github.com/pingcap/chaos-mesh/pkg/mapreader"
@@ -69,6 +70,9 @@ func ModifyTime(pid int, deltaSec int64, deltaNsec int64) error {
 			vdsoEntry = &e
 		}
 	}
+	if vdsoEntry == nil {
+		return errors.New("cannot find [vdso] entry")
+	}
 
 	constImageLen := len(fakeImage) - 16
 	var fakeEntry *mapreader.Entry
@@ -105,6 +109,11 @@ func ModifyTime(pid int, deltaSec int64, deltaNsec int64) error {
 	}
 
 	originAddr, err := program.FindSymbolInEntry("clock_gettime", vdsoEntry)
+	if err != nil {
+		return err
+	}
+
+	_, err = program.Mprotect(vdsoEntry.StartAddress, vdsoEntry.EndAddress-vdsoEntry.StartAddress, 7)
 	if err != nil {
 		return err
 	}
