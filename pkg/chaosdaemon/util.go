@@ -19,6 +19,7 @@ import (
 	"os/exec"
 
 	"github.com/containerd/containerd"
+	"github.com/docker/docker/api/types"
 	dockerclient "github.com/docker/docker/client"
 )
 
@@ -42,9 +43,14 @@ type ContainerRuntimeInfoClient interface {
 	GetPidFromContainerID(ctx context.Context, containerID string) (uint32, error)
 }
 
+// DockerClientI represents the DockerClient, it's used to simply unit test
+type DockerClientI interface {
+	ContainerInspect(ctx context.Context, containerID string) (types.ContainerJSON, error)
+}
+
 // DockerClient can get information from docker
 type DockerClient struct {
-	client *dockerclient.Client
+	client DockerClientI
 }
 
 // GetPidFromContainerID fetches PID according to container id
@@ -60,9 +66,14 @@ func (c DockerClient) GetPidFromContainerID(ctx context.Context, containerID str
 	return uint32(container.State.Pid), nil
 }
 
+// ContainerdClientI represents the ContainerClient, it's used to simply unit test
+type ContainerdClientI interface {
+	LoadContainer(ctx context.Context, id string) (containerd.Container, error)
+}
+
 // ContainerdClient can get information from containerd
 type ContainerdClient struct {
-	client *containerd.Client
+	client ContainerdClientI
 }
 
 // GetPidFromContainerID fetches PID according to container id
