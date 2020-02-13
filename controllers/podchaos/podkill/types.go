@@ -15,7 +15,6 @@ package podkill
 
 import (
 	"context"
-	"errors"
 	"time"
 
 	"golang.org/x/sync/errgroup"
@@ -64,8 +63,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	}
 
 	if len(pods) == 0 {
-		err = errors.New("no pod is selected")
-		r.Log.Error(err, "no pod is selected")
+		r.Log.Error(nil, "no pod is selected","name", req.Name, "namespace", req.Namespace)
 		return ctrl.Result{Requeue: true}, nil
 	}
 

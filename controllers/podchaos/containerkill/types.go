@@ -1,4 +1,4 @@
-// Copyright 2019 PingCAP, Inc.
+// Copyright 2020 PingCAP, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -57,9 +57,8 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	}
 
 	if podchaos.Spec.ContainerName == "" {
-		err = errors.New("the ContainerName is empty")
-		r.Log.Error(err, "the ContainerName is empty")
-		return ctrl.Result{Requeue: true}, nil
+		r.Log.Error(nil, "the name of container is empty","name", req.Name, "namespace", req.Namespace)
+		return ctrl.Result{}, nil
 	}
 
 	shouldAct := podchaos.GetNextStart().Before(now)
@@ -73,8 +72,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	}
 
 	if len(pods) == 0 {
-		err = errors.New("no pod is selected")
-		r.Log.Error(err, "no pod is selected")
+		r.Log.Error(nil, "no pod is selected","name", req.Name, "namespace", req.Namespace)
 		return ctrl.Result{Requeue: true}, nil
 	}
 
@@ -87,12 +85,12 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	g := errgroup.Group{}
 	haveSelected := false
 	haveKilled := false
-	for index := range filteredPod {
-		pod := &filteredPod[index]
+	for podIndex := range filteredPod {
+		pod := &filteredPod[podIndex]
 
-		for index := range pod.Status.ContainerStatuses {
-			containerName := pod.Status.ContainerStatuses[index].Name
-			containerID := pod.Status.ContainerStatuses[index].ContainerID
+		for containerIndex := range pod.Status.ContainerStatuses {
+			containerName := pod.Status.ContainerStatuses[containerIndex].Name
+			containerID := pod.Status.ContainerStatuses[containerIndex].ContainerID
 
 			if containerName == podchaos.Spec.ContainerName {
 				haveSelected = true
@@ -128,7 +126,6 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 // KillContainer kills container according to containerID
 // Use client in chaos-daemon
 func (r *Reconciler) KillContainer(ctx context.Context, pod *v1.Pod, containerID string) error {
-
 	r.Log.Info("try to kill container", "namespace", pod.Namespace, "podName", pod.Name, "containerID", containerID)
 
 	c, err := utils.CreateGrpcConnection(ctx, r.Client, pod)
@@ -147,9 +144,10 @@ func (r *Reconciler) KillContainer(ctx context.Context, pod *v1.Pod, containerID
 		ContainerId: containerID,
 	}); err != nil {
 		r.Log.Error(err, "kill container error", "namespace", pod.Namespace, "podName", pod.Name, "containerID", containerID)
+		return err
 	}
 
-	return err
+	return nil
 }
 
 func (r *Reconciler) updatePodchaos(ctx context.Context, podchaos v1alpha1.PodChaos, pods []v1.Pod, now time.Time) (ctrl.Result, error) {

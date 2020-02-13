@@ -125,6 +125,9 @@ func withNetNS(ctx context.Context, nsPath string, cmd string, args ...string) *
 
 // ContainerKillByContainerID kills container according to container id
 func (c DockerClient) ContainerKillByContainerID(ctx context.Context, containerID string) error {
+	if len(containerID)<len(dockerProtocolPrefix){
+		return fmt.Errorf("container id %s is not a docker container id", containerID)
+	}
 	if containerID[0:len(dockerProtocolPrefix)] != dockerProtocolPrefix {
 		return fmt.Errorf("expected %s but got %s", dockerProtocolPrefix, containerID[0:len(dockerProtocolPrefix)])
 	}
@@ -135,6 +138,9 @@ func (c DockerClient) ContainerKillByContainerID(ctx context.Context, containerI
 
 // ContainerKillByContainerID kills container according to container id
 func (c ContainerdClient) ContainerKillByContainerID(ctx context.Context, containerID string) error {
+	if len(containerID)<len(containerdProtocolPrefix){
+		return fmt.Errorf("container id %s is not a containerd container id", containerID)
+	}
 	if containerID[0:len(containerdProtocolPrefix)] != containerdProtocolPrefix {
 		return fmt.Errorf("expected %s but got %s", containerdProtocolPrefix, containerID[0:len(containerdProtocolPrefix)])
 	}

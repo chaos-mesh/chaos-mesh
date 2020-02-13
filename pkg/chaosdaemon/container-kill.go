@@ -1,4 +1,4 @@
-// Copyright 2019 PingCAP, Inc.
+// Copyright 2020 PingCAP, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ import (
 
 // ContainerKill kills container according to container id in the req
 func (s *daemonServer) ContainerKill(ctx context.Context, req *pb.ContainerRequest) (*empty.Empty, error) {
-	log.Info("container Kill")
+	log.Info("container Kill","request", req)
 
 	err := s.crClient.ContainerKillByContainerID(ctx, req.ContainerId)
 	if err != nil {
