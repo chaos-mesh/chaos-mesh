@@ -191,6 +191,7 @@ kubectl get crd podchaos.pingcap.com
 helm install helm/chaos-mesh --name=chaos-mesh --namespace=chaos-testing --set chaosDaemon.runtime=containerd --set chaosDaemon.socketPath=/run/containerd/containerd.sock
 kubectl get pods --namespace chaos-testing -l app.kubernetes.io/instance=chaos-mesh
 ```
+
 The arguments `--set chaosDaemon.runtime=containerd --set chaosDaemon.socketPath=/run/containerd/containerd.sock` is used to to support network chaos on kind.
 
 3. Create chaos.yaml in any location with the lines below:
