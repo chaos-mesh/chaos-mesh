@@ -47,7 +47,7 @@ If there is no error in the output, the compiling toolchain is successfully conf
 
 ## Prepare the deployment environment
 
-With the toolchain ready, you still need a local Kubernetes cluster as the deployment environment. Because kind is already installed in your local, you can now set up the K8s cluster directly:
+With the toolchain ready, you still need a local Kubernetes cluster as the deployment environment. Because kind is already installed, you can now set up the K8s cluster directly:
 
 ```
 hack/kind-cluster-build.sh
