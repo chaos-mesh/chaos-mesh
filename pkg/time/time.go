@@ -123,5 +123,10 @@ func ModifyTime(pid int, deltaSec int64, deltaNsec int64) error {
 		return err
 	}
 
+	_, err = program.Mprotect(vdsoEntry.StartAddress, vdsoEntry.EndAddress-vdsoEntry.StartAddress, 5)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
