@@ -100,6 +100,10 @@ main() {
                 force_helm=true
                 shift
                 ;;
+            --force-chaos-mesh)
+                force_chaos_mesh=true
+                shift
+                ;;
             --kind-version)
                 kind_version="$2"
                 shift
