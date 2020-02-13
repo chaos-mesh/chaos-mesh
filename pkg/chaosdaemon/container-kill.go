@@ -15,7 +15,6 @@ package chaosdaemon
 
 import (
 	"context"
-	"errors"
 	"fmt"
 
 	"github.com/golang/protobuf/ptypes/empty"
@@ -29,7 +28,7 @@ func (s *daemonServer) ContainerKill(ctx context.Context, req *pb.ContainerReque
 
 	action := req.Action.Action
 	if action != pb.ContainerAction_KILL {
-		err := errors.New(fmt.Sprintf("container action is %s , not kill", pb.ContainerAction_Action_name[int32(action)]))
+		err := fmt.Errorf("container action is %s , not kill", pb.ContainerAction_Action_name[int32(action)])
 		log.Error(err, "container action is not expected")
 		return nil, err
 	}
