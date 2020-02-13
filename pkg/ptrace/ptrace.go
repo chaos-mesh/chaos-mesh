@@ -352,7 +352,7 @@ func (p *TracedProgram) PtraceWriteSlice(addr uint64, buffer []byte) error {
 		_, err := syscall.PtracePokeData(p.pid, addr, data)
 		if err != nil {
 			err = errors.WithStack(err)
-			return errors.WithMessagef(err, "write to addr %d with %+v failed", addr, data)
+			return errors.WithMessagef(err, "write to addr %x with %+v failed", addr, data)
 		}
 
 		wroteSize += ptrSize
