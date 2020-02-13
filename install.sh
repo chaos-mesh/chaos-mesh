@@ -324,8 +324,9 @@ EOF
     ensure kind get kubeconfig --name="${cluster_name}" > "${kubeconfig_path}"
     ensure export KUBECONFIG="${kubeconfig_path}"
 
-    deploy_registry "${cluster_name}" "${data_dir}"
-    init_helm "${data_dir}"
+    deploy_volume_provisioner "${work_dir}"
+    deploy_registry "${cluster_name}" "${work_dir}"
+    init_helm "${work_dir}"
 }
 
 deploy_registry() {
