@@ -137,7 +137,7 @@ metadata:
   namespace: <ns-of-this-resource>
 ```
 
-## Make the image
+## Make the docker image
 
 Having the object successfully added, we can make docker image and push it to your registry:
 
