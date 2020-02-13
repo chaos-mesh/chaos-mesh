@@ -14,7 +14,7 @@ In Chaos Mesh, all chaos types are managed by the controller manager. To add a n
 
 1. Add the HelloWorldChaos object in the controller manager [main.go](https://github.com/pingcap/chaos-mesh/blob/master/cmd/controller-manager/main.go#L104).
 
-**Note:** You will notice existing chaos types such as PodChaos, NetworkChaos and IOChaos. Add the new type below them.
+    You will notice existing chaos types such as PodChaos, NetworkChaos and IOChaos. Add the new type below them:
 
 ```golang
 	if err = (&controllers.HelloWorldChaosReconciler{
