@@ -38,6 +38,8 @@ import (
 	"syscall"
 	"unsafe"
 
+	"github.com/pkg/errors"
+
 	ctrl "sigs.k8s.io/controller-runtime"
 
 	"github.com/pingcap/chaos-mesh/pkg/mapreader"
@@ -70,7 +72,7 @@ func waitPid(pid int) error {
 		return nil
 	}
 
-	return fmt.Errorf(waitPidErrorMessage, ret)
+	return errors.Errorf(waitPidErrorMessage, ret)
 }
 
 func constructPartialProgram(pid int, tidMap map[int]bool) *TracedProgram {
@@ -95,7 +97,7 @@ func Trace(pid int) (*TracedProgram, error) {
 		threads, err := ioutil.ReadDir(fmt.Sprintf("/proc/%d/task", pid))
 		if err != nil {
 			log.Error(err, "read failed", "pid", pid)
-			return constructPartialProgram(pid, tidMap), err
+			return constructPartialProgram(pid, tidMap), errors.WithStack(err)
 		}
 
 		if len(threads) == len(tidMap) {
@@ -105,7 +107,7 @@ func Trace(pid int) (*TracedProgram, error) {
 		for _, thread := range threads {
 			tid64, err := strconv.ParseInt(thread.Name(), 10, 32)
 			if err != nil {
-				return constructPartialProgram(pid, tidMap), err
+				return constructPartialProgram(pid, tidMap), errors.WithStack(err)
 			}
 			tid := int(tid64)
 
@@ -117,13 +119,13 @@ func Trace(pid int) (*TracedProgram, error) {
 			err = syscall.PtraceAttach(tid)
 			if err != nil {
 				log.Error(err, "attach failed", "tid", tid)
-				return constructPartialProgram(pid, tidMap), err
+				return constructPartialProgram(pid, tidMap), errors.WithStack(err)
 			}
 			log.Info("attach successfully", "tid", tid)
 
 			err = waitPid(tid)
 			if err != nil {
-				return constructPartialProgram(pid, tidMap), err
+				return constructPartialProgram(pid, tidMap), errors.WithStack(err)
 			}
 			tidMap[tid] = true
 		}
@@ -157,7 +159,7 @@ func (p *TracedProgram) Detach() error {
 
 		if err != nil {
 			log.Error(err, "detach failed", "tid", tid)
-			return err
+			return errors.WithStack(err)
 		}
 	}
 
@@ -169,12 +171,12 @@ func (p *TracedProgram) Detach() error {
 func (p *TracedProgram) Protect() error {
 	err := syscall.PtraceGetRegs(p.pid, p.backupRegs)
 	if err != nil {
-		return err
+		return errors.WithStack(err)
 	}
 
 	_, err = syscall.PtracePeekData(p.pid, uintptr(p.backupRegs.Rip), p.backupCode)
 	if err != nil {
-		return err
+		return errors.WithStack(err)
 	}
 
 	return nil
@@ -184,12 +186,12 @@ func (p *TracedProgram) Protect() error {
 func (p *TracedProgram) Restore() error {
 	err := syscall.PtraceSetRegs(p.pid, p.backupRegs)
 	if err != nil {
-		return err
+		return errors.WithStack(err)
 	}
 
 	_, err = syscall.PtracePokeData(p.pid, uintptr(p.backupRegs.Rip), p.backupCode)
 	if err != nil {
-		return err
+		return errors.WithStack(err)
 	}
 
 	return nil
@@ -204,7 +206,7 @@ func (p *TracedProgram) Wait() error {
 func (p *TracedProgram) Step() error {
 	err := syscall.PtraceSingleStep(p.pid)
 	if err != nil {
-		return err
+		return errors.WithStack(err)
 	}
 
 	return p.Wait()
@@ -297,7 +299,7 @@ func (p *TracedProgram) ReadSlice(addr uint64, size uint64) (*[]byte, error) {
 		0,
 	)
 	if ret == -1 {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 	// TODO: check size and warn
 	C.memcpy(unsafe.Pointer(&buffer[0]), tmpBuffer, C.ulong(size))
@@ -332,7 +334,7 @@ func (p *TracedProgram) WriteSlice(addr uint64, buffer []byte) error {
 		0,
 	)
 	if ret == -1 {
-		return err
+		return errors.WithStack(err)
 	}
 	// TODO: check size and warn
 
@@ -346,7 +348,7 @@ func (p *TracedProgram) PtraceWriteSlice(addr uint64, buffer []byte) error {
 	for wroteSize+ptrSize < len(buffer) {
 		_, err := syscall.PtracePokeData(p.pid, uintptr(addr+uint64(wroteSize)), buffer[wroteSize:wroteSize+ptrSize])
 		if err != nil {
-			return err
+			return errors.WithStack(err)
 		}
 
 		wroteSize += ptrSize
@@ -354,7 +356,7 @@ func (p *TracedProgram) PtraceWriteSlice(addr uint64, buffer []byte) error {
 
 	_, err := syscall.PtracePokeData(p.pid, uintptr(addr+uint64(wroteSize)), buffer[wroteSize:])
 	if err != nil {
-		return err
+		return errors.WithStack(err)
 	}
 
 	return nil
@@ -377,12 +379,12 @@ func (p *TracedProgram) MmapSlice(slice []byte) (*mapreader.Entry, error) {
 
 	addr, err := p.Mmap(size, 0)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 
 	err = p.WriteSlice(addr, slice)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 
 	return &mapreader.Entry{
@@ -404,12 +406,12 @@ func (p *TracedProgram) FindSymbolInEntry(symbolName string, entry *mapreader.En
 	reader := bytes.NewReader(*libBuffer)
 	elf, err := elf.NewFile(reader)
 	if err != nil {
-		return 0, err
+		return 0, errors.WithStack(err)
 	}
 
 	symbols, err := elf.DynamicSymbols()
 	if err != nil {
-		return 0, err
+		return 0, errors.WithStack(err)
 	}
 	for _, symbol := range symbols {
 		if symbol.Name == symbolName {

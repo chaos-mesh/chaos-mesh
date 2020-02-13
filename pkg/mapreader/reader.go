@@ -15,6 +15,7 @@ package mapreader
 
 import (
 	"fmt"
+	"github.com/pkg/errors"
 	"io/ioutil"
 	"strconv"
 	"strings"
@@ -33,7 +34,7 @@ type Entry struct {
 func Read(pid int) (*[]Entry, error) {
 	data, err := ioutil.ReadFile(fmt.Sprintf("/proc/%d/maps", pid))
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 
 	lines := strings.Split(string(data), "\n")
@@ -56,18 +57,18 @@ func Read(pid int) (*[]Entry, error) {
 		addresses := strings.Split(sections[0], "-")
 		startAddress, err := strconv.ParseUint(addresses[0], 16, 64)
 		if err != nil {
-			return nil, err
+			return nil, errors.WithStack(err)
 		}
 		endAddresses, err := strconv.ParseUint(addresses[1], 16, 64)
 		if err != nil {
-			return nil, err
+			return nil, errors.WithStack(err)
 		}
 
 		privilege := sections[1]
 
 		paddingSize, err := strconv.ParseUint(sections[2], 16, 64)
 		if err != nil {
-			return nil, err
+			return nil, errors.WithStack(err)
 		}
 
 		entries = append(entries, Entry{
