@@ -420,12 +420,23 @@ func (p *TracedProgram) FindSymbolInEntry(symbolName string, entry *mapreader.En
 	}
 
 	reader := bytes.NewReader(*libBuffer)
-	elf, err := elf.NewFile(reader)
+	vdsoElf, err := elf.NewFile(reader)
 	if err != nil {
 		return 0, errors.WithStack(err)
 	}
 
-	symbols, err := elf.DynamicSymbols()
+	loadOffset := uint64(0)
+
+	for _, prog := range vdsoElf.Progs {
+		if prog.Type == elf.PT_LOAD {
+			loadOffset = prog.Vaddr - prog.Off
+
+			// break here is enough for vdso
+			break
+		}
+	}
+
+	symbols, err := vdsoElf.DynamicSymbols()
 	if err != nil {
 		return 0, errors.WithStack(err)
 	}
@@ -433,7 +444,7 @@ func (p *TracedProgram) FindSymbolInEntry(symbolName string, entry *mapreader.En
 		if symbol.Name == symbolName {
 			offset := symbol.Value
 
-			return entry.StartAddress + offset, nil
+			return entry.StartAddress + (offset - loadOffset), nil
 		}
 	}
 	return 0, fmt.Errorf("cannot find symbol")
@@ -451,11 +462,6 @@ func (p *TracedProgram) WriteUint64ToAddr(addr uint64, value uint64) error {
 	return nil
 }
 
-// Mprotect runs mprotect syscall
-func (p *TracedProgram) Mprotect(addr uint64, len uint64, prot uint64) (uint64, error) {
-	return p.Syscall(10, addr, len, prot)
-}
-
 // JumpToFakeFunc writes jmp instruction to jump to fake function
 func (p *TracedProgram) JumpToFakeFunc(originAddr uint64, targetAddr uint64, symbolName string) error {
 	instructions := make([]byte, 16)
@@ -468,5 +474,5 @@ func (p *TracedProgram) JumpToFakeFunc(originAddr uint64, targetAddr uint64, sym
 	instructions[10] = 0xff
 	instructions[11] = 0xe0
 
-	return p.WriteSlice(originAddr, instructions)
+	return p.PtraceWriteSlice(originAddr, instructions)
 }

@@ -113,17 +113,7 @@ func ModifyTime(pid int, deltaSec int64, deltaNsec int64) error {
 		return err
 	}
 
-	_, err = program.Mprotect(vdsoEntry.StartAddress, vdsoEntry.EndAddress-vdsoEntry.StartAddress, 7)
-	if err != nil {
-		return err
-	}
-
 	err = program.JumpToFakeFunc(originAddr, fakeAddr, "clock_gettime")
-	if err != nil {
-		return err
-	}
-
-	_, err = program.Mprotect(vdsoEntry.StartAddress, vdsoEntry.EndAddress-vdsoEntry.StartAddress, 5)
 	if err != nil {
 		return err
 	}
