@@ -36,7 +36,6 @@ make install-kustomize
 
 **Note:** If your yarn is newly installed, you may need to restart the terminal to make it available.
 
-
 Now you can test the toolchain by running:
 
 ```
