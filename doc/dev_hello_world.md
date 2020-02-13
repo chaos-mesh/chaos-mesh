@@ -1,6 +1,6 @@
 # Develop a New Chaos
 
-After [preparing the development environment](./setup_env.md), let's develop a new type of chaos, HelloWorldChaos, which only prints a "hello world" message to log. Generally, to add a new chaos type for Chaos Mesh, you need the following steps:
+After [preparing the development environment](./setup_env.md), let's develop a new type of chaos, HelloWorldChaos, which only prints a "Hello World!" message to the log. Generally, to add a new chaos type for Chaos Mesh, you need to take the following steps:
 
 1. [Add the chaos object in controller](#add-the-chaos-object-in-controller)
 2. [Register the CRD](#register-the-crd)
