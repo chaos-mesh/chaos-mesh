@@ -5,8 +5,6 @@
 # it will use kind or minikube to install the kubernetes cluster according to the configuration.
 # Finally, when all dependencies are installed, chaos-mesh will be installed using helm.
 
-set -e
-
 usage() {
     cat << EOF
 This script is used to install chaos-mesh.
@@ -154,7 +152,7 @@ main() {
     else
         check_docker
         install_kind "${kind_version}" ${force_kind}
-        install_kubernetes_by_kind "${kind_name}" "${k8s_version}" "${node_num}" "${volume_num}" ${force_kind}
+        install_kubernetes_by_kind "${kind_name}" "${k8s_version}" "${node_num}" "${volume_num}" ${force_kube}
     fi
 
     install_chaos_mesh "${release_name}" "${namespace}" "${local-kube}" ${force_chaos_mesh}
@@ -162,13 +160,13 @@ main() {
 
 prepare_env() {
     mkdir -p "$HOME/local/bin"
-    local set_path="export PTAH=$HOME/local/bin:$PATH"
+    local set_path="export PATH=$HOME/local/bin:\$PATH"
     local env_file="$HOME/.bash_profile"
     if [[ ! -e "${env_file}" ]]; then
-        touch "${env_file}"
+        ensure touch "${env_file}"
     fi
     grep -qF -- "${set_path}" "${env_file}" || echo "${set_path}" >> "${env_file}"
-    source "${env_file}"
+    ensure source "${env_file}"
 }
 
 check_kubernetes() {
@@ -203,6 +201,8 @@ install_kubernetes_by_kind() {
 
     printf "Install local Kubernetes %s\n" "${cluster_name}"
 
+    need_cmd "kind"
+
     work_dir=${HOME}/kind/${cluster_name}
     kubeconfig_path=${work_dir}/config
     data_dir=${work_dir}/data
@@ -227,16 +227,16 @@ install_kubernetes_by_kind() {
                 exit 1
             fi
         else
-            kind get kubeconfig --name="${cluster_name}" > "${kubeconfig_path}"
+            ensure kind get kubeconfig --name="${cluster_name}" > "${kubeconfig_path}"
             return
         fi
     fi
 
-    mkdir -p "${work_dir}"
+    ensure mkdir -p "${work_dir}"
 
     printf "Clean data dir: %s\n" "${data_dir}"
     if [ -d "${data_dir}" ]; then
-        rm -rf "${data_dir}"
+        ensure rm -rf "${data_dir}"
     fi
 
     config_file=${work_dir}/kind-config.yaml
@@ -262,14 +262,14 @@ EOF
 
     for ((i=0;i<"${node_num}";i++))
     do
-        mkdir -p "${data_dir}/worker${i}"
+        ensure mkdir -p "${data_dir}/worker${i}"
         cat <<EOF >>  "${config_file}"
 - role: worker
   extraMounts:
 EOF
         for ((k=1;k<="${volume_num}";k++))
         do
-            mkdir -p "${data_dir}/worker${i}/vol${k}"
+            ensure mkdir -p "${data_dir}/worker${i}/vol${k}"
             cat <<EOF  >>  "${config_file}"
   - containerPath: /mnt/disks/vol${k}
     hostPath: ${data_dir}/worker${i}/vol${k}
@@ -278,9 +278,9 @@ EOF
     done
 
     printf "start to create kubernetes cluster %s" "${cluster_name}"
-    kind create cluster --config "${config_file}" --image kindest/node:${cluster_version} --name=${cluster_name}
-    kind get kubeconfig --name="${cluster_name}" > "${kubeconfig_path}"
-    export KUBECONFIG="${kubeconfig_path}"
+    ensure kind create cluster --config "${config_file}" --image kindest/node:${cluster_version} --name=${cluster_name}
+    ensure kind get kubeconfig --name="${cluster_name}" > "${kubeconfig_path}"
+    ensure export KUBECONFIG="${kubeconfig_path}"
 
     deploy_registry "${cluster_name}" "${data_dir}"
     init_helm "${data_dir}"
@@ -291,6 +291,8 @@ deploy_registry() {
     local data_dir=$2
 
     printf "Deploy docker registry in kind\n"
+
+    need_cmd "kubectl"
 
     registry_node=${cluster_name}-control-plane
     registry_node_ip=$(kubectl get nodes "${registry_node}" -o template --template='{{range.status.addresses}}{{if eq .type "InternalIP"}}{{.address}}{{end}}{{end}}')
@@ -364,7 +366,7 @@ spec:
           - tcp-listen:5000,fork,reuseaddr
           - tcp-connect:${registry_node_ip}:5000
 EOF
-    kubectl apply -f "${registry_file}"
+    ensure kubectl apply -f "${registry_file}"
 }
 
 deploy_volume_provisioner() {
@@ -373,8 +375,8 @@ deploy_volume_provisioner() {
     local config_url="https://raw.githubusercontent.com/pingcap/chaos-mesh/master/manifests/local-volume-provisioner.yaml"
 
     rm -rf "${config_file}"
-    wget -O "${config_file}" "$config_url"
-    kubectl apply -f "${config_file}"
+    ensure wget -O "${config_file}" "$config_url"
+    ensure kubectl apply -f "${config_file}"
 }
 
 install_kind() {
@@ -399,9 +401,9 @@ install_kind() {
 
     local KIND_BIN="${HOME}/local/bin/kind"
     local target_os=$(lowercase $(uname))
-    curl -Lo /tmp/kind https://github.com/kubernetes-sigs/kind/releases/download/"$1"/kind-"${target_os}"-amd64
-    chmod +x /tmp/kind
-    mv /tmp/kind "$KIND_BIN"
+    ensure curl -Lo /tmp/kind https://github.com/kubernetes-sigs/kind/releases/download/"$1"/kind-"${target_os}"-amd64
+    ensure chmod +x /tmp/kind
+    ensure mv /tmp/kind "$KIND_BIN"
 }
 
 install_helm() {
@@ -431,11 +433,11 @@ install_helm() {
     local target_os=$(lowercase $(uname))
     local TAR_NAME="helm-$1-$target_os-amd64.tar.gz"
     rm -rf "${TAR_NAME}"
-    wget "https://get.helm.sh/${TAR_NAME}"
+    ensure wget "https://get.helm.sh/${TAR_NAME}"
 
-    tar zxvf "${TAR_NAME}"
-    mv "${target_os}"-amd64/helm ${HELM_BIN}
-    chmod +x "${HELM_BIN}"
+    ensure tar zxvf "${TAR_NAME}"
+    ensure mv "${target_os}"-amd64/helm ${HELM_BIN}
+    ensure chmod +x "${HELM_BIN}"
     rm -rf "${TAR_NAME}" "${target_os}"-amd64
 }
 
@@ -444,11 +446,14 @@ init_helm() {
     local rbac_config=${data_dir}/tiller-rbac.yaml
     local rbac_config_url="https://raw.githubusercontent.com/pingcap/chaos-mesh/master/manifests/tiller-rbac.yaml"
 
+    need_cmd "helm"
     rm -rf "${rbac_config}"
-    wget -O "${rbac_config}" "$rbac_config_url"
-    kubectl apply -f "${rbac_config}"
+    ensure wget -O "${rbac_config}" "$rbac_config_url"
+    ensure kubectl apply -f "${rbac_config}"
 
-    if [[ $(helm version --client --short) == "Client: v2"* ]]; then helm init --service-account=tiller --wait; fi
+    if [[ $(helm version --client --short) == "Client: v2"* ]]; then
+        ensure helm init --service-account=tiller --wait
+    fi
 }
 
 check_chaos_mesh_installed() {
@@ -489,20 +494,20 @@ install_chaos_mesh() {
 
     ns_err_msg=$(kubectl get ns "$namespace" 2>&1 1>/dev/null)
     if [ "$ns_err_msg" != "" ]; then
-        kubectl create ns chaos-testing
+        ensure kubectl create ns chaos-testing
     fi
 
     if [[ $(helm version --client --short) == "Client: v2"* ]]; then
         if [ "${local_kube}" == "kind" ]; then
-            helm install helm/chaos-mesh --name="${release_name}" --namespace="${namespace}" --set chaosDaemon.runtime=containerd --set chaosDaemon.socketPath=/run/containerd/containerd.sock
+            ensure helm install helm/chaos-mesh --name="${release_name}" --namespace="${namespace}" --set chaosDaemon.runtime=containerd --set chaosDaemon.socketPath=/run/containerd/containerd.sock
         else
-            helm install helm/chaos-mesh --name="${release_name}" --namespace="${namespace}"
+            ensure helm install helm/chaos-mesh --name="${release_name}" --namespace="${namespace}"
         fi
     else
         if [ "${local_kube}" == "kind" ]; then
-            helm install "${release_name}" helm/chaos-mesh --namespace="${namespace}" --set chaosDaemon.runtime=containerd --set chaosDaemon.socketPath=/run/containerd/containerd.sock
+            ensure helm install "${release_name}" helm/chaos-mesh --namespace="${namespace}" --set chaosDaemon.runtime=containerd --set chaosDaemon.socketPath=/run/containerd/containerd.sock
         else
-            helm install "${release_name}" helm/chaos-mesh --namespace="${namespace}"
+            ensure helm install "${release_name}" helm/chaos-mesh --namespace="${namespace}"
         fi
     fi
 
@@ -548,6 +553,13 @@ check_cmd() {
 
 lowercase() {
     echo "$@" | tr "[A-Z]" "[a-z]"
+}
+
+# Run a command that should never fail. If the command fails execution
+# will immediately terminate with an error showing the failing
+# command.
+ensure() {
+    if ! "$@"; then err "command failed: $*"; fi
 }
 
 main "$@" || exit 1
