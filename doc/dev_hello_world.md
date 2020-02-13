@@ -193,7 +193,7 @@ kubectl get pods --namespace chaos-testing -l app.kubernetes.io/instance=chaos-m
 ```
 The arguments `--set chaosDaemon.runtime=containerd --set chaosDaemon.socketPath=/run/containerd/containerd.sock` is used to to support network chaos on kind.
 
-3. Create chaos.yaml with the lines below:
+3. Create chaos.yaml in any location with the lines below:
 
 ```yaml
 apiVersion: pingcap.com/v1alpha1
