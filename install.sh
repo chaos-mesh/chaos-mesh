@@ -17,7 +17,8 @@ FLAGS:
     -h, --help              Prints help information
         --force             Force reinstall all components if they are already installed, include: helm, kind, local-kube, chaos-mesh
         --force-chaos-mesh  Force reinstall chaos-mesh if it is already installed
-        --force-kube        Force reinstall local Kubernetes cluster if it is already installed
+        --force-local-kube  Force reinstall local Kubernetes cluster if it is already installed
+        --force-kubectl     Force reinstall kubectl client if it is already installed
         --force-kind        Force reinstall Kind if it is already installed
         --force-helm        Force reinstall Helm if it is already installed
 OPTIONS:
@@ -47,7 +48,8 @@ main() {
     local release_name="chaos-mesh"
     local namespace="chaos-testing"
     local force_chaos_mesh=false
-    local force_kube=false
+    local force_local_kube=false
+    local force_kubectl=false
     local force_kind=false
     local force_helm=false
 
@@ -76,13 +78,18 @@ main() {
                 ;;
             --force)
                 force_chaos_mesh=true
-                force_kube=true
+                force_local_kube=true
+                force_kubectl=true
                 force_kind=true
                 force_helm=true
                 shift
                 ;;
-            --force-kube)
-                force_kube=true
+            --force-local-kube)
+                force_local_kube=true
+                shift
+                ;;
+            --force-kubectl)
+                force_kubectl=true
                 shift
                 ;;
             --force-kind)
@@ -146,13 +153,14 @@ main() {
     prepare_env
 
     install_helm "${helm_version}" ${force_helm}
+    install_kubectl "${k8s_version}" ${force_kubectl}
 
     if [ "${local_kube}" == "" ]; then
         check_kubernetes
     else
         check_docker
         install_kind "${kind_version}" ${force_kind}
-        install_kubernetes_by_kind "${kind_name}" "${k8s_version}" "${node_num}" "${volume_num}" ${force_kube}
+        install_kubernetes_by_kind "${kind_name}" "${k8s_version}" "${node_num}" "${volume_num}" ${force_local_kube}
     fi
 
     install_chaos_mesh "${release_name}" "${namespace}" "${local-kube}" ${force_chaos_mesh}
@@ -191,6 +199,36 @@ check_kubernetes_version() {
         fi
     done
 }
+
+install_kubectl() {
+    local kubectl_version=$1
+    local force_install=$2
+
+    printf "Install kubectl client\n"
+
+    err_msg=$(kubectl version --client=true 2>&1 1>/dev/null)
+    if [ "$err_msg" == "" ]; then
+        v=$(kubectl version --client=true | sed 's/.*GitVersion:\"v\([0-9.]*\).*/\1/g')
+        target_version=$(echo "${kubectl_version}" | sed s/v//g)
+        if version_lt "$v" "${target_version}"; then
+            printf "Chaos Mesg requires kubectl version %s or later\n"  "${target_version}"
+        else
+            printf "kubectl Version %s has been installed\n" "$v"
+            if [ "$force_install" != "true" ]; then
+                return
+            fi
+        fi
+    fi
+
+    need_cmd "curl"
+    local KUBECTL_BIN="${HOME}/local/bin/kubectl"
+    local target_os=$(lowercase $(uname))
+
+    ensure curl -Lo /tmp/kubectl https://storage.googleapis.com/kubernetes-release/release/${kubectl_version}/bin/${target_os}/amd64/kubectl
+    ensure chmod +x /tmp/kubectl
+    ensure mv /tmp/kubectl "${KUBECTL_BIN}"
+}
+
 
 install_kubernetes_by_kind() {
     local cluster_name=$1
