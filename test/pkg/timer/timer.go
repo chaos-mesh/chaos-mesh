@@ -31,6 +31,7 @@ type Timer struct {
 	pid      int
 }
 
+// Pid returns the pid of timer
 func (timer *Timer) Pid() int {
 	return timer.pid
 }
@@ -110,6 +111,7 @@ func (timer *Timer) GetTime() (*time.Time, error) {
 	return result.Time, nil
 }
 
+// Stop stops the process
 func (timer *Timer) Stop() error {
 	_, err := fmt.Fprintf(timer.Stdin, "STOP\n")
 
