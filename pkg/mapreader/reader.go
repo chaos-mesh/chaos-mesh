@@ -15,10 +15,11 @@ package mapreader
 
 import (
 	"fmt"
-	"github.com/pkg/errors"
 	"io/ioutil"
 	"strconv"
 	"strings"
+
+	"github.com/pkg/errors"
 )
 
 // Entry is one line in /proc/pid/maps
