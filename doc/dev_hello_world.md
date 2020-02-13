@@ -12,7 +12,7 @@ After [preparing the development environment](./setup_env.md), let's develop a n
 
 In Chaos Mesh, all chaos types are managed by the controller manager. To add a new chaos type, you need to start from adding the corresponding reconciler type in the controller, as instructed in the following steps:
 
-1. Add the HelloWorldChaos object in the controler manager [main.go](https://github.com/pingcap/chaos-mesh/blob/master/cmd/controller-manager/main.go#L104),
+1. Add the HelloWorldChaos object in the controller manager [main.go](https://github.com/pingcap/chaos-mesh/blob/master/cmd/controller-manager/main.go#L104).
 
 **Note:** You will notice existing chaos types such as PodChaos, NetworkChaos and IOChaos. Add the new type below them.
 
