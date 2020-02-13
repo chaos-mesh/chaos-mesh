@@ -11,7 +11,7 @@ metadata:
 spec:
   type: {{ .Values.controllerManager.service.type }}
   ports:
-    - port: 8080
+    - port: 10080
       targetPort: http
       protocol: TCP
       name: http
