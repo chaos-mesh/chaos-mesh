@@ -341,11 +341,28 @@ func (p *TracedProgram) WriteSlice(addr uint64, buffer []byte) error {
 	return nil
 }
 
+func alignBuffer(buffer []byte) []byte {
+	if buffer == nil {
+		return nil
+	}
+
+	alignedSize := (len(buffer) / ptrSize) * ptrSize
+	if alignedSize < len(buffer) {
+		alignedSize += ptrSize
+	}
+	clonedBuffer := make([]byte, alignedSize)
+	copy(clonedBuffer, buffer)
+
+	return clonedBuffer
+}
+
 // PtraceWriteSlice uses ptrace rather than process_vm_write to write a buffer into addr
 func (p *TracedProgram) PtraceWriteSlice(addr uint64, buffer []byte) error {
 	wroteSize := 0
 
-	for wroteSize+ptrSize < len(buffer) {
+	buffer = alignBuffer(buffer)
+
+	for wroteSize+ptrSize <= len(buffer) {
 		addr := uintptr(addr + uint64(wroteSize))
 		data := buffer[wroteSize : wroteSize+ptrSize]
 
@@ -356,11 +373,6 @@ func (p *TracedProgram) PtraceWriteSlice(addr uint64, buffer []byte) error {
 		}
 
 		wroteSize += ptrSize
-	}
-
-	_, err := syscall.PtracePokeData(p.pid, uintptr(addr+uint64(wroteSize)), buffer[wroteSize:])
-	if err != nil {
-		return errors.WithStack(err)
 	}
 
 	return nil
