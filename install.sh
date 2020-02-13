@@ -152,7 +152,7 @@ main() {
     else
         check_docker
         install_kind "${kind_version}" ${force_kind}
-        install_kubernetes_by_kind "${kind_name}" "${k8s_version}" "${node_num}" "${volume_num}" ${force_kind}
+        install_kubernetes_by_kind "${kind_name}" "${k8s_version}" "${node_num}" "${volume_num}" ${force_kube}
     fi
 
     install_chaos_mesh "${release_name}" "${namespace}" "${local-kube}" ${force_chaos_mesh}
