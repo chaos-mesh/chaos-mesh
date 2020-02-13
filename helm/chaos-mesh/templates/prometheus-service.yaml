@@ -1,3 +1,5 @@
+{{- if .Values.prometheus.create }}
+
 apiVersion: v1
 kind: Service
 metadata:
@@ -17,3 +19,5 @@ spec:
   selector:
     app.kubernetes.io/component: prometheus
     app.kubernetes.io/instance: {{ .Release.Name }}
+
+{{- end }}

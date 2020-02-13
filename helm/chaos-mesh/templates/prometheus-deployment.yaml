@@ -1,3 +1,5 @@
+{{- if .Values.prometheus.create }}
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -93,3 +95,5 @@ spec:
   resources:
     requests:
       storage: {{ .Values.prometheus.volume.storage }}
+
+{{- end }}

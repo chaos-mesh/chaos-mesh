@@ -97,7 +97,7 @@ dashboard:
     storageClassName: standard
 
 prometheus:
-  create: true
+  create: false
 
   serviceAccount: prometheus
 

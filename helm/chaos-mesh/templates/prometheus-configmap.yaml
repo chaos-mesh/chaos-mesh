@@ -1,4 +1,4 @@
----
+{{- if .Values.prometheus.create }}
 kind: ConfigMap
 apiVersion: v1
 metadata:
@@ -62,3 +62,4 @@ data:
         target_label: pod
         replacement: $1
         action: replace
+{{- end }}
