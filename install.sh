@@ -525,7 +525,7 @@ install_chaos_mesh() {
         fi
 
         printf "Delete Chaos Mesh %s\n"  "${release_name}"
-        err_msg=$(helm delete --purge "${relase_name}")
+        err_msg=$(helm delete --purge "${release_name}")
         if [ "$err_msg" != "" ] && [[ "$err_msg" != *"not found" ]]; then
             printf "Delete Chaos Mesh %s failed, error: %s" "${release_name}" "${err_msg}"
             exit 1
