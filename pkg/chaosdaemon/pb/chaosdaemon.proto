@@ -15,7 +15,8 @@ service ChaosDaemon {
 }
 
 message ContainerRequest{
-  string container_id = 1;
+  ContainerAction action = 1;
+  string container_id = 2;
 }
 
 message NetemRequest {
@@ -66,4 +67,11 @@ message Rule {
   }
   Direction direction = 2;
   string set = 3;
+}
+
+message ContainerAction {
+  enum Action {
+      KILL = 0;
+  }
+  Action action = 1;
 }

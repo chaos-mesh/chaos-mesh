@@ -15,7 +15,6 @@ package containerkill
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"time"
 
@@ -35,7 +34,7 @@ import (
 )
 
 const (
-	containerKillActionMsg = "delete container"
+	containerKillActionMsg = "delete container %s"
 )
 
 type Reconciler struct {
@@ -84,7 +83,6 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 
 	g := errgroup.Group{}
 	haveSelected := false
-	haveKilled := false
 	for podIndex := range filteredPod {
 		pod := &filteredPod[podIndex]
 
@@ -97,22 +95,13 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 				err = r.KillContainer(ctx, pod, containerID)
 				if err != nil {
 					r.Log.Error(err, "failed to kill container")
-				} else {
-					haveKilled = true
 				}
 			}
 		}
 	}
 
 	if haveSelected == false {
-		err = errors.New("no container is selected")
-		r.Log.Error(err, "no container is selected")
-		return ctrl.Result{Requeue: true}, nil
-	}
-
-	if haveKilled == false {
-		err = errors.New("no container is killed")
-		r.Log.Error(err, "no container is killed")
+		r.Log.Error(nil, "no container is selected")
 		return ctrl.Result{Requeue: true}, nil
 	}
 
@@ -141,6 +130,9 @@ func (r *Reconciler) KillContainer(ctx context.Context, pod *v1.Pod, containerID
 	}
 
 	if _, err = pbClient.ContainerKill(ctx, &pb.ContainerRequest{
+		Action: &pb.ContainerAction{
+			Action: pb.ContainerAction_KILL,
+		},
 		ContainerId: containerID,
 	}); err != nil {
 		r.Log.Error(err, "kill container error", "namespace", pod.Namespace, "podName", pod.Name, "containerID", containerID)
@@ -174,7 +166,7 @@ func (r *Reconciler) updatePodchaos(ctx context.Context, podchaos v1alpha1.PodCh
 			HostIP:    pod.Status.HostIP,
 			PodIP:     pod.Status.PodIP,
 			Action:    string(podchaos.Spec.Action),
-			Message:   containerKillActionMsg,
+			Message:   fmt.Sprintf(containerKillActionMsg, podchaos.Spec.ContainerName),
 		}
 
 		podchaos.Status.Experiment.Pods = append(podchaos.Status.Experiment.Pods, ps)
