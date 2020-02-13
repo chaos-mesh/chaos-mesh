@@ -343,13 +343,18 @@ func (p *TracedProgram) WriteSlice(addr uint64, buffer []byte) error {
 func (p *TracedProgram) PtraceWriteSlice(addr uint64, buffer []byte) error {
 	wroteSize := 0
 
-	for wroteSize < len(buffer) {
+	for wroteSize+ptrSize < len(buffer) {
 		_, err := syscall.PtracePokeData(p.pid, uintptr(addr+uint64(wroteSize)), buffer[wroteSize:wroteSize+ptrSize])
 		if err != nil {
 			return err
 		}
 
 		wroteSize += ptrSize
+	}
+
+	_, err := syscall.PtracePokeData(p.pid, uintptr(addr+uint64(wroteSize)), buffer[wroteSize:])
+	if err != nil {
+		return err
 	}
 
 	return nil

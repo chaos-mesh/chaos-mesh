@@ -41,11 +41,16 @@ all: yaml build image
 build: dashboard-server-frontend
 
 # Run tests
-test: generate fmt vet lint manifests
+test: generate fmt vet lint manifests test-utils
 	rm -rf cover.* cover
 	mkdir -p cover
 	$(GOTEST) ./api/... ./controllers/... ./pkg/... -coverprofile cover.out.tmp
 	cat cover.out.tmp | grep -v "_generated.deepcopy.go" > cover.out
+
+test-utils: timer
+
+timer:
+	$(GO) build -ldflags '$(LDFLAGS)' -o bin/test/timer ./test/cmd/timer/*.go
 
 coverage:
 ifeq ("$(JenkinsCI)", "1")
