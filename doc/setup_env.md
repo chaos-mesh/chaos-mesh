@@ -34,7 +34,9 @@ make install-kustomize
 4. Make sure `${GOPATH}/bin` is in your `PATH` by executing:
  `echo 'export PATH=$(go env GOPATH)/bin:${PATH}' >> ~/.bash_profile` and `source ~/. bash_profile`.
 
-**Note:** If your yarn is newly installed, you may need to restart the terminal to make it available.
+> **Note:**
+>
+> If your yarn is newly installed, you may need to restart the terminal to make it available.
 
 Now you can test the toolchain by running:
 
