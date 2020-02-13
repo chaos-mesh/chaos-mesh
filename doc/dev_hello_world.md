@@ -139,7 +139,7 @@ metadata:
 
 ## Make the docker image
 
-Having the object successfully added, we can make docker image and push it to your registry:
+Having the object successfully added, you can make a docker image and push it to your registry:
 
 ```
 make
