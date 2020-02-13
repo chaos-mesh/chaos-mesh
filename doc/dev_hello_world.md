@@ -83,7 +83,7 @@ func (r *HelloWorldChaosReconciler) SetupWithManager(mgr ctrl.Manager) error {
 
 ## Register the CRD
 
-The HelloWorldChaos object is a customer resource object in k8s. This means you need to register the corresponding CRD in the K8s API. To do this, modify [kustomization.yaml](https://github.com/pingcap/chaos-mesh/blob/master/config/crd/kustomization.yaml) by adding the corresponding line as shown below:
+The HelloWorldChaos object is a custom resource object in k8s. This means you need to register the corresponding CRD in the K8s API. To do this, modify [kustomization.yaml](https://github.com/pingcap/chaos-mesh/blob/master/config/crd/kustomization.yaml) by adding the corresponding line as shown below:
 
 ```yaml
 resources:
