@@ -17,6 +17,7 @@ import (
 	"context"
 	"fmt"
 	"os/exec"
+	"syscall"
 
 	"github.com/containerd/containerd"
 	dockerclient "github.com/docker/docker/client"
@@ -40,6 +41,7 @@ const (
 // ContainerRuntimeInfoClient represents a struct which can give you information about container runtime
 type ContainerRuntimeInfoClient interface {
 	GetPidFromContainerID(ctx context.Context, containerID string) (uint32, error)
+	ContainerKillByContainerID(ctx context.Context, containerID string) error
 }
 
 // DockerClient can get information from docker
@@ -119,4 +121,40 @@ func withNetNS(ctx context.Context, nsPath string, cmd string, args ...string) *
 	args = append([]string{"-n" + nsPath, "--", cmd}, args...)
 
 	return exec.CommandContext(ctx, "nsenter", args...)
+}
+
+// ContainerKillByContainerID kills container according to container id
+func (c DockerClient) ContainerKillByContainerID(ctx context.Context, containerID string) error {
+	if len(containerID) < len(dockerProtocolPrefix) {
+		return fmt.Errorf("container id %s is not a docker container id", containerID)
+	}
+	if containerID[0:len(dockerProtocolPrefix)] != dockerProtocolPrefix {
+		return fmt.Errorf("expected %s but got %s", dockerProtocolPrefix, containerID[0:len(dockerProtocolPrefix)])
+	}
+	err := c.client.ContainerKill(ctx, containerID[len(dockerProtocolPrefix):], "SIGKILL")
+
+	return err
+}
+
+// ContainerKillByContainerID kills container according to container id
+func (c ContainerdClient) ContainerKillByContainerID(ctx context.Context, containerID string) error {
+	if len(containerID) < len(containerdProtocolPrefix) {
+		return fmt.Errorf("container id %s is not a containerd container id", containerID)
+	}
+	if containerID[0:len(containerdProtocolPrefix)] != containerdProtocolPrefix {
+		return fmt.Errorf("expected %s but got %s", containerdProtocolPrefix, containerID[0:len(containerdProtocolPrefix)])
+	}
+	containerID = containerID[len(containerdProtocolPrefix):]
+	container, err := c.client.LoadContainer(ctx, containerID)
+	if err != nil {
+		return err
+	}
+	task, err := container.Task(ctx, nil)
+	if err != nil {
+		return err
+	}
+
+	err = task.Kill(ctx, syscall.SIGKILL)
+
+	return err
 }
