@@ -82,27 +82,26 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	}
 
 	g := errgroup.Group{}
-	haveSelected := false
 	for podIndex := range filteredPod {
 		pod := &filteredPod[podIndex]
+		haveContainer := false
 
 		for containerIndex := range pod.Status.ContainerStatuses {
 			containerName := pod.Status.ContainerStatuses[containerIndex].Name
 			containerID := pod.Status.ContainerStatuses[containerIndex].ContainerID
 
 			if containerName == podchaos.Spec.ContainerName {
-				haveSelected = true
+				haveContainer = true
 				err = r.KillContainer(ctx, pod, containerID)
 				if err != nil {
 					r.Log.Error(err, "failed to kill container")
 				}
 			}
 		}
-	}
 
-	if haveSelected == false {
-		r.Log.Error(nil, "no container is selected")
-		return ctrl.Result{Requeue: true}, nil
+		if haveContainer == false {
+			r.Log.Error(nil, fmt.Sprintf("the pod %s doesn't have container %s", pod.Name, podchaos.Spec.ContainerName))
+		}
 	}
 
 	if err := g.Wait(); err != nil {
