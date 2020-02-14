@@ -1,0 +1,65 @@
+{{- if .Values.prometheus.create }}
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: prometheus-config
+  labels:
+    app.kubernetes.io/name: {{ template "chaos-mesh.name" . }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/component: prometheus
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+"  "_" }}
+data:
+  prometheus.yml: |-
+    global:
+      scrape_interval: 15s
+      scrape_timeout: 15s
+      evaluation_interval: 15s
+
+    scrape_configs:
+    - job_name: 'prometheus'
+      static_configs:
+      - targets: ['localhost:9090']
+
+    - job_name: 'chaos-controller'
+      kubernetes_sd_configs:
+      - role: pod
+        namespaces:
+          names: ['{{ .Release.Namespace }}']
+      relabel_configs:
+      - source_labels: [__meta_kubernetes_pod_label_app_kubernetes_io_component]
+        regex: controller-manager
+        replacement: $1
+        action: keep
+      - source_labels: [__meta_kubernetes_pod_container_port_name]
+        regex: http
+        replacement: $1
+        action: keep
+      - source_labels: [__meta_kubernetes_pod_name]
+        separator: ;
+        regex: (.*)
+        target_label: pod
+        replacement: $1
+        action: replace
+
+    - job_name: 'chaos-daemon'
+      kubernetes_sd_configs:
+      - role: pod
+        namespaces:
+          names: ['{{ .Release.Namespace }}']
+      relabel_configs:
+      - source_labels: [__meta_kubernetes_pod_label_app_kubernetes_io_component]
+        regex: chaos-daemon
+        replacement: $1
+        action: keep
+      - source_labels: [__meta_kubernetes_pod_container_port_name]
+        regex: http
+        replacement: $1
+        action: keep
+      - source_labels: [__meta_kubernetes_pod_name]
+        separator: ;
+        regex: (.*)
+        target_label: pod
+        replacement: $1
+        action: replace
+{{- end }}
