@@ -69,7 +69,7 @@ var _ = Describe("ModifyTime", func() {
 
 			sec := now.Unix()
 
-			err = ModifyTime(t.Pid(), 10000, 10000)
+			err = ModifyTime(t.Pid(), 10000, 0)
 			Expect(err).ShouldNot(HaveOccurred(), "error: %+v", err)
 
 			newTime, err := t.GetTime()
@@ -97,6 +97,25 @@ var _ = Describe("ModifyTime", func() {
 			newSec := newTime.Unix()
 
 			Expect(10000-(sec-newSec)).Should(BeNumerically("<=", 1), "sec %d newSec %d", sec, newSec)
+		})
+
+		It("should handle nsec overflow", func() {
+			Expect(t).NotTo(BeNil())
+
+			now, err := t.GetTime()
+			Expect(err).ShouldNot(HaveOccurred(), "error: %+v", err)
+
+			sec := now.Unix()
+
+			err = ModifyTime(t.Pid(), 0, 1000000000)
+			Expect(err).ShouldNot(HaveOccurred(), "error: %+v", err)
+
+			newTime, err := t.GetTime()
+			Expect(err).ShouldNot(HaveOccurred(), "error: %+v", err)
+
+			newSec := newTime.Unix()
+
+			Expect(newSec-sec).Should(BeNumerically(">=", 1), "sec %d newSec %d", sec, newSec)
 		})
 	})
 })

@@ -16,11 +16,24 @@ int clock_gettime(clockid_t clk_id, struct timespec *tp) {
             : "rcx", "r11", "memory"
         );
 
-    if(clk_id == CLOCK_REALTIME) {
-        tp->tv_sec += TV_SEC_DELTA;
+    int64_t sec_delta = TV_SEC_DELTA;
+    int64_t nsec_delta = TV_NSEC_DELTA;
 
-        // TODO: avoid overflow here!!!
-        tp->tv_nsec += TV_NSEC_DELTA;
+    int64_t billion = 1000000000;
+
+    if(clk_id == CLOCK_REALTIME) {
+        while (nsec_delta + tp->tv_nsec > billion) {
+            sec_delta += 1;
+            nsec_delta -= billion;
+        }
+
+        while (nsec_delta + tp->tv_nsec < 0) {
+            sec_delta -= 1;
+            nsec_delta += billion;
+        }
+
+        tp->tv_sec += sec_delta;
+        tp->tv_nsec += nsec_delta;
     }
 
     return ret;
