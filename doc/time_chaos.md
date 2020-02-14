@@ -34,7 +34,7 @@ Description:
 * **mode** defines the mode to select pods.
 * **selector** specifies the target pods for chaos injection.
 * **timeOffset** specifies the offset of time. `sec` means the offset of seconds and `nsec` means the offset of nanoseconds.
-* **duration** defines the duration for each chaos experiment. In the sample file above, the network partition lasts for 10 seconds.
+* **duration** defines the duration for each chaos experiment. In the sample file above, the time chaos lasts for 10 seconds.
 * **scheduler** defines the scheduler rules for the running time of the chaos experiment. For more rule information, see <https://godoc.org/github.com/robfig/cron>.
 
 ## Limitation
