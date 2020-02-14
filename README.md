@@ -169,9 +169,9 @@ You can try Chaos Mesh on your local K8s environment deployed using `kind` or `m
 
 There are some known restrictions for Chaos Operator deployed on `minikube` clusters:
 
-- `netem chaos` is not supported for `minikube` clusters.
+- `netem chaos` is only supported for `minikube` clusters >= version 1.6.
 
-    In `minikube`, the default virtual machine driver's image doesn't contain the `sch_netem` kernel module. You can use `none` driver (if your host is Linux with the `sch_netem` kernel module loaded) to try these chaos actions on `minikube` or [build an image with sch_netem by yourself](https://minikube.sigs.k8s.io/docs/contributing/iso/).
+    In `minikube`, the default virtual machine driver's image doesn't contain the `sch_netem` kernel module in smaller versions. You can use `none` driver (if your host is Linux with the `sch_netem` kernel module loaded) to try these chaos actions on `minikube` or [build an image with sch_netem by yourself](https://minikube.sigs.k8s.io/docs/contributing/iso/).
 
 ### Deploy target cluster
 
