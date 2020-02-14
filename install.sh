@@ -27,9 +27,9 @@ OPTIONS:
                             If this value is not set and the Kubernetes is not installed, this script will exit with 1.
     -n, --name              Name of Kubernetes cluster, default value: kind
         --kind-version      Version of the Kind tool, default value: v0.7.0
-        --node-num          The count of the cluster nodes,default value: 3
+        --node-num          The count of the cluster nodes,default value: 5
         --k8s-version       Version of the Kubernetes cluster,default value: v1.12.8
-        --volume-num        The volumes number of each kubernetes node,default value: 3
+        --volume-num        The volumes number of each kubernetes node,default value: 5
         --helm-version      Version of the helm tool, default value: v2.16.1
         --release-name      Release name of chaos-mesh, default value: chaos-mesh
         --namespace         Namespace of chaos-mesh, default value: chaos-testing
@@ -41,9 +41,9 @@ main() {
     local cm_version="latest"
     local kind_name="kind"
     local kind_version="v0.7.0"
-    local node_num=3
+    local node_num=5
     local k8s_version="v1.12.8"
-    local volume_num=3
+    local volume_num=5
     local helm_version="v2.16.1"
     local release_name="chaos-mesh"
     local namespace="chaos-testing"
