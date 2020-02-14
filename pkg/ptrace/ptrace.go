@@ -78,23 +78,10 @@ func waitPid(pid int) error {
 	return errors.Errorf(waitPidErrorMessage, ret)
 }
 
-func constructPartialProgram(pid int, tidMap map[int]bool) *TracedProgram {
-	var tids []int
-	for key := range tidMap {
-		tids = append(tids, key)
-	}
-
-	return &TracedProgram{
-		pid:        pid,
-		tids:       tids,
-		Entries:    nil,
-		backupRegs: nil,
-		backupCode: nil,
-	}
-}
-
 // Trace ptrace all threads of a process
 func Trace(pid int) (*TracedProgram, error) {
+	traceSuccess := false
+
 	tidMap := make(map[int]bool)
 	for {
 		threads, err := ioutil.ReadDir(fmt.Sprintf("/proc/%d/task", pid))
@@ -110,7 +97,7 @@ func Trace(pid int) (*TracedProgram, error) {
 		for _, thread := range threads {
 			tid64, err := strconv.ParseInt(thread.Name(), 10, 32)
 			if err != nil {
-				return constructPartialProgram(pid, tidMap), errors.WithStack(err)
+				return nil, errors.WithStack(err)
 			}
 			tid := int(tid64)
 
@@ -122,13 +109,21 @@ func Trace(pid int) (*TracedProgram, error) {
 			err = syscall.PtraceAttach(tid)
 			if err != nil {
 				log.Error(err, "attach failed", "tid", tid)
-				return constructPartialProgram(pid, tidMap), errors.WithStack(err)
+				return nil, errors.WithStack(err)
 			}
+			defer func() {
+				if !traceSuccess {
+					err = syscall.PtraceDetach(tid)
+					if err != nil {
+						log.Error(err, "detach failed", "tid", tid)
+					}
+				}
+			}()
 			log.Info("attach successfully", "tid", tid)
 
 			err = waitPid(tid)
 			if err != nil {
-				return constructPartialProgram(pid, tidMap), errors.WithStack(err)
+				return nil, errors.WithStack(err)
 			}
 			tidMap[tid] = true
 		}
@@ -141,7 +136,7 @@ func Trace(pid int) (*TracedProgram, error) {
 
 	entries, err := mapreader.Read(pid)
 	if err != nil {
-		return constructPartialProgram(pid, tidMap), err
+		return nil, err
 	}
 
 	program := &TracedProgram{
@@ -151,6 +146,8 @@ func Trace(pid int) (*TracedProgram, error) {
 		backupRegs: &syscall.PtraceRegs{},
 		backupCode: make([]byte, ptrSize),
 	}
+
+	traceSuccess = true
 
 	return program, nil
 }

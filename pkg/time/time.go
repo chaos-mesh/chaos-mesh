@@ -51,6 +51,9 @@ func ModifyTime(pid int, deltaSec int64, deltaNsec int64) error {
 	runtime.LockOSThread()
 
 	program, err := ptrace.Trace(pid)
+	if err != nil {
+		return err
+	}
 	defer func() {
 		err = program.Detach()
 		if err != nil {
@@ -59,9 +62,6 @@ func ModifyTime(pid int, deltaSec int64, deltaNsec int64) error {
 
 		runtime.UnlockOSThread()
 	}()
-	if err != nil {
-		return err
-	}
 
 	var vdsoEntry *mapreader.Entry
 	for index := range program.Entries {
