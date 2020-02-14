@@ -69,7 +69,7 @@ var _ = Describe("ModifyTime", func() {
 
 			sec := now.Unix()
 
-			err = ModifyTime(t.Pid(), 10000, 100000000)
+			err = ModifyTime(t.Pid(), 10000, 10000)
 			Expect(err).ShouldNot(HaveOccurred(), "error: %+v", err)
 
 			newTime, err := t.GetTime()
@@ -88,7 +88,7 @@ var _ = Describe("ModifyTime", func() {
 
 			sec := now.Unix()
 
-			err = ModifyTime(t.Pid(), -10000, -100000000)
+			err = ModifyTime(t.Pid(), -10000, 0)
 			Expect(err).ShouldNot(HaveOccurred(), "error: %+v", err)
 
 			newTime, err := t.GetTime()

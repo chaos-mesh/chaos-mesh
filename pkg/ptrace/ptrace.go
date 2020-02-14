@@ -58,7 +58,7 @@ const ptrSize = 4 << uintptr(^uintptr(0)>>63)
 type TracedProgram struct {
 	pid     int
 	tids    []int
-	Entries *[]mapreader.Entry
+	Entries []mapreader.Entry
 
 	backupRegs *syscall.PtraceRegs
 	backupCode []byte
@@ -276,7 +276,7 @@ func (p *TracedProgram) Syscall(number uint64, args ...uint64) (uint64, error) {
 
 // Mmap runs mmap syscall
 func (p *TracedProgram) Mmap(length uint64, fd uint64) (uint64, error) {
-	return p.Syscall(9, 0, length, 7, 0x22, fd, 0)
+	return p.Syscall(9, 0, length, 7, syscall.MAP_ANON|syscall.MAP_PRIVATE, fd, 0)
 }
 
 // ReadSlice reads from addr and return a slice

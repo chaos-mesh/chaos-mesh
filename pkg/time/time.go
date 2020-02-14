@@ -64,10 +64,12 @@ func ModifyTime(pid int, deltaSec int64, deltaNsec int64) error {
 	}
 
 	var vdsoEntry *mapreader.Entry
-	for _, e := range *program.Entries {
-		e := e
+	for index := range program.Entries {
+		// reverse loop is faster
+		e := program.Entries[len(program.Entries)-index-1]
 		if e.Path == "[vdso]" {
 			vdsoEntry = &e
+			break
 		}
 	}
 	if vdsoEntry == nil {
@@ -76,7 +78,7 @@ func ModifyTime(pid int, deltaSec int64, deltaNsec int64) error {
 
 	constImageLen := len(fakeImage) - 16
 	var fakeEntry *mapreader.Entry
-	for _, e := range *program.Entries {
+	for _, e := range program.Entries {
 		e := e
 
 		image, err := program.ReadSlice(e.StartAddress, uint64(constImageLen))

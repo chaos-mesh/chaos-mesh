@@ -121,4 +121,12 @@ var _ = Describe("PTrace", func() {
 
 		Expect(*readBuf).Should(Equal(expectBuf))
 	})
+
+	It("should be able to detach and reattach", func() {
+		err := program.Detach()
+		Expect(err).ShouldNot(HaveOccurred(), "error: %+v", err)
+
+		program, err = Trace(t.Pid())
+		Expect(err).ShouldNot(HaveOccurred(), "error: %+v", err)
+	})
 })
