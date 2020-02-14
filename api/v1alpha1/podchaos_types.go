@@ -28,6 +28,8 @@ const (
 	// PodFailureAction represents the chaos action of injecting errors to pods.
 	// This action will cause the pod to not be created for a while.
 	PodFailureAction PodChaosAction = "pod-failure"
+	// ContainerKillAction represents the chaos action of killing the container
+	ContainerKillAction PodChaosAction = "container-kill"
 )
 
 // +kubebuilder:object:root=true
@@ -154,6 +156,11 @@ type PodChaosSpec struct {
 	// Next time when this action will be recovered
 	// +optional
 	NextRecover *metav1.Time `json:"nextRecover,omitempty"`
+
+	// ContainerName indicates the name of the container.
+	// Needed in container-kill.
+	// +optional
+	ContainerName string `json:"containerName"`
 }
 
 func (in *PodChaosSpec) GetSelector() SelectorSpec {
