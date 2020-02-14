@@ -18,6 +18,8 @@ int clock_gettime(clockid_t clk_id, struct timespec *tp) {
 
     if(clk_id == CLOCK_REALTIME) {
         tp->tv_sec += TV_SEC_DELTA;
+
+        // TODO: avoid overflow here!!!
         tp->tv_nsec += TV_NSEC_DELTA;
     }
 

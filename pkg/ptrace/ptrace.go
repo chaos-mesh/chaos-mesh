@@ -90,9 +90,8 @@ func Trace(pid int) (*TracedProgram, error) {
 			return nil, errors.WithStack(err)
 		}
 
-		if len(threads) == len(tidMap) {
-			break
-		}
+		// judge whether `threads` is a subset of `tidMap`
+		subset := true
 
 		for _, thread := range threads {
 			tid64, err := strconv.ParseInt(thread.Name(), 10, 32)
@@ -105,6 +104,7 @@ func Trace(pid int) (*TracedProgram, error) {
 			if ok {
 				continue
 			}
+			subset = false
 
 			err = syscall.PtraceAttach(tid)
 			if err != nil {
@@ -126,6 +126,10 @@ func Trace(pid int) (*TracedProgram, error) {
 				return nil, errors.WithStack(err)
 			}
 			tidMap[tid] = true
+		}
+
+		if subset {
+			break
 		}
 	}
 
@@ -273,7 +277,7 @@ func (p *TracedProgram) Syscall(number uint64, args ...uint64) (uint64, error) {
 
 // Mmap runs mmap syscall
 func (p *TracedProgram) Mmap(length uint64, fd uint64) (uint64, error) {
-	return p.Syscall(9, 0, length, 7, syscall.MAP_ANON|syscall.MAP_PRIVATE, fd, 0)
+	return p.Syscall(9, 0, length, syscall.PROT_READ|syscall.PROT_WRITE|syscall.PROT_EXEC, syscall.MAP_ANON|syscall.MAP_PRIVATE, fd, 0)
 }
 
 // ReadSlice reads from addr and return a slice

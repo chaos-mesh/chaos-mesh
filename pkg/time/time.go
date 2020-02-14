@@ -76,6 +76,7 @@ func ModifyTime(pid int, deltaSec int64, deltaNsec int64) error {
 		return errors.New("cannot find [vdso] entry")
 	}
 
+	// minus tailing variable part
 	constImageLen := len(fakeImage) - 16
 	var fakeEntry *mapreader.Entry
 	for _, e := range program.Entries {
@@ -100,11 +101,13 @@ func ModifyTime(pid int, deltaSec int64, deltaNsec int64) error {
 	}
 	fakeAddr := fakeEntry.StartAddress
 
+	// 44 is the index of TV_SEC_DELTA in fakeImage
 	err = program.WriteUint64ToAddr(fakeAddr+44, uint64(deltaSec))
 	if err != nil {
 		return err
 	}
 
+	// 52 is the index of TV_NSEC_DELTA in fakeImage
 	err = program.WriteUint64ToAddr(fakeAddr+52, uint64(deltaNsec))
 	if err != nil {
 		return err
