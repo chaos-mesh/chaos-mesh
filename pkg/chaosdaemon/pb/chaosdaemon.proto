@@ -13,6 +13,13 @@ service ChaosDaemon {
 
   rpc SetTimeOffset(TimeRequest) returns (google.protobuf.Empty) {}
   rpc RecoverTimeOffset(TimeRequest) returns (google.protobuf.Empty) {}
+
+  rpc ContainerKill(ContainerRequest) returns (google.protobuf.Empty) {}
+}
+
+message ContainerRequest{
+  ContainerAction action = 1;
+  string container_id = 2;
 }
 
 message NetemRequest {
@@ -69,4 +76,11 @@ message TimeRequest {
   string container_id = 1;
   int64 sec = 2;
   int64 nsec = 3;
+}
+
+message ContainerAction {
+  enum Action {
+      KILL = 0;
+  }
+  Action action = 1;
 }
