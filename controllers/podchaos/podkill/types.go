@@ -52,10 +52,6 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		return ctrl.Result{}, nil
 	}
 
-	shouldAct := podchaos.GetNextStart().Before(now)
-	if !shouldAct {
-		return ctrl.Result{RequeueAfter: podchaos.GetNextStart().Sub(now)}, nil
-	}
 	pods, err := utils.SelectPods(ctx, r.Client, podchaos.Spec.Selector)
 	if err != nil {
 		r.Log.Error(err, "fail to get selected pods")
