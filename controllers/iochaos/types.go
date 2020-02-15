@@ -15,14 +15,16 @@ package iochaos
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/go-logr/logr"
-
-	"github.com/pingcap/chaos-mesh/api/v1alpha1"
-	"github.com/pingcap/chaos-mesh/controllers/iochaos/fs"
-
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+
+	"github.com/pingcap/chaos-mesh/api/v1alpha1"
+	"github.com/pingcap/chaos-mesh/controllers/common"
+	"github.com/pingcap/chaos-mesh/controllers/iochaos/fs"
+	"github.com/pingcap/chaos-mesh/controllers/twophase"
 )
 
 type Reconciler struct {
@@ -40,13 +42,46 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		return ctrl.Result{}, nil
 	}
 
-	switch iochaos.Spec.Layer {
-	case v1alpha1.FileSystemLayer:
-		reconciler := fs.NewConciler(r.Client, r.Log.WithValues("reconciler", "chaosfs"), req)
-		return reconciler.Reconcile(req)
-	default:
-		r.Log.Error(nil, "unknown file system I/O layer", "I/O layer", string(iochaos.Spec.Layer))
-
+	scheduler := iochaos.GetScheduler()
+	duration, err := iochaos.GetDuration()
+	if err != nil {
+		r.Log.Error(err, fmt.Sprintf("unable to get podchaos[%s/%s]'s duration", iochaos.Namespace, iochaos.Name))
 		return ctrl.Result{}, nil
 	}
+	if scheduler == nil && duration == nil {
+		return r.commonIOChaos(&iochaos, req)
+	} else if scheduler != nil && duration != nil {
+		return r.scheduleIOChaos(&iochaos, req)
+	}
+
+	// This should be ensured by admission webhook in the future
+	r.Log.Error(fmt.Errorf("iochaos[%s/%s] spec invalid", iochaos.Namespace, iochaos.Name), "scheduler and duration should be omitted or defined at the same time")
+	return ctrl.Result{}, nil
+}
+
+func (r *Reconciler) commonIOChaos(iochaos *v1alpha1.IoChaos, req ctrl.Request) (ctrl.Result, error) {
+	var cr *common.Reconciler
+	switch iochaos.Spec.Layer {
+	case v1alpha1.FileSystemLayer:
+		cr = fs.NewCommonReconciler(r.Client, r.Log.WithValues("reconciler", "chaosfs"), req)
+	default:
+		return r.invalidActionResponse(iochaos), nil
+	}
+	return cr.Reconcile(req)
+}
+
+func (r *Reconciler) scheduleIOChaos(iochaos *v1alpha1.IoChaos, req ctrl.Request) (ctrl.Result, error) {
+	var sr *twophase.Reconciler
+	switch iochaos.Spec.Layer {
+	case v1alpha1.FileSystemLayer:
+		sr = fs.NewTwoPhaseReconciler(r.Client, r.Log.WithValues("reconciler", "chaosfs"), req)
+	default:
+		return r.invalidActionResponse(iochaos), nil
+	}
+	return sr.Reconcile(req)
+}
+
+func (r *Reconciler) invalidActionResponse(iochaos *v1alpha1.IoChaos) ctrl.Result {
+	r.Log.Error(nil, "unknown file system I/O layer", "action", iochaos.Spec.Action)
+	return ctrl.Result{}
 }
