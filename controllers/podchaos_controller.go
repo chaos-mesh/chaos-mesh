@@ -19,6 +19,7 @@ import (
 	chaosmeshv1alpha1 "github.com/pingcap/chaos-mesh/api/v1alpha1"
 	"github.com/pingcap/chaos-mesh/controllers/podchaos"
 
+	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
@@ -26,7 +27,8 @@ import (
 // PodChaosReconciler reconciles a PodChaos object
 type PodChaosReconciler struct {
 	client.Client
-	Log logr.Logger
+	Log      logr.Logger
+	Recorder record.EventRecorder
 }
 
 // +kubebuilder:rbac:groups=pingcap.com,resources=podchaos,verbs=get;list;watch;create;update;patch;delete

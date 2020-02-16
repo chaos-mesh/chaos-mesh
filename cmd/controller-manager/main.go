@@ -104,24 +104,27 @@ func main() {
 	}
 
 	if err = (&controllers.PodChaosReconciler{
-		Client: mgr.GetClient(),
-		Log:    ctrl.Log.WithName("controllers").WithName("PodChaos"),
+		Client:   mgr.GetClient(),
+		Log:      ctrl.Log.WithName("controllers").WithName("PodChaos"),
+		Recorder: mgr.GetEventRecorderFor("podchaos-controller"),
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "PodChaos")
 		os.Exit(1)
 	}
 
 	if err = (&controllers.NetworkChaosReconciler{
-		Client: mgr.GetClient(),
-		Log:    ctrl.Log.WithName("controllers").WithName("NetworkChaos"),
+		Client:   mgr.GetClient(),
+		Log:      ctrl.Log.WithName("controllers").WithName("NetworkChaos"),
+		Recorder: mgr.GetEventRecorderFor("networkchaos-controller"),
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "NetworkChaos")
 		os.Exit(1)
 	}
 
 	if err = (&controllers.IoChaosReconciler{
-		Client: mgr.GetClient(),
-		Log:    ctrl.Log.WithName("controllers").WithName("IoChaos"),
+		Client:   mgr.GetClient(),
+		Log:      ctrl.Log.WithName("controllers").WithName("IoChaos"),
+		Recorder: mgr.GetEventRecorderFor("iochaos-controller"),
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "IoChaos")
 		os.Exit(1)
