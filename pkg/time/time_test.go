@@ -17,6 +17,9 @@ import (
 	"os"
 	"testing"
 
+	"github.com/go-logr/zapr"
+	"go.uber.org/zap"
+
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"sigs.k8s.io/controller-runtime/pkg/envtest"
@@ -37,6 +40,12 @@ var _ = BeforeSuite(func(done Done) {
 
 	err := os.Chdir("../../")
 	Expect(err).NotTo(HaveOccurred())
+
+	By("register logger")
+	zapLog, err := zap.NewDevelopment()
+	Expect(err).NotTo(HaveOccurred())
+	log := zapr.NewLogger(zapLog)
+	RegisterLogger(log)
 
 	close(done)
 })

@@ -19,7 +19,11 @@ import (
 	"os"
 	"os/exec"
 	"testing"
+	"time"
 	"unsafe"
+
+	"github.com/go-logr/zapr"
+	"go.uber.org/zap"
 
 	"github.com/pingcap/chaos-mesh/test/pkg/timer"
 
@@ -43,6 +47,12 @@ var _ = BeforeSuite(func(done Done) {
 
 	err := os.Chdir("../../")
 	Expect(err).NotTo(HaveOccurred())
+
+	By("register logger")
+	zapLog, err := zap.NewDevelopment()
+	Expect(err).NotTo(HaveOccurred())
+	log := zapr.NewLogger(zapLog)
+	RegisterLogger(log)
 
 	close(done)
 })
@@ -136,11 +146,16 @@ var _ = Describe("PTrace", func() {
 		err := p.Start()
 		Expect(err).ShouldNot(HaveOccurred(), "error: %+v", err)
 
+		time.Sleep(time.Millisecond)
+
 		pid := p.Process.Pid
 		program, err := Trace(pid)
 		Expect(err).ShouldNot(HaveOccurred(), "error: %+v", err)
 
 		err = program.Detach()
+		Expect(err).ShouldNot(HaveOccurred(), "error: %+v", err)
+
+		err = p.Process.Kill()
 		Expect(err).ShouldNot(HaveOccurred(), "error: %+v", err)
 	})
 })

@@ -18,6 +18,8 @@ import (
 	"errors"
 	"runtime"
 
+	"github.com/go-logr/logr"
+
 	"github.com/pingcap/chaos-mesh/pkg/mapreader"
 	"github.com/pingcap/chaos-mesh/pkg/ptrace"
 
@@ -25,6 +27,11 @@ import (
 )
 
 var log = ctrl.Log.WithName("time")
+
+// RegisterLogger registers a logger on time pkg
+func RegisterLogger(logger logr.Logger) {
+	log = logger
+}
 
 // TODO: support more cpu architecture
 // TODO: auto generate these codes

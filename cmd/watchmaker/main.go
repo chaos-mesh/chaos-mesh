@@ -18,6 +18,11 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/go-logr/zapr"
+	"go.uber.org/zap"
+
+	"github.com/pingcap/chaos-mesh/pkg/ptrace"
+
 	"github.com/pingcap/chaos-mesh/pkg/version"
 
 	"github.com/pingcap/chaos-mesh/pkg/time"
@@ -48,7 +53,15 @@ func main() {
 		os.Exit(0)
 	}
 
-	err := time.ModifyTime(pid, secDelta, nsecDelta)
+	zapLog, err := zap.NewDevelopment()
+	if err != nil {
+		panic(fmt.Sprintf("error while creating zap logger: %v", err))
+	}
+	log := zapr.NewLogger(zapLog)
+	ptrace.RegisterLogger(log.WithName("ptrace"))
+	time.RegisterLogger(log.WithName("time"))
+
+	err = time.ModifyTime(pid, secDelta, nsecDelta)
 
 	if err != nil {
 		fmt.Printf("error while modifying time, pid: %d, sec_delta: %d, nsec_delta: %d\n Error: %s", pid, secDelta, nsecDelta, err.Error())

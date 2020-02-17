@@ -35,17 +35,24 @@ import (
 	"fmt"
 	"io/ioutil"
 	"strconv"
+	"strings"
 	"syscall"
 	"unsafe"
 
-	"github.com/pkg/errors"
-
+	"github.com/go-logr/logr"
 	ctrl "sigs.k8s.io/controller-runtime"
+
+	"github.com/pkg/errors"
 
 	"github.com/pingcap/chaos-mesh/pkg/mapreader"
 )
 
 var log = ctrl.Log.WithName("ptrace")
+
+// RegisterLogger registers a logger on ptrace pkg
+func RegisterLogger(logger logr.Logger) {
+	log = logger
+}
 
 const waitPidErrorMessage = "waitpid ret value: %d"
 
@@ -108,8 +115,12 @@ func Trace(pid int) (*TracedProgram, error) {
 
 			err = syscall.PtraceAttach(tid)
 			if err != nil {
-				log.Error(err, "attach failed", "tid", tid)
-				return nil, errors.WithStack(err)
+				if !strings.Contains(err.Error(), "no such process") {
+					log.Error(err, "attach failed", "tid", tid)
+					return nil, errors.WithStack(err)
+				}
+
+				continue
 			}
 			defer func() {
 				if !traceSuccess {
@@ -119,12 +130,13 @@ func Trace(pid int) (*TracedProgram, error) {
 					}
 				}
 			}()
-			log.Info("attach successfully", "tid", tid)
 
 			err = waitPid(tid)
 			if err != nil {
 				return nil, errors.WithStack(err)
 			}
+
+			log.Info("attach successfully", "tid", tid)
 			tidMap[tid] = true
 		}
 
@@ -159,11 +171,15 @@ func Trace(pid int) (*TracedProgram, error) {
 // Detach detaches from all threads of the processs
 func (p *TracedProgram) Detach() error {
 	for _, tid := range p.tids {
+		log.Info("detaching", "tid", tid)
+
 		err := syscall.PtraceDetach(tid)
 
 		if err != nil {
-			log.Error(err, "detach failed", "tid", tid)
-			return errors.WithStack(err)
+			if !strings.Contains(err.Error(), "no such process") {
+				log.Error(err, "detach failed", "tid", tid)
+				return errors.WithStack(err)
+			}
 		}
 	}
 
