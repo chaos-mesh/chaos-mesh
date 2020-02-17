@@ -43,6 +43,9 @@ spec:
             - !!str {{ .Values.chaosDaemon.httpPort }}
             - --grpc-port
             - !!str {{ .Values.chaosDaemon.grpcPort }}
+          {{- if .Values.enableProfiling }}
+            - --pprof
+          {{- end }}
           securityContext:
             privileged: true
             capabilities:
