@@ -57,6 +57,10 @@ spec:
             containerPort: 9443 # Customize containerPort
           - name: http
             containerPort: 10080
+        {{- if .Values.controllerManager.enableProfiling }}
+          - name: pprof
+            containerPort: 10081
+        {{- end }}
       volumes:
         - name: webhook-certs
           secret:
