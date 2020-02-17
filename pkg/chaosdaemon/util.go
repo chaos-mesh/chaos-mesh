@@ -47,9 +47,10 @@ type ContainerRuntimeInfoClient interface {
 	ContainerKillByContainerID(ctx context.Context, containerID string) error
 }
 
-// DockerClientI represents the DockerClient, it's used to simply unit test
+// DockerClientInterface represents the DockerClient, it's used to simply unit test
 type DockerClientInterface interface {
 	ContainerInspect(ctx context.Context, containerID string) (types.ContainerJSON, error)
+	ContainerKill(ctx context.Context, containerID, signal string) error
 }
 
 // DockerClient can get information from docker
@@ -70,7 +71,7 @@ func (c DockerClient) GetPidFromContainerID(ctx context.Context, containerID str
 	return uint32(container.State.Pid), nil
 }
 
-// ContainerdClientI represents the ContainerClient, it's used to simply unit test
+// ContainerdClientInterface represents the ContainerClient, it's used to simply unit test
 type ContainerdClientInterface interface {
 	LoadContainer(ctx context.Context, id string) (containerd.Container, error)
 }

@@ -33,6 +33,13 @@ func (m *MockClient) ContainerInspect(ctx context.Context, containerID string) (
 	}, nil
 }
 
+func (m *MockClient) ContainerKill(ctx context.Context, containerID, signal string) error {
+	if err := mock.On("containerKillError"); err != nil {
+		return err.(error)
+	}
+	return nil
+}
+
 func (m *MockClient) LoadContainer(ctx context.Context, id string) (containerd.Container, error) {
 	if m.Errors["LoadContainer"] != nil {
 		return nil, m.Errors["LoadContainer"]
