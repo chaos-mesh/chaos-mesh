@@ -25,6 +25,8 @@ spec:
 {{ toYaml . | indent 8 }}
     {{- end }}
     spec:
+      hostIPC: true
+      hostPID: true
       containers:
         - name: chaos-daemon
           image: {{ .Values.chaosDaemon.image }}
@@ -43,9 +45,10 @@ spec:
             - !!str {{ .Values.chaosDaemon.grpcPort }}
           securityContext:
             privileged: true
+            capabilities:
+              add:
+                - SYS_PTRACE
           volumeMounts:
-            - name: proc
-              mountPath: /mnt/proc
             - name: socket-path
               {{- if eq .Values.chaosDaemon.runtime "docker" }}
               mountPath: /var/run/docker.sock
@@ -59,9 +62,6 @@ spec:
             - name: http
               containerPort: {{ .Values.chaosDaemon.httpPort }}
       volumes:
-        - name: proc
-          hostPath:
-            path: /proc
         - name: socket-path
           hostPath:
             path: {{ .Values.chaosDaemon.socketPath | default "/var/run/docker.sock" }}

@@ -35,7 +35,7 @@ const (
 	containerdProtocolPrefix = "containerd://"
 	containerdDefaultNS      = "k8s.io"
 
-	defaultProcPrefix = "/mnt/proc"
+	defaultProcPrefix = "/proc"
 )
 
 // ContainerRuntimeInfoClient represents a struct which can give you information about container runtime
