@@ -54,7 +54,7 @@ type DockerClientInterface interface {
 }
 
 // DockerClientI represents the DockerClient, it's used to simply unit test
-type DockerClientI interface {
+type DockerClientInterface interface {
 	ContainerInspect(ctx context.Context, containerID string) (types.ContainerJSON, error)
 }
 
