@@ -16,12 +16,11 @@ import (
 
 type MockClient struct {
 	MockPid int
-	Errors  map[string]error
 }
 
 func (m *MockClient) ContainerInspect(ctx context.Context, containerID string) (types.ContainerJSON, error) {
-	if m.Errors["ContainerInspect"] != nil {
-		return types.ContainerJSON{}, m.Errors["ContainerInspect"]
+	if err := mock.On("ContainerInspectError"); err != nil {
+		return types.ContainerJSON{}, err.(error)
 	}
 
 	return types.ContainerJSON{
@@ -41,11 +40,11 @@ func (m *MockClient) ContainerKill(ctx context.Context, containerID, signal stri
 }
 
 func (m *MockClient) LoadContainer(ctx context.Context, id string) (containerd.Container, error) {
-	if m.Errors["LoadContainer"] != nil {
-		return nil, m.Errors["LoadContainer"]
+	if err := mock.On("LoadContainerError"); err != nil {
+		return nil, err.(error)
 	}
 
-	return &MockContainer{MockPid: m.MockPid, Errors: m.Errors}, nil
+	return &MockContainer{MockPid: m.MockPid}, nil
 }
 
 type MockContainer struct {
@@ -55,8 +54,8 @@ type MockContainer struct {
 }
 
 func (m *MockContainer) Task(context.Context, cio.Attach) (containerd.Task, error) {
-	if m.Errors["Task"] != nil {
-		return nil, m.Errors["Task"]
+	if err := mock.On("TaskError"); err != nil {
+		return nil, err.(error)
 	}
 
 	return &MockTask{MockPid: m.MockPid}, nil
@@ -91,7 +90,8 @@ var _ = Describe("chaosdaemon util", func() {
 
 		It("should error with specified string", func() {
 			errorStr := "this is a mocked error"
-			m := &MockClient{Errors: map[string]error{"ContainerInspect": errors.New(errorStr)}}
+			defer mock.With("ContainerInspectError", errors.New(errorStr))()
+			m := &MockClient{}
 			c := DockerClient{client: m}
 			_, err := c.GetPidFromContainerID(context.TODO(), "docker://valid-container-id")
 			Expect(err).NotTo(BeNil())
@@ -118,30 +118,33 @@ var _ = Describe("chaosdaemon util", func() {
 
 		It("should error with specified string", func() {
 			errorStr := "this is a mocked error"
-			m := &MockClient{Errors: map[string]error{"LoadContainer": errors.New(errorStr)}}
+			mock.With("LoadContainerError", errors.New(errorStr))
+			m := &MockClient{}
 			c := ContainerdClient{client: m}
 			_, err := c.GetPidFromContainerID(context.TODO(), "containerd://valid-container-id")
 			Expect(err).NotTo(BeNil())
 			Expect(fmt.Sprintf("%s", err)).To(Equal(errorStr))
+			mock.Reset("LoadContainerError")
 
-			m = &MockClient{Errors: map[string]error{"Task": errors.New(errorStr)}}
+			mock.With("TaskError", errors.New(errorStr))
+			m = &MockClient{}
 			c = ContainerdClient{client: m}
 			_, err = c.GetPidFromContainerID(context.TODO(), "containerd://valid-container-id")
 			Expect(err).NotTo(BeNil())
 			Expect(fmt.Sprintf("%s", err)).To(Equal(errorStr))
+			mock.Reset("TaskError")
 		})
 	})
 
 	Context("CreateContainerRuntimeInfoClient", func() {
-		It("test", func() {
-			mock.With("test", errors.New("test error"))
-			mock.Reset("test")
-			//failpoint.Enable("github.com/pingcap/chaos-mesh/pkg/chaosdaemon/test", "return(123)")
+		It("should work", func() {
 			_, err := CreateContainerRuntimeInfoClient(containerRuntimeDocker)
 			Expect(err).To(BeNil())
+			errorStr := "this is a mocked error"
+			defer mock.With("CreateContainerRuntimeInfoClientError", errors.New(errorStr))()
 			_, err = CreateContainerRuntimeInfoClient(containerRuntimeContainerd)
 			Expect(err).ToNot(BeNil())
-			Expect(fmt.Sprintf("%s", err)).To(ContainSubstring("failed to dial"))
+			Expect(fmt.Sprintf("%s", err)).To(Equal(errorStr))
 		})
 	})
 })

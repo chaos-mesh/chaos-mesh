@@ -112,7 +112,7 @@ failpoint-disable: bin/failpoint-ctl
 
 # Run go vet against code
 vet:
-	$(GO) vet -unsafeptr=false ./...
+	$(GO) vet ./...
 
 tidy:
 	@echo "go mod tidy"

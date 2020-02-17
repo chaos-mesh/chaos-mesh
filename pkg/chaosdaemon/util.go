@@ -101,7 +101,8 @@ func (c ContainerdClient) GetPidFromContainerID(ctx context.Context, containerID
 func CreateContainerRuntimeInfoClient(containerRuntime string) (ContainerRuntimeInfoClient, error) {
 	// TODO: support more container runtime
 
-	if err := mock.On("test"); err != nil {
+	// Mock point to return error in unit test
+	if err := mock.On("CreateContainerRuntimeInfoClientError"); err != nil {
 		return nil, err.(error)
 	}
 
