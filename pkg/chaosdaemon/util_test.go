@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"syscall"
 
 	"github.com/containerd/containerd"
 	"github.com/containerd/containerd/cio"
@@ -33,7 +34,7 @@ func (m *MockClient) ContainerInspect(ctx context.Context, containerID string) (
 }
 
 func (m *MockClient) ContainerKill(ctx context.Context, containerID, signal string) error {
-	if err := mock.On("containerKillError"); err != nil {
+	if err := mock.On("ContainerKillError"); err != nil {
 		return err.(error)
 	}
 	return nil
@@ -50,7 +51,6 @@ func (m *MockClient) LoadContainer(ctx context.Context, id string) (containerd.C
 type MockContainer struct {
 	containerd.Container
 	MockPid int
-	Errors  map[string]error
 }
 
 func (m *MockContainer) Task(context.Context, cio.Attach) (containerd.Task, error) {
@@ -68,6 +68,13 @@ type MockTask struct {
 
 func (m *MockTask) Pid() uint32 {
 	return uint32(m.MockPid)
+}
+
+func (m *MockTask) Kill(context.Context, syscall.Signal, ...containerd.KillOpts) error {
+	if err := mock.On("KillError"); err != nil {
+		return err.(error)
+	}
+	return nil
 }
 
 var _ = Describe("chaosdaemon util", func() {
@@ -88,7 +95,7 @@ var _ = Describe("chaosdaemon util", func() {
 			Expect(fmt.Sprintf("%s", err)).To(ContainSubstring(fmt.Sprintf("expected %s but got", dockerProtocolPrefix)))
 		})
 
-		It("should error with specified string", func() {
+		It("should error on ContainerInspectError", func() {
 			errorStr := "this is a mocked error"
 			defer mock.With("ContainerInspectError", errors.New(errorStr))()
 			m := &MockClient{}
@@ -145,6 +152,79 @@ var _ = Describe("chaosdaemon util", func() {
 			_, err = CreateContainerRuntimeInfoClient(containerRuntimeContainerd)
 			Expect(err).ToNot(BeNil())
 			Expect(fmt.Sprintf("%s", err)).To(Equal(errorStr))
+		})
+	})
+
+	Context("DockerClient ContainerKillByContainerID", func() {
+		It("should work", func() {
+			m := &MockClient{}
+			c := DockerClient{client: m}
+			err := c.ContainerKillByContainerID(context.TODO(), "docker://valid-container-id")
+			Expect(err).To(BeNil())
+		})
+
+		It("should error on ContainerKill", func() {
+			errorStr := "this is a mocked error on ContainerKill"
+			m := &MockClient{}
+			c := DockerClient{client: m}
+			defer mock.With("ContainerKillError", errors.New(errorStr))()
+			err := c.ContainerKillByContainerID(context.TODO(), "docker://valid-container-id")
+			Expect(err).ToNot(BeNil())
+			Expect(fmt.Sprintf("%s", err)).To(Equal(errorStr))
+		})
+
+		It("should error on wrong protocol", func() {
+			m := &MockClient{}
+			c := DockerClient{client: m}
+			err := c.ContainerKillByContainerID(context.TODO(), "containerd://this-is-a-wrong-protocol")
+			Expect(err).ToNot(BeNil())
+			Expect(fmt.Sprintf("%s", err)).To(ContainSubstring(fmt.Sprintf("expected %s but got", dockerProtocolPrefix)))
+		})
+
+		It("should error on short protocol", func() {
+			m := &MockClient{}
+			c := DockerClient{client: m}
+			err := c.ContainerKillByContainerID(context.TODO(), "dock:")
+			Expect(err).ToNot(BeNil())
+			Expect(fmt.Sprintf("%s", err)).To(ContainSubstring("is not a docker container id"))
+		})
+	})
+
+	Context("ContainerdClient ContainerKillByContainerID", func() {
+		It("should work", func() {
+			m := &MockClient{}
+			c := ContainerdClient{client: m}
+			err := c.ContainerKillByContainerID(context.TODO(), "containerd://valid-container-id")
+			Expect(err).To(BeNil())
+		})
+
+		errorPoints := []string{"LoadContainer", "Task", "Kill"}
+		for _, e := range errorPoints {
+			It(fmt.Sprintf("should error on %s", e), func() {
+				errorStr := fmt.Sprintf("this is a mocked error on %s", e)
+				m := &MockClient{}
+				c := ContainerdClient{client: m}
+				defer mock.With(e+"Error", errors.New(errorStr))()
+				err := c.ContainerKillByContainerID(context.TODO(), "containerd://valid-container-id")
+				Expect(err).ToNot(BeNil())
+				Expect(fmt.Sprintf("%s", err)).To(Equal(errorStr))
+			})
+		}
+
+		It("should error on wrong protocol", func() {
+			m := &MockClient{}
+			c := ContainerdClient{client: m}
+			err := c.ContainerKillByContainerID(context.TODO(), "docker://this-is-a-wrong-protocol")
+			Expect(err).ToNot(BeNil())
+			Expect(fmt.Sprintf("%s", err)).To(ContainSubstring(fmt.Sprintf("expected %s but got", containerdProtocolPrefix)))
+		})
+
+		It("should error on short protocol", func() {
+			m := &MockClient{}
+			c := ContainerdClient{client: m}
+			err := c.ContainerKillByContainerID(context.TODO(), "dock:")
+			Expect(err).ToNot(BeNil())
+			Expect(fmt.Sprintf("%s", err)).To(ContainSubstring("is not a containerd container id"))
 		})
 	})
 })

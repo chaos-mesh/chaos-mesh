@@ -8,7 +8,8 @@ import (
 	"github.com/pingcap/failpoint"
 )
 
-type finalizer func() error
+// Finalizer represent the function that clean a mock point
+type Finalizer func() error
 
 type mockPoints struct {
 	m map[string]interface{}
@@ -48,7 +49,7 @@ func On(fpname string) interface{} {
 }
 
 // With enable failpoint and provide a value
-func With(fpname string, value interface{}) finalizer {
+func With(fpname string, value interface{}) Finalizer {
 	if err := failpoint.Enable(failpath(fpname), "return(true)"); err != nil {
 		panic(err)
 	}
