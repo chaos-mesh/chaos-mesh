@@ -459,7 +459,7 @@ func (p *TracedProgram) FindSymbolInEntry(symbolName string, entry *mapreader.En
 // WriteUint64ToAddr writes uint64 to addr
 func (p *TracedProgram) WriteUint64ToAddr(addr uint64, value uint64) error {
 	valueSlice := make([]byte, 8)
-	binary.LittleEndian.PutUint64(valueSlice, uint64(value))
+	binary.LittleEndian.PutUint64(valueSlice, value)
 	err := p.WriteSlice(addr, valueSlice)
 	if err != nil {
 		return err
@@ -469,7 +469,7 @@ func (p *TracedProgram) WriteUint64ToAddr(addr uint64, value uint64) error {
 }
 
 // JumpToFakeFunc writes jmp instruction to jump to fake function
-func (p *TracedProgram) JumpToFakeFunc(originAddr uint64, targetAddr uint64, symbolName string) error {
+func (p *TracedProgram) JumpToFakeFunc(originAddr uint64, targetAddr uint64) error {
 	instructions := make([]byte, 16)
 
 	// mov rax, targetAddr;

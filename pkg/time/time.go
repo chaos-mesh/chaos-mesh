@@ -136,7 +136,7 @@ func ModifyTime(pid int, deltaSec int64, deltaNsec int64) error {
 		return err
 	}
 
-	err = program.JumpToFakeFunc(originAddr, fakeAddr, "clock_gettime")
+	err = program.JumpToFakeFunc(originAddr, fakeAddr)
 	if err != nil {
 		return err
 	}
