@@ -61,6 +61,8 @@ const waitPidErrorMessage = "waitpid ret value: %d"
 // If it's on 32-bit platform, After shifting nothing will be left. Than we got 4 here.
 const ptrSize = 4 << uintptr(^uintptr(0)>>63)
 
+var threadRetryLimit = 10
+
 // TracedProgram is a program traced by ptrace
 type TracedProgram struct {
 	pid     int
@@ -90,6 +92,7 @@ func Trace(pid int) (*TracedProgram, error) {
 	traceSuccess := false
 
 	tidMap := make(map[int]bool)
+	retryCount := make(map[int]int)
 	for {
 		threads, err := ioutil.ReadDir(fmt.Sprintf("/proc/%d/task", pid))
 		if err != nil {
@@ -100,6 +103,7 @@ func Trace(pid int) (*TracedProgram, error) {
 		// judge whether `threads` is a subset of `tidMap`
 		subset := true
 
+		tids := make(map[int]bool)
 		for _, thread := range threads {
 			tid64, err := strconv.ParseInt(thread.Name(), 10, 32)
 			if err != nil {
@@ -109,24 +113,36 @@ func Trace(pid int) (*TracedProgram, error) {
 
 			_, ok := tidMap[tid]
 			if ok {
+				tids[tid] = true
 				continue
 			}
 			subset = false
 
 			err = syscall.PtraceAttach(tid)
 			if err != nil {
+				_, ok := retryCount[tid]
+				if !ok {
+					retryCount[tid] = 1
+				} else {
+					retryCount[tid]++
+				}
+				if retryCount[tid] < threadRetryLimit {
+					continue
+				}
+
 				if !strings.Contains(err.Error(), "no such process") {
 					log.Error(err, "attach failed", "tid", tid)
 					return nil, errors.WithStack(err)
 				}
-
 				continue
 			}
 			defer func() {
 				if !traceSuccess {
 					err = syscall.PtraceDetach(tid)
 					if err != nil {
-						log.Error(err, "detach failed", "tid", tid)
+						if !strings.Contains(err.Error(), "no such process") {
+							log.Error(err, "detach failed", "tid", tid)
+						}
 					}
 				}
 			}()
@@ -137,10 +153,12 @@ func Trace(pid int) (*TracedProgram, error) {
 			}
 
 			log.Info("attach successfully", "tid", tid)
+			tids[tid] = true
 			tidMap[tid] = true
 		}
 
 		if subset {
+			tidMap = tids
 			break
 		}
 	}
