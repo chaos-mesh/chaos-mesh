@@ -46,13 +46,13 @@ type ContainerRuntimeInfoClient interface {
 }
 
 // DockerClientI represents the DockerClient, it's used to simply unit test
-type DockerClientI interface {
+type DockerClientInterface interface {
 	ContainerInspect(ctx context.Context, containerID string) (types.ContainerJSON, error)
 }
 
 // DockerClient can get information from docker
 type DockerClient struct {
-	client DockerClientI
+	client DockerClientInterface
 }
 
 // GetPidFromContainerID fetches PID according to container id
@@ -69,13 +69,13 @@ func (c DockerClient) GetPidFromContainerID(ctx context.Context, containerID str
 }
 
 // ContainerdClientI represents the ContainerClient, it's used to simply unit test
-type ContainerdClientI interface {
+type ContainerdClientInterface interface {
 	LoadContainer(ctx context.Context, id string) (containerd.Container, error)
 }
 
 // ContainerdClient can get information from containerd
 type ContainerdClient struct {
-	client ContainerdClientI
+	client ContainerdClientInterface
 }
 
 // GetPidFromContainerID fetches PID according to container id
