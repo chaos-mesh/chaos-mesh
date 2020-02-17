@@ -168,7 +168,7 @@ yaml: manifests
 install-kind:
 ifeq (,$(shell which kind))
 	@echo "installing kind"
-	GO111MODULE="on" go get sigs.k8s.io/kind@v0.4.0
+	GO111MODULE="on" go get sigs.k8s.io/kind@v0.7.0
 else
 	@echo "kind has been installed"
 endif
