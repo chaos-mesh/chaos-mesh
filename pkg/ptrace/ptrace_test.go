@@ -71,6 +71,8 @@ var _ = Describe("PTrace", func() {
 		t, err = timer.StartTimer()
 		Expect(err).ShouldNot(HaveOccurred(), "error: %+v", err)
 
+		time.Sleep(time.Millisecond)
+
 		program, err = Trace(t.Pid())
 		Expect(err).ShouldNot(HaveOccurred(), "error: %+v", err)
 	})
