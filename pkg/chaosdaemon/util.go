@@ -21,6 +21,8 @@ import (
 	"github.com/containerd/containerd"
 	"github.com/docker/docker/api/types"
 	dockerclient "github.com/docker/docker/client"
+
+	"github.com/pingcap/chaos-mesh/pkg/mock"
 )
 
 const (
@@ -95,6 +97,10 @@ func (c ContainerdClient) GetPidFromContainerID(ctx context.Context, containerID
 // CreateContainerRuntimeInfoClient creates a container runtime information client.
 func CreateContainerRuntimeInfoClient(containerRuntime string) (ContainerRuntimeInfoClient, error) {
 	// TODO: support more container runtime
+
+	if err := mock.On("test"); err != nil {
+		return nil, err.(error)
+	}
 
 	var cli ContainerRuntimeInfoClient
 	switch containerRuntime {

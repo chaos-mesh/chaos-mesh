@@ -20,6 +20,9 @@ GO     := $(GOENV) go
 GOTEST := TEST_USE_EXISTING_CLUSTER=false go test
 SHELL    := /usr/bin/env bash
 
+FAILPOINT_ENABLE  := $$(find $$PWD/ -type d | grep -vE "(\.git|bin)" | xargs bin/failpoint-ctl enable)
+FAILPOINT_DISABLE := $$(find $$PWD/ -type d | grep -vE "(\.git|bin)" | xargs bin/failpoint-ctl disable)
+
 PACKAGE_LIST := go list ./... | grep -vE "pkg/client" | grep -vE "zz_generated" | grep -vE "vendor"
 PACKAGE_DIRECTORIES := $(PACKAGE_LIST) | sed 's|github.com/pingcap/chaos-mesh/||'
 FILES := $$(find $$($(PACKAGE_DIRECTORIES)) -name "*.go")
@@ -40,7 +43,7 @@ all: yaml build image
 build: chaosdaemon manager chaosfs dashboard dashboard-server-frontend
 
 # Run tests
-test: generate fmt vet lint manifests
+test: failpoint-enable generate fmt vet lint manifests
 	rm -rf cover.* cover
 	mkdir -p cover
 	$(GOTEST) ./api/... ./controllers/... ./pkg/... -coverprofile cover.out.tmp
@@ -99,9 +102,17 @@ ifeq (,$(shell which goimports))
 	go get golang.org/x/tools/cmd/goimports
 endif
 
+failpoint-enable: bin/failpoint-ctl
+# Converting gofail failpoints...
+	@$(FAILPOINT_ENABLE)
+
+failpoint-disable: bin/failpoint-ctl
+# Restoring gofail failpoints...
+	@$(FAILPOINT_DISABLE)
+
 # Run go vet against code
 vet:
-	$(GO) vet ./...
+	$(GO) vet -unsafeptr=false ./...
 
 tidy:
 	@echo "go mod tidy"
@@ -128,6 +139,9 @@ docker-push:
 
 bin/revive:
 	GO111MODULE="on" go build -o bin/revive github.com/mgechev/revive
+
+bin/failpoint-ctl: go.mod
+	$(GO) build -o $@ github.com/pingcap/failpoint/failpoint-ctl
 
 lint: bin/revive
 	@echo "linting"

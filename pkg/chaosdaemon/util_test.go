@@ -10,6 +10,8 @@ import (
 	"github.com/docker/docker/api/types"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+
+	"github.com/pingcap/chaos-mesh/pkg/mock"
 )
 
 type MockClient struct {
@@ -125,6 +127,9 @@ var _ = Describe("chaosdaemon util", func() {
 
 	Context("CreateContainerRuntimeInfoClient", func() {
 		It("test", func() {
+			mock.With("test", errors.New("test error"))
+			mock.Reset("test")
+			//failpoint.Enable("github.com/pingcap/chaos-mesh/pkg/chaosdaemon/test", "return(123)")
 			_, err := CreateContainerRuntimeInfoClient(containerRuntimeDocker)
 			Expect(err).To(BeNil())
 			_, err = CreateContainerRuntimeInfoClient(containerRuntimeContainerd)
