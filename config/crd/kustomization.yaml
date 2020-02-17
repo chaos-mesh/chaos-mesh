@@ -5,6 +5,7 @@ resources:
 - bases/pingcap.com_podchaos.yaml
 - bases/pingcap.com_networkchaos.yaml
 - bases/pingcap.com_iochaos.yaml
+- bases/pingcap.com_timechaos.yaml
 # +kubebuilder:scaffold:crdkustomizeresource
 
 patchesStrategicMerge:
