@@ -120,7 +120,7 @@ type PodChaosSpec struct {
 	Scheduler *SchedulerSpec `json:"scheduler,omitempty"`
 
 	// Action defines the specific pod chaos action.
-	// Supported action: pod-kill / pod-failure
+	// Supported action: pod-kill / pod-failure / container-kill
 	// Default action: pod-kill
 	Action PodChaosAction `json:"action"`
 

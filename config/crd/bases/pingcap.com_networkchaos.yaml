@@ -39,15 +39,15 @@ spec:
                 action: delay Default action: delay'
               type: string
             corrupt:
-              description: Corrupt represents the detail about loss action
+              description: Reorder represents the detail about reorder action
               properties:
                 correlation:
                   type: string
-                corrupt:
+                reorder:
                   type: string
               required:
               - correlation
-              - corrupt
+              - reorder
               type: object
             delay:
               description: Delay represents the detail about delay action
