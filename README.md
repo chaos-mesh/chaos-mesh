@@ -57,51 +57,15 @@ git clone https://github.com/pingcap/chaos-mesh.git
 cd chaos-mesh/
 ```
 
-### Create custom resource type
-
-To use Chaos Mesh, you must first create the related custom resource type.
+### Run the following command to install Chaos Mesh
 
 ```bash
-kubectl apply -f manifests/
-kubectl get crd podchaos.pingcap.com
+./install.sh 
 ```
 
-### Install Chaos Mesh
-
-* Install Chaos Mesh with Chaos Operator only in docker environment
-
-```bash
-# create namespace chaos-testing
-kubectl create ns chaos-testing
-# helm 2.X
-helm install helm/chaos-mesh --name=chaos-mesh --namespace=chaos-testing
-# helm 3.X
-helm install chaos-mesh helm/chaos-mesh --namespace=chaos-testing
-# check Chaos Mesh pods installed
-kubectl get pods --namespace chaos-testing -l app.kubernetes.io/instance=chaos-mesh
-```
-
-* Install Chaos Mesh with Chaos Operator only in containerd environment (Kind)
-
-```bash
-# create namespace chaos-testing
-kubectl create ns chaos-testing
-# helm 2.X
-helm install helm/chaos-mesh --name=chaos-mesh --namespace=chaos-testing --set chaosDaemon.runtime=containerd --set chaosDaemon.socketPath=/run/containerd/containerd.sock
-# helm 3.X
-helm install chaos-mesh helm/chaos-mesh --namespace=chaos-testing --set chaosDaemon.runtime=containerd --set chaosDaemon.socketPath=/run/containerd/containerd.sock
-# check Chaos Mesh pods installed
-kubectl get pods --namespace chaos-testing -l app.kubernetes.io/instance=chaos-mesh
-```
-
-* Install Chaos Mesh with Chaos Operator and Chaos Dashboard
-
-```bash
-# helm 2.X
-helm install helm/chaos-mesh --name=chaos-mesh --namespace=chaos-testing --set dashboard.create=true
-# helm 3.X
-helm install chaos-mesh helm/chaos-mesh --namespace=chaos-testing --set dashboard.create=true
-```
+> **Note:**
+> 
+> You also can refer to [install chaos mesh manually](./doc/install_chaos_mesh_manually.md) to install Chaos Mesh manually
 
 ## Get started on your local machine
 
@@ -111,67 +75,32 @@ helm install chaos-mesh helm/chaos-mesh --namespace=chaos-testing --set dashboar
 
 You can try Chaos Mesh on your local K8s environment deployed using `kind` or `minikube`.
 
-### Deploy your local K8s environment
 
-#### Deploy with `kind`
+### Deploy with `kind`
 
-1. Clone the code
+1. Make sure docker is installed
+
+```bash
+docker version
+```
+> You can refer [install docker](https://docs.docker.com/install/) to install docker.
+
+2. Clone the code
 
    ```bash
    git clone --depth=1 https://github.com/pingcap/chaos-mesh && \
    cd chaos-mesh
+   
+3. Run the script to install Chaos Mesh
+
+   ```
+   ./install.sh --local kind
    ```
 
-2. Run the script and create a local Kubernetes cluster. Make sure you have installed [kind](https://kind.sigs.k8s.io/).
-
-   ```bash
-   hack/kind-cluster-build.sh
-   ```
-
-3. To connect the local Kubernetes cluster, set the default configuration file path of `kubectl` to `kube-config`.
-
-   ```bash
-   export KUBECONFIG="$(kind get kubeconfig-path)"
-   ```
-
-4. Verify whether the Kubernetes cluster is on and running
-
-   ```bash
-   kubectl cluster-info
-   ```
-
-5. Install `chaos-mesh` on `kind` kubernetes cluster as suggested in [Install Chaos Mesh](#install-chaos-mesh).
-
-#### Deploy with `minikube`
-
-1. Start a `minikube` kubernetes cluster. Make sure you have installed [minikube](https://kubernetes.io/docs/tasks/tools/install-minikube/).
-
-   ```bash
-   minikube start --kubernetes-version v1.15.0 --cpus 4 --memory "8192mb" # we recommend that you allocate enough RAM (more than 8192 MiB) to the VM
-   ```
-
-2. Install helm
-
-   ```bash
-   curl https://raw.githubusercontent.com/helm/helm/master/scripts/get | bash
-   helm init
-   ```
-
-3. Check whether helm tiller pod is running
-
-   ```bash
-   kubectl -n kube-system get pods -l app=helm
-   ```
-
-4. Install `chaos-mesh` on `minikube` kubernetes cluster as suggested in [Install Chaos Mesh](#install-chaos-mesh).
-
-**Note:**
-
-There are some known restrictions for Chaos Operator deployed on `minikube` clusters:
-
-- `netem chaos` is only supported for `minikube` clusters >= version 1.6.
-
-    In `minikube`, the default virtual machine driver's image doesn't contain the `sch_netem` kernel module in smaller versions. You can use `none` driver (if your host is Linux with the `sch_netem` kernel module loaded) to try these chaos actions on `minikube` or [build an image with sch_netem by yourself](https://minikube.sigs.k8s.io/docs/contributing/iso/).
+> Note: 
+> 
+> At present, this `install.sh` only support deploying Chaos Mesh using [kind](https://kind.sigs.k8s.io/). 
+> If you want to deploy Chaos Mesh using [minikube](https://kubernetes.io/docs/tasks/tools/install-minikube/), this doc [get stated on minikube](./doc/get_started_on_minikube.md) can help you.
 
 ### Deploy target cluster
 
