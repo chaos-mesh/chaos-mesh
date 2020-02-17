@@ -10,6 +10,9 @@ clusterScoped: true
 rbac:
   create: true
 
+# enableProfiling is a flag to enable pprof in controller-manager and chaos-daemon.
+enableProfiling: false
+
 controllerManager:
   serviceAccount: chaos-controller-manager
 

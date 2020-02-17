@@ -36,10 +36,11 @@ var log = ctrl.Log.WithName("chaos-daemon-server")
 
 // Config contains the basic chaos daemon configuration.
 type Config struct {
-	HTTPPort int
-	GRPCPort int
-	Host     string
-	Runtime  string
+	HTTPPort  int
+	GRPCPort  int
+	Host      string
+	Runtime   string
+	Profiling bool
 }
 
 // Server represents a grpc server for tc daemon
@@ -91,7 +92,7 @@ func StartServer(conf *Config, reg *prometheus.Registry) error {
 	g := errgroup.Group{}
 
 	httpBindAddr := fmt.Sprintf("%s:%d", conf.Host, conf.HTTPPort)
-	srv := newHTTPServer(httpBindAddr, reg)
+	srv := newHTTPServer(httpBindAddr, conf.Profiling, reg)
 	g.Go(func() error {
 		log.Info("starting http endpoint", "address", httpBindAddr)
 		if err := srv.ListenAndServe(); err != nil {
