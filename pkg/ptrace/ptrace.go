@@ -277,7 +277,7 @@ func (p *TracedProgram) Syscall(number uint64, args ...uint64) (uint64, error) {
 
 // Mmap runs mmap syscall
 func (p *TracedProgram) Mmap(length uint64, fd uint64) (uint64, error) {
-	return p.Syscall(9, 0, length, syscall.PROT_READ|syscall.PROT_WRITE|syscall.PROT_EXEC, syscall.MAP_ANON|syscall.MAP_PRIVATE, fd, 0)
+	return p.Syscall(syscall.SYS_MMAP, 0, length, syscall.PROT_READ|syscall.PROT_WRITE|syscall.PROT_EXEC, syscall.MAP_ANON|syscall.MAP_PRIVATE, fd, 0)
 }
 
 // ReadSlice reads from addr and return a slice
