@@ -1,0 +1,18 @@
+apiVersion: pingcap.com/v1alpha1
+kind: TimeChaos
+metadata:
+  name: time-shift-example
+  namespace: chaos-testing
+spec:
+  mode: one
+  selector:
+    namespaces:
+      - tidb-cluster-demo
+    labelSelectors:
+      "app.kubernetes.io/component": "tikv"
+  timeOffset:
+    sec: 100000
+    nsec: 100000
+  duration: "30s"
+  scheduler:
+    cron: "@every 1m"

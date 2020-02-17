@@ -2,7 +2,8 @@
 LDFLAGS = $(if $(DEBUGGER),,-s -w) $(shell ./hack/version.sh)
 
 # SET DOCKER_REGISTRY to change the docker registry
-DOCKER_REGISTRY := $(if $(DOCKER_REGISTRY),$(DOCKER_REGISTRY),localhost:5000)
+DOCKER_REGISTRY_PREFIX := $(if $(DOCKER_REGISTRY),$(DOCKER_REGISTRY)/,)
+DOCKER_BUILD_ARGS := --build-arg HTTP_PROXY=${HTTP_PROXY} --build-arg HTTPS_PROXY=${HTTPS_PROXY}
 
 GOVER_MAJOR := $(shell go version | sed -E -e "s/.*go([0-9]+)[.]([0-9]+).*/\1/")
 GOVER_MINOR := $(shell go version | sed -E -e "s/.*go([0-9]+)[.]([0-9]+).*/\2/")
@@ -37,14 +38,22 @@ endif
 
 all: yaml build image
 
-build: chaosdaemon manager chaosfs dashboard dashboard-server-frontend
+build: dashboard-server-frontend
 
 # Run tests
-test: generate fmt vet lint manifests
+test: generate fmt vet lint manifests test-utils
 	rm -rf cover.* cover
 	mkdir -p cover
 	$(GOTEST) ./api/... ./controllers/... ./pkg/... -coverprofile cover.out.tmp
 	cat cover.out.tmp | grep -v "_generated.deepcopy.go" > cover.out
+
+test-utils: timer multithread_tracee
+
+timer:
+	$(GO) build -ldflags '$(LDFLAGS)' -o bin/test/timer ./test/cmd/timer/*.go
+
+multithread_tracee: test/cmd/multithread_tracee/main.c
+	cc test/cmd/multithread_tracee/main.c -lpthread -O2 -o ./bin/test/multithread_tracee
 
 coverage:
 ifeq ("$(JenkinsCI)", "1")
@@ -57,17 +66,22 @@ endif
 
 # Build chaos-daemon binary
 chaosdaemon: generate fmt vet
-	$(GO) build -ldflags '$(LDFLAGS)' -o images/chaos-daemon/bin/chaos-daemon ./cmd/chaos-daemon/main.go
+	$(GOENV) CGO_ENABLED=1 go build -ldflags '$(LDFLAGS)' -o bin/chaos-daemon ./cmd/chaos-daemon/main.go
 
 # Build manager binary
 manager: generate fmt vet
-	$(GO) build -ldflags '$(LDFLAGS)' -o images/chaos-mesh/bin/chaos-controller-manager ./cmd/controller-manager/*.go
+	$(GO) build -ldflags '$(LDFLAGS)' -o bin/chaos-controller-manager ./cmd/controller-manager/*.go
 
 chaosfs: generate fmt vet
-	$(GO) build -ldflags '$(LDFLAGS)' -o images/chaosfs/bin/chaosfs ./cmd/chaosfs/*.go
+	$(GO) build -ldflags '$(LDFLAGS)' -o bin/chaosfs ./cmd/chaosfs/*.go
 
 dashboard: fmt vet
-	$(GO) build -ldflags '$(LDFLAGS)' -o images/chaos-dashboard/bin/chaos-dashboard ./cmd/chaos-dashboard/*.go
+	$(GO) build -ldflags '$(LDFLAGS)' -o bin/chaos-dashboard ./cmd/chaos-dashboard/*.go
+
+binary: chaosdaemon manager chaosfs dashboard
+
+watchmaker: fmt vet
+	$(GOENV) CGO_ENABLED=1 go build -ldflags '$(LDFLAGS)' -o bin/watchmaker ./cmd/watchmaker/*.go
 
 dashboard-server-frontend:
 	cd images/chaos-dashboard; yarn install; yarn build
@@ -87,7 +101,7 @@ manifests: controller-gen
 
 # Run go fmt against code
 fmt: groupimports
-	$(GO) fmt ./...
+	$(GOENV) CGO_ENABLED=1 go fmt ./...
 
 groupimports: install-goimports
 	goimports -w -l -local github.com/pingcap/chaos-mesh $$($(PACKAGE_DIRECTORIES))
@@ -101,7 +115,7 @@ endif
 
 # Run go vet against code
 vet:
-	$(GO) vet ./...
+	$(GOENV) CGO_ENABLED=1 go vet ./...
 
 tidy:
 	@echo "go mod tidy"
@@ -109,22 +123,22 @@ tidy:
 	git diff --quiet go.mod go.sum
 
 image:
-	docker build -t ${DOCKER_REGISTRY}/pingcap/chaos-daemon images/chaos-daemon
-	docker build -t ${DOCKER_REGISTRY}/pingcap/chaos-mesh images/chaos-mesh
-	docker build -t ${DOCKER_REGISTRY}/pingcap/chaos-fs images/chaosfs
-	cp -R scripts images/chaos-scripts
-	docker build -t ${DOCKER_REGISTRY}/pingcap/chaos-scripts images/chaos-scripts
-	rm -rf images/chaos-scripts/scripts
-	docker build -t ${DOCKER_REGISTRY}/pingcap/chaos-grafana images/grafana
-	docker build -t ${DOCKER_REGISTRY}/pingcap/chaos-dashboard images/chaos-dashboard
+	docker build -t pingcap/binary ${DOCKER_BUILD_ARGS} .
+
+	docker build -t ${DOCKER_REGISTRY_PREFIX}pingcap/chaos-daemon ${DOCKER_BUILD_ARGS} images/chaos-daemon
+	docker build -t ${DOCKER_REGISTRY_PREFIX}pingcap/chaos-mesh ${DOCKER_BUILD_ARGS} images/chaos-mesh
+	docker build -t ${DOCKER_REGISTRY_PREFIX}pingcap/chaos-fs ${DOCKER_BUILD_ARGS} images/chaosfs
+	docker build -t ${DOCKER_REGISTRY_PREFIX}pingcap/chaos-scripts ${DOCKER_BUILD_ARGS} images/chaos-scripts
+	docker build -t ${DOCKER_REGISTRY_PREFIX}pingcap/chaos-grafana ${DOCKER_BUILD_ARGS} images/grafana
+	docker build -t ${DOCKER_REGISTRY_PREFIX}pingcap/chaos-dashboard ${DOCKER_BUILD_ARGS} images/chaos-dashboard
 
 docker-push:
-	docker push "${DOCKER_REGISTRY}/pingcap/chaos-mesh:latest"
-	docker push "${DOCKER_REGISTRY}/pingcap/chaos-fs:latest"
-	docker push "${DOCKER_REGISTRY}/pingcap/chaos-daemon:latest"
-	docker push "${DOCKER_REGISTRY}/pingcap/chaos-scripts:latest"
-	docker push "${DOCKER_REGISTRY}/pingcap/chaos-grafana:latest"
-	docker push "${DOCKER_REGISTRY}/pingcap/chaos-dashboard:latest"
+	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-mesh:latest"
+	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-fs:latest"
+	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-daemon:latest"
+	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-scripts:latest"
+	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-grafana:latest"
+	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-dashboard:latest"
 
 bin/revive:
 	GO111MODULE="on" go build -o bin/revive github.com/mgechev/revive

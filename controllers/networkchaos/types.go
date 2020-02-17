@@ -46,7 +46,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	scheduler := networkchaos.GetScheduler()
 	duration, err := networkchaos.GetDuration()
 	if err != nil {
-		r.Log.Error(err, fmt.Sprintf("unable to get podchaos[%s/%s]'s duration", networkchaos.Namespace, networkchaos.Name))
+		r.Log.Error(err, fmt.Sprintf("unable to get networkchaos[%s/%s]'s duration", networkchaos.Namespace, networkchaos.Name))
 		return ctrl.Result{}, nil
 	}
 	if scheduler == nil && duration == nil {
