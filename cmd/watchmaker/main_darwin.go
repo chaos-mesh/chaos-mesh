@@ -11,18 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package chaosdaemon
+package main
 
 import (
-	pb "github.com/pingcap/chaos-mesh/pkg/chaosdaemon/pb"
+	"fmt"
 )
 
-// Apply applies a netem on eth0 in pid related namespace
-func Apply(netem *pb.Netem, pid uint32) error {
-	panic("unimplemented")
-}
-
-// Cancel will remove netem on eth0 in pid related namespace
-func Cancel(netem *pb.Netem, pid uint32) error {
-	panic("unimplemented")
+func main() {
+	fmt.Println("darwin is not supported")
 }
