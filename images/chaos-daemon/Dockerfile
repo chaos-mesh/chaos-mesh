@@ -1,6 +1,8 @@
-FROM alpine:3.5
+FROM alpine:3.10
 
-RUN apk add tzdata --no-cache
-RUN apk add iptables --no-cache
-RUN apk add ipset --no-cache
-ADD bin/chaos-daemon /usr/local/bin/chaos-daemon
+ARG HTTPS_PROXY
+ARG HTTP_PROXY
+
+RUN apk add --no-cache tzdata iptables ipset
+
+COPY --from=pingcap/binary /src/bin/chaos-daemon /usr/local/bin/chaos-daemon

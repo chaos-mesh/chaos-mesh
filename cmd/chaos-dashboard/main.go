@@ -105,6 +105,14 @@ func main() {
 		os.Exit(1)
 	}
 
+	if err = (&collector.ChaosCollector{
+		Client: mgr.GetClient(),
+		Log:    ctrl.Log.WithName("controllers").WithName("TimeChaos"),
+	}).Setup(mgr, &chaosoperatorv1alpha1.TimeChaos{}); err != nil {
+		setupLog.Error(err, "unable to create collector", "collector", "TimeChaos")
+		os.Exit(1)
+	}
+
 	stopCh := ctrl.SetupSignalHandler()
 
 	// +kubebuilder:scaffold:builder
