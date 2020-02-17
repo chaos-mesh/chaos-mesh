@@ -17,6 +17,7 @@ import (
 	"encoding/binary"
 	"math/rand"
 	"os"
+	"os/exec"
 	"testing"
 	"unsafe"
 
@@ -127,6 +128,19 @@ var _ = Describe("PTrace", func() {
 		Expect(err).ShouldNot(HaveOccurred(), "error: %+v", err)
 
 		program, err = Trace(t.Pid())
+		Expect(err).ShouldNot(HaveOccurred(), "error: %+v", err)
+	})
+
+	It("should be able to attach and detach multithread program", func() {
+		p := exec.Command("./bin/test/multithread_tracee")
+		err := p.Start()
+		Expect(err).ShouldNot(HaveOccurred(), "error: %+v", err)
+
+		pid := p.Process.Pid
+		program, err := Trace(pid)
+		Expect(err).ShouldNot(HaveOccurred(), "error: %+v", err)
+
+		err = program.Detach()
 		Expect(err).ShouldNot(HaveOccurred(), "error: %+v", err)
 	})
 })

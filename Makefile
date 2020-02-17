@@ -47,10 +47,13 @@ test: generate fmt vet lint manifests test-utils
 	$(GOTEST) ./api/... ./controllers/... ./pkg/... -coverprofile cover.out.tmp
 	cat cover.out.tmp | grep -v "_generated.deepcopy.go" > cover.out
 
-test-utils: timer
+test-utils: timer multithread_tracee
 
 timer:
 	$(GO) build -ldflags '$(LDFLAGS)' -o bin/test/timer ./test/cmd/timer/*.go
+
+multithread_tracee: test/cmd/multithread_tracee/main.c
+	cc test/cmd/multithread_tracee/main.c -lpthread -O2 -o ./bin/test/multithread_tracee
 
 coverage:
 ifeq ("$(JenkinsCI)", "1")
