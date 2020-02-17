@@ -66,3 +66,23 @@ rules:
   - get
   - patch
   - update
+- apiGroups:
+  - pingcap.com
+  resources:
+  - timechaos
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - pingcap.com
+  resources:
+  - timechaos/status
+  verbs:
+  - get
+  - patch
+  - update
