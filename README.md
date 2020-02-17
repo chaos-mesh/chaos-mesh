@@ -83,7 +83,7 @@ You can try Chaos Mesh on your local K8s environment deployed using `kind` or `m
 ```bash
 docker version
 ```
-> You can refer [install docker](https://docs.docker.com/install/) to install docker.
+> You can refer to [install docker](https://docs.docker.com/install/) to install docker.
 
 2. Clone the code
 
@@ -99,7 +99,7 @@ docker version
 
 > Note: 
 > 
-> At present, this `install.sh` only support deploying Chaos Mesh using [kind](https://kind.sigs.k8s.io/). 
+> At present, this `install.sh` only support deploying Chaos Mesh locally using [kind](https://kind.sigs.k8s.io/).
 > If you want to deploy Chaos Mesh using [minikube](https://kubernetes.io/docs/tasks/tools/install-minikube/), this doc [get stated on minikube](./doc/get_started_on_minikube.md) can help you.
 
 ### Deploy target cluster
