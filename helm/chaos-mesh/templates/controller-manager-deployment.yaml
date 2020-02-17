@@ -39,6 +39,9 @@ spec:
           - /usr/local/bin/chaos-controller-manager
           - -configmap-labels=app.kubernetes.io/component=webhook
           - -conf=/etc/webhook/conf
+        {{- if .Values.controllerManager.enableProfiling }}
+          - -pprof-addr=:10081
+        {{- end }}
         env:
           - name: NAMESPACE
             valueFrom:

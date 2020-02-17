@@ -68,7 +68,7 @@ func init() {
 
 func parseFlags() {
 	flag.StringVar(&metricsAddr, "metrics-addr", ":10080", "The address the metric endpoint binds to.")
-	flag.StringVar(&pprofAddr, "pprof-addr", ":10081", "The address the pprof endpoint binds to.")
+	flag.StringVar(&pprofAddr, "pprof-addr", "0", "The address the pprof endpoint binds to.")
 	flag.BoolVar(&enableLeaderElection, "enable-leader-election", false,
 		"Enable leader election for controller manager. Enabling this will ensure there is only one active controller manager.")
 	flag.StringVar(&certsDir, "certs", "/etc/webhook/certs",
