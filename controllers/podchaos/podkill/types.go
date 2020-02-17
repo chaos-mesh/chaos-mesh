@@ -44,11 +44,13 @@ func newReconciler(c client.Client, log logr.Logger, req ctrl.Request) *Reconcil
 	}
 }
 
+// NewTwoPhaseReconciler would create Reconciler for twophase package
 func NewTwoPhaseReconciler(c client.Client, log logr.Logger, req ctrl.Request) *twophase.Reconciler {
 	r := newReconciler(c, log, req)
 	return twophase.NewReconciler(r, r.Client, r.Log)
 }
 
+// Apply implements the reconciler.InnerReconciler.Apply
 func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, obj reconciler.InnerObject) error {
 	podchaos, ok := obj.(*v1alpha1.PodChaos)
 	if !ok {
@@ -110,10 +112,12 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, obj reconciler
 	return nil
 }
 
+// Recover implements the reconciler.InnerReconciler.Recover
 func (r *Reconciler) Recover(ctx context.Context, req ctrl.Request, obj reconciler.InnerObject) error {
 	return nil
 }
 
+// Object implements the reconciler.InnerReconciler.Object
 func (r *Reconciler) Object() reconciler.InnerObject {
 	return &v1alpha1.PodChaos{}
 }

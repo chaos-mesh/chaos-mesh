@@ -48,11 +48,13 @@ type Reconciler struct {
 	Log logr.Logger
 }
 
+// NewTwoPhaseReconciler would create Reconciler for twophase package
 func NewTwoPhaseReconciler(c client.Client, log logr.Logger, req ctrl.Request) *twophase.Reconciler {
 	r := newReconciler(c, log, req)
 	return twophase.NewReconciler(r, r.Client, r.Log)
 }
 
+// Apply implements the reconciler.InnerReconciler.Apply
 func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, obj reconciler.InnerObject) error {
 	var err error
 	now := time.Now()
@@ -116,10 +118,12 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, obj reconciler
 	return r.updatePodchaos(ctx, podchaos, pods, now)
 }
 
+// Recover implements the reconciler.InnerReconciler.Recover
 func (r *Reconciler) Recover(ctx context.Context, req ctrl.Request, obj reconciler.InnerObject) error {
 	return nil
 }
 
+// Object implements the reconciler.InnerReconciler.Object
 func (r *Reconciler) Object() reconciler.InnerObject {
 	return &v1alpha1.PodChaos{}
 }
