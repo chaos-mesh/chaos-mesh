@@ -99,7 +99,7 @@ docker version
 
 > Note: 
 > 
-> At present, this `install.sh` only support deploying Chaos Mesh locally using [kind](https://kind.sigs.k8s.io/).
+> At present, `install.sh` only supports deploying Chaos Mesh locally using [kind](https://kind.sigs.k8s.io/).
 > If you want to deploy Chaos Mesh using [minikube](https://kubernetes.io/docs/tasks/tools/install-minikube/), this doc [get stated on minikube](./doc/get_started_on_minikube.md) can help you.
 
 ### Deploy target cluster
