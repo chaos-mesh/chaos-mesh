@@ -18,14 +18,12 @@ import (
 	"fmt"
 
 	"github.com/go-logr/logr"
-
 	"github.com/pingcap/chaos-mesh/api/v1alpha1"
 	"github.com/pingcap/chaos-mesh/controllers/common"
 	"github.com/pingcap/chaos-mesh/controllers/podchaos/containerkill"
 	"github.com/pingcap/chaos-mesh/controllers/podchaos/podfailure"
 	"github.com/pingcap/chaos-mesh/controllers/podchaos/podkill"
 	"github.com/pingcap/chaos-mesh/controllers/twophase"
-
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
@@ -80,19 +78,11 @@ func (r *Reconciler) schedulePodChaos(podchaos *v1alpha1.PodChaos, req ctrl.Requ
 	var tr *twophase.Reconciler
 	switch podchaos.Spec.Action {
 	case v1alpha1.PodKillAction:
-		reconciler := podkill.Reconciler{
-			Client: r.Client,
-			Log:    r.Log.WithValues("action", "pod-kill"),
-		}
-		return reconciler.Reconcile(req)
+		tr = podkill.NewTwoPhaseReconciler(r.Client, r.Log.WithValues("action", "pod-kill"), req)
 	case v1alpha1.PodFailureAction:
-		tr = podfailure.NewTwoPhaseReconciler(r.Client, r.Log.WithValues("action", "pod-kill"), req)
+		tr = podfailure.NewTwoPhaseReconciler(r.Client, r.Log.WithValues("action", "pod-failure"), req)
 	case v1alpha1.ContainerKillAction:
-		reconciler := containerkill.Reconciler{
-			Client: r.Client,
-			Log:    r.Log.WithValues("action", "container-kill"),
-		}
-		return reconciler.Reconcile(req)
+		tr = containerkill.NewTwoPhaseReconciler(r.Client, r.Log.WithValues("action", "container-kill"), req)
 	default:
 		return r.invalidActionResponse(podchaos), nil
 	}

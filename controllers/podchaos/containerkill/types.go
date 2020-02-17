@@ -18,62 +18,72 @@ import (
 	"fmt"
 	"time"
 
-	"golang.org/x/sync/errgroup"
-
 	"github.com/go-logr/logr"
-
-	"github.com/pingcap/chaos-mesh/api/v1alpha1"
-	pb "github.com/pingcap/chaos-mesh/pkg/chaosdaemon/pb"
-	"github.com/pingcap/chaos-mesh/pkg/utils"
-
+	"golang.org/x/sync/errgroup"
+	v1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	v1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"github.com/pingcap/chaos-mesh/api/v1alpha1"
+	"github.com/pingcap/chaos-mesh/controllers/reconciler"
+	"github.com/pingcap/chaos-mesh/controllers/twophase"
+	pb "github.com/pingcap/chaos-mesh/pkg/chaosdaemon/pb"
+	"github.com/pingcap/chaos-mesh/pkg/utils"
 )
 
 const (
 	containerKillActionMsg = "delete container %s"
 )
 
+func newReconciler(c client.Client, log logr.Logger, req ctrl.Request) *Reconciler {
+	return &Reconciler{
+		Client: c,
+		Log:    log,
+	}
+}
+
 type Reconciler struct {
 	client.Client
 	Log logr.Logger
 }
 
-func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
+func NewTwoPhaseReconciler(c client.Client, log logr.Logger, req ctrl.Request) *twophase.Reconciler {
+	r := newReconciler(c, log, req)
+	return twophase.NewReconciler(r, r.Client, r.Log)
+}
+
+func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, obj reconciler.InnerObject) error {
 	var err error
 	now := time.Now()
 
 	r.Log.Info("reconciling container kill")
-	ctx := context.Background()
 
 	var podchaos v1alpha1.PodChaos
 	if err = r.Get(ctx, req.NamespacedName, &podchaos); err != nil {
 		r.Log.Error(err, "unable to get podchaos")
-		return ctrl.Result{}, nil
+		return err
 	}
 
 	if podchaos.Spec.ContainerName == "" {
 		r.Log.Error(nil, "the name of container is empty", "name", req.Name, "namespace", req.Namespace)
-		return ctrl.Result{}, nil
+		return fmt.Errorf("")
 	}
 	pods, err := utils.SelectPods(ctx, r.Client, podchaos.Spec.Selector)
 	if err != nil {
 		r.Log.Error(err, "fail to get selected pods")
-		return ctrl.Result{Requeue: true}, nil
+		return err
 	}
 
 	if len(pods) == 0 {
 		r.Log.Error(nil, "no pod is selected", "name", req.Name, "namespace", req.Namespace)
-		return ctrl.Result{Requeue: true}, nil
+		return fmt.Errorf("")
 	}
 
 	filteredPod, err := utils.GeneratePods(pods, podchaos.Spec.Mode, podchaos.Spec.Value)
 	if err != nil {
 		r.Log.Error(err, "fail to generate pods")
-		return ctrl.Result{Requeue: true}, nil
+		return err
 	}
 
 	g := errgroup.Group{}
@@ -100,10 +110,18 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	}
 
 	if err := g.Wait(); err != nil {
-		return ctrl.Result{}, nil
+		return err
 	}
 
 	return r.updatePodchaos(ctx, podchaos, pods, now)
+}
+
+func (r *Reconciler) Recover(ctx context.Context, req ctrl.Request, obj reconciler.InnerObject) error {
+	return nil
+}
+
+func (r *Reconciler) Object() reconciler.InnerObject {
+	return &v1alpha1.PodChaos{}
 }
 
 // KillContainer kills container according to containerID
@@ -136,11 +154,11 @@ func (r *Reconciler) KillContainer(ctx context.Context, pod *v1.Pod, containerID
 	return nil
 }
 
-func (r *Reconciler) updatePodchaos(ctx context.Context, podchaos v1alpha1.PodChaos, pods []v1.Pod, now time.Time) (ctrl.Result, error) {
+func (r *Reconciler) updatePodchaos(ctx context.Context, podchaos v1alpha1.PodChaos, pods []v1.Pod, now time.Time) error {
 	next, err := utils.NextTime(*podchaos.Spec.Scheduler, now)
 	if err != nil {
 		r.Log.Error(err, "failed to get next time")
-		return ctrl.Result{}, nil
+		return err
 	}
 
 	podchaos.SetNextStart(*next)
@@ -165,10 +183,6 @@ func (r *Reconciler) updatePodchaos(ctx context.Context, podchaos v1alpha1.PodCh
 
 		podchaos.Status.Experiment.Pods = append(podchaos.Status.Experiment.Pods, ps)
 	}
-	if err := r.Update(ctx, &podchaos); err != nil {
-		r.Log.Error(err, "unable to update chaosctl status")
-		return ctrl.Result{}, nil
-	}
 
-	return ctrl.Result{}, nil
+	return nil
 }
