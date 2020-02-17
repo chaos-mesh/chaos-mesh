@@ -17,6 +17,10 @@ import (
 	"context"
 	"fmt"
 
+	v1 "k8s.io/api/core/v1"
+
+	"k8s.io/client-go/tools/record"
+
 	"github.com/go-logr/logr"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -27,35 +31,47 @@ import (
 	"github.com/pingcap/chaos-mesh/controllers/twophase"
 )
 
+type IochaosReqest struct {
+	ctrl.Request
+	Ctx      context.Context
+	Recorder record.EventRecorder
+	Instance *v1alpha1.IoChaos
+}
+
+const (
+	EventChaosInvalid   string = "ChaosInvalid"
+	EventChaosStarted   string = "ChaosStarted"
+	EventChaosFailed    string = "ChaosFailed"
+	EventChaosCompleted string = "ChaosCompleted"
+)
+
 type Reconciler struct {
 	client.Client
 	Log logr.Logger
 }
 
-func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
+func (r *Reconciler) Reconcile(req *IochaosReqest) (ctrl.Result, error) {
 	r.Log.Info("reconciling iochaos")
-	ctx := context.Background()
 
-	var iochaos v1alpha1.IoChaos
-	if err := r.Get(ctx, req.NamespacedName, &iochaos); err != nil {
-		r.Log.Error(err, "unable to get iochaos")
-		return ctrl.Result{}, nil
-	}
-
-	scheduler := iochaos.GetScheduler()
-	duration, err := iochaos.GetDuration()
+	scheduler := req.Instance.GetScheduler()
+	duration, err := req.Instance.GetDuration()
 	if err != nil {
-		r.Log.Error(err, fmt.Sprintf("unable to get podchaos[%s/%s]'s duration", iochaos.Namespace, iochaos.Name))
+		msg := fmt.Sprintf("unable to get podchaos[%s/%s]'s duration",
+			req.Instance.Namespace, req.Instance.Name)
+		req.Recorder.Eventf(req.Instance, v1.EventTypeWarning, EventChaosInvalid,
+			"%s: %s", msg, err)
+		r.Log.Error(err, msg)
 		return ctrl.Result{}, nil
 	}
 	if scheduler == nil && duration == nil {
-		return r.commonIOChaos(&iochaos, req)
+		return r.commonIOChaos(req.Instance, req.Request)
 	} else if scheduler != nil && duration != nil {
-		return r.scheduleIOChaos(&iochaos, req)
+		return r.scheduleIOChaos(req.Instance, req.Request)
 	}
 
 	// This should be ensured by admission webhook in the future
-	r.Log.Error(fmt.Errorf("iochaos[%s/%s] spec invalid", iochaos.Namespace, iochaos.Name), "scheduler and duration should be omitted or defined at the same time")
+	r.Log.Error(fmt.Errorf("iochaos[%s/%s] spec invalid", req.Instance.Namespace, req.Instance.Name),
+		"scheduler and duration should be omitted or defined at the same time")
 	return ctrl.Result{}, nil
 }
 

@@ -14,14 +14,15 @@
 package controllers
 
 import (
+	"context"
+
 	"github.com/go-logr/logr"
-
-	chaosmeshv1alpha1 "github.com/pingcap/chaos-mesh/api/v1alpha1"
-	"github.com/pingcap/chaos-mesh/controllers/iochaos"
-
 	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+
+	"github.com/pingcap/chaos-mesh/api/v1alpha1"
+	"github.com/pingcap/chaos-mesh/controllers/iochaos"
 )
 
 // IoChaosReconciler reconciles a IoChaos object
@@ -41,12 +42,22 @@ func (r *IoChaosReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		Client: r.Client,
 		Log:    logger,
 	}
+	request := &iochaos.IochaosReqest{
+		Request:  req,
+		Ctx:      context.Background(),
+		Recorder: r.Recorder,
+		Instance: &v1alpha1.IoChaos{},
+	}
+	if err := r.Get(request.Ctx, request.Request.NamespacedName, request.Instance); err != nil {
+		r.Log.Error(err, "unable to get iochaos")
+		return ctrl.Result{}, nil
+	}
 
-	return reconciler.Reconcile(req)
+	return reconciler.Reconcile(request)
 }
 
 func (r *IoChaosReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
-		For(&chaosmeshv1alpha1.IoChaos{}).
+		For(&v1alpha1.IoChaos{}).
 		Complete(r)
 }
