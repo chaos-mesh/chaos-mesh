@@ -111,7 +111,7 @@ var _ = Describe("chaosdaemon util", func() {
 		It("should error on ContainerInspectError", func() {
 			errorStr := "this is a mocked error"
 			defer mock.With("ContainerInspectError", errors.New(errorStr))()
-			m := &MockClient{}t on pkg/chaosdaemon
+			m := &MockClient{}
 			c := DockerClient{client: m}
 			_, err := c.GetPidFromContainerID(context.TODO(), "docker://valid-container-id")
 			Expect(err).NotTo(BeNil())
@@ -139,7 +139,7 @@ var _ = Describe("chaosdaemon util", func() {
 		It("should error with specified string", func() {
 			errorStr := "this is a mocked error"
 			mock.With("LoadContainerError", errors.New(errorStr))
-			m := &MockClient{}t on pkg/chaosdaemon
+			m := &MockClient{}
 			c := ContainerdClient{client: m}
 			_, err := c.GetPidFromContainerID(context.TODO(), "containerd://valid-container-id")
 			Expect(err).NotTo(BeNil())

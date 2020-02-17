@@ -50,6 +50,35 @@ func (p *mockPoints) clr(fpname string) {
 	delete(p.m, fpname)
 }
 
+<<<<<<< HEAD
+=======
+type mockPoints struct {
+	m map[string]interface{}
+	l sync.Mutex
+}
+
+func (p *mockPoints) set(fpname string, value interface{}) {
+	p.l.Lock()
+	defer p.l.Unlock()
+
+	p.m[fpname] = value
+}
+
+func (p *mockPoints) get(fpname string) interface{} {
+	p.l.Lock()
+	defer p.l.Unlock()
+
+	return p.m[fpname]
+}
+
+func (p *mockPoints) clr(fpname string) {
+	p.l.Lock()
+	defer p.l.Unlock()
+
+	delete(p.m, fpname)
+}
+
+>>>>>>> Advaced mock util
 var points = mockPoints{m: make(map[string]interface{})}
 
 // On inject a failpoint
@@ -62,7 +91,11 @@ func On(fpname string) interface{} {
 }
 
 // With enable failpoint and provide a value
+<<<<<<< HEAD
 func With(fpname string, value interface{}) Finalizer {
+=======
+func With(fpname string, value interface{}) finalizer {
+>>>>>>> Advaced mock util
 	if err := failpoint.Enable(failpath(fpname), "return(true)"); err != nil {
 		panic(err)
 	}
