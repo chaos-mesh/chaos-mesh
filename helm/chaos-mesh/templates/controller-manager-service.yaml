@@ -11,7 +11,7 @@ metadata:
 spec:
   type: {{ .Values.controllerManager.service.type }}
   ports:
-  {{- if .Values.controllerManager.enableProfiling }}
+  {{- if .Values.enableProfiling }}
     - port: 10081
       targetPort: pprof
       protocol: TCP

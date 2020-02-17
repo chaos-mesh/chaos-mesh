@@ -21,10 +21,13 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
-func newHTTPServer(addr string, reg prometheus.Gatherer) *http.Server {
+func newHTTPServer(addr string, enableProfiling bool, reg prometheus.Gatherer) *http.Server {
 	mux := http.NewServeMux()
 	registerMetrics(mux, reg)
-	registerProfiler(mux)
+
+	if enableProfiling {
+		registerProfiler(mux)
+	}
 
 	return &http.Server{
 		Addr:    addr,
