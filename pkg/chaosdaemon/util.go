@@ -17,6 +17,7 @@ import (
 	"context"
 	"fmt"
 	"os/exec"
+	"syscall"
 
 	"github.com/containerd/containerd"
 	"github.com/docker/docker/api/types"
@@ -43,16 +44,17 @@ const (
 // ContainerRuntimeInfoClient represents a struct which can give you information about container runtime
 type ContainerRuntimeInfoClient interface {
 	GetPidFromContainerID(ctx context.Context, containerID string) (uint32, error)
+	ContainerKillByContainerID(ctx context.Context, containerID string) error
 }
 
 // DockerClientI represents the DockerClient, it's used to simply unit test
-type DockerClientI interface {
+type DockerClientInterface interface {
 	ContainerInspect(ctx context.Context, containerID string) (types.ContainerJSON, error)
 }
 
 // DockerClient can get information from docker
 type DockerClient struct {
-	client DockerClientI
+	client DockerClientInterface
 }
 
 // GetPidFromContainerID fetches PID according to container id
@@ -69,13 +71,13 @@ func (c DockerClient) GetPidFromContainerID(ctx context.Context, containerID str
 }
 
 // ContainerdClientI represents the ContainerClient, it's used to simply unit test
-type ContainerdClientI interface {
+type ContainerdClientInterface interface {
 	LoadContainer(ctx context.Context, id string) (containerd.Container, error)
 }
 
 // ContainerdClient can get information from containerd
 type ContainerdClient struct {
-	client ContainerdClientI
+	client ContainerdClientInterface
 }
 
 // GetPidFromContainerID fetches PID according to container id
@@ -136,4 +138,40 @@ func withNetNS(ctx context.Context, nsPath string, cmd string, args ...string) *
 	args = append([]string{"-n" + nsPath, "--", cmd}, args...)
 
 	return exec.CommandContext(ctx, "nsenter", args...)
+}
+
+// ContainerKillByContainerID kills container according to container id
+func (c DockerClient) ContainerKillByContainerID(ctx context.Context, containerID string) error {
+	if len(containerID) < len(dockerProtocolPrefix) {
+		return fmt.Errorf("container id %s is not a docker container id", containerID)
+	}
+	if containerID[0:len(dockerProtocolPrefix)] != dockerProtocolPrefix {
+		return fmt.Errorf("expected %s but got %s", dockerProtocolPrefix, containerID[0:len(dockerProtocolPrefix)])
+	}
+	err := c.client.ContainerKill(ctx, containerID[len(dockerProtocolPrefix):], "SIGKILL")
+
+	return err
+}
+
+// ContainerKillByContainerID kills container according to container id
+func (c ContainerdClient) ContainerKillByContainerID(ctx context.Context, containerID string) error {
+	if len(containerID) < len(containerdProtocolPrefix) {
+		return fmt.Errorf("container id %s is not a containerd container id", containerID)
+	}
+	if containerID[0:len(containerdProtocolPrefix)] != containerdProtocolPrefix {
+		return fmt.Errorf("expected %s but got %s", containerdProtocolPrefix, containerID[0:len(containerdProtocolPrefix)])
+	}
+	containerID = containerID[len(containerdProtocolPrefix):]
+	container, err := c.client.LoadContainer(ctx, containerID)
+	if err != nil {
+		return err
+	}
+	task, err := container.Task(ctx, nil)
+	if err != nil {
+		return err
+	}
+
+	err = task.Kill(ctx, syscall.SIGKILL)
+
+	return err
 }
