@@ -69,7 +69,7 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, obj reconciler
 
 	if podchaos.Spec.ContainerName == "" {
 		r.Log.Error(nil, "the name of container is empty", "name", req.Name, "namespace", req.Namespace)
-		return fmt.Errorf("")
+		return fmt.Errorf("podchaos[%s/%s] the name of container is empty", podchaos.Namespace, podchaos.Name)
 	}
 	pods, err := utils.SelectPods(ctx, r.Client, podchaos.Spec.Selector)
 	if err != nil {
@@ -79,7 +79,7 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, obj reconciler
 
 	if len(pods) == 0 {
 		r.Log.Error(nil, "no pod is selected", "name", req.Name, "namespace", req.Namespace)
-		return fmt.Errorf("")
+		return fmt.Errorf("podchaos[%s/%s] no pod is selected", podchaos.Namespace, podchaos.Name)
 	}
 
 	filteredPod, err := utils.GeneratePods(pods, podchaos.Spec.Mode, podchaos.Spec.Value)
