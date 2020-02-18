@@ -15,14 +15,19 @@ package chaosdaemon
 
 import (
 	"net/http"
+	"net/http/pprof"
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
-func newHTTPServer(addr string, reg prometheus.Gatherer) *http.Server {
+func newHTTPServer(addr string, enableProfiling bool, reg prometheus.Gatherer) *http.Server {
 	mux := http.NewServeMux()
 	registerMetrics(mux, reg)
+
+	if enableProfiling {
+		registerProfiler(mux)
+	}
 
 	return &http.Server{
 		Addr:    addr,
@@ -34,4 +39,12 @@ func registerMetrics(mux *http.ServeMux, g prometheus.Gatherer) {
 	if g != nil {
 		mux.Handle("/metrics", promhttp.HandlerFor(g, promhttp.HandlerOpts{}))
 	}
+}
+
+func registerProfiler(mux *http.ServeMux) {
+	mux.HandleFunc("/debug/pprof/", pprof.Index)
+	mux.HandleFunc("/debug/pprof/cmdline", pprof.Cmdline)
+	mux.HandleFunc("/debug/pprof/profile", pprof.Profile)
+	mux.HandleFunc("/debug/pprof/symbol", pprof.Symbol)
+	mux.HandleFunc("/debug/pprof/trace", pprof.Trace)
 }

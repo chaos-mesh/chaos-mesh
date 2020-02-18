@@ -38,7 +38,7 @@ const (
 	containerdProtocolPrefix = "containerd://"
 	containerdDefaultNS      = "k8s.io"
 
-	defaultProcPrefix = "/mnt/proc"
+	defaultProcPrefix = "/proc"
 )
 
 // ContainerRuntimeInfoClient represents a struct which can give you information about container runtime
@@ -60,6 +60,9 @@ type DockerClient struct {
 
 // GetPidFromContainerID fetches PID according to container id
 func (c DockerClient) GetPidFromContainerID(ctx context.Context, containerID string) (uint32, error) {
+	if len(containerID) < len(dockerProtocolPrefix) {
+		return 0, fmt.Errorf("container id %s is not a docker container id", containerID)
+	}
 	if containerID[0:len(dockerProtocolPrefix)] != dockerProtocolPrefix {
 		return 0, fmt.Errorf("expected %s but got %s", dockerProtocolPrefix, containerID[0:len(dockerProtocolPrefix)])
 	}
@@ -83,8 +86,11 @@ type ContainerdClient struct {
 
 // GetPidFromContainerID fetches PID according to container id
 func (c ContainerdClient) GetPidFromContainerID(ctx context.Context, containerID string) (uint32, error) {
+	if len(containerID) < len(containerdProtocolPrefix) {
+		return 0, fmt.Errorf("container id %s is not a containerd container id", containerID)
+	}
 	if containerID[0:len(containerdProtocolPrefix)] != containerdProtocolPrefix {
-		return 0, fmt.Errorf("expected %s but got %s", containerdProtocolPrefix, containerID[0:len(dockerProtocolPrefix)])
+		return 0, fmt.Errorf("expected %s but got %s", containerdProtocolPrefix, containerID[0:len(containerdProtocolPrefix)])
 	}
 	container, err := c.client.LoadContainer(ctx, containerID[len(containerdProtocolPrefix):])
 	if err != nil {
