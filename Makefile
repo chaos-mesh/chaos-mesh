@@ -50,6 +50,7 @@ test: failpoint-enable generate fmt vet lint manifests test-utils
 	mkdir -p cover
 	$(GOTEST) ./api/... ./controllers/... ./pkg/... -coverprofile cover.out.tmp
 	cat cover.out.tmp | grep -v "_generated.deepcopy.go" > cover.out
+	@$(FAILPOINT_DISABLE)
 
 test-utils: timer multithread_tracee
 
