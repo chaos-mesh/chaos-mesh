@@ -10,6 +10,9 @@ clusterScoped: true
 rbac:
   create: true
 
+# enableProfiling is a flag to enable pprof in controller-manager and chaos-daemon.
+enableProfiling: false
+
 controllerManager:
   serviceAccount: chaos-controller-manager
 
@@ -23,7 +26,6 @@ controllerManager:
 
   service:
     type: ClusterIP
-    port: 10080
 
   resources:
     # We usually recommend not to specify default resources and to leave this as a conscious
@@ -95,6 +97,41 @@ dashboard:
 
   volume:
     storage: 3Gi
+    storageClassName: standard
+
+prometheus:
+  create: false
+
+  serviceAccount: prometheus
+
+  image: prom/prometheus:v2.15.2
+  imagePullPolicy: IfNotPresent
+
+  nodeSelector: {}
+
+  tolerations: []
+
+  affinity: {}
+
+  podAnnotations: {}
+
+  resources:
+    # We usually recommend not to specify default resources and to leave this as a conscious
+    # choice for the user. This also increases chances charts run on environments with little
+    # resources, such as Minikube. If you do want to specify resources, uncomment the following
+    # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+    limits:
+      cpu: 500m
+      memory: 1024Mi
+    requests:
+      cpu: 250m
+      memory: 512Mi
+
+  service:
+    type: ClusterIP
+
+  volume:
+    storage: 2Gi
     storageClassName: standard
 
 preJobs:

@@ -2,7 +2,8 @@
 LDFLAGS = $(if $(DEBUGGER),,-s -w) $(shell ./hack/version.sh)
 
 # SET DOCKER_REGISTRY to change the docker registry
-DOCKER_REGISTRY := $(if $(DOCKER_REGISTRY),$(DOCKER_REGISTRY),localhost:5000)
+DOCKER_REGISTRY_PREFIX := $(if $(DOCKER_REGISTRY),$(DOCKER_REGISTRY)/,)
+DOCKER_BUILD_ARGS := --build-arg HTTP_PROXY=${HTTP_PROXY} --build-arg HTTPS_PROXY=${HTTPS_PROXY}
 
 GOVER_MAJOR := $(shell go version | sed -E -e "s/.*go([0-9]+)[.]([0-9]+).*/\1/")
 GOVER_MINOR := $(shell go version | sed -E -e "s/.*go([0-9]+)[.]([0-9]+).*/\2/")
@@ -13,12 +14,16 @@ endif
 
 # Enable GO111MODULE=on explicitly, disable it with GO111MODULE=off when necessary.
 export GO111MODULE := on
-GOOS := $(if $(GOOS),$(GOOS),linux)
-GOARCH := $(if $(GOARCH),$(GOARCH),amd64)
+GOOS := $(if $(GOOS),$(GOOS),"")
+GOARCH := $(if $(GOARCH),$(GOARCH),"")
 GOENV  := GO15VENDOREXPERIMENT="1" CGO_ENABLED=0 GOOS=$(GOOS) GOARCH=$(GOARCH)
+CGOENV  := GO15VENDOREXPERIMENT="1" CGO_ENABLED=1 GOOS=$(GOOS) GOARCH=$(GOARCH)
 GO     := $(GOENV) go
 GOTEST := TEST_USE_EXISTING_CLUSTER=false go test
 SHELL    := /usr/bin/env bash
+
+FAILPOINT_ENABLE  := $$(find $$PWD/ -type d | grep -vE "(\.git|bin)" | xargs bin/failpoint-ctl enable)
+FAILPOINT_DISABLE := $$(find $$PWD/ -type d | grep -vE "(\.git|bin)" | xargs bin/failpoint-ctl disable)
 
 PACKAGE_LIST := go list ./... | grep -vE "pkg/client" | grep -vE "zz_generated" | grep -vE "vendor"
 PACKAGE_DIRECTORIES := $(PACKAGE_LIST) | sed 's|github.com/pingcap/chaos-mesh/||'
@@ -37,14 +42,23 @@ endif
 
 all: yaml build image
 
-build: chaosdaemon manager chaosfs dashboard dashboard-server-frontend
+build: dashboard-server-frontend
 
 # Run tests
-test: generate fmt vet lint manifests
+test: failpoint-enable generate fmt vet lint manifests test-utils
 	rm -rf cover.* cover
 	mkdir -p cover
 	$(GOTEST) ./api/... ./controllers/... ./pkg/... -coverprofile cover.out.tmp
 	cat cover.out.tmp | grep -v "_generated.deepcopy.go" > cover.out
+	@$(FAILPOINT_DISABLE)
+
+test-utils: timer multithread_tracee
+
+timer:
+	$(GO) build -ldflags '$(LDFLAGS)' -o bin/test/timer ./test/cmd/timer/*.go
+
+multithread_tracee: test/cmd/multithread_tracee/main.c
+	cc test/cmd/multithread_tracee/main.c -lpthread -O2 -o ./bin/test/multithread_tracee
 
 coverage:
 ifeq ("$(JenkinsCI)", "1")
@@ -57,17 +71,22 @@ endif
 
 # Build chaos-daemon binary
 chaosdaemon: generate fmt vet
-	$(GO) build -ldflags '$(LDFLAGS)' -o images/chaos-daemon/bin/chaos-daemon ./cmd/chaos-daemon/main.go
+	$(CGOENV) go build -ldflags '$(LDFLAGS)' -o bin/chaos-daemon ./cmd/chaos-daemon/main.go
 
 # Build manager binary
 manager: generate fmt vet
-	$(GO) build -ldflags '$(LDFLAGS)' -o images/chaos-mesh/bin/chaos-controller-manager ./cmd/controller-manager/*.go
+	$(GO) build -ldflags '$(LDFLAGS)' -o bin/chaos-controller-manager ./cmd/controller-manager/*.go
 
 chaosfs: generate fmt vet
-	$(GO) build -ldflags '$(LDFLAGS)' -o images/chaosfs/bin/chaosfs ./cmd/chaosfs/*.go
+	$(GO) build -ldflags '$(LDFLAGS)' -o bin/chaosfs ./cmd/chaosfs/*.go
 
 dashboard: fmt vet
-	$(GO) build -ldflags '$(LDFLAGS)' -o images/chaos-dashboard/bin/chaos-dashboard ./cmd/chaos-dashboard/*.go
+	$(GO) build -ldflags '$(LDFLAGS)' -o bin/chaos-dashboard ./cmd/chaos-dashboard/*.go
+
+binary: chaosdaemon manager chaosfs dashboard
+
+watchmaker: fmt vet
+	$(CGOENV) go build -ldflags '$(LDFLAGS)' -o bin/watchmaker ./cmd/watchmaker/*.go
 
 dashboard-server-frontend:
 	cd images/chaos-dashboard; yarn install; yarn build
@@ -87,7 +106,7 @@ manifests: controller-gen
 
 # Run go fmt against code
 fmt: groupimports
-	$(GO) fmt ./...
+	$(CGOENV) go fmt ./...
 
 groupimports: install-goimports
 	goimports -w -l -local github.com/pingcap/chaos-mesh $$($(PACKAGE_DIRECTORIES))
@@ -99,9 +118,17 @@ ifeq (,$(shell which goimports))
 	go get golang.org/x/tools/cmd/goimports
 endif
 
+failpoint-enable: bin/failpoint-ctl
+# Converting gofail failpoints...
+	@$(FAILPOINT_ENABLE)
+
+failpoint-disable: bin/failpoint-ctl
+# Restoring gofail failpoints...
+	@$(FAILPOINT_DISABLE)
+
 # Run go vet against code
 vet:
-	$(GO) vet ./...
+	$(CGOENV) go vet ./...
 
 tidy:
 	@echo "go mod tidy"
@@ -109,25 +136,28 @@ tidy:
 	git diff --quiet go.mod go.sum
 
 image:
-	docker build -t ${DOCKER_REGISTRY}/pingcap/chaos-daemon images/chaos-daemon
-	docker build -t ${DOCKER_REGISTRY}/pingcap/chaos-mesh images/chaos-mesh
-	docker build -t ${DOCKER_REGISTRY}/pingcap/chaos-fs images/chaosfs
-	cp -R scripts images/chaos-scripts
-	docker build -t ${DOCKER_REGISTRY}/pingcap/chaos-scripts images/chaos-scripts
-	rm -rf images/chaos-scripts/scripts
-	docker build -t ${DOCKER_REGISTRY}/pingcap/chaos-grafana images/grafana
-	docker build -t ${DOCKER_REGISTRY}/pingcap/chaos-dashboard images/chaos-dashboard
+	docker build -t pingcap/binary ${DOCKER_BUILD_ARGS} .
+
+	docker build -t ${DOCKER_REGISTRY_PREFIX}pingcap/chaos-daemon ${DOCKER_BUILD_ARGS} images/chaos-daemon
+	docker build -t ${DOCKER_REGISTRY_PREFIX}pingcap/chaos-mesh ${DOCKER_BUILD_ARGS} images/chaos-mesh
+	docker build -t ${DOCKER_REGISTRY_PREFIX}pingcap/chaos-fs ${DOCKER_BUILD_ARGS} images/chaosfs
+	docker build -t ${DOCKER_REGISTRY_PREFIX}pingcap/chaos-scripts ${DOCKER_BUILD_ARGS} images/chaos-scripts
+	docker build -t ${DOCKER_REGISTRY_PREFIX}pingcap/chaos-grafana ${DOCKER_BUILD_ARGS} images/grafana
+	docker build -t ${DOCKER_REGISTRY_PREFIX}pingcap/chaos-dashboard ${DOCKER_BUILD_ARGS} images/chaos-dashboard
 
 docker-push:
-	docker push "${DOCKER_REGISTRY}/pingcap/chaos-mesh:latest"
-	docker push "${DOCKER_REGISTRY}/pingcap/chaos-fs:latest"
-	docker push "${DOCKER_REGISTRY}/pingcap/chaos-daemon:latest"
-	docker push "${DOCKER_REGISTRY}/pingcap/chaos-scripts:latest"
-	docker push "${DOCKER_REGISTRY}/pingcap/chaos-grafana:latest"
-	docker push "${DOCKER_REGISTRY}/pingcap/chaos-dashboard:latest"
+	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-mesh:latest"
+	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-fs:latest"
+	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-daemon:latest"
+	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-scripts:latest"
+	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-grafana:latest"
+	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-dashboard:latest"
 
 bin/revive:
 	GO111MODULE="on" go build -o bin/revive github.com/mgechev/revive
+
+bin/failpoint-ctl: go.mod
+	$(GO) build -o $@ github.com/pingcap/failpoint/failpoint-ctl
 
 lint: bin/revive
 	@echo "linting"
@@ -141,7 +171,7 @@ generate: controller-gen
 # download controller-gen if necessary
 controller-gen:
 ifeq (, $(shell which controller-gen))
-	go get sigs.k8s.io/controller-tools/cmd/controller-gen@v0.2.4
+	go get sigs.k8s.io/controller-tools/cmd/controller-gen@v0.2.5
 CONTROLLER_GEN=$(GOBIN)/controller-gen
 else
 CONTROLLER_GEN=$(shell which controller-gen)
@@ -153,7 +183,7 @@ yaml: manifests
 install-kind:
 ifeq (,$(shell which kind))
 	@echo "installing kind"
-	GO111MODULE="on" go get sigs.k8s.io/kind@v0.4.0
+	GO111MODULE="on" go get sigs.k8s.io/kind@v0.7.0
 else
 	@echo "kind has been installed"
 endif
@@ -166,7 +196,7 @@ ifeq (,$(shell which kubebuilder))
 	# move to a long-term location and put it on your path
 	# (you'll need to set the KUBEBUILDER_ASSETS env var if you put it somewhere else)
 	sudo mv /tmp/kubebuilder_2.2.0_$(shell go env GOOS)_$(shell go env GOARCH) /usr/local/kubebuilder
-	export PATH=${PATH}:/usr/local/kubebuilder/bin
+	export PATH="${PATH}:/usr/local/kubebuilder/bin"
 else
 	@echo "kubebuilder has been installed"
 endif

@@ -11,12 +11,18 @@ metadata:
 spec:
   type: {{ .Values.controllerManager.service.type }}
   ports:
-#    - port: {{ .Values.controllerManager.service.port }}
-#      targetPort: http
-#      protocol: TCP
-#      name: http
+  {{- if .Values.enableProfiling }}
+    - port: 10081
+      targetPort: pprof
+      protocol: TCP
+      name: pprof
+  {{- end }}
+    - port: 10080
+      targetPort: http
+      protocol: TCP
+      name: http
     - port: 443
-      targetPort: 9443
+      targetPort: webhook
       protocol: TCP
       name: webhook
   selector:
