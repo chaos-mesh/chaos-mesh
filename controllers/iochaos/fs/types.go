@@ -28,7 +28,6 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/tools/cache"
-	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -42,8 +41,7 @@ import (
 
 type Reconciler struct {
 	client.Client
-	Log      logr.Logger
-	Recorder record.EventRecorder
+	Log logr.Logger
 }
 
 func newReconciler(c client.Client, log logr.Logger, req ctrl.Request) twophase.Reconciler {
@@ -83,12 +81,9 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos reconcil
 		return err
 	}
 
-	r.Recorder.Event(chaos, v1.EventTypeNormal, utils.EventChaosStarted, "")
 	pods, err := utils.SelectAndGeneratePods(ctx, r.Client, &iochaos.Spec)
 	if err != nil {
 		r.Log.Error(err, "failed to select and generate pods")
-		r.Recorder.Eventf(chaos, v1.EventTypeWarning, utils.EventChaosFailed,
-			"failed to select and generate pods:%s", err)
 		return err
 	}
 
