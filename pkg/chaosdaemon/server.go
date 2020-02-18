@@ -92,7 +92,8 @@ func StartServer(conf *Config, reg *prometheus.Registry) error {
 	g := errgroup.Group{}
 
 	httpBindAddr := fmt.Sprintf("%s:%d", conf.Host, conf.HTTPPort)
-	srv := newHTTPServer(httpBindAddr, conf.Profiling, reg)
+	srv := newHTTPServerBuilder().Addr(httpBindAddr).Metrics(reg).Profiling(conf.Profiling).Build()
+
 	g.Go(func() error {
 		log.Info("starting http endpoint", "address", httpBindAddr)
 		if err := srv.ListenAndServe(); err != nil {
