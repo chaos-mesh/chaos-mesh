@@ -46,12 +46,11 @@ type Reconciler struct {
 	Recorder record.EventRecorder
 }
 
-func newReconciler(c client.Client, log logr.Logger, req ctrl.Request, recorder record.EventRecorder) twophase.Reconciler {
+func newReconciler(c client.Client, log logr.Logger, req ctrl.Request) twophase.Reconciler {
 	return twophase.Reconciler{
 		InnerReconciler: &Reconciler{
-			Client:   c,
-			Log:      log,
-			Recorder: recorder,
+			Client: c,
+			Log:    log,
 		},
 		Client: c,
 		Log:    log,
@@ -59,16 +58,14 @@ func newReconciler(c client.Client, log logr.Logger, req ctrl.Request, recorder 
 }
 
 // NewTwoPhaseReconciler would create Reconciler for twophase package
-func NewTwoPhaseReconciler(c client.Client, log logr.Logger, req ctrl.Request,
-	recorder record.EventRecorder) *twophase.Reconciler {
-	r := newReconciler(c, log, req, recorder)
+func NewTwoPhaseReconciler(c client.Client, log logr.Logger, req ctrl.Request) *twophase.Reconciler {
+	r := newReconciler(c, log, req)
 	return twophase.NewReconciler(r, r.Client, r.Log)
 }
 
 // NewCommonReconciler would create Reconciler for common package
-func NewCommonReconciler(c client.Client, log logr.Logger, req ctrl.Request,
-	recorder record.EventRecorder) *common.Reconciler {
-	r := newReconciler(c, log, req, recorder)
+func NewCommonReconciler(c client.Client, log logr.Logger, req ctrl.Request) *common.Reconciler {
+	r := newReconciler(c, log, req)
 	return common.NewReconciler(r, r.Client, r.Log)
 }
 

@@ -37,9 +37,8 @@ func (r *IoChaosReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	logger := r.Log.WithValues("iochaos", req.NamespacedName)
 
 	reconciler := iochaos.Reconciler{
-		Client:   r.Client,
-		Log:      logger,
-		Recorder: r.Recorder,
+		Client: r.Client,
+		Log:    logger,
 	}
 
 	return reconciler.Reconcile(req)
