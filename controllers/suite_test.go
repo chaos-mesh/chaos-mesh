@@ -88,18 +88,21 @@ var _ = BeforeSuite(func(done Done) {
 	err = (&IoChaosReconciler{
 		Client: k8sManager.GetClient(),
 		Log:    ctrl.Log.WithName("controllers").WithName("IoChaos"),
+		Recorder: k8sManager.GetEventRecorderFor("iochaos-controller"),
 	}).SetupWithManager(k8sManager)
 	Expect(err).ToNot(HaveOccurred())
 
 	err = (&PodChaosReconciler{
 		Client: k8sManager.GetClient(),
 		Log:    ctrl.Log.WithName("controllers").WithName("PodChaos"),
+		Recorder: k8sManager.GetEventRecorderFor("podchaos-controller"),
 	}).SetupWithManager(k8sManager)
 	Expect(err).ToNot(HaveOccurred())
 
 	err = (&NetworkChaosReconciler{
 		Client: k8sManager.GetClient(),
 		Log:    ctrl.Log.WithName("controllers").WithName("NetworkChaos"),
+		Recorder: k8sManager.GetEventRecorderFor("networkchaos-controller"),
 	}).SetupWithManager(k8sManager)
 	Expect(err).ToNot(HaveOccurred())
 
