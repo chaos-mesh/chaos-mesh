@@ -38,7 +38,7 @@ type TimeChaosReconciler struct {
 // +kubebuilder:rbac:groups=pingcap.com,resources=timechaos,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=pingcap.com,resources=timechaos/status,verbs=get;update;patch
 
-// Reconciles a TimeChaos resource
+// Reconcile reconciles a TimeChaos resource
 func (r *TimeChaosReconciler) Reconcile(req ctrl.Request) (result ctrl.Result, err error) {
 	logger := r.Log.WithValues("reconciler", "timechaos")
 

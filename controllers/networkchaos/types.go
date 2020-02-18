@@ -32,7 +32,7 @@ type Reconciler struct {
 	Log logr.Logger
 }
 
-// Reconciles a NetworkChaos resource
+// Reconcile reconciles a NetworkChaos resource
 func (r *Reconciler) Reconcile(req ctrl.Request, chaos *v1alpha1.NetworkChaos) (ctrl.Result, error) {
 	r.Log.Info("reconciling networkchaos")
 

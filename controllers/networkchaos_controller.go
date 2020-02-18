@@ -37,7 +37,7 @@ type NetworkChaosReconciler struct {
 // +kubebuilder:rbac:groups=pingcap.com,resources=networkchaos,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=pingcap.com,resources=networkchaos/status,verbs=get;update;patch
 
-// Reconciles a NetworkChaos resource
+// Reconcile reconciles a NetworkChaos resource
 func (r *NetworkChaosReconciler) Reconcile(req ctrl.Request) (result ctrl.Result, err error) {
 	logger := r.Log.WithValues("reconciler", "networkchaos")
 

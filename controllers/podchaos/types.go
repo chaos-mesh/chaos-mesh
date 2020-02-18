@@ -34,7 +34,7 @@ type Reconciler struct {
 	Log logr.Logger
 }
 
-// Reconciles a PodChaos resource
+// Reconcile reconciles a PodChaos resource
 func (r *Reconciler) Reconcile(req ctrl.Request, chaos *v1alpha1.PodChaos) (ctrl.Result, error) {
 	r.Log.Info("reconciling podchaos")
 	scheduler := chaos.GetScheduler()

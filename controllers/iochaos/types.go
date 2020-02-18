@@ -31,7 +31,7 @@ type Reconciler struct {
 	Log logr.Logger
 }
 
-// Reconciles an IOChaos resource
+// Reconcile reconciles an IOChaos resource
 func (r *Reconciler) Reconcile(req ctrl.Request, chaos *v1alpha1.IoChaos) (ctrl.Result, error) {
 	r.Log.Info("reconciling iochaos")
 	scheduler := chaos.GetScheduler()
