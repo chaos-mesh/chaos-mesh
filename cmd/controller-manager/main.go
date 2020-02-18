@@ -131,8 +131,9 @@ func main() {
 	}
 
 	if err = (&controllers.TimeChaosReconciler{
-		Client: mgr.GetClient(),
-		Log:    ctrl.Log.WithName("controllers").WithName("TimeChaos"),
+		Client:   mgr.GetClient(),
+		Log:      ctrl.Log.WithName("controllers").WithName("TimeChaos"),
+		Recorder: mgr.GetEventRecorderFor("timeoutchaos-controller"),
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "TimeChaos")
 		os.Exit(1)

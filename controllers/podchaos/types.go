@@ -34,22 +34,23 @@ type Reconciler struct {
 	Log logr.Logger
 }
 
-func (r *Reconciler) Reconcile(req ctrl.Request, podchaos *v1alpha1.PodChaos) (ctrl.Result, error) {
+// Reconciles a PodChaos resource
+func (r *Reconciler) Reconcile(req ctrl.Request, chaos *v1alpha1.PodChaos) (ctrl.Result, error) {
 	r.Log.Info("reconciling podchaos")
-	scheduler := podchaos.GetScheduler()
-	duration, err := podchaos.GetDuration()
+	scheduler := chaos.GetScheduler()
+	duration, err := chaos.GetDuration()
 	if err != nil {
-		r.Log.Error(err, fmt.Sprintf("unable to get podchaos[%s/%s]'s duration", podchaos.Namespace, podchaos.Name))
+		r.Log.Error(err, fmt.Sprintf("unable to get podchaos[%s/%s]'s duration", chaos.Namespace, chaos.Name))
 		return ctrl.Result{}, nil
 	}
 	if scheduler == nil && duration == nil {
-		return r.commonPodChaos(podchaos, req)
+		return r.commonPodChaos(chaos, req)
 	} else if scheduler != nil {
-		return r.schedulePodChaos(podchaos, req)
+		return r.schedulePodChaos(chaos, req)
 	}
 
 	// This should be ensured by admission webhook in the future
-	r.Log.Error(fmt.Errorf("podchaos[%s/%s] spec invalid", podchaos.Namespace, podchaos.Name), "scheduler and duration should be omitted or defined at the same time")
+	r.Log.Error(fmt.Errorf("podchaos[%s/%s] spec invalid", chaos.Namespace, chaos.Name), "scheduler and duration should be omitted or defined at the same time")
 	return ctrl.Result{}, nil
 }
 

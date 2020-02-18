@@ -37,6 +37,7 @@ type PodChaosReconciler struct {
 // +kubebuilder:rbac:groups=pingcap.com,resources=podchaos,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=pingcap.com,resources=podchaos/status,verbs=get;update;patch
 
+// Reconciles a PodChaos resource
 func (r *PodChaosReconciler) Reconcile(req ctrl.Request) (result ctrl.Result, err error) {
 	logger := r.Log.WithValues("reconciler", "podchaos")
 
@@ -64,6 +65,6 @@ func (r *PodChaosReconciler) Reconcile(req ctrl.Request) (result ctrl.Result, er
 
 func (r *PodChaosReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
-		For(&chaosmeshv1alpha1.PodChaos{}).
+		For(&v1alpha1.PodChaos{}).
 		Complete(r)
 }

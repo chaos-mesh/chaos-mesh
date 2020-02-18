@@ -37,6 +37,7 @@ type IoChaosReconciler struct {
 // +kubebuilder:rbac:groups=chaosmesh.pingcap.com,resources=iochaos,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=chaosmesh.pingcap.com,resources=iochaos/status,verbs=get;update;patch
 
+// Reconciles an IOChaos resource
 func (r *IoChaosReconciler) Reconcile(req ctrl.Request) (result ctrl.Result, err error) {
 	logger := r.Log.WithValues("iochaos", req.NamespacedName)
 

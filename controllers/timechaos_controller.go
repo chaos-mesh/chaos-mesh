@@ -16,6 +16,8 @@ package controllers
 import (
 	"context"
 
+	"k8s.io/client-go/tools/record"
+
 	"github.com/pingcap/chaos-mesh/api/v1alpha1"
 	"github.com/pingcap/chaos-mesh/controllers/timechaos"
 	"github.com/pingcap/chaos-mesh/pkg/utils"
@@ -29,13 +31,14 @@ import (
 // TimeChaosReconciler reconciles a TimeChaos object
 type TimeChaosReconciler struct {
 	client.Client
-	Log logr.Logger
+	Log      logr.Logger
+	Recorder record.EventRecorder
 }
 
 // +kubebuilder:rbac:groups=pingcap.com,resources=timechaos,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=pingcap.com,resources=timechaos/status,verbs=get;update;patch
 
-// Reconcile reconciles a request from controller
+// Reconciles a TimeChaos resource
 func (r *TimeChaosReconciler) Reconcile(req ctrl.Request) (result ctrl.Result, err error) {
 	logger := r.Log.WithValues("reconciler", "timechaos")
 

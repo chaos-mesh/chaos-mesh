@@ -31,10 +31,11 @@ type Reconciler struct {
 	Log logr.Logger
 }
 
-func (r *Reconciler) Reconcile(req ctrl.Request, iochaos *v1alpha1.IoChaos) (ctrl.Result, error) {
+// Reconciles an IOChaos resource
+func (r *Reconciler) Reconcile(req ctrl.Request, chaos *v1alpha1.IoChaos) (ctrl.Result, error) {
 	r.Log.Info("reconciling iochaos")
-	scheduler := iochaos.GetScheduler()
-	duration, err := iochaos.GetDuration()
+	scheduler := chaos.GetScheduler()
+	duration, err := chaos.GetDuration()
 	if err != nil {
 		msg := fmt.Sprintf("unable to get podchaos[%s/%s]'s duration",
 			req.Namespace, req.Name)
@@ -42,9 +43,9 @@ func (r *Reconciler) Reconcile(req ctrl.Request, iochaos *v1alpha1.IoChaos) (ctr
 		return ctrl.Result{}, nil
 	}
 	if scheduler == nil && duration == nil {
-		return r.commonIOChaos(iochaos, req)
+		return r.commonIOChaos(chaos, req)
 	} else if scheduler != nil && duration != nil {
-		return r.scheduleIOChaos(iochaos, req)
+		return r.scheduleIOChaos(chaos, req)
 	}
 
 	// This should be ensured by admission webhook in the future

@@ -32,23 +32,24 @@ type Reconciler struct {
 	Log logr.Logger
 }
 
-func (r *Reconciler) Reconcile(req ctrl.Request, networkchaos *v1alpha1.NetworkChaos) (ctrl.Result, error) {
+// Reconciles a NetworkChaos resource
+func (r *Reconciler) Reconcile(req ctrl.Request, chaos *v1alpha1.NetworkChaos) (ctrl.Result, error) {
 	r.Log.Info("reconciling networkchaos")
 
-	scheduler := networkchaos.GetScheduler()
-	duration, err := networkchaos.GetDuration()
+	scheduler := chaos.GetScheduler()
+	duration, err := chaos.GetDuration()
 	if err != nil {
-		r.Log.Error(err, fmt.Sprintf("unable to get networkchaos[%s/%s]'s duration", networkchaos.Namespace, networkchaos.Name))
+		r.Log.Error(err, fmt.Sprintf("unable to get networkchaos[%s/%s]'s duration", chaos.Namespace, chaos.Name))
 		return ctrl.Result{}, nil
 	}
 	if scheduler == nil && duration == nil {
-		return r.commonNetworkChaos(networkchaos, req)
+		return r.commonNetworkChaos(chaos, req)
 	} else if scheduler != nil && duration != nil {
-		return r.scheduleNetworkChaos(networkchaos, req)
+		return r.scheduleNetworkChaos(chaos, req)
 	}
 
 	// This should be ensured by admission webhook in the future
-	r.Log.Error(fmt.Errorf("networkchaos[%s/%s] spec invalid", networkchaos.Namespace, networkchaos.Name), "scheduler and duration should be omitted or defined at the same time")
+	r.Log.Error(fmt.Errorf("networkchaos[%s/%s] spec invalid", chaos.Namespace, chaos.Name), "scheduler and duration should be omitted or defined at the same time")
 	return ctrl.Result{}, nil
 }
 

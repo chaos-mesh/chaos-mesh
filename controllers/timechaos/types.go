@@ -45,23 +45,23 @@ type Reconciler struct {
 	Log logr.Logger
 }
 
-// Reconcile reconciles a request from controller
-func (r *Reconciler) Reconcile(req ctrl.Request, timechaos *v1alpha1.TimeChaos) (ctrl.Result, error) {
+// Reconciles a TimeChaos resource
+func (r *Reconciler) Reconcile(req ctrl.Request, chaos *v1alpha1.TimeChaos) (ctrl.Result, error) {
 	r.Log.Info("reconciling timechaos")
-	scheduler := timechaos.GetScheduler()
-	duration, err := timechaos.GetDuration()
+	scheduler := chaos.GetScheduler()
+	duration, err := chaos.GetDuration()
 	if err != nil {
-		r.Log.Error(err, fmt.Sprintf("unable to get timechaos[%s/%s]'s duration", timechaos.Namespace, timechaos.Name))
+		r.Log.Error(err, fmt.Sprintf("unable to get timechaos[%s/%s]'s duration", chaos.Namespace, chaos.Name))
 		return ctrl.Result{}, nil
 	}
 	if scheduler == nil && duration == nil {
-		return r.commonTimeChaos(timechaos, req)
+		return r.commonTimeChaos(chaos, req)
 	} else if scheduler != nil && duration != nil {
-		return r.scheduleTimeChaos(timechaos, req)
+		return r.scheduleTimeChaos(chaos, req)
 	}
 
 	// This should be ensured by admission webhook in the future
-	r.Log.Error(fmt.Errorf("timechaos[%s/%s] spec invalid", timechaos.Namespace, timechaos.Name), "scheduler and duration should be omitted or defined at the same time")
+	r.Log.Error(fmt.Errorf("timechaos[%s/%s] spec invalid", chaos.Namespace, chaos.Name), "scheduler and duration should be omitted or defined at the same time")
 	return ctrl.Result{}, nil
 }
 
