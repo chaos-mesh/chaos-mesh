@@ -14,15 +14,18 @@
 package chaosdaemon
 
 import (
-	pb "github.com/pingcap/chaos-mesh/pkg/chaosdaemon/pb"
+	"testing"
+
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
+
+	"sigs.k8s.io/controller-runtime/pkg/envtest"
 )
 
-// Apply applies a netem on eth0 in pid related namespace
-func Apply(netem *pb.Netem, pid uint32) error {
-	panic("unimplemented")
-}
+func TestAPIs(t *testing.T) {
+	RegisterFailHandler(Fail)
 
-// Cancel will remove netem on eth0 in pid related namespace
-func Cancel(netem *pb.Netem, pid uint32) error {
-	panic("unimplemented")
+	RunSpecsWithDefaultAndCustomReporters(t,
+		"chaosdaemon Suite",
+		[]Reporter{envtest.NewlineReporter{}})
 }
