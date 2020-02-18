@@ -180,7 +180,7 @@ ifeq (,$(shell which kubebuilder))
 	# move to a long-term location and put it on your path
 	# (you'll need to set the KUBEBUILDER_ASSETS env var if you put it somewhere else)
 	sudo mv /tmp/kubebuilder_2.2.0_$(shell go env GOOS)_$(shell go env GOARCH) /usr/local/kubebuilder
- 	export PATH="${PATH}:/usr/local/kubebuilder/bin"
+	export PATH=${PATH}:/usr/local/kubebuilder/bin
 else
 	@echo "kubebuilder has been installed"
 endif
