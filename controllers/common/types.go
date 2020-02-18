@@ -15,6 +15,7 @@ package common
 
 import (
 	"context"
+	"k8s.io/client-go/tools/record"
 	"time"
 
 	"github.com/go-logr/logr"
@@ -33,15 +34,18 @@ import (
 type Reconciler struct {
 	reconciler.InnerReconciler
 	client.Client
-	Log logr.Logger
+	Log      logr.Logger
+	Recorder record.EventRecorder
 }
 
 // NewReconciler would create Reconciler for common chaos
-func NewReconciler(reconcile reconciler.InnerReconciler, c client.Client, log logr.Logger) *Reconciler {
+func NewReconciler(reconcile reconciler.InnerReconciler, c client.Client,
+	log logr.Logger, recorder record.EventRecorder) *Reconciler {
 	return &Reconciler{
 		InnerReconciler: reconcile,
 		Client:          c,
 		Log:             log,
+		Recorder:        recorder,
 	}
 }
 

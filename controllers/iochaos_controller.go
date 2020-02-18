@@ -14,8 +14,6 @@
 package controllers
 
 import (
-	"context"
-
 	"github.com/go-logr/logr"
 	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -39,21 +37,12 @@ func (r *IoChaosReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	logger := r.Log.WithValues("iochaos", req.NamespacedName)
 
 	reconciler := iochaos.Reconciler{
-		Client: r.Client,
-		Log:    logger,
-	}
-	request := &iochaos.IochaosReqest{
-		Request:  req,
-		Ctx:      context.Background(),
+		Client:   r.Client,
+		Log:      logger,
 		Recorder: r.Recorder,
-		Instance: &v1alpha1.IoChaos{},
-	}
-	if err := r.Get(request.Ctx, request.Request.NamespacedName, request.Instance); err != nil {
-		r.Log.Error(err, "unable to get iochaos")
-		return ctrl.Result{}, nil
 	}
 
-	return reconciler.Reconcile(request)
+	return reconciler.Reconcile(req)
 }
 
 func (r *IoChaosReconciler) SetupWithManager(mgr ctrl.Manager) error {
