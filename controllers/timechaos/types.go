@@ -46,16 +46,8 @@ type Reconciler struct {
 }
 
 // Reconcile reconciles a request from controller
-func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
+func (r *Reconciler) Reconcile(req ctrl.Request, timechaos *v1alpha1.TimeChaos) (ctrl.Result, error) {
 	r.Log.Info("reconciling timechaos")
-	ctx := context.Background()
-
-	var timechaos v1alpha1.TimeChaos
-	if err := r.Get(ctx, req.NamespacedName, &timechaos); err != nil {
-		r.Log.Error(err, "unable to get timechaos")
-		return ctrl.Result{}, nil
-	}
-
 	scheduler := timechaos.GetScheduler()
 	duration, err := timechaos.GetDuration()
 	if err != nil {
@@ -63,9 +55,9 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		return ctrl.Result{}, nil
 	}
 	if scheduler == nil && duration == nil {
-		return r.commonTimeChaos(&timechaos, req)
+		return r.commonTimeChaos(timechaos, req)
 	} else if scheduler != nil && duration != nil {
-		return r.scheduleTimeChaos(&timechaos, req)
+		return r.scheduleTimeChaos(timechaos, req)
 	}
 
 	// This should be ensured by admission webhook in the future

@@ -14,7 +14,6 @@
 package podchaos
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/go-logr/logr"
@@ -35,15 +34,8 @@ type Reconciler struct {
 	Log logr.Logger
 }
 
-func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
+func (r *Reconciler) Reconcile(req ctrl.Request, podchaos *v1alpha1.PodChaos) (ctrl.Result, error) {
 	r.Log.Info("reconciling podchaos")
-	ctx := context.Background()
-
-	var podchaos v1alpha1.PodChaos
-	if err := r.Get(ctx, req.NamespacedName, &podchaos); err != nil {
-		r.Log.Error(err, "unable to get podchaos")
-		return ctrl.Result{}, nil
-	}
 	scheduler := podchaos.GetScheduler()
 	duration, err := podchaos.GetDuration()
 	if err != nil {
@@ -51,9 +43,9 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		return ctrl.Result{}, nil
 	}
 	if scheduler == nil && duration == nil {
-		return r.commonPodChaos(&podchaos, req)
+		return r.commonPodChaos(podchaos, req)
 	} else if scheduler != nil {
-		return r.schedulePodChaos(&podchaos, req)
+		return r.schedulePodChaos(podchaos, req)
 	}
 
 	// This should be ensured by admission webhook in the future

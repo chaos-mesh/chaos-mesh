@@ -14,7 +14,6 @@
 package iochaos
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/go-logr/logr"
@@ -32,15 +31,8 @@ type Reconciler struct {
 	Log logr.Logger
 }
 
-func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
+func (r *Reconciler) Reconcile(req ctrl.Request, iochaos *v1alpha1.IoChaos) (ctrl.Result, error) {
 	r.Log.Info("reconciling iochaos")
-	ctx := context.Background()
-	iochaos := &v1alpha1.IoChaos{}
-	if err := r.Get(ctx, req.NamespacedName, iochaos); err != nil {
-		r.Log.Error(err, "unable to get iochaos")
-		return ctrl.Result{}, nil
-	}
-
 	scheduler := iochaos.GetScheduler()
 	duration, err := iochaos.GetDuration()
 	if err != nil {

@@ -14,7 +14,6 @@
 package networkchaos
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/go-logr/logr"
@@ -33,15 +32,8 @@ type Reconciler struct {
 	Log logr.Logger
 }
 
-func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
+func (r *Reconciler) Reconcile(req ctrl.Request, networkchaos *v1alpha1.NetworkChaos) (ctrl.Result, error) {
 	r.Log.Info("reconciling networkchaos")
-	ctx := context.Background()
-
-	var networkchaos v1alpha1.NetworkChaos
-	if err := r.Get(ctx, req.NamespacedName, &networkchaos); err != nil {
-		r.Log.Error(err, "unable to get networkchaos")
-		return ctrl.Result{}, nil
-	}
 
 	scheduler := networkchaos.GetScheduler()
 	duration, err := networkchaos.GetDuration()
@@ -50,9 +42,9 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		return ctrl.Result{}, nil
 	}
 	if scheduler == nil && duration == nil {
-		return r.commonNetworkChaos(&networkchaos, req)
+		return r.commonNetworkChaos(networkchaos, req)
 	} else if scheduler != nil && duration != nil {
-		return r.scheduleNetworkChaos(&networkchaos, req)
+		return r.scheduleNetworkChaos(networkchaos, req)
 	}
 
 	// This should be ensured by admission webhook in the future
