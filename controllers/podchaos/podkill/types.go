@@ -105,10 +105,6 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, obj reconciler
 
 		podchaos.Status.Experiment.Pods = append(podchaos.Status.Experiment.Pods, ps)
 	}
-	//if err := r.Update(ctx, podchaos); err != nil {
-	//	r.Log.Error(err, "unable to update chaosctl status")
-	//	return err
-	//}
 	return nil
 }
 
