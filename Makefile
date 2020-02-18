@@ -14,9 +14,10 @@ endif
 
 # Enable GO111MODULE=on explicitly, disable it with GO111MODULE=off when necessary.
 export GO111MODULE := on
-GOOS := $(if $(GOOS),$(GOOS),linux)
-GOARCH := $(if $(GOARCH),$(GOARCH),amd64)
+GOOS := $(if $(GOOS),$(GOOS),"")
+GOARCH := $(if $(GOARCH),$(GOARCH),"")
 GOENV  := GO15VENDOREXPERIMENT="1" CGO_ENABLED=0 GOOS=$(GOOS) GOARCH=$(GOARCH)
+CGOENV  := GO15VENDOREXPERIMENT="1" CGO_ENABLED=1 GOOS=$(GOOS) GOARCH=$(GOARCH)
 GO     := $(GOENV) go
 GOTEST := TEST_USE_EXISTING_CLUSTER=false go test
 SHELL    := /usr/bin/env bash
@@ -66,7 +67,7 @@ endif
 
 # Build chaos-daemon binary
 chaosdaemon: generate fmt vet
-	$(GOENV) CGO_ENABLED=1 go build -ldflags '$(LDFLAGS)' -o bin/chaos-daemon ./cmd/chaos-daemon/main.go
+	$(CGOENV) go build -ldflags '$(LDFLAGS)' -o bin/chaos-daemon ./cmd/chaos-daemon/main.go
 
 # Build manager binary
 manager: generate fmt vet
@@ -81,7 +82,7 @@ dashboard: fmt vet
 binary: chaosdaemon manager chaosfs dashboard
 
 watchmaker: fmt vet
-	$(GOENV) CGO_ENABLED=1 go build -ldflags '$(LDFLAGS)' -o bin/watchmaker ./cmd/watchmaker/*.go
+	$(CGOENV) go build -ldflags '$(LDFLAGS)' -o bin/watchmaker ./cmd/watchmaker/*.go
 
 dashboard-server-frontend:
 	cd images/chaos-dashboard; yarn install; yarn build
@@ -101,7 +102,7 @@ manifests: controller-gen
 
 # Run go fmt against code
 fmt: groupimports
-	$(GOENV) CGO_ENABLED=1 go fmt ./...
+	$(CGOENV) go fmt ./...
 
 groupimports: install-goimports
 	goimports -w -l -local github.com/pingcap/chaos-mesh $$($(PACKAGE_DIRECTORIES))
@@ -115,7 +116,7 @@ endif
 
 # Run go vet against code
 vet:
-	$(GOENV) CGO_ENABLED=1 go vet ./...
+	$(CGOENV) go vet ./...
 
 tidy:
 	@echo "go mod tidy"
@@ -155,7 +156,7 @@ generate: controller-gen
 # download controller-gen if necessary
 controller-gen:
 ifeq (, $(shell which controller-gen))
-	go get sigs.k8s.io/controller-tools/cmd/controller-gen@v0.2.4
+	go get sigs.k8s.io/controller-tools/cmd/controller-gen@v0.2.5
 CONTROLLER_GEN=$(GOBIN)/controller-gen
 else
 CONTROLLER_GEN=$(shell which controller-gen)
@@ -167,7 +168,7 @@ yaml: manifests
 install-kind:
 ifeq (,$(shell which kind))
 	@echo "installing kind"
-	GO111MODULE="on" go get sigs.k8s.io/kind@v0.4.0
+	GO111MODULE="on" go get sigs.k8s.io/kind@v0.7.0
 else
 	@echo "kind has been installed"
 endif
