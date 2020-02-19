@@ -40,7 +40,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request, chaos *v1alpha1.IoChaos) (ctrl.
 		msg := fmt.Sprintf("unable to get podchaos[%s/%s]'s duration",
 			req.Namespace, req.Name)
 		r.Log.Error(err, msg)
-		return ctrl.Result{}, nil
+		return ctrl.Result{}, err
 	}
 	if scheduler == nil && duration == nil {
 		return r.commonIOChaos(chaos, req)
@@ -49,9 +49,9 @@ func (r *Reconciler) Reconcile(req ctrl.Request, chaos *v1alpha1.IoChaos) (ctrl.
 	}
 
 	// This should be ensured by admission webhook in the future
-	r.Log.Error(fmt.Errorf("iochaos[%s/%s] spec invalid", req.Namespace, req.Name),
-		"scheduler and duration should be omitted or defined at the same time")
-	return ctrl.Result{}, nil
+	err = fmt.Errorf("iochaos[%s/%s] spec invalid", req.Namespace, req.Name)
+	r.Log.Error(err, "scheduler and duration should be omitted or defined at the same time")
+	return ctrl.Result{}, err
 }
 
 func (r *Reconciler) commonIOChaos(iochaos *v1alpha1.IoChaos, req ctrl.Request) (ctrl.Result, error) {
@@ -60,7 +60,7 @@ func (r *Reconciler) commonIOChaos(iochaos *v1alpha1.IoChaos, req ctrl.Request) 
 	case v1alpha1.FileSystemLayer:
 		cr = fs.NewCommonReconciler(r.Client, r.Log.WithValues("reconciler", "chaosfs"), req)
 	default:
-		return r.invalidActionResponse(iochaos), nil
+		return r.invalidActionResponse(iochaos)
 	}
 	return cr.Reconcile(req)
 }
@@ -71,12 +71,12 @@ func (r *Reconciler) scheduleIOChaos(iochaos *v1alpha1.IoChaos, req ctrl.Request
 	case v1alpha1.FileSystemLayer:
 		sr = fs.NewTwoPhaseReconciler(r.Client, r.Log.WithValues("reconciler", "chaosfs"), req)
 	default:
-		return r.invalidActionResponse(iochaos), nil
+		return r.invalidActionResponse(iochaos)
 	}
 	return sr.Reconcile(req)
 }
 
-func (r *Reconciler) invalidActionResponse(iochaos *v1alpha1.IoChaos) ctrl.Result {
+func (r *Reconciler) invalidActionResponse(iochaos *v1alpha1.IoChaos) (ctrl.Result, error) {
 	r.Log.Error(nil, "unknown file system I/O layer", "action", iochaos.Spec.Action)
-	return ctrl.Result{}
+	return ctrl.Result{}, fmt.Errorf("unknown file system I/O layer")
 }

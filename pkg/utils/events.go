@@ -18,14 +18,14 @@ package utils
 // completing events should be of type "Normal". And the failed events should
 // be of type "Warning". The reasons are defined as following.
 const (
-	// Found an invalid chaos
-	EventChaosInvalid string = "ChaosInvalid"
-
 	// The chaos just started
 	EventChaosStarted string = "ChaosStarted"
 
-	// The chaos just failed. The message should include detailed error
-	EventChaosFailed string = "ChaosFailed"
+	// The chaos just failed when injecting. The message should include detailed error
+	EventChaosInjectFailed string = "ChaosInjectFailed"
+
+	// The chaos just failed when recovering. The message should include detailed error
+	EventChaosRecoverFailed string = "ChaosRecoverFailed"
 
 	// The chaos just completed
 	EventChaosCompleted string = "ChaosCompleted"

@@ -55,7 +55,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	chaos := r.Object()
 	if err = r.Get(ctx, req.NamespacedName, chaos); err != nil {
 		r.Log.Error(err, "unable to get chaos")
-		return ctrl.Result{}, nil
+		return ctrl.Result{}, err
 	}
 	if chaos.IsDeleted() {
 		// This chaos was deleted
@@ -63,7 +63,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		err = r.Recover(ctx, req, chaos)
 		if err != nil {
 			r.Log.Error(err, "failed to recover chaos")
-			return ctrl.Result{Requeue: true}, nil
+			return ctrl.Result{Requeue: true}, err
 		}
 	} else {
 		// Start failure action
@@ -82,7 +82,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 				r.Log.Error(updateError, "unable to update chaos finalizers")
 			}
 
-			return ctrl.Result{Requeue: true}, nil
+			return ctrl.Result{Requeue: true}, err
 		}
 		status.Experiment.StartTime = &metav1.Time{
 			Time: time.Now(),
@@ -92,7 +92,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 
 	if err := r.Update(ctx, chaos); err != nil {
 		r.Log.Error(err, "unable to update chaosctl status")
-		return ctrl.Result{}, nil
+		return ctrl.Result{}, err
 	}
 
 	return ctrl.Result{}, nil

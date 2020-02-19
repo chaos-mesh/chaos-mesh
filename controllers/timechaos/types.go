@@ -52,7 +52,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request, chaos *v1alpha1.TimeChaos) (ctr
 	duration, err := chaos.GetDuration()
 	if err != nil {
 		r.Log.Error(err, fmt.Sprintf("unable to get timechaos[%s/%s]'s duration", chaos.Namespace, chaos.Name))
-		return ctrl.Result{}, nil
+		return ctrl.Result{}, err
 	}
 	if scheduler == nil && duration == nil {
 		return r.commonTimeChaos(chaos, req)
@@ -62,7 +62,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request, chaos *v1alpha1.TimeChaos) (ctr
 
 	// This should be ensured by admission webhook in the future
 	r.Log.Error(fmt.Errorf("timechaos[%s/%s] spec invalid", chaos.Namespace, chaos.Name), "scheduler and duration should be omitted or defined at the same time")
-	return ctrl.Result{}, nil
+	return ctrl.Result{}, fmt.Errorf("invalid scheduler and duration")
 }
 
 func (r *Reconciler) commonTimeChaos(timechaos *v1alpha1.TimeChaos, req ctrl.Request) (ctrl.Result, error) {

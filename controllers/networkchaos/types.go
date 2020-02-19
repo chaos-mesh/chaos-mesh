@@ -40,7 +40,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request, chaos *v1alpha1.NetworkChaos) (
 	duration, err := chaos.GetDuration()
 	if err != nil {
 		r.Log.Error(err, fmt.Sprintf("unable to get networkchaos[%s/%s]'s duration", chaos.Namespace, chaos.Name))
-		return ctrl.Result{}, nil
+		return ctrl.Result{}, err
 	}
 	if scheduler == nil && duration == nil {
 		return r.commonNetworkChaos(chaos, req)
@@ -48,9 +48,10 @@ func (r *Reconciler) Reconcile(req ctrl.Request, chaos *v1alpha1.NetworkChaos) (
 		return r.scheduleNetworkChaos(chaos, req)
 	}
 
+	err = fmt.Errorf("networkchaos[%s/%s] spec invalid", chaos.Namespace, chaos.Name)
 	// This should be ensured by admission webhook in the future
-	r.Log.Error(fmt.Errorf("networkchaos[%s/%s] spec invalid", chaos.Namespace, chaos.Name), "scheduler and duration should be omitted or defined at the same time")
-	return ctrl.Result{}, nil
+	r.Log.Error(err, "scheduler and duration should be omitted or defined at the same time")
+	return ctrl.Result{}, err
 }
 
 func (r *Reconciler) commonNetworkChaos(networkchaos *v1alpha1.NetworkChaos, req ctrl.Request) (ctrl.Result, error) {
@@ -61,7 +62,7 @@ func (r *Reconciler) commonNetworkChaos(networkchaos *v1alpha1.NetworkChaos, req
 	case v1alpha1.PartitionAction:
 		cr = partition.NewCommonReconciler(r.Client, r.Log.WithValues("action", "partition"), req)
 	default:
-		return r.invalidActionResponse(networkchaos), nil
+		return r.invalidActionResponse(networkchaos)
 	}
 	return cr.Reconcile(req)
 }
@@ -74,12 +75,12 @@ func (r *Reconciler) scheduleNetworkChaos(networkchaos *v1alpha1.NetworkChaos, r
 	case v1alpha1.PartitionAction:
 		sr = partition.NewTwoPhaseReconciler(r.Client, r.Log.WithValues("action", "partition"), req)
 	default:
-		return r.invalidActionResponse(networkchaos), nil
+		return r.invalidActionResponse(networkchaos)
 	}
 	return sr.Reconcile(req)
 }
 
-func (r *Reconciler) invalidActionResponse(networkchaos *v1alpha1.NetworkChaos) ctrl.Result {
+func (r *Reconciler) invalidActionResponse(networkchaos *v1alpha1.NetworkChaos) (ctrl.Result, error) {
 	r.Log.Error(nil, "networkchaos action is invalid", "action", networkchaos.Spec.Action)
-	return ctrl.Result{}
+	return ctrl.Result{}, fmt.Errorf("invalid networkchaos action")
 }

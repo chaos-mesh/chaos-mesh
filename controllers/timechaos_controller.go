@@ -53,15 +53,22 @@ func (r *TimeChaosReconciler) Reconcile(req ctrl.Request) (result ctrl.Result, e
 		return ctrl.Result{}, nil
 	}
 
+	result, err = reconciler.Reconcile(req, chaos)
 	if !chaos.IsDeleted() {
-		r.Recorder.Event(chaos, v1.EventTypeNormal, utils.EventChaosStarted, "")
-		result, err = reconciler.Reconcile(req, chaos)
+		if err != nil {
+			r.Recorder.Event(chaos, v1.EventTypeWarning, utils.EventChaosInjectFailed, err.Error())
+		} else {
+			r.Recorder.Event(chaos, v1.EventTypeNormal, utils.EventChaosStarted, "")
+		}
 	} else {
-		result, err = reconciler.Reconcile(req, chaos)
-		r.Recorder.Event(chaos, v1.EventTypeNormal, utils.EventChaosCompleted, "")
+		if err != nil {
+			r.Recorder.Event(chaos, v1.EventTypeWarning, utils.EventChaosRecoverFailed, err.Error())
+		} else {
+			r.Recorder.Event(chaos, v1.EventTypeNormal, utils.EventChaosCompleted, "")
+		}
 	}
 
-	return result, err
+	return result, nil
 }
 
 // SetupWithManager setups a time chaos reconciler on controller-manager
