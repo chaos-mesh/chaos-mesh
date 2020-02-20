@@ -14,17 +14,7 @@
 package config
 
 import (
-	//"context"
-	//"fmt"
-	//"path/filepath"
-
-	//"github.com/docker/docker/api/types"
-
-	//"github.com/pingcap/chaos-mesh/pkg/mock"
-
 	"fmt"
-	//"fmt"
-	//"github.com/stretchr/testify/mock"
 	"os"
 
 	. "github.com/onsi/ginkgo"
