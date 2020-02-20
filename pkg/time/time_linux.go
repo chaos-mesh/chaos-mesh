@@ -21,6 +21,7 @@ import (
 	"github.com/go-logr/logr"
 
 	"github.com/pingcap/chaos-mesh/pkg/mapreader"
+	"github.com/pingcap/chaos-mesh/pkg/mock"
 	"github.com/pingcap/chaos-mesh/pkg/ptrace"
 
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -72,6 +73,16 @@ var fakeImage = []byte{
 
 // ModifyTime modifies time of target process
 func ModifyTime(pid int, deltaSec int64, deltaNsec int64) error {
+	// Mock point to return error in unit test
+	if err := mock.On("ModifyTimeError"); err != nil {
+		if e, ok := err.(error); ok {
+			return e
+		}
+		if ignore, ok := err.(bool); ok && ignore {
+			return nil
+		}
+	}
+
 	runtime.LockOSThread()
 
 	program, err := ptrace.Trace(pid)
