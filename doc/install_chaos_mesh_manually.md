@@ -1,6 +1,6 @@
-## Install Chaos Mesh manually
+# Install Chaos Mesh manually
 
-### Prerequisites
+## Prerequisites
 
 Before deploying Chaos Mesh, make sure the following items have been installed.
 
@@ -8,14 +8,14 @@ Before deploying Chaos Mesh, make sure the following items have been installed.
 - [RBAC](https://kubernetes.io/docs/admin/authorization/rbac) enabled (optional)
 - [Helm](https://helm.sh/) version >= v2.8.2
 
-### Get the Helm files
+## Get the Helm files
 
 ```bash
 git clone https://github.com/pingcap/chaos-mesh.git
 cd chaos-mesh/
 ```
 
-### Create custom resource type
+## Create custom resource type
 
 To use Chaos Mesh, you must first create the related custom resource type.
 
@@ -23,7 +23,7 @@ To use Chaos Mesh, you must first create the related custom resource type.
 kubectl apply -f manifests/crd.yaml
 ```
 
-### Install Chaos Mesh
+## Install Chaos Mesh
 
 * Install Chaos Mesh with Chaos Operator only in docker environment
 

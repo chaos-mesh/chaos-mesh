@@ -42,7 +42,8 @@ Chaos Operator uses [Custom Resource Definition (CRD)](https://kubernetes.io/doc
 
 ## Prerequisites
 
-Before deploying Chaos Mesh, make sure the following items have been installed. If you would like to have a try on your machine, you can refer to [get-started-on-your-local-machine](#get-started-on-your-local-machine) section.
+Before deploying Chaos Mesh, make sure the following items have been installed. 
+If you would like to have a try on your machine, you can refer to [get-started-on-your-local-machine](#get-started-on-your-local-machine) section.
 
 - Kubernetes >= v1.12
 - [RBAC](https://kubernetes.io/docs/admin/authorization/rbac) enabled (optional)
@@ -63,7 +64,11 @@ cd chaos-mesh/
 ./install.sh 
 ```
 
-> You also can refer to [install chaos mesh manually](./doc/install_chaos_mesh_manually.md) to install Chaos Mesh manually
+After executing the above command, if the message that Chaos Mesh is installed 
+successfully is output normally, then you can enjoy Chaos Mesh. Otherwise, 
+please check the current environment according to the prompt message of the script 
+or send us an [issue](https://github.com/pingcap/chaos-mesh/issues/new/choose) for help. 
+In addition, You also can [Helm](https://helm.sh/) to [install Chaos Mesh manually](./doc/install_chaos_mesh_manually.md).
 
 ## Get started on your local machine
 
@@ -74,29 +79,34 @@ cd chaos-mesh/
 You can try Chaos Mesh on your local K8s environment deployed using `kind` or `minikube`.
 
 
-### Deploy with `kind`
+### Deploy with kind
 
-1. Make sure docker is installed
+1. Make sure the docker is installed and running, 
+you can run the following command to check the status of the docker.
 
-```bash
-docker version
-```
-> You can refer to [install docker](https://docs.docker.com/install/) to install docker.
+    ```bash
+    docker version
+    ```
+    
+    After executing the above command, if the version information of the docker client and docker 
+    server is normally output, you can continue to the next steps, 
+    otherwise please refer to the [docker document](https://docs.docker.com/install/) to ensure that docker is running normally 
 
 2. Clone the code
 
    ```bash
-   git clone --depth=1 https://github.com/pingcap/chaos-mesh && \
+   git clone https://github.com/pingcap/chaos-mesh && \
    cd chaos-mesh
+   ```
    
-3. Run the script to install Chaos Mesh
+3. Run the following command to install Chaos Mesh
 
    ```
    ./install.sh --local kind
    ```
 
-> At present, `install.sh` only supports deploying Chaos Mesh locally using [kind](https://kind.sigs.k8s.io/).
-> If you want to deploy Chaos Mesh using [minikube](https://kubernetes.io/docs/tasks/tools/install-minikube/), this doc [get stated on minikube](./doc/get_started_on_minikube.md) can help you.
+At present, `install.sh` only supports deploying Chaos Mesh locally using [kind](https://kind.sigs.k8s.io/).
+If you want to deploy Chaos Mesh using [minikube](https://kubernetes.io/docs/tasks/tools/install-minikube/), this doc [get stated on minikube](./doc/get_started_on_minikube.md) can help you.
 
 ### Deploy target cluster
 
@@ -109,7 +119,7 @@ You can follow the instructions in the following two documents to deploy a TiDB 
 
 ### Define chaos experiment config file
 
-The chaos experiement configuration is defined in a .yaml file. The following sample file (`pod-kill-example.yaml`) defines a chaos experiment to kill one tikv pod randomly every 60 seconds:
+The chaos experiment configuration is defined in a .yaml file. The following sample file (`pod-kill-example.yaml`) defines a chaos experiment to kill one tikv pod randomly every 60 seconds:
 
 ```yaml
 apiVersion: pingcap.com/v1alpha1

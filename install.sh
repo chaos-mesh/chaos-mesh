@@ -418,7 +418,7 @@ deploy_volume_provisioner() {
     local config_url="https://raw.githubusercontent.com/pingcap/chaos-mesh/master/manifests/local-volume-provisioner.yaml"
 
     rm -rf "${config_file}"
-    ensure wget -O "${config_file}" "$config_url"
+    ensure curl -i "${config_file}" "$config_url"
     ensure kubectl apply -f "${config_file}"
 }
 
@@ -469,19 +469,17 @@ install_helm() {
         fi
     fi
 
-    need_cmd "wget"
     need_cmd "tar"
 
     local HELM_BIN="${HOME}/local/bin/helm"
     local target_os=$(lowercase $(uname))
     local TAR_NAME="helm-$1-$target_os-amd64.tar.gz"
     rm -rf "${TAR_NAME}"
-    ensure wget "https://get.helm.sh/${TAR_NAME}"
+    ensure curl -sL "https://get.helm.sh/${TAR_NAME}" | tar xz
 
-    ensure tar zxvf "${TAR_NAME}"
-    ensure mv "${target_os}"-amd64/helm ${HELM_BIN}
+    ensure mv "${target_os}"-amd64/helm "${HELM_BIN}"
     ensure chmod +x "${HELM_BIN}"
-    rm -rf "${TAR_NAME}" "${target_os}"-amd64
+    rm -rf "${target_os}"-amd64
 }
 
 init_helm() {
@@ -491,7 +489,7 @@ init_helm() {
 
     need_cmd "helm"
     rm -rf "${rbac_config}"
-    ensure wget -O "${rbac_config}" "$rbac_config_url"
+    ensure curl -o "${rbac_config}" "$rbac_config_url"
     ensure kubectl apply -f "${rbac_config}"
 
     if [[ $(helm version --client --short) == "Client: v2"* ]]; then
