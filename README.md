@@ -48,6 +48,7 @@ If you would like to have a try on your machine, you can refer to [get-started-o
 - Kubernetes >= v1.12
 - [RBAC](https://kubernetes.io/docs/admin/authorization/rbac) enabled (optional)
 - [Helm](https://helm.sh/) version >= v2.8.2
+- [Docker](https://docs.docker.com/install/) (required when running in [kind](https://kind.sigs.k8s.io/))
 
 ## Deploy Chaos Mesh
 
@@ -81,25 +82,14 @@ You can try Chaos Mesh on your local K8s environment deployed using `kind` or `m
 
 ### Deploy with kind
 
-1. Make sure the docker is installed and running, 
-you can run the following command to check the status of the docker.
-
-    ```bash
-    docker version
-    ```
-    
-    After executing the above command, if the version information of the docker client and docker 
-    server is normally output, you can continue to the next steps, 
-    otherwise please refer to the [docker document](https://docs.docker.com/install/) to ensure that docker is running normally 
-
-2. Clone the code
+1. Clone the code
 
    ```bash
    git clone https://github.com/pingcap/chaos-mesh && \
    cd chaos-mesh
    ```
    
-3. Run the following command to install Chaos Mesh
+2. Run the following command to install Chaos Mesh
 
    ```
    ./install.sh --local kind
