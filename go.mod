@@ -34,7 +34,7 @@ require (
 	github.com/opencontainers/image-spec v1.0.1 // indirect
 	github.com/opencontainers/runc v0.1.1 // indirect
 	github.com/opencontainers/runtime-spec v1.0.1 // indirect
-  github.com/pingcap/failpoint v0.0.0-20200210140405-f8f9fb234798
+	github.com/pingcap/failpoint v0.0.0-20200210140405-f8f9fb234798
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.0.0
 	github.com/robfig/cron/v3 v3.0.0
@@ -54,6 +54,7 @@ require (
 	k8s.io/apimachinery v0.0.0-20191121015412-41065c7a8c2a
 	k8s.io/client-go v0.0.0-20191121015835-571c0ef67034
 	sigs.k8s.io/controller-runtime v0.4.0
+	sigs.k8s.io/controller-tools v0.2.4 // indirect
 )
 
 go 1.13
