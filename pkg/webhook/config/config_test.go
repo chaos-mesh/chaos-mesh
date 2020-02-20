@@ -14,7 +14,7 @@
 package config
 
 import (
-	"fmt"
+	"io/ioutil"
 	"os"
 
 	. "github.com/onsi/ginkgo"
@@ -36,6 +36,47 @@ var _ = Describe("webhook config", func() {
 			Expect(InjectionConfig).To(BeNil())
 			Expect(err).ToNot(BeNil())
 			Expect(err.Error()).To(ContainSubstring("error loading injection config"))
+		})
+
+		It("shoud return yaml error on loading injection", func() {
+
+			err := ioutil.WriteFile("/tmp/wrong.yaml", []byte(`fake yaml`), 0755)
+			Expect(err).To(BeNil())
+			defer os.Remove("/tmp/wrong.yaml")
+
+			configFile := "/tmp/wrong.yaml"
+			InjectionConfig, err := LoadInjectionConfigFromFilePath(configFile)
+
+			Expect(InjectionConfig).To(BeNil())
+			Expect(err).ToNot(BeNil())
+		})
+
+		It("shoud return ErrMissingName on loading injection", func() {
+
+			err := ioutil.WriteFile("/tmp/MissingName.yaml", []byte(``), 0755)
+			Expect(err).To(BeNil())
+			defer os.Remove("/tmp/MissingName.yaml")
+
+			configFile := "/tmp/MissingName.yaml"
+			InjectionConfig, err := LoadInjectionConfigFromFilePath(configFile)
+
+			Expect(InjectionConfig).To(BeNil())
+			Expect(err).ToNot(BeNil())
+			Expect(err).To(Equal(ErrMissingName))
+		})
+
+		It("shoud return nil on loading injection", func() {
+
+			err := ioutil.WriteFile("/tmp/Name.yaml", []byte(`name: "testname"`), 0755)
+			Expect(err).To(BeNil())
+			defer os.Remove("/tmp/Name.yaml")
+
+			configFile := "/tmp/Name.yaml"
+			InjectionConfig, err := LoadInjectionConfigFromFilePath(configFile)
+
+			Expect(InjectionConfig).ToNot(BeNil())
+			Expect(InjectionConfig.Name).To(Equal("testname"))
+			Expect(err).To(BeNil())
 		})
 
 		It("should return testname and defaultVersion on configNameFields", func() {
@@ -121,8 +162,6 @@ var _ = Describe("webhook config", func() {
 				}}
 
 			cfg.ReplaceInjectionConfigs(replacementConfigs)
-			fmt.Println(replacementConfigs)
-			fmt.Println(cfg.Injections)
 			_, ok := cfg.Injections["testname_after:testversion_after"]
 			Expect(ok).To(Equal(true))
 		})
