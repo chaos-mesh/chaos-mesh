@@ -20,7 +20,10 @@ import (
 	"syscall"
 
 	"github.com/containerd/containerd"
+	"github.com/docker/docker/api/types"
 	dockerclient "github.com/docker/docker/client"
+
+	"github.com/pingcap/chaos-mesh/pkg/mock"
 )
 
 const (
@@ -44,9 +47,15 @@ type ContainerRuntimeInfoClient interface {
 	ContainerKillByContainerID(ctx context.Context, containerID string) error
 }
 
+// DockerClientInterface represents the DockerClient, it's used to simply unit test
+type DockerClientInterface interface {
+	ContainerInspect(ctx context.Context, containerID string) (types.ContainerJSON, error)
+	ContainerKill(ctx context.Context, containerID, signal string) error
+}
+
 // DockerClient can get information from docker
 type DockerClient struct {
-	client *dockerclient.Client
+	client DockerClientInterface
 }
 
 // GetPidFromContainerID fetches PID according to container id
@@ -65,9 +74,14 @@ func (c DockerClient) GetPidFromContainerID(ctx context.Context, containerID str
 	return uint32(container.State.Pid), nil
 }
 
+// ContainerdClientInterface represents the ContainerClient, it's used to simply unit test
+type ContainerdClientInterface interface {
+	LoadContainer(ctx context.Context, id string) (containerd.Container, error)
+}
+
 // ContainerdClient can get information from containerd
 type ContainerdClient struct {
-	client *containerd.Client
+	client ContainerdClientInterface
 }
 
 // GetPidFromContainerID fetches PID according to container id
@@ -92,6 +106,11 @@ func (c ContainerdClient) GetPidFromContainerID(ctx context.Context, containerID
 // CreateContainerRuntimeInfoClient creates a container runtime information client.
 func CreateContainerRuntimeInfoClient(containerRuntime string) (ContainerRuntimeInfoClient, error) {
 	// TODO: support more container runtime
+
+	// Mock point to return error in unit test
+	if err := mock.On("CreateContainerRuntimeInfoClientError"); err != nil {
+		return nil, err.(error)
+	}
 
 	var cli ContainerRuntimeInfoClient
 	switch containerRuntime {

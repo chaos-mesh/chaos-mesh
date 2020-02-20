@@ -83,9 +83,14 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	}
 
 	scheduler := chaos.GetScheduler()
-	if duration == nil || scheduler == nil {
-		r.Log.Info("scheduler and duration should be defined currently")
+	if scheduler == nil {
+		r.Log.Info("scheduler should be defined currently")
 		return ctrl.Result{}, nil
+	}
+
+	if duration == nil {
+		zero := 0 * time.Second
+		duration = &zero
 	}
 
 	if chaos.IsDeleted() {

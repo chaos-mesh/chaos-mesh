@@ -11,18 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package chaosdaemon
+package time
 
-import (
-	pb "github.com/pingcap/chaos-mesh/pkg/chaosdaemon/pb"
-)
+import "errors"
 
-// Apply applies a netem on eth0 in pid related namespace
-func Apply(netem *pb.Netem, pid uint32) error {
-	panic("unimplemented")
-}
-
-// Cancel will remove netem on eth0 in pid related namespace
-func Cancel(netem *pb.Netem, pid uint32) error {
-	panic("unimplemented")
+// ModifyTime modifies time of target process
+func ModifyTime(pid int, deltaSec int64, deltaNsec int64) error {
+	return errors.New("darwin is not supported")
 }
