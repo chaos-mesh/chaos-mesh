@@ -16,6 +16,7 @@ package chaosdaemon
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"os/exec"
 	"syscall"
 
@@ -103,19 +104,42 @@ func (c ContainerdClient) GetPidFromContainerID(ctx context.Context, containerID
 	return task.Pid(), nil
 }
 
+// newDockerclient returns a dockerclient.NewClient with mock points
+func newDockerClient(host string, version string, client *http.Client, httpHeaders map[string]string) (DockerClientInterface, error) {
+	// Mock point to return error or mock client in unit test
+	if err := mock.On("NewDockerClientError"); err != nil {
+		return nil, err.(error)
+	}
+	if client := mock.On("MockDockerClient"); client != nil {
+		return client.(DockerClientInterface), nil
+	}
+
+	// The real logic
+	return dockerclient.NewClient(host, version, client, httpHeaders)
+}
+
+// newContainerdClient containerd.New
+func newContainerdClient(address string, opts ...containerd.ClientOpt) (ContainerdClientInterface, error) {
+	// Mock point to return error in unit test
+	if err := mock.On("NewContainerdClientError"); err != nil {
+		return nil, err.(error)
+	}
+	if client := mock.On("MockContainerdClient"); client != nil {
+		return client.(ContainerdClientInterface), nil
+	}
+
+	// The real logic
+	return containerd.New(address, opts...)
+}
+
 // CreateContainerRuntimeInfoClient creates a container runtime information client.
 func CreateContainerRuntimeInfoClient(containerRuntime string) (ContainerRuntimeInfoClient, error) {
 	// TODO: support more container runtime
 
-	// Mock point to return error in unit test
-	if err := mock.On("CreateContainerRuntimeInfoClientError"); err != nil {
-		return nil, err.(error)
-	}
-
 	var cli ContainerRuntimeInfoClient
 	switch containerRuntime {
 	case containerRuntimeDocker:
-		client, err := dockerclient.NewClient(defaultDockerSocket, "", nil, nil)
+		client, err := newDockerClient(defaultDockerSocket, "", nil, nil)
 		if err != nil {
 			return nil, err
 		}
@@ -123,7 +147,7 @@ func CreateContainerRuntimeInfoClient(containerRuntime string) (ContainerRuntime
 
 	case containerRuntimeContainerd:
 		// TODO(yeya24): add more options?
-		client, err := containerd.New(defaultContainerdSocket, containerd.WithDefaultNamespace(containerdDefaultNS))
+		client, err := newContainerdClient(defaultContainerdSocket, containerd.WithDefaultNamespace(containerdDefaultNS))
 		if err != nil {
 			return nil, err
 		}
@@ -141,7 +165,17 @@ func GenNetnsPath(pid uint32) string {
 	return fmt.Sprintf("%s/%d/ns/net", defaultProcPrefix, pid)
 }
 
+func f(x interface{}) *exec.Cmd {
+	return x.(func(...interface{}) *exec.Cmd)(1, "")
+}
+
 func withNetNS(ctx context.Context, nsPath string, cmd string, args ...string) *exec.Cmd {
+	// Mock point to return mock Cmd in unit test
+	if c := mock.On("MockWithNetNs"); c != nil {
+		f := c.(func(context.Context, string, string, ...string) *exec.Cmd)
+		return f(ctx, nsPath, cmd, args...)
+	}
+
 	// BusyBox's nsenter is very confusing. This usage is found by several attempts
 	args = append([]string{"-n" + nsPath, "--", cmd}, args...)
 

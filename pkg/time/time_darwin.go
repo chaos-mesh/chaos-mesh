@@ -13,9 +13,22 @@
 
 package time
 
-import "errors"
+import (
+	"errors"
+
+	"github.com/pingcap/chaos-mesh/pkg/mock"
+)
 
 // ModifyTime modifies time of target process
 func ModifyTime(pid int, deltaSec int64, deltaNsec int64) error {
+	// Mock point to return error in unit test
+	if err := mock.On("ModifyTimeError"); err != nil {
+		if e, ok := err.(error); ok {
+			return e
+		}
+		if ignore, ok := err.(bool); ok && ignore {
+			return nil
+		}
+	}
 	return errors.New("darwin is not supported")
 }
