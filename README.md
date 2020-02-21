@@ -194,7 +194,7 @@ metadata:
   name: pod-failure-example
   namespace: chaos-testing
 spec:
-  action: pod-failure # the specific chaos action to inject; supported actions: pod-kill/pod-failure/container-kill
+  action: pod-failure # the specific chaos action to inject; supported actions: pod-kill/pod-failure
   mode: one # the mode to run chaos action; supported modes are one/all/fixed/fixed-percent/random-max-percent
   duration: "60s" # duration for the injected chaos experiment
   selector: # pods where to inject chaos actions
