@@ -14,7 +14,8 @@
 Chaos Mesh is a cloud-native Chaos Engineering platform that orchestrates chaos on Kubernetes environments. At the current stage, it has the following components:
 
 - **Chaos Operator**: the core component for chaos orchestration. Fully open sourced.
-- **Chaos Dashboard**: a visualized panel that shows the impacts of chaos experiments on the online services of the system; under development; curently only supports chaos experiments on TiDB(https://github.com/pingcap/tidb).
+- **Chaos Dashboard**: a visualized panel that shows the impacts of chaos experiments on the online services of the system; under development; 
+curently only supports chaos experiments on TiDB(https://github.com/pingcap/tidb).
 
 See the following demo video for a quick view of Chaos Mesh:
 
@@ -22,7 +23,8 @@ See the following demo video for a quick view of Chaos Mesh:
 
 ## Chaos Operator
 
-Chaos Operator injects chaos into the applications and Kubernetes infrastructure in a manageable way, which provides easy, custom definitions for chaos experiments and automatic orchestration. There are three components at play:
+Chaos Operator injects chaos into the applications and Kubernetes infrastructure in a manageable way, which provides easy, 
+custom definitions for chaos experiments and automatic orchestration. There are three components at play:
 
 **Controller-manager**: used to schedule and manage the lifecycle of CRD objects
 
@@ -32,15 +34,21 @@ Chaos Operator injects chaos into the applications and Kubernetes infrastructure
 
 ![Chaos Operator](./static/chaos-mesh-overview.png)
 
-Chaos Operator uses [Custom Resource Definition (CRD)](https://kubernetes.io/docs/tasks/access-kubernetes-api/custom-resources/custom-resource-definitions/) to define chaos objects. The current implementation supports three types of CRD objects for fault injection, namely PodChaos, NetworkChaos, and IOChaos, which correspond to the following major actions (experiments):
+Chaos Operator uses [Custom Resource Definition (CRD)](https://kubernetes.io/docs/tasks/access-kubernetes-api/custom-resources/custom-resource-definitions/) to define chaos objects. 
+The current implementation supports three types of CRD objects for fault injection, namely PodChaos, NetworkChaos, IOChaos, and TimeChaos, 
+which correspond to the following major actions (experiments):
 
 - pod-kill: The selected pod is killed (ReplicaSet or something similar may be needed to ensure the pod will be restarted).
 - pod-failure: The selected pod will be unavailable in a specified period of time.
+- container-kill: The selected container of pod is killed.
 - netem chaos: Network chaos such as delay, duplication, etc.
 - network-partition: Simulate network partition.
 - IO chaos: Simulate file system faults such as I/O delay, read/write errors, etc.
+- Time chaos: Modify the time obtained by the application to achieve the effect of time skew.
 
-## Prerequisites
+## Quick Start
+
+### Prerequisites
 
 Before deploying Chaos Mesh, make sure the following items have been installed. 
 If you would like to have a try on your machine, you can refer to [get-started-on-your-local-machine](#get-started-on-your-local-machine) section.
@@ -50,8 +58,6 @@ If you would like to have a try on your machine, you can refer to [get-started-o
 - [Helm](https://helm.sh/) version >= v2.8.2
 - [Docker](https://docs.docker.com/install/) (required when running in [kind](https://kind.sigs.k8s.io/))
 
-## Deploy Chaos Mesh
-
 ### Get the Helm files
 
 ```bash
@@ -59,44 +65,25 @@ git clone https://github.com/pingcap/chaos-mesh.git
 cd chaos-mesh/
 ```
 
-### Run the following command to install Chaos Mesh
+### Install Chaos Mesh
 
 ```bash
 ./install.sh 
 ```
 
-After executing the above command, if the message that Chaos Mesh is installed 
-successfully is output normally, then you can enjoy Chaos Mesh. Otherwise, 
-please check the current environment according to the prompt message of the script 
-or send us an [issue](https://github.com/pingcap/chaos-mesh/issues/new/choose) for help. 
-In addition, You also can [Helm](https://helm.sh/) to [install Chaos Mesh manually](./doc/install_chaos_mesh_manually.md).
-
-## Get started on your local machine
-
-> **Warning:**
->
->**This deployment is for testing only. DO NOT USE in production!**
-
-You can try Chaos Mesh on your local K8s environment deployed using `kind` or `minikube`.
-
-
-### Deploy with kind
-
-1. Clone the code
-
-   ```bash
-   git clone https://github.com/pingcap/chaos-mesh && \
-   cd chaos-mesh
-   ```
-   
-2. Run the following command to install Chaos Mesh
-
-   ```
-   ./install.sh --local kind
-   ```
+`install.sh` will help you to install `kubelet`, `Helm`, and `Chaos Mesh`. 
+If you want to use Chaos Mesh on your local environment with `kind`, you can use `install.sh` with `--local kind` flag field, 
+this script will help you install `kind` and setup a local Kubernetes cluster before installing Chaos Mesh.
 
 At present, `install.sh` only supports deploying Chaos Mesh locally using [kind](https://kind.sigs.k8s.io/).
 If you want to deploy Chaos Mesh using [minikube](https://kubernetes.io/docs/tasks/tools/install-minikube/), this doc [get stated on minikube](./doc/get_started_on_minikube.md) can help you.
+
+After executing the above command, if the message that Chaos Mesh is installed 
+successfully is output normally, then you can continue next steps to test your application and enjoy Chaos Mesh. 
+Otherwise, please check the current environment according to the prompt message of the script 
+or send us an [issue](https://github.com/pingcap/chaos-mesh/issues/new/choose) for help. 
+In addition, You also can use [Helm](https://helm.sh/) to [install Chaos Mesh manually](./doc/install_chaos_mesh_manually.md).
+
 
 ### Deploy target cluster
 
