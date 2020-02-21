@@ -104,7 +104,7 @@ func (c ContainerdClient) GetPidFromContainerID(ctx context.Context, containerID
 	return task.Pid(), nil
 }
 
-// newDockerClient wrap dockerclient.NewClient with mock point
+// newDockerclient returns a dockerclient.NewClient with mock points
 func newDockerClient(host string, version string, client *http.Client, httpHeaders map[string]string) (DockerClientInterface, error) {
 	// Mock point to return error or mock client in unit test
 	if err := mock.On("NewDockerClientError"); err != nil {
@@ -118,7 +118,7 @@ func newDockerClient(host string, version string, client *http.Client, httpHeade
 	return dockerclient.NewClient(host, version, client, httpHeaders)
 }
 
-// newDockerClient wrap dockerclient.NewClient with mock point
+// newContainerdClient returns a containerd.New with mock points
 func newContainerdClient(address string, opts ...containerd.ClientOpt) (ContainerdClientInterface, error) {
 	// Mock point to return error in unit test
 	if err := mock.On("NewContainerdClientError"); err != nil {
