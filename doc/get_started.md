@@ -1,4 +1,4 @@
-# Get started with Chaos Mesh 
+# Getting started with Chaos Mesh
 
 ## Prerequisites
 
