@@ -52,7 +52,7 @@ See [Getting Started Docs](/doc/get_started.md)
 
 ## FAQs
 
-Refer to [FAQs](/doc/faqs.md).
+See [FAQs](/doc/faqs.md).
 
 ## Community
 
