@@ -25,7 +25,7 @@ cd chaos-mesh/
 `install.sh` will help you to install `kubelet`, `Helm`, and `Chaos Mesh`. 
 If you want to use Chaos Mesh on your local environment with `kind`, you can use `install.sh` with `--local kind` flag field, 
 this script will help you install `kind` and setup a local Kubernetes cluster before installing Chaos Mesh. 
-If you want to deploy Chaos Mesh using [minikube](https://kubernetes.io/docs/tasks/tools/install-minikube/), this doc [get stated on minikube](./doc/get_started_on_minikube.md) can help you.
+If you want to deploy Chaos Mesh using [minikube](https://kubernetes.io/docs/tasks/tools/install-minikube/), this doc [get stated on minikube](./get_started_on_minikube.md) can help you.
 
 After executing the above command, if the message that Chaos Mesh is installed 
 successfully is output normally, then you can continue next steps to test your application and enjoy Chaos Mesh. 

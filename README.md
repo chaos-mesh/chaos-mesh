@@ -48,7 +48,7 @@ which correspond to the following major actions (experiments):
 
 ## Getting Started with Chaos Mesh
 
-See [Getting Started Docs](./doc/get_started.md)
+See [Getting Started Docs](/doc/get_started.md)
 
 ## FAQs
 
