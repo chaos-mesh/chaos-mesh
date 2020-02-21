@@ -51,7 +51,6 @@ which correspond to the following major actions (experiments):
 ### Prerequisites
 
 Before deploying Chaos Mesh, make sure the following items have been installed. 
-If you would like to have a try on your machine, you can refer to [get-started-on-your-local-machine](#get-started-on-your-local-machine) section.
 
 - Kubernetes >= v1.12
 - [RBAC](https://kubernetes.io/docs/admin/authorization/rbac) enabled (optional)
