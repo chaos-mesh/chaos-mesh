@@ -40,7 +40,7 @@ Chaos Operator uses [Custom Resource Definition (CRD)](https://kubernetes.io/doc
 - netem chaos: Network chaos such as delay, duplication, etc.
 - network-partition: Simulate network partition.
 - IO chaos: Simulate file system faults such as I/O delay, read/write errors, etc.
-- time chaos: The selected pod will be injected time offset.
+- time chaos: The selected pod will be injected clock skew.
 
 ## Prerequisites
 
