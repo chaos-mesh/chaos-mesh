@@ -16,6 +16,8 @@ package networkchaos
 import (
 	"fmt"
 
+	"k8s.io/client-go/tools/record"
+
 	"github.com/go-logr/logr"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -29,6 +31,7 @@ import (
 
 type Reconciler struct {
 	client.Client
+	record.EventRecorder
 	Log logr.Logger
 }
 
@@ -58,9 +61,11 @@ func (r *Reconciler) commonNetworkChaos(networkchaos *v1alpha1.NetworkChaos, req
 	var cr *common.Reconciler
 	switch networkchaos.Spec.Action {
 	case v1alpha1.DelayAction, v1alpha1.DuplicateAction, v1alpha1.CorruptAction, v1alpha1.LossAction:
-		cr = netem.NewCommonReconciler(r.Client, r.Log.WithValues("action", "netem"), req)
+		cr = netem.NewCommonReconciler(r.Client, r.Log.WithValues("action", "netem"),
+			req, r.EventRecorder)
 	case v1alpha1.PartitionAction:
-		cr = partition.NewCommonReconciler(r.Client, r.Log.WithValues("action", "partition"), req)
+		cr = partition.NewCommonReconciler(r.Client, r.Log.WithValues("action", "partition"),
+			req, r.EventRecorder)
 	default:
 		return r.invalidActionResponse(networkchaos)
 	}
@@ -71,9 +76,11 @@ func (r *Reconciler) scheduleNetworkChaos(networkchaos *v1alpha1.NetworkChaos, r
 	var sr *twophase.Reconciler
 	switch networkchaos.Spec.Action {
 	case v1alpha1.DelayAction, v1alpha1.DuplicateAction, v1alpha1.CorruptAction, v1alpha1.LossAction:
-		sr = netem.NewTwoPhaseReconciler(r.Client, r.Log.WithValues("action", "netem"), req)
+		sr = netem.NewTwoPhaseReconciler(r.Client, r.Log.WithValues("action", "netem"),
+			req, r.EventRecorder)
 	case v1alpha1.PartitionAction:
-		sr = partition.NewTwoPhaseReconciler(r.Client, r.Log.WithValues("action", "partition"), req)
+		sr = partition.NewTwoPhaseReconciler(r.Client, r.Log.WithValues("action", "partition"),
+			req, r.EventRecorder)
 	default:
 		return r.invalidActionResponse(networkchaos)
 	}

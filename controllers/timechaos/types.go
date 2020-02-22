@@ -18,6 +18,8 @@ import (
 	"errors"
 	"fmt"
 
+	"k8s.io/client-go/tools/record"
+
 	k8serror "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
 
@@ -42,6 +44,7 @@ const timeChaosMsg = "time is shifted with %v"
 // Reconciler is time-chaos reconciler
 type Reconciler struct {
 	client.Client
+	record.EventRecorder
 	Log logr.Logger
 }
 
@@ -84,6 +87,7 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos reconcil
 		return err
 	}
 
+	r.Event(timechaos, v1.EventTypeNormal, utils.EventChaosToInject, "")
 	pods, err := utils.SelectAndGeneratePods(ctx, r.Client, &timechaos.Spec)
 
 	if err != nil {
@@ -123,6 +127,7 @@ func (r *Reconciler) Recover(ctx context.Context, req ctrl.Request, chaos reconc
 		return err
 	}
 
+	r.Event(timechaos, v1.EventTypeNormal, utils.EventChaosToRecover, "")
 	err := r.cleanFinalizersAndRecover(ctx, timechaos)
 	if err != nil {
 		return err

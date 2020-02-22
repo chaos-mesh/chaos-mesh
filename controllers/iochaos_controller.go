@@ -30,8 +30,8 @@ import (
 // IoChaosReconciler reconciles a IoChaos object
 type IoChaosReconciler struct {
 	client.Client
-	Log      logr.Logger
-	Recorder record.EventRecorder
+	record.EventRecorder
+	Log logr.Logger
 }
 
 // +kubebuilder:rbac:groups=chaosmesh.pingcap.com,resources=iochaos,verbs=get;list;watch;create;update;patch;delete
@@ -42,8 +42,9 @@ func (r *IoChaosReconciler) Reconcile(req ctrl.Request) (result ctrl.Result, err
 	logger := r.Log.WithValues("iochaos", req.NamespacedName)
 
 	reconciler := iochaos.Reconciler{
-		Client: r.Client,
-		Log:    logger,
+		Client:        r.Client,
+		EventRecorder: r.EventRecorder,
+		Log:           logger,
 	}
 	chaos := &v1alpha1.IoChaos{}
 	if err := r.Get(context.Background(), req.NamespacedName, chaos); err != nil {
@@ -52,17 +53,11 @@ func (r *IoChaosReconciler) Reconcile(req ctrl.Request) (result ctrl.Result, err
 	}
 
 	result, err = reconciler.Reconcile(req, chaos)
-	if !chaos.IsDeleted() {
-		if err != nil {
-			r.Recorder.Event(chaos, v1.EventTypeWarning, utils.EventChaosInjectFailed, err.Error())
+	if err != nil {
+		if !chaos.IsDeleted() {
+			r.Event(chaos, v1.EventTypeWarning, utils.EventChaosInjectFailed, err.Error())
 		} else {
-			r.Recorder.Event(chaos, v1.EventTypeNormal, utils.EventChaosStarted, "")
-		}
-	} else {
-		if err != nil {
-			r.Recorder.Event(chaos, v1.EventTypeWarning, utils.EventChaosRecoverFailed, err.Error())
-		} else {
-			r.Recorder.Event(chaos, v1.EventTypeNormal, utils.EventChaosCompleted, "")
+			r.Event(chaos, v1.EventTypeWarning, utils.EventChaosRecoverFailed, err.Error())
 		}
 	}
 	return result, nil

@@ -86,23 +86,23 @@ var _ = BeforeSuite(func(done Done) {
 	Expect(err).ToNot(HaveOccurred())
 
 	err = (&IoChaosReconciler{
-		Client:   k8sManager.GetClient(),
-		Log:      ctrl.Log.WithName("controllers").WithName("IoChaos"),
-		Recorder: k8sManager.GetEventRecorderFor("iochaos-controller"),
+		Client:        k8sManager.GetClient(),
+		EventRecorder: k8sManager.GetEventRecorderFor("iochaos-controller"),
+		Log:           ctrl.Log.WithName("controllers").WithName("IoChaos"),
 	}).SetupWithManager(k8sManager)
 	Expect(err).ToNot(HaveOccurred())
 
 	err = (&PodChaosReconciler{
-		Client:   k8sManager.GetClient(),
-		Log:      ctrl.Log.WithName("controllers").WithName("PodChaos"),
-		Recorder: k8sManager.GetEventRecorderFor("podchaos-controller"),
+		Client:        k8sManager.GetClient(),
+		EventRecorder: k8sManager.GetEventRecorderFor("podchaos-controller"),
+		Log:           ctrl.Log.WithName("controllers").WithName("PodChaos"),
 	}).SetupWithManager(k8sManager)
 	Expect(err).ToNot(HaveOccurred())
 
 	err = (&NetworkChaosReconciler{
-		Client:   k8sManager.GetClient(),
-		Log:      ctrl.Log.WithName("controllers").WithName("NetworkChaos"),
-		Recorder: k8sManager.GetEventRecorderFor("networkchaos-controller"),
+		Client:        k8sManager.GetClient(),
+		EventRecorder: k8sManager.GetEventRecorderFor("networkchaos-controller"),
+		Log:           ctrl.Log.WithName("controllers").WithName("NetworkChaos"),
 	}).SetupWithManager(k8sManager)
 	Expect(err).ToNot(HaveOccurred())
 

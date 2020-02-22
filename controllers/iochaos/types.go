@@ -17,6 +17,7 @@ import (
 	"fmt"
 
 	"github.com/go-logr/logr"
+	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -28,6 +29,7 @@ import (
 
 type Reconciler struct {
 	client.Client
+	record.EventRecorder
 	Log logr.Logger
 }
 
@@ -37,7 +39,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request, chaos *v1alpha1.IoChaos) (ctrl.
 	scheduler := chaos.GetScheduler()
 	duration, err := chaos.GetDuration()
 	if err != nil {
-		msg := fmt.Sprintf("unable to get podchaos[%s/%s]'s duration",
+		msg := fmt.Sprintf("unable to get iochaos[%s/%s]'s duration",
 			req.Namespace, req.Name)
 		r.Log.Error(err, msg)
 		return ctrl.Result{}, err
@@ -58,7 +60,8 @@ func (r *Reconciler) commonIOChaos(iochaos *v1alpha1.IoChaos, req ctrl.Request) 
 	var cr *common.Reconciler
 	switch iochaos.Spec.Layer {
 	case v1alpha1.FileSystemLayer:
-		cr = fs.NewCommonReconciler(r.Client, r.Log.WithValues("reconciler", "chaosfs"), req)
+		cr = fs.NewCommonReconciler(r.Client, r.Log.WithValues("reconciler", "chaosfs"),
+			req, r.EventRecorder)
 	default:
 		return r.invalidActionResponse(iochaos)
 	}
@@ -69,7 +72,8 @@ func (r *Reconciler) scheduleIOChaos(iochaos *v1alpha1.IoChaos, req ctrl.Request
 	var sr *twophase.Reconciler
 	switch iochaos.Spec.Layer {
 	case v1alpha1.FileSystemLayer:
-		sr = fs.NewTwoPhaseReconciler(r.Client, r.Log.WithValues("reconciler", "chaosfs"), req)
+		sr = fs.NewTwoPhaseReconciler(r.Client, r.Log.WithValues("reconciler", "chaosfs"),
+			req, r.EventRecorder)
 	default:
 		return r.invalidActionResponse(iochaos)
 	}

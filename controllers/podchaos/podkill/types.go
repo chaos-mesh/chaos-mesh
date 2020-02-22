@@ -19,6 +19,8 @@ import (
 
 	"github.com/go-logr/logr"
 	"golang.org/x/sync/errgroup"
+	v1 "k8s.io/api/core/v1"
+	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -34,19 +36,23 @@ const (
 
 type Reconciler struct {
 	client.Client
+	record.EventRecorder
 	Log logr.Logger
 }
 
-func newReconciler(c client.Client, log logr.Logger, req ctrl.Request) *Reconciler {
+func newReconciler(c client.Client, log logr.Logger, req ctrl.Request,
+	recorder record.EventRecorder) *Reconciler {
 	return &Reconciler{
-		Client: c,
-		Log:    log,
+		Client:        c,
+		EventRecorder: recorder,
+		Log:           log,
 	}
 }
 
 // NewTwoPhaseReconciler would create Reconciler for twophase package
-func NewTwoPhaseReconciler(c client.Client, log logr.Logger, req ctrl.Request) *twophase.Reconciler {
-	r := newReconciler(c, log, req)
+func NewTwoPhaseReconciler(c client.Client, log logr.Logger, req ctrl.Request,
+	recorder record.EventRecorder) *twophase.Reconciler {
+	r := newReconciler(c, log, req, recorder)
 	return twophase.NewReconciler(r, r.Client, r.Log)
 }
 
@@ -58,6 +64,7 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, obj reconciler
 		r.Log.Error(err, "chaos is not PodChaos", "chaos", obj)
 		return err
 	}
+	r.Event(podchaos, v1.EventTypeNormal, utils.EventChaosToInject, "")
 	pods, err := utils.SelectPods(ctx, r.Client, podchaos.Spec.Selector)
 	if err != nil {
 		r.Log.Error(err, "fail to get selected pods")
@@ -110,6 +117,7 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, obj reconciler
 
 // Recover implements the reconciler.InnerReconciler.Recover
 func (r *Reconciler) Recover(ctx context.Context, req ctrl.Request, obj reconciler.InnerObject) error {
+	r.Event(obj, v1.EventTypeNormal, utils.EventChaosToRecover, "")
 	return nil
 }
 

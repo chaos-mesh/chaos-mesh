@@ -30,8 +30,8 @@ import (
 // NetworkChaosReconciler reconciles a NetworkChaos object
 type NetworkChaosReconciler struct {
 	client.Client
-	Log      logr.Logger
-	Recorder record.EventRecorder
+	record.EventRecorder
+	Log logr.Logger
 }
 
 // +kubebuilder:rbac:groups=pingcap.com,resources=networkchaos,verbs=get;list;watch;create;update;patch;delete
@@ -42,8 +42,9 @@ func (r *NetworkChaosReconciler) Reconcile(req ctrl.Request) (result ctrl.Result
 	logger := r.Log.WithValues("reconciler", "networkchaos")
 
 	reconciler := networkchaos.Reconciler{
-		Client: r.Client,
-		Log:    logger,
+		Client:        r.Client,
+		EventRecorder: r.EventRecorder,
+		Log:           logger,
 	}
 
 	chaos := &v1alpha1.NetworkChaos{}
@@ -53,17 +54,11 @@ func (r *NetworkChaosReconciler) Reconcile(req ctrl.Request) (result ctrl.Result
 	}
 
 	result, err = reconciler.Reconcile(req, chaos)
-	if !chaos.IsDeleted() {
-		if err != nil {
-			r.Recorder.Event(chaos, v1.EventTypeWarning, utils.EventChaosInjectFailed, err.Error())
+	if err != nil {
+		if !chaos.IsDeleted() {
+			r.Event(chaos, v1.EventTypeWarning, utils.EventChaosInjectFailed, err.Error())
 		} else {
-			r.Recorder.Event(chaos, v1.EventTypeNormal, utils.EventChaosStarted, "")
-		}
-	} else {
-		if err != nil {
-			r.Recorder.Event(chaos, v1.EventTypeWarning, utils.EventChaosRecoverFailed, err.Error())
-		} else {
-			r.Recorder.Event(chaos, v1.EventTypeNormal, utils.EventChaosCompleted, "")
+			r.Event(chaos, v1.EventTypeWarning, utils.EventChaosRecoverFailed, err.Error())
 		}
 	}
 

@@ -19,7 +19,7 @@ package utils
 // be of type "Warning". The reasons are defined as following.
 const (
 	// The chaos just started
-	EventChaosStarted string = "ChaosStarted"
+	EventChaosToInject string = "ChaosToInject"
 
 	// The chaos just failed when injecting. The message should include detailed error
 	EventChaosInjectFailed string = "ChaosInjectFailed"
@@ -28,5 +28,5 @@ const (
 	EventChaosRecoverFailed string = "ChaosRecoverFailed"
 
 	// The chaos just completed
-	EventChaosCompleted string = "ChaosCompleted"
+	EventChaosToRecover string = "ChaosToRecover"
 )
