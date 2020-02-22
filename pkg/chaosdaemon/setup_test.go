@@ -24,6 +24,8 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
+	"github.com/prometheus/client_golang/prometheus"
+
 	"github.com/pingcap/chaos-mesh/pkg/mock"
 
 	"sigs.k8s.io/controller-runtime/pkg/envtest"
@@ -101,4 +103,14 @@ func (m *MockTask) Kill(context.Context, syscall.Signal, ...containerd.KillOpts)
 		return err.(error)
 	}
 	return nil
+}
+
+type MockRegisterer struct {
+	RegisterGatherer
+}
+
+func (*MockRegisterer) MustRegister(...prometheus.Collector) {
+	if err := mock.On("PanicOnMustRegister"); err != nil {
+		panic(err)
+	}
 }
