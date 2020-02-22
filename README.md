@@ -36,9 +36,11 @@ Chaos Operator uses [Custom Resource Definition (CRD)](https://kubernetes.io/doc
 
 - pod-kill: The selected pod is killed (ReplicaSet or something similar may be needed to ensure the pod will be restarted).
 - pod-failure: The selected pod will be unavailable in a specified period of time.
+- container-kill: The selected container is killed in the selected pod.
 - netem chaos: Network chaos such as delay, duplication, etc.
 - network-partition: Simulate network partition.
 - IO chaos: Simulate file system faults such as I/O delay, read/write errors, etc.
+- time chaos: The selected pod will be injected clock skew.
 
 ## Prerequisites
 
