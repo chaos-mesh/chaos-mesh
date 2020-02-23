@@ -118,7 +118,7 @@ func newDockerClient(host string, version string, client *http.Client, httpHeade
 	return dockerclient.NewClient(host, version, client, httpHeaders)
 }
 
-// newContainerdClient containerd.New
+// newContainerdClient returns a containerd.New with mock points
 func newContainerdClient(address string, opts ...containerd.ClientOpt) (ContainerdClientInterface, error) {
 	// Mock point to return error in unit test
 	if err := mock.On("NewContainerdClientError"); err != nil {
