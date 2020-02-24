@@ -15,6 +15,7 @@ package utils
 
 import "fmt"
 
+// EncodeClkIds will convert array of clk ids into a mask
 func EncodeClkIds(clkIds []string) (uint64, error) {
 	mask := uint64(0)
 
