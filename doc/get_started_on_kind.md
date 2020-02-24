@@ -27,9 +27,9 @@ After executing the above command, if the message that Chaos Mesh is installed
 successfully is output normally, then you can continue next steps to test your application and enjoy Chaos Mesh. 
 Otherwise, please check the current environment according to the prompt message of the script 
 or send us an [issue](https://github.com/pingcap/chaos-mesh/issues/new/choose) for help. 
-In addition, You also can use [Helm](https://helm.sh/) to [install Chaos Mesh manually](deploy_and_usage.md).
+In addition, You also can use [Helm](https://helm.sh/) to [install Chaos Mesh manually](deploy.md).
 
 ## Usage
 
-Refer to the Steps in [Usage](deploy_and_usage.md#usage)
+Refer to the Steps in [Usage](usage.md)
 

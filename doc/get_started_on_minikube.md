@@ -36,7 +36,7 @@ cd chaos-mesh
 ./install.sh
 ```
 
-* Install Chaos Mesh manually refer to [Install Chaos Mesh manually](deploy_and_usage.md).
+* Install Chaos Mesh manually refer to [Install Chaos Mesh manually](deploy.md).
 
 **Note:**
 
@@ -48,4 +48,4 @@ There are some known restrictions for Chaos Operator deployed on `minikube` clus
 
 ## Usage
 
-Refer to the Steps in [Usage](deploy_and_usage.md#usage)
+Refer to the Steps in [Usage](usage.md)

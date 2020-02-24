@@ -48,12 +48,12 @@ which correspond to the following major actions (experiments):
 
 ## Quick start
 
-* [Getting Started on kind](/doc/get_started_on_kind.md)
-* [Getting Started on minikube](/doc/get_started_on_minikube.md)
+* [Get Started on kind](/doc/get_started_on_kind.md)
+* [Get Started on minikube](/doc/get_started_on_minikube.md)
 
-## Deploy and Usage
+## Deploy and use
 
-See [Docs](/doc/deploy_and_usage.md)
+See [Docs](/doc/deploy.md)
 
 ## FAQs
 
