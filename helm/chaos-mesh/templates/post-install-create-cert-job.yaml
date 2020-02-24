@@ -1,3 +1,4 @@
+{{ if not .Values.webhook.certManager.enabled }}
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -34,8 +35,8 @@ spec:
             - "-c"
             - |
               set -e
-              K8S_SERVICE=chaos-mesh-controller-manager
-              K8S_SECRET=webhook-certs
+              K8S_SERVICE={{ template "chaos-mesh.svc" . }}
+              K8S_SECRET={{ template "chaos-mesh.certs" . }}
               K8S_NAMESPACE={{ .Release.Namespace }}
 
               # test if secret already exists
@@ -120,3 +121,5 @@ spec:
                       --from-file=tls.crt=${tmpdir}/server-cert.pem \
                       --dry-run -o yaml |
                   kubectl -n ${K8S_NAMESPACE} apply -f -
+
+{{- end }}

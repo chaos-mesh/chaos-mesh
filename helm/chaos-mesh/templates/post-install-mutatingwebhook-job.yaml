@@ -1,3 +1,4 @@
+{{ if not .Values.webhook.certManager.enabled }}
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -46,27 +47,11 @@ spec:
               apiVersion: admissionregistration.k8s.io/v1beta1
               kind: MutatingWebhookConfiguration
               metadata:
-                name: chaos-mesh-sidecar-injector
-                labels:
-                  app.kubernetes.io/name: {{ template "chaos-mesh.name" . }}
-                  app.kubernetes.io/managed-by: {{ .Release.Service }}
-                  app.kubernetes.io/instance: {{ .Release.Name }}
-                  app.kubernetes.io/component: admission-webhook
-                  helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+"  "_" }}
+                name: {{ template "chaos-mesh.mutation" . }}
               webhooks:
-                - name: admission-webhook.pingcap.com
+                - name: {{ template "chaos-mesh.webhook" . }}
                   clientConfig:
-                    service:
-                      name: chaos-mesh-controller-manager
-                      namespace: ${K8S_NAMESPACE}
-                      path: "/inject-v1-pod"
                     caBundle: "${CA_BUNDLE}"
-                  rules:
-                    - operations: [ "CREATE" ]
-                      apiGroups: [""]
-                      apiVersions: ["v1"]
-                      resources: ["pods"]
-                  namespaceSelector:
-                    matchLabels:
-                      admission-webhook: enabled
               EOF
+
+{{- end }}

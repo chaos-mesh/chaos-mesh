@@ -67,7 +67,7 @@ spec:
       volumes:
         - name: webhook-certs
           secret:
-            secretName: webhook-certs
+            secretName: {{ template "chaos-mesh.certs" . }}
     {{- with .Values.controllerManager.nodeSelector }}
       nodeSelector:
 {{ toYaml . | indent 8 }}

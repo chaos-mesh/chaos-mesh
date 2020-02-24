@@ -139,3 +139,11 @@ preJobs:
 
 postJobs:
   podAnnotations: {}
+
+webhook:
+  # Setup the webhook using cert-manager
+  certManager:
+    enabled: false
+    autoDeleteSecret: false
+
+  FailurePolicy: Ignore
