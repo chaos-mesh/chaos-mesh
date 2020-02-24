@@ -1,39 +1,70 @@
-# Getting started with Chaos Mesh
+# Deploy and usage
 
-## Prerequisites
+## Deploy 
 
-Before deploying Chaos Mesh, make sure the following items have been installed. 
+### Prerequisites
+
+Before deploying Chaos Mesh, make sure the following items have been installed.
 
 - Kubernetes >= v1.12
 - [RBAC](https://kubernetes.io/docs/admin/authorization/rbac) enabled (optional)
 - [Helm](https://helm.sh/) version >= v2.8.2
-- [Docker](https://docs.docker.com/install/) (required when running in [kind](https://kind.sigs.k8s.io/))
 
-## Get the Helm files
+### Get the Helm files
 
 ```bash
 git clone https://github.com/pingcap/chaos-mesh.git
 cd chaos-mesh/
 ```
 
-## Install Chaos Mesh
+### Create custom resource type
+
+To use Chaos Mesh, you must first create the related custom resource type.
 
 ```bash
-./install.sh 
+kubectl apply -f manifests/crd.yaml
 ```
 
-`install.sh` will help you to install `kubelet`, `Helm`, and `Chaos Mesh`. 
-If you want to use Chaos Mesh on your local environment with `kind`, you can use `install.sh` with `--local kind` flag field, 
-this script will help you install `kind` and setup a local Kubernetes cluster before installing Chaos Mesh. 
-If you want to deploy Chaos Mesh using [minikube](https://kubernetes.io/docs/tasks/tools/install-minikube/), this doc [get stated on minikube](./get_started_on_minikube.md) can help you.
+### Install Chaos Mesh
 
-After executing the above command, if the message that Chaos Mesh is installed 
-successfully is output normally, then you can continue next steps to test your application and enjoy Chaos Mesh. 
-Otherwise, please check the current environment according to the prompt message of the script 
-or send us an [issue](https://github.com/pingcap/chaos-mesh/issues/new/choose) for help. 
-In addition, You also can use [Helm](https://helm.sh/) to [install Chaos Mesh manually](./install_chaos_mesh_manually.md).
+* Install Chaos Mesh with Chaos Operator only in docker environment
 
-## Deploy target cluster
+```bash
+# create namespace chaos-testing
+kubectl create ns chaos-testing
+# helm 2.X
+helm install helm/chaos-mesh --name=chaos-mesh --namespace=chaos-testing
+# helm 3.X
+helm install chaos-mesh helm/chaos-mesh --namespace=chaos-testing
+# check Chaos Mesh pods installed
+kubectl get pods --namespace chaos-testing -l app.kubernetes.io/instance=chaos-mesh
+```
+
+* Install Chaos Mesh with Chaos Operator only in containerd environment (Kind)
+
+```bash
+# create namespace chaos-testing
+kubectl create ns chaos-testing
+# helm 2.X
+helm install helm/chaos-mesh --name=chaos-mesh --namespace=chaos-testing --set chaosDaemon.runtime=containerd --set chaosDaemon.socketPath=/run/containerd/containerd.sock
+# helm 3.X
+helm install chaos-mesh helm/chaos-mesh --namespace=chaos-testing --set chaosDaemon.runtime=containerd --set chaosDaemon.socketPath=/run/containerd/containerd.sock
+# check Chaos Mesh pods installed
+kubectl get pods --namespace chaos-testing -l app.kubernetes.io/instance=chaos-mesh
+```
+
+* Install Chaos Mesh with Chaos Operator and Chaos Dashboard
+
+```bash
+# helm 2.X
+helm install helm/chaos-mesh --name=chaos-mesh --namespace=chaos-testing --set dashboard.create=true
+# helm 3.X
+helm install chaos-mesh helm/chaos-mesh --namespace=chaos-testing --set dashboard.create=true
+```
+
+## Usage
+
+### Deploy target cluster
 
 After Chaos Mesh is deployed, we can deploy the target cluster to be tested, or where we want to inject faults. For illustration purposes, we use TiDB as our sample cluster.
 
@@ -65,7 +96,7 @@ spec:
     cron: "@every 5m"
 ```
 
-## Create a chaos experiment
+### Create a chaos experiment
 
 ```bash
 kubectl apply -f pod-failure-example.yaml
@@ -76,20 +107,20 @@ You can see the QPS performance (by [running a benchmark against the cluster](ht
 
 ![tikv-pod-failure](../static/tikv-pod-failure.png)
 
-## Update a chaos experiment
+### Update a chaos experiment
 
 ```bash
 vim pod-failure-example.yaml # modify pod-failure-example.yaml to what you want
 kubectl apply -f pod-failure-example.yaml
 ```
 
-## Delete a chaos experiment
+### Delete a chaos experiment
 
 ```bash
 kubectl delete -f pod-failure-example.yaml
 ```
 
-## Watch your chaos experiments in Dashboard
+### Watch your chaos experiments in Dashboard
 
 Chaos Dashboard is currently only available for TiDB clusters. Stay tuned for more supports or join us in making it happen.
 

@@ -46,9 +46,14 @@ which correspond to the following major actions (experiments):
 - IO chaos: Simulate file system faults such as I/O delay, read/write errors, etc.
 - time chaos: The selected pod will be injected clock skew.
 
-## Getting Started
+## Quick start
 
-See [Getting Started Docs](/doc/get_started.md)
+* [Getting Started on kind](/doc/get_started_on_kind.md)
+* [Getting Started on minikube](/doc/get_started_on_minikube.md)
+
+## Deploy and Usage
+
+See [Docs](/doc/deploy_and_usage.md)
 
 ## FAQs
 
