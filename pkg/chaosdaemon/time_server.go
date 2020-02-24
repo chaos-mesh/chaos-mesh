@@ -10,6 +10,8 @@ import (
 	pb "github.com/pingcap/chaos-mesh/pkg/chaosdaemon/pb"
 )
 
+const ALL_CLOCK_IDS_MASK uint64 = 1<<64 - 1
+
 func (s *daemonServer) SetTimeOffset(ctx context.Context, req *pb.TimeRequest) (*empty.Empty, error) {
 	log.Info("shift time", "Request", req)
 
@@ -19,7 +21,7 @@ func (s *daemonServer) SetTimeOffset(ctx context.Context, req *pb.TimeRequest) (
 		return nil, err
 	}
 
-	err = time.ModifyTime(int(pid), int64(req.Sec), int64(req.Nsec))
+	err = time.ModifyTime(int(pid), req.Sec, req.Nsec, req.ClkIdsMask)
 	if err != nil {
 		log.Error(err, "error while modifying time", "pid", pid)
 		return nil, err
@@ -36,7 +38,7 @@ func (s *daemonServer) RecoverTimeOffset(ctx context.Context, req *pb.TimeReques
 		return nil, err
 	}
 
-	err = time.ModifyTime(int(pid), int64(0), int64(0))
+	err = time.ModifyTime(int(pid), int64(0), int64(0), ALL_CLOCK_IDS_MASK)
 	if err != nil {
 		log.Error(err, "error while recovering", "pid", pid)
 		return nil, err

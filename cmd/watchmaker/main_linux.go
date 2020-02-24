@@ -17,6 +17,9 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"strings"
+
+	"github.com/pingcap/chaos-mesh/pkg/utils"
 
 	"github.com/go-logr/zapr"
 	"go.uber.org/zap"
@@ -29,16 +32,18 @@ import (
 )
 
 var (
-	pid          int
-	secDelta     int64
-	nsecDelta    int64
-	printVersion bool
+	pid           int
+	secDelta      int64
+	nsecDelta     int64
+	printVersion  bool
+	clockIdsSlice string
 )
 
 func initFlag() {
 	flag.IntVar(&pid, "pid", 0, "pid of target program")
 	flag.Int64Var(&secDelta, "sec_delta", 0, "delta time of sec field")
 	flag.Int64Var(&nsecDelta, "nsec_delta", 0, "delta time of nsec field")
+	flag.StringVar(&clockIdsSlice, "clk_ids", "CLOCK_REALTIME", "affected clock ids")
 	flag.BoolVar(&printVersion, "version", false, "print version information and exit")
 
 	flag.Parse()
@@ -61,7 +66,15 @@ func main() {
 	ptrace.RegisterLogger(log.WithName("ptrace"))
 	time.RegisterLogger(log.WithName("time"))
 
-	err = time.ModifyTime(pid, secDelta, nsecDelta)
+	clkIds := strings.Split(clockIdsSlice, ",")
+	mask, err := utils.EncodeClkIds(clkIds)
+	if err != nil {
+		log.Error(err, "error while converting clock ids to mask")
+		return
+	}
+	log.Info("get clock ids mask", "mask", mask)
+
+	err = time.ModifyTime(pid, secDelta, nsecDelta, mask)
 
 	if err != nil {
 		fmt.Printf("error while modifying time, pid: %d, sec_delta: %d, nsec_delta: %d\n Error: %s", pid, secDelta, nsecDelta, err.Error())
