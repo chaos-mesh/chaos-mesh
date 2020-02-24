@@ -1,10 +1,12 @@
 # Getting started on minikube
 
-## Prerequisites
+## Deploy 
+
+### Prerequisites
 
 * [Minikube](https://kubernetes.io/docs/tasks/tools/install-minikube/)
 
-## Setup the Kubernetes environment
+### Setup the Kubernetes environment
 1. Start a `minikube` kubernetes cluster. Make sure you have installed [minikube](https://kubernetes.io/docs/tasks/tools/install-minikube/).
 
    ```bash
@@ -24,7 +26,7 @@
    kubectl -n kube-system get pods -l app=helm
    ```
 
-## Install `chaos-mesh` 
+### Install `chaos-mesh` 
 
 * Run the following comments to install Chaos Mesh
 
