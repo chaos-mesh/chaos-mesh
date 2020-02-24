@@ -418,7 +418,7 @@ deploy_volume_provisioner() {
     local config_url="https://raw.githubusercontent.com/pingcap/chaos-mesh/master/manifests/local-volume-provisioner.yaml"
 
     rm -rf "${config_file}"
-    ensure curl -i "${config_file}" "$config_url"
+    ensure curl -o "${config_file}" "$config_url"
     ensure kubectl apply -f "${config_file}"
 }
 
