@@ -94,7 +94,6 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos reconcil
 		return err
 	}
 
-	r.Event(networkchaos, v1.EventTypeNormal, utils.EventChaosToInject, "")
 	pods, err := utils.SelectAndGeneratePods(ctx, r.Client, &networkchaos.Spec)
 
 	if err != nil {
@@ -124,7 +123,7 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos reconcil
 
 		networkchaos.Status.Experiment.Pods = append(networkchaos.Status.Experiment.Pods, ps)
 	}
-
+	r.Event(networkchaos, v1.EventTypeNormal, utils.EventChaosInjected, "")
 	return nil
 }
 
@@ -137,12 +136,11 @@ func (r *Reconciler) Recover(ctx context.Context, req ctrl.Request, chaos reconc
 		return err
 	}
 
-	r.Event(networkchaos, v1.EventTypeNormal, utils.EventChaosToRecover, "")
 	err := r.cleanFinalizersAndRecover(ctx, networkchaos)
 	if err != nil {
 		return err
 	}
-
+	r.Event(networkchaos, v1.EventTypeNormal, utils.EventChaosRecovered, "")
 	return nil
 }
 

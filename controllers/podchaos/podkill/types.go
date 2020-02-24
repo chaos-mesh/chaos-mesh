@@ -64,7 +64,6 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, obj reconciler
 		r.Log.Error(err, "chaos is not PodChaos", "chaos", obj)
 		return err
 	}
-	r.Event(podchaos, v1.EventTypeNormal, utils.EventChaosToInject, "")
 	pods, err := utils.SelectPods(ctx, r.Client, podchaos.Spec.Selector)
 	if err != nil {
 		r.Log.Error(err, "fail to get selected pods")
@@ -112,12 +111,13 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, obj reconciler
 
 		podchaos.Status.Experiment.Pods = append(podchaos.Status.Experiment.Pods, ps)
 	}
+
+	r.Event(podchaos, v1.EventTypeNormal, utils.EventChaosInjected, "")
 	return nil
 }
 
 // Recover implements the reconciler.InnerReconciler.Recover
 func (r *Reconciler) Recover(ctx context.Context, req ctrl.Request, obj reconciler.InnerObject) error {
-	r.Event(obj, v1.EventTypeNormal, utils.EventChaosToRecover, "")
 	return nil
 }
 

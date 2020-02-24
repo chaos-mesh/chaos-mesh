@@ -87,7 +87,6 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos reconcil
 		return err
 	}
 
-	r.Event(timechaos, v1.EventTypeNormal, utils.EventChaosToInject, "")
 	pods, err := utils.SelectAndGeneratePods(ctx, r.Client, &timechaos.Spec)
 
 	if err != nil {
@@ -114,7 +113,7 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos reconcil
 
 		timechaos.Status.Experiment.Pods = append(timechaos.Status.Experiment.Pods, ps)
 	}
-
+	r.Event(timechaos, v1.EventTypeNormal, utils.EventChaosInjected, "")
 	return nil
 }
 
@@ -127,11 +126,11 @@ func (r *Reconciler) Recover(ctx context.Context, req ctrl.Request, chaos reconc
 		return err
 	}
 
-	r.Event(timechaos, v1.EventTypeNormal, utils.EventChaosToRecover, "")
 	err := r.cleanFinalizersAndRecover(ctx, timechaos)
 	if err != nil {
 		return err
 	}
+	r.Event(timechaos, v1.EventTypeNormal, utils.EventChaosRecovered, "")
 
 	return nil
 }

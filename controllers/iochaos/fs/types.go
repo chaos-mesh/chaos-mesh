@@ -83,7 +83,6 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos reconcil
 		r.Log.Error(err, "chaos is not IoChaos", "chaos", chaos)
 		return err
 	}
-	r.Event(iochaos, v1.EventTypeNormal, utils.EventChaosToInject, "")
 
 	pods, err := utils.SelectAndGeneratePods(ctx, r.Client, &iochaos.Spec)
 	if err != nil {
@@ -117,6 +116,7 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos reconcil
 		iochaos.Status.Experiment.Pods = append(iochaos.Status.Experiment.Pods, ps)
 	}
 
+	r.Event(iochaos, v1.EventTypeNormal, utils.EventChaosInjected, "")
 	return nil
 }
 
@@ -128,7 +128,6 @@ func (r *Reconciler) Recover(ctx context.Context, req ctrl.Request, chaos reconc
 		r.Log.Error(err, "chaos is not IoChaos", "chaos", chaos)
 		return err
 	}
-	r.Event(iochaos, v1.EventTypeNormal, utils.EventChaosToRecover, "")
 
 	if err := r.cleanFinalizersAndRecover(ctx, iochaos); err != nil {
 		return err
@@ -140,6 +139,7 @@ func (r *Reconciler) Recover(ctx context.Context, req ctrl.Request, chaos reconc
 
 	iochaos.Status.Experiment.Phase = v1alpha1.ExperimentPhaseFinished
 
+	r.Event(iochaos, v1.EventTypeNormal, utils.EventChaosRecovered, "")
 	return nil
 }
 

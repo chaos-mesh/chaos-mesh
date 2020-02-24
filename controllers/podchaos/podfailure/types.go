@@ -117,6 +117,7 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, obj reconciler
 		}
 		podchaos.Status.Experiment.Pods = append(podchaos.Status.Experiment.Pods, ps)
 	}
+	r.Event(podchaos, v1.EventTypeNormal, utils.EventChaosInjected, "")
 	return nil
 }
 
@@ -138,7 +139,7 @@ func (r *Reconciler) Recover(ctx context.Context, req ctrl.Request, obj reconcil
 		Time: time.Now(),
 	}
 	podchaos.Status.Experiment.Phase = v1alpha1.ExperimentPhaseFinished
-
+	r.Event(podchaos, v1.EventTypeNormal, utils.EventChaosRecovered, "")
 	return nil
 }
 

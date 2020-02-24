@@ -77,7 +77,6 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, obj reconciler
 		return fmt.Errorf("podchaos[%s/%s] the name of container is empty", podchaos.Namespace, podchaos.Name)
 	}
 
-	r.Event(obj, v1.EventTypeNormal, utils.EventChaosToInject, "")
 	pods, err := utils.SelectPods(ctx, r.Client, podchaos.Spec.Selector)
 	if err != nil {
 		r.Log.Error(err, "fail to get selected pods")
@@ -121,13 +120,15 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, obj reconciler
 	if err := g.Wait(); err != nil {
 		return err
 	}
-
-	return r.updatePodchaos(ctx, podchaos, pods, now)
+	if err = r.updatePodchaos(ctx, podchaos, pods, now); err != nil {
+		return err
+	}
+	r.Event(obj, v1.EventTypeNormal, utils.EventChaosInjected, "")
+	return nil
 }
 
 // Recover implements the reconciler.InnerReconciler.Recover
 func (r *Reconciler) Recover(ctx context.Context, req ctrl.Request, obj reconciler.InnerObject) error {
-	r.Event(obj, v1.EventTypeNormal, utils.EventChaosToRecover, "")
 	return nil
 }
 
