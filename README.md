@@ -105,6 +105,18 @@ helm install helm/chaos-mesh --name=chaos-mesh --namespace=chaos-testing --set d
 helm install chaos-mesh helm/chaos-mesh --namespace=chaos-testing --set dashboard.create=true
 ```
 
+### Uninstall Chaos Mesh
+
+To uninstall/delete the Chaos Mesh:
+
+```bash
+# helm 2.X
+helm delete chaos-mesh
+# helm 3.X
+helm uninstall chaos-mesh
+```
+The command removes all the Kubernetes components associated with the chart and deletes the release.
+
 ## Get started on your local machine
 
 > **Warning:**
