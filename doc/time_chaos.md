@@ -41,5 +41,4 @@ Description:
 
 * Time modification will only be injected into the main process of container
 * Time chaos has no effect on pure syscall `clock_gettime`
-* Only `CLOCK_REALTIME` will be modified. This is intended because modification on other clock such as `CLOCK_REALTIME_COARSE` (which go program uses to `time.Sleep`) will cause serious and deterministic problem. We should make it configurable in the future.
 * All injected vdso call will use pure syscall to get realtime, so clock related function call will be much slower.
