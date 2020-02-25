@@ -50,10 +50,10 @@ require (
 	golang.org/x/tools v0.0.0-20200204074204-1cc6d1ef6c74 // indirect
 	google.golang.org/genproto v0.0.0-20191028173616-919d9bdd9fe6 // indirect
 	google.golang.org/grpc v1.27.0
-	k8s.io/api v0.0.0-20191121015604-11707872ac1c
-	k8s.io/apiextensions-apiserver v0.0.0-20191121021419-88daf26ec3b8 // indirect
-	k8s.io/apimachinery v0.0.0-20191121015412-41065c7a8c2a
-	k8s.io/client-go v0.0.0-20191121015835-571c0ef67034
+	k8s.io/api v0.17.0
+	k8s.io/apiextensions-apiserver v0.17.0 // indirect
+	k8s.io/apimachinery v0.17.0
+	k8s.io/client-go v0.17.0
 	sigs.k8s.io/controller-runtime v0.4.0
 )
 
