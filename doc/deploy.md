@@ -28,7 +28,7 @@ kubectl apply -f manifests/crd.yaml
 
 ## Step 3: Install Chaos Mesh
 
-* Install Chaos Mesh with Chaos Operator only in docker environment
+* Install in docker environment
 
 ```bash
 # create namespace chaos-testing
@@ -41,7 +41,7 @@ helm install chaos-mesh helm/chaos-mesh --namespace=chaos-testing
 kubectl get pods --namespace chaos-testing -l app.kubernetes.io/instance=chaos-mesh
 ```
 
-* Install Chaos Mesh with Chaos Operator only in containerd environment (Kind)
+* Install in containerd environment (Kind)
 
 ```bash
 # create namespace chaos-testing
@@ -54,14 +54,9 @@ helm install chaos-mesh helm/chaos-mesh --namespace=chaos-testing --set chaosDae
 kubectl get pods --namespace chaos-testing -l app.kubernetes.io/instance=chaos-mesh
 ```
 
-* Install Chaos Mesh with Chaos Operator and Chaos Dashboard
-
-```bash
-# helm 2.X
-helm install helm/chaos-mesh --name=chaos-mesh --namespace=chaos-testing --set dashboard.create=true
-# helm 3.X
-helm install chaos-mesh helm/chaos-mesh --namespace=chaos-testing --set dashboard.create=true
-```
+> **Note:**
+>
+> Due to current development status of Chaos Dashboard, it is not installed by default. If you want to try it out, add `--set dashboard.create=true` in the helm commands above.
 
 ## Next steps
 
