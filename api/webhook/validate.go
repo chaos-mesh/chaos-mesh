@@ -17,17 +17,16 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/pingcap/chaos-mesh/pkg/webhook/validation"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
-
-	"github.com/pingcap/chaos-mesh/pkg/webhook/validate"
 )
 
 //// +kubebuilder:webhook:path=/validate-v1alpha1-chaos,validating=true,failurePolicy=fail,groups="pingcap.com",resources=iochaos;podchaos;networkchaos;timechaos,verbs=create;update,versions=v1,name=chaos.validate
 
 var validatelog = ctrl.Log.WithName("validate-webhook")
 
-// ChaosValidator
+// ChaosValidator used to handle the validation admission request
 type ChaosValidator struct {
 }
 
@@ -38,6 +37,6 @@ func (v *ChaosValidator) Handle(ctx context.Context, req admission.Request) admi
 	kind := req.Kind
 	validatelog.Info(fmt.Sprintf("receive validation req for obj[%s/%s/%s]", kind.Kind, namespace, name))
 	return admission.Response{
-		AdmissionResponse: *validate.ValidateChaos(&req.AdmissionRequest, kind.Kind),
+		AdmissionResponse: *validation.ValidateChaos(&req.AdmissionRequest, kind.Kind),
 	}
 }

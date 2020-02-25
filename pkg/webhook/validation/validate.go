@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package validate
+package validation
 
 import (
 	"encoding/json"
@@ -29,7 +29,7 @@ const (
 
 var log = ctrl.Log.WithName("validate-webhook")
 
-// ValidateChaos handle the validation for chaos api 
+// ValidateChaos handle the validation for chaos api
 func ValidateChaos(res *admissionv1beta1.AdmissionRequest, kind string) *admissionv1beta1.AdmissionResponse {
 	var err error
 	var permitted bool
