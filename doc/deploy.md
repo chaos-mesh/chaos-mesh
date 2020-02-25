@@ -1,5 +1,8 @@
 # Deploy
 
+This document describes how to deploy Chaos Mesh for performing chaos experiments 
+on your application on Kubernetes. 
+
 ## Prerequisites
 
 Before deploying Chaos Mesh, make sure the following items have been installed.
@@ -8,14 +11,14 @@ Before deploying Chaos Mesh, make sure the following items have been installed.
 - [RBAC](https://kubernetes.io/docs/admin/authorization/rbac) enabled (optional)
 - [Helm](https://helm.sh/) version >= v2.8.2
 
-## Get the Helm files
+## Step 1: Get the Helm files
 
 ```bash
 git clone https://github.com/pingcap/chaos-mesh.git
 cd chaos-mesh/
 ```
 
-## Create custom resource type
+## Step 2: Create custom resource type
 
 To use Chaos Mesh, you must first create the related custom resource type.
 
@@ -23,7 +26,7 @@ To use Chaos Mesh, you must first create the related custom resource type.
 kubectl apply -f manifests/crd.yaml
 ```
 
-## Install Chaos Mesh
+## Step 3: Install Chaos Mesh
 
 * Install Chaos Mesh with Chaos Operator only in docker environment
 
@@ -62,5 +65,5 @@ helm install chaos-mesh helm/chaos-mesh --namespace=chaos-testing --set dashboar
 
 ## Usage
 
-Refer to the Steps in [Usage](usage.md)
+Refer to the Steps in [Usage](run_chaos_mesh.md)
 

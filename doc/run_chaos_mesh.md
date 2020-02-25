@@ -1,17 +1,21 @@
-# Usage
+# Run Chaos Mesh
 
-## Deploy target cluster
+Now that you have deployed Chaos Mesh in your environment. In this document, 
+you will learn about how to use it for your chaos experiments.
 
-After Chaos Mesh is deployed, we can deploy the target cluster to be tested, or where we want to inject faults. For illustration purposes, we use TiDB as our sample cluster.
+## Step 1: Deploy target cluster
+
+After Chaos Mesh is deployed, you can deploy the target cluster to be tested. For illustration purposes,  TiDB is used as a sample cluster.
 
 You can follow the instructions in the following two documents to deploy a TiDB cluster:
 
 * [Deploy using kind](https://pingcap.com/docs/stable/tidb-in-kubernetes/get-started/deploy-tidb-from-kubernetes-kind/)
 * [Deploy using minikube](https://pingcap.com/docs/stable/tidb-in-kubernetes/get-started/deploy-tidb-from-kubernetes-minikube/)
 
-## Define chaos experiment config file
+## Step 2: Define the experiment config file
 
-The chaos experiment configuration is defined in a .yaml file. The following sample file (`pod-kill-example.yaml`) defines a chaos experiment to kill one tikv pod randomly every 60 seconds:
+The chaos experiment configuration is defined in a ·`.yaml` file. In the following sample file, 
+`pod-kill-example.yaml` defines a chaos experiment to kill one random TiKV pod every 60 seconds:
 
 ```yaml
 apiVersion: pingcap.com/v1alpha1
@@ -32,7 +36,7 @@ spec:
     cron: "@every 5m"
 ```
 
-## Create a chaos experiment
+## Step 3: Create a chaos experiment
 
 ```bash
 kubectl apply -f pod-failure-example.yaml
@@ -43,20 +47,20 @@ You can see the QPS performance (by [running a benchmark against the cluster](ht
 
 ![tikv-pod-failure](../static/tikv-pod-failure.png)
 
-## Update a chaos experiment
+## Step 4: Update a chaos experiment
 
 ```bash
 vim pod-failure-example.yaml # modify pod-failure-example.yaml to what you want
 kubectl apply -f pod-failure-example.yaml
 ```
 
-## Delete a chaos experiment
+## Step 5: Delete a chaos experiment
 
 ```bash
 kubectl delete -f pod-failure-example.yaml
 ```
 
-## Watch your chaos experiments in Dashboard
+## Step 6: Watch your chaos experiments in Dashboard
 
 Chaos Dashboard is currently only available for TiDB clusters. Stay tuned for more supports or join us in making it happen.
 

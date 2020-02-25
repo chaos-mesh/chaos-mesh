@@ -31,5 +31,5 @@ In addition, You also can use [Helm](https://helm.sh/) to [install Chaos Mesh ma
 
 ## Usage
 
-Refer to the Steps in [Usage](usage.md)
+Refer to the Steps in [Usage](run_chaos_mesh.md)
 
