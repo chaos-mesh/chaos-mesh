@@ -29,11 +29,10 @@ import (
 
 var _ = Describe("webhook config watcher", func() {
 	Context("New", func() {
-		It("should return maybe you should specify --configmap-namespace", func() {
+		It("should return nil", func() {
 			config := NewConfig()
 			_, err := New(*config)
-			Expect(err).ToNot(BeNil())
-			Expect(fmt.Sprintf("%s", err)).To(ContainSubstring("maybe you should specify --configmap-namespace"))
+			Expect(err).To(BeNil())
 		})
 
 		It("should return InClusterConfig error", func() {
