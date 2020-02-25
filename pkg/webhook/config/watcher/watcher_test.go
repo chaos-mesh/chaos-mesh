@@ -32,7 +32,6 @@ var _ = Describe("webhook config watcher", func() {
 		It("should return maybe you should specify --configmap-namespace", func() {
 			config := NewConfig()
 			configWatcher, err := New(*config)
-			Expect(configWatcher).To(BeNil())
 			Expect(err).ToNot(BeNil())
 			Expect(fmt.Sprintf("%s", err)).To(ContainSubstring("maybe you should specify --configmap-namespace"))
 		})
