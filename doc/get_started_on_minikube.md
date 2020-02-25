@@ -53,4 +53,4 @@ cd chaos-mesh
 
 ## Next steps
 
-Refer to [Run Chaos Mesh](run-chaos-mesh.md)
+Refer to [Run Chaos Mesh](run-chaos-mesh.md).
