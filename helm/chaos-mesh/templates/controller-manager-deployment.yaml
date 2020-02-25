@@ -51,6 +51,8 @@ spec:
             value: {{ .Values.timezone | default "UTC" }}
           - name: CHAOS_DAEMON_PORT
             value: !!str {{ .Values.chaosDaemon.grpcPort }}
+          - name: BPFKI_PORT
+            value: !!str {{ .Values.bpfki.grpcPort }}
         volumeMounts:
           - name: webhook-certs
             mountPath: /etc/webhook/certs
