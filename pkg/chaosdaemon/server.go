@@ -59,7 +59,7 @@ func newDaemonServer(containerRuntime string) (*daemonServer, error) {
 	}, nil
 }
 
-func newGRPCServer(containerRuntime string, reg *prometheus.Registry) (*grpc.Server, error) {
+func newGRPCServer(containerRuntime string, reg prometheus.Registerer) (*grpc.Server, error) {
 	ds, err := newDaemonServer(containerRuntime)
 	if err != nil {
 		return nil, err
@@ -87,8 +87,14 @@ func newGRPCServer(containerRuntime string, reg *prometheus.Registry) (*grpc.Ser
 	return s, nil
 }
 
+// RegisterGatherer combine prometheus.Registerer and prometheus.Gatherer
+type RegisterGatherer interface {
+	prometheus.Registerer
+	prometheus.Gatherer
+}
+
 // StartServer starts chaos-daemon.
-func StartServer(conf *Config, reg *prometheus.Registry) error {
+func StartServer(conf *Config, reg RegisterGatherer) error {
 	g := errgroup.Group{}
 
 	httpBindAddr := fmt.Sprintf("%s:%d", conf.Host, conf.HTTPPort)

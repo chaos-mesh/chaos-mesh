@@ -20,11 +20,22 @@ import (
 	"github.com/vishvananda/netns"
 
 	pb "github.com/pingcap/chaos-mesh/pkg/chaosdaemon/pb"
+	"github.com/pingcap/chaos-mesh/pkg/mock"
 )
 
 // Apply applies a netem on eth0 in pid related namespace
 func Apply(netem *pb.Netem, pid uint32) error {
 	log.Info("Apply netem on PID", "pid", pid)
+
+	// Mock point to return error in unit test
+	if err := mock.On("NetemApplyError"); err != nil {
+		if e, ok := err.(error); ok {
+			return e
+		}
+		if ignore, ok := err.(bool); ok && ignore {
+			return nil
+		}
+	}
 
 	ns, err := netns.GetFromPath(GenNetnsPath(pid))
 	if err != nil {
@@ -66,6 +77,16 @@ func Apply(netem *pb.Netem, pid uint32) error {
 func Cancel(netem *pb.Netem, pid uint32) error {
 	// WARN: This will delete all netem on this interface
 	log.Info("Cancel netem on PID", "pid", pid)
+
+	// Mock point to return error in unit test
+	if err := mock.On("NetemCancelError"); err != nil {
+		if e, ok := err.(error); ok {
+			return e
+		}
+		if ignore, ok := err.(bool); ok && ignore {
+			return nil
+		}
+	}
 
 	ns, err := netns.GetFromPath(GenNetnsPath(pid))
 	if err != nil {

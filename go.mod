@@ -28,6 +28,7 @@ require (
 	github.com/hashicorp/golang-lru v0.5.3 // indirect
 	github.com/jmoiron/sqlx v1.2.0
 	github.com/konsorten/go-windows-terminal-sequences v1.0.2 // indirect
+	github.com/mgechev/revive v1.0.1 // indirect
 	github.com/morikuni/aec v1.0.0 // indirect
 	github.com/onsi/ginkgo v1.11.0
 	github.com/onsi/gomega v1.7.0
@@ -54,7 +55,6 @@ require (
 	k8s.io/apimachinery v0.0.0-20191121015412-41065c7a8c2a
 	k8s.io/client-go v0.0.0-20191121015835-571c0ef67034
 	sigs.k8s.io/controller-runtime v0.4.0
-	sigs.k8s.io/controller-tools v0.2.4 // indirect
 )
 
 go 1.13
