@@ -14,12 +14,16 @@
 package controllers
 
 import (
-	"github.com/go-logr/logr"
+	"context"
 
+	"k8s.io/client-go/tools/record"
+
+	"github.com/pingcap/chaos-mesh/api/v1alpha1"
 	"github.com/pingcap/chaos-mesh/controllers/timechaos"
+	"github.com/pingcap/chaos-mesh/pkg/utils"
 
-	v1alpha1 "github.com/pingcap/chaos-mesh/api/v1alpha1"
-
+	"github.com/go-logr/logr"
+	v1 "k8s.io/api/core/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
@@ -27,22 +31,39 @@ import (
 // TimeChaosReconciler reconciles a TimeChaos object
 type TimeChaosReconciler struct {
 	client.Client
+	record.EventRecorder
 	Log logr.Logger
 }
 
 // +kubebuilder:rbac:groups=pingcap.com,resources=timechaos,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=pingcap.com,resources=timechaos/status,verbs=get;update;patch
 
-// Reconcile reconciles a request from controller
-func (r *TimeChaosReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
+// Reconcile reconciles a TimeChaos resource
+func (r *TimeChaosReconciler) Reconcile(req ctrl.Request) (result ctrl.Result, err error) {
 	logger := r.Log.WithValues("reconciler", "timechaos")
 
 	reconciler := timechaos.Reconciler{
-		Client: r.Client,
-		Log:    logger,
+		Client:        r.Client,
+		EventRecorder: r.EventRecorder,
+		Log:           logger,
 	}
 
-	return reconciler.Reconcile(req)
+	chaos := &v1alpha1.TimeChaos{}
+	if err := r.Get(context.Background(), req.NamespacedName, chaos); err != nil {
+		r.Log.Error(err, "unable to get time chaos")
+		return ctrl.Result{}, nil
+	}
+
+	result, err = reconciler.Reconcile(req, chaos)
+	if err != nil {
+		if !chaos.IsDeleted() {
+			r.Event(chaos, v1.EventTypeWarning, utils.EventChaosInjectFailed, err.Error())
+		} else {
+			r.Event(chaos, v1.EventTypeWarning, utils.EventChaosRecoverFailed, err.Error())
+		}
+	}
+
+	return result, nil
 }
 
 // SetupWithManager setups a time chaos reconciler on controller-manager
