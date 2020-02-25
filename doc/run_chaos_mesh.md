@@ -37,7 +37,7 @@ spec:
 
 ## Step 3: Apply a chaos experiment
 
-Running the following commands to apply the experiment config defined in the .yaml file:
+Running the following commands to apply the experiment config defined in the `.yaml` file:
 
 ```bash
 kubectl apply -f pod-failure-example.yaml

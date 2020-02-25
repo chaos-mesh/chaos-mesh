@@ -1,4 +1,4 @@
-# Deploy
+# Deploy Chaos Mesh
 
 This document describes how to deploy Chaos Mesh for performing chaos experiments 
 on your application on Kubernetes. 
