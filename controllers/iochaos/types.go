@@ -14,10 +14,10 @@
 package iochaos
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/go-logr/logr"
+	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -29,43 +29,41 @@ import (
 
 type Reconciler struct {
 	client.Client
+	record.EventRecorder
 	Log logr.Logger
 }
 
-func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
+// Reconcile reconciles an IOChaos resource
+func (r *Reconciler) Reconcile(req ctrl.Request, chaos *v1alpha1.IoChaos) (ctrl.Result, error) {
 	r.Log.Info("reconciling iochaos")
-	ctx := context.Background()
-
-	var iochaos v1alpha1.IoChaos
-	if err := r.Get(ctx, req.NamespacedName, &iochaos); err != nil {
-		r.Log.Error(err, "unable to get iochaos")
-		return ctrl.Result{}, nil
-	}
-
-	scheduler := iochaos.GetScheduler()
-	duration, err := iochaos.GetDuration()
+	scheduler := chaos.GetScheduler()
+	duration, err := chaos.GetDuration()
 	if err != nil {
-		r.Log.Error(err, fmt.Sprintf("unable to get podchaos[%s/%s]'s duration", iochaos.Namespace, iochaos.Name))
-		return ctrl.Result{}, nil
+		msg := fmt.Sprintf("unable to get iochaos[%s/%s]'s duration",
+			req.Namespace, req.Name)
+		r.Log.Error(err, msg)
+		return ctrl.Result{}, err
 	}
 	if scheduler == nil && duration == nil {
-		return r.commonIOChaos(&iochaos, req)
+		return r.commonIOChaos(chaos, req)
 	} else if scheduler != nil && duration != nil {
-		return r.scheduleIOChaos(&iochaos, req)
+		return r.scheduleIOChaos(chaos, req)
 	}
 
 	// This should be ensured by admission webhook in the future
-	r.Log.Error(fmt.Errorf("iochaos[%s/%s] spec invalid", iochaos.Namespace, iochaos.Name), "scheduler and duration should be omitted or defined at the same time")
-	return ctrl.Result{}, nil
+	err = fmt.Errorf("iochaos[%s/%s] spec invalid", req.Namespace, req.Name)
+	r.Log.Error(err, "scheduler and duration should be omitted or defined at the same time")
+	return ctrl.Result{}, err
 }
 
 func (r *Reconciler) commonIOChaos(iochaos *v1alpha1.IoChaos, req ctrl.Request) (ctrl.Result, error) {
 	var cr *common.Reconciler
 	switch iochaos.Spec.Layer {
 	case v1alpha1.FileSystemLayer:
-		cr = fs.NewCommonReconciler(r.Client, r.Log.WithValues("reconciler", "chaosfs"), req)
+		cr = fs.NewCommonReconciler(r.Client, r.Log.WithValues("reconciler", "chaosfs"),
+			req, r.EventRecorder)
 	default:
-		return r.invalidActionResponse(iochaos), nil
+		return r.invalidActionResponse(iochaos)
 	}
 	return cr.Reconcile(req)
 }
@@ -74,14 +72,15 @@ func (r *Reconciler) scheduleIOChaos(iochaos *v1alpha1.IoChaos, req ctrl.Request
 	var sr *twophase.Reconciler
 	switch iochaos.Spec.Layer {
 	case v1alpha1.FileSystemLayer:
-		sr = fs.NewTwoPhaseReconciler(r.Client, r.Log.WithValues("reconciler", "chaosfs"), req)
+		sr = fs.NewTwoPhaseReconciler(r.Client, r.Log.WithValues("reconciler", "chaosfs"),
+			req, r.EventRecorder)
 	default:
-		return r.invalidActionResponse(iochaos), nil
+		return r.invalidActionResponse(iochaos)
 	}
 	return sr.Reconcile(req)
 }
 
-func (r *Reconciler) invalidActionResponse(iochaos *v1alpha1.IoChaos) ctrl.Result {
+func (r *Reconciler) invalidActionResponse(iochaos *v1alpha1.IoChaos) (ctrl.Result, error) {
 	r.Log.Error(nil, "unknown file system I/O layer", "action", iochaos.Spec.Action)
-	return ctrl.Result{}
+	return ctrl.Result{}, fmt.Errorf("unknown file system I/O layer")
 }

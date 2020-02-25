@@ -14,11 +14,15 @@
 package controllers
 
 import (
-	"github.com/go-logr/logr"
+	"context"
 
-	chaosmeshv1alpha1 "github.com/pingcap/chaos-mesh/api/v1alpha1"
+	"github.com/pingcap/chaos-mesh/api/v1alpha1"
 	"github.com/pingcap/chaos-mesh/controllers/iochaos"
+	"github.com/pingcap/chaos-mesh/pkg/utils"
 
+	"github.com/go-logr/logr"
+	v1 "k8s.io/api/core/v1"
+	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
@@ -26,25 +30,41 @@ import (
 // IoChaosReconciler reconciles a IoChaos object
 type IoChaosReconciler struct {
 	client.Client
+	record.EventRecorder
 	Log logr.Logger
 }
 
 // +kubebuilder:rbac:groups=chaosmesh.pingcap.com,resources=iochaos,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=chaosmesh.pingcap.com,resources=iochaos/status,verbs=get;update;patch
 
-func (r *IoChaosReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
+// Reconcile reconciles an IOChaos resource
+func (r *IoChaosReconciler) Reconcile(req ctrl.Request) (result ctrl.Result, err error) {
 	logger := r.Log.WithValues("iochaos", req.NamespacedName)
 
 	reconciler := iochaos.Reconciler{
-		Client: r.Client,
-		Log:    logger,
+		Client:        r.Client,
+		EventRecorder: r.EventRecorder,
+		Log:           logger,
+	}
+	chaos := &v1alpha1.IoChaos{}
+	if err := r.Get(context.Background(), req.NamespacedName, chaos); err != nil {
+		r.Log.Error(err, "unable to get iochaos")
+		return ctrl.Result{}, nil
 	}
 
-	return reconciler.Reconcile(req)
+	result, err = reconciler.Reconcile(req, chaos)
+	if err != nil {
+		if !chaos.IsDeleted() {
+			r.Event(chaos, v1.EventTypeWarning, utils.EventChaosInjectFailed, err.Error())
+		} else {
+			r.Event(chaos, v1.EventTypeWarning, utils.EventChaosRecoverFailed, err.Error())
+		}
+	}
+	return result, nil
 }
 
 func (r *IoChaosReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
-		For(&chaosmeshv1alpha1.IoChaos{}).
+		For(&v1alpha1.IoChaos{}).
 		Complete(r)
 }
