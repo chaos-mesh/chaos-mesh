@@ -6,8 +6,6 @@ This document describes how to deploy Chaos Mesh in Kubernetes on your laptop (L
 
 Before deployment, make sure [Docker](https://docs.docker.com/install/) is installed and running on your local machine.
 
-- [Docker](https://docs.docker.com/install/) (required when running in [kind](https://kind.sigs.k8s.io/))
-
 ## Step 1: Get the Helm files
 
 ```bash
