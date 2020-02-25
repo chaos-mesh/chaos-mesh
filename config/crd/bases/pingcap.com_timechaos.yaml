@@ -36,8 +36,9 @@ spec:
           properties:
             clockIds:
               description: ClockIds defines all affected clock id All available options
-                are ["CLOCK_REALTIME","CLOCK_MONOTONIC","CLOCK_PROCESS_CPUTIME_ID","CLOCK_THREAD_CPUTIME_ID","CLOCK_MONOTONIC_RAW","CLOCK_REALTIME_COARSE","CLOCK_MONOTONIC_COARSE","CLOCK_BOOTTIME","CLOCK_REALTIME_ALARM","CLOCK_BOOTTIME_ALARM"]
-                Default value is ["CLOCK_REALTIME"]
+                are ["CLOCK_REALTIME","CLOCK_MONOTONIC","CLOCK_PROCESS_CPUTIME_ID","CLOCK_THREAD_CPUTIME_ID",
+                "CLOCK_MONOTONIC_RAW","CLOCK_REALTIME_COARSE","CLOCK_MONOTONIC_COARSE","CLOCK_BOOTTIME","CLOCK_REALTIME_ALARM",
+                "CLOCK_BOOTTIME_ALARM"] Default value is ["CLOCK_REALTIME"]
               items:
                 type: string
               type: array
