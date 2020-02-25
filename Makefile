@@ -155,7 +155,7 @@ failpoint-ctl:
 goimports:
 	$(GO) get golang.org/x/tools/cmd/goimports
 
-lint:
+lint: revive
 	@echo "linting"
 	$(GOBIN)/revive -formatter friendly -config revive.toml $$($(PACKAGE_LIST))
 
