@@ -69,4 +69,28 @@ spec:
                   namespaceSelector:
                     matchLabels:
                       admission-webhook: enabled
+              ---
+              apiVersion: admissionregistration.k8s.io/v1beta1
+              kind: ValidatingWebhookConfiguration
+              metadata:
+                name: chaos-mesh-validator
+                labels:
+                  app.kubernetes.io/name: {{ template "chaos-mesh.name" . }}
+                  app.kubernetes.io/managed-by: {{ .Release.Service }}
+                  app.kubernetes.io/instance: {{ .Release.Name }}
+                  app.kubernetes.io/component: admission-webhook
+                  helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+"  "_" }}
+              webhooks:
+                - name: validator.pingcap.com
+                  clientConfig:
+                    service:
+                      name: chaos-mesh-controller-manager
+                      namespace: ${K8S_NAMESPACE}
+                      path: "/validate-v1alpha1-chaos"
+                    caBundle: "${CA_BUNDLE}"
+                  rules:
+                    - operations: [ "CREATE","UPDATE"]
+                      apiGroups: ["pingcap.com"]
+                      apiVersions: ["v1alpha1"]
+                      resources: ["podchaos","iochaos","timechaos","networkchaos"]
               EOF

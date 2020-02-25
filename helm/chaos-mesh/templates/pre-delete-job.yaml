@@ -35,4 +35,5 @@ spec:
             - |
               set -e
               kubectl delete mutatingwebhookconfigurations.admissionregistration.k8s.io chaos-mesh-sidecar-injector || true // Auto Delete mutatingwebhookconfigurations
+              kubectl delete validatingWebhookConfiguration.admissionregistration.k8s.io chaos-mesh-validator || true
               kubectl delete secrets -n {{ .Release.Namespace }} webhook-certs || true
