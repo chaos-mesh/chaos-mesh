@@ -52,6 +52,10 @@ spec:
                 - name: {{ template "chaos-mesh.webhook" . }}
                   clientConfig:
                     caBundle: "${CA_BUNDLE}"
+                    service:
+                      name: {{ template "chaos-mesh.svc" . }}
+                      namespace: {{ .Release.Namespace }}
+                      path: "/inject-v1-pod"
               EOF
 
 {{- end }}

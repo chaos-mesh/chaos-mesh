@@ -145,5 +145,6 @@ webhook:
   certManager:
     enabled: false
     autoDeleteSecret: false
-
+  # FailurePolicy defines how unrecognized errors and timeout errors from the admission webhook are handled.
+  # https://kubernetes.io/docs/reference/access-authn-authz/extensible-admission-controllers/#failure-policy
   FailurePolicy: Ignore

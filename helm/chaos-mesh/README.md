@@ -18,11 +18,11 @@ The following tables list the configurable parameters of the Chaos Mesh chart an
 |--------------------------------------------|----------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------|
 | `clusterScoped`                            | whether chaos-mesh should manage kubernetes cluster wide chaos.Also see rbac.create and controllerManager.serviceAccount | `true` |
 | `rbac.create` |  | `true`                                                |
-| `enableProfiling` | a flag to enable pprof in controller-manager and chaos-daemon  | `false` |
-| `controllerManager.serviceAccount` | the serviceAccount for chaos-controller-manager | `chaos-controller-manager` |
-| `controllerManager.replicaCount` | replicas for chaos-controller-manager | `1` |
-| `controllerManager.image` | the docker image for chaos-controller-manager  | `pingcap/chaos-mesh:latest` |
-| `controllerManager.imagePullPolicy` | image pull policy | `Always` |
+| `enableProfiling` | A flag to enable pprof in controller-manager and chaos-daemon  | `false` |
+| `controllerManager.serviceAccount` | The serviceAccount for chaos-controller-manager | `chaos-controller-manager` |
+| `controllerManager.replicaCount` | Replicas for chaos-controller-manager | `1` |
+| `controllerManager.image` | docker image for chaos-controller-manager  | `pingcap/chaos-mesh:latest` |
+| `controllerManager.imagePullPolicy` | Image pull policy | `Always` |
 | `controllerManager.nameOverride` |  |  |
 | `controllerManager.fullnameOverride` |  |  |
 | `controllerManager.service.type` | Kubernetes Service type | `ClusterIP` |
@@ -30,18 +30,18 @@ The following tables list the configurable parameters of the Chaos Mesh chart an
 | `controllerManager.nodeSelector` |  Node labels for chaos-controller-manager pod assignment | `{}` |
 | `controllerManager.tolerations` |  Toleration labels for chaos-controller-manager pod assignment | `[]` |
 | `controllerManager.affinity` |  Map of chaos-controller-manager node/pod affinities | `{}` |
-| `controllerManager.podAnnotations` | Deployment chaos-controller-manager annotations | `{}`|
-| `chaosDaemon.image` | the docker image for chaos-daemon | `pingcap/chaos-mesh:latest` |
+| `controllerManager.podAnnotations` |  Pod annotations of chaos-controller-manager | `{}`|
+| `chaosDaemon.image` | docker image for chaos-daemon | `pingcap/chaos-mesh:latest` |
 | `chaosDaemon.imagePullPolicy` | image pull policy | `Always` |
-| `chaosDaemon.grpcPort` |  | `31767` |
-| `chaosDaemon.httpPort` |  | `31766` |
-| `chaosDaemon.podAnnotations` | Deployment chaos-daemon annotations | `{}` |
-| `chaosDaemon.runtime` | runtime specifies which container runtime to use. Currently we only supports docker and containerd. | `docker` |
-| `chaosDaemon.socketPath` | specifies the container runtime socket | `/var/run/docker.sock` |
-| `dashboard.create` | enable the chaos-dashboard | `false` |
-| `dashboard.serviceAccount` | the serviceAccount for chaos-dashboard  | `chaos-dashboard` |
-| `dashboard.image` | the docker image for chaos-dashboard | `pingcap/chaos-dashboard:latest` |
-| `dashboard.imagePullPolicy` | image pull policy | `Always` |
+| `chaosDaemon.grpcPort` | The port which grpc server listens on | `31767` |
+| `chaosDaemon.httpPort` | The port which http server listens on | `31766` |
+| `chaosDaemon.podAnnotations` | Pod annotations of chaos-daemon | `{}` |
+| `chaosDaemon.runtime` | Runtime specifies which container runtime to use. Currently we only supports docker and containerd. | `docker` |
+| `chaosDaemon.socketPath` | Specifies the container runtime socket | `/var/run/docker.sock` |
+| `dashboard.create` | Enable chaos-dashboard | `false` |
+| `dashboard.serviceAccount` | The serviceAccount for chaos-dashboard  | `chaos-dashboard` |
+| `dashboard.image` | Docker image for chaos-dashboard | `pingcap/chaos-dashboard:latest` |
+| `dashboard.imagePullPolicy` | Image pull policy | `Always` |
 | `dashboard.nodeSelector` | Node labels for chaos-dashboard  pod assignment | `{}` |
 | `dashboard.tolerations` | Toleration labels for chaos-dashboard pod assignment | `[]` |
 | `dashboard.affinity` | Map of chaos-dashboard node/pod affinities | `{}` |
@@ -49,10 +49,10 @@ The following tables list the configurable parameters of the Chaos Mesh chart an
 | `dashboard.resources` | CPU/Memory resource requests/limits for chaos-dashboard pod  | `requests: { cpu: "250m", memory: "512Mi" }, limits:{ cpu: "500m", memory: "1024Mi" }`  |
 | `dashboard.volume.storage` | | `3Gi` |
 | `dashboard.volume.storageClassName` | | `standard` |
-| `prometheus.create` | enable the prometheus | `false` |
-| `prometheus.serviceAccount` | the serviceAccount for prometheus | `prometheus` |
-| `prometheus.image` | the docker image for prometheus | `prom/prometheus:v2.15.2` |
-| `prometheus.imagePullPolicy` | image pull policy | `IfNotPresent` |
+| `prometheus.create` | Enable prometheus | `false` |
+| `prometheus.serviceAccount` | The serviceAccount for prometheus | `prometheus` |
+| `prometheus.image` | Docker image for prometheus | `prom/prometheus:v2.15.2` |
+| `prometheus.imagePullPolicy` | Image pull policy | `IfNotPresent` |
 | `prometheus.nodeSelector` | Node labels for prometheus pod assignment | `{}` |
 | `prometheus.tolerations` | Toleration labels for prometheus pod assignment | `[]` |
 | `prometheus.affinity` | Map of prometheus node/pod affinities | `{}` |
@@ -63,9 +63,9 @@ The following tables list the configurable parameters of the Chaos Mesh chart an
 | `prometheus.volume.storageClassName` | | `standard` |
 | `preJobs.podAnnotations` | | `{}` |
 | `postJobs.podAnnotations` | | `{}` |
-| `webhook.certManager.enabled` | setup the webhook using cert-manager | `false` |
-| `webhook.certManager.autoDeleteSecret` | | `false` |
-| `webhook.FailurePolicy` | | `Ignore` |
+| `webhook.certManager.enabled` | Setup the webhook using cert-manager | `false` |
+| `webhook.certManager.autoDeleteSecret` | Whether cert-manager automatically removes the secret resource | `false` |
+| `webhook.FailurePolicy` | Defines how unrecognized errors and timeout errors from the admission webhook are handled | `Ignore` |
 
 
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm install`. For example,
