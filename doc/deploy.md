@@ -28,6 +28,8 @@ kubectl apply -f manifests/crd.yaml
 
 ## Step 3: Install Chaos Mesh
 
+Depending on your environment, there are following methods of installing Chaos Mesh: 
+
 * Install in docker environment
 
 ```bash
