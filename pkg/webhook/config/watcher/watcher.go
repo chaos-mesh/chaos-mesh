@@ -26,14 +26,16 @@ import (
 	v1 "k8s.io/api/core/v1"
 	apierrs "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	k8sv1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/kubernetes"
-	k8sv1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	"k8s.io/client-go/rest"
 )
 
 var log = ctrl.Log.WithName("inject-webhook")
+var restInClusterConfig = rest.InClusterConfig
+var kubernetesNewForConfig = kubernetes.NewForConfig
 
 const (
 	serviceAccountNamespaceFilePath = "/var/run/secrets/kubernetes.io/serviceaccount/namespace"
@@ -66,12 +68,12 @@ func New(cfg Config) (*K8sConfigMapWatcher, error) {
 	}
 
 	log.Info("Creating Kubernetes client from in-cluster discovery")
-	k8sConfig, err := rest.InClusterConfig()
+	k8sConfig, err := restInClusterConfig()
 	if err != nil {
 		return nil, err
 	}
 
-	clientset, err := kubernetes.NewForConfig(k8sConfig)
+	clientset, err := kubernetesNewForConfig(k8sConfig)
 	if err != nil {
 		return nil, err
 	}
