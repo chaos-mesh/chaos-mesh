@@ -1,6 +1,6 @@
 # Run Chaos Mesh
 
-Now that you have deployed Chaos Mesh in your environment. In this document, 
+Now that you have deployed Chaos Mesh in your environment, in this document, 
 you will learn about how to use it for your chaos experiments.
 
 ## Step 1: Deploy target cluster

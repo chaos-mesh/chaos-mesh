@@ -63,7 +63,7 @@ helm install helm/chaos-mesh --name=chaos-mesh --namespace=chaos-testing --set d
 helm install chaos-mesh helm/chaos-mesh --namespace=chaos-testing --set dashboard.create=true
 ```
 
-## Step 4: Run Chaos Mesh
+## Next steps
 
-Refer to the Steps in [Run Chaos Mesh](run_chaos_mesh.md)
+Refer to [Run Chaos Mesh](run_chaos_mesh.md)
 

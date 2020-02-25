@@ -51,6 +51,6 @@ cd chaos-mesh
 >
 >   In `minikube`, the default virtual machine driver's image doesn't contain the `sch_netem` kernel module in smaller versions. You can use `none` driver (if your host is Linux with the `sch_netem` kernel module loaded) to try these chaos actions on `minikube` or [build an image with sch_netem by yourself](https://minikube.sigs.k8s.io/docs/contributing/iso/).
 
-## Step 3: Run Chaos Mesh
+## Next steps
 
-Refer to the Steps in [Run Chaos Mesh](run-chaos-mesh.md)
+Refer to [Run Chaos Mesh](run-chaos-mesh.md)
