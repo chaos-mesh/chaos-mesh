@@ -1,19 +1,18 @@
 # Run Chaos Mesh
 
-Now that you have deployed Chaos Mesh in your environment, in this document, 
-you will learn about how to use it for your chaos experiments.
+Now that you have deployed Chaos Mesh in your environment, it's time 
+to use it for your chaos experiments. This document walks you through the process of running chaos experiments. It also describes the regular operations on chaos experiments.  
 
-## Deploy target cluster
+## Step 1: Deploy the target cluster
 
-After Chaos Mesh is deployed, you can deploy the target cluster to be tested. For illustration purposes, TiDB is used as a sample cluster.
-
+The first step is always to have the target cluster to test deployed. For illustration purposes, TiDB is used as a sample cluster.
 
 You can follow the instructions in the following two documents to deploy a TiDB cluster:
 
 * [Deploy using kind](https://pingcap.com/docs/stable/tidb-in-kubernetes/get-started/deploy-tidb-from-kubernetes-kind/)
 * [Deploy using minikube](https://pingcap.com/docs/stable/tidb-in-kubernetes/get-started/deploy-tidb-from-kubernetes-minikube/)
 
-## Define the experiment config file
+## Step 2: Define the experiment config file
 
 The chaos experiment configuration is defined in a `.yaml` file. You need to create your own experiment config file, based on the available fields in the sample below:
 
@@ -36,31 +35,37 @@ spec:
     cron: "@every 5m"
 ```
 
-## Create a chaos experiment
+## Step 3: Apply a chaos experiment
+
+Running the following commands to apply the experiment config defined in the .yaml file:
 
 ```bash
 kubectl apply -f pod-failure-example.yaml
 kubectl get podchaos --namespace=chaos-testing
 ```
 
-You can see the QPS performance (by [running a benchmark against the cluster](https://pingcap.com/docs/stable/benchmark/how-to-run-sysbench/) affected by the chaos experiment from TiDB Grafana dashboard:
+With this step, you now run your chaos experiment successfully. By [running a benchmark against the cluster](https://pingcap.com/docs/stable/benchmark/how-to-run-sysbench/), you can notice the QPS performance affected by the chaos experiment:
 
 ![tikv-pod-failure](../static/tikv-pod-failure.png)
 
-## Update a chaos experiment
+## Regular operations on chaos experiments
+
+In this section, you will learn about some follow-up operations on a chaos experiment after it is applied.
+
+### Update a chaos experiment
 
 ```bash
 vim pod-failure-example.yaml # modify pod-failure-example.yaml to what you want
 kubectl apply -f pod-failure-example.yaml
 ```
 
-## Delete a chaos experiment
+### Delete a chaos experiment
 
 ```bash
 kubectl delete -f pod-failure-example.yaml
 ```
 
-## Watch your chaos experiments in Dashboard
+### Watch your chaos experiments in Dashboard
 
 Chaos Dashboard is currently only available for TiDB clusters. Stay tuned for more supports or join us in making it happen.
 
