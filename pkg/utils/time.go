@@ -21,27 +21,28 @@ func EncodeClkIds(clkIds []string) (uint64, error) {
 
 	for _, id := range clkIds {
 		// refer to `uapi/linux/time.h`
-		if id == "CLOCK_REALTIME" {
+		switch id {
+		case "CLOCK_REALTIME":
 			mask |= 1 << 0
-		} else if id == "CLOCK_MONOTONIC" {
+		case "CLOCK_MONOTONIC":
 			mask |= 1 << 1
-		} else if id == "CLOCK_PROCESS_CPUTIME_ID" {
+		case "CLOCK_PROCESS_CPUTIME_ID":
 			mask |= 1 << 2
-		} else if id == "CLOCK_THREAD_CPUTIME_ID" {
+		case "CLOCK_THREAD_CPUTIME_ID":
 			mask |= 1 << 3
-		} else if id == "CLOCK_MONOTONIC_RAW" {
+		case "CLOCK_MONOTONIC_RAW":
 			mask |= 1 << 4
-		} else if id == "CLOCK_REALTIME_COARSE" {
+		case "CLOCK_REALTIME_COARSE":
 			mask |= 1 << 5
-		} else if id == "CLOCK_MONOTONIC_COARSE" {
+		case "CLOCK_MONOTONIC_COARSE":
 			mask |= 1 << 6
-		} else if id == "CLOCK_BOOTTIME" {
+		case "CLOCK_BOOTTIME":
 			mask |= 1 << 7
-		} else if id == "CLOCK_REALTIME_ALARM" {
+		case "CLOCK_REALTIME_ALARM":
 			mask |= 1 << 8
-		} else if id == "CLOCK_BOOTTIME_ALARM" {
+		case "CLOCK_BOOTTIME_ALARM":
 			mask |= 1 << 9
-		} else {
+		default:
 			return 0, fmt.Errorf("unknown clock id %s", id)
 		}
 	}

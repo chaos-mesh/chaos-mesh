@@ -43,7 +43,7 @@ func initFlag() {
 	flag.IntVar(&pid, "pid", 0, "pid of target program")
 	flag.Int64Var(&secDelta, "sec_delta", 0, "delta time of sec field")
 	flag.Int64Var(&nsecDelta, "nsec_delta", 0, "delta time of nsec field")
-	flag.StringVar(&clockIdsSlice, "clk_ids", "CLOCK_REALTIME", "affected clock ids")
+	flag.StringVar(&clockIdsSlice, "clk_ids", "CLOCK_REALTIME", "all affected clock ids split with \",\"")
 	flag.BoolVar(&printVersion, "version", false, "print version information and exit")
 
 	flag.Parse()
@@ -70,13 +70,13 @@ func main() {
 	mask, err := utils.EncodeClkIds(clkIds)
 	if err != nil {
 		log.Error(err, "error while converting clock ids to mask")
-		return
+		os.Exit(1)
 	}
 	log.Info("get clock ids mask", "mask", mask)
 
 	err = time.ModifyTime(pid, secDelta, nsecDelta, mask)
 
 	if err != nil {
-		fmt.Printf("error while modifying time, pid: %d, sec_delta: %d, nsec_delta: %d\n Error: %s", pid, secDelta, nsecDelta, err.Error())
+		log.Error(err, "error while modifying time", "pid", pid, "secDelta", secDelta, "nsecDelta", nsecDelta, "mask", mask)
 	}
 }
