@@ -1,4 +1,6 @@
-# Getting started on minikube
+# Get started on minikube
+
+This document describes how to deploy Chaos Mesh in Kubernetes on your laptop (Linux or macOS) using minikube.
 
 ## Prerequisites
 
@@ -28,7 +30,7 @@ Take the following steps to set up the local Kubernetes environment:
    kubectl -n kube-system get pods -l app=helm
    ```
 
-## Install Chaos Mesh
+## Step 2: Install Chaos Mesh
 
 Run the following comments to install Chaos Mesh;
 
@@ -46,9 +48,9 @@ cd chaos-mesh
 >
 > There are some known restrictions for Chaos Operator deployed on `minikube` clusters:
 > - `netem chaos` is only supported for `minikube` clusters >= version 1.6.
+>
+>   In `minikube`, the default virtual machine driver's image doesn't contain the `sch_netem` kernel module in smaller versions. You can use `none` driver (if your host is Linux with the `sch_netem` kernel module loaded) to try these chaos actions on `minikube` or [build an image with sch_netem by yourself](https://minikube.sigs.k8s.io/docs/contributing/iso/).
 
-    In `minikube`, the default virtual machine driver's image doesn't contain the `sch_netem` kernel module in smaller versions. You can use `none` driver (if your host is Linux with the `sch_netem` kernel module loaded) to try these chaos actions on `minikube` or [build an image with sch_netem by yourself](https://minikube.sigs.k8s.io/docs/contributing/iso/).
-
-## Run Chaos Mesh
+## Step 3: Run Chaos Mesh
 
 Refer to the Steps in [Run Chaos Mesh](run-chaos-mesh.md)

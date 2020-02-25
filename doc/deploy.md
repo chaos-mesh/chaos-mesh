@@ -1,4 +1,4 @@
-# Deploy
+# Deploy and use
 
 This document describes how to deploy Chaos Mesh for performing chaos experiments 
 on your application on Kubernetes. 
@@ -63,7 +63,7 @@ helm install helm/chaos-mesh --name=chaos-mesh --namespace=chaos-testing --set d
 helm install chaos-mesh helm/chaos-mesh --namespace=chaos-testing --set dashboard.create=true
 ```
 
-## Usage
+## Step 4: Run Chaos Mesh
 
-Refer to the Steps in [Usage](run_chaos_mesh.md)
+Refer to the Steps in [Run Chaos Mesh](run_chaos_mesh.md)
 

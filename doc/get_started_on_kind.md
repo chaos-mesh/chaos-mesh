@@ -1,21 +1,21 @@
-# Getting started on kind
+# Get started on kind
 
-## Deploy
+This document describes how to deploy Chaos Mesh in Kubernetes on your laptop (Linux or macOS) using kind.
 
-### Prerequisites
+## Prerequisites
 
 Before deploying Chaos Mesh, make sure the following items have been installed. 
 
 - [Docker](https://docs.docker.com/install/) (required when running in [kind](https://kind.sigs.k8s.io/))
 
-### Get the Helm files
+## Step 1: Get the Helm files
 
 ```bash
 git clone https://github.com/pingcap/chaos-mesh.git
 cd chaos-mesh/
 ```
 
-### Install Chaos Mesh
+## Step 2: Install Chaos Mesh
 
 ```bash
 ./install.sh --local kind
@@ -29,7 +29,7 @@ Otherwise, please check the current environment according to the prompt message 
 or send us an [issue](https://github.com/pingcap/chaos-mesh/issues/new/choose) for help. 
 In addition, You also can use [Helm](https://helm.sh/) to [install Chaos Mesh manually](deploy.md).
 
-## Usage
+## Step 3: Run Chaos Mesh
 
-Refer to the Steps in [Usage](run_chaos_mesh.md)
+Refer to the Steps in [Run Chaos Mesh](run_chaos_mesh.md)
 
