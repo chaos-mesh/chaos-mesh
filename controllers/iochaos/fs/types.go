@@ -28,6 +28,7 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/tools/cache"
+	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -41,14 +42,16 @@ import (
 
 type Reconciler struct {
 	client.Client
+	record.EventRecorder
 	Log logr.Logger
 }
 
-func newReconciler(c client.Client, log logr.Logger, req ctrl.Request) twophase.Reconciler {
+func newReconciler(c client.Client, log logr.Logger, req ctrl.Request, recorder record.EventRecorder) twophase.Reconciler {
 	return twophase.Reconciler{
 		InnerReconciler: &Reconciler{
-			Client: c,
-			Log:    log,
+			Client:        c,
+			EventRecorder: recorder,
+			Log:           log,
 		},
 		Client: c,
 		Log:    log,
@@ -56,14 +59,14 @@ func newReconciler(c client.Client, log logr.Logger, req ctrl.Request) twophase.
 }
 
 // NewTwoPhaseReconciler would create Reconciler for twophase package
-func NewTwoPhaseReconciler(c client.Client, log logr.Logger, req ctrl.Request) *twophase.Reconciler {
-	r := newReconciler(c, log, req)
+func NewTwoPhaseReconciler(c client.Client, log logr.Logger, req ctrl.Request, recorder record.EventRecorder) *twophase.Reconciler {
+	r := newReconciler(c, log, req, recorder)
 	return twophase.NewReconciler(r, r.Client, r.Log)
 }
 
 // NewCommonReconciler would create Reconciler for common package
-func NewCommonReconciler(c client.Client, log logr.Logger, req ctrl.Request) *common.Reconciler {
-	r := newReconciler(c, log, req)
+func NewCommonReconciler(c client.Client, log logr.Logger, req ctrl.Request, recorder record.EventRecorder) *common.Reconciler {
+	r := newReconciler(c, log, req, recorder)
 	return common.NewReconciler(r, r.Client, r.Log)
 }
 
@@ -113,6 +116,7 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos reconcil
 		iochaos.Status.Experiment.Pods = append(iochaos.Status.Experiment.Pods, ps)
 	}
 
+	r.Event(iochaos, v1.EventTypeNormal, utils.EventChaosInjected, "")
 	return nil
 }
 
@@ -135,6 +139,7 @@ func (r *Reconciler) Recover(ctx context.Context, req ctrl.Request, chaos reconc
 
 	iochaos.Status.Experiment.Phase = v1alpha1.ExperimentPhaseFinished
 
+	r.Event(iochaos, v1.EventTypeNormal, utils.EventChaosRecovered, "")
 	return nil
 }
 
