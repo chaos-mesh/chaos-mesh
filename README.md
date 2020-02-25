@@ -111,7 +111,7 @@ To uninstall/delete the Chaos Mesh:
 
 ```bash
 # helm 2.X
-helm delete chaos-mesh
+helm delete chaos-mesh --purge
 # helm 3.X
 helm uninstall chaos-mesh
 ```
