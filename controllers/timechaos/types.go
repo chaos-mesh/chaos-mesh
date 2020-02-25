@@ -18,6 +18,8 @@ import (
 	"errors"
 	"fmt"
 
+	"k8s.io/client-go/tools/record"
+
 	k8serror "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
 
@@ -42,35 +44,28 @@ const timeChaosMsg = "time is shifted with %v"
 // Reconciler is time-chaos reconciler
 type Reconciler struct {
 	client.Client
+	record.EventRecorder
 	Log logr.Logger
 }
 
-// Reconcile reconciles a request from controller
-func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
+// Reconcile reconciles a TimeChaos resource
+func (r *Reconciler) Reconcile(req ctrl.Request, chaos *v1alpha1.TimeChaos) (ctrl.Result, error) {
 	r.Log.Info("reconciling timechaos")
-	ctx := context.Background()
-
-	var timechaos v1alpha1.TimeChaos
-	if err := r.Get(ctx, req.NamespacedName, &timechaos); err != nil {
-		r.Log.Error(err, "unable to get timechaos")
-		return ctrl.Result{}, nil
-	}
-
-	scheduler := timechaos.GetScheduler()
-	duration, err := timechaos.GetDuration()
+	scheduler := chaos.GetScheduler()
+	duration, err := chaos.GetDuration()
 	if err != nil {
-		r.Log.Error(err, fmt.Sprintf("unable to get timechaos[%s/%s]'s duration", timechaos.Namespace, timechaos.Name))
-		return ctrl.Result{}, nil
+		r.Log.Error(err, fmt.Sprintf("unable to get timechaos[%s/%s]'s duration", chaos.Namespace, chaos.Name))
+		return ctrl.Result{}, err
 	}
 	if scheduler == nil && duration == nil {
-		return r.commonTimeChaos(&timechaos, req)
+		return r.commonTimeChaos(chaos, req)
 	} else if scheduler != nil && duration != nil {
-		return r.scheduleTimeChaos(&timechaos, req)
+		return r.scheduleTimeChaos(chaos, req)
 	}
 
 	// This should be ensured by admission webhook in the future
-	r.Log.Error(fmt.Errorf("timechaos[%s/%s] spec invalid", timechaos.Namespace, timechaos.Name), "scheduler and duration should be omitted or defined at the same time")
-	return ctrl.Result{}, nil
+	r.Log.Error(fmt.Errorf("timechaos[%s/%s] spec invalid", chaos.Namespace, chaos.Name), "scheduler and duration should be omitted or defined at the same time")
+	return ctrl.Result{}, fmt.Errorf("invalid scheduler and duration")
 }
 
 func (r *Reconciler) commonTimeChaos(timechaos *v1alpha1.TimeChaos, req ctrl.Request) (ctrl.Result, error) {
@@ -118,7 +113,7 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos reconcil
 
 		timechaos.Status.Experiment.Pods = append(timechaos.Status.Experiment.Pods, ps)
 	}
-
+	r.Event(timechaos, v1.EventTypeNormal, utils.EventChaosInjected, "")
 	return nil
 }
 
@@ -135,6 +130,7 @@ func (r *Reconciler) Recover(ctx context.Context, req ctrl.Request, chaos reconc
 	if err != nil {
 		return err
 	}
+	r.Event(timechaos, v1.EventTypeNormal, utils.EventChaosRecovered, "")
 
 	return nil
 }

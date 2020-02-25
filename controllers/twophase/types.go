@@ -72,20 +72,20 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	_chaos := r.Object()
 	if err = r.Get(ctx, req.NamespacedName, _chaos); err != nil {
 		r.Log.Error(err, "unable to get chaos")
-		return ctrl.Result{}, nil
+		return ctrl.Result{}, err
 	}
 	chaos := _chaos.(InnerSchedulerObject)
 
 	duration, err := chaos.GetDuration()
 	if err != nil {
 		r.Log.Error(err, "failed to get chaos duration")
-		return ctrl.Result{}, nil
+		return ctrl.Result{}, err
 	}
 
 	scheduler := chaos.GetScheduler()
 	if scheduler == nil {
 		r.Log.Info("scheduler should be defined currently")
-		return ctrl.Result{}, nil
+		return ctrl.Result{}, fmt.Errorf("misdefined scheduler")
 	}
 
 	if duration == nil {
@@ -99,7 +99,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		err = r.Recover(ctx, req, chaos)
 		if err != nil {
 			r.Log.Error(err, "failed to recover chaos")
-			return ctrl.Result{Requeue: true}, nil
+			return ctrl.Result{Requeue: true}, err
 		}
 	} else if !chaos.GetNextRecover().IsZero() && chaos.GetNextRecover().Before(now) {
 		// Start recover
@@ -110,7 +110,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		err = r.Recover(ctx, req, chaos)
 		if err != nil {
 			r.Log.Error(err, "failed to recover chaos")
-			return ctrl.Result{Requeue: true}, nil
+			return ctrl.Result{Requeue: true}, err
 		}
 		chaos.SetNextRecover(time.Time{})
 
@@ -122,7 +122,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		nextStart, err := utils.NextTime(*chaos.GetScheduler(), now)
 		if err != nil {
 			r.Log.Error(err, "failed to get next start time")
-			return ctrl.Result{}, nil
+			return ctrl.Result{}, err
 		}
 
 		nextRecover := now.Add(*duration)
@@ -130,7 +130,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 			err := fmt.Errorf("nextRecover shouldn't be later than nextStart")
 			r.Log.Error(err, "nextRecover is later than nextStart. Then recover can never be reached",
 				"nextRecover", nextRecover, "nextStart", nextStart)
-			return ctrl.Result{}, nil
+			return ctrl.Result{}, err
 		}
 
 		r.Log.Info("now chaos action:", "chaos", chaos)
@@ -151,7 +151,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 				r.Log.Error(updateError, "unable to update chaos finalizers")
 			}
 
-			return ctrl.Result{Requeue: true}, nil
+			return ctrl.Result{Requeue: true}, err
 		}
 		status.Experiment.StartTime = &metav1.Time{
 			Time: time.Now(),
@@ -174,7 +174,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 
 	if err := r.Update(ctx, chaos); err != nil {
 		r.Log.Error(err, "unable to update chaosctl status")
-		return ctrl.Result{}, nil
+		return ctrl.Result{}, err
 	}
 
 	return ctrl.Result{}, nil
