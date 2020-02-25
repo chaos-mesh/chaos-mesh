@@ -6,7 +6,7 @@ This document describes how to deploy Chaos Mesh in Kubernetes on your laptop (L
 
 Before deployment, make sure [Docker](https://docs.docker.com/install/) is installed and running on your local machine.
 
-## Step 1: Get the Helm files
+## Step 1: Get Chaos Mesh
 
 ```bash
 git clone https://github.com/pingcap/chaos-mesh.git

@@ -5,13 +5,13 @@ on your application on Kubernetes.
 
 ## Prerequisites
 
-Before deploying Chaos Mesh, make sure the following items have been installed.
+Before deploying Chaos Mesh, make sure the following items have been installed:
 
 - Kubernetes >= v1.12
 - [RBAC](https://kubernetes.io/docs/admin/authorization/rbac) enabled (optional)
 - [Helm](https://helm.sh/) version >= v2.8.2
 
-## Step 1: Get the Helm files
+## Step 1: Get Chaos Mesh
 
 ```bash
 git clone https://github.com/pingcap/chaos-mesh.git
@@ -65,5 +65,5 @@ helm install chaos-mesh helm/chaos-mesh --namespace=chaos-testing --set dashboar
 
 ## Next steps
 
-Refer to [Run Chaos Mesh](run_chaos_mesh.md)
+Refer to [Run Chaos Mesh](run_chaos_mesh.md).
 

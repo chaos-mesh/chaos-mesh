@@ -5,7 +5,8 @@ you will learn about how to use it for your chaos experiments.
 
 ## Deploy target cluster
 
-After Chaos Mesh is deployed, you can deploy the target cluster to be tested. For illustration purposes,  TiDB is used as a sample cluster.
+After Chaos Mesh is deployed, you can deploy the target cluster to be tested. For illustration purposes, TiDB is used as a sample cluster.
+
 
 You can follow the instructions in the following two documents to deploy a TiDB cluster:
 
@@ -14,8 +15,7 @@ You can follow the instructions in the following two documents to deploy a TiDB 
 
 ## Define the experiment config file
 
-The chaos experiment configuration is defined in a ·`.yaml` file. In the following sample file, 
-`pod-kill-example.yaml` defines a chaos experiment to kill one random TiKV pod every 60 seconds:
+The chaos experiment configuration is defined in a `.yaml` file. You need to create your own experiment config file, based on the available fields in the sample below:
 
 ```yaml
 apiVersion: pingcap.com/v1alpha1

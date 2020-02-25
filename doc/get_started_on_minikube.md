@@ -7,7 +7,7 @@ This document describes how to deploy Chaos Mesh in Kubernetes on your laptop (L
 Before deployment, make sure [Minikube](https://kubernetes.io/docs/tasks/tools/install-minikube/) 
 is installed on your local machine.
 
-## Step 1: Setup the Kubernetes environment
+## Step 1: Set up the Kubernetes environment
 
 Take the following steps to set up the local Kubernetes environment:
 
