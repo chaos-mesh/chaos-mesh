@@ -15,6 +15,7 @@ package watcher
 
 import (
 	"fmt"
+
 	v1 "k8s.io/api/core/v1"
 
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -160,7 +161,7 @@ var _ = Describe("webhook config watcher", func() {
 			cm.Data = make(map[string]string)
 			cm.Data["testkey"] = "name: \"testname\""
 			_, err := InjectionConfigsFromConfigMap(cm)
-			Expect(err).To(BeNil())  //error parsing ConfigMap
+			Expect(err).To(BeNil()) //error parsing ConfigMap
 		})
 	})
 })
