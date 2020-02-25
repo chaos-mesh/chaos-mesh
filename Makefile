@@ -101,7 +101,7 @@ install: manifests
 	helm install helm/chaos-mesh --name=chaos-mesh --namespace=chaos-testing
 
 # Generate manifests e.g. CRD, RBAC etc.
-manifests:
+manifests: controller-gen
 	$(GOBIN)/controller-gen $(CRD_OPTIONS) rbac:roleName=manager-role webhook paths="./..." output:crd:artifacts:config=config/crd/bases
 
 # Run go fmt against code
