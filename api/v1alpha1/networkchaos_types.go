@@ -41,9 +41,6 @@ const (
 	// CorruptAction represents the chaos action of corrupting packets on pods.
 	CorruptAction NetworkChaosAction = "corrupt"
 
-	// ReorderAction represents the chaos action of reordering packets on pods.
-	ReorderAction NetworkChaosAction = "reorder"
-
 	// PartitionAction represents the chaos action of network partition of pods.
 	PartitionAction NetworkChaosAction = "partition"
 )
@@ -131,9 +128,6 @@ type NetworkChaosSpec struct {
 
 	// Corrupt represents the detail about corrupt action
 	Corrupt *CorruptSpec `json:"corrupt,omitempty"`
-
-	// Reorder represents the detail about reorder action
-	Reorder *ReorderSpec `json:"corrupt,omitempty"`
 
 	// Direction represents the partition direction
 	// +optional
@@ -252,9 +246,10 @@ func (in *NetworkChaos) GetScheduler() *SchedulerSpec {
 
 // DelaySpec defines detail of a delay action
 type DelaySpec struct {
-	Latency     string `json:"latency"`
-	Correlation string `json:"correlation"`
-	Jitter      string `json:"jitter"`
+	Latency     string       `json:"latency"`
+	Correlation string       `json:"correlation"`
+	Jitter      string       `json:"jitter"`
+	Reorder     *ReorderSpec `json:"reorder,omitempty"`
 }
 
 func (delay *DelaySpec) ToNetem() (*chaosdaemon.Netem, error) {
@@ -272,11 +267,29 @@ func (delay *DelaySpec) ToNetem() (*chaosdaemon.Netem, error) {
 		return nil, err
 	}
 
-	return &chaosdaemon.Netem{
+	netem := &chaosdaemon.Netem{
 		Time:      uint32(delayTime.Nanoseconds() / 1e3),
 		DelayCorr: float32(corr),
 		Jitter:    uint32(jitter.Nanoseconds() / 1e3),
-	}, nil
+	}
+
+	if delay.Reorder != nil {
+		reorderPercentage, err := strconv.ParseFloat(delay.Reorder.Reorder, 32)
+		if err != nil {
+			return nil, err
+		}
+
+		corr, err := strconv.ParseFloat(delay.Reorder.Correlation, 32)
+		if err != nil {
+			return nil, err
+		}
+
+		netem.Reorder = float32(reorderPercentage)
+		netem.ReorderCorr = float32(corr)
+		netem.Gap = uint32(delay.Reorder.Gap)
+	}
+
+	return netem, nil
 }
 
 // LossSpec defines detail of a loss action
@@ -348,27 +361,11 @@ func (corrupt *CorruptSpec) ToNetem() (*chaosdaemon.Netem, error) {
 	}, nil
 }
 
-// ReorderSpec defines detail of a reorder action
+// ReorderSpec defines details of packet reorder.
 type ReorderSpec struct {
 	Reorder     string `json:"reorder"`
 	Correlation string `json:"correlation"`
-}
-
-func (reorder *ReorderSpec) ToNetem() (*chaosdaemon.Netem, error) {
-	reorderPercentage, err := strconv.ParseFloat(reorder.Reorder, 32)
-	if err != nil {
-		return nil, err
-	}
-
-	corr, err := strconv.ParseFloat(reorder.Correlation, 32)
-	if err != nil {
-		return nil, err
-	}
-
-	return &chaosdaemon.Netem{
-		Reorder:     float32(reorderPercentage),
-		ReorderCorr: float32(corr),
-	}, nil
+	Gap         int    `json:"gap"`
 }
 
 // +kubebuilder:object:root=true

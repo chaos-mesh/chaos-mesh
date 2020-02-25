@@ -32,7 +32,6 @@ var _ = Describe("NetworkChaos Controller", func() {
 		v1alpha1.LossAction,
 		v1alpha1.DuplicateAction,
 		v1alpha1.CorruptAction,
-		v1alpha1.ReorderAction,
 		v1alpha1.PartitionAction,
 	}
 

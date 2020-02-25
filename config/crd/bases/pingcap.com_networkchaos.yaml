@@ -39,15 +39,15 @@ spec:
                 action: delay Default action: delay'
               type: string
             corrupt:
-              description: Reorder represents the detail about reorder action
+              description: Corrupt represents the detail about corrupt action
               properties:
                 correlation:
                   type: string
-                reorder:
+                corrupt:
                   type: string
               required:
               - correlation
-              - reorder
+              - corrupt
               type: object
             delay:
               description: Delay represents the detail about delay action
@@ -58,6 +58,20 @@ spec:
                   type: string
                 latency:
                   type: string
+                reorder:
+                  description: ReorderSpec defines details of packet reorder.
+                  properties:
+                    correlation:
+                      type: string
+                    gap:
+                      type: integer
+                    reorder:
+                      type: string
+                  required:
+                  - correlation
+                  - gap
+                  - reorder
+                  type: object
               required:
               - correlation
               - jitter
