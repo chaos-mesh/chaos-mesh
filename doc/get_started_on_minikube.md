@@ -44,6 +44,8 @@ cd chaos-mesh
 >
 > `install.sh` is a shell script to automate the installation process. To deploy manually,  refer to [Install Chaos Mesh manually](deploy.md).
 
+After executing the above commands, you should be able to see the prompt that Chaos Mesh is installed successfully. Otherwise, please check the current environment according to the prompt message or send us an [issue](https://github.com/pingcap/chaos-mesh/issues) for help. 
+
 > **Limitations:**
 >
 > There are some known restrictions for Chaos Operator deployed on `minikube` clusters:
