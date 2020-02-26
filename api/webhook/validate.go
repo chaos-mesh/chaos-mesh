@@ -28,7 +28,7 @@ import (
 var validatelog = ctrl.Log.WithName("validate-webhook")
 
 // ChaosValidator used to handle the validation admission request
-type ChaosValidator struct {}
+type ChaosValidator struct{}
 
 // Handle handles the requests from validation admission requests
 func (v *ChaosValidator) Handle(ctx context.Context, req admission.Request) admission.Response {
