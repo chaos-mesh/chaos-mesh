@@ -86,7 +86,7 @@ dashboard: fmt vet
 binary: chaosdaemon manager chaosfs dashboard
 
 watchmaker: fmt vet
-	$(CGOENV) go build -ldflags '$(LDFLAGS)' -o bin/watchmaker ./cmd/watchmaker/*.go
+	$(CGOENV) go build -ldflags '$(LDFLAGS)' -o bin/watchmaker ./cmd/watchmaker/...
 
 dashboard-server-frontend:
 	cd images/chaos-dashboard; yarn install; yarn build
