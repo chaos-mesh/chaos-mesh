@@ -163,7 +163,7 @@ var _ = Describe("webhook inject", func() {
 		It("should return", func() {
 			var target []corev1.Container = []corev1.Container{
 				corev1.Container{
-					Name:    "testContainerName",
+					Name: "testContainerName",
 				}}
 			var postStart map[string]config.ExecAction
 			postStart = make(map[string]config.ExecAction)
@@ -174,7 +174,7 @@ var _ = Describe("webhook inject", func() {
 		It("should return nil", func() {
 			var target []corev1.Container = []corev1.Container{
 				corev1.Container{
-					Name:    "testContainerName",
+					Name: "testContainerName",
 				}}
 			var postStart map[string]config.ExecAction
 			postStart = make(map[string]config.ExecAction)
@@ -191,11 +191,11 @@ var _ = Describe("webhook inject", func() {
 		It("should return not nil", func() {
 			var target []corev1.Container = []corev1.Container{
 				corev1.Container{
-					Name:   "testContainerName",
+					Name: "testContainerName",
 				}}
 			var addEnv []corev1.EnvVar = []corev1.EnvVar{
 				corev1.EnvVar{
-					Name:	"testContainerName",
+					Name: "testContainerName",
 				}}
 			patch := setEnvironment(target, addEnv)
 			Expect(patch).ToNot(BeNil())
@@ -204,16 +204,16 @@ var _ = Describe("webhook inject", func() {
 		It("should return not nil", func() {
 			var Env []corev1.EnvVar = []corev1.EnvVar{
 				corev1.EnvVar{
-					Name: 	"_testContainerName_",
+					Name: "_testContainerName_",
 				}}
 			var target []corev1.Container = []corev1.Container{
 				corev1.Container{
-					Name:   "testContainerName",
-					Env: Env,
+					Name: "testContainerName",
+					Env:  Env,
 				}}
 			var addEnv []corev1.EnvVar = []corev1.EnvVar{
 				corev1.EnvVar{
-					Name:	"testContainerName",
+					Name: "testContainerName",
 				}}
 			patch := setEnvironment(target, addEnv)
 			Expect(patch).ToNot(BeNil())
@@ -222,16 +222,16 @@ var _ = Describe("webhook inject", func() {
 		It("should return nil", func() {
 			var Env []corev1.EnvVar = []corev1.EnvVar{
 				corev1.EnvVar{
-					Name: 	"testContainerName",
+					Name: "testContainerName",
 				}}
 			var target []corev1.Container = []corev1.Container{
 				corev1.Container{
-					Name:    "testContainerName",
-					Env: Env,
+					Name: "testContainerName",
+					Env:  Env,
 				}}
 			var addEnv []corev1.EnvVar = []corev1.EnvVar{
 				corev1.EnvVar{
-					Name:	"testContainerName",
+					Name: "testContainerName",
 				}}
 			patch := setEnvironment(target, addEnv)
 			Expect(patch).To(BeNil())
@@ -242,11 +242,11 @@ var _ = Describe("webhook inject", func() {
 		It("should return not nil", func() {
 			var target []corev1.Container = []corev1.Container{
 				corev1.Container{
-					Name:    "testContainerName",
+					Name: "testContainerName",
 				}}
 			var added []corev1.Container = []corev1.Container{
 				corev1.Container{
-					Name:    "testContainerName",
+					Name: "testContainerName",
 				}}
 			basePath := "/test"
 			patch := addContainers(target, added, basePath)
@@ -257,7 +257,7 @@ var _ = Describe("webhook inject", func() {
 			var target []corev1.Container = []corev1.Container{}
 			var added []corev1.Container = []corev1.Container{
 				corev1.Container{
-					Name:    "testContainerName",
+					Name: "testContainerName",
 				}}
 			basePath := "/test"
 			patch := addContainers(target, added, basePath)
@@ -269,11 +269,11 @@ var _ = Describe("webhook inject", func() {
 		It("should return not nil", func() {
 			var target []corev1.Volume = []corev1.Volume{
 				corev1.Volume{
-					Name:    "test",
+					Name: "test",
 				}}
 			var added []corev1.Volume = []corev1.Volume{
 				corev1.Volume{
-					Name:    "test",
+					Name: "test",
 				}}
 			basePath := "/test"
 			patch := addVolumes(target, added, basePath)
@@ -284,7 +284,7 @@ var _ = Describe("webhook inject", func() {
 			var target []corev1.Volume = []corev1.Volume{}
 			var added []corev1.Volume = []corev1.Volume{
 				corev1.Volume{
-					Name:    "test",
+					Name: "test",
 				}}
 			basePath := "/test"
 			patch := addVolumes(target, added, basePath)
@@ -296,16 +296,16 @@ var _ = Describe("webhook inject", func() {
 		It("should return not nil", func() {
 			var vm []corev1.VolumeMount = []corev1.VolumeMount{
 				corev1.VolumeMount{
-					Name:	"test",
+					Name: "test",
 				}}
 			var target []corev1.Container = []corev1.Container{
 				corev1.Container{
-					Name:   "test",
+					Name:         "test",
 					VolumeMounts: vm,
 				}}
 			var added []corev1.VolumeMount = []corev1.VolumeMount{
 				corev1.VolumeMount{
-					Name:    "test",
+					Name: "test",
 				}}
 			basePath := "/test"
 			patch := setVolumeMounts(target, added, basePath)
@@ -317,11 +317,11 @@ var _ = Describe("webhook inject", func() {
 		It("should return not nil", func() {
 			var target []corev1.HostAlias = []corev1.HostAlias{
 				corev1.HostAlias{
-					IP:		"testip",
+					IP: "testip",
 				}}
 			var added []corev1.HostAlias = []corev1.HostAlias{
 				corev1.HostAlias{
-					IP:		"testip",
+					IP: "testip",
 				}}
 			basePath := "/test"
 			patch := addHostAliases(target, added, basePath)
@@ -332,7 +332,7 @@ var _ = Describe("webhook inject", func() {
 			var target []corev1.HostAlias = []corev1.HostAlias{}
 			var added []corev1.HostAlias = []corev1.HostAlias{
 				corev1.HostAlias{
-					IP:    "testip",
+					IP: "testip",
 				}}
 			basePath := "/test"
 			patch := addHostAliases(target, added, basePath)
@@ -344,11 +344,11 @@ var _ = Describe("webhook inject", func() {
 		It("should return not nil", func() {
 			var envs []corev1.EnvVar = []corev1.EnvVar{
 				corev1.EnvVar{
-					Name: 	"test",
+					Name: "test",
 				}}
 			var containers []corev1.Container = []corev1.Container{
 				corev1.Container{
-					Name:   "test",
+					Name: "test",
 				}}
 			mutatedContainers := mergeEnvVars(envs, containers)
 			Expect(mutatedContainers).ToNot(BeNil())
@@ -357,16 +357,16 @@ var _ = Describe("webhook inject", func() {
 		It("should return not nil", func() {
 			var envs []corev1.EnvVar = []corev1.EnvVar{
 				corev1.EnvVar{
-					Name:	"test",
+					Name: "test",
 				}}
 			var env []corev1.EnvVar = []corev1.EnvVar{
 				corev1.EnvVar{
-					Name: 	"test",
+					Name: "test",
 				}}
 			var containers []corev1.Container = []corev1.Container{
 				corev1.Container{
-					Name:   "test",
-					Env: 	env,
+					Name: "test",
+					Env:  env,
 				}}
 			mutatedContainers := mergeEnvVars(envs, containers)
 			Expect(mutatedContainers).ToNot(BeNil())
@@ -377,11 +377,11 @@ var _ = Describe("webhook inject", func() {
 		It("should return not nil", func() {
 			var volumeMounts []corev1.VolumeMount = []corev1.VolumeMount{
 				corev1.VolumeMount{
-					Name:	"test",
+					Name: "test",
 				}}
 			var containers []corev1.Container = []corev1.Container{
 				corev1.Container{
-					Name:   "test",
+					Name: "test",
 				}}
 			mutatedContainers := mergeVolumeMounts(volumeMounts, containers)
 			Expect(mutatedContainers).ToNot(BeNil())
@@ -390,15 +390,15 @@ var _ = Describe("webhook inject", func() {
 		It("should return not nil", func() {
 			var volumeMounts []corev1.VolumeMount = []corev1.VolumeMount{
 				corev1.VolumeMount{
-					Name:	"test",
+					Name: "test",
 				}}
 			var vm []corev1.VolumeMount = []corev1.VolumeMount{
 				corev1.VolumeMount{
-					Name:	"test",
+					Name: "test",
 				}}
 			var containers []corev1.Container = []corev1.Container{
 				corev1.Container{
-					Name:   "test",
+					Name:         "test",
 					VolumeMounts: vm,
 				}}
 			mutatedContainers := mergeVolumeMounts(volumeMounts, containers)
@@ -428,7 +428,7 @@ var _ = Describe("webhook inject", func() {
 	Context("potentialPodName", func() {
 		It("should return testName", func() {
 			var metadata metav1.ObjectMeta
-			metadata.Name="testName"
+			metadata.Name = "testName"
 			name := potentialPodName(&metadata)
 			Expect(name).ToNot(BeNil())
 			Expect(name).To(Equal("testName"))
@@ -436,7 +436,7 @@ var _ = Describe("webhook inject", func() {
 
 		It("should return (actual name not yet known)", func() {
 			var metadata metav1.ObjectMeta
-			metadata.GenerateName="testName"
+			metadata.GenerateName = "testName"
 			name := potentialPodName(&metadata)
 			Expect(name).ToNot(BeNil())
 			Expect(name).To(ContainSubstring("(actual name not yet known)"))
