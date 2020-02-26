@@ -59,9 +59,6 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	}
 
 	status := chaos.GetStatus()
-	if status == nil {
-		status = &v1alpha1.ChaosStatus{}
-	}
 
 	if chaos.IsDeleted() {
 		// This chaos was deleted
