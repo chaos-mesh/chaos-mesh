@@ -63,7 +63,7 @@ func (s *Server) services(w http.ResponseWriter, r *http.Request) {
 			if err != nil {
 				s.log.Error(err, "cannot get prometheus", "labels", service.Labels)
 
-				s.log.Info("destroying namespace related grafana and service", "namespace", name)
+				s.log.Info("Destroying namespace related grafana and service", "namespace", name)
 
 				var service corev1.Service
 				err := s.client.Get(ctx, types.NamespacedName{
@@ -91,7 +91,7 @@ func (s *Server) services(w http.ResponseWriter, r *http.Request) {
 					s.log.Error(err, "delete deployment error", "deployment", deployment)
 				}
 			} else {
-				s.log.Info("namespace does exist", "namespace", name)
+				s.log.Info("Namespace does exist", "namespace", name)
 
 				names = append(names, name) // remove tailing "-chaos-grafana"
 			}

@@ -137,8 +137,6 @@ func (r *Reconciler) Recover(ctx context.Context, req ctrl.Request, chaos reconc
 		Time: time.Now(),
 	}
 
-	iochaos.Status.Experiment.Phase = v1alpha1.ExperimentPhaseFinished
-
 	r.Event(iochaos, v1.EventTypeNormal, utils.EventChaosRecovered, "")
 	return nil
 }

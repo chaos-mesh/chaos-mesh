@@ -50,7 +50,7 @@ type Reconciler struct {
 
 // Reconcile reconciles a TimeChaos resource
 func (r *Reconciler) Reconcile(req ctrl.Request, chaos *v1alpha1.TimeChaos) (ctrl.Result, error) {
-	r.Log.Info("reconciling timechaos")
+	r.Log.Info("Reconciling timechaos")
 	scheduler := chaos.GetScheduler()
 	duration, err := chaos.GetDuration()
 	if err != nil {
@@ -174,7 +174,7 @@ func (r *Reconciler) cleanFinalizersAndRecover(ctx context.Context, chaos *v1alp
 }
 
 func (r *Reconciler) recoverPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.TimeChaos) error {
-	r.Log.Info("try to recover pod", "namespace", pod.Namespace, "name", pod.Name)
+	r.Log.Info("Try to recover pod", "namespace", pod.Namespace, "name", pod.Name)
 
 	c, err := utils.CreateGrpcConnection(ctx, r.Client, pod)
 	if err != nil {
@@ -197,7 +197,7 @@ func (r *Reconciler) recoverPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha
 	if err != nil {
 		r.Log.Error(err, "recover pod error", "namespace", pod.Namespace, "name", pod.Name)
 	} else {
-		r.Log.Info("recover pod finished", "namespace", pod.Namespace, "name", pod.Name)
+		r.Log.Info("Recover pod finished", "namespace", pod.Namespace, "name", pod.Name)
 	}
 
 	return err

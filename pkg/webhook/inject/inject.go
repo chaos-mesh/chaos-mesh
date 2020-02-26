@@ -372,7 +372,7 @@ func addContainers(target, added []corev1.Container, basePath string) (patch []p
 	var value interface{}
 	for _, add := range added {
 		value = add
-		log.V(6).Info("add container", "add", add)
+		log.V(6).Info("Add container", "add", add)
 		path := basePath
 		if first {
 			first = false
