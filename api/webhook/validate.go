@@ -35,9 +35,9 @@ type ChaosValidator struct {
 func (v *ChaosValidator) Handle(ctx context.Context, req admission.Request) admission.Response {
 	name := req.Name
 	namespace := req.Namespace
-	kind := req.Kind
-	validatelog.Info(fmt.Sprintf("receive validation req for obj[%s/%s/%s]", kind.Kind, namespace, name))
+	kind := req.Kind.Kind
+	validatelog.Info(fmt.Sprintf("receive validation req for obj[%s/%s/%s]", kind, namespace, name))
 	return admission.Response{
-		AdmissionResponse: *validation.ValidateChaos(&req.AdmissionRequest, kind.Kind),
+		AdmissionResponse: *validation.ValidateChaos(&req.AdmissionRequest, kind),
 	}
 }
