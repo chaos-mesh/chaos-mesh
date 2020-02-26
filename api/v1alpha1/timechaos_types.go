@@ -53,6 +53,13 @@ type TimeChaosSpec struct {
 	// TimeOffset defines the delta time of injected program
 	TimeOffset TimeOffset `json:"timeOffset"`
 
+	// ClockIds defines all affected clock id
+	// All available options are ["CLOCK_REALTIME","CLOCK_MONOTONIC","CLOCK_PROCESS_CPUTIME_ID","CLOCK_THREAD_CPUTIME_ID",
+	// "CLOCK_MONOTONIC_RAW","CLOCK_REALTIME_COARSE","CLOCK_MONOTONIC_COARSE","CLOCK_BOOTTIME","CLOCK_REALTIME_ALARM",
+	// "CLOCK_BOOTTIME_ALARM"]
+	// Default value is ["CLOCK_REALTIME"]
+	ClockIds []string `json:"clockIds,omitempty"`
+
 	// Duration represents the duration of the chaos action
 	Duration *string `json:"duration"`
 
@@ -66,6 +73,13 @@ type TimeChaosSpec struct {
 	// Next time when this action will be recovered
 	// +optional
 	NextRecover *metav1.Time `json:"nextRecover,omitempty"`
+}
+
+// SetDefaultValue will set default value for empty fields
+func (in *TimeChaos) SetDefaultValue() {
+	if in.Spec.ClockIds == nil || len(in.Spec.ClockIds) == 0 {
+		in.Spec.ClockIds = []string{"CLOCK_REALTIME"}
+	}
 }
 
 // GetSelector is a getter for Selector (for implementing SelectSpec)
