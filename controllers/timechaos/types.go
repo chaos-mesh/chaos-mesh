@@ -87,6 +87,8 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos reconcil
 		return err
 	}
 
+	timechaos.SetDefaultValue()
+
 	pods, err := utils.SelectAndGeneratePods(ctx, r.Client, &timechaos.Spec)
 
 	if err != nil {
@@ -244,10 +246,17 @@ func (r *Reconciler) applyPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.
 
 	containerID := pod.Status.ContainerStatuses[0].ContainerID
 
+	mask, err := utils.EncodeClkIds(chaos.Spec.ClockIds)
+	if err != nil {
+		return err
+	}
+
+	r.Log.Info("setting time shift", "mask", mask, "sec", chaos.Spec.TimeOffset.Sec, "nsec", chaos.Spec.TimeOffset.NSec)
 	_, err = pbClient.SetTimeOffset(ctx, &pb.TimeRequest{
 		ContainerId: containerID,
 		Sec:         chaos.Spec.TimeOffset.Sec,
 		Nsec:        chaos.Spec.TimeOffset.NSec,
+		ClkIdsMask:  mask,
 	})
 
 	return err
