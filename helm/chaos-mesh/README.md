@@ -8,7 +8,7 @@ This chart bootstraps a [Chaos Mesh](https://github.com/pingcap/chaos-mesh) depl
 
 ## Deploy
 
-Before deploying Chaos Mesh, make sure you have installed the [Prerequisites](https://github.com/pingcap/chaos-mesh#prerequisites). And then follow the [deploy-chaos-mesh](https://github.com/pingcap/chaos-mesh#deploy-chaos-mesh) section step by step.
+Before deploying Chaos Mesh, make sure you have installed the [Prerequisites](https://github.com/pingcap/chaos-mesh/blob/master/doc/deploy.md#prerequisites). And then follow the [deploy](https://github.com/pingcap/chaos-mesh/blob/master/doc/deploy.md) doc step by step.
 
 ## Parameters
 
