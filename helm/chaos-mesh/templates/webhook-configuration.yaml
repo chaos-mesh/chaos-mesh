@@ -29,6 +29,35 @@ webhooks:
       matchLabels:
         admission-webhook: enabled
     failurePolicy: {{ .Values.webhook.FailurePolicy }}
+---
+
+apiVersion: admissionregistration.k8s.io/v1beta1
+kind: ValidatingWebhookConfiguration
+metadata:
+  name: {{ template "chaos-mesh.validation" . }}
+  labels:
+    app.kubernetes.io/name: {{ template "chaos-mesh.name" . }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/component: admission-webhook
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+"  "_" }}
+  {{- if .Values.webhook.certManager.enabled }}
+  annotations:
+    cert-manager.io/inject-ca-from: {{ printf "%s/%s" .Release.Namespace "chaos-mesh-cert" | quote }}
+  {{- end }}
+webhooks:
+  - name: {{ template "chaos-mesh.webhook" . }}
+    clientConfig:
+    service:
+      name: {{ template "chaos-mesh.svc" . }}
+      namespace: {{ .Release.Namespace }}
+      path: "/validate-v1alpha1-chaos"
+    rules:
+      - operations: [ "CREATE","UPDATE"]
+        apiGroups: ["pingcap.com"]
+        apiVersions: ["v1alpha1"]
+        resources: ["podchaos","iochaos","timechaos","networkchaos"]
+    failurePolicy: {{ .Values.webhook.FailurePolicy }}
 
 {{- if .Values.webhook.certManager.enabled }}
 ---
