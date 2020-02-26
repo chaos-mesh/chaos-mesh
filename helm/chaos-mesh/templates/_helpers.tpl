@@ -30,3 +30,31 @@ Create chart name and version as used by the chart label.
 {{- define "chaos-mesh.chart" -}}
 {{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
+
+{{/*
+Define the svc's name
+*/}}
+{{- define "chaos-mesh.svc" -}}
+{{- printf "chaos-mesh-controller-manager" -}}
+{{- end -}}
+
+{{/*
+Define the secret's name of certs
+*/}}
+{{- define "chaos-mesh.certs" -}}
+{{- printf "chaos-mesh-webhook-certs" -}}
+{{- end -}}
+
+{{/*
+Define the MutatingWebhookConfiguration's name
+*/}}
+{{- define "chaos-mesh.mutation" -}}
+{{- printf "chaos-mesh-sidecar-injector" -}}
+{{- end -}}
+
+{{/*
+Define the webhook's name
+*/}}
+{{- define "chaos-mesh.webhook" -}}
+{{- printf "admission-webhook.pingcap.com" -}}
+{{- end -}}
