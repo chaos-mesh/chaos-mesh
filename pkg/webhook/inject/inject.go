@@ -190,7 +190,6 @@ func injectByNamespaceRequired(metadata *metav1.ObjectMeta, cli client.Client, c
 		log.Error(err, "failed to get namespace", "namespace", metadata.Namespace)
 		return "", false
 	}
-
 	annotations := ns.GetAnnotations()
 	if annotations == nil {
 		annotations = make(map[string]string)
@@ -321,7 +320,6 @@ func setCommands(target []corev1.Container, postStart map[string]config.ExecActi
 			Value: []string{},
 		})
 	}
-
 	return patch
 }
 

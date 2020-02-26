@@ -29,12 +29,6 @@ import (
 
 var _ = Describe("webhook config watcher", func() {
 	Context("New", func() {
-		It("should return nil", func() {
-			config := NewConfig()
-			_, err := New(*config)
-			Expect(err).To(BeNil())
-		})
-
 		It("should return InClusterConfig error", func() {
 			old := restInClusterConfig
 			defer func() { restInClusterConfig = old }()
