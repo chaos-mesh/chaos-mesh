@@ -8,9 +8,9 @@ Below is a sample time chaos configuration file:
 
 ```yaml
 apiVersion: pingcap.com/v1alpha1
-kind: NetworkChaos
+kind: TimeChaos
 metadata:
-  name: network-partition-example
+  name: time-shift-example
   namespace: chaos-testing
 spec:
   mode: one
