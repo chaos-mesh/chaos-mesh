@@ -22,9 +22,6 @@ GO     := $(GOENV) go
 GOTEST := TEST_USE_EXISTING_CLUSTER=false go test
 SHELL    := /usr/bin/env bash
 
-FAILPOINT_ENABLE  := $$(find $$PWD/ -type d | grep -vE "(\.git|bin)" | xargs bin/failpoint-ctl enable)
-FAILPOINT_DISABLE := $$(find $$PWD/ -type d | grep -vE "(\.git|bin)" | xargs bin/failpoint-ctl disable)
-
 PACKAGE_LIST := go list ./... | grep -vE "pkg/client" | grep -vE "zz_generated" | grep -vE "vendor"
 PACKAGE_DIRECTORIES := $(PACKAGE_LIST) | sed 's|github.com/pingcap/chaos-mesh/||'
 FILES := $$(find $$($(PACKAGE_DIRECTORIES)) -name "*.go")
@@ -39,6 +36,9 @@ GOBIN=$(shell go env GOPATH)/bin
 else
 GOBIN=$(shell go env GOBIN)
 endif
+
+FAILPOINT_ENABLE  := $$(find $$PWD/ -type d | grep -vE "(\.git|bin)" | xargs $(GOBIN)/failpoint-ctl enable)
+FAILPOINT_DISABLE := $$(find $$PWD/ -type d | grep -vE "(\.git|bin)" | xargs $(GOBIN)/failpoint-ctl disable)
 
 all: yaml build image
 
@@ -86,7 +86,7 @@ dashboard: fmt vet
 binary: chaosdaemon manager chaosfs dashboard
 
 watchmaker: fmt vet
-	$(CGOENV) go build -ldflags '$(LDFLAGS)' -o bin/watchmaker ./cmd/watchmaker/*.go
+	$(CGOENV) go build -ldflags '$(LDFLAGS)' -o bin/watchmaker ./cmd/watchmaker/...
 
 dashboard-server-frontend:
 	cd images/chaos-dashboard; yarn install; yarn build
@@ -102,27 +102,20 @@ install: manifests
 
 # Generate manifests e.g. CRD, RBAC etc.
 manifests: controller-gen
-	$(CONTROLLER_GEN) $(CRD_OPTIONS) rbac:roleName=manager-role webhook paths="./..." output:crd:artifacts:config=config/crd/bases
+	$(GOBIN)/controller-gen $(CRD_OPTIONS) rbac:roleName=manager-role webhook paths="./..." output:crd:artifacts:config=config/crd/bases
 
 # Run go fmt against code
 fmt: groupimports
 	$(CGOENV) go fmt ./...
 
-groupimports: install-goimports
-	goimports -w -l -local github.com/pingcap/chaos-mesh $$($(PACKAGE_DIRECTORIES))
+groupimports: goimports
+	$(GOBIN)/goimports -w -l -local github.com/pingcap/chaos-mesh $$($(PACKAGE_DIRECTORIES))
 
-
-install-goimports:
-ifeq (,$(shell which goimports))
-	@echo "installing goimports"
-	go get golang.org/x/tools/cmd/goimports
-endif
-
-failpoint-enable: bin/failpoint-ctl
+failpoint-enable: failpoint-ctl
 # Converting gofail failpoints...
 	@$(FAILPOINT_ENABLE)
 
-failpoint-disable: bin/failpoint-ctl
+failpoint-disable: failpoint-ctl
 # Restoring gofail failpoints...
 	@$(FAILPOINT_DISABLE)
 
@@ -153,29 +146,22 @@ docker-push:
 	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-grafana:latest"
 	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-dashboard:latest"
 
-bin/revive:
-	GO111MODULE="on" go build -o bin/revive github.com/mgechev/revive
+controller-gen:
+	$(GO) get sigs.k8s.io/controller-tools/cmd/controller-gen
+revive:
+	$(GO) get github.com/mgechev/revive
+failpoint-ctl:
+	$(GO) get github.com/pingcap/failpoint/failpoint-ctl
+goimports:
+	$(GO) get golang.org/x/tools/cmd/goimports
 
-bin/failpoint-ctl: go.mod
-	$(GO) build -o $@ github.com/pingcap/failpoint/failpoint-ctl
-
-lint: bin/revive
+lint: revive
 	@echo "linting"
-	bin/revive -formatter friendly -config revive.toml $$($(PACKAGE_LIST))
+	$(GOBIN)/revive -formatter friendly -config revive.toml $$($(PACKAGE_LIST))
 
 # Generate code
 generate: controller-gen
-	$(CONTROLLER_GEN) object:headerFile=./hack/boilerplate.go.txt paths="./..."
-
-# find or download controller-gen
-# download controller-gen if necessary
-controller-gen:
-ifeq (, $(shell which controller-gen))
-	go get sigs.k8s.io/controller-tools/cmd/controller-gen@v0.2.5
-CONTROLLER_GEN=$(GOBIN)/controller-gen
-else
-CONTROLLER_GEN=$(shell which controller-gen)
-endif
+	$(GOBIN)/controller-gen object:headerFile=./hack/boilerplate.go.txt paths="./..."
 
 yaml: manifests
 	kustomize build config/default > manifests/crd.yaml
@@ -213,16 +199,7 @@ else
 	@echo "kustomize has been installed"
 endif
 
-install-test-dependency: install-kubebuilder
-	go get -u github.com/jstemmer/go-junit-report \
-	&& go get github.com/axw/gocov/gocov \
-	&& go get github.com/AlekSi/gocov-xml \
-	&& go get github.com/onsi/ginkgo/ginkgo \
-	&& go get golang.org/x/tools/cmd/cover \
-	&& go get -u github.com/matm/gocov-html
-
-
 .PHONY: all build test install manifests fmt vet tidy image \
 	docker-push lint generate controller-gen yaml \
 	manager chaosfs chaosdaemon install-kind install-kubebuilder \
-	install-kustomize install-test-dependency dashboard dashboard-server-frontend
+	install-kustomize dashboard dashboard-server-frontend
