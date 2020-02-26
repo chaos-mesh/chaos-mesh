@@ -73,7 +73,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		}
 		status.Experiment.Phase = v1alpha1.ExperimentPhaseFinished
 	} else if status.Experiment.Phase == v1alpha1.ExperimentPhaseRunning {
-		r.Log.Info("Common chaos is already running", "name", req.Name, "namespace", req.Namespace)
+		r.Log.Info("The common chaos is already running", "name", req.Name, "namespace", req.Namespace)
 		return ctrl.Result{}, nil
 	} else {
 		// Start failure action
