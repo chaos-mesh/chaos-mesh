@@ -28,15 +28,14 @@ import (
 var validatelog = ctrl.Log.WithName("validate-webhook")
 
 // ChaosValidator used to handle the validation admission request
-type ChaosValidator struct {
-}
+type ChaosValidator struct {}
 
-// Handle handle the requests from validation admission requests
+// Handle handles the requests from validation admission requests
 func (v *ChaosValidator) Handle(ctx context.Context, req admission.Request) admission.Response {
 	name := req.Name
 	namespace := req.Namespace
 	kind := req.Kind.Kind
-	validatelog.Info(fmt.Sprintf("receive validation req for obj[%s/%s/%s]", kind, namespace, name))
+	validatelog.Info(fmt.Sprintf("Receive validation req for obj[%s/%s/%s]", kind, namespace, name))
 	return admission.Response{
 		AdmissionResponse: *validation.ValidateChaos(&req.AdmissionRequest, kind),
 	}
