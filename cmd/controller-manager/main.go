@@ -168,6 +168,7 @@ func main() {
 	hookServer.Register("/inject-v1-pod", &webhook.Admission{Handler: &apiWebhook.PodInjector{
 		Config: webhookConfig,
 	}})
+	hookServer.Register("/validate-v1alpha1-chaos", &webhook.Admission{Handler: &apiWebhook.ChaosValidator{}})
 
 	// +kubebuilder:scaffold:builder
 

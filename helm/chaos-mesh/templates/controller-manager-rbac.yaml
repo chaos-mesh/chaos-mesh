@@ -63,7 +63,7 @@ rules:
   resources: ["secrets"]
   verbs: ["get", "create", "list", "watch", "update", "delete"]
 - apiGroups: ["admissionregistration.k8s.io"]
-  resources: ["mutatingwebhookconfigurations"]
+  resources: ["mutatingwebhookconfigurations","validatingwebhookconfigurations"]
   verbs: ["get", "create", "delete", "update", "patch"]
 - apiGroups: ["pingcap.com"]
   resources:
