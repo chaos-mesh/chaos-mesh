@@ -112,7 +112,7 @@ func main() {
 		}
 	}()
 
-	log.Info("starting chaosfs server...")
+	log.Info("Starting chaosfs server...")
 	if err = fs.Serve(); err != nil {
 		log.Error(err, "failed to start fuse server")
 		os.Exit(1)

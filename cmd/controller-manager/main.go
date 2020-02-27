@@ -143,7 +143,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	setupLog.Info("setting up webhook server")
+	setupLog.Info("Setting up webhook server")
 	hookServer := mgr.GetWebhookServer()
 	hookServer.CertDir = certsDir
 	webhookConfig, err := config.LoadConfigDirectory(configDir)

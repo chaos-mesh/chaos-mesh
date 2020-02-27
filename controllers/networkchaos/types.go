@@ -37,7 +37,7 @@ type Reconciler struct {
 
 // Reconcile reconciles a NetworkChaos resource
 func (r *Reconciler) Reconcile(req ctrl.Request, chaos *v1alpha1.NetworkChaos) (ctrl.Result, error) {
-	r.Log.Info("reconciling networkchaos")
+	r.Log.Info("Reconciling networkchaos")
 
 	scheduler := chaos.GetScheduler()
 	duration, err := chaos.GetDuration()

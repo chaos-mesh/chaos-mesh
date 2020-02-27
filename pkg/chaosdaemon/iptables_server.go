@@ -32,7 +32,7 @@ const (
 )
 
 func (s *daemonServer) FlushIptables(ctx context.Context, req *pb.IpTablesRequest) (*empty.Empty, error) {
-	log.Info("flush iptables rules", "request", req)
+	log.Info("Flush iptables rules", "request", req)
 
 	pid, err := s.crClient.GetPidFromContainerID(ctx, req.ContainerId)
 	if err != nil {
@@ -74,7 +74,7 @@ func (s *daemonServer) FlushIptables(ctx context.Context, req *pb.IpTablesReques
 }
 
 func (s *daemonServer) addIptablesRules(ctx context.Context, cmd *exec.Cmd) error {
-	log.Info("add iptables rules", "command", cmd.String())
+	log.Info("Add iptables rules", "command", cmd.String())
 
 	out, err := cmd.CombinedOutput()
 	if err != nil {
@@ -86,7 +86,7 @@ func (s *daemonServer) addIptablesRules(ctx context.Context, cmd *exec.Cmd) erro
 }
 
 func (s *daemonServer) deleteIptablesRules(ctx context.Context, cmd *exec.Cmd) error {
-	log.Info("delete iptables rules", "command", cmd.String())
+	log.Info("Delete iptables rules", "command", cmd.String())
 
 	out, err := cmd.CombinedOutput()
 	if err != nil {

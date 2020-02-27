@@ -45,7 +45,7 @@ func (v *PodInjector) Handle(ctx context.Context, req admission.Request) admissi
 		return admission.Errored(http.StatusBadRequest, err)
 	}
 
-	log.Info("get request from pod:", "pod", pod)
+	log.Info("Get request from pod:", "pod", pod)
 
 	return admission.Response{
 		AdmissionResponse: *inject.Inject(&req.AdmissionRequest, v.client, v.Config),

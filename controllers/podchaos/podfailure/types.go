@@ -138,7 +138,6 @@ func (r *Reconciler) Recover(ctx context.Context, req ctrl.Request, obj reconcil
 	podchaos.Status.Experiment.EndTime = &metav1.Time{
 		Time: time.Now(),
 	}
-	podchaos.Status.Experiment.Phase = v1alpha1.ExperimentPhaseFinished
 	r.Event(podchaos, v1.EventTypeNormal, utils.EventChaosRecovered, "")
 	return nil
 }
