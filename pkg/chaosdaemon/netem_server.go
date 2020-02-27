@@ -25,7 +25,7 @@ import (
 )
 
 func (s *daemonServer) SetNetem(ctx context.Context, in *pb.NetemRequest) (*empty.Empty, error) {
-	log.Info("set netem", "Request", in)
+	log.Info("Set netem", "Request", in)
 
 	pid, err := s.crClient.GetPidFromContainerID(ctx, in.ContainerId)
 
@@ -41,7 +41,7 @@ func (s *daemonServer) SetNetem(ctx context.Context, in *pb.NetemRequest) (*empt
 }
 
 func (s *daemonServer) DeleteNetem(ctx context.Context, in *pb.NetemRequest) (*empty.Empty, error) {
-	log.Info("delete netem", "Request", in)
+	log.Info("Delete netem", "Request", in)
 
 	pid, err := s.crClient.GetPidFromContainerID(ctx, in.ContainerId)
 

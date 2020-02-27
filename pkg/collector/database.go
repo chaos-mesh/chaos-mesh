@@ -41,12 +41,12 @@ type Event struct {
 }
 
 func NewDatabaseClient(dataSource string) (*DatabaseClient, error) {
-	databaseLog.Info("connecting to database", "dataSource", dataSource)
+	databaseLog.Info("Connecting to database", "dataSource", dataSource)
 	db, err := sqlx.Open("mysql", dataSource)
 	if err != nil {
 		return nil, err
 	}
-	databaseLog.Info("database connected")
+	databaseLog.Info("Database connected")
 
 	return &DatabaseClient{
 		db,
