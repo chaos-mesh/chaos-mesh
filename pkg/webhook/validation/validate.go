@@ -78,13 +78,13 @@ func validatePodchaos(rawObj []byte) (bool, string, error) {
 			return false, invalidConfigurationMsg, nil
 		}
 	case v1alpha1.PodKillAction:
-		// We choose to ignore the Duration property event user define it
+		// We choose to ignore the Duration property even user define it
 		if podChaos.Spec.Scheduler == nil {
 			return false, invalidConfigurationMsg, nil
 		}
 		return true, "", nil
 	case v1alpha1.ContainerKillAction:
-		// We choose to ignore the Duration property event user define it
+		// We choose to ignore the Duration property even user define it
 		if podChaos.Spec.Scheduler == nil {
 			return false, invalidConfigurationMsg, nil
 		}
