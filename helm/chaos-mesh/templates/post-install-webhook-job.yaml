@@ -69,10 +69,5 @@ spec:
                       namespace: {{ .Release.Namespace }}
                       path: "/validate-v1alpha1-chaos"
                     caBundle: "${CA_BUNDLE}"
-                  rules:
-                    - operations: [ "CREATE","UPDATE"]
-                      apiGroups: ["pingcap.com"]
-                      apiVersions: ["v1alpha1"]
-                      resources: ["podchaos","iochaos","timechaos","networkchaos"]
               EOF
 {{- end }}
