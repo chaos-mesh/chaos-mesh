@@ -156,6 +156,16 @@ type IoChaosStatus struct {
 	ChaosStatus `json:",inline"`
 }
 
+// Validate describe the iochaos validation logic
+func (chaos *IoChaos) Validate() (bool, string, error) {
+	if chaos.Spec.Duration != nil && chaos.Spec.Scheduler != nil {
+		return true, "", nil
+	} else if chaos.Spec.Duration == nil && chaos.Spec.Scheduler == nil {
+		return true, "", nil
+	}
+	return false, invalidConfigurationMsg, nil
+}
+
 // +kubebuilder:object:root=true
 
 // IoChaos is the Schema for the iochaos API

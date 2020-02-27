@@ -180,6 +180,16 @@ func (in *TimeChaos) IsDeleted() bool {
 	return !in.DeletionTimestamp.IsZero()
 }
 
+// Validate describe the timechaos validation logic
+func (chaos *TimeChaos) Validate() (bool, string, error) {
+	if chaos.Spec.Duration != nil && chaos.Spec.Scheduler != nil {
+		return true, "", nil
+	} else if chaos.Spec.Duration == nil && chaos.Spec.Scheduler == nil {
+		return true, "", nil
+	}
+	return false, invalidConfigurationMsg, nil
+}
+
 // +kubebuilder:object:root=true
 
 // TimeChaosList contains a list of TimeChaos

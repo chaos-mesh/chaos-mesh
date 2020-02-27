@@ -14,6 +14,7 @@
 package v1alpha1
 
 import (
+	"fmt"
 	"time"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -173,6 +174,36 @@ func (in *PodChaosSpec) GetMode() PodMode {
 
 func (in *PodChaosSpec) GetValue() string {
 	return in.Value
+}
+
+// Validate describe the podchaos validation logic
+func (chaos *PodChaos) Validate() (bool, string, error) {
+	switch chaos.Spec.Action {
+	case PodFailureAction:
+		if chaos.Spec.Duration != nil && chaos.Spec.Scheduler != nil {
+			return true, "", nil
+		} else if chaos.Spec.Duration == nil && chaos.Spec.Scheduler == nil {
+			return true, "", nil
+		} else {
+			return false, invalidConfigurationMsg, nil
+		}
+	case PodKillAction:
+		// We choose to ignore the Duration property even user define it
+		if chaos.Spec.Scheduler == nil {
+			return false, invalidConfigurationMsg, nil
+		}
+		return true, "", nil
+	case ContainerKillAction:
+		// We choose to ignore the Duration property even user define it
+		if chaos.Spec.Scheduler == nil {
+			return false, invalidConfigurationMsg, nil
+		}
+		return true, "", nil
+	default:
+		err := fmt.Errorf("podchaos[%s/%s] have unknown action type", chaos.Namespace, chaos.Name)
+		log.Error(err, "Wrong PodChaos Action type")
+		return false, err.Error(), err
+	}
 }
 
 // +kubebuilder:object:root=true
