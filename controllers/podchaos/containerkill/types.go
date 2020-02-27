@@ -64,7 +64,7 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, obj reconciler
 	var err error
 	now := time.Now()
 
-	r.Log.Info("reconciling container kill")
+	r.Log.Info("Reconciling container kill")
 
 	var podchaos v1alpha1.PodChaos
 	if err = r.Get(ctx, req.NamespacedName, &podchaos); err != nil {
@@ -140,7 +140,7 @@ func (r *Reconciler) Object() reconciler.InnerObject {
 // KillContainer kills container according to containerID
 // Use client in chaos-daemon
 func (r *Reconciler) KillContainer(ctx context.Context, pod *v1.Pod, containerID string) error {
-	r.Log.Info("try to kill container", "namespace", pod.Namespace, "podName", pod.Name, "containerID", containerID)
+	r.Log.Info("Try to kill container", "namespace", pod.Namespace, "podName", pod.Name, "containerID", containerID)
 
 	c, err := utils.CreateGrpcConnection(ctx, r.Client, pod)
 	if err != nil {

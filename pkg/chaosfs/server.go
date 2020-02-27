@@ -156,7 +156,7 @@ func (s *server) Methods(ctx context.Context, in *empty.Empty) (*pb.Response, er
 }
 
 func (s *server) RecoverAll(ctx context.Context, in *empty.Empty) (*empty.Empty, error) {
-	log.Info("recover all fault")
+	log.Info("Recover all fault")
 	faultMap.Range(func(k, v interface{}) bool {
 		faultMap.Delete(k)
 		return true

@@ -62,7 +62,7 @@ func Apply(netem *pb.Netem, pid uint32) error {
 		Parent:    netlink.HANDLE_ROOT,
 	}, ToNetlinkNetemAttrs(netem))
 
-	log.Info("add qdisc", "qdisc", netemQdisc)
+	log.Info("Add qdisc", "qdisc", netemQdisc)
 	if err = handle.QdiscAdd(netemQdisc); err != nil {
 		if !strings.Contains(err.Error(), "file exists") {
 			log.Error(err, "failed to add Qdisc", "qdisc", netemQdisc)
@@ -126,7 +126,7 @@ func Cancel(netem *pb.Netem, pid uint32) error {
 		return nil
 	}
 
-	log.Info("remove qdisc", "qdisc", netemQdisc)
+	log.Info("Remove qdisc", "qdisc", netemQdisc)
 	if err = handle.QdiscDel(netemQdisc); err != nil {
 		log.Error(err, "failed to remove qdisc", "qdisc", netemQdisc)
 

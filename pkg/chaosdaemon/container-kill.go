@@ -24,7 +24,7 @@ import (
 
 // ContainerKill kills container according to container id in the req
 func (s *daemonServer) ContainerKill(ctx context.Context, req *pb.ContainerRequest) (*empty.Empty, error) {
-	log.Info("container Kill", "request", req)
+	log.Info("Container Kill", "request", req)
 
 	action := req.Action.Action
 	if action != pb.ContainerAction_KILL {

@@ -31,7 +31,7 @@ func Coalescer(interval time.Duration, input chan interface{}, stopCh <-chan str
 			signalled bool
 			inputOpen = true // assume input chan is open before we run our select loop
 		)
-		log.V(2).Info("debouncing reconciliation signals with window",
+		log.V(2).Info("Debouncing reconciliation signals with window",
 			"interval", interval.String())
 		for {
 			select {
@@ -39,13 +39,13 @@ func Coalescer(interval time.Duration, input chan interface{}, stopCh <-chan str
 				return
 			case <-time.After(interval):
 				if signalled {
-					log.V(5).Info("signalling reconciliation", "after interval", interval.String())
+					log.V(5).Info("Signalling reconciliation", "after interval", interval.String())
 					output <- struct{}{}
 					signalled = false
 				}
 			case _, inputOpen = <-input:
 				if inputOpen { // only record events if the input channel is still open
-					log.V(4).Info("got reconciliation signal", "interval", interval.String())
+					log.V(4).Info("Got reconciliation signal", "interval", interval.String())
 					signalled = true
 				}
 			}
@@ -56,7 +56,7 @@ func Coalescer(interval time.Duration, input chan interface{}, stopCh <-chan str
 					// send final event, so we dont miss the trailing event after input chan close
 					output <- struct{}{}
 				}
-				log.Info("coalesce routine terminated, input channel is closed")
+				log.Info("Coalesce routine terminated, input channel is closed")
 				close(output)
 
 				return
