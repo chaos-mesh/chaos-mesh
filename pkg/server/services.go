@@ -46,7 +46,7 @@ func (s *Server) services(w http.ResponseWriter, r *http.Request) {
 		s.log.Error(err, "error while listing services")
 	}
 
-	var names []string
+	names := make([]string, 0)
 
 	tailLen := len("-chaos-grafana")
 	for _, service := range services.Items {
