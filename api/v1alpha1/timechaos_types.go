@@ -181,10 +181,10 @@ func (in *TimeChaos) IsDeleted() bool {
 }
 
 // Validate describe the timechaos validation logic
-func (chaos *TimeChaos) Validate() (bool, string, error) {
-	if chaos.Spec.Duration != nil && chaos.Spec.Scheduler != nil {
+func (in *TimeChaos) Validate() (bool, string, error) {
+	if in.Spec.Duration != nil && in.Spec.Scheduler != nil {
 		return true, "", nil
-	} else if chaos.Spec.Duration == nil && chaos.Spec.Scheduler == nil {
+	} else if in.Spec.Duration == nil && in.Spec.Scheduler == nil {
 		return true, "", nil
 	}
 	return false, invalidConfigurationMsg, nil

@@ -245,10 +245,10 @@ func (in *NetworkChaos) GetScheduler() *SchedulerSpec {
 }
 
 // Validate describe the network validation logic
-func (chaos *NetworkChaos) Validate() (bool, string, error) {
-	if chaos.Spec.Duration != nil && chaos.Spec.Scheduler != nil {
+func (in *NetworkChaos) Validate() (bool, string, error) {
+	if in.Spec.Duration != nil && in.Spec.Scheduler != nil {
 		return true, "", nil
-	} else if chaos.Spec.Duration == nil && chaos.Spec.Scheduler == nil {
+	} else if in.Spec.Duration == nil && in.Spec.Scheduler == nil {
 		return true, "", nil
 	}
 	return false, invalidConfigurationMsg, nil

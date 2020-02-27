@@ -151,19 +151,19 @@ func (in *IoChaosSpec) GetValue() string {
 	return in.Value
 }
 
-// IoChaosStatus defines the observed state of IoChaos
-type IoChaosStatus struct {
-	ChaosStatus `json:",inline"`
-}
-
 // Validate describe the iochaos validation logic
-func (chaos *IoChaos) Validate() (bool, string, error) {
-	if chaos.Spec.Duration != nil && chaos.Spec.Scheduler != nil {
+func (in *IoChaos) Validate() (bool, string, error) {
+	if in.Spec.Duration != nil && in.Spec.Scheduler != nil {
 		return true, "", nil
-	} else if chaos.Spec.Duration == nil && chaos.Spec.Scheduler == nil {
+	} else if in.Spec.Duration == nil && in.Spec.Scheduler == nil {
 		return true, "", nil
 	}
 	return false, invalidConfigurationMsg, nil
+}
+
+// IoChaosStatus defines the observed state of IoChaos
+type IoChaosStatus struct {
+	ChaosStatus `json:",inline"`
 }
 
 // +kubebuilder:object:root=true

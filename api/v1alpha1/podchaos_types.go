@@ -177,30 +177,30 @@ func (in *PodChaosSpec) GetValue() string {
 }
 
 // Validate describe the podchaos validation logic
-func (chaos *PodChaos) Validate() (bool, string, error) {
-	switch chaos.Spec.Action {
+func (in *PodChaos) Validate() (bool, string, error) {
+	switch in.Spec.Action {
 	case PodFailureAction:
-		if chaos.Spec.Duration != nil && chaos.Spec.Scheduler != nil {
+		if in.Spec.Duration != nil && in.Spec.Scheduler != nil {
 			return true, "", nil
-		} else if chaos.Spec.Duration == nil && chaos.Spec.Scheduler == nil {
+		} else if in.Spec.Duration == nil && in.Spec.Scheduler == nil {
 			return true, "", nil
 		} else {
 			return false, invalidConfigurationMsg, nil
 		}
 	case PodKillAction:
 		// We choose to ignore the Duration property even user define it
-		if chaos.Spec.Scheduler == nil {
+		if in.Spec.Scheduler == nil {
 			return false, invalidConfigurationMsg, nil
 		}
 		return true, "", nil
 	case ContainerKillAction:
 		// We choose to ignore the Duration property even user define it
-		if chaos.Spec.Scheduler == nil {
+		if in.Spec.Scheduler == nil {
 			return false, invalidConfigurationMsg, nil
 		}
 		return true, "", nil
 	default:
-		err := fmt.Errorf("podchaos[%s/%s] have unknown action type", chaos.Namespace, chaos.Name)
+		err := fmt.Errorf("podchaos[%s/%s] have unknown action type", in.Namespace, in.Name)
 		log.Error(err, "Wrong PodChaos Action type")
 		return false, err.Error(), err
 	}
