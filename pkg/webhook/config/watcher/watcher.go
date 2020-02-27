@@ -133,7 +133,7 @@ func (c *K8sConfigMapWatcher) Watch(notifyMe chan<- interface{}, stopCh <-chan s
 				fallthrough
 			case watch.Deleted:
 				// signal reconciliation of all InjectionConfigs
-				log.V(3).Info("signalling event received from watch channel",
+				log.V(3).Info("Signalling event received from watch channel",
 					"type", e.Type, "kind", e.Object.GetObjectKind())
 				notifyMe <- struct{}{}
 			default:
@@ -141,7 +141,7 @@ func (c *K8sConfigMapWatcher) Watch(notifyMe chan<- interface{}, stopCh <-chan s
 			}
 			// events! yay!
 		case <-stopCh:
-			log.V(2).Info("stopping configmap watcher, context indicated we are done")
+			log.V(2).Info("Stopping configmap watcher, context indicated we are done")
 			// clean up, we cancelled the context, so stop the watch
 			return nil
 		}

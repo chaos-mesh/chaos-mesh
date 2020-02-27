@@ -65,7 +65,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	var err error
 	now := time.Now()
 
-	r.Log.Info("reconciling a two phase chaos", "name", req.Name, "namespace", req.Namespace)
+	r.Log.Info("Reconciling a two phase chaos", "name", req.Name, "namespace", req.Namespace)
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
@@ -84,7 +84,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 
 	scheduler := chaos.GetScheduler()
 	if scheduler == nil {
-		r.Log.Info("scheduler should be defined currently")
+		r.Log.Info("Scheduler should be defined currently")
 		return ctrl.Result{}, fmt.Errorf("misdefined scheduler")
 	}
 
@@ -92,6 +92,8 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		zero := 0 * time.Second
 		duration = &zero
 	}
+
+	status := chaos.GetStatus()
 
 	if chaos.IsDeleted() {
 		// This chaos was deleted
@@ -101,11 +103,11 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 			r.Log.Error(err, "failed to recover chaos")
 			return ctrl.Result{Requeue: true}, err
 		}
+
+		status.Experiment.Phase = v1alpha1.ExperimentPhaseFinished
 	} else if !chaos.GetNextRecover().IsZero() && chaos.GetNextRecover().Before(now) {
 		// Start recover
 		r.Log.Info("Recovering")
-
-		status := chaos.GetStatus()
 
 		err = r.Recover(ctx, req, chaos)
 		if err != nil {
@@ -133,16 +135,16 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 			return ctrl.Result{}, err
 		}
 
-		r.Log.Info("now chaos action:", "chaos", chaos)
+		r.Log.Info("Chaos action:", "chaos", chaos)
 
-		// Start failure action
+		// Start to apply action
 		r.Log.Info("Performing Action")
-
-		status := chaos.GetStatus()
 
 		err = r.Apply(ctx, req, chaos)
 		if err != nil {
 			r.Log.Error(err, "failed to apply chaos action")
+
+			status.Experiment.Phase = v1alpha1.ExperimentPhaseFailed
 
 			updateError := retry.RetryOnConflict(retry.DefaultRetry, func() error {
 				return r.Update(ctx, chaos)
@@ -156,6 +158,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		status.Experiment.StartTime = &metav1.Time{
 			Time: time.Now(),
 		}
+
 		status.Experiment.Phase = v1alpha1.ExperimentPhaseRunning
 
 		chaos.SetNextStart(*nextStart)

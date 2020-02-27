@@ -11,7 +11,7 @@ import (
 )
 
 func (s *daemonServer) SetTimeOffset(ctx context.Context, req *pb.TimeRequest) (*empty.Empty, error) {
-	log.Info("shift time", "Request", req)
+	log.Info("Shift time", "Request", req)
 
 	pid, err := s.crClient.GetPidFromContainerID(ctx, req.ContainerId)
 	if err != nil {
@@ -28,7 +28,7 @@ func (s *daemonServer) SetTimeOffset(ctx context.Context, req *pb.TimeRequest) (
 }
 
 func (s *daemonServer) RecoverTimeOffset(ctx context.Context, req *pb.TimeRequest) (*empty.Empty, error) {
-	log.Info("recover time", "Request", req)
+	log.Info("Recover time", "Request", req)
 
 	pid, err := s.crClient.GetPidFromContainerID(ctx, req.ContainerId)
 	if err != nil {
