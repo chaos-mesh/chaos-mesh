@@ -15,7 +15,6 @@ package validation
 
 import (
 	"encoding/json"
-	"fmt"
 
 	admissionv1beta1 "k8s.io/api/admission/v1beta1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -64,36 +63,11 @@ func ValidateChaos(res *admissionv1beta1.AdmissionRequest, kind string) *admissi
 }
 
 func validatePodchaos(rawObj []byte) (bool, string, error) {
-	var podChaos v1alpha1.PodChaos
-	if err := json.Unmarshal(rawObj, &podChaos); err != nil {
+	var chaos v1alpha1.PodChaos
+	if err := json.Unmarshal(rawObj, &chaos); err != nil {
 		return false, "", err
 	}
-	switch podChaos.Spec.Action {
-	case v1alpha1.PodFailureAction:
-		if podChaos.Spec.Duration != nil && podChaos.Spec.Scheduler != nil {
-			return true, "", nil
-		} else if podChaos.Spec.Duration == nil && podChaos.Spec.Scheduler == nil {
-			return true, "", nil
-		} else {
-			return false, invalidConfigurationMsg, nil
-		}
-	case v1alpha1.PodKillAction:
-		// We choose to ignore the Duration property even user define it
-		if podChaos.Spec.Scheduler == nil {
-			return false, invalidConfigurationMsg, nil
-		}
-		return true, "", nil
-	case v1alpha1.ContainerKillAction:
-		// We choose to ignore the Duration property even user define it
-		if podChaos.Spec.Scheduler == nil {
-			return false, invalidConfigurationMsg, nil
-		}
-		return true, "", nil
-	default:
-		err := fmt.Errorf("podchaos[%s/%s] have unknown action type", podChaos.Namespace, podChaos.Name)
-		log.Error(err, "Wrong PodChaos Action type")
-		return false, err.Error(), err
-	}
+	return chaos.Validate()
 }
 
 func validateIoChaos(rawObj []byte) (bool, string, error) {
@@ -101,12 +75,7 @@ func validateIoChaos(rawObj []byte) (bool, string, error) {
 	if err := json.Unmarshal(rawObj, &chaos); err != nil {
 		return false, "", err
 	}
-	if chaos.Spec.Duration != nil && chaos.Spec.Scheduler != nil {
-		return true, "", nil
-	} else if chaos.Spec.Duration == nil && chaos.Spec.Scheduler == nil {
-		return true, "", nil
-	}
-	return false, invalidConfigurationMsg, nil
+	return chaos.Validate()
 }
 
 func validateNetworkChaos(rawObj []byte) (bool, string, error) {
@@ -114,12 +83,7 @@ func validateNetworkChaos(rawObj []byte) (bool, string, error) {
 	if err := json.Unmarshal(rawObj, &chaos); err != nil {
 		return false, "", err
 	}
-	if chaos.Spec.Duration != nil && chaos.Spec.Scheduler != nil {
-		return true, "", nil
-	} else if chaos.Spec.Duration == nil && chaos.Spec.Scheduler == nil {
-		return true, "", nil
-	}
-	return false, invalidConfigurationMsg, nil
+	return chaos.Validate()
 }
 
 func validateTimeChaos(rawObj []byte) (bool, string, error) {
@@ -127,10 +91,5 @@ func validateTimeChaos(rawObj []byte) (bool, string, error) {
 	if err := json.Unmarshal(rawObj, &chaos); err != nil {
 		return false, "", err
 	}
-	if chaos.Spec.Duration != nil && chaos.Spec.Scheduler != nil {
-		return true, "", nil
-	} else if chaos.Spec.Duration == nil && chaos.Spec.Scheduler == nil {
-		return true, "", nil
-	}
-	return false, invalidConfigurationMsg, nil
+	return chaos.Validate()
 }
