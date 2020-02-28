@@ -14,6 +14,7 @@
 package v1alpha1
 
 import (
+	"fmt"
 	"time"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -28,6 +29,8 @@ const (
 	// PodFailureAction represents the chaos action of injecting errors to pods.
 	// This action will cause the pod to not be created for a while.
 	PodFailureAction PodChaosAction = "pod-failure"
+	// ContainerKillAction represents the chaos action of killing the container
+	ContainerKillAction PodChaosAction = "container-kill"
 )
 
 // +kubebuilder:object:root=true
@@ -154,6 +157,11 @@ type PodChaosSpec struct {
 	// Next time when this action will be recovered
 	// +optional
 	NextRecover *metav1.Time `json:"nextRecover,omitempty"`
+
+	// ContainerName indicates the name of the container.
+	// Needed in container-kill.
+	// +optional
+	ContainerName string `json:"containerName"`
 }
 
 func (in *PodChaosSpec) GetSelector() SelectorSpec {
@@ -166,6 +174,36 @@ func (in *PodChaosSpec) GetMode() PodMode {
 
 func (in *PodChaosSpec) GetValue() string {
 	return in.Value
+}
+
+// Validate describe the podchaos validation logic
+func (in *PodChaos) Validate() (bool, string, error) {
+	switch in.Spec.Action {
+	case PodFailureAction:
+		if in.Spec.Duration != nil && in.Spec.Scheduler != nil {
+			return true, "", nil
+		} else if in.Spec.Duration == nil && in.Spec.Scheduler == nil {
+			return true, "", nil
+		} else {
+			return false, invalidConfigurationMsg, nil
+		}
+	case PodKillAction:
+		// We choose to ignore the Duration property even user define it
+		if in.Spec.Scheduler == nil {
+			return false, invalidConfigurationMsg, nil
+		}
+		return true, "", nil
+	case ContainerKillAction:
+		// We choose to ignore the Duration property even user define it
+		if in.Spec.Scheduler == nil {
+			return false, invalidConfigurationMsg, nil
+		}
+		return true, "", nil
+	default:
+		err := fmt.Errorf("podchaos[%s/%s] have unknown action type", in.Namespace, in.Name)
+		log.Error(err, "Wrong PodChaos Action type")
+		return false, err.Error(), err
+	}
 }
 
 // +kubebuilder:object:root=true

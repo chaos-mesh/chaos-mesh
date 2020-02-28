@@ -15,6 +15,8 @@ package main
 
 import (
 	"flag"
+	"net/http"
+	_ "net/http/pprof"
 	"os"
 	"time"
 
@@ -47,6 +49,7 @@ var (
 
 var (
 	metricsAddr          string
+	pprofAddr            string
 	enableLeaderElection bool
 	certsDir             string
 	configDir            string
@@ -64,7 +67,8 @@ func init() {
 }
 
 func parseFlags() {
-	flag.StringVar(&metricsAddr, "metrics-addr", ":8080", "The address the metric endpoint binds to.")
+	flag.StringVar(&metricsAddr, "metrics-addr", ":10080", "The address the metric endpoint binds to.")
+	flag.StringVar(&pprofAddr, "pprof-addr", "0", "The address the pprof endpoint binds to.")
 	flag.BoolVar(&enableLeaderElection, "enable-leader-election", false,
 		"Enable leader election for controller manager. Enabling this will ensure there is only one active controller manager.")
 	flag.StringVar(&certsDir, "certs", "/etc/webhook/certs",
@@ -104,30 +108,42 @@ func main() {
 	}
 
 	if err = (&controllers.PodChaosReconciler{
-		Client: mgr.GetClient(),
-		Log:    ctrl.Log.WithName("controllers").WithName("PodChaos"),
+		Client:        mgr.GetClient(),
+		EventRecorder: mgr.GetEventRecorderFor("podchaos-controller"),
+		Log:           ctrl.Log.WithName("controllers").WithName("PodChaos"),
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "PodChaos")
 		os.Exit(1)
 	}
 
 	if err = (&controllers.NetworkChaosReconciler{
-		Client: mgr.GetClient(),
-		Log:    ctrl.Log.WithName("controllers").WithName("NetworkChaos"),
+		Client:        mgr.GetClient(),
+		EventRecorder: mgr.GetEventRecorderFor("networkchaos-controller"),
+		Log:           ctrl.Log.WithName("controllers").WithName("NetworkChaos"),
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "NetworkChaos")
 		os.Exit(1)
 	}
 
 	if err = (&controllers.IoChaosReconciler{
-		Client: mgr.GetClient(),
-		Log:    ctrl.Log.WithName("controllers").WithName("IoChaos"),
+		Client:        mgr.GetClient(),
+		EventRecorder: mgr.GetEventRecorderFor("iochaos-controller"),
+		Log:           ctrl.Log.WithName("controllers").WithName("IoChaos"),
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "IoChaos")
 		os.Exit(1)
 	}
 
-	setupLog.Info("setting up webhook server")
+	if err = (&controllers.TimeChaosReconciler{
+		Client:        mgr.GetClient(),
+		EventRecorder: mgr.GetEventRecorderFor("timeoutchaos-controller"),
+		Log:           ctrl.Log.WithName("controllers").WithName("TimeChaos"),
+	}).SetupWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create controller", "controller", "TimeChaos")
+		os.Exit(1)
+	}
+
+	setupLog.Info("Setting up webhook server")
 	hookServer := mgr.GetWebhookServer()
 	hookServer.CertDir = certsDir
 	webhookConfig, err := config.LoadConfigDirectory(configDir)
@@ -138,19 +154,30 @@ func main() {
 
 	stopCh := ctrl.SetupSignalHandler()
 
+	if pprofAddr != "0" {
+		go func() {
+			if err := http.ListenAndServe(pprofAddr, nil); err != nil {
+				setupLog.Error(err, "unable to start pprof server")
+				os.Exit(1)
+			}
+		}()
+	}
+
 	watchConfig(webhookConfig, stopCh)
 
 	hookServer.Register("/inject-v1-pod", &webhook.Admission{Handler: &apiWebhook.PodInjector{
 		Config: webhookConfig,
 	}})
+	hookServer.Register("/validate-v1alpha1-chaos", &webhook.Admission{Handler: &apiWebhook.ChaosValidator{}})
 
 	// +kubebuilder:scaffold:builder
 
 	setupLog.Info("Starting manager")
 	if err := mgr.Start(stopCh); err != nil {
-		setupLog.Error(err, "problem running manager")
+		setupLog.Error(err, "unable to start manager")
 		os.Exit(1)
 	}
+
 }
 
 func watchConfig(cfg *config.Config, stopCh <-chan struct{}) {

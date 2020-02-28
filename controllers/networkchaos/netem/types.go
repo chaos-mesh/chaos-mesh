@@ -26,6 +26,7 @@ import (
 	k8serror "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/tools/cache"
+	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -46,11 +47,13 @@ type NetemSpec interface {
 	ToNetem() (*pb.Netem, error)
 }
 
-func newReconciler(c client.Client, log logr.Logger, req ctrl.Request) twophase.Reconciler {
+func newReconciler(c client.Client, log logr.Logger, req ctrl.Request,
+	recorder record.EventRecorder) twophase.Reconciler {
 	return twophase.Reconciler{
 		InnerReconciler: &Reconciler{
-			Client: c,
-			Log:    log,
+			Client:        c,
+			EventRecorder: recorder,
+			Log:           log,
 		},
 		Client: c,
 		Log:    log,
@@ -58,19 +61,22 @@ func newReconciler(c client.Client, log logr.Logger, req ctrl.Request) twophase.
 }
 
 // NewTwoPhaseReconciler would create Reconciler for twophase package
-func NewTwoPhaseReconciler(c client.Client, log logr.Logger, req ctrl.Request) *twophase.Reconciler {
-	r := newReconciler(c, log, req)
+func NewTwoPhaseReconciler(c client.Client, log logr.Logger, req ctrl.Request,
+	recorder record.EventRecorder) *twophase.Reconciler {
+	r := newReconciler(c, log, req, recorder)
 	return twophase.NewReconciler(r, r.Client, r.Log)
 }
 
 // NewCommonReconciler would create Reconciler for common package
-func NewCommonReconciler(c client.Client, log logr.Logger, req ctrl.Request) *common.Reconciler {
-	r := newReconciler(c, log, req)
+func NewCommonReconciler(c client.Client, log logr.Logger, req ctrl.Request,
+	recorder record.EventRecorder) *common.Reconciler {
+	r := newReconciler(c, log, req, recorder)
 	return common.NewReconciler(r, r.Client, r.Log)
 }
 
 type Reconciler struct {
 	client.Client
+	record.EventRecorder
 	Log logr.Logger
 }
 
@@ -117,7 +123,7 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos reconcil
 
 		networkchaos.Status.Experiment.Pods = append(networkchaos.Status.Experiment.Pods, ps)
 	}
-
+	r.Event(networkchaos, v1.EventTypeNormal, utils.EventChaosInjected, "")
 	return nil
 }
 
@@ -134,7 +140,7 @@ func (r *Reconciler) Recover(ctx context.Context, req ctrl.Request, chaos reconc
 	if err != nil {
 		return err
 	}
-
+	r.Event(networkchaos, v1.EventTypeNormal, utils.EventChaosRecovered, "")
 	return nil
 }
 
@@ -177,7 +183,7 @@ func (r *Reconciler) cleanFinalizersAndRecover(ctx context.Context, networkchaos
 }
 
 func (r *Reconciler) recoverPod(ctx context.Context, pod *v1.Pod, networkchaos *v1alpha1.NetworkChaos) error {
-	r.Log.Info("try to recover pod", "namespace", pod.Namespace, "name", pod.Name)
+	r.Log.Info("Try to recover pod", "namespace", pod.Namespace, "name", pod.Name)
 
 	c, err := utils.CreateGrpcConnection(ctx, r.Client, pod)
 	if err != nil {
@@ -201,7 +207,7 @@ func (r *Reconciler) recoverPod(ctx context.Context, pod *v1.Pod, networkchaos *
 	if err != nil {
 		r.Log.Error(err, "recover pod error", "namespace", pod.Namespace, "name", pod.Name)
 	} else {
-		r.Log.Info("recover pod finished", "namespace", pod.Namespace, "name", pod.Name)
+		r.Log.Info("Recover pod finished", "namespace", pod.Namespace, "name", pod.Name)
 	}
 
 	return err

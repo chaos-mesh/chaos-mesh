@@ -1,7 +1,10 @@
-FROM alpine:3.5
+FROM alpine:3.10
+
+ARG HTTPS_PROXY
+ARG HTTP_PROXY
 
 RUN apk add tzdata --no-cache
 
 COPY build /web
 
-ADD bin/chaos-dashboard /usr/local/bin/chaos-dashboard
+COPY --from=pingcap/binary /src/bin/chaos-dashboard /usr/local/bin/chaos-dashboard

@@ -34,6 +34,8 @@ import (
 )
 
 var log = ctrl.Log.WithName("inject-webhook")
+var restInClusterConfig = rest.InClusterConfig
+var kubernetesNewForConfig = kubernetes.NewForConfig
 
 const (
 	serviceAccountNamespaceFilePath = "/var/run/secrets/kubernetes.io/serviceaccount/namespace"
@@ -66,12 +68,12 @@ func New(cfg Config) (*K8sConfigMapWatcher, error) {
 	}
 
 	log.Info("Creating Kubernetes client from in-cluster discovery")
-	k8sConfig, err := rest.InClusterConfig()
+	k8sConfig, err := restInClusterConfig()
 	if err != nil {
 		return nil, err
 	}
 
-	clientset, err := kubernetes.NewForConfig(k8sConfig)
+	clientset, err := kubernetesNewForConfig(k8sConfig)
 	if err != nil {
 		return nil, err
 	}
@@ -133,7 +135,7 @@ func (c *K8sConfigMapWatcher) Watch(notifyMe chan<- interface{}, stopCh <-chan s
 				fallthrough
 			case watch.Deleted:
 				// signal reconciliation of all InjectionConfigs
-				log.V(3).Info("signalling event received from watch channel",
+				log.V(3).Info("Signalling event received from watch channel",
 					"type", e.Type, "kind", e.Object.GetObjectKind())
 				notifyMe <- struct{}{}
 			default:
@@ -141,7 +143,7 @@ func (c *K8sConfigMapWatcher) Watch(notifyMe chan<- interface{}, stopCh <-chan s
 			}
 			// events! yay!
 		case <-stopCh:
-			log.V(2).Info("stopping configmap watcher, context indicated we are done")
+			log.V(2).Info("Stopping configmap watcher, context indicated we are done")
 			// clean up, we cancelled the context, so stop the watch
 			return nil
 		}

@@ -39,6 +39,9 @@ spec:
           - /usr/local/bin/chaos-controller-manager
           - -configmap-labels=app.kubernetes.io/component=webhook
           - -conf=/etc/webhook/conf
+        {{- if .Values.enableProfiling }}
+          - -pprof-addr=:10081
+        {{- end }}
         env:
           - name: NAMESPACE
             valueFrom:
@@ -53,12 +56,18 @@ spec:
             mountPath: /etc/webhook/certs
             readOnly: true
         ports:
-          - name: webhook-api
+          - name: webhook
             containerPort: 9443 # Customize containerPort
+          - name: http
+            containerPort: 10080
+        {{- if .Values.enableProfiling }}
+          - name: pprof
+            containerPort: 10081
+        {{- end }}
       volumes:
         - name: webhook-certs
           secret:
-            secretName: webhook-certs
+            secretName: {{ template "chaos-mesh.certs" . }}
     {{- with .Values.controllerManager.nodeSelector }}
       nodeSelector:
 {{ toYaml . | indent 8 }}

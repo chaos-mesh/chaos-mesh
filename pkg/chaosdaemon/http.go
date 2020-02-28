@@ -15,18 +15,57 @@ package chaosdaemon
 
 import (
 	"net/http"
+	"net/http/pprof"
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
-func newHTTPServer(addr string, reg prometheus.Gatherer) *http.Server {
-	mux := http.NewServeMux()
-	registerMetrics(mux, reg)
+type httpServerBuilder struct {
+	mux       *http.ServeMux
+	addr      string
+	profiling bool
+	reg       prometheus.Gatherer
+}
+
+func newHTTPServerBuilder() *httpServerBuilder {
+	return &httpServerBuilder{
+		mux: http.NewServeMux(),
+	}
+}
+
+// Addr sets the addr of http server
+func (b *httpServerBuilder) Addr(addr string) *httpServerBuilder {
+	b.addr = addr
+
+	return b
+}
+
+// Metrics sets the prometheus gatherer for http server
+func (b *httpServerBuilder) Metrics(reg prometheus.Gatherer) *httpServerBuilder {
+	b.reg = reg
+
+	return b
+}
+
+// Profiling turns on or off profiling server of http server
+func (b *httpServerBuilder) Profiling(profiling bool) *httpServerBuilder {
+	b.profiling = profiling
+
+	return b
+}
+
+// Build builds an http server
+func (b *httpServerBuilder) Build() *http.Server {
+	registerMetrics(b.mux, b.reg)
+
+	if b.profiling {
+		registerProfiler(b.mux)
+	}
 
 	return &http.Server{
-		Addr:    addr,
-		Handler: mux,
+		Addr:    b.addr,
+		Handler: b.mux,
 	}
 }
 
@@ -34,4 +73,12 @@ func registerMetrics(mux *http.ServeMux, g prometheus.Gatherer) {
 	if g != nil {
 		mux.Handle("/metrics", promhttp.HandlerFor(g, promhttp.HandlerOpts{}))
 	}
+}
+
+func registerProfiler(mux *http.ServeMux) {
+	mux.HandleFunc("/debug/pprof/", pprof.Index)
+	mux.HandleFunc("/debug/pprof/cmdline", pprof.Cmdline)
+	mux.HandleFunc("/debug/pprof/profile", pprof.Profile)
+	mux.HandleFunc("/debug/pprof/symbol", pprof.Symbol)
+	mux.HandleFunc("/debug/pprof/trace", pprof.Trace)
 }
