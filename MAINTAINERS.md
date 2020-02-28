@@ -13,4 +13,4 @@ Name | Email | Focus
 [Qiang Zhou](https://github.com/zhouqiang-cl) | [zhouqiang@pingcap.com](mailto:zhouqiang@pingcap.com) | Project Lead
 [CWen](https://github.com/cwen0) | [cwen@pingcap.com](mailto:cwen@pingcap.com) | Operator, Dashboard
 [YangKeao](https://github.com/YangKeao) | [yangkeao@pingcap.com](mailto:yangkeao@pingcap.com) | Operator, Dashboard
-[Yisaer](https://github.com/YangKeao) | [gaosong@pingcap.com](mailto:yangkeao@pingcap.com) | Operator
+[Yisaer](https://github.com/Yisaer) | [gaosong@pingcap.com](mailto:gaosong@pingcap.com) | Operator
