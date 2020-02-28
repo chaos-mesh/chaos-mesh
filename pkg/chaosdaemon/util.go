@@ -16,8 +16,12 @@ package chaosdaemon
 import (
 	"context"
 	"fmt"
+	"io/ioutil"
 	"net/http"
+	"os"
 	"os/exec"
+	"strconv"
+	"sync"
 	"syscall"
 
 	"github.com/containerd/containerd"
@@ -216,4 +220,64 @@ func (c ContainerdClient) ContainerKillByContainerID(ctx context.Context, contai
 	err = task.Kill(ctx, syscall.SIGKILL)
 
 	return err
+}
+
+// GetChildProcesses will return all child processes's pid
+func GetChildProcesses(ppid uint32) ([]uint32, error) {
+	procs, err := ioutil.ReadDir(defaultProcPrefix)
+	if err != nil {
+		return nil, err
+	}
+
+	var childProcesses []uint32
+	pids := make(chan uint32)
+	done := make(chan bool)
+
+	go func() {
+		var wg sync.WaitGroup
+
+		for _, proc := range procs {
+			_, err := strconv.ParseUint(proc.Name(), 10, 32)
+			if err != nil {
+				continue
+			}
+
+			statusPath := defaultProcPrefix + "/" + proc.Name() + "/stat"
+
+			wg.Add(1)
+			go func() {
+				defer wg.Done()
+
+				reader, err := os.Open(statusPath)
+				if err != nil {
+					log.Info("read status file error", "path", statusPath)
+					return
+				}
+
+				var (
+					pid uint32
+					comm string
+					state string
+					parent uint32
+				)
+				// according to procfs's man page
+				fmt.Fscanf(reader, "%d %s %s %d", &pid, &comm, &state, &parent)
+
+				if parent == ppid {
+					pids <- pid
+				}
+			}()
+		}
+
+		wg.Wait()
+		done <- true
+	}()
+
+	select {
+		case childPid := <- pids:
+			childProcesses = append(childProcesses, childPid)
+		case <-done:
+	}
+
+	return childProcesses, nil
 }

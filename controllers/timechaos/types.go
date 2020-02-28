@@ -164,7 +164,7 @@ func (r *Reconciler) cleanFinalizersAndRecover(ctx context.Context, chaos *v1alp
 			continue
 		}
 
-		err = r.recoverPod(ctx, &pod, chaos)
+		err = r.recoverPod(ctx, &pod)
 		if err != nil {
 			return err
 		}
@@ -175,7 +175,7 @@ func (r *Reconciler) cleanFinalizersAndRecover(ctx context.Context, chaos *v1alp
 	return nil
 }
 
-func (r *Reconciler) recoverPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.TimeChaos) error {
+func (r *Reconciler) recoverPod(ctx context.Context, pod *v1.Pod) error {
 	r.Log.Info("Try to recover pod", "namespace", pod.Namespace, "name", pod.Name)
 
 	c, err := utils.CreateGrpcConnection(ctx, r.Client, pod)
@@ -190,17 +190,32 @@ func (r *Reconciler) recoverPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha
 		return fmt.Errorf("%s %s can't get the state of container", pod.Namespace, pod.Name)
 	}
 
-	containerID := pod.Status.ContainerStatuses[0].ContainerID
+	g := errgroup.Group{}
+	for index := range pod.Status.ContainerStatuses {
+		id := pod.Status.ContainerStatuses[index].ContainerID
 
-	_, err = pbClient.RecoverTimeOffset(ctx, &pb.TimeRequest{
+		g.Go(func() error {
+			err := r.recoverContainer(ctx, pbClient, id)
+
+			if err != nil {
+				r.Log.Error(err, "recover pod error", "namespace", pod.Namespace, "name", pod.Name)
+			} else {
+				r.Log.Info("Recover pod finished", "namespace", pod.Namespace, "name", pod.Name)
+			}
+
+			return err
+		})
+	}
+
+	return g.Wait()
+}
+
+func (r *Reconciler) recoverContainer(ctx context.Context, client pb.ChaosDaemonClient, containerID string) error {
+	r.Log.Info("Try to recover time on container", "id", containerID)
+
+	_, err := client.RecoverTimeOffset(ctx, &pb.TimeRequest{
 		ContainerId: containerID,
 	})
-
-	if err != nil {
-		r.Log.Error(err, "recover pod error", "namespace", pod.Namespace, "name", pod.Name)
-	} else {
-		r.Log.Info("Recover pod finished", "namespace", pod.Namespace, "name", pod.Name)
-	}
 
 	return err
 }
@@ -244,7 +259,20 @@ func (r *Reconciler) applyPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.
 		return fmt.Errorf("%s %s can't get the state of container", pod.Namespace, pod.Name)
 	}
 
-	containerID := pod.Status.ContainerStatuses[0].ContainerID
+	g := errgroup.Group{}
+	for index := range pod.Status.ContainerStatuses {
+		id := pod.Status.ContainerStatuses[index].ContainerID
+
+		g.Go(func() error {
+			return r.applyContainer(ctx, pbClient, id, chaos)
+		})
+	}
+
+	return g.Wait()
+}
+
+func (r *Reconciler) applyContainer(ctx context.Context, client pb.ChaosDaemonClient, containerID string, chaos *v1alpha1.TimeChaos) error {
+	r.Log.Info("Try to shift time on container", "id", containerID)
 
 	mask, err := utils.EncodeClkIds(chaos.Spec.ClockIds)
 	if err != nil {
@@ -252,7 +280,7 @@ func (r *Reconciler) applyPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.
 	}
 
 	r.Log.Info("setting time shift", "mask", mask, "sec", chaos.Spec.TimeOffset.Sec, "nsec", chaos.Spec.TimeOffset.NSec)
-	_, err = pbClient.SetTimeOffset(ctx, &pb.TimeRequest{
+	_, err = client.SetTimeOffset(ctx, &pb.TimeRequest{
 		ContainerId: containerID,
 		Sec:         chaos.Spec.TimeOffset.Sec,
 		Nsec:        chaos.Spec.TimeOffset.NSec,
