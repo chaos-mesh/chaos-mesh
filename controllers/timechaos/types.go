@@ -117,7 +117,7 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos reconcil
 	return nil
 }
 
-// Recover means the reconciler recover the chaos action
+// Recover means the reconciler recovers the chaos action
 func (r *Reconciler) Recover(ctx context.Context, req ctrl.Request, chaos reconciler.InnerObject) error {
 	timechaos, ok := chaos.(*v1alpha1.TimeChaos)
 	if !ok {
