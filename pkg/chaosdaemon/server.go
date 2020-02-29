@@ -101,7 +101,7 @@ func StartServer(conf *Config, reg RegisterGatherer) error {
 	srv := newHTTPServerBuilder().Addr(httpBindAddr).Metrics(reg).Profiling(conf.Profiling).Build()
 
 	g.Go(func() error {
-		log.Info("starting http endpoint", "address", httpBindAddr)
+		log.Info("Starting http endpoint", "address", httpBindAddr)
 		if err := srv.ListenAndServe(); err != nil {
 			log.Error(err, "failed to start http endpoint")
 			srv.Shutdown(context.Background())
@@ -124,7 +124,7 @@ func StartServer(conf *Config, reg RegisterGatherer) error {
 	}
 
 	g.Go(func() error {
-		log.Info("starting grpc endpoint", "address", grpcBindAddr, "runtime", conf.Runtime)
+		log.Info("Starting grpc endpoint", "address", grpcBindAddr, "runtime", conf.Runtime)
 		if err := grpcServer.Serve(lis); err != nil {
 			log.Error(err, "failed to start grpc endpoint")
 			grpcServer.Stop()

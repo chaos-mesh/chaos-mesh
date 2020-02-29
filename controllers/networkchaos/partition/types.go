@@ -84,7 +84,7 @@ func (r *Reconciler) Object() reconciler.InnerObject {
 
 // Apply implements the reconciler.InnerReconciler.Apply
 func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos reconciler.InnerObject) error {
-	r.Log.Info("applying network partition")
+	r.Log.Info("Applying network partition")
 
 	networkchaos, ok := chaos.(*v1alpha1.NetworkChaos)
 	if !ok {
@@ -124,7 +124,7 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos reconcil
 				return err
 			}
 
-			r.Log.Info("flush ipset on pod", "name", pod.Name, "namespace", pod.Namespace)
+			r.Log.Info("Flush ipset on pod", "name", pod.Name, "namespace", pod.Namespace)
 			return r.flushPodIPSet(ctx, &pod, targetSet, networkchaos)
 		})
 	}
@@ -227,7 +227,7 @@ func (r *Reconciler) Recover(ctx context.Context, req ctrl.Request, chaos reconc
 }
 
 func (r *Reconciler) generateSetName(networkchaos *v1alpha1.NetworkChaos, namePostFix string) string {
-	r.Log.Info("generating name for chaos", "name", networkchaos.Name)
+	r.Log.Info("Generating name for chaos", "name", networkchaos.Name)
 	originalName := networkchaos.Name
 
 	var ipsetName string
@@ -245,7 +245,7 @@ func (r *Reconciler) generateSetName(networkchaos *v1alpha1.NetworkChaos, namePo
 		ipsetName = namePrefix + "_" + hashValue[0:17] + "_" + namePostFix
 	}
 
-	r.Log.Info("name generated", "ipsetName", ipsetName)
+	r.Log.Info("Name generated", "ipsetName", ipsetName)
 	return ipsetName
 }
 
@@ -259,7 +259,7 @@ func (r *Reconciler) generateSet(pods []v1.Pod, networkchaos *v1alpha1.NetworkCh
 		}
 	}
 
-	r.Log.Info("creating ipset", "name", name, "ips", ips)
+	r.Log.Info("Creating ipset", "name", name, "ips", ips)
 	return pb.IpSet{
 		Name: name,
 		Ips:  ips,
@@ -341,7 +341,7 @@ func (r *Reconciler) cleanFinalizersAndRecover(ctx context.Context, networkchaos
 
 		networkchaos.Finalizers = utils.RemoveFromFinalizer(networkchaos.Finalizers, key)
 	}
-	r.Log.Info("after recovering", "finalizers", networkchaos.Finalizers)
+	r.Log.Info("After recovering", "finalizers", networkchaos.Finalizers)
 
 	return nil
 }

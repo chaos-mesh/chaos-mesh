@@ -11,7 +11,7 @@ import (
 )
 
 func (s *daemonServer) SetTimeOffset(ctx context.Context, req *pb.TimeRequest) (*empty.Empty, error) {
-	log.Info("shift time", "Request", req)
+	log.Info("Shift time", "Request", req)
 
 	pid, err := s.crClient.GetPidFromContainerID(ctx, req.ContainerId)
 	if err != nil {
@@ -19,7 +19,7 @@ func (s *daemonServer) SetTimeOffset(ctx context.Context, req *pb.TimeRequest) (
 		return nil, err
 	}
 
-	err = time.ModifyTime(int(pid), int64(req.Sec), int64(req.Nsec))
+	err = time.ModifyTime(int(pid), req.Sec, req.Nsec, req.ClkIdsMask)
 	if err != nil {
 		log.Error(err, "error while modifying time", "pid", pid)
 		return nil, err
@@ -28,7 +28,7 @@ func (s *daemonServer) SetTimeOffset(ctx context.Context, req *pb.TimeRequest) (
 }
 
 func (s *daemonServer) RecoverTimeOffset(ctx context.Context, req *pb.TimeRequest) (*empty.Empty, error) {
-	log.Info("recover time", "Request", req)
+	log.Info("Recover time", "Request", req)
 
 	pid, err := s.crClient.GetPidFromContainerID(ctx, req.ContainerId)
 	if err != nil {
@@ -36,7 +36,7 @@ func (s *daemonServer) RecoverTimeOffset(ctx context.Context, req *pb.TimeReques
 		return nil, err
 	}
 
-	err = time.ModifyTime(int(pid), int64(0), int64(0))
+	err = time.ModifyTime(int(pid), int64(0), int64(0), 0)
 	if err != nil {
 		log.Error(err, "error while recovering", "pid", pid)
 		return nil, err

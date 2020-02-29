@@ -663,6 +663,11 @@ func (in *TimeChaosSpec) DeepCopyInto(out *TimeChaosSpec) {
 	*out = *in
 	in.Selector.DeepCopyInto(&out.Selector)
 	out.TimeOffset = in.TimeOffset
+	if in.ClockIds != nil {
+		in, out := &in.ClockIds, &out.ClockIds
+		*out = make([]string, len(*in))
+		copy(*out, *in)
+	}
 	if in.Duration != nil {
 		in, out := &in.Duration, &out.Duration
 		*out = new(string)

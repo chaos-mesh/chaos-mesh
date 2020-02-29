@@ -21,6 +21,7 @@ FLAGS:
         --force-kubectl     Force reinstall kubectl client if it is already installed
         --force-kind        Force reinstall Kind if it is already installed
         --force-helm        Force reinstall Helm if it is already installed
+        --dashboard         Install Chaos Dashboard
 OPTIONS:
     -v, --version           Version of chaos-mesh, default value: latest
     -l, --local [kind]      Choose a way to run a local kubernetes cluster, supported value: kind,
@@ -52,6 +53,7 @@ main() {
     local force_kubectl=false
     local force_kind=false
     local force_helm=false
+    local install_dashboard=false
 
     while [[ $# -gt 0 ]]
     do
@@ -102,6 +104,10 @@ main() {
                 ;;
             --force-chaos-mesh)
                 force_chaos_mesh=true
+                shift
+                ;;
+            --dashboard)
+                install_dashboard=true
                 shift
                 ;;
             --kind-version)
@@ -167,7 +173,7 @@ main() {
         install_kubernetes_by_kind "${kind_name}" "${k8s_version}" "${node_num}" "${volume_num}" ${force_local_kube}
     fi
 
-    install_chaos_mesh "${release_name}" "${namespace}" "${local-kube}" ${force_chaos_mesh}
+    install_chaos_mesh "${release_name}" "${namespace}" "${local_kube}" ${force_chaos_mesh} ${install_dashboard}
 }
 
 prepare_env() {
@@ -418,7 +424,7 @@ deploy_volume_provisioner() {
     local config_url="https://raw.githubusercontent.com/pingcap/chaos-mesh/master/manifests/local-volume-provisioner.yaml"
 
     rm -rf "${config_file}"
-    ensure wget -O "${config_file}" "$config_url"
+    ensure curl -o "${config_file}" "$config_url"
     ensure kubectl apply -f "${config_file}"
 }
 
@@ -469,19 +475,17 @@ install_helm() {
         fi
     fi
 
-    need_cmd "wget"
     need_cmd "tar"
 
     local HELM_BIN="${HOME}/local/bin/helm"
     local target_os=$(lowercase $(uname))
     local TAR_NAME="helm-$1-$target_os-amd64.tar.gz"
     rm -rf "${TAR_NAME}"
-    ensure wget "https://get.helm.sh/${TAR_NAME}"
+    ensure curl -sL "https://get.helm.sh/${TAR_NAME}" | tar xz
 
-    ensure tar zxvf "${TAR_NAME}"
-    ensure mv "${target_os}"-amd64/helm ${HELM_BIN}
+    ensure mv "${target_os}"-amd64/helm "${HELM_BIN}"
     ensure chmod +x "${HELM_BIN}"
-    rm -rf "${TAR_NAME}" "${target_os}"-amd64
+    rm -rf "${target_os}"-amd64
 }
 
 init_helm() {
@@ -491,7 +495,7 @@ init_helm() {
 
     need_cmd "helm"
     rm -rf "${rbac_config}"
-    ensure wget -O "${rbac_config}" "$rbac_config_url"
+    ensure curl -o "${rbac_config}" "$rbac_config_url"
     ensure kubectl apply -f "${rbac_config}"
 
     if [[ $(helm version --client --short) == "Client: v2"* ]]; then
@@ -515,6 +519,7 @@ install_chaos_mesh() {
     local namespace=$2
     local local_kube=$3
     local force_install=$4
+    local install_dashboard=$5
 
     printf "Install Chaos Mesh %s\n" "${release_name}"
 
@@ -540,18 +545,20 @@ install_chaos_mesh() {
         ensure kubectl create ns chaos-testing
     fi
 
+    local dashboard_cmd=""
+    if [ "$install_dashboard" == "true" ]; then
+        dashboard_cmd="--set dashboard.create=true"
+    fi
+
+    local runtime_cmd=""
+    if [ "${local_kube}" == "kind" ]; then
+        runtime_cmd="--set chaosDaemon.runtime=containerd --set chaosDaemon.socketPath=/run/containerd/containerd.sock"
+    fi
+
     if [[ $(helm version --client --short) == "Client: v2"* ]]; then
-        if [ "${local_kube}" == "kind" ]; then
-            ensure helm install helm/chaos-mesh --name="${release_name}" --namespace="${namespace}" --set chaosDaemon.runtime=containerd --set chaosDaemon.socketPath=/run/containerd/containerd.sock
-        else
-            ensure helm install helm/chaos-mesh --name="${release_name}" --namespace="${namespace}"
-        fi
+        ensure helm install helm/chaos-mesh --name="${release_name}" --namespace="${namespace}" ${runtime_cmd} ${dashboard_cmd}
     else
-        if [ "${local_kube}" == "kind" ]; then
-            ensure helm install "${release_name}" helm/chaos-mesh --namespace="${namespace}" --set chaosDaemon.runtime=containerd --set chaosDaemon.socketPath=/run/containerd/containerd.sock
-        else
-            ensure helm install "${release_name}" helm/chaos-mesh --namespace="${namespace}"
-        fi
+        ensure helm install "${release_name}" helm/chaos-mesh --namespace="${namespace}" ${runtime_cmd} ${dashboard_cmd}
     fi
 
     printf "Chaos Mesh %s is installed successfully\n" "${release_name}"

@@ -14,6 +14,7 @@
 package config
 
 import (
+	"fmt"
 	"io/ioutil"
 	"os"
 
@@ -63,6 +64,20 @@ var _ = Describe("webhook config", func() {
 			Expect(InjectionConfig).To(BeNil())
 			Expect(err).ToNot(BeNil())
 			Expect(err).To(Equal(ErrMissingName))
+		})
+
+		It("shoud return not a valid name or name:version format on loading injection", func() {
+
+			err := ioutil.WriteFile("/tmp/MissingName.yaml", []byte(`name: "testname:test:test:test"`), 0755)
+			Expect(err).To(BeNil())
+			defer os.Remove("/tmp/MissingName.yaml")
+
+			configFile := "/tmp/MissingName.yaml"
+			InjectionConfig, err := LoadInjectionConfigFromFilePath(configFile)
+
+			Expect(InjectionConfig).To(BeNil())
+			Expect(err).ToNot(BeNil())
+			fmt.Println(err)
 		})
 
 		It("shoud return nil on loading injection", func() {

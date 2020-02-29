@@ -50,7 +50,7 @@ type Reconciler struct {
 
 // Reconcile reconciles a TimeChaos resource
 func (r *Reconciler) Reconcile(req ctrl.Request, chaos *v1alpha1.TimeChaos) (ctrl.Result, error) {
-	r.Log.Info("reconciling timechaos")
+	r.Log.Info("Reconciling timechaos")
 	scheduler := chaos.GetScheduler()
 	duration, err := chaos.GetDuration()
 	if err != nil {
@@ -86,6 +86,8 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos reconcil
 		r.Log.Error(err, "chaos is not TimeChaos", "chaos", chaos)
 		return err
 	}
+
+	timechaos.SetDefaultValue()
 
 	pods, err := utils.SelectAndGeneratePods(ctx, r.Client, &timechaos.Spec)
 
@@ -174,7 +176,7 @@ func (r *Reconciler) cleanFinalizersAndRecover(ctx context.Context, chaos *v1alp
 }
 
 func (r *Reconciler) recoverPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.TimeChaos) error {
-	r.Log.Info("try to recover pod", "namespace", pod.Namespace, "name", pod.Name)
+	r.Log.Info("Try to recover pod", "namespace", pod.Namespace, "name", pod.Name)
 
 	c, err := utils.CreateGrpcConnection(ctx, r.Client, pod)
 	if err != nil {
@@ -197,7 +199,7 @@ func (r *Reconciler) recoverPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha
 	if err != nil {
 		r.Log.Error(err, "recover pod error", "namespace", pod.Namespace, "name", pod.Name)
 	} else {
-		r.Log.Info("recover pod finished", "namespace", pod.Namespace, "name", pod.Name)
+		r.Log.Info("Recover pod finished", "namespace", pod.Namespace, "name", pod.Name)
 	}
 
 	return err
@@ -244,10 +246,17 @@ func (r *Reconciler) applyPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.
 
 	containerID := pod.Status.ContainerStatuses[0].ContainerID
 
+	mask, err := utils.EncodeClkIds(chaos.Spec.ClockIds)
+	if err != nil {
+		return err
+	}
+
+	r.Log.Info("setting time shift", "mask", mask, "sec", chaos.Spec.TimeOffset.Sec, "nsec", chaos.Spec.TimeOffset.NSec)
 	_, err = pbClient.SetTimeOffset(ctx, &pb.TimeRequest{
 		ContainerId: containerID,
 		Sec:         chaos.Spec.TimeOffset.Sec,
 		Nsec:        chaos.Spec.TimeOffset.NSec,
+		ClkIdsMask:  mask,
 	})
 
 	return err

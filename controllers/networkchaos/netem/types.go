@@ -183,7 +183,7 @@ func (r *Reconciler) cleanFinalizersAndRecover(ctx context.Context, networkchaos
 }
 
 func (r *Reconciler) recoverPod(ctx context.Context, pod *v1.Pod, networkchaos *v1alpha1.NetworkChaos) error {
-	r.Log.Info("try to recover pod", "namespace", pod.Namespace, "name", pod.Name)
+	r.Log.Info("Try to recover pod", "namespace", pod.Namespace, "name", pod.Name)
 
 	c, err := utils.CreateGrpcConnection(ctx, r.Client, pod)
 	if err != nil {
@@ -207,7 +207,7 @@ func (r *Reconciler) recoverPod(ctx context.Context, pod *v1.Pod, networkchaos *
 	if err != nil {
 		r.Log.Error(err, "recover pod error", "namespace", pod.Namespace, "name", pod.Name)
 	} else {
-		r.Log.Info("recover pod finished", "namespace", pod.Namespace, "name", pod.Name)
+		r.Log.Info("Recover pod finished", "namespace", pod.Namespace, "name", pod.Name)
 	}
 
 	return err
