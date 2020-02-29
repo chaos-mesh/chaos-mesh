@@ -16,6 +16,7 @@ require (
 	github.com/ethercflow/hookfs v0.3.0
 	github.com/ghodss/yaml v1.0.0
 	github.com/go-logr/logr v0.1.0
+	github.com/go-logr/zapr v0.1.0
 	github.com/go-sql-driver/mysql v1.4.1
 	github.com/gogo/googleapis v1.3.2 // indirect
 	github.com/golang/groupcache v0.0.0-20190702054246-869f871628b6 // indirect
@@ -27,14 +28,17 @@ require (
 	github.com/hashicorp/golang-lru v0.5.3 // indirect
 	github.com/jmoiron/sqlx v1.2.0
 	github.com/konsorten/go-windows-terminal-sequences v1.0.2 // indirect
+	github.com/mattn/go-isatty v0.0.12 // indirect
+	github.com/mattn/go-runewidth v0.0.8 // indirect
+	github.com/mgechev/revive v1.0.2-0.20200225072153-6219ca02fffb
 	github.com/morikuni/aec v1.0.0 // indirect
-	github.com/oklog/run v1.1.0
 	github.com/onsi/ginkgo v1.11.0
 	github.com/onsi/gomega v1.7.0
 	github.com/opencontainers/image-spec v1.0.1 // indirect
 	github.com/opencontainers/runc v0.1.1 // indirect
 	github.com/opencontainers/runtime-spec v1.0.1 // indirect
-	github.com/pkg/errors v0.9.1 // indirect
+	github.com/pingcap/failpoint v0.0.0-20200210140405-f8f9fb234798
+	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.0.0
 	github.com/robfig/cron/v3 v3.0.0
 	github.com/syndtr/gocapability v0.0.0-20180916011248-d98352740cb2 // indirect
@@ -42,18 +46,18 @@ require (
 	github.com/vishvananda/netlink v1.0.0
 	github.com/vishvananda/netns v0.0.0-20191106174202-0a2b9b5464df
 	go.uber.org/multierr v1.4.0 // indirect
-	go.uber.org/zap v1.12.0 // indirect
+	go.uber.org/zap v1.12.0
 	golang.org/x/net v0.0.0-20191004110552-13f9640d40b9
 	golang.org/x/sync v0.0.0-20190911185100-cd5d95a43a6e
-	golang.org/x/sys v0.0.0-20200120151820-655fe14d7479 // indirect
-	golang.org/x/tools v0.0.0-20200203023011-6f24f261dadb // indirect
-	google.golang.org/genproto v0.0.0-20200117163144-32f20d992d24 // indirect
-	google.golang.org/grpc v1.26.0
-	k8s.io/api v0.0.0-20191121015604-11707872ac1c
-	k8s.io/apiextensions-apiserver v0.0.0-20191121021419-88daf26ec3b8 // indirect
-	k8s.io/apimachinery v0.0.0-20191121015412-41065c7a8c2a
-	k8s.io/client-go v0.0.0-20191121015835-571c0ef67034
+	golang.org/x/sys v0.0.0-20200223170610-d5e6a3e2c0ae // indirect
+	golang.org/x/tools v0.0.0-20200226224502-204d844ad48d
+	google.golang.org/genproto v0.0.0-20191028173616-919d9bdd9fe6 // indirect
+	google.golang.org/grpc v1.27.0
+	k8s.io/api v0.17.0
+	k8s.io/apimachinery v0.17.0
+	k8s.io/client-go v0.17.0
 	sigs.k8s.io/controller-runtime v0.4.0
+	sigs.k8s.io/controller-tools v0.2.5
 )
 
 go 1.13

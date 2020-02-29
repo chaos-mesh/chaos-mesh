@@ -36,10 +36,11 @@ var log = ctrl.Log.WithName("chaos-daemon-server")
 
 // Config contains the basic chaos daemon configuration.
 type Config struct {
-	HTTPPort int
-	GRPCPort int
-	Host     string
-	Runtime  string
+	HTTPPort  int
+	GRPCPort  int
+	Host      string
+	Runtime   string
+	Profiling bool
 }
 
 // Server represents a grpc server for tc daemon
@@ -58,7 +59,7 @@ func newDaemonServer(containerRuntime string) (*daemonServer, error) {
 	}, nil
 }
 
-func newGRPCServer(containerRuntime string, reg *prometheus.Registry) (*grpc.Server, error) {
+func newGRPCServer(containerRuntime string, reg prometheus.Registerer) (*grpc.Server, error) {
 	ds, err := newDaemonServer(containerRuntime)
 	if err != nil {
 		return nil, err
@@ -86,14 +87,21 @@ func newGRPCServer(containerRuntime string, reg *prometheus.Registry) (*grpc.Ser
 	return s, nil
 }
 
+// RegisterGatherer combine prometheus.Registerer and prometheus.Gatherer
+type RegisterGatherer interface {
+	prometheus.Registerer
+	prometheus.Gatherer
+}
+
 // StartServer starts chaos-daemon.
-func StartServer(conf *Config, reg *prometheus.Registry) error {
+func StartServer(conf *Config, reg RegisterGatherer) error {
 	g := errgroup.Group{}
 
 	httpBindAddr := fmt.Sprintf("%s:%d", conf.Host, conf.HTTPPort)
-	srv := newHTTPServer(httpBindAddr, reg)
+	srv := newHTTPServerBuilder().Addr(httpBindAddr).Metrics(reg).Profiling(conf.Profiling).Build()
+
 	g.Go(func() error {
-		log.Info("starting http endpoint", "address", httpBindAddr)
+		log.Info("Starting http endpoint", "address", httpBindAddr)
 		if err := srv.ListenAndServe(); err != nil {
 			log.Error(err, "failed to start http endpoint")
 			srv.Shutdown(context.Background())
@@ -116,7 +124,7 @@ func StartServer(conf *Config, reg *prometheus.Registry) error {
 	}
 
 	g.Go(func() error {
-		log.Info("starting grpc endpoint", "address", grpcBindAddr, "runtime", conf.Runtime)
+		log.Info("Starting grpc endpoint", "address", grpcBindAddr, "runtime", conf.Runtime)
 		if err := grpcServer.Serve(lis); err != nil {
 			log.Error(err, "failed to start grpc endpoint")
 			grpcServer.Stop()

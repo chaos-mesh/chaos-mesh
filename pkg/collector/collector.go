@@ -83,7 +83,7 @@ func (r *ChaosCollector) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 			StartTime:         &status.Experiment.StartTime.Time,
 			EndTime:           nil,
 		}
-		r.Log.Info("event started, save to database", "event", event)
+		r.Log.Info("Event started, save to database", "event", event)
 
 		err := r.databaseClient.WriteEvent(event)
 		if err != nil {
@@ -99,7 +99,7 @@ func (r *ChaosCollector) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 			StartTime:         &status.Experiment.StartTime.Time,
 			EndTime:           &status.Experiment.EndTime.Time,
 		}
-		r.Log.Info("event finished, save to database", "event", event)
+		r.Log.Info("Event finished, save to database", "event", event)
 
 		err := r.databaseClient.UpdateEvent(event)
 		if err != nil {
@@ -243,7 +243,7 @@ func (r *ChaosCollector) SetupGrafana(ctx context.Context, name string, namespac
 	}
 	deployment.Spec.Template.Spec.Containers = append(deployment.Spec.Template.Spec.Containers, container)
 
-	r.Log.Info("creating grafana deployments")
+	r.Log.Info("Creating grafana deployments")
 	err = r.Create(ctx, &deployment)
 	if err != nil {
 		return err
@@ -270,6 +270,6 @@ func (r *ChaosCollector) SetupGrafana(ctx context.Context, name string, namespac
 			},
 		},
 	}
-	r.Log.Info("creating grafana service")
+	r.Log.Info("Creating grafana service")
 	return r.Create(ctx, &service)
 }

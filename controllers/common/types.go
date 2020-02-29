@@ -49,31 +49,38 @@ func NewReconciler(reconcile reconciler.InnerReconciler, c client.Client, log lo
 func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	var err error
 
-	r.Log.Info("reconciling a common chaos", "name", req.Name, "namespace", req.Namespace)
+	r.Log.Info("Reconciling a common chaos", "name", req.Name, "namespace", req.Namespace)
 	ctx := context.Background()
 
 	chaos := r.Object()
 	if err = r.Get(ctx, req.NamespacedName, chaos); err != nil {
 		r.Log.Error(err, "unable to get chaos")
-		return ctrl.Result{}, nil
+		return ctrl.Result{}, err
 	}
+
+	status := chaos.GetStatus()
+
 	if chaos.IsDeleted() {
 		// This chaos was deleted
 		r.Log.Info("Removing self")
 		err = r.Recover(ctx, req, chaos)
 		if err != nil {
 			r.Log.Error(err, "failed to recover chaos")
-			return ctrl.Result{Requeue: true}, nil
+			return ctrl.Result{Requeue: true}, err
 		}
+		status.Experiment.Phase = v1alpha1.ExperimentPhaseFinished
+	} else if status.Experiment.Phase == v1alpha1.ExperimentPhaseRunning {
+		r.Log.Info("The common chaos is already running", "name", req.Name, "namespace", req.Namespace)
+		return ctrl.Result{}, nil
 	} else {
 		// Start failure action
 		r.Log.Info("Performing Action")
 
-		status := chaos.GetStatus()
-
 		err = r.Apply(ctx, req, chaos)
 		if err != nil {
 			r.Log.Error(err, "failed to apply chaos action")
+
+			status.Experiment.Phase = v1alpha1.ExperimentPhaseFailed
 
 			updateError := retry.RetryOnConflict(retry.DefaultRetry, func() error {
 				return r.Update(ctx, chaos)
@@ -82,7 +89,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 				r.Log.Error(updateError, "unable to update chaos finalizers")
 			}
 
-			return ctrl.Result{Requeue: true}, nil
+			return ctrl.Result{Requeue: true}, err
 		}
 		status.Experiment.StartTime = &metav1.Time{
 			Time: time.Now(),
@@ -92,7 +99,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 
 	if err := r.Update(ctx, chaos); err != nil {
 		r.Log.Error(err, "unable to update chaosctl status")
-		return ctrl.Result{}, nil
+		return ctrl.Result{}, err
 	}
 
 	return ctrl.Result{}, nil
