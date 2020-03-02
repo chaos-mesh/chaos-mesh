@@ -506,7 +506,7 @@ install_helm() {
     local target_os=$(lowercase $(uname))
     local TAR_NAME="helm-$1-$target_os-amd64.tar.gz"
     rm -rf "${TAR_NAME}"
-    ensure curl -sL "https://get.helm.sh/${TAR_NAME}" | tar xz
+    ensure $(curl -sL "https://get.helm.sh/${TAR_NAME}" | tar xz)
 
     ensure mv "${target_os}"-amd64/helm "${HELM_BIN}"
     ensure chmod +x "${HELM_BIN}"
