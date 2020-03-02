@@ -1,4 +1,4 @@
-// Copyright 2019 PingCAP, Inc.
+// Copyright 2020 PingCAP, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package controllers
+package inject
 
 import (
 	"math/rand"
@@ -20,9 +20,10 @@ import (
 	"testing"
 	"time"
 
+	"github.com/onsi/gomega/gexec"
+
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	"github.com/onsi/gomega/gexec"
 
 	chaosmeshv1alpha1 "github.com/pingcap/chaos-mesh/api/v1alpha1"
 
@@ -49,7 +50,7 @@ func TestAPIs(t *testing.T) {
 	RegisterFailHandler(Fail)
 
 	RunSpecsWithDefaultAndCustomReporters(t,
-		"Controller Suite",
+		"webhook inject",
 		[]Reporter{envtest.NewlineReporter{}})
 }
 
@@ -84,27 +85,6 @@ var _ = BeforeSuite(func(done Done) {
 		Scheme:             scheme.Scheme,
 		MetricsBindAddress: "0",
 	})
-	Expect(err).ToNot(HaveOccurred())
-
-	err = (&IoChaosReconciler{
-		Client:        k8sManager.GetClient(),
-		EventRecorder: k8sManager.GetEventRecorderFor("iochaos-controller"),
-		Log:           ctrl.Log.WithName("controllers").WithName("IoChaos"),
-	}).SetupWithManager(k8sManager)
-	Expect(err).ToNot(HaveOccurred())
-
-	err = (&PodChaosReconciler{
-		Client:        k8sManager.GetClient(),
-		EventRecorder: k8sManager.GetEventRecorderFor("podchaos-controller"),
-		Log:           ctrl.Log.WithName("controllers").WithName("PodChaos"),
-	}).SetupWithManager(k8sManager)
-	Expect(err).ToNot(HaveOccurred())
-
-	err = (&NetworkChaosReconciler{
-		Client:        k8sManager.GetClient(),
-		EventRecorder: k8sManager.GetEventRecorderFor("networkchaos-controller"),
-		Log:           ctrl.Log.WithName("controllers").WithName("NetworkChaos"),
-	}).SetupWithManager(k8sManager)
 	Expect(err).ToNot(HaveOccurred())
 
 	go func() {

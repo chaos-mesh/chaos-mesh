@@ -53,6 +53,13 @@ Define the MutatingWebhookConfiguration's name
 {{- end -}}
 
 {{/*
+Define the ValidationWebhookConfiguration's name
+*/}}
+{{- define "chaos-mesh.validation" -}}
+{{- printf "chaos-mesh-validation" -}}
+{{- end -}}
+
+{{/*
 Define the webhook's name
 */}}
 {{- define "chaos-mesh.webhook" -}}

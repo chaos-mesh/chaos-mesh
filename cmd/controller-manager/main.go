@@ -136,7 +136,7 @@ func main() {
 
 	if err = (&controllers.TimeChaosReconciler{
 		Client:        mgr.GetClient(),
-		EventRecorder: mgr.GetEventRecorderFor("timeoutchaos-controller"),
+		EventRecorder: mgr.GetEventRecorderFor("timechaos-controller"),
 		Log:           ctrl.Log.WithName("controllers").WithName("TimeChaos"),
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "TimeChaos")
@@ -168,6 +168,7 @@ func main() {
 	hookServer.Register("/inject-v1-pod", &webhook.Admission{Handler: &apiWebhook.PodInjector{
 		Config: webhookConfig,
 	}})
+	hookServer.Register("/validate-v1alpha1-chaos", &webhook.Admission{Handler: &apiWebhook.ChaosValidator{}})
 
 	// +kubebuilder:scaffold:builder
 

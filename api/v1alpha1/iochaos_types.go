@@ -151,6 +151,16 @@ func (in *IoChaosSpec) GetValue() string {
 	return in.Value
 }
 
+// Validate describe the iochaos validation logic
+func (in *IoChaos) Validate() (bool, string, error) {
+	if in.Spec.Duration != nil && in.Spec.Scheduler != nil {
+		return true, "", nil
+	} else if in.Spec.Duration == nil && in.Spec.Scheduler == nil {
+		return true, "", nil
+	}
+	return false, invalidConfigurationMsg, nil
+}
+
 // IoChaosStatus defines the observed state of IoChaos
 type IoChaosStatus struct {
 	ChaosStatus `json:",inline"`
