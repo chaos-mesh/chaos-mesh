@@ -22,6 +22,7 @@ FLAGS:
         --force-kind        Force reinstall Kind if it is already installed
         --force-helm        Force reinstall Helm if it is already installed
         --dashboard         Install Chaos Dashboard
+        --docker-mirror     Use docker mirror to pull image, dockerhub.azk8s.cn => docker.io, gcr.azk8s.cn => gcr.io
 OPTIONS:
     -v, --version           Version of chaos-mesh, default value: latest
     -l, --local [kind]      Choose a way to run a local kubernetes cluster, supported value: kind,
@@ -54,6 +55,7 @@ main() {
     local force_kind=false
     local force_helm=false
     local install_dashboard=false
+    local docker_mirror=false
 
     while [[ $# -gt 0 ]]
     do
@@ -108,6 +110,10 @@ main() {
                 ;;
             --dashboard)
                 install_dashboard=true
+                shift
+                ;;
+            --docker-mirror)
+                docker_mirror=true
                 shift
                 ;;
             --kind-version)
@@ -170,10 +176,12 @@ main() {
     else
         check_docker
         install_kind "${kind_version}" ${force_kind}
-        install_kubernetes_by_kind "${kind_name}" "${k8s_version}" "${node_num}" "${volume_num}" ${force_local_kube}
+        install_kubernetes_by_kind "${kind_name}" "${k8s_version}" "${node_num}" "${volume_num}" "${helm_version}" ${force_local_kube} ${docker_mirror}
     fi
 
-    install_chaos_mesh "${release_name}" "${namespace}" "${local_kube}" ${force_chaos_mesh} ${install_dashboard}
+    install_chaos_mesh "${release_name}" "${namespace}" "${local_kube}" ${force_chaos_mesh} ${install_dashboard} ${docker_mirror}
+
+    if ! timeout 600 ensure_pods_ready "${namespace}"; then echo "Waiting for pod status running timeout"; fi
 }
 
 prepare_env() {
@@ -245,7 +253,9 @@ install_kubernetes_by_kind() {
     local cluster_version=$2
     local node_num=$3
     local volume_num=$4
-    local force_install=$5
+    local helm_version=$5
+    local force_install=$6
+    local docker_mirror=$7
 
     printf "Install local Kubernetes %s\n" "${cluster_name}"
 
@@ -325,19 +335,25 @@ EOF
         done
     done
 
+    local kind_image="kindest/node:${cluster_version}"
+    if [ "$docker_mirror" == "true" ]; then
+        azk8spull "${kind_image}" || true
+    fi
+
     printf "start to create kubernetes cluster %s" "${cluster_name}"
-    ensure kind create cluster --config "${config_file}" --image kindest/node:${cluster_version} --name=${cluster_name}
+    ensure kind create cluster --config "${config_file}" --image="${kind_image}" --name="${cluster_name}"
     ensure kind get kubeconfig --name="${cluster_name}" > "${kubeconfig_path}"
     ensure export KUBECONFIG="${kubeconfig_path}"
 
     deploy_volume_provisioner "${work_dir}"
-    deploy_registry "${cluster_name}" "${work_dir}"
-    init_helm "${work_dir}"
+    deploy_registry "${cluster_name}" "${work_dir}" ${docker_mirror}
+    init_helm "${work_dir}" "${helm_version}" ${docker_mirror}
 }
 
 deploy_registry() {
     local cluster_name=$1
     local data_dir=$2
+    local docker_mirror=$3
 
     printf "Deploy docker registry in kind\n"
 
@@ -346,6 +362,15 @@ deploy_registry() {
     registry_node=${cluster_name}-control-plane
     registry_node_ip=$(kubectl get nodes "${registry_node}" -o template --template='{{range.status.addresses}}{{if eq .type "InternalIP"}}{{.address}}{{end}}{{end}}')
     registry_file=${data_dir}/registry.yaml
+
+    registry_image="registry:2"
+    socat_image="alpine/socat:1.0.5"
+    if [ "$docker_mirror" == "true" ]; then
+        azk8spull ${registry_image} || true
+        kind load docker-image ${registry_image} > /dev/null 2>&1 || true
+        azk8spull ${socat_image} || true
+        kind load docker-image ${socat_image} > /dev/null 2>&1 || true
+    fi
 
     cat <<EOF >"${registry_file}"
 apiVersion: apps/v1
@@ -370,7 +395,7 @@ spec:
         effect: "NoSchedule"
       containers:
       - name: registry
-        image: registry:2
+        image: ${registry_image}
         volumeMounts:
         - name: data
           mountPath: /data
@@ -410,7 +435,7 @@ spec:
         effect: "NoSchedule"
       containers:
         - name: socat
-          image: alpine/socat:1.0.5
+          image: ${socat_image}
           args:
           - tcp-listen:5000,fork,reuseaddr
           - tcp-connect:${registry_node_ip}:5000
@@ -490,6 +515,8 @@ install_helm() {
 
 init_helm() {
     local data_dir=$1
+    local helm_version=$2
+    local docker_mirror=$3
     local rbac_config=${data_dir}/tiller-rbac.yaml
     local rbac_config_url="https://raw.githubusercontent.com/pingcap/chaos-mesh/master/manifests/tiller-rbac.yaml"
 
@@ -498,8 +525,14 @@ init_helm() {
     ensure curl -o "${rbac_config}" "$rbac_config_url"
     ensure kubectl apply -f "${rbac_config}"
 
+    local tiller_image="gcr.io/kubernetes-helm/tiller:${helm_version}"
+    if [ "$docker_mirror" == "true" ]; then
+        azk8spull "${tiller_image}" || true
+        kind load docker-image "${tiller_image}" > /dev/null 2>&1 || true
+    fi
+
     if [[ $(helm version --client --short) == "Client: v2"* ]]; then
-        ensure helm init --service-account=tiller --wait
+        ensure helm init --service-account=tiller --tiller-image="${tiller_image}" --wait
     fi
 }
 
@@ -520,6 +553,7 @@ install_chaos_mesh() {
     local local_kube=$3
     local force_install=$4
     local install_dashboard=$5
+    local docker_mirror=$6
 
     printf "Install Chaos Mesh %s\n" "${release_name}"
 
@@ -555,6 +589,25 @@ install_chaos_mesh() {
         runtime_cmd="--set chaosDaemon.runtime=containerd --set chaosDaemon.socketPath=/run/containerd/containerd.sock"
     fi
 
+    local chaos_mesh_image="pingcap/chaos-mesh:latest"
+    local chaos_dashboard_image="pingcap/chaos-dashboard:latest"
+    local chaos_daemon_image="pingcap/chaos-daemon:latest"
+    local kubectl_image="bitnami/kubectl:latest"
+
+    if [ "$docker_mirror" == "true" ]; then
+        azk8spull "${chaos_mesh_image}" || true
+        kind load docker-image "${chaos_mesh_image}" > /dev/null 2>&1 || true
+
+        azk8spull "${chaos_dashboard_image}" || true
+        kind load docker-image "${chaos_dashboard_image}" > /dev/null 2>&1 || true
+
+        azk8spull "${chaos_daemon_image}" || true
+        kind load docker-image "${chaos_daemon_image}" > /dev/null 2>&1 || true
+
+        azk8spull "${kubectl_image}" || true
+        kind load docker-image "${kubectl_image}" > /dev/null 2>&1 || true
+    fi
+
     if [[ $(helm version --client --short) == "Client: v2"* ]]; then
         ensure helm install helm/chaos-mesh --name="${release_name}" --namespace="${namespace}" ${runtime_cmd} ${dashboard_cmd}
     else
@@ -564,11 +617,11 @@ install_chaos_mesh() {
     printf "Chaos Mesh %s is installed successfully\n" "${release_name}"
 }
 
-function version_le() {
+version_le() {
     test "$(echo "$@" | tr " " "\n" | sort -V | head -n 1)" == "$1";
 }
 
-function version_lt() {
+version_lt() {
     test "$(echo "$@" | tr " " "\n" | sort -rV | head -n 1)" != "$1";
 }
 
@@ -610,6 +663,72 @@ lowercase() {
 # command.
 ensure() {
     if ! "$@"; then err "command failed: $*"; fi
+}
+
+ensure_pods_ready() {
+    local namespace=$1
+    while [[ $(kubectl get pods -n "${namespace}" -l app.kubernetes.io/instance=chaos-mesh -o 'jsonpath={..status.conditions[?(@.type=="Ready")].status}') != "True" ]];
+    do
+        echo "waiting for pod running" && sleep 10;
+    done
+}
+
+timeout() {
+    perl -e 'alarm shift; exec @ARGV' "$@";
+}
+
+azk8spull() {
+	image=$1
+	if [ -z $image ]; then
+		echo "## azk8spull image name cannot be null."
+	else
+		array=(`echo $image | tr '/' ' '` )
+
+		domainName=""
+		repoName=""
+		imageName=""
+
+		if [ ${#array[*]} -eq 3 ]; then
+			repoName=${array[1]}
+			imageName=${array[2]}
+			if [ "${array[0]}"x = "docker.io"x ]; then
+				domainName="dockerhub.azk8s.cn"
+			elif [ "${array[0]}"x = "gcr.io"x ]; then
+				domainName="gcr.azk8s.cn"
+			elif [ "${array[0]}"x = "quay.io"x ]; then
+				domainName="quay.azk8s.cn"
+			else
+				echo '## azk8spull can not support pulling $image right now.'
+			fi
+		elif [ ${#array[*]} -eq 2 ]; then
+			if [ "${array[0]}"x = "k8s.gcr.io"x ]; then
+				domainName="gcr.azk8s.cn"
+				repoName="google_containers"
+				imageName=${array[1]}
+			else
+				domainName="dockerhub.azk8s.cn"
+				repoName=${array[0]}
+				imageName=${array[1]}
+			fi
+		elif [ ${#array[*]} -eq 1 ]; then
+				domainName="dockerhub.azk8s.cn"
+				repoName="library"
+				imageName=${array[0]}
+		else
+			echo '## azk8spull can not support pulling $image right now.'
+		fi
+		if [ $domainName != "" ]; then
+			echo "## azk8spull try to pull image from mirror $domainName/$repoName/$imageName."
+			docker pull  $domainName/$repoName/$imageName
+			if [ $? -eq 0 ]; then
+				echo "## azk8spull try to tag $domainName/$repoName/$imageName to $image."
+				docker tag $domainName/$repoName/$imageName $image
+				if [ $? -eq 0 ]; then
+					echo '## azk8spull finish pulling. '
+				fi
+			fi
+		fi
+	fi
 }
 
 main "$@" || exit 1
