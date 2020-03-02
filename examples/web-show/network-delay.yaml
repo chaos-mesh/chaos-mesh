@@ -1,0 +1,19 @@
+apiVersion: pingcap.com/v1alpha1
+kind: NetworkChaos
+metadata:
+  name: network-delay-example
+spec:
+  action: delay
+  mode: one
+  selector:
+    namespaces:
+      - default
+    labelSelectors:
+      "app": "web-show"
+  delay:
+    latency: "10ms"
+    correlation: "100"
+    jitter: "0ms"
+  duration: "30s"
+  scheduler:
+    cron: "@every 60s"
