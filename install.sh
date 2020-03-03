@@ -345,7 +345,7 @@ EOF
     ensure kind get kubeconfig --name="${cluster_name}" > "${kubeconfig_path}"
     ensure export KUBECONFIG="${kubeconfig_path}"
 
-    deploy_volume_provisioner "${work_dir}"
+    deploy_volume_provisioner "${work_dir}" ${docker_mirror}
     deploy_registry "${cluster_name}" "${work_dir}" ${docker_mirror}
     init_helm "${work_dir}" "${helm_version}" ${docker_mirror}
 }
@@ -445,7 +445,14 @@ EOF
 
 deploy_volume_provisioner() {
     local data_dir=$1
+    local docker_mirror=$2
     local config_file=${data_dir}/local-volume-provisionser.yaml
+
+    volume_provisioner_image="quay.io/external_storage/local-volume-provisioner:v2.3.2"
+    if [ "$docker_mirror" == "true" ]; then
+        azk8spull volume_provisioner_image || true
+        kind load docker-image ${volume_provisioner_image} > /dev/null 2>&1 || true
+    fi
 
     cat <<EOF >"${config_file}"
 apiVersion: storage.k8s.io/v1
@@ -488,7 +495,7 @@ spec:
     spec:
       serviceAccountName: local-storage-admin
       containers:
-        - image: "quay.io/external_storage/local-volume-provisioner:v2.3.2"
+        - image: ${volume_provisioner_image}
           name: provisioner
           securityContext:
             privileged: true
