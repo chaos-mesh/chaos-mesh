@@ -767,9 +767,6 @@ install_chaos_mesh() {
 }
 
 version_lt() {
-    echo $1
-    echo $2
-
     vercomp $1 $2
     if [ $? == 2 ];  then
         return 0
