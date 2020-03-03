@@ -760,7 +760,7 @@ install_chaos_mesh() {
         if [[ $(helm version --client --short) == "Client: v2"* ]]; then
             err_msg=$(helm delete --purge "${release_name}" 2>&1 1>/dev/null)
         else
-            err_msg=$(helm delete "${release_name}" -n "${namespace}" 2&>1 1>/dev/null)
+            err_msg=$(helm delete "${release_name}" -n "${namespace}" 2>&1 1>/dev/null)
         fi
         if [ "$err_msg" != "" ] && [[ "$err_msg" != *"not found" ]]; then
             printf "Delete Chaos Mesh %s failed, error: %s\n" "${release_name}" "${err_msg}"
