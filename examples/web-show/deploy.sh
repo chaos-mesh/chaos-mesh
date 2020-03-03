@@ -4,7 +4,7 @@ set -e
 
 usage() {
     cat << EOF
-This script is used to install wob-show.
+This script is used to install web-show.
 USAGE:
     install.sh [FLAGS] [OPTIONS]
 FLAGS:
