@@ -19,7 +19,7 @@ cd chaos-mesh/
 ./install.sh --local kind
 ```
 
-`install.sh` is an automation shell script that helps you install dependencies such as `kubelet`, `Helm`, `kind`, and `kubernetes`, and `Chaos Mesh` itself.
+`install.sh` is an automation shell script that helps you install dependencies such as `kubectl`, `Helm`, `kind`, and `kubernetes`, and `Chaos Mesh` itself.
 
 After executing the above command, you should be able to see the prompt that Chaos Mesh is installed successfully. 
 Otherwise, please check the current environment according to the prompt message or send us an [issue](https://github.com/pingcap/chaos-mesh/issues) for help. 
