@@ -14,27 +14,29 @@ Before running this script, please ensure that:
 USAGE:
     install.sh [FLAGS] [OPTIONS]
 FLAGS:
-    -h, --help              Prints help information
-        --force             Force reinstall all components if they are already installed, include: helm, kind, local-kube, chaos-mesh
-        --force-chaos-mesh  Force reinstall chaos-mesh if it is already installed
-        --force-local-kube  Force reinstall local Kubernetes cluster if it is already installed
-        --force-kubectl     Force reinstall kubectl client if it is already installed
-        --force-kind        Force reinstall Kind if it is already installed
-        --force-helm        Force reinstall Helm if it is already installed
-        --dashboard         Install Chaos Dashboard
-        --docker-mirror     Use docker mirror to pull image, dockerhub.azk8s.cn => docker.io, gcr.azk8s.cn => gcr.io
+    -h, --help               Prints help information
+        --force              Force reinstall all components if they are already installed, include: helm, kind, local-kube, chaos-mesh
+        --force-chaos-mesh   Force reinstall chaos-mesh if it is already installed
+        --force-local-kube   Force reinstall local Kubernetes cluster if it is already installed
+        --force-kubectl      Force reinstall kubectl client if it is already installed
+        --force-kind         Force reinstall Kind if it is already installed
+        --force-helm         Force reinstall Helm if it is already installed
+        --dashboard          Install Chaos Dashboard
+        --docker-mirror      Use docker mirror to pull image, dockerhub.azk8s.cn => docker.io, gcr.azk8s.cn => gcr.io
+        --volume-provisioner Deploy volume provisioner in local Kubernetes cluster
+        --local-registry     Deploy local docker registry in local Kubernetes cluster
 OPTIONS:
-    -v, --version           Version of chaos-mesh, default value: latest
-    -l, --local [kind]      Choose a way to run a local kubernetes cluster, supported value: kind,
-                            If this value is not set and the Kubernetes is not installed, this script will exit with 1.
-    -n, --name              Name of Kubernetes cluster, default value: kind
-        --kind-version      Version of the Kind tool, default value: v0.7.0
-        --node-num          The count of the cluster nodes,default value: 5
-        --k8s-version       Version of the Kubernetes cluster,default value: v1.12.8
-        --volume-num        The volumes number of each kubernetes node,default value: 5
-        --helm-version      Version of the helm tool, default value: v2.16.1
-        --release-name      Release name of chaos-mesh, default value: chaos-mesh
-        --namespace         Namespace of chaos-mesh, default value: chaos-testing
+    -v, --version            Version of chaos-mesh, default value: latest
+    -l, --local [kind]       Choose a way to run a local kubernetes cluster, supported value: kind,
+                             If this value is not set and the Kubernetes is not installed, this script will exit with 1.
+    -n, --name               Name of Kubernetes cluster, default value: kind
+        --kind-version       Version of the Kind tool, default value: v0.7.0
+        --node-num           The count of the cluster nodes,default value: 5
+        --k8s-version        Version of the Kubernetes cluster,default value: v1.17.2
+        --volume-num         The volumes number of each kubernetes node,default value: 5
+        --helm-version       Version of the helm tool, default value: v3.1.0
+        --release-name       Release name of chaos-mesh, default value: chaos-mesh
+        --namespace          Namespace of chaos-mesh, default value: chaos-testing
 EOF
 }
 
@@ -44,9 +46,9 @@ main() {
     local kind_name="kind"
     local kind_version="v0.7.0"
     local node_num=5
-    local k8s_version="v1.12.8"
+    local k8s_version="v1.17.2"
     local volume_num=5
-    local helm_version="v2.16.1"
+    local helm_version="v3.1.0"
     local release_name="chaos-mesh"
     local namespace="chaos-testing"
     local force_chaos_mesh=false
@@ -56,6 +58,8 @@ main() {
     local force_helm=false
     local install_dashboard=false
     local docker_mirror=false
+    local volume_provisioner=false
+    local local_registry=false
 
     while [[ $# -gt 0 ]]
     do
@@ -114,6 +118,14 @@ main() {
                 ;;
             --docker-mirror)
                 docker_mirror=true
+                shift
+                ;;
+            --volume-provisioner)
+                volume_provisioner=true
+                shift
+                ;;
+            --local-registry)
+                local_registry=true
                 shift
                 ;;
             --kind-version)
@@ -176,12 +188,12 @@ main() {
     else
         check_docker
         install_kind "${kind_version}" ${force_kind}
-        install_kubernetes_by_kind "${kind_name}" "${k8s_version}" "${node_num}" "${volume_num}" "${helm_version}" ${force_local_kube} ${docker_mirror}
+        install_kubernetes_by_kind "${kind_name}" "${k8s_version}" "${node_num}" "${volume_num}" "${helm_version}" ${force_local_kube} ${docker_mirror} ${volume_provisioner} ${local_registry}
     fi
 
     install_chaos_mesh "${release_name}" "${namespace}" "${local_kube}" ${force_chaos_mesh} ${install_dashboard} ${docker_mirror}
-
-    if ! timeout 600 ensure_pods_ready "${namespace}"; then echo "Waiting for pod status running timeout"; fi
+    ensure_pods_ready "${namespace}" "app.kubernetes.io/component=controller-manager" 100
+    printf "Chaos Mesh %s is installed successfully\n" "${release_name}"
 }
 
 prepare_env() {
@@ -256,6 +268,8 @@ install_kubernetes_by_kind() {
     local helm_version=$5
     local force_install=$6
     local docker_mirror=$7
+    local volume_provisioner=$8
+    local local_registry=$9
 
     printf "Install local Kubernetes %s\n" "${cluster_name}"
 
@@ -345,8 +359,14 @@ EOF
     ensure kind get kubeconfig --name="${cluster_name}" > "${kubeconfig_path}"
     ensure export KUBECONFIG="${kubeconfig_path}"
 
-    deploy_volume_provisioner "${work_dir}" ${docker_mirror}
-    deploy_registry "${cluster_name}" "${work_dir}" ${docker_mirror}
+    if [ "$volume_provisioner" == "true" ]; then
+        deploy_volume_provisioner "${work_dir}" ${docker_mirror}
+    fi
+
+    if [ "$local_registry" == "true" ]; then
+        deploy_registry "${cluster_name}" "${work_dir}" ${docker_mirror}
+    fi
+
     init_helm "${work_dir}" "${helm_version}" ${docker_mirror}
 }
 
@@ -622,7 +642,14 @@ install_helm() {
 
     err_msg=$(helm version --client 2>&1 1>/dev/null)
     if [ "$err_msg" == "" ]; then
-        v=$(helm version --client | sed 's/.*SemVer:\"v\([0-9.]*\).*/\1/g')
+
+        v=""
+        if [[ $(helm version --client --short) == "Client: v2"* ]]; then
+            v=$(helm version --client | sed 's/.*SemVer:\"v\([0-9.]*\).*/\1/g')
+        else
+            v=$(helm version --client --short | sed 's/v\([0-9.]*\).*/\1/g')
+        fi
+
         target_version=$(echo "${helm_version}" | sed s/v//g)
         if version_lt "$v" "${target_version}"; then
             printf "Chaos Mesh requires Helm version %s or later\n" "${target_version}"
@@ -641,6 +668,7 @@ install_helm() {
     local TAR_NAME="helm-$1-$target_os-amd64.tar.gz"
     rm -rf "${TAR_NAME}"
 
+    printf "Download Helm from URL %s\n" "https://get.helm.sh/${TAR_NAME}"
     ensure $(curl -sL "https://get.helm.sh/${TAR_NAME}" | tar xz)
 
     ensure mv "${target_os}"-amd64/helm "${HELM_BIN}"
@@ -677,30 +705,36 @@ roleRef:
   apiGroup: ""
 EOF
 
-    ensure kubectl apply -f "${rbac_config}"
-
-    local tiller_image="gcr.io/kubernetes-helm/tiller:${helm_version}"
-    if [ "$docker_mirror" == "true" ]; then
-        azk8spull "${tiller_image}" || true
-        kind load docker-image "${tiller_image}" > /dev/null 2>&1 || true
-    fi
 
     if [[ $(helm version --client --short) == "Client: v2"* ]]; then
+        ensure kubectl apply -f "${rbac_config}"
+        local tiller_image="gcr.io/kubernetes-helm/tiller:${helm_version}"
+        if [ "$docker_mirror" == "true" ]; then
+            azk8spull "${tiller_image}" || true
+            kind load docker-image "${tiller_image}" > /dev/null 2>&1 || true
+        fi
+
         ensure helm init --service-account=tiller --tiller-image="${tiller_image}" --wait
 
-        if ! timeout 600 ensure_pods_ready "kube-system"; then echo "Waiting for pod status running timeout"; fi
+        ensure_pods_ready "kube-system" "name=tiller" 100
     fi
 }
 
 check_chaos_mesh_installed() {
     local release_name=$1
+    local namespace=$2
 
-    err_msg=$(helm get "${release_name}" 2>&1 1>/dev/null)
-    if [ "$err_msg" == "" ]; then
-        return 0
+    if [[ $(helm version --client --short) == "Client: v2"* ]]; then
+        if ! helm get all ${release_name} > /dev/null 2>&1;then
+            return 1
+        fi
+    else
+        if ! helm get all ${release_name} --namespace=${namespace} > /dev/null 2>&1;then
+            return 1
+        fi
     fi
 
-    return 1
+    return 0
 }
 
 install_chaos_mesh() {
@@ -713,15 +747,21 @@ install_chaos_mesh() {
 
     printf "Install Chaos Mesh %s\n" "${release_name}"
 
-    if check_chaos_mesh_installed "${release_name}"; then
+    if check_chaos_mesh_installed "${release_name}" "${namespace}"; then
         printf "Chaos Mesh %s has been installed\n" "${release_name}"
 
         if [ "$force_install" != "true" ]; then
-            return
+            exit 0
         fi
 
         printf "Delete Chaos Mesh %s\n"  "${release_name}"
-        err_msg=$(helm delete --purge "${release_name}" 2>&1 1>/dev/null)
+
+        err_msg=""
+        if [[ $(helm version --client --short) == "Client: v2"* ]]; then
+            err_msg=$(helm delete --purge "${release_name}" 2>&1 1>/dev/null)
+        else
+            err_msg=$(helm delete "${release_name}" -n "${namespace}" 2&>1 1>/dev/null)
+        fi
         if [ "$err_msg" != "" ] && [[ "$err_msg" != *"not found" ]]; then
             printf "Delete Chaos Mesh %s failed, error: %s\n" "${release_name}" "${err_msg}"
             exit 1
@@ -769,8 +809,6 @@ install_chaos_mesh() {
     else
         ensure helm install "${release_name}" helm/chaos-mesh --namespace="${namespace}" ${runtime_cmd} ${dashboard_cmd}
     fi
-
-    printf "Chaos Mesh %s is installed successfully\n" "${release_name}"
 }
 
 version_lt() {
@@ -855,14 +893,26 @@ ensure() {
 
 ensure_pods_ready() {
     local namespace=$1
-    while [[ $(kubectl get pods -n "${namespace}" -l app.kubernetes.io/instance=chaos-mesh -o 'jsonpath={..status.conditions[?(@.type=="Ready")].status}') != "True" ]];
-    do
-        echo "waiting for pod running" && sleep 5;
-    done
-}
+    local labels=""
+    local limit=$3
 
-timeout() {
-    perl -e 'alarm shift; exec @ARGV' "$@";
+    if [ "$2" != "" ]; then
+        labels="-l $2"
+    fi
+
+    printf "Ensure pod is running\n"
+
+    count=0
+    while [[ "$(kubectl get pods -n "${namespace}" ${labels} -o 'jsonpath={..status.conditions[?(@.type=="Ready")].status}')" != "True" ]];
+    do
+        echo "Waiting for pod running" && sleep 5;
+
+        ((count=count+1))
+        if [ $count -gt $limit ]; then
+            printf "Waiting for pod status running timeout\n"
+            exit 1
+        fi
+    done
 }
 
 azk8spull() {
