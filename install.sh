@@ -446,10 +446,137 @@ EOF
 deploy_volume_provisioner() {
     local data_dir=$1
     local config_file=${data_dir}/local-volume-provisionser.yaml
-    local config_url="https://raw.githubusercontent.com/pingcap/chaos-mesh/master/manifests/local-volume-provisioner.yaml"
 
-    rm -rf "${config_file}"
-    ensure curl -o "${config_file}" "$config_url"
+    cat <<EOF >"${config_file}"
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: "local-storage"
+provisioner: "kubernetes.io/no-provisioner"
+volumeBindingMode: "WaitForFirstConsumer"
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: local-provisioner-config
+  namespace: kube-system
+data:
+  nodeLabelsForPV: |
+    - kubernetes.io/hostname
+  storageClassMap: |
+    local-storage:
+      hostDir: /mnt/disks
+      mountDir: /mnt/disks
+
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: local-volume-provisioner
+  namespace: kube-system
+  labels:
+    app: local-volume-provisioner
+spec:
+  selector:
+    matchLabels:
+      app: local-volume-provisioner
+  template:
+    metadata:
+      labels:
+        app: local-volume-provisioner
+    spec:
+      serviceAccountName: local-storage-admin
+      containers:
+        - image: "quay.io/external_storage/local-volume-provisioner:v2.3.2"
+          name: provisioner
+          securityContext:
+            privileged: true
+          env:
+          - name: MY_NODE_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: spec.nodeName
+          - name: MY_NAMESPACE
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
+          - name: JOB_CONTAINER_IMAGE
+            value: "quay.io/external_storage/local-volume-provisioner:v2.3.2"
+          resources:
+            requests:
+              cpu: 100m
+              memory: 100Mi
+            limits:
+              cpu: 100m
+              memory: 100Mi
+          volumeMounts:
+            - mountPath: /etc/provisioner/config
+              name: provisioner-config
+              readOnly: true
+            # mounting /dev in DinD environment would fail
+            # - mountPath: /dev
+            #   name: provisioner-dev
+            - mountPath: /mnt/disks
+              name: local-disks
+              mountPropagation: "HostToContainer"
+      volumes:
+        - name: provisioner-config
+          configMap:
+            name: local-provisioner-config
+        # - name: provisioner-dev
+        #   hostPath:
+        #     path: /dev
+        - name: local-disks
+          hostPath:
+            path: /mnt/disks
+
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: local-storage-admin
+  namespace: kube-system
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: local-storage-provisioner-pv-binding
+  namespace: kube-system
+subjects:
+- kind: ServiceAccount
+  name: local-storage-admin
+  namespace: kube-system
+roleRef:
+  kind: ClusterRole
+  name: system:persistent-volume-provisioner
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: local-storage-provisioner-node-clusterrole
+  namespace: kube-system
+rules:
+- apiGroups: [""]
+  resources: ["nodes"]
+  verbs: ["get"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: local-storage-provisioner-node-binding
+  namespace: kube-system
+subjects:
+- kind: ServiceAccount
+  name: local-storage-admin
+  namespace: kube-system
+roleRef:
+  kind: ClusterRole
+  name: local-storage-provisioner-node-clusterrole
+  apiGroup: rbac.authorization.k8s.io
+EOF
     ensure kubectl apply -f "${config_file}"
 }
 
@@ -518,11 +645,30 @@ init_helm() {
     local helm_version=$2
     local docker_mirror=$3
     local rbac_config=${data_dir}/tiller-rbac.yaml
-    local rbac_config_url="https://raw.githubusercontent.com/pingcap/chaos-mesh/master/manifests/tiller-rbac.yaml"
 
     need_cmd "helm"
-    rm -rf "${rbac_config}"
-    ensure curl -o "${rbac_config}" "$rbac_config_url"
+
+    cat <<EOF > "${rbac_config}"
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: tiller
+  namespace: kube-system
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: tiller-clusterrolebinding
+subjects:
+  - kind: ServiceAccount
+    name: tiller
+    namespace: kube-system
+roleRef:
+  kind: ClusterRole
+  name: cluster-admin
+  apiGroup: ""
+EOF
+
     ensure kubectl apply -f "${rbac_config}"
 
     local tiller_image="gcr.io/kubernetes-helm/tiller:${helm_version}"
@@ -533,6 +679,8 @@ init_helm() {
 
     if [[ $(helm version --client --short) == "Client: v2"* ]]; then
         ensure helm init --service-account=tiller --tiller-image="${tiller_image}" --wait
+
+        if ! timeout 600 ensure_pods_ready "kube-system"; then echo "Waiting for pod status running timeout"; fi
     fi
 }
 
@@ -669,7 +817,7 @@ ensure_pods_ready() {
     local namespace=$1
     while [[ $(kubectl get pods -n "${namespace}" -l app.kubernetes.io/instance=chaos-mesh -o 'jsonpath={..status.conditions[?(@.type=="Ready")].status}') != "True" ]];
     do
-        echo "waiting for pod running" && sleep 10;
+        echo "waiting for pod running" && sleep 5;
     done
 }
 
