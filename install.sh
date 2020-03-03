@@ -900,8 +900,6 @@ ensure_pods_ready() {
         labels="-l $2"
     fi
 
-    printf "Ensure pod is running\n"
-
     count=0
     while [[ "$(kubectl get pods -n "${namespace}" ${labels} -o 'jsonpath={..status.conditions[?(@.type=="Ready")].status}')" != "True" ]];
     do
