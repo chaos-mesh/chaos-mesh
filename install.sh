@@ -633,6 +633,7 @@ install_helm() {
     local target_os=$(lowercase $(uname))
     local TAR_NAME="helm-$1-$target_os-amd64.tar.gz"
     rm -rf "${TAR_NAME}"
+
     ensure $(curl -sL "https://get.helm.sh/${TAR_NAME}" | tar xz)
 
     ensure mv "${target_os}"-amd64/helm "${HELM_BIN}"
@@ -765,12 +766,47 @@ install_chaos_mesh() {
     printf "Chaos Mesh %s is installed successfully\n" "${release_name}"
 }
 
-version_le() {
-    test "$(echo "$@" | tr " " "\n" | sort -V | head -n 1)" == "$1";
+version_lt() {
+    echo $1
+    echo $2
+
+    vercomp $1 $2
+    if [ $? == 2 ];  then
+        return 0
+    fi
+
+    return 1
 }
 
-version_lt() {
-    test "$(echo "$@" | tr " " "\n" | sort -rV | head -n 1)" != "$1";
+vercomp () {
+    if [[ $1 == $2 ]]
+    then
+        return 0
+    fi
+    local IFS=.
+    local i ver1=($1) ver2=($2)
+    # fill empty fields in ver1 with zeros
+    for ((i=${#ver1[@]}; i<${#ver2[@]}; i++))
+    do
+        ver1[i]=0
+    done
+    for ((i=0; i<${#ver1[@]}; i++))
+    do
+        if [[ -z ${ver2[i]} ]]
+        then
+            # fill empty fields in ver2 with zeros
+            ver2[i]=0
+        fi
+        if ((10#${ver1[i]} > 10#${ver2[i]}))
+        then
+            return 1
+        fi
+        if ((10#${ver1[i]} < 10#${ver2[i]}))
+        then
+            return 2
+        fi
+    done
+    return 0
 }
 
 check_docker() {
