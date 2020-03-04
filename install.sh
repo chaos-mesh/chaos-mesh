@@ -666,14 +666,18 @@ install_helm() {
     local HELM_BIN="${HOME}/local/bin/helm"
     local target_os=$(lowercase $(uname))
     local TAR_NAME="helm-$1-$target_os-amd64.tar.gz"
-    rm -rf "${TAR_NAME}"
+    rm -rf "/tmp/${TAR_NAME}"
+    rm -rf "/tmp/${target_os}"-amd64
 
     printf "Download Helm from URL %s\n" "https://get.helm.sh/${TAR_NAME}"
-    ensure $(curl -sL "https://get.helm.sh/${TAR_NAME}" | tar xz)
+    ensure curl -Lo /tmp/${TAR_NAME} "https://get.helm.sh/${TAR_NAME}"
+    ensure tar -xvf /tmp/${TAR_NAME} -C /tmp
 
-    ensure mv "${target_os}"-amd64/helm "${HELM_BIN}"
+    ensure mv "/tmp/${target_os}"-amd64/helm "${HELM_BIN}"
     ensure chmod +x "${HELM_BIN}"
-    rm -rf "${target_os}"-amd64
+
+    rm -rf "/tmp/${TAR_NAME}"
+    rm -rf "/tmp/${target_os}"-amd64
 }
 
 init_helm() {
