@@ -19,7 +19,7 @@ import (
 
 	"github.com/pingcap/chaos-mesh/api/v1alpha1"
 	. "github.com/pingcap/chaos-mesh/controllers/timechaos"
-	"github.com/pingcap/chaos-mesh/pkg/chaosdaemon/pb"
+	chaosdaemon "github.com/pingcap/chaos-mesh/pkg/chaosdaemon/pb"
 	"github.com/pingcap/chaos-mesh/pkg/mock"
 )
 
@@ -42,6 +42,7 @@ var _ = AfterSuite(func() {
 // Assert *MockChaosDaemonClient implements chaosdaemon.ChaosDaemonClientInterface.
 var _ ChaosDaemonClientInterface = (*MockChaosDaemonClient)(nil)
 
+// todo: move this to somewhere else
 type MockChaosDaemonClient struct{}
 
 func (c *MockChaosDaemonClient) SetNetem(ctx context.Context, in *chaosdaemon.NetemRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
