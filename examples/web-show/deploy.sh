@@ -51,7 +51,7 @@ kubectl apply -f deployment-target.yaml
 
 rm -rf deployment-target.yaml
 
-while [[ $(kubectl get pods -l app=web-show -o 'jsonpath={..status.conditions[?(@.type=="Ready")].status}') != "True" ]]; do echo "Waiting for pod running" && sleep 1; done
+while [[ $(kubectl get pods -l app=web-show -o 'jsonpath={..status.conditions[?(@.type=="Ready")].status}') != "True" ]]; do echo "Waiting for pod running" && sleep 10; done
 
 kill $(lsof -t -i:8081) >/dev/null 2>&1 || true
 
