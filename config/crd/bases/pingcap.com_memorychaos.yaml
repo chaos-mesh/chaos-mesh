@@ -33,12 +33,109 @@ spec:
           type: object
         spec:
           properties:
+            duration:
+              description: Duration represents the duration of the chaos action
+              type: string
+            mode:
+              description: 'Mode defines the mode to run chaos action. Supported mode:
+                one / all / fixed / fixed-percent / random-max-percent'
+              type: string
+            nextRecover:
+              description: Next time when this action will be recovered
+              format: date-time
+              type: string
+            nextStart:
+              description: Next time when this action will be applied again
+              format: date-time
+              type: string
             quota:
               description: 'Quota specifies the strict memory quota a pod should have.
                 Support units: KiB'
               type: string
+            scheduler:
+              description: Scheduler defines some schedule rules to control the running
+                time of the chaos experiment about time.
+              properties:
+                cron:
+                  description: "Cron defines a cron job rule. \n Some rule examples:
+                    \"0 30 * * * *\" means to \"Every hour on the half hour\" \"@hourly\"
+                    \     means to \"Every hour\" \"@every 1h30m\" means to \"Every
+                    hour thirty\" \n More rule info: https://godoc.org/github.com/robfig/cron"
+                  type: string
+              required:
+              - cron
+              type: object
+            selector:
+              description: Selector is used to select pods that are used to inject
+                chaos action.
+              properties:
+                annotationSelectors:
+                  additionalProperties:
+                    type: string
+                  description: Map of string keys and values that can be used to select
+                    objects. A selector based on annotations.
+                  type: object
+                fieldSelectors:
+                  additionalProperties:
+                    type: string
+                  description: Map of string keys and values that can be used to select
+                    objects. A selector based on fields.
+                  type: object
+                labelSelectors:
+                  additionalProperties:
+                    type: string
+                  description: Map of string keys and values that can be used to select
+                    objects. A selector based on labels.
+                  type: object
+                namespaces:
+                  description: Namespaces is a set of namespace to which objects belong.
+                  items:
+                    type: string
+                  type: array
+                nodeSelectors:
+                  additionalProperties:
+                    type: string
+                  description: Map of string keys and values that can be used to select
+                    nodes. Selector which must match a node's labels, and objects
+                    must belong to these selected nodes.
+                  type: object
+                nodes:
+                  description: Nodes is a set of node name and objects must belong
+                    to these nodes.
+                  items:
+                    type: string
+                  type: array
+                podPhaseSelectors:
+                  description: 'PodPhaseSelectors is a set of condition of a pod at
+                    the current time. supported value: Pending / Running / Succeeded
+                    / Failed / Unknown'
+                  items:
+                    type: string
+                  type: array
+                pods:
+                  additionalProperties:
+                    items:
+                      type: string
+                    type: array
+                  description: Pods is a map of string keys and a set values that
+                    used to select pods. The key defines the namespace which pods
+                    belong, and the each values is a set of pod names.
+                  type: object
+              type: object
+            value:
+              description: Value is required when the mode is set to `FixedPodMode`
+                / `FixedPercentPodMod` / `RandomMaxPercentPodMod`. If `FixedPodMode`,
+                provide an integer of pods to do chaos action. If `FixedPercentPodMod`,
+                provide a number from 0-100 to specify the max % of pods the server
+                can do chaos action. If `RandomMaxPercentPodMod`,  provide a number
+                from 0-100 to specify the % of pods to do chaos action
+              type: string
           required:
+          - duration
+          - mode
           - quota
+          - scheduler
+          - selector
           type: object
         status:
           properties:
