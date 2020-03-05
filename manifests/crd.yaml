@@ -396,7 +396,7 @@ spec:
                 action: delay Default action: delay'
               type: string
             corrupt:
-              description: Corrupt represents the detail about loss action
+              description: Corrupt represents the detail about corrupt action
               properties:
                 correlation:
                   type: string
@@ -415,6 +415,20 @@ spec:
                   type: string
                 latency:
                   type: string
+                reorder:
+                  description: ReorderSpec defines details of packet reorder.
+                  properties:
+                    correlation:
+                      type: string
+                    gap:
+                      type: integer
+                    reorder:
+                      type: string
+                  required:
+                  - correlation
+                  - gap
+                  - reorder
+                  type: object
               required:
               - correlation
               - jitter
@@ -725,7 +739,7 @@ spec:
           properties:
             action:
               description: 'Action defines the specific pod chaos action. Supported
-                action: pod-kill / pod-failure Default action: pod-kill'
+                action: pod-kill / pod-failure / container-kill Default action: pod-kill'
               type: string
             containerName:
               description: ContainerName indicates the name of the container. Needed

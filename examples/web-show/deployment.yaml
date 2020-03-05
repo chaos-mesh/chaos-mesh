@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web-show
+  labels:
+    app: web-show
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: web-show
+  template:
+    metadata:
+      labels:
+        app: web-show
+    spec:
+      containers:
+        - name: web-show
+          image: pingcap/web-show
+          imagePullPolicy: Always
+          command:
+            - /usr/local/bin/web-show
+            - --target-ip=TARGETIP
+          ports:
+            - name: web-port
+              containerPort: 8081
+              hostPort: 8081

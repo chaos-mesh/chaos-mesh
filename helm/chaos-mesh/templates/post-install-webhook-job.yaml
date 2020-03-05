@@ -28,7 +28,7 @@ spec:
       serviceAccountName: {{ .Values.controllerManager.serviceAccount }}
       containers:
         - name: "{{ .Release.Name }}-job-mw"
-          image: bitnami/kubectl:latest
+          image: {{ .Values.kubectlImage }}
           imagePullPolicy: IfNotPresent
           command:
             - "sh"

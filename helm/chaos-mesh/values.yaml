@@ -13,6 +13,9 @@ rbac:
 # enableProfiling is a flag to enable pprof in controller-manager and chaos-daemon.
 enableProfiling: false
 
+
+kubectlImage: bitnami/kubectl:latest
+
 controllerManager:
   serviceAccount: chaos-controller-manager
 
