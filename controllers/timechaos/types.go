@@ -17,6 +17,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"google.golang.org/grpc"
 
 	"k8s.io/client-go/tools/record"
 
@@ -34,8 +35,10 @@ import (
 	"github.com/pingcap/chaos-mesh/controllers/common"
 	"github.com/pingcap/chaos-mesh/controllers/reconciler"
 	"github.com/pingcap/chaos-mesh/controllers/twophase"
+	"github.com/pingcap/chaos-mesh/pkg/mock"
 	"github.com/pingcap/chaos-mesh/pkg/utils"
 
+	chaosdaemon "github.com/pingcap/chaos-mesh/pkg/chaosdaemon/pb"
 	pb "github.com/pingcap/chaos-mesh/pkg/chaosdaemon/pb"
 )
 
@@ -76,6 +79,39 @@ func (r *Reconciler) commonTimeChaos(timechaos *v1alpha1.TimeChaos, req ctrl.Req
 func (r *Reconciler) scheduleTimeChaos(timechaos *v1alpha1.TimeChaos, req ctrl.Request) (ctrl.Result, error) {
 	sr := twophase.NewReconciler(r, r.Client, r.Log)
 	return sr.Reconcile(req)
+}
+
+// for convenient unit testing
+type ChaosDaemonClientInterface interface {
+	chaosdaemon.ChaosDaemonClient
+	Close() error
+}
+
+type GrpcChaosDaemonClient struct {
+	chaosdaemon.ChaosDaemonClient
+	conn *grpc.ClientConn
+}
+
+func (c *GrpcChaosDaemonClient) Close() error {
+	return c.conn.Close()
+}
+
+func NewChaosDaemonClient(ctx context.Context, c client.Client, pod *v1.Pod) (ChaosDaemonClientInterface, error) {
+	if cli := mock.On("MockChaosDaemonClient"); cli != nil {
+		return cli.(ChaosDaemonClientInterface), nil
+	}
+	if err := mock.On("NewChaosDaemonClientError"); err != nil {
+		return nil, err.(error)
+	}
+
+	cc, err := utils.CreateGrpcConnection(ctx, c, pod)
+	if err != nil {
+		return nil, err
+	}
+	return &GrpcChaosDaemonClient{
+		ChaosDaemonClient: pb.NewChaosDaemonClient(cc),
+		conn:              cc,
+	}, nil
 }
 
 // Apply applies time-chaos
@@ -178,13 +214,11 @@ func (r *Reconciler) cleanFinalizersAndRecover(ctx context.Context, chaos *v1alp
 func (r *Reconciler) recoverPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.TimeChaos) error {
 	r.Log.Info("Try to recover pod", "namespace", pod.Namespace, "name", pod.Name)
 
-	c, err := utils.CreateGrpcConnection(ctx, r.Client, pod)
+	pbClient, err := NewChaosDaemonClient(ctx, r.Client, pod)
 	if err != nil {
 		return err
 	}
-	defer c.Close()
-
-	pbClient := pb.NewChaosDaemonClient(c)
+	defer pbClient.Close()
 
 	if len(pod.Status.ContainerStatuses) == 0 {
 		return fmt.Errorf("%s %s can't get the state of container", pod.Namespace, pod.Name)
@@ -232,13 +266,11 @@ func (r *Reconciler) applyAllPods(ctx context.Context, pods []v1.Pod, chaos *v1a
 func (r *Reconciler) applyPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.TimeChaos) error {
 	r.Log.Info("Try to shift time on pod", "namespace", pod.Namespace, "name", pod.Name)
 
-	c, err := utils.CreateGrpcConnection(ctx, r.Client, pod)
+	pbClient, err := NewChaosDaemonClient(ctx, r.Client, pod)
 	if err != nil {
 		return err
 	}
-	defer c.Close()
-
-	pbClient := pb.NewChaosDaemonClient(c)
+	defer pbClient.Close()
 
 	if len(pod.Status.ContainerStatuses) == 0 {
 		return fmt.Errorf("%s %s can't get the state of container", pod.Namespace, pod.Name)
