@@ -76,6 +76,7 @@ rules:
       - networkchaos
       - iochaos
       - timechaos
+      - memorychaos
     verbs: ["*"]
 ---
 kind: ClusterRoleBinding
@@ -136,6 +137,7 @@ rules:
       - networkchaos
       - iochaos
       - timechaos
+      - memorychaos
     verbs: ["*"]
 ---
 kind: RoleBinding

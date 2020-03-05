@@ -1,0 +1,5 @@
+apiVersion: pingcap.com/v1alpha1
+kind: MemoryChaos
+metadata:
+  name: memory-example
+  namespace: chaos-testing
