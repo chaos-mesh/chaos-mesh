@@ -24,6 +24,7 @@ import (
 
 	"github.com/pingcap/chaos-mesh/api/v1alpha1"
 	"github.com/pingcap/chaos-mesh/pkg/label"
+	"github.com/pingcap/chaos-mesh/pkg/mock"
 
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -41,6 +42,11 @@ type SelectSpec interface {
 }
 
 func SelectAndGeneratePods(ctx context.Context, c client.Client, spec SelectSpec) ([]v1.Pod, error) {
+	if pods := mock.On("MockSelectAndGeneratePods"); pods != nil {
+		// todo: how to mock array?
+		return []v1.Pod{}, nil
+	}
+
 	selector := spec.GetSelector()
 	mode := spec.GetMode()
 	value := spec.GetValue()
