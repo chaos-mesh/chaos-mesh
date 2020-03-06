@@ -185,13 +185,11 @@ func (r *Reconciler) cleanFinalizersAndRecover(ctx context.Context, networkchaos
 func (r *Reconciler) recoverPod(ctx context.Context, pod *v1.Pod, networkchaos *v1alpha1.NetworkChaos) error {
 	r.Log.Info("Try to recover pod", "namespace", pod.Namespace, "name", pod.Name)
 
-	c, err := utils.CreateGrpcConnection(ctx, r.Client, pod)
+	pbClient, err := utils.NewChaosDaemonClient(ctx, r.Client, pod)
 	if err != nil {
 		return err
 	}
-	defer c.Close()
-
-	pbClient := pb.NewChaosDaemonClient(c)
+	defer pbClient.Close()
 
 	if len(pod.Status.ContainerStatuses) == 0 {
 		return fmt.Errorf("%s %s can't get the state of container", pod.Namespace, pod.Name)
@@ -243,13 +241,11 @@ func (r *Reconciler) applyPod(ctx context.Context, pod *v1.Pod, networkchaos *v1
 		return fmt.Errorf("spec %s is not a NetemSpec", action)
 	}
 
-	c, err := utils.CreateGrpcConnection(ctx, r.Client, pod)
+	pbClient, err := utils.NewChaosDaemonClient(ctx, r.Client, pod)
 	if err != nil {
 		return err
 	}
-	defer c.Close()
-
-	pbClient := pb.NewChaosDaemonClient(c)
+	defer pbClient.Close()
 
 	if len(pod.Status.ContainerStatuses) == 0 {
 		return fmt.Errorf("%s %s can't get the state of container", pod.Namespace, pod.Name)

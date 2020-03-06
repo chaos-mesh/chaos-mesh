@@ -142,13 +142,11 @@ func (r *Reconciler) Object() reconciler.InnerObject {
 func (r *Reconciler) KillContainer(ctx context.Context, pod *v1.Pod, containerID string) error {
 	r.Log.Info("Try to kill container", "namespace", pod.Namespace, "podName", pod.Name, "containerID", containerID)
 
-	c, err := utils.CreateGrpcConnection(ctx, r.Client, pod)
+	pbClient, err := utils.NewChaosDaemonClient(ctx, r.Client, pod)
 	if err != nil {
 		return err
 	}
-	defer c.Close()
-
-	pbClient := pb.NewChaosDaemonClient(c)
+	defer pbClient.Close()
 
 	if len(pod.Status.ContainerStatuses) == 0 {
 		return fmt.Errorf("%s %s can't get the state of container", pod.Namespace, pod.Name)

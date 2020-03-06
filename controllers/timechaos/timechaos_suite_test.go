@@ -7,8 +7,6 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	"github.com/golang/protobuf/ptypes/empty"
-	"google.golang.org/grpc"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -19,7 +17,6 @@ import (
 
 	"github.com/pingcap/chaos-mesh/api/v1alpha1"
 	. "github.com/pingcap/chaos-mesh/controllers/timechaos"
-	chaosdaemon "github.com/pingcap/chaos-mesh/pkg/chaosdaemon/pb"
 	"github.com/pingcap/chaos-mesh/pkg/mock"
 )
 
@@ -38,47 +35,6 @@ var _ = BeforeSuite(func(done Done) {
 
 var _ = AfterSuite(func() {
 })
-
-// Assert *MockChaosDaemonClient implements chaosdaemon.ChaosDaemonClientInterface.
-var _ ChaosDaemonClientInterface = (*MockChaosDaemonClient)(nil)
-
-// todo: move this to somewhere else
-type MockChaosDaemonClient struct{}
-
-func (c *MockChaosDaemonClient) SetNetem(ctx context.Context, in *chaosdaemon.NetemRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
-	panic("implement me")
-}
-
-func (c *MockChaosDaemonClient) DeleteNetem(ctx context.Context, in *chaosdaemon.NetemRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
-	panic("implement me")
-}
-
-func (c *MockChaosDaemonClient) FlushIpSet(ctx context.Context, in *chaosdaemon.IpSetRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
-	panic("implement me")
-}
-
-func (c *MockChaosDaemonClient) FlushIptables(ctx context.Context, in *chaosdaemon.IpTablesRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
-	panic("implement me")
-}
-
-func (c *MockChaosDaemonClient) SetTimeOffset(ctx context.Context, in *chaosdaemon.TimeRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
-	panic("implement me")
-}
-
-func (c *MockChaosDaemonClient) RecoverTimeOffset(ctx context.Context, in *chaosdaemon.TimeRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
-	panic("implement me")
-}
-
-func (c *MockChaosDaemonClient) ContainerKill(ctx context.Context, in *chaosdaemon.ContainerRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
-	panic("implement me")
-}
-
-func (c *MockChaosDaemonClient) Close() error {
-	if err := mock.On("CloseChaosDaemonClient"); err != nil {
-		return err.(error)
-	}
-	return nil
-}
 
 var _ = Describe("TimeChaos", func() {
 	BeforeEach(func() {
