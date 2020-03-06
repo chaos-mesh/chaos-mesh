@@ -26,7 +26,7 @@ func (c *GrpcChaosDaemonClient) Close() error {
 	return c.conn.Close()
 }
 
-func NewChaosDaemonClient(ctx context.Context, c client.Client, pod *v1.Pod) (ChaosDaemonClientInterface, error) {
+func NewChaosDaemonClient(ctx context.Context, c client.Client, pod *v1.Pod, port string) (ChaosDaemonClientInterface, error) {
 	if cli := mock.On("MockChaosDaemonClient"); cli != nil {
 		return cli.(ChaosDaemonClientInterface), nil
 	}
@@ -34,7 +34,7 @@ func NewChaosDaemonClient(ctx context.Context, c client.Client, pod *v1.Pod) (Ch
 		return nil, err.(error)
 	}
 
-	cc, err := CreateGrpcConnection(ctx, c, pod)
+	cc, err := CreateGrpcConnection(ctx, c, pod, port)
 	if err != nil {
 		return nil, err
 	}

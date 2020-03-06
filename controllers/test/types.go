@@ -3,17 +3,26 @@ package test
 import (
 	"context"
 	"fmt"
+
 	"github.com/golang/protobuf/ptypes/empty"
+	"google.golang.org/grpc"
+
 	chaosdaemon "github.com/pingcap/chaos-mesh/pkg/chaosdaemon/pb"
 	"github.com/pingcap/chaos-mesh/pkg/mock"
 	"github.com/pingcap/chaos-mesh/pkg/utils"
-	"google.golang.org/grpc"
 )
 
 // Assert *MockChaosDaemonClient implements chaosdaemon.ChaosDaemonClientInterface.
 var _ utils.ChaosDaemonClientInterface = (*MockChaosDaemonClient)(nil)
 
 type MockChaosDaemonClient struct{}
+
+func (c *MockChaosDaemonClient) ContainerGetPid(ctx context.Context, in *chaosdaemon.ContainerRequest, opts ...grpc.CallOption) (*chaosdaemon.ContainerResponse, error) {
+	if resp := mock.On("MockContainerGetPidResponse"); resp != nil {
+		return resp.(*chaosdaemon.ContainerResponse), nil
+	}
+	return nil, mockError("ContainerGetPid")
+}
 
 func mockError(name string) error {
 	if err := mock.On(fmt.Sprintf("Mock%sError", name)); err != nil {
