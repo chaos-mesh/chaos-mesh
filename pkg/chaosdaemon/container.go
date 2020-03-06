@@ -41,3 +41,22 @@ func (s *daemonServer) ContainerKill(ctx context.Context, req *pb.ContainerReque
 
 	return &empty.Empty{}, nil
 }
+
+func (s *daemonServer) ContainerGetPid(ctx context.Context, req *pb.ContainerRequest) (*pb.ContainerResponse, error) {
+	log.Info("container GetPid", "request", req)
+
+	action := req.Action.Action
+	if action != pb.ContainerAction_GETPID {
+		err := fmt.Errorf("container action is %s , not getpid", pb.ContainerAction_Action_name[int32(action)])
+		log.Error(err, "container action is not expected")
+		return nil, err
+	}
+
+	pid, err := s.crClient.GetPidFromContainerID(ctx, req.ContainerId)
+	if err != nil {
+		log.Error(err, "error while killing container")
+		return nil, err
+	}
+
+	return &pb.ContainerResponse{Pid: pid}, nil
+}
