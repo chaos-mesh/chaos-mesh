@@ -16,7 +16,6 @@ package utils
 import (
 	"context"
 	"fmt"
-	"os"
 	"time"
 
 	"google.golang.org/grpc"
@@ -32,12 +31,8 @@ const DefaultRPCTimeout = 60 * time.Second
 // RPCTimeout specifies timeout of RPC between controller and chaos-operator
 var RPCTimeout = DefaultRPCTimeout
 
-func CreateGrpcConnection(ctx context.Context, c client.Client, pod *v1.Pod) (*grpc.ClientConn, error) {
-	port := os.Getenv("CHAOS_DAEMON_PORT")
-	if port == "" {
-		port = "8080"
-	}
-
+// CreateGrpcConnection create a grpc connection with given port
+func CreateGrpcConnection(ctx context.Context, c client.Client, pod *v1.Pod, port string) (*grpc.ClientConn, error) {
 	nodeName := pod.Spec.NodeName
 	log.Info("Creating client to chaos-daemon", "node", nodeName)
 
