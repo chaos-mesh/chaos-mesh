@@ -50,6 +50,10 @@ spec:
         - name: data
           persistentVolumeClaim:
             claimName: collector-mysql-pv-claim
+      {{- with .Values.dashboard.nodeSelector }}
+      nodeSelector:
+{{ toYaml . | indent 8 }}
+      {{- end }}
       {{- with .Values.dashboard.affinity }}
       affinity:
 {{ toYaml . | indent 8 }}
