@@ -45,7 +45,7 @@ func (r *KernelChaosReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error)
 	return reconciler.Reconcile(req)
 }
 
-// SetupWithManager setups a kernel chaos reconciler on controller-manager
+// SetupWithManager sets up a kernel chaos reconciler on controller-manager
 func (r *KernelChaosReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&v1alpha1.KernelChaos{}).

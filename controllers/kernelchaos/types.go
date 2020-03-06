@@ -41,7 +41,7 @@ import (
 
 const kernelChaosMsg = "kernel is injected with %v"
 
-// Reconciler is KernelChoas reconciler
+// Reconciler is KernelChaos reconciler
 type Reconciler struct {
 	client.Client
 	Log logr.Logger
@@ -124,7 +124,7 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos reconcil
 	return nil
 }
 
-// Recover means the reonciler recover the chaos action
+// Recover means the reconciler recovers the chaos action
 func (r *Reconciler) Recover(ctx context.Context, req ctrl.Request, chaos reconciler.InnerObject) error {
 	kernelchaos, ok := chaos.(*v1alpha1.KernelChaos)
 	if !ok {

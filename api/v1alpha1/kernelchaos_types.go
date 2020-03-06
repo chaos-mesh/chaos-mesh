@@ -85,18 +85,56 @@ func (in *KernelChaosSpec) GetValue() string {
 
 // FailKernRequest defines the injection conditions
 type FailKernRequest struct {
-	FailType    int32    `json:"failtype"`
-	Headers     []string `json:"headers,omitempty"`
-	Callchain   []Frame  `json:"callchain,omitempty"`
-	Probability uint32   `json:"probability,omitempty"`
-	Times       uint32   `json:"times,omitempty"`
+	// FailType indicates what to fail, can be set to '0' / '1' / '2'
+	// If `0`, indicates slab to fail (should_failslab)
+	// If `1`, indicates alloc_page to fail (should_fail_alloc_page)
+	// If `2`, indicates bio to fail (should_fail_bio)
+	// You can read:
+	//   1. https://www.kernel.org/doc/html/latest/fault-injection/fault-injection.html
+	//   2. http://github.com/iovisor/bcc/blob/master/tools/inject_example.txt
+	// to learn more
+	FailType int32 `json:"failtype"`
+
+	// Headers indicates the appropriate kernel headers you need.
+	// Eg: "linux/mmzone.h", "linux/blkdev.h" and so on
+	Headers []string `json:"headers,omitempty"`
+
+	// Callchain indicate a special call chain, such as:
+	//     ext4_mount
+	//       -> mount_subtree
+	//          -> ...
+	//             -> should_failslab
+	// With an optional set of predicates and an optional set of
+	// parameters, which used with predicates. You can read call chan
+	// and predicate examples from https://github.com/chaos-mesh/bpfki/tree/develop/examples
+	// to learn more.
+	// If no special call chain, just keep Callchain empty, which means it will fail at any call chain
+	// with slab alloc (eg: kmalloc).
+	Callchain []Frame `json:"callchain,omitempty"`
+
+	// Probability indicates the fails with probability.
+	// If you want 1%, please set this field with 1.
+	Probability uint32 `json:"probability,omitempty"`
+
+	// Times indicates the max times of fails.
+	Times uint32 `json:"times,omitempty"`
 }
 
 // Frame defines the function signature and predicate in function's body
 type Frame struct {
-	Funcname   string `json:"funcname,omitempty"`
+	// Funcname can be find from kernel source or `/proc/kallsyms`, such as `ext4_mount`
+	Funcname string `json:"funcname,omitempty"`
+
+	// Parameters is used with predicate, for example, if you want to inject slab error
+	// in `d_alloc_parallel(struct dentry *parent, const struct qstr *name)` with a special
+	// name `bananas`, you need to set it to `struct dentry *parent, const struct qstr *name`
+	// otherwise omit it.
 	Parameters string `json:"parameters,omitempty"`
-	Predicate  string `json:"predicate,omitempty"`
+
+	// Predicate will access the arguments of this Frame, example with Parameters's, you can
+	// set it to `STRNCMP(name->name, "bananas", 8)` to make inject only with it, or omit it
+	// to inject for all d_alloc_parallel call chain.
+	Predicate string `json:"predicate,omitempty"`
 }
 
 // KernelChaosStatus defines the observed state of KernelChaos
@@ -137,7 +175,7 @@ func (in *KernelChaos) SetNextStart(t time.Time) {
 	in.Spec.NextStart.Time = t
 }
 
-// GetNextRecover get NextRecover field of KernelChaos
+// GetNextRecover gets NextRecover field of KernelChaos
 func (in *KernelChaos) GetNextRecover() time.Time {
 	if in.Spec.NextRecover == nil {
 		return time.Time{}
