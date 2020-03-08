@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package chaoscm;
+
+import "google/protobuf/empty.proto";
+
+service ChaosCM {
+    rpc EatMemory (MemoryRequest) returns (google.protobuf.Empty) {}
+    rpc RecoverMemory (google.protobuf.Empty) returns (google.protobuf.Empty) {}
+
+    rpc BurnCpu (CpuRequest) returns (google.protobuf.Empty) {}
+    rpc RecoverCpu (google.protobuf.Empty) returns (google.protobuf.Empty) {}
+}
+
+message MemoryRequest {
+    string quota = 1;
+}
+
+message CpuRequest {
+}
+

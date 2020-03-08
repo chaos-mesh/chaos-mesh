@@ -77,13 +77,18 @@ chaosdaemon: generate fmt vet
 manager: generate fmt vet
 	$(GO) build -ldflags '$(LDFLAGS)' -o bin/chaos-controller-manager ./cmd/controller-manager/*.go
 
+# Build chaosfs binary
 chaosfs: generate fmt vet
 	$(GO) build -ldflags '$(LDFLAGS)' -o bin/chaosfs ./cmd/chaosfs/*.go
+
+# Build chaoscm binary
+chaoscm: generate fmt vet
+	$(GO) build -ldflags '$(LDFLAGS)' -o bin/chaoscm ./cmd/chaoscm/main.go
 
 dashboard: fmt vet
 	$(GO) build -ldflags '$(LDFLAGS)' -o bin/chaos-dashboard ./cmd/chaos-dashboard/*.go
 
-binary: chaosdaemon manager chaosfs dashboard
+binary: chaosdaemon manager chaosfs chaoscm dashboard
 
 watchmaker: fmt vet
 	$(CGOENV) go build -ldflags '$(LDFLAGS)' -o bin/watchmaker ./cmd/watchmaker/...
@@ -134,6 +139,7 @@ image:
 	docker build -t ${DOCKER_REGISTRY_PREFIX}pingcap/chaos-daemon ${DOCKER_BUILD_ARGS} images/chaos-daemon
 	docker build -t ${DOCKER_REGISTRY_PREFIX}pingcap/chaos-mesh ${DOCKER_BUILD_ARGS} images/chaos-mesh
 	docker build -t ${DOCKER_REGISTRY_PREFIX}pingcap/chaos-fs ${DOCKER_BUILD_ARGS} images/chaosfs
+	docker build -t ${DOCKER_REGISTRY_PREFIX}pingcap/chaos-cm ${DOCKER_BUILD_ARGS} images/chaoscm
 	docker build -t ${DOCKER_REGISTRY_PREFIX}pingcap/chaos-scripts ${DOCKER_BUILD_ARGS} images/chaos-scripts
 	docker build -t ${DOCKER_REGISTRY_PREFIX}pingcap/chaos-grafana ${DOCKER_BUILD_ARGS} images/grafana
 	docker build -t ${DOCKER_REGISTRY_PREFIX}pingcap/chaos-dashboard ${DOCKER_BUILD_ARGS} images/chaos-dashboard
@@ -141,6 +147,7 @@ image:
 docker-push:
 	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-mesh:latest"
 	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-fs:latest"
+	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-cm:latest"
 	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-daemon:latest"
 	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-scripts:latest"
 	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-grafana:latest"

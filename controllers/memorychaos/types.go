@@ -18,6 +18,8 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/golang/protobuf/ptypes/empty"
+
 	"k8s.io/client-go/tools/record"
 
 	k8serror "k8s.io/apimachinery/pkg/api/errors"
@@ -36,7 +38,7 @@ import (
 	"github.com/pingcap/chaos-mesh/controllers/twophase"
 	"github.com/pingcap/chaos-mesh/pkg/utils"
 
-	pb "github.com/pingcap/chaos-mesh/pkg/chaosdaemon/pb"
+	pb "github.com/pingcap/chaos-mesh/pkg/chaoscm/pb"
 )
 
 const memorychaosMsg = "memory quota: %s"
@@ -182,17 +184,13 @@ func (r *Reconciler) recoverPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha
 	}
 	defer c.Close()
 
-	pbClient := pb.NewChaosDaemonClient(c)
+	pbClient := pb.NewChaosCMClient(c)
 
 	if len(pod.Status.ContainerStatuses) == 0 {
 		return fmt.Errorf("%s %s can't get the state of container", pod.Namespace, pod.Name)
 	}
 
-	containerID := pod.Status.ContainerStatuses[0].ContainerID
-
-	_, err = pbClient.RecoverTimeOffset(ctx, &pb.TimeRequest{
-		ContainerId: containerID,
-	})
+	_, err = pbClient.RecoverMemory(ctx, &empty.Empty{})
 
 	if err != nil {
 		r.Log.Error(err, "recover pod error", "namespace", pod.Namespace, "name", pod.Name)
@@ -208,7 +206,7 @@ func (r *Reconciler) Object() reconciler.InnerObject {
 	return &v1alpha1.TimeChaos{}
 }
 
-func (r *Reconciler) applyAllPods(ctx context.Context, pods []v1.Pod, chaos *v1alpha1.TimeChaos) error {
+func (r *Reconciler) applyAllPods(ctx context.Context, pods []v1.Pod, chaos *v1alpha1.MemoryChaos) error {
 	g := errgroup.Group{}
 	for index := range pods {
 		pod := &pods[index]
@@ -227,7 +225,7 @@ func (r *Reconciler) applyAllPods(ctx context.Context, pods []v1.Pod, chaos *v1a
 	return g.Wait()
 }
 
-func (r *Reconciler) applyPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.TimeChaos) error {
+func (r *Reconciler) applyPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.MemoryChaos) error {
 	r.Log.Info("Try to shift time on pod", "namespace", pod.Namespace, "name", pod.Name)
 
 	c, err := utils.CreateGrpcConnection(ctx, r.Client, pod)
@@ -236,26 +234,14 @@ func (r *Reconciler) applyPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.
 	}
 	defer c.Close()
 
-	pbClient := pb.NewChaosDaemonClient(c)
+	pbClient := pb.NewChaosCMClient(c)
 
 	if len(pod.Status.ContainerStatuses) == 0 {
 		return fmt.Errorf("%s %s can't get the state of container", pod.Namespace, pod.Name)
 	}
-
-	containerID := pod.Status.ContainerStatuses[0].ContainerID
-
-	mask, err := utils.EncodeClkIds(chaos.Spec.ClockIds)
-	if err != nil {
-		return err
-	}
-
-	r.Log.Info("setting time shift", "mask", mask, "sec", chaos.Spec.TimeOffset.Sec, "nsec", chaos.Spec.TimeOffset.NSec)
-	_, err = pbClient.SetTimeOffset(ctx, &pb.TimeRequest{
-		ContainerId: containerID,
-		Sec:         chaos.Spec.TimeOffset.Sec,
-		Nsec:        chaos.Spec.TimeOffset.NSec,
-		ClkIdsMask:  mask,
+	r.Log.Info("Setting Memory chaos")
+	_, err = pbClient.EatMemory(ctx, &pb.MemoryRequest{
+		Quota: chaos.Spec.Quota,
 	})
-
 	return err
 }
