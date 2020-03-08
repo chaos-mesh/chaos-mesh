@@ -1,7 +1,7 @@
 apiVersion: pingcap.com/v1alpha1
 kind: NetworkChaos
 metadata:
-  name: network-delay-example
+  name: web-show-network-delay
 spec:
   action: delay
   mode: one
