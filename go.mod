@@ -38,7 +38,6 @@ require (
 	github.com/pingcap/failpoint v0.0.0-20200210140405-f8f9fb234798
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.0.0
-	github.com/prometheus/prometheus v1.8.2 // indirect
 	github.com/robfig/cron/v3 v3.0.0
 	github.com/spf13/cobra v0.0.6 // indirect
 	github.com/tmc/grpc-websocket-proxy v0.0.0-20200122045848-3419fae592fc // indirect
@@ -64,16 +63,13 @@ require (
 	k8s.io/klog v1.0.0
 	k8s.io/kubernetes v1.17.2
 	k8s.io/utils v0.0.0-20191114184206-e782cd3c129f
-	sigs.k8s.io/apiserver-builder-alpha v0.0.0-20191113095113-4493943d2568 // indirect
-	sigs.k8s.io/apiserver-builder-alpha/cmd v0.0.0-20191113095113-4493943d2568 // indirect
 	sigs.k8s.io/controller-runtime v0.4.0
 	sigs.k8s.io/controller-tools v0.2.5
 	sigs.k8s.io/yaml v1.2.0 // indirect
 )
 
-replace google.golang.org/grpc => google.golang.org/grpc v1.26.0
-
 replace (
+	google.golang.org/grpc => google.golang.org/grpc v1.26.0
 	k8s.io/api => github.com/rancher/kubernetes/staging/src/k8s.io/api v1.17.2-k3s1
 	k8s.io/apiextensions-apiserver => github.com/rancher/kubernetes/staging/src/k8s.io/apiextensions-apiserver v1.17.2-k3s1
 	k8s.io/apimachinery => github.com/rancher/kubernetes/staging/src/k8s.io/apimachinery v1.17.2-k3s1
