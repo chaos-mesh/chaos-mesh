@@ -156,6 +156,7 @@ webhook:
   FailurePolicy: Ignore
 
 bpfki:
+  create: false
   image: pingcap/chaos-kernel:latest
   imagePullPolicy: Always
   grpcPort: 50051

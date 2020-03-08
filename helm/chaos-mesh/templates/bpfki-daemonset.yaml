@@ -1,3 +1,4 @@
+{{- if .Values.bpfki.create }}
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
@@ -110,3 +111,4 @@ spec:
         - name: sys-path
           hostPath:
             path: /sys
+{{- end }}
