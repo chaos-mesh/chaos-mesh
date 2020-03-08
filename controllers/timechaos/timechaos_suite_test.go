@@ -2,7 +2,10 @@ package timechaos_test
 
 import (
 	"context"
+	"errors"
 	"testing"
+
+	"k8s.io/apimachinery/pkg/runtime"
 
 	v1 "k8s.io/api/core/v1"
 
@@ -20,6 +23,8 @@ import (
 	"github.com/pingcap/chaos-mesh/api/v1alpha1"
 	. "github.com/pingcap/chaos-mesh/controllers/timechaos"
 	"github.com/pingcap/chaos-mesh/pkg/mock"
+
+	. "github.com/pingcap/chaos-mesh/controllers/test"
 )
 
 func TestTimechaos(t *testing.T) {
@@ -52,39 +57,64 @@ var _ = Describe("TimeChaos", func() {
 	// Avoid adding tests for vanilla CRUD operations because they would
 	// test Kubernetes API server, which isn't the goal here.
 	Context("TimeChaos", func() {
-		It("TimeChaos Apply", func() {
-			mock.With("MockSelectAndGeneratePods", func() []v1.Pod {
-				return []v1.Pod{}
-			})
+		podObjects, pods := GenerateNPods("p", 1, v1.PodRunning, metav1.NamespaceDefault, nil, map[string]string{"l1": "l1"})
 
-			duration := "invalid_duration"
+		mock.With("MockSelectAndGeneratePods", func() []v1.Pod {
+			return pods
+		})
+		mock.With("MockChaosDaemonClient", &MockChaosDaemonClient{})
 
-			timechaos := v1alpha1.TimeChaos{
-				TypeMeta: metav1.TypeMeta{
-					Kind:       "TimeChaos",
-					APIVersion: "v1",
-				},
-				Spec: v1alpha1.TimeChaosSpec{
-					Mode:  "FixedPodMode",
-					Value: "0",
-					Selector: v1alpha1.SelectorSpec{
-						Namespaces: []string{"namespace"},
-					},
-					TimeOffset: v1alpha1.TimeOffset{},
-					Duration:   &duration,
-					Scheduler:  nil,
-				},
-			}
+		duration := "invalid_duration"
+
+		timechaos := v1alpha1.TimeChaos{
+			TypeMeta: metav1.TypeMeta{
+				Kind:       "TimeChaos",
+				APIVersion: "v1",
+			},
+			Spec: v1alpha1.TimeChaosSpec{
+				Mode:       "FixedPodMode",
+				Value:      "0",
+				Selector:   v1alpha1.SelectorSpec{Namespaces: []string{metav1.NamespaceDefault}},
+				TimeOffset: v1alpha1.TimeOffset{},
+				Duration:   &duration,
+				Scheduler:  nil,
+			},
+		}
+
+		It("TimeChaos Action", func() {
+			scheme := runtime.NewScheme()
+			Expect(v1.AddToScheme(scheme)).To(Succeed())
 
 			r := Reconciler{
-				Client:        fake.NewFakeClient(),
+				Client:        fake.NewFakeClientWithScheme(scheme, podObjects...),
 				EventRecorder: &record.FakeRecorder{},
 				Log:           ctrl.Log.WithName("controllers").WithName("TimeChaos"),
 			}
 
-			err := r.Apply(context.TODO(), ctrl.Request{}, &timechaos)
+			var err error
+
+			err = r.Apply(context.TODO(), ctrl.Request{}, &timechaos)
 
 			Expect(err).ToNot(HaveOccurred())
+
+			mock.With("MockSetTimeOffsetError", errors.New("SetTimeOffsetError"))
+
+			err = r.Apply(context.TODO(), ctrl.Request{}, &timechaos)
+
+			Expect(err).To(HaveOccurred())
+			Expect(err.Error()).To(ContainSubstring("SetTimeOffsetError"))
+
+			err = r.Recover(context.TODO(), ctrl.Request{}, &timechaos)
+			Expect(err).ToNot(HaveOccurred())
+
+			mock.With("MockSetTimeOffsetError", nil)
+			err = r.Apply(context.TODO(), ctrl.Request{}, &timechaos)
+			mock.With("MockRecoverTimeOffsetError", errors.New("RecoverTimeOffsetError"))
+
+			err = r.Recover(context.TODO(), ctrl.Request{}, &timechaos)
+
+			Expect(err).To(HaveOccurred())
+			Expect(err.Error()).To(ContainSubstring("RecoverTimeOffsetError"))
 		})
 	})
 })

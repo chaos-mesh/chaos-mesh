@@ -45,6 +45,9 @@ func SelectAndGeneratePods(ctx context.Context, c client.Client, spec SelectSpec
 	if pods := mock.On("MockSelectAndGeneratePods"); pods != nil {
 		return pods.(func() []v1.Pod)(), nil
 	}
+	if err := mock.On("MockSelectedAndGeneratePodsError"); err != nil {
+		return nil, err.(error)
+	}
 
 	selector := spec.GetSelector()
 	mode := spec.GetMode()

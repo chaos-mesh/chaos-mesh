@@ -4,6 +4,11 @@ import (
 	"context"
 	"fmt"
 
+	"k8s.io/apimachinery/pkg/runtime"
+
+	v1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
 	"github.com/golang/protobuf/ptypes/empty"
 	"google.golang.org/grpc"
 
@@ -61,4 +66,48 @@ func (c *MockChaosDaemonClient) ContainerKill(ctx context.Context, in *chaosdaem
 
 func (c *MockChaosDaemonClient) Close() error {
 	return mockError("CloseChaosDaemonClient")
+}
+
+func newPod(
+	name string,
+	status v1.PodPhase,
+	namespace string,
+	ans map[string]string,
+	ls map[string]string,
+) v1.Pod {
+	return v1.Pod{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "Pod",
+			APIVersion: "v1",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Name:        name,
+			Namespace:   namespace,
+			Labels:      ls,
+			Annotations: ans,
+		},
+		Status: v1.PodStatus{
+			Phase:             status,
+			ContainerStatuses: []v1.ContainerStatus{{ContainerID: "fake-container-id"}},
+		},
+	}
+}
+
+func GenerateNPods(
+	namePrefix string,
+	n int,
+	status v1.PodPhase,
+	ns string,
+	ans map[string]string,
+	ls map[string]string,
+) ([]runtime.Object, []v1.Pod) {
+	var podObjects []runtime.Object
+	var pods []v1.Pod
+	for i := 0; i < n; i++ {
+		pod := newPod(fmt.Sprintf("%s%d", namePrefix, i), status, ns, ans, ls)
+		podObjects = append(podObjects, &pod)
+		pods = append(pods, pod)
+	}
+
+	return podObjects, pods
 }
