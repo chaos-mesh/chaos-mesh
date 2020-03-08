@@ -30,7 +30,7 @@ require (
 	github.com/konsorten/go-windows-terminal-sequences v1.0.2 // indirect
 	github.com/mattn/go-isatty v0.0.12 // indirect
 	github.com/mattn/go-runewidth v0.0.8 // indirect
-	github.com/mgechev/revive v1.0.2-0.20200225072153-6219ca02fffb
+	github.com/mgechev/revive v1.0.2
 	github.com/morikuni/aec v1.0.0 // indirect
 	github.com/onsi/ginkgo v1.11.0
 	github.com/onsi/gomega v1.7.0

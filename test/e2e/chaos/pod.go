@@ -2,6 +2,7 @@ package chaos
 
 import (
 	"context"
+	// load pprof
 	_ "net/http/pprof"
 	"time"
 

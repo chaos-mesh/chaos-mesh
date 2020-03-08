@@ -2,6 +2,7 @@ package e2e
 
 import (
 	"fmt"
+	// load pprof
 	_ "net/http/pprof"
 	"os/exec"
 
