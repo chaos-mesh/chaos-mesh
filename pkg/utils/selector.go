@@ -43,8 +43,7 @@ type SelectSpec interface {
 
 func SelectAndGeneratePods(ctx context.Context, c client.Client, spec SelectSpec) ([]v1.Pod, error) {
 	if pods := mock.On("MockSelectAndGeneratePods"); pods != nil {
-		// todo: how to mock array?
-		return []v1.Pod{}, nil
+		return pods.(func() []v1.Pod)(), nil
 	}
 
 	selector := spec.GetSelector()

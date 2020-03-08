@@ -4,6 +4,8 @@ import (
 	"context"
 	"testing"
 
+	v1 "k8s.io/api/core/v1"
+
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
@@ -51,7 +53,9 @@ var _ = Describe("TimeChaos", func() {
 	// test Kubernetes API server, which isn't the goal here.
 	Context("TimeChaos", func() {
 		It("TimeChaos Apply", func() {
-			mock.With("MockSelectAndGeneratePods", nil)
+			mock.With("MockSelectAndGeneratePods", func() []v1.Pod {
+				return []v1.Pod{}
+			})
 
 			duration := "invalid_duration"
 
@@ -80,9 +84,7 @@ var _ = Describe("TimeChaos", func() {
 
 			err := r.Apply(context.TODO(), ctrl.Request{}, &timechaos)
 
-			Expect(err).To(HaveOccurred())
-			// fixme: incorrect Pods mock
-			Expect(err.Error()).To(ContainSubstring("no pod is selected"))
+			Expect(err).ToNot(HaveOccurred())
 		})
 	})
 })
