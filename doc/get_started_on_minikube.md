@@ -55,4 +55,4 @@ After executing the above commands, you should be able to see the prompt that Ch
 
 ## Next steps
 
-Refer to [Run Chaos Mesh](run-chaos-mesh.md).
+Refer to [Run Chaos Mesh](run_chaos_mesh.md).

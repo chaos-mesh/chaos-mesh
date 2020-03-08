@@ -19,7 +19,7 @@ GOARCH := $(if $(GOARCH),$(GOARCH),"")
 GOENV  := GO15VENDOREXPERIMENT="1" CGO_ENABLED=0 GOOS=$(GOOS) GOARCH=$(GOARCH)
 CGOENV  := GO15VENDOREXPERIMENT="1" CGO_ENABLED=1 GOOS=$(GOOS) GOARCH=$(GOARCH)
 GO     := $(GOENV) go
-GOTEST := TEST_USE_EXISTING_CLUSTER=false go test
+GOTEST := TEST_USE_EXISTING_CLUSTER=false NO_PROXY="${NO_PROXY},testhost" go test
 SHELL    := /usr/bin/env bash
 
 PACKAGE_LIST := go list ./... | grep -vE "pkg/client" | grep -vE "zz_generated" | grep -vE "vendor"
@@ -137,6 +137,7 @@ image:
 	docker build -t ${DOCKER_REGISTRY_PREFIX}pingcap/chaos-scripts ${DOCKER_BUILD_ARGS} images/chaos-scripts
 	docker build -t ${DOCKER_REGISTRY_PREFIX}pingcap/chaos-grafana ${DOCKER_BUILD_ARGS} images/grafana
 	docker build -t ${DOCKER_REGISTRY_PREFIX}pingcap/chaos-dashboard ${DOCKER_BUILD_ARGS} images/chaos-dashboard
+	docker build -t ${DOCKER_REGISTRY_PREFIX}pingcap/chaos-kernel ${DOCKER_BUILD_ARGS} images/chaos-kernel
 
 docker-push:
 	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-mesh:latest"
@@ -145,6 +146,7 @@ docker-push:
 	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-scripts:latest"
 	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-grafana:latest"
 	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-dashboard:latest"
+	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-kernel:latest"
 
 controller-gen:
 	$(GO) get sigs.k8s.io/controller-tools/cmd/controller-gen

@@ -18,6 +18,7 @@ import (
 	"crypto/sha1"
 	"errors"
 	"fmt"
+	"os"
 
 	"github.com/go-logr/logr"
 	"golang.org/x/sync/errgroup"
@@ -347,7 +348,7 @@ func (r *Reconciler) cleanFinalizersAndRecover(ctx context.Context, networkchaos
 }
 
 func (r *Reconciler) flushPodIPSet(ctx context.Context, pod *v1.Pod, ipset pb.IpSet, networkchaos *v1alpha1.NetworkChaos) error {
-	c, err := utils.CreateGrpcConnection(ctx, r.Client, pod)
+	c, err := utils.CreateGrpcConnection(ctx, r.Client, pod, os.Getenv("CHAOS_DAEMON_PORT"))
 	if err != nil {
 		return err
 	}
@@ -369,7 +370,7 @@ func (r *Reconciler) flushPodIPSet(ctx context.Context, pod *v1.Pod, ipset pb.Ip
 }
 
 func (r *Reconciler) sendIPTables(ctx context.Context, pod *v1.Pod, rule pb.Rule, networkchaos *v1alpha1.NetworkChaos) error {
-	c, err := utils.CreateGrpcConnection(ctx, r.Client, pod)
+	c, err := utils.CreateGrpcConnection(ctx, r.Client, pod, os.Getenv("CHAOS_DAEMON_PORT"))
 	if err != nil {
 		return err
 	}
