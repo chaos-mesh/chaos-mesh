@@ -152,6 +152,14 @@ func main() {
 		os.Exit(1)
 	}
 
+	if err = (&controllers.KernelChaosReconciler{
+		Client: mgr.GetClient(),
+		Log:    ctrl.Log.WithName("controllers").WithName("KernelChaos"),
+	}).SetupWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create controller", "controller", "KernelChaos")
+		os.Exit(1)
+	}
+
 	setupLog.Info("Setting up webhook server")
 	hookServer := mgr.GetWebhookServer()
 	hookServer.CertDir = certsDir

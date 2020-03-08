@@ -71,6 +71,7 @@ rules:
     - networkchaos
     - iochaos
     - timechaos
+    - kernelchaos
     - memorychaos
   verbs: ["*"]
 ---
@@ -135,6 +136,7 @@ rules:
   - networkchaos
   - iochaos
   - timechaos
+  - kernelchaos
   - memorychaos
   verbs: ["*"]
 ---

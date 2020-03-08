@@ -29,6 +29,26 @@ rules:
 - apiGroups:
   - pingcap.com
   resources:
+  - kernelchaos
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - pingcap.com
+  resources:
+  - kernelchaos/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - pingcap.com
+  resources:
   - memorychaos
   verbs:
   - create

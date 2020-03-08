@@ -1,0 +1,114 @@
+{{- if .Values.bpfki.create }}
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: bpfki
+  labels:
+    app.kubernetes.io/name: {{ template "chaos-mesh.name" . }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/component: bpfki
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+"  "_" }}
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ template "chaos-mesh.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+      app.kubernetes.io/component: bpfki
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ template "chaos-mesh.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        app.kubernetes.io/component: bpfki
+    {{- with .Values.bpfki.podAnnotations }}
+      annotations:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    spec:
+      hostIPC: true
+      hostPID: true
+      containers:
+        - name: chaos-daemon
+          image: {{ .Values.chaosDaemon.image }}
+          imagePullPolicy: {{ .Values.chaosDaemon.imagePullPolicy | default "IfNotPresent" }}
+          {{- if .Values.chaosDaemon.resources }}
+          resources:
+{{ toYaml .Values.chaosDaemon.resources | indent 12 }}
+          {{- end }}
+          command:
+            - /usr/local/bin/chaos-daemon
+            - --runtime
+            - {{ .Values.chaosDaemon.runtime }}
+            - --http-port
+            - !!str {{ .Values.chaosDaemon.httpPort }}
+            - --grpc-port
+            - !!str {{ .Values.chaosDaemon.grpcPort }}
+          {{- if .Values.enableProfiling }}
+            - --pprof
+          {{- end }}
+          securityContext:
+            privileged: true
+            capabilities:
+              add:
+                - SYS_PTRACE
+          volumeMounts:
+            - name: socket-path
+              {{- if eq .Values.chaosDaemon.runtime "docker" }}
+              mountPath: /var/run/docker.sock
+              {{- else if eq .Values.chaosDaemon.runtime "containerd" }}
+              mountPath: /run/containerd/containerd.sock
+              {{- end }}
+          ports:
+            - name: grpc
+              containerPort: {{ .Values.chaosDaemon.grpcPort }}
+              hostPort: {{ .Values.chaosDaemon.grpcPort }}
+            - name: http
+              containerPort: {{ .Values.chaosDaemon.httpPort }}
+        - name: bpfki
+          image: {{ .Values.bpfki.image }}
+          imagePullPolicy: {{ .Values.bpfki.imagePullPolicy | default "IfNotPresent" }}
+          {{- if .Values.bpfki.resources }}
+          resources:
+{{ toYaml .Values.bpfki.resources | indent 12 }}
+          {{- end }}
+          command:
+            - /usr/local/bin/bpfki
+            - -port
+            - !!str {{ .Values.bpfki.grpcPort }}
+          securityContext:
+            privileged: true
+          volumeMounts:
+            - name: localtime-path
+              mountPath: /etc/localtime
+              readOnly: true
+            - name: modules-path
+              mountPath: /lib/modules
+              readOnly: true
+            - name: src-path
+              mountPath: /usr/src
+              readOnly: true
+            - name: sys-path
+              mountPath: /sys
+              readOnly: true
+          ports:
+            - name: grpc
+              containerPort: {{ .Values.bpfki.grpcPort }}
+              hostPort: {{ .Values.bpfki.grpcPort }}
+      volumes:
+        - name: socket-path
+          hostPath:
+            path: {{ .Values.chaosDaemon.socketPath | default "/var/run/docker.sock" }}
+        - name: localtime-path
+          hostPath:
+            path: /etc/localtime
+        - name: modules-path
+          hostPath:
+            path: /lib/modules
+        - name: src-path
+          hostPath:
+            path: /usr/src
+        - name: sys-path
+          hostPath:
+            path: /sys
+{{- end }}

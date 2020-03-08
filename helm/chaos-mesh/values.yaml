@@ -154,3 +154,11 @@ webhook:
   # FailurePolicy defines how unrecognized errors and timeout errors from the admission webhook are handled.
   # https://kubernetes.io/docs/reference/access-authn-authz/extensible-admission-controllers/#failure-policy
   FailurePolicy: Ignore
+
+bpfki:
+  create: false
+  image: pingcap/chaos-kernel:latest
+  imagePullPolicy: Always
+  grpcPort: 50051
+
+  podAnnotations: {}

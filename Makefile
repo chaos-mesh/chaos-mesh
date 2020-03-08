@@ -143,6 +143,7 @@ image:
 	docker build -t ${DOCKER_REGISTRY_PREFIX}pingcap/chaos-scripts ${DOCKER_BUILD_ARGS} images/chaos-scripts
 	docker build -t ${DOCKER_REGISTRY_PREFIX}pingcap/chaos-grafana ${DOCKER_BUILD_ARGS} images/grafana
 	docker build -t ${DOCKER_REGISTRY_PREFIX}pingcap/chaos-dashboard ${DOCKER_BUILD_ARGS} images/chaos-dashboard
+	docker build -t ${DOCKER_REGISTRY_PREFIX}pingcap/chaos-kernel ${DOCKER_BUILD_ARGS} images/chaos-kernel
 
 docker-push:
 	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-mesh:latest"
@@ -152,6 +153,7 @@ docker-push:
 	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-scripts:latest"
 	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-grafana:latest"
 	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-dashboard:latest"
+	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-kernel:latest"
 
 controller-gen:
 	$(GO) get sigs.k8s.io/controller-tools/cmd/controller-gen
