@@ -13,6 +13,7 @@ import (
 	"k8s.io/kubernetes/test/e2e/framework"
 	e2elog "k8s.io/kubernetes/test/e2e/framework/log"
 	e2epod "k8s.io/kubernetes/test/e2e/framework/pod"
+	utilnet "k8s.io/utils/net"
 
 	// ensure auth plugins are loaded
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
@@ -59,10 +60,10 @@ func setupSuite() {
 	// unschedulable, we need to wait until all of them are schedulable.
 	framework.ExpectNoError(framework.WaitForAllNodesSchedulable(c, framework.TestContext.NodeSchedulableTimeout))
 
-	// If NumNodes is not specified then auto-detect how many are scheduleable and not tainted
-	if framework.TestContext.CloudConfig.NumNodes == framework.DefaultNumNodes {
-		framework.TestContext.CloudConfig.NumNodes = len(framework.GetReadySchedulableNodesOrDie(c).Items)
-	}
+	//// If NumNodes is not specified then auto-detect how many are scheduleable and not tainted
+	//if framework.TestContext.CloudConfig.NumNodes == framework.DefaultNumNodes {
+	//	framework.TestContext.CloudConfig.NumNodes = len(framework.GetReadySchedulableNodesOrDie(c).Items)
+	//}
 
 	// Ensure all pods are running and ready before starting tests (otherwise,
 	// cluster infrastructure pods that are being pulled or started can block
@@ -79,9 +80,9 @@ func setupSuite() {
 		e2elog.Failf("Error waiting for all pods to be running and ready: %v", err)
 	}
 
-	if err := framework.WaitForDaemonSets(c, metav1.NamespaceSystem, int32(framework.TestContext.AllowedNotReadyNodes), framework.TestContext.SystemDaemonsetStartupTimeout); err != nil {
-		e2elog.Logf("WARNING: Waiting for all daemonsets to be ready failed: %v", err)
-	}
+	//if err := framework.WaitForDaemonSets(c, metav1.NamespaceSystem, int32(framework.TestContext.AllowedNotReadyNodes), framework.TestContext.SystemDaemonsetStartupTimeout); err != nil {
+	//	e2elog.Logf("WARNING: Waiting for all daemonsets to be ready failed: %v", err)
+	//}
 
 	dc := c.DiscoveryClient
 
@@ -128,7 +129,7 @@ var _ = ginkgo.SynchronizedBeforeSuite(func() []byte {
 	return nil
 }, func(data []byte) {
 	// Run on all Ginkgo nodes
-	framework.SetupSuitePerGinkgoNode()
+	SetupSuitePerGinkgoNode()
 })
 
 var _ = ginkgo.SynchronizedAfterSuite(func() {
@@ -136,3 +137,30 @@ var _ = ginkgo.SynchronizedAfterSuite(func() {
 }, func() {
 	framework.AfterSuiteActions()
 })
+
+func SetupSuitePerGinkgoNode() {
+	c, err := framework.LoadClientset()
+	if err != nil {
+		klog.Fatal("Error loading client: ", err)
+	}
+	framework.TestContext.IPFamily = getDefaultClusterIPFamily(c)
+	e2elog.Logf("Cluster IP family: %s", framework.TestContext.IPFamily)
+}
+
+// getDefaultClusterIPFamily obtains the default IP family of the cluster
+// using the Cluster IP address of the kubernetes service created in the default namespace
+// This unequivocally identifies the default IP family because services are single family
+// TODO: dual-stack may support multiple families per service
+// but we can detect if a cluster is dual stack because pods have two addresses (one per family)
+func getDefaultClusterIPFamily(c kubernetes.Interface) string {
+	// Get the ClusterIP of the kubernetes service created in the default namespace
+	svc, err := c.CoreV1().Services(metav1.NamespaceDefault).Get("kubernetes", metav1.GetOptions{})
+	if err != nil {
+		e2elog.Failf("Failed to get kubernetes service ClusterIP: %v", err)
+	}
+
+	if utilnet.IsIPv6String(svc.Spec.ClusterIP) {
+		return "ipv6"
+	}
+	return "ipv4"
+}

@@ -32,6 +32,7 @@ github.com/MakeNowJust/heredoc v0.0.0-20170808103936-bb23615498cd/go.mod h1:64YH
 github.com/Masterminds/semver v1.4.2/go.mod h1:MB6lktGJrhw8PrUyiEoblNEGEQ+RzHPF078ddwwvV3Y=
 github.com/Microsoft/go-winio v0.4.11 h1:zoIOcVf0xPN1tnMVbTtEdI+P8OofVk3NObnwOQ6nK2Q=
 github.com/Microsoft/go-winio v0.4.11/go.mod h1:VhR8bwka0BXejwEJY73c50VrPtXAaKcyvVC4A4RozmA=
+github.com/Microsoft/hcsshim v0.0.0-20190417211021-672e52e9209d h1:u64+IetywsPQ0gJ/4cXBJ/KiXV9xTKRMoaCOzW9PI3g=
 github.com/Microsoft/hcsshim v0.0.0-20190417211021-672e52e9209d/go.mod h1:Op3hHsoHPAvb6lceZHDtd9OkTew38wNoXnJs8iY7rUg=
 github.com/Microsoft/hcsshim v0.8.6 h1:ZfF0+zZeYdzMIVMZHKtDKJvLHj76XCuVae/jNkjj0IA=
 github.com/Microsoft/hcsshim v0.8.6/go.mod h1:Op3hHsoHPAvb6lceZHDtd9OkTew38wNoXnJs8iY7rUg=
@@ -1364,6 +1365,7 @@ k8s.io/kubectl v0.0.0-20190918164019-21692a0861df/go.mod h1:AjffgL1ZYSrbpRJHER9v
 k8s.io/kubelet v0.0.0-20190918162654-250a1838aa2c/go.mod h1:LGhpyzd/3AkWcFcQJ3yO1UxMnJ6urMkCYfCp4iVxhjs=
 k8s.io/kubernetes v1.16.0 h1:WPaqle2JWogVzLxhN6IK67u62IHKKrtYF7MS4FVR4/E=
 k8s.io/kubernetes v1.16.0/go.mod h1:nlP2zevWKRGKuaaVbKIwozU0Rjg9leVDXkL4YTtjmVs=
+k8s.io/kubernetes v1.17.2/go.mod h1:NbNV+69yL3eKiKDJ+ZEjqOplN3BFXKBeunzkoOy8WLo=
 k8s.io/legacy-cloud-providers v0.0.0-20190918163543-cfa506e53441/go.mod h1:Phw/j+7dcoTPXRkv9Nyi3RJuA6SVSoHlc7M5K1pHizM=
 k8s.io/metrics v0.0.0-20190918162108-227c654b2546/go.mod h1:XUFuIsGbIqaUga6Ivs02cCzxNjY4RPRvYnW0KhmnpQY=
 k8s.io/repo-infra v0.0.0-20181204233714-00fe14e3d1a3/go.mod h1:+G1xBfZDfVFsm1Tj/HNCvg4QqWx8rJ2Fxpqr1rqp/gQ=
