@@ -48,16 +48,16 @@ which correspond to the following major actions (experiments):
 
 ## Quick start
 
-* [Get Started on kind](/doc/get_started_on_kind.md)
-* [Get Started on minikube](/doc/get_started_on_minikube.md)
+* [Get Started on kind](https://github.com/pingcap/chaos-mesh/wiki/Get-started-on-kind)
+* [Get Started on minikube](https://github.com/pingcap/chaos-mesh/wiki/Get-started-on-minikube)
 
 ## Deploy and use
 
-See [Docs](/doc/deploy.md)
+See [Docs](https://github.com/pingcap/chaos-mesh/wiki/Deploy-Chaos-Mesh)
 
 ## FAQs
 
-See [FAQs](/doc/faqs.md).
+See [FAQs](https://github.com/pingcap/chaos-mesh/wiki/FAQs).
 
 ## Community
 
