@@ -38,8 +38,9 @@ import (
 )
 
 const (
-	// fakeImage is a not-existing image.
-	fakeImage = "pingcap.com/fake-chaos-mesh:latest"
+
+	// Always fails a container
+	pauseImage = "gcr.io/google-containers/pause:latest"
 
 	podFailureActionMsg = "pause pod duration %s"
 )
@@ -217,7 +218,7 @@ func (r *Reconciler) failPod(ctx context.Context, pod *v1.Pod, podchaos *v1alpha
 			continue
 		}
 		pod.Annotations[key] = originImage
-		pod.Spec.InitContainers[index].Image = fakeImage
+		pod.Spec.InitContainers[index].Image = pauseImage
 	}
 
 	for index := range pod.Spec.Containers {
@@ -234,7 +235,7 @@ func (r *Reconciler) failPod(ctx context.Context, pod *v1.Pod, podchaos *v1alpha
 			continue
 		}
 		pod.Annotations[key] = originImage
-		pod.Spec.Containers[index].Image = fakeImage
+		pod.Spec.Containers[index].Image = pauseImage
 	}
 
 	if err := r.Update(ctx, pod); err != nil {

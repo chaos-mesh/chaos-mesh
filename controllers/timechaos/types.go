@@ -17,6 +17,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"os"
 
 	"k8s.io/client-go/tools/record"
 
@@ -119,7 +120,7 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos reconcil
 	return nil
 }
 
-// Recover means the reonciler recover the chaos action
+// Recover means the reconciler recovers the chaos action
 func (r *Reconciler) Recover(ctx context.Context, req ctrl.Request, chaos reconciler.InnerObject) error {
 	timechaos, ok := chaos.(*v1alpha1.TimeChaos)
 	if !ok {
@@ -178,7 +179,7 @@ func (r *Reconciler) cleanFinalizersAndRecover(ctx context.Context, chaos *v1alp
 func (r *Reconciler) recoverPod(ctx context.Context, pod *v1.Pod) error {
 	r.Log.Info("Try to recover pod", "namespace", pod.Namespace, "name", pod.Name)
 
-	c, err := utils.CreateGrpcConnection(ctx, r.Client, pod)
+	c, err := utils.CreateGrpcConnection(ctx, r.Client, pod, os.Getenv("CHAOS_DAEMON_PORT"))
 	if err != nil {
 		return err
 	}
@@ -247,7 +248,7 @@ func (r *Reconciler) applyAllPods(ctx context.Context, pods []v1.Pod, chaos *v1a
 func (r *Reconciler) applyPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.TimeChaos) error {
 	r.Log.Info("Try to shift time on pod", "namespace", pod.Namespace, "name", pod.Name)
 
-	c, err := utils.CreateGrpcConnection(ctx, r.Client, pod)
+	c, err := utils.CreateGrpcConnection(ctx, r.Client, pod, os.Getenv("CHAOS_DAEMON_PORT"))
 	if err != nil {
 		return err
 	}

@@ -33,7 +33,7 @@ type InnerReconciler interface {
 	// Apply means the reconciler perform the chaos action
 	Apply(ctx context.Context, req ctrl.Request, chaos InnerObject) error
 
-	// Recover means the reonciler recover the chaos action
+	// Recover means the reconciler recovers the chaos action
 	Recover(ctx context.Context, req ctrl.Request, chaos InnerObject) error
 
 	// Object would return the instance of chaos

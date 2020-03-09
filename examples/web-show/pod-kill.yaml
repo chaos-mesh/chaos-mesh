@@ -1,0 +1,14 @@
+apiVersion: pingcap.com/v1alpha1
+kind: PodChaos
+metadata:
+  name: web-show-pod-kill
+spec:
+  action: pod-kill
+  mode: one
+  selector:
+    namespaces:
+      - default
+    labelSelectors:
+      "app": "web-show"
+  scheduler:
+    cron: "@every 1m"
