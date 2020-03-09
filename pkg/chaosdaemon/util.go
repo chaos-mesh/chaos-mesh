@@ -255,9 +255,9 @@ func GetChildProcesses(ppid uint32) ([]uint32, error) {
 				}
 
 				var (
-					pid uint32
-					comm string
-					state string
+					pid    uint32
+					comm   string
+					state  string
 					parent uint32
 				)
 				// according to procfs's man page
@@ -274,9 +274,9 @@ func GetChildProcesses(ppid uint32) ([]uint32, error) {
 	}()
 
 	select {
-		case childPid := <- pids:
-			childProcesses = append(childProcesses, childPid)
-		case <-done:
+	case childPid := <-pids:
+		childProcesses = append(childProcesses, childPid)
+	case <-done:
 	}
 
 	return childProcesses, nil
