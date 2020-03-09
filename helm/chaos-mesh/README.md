@@ -38,7 +38,7 @@ The following tables list the configurable parameters of the Chaos Mesh chart an
 | `chaosDaemon.podAnnotations` | Pod annotations of chaos-daemon | `{}` |
 | `chaosDaemon.runtime` | Runtime specifies which container runtime to use. Currently we only supports docker and containerd. | `docker` |
 | `chaosDaemon.socketPath` | Specifies the container runtime socket | `/var/run/docker.sock` |
-| `chaosDaemon.`tolerations` | Toleration labels for chaos-daemon pod assignment | `[]` |
+| `chaosDaemon.tolerations` | Toleration labels for chaos-daemon pod assignment | `[]` |
 | `dashboard.create` | Enable chaos-dashboard | `false` |
 | `dashboard.serviceAccount` | The serviceAccount for chaos-dashboard  | `chaos-dashboard` |
 | `dashboard.image` | Docker image for chaos-dashboard | `pingcap/chaos-dashboard:latest` |
