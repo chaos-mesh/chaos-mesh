@@ -64,6 +64,10 @@ spec:
               hostPort: {{ .Values.chaosDaemon.grpcPort }}
             - name: http
               containerPort: {{ .Values.chaosDaemon.httpPort }}
+      {{- with .Values.chaosDaemon.tolerations }}
+      tolerations:
+{{ toYaml . | indent 8 }}
+      {{- end }}
       volumes:
         - name: socket-path
           hostPath:
