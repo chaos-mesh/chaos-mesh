@@ -19,15 +19,13 @@ import (
 	"fmt"
 	"os"
 
-	"k8s.io/client-go/tools/record"
-
-	k8serror "k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/apimachinery/pkg/types"
-
 	"github.com/go-logr/logr"
 	"golang.org/x/sync/errgroup"
 	v1 "k8s.io/api/core/v1"
+	k8serror "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/tools/cache"
+	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -35,9 +33,8 @@ import (
 	"github.com/pingcap/chaos-mesh/controllers/common"
 	"github.com/pingcap/chaos-mesh/controllers/reconciler"
 	"github.com/pingcap/chaos-mesh/controllers/twophase"
-	"github.com/pingcap/chaos-mesh/pkg/utils"
-
 	chaosdaemon "github.com/pingcap/chaos-mesh/pkg/chaosdaemon/pb"
+	"github.com/pingcap/chaos-mesh/pkg/utils"
 )
 
 const timeChaosMsg = "time is shifted with %v"

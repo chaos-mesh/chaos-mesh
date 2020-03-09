@@ -5,14 +5,12 @@ import (
 	"errors"
 	"testing"
 
-	"k8s.io/apimachinery/pkg/runtime"
-
-	v1 "k8s.io/api/core/v1"
-
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
+	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
@@ -21,10 +19,9 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
 	"github.com/pingcap/chaos-mesh/api/v1alpha1"
+	. "github.com/pingcap/chaos-mesh/controllers/test"
 	. "github.com/pingcap/chaos-mesh/controllers/timechaos"
 	"github.com/pingcap/chaos-mesh/pkg/mock"
-
-	. "github.com/pingcap/chaos-mesh/controllers/test"
 )
 
 func TestTimechaos(t *testing.T) {
