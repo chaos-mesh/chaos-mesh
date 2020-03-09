@@ -20,6 +20,7 @@ import (
 // Assert *MockChaosDaemonClient implements chaosdaemon.ChaosDaemonClientInterface.
 var _ utils.ChaosDaemonClientInterface = (*MockChaosDaemonClient)(nil)
 
+// MockChaosDaemonClient implements ChaosDaemonClientInterface for unit testing
 type MockChaosDaemonClient struct{}
 
 func (c *MockChaosDaemonClient) ContainerGetPid(ctx context.Context, in *chaosdaemon.ContainerRequest, opts ...grpc.CallOption) (*chaosdaemon.ContainerResponse, error) {
@@ -93,6 +94,7 @@ func newPod(
 	}
 }
 
+// GenerateNPods is only for unit testing
 func GenerateNPods(
 	namePrefix string,
 	n int,

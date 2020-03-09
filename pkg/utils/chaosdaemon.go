@@ -11,12 +11,13 @@ import (
 	"github.com/pingcap/chaos-mesh/pkg/mock"
 )
 
-// for convenient unit testing
+// ChaosDaemonClientInterface represents the ChaosDaemonClient, it's used to simply unit test
 type ChaosDaemonClientInterface interface {
 	chaosdaemon.ChaosDaemonClient
 	Close() error
 }
 
+// GrpcChaosDaemonClient would act like chaosdaemon.ChaosDaemonClient with a Close method
 type GrpcChaosDaemonClient struct {
 	chaosdaemon.ChaosDaemonClient
 	conn *grpc.ClientConn
@@ -26,6 +27,7 @@ func (c *GrpcChaosDaemonClient) Close() error {
 	return c.conn.Close()
 }
 
+// NewChaosDaemonClient would create ChaosDaemonClient
 func NewChaosDaemonClient(ctx context.Context, c client.Client, pod *v1.Pod, port string) (ChaosDaemonClientInterface, error) {
 	if cli := mock.On("MockChaosDaemonClient"); cli != nil {
 		return cli.(ChaosDaemonClientInterface), nil
