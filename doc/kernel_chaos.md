@@ -2,6 +2,20 @@
 
 This document describe how to add kernel chaos experiments in Chaos Mesh.
 
+This future is disabled by default. Please don't use it in a production environment unless
+you know the effect explicitly. BTW, although kernel injection will target a
+certain pod, since all pods on the same host share the same kernel, the
+performance of other pods will have some impact, depending on the specific
+callchain and frequency.
+
+## Prerequisites
+
+- Linux kernel >= 4.18
+- [CONFIG_BPF_KPROBE_OVERRIDE](https://cateee.net/lkddb/web-lkddb/BPF_KPROBE_OVERRIDE.html) enabled
+- `bpfki.create = true` in [values.yaml](../helm/chaos-mesh/values.yaml)
+
+## Usage
+
 Kernel chaos's function is similar to
 [inject.py](https://github.com/iovisor/bcc/blob/master/tools/inject.py), which
 guarantees the appropriate erroneous return of the specified injection mode

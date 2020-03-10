@@ -45,6 +45,7 @@ which correspond to the following major actions (experiments):
 - network-partition: Simulate network partition.
 - IO chaos: Simulate file system faults such as I/O delay, read/write errors, etc.
 - time chaos: The selected pod will be injected clock skew.
+- kernel chaos: The selected pod will be injected with (slab,bio,etc) errors.
 
 ## Quick start
 
