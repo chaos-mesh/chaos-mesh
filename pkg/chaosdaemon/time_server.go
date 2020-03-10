@@ -24,6 +24,7 @@ func (s *daemonServer) SetTimeOffset(ctx context.Context, req *pb.TimeRequest) (
 		log.Error(err, "fail to get child processes")
 	}
 	allPids := append(childPids, pid)
+	log.Info("all related processes found", "pids", allPids)
 
 	for _, pid := range allPids {
 		err = time.ModifyTime(int(pid), req.Sec, req.Nsec, req.ClkIdsMask)

@@ -155,9 +155,7 @@ spec:
                 from 0-100 to specify the % of pods to do chaos action
               type: string
           required:
-          - duration
           - mode
-          - scheduler
           - selector
           - timeOffset
           type: object

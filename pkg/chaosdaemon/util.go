@@ -16,6 +16,7 @@ package chaosdaemon
 import (
 	"context"
 	"fmt"
+	"github.com/pingcap/chaos-mesh/pkg/utils"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -222,15 +223,19 @@ func (c ContainerdClient) ContainerKillByContainerID(ctx context.Context, contai
 	return err
 }
 
-// GetChildProcesses will return all child processes's pid
+// GetChildProcesses will return all child processes's pid. Include all generations.
 func GetChildProcesses(ppid uint32) ([]uint32, error) {
 	procs, err := ioutil.ReadDir(defaultProcPrefix)
 	if err != nil {
 		return nil, err
 	}
 
-	var childProcesses []uint32
-	pids := make(chan uint32)
+	type processPair struct {
+		Pid uint32
+		Ppid uint32
+	}
+
+	pairs := make(chan processPair)
 	done := make(chan bool)
 
 	go func() {
@@ -263,8 +268,9 @@ func GetChildProcesses(ppid uint32) ([]uint32, error) {
 				// according to procfs's man page
 				fmt.Fscanf(reader, "%d %s %s %d", &pid, &comm, &state, &parent)
 
-				if parent == ppid {
-					pids <- pid
+				pairs <- processPair {
+					Pid: pid,
+					Ppid: parent,
 				}
 			}()
 		}
@@ -273,11 +279,13 @@ func GetChildProcesses(ppid uint32) ([]uint32, error) {
 		done <- true
 	}()
 
-	select {
-	case childPid := <-pids:
-		childProcesses = append(childProcesses, childPid)
-	case <-done:
+	processGraph := utils.NewGraph()
+	for {
+		select {
+		case pair := <-pairs:
+			processGraph.Insert(pair.Ppid, pair.Pid)
+		case <-done:
+			return processGraph.Flatten(ppid), nil
+		}
 	}
-
-	return childProcesses, nil
 }

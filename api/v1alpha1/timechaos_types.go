@@ -66,9 +66,11 @@ type TimeChaosSpec struct {
 	ContainerNames []string `json:"containerNames,omitempty"`
 
 	// Duration represents the duration of the chaos action
+	// +optional
 	Duration *string `json:"duration"`
 
 	// Scheduler defines some schedule rules to control the running time of the chaos experiment about time.
+	// +optional
 	Scheduler *SchedulerSpec `json:"scheduler"`
 
 	// Next time when this action will be applied again
