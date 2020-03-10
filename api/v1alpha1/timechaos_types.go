@@ -60,6 +60,11 @@ type TimeChaosSpec struct {
 	// Default value is ["CLOCK_REALTIME"]
 	ClockIds []string `json:"clockIds,omitempty"`
 
+	// ContainerName indicates the name of affected container.
+	// If not set, all containers will be injected
+	// +optional
+	ContainerName string `json:"containerName"`
+
 	// Duration represents the duration of the chaos action
 	Duration *string `json:"duration"`
 

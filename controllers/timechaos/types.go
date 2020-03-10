@@ -165,7 +165,7 @@ func (r *Reconciler) cleanFinalizersAndRecover(ctx context.Context, chaos *v1alp
 			continue
 		}
 
-		err = r.recoverPod(ctx, &pod)
+		err = r.recoverPod(ctx, &pod, chaos)
 		if err != nil {
 			return err
 		}
@@ -176,7 +176,7 @@ func (r *Reconciler) cleanFinalizersAndRecover(ctx context.Context, chaos *v1alp
 	return nil
 }
 
-func (r *Reconciler) recoverPod(ctx context.Context, pod *v1.Pod) error {
+func (r *Reconciler) recoverPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.TimeChaos) error {
 	r.Log.Info("Try to recover pod", "namespace", pod.Namespace, "name", pod.Name)
 
 	c, err := utils.CreateGrpcConnection(ctx, r.Client, pod, os.Getenv("CHAOS_DAEMON_PORT"))
@@ -192,20 +192,23 @@ func (r *Reconciler) recoverPod(ctx context.Context, pod *v1.Pod) error {
 	}
 
 	g := errgroup.Group{}
+	expectedName := chaos.Spec.ContainerName
 	for index := range pod.Status.ContainerStatuses {
-		id := pod.Status.ContainerStatuses[index].ContainerID
+		container := pod.Status.ContainerStatuses[index]
 
-		g.Go(func() error {
-			err := r.recoverContainer(ctx, pbClient, id)
+		if len(expectedName) == 0 || container.Name == expectedName {
+			g.Go(func() error {
+				err := r.recoverContainer(ctx, pbClient, container.ContainerID)
 
-			if err != nil {
-				r.Log.Error(err, "recover pod error", "namespace", pod.Namespace, "name", pod.Name)
-			} else {
-				r.Log.Info("Recover pod finished", "namespace", pod.Namespace, "name", pod.Name)
-			}
+				if err != nil {
+					r.Log.Error(err, "recover pod error", "namespace", pod.Namespace, "name", pod.Name)
+				} else {
+					r.Log.Info("Recover pod finished", "namespace", pod.Namespace, "name", pod.Name)
+				}
 
-			return err
-		})
+				return err
+			})
+		}
 	}
 
 	return g.Wait()
@@ -261,12 +264,15 @@ func (r *Reconciler) applyPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.
 	}
 
 	g := errgroup.Group{}
+	expectedName := chaos.Spec.ContainerName
 	for index := range pod.Status.ContainerStatuses {
-		id := pod.Status.ContainerStatuses[index].ContainerID
+		container := pod.Status.ContainerStatuses[index]
 
-		g.Go(func() error {
-			return r.applyContainer(ctx, pbClient, id, chaos)
-		})
+		if len(expectedName) == 0 || container.Name == expectedName {
+			g.Go(func() error {
+				return r.applyContainer(ctx, pbClient, container.ContainerID, chaos)
+			})
+		}
 	}
 
 	return g.Wait()
