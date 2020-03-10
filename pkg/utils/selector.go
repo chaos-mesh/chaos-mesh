@@ -24,6 +24,7 @@ import (
 
 	"github.com/pingcap/chaos-mesh/api/v1alpha1"
 	"github.com/pingcap/chaos-mesh/pkg/label"
+	"github.com/pingcap/chaos-mesh/pkg/mock"
 
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -42,6 +43,13 @@ type SelectSpec interface {
 
 // SelectAndFilterPods returns the list of pods that filtered by selector and PodMode
 func SelectAndFilterPods(ctx context.Context, c client.Client, spec SelectSpec) ([]v1.Pod, error) {
+	if pods := mock.On("MockSelectAndGeneratePods"); pods != nil {
+		return pods.(func() []v1.Pod)(), nil
+	}
+	if err := mock.On("MockSelectedAndGeneratePodsError"); err != nil {
+		return nil, err.(error)
+	}
+
 	selector := spec.GetSelector()
 	mode := spec.GetMode()
 	value := spec.GetValue()
