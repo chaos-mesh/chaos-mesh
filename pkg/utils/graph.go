@@ -17,7 +17,7 @@ package utils
 type Edge struct {
 	Source uint32
 	Target uint32
-	Next *Edge
+	Next   *Edge
 }
 
 // Graph represents a graph with link list
@@ -27,17 +27,17 @@ type Graph struct {
 
 // NewGraph creates a Graph
 func NewGraph() *Graph {
-	return &Graph {
+	return &Graph{
 		head: make(map[uint32]*Edge),
 	}
 }
 
 // Insert inserts an Edge into a graph from source to target
 func (g *Graph) Insert(source uint32, target uint32) {
-	newEdge := Edge {
+	newEdge := Edge{
 		Source: source,
 		Target: target,
-		Next: g.head[source],
+		Next:   g.head[source],
 	}
 	g.head[source] = &newEdge
 }

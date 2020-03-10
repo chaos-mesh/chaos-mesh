@@ -16,7 +16,6 @@ package chaosdaemon
 import (
 	"context"
 	"fmt"
-	"github.com/pingcap/chaos-mesh/pkg/utils"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -24,6 +23,8 @@ import (
 	"strconv"
 	"sync"
 	"syscall"
+
+	"github.com/pingcap/chaos-mesh/pkg/utils"
 
 	"github.com/containerd/containerd"
 	"github.com/docker/docker/api/types"
@@ -231,7 +232,7 @@ func GetChildProcesses(ppid uint32) ([]uint32, error) {
 	}
 
 	type processPair struct {
-		Pid uint32
+		Pid  uint32
 		Ppid uint32
 	}
 
@@ -268,8 +269,8 @@ func GetChildProcesses(ppid uint32) ([]uint32, error) {
 				// according to procfs's man page
 				fmt.Fscanf(reader, "%d %s %s %d", &pid, &comm, &state, &parent)
 
-				pairs <- processPair {
-					Pid: pid,
+				pairs <- processPair{
+					Pid:  pid,
 					Ppid: parent,
 				}
 			}()
