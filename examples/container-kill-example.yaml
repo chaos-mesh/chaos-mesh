@@ -8,8 +8,6 @@ spec:
   mode: one
   containerName: "prometheus"
   selector:
-    namespaces:
-      - default
     labelSelectors:
       "app.kubernetes.io/component": "monitor"
   scheduler:

@@ -57,11 +57,11 @@ func NewTwoPhaseReconciler(c client.Client, log logr.Logger, req ctrl.Request,
 }
 
 // Apply implements the reconciler.InnerReconciler.Apply
-func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, obj reconciler.InnerObject) error {
-	podchaos, ok := obj.(*v1alpha1.PodChaos)
+func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos reconciler.InnerObject) error {
+	podchaos, ok := chaos.(*v1alpha1.PodChaos)
 	if !ok {
 		err := errors.New("chaos is not PodChaos")
-		r.Log.Error(err, "chaos is not PodChaos", "chaos", obj)
+		r.Log.Error(err, "chaos is not PodChaos", "chaos", chaos)
 		return err
 	}
 	pods, err := utils.SelectPods(ctx, r.Client, podchaos.Spec.Selector)
@@ -73,7 +73,7 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, obj reconciler
 		r.Log.Error(nil, "no pod is selected", "name", req.Name, "namespace", req.Namespace)
 		return err
 	}
-	filteredPod, err := utils.GeneratePods(pods, podchaos.Spec.Mode, podchaos.Spec.Value)
+	filteredPod, err := utils.FilterPodsByMode(pods, podchaos.Spec.Mode, podchaos.Spec.Value)
 	if err != nil {
 		r.Log.Error(err, "fail to generate pods")
 		return err

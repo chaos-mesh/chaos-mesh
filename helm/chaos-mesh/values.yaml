@@ -155,10 +155,16 @@ webhook:
   # https://kubernetes.io/docs/reference/access-authn-authz/extensible-admission-controllers/#failure-policy
   FailurePolicy: Ignore
 
+  CRDS:
+    - podchaos
+    - iochaos
+    - timechaos
+    - networkchaos
+    - kernelchaos
+
 bpfki:
   create: false
   image: pingcap/chaos-kernel:latest
   imagePullPolicy: Always
   grpcPort: 50051
-
   podAnnotations: {}

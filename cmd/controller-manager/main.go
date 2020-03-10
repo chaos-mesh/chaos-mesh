@@ -115,6 +115,10 @@ func main() {
 		setupLog.Error(err, "unable to create controller", "controller", "PodChaos")
 		os.Exit(1)
 	}
+	if err = (&chaosmeshv1alpha1.PodChaos{}).SetupWebhookWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create webhook", "webhook", "PodChaos")
+		os.Exit(1)
+	}
 
 	if err = (&controllers.NetworkChaosReconciler{
 		Client:        mgr.GetClient(),
@@ -122,6 +126,10 @@ func main() {
 		Log:           ctrl.Log.WithName("controllers").WithName("NetworkChaos"),
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "NetworkChaos")
+		os.Exit(1)
+	}
+	if err = (&chaosmeshv1alpha1.NetworkChaos{}).SetupWebhookWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create webhook", "webhook", "NetworkChaos")
 		os.Exit(1)
 	}
 
@@ -133,6 +141,10 @@ func main() {
 		setupLog.Error(err, "unable to create controller", "controller", "IoChaos")
 		os.Exit(1)
 	}
+	if err = (&chaosmeshv1alpha1.IoChaos{}).SetupWebhookWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create webhook", "webhook", "IoChaos")
+		os.Exit(1)
+	}
 
 	if err = (&controllers.TimeChaosReconciler{
 		Client:        mgr.GetClient(),
@@ -140,6 +152,10 @@ func main() {
 		Log:           ctrl.Log.WithName("controllers").WithName("TimeChaos"),
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "TimeChaos")
+		os.Exit(1)
+	}
+	if err = (&chaosmeshv1alpha1.TimeChaos{}).SetupWebhookWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create webhook", "webhook", "TimeChaos")
 		os.Exit(1)
 	}
 
@@ -150,8 +166,12 @@ func main() {
 		setupLog.Error(err, "unable to create controller", "controller", "KernelChaos")
 		os.Exit(1)
 	}
+	if err = (&chaosmeshv1alpha1.KernelChaos{}).SetupWebhookWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create webhook", "webhook", "KernelChaos")
+		os.Exit(1)
+	}
 
-	setupLog.Info("setting up webhook server")
+	setupLog.Info("Setting up webhook server")
 
 	hookServer := mgr.GetWebhookServer()
 	hookServer.CertDir = certsDir

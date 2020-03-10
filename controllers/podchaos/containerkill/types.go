@@ -89,7 +89,7 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, obj reconciler
 		return fmt.Errorf("podchaos[%s/%s] no pod is selected", podchaos.Namespace, podchaos.Name)
 	}
 
-	filteredPod, err := utils.GeneratePods(pods, podchaos.Spec.Mode, podchaos.Spec.Value)
+	filteredPod, err := utils.FilterPodsByMode(pods, podchaos.Spec.Mode, podchaos.Spec.Value)
 	if err != nil {
 		r.Log.Error(err, "fail to generate pods")
 		return err

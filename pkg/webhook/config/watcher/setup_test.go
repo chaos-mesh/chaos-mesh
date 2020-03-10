@@ -32,7 +32,7 @@ func TestAPIs(t *testing.T) {
 		[]Reporter{envtest.NewlineReporter{}})
 }
 
-func MockInClusterConfig() (*rest.Config, error) {
+func MockClusterConfig() (*rest.Config, error) {
 	return &rest.Config{
 		Host:            "https://testhost:9527",
 		TLSClientConfig: rest.TLSClientConfig{},

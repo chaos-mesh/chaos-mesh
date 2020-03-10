@@ -90,7 +90,7 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos reconcil
 
 	timechaos.SetDefaultValue()
 
-	pods, err := utils.SelectAndGeneratePods(ctx, r.Client, &timechaos.Spec)
+	pods, err := utils.SelectAndFilterPods(ctx, r.Client, &timechaos.Spec)
 
 	if err != nil {
 		r.Log.Error(err, "failed to select and generate pods")

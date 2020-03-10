@@ -1,6 +1,104 @@
 
 ---
 apiVersion: admissionregistration.k8s.io/v1beta1
+kind: MutatingWebhookConfiguration
+metadata:
+  creationTimestamp: null
+  name: mutating-webhook-configuration
+webhooks:
+- clientConfig:
+    caBundle: Cg==
+    service:
+      name: webhook-service
+      namespace: system
+      path: /mutate-pingcap-com-v1alpha1-iochaos
+  failurePolicy: Fail
+  name: miochaos.kb.io
+  rules:
+  - apiGroups:
+    - pingcap.com
+    apiVersions:
+    - v1alpha1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - iochaos
+- clientConfig:
+    caBundle: Cg==
+    service:
+      name: webhook-service
+      namespace: system
+      path: /mutate-pingcap-com-v1alpha1-kernelchaos
+  failurePolicy: Fail
+  name: mkernelchaos.kb.io
+  rules:
+  - apiGroups:
+    - pingcap.com
+    apiVersions:
+    - v1alpha1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - kernelchaos
+- clientConfig:
+    caBundle: Cg==
+    service:
+      name: webhook-service
+      namespace: system
+      path: /mutate-pingcap-com-v1alpha1-networkchaos
+  failurePolicy: Fail
+  name: mnetworkchaos.kb.io
+  rules:
+  - apiGroups:
+    - pingcap.com
+    apiVersions:
+    - v1alpha1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - networkchaos
+- clientConfig:
+    caBundle: Cg==
+    service:
+      name: webhook-service
+      namespace: system
+      path: /mutate-pingcap-com-v1alpha1-podchaos
+  failurePolicy: Fail
+  name: mpodchaos.kb.io
+  rules:
+  - apiGroups:
+    - pingcap.com
+    apiVersions:
+    - v1alpha1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - podchaos
+- clientConfig:
+    caBundle: Cg==
+    service:
+      name: webhook-service
+      namespace: system
+      path: /mutate-pingcap-com-v1alpha1-timechaos
+  failurePolicy: Fail
+  name: mtimechaos.kb.io
+  rules:
+  - apiGroups:
+    - pingcap.com
+    apiVersions:
+    - v1alpha1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - timechaos
+
+---
+apiVersion: admissionregistration.k8s.io/v1beta1
 kind: ValidatingWebhookConfiguration
 metadata:
   creationTimestamp: null

@@ -40,7 +40,8 @@ type SelectSpec interface {
 	GetValue() string
 }
 
-func SelectAndGeneratePods(ctx context.Context, c client.Client, spec SelectSpec) ([]v1.Pod, error) {
+// SelectAndFilterPods returns the list of pods that filtered by selector and PodMode
+func SelectAndFilterPods(ctx context.Context, c client.Client, spec SelectSpec) ([]v1.Pod, error) {
 	selector := spec.GetSelector()
 	mode := spec.GetMode()
 	value := spec.GetValue()
@@ -55,7 +56,7 @@ func SelectAndGeneratePods(ctx context.Context, c client.Client, spec SelectSpec
 		return nil, err
 	}
 
-	filteredPod, err := GeneratePods(pods, mode, value)
+	filteredPod, err := FilterPodsByMode(pods, mode, value)
 	if err != nil {
 		return nil, err
 	}
@@ -207,8 +208,8 @@ func CheckPodMeetSelector(pod v1.Pod, selector v1alpha1.SelectorSpec) (bool, err
 	return false, nil
 }
 
-// GeneratePods generate pods according to mode from pod list
-func GeneratePods(pods []v1.Pod, mode v1alpha1.PodMode, value string) ([]v1.Pod, error) {
+// FilterPodsByMode filters pods by mode from pod list
+func FilterPodsByMode(pods []v1.Pod, mode v1alpha1.PodMode, value string) ([]v1.Pod, error) {
 	if len(pods) == 0 {
 		return nil, errors.New("cannot generate pods from empty list")
 	}

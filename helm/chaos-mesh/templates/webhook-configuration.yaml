@@ -29,6 +29,26 @@ webhooks:
       matchLabels:
         admission-webhook: enabled
     failurePolicy: {{ .Values.webhook.FailurePolicy }}
+  {{- range $crd := .Values.webhook.CRDS }}
+  - clientConfig:
+      caBundle: Cg==
+      service:
+        name: {{ template "chaos-mesh.svc" $ }}
+        namespace: {{ $.Release.Namespace }}
+        path: /mutate-pingcap-com-v1alpha1-{{ $crd }}
+    failurePolicy: Fail
+    name: m{{ $crd }}.kb.io
+    rules:
+      - apiGroups:
+          - pingcap.com
+        apiVersions:
+          - v1alpha1
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - {{ $crd }}
+  {{- end }}
 ---
 
 apiVersion: admissionregistration.k8s.io/v1beta1

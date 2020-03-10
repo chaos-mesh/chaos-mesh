@@ -95,14 +95,14 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos reconcil
 		return err
 	}
 
-	sources, err := utils.SelectAndGeneratePods(ctx, r.Client, &networkchaos.Spec)
+	sources, err := utils.SelectAndFilterPods(ctx, r.Client, &networkchaos.Spec)
 
 	if err != nil {
 		r.Log.Error(err, "failed to select and generate pods")
 		return err
 	}
 
-	targets, err := utils.SelectAndGeneratePods(ctx, r.Client, &networkchaos.Spec.Target)
+	targets, err := utils.SelectAndFilterPods(ctx, r.Client, &networkchaos.Spec.Target)
 
 	if err != nil {
 		r.Log.Error(err, "failed to select and generate pods")

@@ -17,6 +17,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"os"
 	"strings"
 
 	"github.com/pingcap/chaos-mesh/pkg/webhook/config"
@@ -30,11 +31,11 @@ import (
 	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/kubernetes"
 	k8sv1 "k8s.io/client-go/kubernetes/typed/core/v1"
-	"k8s.io/client-go/rest"
+	ctrlconfig "sigs.k8s.io/controller-runtime/pkg/client/config"
 )
 
 var log = ctrl.Log.WithName("inject-webhook")
-var restInClusterConfig = rest.InClusterConfig
+var restClusterConfig = ctrlconfig.GetConfig
 var kubernetesNewForConfig = kubernetes.NewForConfig
 
 const (
@@ -53,22 +54,28 @@ type K8sConfigMapWatcher struct {
 // New creates a new K8sConfigMapWatcher
 func New(cfg Config) (*K8sConfigMapWatcher, error) {
 	c := K8sConfigMapWatcher{Config: cfg}
-	if c.Namespace == "" {
+	if strings.TrimSpace(c.Namespace) == "" {
 		// ENHANCEMENT: support downward API/env vars instead? https://github.com/kubernetes/kubernetes/blob/release-1.0/docs/user-guide/downward-api.md
 		// load from file on disk for serviceaccount: /var/run/secrets/kubernetes.io/serviceaccount/namespace
-		ns, err := ioutil.ReadFile(serviceAccountNamespaceFilePath)
+		nsBytes, err := ioutil.ReadFile(serviceAccountNamespaceFilePath)
 		if err != nil {
-			return nil, fmt.Errorf("%s: maybe you should specify --configmap-namespace if you are running outside of kubernetes", err.Error())
+			if os.IsNotExist(err) {
+				return nil, fmt.Errorf("%s: maybe you should specify --configmap-namespace if you are running outside of kubernetes", err.Error())
+			}
+			return nil, err
 		}
-		if string(ns) != "" {
+		ns := strings.TrimSpace(string(nsBytes))
+		if ns != "" {
 			c.Namespace = string(ns)
 			log.Info("Inferred ConfigMap",
 				"namespace", c.Namespace, "filepath", serviceAccountNamespaceFilePath)
+		} else {
+			return nil, fmt.Errorf("can not found namespace. maybe you should specify --configmap-namespace if you are running outside of kubernetes")
 		}
 	}
 
-	log.Info("Creating Kubernetes client from in-cluster discovery")
-	k8sConfig, err := restInClusterConfig()
+	log.Info("Creating Kubernetes client to talk to the api-server")
+	k8sConfig, err := restClusterConfig()
 	if err != nil {
 		return nil, err
 	}
