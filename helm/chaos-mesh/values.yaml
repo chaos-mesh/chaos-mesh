@@ -70,6 +70,8 @@ chaosDaemon:
   # runtime: containerd
   # socketPath: /run/containerd/containerd.sock
 
+  tolerations: []
+
 dashboard:
   create: false
 
