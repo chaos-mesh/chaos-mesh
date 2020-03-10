@@ -24,7 +24,8 @@ spec:
     nsec: 100000
   clockIds:
     - CLOCK_REALTIME
-  containerName: pd
+  containerNames: 
+    - pd
   duration: "10s"
   scheduler:
     cron: "@every 15s"
@@ -38,7 +39,7 @@ Description:
 * **selector** specifies the target pods for chaos injection.
 * **timeOffset** specifies the offset of time. `sec` means the offset of seconds and `nsec` means the offset of nanoseconds.
 * **clockIds** defines all affected `clk_id`. `clk_id` refers to the first argument of `clock_gettime` call. For most application, `CLOCK_REALTIME` is enough.
-* **containerName** selects affected container's name. If not set, all containers will be injected.
+* **containerNames** selects affected container's names. If not set, all containers will be injected.
 * **duration** defines the duration for each chaos experiment. In the sample file above, the time chaos lasts for 10 seconds.
 * **scheduler** defines the scheduler rules for the running time of the chaos experiment. For more rule information, see <https://godoc.org/github.com/robfig/cron>.
 

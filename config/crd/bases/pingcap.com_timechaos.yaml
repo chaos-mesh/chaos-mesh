@@ -42,10 +42,12 @@ spec:
               items:
                 type: string
               type: array
-            containerName:
+            containerNames:
               description: ContainerName indicates the name of affected container.
                 If not set, all containers will be injected
-              type: string
+              items:
+                type: string
+              type: array
             duration:
               description: Duration represents the duration of the chaos action
               type: string

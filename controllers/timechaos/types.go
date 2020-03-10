@@ -192,11 +192,14 @@ func (r *Reconciler) recoverPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha
 	}
 
 	g := errgroup.Group{}
-	expectedName := chaos.Spec.ContainerName
+	expectedNames := make(map[string]bool)
+	for _, name := range chaos.Spec.ContainerNames {
+		expectedNames[name] = true
+	}
 	for index := range pod.Status.ContainerStatuses {
 		container := pod.Status.ContainerStatuses[index]
 
-		if len(expectedName) == 0 || container.Name == expectedName {
+		if len(expectedNames) == 0 || expectedNames[container.Name] {
 			g.Go(func() error {
 				err := r.recoverContainer(ctx, pbClient, container.ContainerID)
 
@@ -264,11 +267,14 @@ func (r *Reconciler) applyPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.
 	}
 
 	g := errgroup.Group{}
-	expectedName := chaos.Spec.ContainerName
+	expectedNames := make(map[string]bool)
+	for _, name := range chaos.Spec.ContainerNames {
+		expectedNames[name] = true
+	}
 	for index := range pod.Status.ContainerStatuses {
 		container := pod.Status.ContainerStatuses[index]
 
-		if len(expectedName) == 0 || container.Name == expectedName {
+		if len(expectedNames) == 0 || expectedNames[container.Name] {
 			g.Go(func() error {
 				return r.applyContainer(ctx, pbClient, container.ContainerID, chaos)
 			})

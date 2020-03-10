@@ -63,7 +63,7 @@ type TimeChaosSpec struct {
 	// ContainerName indicates the name of affected container.
 	// If not set, all containers will be injected
 	// +optional
-	ContainerName string `json:"containerName"`
+	ContainerNames []string `json:"containerNames,omitempty"`
 
 	// Duration represents the duration of the chaos action
 	Duration *string `json:"duration"`
