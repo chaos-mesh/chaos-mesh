@@ -164,3 +164,6 @@ bpfki:
   grpcPort: 50051
 
   podAnnotations: {}
+
+stressServer:
+  grpcPort: 65533

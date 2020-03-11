@@ -17,6 +17,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"os"
+
 	"github.com/go-logr/logr"
 	"golang.org/x/sync/errgroup"
 	v1 "k8s.io/api/core/v1"
@@ -31,6 +33,8 @@ import (
 	"github.com/pingcap/chaos-mesh/controllers/common"
 	"github.com/pingcap/chaos-mesh/controllers/reconciler"
 	"github.com/pingcap/chaos-mesh/controllers/twophase"
+	"github.com/pingcap/chaos-mesh/pkg/chaosstress"
+	pb "github.com/pingcap/chaos-mesh/pkg/chaosstress/pb"
 	"github.com/pingcap/chaos-mesh/pkg/utils"
 )
 
@@ -170,7 +174,25 @@ func (r *Reconciler) cleanFinalizersAndRecover(ctx context.Context, chaos *v1alp
 
 func (r *Reconciler) recoverPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.StressChaos) error {
 	r.Log.Info("Try to recover pod", "namespace", pod.Namespace, "name", pod.Name)
-	return nil
+	stressClient, err := chaosstress.NewGrpcChaosStressClient(ctx, r.Client,
+		pod, os.Getenv("STRESS_SERVER_PORT"))
+	if err != nil {
+		return err
+	}
+	defer client.Close()
+	res, err := stressClient.CancelStressors(ctx, &pb.StressRequest{
+		Action: pb.StressRequest_CANCEL,
+		Uuid:   chaos.Status.Uuid,
+	})
+	if err != nil {
+		return err
+	}
+	chaos.Status.Uuid = ""
+	err = r.Update(ctx, chaos)
+	if err != nil {
+		r.Log.Error(err, "unable to clear stress chaos uuid", "uuid", res.Uuid)
+	}
+	return err
 }
 
 // Object would return the instance of chaos
@@ -199,5 +221,23 @@ func (r *Reconciler) applyAllPods(ctx context.Context, pods []v1.Pod, chaos *v1a
 
 func (r *Reconciler) applyPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.StressChaos) error {
 	r.Log.Info("Try to apply stress tests", "namespace", pod.Namespace, "name", pod.Name)
-	return nil
+	stressClient, err := chaosstress.NewGrpcChaosStressClient(ctx, r.Client,
+		pod, os.Getenv("STRESS_SERVER_PORT"))
+	if err != nil {
+		return err
+	}
+	defer client.Close()
+	res, err := stressClient.ExecStressors(ctx, &pb.StressRequest{
+		Action:    pb.StressRequest_EXEC,
+		Stressors: chaos.Spec.Stressors,
+	})
+	if err != nil {
+		return err
+	}
+	chaos.Status.Uuid = res.Uuid
+	err = r.Update(ctx, chaos)
+	if err != nil {
+		r.Log.Error(err, "unable to set stress chaos uuid", "uuid", res.Uuid)
+	}
+	return err
 }

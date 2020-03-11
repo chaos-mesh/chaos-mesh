@@ -29,7 +29,7 @@ import (
 
 var log = ctrl.Log.WithName("inject-webhook")
 
-// +kubebuilder:webhook:path=/inject-v1-pod,mutating=false,failurePolicy=fail,groups="",resources=pods,verbs=create;update,versions=v1,name=vpod.kb.io
+// +kubebuilder:webhook:path=/inject-v1-pod,mutating=false,failurePolicy=fail,matchPolicy=Equivalent,groups="",resources=pods,verbs=create;update,versions=v1,name=vpod.kb.io
 
 type PodInjector struct {
 	client  client.Client

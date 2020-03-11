@@ -53,7 +53,10 @@ spec:
             value: !!str {{ .Values.chaosDaemon.grpcPort }}
           - name: BPFKI_PORT
             value: !!str {{ .Values.bpfki.grpcPort }}
-        volumeMounts:
+          - name: STRESS_SERVER_PORT
+            value: !!str {{ .Values.stressServer.grpcPort }}
+
+volumeMounts:
           - name: webhook-certs
             mountPath: /etc/webhook/certs
             readOnly: true

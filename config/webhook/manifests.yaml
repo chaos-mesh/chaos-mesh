@@ -13,6 +13,7 @@ webhooks:
       namespace: system
       path: /inject-v1-pod
   failurePolicy: Fail
+  matchPolicy: Equivalent
   name: vpod.kb.io
   rules:
   - apiGroups:

@@ -19,9 +19,13 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+// Stress chaos is a chaos to generate plenty of stresses over a collection of pods.
+// A sidecar will be injected along with the target pod during creating. It's the
+// sidecar which generates stresses or cancels them.
+
 // +kubebuilder:object:root=true
 
-// StressChaos is the Schema for the timechaos API
+// StressChaos is the Schema for the stresschaos API
 type StressChaos struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
@@ -51,7 +55,7 @@ type StressChaosSpec struct {
 	Selector SelectorSpec `json:"selector"`
 
 	// Stressors defines the delta time of injected program
-	Stressors Stressors `json:"stressors"`
+	Stressors string `json:"stressors"`
 
 	// Duration represents the duration of the chaos action
 	Duration *string `json:"duration"`
@@ -68,7 +72,6 @@ type StressChaosSpec struct {
 	NextRecover *metav1.Time `json:"nextRecover,omitempty"`
 }
 
-
 // GetSelector is a getter for Selector (for implementing SelectSpec)
 func (in *StressChaosSpec) GetSelector() SelectorSpec {
 	return in.Selector
@@ -84,18 +87,10 @@ func (in *StressChaosSpec) GetValue() string {
 	return in.Value
 }
 
-// Stressors defines the delta time of injected program
-// As `clock_gettime` return a struct contains two field: `tv_sec` and `tv_nsec`.
-// `Sec` is the offset of seconds, corresponding to `tv_sec` field.
-// `NSec` is the offset of nanoseconds, corresponding to `tv_nsec` field.
-type Stressors struct {
-	Sec  int64 `json:"sec"`
-	NSec int64 `json:"nsec"`
-}
-
 // StressChaosStatus defines the observed state of StressChaos
 type StressChaosStatus struct {
 	ChaosStatus `json:",inline"`
+	Uuid        string `json:"uuid"`
 }
 
 // GetDuration gets the duration of StressChaos
@@ -167,7 +162,7 @@ func (in *StressChaos) IsDeleted() bool {
 	return !in.DeletionTimestamp.IsZero()
 }
 
-// Validate describe the timechaos validation logic
+// Validate describe the stresschaos validation logic
 func (in *StressChaos) Validate() (bool, string, error) {
 	if in.Spec.Duration != nil && in.Spec.Scheduler != nil {
 		return true, "", nil
