@@ -54,6 +54,7 @@ func (s *daemonServer) RecoverTimeOffset(ctx context.Context, req *pb.TimeReques
 	log.Info("get all related process pids", "pids", allPids)
 
 	for _, pid := range allPids {
+		// FIXME: if the process has halted and no process with this pid exists, we will get an error.
 		err = time.ModifyTime(int(pid), int64(0), int64(0), 0)
 		if err != nil {
 			log.Error(err, "error while recovering", "pid", pid)

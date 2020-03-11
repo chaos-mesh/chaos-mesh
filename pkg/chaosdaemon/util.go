@@ -256,7 +256,7 @@ func GetChildProcesses(ppid uint32) ([]uint32, error) {
 
 				reader, err := os.Open(statusPath)
 				if err != nil {
-					log.Info("read status file error", "path", statusPath)
+					log.Error(err, "read status file error", "path", statusPath)
 					return
 				}
 
