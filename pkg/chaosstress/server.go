@@ -81,6 +81,7 @@ func (r *rpcServer) CancelStressors(ctx context.Context,
 	return nil, nil
 }
 
+// StartServer starts the stress server over the specified address
 func StartServer(addr string) error {
 	conn, err := net.Listen("tcp", addr)
 	if err != nil {

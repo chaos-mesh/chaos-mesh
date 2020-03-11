@@ -182,12 +182,12 @@ func (r *Reconciler) recoverPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha
 	defer client.Close()
 	res, err := stressClient.CancelStressors(ctx, &pb.StressRequest{
 		Action: pb.StressRequest_CANCEL,
-		Uuid:   chaos.Status.Uuid,
+		Uuid:   chaos.Status.UUID,
 	})
 	if err != nil {
 		return err
 	}
-	chaos.Status.Uuid = ""
+	chaos.Status.UUID = ""
 	err = r.Update(ctx, chaos)
 	if err != nil {
 		r.Log.Error(err, "unable to clear stress chaos uuid", "uuid", res.Uuid)
@@ -234,7 +234,7 @@ func (r *Reconciler) applyPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.
 	if err != nil {
 		return err
 	}
-	chaos.Status.Uuid = res.Uuid
+	chaos.Status.UUID = res.Uuid
 	err = r.Update(ctx, chaos)
 	if err != nil {
 		r.Log.Error(err, "unable to set stress chaos uuid", "uuid", res.Uuid)

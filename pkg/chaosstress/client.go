@@ -41,7 +41,7 @@ func (c *GrpcChaosStressClient) Close() error {
 	return c.conn.Close()
 }
 
-// NewChaosStressClient would create a ChaosStressClient
+// NewGrpcChaosStressClient would create a ChaosStressClient
 func NewGrpcChaosStressClient(ctx context.Context, c client.Client, pod *v1.Pod,
 	port string) (ClientInterface, error) {
 	if cli := mock.On("MockChaosStressClient"); cli != nil {

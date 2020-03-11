@@ -90,7 +90,7 @@ func (in *StressChaosSpec) GetValue() string {
 // StressChaosStatus defines the observed state of StressChaos
 type StressChaosStatus struct {
 	ChaosStatus `json:",inline"`
-	Uuid        string `json:"uuid"`
+	UUID        string `json:"uuid"`
 }
 
 // GetDuration gets the duration of StressChaos
