@@ -121,7 +121,8 @@ func ModifyTime(pid int, deltaSec int64, deltaNsec int64, clockIdsMask uint64) e
 	}
 
 	// minus tailing variable part
-	constImageLen := len(fakeImage) - 16
+	// 24 = 3 * 8 because we have three variables
+	constImageLen := len(fakeImage) - 24
 	var fakeEntry *mapreader.Entry
 	for _, e := range program.Entries {
 		e := e
