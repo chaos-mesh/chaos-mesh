@@ -37,6 +37,7 @@ type GrpcChaosStressClient struct {
 	conn *grpc.ClientConn
 }
 
+// Close closes the client
 func (c *GrpcChaosStressClient) Close() error {
 	return c.conn.Close()
 }

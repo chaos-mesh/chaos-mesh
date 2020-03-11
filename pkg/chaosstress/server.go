@@ -90,7 +90,7 @@ func StartServer(addr string) error {
 	}
 	server := grpc.NewServer(grpc.UnaryInterceptor(
 		utils.TimeoutServerInterceptor))
-	pb.RegisterChaosStressServiceServer(s,
+	pb.RegisterChaosStressServer(server,
 		&rpcServer{
 			tasks: make(map[string]*exec.Cmd),
 		})
