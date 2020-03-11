@@ -149,13 +149,13 @@ docker-push:
 	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-kernel:latest"
 
 controller-gen:
-	$(GO) get sigs.k8s.io/controller-tools/cmd/controller-gen
+	$(GO) get sigs.k8s.io/controller-tools/cmd/controller-gen@v0.2.5
 revive:
-	$(GO) get github.com/mgechev/revive
+	$(GO) get github.com/mgechev/revive@v1.0.2-0.20200225072153-6219ca02fffb
 failpoint-ctl:
-	$(GO) get github.com/pingcap/failpoint/failpoint-ctl
+	$(GO) get github.com/pingcap/failpoint/failpoint-ctl@v0.0.0-20200210140405-f8f9fb234798
 goimports:
-	$(GO) get golang.org/x/tools/cmd/goimports
+	$(GO) get golang.org/x/tools/cmd/goimports@v0.0.0-20200309202150-20ab64c0d93f
 
 lint: revive
 	@echo "linting"
