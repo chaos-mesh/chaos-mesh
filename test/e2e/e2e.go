@@ -130,7 +130,7 @@ var _ = ginkgo.SynchronizedBeforeSuite(func() []byte {
 	return nil
 }, func(data []byte) {
 	// Run on all Ginkgo nodes
-	SetupSuitePerGinkgoNode()
+	setupSuitePerGinkgoNode()
 })
 
 var _ = ginkgo.SynchronizedAfterSuite(func() {
@@ -139,7 +139,7 @@ var _ = ginkgo.SynchronizedAfterSuite(func() {
 	framework.AfterSuiteActions()
 })
 
-func SetupSuitePerGinkgoNode() {
+func setupSuitePerGinkgoNode() {
 	c, err := framework.LoadClientset()
 	if err != nil {
 		klog.Fatal("Error loading client: ", err)

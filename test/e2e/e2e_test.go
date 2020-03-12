@@ -11,6 +11,7 @@ import (
 	"github.com/onsi/ginkgo"
 	ginkgoconfig "github.com/onsi/ginkgo/config"
 	"github.com/onsi/gomega"
+	e2econfig "github.com/pingcap/chaos-mesh/test/e2e/config"
 	runtimeutils "k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/component-base/logs"
 	"k8s.io/klog"
@@ -31,6 +32,7 @@ func handleFlags() {
 	config.CopyFlags(config.Flags, flag.CommandLine)
 	framework.RegisterCommonFlags(flag.CommandLine)
 	framework.RegisterClusterFlags(flag.CommandLine)
+	e2econfig.RegisterChaosMeshConfig(flag.CommandLine)
 	flag.Parse()
 }
 
