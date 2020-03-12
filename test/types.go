@@ -14,9 +14,10 @@
 package test
 
 import (
-	"github.com/pingcap/chaos-mesh/test/e2e/util/portforward"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/kubernetes/test/e2e/framework"
+
+	"github.com/pingcap/chaos-mesh/test/e2e/util/portforward"
 )
 
 type OperatorConfig struct {

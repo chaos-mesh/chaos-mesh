@@ -15,11 +15,12 @@ package test
 
 import (
 	"fmt"
-	"k8s.io/client-go/kubernetes"
-	"k8s.io/klog"
 	"os/exec"
 	"path/filepath"
 	"strings"
+
+	"k8s.io/client-go/kubernetes"
+	"k8s.io/klog"
 )
 
 const (
@@ -37,8 +38,8 @@ func NewOperatorAction(
 ) OperatorAction {
 
 	oa := &operatorAction{
-		kubeCli:   kubeCli,
-		cfg:       cfg,
+		kubeCli: kubeCli,
+		cfg:     cfg,
 	}
 	return oa
 }

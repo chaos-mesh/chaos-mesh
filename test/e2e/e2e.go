@@ -8,8 +8,6 @@ import (
 	"os/exec"
 
 	"github.com/onsi/ginkgo"
-	"github.com/pingcap/chaos-mesh/test"
-	e2econfig "github.com/pingcap/chaos-mesh/test/e2e/config"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
@@ -18,6 +16,9 @@ import (
 	e2elog "k8s.io/kubernetes/test/e2e/framework/log"
 	e2epod "k8s.io/kubernetes/test/e2e/framework/pod"
 	utilnet "k8s.io/utils/net"
+
+	"github.com/pingcap/chaos-mesh/test"
+	e2econfig "github.com/pingcap/chaos-mesh/test/e2e/config"
 
 	// ensure auth plugins are loaded
 	_ "k8s.io/client-go/plugin/pkg/client/auth"

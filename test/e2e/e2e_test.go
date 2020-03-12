@@ -11,7 +11,6 @@ import (
 	"github.com/onsi/ginkgo"
 	ginkgoconfig "github.com/onsi/ginkgo/config"
 	"github.com/onsi/gomega"
-	e2econfig "github.com/pingcap/chaos-mesh/test/e2e/config"
 	runtimeutils "k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/component-base/logs"
 	"k8s.io/klog"
@@ -20,6 +19,8 @@ import (
 	e2elog "k8s.io/kubernetes/test/e2e/framework/log"
 	"k8s.io/kubernetes/test/e2e/framework/testfiles"
 	"k8s.io/kubernetes/test/e2e/framework/viperconfig"
+
+	e2econfig "github.com/pingcap/chaos-mesh/test/e2e/config"
 
 	// test sources
 	_ "github.com/pingcap/chaos-mesh/test/e2e/chaos"

@@ -2,6 +2,7 @@ package config
 
 import (
 	"flag"
+
 	"github.com/pingcap/chaos-mesh/test"
 )
 
