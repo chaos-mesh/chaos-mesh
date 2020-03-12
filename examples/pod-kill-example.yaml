@@ -7,8 +7,6 @@ spec:
   action: pod-kill
   mode: one
   selector:
-    namespaces:
-      - tidb-cluster-demo
     labelSelectors:
       "app.kubernetes.io/component": "tikv"
   scheduler:

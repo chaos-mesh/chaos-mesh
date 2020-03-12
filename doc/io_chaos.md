@@ -80,8 +80,6 @@ spec:
   configName: "chaosfs-tikv"
   path: ""
   selector:
-    namespaces:
-      - tidb-cluster-demo
     labelSelectors:
       "app.kubernetes.io/component": "tikv"
   layer: "fs"

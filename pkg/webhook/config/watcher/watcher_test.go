@@ -30,10 +30,10 @@ import (
 var _ = Describe("webhook config watcher", func() {
 	Context("New", func() {
 		It("should return InClusterConfig error", func() {
-			old := restInClusterConfig
-			defer func() { restInClusterConfig = old }()
+			old := restClusterConfig
+			defer func() { restClusterConfig = old }()
 
-			restInClusterConfig = func() (*rest.Config, error) {
+			restClusterConfig = func() (*rest.Config, error) {
 				return nil, fmt.Errorf("InClusterConfig error")
 			}
 			config := NewConfig()
@@ -45,7 +45,7 @@ var _ = Describe("webhook config watcher", func() {
 		})
 
 		It("should return NewForConfig error", func() {
-			restInClusterConfig = MockInClusterConfig
+			restClusterConfig = MockClusterConfig
 			old := kubernetesNewForConfig
 			defer func() { kubernetesNewForConfig = old }()
 
@@ -61,7 +61,7 @@ var _ = Describe("webhook config watcher", func() {
 		})
 
 		It("should return no error", func() {
-			restInClusterConfig = MockInClusterConfig
+			restClusterConfig = MockClusterConfig
 
 			config := NewConfig()
 			config.Namespace = "testNamespace"
@@ -108,7 +108,7 @@ var _ = Describe("webhook config watcher", func() {
 			var cmw K8sConfigMapWatcher
 			cmw.Config = *NewConfig()
 			cmw.Namespace = "testNamespace"
-			k8sConfig, _ := MockInClusterConfig()
+			k8sConfig, _ := MockClusterConfig()
 			clientset, _ := kubernetesNewForConfig(k8sConfig)
 			cmw.client = clientset.CoreV1()
 			sigChan := make(chan interface{}, 10)
@@ -124,7 +124,7 @@ var _ = Describe("webhook config watcher", func() {
 			var cmw K8sConfigMapWatcher
 			cmw.Config = *NewConfig()
 			cmw.Namespace = "testNamespace"
-			k8sConfig, _ := MockInClusterConfig()
+			k8sConfig, _ := MockClusterConfig()
 			clientset, _ := kubernetesNewForConfig(k8sConfig)
 			cmw.client = clientset.CoreV1()
 			_, err := cmw.Get()

@@ -15,8 +15,6 @@ metadata:
 spec:
   mode: one
   selector:
-    namespaces:
-      - tidb-cluster-demo
     labelSelectors:
       "app.kubernetes.io/component": "pd"
   timeOffset:
