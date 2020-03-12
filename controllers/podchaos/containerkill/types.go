@@ -15,6 +15,7 @@ package containerkill
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"time"
@@ -65,11 +66,10 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, obj reconciler
 	var err error
 	now := time.Now()
 
-	r.Log.Info("Reconciling container kill")
-
-	var podchaos v1alpha1.PodChaos
-	if err = r.Get(ctx, req.NamespacedName, &podchaos); err != nil {
-		r.Log.Error(err, "unable to get podchaos")
+	podchaos, ok := obj.(*v1alpha1.PodChaos)
+	if !ok {
+		err = errors.New("chaos is not PodChaos")
+		r.Log.Error(err, "chaos is not PodChaos", "chaos", obj)
 		return err
 	}
 
@@ -124,7 +124,7 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, obj reconciler
 	if err := g.Wait(); err != nil {
 		return err
 	}
-	if err = r.updatePodchaos(ctx, podchaos, pods, now); err != nil {
+	if err = r.updatePodchaos(ctx, *podchaos, pods, now); err != nil {
 		return err
 	}
 	r.Event(obj, v1.EventTypeNormal, utils.EventChaosInjected, "")

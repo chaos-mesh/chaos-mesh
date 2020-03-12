@@ -72,7 +72,6 @@ var _ = Describe("PodChaos", func() {
 				Scheduler:     &v1alpha1.SchedulerSpec{Cron: "@hourly"},
 			},
 		}
-		objs = append(objs, &podChaos)
 
 		It("ContainerKill Action", func() {
 			scheme := runtime.NewScheme()
@@ -87,17 +86,17 @@ var _ = Describe("PodChaos", func() {
 
 			var err error
 
-			err = r.Apply(context.TODO(), req, r.Object())
+			err = r.Apply(context.TODO(), req, &podChaos)
 			Expect(err).ToNot(HaveOccurred())
 
 			mock.With("MockContainerKillError", errors.New("ContainerKillError"))
 
-			err = r.Apply(context.TODO(), req, r.Object())
+			err = r.Apply(context.TODO(), req, &podChaos)
 
 			Expect(err).To(HaveOccurred())
 			Expect(err.Error()).To(ContainSubstring("ContainerKillError"))
 
-			err = r.Recover(context.TODO(), req, r.Object())
+			err = r.Recover(context.TODO(), req, &podChaos)
 			Expect(err).ToNot(HaveOccurred())
 		})
 	})
