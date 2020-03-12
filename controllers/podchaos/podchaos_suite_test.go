@@ -71,11 +71,6 @@ var _ = Describe("PodChaos", func() {
 			})
 			Expect(err).To(HaveOccurred())
 			Expect(err.Error()).To(ContainSubstring("unsupported chaos action"))
-			//_, err = r.Reconcile(ctrl.Request{}, &v1alpha1.PodChaos{
-			//	TypeMeta: meta,
-			//	Spec:     v1alpha1.PodChaosSpec{Scheduler: nil, Duration: nil, Action: v1alpha1.PodFailureAction},
-			//})
-			//Expect(err).ToNot(HaveOccurred())
 			_, err = r.Reconcile(ctrl.Request{}, &v1alpha1.PodChaos{
 				TypeMeta: meta,
 				Spec:     v1alpha1.PodChaosSpec{Scheduler: nil, Duration: nil, Action: ""},
@@ -83,21 +78,6 @@ var _ = Describe("PodChaos", func() {
 			Expect(err).To(HaveOccurred())
 			Expect(err.Error()).To(ContainSubstring("invalid chaos action"))
 
-			//_, err = r.Reconcile(ctrl.Request{}, &v1alpha1.PodChaos{
-			//	TypeMeta: meta,
-			//	Spec:     v1alpha1.PodChaosSpec{Scheduler: &v1alpha1.SchedulerSpec{}, Duration: nil, Action: v1alpha1.PodKillAction},
-			//})
-			//Expect(err).ToNot(HaveOccurred())
-			//_, err = r.Reconcile(ctrl.Request{}, &v1alpha1.PodChaos{
-			//	TypeMeta: meta,
-			//	Spec:     v1alpha1.PodChaosSpec{Scheduler: &v1alpha1.SchedulerSpec{}, Duration: nil, Action: v1alpha1.ContainerKillAction},
-			//})
-			//Expect(err).ToNot(HaveOccurred())
-			//_, err = r.Reconcile(ctrl.Request{}, &v1alpha1.PodChaos{
-			//	TypeMeta: meta,
-			//	Spec:     v1alpha1.PodChaosSpec{Scheduler: &v1alpha1.SchedulerSpec{}, Duration: nil, Action: v1alpha1.PodFailureAction},
-			//})
-			//Expect(err).ToNot(HaveOccurred())
 			_, err = r.Reconcile(ctrl.Request{}, &v1alpha1.PodChaos{
 				TypeMeta: meta,
 				Spec:     v1alpha1.PodChaosSpec{Scheduler: &v1alpha1.SchedulerSpec{}, Duration: nil, Action: ""},
