@@ -92,6 +92,10 @@ func newPod(
 			Phase:             status,
 			ContainerStatuses: []v1.ContainerStatus{containerStatus},
 		},
+		Spec: v1.PodSpec{
+			InitContainers: []v1.Container{{Name: "fake-name", Image: "fake-image"}},
+			Containers:     []v1.Container{{Name: "fake-name", Image: "fake-image"}},
+		},
 	}
 }
 

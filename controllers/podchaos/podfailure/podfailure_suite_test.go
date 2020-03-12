@@ -1,11 +1,8 @@
-package podkill_test
+package podfailure_test
 
 import (
 	"context"
 	"testing"
-
-	. "github.com/onsi/ginkgo"
-	. "github.com/onsi/gomega"
 
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -14,21 +11,26 @@ import (
 	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
+
+	"github.com/pingcap/chaos-mesh/api/v1alpha1"
+	"github.com/pingcap/chaos-mesh/controllers/podchaos/podfailure"
+
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
+
 	"sigs.k8s.io/controller-runtime/pkg/envtest"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
-	"github.com/pingcap/chaos-mesh/api/v1alpha1"
-	"github.com/pingcap/chaos-mesh/controllers/podchaos/podkill"
 	. "github.com/pingcap/chaos-mesh/controllers/test"
 	"github.com/pingcap/chaos-mesh/pkg/mock"
 )
 
-func TestPodKill(t *testing.T) {
+func TestPodFailure(t *testing.T) {
 	RegisterFailHandler(Fail)
 
 	RunSpecsWithDefaultAndCustomReporters(t,
-		"PodKill Suite",
+		"PodFailure Suite",
 		[]Reporter{envtest.NewlineReporter{}})
 }
 
@@ -41,7 +43,7 @@ var _ = AfterSuite(func() {
 })
 
 var _ = Describe("PodChaos", func() {
-	Context("PodKill", func() {
+	Context("PodFailure", func() {
 		mock.With("MockChaosDaemonClient", &MockChaosDaemonClient{})
 
 		req := ctrl.Request{NamespacedName: types.NamespacedName{
@@ -75,12 +77,12 @@ var _ = Describe("PodChaos", func() {
 			},
 		}
 
-		It("PodKill Action", func() {
+		It("PodFailure Action", func() {
 			scheme := runtime.NewScheme()
 			Expect(v1.AddToScheme(scheme)).To(Succeed())
 			Expect(v1alpha1.AddToScheme(scheme)).To(Succeed())
 
-			r := podkill.Reconciler{
+			r := podfailure.Reconciler{
 				Client:        fake.NewFakeClientWithScheme(scheme, objs...),
 				EventRecorder: &record.FakeRecorder{},
 				Log:           ctrl.Log.WithName("controllers").WithName("PodChaos"),
@@ -91,13 +93,9 @@ var _ = Describe("PodChaos", func() {
 			err = r.Apply(context.TODO(), req, &podChaos)
 			Expect(err).ToNot(HaveOccurred())
 
-			// pod "p0" already deleted
-			err = r.Apply(context.TODO(), req, &podChaos)
-			Expect(err).To(HaveOccurred())
-			Expect(err.Error()).To(ContainSubstring("pods \"p0\" not found"))
-
 			err = r.Recover(context.TODO(), req, &podChaos)
 			Expect(err).ToNot(HaveOccurred())
 		})
+
 	})
 })
