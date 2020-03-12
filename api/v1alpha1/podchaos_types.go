@@ -201,7 +201,6 @@ func (in *PodChaos) Validate() (bool, string, error) {
 		return true, "", nil
 	default:
 		err := fmt.Errorf("podchaos[%s/%s] have unknown action type", in.Namespace, in.Name)
-		log.Error(err, "Wrong PodChaos Action type")
 		return false, err.Error(), err
 	}
 }

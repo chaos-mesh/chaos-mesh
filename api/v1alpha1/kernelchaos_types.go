@@ -211,6 +211,17 @@ func (in *KernelChaos) IsDeleted() bool {
 	return !in.DeletionTimestamp.IsZero()
 }
 
+// Validate implements Validator interface and describes the kernelchaos validation logic.
+func (in *KernelChaos) Validate() (bool, string, error) {
+	if in.Spec.Duration != nil && in.Spec.Scheduler != nil {
+		return true, "", nil
+	} else if in.Spec.Duration == nil && in.Spec.Scheduler == nil {
+		return true, "", nil
+	}
+
+	return false, invalidConfigurationMsg, nil
+}
+
 // +kubebuilder:object:root=true
 
 // KernelChaosList contains a list of KernelChaos

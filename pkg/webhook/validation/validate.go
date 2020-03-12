@@ -14,13 +14,11 @@
 package validation
 
 import (
-	"encoding/json"
+	"github.com/pingcap/chaos-mesh/api/v1alpha1"
 
 	admissionv1beta1 "k8s.io/api/admission/v1beta1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
-
-	"github.com/pingcap/chaos-mesh/api/v1alpha1"
 )
 
 const (
@@ -31,22 +29,20 @@ var log = ctrl.Log.WithName("validate-webhook")
 
 // ValidateChaos handles the validation for chaos api
 func ValidateChaos(res *admissionv1beta1.AdmissionRequest, kind string) *admissionv1beta1.AdmissionResponse {
-	var err error
-	var permitted bool
-	var msg string
-	switch kind {
-	case "PodChaos":
-		permitted, msg, err = validatePodchaos(res.Object.Raw)
-	case "NetworkChaos":
-		permitted, msg, err = validateNetworkChaos(res.Object.Raw)
-	case "IoChaos":
-		permitted, msg, err = validateIoChaos(res.Object.Raw)
-	case "TimeChaos":
-		permitted, msg, err = validateTimeChaos(res.Object.Raw)
-	default:
-		log.Error(err, "Could not unmarshal raw object")
+	var (
+		err       error
+		permitted bool
+		msg       string
+		validator v1alpha1.Validator
+	)
+
+	validator, err = v1alpha1.ParseValidator(res.Object.Raw, kind)
+	if err == nil {
+		permitted, msg, err = validator.Validate()
 	}
+
 	if err != nil {
+		log.Error(err, "chaos is invalided", "kind", kind, "chaos", string(res.Object.Raw))
 		return &admissionv1beta1.AdmissionResponse{
 			Result: &metav1.Status{
 				Message: err.Error(),
@@ -60,36 +56,4 @@ func ValidateChaos(res *admissionv1beta1.AdmissionRequest, kind string) *admissi
 			Message: msg,
 		},
 	}
-}
-
-func validatePodchaos(rawObj []byte) (bool, string, error) {
-	var chaos v1alpha1.PodChaos
-	if err := json.Unmarshal(rawObj, &chaos); err != nil {
-		return false, "", err
-	}
-	return chaos.Validate()
-}
-
-func validateIoChaos(rawObj []byte) (bool, string, error) {
-	var chaos v1alpha1.IoChaos
-	if err := json.Unmarshal(rawObj, &chaos); err != nil {
-		return false, "", err
-	}
-	return chaos.Validate()
-}
-
-func validateNetworkChaos(rawObj []byte) (bool, string, error) {
-	var chaos v1alpha1.NetworkChaos
-	if err := json.Unmarshal(rawObj, &chaos); err != nil {
-		return false, "", err
-	}
-	return chaos.Validate()
-}
-
-func validateTimeChaos(rawObj []byte) (bool, string, error) {
-	var chaos v1alpha1.TimeChaos
-	if err := json.Unmarshal(rawObj, &chaos); err != nil {
-		return false, "", err
-	}
-	return chaos.Validate()
 }

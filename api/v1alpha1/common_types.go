@@ -15,7 +15,6 @@ package v1alpha1
 
 import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	ctrl "sigs.k8s.io/controller-runtime"
 )
 
 // SelectorSpec defines the some selectors to select objects.
@@ -135,13 +134,3 @@ type ExperimentStatus struct {
 const (
 	invalidConfigurationMsg = "invalid configuration"
 )
-
-var log = ctrl.Log.WithName("validate-webhook")
-
-// +kubebuilder:object:generate=false
-
-// Admission describe the interface should be implemented in admission webhook
-type Admission interface {
-	// Validate describe the interface should be implemented in validation webhook
-	Validate() (bool, string, error)
-}

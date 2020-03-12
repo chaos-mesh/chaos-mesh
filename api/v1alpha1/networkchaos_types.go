@@ -244,7 +244,7 @@ func (in *NetworkChaos) GetScheduler() *SchedulerSpec {
 	return in.Spec.Scheduler
 }
 
-// Validate describe the network validation logic
+// Validate describes the network validation logic
 func (in *NetworkChaos) Validate() (bool, string, error) {
 	if in.Spec.Duration != nil && in.Spec.Scheduler != nil {
 		return true, "", nil
