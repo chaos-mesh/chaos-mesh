@@ -7,7 +7,6 @@ import (
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
@@ -45,11 +44,6 @@ var _ = AfterSuite(func() {
 var _ = Describe("PodChaos", func() {
 	Context("PodFailure", func() {
 		mock.With("MockChaosDaemonClient", &MockChaosDaemonClient{})
-
-		req := ctrl.Request{NamespacedName: types.NamespacedName{
-			Namespace: metav1.NamespaceDefault,
-			Name:      "podchaos-name",
-		}}
 
 		objs, pods := GenerateNPods("p", 1, v1.PodRunning, metav1.NamespaceDefault, nil, nil, v1.ContainerStatus{
 			ContainerID: "fake-container-id",
@@ -90,10 +84,10 @@ var _ = Describe("PodChaos", func() {
 
 			var err error
 
-			err = r.Apply(context.TODO(), req, &podChaos)
+			err = r.Apply(context.TODO(), ctrl.Request{}, &podChaos)
 			Expect(err).ToNot(HaveOccurred())
 
-			err = r.Recover(context.TODO(), req, &podChaos)
+			err = r.Recover(context.TODO(), ctrl.Request{}, &podChaos)
 			Expect(err).ToNot(HaveOccurred())
 		})
 
