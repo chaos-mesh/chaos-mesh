@@ -78,26 +78,15 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, obj reconciler
 		return fmt.Errorf("podchaos[%s/%s] the name of container is empty", podchaos.Namespace, podchaos.Name)
 	}
 
-	pods, err := utils.SelectPods(ctx, r.Client, podchaos.Spec.Selector)
+	pods, err := utils.SelectAndGeneratePods(ctx, r.Client, &podchaos.Spec)
 	if err != nil {
-		r.Log.Error(err, "fail to get selected pods")
-		return err
-	}
-
-	if len(pods) == 0 {
-		r.Log.Error(nil, "no pod is selected", "name", req.Name, "namespace", req.Namespace)
-		return fmt.Errorf("podchaos[%s/%s] no pod is selected", podchaos.Namespace, podchaos.Name)
-	}
-
-	filteredPod, err := utils.GeneratePods(pods, podchaos.Spec.Mode, podchaos.Spec.Value)
-	if err != nil {
-		r.Log.Error(err, "fail to generate pods")
+		r.Log.Error(err, "failed to select and generate pods")
 		return err
 	}
 
 	g := errgroup.Group{}
-	for podIndex := range filteredPod {
-		pod := &filteredPod[podIndex]
+	for podIndex := range pods {
+		pod := &pods[podIndex]
 		haveContainer := false
 
 		for containerIndex := range pod.Status.ContainerStatuses {

@@ -53,7 +53,7 @@ func SelectAndGeneratePods(ctx context.Context, c client.Client, spec SelectSpec
 	mode := spec.GetMode()
 	value := spec.GetValue()
 
-	pods, err := SelectPods(ctx, c, selector)
+	pods, err := selectPods(ctx, c, selector)
 	if err != nil {
 		return nil, err
 	}
@@ -63,7 +63,7 @@ func SelectAndGeneratePods(ctx context.Context, c client.Client, spec SelectSpec
 		return nil, err
 	}
 
-	filteredPod, err := GeneratePods(pods, mode, value)
+	filteredPod, err := generatePods(pods, mode, value)
 	if err != nil {
 		return nil, err
 	}
@@ -71,10 +71,10 @@ func SelectAndGeneratePods(ctx context.Context, c client.Client, spec SelectSpec
 	return filteredPod, nil
 }
 
-// SelectPods returns the list of pods that are available for pod chaos action.
+// selectPods returns the list of pods that are available for pod chaos action.
 // It returns all pods that match the configured label, annotation and namespace selectors.
 // If pods are specifically specified by `selector.Pods`, it just returns the selector.Pods.
-func SelectPods(ctx context.Context, c client.Client, selector v1alpha1.SelectorSpec) ([]v1.Pod, error) {
+func selectPods(ctx context.Context, c client.Client, selector v1alpha1.SelectorSpec) ([]v1.Pod, error) {
 	var pods []v1.Pod
 
 	// pods are specifically specified
@@ -215,8 +215,8 @@ func CheckPodMeetSelector(pod v1.Pod, selector v1alpha1.SelectorSpec) (bool, err
 	return false, nil
 }
 
-// GeneratePods generate pods according to mode from pod list
-func GeneratePods(pods []v1.Pod, mode v1alpha1.PodMode, value string) ([]v1.Pod, error) {
+// generatePods generate pods according to mode from pod list
+func generatePods(pods []v1.Pod, mode v1alpha1.PodMode, value string) ([]v1.Pod, error) {
 	if len(pods) == 0 {
 		return nil, errors.New("cannot generate pods from empty list")
 	}
