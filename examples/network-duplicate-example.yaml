@@ -7,8 +7,6 @@ spec:
   action: duplicate
   mode: one
   selector:
-    namespaces:
-      - tidb-cluster-demo
     labelSelectors:
       "app.kubernetes.io/component": "tikv"
   duplicate:

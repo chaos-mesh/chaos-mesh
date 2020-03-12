@@ -56,6 +56,15 @@ spec:
                       name: {{ template "chaos-mesh.svc" . }}
                       namespace: {{ .Release.Namespace }}
                       path: "/inject-v1-pod"
+                {{- range $crd := .Values.webhook.CRDS }}
+                - name: m{{ $crd }}.kb.io
+                  clientConfig:
+                    caBundle: "${CA_BUNDLE}"
+                    service:
+                      name: {{ template "chaos-mesh.svc" $ }}
+                      namespace: {{ $.Release.Namespace }}
+                      path: /mutate-pingcap-com-v1alpha1-{{ $crd }}
+                {{- end }}
               ---
               apiVersion: admissionregistration.k8s.io/v1beta1
               kind: ValidatingWebhookConfiguration

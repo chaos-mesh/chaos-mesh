@@ -7,8 +7,6 @@ spec:
   action: loss
   mode: one
   selector:
-    namespaces:
-      - tidb-cluster-demo
     labelSelectors:
       "app.kubernetes.io/component": "tikv"
   loss:

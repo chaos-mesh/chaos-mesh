@@ -11,32 +11,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package watcher
+package v1alpha1
 
 import (
-	"testing"
-
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-
-	"sigs.k8s.io/controller-runtime/pkg/envtest"
-
-	"k8s.io/client-go/rest"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-func TestAPIs(t *testing.T) {
-	RegisterFailHandler(Fail)
-
-	RunSpecsWithDefaultAndCustomReporters(t,
-		"webhook config watcher",
-		[]Reporter{envtest.NewlineReporter{}})
-}
-
-func MockClusterConfig() (*rest.Config, error) {
-	return &rest.Config{
-		Host:            "https://testhost:9527",
-		TLSClientConfig: rest.TLSClientConfig{},
-		BearerToken:     "testToken",
-		BearerTokenFile: "/var/run/secrets/kubernetes.io/serviceaccount/token",
-	}, nil
-}
+var _ = Describe("iochaos_webhook", func() {
+	Context("Defaulter", func() {
+		It("set default namespace selector", func() {
+			iochaos := &IoChaos{
+				ObjectMeta: metav1.ObjectMeta{Namespace: metav1.NamespaceDefault},
+			}
+			iochaos.Default()
+			Expect(iochaos.Spec.Selector.Namespaces[0]).To(Equal(metav1.NamespaceDefault))
+		})
+	})
+})
