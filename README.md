@@ -60,7 +60,7 @@ See [Docs](https://github.com/pingcap/chaos-mesh/wiki/Deploy-Chaos-Mesh)
 
 See [FAQs](https://github.com/pingcap/chaos-mesh/wiki/FAQs).
 
-## Contrbute
+## Contribute
 
 See [Development Guide](https://github.com/pingcap/chaos-mesh/wiki/Development-Overview).
 
