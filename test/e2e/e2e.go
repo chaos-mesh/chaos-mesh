@@ -2,11 +2,14 @@ package e2e
 
 import (
 	"fmt"
+
 	// load pprof
 	_ "net/http/pprof"
 	"os/exec"
 
 	"github.com/onsi/ginkgo"
+	"github.com/pingcap/chaos-mesh/test"
+	e2econfig "github.com/pingcap/chaos-mesh/test/e2e/config"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
@@ -127,6 +130,12 @@ var _ = ginkgo.SynchronizedBeforeSuite(func() []byte {
 		_, err = kubeCli.CoreV1().PersistentVolumes().Update(&pv)
 		framework.ExpectNoError(err, fmt.Sprintf("failed to update pv %s", pv.Name))
 	}
+	oa := test.NewOperatorAction(kubeCli, test.NewDefaultConfig())
+	ocfg := e2econfig.NewDefaultOperatorConfig()
+	err = oa.InstallCRD(ocfg)
+	framework.ExpectNoError(err, "failed to install crd")
+	err = oa.DeployOperator(ocfg)
+	framework.ExpectNoError(err, "failed to install chaos-mesh")
 	return nil
 }, func(data []byte) {
 	// Run on all Ginkgo nodes

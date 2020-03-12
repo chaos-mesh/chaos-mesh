@@ -178,6 +178,7 @@ e2e-build:
 e2e-docker: e2e-build
 	[ -d test/image/e2e/chaos-mesh ] && rm -r test/image/e2e/chaos-mesh || true
 	cp -r helm/chaos-mesh test/image/e2e
+	cp -r manifests test/image/e2e
 	docker build -t "${DOCKER_REGISTRY}/pingcap/chaos-mesh-e2e:latest" test/image/e2e
 
 

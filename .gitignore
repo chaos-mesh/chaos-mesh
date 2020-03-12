@@ -25,3 +25,4 @@ output/
 _artifacts/
 
 test/image/e2e/chaos-mesh
+test/image/e2e/manifests/

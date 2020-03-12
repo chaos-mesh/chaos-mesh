@@ -353,7 +353,7 @@ trap "e2e::down" EXIT
 e2e::up
 e2e::setup_helm_server
 e2e::image_build
-#e2e::image_load
+e2e::image_load
 
 export KUBECONFIG
 export KUBECONTEXT

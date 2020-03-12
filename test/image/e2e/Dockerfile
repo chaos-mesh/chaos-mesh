@@ -16,6 +16,7 @@ RUN curl https://storage.googleapis.com/kubernetes-release/release/${KUBECTL_VER
 
 
 ADD chaos-mesh /charts/e2e/chaos-mesh
+ADD manifests /manifests/e2e
 
 ADD bin/ginkgo /usr/local/bin/
 ADD bin/e2e.test /usr/local/bin/

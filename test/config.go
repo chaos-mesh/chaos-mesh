@@ -14,13 +14,15 @@
 package test
 
 type Config struct {
-	ChartDir string
-	Tag      string
+	ChartDir    string
+	ManifestDir string
+	Tag         string
 }
 
 func NewDefaultConfig() *Config {
 	return &Config{
-		ChartDir: "/charts",
-		Tag:      "e2e",
+		ChartDir:    "/charts",
+		ManifestDir: "/manifests",
+		Tag:         "e2e",
 	}
 }

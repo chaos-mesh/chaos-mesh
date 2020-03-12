@@ -15,10 +15,8 @@ package test
 
 import (
 	"fmt"
-	"github.com/pingcap/chaos-mesh/test/e2e/util/portforward"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/klog"
-	"k8s.io/kubernetes/test/e2e/framework"
 	"os/exec"
 	"path/filepath"
 	"strings"
@@ -30,19 +28,16 @@ const (
 
 type OperatorAction interface {
 	DeployOperator(config OperatorConfig) error
+	InstallCRD(config OperatorConfig) error
 }
 
 func NewOperatorAction(
 	kubeCli kubernetes.Interface,
-	fw portforward.PortForward,
-	f *framework.Framework,
 	cfg *Config,
 ) OperatorAction {
 
 	oa := &operatorAction{
-		framework: f,
 		kubeCli:   kubeCli,
-		fw:        fw,
 		cfg:       cfg,
 	}
 	return oa
@@ -50,7 +45,6 @@ func NewOperatorAction(
 
 func (oa *operatorAction) DeployOperator(info OperatorConfig) error {
 	klog.Infof("deploying chaos-mesh:%v", info.ReleaseName)
-
 	cmd := fmt.Sprintf(`helm install %s --name %s --namespace %s --set-string %s`,
 		oa.operatorChartPath(info.Tag),
 		info.ReleaseName,
@@ -60,6 +54,20 @@ func (oa *operatorAction) DeployOperator(info OperatorConfig) error {
 	res, err := exec.Command("/bin/sh", "-c", cmd).CombinedOutput()
 	if err != nil {
 		return fmt.Errorf("failed to deploy operator: %v, %s", err, string(res))
+	}
+	return nil
+}
+
+func (oa *operatorAction) InstallCRD(info OperatorConfig) error {
+	klog.Infof("deploying chaos-mesh crd :%v", info.ReleaseName)
+	oa.runKubectlOrDie("apply", "-f", oa.manifestPath("e2e/crd.yaml"))
+
+	// workaround for https://github.com/kubernetes/kubernetes/issues/65517
+	klog.Infof("force sync kubectl cache")
+	cmdArgs := []string{"sh", "-c", "rm -rf ~/.kube/cache ~/.kube/http-cache"}
+	_, err := exec.Command(cmdArgs[0], cmdArgs[1:]...).CombinedOutput()
+	if err != nil {
+		klog.Fatalf("Failed to run '%s': %v", strings.Join(cmdArgs, " "), err)
 	}
 	return nil
 }
@@ -85,4 +93,19 @@ func (oa *operatorAction) operatorChartPath(tag string) string {
 
 func (oa *operatorAction) chartPath(name string, tag string) string {
 	return filepath.Join(oa.cfg.ChartDir, tag, name)
+}
+
+func (oa *operatorAction) manifestPath(tag string) string {
+	return filepath.Join(oa.cfg.ManifestDir, tag)
+}
+
+func (oa *operatorAction) runKubectlOrDie(args ...string) string {
+	cmd := "kubectl"
+	klog.Infof("Running '%s %s'", cmd, strings.Join(args, " "))
+	out, err := exec.Command(cmd, args...).CombinedOutput()
+	if err != nil {
+		klog.Fatalf("Failed to run '%s %s'\nCombined output: %q\nError: %v", cmd, strings.Join(args, " "), string(out), err)
+	}
+	klog.Infof("Combined output: %q", string(out))
+	return string(out)
 }
