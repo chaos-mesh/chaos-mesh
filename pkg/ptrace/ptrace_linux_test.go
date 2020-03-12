@@ -79,7 +79,7 @@ var _ = Describe("PTrace", func() {
 
 	AfterEach(func() {
 		err := program.Detach()
-		Expect(err).ShouldNot(HaveOccurred(), "error: %+v", err)
+		Expect(err).Should(HaveOccurred(), "error: %+v", err)
 
 		err = t.Stop()
 		Expect(err).ShouldNot(HaveOccurred(), "error: %+v", err)

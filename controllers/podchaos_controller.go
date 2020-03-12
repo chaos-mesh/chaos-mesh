@@ -48,18 +48,18 @@ func (r *PodChaosReconciler) Reconcile(req ctrl.Request) (result ctrl.Result, er
 	}
 
 	chaos := &v1alpha1.PodChaos{}
-if err := r.Get(context.Background(), req.NamespacedName, chaos); err != nil {
-	r.Log.Error(err, "unable to get pod chaos")
-								return ctrl.Result{}, nil
-}
+	if err := r.Get(context.Background(), req.NamespacedName, chaos); err != nil {
+		r.Log.Error(err, "unable to get pod chaos")
+		return ctrl.Result{}, nil
+	}
 
-result, err = reconciler.Reconcile(req, chaos)
-if err != nil {
-			if !chaos.IsDeleted() {
-				r.Event(chaos, v1.EventTypeWarning, utils.EventChaosInjectFailed, err.Error())
-					} else {
-						r.Event(chaos, v1.EventTypeWarning, utils.EventChaosRecoverFailed, err.Error())
-					}
+	result, err = reconciler.Reconcile(req, chaos)
+	if err != nil {
+		if !chaos.IsDeleted() {
+			r.Event(chaos, v1.EventTypeWarning, utils.EventChaosInjectFailed, err.Error())
+		} else {
+			r.Event(chaos, v1.EventTypeWarning, utils.EventChaosRecoverFailed, err.Error())
+		}
 	}
 
 	return result, nil
