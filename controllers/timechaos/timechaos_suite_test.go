@@ -41,20 +41,16 @@ var _ = AfterSuite(func() {
 })
 
 var _ = Describe("TimeChaos", func() {
-	BeforeEach(func() {
-		// Add any setup steps that needs to be executed before each test
-	})
-
-	AfterEach(func() {
-		// Add any teardown steps that needs to be executed after each test
-	})
-
-	// Add Tests for OpenAPI validation (or additional CRD features) specified in
-	// your API definition.
-	// Avoid adding tests for vanilla CRUD operations because they would
-	// test Kubernetes API server, which isn't the goal here.
 	Context("TimeChaos", func() {
-		podObjects, pods := GenerateNPods("p", 1, v1.PodRunning, metav1.NamespaceDefault, nil, map[string]string{"l1": "l1"})
+		podObjects, pods := GenerateNPods(
+			"p",
+			1,
+			v1.PodRunning,
+			metav1.NamespaceDefault,
+			nil,
+			map[string]string{"l1": "l1"},
+			v1.ContainerStatus{ContainerID: "fake-container-id"},
+		)
 
 		mock.With("MockSelectAndGeneratePods", func() []v1.Pod {
 			return pods
@@ -69,7 +65,7 @@ var _ = Describe("TimeChaos", func() {
 				APIVersion: "v1",
 			},
 			Spec: v1alpha1.TimeChaosSpec{
-				Mode:       "FixedPodMode",
+				Mode:       v1alpha1.AllPodMode,
 				Value:      "0",
 				Selector:   v1alpha1.SelectorSpec{Namespaces: []string{metav1.NamespaceDefault}},
 				TimeOffset: v1alpha1.TimeOffset{},

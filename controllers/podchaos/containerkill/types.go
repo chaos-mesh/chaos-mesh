@@ -106,10 +106,13 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, obj reconciler
 
 			if containerName == podchaos.Spec.ContainerName {
 				haveContainer = true
-				err = r.KillContainer(ctx, pod, containerID)
-				if err != nil {
-					r.Log.Error(err, "failed to kill container")
-				}
+				g.Go(func() error {
+					err = r.KillContainer(ctx, pod, containerID)
+					if err != nil {
+						r.Log.Error(err, "failed to kill container")
+					}
+					return err
+				})
 			}
 		}
 
