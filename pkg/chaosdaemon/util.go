@@ -16,9 +16,15 @@ package chaosdaemon
 import (
 	"context"
 	"fmt"
+	"io/ioutil"
 	"net/http"
+	"os"
 	"os/exec"
+	"strconv"
+	"sync"
 	"syscall"
+
+	"github.com/pingcap/chaos-mesh/pkg/utils"
 
 	"github.com/containerd/containerd"
 	"github.com/docker/docker/api/types"
@@ -216,4 +222,71 @@ func (c ContainerdClient) ContainerKillByContainerID(ctx context.Context, contai
 	err = task.Kill(ctx, syscall.SIGKILL)
 
 	return err
+}
+
+// GetChildProcesses will return all child processes's pid. Include all generations.
+func GetChildProcesses(ppid uint32) ([]uint32, error) {
+	procs, err := ioutil.ReadDir(defaultProcPrefix)
+	if err != nil {
+		return nil, err
+	}
+
+	type processPair struct {
+		Pid  uint32
+		Ppid uint32
+	}
+
+	pairs := make(chan processPair)
+	done := make(chan bool)
+
+	go func() {
+		var wg sync.WaitGroup
+
+		for _, proc := range procs {
+			_, err := strconv.ParseUint(proc.Name(), 10, 32)
+			if err != nil {
+				continue
+			}
+
+			statusPath := defaultProcPrefix + "/" + proc.Name() + "/stat"
+
+			wg.Add(1)
+			go func() {
+				defer wg.Done()
+
+				reader, err := os.Open(statusPath)
+				if err != nil {
+					log.Error(err, "read status file error", "path", statusPath)
+					return
+				}
+
+				var (
+					pid    uint32
+					comm   string
+					state  string
+					parent uint32
+				)
+				// according to procfs's man page
+				fmt.Fscanf(reader, "%d %s %s %d", &pid, &comm, &state, &parent)
+
+				pairs <- processPair{
+					Pid:  pid,
+					Ppid: parent,
+				}
+			}()
+		}
+
+		wg.Wait()
+		done <- true
+	}()
+
+	processGraph := utils.NewGraph()
+	for {
+		select {
+		case pair := <-pairs:
+			processGraph.Insert(pair.Ppid, pair.Pid)
+		case <-done:
+			return processGraph.Flatten(ppid), nil
+		}
+	}
 }

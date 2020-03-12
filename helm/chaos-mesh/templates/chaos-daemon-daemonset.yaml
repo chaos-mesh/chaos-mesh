@@ -64,7 +64,57 @@ spec:
               hostPort: {{ .Values.chaosDaemon.grpcPort }}
             - name: http
               containerPort: {{ .Values.chaosDaemon.httpPort }}
+      {{- with .Values.chaosDaemon.tolerations }}
+      tolerations:
+{{ toYaml . | indent 8 }}
+      {{- end }}
+{{- if .Values.bpfki.create }}
+        - name: bpfki
+          image: {{ .Values.bpfki.image }}
+          imagePullPolicy: {{ .Values.bpfki.imagePullPolicy | default "IfNotPresent" }}
+          {{- if .Values.bpfki.resources }}
+          resources:
+{{ toYaml .Values.bpfki.resources | indent 12 }}
+          {{- end }}
+          command:
+            - /usr/local/bin/bpfki
+            - -port
+            - !!str {{ .Values.bpfki.grpcPort }}
+          securityContext:
+            privileged: true
+          volumeMounts:
+            - name: localtime-path
+              mountPath: /etc/localtime
+              readOnly: true
+            - name: modules-path
+              mountPath: /lib/modules
+              readOnly: true
+            - name: src-path
+              mountPath: /usr/src
+              readOnly: true
+            - name: sys-path
+              mountPath: /sys
+              readOnly: true
+          ports:
+            - name: grpc
+              containerPort: {{ .Values.bpfki.grpcPort }}
+              hostPort: {{ .Values.bpfki.grpcPort }}
+{{- end }}
       volumes:
         - name: socket-path
           hostPath:
             path: {{ .Values.chaosDaemon.socketPath | default "/var/run/docker.sock" }}
+{{- if .Values.bpfki.create }}
+        - name: localtime-path
+          hostPath:
+            path: /etc/localtime
+        - name: modules-path
+          hostPath:
+            path: /lib/modules
+        - name: src-path
+          hostPath:
+            path: /usr/src
+        - name: sys-path
+          hostPath:
+            path: /sys
+{{- end }}

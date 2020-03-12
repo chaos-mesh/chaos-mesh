@@ -107,7 +107,6 @@ func ModifyTime(pid int, deltaSec int64, deltaNsec int64, clockIdsMask uint64) e
 	}()
 
 	var vdsoEntry *mapreader.Entry
-	// find injected image to avoid redundant inject (which will lead to memory leak)
 	for index := range program.Entries {
 		// reverse loop is faster
 		e := program.Entries[len(program.Entries)-index-1]
@@ -121,8 +120,11 @@ func ModifyTime(pid int, deltaSec int64, deltaNsec int64, clockIdsMask uint64) e
 	}
 
 	// minus tailing variable part
-	constImageLen := len(fakeImage) - 16
+	// 24 = 3 * 8 because we have three variables
+	constImageLen := len(fakeImage) - 24
 	var fakeEntry *mapreader.Entry
+
+	// find injected image to avoid redundant inject (which will lead to memory leak)
 	for _, e := range program.Entries {
 		e := e
 

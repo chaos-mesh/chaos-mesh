@@ -131,15 +131,30 @@ tidy:
 	GO111MODULE=on go mod tidy
 	git diff --quiet go.mod go.sum
 
-image:
+image: image-chaos-daemon image-chaos-mesh image-chaos-fs image-chaos-scripts image-chaos-grafana image-chaos-dashboard image-chaos-kernel
+
+image-binary:
 	docker build -t pingcap/binary ${DOCKER_BUILD_ARGS} .
 
+image-chaos-daemon: image-binary
 	docker build -t ${DOCKER_REGISTRY_PREFIX}pingcap/chaos-daemon ${DOCKER_BUILD_ARGS} images/chaos-daemon
+
+image-chaos-mesh: image-binary
 	docker build -t ${DOCKER_REGISTRY_PREFIX}pingcap/chaos-mesh ${DOCKER_BUILD_ARGS} images/chaos-mesh
+
+image-chaos-fs: image-binary
 	docker build -t ${DOCKER_REGISTRY_PREFIX}pingcap/chaos-fs ${DOCKER_BUILD_ARGS} images/chaosfs
+
+image-chaos-scripts:
 	docker build -t ${DOCKER_REGISTRY_PREFIX}pingcap/chaos-scripts ${DOCKER_BUILD_ARGS} images/chaos-scripts
+
+image-chaos-grafana:
 	docker build -t ${DOCKER_REGISTRY_PREFIX}pingcap/chaos-grafana ${DOCKER_BUILD_ARGS} images/grafana
+
+image-chaos-dashboard: image-binary
 	docker build -t ${DOCKER_REGISTRY_PREFIX}pingcap/chaos-dashboard ${DOCKER_BUILD_ARGS} images/chaos-dashboard
+
+image-chaos-kernel:
 	docker build -t ${DOCKER_REGISTRY_PREFIX}pingcap/chaos-kernel ${DOCKER_BUILD_ARGS} images/chaos-kernel
 
 docker-push:
@@ -152,13 +167,13 @@ docker-push:
 	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-kernel:latest"
 
 controller-gen:
-	$(GO) get sigs.k8s.io/controller-tools/cmd/controller-gen
+	$(GO) get sigs.k8s.io/controller-tools/cmd/controller-gen@v0.2.5
 revive:
-	$(GO) get github.com/mgechev/revive
+	$(GO) get github.com/mgechev/revive@v1.0.2-0.20200225072153-6219ca02fffb
 failpoint-ctl:
-	$(GO) get github.com/pingcap/failpoint/failpoint-ctl
+	$(GO) get github.com/pingcap/failpoint/failpoint-ctl@v0.0.0-20200210140405-f8f9fb234798
 goimports:
-	$(GO) get golang.org/x/tools/cmd/goimports
+	$(GO) get golang.org/x/tools/cmd/goimports@v0.0.0-20200309202150-20ab64c0d93f
 
 lint: revive
 	@echo "linting"

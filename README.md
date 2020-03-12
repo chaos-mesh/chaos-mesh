@@ -45,6 +45,7 @@ which correspond to the following major actions (experiments):
 - network-partition: Simulate network partition.
 - IO chaos: Simulate file system faults such as I/O delay, read/write errors, etc.
 - time chaos: The selected pod will be injected clock skew.
+- kernel chaos: The selected pod will be injected with (slab,bio,etc) errors.
 
 ## Quick start
 
@@ -58,6 +59,10 @@ See [Docs](https://github.com/pingcap/chaos-mesh/wiki/Deploy-Chaos-Mesh)
 ## FAQs
 
 See [FAQs](https://github.com/pingcap/chaos-mesh/wiki/FAQs).
+
+## Contribute
+
+See [Development Guide](https://github.com/pingcap/chaos-mesh/wiki/Development-Overview).
 
 ## Community
 
