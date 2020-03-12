@@ -41,11 +41,12 @@ type SelectSpec interface {
 	GetValue() string
 }
 
-func SelectAndGeneratePods(ctx context.Context, c client.Client, spec SelectSpec) ([]v1.Pod, error) {
-	if pods := mock.On("MockSelectAndGeneratePods"); pods != nil {
+// SelectAndFilterPods returns the list of pods that filtered by selector and PodMode
+func SelectAndFilterPods(ctx context.Context, c client.Client, spec SelectSpec) ([]v1.Pod, error) {
+	if pods := mock.On("MockSelectAndFilterPods"); pods != nil {
 		return pods.(func() []v1.Pod)(), nil
 	}
-	if err := mock.On("MockSelectedAndGeneratePodsError"); err != nil {
+	if err := mock.On("MockSelectedAndFilterPodsError"); err != nil {
 		return nil, err.(error)
 	}
 
@@ -63,7 +64,7 @@ func SelectAndGeneratePods(ctx context.Context, c client.Client, spec SelectSpec
 		return nil, err
 	}
 
-	filteredPod, err := generatePods(pods, mode, value)
+	filteredPod, err := filterPodsByMode(pods, mode, value)
 	if err != nil {
 		return nil, err
 	}
@@ -215,8 +216,8 @@ func CheckPodMeetSelector(pod v1.Pod, selector v1alpha1.SelectorSpec) (bool, err
 	return false, nil
 }
 
-// generatePods generate pods according to mode from pod list
-func generatePods(pods []v1.Pod, mode v1alpha1.PodMode, value string) ([]v1.Pod, error) {
+// filterPodsByMode filters pods by mode from pod list
+func filterPodsByMode(pods []v1.Pod, mode v1alpha1.PodMode, value string) ([]v1.Pod, error) {
 	if len(pods) == 0 {
 		return nil, errors.New("cannot generate pods from empty list")
 	}

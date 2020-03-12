@@ -48,7 +48,7 @@ var _ = Describe("PodChaos", func() {
 			Name:        "container-name",
 		})
 
-		mock.With("MockSelectAndGeneratePods", func() []v1.Pod {
+		mock.With("MockSelectAndFilterPods", func() []v1.Pod {
 			return pods
 		})
 

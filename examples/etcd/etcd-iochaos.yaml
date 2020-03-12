@@ -9,8 +9,6 @@ spec:
   configName: "chaosfs-etcd"
   path: ""
   selector:
-    namespaces:
-      - chaos-testing
     labelSelectors:
       app: etcd
   layer: "fs"

@@ -52,7 +52,7 @@ var _ = Describe("TimeChaos", func() {
 			v1.ContainerStatus{ContainerID: "fake-container-id"},
 		)
 
-		mock.With("MockSelectAndGeneratePods", func() []v1.Pod {
+		mock.With("MockSelectAndFilterPods", func() []v1.Pod {
 			return pods
 		})
 		mock.With("MockChaosDaemonClient", &MockChaosDaemonClient{})

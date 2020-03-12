@@ -78,9 +78,9 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, obj reconciler
 		return fmt.Errorf("podchaos[%s/%s] the name of container is empty", podchaos.Namespace, podchaos.Name)
 	}
 
-	pods, err := utils.SelectAndGeneratePods(ctx, r.Client, &podchaos.Spec)
+	pods, err := utils.SelectAndFilterPods(ctx, r.Client, &podchaos.Spec)
 	if err != nil {
-		r.Log.Error(err, "failed to select and generate pods")
+		r.Log.Error(err, "fail to select and filter pods")
 		return err
 	}
 
