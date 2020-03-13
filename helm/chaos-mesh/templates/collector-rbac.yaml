@@ -77,6 +77,7 @@ rules:
       - iochaos
       - timechaos
       - kernelchaos
+      - stresschaos
     verbs: ["*"]
 ---
 kind: ClusterRoleBinding
@@ -138,6 +139,7 @@ rules:
       - iochaos
       - timechaos
       - kernelchaos
+      - stresschaos
     verbs: ["*"]
 ---
 kind: RoleBinding

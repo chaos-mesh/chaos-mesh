@@ -14,15 +14,13 @@
 package chaosstress
 
 import (
-	"context"
-
+	"fmt"
 	pb "github.com/pingcap/chaos-mesh/pkg/chaosstress/pb"
 	"github.com/pingcap/chaos-mesh/pkg/mock"
 	"github.com/pingcap/chaos-mesh/pkg/utils"
 
 	"google.golang.org/grpc"
 	v1 "k8s.io/api/core/v1"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 // ClientInterface represents the ChaosStressClient, it's used to simply unit test
@@ -42,9 +40,18 @@ func (c *GrpcChaosStressClient) Close() error {
 	return c.conn.Close()
 }
 
+func createGrpcConnection(pod *v1.Pod, port string) (*grpc.ClientConn, error) {
+	conn, err := grpc.Dial(fmt.Sprintf("%s:%s", pod.Status.PodIP, port),
+		grpc.WithInsecure(),
+		grpc.WithUnaryInterceptor(utils.TimeoutClientInterceptor))
+	if err != nil {
+		return nil, err
+	}
+	return conn, nil
+}
+
 // NewGrpcChaosStressClient would create a ChaosStressClient
-func NewGrpcChaosStressClient(ctx context.Context, c client.Client, pod *v1.Pod,
-	port string) (ClientInterface, error) {
+func NewGrpcChaosStressClient(pod *v1.Pod, port string) (ClientInterface, error) {
 	if cli := mock.On("MockChaosStressClient"); cli != nil {
 		return cli.(ClientInterface), nil
 	}
@@ -52,7 +59,7 @@ func NewGrpcChaosStressClient(ctx context.Context, c client.Client, pod *v1.Pod,
 		return nil, err.(error)
 	}
 
-	cc, err := utils.CreateGrpcConnection(ctx, c, pod, port)
+	cc, err := createGrpcConnection(pod, port)
 	if err != nil {
 		return nil, err
 	}

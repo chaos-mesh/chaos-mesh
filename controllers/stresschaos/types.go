@@ -174,26 +174,26 @@ func (r *Reconciler) cleanFinalizersAndRecover(ctx context.Context, chaos *v1alp
 
 func (r *Reconciler) recoverPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.StressChaos) error {
 	r.Log.Info("Try to recover pod", "namespace", pod.Namespace, "name", pod.Name)
-	stressClient, err := chaosstress.NewGrpcChaosStressClient(ctx, r.Client,
-		pod, os.Getenv("STRESS_SERVER_PORT"))
-	if err != nil {
-		return err
-	}
-	defer stressClient.Close()
-	if _, err := stressClient.CancelStressors(ctx,
-		&pb.StressRequest{
-			Action: pb.StressRequest_CANCEL,
-			Uuid:   chaos.Status.UUID,
-		}); err != nil {
-		return err
-	}
-	old := chaos.Status.UUID
-	chaos.Status.UUID = ""
-	err = r.Update(ctx, chaos)
-	if err != nil {
-		r.Log.Error(err, "unable to clear stress chaos uuid", "uuid", old)
-	}
-	return err
+	//stressClient, err := chaosstress.NewGrpcChaosStressClient(
+	//	pod, os.Getenv("STRESS_SERVER_PORT"))
+	//if err != nil {
+	//	return err
+	//}
+	//defer stressClient.Close()
+	//if _, err := stressClient.CancelStressors(ctx,
+	//	&pb.StressRequest{
+	//		Action: pb.StressRequest_CANCEL,
+	//		Uuid:   chaos.Status.UUID,
+	//	}); err != nil {
+	//	return err
+	//}
+	//old := chaos.Status.UUID
+	//chaos.Status.UUID = ""
+	//err = r.Update(ctx, chaos)
+	//if err != nil {
+	//	r.Log.Error(err, "unable to clear stress chaos uuid", "uuid", old)
+	//}
+	return nil
 }
 
 // Object would return the instance of chaos
@@ -221,8 +221,9 @@ func (r *Reconciler) applyAllPods(ctx context.Context, pods []v1.Pod, chaos *v1a
 }
 
 func (r *Reconciler) applyPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.StressChaos) error {
-	r.Log.Info("Try to apply stress tests", "namespace", pod.Namespace, "name", pod.Name)
-	stressClient, err := chaosstress.NewGrpcChaosStressClient(ctx, r.Client,
+	r.Log.Info("Try to apply stress tests", "namespace",
+		pod.Namespace, "name", pod.Name, "port", os.Getenv("STRESS_SERVER_PORT"))
+	stressClient, err := chaosstress.NewGrpcChaosStressClient(
 		pod, os.Getenv("STRESS_SERVER_PORT"))
 	if err != nil {
 		return err
