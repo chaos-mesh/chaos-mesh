@@ -13,9 +13,33 @@
 
 package v1alpha1
 
+import (
+	"k8s.io/apimachinery/pkg/util/validation/field"
+	"sigs.k8s.io/controller-runtime/pkg/webhook"
+)
+
+const (
+	// ValidateSchedulerError defined the error message for ValidateScheduler
+	ValidateSchedulerError = "schedule and duration should be omitted or defined at the same time"
+
+	// ValidatePodchaosSchedulerError defined the error message for ValidateScheduler of Podchaos
+	ValidatePodchaosSchedulerError = "schedule should be omitted"
+)
+
 // DefaultNamespace set the namespace of chaos object as the default namespace selector if namespaces not set
 func (in *SelectorSpec) DefaultNamespace(namespace string) {
 	if len(in.Namespaces) == 0 {
 		in.Namespaces = []string{namespace}
 	}
+}
+
+// +kubebuilder:object:generate=false
+
+// ChaosValidator describe the interface should be implemented in chaos
+type ChaosValidator interface {
+	webhook.Validator
+	// Validate validate chaos object
+	Validate() error
+	// ValidateScheduler validate the scheduler and duration
+	ValidateScheduler(root *field.Path) field.ErrorList
 }

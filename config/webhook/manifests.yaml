@@ -109,6 +109,101 @@ webhooks:
     service:
       name: webhook-service
       namespace: system
+      path: /validate-pingcap-com-v1alpha1-iochaos
+  failurePolicy: Fail
+  name: viochaos.kb.io
+  rules:
+  - apiGroups:
+    - pingcap.com
+    apiVersions:
+    - v1alpha1
+    operations:
+    - CREATE
+    - UPDATE
+    - DELETE
+    resources:
+    - iochaos
+- clientConfig:
+    caBundle: Cg==
+    service:
+      name: webhook-service
+      namespace: system
+      path: /validate-pingcap-com-v1alpha1-kernelchaos
+  failurePolicy: Fail
+  name: vkernelchaos.kb.io
+  rules:
+  - apiGroups:
+    - pingcap.com
+    apiVersions:
+    - v1alpha1
+    operations:
+    - CREATE
+    - UPDATE
+    - DELETE
+    resources:
+    - kernelchaos
+- clientConfig:
+    caBundle: Cg==
+    service:
+      name: webhook-service
+      namespace: system
+      path: /validate-pingcap-com-v1alpha1-networkchaos
+  failurePolicy: Fail
+  name: vnetworkchaos.kb.io
+  rules:
+  - apiGroups:
+    - pingcap.com
+    apiVersions:
+    - v1alpha1
+    operations:
+    - CREATE
+    - UPDATE
+    - DELETE
+    resources:
+    - networkchaos
+- clientConfig:
+    caBundle: Cg==
+    service:
+      name: webhook-service
+      namespace: system
+      path: /validate-pingcap-com-v1alpha1-podchaos
+  failurePolicy: Fail
+  name: vpodchaos.kb.io
+  rules:
+  - apiGroups:
+    - pingcap.com
+    apiVersions:
+    - v1alpha1
+    operations:
+    - CREATE
+    - UPDATE
+    - DELETE
+    resources:
+    - podchaos
+- clientConfig:
+    caBundle: Cg==
+    service:
+      name: webhook-service
+      namespace: system
+      path: /validate-pingcap-com-v1alpha1-timechaos
+  failurePolicy: Fail
+  name: vtimechaos.kb.io
+  rules:
+  - apiGroups:
+    - pingcap.com
+    apiVersions:
+    - v1alpha1
+    operations:
+    - CREATE
+    - UPDATE
+    - DELETE
+    resources:
+    - timechaos
+- clientConfig:
+    caBundle: Cg==
+    service:
+      name: webhook-service
+      namespace: system
       path: /inject-v1-pod
   failurePolicy: Fail
   name: vpod.kb.io

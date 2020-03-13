@@ -14,6 +14,10 @@
 package v1alpha1
 
 import (
+	"fmt"
+
+	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/util/validation/field"
 	ctrl "sigs.k8s.io/controller-runtime"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
@@ -23,9 +27,9 @@ import (
 var podchaoslog = logf.Log.WithName("podchaos-resource")
 
 // SetupWebhookWithManager setup PodChaos's webhook with manager
-func (r *PodChaos) SetupWebhookWithManager(mgr ctrl.Manager) error {
+func (in *PodChaos) SetupWebhookWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewWebhookManagedBy(mgr).
-		For(r).
+		For(in).
 		Complete()
 }
 
@@ -34,8 +38,80 @@ func (r *PodChaos) SetupWebhookWithManager(mgr ctrl.Manager) error {
 var _ webhook.Defaulter = &PodChaos{}
 
 // Default implements webhook.Defaulter so a webhook will be registered for the type
-func (r *PodChaos) Default() {
-	podchaoslog.Info("default", "name", r.Name)
+func (in *PodChaos) Default() {
+	podchaoslog.Info("default", "name", in.Name)
 
-	r.Spec.Selector.DefaultNamespace(r.GetNamespace())
+	in.Spec.Selector.DefaultNamespace(in.GetNamespace())
+}
+
+// +kubebuilder:webhook:verbs=create;update;delete,path=/validate-pingcap-com-v1alpha1-podchaos,mutating=false,failurePolicy=fail,groups=pingcap.com,resources=podchaos,versions=v1alpha1,name=vpodchaos.kb.io
+
+var _ ChaosValidator = &PodChaos{}
+
+// ValidateCreate implements webhook.Validator so a webhook will be registered for the type
+func (in *PodChaos) ValidateCreate() error {
+	podchaoslog.Info("validate create", "name", in.Name)
+	return in.Validate()
+}
+
+// ValidateUpdate implements webhook.Validator so a webhook will be registered for the type
+func (in *PodChaos) ValidateUpdate(old runtime.Object) error {
+	podchaoslog.Info("validate update", "name", in.Name)
+	return in.Validate()
+}
+
+// ValidateDelete implements webhook.Validator so a webhook will be registered for the type
+func (in *PodChaos) ValidateDelete() error {
+	podchaoslog.Info("validate delete", "name", in.Name)
+
+	// Nothing to do?
+	return nil
+}
+
+// Validate validate chaos object
+func (in *PodChaos) Validate() error {
+	specField := field.NewPath("spec")
+	errLst := in.ValidateScheduler(specField)
+
+	if len(errLst) > 0 {
+		return fmt.Errorf(errLst.ToAggregate().Error())
+	}
+	return nil
+}
+
+// ValidateScheduler validate the scheduler and duration
+func (in *PodChaos) ValidateScheduler(root *field.Path) field.ErrorList {
+	allErrs := field.ErrorList{}
+	schedulerField := root.Child("scheduler")
+
+	switch in.Spec.Action {
+	case PodFailureAction:
+		if in.Spec.Duration != nil && in.Spec.Scheduler != nil {
+			return nil
+		} else if in.Spec.Duration == nil && in.Spec.Scheduler == nil {
+			return nil
+		}
+		allErrs = append(allErrs, field.Invalid(schedulerField, in.Spec.Scheduler, ValidateSchedulerError))
+		break
+	case PodKillAction:
+		// We choose to ignore the Duration property even user define it
+		if in.Spec.Scheduler == nil {
+			allErrs = append(allErrs, field.Invalid(schedulerField, in.Spec.Scheduler, ValidatePodchaosSchedulerError))
+		}
+		break
+	case ContainerKillAction:
+		// We choose to ignore the Duration property even user define it
+		if in.Spec.Scheduler == nil {
+			allErrs = append(allErrs, field.Invalid(schedulerField, in.Spec.Scheduler, ValidatePodchaosSchedulerError))
+		}
+		break
+	default:
+		err := fmt.Errorf("podchaos[%s/%s] have unknown action type", in.Namespace, in.Name)
+		log.Error(err, "Wrong PodChaos Action type")
+
+		actionField := root.Child("action")
+		allErrs = append(allErrs, field.Invalid(actionField, in.Spec.Action, err.Error()))
+		break
+	}
+	return allErrs
 }
