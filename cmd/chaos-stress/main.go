@@ -45,7 +45,7 @@ func main() {
 		os.Exit(0)
 	}
 	if err := chaosstress.StartServer(addr); err != nil {
-		log.Error(err, "Failed to start server")
+		log.Error(err, "Server exited")
 		os.Exit(1)
 	}
 }

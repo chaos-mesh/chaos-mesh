@@ -43,6 +43,7 @@ type rpcServer struct {
 
 func (r *rpcServer) ExecStressors(ctx context.Context,
 	req *pb.StressRequest) (*pb.StressResponse, error) {
+	log.Info("executing stressors", "request", req)
 	raw, err := uuid2.NewUUID()
 	if err != nil {
 		return nil, err
@@ -69,6 +70,7 @@ func (r *rpcServer) ExecStressors(ctx context.Context,
 
 func (r *rpcServer) CancelStressors(ctx context.Context,
 	req *pb.StressRequest) (*empty.Empty, error) {
+	log.Info("canceling stressors", "request", req)
 	if len(req.Uuid) == 0 {
 		return nil, fmt.Errorf("missing chaos uuid")
 	}
@@ -78,7 +80,7 @@ func (r *rpcServer) CancelStressors(ctx context.Context,
 			return nil, err
 		}
 	}
-	return nil, nil
+	return &empty.Empty{}, nil
 }
 
 // StartServer starts the stress server over the specified address

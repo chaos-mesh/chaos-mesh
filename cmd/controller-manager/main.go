@@ -152,8 +152,9 @@ func main() {
 	}
 
 	if err = (&controllers.StressChaosReconciler{
-		Client: mgr.GetClient(),
-		Log:    ctrl.Log.WithName("controllers").WithName("StressChaos"),
+		Client:        mgr.GetClient(),
+		EventRecorder: mgr.GetEventRecorderFor("stresschaos-controller"),
+		Log:           ctrl.Log.WithName("controllers").WithName("StressChaos"),
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "StressChaos")
 		os.Exit(1)

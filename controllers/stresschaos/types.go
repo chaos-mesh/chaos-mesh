@@ -40,7 +40,7 @@ import (
 
 const stressChaosMsg = "stressors: %v"
 
-// Reconciler is time-chaos reconciler
+// Reconciler is stresschaos reconciler
 type Reconciler struct {
 	client.Client
 	record.EventRecorder
@@ -77,7 +77,7 @@ func (r *Reconciler) scheduleStressChaos(stresschaos *v1alpha1.StressChaos, req 
 	return sr.Reconcile(req)
 }
 
-// Apply applies time-chaos
+// Apply applies stress-chaos
 func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos reconciler.InnerObject) error {
 	stresschaos, ok := chaos.(*v1alpha1.StressChaos)
 	if !ok {
@@ -174,25 +174,24 @@ func (r *Reconciler) cleanFinalizersAndRecover(ctx context.Context, chaos *v1alp
 
 func (r *Reconciler) recoverPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.StressChaos) error {
 	r.Log.Info("Try to recover pod", "namespace", pod.Namespace, "name", pod.Name)
-	//stressClient, err := chaosstress.NewGrpcChaosStressClient(
-	//	pod, os.Getenv("STRESS_SERVER_PORT"))
-	//if err != nil {
-	//	return err
-	//}
-	//defer stressClient.Close()
-	//if _, err := stressClient.CancelStressors(ctx,
-	//	&pb.StressRequest{
-	//		Action: pb.StressRequest_CANCEL,
-	//		Uuid:   chaos.Status.UUID,
-	//	}); err != nil {
-	//	return err
-	//}
-	//old := chaos.Status.UUID
-	//chaos.Status.UUID = ""
-	//err = r.Update(ctx, chaos)
-	//if err != nil {
-	//	r.Log.Error(err, "unable to clear stress chaos uuid", "uuid", old)
-	//}
+	stressClient, err := chaosstress.NewGrpcChaosStressClient(
+		pod, os.Getenv("STRESS_SERVER_PORT"))
+	if err != nil {
+		return err
+	}
+	defer stressClient.Close()
+	if _, err := stressClient.CancelStressors(ctx,
+		&pb.StressRequest{
+			Uuid: chaos.Status.UUID,
+		}); err != nil {
+		return err
+	}
+	old := chaos.Status.UUID
+	chaos.Status.UUID = ""
+	err = r.Update(ctx, chaos)
+	if err != nil {
+		r.Log.Error(err, "unable to clear stress chaos uuid", "uuid", old)
+	}
 	return nil
 }
 
@@ -221,7 +220,7 @@ func (r *Reconciler) applyAllPods(ctx context.Context, pods []v1.Pod, chaos *v1a
 }
 
 func (r *Reconciler) applyPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.StressChaos) error {
-	r.Log.Info("Try to apply stress tests", "namespace",
+	r.Log.Info("Try to apply stress chaos", "namespace",
 		pod.Namespace, "name", pod.Name, "port", os.Getenv("STRESS_SERVER_PORT"))
 	stressClient, err := chaosstress.NewGrpcChaosStressClient(
 		pod, os.Getenv("STRESS_SERVER_PORT"))
@@ -230,7 +229,6 @@ func (r *Reconciler) applyPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.
 	}
 	defer stressClient.Close()
 	res, err := stressClient.ExecStressors(ctx, &pb.StressRequest{
-		Action:    pb.StressRequest_EXEC,
 		Stressors: chaos.Spec.Stressors,
 	})
 	if err != nil {
@@ -239,7 +237,7 @@ func (r *Reconciler) applyPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.
 	chaos.Status.UUID = res.Uuid
 	err = r.Update(ctx, chaos)
 	if err != nil {
-		r.Log.Error(err, "unable to set stress chaos uuid", "uuid", res.Uuid)
+		r.Log.Error(err, "unable to clear stress chaos uuid", "uuid", res.Uuid)
 	}
 	return err
 }

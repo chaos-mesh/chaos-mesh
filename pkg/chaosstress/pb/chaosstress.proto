@@ -25,13 +25,8 @@ service ChaosStress {
 }
 
 message StressRequest {
-    enum Action {
-        EXEC = 0;
-        CANCEL = 1;
-    }
     string uuid = 1;
-    Action action = 2;
-    string stressors = 3;
+    string stressors = 2;
 }
 
 message StressResponse {
