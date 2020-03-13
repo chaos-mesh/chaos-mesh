@@ -14,7 +14,15 @@
 package test
 
 import (
+	"fmt"
+	"os/exec"
+	"path/filepath"
+	"strings"
+
+	apiextensionsclientset "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	"k8s.io/client-go/kubernetes"
+	"k8s.io/klog"
+	aggregatorclientset "k8s.io/kube-aggregator/pkg/client/clientset_generated/clientset"
 	"k8s.io/kubernetes/test/e2e/framework"
 
 	"github.com/pingcap/chaos-mesh/test/e2e/util/portforward"
@@ -46,5 +54,46 @@ type operatorAction struct {
 	framework *framework.Framework
 	kubeCli   kubernetes.Interface
 	fw        portforward.PortForward
+	aggrCli   aggregatorclientset.Interface
+	apiExtCli apiextensionsclientset.Interface
 	cfg       *Config
+}
+
+func (oi *OperatorConfig) OperatorHelmSetString() string {
+	set := map[string]string{
+		"controllerManager.image":           fmt.Sprintf("%s:%s", oi.Manager.Image, oi.Manager.Tag),
+		"controllerManager.imagePullPolicy": oi.Manager.ImagePullPolicy,
+		"chaosDaemon.image":                 fmt.Sprintf("%s:%s", oi.Daemon.Image, oi.Daemon.Tag),
+		"chaosDaemon.runtime":               oi.Daemon.Runtime,
+		"chaosDaemon.socketPath":            oi.Daemon.SocketPath,
+		"chaosDaemon.imagePullPolicy":       oi.Daemon.ImagePullPolicy,
+	}
+	arr := make([]string, 0, len(set))
+	for k, v := range set {
+		arr = append(arr, fmt.Sprintf("%s=%s", k, v))
+	}
+	return fmt.Sprintf("\"%s\"", strings.Join(arr, ","))
+}
+
+func (oa *operatorAction) operatorChartPath(tag string) string {
+	return oa.chartPath(operartorChartName, tag)
+}
+
+func (oa *operatorAction) chartPath(name string, tag string) string {
+	return filepath.Join(oa.cfg.ChartDir, tag, name)
+}
+
+func (oa *operatorAction) manifestPath(tag string) string {
+	return filepath.Join(oa.cfg.ManifestDir, tag)
+}
+
+func (oa *operatorAction) runKubectlOrDie(args ...string) string {
+	cmd := "kubectl"
+	klog.Infof("Running '%s %s'", cmd, strings.Join(args, " "))
+	out, err := exec.Command(cmd, args...).CombinedOutput()
+	if err != nil {
+		klog.Fatalf("Failed to run '%s %s'\nCombined output: %q\nError: %v", cmd, strings.Join(args, " "), string(out), err)
+	}
+	klog.Infof("Combined output: %q", string(out))
+	return string(out)
 }

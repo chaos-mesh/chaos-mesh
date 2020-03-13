@@ -637,6 +637,7 @@ github.com/rancher/kubernetes/staging/src/k8s.io/cri-api v1.17.2-k3s1 h1:Qt0G43l
 github.com/rancher/kubernetes/staging/src/k8s.io/cri-api v1.17.2-k3s1/go.mod h1:za6HqWgDNrKSvaq+Zg8GwyNeZifm/H9eMXr7yLJ+UdA=
 github.com/rancher/kubernetes/staging/src/k8s.io/csi-translation-lib v1.17.2-k3s1 h1:sBaMw7zGRqFJny6R7Txb5HsJi8wZAOwkhpV4b0ybcUg=
 github.com/rancher/kubernetes/staging/src/k8s.io/csi-translation-lib v1.17.2-k3s1/go.mod h1:LO9jViQKnx/FqMjlXE9SmKjZ3I4PE/SLsaDWKTlmiRw=
+github.com/rancher/kubernetes/staging/src/k8s.io/kube-aggregator v1.17.2-k3s1 h1:atWWD3UQlheciunS/Ht4tgCOThVLHqiIe1Vgw5jK9OE=
 github.com/rancher/kubernetes/staging/src/k8s.io/kube-aggregator v1.17.2-k3s1/go.mod h1:vh3GqAHrJU/N5vuEaKFmWYb78D7L6fiVBS4Id3OyDSc=
 github.com/rancher/kubernetes/staging/src/k8s.io/kube-controller-manager v1.17.2-k3s1/go.mod h1:mKHow8zS1GpDcLHlAgghj2BKPOZrpEIHA30lWyRF3gg=
 github.com/rancher/kubernetes/staging/src/k8s.io/kube-proxy v1.17.2-k3s1/go.mod h1:6SB+e2ragxZ8CPWrgNZ7F9KkCFykx5zQjnLVP2SWQ00=
