@@ -7,7 +7,7 @@ import (
 	. "github.com/onsi/gomega"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
@@ -43,13 +43,13 @@ var _ = Describe("PodChaos", func() {
 			APIVersion: "v1",
 		}
 
-		It("PodChaos Reconcile", func() {
-			r := podchaos.Reconciler{
-				Client:        fake.NewFakeClientWithScheme(runtime.NewScheme()),
-				EventRecorder: &record.FakeRecorder{},
-				Log:           ctrl.Log.WithName("controllers").WithName("PodChaos"),
-			}
+		r := podchaos.Reconciler{
+			Client:        fake.NewFakeClientWithScheme(scheme.Scheme),
+			EventRecorder: &record.FakeRecorder{},
+			Log:           ctrl.Log.WithName("controllers").WithName("PodChaos"),
+		}
 
+		It("PodChaos Reconcile", func() {
 			var err error
 
 			_, err = r.Reconcile(ctrl.Request{}, &v1alpha1.PodChaos{
