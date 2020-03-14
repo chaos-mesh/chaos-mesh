@@ -131,7 +131,7 @@ tidy:
 	GO111MODULE=on go mod tidy
 	git diff --quiet go.mod go.sum
 
-image: image-chaos-daemon image-chaos-mesh image-chaos-fs image-chaos-scripts image-chaos-grafana image-chaos-dashboard image-chaos-kernel
+image: image-chaos-daemon image-chaos-mesh image-chaos-fs image-chaos-scripts image-chaos-grafana image-chaos-dashboard image-chaos-kernel image-chaos-stress
 
 image-binary:
 	docker build -t pingcap/binary ${DOCKER_BUILD_ARGS} .
@@ -144,6 +144,9 @@ image-chaos-mesh: image-binary
 
 image-chaos-fs: image-binary
 	docker build -t ${DOCKER_REGISTRY_PREFIX}pingcap/chaos-fs ${DOCKER_BUILD_ARGS} images/chaosfs
+
+image-chaos-stress: image-binary
+	docker build -t ${DOCKER_REGISTRY_PREFIX}pingcap/chaos-stress ${DOCKER_BUILD_ARGS} images/chaos-stress
 
 image-chaos-scripts:
 	docker build -t ${DOCKER_REGISTRY_PREFIX}pingcap/chaos-scripts ${DOCKER_BUILD_ARGS} images/chaos-scripts
