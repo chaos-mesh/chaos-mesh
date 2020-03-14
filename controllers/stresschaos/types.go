@@ -237,7 +237,7 @@ func (r *Reconciler) applyPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.
 	chaos.Status.UUID = res.Uuid
 	err = r.Update(ctx, chaos)
 	if err != nil {
-		r.Log.Error(err, "unable to clear stress chaos uuid", "uuid", res.Uuid)
+		r.Log.Error(err, "unable to set stress chaos uuid", "uuid", res.Uuid)
 	}
 	return err
 }
