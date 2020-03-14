@@ -120,7 +120,9 @@ spec:
                   type: object
               type: object
             stressors:
-              description: Stressors defines the delta time of injected program
+              description: Stressors defines plenty of stressors to be generated.
+                It's simply a few arguments for stress-ng. For fully supported stressors,
+                see stress-ng(1)
               type: string
             value:
               description: Value is required when the mode is set to `FixedPodMode`
@@ -131,9 +133,7 @@ spec:
                 from 0-100 to specify the % of pods to do chaos action
               type: string
           required:
-          - duration
           - mode
-          - scheduler
           - selector
           - stressors
           type: object
