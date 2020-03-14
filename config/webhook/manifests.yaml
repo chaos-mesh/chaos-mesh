@@ -83,6 +83,24 @@ webhooks:
     service:
       name: webhook-service
       namespace: system
+      path: /mutate-pingcap-com-v1alpha1-stresschaos
+  failurePolicy: Fail
+  name: mstresschaos.kb.io
+  rules:
+  - apiGroups:
+    - pingcap.com
+    apiVersions:
+    - v1alpha1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - stresschaos
+- clientConfig:
+    caBundle: Cg==
+    service:
+      name: webhook-service
+      namespace: system
       path: /mutate-pingcap-com-v1alpha1-timechaos
   failurePolicy: Fail
   name: mtimechaos.kb.io

@@ -179,6 +179,10 @@ func main() {
 		setupLog.Error(err, "unable to create controller", "controller", "StressChaos")
 		os.Exit(1)
 	}
+	if err = (&chaosmeshv1alpha1.StressChaos{}).SetupWebhookWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create webhook", "webhook", "StressChaos")
+		os.Exit(1)
+	}
 
 	setupLog.Info("Setting up webhook server")
 
