@@ -63,7 +63,7 @@ func (oa *operatorAction) DeployOperator(info OperatorConfig) error {
 		oa.operatorChartPath(info.Tag),
 		info.ReleaseName,
 		info.Namespace,
-		info.OperatorHelmSetString())
+		info.operatorHelmSetString())
 	klog.Info(cmd)
 	res, err := exec.Command("/bin/sh", "-c", cmd).CombinedOutput()
 	if err != nil {

@@ -4,8 +4,6 @@ import (
 	"github.com/pingcap/chaos-mesh/test"
 )
 
-var TestConfig *test.Config = test.NewDefaultConfig()
-
 const (
 	imagePullPolicyIfNotPresent = "IfNotPresent"
 )

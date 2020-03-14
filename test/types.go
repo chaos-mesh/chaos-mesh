@@ -56,7 +56,7 @@ type operatorAction struct {
 	cfg       *Config
 }
 
-func (oi *OperatorConfig) OperatorHelmSetString() string {
+func (oi *OperatorConfig) operatorHelmSetString() string {
 	set := map[string]string{
 		"controllerManager.image":           fmt.Sprintf("%s:%s", oi.Manager.Image, oi.Manager.Tag),
 		"controllerManager.imagePullPolicy": oi.Manager.ImagePullPolicy,
