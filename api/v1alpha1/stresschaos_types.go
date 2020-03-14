@@ -21,7 +21,8 @@ import (
 
 // Stress chaos is a chaos to generate plenty of stresses over a collection of pods.
 // A sidecar will be injected along with the target pod during creating. It's the
-// sidecar which generates stresses or cancels them.
+// sidecar which generates stresses or cancels them. For now, we use stress-ng as
+// the stress generator for the chaos.
 
 // +kubebuilder:object:root=true
 
@@ -54,13 +55,16 @@ type StressChaosSpec struct {
 	// Selector is used to select pods that are used to inject chaos action.
 	Selector SelectorSpec `json:"selector"`
 
-	// Stressors defines the delta time of injected program
+	// Stressors defines plenty of stressors to be generated. It's simply a few
+	// arguments for stress-ng. For fully supported stressors, see stress-ng(1)
 	Stressors string `json:"stressors"`
 
 	// Duration represents the duration of the chaos action
+	// +optional
 	Duration *string `json:"duration"`
 
 	// Scheduler defines some schedule rules to control the running time of the chaos experiment about time.
+	// +optional
 	Scheduler *SchedulerSpec `json:"scheduler"`
 
 	// Next time when this action will be applied again
@@ -160,16 +164,6 @@ func (in *StressChaos) GetStatus() *ChaosStatus {
 // IsDeleted returns whether this resource has been deleted
 func (in *StressChaos) IsDeleted() bool {
 	return !in.DeletionTimestamp.IsZero()
-}
-
-// Validate describe the stresschaos validation logic
-func (in *StressChaos) Validate() (bool, string, error) {
-	if in.Spec.Duration != nil && in.Spec.Scheduler != nil {
-		return true, "", nil
-	} else if in.Spec.Duration == nil && in.Spec.Scheduler == nil {
-		return true, "", nil
-	}
-	return false, invalidConfigurationMsg, nil
 }
 
 // +kubebuilder:object:root=true
