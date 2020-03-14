@@ -22,8 +22,6 @@ spec:
   action: partition
   mode: one
   selector:
-    namespaces:
-      - tidb-cluster-demo
     labelSelectors:
       "app.kubernetes.io/component": "tikv"
   direction: to

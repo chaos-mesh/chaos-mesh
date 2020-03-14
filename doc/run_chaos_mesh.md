@@ -27,8 +27,6 @@ spec:
   mode: one # the mode to run chaos action; supported modes are one/all/fixed/fixed-percent/random-max-percent
   duration: "60s" # duration for the injected chaos experiment
   selector: # pods where to inject chaos actions
-    namespaces:
-      - tidb-cluster-demo  # the namespace of the system under test (SUT) you've deployed
     labelSelectors:
       "app.kubernetes.io/component": "tikv" # the label of the pod for chaos injection
   scheduler: # scheduler rules for the running time of the chaos experiments about pods.

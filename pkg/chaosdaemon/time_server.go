@@ -19,11 +19,21 @@ func (s *daemonServer) SetTimeOffset(ctx context.Context, req *pb.TimeRequest) (
 		return nil, err
 	}
 
-	err = time.ModifyTime(int(pid), req.Sec, req.Nsec, req.ClkIdsMask)
+	childPids, err := GetChildProcesses(pid)
 	if err != nil {
-		log.Error(err, "error while modifying time", "pid", pid)
-		return nil, err
+		log.Error(err, "fail to get child processes")
 	}
+	allPids := append(childPids, pid)
+	log.Info("all related processes found", "pids", allPids)
+
+	for _, pid := range allPids {
+		err = time.ModifyTime(int(pid), req.Sec, req.Nsec, req.ClkIdsMask)
+		if err != nil {
+			log.Error(err, "error while modifying time", "pid", pid)
+			return nil, err
+		}
+	}
+
 	return &empty.Empty{}, nil
 }
 
@@ -36,10 +46,21 @@ func (s *daemonServer) RecoverTimeOffset(ctx context.Context, req *pb.TimeReques
 		return nil, err
 	}
 
-	err = time.ModifyTime(int(pid), int64(0), int64(0), 0)
+	childPids, err := GetChildProcesses(pid)
 	if err != nil {
-		log.Error(err, "error while recovering", "pid", pid)
-		return nil, err
+		log.Error(err, "fail to get child processes")
 	}
+	allPids := append(childPids, pid)
+	log.Info("get all related process pids", "pids", allPids)
+
+	for _, pid := range allPids {
+		// FIXME: if the process has halted and no process with this pid exists, we will get an error.
+		err = time.ModifyTime(int(pid), int64(0), int64(0), 0)
+		if err != nil {
+			log.Error(err, "error while recovering", "pid", pid)
+			return nil, err
+		}
+	}
+
 	return &empty.Empty{}, nil
 }

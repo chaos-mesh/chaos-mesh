@@ -60,11 +60,16 @@ type TimeChaosSpec struct {
 	// Default value is ["CLOCK_REALTIME"]
 	ClockIds []string `json:"clockIds,omitempty"`
 
+	// ContainerName indicates the name of affected container.
+	// If not set, all containers will be injected
+	// +optional
+	ContainerNames []string `json:"containerNames,omitempty"`
+
 	// Duration represents the duration of the chaos action
-	Duration *string `json:"duration"`
+	Duration *string `json:"duration,omitempty"`
 
 	// Scheduler defines some schedule rules to control the running time of the chaos experiment about time.
-	Scheduler *SchedulerSpec `json:"scheduler"`
+	Scheduler *SchedulerSpec `json:"scheduler,omitempty"`
 
 	// Next time when this action will be applied again
 	// +optional
