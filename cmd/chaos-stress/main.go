@@ -23,6 +23,7 @@ import (
 	"github.com/pingcap/chaos-mesh/pkg/version"
 
 	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 )
 
 var (
@@ -44,8 +45,9 @@ func main() {
 	if printVersion {
 		os.Exit(0)
 	}
+	ctrl.SetLogger(zap.New(zap.UseDevMode(true), zap.WriteTo(os.Stderr)))
 	if err := chaosstress.StartServer(addr); err != nil {
-		log.Error(err, "Server exited")
+		log.Error(err, "Fail to start server")
 		os.Exit(1)
 	}
 }
