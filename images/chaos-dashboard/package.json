@@ -8,6 +8,7 @@
     "@testing-library/user-event": "^7.1.2",
     "acorn": "^7.1.1",
     "antd": "^3.26.3",
+    "minimist": "1.2.2",
     "react": "^16.12.0",
     "react-dom": "^16.12.0",
     "react-scripts": "3.3.0"
