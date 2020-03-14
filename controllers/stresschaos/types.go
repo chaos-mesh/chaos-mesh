@@ -86,7 +86,7 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos reconcil
 		return err
 	}
 
-	pods, err := utils.SelectAndGeneratePods(ctx, r.Client, &stresschaos.Spec)
+	pods, err := utils.SelectAndFilterPods(ctx, r.Client, &stresschaos.Spec)
 
 	if err != nil {
 		r.Log.Error(err, "failed to select and generate pods")
