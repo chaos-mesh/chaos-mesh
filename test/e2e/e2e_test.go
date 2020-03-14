@@ -40,6 +40,7 @@ func handleFlags() {
 func TestMain(m *testing.M) {
 	// Register test flags, then parse flags.
 	handleFlags()
+	framework.TestContext.CleanStart = true
 
 	// Now that we know which Viper config (if any) was chosen,
 	// parse it and update those options which weren't already set via command line flags
@@ -77,14 +78,14 @@ func RunE2ETests(t *testing.T) {
 	ginkgo.RunSpecsWithDefaultAndCustomReporters(t, "chaosmesh e2e suit", r)
 }
 
+// we hack framework.RegisterClusterFlags to avoid redefine flag error
+// caused by controller-runtime client
 func hackRegisterClusterFlags(flags *flag.FlagSet) {
 	framework.TestContext.KubeConfig = os.Getenv("KUBECONFIG")
 	if len(framework.TestContext.KubeConfig) < 1 {
 		klog.Fatalf("KUBECONFIG ENV NOT SET")
 	}
-
 	flags.BoolVar(&framework.TestContext.VerifyServiceAccount, "e2e-verify-service-account", true, "If true tests will verify the service account before running.")
-	//flags.StringVar(&TestContext.KubeConfig, clientcmd.RecommendedConfigPathFlag, os.Getenv(clientcmd.RecommendedConfigPathEnvVar), "Path to kubeconfig containing embedded authinfo.")
 	flags.StringVar(&framework.TestContext.KubeContext, clientcmd.FlagContext, "", "kubeconfig context to use/override. If unset, will use value from 'current-context'")
 	flags.StringVar(&framework.TestContext.KubeAPIContentType, "kube-api-content-type", "application/vnd.kubernetes.protobuf", "ContentType used to communicate with apiserver")
 

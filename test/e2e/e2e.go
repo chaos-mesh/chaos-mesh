@@ -125,6 +125,8 @@ var _ = ginkgo.SynchronizedBeforeSuite(func() []byte {
 	framework.ExpectNoError(err, "failed to create clientset")
 	oa := test.NewOperatorAction(kubeCli, aggrCli, apiExtCli, test.NewDefaultConfig())
 	ocfg := e2econfig.NewDefaultOperatorConfig()
+
+	oa.CleanCRDOrDie()
 	err = oa.InstallCRD(ocfg)
 	framework.ExpectNoError(err, "failed to install crd")
 	err = oa.DeployOperator(ocfg)

@@ -14,26 +14,27 @@
 package fixture
 
 import (
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
-	"github.com/pingcap/chaos-mesh/api/v1alpha1"
 )
 
-func NewDefaultPodChaos() *v1alpha1.PodChaos {
-
-	return &v1alpha1.PodChaos{
+func NewCommonNginxPod(name, namespace string) *corev1.Pod {
+	return &corev1.Pod{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      "pod-chaos-example",
-			Namespace: "chaos-testing",
+			Name:      name,
+			Namespace: namespace,
+			Labels: map[string]string{
+				"app": "nginx",
+			},
 		},
-		Spec: v1alpha1.PodChaosSpec{
-			Selector: v1alpha1.SelectorSpec{
-				Namespaces: []string{
-					"chaos-testing",
+		Spec: corev1.PodSpec{
+			Containers: []corev1.Container{
+				{
+					Image:           "nginx:latest",
+					ImagePullPolicy: corev1.PullIfNotPresent,
+					Name:            "nginx",
 				},
 			},
-			Action: v1alpha1.PodFailureAction,
-			Mode:   v1alpha1.OnePodMode,
 		},
 	}
 }

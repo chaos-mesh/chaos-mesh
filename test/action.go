@@ -37,6 +37,7 @@ const (
 )
 
 type OperatorAction interface {
+	CleanCRDOrDie()
 	DeployOperator(config OperatorConfig) error
 	InstallCRD(config OperatorConfig) error
 }
@@ -96,8 +97,6 @@ func (oa *operatorAction) DeployOperator(info OperatorConfig) error {
 	if err != nil {
 		return err
 	}
-	// wait chaos-mesh admission webhook ready
-	time.Sleep(30 * time.Second)
 	return e2eutil.WaitForAPIServicesAvaiable(oa.aggrCli, labels.Everything())
 }
 
@@ -113,4 +112,8 @@ func (oa *operatorAction) InstallCRD(info OperatorConfig) error {
 		klog.Fatalf("Failed to run '%s': %v", strings.Join(cmdArgs, " "), err)
 	}
 	return nil
+}
+
+func (oa *operatorAction) CleanCRDOrDie() {
+	oa.runKubectlOrDie("delete", "crds", "--all")
 }

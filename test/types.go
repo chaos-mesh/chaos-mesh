@@ -24,8 +24,6 @@ import (
 	"k8s.io/klog"
 	aggregatorclientset "k8s.io/kube-aggregator/pkg/client/clientset_generated/clientset"
 	"k8s.io/kubernetes/test/e2e/framework"
-
-	"github.com/pingcap/chaos-mesh/test/e2e/util/portforward"
 )
 
 type OperatorConfig struct {
@@ -53,7 +51,6 @@ type DaemonConfig struct {
 type operatorAction struct {
 	framework *framework.Framework
 	kubeCli   kubernetes.Interface
-	fw        portforward.PortForward
 	aggrCli   aggregatorclientset.Interface
 	apiExtCli apiextensionsclientset.Interface
 	cfg       *Config

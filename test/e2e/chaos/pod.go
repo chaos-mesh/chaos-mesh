@@ -2,6 +2,9 @@ package chaos
 
 import (
 	"context"
+	"time"
+
+	"k8s.io/apimachinery/pkg/util/wait"
 
 	"k8s.io/apimachinery/pkg/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
@@ -9,20 +12,22 @@ import (
 	chaosmeshv1alpha1 "github.com/pingcap/chaos-mesh/api/v1alpha1"
 	"github.com/pingcap/chaos-mesh/test/pkg/fixture"
 
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	restClient "k8s.io/client-go/rest"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/pingcap/chaos-mesh/api/v1alpha1"
 
+	"github.com/onsi/ginkgo"
+	"k8s.io/kubernetes/test/e2e/framework"
+
 	// load pprof
 	_ "net/http/pprof"
-	"time"
+)
 
-	"github.com/onsi/ginkgo"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/klog"
-	"k8s.io/kubernetes/test/e2e/framework"
+const (
+	pauseImage = "gcr.io/google-containers/pause:latest"
 )
 
 var _ = ginkgo.Describe("[chaos-mesh] Basic", func() {
@@ -54,30 +59,62 @@ var _ = ginkgo.Describe("[chaos-mesh] Basic", func() {
 		}
 	})
 
-	ginkgo.It("example1", func() {
+	ginkgo.It("PodFailure Test", func() {
 		ctx, cancel := context.WithCancel(context.Background())
-		klog.Infof("ns=%s,start", ns)
-		namespace, err := kubeCli.CoreV1().Namespaces().Get("chaos-testing", metav1.GetOptions{})
-		framework.ExpectNoError(err, "namespace error")
-		klog.Infof(namespace.Name)
-		klog.Infof("config = %s", config.Username)
-		err = cli.Create(ctx, fixture.NewDefaultPodChaos())
+		bpod := fixture.NewCommonNginxPod("nginx", ns)
+		_, err := kubeCli.CoreV1().Pods(ns).Create(bpod)
+		framework.ExpectNoError(err, "create nginx pod error")
+
+		busyboxPodFailureChaos := &v1alpha1.PodChaos{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "nginx-failure",
+				Namespace: ns,
+			},
+			Spec: v1alpha1.PodChaosSpec{
+				Selector: v1alpha1.SelectorSpec{
+					Namespaces: []string{
+						ns,
+					},
+					LabelSelectors: map[string]string{
+						"app": "nginx",
+					},
+				},
+				Action: v1alpha1.PodFailureAction,
+				Mode:   v1alpha1.OnePodMode,
+			},
+		}
+		err = cli.Create(ctx, busyboxPodFailureChaos)
 		framework.ExpectNoError(err, "create pod chaos error")
-		pc := &v1alpha1.PodChaos{}
-		err = cli.Get(ctx, client.ObjectKey{
-			Namespace: "chaos-testing",
-			Name:      "pod-chaos-example",
-		}, pc)
-		framework.ExpectNoError(err, "get pod chaos error")
-		klog.Infof("podchaos name = %v", pc.GetName())
+
+		err = wait.PollImmediate(3*time.Second, 5*time.Minute, func() (done bool, err error) {
+			pod, err := kubeCli.CoreV1().Pods(ns).Get("nginx", metav1.GetOptions{})
+			if err != nil {
+				return false, err
+			}
+			for _, c := range pod.Spec.Containers {
+				if c.Image == pauseImage {
+					return true, nil
+				}
+			}
+			return false, nil
+		})
+
+		err = cli.Delete(ctx, busyboxPodFailureChaos)
+		framework.ExpectNoError(err, "failed to recover pod failure chaos")
+
+		err = wait.PollImmediate(3*time.Second, 5*time.Minute, func() (done bool, err error) {
+			pod, err := kubeCli.CoreV1().Pods(ns).Get("nginx", metav1.GetOptions{})
+			if err != nil {
+				return false, err
+			}
+			for _, c := range pod.Spec.Containers {
+				if c.Image == "nginx:latest" {
+					return true, nil
+				}
+			}
+			return false, nil
+		})
+
 		cancel()
-		klog.Infof("ns=%s,end", ns)
 	})
-
-	ginkgo.It("example2", func() {
-		klog.Infof("ns=%s,start", ns)
-		time.Sleep(10 * time.Second)
-		klog.Infof("ns=%s,end", ns)
-	})
-
 })
