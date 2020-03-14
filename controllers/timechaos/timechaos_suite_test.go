@@ -56,11 +56,6 @@ var _ = Describe("TimeChaos", func() {
 			v1.ContainerStatus{ContainerID: "fake-container-id"},
 		)
 
-		defer mock.With("MockSelectAndFilterPods", func() []v1.Pod {
-			return pods
-		})()
-		defer mock.With("MockChaosDaemonClient", &MockChaosDaemonClient{})()
-
 		duration := "invalid_duration"
 
 		timechaos := v1alpha1.TimeChaos{
@@ -85,12 +80,21 @@ var _ = Describe("TimeChaos", func() {
 		}
 
 		It("TimeChaos Apply", func() {
+			defer mock.With("MockSelectAndFilterPods", func() []v1.Pod {
+				return pods
+			})()
+			defer mock.With("MockChaosDaemonClient", &MockChaosDaemonClient{})()
+
 			err := r.Apply(context.TODO(), ctrl.Request{}, &timechaos)
 
 			Expect(err).ToNot(HaveOccurred())
 		})
 
 		It("TimeChaos Apply Error", func() {
+			defer mock.With("MockSelectAndFilterPods", func() []v1.Pod {
+				return pods
+			})()
+			defer mock.With("MockChaosDaemonClient", &MockChaosDaemonClient{})()
 			defer mock.With("MockSetTimeOffsetError", errors.New("SetTimeOffsetError"))()
 
 			err := r.Apply(context.TODO(), ctrl.Request{}, &timechaos)
@@ -101,11 +105,20 @@ var _ = Describe("TimeChaos", func() {
 		})
 
 		It("TimeChaos Recover", func() {
+			defer mock.With("MockSelectAndFilterPods", func() []v1.Pod {
+				return pods
+			})()
+			defer mock.With("MockChaosDaemonClient", &MockChaosDaemonClient{})()
+
 			err := r.Recover(context.TODO(), ctrl.Request{}, &timechaos)
 			Expect(err).ToNot(HaveOccurred())
 		})
 
 		It("TimeChaos Recover Error", func() {
+			defer mock.With("MockSelectAndFilterPods", func() []v1.Pod {
+				return pods
+			})()
+			defer mock.With("MockChaosDaemonClient", &MockChaosDaemonClient{})()
 			defer mock.With("MockRecoverTimeOffsetError", errors.New("RecoverTimeOffsetError"))()
 
 			err := r.Apply(context.TODO(), ctrl.Request{}, &timechaos)

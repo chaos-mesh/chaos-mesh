@@ -46,16 +46,10 @@ var _ = AfterSuite(func() {
 
 var _ = Describe("PodChaos", func() {
 	Context("PodFailure", func() {
-		defer mock.With("MockChaosDaemonClient", &MockChaosDaemonClient{})()
-
 		objs, pods := GenerateNPods("p", 1, v1.PodRunning, metav1.NamespaceDefault, nil, nil, v1.ContainerStatus{
 			ContainerID: "fake-container-id",
 			Name:        "container-name",
 		})
-
-		defer mock.With("MockSelectAndFilterPods", func() []v1.Pod {
-			return pods
-		})()
 
 		podChaos := v1alpha1.PodChaos{
 			TypeMeta: metav1.TypeMeta{
@@ -81,6 +75,11 @@ var _ = Describe("PodChaos", func() {
 		}
 
 		It("PodFailure Action", func() {
+			defer mock.With("MockChaosDaemonClient", &MockChaosDaemonClient{})()
+			defer mock.With("MockSelectAndFilterPods", func() []v1.Pod {
+				return pods
+			})()
+
 			var err error
 
 			err = r.Apply(context.TODO(), ctrl.Request{}, &podChaos)

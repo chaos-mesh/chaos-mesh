@@ -46,8 +46,6 @@ var _ = AfterSuite(func() {
 
 var _ = Describe("PodChaos", func() {
 	Context("ContainerKill", func() {
-		defer mock.With("MockChaosDaemonClient", &MockChaosDaemonClient{})()
-
 		objs, _ := GenerateNPods("p", 1, v1.PodRunning, metav1.NamespaceDefault, nil, nil, v1.ContainerStatus{
 			ContainerID: "fake-container-id",
 			Name:        "container-name",
@@ -77,6 +75,8 @@ var _ = Describe("PodChaos", func() {
 		}
 
 		It("ContainerKill Apply", func() {
+			defer mock.With("MockChaosDaemonClient", &MockChaosDaemonClient{})()
+
 			err := r.Apply(context.TODO(), ctrl.Request{}, &podChaos)
 			Expect(err).ToNot(HaveOccurred())
 
@@ -85,6 +85,7 @@ var _ = Describe("PodChaos", func() {
 		})
 
 		It("ContainerKill Apply Error", func() {
+			defer mock.With("MockChaosDaemonClient", &MockChaosDaemonClient{})()
 			defer mock.With("MockContainerKillError", errors.New("ContainerKillError"))()
 
 			err := r.Apply(context.TODO(), ctrl.Request{}, &podChaos)
