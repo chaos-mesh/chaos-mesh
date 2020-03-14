@@ -838,6 +838,11 @@ func (in *TimeChaosSpec) DeepCopyInto(out *TimeChaosSpec) {
 		*out = make([]string, len(*in))
 		copy(*out, *in)
 	}
+	if in.ContainerNames != nil {
+		in, out := &in.ContainerNames, &out.ContainerNames
+		*out = make([]string, len(*in))
+		copy(*out, *in)
+	}
 	if in.Duration != nil {
 		in, out := &in.Duration, &out.Duration
 		*out = new(string)
