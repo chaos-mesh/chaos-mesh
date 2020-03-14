@@ -19,7 +19,9 @@ import (
 	"net"
 	"os"
 	"os/exec"
+	"strings"
 	"sync"
+	"syscall"
 
 	pb "github.com/pingcap/chaos-mesh/pkg/chaosstress/pb"
 	"github.com/pingcap/chaos-mesh/pkg/utils"
@@ -43,29 +45,33 @@ type rpcServer struct {
 
 func (r *rpcServer) ExecStressors(ctx context.Context,
 	req *pb.StressRequest) (*pb.StressResponse, error) {
-	log.Info("executing stressors", "request", req)
 	raw, err := uuid2.NewUUID()
 	if err != nil {
 		return nil, err
 	}
-	uuid := raw.String()
-	cmd := exec.Command("stress-ng", req.Stressors)
-	log.Info("execute stressors", "stressors", req.Stressors)
+	req.Uuid = raw.String()
+	log.Info("executing stressors", "request", req)
+	cmd := exec.Command("stress-ng", strings.Fields(req.Stressors)...)
 	if err := cmd.Start(); err != nil {
 		return nil, err
 	}
 	r.Lock()
 	defer r.Unlock()
-	r.tasks[uuid] = cmd
-	go func() {
-		if err := cmd.Wait(); err != nil {
-			log.Error(err, "stressors exit accidentally", "stressors", req.Stressors)
+	r.tasks[req.Uuid] = cmd
+	go func(req *pb.StressRequest) {
+		if err, ok := cmd.Wait().(*exec.ExitError); ok {
+			status := err.Sys().(syscall.WaitStatus)
+			if status.Signaled() && status.Signal() == syscall.SIGKILL {
+				log.Info("stressors cancelled", "request", req)
+			} else {
+				log.Error(err, "stressors exited accidentally", "request", req)
+			}
 		}
 		r.Lock()
 		defer r.Unlock()
-		delete(r.tasks, uuid)
-	}()
-	return &pb.StressResponse{Uuid: uuid}, nil
+		delete(r.tasks, req.Uuid)
+	}(req)
+	return &pb.StressResponse{Uuid: req.Uuid}, nil
 }
 
 func (r *rpcServer) CancelStressors(ctx context.Context,
