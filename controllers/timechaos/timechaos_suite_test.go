@@ -5,12 +5,13 @@ import (
 	"errors"
 	"testing"
 
+	"k8s.io/client-go/kubernetes/scheme"
+
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
@@ -34,6 +35,9 @@ func TestTimechaos(t *testing.T) {
 
 var _ = BeforeSuite(func(done Done) {
 	logf.SetLogger(zap.LoggerTo(GinkgoWriter, true))
+
+	Expect(v1.AddToScheme(scheme.Scheme)).To(Succeed())
+
 	close(done)
 }, 60)
 
@@ -52,11 +56,6 @@ var _ = Describe("TimeChaos", func() {
 			v1.ContainerStatus{ContainerID: "fake-container-id"},
 		)
 
-		mock.With("MockSelectAndFilterPods", func() []v1.Pod {
-			return pods
-		})
-		mock.With("MockChaosDaemonClient", &MockChaosDaemonClient{})
-
 		duration := "invalid_duration"
 
 		timechaos := v1alpha1.TimeChaos{
@@ -74,35 +73,56 @@ var _ = Describe("TimeChaos", func() {
 			},
 		}
 
-		It("TimeChaos Action", func() {
-			scheme := runtime.NewScheme()
-			Expect(v1.AddToScheme(scheme)).To(Succeed())
+		r := Reconciler{
+			Client:        fake.NewFakeClientWithScheme(scheme.Scheme, podObjects...),
+			EventRecorder: &record.FakeRecorder{},
+			Log:           ctrl.Log.WithName("controllers").WithName("TimeChaos"),
+		}
 
-			r := Reconciler{
-				Client:        fake.NewFakeClientWithScheme(scheme, podObjects...),
-				EventRecorder: &record.FakeRecorder{},
-				Log:           ctrl.Log.WithName("controllers").WithName("TimeChaos"),
-			}
+		It("TimeChaos Apply", func() {
+			defer mock.With("MockSelectAndFilterPods", func() []v1.Pod {
+				return pods
+			})()
+			defer mock.With("MockChaosDaemonClient", &MockChaosDaemonClient{})()
 
-			var err error
-
-			err = r.Apply(context.TODO(), ctrl.Request{}, &timechaos)
+			err := r.Apply(context.TODO(), ctrl.Request{}, &timechaos)
 
 			Expect(err).ToNot(HaveOccurred())
+		})
 
-			mock.With("MockSetTimeOffsetError", errors.New("SetTimeOffsetError"))
+		It("TimeChaos Apply Error", func() {
+			defer mock.With("MockSelectAndFilterPods", func() []v1.Pod {
+				return pods
+			})()
+			defer mock.With("MockChaosDaemonClient", &MockChaosDaemonClient{})()
+			defer mock.With("MockSetTimeOffsetError", errors.New("SetTimeOffsetError"))()
 
-			err = r.Apply(context.TODO(), ctrl.Request{}, &timechaos)
+			err := r.Apply(context.TODO(), ctrl.Request{}, &timechaos)
 
 			Expect(err).To(HaveOccurred())
 			Expect(err.Error()).To(ContainSubstring("SetTimeOffsetError"))
 
-			err = r.Recover(context.TODO(), ctrl.Request{}, &timechaos)
-			Expect(err).ToNot(HaveOccurred())
+		})
 
-			mock.With("MockSetTimeOffsetError", nil)
-			err = r.Apply(context.TODO(), ctrl.Request{}, &timechaos)
-			mock.With("MockRecoverTimeOffsetError", errors.New("RecoverTimeOffsetError"))
+		It("TimeChaos Recover", func() {
+			defer mock.With("MockSelectAndFilterPods", func() []v1.Pod {
+				return pods
+			})()
+			defer mock.With("MockChaosDaemonClient", &MockChaosDaemonClient{})()
+
+			err := r.Recover(context.TODO(), ctrl.Request{}, &timechaos)
+			Expect(err).ToNot(HaveOccurred())
+		})
+
+		It("TimeChaos Recover Error", func() {
+			defer mock.With("MockSelectAndFilterPods", func() []v1.Pod {
+				return pods
+			})()
+			defer mock.With("MockChaosDaemonClient", &MockChaosDaemonClient{})()
+			defer mock.With("MockRecoverTimeOffsetError", errors.New("RecoverTimeOffsetError"))()
+
+			err := r.Apply(context.TODO(), ctrl.Request{}, &timechaos)
+			Expect(err).ToNot(HaveOccurred())
 
 			err = r.Recover(context.TODO(), ctrl.Request{}, &timechaos)
 
