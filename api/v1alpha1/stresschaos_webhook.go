@@ -19,7 +19,7 @@ import (
 )
 
 // log is for logging in this package.
-var stressChaosLog = ctrl.Log.WithName("podchaos-resource")
+var stressChaosLog = ctrl.Log.WithName("stresschaos-resource")
 
 // SetupWebhookWithManager setup StressChaos's webhook with manager
 func (r *StressChaos) SetupWebhookWithManager(mgr ctrl.Manager) error {
