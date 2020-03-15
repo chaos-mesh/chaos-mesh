@@ -4,9 +4,7 @@ import (
 	"context"
 	"errors"
 	"testing"
-	time "time"
-
-	"github.com/pingcap/chaos-mesh/pkg/mock"
+	"time"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -25,6 +23,7 @@ import (
 	"github.com/pingcap/chaos-mesh/api/v1alpha1"
 	"github.com/pingcap/chaos-mesh/controllers/reconciler"
 	"github.com/pingcap/chaos-mesh/controllers/twophase"
+	"github.com/pingcap/chaos-mesh/pkg/mock"
 )
 
 func TestTwoPhase(t *testing.T) {
