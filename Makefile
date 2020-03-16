@@ -223,7 +223,7 @@ else
 	@echo "kustomize has been installed"
 endif
 
-.PHONY: all build test install manifests fmt vet tidy image \
+.PHONY: all build test install manifests groupimports fmt vet tidy image \
 	docker-push lint generate controller-gen yaml \
 	manager chaosfs chaosdaemon install-kind install-kubebuilder \
 	install-kustomize dashboard dashboard-server-frontend
