@@ -26,6 +26,11 @@ import (
 	"k8s.io/kubernetes/test/e2e/framework"
 )
 
+const (
+	imagePullPolicyIfNotPresent = "IfNotPresent"
+)
+
+// OperatorConfig describe the configuration during installing chaos-mesh
 type OperatorConfig struct {
 	Namespace   string
 	ReleaseName string
@@ -34,18 +39,41 @@ type OperatorConfig struct {
 	Tag         string
 }
 
+// ManagerConfig describe the chaos-operator configuration during installing chaos-mesh
 type ManagerConfig struct {
 	Image           string
 	Tag             string
 	ImagePullPolicy string
 }
 
+// DaemonConfig describe the chaos-daemon configuration during installing chaos-mesh
 type DaemonConfig struct {
 	Image           string
 	Tag             string
 	Runtime         string
 	SocketPath      string
 	ImagePullPolicy string
+}
+
+// NewDefaultOperatorConfig create the default configuration for chaos-mesh test
+func NewDefaultOperatorConfig() OperatorConfig {
+	return OperatorConfig{
+		Namespace:   "chaos-testing",
+		ReleaseName: "chaos-mesh",
+		Tag:         "e2e",
+		Manager: ManagerConfig{
+			Image:           "localhost:5000/pingcap/chaos-mesh",
+			Tag:             "latest",
+			ImagePullPolicy: imagePullPolicyIfNotPresent,
+		},
+		Daemon: DaemonConfig{
+			Image:           "localhost:5000/pingcap/chaos-daemon",
+			Tag:             "latest",
+			ImagePullPolicy: imagePullPolicyIfNotPresent,
+			Runtime:         "containerd",
+			SocketPath:      "/run/containerd/containerd.sock",
+		},
+	}
 }
 
 type operatorAction struct {
