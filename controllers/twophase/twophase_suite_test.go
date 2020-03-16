@@ -221,8 +221,8 @@ var _ = Describe("TwoPhase", func() {
 
 		zeroTime := time.Time{}
 		var _ = zeroTime
-		pastTime := time.Now().Add(-10)
-		futureTime := time.Now().Add(3600)
+		pastTime := time.Now().Add(-10 * time.Hour)
+		futureTime := time.Now().Add(10 * time.Hour)
 
 		req := ctrl.Request{
 			NamespacedName: types.NamespacedName{
@@ -279,8 +279,10 @@ var _ = Describe("TwoPhase", func() {
 			_, err = r.Reconcile(req)
 
 			Expect(err).ToNot(HaveOccurred())
-			// fixme: why this failed?
-			//Expect(chaos.Status.Experiment.Phase).To(Equal(v1alpha1.ExperimentPhaseFinished))
+			_chaos := r.Object()
+			err = r.Get(context.TODO(), req.NamespacedName, _chaos)
+			Expect(err).ToNot(HaveOccurred())
+			Expect(_chaos.(twophase.InnerSchedulerObject).GetStatus().Experiment.Phase).To(Equal(v1alpha1.ExperimentPhaseFinished))
 
 			defer mock.With("MockRecoverError", errors.New("RecoverError"))()
 
@@ -310,7 +312,10 @@ var _ = Describe("TwoPhase", func() {
 			_, err = r.Reconcile(req)
 
 			Expect(err).ToNot(HaveOccurred())
-			//Expect(chaos.Status.Experiment.Phase).To(Equal(v1alpha1.ExperimentPhaseFinished))
+			_chaos := r.Object()
+			err = r.Get(context.TODO(), req.NamespacedName, _chaos)
+			Expect(err).ToNot(HaveOccurred())
+			Expect(_chaos.(twophase.InnerSchedulerObject).GetStatus().Experiment.Phase).To(Equal(v1alpha1.ExperimentPhaseFinished))
 		})
 
 		It("TwoPhase ToRecover Error", func() {
@@ -358,6 +363,29 @@ var _ = Describe("TwoPhase", func() {
 			_, err = r.Reconcile(req)
 
 			Expect(err).ToNot(HaveOccurred())
+			_chaos := r.Object()
+			err = r.Get(context.TODO(), req.NamespacedName, _chaos)
+			Expect(err).ToNot(HaveOccurred())
+			Expect(_chaos.(twophase.InnerSchedulerObject).GetStatus().Experiment.Phase).To(Equal(v1alpha1.ExperimentPhaseRunning))
+		})
+
+		It("TwoPhase ToApply Error", func() {
+			chaos := fakeTwoPhaseChaos{
+				TypeMeta:   typeMeta,
+				ObjectMeta: objectMeta,
+				Scheduler:  &v1alpha1.SchedulerSpec{Cron: "@hourly"},
+			}
+
+			chaos.SetNextRecover(futureTime)
+			chaos.SetNextStart(pastTime)
+
+			c := fake.NewFakeClientWithScheme(scheme.Scheme, &chaos)
+
+			r := twophase.Reconciler{
+				InnerReconciler: fakeReconciler{},
+				Client:          c,
+				Log:             ctrl.Log.WithName("controllers").WithName("TwoPhase"),
+			}
 
 			defer mock.With("MockApplyError", errors.New("ApplyError"))()
 
