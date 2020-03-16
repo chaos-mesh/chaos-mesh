@@ -13,12 +13,14 @@
 
 package test
 
+// Config describe the basic config for the operator test
 type Config struct {
 	ChartDir    string
 	ManifestDir string
 	Tag         string
 }
 
+// NewDefaultConfig describe the default configuration for operator test
 func NewDefaultConfig() *Config {
 	return &Config{
 		ChartDir:    "/charts",

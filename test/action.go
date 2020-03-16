@@ -36,12 +36,14 @@ const (
 	operartorChartName = "chaos-mesh"
 )
 
+// OperatorAction describe the common operation during test (e2e/stability/etc..)
 type OperatorAction interface {
 	CleanCRDOrDie()
 	DeployOperator(config OperatorConfig) error
 	InstallCRD(config OperatorConfig) error
 }
 
+// NewOperatorAction create a OperatorAction interface instance
 func NewOperatorAction(
 	kubeCli kubernetes.Interface,
 	aggrCli aggregatorclientset.Interface,
