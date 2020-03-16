@@ -64,24 +64,15 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos reconcil
 		r.Log.Error(err, "chaos is not PodChaos", "chaos", chaos)
 		return err
 	}
-	pods, err := utils.SelectPods(ctx, r.Client, podchaos.Spec.Selector)
+	pods, err := utils.SelectAndFilterPods(ctx, r.Client, &podchaos.Spec)
 	if err != nil {
-		r.Log.Error(err, "fail to get selected pods")
-		return err
-	}
-	if len(pods) == 0 {
-		r.Log.Error(nil, "no pod is selected", "name", req.Name, "namespace", req.Namespace)
-		return err
-	}
-	filteredPod, err := utils.FilterPodsByMode(pods, podchaos.Spec.Mode, podchaos.Spec.Value)
-	if err != nil {
-		r.Log.Error(err, "fail to generate pods")
+		r.Log.Error(err, "fail to select and generate pods")
 		return err
 	}
 
 	g := errgroup.Group{}
-	for index := range filteredPod {
-		pod := &filteredPod[index]
+	for index := range pods {
+		pod := &pods[index]
 		g.Go(func() error {
 			r.Log.Info("Deleting", "namespace", pod.Namespace, "name", pod.Name)
 
