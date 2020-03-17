@@ -53,7 +53,7 @@ spec:
               type: string
             mode:
               description: 'Mode defines the mode to run chaos action. Supported mode:
-                one / all / fixed / fixed-percent / random-max-percent'
+                exact / one / all / fixed / fixed-percent / random-max-percent'
               type: string
             nextRecover:
               description: Next time when this action will be recovered
@@ -148,7 +148,8 @@ spec:
               type: object
             value:
               description: Value is required when the mode is set to `FixedPodMode`
-                / `FixedPercentPodMod` / `RandomMaxPercentPodMod`. If `FixedPodMode`,
+                / `FixedPercentPodMod` / `RandomMaxPercentPodMod`. If `ExactPodMod`,
+                provide the name of the pod to do chaos action If `FixedPodMode`,
                 provide an integer of pods to do chaos action. If `FixedPercentPodMod`,
                 provide a number from 0-100 to specify the max % of pods the server
                 can do chaos action. If `RandomMaxPercentPodMod`,  provide a number
