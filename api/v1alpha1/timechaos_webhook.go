@@ -44,7 +44,7 @@ func (in *TimeChaos) Default() {
 	in.Spec.Selector.DefaultNamespace(in.GetNamespace())
 }
 
-// +kubebuilder:webhook:verbs=create;update;delete,path=/validate-pingcap-com-v1alpha1-timechaos,mutating=false,failurePolicy=fail,groups=pingcap.com,resources=timechaos,versions=v1alpha1,name=vtimechaos.kb.io
+// +kubebuilder:webhook:verbs=create;update,path=/validate-pingcap-com-v1alpha1-timechaos,mutating=false,failurePolicy=fail,groups=pingcap.com,resources=timechaos,versions=v1alpha1,name=vtimechaos.kb.io
 
 var _ ChaosValidator = &TimeChaos{}
 

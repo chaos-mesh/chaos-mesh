@@ -83,7 +83,6 @@ webhooks:
         operations:
           - CREATE
           - UPDATE
-          - DELETE
         resources:
           - {{ $crd }}
   {{- end }}

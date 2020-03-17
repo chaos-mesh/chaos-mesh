@@ -46,7 +46,7 @@ func (in *NetworkChaos) Default() {
 	in.Spec.Target.TargetSelector.DefaultNamespace(in.GetNamespace())
 }
 
-// +kubebuilder:webhook:verbs=create;update;delete,path=/validate-pingcap-com-v1alpha1-networkchaos,mutating=false,failurePolicy=fail,groups=pingcap.com,resources=networkchaos,versions=v1alpha1,name=vnetworkchaos.kb.io
+// +kubebuilder:webhook:verbs=create;update,path=/validate-pingcap-com-v1alpha1-networkchaos,mutating=false,failurePolicy=fail,groups=pingcap.com,resources=networkchaos,versions=v1alpha1,name=vnetworkchaos.kb.io
 
 var _ ChaosValidator = &NetworkChaos{}
 

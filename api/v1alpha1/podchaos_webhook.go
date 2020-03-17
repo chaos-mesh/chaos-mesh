@@ -44,7 +44,7 @@ func (in *PodChaos) Default() {
 	in.Spec.Selector.DefaultNamespace(in.GetNamespace())
 }
 
-// +kubebuilder:webhook:verbs=create;update;delete,path=/validate-pingcap-com-v1alpha1-podchaos,mutating=false,failurePolicy=fail,groups=pingcap.com,resources=podchaos,versions=v1alpha1,name=vpodchaos.kb.io
+// +kubebuilder:webhook:verbs=create;update,path=/validate-pingcap-com-v1alpha1-podchaos,mutating=false,failurePolicy=fail,groups=pingcap.com,resources=podchaos,versions=v1alpha1,name=vpodchaos.kb.io
 
 var _ ChaosValidator = &PodChaos{}
 

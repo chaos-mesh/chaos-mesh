@@ -44,7 +44,7 @@ func (in *KernelChaos) Default() {
 	in.Spec.Selector.DefaultNamespace(in.GetNamespace())
 }
 
-// +kubebuilder:webhook:verbs=create;update;delete,path=/validate-pingcap-com-v1alpha1-kernelchaos,mutating=false,failurePolicy=fail,groups=pingcap.com,resources=kernelchaos,versions=v1alpha1,name=vkernelchaos.kb.io
+// +kubebuilder:webhook:verbs=create;update,path=/validate-pingcap-com-v1alpha1-kernelchaos,mutating=false,failurePolicy=fail,groups=pingcap.com,resources=kernelchaos,versions=v1alpha1,name=vkernelchaos.kb.io
 
 var _ ChaosValidator = &KernelChaos{}
 
