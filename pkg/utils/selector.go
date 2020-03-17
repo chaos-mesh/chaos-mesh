@@ -223,6 +223,13 @@ func FilterPodsByMode(pods []v1.Pod, mode v1alpha1.PodMode, value string) ([]v1.
 	}
 
 	switch mode {
+	case v1alpha1.ExactPodMod:
+		for _, pod := range pods {
+			if pod.Name == value {
+				return []v1.Pod{pod}, nil
+			}
+		}
+		return nil, fmt.Errorf("cannot find a pod named with %s", value)
 	case v1alpha1.OnePodMode:
 		index := rand.Intn(len(pods))
 		pod := pods[index]

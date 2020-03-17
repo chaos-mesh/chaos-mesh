@@ -37,10 +37,11 @@ type KernelChaos struct {
 // KernelChaosSpec defines the desired state of KernelChaos
 type KernelChaosSpec struct {
 	// Mode defines the mode to run chaos action.
-	// Supported mode: one / all / fixed / fixed-percent / random-max-percent
+	// Supported mode: exact / one / all / fixed / fixed-percent / random-max-percent
 	Mode PodMode `json:"mode"`
 
 	// Value is required when the mode is set to `FixedPodMode` / `FixedPercentPodMod` / `RandomMaxPercentPodMod`.
+	// If `ExactPodMod`, provide the name of the pod to do chaos action
 	// If `FixedPodMode`, provide an integer of pods to do chaos action.
 	// If `FixedPercentPodMod`, provide a number from 0-100 to specify the max % of pods the server can do chaos action.
 	// If `RandomMaxPercentPodMod`,  provide a number from 0-100 to specify the % of pods to do chaos action

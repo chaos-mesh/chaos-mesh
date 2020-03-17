@@ -78,6 +78,8 @@ type SchedulerSpec struct {
 type PodMode string
 
 const (
+	//ExactPodMod represents that the system will do the chaos action on the exact pod
+	ExactPodMod PodMode = "exact"
 	// OnePodMode represents that the system will do the chaos action on one pod selected randomly.
 	OnePodMode PodMode = "one"
 	// AllPodMode represents that the system will do the chaos action on all pods
