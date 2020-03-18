@@ -86,7 +86,7 @@ func TestSelectPods(t *testing.T) {
 	}
 
 	for _, tc := range tcs {
-		filteredPods, err := SelectPods(context.Background(), c, tc.selector)
+		filteredPods, err := selectPods(context.Background(), c, tc.selector)
 		g.Expect(err).ShouldNot(HaveOccurred(), tc.name)
 		g.Expect(len(filteredPods)).To(Equal(len(tc.expectedPods)), tc.name)
 	}

@@ -4,13 +4,11 @@ import (
 	"context"
 	"fmt"
 
-	"k8s.io/apimachinery/pkg/runtime"
-
-	v1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
 	"github.com/golang/protobuf/ptypes/empty"
 	"google.golang.org/grpc"
+	v1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 
 	chaosdaemon "github.com/pingcap/chaos-mesh/pkg/chaosdaemon/pb"
 	"github.com/pingcap/chaos-mesh/pkg/mock"
@@ -75,6 +73,7 @@ func newPod(
 	namespace string,
 	ans map[string]string,
 	ls map[string]string,
+	containerStatus v1.ContainerStatus,
 ) v1.Pod {
 	return v1.Pod{
 		TypeMeta: metav1.TypeMeta{
@@ -89,7 +88,11 @@ func newPod(
 		},
 		Status: v1.PodStatus{
 			Phase:             status,
-			ContainerStatuses: []v1.ContainerStatus{{ContainerID: "fake-container-id"}},
+			ContainerStatuses: []v1.ContainerStatus{containerStatus},
+		},
+		Spec: v1.PodSpec{
+			InitContainers: []v1.Container{{Name: "fake-name", Image: "fake-image"}},
+			Containers:     []v1.Container{{Name: "fake-name", Image: "fake-image"}},
 		},
 	}
 }
@@ -102,11 +105,12 @@ func GenerateNPods(
 	ns string,
 	ans map[string]string,
 	ls map[string]string,
+	containerStatus v1.ContainerStatus,
 ) ([]runtime.Object, []v1.Pod) {
 	var podObjects []runtime.Object
 	var pods []v1.Pod
 	for i := 0; i < n; i++ {
-		pod := newPod(fmt.Sprintf("%s%d", namePrefix, i), status, ns, ans, ls)
+		pod := newPod(fmt.Sprintf("%s%d", namePrefix, i), status, ns, ans, ls, containerStatus)
 		podObjects = append(podObjects, &pod)
 		pods = append(pods, pod)
 	}
