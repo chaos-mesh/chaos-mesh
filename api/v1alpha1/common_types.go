@@ -137,11 +137,3 @@ const (
 )
 
 var log = ctrl.Log.WithName("validate-webhook")
-
-// +kubebuilder:object:generate=false
-
-// Admission describe the interface should be implemented in admission webhook
-type Admission interface {
-	// Validate describe the interface should be implemented in validation webhook
-	Validate() (bool, string, error)
-}

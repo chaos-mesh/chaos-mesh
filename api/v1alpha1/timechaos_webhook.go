@@ -14,6 +14,10 @@
 package v1alpha1
 
 import (
+	"fmt"
+
+	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/util/validation/field"
 	ctrl "sigs.k8s.io/controller-runtime"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
@@ -23,9 +27,9 @@ import (
 var timechaoslog = logf.Log.WithName("timechaos-resource")
 
 // SetupWebhookWithManager setup TimeChaos's webhook with manager
-func (r *TimeChaos) SetupWebhookWithManager(mgr ctrl.Manager) error {
+func (in *TimeChaos) SetupWebhookWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewWebhookManagedBy(mgr).
-		For(r).
+		For(in).
 		Complete()
 }
 
@@ -34,8 +38,58 @@ func (r *TimeChaos) SetupWebhookWithManager(mgr ctrl.Manager) error {
 var _ webhook.Defaulter = &TimeChaos{}
 
 // Default implements webhook.Defaulter so a webhook will be registered for the type
-func (r *TimeChaos) Default() {
-	timechaoslog.Info("default", "name", r.Name)
+func (in *TimeChaos) Default() {
+	timechaoslog.Info("default", "name", in.Name)
 
-	r.Spec.Selector.DefaultNamespace(r.GetNamespace())
+	in.Spec.Selector.DefaultNamespace(in.GetNamespace())
+}
+
+// +kubebuilder:webhook:verbs=create;update,path=/validate-pingcap-com-v1alpha1-timechaos,mutating=false,failurePolicy=fail,groups=pingcap.com,resources=timechaos,versions=v1alpha1,name=vtimechaos.kb.io
+
+var _ ChaosValidator = &TimeChaos{}
+
+// ValidateCreate implements webhook.Validator so a webhook will be registered for the type
+func (in *TimeChaos) ValidateCreate() error {
+	timechaoslog.Info("validate create", "name", in.Name)
+	return in.Validate()
+}
+
+// ValidateUpdate implements webhook.Validator so a webhook will be registered for the type
+func (in *TimeChaos) ValidateUpdate(old runtime.Object) error {
+	timechaoslog.Info("validate update", "name", in.Name)
+	return in.Validate()
+}
+
+// ValidateDelete implements webhook.Validator so a webhook will be registered for the type
+func (in *TimeChaos) ValidateDelete() error {
+	timechaoslog.Info("validate delete", "name", in.Name)
+
+	// Nothing to do?
+	return nil
+}
+
+// Validate validates chaos object
+func (in *TimeChaos) Validate() error {
+	specField := field.NewPath("spec")
+	errLst := in.ValidateScheduler(specField)
+
+	if len(errLst) > 0 {
+		return fmt.Errorf(errLst.ToAggregate().Error())
+	}
+	return nil
+}
+
+// ValidateScheduler validates the scheduler and duration
+func (in *TimeChaos) ValidateScheduler(root *field.Path) field.ErrorList {
+	if in.Spec.Duration != nil && in.Spec.Scheduler != nil {
+		return nil
+	} else if in.Spec.Duration == nil && in.Spec.Scheduler == nil {
+		return nil
+	}
+
+	allErrs := field.ErrorList{}
+	schedulerField := root.Child("scheduler")
+
+	allErrs = append(allErrs, field.Invalid(schedulerField, in.Spec.Scheduler, ValidateSchedulerError))
+	return allErrs
 }
