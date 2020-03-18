@@ -72,6 +72,7 @@ e2e_args=(
     /usr/local/bin/ginkgo
     ${ginkgo_args[@]:-}
     /usr/local/bin/e2e.test
+    --
 )
 
 if [ -n "$REPORT_DIR" ]; then

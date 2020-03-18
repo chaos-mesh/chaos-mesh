@@ -83,7 +83,7 @@ hack::ensure_kind
 hack::ensure_kubectl
 hack::ensure_helm
 
-DOCKER_REGISTRY_PREFIX=${DOCKER_REGISTRY_PREFIX:-localhost:5000/}
+DOCKER_REGISTRY=${DOCKER_REGISTRY:-localhost:5000}
 IMAGE_TAG=${IMAGE_TAG:-latest}
 CLUSTER=${CLUSTER:-chaos-mesh}
 KUBECONFIG=${KUBECONFIG:-~/.kube/config}
@@ -100,7 +100,7 @@ DOCKER_IO_MIRROR=${DOCKER_IO_MIRROR:-}
 GCR_IO_MIRROR=${GCR_IO_MIRROR:-}
 QUAY_IO_MIRROR=${QUAY_IO_MIRROR:-}
 
-echo "DOCKER_REGISTRY_PREFIX: $DOCKER_REGISTRY_PREFIX"
+echo "DOCKER_REGISTRY: $DOCKER_REGISTRY"
 echo "IMAGE_TAG: $IMAGE_TAG"
 echo "CLUSTER: $CLUSTER"
 echo "KUBECONFIG: $KUBECONFIG"
@@ -134,9 +134,9 @@ function e2e::image_build() {
         echo "info: skip building and pushing images"
         return
     fi
-    DOCKER_REGISTRY_PREFIX=$DOCKER_REGISTRY_PREFIX GOOS=linux GOARCH=amd64 make e2e-docker
-    DOCKER_REGISTRY_PREFIX=$DOCKER_REGISTRY_PREFIX make image-chaos-mesh
-    DOCKER_REGISTRY_PREFIX=$DOCKER_REGISTRY_PREFIX make image-chaos-daemon
+    DOCKER_REGISTRY=${DOCKER_REGISTRY} GOOS=linux GOARCH=amd64 make e2e-docker
+#    DOCKER_REGISTRY=$DOCKER_REGISTRY make image-chaos-mesh
+#    DOCKER_REGISTRY=$DOCKER_REGISTRY make image-chaos-daemon
 }
 
 function e2e::image_load() {
@@ -145,7 +145,7 @@ function e2e::image_load() {
         pingcap/chaos-daemon
     )
     for n in ${names[@]}; do
-        $KIND_BIN load docker-image --name $CLUSTER ${DOCKER_REGISTRY_PREFIX}$n:$IMAGE_TAG
+        $KIND_BIN load docker-image --name $CLUSTER ${DOCKER_REGISTRY}/$n:$IMAGE_TAG
     done
 }
 
@@ -360,6 +360,6 @@ e2e::image_load
 
 export KUBECONFIG
 export KUBECONTEXT
-export E2E_IMAGE=${DOCKER_REGISTRY_PREFIX}pingcap/chaos-mesh-e2e:${IMAGE_TAG}
+export E2E_IMAGE=${DOCKER_REGISTRY}/pingcap/chaos-mesh-e2e:${IMAGE_TAG}
 
 hack/run-e2e.sh "$@"

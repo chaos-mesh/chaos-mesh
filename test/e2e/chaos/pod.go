@@ -4,10 +4,11 @@ import (
 	"context"
 	"time"
 
+	"k8s.io/apimachinery/pkg/labels"
+	"k8s.io/klog"
+
 	"github.com/onsi/ginkgo"
-	"github.com/pingcap/chaos-mesh/api/v1alpha1"
-	chaosmeshv1alpha1 "github.com/pingcap/chaos-mesh/api/v1alpha1"
-	"github.com/pingcap/chaos-mesh/test/pkg/fixture"
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -17,6 +18,10 @@ import (
 	restClient "k8s.io/client-go/rest"
 	"k8s.io/kubernetes/test/e2e/framework"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+
+	"github.com/pingcap/chaos-mesh/api/v1alpha1"
+	chaosmeshv1alpha1 "github.com/pingcap/chaos-mesh/api/v1alpha1"
+	"github.com/pingcap/chaos-mesh/test/pkg/fixture"
 
 	// load pprof
 	_ "net/http/pprof"
@@ -55,11 +60,13 @@ var _ = ginkgo.Describe("[chaos-mesh] Basic", func() {
 		}
 	})
 
-	ginkgo.It("[PodFailure]", func() {
+	ginkgo.It("PodFailure", func() {
 		ctx, cancel := context.WithCancel(context.Background())
-		bpod := fixture.NewCommonNginxPod("nginx", ns)
-		_, err := kubeCli.CoreV1().Pods(ns).Create(bpod)
-		framework.ExpectNoError(err, "create nginx pod error")
+		nd := fixture.NewCommonNginxDeployment("nginx", ns, 1)
+		_, err := kubeCli.AppsV1().Deployments(ns).Create(nd)
+		framework.ExpectNoError(err, "create nginx deployment error")
+		err = waitDeploymentReady("nginx", ns, kubeCli)
+		framework.ExpectNoError(err, "wait nginx deployment ready error")
 
 		podFailureChaos := &v1alpha1.PodChaos{
 			ObjectMeta: metav1.ObjectMeta{
@@ -80,13 +87,23 @@ var _ = ginkgo.Describe("[chaos-mesh] Basic", func() {
 			},
 		}
 		err = cli.Create(ctx, podFailureChaos)
-		framework.ExpectNoError(err, "create pod chaos error")
+		framework.ExpectNoError(err, "create pod failure chaos error")
 
 		err = wait.PollImmediate(3*time.Second, 5*time.Minute, func() (done bool, err error) {
-			pod, err := kubeCli.CoreV1().Pods(ns).Get("nginx", metav1.GetOptions{})
-			if err != nil {
-				return false, err
+
+			listOption := metav1.ListOptions{
+				LabelSelector: labels.SelectorFromSet(map[string]string{
+					"app": "nginx",
+				}).String(),
 			}
+			pods, err := kubeCli.CoreV1().Pods(ns).List(listOption)
+			if err != nil {
+				return false, nil
+			}
+			if len(pods.Items) != 1 {
+				return false, nil
+			}
+			pod := pods.Items[0]
 			for _, c := range pod.Spec.Containers {
 				if c.Image == pauseImage {
 					return true, nil
@@ -98,11 +115,21 @@ var _ = ginkgo.Describe("[chaos-mesh] Basic", func() {
 		err = cli.Delete(ctx, podFailureChaos)
 		framework.ExpectNoError(err, "failed to delete pod failure chaos")
 
+		klog.Infof("success to perform pod failure")
 		err = wait.PollImmediate(3*time.Second, 5*time.Minute, func() (done bool, err error) {
-			pod, err := kubeCli.CoreV1().Pods(ns).Get("nginx", metav1.GetOptions{})
-			if err != nil {
-				return false, err
+			listOption := metav1.ListOptions{
+				LabelSelector: labels.SelectorFromSet(map[string]string{
+					"app": "nginx",
+				}).String(),
 			}
+			pods, err := kubeCli.CoreV1().Pods(ns).List(listOption)
+			if err != nil {
+				return false, nil
+			}
+			if len(pods.Items) != 1 {
+				return false, nil
+			}
+			pod := pods.Items[0]
 			for _, c := range pod.Spec.Containers {
 				if c.Image == "nginx:latest" {
 					return true, nil
@@ -115,11 +142,13 @@ var _ = ginkgo.Describe("[chaos-mesh] Basic", func() {
 		cancel()
 	})
 
-	ginkgo.It("[PodKill]", func() {
+	ginkgo.It("PodKill", func() {
 		ctx, cancel := context.WithCancel(context.Background())
 		bpod := fixture.NewCommonNginxPod("nginx", ns)
 		_, err := kubeCli.CoreV1().Pods(ns).Create(bpod)
 		framework.ExpectNoError(err, "create nginx pod error")
+		err = waitPodRunning("nginx", ns, kubeCli)
+		framework.ExpectNoError(err, "wait nginx running error")
 
 		podKillChaos := &v1alpha1.PodChaos{
 			ObjectMeta: metav1.ObjectMeta{
@@ -137,6 +166,9 @@ var _ = ginkgo.Describe("[chaos-mesh] Basic", func() {
 				},
 				Action: v1alpha1.PodKillAction,
 				Mode:   v1alpha1.OnePodMode,
+				Scheduler: &v1alpha1.SchedulerSpec{
+					Cron: "@every 10s",
+				},
 			},
 		}
 		err = cli.Create(ctx, podKillChaos)
@@ -153,3 +185,32 @@ var _ = ginkgo.Describe("[chaos-mesh] Basic", func() {
 		cancel()
 	})
 })
+
+func waitPodRunning(name, namespace string, cli kubernetes.Interface) error {
+	return wait.Poll(5*time.Second, 5*time.Minute, func() (done bool, err error) {
+		pod, err := cli.CoreV1().Pods(namespace).Get(name, metav1.GetOptions{})
+		if err != nil {
+			return false, nil
+		}
+		if pod.Status.Phase != corev1.PodRunning {
+			return false, nil
+		}
+		return true, nil
+	})
+}
+
+func waitDeploymentReady(name, namespace string, cli kubernetes.Interface) error {
+	return wait.Poll(5*time.Second, 5*time.Minute, func() (done bool, err error) {
+		d, err := cli.AppsV1().Deployments(namespace).Get(name, metav1.GetOptions{})
+		if err != nil {
+			return false, nil
+		}
+		if d.Status.AvailableReplicas != *d.Spec.Replicas {
+			return false, nil
+		}
+		if d.Status.UpdatedReplicas != *d.Spec.Replicas {
+			return false, nil
+		}
+		return true, nil
+	})
+}
