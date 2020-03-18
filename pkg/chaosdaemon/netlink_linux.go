@@ -76,7 +76,7 @@ func deleteQdisc(pid uint32, toQdisc toQdiscFunc) error {
 	}
 
 	if !exist {
-		log.Error(nil, "qdisc not exists, qdisc may be deleted by mistake or not injected successfully, there may be bugs here", "qdisc", netemQdisc)
+		log.Error(nil, "qdisc not exists, qdisc may be deleted by mistake or not injected successfully, there may be bugs here", "qdisc", qdisc)
 		return nil
 	}
 
