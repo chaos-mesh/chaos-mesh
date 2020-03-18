@@ -135,21 +135,3 @@ func Cancel(netem *pb.Netem, pid uint32) error {
 
 	return nil
 }
-
-func qdiscExists(qdisc netlink.Qdisc, handler *netlink.Handle, link netlink.Link) (bool, error) {
-	qds, err := handler.QdiscList(link)
-	if err != nil {
-		log.Error(err, "failed to list qdiscs", "link", link)
-		return false, err
-	}
-
-	for _, qd := range qds {
-		if qd.Attrs().LinkIndex == qdisc.Attrs().LinkIndex &&
-			qd.Attrs().Parent == qdisc.Attrs().Parent &&
-			qd.Attrs().Handle == qdisc.Attrs().Handle {
-			return true, nil
-		}
-	}
-
-	return false, nil
-}
