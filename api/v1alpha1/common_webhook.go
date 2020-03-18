@@ -35,11 +35,11 @@ func (in *SelectorSpec) DefaultNamespace(namespace string) {
 
 // +kubebuilder:object:generate=false
 
-// ChaosValidator describe the interface should be implemented in chaos
+// ChaosValidator describes the interface should be implemented in chaos
 type ChaosValidator interface {
 	webhook.Validator
-	// Validate validate chaos object
+	// Validate validates chaos object
 	Validate() error
-	// ValidateScheduler validate the scheduler and duration
+	// ValidateScheduler validates the scheduler and duration
 	ValidateScheduler(root *field.Path) field.ErrorList
 }

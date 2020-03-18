@@ -68,7 +68,7 @@ func (in *PodChaos) ValidateDelete() error {
 	return nil
 }
 
-// Validate validate chaos object
+// Validate validates chaos object
 func (in *PodChaos) Validate() error {
 	specField := field.NewPath("spec")
 	errLst := in.ValidateScheduler(specField)
@@ -79,7 +79,7 @@ func (in *PodChaos) Validate() error {
 	return nil
 }
 
-// ValidateScheduler validate the scheduler and duration
+// ValidateScheduler validates the scheduler and duration
 func (in *PodChaos) ValidateScheduler(root *field.Path) field.ErrorList {
 	allErrs := field.ErrorList{}
 	schedulerField := root.Child("scheduler")

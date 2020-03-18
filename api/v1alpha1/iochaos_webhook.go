@@ -68,7 +68,7 @@ func (in *IoChaos) ValidateDelete() error {
 	return nil
 }
 
-// Validate validate chaos object
+// Validate validates chaos object
 func (in *IoChaos) Validate() error {
 	specField := field.NewPath("spec")
 	errLst := in.ValidateScheduler(specField)
@@ -79,7 +79,7 @@ func (in *IoChaos) Validate() error {
 	return nil
 }
 
-// ValidateScheduler validate the scheduler and duration
+// ValidateScheduler validates the scheduler and duration
 func (in *IoChaos) ValidateScheduler(root *field.Path) field.ErrorList {
 	if in.Spec.Duration != nil && in.Spec.Scheduler != nil {
 		return nil
