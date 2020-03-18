@@ -133,6 +133,8 @@ type NetworkChaosSpec struct {
 	// Corrupt represents the detail about corrupt action
 	Corrupt *CorruptSpec `json:"corrupt,omitempty"`
 
+	Limit *LimitSpec `json:"limit,omitempty"`
+
 	// Direction represents the partition direction
 	// +optional
 	Direction PartitionDirection `json:"direction"`
