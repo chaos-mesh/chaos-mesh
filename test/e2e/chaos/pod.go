@@ -2,26 +2,21 @@ package chaos
 
 import (
 	"context"
-	"k8s.io/apimachinery/pkg/api/errors"
 	"time"
 
-	"k8s.io/apimachinery/pkg/util/wait"
-
-	"k8s.io/apimachinery/pkg/runtime"
-	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
-
+	"github.com/onsi/ginkgo"
+	"github.com/pingcap/chaos-mesh/api/v1alpha1"
 	chaosmeshv1alpha1 "github.com/pingcap/chaos-mesh/api/v1alpha1"
 	"github.com/pingcap/chaos-mesh/test/pkg/fixture"
-
+	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/kubernetes"
+	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	restClient "k8s.io/client-go/rest"
-	"sigs.k8s.io/controller-runtime/pkg/client"
-
-	"github.com/pingcap/chaos-mesh/api/v1alpha1"
-
-	"github.com/onsi/ginkgo"
 	"k8s.io/kubernetes/test/e2e/framework"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	// load pprof
 	_ "net/http/pprof"
