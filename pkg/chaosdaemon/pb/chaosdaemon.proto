@@ -16,7 +16,11 @@ service ChaosDaemon {
 
   rpc ContainerKill(ContainerRequest) returns (google.protobuf.Empty) {}
   rpc ContainerGetPid(ContainerRequest) returns (ContainerResponse) {}
+
+  rpc ExecPodStressors (StressRequest) returns (google.protobuf.Empty) {}
+  rpc CancelPodStressors (StressRequest) returns (google.protobuf.Empty) {}
 }
+
 
 message ContainerRequest{
   ContainerAction action = 1;
@@ -91,3 +95,9 @@ message ContainerAction {
   }
   Action action = 1;
 }
+
+message StressRequest {
+  string target = 1;
+  string stressors = 2;
+}
+

@@ -33,8 +33,7 @@ import (
 	"github.com/pingcap/chaos-mesh/controllers/common"
 	"github.com/pingcap/chaos-mesh/controllers/reconciler"
 	"github.com/pingcap/chaos-mesh/controllers/twophase"
-	"github.com/pingcap/chaos-mesh/pkg/chaosstress"
-	pb "github.com/pingcap/chaos-mesh/pkg/chaosstress/pb"
+	pb "github.com/pingcap/chaos-mesh/pkg/chaosdaemon/pb"
 	"github.com/pingcap/chaos-mesh/pkg/utils"
 )
 
@@ -174,24 +173,18 @@ func (r *Reconciler) cleanFinalizersAndRecover(ctx context.Context, chaos *v1alp
 
 func (r *Reconciler) recoverPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.StressChaos) error {
 	r.Log.Info("Try to recover pod", "namespace", pod.Namespace, "name", pod.Name)
-	stressClient, err := chaosstress.NewGrpcChaosStressClient(
-		pod, os.Getenv("STRESS_SERVER_PORT"))
+	daemonClient, err := utils.NewChaosDaemonClient(ctx, r.Client,
+		pod, os.Getenv("CHAOS_DAEMON_PORT"))
 	if err != nil {
 		return err
 	}
-	defer stressClient.Close()
-	if _, err := stressClient.CancelStressors(ctx,
-		&pb.StressRequest{
-			Uuid: chaos.Status.UUID,
-		}); err != nil {
-		return err
+	defer daemonClient.Close()
+	if len(pod.Status.ContainerStatuses) == 0 {
+		return fmt.Errorf("%s %s can't get the state of container", pod.Namespace, pod.Name)
 	}
-	old := chaos.Status.UUID
-	chaos.Status.UUID = ""
-	err = r.Update(ctx, chaos)
-	if err != nil {
-		r.Log.Error(err, "unable to clear stress chaos uuid", "uuid", old)
-	}
+	_, err = daemonClient.CancelPodStressors(ctx, &pb.StressRequest{
+		Target: pod.Status.ContainerStatuses[0].ContainerID,
+	})
 	return nil
 }
 
@@ -215,25 +208,24 @@ func (r *Reconciler) applyAllPods(ctx context.Context, pods []v1.Pod, chaos *v1a
 			return r.applyPod(ctx, pod, chaos)
 		})
 	}
-
 	return g.Wait()
 }
 
 func (r *Reconciler) applyPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.StressChaos) error {
 	r.Log.Info("Try to apply stress chaos", "namespace",
 		pod.Namespace, "name", pod.Name, "port", os.Getenv("STRESS_SERVER_PORT"))
-	stressClient, err := chaosstress.NewGrpcChaosStressClient(
-		pod, os.Getenv("STRESS_SERVER_PORT"))
+	daemonClient, err := utils.NewChaosDaemonClient(ctx, r.Client,
+		pod, os.Getenv("CHAOS_DAEMON_PORT"))
 	if err != nil {
 		return err
 	}
-	defer stressClient.Close()
-	res, err := stressClient.ExecStressors(ctx, &pb.StressRequest{
+	defer daemonClient.Close()
+	if len(pod.Status.ContainerStatuses) == 0 {
+		return fmt.Errorf("%s %s can't get the state of container", pod.Namespace, pod.Name)
+	}
+	_, err = daemonClient.ExecPodStressors(ctx, &pb.StressRequest{
+		Target:    pod.Status.ContainerStatuses[0].ContainerID,
 		Stressors: chaos.Spec.Stressors,
 	})
-	if err != nil {
-		return err
-	}
-	chaos.Status.UUID = res.Uuid
 	return nil
 }
