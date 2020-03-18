@@ -23,6 +23,14 @@ var _ utils.ChaosDaemonClientInterface = (*MockChaosDaemonClient)(nil)
 // MockChaosDaemonClient implements ChaosDaemonClientInterface for unit testing
 type MockChaosDaemonClient struct{}
 
+func (c *MockChaosDaemonClient) ExecPodStressors(ctx context.Context, in *chaosdaemon.StressRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
+	panic("implement me")
+}
+
+func (c *MockChaosDaemonClient) CancelPodStressors(ctx context.Context, in *chaosdaemon.StressRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
+	panic("implement me")
+}
+
 func (c *MockChaosDaemonClient) ContainerGetPid(ctx context.Context, in *chaosdaemon.ContainerRequest, opts ...grpc.CallOption) (*chaosdaemon.ContainerResponse, error) {
 	if resp := mock.On("MockContainerGetPidResponse"); resp != nil {
 		return resp.(*chaosdaemon.ContainerResponse), nil
