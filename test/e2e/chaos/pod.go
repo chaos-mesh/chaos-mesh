@@ -2,6 +2,7 @@ package chaos
 
 import (
 	"context"
+	"k8s.io/apimachinery/pkg/api/errors"
 	"time"
 
 	"k8s.io/apimachinery/pkg/util/wait"
@@ -59,13 +60,13 @@ var _ = ginkgo.Describe("[chaos-mesh] Basic", func() {
 		}
 	})
 
-	ginkgo.It("PodFailure Test", func() {
+	ginkgo.It("[PodFailure]", func() {
 		ctx, cancel := context.WithCancel(context.Background())
 		bpod := fixture.NewCommonNginxPod("nginx", ns)
 		_, err := kubeCli.CoreV1().Pods(ns).Create(bpod)
 		framework.ExpectNoError(err, "create nginx pod error")
 
-		busyboxPodFailureChaos := &v1alpha1.PodChaos{
+		podFailureChaos := &v1alpha1.PodChaos{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      "nginx-failure",
 				Namespace: ns,
@@ -83,7 +84,7 @@ var _ = ginkgo.Describe("[chaos-mesh] Basic", func() {
 				Mode:   v1alpha1.OnePodMode,
 			},
 		}
-		err = cli.Create(ctx, busyboxPodFailureChaos)
+		err = cli.Create(ctx, podFailureChaos)
 		framework.ExpectNoError(err, "create pod chaos error")
 
 		err = wait.PollImmediate(3*time.Second, 5*time.Minute, func() (done bool, err error) {
@@ -99,8 +100,8 @@ var _ = ginkgo.Describe("[chaos-mesh] Basic", func() {
 			return false, nil
 		})
 
-		err = cli.Delete(ctx, busyboxPodFailureChaos)
-		framework.ExpectNoError(err, "failed to recover pod failure chaos")
+		err = cli.Delete(ctx, podFailureChaos)
+		framework.ExpectNoError(err, "failed to delete pod failure chaos")
 
 		err = wait.PollImmediate(3*time.Second, 5*time.Minute, func() (done bool, err error) {
 			pod, err := kubeCli.CoreV1().Pods(ns).Get("nginx", metav1.GetOptions{})
@@ -114,7 +115,46 @@ var _ = ginkgo.Describe("[chaos-mesh] Basic", func() {
 			}
 			return false, nil
 		})
+		framework.ExpectNoError(err, "pod failure recover failed")
 
+		cancel()
+	})
+
+	ginkgo.It("[PodKill]", func() {
+		ctx, cancel := context.WithCancel(context.Background())
+		bpod := fixture.NewCommonNginxPod("nginx", ns)
+		_, err := kubeCli.CoreV1().Pods(ns).Create(bpod)
+		framework.ExpectNoError(err, "create nginx pod error")
+
+		podKillChaos := &v1alpha1.PodChaos{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "nginx-kill",
+				Namespace: ns,
+			},
+			Spec: v1alpha1.PodChaosSpec{
+				Selector: v1alpha1.SelectorSpec{
+					Namespaces: []string{
+						ns,
+					},
+					LabelSelectors: map[string]string{
+						"app": "nginx",
+					},
+				},
+				Action: v1alpha1.PodKillAction,
+				Mode:   v1alpha1.OnePodMode,
+			},
+		}
+		err = cli.Create(ctx, podKillChaos)
+		framework.ExpectNoError(err, "create pod chaos error")
+
+		err = wait.Poll(5*time.Second, 5*time.Minute, func() (done bool, err error) {
+			_, err = kubeCli.CoreV1().Pods(ns).Get("nginx", metav1.GetOptions{})
+			if err != nil && errors.IsNotFound(err) {
+				return true, nil
+			}
+			return false, nil
+		})
+		framework.ExpectNoError(err, "Pod kill chaos perform failed")
 		cancel()
 	})
 })
