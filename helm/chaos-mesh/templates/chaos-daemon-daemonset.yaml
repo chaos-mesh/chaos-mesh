@@ -58,6 +58,8 @@ spec:
               {{- else if eq .Values.chaosDaemon.runtime "containerd" }}
               mountPath: /run/containerd/containerd.sock
               {{- end }}
+            - name: sys-path
+              mountPath: /sys
           ports:
             - name: grpc
               containerPort: {{ .Values.chaosDaemon.grpcPort }}
@@ -92,9 +94,6 @@ spec:
             - name: src-path
               mountPath: /usr/src
               readOnly: true
-            - name: sys-path
-              mountPath: /sys
-              readOnly: true
           ports:
             - name: grpc
               containerPort: {{ .Values.bpfki.grpcPort }}
@@ -104,6 +103,9 @@ spec:
         - name: socket-path
           hostPath:
             path: {{ .Values.chaosDaemon.socketPath | default "/var/run/docker.sock" }}
+        - name: sys-path
+          hostPath:
+            path: /sys
 {{- if .Values.bpfki.create }}
         - name: localtime-path
           hostPath:
@@ -114,7 +116,4 @@ spec:
         - name: src-path
           hostPath:
             path: /usr/src
-        - name: sys-path
-          hostPath:
-            path: /sys
 {{- end }}

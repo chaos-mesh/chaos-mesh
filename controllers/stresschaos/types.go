@@ -223,9 +223,11 @@ func (r *Reconciler) applyPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.
 	if len(pod.Status.ContainerStatuses) == 0 {
 		return fmt.Errorf("%s %s can't get the state of container", pod.Namespace, pod.Name)
 	}
-	_, err = daemonClient.ExecPodStressors(ctx, &pb.StressRequest{
+	if _, err = daemonClient.ExecPodStressors(ctx, &pb.StressRequest{
 		Target:    pod.Status.ContainerStatuses[0].ContainerID,
 		Stressors: chaos.Spec.Stressors,
-	})
+	}); err != nil {
+		return err
+	}
 	return nil
 }

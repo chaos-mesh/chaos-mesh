@@ -34,7 +34,11 @@ var (
 func (s *daemonServer) ExecPodStressors(ctx context.Context,
 	req *pb.StressRequest) (*empty.Empty, error) {
 	log.Info("executing stressors", "request", req)
-	control, err := cgroups.Load(cgroups.V1, cgroups.StaticPath(""))
+	cgroup, err := s.crClient.GetPodCgroupFromContainerID(ctx, req.Target)
+	if err != nil {
+		return nil, err
+	}
+	control, err := cgroups.Load(cgroups.V1, cgroups.StaticPath(cgroup))
 	if err != nil {
 		return nil, err
 	}
