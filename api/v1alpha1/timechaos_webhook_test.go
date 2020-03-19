@@ -98,7 +98,7 @@ var _ = Describe("timechaos_webhook", func() {
 					expect: "error",
 				},
 				{
-					name: "only define the Scheduler",
+					name: "only define the Duration",
 					chaos: TimeChaos{
 						ObjectMeta: metav1.ObjectMeta{
 							Namespace: metav1.NamespaceDefault,
