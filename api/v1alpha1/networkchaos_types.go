@@ -47,6 +47,9 @@ const (
 
 	// PartitionAction represents the chaos action of network partition of pods.
 	PartitionAction NetworkChaosAction = "partition"
+
+	// LimitAction represents the chaos action of network limit of pods.
+	LimitAction NetworkChaosAction = "limit"
 )
 
 // PartitionDirection represents the block direction from source to target
@@ -132,6 +135,9 @@ type NetworkChaosSpec struct {
 
 	// Corrupt represents the detail about corrupt action
 	Corrupt *CorruptSpec `json:"corrupt,omitempty"`
+
+	// Limit represents the detail about limit action
+	Limit *LimitSpec `json:"limit,omitempty"`
 
 	// Direction represents the partition direction
 	// +optional
@@ -367,6 +373,14 @@ func (corrupt *CorruptSpec) ToNetem() (*chaosdaemonpb.Netem, error) {
 		Corrupt:     float32(corruptPercentage),
 		CorruptCorr: float32(corr),
 	}, nil
+}
+
+type LimitSpec struct {
+	Rate     string `json:"rate"`
+	Limit    string `json:"limit"`
+	Buffer   string `json:"buffer"`
+	PeakRate string `json:"peakrate"`
+	MinBurst string `json:"minburst"`
 }
 
 // ReorderSpec defines details of packet reorder.
