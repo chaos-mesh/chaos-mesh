@@ -58,7 +58,7 @@ kubectl get pods --namespace chaos-testing -l app.kubernetes.io/instance=chaos-m
 
 > **Note:**
 >
-> Due to current development status of Chaos Dashboard, it is not installed by default. If you want to try it out, add `--set dashboard.create=true` in the helm commands above.
+> Due to current development status of Chaos Dashboard, it is not installed by default. If you want to try it out, add `--set dashboard.create=true` in the helm commands above.Please refer to [Configuration](../helm/chaos-mesh/README.md#parameters) for more information.
 
 After executing the above commands, you should be able to see the output indicating that all Chaos Mesh pods are up and running. Otherwise, please check the current environment according to the prompt message or send us an [issue](https://github.com/pingcap/chaos-mesh/issues) for help.
 
