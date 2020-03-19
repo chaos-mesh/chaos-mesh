@@ -43,11 +43,11 @@ func (c *MockChaosDaemonClient) DeleteNetem(ctx context.Context, in *chaosdaemon
 	return nil, mockError("DeleteNetem")
 }
 
-func (c *MockChaosDaemonClient) SetTbf(ctx context.Context, in *chaosdaemon.TbfRequest) (*empty.Empty, error) {
+func (c *MockChaosDaemonClient) SetTbf(ctx context.Context, in *chaosdaemon.TbfRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
 	return nil, mockError("SetTbf")
 }
 
-func (c *MockChaosDaemonClient) DeleteTbf(ctx context.Context, in *chaosdaemon.TbfRequest) (*empty.Empty, error) {
+func (c *MockChaosDaemonClient) DeleteTbf(ctx context.Context, in *chaosdaemon.TbfRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
 	return nil, mockError("DeleteTbf")
 }
 
