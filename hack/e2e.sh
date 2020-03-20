@@ -32,7 +32,8 @@ This script is entrypoint to run e2e tests.
 Usage: hack/e2e.sh [-h] -- [extra test args]
     -h      show this message and exit
 Environments:
-    DOCKER_REGISTRY_PREFIX      image docker registry
+    HELM_IMAGE                  image for helm tiller
+    DOCKER_REGISTRY             image docker registry
     IMAGE_TAG                   image tag
     SKIP_BUILD                  skip building binaries
     SKIP_IMAGE_BUILD            skip build and push images
@@ -62,6 +63,8 @@ Examples:
     REUSE_CLUSTER=y SKIP_DOWN=y ./hack/e2e.sh -- <e2e args>
 4) use registry mirrors
     DOCKER_IO_MIRROR=https://dockerhub.azk8s.cn QUAY_IO_MIRROR=https://quay.azk8s.cn GCR_IO_MIRROR=https://gcr.azk8s.cn ./hack/e2e.sh -- <e2e args>
+5) use mirror helm image
+    HELM_IMAGE=registry.cn-hangzhou.aliyuncs.com/google_containers/tiller:v2.9.1 ./hack/e2e.sh
 EOF
 
 }
@@ -83,6 +86,7 @@ hack::ensure_kind
 hack::ensure_kubectl
 hack::ensure_helm
 
+HELM_IMAGE=${HELM_IMAGE:-gcr.io/kubernetes-helm/tiller:v2.9.1}
 DOCKER_REGISTRY=${DOCKER_REGISTRY:-localhost:5000}
 IMAGE_TAG=${IMAGE_TAG:-latest}
 CLUSTER=${CLUSTER:-chaos-mesh}
@@ -135,8 +139,8 @@ function e2e::image_build() {
         return
     fi
     DOCKER_REGISTRY=${DOCKER_REGISTRY} GOOS=linux GOARCH=amd64 make e2e-docker
-#    DOCKER_REGISTRY=$DOCKER_REGISTRY make image-chaos-mesh
-#    DOCKER_REGISTRY=$DOCKER_REGISTRY make image-chaos-daemon
+    DOCKER_REGISTRY=${DOCKER_REGISTRY} make image-chaos-mesh
+    DOCKER_REGISTRY=${DOCKER_REGISTRY} make image-chaos-daemon
 }
 
 function e2e::image_load() {
@@ -327,7 +331,7 @@ function e2e::setup_helm_server() {
     if hack::version_ge $KUBE_VERSION "v1.16.0"; then
         # workaround for https://github.com/helm/helm/issues/6374
         # TODO remove this when we can upgrade to helm 2.15+, see https://github.com/helm/helm/pull/6462
-        $HELM_BIN init --service-account tiller --output yaml \
+        $HELM_BIN init -i ${HELM_IMAGE} --service-account tiller --output yaml \
             | sed 's@apiVersion: extensions/v1beta1@apiVersion: apps/v1@' \
             | sed 's@  replicas: 1@  replicas: 1\n  selector: {"matchLabels": {"app": "helm", "name": "tiller"}}@' \
             | $KUBECTL_BIN --context $KUBECONTEXT apply -f -
