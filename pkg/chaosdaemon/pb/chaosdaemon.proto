@@ -97,7 +97,12 @@ message ContainerAction {
 }
 
 message StressRequest {
-  string target = 1;
-  string stressors = 2;
+  enum Scope {
+    CONTAINER = 0;
+    POD = 1;
+  }
+  Scope scope = 1;
+  string target = 2;
+  string stressors = 3;
 }
 

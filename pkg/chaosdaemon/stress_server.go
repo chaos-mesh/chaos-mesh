@@ -50,8 +50,10 @@ func (s *daemonServer) ExecPodStressors(ctx context.Context,
 	if err != nil {
 		return nil, err
 	}
-	dir, _ := filepath.Split(cgroup)
-	control, err := cgroups.Load(cgroups.V1, cgroups.StaticPath(dir))
+	if req.Scope == pb.StressRequest_POD {
+		cgroup, _ = filepath.Split(cgroup)
+	}
+	control, err := cgroups.Load(cgroups.V1, cgroups.StaticPath(cgroup))
 	if err != nil {
 		return nil, err
 	}
