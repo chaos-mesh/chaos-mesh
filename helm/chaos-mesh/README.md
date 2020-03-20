@@ -8,9 +8,9 @@ This chart bootstraps a [Chaos Mesh](https://github.com/pingcap/chaos-mesh) depl
 
 ## Deploy
 
-Before deploying Chaos Mesh, make sure you have installed the [Prerequisites](https://github.com/pingcap/chaos-mesh/blob/master/doc/deploy.md#prerequisites). And then follow the [deploy](https://github.com/pingcap/chaos-mesh/blob/master/doc/deploy.md) doc step by step.
+Before deploying Chaos Mesh, make sure you have installed the [Prerequisites](../../doc/deploy.md#prerequisites). And then follow the [deploy](../../doc/deploy.md) doc step by step.
 
-## Parameters
+## Configuration
 
 The following tables list the configurable parameters of the Chaos Mesh chart and their default values.
 
@@ -39,6 +39,12 @@ The following tables list the configurable parameters of the Chaos Mesh chart an
 | `chaosDaemon.runtime` | Runtime specifies which container runtime to use. Currently we only supports docker and containerd. | `docker` |
 | `chaosDaemon.socketPath` | Specifies the container runtime socket | `/var/run/docker.sock` |
 | `chaosDaemon.tolerations` | Toleration labels for chaos-daemon pod assignment | `[]` |
+| `chaosDaemon.resources` | CPU/Memory resource requests/limits for chaosDaemon container | `requests: { cpu: "250m", memory: "512Mi" }, limits:{ cpu: "500m", memory: "1024Mi" }`  |
+| `bpfki.create` | Enable chaos-kernel | `false` |
+| `bpfki.image` | Docker image for chaos-kernel | `pingcap/chaos-kernel:latest` |
+| `bpfki.imagePullPolicy` | Image pull policy | `Always` |
+| `bpfki.grpcPort` | The port which grpc server listens on | `50051` |
+| `bpfki.resources` | CPU/Memory resource requests/limits for chaos-kernel container | `requests: { cpu: "250m", memory: "512Mi" }, limits:{ cpu: "500m", memory: "1024Mi" }`  |
 | `dashboard.create` | Enable chaos-dashboard | `false` |
 | `dashboard.serviceAccount` | The serviceAccount for chaos-dashboard  | `chaos-dashboard` |
 | `dashboard.image` | Docker image for chaos-dashboard | `pingcap/chaos-dashboard:latest` |
@@ -67,7 +73,7 @@ The following tables list the configurable parameters of the Chaos Mesh chart an
 | `webhook.certManager.enabled` | Setup the webhook using cert-manager | `false` |
 | `webhook.deleteSecret` | If true, will create a job to delete the secret. Otherwise, do nothing | `true` |
 | `webhook.FailurePolicy` | Defines how unrecognized errors and timeout errors from the admission webhook are handled | `Ignore` |
-
+| `webhook.CRDS` | Define a list of chaos types that implement admission webhook | `[podchaos,iochaos,timechaos,networkchaos,kernelchaos]` |
 
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm install`. For example,
 ```console
