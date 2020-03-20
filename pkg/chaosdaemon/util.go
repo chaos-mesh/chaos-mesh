@@ -52,7 +52,6 @@ const (
 type ContainerRuntimeInfoClient interface {
 	GetPidFromContainerID(ctx context.Context, containerID string) (uint32, error)
 	ContainerKillByContainerID(ctx context.Context, containerID string) error
-	GetPodCgroupFromContainerID(ctx context.Context, containerID string) (string, error)
 }
 
 // DockerClientInterface represents the DockerClient, it's used to simply unit test
@@ -64,24 +63,6 @@ type DockerClientInterface interface {
 // DockerClient can get information from docker
 type DockerClient struct {
 	client DockerClientInterface
-}
-
-func (c DockerClient) GetPodCgroupFromContainerID(ctx context.Context,
-	containerID string) (string, error) {
-	if len(containerID) < len(dockerProtocolPrefix) {
-		return "", fmt.Errorf("container id %s is not a docker container id", containerID)
-	}
-	if containerID[0:len(dockerProtocolPrefix)] != dockerProtocolPrefix {
-		return "", fmt.Errorf("expected %s but got %s", dockerProtocolPrefix, containerID[0:len(dockerProtocolPrefix)])
-	}
-	container, err := c.client.ContainerInspect(ctx, containerID[len(dockerProtocolPrefix):])
-	if err != nil {
-		return "", err
-	}
-	if container.HostConfig.CgroupParent == "" {
-		return "", fmt.Errorf("pod does not have a resource limit")
-	}
-	return container.HostConfig.CgroupParent, nil
 }
 
 // GetPidFromContainerID fetches PID according to container id
@@ -108,10 +89,6 @@ type ContainerdClientInterface interface {
 // ContainerdClient can get information from containerd
 type ContainerdClient struct {
 	client ContainerdClientInterface
-}
-
-func (c ContainerdClient) GetPodCgroupFromContainerID(ctx context.Context, containerID string) (string, error) {
-	panic("implement me")
 }
 
 // GetPidFromContainerID fetches PID according to container id

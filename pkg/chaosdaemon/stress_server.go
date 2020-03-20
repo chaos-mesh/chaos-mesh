@@ -15,7 +15,9 @@ package chaosdaemon
 
 import (
 	"context"
+	"fmt"
 	"os/exec"
+	"path/filepath"
 	"strings"
 	"sync"
 	"syscall"
@@ -29,16 +31,27 @@ import (
 var (
 	stressorLocker = new(sync.Mutex)
 	podStressors   = make(map[string]*exec.Cmd)
+
+	// Possible cgroup subsystems
+	cgroup_subsys = []string{"cpu", "memory", "systemd", "net_cls",
+		"net_prio", "freezer", "blkio", "perf_event", "devices",
+		"cpuset", "cpuacct", "pids", "hugetlb"}
 )
 
 func (s *daemonServer) ExecPodStressors(ctx context.Context,
 	req *pb.StressRequest) (*empty.Empty, error) {
 	log.Info("executing stressors", "request", req)
-	cgroup, err := s.crClient.GetPodCgroupFromContainerID(ctx, req.Target)
+	pid, err := s.crClient.GetPidFromContainerID(ctx, req.Target)
 	if err != nil {
 		return nil, err
 	}
-	control, err := cgroups.Load(cgroups.V1, cgroups.StaticPath(cgroup))
+	path := cgroups.PidPath(int(pid))
+	cgroup, err := findValidCgroup(path, req.Target)
+	if err != nil {
+		return nil, err
+	}
+	dir, _ := filepath.Split(cgroup)
+	control, err := cgroups.Load(cgroups.V1, cgroups.StaticPath(dir))
 	if err != nil {
 		return nil, err
 	}
@@ -81,4 +94,14 @@ func (s *daemonServer) CancelPodStressors(ctx context.Context,
 		}
 	}
 	return &empty.Empty{}, nil
+}
+
+func findValidCgroup(path cgroups.Path, target string) (string, error) {
+	for _, subsys := range cgroup_subsys {
+		if p, _ := path(cgroups.Name(subsys));
+			strings.Contains(p, target) {
+			return p, nil
+		}
+	}
+	return "", fmt.Errorf("never found cgroup for %s", target)
 }
