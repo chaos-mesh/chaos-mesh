@@ -48,8 +48,8 @@ const (
 	// PartitionAction represents the chaos action of network partition of pods.
 	PartitionAction NetworkChaosAction = "partition"
 
-	// LimitAction represents the chaos action of network limit of pods.
-	LimitAction NetworkChaosAction = "limit"
+	// BandwidthAction represents the chaos action of network bandwidth of pods.
+	BandwidthAction NetworkChaosAction = "bandwidth"
 )
 
 // PartitionDirection represents the block direction from source to target
@@ -137,7 +137,7 @@ type NetworkChaosSpec struct {
 	Corrupt *CorruptSpec `json:"corrupt,omitempty"`
 
 	// Limit represents the detail about limit action
-	Limit *LimitSpec `json:"limit,omitempty"`
+	Bandwidth *BandwidthSpec `json:"bandwidth,omitempty"`
 
 	// Direction represents the partition direction
 	// +optional
@@ -375,12 +375,47 @@ func (corrupt *CorruptSpec) ToNetem() (*chaosdaemonpb.Netem, error) {
 	}, nil
 }
 
-type LimitSpec struct {
+type BandwidthSpec struct {
 	Rate     string `json:"rate"`
 	Limit    string `json:"limit"`
 	Buffer   string `json:"buffer"`
 	PeakRate string `json:"peakrate"`
 	MinBurst string `json:"minburst"`
+}
+
+func (spec *BandwidthSpec) ToTbf() (*chaosdaemon.Tbf, error) {
+	rate, err := strconv.ParseUint(spec.Rate, 10, 64)
+	if err != nil {
+		return nil, err
+	}
+
+	limit, err := strconv.ParseUint(spec.Limit, 10, 32)
+	if err != nil {
+		return nil, err
+	}
+
+	buffer, err := strconv.ParseUint(spec.Buffer, 10, 32)
+	if err != nil {
+		return nil, err
+	}
+
+	peakrate, err := strconv.ParseUint(spec.PeakRate, 10, 32)
+	if err != nil {
+		return nil, err
+	}
+
+	minburst, err := strconv.ParseUint(spec.MinBurst, 10, 32)
+	if err != nil {
+		return nil, err
+	}
+
+	return &chaosdaemon.Tbf{
+		Rate:     rate,
+		Limit:    uint32(limit),
+		Buffer:   uint32(buffer),
+		PeakRate: peakrate,
+		MinBurst: uint32(minburst),
+	}, nil
 }
 
 // ReorderSpec defines details of packet reorder.

@@ -68,7 +68,7 @@ func (r *Reconciler) commonNetworkChaos(networkchaos *v1alpha1.NetworkChaos, req
 	case v1alpha1.PartitionAction:
 		cr = partition.NewCommonReconciler(r.Client, r.Log.WithValues("action", "partition"),
 			req, r.EventRecorder)
-	case v1alpha1.LimitAction:
+	case v1alpha1.BandwidthAction:
 		cr = tbf.NewCommonReconciler(r.Client, r.Log.WithValues("action", "limit"), req, r.EventRecorder)
 	default:
 		return r.invalidActionResponse(networkchaos)
@@ -85,7 +85,7 @@ func (r *Reconciler) scheduleNetworkChaos(networkchaos *v1alpha1.NetworkChaos, r
 	case v1alpha1.PartitionAction:
 		sr = partition.NewTwoPhaseReconciler(r.Client, r.Log.WithValues("action", "partition"),
 			req, r.EventRecorder)
-	case v1alpha1.LimitAction:
+	case v1alpha1.BandwidthAction:
 		sr = tbf.NewTwoPhaseReconciler(r.Client, r.Log.WithValues("action", "limit"), req, r.EventRecorder)
 	default:
 		return r.invalidActionResponse(networkchaos)
