@@ -41,6 +41,7 @@ func NewCommonNginxPod(name, namespace string) *corev1.Pod {
 	}
 }
 
+// NewCommonNginxDeployment would create a nginx deployment
 func NewCommonNginxDeployment(name, namespace string, replicas int32) *appsv1.Deployment {
 	return &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
