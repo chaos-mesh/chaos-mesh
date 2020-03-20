@@ -24,13 +24,12 @@ import (
 	"sync"
 	"syscall"
 
-	"github.com/pingcap/chaos-mesh/pkg/utils"
-
 	"github.com/containerd/containerd"
 	"github.com/docker/docker/api/types"
 	dockerclient "github.com/docker/docker/client"
 
 	"github.com/pingcap/chaos-mesh/pkg/mock"
+	"github.com/pingcap/chaos-mesh/pkg/utils"
 )
 
 const (
