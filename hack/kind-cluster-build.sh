@@ -15,7 +15,7 @@ Options:
        -n,--name               name of the Kubernetes cluster,default value: kind
        -c,--nodeNum            the count of the cluster nodes,default value: 3
        -k,--k8sVersion         version of the Kubernetes cluster,default value: v1.17.2
-       -v,--volumeNum          the volumes number of each kubernetes node,default value: 3
+       -v,--volumeNum          the volumes number of each kubernetes node,default value: 5
 Usage:
     $0 --name testCluster --nodeNum 4 --k8sVersion v1.17.2
 EOF
@@ -61,7 +61,7 @@ done
 clusterName=${clusterName:-kind}
 nodeNum=${nodeNum:-3}
 k8sVersion=${k8sVersion:-v1.17.2}
-volumeNum=${volumeNum:-3}
+volumeNum=${volumeNum:-5}
 
 echo "clusterName: ${clusterName}"
 echo "nodeNum: ${nodeNum}"
