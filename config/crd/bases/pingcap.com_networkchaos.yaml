@@ -39,6 +39,27 @@ spec:
                 action: partition, netem, delay, loss, duplicate, corrupt Default
                 action: delay'
               type: string
+            bandwidth:
+              description: Bandwidth represents the detail about bandwidth control
+                action
+              properties:
+                buffer:
+                  type: string
+                limit:
+                  type: string
+                minburst:
+                  type: string
+                peakrate:
+                  type: string
+                rate:
+                  type: string
+              required:
+              - buffer
+              - limit
+              - minburst
+              - peakrate
+              - rate
+              type: object
             corrupt:
               description: Corrupt represents the detail about corrupt action
               properties:
