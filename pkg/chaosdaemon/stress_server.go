@@ -37,7 +37,7 @@ var (
 	podStressors   = make(map[string]*exec.Cmd)
 
 	// Possible cgroup subsystems
-	cgroup_subsys = []string{"cpu", "memory", "systemd", "net_cls",
+	cgroupSubsys = []string{"cpu", "memory", "systemd", "net_cls",
 		"net_prio", "freezer", "blkio", "perf_event", "devices",
 		"cpuset", "cpuacct", "pids", "hugetlb"}
 )
@@ -107,7 +107,7 @@ func (s *daemonServer) CancelPodStressors(ctx context.Context,
 }
 
 func findValidCgroup(path cgroups.Path, target string) (string, error) {
-	for _, subsys := range cgroup_subsys {
+	for _, subsys := range cgroupSubsys {
 		if p, _ := path(cgroups.Name(subsys));
 			strings.Contains(p, target) {
 			return p, nil
