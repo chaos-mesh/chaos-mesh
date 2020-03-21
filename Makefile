@@ -121,7 +121,7 @@ failpoint-disable: failpoint-ctl
 
 # Run go vet against code
 vet:
-	#$(CGOENV) go vet ./...
+	$(CGOENV) go vet ./...
 
 tidy:
 	@echo "go mod tidy"
