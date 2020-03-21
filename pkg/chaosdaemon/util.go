@@ -115,7 +115,7 @@ func (c ContainerdClient) StripContainerIDProtocolPrefix(ctx context.Context, co
 // GetPidFromContainerID fetches PID according to container id
 func (c ContainerdClient) GetPidFromContainerID(ctx context.Context, containerID string) (uint32, error) {
 	id, err := c.StripContainerIDProtocolPrefix(ctx, containerID)
-	if err != nil{
+	if err != nil {
 		return 0, err
 	}
 	container, err := c.client.LoadContainer(ctx, id)

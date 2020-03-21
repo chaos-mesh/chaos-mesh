@@ -25,7 +25,7 @@ type MockChaosDaemonClient struct{}
 
 // ExecPodStressors mocks executing pod stressors on chaos-daemon
 func (c *MockChaosDaemonClient) ExecPodStressors(ctx context.Context, in *chaosdaemon.StressRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
-	return  nil, mockError("ExecPodStressors")
+	return nil, mockError("ExecPodStressors")
 }
 
 // CancelPodStressors mocks canceling pod stressors on chaos-daemon

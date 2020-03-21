@@ -108,8 +108,7 @@ func (s *daemonServer) CancelPodStressors(ctx context.Context,
 
 func findValidCgroup(path cgroups.Path, target string) (string, error) {
 	for _, subsys := range cgroupSubsys {
-		if p, _ := path(cgroups.Name(subsys));
-			strings.Contains(p, target) {
+		if p, _ := path(cgroups.Name(subsys)); strings.Contains(p, target) {
 			return p, nil
 		}
 	}
