@@ -13,11 +13,11 @@ Before run this script,please ensure that:
 Options:
        -h,--help               prints the usage message
        -n,--name               name of the Kubernetes cluster,default value: kind
-       -c,--nodeNum            the count of the cluster nodes,default value: 6
-       -k,--k8sVersion         version of the Kubernetes cluster,default value: v1.12.8
-       -v,--volumeNum          the volumes number of each kubernetes node,default value: 9
+       -c,--nodeNum            the count of the cluster nodes,default value: 3
+       -k,--k8sVersion         version of the Kubernetes cluster,default value: v1.17.2
+       -v,--volumeNum          the volumes number of each kubernetes node,default value: 5
 Usage:
-    $0 --name testCluster --nodeNum 4 --k8sVersion v1.12.9
+    $0 --name testCluster --nodeNum 4 --k8sVersion v1.17.2
 EOF
 }
 
@@ -59,9 +59,9 @@ esac
 done
 
 clusterName=${clusterName:-kind}
-nodeNum=${nodeNum:-6}
-k8sVersion=${k8sVersion:-v1.12.8}
-volumeNum=${volumeNum:-9}
+nodeNum=${nodeNum:-3}
+k8sVersion=${k8sVersion:-v1.17.2}
+volumeNum=${volumeNum:-5}
 
 echo "clusterName: ${clusterName}"
 echo "nodeNum: ${nodeNum}"
