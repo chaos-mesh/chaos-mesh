@@ -52,6 +52,7 @@ const (
 type ContainerRuntimeInfoClient interface {
 	GetPidFromContainerID(ctx context.Context, containerID string) (uint32, error)
 	ContainerKillByContainerID(ctx context.Context, containerID string) error
+	StripContainerIDProtocolPrefix(ctx context.Context, containerID string) (string, error)
 }
 
 // DockerClientInterface represents the DockerClient, it's used to simply unit test
@@ -65,15 +66,24 @@ type DockerClient struct {
 	client DockerClientInterface
 }
 
-// GetPidFromContainerID fetches PID according to container id
-func (c DockerClient) GetPidFromContainerID(ctx context.Context, containerID string) (uint32, error) {
+// StripContainerIDProtocolPrefix strips protocol prefix from the container ID
+func (c DockerClient) StripContainerIDProtocolPrefix(ctx context.Context, containerID string) (string, error) {
 	if len(containerID) < len(dockerProtocolPrefix) {
-		return 0, fmt.Errorf("container id %s is not a docker container id", containerID)
+		return "", fmt.Errorf("container id %s is not a docker container id", containerID)
 	}
 	if containerID[0:len(dockerProtocolPrefix)] != dockerProtocolPrefix {
-		return 0, fmt.Errorf("expected %s but got %s", dockerProtocolPrefix, containerID[0:len(dockerProtocolPrefix)])
+		return "", fmt.Errorf("expected %s but got %s", dockerProtocolPrefix, containerID[0:len(dockerProtocolPrefix)])
 	}
-	container, err := c.client.ContainerInspect(ctx, containerID[len(dockerProtocolPrefix):])
+	return containerID[len(dockerProtocolPrefix):], nil
+}
+
+// GetPidFromContainerID fetches PID according to container id
+func (c DockerClient) GetPidFromContainerID(ctx context.Context, containerID string) (uint32, error) {
+	id, err := c.StripContainerIDProtocolPrefix(ctx, containerID)
+	if err != nil {
+		return 0, err
+	}
+	container, err := c.client.ContainerInspect(ctx, id)
 	if err != nil {
 		return 0, err
 	}
@@ -91,15 +101,24 @@ type ContainerdClient struct {
 	client ContainerdClientInterface
 }
 
-// GetPidFromContainerID fetches PID according to container id
-func (c ContainerdClient) GetPidFromContainerID(ctx context.Context, containerID string) (uint32, error) {
+// StripContainerIDProtocolPrefix strips protocol prefix from the container ID
+func (c ContainerdClient) StripContainerIDProtocolPrefix(ctx context.Context, containerID string) (string, error) {
 	if len(containerID) < len(containerdProtocolPrefix) {
-		return 0, fmt.Errorf("container id %s is not a containerd container id", containerID)
+		return "", fmt.Errorf("container id %s is not a containerd container id", containerID)
 	}
 	if containerID[0:len(containerdProtocolPrefix)] != containerdProtocolPrefix {
-		return 0, fmt.Errorf("expected %s but got %s", containerdProtocolPrefix, containerID[0:len(containerdProtocolPrefix)])
+		return "", fmt.Errorf("expected %s but got %s", containerdProtocolPrefix, containerID[0:len(containerdProtocolPrefix)])
 	}
-	container, err := c.client.LoadContainer(ctx, containerID[len(containerdProtocolPrefix):])
+	return containerID[len(containerdProtocolPrefix):], nil
+}
+
+// GetPidFromContainerID fetches PID according to container id
+func (c ContainerdClient) GetPidFromContainerID(ctx context.Context, containerID string) (uint32, error) {
+	id, err := c.StripContainerIDProtocolPrefix(ctx, containerID)
+	if err != nil{
+		return 0, err
+	}
+	container, err := c.client.LoadContainer(ctx, id)
 	if err != nil {
 		return 0, err
 	}
