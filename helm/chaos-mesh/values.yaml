@@ -13,7 +13,6 @@ rbac:
 # enableProfiling is a flag to enable pprof in controller-manager and chaos-daemon.
 enableProfiling: false
 
-
 kubectlImage: bitnami/kubectl:latest
 
 controllerManager:
@@ -35,12 +34,12 @@ controllerManager:
     # choice for the user. This also increases chances charts run on environments with little
     # resources, such as Minikube. If you do want to specify resources, uncomment the following
     # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
-    limits:
-      cpu: 500m
-      memory: 1024Mi
+    limits: {}
+    #  cpu: 500m
+    #  memory: 1024Mi
     requests:
-      cpu: 250m
-      memory: 512Mi
+      cpu: 25m
+      memory: 256Mi
 
   nodeSelector: {}
 
@@ -70,6 +69,18 @@ chaosDaemon:
   # runtime: containerd
   # socketPath: /run/containerd/containerd.sock
 
+  resources: {}
+    # We usually recommend not to specify default resources and to leave this as a conscious
+    # choice for the user. This also increases chances charts run on environments with little
+    # resources, such as Minikube. If you do want to specify resources, uncomment the following
+    # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+    # limits:
+    #   cpu: 500m
+    #   memory: 1024Mi
+    # requests:
+    #   cpu: 250m
+    #   memory: 512Mi
+
   tolerations: []
 
 dashboard:
@@ -93,12 +104,12 @@ dashboard:
     # choice for the user. This also increases chances charts run on environments with little
     # resources, such as Minikube. If you do want to specify resources, uncomment the following
     # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
-    limits:
-      cpu: 500m
-      memory: 1024Mi
+    limits: {}
+    #  cpu: 500m
+    #  memory: 1024Mi
     requests:
-      cpu: 250m
-      memory: 512Mi
+      cpu: 25m
+      memory: 256Mi
 
   volume:
     storage: 3Gi
@@ -169,4 +180,14 @@ bpfki:
   image: pingcap/chaos-kernel:latest
   imagePullPolicy: Always
   grpcPort: 50051
-  podAnnotations: {}
+  resources: {}
+    # We usually recommend not to specify default resources and to leave this as a conscious
+    # choice for the user. This also increases chances charts run on environments with little
+    # resources, such as Minikube. If you do want to specify resources, uncomment the following
+    # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+    # limits:
+    #  cpu: 500m
+    #  memory: 1024Mi
+    # requests:
+    #  cpu: 250m
+    #  memory: 512Mi
