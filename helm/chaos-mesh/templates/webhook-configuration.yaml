@@ -16,6 +16,7 @@ metadata:
 webhooks:
   - name: {{ template "chaos-mesh.webhook" . }}
     clientConfig:
+      caBundle: Cg==
       service:
         name: {{ template "chaos-mesh.svc" . }}
         namespace: {{ .Release.Namespace }}
@@ -66,18 +67,26 @@ metadata:
     cert-manager.io/inject-ca-from: {{ printf "%s/%s" .Release.Namespace "chaos-mesh-cert" | quote }}
   {{- end }}
 webhooks:
-  - name: {{ template "chaos-mesh.webhook" . }}
-    clientConfig:
+  {{- range $crd := .Values.webhook.CRDS }}
+  - clientConfig:
+      caBundle: Cg==
       service:
-        name: {{ template "chaos-mesh.svc" . }}
-        namespace: {{ .Release.Namespace }}
-        path: "/validate-v1alpha1-chaos"
+        name: {{ template "chaos-mesh.svc" $ }}
+        namespace: {{ $.Release.Namespace }}
+        path: /validate-pingcap-com-v1alpha1-{{ $crd }}
+    failurePolicy: Fail
+    name: v{{ $crd }}.kb.io
     rules:
-      - operations: [ "CREATE","UPDATE"]
-        apiGroups: ["pingcap.com"]
-        apiVersions: ["v1alpha1"]
-        resources: ["podchaos","iochaos","timechaos","networkchaos"]
-    failurePolicy: {{ .Values.webhook.FailurePolicy }}
+      - apiGroups:
+          - pingcap.com
+        apiVersions:
+          - v1alpha1
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - {{ $crd }}
+  {{- end }}
 
 {{- if .Values.webhook.certManager.enabled }}
 ---

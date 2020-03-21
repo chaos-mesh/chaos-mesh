@@ -71,12 +71,14 @@ spec:
               metadata:
                 name: {{ template "chaos-mesh.validation" . }}
               webhooks:
-                - name: {{ template "chaos-mesh.webhook" . }}
+                {{- range $crd := .Values.webhook.CRDS }}
+                - name: v{{ $crd }}.kb.io
                   clientConfig:
-                    service:
-                      name: {{ template "chaos-mesh.svc" . }}
-                      namespace: {{ .Release.Namespace }}
-                      path: "/validate-v1alpha1-chaos"
                     caBundle: "${CA_BUNDLE}"
+                    service:
+                      name: {{ template "chaos-mesh.svc" $ }}
+                      namespace: {{ $.Release.Namespace }}
+                      path: /validate-pingcap-com-v1alpha1-{{ $crd }}
+                {{- end }}
               EOF
 {{- end }}

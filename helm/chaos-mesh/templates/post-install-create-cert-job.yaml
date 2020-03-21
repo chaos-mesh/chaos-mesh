@@ -41,6 +41,7 @@ spec:
 
               # test if secret already exists
               certs=$(kubectl get secret ${K8S_SECRET} --ignore-not-found -n ${K8S_NAMESPACE} -o name)
+
               if [ "${certs}" = "secret/${K8S_SECRET}" ];then
                 echo "Secret already exists"
                 exit 0
@@ -67,11 +68,14 @@ spec:
               EOF
 
               openssl genrsa -out ${tmpdir}/server-key.pem 2048
+
+              echo "generate csr"
               openssl req -new -key ${tmpdir}/server-key.pem -subj "/CN=${K8S_SERVICE}.${K8S_NAMESPACE}.svc" -out ${tmpdir}/server.csr -config ${tmpdir}/csr.conf
 
               # clean-up any previously created CSR for our service. Ignore errors if not present.
               kubectl delete csr ${csrName} 2>/dev/null || true
 
+              echo "create CSR"
               # create server cert/key CSR and send to k8s API
               cat <<EOF | kubectl create -f -
               apiVersion: certificates.k8s.io/v1beta1
@@ -88,6 +92,7 @@ spec:
                 - server auth
               EOF
 
+              echo "verify CSR"
               # verify CSR has been created
               while true; do
                   kubectl get csr ${csrName}
@@ -96,22 +101,26 @@ spec:
                   fi
               done
 
+              echo "approve certificats"
               # approve and fetch the signed certificate
               kubectl certificate approve ${csrName}
 
               # verify certificate has been signed
               for x in $(seq 10); do
                   serverCert=$(kubectl get csr ${csrName} -o jsonpath='{.status.certificate}')
-                  if [[ ${serverCert} != '' ]]; then
+                  if [ ! -z ${serverCert} ]; then
+                      echo "not empty"
                       break
                   fi
                   sleep 1
               done
 
-              if [[ ${serverCert} == '' ]]; then
+              if [ -z ${serverCert} ]; then
                   echo "ERROR: After approving csr ${csrName}, the signed certificate did not appear on the resource. Giving up after 10 attempts." >&2
                   exit 1
               fi
+
+              echo "start to openssl base64"
 
               echo ${serverCert} | openssl base64 -d -A -out ${tmpdir}/server-cert.pem
 
@@ -121,5 +130,4 @@ spec:
                       --from-file=tls.crt=${tmpdir}/server-cert.pem \
                       --dry-run -o yaml |
                   kubectl -n ${K8S_NAMESPACE} apply -f -
-
 {{- end }}
