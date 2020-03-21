@@ -42,9 +42,6 @@ spec:
               # test if secret already exists
               certs=$(kubectl get secret ${K8S_SECRET} --ignore-not-found -n ${K8S_NAMESPACE} -o name)
 
-              echo "get certs"
-              echo ${certs}
-
               if [ "${certs}" = "secret/${K8S_SECRET}" ];then
                 echo "Secret already exists"
                 exit 0
@@ -72,12 +69,8 @@ spec:
 
               openssl genrsa -out ${tmpdir}/server-key.pem 2048
 
-              echo "cat ${tmpdir}/server-key.pem"
-              cat ${tmpdir}/server-key.pem
-
               echo "generate csr"
               openssl req -new -key ${tmpdir}/server-key.pem -subj "/CN=${K8S_SERVICE}.${K8S_NAMESPACE}.svc" -out ${tmpdir}/server.csr -config ${tmpdir}/csr.conf
-              cat ${tmpdir}/server-key.pem
 
               # clean-up any previously created CSR for our service. Ignore errors if not present.
               kubectl delete csr ${csrName} 2>/dev/null || true
