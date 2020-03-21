@@ -137,7 +137,4 @@ spec:
                       --from-file=tls.crt=${tmpdir}/server-cert.pem \
                       --dry-run -o yaml |
                   kubectl -n ${K8S_NAMESPACE} apply -f -
-
-              sleep 600
-
 {{- end }}
