@@ -29,4 +29,125 @@ var _ = Describe("stresschaos_webhook", func() {
 			Expect(stresschaos.Spec.Selector.Namespaces[0]).To(Equal(metav1.NamespaceDefault))
 		})
 	})
+	Context("ChaosValidator of stresschaos", func() {
+		It("Validate", func() {
+
+			type TestCase struct {
+				name    string
+				chaos   StressChaos
+				execute func(chaos *StressChaos) error
+				expect  string
+			}
+			duration := "400s"
+			stressors := "--cpu 8"
+			tcs := []TestCase{
+				{
+					name: "simple ValidateCreate",
+					chaos: StressChaos{
+						ObjectMeta: metav1.ObjectMeta{
+							Namespace: metav1.NamespaceDefault,
+							Name:      "foo1",
+						},
+						Spec: StressChaosSpec{
+							Stressors: stressors,
+						},
+					},
+					execute: func(chaos *StressChaos) error {
+						return chaos.ValidateCreate()
+					},
+					expect: "",
+				},
+				{
+					name: "simple ValidateUpdate",
+					chaos: StressChaos{
+						ObjectMeta: metav1.ObjectMeta{
+							Namespace: metav1.NamespaceDefault,
+							Name:      "foo2",
+						},
+						Spec: StressChaosSpec{
+							Stressors: stressors,
+						},
+					},
+					execute: func(chaos *StressChaos) error {
+						return chaos.ValidateUpdate(chaos)
+					},
+					expect: "",
+				},
+				{
+					name: "simple ValidateDelete",
+					chaos: StressChaos{
+						ObjectMeta: metav1.ObjectMeta{
+							Namespace: metav1.NamespaceDefault,
+							Name:      "foo3",
+						},
+						Spec: StressChaosSpec{
+							Stressors: stressors,
+						},
+					},
+					execute: func(chaos *StressChaos) error {
+						return chaos.ValidateDelete()
+					},
+					expect: "",
+				},
+				{
+					name: "only define the Scheduler",
+					chaos: StressChaos{
+						ObjectMeta: metav1.ObjectMeta{
+							Namespace: metav1.NamespaceDefault,
+							Name:      "foo4",
+						},
+						Spec: StressChaosSpec{
+							Stressors: stressors,
+							Scheduler: &SchedulerSpec{
+								Cron: "@every 10m",
+							},
+						},
+					},
+					execute: func(chaos *StressChaos) error {
+						return chaos.ValidateCreate()
+					},
+					expect: "error",
+				},
+				{
+					name: "only define the Duration",
+					chaos: StressChaos{
+						ObjectMeta: metav1.ObjectMeta{
+							Namespace: metav1.NamespaceDefault,
+							Name:      "foo5",
+						},
+						Spec: StressChaosSpec{
+							Stressors: stressors,
+							Duration:  &duration,
+						},
+					},
+					execute: func(chaos *StressChaos) error {
+						return chaos.ValidateCreate()
+					},
+					expect: "error",
+				},
+				{
+					name: "missing stressors",
+					chaos: StressChaos{
+						ObjectMeta: metav1.ObjectMeta{
+							Namespace: metav1.NamespaceDefault,
+							Name:      "foo5",
+						},
+					},
+					execute: func(chaos *StressChaos) error {
+						return chaos.ValidateCreate()
+					},
+					expect: "error",
+				},
+			}
+
+			for _, tc := range tcs {
+				err := tc.execute(&tc.chaos)
+				if tc.expect == "error" {
+					Expect(err).To(HaveOccurred())
+				} else {
+					Expect(err).NotTo(HaveOccurred())
+				}
+			}
+		})
+	})
 })
