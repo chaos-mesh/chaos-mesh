@@ -17,8 +17,8 @@ service ChaosDaemon {
   rpc ContainerKill(ContainerRequest) returns (google.protobuf.Empty) {}
   rpc ContainerGetPid(ContainerRequest) returns (ContainerResponse) {}
 
-  rpc ExecPodStressors (StressRequest) returns (google.protobuf.Empty) {}
-  rpc CancelPodStressors (StressRequest) returns (google.protobuf.Empty) {}
+  rpc ExecStressors (StressRequest) returns (google.protobuf.Empty) {}
+  rpc CancelStressors (StressRequest) returns (google.protobuf.Empty) {}
 }
 
 

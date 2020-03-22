@@ -42,7 +42,7 @@ var (
 		"cpuset", "cpuacct", "pids", "hugetlb"}
 )
 
-func (s *daemonServer) ExecPodStressors(ctx context.Context,
+func (s *daemonServer) ExecStressors(ctx context.Context,
 	req *pb.StressRequest) (*empty.Empty, error) {
 	log.Info("executing stressors", "request", req)
 	pid, err := s.crClient.GetPidFromContainerID(ctx, req.Target)
@@ -94,7 +94,7 @@ func (s *daemonServer) ExecPodStressors(ctx context.Context,
 	return &empty.Empty{}, nil
 }
 
-func (s *daemonServer) CancelPodStressors(ctx context.Context,
+func (s *daemonServer) CancelStressors(ctx context.Context,
 	req *pb.StressRequest) (*empty.Empty, error) {
 	log.Info("canceling stressors", "request", req)
 	if cmd, ok := podStressors[req.Target]; ok {
