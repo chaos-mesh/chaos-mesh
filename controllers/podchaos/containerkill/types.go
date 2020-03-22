@@ -78,11 +78,13 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, obj reconciler
 		return fmt.Errorf("podchaos[%s/%s] the name of container is empty", podchaos.Namespace, podchaos.Name)
 	}
 
-	pods, err := utils.SelectAndFilterPods(ctx, r.Client, &podchaos.Spec)
+	max := podchaos.Status.MaxInjectablePods
+	pods, max, err := utils.SelectAndFilterPods(ctx, r.Client, &podchaos.Spec, max)
 	if err != nil {
 		r.Log.Error(err, "fail to select and filter pods")
 		return err
 	}
+	podchaos.Status.MaxInjectablePods = max
 
 	g := errgroup.Group{}
 	for podIndex := range pods {

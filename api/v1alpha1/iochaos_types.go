@@ -54,6 +54,11 @@ const (
 
 // IoChaosSpec defines the desired state of IoChaos
 type IoChaosSpec struct {
+
+	// Protector protects the target cluster from being corrupted by the chaos
+	// +optional
+	Protector ProtectorSpec `json:"protector"`
+
 	// Selector is used to select pods that are used to inject chaos action.
 	Selector SelectorSpec `json:"selector"`
 
@@ -137,6 +142,11 @@ type IoChaosSpec struct {
 	// Next time when this action will be recovered.
 	// +optional
 	NextRecover *metav1.Time `json:"nextRecover,omitempty"`
+}
+
+// GetProtector gets the internal protector
+func (in *IoChaosSpec) GetProtector() *ProtectorSpec {
+	return &in.Protector
 }
 
 func (in *IoChaosSpec) GetSelector() SelectorSpec {

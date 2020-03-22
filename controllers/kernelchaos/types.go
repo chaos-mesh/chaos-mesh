@@ -94,12 +94,14 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos reconcil
 		return err
 	}
 
-	pods, err := utils.SelectAndFilterPods(ctx, r.Client, &kernelchaos.Spec)
+	max := kernelchaos.Status.MaxInjectablePods
+	pods, max, err := utils.SelectAndFilterPods(ctx, r.Client, &kernelchaos.Spec, max)
 
 	if err != nil {
 		r.Log.Error(err, "failed to select and filter pods")
 		return err
 	}
+	kernelchaos.Status.MaxInjectablePods = max
 
 	err = r.applyAllPods(ctx, pods, kernelchaos)
 	if err != nil {

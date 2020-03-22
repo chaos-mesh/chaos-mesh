@@ -83,12 +83,13 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos reconcil
 		r.Log.Error(err, "chaos is not IoChaos", "chaos", chaos)
 		return err
 	}
-
-	pods, err := utils.SelectAndFilterPods(ctx, r.Client, &iochaos.Spec)
+	max := iochaos.Status.MaxInjectablePods
+	pods, max, err := utils.SelectAndFilterPods(ctx, r.Client, &iochaos.Spec, max)
 	if err != nil {
 		r.Log.Error(err, "failed to select and filter pods")
 		return err
 	}
+	iochaos.Status.MaxInjectablePods = max
 
 	if err := r.injectAllPods(ctx, pods, iochaos); err != nil {
 		return err

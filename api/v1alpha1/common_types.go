@@ -14,9 +14,34 @@
 package v1alpha1
 
 import (
+	"math"
+
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
 )
+
+// ProtectorSpec protects the target cluster from being corrupted by the chaos.
+// For now, some chaos could not be recovered such as pod-kill. If we continue
+// to inject it into our application cluster, it will finally pull down our
+// entire application cluster. That may be not our intention. We should protect
+// our application cluster from that disaster via a protector to make the
+// application cluster always in available.
+type ProtectorSpec struct {
+
+	// MaxInjectPercent specifies the ratio of maximum pods involved in the
+	// chaos to be injected later.  A value of less than or equal to 0, or
+	// greater than 100, we see it as illegal. It takes no effects for the
+	// protection.
+	MaxInjectPercent int `json:"maxInjectPercent,omitempty"`
+}
+
+// GetMaxInjectablePods calculates the maximum number pods to inject the chaos.
+func (in *ProtectorSpec) GetMaxInjectablePods(total int, failed int) int {
+	if in.MaxInjectPercent <= 0 || in.MaxInjectPercent > 100 {
+		in.MaxInjectPercent = 100
+	}
+	return int(math.Floor(float64(total*in.MaxInjectPercent/100.0 - failed)))
+}
 
 // SelectorSpec defines the some selectors to select objects.
 // If the all selectors are empty, all objects will be used in chaos experiment.
@@ -108,6 +133,8 @@ type ChaosStatus struct {
 
 	// Experiment records the last experiment state.
 	Experiment ExperimentStatus `json:"experiment"`
+
+	MaxInjectablePods int `json:"maxInjectNumPods,omitempty"`
 }
 
 // ExperimentPhase is the current status of chaos experiment.

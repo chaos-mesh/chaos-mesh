@@ -36,6 +36,11 @@ type KernelChaos struct {
 
 // KernelChaosSpec defines the desired state of KernelChaos
 type KernelChaosSpec struct {
+
+	// Protector protects the target cluster from being corrupted by the chaos
+	// +optional
+	Protector ProtectorSpec `json:"protector"`
+
 	// Mode defines the mode to run chaos action.
 	// Supported mode: one / all / fixed / fixed-percent / random-max-percent
 	Mode PodMode `json:"mode"`
@@ -66,6 +71,11 @@ type KernelChaosSpec struct {
 	// Next time when this action will be recovered
 	// +optional
 	NextRecover *metav1.Time `json:"nextRecover,omitempty"`
+}
+
+// GetProtector gets the internal protector
+func (in *KernelChaosSpec) GetProtector() *ProtectorSpec {
+	return &in.Protector
 }
 
 // GetSelector is a getter for Selector (for implementing SelectSpec)

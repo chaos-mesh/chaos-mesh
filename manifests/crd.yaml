@@ -94,6 +94,17 @@ spec:
               description: 'Percent defines the percentage of injection errors and
                 provides a number from 0-100. default: 100.'
               type: string
+            protector:
+              description: Protector protects the target cluster from being corrupted
+                by the chaos
+              properties:
+                maxInjectPercent:
+                  description: MaxInjectPercent specifies the ratio of maximum pods
+                    involved in the chaos to be injected later.  A value of less than
+                    or equal to 0, or greater than 100, we see it as illegal. It takes
+                    no effects for the protection.
+                  type: integer
+              type: object
             scheduler:
               description: Scheduler defines some schedule rules to control the running
                 time of the chaos experiment about pods.
@@ -225,6 +236,8 @@ spec:
                   format: date-time
                   type: string
               type: object
+            maxInjectNumPods:
+              type: integer
             phase:
               description: Phase is the chaos status.
               type: string
@@ -359,6 +372,17 @@ spec:
               description: Next time when this action will be applied again
               format: date-time
               type: string
+            protector:
+              description: Protector protects the target cluster from being corrupted
+                by the chaos
+              properties:
+                maxInjectPercent:
+                  description: MaxInjectPercent specifies the ratio of maximum pods
+                    involved in the chaos to be injected later.  A value of less than
+                    or equal to 0, or greater than 100, we see it as illegal. It takes
+                    no effects for the protection.
+                  type: integer
+              type: object
             scheduler:
               description: Scheduler defines some schedule rules to control the running
                 time of the chaos experiment about time.
@@ -488,6 +512,8 @@ spec:
                   format: date-time
                   type: string
               type: object
+            maxInjectNumPods:
+              type: integer
             phase:
               description: Phase is the chaos status.
               type: string
@@ -629,6 +655,17 @@ spec:
               description: Next time when this action will be applied again
               format: date-time
               type: string
+            protector:
+              description: Protector protects the target cluster from being corrupted
+                by the chaos
+              properties:
+                maxInjectPercent:
+                  description: MaxInjectPercent specifies the ratio of maximum pods
+                    involved in the chaos to be injected later.  A value of less than
+                    or equal to 0, or greater than 100, we see it as illegal. It takes
+                    no effects for the protection.
+                  type: integer
+              type: object
             scheduler:
               description: Scheduler defines some schedule rules to control the running
                 time of the chaos experiment about network.
@@ -834,6 +871,8 @@ spec:
                   format: date-time
                   type: string
               type: object
+            maxInjectNumPods:
+              type: integer
             phase:
               description: Phase is the chaos status.
               type: string
@@ -925,6 +964,17 @@ spec:
               description: Next time when this action will be applied again
               format: date-time
               type: string
+            protector:
+              description: Protector protects the target cluster from being corrupted
+                by the chaos
+              properties:
+                maxInjectPercent:
+                  description: MaxInjectPercent specifies the ratio of maximum pods
+                    involved in the chaos to be injected later.  A value of less than
+                    or equal to 0, or greater than 100, we see it as illegal. It takes
+                    no effects for the protection.
+                  type: integer
+              type: object
             scheduler:
               description: Scheduler defines some schedule rules to control the running
                 time of the chaos experiment about pods.
@@ -1055,6 +1105,8 @@ spec:
                   format: date-time
                   type: string
               type: object
+            maxInjectNumPods:
+              type: integer
             phase:
               description: Phase is the chaos status.
               type: string
@@ -1142,6 +1194,17 @@ spec:
               description: Next time when this action will be applied again
               format: date-time
               type: string
+            protector:
+              description: Protector protects the target cluster from being corrupted
+                by the chaos
+              properties:
+                maxInjectPercent:
+                  description: MaxInjectPercent specifies the ratio of maximum pods
+                    involved in the chaos to be injected later.  A value of less than
+                    or equal to 0, or greater than 100, we see it as illegal. It takes
+                    no effects for the protection.
+                  type: integer
+              type: object
             scheduler:
               description: Scheduler defines some schedule rules to control the running
                 time of the chaos experiment about time.
@@ -1284,6 +1347,8 @@ spec:
                   format: date-time
                   type: string
               type: object
+            maxInjectNumPods:
+              type: integer
             phase:
               description: Phase is the chaos status.
               type: string

@@ -95,12 +95,14 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos reconcil
 		return err
 	}
 
-	pods, err := utils.SelectAndFilterPods(ctx, r.Client, &networkchaos.Spec)
+	max := networkchaos.Status.MaxInjectablePods
+	pods, max, err := utils.SelectAndFilterPods(ctx, r.Client, &networkchaos.Spec, max)
 
 	if err != nil {
 		r.Log.Error(err, "failed to select and filter pods")
 		return err
 	}
+	networkchaos.Status.MaxInjectablePods = max
 
 	err = r.applyAllPods(ctx, pods, networkchaos)
 	if err != nil {

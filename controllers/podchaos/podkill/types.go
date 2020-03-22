@@ -64,11 +64,13 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos reconcil
 		r.Log.Error(err, "chaos is not PodChaos", "chaos", chaos)
 		return err
 	}
-	pods, err := utils.SelectAndFilterPods(ctx, r.Client, &podchaos.Spec)
+	max := podchaos.Status.MaxInjectablePods
+	pods, max, err := utils.SelectAndFilterPods(ctx, r.Client, &podchaos.Spec, max)
 	if err != nil {
 		r.Log.Error(err, "fail to select and generate pods")
 		return err
 	}
+	podchaos.Status.MaxInjectablePods = max
 
 	g := errgroup.Group{}
 	for index := range pods {

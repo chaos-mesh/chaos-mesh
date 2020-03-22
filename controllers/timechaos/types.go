@@ -87,12 +87,14 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos reconcil
 
 	timechaos.SetDefaultValue()
 
-	pods, err := utils.SelectAndFilterPods(ctx, r.Client, &timechaos.Spec)
+	max := timechaos.Status.MaxInjectablePods
+	pods, max, err := utils.SelectAndFilterPods(ctx, r.Client, &timechaos.Spec, max)
 
 	if err != nil {
 		r.Log.Error(err, "failed to select and filter pods")
 		return err
 	}
+	timechaos.Status.MaxInjectablePods = max
 
 	err = r.applyAllPods(ctx, pods, timechaos)
 	if err != nil {

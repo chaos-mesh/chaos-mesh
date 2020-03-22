@@ -26,28 +26,28 @@ import (
 	"github.com/pingcap/chaos-mesh/pkg/label"
 	"github.com/pingcap/chaos-mesh/pkg/mock"
 
-	"sigs.k8s.io/controller-runtime/pkg/client"
-
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/fields"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/selection"
 	"k8s.io/apimachinery/pkg/types"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 type SelectSpec interface {
+	GetProtector() *v1alpha1.ProtectorSpec
 	GetSelector() v1alpha1.SelectorSpec
 	GetMode() v1alpha1.PodMode
 	GetValue() string
 }
 
 // SelectAndFilterPods returns the list of pods that filtered by selector and PodMode
-func SelectAndFilterPods(ctx context.Context, c client.Client, spec SelectSpec) ([]v1.Pod, error) {
+func SelectAndFilterPods(ctx context.Context, c client.Client, spec SelectSpec, max int) ([]v1.Pod, int, error) {
 	if pods := mock.On("MockSelectAndFilterPods"); pods != nil {
-		return pods.(func() []v1.Pod)(), nil
+		return pods.(func() []v1.Pod)(), 0, nil
 	}
 	if err := mock.On("MockSelectedAndFilterPodsError"); err != nil {
-		return nil, err.(error)
+		return nil, 0, err.(error)
 	}
 
 	selector := spec.GetSelector()
@@ -56,20 +56,37 @@ func SelectAndFilterPods(ctx context.Context, c client.Client, spec SelectSpec) 
 
 	pods, err := selectPods(ctx, c, selector)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
 	if len(pods) == 0 {
 		err = errors.New("no pod is selected")
-		return nil, err
+		return nil, 0, err
+	}
+	if max == 0 {
+		// set max to selected pods for first round of the injection, it will
+		// be used to calculate the maximum injectable pods afterwards
+		max = len(pods)
 	}
 
-	filteredPod, err := filterPodsByMode(pods, mode, value)
+	healthy := findHealthyPods(pods)
+	allowed := len(healthy)
+	if spec.GetProtector() != nil {
+		allowed = spec.GetProtector().GetMaxInjectablePods(
+			max, max-len(healthy))
+	}
+
+	filteredPods, err := filterPodsByMode(pods, mode, value)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
-	return filteredPod, nil
+	if len(filteredPods) > allowed {
+		return nil, 0, fmt.Errorf("chaos rejected due to "+
+			"%d pods requested, only %d pods allowed", len(filteredPods), allowed)
+	}
+
+	return filteredPods, max, nil
 }
 
 // selectPods returns the list of pods that are available for pod chaos action.
@@ -438,6 +455,22 @@ func getFixedSubListFromPodList(pods []v1.Pod, num int) []v1.Pod {
 	}
 
 	return filteredPods
+}
+
+func findHealthyPods(pods []v1.Pod) []v1.Pod {
+	var healthy []v1.Pod
+	for _, pod := range pods {
+		for _, cond := range pod.Status.Conditions {
+			if cond.Type != v1.PodReady {
+				continue
+			}
+			if cond.Status == v1.ConditionTrue {
+				healthy = append(healthy, pod)
+			}
+			break
+		}
+	}
+	return healthy
 }
 
 // RandomFixedIndexes returns the `count` random indexes between `start` and `end`.

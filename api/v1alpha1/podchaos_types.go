@@ -112,6 +112,11 @@ func (in *PodChaos) GetScheduler() *SchedulerSpec {
 
 // PodChaosSpec defines the attributes that a user creates on a chaos experiment about pods.
 type PodChaosSpec struct {
+
+	// Protector protects the target cluster from being corrupted by the chaos
+	// +optional
+	Protector ProtectorSpec `json:"protector"`
+
 	// Selector is used to select pods that are used to inject chaos action.
 	Selector SelectorSpec `json:"selector"`
 
@@ -161,6 +166,11 @@ type PodChaosSpec struct {
 	// Needed in container-kill.
 	// +optional
 	ContainerName string `json:"containerName"`
+}
+
+// GetProtector gets the internal protector
+func (in *PodChaosSpec) GetProtector() *ProtectorSpec {
+	return &in.Protector
 }
 
 func (in *PodChaosSpec) GetSelector() SelectorSpec {

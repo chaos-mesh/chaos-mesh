@@ -74,6 +74,11 @@ type PartitionTarget struct {
 	TargetValue string `json:"value"`
 }
 
+// GetProtector gets the internal protector
+func (t *PartitionTarget) GetProtector() *ProtectorSpec {
+	return nil
+}
+
 // GetSelector is a getter for Selector (for implementing SelectSpec)
 func (t *PartitionTarget) GetSelector() SelectorSpec {
 	return t.TargetSelector
@@ -91,6 +96,11 @@ func (t *PartitionTarget) GetValue() string {
 
 // NetworkChaosSpec defines the desired state of NetworkChaos
 type NetworkChaosSpec struct {
+
+	// Protector protects the target cluster from being corrupted by the chaos
+	// +optional
+	Protector ProtectorSpec `json:"protector"`
+
 	// Action defines the specific network chaos action.
 	// Supported action: delay
 	// Default action: delay
@@ -144,6 +154,11 @@ type NetworkChaosSpec struct {
 	// Next time when this action will be recovered
 	// +optional
 	NextRecover *metav1.Time `json:"nextRecover,omitempty"`
+}
+
+// GetProtector gets the internal protector
+func (in *NetworkChaosSpec) GetProtector() *ProtectorSpec {
+	return &in.Protector
 }
 
 // GetSelector is a getter for Selector (for implementing SelectSpec)
