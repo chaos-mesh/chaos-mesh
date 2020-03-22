@@ -37,7 +37,7 @@ func (s *daemonServer) DeleteTbf(ctx context.Context, in *pb.TbfRequest) (*empty
 	}
 
 	if err := deleteTbf(in.Tbf, pid); err != nil {
-		return nil, status.Errorf(codes.Internal, "tbf apply error: %v", err)
+		return nil, status.Errorf(codes.Internal, "tbf delete error: %v", err)
 	}
 
 	return &empty.Empty{}, nil

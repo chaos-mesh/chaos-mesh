@@ -384,38 +384,49 @@ type BandwidthSpec struct {
 }
 
 func (spec *BandwidthSpec) ToTbf() (*chaosdaemon.Tbf, error) {
-	rate, err := strconv.ParseUint(spec.Rate, 10, 64)
-	if err != nil {
-		return nil, err
+	tbf := &chaosdaemon.Tbf{}
+
+	if spec.Rate != "" {
+		rate, err := strconv.ParseUint(spec.Rate, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		tbf.Rate = rate
 	}
 
-	limit, err := strconv.ParseUint(spec.Limit, 10, 32)
-	if err != nil {
-		return nil, err
+	if spec.Limit != "" {
+		limit, err := strconv.ParseUint(spec.Limit, 10, 32)
+		if err != nil {
+			return nil, err
+		}
+		tbf.Limit = uint32(limit)
 	}
 
-	buffer, err := strconv.ParseUint(spec.Buffer, 10, 32)
-	if err != nil {
-		return nil, err
+	if spec.Buffer != "" {
+		buffer, err := strconv.ParseUint(spec.Buffer, 10, 32)
+		if err != nil {
+			return nil, err
+		}
+		tbf.Buffer = uint32(buffer)
 	}
 
-	peakrate, err := strconv.ParseUint(spec.PeakRate, 10, 32)
-	if err != nil {
-		return nil, err
+	if spec.PeakRate != "" {
+		peakrate, err := strconv.ParseUint(spec.PeakRate, 10, 32)
+		if err != nil {
+			return nil, err
+		}
+		tbf.PeakRate = peakrate
 	}
 
-	minburst, err := strconv.ParseUint(spec.MinBurst, 10, 32)
-	if err != nil {
-		return nil, err
+	if spec.MinBurst != "" {
+		minburst, err := strconv.ParseUint(spec.MinBurst, 10, 32)
+		if err != nil {
+			return nil, err
+		}
+		tbf.MinBurst = uint32(minburst)
 	}
 
-	return &chaosdaemon.Tbf{
-		Rate:     rate,
-		Limit:    uint32(limit),
-		Buffer:   uint32(buffer),
-		PeakRate: peakrate,
-		MinBurst: uint32(minburst),
-	}, nil
+	return tbf, nil
 }
 
 // ReorderSpec defines details of packet reorder.
