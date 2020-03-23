@@ -128,6 +128,12 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		}
 
 		nextRecover := now.Add(*duration)
+		// TODO(at15): this should be validated in webhook instead of throwing error at runtime.
+		// User can give a cron with interval shorter than duration.
+		// Example:
+		//  duration: "10s"
+		//  scheduler:
+		//    cron: "@every 5s
 		if nextStart.Before(nextRecover) {
 			err := fmt.Errorf("nextRecover shouldn't be later than nextStart")
 			r.Log.Error(err, "nextRecover is later than nextStart. Then recover can never be reached",
