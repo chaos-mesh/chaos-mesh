@@ -60,7 +60,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request, chaos *v1alpha1.NetworkChaos) (
 func (r *Reconciler) commonNetworkChaos(networkchaos *v1alpha1.NetworkChaos, req ctrl.Request) (ctrl.Result, error) {
 	var cr *common.Reconciler
 	switch networkchaos.Spec.Action {
-	case v1alpha1.DelayAction, v1alpha1.DuplicateAction, v1alpha1.CorruptAction, v1alpha1.LossAction:
+	case v1alpha1.NetemAction, v1alpha1.DelayAction, v1alpha1.DuplicateAction, v1alpha1.CorruptAction, v1alpha1.LossAction:
 		cr = netem.NewCommonReconciler(r.Client, r.Log.WithValues("action", "netem"),
 			req, r.EventRecorder)
 	case v1alpha1.PartitionAction:
@@ -75,7 +75,7 @@ func (r *Reconciler) commonNetworkChaos(networkchaos *v1alpha1.NetworkChaos, req
 func (r *Reconciler) scheduleNetworkChaos(networkchaos *v1alpha1.NetworkChaos, req ctrl.Request) (ctrl.Result, error) {
 	var sr *twophase.Reconciler
 	switch networkchaos.Spec.Action {
-	case v1alpha1.DelayAction, v1alpha1.DuplicateAction, v1alpha1.CorruptAction, v1alpha1.LossAction:
+	case v1alpha1.NetemAction, v1alpha1.DelayAction, v1alpha1.DuplicateAction, v1alpha1.CorruptAction, v1alpha1.LossAction:
 		sr = netem.NewTwoPhaseReconciler(r.Client, r.Log.WithValues("action", "netem"),
 			req, r.EventRecorder)
 	case v1alpha1.PartitionAction:

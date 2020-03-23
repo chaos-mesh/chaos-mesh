@@ -2,6 +2,7 @@ package utils
 
 import (
 	"context"
+	"math"
 
 	"google.golang.org/grpc"
 	v1 "k8s.io/api/core/v1"
@@ -44,4 +45,50 @@ func NewChaosDaemonClient(ctx context.Context, c client.Client, pod *v1.Pod, por
 		ChaosDaemonClient: chaosdaemon.NewChaosDaemonClient(cc),
 		conn:              cc,
 	}, nil
+}
+
+// MergeNetem merges two Netem protos into a new one.
+// REMEMBER to assign the return value, i.e. merged = utils.MergeNetm(merged, em)
+// For each field it takes the bigger value of the two.
+// Its main use case is merging netem of different types, e.g. delay and loss.
+// It returns nil if both inputs are nil.
+// Otherwise it returns a new Netem with merged values.
+func MergeNetem(a, b *chaosdaemon.Netem) *chaosdaemon.Netem {
+	if a == nil && b == nil {
+		return nil
+	}
+	// NOTE: because proto getters check nil, we are good here even if one of them is nil.
+	// But we just assign empty value to make IDE and linters happy.
+	if a == nil {
+		a = &chaosdaemon.Netem{}
+	}
+	if b == nil {
+		b = &chaosdaemon.Netem{}
+	}
+	return &chaosdaemon.Netem{
+		Time:          maxu32(a.GetTime(), b.GetTime()),
+		Jitter:        maxu32(a.GetJitter(), b.GetJitter()),
+		DelayCorr:     maxf32(a.GetDelayCorr(), b.GetDelayCorr()),
+		Limit:         maxu32(a.GetLimit(), b.GetLimit()),
+		Loss:          maxf32(a.GetLoss(), b.GetLoss()),
+		LossCorr:      maxf32(a.GetLossCorr(), b.GetLossCorr()),
+		Gap:           maxu32(a.GetGap(), b.GetGap()),
+		Duplicate:     maxf32(a.GetDuplicate(), b.GetDuplicate()),
+		DuplicateCorr: maxf32(a.GetDuplicateCorr(), b.GetDuplicateCorr()),
+		Reorder:       maxf32(a.GetReorder(), b.GetReorder()),
+		ReorderCorr:   maxf32(a.GetReorderCorr(), b.GetReorderCorr()),
+		Corrupt:       maxf32(a.GetCorrupt(), b.GetCorrupt()),
+		CorruptCorr:   maxf32(a.GetCorruptCorr(), b.GetCorruptCorr()),
+	}
+}
+
+func maxu32(a, b uint32) uint32 {
+	if a > b {
+		return a
+	}
+	return b
+}
+
+func maxf32(a, b float32) float32 {
+	return float32(math.Max(float64(a), float64(b)))
 }

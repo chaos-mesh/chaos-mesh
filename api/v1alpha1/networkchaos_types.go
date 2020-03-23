@@ -17,9 +17,9 @@ import (
 	"strconv"
 	"time"
 
-	chaosdaemon "github.com/pingcap/chaos-mesh/pkg/chaosdaemon/pb"
-
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	chaosdaemonpb "github.com/pingcap/chaos-mesh/pkg/chaosdaemon/pb"
 )
 
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
@@ -29,6 +29,10 @@ import (
 type NetworkChaosAction string
 
 const (
+	// NetemAction is a combination of several chaos actions i.e. delay, loss, duplicate, corrupt.
+	// When using this action multiple specs are merged into one Netem RPC and sends to chaos daemon.
+	NetemAction NetworkChaosAction = "netem"
+
 	// DelayAction represents the chaos action of adding delay on pods.
 	DelayAction NetworkChaosAction = "delay"
 
@@ -92,7 +96,7 @@ func (t *PartitionTarget) GetValue() string {
 // NetworkChaosSpec defines the desired state of NetworkChaos
 type NetworkChaosSpec struct {
 	// Action defines the specific network chaos action.
-	// Supported action: delay
+	// Supported action: partition, netem, delay, loss, duplicate, corrupt
 	// Default action: delay
 	Action NetworkChaosAction `json:"action"`
 
@@ -252,7 +256,8 @@ type DelaySpec struct {
 	Reorder     *ReorderSpec `json:"reorder,omitempty"`
 }
 
-func (delay *DelaySpec) ToNetem() (*chaosdaemon.Netem, error) {
+// ToNetem implements Netem interface.
+func (delay *DelaySpec) ToNetem() (*chaosdaemonpb.Netem, error) {
 	delayTime, err := time.ParseDuration(delay.Latency)
 	if err != nil {
 		return nil, err
@@ -267,7 +272,7 @@ func (delay *DelaySpec) ToNetem() (*chaosdaemon.Netem, error) {
 		return nil, err
 	}
 
-	netem := &chaosdaemon.Netem{
+	netem := &chaosdaemonpb.Netem{
 		Time:      uint32(delayTime.Nanoseconds() / 1e3),
 		DelayCorr: float32(corr),
 		Jitter:    uint32(jitter.Nanoseconds() / 1e3),
@@ -298,7 +303,8 @@ type LossSpec struct {
 	Correlation string `json:"correlation"`
 }
 
-func (loss *LossSpec) ToNetem() (*chaosdaemon.Netem, error) {
+// ToNetem implements Netem interface.
+func (loss *LossSpec) ToNetem() (*chaosdaemonpb.Netem, error) {
 	lossPercentage, err := strconv.ParseFloat(loss.Loss, 32)
 	if err != nil {
 		return nil, err
@@ -309,7 +315,7 @@ func (loss *LossSpec) ToNetem() (*chaosdaemon.Netem, error) {
 		return nil, err
 	}
 
-	return &chaosdaemon.Netem{
+	return &chaosdaemonpb.Netem{
 		Loss:     float32(lossPercentage),
 		LossCorr: float32(corr),
 	}, nil
@@ -321,7 +327,8 @@ type DuplicateSpec struct {
 	Correlation string `json:"correlation"`
 }
 
-func (duplicate *DuplicateSpec) ToNetem() (*chaosdaemon.Netem, error) {
+// ToNetem implements Netem interface.
+func (duplicate *DuplicateSpec) ToNetem() (*chaosdaemonpb.Netem, error) {
 	duplicatePercentage, err := strconv.ParseFloat(duplicate.Duplicate, 32)
 	if err != nil {
 		return nil, err
@@ -332,7 +339,7 @@ func (duplicate *DuplicateSpec) ToNetem() (*chaosdaemon.Netem, error) {
 		return nil, err
 	}
 
-	return &chaosdaemon.Netem{
+	return &chaosdaemonpb.Netem{
 		Duplicate:     float32(duplicatePercentage),
 		DuplicateCorr: float32(corr),
 	}, nil
@@ -344,7 +351,8 @@ type CorruptSpec struct {
 	Correlation string `json:"correlation"`
 }
 
-func (corrupt *CorruptSpec) ToNetem() (*chaosdaemon.Netem, error) {
+// ToNetem implements Netem interface.
+func (corrupt *CorruptSpec) ToNetem() (*chaosdaemonpb.Netem, error) {
 	corruptPercentage, err := strconv.ParseFloat(corrupt.Corrupt, 32)
 	if err != nil {
 		return nil, err
@@ -355,7 +363,7 @@ func (corrupt *CorruptSpec) ToNetem() (*chaosdaemon.Netem, error) {
 		return nil, err
 	}
 
-	return &chaosdaemon.Netem{
+	return &chaosdaemonpb.Netem{
 		Corrupt:     float32(corruptPercentage),
 		CorruptCorr: float32(corr),
 	}, nil
