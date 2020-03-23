@@ -574,7 +574,8 @@ spec:
           properties:
             action:
               description: 'Action defines the specific network chaos action. Supported
-                action: delay Default action: delay'
+                action: partition, netem, delay, loss, duplicate, corrupt Default
+                action: delay'
               type: string
             corrupt:
               description: Corrupt represents the detail about corrupt action
