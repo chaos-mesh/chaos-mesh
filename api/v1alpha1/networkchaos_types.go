@@ -376,57 +376,26 @@ func (corrupt *CorruptSpec) ToNetem() (*chaosdaemonpb.Netem, error) {
 }
 
 type BandwidthSpec struct {
-	Rate     string `json:"rate"`
-	Limit    string `json:"limit"`
-	Buffer   string `json:"buffer"`
-	PeakRate string `json:"peakrate"`
-	MinBurst string `json:"minburst"`
+	// Rate is the speed knob.
+	// see http://man7.org/linux/man-pages/man8/tc.8.html#PARAMETERS for units
+	Rate string `json:"rate"`
+	// Limit is the number of bytes that can be queued waiting for  tokens to become available.
+	Limit uint32 `json:"limit"`
+	// Buffer is the maximum amount of bytes that tokens can be available for instantaneously.
+	Buffer uint32 `json:"buffer"`
 }
 
 func (spec *BandwidthSpec) ToTbf() (*chaosdaemon.Tbf, error) {
-	tbf := &chaosdaemon.Tbf{}
-
-	if spec.Rate != "" {
-		rate, err := strconv.ParseUint(spec.Rate, 10, 64)
-		if err != nil {
-			return nil, err
-		}
-		tbf.Rate = rate
+	rate, err := strconv.ParseUint(spec.Rate, 10, 64)
+	if err != nil {
+		return nil, err
 	}
 
-	if spec.Limit != "" {
-		limit, err := strconv.ParseUint(spec.Limit, 10, 32)
-		if err != nil {
-			return nil, err
-		}
-		tbf.Limit = uint32(limit)
-	}
-
-	if spec.Buffer != "" {
-		buffer, err := strconv.ParseUint(spec.Buffer, 10, 32)
-		if err != nil {
-			return nil, err
-		}
-		tbf.Buffer = uint32(buffer)
-	}
-
-	if spec.PeakRate != "" {
-		peakrate, err := strconv.ParseUint(spec.PeakRate, 10, 32)
-		if err != nil {
-			return nil, err
-		}
-		tbf.PeakRate = peakrate
-	}
-
-	if spec.MinBurst != "" {
-		minburst, err := strconv.ParseUint(spec.MinBurst, 10, 32)
-		if err != nil {
-			return nil, err
-		}
-		tbf.MinBurst = uint32(minburst)
-	}
-
-	return tbf, nil
+	return &chaosdaemon.Tbf{
+		Rate:   rate,
+		Limit:  spec.Limit,
+		Buffer: spec.Buffer,
+	}, nil
 }
 
 // ReorderSpec defines details of packet reorder.
