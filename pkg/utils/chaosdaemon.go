@@ -47,7 +47,8 @@ func NewChaosDaemonClient(ctx context.Context, c client.Client, pod *v1.Pod, por
 	}, nil
 }
 
-// MergeNetem merges two Netem protos.
+// MergeNetem merges two Netem protos into a new one.
+// REMEMBER to assign the return value, i.e. merged = utils.MergeNetm(merged, em)
 // For each field it takes the bigger value of the two.
 // Its main use case is merging netem of different types, e.g. delay and loss.
 // It returns nil if both inputs are nil.

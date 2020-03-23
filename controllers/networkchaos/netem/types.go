@@ -306,7 +306,7 @@ func mergeNetem(spec v1alpha1.NetworkChaosSpec) (*pb.Netem, error) {
 		if err != nil {
 			return nil, err
 		}
-		utils.MergeNetem(merged, em)
+		merged = utils.MergeNetem(merged, em)
 	}
 	return merged, nil
 }
