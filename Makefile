@@ -8,6 +8,7 @@ DOCKER_BUILD_ARGS := --build-arg HTTP_PROXY=${HTTP_PROXY} --build-arg HTTPS_PROX
 GOVER_MAJOR := $(shell go version | sed -E -e "s/.*go([0-9]+)[.]([0-9]+).*/\1/")
 GOVER_MINOR := $(shell go version | sed -E -e "s/.*go([0-9]+)[.]([0-9]+).*/\2/")
 GO111 := $(shell [ $(GOVER_MAJOR) -gt 1 ] || [ $(GOVER_MAJOR) -eq 1 ] && [ $(GOVER_MINOR) -ge 11 ]; echo $$?)
+
 ifeq ($(GO111), 1)
 $(error Please upgrade your Go compiler to 1.11 or higher version)
 endif
@@ -98,7 +99,7 @@ run: generate fmt vet manifests
 # Install CRDs into a cluster
 install: manifests
 	kubectl apply -f manifests/crd.yaml
-	helm install helm/chaos-mesh --name=chaos-mesh --namespace=chaos-testing
+	bash -c '[[ `helm version --client --short` == "Client: v2"* ]] && helm install helm/chaos-mesh --name=chaos-mesh --namespace=chaos-testing || helm install chaos-mesh helm/chaos-mesh --namespace=chaos-testing;'
 
 # Generate manifests e.g. CRD, RBAC etc.
 manifests: controller-gen
