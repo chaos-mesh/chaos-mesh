@@ -116,3 +116,20 @@ A Network Corrupt action causes packet corruption. To add a Network Corrupt acti
 >```
 >
 > **corrupt** specifies the percentage of packet corruption.
+
+## Network Bandwidth Action
+
+Network Bandwidth Action is used to limit the network bandwidth. To add a Network Bandwidth Action, locale and edit the corresponding template in [/examples](../examples/network-bandwidth-example.yaml).
+> In this case, three action specific attributes are required - rate, buffer and limit.
+>
+>```yaml
+> bandwidth:
+>   rate: 10 kbps
+>   buffer: 1000
+>   limit: 100
+>```
+>
+> **rate** allows bps, kbps, mbps, gbps, tbps unit. bps means bytes per second.
+> **limit** defines the number of bytes that can be queued waiting for tokens to become available.
+> **buffer** is the maximum amount of bytes that tokens can be available for instantaneously.
+

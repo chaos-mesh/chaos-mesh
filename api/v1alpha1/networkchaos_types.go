@@ -386,7 +386,7 @@ type BandwidthSpec struct {
 	// gbps   Gigabytes per second
 	// tbps   Terabytes per second
 	Rate string `json:"rate"`
-	// Limit is the number of bytes that can be queued waiting for  tokens to become available.
+	// Limit is the number of bytes that can be queued waiting for tokens to become available.
 	Limit uint32 `json:"limit"`
 	// Buffer is the maximum amount of bytes that tokens can be available for instantaneously.
 	Buffer uint32 `json:"buffer"`
