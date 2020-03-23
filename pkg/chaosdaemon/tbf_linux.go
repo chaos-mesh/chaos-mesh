@@ -52,11 +52,6 @@ func deleteTbf(tbf *pb.Tbf, pid uint32) error {
 				Handle:    netlink.MakeHandle(1, 0),
 				Parent:    netlink.HANDLE_ROOT,
 			},
-			Rate:     tbf.Rate,
-			Limit:    tbf.Limit,
-			Buffer:   tbf.Buffer,
-			Peakrate: tbf.PeakRate,
-			Minburst: tbf.MinBurst,
 		}
 	})
 }
