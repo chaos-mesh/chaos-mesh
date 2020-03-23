@@ -28,6 +28,7 @@ import (
 
 var _ = Describe("NetworkChaos Controller", func() {
 	supportingModes := []v1alpha1.NetworkChaosAction{
+		v1alpha1.NetemAction,
 		v1alpha1.DelayAction,
 		v1alpha1.LossAction,
 		v1alpha1.DuplicateAction,
