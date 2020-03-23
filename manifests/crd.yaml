@@ -556,20 +556,22 @@ spec:
                 action
               properties:
                 buffer:
-                  type: string
+                  description: Buffer is the maximum amount of bytes that tokens can
+                    be available for instantaneously.
+                  format: int32
+                  type: integer
                 limit:
-                  type: string
-                minburst:
-                  type: string
-                peakrate:
-                  type: string
+                  description: Limit is the number of bytes that can be queued waiting
+                    for  tokens to become available.
+                  format: int32
+                  type: integer
                 rate:
+                  description: Rate is the speed knob. see http://man7.org/linux/man-pages/man8/tc.8.html#PARAMETERS
+                    for units
                   type: string
               required:
               - buffer
               - limit
-              - minburst
-              - peakrate
               - rate
               type: object
             corrupt:
