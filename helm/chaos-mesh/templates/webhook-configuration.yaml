@@ -1,3 +1,4 @@
+{{- if .Values.webhook.certManager.enabled }}
 ---
 apiVersion: admissionregistration.k8s.io/v1beta1
 kind: MutatingWebhookConfiguration
@@ -9,10 +10,8 @@ metadata:
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/component: admission-webhook
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+"  "_" }}
-  {{- if .Values.webhook.certManager.enabled }}
   annotations:
     cert-manager.io/inject-ca-from: {{ printf "%s/%s" .Release.Namespace "chaos-mesh-cert" | quote }}
-  {{- end }}
 webhooks:
   - name: {{ template "chaos-mesh.webhook" . }}
     clientConfig:
@@ -62,10 +61,8 @@ metadata:
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/component: admission-webhook
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+"  "_" }}
-  {{- if .Values.webhook.certManager.enabled }}
   annotations:
     cert-manager.io/inject-ca-from: {{ printf "%s/%s" .Release.Namespace "chaos-mesh-cert" | quote }}
-  {{- end }}
 webhooks:
   {{- range $crd := .Values.webhook.CRDS }}
   - clientConfig:
@@ -88,7 +85,6 @@ webhooks:
           - {{ $crd }}
   {{- end }}
 
-{{- if .Values.webhook.certManager.enabled }}
 ---
 apiVersion: cert-manager.io/v1alpha2
 kind: Issuer
