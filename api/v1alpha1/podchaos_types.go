@@ -161,6 +161,9 @@ type PodChaosSpec struct {
 	// Needed in container-kill.
 	// +optional
 	ContainerName string `json:"containerName"`
+
+	// +optional
+	Paused bool `json:"paused"`
 }
 
 func (in *PodChaosSpec) GetSelector() SelectorSpec {
