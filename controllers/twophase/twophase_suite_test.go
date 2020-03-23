@@ -98,6 +98,10 @@ func (in *fakeTwoPhaseChaos) IsDeleted() bool {
 	return in.Deleted
 }
 
+func (in *fakeTwoPhaseChaos) IsPaused() bool {
+	return false
+}
+
 func (r fakeReconciler) Object() reconciler.InnerObject {
 	return &fakeTwoPhaseChaos{}
 }

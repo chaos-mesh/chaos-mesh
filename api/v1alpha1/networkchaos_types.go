@@ -193,6 +193,10 @@ func (in *NetworkChaos) IsDeleted() bool {
 	return !in.DeletionTimestamp.IsZero()
 }
 
+func (in *NetworkChaos) IsPaused() bool {
+	return false
+}
+
 // GetDuration would return the duration for chaos
 func (in *NetworkChaos) GetDuration() (*time.Duration, error) {
 	if in.Spec.Duration == nil {

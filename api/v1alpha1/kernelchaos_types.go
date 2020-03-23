@@ -211,6 +211,10 @@ func (in *KernelChaos) IsDeleted() bool {
 	return !in.DeletionTimestamp.IsZero()
 }
 
+func (in *KernelChaos) IsPaused() bool {
+	return false
+}
+
 // +kubebuilder:object:root=true
 
 // KernelChaosList contains a list of KernelChaos

@@ -926,6 +926,8 @@ spec:
               description: Next time when this action will be applied again
               format: date-time
               type: string
+            paused:
+              type: boolean
             scheduler:
               description: Scheduler defines some schedule rules to control the running
                 time of the chaos experiment about pods.

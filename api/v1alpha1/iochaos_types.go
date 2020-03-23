@@ -175,6 +175,10 @@ func (in *IoChaos) IsDeleted() bool {
 	return !in.DeletionTimestamp.IsZero()
 }
 
+func (in *IoChaos) IsPaused() bool {
+	return false
+}
+
 // GetDuration would return the duration for chaos
 func (in *IoChaos) GetDuration() (*time.Duration, error) {
 	if in.Spec.Duration == nil {

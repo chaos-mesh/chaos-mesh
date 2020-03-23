@@ -185,6 +185,10 @@ func (in *TimeChaos) IsDeleted() bool {
 	return !in.DeletionTimestamp.IsZero()
 }
 
+func (in *TimeChaos) IsPaused() bool {
+	return false
+}
+
 // +kubebuilder:object:root=true
 
 // TimeChaosList contains a list of TimeChaos

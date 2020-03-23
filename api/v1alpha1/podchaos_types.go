@@ -55,6 +55,10 @@ func (in *PodChaos) IsDeleted() bool {
 	return !in.DeletionTimestamp.IsZero()
 }
 
+func (in *PodChaos) IsPaused() bool {
+	return false
+}
+
 // GetDuration would return the duration for chaos
 func (in *PodChaos) GetDuration() (*time.Duration, error) {
 	if in.Spec.Duration == nil {
