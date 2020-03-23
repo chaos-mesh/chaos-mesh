@@ -85,9 +85,11 @@ A Network Delay action causes delays in message sending. To add a Network Delay 
 >```
 > **latency** defines the delay time in sending packets.
 >
-> **jitter** specifies the jitter of the delay time.
+> **jitter** specifies the jitter of the delay time. Default is `0ms`.
 >
-> In the above example, the network latency is 90ms ± 90ms.
+> **correlation** specifies the correlation of the jitter. Default is `0`.
+>
+> In the above example, the network latency is 90ms ± 90ms with 25% correlation.
 
 ### Network Duplicate
 
