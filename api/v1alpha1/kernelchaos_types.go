@@ -211,6 +211,7 @@ func (in *KernelChaos) IsDeleted() bool {
 	return !in.DeletionTimestamp.IsZero()
 }
 
+// IsPaused returns whether this resource is paused
 func (in *KernelChaos) IsPaused() bool {
 	return false
 }

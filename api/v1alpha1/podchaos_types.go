@@ -51,10 +51,12 @@ func (in *PodChaos) GetStatus() *ChaosStatus {
 	return &in.Status.ChaosStatus
 }
 
+// IsDeleted returns whether this resource has been deleted
 func (in *PodChaos) IsDeleted() bool {
 	return !in.DeletionTimestamp.IsZero()
 }
 
+// IsPaused returns whether this resource is paused
 func (in *PodChaos) IsPaused() bool {
 	return false
 }

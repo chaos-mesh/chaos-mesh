@@ -171,10 +171,12 @@ func (in *IoChaos) GetStatus() *ChaosStatus {
 	return &in.Status.ChaosStatus
 }
 
+// IsDeleted returns whether this resource has been deleted
 func (in *IoChaos) IsDeleted() bool {
 	return !in.DeletionTimestamp.IsZero()
 }
 
+// IsPaused returns whether this resource is paused
 func (in *IoChaos) IsPaused() bool {
 	return false
 }
