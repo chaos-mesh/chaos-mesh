@@ -69,6 +69,13 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 			return ctrl.Result{Requeue: true}, err
 		}
 		status.Experiment.Phase = v1alpha1.ExperimentPhaseFinished
+	} else if status.Experiment.Phase == v1alpha1.ExperimentPhaseRunning && chaos.IsPaused() {
+		err = r.Recover(ctx, req, chaos)
+		if err != nil {
+			r.Log.Error(err, "failed to pause chaos")
+			return ctrl.Result{Requeue: true}, err
+		}
+		status.Experiment.Phase = v1alpha1.ExperimentPhasePaused
 	} else if status.Experiment.Phase == v1alpha1.ExperimentPhaseRunning {
 		r.Log.Info("The common chaos is already running", "name", req.Name, "namespace", req.Namespace)
 		return ctrl.Result{}, nil
