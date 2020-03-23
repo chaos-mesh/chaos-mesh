@@ -16,6 +16,7 @@ metadata:
 webhooks:
   - name: {{ template "chaos-mesh.webhook" . }}
     clientConfig:
+      caBundle: Cg==
       service:
         name: {{ template "chaos-mesh.svc" . }}
         namespace: {{ .Release.Namespace }}

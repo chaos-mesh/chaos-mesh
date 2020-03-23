@@ -60,6 +60,11 @@ See [Docs](https://github.com/pingcap/chaos-mesh/wiki/Deploy-Chaos-Mesh)
 
 See [FAQs](https://github.com/pingcap/chaos-mesh/wiki/FAQs).
 
+## Blogs
+
+- [Chaos Mesh - Your Chaos Engineering Solution for System Resiliency on Kubernetes](https://pingcap.com/blog/chaos-mesh-your-chaos-engineering-solution-for-system-resiliency-on-kubernetes/) 
+- [Run Your First Chaos Experiment in 10 Minutes](https://pingcap.com/blog/run-first-chaos-experiment-in-ten-minutes/)
+
 ## Contribute
 
 See [Development Guide](https://github.com/pingcap/chaos-mesh/wiki/Development-Overview).
