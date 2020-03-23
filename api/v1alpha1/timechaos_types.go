@@ -185,6 +185,7 @@ func (in *TimeChaos) IsDeleted() bool {
 	return !in.DeletionTimestamp.IsZero()
 }
 
+// IsPaused returns whether this resource is paused
 func (in *TimeChaos) IsPaused() bool {
 	return false
 }
