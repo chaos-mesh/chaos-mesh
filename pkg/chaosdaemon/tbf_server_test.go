@@ -50,7 +50,7 @@ var _ = Describe("netem server", func() {
 	Context("DeleteTbf", func() {
 		It("should work", func() {
 			const ignore = true
-			defer mock.With("DeleteTbf", ignore)()
+			defer mock.With("TbfDeleteError", ignore)()
 			_, err := s.DeleteTbf(context.TODO(), &pb.TbfRequest{
 				ContainerId: "containerd://container-id",
 			})
@@ -69,7 +69,7 @@ var _ = Describe("netem server", func() {
 
 		It("should fail on Apply", func() {
 			const errorStr = "mock error on Apply()"
-			defer mock.With("DeleteTbf", errors.New(errorStr))()
+			defer mock.With("TbfDeleteError", errors.New(errorStr))()
 			_, err := s.DeleteTbf(context.TODO(), &pb.TbfRequest{
 				ContainerId: "containerd://container-id",
 			})
