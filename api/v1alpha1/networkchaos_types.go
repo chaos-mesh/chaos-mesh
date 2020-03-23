@@ -14,7 +14,9 @@
 package v1alpha1
 
 import (
+	"errors"
 	"strconv"
+	"strings"
 	"time"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -375,9 +377,14 @@ func (corrupt *CorruptSpec) ToNetem() (*chaosdaemonpb.Netem, error) {
 	}, nil
 }
 
+// BandwidthSpec defines details of bandwidth limit.
 type BandwidthSpec struct {
 	// Rate is the speed knob.
-	// see http://man7.org/linux/man-pages/man8/tc.8.html#PARAMETERS for units
+	// bps    Bytes per second
+	// kbps   Kilobytes per second
+	// mbps   Megabytes per second
+	// gbps   Gigabytes per second
+	// tbps   Terabytes per second
 	Rate string `json:"rate"`
 	// Limit is the number of bytes that can be queued waiting for  tokens to become available.
 	Limit uint32 `json:"limit"`
@@ -386,16 +393,30 @@ type BandwidthSpec struct {
 }
 
 func (spec *BandwidthSpec) ToTbf() (*chaosdaemon.Tbf, error) {
-	rate, err := strconv.ParseUint(spec.Rate, 10, 64)
-	if err != nil {
-		return nil, err
+	for i, u := range []string{"tbps", "gbps", "mbps", "kbps", "bps"} {
+		if strings.HasSuffix(strings.TrimSpace(spec.Rate), u) {
+			ts := strings.TrimSuffix(spec.Rate, u)
+			s := strings.TrimSpace(ts)
+
+			rate, err := strconv.ParseUint(s, 10, 64)
+			if err != nil {
+				return nil, err
+			}
+
+			// convert unit to bytes
+			for i := 4 - i; i > 0; i-- {
+				rate = rate * 1024
+			}
+
+			return &chaosdaemon.Tbf{
+				Rate:   rate,
+				Limit:  spec.Limit,
+				Buffer: spec.Buffer,
+			}, nil
+		}
 	}
 
-	return &chaosdaemon.Tbf{
-		Rate:   rate,
-		Limit:  spec.Limit,
-		Buffer: spec.Buffer,
-	}, nil
+	return nil, errors.New("invalid rate unit")
 }
 
 // ReorderSpec defines details of packet reorder.
