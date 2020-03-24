@@ -412,11 +412,9 @@ func (spec *BandwidthSpec) ToTbf() (*chaosdaemon.Tbf, error) {
 			}
 
 			tbf := &chaosdaemon.Tbf{
-				Rate:     rate,
-				Limit:    spec.Limit,
-				Buffer:   spec.Buffer,
-				PeakRate: *spec.Peakrate,
-				MinBurst: *spec.Minburst,
+				Rate:   rate,
+				Limit:  spec.Limit,
+				Buffer: spec.Buffer,
 			}
 
 			if spec.Peakrate != nil && spec.Minburst != nil {
