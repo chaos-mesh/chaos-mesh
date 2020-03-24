@@ -49,8 +49,8 @@ var _ = Describe("netem server", func() {
 			Expect(err.Error()).To(ContainSubstring(errorStr))
 		})
 
-		It("should fail on Apply", func() {
-			const errorStr = "mock error on Apply()"
+		It("should fail on applyNetem", func() {
+			const errorStr = "mock error on applyNetem()"
 			defer mock.With("NetemApplyError", errors.New(errorStr))()
 			_, err := s.SetNetem(context.TODO(), &pb.NetemRequest{
 				ContainerId: "containerd://container-id",
@@ -80,8 +80,8 @@ var _ = Describe("netem server", func() {
 			Expect(err.Error()).To(ContainSubstring(errorStr))
 		})
 
-		It("should fail on Apply", func() {
-			const errorStr = "mock error on Apply()"
+		It("should fail on applyNetem", func() {
+			const errorStr = "mock error on applyNetem()"
 			defer mock.With("NetemCancelError", errors.New(errorStr))()
 			_, err := s.DeleteNetem(context.TODO(), &pb.NetemRequest{
 				ContainerId: "containerd://container-id",

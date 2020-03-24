@@ -10,7 +10,7 @@ import (
 type toQdiscFunc func(*netlink.Handle, netlink.Link) netlink.Qdisc
 
 func applyQdisc(pid uint32, toQdisc toQdiscFunc) error {
-	log.Info("Apply qdisc on PID", "pid", pid)
+	log.Info("apply qdisc on PID", "pid", pid)
 
 	ns, err := netns.GetFromPath(GenNetnsPath(pid))
 	if err != nil {
@@ -46,7 +46,7 @@ func applyQdisc(pid uint32, toQdisc toQdiscFunc) error {
 
 func deleteQdisc(pid uint32, toQdisc toQdiscFunc) error {
 	// WARN: This will delete all qdisc on this interface
-	log.Info("Cancel qdisc on PID", "pid", pid)
+	log.Info("delete qdisc on PID", "pid", pid)
 
 	ns, err := netns.GetFromPath(GenNetnsPath(pid))
 	if err != nil {

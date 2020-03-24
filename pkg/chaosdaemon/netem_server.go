@@ -33,7 +33,7 @@ func (s *daemonServer) SetNetem(ctx context.Context, in *pb.NetemRequest) (*empt
 		return nil, status.Errorf(codes.Internal, "get pid from containerID error: %v", err)
 	}
 
-	if err := Apply(in.Netem, pid); err != nil {
+	if err := applyNetem(in.Netem, pid); err != nil {
 		return nil, status.Errorf(codes.Internal, "netem apply error: %v", err)
 	}
 
@@ -49,7 +49,7 @@ func (s *daemonServer) DeleteNetem(ctx context.Context, in *pb.NetemRequest) (*e
 		return nil, status.Errorf(codes.Internal, "get pid from containerID error: %v", err)
 	}
 
-	if err := Cancel(in.Netem, pid); err != nil {
+	if err := deleteNetem(in.Netem, pid); err != nil {
 		return nil, status.Errorf(codes.Internal, "netem cancel error: %v", err)
 	}
 

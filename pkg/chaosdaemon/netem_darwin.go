@@ -18,8 +18,7 @@ import (
 	"github.com/pingcap/chaos-mesh/pkg/mock"
 )
 
-// Apply applies a netem on eth0 in pid related namespace
-func Apply(netem *pb.Netem, pid uint32) error {
+func applyNetem(netem *pb.Netem, pid uint32) error {
 	// Mock point to return error in unit test
 	if err := mock.On("NetemApplyError"); err != nil {
 		if e, ok := err.(error); ok {
@@ -32,8 +31,7 @@ func Apply(netem *pb.Netem, pid uint32) error {
 	panic("unimplemented")
 }
 
-// Cancel will remove netem on eth0 in pid related namespace
-func Cancel(netem *pb.Netem, pid uint32) error {
+func deleteNetem(netem *pb.Netem, pid uint32) error {
 	// Mock point to return error in unit test
 	if err := mock.On("NetemCancelError"); err != nil {
 		if e, ok := err.(error); ok {
