@@ -14,9 +14,10 @@
 package chaosdaemon
 
 import (
+	"github.com/vishvananda/netlink"
+
 	pb "github.com/pingcap/chaos-mesh/pkg/chaosdaemon/pb"
 	"github.com/pingcap/chaos-mesh/pkg/mock"
-	"github.com/vishvananda/netlink"
 )
 
 func applyNetem(netem *pb.Netem, pid uint32) error {

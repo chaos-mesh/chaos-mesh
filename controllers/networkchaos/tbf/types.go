@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"reflect"
 	"strings"
 
 	"github.com/go-logr/logr"
@@ -29,11 +28,6 @@ import (
 const (
 	networkTbfActionMsg = "network tbf action duration %s"
 )
-
-// TbfSpec defines the interface to convert to a Tbf protobuf
-type TbfSpec interface {
-	ToTbf() (*pb.Tbf, error)
-}
 
 type Reconciler struct {
 	client.Client
@@ -137,10 +131,7 @@ func (r *Reconciler) applyPod(ctx context.Context, pod *v1.Pod, networkchaos *v1
 	action := string(networkchaos.Spec.Action)
 	action = strings.Title(action)
 
-	spec, ok := reflect.Indirect(reflect.ValueOf(networkchaos.Spec)).FieldByName(action).Interface().(TbfSpec)
-	if !ok {
-		return fmt.Errorf("spec %s is not a NetemSpec", action)
-	}
+	spec := networkchaos.Spec.Bandwidth
 
 	pbClient, err := utils.NewChaosDaemonClient(ctx, r.Client, pod, os.Getenv("CHAOS_DAEMON_PORT"))
 	if err != nil {
