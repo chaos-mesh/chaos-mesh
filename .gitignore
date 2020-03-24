@@ -20,3 +20,9 @@ vendor
 
 /images/chaos-dashboard/build
 node_modules
+
+output/
+_artifacts/
+
+test/image/e2e/chaos-mesh
+test/image/e2e/manifests/

@@ -184,6 +184,17 @@ generate: controller-gen
 yaml: manifests
 	kustomize build config/default > manifests/crd.yaml
 
+e2e-build:
+	$(GO) build -trimpath  -o test/image/e2e/bin/ginkgo github.com/onsi/ginkgo/ginkgo
+	$(GO) test -c  -o ./test/image/e2e/bin/e2e.test ./test/e2e
+
+e2e-docker: e2e-build
+	[ -d test/image/e2e/chaos-mesh ] && rm -r test/image/e2e/chaos-mesh || true
+	cp -r helm/chaos-mesh test/image/e2e
+	cp -r manifests test/image/e2e
+	docker build -t "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-mesh-e2e:latest" test/image/e2e
+
+
 install-kind:
 ifeq (,$(shell which kind))
 	@echo "installing kind"
