@@ -21,6 +21,7 @@ import (
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
+	chaosdaemon "github.com/pingcap/chaos-mesh/pkg/chaosdaemon/pb"
 	chaosdaemonpb "github.com/pingcap/chaos-mesh/pkg/chaosdaemon/pb"
 )
 
