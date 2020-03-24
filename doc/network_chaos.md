@@ -120,6 +120,8 @@ A Network Corrupt action causes packet corruption. To add a Network Corrupt acti
 ## Network Bandwidth Action
 
 Network Bandwidth Action is used to limit the network bandwidth. To add a Network Bandwidth Action, locale and edit the corresponding template in [/examples](../examples/network-bandwidth-example.yaml).
+
+Right now *minikube* doesn't support this feature as `CONFIG_NET_SCH_TBF` was disabled in minikube's image.
 > In this case, three action specific attributes are required - rate, buffer and limit.
 >
 >```yaml
@@ -132,4 +134,6 @@ Network Bandwidth Action is used to limit the network bandwidth. To add a Networ
 > **rate** allows bps, kbps, mbps, gbps, tbps unit. bps means bytes per second.
 > **limit** defines the number of bytes that can be queued waiting for tokens to become available.
 > **buffer** is the maximum amount of bytes that tokens can be available for instantaneously.
+> **peakrate** is the maximum depletion rate of the bucket.
+> **minburst** specifies the size of the peakrate bucket.
 
