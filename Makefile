@@ -153,7 +153,7 @@ image-chaos-dashboard: image-binary
 	docker build -t ${DOCKER_REGISTRY_PREFIX}pingcap/chaos-dashboard ${DOCKER_BUILD_ARGS} images/chaos-dashboard
 
 image-chaos-kernel:
-	docker build -t ${DOCKER_REGISTRY_PREFIX}pingcap/chaos-kernel ${DOCKER_BUILD_ARGS} images/chaos-kernel
+	docker build -t ${DOCKER_REGISTRY_PREFIX}pingcap/chaos-kernel ${DOCKER_BUILD_ARGS} --build-arg MAKE_JOBS=${MAKE_JOBS} images/chaos-kernel
 
 docker-push:
 	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-mesh:latest"
