@@ -67,7 +67,7 @@ var _ = Describe("TimeChaos", func() {
 				Mode:       v1alpha1.AllPodMode,
 				Value:      "0",
 				Selector:   v1alpha1.SelectorSpec{Namespaces: []string{metav1.NamespaceDefault}},
-				TimeOffset: v1alpha1.TimeOffset{},
+				TimeOffset: "0s0ns",
 				Duration:   &duration,
 				Scheduler:  nil,
 			},
