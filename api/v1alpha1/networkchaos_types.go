@@ -388,10 +388,10 @@ type BandwidthSpec struct {
 	Buffer uint32 `json:"buffer"`
 	// Peakrate is the maximum depletion rate of the bucket.
 	// +optional
-	Peakrate uint64 `json:"peakrate,omitempty"`
+	Peakrate *uint64 `json:"peakrate,omitempty"`
 	// Minburst specifies the size of the peakrate bucket.
 	// +optional
-	Minburst uint32 `json:"minburst,omitempty"`
+	Minburst *uint32 `json:"minburst,omitempty"`
 }
 
 func (spec *BandwidthSpec) ToTbf() (*chaosdaemon.Tbf, error) {
@@ -411,13 +411,20 @@ func (spec *BandwidthSpec) ToTbf() (*chaosdaemon.Tbf, error) {
 				rate = rate * 1024
 			}
 
-			return &chaosdaemon.Tbf{
+			tbf := &chaosdaemon.Tbf{
 				Rate:     rate,
 				Limit:    spec.Limit,
 				Buffer:   spec.Buffer,
-				PeakRate: spec.Peakrate,
-				MinBurst: spec.Minburst,
-			}, nil
+				PeakRate: *spec.Peakrate,
+				MinBurst: *spec.Minburst,
+			}
+
+			if spec.Peakrate != nil && spec.Minburst != nil {
+				tbf.PeakRate = *spec.Peakrate
+				tbf.MinBurst = *spec.Minburst
+			}
+
+			return tbf, nil
 		}
 	}
 
