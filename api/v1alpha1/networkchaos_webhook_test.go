@@ -29,6 +29,20 @@ var _ = Describe("networkchaos_webhook", func() {
 			Expect(networkchaos.Spec.Selector.Namespaces[0]).To(Equal(metav1.NamespaceDefault))
 			Expect(networkchaos.Spec.Target.TargetSelector.Namespaces[0]).To(Equal(metav1.NamespaceDefault))
 		})
+
+		It("set default DelaySpec", func() {
+			networkchaos := &NetworkChaos{
+				ObjectMeta: metav1.ObjectMeta{Namespace: metav1.NamespaceDefault},
+				Spec: NetworkChaosSpec{
+					Delay: &DelaySpec{
+						Latency: "90ms",
+					},
+				},
+			}
+			networkchaos.Default()
+			Expect(networkchaos.Spec.Delay.Correlation).To(Equal(DefaultCorrelation))
+			Expect(networkchaos.Spec.Delay.Jitter).To(Equal(DefaultJitter))
+		})
 	})
 	Context("ChaosValidator of networkchaos", func() {
 		It("Validate", func() {
