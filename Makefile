@@ -70,22 +70,22 @@ else
 endif
 
 # Build chaos-daemon binary
-chaosdaemon: generate fmt vet
+chaosdaemon: generate
 	$(CGOENV) go build -ldflags '$(LDFLAGS)' -o bin/chaos-daemon ./cmd/chaos-daemon/main.go
 
 # Build manager binary
-manager: generate fmt vet
+manager: generate
 	$(GO) build -ldflags '$(LDFLAGS)' -o bin/chaos-controller-manager ./cmd/controller-manager/*.go
 
-chaosfs: generate fmt vet
+chaosfs: generate
 	$(GO) build -ldflags '$(LDFLAGS)' -o bin/chaosfs ./cmd/chaosfs/*.go
 
-dashboard: fmt vet
+dashboard:
 	$(GO) build -ldflags '$(LDFLAGS)' -o bin/chaos-dashboard ./cmd/chaos-dashboard/*.go
 
 binary: chaosdaemon manager chaosfs dashboard
 
-watchmaker: fmt vet
+watchmaker:
 	$(CGOENV) go build -ldflags '$(LDFLAGS)' -o bin/watchmaker ./cmd/watchmaker/...
 
 dashboard-server-frontend:

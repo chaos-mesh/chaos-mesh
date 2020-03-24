@@ -2,3 +2,13 @@
 _tools
 bin
 */*/node_modules
+config
+cover.out*
+cover
+doc
+examples
+helm
+images
+manifests
+scripts
+static
