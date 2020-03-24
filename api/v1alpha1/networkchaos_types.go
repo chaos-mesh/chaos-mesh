@@ -386,11 +386,18 @@ type BandwidthSpec struct {
 	Limit uint32 `json:"limit"`
 	// Buffer is the maximum amount of bytes that tokens can be available for instantaneously.
 	Buffer uint32 `json:"buffer"`
+	// Peakrate is the maximum depletion rate of the bucket.
+	// +optional
+	Peakrate uint64 `json:"peakrate,omitempty"`
+	// Minburst specifies the size of the peakrate bucket.
+	// +optional
+	Minburst uint32 `json:"minburst,omitempty"`
 }
 
 func (spec *BandwidthSpec) ToTbf() (*chaosdaemon.Tbf, error) {
+	s := strings.ToLower(strings.TrimSpace(spec.Rate))
 	for i, u := range []string{"tbps", "gbps", "mbps", "kbps", "bps"} {
-		if strings.HasSuffix(strings.TrimSpace(spec.Rate), u) {
+		if strings.HasSuffix(s, u) {
 			ts := strings.TrimSuffix(spec.Rate, u)
 			s := strings.TrimSpace(ts)
 
@@ -405,9 +412,11 @@ func (spec *BandwidthSpec) ToTbf() (*chaosdaemon.Tbf, error) {
 			}
 
 			return &chaosdaemon.Tbf{
-				Rate:   rate,
-				Limit:  spec.Limit,
-				Buffer: spec.Buffer,
+				Rate:     rate,
+				Limit:    spec.Limit,
+				Buffer:   spec.Buffer,
+				PeakRate: spec.Peakrate,
+				MinBurst: spec.Minburst,
 			}, nil
 		}
 	}

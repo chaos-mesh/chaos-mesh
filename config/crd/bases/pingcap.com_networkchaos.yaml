@@ -53,6 +53,14 @@ spec:
                     for tokens to become available.
                   format: int32
                   type: integer
+                minburst:
+                  description: Minburst specifies the size of the peakrate bucket.
+                  format: int32
+                  type: integer
+                peakrate:
+                  description: Peakrate is the maximum depletion rate of the bucket.
+                  format: int64
+                  type: integer
                 rate:
                   description: Rate is the speed knob. Allows bps, kbps, mbps, gbps,
                     tbps unit. bps means bytes per second.
