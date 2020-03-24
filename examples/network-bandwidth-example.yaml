@@ -10,9 +10,11 @@ spec:
     labelSelectors:
       "app.kubernetes.io/component": "tikv"
   bandwidth:
-    rate: 10 kbps
-    buffer: 1000
+    rate: 100kbps
     limit: 100
+    buffer: 10000
+    peakrate: 1000000
+    minburst: 1000000
   duration: "10s"
   scheduler:
     cron: "@every 15s"
