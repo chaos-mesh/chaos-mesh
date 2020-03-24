@@ -50,12 +50,13 @@ spec:
                   type: integer
                 limit:
                   description: Limit is the number of bytes that can be queued waiting
-                    for  tokens to become available.
+                    for tokens to become available.
                   format: int32
                   type: integer
                 rate:
-                  description: Rate is the speed knob. see http://man7.org/linux/man-pages/man8/tc.8.html#PARAMETERS
-                    for units
+                  description: Rate is the speed knob. bps    Bytes per second kbps   Kilobytes
+                    per second mbps   Megabytes per second gbps   Gigabytes per second
+                    tbps   Terabytes per second
                   type: string
               required:
               - buffer
