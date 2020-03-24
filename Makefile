@@ -194,6 +194,7 @@ e2e-docker: e2e-build
 	cp -r manifests test/image/e2e
 	docker build -t "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-mesh-e2e:latest" test/image/e2e
 
+check: fmt vet lint
 
 install-kind:
 ifeq (,$(shell which kind))

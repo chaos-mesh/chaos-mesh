@@ -495,6 +495,8 @@ github.com/matttproud/golang_protobuf_extensions v1.0.1/go.mod h1:D8He9yQNgCq6Z5
 github.com/mesos/mesos-go v0.0.9/go.mod h1:kPYCMQ9gsOXVAle1OsoY4I1+9kPu8GHkf88aV59fDr4=
 github.com/mgechev/dots v0.0.0-20190921121421-c36f7dcfbb81 h1:QASJXOGm2RZ5Ardbc86qNFvby9AqkLDibfChMtAg5QM=
 github.com/mgechev/dots v0.0.0-20190921121421-c36f7dcfbb81/go.mod h1:KQ7+USdGKfpPjXk4Ga+5XxQM4Lm4e3gAogrreFAYpOg=
+github.com/mgechev/revive v1.0.2-0.20200225072153-6219ca02fffb h1:EabZ4SffLYB6FcYN8VDMk1TCMahjhEhEqKcOxBNbPmY=
+github.com/mgechev/revive v1.0.2-0.20200225072153-6219ca02fffb/go.mod h1:E9j8UNyHeYo/uUXIIUOAehxf5B69UwZ5u3qj7wEn8J0=
 github.com/mgechev/revive v1.0.2 h1:v0NxxQ7fSFz/u1NQydPo6EGdq7va0J1BtsZmae6kzUg=
 github.com/mgechev/revive v1.0.2/go.mod h1:rb0dQy1LVAxW9SWy5R3LPUjevzUbUS316U5MFySA2lo=
 github.com/mholt/certmagic v0.6.2-0.20190624175158-6a42ef9fe8c2/go.mod h1:g4cOPxcjV0oFq3qwpjSA30LReKD8AoIfwAY9VvG35NY=
@@ -930,6 +932,7 @@ golang.org/x/tools v0.0.0-20191029190741-b9c20aec41a5/go.mod h1:b+2E5dAYhXwXZwtn
 golang.org/x/tools v0.0.0-20191119224855-298f0cb1881e/go.mod h1:b+2E5dAYhXwXZwtnZ6UAqBI28+e2cm9otk0dWdXHAEo=
 golang.org/x/tools v0.0.0-20191130070609-6e064ea0cf2d/go.mod h1:b+2E5dAYhXwXZwtnZ6UAqBI28+e2cm9otk0dWdXHAEo=
 golang.org/x/tools v0.0.0-20200130002326-2f3ba24bd6e7/go.mod h1:TB2adYChydJhpapKDTa4BR/hXlZSLoq2Wpct/0txZ28=
+golang.org/x/tools v0.0.0-20200221224223-e1da425f72fd/go.mod h1:TB2adYChydJhpapKDTa4BR/hXlZSLoq2Wpct/0txZ28=
 golang.org/x/tools v0.0.0-20200225230052-807dcd883420/go.mod h1:TB2adYChydJhpapKDTa4BR/hXlZSLoq2Wpct/0txZ28=
 golang.org/x/tools v0.0.0-20200309202150-20ab64c0d93f h1:NbrfHxef+IfdI86qCgO/1Siq1BuMH2xG0NqgvCguRhQ=
 golang.org/x/tools v0.0.0-20200309202150-20ab64c0d93f/go.mod h1:o4KQGtdN14AW+yjsvvwRTJJuXz8XRtIHtEnmAXLyFUw=
