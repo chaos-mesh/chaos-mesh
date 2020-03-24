@@ -566,9 +566,8 @@ spec:
                   format: int32
                   type: integer
                 rate:
-                  description: Rate is the speed knob. bps    Bytes per second kbps   Kilobytes
-                    per second mbps   Megabytes per second gbps   Gigabytes per second
-                    tbps   Terabytes per second
+                  description: Rate is the speed knob. Allows bps, kbps, mbps, gbps,
+                    tbps unit. bps means bytes per second.
                   type: string
               required:
               - buffer

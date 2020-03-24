@@ -380,12 +380,7 @@ func (corrupt *CorruptSpec) ToNetem() (*chaosdaemonpb.Netem, error) {
 
 // BandwidthSpec defines details of bandwidth limit.
 type BandwidthSpec struct {
-	// Rate is the speed knob.
-	// bps    Bytes per second
-	// kbps   Kilobytes per second
-	// mbps   Megabytes per second
-	// gbps   Gigabytes per second
-	// tbps   Terabytes per second
+	// Rate is the speed knob. Allows bps, kbps, mbps, gbps, tbps unit. bps means bytes per second.
 	Rate string `json:"rate"`
 	// Limit is the number of bytes that can be queued waiting for tokens to become available.
 	Limit uint32 `json:"limit"`
