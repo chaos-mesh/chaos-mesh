@@ -11,8 +11,6 @@ import (
 	proto "github.com/golang/protobuf/proto"
 	empty "github.com/golang/protobuf/ptypes/empty"
 	grpc "google.golang.org/grpc"
-	codes "google.golang.org/grpc/codes"
-	status "google.golang.org/grpc/status"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -803,9 +801,7 @@ func init() {
 	proto.RegisterType((*ContainerAction)(nil), "chaosdaemon.ContainerAction")
 }
 
-func init() {
-	proto.RegisterFile("chaosdaemon.proto", fileDescriptor_143136706133b591)
-}
+func init() { proto.RegisterFile("chaosdaemon.proto", fileDescriptor_143136706133b591) }
 
 var fileDescriptor_143136706133b591 = []byte{
 	// 885 bytes of a gzipped FileDescriptorProto
@@ -869,11 +865,11 @@ var fileDescriptor_143136706133b591 = []byte{
 
 // Reference imports to suppress errors if they are not otherwise used.
 var _ context.Context
-var _ grpc.ClientConnInterface
+var _ grpc.ClientConn
 
 // This is a compile-time assertion to ensure that this generated file
 // is compatible with the grpc package it is being compiled against.
-const _ = grpc.SupportPackageIsVersion6
+const _ = grpc.SupportPackageIsVersion4
 
 // ChaosDaemonClient is the client API for ChaosDaemon service.
 //
@@ -892,10 +888,10 @@ type ChaosDaemonClient interface {
 }
 
 type chaosDaemonClient struct {
-	cc grpc.ClientConnInterface
+	cc *grpc.ClientConn
 }
 
-func NewChaosDaemonClient(cc grpc.ClientConnInterface) ChaosDaemonClient {
+func NewChaosDaemonClient(cc *grpc.ClientConn) ChaosDaemonClient {
 	return &chaosDaemonClient{cc}
 }
 
@@ -1001,41 +997,6 @@ type ChaosDaemonServer interface {
 	RecoverTimeOffset(context.Context, *TimeRequest) (*empty.Empty, error)
 	ContainerKill(context.Context, *ContainerRequest) (*empty.Empty, error)
 	ContainerGetPid(context.Context, *ContainerRequest) (*ContainerResponse, error)
-}
-
-// UnimplementedChaosDaemonServer can be embedded to have forward compatible implementations.
-type UnimplementedChaosDaemonServer struct {
-}
-
-func (*UnimplementedChaosDaemonServer) SetNetem(ctx context.Context, req *NetemRequest) (*empty.Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method SetNetem not implemented")
-}
-func (*UnimplementedChaosDaemonServer) DeleteNetem(ctx context.Context, req *NetemRequest) (*empty.Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method DeleteNetem not implemented")
-}
-func (*UnimplementedChaosDaemonServer) SetTbf(ctx context.Context, req *TbfRequest) (*empty.Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method SetTbf not implemented")
-}
-func (*UnimplementedChaosDaemonServer) DeleteTbf(ctx context.Context, req *TbfRequest) (*empty.Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method DeleteTbf not implemented")
-}
-func (*UnimplementedChaosDaemonServer) FlushIpSet(ctx context.Context, req *IpSetRequest) (*empty.Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method FlushIpSet not implemented")
-}
-func (*UnimplementedChaosDaemonServer) FlushIptables(ctx context.Context, req *IpTablesRequest) (*empty.Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method FlushIptables not implemented")
-}
-func (*UnimplementedChaosDaemonServer) SetTimeOffset(ctx context.Context, req *TimeRequest) (*empty.Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method SetTimeOffset not implemented")
-}
-func (*UnimplementedChaosDaemonServer) RecoverTimeOffset(ctx context.Context, req *TimeRequest) (*empty.Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method RecoverTimeOffset not implemented")
-}
-func (*UnimplementedChaosDaemonServer) ContainerKill(ctx context.Context, req *ContainerRequest) (*empty.Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ContainerKill not implemented")
-}
-func (*UnimplementedChaosDaemonServer) ContainerGetPid(ctx context.Context, req *ContainerRequest) (*ContainerResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ContainerGetPid not implemented")
 }
 
 func RegisterChaosDaemonServer(s *grpc.Server, srv ChaosDaemonServer) {
