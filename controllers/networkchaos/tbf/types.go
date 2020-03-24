@@ -132,7 +132,7 @@ func (r *Reconciler) applyAllPods(ctx context.Context, pods []v1.Pod, networkcha
 }
 
 func (r *Reconciler) applyPod(ctx context.Context, pod *v1.Pod, networkchaos *v1alpha1.NetworkChaos) error {
-	r.Log.Info("Try to apply netem on pod", "namespace", pod.Namespace, "name", pod.Name)
+	r.Log.Info("Try to apply tbf on pod", "namespace", pod.Namespace, "name", pod.Name)
 
 	action := string(networkchaos.Spec.Action)
 	action = strings.Title(action)
