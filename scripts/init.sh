@@ -22,7 +22,7 @@ EXAMPLES:
 EOF
 }
 
-while getopts h:d:f: o
+while getopts h:d:f:p: o
 do	case "$o" in
 	h)      usage
             exit 1;;
