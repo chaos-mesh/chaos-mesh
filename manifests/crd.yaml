@@ -612,8 +612,6 @@ spec:
                   - reorder
                   type: object
               required:
-              - correlation
-              - jitter
               - latency
               type: object
             direction:

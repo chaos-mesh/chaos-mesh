@@ -266,8 +266,8 @@ func (in *NetworkChaos) GetScheduler() *SchedulerSpec {
 // DelaySpec defines detail of a delay action
 type DelaySpec struct {
 	Latency     string       `json:"latency"`
-	Correlation string       `json:"correlation"`
-	Jitter      string       `json:"jitter"`
+	Correlation string       `json:"correlation,omitempty"`
+	Jitter      string       `json:"jitter,omitempty"`
 	Reorder     *ReorderSpec `json:"reorder,omitempty"`
 }
 

@@ -23,6 +23,14 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
 )
 
+const (
+	// DefaultJitter defines default value for jitter
+	DefaultJitter = "0ms"
+
+	// DefaultCorrelation defines default value for correlation
+	DefaultCorrelation = "0"
+)
+
 // log is for logging in this package.
 var networkchaoslog = logf.Log.WithName("networkchaos-resource")
 
@@ -44,6 +52,20 @@ func (in *NetworkChaos) Default() {
 	in.Spec.Selector.DefaultNamespace(in.GetNamespace())
 	// the target's namespace selector
 	in.Spec.Target.TargetSelector.DefaultNamespace(in.GetNamespace())
+
+	in.Spec.DefaultDelay()
+}
+
+// DefaultDelay set the default value if Jitter or Correlation is not set
+func (in *NetworkChaosSpec) DefaultDelay() {
+	if in.Delay != nil {
+		if in.Delay.Jitter == "" {
+			in.Delay.Jitter = DefaultJitter
+		}
+		if in.Delay.Correlation == "" {
+			in.Delay.Correlation = DefaultCorrelation
+		}
+	}
 }
 
 // +kubebuilder:webhook:verbs=create;update,path=/validate-pingcap-com-v1alpha1-networkchaos,mutating=false,failurePolicy=fail,groups=pingcap.com,resources=networkchaos,versions=v1alpha1,name=vnetworkchaos.kb.io
