@@ -21,7 +21,6 @@ import (
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	chaosdaemon "github.com/pingcap/chaos-mesh/pkg/chaosdaemon/pb"
 	chaosdaemonpb "github.com/pingcap/chaos-mesh/pkg/chaosdaemon/pb"
 )
 
@@ -394,7 +393,7 @@ type BandwidthSpec struct {
 	Minburst *uint32 `json:"minburst,omitempty"`
 }
 
-func (spec *BandwidthSpec) ToTbf() (*chaosdaemon.Tbf, error) {
+func (spec *BandwidthSpec) ToTbf() (*chaosdaemonpb.Tbf, error) {
 	s := strings.ToLower(strings.TrimSpace(spec.Rate))
 	for i, u := range []string{"tbps", "gbps", "mbps", "kbps", "bps"} {
 		if strings.HasSuffix(s, u) {
@@ -411,7 +410,7 @@ func (spec *BandwidthSpec) ToTbf() (*chaosdaemon.Tbf, error) {
 				rate = rate * 1024
 			}
 
-			tbf := &chaosdaemon.Tbf{
+			tbf := &chaosdaemonpb.Tbf{
 				Rate:   rate,
 				Limit:  spec.Limit,
 				Buffer: spec.Buffer,
