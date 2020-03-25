@@ -5,16 +5,18 @@ set -eo pipefail
 DATADIR=""
 FUSEDIR=""
 SCRIPTSDIR="/tmp/scripts"
+PIDFILE="/tmp/fuse/pid"
 
 usage() {
 cat << EOF
 USAGE: $0 [-d data directory] [-f fuse directory]
 Used to do some preparation
 OPTIONS:
-   -h                      Show this message
-   -d <data directory>     Data directory of the application
-   -f <fuse directory>     Data directory of the fuse original directory
-   -s <scripts directory>  Scripts directory
+   -h                        Show this message
+   -d <data directory>       Data directory of the application
+   -f <fuse directory>       Data directory of the fuse original directory
+   -s <scripts directory>    Scripts directory
+   -p <fuse pidfile>         The pid file of fuse server
 EXAMPLES:
    init.sh -d /var/lib/tikv/data -f /var/lib/tikv/fuse-data
 EOF
@@ -26,6 +28,7 @@ do	case "$o" in
             exit 1;;
 	d)      DATADIR=$OPTARG;;
 	f)      FUSEDIR=$OPTARG;;
+	p)      PIDFILE=$OPTARG;;
 	[?])	usage
 		exit 1;;
 	esac
@@ -55,6 +58,11 @@ copy_scripts() {
 
   echo "cp -R /scripts/* ${1}/"
   cp -R /scripts/* ${1}/
+}
+
+clean_fuse_pidfile() {
+   echo "clean fuse pidfile ${1}"
+   rm -rf ${1}
 }
 
 copy_scripts ${SCRIPTSDIR}

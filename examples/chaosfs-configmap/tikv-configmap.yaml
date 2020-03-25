@@ -16,7 +16,7 @@ data:
     - name: inject-scripts
       image: pingcap/chaos-scripts:latest
       imagePullpolicy: Always
-      command: ["sh", "-c", "/scripts/init.sh -d /var/lib/tikv/data -f /var/lib/tikv/fuse-data"]
+      command: ["sh", "-c", "/scripts/init.sh -d /var/lib/tikv/data -f /var/lib/tikv/fuse-data -p /tmp/fuse/pid"]
     containers:
     - name: chaosfs
       image: pingcap/chaos-fs:latest

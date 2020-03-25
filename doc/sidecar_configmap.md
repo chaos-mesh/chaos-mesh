@@ -32,7 +32,7 @@ data:
     - name: inject-scripts
       image: pingcap/chaos-scripts:latest
       imagePullpolicy: Always
-      command: ["sh", "-c", "/scripts/init.sh -d /var/lib/tikv/data -f /var/lib/tikv/fuse-data"]
+      command: ["sh", "-c", "/scripts/init.sh -d /var/lib/tikv/data -f /var/lib/tikv/fuse-data -p /tmp/fuse/pid"]
     containers:
     - name: chaosfs
       image: pingcap/chaos-fs:latest
@@ -160,6 +160,7 @@ OPTIONS:
    -d <data directory>     Data directory of the application
    -f <fuse directory>     Data directory of the fuse original directory
    -s <scripts directory>  Scripts directory
+   -p <fuse pidfile>       Pidfile of fuse server
 EXAMPLES:
    init.sh -d /var/lib/tikv/data -f /var/lib/tikv/fuse-data
 ```
