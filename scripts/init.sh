@@ -68,3 +68,5 @@ clean_fuse_pidfile() {
 copy_scripts ${SCRIPTSDIR}
 
 mkdir_dir ${DATADIR} ${FUSEDIR}
+
+clean_fuse_pidfile ${PIDFILE}
