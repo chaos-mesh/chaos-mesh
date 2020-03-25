@@ -71,22 +71,22 @@ else
 endif
 
 # Build chaos-daemon binary
-chaosdaemon: generate fmt vet
+chaosdaemon: generate
 	$(CGOENV) go build -ldflags '$(LDFLAGS)' -o bin/chaos-daemon ./cmd/chaos-daemon/main.go
 
 # Build manager binary
-manager: generate fmt vet
+manager: generate
 	$(GO) build -ldflags '$(LDFLAGS)' -o bin/chaos-controller-manager ./cmd/controller-manager/*.go
 
-chaosfs: generate fmt vet
+chaosfs: generate
 	$(GO) build -ldflags '$(LDFLAGS)' -o bin/chaosfs ./cmd/chaosfs/*.go
 
-dashboard: fmt vet
+dashboard:
 	$(GO) build -ldflags '$(LDFLAGS)' -o bin/chaos-dashboard ./cmd/chaos-dashboard/*.go
 
 binary: chaosdaemon manager chaosfs dashboard
 
-watchmaker: fmt vet
+watchmaker:
 	$(CGOENV) go build -ldflags '$(LDFLAGS)' -o bin/watchmaker ./cmd/watchmaker/...
 
 dashboard-server-frontend:
@@ -153,7 +153,7 @@ image-chaos-dashboard: image-binary
 	docker build -t ${DOCKER_REGISTRY_PREFIX}pingcap/chaos-dashboard ${DOCKER_BUILD_ARGS} images/chaos-dashboard
 
 image-chaos-kernel:
-	docker build -t ${DOCKER_REGISTRY_PREFIX}pingcap/chaos-kernel ${DOCKER_BUILD_ARGS} images/chaos-kernel
+	docker build -t ${DOCKER_REGISTRY_PREFIX}pingcap/chaos-kernel ${DOCKER_BUILD_ARGS} --build-arg MAKE_JOBS=${MAKE_JOBS} images/chaos-kernel
 
 docker-push:
 	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-mesh:latest"
@@ -194,6 +194,7 @@ e2e-docker: e2e-build
 	cp -r manifests test/image/e2e
 	docker build -t "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-mesh-e2e:latest" test/image/e2e
 
+check: fmt vet lint
 
 install-kind:
 ifeq (,$(shell which kind))
