@@ -8,9 +8,7 @@ spec:
   selector:
     labelSelectors:
       "app.kubernetes.io/component": "tikv"
-  timeOffset:
-    sec: 100000
-    nsec: 100000
+  timeOffset: "-10m100ns"
   duration: "30s"
   scheduler:
     cron: "@every 1m"

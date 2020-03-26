@@ -134,18 +134,11 @@ spec:
                   type: object
               type: object
             timeOffset:
-              description: TimeOffset defines the delta time of injected program
-              properties:
-                nsec:
-                  format: int64
-                  type: integer
-                sec:
-                  format: int64
-                  type: integer
-              required:
-              - nsec
-              - sec
-              type: object
+              description: TimeOffset defines the delta time of injected program.
+                It's a possibly signed sequence of decimal numbers, such as "300ms",
+                "-1.5h" or "2h45m". Valid time units are "ns", "us" (or "µs"), "ms",
+                "s", "m", "h".
+              type: string
             value:
               description: Value is required when the mode is set to `FixedPodMode`
                 / `FixedPercentPodMod` / `RandomMaxPercentPodMod`. If `FixedPodMode`,
