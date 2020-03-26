@@ -399,6 +399,10 @@ type BandwidthSpec struct {
 	Minburst *uint32 `json:"minburst,omitempty"`
 }
 
+// Bandwidth action use TBF under the hood.
+// TBF stands for Token Bucket Filter, is a classful queueing discipline available
+// for traffic control with the tc command.
+// http://man7.org/linux/man-pages/man8/tc-tbf.8.html
 func (spec *BandwidthSpec) ToTbf() (*chaosdaemonpb.Tbf, error) {
 	rate, err := convertUnitToBytes(spec.Rate)
 
