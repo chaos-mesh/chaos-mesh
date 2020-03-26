@@ -139,6 +139,7 @@ type NetworkChaosSpec struct {
 	Corrupt *CorruptSpec `json:"corrupt,omitempty"`
 
 	// Bandwidth represents the detail about bandwidth control action
+	// +optional
 	Bandwidth *BandwidthSpec `json:"bandwidth,omitempty"`
 
 	// Direction represents the partition direction
@@ -431,7 +432,7 @@ func convertUnitToBytes(nu string) (uint64, error) {
 
 	for i, u := range []string{"tbps", "gbps", "mbps", "kbps", "bps"} {
 		if strings.HasSuffix(s, u) {
-			ts := strings.TrimSuffix(nu, u)
+			ts := strings.TrimSuffix(s, u)
 			s := strings.TrimSpace(ts)
 
 			n, err := strconv.ParseUint(s, 10, 64)
