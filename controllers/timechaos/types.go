@@ -291,8 +291,7 @@ func (r *Reconciler) applyContainer(ctx context.Context, client chaosdaemon.Chao
 		return err
 	}
 
-	sec := duration.Nanoseconds() / 1e9
-	nsec := duration.Nanoseconds() - (sec * 1e9)
+	sec, nsec := secAndNSecFromDuration(duration)
 
 	r.Log.Info("setting time shift", "mask", mask, "sec", sec, "nsec", nsec)
 	_, err = client.SetTimeOffset(ctx, &chaosdaemon.TimeRequest{
@@ -303,4 +302,11 @@ func (r *Reconciler) applyContainer(ctx context.Context, client chaosdaemon.Chao
 	})
 
 	return err
+}
+
+func secAndNSecFromDuration(duration time.Duration) (int64, int64) {
+	sec := duration.Nanoseconds() / 1e9
+	nsec := duration.Nanoseconds() - (sec * 1e9)
+
+	return sec, nsec
 }
