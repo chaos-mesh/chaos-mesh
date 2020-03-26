@@ -399,6 +399,7 @@ type BandwidthSpec struct {
 	Minburst *uint32 `json:"minburst,omitempty"`
 }
 
+// ToTbf converts BandwidthSpec to *chaosdaemonpb.Tbf
 // Bandwidth action use TBF under the hood.
 // TBF stands for Token Bucket Filter, is a classful queueing discipline available
 // for traffic control with the tc command.
