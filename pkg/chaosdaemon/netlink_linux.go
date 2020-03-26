@@ -1,3 +1,16 @@
+// Copyright 2019 PingCAP, Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package chaosdaemon
 
 import (
@@ -10,7 +23,7 @@ import (
 type toQdiscFunc func(*netlink.Handle, netlink.Link) netlink.Qdisc
 
 func applyQdisc(pid uint32, toQdisc toQdiscFunc) error {
-	log.Info("apply qdisc on PID", "pid", pid)
+	log.Info("Apply qdisc on PID", "pid", pid)
 
 	ns, err := netns.GetFromPath(GenNetnsPath(pid))
 	if err != nil {
@@ -46,7 +59,7 @@ func applyQdisc(pid uint32, toQdisc toQdiscFunc) error {
 
 func deleteQdisc(pid uint32, toQdisc toQdiscFunc) error {
 	// WARN: This will delete all qdisc on this interface
-	log.Info("delete qdisc on PID", "pid", pid)
+	log.Info("Delete qdisc on PID", "pid", pid)
 
 	ns, err := netns.GetFromPath(GenNetnsPath(pid))
 	if err != nil {
@@ -90,7 +103,6 @@ func deleteQdisc(pid uint32, toQdisc toQdiscFunc) error {
 	return nil
 }
 
-// TODO(vincent178): this is ok if we only apply either netem or tbf, revisit this if we want both working
 func qdiscExists(qdisc netlink.Qdisc, handler *netlink.Handle, link netlink.Link) (bool, error) {
 	qds, err := handler.QdiscList(link)
 	if err != nil {

@@ -400,38 +400,51 @@ type BandwidthSpec struct {
 }
 
 func (spec *BandwidthSpec) ToTbf() (*chaosdaemonpb.Tbf, error) {
-	s := strings.ToLower(strings.TrimSpace(spec.Rate))
+	rate, err := convertUnitToBytes(spec.Rate)
+
+	if err != nil {
+		return nil, err
+	}
+
+	tbf := &chaosdaemonpb.Tbf{
+		Rate:   rate,
+		Limit:  spec.Limit,
+		Buffer: spec.Buffer,
+	}
+
+	if spec.Peakrate != nil && spec.Minburst != nil {
+		tbf.PeakRate = *spec.Peakrate
+		tbf.MinBurst = *spec.Minburst
+	}
+
+	return tbf, nil
+}
+
+func convertUnitToBytes(nu string) (uint64, error) {
+	// normalize input
+	s := strings.ToLower(strings.TrimSpace(nu))
+
 	for i, u := range []string{"tbps", "gbps", "mbps", "kbps", "bps"} {
 		if strings.HasSuffix(s, u) {
-			ts := strings.TrimSuffix(spec.Rate, u)
+			ts := strings.TrimSuffix(nu, u)
 			s := strings.TrimSpace(ts)
 
-			rate, err := strconv.ParseUint(s, 10, 64)
+			n, err := strconv.ParseUint(s, 10, 64)
+
 			if err != nil {
-				return nil, err
+				return 0, err
 			}
 
 			// convert unit to bytes
 			for i := 4 - i; i > 0; i-- {
-				rate = rate * 1024
+				n = n * 1024
 			}
 
-			tbf := &chaosdaemonpb.Tbf{
-				Rate:   rate,
-				Limit:  spec.Limit,
-				Buffer: spec.Buffer,
-			}
-
-			if spec.Peakrate != nil && spec.Minburst != nil {
-				tbf.PeakRate = *spec.Peakrate
-				tbf.MinBurst = *spec.Minburst
-			}
-
-			return tbf, nil
+			return n, nil
 		}
 	}
 
-	return nil, errors.New("invalid rate unit")
+	return 0, errors.New("invalid unit")
 }
 
 // ReorderSpec defines details of packet reorder.

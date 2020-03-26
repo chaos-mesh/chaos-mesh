@@ -16,11 +16,8 @@ package networkchaos
 import (
 	"fmt"
 
-	"github.com/pingcap/chaos-mesh/controllers/networkchaos/tbf"
-
-	"k8s.io/client-go/tools/record"
-
 	"github.com/go-logr/logr"
+	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -28,6 +25,7 @@ import (
 	"github.com/pingcap/chaos-mesh/controllers/common"
 	"github.com/pingcap/chaos-mesh/controllers/networkchaos/netem"
 	"github.com/pingcap/chaos-mesh/controllers/networkchaos/partition"
+	"github.com/pingcap/chaos-mesh/controllers/networkchaos/tbf"
 	"github.com/pingcap/chaos-mesh/controllers/twophase"
 )
 
