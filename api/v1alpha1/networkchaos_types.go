@@ -383,8 +383,10 @@ type BandwidthSpec struct {
 	// Rate is the speed knob. Allows bps, kbps, mbps, gbps, tbps unit. bps means bytes per second.
 	Rate string `json:"rate"`
 	// Limit is the number of bytes that can be queued waiting for tokens to become available.
+	// +kubebuilder:validation:Minimum=1
 	Limit uint32 `json:"limit"`
 	// Buffer is the maximum amount of bytes that tokens can be available for instantaneously.
+	// +kubebuilder:validation:Minimum=1
 	Buffer uint32 `json:"buffer"`
 	// Peakrate is the maximum depletion rate of the bucket.
 	// The peakrate does not need to be set, it is only necessary

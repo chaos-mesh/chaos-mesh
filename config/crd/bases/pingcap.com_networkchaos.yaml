@@ -47,11 +47,13 @@ spec:
                   description: Buffer is the maximum amount of bytes that tokens can
                     be available for instantaneously.
                   format: int32
+                  minimum: 1
                   type: integer
                 limit:
                   description: Limit is the number of bytes that can be queued waiting
                     for tokens to become available.
                   format: int32
+                  minimum: 1
                   type: integer
                 minburst:
                   description: Minburst specifies the size of the peakrate bucket.
