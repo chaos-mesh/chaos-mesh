@@ -304,9 +304,9 @@ func (r *Reconciler) applyContainer(ctx context.Context, client chaosdaemon.Chao
 	return err
 }
 
-func secAndNSecFromDuration(duration time.Duration) (int64, int64) {
-	sec := duration.Nanoseconds() / 1e9
-	nsec := duration.Nanoseconds() - (sec * 1e9)
+func secAndNSecFromDuration(duration time.Duration) (sec int64, nsec int64) {
+	sec = duration.Nanoseconds() / 1e9
+	nsec = duration.Nanoseconds() - (sec * 1e9)
 
-	return sec, nsec
+	return
 }
