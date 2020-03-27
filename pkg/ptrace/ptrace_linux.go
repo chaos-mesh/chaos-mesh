@@ -187,7 +187,7 @@ func Trace(pid int) (*TracedProgram, error) {
 	return program, nil
 }
 
-// Detach detaches from all threads of the processs
+// Detach detaches from all threads of the processes
 func (p *TracedProgram) Detach() error {
 	for _, tid := range p.tids {
 		log.Info("detaching", "tid", tid)
