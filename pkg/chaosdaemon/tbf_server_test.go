@@ -29,11 +29,11 @@ var _ = Describe("netem server", func() {
 	c, _ := CreateContainerRuntimeInfoClient(containerRuntimeContainerd)
 	s := &daemonServer{c}
 
-	Context("SetNetem", func() {
+	Context("SetTbf", func() {
 		It("should work", func() {
 			const ignore = true
-			defer mock.With("NetemApplyError", ignore)()
-			_, err := s.SetNetem(context.TODO(), &pb.NetemRequest{
+			defer mock.With("TbfApplyError", ignore)()
+			_, err := s.SetTbf(context.TODO(), &pb.TbfRequest{
 				ContainerId: "containerd://container-id",
 			})
 			Expect(err).To(BeNil())
@@ -42,7 +42,7 @@ var _ = Describe("netem server", func() {
 		It("should fail on get pid", func() {
 			const errorStr = "mock error on Task()"
 			defer mock.With("TaskError", errors.New(errorStr))()
-			_, err := s.SetNetem(context.TODO(), &pb.NetemRequest{
+			_, err := s.SetTbf(context.TODO(), &pb.TbfRequest{
 				ContainerId: "containerd://container-id",
 			})
 			Expect(err).ToNot(BeNil())
@@ -51,8 +51,8 @@ var _ = Describe("netem server", func() {
 
 		It("should fail on applyNetem", func() {
 			const errorStr = "mock error on applyNetem()"
-			defer mock.With("NetemApplyError", errors.New(errorStr))()
-			_, err := s.SetNetem(context.TODO(), &pb.NetemRequest{
+			defer mock.With("TbfApplyError", errors.New(errorStr))()
+			_, err := s.SetTbf(context.TODO(), &pb.TbfRequest{
 				ContainerId: "containerd://container-id",
 			})
 			Expect(err).ToNot(BeNil())
@@ -60,11 +60,11 @@ var _ = Describe("netem server", func() {
 		})
 	})
 
-	Context("DeleteNetem", func() {
+	Context("DeleteTbf", func() {
 		It("should work", func() {
 			const ignore = true
-			defer mock.With("NetemCancelError", ignore)()
-			_, err := s.DeleteNetem(context.TODO(), &pb.NetemRequest{
+			defer mock.With("TbfDeleteError", ignore)()
+			_, err := s.DeleteTbf(context.TODO(), &pb.TbfRequest{
 				ContainerId: "containerd://container-id",
 			})
 			Expect(err).To(BeNil())
@@ -73,7 +73,7 @@ var _ = Describe("netem server", func() {
 		It("should fail on get pid", func() {
 			const errorStr = "mock error on Task()"
 			defer mock.With("TaskError", errors.New(errorStr))()
-			_, err := s.DeleteNetem(context.TODO(), &pb.NetemRequest{
+			_, err := s.DeleteTbf(context.TODO(), &pb.TbfRequest{
 				ContainerId: "containerd://container-id",
 			})
 			Expect(err).ToNot(BeNil())
@@ -82,8 +82,8 @@ var _ = Describe("netem server", func() {
 
 		It("should fail on applyNetem", func() {
 			const errorStr = "mock error on applyNetem()"
-			defer mock.With("NetemCancelError", errors.New(errorStr))()
-			_, err := s.DeleteNetem(context.TODO(), &pb.NetemRequest{
+			defer mock.With("TbfDeleteError", errors.New(errorStr))()
+			_, err := s.DeleteTbf(context.TODO(), &pb.TbfRequest{
 				ContainerId: "containerd://container-id",
 			})
 			Expect(err).ToNot(BeNil())
