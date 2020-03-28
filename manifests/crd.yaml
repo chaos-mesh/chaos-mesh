@@ -77,6 +77,12 @@ spec:
             mode:
               description: 'Mode defines the mode to run chaos action. Supported mode:
                 one / all / fixed / fixed-percent / random-max-percent'
+              enum:
+              - one
+              - all
+              - fixed
+              - fixed-percent
+              - random-max-percent
               type: string
             nextRecover:
               description: Next time when this action will be recovered.
@@ -350,6 +356,12 @@ spec:
             mode:
               description: 'Mode defines the mode to run chaos action. Supported mode:
                 one / all / fixed / fixed-percent / random-max-percent'
+              enum:
+              - one
+              - all
+              - fixed
+              - fixed-percent
+              - random-max-percent
               type: string
             nextRecover:
               description: Next time when this action will be recovered
@@ -619,6 +631,12 @@ spec:
             mode:
               description: 'Mode defines the mode to run chaos action. Supported mode:
                 one / all / fixed / fixed-percent / random-max-percent'
+              enum:
+              - one
+              - all
+              - fixed
+              - fixed-percent
+              - random-max-percent
               type: string
             nextRecover:
               description: Next time when this action will be recovered
@@ -915,6 +933,12 @@ spec:
             mode:
               description: 'Mode defines the mode to run chaos action. Supported mode:
                 one / all / fixed / fixed-percent / random-max-percent'
+              enum:
+              - one
+              - all
+              - fixed
+              - fixed-percent
+              - random-max-percent
               type: string
             nextRecover:
               description: Next time when this action will be recovered
@@ -1132,6 +1156,12 @@ spec:
             mode:
               description: 'Mode defines the mode to run chaos action. Supported mode:
                 one / all / fixed / fixed-percent / random-max-percent'
+              enum:
+              - one
+              - all
+              - fixed
+              - fixed-percent
+              - random-max-percent
               type: string
             nextRecover:
               description: Next time when this action will be recovered
