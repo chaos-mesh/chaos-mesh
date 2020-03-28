@@ -50,8 +50,9 @@ type TimeChaosSpec struct {
 	// Selector is used to select pods that are used to inject chaos action.
 	Selector SelectorSpec `json:"selector"`
 
-	// TimeOffset defines the delta time of injected program
-	TimeOffset TimeOffset `json:"timeOffset"`
+	// TimeOffset defines the delta time of injected program. It's a possibly signed sequence of decimal numbers, such as
+	// "300ms", "-1.5h" or "2h45m". Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
+	TimeOffset string `json:"timeOffset"`
 
 	// ClockIds defines all affected clock id
 	// All available options are ["CLOCK_REALTIME","CLOCK_MONOTONIC","CLOCK_PROCESS_CPUTIME_ID","CLOCK_THREAD_CPUTIME_ID",
@@ -100,15 +101,6 @@ func (in *TimeChaosSpec) GetMode() PodMode {
 // GetValue is a getter for Value (for implementing SelectSpec)
 func (in *TimeChaosSpec) GetValue() string {
 	return in.Value
-}
-
-// TimeOffset defines the delta time of injected program
-// As `clock_gettime` return a struct contains two field: `tv_sec` and `tv_nsec`.
-// `Sec` is the offset of seconds, corresponding to `tv_sec` field.
-// `NSec` is the offset of nanoseconds, corresponding to `tv_nsec` field.
-type TimeOffset struct {
-	Sec  int64 `json:"sec"`
-	NSec int64 `json:"nsec"`
 }
 
 // TimeChaosStatus defines the observed state of TimeChaos

@@ -14,7 +14,9 @@
 package v1alpha1
 
 import (
+	"errors"
 	"strconv"
+	"strings"
 	"time"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -47,6 +49,9 @@ const (
 
 	// PartitionAction represents the chaos action of network partition of pods.
 	PartitionAction NetworkChaosAction = "partition"
+
+	// BandwidthAction represents the chaos action of network bandwidth of pods.
+	BandwidthAction NetworkChaosAction = "bandwidth"
 )
 
 // PartitionDirection represents the block direction from source to target
@@ -132,6 +137,10 @@ type NetworkChaosSpec struct {
 
 	// Corrupt represents the detail about corrupt action
 	Corrupt *CorruptSpec `json:"corrupt,omitempty"`
+
+	// Bandwidth represents the detail about bandwidth control action
+	// +optional
+	Bandwidth *BandwidthSpec `json:"bandwidth,omitempty"`
 
 	// Direction represents the partition direction
 	// +optional
@@ -373,6 +382,83 @@ func (corrupt *CorruptSpec) ToNetem() (*chaosdaemonpb.Netem, error) {
 		Corrupt:     float32(corruptPercentage),
 		CorruptCorr: float32(corr),
 	}, nil
+}
+
+// BandwidthSpec defines detail of bandwidth limit.
+type BandwidthSpec struct {
+	// Rate is the speed knob. Allows bps, kbps, mbps, gbps, tbps unit. bps means bytes per second.
+	Rate string `json:"rate"`
+	// Limit is the number of bytes that can be queued waiting for tokens to become available.
+	// +kubebuilder:validation:Minimum=1
+	Limit uint32 `json:"limit"`
+	// Buffer is the maximum amount of bytes that tokens can be available for instantaneously.
+	// +kubebuilder:validation:Minimum=1
+	Buffer uint32 `json:"buffer"`
+	// Peakrate is the maximum depletion rate of the bucket.
+	// The peakrate does not need to be set, it is only necessary
+	// if perfect millisecond timescale shaping is required.
+	// +optional
+	Peakrate *uint64 `json:"peakrate,omitempty"`
+	// Minburst specifies the size of the peakrate bucket. For perfect
+	// accuracy, should be set to the MTU of the interface.  If a
+	// peakrate is needed, but some burstiness is acceptable, this
+	// size can be raised. A 3000 byte minburst allows around 3mbit/s
+	// of peakrate, given 1000 byte packets.
+	// +optional
+	Minburst *uint32 `json:"minburst,omitempty"`
+}
+
+// ToTbf converts BandwidthSpec to *chaosdaemonpb.Tbf
+// Bandwidth action use TBF under the hood.
+// TBF stands for Token Bucket Filter, is a classful queueing discipline available
+// for traffic control with the tc command.
+// http://man7.org/linux/man-pages/man8/tc-tbf.8.html
+func (spec *BandwidthSpec) ToTbf() (*chaosdaemonpb.Tbf, error) {
+	rate, err := convertUnitToBytes(spec.Rate)
+
+	if err != nil {
+		return nil, err
+	}
+
+	tbf := &chaosdaemonpb.Tbf{
+		Rate:   rate,
+		Limit:  spec.Limit,
+		Buffer: spec.Buffer,
+	}
+
+	if spec.Peakrate != nil && spec.Minburst != nil {
+		tbf.PeakRate = *spec.Peakrate
+		tbf.MinBurst = *spec.Minburst
+	}
+
+	return tbf, nil
+}
+
+func convertUnitToBytes(nu string) (uint64, error) {
+	// normalize input
+	s := strings.ToLower(strings.TrimSpace(nu))
+
+	for i, u := range []string{"tbps", "gbps", "mbps", "kbps", "bps"} {
+		if strings.HasSuffix(s, u) {
+			ts := strings.TrimSuffix(s, u)
+			s := strings.TrimSpace(ts)
+
+			n, err := strconv.ParseUint(s, 10, 64)
+
+			if err != nil {
+				return 0, err
+			}
+
+			// convert unit to bytes
+			for j := 4 - i; j > 0; j-- {
+				n = n * 1024
+			}
+
+			return n, nil
+		}
+	}
+
+	return 0, errors.New("invalid unit")
 }
 
 // ReorderSpec defines details of packet reorder.

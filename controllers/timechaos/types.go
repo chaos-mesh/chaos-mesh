@@ -18,6 +18,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/go-logr/logr"
 	"golang.org/x/sync/errgroup"
@@ -285,13 +286,27 @@ func (r *Reconciler) applyContainer(ctx context.Context, client chaosdaemon.Chao
 		return err
 	}
 
-	r.Log.Info("setting time shift", "mask", mask, "sec", chaos.Spec.TimeOffset.Sec, "nsec", chaos.Spec.TimeOffset.NSec)
+	duration, err := time.ParseDuration(chaos.Spec.TimeOffset)
+	if err != nil {
+		return err
+	}
+
+	sec, nsec := secAndNSecFromDuration(duration)
+
+	r.Log.Info("setting time shift", "mask", mask, "sec", sec, "nsec", nsec)
 	_, err = client.SetTimeOffset(ctx, &chaosdaemon.TimeRequest{
 		ContainerId: containerID,
-		Sec:         chaos.Spec.TimeOffset.Sec,
-		Nsec:        chaos.Spec.TimeOffset.NSec,
+		Sec:         sec,
+		Nsec:        nsec,
 		ClkIdsMask:  mask,
 	})
 
 	return err
+}
+
+func secAndNSecFromDuration(duration time.Duration) (sec int64, nsec int64) {
+	sec = duration.Nanoseconds() / 1e9
+	nsec = duration.Nanoseconds() - (sec * 1e9)
+
+	return
 }
