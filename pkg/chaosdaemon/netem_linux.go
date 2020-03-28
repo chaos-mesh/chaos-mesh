@@ -14,19 +14,13 @@
 package chaosdaemon
 
 import (
-	"strings"
-
 	"github.com/vishvananda/netlink"
-	"github.com/vishvananda/netns"
 
 	pb "github.com/pingcap/chaos-mesh/pkg/chaosdaemon/pb"
 	"github.com/pingcap/chaos-mesh/pkg/mock"
 )
 
-// Apply applies a netem on eth0 in pid related namespace
-func Apply(netem *pb.Netem, pid uint32) error {
-	log.Info("Apply netem on PID", "pid", pid)
-
+func applyNetem(netem *pb.Netem, pid uint32) error {
 	// Mock point to return error in unit test
 	if err := mock.On("NetemApplyError"); err != nil {
 		if e, ok := err.(error); ok {
@@ -37,47 +31,16 @@ func Apply(netem *pb.Netem, pid uint32) error {
 		}
 	}
 
-	ns, err := netns.GetFromPath(GenNetnsPath(pid))
-	if err != nil {
-		log.Error(err, "failed to find network namespace", "pid", pid)
-		return err
-	}
-	defer ns.Close()
-
-	handle, err := netlink.NewHandleAt(ns)
-	if err != nil {
-		log.Error(err, "failed to get handle at network namespace", "network namespace", ns)
-		return err
-	}
-
-	link, err := handle.LinkByName("eth0") // TODO: check whether interface name is eth0
-	if err != nil {
-		log.Error(err, "failed to find eth0 interface")
-		return err
-	}
-
-	netemQdisc := netlink.NewNetem(netlink.QdiscAttrs{
-		LinkIndex: link.Attrs().Index,
-		Handle:    netlink.MakeHandle(1, 0),
-		Parent:    netlink.HANDLE_ROOT,
-	}, ToNetlinkNetemAttrs(netem))
-
-	log.Info("Add qdisc", "qdisc", netemQdisc)
-	if err = handle.QdiscAdd(netemQdisc); err != nil {
-		if !strings.Contains(err.Error(), "file exists") {
-			log.Error(err, "failed to add Qdisc", "qdisc", netemQdisc)
-			return err
-		}
-	}
-
-	return nil
+	return applyQdisc(pid, func(handle *netlink.Handle, link netlink.Link) netlink.Qdisc {
+		return netlink.NewNetem(netlink.QdiscAttrs{
+			LinkIndex: link.Attrs().Index,
+			Handle:    netlink.MakeHandle(1, 0),
+			Parent:    netlink.HANDLE_ROOT,
+		}, ToNetlinkNetemAttrs(netem))
+	})
 }
 
-// Cancel will remove netem on eth0 in pid related namespace
-func Cancel(netem *pb.Netem, pid uint32) error {
-	// WARN: This will delete all netem on this interface
-	log.Info("Cancel netem on PID", "pid", pid)
-
+func deleteNetem(netem *pb.Netem, pid uint32) error {
 	// Mock point to return error in unit test
 	if err := mock.On("NetemCancelError"); err != nil {
 		if e, ok := err.(error); ok {
@@ -88,68 +51,13 @@ func Cancel(netem *pb.Netem, pid uint32) error {
 		}
 	}
 
-	ns, err := netns.GetFromPath(GenNetnsPath(pid))
-	if err != nil {
-		log.Error(err, "failed to find network namespace", "pid", pid)
-		return err
-	}
-	defer ns.Close()
-
-	handle, err := netlink.NewHandleAt(ns)
-	if err != nil {
-		log.Error(err, "failed to create new handle at network namespace", "network namespace", ns)
-		return err
-	}
-
-	link, err := handle.LinkByName("eth0") // TODO: check whether interface name is eth0
-	if err != nil {
-		log.Error(err, "failed to find eth0 interface")
-		return err
-	}
-
-	netemQdisc := &netlink.Netem{
-		QdiscAttrs: netlink.QdiscAttrs{
-			LinkIndex: link.Attrs().Index,
-			Handle:    netlink.MakeHandle(1, 0),
-			Parent:    netlink.HANDLE_ROOT,
-		},
-	}
-
-	exist, err := qdiscExists(netemQdisc, handle, link)
-	if err != nil {
-		log.Error(err, "failed to check qdisc", "qdisc", netemQdisc, "link", link)
-		return err
-	}
-
-	if !exist {
-		log.Error(nil, "qdisc not exists, qdisc may be deleted by mistake or not injected successfully, there may be bugs here", "qdisc", netemQdisc)
-		return nil
-	}
-
-	log.Info("Remove qdisc", "qdisc", netemQdisc)
-	if err = handle.QdiscDel(netemQdisc); err != nil {
-		log.Error(err, "failed to remove qdisc", "qdisc", netemQdisc)
-
-		return err
-	}
-
-	return nil
-}
-
-func qdiscExists(qdisc netlink.Qdisc, handler *netlink.Handle, link netlink.Link) (bool, error) {
-	qds, err := handler.QdiscList(link)
-	if err != nil {
-		log.Error(err, "failed to list qdiscs", "link", link)
-		return false, err
-	}
-
-	for _, qd := range qds {
-		if qd.Attrs().LinkIndex == qdisc.Attrs().LinkIndex &&
-			qd.Attrs().Parent == qdisc.Attrs().Parent &&
-			qd.Attrs().Handle == qdisc.Attrs().Handle {
-			return true, nil
+	return deleteQdisc(pid, func(handle *netlink.Handle, link netlink.Link) netlink.Qdisc {
+		return &netlink.Netem{
+			QdiscAttrs: netlink.QdiscAttrs{
+				LinkIndex: link.Attrs().Index,
+				Handle:    netlink.MakeHandle(1, 0),
+				Parent:    netlink.HANDLE_ROOT,
+			},
 		}
-	}
-
-	return false, nil
+	})
 }

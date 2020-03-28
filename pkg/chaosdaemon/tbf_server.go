@@ -1,4 +1,4 @@
-// Copyright 2019 PingCAP, Inc.
+// Copyright 2020 PingCAP, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -24,8 +24,8 @@ import (
 	pb "github.com/pingcap/chaos-mesh/pkg/chaosdaemon/pb"
 )
 
-func (s *daemonServer) SetNetem(ctx context.Context, in *pb.NetemRequest) (*empty.Empty, error) {
-	log.Info("Set netem", "Request", in)
+func (s *daemonServer) SetTbf(ctx context.Context, in *pb.TbfRequest) (*empty.Empty, error) {
+	log.Info("Set Tbf", "Request", in)
 
 	pid, err := s.crClient.GetPidFromContainerID(ctx, in.ContainerId)
 
@@ -33,15 +33,15 @@ func (s *daemonServer) SetNetem(ctx context.Context, in *pb.NetemRequest) (*empt
 		return nil, status.Errorf(codes.Internal, "get pid from containerID error: %v", err)
 	}
 
-	if err := applyNetem(in.Netem, pid); err != nil {
-		return nil, status.Errorf(codes.Internal, "netem apply error: %v", err)
+	if err := applyTbf(in.Tbf, pid); err != nil {
+		return nil, status.Errorf(codes.Internal, "tbf apply error: %v", err)
 	}
 
 	return &empty.Empty{}, nil
 }
 
-func (s *daemonServer) DeleteNetem(ctx context.Context, in *pb.NetemRequest) (*empty.Empty, error) {
-	log.Info("Delete netem", "Request", in)
+func (s *daemonServer) DeleteTbf(ctx context.Context, in *pb.TbfRequest) (*empty.Empty, error) {
+	log.Info("Delete Tbf", "Request", in)
 
 	pid, err := s.crClient.GetPidFromContainerID(ctx, in.ContainerId)
 
@@ -49,8 +49,8 @@ func (s *daemonServer) DeleteNetem(ctx context.Context, in *pb.NetemRequest) (*e
 		return nil, status.Errorf(codes.Internal, "get pid from containerID error: %v", err)
 	}
 
-	if err := deleteNetem(in.Netem, pid); err != nil {
-		return nil, status.Errorf(codes.Internal, "netem cancel error: %v", err)
+	if err := deleteTbf(in.Tbf, pid); err != nil {
+		return nil, status.Errorf(codes.Internal, "tbf delete error: %v", err)
 	}
 
 	return &empty.Empty{}, nil

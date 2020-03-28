@@ -18,9 +18,9 @@ import (
 	"github.com/pingcap/chaos-mesh/pkg/mock"
 )
 
-func applyNetem(netem *pb.Netem, pid uint32) error {
+func applyTbf(tbf *pb.Tbf, pid uint32) error {
 	// Mock point to return error in unit test
-	if err := mock.On("NetemApplyError"); err != nil {
+	if err := mock.On("TbfApplyError"); err != nil {
 		if e, ok := err.(error); ok {
 			return e
 		}
@@ -28,12 +28,13 @@ func applyNetem(netem *pb.Netem, pid uint32) error {
 			return nil
 		}
 	}
+
 	panic("unimplemented")
 }
 
-func deleteNetem(netem *pb.Netem, pid uint32) error {
+func deleteTbf(tbf *pb.Tbf, pid uint32) error {
 	// Mock point to return error in unit test
-	if err := mock.On("NetemCancelError"); err != nil {
+	if err := mock.On("TbfDeleteError"); err != nil {
 		if e, ok := err.(error); ok {
 			return e
 		}
@@ -41,5 +42,6 @@ func deleteNetem(netem *pb.Netem, pid uint32) error {
 			return nil
 		}
 	}
+
 	panic("unimplemented")
 }

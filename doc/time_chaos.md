@@ -17,9 +17,7 @@ spec:
   selector:
     labelSelectors:
       "app.kubernetes.io/component": "pd"
-  timeOffset:
-    sec: 100000
-    nsec: 100000
+  timeOffset: "-10m100ns"
   clockIds:
     - CLOCK_REALTIME
   containerNames: 
