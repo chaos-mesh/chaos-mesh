@@ -15,6 +15,7 @@ package common
 
 import (
 	"context"
+	"errors"
 	"time"
 
 	"github.com/go-logr/logr"
@@ -69,13 +70,20 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 			return ctrl.Result{Requeue: true}, err
 		}
 		status.Experiment.Phase = v1alpha1.ExperimentPhaseFinished
-	} else if status.Experiment.Phase == v1alpha1.ExperimentPhaseRunning && chaos.IsPaused() {
-		err = r.Recover(ctx, req, chaos)
-		if err != nil {
-			r.Log.Error(err, "failed to pause chaos")
-			return ctrl.Result{Requeue: true}, err
+	} else if chaos.IsPaused() {
+		if status.Experiment.Phase == v1alpha1.ExperimentPhaseRunning {
+			r.Log.Info("Pausing")
+
+			err = r.Recover(ctx, req, chaos)
+			if err != nil {
+				r.Log.Error(err, "failed to pause chaos")
+				return ctrl.Result{Requeue: true}, err
+			}
+			status.Experiment.Phase = v1alpha1.ExperimentPhasePaused
+		} else {
+			r.Log.Error(err, "failed to pause chaos, the common chaos is not running.", "status", status.Experiment.Phase)
+			return ctrl.Result{}, errors.New("common chaos is not running")
 		}
-		status.Experiment.Phase = v1alpha1.ExperimentPhasePaused
 	} else if status.Experiment.Phase == v1alpha1.ExperimentPhaseRunning {
 		r.Log.Info("The common chaos is already running", "name", req.Name, "namespace", req.Namespace)
 		return ctrl.Result{}, nil

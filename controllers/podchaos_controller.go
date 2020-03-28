@@ -15,15 +15,16 @@ package controllers
 
 import (
 	"context"
-	"github.com/pingcap/chaos-mesh/pkg/utils"
-	v1 "k8s.io/api/core/v1"
 
 	"github.com/go-logr/logr"
-	"github.com/pingcap/chaos-mesh/api/v1alpha1"
-	"github.com/pingcap/chaos-mesh/controllers/podchaos"
+	v1 "k8s.io/api/core/v1"
 	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+
+	"github.com/pingcap/chaos-mesh/api/v1alpha1"
+	"github.com/pingcap/chaos-mesh/controllers/podchaos"
+	"github.com/pingcap/chaos-mesh/pkg/utils"
 )
 
 // PodChaosReconciler reconciles a PodChaos object
