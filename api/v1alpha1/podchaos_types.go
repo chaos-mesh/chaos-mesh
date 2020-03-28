@@ -58,7 +58,7 @@ func (in *PodChaos) IsDeleted() bool {
 
 // IsPaused returns whether this resource is paused
 func (in *PodChaos) IsPaused() bool {
-	return in.Spec.Paused
+	return in.Status.Paused
 }
 
 // GetDuration would return the duration for chaos
@@ -167,10 +167,6 @@ type PodChaosSpec struct {
 	// Needed in container-kill.
 	// +optional
 	ContainerName string `json:"containerName"`
-
-	// If this chaos is paused
-	// +optional
-	Paused bool `json:"paused"`
 }
 
 func (in *PodChaosSpec) GetSelector() SelectorSpec {
