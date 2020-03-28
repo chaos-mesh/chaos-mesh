@@ -64,6 +64,7 @@ type IoChaosSpec struct {
 	// Action defines the specific pod chaos action.
 	// Supported action: delay / errno / mixed
 	// Default action: delay
+	// +kubebuilder:validation:Enum=delay;errno;mixed
 	Action IOChaosAction `json:"action"`
 
 	// Mode defines the mode to run chaos action.
@@ -90,6 +91,7 @@ type IoChaosSpec struct {
 	// Layer represents the layer of the I/O action.
 	// Supported value: fs.
 	// Default layer: fs
+	// +kubebuilder:validation:Enum=fs
 	Layer IOLayer `json:"layer"`
 
 	// Delay defines the value of I/O chaos action delay.

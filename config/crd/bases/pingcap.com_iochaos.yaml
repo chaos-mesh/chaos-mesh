@@ -37,6 +37,10 @@ spec:
             action:
               description: 'Action defines the specific pod chaos action. Supported
                 action: delay / errno / mixed Default action: delay'
+              enum:
+              - delay
+              - errno
+              - mixed
               type: string
             addr:
               description: Addr defines the address for sidecar container.
@@ -69,6 +73,8 @@ spec:
             layer:
               description: 'Layer represents the layer of the I/O action. Supported
                 value: fs. Default layer: fs'
+              enum:
+              - fs
               type: string
             methods:
               description: 'Methods defines the I/O methods for injecting I/O chaos

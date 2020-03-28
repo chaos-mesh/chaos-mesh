@@ -38,6 +38,13 @@ spec:
               description: 'Action defines the specific network chaos action. Supported
                 action: partition, netem, delay, loss, duplicate, corrupt Default
                 action: delay'
+              enum:
+              - netem
+              - delay
+              - loss
+              - duplicate
+              - corrupt
+              - partition
               type: string
             corrupt:
               description: Corrupt represents the detail about corrupt action
@@ -78,6 +85,10 @@ spec:
               type: object
             direction:
               description: Direction represents the partition direction
+              enum:
+              - to
+              - from
+              - both
               type: string
             duplicate:
               description: DuplicateSpec represents the detail about loss action
@@ -197,6 +208,12 @@ spec:
               properties:
                 mode:
                   description: TargetMode defines the partition target selector mode
+                  enum:
+                  - one
+                  - all
+                  - fixed
+                  - fixed-percent
+                  - random-max-percent
                   type: string
                 selector:
                   description: TargetSelector defines the partition target selector

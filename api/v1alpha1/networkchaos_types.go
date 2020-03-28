@@ -68,6 +68,7 @@ type PartitionTarget struct {
 	TargetSelector SelectorSpec `json:"selector"`
 
 	// TargetMode defines the partition target selector mode
+	// +kubebuilder:validation:Enum=one;all;fixed;fixed-percent;random-max-percent
 	TargetMode PodMode `json:"mode"`
 
 	// TargetValue is required when the mode is set to `FixedPodMode` / `FixedPercentPodMod` / `RandomMaxPercentPodMod`.
@@ -98,6 +99,7 @@ type NetworkChaosSpec struct {
 	// Action defines the specific network chaos action.
 	// Supported action: partition, netem, delay, loss, duplicate, corrupt
 	// Default action: delay
+	// +kubebuilder:validation:Enum=netem;delay;loss;duplicate;corrupt;partition
 	Action NetworkChaosAction `json:"action"`
 
 	// Mode defines the mode to run chaos action.
@@ -136,7 +138,8 @@ type NetworkChaosSpec struct {
 
 	// Direction represents the partition direction
 	// +optional
-	Direction PartitionDirection `json:"direction"`
+	// +kubebuilder:validation:Enum=to;from;both
+	Direction PartitionDirection `json:"direction,omitempty"`
 
 	// Target represents network partition target
 	// +optional

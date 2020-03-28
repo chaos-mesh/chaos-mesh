@@ -35,6 +35,10 @@ spec:
             action:
               description: 'Action defines the specific pod chaos action. Supported
                 action: delay / errno / mixed Default action: delay'
+              enum:
+              - delay
+              - errno
+              - mixed
               type: string
             addr:
               description: Addr defines the address for sidecar container.
@@ -67,6 +71,8 @@ spec:
             layer:
               description: 'Layer represents the layer of the I/O action. Supported
                 value: fs. Default layer: fs'
+              enum:
+              - fs
               type: string
             methods:
               description: 'Methods defines the I/O methods for injecting I/O chaos
@@ -334,6 +340,8 @@ spec:
                     http://github.com/iovisor/bcc/blob/master/tools/inject_example.txt
                     to learn more'
                   format: int32
+                  maximum: 2
+                  minimum: 0
                   type: integer
                 headers:
                   description: 'Headers indicates the appropriate kernel headers you
@@ -345,10 +353,12 @@ spec:
                   description: Probability indicates the fails with probability. If
                     you want 1%, please set this field with 1.
                   format: int32
+                  minimum: 0
                   type: integer
                 times:
                   description: Times indicates the max times of fails.
                   format: int32
+                  minimum: 0
                   type: integer
               required:
               - failtype
@@ -562,6 +572,13 @@ spec:
               description: 'Action defines the specific network chaos action. Supported
                 action: partition, netem, delay, loss, duplicate, corrupt Default
                 action: delay'
+              enum:
+              - netem
+              - delay
+              - loss
+              - duplicate
+              - corrupt
+              - partition
               type: string
             corrupt:
               description: Corrupt represents the detail about corrupt action
@@ -602,6 +619,10 @@ spec:
               type: object
             direction:
               description: Direction represents the partition direction
+              enum:
+              - to
+              - from
+              - both
               type: string
             duplicate:
               description: DuplicateSpec represents the detail about loss action
@@ -721,6 +742,12 @@ spec:
               properties:
                 mode:
                   description: TargetMode defines the partition target selector mode
+                  enum:
+                  - one
+                  - all
+                  - fixed
+                  - fixed-percent
+                  - random-max-percent
                   type: string
                 selector:
                   description: TargetSelector defines the partition target selector
@@ -912,6 +939,10 @@ spec:
             action:
               description: 'Action defines the specific pod chaos action. Supported
                 action: pod-kill / pod-failure / container-kill Default action: pod-kill'
+              enum:
+              - pod-kill
+              - pod-failure
+              - container-kill
               type: string
             containerName:
               description: ContainerName indicates the name of the container. Needed
@@ -924,12 +955,6 @@ spec:
                 fraction and a unit suffix, such as "300ms", "-1.5h" or "2h45m". Valid
                 time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
               type: string
-            gracePeriodSeconds:
-              description: The duration in seconds before the object should be deleted.
-                Value must be non-negative integer. The value zero indicates delete
-                immediately.
-              format: int64
-              type: integer
             mode:
               description: 'Mode defines the mode to run chaos action. Supported mode:
                 one / all / fixed / fixed-percent / random-max-percent'

@@ -122,6 +122,7 @@ type PodChaosSpec struct {
 	// Action defines the specific pod chaos action.
 	// Supported action: pod-kill / pod-failure / container-kill
 	// Default action: pod-kill
+	// +kubebuilder:validation:Enum=pod-kill;pod-failure;container-kill
 	Action PodChaosAction `json:"action"`
 
 	// Mode defines the mode to run chaos action.
@@ -144,11 +145,6 @@ type PodChaosSpec struct {
 	// Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
 	// +optional
 	Duration *string `json:"duration,omitempty"`
-
-	// The duration in seconds before the object should be deleted. Value must be non-negative integer.
-	// The value zero indicates delete immediately.
-	// +optional
-	GracePeriodSeconds int64 `json:"gracePeriodSeconds"`
 
 	// Next time when this action will be applied again
 	// +optional
