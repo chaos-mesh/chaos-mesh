@@ -1,5 +1,5 @@
 # todo: remove this file after fully implemented
-spec:
+#spec:
+#  paused: false
+status:
   paused: true
-#status:
-#  paused: true
