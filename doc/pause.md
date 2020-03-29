@@ -79,7 +79,7 @@ NAME                                        READY   STATUS    RESTARTS   AGE
 chaos-controller-manager-7f67fbcfdc-bx5vs   1/1     Running   0          26s
 chaos-daemon-2nw8x                          1/1     Running   0          11s
 chaos-daemon-4dzh4                          1/1     Running   0          71s
-chaos-daemon-dlmfb                          1/1     Running   0          41s```
+chaos-daemon-dlmfb                          1/1     Running   0          41s
 ```
 
 Resume this chaos:
