@@ -56,9 +56,6 @@ var _ = Describe("NetworkChaos", func() {
 				Spec: NetworkChaosSpec{
 					Mode:   OnePodMode,
 					Action: DelayAction,
-					Target: PartitionTarget{
-						TargetMode: OnePodMode,
-					},
 				},
 			}
 

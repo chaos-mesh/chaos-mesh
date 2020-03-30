@@ -45,6 +45,7 @@ spec:
               - duplicate
               - corrupt
               - partition
+              - bandwidth
               type: string
             bandwidth:
               description: Bandwidth represents the detail about bandwidth control
@@ -130,6 +131,7 @@ spec:
               - to
               - from
               - both
+              - ""
               type: string
             duplicate:
               description: DuplicateSpec represents the detail about loss action
@@ -255,6 +257,7 @@ spec:
                   - fixed
                   - fixed-percent
                   - random-max-percent
+                  - ""
                   type: string
                 selector:
                   description: TargetSelector defines the partition target selector
