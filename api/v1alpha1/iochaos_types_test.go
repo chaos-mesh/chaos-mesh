@@ -52,7 +52,13 @@ var _ = Describe("IoChaos", func() {
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      "foo",
 					Namespace: "default",
-				}}
+				},
+				Spec: IoChaosSpec{
+					Action: IODelayAction,
+					Mode:   OnePodMode,
+					Layer:  FileSystemLayer,
+				},
+			}
 
 			By("creating an API obj")
 			Expect(k8sClient.Create(context.TODO(), created)).To(Succeed())
