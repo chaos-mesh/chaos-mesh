@@ -75,6 +75,9 @@ var _ = Describe("NetworkChaos Controller", func() {
 							Correlation: "0.15",
 							Jitter:      "2ms",
 						},
+						Target: v1alpha1.PartitionTarget{
+								TargetMode:v1alpha1.OnePodMode,
+						},
 					},
 				}
 
