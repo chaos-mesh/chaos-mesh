@@ -396,6 +396,7 @@ type BandwidthSpec struct {
 	// The peakrate does not need to be set, it is only necessary
 	// if perfect millisecond timescale shaping is required.
 	// +optional
+	// +kubebuilder:validation:Minimum=0
 	Peakrate *uint64 `json:"peakrate,omitempty"`
 	// Minburst specifies the size of the peakrate bucket. For perfect
 	// accuracy, should be set to the MTU of the interface.  If a
@@ -403,6 +404,7 @@ type BandwidthSpec struct {
 	// size can be raised. A 3000 byte minburst allows around 3mbit/s
 	// of peakrate, given 1000 byte packets.
 	// +optional
+	// +kubebuilder:validation:Minimum=0
 	Minburst *uint32 `json:"minburst,omitempty"`
 }
 
