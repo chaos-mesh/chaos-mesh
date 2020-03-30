@@ -71,25 +71,21 @@ func (in *KernelChaos) ValidateDelete() error {
 // Validate validates chaos object
 func (in *KernelChaos) Validate() error {
 	specField := field.NewPath("spec")
-	errLst := in.ValidateScheduler(specField)
+	allErrs := in.ValidateScheduler(specField)
+	allErrs = append(allErrs, in.ValidateValue(specField)...)
 
-	if len(errLst) > 0 {
-		return fmt.Errorf(errLst.ToAggregate().Error())
+	if len(allErrs) > 0 {
+		return fmt.Errorf(allErrs.ToAggregate().Error())
 	}
 	return nil
 }
 
 // ValidateScheduler validates the scheduler and duration
-func (in *KernelChaos) ValidateScheduler(root *field.Path) field.ErrorList {
-	if in.Spec.Duration != nil && in.Spec.Scheduler != nil {
-		return nil
-	} else if in.Spec.Duration == nil && in.Spec.Scheduler == nil {
-		return nil
-	}
+func (in *KernelChaos) ValidateScheduler(spec *field.Path) field.ErrorList {
+	return ValidateScheduler(in.Spec.Duration, in.Spec.Scheduler, spec)
+}
 
-	allErrs := field.ErrorList{}
-	schedulerField := root.Child("scheduler")
-
-	allErrs = append(allErrs, field.Invalid(schedulerField, in.Spec.Scheduler, ValidateSchedulerError))
-	return allErrs
+// ValidateValue validates the value
+func (in *KernelChaos) ValidateValue(spec *field.Path) field.ErrorList {
+	return ValidateValue(in.Spec.Value, in.Spec.Mode, spec.Child("value"))
 }

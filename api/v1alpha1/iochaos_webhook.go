@@ -15,6 +15,8 @@ package v1alpha1
 
 import (
 	"fmt"
+	"strconv"
+	"time"
 
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/validation/field"
@@ -71,25 +73,65 @@ func (in *IoChaos) ValidateDelete() error {
 // Validate validates chaos object
 func (in *IoChaos) Validate() error {
 	specField := field.NewPath("spec")
-	errLst := in.ValidateScheduler(specField)
+	allErrs := in.ValidateScheduler(specField)
+	allErrs = append(allErrs, in.ValidateValue(specField)...)
+	allErrs = append(allErrs, in.validateDelay(specField.Child("delay"))...)
+	allErrs = append(allErrs, in.validateErrno(specField.Child("errno"))...)
+	allErrs = append(allErrs, in.validatePercent(specField.Child("percent"))...)
 
-	if len(errLst) > 0 {
-		return fmt.Errorf(errLst.ToAggregate().Error())
+	if len(allErrs) > 0 {
+		return fmt.Errorf(allErrs.ToAggregate().Error())
 	}
 	return nil
 }
 
 // ValidateScheduler validates the scheduler and duration
-func (in *IoChaos) ValidateScheduler(root *field.Path) field.ErrorList {
-	if in.Spec.Duration != nil && in.Spec.Scheduler != nil {
-		return nil
-	} else if in.Spec.Duration == nil && in.Spec.Scheduler == nil {
-		return nil
-	}
+func (in *IoChaos) ValidateScheduler(spec *field.Path) field.ErrorList {
+	return ValidateScheduler(in.Spec.Duration, in.Spec.Scheduler, spec)
+}
 
+// ValidateValue validates the value
+func (in *IoChaos) ValidateValue(spec *field.Path) field.ErrorList {
+	return ValidateValue(in.Spec.Value, in.Spec.Mode, spec.Child("value"))
+}
+
+func (in *IoChaos) validateDelay(delay *field.Path) field.ErrorList {
 	allErrs := field.ErrorList{}
-	schedulerField := root.Child("scheduler")
+	if in.Spec.Action == IODelayAction || in.Spec.Action == IOMixedAction {
+		_, err := time.ParseDuration(in.Spec.Delay)
+		if err != nil {
+			allErrs = append(allErrs, field.Invalid(delay, in.Spec.Delay,
+				fmt.Sprintf("parse delay error:%s for action:%s", err, in.Spec.Action)))
+		}
+	}
+	return allErrs
+}
 
-	allErrs = append(allErrs, field.Invalid(schedulerField, in.Spec.Scheduler, ValidateSchedulerError))
+func (in *IoChaos) validateErrno(errno *field.Path) field.ErrorList {
+	allErrs := field.ErrorList{}
+	if in.Spec.Action == IOErrnoAction || in.Spec.Action == IOMixedAction {
+		_, err := time.ParseDuration(in.Spec.Errno)
+		if err != nil {
+			allErrs = append(allErrs, field.Invalid(errno, in.Spec.Errno,
+				fmt.Sprintf("parse errno field error:%s for action:%s", err, in.Spec.Action)))
+		}
+	}
+	return allErrs
+}
+
+func (in *IoChaos) validatePercent(percentField *field.Path) field.ErrorList {
+	allErrs := field.ErrorList{}
+	if in.Spec.Percent != "" {
+		percent, err := strconv.Atoi(in.Spec.Percent)
+		if err != nil {
+			allErrs = append(allErrs, field.Invalid(percentField, in.Spec.Percent,
+				fmt.Sprintf("parse percent field error:%s", err)))
+		}
+
+		if percent <= 0 || percent > 100 {
+			allErrs = append(allErrs, field.Invalid(percentField, in.Spec.Percent,
+				fmt.Sprintf("percent value of %d is invalid, Must be (0,100]", percent)))
+		}
+	}
 	return allErrs
 }

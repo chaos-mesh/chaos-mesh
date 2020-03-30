@@ -17,7 +17,7 @@ import (
 	"fmt"
 	"time"
 
-	cron "github.com/robfig/cron/v3"
+	"github.com/robfig/cron/v3"
 
 	"github.com/pingcap/chaos-mesh/api/v1alpha1"
 )

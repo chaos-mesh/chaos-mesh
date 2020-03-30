@@ -71,18 +71,19 @@ func (in *PodChaos) ValidateDelete() error {
 // Validate validates chaos object
 func (in *PodChaos) Validate() error {
 	specField := field.NewPath("spec")
-	errLst := in.ValidateScheduler(specField)
+	allErrs := in.ValidateScheduler(specField)
+	allErrs = append(allErrs, in.ValidateValue(specField)...)
 
-	if len(errLst) > 0 {
-		return fmt.Errorf(errLst.ToAggregate().Error())
+	if len(allErrs) > 0 {
+		return fmt.Errorf(allErrs.ToAggregate().Error())
 	}
 	return nil
 }
 
 // ValidateScheduler validates the scheduler and duration
-func (in *PodChaos) ValidateScheduler(root *field.Path) field.ErrorList {
+func (in *PodChaos) ValidateScheduler(spec *field.Path) field.ErrorList {
 	allErrs := field.ErrorList{}
-	schedulerField := root.Child("scheduler")
+	schedulerField := spec.Child("scheduler")
 
 	switch in.Spec.Action {
 	case PodFailureAction:
@@ -109,9 +110,14 @@ func (in *PodChaos) ValidateScheduler(root *field.Path) field.ErrorList {
 		err := fmt.Errorf("podchaos[%s/%s] have unknown action type", in.Namespace, in.Name)
 		log.Error(err, "Wrong PodChaos Action type")
 
-		actionField := root.Child("action")
+		actionField := spec.Child("action")
 		allErrs = append(allErrs, field.Invalid(actionField, in.Spec.Action, err.Error()))
 		break
 	}
 	return allErrs
+}
+
+// ValidateValue validates the value
+func (in *PodChaos) ValidateValue(spec *field.Path) field.ErrorList {
+	return ValidateValue(in.Spec.Value, in.Spec.Mode, spec.Child("value"))
 }
