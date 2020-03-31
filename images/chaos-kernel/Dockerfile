@@ -8,7 +8,6 @@ ARG MIRROR=http://archive.ubuntu.com/ubuntu
 RUN apt-get update && apt-get install -y ca-certificates gnupg2 wget
 
 RUN if [ ! -z "$MIRROR" ]; then sed -i "s|http://archive.ubuntu.com/ubuntu|$MIRROR|g" /etc/apt/sources.list; fi
-RUN cat /etc/apt/sources.list
 
 RUN echo "" >> /etc/apt/sources.list
 RUN echo "deb https://apt.kitware.com/ubuntu/ bionic main" >> /etc/apt/sources.list
