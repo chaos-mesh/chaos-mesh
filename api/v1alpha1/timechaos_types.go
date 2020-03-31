@@ -84,8 +84,13 @@ type TimeChaosSpec struct {
 
 // SetDefaultValue will set default value for empty fields
 func (in *TimeChaos) SetDefaultValue() {
-	if in.Spec.ClockIds == nil || len(in.Spec.ClockIds) == 0 {
-		in.Spec.ClockIds = []string{"CLOCK_REALTIME"}
+	in.Spec.DefaultClockIds()
+}
+
+// DefaultClockIds will set default value for empty ClockIds fields
+func (in *TimeChaosSpec) DefaultClockIds() {
+	if in.ClockIds == nil || len(in.ClockIds) == 0 {
+		in.ClockIds = []string{"CLOCK_REALTIME"}
 	}
 }
 

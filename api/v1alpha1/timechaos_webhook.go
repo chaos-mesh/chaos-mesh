@@ -15,6 +15,7 @@ package v1alpha1
 
 import (
 	"fmt"
+	"time"
 
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/validation/field"
@@ -42,6 +43,7 @@ func (in *TimeChaos) Default() {
 	timechaoslog.Info("default", "name", in.Name)
 
 	in.Spec.Selector.DefaultNamespace(in.GetNamespace())
+	in.Spec.DefaultClockIds()
 }
 
 // +kubebuilder:webhook:verbs=create;update,path=/validate-pingcap-com-v1alpha1-timechaos,mutating=false,failurePolicy=fail,groups=pingcap.com,resources=timechaos,versions=v1alpha1,name=vtimechaos.kb.io
@@ -73,6 +75,7 @@ func (in *TimeChaos) Validate() error {
 	specField := field.NewPath("spec")
 	allErrs := in.ValidateScheduler(specField)
 	allErrs = append(allErrs, in.ValidateValue(specField)...)
+	allErrs = append(allErrs, in.Spec.validateTimeOffset(specField.Child("timeOffset"))...)
 
 	if len(allErrs) > 0 {
 		return fmt.Errorf(allErrs.ToAggregate().Error())
@@ -88,4 +91,18 @@ func (in *TimeChaos) ValidateScheduler(spec *field.Path) field.ErrorList {
 // ValidateValue validates the value
 func (in *TimeChaos) ValidateValue(spec *field.Path) field.ErrorList {
 	return ValidateValue(in.Spec.Value, in.Spec.Mode, spec.Child("value"))
+}
+
+// validateTimeOffset validates the timeOffset
+func (in *TimeChaosSpec) validateTimeOffset(timeOffset *field.Path) field.ErrorList {
+	allErrs := field.ErrorList{}
+
+	_, err := time.ParseDuration(in.TimeOffset)
+	if err != nil {
+		allErrs = append(allErrs, field.Invalid(timeOffset,
+			in.TimeOffset,
+			fmt.Sprintf("parse timeOffset field error:%s", err)))
+	}
+
+	return allErrs
 }

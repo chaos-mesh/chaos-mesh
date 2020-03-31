@@ -75,9 +75,9 @@ func (in *IoChaos) Validate() error {
 	specField := field.NewPath("spec")
 	allErrs := in.ValidateScheduler(specField)
 	allErrs = append(allErrs, in.ValidateValue(specField)...)
-	allErrs = append(allErrs, in.validateDelay(specField.Child("delay"))...)
-	allErrs = append(allErrs, in.validateErrno(specField.Child("errno"))...)
-	allErrs = append(allErrs, in.validatePercent(specField.Child("percent"))...)
+	allErrs = append(allErrs, in.Spec.validateDelay(specField.Child("delay"))...)
+	allErrs = append(allErrs, in.Spec.validateErrno(specField.Child("errno"))...)
+	allErrs = append(allErrs, in.Spec.validatePercent(specField.Child("percent"))...)
 
 	if len(allErrs) > 0 {
 		return fmt.Errorf(allErrs.ToAggregate().Error())
@@ -95,41 +95,41 @@ func (in *IoChaos) ValidateValue(spec *field.Path) field.ErrorList {
 	return ValidateValue(in.Spec.Value, in.Spec.Mode, spec.Child("value"))
 }
 
-func (in *IoChaos) validateDelay(delay *field.Path) field.ErrorList {
+func (in *IoChaosSpec) validateDelay(delay *field.Path) field.ErrorList {
 	allErrs := field.ErrorList{}
-	if in.Spec.Action == IODelayAction || in.Spec.Action == IOMixedAction {
-		_, err := time.ParseDuration(in.Spec.Delay)
+	if in.Action == IODelayAction || in.Action == IOMixedAction {
+		_, err := time.ParseDuration(in.Delay)
 		if err != nil {
-			allErrs = append(allErrs, field.Invalid(delay, in.Spec.Delay,
-				fmt.Sprintf("parse delay error:%s for action:%s", err, in.Spec.Action)))
+			allErrs = append(allErrs, field.Invalid(delay, in.Delay,
+				fmt.Sprintf("parse delay field error:%s for action:%s", err, in.Action)))
 		}
 	}
 	return allErrs
 }
 
-func (in *IoChaos) validateErrno(errno *field.Path) field.ErrorList {
+func (in *IoChaosSpec) validateErrno(errno *field.Path) field.ErrorList {
 	allErrs := field.ErrorList{}
-	if in.Spec.Action == IOErrnoAction || in.Spec.Action == IOMixedAction {
-		_, err := time.ParseDuration(in.Spec.Errno)
+	if in.Action == IOErrnoAction || in.Action == IOMixedAction {
+		_, err := time.ParseDuration(in.Errno)
 		if err != nil {
-			allErrs = append(allErrs, field.Invalid(errno, in.Spec.Errno,
-				fmt.Sprintf("parse errno field error:%s for action:%s", err, in.Spec.Action)))
+			allErrs = append(allErrs, field.Invalid(errno, in.Errno,
+				fmt.Sprintf("parse errno field error:%s for action:%s", err, in.Action)))
 		}
 	}
 	return allErrs
 }
 
-func (in *IoChaos) validatePercent(percentField *field.Path) field.ErrorList {
+func (in *IoChaosSpec) validatePercent(percentField *field.Path) field.ErrorList {
 	allErrs := field.ErrorList{}
-	if in.Spec.Percent != "" {
-		percent, err := strconv.Atoi(in.Spec.Percent)
+	if in.Percent != "" {
+		percent, err := strconv.Atoi(in.Percent)
 		if err != nil {
-			allErrs = append(allErrs, field.Invalid(percentField, in.Spec.Percent,
+			allErrs = append(allErrs, field.Invalid(percentField, in.Percent,
 				fmt.Sprintf("parse percent field error:%s", err)))
 		}
 
 		if percent <= 0 || percent > 100 {
-			allErrs = append(allErrs, field.Invalid(percentField, in.Spec.Percent,
+			allErrs = append(allErrs, field.Invalid(percentField, in.Percent,
 				fmt.Sprintf("percent value of %d is invalid, Must be (0,100]", percent)))
 		}
 	}

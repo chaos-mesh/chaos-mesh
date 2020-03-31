@@ -73,6 +73,7 @@ func (in *PodChaos) Validate() error {
 	specField := field.NewPath("spec")
 	allErrs := in.ValidateScheduler(specField)
 	allErrs = append(allErrs, in.ValidateValue(specField)...)
+	allErrs = append(allErrs, in.Spec.validateContainerName(specField.Child("containerName"))...)
 
 	if len(allErrs) > 0 {
 		return fmt.Errorf(allErrs.ToAggregate().Error())
@@ -120,4 +121,16 @@ func (in *PodChaos) ValidateScheduler(spec *field.Path) field.ErrorList {
 // ValidateValue validates the value
 func (in *PodChaos) ValidateValue(spec *field.Path) field.ErrorList {
 	return ValidateValue(in.Spec.Value, in.Spec.Mode, spec.Child("value"))
+}
+
+// validateContainerName validates the ContainerName
+func (in *PodChaosSpec) validateContainerName(containerField *field.Path) field.ErrorList {
+	allErrs := field.ErrorList{}
+	if in.Action == ContainerKillAction {
+		if in.ContainerName == "" {
+			err := fmt.Errorf("the name of container should not be empty on %s action", in.Action)
+			allErrs = append(allErrs, field.Invalid(containerField, in.ContainerName, err.Error()))
+		}
+	}
+	return allErrs
 }

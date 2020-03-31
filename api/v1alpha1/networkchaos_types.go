@@ -85,18 +85,18 @@ type PartitionTarget struct {
 }
 
 // GetSelector is a getter for Selector (for implementing SelectSpec)
-func (t *PartitionTarget) GetSelector() SelectorSpec {
-	return t.TargetSelector
+func (in *PartitionTarget) GetSelector() SelectorSpec {
+	return in.TargetSelector
 }
 
 // GetMode is a getter for Mode (for implementing SelectSpec)
-func (t *PartitionTarget) GetMode() PodMode {
-	return t.TargetMode
+func (in *PartitionTarget) GetMode() PodMode {
+	return in.TargetMode
 }
 
 // GetValue is a getter for Value (for implementing SelectSpec)
-func (t *PartitionTarget) GetValue() string {
-	return t.TargetValue
+func (in *PartitionTarget) GetValue() string {
+	return in.TargetValue
 }
 
 // NetworkChaosSpec defines the desired state of NetworkChaos
@@ -270,17 +270,17 @@ type DelaySpec struct {
 }
 
 // ToNetem implements Netem interface.
-func (delay *DelaySpec) ToNetem() (*chaosdaemonpb.Netem, error) {
-	delayTime, err := time.ParseDuration(delay.Latency)
+func (in *DelaySpec) ToNetem() (*chaosdaemonpb.Netem, error) {
+	delayTime, err := time.ParseDuration(in.Latency)
 	if err != nil {
 		return nil, err
 	}
-	jitter, err := time.ParseDuration(delay.Jitter)
+	jitter, err := time.ParseDuration(in.Jitter)
 	if err != nil {
 		return nil, err
 	}
 
-	corr, err := strconv.ParseFloat(delay.Correlation, 32)
+	corr, err := strconv.ParseFloat(in.Correlation, 32)
 	if err != nil {
 		return nil, err
 	}
@@ -291,20 +291,20 @@ func (delay *DelaySpec) ToNetem() (*chaosdaemonpb.Netem, error) {
 		Jitter:    uint32(jitter.Nanoseconds() / 1e3),
 	}
 
-	if delay.Reorder != nil {
-		reorderPercentage, err := strconv.ParseFloat(delay.Reorder.Reorder, 32)
+	if in.Reorder != nil {
+		reorderPercentage, err := strconv.ParseFloat(in.Reorder.Reorder, 32)
 		if err != nil {
 			return nil, err
 		}
 
-		corr, err := strconv.ParseFloat(delay.Reorder.Correlation, 32)
+		corr, err := strconv.ParseFloat(in.Reorder.Correlation, 32)
 		if err != nil {
 			return nil, err
 		}
 
 		netem.Reorder = float32(reorderPercentage)
 		netem.ReorderCorr = float32(corr)
-		netem.Gap = uint32(delay.Reorder.Gap)
+		netem.Gap = uint32(in.Reorder.Gap)
 	}
 
 	return netem, nil
@@ -317,13 +317,13 @@ type LossSpec struct {
 }
 
 // ToNetem implements Netem interface.
-func (loss *LossSpec) ToNetem() (*chaosdaemonpb.Netem, error) {
-	lossPercentage, err := strconv.ParseFloat(loss.Loss, 32)
+func (in *LossSpec) ToNetem() (*chaosdaemonpb.Netem, error) {
+	lossPercentage, err := strconv.ParseFloat(in.Loss, 32)
 	if err != nil {
 		return nil, err
 	}
 
-	corr, err := strconv.ParseFloat(loss.Correlation, 32)
+	corr, err := strconv.ParseFloat(in.Correlation, 32)
 	if err != nil {
 		return nil, err
 	}
@@ -341,13 +341,13 @@ type DuplicateSpec struct {
 }
 
 // ToNetem implements Netem interface.
-func (duplicate *DuplicateSpec) ToNetem() (*chaosdaemonpb.Netem, error) {
-	duplicatePercentage, err := strconv.ParseFloat(duplicate.Duplicate, 32)
+func (in *DuplicateSpec) ToNetem() (*chaosdaemonpb.Netem, error) {
+	duplicatePercentage, err := strconv.ParseFloat(in.Duplicate, 32)
 	if err != nil {
 		return nil, err
 	}
 
-	corr, err := strconv.ParseFloat(duplicate.Correlation, 32)
+	corr, err := strconv.ParseFloat(in.Correlation, 32)
 	if err != nil {
 		return nil, err
 	}
@@ -365,13 +365,13 @@ type CorruptSpec struct {
 }
 
 // ToNetem implements Netem interface.
-func (corrupt *CorruptSpec) ToNetem() (*chaosdaemonpb.Netem, error) {
-	corruptPercentage, err := strconv.ParseFloat(corrupt.Corrupt, 32)
+func (in *CorruptSpec) ToNetem() (*chaosdaemonpb.Netem, error) {
+	corruptPercentage, err := strconv.ParseFloat(in.Corrupt, 32)
 	if err != nil {
 		return nil, err
 	}
 
-	corr, err := strconv.ParseFloat(corrupt.Correlation, 32)
+	corr, err := strconv.ParseFloat(in.Correlation, 32)
 	if err != nil {
 		return nil, err
 	}
@@ -413,8 +413,8 @@ type BandwidthSpec struct {
 // TBF stands for Token Bucket Filter, is a classful queueing discipline available
 // for traffic control with the tc command.
 // http://man7.org/linux/man-pages/man8/tc-tbf.8.html
-func (spec *BandwidthSpec) ToTbf() (*chaosdaemonpb.Tbf, error) {
-	rate, err := convertUnitToBytes(spec.Rate)
+func (in *BandwidthSpec) ToTbf() (*chaosdaemonpb.Tbf, error) {
+	rate, err := convertUnitToBytes(in.Rate)
 
 	if err != nil {
 		return nil, err
@@ -422,13 +422,13 @@ func (spec *BandwidthSpec) ToTbf() (*chaosdaemonpb.Tbf, error) {
 
 	tbf := &chaosdaemonpb.Tbf{
 		Rate:   rate,
-		Limit:  spec.Limit,
-		Buffer: spec.Buffer,
+		Limit:  in.Limit,
+		Buffer: in.Buffer,
 	}
 
-	if spec.Peakrate != nil && spec.Minburst != nil {
-		tbf.PeakRate = *spec.Peakrate
-		tbf.MinBurst = *spec.Minburst
+	if in.Peakrate != nil && in.Minburst != nil {
+		tbf.PeakRate = *in.Peakrate
+		tbf.MinBurst = *in.Minburst
 	}
 
 	return tbf, nil

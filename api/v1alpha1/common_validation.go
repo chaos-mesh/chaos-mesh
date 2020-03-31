@@ -31,7 +31,7 @@ const (
 	ValidatePodchaosSchedulerError = "schedule should be omitted"
 
 	// ValidateValueParseError defined the error message for value parse error
-	ValidateValueParseError = "value parse error"
+	ValidateValueParseError = "parse value field error"
 )
 
 // ValidateScheduler validates the scheduler and duration
@@ -45,14 +45,14 @@ func ValidateScheduler(duration *string, scheduler *SchedulerSpec, spec *field.P
 		if err != nil {
 			allErrs = append(allErrs, field.Invalid(schedulerField.Child("cron"),
 				scheduler.Cron,
-				fmt.Sprintf("parse cron error:%s", err)))
+				fmt.Sprintf("parse cron field error:%s", err)))
 		}
 
 		_, err = time.ParseDuration(*duration)
 		if err != nil {
 			allErrs = append(allErrs, field.Invalid(durationField,
 				*duration,
-				fmt.Sprintf("parse duration error:%s", err)))
+				fmt.Sprintf("parse duration field error:%s", err)))
 		}
 
 		if len(allErrs) > 0 {
