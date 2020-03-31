@@ -110,10 +110,12 @@ func (in *IoChaosSpec) validateDelay(delay *field.Path) field.ErrorList {
 func (in *IoChaosSpec) validateErrno(errno *field.Path) field.ErrorList {
 	allErrs := field.ErrorList{}
 	if in.Action == IOErrnoAction || in.Action == IOMixedAction {
-		_, err := time.ParseDuration(in.Errno)
-		if err != nil {
-			allErrs = append(allErrs, field.Invalid(errno, in.Errno,
-				fmt.Sprintf("parse errno field error:%s for action:%s", err, in.Action)))
+		if in.Errno != "" {
+			_, err := strconv.Atoi(in.Errno)
+			if err != nil {
+				allErrs = append(allErrs, field.Invalid(errno, in.Errno,
+					fmt.Sprintf("parse errno field error:%s for action:%s", err, in.Action)))
+			}
 		}
 	}
 	return allErrs
