@@ -27,6 +27,7 @@ var _ = Describe("timechaos_webhook", func() {
 			}
 			timechaos.Default()
 			Expect(timechaos.Spec.Selector.Namespaces[0]).To(Equal(metav1.NamespaceDefault))
+			Expect(timechaos.Spec.ClockIds[0]).To(Equal("CLOCK_REALTIME"))
 		})
 	})
 	Context("ChaosValidator of timechaos", func() {
