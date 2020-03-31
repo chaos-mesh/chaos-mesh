@@ -47,6 +47,7 @@ var _ = Describe("timechaos_webhook", func() {
 							Namespace: metav1.NamespaceDefault,
 							Name:      "foo1",
 						},
+						Spec:TimeChaosSpec{TimeOffset:"1s"},
 					},
 					execute: func(chaos *TimeChaos) error {
 						return chaos.ValidateCreate()
@@ -60,6 +61,7 @@ var _ = Describe("timechaos_webhook", func() {
 							Namespace: metav1.NamespaceDefault,
 							Name:      "foo2",
 						},
+						Spec:TimeChaosSpec{TimeOffset:"1s"},
 					},
 					execute: func(chaos *TimeChaos) error {
 						return chaos.ValidateUpdate(chaos)
@@ -73,6 +75,7 @@ var _ = Describe("timechaos_webhook", func() {
 							Namespace: metav1.NamespaceDefault,
 							Name:      "foo3",
 						},
+						Spec:TimeChaosSpec{TimeOffset:"1s"},
 					},
 					execute: func(chaos *TimeChaos) error {
 						return chaos.ValidateDelete()
@@ -90,6 +93,7 @@ var _ = Describe("timechaos_webhook", func() {
 							Scheduler: &SchedulerSpec{
 								Cron: "@every 10m",
 							},
+							TimeOffset:"1s",
 						},
 					},
 					execute: func(chaos *TimeChaos) error {
@@ -106,6 +110,7 @@ var _ = Describe("timechaos_webhook", func() {
 						},
 						Spec: TimeChaosSpec{
 							Duration: &duration,
+							TimeOffset:"1s",
 						},
 					},
 					execute: func(chaos *TimeChaos) error {
