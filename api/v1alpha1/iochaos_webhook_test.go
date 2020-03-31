@@ -149,14 +149,48 @@ var _ = Describe("iochaos_webhook", func() {
 					expect: "error",
 				},
 				{
-					name: "validate value with RandomMaxPercentPodMode",
+					name: "validate value with FixedPercentPodMode, parse value error",
 					chaos: IoChaos{
 						ObjectMeta: metav1.ObjectMeta{
 							Namespace: metav1.NamespaceDefault,
 							Name:      "foo8",
 						},
 						Spec: IoChaosSpec{
+							Value: "num",
+							Mode:  FixedPodMode,
+						},
+					},
+					execute: func(chaos *IoChaos) error {
+						return chaos.ValidateCreate()
+					},
+					expect: "error",
+				},
+				{
+					name: "validate value with RandomMaxPercentPodMode",
+					chaos: IoChaos{
+						ObjectMeta: metav1.ObjectMeta{
+							Namespace: metav1.NamespaceDefault,
+							Name:      "foo9",
+						},
+						Spec: IoChaosSpec{
 							Value: "0",
+							Mode:  RandomMaxPercentPodMode,
+						},
+					},
+					execute: func(chaos *IoChaos) error {
+						return chaos.ValidateCreate()
+					},
+					expect: "error",
+				},
+				{
+					name: "validate value with RandomMaxPercentPodMode ,parse value error",
+					chaos: IoChaos{
+						ObjectMeta: metav1.ObjectMeta{
+							Namespace: metav1.NamespaceDefault,
+							Name:      "foo10",
+						},
+						Spec: IoChaosSpec{
+							Value: "num",
 							Mode:  RandomMaxPercentPodMode,
 						},
 					},
@@ -170,7 +204,7 @@ var _ = Describe("iochaos_webhook", func() {
 					chaos: IoChaos{
 						ObjectMeta: metav1.ObjectMeta{
 							Namespace: metav1.NamespaceDefault,
-							Name:      "foo9",
+							Name:      "foo11",
 						},
 						Spec: IoChaosSpec{
 							Value: "101",
@@ -187,7 +221,7 @@ var _ = Describe("iochaos_webhook", func() {
 					chaos: IoChaos{
 						ObjectMeta: metav1.ObjectMeta{
 							Namespace: metav1.NamespaceDefault,
-							Name:      "foo10",
+							Name:      "foo12",
 						},
 						Spec: IoChaosSpec{
 							Delay:  "1S",
@@ -204,7 +238,7 @@ var _ = Describe("iochaos_webhook", func() {
 					chaos: IoChaos{
 						ObjectMeta: metav1.ObjectMeta{
 							Namespace: metav1.NamespaceDefault,
-							Name:      "foo11",
+							Name:      "foo13",
 						},
 						Spec: IoChaosSpec{
 							Errno:  "num",
@@ -221,7 +255,7 @@ var _ = Describe("iochaos_webhook", func() {
 					chaos: IoChaos{
 						ObjectMeta: metav1.ObjectMeta{
 							Namespace: metav1.NamespaceDefault,
-							Name:      "foo12",
+							Name:      "foo14",
 						},
 						Spec: IoChaosSpec{
 							Percent: "num",
