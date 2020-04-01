@@ -157,6 +157,10 @@ type NetworkChaosSpec struct {
 	// Next time when this action will be recovered
 	// +optional
 	NextRecover *metav1.Time `json:"nextRecover,omitempty"`
+
+	// If this chaos is paused
+	// +optional
+	Paused bool `json:"paused"`
 }
 
 // GetSelector is a getter for Selector (for implementing SelectSpec)
@@ -205,7 +209,7 @@ func (in *NetworkChaos) IsDeleted() bool {
 
 // IsPaused returns whether this resource is paused
 func (in *NetworkChaos) IsPaused() bool {
-	return in.Status.Paused
+	return in.Spec.Paused
 }
 
 // GetDuration would return the duration for chaos

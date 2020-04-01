@@ -155,6 +155,9 @@ spec:
               description: Next time when this action will be applied again
               format: date-time
               type: string
+            paused:
+              description: If this chaos is paused
+              type: boolean
             scheduler:
               description: Scheduler defines some schedule rules to control the running
                 time of the chaos experiment about network.
@@ -361,9 +364,6 @@ spec:
                   format: date-time
                   type: string
               type: object
-            paused:
-              description: If this chaos is paused
-              type: boolean
             phase:
               description: Phase is the chaos status.
               type: string

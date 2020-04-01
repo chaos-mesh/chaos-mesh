@@ -108,10 +108,6 @@ type ChaosStatus struct {
 
 	// Experiment records the last experiment state.
 	Experiment ExperimentStatus `json:"experiment"`
-
-	// If this chaos is paused
-	// +optional
-	Paused bool `json:"paused"`
 }
 
 // ExperimentPhase is the current status of chaos experiment.
