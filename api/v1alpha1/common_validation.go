@@ -24,13 +24,13 @@ import (
 )
 
 const (
-	// ValidateSchedulerError defined the error message for ValidateScheduler
+	// ValidateSchedulerError defines the error message for ValidateScheduler
 	ValidateSchedulerError = "schedule and duration should be omitted or defined at the same time"
 
-	// ValidatePodchaosSchedulerError defined the error message for ValidateScheduler of Podchaos
+	// ValidatePodchaosSchedulerError defines the error message for ValidateScheduler of Podchaos
 	ValidatePodchaosSchedulerError = "schedule should be omitted"
 
-	// ValidateValueParseError defined the error message for value parse error
+	// ValidateValueParseError defines the error message for value parse error
 	ValidateValueParseError = "parse value field error"
 )
 
@@ -68,8 +68,8 @@ func ValidateScheduler(duration *string, scheduler *SchedulerSpec, spec *field.P
 	return allErrs
 }
 
-// ValidateValue validates the value with podmode
-func ValidateValue(value string, mode PodMode, valueField *field.Path) field.ErrorList {
+// ValidatePodMode validates the value with podmode
+func ValidatePodMode(value string, mode PodMode, valueField *field.Path) field.ErrorList {
 	allErrs := field.ErrorList{}
 	switch mode {
 	case FixedPodMode:

@@ -72,7 +72,7 @@ func (in *PodChaos) ValidateDelete() error {
 func (in *PodChaos) Validate() error {
 	specField := field.NewPath("spec")
 	allErrs := in.ValidateScheduler(specField)
-	allErrs = append(allErrs, in.ValidateValue(specField)...)
+	allErrs = append(allErrs, in.ValidatePodMode(specField)...)
 	allErrs = append(allErrs, in.Spec.validateContainerName(specField.Child("containerName"))...)
 
 	if len(allErrs) > 0 {
@@ -118,9 +118,9 @@ func (in *PodChaos) ValidateScheduler(spec *field.Path) field.ErrorList {
 	return allErrs
 }
 
-// ValidateValue validates the value
-func (in *PodChaos) ValidateValue(spec *field.Path) field.ErrorList {
-	return ValidateValue(in.Spec.Value, in.Spec.Mode, spec.Child("value"))
+// ValidatePodMode validates the value with podmode
+func (in *PodChaos) ValidatePodMode(spec *field.Path) field.ErrorList {
+	return ValidatePodMode(in.Spec.Value, in.Spec.Mode, spec.Child("value"))
 }
 
 // validateContainerName validates the ContainerName

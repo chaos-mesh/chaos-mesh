@@ -98,7 +98,7 @@ func (in *NetworkChaos) ValidateDelete() error {
 func (in *NetworkChaos) Validate() error {
 	specField := field.NewPath("spec")
 	allErrs := in.ValidateScheduler(specField)
-	allErrs = append(allErrs, in.ValidateValue(specField)...)
+	allErrs = append(allErrs, in.ValidatePodMode(specField)...)
 
 	if in.Spec.Delay != nil {
 		allErrs = append(allErrs, in.Spec.Delay.validateDelay(specField.Child("delay"))...)
@@ -129,9 +129,9 @@ func (in *NetworkChaos) ValidateScheduler(spec *field.Path) field.ErrorList {
 	return ValidateScheduler(in.Spec.Duration, in.Spec.Scheduler, spec)
 }
 
-// ValidateValue validates the value
-func (in *NetworkChaos) ValidateValue(spec *field.Path) field.ErrorList {
-	return ValidateValue(in.Spec.Value, in.Spec.Mode, spec.Child("value"))
+// ValidatePodMode validates the value with podmode
+func (in *NetworkChaos) ValidatePodMode(spec *field.Path) field.ErrorList {
+	return ValidatePodMode(in.Spec.Value, in.Spec.Mode, spec.Child("value"))
 }
 
 // validateDelay validates the delay
@@ -256,5 +256,5 @@ func (in *BandwidthSpec) validateBandwidth(bandwidth *field.Path) field.ErrorLis
 
 // validateTarget validates the target
 func (in *PartitionTarget) validateTarget(target *field.Path) field.ErrorList {
-	return ValidateValue(in.TargetValue, in.TargetMode, target.Child("value"))
+	return ValidatePodMode(in.TargetValue, in.TargetMode, target.Child("value"))
 }

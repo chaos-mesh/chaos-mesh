@@ -74,7 +74,7 @@ func (in *IoChaos) ValidateDelete() error {
 func (in *IoChaos) Validate() error {
 	specField := field.NewPath("spec")
 	allErrs := in.ValidateScheduler(specField)
-	allErrs = append(allErrs, in.ValidateValue(specField)...)
+	allErrs = append(allErrs, in.ValidatePodMode(specField)...)
 	allErrs = append(allErrs, in.Spec.validateDelay(specField.Child("delay"))...)
 	allErrs = append(allErrs, in.Spec.validateErrno(specField.Child("errno"))...)
 	allErrs = append(allErrs, in.Spec.validatePercent(specField.Child("percent"))...)
@@ -90,9 +90,9 @@ func (in *IoChaos) ValidateScheduler(spec *field.Path) field.ErrorList {
 	return ValidateScheduler(in.Spec.Duration, in.Spec.Scheduler, spec)
 }
 
-// ValidateValue validates the value
-func (in *IoChaos) ValidateValue(spec *field.Path) field.ErrorList {
-	return ValidateValue(in.Spec.Value, in.Spec.Mode, spec.Child("value"))
+// ValidatePodMode validates the value with podmode
+func (in *IoChaos) ValidatePodMode(spec *field.Path) field.ErrorList {
+	return ValidatePodMode(in.Spec.Value, in.Spec.Mode, spec.Child("value"))
 }
 
 func (in *IoChaosSpec) validateDelay(delay *field.Path) field.ErrorList {

@@ -72,7 +72,7 @@ func (in *KernelChaos) ValidateDelete() error {
 func (in *KernelChaos) Validate() error {
 	specField := field.NewPath("spec")
 	allErrs := in.ValidateScheduler(specField)
-	allErrs = append(allErrs, in.ValidateValue(specField)...)
+	allErrs = append(allErrs, in.ValidatePodMode(specField)...)
 
 	if len(allErrs) > 0 {
 		return fmt.Errorf(allErrs.ToAggregate().Error())
@@ -85,7 +85,7 @@ func (in *KernelChaos) ValidateScheduler(spec *field.Path) field.ErrorList {
 	return ValidateScheduler(in.Spec.Duration, in.Spec.Scheduler, spec)
 }
 
-// ValidateValue validates the value
-func (in *KernelChaos) ValidateValue(spec *field.Path) field.ErrorList {
-	return ValidateValue(in.Spec.Value, in.Spec.Mode, spec.Child("value"))
+// ValidatePodMode validates the value with podmode
+func (in *KernelChaos) ValidatePodMode(spec *field.Path) field.ErrorList {
+	return ValidatePodMode(in.Spec.Value, in.Spec.Mode, spec.Child("value"))
 }

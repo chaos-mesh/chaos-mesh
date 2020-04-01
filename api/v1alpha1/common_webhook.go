@@ -34,6 +34,6 @@ type ChaosValidator interface {
 	Validate() error
 	// ValidateScheduler validates the scheduler and duration
 	ValidateScheduler(spec *field.Path) field.ErrorList
-	// ValidateValue validates the value
-	ValidateValue(spec *field.Path) field.ErrorList
+	// ValidatePodMode validates the value with podmode
+	ValidatePodMode(spec *field.Path) field.ErrorList
 }

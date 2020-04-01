@@ -74,7 +74,7 @@ func (in *TimeChaos) ValidateDelete() error {
 func (in *TimeChaos) Validate() error {
 	specField := field.NewPath("spec")
 	allErrs := in.ValidateScheduler(specField)
-	allErrs = append(allErrs, in.ValidateValue(specField)...)
+	allErrs = append(allErrs, in.ValidatePodMode(specField)...)
 	allErrs = append(allErrs, in.Spec.validateTimeOffset(specField.Child("timeOffset"))...)
 
 	if len(allErrs) > 0 {
@@ -88,9 +88,9 @@ func (in *TimeChaos) ValidateScheduler(spec *field.Path) field.ErrorList {
 	return ValidateScheduler(in.Spec.Duration, in.Spec.Scheduler, spec)
 }
 
-// ValidateValue validates the value
-func (in *TimeChaos) ValidateValue(spec *field.Path) field.ErrorList {
-	return ValidateValue(in.Spec.Value, in.Spec.Mode, spec.Child("value"))
+// ValidatePodMode validates the value with podmode
+func (in *TimeChaos) ValidatePodMode(spec *field.Path) field.ErrorList {
+	return ValidatePodMode(in.Spec.Value, in.Spec.Mode, spec.Child("value"))
 }
 
 // validateTimeOffset validates the timeOffset
