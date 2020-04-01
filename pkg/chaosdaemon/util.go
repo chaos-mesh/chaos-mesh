@@ -170,10 +170,6 @@ func GenNetnsPath(pid uint32) string {
 	return fmt.Sprintf("%s/%d/ns/net", defaultProcPrefix, pid)
 }
 
-func f(x interface{}) *exec.Cmd {
-	return x.(func(...interface{}) *exec.Cmd)(1, "")
-}
-
 func withNetNS(ctx context.Context, nsPath string, cmd string, args ...string) *exec.Cmd {
 	// Mock point to return mock Cmd in unit test
 	if c := mock.On("MockWithNetNs"); c != nil {
