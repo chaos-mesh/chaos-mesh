@@ -3,24 +3,18 @@ FROM ubuntu:bionic
 ARG HTTPS_PROXY
 ARG HTTP_PROXY
 ARG MAKE_JOBS
+ARG MIRROR=http://archive.ubuntu.com/ubuntu
 
-RUN apt update && apt install -y ca-certificates gnupg2
+RUN apt-get update && apt-get install -y ca-certificates gnupg2 wget
 
-RUN echo "deb https://mirrors.aliyun.com/ubuntu/ bionic main restricted universe multiverse\n"\
-    "deb https://mirrors.aliyun.com/ubuntu/ bionic-security main restricted universe multiverse\n"\
-    "deb https://mirrors.aliyun.com/ubuntu/ bionic-updates main restricted universe multiverse\n"\
-    "deb https://mirrors.aliyun.com/ubuntu/ bionic-proposed main restricted universe multiverse\n"\
-    "deb https://mirrors.aliyun.com/ubuntu/ bionic-backports main restricted universe multiverse\n"\
-    "deb-src https://mirrors.aliyun.com/ubuntu/ bionic main restricted universe multiverse\n"\
-    "deb-src https://mirrors.aliyun.com/ubuntu/ bionic-security main restricted universe multiverse\n"\
-    "deb-src https://mirrors.aliyun.com/ubuntu/ bionic-updates main restricted universe multiverse\n"\
-    "deb-src https://mirrors.aliyun.com/ubuntu/ bionic-proposed main restricted universe multiverse\n"\
-    "deb-src https://mirrors.aliyun.com/ubuntu/ bionic-backports main restricted universe multiverse\n"\
-    "deb https://apt.kitware.com/ubuntu/ bionic main" > /etc/apt/sources.list
+RUN if [ ! -z "$MIRROR" ]; then sed -i "s|http://archive.ubuntu.com/ubuntu|$MIRROR|g" /etc/apt/sources.list; fi
 
-RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 8611B7A28669BB93
+RUN echo "" >> /etc/apt/sources.list
+RUN echo "deb https://apt.kitware.com/ubuntu/ bionic main" >> /etc/apt/sources.list
 
-RUN apt update &&  apt install -y gcc-8 g++-8 bison build-essential \
+RUN wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | apt-key add -
+
+RUN apt-get update &&  apt-get install -y gcc-8 g++-8 bison build-essential \
     flex git libedit-dev libllvm6.0 llvm-6.0-dev libclang-6.0-dev python python-pip \
     zlib1g-dev libelf-dev libssl-dev && pip install cmake==3.13.3
 
