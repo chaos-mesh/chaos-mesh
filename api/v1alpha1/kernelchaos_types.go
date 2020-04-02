@@ -118,6 +118,7 @@ type FailKernRequest struct {
 	// Probability indicates the fails with probability.
 	// If you want 1%, please set this field with 1.
 	// +kubebuilder:validation:Minimum=0
+	// +kubebuilder:validation:Maximum=100
 	Probability uint32 `json:"probability,omitempty"`
 
 	// Times indicates the max times of fails.

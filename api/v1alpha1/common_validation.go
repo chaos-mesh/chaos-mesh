@@ -31,7 +31,7 @@ const (
 	ValidatePodchaosSchedulerError = "schedule should be omitted"
 
 	// ValidateValueParseError defines the error message for value parse error
-	ValidateValueParseError = "parse value field error"
+	ValidateValueParseError = "parse value field error:%s"
 )
 
 // ValidateScheduler validates the scheduler and duration
@@ -75,23 +75,27 @@ func ValidatePodMode(value string, mode PodMode, valueField *field.Path) field.E
 	case FixedPodMode:
 		num, err := strconv.Atoi(value)
 		if err != nil {
-			allErrs = append(allErrs, field.Invalid(valueField, value, ValidateValueParseError))
-		} else if num <= 0 {
+			allErrs = append(allErrs, field.Invalid(valueField, value,
+				fmt.Sprintf(ValidateValueParseError, err)))
+		}
+
+		if num <= 0 {
 			allErrs = append(allErrs, field.Invalid(valueField, value,
 				fmt.Sprintf("value must be greater than 0 with mode:%s", FixedPodMode)))
 		}
-		break
 
 	case RandomMaxPercentPodMode, FixedPercentPodMode:
 		percentage, err := strconv.Atoi(value)
 		if err != nil {
-			allErrs = append(allErrs, field.Invalid(valueField, value, ValidateValueParseError))
-		} else if percentage <= 0 || percentage > 100 {
+			allErrs = append(allErrs, field.Invalid(valueField, value,
+				fmt.Sprintf(ValidateValueParseError, err)))
+		}
+
+		if percentage <= 0 || percentage > 100 {
 			allErrs = append(allErrs, field.Invalid(valueField, value,
 				fmt.Sprintf("value of %d is invalid, Must be (0,100] with mode:%s",
 					percentage, mode)))
 		}
-		break
 	}
 	return allErrs
 }

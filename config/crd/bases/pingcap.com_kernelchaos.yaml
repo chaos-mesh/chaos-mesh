@@ -94,6 +94,7 @@ spec:
                   description: Probability indicates the fails with probability. If
                     you want 1%, please set this field with 1.
                   format: int32
+                  maximum: 100
                   minimum: 0
                   type: integer
                 times:
