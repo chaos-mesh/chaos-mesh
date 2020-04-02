@@ -38,6 +38,14 @@ spec:
               description: 'Action defines the specific network chaos action. Supported
                 action: partition, netem, delay, loss, duplicate, corrupt Default
                 action: delay'
+              enum:
+              - netem
+              - delay
+              - loss
+              - duplicate
+              - corrupt
+              - partition
+              - bandwidth
               type: string
             bandwidth:
               description: Bandwidth represents the detail about bandwidth control
@@ -62,12 +70,14 @@ spec:
                     size can be raised. A 3000 byte minburst allows around 3mbit/s
                     of peakrate, given 1000 byte packets.
                   format: int32
+                  minimum: 0
                   type: integer
                 peakrate:
                   description: Peakrate is the maximum depletion rate of the bucket.
                     The peakrate does not need to be set, it is only necessary if
                     perfect millisecond timescale shaping is required.
                   format: int64
+                  minimum: 0
                   type: integer
                 rate:
                   description: Rate is the speed knob. Allows bps, kbps, mbps, gbps,
@@ -117,6 +127,11 @@ spec:
               type: object
             direction:
               description: Direction represents the partition direction
+              enum:
+              - to
+              - from
+              - both
+              - ""
               type: string
             duplicate:
               description: DuplicateSpec represents the detail about loss action
@@ -146,6 +161,12 @@ spec:
             mode:
               description: 'Mode defines the mode to run chaos action. Supported mode:
                 one / all / fixed / fixed-percent / random-max-percent'
+              enum:
+              - one
+              - all
+              - fixed
+              - fixed-percent
+              - random-max-percent
               type: string
             nextRecover:
               description: Next time when this action will be recovered
@@ -230,6 +251,13 @@ spec:
               properties:
                 mode:
                   description: TargetMode defines the partition target selector mode
+                  enum:
+                  - one
+                  - all
+                  - fixed
+                  - fixed-percent
+                  - random-max-percent
+                  - ""
                   type: string
                 selector:
                   description: TargetSelector defines the partition target selector

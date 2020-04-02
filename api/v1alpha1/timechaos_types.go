@@ -38,6 +38,7 @@ type TimeChaos struct {
 type TimeChaosSpec struct {
 	// Mode defines the mode to run chaos action.
 	// Supported mode: one / all / fixed / fixed-percent / random-max-percent
+	// +kubebuilder:validation:Enum=one;all;fixed;fixed-percent;random-max-percent
 	Mode PodMode `json:"mode"`
 
 	// Value is required when the mode is set to `FixedPodMode` / `FixedPercentPodMod` / `RandomMaxPercentPodMod`.
@@ -83,8 +84,13 @@ type TimeChaosSpec struct {
 
 // SetDefaultValue will set default value for empty fields
 func (in *TimeChaos) SetDefaultValue() {
-	if in.Spec.ClockIds == nil || len(in.Spec.ClockIds) == 0 {
-		in.Spec.ClockIds = []string{"CLOCK_REALTIME"}
+	in.Spec.DefaultClockIds()
+}
+
+// DefaultClockIds will set default value for empty ClockIds fields
+func (in *TimeChaosSpec) DefaultClockIds() {
+	if in.ClockIds == nil || len(in.ClockIds) == 0 {
+		in.ClockIds = []string{"CLOCK_REALTIME"}
 	}
 }
 
