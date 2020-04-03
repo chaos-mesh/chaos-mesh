@@ -81,6 +81,8 @@ spec:
                     http://github.com/iovisor/bcc/blob/master/tools/inject_example.txt
                     to learn more'
                   format: int32
+                  maximum: 2
+                  minimum: 0
                   type: integer
                 headers:
                   description: 'Headers indicates the appropriate kernel headers you
@@ -92,10 +94,13 @@ spec:
                   description: Probability indicates the fails with probability. If
                     you want 1%, please set this field with 1.
                   format: int32
+                  maximum: 100
+                  minimum: 0
                   type: integer
                 times:
                   description: Times indicates the max times of fails.
                   format: int32
+                  minimum: 0
                   type: integer
               required:
               - failtype
@@ -103,6 +108,12 @@ spec:
             mode:
               description: 'Mode defines the mode to run chaos action. Supported mode:
                 one / all / fixed / fixed-percent / random-max-percent'
+              enum:
+              - one
+              - all
+              - fixed
+              - fixed-percent
+              - random-max-percent
               type: string
             nextRecover:
               description: Next time when this action will be recovered

@@ -38,6 +38,7 @@ type KernelChaos struct {
 type KernelChaosSpec struct {
 	// Mode defines the mode to run chaos action.
 	// Supported mode: one / all / fixed / fixed-percent / random-max-percent
+	// +kubebuilder:validation:Enum=one;all;fixed;fixed-percent;random-max-percent
 	Mode PodMode `json:"mode"`
 
 	// Value is required when the mode is set to `FixedPodMode` / `FixedPercentPodMod` / `RandomMaxPercentPodMod`.
@@ -97,6 +98,8 @@ type FailKernRequest struct {
 	//   1. https://www.kernel.org/doc/html/latest/fault-injection/fault-injection.html
 	//   2. http://github.com/iovisor/bcc/blob/master/tools/inject_example.txt
 	// to learn more
+	// +kubebuilder:validation:Maximum=2
+	// +kubebuilder:validation:Minimum=0
 	FailType int32 `json:"failtype"`
 
 	// Headers indicates the appropriate kernel headers you need.
@@ -118,9 +121,12 @@ type FailKernRequest struct {
 
 	// Probability indicates the fails with probability.
 	// If you want 1%, please set this field with 1.
+	// +kubebuilder:validation:Minimum=0
+	// +kubebuilder:validation:Maximum=100
 	Probability uint32 `json:"probability,omitempty"`
 
 	// Times indicates the max times of fails.
+	// +kubebuilder:validation:Minimum=0
 	Times uint32 `json:"times,omitempty"`
 }
 

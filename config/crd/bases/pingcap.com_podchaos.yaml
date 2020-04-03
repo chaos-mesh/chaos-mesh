@@ -37,6 +37,10 @@ spec:
             action:
               description: 'Action defines the specific pod chaos action. Supported
                 action: pod-kill / pod-failure / container-kill Default action: pod-kill'
+              enum:
+              - pod-kill
+              - pod-failure
+              - container-kill
               type: string
             containerName:
               description: ContainerName indicates the name of the container. Needed
@@ -49,15 +53,15 @@ spec:
                 fraction and a unit suffix, such as "300ms", "-1.5h" or "2h45m". Valid
                 time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
               type: string
-            gracePeriodSeconds:
-              description: The duration in seconds before the object should be deleted.
-                Value must be non-negative integer. The value zero indicates delete
-                immediately.
-              format: int64
-              type: integer
             mode:
               description: 'Mode defines the mode to run chaos action. Supported mode:
                 one / all / fixed / fixed-percent / random-max-percent'
+              enum:
+              - one
+              - all
+              - fixed
+              - fixed-percent
+              - random-max-percent
               type: string
             nextRecover:
               description: Next time when this action will be recovered

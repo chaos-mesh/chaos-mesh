@@ -28,10 +28,13 @@ var _ = Describe("server", func() {
 	const faultInjectPath = "fault-inject-path"
 
 	Context("randomErrno", func() {
-		It("should not equal", func() {
-			e1 := randomErrno()
-			e2 := randomErrno()
-			Expect(e1.Error()).ToNot(Equal(e2.Error()))
+		It("pseudo random", func() {
+			errSets := make(map[string]bool)
+			for i := 0; i < 5; i++ {
+				e := randomErrno()
+				errSets[e.Error()] = true
+			}
+			Expect(len(errSets) > 1).Should(Equal(true))
 		})
 	})
 

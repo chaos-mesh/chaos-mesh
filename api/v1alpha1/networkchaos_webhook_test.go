@@ -128,6 +128,141 @@ var _ = Describe("networkchaos_webhook", func() {
 					},
 					expect: "error",
 				},
+				{
+					name: "validate the delay",
+					chaos: NetworkChaos{
+						ObjectMeta: metav1.ObjectMeta{
+							Namespace: metav1.NamespaceDefault,
+							Name:      "foo6",
+						},
+						Spec: NetworkChaosSpec{
+							Delay: &DelaySpec{
+								Latency:     "1S",
+								Jitter:      "1S",
+								Correlation: "num",
+							},
+						},
+					},
+					execute: func(chaos *NetworkChaos) error {
+						return chaos.ValidateCreate()
+					},
+					expect: "error",
+				},
+				{
+					name: "validate the reorder",
+					chaos: NetworkChaos{
+						ObjectMeta: metav1.ObjectMeta{
+							Namespace: metav1.NamespaceDefault,
+							Name:      "foo7",
+						},
+						Spec: NetworkChaosSpec{
+							Delay: &DelaySpec{
+								Reorder: &ReorderSpec{
+									Reorder:     "num",
+									Correlation: "num",
+								},
+							},
+						},
+					},
+					execute: func(chaos *NetworkChaos) error {
+						return chaos.ValidateCreate()
+					},
+					expect: "error",
+				},
+				{
+					name: "validate the loss",
+					chaos: NetworkChaos{
+						ObjectMeta: metav1.ObjectMeta{
+							Namespace: metav1.NamespaceDefault,
+							Name:      "foo8",
+						},
+						Spec: NetworkChaosSpec{
+							Loss: &LossSpec{
+								Loss:        "num",
+								Correlation: "num",
+							},
+						},
+					},
+					execute: func(chaos *NetworkChaos) error {
+						return chaos.ValidateCreate()
+					},
+					expect: "error",
+				},
+				{
+					name: "validate the duplicate",
+					chaos: NetworkChaos{
+						ObjectMeta: metav1.ObjectMeta{
+							Namespace: metav1.NamespaceDefault,
+							Name:      "foo9",
+						},
+						Spec: NetworkChaosSpec{
+							Duplicate: &DuplicateSpec{
+								Duplicate:   "num",
+								Correlation: "num",
+							},
+						},
+					},
+					execute: func(chaos *NetworkChaos) error {
+						return chaos.ValidateCreate()
+					},
+					expect: "error",
+				},
+				{
+					name: "validate the corrupt",
+					chaos: NetworkChaos{
+						ObjectMeta: metav1.ObjectMeta{
+							Namespace: metav1.NamespaceDefault,
+							Name:      "foo10",
+						},
+						Spec: NetworkChaosSpec{
+							Corrupt: &CorruptSpec{
+								Corrupt:     "num",
+								Correlation: "num",
+							},
+						},
+					},
+					execute: func(chaos *NetworkChaos) error {
+						return chaos.ValidateCreate()
+					},
+					expect: "error",
+				},
+				{
+					name: "validate the bandwidth",
+					chaos: NetworkChaos{
+						ObjectMeta: metav1.ObjectMeta{
+							Namespace: metav1.NamespaceDefault,
+							Name:      "foo11",
+						},
+						Spec: NetworkChaosSpec{
+							Bandwidth: &BandwidthSpec{
+								Rate: "10",
+							},
+						},
+					},
+					execute: func(chaos *NetworkChaos) error {
+						return chaos.ValidateCreate()
+					},
+					expect: "error",
+				},
+				{
+					name: "validate the target",
+					chaos: NetworkChaos{
+						ObjectMeta: metav1.ObjectMeta{
+							Namespace: metav1.NamespaceDefault,
+							Name:      "foo12",
+						},
+						Spec: NetworkChaosSpec{
+							Target: PartitionTarget{
+								TargetMode:  FixedPodMode,
+								TargetValue: "0",
+							},
+						},
+					},
+					execute: func(chaos *NetworkChaos) error {
+						return chaos.ValidateCreate()
+					},
+					expect: "error",
+				},
 			}
 
 			for _, tc := range tcs {
