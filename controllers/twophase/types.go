@@ -15,7 +15,6 @@ package twophase
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"time"
 
@@ -120,11 +119,8 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 			status.Experiment.EndTime = &metav1.Time{
 				Time: time.Now(),
 			}
-			status.Experiment.Phase = v1alpha1.ExperimentPhasePaused
-		} else {
-			r.Log.Error(err, "failed to pause chaos, the twophase chaos is not running.", "status", status.Experiment.Phase)
-			return ctrl.Result{}, errors.New("twophase chaos is not running")
 		}
+		status.Experiment.Phase = v1alpha1.ExperimentPhasePaused
 	} else if !chaos.GetNextRecover().IsZero() && chaos.GetNextRecover().Before(now) {
 		// Start recover
 		r.Log.Info("Recovering")
