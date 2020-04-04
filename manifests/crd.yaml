@@ -667,7 +667,8 @@ spec:
               - latency
               type: object
             direction:
-              description: Direction represents the partition direction
+              description: Direction represents the direction, this applies on netem
+                and network partition action
               enum:
               - to
               - from
@@ -791,10 +792,11 @@ spec:
                   type: object
               type: object
             target:
-              description: Target represents network partition target
+              description: Target represents network target, this applies on netem
+                and network partition action
               properties:
                 mode:
-                  description: TargetMode defines the partition target selector mode
+                  description: TargetMode defines the target selector mode
                   enum:
                   - one
                   - all
@@ -804,7 +806,7 @@ spec:
                   - ""
                   type: string
                 selector:
-                  description: TargetSelector defines the partition target selector
+                  description: TargetSelector defines the target selector
                   properties:
                     annotationSelectors:
                       additionalProperties:
