@@ -39,6 +39,7 @@ var _ = Describe("iochaos_webhook", func() {
 				expect  string
 			}
 			duration := "400s"
+			errorDuration := "400S"
 			tcs := []TestCase{
 				{
 					name: "simple ValidateCreate",
@@ -106,6 +107,158 @@ var _ = Describe("iochaos_webhook", func() {
 						},
 						Spec: IoChaosSpec{
 							Duration: &duration,
+						},
+					},
+					execute: func(chaos *IoChaos) error {
+						return chaos.ValidateCreate()
+					},
+					expect: "error",
+				},
+				{
+					name: "parse the duration and scheduler error",
+					chaos: IoChaos{
+						ObjectMeta: metav1.ObjectMeta{
+							Namespace: metav1.NamespaceDefault,
+							Name:      "foo6",
+						},
+						Spec: IoChaosSpec{
+							Duration:  &errorDuration,
+							Scheduler: &SchedulerSpec{Cron: "xx"},
+						},
+					},
+					execute: func(chaos *IoChaos) error {
+						return chaos.ValidateCreate()
+					},
+					expect: "error",
+				},
+				{
+					name: "validate value with FixedPercentPodMode",
+					chaos: IoChaos{
+						ObjectMeta: metav1.ObjectMeta{
+							Namespace: metav1.NamespaceDefault,
+							Name:      "foo7",
+						},
+						Spec: IoChaosSpec{
+							Value: "0",
+							Mode:  FixedPodMode,
+						},
+					},
+					execute: func(chaos *IoChaos) error {
+						return chaos.ValidateCreate()
+					},
+					expect: "error",
+				},
+				{
+					name: "validate value with FixedPercentPodMode, parse value error",
+					chaos: IoChaos{
+						ObjectMeta: metav1.ObjectMeta{
+							Namespace: metav1.NamespaceDefault,
+							Name:      "foo8",
+						},
+						Spec: IoChaosSpec{
+							Value: "num",
+							Mode:  FixedPodMode,
+						},
+					},
+					execute: func(chaos *IoChaos) error {
+						return chaos.ValidateCreate()
+					},
+					expect: "error",
+				},
+				{
+					name: "validate value with RandomMaxPercentPodMode",
+					chaos: IoChaos{
+						ObjectMeta: metav1.ObjectMeta{
+							Namespace: metav1.NamespaceDefault,
+							Name:      "foo9",
+						},
+						Spec: IoChaosSpec{
+							Value: "0",
+							Mode:  RandomMaxPercentPodMode,
+						},
+					},
+					execute: func(chaos *IoChaos) error {
+						return chaos.ValidateCreate()
+					},
+					expect: "error",
+				},
+				{
+					name: "validate value with RandomMaxPercentPodMode ,parse value error",
+					chaos: IoChaos{
+						ObjectMeta: metav1.ObjectMeta{
+							Namespace: metav1.NamespaceDefault,
+							Name:      "foo10",
+						},
+						Spec: IoChaosSpec{
+							Value: "num",
+							Mode:  RandomMaxPercentPodMode,
+						},
+					},
+					execute: func(chaos *IoChaos) error {
+						return chaos.ValidateCreate()
+					},
+					expect: "error",
+				},
+				{
+					name: "validate value with FixedPercentPodMode",
+					chaos: IoChaos{
+						ObjectMeta: metav1.ObjectMeta{
+							Namespace: metav1.NamespaceDefault,
+							Name:      "foo11",
+						},
+						Spec: IoChaosSpec{
+							Value: "101",
+							Mode:  FixedPercentPodMode,
+						},
+					},
+					execute: func(chaos *IoChaos) error {
+						return chaos.ValidateCreate()
+					},
+					expect: "error",
+				},
+				{
+					name: "validate delay",
+					chaos: IoChaos{
+						ObjectMeta: metav1.ObjectMeta{
+							Namespace: metav1.NamespaceDefault,
+							Name:      "foo12",
+						},
+						Spec: IoChaosSpec{
+							Delay:  "1S",
+							Action: IODelayAction,
+						},
+					},
+					execute: func(chaos *IoChaos) error {
+						return chaos.ValidateCreate()
+					},
+					expect: "error",
+				},
+				{
+					name: "validate errno",
+					chaos: IoChaos{
+						ObjectMeta: metav1.ObjectMeta{
+							Namespace: metav1.NamespaceDefault,
+							Name:      "foo13",
+						},
+						Spec: IoChaosSpec{
+							Errno:  "num",
+							Action: IOMixedAction,
+						},
+					},
+					execute: func(chaos *IoChaos) error {
+						return chaos.ValidateCreate()
+					},
+					expect: "error",
+				},
+				{
+					name: "validate percent",
+					chaos: IoChaos{
+						ObjectMeta: metav1.ObjectMeta{
+							Namespace: metav1.NamespaceDefault,
+							Name:      "foo14",
+						},
+						Spec: IoChaosSpec{
+							Percent: "num",
 						},
 					},
 					execute: func(chaos *IoChaos) error {
