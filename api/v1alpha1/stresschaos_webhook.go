@@ -82,10 +82,16 @@ func (in *StressChaos) Validate() error {
 	root := field.NewPath("stresschaos")
 	errs := field.ErrorList{}
 	errs = in.Spec.Validate(root, errs)
+	errs = append(errs, in.ValidatePodMode(root)...)
 	if len(errs) > 0 {
 		return fmt.Errorf(errs.ToAggregate().Error())
 	}
 	return nil
+}
+
+// ValidatePodMode validates the value with podmode
+func (in *StressChaos) ValidatePodMode(spec *field.Path) field.ErrorList {
+	return ValidatePodMode(in.Spec.Value, in.Spec.Mode, spec.Child("value"))
 }
 
 func (in *StressChaos) ValidateScheduler(root *field.Path) field.ErrorList {

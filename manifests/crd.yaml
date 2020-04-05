@@ -1293,9 +1293,7 @@ spec:
                   type: object
               type: object
             stressors:
-              description: 'Stressors defines plenty of stressors to be generated.
-                It''s simply a few arguments for stress-ng. For fully supported stressors,
-                see stress-ng(1) FIXME: FIX DOC'
+              description: Stressors defines plenty of stressors
               properties:
                 cpu:
                   description: CpuStressor stresses CPU out
@@ -1527,7 +1525,7 @@ spec:
                   type: string
               type: object
             instance:
-              description: Target always specifies a stressing instance
+              description: Instance always specifies a stressing instance
               type: string
             phase:
               description: Phase is the chaos status.
