@@ -120,10 +120,13 @@ spec:
                   type: object
               type: object
             stressors:
-              description: Stressors defines plenty of stressors
+              description: Stressors defines plenty of stressors supported to stress
+                system components out. You can use one or more of them to make up
+                various kinds of stresses. At least one of the stressors should be
+                specified.
               properties:
                 cpu:
-                  description: CpuStressor stresses CPU out
+                  description: CPUStressor stresses CPU out
                   properties:
                     load:
                       default: 100

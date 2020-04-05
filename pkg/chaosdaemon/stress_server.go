@@ -45,13 +45,13 @@ var (
 
 func (s *daemonServer) ExecStressors(ctx context.Context,
 	req *pb.StressRequest) (*pb.StressResponse, error) {
-	log.Info("executing stressors", "request", req)
+	log.Info("Executing stressors", "request", req)
 	pid, err := s.crClient.GetPidFromContainerID(ctx, req.Target)
 	if err != nil {
 		return nil, err
 	}
 	path := pidPath(int(pid))
-	id, err := s.crClient.StripContainerIDProtocolPrefix(ctx, req.Target)
+	id, err := s.crClient.FormatContainerID(ctx, req.Target)
 	if err != nil {
 		return nil, err
 	}
@@ -95,7 +95,7 @@ func (s *daemonServer) CancelStressors(ctx context.Context,
 	if err != nil {
 		return nil, err
 	}
-	log.Info("canceling stressors", "request", req)
+	log.Info("Canceling stressors", "request", req)
 	process, err := os.FindProcess(pid)
 	if err == nil {
 		if err := process.Kill(); err != nil {

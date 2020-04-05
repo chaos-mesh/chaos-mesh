@@ -111,6 +111,7 @@ func (in *StressChaosSpec) Validate(parent *field.Path, errs field.ErrorList) fi
 	return append(errs, field.Invalid(schedulerField, in.Scheduler, ValidateSchedulerError))
 }
 
+// Validate validates whether the Stressors are all well defined
 func (in *Stressors) Validate(parent *field.Path, errs field.ErrorList) field.ErrorList {
 	current := parent.Child("stressors")
 	once := false
@@ -118,8 +119,8 @@ func (in *Stressors) Validate(parent *field.Path, errs field.ErrorList) field.Er
 		errs = in.VmStressor.Validate(current, errs)
 		once = true
 	}
-	if in.CpuStressor != nil {
-		errs = in.CpuStressor.Validate(current, errs)
+	if in.CPUStressor != nil {
+		errs = in.CPUStressor.Validate(current, errs)
 		once = true
 	}
 	if !once {
@@ -128,6 +129,7 @@ func (in *Stressors) Validate(parent *field.Path, errs field.ErrorList) field.Er
 	return errs
 }
 
+// Validate validates whether the Stressor is well defined
 func (in *Stressor) Validate(parent *field.Path, errs field.ErrorList) field.ErrorList {
 	if in.Workers <= 0 {
 		errs = append(errs, field.Invalid(parent, in, "workers should always be positive"))
@@ -135,6 +137,7 @@ func (in *Stressor) Validate(parent *field.Path, errs field.ErrorList) field.Err
 	return errs
 }
 
+// Validate validates whether the VmStressor is well defined
 func (in *VmStressor) Validate(parent *field.Path, errs field.ErrorList) field.ErrorList {
 	current := parent.Child("vm")
 	errs = in.Stressor.Validate(current, errs)
@@ -165,7 +168,8 @@ func (in *VmStressor) tryParseBytes() error {
 	return nil
 }
 
-func (in *CpuStressor) Validate(parent *field.Path, errs field.ErrorList) field.ErrorList {
+// Validate validates whether the CPUStressor is well defined
+func (in *CPUStressor) Validate(parent *field.Path, errs field.ErrorList) field.ErrorList {
 	current := parent.Child("cpu")
 	errs = in.Stressor.Validate(current, errs)
 	if in.Load < 0 || in.Load > 100 {

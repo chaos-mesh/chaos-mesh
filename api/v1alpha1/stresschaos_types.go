@@ -56,7 +56,9 @@ type StressChaosSpec struct {
 	// Selector is used to select pods that are used to inject chaos action.
 	Selector SelectorSpec `json:"selector"`
 
-	// Stressors defines plenty of stressors
+	// Stressors defines plenty of stressors supported to stress system components out.
+	// You can use one or more of them to make up various kinds of stresses. At least
+	// one of the stressors should be specified.
 	Stressors Stressors `json:"stressors"`
 
 	// Duration represents the duration of the chaos action
@@ -167,13 +169,15 @@ func (in *StressChaos) IsDeleted() bool {
 	return !in.DeletionTimestamp.IsZero()
 }
 
+// Stressors defines plenty of stressors supported to stress system components out.
+// You can use one or more of them to make up various kinds of stresses
 type Stressors struct {
 	// VmStressor stresses virtual memory out
 	// +optional
 	VmStressor *VmStressor `json:"vm,omitempty"`
-	// CpuStressor stresses CPU out
+	// CPUStressor stresses CPU out
 	// +optional
-	CpuStressor *CpuStressor `json:"cpu,omitempty"`
+	CPUStressor *CPUStressor `json:"cpu,omitempty"`
 }
 
 // Normalize the stressors to comply with stress-ng
@@ -183,18 +187,20 @@ func (in *Stressors) Normalize() string {
 		stressors += fmt.Sprintf("--vm %d --vm-bytes %s",
 			in.VmStressor.Workers, in.VmStressor.Bytes)
 	}
-	if in.CpuStressor != nil {
+	if in.CPUStressor != nil {
 		stressors += fmt.Sprintf("--cpu %d --cpu-load %d --cpu-method %s",
-			in.CpuStressor.Workers, in.CpuStressor.Load, in.CpuStressor.Method)
+			in.CPUStressor.Workers, in.CPUStressor.Load, in.CPUStressor.Method)
 	}
 	return stressors
 }
 
+// Stressor defines common configurations of a stressor
 type Stressor struct {
 	// Workers specifies N workers to apply the stressor.
 	Workers int `json:"workers"`
 }
 
+// VmStressor defines how to stress memory out
 type VmStressor struct {
 	Stressor `json:",inline"`
 
@@ -206,87 +212,89 @@ type VmStressor struct {
 	Bytes string `json:"bytes,omitempty"`
 }
 
-type CpuMethod string
+// CPUMethod defines the method to be executed by a CPUStressor
+type CPUMethod string
 
 const (
-	CpuMethodAll              CpuMethod = "all"
-	CpuMethodAckermann        CpuMethod = "ackermann"
-	CpuMethodBitops           CpuMethod = "bitops"
-	CpuMethodCallfunc         CpuMethod = "callfunc"
-	CpuMethodCfloat           CpuMethod = "cfloat"
-	CpuMethodCdouble          CpuMethod = "cdouble"
-	CpuMethodClongdouble      CpuMethod = "clongdouble"
-	CpuMethodCorrelate        CpuMethod = "correlate"
-	CpuMethodCrc16            CpuMethod = "crc16"
-	CpuMethodDecimal32        CpuMethod = "decimal32"
-	CpuMethodDecimal64        CpuMethod = "decimal64"
-	CpuMethodDecimal128       CpuMethod = "decimal128"
-	CpuMethodDither           CpuMethod = "dither"
-	CpuMethodDjb2a            CpuMethod = "djb2a"
-	CpuMethodDouble           CpuMethod = "double"
-	CpuMethodEuler            CpuMethod = "euler"
-	CpuMethodExplog           CpuMethod = "explog"
-	CpuMethodFactorial        CpuMethod = "factorial"
-	CpuMethodFibonacci        CpuMethod = "fibonacci"
-	CpuMethodFft              CpuMethod = "fft"
-	CpuMethodFloat            CpuMethod = "float"
-	CpuMethodFloat16          CpuMethod = "float16"
-	CpuMethodFloat32          CpuMethod = "float32"
-	CpuMethodFloat80          CpuMethod = "float80"
-	CpuMethodFloat128         CpuMethod = "float128"
-	CpuMethodFnv1a            CpuMethod = "fnv1a"
-	CpuMethodGamma            CpuMethod = "gamma"
-	CpuMethodGcd              CpuMethod = "gcd"
-	CpuMethodGray             CpuMethod = "gray"
-	CpuMethodHamming          CpuMethod = "hamming"
-	CpuMethodHanoi            CpuMethod = "hanoi"
-	CpuMethodHyperbolic       CpuMethod = "hyperbolic"
-	CpuMethodIdct             CpuMethod = "idct"
-	CpuMethodInt8             CpuMethod = "int8"
-	CpuMethodInt16            CpuMethod = "int16"
-	CpuMethodInt32            CpuMethod = "int32"
-	CpuMethodInt64            CpuMethod = "int64"
-	CpuMethodInt128           CpuMethod = "int128"
-	CpuMethodInt32float       CpuMethod = "int32float"
-	CpuMethodInt32double      CpuMethod = "int32double"
-	CpuMethodInt32longdouble  CpuMethod = "int32longdouble"
-	CpuMethodInt64float       CpuMethod = "int64float"
-	CpuMethodInt64double      CpuMethod = "int64double"
-	CpuMethodInt64longdouble  CpuMethod = "int64longdouble"
-	CpuMethodInt128float      CpuMethod = "int128float"
-	CpuMethodInt128double     CpuMethod = "int128double"
-	CpuMethodInt128longdouble CpuMethod = "int128longdouble"
-	CpuMethodInt128decimal32  CpuMethod = "int128decimal32"
-	CpuMethodInt128decimal64  CpuMethod = "int128decimal64"
-	CpuMethodInt128decimal128 CpuMethod = "int128decimal128"
-	CpuMethodJenkin           CpuMethod = "jenkin"
-	CpuMethodJmp              CpuMethod = "jmp"
-	CpuMethodLn2              CpuMethod = "ln2"
-	CpuMethodLongdouble       CpuMethod = "longdouble"
-	CpuMethodLoop             CpuMethod = "loop"
-	CpuMethodMatrixprod       CpuMethod = "matrixprod"
-	CpuMethodNsqrt            CpuMethod = "nsqrt"
-	CpuMethodOmega            CpuMethod = "omega"
-	CpuMethodParity           CpuMethod = "parity"
-	CpuMethodPhi              CpuMethod = "phi"
-	CpuMethodPi               CpuMethod = "pi"
-	CpuMethodPjw              CpuMethod = "pjw"
-	CpuMethodPrime            CpuMethod = "prime"
-	CpuMethodPsi              CpuMethod = "psi"
-	CpuMethodQueens           CpuMethod = "queens"
-	CpuMethodRand             CpuMethod = "rand"
-	CpuMethodRand48           CpuMethod = "rand48"
-	CpuMethodRgb              CpuMethod = "rgb"
-	CpuMethodSdbm             CpuMethod = "sdbm"
-	CpuMethodSieve            CpuMethod = "sieve"
-	CpuMethodStats            CpuMethod = "stats"
-	CpuMethodSqrt             CpuMethod = "sqrt"
-	CpuMethodTrig             CpuMethod = "trig"
-	CpuMethodUnion            CpuMethod = "union"
-	CpuMethodZeta             CpuMethod = "zeta"
+	CPUMethodAll              CPUMethod = "all"
+	CPUMethodAckermann        CPUMethod = "ackermann"
+	CPUMethodBitops           CPUMethod = "bitops"
+	CPUMethodCallfunc         CPUMethod = "callfunc"
+	CPUMethodCfloat           CPUMethod = "cfloat"
+	CPUMethodCdouble          CPUMethod = "cdouble"
+	CPUMethodClongdouble      CPUMethod = "clongdouble"
+	CPUMethodCorrelate        CPUMethod = "correlate"
+	CPUMethodCrc16            CPUMethod = "crc16"
+	CPUMethodDecimal32        CPUMethod = "decimal32"
+	CPUMethodDecimal64        CPUMethod = "decimal64"
+	CPUMethodDecimal128       CPUMethod = "decimal128"
+	CPUMethodDither           CPUMethod = "dither"
+	CPUMethodDjb2a            CPUMethod = "djb2a"
+	CPUMethodDouble           CPUMethod = "double"
+	CPUMethodEuler            CPUMethod = "euler"
+	CPUMethodExplog           CPUMethod = "explog"
+	CPUMethodFactorial        CPUMethod = "factorial"
+	CPUMethodFibonacci        CPUMethod = "fibonacci"
+	CPUMethodFft              CPUMethod = "fft"
+	CPUMethodFloat            CPUMethod = "float"
+	CPUMethodFloat16          CPUMethod = "float16"
+	CPUMethodFloat32          CPUMethod = "float32"
+	CPUMethodFloat80          CPUMethod = "float80"
+	CPUMethodFloat128         CPUMethod = "float128"
+	CPUMethodFnv1a            CPUMethod = "fnv1a"
+	CPUMethodGamma            CPUMethod = "gamma"
+	CPUMethodGcd              CPUMethod = "gcd"
+	CPUMethodGray             CPUMethod = "gray"
+	CPUMethodHamming          CPUMethod = "hamming"
+	CPUMethodHanoi            CPUMethod = "hanoi"
+	CPUMethodHyperbolic       CPUMethod = "hyperbolic"
+	CPUMethodIdct             CPUMethod = "idct"
+	CPUMethodInt8             CPUMethod = "int8"
+	CPUMethodInt16            CPUMethod = "int16"
+	CPUMethodInt32            CPUMethod = "int32"
+	CPUMethodInt64            CPUMethod = "int64"
+	CPUMethodInt128           CPUMethod = "int128"
+	CPUMethodInt32float       CPUMethod = "int32float"
+	CPUMethodInt32double      CPUMethod = "int32double"
+	CPUMethodInt32longdouble  CPUMethod = "int32longdouble"
+	CPUMethodInt64float       CPUMethod = "int64float"
+	CPUMethodInt64double      CPUMethod = "int64double"
+	CPUMethodInt64longdouble  CPUMethod = "int64longdouble"
+	CPUMethodInt128float      CPUMethod = "int128float"
+	CPUMethodInt128double     CPUMethod = "int128double"
+	CPUMethodInt128longdouble CPUMethod = "int128longdouble"
+	CPUMethodInt128decimal32  CPUMethod = "int128decimal32"
+	CPUMethodInt128decimal64  CPUMethod = "int128decimal64"
+	CPUMethodInt128decimal128 CPUMethod = "int128decimal128"
+	CPUMethodJenkin           CPUMethod = "jenkin"
+	CPUMethodJmp              CPUMethod = "jmp"
+	CPUMethodLn2              CPUMethod = "ln2"
+	CPUMethodLongdouble       CPUMethod = "longdouble"
+	CPUMethodLoop             CPUMethod = "loop"
+	CPUMethodMatrixprod       CPUMethod = "matrixprod"
+	CPUMethodNsqrt            CPUMethod = "nsqrt"
+	CPUMethodOmega            CPUMethod = "omega"
+	CPUMethodParity           CPUMethod = "parity"
+	CPUMethodPhi              CPUMethod = "phi"
+	CPUMethodPi               CPUMethod = "pi"
+	CPUMethodPjw              CPUMethod = "pjw"
+	CPUMethodPrime            CPUMethod = "prime"
+	CPUMethodPsi              CPUMethod = "psi"
+	CPUMethodQueens           CPUMethod = "queens"
+	CPUMethodRand             CPUMethod = "rand"
+	CPUMethodRand48           CPUMethod = "rand48"
+	CPUMethodRgb              CPUMethod = "rgb"
+	CPUMethodSdbm             CPUMethod = "sdbm"
+	CPUMethodSieve            CPUMethod = "sieve"
+	CPUMethodStats            CPUMethod = "stats"
+	CPUMethodSqrt             CPUMethod = "sqrt"
+	CPUMethodTrig             CPUMethod = "trig"
+	CPUMethodUnion            CPUMethod = "union"
+	CPUMethodZeta             CPUMethod = "zeta"
 )
 
-type CpuStressor struct {
+// CPUStressor defines how to stress CPU out
+type CPUStressor struct {
 	Stressor `json:",inline"`
 	// Load specifies P percent loading per CPU worker. 0 is effectively a sleep (no load) and 100
 	// is full loading.
@@ -395,7 +403,7 @@ type CpuStressor struct {
 	// zeta             compute the Riemann Zeta function ζ(s) for s = 2.0..10.0
 	// +kubebuilder:default=all
 	// +optional
-	Method CpuMethod `json:"method,omitempty"`
+	Method CPUMethod `json:"method,omitempty"`
 }
 
 // +kubebuilder:object:root=true

@@ -175,8 +175,8 @@ var _ = Describe("stresschaos_webhook", func() {
 					errs: 0,
 				},
 				{
-					name: "default CpuStressor",
-					stressor: &CpuStressor{
+					name: "default CPUStressor",
+					stressor: &CPUStressor{
 						Stressor: Stressor{Workers: 1},
 					},
 					errs: 0,
