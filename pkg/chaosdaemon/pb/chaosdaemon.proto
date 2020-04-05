@@ -17,7 +17,7 @@ service ChaosDaemon {
   rpc ContainerKill(ContainerRequest) returns (google.protobuf.Empty) {}
   rpc ContainerGetPid(ContainerRequest) returns (ContainerResponse) {}
 
-  rpc ExecStressors (StressRequest) returns (google.protobuf.Empty) {}
+  rpc ExecStressors (StressRequest) returns (StressResponse) {}
   rpc CancelStressors (StressRequest) returns (google.protobuf.Empty) {}
 }
 
@@ -104,5 +104,9 @@ message StressRequest {
   Scope scope = 1;
   string target = 2;
   string stressors = 3;
+}
+
+message StressResponse {
+  string instance = 1;
 }
 

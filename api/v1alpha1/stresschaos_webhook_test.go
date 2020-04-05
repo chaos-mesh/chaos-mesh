@@ -17,6 +17,7 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/util/validation/field"
 )
 
 var _ = Describe("stresschaos_webhook", func() {
@@ -30,7 +31,7 @@ var _ = Describe("stresschaos_webhook", func() {
 		})
 	})
 	Context("ChaosValidator of stresschaos", func() {
-		It("Validate", func() {
+		It("Validate StressChaos", func() {
 
 			type TestCase struct {
 				name    string
@@ -39,7 +40,11 @@ var _ = Describe("stresschaos_webhook", func() {
 				expect  string
 			}
 			duration := "400s"
-			stressors := "--cpu 8"
+			stressors := Stressors{
+				VmStressor: &VmStressor{
+					Stressor: Stressor{Workers: 1},
+				},
+			}
 			tcs := []TestCase{
 				{
 					name: "simple ValidateCreate",
@@ -149,5 +154,53 @@ var _ = Describe("stresschaos_webhook", func() {
 				}
 			}
 		})
+
+		It("Validate Stressors", func() {
+			type TestCase struct {
+				name     string
+				stressor Validateable
+				errs     int
+			}
+			tcs := []TestCase{
+				{
+					name:     "missing workers",
+					stressor: &Stressor{},
+					errs:     1,
+				},
+				{
+					name: "default VmStressor",
+					stressor: &VmStressor{
+						Stressor: Stressor{Workers: 1},
+					},
+					errs: 0,
+				},
+				{
+					name: "default CpuStressor",
+					stressor: &CpuStressor{
+						Stressor: Stressor{Workers: 1},
+					},
+					errs: 0,
+				},
+			}
+			parent := field.NewPath("parent")
+			for _, tc := range tcs {
+				Expect(tc.stressor.Validate(parent, field.ErrorList{})).To(HaveLen(tc.errs))
+			}
+		})
+
+		It("Parse VmStressor fields", func() {
+			vm := VmStressor{}
+			incorrectBytes := []string{"-1", "-1%", "101%", "x%", "-1Kb"}
+			for _, b := range incorrectBytes {
+				vm.Bytes = b
+				Expect(vm.tryParseBytes()).Should(HaveOccurred())
+			}
+			correctBytes := []string{"", "1%", "100KB", "100B"}
+			for _, b := range correctBytes {
+				vm.Bytes = b
+				Expect(vm.tryParseBytes()).ShouldNot(HaveOccurred())
+			}
+		})
 	})
+
 })

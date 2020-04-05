@@ -21,6 +21,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"sync"
 	"syscall"
@@ -43,13 +44,13 @@ var (
 )
 
 func (s *daemonServer) ExecStressors(ctx context.Context,
-	req *pb.StressRequest) (*empty.Empty, error) {
+	req *pb.StressRequest) (*pb.StressResponse, error) {
 	log.Info("executing stressors", "request", req)
 	pid, err := s.crClient.GetPidFromContainerID(ctx, req.Target)
 	if err != nil {
 		return nil, err
 	}
-	path := PidPath(int(pid))
+	path := pidPath(int(pid))
 	id, err := s.crClient.StripContainerIDProtocolPrefix(ctx, req.Target)
 	if err != nil {
 		return nil, err
@@ -74,9 +75,6 @@ func (s *daemonServer) ExecStressors(ctx context.Context,
 			return nil, err
 		}
 	}
-	stressorLocker.Lock()
-	defer stressorLocker.Unlock()
-	podStressors[req.Target] = cmd
 	go func() {
 		if err, ok := cmd.Wait().(*exec.ExitError); ok {
 			status := err.Sys().(syscall.WaitStatus)
@@ -86,20 +84,22 @@ func (s *daemonServer) ExecStressors(ctx context.Context,
 				log.Error(err, "stressors exited accidentally", "request", req)
 			}
 		}
-		stressorLocker.Lock()
-		defer stressorLocker.Unlock()
-		delete(podStressors, req.Target)
 	}()
 
-	return &empty.Empty{}, nil
+	return &pb.StressResponse{Instance: string(cmd.Process.Pid)}, nil
 }
 
 func (s *daemonServer) CancelStressors(ctx context.Context,
 	req *pb.StressRequest) (*empty.Empty, error) {
+	pid, err := strconv.Atoi(req.Target)
+	if err != nil {
+		return nil, err
+	}
 	log.Info("canceling stressors", "request", req)
-	if cmd, ok := podStressors[req.Target]; ok {
-		if err := cmd.Process.Kill(); err != nil {
-			log.Error(err, "fail to exit stressors", "pid", cmd.Process.Pid)
+	process, err := os.FindProcess(pid)
+	if err == nil {
+		if err := process.Kill(); err != nil {
+			log.Error(err, "fail to exit stressors", "pid", process.Pid)
 			return nil, err
 		}
 	}
@@ -115,12 +115,12 @@ func findValidCgroup(path cgroups.Path, target string) (string, error) {
 	return "", fmt.Errorf("never found valid cgroup for %s", target)
 }
 
-// PidPath will return the correct cgroup paths for an existing process running inside a cgroup
+// pidPath will return the correct cgroup paths for an existing process running inside a cgroup
 // This is commonly used for the Load function to restore an existing container.
 //
-// Note: it is migrated from cgroups.PidPath since it will find mountinfo incorrectly inside
+// Note: it is migrated from cgroups.pidPath since it will find mountinfo incorrectly inside
 // the daemonset. Hope we can fix it in official cgroups repo to solve it.
-func PidPath(pid int) cgroups.Path {
+func pidPath(pid int) cgroups.Path {
 	p := fmt.Sprintf("/proc/%d/cgroup", pid)
 	paths, err := parseCgroupFile(p)
 	if err != nil {

@@ -183,11 +183,11 @@ func (r *Reconciler) recoverPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha
 		return fmt.Errorf("%s %s can't get the state of container", pod.Namespace, pod.Name)
 	}
 	if _, err = daemonClient.CancelStressors(ctx, &pb.StressRequest{
-		Target: chaos.Status.Target,
+		Target: chaos.Status.Instance,
 	}); err != nil {
 		return err
 	}
-	chaos.Status.Target = ""
+	chaos.Status.Instance = ""
 	return nil
 }
 
@@ -227,13 +227,14 @@ func (r *Reconciler) applyPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.
 		return fmt.Errorf("%s %s can't get the state of container", pod.Namespace, pod.Name)
 	}
 	target := pod.Status.ContainerStatuses[0].ContainerID
-	if _, err = daemonClient.ExecStressors(ctx, &pb.StressRequest{
+	res, err := daemonClient.ExecStressors(ctx, &pb.StressRequest{
 		Scope:     pb.StressRequest_POD,
 		Target:    target,
-		Stressors: chaos.Spec.Stressors,
-	}); err != nil {
+		Stressors: chaos.Spec.Stressors.Normalize(),
+	})
+	if err != nil {
 		return err
 	}
-	chaos.Status.Target = target
+	chaos.Status.Instance = res.Instance
 	return nil
 }

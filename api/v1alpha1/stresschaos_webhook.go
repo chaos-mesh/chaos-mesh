@@ -14,17 +14,27 @@
 package v1alpha1
 
 import (
+	"errors"
 	"fmt"
-	"strings"
+	"strconv"
 
+	"github.com/docker/go-units"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
 )
 
+// +kubebuilder:object:generate=false
+type Validateable interface {
+	Validate(parent *field.Path, errs field.ErrorList) field.ErrorList
+}
+
 // log is for logging in this package.
-var stressChaosLog = ctrl.Log.WithName("stresschaos-resource")
+var (
+	stressChaosLog = ctrl.Log.WithName("stresschaos-resource")
+	cpuMethods     = []string{""}
+)
 
 // SetupWebhookWithManager setup StressChaos's webhook with manager
 func (in *StressChaos) SetupWebhookWithManager(mgr ctrl.Manager) error {
@@ -69,35 +79,91 @@ func (in *StressChaos) ValidateDelete() error {
 
 // Validate validates chaos object
 func (in *StressChaos) Validate() error {
-	specField := field.NewPath("spec")
-
-	errList := in.ValidateScheduler(specField)
-	if len(errList) == 0 {
-		errList = field.ErrorList{}
-	}
-	if strings.TrimSpace(in.Spec.Stressors) == "" {
-		errList = append(errList, field.Invalid(
-			specField.Child("stressors"), in.Spec.Stressors,
-			"stressors should always be set"))
-	}
-	if len(errList) > 0 {
-		return fmt.Errorf(errList.ToAggregate().Error())
+	root := field.NewPath("stresschaos")
+	errs := field.ErrorList{}
+	errs = in.Spec.Validate(root, errs)
+	if len(errs) > 0 {
+		return fmt.Errorf(errs.ToAggregate().Error())
 	}
 	return nil
+}
 
+func (in *StressChaos) ValidateScheduler(root *field.Path) field.ErrorList {
+	panic("implement me")
 }
 
 // ValidateScheduler validates the scheduler and duration
-func (in *StressChaos) ValidateScheduler(root *field.Path) field.ErrorList {
-	if in.Spec.Duration != nil && in.Spec.Scheduler != nil {
-		return nil
-	} else if in.Spec.Duration == nil && in.Spec.Scheduler == nil {
-		return nil
+func (in *StressChaosSpec) Validate(parent *field.Path, errs field.ErrorList) field.ErrorList {
+	current := parent.Child("spec")
+	errs = in.Stressors.Validate(current, errs)
+	if in.Duration != nil && in.Scheduler != nil {
+		return errs
+	} else if in.Duration == nil && in.Scheduler == nil {
+		return errs
 	}
+	schedulerField := current.Child("scheduler")
+	return append(errs, field.Invalid(schedulerField, in.Scheduler, ValidateSchedulerError))
+}
 
-	allErrs := field.ErrorList{}
-	schedulerField := root.Child("scheduler")
+func (in *Stressors) Validate(parent *field.Path, errs field.ErrorList) field.ErrorList {
+	current := parent.Child("stressors")
+	once := false
+	if in.VmStressor != nil {
+		errs = in.VmStressor.Validate(current, errs)
+		once = true
+	}
+	if in.CpuStressor != nil {
+		errs = in.CpuStressor.Validate(current, errs)
+		once = true
+	}
+	if !once {
+		errs = append(errs, field.Invalid(current, in, "missing stressors"))
+	}
+	return errs
+}
 
-	allErrs = append(allErrs, field.Invalid(schedulerField, in.Spec.Scheduler, ValidateSchedulerError))
-	return allErrs
+func (in *Stressor) Validate(parent *field.Path, errs field.ErrorList) field.ErrorList {
+	if in.Workers <= 0 {
+		errs = append(errs, field.Invalid(parent, in, "workers should always be positive"))
+	}
+	return errs
+}
+
+func (in *VmStressor) Validate(parent *field.Path, errs field.ErrorList) field.ErrorList {
+	current := parent.Child("vm")
+	errs = in.Stressor.Validate(current, errs)
+	if err := in.tryParseBytes(); err != nil {
+		errs = append(errs, field.Invalid(current, in,
+			fmt.Sprintf("incorrect bytes format: %s", err)))
+	}
+	return errs
+}
+
+func (in *VmStressor) tryParseBytes() error {
+	length := len(in.Bytes)
+	if in.Bytes[length-1] == '%' {
+		percent, err := strconv.Atoi(in.Bytes[:length-1])
+		if err != nil {
+			return err
+		}
+		if percent > 100 || percent < 0 {
+			return errors.New("illegal proportion")
+		}
+	} else {
+		size, err := units.FromHumanSize(in.Bytes)
+		if err != nil {
+			return err
+		}
+		in.Bytes = fmt.Sprintf("%db", size)
+	}
+	return nil
+}
+
+func (in *CpuStressor) Validate(parent *field.Path, errs field.ErrorList) field.ErrorList {
+	current := parent.Child("cpu")
+	errs = in.Stressor.Validate(current, errs)
+	if in.Load < 0 || in.Load > 100 {
+		errs = append(errs, field.Invalid(current, in, "illegal proportion"))
+	}
+	return errs
 }
