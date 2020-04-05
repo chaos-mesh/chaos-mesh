@@ -6,6 +6,7 @@ ARG HTTP_PROXY
 RUN apk add --no-cache gcc g++ make bash git
 
 ENV GO111MODULE=on
+ENV GOPROXY=https://goproxy.cn
 RUN mkdir /src
 WORKDIR /src
 COPY go.mod .
