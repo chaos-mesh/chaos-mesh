@@ -26,6 +26,7 @@ import (
 )
 
 // +kubebuilder:object:generate=false
+// Validateable defines how a resource is validated
 type Validateable interface {
 	Validate(parent *field.Path, errs field.ErrorList) field.ErrorList
 }
@@ -94,11 +95,12 @@ func (in *StressChaos) ValidatePodMode(spec *field.Path) field.ErrorList {
 	return ValidatePodMode(in.Spec.Value, in.Spec.Mode, spec.Child("value"))
 }
 
+// ValidateScheduler validates whether scheduler is well defined
 func (in *StressChaos) ValidateScheduler(root *field.Path) field.ErrorList {
 	panic("implement me")
 }
 
-// ValidateScheduler validates the scheduler and duration
+// Validate validates the scheduler and duration
 func (in *StressChaosSpec) Validate(parent *field.Path, errs field.ErrorList) field.ErrorList {
 	current := parent.Child("spec")
 	errs = in.Stressors.Validate(current, errs)
@@ -137,8 +139,8 @@ func (in *Stressor) Validate(parent *field.Path, errs field.ErrorList) field.Err
 	return errs
 }
 
-// Validate validates whether the VmStressor is well defined
-func (in *VmStressor) Validate(parent *field.Path, errs field.ErrorList) field.ErrorList {
+// Validate validates whether the VMStressor is well defined
+func (in *VMStressor) Validate(parent *field.Path, errs field.ErrorList) field.ErrorList {
 	current := parent.Child("vm")
 	errs = in.Stressor.Validate(current, errs)
 	if err := in.tryParseBytes(); err != nil {
@@ -148,7 +150,7 @@ func (in *VmStressor) Validate(parent *field.Path, errs field.ErrorList) field.E
 	return errs
 }
 
-func (in *VmStressor) tryParseBytes() error {
+func (in *VMStressor) tryParseBytes() error {
 	length := len(in.Bytes)
 	if in.Bytes[length-1] == '%' {
 		percent, err := strconv.Atoi(in.Bytes[:length-1])

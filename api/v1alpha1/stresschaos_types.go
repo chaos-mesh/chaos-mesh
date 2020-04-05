@@ -172,9 +172,9 @@ func (in *StressChaos) IsDeleted() bool {
 // Stressors defines plenty of stressors supported to stress system components out.
 // You can use one or more of them to make up various kinds of stresses
 type Stressors struct {
-	// VmStressor stresses virtual memory out
+	// VMStressor stresses virtual memory out
 	// +optional
-	VmStressor *VmStressor `json:"vm,omitempty"`
+	VmStressor *VMStressor `json:"vm,omitempty"`
 	// CPUStressor stresses CPU out
 	// +optional
 	CPUStressor *CPUStressor `json:"cpu,omitempty"`
@@ -200,8 +200,8 @@ type Stressor struct {
 	Workers int `json:"workers"`
 }
 
-// VmStressor defines how to stress memory out
-type VmStressor struct {
+// VMStressor defines how to stress memory out
+type VMStressor struct {
 	Stressor `json:",inline"`
 
 	// Bytes specifies N bytes consumed per vm worker, default is the total available memory.
@@ -216,6 +216,7 @@ type VmStressor struct {
 type CPUMethod string
 
 const (
+	// CPUMethodAll implies all of the CPUMethod should be applied
 	CPUMethodAll              CPUMethod = "all"
 	CPUMethodAckermann        CPUMethod = "ackermann"
 	CPUMethodBitops           CPUMethod = "bitops"

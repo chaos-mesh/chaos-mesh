@@ -41,7 +41,7 @@ var _ = Describe("stresschaos_webhook", func() {
 			}
 			duration := "400s"
 			stressors := Stressors{
-				VmStressor: &VmStressor{
+				VmStressor: &VMStressor{
 					Stressor: Stressor{Workers: 1},
 				},
 			}
@@ -168,8 +168,8 @@ var _ = Describe("stresschaos_webhook", func() {
 					errs:     1,
 				},
 				{
-					name: "default VmStressor",
-					stressor: &VmStressor{
+					name: "default VMStressor",
+					stressor: &VMStressor{
 						Stressor: Stressor{Workers: 1},
 					},
 					errs: 0,
@@ -188,8 +188,8 @@ var _ = Describe("stresschaos_webhook", func() {
 			}
 		})
 
-		It("Parse VmStressor fields", func() {
-			vm := VmStressor{}
+		It("Parse VMStressor fields", func() {
+			vm := VMStressor{}
 			incorrectBytes := []string{"-1", "-1%", "101%", "x%", "-1Kb"}
 			for _, b := range incorrectBytes {
 				vm.Bytes = b
