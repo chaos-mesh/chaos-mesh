@@ -27,6 +27,7 @@ var _ = Describe("timechaos_webhook", func() {
 			}
 			timechaos.Default()
 			Expect(timechaos.Spec.Selector.Namespaces[0]).To(Equal(metav1.NamespaceDefault))
+			Expect(timechaos.Spec.ClockIds[0]).To(Equal("CLOCK_REALTIME"))
 		})
 	})
 	Context("ChaosValidator of timechaos", func() {
@@ -47,6 +48,7 @@ var _ = Describe("timechaos_webhook", func() {
 							Namespace: metav1.NamespaceDefault,
 							Name:      "foo1",
 						},
+						Spec: TimeChaosSpec{TimeOffset: "1s"},
 					},
 					execute: func(chaos *TimeChaos) error {
 						return chaos.ValidateCreate()
@@ -60,6 +62,7 @@ var _ = Describe("timechaos_webhook", func() {
 							Namespace: metav1.NamespaceDefault,
 							Name:      "foo2",
 						},
+						Spec: TimeChaosSpec{TimeOffset: "1s"},
 					},
 					execute: func(chaos *TimeChaos) error {
 						return chaos.ValidateUpdate(chaos)
@@ -73,6 +76,7 @@ var _ = Describe("timechaos_webhook", func() {
 							Namespace: metav1.NamespaceDefault,
 							Name:      "foo3",
 						},
+						Spec: TimeChaosSpec{TimeOffset: "1s"},
 					},
 					execute: func(chaos *TimeChaos) error {
 						return chaos.ValidateDelete()
@@ -90,6 +94,7 @@ var _ = Describe("timechaos_webhook", func() {
 							Scheduler: &SchedulerSpec{
 								Cron: "@every 10m",
 							},
+							TimeOffset: "1s",
 						},
 					},
 					execute: func(chaos *TimeChaos) error {
@@ -105,7 +110,24 @@ var _ = Describe("timechaos_webhook", func() {
 							Name:      "foo5",
 						},
 						Spec: TimeChaosSpec{
-							Duration: &duration,
+							Duration:   &duration,
+							TimeOffset: "1s",
+						},
+					},
+					execute: func(chaos *TimeChaos) error {
+						return chaos.ValidateCreate()
+					},
+					expect: "error",
+				},
+				{
+					name: "validate the timeOffset",
+					chaos: TimeChaos{
+						ObjectMeta: metav1.ObjectMeta{
+							Namespace: metav1.NamespaceDefault,
+							Name:      "foo6",
+						},
+						Spec: TimeChaosSpec{
+							TimeOffset: "1S",
 						},
 					},
 					execute: func(chaos *TimeChaos) error {

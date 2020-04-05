@@ -37,6 +37,10 @@ spec:
             action:
               description: 'Action defines the specific pod chaos action. Supported
                 action: delay / errno / mixed Default action: delay'
+              enum:
+              - delay
+              - errno
+              - mixed
               type: string
             addr:
               description: Addr defines the address for sidecar container.
@@ -69,6 +73,8 @@ spec:
             layer:
               description: 'Layer represents the layer of the I/O action. Supported
                 value: fs. Default layer: fs'
+              enum:
+              - fs
               type: string
             methods:
               description: 'Methods defines the I/O methods for injecting I/O chaos
@@ -79,6 +85,12 @@ spec:
             mode:
               description: 'Mode defines the mode to run chaos action. Supported mode:
                 one / all / fixed / fixed-percent / random-max-percent'
+              enum:
+              - one
+              - all
+              - fixed
+              - fixed-percent
+              - random-max-percent
               type: string
             nextRecover:
               description: Next time when this action will be recovered.
@@ -170,9 +182,9 @@ spec:
               description: Value is required when the mode is set to `FixedPodMode`
                 / `FixedPercentPodMod` / `RandomMaxPercentPodMod`. If `FixedPodMode`,
                 provide an integer of pods to do chaos action. If `FixedPercentPodMod`,
-                provide a number from 0-100 to specify the max % of pods the server
+                provide a number from 0-100 to specify the percent of pods the server
                 can do chaos action. IF `RandomMaxPercentPodMod`,  provide a number
-                from 0-100 to specify the % of pods to do chaos action
+                from 0-100 to specify the max percent of pods to do chaos action
               type: string
           required:
           - action

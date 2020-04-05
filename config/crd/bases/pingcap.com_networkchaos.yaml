@@ -36,8 +36,58 @@ spec:
           properties:
             action:
               description: 'Action defines the specific network chaos action. Supported
-                action: delay Default action: delay'
+                action: partition, netem, delay, loss, duplicate, corrupt Default
+                action: delay'
+              enum:
+              - netem
+              - delay
+              - loss
+              - duplicate
+              - corrupt
+              - partition
+              - bandwidth
               type: string
+            bandwidth:
+              description: Bandwidth represents the detail about bandwidth control
+                action
+              properties:
+                buffer:
+                  description: Buffer is the maximum amount of bytes that tokens can
+                    be available for instantaneously.
+                  format: int32
+                  minimum: 1
+                  type: integer
+                limit:
+                  description: Limit is the number of bytes that can be queued waiting
+                    for tokens to become available.
+                  format: int32
+                  minimum: 1
+                  type: integer
+                minburst:
+                  description: Minburst specifies the size of the peakrate bucket.
+                    For perfect accuracy, should be set to the MTU of the interface.  If
+                    a peakrate is needed, but some burstiness is acceptable, this
+                    size can be raised. A 3000 byte minburst allows around 3mbit/s
+                    of peakrate, given 1000 byte packets.
+                  format: int32
+                  minimum: 0
+                  type: integer
+                peakrate:
+                  description: Peakrate is the maximum depletion rate of the bucket.
+                    The peakrate does not need to be set, it is only necessary if
+                    perfect millisecond timescale shaping is required.
+                  format: int64
+                  minimum: 0
+                  type: integer
+                rate:
+                  description: Rate is the speed knob. Allows bps, kbps, mbps, gbps,
+                    tbps unit. bps means bytes per second.
+                  type: string
+              required:
+              - buffer
+              - limit
+              - rate
+              type: object
             corrupt:
               description: Corrupt represents the detail about corrupt action
               properties:
@@ -73,12 +123,15 @@ spec:
                   - reorder
                   type: object
               required:
-              - correlation
-              - jitter
               - latency
               type: object
             direction:
               description: Direction represents the partition direction
+              enum:
+              - to
+              - from
+              - both
+              - ""
               type: string
             duplicate:
               description: DuplicateSpec represents the detail about loss action
@@ -108,6 +161,12 @@ spec:
             mode:
               description: 'Mode defines the mode to run chaos action. Supported mode:
                 one / all / fixed / fixed-percent / random-max-percent'
+              enum:
+              - one
+              - all
+              - fixed
+              - fixed-percent
+              - random-max-percent
               type: string
             nextRecover:
               description: Next time when this action will be recovered
@@ -192,6 +251,13 @@ spec:
               properties:
                 mode:
                   description: TargetMode defines the partition target selector mode
+                  enum:
+                  - one
+                  - all
+                  - fixed
+                  - fixed-percent
+                  - random-max-percent
+                  - ""
                   type: string
                 selector:
                   description: TargetSelector defines the partition target selector
@@ -254,9 +320,10 @@ spec:
                   description: TargetValue is required when the mode is set to `FixedPodMode`
                     / `FixedPercentPodMod` / `RandomMaxPercentPodMod`. If `FixedPodMode`,
                     provide an integer of pods to do chaos action. If `FixedPercentPodMod`,
-                    provide a number from 0-100 to specify the max % of pods the server
-                    can do chaos action. If `RandomMaxPercentPodMod`,  provide a number
-                    from 0-100 to specify the % of pods to do chaos action
+                    provide a number from 0-100 to specify the percent of pods the
+                    server can do chaos action. If `RandomMaxPercentPodMod`,  provide
+                    a number from 0-100 to specify the max percent of pods to do chaos
+                    action
                   type: string
               required:
               - mode
@@ -266,9 +333,9 @@ spec:
               description: Value is required when the mode is set to `FixedPodMode`
                 / `FixedPercentPodMod` / `RandomMaxPercentPodMod`. If `FixedPodMode`,
                 provide an integer of pods to do chaos action. If `FixedPercentPodMod`,
-                provide a number from 0-100 to specify the max % of pods the server
+                provide a number from 0-100 to specify the percent of pods the server
                 can do chaos action. If `RandomMaxPercentPodMod`,  provide a number
-                from 0-100 to specify the % of pods to do chaos action
+                from 0-100 to specify the max percent of pods to do chaos action
               type: string
           required:
           - action

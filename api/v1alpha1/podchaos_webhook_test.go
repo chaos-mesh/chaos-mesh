@@ -134,6 +134,22 @@ var _ = Describe("podchaos_webhook", func() {
 					},
 					expect: "error",
 				},
+				{
+					name: "validate the ContainerName",
+					chaos: PodChaos{
+						ObjectMeta: metav1.ObjectMeta{
+							Namespace: metav1.NamespaceDefault,
+							Name:      "foo7",
+						},
+						Spec: PodChaosSpec{
+							Action: ContainerKillAction,
+						},
+					},
+					execute: func(chaos *PodChaos) error {
+						return chaos.ValidateCreate()
+					},
+					expect: "error",
+				},
 			}
 
 			for _, tc := range tcs {

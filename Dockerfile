@@ -12,8 +12,6 @@ COPY go.mod .
 COPY go.sum .
 
 RUN go mod download
-RUN go get sigs.k8s.io/controller-tools/cmd/controller-gen@v0.2.4
-RUN go get golang.org/x/tools/cmd/goimports
 
 FROM build_base AS binary_builder
 

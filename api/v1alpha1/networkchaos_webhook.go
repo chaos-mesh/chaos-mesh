@@ -15,12 +15,22 @@ package v1alpha1
 
 import (
 	"fmt"
+	"strconv"
+	"time"
 
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 	ctrl "sigs.k8s.io/controller-runtime"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
+)
+
+const (
+	// DefaultJitter defines default value for jitter
+	DefaultJitter = "0ms"
+
+	// DefaultCorrelation defines default value for correlation
+	DefaultCorrelation = "0"
 )
 
 // log is for logging in this package.
@@ -44,6 +54,20 @@ func (in *NetworkChaos) Default() {
 	in.Spec.Selector.DefaultNamespace(in.GetNamespace())
 	// the target's namespace selector
 	in.Spec.Target.TargetSelector.DefaultNamespace(in.GetNamespace())
+
+	in.Spec.DefaultDelay()
+}
+
+// DefaultDelay set the default value if Jitter or Correlation is not set
+func (in *NetworkChaosSpec) DefaultDelay() {
+	if in.Delay != nil {
+		if in.Delay.Jitter == "" {
+			in.Delay.Jitter = DefaultJitter
+		}
+		if in.Delay.Correlation == "" {
+			in.Delay.Correlation = DefaultCorrelation
+		}
+	}
 }
 
 // +kubebuilder:webhook:verbs=create;update,path=/validate-pingcap-com-v1alpha1-networkchaos,mutating=false,failurePolicy=fail,groups=pingcap.com,resources=networkchaos,versions=v1alpha1,name=vnetworkchaos.kb.io
@@ -73,25 +97,164 @@ func (in *NetworkChaos) ValidateDelete() error {
 // Validate validates chaos object
 func (in *NetworkChaos) Validate() error {
 	specField := field.NewPath("spec")
-	errLst := in.ValidateScheduler(specField)
+	allErrs := in.ValidateScheduler(specField)
+	allErrs = append(allErrs, in.ValidatePodMode(specField)...)
 
-	if len(errLst) > 0 {
-		return fmt.Errorf(errLst.ToAggregate().Error())
+	if in.Spec.Delay != nil {
+		allErrs = append(allErrs, in.Spec.Delay.validateDelay(specField.Child("delay"))...)
+	}
+	if in.Spec.Loss != nil {
+		allErrs = append(allErrs, in.Spec.Loss.validateLoss(specField.Child("loss"))...)
+	}
+	if in.Spec.Duplicate != nil {
+		allErrs = append(allErrs, in.Spec.Duplicate.validateDuplicate(specField.Child("duplicate"))...)
+	}
+	if in.Spec.Corrupt != nil {
+		allErrs = append(allErrs, in.Spec.Corrupt.validateCorrupt(specField.Child("corrupt"))...)
+	}
+	if in.Spec.Bandwidth != nil {
+		allErrs = append(allErrs, in.Spec.Bandwidth.validateBandwidth(specField.Child("bandwidth"))...)
+	}
+
+	allErrs = append(allErrs, in.Spec.Target.validateTarget(specField.Child("target"))...)
+
+	if len(allErrs) > 0 {
+		return fmt.Errorf(allErrs.ToAggregate().Error())
 	}
 	return nil
 }
 
 // ValidateScheduler validates the scheduler and duration
-func (in *NetworkChaos) ValidateScheduler(root *field.Path) field.ErrorList {
-	if in.Spec.Duration != nil && in.Spec.Scheduler != nil {
-		return nil
-	} else if in.Spec.Duration == nil && in.Spec.Scheduler == nil {
-		return nil
+func (in *NetworkChaos) ValidateScheduler(spec *field.Path) field.ErrorList {
+	return ValidateScheduler(in.Spec.Duration, in.Spec.Scheduler, spec)
+}
+
+// ValidatePodMode validates the value with podmode
+func (in *NetworkChaos) ValidatePodMode(spec *field.Path) field.ErrorList {
+	return ValidatePodMode(in.Spec.Value, in.Spec.Mode, spec.Child("value"))
+}
+
+// validateDelay validates the delay
+func (in *DelaySpec) validateDelay(delay *field.Path) field.ErrorList {
+	allErrs := field.ErrorList{}
+	_, err := time.ParseDuration(in.Latency)
+	if err != nil {
+		allErrs = append(allErrs,
+			field.Invalid(delay.Child("latency"), in.Latency,
+				fmt.Sprintf("parse latency field error:%s", err)))
+	}
+	_, err = time.ParseDuration(in.Jitter)
+	if err != nil {
+		allErrs = append(allErrs,
+			field.Invalid(delay.Child("jitter"), in.Jitter,
+				fmt.Sprintf("parse jitter field error:%s", err)))
 	}
 
-	allErrs := field.ErrorList{}
-	schedulerField := root.Child("scheduler")
+	_, err = strconv.ParseFloat(in.Correlation, 32)
+	if err != nil {
+		allErrs = append(allErrs,
+			field.Invalid(delay.Child("correlation"), in.Correlation,
+				fmt.Sprintf("parse correlation field error:%s", err)))
+	}
 
-	allErrs = append(allErrs, field.Invalid(schedulerField, in.Spec.Scheduler, ValidateSchedulerError))
+	if in.Reorder != nil {
+		allErrs = append(allErrs, in.Reorder.validateReorder(delay.Child("reorder"))...)
+	}
 	return allErrs
+}
+
+// validateReorder validates the reorder
+func (in *ReorderSpec) validateReorder(reorder *field.Path) field.ErrorList {
+	allErrs := field.ErrorList{}
+	_, err := strconv.ParseFloat(in.Reorder, 32)
+	if err != nil {
+		allErrs = append(allErrs,
+			field.Invalid(reorder.Child("reorder"), in.Reorder,
+				fmt.Sprintf("parse reorder field error:%s", err)))
+	}
+
+	_, err = strconv.ParseFloat(in.Correlation, 32)
+	if err != nil {
+		allErrs = append(allErrs,
+			field.Invalid(reorder.Child("correlation"), in.Correlation,
+				fmt.Sprintf("parse correlation field error:%s", err)))
+	}
+	return allErrs
+}
+
+// validateLoss validates the loss
+func (in *LossSpec) validateLoss(loss *field.Path) field.ErrorList {
+	allErrs := field.ErrorList{}
+
+	_, err := strconv.ParseFloat(in.Loss, 32)
+	if err != nil {
+		allErrs = append(allErrs,
+			field.Invalid(loss.Child("loss"), in.Loss,
+				fmt.Sprintf("parse loss field error:%s", err)))
+	}
+
+	_, err = strconv.ParseFloat(in.Correlation, 32)
+	if err != nil {
+		allErrs = append(allErrs,
+			field.Invalid(loss.Child("correlation"), in.Correlation,
+				fmt.Sprintf("parse correlation field error:%s", err)))
+	}
+
+	return allErrs
+}
+
+// validateDuplicate validates the duplicate
+func (in *DuplicateSpec) validateDuplicate(duplicate *field.Path) field.ErrorList {
+	allErrs := field.ErrorList{}
+	_, err := strconv.ParseFloat(in.Duplicate, 32)
+	if err != nil {
+		allErrs = append(allErrs,
+			field.Invalid(duplicate.Child("duplicate"), in.Duplicate,
+				fmt.Sprintf("parse duplicate field error:%s", err)))
+	}
+
+	_, err = strconv.ParseFloat(in.Correlation, 32)
+	if err != nil {
+		allErrs = append(allErrs,
+			field.Invalid(duplicate.Child("correlation"), in.Correlation,
+				fmt.Sprintf("parse correlation field error:%s", err)))
+	}
+	return allErrs
+}
+
+// validateCorrupt validates the corrupt
+func (in *CorruptSpec) validateCorrupt(corrupt *field.Path) field.ErrorList {
+	allErrs := field.ErrorList{}
+	_, err := strconv.ParseFloat(in.Corrupt, 32)
+	if err != nil {
+		allErrs = append(allErrs,
+			field.Invalid(corrupt.Child("corrupt"), in.Corrupt,
+				fmt.Sprintf("parse corrupt field error:%s", err)))
+	}
+
+	_, err = strconv.ParseFloat(in.Correlation, 32)
+	if err != nil {
+		allErrs = append(allErrs,
+			field.Invalid(corrupt.Child("correlation"), in.Correlation,
+				fmt.Sprintf("parse correlation field error:%s", err)))
+	}
+	return allErrs
+}
+
+// validateBandwidth validates the bandwidth
+func (in *BandwidthSpec) validateBandwidth(bandwidth *field.Path) field.ErrorList {
+	allErrs := field.ErrorList{}
+	_, err := convertUnitToBytes(in.Rate)
+
+	if err != nil {
+		allErrs = append(allErrs,
+			field.Invalid(bandwidth.Child("rate"), in.Rate,
+				fmt.Sprintf("parse rate field error:%s", err)))
+	}
+	return allErrs
+}
+
+// validateTarget validates the target
+func (in *PartitionTarget) validateTarget(target *field.Path) field.ErrorList {
+	return ValidatePodMode(in.TargetValue, in.TargetMode, target.Child("value"))
 }

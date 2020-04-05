@@ -1,0 +1,20 @@
+apiVersion: pingcap.com/v1alpha1
+kind: NetworkChaos
+metadata:
+  name: network-bandwidth-example
+  namespace: chaos-testing
+spec:
+  action: bandwidth
+  mode: one
+  selector:
+    labelSelectors:
+      "app.kubernetes.io/component": "tikv"
+  bandwidth:
+    rate: 100kbps
+    limit: 100
+    buffer: 10000
+    peakrate: 1000000
+    minburst: 1000000
+  duration: "10s"
+  scheduler:
+    cron: "@every 15s"

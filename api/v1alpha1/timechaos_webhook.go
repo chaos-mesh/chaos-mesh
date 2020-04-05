@@ -15,6 +15,7 @@ package v1alpha1
 
 import (
 	"fmt"
+	"time"
 
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/validation/field"
@@ -42,6 +43,7 @@ func (in *TimeChaos) Default() {
 	timechaoslog.Info("default", "name", in.Name)
 
 	in.Spec.Selector.DefaultNamespace(in.GetNamespace())
+	in.Spec.DefaultClockIds()
 }
 
 // +kubebuilder:webhook:verbs=create;update,path=/validate-pingcap-com-v1alpha1-timechaos,mutating=false,failurePolicy=fail,groups=pingcap.com,resources=timechaos,versions=v1alpha1,name=vtimechaos.kb.io
@@ -71,25 +73,36 @@ func (in *TimeChaos) ValidateDelete() error {
 // Validate validates chaos object
 func (in *TimeChaos) Validate() error {
 	specField := field.NewPath("spec")
-	errLst := in.ValidateScheduler(specField)
+	allErrs := in.ValidateScheduler(specField)
+	allErrs = append(allErrs, in.ValidatePodMode(specField)...)
+	allErrs = append(allErrs, in.Spec.validateTimeOffset(specField.Child("timeOffset"))...)
 
-	if len(errLst) > 0 {
-		return fmt.Errorf(errLst.ToAggregate().Error())
+	if len(allErrs) > 0 {
+		return fmt.Errorf(allErrs.ToAggregate().Error())
 	}
 	return nil
 }
 
 // ValidateScheduler validates the scheduler and duration
-func (in *TimeChaos) ValidateScheduler(root *field.Path) field.ErrorList {
-	if in.Spec.Duration != nil && in.Spec.Scheduler != nil {
-		return nil
-	} else if in.Spec.Duration == nil && in.Spec.Scheduler == nil {
-		return nil
+func (in *TimeChaos) ValidateScheduler(spec *field.Path) field.ErrorList {
+	return ValidateScheduler(in.Spec.Duration, in.Spec.Scheduler, spec)
+}
+
+// ValidatePodMode validates the value with podmode
+func (in *TimeChaos) ValidatePodMode(spec *field.Path) field.ErrorList {
+	return ValidatePodMode(in.Spec.Value, in.Spec.Mode, spec.Child("value"))
+}
+
+// validateTimeOffset validates the timeOffset
+func (in *TimeChaosSpec) validateTimeOffset(timeOffset *field.Path) field.ErrorList {
+	allErrs := field.ErrorList{}
+
+	_, err := time.ParseDuration(in.TimeOffset)
+	if err != nil {
+		allErrs = append(allErrs, field.Invalid(timeOffset,
+			in.TimeOffset,
+			fmt.Sprintf("parse timeOffset field error:%s", err)))
 	}
 
-	allErrs := field.ErrorList{}
-	schedulerField := root.Child("scheduler")
-
-	allErrs = append(allErrs, field.Invalid(schedulerField, in.Spec.Scheduler, ValidateSchedulerError))
 	return allErrs
 }

@@ -24,13 +24,12 @@ import (
 	"sync"
 	"syscall"
 
-	"github.com/pingcap/chaos-mesh/pkg/utils"
-
 	"github.com/containerd/containerd"
 	"github.com/docker/docker/api/types"
 	dockerclient "github.com/docker/docker/client"
 
 	"github.com/pingcap/chaos-mesh/pkg/mock"
+	"github.com/pingcap/chaos-mesh/pkg/utils"
 )
 
 const (
@@ -188,10 +187,6 @@ func CreateContainerRuntimeInfoClient(containerRuntime string) (ContainerRuntime
 // GetNetnsPath returns network namespace path
 func GenNetnsPath(pid uint32) string {
 	return fmt.Sprintf("%s/%d/ns/net", defaultProcPrefix, pid)
-}
-
-func f(x interface{}) *exec.Cmd {
-	return x.(func(...interface{}) *exec.Cmd)(1, "")
 }
 
 func withNetNS(ctx context.Context, nsPath string, cmd string, args ...string) *exec.Cmd {

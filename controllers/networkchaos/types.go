@@ -16,9 +16,8 @@ package networkchaos
 import (
 	"fmt"
 
-	"k8s.io/client-go/tools/record"
-
 	"github.com/go-logr/logr"
+	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -26,6 +25,7 @@ import (
 	"github.com/pingcap/chaos-mesh/controllers/common"
 	"github.com/pingcap/chaos-mesh/controllers/networkchaos/netem"
 	"github.com/pingcap/chaos-mesh/controllers/networkchaos/partition"
+	"github.com/pingcap/chaos-mesh/controllers/networkchaos/tbf"
 	"github.com/pingcap/chaos-mesh/controllers/twophase"
 )
 
@@ -60,12 +60,14 @@ func (r *Reconciler) Reconcile(req ctrl.Request, chaos *v1alpha1.NetworkChaos) (
 func (r *Reconciler) commonNetworkChaos(networkchaos *v1alpha1.NetworkChaos, req ctrl.Request) (ctrl.Result, error) {
 	var cr *common.Reconciler
 	switch networkchaos.Spec.Action {
-	case v1alpha1.DelayAction, v1alpha1.DuplicateAction, v1alpha1.CorruptAction, v1alpha1.LossAction:
+	case v1alpha1.NetemAction, v1alpha1.DelayAction, v1alpha1.DuplicateAction, v1alpha1.CorruptAction, v1alpha1.LossAction:
 		cr = netem.NewCommonReconciler(r.Client, r.Log.WithValues("action", "netem"),
 			req, r.EventRecorder)
 	case v1alpha1.PartitionAction:
 		cr = partition.NewCommonReconciler(r.Client, r.Log.WithValues("action", "partition"),
 			req, r.EventRecorder)
+	case v1alpha1.BandwidthAction:
+		cr = tbf.NewCommonReconciler(r.Client, r.Log.WithValues("action", "bandwidth"), req, r.EventRecorder)
 	default:
 		return r.invalidActionResponse(networkchaos)
 	}
@@ -75,12 +77,14 @@ func (r *Reconciler) commonNetworkChaos(networkchaos *v1alpha1.NetworkChaos, req
 func (r *Reconciler) scheduleNetworkChaos(networkchaos *v1alpha1.NetworkChaos, req ctrl.Request) (ctrl.Result, error) {
 	var sr *twophase.Reconciler
 	switch networkchaos.Spec.Action {
-	case v1alpha1.DelayAction, v1alpha1.DuplicateAction, v1alpha1.CorruptAction, v1alpha1.LossAction:
+	case v1alpha1.NetemAction, v1alpha1.DelayAction, v1alpha1.DuplicateAction, v1alpha1.CorruptAction, v1alpha1.LossAction:
 		sr = netem.NewTwoPhaseReconciler(r.Client, r.Log.WithValues("action", "netem"),
 			req, r.EventRecorder)
 	case v1alpha1.PartitionAction:
 		sr = partition.NewTwoPhaseReconciler(r.Client, r.Log.WithValues("action", "partition"),
 			req, r.EventRecorder)
+	case v1alpha1.BandwidthAction:
+		sr = tbf.NewTwoPhaseReconciler(r.Client, r.Log.WithValues("action", "bandwidth"), req, r.EventRecorder)
 	default:
 		return r.invalidActionResponse(networkchaos)
 	}

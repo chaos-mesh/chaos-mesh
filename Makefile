@@ -8,6 +8,7 @@ DOCKER_BUILD_ARGS := --build-arg HTTP_PROXY=${HTTP_PROXY} --build-arg HTTPS_PROX
 GOVER_MAJOR := $(shell go version | sed -E -e "s/.*go([0-9]+)[.]([0-9]+).*/\1/")
 GOVER_MINOR := $(shell go version | sed -E -e "s/.*go([0-9]+)[.]([0-9]+).*/\2/")
 GO111 := $(shell [ $(GOVER_MAJOR) -gt 1 ] || [ $(GOVER_MAJOR) -eq 1 ] && [ $(GOVER_MINOR) -ge 11 ]; echo $$?)
+
 ifeq ($(GO111), 1)
 $(error Please upgrade your Go compiler to 1.11 or higher version)
 endif
@@ -70,22 +71,22 @@ else
 endif
 
 # Build chaos-daemon binary
-chaosdaemon: generate fmt vet
+chaosdaemon: generate
 	$(CGOENV) go build -ldflags '$(LDFLAGS)' -o bin/chaos-daemon ./cmd/chaos-daemon/main.go
 
 # Build manager binary
-manager: generate fmt vet
+manager: generate
 	$(GO) build -ldflags '$(LDFLAGS)' -o bin/chaos-controller-manager ./cmd/controller-manager/*.go
 
-chaosfs: generate fmt vet
+chaosfs: generate
 	$(GO) build -ldflags '$(LDFLAGS)' -o bin/chaosfs ./cmd/chaosfs/*.go
 
-dashboard: fmt vet
+dashboard:
 	$(GO) build -ldflags '$(LDFLAGS)' -o bin/chaos-dashboard ./cmd/chaos-dashboard/*.go
 
 binary: chaosdaemon manager chaosfs dashboard
 
-watchmaker: fmt vet
+watchmaker:
 	$(CGOENV) go build -ldflags '$(LDFLAGS)' -o bin/watchmaker ./cmd/watchmaker/...
 
 dashboard-server-frontend:
@@ -98,7 +99,7 @@ run: generate fmt vet manifests
 # Install CRDs into a cluster
 install: manifests
 	kubectl apply -f manifests/crd.yaml
-	helm install helm/chaos-mesh --name=chaos-mesh --namespace=chaos-testing
+	bash -c '[[ `helm version --client --short` == "Client: v2"* ]] && helm install helm/chaos-mesh --name=chaos-mesh --namespace=chaos-testing || helm install chaos-mesh helm/chaos-mesh --namespace=chaos-testing;'
 
 # Generate manifests e.g. CRD, RBAC etc.
 manifests: controller-gen
@@ -142,7 +143,7 @@ image-chaos-mesh: image-binary
 image-chaos-fs: image-binary
 	docker build -t ${DOCKER_REGISTRY_PREFIX}pingcap/chaos-fs ${DOCKER_BUILD_ARGS} images/chaosfs
 
-image-chaos-scripts:
+image-chaos-scripts: image-binary
 	docker build -t ${DOCKER_REGISTRY_PREFIX}pingcap/chaos-scripts ${DOCKER_BUILD_ARGS} images/chaos-scripts
 
 image-chaos-grafana:
@@ -152,7 +153,7 @@ image-chaos-dashboard: image-binary
 	docker build -t ${DOCKER_REGISTRY_PREFIX}pingcap/chaos-dashboard ${DOCKER_BUILD_ARGS} images/chaos-dashboard
 
 image-chaos-kernel:
-	docker build -t ${DOCKER_REGISTRY_PREFIX}pingcap/chaos-kernel ${DOCKER_BUILD_ARGS} images/chaos-kernel
+	docker build -t ${DOCKER_REGISTRY_PREFIX}pingcap/chaos-kernel ${DOCKER_BUILD_ARGS} --build-arg MAKE_JOBS=${MAKE_JOBS} --build-arg MIRROR=${UBUNTU_MIRROR} images/chaos-kernel
 
 docker-push:
 	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-mesh:latest"
@@ -182,6 +183,18 @@ generate: controller-gen
 
 yaml: manifests
 	kustomize build config/default > manifests/crd.yaml
+
+e2e-build:
+	$(GO) build -trimpath  -o test/image/e2e/bin/ginkgo github.com/onsi/ginkgo/ginkgo
+	$(GO) test -c  -o ./test/image/e2e/bin/e2e.test ./test/e2e
+
+e2e-docker: e2e-build
+	[ -d test/image/e2e/chaos-mesh ] && rm -r test/image/e2e/chaos-mesh || true
+	cp -r helm/chaos-mesh test/image/e2e
+	cp -r manifests test/image/e2e
+	docker build -t "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-mesh-e2e:latest" test/image/e2e
+
+check: fmt vet lint
 
 install-kind:
 ifeq (,$(shell which kind))
