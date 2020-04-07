@@ -207,7 +207,6 @@ type VMStressor struct {
 	// Bytes specifies N bytes consumed per vm worker, default is the total available memory.
 	// One can specify the size as % of total available memory or in units of B, KB/KiB,
 	// MB/MiB, GB/GiB, TB/TiB.
-	// +kubebuilder:default="100%"
 	// +optional
 	Bytes string `json:"bytes,omitempty"`
 }
@@ -373,9 +372,8 @@ type CPUStressor struct {
 	Stressor `json:",inline"`
 	// Load specifies P percent loading per CPU worker. 0 is effectively a sleep (no load) and 100
 	// is full loading.
-	// +kubebuilder:default=100
 	// +optional
-	Load int `json:"load,omitempty"`
+	Load *int `json:"load,omitempty"`
 	// Method specify a cpu stress method. By default, all the stress methods are exercised
 	// sequentially, however one can specify just one method to be used if required. Available cpu
 	// stress methods are described as follows:
@@ -476,7 +474,6 @@ type CPUStressor struct {
 	// union            perform  integer  arithmetic  on  a  mix of bit fields in a C union.  This exercises how well the compiler and CPU can perform integer bit field loads and
 	//                  stores.
 	// zeta             compute the Riemann Zeta function ζ(s) for s = 2.0..10.0
-	// +kubebuilder:default=all
 	// +optional
 	Method CPUMethod `json:"method,omitempty"`
 }

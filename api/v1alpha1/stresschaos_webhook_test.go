@@ -181,6 +181,14 @@ var _ = Describe("stresschaos_webhook", func() {
 					},
 					errs: 0,
 				},
+				//{
+				//	name: "unsupported method for CPUStressor",
+				//	stressor: &CPUStressor{
+				//		Stressor: Stressor{Workers: 1},
+				//		Method:   "xx",
+				//	},
+				//	errs: 1,
+				//},
 			}
 			parent := field.NewPath("parent")
 			for _, tc := range tcs {
@@ -201,6 +209,7 @@ var _ = Describe("stresschaos_webhook", func() {
 				Expect(vm.tryParseBytes()).ShouldNot(HaveOccurred())
 			}
 		})
+
 	})
 
 })

@@ -34,7 +34,6 @@ type Validateable interface {
 // log is for logging in this package.
 var (
 	stressChaosLog = ctrl.Log.WithName("stresschaos-resource")
-	cpuMethods     = []string{""}
 )
 
 // SetupWebhookWithManager setup StressChaos's webhook with manager
@@ -152,6 +151,10 @@ func (in *VMStressor) Validate(parent *field.Path, errs field.ErrorList) field.E
 
 func (in *VMStressor) tryParseBytes() error {
 	length := len(in.Bytes)
+	if length == 0 {
+		in.Bytes = "100%"
+		return nil
+	}
 	if in.Bytes[length-1] == '%' {
 		percent, err := strconv.Atoi(in.Bytes[:length-1])
 		if err != nil {
@@ -172,10 +175,18 @@ func (in *VMStressor) tryParseBytes() error {
 
 // Validate validates whether the CPUStressor is well defined
 func (in *CPUStressor) Validate(parent *field.Path, errs field.ErrorList) field.ErrorList {
+	if in.Load == nil {
+		in.Load = new(int)
+		*in.Load = 100
+		return errs
+	}
 	current := parent.Child("cpu")
 	errs = in.Stressor.Validate(current, errs)
-	if in.Load < 0 || in.Load > 100 {
+	if *in.Load < 0 || *in.Load > 100 {
 		errs = append(errs, field.Invalid(current, in, "illegal proportion"))
+	}
+	if len(in.Method) == 0 {
+		in.Method = CPUMethodAll
 	}
 	return errs
 }
