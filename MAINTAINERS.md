@@ -2,7 +2,7 @@
 
 This file lists the initial committers, and hence the maintainers of the Chaos Mesh project.
 
-In short, maintainers are people who are in charge of the maintenance of the Chaos Mesh project. This includes everything from day-to-day tasks such as issue triage to completing epics. Maintainers should be the first point of contact for security issues or other critical issues that require privacy not offered by the issue tracker.
+In short, maintainers are people who are in charge of the maintenance of the Chaos Mesh™ project. This includes everything from day-to-day tasks such as issue triage to completing epics. Maintainers should be the first point of contact for security issues or other critical issues that require privacy not offered by the issue tracker.
 
 The maintainers of Chaos Mesh, along with their email and focus area, are listed below:
 

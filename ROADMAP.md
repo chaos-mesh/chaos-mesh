@@ -1,6 +1,6 @@
-# Chaos Mesh Roadmap
+# Chaos Mesh™ Roadmap
 
-This document defines the roadmap for Chaos Mesh development.
+This document defines the roadmap for Chaos Mesh™ development.
 
 ## v1.0
 - [ ] Support BPF injection for time skew chaos. Simulate time jumping forward or backword.
