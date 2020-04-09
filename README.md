@@ -267,4 +267,5 @@ See [ROADMAP](/ROADMAP.md)
 
 Chaos Mesh is licensed under the Apache License, Version 2.0. See [LICENSE](/LICENSE) for the full license text.
 
-Chaos Mesh™is a trademark of Beijing PingCap Xingchen Technology and Development Co., Ltd. © 2020 Beijing PingCap Xingchen Technology and Development Co., Ltd. All rights reserved.
+
+Chaos Mesh™ is a trademark of Beijing PingCap Xingchen Technology and Development Co., Ltd. © 2020 Beijing PingCap Xingchen Technology and Development Co., Ltd. All rights reserved.
