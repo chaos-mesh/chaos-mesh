@@ -1,6 +1,6 @@
 # Network Chaos Document
 
-This document describes how to add network chaos experiments in Chaos Mesh™.
+This document describes how to add network chaos experiments in Chaos Mesh.
 
 Network Chaos actions are mainly divided into the following two categories:
 

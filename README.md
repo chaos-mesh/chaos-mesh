@@ -11,12 +11,12 @@
 >
 > This readme and related documentation are Work in Progress.
 
-Chaos Mesh™ is a cloud-native Chaos Engineering platform that orchestrates chaos on Kubernetes environments. At the current stage, it has the following components:
+Chaos Mesh is a cloud-native Chaos Engineering platform that orchestrates chaos on Kubernetes environments. At the current stage, it has the following components:
 
 - **Chaos Operator**: the core component for chaos orchestration. Fully open sourced.
 - **Chaos Dashboard**: a visualized panel that shows the impacts of chaos experiments on the online services of the system; under development; curently only supports chaos experiments on TiDB(https://github.com/pingcap/tidb).
 
-See the following demo video for a quick view of Chaos Mesh™:
+See the following demo video for a quick view of Chaos Mesh:
 
 [![Watch the video](./static/demo.gif)](https://www.youtube.com/watch?v=ifZEwdJO868)
 
@@ -42,13 +42,13 @@ Chaos Operator uses [Custom Resource Definition (CRD)](https://kubernetes.io/doc
 
 ## Prerequisites
 
-Before deploying Chaos Mesh™, make sure the following items have been installed. If you would like to have a try on your machine, you can refer to [get-started-on-your-local-machine](#get-started-on-your-local-machine) section.
+Before deploying Chaos Mesh, make sure the following items have been installed. If you would like to have a try on your machine, you can refer to [get-started-on-your-local-machine](#get-started-on-your-local-machine) section.
 
 - Kubernetes >= v1.12
 - [RBAC](https://kubernetes.io/docs/admin/authorization/rbac) enabled (optional)
 - [Helm](https://helm.sh/) version >= v2.8.2
 
-## Deploy Chaos Mesh™
+## Deploy Chaos Mesh
 
 ### Get the Helm files
 
@@ -59,16 +59,16 @@ cd chaos-mesh/
 
 ### Create custom resource type
 
-To use Chaos Mesh™, you must first create the related custom resource type.
+To use Chaos Mesh, you must first create the related custom resource type.
 
 ```bash
 kubectl apply -f manifests/
 kubectl get crd podchaos.pingcap.com
 ```
 
-### Install Chaos Mesh™
+### Install Chaos Mesh
 
-* Install Chaos Mesh™ with Chaos Operator only in docker environment
+* Install Chaos Mesh with Chaos Operator only in docker environment
 
 ```bash
 # create namespace chaos-testing
@@ -77,11 +77,11 @@ kubectl create ns chaos-testing
 helm install helm/chaos-mesh --name=chaos-mesh --namespace=chaos-testing
 # helm 3.X
 helm install chaos-mesh helm/chaos-mesh --namespace=chaos-testing
-# check Chaos Mesh™ pods installed
+# check Chaos Mesh pods installed
 kubectl get pods --namespace chaos-testing -l app.kubernetes.io/instance=chaos-mesh
 ```
 
-* Install Chaos Mesh™ with Chaos Operator only in containerd environment (Kind)
+* Install Chaos Mesh with Chaos Operator only in containerd environment (Kind)
 
 ```bash
 # create namespace chaos-testing
@@ -90,11 +90,11 @@ kubectl create ns chaos-testing
 helm install helm/chaos-mesh --name=chaos-mesh --namespace=chaos-testing --set chaosDaemon.runtime=containerd --set chaosDaemon.socketPath=/run/containerd/containerd.sock
 # helm 3.X
 helm install chaos-mesh helm/chaos-mesh --namespace=chaos-testing --set chaosDaemon.runtime=containerd --set chaosDaemon.socketPath=/run/containerd/containerd.sock
-# check Chaos Mesh™ pods installed
+# check Chaos Mesh pods installed
 kubectl get pods --namespace chaos-testing -l app.kubernetes.io/instance=chaos-mesh
 ```
 
-* Install Chaos Mesh™ with Chaos Operator and Chaos Dashboard
+* Install Chaos Mesh with Chaos Operator and Chaos Dashboard
 
 ```bash
 # helm 2.X
@@ -109,7 +109,7 @@ helm install chaos-mesh helm/chaos-mesh --namespace=chaos-testing --set dashboar
 >
 >**This deployment is for testing only. DO NOT USE in production!**
 
-You can try Chaos Mesh™ on your local K8s environment deployed using `kind` or `minikube`.
+You can try Chaos Mesh on your local K8s environment deployed using `kind` or `minikube`.
 
 ### Deploy your local K8s environment
 
@@ -140,7 +140,7 @@ You can try Chaos Mesh™ on your local K8s environment deployed using `kind` or
    kubectl cluster-info
    ```
 
-5. Install `chaos-mesh` on `kind` kubernetes cluster as suggested in [Install Chaos Mesh™](#install-chaos-mesh).
+5. Install `chaos-mesh` on `kind` kubernetes cluster as suggested in [Install Chaos Mesh](#install-chaos-mesh).
 
 #### Deploy with `minikube`
 
@@ -163,7 +163,7 @@ You can try Chaos Mesh™ on your local K8s environment deployed using `kind` or
    kubectl -n kube-system get pods -l app=helm
    ```
 
-4. Install `chaos-mesh` on `minikube` kubernetes cluster as suggested in [Install Chaos Mesh™](#install-chaos-mesh).
+4. Install `chaos-mesh` on `minikube` kubernetes cluster as suggested in [Install Chaos Mesh](#install-chaos-mesh).
 
 **Note:**
 
@@ -175,7 +175,7 @@ There are some known restrictions for Chaos Operator deployed on `minikube` clus
 
 ### Deploy target cluster
 
-After Chaos Mesh™ is deployed, we can deploy the target cluster to be tested, or where we want to inject faults. For illustration purposes, we use TiDB as our sample cluster.
+After Chaos Mesh is deployed, we can deploy the target cluster to be tested, or where we want to inject faults. For illustration purposes, we use TiDB as our sample cluster.
 
 You can follow the instructions in the following two documents to deploy a TiDB cluster:
 
@@ -235,7 +235,7 @@ Chaos Dashboard is currently only available for TiDB clusters. Stay tuned for mo
 
 > **Note:**
 >
-> If Chaos Dashboard was not installed in your earlier deployment, you need to install it by upgrading Chaos Mesh™:
+> If Chaos Dashboard was not installed in your earlier deployment, you need to install it by upgrading Chaos Mesh:
 >
 > ```helm upgrade chaos-mesh helm/chaos-mesh --namespace=chaos-testing --set dashboard.create=true```
 
@@ -265,4 +265,4 @@ See [ROADMAP](/ROADMAP.md)
 
 ## License
 
-Chaos Mesh™ is licensed under the Apache License, Version 2.0. See [LICENSE](/LICENSE) for the full license text.
+Chaos Mesh is licensed under the Apache License, Version 2.0. See [LICENSE](/LICENSE) for the full license text.

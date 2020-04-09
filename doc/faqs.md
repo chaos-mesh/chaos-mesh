@@ -2,9 +2,9 @@
 
 ## Question
 
-### Q: If I do not have k8s, can I using Chaos Mesh™ to create chaos experiments
+### Q: If I do not have k8s, can I using Chaos Mesh to create chaos experiments
 
-No, you can not use Chaos Mesh™ in this case, but you can still do chaos experiments using command line following [Command Line Usages of Chaos](https://github.com/pingcap/tipocket/blob/master/doc/command_line_chaos.md)
+No, you can not use Chaos Mesh in this case, but you can still do chaos experiments using command line following [Command Line Usages of Chaos](https://github.com/pingcap/tipocket/blob/master/doc/command_line_chaos.md)
 
 ## Debug
 

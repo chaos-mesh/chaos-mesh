@@ -12,14 +12,14 @@ read/write errors, etc. It can inject delay and errno when you use the IO system
 
 ### Commands and args for the application container
 
-Chaos Mesh™ uses [`wait-fush.sh`](https://github.com/pingcap/chaos-mesh/blob/master/doc/sidecar_configmap.md#tips) to ensure that the fuse-daemon server is running normally before the application starts. 
+Chaos Mesh uses [`wait-fush.sh`](https://github.com/pingcap/chaos-mesh/blob/master/doc/sidecar_configmap.md#tips) to ensure that the fuse-daemon server is running normally before the application starts. 
 so `wait-fush.sh` needs to be injected into the startup command of the container. If the application process is not started by the [commands and args of the container](https://kubernetes.io/docs/tasks/inject-data-application/define-command-argument-container/), 
 IO chaos won't work properly. When Kubernetes natively supports [Sidecar Containers](https://github.com/kubernetes/enhancements/issues/753) in future versions, we will remove the `wait-fush.sh` dependency.
 
 ### Admission Controller
 
 IO chaos needs to inject a sidecar container to user pods and the sidecar container can be added to applicable Kubernetes pods 
-using a [mutating webhook admission controller](https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/) provided by Chaos Mesh™.
+using a [mutating webhook admission controller](https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/) provided by Chaos Mesh.
 
 > While admission controllers are enabled by default, some Kubernetes distributions may disable them. 
 > If this is the case, follow the instructions to [turn on admission controllers](https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/#how-do-i-turn-on-an-admission-controller).     
@@ -53,7 +53,7 @@ ARGS="--pd=${CLUSTER_NAME}-pd:2379 \
 
 ### Configure a ConfigMap 
 
-Chaos Mesh™ uses sidecar container to inject IO chaos, 
+Chaos Mesh uses sidecar container to inject IO chaos, 
 to fulfill this chaos you need to configure this sidecar container using a [ConfigMap](https://kubernetes.io/docs/tasks/configure-pod-container/configure-pod-configmap/)
 You can refer this [document](sidecar_configmap.md) to define a specify ConfigMap for your application before starting your chaos experiment. 
 

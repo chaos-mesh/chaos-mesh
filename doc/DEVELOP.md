@@ -1,6 +1,6 @@
 # Development Guide
 
-This guide prepares you for the development of Chaos Mesh™ from scratch. Before you get started, it is recommended you get familiar with the project through the following materials:
+This guide prepares you for the development of Chaos Mesh from scratch. Before you get started, it is recommended you get familiar with the project through the following materials:
 
 - [README](./README.md)
 
