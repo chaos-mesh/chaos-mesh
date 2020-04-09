@@ -1,3 +1,4 @@
+{{ if .Values.webhook.deleteSecret }}
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -27,12 +28,12 @@ spec:
       serviceAccountName: {{ .Values.controllerManager.serviceAccount }}
       containers:
         - name: "{{.Release.Name}}-job-del"
-          image: bitnami/kubectl:latest
+          image: {{ .Values.kubectlImage }}
           imagePullPolicy: IfNotPresent
           command:
             - "sh"
             - "-c"
             - |
               set -e
-              kubectl delete mutatingwebhookconfigurations.admissionregistration.k8s.io chaos-mesh-sidecar-injector || true // Auto Delete mutatingwebhookconfigurations
-              kubectl delete secrets -n {{ .Release.Namespace }} webhook-certs || true
+              kubectl delete secrets -n {{ .Release.Namespace }} {{ template "chaos-mesh.certs" . }} || true
+{{- end }}

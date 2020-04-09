@@ -1,4 +1,4 @@
-FROM grafana/grafana:master
+FROM grafana/grafana:6.7.1
 
 # enable anonymous
 COPY grafana.ini /etc/grafana

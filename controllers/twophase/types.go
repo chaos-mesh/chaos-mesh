@@ -65,28 +65,35 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	var err error
 	now := time.Now()
 
-	r.Log.Info("reconciling a two phase chaos", "name", req.Name, "namespace", req.Namespace)
+	r.Log.Info("Reconciling a two phase chaos", "name", req.Name, "namespace", req.Namespace)
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
 	_chaos := r.Object()
 	if err = r.Get(ctx, req.NamespacedName, _chaos); err != nil {
 		r.Log.Error(err, "unable to get chaos")
-		return ctrl.Result{}, nil
+		return ctrl.Result{}, err
 	}
 	chaos := _chaos.(InnerSchedulerObject)
 
 	duration, err := chaos.GetDuration()
 	if err != nil {
 		r.Log.Error(err, "failed to get chaos duration")
-		return ctrl.Result{}, nil
+		return ctrl.Result{}, err
 	}
 
 	scheduler := chaos.GetScheduler()
-	if duration == nil || scheduler == nil {
-		r.Log.Info("scheduler and duration should be defined currently")
-		return ctrl.Result{}, nil
+	if scheduler == nil {
+		r.Log.Info("Scheduler should be defined currently")
+		return ctrl.Result{}, fmt.Errorf("misdefined scheduler")
 	}
+
+	if duration == nil {
+		zero := 0 * time.Second
+		duration = &zero
+	}
+
+	status := chaos.GetStatus()
 
 	if chaos.IsDeleted() {
 		// This chaos was deleted
@@ -94,18 +101,18 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		err = r.Recover(ctx, req, chaos)
 		if err != nil {
 			r.Log.Error(err, "failed to recover chaos")
-			return ctrl.Result{Requeue: true}, nil
+			return ctrl.Result{Requeue: true}, err
 		}
+
+		status.Experiment.Phase = v1alpha1.ExperimentPhaseFinished
 	} else if !chaos.GetNextRecover().IsZero() && chaos.GetNextRecover().Before(now) {
 		// Start recover
 		r.Log.Info("Recovering")
 
-		status := chaos.GetStatus()
-
 		err = r.Recover(ctx, req, chaos)
 		if err != nil {
 			r.Log.Error(err, "failed to recover chaos")
-			return ctrl.Result{Requeue: true}, nil
+			return ctrl.Result{Requeue: true}, err
 		}
 		chaos.SetNextRecover(time.Time{})
 
@@ -117,27 +124,33 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		nextStart, err := utils.NextTime(*chaos.GetScheduler(), now)
 		if err != nil {
 			r.Log.Error(err, "failed to get next start time")
-			return ctrl.Result{}, nil
+			return ctrl.Result{}, err
 		}
 
 		nextRecover := now.Add(*duration)
+		// TODO(at15): this should be validated in webhook instead of throwing error at runtime.
+		// User can give a cron with interval shorter than duration.
+		// Example:
+		//  duration: "10s"
+		//  scheduler:
+		//    cron: "@every 5s
 		if nextStart.Before(nextRecover) {
 			err := fmt.Errorf("nextRecover shouldn't be later than nextStart")
 			r.Log.Error(err, "nextRecover is later than nextStart. Then recover can never be reached",
 				"nextRecover", nextRecover, "nextStart", nextStart)
-			return ctrl.Result{}, nil
+			return ctrl.Result{}, err
 		}
 
-		r.Log.Info("now chaos action:", "chaos", chaos)
+		r.Log.Info("Chaos action:", "chaos", chaos)
 
-		// Start failure action
+		// Start to apply action
 		r.Log.Info("Performing Action")
-
-		status := chaos.GetStatus()
 
 		err = r.Apply(ctx, req, chaos)
 		if err != nil {
 			r.Log.Error(err, "failed to apply chaos action")
+
+			status.Experiment.Phase = v1alpha1.ExperimentPhaseFailed
 
 			updateError := retry.RetryOnConflict(retry.DefaultRetry, func() error {
 				return r.Update(ctx, chaos)
@@ -146,11 +159,12 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 				r.Log.Error(updateError, "unable to update chaos finalizers")
 			}
 
-			return ctrl.Result{Requeue: true}, nil
+			return ctrl.Result{Requeue: true}, err
 		}
 		status.Experiment.StartTime = &metav1.Time{
 			Time: time.Now(),
 		}
+
 		status.Experiment.Phase = v1alpha1.ExperimentPhaseRunning
 
 		chaos.SetNextStart(*nextStart)
@@ -169,7 +183,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 
 	if err := r.Update(ctx, chaos); err != nil {
 		r.Log.Error(err, "unable to update chaosctl status")
-		return ctrl.Result{}, nil
+		return ctrl.Result{}, err
 	}
 
 	return ctrl.Result{}, nil

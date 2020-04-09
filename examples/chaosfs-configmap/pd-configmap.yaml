@@ -32,8 +32,8 @@ data:
         - -original=/var/lib/pd/fuse-data
         - -mountpoint=/var/lib/pd/data
       volumeMounts:
-        - name: tikv
-          mountPath: /var/lib/tikv
+        - name: pd
+          mountPath: /var/lib/pd
           mountPropagation: Bidirectional
     volumeMounts:
     - name: pd

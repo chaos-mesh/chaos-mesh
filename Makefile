@@ -2,22 +2,25 @@
 LDFLAGS = $(if $(DEBUGGER),,-s -w) $(shell ./hack/version.sh)
 
 # SET DOCKER_REGISTRY to change the docker registry
-DOCKER_REGISTRY := $(if $(DOCKER_REGISTRY),$(DOCKER_REGISTRY),localhost:5000)
+DOCKER_REGISTRY_PREFIX := $(if $(DOCKER_REGISTRY),$(DOCKER_REGISTRY)/,)
+DOCKER_BUILD_ARGS := --build-arg HTTP_PROXY=${HTTP_PROXY} --build-arg HTTPS_PROXY=${HTTPS_PROXY}
 
 GOVER_MAJOR := $(shell go version | sed -E -e "s/.*go([0-9]+)[.]([0-9]+).*/\1/")
 GOVER_MINOR := $(shell go version | sed -E -e "s/.*go([0-9]+)[.]([0-9]+).*/\2/")
 GO111 := $(shell [ $(GOVER_MAJOR) -gt 1 ] || [ $(GOVER_MAJOR) -eq 1 ] && [ $(GOVER_MINOR) -ge 11 ]; echo $$?)
+
 ifeq ($(GO111), 1)
 $(error Please upgrade your Go compiler to 1.11 or higher version)
 endif
 
 # Enable GO111MODULE=on explicitly, disable it with GO111MODULE=off when necessary.
 export GO111MODULE := on
-GOOS := $(if $(GOOS),$(GOOS),linux)
-GOARCH := $(if $(GOARCH),$(GOARCH),amd64)
+GOOS := $(if $(GOOS),$(GOOS),"")
+GOARCH := $(if $(GOARCH),$(GOARCH),"")
 GOENV  := GO15VENDOREXPERIMENT="1" CGO_ENABLED=0 GOOS=$(GOOS) GOARCH=$(GOARCH)
+CGOENV  := GO15VENDOREXPERIMENT="1" CGO_ENABLED=1 GOOS=$(GOOS) GOARCH=$(GOARCH)
 GO     := $(GOENV) go
-GOTEST := TEST_USE_EXISTING_CLUSTER=false go test
+GOTEST := TEST_USE_EXISTING_CLUSTER=false NO_PROXY="${NO_PROXY},testhost" go test
 SHELL    := /usr/bin/env bash
 
 PACKAGE_LIST := go list ./... | grep -vE "pkg/client" | grep -vE "zz_generated" | grep -vE "vendor"
@@ -35,16 +38,28 @@ else
 GOBIN=$(shell go env GOBIN)
 endif
 
+FAILPOINT_ENABLE  := $$(find $$PWD/ -type d | grep -vE "(\.git|bin)" | xargs $(GOBIN)/failpoint-ctl enable)
+FAILPOINT_DISABLE := $$(find $$PWD/ -type d | grep -vE "(\.git|bin)" | xargs $(GOBIN)/failpoint-ctl disable)
+
 all: yaml build image
 
-build: chaosdaemon manager chaosfs dashboard dashboard-server-frontend
+build: dashboard-server-frontend
 
 # Run tests
-test: generate fmt vet lint manifests
+test: failpoint-enable generate fmt vet lint manifests test-utils
 	rm -rf cover.* cover
 	mkdir -p cover
 	$(GOTEST) ./api/... ./controllers/... ./pkg/... -coverprofile cover.out.tmp
 	cat cover.out.tmp | grep -v "_generated.deepcopy.go" > cover.out
+	@$(FAILPOINT_DISABLE)
+
+test-utils: timer multithread_tracee
+
+timer:
+	$(GO) build -ldflags '$(LDFLAGS)' -o bin/test/timer ./test/cmd/timer/*.go
+
+multithread_tracee: test/cmd/multithread_tracee/main.c
+	cc test/cmd/multithread_tracee/main.c -lpthread -O2 -o ./bin/test/multithread_tracee
 
 coverage:
 ifeq ("$(JenkinsCI)", "1")
@@ -56,18 +71,23 @@ else
 endif
 
 # Build chaos-daemon binary
-chaosdaemon: generate fmt vet
-	$(GO) build -ldflags '$(LDFLAGS)' -o images/chaos-daemon/bin/chaos-daemon ./cmd/chaos-daemon/main.go
+chaosdaemon: generate
+	$(CGOENV) go build -ldflags '$(LDFLAGS)' -o bin/chaos-daemon ./cmd/chaos-daemon/main.go
 
 # Build manager binary
-manager: generate fmt vet
-	$(GO) build -ldflags '$(LDFLAGS)' -o images/chaos-mesh/bin/chaos-controller-manager ./cmd/controller-manager/*.go
+manager: generate
+	$(GO) build -ldflags '$(LDFLAGS)' -o bin/chaos-controller-manager ./cmd/controller-manager/*.go
 
-chaosfs: generate fmt vet
-	$(GO) build -ldflags '$(LDFLAGS)' -o images/chaosfs/bin/chaosfs ./cmd/chaosfs/*.go
+chaosfs: generate
+	$(GO) build -ldflags '$(LDFLAGS)' -o bin/chaosfs ./cmd/chaosfs/*.go
 
-dashboard: fmt vet
-	$(GO) build -ldflags '$(LDFLAGS)' -o images/chaos-dashboard/bin/chaos-dashboard ./cmd/chaos-dashboard/*.go
+dashboard:
+	$(GO) build -ldflags '$(LDFLAGS)' -o bin/chaos-dashboard ./cmd/chaos-dashboard/*.go
+
+binary: chaosdaemon manager chaosfs dashboard
+
+watchmaker:
+	$(CGOENV) go build -ldflags '$(LDFLAGS)' -o bin/watchmaker ./cmd/watchmaker/...
 
 dashboard-server-frontend:
 	cd images/chaos-dashboard; yarn install; yarn build
@@ -79,81 +99,107 @@ run: generate fmt vet manifests
 # Install CRDs into a cluster
 install: manifests
 	kubectl apply -f manifests/crd.yaml
-	helm install helm/chaos-mesh --name=chaos-mesh --namespace=chaos-testing
+	bash -c '[[ `helm version --client --short` == "Client: v2"* ]] && helm install helm/chaos-mesh --name=chaos-mesh --namespace=chaos-testing || helm install chaos-mesh helm/chaos-mesh --namespace=chaos-testing;'
 
 # Generate manifests e.g. CRD, RBAC etc.
 manifests: controller-gen
-	$(CONTROLLER_GEN) $(CRD_OPTIONS) rbac:roleName=manager-role webhook paths="./..." output:crd:artifacts:config=config/crd/bases
+	$(GOBIN)/controller-gen $(CRD_OPTIONS) rbac:roleName=manager-role webhook paths="./..." output:crd:artifacts:config=config/crd/bases
 
 # Run go fmt against code
 fmt: groupimports
-	$(GO) fmt ./...
+	$(CGOENV) go fmt ./...
 
-groupimports: install-goimports
-	goimports -w -l -local github.com/pingcap/chaos-mesh $$($(PACKAGE_DIRECTORIES))
+groupimports: goimports
+	$(GOBIN)/goimports -w -l -local github.com/pingcap/chaos-mesh $$($(PACKAGE_DIRECTORIES))
 
+failpoint-enable: failpoint-ctl
+# Converting gofail failpoints...
+	@$(FAILPOINT_ENABLE)
 
-install-goimports:
-ifeq (,$(shell which goimports))
-	@echo "installing goimports"
-	go get golang.org/x/tools/cmd/goimports
-endif
+failpoint-disable: failpoint-ctl
+# Restoring gofail failpoints...
+	@$(FAILPOINT_DISABLE)
 
 # Run go vet against code
 vet:
-	$(GO) vet ./...
+	$(CGOENV) go vet ./...
 
 tidy:
 	@echo "go mod tidy"
 	GO111MODULE=on go mod tidy
 	git diff --quiet go.mod go.sum
 
-image:
-	docker build -t ${DOCKER_REGISTRY}/pingcap/chaos-daemon images/chaos-daemon
-	docker build -t ${DOCKER_REGISTRY}/pingcap/chaos-mesh images/chaos-mesh
-	docker build -t ${DOCKER_REGISTRY}/pingcap/chaos-fs images/chaosfs
-	cp -R scripts images/chaos-scripts
-	docker build -t ${DOCKER_REGISTRY}/pingcap/chaos-scripts images/chaos-scripts
-	rm -rf images/chaos-scripts/scripts
-	docker build -t ${DOCKER_REGISTRY}/pingcap/chaos-grafana images/grafana
-	docker build -t ${DOCKER_REGISTRY}/pingcap/chaos-dashboard images/chaos-dashboard
+image: image-chaos-daemon image-chaos-mesh image-chaos-fs image-chaos-scripts image-chaos-grafana image-chaos-dashboard image-chaos-kernel
+
+image-binary:
+	docker build -t pingcap/binary ${DOCKER_BUILD_ARGS} .
+
+image-chaos-daemon: image-binary
+	docker build -t ${DOCKER_REGISTRY_PREFIX}pingcap/chaos-daemon ${DOCKER_BUILD_ARGS} images/chaos-daemon
+
+image-chaos-mesh: image-binary
+	docker build -t ${DOCKER_REGISTRY_PREFIX}pingcap/chaos-mesh ${DOCKER_BUILD_ARGS} images/chaos-mesh
+
+image-chaos-fs: image-binary
+	docker build -t ${DOCKER_REGISTRY_PREFIX}pingcap/chaos-fs ${DOCKER_BUILD_ARGS} images/chaosfs
+
+image-chaos-scripts: image-binary
+	docker build -t ${DOCKER_REGISTRY_PREFIX}pingcap/chaos-scripts ${DOCKER_BUILD_ARGS} images/chaos-scripts
+
+image-chaos-grafana:
+	docker build -t ${DOCKER_REGISTRY_PREFIX}pingcap/chaos-grafana ${DOCKER_BUILD_ARGS} images/grafana
+
+image-chaos-dashboard: image-binary
+	docker build -t ${DOCKER_REGISTRY_PREFIX}pingcap/chaos-dashboard ${DOCKER_BUILD_ARGS} images/chaos-dashboard
+
+image-chaos-kernel:
+	docker build -t ${DOCKER_REGISTRY_PREFIX}pingcap/chaos-kernel ${DOCKER_BUILD_ARGS} --build-arg MAKE_JOBS=${MAKE_JOBS} --build-arg MIRROR=${UBUNTU_MIRROR} images/chaos-kernel
 
 docker-push:
-	docker push "${DOCKER_REGISTRY}/pingcap/chaos-mesh:latest"
-	docker push "${DOCKER_REGISTRY}/pingcap/chaos-fs:latest"
-	docker push "${DOCKER_REGISTRY}/pingcap/chaos-daemon:latest"
-	docker push "${DOCKER_REGISTRY}/pingcap/chaos-scripts:latest"
-	docker push "${DOCKER_REGISTRY}/pingcap/chaos-grafana:latest"
-	docker push "${DOCKER_REGISTRY}/pingcap/chaos-dashboard:latest"
+	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-mesh:latest"
+	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-fs:latest"
+	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-daemon:latest"
+	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-scripts:latest"
+	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-grafana:latest"
+	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-dashboard:latest"
+	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-kernel:latest"
 
-bin/revive:
-	GO111MODULE="on" go build -o bin/revive github.com/mgechev/revive
+controller-gen:
+	$(GO) get sigs.k8s.io/controller-tools/cmd/controller-gen@v0.2.5
+revive:
+	$(GO) get github.com/mgechev/revive@v1.0.2-0.20200225072153-6219ca02fffb
+failpoint-ctl:
+	$(GO) get github.com/pingcap/failpoint/failpoint-ctl@v0.0.0-20200210140405-f8f9fb234798
+goimports:
+	$(GO) get golang.org/x/tools/cmd/goimports@v0.0.0-20200309202150-20ab64c0d93f
 
-lint: bin/revive
+lint: revive
 	@echo "linting"
-	bin/revive -formatter friendly -config revive.toml $$($(PACKAGE_LIST))
+	$(GOBIN)/revive -formatter friendly -config revive.toml $$($(PACKAGE_LIST))
 
 # Generate code
 generate: controller-gen
-	$(CONTROLLER_GEN) object:headerFile=./hack/boilerplate.go.txt paths="./..."
-
-# find or download controller-gen
-# download controller-gen if necessary
-controller-gen:
-ifeq (, $(shell which controller-gen))
-	go get sigs.k8s.io/controller-tools/cmd/controller-gen@v0.2.4
-CONTROLLER_GEN=$(GOBIN)/controller-gen
-else
-CONTROLLER_GEN=$(shell which controller-gen)
-endif
+	$(GOBIN)/controller-gen object:headerFile=./hack/boilerplate.go.txt paths="./..."
 
 yaml: manifests
 	kustomize build config/default > manifests/crd.yaml
 
+e2e-build:
+	$(GO) build -trimpath  -o test/image/e2e/bin/ginkgo github.com/onsi/ginkgo/ginkgo
+	$(GO) test -c  -o ./test/image/e2e/bin/e2e.test ./test/e2e
+
+e2e-docker: e2e-build
+	[ -d test/image/e2e/chaos-mesh ] && rm -r test/image/e2e/chaos-mesh || true
+	cp -r helm/chaos-mesh test/image/e2e
+	cp -r manifests test/image/e2e
+	docker build -t "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-mesh-e2e:latest" test/image/e2e
+
+check: fmt vet lint
+
 install-kind:
 ifeq (,$(shell which kind))
 	@echo "installing kind"
-	GO111MODULE="on" go get sigs.k8s.io/kind@v0.4.0
+	GO111MODULE="on" go get sigs.k8s.io/kind@v0.7.0
 else
 	@echo "kind has been installed"
 endif
@@ -166,7 +212,7 @@ ifeq (,$(shell which kubebuilder))
 	# move to a long-term location and put it on your path
 	# (you'll need to set the KUBEBUILDER_ASSETS env var if you put it somewhere else)
 	sudo mv /tmp/kubebuilder_2.2.0_$(shell go env GOOS)_$(shell go env GOARCH) /usr/local/kubebuilder
-	export PATH=${PATH}:/usr/local/kubebuilder/bin
+	export PATH="${PATH}:/usr/local/kubebuilder/bin"
 else
 	@echo "kubebuilder has been installed"
 endif
@@ -183,16 +229,7 @@ else
 	@echo "kustomize has been installed"
 endif
 
-install-test-dependency: install-kubebuilder
-	go get -u github.com/jstemmer/go-junit-report \
-	&& go get github.com/axw/gocov/gocov \
-	&& go get github.com/AlekSi/gocov-xml \
-	&& go get github.com/onsi/ginkgo/ginkgo \
-	&& go get golang.org/x/tools/cmd/cover \
-	&& go get -u github.com/matm/gocov-html
-
-
-.PHONY: all build test install manifests fmt vet tidy image \
+.PHONY: all build test install manifests groupimports fmt vet tidy image \
 	docker-push lint generate controller-gen yaml \
 	manager chaosfs chaosdaemon install-kind install-kubebuilder \
-	install-kustomize install-test-dependency dashboard dashboard-server-frontend
+	install-kustomize dashboard dashboard-server-frontend

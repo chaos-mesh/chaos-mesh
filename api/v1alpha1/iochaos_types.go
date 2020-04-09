@@ -64,16 +64,18 @@ type IoChaosSpec struct {
 	// Action defines the specific pod chaos action.
 	// Supported action: delay / errno / mixed
 	// Default action: delay
+	// +kubebuilder:validation:Enum=delay;errno;mixed
 	Action IOChaosAction `json:"action"`
 
 	// Mode defines the mode to run chaos action.
 	// Supported mode: one / all / fixed / fixed-percent / random-max-percent
+	// +kubebuilder:validation:Enum=one;all;fixed;fixed-percent;random-max-percent
 	Mode PodMode `json:"mode"`
 
 	// Value is required when the mode is set to `FixedPodMode` / `FixedPercentPodMod` / `RandomMaxPercentPodMod`.
 	// If `FixedPodMode`, provide an integer of pods to do chaos action.
-	// If `FixedPercentPodMod`, provide a number from 0-100 to specify the max % of pods the server can do chaos action.
-	// IF `RandomMaxPercentPodMod`,  provide a number from 0-100 to specify the % of pods to do chaos action
+	// If `FixedPercentPodMod`, provide a number from 0-100 to specify the percent of pods the server can do chaos action.
+	// IF `RandomMaxPercentPodMod`,  provide a number from 0-100 to specify the max percent of pods to do chaos action
 	// +optional
 	Value string `json:"value"`
 
@@ -89,6 +91,7 @@ type IoChaosSpec struct {
 	// Layer represents the layer of the I/O action.
 	// Supported value: fs.
 	// Default layer: fs
+	// +kubebuilder:validation:Enum=fs
 	Layer IOLayer `json:"layer"`
 
 	// Delay defines the value of I/O chaos action delay.

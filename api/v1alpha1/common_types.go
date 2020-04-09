@@ -15,6 +15,7 @@ package v1alpha1
 
 import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	ctrl "sigs.k8s.io/controller-runtime"
 )
 
 // SelectorSpec defines the some selectors to select objects.
@@ -130,3 +131,9 @@ type ExperimentStatus struct {
 	// +optional
 	Pods []PodStatus `json:"podChaos,omitempty"`
 }
+
+const (
+	invalidConfigurationMsg = "invalid configuration"
+)
+
+var log = ctrl.Log.WithName("validate-webhook")

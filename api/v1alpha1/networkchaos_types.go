@@ -14,12 +14,14 @@
 package v1alpha1
 
 import (
+	"errors"
 	"strconv"
+	"strings"
 	"time"
 
-	chaosdaemon "github.com/pingcap/chaos-mesh/pkg/chaosdaemon/pb"
-
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	chaosdaemonpb "github.com/pingcap/chaos-mesh/pkg/chaosdaemon/pb"
 )
 
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
@@ -29,10 +31,14 @@ import (
 type NetworkChaosAction string
 
 const (
+	// NetemAction is a combination of several chaos actions i.e. delay, loss, duplicate, corrupt.
+	// When using this action multiple specs are merged into one Netem RPC and sends to chaos daemon.
+	NetemAction NetworkChaosAction = "netem"
+
 	// DelayAction represents the chaos action of adding delay on pods.
 	DelayAction NetworkChaosAction = "delay"
 
-	// LossAction represents the chaos action of lossing packets on pods.
+	// LossAction represents the chaos action of losing packets on pods.
 	LossAction NetworkChaosAction = "loss"
 
 	// DuplicateAction represents the chaos action of duplicating packets on pods.
@@ -43,6 +49,9 @@ const (
 
 	// PartitionAction represents the chaos action of network partition of pods.
 	PartitionAction NetworkChaosAction = "partition"
+
+	// BandwidthAction represents the chaos action of network bandwidth of pods.
+	BandwidthAction NetworkChaosAction = "bandwidth"
 )
 
 // PartitionDirection represents the block direction from source to target
@@ -64,46 +73,49 @@ type PartitionTarget struct {
 	TargetSelector SelectorSpec `json:"selector"`
 
 	// TargetMode defines the partition target selector mode
+	// +kubebuilder:validation:Enum=one;all;fixed;fixed-percent;random-max-percent;""
 	TargetMode PodMode `json:"mode"`
 
 	// TargetValue is required when the mode is set to `FixedPodMode` / `FixedPercentPodMod` / `RandomMaxPercentPodMod`.
 	// If `FixedPodMode`, provide an integer of pods to do chaos action.
-	// If `FixedPercentPodMod`, provide a number from 0-100 to specify the max % of pods the server can do chaos action.
-	// If `RandomMaxPercentPodMod`,  provide a number from 0-100 to specify the % of pods to do chaos action
+	// If `FixedPercentPodMod`, provide a number from 0-100 to specify the percent of pods the server can do chaos action.
+	// If `RandomMaxPercentPodMod`,  provide a number from 0-100 to specify the max percent of pods to do chaos action
 	// +optional
 	TargetValue string `json:"value"`
 }
 
 // GetSelector is a getter for Selector (for implementing SelectSpec)
-func (t *PartitionTarget) GetSelector() SelectorSpec {
-	return t.TargetSelector
+func (in *PartitionTarget) GetSelector() SelectorSpec {
+	return in.TargetSelector
 }
 
 // GetMode is a getter for Mode (for implementing SelectSpec)
-func (t *PartitionTarget) GetMode() PodMode {
-	return t.TargetMode
+func (in *PartitionTarget) GetMode() PodMode {
+	return in.TargetMode
 }
 
 // GetValue is a getter for Value (for implementing SelectSpec)
-func (t *PartitionTarget) GetValue() string {
-	return t.TargetValue
+func (in *PartitionTarget) GetValue() string {
+	return in.TargetValue
 }
 
 // NetworkChaosSpec defines the desired state of NetworkChaos
 type NetworkChaosSpec struct {
 	// Action defines the specific network chaos action.
-	// Supported action: delay
+	// Supported action: partition, netem, delay, loss, duplicate, corrupt
 	// Default action: delay
+	// +kubebuilder:validation:Enum=netem;delay;loss;duplicate;corrupt;partition;bandwidth
 	Action NetworkChaosAction `json:"action"`
 
 	// Mode defines the mode to run chaos action.
 	// Supported mode: one / all / fixed / fixed-percent / random-max-percent
+	// +kubebuilder:validation:Enum=one;all;fixed;fixed-percent;random-max-percent
 	Mode PodMode `json:"mode"`
 
 	// Value is required when the mode is set to `FixedPodMode` / `FixedPercentPodMod` / `RandomMaxPercentPodMod`.
 	// If `FixedPodMode`, provide an integer of pods to do chaos action.
-	// If `FixedPercentPodMod`, provide a number from 0-100 to specify the max % of pods the server can do chaos action.
-	// If `RandomMaxPercentPodMod`,  provide a number from 0-100 to specify the % of pods to do chaos action
+	// If `FixedPercentPodMod`, provide a number from 0-100 to specify the percent of pods the server can do chaos action.
+	// If `RandomMaxPercentPodMod`,  provide a number from 0-100 to specify the max percent of pods to do chaos action
 	// +optional
 	Value string `json:"value"`
 
@@ -126,16 +138,21 @@ type NetworkChaosSpec struct {
 	// DuplicateSpec represents the detail about loss action
 	Duplicate *DuplicateSpec `json:"duplicate,omitempty"`
 
-	// Corrupt represents the detail about loss action
+	// Corrupt represents the detail about corrupt action
 	Corrupt *CorruptSpec `json:"corrupt,omitempty"`
+
+	// Bandwidth represents the detail about bandwidth control action
+	// +optional
+	Bandwidth *BandwidthSpec `json:"bandwidth,omitempty"`
 
 	// Direction represents the partition direction
 	// +optional
-	Direction PartitionDirection `json:"direction"`
+	// +kubebuilder:validation:Enum=to;from;both;""
+	Direction PartitionDirection `json:"direction,omitempty"`
 
 	// Target represents network partition target
 	// +optional
-	Target PartitionTarget `json:"target"`
+	Target PartitionTarget `json:"target,omitempty"`
 
 	// Next time when this action will be applied again
 	// +optional
@@ -246,31 +263,51 @@ func (in *NetworkChaos) GetScheduler() *SchedulerSpec {
 
 // DelaySpec defines detail of a delay action
 type DelaySpec struct {
-	Latency     string `json:"latency"`
-	Correlation string `json:"correlation"`
-	Jitter      string `json:"jitter"`
+	Latency     string       `json:"latency"`
+	Correlation string       `json:"correlation,omitempty"`
+	Jitter      string       `json:"jitter,omitempty"`
+	Reorder     *ReorderSpec `json:"reorder,omitempty"`
 }
 
-func (delay *DelaySpec) ToNetem() (*chaosdaemon.Netem, error) {
-	delayTime, err := time.ParseDuration(delay.Latency)
+// ToNetem implements Netem interface.
+func (in *DelaySpec) ToNetem() (*chaosdaemonpb.Netem, error) {
+	delayTime, err := time.ParseDuration(in.Latency)
 	if err != nil {
 		return nil, err
 	}
-	jitter, err := time.ParseDuration(delay.Jitter)
-	if err != nil {
-		return nil, err
-	}
-
-	corr, err := strconv.ParseFloat(delay.Correlation, 32)
+	jitter, err := time.ParseDuration(in.Jitter)
 	if err != nil {
 		return nil, err
 	}
 
-	return &chaosdaemon.Netem{
+	corr, err := strconv.ParseFloat(in.Correlation, 32)
+	if err != nil {
+		return nil, err
+	}
+
+	netem := &chaosdaemonpb.Netem{
 		Time:      uint32(delayTime.Nanoseconds() / 1e3),
 		DelayCorr: float32(corr),
 		Jitter:    uint32(jitter.Nanoseconds() / 1e3),
-	}, nil
+	}
+
+	if in.Reorder != nil {
+		reorderPercentage, err := strconv.ParseFloat(in.Reorder.Reorder, 32)
+		if err != nil {
+			return nil, err
+		}
+
+		corr, err := strconv.ParseFloat(in.Reorder.Correlation, 32)
+		if err != nil {
+			return nil, err
+		}
+
+		netem.Reorder = float32(reorderPercentage)
+		netem.ReorderCorr = float32(corr)
+		netem.Gap = uint32(in.Reorder.Gap)
+	}
+
+	return netem, nil
 }
 
 // LossSpec defines detail of a loss action
@@ -279,18 +316,19 @@ type LossSpec struct {
 	Correlation string `json:"correlation"`
 }
 
-func (loss *LossSpec) ToNetem() (*chaosdaemon.Netem, error) {
-	lossPercentage, err := strconv.ParseFloat(loss.Loss, 32)
+// ToNetem implements Netem interface.
+func (in *LossSpec) ToNetem() (*chaosdaemonpb.Netem, error) {
+	lossPercentage, err := strconv.ParseFloat(in.Loss, 32)
 	if err != nil {
 		return nil, err
 	}
 
-	corr, err := strconv.ParseFloat(loss.Correlation, 32)
+	corr, err := strconv.ParseFloat(in.Correlation, 32)
 	if err != nil {
 		return nil, err
 	}
 
-	return &chaosdaemon.Netem{
+	return &chaosdaemonpb.Netem{
 		Loss:     float32(lossPercentage),
 		LossCorr: float32(corr),
 	}, nil
@@ -302,18 +340,19 @@ type DuplicateSpec struct {
 	Correlation string `json:"correlation"`
 }
 
-func (duplicate *DuplicateSpec) ToNetem() (*chaosdaemon.Netem, error) {
-	duplicatePercentage, err := strconv.ParseFloat(duplicate.Duplicate, 32)
+// ToNetem implements Netem interface.
+func (in *DuplicateSpec) ToNetem() (*chaosdaemonpb.Netem, error) {
+	duplicatePercentage, err := strconv.ParseFloat(in.Duplicate, 32)
 	if err != nil {
 		return nil, err
 	}
 
-	corr, err := strconv.ParseFloat(duplicate.Correlation, 32)
+	corr, err := strconv.ParseFloat(in.Correlation, 32)
 	if err != nil {
 		return nil, err
 	}
 
-	return &chaosdaemon.Netem{
+	return &chaosdaemonpb.Netem{
 		Duplicate:     float32(duplicatePercentage),
 		DuplicateCorr: float32(corr),
 	}, nil
@@ -325,21 +364,108 @@ type CorruptSpec struct {
 	Correlation string `json:"correlation"`
 }
 
-func (corrupt *CorruptSpec) ToNetem() (*chaosdaemon.Netem, error) {
-	corruptPercentage, err := strconv.ParseFloat(corrupt.Corrupt, 32)
+// ToNetem implements Netem interface.
+func (in *CorruptSpec) ToNetem() (*chaosdaemonpb.Netem, error) {
+	corruptPercentage, err := strconv.ParseFloat(in.Corrupt, 32)
 	if err != nil {
 		return nil, err
 	}
 
-	corr, err := strconv.ParseFloat(corrupt.Correlation, 32)
+	corr, err := strconv.ParseFloat(in.Correlation, 32)
 	if err != nil {
 		return nil, err
 	}
 
-	return &chaosdaemon.Netem{
+	return &chaosdaemonpb.Netem{
 		Corrupt:     float32(corruptPercentage),
 		CorruptCorr: float32(corr),
 	}, nil
+}
+
+// BandwidthSpec defines detail of bandwidth limit.
+type BandwidthSpec struct {
+	// Rate is the speed knob. Allows bps, kbps, mbps, gbps, tbps unit. bps means bytes per second.
+	Rate string `json:"rate"`
+	// Limit is the number of bytes that can be queued waiting for tokens to become available.
+	// +kubebuilder:validation:Minimum=1
+	Limit uint32 `json:"limit"`
+	// Buffer is the maximum amount of bytes that tokens can be available for instantaneously.
+	// +kubebuilder:validation:Minimum=1
+	Buffer uint32 `json:"buffer"`
+	// Peakrate is the maximum depletion rate of the bucket.
+	// The peakrate does not need to be set, it is only necessary
+	// if perfect millisecond timescale shaping is required.
+	// +optional
+	// +kubebuilder:validation:Minimum=0
+	Peakrate *uint64 `json:"peakrate,omitempty"`
+	// Minburst specifies the size of the peakrate bucket. For perfect
+	// accuracy, should be set to the MTU of the interface.  If a
+	// peakrate is needed, but some burstiness is acceptable, this
+	// size can be raised. A 3000 byte minburst allows around 3mbit/s
+	// of peakrate, given 1000 byte packets.
+	// +optional
+	// +kubebuilder:validation:Minimum=0
+	Minburst *uint32 `json:"minburst,omitempty"`
+}
+
+// ToTbf converts BandwidthSpec to *chaosdaemonpb.Tbf
+// Bandwidth action use TBF under the hood.
+// TBF stands for Token Bucket Filter, is a classful queueing discipline available
+// for traffic control with the tc command.
+// http://man7.org/linux/man-pages/man8/tc-tbf.8.html
+func (in *BandwidthSpec) ToTbf() (*chaosdaemonpb.Tbf, error) {
+	rate, err := convertUnitToBytes(in.Rate)
+
+	if err != nil {
+		return nil, err
+	}
+
+	tbf := &chaosdaemonpb.Tbf{
+		Rate:   rate,
+		Limit:  in.Limit,
+		Buffer: in.Buffer,
+	}
+
+	if in.Peakrate != nil && in.Minburst != nil {
+		tbf.PeakRate = *in.Peakrate
+		tbf.MinBurst = *in.Minburst
+	}
+
+	return tbf, nil
+}
+
+func convertUnitToBytes(nu string) (uint64, error) {
+	// normalize input
+	s := strings.ToLower(strings.TrimSpace(nu))
+
+	for i, u := range []string{"tbps", "gbps", "mbps", "kbps", "bps"} {
+		if strings.HasSuffix(s, u) {
+			ts := strings.TrimSuffix(s, u)
+			s := strings.TrimSpace(ts)
+
+			n, err := strconv.ParseUint(s, 10, 64)
+
+			if err != nil {
+				return 0, err
+			}
+
+			// convert unit to bytes
+			for j := 4 - i; j > 0; j-- {
+				n = n * 1024
+			}
+
+			return n, nil
+		}
+	}
+
+	return 0, errors.New("invalid unit")
+}
+
+// ReorderSpec defines details of packet reorder.
+type ReorderSpec struct {
+	Reorder     string `json:"reorder"`
+	Correlation string `json:"correlation"`
+	Gap         int    `json:"gap"`
 }
 
 // +kubebuilder:object:root=true

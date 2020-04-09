@@ -17,6 +17,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"os"
 	"reflect"
 	"strings"
 
@@ -26,6 +27,7 @@ import (
 	k8serror "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/tools/cache"
+	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -39,6 +41,7 @@ import (
 
 const (
 	networkNetemActionMsg = "network netem action duration %s"
+	invalidNetemSpecMsg   = "invalid spec for netem action, at least one is required from delay, loss, duplicate, corrupt"
 )
 
 // NetemSpec defines the interface to convert to a Netem protobuf
@@ -46,11 +49,13 @@ type NetemSpec interface {
 	ToNetem() (*pb.Netem, error)
 }
 
-func newReconciler(c client.Client, log logr.Logger, req ctrl.Request) twophase.Reconciler {
+func newReconciler(c client.Client, log logr.Logger, req ctrl.Request,
+	recorder record.EventRecorder) twophase.Reconciler {
 	return twophase.Reconciler{
 		InnerReconciler: &Reconciler{
-			Client: c,
-			Log:    log,
+			Client:        c,
+			EventRecorder: recorder,
+			Log:           log,
 		},
 		Client: c,
 		Log:    log,
@@ -58,19 +63,22 @@ func newReconciler(c client.Client, log logr.Logger, req ctrl.Request) twophase.
 }
 
 // NewTwoPhaseReconciler would create Reconciler for twophase package
-func NewTwoPhaseReconciler(c client.Client, log logr.Logger, req ctrl.Request) *twophase.Reconciler {
-	r := newReconciler(c, log, req)
+func NewTwoPhaseReconciler(c client.Client, log logr.Logger, req ctrl.Request,
+	recorder record.EventRecorder) *twophase.Reconciler {
+	r := newReconciler(c, log, req, recorder)
 	return twophase.NewReconciler(r, r.Client, r.Log)
 }
 
 // NewCommonReconciler would create Reconciler for common package
-func NewCommonReconciler(c client.Client, log logr.Logger, req ctrl.Request) *common.Reconciler {
-	r := newReconciler(c, log, req)
+func NewCommonReconciler(c client.Client, log logr.Logger, req ctrl.Request,
+	recorder record.EventRecorder) *common.Reconciler {
+	r := newReconciler(c, log, req, recorder)
 	return common.NewReconciler(r, r.Client, r.Log)
 }
 
 type Reconciler struct {
 	client.Client
+	record.EventRecorder
 	Log logr.Logger
 }
 
@@ -88,10 +96,10 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos reconcil
 		return err
 	}
 
-	pods, err := utils.SelectAndGeneratePods(ctx, r.Client, &networkchaos.Spec)
+	pods, err := utils.SelectAndFilterPods(ctx, r.Client, &networkchaos.Spec)
 
 	if err != nil {
-		r.Log.Error(err, "failed to select and generate pods")
+		r.Log.Error(err, "failed to select and filter pods")
 		return err
 	}
 
@@ -117,7 +125,7 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos reconcil
 
 		networkchaos.Status.Experiment.Pods = append(networkchaos.Status.Experiment.Pods, ps)
 	}
-
+	r.Event(networkchaos, v1.EventTypeNormal, utils.EventChaosInjected, "")
 	return nil
 }
 
@@ -134,7 +142,7 @@ func (r *Reconciler) Recover(ctx context.Context, req ctrl.Request, chaos reconc
 	if err != nil {
 		return err
 	}
-
+	r.Event(networkchaos, v1.EventTypeNormal, utils.EventChaosRecovered, "")
 	return nil
 }
 
@@ -177,15 +185,13 @@ func (r *Reconciler) cleanFinalizersAndRecover(ctx context.Context, networkchaos
 }
 
 func (r *Reconciler) recoverPod(ctx context.Context, pod *v1.Pod, networkchaos *v1alpha1.NetworkChaos) error {
-	r.Log.Info("try to recover pod", "namespace", pod.Namespace, "name", pod.Name)
+	r.Log.Info("Try to recover pod", "namespace", pod.Namespace, "name", pod.Name)
 
-	c, err := utils.CreateGrpcConnection(ctx, r.Client, pod)
+	pbClient, err := utils.NewChaosDaemonClient(ctx, r.Client, pod, os.Getenv("CHAOS_DAEMON_PORT"))
 	if err != nil {
 		return err
 	}
-	defer c.Close()
-
-	pbClient := pb.NewChaosDaemonClient(c)
+	defer pbClient.Close()
 
 	if len(pod.Status.ContainerStatuses) == 0 {
 		return fmt.Errorf("%s %s can't get the state of container", pod.Namespace, pod.Name)
@@ -201,7 +207,7 @@ func (r *Reconciler) recoverPod(ctx context.Context, pod *v1.Pod, networkchaos *
 	if err != nil {
 		r.Log.Error(err, "recover pod error", "namespace", pod.Namespace, "name", pod.Name)
 	} else {
-		r.Log.Info("recover pod finished", "namespace", pod.Namespace, "name", pod.Name)
+		r.Log.Info("Recover pod finished", "namespace", pod.Namespace, "name", pod.Name)
 	}
 
 	return err
@@ -229,21 +235,30 @@ func (r *Reconciler) applyAllPods(ctx context.Context, pods []v1.Pod, networkcha
 func (r *Reconciler) applyPod(ctx context.Context, pod *v1.Pod, networkchaos *v1alpha1.NetworkChaos) error {
 	r.Log.Info("Try to apply netem on pod", "namespace", pod.Namespace, "name", pod.Name)
 
-	action := string(networkchaos.Spec.Action)
-	action = strings.Title(action)
-
-	spec, ok := reflect.Indirect(reflect.ValueOf(networkchaos.Spec)).FieldByName(action).Interface().(NetemSpec)
-	if !ok {
-		return fmt.Errorf("spec %s is not a NetemSpec", action)
+	var (
+		netem *pb.Netem
+		err   error
+	)
+	switch networkchaos.Spec.Action {
+	case v1alpha1.NetemAction:
+		netem, err = mergeNetem(networkchaos.Spec)
+	default:
+		action := strings.Title(string(networkchaos.Spec.Action))
+		spec, ok := reflect.Indirect(reflect.ValueOf(networkchaos.Spec)).FieldByName(action).Interface().(NetemSpec)
+		if !ok {
+			return fmt.Errorf("spec %s is not a NetemSpec", action)
+		}
+		netem, err = spec.ToNetem()
 	}
-
-	c, err := utils.CreateGrpcConnection(ctx, r.Client, pod)
 	if err != nil {
 		return err
 	}
-	defer c.Close()
 
-	pbClient := pb.NewChaosDaemonClient(c)
+	pbClient, err := utils.NewChaosDaemonClient(ctx, r.Client, pod, os.Getenv("CHAOS_DAEMON_PORT"))
+	if err != nil {
+		return err
+	}
+	defer pbClient.Close()
 
 	if len(pod.Status.ContainerStatuses) == 0 {
 		return fmt.Errorf("%s %s can't get the state of container", pod.Namespace, pod.Name)
@@ -251,15 +266,47 @@ func (r *Reconciler) applyPod(ctx context.Context, pod *v1.Pod, networkchaos *v1
 
 	containerID := pod.Status.ContainerStatuses[0].ContainerID
 
-	netem, err := spec.ToNetem()
-	if err != nil {
-		return err
-	}
-
 	_, err = pbClient.SetNetem(ctx, &pb.NetemRequest{
 		ContainerId: containerID,
 		Netem:       netem,
 	})
 
 	return err
+}
+
+// mergeNetem calls ToNetem on all non nil network emulation specs and merges them into one request.
+func mergeNetem(spec v1alpha1.NetworkChaosSpec) (*pb.Netem, error) {
+	// NOTE: a cleaner way like
+	// emSpecs = []NetemSpec{spec.Delay, spec.Loss} won't work.
+	// Because in the for _, spec := range emSpecs loop,
+	// spec != nil would always be true.
+	// See https://stackoverflow.com/questions/13476349/check-for-nil-and-nil-interface-in-go
+	// And https://groups.google.com/forum/#!topic/golang-nuts/wnH302gBa4I/discussion
+	// > In short: If you never store (*T)(nil) in an interface, then you can reliably use comparison against nil
+	var emSpecs []NetemSpec
+	if spec.Delay != nil {
+		emSpecs = append(emSpecs, spec.Delay)
+	}
+	if spec.Loss != nil {
+		emSpecs = append(emSpecs, spec.Loss)
+	}
+	if spec.Duplicate != nil {
+		emSpecs = append(emSpecs, spec.Duplicate)
+	}
+	if spec.Corrupt != nil {
+		emSpecs = append(emSpecs, spec.Corrupt)
+	}
+	if len(emSpecs) == 0 {
+		return nil, errors.New(invalidNetemSpecMsg)
+	}
+
+	merged := &pb.Netem{}
+	for _, spec := range emSpecs {
+		em, err := spec.ToNetem()
+		if err != nil {
+			return nil, err
+		}
+		merged = utils.MergeNetem(merged, em)
+	}
+	return merged, nil
 }

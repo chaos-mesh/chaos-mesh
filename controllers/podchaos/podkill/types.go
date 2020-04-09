@@ -16,19 +16,18 @@ package podkill
 import (
 	"context"
 	"errors"
-	"time"
-
-	"golang.org/x/sync/errgroup"
 
 	"github.com/go-logr/logr"
-
-	"github.com/pingcap/chaos-mesh/api/v1alpha1"
-	"github.com/pingcap/chaos-mesh/pkg/utils"
-
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
+	"golang.org/x/sync/errgroup"
+	v1 "k8s.io/api/core/v1"
+	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+
+	"github.com/pingcap/chaos-mesh/api/v1alpha1"
+	"github.com/pingcap/chaos-mesh/controllers/reconciler"
+	"github.com/pingcap/chaos-mesh/controllers/twophase"
+	"github.com/pingcap/chaos-mesh/pkg/utils"
 )
 
 const (
@@ -37,47 +36,43 @@ const (
 
 type Reconciler struct {
 	client.Client
+	record.EventRecorder
 	Log logr.Logger
 }
 
-func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
-	var err error
-	now := time.Now()
-
-	r.Log.Info("reconciling pod kill")
-	ctx := context.Background()
-
-	var podchaos v1alpha1.PodChaos
-	if err = r.Get(ctx, req.NamespacedName, &podchaos); err != nil {
-		r.Log.Error(err, "unable to get podchaos")
-		return ctrl.Result{}, nil
+func newReconciler(c client.Client, log logr.Logger, req ctrl.Request,
+	recorder record.EventRecorder) *Reconciler {
+	return &Reconciler{
+		Client:        c,
+		EventRecorder: recorder,
+		Log:           log,
 	}
+}
 
-	shouldAct := podchaos.GetNextStart().Before(now)
-	if !shouldAct {
-		return ctrl.Result{RequeueAfter: podchaos.GetNextStart().Sub(now)}, nil
+// NewTwoPhaseReconciler would create Reconciler for twophase package
+func NewTwoPhaseReconciler(c client.Client, log logr.Logger, req ctrl.Request,
+	recorder record.EventRecorder) *twophase.Reconciler {
+	r := newReconciler(c, log, req, recorder)
+	return twophase.NewReconciler(r, r.Client, r.Log)
+}
+
+// Apply implements the reconciler.InnerReconciler.Apply
+func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos reconciler.InnerObject) error {
+	podchaos, ok := chaos.(*v1alpha1.PodChaos)
+	if !ok {
+		err := errors.New("chaos is not PodChaos")
+		r.Log.Error(err, "chaos is not PodChaos", "chaos", chaos)
+		return err
 	}
-	pods, err := utils.SelectPods(ctx, r.Client, podchaos.Spec.Selector)
+	pods, err := utils.SelectAndFilterPods(ctx, r.Client, &podchaos.Spec)
 	if err != nil {
-		r.Log.Error(err, "fail to get selected pods")
-		return ctrl.Result{Requeue: true}, nil
-	}
-
-	if len(pods) == 0 {
-		err = errors.New("no pod is selected")
-		r.Log.Error(err, "no pod is selected")
-		return ctrl.Result{Requeue: true}, nil
-	}
-
-	filteredPod, err := utils.GeneratePods(pods, podchaos.Spec.Mode, podchaos.Spec.Value)
-	if err != nil {
-		r.Log.Error(err, "fail to generate pods")
-		return ctrl.Result{Requeue: true}, nil
+		r.Log.Error(err, "fail to select and generate pods")
+		return err
 	}
 
 	g := errgroup.Group{}
-	for index := range filteredPod {
-		pod := &filteredPod[index]
+	for index := range pods {
+		pod := &pods[index]
 		g.Go(func() error {
 			r.Log.Info("Deleting", "namespace", pod.Namespace, "name", pod.Name)
 
@@ -92,23 +87,8 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	}
 
 	if err := g.Wait(); err != nil {
-		return ctrl.Result{}, nil
+		return err
 	}
-	next, err := utils.NextTime(*podchaos.Spec.Scheduler, now)
-	if err != nil {
-		r.Log.Error(err, "failed to get next time")
-		return ctrl.Result{}, nil
-	}
-
-	podchaos.SetNextStart(*next)
-
-	podchaos.Status.Experiment.StartTime = &metav1.Time{
-		Time: now,
-	}
-	podchaos.Status.Experiment.EndTime = &metav1.Time{
-		Time: now,
-	}
-
 	podchaos.Status.Experiment.Pods = []v1alpha1.PodStatus{}
 	for _, pod := range pods {
 		ps := v1alpha1.PodStatus{
@@ -122,10 +102,17 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 
 		podchaos.Status.Experiment.Pods = append(podchaos.Status.Experiment.Pods, ps)
 	}
-	if err := r.Update(ctx, &podchaos); err != nil {
-		r.Log.Error(err, "unable to update chaosctl status")
-		return ctrl.Result{}, nil
-	}
 
-	return ctrl.Result{}, nil
+	r.Event(podchaos, v1.EventTypeNormal, utils.EventChaosInjected, "")
+	return nil
+}
+
+// Recover implements the reconciler.InnerReconciler.Recover
+func (r *Reconciler) Recover(ctx context.Context, req ctrl.Request, obj reconciler.InnerObject) error {
+	return nil
+}
+
+// Object implements the reconciler.InnerReconciler.Object
+func (r *Reconciler) Object() reconciler.InnerObject {
+	return &v1alpha1.PodChaos{}
 }

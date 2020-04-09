@@ -18,6 +18,7 @@ import (
 	"crypto/sha1"
 	"errors"
 	"fmt"
+	"os"
 
 	"github.com/go-logr/logr"
 	"golang.org/x/sync/errgroup"
@@ -25,6 +26,7 @@ import (
 	k8sError "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/tools/cache"
+	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -43,11 +45,13 @@ const (
 	targetIpSetPostFix = "tgt"
 )
 
-func newReconciler(c client.Client, log logr.Logger, req ctrl.Request) twophase.Reconciler {
+func newReconciler(c client.Client, log logr.Logger, req ctrl.Request,
+	recorder record.EventRecorder) twophase.Reconciler {
 	return twophase.Reconciler{
 		InnerReconciler: &Reconciler{
-			Client: c,
-			Log:    log,
+			Client:        c,
+			EventRecorder: recorder,
+			Log:           log,
 		},
 		Client: c,
 		Log:    log,
@@ -55,19 +59,22 @@ func newReconciler(c client.Client, log logr.Logger, req ctrl.Request) twophase.
 }
 
 // NewTwoPhaseReconciler would create Reconciler for twophase package
-func NewTwoPhaseReconciler(c client.Client, log logr.Logger, req ctrl.Request) *twophase.Reconciler {
-	r := newReconciler(c, log, req)
+func NewTwoPhaseReconciler(c client.Client, log logr.Logger, req ctrl.Request,
+	recorder record.EventRecorder) *twophase.Reconciler {
+	r := newReconciler(c, log, req, recorder)
 	return twophase.NewReconciler(r, r.Client, r.Log)
 }
 
 // NewCommonReconciler would create Reconciler for common package
-func NewCommonReconciler(c client.Client, log logr.Logger, req ctrl.Request) *common.Reconciler {
-	r := newReconciler(c, log, req)
+func NewCommonReconciler(c client.Client, log logr.Logger, req ctrl.Request,
+	recorder record.EventRecorder) *common.Reconciler {
+	r := newReconciler(c, log, req, recorder)
 	return common.NewReconciler(r, r.Client, r.Log)
 }
 
 type Reconciler struct {
 	client.Client
+	record.EventRecorder
 	Log logr.Logger
 }
 
@@ -78,7 +85,7 @@ func (r *Reconciler) Object() reconciler.InnerObject {
 
 // Apply implements the reconciler.InnerReconciler.Apply
 func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos reconciler.InnerObject) error {
-	r.Log.Info("applying network partition")
+	r.Log.Info("Applying network partition")
 
 	networkchaos, ok := chaos.(*v1alpha1.NetworkChaos)
 	if !ok {
@@ -88,17 +95,17 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos reconcil
 		return err
 	}
 
-	sources, err := utils.SelectAndGeneratePods(ctx, r.Client, &networkchaos.Spec)
+	sources, err := utils.SelectAndFilterPods(ctx, r.Client, &networkchaos.Spec)
 
 	if err != nil {
-		r.Log.Error(err, "failed to select and generate pods")
+		r.Log.Error(err, "failed to select and filter pods")
 		return err
 	}
 
-	targets, err := utils.SelectAndGeneratePods(ctx, r.Client, &networkchaos.Spec.Target)
+	targets, err := utils.SelectAndFilterPods(ctx, r.Client, &networkchaos.Spec.Target)
 
 	if err != nil {
-		r.Log.Error(err, "failed to select and generate pods")
+		r.Log.Error(err, "failed to select and filter pods")
 		return err
 	}
 
@@ -118,7 +125,7 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos reconcil
 				return err
 			}
 
-			r.Log.Info("flush ipset on pod", "name", pod.Name, "namespace", pod.Namespace)
+			r.Log.Info("Flush ipset on pod", "name", pod.Name, "namespace", pod.Namespace)
 			return r.flushPodIPSet(ctx, &pod, targetSet, networkchaos)
 		})
 	}
@@ -170,6 +177,7 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos reconcil
 		networkchaos.Status.Experiment.Pods = append(networkchaos.Status.Experiment.Pods, ps)
 	}
 
+	r.Event(networkchaos, v1.EventTypeNormal, utils.EventChaosInjected, "")
 	return nil
 }
 
@@ -214,12 +222,13 @@ func (r *Reconciler) Recover(ctx context.Context, req ctrl.Request, chaos reconc
 		r.Log.Error(err, "cleanFinalizersAndRecover failed")
 		return err
 	}
+	r.Event(networkchaos, v1.EventTypeNormal, utils.EventChaosRecovered, "")
 
 	return nil
 }
 
 func (r *Reconciler) generateSetName(networkchaos *v1alpha1.NetworkChaos, namePostFix string) string {
-	r.Log.Info("generating name for chaos", "name", networkchaos.Name)
+	r.Log.Info("Generating name for chaos", "name", networkchaos.Name)
 	originalName := networkchaos.Name
 
 	var ipsetName string
@@ -237,7 +246,7 @@ func (r *Reconciler) generateSetName(networkchaos *v1alpha1.NetworkChaos, namePo
 		ipsetName = namePrefix + "_" + hashValue[0:17] + "_" + namePostFix
 	}
 
-	r.Log.Info("name generated", "ipsetName", ipsetName)
+	r.Log.Info("Name generated", "ipsetName", ipsetName)
 	return ipsetName
 }
 
@@ -251,7 +260,7 @@ func (r *Reconciler) generateSet(pods []v1.Pod, networkchaos *v1alpha1.NetworkCh
 		}
 	}
 
-	r.Log.Info("creating ipset", "name", name, "ips", ips)
+	r.Log.Info("Creating ipset", "name", name, "ips", ips)
 	return pb.IpSet{
 		Name: name,
 		Ips:  ips,
@@ -333,19 +342,17 @@ func (r *Reconciler) cleanFinalizersAndRecover(ctx context.Context, networkchaos
 
 		networkchaos.Finalizers = utils.RemoveFromFinalizer(networkchaos.Finalizers, key)
 	}
-	r.Log.Info("after recovering", "finalizers", networkchaos.Finalizers)
+	r.Log.Info("After recovering", "finalizers", networkchaos.Finalizers)
 
 	return nil
 }
 
 func (r *Reconciler) flushPodIPSet(ctx context.Context, pod *v1.Pod, ipset pb.IpSet, networkchaos *v1alpha1.NetworkChaos) error {
-	c, err := utils.CreateGrpcConnection(ctx, r.Client, pod)
+	pbClient, err := utils.NewChaosDaemonClient(ctx, r.Client, pod, os.Getenv("CHAOS_DAEMON_PORT"))
 	if err != nil {
 		return err
 	}
-	defer c.Close()
-
-	pbClient := pb.NewChaosDaemonClient(c)
+	defer pbClient.Close()
 
 	if len(pod.Status.ContainerStatuses) == 0 {
 		return fmt.Errorf("%s %s can't get the state of container", pod.Namespace, pod.Name)
@@ -361,13 +368,11 @@ func (r *Reconciler) flushPodIPSet(ctx context.Context, pod *v1.Pod, ipset pb.Ip
 }
 
 func (r *Reconciler) sendIPTables(ctx context.Context, pod *v1.Pod, rule pb.Rule, networkchaos *v1alpha1.NetworkChaos) error {
-	c, err := utils.CreateGrpcConnection(ctx, r.Client, pod)
+	pbClient, err := utils.NewChaosDaemonClient(ctx, r.Client, pod, os.Getenv("CHAOS_DAEMON_PORT"))
 	if err != nil {
 		return err
 	}
-	defer c.Close()
-
-	pbClient := pb.NewChaosDaemonClient(c)
+	defer pbClient.Close()
 
 	if len(pod.Status.ContainerStatuses) == 0 {
 		return fmt.Errorf("%s %s can't get the state of container", pod.Namespace, pod.Name)

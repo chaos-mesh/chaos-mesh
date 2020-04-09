@@ -75,6 +75,8 @@ rules:
       - podchaos
       - networkchaos
       - iochaos
+      - timechaos
+      - kernelchaos
     verbs: ["*"]
 ---
 kind: ClusterRoleBinding
@@ -134,6 +136,8 @@ rules:
       - podchaos
       - networkchaos
       - iochaos
+      - timechaos
+      - kernelchaos
     verbs: ["*"]
 ---
 kind: RoleBinding

@@ -11,8 +11,6 @@ import (
 	proto "github.com/golang/protobuf/proto"
 	empty "github.com/golang/protobuf/ptypes/empty"
 	grpc "google.golang.org/grpc"
-	codes "google.golang.org/grpc/codes"
-	status "google.golang.org/grpc/status"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -48,7 +46,7 @@ func (x Rule_Action) String() string {
 }
 
 func (Rule_Action) EnumDescriptor() ([]byte, []int) {
-	return fileDescriptor_143136706133b591, []int{5, 0}
+	return fileDescriptor_143136706133b591, []int{9, 0}
 }
 
 type Rule_Direction int32
@@ -73,7 +71,118 @@ func (x Rule_Direction) String() string {
 }
 
 func (Rule_Direction) EnumDescriptor() ([]byte, []int) {
-	return fileDescriptor_143136706133b591, []int{5, 1}
+	return fileDescriptor_143136706133b591, []int{9, 1}
+}
+
+type ContainerAction_Action int32
+
+const (
+	ContainerAction_KILL   ContainerAction_Action = 0
+	ContainerAction_GETPID ContainerAction_Action = 1
+)
+
+var ContainerAction_Action_name = map[int32]string{
+	0: "KILL",
+	1: "GETPID",
+}
+
+var ContainerAction_Action_value = map[string]int32{
+	"KILL":   0,
+	"GETPID": 1,
+}
+
+func (x ContainerAction_Action) String() string {
+	return proto.EnumName(ContainerAction_Action_name, int32(x))
+}
+
+func (ContainerAction_Action) EnumDescriptor() ([]byte, []int) {
+	return fileDescriptor_143136706133b591, []int{11, 0}
+}
+
+type ContainerRequest struct {
+	Action               *ContainerAction `protobuf:"bytes,1,opt,name=action,proto3" json:"action,omitempty"`
+	ContainerId          string           `protobuf:"bytes,2,opt,name=container_id,json=containerId,proto3" json:"container_id,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}         `json:"-"`
+	XXX_unrecognized     []byte           `json:"-"`
+	XXX_sizecache        int32            `json:"-"`
+}
+
+func (m *ContainerRequest) Reset()         { *m = ContainerRequest{} }
+func (m *ContainerRequest) String() string { return proto.CompactTextString(m) }
+func (*ContainerRequest) ProtoMessage()    {}
+func (*ContainerRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_143136706133b591, []int{0}
+}
+
+func (m *ContainerRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_ContainerRequest.Unmarshal(m, b)
+}
+func (m *ContainerRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_ContainerRequest.Marshal(b, m, deterministic)
+}
+func (m *ContainerRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ContainerRequest.Merge(m, src)
+}
+func (m *ContainerRequest) XXX_Size() int {
+	return xxx_messageInfo_ContainerRequest.Size(m)
+}
+func (m *ContainerRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_ContainerRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_ContainerRequest proto.InternalMessageInfo
+
+func (m *ContainerRequest) GetAction() *ContainerAction {
+	if m != nil {
+		return m.Action
+	}
+	return nil
+}
+
+func (m *ContainerRequest) GetContainerId() string {
+	if m != nil {
+		return m.ContainerId
+	}
+	return ""
+}
+
+type ContainerResponse struct {
+	Pid                  uint32   `protobuf:"varint,1,opt,name=pid,proto3" json:"pid,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *ContainerResponse) Reset()         { *m = ContainerResponse{} }
+func (m *ContainerResponse) String() string { return proto.CompactTextString(m) }
+func (*ContainerResponse) ProtoMessage()    {}
+func (*ContainerResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_143136706133b591, []int{1}
+}
+
+func (m *ContainerResponse) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_ContainerResponse.Unmarshal(m, b)
+}
+func (m *ContainerResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_ContainerResponse.Marshal(b, m, deterministic)
+}
+func (m *ContainerResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ContainerResponse.Merge(m, src)
+}
+func (m *ContainerResponse) XXX_Size() int {
+	return xxx_messageInfo_ContainerResponse.Size(m)
+}
+func (m *ContainerResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_ContainerResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_ContainerResponse proto.InternalMessageInfo
+
+func (m *ContainerResponse) GetPid() uint32 {
+	if m != nil {
+		return m.Pid
+	}
+	return 0
 }
 
 type NetemRequest struct {
@@ -88,7 +197,7 @@ func (m *NetemRequest) Reset()         { *m = NetemRequest{} }
 func (m *NetemRequest) String() string { return proto.CompactTextString(m) }
 func (*NetemRequest) ProtoMessage()    {}
 func (*NetemRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_143136706133b591, []int{0}
+	return fileDescriptor_143136706133b591, []int{2}
 }
 
 func (m *NetemRequest) XXX_Unmarshal(b []byte) error {
@@ -146,7 +255,7 @@ func (m *Netem) Reset()         { *m = Netem{} }
 func (m *Netem) String() string { return proto.CompactTextString(m) }
 func (*Netem) ProtoMessage()    {}
 func (*Netem) Descriptor() ([]byte, []int) {
-	return fileDescriptor_143136706133b591, []int{1}
+	return fileDescriptor_143136706133b591, []int{3}
 }
 
 func (m *Netem) XXX_Unmarshal(b []byte) error {
@@ -258,6 +367,124 @@ func (m *Netem) GetCorruptCorr() float32 {
 	return 0
 }
 
+type TbfRequest struct {
+	Tbf                  *Tbf     `protobuf:"bytes,1,opt,name=tbf,proto3" json:"tbf,omitempty"`
+	ContainerId          string   `protobuf:"bytes,2,opt,name=container_id,json=containerId,proto3" json:"container_id,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *TbfRequest) Reset()         { *m = TbfRequest{} }
+func (m *TbfRequest) String() string { return proto.CompactTextString(m) }
+func (*TbfRequest) ProtoMessage()    {}
+func (*TbfRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_143136706133b591, []int{4}
+}
+
+func (m *TbfRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_TbfRequest.Unmarshal(m, b)
+}
+func (m *TbfRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_TbfRequest.Marshal(b, m, deterministic)
+}
+func (m *TbfRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_TbfRequest.Merge(m, src)
+}
+func (m *TbfRequest) XXX_Size() int {
+	return xxx_messageInfo_TbfRequest.Size(m)
+}
+func (m *TbfRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_TbfRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_TbfRequest proto.InternalMessageInfo
+
+func (m *TbfRequest) GetTbf() *Tbf {
+	if m != nil {
+		return m.Tbf
+	}
+	return nil
+}
+
+func (m *TbfRequest) GetContainerId() string {
+	if m != nil {
+		return m.ContainerId
+	}
+	return ""
+}
+
+type Tbf struct {
+	Rate                 uint64   `protobuf:"varint,1,opt,name=rate,proto3" json:"rate,omitempty"`
+	Limit                uint32   `protobuf:"varint,2,opt,name=limit,proto3" json:"limit,omitempty"`
+	Buffer               uint32   `protobuf:"varint,3,opt,name=buffer,proto3" json:"buffer,omitempty"`
+	PeakRate             uint64   `protobuf:"varint,4,opt,name=peak_rate,json=peakRate,proto3" json:"peak_rate,omitempty"`
+	MinBurst             uint32   `protobuf:"varint,5,opt,name=min_burst,json=minBurst,proto3" json:"min_burst,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *Tbf) Reset()         { *m = Tbf{} }
+func (m *Tbf) String() string { return proto.CompactTextString(m) }
+func (*Tbf) ProtoMessage()    {}
+func (*Tbf) Descriptor() ([]byte, []int) {
+	return fileDescriptor_143136706133b591, []int{5}
+}
+
+func (m *Tbf) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_Tbf.Unmarshal(m, b)
+}
+func (m *Tbf) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_Tbf.Marshal(b, m, deterministic)
+}
+func (m *Tbf) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_Tbf.Merge(m, src)
+}
+func (m *Tbf) XXX_Size() int {
+	return xxx_messageInfo_Tbf.Size(m)
+}
+func (m *Tbf) XXX_DiscardUnknown() {
+	xxx_messageInfo_Tbf.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_Tbf proto.InternalMessageInfo
+
+func (m *Tbf) GetRate() uint64 {
+	if m != nil {
+		return m.Rate
+	}
+	return 0
+}
+
+func (m *Tbf) GetLimit() uint32 {
+	if m != nil {
+		return m.Limit
+	}
+	return 0
+}
+
+func (m *Tbf) GetBuffer() uint32 {
+	if m != nil {
+		return m.Buffer
+	}
+	return 0
+}
+
+func (m *Tbf) GetPeakRate() uint64 {
+	if m != nil {
+		return m.PeakRate
+	}
+	return 0
+}
+
+func (m *Tbf) GetMinBurst() uint32 {
+	if m != nil {
+		return m.MinBurst
+	}
+	return 0
+}
+
 type IpSetRequest struct {
 	Ipset                *IpSet   `protobuf:"bytes,1,opt,name=ipset,proto3" json:"ipset,omitempty"`
 	ContainerId          string   `protobuf:"bytes,2,opt,name=container_id,json=containerId,proto3" json:"container_id,omitempty"`
@@ -270,7 +497,7 @@ func (m *IpSetRequest) Reset()         { *m = IpSetRequest{} }
 func (m *IpSetRequest) String() string { return proto.CompactTextString(m) }
 func (*IpSetRequest) ProtoMessage()    {}
 func (*IpSetRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_143136706133b591, []int{2}
+	return fileDescriptor_143136706133b591, []int{6}
 }
 
 func (m *IpSetRequest) XXX_Unmarshal(b []byte) error {
@@ -317,7 +544,7 @@ func (m *IpSet) Reset()         { *m = IpSet{} }
 func (m *IpSet) String() string { return proto.CompactTextString(m) }
 func (*IpSet) ProtoMessage()    {}
 func (*IpSet) Descriptor() ([]byte, []int) {
-	return fileDescriptor_143136706133b591, []int{3}
+	return fileDescriptor_143136706133b591, []int{7}
 }
 
 func (m *IpSet) XXX_Unmarshal(b []byte) error {
@@ -364,7 +591,7 @@ func (m *IpTablesRequest) Reset()         { *m = IpTablesRequest{} }
 func (m *IpTablesRequest) String() string { return proto.CompactTextString(m) }
 func (*IpTablesRequest) ProtoMessage()    {}
 func (*IpTablesRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_143136706133b591, []int{4}
+	return fileDescriptor_143136706133b591, []int{8}
 }
 
 func (m *IpTablesRequest) XXX_Unmarshal(b []byte) error {
@@ -412,7 +639,7 @@ func (m *Rule) Reset()         { *m = Rule{} }
 func (m *Rule) String() string { return proto.CompactTextString(m) }
 func (*Rule) ProtoMessage()    {}
 func (*Rule) Descriptor() ([]byte, []int) {
-	return fileDescriptor_143136706133b591, []int{5}
+	return fileDescriptor_143136706133b591, []int{9}
 }
 
 func (m *Rule) XXX_Unmarshal(b []byte) error {
@@ -454,57 +681,186 @@ func (m *Rule) GetSet() string {
 	return ""
 }
 
+type TimeRequest struct {
+	ContainerId          string   `protobuf:"bytes,1,opt,name=container_id,json=containerId,proto3" json:"container_id,omitempty"`
+	Sec                  int64    `protobuf:"varint,2,opt,name=sec,proto3" json:"sec,omitempty"`
+	Nsec                 int64    `protobuf:"varint,3,opt,name=nsec,proto3" json:"nsec,omitempty"`
+	ClkIdsMask           uint64   `protobuf:"varint,4,opt,name=clk_ids_mask,json=clkIdsMask,proto3" json:"clk_ids_mask,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *TimeRequest) Reset()         { *m = TimeRequest{} }
+func (m *TimeRequest) String() string { return proto.CompactTextString(m) }
+func (*TimeRequest) ProtoMessage()    {}
+func (*TimeRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_143136706133b591, []int{10}
+}
+
+func (m *TimeRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_TimeRequest.Unmarshal(m, b)
+}
+func (m *TimeRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_TimeRequest.Marshal(b, m, deterministic)
+}
+func (m *TimeRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_TimeRequest.Merge(m, src)
+}
+func (m *TimeRequest) XXX_Size() int {
+	return xxx_messageInfo_TimeRequest.Size(m)
+}
+func (m *TimeRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_TimeRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_TimeRequest proto.InternalMessageInfo
+
+func (m *TimeRequest) GetContainerId() string {
+	if m != nil {
+		return m.ContainerId
+	}
+	return ""
+}
+
+func (m *TimeRequest) GetSec() int64 {
+	if m != nil {
+		return m.Sec
+	}
+	return 0
+}
+
+func (m *TimeRequest) GetNsec() int64 {
+	if m != nil {
+		return m.Nsec
+	}
+	return 0
+}
+
+func (m *TimeRequest) GetClkIdsMask() uint64 {
+	if m != nil {
+		return m.ClkIdsMask
+	}
+	return 0
+}
+
+type ContainerAction struct {
+	Action               ContainerAction_Action `protobuf:"varint,1,opt,name=action,proto3,enum=chaosdaemon.ContainerAction_Action" json:"action,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}               `json:"-"`
+	XXX_unrecognized     []byte                 `json:"-"`
+	XXX_sizecache        int32                  `json:"-"`
+}
+
+func (m *ContainerAction) Reset()         { *m = ContainerAction{} }
+func (m *ContainerAction) String() string { return proto.CompactTextString(m) }
+func (*ContainerAction) ProtoMessage()    {}
+func (*ContainerAction) Descriptor() ([]byte, []int) {
+	return fileDescriptor_143136706133b591, []int{11}
+}
+
+func (m *ContainerAction) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_ContainerAction.Unmarshal(m, b)
+}
+func (m *ContainerAction) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_ContainerAction.Marshal(b, m, deterministic)
+}
+func (m *ContainerAction) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ContainerAction.Merge(m, src)
+}
+func (m *ContainerAction) XXX_Size() int {
+	return xxx_messageInfo_ContainerAction.Size(m)
+}
+func (m *ContainerAction) XXX_DiscardUnknown() {
+	xxx_messageInfo_ContainerAction.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_ContainerAction proto.InternalMessageInfo
+
+func (m *ContainerAction) GetAction() ContainerAction_Action {
+	if m != nil {
+		return m.Action
+	}
+	return ContainerAction_KILL
+}
+
 func init() {
 	proto.RegisterEnum("chaosdaemon.Rule_Action", Rule_Action_name, Rule_Action_value)
 	proto.RegisterEnum("chaosdaemon.Rule_Direction", Rule_Direction_name, Rule_Direction_value)
+	proto.RegisterEnum("chaosdaemon.ContainerAction_Action", ContainerAction_Action_name, ContainerAction_Action_value)
+	proto.RegisterType((*ContainerRequest)(nil), "chaosdaemon.ContainerRequest")
+	proto.RegisterType((*ContainerResponse)(nil), "chaosdaemon.ContainerResponse")
 	proto.RegisterType((*NetemRequest)(nil), "chaosdaemon.NetemRequest")
 	proto.RegisterType((*Netem)(nil), "chaosdaemon.Netem")
+	proto.RegisterType((*TbfRequest)(nil), "chaosdaemon.TbfRequest")
+	proto.RegisterType((*Tbf)(nil), "chaosdaemon.Tbf")
 	proto.RegisterType((*IpSetRequest)(nil), "chaosdaemon.IpSetRequest")
 	proto.RegisterType((*IpSet)(nil), "chaosdaemon.IpSet")
 	proto.RegisterType((*IpTablesRequest)(nil), "chaosdaemon.IpTablesRequest")
 	proto.RegisterType((*Rule)(nil), "chaosdaemon.Rule")
+	proto.RegisterType((*TimeRequest)(nil), "chaosdaemon.TimeRequest")
+	proto.RegisterType((*ContainerAction)(nil), "chaosdaemon.ContainerAction")
 }
 
 func init() { proto.RegisterFile("chaosdaemon.proto", fileDescriptor_143136706133b591) }
 
 var fileDescriptor_143136706133b591 = []byte{
-	// 576 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xa4, 0x53, 0xcd, 0x6e, 0xd3, 0x40,
-	0x10, 0xae, 0x9d, 0xd8, 0xad, 0xc7, 0x4d, 0x69, 0x57, 0xa8, 0xda, 0xfe, 0x49, 0xc1, 0x52, 0xa5,
-	0x5c, 0x70, 0x51, 0x39, 0x71, 0x42, 0xa1, 0x0e, 0x28, 0x12, 0x2a, 0xc8, 0x4d, 0x4f, 0x3d, 0x54,
-	0x4e, 0x3c, 0xa4, 0x46, 0x8e, 0xd7, 0xac, 0xd7, 0x87, 0xbe, 0x0c, 0xcf, 0xc3, 0xb3, 0xf0, 0x14,
-	0x68, 0x67, 0xed, 0x90, 0xd2, 0x20, 0x2a, 0x71, 0xca, 0xcc, 0x37, 0xdf, 0xf7, 0xed, 0x64, 0xc6,
-	0x03, 0x7b, 0xb3, 0xbb, 0x44, 0x54, 0x69, 0x82, 0x0b, 0x51, 0x84, 0xa5, 0x14, 0x4a, 0x30, 0x7f,
-	0x05, 0x3a, 0x3c, 0x9a, 0x0b, 0x31, 0xcf, 0xf1, 0x8c, 0x4a, 0xd3, 0xfa, 0xcb, 0x19, 0x2e, 0x4a,
-	0x75, 0x6f, 0x98, 0xc1, 0x0d, 0x6c, 0x5f, 0xa2, 0xc2, 0x45, 0x8c, 0xdf, 0x6a, 0xac, 0x14, 0x1b,
-	0x80, 0x53, 0xe8, 0x9c, 0x5b, 0x7d, 0x6b, 0xe0, 0x9f, 0xb3, 0x70, 0xd5, 0xdc, 0x30, 0x0d, 0x81,
-	0xbd, 0x80, 0xed, 0x99, 0x28, 0x54, 0x92, 0x15, 0x28, 0x6f, 0xb3, 0x94, 0xdb, 0x7d, 0x6b, 0xe0,
-	0xc5, 0xfe, 0x12, 0x1b, 0xa7, 0xc1, 0x4f, 0x1b, 0x1c, 0xd2, 0x30, 0x06, 0x5d, 0x95, 0x2d, 0x90,
-	0x5c, 0x7b, 0x31, 0xc5, 0x6c, 0x1f, 0xdc, 0xaf, 0x99, 0x52, 0x28, 0x49, 0xda, 0x8b, 0x9b, 0x8c,
-	0x9d, 0x00, 0xa4, 0x98, 0x27, 0xf7, 0xb7, 0x33, 0x21, 0x25, 0xef, 0xf4, 0xad, 0x81, 0x1d, 0x7b,
-	0x84, 0x5c, 0x08, 0x29, 0xd9, 0x73, 0x70, 0xf2, 0x6c, 0x91, 0x29, 0xde, 0x25, 0x95, 0x49, 0xf4,
-	0x03, 0xb9, 0xa8, 0x2a, 0xee, 0x10, 0x9d, 0x62, 0x76, 0x04, 0x9e, 0xfe, 0x35, 0x3e, 0x2e, 0x15,
-	0xb6, 0x34, 0x40, 0x36, 0xbb, 0xd0, 0x99, 0x27, 0x25, 0xdf, 0x24, 0x13, 0x1d, 0xb2, 0x63, 0xf0,
-	0xd2, 0xba, 0xcc, 0xb3, 0x59, 0xa2, 0x90, 0x6f, 0x35, 0xcf, 0xb6, 0x00, 0x3b, 0x85, 0x9d, 0x65,
-	0x62, 0x1c, 0x3d, 0xa2, 0xf4, 0x96, 0x28, 0xd9, 0x72, 0xd8, 0x94, 0x28, 0x64, 0x8a, 0x92, 0x03,
-	0xd5, 0xdb, 0x54, 0xcf, 0xab, 0x09, 0x8d, 0xdc, 0xa7, 0xb2, 0xdf, 0x60, 0xad, 0x58, 0x97, 0xea,
-	0x52, 0xf1, 0x6d, 0x23, 0x6e, 0x52, 0x33, 0x6c, 0x0a, 0x8d, 0xb8, 0x67, 0xc4, 0x0d, 0xa6, 0xc5,
-	0x7a, 0x93, 0xe3, 0xf2, 0x0a, 0xd5, 0xca, 0x26, 0xb3, 0xb2, 0x42, 0xb5, 0x76, 0x93, 0x86, 0x69,
-	0x08, 0x4f, 0xd9, 0xe4, 0x4b, 0x70, 0x48, 0xa2, 0xe7, 0x5c, 0x24, 0xcd, 0x22, 0xbd, 0x98, 0x62,
-	0x3d, 0xca, 0xac, 0xac, 0xb8, 0xdd, 0xef, 0x0c, 0xbc, 0x58, 0x87, 0xc1, 0x0d, 0x3c, 0x1b, 0x97,
-	0x93, 0x64, 0x9a, 0x63, 0xd5, 0xb6, 0x73, 0x0a, 0x5d, 0x59, 0xe7, 0xd8, 0x74, 0xb3, 0xf7, 0xa0,
-	0x9b, 0xb8, 0xce, 0x31, 0xa6, 0xf2, 0x53, 0x7a, 0xf9, 0x61, 0x41, 0x57, 0x2b, 0xd8, 0x2b, 0x70,
-	0x93, 0x99, 0xca, 0x44, 0x41, 0xa6, 0x3b, 0xe7, 0xfc, 0x91, 0x69, 0x38, 0xa4, 0x7a, 0xdc, 0xf0,
-	0xd8, 0x1b, 0xf0, 0xd2, 0x4c, 0xa2, 0x11, 0xd9, 0x24, 0x3a, 0x7a, 0x2c, 0x8a, 0x5a, 0x4a, 0xfc,
-	0x9b, 0xad, 0xff, 0xa4, 0x1e, 0x66, 0x87, 0xfa, 0xd1, 0x61, 0x70, 0x02, 0xae, 0xb1, 0x67, 0x9b,
-	0xd0, 0x19, 0x46, 0xd1, 0xee, 0x06, 0x03, 0x70, 0xa3, 0xd1, 0xc7, 0xd1, 0x64, 0xb4, 0x6b, 0x05,
-	0x01, 0x78, 0x4b, 0x23, 0xe6, 0x81, 0x33, 0xbe, 0xfc, 0x7c, 0x3d, 0x31, 0x9c, 0x4f, 0xd7, 0x13,
-	0x1d, 0x5b, 0xe7, 0xdf, 0x6d, 0xf0, 0x2f, 0xf4, 0xf3, 0x11, 0x3d, 0xcf, 0xde, 0xc2, 0xd6, 0x15,
-	0x2a, 0x73, 0x32, 0x07, 0x6b, 0x4e, 0xcf, 0xcc, 0xf2, 0x70, 0x3f, 0x34, 0x27, 0x1d, 0xb6, 0x27,
-	0x1d, 0x8e, 0xf4, 0x49, 0x07, 0x1b, 0xec, 0x1d, 0xf8, 0x11, 0xe6, 0xa8, 0xf0, 0x3f, 0x3c, 0x86,
-	0x00, 0xef, 0xf3, 0xba, 0xba, 0x33, 0x0b, 0x3f, 0x58, 0xf3, 0xdd, 0xfc, 0xd3, 0xe2, 0x03, 0xf4,
-	0x1a, 0x0b, 0x45, 0x1f, 0x01, 0x3b, 0xfe, 0xc3, 0xe5, 0xc1, 0xb7, 0xf1, 0x77, 0xa3, 0xa9, 0x4b,
-	0xc8, 0xeb, 0x5f, 0x01, 0x00, 0x00, 0xff, 0xff, 0x4e, 0x5d, 0x9b, 0x95, 0xe4, 0x04, 0x00, 0x00,
+	// 885 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xa4, 0x56, 0xcd, 0x6e, 0xdb, 0x46,
+	0x10, 0x36, 0x45, 0x49, 0x16, 0x47, 0x66, 0x22, 0x2f, 0x0a, 0x97, 0x89, 0xed, 0x40, 0x65, 0x61,
+	0x40, 0x97, 0x2a, 0x85, 0xdb, 0x4b, 0x11, 0xa0, 0x85, 0x63, 0xa9, 0xae, 0x10, 0x37, 0x31, 0xd6,
+	0xca, 0x29, 0x07, 0x81, 0x22, 0x97, 0xce, 0x56, 0xfc, 0x2b, 0xb9, 0x2c, 0x9a, 0x63, 0x9f, 0xae,
+	0x7d, 0x96, 0x3e, 0x45, 0x31, 0xb3, 0xa4, 0x22, 0xc9, 0xae, 0x2d, 0x24, 0x27, 0xcd, 0xdf, 0xf7,
+	0xed, 0xec, 0xcc, 0xec, 0x50, 0xb0, 0xef, 0xbf, 0xf7, 0xd2, 0x22, 0xf0, 0x44, 0x9c, 0x26, 0xc3,
+	0x2c, 0x4f, 0x55, 0xca, 0xba, 0x2b, 0xa6, 0xa7, 0x87, 0x37, 0x69, 0x7a, 0x13, 0x89, 0xe7, 0xe4,
+	0x9a, 0x97, 0xe1, 0x73, 0x11, 0x67, 0xea, 0x83, 0x8e, 0x74, 0x17, 0xd0, 0x3b, 0x4f, 0x13, 0xe5,
+	0xc9, 0x44, 0xe4, 0x5c, 0xfc, 0x5e, 0x8a, 0x42, 0xb1, 0xef, 0xa1, 0xed, 0xf9, 0x4a, 0xa6, 0x89,
+	0x63, 0xf4, 0x8d, 0x41, 0xf7, 0xf4, 0x68, 0xb8, 0x7a, 0xc2, 0x32, 0xfc, 0x8c, 0x62, 0x78, 0x15,
+	0xcb, 0xbe, 0x82, 0x3d, 0xbf, 0x76, 0xcd, 0x64, 0xe0, 0x34, 0xfa, 0xc6, 0xc0, 0xe2, 0xdd, 0xa5,
+	0x6d, 0x12, 0xb8, 0x27, 0xb0, 0xbf, 0x72, 0x58, 0x91, 0xa5, 0x49, 0x21, 0x58, 0x0f, 0xcc, 0x4c,
+	0x06, 0x74, 0x94, 0xcd, 0x51, 0x74, 0xdf, 0xc1, 0xde, 0x6b, 0xa1, 0x44, 0x5c, 0xe7, 0x33, 0x80,
+	0x56, 0x82, 0x7a, 0x95, 0x0e, 0x5b, 0x4b, 0x47, 0x47, 0xea, 0x80, 0x6d, 0x72, 0xf8, 0xb7, 0x01,
+	0x2d, 0xc2, 0x30, 0x06, 0x4d, 0x25, 0x63, 0x51, 0x9d, 0x4c, 0x32, 0x3b, 0x80, 0xf6, 0x6f, 0x52,
+	0x29, 0x91, 0x13, 0xd4, 0xe6, 0x95, 0xc6, 0x8e, 0x01, 0x02, 0x11, 0x79, 0x1f, 0x66, 0x7e, 0x9a,
+	0xe7, 0x8e, 0xd9, 0x37, 0x06, 0x0d, 0x6e, 0x91, 0xe5, 0x3c, 0xcd, 0x73, 0xf6, 0x05, 0xb4, 0x22,
+	0x19, 0x4b, 0xe5, 0x34, 0x09, 0xa5, 0x15, 0x3c, 0x20, 0x4a, 0x8b, 0xc2, 0x69, 0x51, 0x38, 0xc9,
+	0xec, 0x10, 0x2c, 0xfc, 0xd5, 0x3c, 0x6d, 0x72, 0x74, 0xd0, 0x40, 0x34, 0x3d, 0x30, 0x6f, 0xbc,
+	0xcc, 0xd9, 0xd5, 0xa5, 0xb8, 0xf1, 0x32, 0x76, 0x04, 0x56, 0x50, 0x66, 0x91, 0xf4, 0x3d, 0x25,
+	0x9c, 0x4e, 0x75, 0x6c, 0x6d, 0x60, 0x27, 0xf0, 0x68, 0xa9, 0x68, 0x46, 0x8b, 0x42, 0xec, 0xa5,
+	0x95, 0x68, 0x1d, 0xd8, 0xcd, 0x45, 0x9a, 0x07, 0x22, 0x77, 0x80, 0xfc, 0xb5, 0x8a, 0xf5, 0xaa,
+	0x44, 0x0d, 0xef, 0x92, 0xbb, 0x5b, 0xd9, 0x6a, 0x30, 0xba, 0xca, 0x4c, 0x39, 0x7b, 0x1a, 0x5c,
+	0xa9, 0xba, 0xd8, 0x24, 0x6a, 0xb0, 0xad, 0xc1, 0x95, 0x0d, 0xc1, 0xee, 0x35, 0xc0, 0x74, 0x1e,
+	0xd6, 0x7d, 0x74, 0xc1, 0x54, 0xf3, 0xb0, 0xea, 0x62, 0x6f, 0xad, 0x8b, 0x18, 0x85, 0xce, 0x6d,
+	0x3a, 0xf8, 0x97, 0x01, 0xe6, 0x74, 0x1e, 0x62, 0x79, 0x73, 0x2c, 0x0b, 0xf2, 0x35, 0x39, 0xc9,
+	0x1f, 0x1b, 0xd1, 0x58, 0x6d, 0xc4, 0x01, 0xb4, 0xe7, 0x65, 0x18, 0x0a, 0xdd, 0x39, 0x9b, 0x57,
+	0x1a, 0x36, 0x23, 0x13, 0xde, 0x62, 0x46, 0x34, 0x4d, 0xa2, 0xe9, 0xa0, 0x81, 0x23, 0xd5, 0x21,
+	0x58, 0xb1, 0x4c, 0x66, 0xf3, 0x32, 0x2f, 0x14, 0xb5, 0xd0, 0xe6, 0x9d, 0x58, 0x26, 0x2f, 0x51,
+	0xc7, 0x11, 0x9d, 0x64, 0xd7, 0x42, 0xad, 0x8c, 0xa8, 0xcc, 0x0a, 0xa1, 0xee, 0x1c, 0x51, 0x1d,
+	0xa9, 0x03, 0xb6, 0xb9, 0xe0, 0x37, 0xd0, 0x22, 0x08, 0xde, 0x30, 0xf1, 0xaa, 0x09, 0xb5, 0x38,
+	0xc9, 0x38, 0x23, 0x32, 0x2b, 0x9c, 0x46, 0xdf, 0x1c, 0x58, 0x1c, 0x45, 0xf7, 0x1d, 0x3c, 0x9e,
+	0x64, 0x53, 0x6f, 0x1e, 0x89, 0xa2, 0x4e, 0xe7, 0x04, 0x9a, 0x79, 0x19, 0x89, 0x2a, 0x9b, 0xfd,
+	0xb5, 0x6c, 0x78, 0x19, 0x09, 0x4e, 0xee, 0x6d, 0x72, 0xf9, 0xc7, 0x80, 0x26, 0x22, 0xd8, 0xb7,
+	0x6b, 0x4b, 0xe1, 0xd1, 0xa9, 0x73, 0x8b, 0x74, 0xb8, 0xb1, 0x10, 0x7e, 0x00, 0x2b, 0x90, 0xb9,
+	0xd0, 0xa0, 0x06, 0x81, 0x0e, 0x6f, 0x83, 0x46, 0x75, 0x08, 0xff, 0x18, 0x8d, 0x97, 0xc4, 0x62,
+	0x9a, 0x94, 0x0f, 0x8a, 0xee, 0x31, 0xb4, 0x35, 0x3d, 0xdb, 0x05, 0xf3, 0x6c, 0x34, 0xea, 0xed,
+	0x30, 0x80, 0xf6, 0x68, 0x7c, 0x39, 0x9e, 0x8e, 0x7b, 0x86, 0xeb, 0x82, 0xb5, 0x24, 0x62, 0x16,
+	0xb4, 0x26, 0xaf, 0xaf, 0xde, 0x4e, 0x75, 0xcc, 0x9b, 0xb7, 0x53, 0x94, 0x0d, 0xf7, 0x4f, 0xe8,
+	0x4e, 0x65, 0x2c, 0xea, 0x1a, 0x6d, 0x5e, 0xde, 0xb8, 0x75, 0x79, 0x9d, 0x86, 0x4f, 0xb9, 0x9b,
+	0x98, 0x86, 0x4f, 0x1d, 0x41, 0x93, 0x49, 0x26, 0x92, 0x59, 0x1f, 0xf6, 0xfc, 0x68, 0x31, 0x93,
+	0x41, 0x31, 0x8b, 0xbd, 0x62, 0x51, 0x0d, 0x12, 0xf8, 0xd1, 0x62, 0x12, 0x14, 0xbf, 0x7a, 0xc5,
+	0xc2, 0x4d, 0xe0, 0xf1, 0xc6, 0xd6, 0x64, 0x2f, 0x36, 0xca, 0xf9, 0xf5, 0x7d, 0x3b, 0x76, 0xa3,
+	0xb2, 0xee, 0xb3, 0x65, 0x31, 0x3a, 0xd0, 0x7c, 0x35, 0xb9, 0xbc, 0xd4, 0x37, 0xbd, 0x18, 0x4f,
+	0xaf, 0x26, 0xa3, 0x9e, 0x71, 0xfa, 0x77, 0x0b, 0xba, 0xe7, 0x48, 0x37, 0x22, 0x3a, 0xf6, 0x13,
+	0x74, 0xae, 0x85, 0xd2, 0x5b, 0xef, 0xc9, 0x1d, 0xdb, 0x53, 0x57, 0xe4, 0xe9, 0xc1, 0x50, 0x7f,
+	0x29, 0x86, 0xf5, 0x97, 0x62, 0x38, 0xc6, 0x2f, 0x85, 0xbb, 0xc3, 0x5e, 0x42, 0x77, 0x24, 0x22,
+	0xa1, 0xc4, 0x67, 0x70, 0xbc, 0x80, 0xf6, 0xb5, 0x50, 0xf8, 0x70, 0xbf, 0xbc, 0xf5, 0xf4, 0x1f,
+	0x04, 0xff, 0x08, 0x96, 0x4e, 0xe0, 0x13, 0xf1, 0x67, 0x00, 0x3f, 0x47, 0x65, 0xf1, 0x5e, 0xbf,
+	0xab, 0x27, 0x77, 0x3c, 0xcf, 0x07, 0x29, 0x2e, 0xc0, 0xae, 0x28, 0x14, 0xbd, 0x35, 0x76, 0xb4,
+	0xc1, 0xb2, 0xf6, 0x04, 0xef, 0x21, 0x3a, 0x07, 0x1b, 0x0b, 0x21, 0x63, 0xf1, 0x26, 0x0c, 0x71,
+	0x25, 0xac, 0x3f, 0xa5, 0x95, 0x19, 0xbd, 0x37, 0x9b, 0x7d, 0x2e, 0xfc, 0xf4, 0x0f, 0x91, 0x7f,
+	0x26, 0xd1, 0x2f, 0x60, 0x2f, 0xa7, 0xed, 0x95, 0x8c, 0x22, 0x76, 0x7c, 0xf7, 0x24, 0x3e, 0xcc,
+	0xc4, 0x57, 0xa6, 0xfc, 0x42, 0xa8, 0x2b, 0x19, 0x3c, 0xc4, 0xf5, 0xec, 0xff, 0xdc, 0xfa, 0xaf,
+	0x81, 0xbb, 0x33, 0x6f, 0xd3, 0x29, 0xdf, 0xfd, 0x17, 0x00, 0x00, 0xff, 0xff, 0x47, 0x93, 0x13,
+	0x5f, 0xe4, 0x08, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -521,8 +877,14 @@ const _ = grpc.SupportPackageIsVersion4
 type ChaosDaemonClient interface {
 	SetNetem(ctx context.Context, in *NetemRequest, opts ...grpc.CallOption) (*empty.Empty, error)
 	DeleteNetem(ctx context.Context, in *NetemRequest, opts ...grpc.CallOption) (*empty.Empty, error)
+	SetTbf(ctx context.Context, in *TbfRequest, opts ...grpc.CallOption) (*empty.Empty, error)
+	DeleteTbf(ctx context.Context, in *TbfRequest, opts ...grpc.CallOption) (*empty.Empty, error)
 	FlushIpSet(ctx context.Context, in *IpSetRequest, opts ...grpc.CallOption) (*empty.Empty, error)
 	FlushIptables(ctx context.Context, in *IpTablesRequest, opts ...grpc.CallOption) (*empty.Empty, error)
+	SetTimeOffset(ctx context.Context, in *TimeRequest, opts ...grpc.CallOption) (*empty.Empty, error)
+	RecoverTimeOffset(ctx context.Context, in *TimeRequest, opts ...grpc.CallOption) (*empty.Empty, error)
+	ContainerKill(ctx context.Context, in *ContainerRequest, opts ...grpc.CallOption) (*empty.Empty, error)
+	ContainerGetPid(ctx context.Context, in *ContainerRequest, opts ...grpc.CallOption) (*ContainerResponse, error)
 }
 
 type chaosDaemonClient struct {
@@ -551,6 +913,24 @@ func (c *chaosDaemonClient) DeleteNetem(ctx context.Context, in *NetemRequest, o
 	return out, nil
 }
 
+func (c *chaosDaemonClient) SetTbf(ctx context.Context, in *TbfRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
+	out := new(empty.Empty)
+	err := c.cc.Invoke(ctx, "/chaosdaemon.ChaosDaemon/SetTbf", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *chaosDaemonClient) DeleteTbf(ctx context.Context, in *TbfRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
+	out := new(empty.Empty)
+	err := c.cc.Invoke(ctx, "/chaosdaemon.ChaosDaemon/DeleteTbf", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *chaosDaemonClient) FlushIpSet(ctx context.Context, in *IpSetRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
 	out := new(empty.Empty)
 	err := c.cc.Invoke(ctx, "/chaosdaemon.ChaosDaemon/FlushIpSet", in, out, opts...)
@@ -569,29 +949,54 @@ func (c *chaosDaemonClient) FlushIptables(ctx context.Context, in *IpTablesReque
 	return out, nil
 }
 
+func (c *chaosDaemonClient) SetTimeOffset(ctx context.Context, in *TimeRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
+	out := new(empty.Empty)
+	err := c.cc.Invoke(ctx, "/chaosdaemon.ChaosDaemon/SetTimeOffset", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *chaosDaemonClient) RecoverTimeOffset(ctx context.Context, in *TimeRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
+	out := new(empty.Empty)
+	err := c.cc.Invoke(ctx, "/chaosdaemon.ChaosDaemon/RecoverTimeOffset", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *chaosDaemonClient) ContainerKill(ctx context.Context, in *ContainerRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
+	out := new(empty.Empty)
+	err := c.cc.Invoke(ctx, "/chaosdaemon.ChaosDaemon/ContainerKill", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *chaosDaemonClient) ContainerGetPid(ctx context.Context, in *ContainerRequest, opts ...grpc.CallOption) (*ContainerResponse, error) {
+	out := new(ContainerResponse)
+	err := c.cc.Invoke(ctx, "/chaosdaemon.ChaosDaemon/ContainerGetPid", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ChaosDaemonServer is the server API for ChaosDaemon service.
 type ChaosDaemonServer interface {
 	SetNetem(context.Context, *NetemRequest) (*empty.Empty, error)
 	DeleteNetem(context.Context, *NetemRequest) (*empty.Empty, error)
+	SetTbf(context.Context, *TbfRequest) (*empty.Empty, error)
+	DeleteTbf(context.Context, *TbfRequest) (*empty.Empty, error)
 	FlushIpSet(context.Context, *IpSetRequest) (*empty.Empty, error)
 	FlushIptables(context.Context, *IpTablesRequest) (*empty.Empty, error)
-}
-
-// UnimplementedChaosDaemonServer can be embedded to have forward compatible implementations.
-type UnimplementedChaosDaemonServer struct {
-}
-
-func (*UnimplementedChaosDaemonServer) SetNetem(ctx context.Context, req *NetemRequest) (*empty.Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method SetNetem not implemented")
-}
-func (*UnimplementedChaosDaemonServer) DeleteNetem(ctx context.Context, req *NetemRequest) (*empty.Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method DeleteNetem not implemented")
-}
-func (*UnimplementedChaosDaemonServer) FlushIpSet(ctx context.Context, req *IpSetRequest) (*empty.Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method FlushIpSet not implemented")
-}
-func (*UnimplementedChaosDaemonServer) FlushIptables(ctx context.Context, req *IpTablesRequest) (*empty.Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method FlushIptables not implemented")
+	SetTimeOffset(context.Context, *TimeRequest) (*empty.Empty, error)
+	RecoverTimeOffset(context.Context, *TimeRequest) (*empty.Empty, error)
+	ContainerKill(context.Context, *ContainerRequest) (*empty.Empty, error)
+	ContainerGetPid(context.Context, *ContainerRequest) (*ContainerResponse, error)
 }
 
 func RegisterChaosDaemonServer(s *grpc.Server, srv ChaosDaemonServer) {
@@ -634,6 +1039,42 @@ func _ChaosDaemon_DeleteNetem_Handler(srv interface{}, ctx context.Context, dec 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ChaosDaemon_SetTbf_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(TbfRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ChaosDaemonServer).SetTbf(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/chaosdaemon.ChaosDaemon/SetTbf",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ChaosDaemonServer).SetTbf(ctx, req.(*TbfRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ChaosDaemon_DeleteTbf_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(TbfRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ChaosDaemonServer).DeleteTbf(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/chaosdaemon.ChaosDaemon/DeleteTbf",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ChaosDaemonServer).DeleteTbf(ctx, req.(*TbfRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _ChaosDaemon_FlushIpSet_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(IpSetRequest)
 	if err := dec(in); err != nil {
@@ -670,6 +1111,78 @@ func _ChaosDaemon_FlushIptables_Handler(srv interface{}, ctx context.Context, de
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ChaosDaemon_SetTimeOffset_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(TimeRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ChaosDaemonServer).SetTimeOffset(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/chaosdaemon.ChaosDaemon/SetTimeOffset",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ChaosDaemonServer).SetTimeOffset(ctx, req.(*TimeRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ChaosDaemon_RecoverTimeOffset_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(TimeRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ChaosDaemonServer).RecoverTimeOffset(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/chaosdaemon.ChaosDaemon/RecoverTimeOffset",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ChaosDaemonServer).RecoverTimeOffset(ctx, req.(*TimeRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ChaosDaemon_ContainerKill_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ContainerRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ChaosDaemonServer).ContainerKill(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/chaosdaemon.ChaosDaemon/ContainerKill",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ChaosDaemonServer).ContainerKill(ctx, req.(*ContainerRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ChaosDaemon_ContainerGetPid_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ContainerRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ChaosDaemonServer).ContainerGetPid(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/chaosdaemon.ChaosDaemon/ContainerGetPid",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ChaosDaemonServer).ContainerGetPid(ctx, req.(*ContainerRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _ChaosDaemon_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "chaosdaemon.ChaosDaemon",
 	HandlerType: (*ChaosDaemonServer)(nil),
@@ -683,12 +1196,36 @@ var _ChaosDaemon_serviceDesc = grpc.ServiceDesc{
 			Handler:    _ChaosDaemon_DeleteNetem_Handler,
 		},
 		{
+			MethodName: "SetTbf",
+			Handler:    _ChaosDaemon_SetTbf_Handler,
+		},
+		{
+			MethodName: "DeleteTbf",
+			Handler:    _ChaosDaemon_DeleteTbf_Handler,
+		},
+		{
 			MethodName: "FlushIpSet",
 			Handler:    _ChaosDaemon_FlushIpSet_Handler,
 		},
 		{
 			MethodName: "FlushIptables",
 			Handler:    _ChaosDaemon_FlushIptables_Handler,
+		},
+		{
+			MethodName: "SetTimeOffset",
+			Handler:    _ChaosDaemon_SetTimeOffset_Handler,
+		},
+		{
+			MethodName: "RecoverTimeOffset",
+			Handler:    _ChaosDaemon_RecoverTimeOffset_Handler,
+		},
+		{
+			MethodName: "ContainerKill",
+			Handler:    _ChaosDaemon_ContainerKill_Handler,
+		},
+		{
+			MethodName: "ContainerGetPid",
+			Handler:    _ChaosDaemon_ContainerGetPid_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

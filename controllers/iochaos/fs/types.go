@@ -19,42 +19,55 @@ import (
 	"fmt"
 	"time"
 
-	"golang.org/x/sync/errgroup"
-
 	"github.com/go-logr/logr"
 	"github.com/golang/protobuf/ptypes/empty"
-
-	"github.com/pingcap/chaos-mesh/api/v1alpha1"
-	"github.com/pingcap/chaos-mesh/controllers/reconciler"
-	"github.com/pingcap/chaos-mesh/controllers/twophase"
-	fscli "github.com/pingcap/chaos-mesh/pkg/chaosfs/client"
-	"github.com/pingcap/chaos-mesh/pkg/utils"
-
-	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/client"
-
+	"golang.org/x/sync/errgroup"
 	v1 "k8s.io/api/core/v1"
 	k8serror "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/tools/cache"
+	"k8s.io/client-go/tools/record"
+	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/client"
+
+	"github.com/pingcap/chaos-mesh/api/v1alpha1"
+	"github.com/pingcap/chaos-mesh/controllers/common"
+	"github.com/pingcap/chaos-mesh/controllers/reconciler"
+	"github.com/pingcap/chaos-mesh/controllers/twophase"
+	fscli "github.com/pingcap/chaos-mesh/pkg/chaosfs/client"
+	"github.com/pingcap/chaos-mesh/pkg/utils"
 )
 
 type Reconciler struct {
 	client.Client
+	record.EventRecorder
 	Log logr.Logger
 }
 
-func NewConciler(c client.Client, log logr.Logger, req ctrl.Request) twophase.Reconciler {
+func newReconciler(c client.Client, log logr.Logger, req ctrl.Request, recorder record.EventRecorder) twophase.Reconciler {
 	return twophase.Reconciler{
 		InnerReconciler: &Reconciler{
-			Client: c,
-			Log:    log,
+			Client:        c,
+			EventRecorder: recorder,
+			Log:           log,
 		},
 		Client: c,
 		Log:    log,
 	}
+}
+
+// NewTwoPhaseReconciler would create Reconciler for twophase package
+func NewTwoPhaseReconciler(c client.Client, log logr.Logger, req ctrl.Request, recorder record.EventRecorder) *twophase.Reconciler {
+	r := newReconciler(c, log, req, recorder)
+	return twophase.NewReconciler(r, r.Client, r.Log)
+}
+
+// NewCommonReconciler would create Reconciler for common package
+func NewCommonReconciler(c client.Client, log logr.Logger, req ctrl.Request, recorder record.EventRecorder) *common.Reconciler {
+	r := newReconciler(c, log, req, recorder)
+	return common.NewReconciler(r, r.Client, r.Log)
 }
 
 // Object implements the reconciler.InnerReconciler.Object
@@ -71,9 +84,9 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos reconcil
 		return err
 	}
 
-	pods, err := utils.SelectAndGeneratePods(ctx, r.Client, &iochaos.Spec)
+	pods, err := utils.SelectAndFilterPods(ctx, r.Client, &iochaos.Spec)
 	if err != nil {
-		r.Log.Error(err, "failed to select and generate pods")
+		r.Log.Error(err, "failed to select and filter pods")
 		return err
 	}
 
@@ -95,12 +108,15 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos reconcil
 			HostIP:    pod.Status.HostIP,
 			PodIP:     pod.Status.PodIP,
 			Action:    string(iochaos.Spec.Action),
-			Message:   genMessage(iochaos),
+		}
+		if iochaos.Spec.Duration != nil {
+			ps.Message = genMessage(iochaos)
 		}
 
 		iochaos.Status.Experiment.Pods = append(iochaos.Status.Experiment.Pods, ps)
 	}
 
+	r.Event(iochaos, v1.EventTypeNormal, utils.EventChaosInjected, "")
 	return nil
 }
 
@@ -121,8 +137,7 @@ func (r *Reconciler) Recover(ctx context.Context, req ctrl.Request, chaos reconc
 		Time: time.Now(),
 	}
 
-	iochaos.Status.Experiment.Phase = v1alpha1.ExperimentPhaseFinished
-
+	r.Event(iochaos, v1.EventTypeNormal, utils.EventChaosRecovered, "")
 	return nil
 }
 

@@ -1,0 +1,116 @@
+---
+apiVersion: admissionregistration.k8s.io/v1beta1
+kind: MutatingWebhookConfiguration
+metadata:
+  name: {{ template "chaos-mesh.mutation" . }}
+  labels:
+    app.kubernetes.io/name: {{ template "chaos-mesh.name" . }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/component: admission-webhook
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+"  "_" }}
+  {{- if .Values.webhook.certManager.enabled }}
+  annotations:
+    cert-manager.io/inject-ca-from: {{ printf "%s/%s" .Release.Namespace "chaos-mesh-cert" | quote }}
+  {{- end }}
+webhooks:
+  - name: {{ template "chaos-mesh.webhook" . }}
+    clientConfig:
+      caBundle: Cg==
+      service:
+        name: {{ template "chaos-mesh.svc" . }}
+        namespace: {{ .Release.Namespace }}
+        path: "/inject-v1-pod"
+    rules:
+      - operations: [ "CREATE" ]
+        apiGroups: [""]
+        apiVersions: ["v1"]
+        resources: ["pods"]
+    namespaceSelector:
+      matchLabels:
+        admission-webhook: enabled
+    failurePolicy: {{ .Values.webhook.FailurePolicy }}
+  {{- range $crd := .Values.webhook.CRDS }}
+  - clientConfig:
+      caBundle: Cg==
+      service:
+        name: {{ template "chaos-mesh.svc" $ }}
+        namespace: {{ $.Release.Namespace }}
+        path: /mutate-pingcap-com-v1alpha1-{{ $crd }}
+    failurePolicy: Fail
+    name: m{{ $crd }}.kb.io
+    rules:
+      - apiGroups:
+          - pingcap.com
+        apiVersions:
+          - v1alpha1
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - {{ $crd }}
+  {{- end }}
+---
+
+apiVersion: admissionregistration.k8s.io/v1beta1
+kind: ValidatingWebhookConfiguration
+metadata:
+  name: {{ template "chaos-mesh.validation" . }}
+  labels:
+    app.kubernetes.io/name: {{ template "chaos-mesh.name" . }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/component: admission-webhook
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+"  "_" }}
+  {{- if .Values.webhook.certManager.enabled }}
+  annotations:
+    cert-manager.io/inject-ca-from: {{ printf "%s/%s" .Release.Namespace "chaos-mesh-cert" | quote }}
+  {{- end }}
+webhooks:
+  {{- range $crd := .Values.webhook.CRDS }}
+  - clientConfig:
+      caBundle: Cg==
+      service:
+        name: {{ template "chaos-mesh.svc" $ }}
+        namespace: {{ $.Release.Namespace }}
+        path: /validate-pingcap-com-v1alpha1-{{ $crd }}
+    failurePolicy: Fail
+    name: v{{ $crd }}.kb.io
+    rules:
+      - apiGroups:
+          - pingcap.com
+        apiVersions:
+          - v1alpha1
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - {{ $crd }}
+  {{- end }}
+
+{{- if .Values.webhook.certManager.enabled }}
+---
+apiVersion: cert-manager.io/v1alpha2
+kind: Issuer
+metadata:
+  name: chaos-mesh-selfsigned
+  namespace: {{ .Release.Namespace }}
+spec:
+  selfSigned: {}
+
+---
+apiVersion: cert-manager.io/v1alpha2
+kind: Certificate
+metadata:
+  name: chaos-mesh-cert
+  namespace: {{ .Release.Namespace }}
+spec:
+  duration: 43800h #5year
+  dnsNames:
+    - {{ template "chaos-mesh.svc" . }}
+    - {{ template "chaos-mesh.svc" . }}.{{ .Release.Namespace }}
+    - {{ template "chaos-mesh.svc" . }}.{{ .Release.Namespace }}.svc
+  secretName: {{ template "chaos-mesh.certs" . }}
+  issuerRef:
+    name: chaos-mesh-selfsigned
+{{- end }}

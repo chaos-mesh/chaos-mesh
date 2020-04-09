@@ -28,11 +28,11 @@ const (
 	iptablesCmd = "iptables"
 
 	iptablesBadRuleErr       = "Bad rule (does a matching rule exist in that chain?)."
-	iptablesIpSetNotExistErr = "doesn't exist.\n\nTry `iptables -h' or 'iptables --help' for more information.\n"
+	iptablesIPSetNotExistErr = "doesn't exist."
 )
 
 func (s *daemonServer) FlushIptables(ctx context.Context, req *pb.IpTablesRequest) (*empty.Empty, error) {
-	log.Info("flush iptables rules", "request", req)
+	log.Info("Flush iptables rules", "request", req)
 
 	pid, err := s.crClient.GetPidFromContainerID(ctx, req.ContainerId)
 	if err != nil {
@@ -74,7 +74,7 @@ func (s *daemonServer) FlushIptables(ctx context.Context, req *pb.IpTablesReques
 }
 
 func (s *daemonServer) addIptablesRules(ctx context.Context, cmd *exec.Cmd) error {
-	log.Info("add iptables rules", "command", cmd.String())
+	log.Info("Add iptables rules", "command", cmd.String())
 
 	out, err := cmd.CombinedOutput()
 	if err != nil {
@@ -86,12 +86,12 @@ func (s *daemonServer) addIptablesRules(ctx context.Context, cmd *exec.Cmd) erro
 }
 
 func (s *daemonServer) deleteIptablesRules(ctx context.Context, cmd *exec.Cmd) error {
-	log.Info("delete iptables rules", "command", cmd.String())
+	log.Info("Delete iptables rules", "command", cmd.String())
 
 	out, err := cmd.CombinedOutput()
 	if err != nil {
 		output := string(out)
-		if !(strings.Contains(output, iptablesBadRuleErr) || strings.Contains(output, iptablesIpSetNotExistErr)) {
+		if !(strings.Contains(output, iptablesBadRuleErr) || strings.Contains(output, iptablesIPSetNotExistErr)) {
 			log.Error(err, "failed to delete iptables rules", "command", cmd.String(), "output", output)
 			return err
 		}

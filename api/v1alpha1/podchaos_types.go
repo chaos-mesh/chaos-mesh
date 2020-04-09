@@ -28,6 +28,8 @@ const (
 	// PodFailureAction represents the chaos action of injecting errors to pods.
 	// This action will cause the pod to not be created for a while.
 	PodFailureAction PodChaosAction = "pod-failure"
+	// ContainerKillAction represents the chaos action of killing the container
+	ContainerKillAction PodChaosAction = "container-kill"
 )
 
 // +kubebuilder:object:root=true
@@ -118,18 +120,20 @@ type PodChaosSpec struct {
 	Scheduler *SchedulerSpec `json:"scheduler,omitempty"`
 
 	// Action defines the specific pod chaos action.
-	// Supported action: pod-kill / pod-failure
+	// Supported action: pod-kill / pod-failure / container-kill
 	// Default action: pod-kill
+	// +kubebuilder:validation:Enum=pod-kill;pod-failure;container-kill
 	Action PodChaosAction `json:"action"`
 
 	// Mode defines the mode to run chaos action.
 	// Supported mode: one / all / fixed / fixed-percent / random-max-percent
+	// +kubebuilder:validation:Enum=one;all;fixed;fixed-percent;random-max-percent
 	Mode PodMode `json:"mode"`
 
 	// Value is required when the mode is set to `FixedPodMode` / `FixedPercentPodMod` / `RandomMaxPercentPodMod`.
 	// If `FixedPodMode`, provide an integer of pods to do chaos action.
-	// If `FixedPercentPodMod`, provide a number from 0-100 to specify the max % of pods the server can do chaos action.
-	// IF `RandomMaxPercentPodMod`,  provide a number from 0-100 to specify the % of pods to do chaos action
+	// If `FixedPercentPodMod`, provide a number from 0-100 to specify the percent of pods the server can do chaos action.
+	// IF `RandomMaxPercentPodMod`,  provide a number from 0-100 to specify the max percent of pods to do chaos action
 	// +optional
 	Value string `json:"value"`
 
@@ -142,11 +146,6 @@ type PodChaosSpec struct {
 	// +optional
 	Duration *string `json:"duration,omitempty"`
 
-	// The duration in seconds before the object should be deleted. Value must be non-negative integer.
-	// The value zero indicates delete immediately.
-	// +optional
-	GracePeriodSeconds int64 `json:"gracePeriodSeconds"`
-
 	// Next time when this action will be applied again
 	// +optional
 	NextStart *metav1.Time `json:"nextStart,omitempty"`
@@ -154,6 +153,11 @@ type PodChaosSpec struct {
 	// Next time when this action will be recovered
 	// +optional
 	NextRecover *metav1.Time `json:"nextRecover,omitempty"`
+
+	// ContainerName indicates the name of the container.
+	// Needed in container-kill.
+	// +optional
+	ContainerName string `json:"containerName"`
 }
 
 func (in *PodChaosSpec) GetSelector() SelectorSpec {

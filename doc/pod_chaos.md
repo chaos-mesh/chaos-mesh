@@ -25,10 +25,9 @@ metadata:
 spec:
   action: pod-failure
   mode: one
+  value: ""
   duration: "30s"
   selector:
-    namespaces:
-      - tidb-cluster-demo
     labelSelectors:
       "app.kubernetes.io/component": "tikv"
   scheduler:
@@ -41,6 +40,7 @@ Description:
 
 * **action** defines the specific chaos action for the pod. In this case, it is pod failure.
 * **mode** defines the mode to run chaos action. Supported mode: `one / all / fixed / fixed-percent / random-max-percent`.
+* **value** depends on the value of `mode`. If `mode` is `one` or `all`, leave `value` empty. If `fixed`, provide an integer of pods to do chaos action. If `fixed-percent`, provide a number from 0-100 to specify the percent of pods the server can do chaos action. If `random-max-percent`, provide a number from 0-100 to specify the max percent of pods to do chaos action.
 * **duration** defines the duration for each chaos experiment. The value of the `Duration` field is `30s`, which indicates that pod failure will last 30 seconds.
 * **selector** is used to select pods that are used to inject chaos actions.
 * **scheduler** defines the scheduler rules for the running time of the chaos experiment. For more rule information, see <https://godoc.org/github.com/robfig/cron>.

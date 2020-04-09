@@ -8,8 +8,26 @@ service ChaosDaemon {
   rpc SetNetem(NetemRequest) returns (google.protobuf.Empty) {}
   rpc DeleteNetem(NetemRequest) returns (google.protobuf.Empty) {}
 
+  rpc SetTbf(TbfRequest) returns (google.protobuf.Empty) {}
+  rpc DeleteTbf(TbfRequest) returns (google.protobuf.Empty) {}
+
   rpc FlushIpSet(IpSetRequest) returns (google.protobuf.Empty) {}
   rpc FlushIptables(IpTablesRequest) returns (google.protobuf.Empty) {}
+
+  rpc SetTimeOffset(TimeRequest) returns (google.protobuf.Empty) {}
+  rpc RecoverTimeOffset(TimeRequest) returns (google.protobuf.Empty) {}
+
+  rpc ContainerKill(ContainerRequest) returns (google.protobuf.Empty) {}
+  rpc ContainerGetPid(ContainerRequest) returns (ContainerResponse) {}
+}
+
+message ContainerRequest{
+  ContainerAction action = 1;
+  string container_id = 2;
+}
+
+message ContainerResponse{
+ uint32 pid = 1;
 }
 
 message NetemRequest {
@@ -31,6 +49,19 @@ message Netem {
   float reorder_corr = 11;
   float corrupt = 12;
   float corrupt_corr = 13;
+}
+
+message TbfRequest {
+  Tbf tbf = 1;
+  string container_id = 2;
+}
+
+message Tbf {
+  uint64 rate = 1;
+  uint32 limit = 2;
+  uint32 buffer = 3;
+  uint64 peak_rate = 4;
+  uint32 min_burst = 5;
 }
 
 message IpSetRequest {
@@ -60,4 +91,19 @@ message Rule {
   }
   Direction direction = 2;
   string set = 3;
+}
+
+message TimeRequest {
+  string container_id = 1;
+  int64 sec = 2;
+  int64 nsec = 3;
+  uint64 clk_ids_mask = 4;
+}
+
+message ContainerAction {
+  enum Action {
+      KILL = 0;
+      GETPID = 1;
+  }
+  Action action = 1;
 }
