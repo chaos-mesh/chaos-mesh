@@ -81,7 +81,7 @@ type TimeChaosSpec struct {
 	// +optional
 	NextRecover *metav1.Time `json:"nextRecover,omitempty"`
 
-	// If this chaos is paused
+	// If this chaos has been paused
 	// +optional
 	Paused bool `json:"paused"`
 }

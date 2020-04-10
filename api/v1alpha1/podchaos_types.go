@@ -165,7 +165,7 @@ type PodChaosSpec struct {
 	// +optional
 	ContainerName string `json:"containerName"`
 
-	// If this chaos is paused
+	// If this chaos has been paused
 	// +optional
 	Paused bool `json:"paused"`
 }

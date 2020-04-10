@@ -72,7 +72,7 @@ spec:
               format: date-time
               type: string
             paused:
-              description: If this chaos is paused
+              description: If this chaos has been paused
               type: boolean
             scheduler:
               description: Scheduler defines some schedule rules to control the running

@@ -103,7 +103,7 @@ spec:
                 action.
               type: string
             paused:
-              description: If this chaos is paused
+              description: If this chaos has been paused
               type: boolean
             percent:
               description: 'Percent defines the percentage of injection errors and
@@ -386,7 +386,7 @@ spec:
               format: date-time
               type: string
             paused:
-              description: If this chaos is paused
+              description: If this chaos has been paused
               type: boolean
             scheduler:
               description: Scheduler defines some schedule rules to control the running
@@ -718,7 +718,7 @@ spec:
               format: date-time
               type: string
             paused:
-              description: If this chaos is paused
+              description: If this chaos has been paused
               type: boolean
             scheduler:
               description: Scheduler defines some schedule rules to control the running
@@ -1029,7 +1029,7 @@ spec:
               format: date-time
               type: string
             paused:
-              description: If this chaos is paused
+              description: If this chaos has been paused
               type: boolean
             scheduler:
               description: Scheduler defines some schedule rules to control the running
@@ -1255,7 +1255,7 @@ spec:
               format: date-time
               type: string
             paused:
-              description: If this chaos is paused
+              description: If this chaos has been paused
               type: boolean
             scheduler:
               description: Scheduler defines some schedule rules to control the running

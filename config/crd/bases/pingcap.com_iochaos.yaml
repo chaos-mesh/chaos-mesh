@@ -105,7 +105,7 @@ spec:
                 action.
               type: string
             paused:
-              description: If this chaos is paused
+              description: If this chaos has been paused
               type: boolean
             percent:
               description: 'Percent defines the percentage of injection errors and
