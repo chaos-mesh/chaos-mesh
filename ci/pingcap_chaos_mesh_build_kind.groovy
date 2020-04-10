@@ -187,9 +187,10 @@ def call(BUILD_BRANCH, CREDENTIALS_ID) {
 						GITHASH = sh(returnStdout: true, script: "git rev-parse HEAD").trim()
 					}
 
-					stage("Build and Test") {
+					stage("Build") {
 						ansiColor('xterm') {
 							sh """
+							make install-kustomize
 							DOCKER_REGISTRY=localhost:5000 make
 							make e2e-build
 							"""
