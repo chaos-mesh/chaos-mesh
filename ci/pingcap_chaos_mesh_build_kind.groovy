@@ -241,6 +241,8 @@ def call(BUILD_BRANCH, CREDENTIALS_ID) {
 
 		slackSend channel: '#cloud_jenkins', color: 'good', teamDomain: 'pingcap', tokenCredentialId: 'slack-pingcap-token', message: "${slackmsg}"
 	}
+
+    }
 }
 
 return this
