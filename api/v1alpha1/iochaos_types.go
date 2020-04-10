@@ -183,7 +183,7 @@ func (in *IoChaos) IsDeleted() bool {
 	return !in.DeletionTimestamp.IsZero()
 }
 
-// IsPaused returns whether this resource is paused
+// IsPaused returns whether this resource has been paused
 func (in *IoChaos) IsPaused() bool {
 	return in.Spec.Paused
 }

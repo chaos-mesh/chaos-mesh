@@ -211,7 +211,7 @@ func (in *NetworkChaos) IsDeleted() bool {
 	return !in.DeletionTimestamp.IsZero()
 }
 
-// IsPaused returns whether this resource is paused
+// IsPaused returns whether this resource has been paused
 func (in *NetworkChaos) IsPaused() bool {
 	return in.Spec.Paused
 }

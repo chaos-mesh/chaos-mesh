@@ -56,7 +56,7 @@ func (in *PodChaos) IsDeleted() bool {
 	return !in.DeletionTimestamp.IsZero()
 }
 
-// IsPaused returns whether this resource is paused
+// IsPaused returns whether this resource has been paused
 func (in *PodChaos) IsPaused() bool {
 	return in.Spec.Paused
 }

@@ -99,7 +99,7 @@ func (in *fakeTwoPhaseChaos) IsDeleted() bool {
 	return in.Deleted
 }
 
-// IsPaused returns whether this resource is paused
+// IsPaused returns whether this resource has been paused
 func (in *fakeTwoPhaseChaos) IsPaused() bool {
 	return false
 }
