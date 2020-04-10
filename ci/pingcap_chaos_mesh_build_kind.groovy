@@ -190,6 +190,7 @@ def call(BUILD_BRANCH, CREDENTIALS_ID) {
 					stage("Build") {
 						ansiColor('xterm') {
 							sh """
+							make install-kubebuilder
 							make install-kustomize
 							DOCKER_REGISTRY=localhost:5000 make
 							make e2e-build
