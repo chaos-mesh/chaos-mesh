@@ -153,11 +153,10 @@ def getChangeLogText() {
 	return changeLogText
 }
 
-def call(BUILD_BRANCH, CREDENTIALS_ID, CODECOV_CREDENTIALS_ID) {
+def call(BUILD_BRANCH, CREDENTIALS_ID) {
 	timeout (time: 2, unit: 'HOURS') {
 
 	def GITHASH
-	def CODECOV_TOKEN
 	def UCLOUD_OSS_URL = "http://pingcap-dev.hk.ufileos.com"
 	def BUILD_URL = "git@github.com:pingcap/chaos-mesh.git"
 	def PROJECT_DIR = "go/src/github.com/pingcap/chaos-mesh"
@@ -186,9 +185,6 @@ def call(BUILD_BRANCH, CREDENTIALS_ID, CODECOV_CREDENTIALS_ID) {
 						]
 
 						GITHASH = sh(returnStdout: true, script: "git rev-parse HEAD").trim()
-						withCredentials([string(credentialsId: "${CODECOV_CREDENTIALS_ID}", variable: 'codecovToken')]) {
-							CODECOV_TOKEN = codecovToken
-						}
 					}
 
 					stage("Build and Test") {
