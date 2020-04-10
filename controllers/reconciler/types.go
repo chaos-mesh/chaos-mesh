@@ -18,24 +18,18 @@ import (
 
 	ctrl "sigs.k8s.io/controller-runtime"
 
-	"github.com/pingcap/chaos-mesh/pkg/apiinterface"
+	"github.com/pingcap/chaos-mesh/api/v1alpha1"
 )
-
-// InnerObject is basic Object for the Reconciler
-type InnerObject interface {
-	IsDeleted() bool
-	apiinterface.StatefulObject
-}
 
 // InnerReconciler is interface for reconciler
 type InnerReconciler interface {
 
 	// Apply means the reconciler perform the chaos action
-	Apply(ctx context.Context, req ctrl.Request, chaos InnerObject) error
+	Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.InnerObject) error
 
 	// Recover means the reconciler recovers the chaos action
-	Recover(ctx context.Context, req ctrl.Request, chaos InnerObject) error
+	Recover(ctx context.Context, req ctrl.Request, chaos v1alpha1.InnerObject) error
 
 	// Object would return the instance of chaos
-	Object() InnerObject
+	Object() v1alpha1.InnerObject
 }

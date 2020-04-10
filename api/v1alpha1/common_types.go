@@ -14,7 +14,10 @@
 package v1alpha1
 
 import (
+	"time"
+
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 )
 
@@ -135,5 +138,31 @@ type ExperimentStatus struct {
 const (
 	invalidConfigurationMsg = "invalid configuration"
 )
+
+// InnerSchedulerObject is the Object for the twophase reconcile
+type InnerSchedulerObject interface {
+	InnerObject
+	GetDuration() (*time.Duration, error)
+
+	GetNextStart() time.Time
+	SetNextStart(time.Time)
+
+	GetNextRecover() time.Time
+	SetNextRecover(time.Time)
+
+	GetScheduler() *SchedulerSpec
+}
+
+// InnerObject is basic Object for the Reconciler
+type InnerObject interface {
+	IsDeleted() bool
+	StatefulObject
+}
+
+// StatefulObject is basic Object for the Reconciler
+type StatefulObject interface {
+	runtime.Object
+	GetStatus() *ChaosStatus
+}
 
 var log = ctrl.Log.WithName("validate-webhook")

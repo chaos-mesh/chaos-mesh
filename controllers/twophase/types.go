@@ -31,20 +31,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-// InnerSchedulerObject is the Object for the twophase reconcile
-type InnerSchedulerObject interface {
-	reconciler.InnerObject
-	GetDuration() (*time.Duration, error)
-
-	GetNextStart() time.Time
-	SetNextStart(time.Time)
-
-	GetNextRecover() time.Time
-	SetNextRecover(time.Time)
-
-	GetScheduler() *v1alpha1.SchedulerSpec
-}
-
 // Reconciler for the twophase reconciler
 type Reconciler struct {
 	reconciler.InnerReconciler
@@ -74,7 +60,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		r.Log.Error(err, "unable to get chaos")
 		return ctrl.Result{}, err
 	}
-	chaos := _chaos.(InnerSchedulerObject)
+	chaos := _chaos.(v1alpha1.InnerSchedulerObject)
 
 	duration, err := chaos.GetDuration()
 	if err != nil {

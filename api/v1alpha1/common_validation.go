@@ -16,7 +16,6 @@ package v1alpha1
 import (
 	"fmt"
 	"strconv"
-	"time"
 
 	"github.com/robfig/cron/v3"
 
@@ -34,12 +33,20 @@ const (
 	ValidateValueParseError = "parse value field error:%s"
 )
 
-// ValidateScheduler validates the scheduler and duration
-func ValidateScheduler(duration *string, scheduler *SchedulerSpec, spec *field.Path) field.ErrorList {
+// ValidateScheduler validates the scheduler
+func ValidateScheduler(obj InnerSchedulerObject, spec *field.Path) field.ErrorList {
 	allErrs := field.ErrorList{}
 	schedulerField := spec.Child("scheduler")
 	durationField := spec.Child("duration")
 
+	duration, err := obj.GetDuration()
+	if err != nil {
+		allErrs = append(allErrs, field.Invalid(durationField,
+			duration,
+			fmt.Sprintf("parse duration field error:%s", err)))
+	}
+
+	scheduler := obj.GetScheduler()
 	if duration != nil && scheduler != nil {
 		_, err := cron.ParseStandard(scheduler.Cron)
 		if err != nil {
@@ -48,23 +55,9 @@ func ValidateScheduler(duration *string, scheduler *SchedulerSpec, spec *field.P
 				fmt.Sprintf("parse cron field error:%s", err)))
 		}
 
-		_, err = time.ParseDuration(*duration)
-		if err != nil {
-			allErrs = append(allErrs, field.Invalid(durationField,
-				*duration,
-				fmt.Sprintf("parse duration field error:%s", err)))
-		}
-
-		if len(allErrs) > 0 {
-			return allErrs
-		}
-
-		return nil
-	} else if duration == nil && scheduler == nil {
-		return nil
+	} else if (duration == nil && scheduler != nil) || (duration != nil && scheduler == nil) {
+		allErrs = append(allErrs, field.Invalid(schedulerField, scheduler, ValidateSchedulerError))
 	}
-
-	allErrs = append(allErrs, field.Invalid(schedulerField, scheduler, ValidateSchedulerError))
 	return allErrs
 }
 
