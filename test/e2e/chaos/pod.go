@@ -222,28 +222,48 @@ var _ = ginkgo.Describe("[chaos-mesh] Basic", func() {
 		framework.ExpectNoError(err, "create pod chaos error")
 
 		var mergePatch []byte
-		mergePatch, err = json.Marshal(map[string]interface{}{
+		mergePatch, _ = json.Marshal(map[string]interface{}{
 			"spec": map[string]interface{}{
 				"paused": true,
 			},
 		})
-		framework.ExpectNoError(err, "parse pause patch error")
 
 		err = cli.Patch(ctx, podKillChaos, client.ConstantPatch(types.MergePatchType, mergePatch))
-		framework.ExpectNoError(err, "patch pod chaos error")
+		framework.ExpectNoError(err, "patch pause pod chaos error")
+
+		chaosKey := types.NamespacedName{
+			Namespace: ns,
+			Name:      "nginx-kill",
+		}
 
 		err = wait.Poll(5*time.Second, 5*time.Minute, func() (done bool, err error) {
 			chaos := &v1alpha1.PodChaos{}
-			err = cli.Get(ctx, types.NamespacedName{
-				Namespace: ns,
-				Name:      "nginx-kill",
-			}, chaos)
+			err = cli.Get(ctx, chaosKey, chaos)
 			if chaos.Status.Experiment.Phase == chaosmeshv1alpha1.ExperimentPhasePaused {
 				return true, nil
 			}
 			return false, err
 		})
 		framework.ExpectNoError(err, "Check paused chaos failed")
+
+		mergePatch, _ = json.Marshal(map[string]interface{}{
+			"spec": map[string]interface{}{
+				"paused": false,
+			},
+		})
+
+		err = cli.Patch(ctx, podKillChaos, client.ConstantPatch(types.MergePatchType, mergePatch))
+		framework.ExpectNoError(err, "patch resume pod chaos error")
+
+		err = wait.Poll(5*time.Second, 5*time.Minute, func() (done bool, err error) {
+			chaos := &v1alpha1.PodChaos{}
+			err = cli.Get(ctx, chaosKey, chaos)
+			if chaos.Status.Experiment.Phase == chaosmeshv1alpha1.ExperimentPhaseRunning {
+				return true, nil
+			}
+			return false, err
+		})
+		framework.ExpectNoError(err, "Check resumed chaos failed")
 
 		cancel()
 	})
