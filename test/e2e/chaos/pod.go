@@ -3,7 +3,6 @@ package chaos
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"time"
 
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -242,7 +241,6 @@ var _ = ginkgo.Describe("[chaos-mesh] Basic", func() {
 			if chaos.Status.Experiment.Phase == chaosmeshv1alpha1.ExperimentPhasePaused {
 				return true, nil
 			}
-			fmt.Printf("%+v\n", chaos)
 			return false, err
 		})
 		framework.ExpectNoError(err, "Check paused chaos failed")
