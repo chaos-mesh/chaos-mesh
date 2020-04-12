@@ -2,16 +2,19 @@ package chaos
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
 	"time"
 
+	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/klog"
 
 	"github.com/onsi/ginkgo"
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/kubernetes"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
@@ -182,6 +185,68 @@ var _ = ginkgo.Describe("[chaos-mesh] Basic", func() {
 			return false, nil
 		})
 		framework.ExpectNoError(err, "Pod kill chaos perform failed")
+		cancel()
+	})
+
+	ginkgo.It("PauseChaos", func() {
+		ctx, cancel := context.WithCancel(context.Background())
+		bpod := fixture.NewCommonNginxPod("nginx", ns)
+		_, err := kubeCli.CoreV1().Pods(ns).Create(bpod)
+		framework.ExpectNoError(err, "create nginx pod error")
+		err = waitPodRunning("nginx", ns, kubeCli)
+		framework.ExpectNoError(err, "wait nginx running error")
+
+		dur := "5s"
+		podKillChaos := &v1alpha1.PodChaos{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "nginx-kill",
+				Namespace: ns,
+			},
+			Spec: v1alpha1.PodChaosSpec{
+				Selector: v1alpha1.SelectorSpec{
+					Namespaces: []string{
+						ns,
+					},
+					LabelSelectors: map[string]string{
+						"app": "nginx",
+					},
+				},
+				Action:   v1alpha1.PodKillAction,
+				Mode:     v1alpha1.OnePodMode,
+				Duration: &dur,
+				Scheduler: &v1alpha1.SchedulerSpec{
+					Cron: "@every 10s",
+				},
+			},
+		}
+		err = cli.Create(ctx, podKillChaos)
+		framework.ExpectNoError(err, "create pod chaos error")
+
+		var mergePatch []byte
+		mergePatch, err = json.Marshal(map[string]interface{}{
+			"spec": map[string]interface{}{
+				"paused": true,
+			},
+		})
+		framework.ExpectNoError(err, "parse pause patch error")
+
+		err = cli.Patch(ctx, podKillChaos, client.ConstantPatch(types.MergePatchType, mergePatch))
+		framework.ExpectNoError(err, "patch pod chaos error")
+
+		err = wait.Poll(5*time.Second, 5*time.Minute, func() (done bool, err error) {
+			chaos := &v1alpha1.PodChaos{}
+			err = cli.Get(ctx, types.NamespacedName{
+				Namespace: ns,
+				Name:      "nginx-kill",
+			}, chaos)
+			if chaos.Status.Experiment.Phase == chaosmeshv1alpha1.ExperimentPhasePaused {
+				return true, nil
+			}
+			fmt.Printf("%+v\n", chaos)
+			return false, err
+		})
+		framework.ExpectNoError(err, "Check paused chaos failed")
+
 		cancel()
 	})
 })
