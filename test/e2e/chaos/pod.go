@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/pingcap/chaos-mesh/test/pkg/fixture"
 	"time"
 
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -25,6 +24,8 @@ import (
 
 	"github.com/pingcap/chaos-mesh/api/v1alpha1"
 	chaosmeshv1alpha1 "github.com/pingcap/chaos-mesh/api/v1alpha1"
+	"github.com/pingcap/chaos-mesh/test/pkg/fixture"
+
 	// load pprof
 	_ "net/http/pprof"
 )
