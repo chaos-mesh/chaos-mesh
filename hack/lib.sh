@@ -51,7 +51,6 @@ function hack::verify_terraform() {
 }
 
 function hack::install_terraform() {
-    echo "Installing terraform v$TERRAFORM_VERSION..."
     local tmpdir=$(mktemp -d)
     trap "test -d $tmpdir && rm -r $tmpdir" RETURN
     pushd $tmpdir > /dev/null
@@ -80,7 +79,6 @@ function hack::ensure_kubectl() {
     if hack::verify_kubectl; then
         return 0
     fi
-    echo "Installing kubectl v$KUBECTL_VERSION..."
     tmpfile=$(mktemp)
     trap "test -f $tmpfile && rm $tmpfile" RETURN
     curl --retry 10 -L -o $tmpfile https://storage.googleapis.com/kubernetes-release/release/v${KUBECTL_VERSION}/bin/${OS}/${ARCH}/kubectl

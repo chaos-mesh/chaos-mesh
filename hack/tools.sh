@@ -35,3 +35,11 @@ fi
 if [ "${INSTALLS}" = "all" ] || grep -qw "kind" <<<"${INSTALLS}"; then
   hack::ensure_kind
 fi
+
+if [ "${INSTALLS}" = "all" ] || grep -qw "kubectl" <<<"${INSTALLS}"; then
+  hack::ensure_kubectl
+fi
+
+if [ "${INSTALLS}" = "all" ] || grep -qw "helm" <<<"${INSTALLS}"; then
+  hack::ensure_helm
+fi

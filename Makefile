@@ -9,10 +9,12 @@ GOVER_MAJOR := $(shell go version | sed -E -e "s/.*go([0-9]+)[.]([0-9]+).*/\1/")
 GOVER_MINOR := $(shell go version | sed -E -e "s/.*go([0-9]+)[.]([0-9]+).*/\2/")
 GO111 := $(shell [ $(GOVER_MAJOR) -gt 1 ] || [ $(GOVER_MAJOR) -eq 1 ] && [ $(GOVER_MINOR) -ge 11 ]; echo $$?)
 
-START=$(shell pwd)
-OUTPUT_BIN=$(START)/output/bin
+ROOT=$(shell pwd)
+OUTPUT_BIN=$(ROOT)/output/bin
 KUSTOMIZE_BIN=$(OUTPUT_BIN)/kustomize
 KUBEBUILDER_BIN=$(OUTPUT_BIN)/kubebuilder
+KUBECTL_BIN=$(OUTPUT_BIN)/kubectl
+HELM_BIN=$(OUTPUT_BIN)/helm
 
 ifeq ($(GO111), 1)
 $(error Please upgrade your Go compiler to 1.11 or higher version)
@@ -103,8 +105,8 @@ run: generate fmt vet manifests
 
 # Install CRDs into a cluster
 install: manifests
-	kubectl apply -f manifests/crd.yaml
-	bash -c '[[ `helm version --client --short` == "Client: v2"* ]] && helm install helm/chaos-mesh --name=chaos-mesh --namespace=chaos-testing || helm install chaos-mesh helm/chaos-mesh --namespace=chaos-testing;'
+	$(KUBECTL_BIN) apply -f manifests/crd.yaml
+	bash -c '[[ `$(HELM_BIN) version --client --short` == "Client: v2"* ]] && $(HELM_BIN) install helm/chaos-mesh --name=chaos-mesh --namespace=chaos-testing || $(HELM_BIN) install chaos-mesh helm/chaos-mesh --namespace=chaos-testing;'
 
 # Generate manifests e.g. CRD, RBAC etc.
 manifests: controller-gen
@@ -212,6 +214,10 @@ ensure-kubebuilder:
 ensure-kustomize:
 	@echo "ensuring kustomize"
 	$(shell ./hack/tools.sh kustomize)
+
+ensure-kubectl:
+	@echo "ensuring kubectl"
+	$(shell ./hack/tools.sh kubectl)
 
 ensure-all:
 	@echo "ensuring all"
