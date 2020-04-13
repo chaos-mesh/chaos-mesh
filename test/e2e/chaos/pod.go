@@ -3,6 +3,8 @@ package chaos
 import (
 	"context"
 	"encoding/json"
+	"fmt"
+	"github.com/pingcap/chaos-mesh/test/pkg/fixture"
 	"time"
 
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -23,8 +25,6 @@ import (
 
 	"github.com/pingcap/chaos-mesh/api/v1alpha1"
 	chaosmeshv1alpha1 "github.com/pingcap/chaos-mesh/api/v1alpha1"
-	"github.com/pingcap/chaos-mesh/test/pkg/fixture"
-
 	// load pprof
 	_ "net/http/pprof"
 )
@@ -189,11 +189,15 @@ var _ = ginkgo.Describe("[chaos-mesh] Basic", func() {
 
 	ginkgo.It("PauseChaos", func() {
 		ctx, cancel := context.WithCancel(context.Background())
-		bpod := fixture.NewCommonNginxPod("nginx", ns)
-		_, err := kubeCli.CoreV1().Pods(ns).Create(bpod)
-		framework.ExpectNoError(err, "create nginx pod error")
-		err = waitPodRunning("nginx", ns, kubeCli)
-		framework.ExpectNoError(err, "wait nginx running error")
+		var err error
+		for _, i := range []int{1, 2, 3} {
+			name := fmt.Sprintf("nginx-%d", i)
+			bpod := fixture.NewCommonNginxPod(name, ns)
+			_, err = kubeCli.CoreV1().Pods(ns).Create(bpod)
+			framework.ExpectNoError(err, fmt.Sprint("create pod", name, "error"))
+			err = waitPodRunning(name, ns, kubeCli)
+			framework.ExpectNoError(err, fmt.Sprint("wait pod", name, "error"))
+		}
 
 		dur := "5s"
 		podKillChaos := &v1alpha1.PodChaos{
@@ -261,6 +265,7 @@ var _ = ginkgo.Describe("[chaos-mesh] Basic", func() {
 			if chaos.Status.Experiment.Phase == chaosmeshv1alpha1.ExperimentPhaseRunning {
 				return true, nil
 			}
+
 			return false, err
 		})
 		framework.ExpectNoError(err, "Check resumed chaos failed")
