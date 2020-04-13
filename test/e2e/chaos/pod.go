@@ -199,7 +199,6 @@ var _ = ginkgo.Describe("[chaos-mesh] Basic", func() {
 			framework.ExpectNoError(err, fmt.Sprint("wait pod", name, "error"))
 		}
 
-		dur := "5s"
 		podKillChaos := &v1alpha1.PodChaos{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      "nginx-kill",
@@ -207,16 +206,11 @@ var _ = ginkgo.Describe("[chaos-mesh] Basic", func() {
 			},
 			Spec: v1alpha1.PodChaosSpec{
 				Selector: v1alpha1.SelectorSpec{
-					Namespaces: []string{
-						ns,
-					},
-					LabelSelectors: map[string]string{
-						"app": "nginx",
-					},
+					Namespaces:     []string{ns},
+					LabelSelectors: map[string]string{"app": "nginx"},
 				},
-				Action:   v1alpha1.PodKillAction,
-				Mode:     v1alpha1.OnePodMode,
-				Duration: &dur,
+				Action: v1alpha1.PodKillAction,
+				Mode:   v1alpha1.OnePodMode,
 				Scheduler: &v1alpha1.SchedulerSpec{
 					Cron: "@every 10s",
 				},
