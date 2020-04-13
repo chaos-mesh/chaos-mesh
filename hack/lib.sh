@@ -34,6 +34,10 @@ HELM_BIN=$OUTPUT_BIN/helm
 HELM_VERSION=2.9.1
 KIND_VERSION=0.7.0
 KIND_BIN=$OUTPUT_BIN/kind
+KUBEBUILDER_BIN=$OUTPUT_BIN/kubebuilder
+KUBEBUILDER_VERSION=2.2.0
+KUSTOMIZE_BIN=$OUTPUT_BIN/kustomize
+KUSTOMIZE_VERSION=3.5.4
 
 test -d "$OUTPUT_BIN" || mkdir -p "$OUTPUT_BIN"
 
@@ -113,12 +117,53 @@ function hack::ensure_kind() {
     if hack::verify_kind; then
         return 0
     fi
-    echo "Installing kind v$KIND_VERSION..."
     tmpfile=$(mktemp)
     trap "test -f $tmpfile && rm $tmpfile" RETURN
     curl --retry 10 -L -o $tmpfile https://github.com/kubernetes-sigs/kind/releases/download/v${KIND_VERSION}/kind-$(uname)-amd64
     mv $tmpfile $KIND_BIN
     chmod +x $KIND_BIN
+}
+
+function hack::verify_kubebuilder() {
+    if test -x "$KUBEBUILDER_BIN"; then
+        v=$($KUBEBUILDER_BIN version | grep -o -E '[0-9]+\.[0-9]+\.[0-9]+' | head -n 1)
+        [[ "${v}" == "${KUBEBUILDER_VERSION}" ]]
+        return
+    fi
+    return 1
+}
+
+function hack::ensure_kubebuilder() {
+    if hack::verify_kubebuilder; then
+        return 0
+    fi
+    tmpfile=$(mktemp)
+    trap "test -f $tmpfile && rm $tmpfile" RETURN
+    curl --retry 10 -L -o ${tmpfile} https://go.kubebuilder.io/dl/$KUBEBUILDER_VERSION/$OS/$ARCH
+    tar -C ${OUTPUT_BIN} -xf ${tmpfile} kubebuilder_${KUBEBUILDER_VERSION}_${OS}_${ARCH}/bin/kubebuilder
+    mv ${OUTPUT_BIN}/kubebuilder_${KUBEBUILDER_VERSION}_${OS}_${ARCH}/bin/kubebuilder ${KUBEBUILDER_BIN}
+    chmod +x ${KUBEBUILDER_BIN}
+    rm -r ${OUTPUT_BIN}/kubebuilder_${KUBEBUILDER_VERSION}_${OS}_${ARCH}
+}
+
+function hack::verify_kustomize() {
+    if test -x "$KUSTOMIZE_BIN"; then
+        v=$($KUSTOMIZE_BIN version | grep -o -E '[0-9]+\.[0-9]+\.[0-9]+')
+        [[ "${v}" == "${KUSTOMIZE_VERSION}" ]]
+        return
+    fi
+    return 1
+}
+
+function hack::ensure_kustomize() {
+    if hack::verify_kustomize; then
+        return 0
+    fi
+    tmpfile=$(mktemp)
+    trap "test -f $tmpfile && rm $tmpfile" RETURN
+    curl --retry 10 -L -o ${tmpfile} "https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv${KUSTOMIZE_VERSION}/kustomize_v${KUSTOMIZE_VERSION}_${OS}_${ARCH}.tar.gz"
+    tar -C $OUTPUT_BIN -zxf ${tmpfile}
+    chmod +x $KUSTOMIZE_BIN
 }
 
 # hack::version_ge "$v1" "$v2" checks whether "v1" is greater or equal to "v2"

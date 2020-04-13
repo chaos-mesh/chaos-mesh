@@ -9,6 +9,11 @@ GOVER_MAJOR := $(shell go version | sed -E -e "s/.*go([0-9]+)[.]([0-9]+).*/\1/")
 GOVER_MINOR := $(shell go version | sed -E -e "s/.*go([0-9]+)[.]([0-9]+).*/\2/")
 GO111 := $(shell [ $(GOVER_MAJOR) -gt 1 ] || [ $(GOVER_MAJOR) -eq 1 ] && [ $(GOVER_MINOR) -ge 11 ]; echo $$?)
 
+START=$(shell pwd)
+OUTPUT_BIN=$(START)/output/bin
+KUSTOMIZE_BIN=$(OUTPUT_BIN)/kustomize
+KUBEBUILDER_BIN=$(OUTPUT_BIN)/kubebuilder
+
 ifeq ($(GO111), 1)
 $(error Please upgrade your Go compiler to 1.11 or higher version)
 endif
@@ -181,8 +186,8 @@ lint: revive
 generate: controller-gen
 	$(GOBIN)/controller-gen object:headerFile=./hack/boilerplate.go.txt paths="./..."
 
-yaml: manifests
-	kustomize build config/default > manifests/crd.yaml
+yaml: manifests ensure-kustomize
+	$(KUSTOMIZE_BIN) build config/default > manifests/crd.yaml
 
 e2e-build:
 	$(GO) build -trimpath  -o test/image/e2e/bin/ginkgo github.com/onsi/ginkgo/ginkgo
@@ -196,40 +201,23 @@ e2e-docker: e2e-build
 
 check: fmt vet lint
 
-install-kind:
-ifeq (,$(shell which kind))
-	@echo "installing kind"
-	GO111MODULE="on" go get sigs.k8s.io/kind@v0.7.0
-else
-	@echo "kind has been installed"
-endif
+ensure-kind:
+	@echo "ensuring kind"
+	$(shell ./hack/tools.sh kind)
 
-install-kubebuilder:
-ifeq (,$(shell which kubebuilder))
-	@echo "installing kubebuilder"
-	# download kubebuilder and extract it to tmp
-	curl -sL https://go.kubebuilder.io/dl/2.2.0/$(shell go env GOOS)/$(shell go env GOARCH) | tar -zx -C /tmp/
-	# move to a long-term location and put it on your path
-	# (you'll need to set the KUBEBUILDER_ASSETS env var if you put it somewhere else)
-	sudo mv /tmp/kubebuilder_2.2.0_$(shell go env GOOS)_$(shell go env GOARCH) /usr/local/kubebuilder
-	export PATH="${PATH}:/usr/local/kubebuilder/bin"
-else
-	@echo "kubebuilder has been installed"
-endif
+ensure-kubebuilder:
+	@echo "ensuring kubebuilder"
+	$(shell ./hack/tools.sh kubebuilder)
 
-install-kustomize:
-ifeq (,$(shell which kustomize))
-	@echo "installing kustomize"
-	# download kustomize
-	curl -o /usr/local/kubebuilder/bin/kustomize -sL "https://go.kubebuilder.io/kustomize/$(shell go env GOOS)/$(shell go env GOARCH)"
-	# set permission
-	sudo chmod a+x /usr/local/kubebuilder/bin/kustomize
-	$(shell which kustomize)
-else
-	@echo "kustomize has been installed"
-endif
+ensure-kustomize:
+	@echo "ensuring kustomize"
+	$(shell ./hack/tools.sh kustomize)
+
+ensure-all:
+	@echo "ensuring all"
+	$(shell ./hack/tools.sh all)
 
 .PHONY: all build test install manifests groupimports fmt vet tidy image \
 	docker-push lint generate controller-gen yaml \
-	manager chaosfs chaosdaemon install-kind install-kubebuilder \
-	install-kustomize dashboard dashboard-server-frontend
+	manager chaosfs chaosdaemon ensure-all \
+	dashboard dashboard-server-frontend

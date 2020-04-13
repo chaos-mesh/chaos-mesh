@@ -85,6 +85,8 @@ fi
 hack::ensure_kind
 hack::ensure_kubectl
 hack::ensure_helm
+hack::ensure_kubebuilder
+hack::ensure_kustomize
 
 HELM_IMAGE=${HELM_IMAGE:-gcr.io/kubernetes-helm/tiller:v2.9.1}
 DOCKER_REGISTRY=${DOCKER_REGISTRY:-localhost:5000}
