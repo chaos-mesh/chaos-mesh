@@ -41,9 +41,7 @@ endif
 FAILPOINT_ENABLE  := $$(find $$PWD/ -type d | grep -vE "(\.git|bin)" | xargs $(GOBIN)/failpoint-ctl enable)
 FAILPOINT_DISABLE := $$(find $$PWD/ -type d | grep -vE "(\.git|bin)" | xargs $(GOBIN)/failpoint-ctl disable)
 
-all: yaml build image
-
-build: dashboard-server-frontend
+all: yaml image
 
 # Run tests
 test: failpoint-enable generate fmt vet lint manifests test-utils
@@ -81,16 +79,16 @@ manager: generate
 chaosfs: generate
 	$(GO) build -ldflags '$(LDFLAGS)' -o bin/chaosfs ./cmd/chaosfs/*.go
 
-dashboard:
-	$(GO) build -ldflags '$(LDFLAGS)' -o bin/chaos-dashboard ./cmd/chaos-dashboard/*.go
+# dashboard:
+# 	$(GO) build -ldflags '$(LDFLAGS)' -o bin/chaos-dashboard ./cmd/chaos-dashboard/*.go
 
-binary: chaosdaemon manager chaosfs dashboard
+binary: chaosdaemon manager chaosfs
 
 watchmaker:
 	$(CGOENV) go build -ldflags '$(LDFLAGS)' -o bin/watchmaker ./cmd/watchmaker/...
 
-dashboard-server-frontend:
-	cd images/chaos-dashboard; yarn install; yarn build
+# dashboard-server-frontend:
+# 	cd images/chaos-dashboard; yarn install; yarn build
 
 # Run against the configured Kubernetes cluster in ~/.kube/config
 run: generate fmt vet manifests
@@ -129,7 +127,7 @@ tidy:
 	GO111MODULE=on go mod tidy
 	git diff --quiet go.mod go.sum
 
-image: image-chaos-daemon image-chaos-mesh image-chaos-fs image-chaos-scripts image-chaos-grafana image-chaos-dashboard image-chaos-kernel
+image: image-chaos-daemon image-chaos-mesh image-chaos-fs image-chaos-scripts image-chaos-grafana image-chaos-kernel
 
 image-binary:
 	docker build -t pingcap/binary ${DOCKER_BUILD_ARGS} .
@@ -149,8 +147,8 @@ image-chaos-scripts: image-binary
 image-chaos-grafana:
 	docker build -t ${DOCKER_REGISTRY_PREFIX}pingcap/chaos-grafana ${DOCKER_BUILD_ARGS} images/grafana
 
-image-chaos-dashboard: image-binary
-	docker build -t ${DOCKER_REGISTRY_PREFIX}pingcap/chaos-dashboard ${DOCKER_BUILD_ARGS} images/chaos-dashboard
+# image-chaos-dashboard: image-binary
+# 	docker build -t ${DOCKER_REGISTRY_PREFIX}pingcap/chaos-dashboard ${DOCKER_BUILD_ARGS} images/chaos-dashboard
 
 image-chaos-kernel:
 	docker build -t ${DOCKER_REGISTRY_PREFIX}pingcap/chaos-kernel ${DOCKER_BUILD_ARGS} --build-arg MAKE_JOBS=${MAKE_JOBS} --build-arg MIRROR=${UBUNTU_MIRROR} images/chaos-kernel
@@ -161,7 +159,7 @@ docker-push:
 	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-daemon:latest"
 	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-scripts:latest"
 	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-grafana:latest"
-	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-dashboard:latest"
+	# docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-dashboard:latest"
 	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-kernel:latest"
 
 controller-gen:
@@ -232,4 +230,4 @@ endif
 .PHONY: all build test install manifests groupimports fmt vet tidy image \
 	docker-push lint generate controller-gen yaml \
 	manager chaosfs chaosdaemon install-kind install-kubebuilder \
-	install-kustomize dashboard dashboard-server-frontend
+	install-kustomize

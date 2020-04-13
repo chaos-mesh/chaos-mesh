@@ -1,4 +1,4 @@
-// Copyright 2019 PingCAP, Inc.
+// Copyright 2020 PingCAP, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -11,4 +11,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package server
+package apiserver
+
+import (
+	"github.com/pingcap/chaos-mesh/pkg/apiserver/archive"
+	"github.com/pingcap/chaos-mesh/pkg/apiserver/event"
+	"github.com/pingcap/chaos-mesh/pkg/apiserver/experiment"
+	"go.uber.org/fx"
+)
+
+var handlerModule = fx.Options(
+	fx.Provide(
+		experiment.NewService,
+		event.NewService,
+		archive.NewService,
+	),
+	fx.Invoke(
+		experiment.Register,
+		event.Register,
+		archive.NewService,
+	),
+)

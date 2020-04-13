@@ -16,15 +16,15 @@ package reconciler
 import (
 	"context"
 
-	ctrl "sigs.k8s.io/controller-runtime"
+	"github.com/pingcap/chaos-mesh/api/v1alpha1"
 
-	"github.com/pingcap/chaos-mesh/pkg/apiinterface"
+	ctrl "sigs.k8s.io/controller-runtime"
 )
 
 // InnerObject is basic Object for the Reconciler
 type InnerObject interface {
 	IsDeleted() bool
-	apiinterface.StatefulObject
+	v1alpha1.StatefulObject
 }
 
 // InnerReconciler is interface for reconciler

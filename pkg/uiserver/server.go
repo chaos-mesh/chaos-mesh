@@ -1,4 +1,4 @@
-// Copyright 2019 PingCAP, Inc.
+// Copyright 2020 PingCAP, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -11,4 +11,30 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package server
+package uiserver
+
+import (
+	"io"
+	"net/http"
+
+	assetfs "github.com/elazarl/go-bindata-assetfs"
+)
+
+var (
+	fs = assetFS()
+)
+
+func Handler() http.Handler {
+	if fs != nil {
+		fileServer := http.FileServer(fs)
+		return fileServer
+	}
+
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		_, _ = io.WriteString(w, "Dashboard UI is not built. Use `UI=1 make`.\n")
+	})
+}
+
+func AssetFS() *assetfs.AssetFS {
+	return fs
+}
