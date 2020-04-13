@@ -9,7 +9,7 @@ usage() {
 This script use kind to create Kubernetes cluster,about kind please refer: https://kind.sigs.k8s.io/
 Before run this script,please ensure that:
 * have installed docker
-* have installed kind and kind's version == v0.4.0
+* have installed helm
 Options:
        -h,--help               prints the usage message
        -n,--name               name of the Kubernetes cluster,default value: kind
@@ -74,8 +74,6 @@ echo "ensuring kind"
 hack::ensure_kind
 echo "ensuring kubectl"
 hack::ensure_kubectl
-echo "ensuring helm"
-hack::ensure_helm
 
 OUTPUT_BIN=${ROOT}/output/bin
 KUBECTL_BIN=${OUTPUT_BIN}/kubectl
@@ -143,7 +141,7 @@ ${KUBECTL_BIN} apply -f ${ROOT}/manifests/tiller-rbac.yaml
 
 $KUBECTL_BIN create ns chaos-testing
 
-${HELM_BIN} init --service-account=tiller --wait
+if [[ $(helm version --client --short) == "Client: v2"* ]]; then helm init --service-account=tiller --wait; fi
 
 echo "############# success create cluster:[${clusterName}] #############"
 
