@@ -27,6 +27,7 @@ import (
 	"github.com/pingcap/chaos-mesh/pkg/collector"
 	"github.com/pingcap/chaos-mesh/pkg/config"
 	"github.com/pingcap/chaos-mesh/pkg/store"
+	"github.com/pingcap/chaos-mesh/pkg/store/dbstore"
 	"github.com/pingcap/chaos-mesh/pkg/version"
 
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
@@ -62,10 +63,11 @@ func main() {
 	app := fx.New(
 		fx.Provide(
 			&conf,
-			store.NewDBStore,
+			dbstore.NewDBStore,
 			collector.NewServer,
 		),
 		apiserver.Module,
+		store.Module,
 	)
 
 	startCtx, cancel := context.WithTimeout(context.Background(), 15*time.Second)

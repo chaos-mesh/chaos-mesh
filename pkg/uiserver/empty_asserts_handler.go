@@ -10,26 +10,14 @@
 // distributed under the License is distributed on an "AS IS" BASIS,
 // See the License for the specific language governing permissions and
 // limitations under the License.
+// +build !ui_server
 
-package archive
+package uiserver
 
 import (
-	"github.com/jinzhu/gorm"
-	"github.com/pingcap/chaos-mesh/pkg/store/dbstore"
+	assetfs "github.com/elazarl/go-bindata-assetfs"
 )
 
-type ArchiveStore interface{}
-
-func NewStore(db *dbstore.DB) ArchiveStore {
-	db.AutoMigrate(&ArchiveExperiment{})
-
-	return &archiveStore{db}
-}
-
-type archiveStore struct {
-	db *dbstore.DB
-}
-
-type ArchiveExperiment struct {
-	gorm.Model
+func assetFS() *assetfs.AssetFS {
+	return nil
 }

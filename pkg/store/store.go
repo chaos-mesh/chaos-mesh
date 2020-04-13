@@ -14,42 +14,14 @@
 package store
 
 import (
-	"context"
 	"go.uber.org/fx"
 
-	_ "github.com/go-sql-driver/mysql"
-	"github.com/jinzhu/gorm"
-	_ "github.com/jinzhu/gorm/dialects/sqlite"
-
-	"github.com/pingcap/chaos-mesh/pkg/config"
-
-	ctrl "sigs.k8s.io/controller-runtime"
+	"github.com/pingcap/chaos-mesh/pkg/store/archive"
+	"github.com/pingcap/chaos-mesh/pkg/store/event"
 )
 
-var (
-	log = ctrl.Log.WithName("store")
-)
-
-type DB struct {
-	*gorm.DB
-}
-
-func NewDBStore(lc fx.Lifecycle, conf *config.ChaosServerConfig) (*DB, error) {
-	gormDB, err := gorm.Open(conf.Database.Driver, conf.Database.Datasource)
-	if err != nil {
-		log.Error(err, "failed to open DB")
-		return nil, err
-	}
-
-	db := &DB{
-		gormDB,
-	}
-
-	lc.Append(fx.Hook{
-		OnStop: func(context.Context) error {
-			return db.Close()
-		},
-	})
-
-	return db, nil
-}
+var Module = fx.Options(
+	fx.Provide(
+		event.NewStore,
+		archive.NewStore,
+	))

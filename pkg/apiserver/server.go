@@ -38,6 +38,7 @@ var (
 			newAPIHandlerEngine,
 			NewServer,
 		),
+		handlerModule,
 		fx.Invoke(serverRegister))
 
 	log = ctrl.Log.WithName("apiserver")

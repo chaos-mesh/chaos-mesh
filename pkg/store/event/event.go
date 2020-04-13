@@ -13,14 +13,23 @@
 
 package event
 
-import "github.com/pingcap/chaos-mesh/pkg/store"
+import (
+	"github.com/jinzhu/gorm"
+	"github.com/pingcap/chaos-mesh/pkg/store/dbstore"
+)
 
 type EventStore interface{}
 
-func New(db *store.DB) EventStore {
+func NewStore(db *dbstore.DB) EventStore {
+	db.AutoMigrate(&Event{})
+
 	return &eventStore{db}
 }
 
 type eventStore struct {
-	db *store.DB
+	db *dbstore.DB
+}
+
+type Event struct {
+	gorm.Model
 }

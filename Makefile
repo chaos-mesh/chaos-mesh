@@ -79,16 +79,13 @@ manager: generate
 chaosfs: generate
 	$(GO) build -ldflags '$(LDFLAGS)' -o bin/chaosfs ./cmd/chaosfs/*.go
 
-# dashboard:
-# 	$(GO) build -ldflags '$(LDFLAGS)' -o bin/chaos-dashboard ./cmd/chaos-dashboard/*.go
+chaos-server: generate
+	$(GO) build -ldflags '$(LDFLAGS)' -o bin/chaos-server ./cmd/chaos-server/*.go
 
-binary: chaosdaemon manager chaosfs
+binary: chaosdaemon manager chaosfs chaos-server
 
 watchmaker:
 	$(CGOENV) go build -ldflags '$(LDFLAGS)' -o bin/watchmaker ./cmd/watchmaker/...
-
-# dashboard-server-frontend:
-# 	cd images/chaos-dashboard; yarn install; yarn build
 
 # Run against the configured Kubernetes cluster in ~/.kube/config
 run: generate fmt vet manifests
@@ -144,11 +141,11 @@ image-chaos-fs: image-binary
 image-chaos-scripts: image-binary
 	docker build -t ${DOCKER_REGISTRY_PREFIX}pingcap/chaos-scripts ${DOCKER_BUILD_ARGS} images/chaos-scripts
 
+image-chaos-server: image-binary
+	docker build -t ${DOCKER_REGISTRY_PREFIX}pingcap/chaos-server ${DOCKER_BUILD_ARGS} images/chaos-server
+
 image-chaos-grafana:
 	docker build -t ${DOCKER_REGISTRY_PREFIX}pingcap/chaos-grafana ${DOCKER_BUILD_ARGS} images/grafana
-
-# image-chaos-dashboard: image-binary
-# 	docker build -t ${DOCKER_REGISTRY_PREFIX}pingcap/chaos-dashboard ${DOCKER_BUILD_ARGS} images/chaos-dashboard
 
 image-chaos-kernel:
 	docker build -t ${DOCKER_REGISTRY_PREFIX}pingcap/chaos-kernel ${DOCKER_BUILD_ARGS} --build-arg MAKE_JOBS=${MAKE_JOBS} --build-arg MIRROR=${UBUNTU_MIRROR} images/chaos-kernel
@@ -159,7 +156,6 @@ docker-push:
 	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-daemon:latest"
 	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-scripts:latest"
 	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-grafana:latest"
-	# docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-dashboard:latest"
 	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-kernel:latest"
 
 controller-gen:
@@ -229,5 +225,5 @@ endif
 
 .PHONY: all build test install manifests groupimports fmt vet tidy image \
 	docker-push lint generate controller-gen yaml \
-	manager chaosfs chaosdaemon install-kind install-kubebuilder \
-	install-kustomize
+	manager chaosfs chaosdaemon chaos-server \
+	install-kind install-kubebuilder install-kustomize

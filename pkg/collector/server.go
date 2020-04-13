@@ -15,7 +15,7 @@ package collector
 
 import (
 	"context"
-	"github.com/pingcap/chaos-mesh/pkg/store"
+	"github.com/pingcap/chaos-mesh/pkg/store/dbstore"
 	"os"
 
 	"github.com/pingcap/chaos-mesh/api/v1alpha1"
@@ -40,7 +40,7 @@ func init() {
 	_ = v1alpha1.AddToScheme(scheme)
 }
 
-func NewServer(lc fx.Lifecycle, conf *config.ChaosServerConfig, db *store.DB) client.Client {
+func NewServer(lc fx.Lifecycle, conf *config.ChaosServerConfig, db *dbstore.DB) client.Client {
 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
 		Scheme:             scheme,
 		MetricsBindAddress: conf.MetricAddress,

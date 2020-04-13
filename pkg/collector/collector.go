@@ -16,7 +16,7 @@ package collector
 import (
 	"context"
 	"github.com/go-logr/logr"
-	"github.com/pingcap/chaos-mesh/pkg/store"
+	"github.com/pingcap/chaos-mesh/pkg/store/dbstore"
 
 	"github.com/pingcap/chaos-mesh/api/v1alpha1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -28,7 +28,7 @@ type ChaosCollector struct {
 	client.Client
 	Log     logr.Logger
 	apiType runtime.Object
-	db      *store.DB
+	db      *dbstore.DB
 }
 
 func (r *ChaosCollector) Reconcile(req ctrl.Request) (ctrl.Result, error) {
