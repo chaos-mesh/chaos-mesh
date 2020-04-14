@@ -14,10 +14,7 @@
 package collector
 
 import (
-	"context"
 	"os"
-
-	"go.uber.org/fx"
 
 	"github.com/pingcap/chaos-mesh/api/v1alpha1"
 	"github.com/pingcap/chaos-mesh/pkg/config"
@@ -41,13 +38,20 @@ func init() {
 	_ = v1alpha1.AddToScheme(scheme)
 }
 
-func NewServer(
-	lc fx.Lifecycle,
+// CollectorServer defines a server to manage collectors.
+type CollectorServer struct {
+	Mgr ctrl.Manager
+}
+
+// NewServer returns a CollectorServer and Client.
+func NewCollectorServer(
 	conf *config.ChaosServerConfig,
 	archive archive.ArchiveStore,
 	event event.EventStore,
-) client.Client {
-	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
+) (*CollectorServer, client.Client) {
+	var err error
+	s := &CollectorServer{}
+	s.Mgr, err = ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
 		Scheme:             scheme,
 		MetricsBindAddress: conf.MetricAddress,
 		LeaderElection:     conf.EnableLeaderElection,
@@ -59,71 +63,64 @@ func NewServer(
 	}
 
 	if err = (&ChaosCollector{
-		Client:  mgr.GetClient(),
+		Client:  s.Mgr.GetClient(),
 		Log:     ctrl.Log.WithName("collector").WithName("PodChaos"),
 		archive: archive,
 		event:   event,
-	}).Setup(mgr, &v1alpha1.PodChaos{}); err != nil {
+	}).Setup(s.Mgr, &v1alpha1.PodChaos{}); err != nil {
 		log.Error(err, "unable to create collector", "collector", "PodChaos")
 		os.Exit(1)
 	}
 
 	if err = (&ChaosCollector{
-		Client:  mgr.GetClient(),
+		Client:  s.Mgr.GetClient(),
 		Log:     ctrl.Log.WithName("collector").WithName("NetworkChaos"),
 		archive: archive,
 		event:   event,
-	}).Setup(mgr, &v1alpha1.NetworkChaos{}); err != nil {
+	}).Setup(s.Mgr, &v1alpha1.NetworkChaos{}); err != nil {
 		log.Error(err, "unable to create collector", "collector", "NetworkChaos")
 		os.Exit(1)
 	}
 
 	if err = (&ChaosCollector{
-		Client:  mgr.GetClient(),
+		Client:  s.Mgr.GetClient(),
 		Log:     ctrl.Log.WithName("collector").WithName("IoChaos"),
 		archive: archive,
 		event:   event,
-	}).Setup(mgr, &v1alpha1.IoChaos{}); err != nil {
+	}).Setup(s.Mgr, &v1alpha1.IoChaos{}); err != nil {
 		log.Error(err, "unable to create collector", "collector", "IoChaos")
 		os.Exit(1)
 	}
 
 	if err = (&ChaosCollector{
-		Client:  mgr.GetClient(),
+		Client:  s.Mgr.GetClient(),
 		Log:     ctrl.Log.WithName("controllers").WithName("TimeChaos"),
 		archive: archive,
 		event:   event,
-	}).Setup(mgr, &v1alpha1.TimeChaos{}); err != nil {
+	}).Setup(s.Mgr, &v1alpha1.TimeChaos{}); err != nil {
 		log.Error(err, "unable to create collector", "collector", "TimeChaos")
 		os.Exit(1)
 	}
 
 	if err = (&ChaosCollector{
-		Client:  mgr.GetClient(),
+		Client:  s.Mgr.GetClient(),
 		Log:     ctrl.Log.WithName("controllers").WithName("KernelChaos"),
 		archive: archive,
 		event:   event,
-	}).Setup(mgr, &v1alpha1.KernelChaos{}); err != nil {
+	}).Setup(s.Mgr, &v1alpha1.KernelChaos{}); err != nil {
 		log.Error(err, "unable to create collector", "collector", "KernelChaos")
 		os.Exit(1)
 	}
+	return s, s.Mgr.GetClient()
+}
 
-	lc.Append(fx.Hook{
-		// To mitigate the impact of deadlocks in application startup and
-		// shutdown, Fx imposes a time limit on OnStart and OnStop hooks. By
-		// default, hooks have a total of 30 seconds to complete. Timeouts are
-		// passed via Go's usual context.Context.
-		OnStart: func(ctx context.Context) error {
-			go func() {
-				log.Info("Starting collector")
-				if err := mgr.Start(ctx.Done()); err != nil {
-					log.Error(err, "problem running collector")
-					os.Exit(1)
-				}
-			}()
-			return nil
-		},
-	})
-
-	return mgr.GetClient()
+// Register starts collectors manager.
+func Register(s *CollectorServer, stopCh <-chan struct{}) {
+	go func() {
+		log.Info("Starting collector")
+		if err := s.Mgr.Start(stopCh); err != nil {
+			log.Error(err, "problem running collector")
+			os.Exit(1)
+		}
+	}()
 }

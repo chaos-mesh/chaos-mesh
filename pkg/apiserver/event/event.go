@@ -23,6 +23,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
+// Service defines a handler service for events.
 type Service struct {
 	conf    *config.ChaosServerConfig
 	kubeCli client.Client
@@ -30,6 +31,7 @@ type Service struct {
 	event   event.EventStore
 }
 
+// NewService return a event service instance.
 func NewService(
 	conf *config.ChaosServerConfig,
 	cli client.Client,
@@ -44,6 +46,7 @@ func NewService(
 	}
 }
 
+// Register mounts our HTTP handler on the mux.
 func Register(r *gin.RouterGroup, s *Service) {
 	endpoint := r.Group("/event")
 

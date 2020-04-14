@@ -15,11 +15,14 @@ package event
 
 import (
 	"github.com/jinzhu/gorm"
+
 	"github.com/pingcap/chaos-mesh/pkg/store/dbstore"
 )
 
+// EventStore defines operations for working with event.
 type EventStore interface{}
 
+// NewStore return a new EventStore.
 func NewStore(db *dbstore.DB) EventStore {
 	db.AutoMigrate(&Event{})
 
@@ -30,6 +33,7 @@ type eventStore struct {
 	db *dbstore.DB
 }
 
+// Event represents a event instance.
 type Event struct {
 	gorm.Model
 }

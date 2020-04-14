@@ -24,6 +24,7 @@ var (
 	fs = assetFS()
 )
 
+// Handler returns a FileServer `http.Handler` to handle http request.
 func Handler() http.Handler {
 	if fs != nil {
 		fileServer := http.FileServer(fs)
@@ -35,6 +36,7 @@ func Handler() http.Handler {
 	})
 }
 
+// AssetFS returns fs
 func AssetFS() *assetfs.AssetFS {
 	return fs
 }

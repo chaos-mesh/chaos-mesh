@@ -15,6 +15,7 @@ package experiment
 
 import (
 	"github.com/gin-gonic/gin"
+
 	"github.com/pingcap/chaos-mesh/pkg/config"
 	"github.com/pingcap/chaos-mesh/pkg/store/archive"
 	"github.com/pingcap/chaos-mesh/pkg/store/event"
@@ -22,6 +23,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
+// Service defines a handler service for experiments.
 type Service struct {
 	conf    *config.ChaosServerConfig
 	kubeCli client.Client
@@ -29,6 +31,7 @@ type Service struct {
 	event   event.EventStore
 }
 
+// NewService return a experiment service instance.
 func NewService(
 	conf *config.ChaosServerConfig,
 	cli client.Client,
@@ -43,6 +46,7 @@ func NewService(
 	}
 }
 
+// Register mounts our HTTP handler on the mux.
 func Register(r *gin.RouterGroup, s *Service) {
 	endpoint := r.Group("/experiment")
 	endpoint.GET("/all", s.listExperiments)

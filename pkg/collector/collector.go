@@ -27,6 +27,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
+// ChaosCollector represents a collector for Chaos Object.
 type ChaosCollector struct {
 	client.Client
 	Log     logr.Logger
@@ -35,6 +36,7 @@ type ChaosCollector struct {
 	event   event.EventStore
 }
 
+// Reconcile reconciles a chaos collector.
 func (r *ChaosCollector) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	if r.apiType == nil {
 		r.Log.Error(nil, "apiType has not been initialized")
@@ -88,6 +90,7 @@ func (r *ChaosCollector) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	return ctrl.Result{}, nil
 }
 
+// Setup setups collectors by Manager.
 func (r *ChaosCollector) Setup(mgr ctrl.Manager, apiType runtime.Object) error {
 	r.apiType = apiType
 

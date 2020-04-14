@@ -21,7 +21,6 @@ require (
 	github.com/gogo/googleapis v1.3.2 // indirect
 	github.com/golang/groupcache v0.0.0-20200121045136-8c9f03a8e57e // indirect
 	github.com/golang/protobuf v1.3.5
-	github.com/gorilla/mux v1.7.3
 	github.com/gorilla/websocket v1.4.1 // indirect
 	github.com/grpc-ecosystem/go-grpc-middleware v1.2.0
 	github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0
@@ -34,8 +33,8 @@ require (
 	github.com/mattn/go-runewidth v0.0.8 // indirect
 	github.com/mgechev/revive v1.0.2-0.20200225072153-6219ca02fffb
 	github.com/morikuni/aec v1.0.0 // indirect
-	github.com/onsi/ginkgo v1.11.0
-	github.com/onsi/gomega v1.7.0
+	github.com/onsi/ginkgo v1.12.0
+	github.com/onsi/gomega v1.7.1
 	github.com/opencontainers/runtime-spec v1.0.1 // indirect
 	github.com/pingcap/check v0.0.0-20191216031241-8a5a85928f12 // indirect
 	github.com/pingcap/errors v0.11.5-0.20190809092503-95897b64e011 // indirect
@@ -50,6 +49,7 @@ require (
 	github.com/tmc/grpc-websocket-proxy v0.0.0-20200122045848-3419fae592fc // indirect
 	github.com/vishvananda/netlink v1.0.0
 	github.com/vishvananda/netns v0.0.0-20191106174202-0a2b9b5464df
+	github.com/yuin/goldmark v1.1.27 // indirect
 	go.uber.org/fx v1.12.0
 	go.uber.org/multierr v1.5.0 // indirect
 	go.uber.org/zap v1.14.0

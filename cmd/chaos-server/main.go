@@ -17,8 +17,6 @@ import (
 	"context"
 	"flag"
 	"os"
-	"os/signal"
-	"syscall"
 	"time"
 
 	"go.uber.org/fx"
@@ -29,6 +27,9 @@ import (
 	"github.com/pingcap/chaos-mesh/pkg/store"
 	"github.com/pingcap/chaos-mesh/pkg/store/dbstore"
 	"github.com/pingcap/chaos-mesh/pkg/version"
+
+	_ "github.com/go-sql-driver/mysql"
+	_ "github.com/jinzhu/gorm/dialects/sqlite"
 
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -60,15 +61,18 @@ func main() {
 
 	ctrl.SetLogger(zap.Logger(true))
 
+	stopCh := ctrl.SetupSignalHandler()
+
 	app := fx.New(
 		fx.Provide(
+			stopCh,
 			&conf,
 			dbstore.NewDBStore,
-			collector.NewServer,
+			collector.NewCollectorServer,
 		),
-		apiserver.Module,
 		store.Module,
-	)
+		apiserver.Module,
+		fx.Invoke(collector.Register))
 
 	startCtx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
@@ -77,18 +81,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	sc := make(chan os.Signal, 1)
-	signal.Notify(sc,
-		os.Kill,
-		os.Interrupt,
-		syscall.SIGHUP,
-		syscall.SIGINT,
-		syscall.SIGTERM,
-		syscall.SIGQUIT)
-
-	sig := <-sc
-	log.Info("Got signal to exit", "signal", sig)
-
+	<-stopCh
 	stopCtx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
 	if err := app.Stop(stopCtx); err != nil {

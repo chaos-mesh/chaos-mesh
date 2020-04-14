@@ -33,17 +33,20 @@ import (
 )
 
 var (
+	// Module includes the providers and registers provided by apiserver and handlers.
 	Module = fx.Options(
 		fx.Provide(
+			uiserver.AssetFS,
 			newAPIHandlerEngine,
 			NewServer,
 		),
-		handlerModule,
-		fx.Invoke(serverRegister))
+		fx.Invoke(serverRegister),
+		handlerModule)
 
 	log = ctrl.Log.WithName("apiserver")
 )
 
+// Server is a server to run API service.
 type Server struct {
 	ctx context.Context
 
@@ -53,8 +56,8 @@ type Server struct {
 	apiHandlerEngine *gin.Engine
 }
 
+// NewServer returns a Server instance.
 func NewServer(
-	lx fx.Lifecycle,
 	conf *config.ChaosServerConfig,
 	uiAssetFS *assetfs.AssetFS,
 	apiHandlerEngine *gin.Engine,
@@ -108,6 +111,7 @@ func newAPIHandlerEngine() (*gin.Engine, *gin.RouterGroup) {
 	return apiHandlerEngine, endpoint
 }
 
+// Handler returns a `http.Handler`
 func Handler(s *Server) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		s.handler(w, r)

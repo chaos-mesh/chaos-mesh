@@ -15,11 +15,9 @@ package dbstore
 
 import (
 	"context"
-	"go.uber.org/fx"
 
-	_ "github.com/go-sql-driver/mysql"
 	"github.com/jinzhu/gorm"
-	_ "github.com/jinzhu/gorm/dialects/sqlite"
+	"go.uber.org/fx"
 
 	"github.com/pingcap/chaos-mesh/pkg/config"
 
@@ -30,10 +28,12 @@ var (
 	log = ctrl.Log.WithName("store")
 )
 
+// DB defines a db storage.
 type DB struct {
 	*gorm.DB
 }
 
+// NewDBStore returns a new DB
 func NewDBStore(lc fx.Lifecycle, conf *config.ChaosServerConfig) (*DB, error) {
 	gormDB, err := gorm.Open(conf.Database.Driver, conf.Database.Datasource)
 	if err != nil {

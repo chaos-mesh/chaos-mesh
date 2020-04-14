@@ -20,6 +20,7 @@ import (
 	"github.com/pingcap/chaos-mesh/pkg/store/event"
 )
 
+// Module includes the providers provided by store.
 var Module = fx.Options(
 	fx.Provide(
 		event.NewStore,

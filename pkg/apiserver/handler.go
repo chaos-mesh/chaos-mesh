@@ -14,10 +14,11 @@
 package apiserver
 
 import (
+	"go.uber.org/fx"
+
 	"github.com/pingcap/chaos-mesh/pkg/apiserver/archive"
 	"github.com/pingcap/chaos-mesh/pkg/apiserver/event"
 	"github.com/pingcap/chaos-mesh/pkg/apiserver/experiment"
-	"go.uber.org/fx"
 )
 
 var handlerModule = fx.Options(
@@ -29,6 +30,6 @@ var handlerModule = fx.Options(
 	fx.Invoke(
 		experiment.Register,
 		event.Register,
-		archive.NewService,
+		archive.Register,
 	),
 )

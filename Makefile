@@ -56,7 +56,6 @@ all: yaml image
 # Run tests
 test: failpoint-enable generate fmt vet lint manifests test-utils
 	rm -rf cover.* cover
-	mkdir -p cover
 	$(GOTEST) ./api/... ./controllers/... ./pkg/... -coverprofile cover.out.tmp
 	cat cover.out.tmp | grep -v "_generated.deepcopy.go" > cover.out
 	@$(FAILPOINT_DISABLE)
@@ -73,6 +72,7 @@ coverage:
 ifeq ("$(JenkinsCI)", "1")
 	@bash <(curl -s https://codecov.io/bash) -f cover.out -t $(CODECOV_TOKEN)
 else
+	mkdir -p cover
 	gocov convert cover.out > cover.json
 	gocov-xml < cover.json > cover.xml
 	gocov-html < cover.json > cover/index.html
@@ -239,7 +239,12 @@ else
 	@echo "kustomize has been installed"
 endif
 
+install-local-coverage-tools:
+	go get github.com/axw/gocov/gocov \
+	&& go get github.com/AlekSi/gocov-xml \
+	&& go get -u github.com/matm/gocov-html
+
 .PHONY: all build test install manifests groupimports fmt vet tidy image \
 	docker-push lint generate controller-gen yaml \
 	manager chaosfs chaosdaemon chaos-server \
-	install-kind install-kubebuilder install-kustomize
+	install-kind install-kubebuilder install-kustomize install-local-coverage-tools
