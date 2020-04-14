@@ -18,8 +18,7 @@ import (
 
 	"github.com/pingcap/chaos-mesh/api/v1alpha1"
 	"github.com/pingcap/chaos-mesh/pkg/config"
-	"github.com/pingcap/chaos-mesh/pkg/store/archive"
-	"github.com/pingcap/chaos-mesh/pkg/store/event"
+	"github.com/pingcap/chaos-mesh/pkg/core"
 
 	"k8s.io/apimachinery/pkg/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
@@ -38,19 +37,19 @@ func init() {
 	_ = v1alpha1.AddToScheme(scheme)
 }
 
-// CollectorServer defines a server to manage collectors.
-type CollectorServer struct {
+// Server defines a server to manage collectors.
+type Server struct {
 	Mgr ctrl.Manager
 }
 
 // NewServer returns a CollectorServer and Client.
-func NewCollectorServer(
+func NewServer(
 	conf *config.ChaosServerConfig,
-	archive archive.ArchiveStore,
-	event event.EventStore,
-) (*CollectorServer, client.Client) {
+	archive core.ArchiveStore,
+	event core.EventStore,
+) (*Server, client.Client) {
 	var err error
-	s := &CollectorServer{}
+	s := &Server{}
 	s.Mgr, err = ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
 		Scheme:             scheme,
 		MetricsBindAddress: conf.MetricAddress,
@@ -115,7 +114,7 @@ func NewCollectorServer(
 }
 
 // Register starts collectors manager.
-func Register(s *CollectorServer, stopCh <-chan struct{}) {
+func Register(s *Server, stopCh <-chan struct{}) {
 	go func() {
 		log.Info("Starting collector")
 		if err := s.Mgr.Start(stopCh); err != nil {

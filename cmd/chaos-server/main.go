@@ -68,7 +68,7 @@ func main() {
 			stopCh,
 			&conf,
 			dbstore.NewDBStore,
-			collector.NewCollectorServer,
+			collector.NewServer,
 		),
 		store.Module,
 		apiserver.Module,

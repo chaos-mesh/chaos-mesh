@@ -14,26 +14,17 @@
 package archive
 
 import (
-	"github.com/jinzhu/gorm"
-
+	"github.com/pingcap/chaos-mesh/pkg/core"
 	"github.com/pingcap/chaos-mesh/pkg/store/dbstore"
 )
 
-// ArchiveStore defines operations for working with archive experiments
-type ArchiveStore interface{}
-
 // NewStore returns a new ArchiveStore.
-func NewStore(db *dbstore.DB) ArchiveStore {
-	db.AutoMigrate(&ArchiveExperiment{})
+func NewStore(db *dbstore.DB) core.ArchiveStore {
+	db.AutoMigrate(&core.ArchiveExperiment{})
 
 	return &archiveStore{db}
 }
 
 type archiveStore struct {
 	db *dbstore.DB
-}
-
-// ArchiveExperiment represents a experiment instance.
-type ArchiveExperiment struct {
-	gorm.Model
 }

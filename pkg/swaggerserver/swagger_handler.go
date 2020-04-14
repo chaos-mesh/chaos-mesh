@@ -19,7 +19,7 @@ import (
 
 	httpSwagger "github.com/swaggo/http-swagger"
 
-	_ "github.com/pingcap/chaos-mesh/doc"
+	_ "github.com/pingcap/chaos-mesh/doc" // for swagger api
 )
 
 // Handler returns a swagger `http.Handler`.

@@ -19,8 +19,7 @@ import (
 	"github.com/go-logr/logr"
 
 	"github.com/pingcap/chaos-mesh/controllers/reconciler"
-	"github.com/pingcap/chaos-mesh/pkg/store/archive"
-	"github.com/pingcap/chaos-mesh/pkg/store/event"
+	"github.com/pingcap/chaos-mesh/pkg/core"
 
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -32,8 +31,8 @@ type ChaosCollector struct {
 	client.Client
 	Log     logr.Logger
 	apiType runtime.Object
-	archive archive.ArchiveStore
-	event   event.EventStore
+	archive core.ArchiveStore
+	event   core.EventStore
 }
 
 // Reconcile reconciles a chaos collector.

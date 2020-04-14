@@ -17,8 +17,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/pingcap/chaos-mesh/pkg/config"
-	"github.com/pingcap/chaos-mesh/pkg/store/archive"
-	"github.com/pingcap/chaos-mesh/pkg/store/event"
+	"github.com/pingcap/chaos-mesh/pkg/core"
 
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
@@ -27,16 +26,16 @@ import (
 type Service struct {
 	conf    *config.ChaosServerConfig
 	kubeCli client.Client
-	archive archive.ArchiveStore
-	event   event.EventStore
+	archive core.ArchiveStore
+	event   core.EventStore
 }
 
 // NewService return a event service instance.
 func NewService(
 	conf *config.ChaosServerConfig,
 	cli client.Client,
-	archive archive.ArchiveStore,
-	event event.EventStore,
+	archive core.ArchiveStore,
+	event core.EventStore,
 ) *Service {
 	return &Service{
 		conf:    conf,

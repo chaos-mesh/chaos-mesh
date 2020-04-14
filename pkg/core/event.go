@@ -11,20 +11,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package event
+package core
 
 import (
-	"github.com/pingcap/chaos-mesh/pkg/core"
-	"github.com/pingcap/chaos-mesh/pkg/store/dbstore"
+	"github.com/jinzhu/gorm"
 )
 
-// NewStore return a new EventStore.
-func NewStore(db *dbstore.DB) core.EventStore {
-	db.AutoMigrate(&core.Event{})
+// EventStore defines operations for working with event.
+type EventStore interface{}
 
-	return &eventStore{db}
-}
-
-type eventStore struct {
-	db *dbstore.DB
+// Event represents a event instance.
+type Event struct {
+	gorm.Model
 }
