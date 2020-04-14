@@ -336,10 +336,10 @@ func getUIDs(pods []corev1.Pod) []types.UID {
 }
 
 func haveNewUID(newUIDs []types.UID, oldUIDs []types.UID) bool {
-	for _, newUid := range newUIDs {
+	for _, newUID := range newUIDs {
 		found := false
 		for _, uid := range oldUIDs {
-			if uid == newUid {
+			if uid == newUID {
 				found = true
 				break
 			}
