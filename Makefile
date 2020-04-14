@@ -123,7 +123,7 @@ fmt: groupimports
 
 gosec:
 ifeq (,$(shell which gosec))
-	curl -sfL https://raw.githubusercontent.com/securego/gosec/master/install.sh | sh -s -- -b $(shell go env GOPATH)/bin v2.2.2
+	curl -sfL https://raw.githubusercontent.com/securego/gosec/master/install.sh | sh -s -- -b $(shell go env GOPATH)/bin v2.2.0
 endif
 	$(GOSEC) ./api/... ./controllers/... ./pkg/...
 
