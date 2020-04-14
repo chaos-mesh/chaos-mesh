@@ -41,6 +41,16 @@ endif
 FAILPOINT_ENABLE  := $$(find $$PWD/ -type d | grep -vE "(\.git|bin)" | xargs $(GOBIN)/failpoint-ctl enable)
 FAILPOINT_DISABLE := $$(find $$PWD/ -type d | grep -vE "(\.git|bin)" | xargs $(GOBIN)/failpoint-ctl disable)
 
+BUILD_TAGS ?=
+
+ifeq ($(SWAGGER),1)
+	BUILD_TAGS += swagger_server
+endif
+
+ifeq ($(UI),1)
+	BUILD_TAGS += ui_server
+endif
+
 all: yaml image
 
 # Run tests
@@ -80,7 +90,13 @@ chaosfs: generate
 	$(GO) build -ldflags '$(LDFLAGS)' -o bin/chaosfs ./cmd/chaosfs/*.go
 
 chaos-server: generate
-	$(GO) build -ldflags '$(LDFLAGS)' -o bin/chaos-server ./cmd/chaos-server/*.go
+ifeq ($(SWAGGER),1)
+	make swagger_spec
+endif
+ifeq ($(UI),1)
+	scripts/embed_ui_assets.sh
+endif
+	go build -o bin/chaos-server -ldflags '$(LDFLAGS)' -tags "${BUILD_TAGS}" cmd/chaos-server/*.go
 
 binary: chaosdaemon manager chaosfs chaos-server
 

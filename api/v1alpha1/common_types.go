@@ -15,7 +15,6 @@ package v1alpha1
 
 import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 )
 
@@ -138,11 +137,3 @@ const (
 )
 
 var log = ctrl.Log.WithName("validate-webhook")
-
-// +kubebuilder:object:root=false
-// +k8s:deepcopy-gen=false
-// +k8s:gen-deepcopy=false
-type StatefulObject interface {
-	runtime.Object
-	GetStatus() *ChaosStatus
-}

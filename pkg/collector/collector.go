@@ -15,10 +15,13 @@ package collector
 
 import (
 	"context"
-	"github.com/go-logr/logr"
-	"github.com/pingcap/chaos-mesh/pkg/store/dbstore"
 
-	"github.com/pingcap/chaos-mesh/api/v1alpha1"
+	"github.com/go-logr/logr"
+
+	"github.com/pingcap/chaos-mesh/controllers/reconciler"
+	"github.com/pingcap/chaos-mesh/pkg/store/archive"
+	"github.com/pingcap/chaos-mesh/pkg/store/event"
+
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -28,7 +31,8 @@ type ChaosCollector struct {
 	client.Client
 	Log     logr.Logger
 	apiType runtime.Object
-	db      *dbstore.DB
+	archive archive.ArchiveStore
+	event   event.EventStore
 }
 
 func (r *ChaosCollector) Reconcile(req ctrl.Request) (ctrl.Result, error) {
@@ -38,7 +42,7 @@ func (r *ChaosCollector) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	}
 	ctx := context.Background()
 
-	obj, ok := r.apiType.DeepCopyObject().(v1alpha1.StatefulObject)
+	obj, ok := r.apiType.DeepCopyObject().(reconciler.InnerObject)
 	if !ok {
 		r.Log.Error(nil, "it's not a stateful object")
 		return ctrl.Result{}, nil

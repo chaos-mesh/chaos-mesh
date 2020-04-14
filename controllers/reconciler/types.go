@@ -18,13 +18,20 @@ import (
 
 	"github.com/pingcap/chaos-mesh/api/v1alpha1"
 
+	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 )
 
 // InnerObject is basic Object for the Reconciler
 type InnerObject interface {
 	IsDeleted() bool
-	v1alpha1.StatefulObject
+	StatefulObject
+}
+
+// StatefulObject defines a basic Object that can get the status
+type StatefulObject interface {
+	runtime.Object
+	GetStatus() *v1alpha1.ChaosStatus
 }
 
 // InnerReconciler is interface for reconciler

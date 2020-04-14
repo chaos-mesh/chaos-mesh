@@ -15,13 +15,14 @@ package collector
 
 import (
 	"context"
-	"github.com/pingcap/chaos-mesh/pkg/store/dbstore"
 	"os"
+
+	"go.uber.org/fx"
 
 	"github.com/pingcap/chaos-mesh/api/v1alpha1"
 	"github.com/pingcap/chaos-mesh/pkg/config"
-
-	"go.uber.org/fx"
+	"github.com/pingcap/chaos-mesh/pkg/store/archive"
+	"github.com/pingcap/chaos-mesh/pkg/store/event"
 
 	"k8s.io/apimachinery/pkg/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
@@ -40,7 +41,12 @@ func init() {
 	_ = v1alpha1.AddToScheme(scheme)
 }
 
-func NewServer(lc fx.Lifecycle, conf *config.ChaosServerConfig, db *dbstore.DB) client.Client {
+func NewServer(
+	lc fx.Lifecycle,
+	conf *config.ChaosServerConfig,
+	archive archive.ArchiveStore,
+	event event.EventStore,
+) client.Client {
 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
 		Scheme:             scheme,
 		MetricsBindAddress: conf.MetricAddress,
@@ -53,38 +59,52 @@ func NewServer(lc fx.Lifecycle, conf *config.ChaosServerConfig, db *dbstore.DB) 
 	}
 
 	if err = (&ChaosCollector{
-		Client: mgr.GetClient(),
-		Log:    ctrl.Log.WithName("collector").WithName("PodChaos"),
-		db:     db,
+		Client:  mgr.GetClient(),
+		Log:     ctrl.Log.WithName("collector").WithName("PodChaos"),
+		archive: archive,
+		event:   event,
 	}).Setup(mgr, &v1alpha1.PodChaos{}); err != nil {
 		log.Error(err, "unable to create collector", "collector", "PodChaos")
 		os.Exit(1)
 	}
 
 	if err = (&ChaosCollector{
-		Client: mgr.GetClient(),
-		Log:    ctrl.Log.WithName("collector").WithName("NetworkChaos"),
-		db:     db,
+		Client:  mgr.GetClient(),
+		Log:     ctrl.Log.WithName("collector").WithName("NetworkChaos"),
+		archive: archive,
+		event:   event,
 	}).Setup(mgr, &v1alpha1.NetworkChaos{}); err != nil {
 		log.Error(err, "unable to create collector", "collector", "NetworkChaos")
 		os.Exit(1)
 	}
 
 	if err = (&ChaosCollector{
-		Client: mgr.GetClient(),
-		Log:    ctrl.Log.WithName("collector").WithName("IoChaos"),
-		db:     db,
+		Client:  mgr.GetClient(),
+		Log:     ctrl.Log.WithName("collector").WithName("IoChaos"),
+		archive: archive,
+		event:   event,
 	}).Setup(mgr, &v1alpha1.IoChaos{}); err != nil {
 		log.Error(err, "unable to create collector", "collector", "IoChaos")
 		os.Exit(1)
 	}
 
 	if err = (&ChaosCollector{
-		Client: mgr.GetClient(),
-		Log:    ctrl.Log.WithName("controllers").WithName("TimeChaos"),
-		db:     db,
+		Client:  mgr.GetClient(),
+		Log:     ctrl.Log.WithName("controllers").WithName("TimeChaos"),
+		archive: archive,
+		event:   event,
 	}).Setup(mgr, &v1alpha1.TimeChaos{}); err != nil {
 		log.Error(err, "unable to create collector", "collector", "TimeChaos")
+		os.Exit(1)
+	}
+
+	if err = (&ChaosCollector{
+		Client:  mgr.GetClient(),
+		Log:     ctrl.Log.WithName("controllers").WithName("KernelChaos"),
+		archive: archive,
+		event:   event,
+	}).Setup(mgr, &v1alpha1.KernelChaos{}); err != nil {
+		log.Error(err, "unable to create collector", "collector", "KernelChaos")
 		os.Exit(1)
 	}
 
