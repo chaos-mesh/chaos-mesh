@@ -55,7 +55,7 @@ all: yaml build image
 
 build: dashboard-server-frontend
 
-check: fmt vet lint generate yaml tidy
+check: fmt vet lint generate yaml tidy gosec
 
 # Run tests
 test: failpoint-enable generate manifests test-utils
