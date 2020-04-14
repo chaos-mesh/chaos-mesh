@@ -30,6 +30,7 @@ GOENV  := GO15VENDOREXPERIMENT="1" CGO_ENABLED=0 GOOS=$(GOOS) GOARCH=$(GOARCH)
 CGOENV  := GO15VENDOREXPERIMENT="1" CGO_ENABLED=1 GOOS=$(GOOS) GOARCH=$(GOARCH)
 GO     := $(GOENV) go
 GOTEST := TEST_USE_EXISTING_CLUSTER=false NO_PROXY="${NO_PROXY},testhost" go test
+GOSEC := $(GOENV) gosec
 SHELL    := /usr/bin/env bash
 
 PACKAGE_LIST := go list ./... | grep -vE "pkg/client" | grep -vE "zz_generated" | grep -vE "vendor"
@@ -119,6 +120,12 @@ manifests: controller-gen
 # Run go fmt against code
 fmt: groupimports
 	$(CGOENV) go fmt ./...
+
+gosec:
+ifeq (,$(shell which gosec))
+	curl -sfL https://raw.githubusercontent.com/securego/gosec/master/install.sh | sh -s -- -b $(shell go env GOPATH)/bin v2.2.2
+endif
+	$(GOSEC) ./api/... ./controllers/... ./pkg/...
 
 groupimports: goimports
 	$(GOBIN)/goimports -w -l -local github.com/pingcap/chaos-mesh $$($(PACKAGE_DIRECTORIES))
