@@ -19,10 +19,10 @@ import (
 
 // ChaosServerConfig defines the configuration for Chaos Dashboard
 type ChaosServerConfig struct {
-	ListenHost           string `enconfig:"LISTEN_HOST" default:"0.0.0.0"`
-	ListenPort           int    `enconfig:"LISTEN_PORT" default:"2333"`
-	MetricAddress        string `enconfig:"METRIC_ADDRESS"`
-	EnableLeaderElection bool   `enconfig:"ENABLE_LEADER_ELECTION"`
+	ListenHost           string `envconfig:"LISTEN_HOST" default:"0.0.0.0"`
+	ListenPort           int    `envconfig:"LISTEN_PORT" default:"2333"`
+	MetricAddress        string `envconfig:"METRIC_ADDRESS"`
+	EnableLeaderElection bool   `envconfig:"ENABLE_LEADER_ELECTION"`
 	Database             *DatabaseConfig
 }
 

@@ -54,7 +54,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	version.PrintVersionInfo("Chaos collector")
+	version.PrintVersionInfo("Chaos Server")
 	if printVersion {
 		os.Exit(0)
 	}
