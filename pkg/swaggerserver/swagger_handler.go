@@ -17,7 +17,7 @@ package swaggerserver
 import (
 	"net/http"
 
-	_ "github.com/pingcap/chaos-mesh/docs"
+	_ "github.com/pingcap/chaos-mesh/doc"
 	httpSwagger "github.com/swaggo/http-swagger"
 )
 

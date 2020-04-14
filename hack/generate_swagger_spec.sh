@@ -22,4 +22,4 @@ go mod tidy
 
 echo "+ Generate swagger spec"
 swag init -g cmd/chaos-server/main.go
-cp docs/swagger.yaml ui/packages/dashboard_client/
+cp doc/swagger.yaml ui/packages/dashboard_client/
