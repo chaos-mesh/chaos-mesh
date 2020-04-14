@@ -264,7 +264,7 @@ var _ = ginkgo.Describe("[chaos-mesh] Basic", func() {
 			return !haveNewUID(newUIDs, uids), nil
 		})
 		framework.ExpectError(err, "wait pod not killed failed")
-		framework.ExpectEqual(err.Error(), "timed out waiting for the condition")
+		framework.ExpectEqual(err.Error(), wait.ErrWaitTimeout.Error())
 
 		// resume experiment
 		mergePatch, _ = json.Marshal(map[string]interface{}{
