@@ -7,7 +7,7 @@ This document defines the roadmap for Chaos Mesh development.
 - [x] Add container kill chaos. Simulate killing a specified container in a multi-container pod.
 - [ ] Add CPU chaos. Simulate CPU being busy.
 - [ ] Add memory chaos. Simulate memory allocation failure.
-- [ ] Make scheduler optional. Support single time chaos triggering.
+- [x] Make scheduler optional. Support single time chaos triggering.
 
 ## Long-term
 
