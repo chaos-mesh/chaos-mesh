@@ -192,7 +192,8 @@ def call(BUILD_BRANCH, CREDENTIALS_ID) {
 							sh """
 							make ensure-kubebuilder
 							make ensure-kustomize
-							DOCKER_REGISTRY=localhost:5000 make
+							make binary
+							make manifests
 							make e2e-build
 							"""
 						}

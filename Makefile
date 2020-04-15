@@ -195,7 +195,12 @@ e2e-build:
 	$(GO) build -trimpath  -o test/image/e2e/bin/ginkgo github.com/onsi/ginkgo/ginkgo
 	$(GO) test -c  -o ./test/image/e2e/bin/e2e.test ./test/e2e
 
+ifeq ($(NO_BUILD),y)
+e2e-docker:
+	@echo "NO_BUILD=y, skip build for $@"
+else
 e2e-docker: e2e-build
+endif
 	[ -d test/image/e2e/chaos-mesh ] && rm -r test/image/e2e/chaos-mesh || true
 	cp -r helm/chaos-mesh test/image/e2e
 	cp -r manifests test/image/e2e
