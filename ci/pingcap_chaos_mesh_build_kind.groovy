@@ -10,7 +10,8 @@ apiVersion: v1
 kind: Pod
 metadata:
   labels:
-    app: chaos-mesh-e2e
+    # we pretend as tidb-operator in order to not meet tidb-operator-e2e job in the same node
+    app: tidb-operator-e2e
 spec:
   containers:
   - name: main
@@ -71,10 +72,6 @@ spec:
     emptyDir: {}
   - name: docker-graph
     emptyDir: {}
-  tolerations:
-  - effect: NoSchedule
-    key: chaos-mesh
-    operator: Exists
   affinity:
     # running on nodes for chaos-mesh only
     nodeAffinity:
@@ -84,7 +81,8 @@ spec:
           - key: ci.pingcap.com
             operator: In
             values:
-            - chaos-mesh
+            # we pretend as tidb-operator in order to not meet tidb-operator-e2e job in the same node
+            - tidb-operator
     podAntiAffinity:
       preferredDuringSchedulingIgnoredDuringExecution:
       - weight: 100
@@ -94,7 +92,8 @@ spec:
             - key: app
               operator: In
               values:
-              - chaos-mesh-e2e
+              # we pretend as tidb-operator in order to not meet tidb-operator-e2e job in the same node
+              - tidb-operator-e2e
           topologyKey: kubernetes.io/hostname
 '''
 
