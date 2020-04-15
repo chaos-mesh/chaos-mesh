@@ -285,7 +285,6 @@ var _ = ginkgo.Describe("[chaos-mesh] Basic", func() {
 			if chaos.Status.Experiment.Phase == chaosmeshv1alpha1.ExperimentPhaseRunning {
 				return true, nil
 			}
-
 			return false, err
 		})
 		framework.ExpectNoError(err, "check resumed chaos failed")
