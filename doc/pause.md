@@ -22,6 +22,7 @@ spec:
   selector:
     labelSelectors:
       "app.kubernetes.io/component": "chaos-daemon"
+  duration: "10s"
   scheduler:
     cron: "@every 15s"
 ```
@@ -34,8 +35,10 @@ $ kubectl get podchaos pod-kill-example --namespace chaos-testing --output yaml 
 spec:
   action: pod-kill
   containerName: ""
+  duration: 10s
   mode: one
-  nextStart: "2020-04-15T03:11:00Z"
+  nextRecover: "2020-04-15T03:18:14Z"
+  nextStart: "2020-04-15T03:18:19Z"
   paused: false
   scheduler:
     cron: '@every 15s'
@@ -47,22 +50,22 @@ spec:
   value: ""
 status:
   experiment:
-    endTime: "2020-04-15T03:10:45Z"
-    phase: Finished
+    endTime: "2020-04-15T03:17:59Z"
+    phase: Running
     podChaos:
     - action: pod-kill
       hostIP: 172.17.0.5
       message: delete pod
-      name: chaos-daemon-j8n7h
+      name: chaos-daemon-mdwqr
       namespace: chaos-testing
       podIP: 10.244.2.3
-    startTime: "2020-04-15T03:10:45Z"
+    startTime: "2020-04-15T03:18:04Z"
   phase: ""
-NAME                                        READY   STATUS    RESTARTS   AGE
-chaos-controller-manager-7f67fbcfdc-n4rps   1/1     Running   0          25s
-chaos-daemon-6ssph                          1/1     Running   0          7s
-chaos-daemon-8rsvv                          1/1     Running   0          25s
-chaos-daemon-qq6cp                          1/1     Running   0          25s
+NAME                                        READY   STATUS              RESTARTS   AGE
+chaos-controller-manager-7f67fbcfdc-ljlkn   1/1     Running             0          39s
+chaos-daemon-8cdv2                          1/1     Running             0          15s
+chaos-daemon-k7smn                          0/1     ContainerCreating   0          1s
+chaos-daemon-p9wxd                          1/1     Running             0          39s
 ```
 
 Pause the running chaos:
@@ -76,8 +79,9 @@ $ kubectl get podchaos pod-kill-example --namespace chaos-testing --output yaml 
 spec:
   action: pod-kill
   containerName: ""
+  duration: 10s
   mode: one
-  nextStart: "2020-04-15T03:11:15Z"
+  nextStart: "2020-04-15T03:18:34Z"
   paused: true
   scheduler:
     cron: '@every 15s'
@@ -89,22 +93,22 @@ spec:
   value: ""
 status:
   experiment:
-    endTime: "2020-04-15T03:11:00Z"
+    endTime: "2020-04-15T03:18:24Z"
     phase: Paused
     podChaos:
     - action: pod-kill
-      hostIP: 172.17.0.3
+      hostIP: 172.17.0.4
       message: delete pod
-      name: chaos-daemon-8rsvv
+      name: chaos-daemon-p9wxd
       namespace: chaos-testing
       podIP: 10.244.3.3
-    startTime: "2020-04-15T03:11:00Z"
+    startTime: "2020-04-15T03:18:19Z"
   phase: ""
 NAME                                        READY   STATUS    RESTARTS   AGE
-chaos-controller-manager-7f67fbcfdc-n4rps   1/1     Running   0          54s
-chaos-daemon-6ssph                          1/1     Running   0          36s
-chaos-daemon-qq6cp                          1/1     Running   0          54s
-chaos-daemon-rjl94                          1/1     Running   0          21s
+chaos-controller-manager-7f67fbcfdc-ljlkn   1/1     Running   0          5m58s
+chaos-daemon-8cdv2                          1/1     Running   0          5m34s
+chaos-daemon-k7smn                          1/1     Running   0          5m20s
+chaos-daemon-sflc4                          1/1     Running   0          5m5s
 ```
 
 Resume this chaos:
@@ -118,8 +122,10 @@ $ kubectl get podchaos pod-kill-example --namespace chaos-testing --output yaml 
 spec:
   action: pod-kill
   containerName: ""
+  duration: 10s
   mode: one
-  nextStart: "2020-04-15T03:11:44Z"
+  nextRecover: "2020-04-15T03:23:56Z"
+  nextStart: "2020-04-15T03:24:01Z"
   paused: false
   scheduler:
     cron: '@every 15s'
@@ -131,20 +137,20 @@ spec:
   value: ""
 status:
   experiment:
-    endTime: "2020-04-15T03:11:29Z"
-    phase: Finished
+    endTime: "2020-04-15T03:18:24Z"
+    phase: Running
     podChaos:
     - action: pod-kill
-      hostIP: 172.17.0.3
+      hostIP: 172.17.0.5
       message: delete pod
-      name: chaos-daemon-rjl94
+      name: chaos-daemon-k7smn
       namespace: chaos-testing
-      podIP: 10.244.3.5
-    startTime: "2020-04-15T03:11:29Z"
+      podIP: 10.244.2.4
+    startTime: "2020-04-15T03:23:46Z"
   phase: ""
 NAME                                        READY   STATUS    RESTARTS   AGE
-chaos-controller-manager-7f67fbcfdc-n4rps   1/1     Running   0          67s
-chaos-daemon-6ssph                          1/1     Running   0          49s
-chaos-daemon-6t9tb                          1/1     Running   0          5s
-chaos-daemon-qq6cp                          1/1     Running   0          67s
+chaos-controller-manager-7f67fbcfdc-ljlkn   1/1     Running   0          6m29s
+chaos-daemon-2pcs9                          1/1     Running   0          9s
+chaos-daemon-8cdv2                          1/1     Running   0          6m5s
+chaos-daemon-sflc4                          1/1     Running   0          5m36s
 ```
