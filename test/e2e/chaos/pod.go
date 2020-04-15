@@ -3,6 +3,7 @@ package chaos
 import (
 	"context"
 	"encoding/json"
+	"sort"
 	"time"
 
 	"github.com/onsi/ginkgo"
@@ -203,7 +204,7 @@ var _ = ginkgo.Describe("[chaos-mesh] Basic", func() {
 		pods, err = kubeCli.CoreV1().Pods(ns).List(listOption)
 		framework.ExpectNoError(err, "get nginx pods error")
 
-		uids := getUIDs(pods.Items)
+		uids := getUIDs3Pods(pods.Items)
 
 		podKillChaos := &v1alpha1.PodChaos{
 			ObjectMeta: metav1.ObjectMeta{
@@ -234,8 +235,7 @@ var _ = ginkgo.Describe("[chaos-mesh] Basic", func() {
 		err = wait.Poll(5*time.Second, 5*time.Minute, func() (done bool, err error) {
 			pods, err = kubeCli.CoreV1().Pods(ns).List(listOption)
 			framework.ExpectNoError(err, "get nginx pods error")
-			newUIDs := getUIDs(pods.Items)
-			return haveNewUID(newUIDs, uids), nil
+			return getUIDs3Pods(pods.Items) != uids, nil
 		})
 		framework.ExpectNoError(err, "wait pod killed failed")
 
@@ -261,12 +261,11 @@ var _ = ginkgo.Describe("[chaos-mesh] Basic", func() {
 		// wait for 1 minutes and no pod is killed
 		pods, err = kubeCli.CoreV1().Pods(ns).List(listOption)
 		framework.ExpectNoError(err, "get nginx pods error")
-		uids = getUIDs(pods.Items)
+		uids = getUIDs3Pods(pods.Items)
 		err = wait.Poll(5*time.Second, 1*time.Minute, func() (done bool, err error) {
 			pods, err = kubeCli.CoreV1().Pods(ns).List(listOption)
 			framework.ExpectNoError(err, "get nginx pods error")
-			newUIDs := getUIDs(pods.Items)
-			return haveNewUID(newUIDs, uids), nil
+			return getUIDs3Pods(pods.Items) != uids, nil
 		})
 		framework.ExpectError(err, "wait pod not killed failed")
 		framework.ExpectEqual(err.Error(), wait.ErrWaitTimeout.Error())
@@ -293,8 +292,7 @@ var _ = ginkgo.Describe("[chaos-mesh] Basic", func() {
 		err = wait.Poll(5*time.Second, 5*time.Minute, func() (done bool, err error) {
 			pods, err = kubeCli.CoreV1().Pods(ns).List(listOption)
 			framework.ExpectNoError(err, "get nginx pods error")
-			newUIDs := getUIDs(pods.Items)
-			return haveNewUID(newUIDs, uids), nil
+			return getUIDs3Pods(pods.Items) != uids, nil
 		})
 		framework.ExpectNoError(err, "wait pod killed failed")
 
@@ -331,26 +329,11 @@ func waitDeploymentReady(name, namespace string, cli kubernetes.Interface) error
 	})
 }
 
-func getUIDs(pods []corev1.Pod) []types.UID {
-	var ids []types.UID
-	for _, pod := range pods {
-		ids = append(ids, pod.UID)
+func getUIDs3Pods(pods []corev1.Pod) [3]string {
+	var ids [3]string
+	for i, pod := range pods {
+		ids[i] = string(pod.UID)
 	}
+	sort.Strings(ids[:])
 	return ids
-}
-
-func haveNewUID(newUIDs []types.UID, oldUIDs []types.UID) bool {
-	for _, newUID := range newUIDs {
-		found := false
-		for _, uid := range oldUIDs {
-			if uid == newUID {
-				found = true
-				break
-			}
-		}
-		if !found {
-			return true
-		}
-	}
-	return false
 }
