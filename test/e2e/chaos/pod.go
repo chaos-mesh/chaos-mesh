@@ -195,8 +195,13 @@ var _ = ginkgo.Describe("[chaos-mesh] Basic", func() {
 		framework.ExpectNoError(err, "wait nginx deployment ready error")
 
 		var pods *corev1.PodList
-		pods, err = kubeCli.CoreV1().Pods(ns).List(metav1.ListOptions{LabelSelector: "app:nginx"})
-		framework.ExpectNoError(err, "get ngins pods error")
+		listOption := metav1.ListOptions{
+			LabelSelector: labels.SelectorFromSet(map[string]string{
+				"app": "nginx",
+			}).String(),
+		}
+		pods, err = kubeCli.CoreV1().Pods(ns).List(listOption)
+		framework.ExpectNoError(err, "get nginx pods error")
 
 		uids := getUIDs(pods.Items)
 
@@ -227,8 +232,8 @@ var _ = ginkgo.Describe("[chaos-mesh] Basic", func() {
 
 		// some pod is killed as expected
 		err = wait.Poll(5*time.Second, 5*time.Minute, func() (done bool, err error) {
-			pods, err = kubeCli.CoreV1().Pods(ns).List(metav1.ListOptions{LabelSelector: "app:nginx"})
-			framework.ExpectNoError(err, "get ngins pods error")
+			pods, err = kubeCli.CoreV1().Pods(ns).List(listOption)
+			framework.ExpectNoError(err, "get nginx pods error")
 			newUIDs := getUIDs(pods.Items)
 			return haveNewUID(newUIDs, uids), nil
 		})
@@ -253,15 +258,15 @@ var _ = ginkgo.Describe("[chaos-mesh] Basic", func() {
 		})
 		framework.ExpectNoError(err, "check paused chaos failed")
 
-		// wait for 5 mins and no pod is killed
-		pods, err = kubeCli.CoreV1().Pods(ns).List(metav1.ListOptions{LabelSelector: "app:nginx"})
-		framework.ExpectNoError(err, "get ngins pods error")
+		// wait for 5 minutes and no pod is killed
+		pods, err = kubeCli.CoreV1().Pods(ns).List(listOption)
+		framework.ExpectNoError(err, "get nginx pods error")
 		uids = getUIDs(pods.Items)
-		err = wait.Poll(5*time.Second, 5*time.Minute, func() (done bool, err error) {
-			pods, err = kubeCli.CoreV1().Pods(ns).List(metav1.ListOptions{LabelSelector: "app:nginx"})
-			framework.ExpectNoError(err, "get ngins pods error")
+		err = wait.Poll(5*time.Second, 1*time.Minute, func() (done bool, err error) {
+			pods, err = kubeCli.CoreV1().Pods(ns).List(listOption)
+			framework.ExpectNoError(err, "get nginx pods error")
 			newUIDs := getUIDs(pods.Items)
-			return !haveNewUID(newUIDs, uids), nil
+			return haveNewUID(newUIDs, uids), nil
 		})
 		framework.ExpectError(err, "wait pod not killed failed")
 		framework.ExpectEqual(err.Error(), wait.ErrWaitTimeout.Error())
@@ -287,8 +292,8 @@ var _ = ginkgo.Describe("[chaos-mesh] Basic", func() {
 
 		// some pod is killed by resumed experiment
 		err = wait.Poll(5*time.Second, 5*time.Minute, func() (done bool, err error) {
-			pods, err = kubeCli.CoreV1().Pods(ns).List(metav1.ListOptions{LabelSelector: "app:nginx"})
-			framework.ExpectNoError(err, "get ngins pods error")
+			pods, err = kubeCli.CoreV1().Pods(ns).List(listOption)
+			framework.ExpectNoError(err, "get nginx pods error")
 			newUIDs := getUIDs(pods.Items)
 			return haveNewUID(newUIDs, uids), nil
 		})
