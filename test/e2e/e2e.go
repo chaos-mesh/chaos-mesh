@@ -128,7 +128,7 @@ var _ = ginkgo.SynchronizedBeforeSuite(func() []byte {
 	ocfg.Manager.Image = e2econfig.TestConfig.ManagerImage
 	ocfg.Manager.Tag = e2econfig.TestConfig.ManagerTag
 	ocfg.Daemon.Image = e2econfig.TestConfig.DaemonImage
-	ocfg.Daemon.Image = e2econfig.TestConfig.DaemonTag
+	ocfg.Daemon.Tag = e2econfig.TestConfig.DaemonTag
 
 	oa.CleanCRDOrDie()
 	err = oa.InstallCRD(ocfg)
