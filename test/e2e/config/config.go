@@ -19,10 +19,10 @@ import (
 	"github.com/pingcap/chaos-mesh/test"
 )
 
-// Global Test configuration.
+// TestConfig for the test config
 var TestConfig *test.Config = test.NewDefaultConfig()
 
-// RegisterTiDBOperatorFlags registers flags for tidb-operator.
+// RegisterOperatorFlags registers flags for chaos-mesh.
 func RegisterOperatorFlags(flags *flag.FlagSet) {
 	flags.StringVar(&TestConfig.ManagerImage, "manager-image", "pingcap/chaos-mesh", "chaos-mesh image")
 	flags.StringVar(&TestConfig.ManagerTag, "manager-image-tag", "latest", "chaos-mesh image tag")
