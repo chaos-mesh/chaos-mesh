@@ -1,15 +1,15 @@
 # Pause Experiment
 
-This document describe how to pause a running chaos in Chaos Mesh.
+This document describes how to pause a running chaos in Chaos Mesh.
 
 ## Pause
 
-Pause is a state that a running chaos is recovered temporally but not deleted.
+Pause is a state a running chaos has been recovered temporally but not deleted.
 Undoing pausing a chaos will run the chaos again with same parameter.
 
 ## How To
 
-For instance we have a podchaos:
+For instance, we have a podchaos:
 ```yaml
 apiVersion: pingcap.com/v1alpha1
 kind: PodChaos
@@ -20,9 +20,8 @@ spec:
   action: pod-kill
   mode: one
   selector:
-    namespaces:
-      - chaos-testing
-  duration: "10s"
+    labelSelectors:
+      "app.kubernetes.io/component": "chaos-daemon"
   scheduler:
     cron: "@every 15s"
 ```
@@ -35,34 +34,35 @@ $ kubectl get podchaos pod-kill-example --namespace chaos-testing --output yaml 
 spec:
   action: pod-kill
   containerName: ""
-  duration: 10s
   mode: one
-  nextRecover: "2020-04-10T06:45:04Z"
-  nextStart: "2020-04-10T06:45:09Z"
+  nextStart: "2020-04-15T03:11:00Z"
   paused: false
   scheduler:
     cron: '@every 15s'
   selector:
+    labelSelectors:
+      app.kubernetes.io/component: chaos-daemon
     namespaces:
     - chaos-testing
   value: ""
 status:
   experiment:
-    phase: Running
+    endTime: "2020-04-15T03:10:45Z"
+    phase: Finished
     podChaos:
     - action: pod-kill
-      hostIP: 172.17.0.2
+      hostIP: 172.17.0.5
       message: delete pod
-      name: chaos-daemon-g4s25
+      name: chaos-daemon-j8n7h
       namespace: chaos-testing
-      podIP: ""
-    startTime: "2020-04-10T06:44:54Z"
+      podIP: 10.244.2.3
+    startTime: "2020-04-15T03:10:45Z"
   phase: ""
-NAME                                        READY   STATUS              RESTARTS   AGE
-chaos-controller-manager-7f67fbcfdc-n2dht   1/1     Running             0          47s
-chaos-daemon-2tfcw                          0/1     ContainerCreating   0          2s
-chaos-daemon-5qq74                          1/1     Running             0          47s
-chaos-daemon-bk4jd                          1/1     Running             0          47s
+NAME                                        READY   STATUS    RESTARTS   AGE
+chaos-controller-manager-7f67fbcfdc-n4rps   1/1     Running   0          25s
+chaos-daemon-6ssph                          1/1     Running   0          7s
+chaos-daemon-8rsvv                          1/1     Running   0          25s
+chaos-daemon-qq6cp                          1/1     Running   0          25s
 ```
 
 Pause the running chaos:
@@ -76,34 +76,35 @@ $ kubectl get podchaos pod-kill-example --namespace chaos-testing --output yaml 
 spec:
   action: pod-kill
   containerName: ""
-  duration: 10s
   mode: one
-  nextStart: "2020-04-10T06:45:09Z"
+  nextStart: "2020-04-15T03:11:15Z"
   paused: true
   scheduler:
     cron: '@every 15s'
   selector:
+    labelSelectors:
+      app.kubernetes.io/component: chaos-daemon
     namespaces:
     - chaos-testing
   value: ""
 status:
   experiment:
-    endTime: "2020-04-10T06:45:03Z"
+    endTime: "2020-04-15T03:11:00Z"
     phase: Paused
     podChaos:
     - action: pod-kill
-      hostIP: 172.17.0.2
+      hostIP: 172.17.0.3
       message: delete pod
-      name: chaos-daemon-g4s25
+      name: chaos-daemon-8rsvv
       namespace: chaos-testing
-      podIP: ""
-    startTime: "2020-04-10T06:44:54Z"
+      podIP: 10.244.3.3
+    startTime: "2020-04-15T03:11:00Z"
   phase: ""
 NAME                                        READY   STATUS    RESTARTS   AGE
-chaos-controller-manager-7f67fbcfdc-n2dht   1/1     Running   0          60s
-chaos-daemon-2tfcw                          1/1     Running   0          15s
-chaos-daemon-5qq74                          1/1     Running   0          60s
-chaos-daemon-bk4jd                          1/1     Running   0          60s
+chaos-controller-manager-7f67fbcfdc-n4rps   1/1     Running   0          54s
+chaos-daemon-6ssph                          1/1     Running   0          36s
+chaos-daemon-qq6cp                          1/1     Running   0          54s
+chaos-daemon-rjl94                          1/1     Running   0          21s
 ```
 
 Resume this chaos:
@@ -117,33 +118,33 @@ $ kubectl get podchaos pod-kill-example --namespace chaos-testing --output yaml 
 spec:
   action: pod-kill
   containerName: ""
-  duration: 10s
   mode: one
-  nextRecover: "2020-04-10T06:45:27Z"
-  nextStart: "2020-04-10T06:45:32Z"
+  nextStart: "2020-04-15T03:11:44Z"
   paused: false
   scheduler:
     cron: '@every 15s'
   selector:
+    labelSelectors:
+      app.kubernetes.io/component: chaos-daemon
     namespaces:
     - chaos-testing
   value: ""
 status:
   experiment:
-    endTime: "2020-04-10T06:45:03Z"
-    phase: Running
+    endTime: "2020-04-15T03:11:29Z"
+    phase: Finished
     podChaos:
     - action: pod-kill
-      hostIP: 172.17.0.2
+      hostIP: 172.17.0.3
       message: delete pod
-      name: chaos-controller-manager-7f67fbcfdc-n2dht
+      name: chaos-daemon-rjl94
       namespace: chaos-testing
-      podIP: 10.244.2.5
-    startTime: "2020-04-10T06:45:18Z"
+      podIP: 10.244.3.5
+    startTime: "2020-04-15T03:11:29Z"
   phase: ""
 NAME                                        READY   STATUS    RESTARTS   AGE
-chaos-controller-manager-7f67fbcfdc-mdh7l   1/1     Running   0          7s
-chaos-daemon-2tfcw                          1/1     Running   0          31s
-chaos-daemon-5qq74                          1/1     Running   0          76s
-chaos-daemon-bk4jd                          1/1     Running   0          76s
+chaos-controller-manager-7f67fbcfdc-n4rps   1/1     Running   0          67s
+chaos-daemon-6ssph                          1/1     Running   0          49s
+chaos-daemon-6t9tb                          1/1     Running   0          5s
+chaos-daemon-qq6cp                          1/1     Running   0          67s
 ```
