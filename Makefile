@@ -9,6 +9,8 @@ GOVER_MAJOR := $(shell go version | sed -E -e "s/.*go([0-9]+)[.]([0-9]+).*/\1/")
 GOVER_MINOR := $(shell go version | sed -E -e "s/.*go([0-9]+)[.]([0-9]+).*/\2/")
 GO111 := $(shell [ $(GOVER_MAJOR) -gt 1 ] || [ $(GOVER_MAJOR) -eq 1 ] && [ $(GOVER_MINOR) -ge 11 ]; echo $$?)
 
+IMAGE_TAG := $(if $(IMAGE_TAG),$(IMAGE_TAG),latest)
+
 ROOT=$(shell pwd)
 OUTPUT_BIN=$(ROOT)/output/bin
 KUSTOMIZE_BIN=$(OUTPUT_BIN)/kustomize
@@ -139,37 +141,37 @@ tidy:
 image: image-chaos-daemon image-chaos-mesh image-chaos-fs image-chaos-scripts image-chaos-grafana image-chaos-dashboard image-chaos-kernel
 
 image-binary:
-	docker build -t pingcap/binary ${DOCKER_BUILD_ARGS} .
+	docker build -t pingcap/binary:${IMAGE_TAG} ${DOCKER_BUILD_ARGS} .
 
 image-chaos-daemon: image-binary
-	docker build -t ${DOCKER_REGISTRY_PREFIX}pingcap/chaos-daemon ${DOCKER_BUILD_ARGS} images/chaos-daemon
+	docker build -t ${DOCKER_REGISTRY_PREFIX}pingcap/chaos-daemon:${IMAGE_TAG} ${DOCKER_BUILD_ARGS} images/chaos-daemon
 
 image-chaos-mesh: image-binary
-	docker build -t ${DOCKER_REGISTRY_PREFIX}pingcap/chaos-mesh ${DOCKER_BUILD_ARGS} images/chaos-mesh
+	docker build -t ${DOCKER_REGISTRY_PREFIX}pingcap/chaos-mesh:${IMAGE_TAG} ${DOCKER_BUILD_ARGS} images/chaos-mesh
 
 image-chaos-fs: image-binary
-	docker build -t ${DOCKER_REGISTRY_PREFIX}pingcap/chaos-fs ${DOCKER_BUILD_ARGS} images/chaosfs
+	docker build -t ${DOCKER_REGISTRY_PREFIX}pingcap/chaos-fs:${IMAGE_TAG} ${DOCKER_BUILD_ARGS} images/chaosfs
 
 image-chaos-scripts: image-binary
-	docker build -t ${DOCKER_REGISTRY_PREFIX}pingcap/chaos-scripts ${DOCKER_BUILD_ARGS} images/chaos-scripts
+	docker build -t ${DOCKER_REGISTRY_PREFIX}pingcap/chaos-scripts:${IMAGE_TAG} ${DOCKER_BUILD_ARGS} images/chaos-scripts
 
 image-chaos-grafana:
-	docker build -t ${DOCKER_REGISTRY_PREFIX}pingcap/chaos-grafana ${DOCKER_BUILD_ARGS} images/grafana
+	docker build -t ${DOCKER_REGISTRY_PREFIX}pingcap/chaos-grafana:${IMAGE_TAG} ${DOCKER_BUILD_ARGS} images/grafana
 
 image-chaos-dashboard: image-binary
-	docker build -t ${DOCKER_REGISTRY_PREFIX}pingcap/chaos-dashboard ${DOCKER_BUILD_ARGS} images/chaos-dashboard
+	docker build -t ${DOCKER_REGISTRY_PREFIX}pingcap/chaos-dashboard:${IMAGE_TAG} ${DOCKER_BUILD_ARGS} images/chaos-dashboard
 
 image-chaos-kernel:
 	docker build -t ${DOCKER_REGISTRY_PREFIX}pingcap/chaos-kernel ${DOCKER_BUILD_ARGS} --build-arg MAKE_JOBS=${MAKE_JOBS} --build-arg MIRROR=${UBUNTU_MIRROR} images/chaos-kernel
 
 docker-push:
-	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-mesh:latest"
-	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-fs:latest"
-	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-daemon:latest"
-	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-scripts:latest"
-	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-grafana:latest"
-	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-dashboard:latest"
-	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-kernel:latest"
+	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-mesh:${IMAGE_TAG}"
+	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-fs:${IMAGE_TAG}"
+	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-daemon:${IMAGE_TAG}"
+	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-scripts:${IMAGE_TAG}"
+	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-grafana:${IMAGE_TAG}"
+	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-dashboard:${IMAGE_TAG}"
+	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-kernel:${IMAGE_TAG}"
 
 controller-gen:
 	$(GO) get sigs.k8s.io/controller-tools/cmd/controller-gen@v0.2.5
