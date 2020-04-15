@@ -14,6 +14,4 @@ This document defines the roadmap for Chaos Mesh development.
 - [x] chaos-operator
 - [ ] chaos-dashboard
 - [ ] chaos-verify
-- [ ] chaos-engine
-- [ ] chaos-admin
 - [ ] chaos-cloud
