@@ -30,6 +30,8 @@ KUBECONFIG=${KUBECONFIG:-$HOME/.kube/config}
 KUBECONTEXT=${KUBECONTEXT:-}
 REPORT_DIR=${REPORT_DIR:-}
 REPORT_PREFIX=${REPORT_PREFIX:-}
+DOCKER_REGISTRY=${DOCKER_REGISTRY:-localhost:5000}
+IMAGE_TAG=${IMAGE_TAG:-latest}
 
 if [ -z "$KUBECONFIG" ]; then
     echo "error: KUBECONFIG is required"
@@ -41,6 +43,8 @@ echo "KUBECONFIG: $KUBECONFIG"
 echo "KUBECONTEXT: $KUBECONTEXT"
 echo "REPORT_DIR: $REPORT_DIR"
 echo "REPORT_PREFIX: $REPORT_PREFIX"
+echo "DOCKER_REGISTRY: $DOCKER_REGISTRY"
+echo "IMAGE_TAG: $IMAGE_TAG"
 
 
 
@@ -72,6 +76,10 @@ e2e_args=(
     ${ginkgo_args[@]:-}
     /usr/local/bin/e2e.test
     --
+    --manager-image="${DOCKER_REGISTRY}/pingcap/chaos-mesh"
+    --manager-image-tag="${IMAGE_TAG}"
+    --daemon-image="${DOCKER_REGISTRY}/pingcap/chaos-daemon"
+    --daemon-image-tag="${IMAGE_TAG}"
 )
 
 if [ -n "$REPORT_DIR" ]; then

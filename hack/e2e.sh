@@ -367,5 +367,7 @@ e2e::image_load
 export KUBECONFIG
 export KUBECONTEXT
 export E2E_IMAGE=${DOCKER_REGISTRY}/pingcap/chaos-mesh-e2e:${IMAGE_TAG}
+export DOCKER_REGISTRY=${DOCKER_REGISTRY}
+export IMAGE_TAG=${IMAGE_TAG}
 
 hack/run-e2e.sh "$@"
