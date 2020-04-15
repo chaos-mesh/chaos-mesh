@@ -17,7 +17,7 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
-// Experiment defines operations for working with archive experiments
+// ExperimentStore defines operations for working with archive experiments
 type ExperimentStore interface{}
 
 // ArchiveExperiment represents a experiment instance.
