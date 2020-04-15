@@ -206,7 +206,7 @@ endif
 	[ -d test/image/e2e/chaos-mesh ] && rm -r test/image/e2e/chaos-mesh || true
 	cp -r helm/chaos-mesh test/image/e2e
 	cp -r manifests test/image/e2e
-	docker build -t "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-mesh-e2e:latest" test/image/e2e
+	docker build -t "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-mesh-e2e:${IMAGE_TAG}" test/image/e2e
 
 check: fmt vet lint
 

@@ -8,12 +8,12 @@ import (
 	"testing"
 	"time"
 
-	"k8s.io/client-go/tools/clientcmd"
-
 	"github.com/onsi/ginkgo"
 	ginkgoconfig "github.com/onsi/ginkgo/config"
 	"github.com/onsi/gomega"
+	e2econfig "github.com/pingcap/chaos-mesh/test/e2e/config"
 	runtimeutils "k8s.io/apimachinery/pkg/util/runtime"
+	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/component-base/logs"
 	"k8s.io/klog"
 	"k8s.io/kubernetes/test/e2e/framework"
@@ -33,7 +33,7 @@ func handleFlags() {
 	config.CopyFlags(config.Flags, flag.CommandLine)
 	framework.RegisterCommonFlags(flag.CommandLine)
 	hackRegisterClusterFlags(flag.CommandLine)
-	//framework.RegisterClusterFlags(flag.CommandLine)
+	e2econfig.RegisterOperatorFlags(flag.CommandLine)
 	flag.Parse()
 }
 
