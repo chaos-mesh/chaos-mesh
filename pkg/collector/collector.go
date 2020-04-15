@@ -31,7 +31,7 @@ type ChaosCollector struct {
 	client.Client
 	Log     logr.Logger
 	apiType runtime.Object
-	archive core.ArchiveStore
+	archive core.ExperimentStore
 	event   core.EventStore
 }
 
@@ -53,6 +53,7 @@ func (r *ChaosCollector) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		return ctrl.Result{}, nil
 	}
 
+	// TODO: record the events
 	// status := obj.GetStatus()
 
 	// if status.Experiment.Phase == v1alpha1.ExperimentPhaseRunning {

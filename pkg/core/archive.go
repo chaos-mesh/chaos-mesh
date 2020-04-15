@@ -17,8 +17,8 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
-// ArchiveStore defines operations for working with archive experiments
-type ArchiveStore interface{}
+// Experiment defines operations for working with archive experiments
+type ExperimentStore interface{}
 
 // ArchiveExperiment represents a experiment instance.
 type ArchiveExperiment struct {

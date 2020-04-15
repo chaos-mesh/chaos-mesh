@@ -26,7 +26,7 @@ import (
 type Service struct {
 	conf    *config.ChaosServerConfig
 	kubeCli client.Client
-	archive core.ArchiveStore
+	archive core.ExperimentStore
 	event   core.EventStore
 }
 
@@ -34,7 +34,7 @@ type Service struct {
 func NewService(
 	conf *config.ChaosServerConfig,
 	cli client.Client,
-	archive core.ArchiveStore,
+	archive core.ExperimentStore,
 	event core.EventStore,
 ) *Service {
 	return &Service{
@@ -49,7 +49,9 @@ func NewService(
 func Register(r *gin.RouterGroup, s *Service) {
 	endpoint := r.Group("/event")
 
+	// TODO: add more api handlers
 	endpoint.GET("/all", s.listEvents)
 }
 
+// TODO: need to be implemented
 func (s *Service) listEvents(c *gin.Context) {}

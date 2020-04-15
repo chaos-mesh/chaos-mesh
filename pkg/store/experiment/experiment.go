@@ -11,20 +11,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package archive
+package experiment
 
 import (
 	"github.com/pingcap/chaos-mesh/pkg/core"
 	"github.com/pingcap/chaos-mesh/pkg/store/dbstore"
 )
 
-// NewStore returns a new ArchiveStore.
-func NewStore(db *dbstore.DB) core.ArchiveStore {
+// NewStore returns a new ExperimentStore.
+func NewStore(db *dbstore.DB) core.ExperimentStore {
 	db.AutoMigrate(&core.ArchiveExperiment{})
 
-	return &archiveStore{db}
+	return &experimentStore{db}
 }
 
-type archiveStore struct {
+// TODO: need to define the fields of this struct
+type experimentStore struct {
 	db *dbstore.DB
 }

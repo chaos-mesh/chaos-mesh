@@ -16,13 +16,13 @@ package store
 import (
 	"go.uber.org/fx"
 
-	"github.com/pingcap/chaos-mesh/pkg/store/archive"
 	"github.com/pingcap/chaos-mesh/pkg/store/event"
+	"github.com/pingcap/chaos-mesh/pkg/store/experiment"
 )
 
 // Module includes the providers provided by store.
 var Module = fx.Options(
 	fx.Provide(
 		event.NewStore,
-		archive.NewStore,
+		experiment.NewStore,
 	))

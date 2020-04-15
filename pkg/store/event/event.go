@@ -25,6 +25,7 @@ func NewStore(db *dbstore.DB) core.EventStore {
 	return &eventStore{db}
 }
 
+// TODO: need to define the fields of this struct
 type eventStore struct {
 	db *dbstore.DB
 }
