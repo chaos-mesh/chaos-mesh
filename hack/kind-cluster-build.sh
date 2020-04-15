@@ -9,15 +9,15 @@ usage() {
 This script use kind to create Kubernetes cluster,about kind please refer: https://kind.sigs.k8s.io/
 Before run this script,please ensure that:
 * have installed docker
-* have installed kind and kind's version == v0.4.0
+* have installed helm
 Options:
        -h,--help               prints the usage message
        -n,--name               name of the Kubernetes cluster,default value: kind
        -c,--nodeNum            the count of the cluster nodes,default value: 3
-       -k,--k8sVersion         version of the Kubernetes cluster,default value: v1.17.2
+       -k,--k8sVersion         version of the Kubernetes cluster,default value: v1.15.6
        -v,--volumeNum          the volumes number of each kubernetes node,default value: 5
 Usage:
-    $0 --name testCluster --nodeNum 4 --k8sVersion v1.17.2
+    $0 --name testCluster --nodeNum 4 --k8sVersion v1.15.6
 EOF
 }
 
@@ -60,7 +60,7 @@ done
 
 clusterName=${clusterName:-kind}
 nodeNum=${nodeNum:-3}
-k8sVersion=${k8sVersion:-v1.17.2}
+k8sVersion=${k8sVersion:-v1.15.6}
 volumeNum=${volumeNum:-5}
 
 echo "clusterName: ${clusterName}"
@@ -68,17 +68,17 @@ echo "nodeNum: ${nodeNum}"
 echo "k8sVersion: ${k8sVersion}"
 echo "volumeNum: ${volumeNum}"
 
-# check requirements
-for requirement in kind kubectl helm docker
-do
-    echo "############ check ${requirement} ##############"
-    if hash ${requirement} 2>/dev/null;then
-        echo "${requirement} have installed"
-    else
-        echo "this script needs ${requirement}, please install ${requirement} first."
-        exit 1
-    fi
-done
+source "${ROOT}/hack/lib.sh"
+
+echo "ensuring kind"
+hack::ensure_kind
+echo "ensuring kubectl"
+hack::ensure_kubectl
+
+OUTPUT_BIN=${ROOT}/output/bin
+KUBECTL_BIN=${OUTPUT_BIN}/kubectl
+HELM_BIN=${OUTPUT_BIN}/helm
+KIND_BIN=${OUTPUT_BIN}/kind
 
 echo "############# start create cluster:[${clusterName}] #############"
 workDir=${HOME}/kind/${clusterName}
@@ -132,89 +132,14 @@ EOF
 done
 
 echo "start to create k8s cluster"
-kind create cluster --config ${configFile} --image kindest/node:${k8sVersion} --name=${clusterName}
-kind get kubeconfig --name=${clusterName} > ${kubeconfigPath}
+${KIND_BIN} create cluster --config ${configFile} --image kindest/node:${k8sVersion} --name=${clusterName}
+${KIND_BIN} get kubeconfig --name=${clusterName} > ${kubeconfigPath}
 export KUBECONFIG=${kubeconfigPath}
 
-echo "deploy docker registry in kind"
-registryNode=${clusterName}-control-plane
-registryNodeIP=$(kubectl get nodes ${registryNode} -o template --template='{{range.status.addresses}}{{if eq .type "InternalIP"}}{{.address}}{{end}}{{end}}')
-registryFile=${workDir}/registry.yaml
+${KUBECTL_BIN} apply -f ${ROOT}/manifests/local-volume-provisioner.yaml
+${KUBECTL_BIN} apply -f ${ROOT}/manifests/tiller-rbac.yaml
 
-cat <<EOF >${registryFile}
-apiVersion: apps/v1
-kind: DaemonSet
-metadata:
-  name: registry
-spec:
-  selector:
-    matchLabels:
-      app: registry
-  template:
-    metadata:
-      labels:
-        app: registry
-    spec:
-      hostNetwork: true
-      nodeSelector:
-        kubernetes.io/hostname: ${registryNode}
-      tolerations:
-      - key: node-role.kubernetes.io/master
-        operator: "Equal"
-        effect: "NoSchedule"
-      containers:
-      - name: registry
-        image: registry:2
-        volumeMounts:
-        - name: data
-          mountPath: /data
-      volumes:
-      - name: data
-        hostPath:
-          path: /data
----
-apiVersion: apps/v1
-kind: DaemonSet
-metadata:
-  name: registry-proxy
-  labels:
-    app: registry-proxy
-spec:
-  selector:
-    matchLabels:
-      app: registry-proxy
-  template:
-    metadata:
-      labels:
-        app: registry-proxy
-    spec:
-      hostNetwork: true
-      affinity:
-        nodeAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-            nodeSelectorTerms:
-            - matchExpressions:
-              - key: kubernetes.io/hostname
-                operator: NotIn
-                values:
-                  - ${registryNode}
-      tolerations:
-      - key: node-role.kubernetes.io/master
-        operator: "Equal"
-        effect: "NoSchedule"
-      containers:
-        - name: socat
-          image: alpine/socat:1.0.5
-          args:
-          - tcp-listen:5000,fork,reuseaddr
-          - tcp-connect:${registryNodeIP}:5000
-EOF
-kubectl apply -f ${registryFile}
-
-kubectl apply -f ${ROOT}/manifests/local-volume-provisioner.yaml
-kubectl apply -f ${ROOT}/manifests/tiller-rbac.yaml
-
-kubectl create ns chaos-testing
+$KUBECTL_BIN create ns chaos-testing
 
 if [[ $(helm version --client --short) == "Client: v2"* ]]; then helm init --service-account=tiller --wait; fi
 
