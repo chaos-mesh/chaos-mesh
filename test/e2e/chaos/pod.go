@@ -258,7 +258,7 @@ var _ = ginkgo.Describe("[chaos-mesh] Basic", func() {
 		})
 		framework.ExpectNoError(err, "check paused chaos failed")
 
-		// wait for 5 minutes and no pod is killed
+		// wait for 1 minutes and no pod is killed
 		pods, err = kubeCli.CoreV1().Pods(ns).List(listOption)
 		framework.ExpectNoError(err, "get nginx pods error")
 		uids = getUIDs(pods.Items)
