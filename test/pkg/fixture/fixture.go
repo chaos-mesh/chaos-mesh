@@ -17,6 +17,7 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"sort"
 )
 
 // NewCommonNginxPod describe that we use common nginx pod to be tested in our chaos-operator test
@@ -76,4 +77,24 @@ func NewCommonNginxDeployment(name, namespace string, replicas int32) *appsv1.De
 			},
 		},
 	}
+}
+
+// HaveSameUIDs returns if pods1 and pods2 are same based on their UIDs
+func HaveSameUIDs(pods1 []corev1.Pod, pods2 []corev1.Pod) bool {
+	count := len(pods1)
+	if count != len(pods2) {
+		return false
+	}
+	ids1, ids2 := make([]string, count), make([]string, count)
+	for i := 0; i < count; i++ {
+		ids1[i], ids2[i] = string(pods1[i].UID), string(pods2[i].UID)
+	}
+	sort.Strings(ids1)
+	sort.Strings(ids2)
+	for i := 0; i < count; i++ {
+		if ids1[i] != ids2[i] {
+			return false
+		}
+	}
+	return true
 }
