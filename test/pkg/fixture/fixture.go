@@ -14,10 +14,11 @@
 package fixture
 
 import (
+	"sort"
+
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"sort"
 )
 
 // NewCommonNginxPod describe that we use common nginx pod to be tested in our chaos-operator test
