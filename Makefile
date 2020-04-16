@@ -9,6 +9,8 @@ GOVER_MAJOR := $(shell go version | sed -E -e "s/.*go([0-9]+)[.]([0-9]+).*/\1/")
 GOVER_MINOR := $(shell go version | sed -E -e "s/.*go([0-9]+)[.]([0-9]+).*/\2/")
 GO111 := $(shell [ $(GOVER_MAJOR) -gt 1 ] || [ $(GOVER_MAJOR) -eq 1 ] && [ $(GOVER_MINOR) -ge 11 ]; echo $$?)
 
+IMAGE_TAG := $(if $(IMAGE_TAG),$(IMAGE_TAG),latest)
+
 ROOT=$(shell pwd)
 OUTPUT_BIN=$(ROOT)/output/bin
 KUSTOMIZE_BIN=$(OUTPUT_BIN)/kustomize
@@ -60,6 +62,8 @@ endif
 
 all: yaml image
 
+build: binary
+
 # Run tests
 test: failpoint-enable generate fmt vet lint manifests test-utils
 	rm -rf cover.* cover
@@ -103,7 +107,7 @@ endif
 ifeq ($(UI),1)
 	scripts/embed_ui_assets.sh
 endif
-	go build -o bin/chaos-server -ldflags '$(LDFLAGS)' -tags "${BUILD_TAGS}" cmd/chaos-server/*.go
+	$(GO) build -ldflags '$(LDFLAGS)' -tags "${BUILD_TAGS}" -o bin/chaos-server cmd/chaos-server/*.go
 
 binary: chaosdaemon manager chaosfs chaos-server
 
@@ -153,34 +157,34 @@ image-binary:
 	docker build -t pingcap/binary ${DOCKER_BUILD_ARGS} .
 
 image-chaos-daemon: image-binary
-	docker build -t ${DOCKER_REGISTRY_PREFIX}pingcap/chaos-daemon ${DOCKER_BUILD_ARGS} images/chaos-daemon
+	docker build -t ${DOCKER_REGISTRY_PREFIX}pingcap/chaos-daemon:${IMAGE_TAG} ${DOCKER_BUILD_ARGS} images/chaos-daemon
 
 image-chaos-mesh: image-binary
-	docker build -t ${DOCKER_REGISTRY_PREFIX}pingcap/chaos-mesh ${DOCKER_BUILD_ARGS} images/chaos-mesh
+	docker build -t ${DOCKER_REGISTRY_PREFIX}pingcap/chaos-mesh:${IMAGE_TAG} ${DOCKER_BUILD_ARGS} images/chaos-mesh
 
 image-chaos-fs: image-binary
-	docker build -t ${DOCKER_REGISTRY_PREFIX}pingcap/chaos-fs ${DOCKER_BUILD_ARGS} images/chaosfs
+	docker build -t ${DOCKER_REGISTRY_PREFIX}pingcap/chaos-fs:${IMAGE_TAG} ${DOCKER_BUILD_ARGS} images/chaosfs
 
 image-chaos-scripts: image-binary
-	docker build -t ${DOCKER_REGISTRY_PREFIX}pingcap/chaos-scripts ${DOCKER_BUILD_ARGS} images/chaos-scripts
+	docker build -t ${DOCKER_REGISTRY_PREFIX}pingcap/chaos-scripts:${IMAGE_TAG} ${DOCKER_BUILD_ARGS} images/chaos-scripts
 
 image-chaos-server: image-binary
-	docker build -t ${DOCKER_REGISTRY_PREFIX}pingcap/chaos-server ${DOCKER_BUILD_ARGS} images/chaos-server
+	docker build -t ${DOCKER_REGISTRY_PREFIX}pingcap/chaos-server:${IMAGE_TAG} ${DOCKER_BUILD_ARGS} images/chaos-server
 
 image-chaos-grafana:
-	docker build -t ${DOCKER_REGISTRY_PREFIX}pingcap/chaos-grafana ${DOCKER_BUILD_ARGS} images/grafana
+	docker build -t ${DOCKER_REGISTRY_PREFIX}pingcap/chaos-grafana:${IMAGE_TAG} ${DOCKER_BUILD_ARGS} images/grafana
 
 image-chaos-kernel:
 	docker build -t ${DOCKER_REGISTRY_PREFIX}pingcap/chaos-kernel ${DOCKER_BUILD_ARGS} --build-arg MAKE_JOBS=${MAKE_JOBS} --build-arg MIRROR=${UBUNTU_MIRROR} images/chaos-kernel
 
 docker-push:
-	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-mesh:latest"
-	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-server:latest"
-	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-fs:latest"
-	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-daemon:latest"
-	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-scripts:latest"
-	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-grafana:latest"
-	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-kernel:latest"
+	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-mesh:${IMAGE_TAG}"
+	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-server:${IMAGE_TAG}"
+	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-fs:${IMAGE_TAG}"
+	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-daemon:${IMAGE_TAG}"
+	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-scripts:${IMAGE_TAG}"
+	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-grafana:${IMAGE_TAG}"
+	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-kernel:${IMAGE_TAG}"
 
 controller-gen:
 	$(GO) get sigs.k8s.io/controller-tools/cmd/controller-gen@v0.2.5
@@ -206,11 +210,16 @@ e2e-build:
 	$(GO) build -trimpath  -o test/image/e2e/bin/ginkgo github.com/onsi/ginkgo/ginkgo
 	$(GO) test -c  -o ./test/image/e2e/bin/e2e.test ./test/e2e
 
+ifeq ($(NO_BUILD),y)
+e2e-docker:
+	@echo "NO_BUILD=y, skip build for $@"
+else
 e2e-docker: e2e-build
+endif
 	[ -d test/image/e2e/chaos-mesh ] && rm -r test/image/e2e/chaos-mesh || true
 	cp -r helm/chaos-mesh test/image/e2e
 	cp -r manifests test/image/e2e
-	docker build -t "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-mesh-e2e:latest" test/image/e2e
+	docker build -t "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-mesh-e2e:${IMAGE_TAG}" test/image/e2e
 
 check: fmt vet lint
 
@@ -241,5 +250,4 @@ install-local-coverage-tools:
 
 .PHONY: all build test install manifests groupimports fmt vet tidy image \
 	docker-push lint generate controller-gen yaml \
-	manager chaosfs chaosdaemon chaos-server ensure-all \
-	dashboard dashboard-server-frontend
+	manager chaosfs chaosdaemon chaos-server ensure-all
