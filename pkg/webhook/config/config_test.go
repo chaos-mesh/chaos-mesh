@@ -171,7 +171,7 @@ var _ = Describe("webhook config", func() {
 			cfg.Injections["testname_origin:testversion_origin"] = ifg
 
 			var replacementConfigs []*InjectionConfig = []*InjectionConfig{
-				&InjectionConfig{
+				{
 					Name:    "testname_after",
 					version: "testversion_after",
 				}}
