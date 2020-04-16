@@ -105,6 +105,22 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		}
 
 		status.Experiment.Phase = v1alpha1.ExperimentPhaseFinished
+	} else if chaos.IsPaused() {
+		if status.Experiment.Phase == v1alpha1.ExperimentPhaseRunning {
+			r.Log.Info("Pausing")
+
+			err = r.Recover(ctx, req, chaos)
+			if err != nil {
+				r.Log.Error(err, "failed to pause chaos")
+				return ctrl.Result{Requeue: true}, err
+			}
+			chaos.SetNextRecover(time.Time{})
+
+			status.Experiment.EndTime = &metav1.Time{
+				Time: time.Now(),
+			}
+		}
+		status.Experiment.Phase = v1alpha1.ExperimentPhasePaused
 	} else if !chaos.GetNextRecover().IsZero() && chaos.GetNextRecover().Before(now) {
 		// Start recover
 		r.Log.Info("Recovering")
