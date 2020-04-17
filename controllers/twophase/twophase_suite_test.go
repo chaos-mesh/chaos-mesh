@@ -94,8 +94,14 @@ func (in *fakeTwoPhaseChaos) GetStatus() *v1alpha1.ChaosStatus {
 	return &in.Status
 }
 
+// IsDeleted returns whether this resource has been deleted
 func (in *fakeTwoPhaseChaos) IsDeleted() bool {
 	return in.Deleted
+}
+
+// IsPaused returns whether this resource has been paused
+func (in *fakeTwoPhaseChaos) IsPaused() bool {
+	return false
 }
 
 func (r fakeReconciler) Object() reconciler.InnerObject {
