@@ -53,7 +53,14 @@ func (in *NetworkChaos) Default() {
 
 	in.Spec.Selector.DefaultNamespace(in.GetNamespace())
 	// the target's namespace selector
-	in.Spec.Target.TargetSelector.DefaultNamespace(in.GetNamespace())
+	if in.Spec.Target != nil {
+		in.Spec.Target.TargetSelector.DefaultNamespace(in.GetNamespace())
+	}
+
+	// set default direction
+	if in.Spec.Direction == "" {
+		in.Spec.Direction = To
+	}
 
 	in.Spec.DefaultDelay()
 }
@@ -116,7 +123,9 @@ func (in *NetworkChaos) Validate() error {
 		allErrs = append(allErrs, in.Spec.Bandwidth.validateBandwidth(specField.Child("bandwidth"))...)
 	}
 
-	allErrs = append(allErrs, in.Spec.Target.validateTarget(specField.Child("target"))...)
+	if in.Spec.Target != nil {
+		allErrs = append(allErrs, in.Spec.Target.validateTarget(specField.Child("target"))...)
+	}
 
 	if len(allErrs) > 0 {
 		return fmt.Errorf(allErrs.ToAggregate().Error())
@@ -255,6 +264,6 @@ func (in *BandwidthSpec) validateBandwidth(bandwidth *field.Path) field.ErrorLis
 }
 
 // validateTarget validates the target
-func (in *PartitionTarget) validateTarget(target *field.Path) field.ErrorList {
+func (in *Target) validateTarget(target *field.Path) field.ErrorList {
 	return ValidatePodMode(in.TargetValue, in.TargetMode, target.Child("value"))
 }

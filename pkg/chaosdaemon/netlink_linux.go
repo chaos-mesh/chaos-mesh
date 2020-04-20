@@ -58,7 +58,6 @@ func applyQdisc(pid uint32, toQdisc toQdiscFunc) error {
 }
 
 func deleteQdisc(pid uint32, toQdisc toQdiscFunc) error {
-	// WARN: This will delete all qdisc on this interface
 	log.Info("Delete qdisc on PID", "pid", pid)
 
 	ns, err := netns.GetFromPath(GenNetnsPath(pid))
