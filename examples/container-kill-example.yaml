@@ -2,13 +2,13 @@ apiVersion: pingcap.com/v1alpha1
 kind: PodChaos
 metadata:
   name: container-kill-example
-  namespace: yeya24
+  namespace: chaos-testing
 spec:
   action: container-kill
   mode: one
-  containerName: "etcd"
+  containerName: "prometheus"
   selector:
     labelSelectors:
-      app: etcd
+      "app.kubernetes.io/component": "monitor"
   scheduler:
     cron: "@every 30s"
