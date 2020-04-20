@@ -162,7 +162,7 @@ var _ = Describe("webhook inject", func() {
 	Context("setCommands", func() {
 		It("should return", func() {
 			var target []corev1.Container = []corev1.Container{
-				corev1.Container{
+				{
 					Name: "testContainerName",
 				}}
 			var postStart map[string]config.ExecAction
@@ -173,7 +173,7 @@ var _ = Describe("webhook inject", func() {
 
 		It("should return nil", func() {
 			var target []corev1.Container = []corev1.Container{
-				corev1.Container{
+				{
 					Name: "testContainerName",
 				}}
 			var postStart map[string]config.ExecAction
@@ -190,11 +190,11 @@ var _ = Describe("webhook inject", func() {
 	Context("setEnvironment", func() {
 		It("should return not nil", func() {
 			var target []corev1.Container = []corev1.Container{
-				corev1.Container{
+				{
 					Name: "testContainerName",
 				}}
 			var addEnv []corev1.EnvVar = []corev1.EnvVar{
-				corev1.EnvVar{
+				{
 					Name: "testContainerName",
 				}}
 			patch := setEnvironment(target, addEnv)
@@ -203,16 +203,16 @@ var _ = Describe("webhook inject", func() {
 
 		It("should return not nil", func() {
 			var Env []corev1.EnvVar = []corev1.EnvVar{
-				corev1.EnvVar{
+				{
 					Name: "_testContainerName_",
 				}}
 			var target []corev1.Container = []corev1.Container{
-				corev1.Container{
+				{
 					Name: "testContainerName",
 					Env:  Env,
 				}}
 			var addEnv []corev1.EnvVar = []corev1.EnvVar{
-				corev1.EnvVar{
+				{
 					Name: "testContainerName",
 				}}
 			patch := setEnvironment(target, addEnv)
@@ -221,16 +221,16 @@ var _ = Describe("webhook inject", func() {
 
 		It("should return nil", func() {
 			var Env []corev1.EnvVar = []corev1.EnvVar{
-				corev1.EnvVar{
+				{
 					Name: "testContainerName",
 				}}
 			var target []corev1.Container = []corev1.Container{
-				corev1.Container{
+				{
 					Name: "testContainerName",
 					Env:  Env,
 				}}
 			var addEnv []corev1.EnvVar = []corev1.EnvVar{
-				corev1.EnvVar{
+				{
 					Name: "testContainerName",
 				}}
 			patch := setEnvironment(target, addEnv)
@@ -241,11 +241,11 @@ var _ = Describe("webhook inject", func() {
 	Context("addContainers", func() {
 		It("should return not nil", func() {
 			var target []corev1.Container = []corev1.Container{
-				corev1.Container{
+				{
 					Name: "testContainerName",
 				}}
 			var added []corev1.Container = []corev1.Container{
-				corev1.Container{
+				{
 					Name: "testContainerName",
 				}}
 			basePath := "/test"
@@ -256,7 +256,7 @@ var _ = Describe("webhook inject", func() {
 		It("should return not nil", func() {
 			var target []corev1.Container = []corev1.Container{}
 			var added []corev1.Container = []corev1.Container{
-				corev1.Container{
+				{
 					Name: "testContainerName",
 				}}
 			basePath := "/test"
@@ -268,11 +268,11 @@ var _ = Describe("webhook inject", func() {
 	Context("addVolumes", func() {
 		It("should return not nil", func() {
 			var target []corev1.Volume = []corev1.Volume{
-				corev1.Volume{
+				{
 					Name: "test",
 				}}
 			var added []corev1.Volume = []corev1.Volume{
-				corev1.Volume{
+				{
 					Name: "test",
 				}}
 			basePath := "/test"
@@ -283,7 +283,7 @@ var _ = Describe("webhook inject", func() {
 		It("should return not nil", func() {
 			var target []corev1.Volume = []corev1.Volume{}
 			var added []corev1.Volume = []corev1.Volume{
-				corev1.Volume{
+				{
 					Name: "test",
 				}}
 			basePath := "/test"
@@ -295,16 +295,16 @@ var _ = Describe("webhook inject", func() {
 	Context("setVolumeMounts", func() {
 		It("should return not nil", func() {
 			var vm []corev1.VolumeMount = []corev1.VolumeMount{
-				corev1.VolumeMount{
+				{
 					Name: "test",
 				}}
 			var target []corev1.Container = []corev1.Container{
-				corev1.Container{
+				{
 					Name:         "test",
 					VolumeMounts: vm,
 				}}
 			var added []corev1.VolumeMount = []corev1.VolumeMount{
-				corev1.VolumeMount{
+				{
 					Name: "test",
 				}}
 			basePath := "/test"
@@ -316,11 +316,11 @@ var _ = Describe("webhook inject", func() {
 	Context("addHostAliases", func() {
 		It("should return not nil", func() {
 			var target []corev1.HostAlias = []corev1.HostAlias{
-				corev1.HostAlias{
+				{
 					IP: "testip",
 				}}
 			var added []corev1.HostAlias = []corev1.HostAlias{
-				corev1.HostAlias{
+				{
 					IP: "testip",
 				}}
 			basePath := "/test"
@@ -331,7 +331,7 @@ var _ = Describe("webhook inject", func() {
 		It("should return not nil", func() {
 			var target []corev1.HostAlias = []corev1.HostAlias{}
 			var added []corev1.HostAlias = []corev1.HostAlias{
-				corev1.HostAlias{
+				{
 					IP: "testip",
 				}}
 			basePath := "/test"
@@ -343,11 +343,11 @@ var _ = Describe("webhook inject", func() {
 	Context("mergeEnvVars", func() {
 		It("should return not nil", func() {
 			var envs []corev1.EnvVar = []corev1.EnvVar{
-				corev1.EnvVar{
+				{
 					Name: "test",
 				}}
 			var containers []corev1.Container = []corev1.Container{
-				corev1.Container{
+				{
 					Name: "test",
 				}}
 			mutatedContainers := mergeEnvVars(envs, containers)
@@ -356,15 +356,15 @@ var _ = Describe("webhook inject", func() {
 
 		It("should return not nil", func() {
 			var envs []corev1.EnvVar = []corev1.EnvVar{
-				corev1.EnvVar{
+				{
 					Name: "test",
 				}}
 			var env []corev1.EnvVar = []corev1.EnvVar{
-				corev1.EnvVar{
+				{
 					Name: "test",
 				}}
 			var containers []corev1.Container = []corev1.Container{
-				corev1.Container{
+				{
 					Name: "test",
 					Env:  env,
 				}}
@@ -376,11 +376,11 @@ var _ = Describe("webhook inject", func() {
 	Context("mergeVolumeMounts", func() {
 		It("should return not nil", func() {
 			var volumeMounts []corev1.VolumeMount = []corev1.VolumeMount{
-				corev1.VolumeMount{
+				{
 					Name: "test",
 				}}
 			var containers []corev1.Container = []corev1.Container{
-				corev1.Container{
+				{
 					Name: "test",
 				}}
 			mutatedContainers := mergeVolumeMounts(volumeMounts, containers)
@@ -389,15 +389,15 @@ var _ = Describe("webhook inject", func() {
 
 		It("should return not nil", func() {
 			var volumeMounts []corev1.VolumeMount = []corev1.VolumeMount{
-				corev1.VolumeMount{
+				{
 					Name: "test",
 				}}
 			var vm []corev1.VolumeMount = []corev1.VolumeMount{
-				corev1.VolumeMount{
+				{
 					Name: "test",
 				}}
 			var containers []corev1.Container = []corev1.Container{
-				corev1.Container{
+				{
 					Name:         "test",
 					VolumeMounts: vm,
 				}}

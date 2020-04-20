@@ -85,6 +85,8 @@ fi
 hack::ensure_kind
 hack::ensure_kubectl
 hack::ensure_helm
+hack::ensure_kubebuilder
+hack::ensure_kustomize
 
 HELM_IMAGE=${HELM_IMAGE:-gcr.io/kubernetes-helm/tiller:v2.9.1}
 DOCKER_REGISTRY=${DOCKER_REGISTRY:-localhost:5000}
@@ -365,5 +367,7 @@ e2e::image_load
 export KUBECONFIG
 export KUBECONTEXT
 export E2E_IMAGE=${DOCKER_REGISTRY}/pingcap/chaos-mesh-e2e:${IMAGE_TAG}
+export DOCKER_REGISTRY=${DOCKER_REGISTRY}
+export IMAGE_TAG=${IMAGE_TAG}
 
 hack/run-e2e.sh "$@"

@@ -90,7 +90,7 @@ func (r *ChaosCollector) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 			r.Log.Error(err, "write event to database error")
 			return ctrl.Result{}, nil
 		}
-	} else if status.Experiment.Phase == v1alpha1.ExperimentPhaseFinished {
+	} else if status.Experiment.Phase == v1alpha1.ExperimentPhaseFinished || status.Experiment.Phase == v1alpha1.ExperimentPhasePaused {
 		event := Event{
 			Name:              req.Name,
 			Namespace:         req.Namespace,

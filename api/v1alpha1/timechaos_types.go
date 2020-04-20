@@ -80,6 +80,10 @@ type TimeChaosSpec struct {
 	// Next time when this action will be recovered
 	// +optional
 	NextRecover *metav1.Time `json:"nextRecover,omitempty"`
+
+	// If this chaos has been paused
+	// +optional
+	Paused bool `json:"paused"`
 }
 
 // SetDefaultValue will set default value for empty fields
@@ -181,6 +185,11 @@ func (in *TimeChaos) GetStatus() *ChaosStatus {
 // IsDeleted returns whether this resource has been deleted
 func (in *TimeChaos) IsDeleted() bool {
 	return !in.DeletionTimestamp.IsZero()
+}
+
+// IsPaused returns whether this resource has been paused
+func (in *TimeChaos) IsPaused() bool {
+	return in.Spec.Paused
 }
 
 // +kubebuilder:object:root=true

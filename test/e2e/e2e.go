@@ -18,6 +18,7 @@ import (
 	utilnet "k8s.io/utils/net"
 
 	"github.com/pingcap/chaos-mesh/test"
+	e2econfig "github.com/pingcap/chaos-mesh/test/e2e/config"
 
 	// ensure auth plugins are loaded
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
@@ -122,8 +123,12 @@ var _ = ginkgo.SynchronizedBeforeSuite(func() []byte {
 	framework.ExpectNoError(err, "failed to create clientset")
 	apiExtCli, err := apiextensionsclientset.NewForConfig(config)
 	framework.ExpectNoError(err, "failed to create clientset")
-	oa := test.NewOperatorAction(kubeCli, aggrCli, apiExtCli, test.NewDefaultConfig())
+	oa := test.NewOperatorAction(kubeCli, aggrCli, apiExtCli, e2econfig.TestConfig)
 	ocfg := test.NewDefaultOperatorConfig()
+	ocfg.Manager.Image = e2econfig.TestConfig.ManagerImage
+	ocfg.Manager.Tag = e2econfig.TestConfig.ManagerTag
+	ocfg.Daemon.Image = e2econfig.TestConfig.DaemonImage
+	ocfg.Daemon.Tag = e2econfig.TestConfig.DaemonTag
 
 	oa.CleanCRDOrDie()
 	err = oa.InstallCRD(ocfg)

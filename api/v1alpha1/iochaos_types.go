@@ -140,6 +140,10 @@ type IoChaosSpec struct {
 	// Next time when this action will be recovered.
 	// +optional
 	NextRecover *metav1.Time `json:"nextRecover,omitempty"`
+
+	// If this chaos has been paused
+	// +optional
+	Paused bool `json:"paused"`
 }
 
 func (in *IoChaosSpec) GetSelector() SelectorSpec {
@@ -174,8 +178,14 @@ func (in *IoChaos) GetStatus() *ChaosStatus {
 	return &in.Status.ChaosStatus
 }
 
+// IsDeleted returns whether this resource has been deleted
 func (in *IoChaos) IsDeleted() bool {
 	return !in.DeletionTimestamp.IsZero()
+}
+
+// IsPaused returns whether this resource has been paused
+func (in *IoChaos) IsPaused() bool {
+	return in.Spec.Paused
 }
 
 // GetDuration would return the duration for chaos

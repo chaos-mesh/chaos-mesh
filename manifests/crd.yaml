@@ -102,6 +102,9 @@ spec:
               description: Path defines the path of files for injecting I/O chaos
                 action.
               type: string
+            paused:
+              description: If this chaos has been paused
+              type: boolean
             percent:
               description: 'Percent defines the percentage of injection errors and
                 provides a number from 0-100. default: 100.'
@@ -382,6 +385,9 @@ spec:
               description: Next time when this action will be applied again
               format: date-time
               type: string
+            paused:
+              description: If this chaos has been paused
+              type: boolean
             scheduler:
               description: Scheduler defines some schedule rules to control the running
                 time of the chaos experiment about time.
@@ -711,6 +717,9 @@ spec:
               description: Next time when this action will be applied again
               format: date-time
               type: string
+            paused:
+              description: If this chaos has been paused
+              type: boolean
             scheduler:
               description: Scheduler defines some schedule rules to control the running
                 time of the chaos experiment about network.
@@ -1019,6 +1028,9 @@ spec:
               description: Next time when this action will be applied again
               format: date-time
               type: string
+            paused:
+              description: If this chaos has been paused
+              type: boolean
             scheduler:
               description: Scheduler defines some schedule rules to control the running
                 time of the chaos experiment about pods.
@@ -1621,6 +1633,9 @@ spec:
               description: Next time when this action will be applied again
               format: date-time
               type: string
+            paused:
+              description: If this chaos has been paused
+              type: boolean
             scheduler:
               description: Scheduler defines some schedule rules to control the running
                 time of the chaos experiment about time.

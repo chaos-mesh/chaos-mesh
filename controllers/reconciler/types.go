@@ -24,6 +24,7 @@ import (
 // InnerObject is basic Object for the Reconciler
 type InnerObject interface {
 	IsDeleted() bool
+	IsPaused() bool
 	apiinterface.StatefulObject
 }
 

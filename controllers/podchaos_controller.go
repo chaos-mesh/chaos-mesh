@@ -16,15 +16,15 @@ package controllers
 import (
 	"context"
 
-	"github.com/pingcap/chaos-mesh/api/v1alpha1"
-	"github.com/pingcap/chaos-mesh/controllers/podchaos"
-	"github.com/pingcap/chaos-mesh/pkg/utils"
-
 	"github.com/go-logr/logr"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+
+	"github.com/pingcap/chaos-mesh/api/v1alpha1"
+	"github.com/pingcap/chaos-mesh/controllers/podchaos"
+	"github.com/pingcap/chaos-mesh/pkg/utils"
 )
 
 // PodChaosReconciler reconciles a PodChaos object
@@ -55,10 +55,10 @@ func (r *PodChaosReconciler) Reconcile(req ctrl.Request) (result ctrl.Result, er
 
 	result, err = reconciler.Reconcile(req, chaos)
 	if err != nil {
-		if !chaos.IsDeleted() {
-			r.Event(chaos, v1.EventTypeWarning, utils.EventChaosInjectFailed, err.Error())
-		} else {
+		if chaos.IsDeleted() || chaos.IsPaused() {
 			r.Event(chaos, v1.EventTypeWarning, utils.EventChaosRecoverFailed, err.Error())
+		} else {
+			r.Event(chaos, v1.EventTypeWarning, utils.EventChaosInjectFailed, err.Error())
 		}
 	}
 
