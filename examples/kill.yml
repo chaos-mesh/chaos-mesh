@@ -2,13 +2,14 @@ apiVersion: pingcap.com/v1alpha1
 kind: PodChaos
 metadata:
   name: container-kill-example
-  namespace: yeya24
 spec:
   action: container-kill
   mode: one
-  containerName: "etcd"
+  containerName: "alertmanager"
   selector:
+    namespaces:
+      - monitoring
     labelSelectors:
-      app: etcd
+      app: alertmanager
   scheduler:
-    cron: "@every 30s"
+    cron: "@every 10s"

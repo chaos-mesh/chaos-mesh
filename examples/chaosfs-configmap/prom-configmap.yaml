@@ -1,0 +1,48 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: chaosfs-prom
+  namespace: default
+  labels:
+    app.kubernetes.io/component: webhook
+data:
+  chaosfs-prom.yaml: |
+    name: chaosfs-prom:1.0
+    initContainers:
+    - name: inject-scripts
+      image: pingcap/chaos-scripts:latest
+      imagePullpolicy: Always
+      command: ["sh", "-c", "/scripts/init.sh -d /var/run/prometheus/data -f /var/run/fuse-data"]
+    containers:
+    - name: chaosfs
+      image: pingcap/chaos-fs:latest
+      imagePullpolicy: Always
+      ports:
+      - containerPort: 65534
+      securityContext:
+        privileged: true
+      command:
+        - sleep
+        - 100000
+      volumeMounts:
+        - name: data
+          mountPath: /var/run/prometheus/data
+          mountPropagation: Bidirectional
+    volumeMounts:
+    - name: data
+      mountPath: /var/run/prometheus
+      mountPropagation: HostToContainer
+    - name: scripts
+      mountPath: /tmp/scripts
+    - name: fuse
+      mountPath: /tmp/fuse
+    volumes:
+    - name: scripts
+      emptyDir: {}
+    - name: fuse
+      emptyDir: {}
+    postStart:
+      prom:
+        command:
+          - /tmp/scripts/wait-fuse.sh

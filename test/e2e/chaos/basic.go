@@ -297,6 +297,89 @@ var _ = ginkgo.Describe("[chaos-mesh] Basic", func() {
 
 		cancel()
 	})
+
+	ginkgo.It("ContainerKill", func() {
+		ctx, cancel := context.WithCancel(context.Background())
+		nd := fixture.NewCommonNginxDeployment("nginx", ns, 1)
+		_, err := kubeCli.AppsV1().Deployments(ns).Create(nd)
+		framework.ExpectNoError(err, "create nginx deployment error")
+		err = waitDeploymentReady("nginx", ns, kubeCli)
+		framework.ExpectNoError(err, "wait nginx deployment ready error")
+
+		containerKillChaos := &v1alpha1.PodChaos{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "nginx-container-kill",
+				Namespace: ns,
+			},
+			Spec: v1alpha1.PodChaosSpec{
+				Selector: v1alpha1.SelectorSpec{
+					Namespaces: []string{
+						ns,
+					},
+					LabelSelectors: map[string]string{
+						"app": "nginx",
+					},
+				},
+				Action: v1alpha1.ContainerKillAction,
+				Mode:   v1alpha1.OnePodMode,
+				ContainerName: "nginx",
+			},
+		}
+		err = cli.Create(ctx, containerKillChaos)
+		framework.ExpectNoError(err, "create container kill chaos error")
+
+		err = wait.PollImmediate(3*time.Second, 5*time.Minute, func() (done bool, err error) {
+
+			listOption := metav1.ListOptions{
+				LabelSelector: labels.SelectorFromSet(map[string]string{
+					"app": "nginx",
+				}).String(),
+			}
+			pods, err := kubeCli.CoreV1().Pods(ns).List(listOption)
+			if err != nil {
+				return false, nil
+			}
+			if len(pods.Items) != 1 {
+				return false, nil
+			}
+			pod := pods.Items[0]
+			for _, c := range pod.Spec.Containers {
+				if c.Image == pauseImage {
+					return true, nil
+				}
+			}
+			return false, nil
+		})
+
+		err = cli.Delete(ctx, containerKillChaos)
+		framework.ExpectNoError(err, "failed to delete container kill chaos")
+
+		klog.Infof("success to perform container kill")
+		err = wait.PollImmediate(3*time.Second, 5*time.Minute, func() (done bool, err error) {
+			listOption := metav1.ListOptions{
+				LabelSelector: labels.SelectorFromSet(map[string]string{
+					"app": "nginx",
+				}).String(),
+			}
+			pods, err := kubeCli.CoreV1().Pods(ns).List(listOption)
+			if err != nil {
+				return false, nil
+			}
+			if len(pods.Items) != 1 {
+				return false, nil
+			}
+			pod := pods.Items[0]
+			for _, c := range pod.Spec.Containers {
+				if c.Image == "nginx:latest" {
+					return true, nil
+				}
+			}
+			return false, nil
+		})
+		framework.ExpectNoError(err, "container kill recover failed")
+
+		cancel()
+	})
 })
 
 func waitPodRunning(name, namespace string, cli kubernetes.Interface) error {
