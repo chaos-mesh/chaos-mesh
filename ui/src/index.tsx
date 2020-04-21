@@ -1,7 +1,7 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
 
-// customize Material-UI with specific theme
+// Customize Material-UI with a theme config
 // https://material-ui.com/customization/theming/
 import CssBaseline from '@material-ui/core/CssBaseline'
 import { ThemeProvider } from '@material-ui/core/styles'
@@ -11,6 +11,7 @@ import App from './App'
 
 import * as serviceWorker from './serviceWorker'
 
+// TODO: add ErrorBoundary components
 ReactDOM.render(
   <React.StrictMode>
     <ThemeProvider theme={theme}>

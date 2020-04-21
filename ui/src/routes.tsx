@@ -3,8 +3,9 @@ import { RouteProps } from 'react-router'
 import Overview from './pages/Overview'
 import Experiments from './pages/Experiments'
 import ExperimentDetail from './pages/Experiments/Detail'
+import NewExperiment from './pages/Experiments/New'
 import Events from './pages/Events'
-import Archive from './pages/Archive'
+import Archives from './pages/Archives'
 
 export const routes: RouteProps[] = [
   {
@@ -19,7 +20,12 @@ export const routes: RouteProps[] = [
   },
   {
     component: ExperimentDetail,
-    path: '/experiment/:name',
+    path: '/experiments/:name',
+    exact: true,
+  },
+  {
+    component: NewExperiment,
+    path: '/new-experiment',
     exact: true,
   },
   {
@@ -28,8 +34,8 @@ export const routes: RouteProps[] = [
     exact: true,
   },
   {
-    component: Archive,
-    path: '/archive',
+    component: Archives,
+    path: '/archives',
     exact: true,
   },
 ]
