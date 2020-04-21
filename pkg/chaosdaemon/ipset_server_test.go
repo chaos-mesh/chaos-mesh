@@ -158,7 +158,7 @@ exit 1
 			Expect(err).To(BeNil())
 			defer os.Remove("/tmp/mockfail.sh")
 			defer mock.With("MockWithNetNs", func(context.Context, string, string, ...string) *exec.Cmd {
-				return exec.Command("/tmp/mockfail.sh", ipsetExistErr)
+				return exec.Command("/tmp/mockfail.sh", ipsetNewNameExistErr)
 			})()
 			err = s.renameIPSet(context.TODO(), "nsPath", "name", "newname")
 			Expect(err).To(BeNil())
