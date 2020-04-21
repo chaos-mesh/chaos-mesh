@@ -5,7 +5,6 @@ import { createBrowserHistory } from 'history'
 import {
   AppBar,
   Box,
-  Container,
   Drawer,
   Hidden,
   IconButton,
@@ -54,7 +53,6 @@ const useStyles = makeStyles((theme: Theme) =>
     },
     content: {
       flexGrow: 1,
-      padding: theme.spacing(5),
     },
   })
 )
@@ -123,19 +121,14 @@ export default function App() {
         </nav>
         <main className={classes.content}>
           <div className={classes.toolbar} />
-          {/* TODO: breadcrumbs */}
-          <Container maxWidth="xl" disableGutters>
-            <Box py={1}>
-              <Switch>
-                <Redirect exact={true} path="/" to="./overview" />
-                {routes.map((route: RouteProps) => {
-                  const { path } = route
+          <Switch>
+            <Redirect exact={true} path="/" to="./overview" />
+            {routes.map((route: RouteProps) => {
+              const { path } = route
 
-                  return <Route key={path as string} {...route} />
-                })}
-              </Switch>
-            </Box>
-          </Container>
+              return <Route key={path as string} {...route} />
+            })}
+          </Switch>
         </main>
       </Router>
     </div>

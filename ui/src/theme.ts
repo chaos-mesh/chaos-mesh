@@ -1,4 +1,4 @@
-import red from '@material-ui/core/colors/red'
+import { red, green, blue } from '@material-ui/core/colors'
 import { createMuiTheme, responsiveFontSizes } from '@material-ui/core/styles'
 
 // Material UI Style System:
@@ -18,8 +18,15 @@ let theme = createMuiTheme({
     error: {
       main: red.A400,
     },
+    success: {
+      main: green.A400,
+    },
+    info: {
+      main: blue.A400,
+    },
     background: {
-      default: '#fff',
+      default: '#f5f5f5',
+      paper: '#fff',
     },
   },
   spacing: (factor: number) => `${0.25 * factor}rem`, // (Bootstrap strategy),

@@ -11,7 +11,7 @@ import {
 import WebIcon from '@material-ui/icons/Web'
 import BlurLinearIcon from '@material-ui/icons/BlurLinear'
 import TuneIcon from '@material-ui/icons/Tune'
-import ArchiveIcon from '@material-ui/icons/Archive'
+import ArchiveOutlinedIcon from '@material-ui/icons/ArchiveOutlined'
 
 import { makeStyles, Theme, createStyles } from '@material-ui/core/styles'
 
@@ -28,6 +28,9 @@ const useStyles = makeStyles((theme: Theme) =>
         },
       },
     },
+    itemIcon: {
+      paddingLeft: theme.spacing(3),
+    },
     // necessary for content to be below app bar
     toolbar: {
       ...theme.mixins.toolbar,
@@ -41,7 +44,12 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 )
 
-const icons = [<WebIcon />, <TuneIcon />, <BlurLinearIcon />, <ArchiveIcon />]
+const icons = [
+  <WebIcon />,
+  <TuneIcon />,
+  <BlurLinearIcon />,
+  <ArchiveOutlinedIcon />,
+]
 
 export default function SideMenu() {
   const classes = useStyles()
@@ -62,7 +70,9 @@ export default function SideMenu() {
               key={text}
               className={classes.listItem}
             >
-              <ListItemIcon>{icons[index]}</ListItemIcon>
+              <ListItemIcon className={classes.itemIcon}>
+                {icons[index]}
+              </ListItemIcon>
               <ListItemText primary={text} />
             </ListItem>
           )
