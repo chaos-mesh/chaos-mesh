@@ -30,7 +30,6 @@ GOENV  := GO15VENDOREXPERIMENT="1" CGO_ENABLED=0 GOOS=$(GOOS) GOARCH=$(GOARCH)
 CGOENV  := GO15VENDOREXPERIMENT="1" CGO_ENABLED=1 GOOS=$(GOOS) GOARCH=$(GOARCH)
 GO     := $(GOENV) go
 GOTEST := TEST_USE_EXISTING_CLUSTER=false NO_PROXY="${NO_PROXY},testhost" go test
-GOSEC := $(GOENV) gosec
 SHELL    := /usr/bin/env bash
 
 PACKAGE_LIST := go list ./... | grep -vE "pkg/client" | grep -vE "zz_generated" | grep -vE "vendor"
@@ -55,7 +54,7 @@ all: yaml build image
 
 build: dashboard-server-frontend
 
-check: fmt vet lint generate yaml tidy gosec
+check: fmt vet lint generate yaml tidy gosec-scan
 
 # Run tests
 test: failpoint-enable generate manifests test-utils
@@ -121,11 +120,8 @@ manifests: controller-gen
 fmt: groupimports
 	$(CGOENV) go fmt ./...
 
-gosec:
-ifeq (,$(shell which gosec))
-	curl -sfL https://raw.githubusercontent.com/securego/gosec/master/install.sh | sh -s -- -b $(shell go env GOPATH)/bin v2.2.0
-endif
-	$(GOSEC) ./api/... ./controllers/... ./pkg/...
+gosec-scan: gosec
+	$(GOENV) $(GOBIN)/gosec ./api/... ./controllers/... ./pkg/...
 
 groupimports: goimports
 	$(GOBIN)/goimports -w -l -local github.com/pingcap/chaos-mesh $$($(PACKAGE_DIRECTORIES))
@@ -192,6 +188,8 @@ failpoint-ctl:
 	$(GO) get github.com/pingcap/failpoint/failpoint-ctl@v0.0.0-20200210140405-f8f9fb234798
 goimports:
 	$(GO) get golang.org/x/tools/cmd/goimports@v0.0.0-20200309202150-20ab64c0d93f
+gosec:
+	$(GO) get github.com/securego/gosec/cmd/gosec
 
 lint: revive
 	@echo "linting"
@@ -242,4 +240,5 @@ ensure-all:
 .PHONY: all build test install manifests groupimports fmt vet tidy image \
 	docker-push lint generate controller-gen yaml \
 	manager chaosfs chaosdaemon ensure-all \
-	dashboard dashboard-server-frontend
+	dashboard dashboard-server-frontend \
+	gosec-scan
