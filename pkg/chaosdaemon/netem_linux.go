@@ -31,11 +31,13 @@ func applyNetem(netem *pb.Netem, pid uint32) error {
 		}
 	}
 
+	p, h := buildHandles(netem)
+
 	return applyQdisc(pid, func(handle *netlink.Handle, link netlink.Link) netlink.Qdisc {
 		return netlink.NewNetem(netlink.QdiscAttrs{
 			LinkIndex: link.Attrs().Index,
-			Handle:    netlink.MakeHandle(1, 0),
-			Parent:    netlink.HANDLE_ROOT,
+			Handle:    h,
+			Parent:    p,
 		}, ToNetlinkNetemAttrs(netem))
 	})
 }
@@ -51,13 +53,40 @@ func deleteNetem(netem *pb.Netem, pid uint32) error {
 		}
 	}
 
+	p, h := buildHandles(netem)
+
 	return deleteQdisc(pid, func(handle *netlink.Handle, link netlink.Link) netlink.Qdisc {
 		return &netlink.Netem{
 			QdiscAttrs: netlink.QdiscAttrs{
 				LinkIndex: link.Attrs().Index,
-				Handle:    netlink.MakeHandle(1, 0),
-				Parent:    netlink.HANDLE_ROOT,
+				Handle:    h,
+				Parent:    p,
 			},
 		}
 	})
+}
+
+func buildHandles(netem *pb.Netem) (parent, handle uint32) {
+
+	if netem == nil {
+		parent = netlink.HANDLE_ROOT
+		handle = netlink.MakeHandle(1, 0)
+		return
+	}
+
+	if netem.Parent == nil {
+		parent = netlink.HANDLE_ROOT
+	} else if netem.Parent.Major == 1 && netem.Parent.Minor == 0 {
+		parent = netlink.HANDLE_ROOT
+	} else {
+		parent = netlink.MakeHandle(uint16(netem.Parent.Major), uint16(netem.Parent.Minor))
+	}
+
+	if netem.Handle == nil {
+		handle = netlink.MakeHandle(1, 0)
+	} else {
+		handle = netlink.MakeHandle(uint16(netem.Handle.Major), uint16(netem.Handle.Minor))
+	}
+
+	return
 }
