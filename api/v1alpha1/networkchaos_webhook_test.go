@@ -27,7 +27,6 @@ var _ = Describe("networkchaos_webhook", func() {
 			}
 			networkchaos.Default()
 			Expect(networkchaos.Spec.Selector.Namespaces[0]).To(Equal(metav1.NamespaceDefault))
-			Expect(networkchaos.Spec.Target.TargetSelector.Namespaces[0]).To(Equal(metav1.NamespaceDefault))
 		})
 
 		It("set default DelaySpec", func() {
@@ -252,7 +251,7 @@ var _ = Describe("networkchaos_webhook", func() {
 							Name:      "foo12",
 						},
 						Spec: NetworkChaosSpec{
-							Target: PartitionTarget{
+							Target: &Target{
 								TargetMode:  FixedPodMode,
 								TargetValue: "0",
 							},
