@@ -45,7 +45,17 @@
     "@types/react": "^16.9.34",
     "@types/react-dom": "^16.9.6",
     "@types/react-router-dom": "^5.1.4",
+    "husky": "^4.2.5",
+    "lint-staged": "^10.1.7",
     "node-sass": "^4.13.1",
-    "prettier": "^2.0.4"
+    "prettier": "^2.0.5"
+  },
+  "lint-staged": {
+    "*.(j|t)s?(x)": "prettier --write"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
   }
 }
