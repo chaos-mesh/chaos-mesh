@@ -2,7 +2,7 @@ FROM golang:alpine3.10
 
 WORKDIR /src
 
-COPY main.go /src
+COPY timer/main.go /src
 
 RUN go build -o timer main.go
 

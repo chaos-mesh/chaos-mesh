@@ -22,7 +22,7 @@ type Config struct {
 	ManagerTag   string
 	DaemonImage  string
 	DaemonTag    string
-	TimerImage   string
+	E2EImage     string
 }
 
 // NewDefaultConfig describe the default configuration for operator test
@@ -35,6 +35,6 @@ func NewDefaultConfig() *Config {
 		ManagerTag:   "latest",
 		DaemonImage:  "localhost:5000/pingcap/chaos-daemon",
 		DaemonTag:    "latest",
-		TimerImage:   "localhost:5000/pingcap/timer:latest",
+		E2EImage:     "localhost:5000/pingcap/e2e-helper:latest",
 	}
 }
