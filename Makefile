@@ -54,7 +54,7 @@ all: yaml build image
 
 build: dashboard-server-frontend
 
-check: fmt vet lint generate yaml tidy
+check: fmt vet lint generate yaml tidy gosec-scan
 
 # Run tests
 test: failpoint-enable generate manifests test-utils
@@ -119,6 +119,9 @@ manifests: controller-gen
 # Run go fmt against code
 fmt: groupimports
 	$(CGOENV) go fmt ./...
+
+gosec-scan: gosec
+	$(GOENV) $(GOBIN)/gosec ./api/... ./controllers/... ./pkg/... || echo "*** sec-scan failed: known-issues ***"
 
 groupimports: goimports
 	$(GOBIN)/goimports -w -l -local github.com/pingcap/chaos-mesh $$($(PACKAGE_DIRECTORIES))
@@ -185,6 +188,8 @@ failpoint-ctl:
 	$(GO) get github.com/pingcap/failpoint/failpoint-ctl@v0.0.0-20200210140405-f8f9fb234798
 goimports:
 	$(GO) get golang.org/x/tools/cmd/goimports@v0.0.0-20200309202150-20ab64c0d93f
+gosec:
+	$(GO) get github.com/securego/gosec/cmd/gosec@v0.0.0-20200401082031-e946c8c39989
 
 lint: revive
 	@echo "linting"
@@ -235,4 +240,5 @@ ensure-all:
 .PHONY: all build test install manifests groupimports fmt vet tidy image \
 	docker-push lint generate controller-gen yaml \
 	manager chaosfs chaosdaemon ensure-all \
-	dashboard dashboard-server-frontend
+	dashboard dashboard-server-frontend \
+	gosec-scan
