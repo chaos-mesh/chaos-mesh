@@ -80,6 +80,7 @@ e2e_args=(
     --manager-image-tag="${IMAGE_TAG}"
     --daemon-image="${DOCKER_REGISTRY}/pingcap/chaos-daemon"
     --daemon-image-tag="${IMAGE_TAG}"
+    --timer-image="${DOCKER_REGISTRY}/pingcap/timer:latest"
 )
 
 if [ -n "$REPORT_DIR" ]; then

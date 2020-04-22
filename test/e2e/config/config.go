@@ -28,4 +28,5 @@ func RegisterOperatorFlags(flags *flag.FlagSet) {
 	flags.StringVar(&TestConfig.ManagerTag, "manager-image-tag", "latest", "chaos-mesh image tag")
 	flags.StringVar(&TestConfig.DaemonImage, "daemon-image", "pingcap/chaos-daemon", "chaos-daemon image")
 	flags.StringVar(&TestConfig.DaemonTag, "daemon-image-tag", "latest", "chaos-daemon image tag")
+	flags.StringVar(&TestConfig.TimerImage, "timer-image", "pingcap/timer:latest", "timer image")
 }

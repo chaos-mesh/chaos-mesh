@@ -3,6 +3,7 @@ package chaos
 import (
 	"context"
 	"encoding/json"
+	"strings"
 	"time"
 
 	"github.com/onsi/ginkgo"
@@ -18,6 +19,7 @@ import (
 	restClient "k8s.io/client-go/rest"
 	"k8s.io/klog"
 	"k8s.io/kubernetes/test/e2e/framework"
+	"k8s.io/utils/exec"
 	"k8s.io/utils/pointer"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -28,6 +30,7 @@ import (
 
 const (
 	pauseImage = "gcr.io/google-containers/pause:latest"
+	timerImage = ""
 )
 
 var _ = ginkgo.Describe("[Basic]", func() {
@@ -650,6 +653,200 @@ var _ = ginkgo.Describe("[Basic]", func() {
 			})
 		})
 	})
+
+	ginkgo.It("TimeChaos", func() {
+		ctx, cancel := context.WithCancel(context.Background())
+		nd := fixture.NewTimerDeployment("timer", ns)
+		_, err := kubeCli.AppsV1().Deployments(ns).Create(nd)
+		framework.ExpectNoError(err, "create timer deployment error")
+		err = waitDeploymentReady("timer", ns, kubeCli)
+		framework.ExpectNoError(err, "wait timer deployment ready error")
+
+		listOption := metav1.ListOptions{
+			LabelSelector: labels.SelectorFromSet(map[string]string{
+				"app": "timer",
+			}).String(),
+		}
+		pods, err := kubeCli.CoreV1().Pods(ns).List(listOption)
+		framework.ExpectNoError(err, "failed to get timer pod")
+
+		initTime, err := getPodTimeNS(pods.Items[0].Name, ns)
+		framework.ExpectNoError(err, "failed to get pod time")
+
+		timeChaos := &v1alpha1.TimeChaos{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "timer-time-chaos",
+				Namespace: ns,
+			},
+			Spec: v1alpha1.TimeChaosSpec{
+				Selector: v1alpha1.SelectorSpec{
+					Namespaces:     []string{ns},
+					LabelSelectors: map[string]string{"app": "timer"},
+				},
+				Mode:       v1alpha1.OnePodMode,
+				Duration:   pointer.StringPtr("5s"),
+				TimeOffset: "-1h",
+				Scheduler: &v1alpha1.SchedulerSpec{
+					Cron: "@every 10s",
+				},
+			},
+		}
+		err = cli.Create(ctx, timeChaos)
+		framework.ExpectNoError(err, "create time chaos error")
+
+		err = wait.PollImmediate(3*time.Second, 5*time.Minute, func() (done bool, err error) {
+			podTime, err := getPodTimeNS(pods.Items[0].Name, ns)
+			framework.ExpectNoError(err, "failed to get pod time")
+			if podTime.Before(*initTime) {
+				return true, nil
+			}
+			return false, nil
+		})
+		framework.ExpectNoError(err, "time chaos doesn't work as expected")
+
+		err = cli.Delete(ctx, timeChaos)
+		framework.ExpectNoError(err, "failed to delete time chaos")
+		time.Sleep(10 * time.Second)
+
+		klog.Infof("success to perform time chaos")
+		err = wait.PollImmediate(5*time.Second, 1*time.Minute, func() (done bool, err error) {
+			podTime, err := getPodTimeNS(pods.Items[0].Name, ns)
+			framework.ExpectNoError(err, "failed to get pod time")
+			// since there is no timechaos now, current pod time should not be earlier
+			// than the init time
+			if podTime.Before(*initTime) {
+				return true, nil
+			}
+			return false, nil
+		})
+		framework.ExpectError(err, "wait no timechaos error")
+		framework.ExpectEqual(err.Error(), wait.ErrWaitTimeout.Error())
+
+		cancel()
+	})
+
+	ginkgo.It("PauseTimeChaos", func() {
+		ctx, cancel := context.WithCancel(context.Background())
+		nd := fixture.NewTimerDeployment("timer", ns)
+		_, err := kubeCli.AppsV1().Deployments(ns).Create(nd)
+		framework.ExpectNoError(err, "create timer deployment error")
+		err = waitDeploymentReady("timer", ns, kubeCli)
+		framework.ExpectNoError(err, "wait timer deployment ready error")
+
+		listOption := metav1.ListOptions{
+			LabelSelector: labels.SelectorFromSet(map[string]string{
+				"app": "timer",
+			}).String(),
+		}
+		pods, err := kubeCli.CoreV1().Pods(ns).List(listOption)
+		framework.ExpectNoError(err, "failed to get timer pod")
+
+		initTime, err := getPodTimeNS(pods.Items[0].Name, ns)
+		framework.ExpectNoError(err, "failed to get pod time")
+
+		timeChaos := &v1alpha1.TimeChaos{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "timer-time-chaos",
+				Namespace: ns,
+			},
+			Spec: v1alpha1.TimeChaosSpec{
+				Selector: v1alpha1.SelectorSpec{
+					Namespaces:     []string{ns},
+					LabelSelectors: map[string]string{"app": "timer"},
+				},
+				Mode:       v1alpha1.OnePodMode,
+				Duration:   pointer.StringPtr("5s"),
+				TimeOffset: "-1h",
+				Scheduler: &v1alpha1.SchedulerSpec{
+					Cron: "@every 10s",
+				},
+			},
+		}
+		err = cli.Create(ctx, timeChaos)
+		framework.ExpectNoError(err, "create time chaos error")
+
+		err = wait.PollImmediate(3*time.Second, 5*time.Minute, func() (done bool, err error) {
+			podTime, err := getPodTimeNS(pods.Items[0].Name, ns)
+			framework.ExpectNoError(err, "failed to get pod time")
+			if podTime.Before(*initTime) {
+				return true, nil
+			}
+			return false, nil
+		})
+		framework.ExpectNoError(err, "time chaos doesn't work as expected")
+
+		chaosKey := types.NamespacedName{
+			Namespace: ns,
+			Name:      "timer-time-chaos",
+		}
+
+		// pause experiment
+		var mergePatch []byte
+		mergePatch, _ = json.Marshal(map[string]interface{}{
+			"spec": map[string]interface{}{
+				"paused": true,
+			},
+		})
+		err = cli.Patch(ctx, timeChaos, client.ConstantPatch(types.MergePatchType, mergePatch))
+		framework.ExpectNoError(err, "patch pause time chaos error")
+		err = wait.Poll(5*time.Second, 5*time.Minute, func() (done bool, err error) {
+			chaos := &v1alpha1.TimeChaos{}
+			err = cli.Get(ctx, chaosKey, chaos)
+			framework.ExpectNoError(err, "get time chaos error")
+			if chaos.Status.Experiment.Phase == chaosmeshv1alpha1.ExperimentPhasePaused {
+				return true, nil
+			}
+			return false, err
+		})
+		framework.ExpectNoError(err, "check paused chaos failed")
+
+		// wait for 1 minutes and check timer
+		pods, err = kubeCli.CoreV1().Pods(ns).List(listOption)
+		framework.ExpectNoError(err, "get timer pod error")
+		err = wait.Poll(5*time.Second, 1*time.Minute, func() (done bool, err error) {
+			podTime, err := getPodTimeNS(pods.Items[0].Name, ns)
+			framework.ExpectNoError(err, "failed to get pod time")
+			if podTime.Before(*initTime) {
+				return true, nil
+			}
+			return false, nil
+		})
+		framework.ExpectError(err, "wait time chaos paused error")
+		framework.ExpectEqual(err.Error(), wait.ErrWaitTimeout.Error())
+
+		// resume experiment
+		mergePatch, _ = json.Marshal(map[string]interface{}{
+			"spec": map[string]interface{}{
+				"paused": false,
+			},
+		})
+		err = cli.Patch(ctx, timeChaos, client.ConstantPatch(types.MergePatchType, mergePatch))
+		framework.ExpectNoError(err, "patch resume time chaos error")
+		err = wait.Poll(5*time.Second, 5*time.Minute, func() (done bool, err error) {
+			chaos := &v1alpha1.TimeChaos{}
+			err = cli.Get(ctx, chaosKey, chaos)
+			framework.ExpectNoError(err, "get time chaos error")
+			if chaos.Status.Experiment.Phase == chaosmeshv1alpha1.ExperimentPhaseRunning {
+				return true, nil
+			}
+			return false, err
+		})
+		framework.ExpectNoError(err, "check resumed chaos failed")
+
+		// timechaos is running again, we want to check pod
+		// whether time is earlier than init time,
+		err = wait.PollImmediate(5*time.Second, 1*time.Minute, func() (done bool, err error) {
+			podTime, err := getPodTimeNS(pods.Items[0].Name, ns)
+			framework.ExpectNoError(err, "failed to get pod time")
+			if podTime.Before(*initTime) {
+				return true, nil
+			}
+			return false, nil
+		})
+		framework.ExpectNoError(err, "time chaos failed")
+
+		cancel()
+	})
 })
 
 func waitPodRunning(name, namespace string, cli kubernetes.Interface) error {
@@ -679,4 +876,21 @@ func waitDeploymentReady(name, namespace string, cli kubernetes.Interface) error
 		}
 		return true, nil
 	})
+
+}
+
+// get pod current time in nanosecond
+func getPodTimeNS(name, namespace string) (*time.Time, error) {
+	args := []string{"logs", "-n", namespace, name, "--tail", "1"}
+	out, err := exec.New().Command("kubectl", args...).CombinedOutput()
+	if err != nil {
+		klog.Fatalf("Failed to run 'kubectl %s'\nCombined output: %q\nError: %v", strings.Join(args, " "), string(out), err)
+	}
+
+	result := strings.Trim(string(out), "\n")
+	t, err := time.Parse(time.RFC3339Nano, result)
+	if err != nil {
+		return nil, err
+	}
+	return &t, nil
 }

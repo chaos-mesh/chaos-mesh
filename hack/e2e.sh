@@ -143,6 +143,7 @@ function e2e::image_build() {
     DOCKER_REGISTRY=${DOCKER_REGISTRY} GOOS=linux GOARCH=amd64 make e2e-docker
     DOCKER_REGISTRY=${DOCKER_REGISTRY} make image-chaos-mesh
     DOCKER_REGISTRY=${DOCKER_REGISTRY} make image-chaos-daemon
+    DOCKER_REGISTRY=${DOCKER_REGISTRY} make e2e-timer
 }
 
 function e2e::image_load() {

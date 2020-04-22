@@ -217,6 +217,9 @@ endif
 	cp -r manifests test/image/e2e
 	docker build -t "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-mesh-e2e:${IMAGE_TAG}" test/image/e2e
 
+e2e-timer:
+	docker build -t "${DOCKER_REGISTRY_PREFIX}pingcap/timer:latest" test/cmd/e2e_timer
+
 ensure-kind:
 	@echo "ensuring kind"
 	$(shell ./hack/tools.sh kind)
