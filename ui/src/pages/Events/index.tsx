@@ -7,10 +7,10 @@ import Container from '../../components/Container'
 export default function Events() {
   return (
     <>
-      <PageBar breadcrumbs={[{ name: ' Events' }]} />
+      <PageBar />
       <ToolBar />
 
-      <Container maxWidth="xl">Event List</Container>
+      <Container>Event List</Container>
     </>
   )
 }

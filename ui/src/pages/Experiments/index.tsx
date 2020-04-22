@@ -10,27 +10,17 @@ import Container from '../../components/Container'
 export default function Experiments() {
   return (
     <>
-      <PageBar breadcrumbs={[{ name: 'Experiments' }]} />
+      <PageBar />
       <ToolBar>
-        <Button
-          variant="outlined"
-          startIcon={<AddIcon />}
-          component={Link}
-          to="new-experiment"
-        >
+        <Button variant="outlined" startIcon={<AddIcon />} component={Link} to="new-experiment">
           New Experiment
         </Button>
       </ToolBar>
 
-      <Container maxWidth="xl">
+      <Container>
         <Card>
           <CardContent>
-            <Typography
-              component={Link}
-              to="/experiments/tikv-failure"
-              variant="h6"
-              color="primary"
-            >
+            <Typography component={Link} to="/experiments/tikv-failure" variant="h6" color="primary">
               tikv-failure
             </Typography>
           </CardContent>

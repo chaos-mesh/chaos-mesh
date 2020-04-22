@@ -8,17 +8,13 @@ import Container from '../../components/Container'
 export default function NewExperiment() {
   return (
     <>
-      <PageBar
-        breadcrumbs={[
-          { name: 'Experiments', path: '/experiments' },
-          { name: 'New' },
-        ]}
-      />
+      <PageBar />
       <ToolBar>
         <Button variant="outlined" startIcon={<CloudUploadOutlinedIcon />}>
           Yaml File
         </Button>
       </ToolBar>
+
       <Container>Form Step</Container>
     </>
   )

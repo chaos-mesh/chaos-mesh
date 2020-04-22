@@ -1,13 +1,7 @@
 import React from 'react'
 import { NavLink } from 'react-router-dom'
 
-import {
-  Divider,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
-} from '@material-ui/core'
+import { Divider, List, ListItem, ListItemIcon, ListItemText } from '@material-ui/core'
 import WebIcon from '@material-ui/icons/Web'
 import BlurLinearIcon from '@material-ui/icons/BlurLinear'
 import TuneIcon from '@material-ui/icons/Tune'
@@ -23,7 +17,7 @@ const useStyles = makeStyles((theme: Theme) =>
         '& svg': {
           fill: theme.palette.primary.main,
         },
-        '& .MuiListItemText-primary': {
+        '& .MuiListItemText': {
           fontWeight: 500,
         },
       },
@@ -44,11 +38,20 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 )
 
-const icons = [
-  <WebIcon />,
-  <TuneIcon />,
-  <BlurLinearIcon />,
-  <ArchiveOutlinedIcon />,
+const listItems = [
+  { icon: <WebIcon />, text: 'Overview' },
+  {
+    icon: <TuneIcon />,
+    text: 'Experiments',
+  },
+  {
+    icon: <BlurLinearIcon />,
+    text: 'Events',
+  },
+  {
+    icon: <ArchiveOutlinedIcon />,
+    text: 'Archives',
+  },
 ]
 
 export default function SideMenu() {
@@ -57,26 +60,16 @@ export default function SideMenu() {
   return (
     <>
       <NavLink to="/" className={classes.toolbar}>
-        <img className={classes.logo} src="/logo.svg" alt="Chaos Mesh" />
+        <img className={classes.logo} src="/logo.svg" alt="Chaos Mesh Logo" />
       </NavLink>
       <Divider />
       <List>
-        {['Overview', 'Experiments', 'Events', 'Archives'].map(
-          (text, index) => (
-            <ListItem
-              button
-              component={NavLink}
-              to={`/${text.toLowerCase()}`}
-              key={text}
-              className={classes.listItem}
-            >
-              <ListItemIcon className={classes.itemIcon}>
-                {icons[index]}
-              </ListItemIcon>
-              <ListItemText primary={text} />
-            </ListItem>
-          )
-        )}
+        {listItems.map(({ icon, text }, index) => (
+          <ListItem key={text} button component={NavLink} to={`/${text.toLowerCase()}`} className={classes.listItem}>
+            <ListItemIcon className={classes.itemIcon}>{icon}</ListItemIcon>
+            <ListItemText primary={text} />
+          </ListItem>
+        ))}
       </List>
     </>
   )

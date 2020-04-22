@@ -7,7 +7,7 @@ import NewExperiment from './pages/Experiments/New'
 import Events from './pages/Events'
 import Archives from './pages/Archives'
 
-export const routes: RouteProps[] = [
+const routes: RouteProps[] = [
   {
     component: Overview,
     path: '/overview',
@@ -21,7 +21,6 @@ export const routes: RouteProps[] = [
   {
     component: ExperimentDetail,
     path: '/experiments/:name',
-    exact: true,
   },
   {
     component: NewExperiment,
@@ -39,3 +38,5 @@ export const routes: RouteProps[] = [
     exact: true,
   },
 ]
+
+export default routes
