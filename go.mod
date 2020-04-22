@@ -39,7 +39,7 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.0.0
 	github.com/robfig/cron/v3 v3.0.0
-	github.com/securego/gosec v0.0.0-20200401082031-e946c8c39989 // indirect
+	github.com/securego/gosec v0.0.0-20200401082031-e946c8c39989
 	github.com/spf13/cobra v0.0.6 // indirect
 	github.com/tmc/grpc-websocket-proxy v0.0.0-20200122045848-3419fae592fc // indirect
 	github.com/unrolled/render v1.0.1
