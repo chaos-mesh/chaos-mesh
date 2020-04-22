@@ -1,6 +1,8 @@
 import { blue, green, orange, red } from '@material-ui/core/colors'
 import { createMuiTheme, responsiveFontSizes } from '@material-ui/core/styles'
 
+// Design system
+// https://material-ui.com/system/basics/
 // The Default theme
 // https://material-ui.com/customization/default-theme/
 // How to customize
