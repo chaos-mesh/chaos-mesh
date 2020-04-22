@@ -141,6 +141,135 @@ var _ = ginkgo.Describe("[chaos-mesh] Basic", func() {
 		cancel()
 	})
 
+	ginkgo.It("PausePodFailure", func() {
+		ctx, cancel := context.WithCancel(context.Background())
+		nd := fixture.NewCommonNginxDeployment("nginx", ns, 1)
+		_, err := kubeCli.AppsV1().Deployments(ns).Create(nd)
+		framework.ExpectNoError(err, "create nginx deployment error")
+		err = waitDeploymentReady("nginx", ns, kubeCli)
+		framework.ExpectNoError(err, "wait nginx deployment ready error")
+
+		var pods *corev1.PodList
+		listOption := metav1.ListOptions{
+			LabelSelector: labels.SelectorFromSet(map[string]string{
+				"app": "nginx",
+			}).String(),
+		}
+
+		podFailureChaos := &v1alpha1.PodChaos{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "nginx-failure",
+				Namespace: ns,
+			},
+			Spec: v1alpha1.PodChaosSpec{
+				Selector: v1alpha1.SelectorSpec{
+					Namespaces:     []string{ns},
+					LabelSelectors: map[string]string{"app": "nginx"},
+				},
+				Action:   v1alpha1.PodFailureAction,
+				Mode:     v1alpha1.OnePodMode,
+				Duration: pointer.StringPtr("5s"),
+				Scheduler: &v1alpha1.SchedulerSpec{
+					Cron: "@every 10s",
+				},
+			},
+		}
+		err = cli.Create(ctx, podFailureChaos)
+		framework.ExpectNoError(err, "create pod failure chaos error")
+
+		chaosKey := types.NamespacedName{
+			Namespace: ns,
+			Name:      "nginx-failure",
+		}
+
+		// check whether the pod failure chaos succeeded or not
+		err = wait.PollImmediate(3*time.Second, 5*time.Minute, func() (done bool, err error) {
+			pods, err := kubeCli.CoreV1().Pods(ns).List(listOption)
+			if err != nil {
+				return false, nil
+			}
+			pod := pods.Items[0]
+			for _, c := range pod.Spec.Containers {
+				if c.Image == pauseImage {
+					return true, nil
+				}
+			}
+			return false, nil
+		})
+
+		// pause experiment
+		var mergePatch []byte
+		mergePatch, _ = json.Marshal(map[string]interface{}{
+			"spec": map[string]interface{}{
+				"paused": true,
+			},
+		})
+		err = cli.Patch(ctx, podFailureChaos, client.ConstantPatch(types.MergePatchType, mergePatch))
+		framework.ExpectNoError(err, "patch pause pod chaos error")
+		err = wait.Poll(5*time.Second, 5*time.Minute, func() (done bool, err error) {
+			chaos := &v1alpha1.PodChaos{}
+			err = cli.Get(ctx, chaosKey, chaos)
+			framework.ExpectNoError(err, "get pod chaos error")
+			if chaos.Status.Experiment.Phase == chaosmeshv1alpha1.ExperimentPhasePaused {
+				return true, nil
+			}
+			return false, err
+		})
+		framework.ExpectNoError(err, "check paused chaos failed")
+
+		// wait for 1 minutes and no pod failure
+		pods, err = kubeCli.CoreV1().Pods(ns).List(listOption)
+		framework.ExpectNoError(err, "get nginx pods error")
+		err = wait.Poll(5*time.Second, 1*time.Minute, func() (done bool, err error) {
+			pods, err = kubeCli.CoreV1().Pods(ns).List(listOption)
+			framework.ExpectNoError(err, "get nginx pods error")
+			pod := pods.Items[0]
+			for _, c := range pod.Spec.Containers {
+				if c.Image == pauseImage {
+					return true, nil
+				}
+			}
+			return false, nil
+		})
+		framework.ExpectError(err, "wait no pod failure failed")
+		framework.ExpectEqual(err.Error(), wait.ErrWaitTimeout.Error())
+
+		// resume experiment
+		mergePatch, _ = json.Marshal(map[string]interface{}{
+			"spec": map[string]interface{}{
+				"paused": false,
+			},
+		})
+		err = cli.Patch(ctx, podFailureChaos, client.ConstantPatch(types.MergePatchType, mergePatch))
+		framework.ExpectNoError(err, "patch resume pod chaos error")
+		err = wait.Poll(5*time.Second, 5*time.Minute, func() (done bool, err error) {
+			chaos := &v1alpha1.PodChaos{}
+			err = cli.Get(ctx, chaosKey, chaos)
+			framework.ExpectNoError(err, "get pod chaos error")
+			if chaos.Status.Experiment.Phase == chaosmeshv1alpha1.ExperimentPhaseRunning {
+				return true, nil
+			}
+			return false, err
+		})
+		framework.ExpectNoError(err, "check resumed chaos failed")
+
+		// pod failure happens again
+		err = wait.Poll(5*time.Second, 5*time.Minute, func() (done bool, err error) {
+			pods, err = kubeCli.CoreV1().Pods(ns).List(listOption)
+			framework.ExpectNoError(err, "get nginx pods error")
+			pod := pods.Items[0]
+			for _, c := range pod.Spec.Containers {
+				if c.Image == pauseImage {
+					return true, nil
+				}
+			}
+			return false, nil
+		})
+		framework.ExpectNoError(err, "wait pod failure failed")
+
+		cancel()
+	})
+
 	ginkgo.It("PodKill", func() {
 		ctx, cancel := context.WithCancel(context.Background())
 		bpod := fixture.NewCommonNginxPod("nginx", ns)
@@ -248,7 +377,7 @@ var _ = ginkgo.Describe("[chaos-mesh] Basic", func() {
 		err = wait.Poll(5*time.Second, 5*time.Minute, func() (done bool, err error) {
 			chaos := &v1alpha1.PodChaos{}
 			err = cli.Get(ctx, chaosKey, chaos)
-			framework.ExpectNoError(err, "get nginx pods error")
+			framework.ExpectNoError(err, "get pod chaos error")
 			if chaos.Status.Experiment.Phase == chaosmeshv1alpha1.ExperimentPhasePaused {
 				return true, nil
 			}
@@ -278,7 +407,7 @@ var _ = ginkgo.Describe("[chaos-mesh] Basic", func() {
 		err = wait.Poll(5*time.Second, 5*time.Minute, func() (done bool, err error) {
 			chaos := &v1alpha1.PodChaos{}
 			err = cli.Get(ctx, chaosKey, chaos)
-			framework.ExpectNoError(err, "get nginx pods error")
+			framework.ExpectNoError(err, "get pod chaos error")
 			if chaos.Status.Experiment.Phase == chaosmeshv1alpha1.ExperimentPhaseRunning {
 				return true, nil
 			}
