@@ -189,7 +189,7 @@ failpoint-ctl:
 goimports:
 	$(GO) get golang.org/x/tools/cmd/goimports@v0.0.0-20200309202150-20ab64c0d93f
 gosec:
-	$(GO) get github.com/securego/gosec/cmd/gosec
+	$(GO) get github.com/securego/gosec/cmd/gosec@v0.0.0-20200401082031-e946c8c39989
 
 lint: revive
 	@echo "linting"
