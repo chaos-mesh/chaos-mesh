@@ -1,6 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
+  namespace: {{ .Release.Namespace }}
   name: chaos-controller-manager
   labels:
     app.kubernetes.io/name: {{ template "chaos-mesh.name" . }}
