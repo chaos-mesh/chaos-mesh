@@ -1,0 +1,56 @@
+name: ci
+
+on:
+  pull_request:
+    branches:
+      - master
+
+jobs:
+
+  pull:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        job:
+          - verify
+          - build
+          - test
+    steps:
+      - name: Set up Go 1.13
+        uses: actions/setup-go@v1
+        with:
+          go-version: 1.13
+        id: go
+
+      - name: Check out code into the Go module directory
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          path: go/src/github.com/${{ github.repository }}
+
+      - name: ${{ matrix.job }}
+        run: |
+          # workaround for https://github.com/actions/setup-go/issues/14
+          export GOPATH=${GITHUB_WORKSPACE}/go
+          export PATH=$PATH:$GOPATH/bin
+          make ensure-kubebuilder || echo 0
+          make ensure-kustomize || echo 0
+          make goimports || echo 0
+          #use sh function
+
+          if [[ "$job" == "verify" ]]; then
+            make check
+            git diff -- . ':(exclude)go.mod' ':(exclude)go.sum' || (git diff --quiet -- . ':(exclude)go.mod' ':(exclude)go.sum'; echo Please make check before creating a PR; exit 1)
+          elif [[ "$job" == "build" ]]; then
+            make image
+          elif [[ "$job" == "test" ]]; then
+            ROOT=$(pwd)
+            KUBEBUILDER_ASSETS=${ROOT}/output/bin/kubebuilder/bin make test
+            BUILD_NUMBER=${BUILD_NUMBER} CODECOV_TOKEN="${CODECOV_TOKEN}" CI=1 make coverage
+          else
+            make $job
+          fi
+        working-directory: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}
+        env:
+          job: ${{ matrix.job }}
