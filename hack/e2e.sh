@@ -150,6 +150,7 @@ function e2e::image_load() {
     local names=(
         pingcap/chaos-mesh
         pingcap/chaos-daemon
+        pingcap/timer
     )
     for n in ${names[@]}; do
         $KIND_BIN load docker-image --name $CLUSTER ${DOCKER_REGISTRY}/$n:$IMAGE_TAG
