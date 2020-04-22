@@ -108,7 +108,7 @@ func NewTimerDeployment(name, namespace string) *appsv1.Deployment {
 				Spec: corev1.PodSpec{
 					Containers: []corev1.Container{
 						{
-							Image:           config.TestConfig.TimerImage,
+							Image:           config.TestConfig.E2EImage,
 							ImagePullPolicy: corev1.PullIfNotPresent,
 							Name:            "timer",
 						},
