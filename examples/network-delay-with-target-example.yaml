@@ -1,0 +1,24 @@
+apiVersion: pingcap.com/v1alpha1
+kind: NetworkChaos
+metadata:
+  name: network-delay-example
+  namespace: chaos-testing
+spec:
+  action: delay
+  mode: one
+  selector:
+    labelSelectors:
+      "app.kubernetes.io/component": "tikv"
+  delay:
+    latency: "90ms"
+    correlation: "25"
+    jitter: "90ms"
+  direction: to
+  target:
+    selector:
+      labelSelectors:
+        "app.kubernetes.io/component": "tikv"
+    mode: one
+  duration: "10s"
+  scheduler:
+    cron: "@every 15s"

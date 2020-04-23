@@ -11,6 +11,14 @@ service ChaosDaemon {
   rpc SetTbf(TbfRequest) returns (google.protobuf.Empty) {}
   rpc DeleteTbf(TbfRequest) returns (google.protobuf.Empty) {}
 
+  rpc AddQdisc(QdiscRequest) returns (google.protobuf.Empty) {}
+  rpc DelQdisc(QdiscRequest) returns (google.protobuf.Empty) {}
+
+  rpc AddEmatchFilter(EmatchFilterRequest) returns (google.protobuf.Empty) {}
+
+  // generic tc filter del command
+  rpc DelTcFilter(TcFilterRequest) returns (google.protobuf.Empty) {}
+
   rpc FlushIpSet(IpSetRequest) returns (google.protobuf.Empty) {}
   rpc FlushIptables(IpTablesRequest) returns (google.protobuf.Empty) {}
 
@@ -24,6 +32,10 @@ service ChaosDaemon {
   rpc CancelStressors (StressRequest) returns (google.protobuf.Empty) {}
 }
 
+message TcHandle {
+  uint32 major = 1;
+  uint32 minor = 2;
+}
 
 message ContainerRequest{
   ContainerAction action = 1;
@@ -37,6 +49,8 @@ message ContainerResponse{
 message NetemRequest {
   Netem netem = 1;
   string container_id = 2;
+  TcHandle handle = 3;
+  TcHandle parent = 4;
 }
 
 message Netem {
@@ -53,6 +67,8 @@ message Netem {
   float reorder_corr = 11;
   float corrupt = 12;
   float corrupt_corr = 13;
+  TcHandle parent = 14;
+  TcHandle handle = 15;
 }
 
 message TbfRequest {
@@ -66,6 +82,38 @@ message Tbf {
   uint32 buffer = 3;
   uint64 peak_rate = 4;
   uint32 min_burst = 5;
+}
+
+message QdiscRequest {
+  Qdisc qdisc = 1;
+  string container_id = 2;
+}
+
+message Qdisc {
+  TcHandle parent = 1;
+  TcHandle handle = 2;
+  string type = 3;
+  repeated string args = 4;
+}
+
+message EmatchFilterRequest {
+    EmatchFilter filter = 1;
+    string container_id = 2;
+}
+
+message EmatchFilter {
+  string match = 1;
+  TcHandle parent = 2;
+  TcHandle classid = 3;
+}
+
+message TcFilterRequest {
+  TcFilter filter = 1;
+  string container_id = 2;
+}
+
+message TcFilter {
+  TcHandle parent = 1;
 }
 
 message IpSetRequest {

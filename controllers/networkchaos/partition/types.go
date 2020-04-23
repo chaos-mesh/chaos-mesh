@@ -18,7 +18,6 @@ import (
 	"crypto/sha1"
 	"errors"
 	"fmt"
-	"os"
 
 	"github.com/go-logr/logr"
 	"golang.org/x/sync/errgroup"
@@ -32,6 +31,8 @@ import (
 
 	"github.com/pingcap/chaos-mesh/api/v1alpha1"
 	"github.com/pingcap/chaos-mesh/controllers/common"
+	"github.com/pingcap/chaos-mesh/controllers/networkchaos/ipset"
+	"github.com/pingcap/chaos-mesh/controllers/networkchaos/iptable"
 	"github.com/pingcap/chaos-mesh/controllers/reconciler"
 	"github.com/pingcap/chaos-mesh/controllers/twophase"
 	pb "github.com/pingcap/chaos-mesh/pkg/chaosdaemon/pb"
@@ -102,7 +103,7 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos reconcil
 		return err
 	}
 
-	targets, err := utils.SelectAndFilterPods(ctx, r.Client, &networkchaos.Spec.Target)
+	targets, err := utils.SelectAndFilterPods(ctx, r.Client, networkchaos.Spec.Target)
 
 	if err != nil {
 		r.Log.Error(err, "failed to select and filter pods")
@@ -120,13 +121,13 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos reconcil
 		pod := allPods[index]
 		r.Log.Info("PODS", "name", pod.Name, "namespace", pod.Namespace)
 		g.Go(func() error {
-			err := r.flushPodIPSet(ctx, &pod, sourceSet, networkchaos)
+			err = ipset.FlushIpSet(ctx, r.Client, &pod, sourceSet)
 			if err != nil {
 				return err
 			}
 
 			r.Log.Info("Flush ipset on pod", "name", pod.Name, "namespace", pod.Namespace)
-			return r.flushPodIPSet(ctx, &pod, targetSet, networkchaos)
+			return ipset.FlushIpSet(ctx, r.Client, &pod, targetSet)
 		})
 	}
 
@@ -201,7 +202,7 @@ func (r *Reconciler) BlockSet(ctx context.Context, pods []v1.Pod, set pb.IpSet, 
 		}
 
 		g.Go(func() error {
-			return r.sendIPTables(ctx, pod, sourceRule, networkchaos)
+			return iptable.FlushIptables(ctx, r.Client, pod, sourceRule)
 		})
 	}
 	return g.Wait()
@@ -316,7 +317,7 @@ func (r *Reconciler) cleanFinalizersAndRecover(ctx context.Context, networkchaos
 				rule = r.generateIPTables(pb.Rule_DELETE, pb.Rule_INPUT, set)
 			}
 
-			err = r.sendIPTables(ctx, &pod, rule, networkchaos)
+			err = iptable.FlushIptables(ctx, r.Client, &pod, rule)
 			if err != nil {
 				r.Log.Error(err, "error while deleting iptables rules")
 				return err
@@ -333,7 +334,7 @@ func (r *Reconciler) cleanFinalizersAndRecover(ctx context.Context, networkchaos
 				rule = r.generateIPTables(pb.Rule_DELETE, pb.Rule_INPUT, set)
 			}
 
-			err = r.sendIPTables(ctx, &pod, rule, networkchaos)
+			err = iptable.FlushIptables(ctx, r.Client, &pod, rule)
 			if err != nil {
 				r.Log.Error(err, "error while deleting iptables rules")
 				return err
@@ -345,44 +346,4 @@ func (r *Reconciler) cleanFinalizersAndRecover(ctx context.Context, networkchaos
 	r.Log.Info("After recovering", "finalizers", networkchaos.Finalizers)
 
 	return nil
-}
-
-func (r *Reconciler) flushPodIPSet(ctx context.Context, pod *v1.Pod, ipset pb.IpSet, networkchaos *v1alpha1.NetworkChaos) error {
-	pbClient, err := utils.NewChaosDaemonClient(ctx, r.Client, pod, os.Getenv("CHAOS_DAEMON_PORT"))
-	if err != nil {
-		return err
-	}
-	defer pbClient.Close()
-
-	if len(pod.Status.ContainerStatuses) == 0 {
-		return fmt.Errorf("%s %s can't get the state of container", pod.Namespace, pod.Name)
-	}
-
-	containerID := pod.Status.ContainerStatuses[0].ContainerID
-
-	_, err = pbClient.FlushIpSet(ctx, &pb.IpSetRequest{
-		Ipset:       &ipset,
-		ContainerId: containerID,
-	})
-	return err
-}
-
-func (r *Reconciler) sendIPTables(ctx context.Context, pod *v1.Pod, rule pb.Rule, networkchaos *v1alpha1.NetworkChaos) error {
-	pbClient, err := utils.NewChaosDaemonClient(ctx, r.Client, pod, os.Getenv("CHAOS_DAEMON_PORT"))
-	if err != nil {
-		return err
-	}
-	defer pbClient.Close()
-
-	if len(pod.Status.ContainerStatuses) == 0 {
-		return fmt.Errorf("%s %s can't get the state of container", pod.Namespace, pod.Name)
-	}
-
-	containerID := pod.Status.ContainerStatuses[0].ContainerID
-
-	_, err = pbClient.FlushIptables(ctx, &pb.IpTablesRequest{
-		Rule:        &rule,
-		ContainerId: containerID,
-	})
-	return err
 }

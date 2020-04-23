@@ -11,14 +11,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// +build tools
-
-package tools
+package chaosdaemon
 
 import (
-	_ "github.com/mgechev/revive"
-	_ "github.com/pingcap/failpoint/failpoint-ctl"
-	_ "github.com/securego/gosec/cmd/gosec"
-	_ "golang.org/x/tools/cmd/goimports"
-	_ "sigs.k8s.io/controller-tools/cmd/controller-gen"
+	"context"
+
+	"github.com/pingcap/chaos-mesh/pkg/mock"
 )
+
+func applyTc(ctx context.Context, pid uint32, args ...string) error {
+	// Mock point to return error in unit test
+	if err := mock.On("TcApplyError"); err != nil {
+		if e, ok := err.(error); ok {
+			return e
+		}
+		if ignore, ok := err.(bool); ok && ignore {
+			return nil
+		}
+	}
+
+	panic("unimplemented")
+}
