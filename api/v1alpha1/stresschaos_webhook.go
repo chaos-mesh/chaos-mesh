@@ -26,6 +26,7 @@ import (
 )
 
 // +kubebuilder:object:generate=false
+
 // Validateable defines how a resource is validated
 type Validateable interface {
 	Validate(parent *field.Path, errs field.ErrorList) field.ErrorList
