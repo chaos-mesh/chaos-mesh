@@ -192,7 +192,7 @@ func (in *StressChaos) IsPaused() bool {
 type Stressors struct {
 	// VMStressor stresses virtual memory out
 	// +optional
-	VmStressor *VMStressor `json:"vm,omitempty"`
+	VMStressor *VMStressor `json:"vm,omitempty"`
 	// CPUStressor stresses CPU out
 	// +optional
 	CPUStressor *CPUStressor `json:"cpu,omitempty"`
@@ -201,15 +201,15 @@ type Stressors struct {
 // Normalize the stressors to comply with stress-ng
 func (in *Stressors) Normalize() string {
 	stressors := ""
-	if in.VmStressor != nil {
-		stressors += fmt.Sprintf(" --vm %d --vm-keep", in.VmStressor.Workers)
-		if len(in.VmStressor.Bytes) != 0 {
-			if in.VmStressor.Bytes[len(in.VmStressor.Bytes)-1] != '%' {
-				size, _ := units.FromHumanSize(in.VmStressor.Bytes)
+	if in.VMStressor != nil {
+		stressors += fmt.Sprintf(" --vm %d --vm-keep", in.VMStressor.Workers)
+		if len(in.VMStressor.Bytes) != 0 {
+			if in.VMStressor.Bytes[len(in.VMStressor.Bytes)-1] != '%' {
+				size, _ := units.FromHumanSize(in.VMStressor.Bytes)
 				stressors += fmt.Sprintf(" --vm-bytes %dd", size)
 			} else {
 				stressors += fmt.Sprintf("--vm-bytes %s",
-					in.VmStressor.Bytes)
+					in.VMStressor.Bytes)
 			}
 		}
 	}

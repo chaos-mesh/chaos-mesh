@@ -46,7 +46,7 @@ func (x Rule_Action) String() string {
 }
 
 func (Rule_Action) EnumDescriptor() ([]byte, []int) {
-	return fileDescriptor_143136706133b591, []int{9, 0}
+	return fileDescriptor_143136706133b591, []int{16, 0}
 }
 
 type Rule_Direction int32
@@ -71,7 +71,7 @@ func (x Rule_Direction) String() string {
 }
 
 func (Rule_Direction) EnumDescriptor() ([]byte, []int) {
-	return fileDescriptor_143136706133b591, []int{9, 1}
+	return fileDescriptor_143136706133b591, []int{16, 1}
 }
 
 type ContainerAction_Action int32
@@ -96,7 +96,7 @@ func (x ContainerAction_Action) String() string {
 }
 
 func (ContainerAction_Action) EnumDescriptor() ([]byte, []int) {
-	return fileDescriptor_143136706133b591, []int{11, 0}
+	return fileDescriptor_143136706133b591, []int{18, 0}
 }
 
 type StressRequest_Scope int32
@@ -121,7 +121,54 @@ func (x StressRequest_Scope) String() string {
 }
 
 func (StressRequest_Scope) EnumDescriptor() ([]byte, []int) {
-	return fileDescriptor_143136706133b591, []int{12, 0}
+	return fileDescriptor_143136706133b591, []int{19, 0}
+}
+
+type TcHandle struct {
+	Major                uint32   `protobuf:"varint,1,opt,name=major,proto3" json:"major,omitempty"`
+	Minor                uint32   `protobuf:"varint,2,opt,name=minor,proto3" json:"minor,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *TcHandle) Reset()         { *m = TcHandle{} }
+func (m *TcHandle) String() string { return proto.CompactTextString(m) }
+func (*TcHandle) ProtoMessage()    {}
+func (*TcHandle) Descriptor() ([]byte, []int) {
+	return fileDescriptor_143136706133b591, []int{0}
+}
+
+func (m *TcHandle) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_TcHandle.Unmarshal(m, b)
+}
+func (m *TcHandle) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_TcHandle.Marshal(b, m, deterministic)
+}
+func (m *TcHandle) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_TcHandle.Merge(m, src)
+}
+func (m *TcHandle) XXX_Size() int {
+	return xxx_messageInfo_TcHandle.Size(m)
+}
+func (m *TcHandle) XXX_DiscardUnknown() {
+	xxx_messageInfo_TcHandle.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_TcHandle proto.InternalMessageInfo
+
+func (m *TcHandle) GetMajor() uint32 {
+	if m != nil {
+		return m.Major
+	}
+	return 0
+}
+
+func (m *TcHandle) GetMinor() uint32 {
+	if m != nil {
+		return m.Minor
+	}
+	return 0
 }
 
 type ContainerRequest struct {
@@ -136,7 +183,7 @@ func (m *ContainerRequest) Reset()         { *m = ContainerRequest{} }
 func (m *ContainerRequest) String() string { return proto.CompactTextString(m) }
 func (*ContainerRequest) ProtoMessage()    {}
 func (*ContainerRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_143136706133b591, []int{0}
+	return fileDescriptor_143136706133b591, []int{1}
 }
 
 func (m *ContainerRequest) XXX_Unmarshal(b []byte) error {
@@ -182,7 +229,7 @@ func (m *ContainerResponse) Reset()         { *m = ContainerResponse{} }
 func (m *ContainerResponse) String() string { return proto.CompactTextString(m) }
 func (*ContainerResponse) ProtoMessage()    {}
 func (*ContainerResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_143136706133b591, []int{1}
+	return fileDescriptor_143136706133b591, []int{2}
 }
 
 func (m *ContainerResponse) XXX_Unmarshal(b []byte) error {
@@ -211,18 +258,20 @@ func (m *ContainerResponse) GetPid() uint32 {
 }
 
 type NetemRequest struct {
-	Netem                *Netem   `protobuf:"bytes,1,opt,name=netem,proto3" json:"netem,omitempty"`
-	ContainerId          string   `protobuf:"bytes,2,opt,name=container_id,json=containerId,proto3" json:"container_id,omitempty"`
-	XXX_NoUnkeyedLiteral struct{} `json:"-"`
-	XXX_unrecognized     []byte   `json:"-"`
-	XXX_sizecache        int32    `json:"-"`
+	Netem                *Netem    `protobuf:"bytes,1,opt,name=netem,proto3" json:"netem,omitempty"`
+	ContainerId          string    `protobuf:"bytes,2,opt,name=container_id,json=containerId,proto3" json:"container_id,omitempty"`
+	Handle               *TcHandle `protobuf:"bytes,3,opt,name=handle,proto3" json:"handle,omitempty"`
+	Parent               *TcHandle `protobuf:"bytes,4,opt,name=parent,proto3" json:"parent,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}  `json:"-"`
+	XXX_unrecognized     []byte    `json:"-"`
+	XXX_sizecache        int32     `json:"-"`
 }
 
 func (m *NetemRequest) Reset()         { *m = NetemRequest{} }
 func (m *NetemRequest) String() string { return proto.CompactTextString(m) }
 func (*NetemRequest) ProtoMessage()    {}
 func (*NetemRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_143136706133b591, []int{2}
+	return fileDescriptor_143136706133b591, []int{3}
 }
 
 func (m *NetemRequest) XXX_Unmarshal(b []byte) error {
@@ -257,30 +306,46 @@ func (m *NetemRequest) GetContainerId() string {
 	return ""
 }
 
+func (m *NetemRequest) GetHandle() *TcHandle {
+	if m != nil {
+		return m.Handle
+	}
+	return nil
+}
+
+func (m *NetemRequest) GetParent() *TcHandle {
+	if m != nil {
+		return m.Parent
+	}
+	return nil
+}
+
 type Netem struct {
-	Time                 uint32   `protobuf:"varint,1,opt,name=time,proto3" json:"time,omitempty"`
-	Jitter               uint32   `protobuf:"varint,2,opt,name=jitter,proto3" json:"jitter,omitempty"`
-	DelayCorr            float32  `protobuf:"fixed32,3,opt,name=delay_corr,json=delayCorr,proto3" json:"delay_corr,omitempty"`
-	Limit                uint32   `protobuf:"varint,4,opt,name=limit,proto3" json:"limit,omitempty"`
-	Loss                 float32  `protobuf:"fixed32,5,opt,name=loss,proto3" json:"loss,omitempty"`
-	LossCorr             float32  `protobuf:"fixed32,6,opt,name=loss_corr,json=lossCorr,proto3" json:"loss_corr,omitempty"`
-	Gap                  uint32   `protobuf:"varint,7,opt,name=gap,proto3" json:"gap,omitempty"`
-	Duplicate            float32  `protobuf:"fixed32,8,opt,name=duplicate,proto3" json:"duplicate,omitempty"`
-	DuplicateCorr        float32  `protobuf:"fixed32,9,opt,name=duplicate_corr,json=duplicateCorr,proto3" json:"duplicate_corr,omitempty"`
-	Reorder              float32  `protobuf:"fixed32,10,opt,name=reorder,proto3" json:"reorder,omitempty"`
-	ReorderCorr          float32  `protobuf:"fixed32,11,opt,name=reorder_corr,json=reorderCorr,proto3" json:"reorder_corr,omitempty"`
-	Corrupt              float32  `protobuf:"fixed32,12,opt,name=corrupt,proto3" json:"corrupt,omitempty"`
-	CorruptCorr          float32  `protobuf:"fixed32,13,opt,name=corrupt_corr,json=corruptCorr,proto3" json:"corrupt_corr,omitempty"`
-	XXX_NoUnkeyedLiteral struct{} `json:"-"`
-	XXX_unrecognized     []byte   `json:"-"`
-	XXX_sizecache        int32    `json:"-"`
+	Time                 uint32    `protobuf:"varint,1,opt,name=time,proto3" json:"time,omitempty"`
+	Jitter               uint32    `protobuf:"varint,2,opt,name=jitter,proto3" json:"jitter,omitempty"`
+	DelayCorr            float32   `protobuf:"fixed32,3,opt,name=delay_corr,json=delayCorr,proto3" json:"delay_corr,omitempty"`
+	Limit                uint32    `protobuf:"varint,4,opt,name=limit,proto3" json:"limit,omitempty"`
+	Loss                 float32   `protobuf:"fixed32,5,opt,name=loss,proto3" json:"loss,omitempty"`
+	LossCorr             float32   `protobuf:"fixed32,6,opt,name=loss_corr,json=lossCorr,proto3" json:"loss_corr,omitempty"`
+	Gap                  uint32    `protobuf:"varint,7,opt,name=gap,proto3" json:"gap,omitempty"`
+	Duplicate            float32   `protobuf:"fixed32,8,opt,name=duplicate,proto3" json:"duplicate,omitempty"`
+	DuplicateCorr        float32   `protobuf:"fixed32,9,opt,name=duplicate_corr,json=duplicateCorr,proto3" json:"duplicate_corr,omitempty"`
+	Reorder              float32   `protobuf:"fixed32,10,opt,name=reorder,proto3" json:"reorder,omitempty"`
+	ReorderCorr          float32   `protobuf:"fixed32,11,opt,name=reorder_corr,json=reorderCorr,proto3" json:"reorder_corr,omitempty"`
+	Corrupt              float32   `protobuf:"fixed32,12,opt,name=corrupt,proto3" json:"corrupt,omitempty"`
+	CorruptCorr          float32   `protobuf:"fixed32,13,opt,name=corrupt_corr,json=corruptCorr,proto3" json:"corrupt_corr,omitempty"`
+	Parent               *TcHandle `protobuf:"bytes,14,opt,name=parent,proto3" json:"parent,omitempty"`
+	Handle               *TcHandle `protobuf:"bytes,15,opt,name=handle,proto3" json:"handle,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}  `json:"-"`
+	XXX_unrecognized     []byte    `json:"-"`
+	XXX_sizecache        int32     `json:"-"`
 }
 
 func (m *Netem) Reset()         { *m = Netem{} }
 func (m *Netem) String() string { return proto.CompactTextString(m) }
 func (*Netem) ProtoMessage()    {}
 func (*Netem) Descriptor() ([]byte, []int) {
-	return fileDescriptor_143136706133b591, []int{3}
+	return fileDescriptor_143136706133b591, []int{4}
 }
 
 func (m *Netem) XXX_Unmarshal(b []byte) error {
@@ -392,6 +457,20 @@ func (m *Netem) GetCorruptCorr() float32 {
 	return 0
 }
 
+func (m *Netem) GetParent() *TcHandle {
+	if m != nil {
+		return m.Parent
+	}
+	return nil
+}
+
+func (m *Netem) GetHandle() *TcHandle {
+	if m != nil {
+		return m.Handle
+	}
+	return nil
+}
+
 type TbfRequest struct {
 	Tbf                  *Tbf     `protobuf:"bytes,1,opt,name=tbf,proto3" json:"tbf,omitempty"`
 	ContainerId          string   `protobuf:"bytes,2,opt,name=container_id,json=containerId,proto3" json:"container_id,omitempty"`
@@ -404,7 +483,7 @@ func (m *TbfRequest) Reset()         { *m = TbfRequest{} }
 func (m *TbfRequest) String() string { return proto.CompactTextString(m) }
 func (*TbfRequest) ProtoMessage()    {}
 func (*TbfRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_143136706133b591, []int{4}
+	return fileDescriptor_143136706133b591, []int{5}
 }
 
 func (m *TbfRequest) XXX_Unmarshal(b []byte) error {
@@ -454,7 +533,7 @@ func (m *Tbf) Reset()         { *m = Tbf{} }
 func (m *Tbf) String() string { return proto.CompactTextString(m) }
 func (*Tbf) ProtoMessage()    {}
 func (*Tbf) Descriptor() ([]byte, []int) {
-	return fileDescriptor_143136706133b591, []int{5}
+	return fileDescriptor_143136706133b591, []int{6}
 }
 
 func (m *Tbf) XXX_Unmarshal(b []byte) error {
@@ -510,6 +589,304 @@ func (m *Tbf) GetMinBurst() uint32 {
 	return 0
 }
 
+type QdiscRequest struct {
+	Qdisc                *Qdisc   `protobuf:"bytes,1,opt,name=qdisc,proto3" json:"qdisc,omitempty"`
+	ContainerId          string   `protobuf:"bytes,2,opt,name=container_id,json=containerId,proto3" json:"container_id,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *QdiscRequest) Reset()         { *m = QdiscRequest{} }
+func (m *QdiscRequest) String() string { return proto.CompactTextString(m) }
+func (*QdiscRequest) ProtoMessage()    {}
+func (*QdiscRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_143136706133b591, []int{7}
+}
+
+func (m *QdiscRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_QdiscRequest.Unmarshal(m, b)
+}
+func (m *QdiscRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_QdiscRequest.Marshal(b, m, deterministic)
+}
+func (m *QdiscRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QdiscRequest.Merge(m, src)
+}
+func (m *QdiscRequest) XXX_Size() int {
+	return xxx_messageInfo_QdiscRequest.Size(m)
+}
+func (m *QdiscRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_QdiscRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_QdiscRequest proto.InternalMessageInfo
+
+func (m *QdiscRequest) GetQdisc() *Qdisc {
+	if m != nil {
+		return m.Qdisc
+	}
+	return nil
+}
+
+func (m *QdiscRequest) GetContainerId() string {
+	if m != nil {
+		return m.ContainerId
+	}
+	return ""
+}
+
+type Qdisc struct {
+	Parent               *TcHandle `protobuf:"bytes,1,opt,name=parent,proto3" json:"parent,omitempty"`
+	Handle               *TcHandle `protobuf:"bytes,2,opt,name=handle,proto3" json:"handle,omitempty"`
+	Type                 string    `protobuf:"bytes,3,opt,name=type,proto3" json:"type,omitempty"`
+	Args                 []string  `protobuf:"bytes,4,rep,name=args,proto3" json:"args,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}  `json:"-"`
+	XXX_unrecognized     []byte    `json:"-"`
+	XXX_sizecache        int32     `json:"-"`
+}
+
+func (m *Qdisc) Reset()         { *m = Qdisc{} }
+func (m *Qdisc) String() string { return proto.CompactTextString(m) }
+func (*Qdisc) ProtoMessage()    {}
+func (*Qdisc) Descriptor() ([]byte, []int) {
+	return fileDescriptor_143136706133b591, []int{8}
+}
+
+func (m *Qdisc) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_Qdisc.Unmarshal(m, b)
+}
+func (m *Qdisc) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_Qdisc.Marshal(b, m, deterministic)
+}
+func (m *Qdisc) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_Qdisc.Merge(m, src)
+}
+func (m *Qdisc) XXX_Size() int {
+	return xxx_messageInfo_Qdisc.Size(m)
+}
+func (m *Qdisc) XXX_DiscardUnknown() {
+	xxx_messageInfo_Qdisc.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_Qdisc proto.InternalMessageInfo
+
+func (m *Qdisc) GetParent() *TcHandle {
+	if m != nil {
+		return m.Parent
+	}
+	return nil
+}
+
+func (m *Qdisc) GetHandle() *TcHandle {
+	if m != nil {
+		return m.Handle
+	}
+	return nil
+}
+
+func (m *Qdisc) GetType() string {
+	if m != nil {
+		return m.Type
+	}
+	return ""
+}
+
+func (m *Qdisc) GetArgs() []string {
+	if m != nil {
+		return m.Args
+	}
+	return nil
+}
+
+type EmatchFilterRequest struct {
+	Filter               *EmatchFilter `protobuf:"bytes,1,opt,name=filter,proto3" json:"filter,omitempty"`
+	ContainerId          string        `protobuf:"bytes,2,opt,name=container_id,json=containerId,proto3" json:"container_id,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}      `json:"-"`
+	XXX_unrecognized     []byte        `json:"-"`
+	XXX_sizecache        int32         `json:"-"`
+}
+
+func (m *EmatchFilterRequest) Reset()         { *m = EmatchFilterRequest{} }
+func (m *EmatchFilterRequest) String() string { return proto.CompactTextString(m) }
+func (*EmatchFilterRequest) ProtoMessage()    {}
+func (*EmatchFilterRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_143136706133b591, []int{9}
+}
+
+func (m *EmatchFilterRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_EmatchFilterRequest.Unmarshal(m, b)
+}
+func (m *EmatchFilterRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_EmatchFilterRequest.Marshal(b, m, deterministic)
+}
+func (m *EmatchFilterRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_EmatchFilterRequest.Merge(m, src)
+}
+func (m *EmatchFilterRequest) XXX_Size() int {
+	return xxx_messageInfo_EmatchFilterRequest.Size(m)
+}
+func (m *EmatchFilterRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_EmatchFilterRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_EmatchFilterRequest proto.InternalMessageInfo
+
+func (m *EmatchFilterRequest) GetFilter() *EmatchFilter {
+	if m != nil {
+		return m.Filter
+	}
+	return nil
+}
+
+func (m *EmatchFilterRequest) GetContainerId() string {
+	if m != nil {
+		return m.ContainerId
+	}
+	return ""
+}
+
+type EmatchFilter struct {
+	Match                string    `protobuf:"bytes,1,opt,name=match,proto3" json:"match,omitempty"`
+	Parent               *TcHandle `protobuf:"bytes,2,opt,name=parent,proto3" json:"parent,omitempty"`
+	Classid              *TcHandle `protobuf:"bytes,3,opt,name=classid,proto3" json:"classid,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}  `json:"-"`
+	XXX_unrecognized     []byte    `json:"-"`
+	XXX_sizecache        int32     `json:"-"`
+}
+
+func (m *EmatchFilter) Reset()         { *m = EmatchFilter{} }
+func (m *EmatchFilter) String() string { return proto.CompactTextString(m) }
+func (*EmatchFilter) ProtoMessage()    {}
+func (*EmatchFilter) Descriptor() ([]byte, []int) {
+	return fileDescriptor_143136706133b591, []int{10}
+}
+
+func (m *EmatchFilter) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_EmatchFilter.Unmarshal(m, b)
+}
+func (m *EmatchFilter) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_EmatchFilter.Marshal(b, m, deterministic)
+}
+func (m *EmatchFilter) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_EmatchFilter.Merge(m, src)
+}
+func (m *EmatchFilter) XXX_Size() int {
+	return xxx_messageInfo_EmatchFilter.Size(m)
+}
+func (m *EmatchFilter) XXX_DiscardUnknown() {
+	xxx_messageInfo_EmatchFilter.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_EmatchFilter proto.InternalMessageInfo
+
+func (m *EmatchFilter) GetMatch() string {
+	if m != nil {
+		return m.Match
+	}
+	return ""
+}
+
+func (m *EmatchFilter) GetParent() *TcHandle {
+	if m != nil {
+		return m.Parent
+	}
+	return nil
+}
+
+func (m *EmatchFilter) GetClassid() *TcHandle {
+	if m != nil {
+		return m.Classid
+	}
+	return nil
+}
+
+type TcFilterRequest struct {
+	Filter               *TcFilter `protobuf:"bytes,1,opt,name=filter,proto3" json:"filter,omitempty"`
+	ContainerId          string    `protobuf:"bytes,2,opt,name=container_id,json=containerId,proto3" json:"container_id,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}  `json:"-"`
+	XXX_unrecognized     []byte    `json:"-"`
+	XXX_sizecache        int32     `json:"-"`
+}
+
+func (m *TcFilterRequest) Reset()         { *m = TcFilterRequest{} }
+func (m *TcFilterRequest) String() string { return proto.CompactTextString(m) }
+func (*TcFilterRequest) ProtoMessage()    {}
+func (*TcFilterRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_143136706133b591, []int{11}
+}
+
+func (m *TcFilterRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_TcFilterRequest.Unmarshal(m, b)
+}
+func (m *TcFilterRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_TcFilterRequest.Marshal(b, m, deterministic)
+}
+func (m *TcFilterRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_TcFilterRequest.Merge(m, src)
+}
+func (m *TcFilterRequest) XXX_Size() int {
+	return xxx_messageInfo_TcFilterRequest.Size(m)
+}
+func (m *TcFilterRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_TcFilterRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_TcFilterRequest proto.InternalMessageInfo
+
+func (m *TcFilterRequest) GetFilter() *TcFilter {
+	if m != nil {
+		return m.Filter
+	}
+	return nil
+}
+
+func (m *TcFilterRequest) GetContainerId() string {
+	if m != nil {
+		return m.ContainerId
+	}
+	return ""
+}
+
+type TcFilter struct {
+	Parent               *TcHandle `protobuf:"bytes,1,opt,name=parent,proto3" json:"parent,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}  `json:"-"`
+	XXX_unrecognized     []byte    `json:"-"`
+	XXX_sizecache        int32     `json:"-"`
+}
+
+func (m *TcFilter) Reset()         { *m = TcFilter{} }
+func (m *TcFilter) String() string { return proto.CompactTextString(m) }
+func (*TcFilter) ProtoMessage()    {}
+func (*TcFilter) Descriptor() ([]byte, []int) {
+	return fileDescriptor_143136706133b591, []int{12}
+}
+
+func (m *TcFilter) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_TcFilter.Unmarshal(m, b)
+}
+func (m *TcFilter) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_TcFilter.Marshal(b, m, deterministic)
+}
+func (m *TcFilter) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_TcFilter.Merge(m, src)
+}
+func (m *TcFilter) XXX_Size() int {
+	return xxx_messageInfo_TcFilter.Size(m)
+}
+func (m *TcFilter) XXX_DiscardUnknown() {
+	xxx_messageInfo_TcFilter.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_TcFilter proto.InternalMessageInfo
+
+func (m *TcFilter) GetParent() *TcHandle {
+	if m != nil {
+		return m.Parent
+	}
+	return nil
+}
+
 type IpSetRequest struct {
 	Ipset                *IpSet   `protobuf:"bytes,1,opt,name=ipset,proto3" json:"ipset,omitempty"`
 	ContainerId          string   `protobuf:"bytes,2,opt,name=container_id,json=containerId,proto3" json:"container_id,omitempty"`
@@ -522,7 +899,7 @@ func (m *IpSetRequest) Reset()         { *m = IpSetRequest{} }
 func (m *IpSetRequest) String() string { return proto.CompactTextString(m) }
 func (*IpSetRequest) ProtoMessage()    {}
 func (*IpSetRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_143136706133b591, []int{6}
+	return fileDescriptor_143136706133b591, []int{13}
 }
 
 func (m *IpSetRequest) XXX_Unmarshal(b []byte) error {
@@ -569,7 +946,7 @@ func (m *IpSet) Reset()         { *m = IpSet{} }
 func (m *IpSet) String() string { return proto.CompactTextString(m) }
 func (*IpSet) ProtoMessage()    {}
 func (*IpSet) Descriptor() ([]byte, []int) {
-	return fileDescriptor_143136706133b591, []int{7}
+	return fileDescriptor_143136706133b591, []int{14}
 }
 
 func (m *IpSet) XXX_Unmarshal(b []byte) error {
@@ -616,7 +993,7 @@ func (m *IpTablesRequest) Reset()         { *m = IpTablesRequest{} }
 func (m *IpTablesRequest) String() string { return proto.CompactTextString(m) }
 func (*IpTablesRequest) ProtoMessage()    {}
 func (*IpTablesRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_143136706133b591, []int{8}
+	return fileDescriptor_143136706133b591, []int{15}
 }
 
 func (m *IpTablesRequest) XXX_Unmarshal(b []byte) error {
@@ -664,7 +1041,7 @@ func (m *Rule) Reset()         { *m = Rule{} }
 func (m *Rule) String() string { return proto.CompactTextString(m) }
 func (*Rule) ProtoMessage()    {}
 func (*Rule) Descriptor() ([]byte, []int) {
-	return fileDescriptor_143136706133b591, []int{9}
+	return fileDescriptor_143136706133b591, []int{16}
 }
 
 func (m *Rule) XXX_Unmarshal(b []byte) error {
@@ -720,7 +1097,7 @@ func (m *TimeRequest) Reset()         { *m = TimeRequest{} }
 func (m *TimeRequest) String() string { return proto.CompactTextString(m) }
 func (*TimeRequest) ProtoMessage()    {}
 func (*TimeRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_143136706133b591, []int{10}
+	return fileDescriptor_143136706133b591, []int{17}
 }
 
 func (m *TimeRequest) XXX_Unmarshal(b []byte) error {
@@ -780,7 +1157,7 @@ func (m *ContainerAction) Reset()         { *m = ContainerAction{} }
 func (m *ContainerAction) String() string { return proto.CompactTextString(m) }
 func (*ContainerAction) ProtoMessage()    {}
 func (*ContainerAction) Descriptor() ([]byte, []int) {
-	return fileDescriptor_143136706133b591, []int{11}
+	return fileDescriptor_143136706133b591, []int{18}
 }
 
 func (m *ContainerAction) XXX_Unmarshal(b []byte) error {
@@ -821,7 +1198,7 @@ func (m *StressRequest) Reset()         { *m = StressRequest{} }
 func (m *StressRequest) String() string { return proto.CompactTextString(m) }
 func (*StressRequest) ProtoMessage()    {}
 func (*StressRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_143136706133b591, []int{12}
+	return fileDescriptor_143136706133b591, []int{19}
 }
 
 func (m *StressRequest) XXX_Unmarshal(b []byte) error {
@@ -874,7 +1251,7 @@ func (m *StressResponse) Reset()         { *m = StressResponse{} }
 func (m *StressResponse) String() string { return proto.CompactTextString(m) }
 func (*StressResponse) ProtoMessage()    {}
 func (*StressResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_143136706133b591, []int{13}
+	return fileDescriptor_143136706133b591, []int{20}
 }
 
 func (m *StressResponse) XXX_Unmarshal(b []byte) error {
@@ -907,12 +1284,19 @@ func init() {
 	proto.RegisterEnum("chaosdaemon.Rule_Direction", Rule_Direction_name, Rule_Direction_value)
 	proto.RegisterEnum("chaosdaemon.ContainerAction_Action", ContainerAction_Action_name, ContainerAction_Action_value)
 	proto.RegisterEnum("chaosdaemon.StressRequest_Scope", StressRequest_Scope_name, StressRequest_Scope_value)
+	proto.RegisterType((*TcHandle)(nil), "chaosdaemon.TcHandle")
 	proto.RegisterType((*ContainerRequest)(nil), "chaosdaemon.ContainerRequest")
 	proto.RegisterType((*ContainerResponse)(nil), "chaosdaemon.ContainerResponse")
 	proto.RegisterType((*NetemRequest)(nil), "chaosdaemon.NetemRequest")
 	proto.RegisterType((*Netem)(nil), "chaosdaemon.Netem")
 	proto.RegisterType((*TbfRequest)(nil), "chaosdaemon.TbfRequest")
 	proto.RegisterType((*Tbf)(nil), "chaosdaemon.Tbf")
+	proto.RegisterType((*QdiscRequest)(nil), "chaosdaemon.QdiscRequest")
+	proto.RegisterType((*Qdisc)(nil), "chaosdaemon.Qdisc")
+	proto.RegisterType((*EmatchFilterRequest)(nil), "chaosdaemon.EmatchFilterRequest")
+	proto.RegisterType((*EmatchFilter)(nil), "chaosdaemon.EmatchFilter")
+	proto.RegisterType((*TcFilterRequest)(nil), "chaosdaemon.TcFilterRequest")
+	proto.RegisterType((*TcFilter)(nil), "chaosdaemon.TcFilter")
 	proto.RegisterType((*IpSetRequest)(nil), "chaosdaemon.IpSetRequest")
 	proto.RegisterType((*IpSet)(nil), "chaosdaemon.IpSet")
 	proto.RegisterType((*IpTablesRequest)(nil), "chaosdaemon.IpTablesRequest")
@@ -926,71 +1310,87 @@ func init() {
 func init() { proto.RegisterFile("chaosdaemon.proto", fileDescriptor_143136706133b591) }
 
 var fileDescriptor_143136706133b591 = []byte{
-	// 1011 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xa4, 0x55, 0xdd, 0x6e, 0xe3, 0x44,
-	0x14, 0xae, 0xe3, 0x24, 0x8d, 0x4f, 0xea, 0x36, 0x1d, 0xa1, 0xe2, 0xed, 0xcf, 0x12, 0x8c, 0x2a,
-	0xf5, 0x02, 0xb2, 0xa8, 0x20, 0x24, 0xb4, 0x12, 0xa8, 0x9b, 0x84, 0x12, 0xb6, 0xb4, 0x95, 0x93,
-	0xbd, 0xda, 0x8b, 0xc8, 0xb1, 0x27, 0xdd, 0x21, 0xfe, 0xc3, 0x33, 0x41, 0xbb, 0x97, 0xbc, 0x08,
-	0xcf, 0xc3, 0x43, 0xf0, 0x04, 0x3c, 0x05, 0x3a, 0x33, 0x63, 0x37, 0x49, 0xff, 0x22, 0xf6, 0xca,
-	0xe7, 0xf7, 0x9b, 0x6f, 0xce, 0x39, 0x73, 0x0c, 0xbb, 0xc1, 0x3b, 0x3f, 0xe5, 0xa1, 0x4f, 0xe3,
-	0x34, 0xe9, 0x64, 0x79, 0x2a, 0x52, 0xd2, 0x5c, 0x30, 0xed, 0x1f, 0xdc, 0xa4, 0xe9, 0x4d, 0x44,
-	0x5f, 0x48, 0xd7, 0x64, 0x3e, 0x7d, 0x41, 0xe3, 0x4c, 0x7c, 0x50, 0x91, 0xee, 0x0c, 0x5a, 0xdd,
-	0x34, 0x11, 0x3e, 0x4b, 0x68, 0xee, 0xd1, 0xdf, 0xe7, 0x94, 0x0b, 0xf2, 0x2d, 0xd4, 0xfd, 0x40,
-	0xb0, 0x34, 0x71, 0x8c, 0xb6, 0x71, 0xd2, 0x3c, 0x3d, 0xec, 0x2c, 0x9e, 0x50, 0x86, 0x9f, 0xc9,
-	0x18, 0x4f, 0xc7, 0x92, 0xcf, 0x61, 0x2b, 0x28, 0x5c, 0x63, 0x16, 0x3a, 0x95, 0xb6, 0x71, 0x62,
-	0x79, 0xcd, 0xd2, 0x36, 0x08, 0xdd, 0x63, 0xd8, 0x5d, 0x38, 0x8c, 0x67, 0x69, 0xc2, 0x29, 0x69,
-	0x81, 0x99, 0xb1, 0x50, 0x1e, 0x65, 0x7b, 0x28, 0xba, 0x6f, 0x61, 0xeb, 0x92, 0x0a, 0x1a, 0x17,
-	0x7c, 0x4e, 0xa0, 0x96, 0xa0, 0xae, 0xe9, 0x90, 0x25, 0x3a, 0x2a, 0x52, 0x05, 0xac, 0xc3, 0xe1,
-	0xdf, 0x0a, 0xd4, 0x64, 0x0e, 0x21, 0x50, 0x15, 0x2c, 0xa6, 0xfa, 0x64, 0x29, 0x93, 0x3d, 0xa8,
-	0xff, 0xc6, 0x84, 0xa0, 0xb9, 0x4c, 0xb5, 0x3d, 0xad, 0x91, 0x23, 0x80, 0x90, 0x46, 0xfe, 0x87,
-	0x71, 0x90, 0xe6, 0xb9, 0x63, 0xb6, 0x8d, 0x93, 0x8a, 0x67, 0x49, 0x4b, 0x37, 0xcd, 0x73, 0xf2,
-	0x09, 0xd4, 0x22, 0x16, 0x33, 0xe1, 0x54, 0x65, 0x96, 0x52, 0xf0, 0x80, 0x28, 0xe5, 0xdc, 0xa9,
-	0xc9, 0x70, 0x29, 0x93, 0x03, 0xb0, 0xf0, 0xab, 0x70, 0xea, 0xd2, 0xd1, 0x40, 0x83, 0x84, 0x69,
-	0x81, 0x79, 0xe3, 0x67, 0xce, 0xa6, 0x2a, 0xc5, 0x8d, 0x9f, 0x91, 0x43, 0xb0, 0xc2, 0x79, 0x16,
-	0xb1, 0xc0, 0x17, 0xd4, 0x69, 0xe8, 0x63, 0x0b, 0x03, 0x39, 0x86, 0xed, 0x52, 0x51, 0x88, 0x96,
-	0x0c, 0xb1, 0x4b, 0xab, 0x84, 0x75, 0x60, 0x33, 0xa7, 0x69, 0x1e, 0xd2, 0xdc, 0x01, 0xe9, 0x2f,
-	0x54, 0xac, 0x97, 0x16, 0x55, 0x7a, 0x53, 0xba, 0x9b, 0xda, 0x56, 0x24, 0xa3, 0x6b, 0x9e, 0x09,
-	0x67, 0x4b, 0x25, 0x6b, 0x55, 0x15, 0x5b, 0x8a, 0x2a, 0xd9, 0x56, 0xc9, 0xda, 0x86, 0xc9, 0xee,
-	0x10, 0x60, 0x34, 0x99, 0x16, 0x7d, 0x74, 0xc1, 0x14, 0x93, 0xa9, 0xee, 0x62, 0x6b, 0xa9, 0x8b,
-	0x18, 0x85, 0xce, 0x75, 0x3a, 0xf8, 0xa7, 0x01, 0xe6, 0x68, 0x32, 0xc5, 0xf2, 0xe6, 0x58, 0x16,
-	0xc4, 0xab, 0x7a, 0x52, 0xbe, 0x6d, 0x44, 0x65, 0xb1, 0x11, 0x7b, 0x50, 0x9f, 0xcc, 0xa7, 0x53,
-	0xaa, 0x3a, 0x67, 0x7b, 0x5a, 0xc3, 0x66, 0x64, 0xd4, 0x9f, 0x8d, 0x25, 0x4c, 0x55, 0xc2, 0x34,
-	0xd0, 0xe0, 0x21, 0xd4, 0x01, 0x58, 0x31, 0x4b, 0xc6, 0x93, 0x79, 0xce, 0x85, 0x6c, 0xa1, 0xed,
-	0x35, 0x62, 0x96, 0xbc, 0x42, 0x1d, 0x47, 0x74, 0x90, 0x0d, 0xa9, 0x58, 0x18, 0x51, 0x96, 0x71,
-	0x2a, 0xee, 0x1d, 0x51, 0x15, 0xa9, 0x02, 0xd6, 0xb9, 0xe0, 0x57, 0x50, 0x93, 0x29, 0x78, 0xc3,
-	0xc4, 0xd7, 0x13, 0x6a, 0x79, 0x52, 0xc6, 0x19, 0x61, 0x19, 0x77, 0x2a, 0x6d, 0xf3, 0xc4, 0xf2,
-	0x50, 0x74, 0xdf, 0xc2, 0xce, 0x20, 0x1b, 0xf9, 0x93, 0x88, 0xf2, 0x82, 0xce, 0x31, 0x54, 0xf3,
-	0x79, 0x44, 0x35, 0x9b, 0xdd, 0x25, 0x36, 0xde, 0x3c, 0xa2, 0x9e, 0x74, 0xaf, 0xc3, 0xe5, 0x6f,
-	0x03, 0xaa, 0x98, 0x41, 0xbe, 0x5e, 0x5a, 0x0a, 0xdb, 0xa7, 0xce, 0x1d, 0xd0, 0xce, 0xca, 0x42,
-	0xf8, 0x1e, 0xac, 0x90, 0xe5, 0x54, 0x25, 0x55, 0x64, 0xd2, 0xc1, 0xdd, 0xa4, 0x5e, 0x11, 0xe2,
-	0xdd, 0x46, 0xe3, 0x25, 0xb1, 0x98, 0xa6, 0xe4, 0x83, 0xa2, 0x7b, 0x04, 0x75, 0x05, 0x4f, 0x36,
-	0xc1, 0x3c, 0xeb, 0xf5, 0x5a, 0x1b, 0x04, 0xa0, 0xde, 0xeb, 0x5f, 0xf4, 0x47, 0xfd, 0x96, 0xe1,
-	0xba, 0x60, 0x95, 0x40, 0xc4, 0x82, 0xda, 0xe0, 0xf2, 0xfa, 0xcd, 0x48, 0xc5, 0x5c, 0xbd, 0x19,
-	0xa1, 0x6c, 0xb8, 0xef, 0xa1, 0x39, 0x62, 0x31, 0x2d, 0x6a, 0xb4, 0x7a, 0x79, 0xe3, 0xce, 0xe5,
-	0x15, 0x8d, 0x40, 0x72, 0x37, 0x91, 0x46, 0x20, 0x3b, 0x82, 0x26, 0x53, 0x9a, 0xa4, 0x4c, 0xda,
-	0xb0, 0x15, 0x44, 0xb3, 0x31, 0x0b, 0xf9, 0x38, 0xf6, 0xf9, 0x4c, 0x0f, 0x12, 0x04, 0xd1, 0x6c,
-	0x10, 0xf2, 0x5f, 0x7d, 0x3e, 0x73, 0x13, 0xd8, 0x59, 0xd9, 0x9a, 0xe4, 0xe5, 0x4a, 0x39, 0xbf,
-	0x78, 0x6c, 0xc7, 0xae, 0x54, 0xd6, 0x7d, 0x5e, 0x16, 0xa3, 0x01, 0xd5, 0xd7, 0x83, 0x8b, 0x0b,
-	0x75, 0xd3, 0xf3, 0xfe, 0xe8, 0x7a, 0xd0, 0x6b, 0x19, 0xee, 0x5f, 0x06, 0xd8, 0x43, 0x91, 0x53,
-	0x5e, 0x0e, 0xc4, 0x77, 0x50, 0xe3, 0x41, 0x9a, 0x51, 0x7d, 0x5a, 0x7b, 0xe9, 0xb4, 0xa5, 0xd0,
-	0xce, 0x10, 0xe3, 0x3c, 0x15, 0x8e, 0x2f, 0x47, 0xf8, 0xf9, 0x0d, 0x15, 0x7a, 0x36, 0xb4, 0x86,
-	0x7b, 0x89, 0xcb, 0xac, 0x34, 0xe7, 0xba, 0x4d, 0xb7, 0x06, 0xf7, 0x33, 0xa8, 0x49, 0x14, 0x62,
-	0x83, 0xd5, 0xbd, 0xba, 0x1c, 0x9d, 0x0d, 0x2e, 0xfb, 0x5e, 0x6b, 0x03, 0x5b, 0x77, 0x7d, 0x85,
-	0x04, 0xbf, 0x84, 0xed, 0xe2, 0x50, 0xfd, 0x17, 0xd8, 0x87, 0x06, 0x4b, 0xb8, 0xf0, 0x93, 0xa0,
-	0x18, 0xf7, 0x52, 0x3f, 0xfd, 0xa7, 0x0e, 0xcd, 0x2e, 0xf2, 0xed, 0x49, 0xbe, 0xe4, 0x47, 0x68,
-	0x0c, 0xa9, 0x50, 0x4b, 0xfc, 0xd9, 0x3d, 0x3f, 0x03, 0x75, 0x91, 0xfd, 0xbd, 0x8e, 0xfa, 0xf1,
-	0x75, 0x8a, 0x1f, 0x5f, 0xa7, 0x8f, 0x3f, 0x3e, 0x77, 0x83, 0xbc, 0x82, 0x66, 0x8f, 0x46, 0x54,
-	0xd0, 0x8f, 0xc0, 0x78, 0x09, 0xf5, 0x21, 0x15, 0xb8, 0x87, 0x3e, 0xbd, 0xb3, 0xc9, 0x9e, 0x4c,
-	0xfe, 0x01, 0x2c, 0x45, 0xe0, 0x7f, 0xe6, 0x9f, 0x01, 0xfc, 0x14, 0xcd, 0xf9, 0x3b, 0xb5, 0x26,
-	0x9e, 0xdd, 0xb3, 0x6d, 0x9e, 0x84, 0x38, 0x07, 0x5b, 0x43, 0x08, 0xb9, 0x3a, 0xc8, 0xe1, 0x0a,
-	0xca, 0xd2, 0x46, 0x79, 0x04, 0xa8, 0x0b, 0x36, 0x16, 0x82, 0xc5, 0xf4, 0x6a, 0x3a, 0xc5, 0x0d,
-	0xb7, 0xbc, 0x19, 0x16, 0x9e, 0xdc, 0xa3, 0x6c, 0x76, 0x3d, 0x1a, 0xa4, 0x7f, 0xd0, 0xfc, 0x23,
-	0x81, 0x7e, 0x06, 0xbb, 0x7c, 0x3c, 0xaf, 0x59, 0x14, 0x91, 0xa3, 0xfb, 0x1f, 0xd6, 0xd3, 0x48,
-	0xde, 0xc2, 0xa3, 0x3d, 0xa7, 0xe2, 0x9a, 0x85, 0x4f, 0x61, 0x3d, 0x7f, 0xc8, 0xad, 0x66, 0xdc,
-	0xdd, 0x20, 0xbf, 0x80, 0xdd, 0x7f, 0x4f, 0x83, 0x61, 0xf1, 0x52, 0xc8, 0xfe, 0xc3, 0x0f, 0x71,
-	0xff, 0xe0, 0x5e, 0x5f, 0x89, 0x75, 0x0e, 0x3b, 0x5d, 0x7c, 0x1e, 0xd1, 0x7a, 0x68, 0x0f, 0x5e,
-	0x74, 0x52, 0x97, 0x96, 0x6f, 0xfe, 0x0b, 0x00, 0x00, 0xff, 0xff, 0xe3, 0x9a, 0x3f, 0x39, 0x48,
-	0x0a, 0x00, 0x00,
+	// 1266 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xa4, 0x56, 0xcd, 0x6e, 0xdb, 0x46,
+	0x10, 0x36, 0xf5, 0x67, 0x71, 0x64, 0x5a, 0xf2, 0xb6, 0x4d, 0x69, 0x3b, 0x49, 0x5d, 0x16, 0x01,
+	0x72, 0x68, 0x94, 0x36, 0x2d, 0x02, 0x04, 0x01, 0x1a, 0x28, 0x92, 0xe2, 0xa8, 0x49, 0x6c, 0x97,
+	0x52, 0x4e, 0x39, 0x08, 0x14, 0xb9, 0x92, 0x37, 0xe2, 0x5f, 0xb8, 0xab, 0x22, 0x39, 0x16, 0xe8,
+	0xb5, 0xaf, 0xd0, 0xf7, 0xe8, 0x1b, 0xe4, 0x81, 0xfa, 0x00, 0xc5, 0xfe, 0x50, 0x26, 0x65, 0xd9,
+	0x62, 0x9a, 0x13, 0x67, 0x66, 0x67, 0xbe, 0xfd, 0x66, 0x67, 0x38, 0xbb, 0xb0, 0xe7, 0x9e, 0x3b,
+	0x11, 0xf5, 0x1c, 0x1c, 0x44, 0x61, 0x3b, 0x4e, 0x22, 0x16, 0xa1, 0x46, 0xc6, 0x74, 0x70, 0x38,
+	0x8b, 0xa2, 0x99, 0x8f, 0xef, 0x8b, 0xa5, 0xc9, 0x62, 0x7a, 0x1f, 0x07, 0x31, 0xfb, 0x20, 0x3d,
+	0xad, 0x87, 0x50, 0x1f, 0xb9, 0xcf, 0x9d, 0xd0, 0xf3, 0x31, 0xfa, 0x12, 0xaa, 0x81, 0xf3, 0x36,
+	0x4a, 0x4c, 0xed, 0x48, 0xbb, 0x6b, 0xd8, 0x52, 0x11, 0x56, 0x12, 0x46, 0x89, 0x59, 0x52, 0x56,
+	0xae, 0x58, 0x73, 0x68, 0x75, 0xa3, 0x90, 0x39, 0x24, 0xc4, 0x89, 0x8d, 0xdf, 0x2d, 0x30, 0x65,
+	0xe8, 0x67, 0xa8, 0x39, 0x2e, 0x23, 0x51, 0x28, 0x00, 0x1a, 0x0f, 0x6e, 0xb6, 0xb3, 0xcc, 0x96,
+	0xee, 0x1d, 0xe1, 0x63, 0x2b, 0x5f, 0xf4, 0x2d, 0xec, 0xb8, 0xe9, 0xd2, 0x98, 0x78, 0x62, 0x1b,
+	0xdd, 0x6e, 0x2c, 0x6d, 0x03, 0xcf, 0xba, 0x03, 0x7b, 0x99, 0xcd, 0x68, 0x1c, 0x85, 0x14, 0xa3,
+	0x16, 0x94, 0x63, 0xe2, 0x29, 0xae, 0x5c, 0xb4, 0xfe, 0xd1, 0x60, 0xe7, 0x04, 0x33, 0x1c, 0xa4,
+	0x84, 0xee, 0x42, 0x35, 0xe4, 0xba, 0xe2, 0x83, 0x72, 0x7c, 0xa4, 0xa7, 0x74, 0x28, 0x40, 0x02,
+	0xdd, 0x83, 0xda, 0xb9, 0x38, 0x27, 0xb3, 0x2c, 0xd0, 0xbe, 0xca, 0xa1, 0xa5, 0x87, 0x68, 0x2b,
+	0x27, 0xee, 0x1e, 0x3b, 0x09, 0x0e, 0x99, 0x59, 0xb9, 0xd6, 0x5d, 0x3a, 0x59, 0x1f, 0xcb, 0x50,
+	0x15, 0x8c, 0x10, 0x82, 0x0a, 0x23, 0x01, 0x56, 0x89, 0x09, 0x19, 0xdd, 0x80, 0xda, 0x5b, 0xc2,
+	0x18, 0x4e, 0x8b, 0xa0, 0x34, 0x74, 0x0b, 0xc0, 0xc3, 0xbe, 0xf3, 0x61, 0xec, 0x46, 0x49, 0x22,
+	0x78, 0x95, 0x6c, 0x5d, 0x58, 0xba, 0x51, 0x22, 0x4a, 0xe7, 0x93, 0x80, 0x48, 0x0a, 0x86, 0x2d,
+	0x15, 0xbe, 0x81, 0x1f, 0x51, 0x6a, 0x56, 0x85, 0xbb, 0x90, 0xd1, 0x21, 0xe8, 0xfc, 0x2b, 0x71,
+	0x6a, 0x62, 0xa1, 0xce, 0x0d, 0x02, 0xa6, 0x05, 0xe5, 0x99, 0x13, 0x9b, 0xdb, 0xf2, 0xa4, 0x67,
+	0x4e, 0x8c, 0x6e, 0x82, 0xee, 0x2d, 0x62, 0x9f, 0xb8, 0x0e, 0xc3, 0x66, 0x5d, 0x6d, 0x9b, 0x1a,
+	0xd0, 0x1d, 0xd8, 0x5d, 0x2a, 0x12, 0x51, 0x17, 0x2e, 0xc6, 0xd2, 0x2a, 0x60, 0x4d, 0xd8, 0x4e,
+	0x70, 0x94, 0x78, 0x38, 0x31, 0x41, 0xac, 0xa7, 0x2a, 0xaf, 0x86, 0x12, 0x65, 0x78, 0x43, 0x2c,
+	0x37, 0x94, 0x2d, 0x0d, 0xe6, 0x4b, 0x8b, 0x98, 0x99, 0x3b, 0x32, 0x58, 0xa9, 0xb2, 0x94, 0x42,
+	0x94, 0xc1, 0x86, 0x0c, 0x56, 0x36, 0x11, 0x7c, 0x51, 0x9b, 0xdd, 0x02, 0xb5, 0xc9, 0x54, 0xbe,
+	0x59, 0xa0, 0xf2, 0xd6, 0x10, 0x60, 0x34, 0x99, 0xa6, 0x3d, 0x68, 0x41, 0x99, 0x4d, 0xa6, 0xaa,
+	0x03, 0x5b, 0xf9, 0xc8, 0xc9, 0xd4, 0xe6, 0x8b, 0x45, 0x7e, 0x81, 0x3f, 0x34, 0x28, 0x8f, 0x26,
+	0x53, 0x5e, 0xbc, 0x84, 0x1f, 0x3a, 0xc7, 0xab, 0xd8, 0x42, 0xbe, 0x28, 0x73, 0x29, 0x5b, 0xe6,
+	0x1b, 0x50, 0x9b, 0x2c, 0xa6, 0x53, 0x2c, 0xfb, 0xc2, 0xb0, 0x95, 0xc6, 0x4b, 0x1d, 0x63, 0x67,
+	0x3e, 0x16, 0x30, 0x15, 0x01, 0x53, 0xe7, 0x06, 0x9b, 0x43, 0x1d, 0x82, 0x1e, 0x90, 0x70, 0x3c,
+	0x59, 0x24, 0x94, 0x89, 0x06, 0x31, 0xec, 0x7a, 0x40, 0xc2, 0xa7, 0x5c, 0xb7, 0xde, 0xc0, 0xce,
+	0x6f, 0x1e, 0xa1, 0x6e, 0xe6, 0xf7, 0x7a, 0xc7, 0xf5, 0xb5, 0xbf, 0x97, 0xf4, 0x94, 0x0e, 0x45,
+	0x12, 0xfc, 0x4b, 0x83, 0xaa, 0x88, 0xc9, 0x54, 0x47, 0xfb, 0xb4, 0xea, 0x94, 0x8a, 0xfc, 0x97,
+	0xfc, 0xf7, 0xfa, 0x10, 0xcb, 0x9f, 0x58, 0xb7, 0x85, 0xcc, 0x6d, 0x4e, 0x32, 0xa3, 0x66, 0xe5,
+	0xa8, 0xcc, 0x6d, 0x5c, 0xb6, 0xe6, 0xf0, 0x45, 0x3f, 0x70, 0x98, 0x7b, 0xfe, 0x8c, 0xf8, 0xec,
+	0x62, 0xc6, 0xfd, 0x08, 0xb5, 0xa9, 0x30, 0x28, 0x72, 0xfb, 0xb9, 0xdd, 0x72, 0x11, 0xca, 0xb1,
+	0x48, 0xf2, 0x7f, 0x6a, 0xb0, 0x93, 0x8d, 0x95, 0xa3, 0x98, 0xb9, 0xe7, 0x62, 0x17, 0xdd, 0x96,
+	0x4a, 0xe6, 0x64, 0x4a, 0x45, 0x4e, 0xe6, 0x3e, 0x6c, 0xbb, 0xbe, 0x43, 0x29, 0xf1, 0xae, 0x1f,
+	0x59, 0xa9, 0x97, 0xe5, 0x42, 0x73, 0xe4, 0xe6, 0xf3, 0xbd, 0xb7, 0x92, 0xef, 0x2a, 0xc4, 0xa7,
+	0xe7, 0xfa, 0x88, 0xdf, 0x38, 0x2a, 0xcd, 0x4f, 0x2b, 0x35, 0x6f, 0xc0, 0x41, 0x3c, 0xc4, 0x2c,
+	0xd3, 0x80, 0x24, 0xa6, 0x98, 0xad, 0x6d, 0x40, 0xe9, 0x29, 0x1d, 0x8a, 0xf0, 0xba, 0x07, 0x55,
+	0x11, 0xc2, 0xbb, 0x21, 0x74, 0xd4, 0x00, 0xd6, 0x6d, 0x21, 0xf3, 0x11, 0x48, 0x62, 0x6a, 0x96,
+	0x44, 0x83, 0x70, 0xd1, 0x7a, 0x03, 0xcd, 0x41, 0x3c, 0x72, 0x26, 0x3e, 0xa6, 0x29, 0x9d, 0x3b,
+	0x50, 0x49, 0x16, 0x3e, 0x56, 0x6c, 0xf6, 0x72, 0x6c, 0xec, 0x85, 0x8f, 0x6d, 0xb1, 0x5c, 0x84,
+	0xcb, 0x47, 0x0d, 0x2a, 0x3c, 0x02, 0xfd, 0x90, 0xbb, 0x52, 0x77, 0x1f, 0x98, 0x97, 0x40, 0xdb,
+	0x2b, 0xd7, 0xe9, 0x23, 0xd0, 0x3d, 0x92, 0x60, 0x19, 0x54, 0x12, 0x41, 0x87, 0x97, 0x83, 0x7a,
+	0xa9, 0x8b, 0x7d, 0xe1, 0xcd, 0x93, 0xe4, 0x87, 0x29, 0xff, 0x0c, 0x2e, 0x5a, 0xb7, 0xa0, 0x26,
+	0xe1, 0xd1, 0x36, 0x94, 0x3b, 0xbd, 0x5e, 0x6b, 0x0b, 0x01, 0xd4, 0x7a, 0xfd, 0x97, 0xfd, 0x51,
+	0xbf, 0xa5, 0x59, 0x16, 0xe8, 0x4b, 0x20, 0xa4, 0x43, 0x75, 0x70, 0x72, 0xf6, 0x7a, 0x24, 0x7d,
+	0x4e, 0x5f, 0x8f, 0xb8, 0xac, 0x59, 0xef, 0xa1, 0x31, 0x22, 0x01, 0x4e, 0xcf, 0x68, 0x35, 0x79,
+	0xed, 0xf2, 0x45, 0x2b, 0x68, 0xb8, 0x82, 0x7b, 0x99, 0xd3, 0x70, 0x45, 0x45, 0xb8, 0xa9, 0x2c,
+	0x4c, 0x42, 0x46, 0x47, 0xb0, 0xe3, 0xfa, 0xf3, 0x31, 0xf1, 0xe8, 0x38, 0x70, 0xe8, 0x5c, 0x4d,
+	0x32, 0x70, 0xfd, 0xf9, 0xc0, 0xa3, 0xaf, 0x1c, 0x3a, 0xb7, 0x42, 0x68, 0xae, 0xbc, 0x39, 0xd0,
+	0xe3, 0x95, 0xe3, 0xfc, 0xee, 0xba, 0x17, 0xca, 0xca, 0xc9, 0x5a, 0xb7, 0x97, 0x87, 0x51, 0x87,
+	0xca, 0x8b, 0xc1, 0xcb, 0x97, 0x32, 0xd3, 0xe3, 0xfe, 0xe8, 0x6c, 0xd0, 0x6b, 0x69, 0xd6, 0xdf,
+	0x1a, 0x18, 0x43, 0x96, 0x60, 0xba, 0x6c, 0x88, 0x87, 0x50, 0xa5, 0x6e, 0x14, 0x63, 0xb5, 0xdb,
+	0x51, 0x6e, 0xb7, 0x9c, 0x6b, 0x7b, 0xc8, 0xfd, 0x6c, 0xe9, 0xce, 0x47, 0x37, 0x73, 0x92, 0x19,
+	0x66, 0xaa, 0x37, 0x94, 0xc6, 0xaf, 0x5d, 0x2a, 0xa2, 0xa2, 0x84, 0xaa, 0x32, 0x5d, 0x18, 0xac,
+	0x6f, 0xa0, 0x2a, 0x50, 0x90, 0x01, 0x7a, 0xf7, 0xf4, 0x64, 0xd4, 0x19, 0x9c, 0xf4, 0xed, 0xd6,
+	0x16, 0x2f, 0xdd, 0xd9, 0x29, 0x27, 0xf8, 0x3d, 0xec, 0xa6, 0x9b, 0xaa, 0x37, 0xd4, 0x01, 0xd4,
+	0x49, 0x48, 0x99, 0x13, 0xba, 0x69, 0xbb, 0x2f, 0xf5, 0x07, 0xff, 0xd6, 0xa1, 0xd1, 0xe5, 0x7c,
+	0x7b, 0x82, 0x2f, 0x7a, 0x02, 0xf5, 0x21, 0x66, 0xf2, 0x8d, 0xb2, 0xbf, 0xe6, 0x25, 0x25, 0x13,
+	0x39, 0xb8, 0xd1, 0x96, 0xcf, 0xcd, 0x76, 0xfa, 0xdc, 0x6c, 0xf7, 0xf9, 0x73, 0xd3, 0xda, 0x42,
+	0x4f, 0xa1, 0xd1, 0xc3, 0x3e, 0x66, 0xf8, 0x33, 0x30, 0x1e, 0x43, 0x6d, 0x88, 0x19, 0xbf, 0x08,
+	0xbf, 0xbe, 0x74, 0x95, 0x6e, 0x0c, 0xfe, 0x05, 0x74, 0x49, 0xe0, 0x7f, 0xc6, 0x3f, 0x81, 0x7a,
+	0xc7, 0xf3, 0xe4, 0x25, 0xb5, 0xbf, 0xe6, 0xb2, 0x2b, 0x02, 0xd0, 0xc3, 0xfe, 0x67, 0x00, 0xbc,
+	0x82, 0x66, 0xc7, 0xf3, 0x72, 0x37, 0xc5, 0xd1, 0xd5, 0x17, 0xd0, 0x46, 0xb8, 0xbe, 0xa8, 0xc8,
+	0x72, 0x1a, 0xdf, 0x5c, 0x3f, 0xdb, 0x37, 0xc2, 0x74, 0x00, 0x9e, 0xf9, 0x0b, 0x7a, 0x2e, 0xc7,
+	0xe7, 0xfe, 0x9a, 0x29, 0xbc, 0x11, 0xe2, 0x18, 0x0c, 0x05, 0xc1, 0xc4, 0x48, 0x5d, 0xe1, 0xb2,
+	0x32, 0x69, 0xaf, 0x01, 0xea, 0x82, 0xc1, 0x1b, 0x84, 0x04, 0xf8, 0x74, 0x3a, 0xe5, 0x93, 0x3f,
+	0x3f, 0x31, 0x33, 0xa3, 0xe8, 0x5a, 0x36, 0x7b, 0x36, 0x76, 0xa3, 0xdf, 0x71, 0xf2, 0x99, 0x40,
+	0xcf, 0xc1, 0x58, 0x0e, 0x95, 0x17, 0xc4, 0xf7, 0xd1, 0xad, 0xf5, 0x03, 0x67, 0x33, 0x92, 0x9d,
+	0x19, 0x66, 0xc7, 0x98, 0x9d, 0x11, 0x6f, 0x13, 0xd6, 0xed, 0xab, 0x96, 0xe5, 0xbf, 0x6f, 0x6d,
+	0xa1, 0x5f, 0xc1, 0xe8, 0xbf, 0xc7, 0xee, 0x30, 0x9d, 0x20, 0xe8, 0xe0, 0xea, 0x01, 0x75, 0x70,
+	0xb8, 0x76, 0x6d, 0x89, 0x75, 0x0c, 0xcd, 0x2e, 0x1f, 0x1b, 0x7e, 0x31, 0xb4, 0x2b, 0x13, 0x9d,
+	0xd4, 0x84, 0xe5, 0xa7, 0xff, 0x02, 0x00, 0x00, 0xff, 0xff, 0xa1, 0x38, 0xc5, 0x8c, 0xd6, 0x0e,
+	0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -1009,6 +1409,11 @@ type ChaosDaemonClient interface {
 	DeleteNetem(ctx context.Context, in *NetemRequest, opts ...grpc.CallOption) (*empty.Empty, error)
 	SetTbf(ctx context.Context, in *TbfRequest, opts ...grpc.CallOption) (*empty.Empty, error)
 	DeleteTbf(ctx context.Context, in *TbfRequest, opts ...grpc.CallOption) (*empty.Empty, error)
+	AddQdisc(ctx context.Context, in *QdiscRequest, opts ...grpc.CallOption) (*empty.Empty, error)
+	DelQdisc(ctx context.Context, in *QdiscRequest, opts ...grpc.CallOption) (*empty.Empty, error)
+	AddEmatchFilter(ctx context.Context, in *EmatchFilterRequest, opts ...grpc.CallOption) (*empty.Empty, error)
+	// generic tc filter del command
+	DelTcFilter(ctx context.Context, in *TcFilterRequest, opts ...grpc.CallOption) (*empty.Empty, error)
 	FlushIpSet(ctx context.Context, in *IpSetRequest, opts ...grpc.CallOption) (*empty.Empty, error)
 	FlushIptables(ctx context.Context, in *IpTablesRequest, opts ...grpc.CallOption) (*empty.Empty, error)
 	SetTimeOffset(ctx context.Context, in *TimeRequest, opts ...grpc.CallOption) (*empty.Empty, error)
@@ -1057,6 +1462,42 @@ func (c *chaosDaemonClient) SetTbf(ctx context.Context, in *TbfRequest, opts ...
 func (c *chaosDaemonClient) DeleteTbf(ctx context.Context, in *TbfRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
 	out := new(empty.Empty)
 	err := c.cc.Invoke(ctx, "/chaosdaemon.ChaosDaemon/DeleteTbf", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *chaosDaemonClient) AddQdisc(ctx context.Context, in *QdiscRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
+	out := new(empty.Empty)
+	err := c.cc.Invoke(ctx, "/chaosdaemon.ChaosDaemon/AddQdisc", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *chaosDaemonClient) DelQdisc(ctx context.Context, in *QdiscRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
+	out := new(empty.Empty)
+	err := c.cc.Invoke(ctx, "/chaosdaemon.ChaosDaemon/DelQdisc", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *chaosDaemonClient) AddEmatchFilter(ctx context.Context, in *EmatchFilterRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
+	out := new(empty.Empty)
+	err := c.cc.Invoke(ctx, "/chaosdaemon.ChaosDaemon/AddEmatchFilter", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *chaosDaemonClient) DelTcFilter(ctx context.Context, in *TcFilterRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
+	out := new(empty.Empty)
+	err := c.cc.Invoke(ctx, "/chaosdaemon.ChaosDaemon/DelTcFilter", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -1141,6 +1582,11 @@ type ChaosDaemonServer interface {
 	DeleteNetem(context.Context, *NetemRequest) (*empty.Empty, error)
 	SetTbf(context.Context, *TbfRequest) (*empty.Empty, error)
 	DeleteTbf(context.Context, *TbfRequest) (*empty.Empty, error)
+	AddQdisc(context.Context, *QdiscRequest) (*empty.Empty, error)
+	DelQdisc(context.Context, *QdiscRequest) (*empty.Empty, error)
+	AddEmatchFilter(context.Context, *EmatchFilterRequest) (*empty.Empty, error)
+	// generic tc filter del command
+	DelTcFilter(context.Context, *TcFilterRequest) (*empty.Empty, error)
 	FlushIpSet(context.Context, *IpSetRequest) (*empty.Empty, error)
 	FlushIptables(context.Context, *IpTablesRequest) (*empty.Empty, error)
 	SetTimeOffset(context.Context, *TimeRequest) (*empty.Empty, error)
@@ -1223,6 +1669,78 @@ func _ChaosDaemon_DeleteTbf_Handler(srv interface{}, ctx context.Context, dec fu
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(ChaosDaemonServer).DeleteTbf(ctx, req.(*TbfRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ChaosDaemon_AddQdisc_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(QdiscRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ChaosDaemonServer).AddQdisc(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/chaosdaemon.ChaosDaemon/AddQdisc",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ChaosDaemonServer).AddQdisc(ctx, req.(*QdiscRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ChaosDaemon_DelQdisc_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(QdiscRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ChaosDaemonServer).DelQdisc(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/chaosdaemon.ChaosDaemon/DelQdisc",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ChaosDaemonServer).DelQdisc(ctx, req.(*QdiscRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ChaosDaemon_AddEmatchFilter_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(EmatchFilterRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ChaosDaemonServer).AddEmatchFilter(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/chaosdaemon.ChaosDaemon/AddEmatchFilter",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ChaosDaemonServer).AddEmatchFilter(ctx, req.(*EmatchFilterRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ChaosDaemon_DelTcFilter_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(TcFilterRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ChaosDaemonServer).DelTcFilter(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/chaosdaemon.ChaosDaemon/DelTcFilter",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ChaosDaemonServer).DelTcFilter(ctx, req.(*TcFilterRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1390,6 +1908,22 @@ var _ChaosDaemon_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeleteTbf",
 			Handler:    _ChaosDaemon_DeleteTbf_Handler,
+		},
+		{
+			MethodName: "AddQdisc",
+			Handler:    _ChaosDaemon_AddQdisc_Handler,
+		},
+		{
+			MethodName: "DelQdisc",
+			Handler:    _ChaosDaemon_DelQdisc_Handler,
+		},
+		{
+			MethodName: "AddEmatchFilter",
+			Handler:    _ChaosDaemon_AddEmatchFilter_Handler,
+		},
+		{
+			MethodName: "DelTcFilter",
+			Handler:    _ChaosDaemon_DelTcFilter_Handler,
 		},
 		{
 			MethodName: "FlushIpSet",

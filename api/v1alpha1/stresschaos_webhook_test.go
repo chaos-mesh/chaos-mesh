@@ -41,7 +41,7 @@ var _ = Describe("stresschaos_webhook", func() {
 			}
 			duration := "400s"
 			stressors := &Stressors{
-				VmStressor: &VMStressor{
+				VMStressor: &VMStressor{
 					Stressor: Stressor{Workers: 1},
 				},
 			}

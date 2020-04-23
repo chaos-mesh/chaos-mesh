@@ -120,8 +120,8 @@ func (in *StressChaosSpec) Validate(parent *field.Path, errs field.ErrorList) fi
 func (in *Stressors) Validate(parent *field.Path, errs field.ErrorList) field.ErrorList {
 	current := parent.Child("stressors")
 	once := false
-	if in.VmStressor != nil {
-		errs = in.VmStressor.Validate(current, errs)
+	if in.VMStressor != nil {
+		errs = in.VMStressor.Validate(current, errs)
 		once = true
 	}
 	if in.CPUStressor != nil {
