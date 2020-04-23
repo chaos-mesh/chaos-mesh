@@ -102,7 +102,11 @@ func (in *StressChaos) ValidateScheduler(root *field.Path) field.ErrorList {
 // Validate validates the scheduler and duration
 func (in *StressChaosSpec) Validate(parent *field.Path, errs field.ErrorList) field.ErrorList {
 	current := parent.Child("spec")
-	errs = in.Stressors.Validate(current, errs)
+	if len(in.StressngStressors) == 0 && in.Stressors == nil {
+		errs = append(errs, field.Invalid(current, in, "missing stressors"))
+	} else if in.Stressors != nil {
+		errs = in.Stressors.Validate(current, errs)
+	}
 	if in.Duration != nil && in.Scheduler != nil {
 		return errs
 	} else if in.Duration == nil && in.Scheduler == nil {
@@ -152,7 +156,6 @@ func (in *VMStressor) Validate(parent *field.Path, errs field.ErrorList) field.E
 func (in *VMStressor) tryParseBytes() error {
 	length := len(in.Bytes)
 	if length == 0 {
-		in.Bytes = "100%"
 		return nil
 	}
 	if in.Bytes[length-1] == '%' {
@@ -175,18 +178,10 @@ func (in *VMStressor) tryParseBytes() error {
 
 // Validate validates whether the CPUStressor is well defined
 func (in *CPUStressor) Validate(parent *field.Path, errs field.ErrorList) field.ErrorList {
-	if in.Load == nil {
-		in.Load = new(int)
-		*in.Load = 100
-		return errs
-	}
 	current := parent.Child("cpu")
 	errs = in.Stressor.Validate(current, errs)
-	if *in.Load < 0 || *in.Load > 100 {
+	if in.Load != nil && (*in.Load < 0 || *in.Load > 100) {
 		errs = append(errs, field.Invalid(current, in, "illegal proportion"))
-	}
-	if len(in.Method) == 0 {
-		in.Method = CPUMethodAll
 	}
 	return errs
 }

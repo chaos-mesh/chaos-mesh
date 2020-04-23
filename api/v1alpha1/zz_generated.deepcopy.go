@@ -868,7 +868,11 @@ func (in *StressChaosList) DeepCopyObject() runtime.Object {
 func (in *StressChaosSpec) DeepCopyInto(out *StressChaosSpec) {
 	*out = *in
 	in.Selector.DeepCopyInto(&out.Selector)
-	in.Stressors.DeepCopyInto(&out.Stressors)
+	if in.Stressors != nil {
+		in, out := &in.Stressors, &out.Stressors
+		*out = new(Stressors)
+		(*in).DeepCopyInto(*out)
+	}
 	if in.Duration != nil {
 		in, out := &in.Duration, &out.Duration
 		*out = new(string)

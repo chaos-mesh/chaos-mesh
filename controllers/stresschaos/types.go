@@ -227,10 +227,14 @@ func (r *Reconciler) applyPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.
 		return fmt.Errorf("%s %s can't get the state of container", pod.Namespace, pod.Name)
 	}
 	target := pod.Status.ContainerStatuses[0].ContainerID
+	stressors := chaos.Spec.StressngStressors
+	if len(stressors) == 0 {
+		stressors = chaos.Spec.Stressors.Normalize()
+	}
 	res, err := daemonClient.ExecStressors(ctx, &pb.StressRequest{
 		Scope:     pb.StressRequest_POD,
 		Target:    target,
-		Stressors: chaos.Spec.Stressors.Normalize(),
+		Stressors: stressors,
 	})
 	if err != nil {
 		return err

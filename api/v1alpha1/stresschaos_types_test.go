@@ -42,6 +42,9 @@ var _ = Describe("StressChaos", func() {
 					Name:      "foo",
 					Namespace: "default",
 				},
+				Spec: StressChaosSpec{
+					Stressors: &Stressors{VmStressor: &VMStressor{Stressor: Stressor{Workers: 1}}},
+				},
 			}
 			By("creating an API object")
 			Expect(k8sClient.Create(context.TODO(), created)).To(Succeed())

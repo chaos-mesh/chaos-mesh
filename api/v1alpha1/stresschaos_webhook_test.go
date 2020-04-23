@@ -40,7 +40,7 @@ var _ = Describe("stresschaos_webhook", func() {
 				expect  string
 			}
 			duration := "400s"
-			stressors := Stressors{
+			stressors := &Stressors{
 				VmStressor: &VMStressor{
 					Stressor: Stressor{Workers: 1},
 				},
@@ -181,14 +181,6 @@ var _ = Describe("stresschaos_webhook", func() {
 					},
 					errs: 0,
 				},
-				//{
-				//	name: "unsupported method for CPUStressor",
-				//	stressor: &CPUStressor{
-				//		Stressor: Stressor{Workers: 1},
-				//		Method:   "xx",
-				//	},
-				//	errs: 1,
-				//},
 			}
 			parent := field.NewPath("parent")
 			for _, tc := range tcs {

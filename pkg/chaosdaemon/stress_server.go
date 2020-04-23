@@ -71,9 +71,10 @@ func (s *daemonServer) ExecStressors(ctx context.Context,
 		return nil, err
 	}
 	if err = control.Add(cgroups.Process{Pid: cmd.Process.Pid}); err != nil {
-		if err := cmd.Process.Kill(); err != nil {
-			return nil, err
+		if kerr := cmd.Process.Kill(); kerr != nil {
+			log.Error(kerr, "kill stressors failed", "request", req)
 		}
+		return nil, err
 	}
 	go func() {
 		if err, ok := cmd.Wait().(*exec.ExitError); ok {
@@ -86,7 +87,7 @@ func (s *daemonServer) ExecStressors(ctx context.Context,
 		}
 	}()
 
-	return &pb.StressResponse{Instance: string(cmd.Process.Pid)}, nil
+	return &pb.StressResponse{Instance: strconv.Itoa(cmd.Process.Pid)}, nil
 }
 
 func (s *daemonServer) CancelStressors(ctx context.Context,
@@ -98,10 +99,7 @@ func (s *daemonServer) CancelStressors(ctx context.Context,
 	log.Info("Canceling stressors", "request", req)
 	process, err := os.FindProcess(pid)
 	if err == nil {
-		if err := process.Kill(); err != nil {
-			log.Error(err, "fail to exit stressors", "pid", process.Pid)
-			return nil, err
-		}
+		process.Kill()
 	}
 	return &empty.Empty{}, nil
 }
