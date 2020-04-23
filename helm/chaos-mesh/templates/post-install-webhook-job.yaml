@@ -2,6 +2,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
+  namespace: {{ .Release.Namespace }}
   name: webhook-mw-job
   labels:
     app.kubernetes.io/name: {{ template "chaos-mesh.name" . }}

@@ -4,6 +4,7 @@
 kind: ServiceAccount
 apiVersion: v1
 metadata:
+  namespace: {{ .Release.Namespace }}
   name: {{ .Values.prometheus.serviceAccount }}
   labels:
     app.kubernetes.io/name: {{ template "chaos-mesh.name" . }}
