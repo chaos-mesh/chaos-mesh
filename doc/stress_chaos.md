@@ -14,19 +14,19 @@ A `StressChaos` shares common configurations like other chaos, such as how to se
 
      A `vm` stressor will continuously stress virtual memory out. 
 
-     | Option   | Type    | Required | Description                                                  |
-     | -------- | ------- | -------- | ------------------------------------------------------------ |
-     | `worker` | Integer | True     | Specifies concurrent stressing instance                      |
-     | `bytes`  | String  | False    | Specifies N bytes consumed per worker, default is the total available memory. One can also specify the size as *%* of total available memory or in units of *B, KB/KiB, MB/MiB, GB/GiB, TB/TiB*. |
+     | Option    | Type    | Required | Description                                                  |
+     | --------- | ------- | -------- | ------------------------------------------------------------ |
+     | `workers` | Integer | True     | Specifies concurrent stressing instance                      |
+     | `bytes`   | String  | False    | Specifies N bytes consumed per worker, default is the total available memory. One can also specify the size as *%* of total available memory or in units of *B, KB/KiB, MB/MiB, GB/GiB, TB/TiB*. |
 
   2. `cpu`
 
      A `cpu` stressor will continuously stress CPU out. 
 
-     | Option   | Type    | Required | Description                                                  |
-     | -------- | ------- | -------- | ------------------------------------------------------------ |
-     | `worker` | Integer | True     | Specifies concurrent stressing instance. Actually it specifies how many CPUs to stress when it's less than available CPUs. |
-     | `load`   | Integer | False    | Specifies  percent loading per worker. 0 is effectively a sleep (no load) and 100 is full loading |
+     | Option    | Type    | Required | Description                                                  |
+     | --------- | ------- | -------- | ------------------------------------------------------------ |
+     | `workers` | Integer | True     | Specifies concurrent stressing instance. Actually it specifies how many CPUs to stress when it's less than available CPUs. |
+     | `load`    | Integer | False    | Specifies  percent loading per worker. 0 is effectively a sleep (no load) and 100 is full loading |
 
 * `stressngStressors`
 
@@ -47,7 +47,7 @@ spec:
       - tidb-cluster-demo
   stressors:
     cpu:
-      worker: 1
+      workers: 1
   duration: "30s"
   scheduler:
     cron: "@every 2m"
