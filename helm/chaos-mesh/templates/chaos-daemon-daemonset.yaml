@@ -1,6 +1,7 @@
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
+  namespace: {{ .Release.Namespace }}
   name: chaos-daemon
   labels:
     app.kubernetes.io/name: {{ template "chaos-mesh.name" . }}
