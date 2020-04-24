@@ -1338,8 +1338,8 @@ spec:
                   required:
                   - workers
                   type: object
-                vm:
-                  description: VMStressor stresses virtual memory out
+                memory:
+                  description: MemoryStressor stresses virtual memory out
                   properties:
                     bytes:
                       description: Bytes specifies N bytes consumed per vm worker,
@@ -1412,9 +1412,21 @@ spec:
                   format: date-time
                   type: string
               type: object
-            instance:
-              description: Instance always specifies a stressing instance
-              type: string
+            instances:
+              additionalProperties:
+                description: StressInstance is an instance generates stresses
+                properties:
+                  startTime:
+                    description: StartTime specifies when the instance starts in unix
+                      timestamp
+                    format: int64
+                    type: integer
+                  uid:
+                    description: UID is the instance identifier
+                    type: string
+                type: object
+              description: Instances always specifies stressing instances
+              type: object
             phase:
               description: Phase is the chaos status.
               type: string
@@ -1422,7 +1434,6 @@ spec:
               type: string
           required:
           - experiment
-          - instance
           - phase
           type: object
       required:

@@ -26,10 +26,10 @@ service ChaosDaemon {
   rpc RecoverTimeOffset(TimeRequest) returns (google.protobuf.Empty) {}
 
   rpc ContainerKill(ContainerRequest) returns (google.protobuf.Empty) {}
-  rpc ContainerGetPid(ContainerRequest) returns (ContainerResponse) {}
+  rpc ContainerGetPid (ContainerRequest) returns (ContainerResponse) {}
 
-  rpc ExecStressors (StressRequest) returns (StressResponse) {}
-  rpc CancelStressors (StressRequest) returns (google.protobuf.Empty) {}
+  rpc ExecStressors (ExecStressRequest) returns (ExecStressResponse) {}
+  rpc CancelStressors (CancelStressRequest) returns (google.protobuf.Empty) {}
 }
 
 message TcHandle {
@@ -160,7 +160,7 @@ message ContainerAction {
   Action action = 1;
 }
 
-message StressRequest {
+message ExecStressRequest {
   enum Scope {
     CONTAINER = 0;
     POD = 1;
@@ -170,7 +170,13 @@ message StressRequest {
   string stressors = 3;
 }
 
-message StressResponse {
+message ExecStressResponse {
   string instance = 1;
+  int64 startTime = 2;
+}
+
+message CancelStressRequest {
+  string instance = 1;
+  int64 startTime = 2;
 }
 

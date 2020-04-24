@@ -37,7 +37,7 @@ var (
 	stressChaosLog = ctrl.Log.WithName("stresschaos-resource")
 )
 
-// SetupWebhookWithManager setup StressChaos's webhook with manager
+// SetupWebhookWithManager setups StressChaos's webhook with manager
 func (in *StressChaos) SetupWebhookWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewWebhookManagedBy(mgr).
 		For(in).
@@ -108,21 +108,15 @@ func (in *StressChaosSpec) Validate(parent *field.Path, errs field.ErrorList) fi
 	} else if in.Stressors != nil {
 		errs = in.Stressors.Validate(current, errs)
 	}
-	if in.Duration != nil && in.Scheduler != nil {
-		return errs
-	} else if in.Duration == nil && in.Scheduler == nil {
-		return errs
-	}
-	schedulerField := current.Child("scheduler")
-	return append(errs, field.Invalid(schedulerField, in.Scheduler, ValidateSchedulerError))
+	return append(errs, ValidateScheduler(in.Duration, in.Scheduler, current)...)
 }
 
 // Validate validates whether the Stressors are all well defined
 func (in *Stressors) Validate(parent *field.Path, errs field.ErrorList) field.ErrorList {
 	current := parent.Child("stressors")
 	once := false
-	if in.VMStressor != nil {
-		errs = in.VMStressor.Validate(current, errs)
+	if in.MemoryStressor != nil {
+		errs = in.MemoryStressor.Validate(current, errs)
 		once = true
 	}
 	if in.CPUStressor != nil {
@@ -143,8 +137,8 @@ func (in *Stressor) Validate(parent *field.Path, errs field.ErrorList) field.Err
 	return errs
 }
 
-// Validate validates whether the VMStressor is well defined
-func (in *VMStressor) Validate(parent *field.Path, errs field.ErrorList) field.ErrorList {
+// Validate validates whether the MemoryStressor is well defined
+func (in *MemoryStressor) Validate(parent *field.Path, errs field.ErrorList) field.ErrorList {
 	current := parent.Child("vm")
 	errs = in.Stressor.Validate(current, errs)
 	if err := in.tryParseBytes(); err != nil {
@@ -154,7 +148,7 @@ func (in *VMStressor) Validate(parent *field.Path, errs field.ErrorList) field.E
 	return errs
 }
 
-func (in *VMStressor) tryParseBytes() error {
+func (in *MemoryStressor) tryParseBytes() error {
 	length := len(in.Bytes)
 	if length == 0 {
 		return nil

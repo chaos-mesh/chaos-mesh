@@ -92,6 +92,7 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos reconcil
 		return err
 	}
 
+	stresschaos.Status.Instances = make(map[types.UID]v1alpha1.StressInstance)
 	err = r.applyAllPods(ctx, pods, stresschaos)
 	if err != nil {
 		r.Log.Error(err, "failed to apply chaos on all pods")
@@ -182,12 +183,18 @@ func (r *Reconciler) recoverPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha
 	if len(pod.Status.ContainerStatuses) == 0 {
 		return fmt.Errorf("%s %s can't get the state of container", pod.Namespace, pod.Name)
 	}
-	if _, err = daemonClient.CancelStressors(ctx, &pb.StressRequest{
-		Target: chaos.Status.Instance,
+	instance, ok := chaos.Status.Instances[pod.UID]
+	if !ok {
+		r.Log.Info("Pod seems already recovered", "pod", pod.UID)
+		return nil
+	}
+	if _, err = daemonClient.CancelStressors(ctx, &pb.CancelStressRequest{
+		Instance:  instance.UID,
+		StartTime: instance.StartTime,
 	}); err != nil {
 		return err
 	}
-	chaos.Status.Instance = ""
+	delete(chaos.Status.Instances, pod.UID)
 	return nil
 }
 
@@ -231,14 +238,17 @@ func (r *Reconciler) applyPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.
 	if len(stressors) == 0 {
 		stressors = chaos.Spec.Stressors.Normalize()
 	}
-	res, err := daemonClient.ExecStressors(ctx, &pb.StressRequest{
-		Scope:     pb.StressRequest_POD,
+	res, err := daemonClient.ExecStressors(ctx, &pb.ExecStressRequest{
+		Scope:     pb.ExecStressRequest_POD,
 		Target:    target,
 		Stressors: stressors,
 	})
 	if err != nil {
 		return err
 	}
-	chaos.Status.Instance = res.Instance
+	chaos.Status.Instances[pod.UID] = v1alpha1.StressInstance{
+		UID:       res.Instance,
+		StartTime: res.StartTime,
+	}
 	return nil
 }

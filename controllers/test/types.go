@@ -22,12 +22,12 @@ var _ utils.ChaosDaemonClientInterface = (*MockChaosDaemonClient)(nil)
 type MockChaosDaemonClient struct{}
 
 // ExecStressors mocks executing pod stressors on chaos-daemon
-func (c *MockChaosDaemonClient) ExecStressors(ctx context.Context, in *chaosdaemon.StressRequest, opts ...grpc.CallOption) (*chaosdaemon.StressResponse, error) {
+func (c *MockChaosDaemonClient) ExecStressors(ctx context.Context, in *chaosdaemon.ExecStressRequest, opts ...grpc.CallOption) (*chaosdaemon.ExecStressResponse, error) {
 	return nil, mockError("ExecStressors")
 }
 
 // CancelStressors mocks canceling pod stressors on chaos-daemon
-func (c *MockChaosDaemonClient) CancelStressors(ctx context.Context, in *chaosdaemon.StressRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
+func (c *MockChaosDaemonClient) CancelStressors(ctx context.Context, in *chaosdaemon.CancelStressRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
 	return nil, mockError("CancelStressors")
 }
 

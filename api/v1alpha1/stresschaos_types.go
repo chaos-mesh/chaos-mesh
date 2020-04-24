@@ -18,6 +18,7 @@ import (
 	"time"
 
 	"github.com/docker/go-units"
+	"k8s.io/apimachinery/pkg/types"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -109,8 +110,19 @@ func (in *StressChaosSpec) GetValue() string {
 // StressChaosStatus defines the observed state of StressChaos
 type StressChaosStatus struct {
 	ChaosStatus `json:",inline"`
-	// Instance always specifies a stressing instance
-	Instance string `json:"instance"`
+	// Instances always specifies stressing instances
+	// +optional
+	Instances map[types.UID]StressInstance `json:"instances,omitempty"`
+}
+
+// StressInstance is an instance generates stresses
+type StressInstance struct {
+	// UID is the instance identifier
+	// +optional
+	UID string `json:"uid"`
+	// StartTime specifies when the instance starts in unix timestamp
+	// +optional
+	StartTime int64 `json:"startTime"`
 }
 
 // GetDuration gets the duration of StressChaos
@@ -190,9 +202,9 @@ func (in *StressChaos) IsPaused() bool {
 // Stressors defines plenty of stressors supported to stress system components out.
 // You can use one or more of them to make up various kinds of stresses
 type Stressors struct {
-	// VMStressor stresses virtual memory out
+	// MemoryStressor stresses virtual memory out
 	// +optional
-	VMStressor *VMStressor `json:"vm,omitempty"`
+	MemoryStressor *MemoryStressor `json:"memory,omitempty"`
 	// CPUStressor stresses CPU out
 	// +optional
 	CPUStressor *CPUStressor `json:"cpu,omitempty"`
@@ -201,15 +213,15 @@ type Stressors struct {
 // Normalize the stressors to comply with stress-ng
 func (in *Stressors) Normalize() string {
 	stressors := ""
-	if in.VMStressor != nil {
-		stressors += fmt.Sprintf(" --vm %d --vm-keep", in.VMStressor.Workers)
-		if len(in.VMStressor.Bytes) != 0 {
-			if in.VMStressor.Bytes[len(in.VMStressor.Bytes)-1] != '%' {
-				size, _ := units.FromHumanSize(in.VMStressor.Bytes)
+	if in.MemoryStressor != nil {
+		stressors += fmt.Sprintf(" --vm %d --vm-keep", in.MemoryStressor.Workers)
+		if len(in.MemoryStressor.Bytes) != 0 {
+			if in.MemoryStressor.Bytes[len(in.MemoryStressor.Bytes)-1] != '%' {
+				size, _ := units.FromHumanSize(in.MemoryStressor.Bytes)
 				stressors += fmt.Sprintf(" --vm-bytes %dd", size)
 			} else {
 				stressors += fmt.Sprintf("--vm-bytes %s",
-					in.VMStressor.Bytes)
+					in.MemoryStressor.Bytes)
 			}
 		}
 	}
@@ -229,8 +241,8 @@ type Stressor struct {
 	Workers int `json:"workers"`
 }
 
-// VMStressor defines how to stress memory out
-type VMStressor struct {
+// MemoryStressor defines how to stress memory out
+type MemoryStressor struct {
 	Stressor `json:",inline"`
 
 	// Bytes specifies N bytes consumed per vm worker, default is the total available memory.

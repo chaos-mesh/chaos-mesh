@@ -29,6 +29,7 @@ import (
 	"github.com/containerd/cgroups"
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/pkg/errors"
+	"github.com/shirou/gopsutil/process"
 
 	pb "github.com/pingcap/chaos-mesh/pkg/chaosdaemon/pb"
 )
@@ -44,7 +45,7 @@ var (
 )
 
 func (s *daemonServer) ExecStressors(ctx context.Context,
-	req *pb.StressRequest) (*pb.StressResponse, error) {
+	req *pb.ExecStressRequest) (*pb.ExecStressResponse, error) {
 	log.Info("Executing stressors", "request", req)
 	pid, err := s.crClient.GetPidFromContainerID(ctx, req.Target)
 	if err != nil {
@@ -59,7 +60,7 @@ func (s *daemonServer) ExecStressors(ctx context.Context,
 	if err != nil {
 		return nil, err
 	}
-	if req.Scope == pb.StressRequest_POD {
+	if req.Scope == pb.ExecStressRequest_POD {
 		cgroup, _ = filepath.Split(cgroup)
 	}
 	control, err := cgroups.Load(cgroups.V1, cgroups.StaticPath(cgroup))
@@ -68,6 +69,17 @@ func (s *daemonServer) ExecStressors(ctx context.Context,
 	}
 	cmd := exec.Command("stress-ng", strings.Fields(req.Stressors)...)
 	if err := cmd.Start(); err != nil {
+		return nil, err
+	}
+	procState, err := process.NewProcess(int32(cmd.Process.Pid))
+	if err != nil {
+		return nil, err
+	}
+	ct, err := procState.CreateTime()
+	if err != nil {
+		if kerr := cmd.Process.Kill(); kerr != nil {
+			log.Error(kerr, "kill stressors failed", "request", req)
+		}
 		return nil, err
 	}
 	if err = control.Add(cgroups.Process{Pid: cmd.Process.Pid}); err != nil {
@@ -80,26 +92,34 @@ func (s *daemonServer) ExecStressors(ctx context.Context,
 		if err, ok := cmd.Wait().(*exec.ExitError); ok {
 			status := err.Sys().(syscall.WaitStatus)
 			if status.Signaled() && status.Signal() == syscall.SIGKILL {
-				log.Info("stressors cancelled", "request", req)
+				log.Info("Stressors cancelled", "request", req)
 			} else {
 				log.Error(err, "stressors exited accidentally", "request", req)
 			}
 		}
 	}()
 
-	return &pb.StressResponse{Instance: strconv.Itoa(cmd.Process.Pid)}, nil
+	return &pb.ExecStressResponse{
+		Instance:  strconv.Itoa(cmd.Process.Pid),
+		StartTime: ct,
+	}, nil
 }
 
 func (s *daemonServer) CancelStressors(ctx context.Context,
-	req *pb.StressRequest) (*empty.Empty, error) {
-	pid, err := strconv.Atoi(req.Target)
+	req *pb.CancelStressRequest) (*empty.Empty, error) {
+	pid, err := strconv.Atoi(req.Instance)
 	if err != nil {
 		return nil, err
 	}
 	log.Info("Canceling stressors", "request", req)
-	process, err := os.FindProcess(pid)
-	if err == nil {
-		process.Kill()
+	ins, err := process.NewProcess(int32(pid))
+	if err != nil {
+		return &empty.Empty{}, nil
+	}
+	if ct, err := ins.CreateTime(); err == nil && ct == req.StartTime {
+		if err := ins.Kill(); err != nil {
+			return nil, err
+		}
 	}
 	return &empty.Empty{}, nil
 }

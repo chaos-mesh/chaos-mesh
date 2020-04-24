@@ -43,7 +43,7 @@ var _ = Describe("StressChaos", func() {
 					Namespace: "default",
 				},
 				Spec: StressChaosSpec{
-					Stressors: &Stressors{VMStressor: &VMStressor{Stressor: Stressor{Workers: 1}}},
+					Stressors: &Stressors{MemoryStressor: &MemoryStressor{Stressor: Stressor{Workers: 1}}},
 				},
 			}
 			By("creating an API object")

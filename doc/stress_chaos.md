@@ -10,9 +10,9 @@ A `StressChaos` shares common configurations like other chaos, such as how to se
 
   Stressors defines plenty of stressors supported to stress system components out. You can use one or more of them to make up various kinds of stresses. At least one of the stressors should be specified. The following is supported stressors for now:
 
-  1. `vm`
+  1. `memory`
 
-     A `vm` stressor will continuously stress virtual memory out. 
+     A `memory` stressor will continuously stress virtual memory out. 
 
      | Option    | Type    | Required | Description                                                  |
      | --------- | ------- | -------- | ------------------------------------------------------------ |
