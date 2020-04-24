@@ -16,11 +16,12 @@ package fixture
 import (
 	"sort"
 
-	"github.com/pingcap/chaos-mesh/test/e2e/config"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/utils/pointer"
+
+	"github.com/pingcap/chaos-mesh/test/e2e/config"
 )
 
 // NewCommonNginxPod describe that we use common nginx pod to be tested in our chaos-operator test
