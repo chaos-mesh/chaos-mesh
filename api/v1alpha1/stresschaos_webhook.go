@@ -81,8 +81,7 @@ func (in *StressChaos) ValidateDelete() error {
 // Validate validates chaos object
 func (in *StressChaos) Validate() error {
 	root := field.NewPath("stresschaos")
-	errs := field.ErrorList{}
-	errs = in.Spec.Validate(root, errs)
+	errs := in.Spec.Validate(root)
 	errs = append(errs, in.ValidatePodMode(root)...)
 	if len(errs) > 0 {
 		return fmt.Errorf(errs.ToAggregate().Error())
@@ -101,7 +100,8 @@ func (in *StressChaos) ValidateScheduler(root *field.Path) field.ErrorList {
 }
 
 // Validate validates the scheduler and duration
-func (in *StressChaosSpec) Validate(parent *field.Path, errs field.ErrorList) field.ErrorList {
+func (in *StressChaosSpec) Validate(parent *field.Path) field.ErrorList {
+	errs := field.ErrorList{}
 	current := parent.Child("spec")
 	if len(in.StressngStressors) == 0 && in.Stressors == nil {
 		errs = append(errs, field.Invalid(current, in, "missing stressors"))
