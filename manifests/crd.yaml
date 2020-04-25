@@ -1341,8 +1341,8 @@ spec:
                 memory:
                   description: MemoryStressor stresses virtual memory out
                   properties:
-                    bytes:
-                      description: Bytes specifies N bytes consumed per vm worker,
+                    size:
+                      description: Size specifies N bytes consumed per vm worker,
                         default is the total available memory. One can specify the
                         size as % of total available memory or in units of B, KB/KiB,
                         MB/MiB, GB/GiB, TB/TiB.
@@ -1417,10 +1417,9 @@ spec:
                 description: StressInstance is an instance generates stresses
                 properties:
                   startTime:
-                    description: StartTime specifies when the instance starts in unix
-                      timestamp
-                    format: int64
-                    type: integer
+                    description: StartTime specifies when the instance starts
+                    format: date-time
+                    type: string
                   uid:
                     description: UID is the instance identifier
                     type: string

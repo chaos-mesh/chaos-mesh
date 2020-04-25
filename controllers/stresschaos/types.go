@@ -18,11 +18,13 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/go-logr/logr"
 	"golang.org/x/sync/errgroup"
 	v1 "k8s.io/api/core/v1"
 	k8serror "k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/tools/cache"
 	"k8s.io/client-go/tools/record"
@@ -37,7 +39,7 @@ import (
 	"github.com/pingcap/chaos-mesh/pkg/utils"
 )
 
-const stressChaosMsg = "stressors: %v"
+const stressChaosMsg = "stress out pod"
 
 // Reconciler is stresschaos reconciler
 type Reconciler struct {
@@ -92,7 +94,7 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos reconcil
 		return err
 	}
 
-	stresschaos.Status.Instances = make(map[types.UID]v1alpha1.StressInstance)
+	stresschaos.Status.Instances = make(map[string]v1alpha1.StressInstance)
 	err = r.applyAllPods(ctx, pods, stresschaos)
 	if err != nil {
 		r.Log.Error(err, "failed to apply chaos on all pods")
@@ -107,7 +109,7 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos reconcil
 			Name:      pod.Name,
 			HostIP:    pod.Status.HostIP,
 			PodIP:     pod.Status.PodIP,
-			Message:   fmt.Sprintf(stressChaosMsg, stresschaos.Spec.Stressors),
+			Message:   stressChaosMsg,
 		}
 
 		stresschaos.Status.Experiment.Pods = append(stresschaos.Status.Experiment.Pods, ps)
@@ -181,20 +183,20 @@ func (r *Reconciler) recoverPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha
 	}
 	defer daemonClient.Close()
 	if len(pod.Status.ContainerStatuses) == 0 {
-		return fmt.Errorf("%s %s can't get the state of container", pod.Namespace, pod.Name)
+		return fmt.Errorf("%s/%s can't get the state of container", pod.Namespace, pod.Name)
 	}
-	instance, ok := chaos.Status.Instances[pod.UID]
+	instance, ok := chaos.Status.Instances[fmt.Sprintf("%s/%s", pod.Namespace, pod.Name)]
 	if !ok {
 		r.Log.Info("Pod seems already recovered", "pod", pod.UID)
 		return nil
 	}
 	if _, err = daemonClient.CancelStressors(ctx, &pb.CancelStressRequest{
 		Instance:  instance.UID,
-		StartTime: instance.StartTime,
+		StartTime: instance.StartTime.UnixNano() / int64(time.Millisecond),
 	}); err != nil {
 		return err
 	}
-	delete(chaos.Status.Instances, pod.UID)
+	delete(chaos.Status.Instances, fmt.Sprintf("%s/%s", pod.Namespace, pod.Name))
 	return nil
 }
 
@@ -246,9 +248,11 @@ func (r *Reconciler) applyPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.
 	if err != nil {
 		return err
 	}
-	chaos.Status.Instances[pod.UID] = v1alpha1.StressInstance{
-		UID:       res.Instance,
-		StartTime: res.StartTime,
+	chaos.Status.Instances[fmt.Sprintf("%s/%s", pod.Namespace, pod.Name)] = v1alpha1.StressInstance{
+		UID: res.Instance,
+		StartTime: &metav1.Time{
+			Time: time.Unix(res.StartTime/1000, (res.StartTime%1000)*int64(time.Millisecond)),
+		},
 	}
 	return nil
 }

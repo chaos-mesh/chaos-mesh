@@ -192,12 +192,12 @@ var _ = Describe("stresschaos_webhook", func() {
 			vm := MemoryStressor{}
 			incorrectBytes := []string{"-1", "-1%", "101%", "x%", "-1Kb"}
 			for _, b := range incorrectBytes {
-				vm.Bytes = b
+				vm.Size = b
 				Expect(vm.tryParseBytes()).Should(HaveOccurred())
 			}
 			correctBytes := []string{"", "1%", "100KB", "100B"}
 			for _, b := range correctBytes {
-				vm.Bytes = b
+				vm.Size = b
 				Expect(vm.tryParseBytes()).ShouldNot(HaveOccurred())
 			}
 		})

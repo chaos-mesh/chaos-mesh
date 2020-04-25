@@ -149,12 +149,12 @@ func (in *MemoryStressor) Validate(parent *field.Path, errs field.ErrorList) fie
 }
 
 func (in *MemoryStressor) tryParseBytes() error {
-	length := len(in.Bytes)
+	length := len(in.Size)
 	if length == 0 {
 		return nil
 	}
-	if in.Bytes[length-1] == '%' {
-		percent, err := strconv.Atoi(in.Bytes[:length-1])
+	if in.Size[length-1] == '%' {
+		percent, err := strconv.Atoi(in.Size[:length-1])
 		if err != nil {
 			return err
 		}
@@ -162,11 +162,11 @@ func (in *MemoryStressor) tryParseBytes() error {
 			return errors.New("illegal proportion")
 		}
 	} else {
-		size, err := units.FromHumanSize(in.Bytes)
+		size, err := units.FromHumanSize(in.Size)
 		if err != nil {
 			return err
 		}
-		in.Bytes = fmt.Sprintf("%db", size)
+		in.Size = fmt.Sprintf("%db", size)
 	}
 	return nil
 }
