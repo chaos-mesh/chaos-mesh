@@ -30,12 +30,12 @@ data:
         "app.kubernetes.io/component": "tikv"
     initContainers:
     - name: inject-scripts
-      image: pingcap/chaos-scripts:latest
+      image: pingcap/chaos-scripts:v0.8.0
       imagePullpolicy: Always
       command: ["sh", "-c", "/scripts/init.sh -d /var/lib/tikv/data -f /var/lib/tikv/fuse-data"]
     containers:
     - name: chaosfs
-      image: pingcap/chaos-fs:latest
+      image: pingcap/chaos-fs:v0.8.0
       imagePullpolicy: Always
       ports:
       - containerPort: 65534
@@ -145,7 +145,7 @@ You should also create the original directory in the PersistentVolumes directory
 ```yaml
 initContainers:
   - name: inject-scripts
-    image: pingcap/chaos-scripts:latest
+    image: pingcap/chaos-scripts:v0.8.0
     imagePullpolicy: Always
     command: ["sh", "-c", "/scripts/init.sh -d /var/lib/tikv/data -f /var/lib/tikv/fuse-data"]
 ```
