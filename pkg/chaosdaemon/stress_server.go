@@ -23,7 +23,6 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
-	"sync"
 	"syscall"
 
 	"github.com/containerd/cgroups"
@@ -35,9 +34,6 @@ import (
 )
 
 var (
-	stressorLocker = new(sync.Mutex)
-	podStressors   = make(map[string]*exec.Cmd)
-
 	// Possible cgroup subsystems
 	cgroupSubsys = []string{"cpu", "memory", "systemd", "net_cls",
 		"net_prio", "freezer", "blkio", "perf_event", "devices",
