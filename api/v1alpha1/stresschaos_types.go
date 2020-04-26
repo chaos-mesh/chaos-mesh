@@ -209,13 +209,16 @@ type Stressors struct {
 }
 
 // Normalize the stressors to comply with stress-ng
-func (in *Stressors) Normalize() string {
+func (in *Stressors) Normalize() (string, error) {
 	stressors := ""
 	if in.MemoryStressor != nil {
 		stressors += fmt.Sprintf(" --vm %d --vm-keep", in.MemoryStressor.Workers)
 		if len(in.MemoryStressor.Size) != 0 {
 			if in.MemoryStressor.Size[len(in.MemoryStressor.Size)-1] != '%' {
-				size, _ := units.FromHumanSize(in.MemoryStressor.Size)
+				size, err := units.FromHumanSize(in.MemoryStressor.Size)
+				if err != nil {
+					return "", err
+				}
 				stressors += fmt.Sprintf(" --vm-bytes %d", size)
 			} else {
 				stressors += fmt.Sprintf("--vm-bytes %s",
@@ -230,7 +233,7 @@ func (in *Stressors) Normalize() string {
 				*in.CPUStressor.Load)
 		}
 	}
-	return stressors
+	return stressors, nil
 }
 
 // Stressor defines common configurations of a stressor

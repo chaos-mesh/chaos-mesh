@@ -238,7 +238,10 @@ func (r *Reconciler) applyPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.
 	target := pod.Status.ContainerStatuses[0].ContainerID
 	stressors := chaos.Spec.StressngStressors
 	if len(stressors) == 0 {
-		stressors = chaos.Spec.Stressors.Normalize()
+		stressors, err = chaos.Spec.Stressors.Normalize()
+		if err != nil {
+			return err
+		}
 	}
 	res, err := daemonClient.ExecStressors(ctx, &pb.ExecStressRequest{
 		Scope:     pb.ExecStressRequest_POD,

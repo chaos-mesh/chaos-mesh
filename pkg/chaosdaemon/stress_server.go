@@ -122,7 +122,12 @@ func (s *daemonServer) CancelStressors(ctx context.Context,
 
 func findValidCgroup(path cgroups.Path, target string) (string, error) {
 	for _, subsys := range cgroupSubsys {
-		if p, _ := path(cgroups.Name(subsys)); strings.Contains(p, target) {
+		p, err := path(cgroups.Name(subsys))
+		if err != nil {
+			log.Error(err, "Failed to retrieve the cgroup path", "subsystem", subsys, "target", target)
+			continue
+		}
+		if strings.Contains(p, target) {
 			return p, nil
 		}
 	}
