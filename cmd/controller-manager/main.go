@@ -171,6 +171,19 @@ func main() {
 		os.Exit(1)
 	}
 
+	if err = (&controllers.StressChaosReconciler{
+		Client:        mgr.GetClient(),
+		EventRecorder: mgr.GetEventRecorderFor("stresschaos-controller"),
+		Log:           ctrl.Log.WithName("controllers").WithName("StressChaos"),
+	}).SetupWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create controller", "controller", "StressChaos")
+		os.Exit(1)
+	}
+	if err = (&chaosmeshv1alpha1.StressChaos{}).SetupWebhookWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create webhook", "webhook", "StressChaos")
+		os.Exit(1)
+	}
+
 	setupLog.Info("Setting up webhook server")
 
 	hookServer := mgr.GetWebhookServer()
