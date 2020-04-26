@@ -184,7 +184,7 @@ var _ = Describe("stresschaos_webhook", func() {
 			}
 			parent := field.NewPath("parent")
 			for _, tc := range tcs {
-				Expect(tc.stressor.Validate(parent, field.ErrorList{})).To(HaveLen(tc.errs))
+				Expect(tc.stressor.Validate(parent)).To(HaveLen(tc.errs))
 			}
 		})
 

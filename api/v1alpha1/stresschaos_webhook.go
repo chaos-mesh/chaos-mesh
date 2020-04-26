@@ -29,7 +29,7 @@ import (
 
 // Validateable defines how a resource is validated
 type Validateable interface {
-	Validate(parent *field.Path, errs field.ErrorList) field.ErrorList
+	Validate(parent *field.Path) field.ErrorList
 }
 
 // log is for logging in this package.
@@ -106,21 +106,22 @@ func (in *StressChaosSpec) Validate(parent *field.Path) field.ErrorList {
 	if len(in.StressngStressors) == 0 && in.Stressors == nil {
 		errs = append(errs, field.Invalid(current, in, "missing stressors"))
 	} else if in.Stressors != nil {
-		errs = in.Stressors.Validate(current, errs)
+		errs = append(errs, in.Stressors.Validate(current)...)
 	}
 	return append(errs, ValidateScheduler(in.Duration, in.Scheduler, current)...)
 }
 
 // Validate validates whether the Stressors are all well defined
-func (in *Stressors) Validate(parent *field.Path, errs field.ErrorList) field.ErrorList {
+func (in *Stressors) Validate(parent *field.Path) field.ErrorList {
+	errs := field.ErrorList{}
 	current := parent.Child("stressors")
 	once := false
 	if in.MemoryStressor != nil {
-		errs = in.MemoryStressor.Validate(current, errs)
+		errs = append(errs, in.MemoryStressor.Validate(current)...)
 		once = true
 	}
 	if in.CPUStressor != nil {
-		errs = in.CPUStressor.Validate(current, errs)
+		errs = append(errs, in.CPUStressor.Validate(current)...)
 		once = true
 	}
 	if !once {
@@ -130,7 +131,8 @@ func (in *Stressors) Validate(parent *field.Path, errs field.ErrorList) field.Er
 }
 
 // Validate validates whether the Stressor is well defined
-func (in *Stressor) Validate(parent *field.Path, errs field.ErrorList) field.ErrorList {
+func (in *Stressor) Validate(parent *field.Path) field.ErrorList {
+	errs := field.ErrorList{}
 	if in.Workers <= 0 {
 		errs = append(errs, field.Invalid(parent, in, "workers should always be positive"))
 	}
@@ -138,9 +140,10 @@ func (in *Stressor) Validate(parent *field.Path, errs field.ErrorList) field.Err
 }
 
 // Validate validates whether the MemoryStressor is well defined
-func (in *MemoryStressor) Validate(parent *field.Path, errs field.ErrorList) field.ErrorList {
+func (in *MemoryStressor) Validate(parent *field.Path) field.ErrorList {
+	errs := field.ErrorList{}
 	current := parent.Child("vm")
-	errs = in.Stressor.Validate(current, errs)
+	errs = append(errs, in.Stressor.Validate(current)...)
 	if err := in.tryParseBytes(); err != nil {
 		errs = append(errs, field.Invalid(current, in,
 			fmt.Sprintf("incorrect bytes format: %s", err)))
@@ -172,9 +175,10 @@ func (in *MemoryStressor) tryParseBytes() error {
 }
 
 // Validate validates whether the CPUStressor is well defined
-func (in *CPUStressor) Validate(parent *field.Path, errs field.ErrorList) field.ErrorList {
+func (in *CPUStressor) Validate(parent *field.Path) field.ErrorList {
+	errs := field.ErrorList{}
 	current := parent.Child("cpu")
-	errs = in.Stressor.Validate(current, errs)
+	errs = append(errs, in.Stressor.Validate(current)...)
 	if in.Load != nil && (*in.Load < 0 || *in.Load > 100) {
 		errs = append(errs, field.Invalid(current, in, "illegal proportion"))
 	}
