@@ -89,6 +89,26 @@ rules:
 - apiGroups:
   - pingcap.com
   resources:
+  - stresschaos
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - pingcap.com
+  resources:
+  - stresschaos/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - pingcap.com
+  resources:
   - timechaos
   verbs:
   - create

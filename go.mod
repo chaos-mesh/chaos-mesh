@@ -1,7 +1,7 @@
 module github.com/pingcap/chaos-mesh
 
 require (
-	github.com/containerd/cgroups v0.0.0-20200116170754-a8908713319d // indirect
+	github.com/containerd/cgroups v0.0.0-20200404012852-53ba5634dc0f
 	github.com/containerd/containerd v1.2.3
 	github.com/containerd/continuity v0.0.0-20200107194136-26c1120b8d41 // indirect
 	github.com/containerd/cri v1.11.1 // indirect
@@ -11,6 +11,7 @@ require (
 	github.com/docker/docker v0.7.3-0.20190327010347-be7ac8be2ae0
 	github.com/docker/go-connections v0.4.0 // indirect
 	github.com/docker/go-events v0.0.0-20190806004212-e31b211e4f1c // indirect
+	github.com/docker/go-units v0.4.0
 	github.com/ethercflow/hookfs v0.3.0
 	github.com/ghodss/yaml v1.0.0
 	github.com/go-logr/logr v0.1.0
@@ -27,19 +28,18 @@ require (
 	github.com/hanwen/go-fuse v0.0.0-20190111173210-425e8d5301f6
 	github.com/hashicorp/golang-lru v0.5.3 // indirect
 	github.com/jmoiron/sqlx v1.2.0
-	github.com/konsorten/go-windows-terminal-sequences v1.0.2 // indirect
 	github.com/mattn/go-isatty v0.0.12 // indirect
 	github.com/mattn/go-runewidth v0.0.8 // indirect
 	github.com/mgechev/revive v1.0.2-0.20200225072153-6219ca02fffb
 	github.com/morikuni/aec v1.0.0 // indirect
 	github.com/onsi/ginkgo v1.12.0
 	github.com/onsi/gomega v1.9.0
-	github.com/opencontainers/runtime-spec v1.0.1 // indirect
 	github.com/pingcap/failpoint v0.0.0-20200210140405-f8f9fb234798
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.0.0
 	github.com/robfig/cron/v3 v3.0.0
 	github.com/securego/gosec v0.0.0-20200401082031-e946c8c39989
+	github.com/shirou/gopsutil v0.0.0-20180427012116-c95755e4bcd7
 	github.com/spf13/cobra v0.0.6 // indirect
 	github.com/tmc/grpc-websocket-proxy v0.0.0-20200122045848-3419fae592fc // indirect
 	github.com/unrolled/render v1.0.1
