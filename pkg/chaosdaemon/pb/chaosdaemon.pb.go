@@ -46,7 +46,7 @@ func (x Rule_Action) String() string {
 }
 
 func (Rule_Action) EnumDescriptor() ([]byte, []int) {
-	return fileDescriptor_143136706133b591, []int{9, 0}
+	return fileDescriptor_143136706133b591, []int{16, 0}
 }
 
 type Rule_Direction int32
@@ -71,7 +71,7 @@ func (x Rule_Direction) String() string {
 }
 
 func (Rule_Direction) EnumDescriptor() ([]byte, []int) {
-	return fileDescriptor_143136706133b591, []int{9, 1}
+	return fileDescriptor_143136706133b591, []int{16, 1}
 }
 
 type ContainerAction_Action int32
@@ -96,7 +96,79 @@ func (x ContainerAction_Action) String() string {
 }
 
 func (ContainerAction_Action) EnumDescriptor() ([]byte, []int) {
-	return fileDescriptor_143136706133b591, []int{11, 0}
+	return fileDescriptor_143136706133b591, []int{18, 0}
+}
+
+type ExecStressRequest_Scope int32
+
+const (
+	ExecStressRequest_CONTAINER ExecStressRequest_Scope = 0
+	ExecStressRequest_POD       ExecStressRequest_Scope = 1
+)
+
+var ExecStressRequest_Scope_name = map[int32]string{
+	0: "CONTAINER",
+	1: "POD",
+}
+
+var ExecStressRequest_Scope_value = map[string]int32{
+	"CONTAINER": 0,
+	"POD":       1,
+}
+
+func (x ExecStressRequest_Scope) String() string {
+	return proto.EnumName(ExecStressRequest_Scope_name, int32(x))
+}
+
+func (ExecStressRequest_Scope) EnumDescriptor() ([]byte, []int) {
+	return fileDescriptor_143136706133b591, []int{19, 0}
+}
+
+type TcHandle struct {
+	Major                uint32   `protobuf:"varint,1,opt,name=major,proto3" json:"major,omitempty"`
+	Minor                uint32   `protobuf:"varint,2,opt,name=minor,proto3" json:"minor,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *TcHandle) Reset()         { *m = TcHandle{} }
+func (m *TcHandle) String() string { return proto.CompactTextString(m) }
+func (*TcHandle) ProtoMessage()    {}
+func (*TcHandle) Descriptor() ([]byte, []int) {
+	return fileDescriptor_143136706133b591, []int{0}
+}
+
+func (m *TcHandle) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_TcHandle.Unmarshal(m, b)
+}
+func (m *TcHandle) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_TcHandle.Marshal(b, m, deterministic)
+}
+func (m *TcHandle) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_TcHandle.Merge(m, src)
+}
+func (m *TcHandle) XXX_Size() int {
+	return xxx_messageInfo_TcHandle.Size(m)
+}
+func (m *TcHandle) XXX_DiscardUnknown() {
+	xxx_messageInfo_TcHandle.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_TcHandle proto.InternalMessageInfo
+
+func (m *TcHandle) GetMajor() uint32 {
+	if m != nil {
+		return m.Major
+	}
+	return 0
+}
+
+func (m *TcHandle) GetMinor() uint32 {
+	if m != nil {
+		return m.Minor
+	}
+	return 0
 }
 
 type ContainerRequest struct {
@@ -111,7 +183,7 @@ func (m *ContainerRequest) Reset()         { *m = ContainerRequest{} }
 func (m *ContainerRequest) String() string { return proto.CompactTextString(m) }
 func (*ContainerRequest) ProtoMessage()    {}
 func (*ContainerRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_143136706133b591, []int{0}
+	return fileDescriptor_143136706133b591, []int{1}
 }
 
 func (m *ContainerRequest) XXX_Unmarshal(b []byte) error {
@@ -157,7 +229,7 @@ func (m *ContainerResponse) Reset()         { *m = ContainerResponse{} }
 func (m *ContainerResponse) String() string { return proto.CompactTextString(m) }
 func (*ContainerResponse) ProtoMessage()    {}
 func (*ContainerResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_143136706133b591, []int{1}
+	return fileDescriptor_143136706133b591, []int{2}
 }
 
 func (m *ContainerResponse) XXX_Unmarshal(b []byte) error {
@@ -186,18 +258,20 @@ func (m *ContainerResponse) GetPid() uint32 {
 }
 
 type NetemRequest struct {
-	Netem                *Netem   `protobuf:"bytes,1,opt,name=netem,proto3" json:"netem,omitempty"`
-	ContainerId          string   `protobuf:"bytes,2,opt,name=container_id,json=containerId,proto3" json:"container_id,omitempty"`
-	XXX_NoUnkeyedLiteral struct{} `json:"-"`
-	XXX_unrecognized     []byte   `json:"-"`
-	XXX_sizecache        int32    `json:"-"`
+	Netem                *Netem    `protobuf:"bytes,1,opt,name=netem,proto3" json:"netem,omitempty"`
+	ContainerId          string    `protobuf:"bytes,2,opt,name=container_id,json=containerId,proto3" json:"container_id,omitempty"`
+	Handle               *TcHandle `protobuf:"bytes,3,opt,name=handle,proto3" json:"handle,omitempty"`
+	Parent               *TcHandle `protobuf:"bytes,4,opt,name=parent,proto3" json:"parent,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}  `json:"-"`
+	XXX_unrecognized     []byte    `json:"-"`
+	XXX_sizecache        int32     `json:"-"`
 }
 
 func (m *NetemRequest) Reset()         { *m = NetemRequest{} }
 func (m *NetemRequest) String() string { return proto.CompactTextString(m) }
 func (*NetemRequest) ProtoMessage()    {}
 func (*NetemRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_143136706133b591, []int{2}
+	return fileDescriptor_143136706133b591, []int{3}
 }
 
 func (m *NetemRequest) XXX_Unmarshal(b []byte) error {
@@ -232,30 +306,46 @@ func (m *NetemRequest) GetContainerId() string {
 	return ""
 }
 
+func (m *NetemRequest) GetHandle() *TcHandle {
+	if m != nil {
+		return m.Handle
+	}
+	return nil
+}
+
+func (m *NetemRequest) GetParent() *TcHandle {
+	if m != nil {
+		return m.Parent
+	}
+	return nil
+}
+
 type Netem struct {
-	Time                 uint32   `protobuf:"varint,1,opt,name=time,proto3" json:"time,omitempty"`
-	Jitter               uint32   `protobuf:"varint,2,opt,name=jitter,proto3" json:"jitter,omitempty"`
-	DelayCorr            float32  `protobuf:"fixed32,3,opt,name=delay_corr,json=delayCorr,proto3" json:"delay_corr,omitempty"`
-	Limit                uint32   `protobuf:"varint,4,opt,name=limit,proto3" json:"limit,omitempty"`
-	Loss                 float32  `protobuf:"fixed32,5,opt,name=loss,proto3" json:"loss,omitempty"`
-	LossCorr             float32  `protobuf:"fixed32,6,opt,name=loss_corr,json=lossCorr,proto3" json:"loss_corr,omitempty"`
-	Gap                  uint32   `protobuf:"varint,7,opt,name=gap,proto3" json:"gap,omitempty"`
-	Duplicate            float32  `protobuf:"fixed32,8,opt,name=duplicate,proto3" json:"duplicate,omitempty"`
-	DuplicateCorr        float32  `protobuf:"fixed32,9,opt,name=duplicate_corr,json=duplicateCorr,proto3" json:"duplicate_corr,omitempty"`
-	Reorder              float32  `protobuf:"fixed32,10,opt,name=reorder,proto3" json:"reorder,omitempty"`
-	ReorderCorr          float32  `protobuf:"fixed32,11,opt,name=reorder_corr,json=reorderCorr,proto3" json:"reorder_corr,omitempty"`
-	Corrupt              float32  `protobuf:"fixed32,12,opt,name=corrupt,proto3" json:"corrupt,omitempty"`
-	CorruptCorr          float32  `protobuf:"fixed32,13,opt,name=corrupt_corr,json=corruptCorr,proto3" json:"corrupt_corr,omitempty"`
-	XXX_NoUnkeyedLiteral struct{} `json:"-"`
-	XXX_unrecognized     []byte   `json:"-"`
-	XXX_sizecache        int32    `json:"-"`
+	Time                 uint32    `protobuf:"varint,1,opt,name=time,proto3" json:"time,omitempty"`
+	Jitter               uint32    `protobuf:"varint,2,opt,name=jitter,proto3" json:"jitter,omitempty"`
+	DelayCorr            float32   `protobuf:"fixed32,3,opt,name=delay_corr,json=delayCorr,proto3" json:"delay_corr,omitempty"`
+	Limit                uint32    `protobuf:"varint,4,opt,name=limit,proto3" json:"limit,omitempty"`
+	Loss                 float32   `protobuf:"fixed32,5,opt,name=loss,proto3" json:"loss,omitempty"`
+	LossCorr             float32   `protobuf:"fixed32,6,opt,name=loss_corr,json=lossCorr,proto3" json:"loss_corr,omitempty"`
+	Gap                  uint32    `protobuf:"varint,7,opt,name=gap,proto3" json:"gap,omitempty"`
+	Duplicate            float32   `protobuf:"fixed32,8,opt,name=duplicate,proto3" json:"duplicate,omitempty"`
+	DuplicateCorr        float32   `protobuf:"fixed32,9,opt,name=duplicate_corr,json=duplicateCorr,proto3" json:"duplicate_corr,omitempty"`
+	Reorder              float32   `protobuf:"fixed32,10,opt,name=reorder,proto3" json:"reorder,omitempty"`
+	ReorderCorr          float32   `protobuf:"fixed32,11,opt,name=reorder_corr,json=reorderCorr,proto3" json:"reorder_corr,omitempty"`
+	Corrupt              float32   `protobuf:"fixed32,12,opt,name=corrupt,proto3" json:"corrupt,omitempty"`
+	CorruptCorr          float32   `protobuf:"fixed32,13,opt,name=corrupt_corr,json=corruptCorr,proto3" json:"corrupt_corr,omitempty"`
+	Parent               *TcHandle `protobuf:"bytes,14,opt,name=parent,proto3" json:"parent,omitempty"`
+	Handle               *TcHandle `protobuf:"bytes,15,opt,name=handle,proto3" json:"handle,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}  `json:"-"`
+	XXX_unrecognized     []byte    `json:"-"`
+	XXX_sizecache        int32     `json:"-"`
 }
 
 func (m *Netem) Reset()         { *m = Netem{} }
 func (m *Netem) String() string { return proto.CompactTextString(m) }
 func (*Netem) ProtoMessage()    {}
 func (*Netem) Descriptor() ([]byte, []int) {
-	return fileDescriptor_143136706133b591, []int{3}
+	return fileDescriptor_143136706133b591, []int{4}
 }
 
 func (m *Netem) XXX_Unmarshal(b []byte) error {
@@ -367,6 +457,20 @@ func (m *Netem) GetCorruptCorr() float32 {
 	return 0
 }
 
+func (m *Netem) GetParent() *TcHandle {
+	if m != nil {
+		return m.Parent
+	}
+	return nil
+}
+
+func (m *Netem) GetHandle() *TcHandle {
+	if m != nil {
+		return m.Handle
+	}
+	return nil
+}
+
 type TbfRequest struct {
 	Tbf                  *Tbf     `protobuf:"bytes,1,opt,name=tbf,proto3" json:"tbf,omitempty"`
 	ContainerId          string   `protobuf:"bytes,2,opt,name=container_id,json=containerId,proto3" json:"container_id,omitempty"`
@@ -379,7 +483,7 @@ func (m *TbfRequest) Reset()         { *m = TbfRequest{} }
 func (m *TbfRequest) String() string { return proto.CompactTextString(m) }
 func (*TbfRequest) ProtoMessage()    {}
 func (*TbfRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_143136706133b591, []int{4}
+	return fileDescriptor_143136706133b591, []int{5}
 }
 
 func (m *TbfRequest) XXX_Unmarshal(b []byte) error {
@@ -429,7 +533,7 @@ func (m *Tbf) Reset()         { *m = Tbf{} }
 func (m *Tbf) String() string { return proto.CompactTextString(m) }
 func (*Tbf) ProtoMessage()    {}
 func (*Tbf) Descriptor() ([]byte, []int) {
-	return fileDescriptor_143136706133b591, []int{5}
+	return fileDescriptor_143136706133b591, []int{6}
 }
 
 func (m *Tbf) XXX_Unmarshal(b []byte) error {
@@ -485,6 +589,304 @@ func (m *Tbf) GetMinBurst() uint32 {
 	return 0
 }
 
+type QdiscRequest struct {
+	Qdisc                *Qdisc   `protobuf:"bytes,1,opt,name=qdisc,proto3" json:"qdisc,omitempty"`
+	ContainerId          string   `protobuf:"bytes,2,opt,name=container_id,json=containerId,proto3" json:"container_id,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *QdiscRequest) Reset()         { *m = QdiscRequest{} }
+func (m *QdiscRequest) String() string { return proto.CompactTextString(m) }
+func (*QdiscRequest) ProtoMessage()    {}
+func (*QdiscRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_143136706133b591, []int{7}
+}
+
+func (m *QdiscRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_QdiscRequest.Unmarshal(m, b)
+}
+func (m *QdiscRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_QdiscRequest.Marshal(b, m, deterministic)
+}
+func (m *QdiscRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QdiscRequest.Merge(m, src)
+}
+func (m *QdiscRequest) XXX_Size() int {
+	return xxx_messageInfo_QdiscRequest.Size(m)
+}
+func (m *QdiscRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_QdiscRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_QdiscRequest proto.InternalMessageInfo
+
+func (m *QdiscRequest) GetQdisc() *Qdisc {
+	if m != nil {
+		return m.Qdisc
+	}
+	return nil
+}
+
+func (m *QdiscRequest) GetContainerId() string {
+	if m != nil {
+		return m.ContainerId
+	}
+	return ""
+}
+
+type Qdisc struct {
+	Parent               *TcHandle `protobuf:"bytes,1,opt,name=parent,proto3" json:"parent,omitempty"`
+	Handle               *TcHandle `protobuf:"bytes,2,opt,name=handle,proto3" json:"handle,omitempty"`
+	Type                 string    `protobuf:"bytes,3,opt,name=type,proto3" json:"type,omitempty"`
+	Args                 []string  `protobuf:"bytes,4,rep,name=args,proto3" json:"args,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}  `json:"-"`
+	XXX_unrecognized     []byte    `json:"-"`
+	XXX_sizecache        int32     `json:"-"`
+}
+
+func (m *Qdisc) Reset()         { *m = Qdisc{} }
+func (m *Qdisc) String() string { return proto.CompactTextString(m) }
+func (*Qdisc) ProtoMessage()    {}
+func (*Qdisc) Descriptor() ([]byte, []int) {
+	return fileDescriptor_143136706133b591, []int{8}
+}
+
+func (m *Qdisc) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_Qdisc.Unmarshal(m, b)
+}
+func (m *Qdisc) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_Qdisc.Marshal(b, m, deterministic)
+}
+func (m *Qdisc) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_Qdisc.Merge(m, src)
+}
+func (m *Qdisc) XXX_Size() int {
+	return xxx_messageInfo_Qdisc.Size(m)
+}
+func (m *Qdisc) XXX_DiscardUnknown() {
+	xxx_messageInfo_Qdisc.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_Qdisc proto.InternalMessageInfo
+
+func (m *Qdisc) GetParent() *TcHandle {
+	if m != nil {
+		return m.Parent
+	}
+	return nil
+}
+
+func (m *Qdisc) GetHandle() *TcHandle {
+	if m != nil {
+		return m.Handle
+	}
+	return nil
+}
+
+func (m *Qdisc) GetType() string {
+	if m != nil {
+		return m.Type
+	}
+	return ""
+}
+
+func (m *Qdisc) GetArgs() []string {
+	if m != nil {
+		return m.Args
+	}
+	return nil
+}
+
+type EmatchFilterRequest struct {
+	Filter               *EmatchFilter `protobuf:"bytes,1,opt,name=filter,proto3" json:"filter,omitempty"`
+	ContainerId          string        `protobuf:"bytes,2,opt,name=container_id,json=containerId,proto3" json:"container_id,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}      `json:"-"`
+	XXX_unrecognized     []byte        `json:"-"`
+	XXX_sizecache        int32         `json:"-"`
+}
+
+func (m *EmatchFilterRequest) Reset()         { *m = EmatchFilterRequest{} }
+func (m *EmatchFilterRequest) String() string { return proto.CompactTextString(m) }
+func (*EmatchFilterRequest) ProtoMessage()    {}
+func (*EmatchFilterRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_143136706133b591, []int{9}
+}
+
+func (m *EmatchFilterRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_EmatchFilterRequest.Unmarshal(m, b)
+}
+func (m *EmatchFilterRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_EmatchFilterRequest.Marshal(b, m, deterministic)
+}
+func (m *EmatchFilterRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_EmatchFilterRequest.Merge(m, src)
+}
+func (m *EmatchFilterRequest) XXX_Size() int {
+	return xxx_messageInfo_EmatchFilterRequest.Size(m)
+}
+func (m *EmatchFilterRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_EmatchFilterRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_EmatchFilterRequest proto.InternalMessageInfo
+
+func (m *EmatchFilterRequest) GetFilter() *EmatchFilter {
+	if m != nil {
+		return m.Filter
+	}
+	return nil
+}
+
+func (m *EmatchFilterRequest) GetContainerId() string {
+	if m != nil {
+		return m.ContainerId
+	}
+	return ""
+}
+
+type EmatchFilter struct {
+	Match                string    `protobuf:"bytes,1,opt,name=match,proto3" json:"match,omitempty"`
+	Parent               *TcHandle `protobuf:"bytes,2,opt,name=parent,proto3" json:"parent,omitempty"`
+	Classid              *TcHandle `protobuf:"bytes,3,opt,name=classid,proto3" json:"classid,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}  `json:"-"`
+	XXX_unrecognized     []byte    `json:"-"`
+	XXX_sizecache        int32     `json:"-"`
+}
+
+func (m *EmatchFilter) Reset()         { *m = EmatchFilter{} }
+func (m *EmatchFilter) String() string { return proto.CompactTextString(m) }
+func (*EmatchFilter) ProtoMessage()    {}
+func (*EmatchFilter) Descriptor() ([]byte, []int) {
+	return fileDescriptor_143136706133b591, []int{10}
+}
+
+func (m *EmatchFilter) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_EmatchFilter.Unmarshal(m, b)
+}
+func (m *EmatchFilter) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_EmatchFilter.Marshal(b, m, deterministic)
+}
+func (m *EmatchFilter) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_EmatchFilter.Merge(m, src)
+}
+func (m *EmatchFilter) XXX_Size() int {
+	return xxx_messageInfo_EmatchFilter.Size(m)
+}
+func (m *EmatchFilter) XXX_DiscardUnknown() {
+	xxx_messageInfo_EmatchFilter.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_EmatchFilter proto.InternalMessageInfo
+
+func (m *EmatchFilter) GetMatch() string {
+	if m != nil {
+		return m.Match
+	}
+	return ""
+}
+
+func (m *EmatchFilter) GetParent() *TcHandle {
+	if m != nil {
+		return m.Parent
+	}
+	return nil
+}
+
+func (m *EmatchFilter) GetClassid() *TcHandle {
+	if m != nil {
+		return m.Classid
+	}
+	return nil
+}
+
+type TcFilterRequest struct {
+	Filter               *TcFilter `protobuf:"bytes,1,opt,name=filter,proto3" json:"filter,omitempty"`
+	ContainerId          string    `protobuf:"bytes,2,opt,name=container_id,json=containerId,proto3" json:"container_id,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}  `json:"-"`
+	XXX_unrecognized     []byte    `json:"-"`
+	XXX_sizecache        int32     `json:"-"`
+}
+
+func (m *TcFilterRequest) Reset()         { *m = TcFilterRequest{} }
+func (m *TcFilterRequest) String() string { return proto.CompactTextString(m) }
+func (*TcFilterRequest) ProtoMessage()    {}
+func (*TcFilterRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_143136706133b591, []int{11}
+}
+
+func (m *TcFilterRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_TcFilterRequest.Unmarshal(m, b)
+}
+func (m *TcFilterRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_TcFilterRequest.Marshal(b, m, deterministic)
+}
+func (m *TcFilterRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_TcFilterRequest.Merge(m, src)
+}
+func (m *TcFilterRequest) XXX_Size() int {
+	return xxx_messageInfo_TcFilterRequest.Size(m)
+}
+func (m *TcFilterRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_TcFilterRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_TcFilterRequest proto.InternalMessageInfo
+
+func (m *TcFilterRequest) GetFilter() *TcFilter {
+	if m != nil {
+		return m.Filter
+	}
+	return nil
+}
+
+func (m *TcFilterRequest) GetContainerId() string {
+	if m != nil {
+		return m.ContainerId
+	}
+	return ""
+}
+
+type TcFilter struct {
+	Parent               *TcHandle `protobuf:"bytes,1,opt,name=parent,proto3" json:"parent,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}  `json:"-"`
+	XXX_unrecognized     []byte    `json:"-"`
+	XXX_sizecache        int32     `json:"-"`
+}
+
+func (m *TcFilter) Reset()         { *m = TcFilter{} }
+func (m *TcFilter) String() string { return proto.CompactTextString(m) }
+func (*TcFilter) ProtoMessage()    {}
+func (*TcFilter) Descriptor() ([]byte, []int) {
+	return fileDescriptor_143136706133b591, []int{12}
+}
+
+func (m *TcFilter) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_TcFilter.Unmarshal(m, b)
+}
+func (m *TcFilter) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_TcFilter.Marshal(b, m, deterministic)
+}
+func (m *TcFilter) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_TcFilter.Merge(m, src)
+}
+func (m *TcFilter) XXX_Size() int {
+	return xxx_messageInfo_TcFilter.Size(m)
+}
+func (m *TcFilter) XXX_DiscardUnknown() {
+	xxx_messageInfo_TcFilter.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_TcFilter proto.InternalMessageInfo
+
+func (m *TcFilter) GetParent() *TcHandle {
+	if m != nil {
+		return m.Parent
+	}
+	return nil
+}
+
 type IpSetRequest struct {
 	Ipset                *IpSet   `protobuf:"bytes,1,opt,name=ipset,proto3" json:"ipset,omitempty"`
 	ContainerId          string   `protobuf:"bytes,2,opt,name=container_id,json=containerId,proto3" json:"container_id,omitempty"`
@@ -497,7 +899,7 @@ func (m *IpSetRequest) Reset()         { *m = IpSetRequest{} }
 func (m *IpSetRequest) String() string { return proto.CompactTextString(m) }
 func (*IpSetRequest) ProtoMessage()    {}
 func (*IpSetRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_143136706133b591, []int{6}
+	return fileDescriptor_143136706133b591, []int{13}
 }
 
 func (m *IpSetRequest) XXX_Unmarshal(b []byte) error {
@@ -544,7 +946,7 @@ func (m *IpSet) Reset()         { *m = IpSet{} }
 func (m *IpSet) String() string { return proto.CompactTextString(m) }
 func (*IpSet) ProtoMessage()    {}
 func (*IpSet) Descriptor() ([]byte, []int) {
-	return fileDescriptor_143136706133b591, []int{7}
+	return fileDescriptor_143136706133b591, []int{14}
 }
 
 func (m *IpSet) XXX_Unmarshal(b []byte) error {
@@ -591,7 +993,7 @@ func (m *IpTablesRequest) Reset()         { *m = IpTablesRequest{} }
 func (m *IpTablesRequest) String() string { return proto.CompactTextString(m) }
 func (*IpTablesRequest) ProtoMessage()    {}
 func (*IpTablesRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_143136706133b591, []int{8}
+	return fileDescriptor_143136706133b591, []int{15}
 }
 
 func (m *IpTablesRequest) XXX_Unmarshal(b []byte) error {
@@ -639,7 +1041,7 @@ func (m *Rule) Reset()         { *m = Rule{} }
 func (m *Rule) String() string { return proto.CompactTextString(m) }
 func (*Rule) ProtoMessage()    {}
 func (*Rule) Descriptor() ([]byte, []int) {
-	return fileDescriptor_143136706133b591, []int{9}
+	return fileDescriptor_143136706133b591, []int{16}
 }
 
 func (m *Rule) XXX_Unmarshal(b []byte) error {
@@ -695,7 +1097,7 @@ func (m *TimeRequest) Reset()         { *m = TimeRequest{} }
 func (m *TimeRequest) String() string { return proto.CompactTextString(m) }
 func (*TimeRequest) ProtoMessage()    {}
 func (*TimeRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_143136706133b591, []int{10}
+	return fileDescriptor_143136706133b591, []int{17}
 }
 
 func (m *TimeRequest) XXX_Unmarshal(b []byte) error {
@@ -755,7 +1157,7 @@ func (m *ContainerAction) Reset()         { *m = ContainerAction{} }
 func (m *ContainerAction) String() string { return proto.CompactTextString(m) }
 func (*ContainerAction) ProtoMessage()    {}
 func (*ContainerAction) Descriptor() ([]byte, []int) {
-	return fileDescriptor_143136706133b591, []int{11}
+	return fileDescriptor_143136706133b591, []int{18}
 }
 
 func (m *ContainerAction) XXX_Unmarshal(b []byte) error {
@@ -783,84 +1185,269 @@ func (m *ContainerAction) GetAction() ContainerAction_Action {
 	return ContainerAction_KILL
 }
 
+type ExecStressRequest struct {
+	Scope                ExecStressRequest_Scope `protobuf:"varint,1,opt,name=scope,proto3,enum=chaosdaemon.ExecStressRequest_Scope" json:"scope,omitempty"`
+	Target               string                  `protobuf:"bytes,2,opt,name=target,proto3" json:"target,omitempty"`
+	Stressors            string                  `protobuf:"bytes,3,opt,name=stressors,proto3" json:"stressors,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}                `json:"-"`
+	XXX_unrecognized     []byte                  `json:"-"`
+	XXX_sizecache        int32                   `json:"-"`
+}
+
+func (m *ExecStressRequest) Reset()         { *m = ExecStressRequest{} }
+func (m *ExecStressRequest) String() string { return proto.CompactTextString(m) }
+func (*ExecStressRequest) ProtoMessage()    {}
+func (*ExecStressRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_143136706133b591, []int{19}
+}
+
+func (m *ExecStressRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_ExecStressRequest.Unmarshal(m, b)
+}
+func (m *ExecStressRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_ExecStressRequest.Marshal(b, m, deterministic)
+}
+func (m *ExecStressRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ExecStressRequest.Merge(m, src)
+}
+func (m *ExecStressRequest) XXX_Size() int {
+	return xxx_messageInfo_ExecStressRequest.Size(m)
+}
+func (m *ExecStressRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_ExecStressRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_ExecStressRequest proto.InternalMessageInfo
+
+func (m *ExecStressRequest) GetScope() ExecStressRequest_Scope {
+	if m != nil {
+		return m.Scope
+	}
+	return ExecStressRequest_CONTAINER
+}
+
+func (m *ExecStressRequest) GetTarget() string {
+	if m != nil {
+		return m.Target
+	}
+	return ""
+}
+
+func (m *ExecStressRequest) GetStressors() string {
+	if m != nil {
+		return m.Stressors
+	}
+	return ""
+}
+
+type ExecStressResponse struct {
+	Instance             string   `protobuf:"bytes,1,opt,name=instance,proto3" json:"instance,omitempty"`
+	StartTime            int64    `protobuf:"varint,2,opt,name=startTime,proto3" json:"startTime,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *ExecStressResponse) Reset()         { *m = ExecStressResponse{} }
+func (m *ExecStressResponse) String() string { return proto.CompactTextString(m) }
+func (*ExecStressResponse) ProtoMessage()    {}
+func (*ExecStressResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_143136706133b591, []int{20}
+}
+
+func (m *ExecStressResponse) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_ExecStressResponse.Unmarshal(m, b)
+}
+func (m *ExecStressResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_ExecStressResponse.Marshal(b, m, deterministic)
+}
+func (m *ExecStressResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ExecStressResponse.Merge(m, src)
+}
+func (m *ExecStressResponse) XXX_Size() int {
+	return xxx_messageInfo_ExecStressResponse.Size(m)
+}
+func (m *ExecStressResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_ExecStressResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_ExecStressResponse proto.InternalMessageInfo
+
+func (m *ExecStressResponse) GetInstance() string {
+	if m != nil {
+		return m.Instance
+	}
+	return ""
+}
+
+func (m *ExecStressResponse) GetStartTime() int64 {
+	if m != nil {
+		return m.StartTime
+	}
+	return 0
+}
+
+type CancelStressRequest struct {
+	Instance             string   `protobuf:"bytes,1,opt,name=instance,proto3" json:"instance,omitempty"`
+	StartTime            int64    `protobuf:"varint,2,opt,name=startTime,proto3" json:"startTime,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *CancelStressRequest) Reset()         { *m = CancelStressRequest{} }
+func (m *CancelStressRequest) String() string { return proto.CompactTextString(m) }
+func (*CancelStressRequest) ProtoMessage()    {}
+func (*CancelStressRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_143136706133b591, []int{21}
+}
+
+func (m *CancelStressRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_CancelStressRequest.Unmarshal(m, b)
+}
+func (m *CancelStressRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_CancelStressRequest.Marshal(b, m, deterministic)
+}
+func (m *CancelStressRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_CancelStressRequest.Merge(m, src)
+}
+func (m *CancelStressRequest) XXX_Size() int {
+	return xxx_messageInfo_CancelStressRequest.Size(m)
+}
+func (m *CancelStressRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_CancelStressRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_CancelStressRequest proto.InternalMessageInfo
+
+func (m *CancelStressRequest) GetInstance() string {
+	if m != nil {
+		return m.Instance
+	}
+	return ""
+}
+
+func (m *CancelStressRequest) GetStartTime() int64 {
+	if m != nil {
+		return m.StartTime
+	}
+	return 0
+}
+
 func init() {
 	proto.RegisterEnum("chaosdaemon.Rule_Action", Rule_Action_name, Rule_Action_value)
 	proto.RegisterEnum("chaosdaemon.Rule_Direction", Rule_Direction_name, Rule_Direction_value)
 	proto.RegisterEnum("chaosdaemon.ContainerAction_Action", ContainerAction_Action_name, ContainerAction_Action_value)
+	proto.RegisterEnum("chaosdaemon.ExecStressRequest_Scope", ExecStressRequest_Scope_name, ExecStressRequest_Scope_value)
+	proto.RegisterType((*TcHandle)(nil), "chaosdaemon.TcHandle")
 	proto.RegisterType((*ContainerRequest)(nil), "chaosdaemon.ContainerRequest")
 	proto.RegisterType((*ContainerResponse)(nil), "chaosdaemon.ContainerResponse")
 	proto.RegisterType((*NetemRequest)(nil), "chaosdaemon.NetemRequest")
 	proto.RegisterType((*Netem)(nil), "chaosdaemon.Netem")
 	proto.RegisterType((*TbfRequest)(nil), "chaosdaemon.TbfRequest")
 	proto.RegisterType((*Tbf)(nil), "chaosdaemon.Tbf")
+	proto.RegisterType((*QdiscRequest)(nil), "chaosdaemon.QdiscRequest")
+	proto.RegisterType((*Qdisc)(nil), "chaosdaemon.Qdisc")
+	proto.RegisterType((*EmatchFilterRequest)(nil), "chaosdaemon.EmatchFilterRequest")
+	proto.RegisterType((*EmatchFilter)(nil), "chaosdaemon.EmatchFilter")
+	proto.RegisterType((*TcFilterRequest)(nil), "chaosdaemon.TcFilterRequest")
+	proto.RegisterType((*TcFilter)(nil), "chaosdaemon.TcFilter")
 	proto.RegisterType((*IpSetRequest)(nil), "chaosdaemon.IpSetRequest")
 	proto.RegisterType((*IpSet)(nil), "chaosdaemon.IpSet")
 	proto.RegisterType((*IpTablesRequest)(nil), "chaosdaemon.IpTablesRequest")
 	proto.RegisterType((*Rule)(nil), "chaosdaemon.Rule")
 	proto.RegisterType((*TimeRequest)(nil), "chaosdaemon.TimeRequest")
 	proto.RegisterType((*ContainerAction)(nil), "chaosdaemon.ContainerAction")
+	proto.RegisterType((*ExecStressRequest)(nil), "chaosdaemon.ExecStressRequest")
+	proto.RegisterType((*ExecStressResponse)(nil), "chaosdaemon.ExecStressResponse")
+	proto.RegisterType((*CancelStressRequest)(nil), "chaosdaemon.CancelStressRequest")
 }
 
 func init() { proto.RegisterFile("chaosdaemon.proto", fileDescriptor_143136706133b591) }
 
 var fileDescriptor_143136706133b591 = []byte{
-	// 885 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xa4, 0x56, 0xcd, 0x6e, 0xdb, 0x46,
-	0x10, 0x36, 0x45, 0x49, 0x16, 0x47, 0x66, 0x22, 0x2f, 0x0a, 0x97, 0x89, 0xed, 0x40, 0x65, 0x61,
-	0x40, 0x97, 0x2a, 0x85, 0xdb, 0x4b, 0x11, 0xa0, 0x85, 0x63, 0xa9, 0xae, 0x10, 0x37, 0x31, 0xd6,
-	0xca, 0x29, 0x07, 0x81, 0x22, 0x97, 0xce, 0x56, 0xfc, 0x2b, 0xb9, 0x2c, 0x9a, 0x63, 0x9f, 0xae,
-	0x7d, 0x96, 0x3e, 0x45, 0x31, 0xb3, 0xa4, 0x22, 0xc9, 0xae, 0x2d, 0x24, 0x27, 0xcd, 0xdf, 0xf7,
-	0xed, 0xec, 0xcc, 0xec, 0x50, 0xb0, 0xef, 0xbf, 0xf7, 0xd2, 0x22, 0xf0, 0x44, 0x9c, 0x26, 0xc3,
-	0x2c, 0x4f, 0x55, 0xca, 0xba, 0x2b, 0xa6, 0xa7, 0x87, 0x37, 0x69, 0x7a, 0x13, 0x89, 0xe7, 0xe4,
-	0x9a, 0x97, 0xe1, 0x73, 0x11, 0x67, 0xea, 0x83, 0x8e, 0x74, 0x17, 0xd0, 0x3b, 0x4f, 0x13, 0xe5,
-	0xc9, 0x44, 0xe4, 0x5c, 0xfc, 0x5e, 0x8a, 0x42, 0xb1, 0xef, 0xa1, 0xed, 0xf9, 0x4a, 0xa6, 0x89,
-	0x63, 0xf4, 0x8d, 0x41, 0xf7, 0xf4, 0x68, 0xb8, 0x7a, 0xc2, 0x32, 0xfc, 0x8c, 0x62, 0x78, 0x15,
-	0xcb, 0xbe, 0x82, 0x3d, 0xbf, 0x76, 0xcd, 0x64, 0xe0, 0x34, 0xfa, 0xc6, 0xc0, 0xe2, 0xdd, 0xa5,
-	0x6d, 0x12, 0xb8, 0x27, 0xb0, 0xbf, 0x72, 0x58, 0x91, 0xa5, 0x49, 0x21, 0x58, 0x0f, 0xcc, 0x4c,
-	0x06, 0x74, 0x94, 0xcd, 0x51, 0x74, 0xdf, 0xc1, 0xde, 0x6b, 0xa1, 0x44, 0x5c, 0xe7, 0x33, 0x80,
-	0x56, 0x82, 0x7a, 0x95, 0x0e, 0x5b, 0x4b, 0x47, 0x47, 0xea, 0x80, 0x6d, 0x72, 0xf8, 0xb7, 0x01,
-	0x2d, 0xc2, 0x30, 0x06, 0x4d, 0x25, 0x63, 0x51, 0x9d, 0x4c, 0x32, 0x3b, 0x80, 0xf6, 0x6f, 0x52,
-	0x29, 0x91, 0x13, 0xd4, 0xe6, 0x95, 0xc6, 0x8e, 0x01, 0x02, 0x11, 0x79, 0x1f, 0x66, 0x7e, 0x9a,
-	0xe7, 0x8e, 0xd9, 0x37, 0x06, 0x0d, 0x6e, 0x91, 0xe5, 0x3c, 0xcd, 0x73, 0xf6, 0x05, 0xb4, 0x22,
-	0x19, 0x4b, 0xe5, 0x34, 0x09, 0xa5, 0x15, 0x3c, 0x20, 0x4a, 0x8b, 0xc2, 0x69, 0x51, 0x38, 0xc9,
-	0xec, 0x10, 0x2c, 0xfc, 0xd5, 0x3c, 0x6d, 0x72, 0x74, 0xd0, 0x40, 0x34, 0x3d, 0x30, 0x6f, 0xbc,
-	0xcc, 0xd9, 0xd5, 0xa5, 0xb8, 0xf1, 0x32, 0x76, 0x04, 0x56, 0x50, 0x66, 0x91, 0xf4, 0x3d, 0x25,
-	0x9c, 0x4e, 0x75, 0x6c, 0x6d, 0x60, 0x27, 0xf0, 0x68, 0xa9, 0x68, 0x46, 0x8b, 0x42, 0xec, 0xa5,
-	0x95, 0x68, 0x1d, 0xd8, 0xcd, 0x45, 0x9a, 0x07, 0x22, 0x77, 0x80, 0xfc, 0xb5, 0x8a, 0xf5, 0xaa,
-	0x44, 0x0d, 0xef, 0x92, 0xbb, 0x5b, 0xd9, 0x6a, 0x30, 0xba, 0xca, 0x4c, 0x39, 0x7b, 0x1a, 0x5c,
-	0xa9, 0xba, 0xd8, 0x24, 0x6a, 0xb0, 0xad, 0xc1, 0x95, 0x0d, 0xc1, 0xee, 0x35, 0xc0, 0x74, 0x1e,
-	0xd6, 0x7d, 0x74, 0xc1, 0x54, 0xf3, 0xb0, 0xea, 0x62, 0x6f, 0xad, 0x8b, 0x18, 0x85, 0xce, 0x6d,
-	0x3a, 0xf8, 0x97, 0x01, 0xe6, 0x74, 0x1e, 0x62, 0x79, 0x73, 0x2c, 0x0b, 0xf2, 0x35, 0x39, 0xc9,
-	0x1f, 0x1b, 0xd1, 0x58, 0x6d, 0xc4, 0x01, 0xb4, 0xe7, 0x65, 0x18, 0x0a, 0xdd, 0x39, 0x9b, 0x57,
-	0x1a, 0x36, 0x23, 0x13, 0xde, 0x62, 0x46, 0x34, 0x4d, 0xa2, 0xe9, 0xa0, 0x81, 0x23, 0xd5, 0x21,
-	0x58, 0xb1, 0x4c, 0x66, 0xf3, 0x32, 0x2f, 0x14, 0xb5, 0xd0, 0xe6, 0x9d, 0x58, 0x26, 0x2f, 0x51,
-	0xc7, 0x11, 0x9d, 0x64, 0xd7, 0x42, 0xad, 0x8c, 0xa8, 0xcc, 0x0a, 0xa1, 0xee, 0x1c, 0x51, 0x1d,
-	0xa9, 0x03, 0xb6, 0xb9, 0xe0, 0x37, 0xd0, 0x22, 0x08, 0xde, 0x30, 0xf1, 0xaa, 0x09, 0xb5, 0x38,
-	0xc9, 0x38, 0x23, 0x32, 0x2b, 0x9c, 0x46, 0xdf, 0x1c, 0x58, 0x1c, 0x45, 0xf7, 0x1d, 0x3c, 0x9e,
-	0x64, 0x53, 0x6f, 0x1e, 0x89, 0xa2, 0x4e, 0xe7, 0x04, 0x9a, 0x79, 0x19, 0x89, 0x2a, 0x9b, 0xfd,
-	0xb5, 0x6c, 0x78, 0x19, 0x09, 0x4e, 0xee, 0x6d, 0x72, 0xf9, 0xc7, 0x80, 0x26, 0x22, 0xd8, 0xb7,
-	0x6b, 0x4b, 0xe1, 0xd1, 0xa9, 0x73, 0x8b, 0x74, 0xb8, 0xb1, 0x10, 0x7e, 0x00, 0x2b, 0x90, 0xb9,
-	0xd0, 0xa0, 0x06, 0x81, 0x0e, 0x6f, 0x83, 0x46, 0x75, 0x08, 0xff, 0x18, 0x8d, 0x97, 0xc4, 0x62,
-	0x9a, 0x94, 0x0f, 0x8a, 0xee, 0x31, 0xb4, 0x35, 0x3d, 0xdb, 0x05, 0xf3, 0x6c, 0x34, 0xea, 0xed,
-	0x30, 0x80, 0xf6, 0x68, 0x7c, 0x39, 0x9e, 0x8e, 0x7b, 0x86, 0xeb, 0x82, 0xb5, 0x24, 0x62, 0x16,
-	0xb4, 0x26, 0xaf, 0xaf, 0xde, 0x4e, 0x75, 0xcc, 0x9b, 0xb7, 0x53, 0x94, 0x0d, 0xf7, 0x4f, 0xe8,
-	0x4e, 0x65, 0x2c, 0xea, 0x1a, 0x6d, 0x5e, 0xde, 0xb8, 0x75, 0x79, 0x9d, 0x86, 0x4f, 0xb9, 0x9b,
-	0x98, 0x86, 0x4f, 0x1d, 0x41, 0x93, 0x49, 0x26, 0x92, 0x59, 0x1f, 0xf6, 0xfc, 0x68, 0x31, 0x93,
-	0x41, 0x31, 0x8b, 0xbd, 0x62, 0x51, 0x0d, 0x12, 0xf8, 0xd1, 0x62, 0x12, 0x14, 0xbf, 0x7a, 0xc5,
-	0xc2, 0x4d, 0xe0, 0xf1, 0xc6, 0xd6, 0x64, 0x2f, 0x36, 0xca, 0xf9, 0xf5, 0x7d, 0x3b, 0x76, 0xa3,
-	0xb2, 0xee, 0xb3, 0x65, 0x31, 0x3a, 0xd0, 0x7c, 0x35, 0xb9, 0xbc, 0xd4, 0x37, 0xbd, 0x18, 0x4f,
-	0xaf, 0x26, 0xa3, 0x9e, 0x71, 0xfa, 0x77, 0x0b, 0xba, 0xe7, 0x48, 0x37, 0x22, 0x3a, 0xf6, 0x13,
-	0x74, 0xae, 0x85, 0xd2, 0x5b, 0xef, 0xc9, 0x1d, 0xdb, 0x53, 0x57, 0xe4, 0xe9, 0xc1, 0x50, 0x7f,
-	0x29, 0x86, 0xf5, 0x97, 0x62, 0x38, 0xc6, 0x2f, 0x85, 0xbb, 0xc3, 0x5e, 0x42, 0x77, 0x24, 0x22,
-	0xa1, 0xc4, 0x67, 0x70, 0xbc, 0x80, 0xf6, 0xb5, 0x50, 0xf8, 0x70, 0xbf, 0xbc, 0xf5, 0xf4, 0x1f,
-	0x04, 0xff, 0x08, 0x96, 0x4e, 0xe0, 0x13, 0xf1, 0x67, 0x00, 0x3f, 0x47, 0x65, 0xf1, 0x5e, 0xbf,
-	0xab, 0x27, 0x77, 0x3c, 0xcf, 0x07, 0x29, 0x2e, 0xc0, 0xae, 0x28, 0x14, 0xbd, 0x35, 0x76, 0xb4,
-	0xc1, 0xb2, 0xf6, 0x04, 0xef, 0x21, 0x3a, 0x07, 0x1b, 0x0b, 0x21, 0x63, 0xf1, 0x26, 0x0c, 0x71,
-	0x25, 0xac, 0x3f, 0xa5, 0x95, 0x19, 0xbd, 0x37, 0x9b, 0x7d, 0x2e, 0xfc, 0xf4, 0x0f, 0x91, 0x7f,
-	0x26, 0xd1, 0x2f, 0x60, 0x2f, 0xa7, 0xed, 0x95, 0x8c, 0x22, 0x76, 0x7c, 0xf7, 0x24, 0x3e, 0xcc,
-	0xc4, 0x57, 0xa6, 0xfc, 0x42, 0xa8, 0x2b, 0x19, 0x3c, 0xc4, 0xf5, 0xec, 0xff, 0xdc, 0xfa, 0xaf,
-	0x81, 0xbb, 0x33, 0x6f, 0xd3, 0x29, 0xdf, 0xfd, 0x17, 0x00, 0x00, 0xff, 0xff, 0x47, 0x93, 0x13,
-	0x5f, 0xe4, 0x08, 0x00, 0x00,
+	// 1286 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xa4, 0x56, 0x4b, 0x93, 0xda, 0x46,
+	0x10, 0xb6, 0x78, 0x2d, 0x6a, 0xc0, 0xb0, 0xe3, 0xc4, 0xd1, 0xee, 0xfa, 0xb1, 0x51, 0xe2, 0x2a,
+	0x5f, 0x8c, 0x13, 0x27, 0x95, 0x2a, 0xc7, 0x55, 0x71, 0x61, 0xc0, 0x36, 0x65, 0xef, 0x23, 0x02,
+	0x9f, 0x7c, 0xa0, 0x84, 0x34, 0xb0, 0x63, 0xf4, 0xb2, 0x66, 0x48, 0x79, 0x8f, 0x49, 0xe5, 0x9a,
+	0xbf, 0x91, 0xff, 0x90, 0x7f, 0xe0, 0x9f, 0x95, 0x9a, 0x87, 0x40, 0x62, 0x59, 0x60, 0xbd, 0x27,
+	0x75, 0xf7, 0x74, 0x7f, 0xd3, 0x2f, 0x75, 0x0f, 0xec, 0x3a, 0x67, 0x76, 0x48, 0x5d, 0x1b, 0xfb,
+	0x61, 0xd0, 0x8c, 0xe2, 0x90, 0x85, 0xa8, 0x92, 0x12, 0xed, 0x1f, 0x4c, 0xc2, 0x70, 0xe2, 0xe1,
+	0xc7, 0xe2, 0x68, 0x34, 0x1b, 0x3f, 0xc6, 0x7e, 0xc4, 0xce, 0xa5, 0xa6, 0xf9, 0x0b, 0x94, 0x07,
+	0xce, 0x6b, 0x3b, 0x70, 0x3d, 0x8c, 0xbe, 0x82, 0xa2, 0x6f, 0x7f, 0x08, 0x63, 0x43, 0x3b, 0xd4,
+	0x1e, 0xd6, 0x2c, 0xc9, 0x08, 0x29, 0x09, 0xc2, 0xd8, 0xc8, 0x29, 0x29, 0x67, 0xcc, 0x29, 0x34,
+	0xda, 0x61, 0xc0, 0x6c, 0x12, 0xe0, 0xd8, 0xc2, 0x1f, 0x67, 0x98, 0x32, 0xf4, 0x33, 0x94, 0x6c,
+	0x87, 0x91, 0x30, 0x10, 0x00, 0x95, 0x27, 0x77, 0x9a, 0x69, 0xcf, 0xe6, 0xea, 0x2d, 0xa1, 0x63,
+	0x29, 0x5d, 0xf4, 0x2d, 0x54, 0x9d, 0xe4, 0x68, 0x48, 0x5c, 0x71, 0x8d, 0x6e, 0x55, 0xe6, 0xb2,
+	0x9e, 0x6b, 0x3e, 0x80, 0xdd, 0xd4, 0x65, 0x34, 0x0a, 0x03, 0x8a, 0x51, 0x03, 0xf2, 0x11, 0x71,
+	0x95, 0xaf, 0x9c, 0x34, 0xff, 0xd3, 0xa0, 0x7a, 0x8c, 0x19, 0xf6, 0x13, 0x87, 0x1e, 0x42, 0x31,
+	0xe0, 0xbc, 0xf2, 0x07, 0x65, 0xfc, 0x91, 0x9a, 0x52, 0x61, 0x0b, 0x27, 0xd0, 0x23, 0x28, 0x9d,
+	0x89, 0x3c, 0x19, 0x79, 0x81, 0xf6, 0x75, 0x06, 0x2d, 0x49, 0xa2, 0xa5, 0x94, 0xb8, 0x7a, 0x64,
+	0xc7, 0x38, 0x60, 0x46, 0x61, 0xad, 0xba, 0x54, 0x32, 0x3f, 0xe7, 0xa1, 0x28, 0x3c, 0x42, 0x08,
+	0x0a, 0x8c, 0xf8, 0x58, 0x05, 0x26, 0x68, 0x74, 0x1b, 0x4a, 0x1f, 0x08, 0x63, 0x38, 0x29, 0x82,
+	0xe2, 0xd0, 0x5d, 0x00, 0x17, 0x7b, 0xf6, 0xf9, 0xd0, 0x09, 0xe3, 0x58, 0xf8, 0x95, 0xb3, 0x74,
+	0x21, 0x69, 0x87, 0xb1, 0x28, 0x9d, 0x47, 0x7c, 0x22, 0x5d, 0xa8, 0x59, 0x92, 0xe1, 0x17, 0x78,
+	0x21, 0xa5, 0x46, 0x51, 0xa8, 0x0b, 0x1a, 0x1d, 0x80, 0xce, 0xbf, 0x12, 0xa7, 0x24, 0x0e, 0xca,
+	0x5c, 0x20, 0x60, 0x1a, 0x90, 0x9f, 0xd8, 0x91, 0xb1, 0x23, 0x33, 0x3d, 0xb1, 0x23, 0x74, 0x07,
+	0x74, 0x77, 0x16, 0x79, 0xc4, 0xb1, 0x19, 0x36, 0xca, 0xea, 0xda, 0x44, 0x80, 0x1e, 0xc0, 0xcd,
+	0x39, 0x23, 0x11, 0x75, 0xa1, 0x52, 0x9b, 0x4b, 0x05, 0xac, 0x01, 0x3b, 0x31, 0x0e, 0x63, 0x17,
+	0xc7, 0x06, 0x88, 0xf3, 0x84, 0xe5, 0xd5, 0x50, 0xa4, 0x34, 0xaf, 0x88, 0xe3, 0x8a, 0x92, 0x25,
+	0xc6, 0xfc, 0x68, 0x16, 0x31, 0xa3, 0x2a, 0x8d, 0x15, 0x2b, 0x4b, 0x29, 0x48, 0x69, 0x5c, 0x93,
+	0xc6, 0x4a, 0x26, 0x8c, 0x17, 0xb5, 0xb9, 0xb9, 0x45, 0x6d, 0x52, 0x95, 0xaf, 0x6f, 0x51, 0x79,
+	0xb3, 0x0f, 0x30, 0x18, 0x8d, 0x93, 0x1e, 0x34, 0x21, 0xcf, 0x46, 0x63, 0xd5, 0x81, 0x8d, 0xac,
+	0xe5, 0x68, 0x6c, 0xf1, 0xc3, 0x6d, 0x7e, 0x81, 0x3f, 0x35, 0xc8, 0x0f, 0x46, 0x63, 0x5e, 0xbc,
+	0x98, 0x27, 0x9d, 0xe3, 0x15, 0x2c, 0x41, 0x2f, 0xca, 0x9c, 0x4b, 0x97, 0xf9, 0x36, 0x94, 0x46,
+	0xb3, 0xf1, 0x18, 0xcb, 0xbe, 0xa8, 0x59, 0x8a, 0xe3, 0xa5, 0x8e, 0xb0, 0x3d, 0x1d, 0x0a, 0x98,
+	0x82, 0x80, 0x29, 0x73, 0x81, 0xc5, 0xa1, 0x0e, 0x40, 0xf7, 0x49, 0x30, 0x1c, 0xcd, 0x62, 0xca,
+	0x44, 0x83, 0xd4, 0xac, 0xb2, 0x4f, 0x82, 0x17, 0x9c, 0x37, 0xdf, 0x43, 0xf5, 0x77, 0x97, 0x50,
+	0x27, 0xf5, 0x7b, 0x7d, 0xe4, 0xfc, 0xca, 0xdf, 0x4b, 0x6a, 0x4a, 0x85, 0x6d, 0x02, 0xfc, 0x47,
+	0x83, 0xa2, 0xb0, 0x49, 0x55, 0x47, 0xbb, 0x5a, 0x75, 0x72, 0xdb, 0xfc, 0x97, 0xfc, 0xf7, 0x3a,
+	0x8f, 0xe4, 0x4f, 0xac, 0x5b, 0x82, 0xe6, 0x32, 0x3b, 0x9e, 0x50, 0xa3, 0x70, 0x98, 0xe7, 0x32,
+	0x4e, 0x9b, 0x53, 0xb8, 0xd5, 0xf5, 0x6d, 0xe6, 0x9c, 0xbd, 0x24, 0x1e, 0x5b, 0xcc, 0xb8, 0x1f,
+	0xa1, 0x34, 0x16, 0x02, 0xe5, 0xdc, 0x5e, 0xe6, 0xb6, 0x8c, 0x85, 0x52, 0xdc, 0x26, 0xf8, 0xbf,
+	0x35, 0xa8, 0xa6, 0x6d, 0xe5, 0x28, 0x66, 0xce, 0x99, 0xb8, 0x45, 0xb7, 0x24, 0x93, 0xca, 0x4c,
+	0x6e, 0x9b, 0xcc, 0x3c, 0x86, 0x1d, 0xc7, 0xb3, 0x29, 0x25, 0xee, 0xfa, 0x91, 0x95, 0x68, 0x99,
+	0x0e, 0xd4, 0x07, 0x4e, 0x36, 0xde, 0x47, 0x4b, 0xf1, 0x2e, 0x43, 0x5c, 0x3d, 0xd6, 0xa7, 0x7c,
+	0xe3, 0xa8, 0x30, 0xaf, 0x56, 0x6a, 0xde, 0x80, 0xbd, 0xa8, 0x8f, 0x59, 0xaa, 0x01, 0x49, 0x44,
+	0x31, 0x5b, 0xd9, 0x80, 0x52, 0x53, 0x2a, 0x6c, 0xe3, 0xd7, 0x23, 0x28, 0x0a, 0x13, 0xde, 0x0d,
+	0x81, 0xad, 0x06, 0xb0, 0x6e, 0x09, 0x9a, 0x8f, 0x40, 0x12, 0x51, 0x23, 0x27, 0x1a, 0x84, 0x93,
+	0xe6, 0x7b, 0xa8, 0xf7, 0xa2, 0x81, 0x3d, 0xf2, 0x30, 0x4d, 0xdc, 0x79, 0x00, 0x85, 0x78, 0xe6,
+	0x61, 0xe5, 0xcd, 0x6e, 0xc6, 0x1b, 0x6b, 0xe6, 0x61, 0x4b, 0x1c, 0x6f, 0xe3, 0xcb, 0x67, 0x0d,
+	0x0a, 0xdc, 0x02, 0xfd, 0x90, 0x59, 0xa9, 0x37, 0x9f, 0x18, 0x17, 0x40, 0x9b, 0x4b, 0xeb, 0xf4,
+	0x29, 0xe8, 0x2e, 0x89, 0xb1, 0x34, 0xca, 0x09, 0xa3, 0x83, 0x8b, 0x46, 0x9d, 0x44, 0xc5, 0x5a,
+	0x68, 0xf3, 0x20, 0x79, 0x32, 0xe5, 0x9f, 0xc1, 0x49, 0xf3, 0x2e, 0x94, 0x24, 0x3c, 0xda, 0x81,
+	0x7c, 0xab, 0xd3, 0x69, 0xdc, 0x40, 0x00, 0xa5, 0x4e, 0xf7, 0x6d, 0x77, 0xd0, 0x6d, 0x68, 0xa6,
+	0x09, 0xfa, 0x1c, 0x08, 0xe9, 0x50, 0xec, 0x1d, 0x9f, 0xbe, 0x1b, 0x48, 0x9d, 0x93, 0x77, 0x03,
+	0x4e, 0x6b, 0xe6, 0x27, 0xa8, 0x0c, 0x88, 0x8f, 0x93, 0x1c, 0x2d, 0x07, 0xaf, 0x5d, 0x5c, 0xb4,
+	0xc2, 0x0d, 0x47, 0xf8, 0x9e, 0xe7, 0x6e, 0x38, 0xa2, 0x22, 0x5c, 0x94, 0x17, 0x22, 0x41, 0xa3,
+	0x43, 0xa8, 0x3a, 0xde, 0x74, 0x48, 0x5c, 0x3a, 0xf4, 0x6d, 0x3a, 0x55, 0x93, 0x0c, 0x1c, 0x6f,
+	0xda, 0x73, 0xe9, 0x91, 0x4d, 0xa7, 0x66, 0x00, 0xf5, 0xa5, 0x37, 0x07, 0x7a, 0xb6, 0x94, 0xce,
+	0xef, 0xd6, 0xbd, 0x50, 0x96, 0x32, 0x6b, 0xde, 0x9b, 0x27, 0xa3, 0x0c, 0x85, 0x37, 0xbd, 0xb7,
+	0x6f, 0x65, 0xa4, 0xaf, 0xba, 0x83, 0xd3, 0x5e, 0xa7, 0xa1, 0x99, 0xff, 0x6a, 0xb0, 0xdb, 0xfd,
+	0x84, 0x9d, 0x3e, 0x8b, 0x31, 0x9d, 0x37, 0xc5, 0xaf, 0x50, 0xa4, 0x4e, 0x18, 0x61, 0x75, 0xe3,
+	0xf7, 0xd9, 0x79, 0xb1, 0xac, 0xde, 0xec, 0x73, 0x5d, 0x4b, 0x9a, 0xf0, 0x11, 0xce, 0xec, 0x78,
+	0x82, 0x99, 0xea, 0x11, 0xc5, 0xf1, 0xf5, 0x4b, 0x85, 0x55, 0x18, 0x53, 0x55, 0xae, 0x85, 0xc0,
+	0xbc, 0x0f, 0x45, 0x81, 0x82, 0x6a, 0xa0, 0xb7, 0x4f, 0x8e, 0x07, 0xad, 0xde, 0x71, 0xd7, 0x6a,
+	0xdc, 0xe0, 0x25, 0x3c, 0x3d, 0xe1, 0x8e, 0x1e, 0x03, 0x4a, 0x5f, 0xac, 0xde, 0x53, 0xfb, 0x50,
+	0x26, 0x01, 0x65, 0x76, 0xe0, 0x24, 0xad, 0x3f, 0xe7, 0xe5, 0x85, 0x76, 0xcc, 0x78, 0x25, 0x55,
+	0x61, 0x16, 0x02, 0xf3, 0x04, 0x6e, 0xb5, 0xb9, 0x9a, 0x97, 0x8d, 0xfc, 0x8b, 0x01, 0x9f, 0xfc,
+	0xa5, 0x43, 0xa5, 0xcd, 0xd3, 0xd4, 0x11, 0x69, 0x42, 0xcf, 0xa1, 0xdc, 0xc7, 0x4c, 0x3e, 0x8f,
+	0xf6, 0x56, 0x3c, 0xe2, 0xe4, 0x85, 0xfb, 0xb7, 0x9b, 0xf2, 0xa5, 0xdb, 0x4c, 0x5e, 0xba, 0xcd,
+	0x2e, 0x7f, 0xe9, 0x9a, 0x37, 0xd0, 0x0b, 0xa8, 0x74, 0xb0, 0x87, 0x19, 0xbe, 0x06, 0xc6, 0x33,
+	0x28, 0xf5, 0x31, 0xe3, 0x3b, 0xf8, 0x9b, 0x0b, 0x5b, 0x7c, 0xa3, 0xf1, 0x6f, 0xa0, 0x4b, 0x07,
+	0xbe, 0xd0, 0xfe, 0x39, 0x94, 0x5b, 0xae, 0x2b, 0xf7, 0xe3, 0xde, 0x8a, 0x3d, 0xbb, 0x0d, 0x40,
+	0x07, 0x7b, 0xd7, 0x00, 0x38, 0x82, 0x7a, 0xcb, 0x75, 0x33, 0x4b, 0xea, 0xf0, 0xf2, 0xdd, 0xb7,
+	0x11, 0xae, 0x2b, 0x2a, 0x32, 0x5f, 0x04, 0x77, 0x56, 0xaf, 0x95, 0x8d, 0x30, 0x2d, 0x80, 0x97,
+	0xde, 0x8c, 0x9e, 0xc9, 0xc9, 0xbd, 0xb7, 0x62, 0x01, 0x6c, 0x84, 0x78, 0x05, 0x35, 0x05, 0xc1,
+	0xc4, 0x34, 0x5f, 0xf2, 0x65, 0x69, 0xc8, 0xaf, 0x01, 0x6a, 0x43, 0x8d, 0x37, 0x08, 0xf1, 0xf1,
+	0xc9, 0x78, 0xcc, 0x97, 0x4e, 0x76, 0x58, 0xa7, 0xa6, 0xe0, 0x5a, 0x6f, 0x76, 0x2d, 0xec, 0x84,
+	0x7f, 0xe0, 0xf8, 0x9a, 0x40, 0xaf, 0xa1, 0x36, 0x9f, 0x67, 0x6f, 0x88, 0xe7, 0xa1, 0xbb, 0xab,
+	0x67, 0xdd, 0x66, 0x24, 0x2b, 0x35, 0x47, 0x5f, 0x61, 0x76, 0x4a, 0xdc, 0x4d, 0x58, 0xf7, 0x2e,
+	0x3b, 0x96, 0xa3, 0x46, 0x60, 0xd6, 0x16, 0x23, 0x28, 0x8c, 0x29, 0xba, 0xb7, 0x7e, 0x2e, 0xee,
+	0xdf, 0xbf, 0xf4, 0x7c, 0x8e, 0x79, 0x04, 0xf5, 0xf4, 0x18, 0xe2, 0xa8, 0xd9, 0x0e, 0x5d, 0x31,
+	0xa4, 0x2e, 0x0f, 0x7b, 0x54, 0x12, 0x92, 0x9f, 0xfe, 0x0f, 0x00, 0x00, 0xff, 0xff, 0xe6, 0xe5,
+	0x1e, 0x4d, 0x5f, 0x0f, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -879,12 +1466,19 @@ type ChaosDaemonClient interface {
 	DeleteNetem(ctx context.Context, in *NetemRequest, opts ...grpc.CallOption) (*empty.Empty, error)
 	SetTbf(ctx context.Context, in *TbfRequest, opts ...grpc.CallOption) (*empty.Empty, error)
 	DeleteTbf(ctx context.Context, in *TbfRequest, opts ...grpc.CallOption) (*empty.Empty, error)
+	AddQdisc(ctx context.Context, in *QdiscRequest, opts ...grpc.CallOption) (*empty.Empty, error)
+	DelQdisc(ctx context.Context, in *QdiscRequest, opts ...grpc.CallOption) (*empty.Empty, error)
+	AddEmatchFilter(ctx context.Context, in *EmatchFilterRequest, opts ...grpc.CallOption) (*empty.Empty, error)
+	// generic tc filter del command
+	DelTcFilter(ctx context.Context, in *TcFilterRequest, opts ...grpc.CallOption) (*empty.Empty, error)
 	FlushIpSet(ctx context.Context, in *IpSetRequest, opts ...grpc.CallOption) (*empty.Empty, error)
 	FlushIptables(ctx context.Context, in *IpTablesRequest, opts ...grpc.CallOption) (*empty.Empty, error)
 	SetTimeOffset(ctx context.Context, in *TimeRequest, opts ...grpc.CallOption) (*empty.Empty, error)
 	RecoverTimeOffset(ctx context.Context, in *TimeRequest, opts ...grpc.CallOption) (*empty.Empty, error)
 	ContainerKill(ctx context.Context, in *ContainerRequest, opts ...grpc.CallOption) (*empty.Empty, error)
 	ContainerGetPid(ctx context.Context, in *ContainerRequest, opts ...grpc.CallOption) (*ContainerResponse, error)
+	ExecStressors(ctx context.Context, in *ExecStressRequest, opts ...grpc.CallOption) (*ExecStressResponse, error)
+	CancelStressors(ctx context.Context, in *CancelStressRequest, opts ...grpc.CallOption) (*empty.Empty, error)
 }
 
 type chaosDaemonClient struct {
@@ -925,6 +1519,42 @@ func (c *chaosDaemonClient) SetTbf(ctx context.Context, in *TbfRequest, opts ...
 func (c *chaosDaemonClient) DeleteTbf(ctx context.Context, in *TbfRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
 	out := new(empty.Empty)
 	err := c.cc.Invoke(ctx, "/chaosdaemon.ChaosDaemon/DeleteTbf", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *chaosDaemonClient) AddQdisc(ctx context.Context, in *QdiscRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
+	out := new(empty.Empty)
+	err := c.cc.Invoke(ctx, "/chaosdaemon.ChaosDaemon/AddQdisc", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *chaosDaemonClient) DelQdisc(ctx context.Context, in *QdiscRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
+	out := new(empty.Empty)
+	err := c.cc.Invoke(ctx, "/chaosdaemon.ChaosDaemon/DelQdisc", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *chaosDaemonClient) AddEmatchFilter(ctx context.Context, in *EmatchFilterRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
+	out := new(empty.Empty)
+	err := c.cc.Invoke(ctx, "/chaosdaemon.ChaosDaemon/AddEmatchFilter", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *chaosDaemonClient) DelTcFilter(ctx context.Context, in *TcFilterRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
+	out := new(empty.Empty)
+	err := c.cc.Invoke(ctx, "/chaosdaemon.ChaosDaemon/DelTcFilter", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -985,18 +1615,43 @@ func (c *chaosDaemonClient) ContainerGetPid(ctx context.Context, in *ContainerRe
 	return out, nil
 }
 
+func (c *chaosDaemonClient) ExecStressors(ctx context.Context, in *ExecStressRequest, opts ...grpc.CallOption) (*ExecStressResponse, error) {
+	out := new(ExecStressResponse)
+	err := c.cc.Invoke(ctx, "/chaosdaemon.ChaosDaemon/ExecStressors", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *chaosDaemonClient) CancelStressors(ctx context.Context, in *CancelStressRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
+	out := new(empty.Empty)
+	err := c.cc.Invoke(ctx, "/chaosdaemon.ChaosDaemon/CancelStressors", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ChaosDaemonServer is the server API for ChaosDaemon service.
 type ChaosDaemonServer interface {
 	SetNetem(context.Context, *NetemRequest) (*empty.Empty, error)
 	DeleteNetem(context.Context, *NetemRequest) (*empty.Empty, error)
 	SetTbf(context.Context, *TbfRequest) (*empty.Empty, error)
 	DeleteTbf(context.Context, *TbfRequest) (*empty.Empty, error)
+	AddQdisc(context.Context, *QdiscRequest) (*empty.Empty, error)
+	DelQdisc(context.Context, *QdiscRequest) (*empty.Empty, error)
+	AddEmatchFilter(context.Context, *EmatchFilterRequest) (*empty.Empty, error)
+	// generic tc filter del command
+	DelTcFilter(context.Context, *TcFilterRequest) (*empty.Empty, error)
 	FlushIpSet(context.Context, *IpSetRequest) (*empty.Empty, error)
 	FlushIptables(context.Context, *IpTablesRequest) (*empty.Empty, error)
 	SetTimeOffset(context.Context, *TimeRequest) (*empty.Empty, error)
 	RecoverTimeOffset(context.Context, *TimeRequest) (*empty.Empty, error)
 	ContainerKill(context.Context, *ContainerRequest) (*empty.Empty, error)
 	ContainerGetPid(context.Context, *ContainerRequest) (*ContainerResponse, error)
+	ExecStressors(context.Context, *ExecStressRequest) (*ExecStressResponse, error)
+	CancelStressors(context.Context, *CancelStressRequest) (*empty.Empty, error)
 }
 
 func RegisterChaosDaemonServer(s *grpc.Server, srv ChaosDaemonServer) {
@@ -1071,6 +1726,78 @@ func _ChaosDaemon_DeleteTbf_Handler(srv interface{}, ctx context.Context, dec fu
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(ChaosDaemonServer).DeleteTbf(ctx, req.(*TbfRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ChaosDaemon_AddQdisc_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(QdiscRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ChaosDaemonServer).AddQdisc(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/chaosdaemon.ChaosDaemon/AddQdisc",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ChaosDaemonServer).AddQdisc(ctx, req.(*QdiscRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ChaosDaemon_DelQdisc_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(QdiscRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ChaosDaemonServer).DelQdisc(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/chaosdaemon.ChaosDaemon/DelQdisc",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ChaosDaemonServer).DelQdisc(ctx, req.(*QdiscRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ChaosDaemon_AddEmatchFilter_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(EmatchFilterRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ChaosDaemonServer).AddEmatchFilter(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/chaosdaemon.ChaosDaemon/AddEmatchFilter",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ChaosDaemonServer).AddEmatchFilter(ctx, req.(*EmatchFilterRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ChaosDaemon_DelTcFilter_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(TcFilterRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ChaosDaemonServer).DelTcFilter(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/chaosdaemon.ChaosDaemon/DelTcFilter",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ChaosDaemonServer).DelTcFilter(ctx, req.(*TcFilterRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1183,6 +1910,42 @@ func _ChaosDaemon_ContainerGetPid_Handler(srv interface{}, ctx context.Context, 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ChaosDaemon_ExecStressors_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ExecStressRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ChaosDaemonServer).ExecStressors(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/chaosdaemon.ChaosDaemon/ExecStressors",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ChaosDaemonServer).ExecStressors(ctx, req.(*ExecStressRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ChaosDaemon_CancelStressors_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CancelStressRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ChaosDaemonServer).CancelStressors(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/chaosdaemon.ChaosDaemon/CancelStressors",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ChaosDaemonServer).CancelStressors(ctx, req.(*CancelStressRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _ChaosDaemon_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "chaosdaemon.ChaosDaemon",
 	HandlerType: (*ChaosDaemonServer)(nil),
@@ -1202,6 +1965,22 @@ var _ChaosDaemon_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeleteTbf",
 			Handler:    _ChaosDaemon_DeleteTbf_Handler,
+		},
+		{
+			MethodName: "AddQdisc",
+			Handler:    _ChaosDaemon_AddQdisc_Handler,
+		},
+		{
+			MethodName: "DelQdisc",
+			Handler:    _ChaosDaemon_DelQdisc_Handler,
+		},
+		{
+			MethodName: "AddEmatchFilter",
+			Handler:    _ChaosDaemon_AddEmatchFilter_Handler,
+		},
+		{
+			MethodName: "DelTcFilter",
+			Handler:    _ChaosDaemon_DelTcFilter_Handler,
 		},
 		{
 			MethodName: "FlushIpSet",
@@ -1226,6 +2005,14 @@ var _ChaosDaemon_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ContainerGetPid",
 			Handler:    _ChaosDaemon_ContainerGetPid_Handler,
+		},
+		{
+			MethodName: "ExecStressors",
+			Handler:    _ChaosDaemon_ExecStressors_Handler,
+		},
+		{
+			MethodName: "CancelStressors",
+			Handler:    _ChaosDaemon_CancelStressors_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

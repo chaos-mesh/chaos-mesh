@@ -54,25 +54,28 @@ const (
 	BandwidthAction NetworkChaosAction = "bandwidth"
 )
 
-// PartitionDirection represents the block direction from source to target
-type PartitionDirection string
+// Direction represents traffic direction from source to target,
+// it could be netem, delay, loss, duplicate, corrupt or partition,
+// check comments below for detail direction flow.
+type Direction string
 
 const (
-	// To represents block network packet from source to target
-	To PartitionDirection = "to"
+	// To represents network packet from source to target
+	To Direction = "to"
 
-	// From represents block network packet to source from target
-	From PartitionDirection = "from"
+	// From represents network packet to source from target
+	From Direction = "from"
 
-	// Both represents block both directions
-	Both PartitionDirection = "both"
+	// Both represents both directions
+	Both Direction = "both"
 )
 
-type PartitionTarget struct {
-	// TargetSelector defines the partition target selector
+// Target represents network partition and netem action target.
+type Target struct {
+	// TargetSelector defines the target selector
 	TargetSelector SelectorSpec `json:"selector"`
 
-	// TargetMode defines the partition target selector mode
+	// TargetMode defines the target selector mode
 	// +kubebuilder:validation:Enum=one;all;fixed;fixed-percent;random-max-percent;""
 	TargetMode PodMode `json:"mode"`
 
@@ -85,17 +88,17 @@ type PartitionTarget struct {
 }
 
 // GetSelector is a getter for Selector (for implementing SelectSpec)
-func (in *PartitionTarget) GetSelector() SelectorSpec {
+func (in *Target) GetSelector() SelectorSpec {
 	return in.TargetSelector
 }
 
 // GetMode is a getter for Mode (for implementing SelectSpec)
-func (in *PartitionTarget) GetMode() PodMode {
+func (in *Target) GetMode() PodMode {
 	return in.TargetMode
 }
 
 // GetValue is a getter for Value (for implementing SelectSpec)
-func (in *PartitionTarget) GetValue() string {
+func (in *Target) GetValue() string {
 	return in.TargetValue
 }
 
@@ -145,14 +148,14 @@ type NetworkChaosSpec struct {
 	// +optional
 	Bandwidth *BandwidthSpec `json:"bandwidth,omitempty"`
 
-	// Direction represents the partition direction
+	// Direction represents the direction, this applies on netem and network partition action
 	// +optional
 	// +kubebuilder:validation:Enum=to;from;both;""
-	Direction PartitionDirection `json:"direction,omitempty"`
+	Direction Direction `json:"direction,omitempty"`
 
-	// Target represents network partition target
+	// Target represents network target, this applies on netem and network partition action
 	// +optional
-	Target PartitionTarget `json:"target,omitempty"`
+	Target *Target `json:"target,omitempty"`
 
 	// Next time when this action will be applied again
 	// +optional

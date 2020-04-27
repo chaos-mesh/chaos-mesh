@@ -21,6 +21,16 @@ var _ utils.ChaosDaemonClientInterface = (*MockChaosDaemonClient)(nil)
 // MockChaosDaemonClient implements ChaosDaemonClientInterface for unit testing
 type MockChaosDaemonClient struct{}
 
+// ExecStressors mocks executing pod stressors on chaos-daemon
+func (c *MockChaosDaemonClient) ExecStressors(ctx context.Context, in *chaosdaemon.ExecStressRequest, opts ...grpc.CallOption) (*chaosdaemon.ExecStressResponse, error) {
+	return nil, mockError("ExecStressors")
+}
+
+// CancelStressors mocks canceling pod stressors on chaos-daemon
+func (c *MockChaosDaemonClient) CancelStressors(ctx context.Context, in *chaosdaemon.CancelStressRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
+	return nil, mockError("CancelStressors")
+}
+
 func (c *MockChaosDaemonClient) ContainerGetPid(ctx context.Context, in *chaosdaemon.ContainerRequest, opts ...grpc.CallOption) (*chaosdaemon.ContainerResponse, error) {
 	if resp := mock.On("MockContainerGetPidResponse"); resp != nil {
 		return resp.(*chaosdaemon.ContainerResponse), nil
@@ -49,6 +59,22 @@ func (c *MockChaosDaemonClient) SetTbf(ctx context.Context, in *chaosdaemon.TbfR
 
 func (c *MockChaosDaemonClient) DeleteTbf(ctx context.Context, in *chaosdaemon.TbfRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
 	return nil, mockError("DeleteTbf")
+}
+
+func (c *MockChaosDaemonClient) AddQdisc(ctx context.Context, in *chaosdaemon.QdiscRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
+	return nil, mockError("AddQdisc")
+}
+
+func (c *MockChaosDaemonClient) DelQdisc(ctx context.Context, in *chaosdaemon.QdiscRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
+	return nil, mockError("DelQdisc")
+}
+
+func (c *MockChaosDaemonClient) AddEmatchFilter(ctx context.Context, in *chaosdaemon.EmatchFilterRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
+	return nil, mockError("AddEmatchFilter")
+}
+
+func (c *MockChaosDaemonClient) DelTcFilter(ctx context.Context, in *chaosdaemon.TcFilterRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
+	return nil, mockError("DelTcFilter")
 }
 
 func (c *MockChaosDaemonClient) FlushIpSet(ctx context.Context, in *chaosdaemon.IpSetRequest, opts ...grpc.CallOption) (*empty.Empty, error) {

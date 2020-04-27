@@ -3,6 +3,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
+  namespace: {{ .Release.Namespace }}
   name: chaos-dashboard
   labels:
     app.kubernetes.io/name: {{ template "chaos-mesh.name" . }}
@@ -62,6 +63,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
+  namespace: {{ .Release.Namespace }}
   name: chaos-dashboard
   labels:
     app.kubernetes.io/name: {{ template "chaos-mesh.name" . }}

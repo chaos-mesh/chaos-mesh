@@ -19,6 +19,9 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/utils/pointer"
+
+	"github.com/pingcap/chaos-mesh/test/e2e/config"
 )
 
 // NewCommonNginxPod describe that we use common nginx pod to be tested in our chaos-operator test
@@ -72,6 +75,43 @@ func NewCommonNginxDeployment(name, namespace string, replicas int32) *appsv1.De
 							Image:           "nginx:latest",
 							ImagePullPolicy: corev1.PullIfNotPresent,
 							Name:            "nginx",
+						},
+					},
+				},
+			},
+		},
+	}
+}
+
+// NewTimerDeployment would create a timer deployment
+func NewTimerDeployment(name, namespace string) *appsv1.Deployment {
+	return &appsv1.Deployment{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      name,
+			Namespace: namespace,
+			Labels: map[string]string{
+				"app": "timer",
+			},
+		},
+		Spec: appsv1.DeploymentSpec{
+			Replicas: pointer.Int32Ptr(1),
+			Selector: &metav1.LabelSelector{
+				MatchLabels: map[string]string{
+					"app": "timer",
+				},
+			},
+			Template: corev1.PodTemplateSpec{
+				ObjectMeta: metav1.ObjectMeta{
+					Labels: map[string]string{
+						"app": "timer",
+					},
+				},
+				Spec: corev1.PodSpec{
+					Containers: []corev1.Container{
+						{
+							Image:           config.TestConfig.E2EImage,
+							ImagePullPolicy: corev1.PullIfNotPresent,
+							Name:            "timer",
 						},
 					},
 				},

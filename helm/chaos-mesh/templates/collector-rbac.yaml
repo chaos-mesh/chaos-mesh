@@ -4,6 +4,7 @@
 kind: ServiceAccount
 apiVersion: v1
 metadata:
+  namespace: {{ .Release.Namespace }}
   name: {{ .Values.dashboard.serviceAccount }}
   labels:
     app.kubernetes.io/name: {{ template "chaos-mesh.name" . }}
@@ -77,6 +78,7 @@ rules:
       - iochaos
       - timechaos
       - kernelchaos
+      - stresschaos
     verbs: ["*"]
 ---
 kind: ClusterRoleBinding
@@ -102,6 +104,7 @@ roleRef:
 kind: Role
 apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
+  namespace: {{ .Release.Namespace }}
   name: {{ .Release.Name }}:chaos-dashboard
   labels:
     app.kubernetes.io/name: {{ template "chaos-mesh.name" . }}
@@ -138,11 +141,13 @@ rules:
       - iochaos
       - timechaos
       - kernelchaos
+      - stresschaos
     verbs: ["*"]
 ---
 kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
+  namespace: {{ .Release.Namespace }}
   name: {{ .Release.Name }}:chaos-dashboard
   labels:
     app.kubernetes.io/name: {{ template "chaos-mesh.name" . }}
