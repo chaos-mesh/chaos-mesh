@@ -157,6 +157,11 @@ postJobs:
   podAnnotations: {}
 
 webhook:
+  # if empty and disable certManager, Helm will auto-generate these fields
+  crtPEM: |
+
+  keyPEM: |
+
   # Setup the webhook using cert-manager
   certManager:
     enabled: false

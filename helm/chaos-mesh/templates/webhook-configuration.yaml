@@ -1,3 +1,21 @@
+{{ if not .Values.webhook.certManager.enabled }}
+kind: Secret
+apiVersion: v1
+metadata:
+  name: {{ template "chaos-mesh.certs" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: {{ template "chaos-mesh.name" . }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/component: webhook-secret
+type: Opaque
+data:
+  {{ $ca := genCA (printf "chaos-mesh-webhooks.%s.svc" .Release.namespace) 365 -}}
+  crt.pem: {{ ternary (b64enc $ca.Cert) (b64enc (trim .Values.webhook.crtPEM)) (empty .Values.webhook.crtPEM) }}
+  key.pem: {{ ternary (b64enc $ca.Key) (b64enc (trim .Values.webhook.keyPEM)) (empty .Values.webhook.keyPEM) }}
+{{- end }}
+
 ---
 apiVersion: admissionregistration.k8s.io/v1beta1
 kind: MutatingWebhookConfiguration
@@ -16,7 +34,11 @@ metadata:
 webhooks:
   - name: {{ template "chaos-mesh.webhook" . }}
     clientConfig:
+      {{- if .Values.webhook.certManager.enabled }}
       caBundle: Cg==
+      {{- else }}
+      caBundle: {{ ternary (b64enc $ca.Cert) (b64enc (trim .Values.webhook.crtPEM)) (empty .Values.webhook.crtPEM) }}
+      {{- end }}
       service:
         name: {{ template "chaos-mesh.svc" . }}
         namespace: {{ .Release.Namespace }}
@@ -32,7 +54,11 @@ webhooks:
     failurePolicy: {{ .Values.webhook.FailurePolicy }}
   {{- range $crd := .Values.webhook.CRDS }}
   - clientConfig:
+      {{- if .Values.webhook.certManager.enabled }}
       caBundle: Cg==
+      {{- else }}
+      caBundle: {{ ternary (b64enc $ca.Cert) (b64enc (trim .Values.webhook.crtPEM)) (empty .Values.webhook.crtPEM) }}
+      {{- end }}
       service:
         name: {{ template "chaos-mesh.svc" $ }}
         namespace: {{ $.Release.Namespace }}
