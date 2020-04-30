@@ -17,13 +17,10 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
-    "experimentalDecorators": true,
-    "jsx": "react"
+    "jsx": "react",
+    "experimentalDecorators": true
   },
   "include": [
     "src"
-  ],
-  "exclude": [
-    "src/serviceWorker.ts"
   ]
 }

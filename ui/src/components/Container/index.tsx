@@ -14,7 +14,7 @@ const useStyles = makeStyles((theme: Theme) =>
 const ContentContainer: FC<ContainerProps> = (props) => {
   const classes = useStyles()
 
-  return <Container className={classes.container} disableGutters {...props} />
+  return <Container maxWidth="xl" className={classes.container} {...props} />
 }
 
 export default ContentContainer

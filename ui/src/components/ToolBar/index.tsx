@@ -6,9 +6,9 @@ import { makeStyles, Theme, createStyles } from '@material-ui/core/styles'
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     paper: {
-      borderTop: `1px solid rgba(0, 0, 0, 0.12)`,
       paddingLeft: theme.spacing(2),
       paddingRight: theme.spacing(2),
+      borderTop: `1px solid rgba(0, 0, 0, 0.12)`,
     },
     toolbar: { ...theme.mixins.toolbar, justifyContent: 'space-between' },
     row: {
@@ -22,7 +22,7 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 )
 
-//  TODO: get real dynamic data by using global context hooks
+// TODO: get real dynamic data by using global context hooks
 export const CurrentStatus = () => {
   const classes = useStyles()
 

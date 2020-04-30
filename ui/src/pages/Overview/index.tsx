@@ -7,7 +7,7 @@ import Container from '../../components/Container'
 export default function Overview() {
   return (
     <>
-      <PageBar breadcrumbs={[{ name: 'Overview' }]} />
+      <PageBar />
       <ToolBar />
 
       <Container>Metrics Charts</Container>

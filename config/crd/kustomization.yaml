@@ -7,6 +7,7 @@ resources:
 - bases/pingcap.com_iochaos.yaml
 - bases/pingcap.com_timechaos.yaml
 - bases/pingcap.com_kernelchaos.yaml
+- bases/pingcap.com_stresschaos.yaml
 # +kubebuilder:scaffold:crdkustomizeresource
 
 patchesStrategicMerge:

@@ -6,7 +6,6 @@
   "dependencies": {
     "@material-ui/core": "^4.9.11",
     "@material-ui/icons": "^4.9.1",
-    "history": "^4.10.1",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
     "react-router-dom": "^5.1.2",
@@ -39,13 +38,22 @@
     "@testing-library/jest-dom": "^4.2.4",
     "@testing-library/react": "^9.3.2",
     "@testing-library/user-event": "^7.1.2",
-    "@types/history": "^4.7.5",
     "@types/jest": "^25.2.1",
     "@types/node": "^12.12.36",
     "@types/react": "^16.9.34",
     "@types/react-dom": "^16.9.6",
     "@types/react-router-dom": "^5.1.4",
+    "husky": "^4.2.5",
+    "lint-staged": "^10.1.7",
     "node-sass": "^4.13.1",
-    "prettier": "^2.0.4"
+    "prettier": "^2.0.5"
+  },
+  "lint-staged": {
+    "*.(j|t)s?(x)": "prettier --write"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
   }
 }

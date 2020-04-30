@@ -24,33 +24,15 @@ export default function ExperimentDetail() {
 
   return (
     <>
-      <PageBar
-        breadcrumbs={[
-          { name: 'Experiments', path: '/experiments' },
-          { name: 'tikv-failure' },
-        ]}
-      />
+      <PageBar />
       <ToolBar>
-        <Button
-          className={classes.button}
-          variant="outlined"
-          startIcon={<StopIcon />}
-        >
+        <Button className={classes.button} variant="outlined" startIcon={<StopIcon />}>
           Stop
         </Button>
-        <Button
-          className={classes.button}
-          variant="outlined"
-          startIcon={<SettingsIcon />}
-        >
+        <Button className={classes.button} variant="outlined" startIcon={<SettingsIcon />}>
           Config
         </Button>
-        <Button
-          className={classes.button}
-          variant="outlined"
-          color="secondary"
-          startIcon={<DeleteOutlinedIcon />}
-        >
+        <Button className={classes.button} variant="outlined" color="secondary" startIcon={<DeleteOutlinedIcon />}>
           Delete
         </Button>
       </ToolBar>

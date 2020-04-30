@@ -3,6 +3,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
+  namespace: {{ .Release.Namespace }}
   name: chaos-prometheus
   labels:
     app.kubernetes.io/name: {{ template "chaos-mesh.name" . }}
@@ -84,6 +85,7 @@ spec:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
+  namespace: {{ .Release.Namespace }}
   name: prometheus-pvc
 spec:
   {{- if .Values.prometheus.volume.storageClassName }}

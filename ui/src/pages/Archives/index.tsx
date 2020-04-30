@@ -7,10 +7,10 @@ import Container from '../../components/Container'
 export default function Archives() {
   return (
     <>
-      <PageBar breadcrumbs={[{ name: ' Archives' }]} />
+      <PageBar />
       <ToolBar />
 
-      <Container maxWidth="xl">Archived Experiment List</Container>
+      <Container>Archived Experiment List</Container>
     </>
   )
 }
