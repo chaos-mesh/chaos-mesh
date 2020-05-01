@@ -21,6 +21,7 @@ var Cfg *Config
 func init() {
 	Cfg = NewConfig()
 }
+
 // Config is a struct for daemon ports config
 type Config struct {
 	ChaosDaemonPort string
