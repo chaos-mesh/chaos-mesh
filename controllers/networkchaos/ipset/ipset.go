@@ -17,8 +17,8 @@ import (
 	"context"
 	"crypto/sha1"
 	"fmt"
-	"os"
 
+	"github.com/pingcap/chaos-mesh/controllers/common"
 	v1 "k8s.io/api/core/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -71,7 +71,7 @@ func generateIpSetName(networkchaos *v1alpha1.NetworkChaos, namePostFix string) 
 
 // FlushIpSet makes grpc calls to chaosdaemon to save ipset
 func FlushIpSet(ctx context.Context, c client.Client, pod *v1.Pod, ipset pb.IpSet) error {
-	pbClient, err := utils.NewChaosDaemonClient(ctx, c, pod, os.Getenv("CHAOS_DAEMON_PORT"))
+	pbClient, err := utils.NewChaosDaemonClient(ctx, c, pod, common.Cfg.ChaosDaemonPort)
 	if err != nil {
 		return err
 	}

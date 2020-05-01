@@ -17,10 +17,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"os"
 	"time"
 
 	"github.com/go-logr/logr"
+	"github.com/pingcap/chaos-mesh/controllers/common"
 	"golang.org/x/sync/errgroup"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -135,7 +135,7 @@ func (r *Reconciler) Object() reconciler.InnerObject {
 func (r *Reconciler) KillContainer(ctx context.Context, pod *v1.Pod, containerID string) error {
 	r.Log.Info("Try to kill container", "namespace", pod.Namespace, "podName", pod.Name, "containerID", containerID)
 
-	pbClient, err := utils.NewChaosDaemonClient(ctx, r.Client, pod, os.Getenv("CHAOS_DAEMON_PORT"))
+	pbClient, err := utils.NewChaosDaemonClient(ctx, r.Client, pod, common.Cfg.ChaosDaemonPort)
 	if err != nil {
 		return err
 	}
