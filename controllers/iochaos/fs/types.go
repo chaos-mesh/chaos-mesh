@@ -34,7 +34,6 @@ import (
 
 	"github.com/pingcap/chaos-mesh/api/v1alpha1"
 	"github.com/pingcap/chaos-mesh/controllers/common"
-	"github.com/pingcap/chaos-mesh/controllers/reconciler"
 	"github.com/pingcap/chaos-mesh/controllers/twophase"
 	fscli "github.com/pingcap/chaos-mesh/pkg/chaosfs/client"
 	"github.com/pingcap/chaos-mesh/pkg/utils"
@@ -71,12 +70,12 @@ func NewCommonReconciler(c client.Client, log logr.Logger, req ctrl.Request, rec
 }
 
 // Object implements the reconciler.InnerReconciler.Object
-func (r *Reconciler) Object() reconciler.InnerObject {
+func (r *Reconciler) Object() v1alpha1.InnerObject {
 	return &v1alpha1.IoChaos{}
 }
 
 // Apply implements the reconciler.InnerReconciler.Apply
-func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos reconciler.InnerObject) error {
+func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.InnerObject) error {
 	iochaos, ok := chaos.(*v1alpha1.IoChaos)
 	if !ok {
 		err := errors.New("chaos is not IoChaos")
@@ -121,7 +120,7 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos reconcil
 }
 
 // Recover implements the reconciler.InnerReconciler.Recover
-func (r *Reconciler) Recover(ctx context.Context, req ctrl.Request, chaos reconciler.InnerObject) error {
+func (r *Reconciler) Recover(ctx context.Context, req ctrl.Request, chaos v1alpha1.InnerObject) error {
 	iochaos, ok := chaos.(*v1alpha1.IoChaos)
 	if !ok {
 		err := errors.New("chaos is not IoChaos")

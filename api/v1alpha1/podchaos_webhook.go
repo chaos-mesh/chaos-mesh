@@ -88,23 +88,22 @@ func (in *PodChaos) ValidateScheduler(spec *field.Path) field.ErrorList {
 
 	switch in.Spec.Action {
 	case PodFailureAction:
-		if in.Spec.Duration != nil && in.Spec.Scheduler != nil {
-			return nil
-		} else if in.Spec.Duration == nil && in.Spec.Scheduler == nil {
-			return nil
-		}
-		allErrs = append(allErrs, field.Invalid(schedulerField, in.Spec.Scheduler, ValidateSchedulerError))
+		allErrs = append(allErrs, ValidateScheduler(in, spec)...)
 		break
 	case PodKillAction:
 		// We choose to ignore the Duration property even user define it
 		if in.Spec.Scheduler == nil {
 			allErrs = append(allErrs, field.Invalid(schedulerField, in.Spec.Scheduler, ValidatePodchaosSchedulerError))
+		} else {
+			allErrs = append(allErrs, validateCron(in.Spec.Scheduler.Cron, schedulerField.Child("cron"))...)
 		}
 		break
 	case ContainerKillAction:
 		// We choose to ignore the Duration property even user define it
 		if in.Spec.Scheduler == nil {
 			allErrs = append(allErrs, field.Invalid(schedulerField, in.Spec.Scheduler, ValidatePodchaosSchedulerError))
+		} else {
+			allErrs = append(allErrs, validateCron(in.Spec.Scheduler.Cron, schedulerField.Child("cron"))...)
 		}
 		break
 	default:

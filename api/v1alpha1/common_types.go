@@ -14,7 +14,10 @@
 package v1alpha1
 
 import (
+	"time"
+
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 )
 
@@ -131,6 +134,33 @@ type ExperimentStatus struct {
 	EndTime *metav1.Time `json:"endTime,omitempty"`
 	// +optional
 	Pods []PodStatus `json:"podChaos,omitempty"`
+}
+
+// InnerSchedulerObject is the Object for the twophase reconcile
+type InnerSchedulerObject interface {
+	InnerObject
+	GetDuration() (*time.Duration, error)
+
+	GetNextStart() time.Time
+	SetNextStart(time.Time)
+
+	GetNextRecover() time.Time
+	SetNextRecover(time.Time)
+
+	GetScheduler() *SchedulerSpec
+}
+
+// InnerObject is basic Object for the Reconciler
+type InnerObject interface {
+	IsDeleted() bool
+	IsPaused() bool
+	StatefulObject
+}
+
+// StatefulObject defines a basic Object that can get the status
+type StatefulObject interface {
+	runtime.Object
+	GetStatus() *ChaosStatus
 }
 
 const (
