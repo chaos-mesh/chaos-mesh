@@ -14,11 +14,10 @@
 package v1alpha1
 
 import (
-	"time"
-
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
+	"time"
 )
 
 // SelectorSpec defines the some selectors to select objects.
@@ -136,6 +135,14 @@ type ExperimentStatus struct {
 	Pods []PodStatus `json:"podChaos,omitempty"`
 }
 
+const (
+	invalidConfigurationMsg = "invalid configuration"
+)
+
+var log = ctrl.Log.WithName("validate-webhook")
+
+// +kubebuilder:object:generate=false
+
 // InnerSchedulerObject is the Object for the twophase reconcile
 type InnerSchedulerObject interface {
 	InnerObject
@@ -162,9 +169,3 @@ type StatefulObject interface {
 	runtime.Object
 	GetStatus() *ChaosStatus
 }
-
-const (
-	invalidConfigurationMsg = "invalid configuration"
-)
-
-var log = ctrl.Log.WithName("validate-webhook")
