@@ -14,10 +14,11 @@
 package v1alpha1
 
 import (
+	"time"
+
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
-	"time"
 )
 
 // SelectorSpec defines the some selectors to select objects.
@@ -157,12 +158,16 @@ type InnerSchedulerObject interface {
 	GetScheduler() *SchedulerSpec
 }
 
+// +kubebuilder:object:generate=false
+
 // InnerObject is basic Object for the Reconciler
 type InnerObject interface {
 	IsDeleted() bool
 	IsPaused() bool
 	StatefulObject
 }
+
+// +kubebuilder:object:generate=false
 
 // StatefulObject defines a basic Object that can get the status
 type StatefulObject interface {
