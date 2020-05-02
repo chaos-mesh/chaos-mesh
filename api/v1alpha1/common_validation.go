@@ -18,8 +18,6 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/robfig/cron"
-
 	cronv3 "github.com/robfig/cron/v3"
 
 	"k8s.io/apimachinery/pkg/util/validation/field"
@@ -76,7 +74,7 @@ func validateSchedulerParams(duration *time.Duration, durationField *field.Path,
 		cronField := schedulerField.Child("cron")
 		allErrs = append(validateCron(spec.Cron, cronField))
 
-		scheduler, _ := cron.ParseStandard(spec.Cron)
+		scheduler, _ := cronv3.ParseStandard(spec.Cron)
 		if scheduler != nil {
 			tmpTime := time.Time{}
 			nextTime := scheduler.Next(tmpTime)
