@@ -1,4 +1,10 @@
-{{ if not .Values.webhook.certManager.enabled }}
+{{- $altNames := list ( printf "%s.%s.svc" (include "chaos-mesh.svc" .) .Release.Namespace )  }}
+{{- $ca := genCA "chaos-mesh-ca" 3650 }}
+{{- $cert := genSignedCert "chaos-mesh-ca" nil $altNames 3650 $ca }}
+{{- $certEnabled := .Values.webhook.certManager.enabled }}
+{{- $crtPEM := .Values.webhook.crtPEM }}
+{{- $keyPEM := .Values.webhook.keyPEM }}
+{{- if not $certEnabled }}
 kind: Secret
 apiVersion: v1
 metadata:
@@ -9,11 +15,11 @@ metadata:
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/component: webhook-secret
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+"  "_" }}
 type: Opaque
 data:
-  {{ $ca := genCA (printf "chaos-mesh-webhooks.%s.svc" .Release.namespace) 365 -}}
-  crt.pem: {{ ternary (b64enc $ca.Cert) (b64enc (trim .Values.webhook.crtPEM)) (empty .Values.webhook.crtPEM) }}
-  key.pem: {{ ternary (b64enc $ca.Key) (b64enc (trim .Values.webhook.keyPEM)) (empty .Values.webhook.keyPEM) }}
+  tls.crt: {{ ternary (b64enc $cert.Cert) (b64enc (trim $crtPEM)) (empty $crtPEM) }}
+  tls.key: {{ ternary (b64enc $cert.Key) (b64enc (trim $keyPEM)) (empty $keyPEM) }}
 {{- end }}
 
 ---
@@ -27,17 +33,17 @@ metadata:
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/component: admission-webhook
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+"  "_" }}
-  {{- if .Values.webhook.certManager.enabled }}
+  {{- if $certEnabled }}
   annotations:
     cert-manager.io/inject-ca-from: {{ printf "%s/%s" .Release.Namespace "chaos-mesh-cert" | quote }}
   {{- end }}
 webhooks:
   - name: {{ template "chaos-mesh.webhook" . }}
     clientConfig:
-      {{- if .Values.webhook.certManager.enabled }}
+      {{- if $certEnabled }}
       caBundle: Cg==
       {{- else }}
-      caBundle: {{ ternary (b64enc $ca.Cert) (b64enc (trim .Values.webhook.crtPEM)) (empty .Values.webhook.crtPEM) }}
+      caBundle: {{ ternary (b64enc $ca.Cert) (b64enc (trim $crtPEM)) (empty $crtPEM) }}
       {{- end }}
       service:
         name: {{ template "chaos-mesh.svc" . }}
@@ -54,10 +60,10 @@ webhooks:
     failurePolicy: {{ .Values.webhook.FailurePolicy }}
   {{- range $crd := .Values.webhook.CRDS }}
   - clientConfig:
-      {{- if .Values.webhook.certManager.enabled }}
+      {{- if $certEnabled }}
       caBundle: Cg==
       {{- else }}
-      caBundle: {{ ternary (b64enc $ca.Cert) (b64enc (trim .Values.webhook.crtPEM)) (empty .Values.webhook.crtPEM) }}
+      caBundle: {{ ternary (b64enc $ca.Cert) (b64enc (trim $crtPEM)) (empty $crtPEM) }}
       {{- end }}
       service:
         name: {{ template "chaos-mesh.svc" $ }}
@@ -88,14 +94,18 @@ metadata:
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/component: admission-webhook
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+"  "_" }}
-  {{- if .Values.webhook.certManager.enabled }}
+  {{- if $certEnabled }}
   annotations:
     cert-manager.io/inject-ca-from: {{ printf "%s/%s" .Release.Namespace "chaos-mesh-cert" | quote }}
   {{- end }}
 webhooks:
   {{- range $crd := .Values.webhook.CRDS }}
   - clientConfig:
+      {{- if $certEnabled }}
       caBundle: Cg==
+      {{- else }}
+      caBundle: {{ ternary (b64enc $ca.Cert) (b64enc (trim $crtPEM)) (empty $crtPEM) }}
+      {{- end }}
       service:
         name: {{ template "chaos-mesh.svc" $ }}
         namespace: {{ $.Release.Namespace }}
@@ -114,7 +124,7 @@ webhooks:
           - {{ $crd }}
   {{- end }}
 
-{{- if .Values.webhook.certManager.enabled }}
+{{- if $certEnabled }}
 ---
 apiVersion: cert-manager.io/v1alpha2
 kind: Issuer
