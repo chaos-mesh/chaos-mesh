@@ -50,16 +50,25 @@ endif
 FAILPOINT_ENABLE  := $$(find $$PWD/ -type d | grep -vE "(\.git|bin)" | xargs $(GOBIN)/failpoint-ctl enable)
 FAILPOINT_DISABLE := $$(find $$PWD/ -type d | grep -vE "(\.git|bin)" | xargs $(GOBIN)/failpoint-ctl disable)
 
-all: yaml build image
+BUILD_TAGS ?=
 
-build: dashboard-server-frontend
+ifeq ($(SWAGGER),1)
+	BUILD_TAGS += swagger_server
+endif
+
+ifeq ($(UI),1)
+	BUILD_TAGS += ui_server
+endif
+
+all: yaml image
+
+build: binary
 
 check: fmt vet lint generate yaml tidy gosec-scan
 
 # Run tests
 test: failpoint-enable generate manifests test-utils
 	rm -rf cover.* cover
-	mkdir -p cover
 	$(GOTEST) ./api/... ./controllers/... ./pkg/... -coverprofile cover.out.tmp
 	cat cover.out.tmp | grep -v "_generated.deepcopy.go" > cover.out
 	@$(FAILPOINT_DISABLE)
@@ -76,6 +85,7 @@ coverage:
 ifeq ("$(CI)", "1")
 	@bash <(curl -s https://codecov.io/bash) -f cover.out -t $(CODECOV_TOKEN)
 else
+	mkdir -p cover
 	gocov convert cover.out > cover.json
 	gocov-xml < cover.json > cover.xml
 	gocov-html < cover.json > cover/index.html
@@ -92,16 +102,19 @@ manager: generate
 chaosfs: generate
 	$(GO) build -ldflags '$(LDFLAGS)' -o bin/chaosfs ./cmd/chaosfs/*.go
 
-dashboard:
-	$(GO) build -ldflags '$(LDFLAGS)' -o bin/chaos-dashboard ./cmd/chaos-dashboard/*.go
+chaos-server: generate
+ifeq ($(SWAGGER),1)
+	make swagger_spec
+endif
+ifeq ($(UI),1)
+	scripts/embed_ui_assets.sh
+endif
+	$(GO) build -ldflags '$(LDFLAGS)' -tags "${BUILD_TAGS}" -o bin/chaos-server cmd/chaos-server/*.go
 
-binary: chaosdaemon manager chaosfs dashboard
+binary: chaosdaemon manager chaosfs chaos-server
 
 watchmaker:
 	$(CGOENV) go build -ldflags '$(LDFLAGS)' -o bin/watchmaker ./cmd/watchmaker/...
-
-dashboard-server-frontend:
-	cd images/chaos-dashboard; yarn install; yarn build
 
 # Run against the configured Kubernetes cluster in ~/.kube/config
 run: generate fmt vet manifests
@@ -143,7 +156,7 @@ tidy:
 	GO111MODULE=on go mod tidy
 	git diff --quiet go.mod go.sum
 
-image: image-chaos-daemon image-chaos-mesh image-chaos-fs image-chaos-scripts image-chaos-grafana image-chaos-dashboard
+image: image-chaos-daemon image-chaos-mesh image-chaos-server image-chaos-fs image-chaos-scripts image-chaos-grafana
 
 image-binary:
 	docker build -t pingcap/binary ${DOCKER_BUILD_ARGS} .
@@ -160,22 +173,22 @@ image-chaos-fs: image-binary
 image-chaos-scripts: image-binary
 	docker build -t ${DOCKER_REGISTRY_PREFIX}pingcap/chaos-scripts:${IMAGE_TAG} ${DOCKER_BUILD_ARGS} images/chaos-scripts
 
+image-chaos-server: image-binary
+	docker build -t ${DOCKER_REGISTRY_PREFIX}pingcap/chaos-server:${IMAGE_TAG} ${DOCKER_BUILD_ARGS} images/chaos-server
+
 image-chaos-grafana:
 	docker build -t ${DOCKER_REGISTRY_PREFIX}pingcap/chaos-grafana:${IMAGE_TAG} ${DOCKER_BUILD_ARGS} images/grafana
-
-image-chaos-dashboard: image-binary
-	docker build -t ${DOCKER_REGISTRY_PREFIX}pingcap/chaos-dashboard:${IMAGE_TAG} ${DOCKER_BUILD_ARGS} images/chaos-dashboard
 
 image-chaos-kernel:
 	docker build -t ${DOCKER_REGISTRY_PREFIX}pingcap/chaos-kernel ${DOCKER_BUILD_ARGS} --build-arg MAKE_JOBS=${MAKE_JOBS} --build-arg MIRROR=${UBUNTU_MIRROR} images/chaos-kernel
 
 docker-push:
 	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-mesh:${IMAGE_TAG}"
+	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-server:${IMAGE_TAG}"
 	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-fs:${IMAGE_TAG}"
 	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-daemon:${IMAGE_TAG}"
 	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-scripts:${IMAGE_TAG}"
 	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-grafana:${IMAGE_TAG}"
-	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-dashboard:${IMAGE_TAG}"
 
 docker-push-chaos-kernel:
 	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-kernel:${IMAGE_TAG}"
@@ -240,8 +253,13 @@ ensure-all:
 	@echo "ensuring all"
 	$(shell ./hack/tools.sh all)
 
+install-local-coverage-tools:
+	go get github.com/axw/gocov/gocov \
+	&& go get github.com/AlekSi/gocov-xml \
+	&& go get -u github.com/matm/gocov-html
+
 .PHONY: all build test install manifests groupimports fmt vet tidy image \
-	docker-push lint generate controller-gen yaml \
-	manager chaosfs chaosdaemon ensure-all \
+	binary docker-push lint generate controller-gen yaml \
+	manager chaosfs chaosdaemon chaos-server ensure-all \
 	dashboard dashboard-server-frontend \
 	gosec-scan

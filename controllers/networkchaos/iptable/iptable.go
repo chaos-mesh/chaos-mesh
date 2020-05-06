@@ -16,8 +16,8 @@ package iptable
 import (
 	"context"
 	"fmt"
-	"os"
 
+	"github.com/pingcap/chaos-mesh/controllers/common"
 	v1 "k8s.io/api/core/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -27,7 +27,7 @@ import (
 
 // FlushIptables makes grpc call to chaosdaemon to flush iptable
 func FlushIptables(ctx context.Context, c client.Client, pod *v1.Pod, rule pb.Rule) error {
-	pbClient, err := utils.NewChaosDaemonClient(ctx, c, pod, os.Getenv("CHAOS_DAEMON_PORT"))
+	pbClient, err := utils.NewChaosDaemonClient(ctx, c, pod, common.Cfg.ChaosDaemonPort)
 	if err != nil {
 		return err
 	}
