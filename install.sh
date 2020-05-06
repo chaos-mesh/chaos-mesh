@@ -186,14 +186,13 @@ main() {
     fi
 
     if $dry_run; then
+        gen_crd_manifests $crd
         gen_chaos_mesh_manifests "${runc}"
         exit 0
     fi
 
     need_cmd "sed"
     need_cmd "tr"
-
-    check_kubernetes
 
     if [ "${local_kube}" == "kind" ]; then
         prepare_env
@@ -203,6 +202,8 @@ main() {
         install_kind "${kind_version}" ${force_kind}
         install_kubernetes_by_kind "${kind_name}" "${k8s_version}" "${node_num}" "${volume_num}" ${force_local_kube} ${docker_mirror} ${volume_provisioner} ${local_registry}
     fi
+
+    check_kubernetes
 
     install_chaos_mesh "${release_name}" "${namespace}" "${local_kube}" ${force_chaos_mesh} ${docker_mirror} ${crd} ${runc}
     ensure_pods_ready "${namespace}" "app.kubernetes.io/component=controller-manager" 100
@@ -558,8 +559,6 @@ install_chaos_mesh() {
 
     printf "Install Chaos Mesh %s\n" "${release_name}"
 
-    curl -sSL ${crd} | kubectl apply -f -
-
     local chaos_mesh_image="pingcap/chaos-mesh:latest"
     local chaos_daemon_image="pingcap/chaos-daemon:latest"
 
@@ -572,6 +571,7 @@ install_chaos_mesh() {
         fi
     fi
 
+    gen_crd_manifests ${crd} | kubectl apply -f -
     gen_chaos_mesh_manifests ${runc} | kubectl apply -f -
 }
 
@@ -731,6 +731,12 @@ azk8spull() {
 	fi
 }
 
+gen_crd_manifests() {
+    local crd=$1
+    need_cmd curl
+    ensure curl -sSL $crd
+}
+
 gen_chaos_mesh_manifests() {
     local runc=$1
     local socketPath="/var/run/docker.sock"
@@ -778,6 +784,7 @@ EOF
     CA_BUNDLE=$(openssl base64 -A -in ${tmpdir}/ca.crt)
 
     cat <<EOF
+---
 apiVersion: v1
 kind: Namespace
 metadata:
