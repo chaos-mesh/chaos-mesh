@@ -68,8 +68,6 @@ The following tables list the configurable parameters of the Chaos Mesh chart an
 | `prometheus.service.type` | Kubernetes Service type | `ClusterIP` |
 | `prometheus.volume.storage` | | `2Gi` |
 | `prometheus.volume.storageClassName` | | `standard` |
-| `preJobs.podAnnotations` | | `{}` |
-| `postJobs.podAnnotations` | | `{}` |
 | `webhook.certManager.enabled` | Setup the webhook using cert-manager | `false` |
 | `webhook.FailurePolicy` | Defines how unrecognized errors and timeout errors from the admission webhook are handled | `Ignore` |
 | `webhook.CRDS` | Define a list of chaos types that implement admission webhook | `[podchaos,iochaos,timechaos,networkchaos,kernelchaos]` |
