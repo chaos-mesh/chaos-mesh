@@ -1,6 +1,6 @@
 {{- $altNames := list ( printf "%s.%s.svc" (include "chaos-mesh.svc" .) .Release.Namespace )  }}
-{{- $ca := genCA "chaos-mesh-ca" 3650 }}
-{{- $cert := genSignedCert "chaos-mesh-ca" nil $altNames 3650 $ca }}
+{{- $ca := genCA "chaos-mesh-ca" 1825 }}
+{{- $cert := genSignedCert "chaos-mesh-ca" nil $altNames 1825 $ca }}
 {{- $certEnabled := .Values.webhook.certManager.enabled }}
 {{- $crtPEM := .Values.webhook.crtPEM }}
 {{- $keyPEM := .Values.webhook.keyPEM }}
