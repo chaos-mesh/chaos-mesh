@@ -171,14 +171,18 @@ main() {
         esac
     done
 
-    if $dry_run; then
-        gen_chaos_mesh_manifests "${runc}"
-        exit 0
-    fi
-
     if [ "${local_kube}" != "" ] && [ "${local_kube}" != "kind" ]; then
         printf "local Kubernetes by %s is not supported\n" "${local_kube}"
         exit 1
+    fi
+
+    if [ "${local_kube}" == "kind" ]; then
+        runc="containerd"
+    fi
+
+    if $dry_run; then
+        gen_chaos_mesh_manifests "${runc}"
+        exit 0
     fi
 
     need_cmd "sed"
