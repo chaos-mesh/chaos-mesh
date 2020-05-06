@@ -555,11 +555,6 @@ install_chaos_mesh() {
 
     curl -sSL ${crd} | kubectl apply -f -
 
-    ns_err_msg=$(kubectl get ns "$namespace" 2>&1 1>/dev/null)
-    if [ "$ns_err_msg" != "" ]; then
-        ensure kubectl create ns chaos-testing
-    fi
-
     local chaos_mesh_image="pingcap/chaos-mesh:latest"
     local chaos_daemon_image="pingcap/chaos-daemon:latest"
 
@@ -778,6 +773,10 @@ EOF
     CA_BUNDLE=$(openssl base64 -A -in ${tmpdir}/ca.crt)
 
     cat <<EOF
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: chaos-testing
 ---
 # Source: chaos-mesh/templates/controller-manager-rbac.yaml
 kind: ServiceAccount
