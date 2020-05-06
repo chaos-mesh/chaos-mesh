@@ -34,7 +34,7 @@ OPTIONS:
         --node-num           The count of the cluster nodes,default value: 3
         --k8s-version        Version of the Kubernetes cluster,default value: v1.17.2
         --volume-num         The volumes number of each kubernetes node,default value: 5
-        --helm-version       Version of the helm tool, default value: v3.1.0
+        --helm-version       Version of the helm tool, default value: v3.2.0
         --release-name       Release name of chaos-mesh, default value: chaos-mesh
         --namespace          Namespace of chaos-mesh, default value: chaos-testing
 EOF
@@ -48,7 +48,7 @@ main() {
     local node_num=3
     local k8s_version="v1.17.2"
     local volume_num=5
-    local helm_version="v3.1.0"
+    local helm_version="v3.2.0"
     local release_name="chaos-mesh"
     local namespace="chaos-testing"
     local force_chaos_mesh=false
