@@ -31,7 +31,7 @@ import (
 
 const (
 	// AnnotationCleanFinalizer key
-	AnnotationCleanFinalizer = `chaos-mesh/cleanFinalizer`
+	AnnotationCleanFinalizer = `chaos-mesh.pingcap.com/cleanFinalizer`
 	// AnnotationCleanFinalizerForced value
 	AnnotationCleanFinalizerForced = `forced`
 )

@@ -216,7 +216,7 @@ func (r *Reconciler) cleanFinalizersAndRecover(ctx context.Context, networkchaos
 	}
 
 	if networkchaos.Annotations[common.AnnotationCleanFinalizer] == common.AnnotationCleanFinalizerForced {
-		r.Log.Info("Force cleanup all finalizers")
+		r.Log.Info("Force cleanup all finalizers", "chaos", networkchaos)
 		networkchaos.Finalizers = make([]string, 0)
 		return nil
 	}
