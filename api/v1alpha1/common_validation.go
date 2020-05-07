@@ -90,12 +90,13 @@ func validateSchedulerParams(duration *time.Duration, durationField *field.Path,
 	}
 	return allErrs
 }
-func ParseCron(cron string, cronField *field.Path) (cronv3.Schedule, field.ErrorList) {
+
+// ParseCron returns a new crontab schedule representing the given standardSpec (https://en.wikipedia.org/wiki/Cron)
+func ParseCron(standardSpec string, cronField *field.Path) (cronv3.Schedule, field.ErrorList) {
 	allErrs := field.ErrorList{}
-	scheduler, err := cronv3.ParseStandard(cron)
+	scheduler, err := cronv3.ParseStandard(standardSpec)
 	if err != nil {
-		allErrs = append(allErrs, field.Invalid(cronField,
-			cron,
+		allErrs = append(allErrs, field.Invalid(cronField, standardSpec,
 			fmt.Sprintf("parse cron field error:%s", err)))
 	}
 	return scheduler, allErrs
