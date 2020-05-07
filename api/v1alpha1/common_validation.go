@@ -71,10 +71,13 @@ func ValidateScheduler(schedulerObject InnerSchedulerObject, spec *field.Path) f
 func validateSchedulerParams(duration *time.Duration, durationField *field.Path, spec *SchedulerSpec, schedulerField *field.Path) field.ErrorList {
 	allErrs := field.ErrorList{}
 	if duration != nil && spec != nil {
-		cronField := schedulerField.Child("cron")
-		allErrs = append(validateCron(spec.Cron, cronField))
 
-		scheduler, _ := cronv3.ParseStandard(spec.Cron)
+		cronField := schedulerField.Child("cron")
+		scheduler, err := ParseCron(spec.Cron, cronField)
+		if len(err) != 0 {
+			allErrs = append(allErrs, err...)
+		}
+
 		if scheduler != nil {
 			tmpTime := time.Time{}
 			nextTime := scheduler.Next(tmpTime)
@@ -87,15 +90,15 @@ func validateSchedulerParams(duration *time.Duration, durationField *field.Path,
 	}
 	return allErrs
 }
-func validateCron(cron string, cronField *field.Path) field.ErrorList {
+func ParseCron(cron string, cronField *field.Path) (cronv3.Schedule, field.ErrorList) {
 	allErrs := field.ErrorList{}
-	_, err := cronv3.ParseStandard(cron)
+	scheduler, err := cronv3.ParseStandard(cron)
 	if err != nil {
 		allErrs = append(allErrs, field.Invalid(cronField,
 			cron,
 			fmt.Sprintf("parse cron field error:%s", err)))
 	}
-	return allErrs
+	return scheduler, allErrs
 }
 
 // ValidatePodMode validates the value with podmode

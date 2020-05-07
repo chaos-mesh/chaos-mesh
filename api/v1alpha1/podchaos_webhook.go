@@ -95,7 +95,8 @@ func (in *PodChaos) ValidateScheduler(spec *field.Path) field.ErrorList {
 		if in.Spec.Scheduler == nil {
 			allErrs = append(allErrs, field.Invalid(schedulerField, in.Spec.Scheduler, ValidatePodchaosSchedulerError))
 		} else {
-			allErrs = append(allErrs, validateCron(in.Spec.Scheduler.Cron, schedulerField.Child("cron"))...)
+			_, err := ParseCron(in.Spec.Scheduler.Cron, schedulerField.Child("cron"))
+			allErrs = append(allErrs, err...)
 		}
 		break
 	case ContainerKillAction:
@@ -103,7 +104,8 @@ func (in *PodChaos) ValidateScheduler(spec *field.Path) field.ErrorList {
 		if in.Spec.Scheduler == nil {
 			allErrs = append(allErrs, field.Invalid(schedulerField, in.Spec.Scheduler, ValidatePodchaosSchedulerError))
 		} else {
-			allErrs = append(allErrs, validateCron(in.Spec.Scheduler.Cron, schedulerField.Child("cron"))...)
+			_, err := ParseCron(in.Spec.Scheduler.Cron, schedulerField.Child("cron"))
+			allErrs = append(allErrs, err...)
 		}
 		break
 	default:
