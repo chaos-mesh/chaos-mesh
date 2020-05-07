@@ -30,7 +30,7 @@ OPTIONS:
                              If this value is not set and the Kubernetes is not installed, this script will exit with 1.
     -n, --name               Name of Kubernetes cluster, default value: kind
     -c  --crd                The URL of the crd files, default value: https://raw.githubusercontent.com/pingcap/chaos-mesh/master/manifests/crd.yaml
-    -r  --runc               Runtime specifies which container runtime to use. Currently we only supports docker and containerd. default value: docker
+    -r  --runtime               Runtime specifies which container runtime to use. Currently we only supports docker and containerd. default value: docker
         --kind-version       Version of the Kind tool, default value: v0.7.0
         --node-num           The count of the cluster nodes,default value: 3
         --k8s-version        Version of the Kubernetes cluster,default value: v1.17.2
@@ -58,7 +58,7 @@ main() {
     local volume_provisioner=false
     local local_registry=false
     local crd="https://raw.githubusercontent.com/pingcap/chaos-mesh/master/manifests/crd.yaml"
-    local runc="docker"
+    local runtime="docker"
     local dry_run=false
 
     while [[ $# -gt 0 ]]
@@ -89,8 +89,8 @@ main() {
                 shift
                 shift
                 ;;
-            -r|--runc)
-                runc="$2"
+            -r|--runtime)
+                runtime="$2"
                 shift
                 shift
                 ;;
@@ -171,7 +171,7 @@ main() {
         esac
     done
 
-    if [ "${runc}" != "docker" ] && [ "${runc}" != "containerd" ]; then
+    if [ "${runtime}" != "docker" ] && [ "${runtime}" != "containerd" ]; then
         printf "container runtime %s is not supported\n" "${local_kube}"
         exit 1
     fi
@@ -182,12 +182,12 @@ main() {
     fi
 
     if [ "${local_kube}" == "kind" ]; then
-        runc="containerd"
+        runtime="containerd"
     fi
 
     if $dry_run; then
         gen_crd_manifests $crd
-        gen_chaos_mesh_manifests "${runc}"
+        gen_chaos_mesh_manifests "${runtime}"
         exit 0
     fi
 
@@ -205,7 +205,7 @@ main() {
 
     check_kubernetes
 
-    install_chaos_mesh "${release_name}" "${namespace}" "${local_kube}" ${force_chaos_mesh} ${docker_mirror} ${crd} ${runc}
+    install_chaos_mesh "${release_name}" "${namespace}" "${local_kube}" ${force_chaos_mesh} ${docker_mirror} ${crd} ${runtime}
     ensure_pods_ready "${namespace}" "app.kubernetes.io/component=controller-manager" 100
     printf "Chaos Mesh %s is installed successfully\n" "${release_name}"
 }
@@ -555,7 +555,7 @@ install_chaos_mesh() {
     local force_install=$4
     local docker_mirror=$5
     local crd=$6
-    local runc=$7
+    local runtime=$7
 
     printf "Install Chaos Mesh %s\n" "${release_name}"
 
@@ -572,7 +572,7 @@ install_chaos_mesh() {
     fi
 
     gen_crd_manifests ${crd} | kubectl apply -f -
-    gen_chaos_mesh_manifests ${runc} | kubectl apply -f -
+    gen_chaos_mesh_manifests ${runtime} | kubectl apply -f -
 }
 
 version_lt() {
@@ -738,10 +738,10 @@ gen_crd_manifests() {
 }
 
 gen_chaos_mesh_manifests() {
-    local runc=$1
+    local runtime=$1
     local socketPath="/var/run/docker.sock"
     local mountPath="/var/run/docker.sock"
-    if [ "${runc}" == "containerd" ]; then
+    if [ "${runtime}" == "containerd" ]; then
         socketPath="/run/containerd/containerd.sock"
         mountPath="/run/containerd/containerd.sock"
     fi
@@ -959,7 +959,7 @@ spec:
           command:
             - /usr/local/bin/chaos-daemon
             - --runtime
-            - ${runc}
+            - ${runtime}
             - --http-port
             - !!str 31766
             - --grpc-port
