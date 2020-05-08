@@ -179,7 +179,7 @@ func (s *server) setFault(ms []string, f *faultContext) {
 }
 
 func (s *server) SetFault(ctx context.Context, in *pb.Request) (*empty.Empty, error) {
-	// TODO: use Errno(0), and hanle Errno(0) in Hook interfaces
+	// TODO: use Errno(0), and handle Errno(0) in Hook interfaces
 	log.Info("Set fault", "request", in)
 
 	var errno error = nil
@@ -199,7 +199,7 @@ func (s *server) SetFault(ctx context.Context, in *pb.Request) (*empty.Empty, er
 }
 
 func (s *server) SetFaultAll(ctx context.Context, in *pb.Request) (*empty.Empty, error) {
-	// TODO: use Errno(0), and hanle Errno(0) in Hook interfaces
+	// TODO: use Errno(0), and handle Errno(0) in Hook interfaces
 	log.Info("Set fault all methods", "request", in)
 
 	var errno error = nil
