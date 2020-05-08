@@ -77,11 +77,11 @@ Please reach out for bugs, feature requests, and other issues via:
 - The #sig-chaos-mesh channel in the [TiDB Community](https://pingcap.com/tidbslack) slack workspace.
 - Filing a issue or opening a PR against this repo.
 
-Community meeting
+### Community meeting
 
 On the fourth Thursday of every month (unless otherwise specified), the Chaos Mesh community holds a monthly meeting by video conference to discuss the status of Chaos Mesh.
 
-Quick links:
+**Quick links:**
 
 - [Meeting notes](https://docs.google.com/document/d/1H8IfmhIJiJ1ltg-XLjqR_P_RaMHUGrl1CzvHnKM_9Sc/edit?usp=sharing)
 - [Zoom meeting link](https://pingcap.zoom.com.cn/j/99421307560)
