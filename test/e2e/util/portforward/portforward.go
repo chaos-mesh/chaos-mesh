@@ -108,6 +108,7 @@ func (f *portForwarder) forwardPorts(podKey, method string, url *url.URL, addres
 	return forwardedPorts, cancel, nil
 }
 
+// Forward would port-forward forward target resources
 func (f *portForwarder) Forward(namespace, resourceName string, addresses []string, ports []string) (forwardedPorts []portforward.ForwardedPort, cancel context.CancelFunc, err error) {
 	builder := resource.NewBuilder(f).
 		WithScheme(scheme.Scheme, scheme.Scheme.PrioritizedVersionsAllGroups()...).
@@ -133,6 +134,7 @@ func (f *portForwarder) Forward(namespace, resourceName string, addresses []stri
 	return f.ForwardPod(pod, addresses, ports)
 }
 
+// ForwardPod would port-forward target Pod
 func (f *portForwarder) ForwardPod(pod *corev1.Pod, addresses []string, ports []string) (forwardedPorts []portforward.ForwardedPort, cancel context.CancelFunc, err error) {
 	if pod.Status.Phase != corev1.PodRunning {
 		return nil, nil, fmt.Errorf("unable to forward port because pod is not running. Current status=%v", pod.Status.Phase)
@@ -147,6 +149,7 @@ func (f *portForwarder) ForwardPod(pod *corev1.Pod, addresses []string, ports []
 	return f.forwardPorts(fmt.Sprintf("%s/%s", pod.Namespace, pod.Name), "POST", req.URL(), addresses, ports)
 }
 
+// NewPortForwarder would create a new port-forward
 func NewPortForwarder(ctx context.Context, restClientGetter genericclioptions.RESTClientGetter) (PortForward, error) {
 	config, err := restClientGetter.ToRESTConfig()
 	if err != nil {
@@ -165,7 +168,7 @@ func NewPortForwarder(ctx context.Context, restClientGetter genericclioptions.RE
 	return f, nil
 }
 
-// A helper utility to forward one port of Kubernetes resource.
+// ForwardOnePort help to utility to forward one port of Kubernetes resource.
 func ForwardOnePort(fw PortForward, ns, resource string, port uint16) (string, uint16, context.CancelFunc, error) {
 	ports := []string{fmt.Sprintf("0:%d", port)}
 	forwardedPorts, cancel, err := fw.Forward(ns, resource, []string{"127.0.0.1"}, ports)

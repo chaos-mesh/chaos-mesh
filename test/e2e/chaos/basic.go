@@ -888,7 +888,7 @@ var _ = ginkgo.Describe("[Basic]", func() {
 			framework.ExpectNoError(err, "create io-test deployment error")
 			err = waitDeploymentReady("io-test", ns, kubeCli)
 			framework.ExpectNoError(err, "wait io-test deployment ready error")
-			_, port, pfCancel, err = portforward.ForwardOnePort(fw, ns, "svc/timer", 8080)
+			_, port, pfCancel, err = portforward.ForwardOnePort(fw, ns, "svc/io", 8080)
 			framework.ExpectNoError(err, "create helper port-forward failed")
 		})
 
