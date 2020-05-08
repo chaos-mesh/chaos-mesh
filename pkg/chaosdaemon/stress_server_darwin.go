@@ -11,20 +11,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package store
+package chaosdaemon
 
 import (
-	"go.uber.org/fx"
+	"context"
 
-	"github.com/pingcap/chaos-mesh/pkg/store/event"
-	"github.com/pingcap/chaos-mesh/pkg/store/experiment"
-	"github.com/pingcap/chaos-mesh/pkg/store/podrecord"
+	"github.com/golang/protobuf/ptypes/empty"
+
+	pb "github.com/pingcap/chaos-mesh/pkg/chaosdaemon/pb"
 )
 
-// Module includes the providers provided by store.
-var Module = fx.Options(
-	fx.Provide(
-		event.NewStore,
-		experiment.NewStore,
-		podrecord.NewStore,
-	))
+func (s *daemonServer) ExecStressors(context.Context, *pb.ExecStressRequest) (*pb.ExecStressResponse, error) {
+	return nil, nil
+}
+
+func (s *daemonServer) CancelStressors(context.Context, *pb.CancelStressRequest) (*empty.Empty, error) {
+	return &empty.Empty{}, nil
+}
