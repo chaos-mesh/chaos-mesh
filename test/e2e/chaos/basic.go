@@ -5,9 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"net"
 	"net/http"
-	"strconv"
 	"strings"
 	"time"
 
@@ -670,15 +668,27 @@ var _ = ginkgo.Describe("[Basic]", func() {
 	// time chaos case in [TimeChaos] context
 	ginkgo.Context("[TimeChaos]", func() {
 
+		var err error
+		var port uint16
+		var pfCancel context.CancelFunc
+
 		ginkgo.JustBeforeEach(func() {
 			svc := fixture.NewE2EService("timer", ns)
-			_, err := kubeCli.CoreV1().Services(ns).Create(svc)
+			_, err = kubeCli.CoreV1().Services(ns).Create(svc)
 			framework.ExpectNoError(err, "create service error")
 			nd := fixture.NewTimerDeployment("timer", ns)
 			_, err = kubeCli.AppsV1().Deployments(ns).Create(nd)
 			framework.ExpectNoError(err, "create timer deployment error")
 			err = waitDeploymentReady("timer", ns, kubeCli)
 			framework.ExpectNoError(err, "wait timer deployment ready error")
+			_, port, pfCancel, err = portforward.ForwardOnePort(fw, ns, "svc/timer", 8080)
+			framework.ExpectNoError(err, "create helper port-forward failed")
+		})
+
+		ginkgo.JustAfterEach(func() {
+			if pfCancel != nil {
+				pfCancel()
+			}
 		})
 
 		// time skew chaos case in [TimeSkew] context
@@ -686,9 +696,6 @@ var _ = ginkgo.Describe("[Basic]", func() {
 
 			ginkgo.It("[Schedule]", func() {
 				ctx, cancel := context.WithCancel(context.Background())
-				port, err := getAvailablePort()
-				framework.ExpectNoError(err, "get free port error")
-				go portForward(ctx, "timer", ns, strconv.Itoa(port))
 				err = waitE2EHelperReady(c, port)
 				framework.ExpectNoError(err, "wait e2e helper ready error")
 
@@ -749,9 +756,6 @@ var _ = ginkgo.Describe("[Basic]", func() {
 
 			ginkgo.It("[Pause]", func() {
 				ctx, cancel := context.WithCancel(context.Background())
-				port, err := getAvailablePort()
-				framework.ExpectNoError(err, "get free port error")
-				go portForward(ctx, "timer", ns, strconv.Itoa(port))
 				err = waitE2EHelperReady(c, port)
 				framework.ExpectNoError(err, "wait e2e helper ready error")
 
@@ -867,8 +871,12 @@ var _ = ginkgo.Describe("[Basic]", func() {
 	// io chaos case in [IOChaos] context
 	ginkgo.Context("[IOChaos]", func() {
 
+		var err error
+		var port uint16
+		var pfCancel context.CancelFunc
+
 		ginkgo.JustBeforeEach(func() {
-			err := createIOChaosConfigMap(kubeCli)
+			err = createIOChaosConfigMap(kubeCli)
 			framework.ExpectNoError(err, "create io chaos configmap error")
 			err = enableWebhook(ns)
 			framework.ExpectNoError(err, "enable webhook on ns error")
@@ -880,6 +888,14 @@ var _ = ginkgo.Describe("[Basic]", func() {
 			framework.ExpectNoError(err, "create io-test deployment error")
 			err = waitDeploymentReady("io-test", ns, kubeCli)
 			framework.ExpectNoError(err, "wait io-test deployment ready error")
+			_, port, pfCancel, err = portforward.ForwardOnePort(fw, ns, "svc/timer", 8080)
+			framework.ExpectNoError(err, "create helper port-forward failed")
+		})
+
+		ginkgo.JustAfterEach(func() {
+			if pfCancel != nil {
+				pfCancel()
+			}
 		})
 
 		// io chaos case in [IODelay] context
@@ -887,9 +903,6 @@ var _ = ginkgo.Describe("[Basic]", func() {
 
 			ginkgo.It("[Schedule]", func() {
 				ctx, cancel := context.WithCancel(context.Background())
-				port, err := getAvailablePort()
-				framework.ExpectNoError(err, "get free port error")
-				go portForward(ctx, "io", ns, strconv.Itoa(port))
 				err = waitE2EHelperReady(c, port)
 				framework.ExpectNoError(err, "wait e2e helper ready error")
 
@@ -962,9 +975,6 @@ var _ = ginkgo.Describe("[Basic]", func() {
 
 			ginkgo.It("[Pause]", func() {
 				ctx, cancel := context.WithCancel(context.Background())
-				port, err := getAvailablePort()
-				framework.ExpectNoError(err, "get free port error")
-				go portForward(ctx, "io", ns, strconv.Itoa(port))
 				err = waitE2EHelperReady(c, port)
 				framework.ExpectNoError(err, "wait e2e helper ready error")
 
@@ -1095,9 +1105,6 @@ var _ = ginkgo.Describe("[Basic]", func() {
 
 			ginkgo.It("[Schedule]", func() {
 				ctx, cancel := context.WithCancel(context.Background())
-				port, err := getAvailablePort()
-				framework.ExpectNoError(err, "get free port error")
-				go portForward(ctx, "io", ns, strconv.Itoa(port))
 				err = waitE2EHelperReady(c, port)
 				framework.ExpectNoError(err, "wait e2e helper ready error")
 
@@ -1167,9 +1174,6 @@ var _ = ginkgo.Describe("[Basic]", func() {
 
 			ginkgo.It("[Pause]", func() {
 				ctx, cancel := context.WithCancel(context.Background())
-				port, err := getAvailablePort()
-				framework.ExpectNoError(err, "get free port error")
-				go portForward(ctx, "io", ns, strconv.Itoa(port))
 				err = waitE2EHelperReady(c, port)
 				framework.ExpectNoError(err, "wait e2e helper ready error")
 
@@ -1322,12 +1326,7 @@ func waitDeploymentReady(name, namespace string, cli kubernetes.Interface) error
 	})
 }
 
-func portForward(ctx context.Context, name, namespace, port string) {
-	args := []string{"port-forward", "-n", namespace, "svc/" + name, port + ":8080"}
-	exec.New().CommandContext(ctx, "kubectl", args...).Run()
-}
-
-func waitE2EHelperReady(c http.Client, port int) error {
+func waitE2EHelperReady(c http.Client, port uint16) error {
 	return wait.Poll(10*time.Second, 5*time.Minute, func() (done bool, err error) {
 		_, err = c.Get(fmt.Sprintf("http://localhost:%d/ping", port))
 		if err != nil {
@@ -1337,22 +1336,8 @@ func waitE2EHelperReady(c http.Client, port int) error {
 	})
 }
 
-func getAvailablePort() (int, error) {
-	addr, err := net.ResolveTCPAddr("tcp", "localhost:0")
-	if err != nil {
-		return 0, err
-	}
-
-	l, err := net.ListenTCP("tcp", addr)
-	if err != nil {
-		return 0, err
-	}
-	defer l.Close()
-	return l.Addr().(*net.TCPAddr).Port, nil
-}
-
 // get pod current time in nanosecond
-func getPodTimeNS(c http.Client, port int) (*time.Time, error) {
+func getPodTimeNS(c http.Client, port uint16) (*time.Time, error) {
 	resp, err := c.Get(fmt.Sprintf("http://localhost:%d/time", port))
 	if err != nil {
 		return nil, err
@@ -1372,7 +1357,7 @@ func getPodTimeNS(c http.Client, port int) (*time.Time, error) {
 }
 
 // get pod io delay
-func getPodIODelay(c http.Client, port int) (time.Duration, error) {
+func getPodIODelay(c http.Client, port uint16) (time.Duration, error) {
 	resp, err := c.Get(fmt.Sprintf("http://localhost:%d/io", port))
 	if err != nil {
 		return 0, err
