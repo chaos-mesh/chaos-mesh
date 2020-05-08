@@ -49,6 +49,6 @@ data:
     - name: fuse
       emptyDir: {}
     postStart:
-      cockroachdb:
+      db:
         command:
           - /tmp/scripts/wait-fuse.sh
