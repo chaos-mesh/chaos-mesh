@@ -47,7 +47,7 @@ ARGS="--pd=${CLUSTER_NAME}-pd:2379 \
 
 > Node: The default data directory of TiKV is not a subdirectory of `PersistentVolumes`.
 > If your application is TiDB cluster, you need to modify it at [_start_tikv.sh.tpl](https://github.com/pingcap/tidb-operator/blob/master/charts/tidb-cluster/templates/scripts/_start_tikv.sh.tpl). 
-> PD has the same issue with TiKV, you need to modity the data directory of pd at [_start_pd.sh.tpl](https://github.com/pingcap/tidb-operator/blob/master/charts/tidb-cluster/templates/scripts/_start_pd.sh.tpl).
+> PD has the same issue with TiKV, you need to modify the data directory of pd at [_start_pd.sh.tpl](https://github.com/pingcap/tidb-operator/blob/master/charts/tidb-cluster/templates/scripts/_start_pd.sh.tpl).
 
 ## Usage
 
@@ -55,7 +55,7 @@ ARGS="--pd=${CLUSTER_NAME}-pd:2379 \
 
 Chaos Mesh uses sidecar container to inject IO chaos, 
 to fulfill this chaos you need to configure this sidecar container using a [ConfigMap](https://kubernetes.io/docs/tasks/configure-pod-container/configure-pod-configmap/)
-You can refer this [document](sidecar_configmap.md) to define a specify ConfigMap for your application before starting your chaos experiment. 
+You can refer this [document](sidecar_configmap.md) to define a ConfigMap for your application before starting your chaos experiment. 
 
 You can apply the ConfigMap defined for your application to Kubernetes cluster by using this command:
 
