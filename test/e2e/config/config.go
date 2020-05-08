@@ -15,8 +15,10 @@ package config
 
 import (
 	"flag"
-
 	"github.com/pingcap/chaos-mesh/test"
+	"k8s.io/client-go/tools/clientcmd"
+	clientcmdapi "k8s.io/client-go/tools/clientcmd/api"
+	"k8s.io/kubernetes/test/e2e/framework"
 )
 
 // TestConfig for the test config
@@ -29,4 +31,14 @@ func RegisterOperatorFlags(flags *flag.FlagSet) {
 	flags.StringVar(&TestConfig.DaemonImage, "daemon-image", "pingcap/chaos-daemon", "chaos-daemon image")
 	flags.StringVar(&TestConfig.DaemonTag, "daemon-image-tag", "latest", "chaos-daemon image tag")
 	flags.StringVar(&TestConfig.E2EImage, "e2e-image", "pingcap/e2e-helper:latest", "e2e helper image")
+}
+
+func LoadClientRawConfig() (clientcmdapi.Config, error) {
+	loadingRules := clientcmd.NewDefaultClientConfigLoadingRules()
+	loadingRules.ExplicitPath = framework.TestContext.KubeConfig
+	overrides := &clientcmd.ConfigOverrides{ClusterDefaults: clientcmd.ClusterDefaults}
+	if framework.TestContext.KubeContext != "" {
+		overrides.CurrentContext = framework.TestContext.KubeContext
+	}
+	return clientcmd.NewNonInteractiveDeferredLoadingClientConfig(loadingRules, overrides).RawConfig()
 }

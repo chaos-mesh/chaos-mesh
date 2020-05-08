@@ -14,6 +14,8 @@ import (
 	"github.com/onsi/ginkgo"
 	"github.com/pingcap/chaos-mesh/api/v1alpha1"
 	chaosmeshv1alpha1 "github.com/pingcap/chaos-mesh/api/v1alpha1"
+	e2econfig "github.com/pingcap/chaos-mesh/test/e2e/config"
+	"github.com/pingcap/chaos-mesh/test/e2e/util/portforward"
 	"github.com/pingcap/chaos-mesh/test/pkg/fixture"
 	"github.com/pingcap/errors"
 	corev1 "k8s.io/api/core/v1"
@@ -41,6 +43,7 @@ var _ = ginkgo.Describe("[Basic]", func() {
 	f := framework.NewDefaultFramework("chaos-mesh")
 	var ns string
 	var fwCancel context.CancelFunc
+	var fw portforward.PortForward
 	var kubeCli kubernetes.Interface
 	var config *restClient.Config
 	var cli client.Client
@@ -50,17 +53,20 @@ var _ = ginkgo.Describe("[Basic]", func() {
 
 	ginkgo.BeforeEach(func() {
 		ns = f.Namespace.Name
-		_, cancel := context.WithCancel(context.Background())
+		ctx, cancel := context.WithCancel(context.Background())
+		clientRawConfig, err := e2econfig.LoadClientRawConfig()
+		framework.ExpectNoError(err, "failed to load raw config")
+		fw, err = portforward.NewPortForwarder(ctx, e2econfig.NewSimpleRESTClientGetter(clientRawConfig))
+		framework.ExpectNoError(err, "failed to create port forwarder")
 		fwCancel = cancel
 		kubeCli = f.ClientSet
-		var err error
 		config, err = framework.LoadConfig()
 		framework.ExpectNoError(err, "config error")
 		scheme := runtime.NewScheme()
 		_ = clientgoscheme.AddToScheme(scheme)
 		_ = chaosmeshv1alpha1.AddToScheme(scheme)
 		cli, err = client.New(config, client.Options{Scheme: scheme})
-
+		framework.ExpectNoError(err, "create client error")
 	})
 
 	ginkgo.AfterEach(func() {
