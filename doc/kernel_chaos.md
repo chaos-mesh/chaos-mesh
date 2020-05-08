@@ -1,8 +1,8 @@
 # Kernel Chaos Document
 
-This document describe how to add kernel chaos experiments in Chaos Mesh.
+This document describes how to add kernel chaos experiments in Chaos Mesh.
 
-This future is disabled by default. Please don't use it in a production environment unless
+This feature is disabled by default. Please don't use it in a production environment unless
 you know the effect explicitly. BTW, although kernel injection will target a
 certain pod, since all pods on the same host share the same kernel, the
 performance of other pods will have some impact, depending on the specific
@@ -118,7 +118,7 @@ Description:
       *name)` with a special name `bananas`, you need to set it to `struct
       dentry *parent, const struct qstr *name`otherwise omit it.
       **predicate** will access the arguments of this frame, example with
-      parameters's, you can set it to `STRNCMP(name->name, "bananas", 8)` to
+      parameters', you can set it to `STRNCMP(name->name, "bananas", 8)` to
       make inject only with it, or omit it to inject for all d_alloc_parallel call chain.
   * **headers** indicates the appropriate kernel headers you need. Eg: "linux/mmzone.h", "linux/blkdev.h" and so on.
   * **probability** indicates the fails with probability. If you want 1%, please set this field with 1.

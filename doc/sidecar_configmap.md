@@ -1,12 +1,12 @@
 # Sidecar ConfigMap
 
-This document guides user to define a specify sidecar ConfigMap for your application.
+This document guides user to define a specified sidecar ConfigMap for your application.
 
-## Why need a specify Sidecar ConfigMap?
+## Why do we need a specified Sidecar ConfigMap?
 
 Chaos Mesh runs a [fuse-daemon](https://www.kernel.org/doc/Documentation/filesystems/fuse.txt) server in [sidecar container](https://www.magalix.com/blog/the-sidecar-pattern) for implementing file system IO Chaos. 
 In sidecar container, fuse-daemon need to mount the data directory of application by [fusermount](http://manpages.ubuntu.com/manpages/bionic/en/man1/fusermount.1.html) before the application starts.
-The most applications use different data directories, so we need to defines the different sidecar configs for most different applications. 
+The most applications use different data directories, so we need to define the different sidecar configs for most different applications. 
 
 ## What in Sidecar ConfigMap?
 
@@ -77,7 +77,7 @@ Description of `chaofs-tikv.yaml`:
 * **selector**: is used to filter pods to inject sidecar.
 * **initContainers**: defines the [initContainer](https://kubernetes.io/docs/concepts/workloads/pods/init-containers/) need to be injected.
 * **container**: defines the sidecar container need to be injected. 
-* **volumeMounts**: defines the new volumeMounts or overwrite the old volumeMounts of the each containers in target pods.
+* **volumeMounts**: defines the new volumeMounts or overwrite the old volumeMounts of each containers in target pods.
 * **volume**: defines the new volumes for the target pod or overwrite the old volumes in target pods.
 * **postStart**: called after a container is created first. If the handler fails, the containers will failed. 
 Key defines for the name of deployment container. Value defines for the Commands for stating container.
