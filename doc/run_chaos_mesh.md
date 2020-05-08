@@ -1,6 +1,6 @@
 # Run Chaos Mesh
 
-Now that you have deployed Chaos Mesh in your environment, it's time 
+Now you have deployed Chaos Mesh in your environment, it's time 
 to use it for your chaos experiments. This document walks you through the process of running chaos experiments. It also describes the regular operations on chaos experiments.  
 
 ## Step 1: Deploy the target cluster
@@ -62,21 +62,3 @@ kubectl apply -f pod-failure-example.yaml
 ```bash
 kubectl delete -f pod-failure-example.yaml
 ```
-
-### Watch your chaos experiments in Dashboard
-
-Chaos Dashboard is currently only available for TiDB clusters. Stay tuned for more supports or join us in making it happen.
-
-> **Note:**
->
-> If Chaos Dashboard was not installed in your earlier deployment, you need to install it by upgrading Chaos Mesh:
->
-> ```helm upgrade chaos-mesh helm/chaos-mesh --namespace=chaos-testing --set dashboard.create=true```
-
-A typical way to access it is to use `kubectl port-forward`
-
-```bash
-kubectl port-forward -n chaos-testing svc/chaos-dashboard 8080:80
-```
-
-Then you can access [`http://localhost:8080`](http://localhost:8080) in browser.
