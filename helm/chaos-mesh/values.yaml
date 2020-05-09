@@ -157,12 +157,14 @@ postJobs:
   podAnnotations: {}
 
 webhook:
+  # if empty and disable certManager, Helm will auto-generate these fields
+  crtPEM: |
+
+  keyPEM: |
+
   # Setup the webhook using cert-manager
   certManager:
     enabled: false
-
-  # If the deleteSecret is true, we will create a job to delete the secret, Otherwise, do nothing
-  deleteSecret: true
 
   # FailurePolicy defines how unrecognized errors and timeout errors from the admission webhook are handled.
   # https://kubernetes.io/docs/reference/access-authn-authz/extensible-admission-controllers/#failure-policy

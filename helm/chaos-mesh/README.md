@@ -68,10 +68,7 @@ The following tables list the configurable parameters of the Chaos Mesh chart an
 | `prometheus.service.type` | Kubernetes Service type | `ClusterIP` |
 | `prometheus.volume.storage` | | `2Gi` |
 | `prometheus.volume.storageClassName` | | `standard` |
-| `preJobs.podAnnotations` | | `{}` |
-| `postJobs.podAnnotations` | | `{}` |
 | `webhook.certManager.enabled` | Setup the webhook using cert-manager | `false` |
-| `webhook.deleteSecret` | If true, will create a job to delete the secret. Otherwise, do nothing | `true` |
 | `webhook.FailurePolicy` | Defines how unrecognized errors and timeout errors from the admission webhook are handled | `Ignore` |
 | `webhook.CRDS` | Define a list of chaos types that implement admission webhook | `[podchaos,iochaos,timechaos,networkchaos,kernelchaos]` |
 
@@ -122,16 +119,7 @@ webhook:
 
 The webhook's cert and the [MutatingAdmissionWebhook](https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/#mutatingadmissionwebhook)'s `caBundle` property will be managed by the [Certificate](https://cert-manager.io/docs/usage/certificate/) of Cert-manager.
 
-In case your Cert-manager's option `enable-certificate-owner-ref` is true, it means that deleting a certificate resource will also delete its secret. You can set the `webhook.deleteSecret` property to `false`.
-
-```yaml
-webhook:
-  certManager:
-    enabled: true
-  deleteSecret: false
-```
-
-Otherwise, when uninstalling Chaos Mesh, we will create a job to delete the secret.
+In case your Cert-manager's option `enable-certificate-owner-ref` is true, it means that deleting a certificate resource will also delete its secret.
 
 The Cert-manager's option `enable-certificate-owner-ref` refer to the following:
 > https://github.com/jetstack/cert-manager/issues/296
