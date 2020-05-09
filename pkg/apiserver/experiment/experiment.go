@@ -30,7 +30,7 @@ type Service struct {
 	event   core.EventStore
 }
 
-// NewService return a experiment service instance.
+// NewService return an experiment service instance.
 func NewService(
 	conf *config.ChaosServerConfig,
 	cli client.Client,
