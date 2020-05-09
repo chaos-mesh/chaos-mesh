@@ -1,5 +1,5 @@
 import React from 'react'
-import { Button, Container, Stepper, Step, StepLabel, Typography } from '@material-ui/core'
+import { Box, Button, Container, Stepper, Step, StepLabel, Typography } from '@material-ui/core'
 import CloudUploadOutlinedIcon from '@material-ui/icons/CloudUploadOutlined'
 import PublishIcon from '@material-ui/icons/Publish'
 
@@ -13,14 +13,6 @@ const useStyles = makeStyles((theme: Theme) =>
       width: '80vw',
       height: '100%',
       padding: theme.spacing(6),
-    },
-    toolbar: {
-      display: 'flex',
-      justifyContent: 'space-between',
-      marginBottom: theme.spacing(5),
-    },
-    stepperWrapper: {
-      flex: 1,
     },
     stepContent: {
       maxWidth: '80%',
@@ -82,7 +74,7 @@ const CreateStepper = () => {
   }
 
   return (
-    <div className={classes.stepperWrapper}>
+    <Box flexGrow={1}>
       <Stepper activeStep={activeStep} alternativeLabel>
         {steps.map((label) => (
           <Step key={label}>
@@ -112,7 +104,7 @@ const CreateStepper = () => {
           </>
         )}
       </div>
-    </div>
+    </Box>
   )
 }
 
@@ -121,14 +113,14 @@ export default function NewExperiment() {
 
   return (
     <Container className={classes.container} maxWidth="lg">
-      <div className={classes.toolbar}>
+      <Box display="flex" justifyContent="space-between" mb={6}>
         <Button variant="outlined" startIcon={<CloudUploadOutlinedIcon />}>
           Yaml File
         </Button>
         <Button variant="contained" color="primary" startIcon={<PublishIcon />}>
           Submit
         </Button>
-      </div>
+      </Box>
 
       <CreateStepper />
     </Container>
