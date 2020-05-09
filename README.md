@@ -15,7 +15,7 @@ Chaos Mesh is a cloud-native Chaos Engineering platform that orchestrates chaos 
 
 - **Chaos Operator**: the core component for chaos orchestration. Fully open sourced.
 - **Chaos Dashboard**: a visualized panel that shows the impacts of chaos experiments on the online services of the system; under development; 
-curently only supports chaos experiments on TiDB(https://github.com/pingcap/tidb).
+currently only supports chaos experiments on TiDB(https://github.com/pingcap/tidb).
 
 See the following demo video for a quick view of Chaos Mesh:
 
@@ -28,7 +28,7 @@ custom definitions for chaos experiments and automatic orchestration. There are 
 
 **Controller-manager**: used to schedule and manage the lifecycle of CRD objects
 
-**Chaos-daemon**: runs as daemonset with privileged system permissions over network, Cgroup, etc. for a specifc node
+**Chaos-daemon**: runs as daemonset with privileged system permissions over network, Cgroup, etc. for a specific node
 
 **Sidecar**: a special type of container that is dynamically injected into the target Pod by the webhook-server, which can be used for hijacking I/O of the application container.
 
@@ -45,7 +45,7 @@ which correspond to the following major actions (experiments):
 - network-partition: Simulate network partition.
 - IO chaos: Simulate file system faults such as I/O delay, read/write errors, etc.
 - time chaos: The selected pod will be injected clock skew.
-- kernel chaos: The selected pod will be injected with (slab,bio,etc) errors.
+- kernel chaos: The selected pod will be injected with (slab, bio, etc) errors.
 
 ## Quick start
 
@@ -75,7 +75,7 @@ Please reach out for bugs, feature requests, and other issues via:
 
 - Following us on Twitter at [@chaos_mesh](https://twitter.com/chaos_mesh).
 - The #sig-chaos-mesh channel in the [TiDB Community](https://pingcap.com/tidbslack) slack workspace.
-- Filing a issue or opening a PR against this repo.
+- Filing an issue or opening a PR against this repo.
 
 ### Community meeting
 

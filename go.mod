@@ -27,6 +27,7 @@ require (
 	github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0
 	github.com/grpc-ecosystem/grpc-gateway v1.14.1 // indirect
 	github.com/hanwen/go-fuse v0.0.0-20190111173210-425e8d5301f6
+	github.com/hashicorp/go-multierror v1.1.0
 	github.com/hashicorp/golang-lru v0.5.3 // indirect
 	github.com/jinzhu/gorm v1.9.12
 	github.com/kelseyhightower/envconfig v1.4.0
@@ -66,6 +67,7 @@ require (
 	k8s.io/api v0.17.0
 	k8s.io/apiextensions-apiserver v0.17.0
 	k8s.io/apimachinery v0.17.0
+	k8s.io/cli-runtime v0.17.0
 	k8s.io/client-go v0.17.0
 	k8s.io/component-base v0.17.0
 	k8s.io/klog v1.0.0
