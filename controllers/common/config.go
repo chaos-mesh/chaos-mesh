@@ -11,22 +11,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package main
+package common
 
-import (
-	"fmt"
-	"time"
-)
+import "os"
 
-// This program is for testing time chaos in the e2e test
-func main() {
-	ticker := time.NewTicker(2 * time.Second)
+// Cfg is a global variable to keep daemon ports
+var Cfg *Config
 
-	for {
-		select {
-		case <-ticker.C:
-			now := time.Now().Format(time.RFC3339Nano)
-			fmt.Println(now)
-		}
+func init() {
+	Cfg = NewConfig()
+}
+
+// Config is a struct for daemon ports config
+type Config struct {
+	ChaosDaemonPort string
+	BPFKIPort       string
+}
+
+// NewConfig returns a new Config
+func NewConfig() *Config {
+	return &Config{
+		ChaosDaemonPort: os.Getenv("CHAOS_DAEMON_PORT"),
+		BPFKIPort:       os.Getenv("BPFKI_PORT"),
 	}
 }
