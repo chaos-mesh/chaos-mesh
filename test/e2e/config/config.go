@@ -33,6 +33,7 @@ func RegisterOperatorFlags(flags *flag.FlagSet) {
 	flags.StringVar(&TestConfig.E2EImage, "e2e-image", "pingcap/e2e-helper:latest", "e2e helper image")
 }
 
+// LoadClientRawConfig would provide client raw config
 func LoadClientRawConfig() (clientcmdapi.Config, error) {
 	loadingRules := clientcmd.NewDefaultClientConfigLoadingRules()
 	loadingRules.ExplicitPath = framework.TestContext.KubeConfig
