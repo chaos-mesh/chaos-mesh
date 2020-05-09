@@ -18,9 +18,9 @@ import (
 	"crypto/sha1"
 	"errors"
 	"fmt"
-	"github.com/hashicorp/go-multierror"
 
 	"github.com/go-logr/logr"
+	"github.com/hashicorp/go-multierror"
 	"golang.org/x/sync/errgroup"
 	v1 "k8s.io/api/core/v1"
 	k8sError "k8s.io/apimachinery/pkg/api/errors"
@@ -351,7 +351,7 @@ func (r *Reconciler) cleanFinalizersAndRecover(ctx context.Context, networkchaos
 
 	if networkchaos.Annotations[common.AnnotationCleanFinalizer] == common.AnnotationCleanFinalizerForced {
 		r.Log.Info("Force cleanup all finalizers", "chaos", networkchaos)
-		networkchaos.Finalizers = make([]string, 0)
+		networkchaos.Finalizers = networkchaos.Finalizers[:0]
 		return nil
 	}
 
