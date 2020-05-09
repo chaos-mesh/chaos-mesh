@@ -108,7 +108,7 @@ func (f *portForwarder) forwardPorts(podKey, method string, url *url.URL, addres
 	return forwardedPorts, cancel, nil
 }
 
-// Forward would port-forward forward target resources
+// Forward would port-forward to target resources
 func (f *portForwarder) Forward(namespace, resourceName string, addresses []string, ports []string) (forwardedPorts []portforward.ForwardedPort, cancel context.CancelFunc, err error) {
 	builder := resource.NewBuilder(f).
 		WithScheme(scheme.Scheme, scheme.Scheme.PrioritizedVersionsAllGroups()...).
