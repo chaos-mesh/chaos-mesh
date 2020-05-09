@@ -81,15 +81,21 @@ var _ = ginkgo.Describe("[Basic]", func() {
 
 			ginkgo.It("[Duration]", func() {
 				ctx, cancel := context.WithCancel(context.Background())
-				nd := fixture.NewCommonNginxDeployment("nginx", ns, 1)
+				nd := fixture.NewTimerDeployment("timer", ns)
 				_, err := kubeCli.AppsV1().Deployments(ns).Create(nd)
-				framework.ExpectNoError(err, "create nginx deployment error")
-				err = waitDeploymentReady("nginx", ns, kubeCli)
-				framework.ExpectNoError(err, "wait nginx deployment ready error")
+				framework.ExpectNoError(err, "create timer deployment error")
+				err = waitDeploymentReady("timer", ns, kubeCli)
+				framework.ExpectNoError(err, "wait timer deployment ready error")
+
+				listOption := metav1.ListOptions{
+					LabelSelector: labels.SelectorFromSet(map[string]string{
+						"app": "timer",
+					}).String(),
+				}
 
 				podFailureChaos := &v1alpha1.PodChaos{
 					ObjectMeta: metav1.ObjectMeta{
-						Name:      "nginx-failure",
+						Name:      "timer-failure",
 						Namespace: ns,
 					},
 					Spec: v1alpha1.PodChaosSpec{
@@ -98,7 +104,7 @@ var _ = ginkgo.Describe("[Basic]", func() {
 								ns,
 							},
 							LabelSelectors: map[string]string{
-								"app": "nginx",
+								"app": "timer",
 							},
 						},
 						Action: v1alpha1.PodFailureAction,
@@ -109,11 +115,6 @@ var _ = ginkgo.Describe("[Basic]", func() {
 				framework.ExpectNoError(err, "create pod failure chaos error")
 
 				err = wait.PollImmediate(5*time.Second, 5*time.Minute, func() (done bool, err error) {
-					listOption := metav1.ListOptions{
-						LabelSelector: labels.SelectorFromSet(map[string]string{
-							"app": "nginx",
-						}).String(),
-					}
 					pods, err := kubeCli.CoreV1().Pods(ns).List(listOption)
 					if err != nil {
 						return false, nil
@@ -135,11 +136,6 @@ var _ = ginkgo.Describe("[Basic]", func() {
 
 				klog.Infof("success to perform pod failure")
 				err = wait.PollImmediate(5*time.Second, 1*time.Minute, func() (done bool, err error) {
-					listOption := metav1.ListOptions{
-						LabelSelector: labels.SelectorFromSet(map[string]string{
-							"app": "nginx",
-						}).String(),
-					}
 					pods, err := kubeCli.CoreV1().Pods(ns).List(listOption)
 					if err != nil {
 						return false, nil
@@ -149,7 +145,7 @@ var _ = ginkgo.Describe("[Basic]", func() {
 					}
 					pod := pods.Items[0]
 					for _, c := range pod.Spec.Containers {
-						if c.Image == "nginx:latest" {
+						if c.Image == nd.Spec.Template.Spec.Containers[0].Image {
 							return true, nil
 						}
 					}
@@ -162,28 +158,28 @@ var _ = ginkgo.Describe("[Basic]", func() {
 
 			ginkgo.It("[Pause]", func() {
 				ctx, cancel := context.WithCancel(context.Background())
-				nd := fixture.NewCommonNginxDeployment("nginx", ns, 1)
+				nd := fixture.NewTimerDeployment("timer", ns)
 				_, err := kubeCli.AppsV1().Deployments(ns).Create(nd)
-				framework.ExpectNoError(err, "create nginx deployment error")
-				err = waitDeploymentReady("nginx", ns, kubeCli)
-				framework.ExpectNoError(err, "wait nginx deployment ready error")
+				framework.ExpectNoError(err, "create timer deployment error")
+				err = waitDeploymentReady("timer", ns, kubeCli)
+				framework.ExpectNoError(err, "wait timer deployment ready error")
 
 				var pods *corev1.PodList
 				listOption := metav1.ListOptions{
 					LabelSelector: labels.SelectorFromSet(map[string]string{
-						"app": "nginx",
+						"app": "timer",
 					}).String(),
 				}
 
 				podFailureChaos := &v1alpha1.PodChaos{
 					ObjectMeta: metav1.ObjectMeta{
-						Name:      "nginx-failure",
+						Name:      "timer-failure",
 						Namespace: ns,
 					},
 					Spec: v1alpha1.PodChaosSpec{
 						Selector: v1alpha1.SelectorSpec{
 							Namespaces:     []string{ns},
-							LabelSelectors: map[string]string{"app": "nginx"},
+							LabelSelectors: map[string]string{"app": "timer"},
 						},
 						Action:   v1alpha1.PodFailureAction,
 						Mode:     v1alpha1.OnePodMode,
@@ -198,7 +194,7 @@ var _ = ginkgo.Describe("[Basic]", func() {
 
 				chaosKey := types.NamespacedName{
 					Namespace: ns,
-					Name:      "nginx-failure",
+					Name:      "timer-failure",
 				}
 
 				// check whether the pod failure chaos succeeded or not
@@ -238,10 +234,10 @@ var _ = ginkgo.Describe("[Basic]", func() {
 
 				// wait for 1 minutes and no pod failure
 				pods, err = kubeCli.CoreV1().Pods(ns).List(listOption)
-				framework.ExpectNoError(err, "get nginx pods error")
+				framework.ExpectNoError(err, "get timer pod error")
 				err = wait.Poll(5*time.Second, 1*time.Minute, func() (done bool, err error) {
 					pods, err = kubeCli.CoreV1().Pods(ns).List(listOption)
-					framework.ExpectNoError(err, "get nginx pods error")
+					framework.ExpectNoError(err, "get timer pod error")
 					pod := pods.Items[0]
 					for _, c := range pod.Spec.Containers {
 						if c.Image == pauseImage {
@@ -275,7 +271,7 @@ var _ = ginkgo.Describe("[Basic]", func() {
 				// pod failure happens again
 				err = wait.Poll(5*time.Second, 5*time.Minute, func() (done bool, err error) {
 					pods, err = kubeCli.CoreV1().Pods(ns).List(listOption)
-					framework.ExpectNoError(err, "get nginx pods error")
+					framework.ExpectNoError(err, "get timer pod error")
 					pod := pods.Items[0]
 					for _, c := range pod.Spec.Containers {
 						if c.Image == pauseImage {
