@@ -14,6 +14,8 @@
 package event
 
 import (
+	"context"
+
 	"github.com/pingcap/chaos-mesh/pkg/core"
 	"github.com/pingcap/chaos-mesh/pkg/store/dbstore"
 )
@@ -25,7 +27,15 @@ func NewStore(db *dbstore.DB) core.EventStore {
 	return &eventStore{db}
 }
 
-// TODO: need to define the fields of this struct
 type eventStore struct {
 	db *dbstore.DB
 }
+
+// TODO: implement core.EventStore interface
+func (e *eventStore) List(context.Context) ([]*core.Event, error) { return nil, nil }
+func (e *eventStore) ListByExperiment(context.Context, string, string) ([]*core.Event, error) {
+	return nil, nil
+}
+func (e *eventStore) Find(context.Context, int64) (*core.Event, error) { return nil, nil }
+func (e *eventStore) Create(context.Context, *core.Event) error        { return nil }
+func (e *eventStore) Update(context.Context, *core.Event) error        { return nil }

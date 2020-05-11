@@ -11,22 +11,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package main
+package chaosdaemon
 
 import (
-	"fmt"
-	"time"
+	"context"
+
+	"github.com/golang/protobuf/ptypes/empty"
+
+	pb "github.com/pingcap/chaos-mesh/pkg/chaosdaemon/pb"
 )
 
-// This program is for testing time chaos in the e2e test
-func main() {
-	ticker := time.NewTicker(2 * time.Second)
+func (s *daemonServer) ExecStressors(context.Context, *pb.ExecStressRequest) (*pb.ExecStressResponse, error) {
+	return nil, nil
+}
 
-	for {
-		select {
-		case <-ticker.C:
-			now := time.Now().Format(time.RFC3339Nano)
-			fmt.Println(now)
-		}
-	}
+func (s *daemonServer) CancelStressors(context.Context, *pb.CancelStressRequest) (*empty.Empty, error) {
+	return &empty.Empty{}, nil
 }

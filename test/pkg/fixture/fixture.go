@@ -19,10 +19,54 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/util/intstr"
 	"k8s.io/utils/pointer"
 
 	"github.com/pingcap/chaos-mesh/test/e2e/config"
 )
+
+const ioTestConfigMap = `name: chaosfs-io
+initContainers:
+- name: inject-scripts
+  image: pingcap/chaos-scripts:latest
+  imagePullpolicy: Always
+  command: ["sh", "-c", "/scripts/init.sh -d /var/run/data/test -f /var/run/data/fuse-data"]
+containers:
+- name: chaosfs
+  image: pingcap/chaos-fs:latest
+  imagePullpolicy: Always
+  ports:
+  - containerPort: 65534
+  securityContext:
+    privileged: true
+  command:
+    - /usr/local/bin/chaosfs
+    - -addr=:65534
+    - -pidfile=/tmp/fuse/pid
+    - -original=/var/run/data/fuse-data
+    - -mountpoint=/var/run/data/test
+  volumeMounts:
+    - name: datadir
+      mountPath: /var/run/data
+      mountPropagation: Bidirectional
+volumeMounts:
+  - name: datadir
+    mountPath: /var/run/data
+    mountPropagation: HostToContainer
+  - name: scripts
+    mountPath: /tmp/scripts
+  - name: fuse
+    mountPath: /tmp/fuse
+volumes:
+  - name: scripts
+    emptyDir: {}
+  - name: fuse
+    emptyDir: {}
+postStart:
+  io:
+    command:
+      - /tmp/scripts/wait-fuse.sh
+`
 
 // NewCommonNginxPod describe that we use common nginx pod to be tested in our chaos-operator test
 func NewCommonNginxPod(name, namespace string) *corev1.Pod {
@@ -83,7 +127,7 @@ func NewCommonNginxDeployment(name, namespace string, replicas int32) *appsv1.De
 	}
 }
 
-// NewTimerDeployment would create a timer deployment
+// NewTimerDeployment creates a timer deployment
 func NewTimerDeployment(name, namespace string) *appsv1.Deployment {
 	return &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
@@ -112,8 +156,102 @@ func NewTimerDeployment(name, namespace string) *appsv1.Deployment {
 							Image:           config.TestConfig.E2EImage,
 							ImagePullPolicy: corev1.PullIfNotPresent,
 							Name:            "timer",
+							Command:         []string{"/bin/test"},
 						},
 					},
+				},
+			},
+		},
+	}
+}
+
+// NewIOTestDeployment creates a deployment for e2e test
+func NewIOTestDeployment(name, namespace string) *appsv1.Deployment {
+	return &appsv1.Deployment{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      name,
+			Namespace: namespace,
+			Labels: map[string]string{
+				"app": "io",
+			},
+		},
+		Spec: appsv1.DeploymentSpec{
+			Replicas: pointer.Int32Ptr(1),
+			Selector: &metav1.LabelSelector{
+				MatchLabels: map[string]string{
+					"app": "io",
+				},
+			},
+			Template: corev1.PodTemplateSpec{
+				ObjectMeta: metav1.ObjectMeta{
+					Labels: map[string]string{
+						"app": "io",
+					},
+					Annotations: map[string]string{
+						"admission-webhook.pingcap.com/request": "chaosfs-io",
+					},
+				},
+				Spec: corev1.PodSpec{
+					Containers: []corev1.Container{
+						{
+							Image:           config.TestConfig.E2EImage,
+							ImagePullPolicy: corev1.PullIfNotPresent,
+							Name:            "io",
+							Command:         []string{"/bin/test"},
+							VolumeMounts: []corev1.VolumeMount{
+								{
+									Name:      "datadir",
+									MountPath: "/var/run/data",
+								},
+							},
+						},
+					},
+					Volumes: []corev1.Volume{
+						{
+							Name: "datadir",
+							VolumeSource: corev1.VolumeSource{
+								EmptyDir: &corev1.EmptyDirVolumeSource{},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+}
+
+func NewIOTestConfigMap(name, namespace string) *corev1.ConfigMap {
+	return &corev1.ConfigMap{
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: namespace,
+			Name:      name,
+			Labels: map[string]string{
+				"app.kubernetes.io/component": "webhook",
+			},
+		},
+		Data: map[string]string{
+			"chaosfs-io.yaml": ioTestConfigMap,
+		},
+	}
+}
+
+// NewE2EService creates a service for the E2E helper deployment
+func NewE2EService(name, namespace string) *corev1.Service {
+	return &corev1.Service{
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: namespace,
+			Name:      name,
+		},
+		Spec: corev1.ServiceSpec{
+			Type: corev1.ServiceTypeNodePort,
+			Selector: map[string]string{
+				"app": name,
+			},
+			Ports: []corev1.ServicePort{
+				{
+					Name:       "http",
+					Port:       8080,
+					TargetPort: intstr.IntOrString{IntVal: 8080},
 				},
 			},
 		},

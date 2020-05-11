@@ -65,8 +65,9 @@ func main() {
 
 	app := fx.New(
 		fx.Provide(
-			stopCh,
-			&conf,
+			func() (<-chan struct{}, *config.ChaosServerConfig) {
+				return stopCh, &conf
+			},
 			dbstore.NewDBStore,
 			collector.NewServer,
 		),
