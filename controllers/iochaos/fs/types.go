@@ -24,7 +24,6 @@ import (
 	"golang.org/x/sync/errgroup"
 	v1 "k8s.io/api/core/v1"
 	k8serror "k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/tools/cache"
@@ -94,13 +93,7 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos reconcil
 		return err
 	}
 
-	iochaos.Status.Experiment.StartTime = &metav1.Time{
-		Time: time.Now(),
-	}
-
-	iochaos.Status.Experiment.Pods = []v1alpha1.PodStatus{}
-	iochaos.Status.Experiment.Phase = v1alpha1.ExperimentPhaseRunning
-
+	iochaos.Status.Experiment.Pods = make([]v1alpha1.PodStatus, 0, len(pods))
 	for _, pod := range pods {
 		ps := v1alpha1.PodStatus{
 			Namespace: pod.Namespace,
@@ -131,10 +124,6 @@ func (r *Reconciler) Recover(ctx context.Context, req ctrl.Request, chaos reconc
 
 	if err := r.cleanFinalizersAndRecover(ctx, iochaos); err != nil {
 		return err
-	}
-
-	iochaos.Status.Experiment.EndTime = &metav1.Time{
-		Time: time.Now(),
 	}
 
 	r.Event(iochaos, v1.EventTypeNormal, utils.EventChaosRecovered, "")

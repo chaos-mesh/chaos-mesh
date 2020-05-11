@@ -106,8 +106,7 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos reconcil
 		return err
 	}
 
-	kernelchaos.Status.Experiment.Pods = []v1alpha1.PodStatus{}
-
+	kernelchaos.Status.Experiment.Pods = make([]v1alpha1.PodStatus, 0, len(pods))
 	for _, pod := range pods {
 		ps := v1alpha1.PodStatus{
 			Namespace: pod.Namespace,
@@ -132,8 +131,7 @@ func (r *Reconciler) Recover(ctx context.Context, req ctrl.Request, chaos reconc
 		return err
 	}
 
-	err := r.cleanFinalizersAndRecover(ctx, kernelchaos)
-	if err != nil {
+	if err := r.cleanFinalizersAndRecover(ctx, kernelchaos); err != nil {
 		return err
 	}
 

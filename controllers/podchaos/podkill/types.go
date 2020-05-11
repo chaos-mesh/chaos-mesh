@@ -89,7 +89,7 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos reconcil
 	if err := g.Wait(); err != nil {
 		return err
 	}
-	podchaos.Status.Experiment.Pods = []v1alpha1.PodStatus{}
+	podchaos.Status.Experiment.Pods = make([]v1alpha1.PodStatus, 0, len(pods))
 	for _, pod := range pods {
 		ps := v1alpha1.PodStatus{
 			Namespace: pod.Namespace,
