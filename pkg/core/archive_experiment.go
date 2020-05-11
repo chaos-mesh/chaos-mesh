@@ -41,6 +41,9 @@ type ExperimentStore interface {
 
 	// Update persists an updated experiment to the datastore.
 	Update(context.Context, *ArchiveExperiment) error
+
+	// Delete deletes the experiment from the datastore.
+	Delete(context.Context, *ArchiveExperiment) error
 }
 
 // ArchiveExperiment represents an experiment instance.

@@ -44,3 +44,4 @@ func (e *experimentStore) FindByName(context.Context, string, string) (*core.Arc
 }
 func (e *experimentStore) Create(context.Context, *core.ArchiveExperiment) error { return nil }
 func (e *experimentStore) Update(context.Context, *core.ArchiveExperiment) error { return nil }
+func (e *experimentStore) Delete(context.Context, *core.ArchiveExperiment) error { return nil }

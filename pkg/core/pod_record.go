@@ -19,7 +19,7 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
-// ExperimentStore defines operations for working with pod records
+// PodRecordStore defines operations for working with pod records
 type PodRecordStore interface {
 	// List returns a pod record list from the datastore.
 	List(context.Context) ([]*PodRecord, error)
