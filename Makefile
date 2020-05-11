@@ -29,6 +29,7 @@ GOARCH := $(if $(GOARCH),$(GOARCH),"")
 GOENV  := GO15VENDOREXPERIMENT="1" CGO_ENABLED=0 GOOS=$(GOOS) GOARCH=$(GOARCH)
 CGOENV  := GO15VENDOREXPERIMENT="1" CGO_ENABLED=1 GOOS=$(GOOS) GOARCH=$(GOARCH)
 GO     := $(GOENV) go
+CGO    := $(CGOENV) go
 GOTEST := TEST_USE_EXISTING_CLUSTER=false NO_PROXY="${NO_PROXY},testhost" go test
 SHELL    := /usr/bin/env bash
 
@@ -109,7 +110,7 @@ endif
 ifeq ($(UI),1)
 	scripts/embed_ui_assets.sh
 endif
-	$(GO) build -ldflags '$(LDFLAGS)' -tags "${BUILD_TAGS}" -o bin/chaos-server cmd/chaos-server/*.go
+	$(CGO) build -ldflags '$(LDFLAGS)' -tags "${BUILD_TAGS}" -o bin/chaos-server cmd/chaos-server/*.go
 
 binary: chaosdaemon manager chaosfs chaos-server
 
