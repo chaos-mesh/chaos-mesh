@@ -131,11 +131,7 @@ func (r *Reconciler) Recover(ctx context.Context, req ctrl.Request, chaos reconc
 		return err
 	}
 
-	if err := r.cleanFinalizersAndRecover(ctx, kernelchaos); err != nil {
-		return err
-	}
-
-	return nil
+	return r.cleanFinalizersAndRecover(ctx, kernelchaos)
 }
 
 func (r *Reconciler) cleanFinalizersAndRecover(ctx context.Context, chaos *v1alpha1.KernelChaos) error {
