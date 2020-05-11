@@ -8,7 +8,7 @@ This document helps you to build pod chaos experiments.
 
 Pod chaos allows you to simulate pod faults, specifically `pod failure` and `pod kill`. `pod failure` can be used to simulate a situation where a pod is down. In this case, the pod will be unavailable for a long time.
 
-- **Pod Failure** action periodically injects errors to pods. And it will cause the pod to not be created for a while. In another word, the selected pod will be unavailable in a specified period of time.
+- **Pod Failure** action periodically injects errors to pods. And it will cause the pod to not be created for a while. In another word, the selected pod will be unavailable in a specified period.
 
 - **Pod Kill** action kills the specified pod (ReplicaSet or something similar may be needed to ensure the pod will be restarted).
 

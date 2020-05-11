@@ -2,13 +2,12 @@ FROM golang:alpine3.10
 
 WORKDIR /src
 
-COPY timer/main.go /src
+COPY main.go /src
 
-RUN go build -o timer main.go
+RUN go build -o test main.go
 
 FROM alpine:3.10
 
-COPY --from=0 /src/timer /bin
+COPY --from=0 /src/test /bin
 
-CMD ["/bin/timer"]
-
+ENTRYPOINT ["/bin/test"]

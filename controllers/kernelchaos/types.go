@@ -17,7 +17,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"os"
 
 	k8serror "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
@@ -182,7 +181,7 @@ func (r *Reconciler) cleanFinalizersAndRecover(ctx context.Context, chaos *v1alp
 func (r *Reconciler) recoverPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.KernelChaos) error {
 	r.Log.Info("try to recover pod", "namespace", pod.Namespace, "name", pod.Name)
 
-	c1, err := utils.CreateGrpcConnection(ctx, r.Client, pod, os.Getenv("CHAOS_DAEMON_PORT"))
+	c1, err := utils.CreateGrpcConnection(ctx, r.Client, pod, common.Cfg.ChaosDaemonPort)
 	if err != nil {
 		return err
 	}
@@ -209,7 +208,7 @@ func (r *Reconciler) recoverPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha
 		r.Log.Info("Get container pid", "namespace", pod.Namespace, "name", pod.Name)
 	}
 
-	c2, err := utils.CreateGrpcConnection(ctx, r.Client, pod, os.Getenv("BPFKI_PORT"))
+	c2, err := utils.CreateGrpcConnection(ctx, r.Client, pod, common.Cfg.BPFKIPort)
 	if err != nil {
 		return err
 	}
@@ -260,7 +259,7 @@ func (r *Reconciler) applyAllPods(ctx context.Context, pods []v1.Pod, chaos *v1a
 func (r *Reconciler) applyPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.KernelChaos) error {
 	r.Log.Info("Try to inject kernel on pod", "namespace", pod.Namespace, "name", pod.Name)
 
-	c1, err := utils.CreateGrpcConnection(ctx, r.Client, pod, os.Getenv("CHAOS_DAEMON_PORT"))
+	c1, err := utils.CreateGrpcConnection(ctx, r.Client, pod, common.Cfg.ChaosDaemonPort)
 	if err != nil {
 		return err
 	}
@@ -287,7 +286,7 @@ func (r *Reconciler) applyPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.
 		r.Log.Info("Get container pid", "namespace", pod.Namespace, "name", pod.Name)
 	}
 
-	c2, err := utils.CreateGrpcConnection(ctx, r.Client, pod, os.Getenv("BPFKI_PORT"))
+	c2, err := utils.CreateGrpcConnection(ctx, r.Client, pod, common.Cfg.BPFKIPort)
 	if err != nil {
 		return err
 	}

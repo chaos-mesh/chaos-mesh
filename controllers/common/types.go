@@ -29,6 +29,13 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
+const (
+	// AnnotationCleanFinalizer key
+	AnnotationCleanFinalizer = `chaos-mesh.pingcap.com/cleanFinalizer`
+	// AnnotationCleanFinalizerForced value
+	AnnotationCleanFinalizerForced = `forced`
+)
+
 // Reconciler for common chaos
 type Reconciler struct {
 	reconciler.InnerReconciler
