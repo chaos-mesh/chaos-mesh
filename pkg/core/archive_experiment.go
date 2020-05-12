@@ -14,13 +14,59 @@
 package core
 
 import (
+	"context"
+	"time"
+
 	"github.com/jinzhu/gorm"
+
+	"github.com/pingcap/chaos-mesh/api/v1alpha1"
 )
 
 // ExperimentStore defines operations for working with archive experiments
-type ExperimentStore interface{}
+type ExperimentStore interface {
+	// List returns an archive experiment list from the datastore.
+	List(context.Context) ([]*ArchiveExperiment, error)
 
-// ArchiveExperiment represents a experiment instance.
-type ArchiveExperiment struct {
-	gorm.Model
+	// ListByKind returns an archive experiment list by kind from the datastore.
+	ListByKind(context.Context, string) ([]*ArchiveExperiment, error)
+
+	// Find returns an archive experiment by ID.
+	Find(context.Context, int64) (*ArchiveExperiment, error)
+
+	// FindByName returns an archive experiment by the name and namespace of the experiment.
+	FindByName(context.Context, string, string) (*ArchiveExperiment, error)
+
+	// Create persists a new archive experiment to the datastore.
+	Create(context.Context, *ArchiveExperiment) error
+
+	// Update persists an updated experiment to the datastore.
+	Update(context.Context, *ArchiveExperiment) error
+
+	// Delete deletes the experiment from the datastore.
+	Delete(context.Context, *ArchiveExperiment) error
 }
+
+// ArchiveExperiment represents an experiment instance.
+type ArchiveExperiment struct {
+	ArchiveExperimentMeta
+	Experiment string `gorm:"size:2048"`
+}
+
+// ArchiveExperimentMeta defines the meta data for ArchiveExperiment.
+type ArchiveExperimentMeta struct {
+	gorm.Model
+	Name       string
+	Namespace  string
+	Kind       string
+	Action     string
+	StartTime  time.Time
+	FinishTime time.Time
+}
+
+// TODO: implement parse functions
+func (e *ArchiveExperiment) ParsePodChaos() (*v1alpha1.PodChaos, error)       { return nil, nil }
+func (e *ArchiveExperiment) ParseNetChaos() (*v1alpha1.NetworkChaos, error)   { return nil, nil }
+func (e *ArchiveExperiment) ParseIOChaos() (*v1alpha1.IoChaos, error)         { return nil, nil }
+func (e *ArchiveExperiment) ParseTimeChaos() (*v1alpha1.TimeChaos, error)     { return nil, nil }
+func (e *ArchiveExperiment) ParseKernelChaos() (*v1alpha1.KernelChaos, error) { return nil, nil }
+func (e *ArchiveExperiment) ParseStressChaos() (*v1alpha1.StressChaos, error) { return nil, nil }

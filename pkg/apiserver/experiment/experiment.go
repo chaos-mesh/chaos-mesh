@@ -30,7 +30,7 @@ type Service struct {
 	event   core.EventStore
 }
 
-// NewService return a experiment service instance.
+// NewService returns an experiment service instance.
 func NewService(
 	conf *config.ChaosServerConfig,
 	cli client.Client,
@@ -50,7 +50,7 @@ func Register(r *gin.RouterGroup, s *Service) {
 	endpoint := r.Group("/experiment")
 
 	// TODO: add more api handlers
-	endpoint.GET("/all", s.listExperiments)
+	endpoint.GET("/", s.listExperiments)
 	endpoint.GET("/:name", s.getExperimentDetail)
 	endpoint.DELETE("/delete/:ns/:name", s.deleteExperiment)
 }

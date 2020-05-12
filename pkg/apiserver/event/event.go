@@ -24,10 +24,11 @@ import (
 
 // Service defines a handler service for events.
 type Service struct {
-	conf    *config.ChaosServerConfig
-	kubeCli client.Client
-	archive core.ExperimentStore
-	event   core.EventStore
+	conf      *config.ChaosServerConfig
+	kubeCli   client.Client
+	archive   core.ExperimentStore
+	event     core.EventStore
+	podRecord core.PodRecordStore
 }
 
 // NewService return a event service instance.
@@ -36,12 +37,14 @@ func NewService(
 	cli client.Client,
 	archive core.ExperimentStore,
 	event core.EventStore,
+	podRecord core.PodRecordStore,
 ) *Service {
 	return &Service{
-		conf:    conf,
-		kubeCli: cli,
-		archive: archive,
-		event:   event,
+		conf:      conf,
+		kubeCli:   cli,
+		archive:   archive,
+		event:     event,
+		podRecord: podRecord,
 	}
 }
 

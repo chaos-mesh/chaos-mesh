@@ -93,14 +93,12 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1
 		return err
 	}
 
-	err = r.applyAllPods(ctx, pods, timechaos)
-	if err != nil {
+	if err = r.applyAllPods(ctx, pods, timechaos); err != nil {
 		r.Log.Error(err, "failed to apply chaos on all pods")
 		return err
 	}
 
-	timechaos.Status.Experiment.Pods = []v1alpha1.PodStatus{}
-
+	timechaos.Status.Experiment.Pods = make([]v1alpha1.PodStatus, 0, len(pods))
 	for _, pod := range pods {
 		ps := v1alpha1.PodStatus{
 			Namespace: pod.Namespace,
@@ -125,8 +123,7 @@ func (r *Reconciler) Recover(ctx context.Context, req ctrl.Request, chaos v1alph
 		return err
 	}
 
-	err := r.cleanFinalizersAndRecover(ctx, timechaos)
-	if err != nil {
+	if err := r.cleanFinalizersAndRecover(ctx, timechaos); err != nil {
 		return err
 	}
 	r.Event(timechaos, v1.EventTypeNormal, utils.EventChaosRecovered, "")

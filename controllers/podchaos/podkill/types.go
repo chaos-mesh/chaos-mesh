@@ -39,8 +39,7 @@ type Reconciler struct {
 	Log logr.Logger
 }
 
-func newReconciler(c client.Client, log logr.Logger, req ctrl.Request,
-	recorder record.EventRecorder) *Reconciler {
+func newReconciler(c client.Client, log logr.Logger, recorder record.EventRecorder) *Reconciler {
 	return &Reconciler{
 		Client:        c,
 		EventRecorder: recorder,
@@ -49,9 +48,8 @@ func newReconciler(c client.Client, log logr.Logger, req ctrl.Request,
 }
 
 // NewTwoPhaseReconciler would create Reconciler for twophase package
-func NewTwoPhaseReconciler(c client.Client, log logr.Logger, req ctrl.Request,
-	recorder record.EventRecorder) *twophase.Reconciler {
-	r := newReconciler(c, log, req, recorder)
+func NewTwoPhaseReconciler(c client.Client, log logr.Logger, recorder record.EventRecorder) *twophase.Reconciler {
+	r := newReconciler(c, log, recorder)
 	return twophase.NewReconciler(r, r.Client, r.Log)
 }
 
@@ -88,7 +86,7 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1
 	if err := g.Wait(); err != nil {
 		return err
 	}
-	podchaos.Status.Experiment.Pods = []v1alpha1.PodStatus{}
+	podchaos.Status.Experiment.Pods = make([]v1alpha1.PodStatus, 0, len(pods))
 	for _, pod := range pods {
 		ps := v1alpha1.PodStatus{
 			Namespace: pod.Namespace,
