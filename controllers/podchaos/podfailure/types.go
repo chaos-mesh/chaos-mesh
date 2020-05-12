@@ -17,13 +17,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"time"
 
 	"github.com/go-logr/logr"
 	"golang.org/x/sync/errgroup"
 	v1 "k8s.io/api/core/v1"
 	k8serror "k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/tools/cache"
 	"k8s.io/client-go/tools/record"
@@ -42,25 +40,22 @@ const (
 	// Always fails a container
 	pauseImage = "gcr.io/google-containers/pause:latest"
 
-	podFailureActionMsg = "pause pod duration %s"
+	podFailureActionMsg = "pod failure duration %s"
 )
 
 // NewTwoPhaseReconciler would create Reconciler for twophase package
-func NewTwoPhaseReconciler(c client.Client, log logr.Logger, req ctrl.Request,
-	recorder record.EventRecorder) *twophase.Reconciler {
-	r := newReconciler(c, log, req, recorder)
+func NewTwoPhaseReconciler(c client.Client, log logr.Logger, recorder record.EventRecorder) *twophase.Reconciler {
+	r := newReconciler(c, log, recorder)
 	return twophase.NewReconciler(r, r.Client, r.Log)
 }
 
 // NewCommonReconciler would create Reconciler for common package
-func NewCommonReconciler(c client.Client, log logr.Logger, req ctrl.Request,
-	recorder record.EventRecorder) *common.Reconciler {
-	r := newReconciler(c, log, req, recorder)
+func NewCommonReconciler(c client.Client, log logr.Logger, recorder record.EventRecorder) *common.Reconciler {
+	r := newReconciler(c, log, recorder)
 	return common.NewReconciler(r, r.Client, r.Log)
 }
 
-func newReconciler(c client.Client, log logr.Logger, req ctrl.Request,
-	recorder record.EventRecorder) *Reconciler {
+func newReconciler(c client.Client, log logr.Logger, recorder record.EventRecorder) *Reconciler {
 	return &Reconciler{
 		Client:        c,
 		EventRecorder: recorder,
@@ -99,12 +94,7 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos reconcil
 		return err
 	}
 
-	podchaos.Status.Experiment.StartTime = &metav1.Time{
-		Time: time.Now(),
-	}
-	podchaos.Status.Experiment.Pods = []v1alpha1.PodStatus{}
-	podchaos.Status.Experiment.Phase = v1alpha1.ExperimentPhaseRunning
-
+	podchaos.Status.Experiment.Pods = make([]v1alpha1.PodStatus, 0, len(pods))
 	for _, pod := range pods {
 		ps := v1alpha1.PodStatus{
 			Namespace: pod.Namespace,
@@ -132,13 +122,10 @@ func (r *Reconciler) Recover(ctx context.Context, req ctrl.Request, obj reconcil
 		return err
 	}
 
-	err := r.cleanFinalizersAndRecover(ctx, podchaos)
-	if err != nil {
+	if err := r.cleanFinalizersAndRecover(ctx, podchaos); err != nil {
 		return err
 	}
-	podchaos.Status.Experiment.EndTime = &metav1.Time{
-		Time: time.Now(),
-	}
+
 	r.Event(podchaos, v1.EventTypeNormal, utils.EventChaosRecovered, "")
 	return nil
 }
