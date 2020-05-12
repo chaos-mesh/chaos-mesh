@@ -14,8 +14,6 @@
 package v1alpha1
 
 import (
-	"time"
-
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -42,10 +40,6 @@ var _ = Describe("iochaos_webhook", func() {
 			}
 			duration := "400s"
 			errorDuration := "400S"
-
-			now := time.Now()
-			nextStart := metav1.NewTime(now.Add(time.Duration(100)))
-			nextRecover := metav1.NewTime(now)
 
 			tcs := []TestCase{
 				{
@@ -300,23 +294,6 @@ var _ = Describe("iochaos_webhook", func() {
 						Spec: IoChaosSpec{
 							Duration:  &duration,
 							Scheduler: &SchedulerSpec{Cron: "@every 1m"},
-						},
-					},
-					execute: func(chaos *IoChaos) error {
-						return chaos.ValidateCreate()
-					},
-					expect: "error",
-				},
-				{
-					name: "validate nextStart and nextRecover",
-					chaos: IoChaos{
-						ObjectMeta: metav1.ObjectMeta{
-							Namespace: metav1.NamespaceDefault,
-							Name:      "foo17",
-						},
-						Spec: IoChaosSpec{
-							NextStart:   &nextStart,
-							NextRecover: &nextRecover,
 						},
 					},
 					execute: func(chaos *IoChaos) error {
