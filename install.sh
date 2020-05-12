@@ -30,7 +30,7 @@ OPTIONS:
                              If this value is not set and the Kubernetes is not installed, this script will exit with 1.
     -n, --name               Name of Kubernetes cluster, default value: kind
     -c  --crd                The URL of the crd files, default value: https://raw.githubusercontent.com/pingcap/chaos-mesh/master/manifests/crd.yaml
-    -r  --runtime               Runtime specifies which container runtime to use. Currently we only supports docker and containerd. default value: docker
+    -r  --runtime            Runtime specifies which container runtime to use. Currently we only supports docker and containerd. default value: docker
         --kind-version       Version of the Kind tool, default value: v0.7.0
         --node-num           The count of the cluster nodes,default value: 3
         --k8s-version        Version of the Kubernetes cluster,default value: v1.17.2
@@ -733,8 +733,14 @@ azk8spull() {
 
 gen_crd_manifests() {
     local crd=$1
-    need_cmd curl
-    ensure curl -sSL $crd
+    local local_crd_path="manifests/crd.yaml"
+
+    if [ "${crd}" == "" ]; then
+        ensure cat "$local_crd_path"
+    else
+        need_cmd curl
+        ensure curl -sSL $crd
+    fi
 }
 
 gen_chaos_mesh_manifests() {
@@ -783,6 +789,7 @@ EOF
     TLS_CRT=$(openssl base64 -A -in ${tmpdir}/server.crt)
     CA_BUNDLE=$(openssl base64 -A -in ${tmpdir}/ca.crt)
 
+    # chaos-mesh.yaml start
     cat <<EOF
 ---
 apiVersion: v1
@@ -1305,6 +1312,7 @@ webhooks:
         resources:
           - stresschaos
 EOF
+    # chaos-mesh.yaml end
 }
 
 main "$@" || exit 1
