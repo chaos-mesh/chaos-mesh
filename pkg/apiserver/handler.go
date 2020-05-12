@@ -17,17 +17,20 @@ import (
 	"go.uber.org/fx"
 
 	"github.com/pingcap/chaos-mesh/pkg/apiserver/archive"
+	"github.com/pingcap/chaos-mesh/pkg/apiserver/common"
 	"github.com/pingcap/chaos-mesh/pkg/apiserver/event"
 	"github.com/pingcap/chaos-mesh/pkg/apiserver/experiment"
 )
 
 var handlerModule = fx.Options(
 	fx.Provide(
+		common.NewService,
 		experiment.NewService,
 		event.NewService,
 		archive.NewService,
 	),
 	fx.Invoke(
+		common.Register,
 		experiment.Register,
 		event.Register,
 		archive.Register,
