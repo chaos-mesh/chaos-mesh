@@ -39,14 +39,6 @@ func ValidateScheduler(schedulerObject InnerSchedulerObject, spec *field.Path) f
 
 	allErrs := field.ErrorList{}
 
-	nextStart := schedulerObject.GetNextStart()
-	nextRecover := schedulerObject.GetNextRecover()
-	if nextStart.After(nextRecover) {
-		nextStartField := spec.Child("nextStart")
-		allErrs = append(allErrs, field.Invalid(nextStartField, nextStart,
-			fmt.Sprintf("the nextStart: \"%s\" can not after the nextRecover: \"%s\"", nextStart, nextRecover)))
-	}
-
 	schedulerField := spec.Child("scheduler")
 	durationField := spec.Child("duration")
 	duration, err := schedulerObject.GetDuration()
