@@ -12,7 +12,7 @@ import NewExperiment from '../../pages/Experiments/New'
 export default function Experiments() {
   const [isOpen, setIsOpen] = useState(false)
 
-  const toggleDrawer = (isOpen: boolean) => (event: React.MouseEvent | React.KeyboardEvent) => {
+  const toggleDrawer = (isOpen: boolean) => () => {
     setIsOpen(isOpen)
   }
 
