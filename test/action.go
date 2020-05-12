@@ -33,7 +33,49 @@ import (
 )
 
 const (
-	operartorChartName = "chaos-mesh"
+	operatorChartName = "chaos-mesh"
+	// this hardcoded template is used for replacing images we use in E2E
+	sidecarTemplate   = `initContainers:
+- name: inject-scripts
+  image: %s
+  imagePullPolicy: IfNotPresent
+  command: ["sh", "-c", "/scripts/init.sh -d {{.DataPath}} -f {{.MountPath}}/fuse-data"]
+containers:
+- name: chaosfs
+  image: %s
+  imagePullPolicy: IfNotPresent
+  ports:
+  - containerPort: 65534
+  securityContext:
+    privileged: true
+  command:
+    - /usr/local/bin/chaosfs
+    - -addr=:65534
+    - -pidfile=/tmp/fuse/pid
+    - -original={{.MountPath}}/fuse-data
+    - -mountpoint={{.DataPath}}
+  volumeMounts:
+    - name: {{.VolumeName}}
+      mountPath: {{.MountPath}}
+      mountPropagation: Bidirectional
+volumeMounts:
+- name: {{.VolumeName}}
+  mountPath: {{.MountPath}}
+  mountPropagation: HostToContainer
+- name: scripts
+  mountPath: /tmp/scripts
+- name: fuse
+  mountPath: /tmp/fuse
+volumes:
+- name: scripts
+  emptyDir: {}
+- name: fuse
+  emptyDir: {}
+postStart:
+  {{.ContainerName}}:
+    command:
+      - /tmp/scripts/wait-fuse.sh
+`
 )
 
 // OperatorAction describe the common operation during test (e2e/stability/etc..)
@@ -41,6 +83,7 @@ type OperatorAction interface {
 	CleanCRDOrDie()
 	DeployOperator(config OperatorConfig) error
 	InstallCRD(config OperatorConfig) error
+	InstallTemplate(config OperatorConfig) error
 }
 
 // NewOperatorAction create a OperatorAction interface instance
@@ -114,6 +157,39 @@ func (oa *operatorAction) InstallCRD(info OperatorConfig) error {
 		klog.Fatalf("Failed to run '%s': %v", strings.Join(cmdArgs, " "), err)
 	}
 	return nil
+}
+
+func (oa *operatorAction) InstallTemplate(info OperatorConfig) error {
+	klog.Infof("deploying chaos-mesh sidecar template :%v", info.ReleaseName)
+	templateCM := &corev1.ConfigMap{
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: info.Namespace,
+			Name:      "sidecar-template",
+			Labels: map[string]string{
+				"app.kubernetes.io/component": "template",
+			},
+		},
+		Data: map[string]string{
+			"data": fmt.Sprintf(sidecarTemplate, oa.cfg.ChaosScriptsImage, oa.cfg.ChaosFSImage),
+		},
+	}
+	if _, err := oa.kubeCli.CoreV1().ConfigMaps(info.Namespace).
+		Create(templateCM); err != nil {
+		return err
+	}
+
+	return wait.PollImmediate(5*time.Second, 3*time.Minute, func() (done bool, err error) {
+		list, err := oa.kubeCli.CoreV1().ConfigMaps(info.Namespace).List(
+			metav1.ListOptions{LabelSelector: "app.kubernetes.io/component=template"},
+		)
+		if err != nil {
+			return false, err
+		}
+		if len(list.Items) > 0 {
+			return true, nil
+		}
+		return false, nil
+	})
 }
 
 func (oa *operatorAction) CleanCRDOrDie() {

@@ -842,7 +842,7 @@ var _ = ginkgo.Describe("[Basic]", func() {
 		)
 
 		ginkgo.JustBeforeEach(func() {
-			err = createIOChaosConfigMap(kubeCli)
+			err = createIOChaosConfigMap(kubeCli, ns)
 			framework.ExpectNoError(err, "create io chaos configmap error")
 			err = enableWebhook(ns)
 			framework.ExpectNoError(err, "enable webhook on ns error")
@@ -898,14 +898,13 @@ var _ = ginkgo.Describe("[Basic]", func() {
 							Namespaces:     []string{ns},
 							LabelSelectors: map[string]string{"app": "io"},
 						},
-						Action:     v1alpha1.IODelayAction,
-						ConfigName: "chaosfs-io",
-						Mode:       v1alpha1.OnePodMode,
-						Path:       "",
-						Delay:      "1s",
-						Percent:    "100",
-						Layer:      v1alpha1.FileSystemLayer,
-						Duration:   pointer.StringPtr("9m"),
+						Action:   v1alpha1.IODelayAction,
+						Mode:     v1alpha1.OnePodMode,
+						Path:     "",
+						Delay:    "1s",
+						Percent:  "100",
+						Layer:    v1alpha1.FileSystemLayer,
+						Duration: pointer.StringPtr("9m"),
 						Scheduler: &v1alpha1.SchedulerSpec{
 							Cron: "@every 10m",
 						},
@@ -972,14 +971,13 @@ var _ = ginkgo.Describe("[Basic]", func() {
 							Namespaces:     []string{ns},
 							LabelSelectors: map[string]string{"app": "io"},
 						},
-						Action:     v1alpha1.IODelayAction,
-						ConfigName: "chaosfs-io",
-						Mode:       v1alpha1.OnePodMode,
-						Path:       "",
-						Delay:      "1s",
-						Percent:    "100",
-						Layer:      v1alpha1.FileSystemLayer,
-						Duration:   pointer.StringPtr("9s"),
+						Action:   v1alpha1.IODelayAction,
+						Mode:     v1alpha1.OnePodMode,
+						Path:     "",
+						Delay:    "1s",
+						Percent:  "100",
+						Layer:    v1alpha1.FileSystemLayer,
+						Duration: pointer.StringPtr("9s"),
 						Scheduler: &v1alpha1.SchedulerSpec{
 							Cron: "@every 10s",
 						},
@@ -1094,11 +1092,10 @@ var _ = ginkgo.Describe("[Basic]", func() {
 							Namespaces:     []string{ns},
 							LabelSelectors: map[string]string{"app": "io"},
 						},
-						Action:     v1alpha1.IOErrnoAction,
-						ConfigName: "chaosfs-io",
-						Mode:       v1alpha1.OnePodMode,
-						Path:       "",
-						Percent:    "100",
+						Action:  v1alpha1.IOErrnoAction,
+						Mode:    v1alpha1.OnePodMode,
+						Path:    "",
+						Percent: "100",
 						// errno 5 is EIO -> I/O error
 						Errno: "5",
 						// only inject write method
@@ -1165,11 +1162,10 @@ var _ = ginkgo.Describe("[Basic]", func() {
 							Namespaces:     []string{ns},
 							LabelSelectors: map[string]string{"app": "io"},
 						},
-						Action:     v1alpha1.IOErrnoAction,
-						ConfigName: "chaosfs-io",
-						Mode:       v1alpha1.OnePodMode,
-						Path:       "",
-						Percent:    "100",
+						Action:  v1alpha1.IOErrnoAction,
+						Mode:    v1alpha1.OnePodMode,
+						Path:    "",
+						Percent: "100",
 						// errno 5 is EIO -> I/O error
 						Errno: "5",
 						// only inject write method
@@ -1363,9 +1359,9 @@ func enableWebhook(ns string) error {
 }
 
 // create the config map for io chaos sidecar injection
-func createIOChaosConfigMap(kubeCli kubernetes.Interface) error {
-	cm := fixture.NewIOTestConfigMap("io-test", "chaos-testing")
-	if _, err := kubeCli.CoreV1().ConfigMaps("chaos-testing").Create(cm); err != nil {
+func createIOChaosConfigMap(kubeCli kubernetes.Interface, namespace string) error {
+	cm := fixture.NewIOTestConfigMap("io-test", namespace)
+	if _, err := kubeCli.CoreV1().ConfigMaps(namespace).Create(cm); err != nil {
 		if !apierrors.IsAlreadyExists(err) {
 			return err
 		}
