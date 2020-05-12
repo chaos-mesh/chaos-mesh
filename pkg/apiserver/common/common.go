@@ -66,7 +66,7 @@ func (s *Service) GetPods(c *gin.Context) {
 	pods :=  make([]Pod, 0)
 
 	var podList v1.PodList
-	err := s.kubeCli.List(context.Background(),&podList)
+	err := s.kubeCli.List(context.Background(), &podList)
 
 	if err != nil {
 		c.JSON(200, gin.H{
@@ -98,7 +98,7 @@ func (s *Service) GetNamespaces(c *gin.Context) {
 
 	var namespace v1.NamespaceList
 
-	err := s.kubeCli.List(context.Background(),&namespace)
+	err := s.kubeCli.List(context.Background(), &namespace)
 
 	if err != nil {
 		c.JSON(200, gin.H{
