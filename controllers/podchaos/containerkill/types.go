@@ -17,12 +17,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"time"
 
 	"github.com/go-logr/logr"
 	"golang.org/x/sync/errgroup"
 	v1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -39,8 +37,7 @@ const (
 	containerKillActionMsg = "delete container %s"
 )
 
-func newReconciler(c client.Client, log logr.Logger, req ctrl.Request,
-	recorder record.EventRecorder) *Reconciler {
+func newReconciler(c client.Client, log logr.Logger, recorder record.EventRecorder) *Reconciler {
 	return &Reconciler{
 		Client:        c,
 		EventRecorder: recorder,
@@ -55,16 +52,14 @@ type Reconciler struct {
 }
 
 // NewTwoPhaseReconciler would create Reconciler for twophase package
-func NewTwoPhaseReconciler(c client.Client, log logr.Logger, req ctrl.Request,
-	recorder record.EventRecorder) *twophase.Reconciler {
-	r := newReconciler(c, log, req, recorder)
+func NewTwoPhaseReconciler(c client.Client, log logr.Logger, recorder record.EventRecorder) *twophase.Reconciler {
+	r := newReconciler(c, log, recorder)
 	return twophase.NewReconciler(r, r.Client, r.Log)
 }
 
 // Apply implements the reconciler.InnerReconciler.Apply
 func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, obj reconciler.InnerObject) error {
 	var err error
-	now := time.Now()
 
 	podchaos, ok := obj.(*v1alpha1.PodChaos)
 	if !ok {
@@ -113,8 +108,19 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, obj reconciler
 	if err := g.Wait(); err != nil {
 		return err
 	}
-	if err = r.updatePodchaos(ctx, *podchaos, pods, now); err != nil {
-		return err
+
+	podchaos.Status.Experiment.Pods = make([]v1alpha1.PodStatus, 0, len(pods))
+	for _, pod := range pods {
+		ps := v1alpha1.PodStatus{
+			Namespace: pod.Namespace,
+			Name:      pod.Name,
+			HostIP:    pod.Status.HostIP,
+			PodIP:     pod.Status.PodIP,
+			Action:    string(podchaos.Spec.Action),
+			Message:   fmt.Sprintf(containerKillActionMsg, podchaos.Spec.ContainerName),
+		}
+
+		podchaos.Status.Experiment.Pods = append(podchaos.Status.Experiment.Pods, ps)
 	}
 	r.Event(obj, v1.EventTypeNormal, utils.EventChaosInjected, "")
 	return nil
@@ -153,39 +159,6 @@ func (r *Reconciler) KillContainer(ctx context.Context, pod *v1.Pod, containerID
 	}); err != nil {
 		r.Log.Error(err, "kill container error", "namespace", pod.Namespace, "podName", pod.Name, "containerID", containerID)
 		return err
-	}
-
-	return nil
-}
-
-func (r *Reconciler) updatePodchaos(ctx context.Context, podchaos v1alpha1.PodChaos, pods []v1.Pod, now time.Time) error {
-	next, err := utils.NextTime(*podchaos.Spec.Scheduler, now)
-	if err != nil {
-		r.Log.Error(err, "failed to get next time")
-		return err
-	}
-
-	podchaos.SetNextStart(*next)
-
-	podchaos.Status.Experiment.StartTime = &metav1.Time{
-		Time: now,
-	}
-	podchaos.Status.Experiment.EndTime = &metav1.Time{
-		Time: now,
-	}
-
-	podchaos.Status.Experiment.Pods = []v1alpha1.PodStatus{}
-	for _, pod := range pods {
-		ps := v1alpha1.PodStatus{
-			Namespace: pod.Namespace,
-			Name:      pod.Name,
-			HostIP:    pod.Status.HostIP,
-			PodIP:     pod.Status.PodIP,
-			Action:    string(podchaos.Spec.Action),
-			Message:   fmt.Sprintf(containerKillActionMsg, podchaos.Spec.ContainerName),
-		}
-
-		podchaos.Status.Experiment.Pods = append(podchaos.Status.Experiment.Pods, ps)
 	}
 
 	return nil
