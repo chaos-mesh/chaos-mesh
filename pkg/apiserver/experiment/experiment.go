@@ -14,7 +14,14 @@
 package experiment
 
 import (
+	"context"
+	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/pingcap/chaos-mesh/api/v1alpha1"
+	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/apimachinery/pkg/util/wait"
+	"k8s.io/kubernetes/test/e2e/framework"
+	"time"
 
 	"github.com/pingcap/chaos-mesh/pkg/config"
 	"github.com/pingcap/chaos-mesh/pkg/core"
@@ -47,12 +54,13 @@ func NewService(
 
 // Register mounts our HTTP handler on the mux.
 func Register(r *gin.RouterGroup, s *Service) {
-	endpoint := r.Group("/experiment")
+	endpoint := r.Group("/experiments")
 
 	// TODO: add more api handlers
 	endpoint.GET("/", s.listExperiments)
-	endpoint.GET("/:name", s.getExperimentDetail)
+	endpoint.GET("/detail/:name", s.getExperimentDetail)
 	endpoint.DELETE("/delete/:ns/:name", s.deleteExperiment)
+	endpoint.GET("/test", s.test)
 }
 
 // TODO: need to be implemented
@@ -63,3 +71,30 @@ func (s *Service) getExperimentDetail(c *gin.Context) {}
 
 // TODO: need to be implemented
 func (s *Service) deleteExperiment(c *gin.Context) {}
+
+func (s *Service) test(c *gin.Context) {
+
+	chaosKey := types.NamespacedName{
+		Namespace: "chaos-testing",
+		Name:      "io-chaos",
+	}
+
+
+	chaos := &v1alpha1.IoChaos{}
+	err := s.kubeCli.Get(context.Background(), chaosKey, chaos)
+
+
+	err := s.kubeCli.List(context.Background(), &namespace)
+
+	if err != nil {
+		fmt.Println("!!!!!!!!!!!! ,eerrerer")
+	} else {
+		fmt.Println(chaos.Status)
+	}
+
+	c.JSON(200, gin.H{
+		"Name": "testtest",
+	})
+}
+
+
