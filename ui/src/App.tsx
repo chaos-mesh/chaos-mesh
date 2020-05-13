@@ -3,6 +3,7 @@ import React, { useState } from 'react'
 import { Redirect, Route, BrowserRouter as Router, Switch } from 'react-router-dom'
 import { Theme, createStyles, makeStyles, useTheme } from '@material-ui/core/styles'
 
+import GitHubIcon from '@material-ui/icons/GitHub'
 import MenuIcon from '@material-ui/icons/Menu'
 import NavMenu from './components/NavMenu'
 import { ThemeProvider } from '@material-ui/core/styles'
@@ -12,9 +13,6 @@ import chaosMeshTheme from './theme'
 const drawerWidth = '14rem'
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
-    root: {
-      display: 'flex',
-    },
     drawer: {
       [theme.breakpoints.up('sm')]: {
         flexShrink: 0,
@@ -64,8 +62,17 @@ export default function App() {
         >
           <MenuIcon />
         </IconButton>
-        <Box p={2}>
+        <Box display="flex" justifyContent="space-between" alignItems="center" width="100%" p={2}>
           <Typography variant="h6">Dashboard</Typography>
+          <IconButton
+            aria-label="github"
+            color="inherit"
+            component="a"
+            href="https://github.com/pingcap/chaos-mesh"
+            target="_blank"
+          >
+            <GitHubIcon />
+          </IconButton>
         </Box>
       </Toolbar>
     </AppBar>
@@ -106,7 +113,8 @@ export default function App() {
 
   return (
     <ThemeProvider theme={chaosMeshTheme}>
-      <div className={classes.root}>
+      {/* flexbox: https://material-ui.com/system/flexbox/#api */}
+      <Box display="flex">
         {/* CssBaseline: kickstart an elegant, consistent, and simple baseline to build upon. */}
         <CssBaseline />
         <Router>
@@ -122,7 +130,7 @@ export default function App() {
             </Switch>
           </main>
         </Router>
-      </div>
+      </Box>
     </ThemeProvider>
   )
 }

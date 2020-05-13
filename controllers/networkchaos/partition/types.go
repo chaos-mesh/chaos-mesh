@@ -20,6 +20,7 @@ import (
 	"fmt"
 
 	"github.com/go-logr/logr"
+	"github.com/hashicorp/go-multierror"
 	"golang.org/x/sync/errgroup"
 	v1 "k8s.io/api/core/v1"
 	k8sError "k8s.io/apimachinery/pkg/api/errors"
@@ -274,16 +275,16 @@ func (r *Reconciler) generateIPTables(action pb.Rule_Action, direction pb.Rule_D
 }
 
 func (r *Reconciler) cleanFinalizersAndRecover(ctx context.Context, networkchaos *v1alpha1.NetworkChaos) error {
-	if len(networkchaos.Finalizers) == 0 {
-		return nil
-	}
+	var result error
+
 	for _, key := range networkchaos.Finalizers {
 		direction := key[0:6]
 
 		podKey := key[6:]
 		ns, name, err := cache.SplitMetaNamespaceKey(podKey)
 		if err != nil {
-			return err
+			result = multierror.Append(result, err)
+			continue
 		}
 
 		var pod v1.Pod
@@ -294,7 +295,8 @@ func (r *Reconciler) cleanFinalizersAndRecover(ctx context.Context, networkchaos
 
 		if err != nil {
 			if !k8sError.IsNotFound(err) {
-				return err
+				result = multierror.Append(result, err)
+				continue
 			}
 
 			r.Log.Info("Pod not found", "namespace", ns, "name", name)
@@ -317,7 +319,8 @@ func (r *Reconciler) cleanFinalizersAndRecover(ctx context.Context, networkchaos
 			err = iptable.FlushIptables(ctx, r.Client, &pod, rule)
 			if err != nil {
 				r.Log.Error(err, "error while deleting iptables rules")
-				return err
+				result = multierror.Append(result, err)
+				continue
 			}
 		}
 
@@ -334,7 +337,8 @@ func (r *Reconciler) cleanFinalizersAndRecover(ctx context.Context, networkchaos
 			err = iptable.FlushIptables(ctx, r.Client, &pod, rule)
 			if err != nil {
 				r.Log.Error(err, "error while deleting iptables rules")
-				return err
+				result = multierror.Append(result, err)
+				continue
 			}
 		}
 
@@ -342,5 +346,11 @@ func (r *Reconciler) cleanFinalizersAndRecover(ctx context.Context, networkchaos
 	}
 	r.Log.Info("After recovering", "finalizers", networkchaos.Finalizers)
 
-	return nil
+	if networkchaos.Annotations[common.AnnotationCleanFinalizer] == common.AnnotationCleanFinalizerForced {
+		r.Log.Info("Force cleanup all finalizers", "chaos", networkchaos)
+		networkchaos.Finalizers = networkchaos.Finalizers[:0]
+		return nil
+	}
+
+	return result
 }
