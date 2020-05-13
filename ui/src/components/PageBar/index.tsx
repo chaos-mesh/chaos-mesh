@@ -38,7 +38,7 @@ export default function PageBar() {
   const { pathname } = useLocation()
   const breadcrumbs = pathnameToBreadCrumbs(pathname)
 
-  document.title = breadcrumbs.map((b) => b.name).join(' > ')
+  document.title = breadcrumbs.map((b) => b.name).join(' > ') + ' | Chaos Mesh Dashboard'
 
   return (
     <Paper className={classes.pager} square>

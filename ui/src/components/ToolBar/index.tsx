@@ -1,5 +1,5 @@
 import React, { FC } from 'react'
-import { Paper, Toolbar, Typography } from '@material-ui/core'
+import { Box, Paper, Toolbar, Typography } from '@material-ui/core'
 import ListOutlinedIcon from '@material-ui/icons/ListOutlined'
 import { makeStyles, Theme, createStyles } from '@material-ui/core/styles'
 
@@ -11,35 +11,31 @@ const useStyles = makeStyles((theme: Theme) =>
       borderTop: `1px solid rgba(0, 0, 0, 0.12)`,
     },
     toolbar: { ...theme.mixins.toolbar, justifyContent: 'space-between' },
-    row: {
-      display: 'flex',
-    },
-    item: {
-      display: 'flex',
-      alignItems: 'center',
-      marginRight: theme.spacing(2),
-    },
   })
 )
 
-// TODO: get real dynamic data by using global context hooks
 export const CurrentStatus = () => {
-  const classes = useStyles()
+  // flexbox: https://material-ui.com/system/flexbox/#api
+  const boxProps = {
+    display: 'flex',
+    alignItems: 'center',
+    mr: 2,
+  }
 
   return (
     <>
-      <div className={classes.item}>
+      <Box {...boxProps}>
         <ListOutlinedIcon />
-      </div>
-      <div className={classes.item}>
+      </Box>
+      <Box {...boxProps}>
         <Typography variant="subtitle2">Total: 26</Typography>
-      </div>
-      <div className={classes.item}>
+      </Box>
+      <Box {...boxProps}>
         <Typography variant="subtitle2">Running: 23</Typography>
-      </div>
-      <div className={classes.item}>
+      </Box>
+      <Box {...boxProps}>
         <Typography variant="subtitle2">Failed: 3</Typography>
-      </div>
+      </Box>
     </>
   )
 }
@@ -50,11 +46,11 @@ const Bar: FC<{}> = ({ children }) => {
   return (
     <Paper square elevation={0} className={classes.paper}>
       <Toolbar className={classes.toolbar}>
-        <div className={classes.row}>{children}</div>
+        <Box display="flex">{children}</Box>
 
-        <div className={classes.row}>
+        <Box display="flex">
           <CurrentStatus />
-        </div>
+        </Box>
       </Toolbar>
     </Paper>
   )
