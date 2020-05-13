@@ -217,7 +217,7 @@ yaml: manifests ensure-kustomize
 	$(KUSTOMIZE_BIN) build config/default > manifests/crd.yaml
 
 update-install-script:
-	./hack/update_install.sh
+	./hack/update_install_script.sh
 
 e2e-build:
 	$(GO) build -trimpath  -o test/image/e2e/bin/ginkgo github.com/onsi/ginkgo/ginkgo

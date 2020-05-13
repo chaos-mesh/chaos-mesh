@@ -23,7 +23,7 @@ FLAGS:
         --docker-mirror      Use docker mirror to pull image, dockerhub.azk8s.cn => docker.io, gcr.azk8s.cn => gcr.io
         --volume-provisioner Deploy volume provisioner in local Kubernetes cluster
         --local-registry     Deploy local docker registry in local Kubernetes cluster
-        --dry-run            Simulate an install and generate chaos-mesh manifests files
+        --template           Locally render templates
 OPTIONS:
     -v, --version            Version of chaos-mesh, default value: latest
     -l, --local [kind]       Choose a way to run a local kubernetes cluster, supported value: kind,
@@ -59,7 +59,7 @@ main() {
     local local_registry=false
     local crd="https://raw.githubusercontent.com/pingcap/chaos-mesh/master/manifests/crd.yaml"
     local runtime="docker"
-    local dry_run=false
+    local template=false
 
     while [[ $# -gt 0 ]]
     do
@@ -117,8 +117,8 @@ main() {
                 force_chaos_mesh=true
                 shift
                 ;;
-            --dry-run)
-                dry_run=true
+            --template)
+                template=true
                 shift
                 ;;
             --docker-mirror)
@@ -185,7 +185,7 @@ main() {
         runtime="containerd"
     fi
 
-    if $dry_run; then
+    if $template; then
         gen_crd_manifests $crd
         gen_chaos_mesh_manifests "${runtime}"
         exit 0
