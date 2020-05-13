@@ -127,7 +127,7 @@ func (s *Service) GetNamespaces(c *gin.Context) {
 	})
 }
 
-// GetNamespaces returns the list of namespaces
+// GetKinds returns the list of chaos kinds
 func (s *Service) GetKinds(c *gin.Context) {
 	ChaosKindList :=  make([]ChaosKind, 0)
 
