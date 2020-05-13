@@ -37,5 +37,16 @@ func (e *eventStore) ListByExperiment(context.Context, string, string) ([]*core.
 	return nil, nil
 }
 func (e *eventStore) Find(context.Context, int64) (*core.Event, error) { return nil, nil }
-func (e *eventStore) Create(context.Context, *core.Event) error        { return nil }
-func (e *eventStore) Update(context.Context, *core.Event) error        { return nil }
+
+// Create persists a new event to the datastore.
+func (e *eventStore) Create(_ context.Context, et *core.Event) error {
+	return e.db.Create(et).Error
+}
+
+// Update persists an updated event to the datastore.
+func (e *eventStore) Update(_ context.Context, et *core.Event) error {
+	return e.db.Model(core.Event{}).
+		Where("experiment = ? and start_time = ?", et.Experiment, et.StartTime).
+		Update("finish_time", et.FinishTime).
+		Error
+}

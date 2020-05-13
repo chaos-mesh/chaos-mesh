@@ -43,8 +43,9 @@ type PodRecordStore interface {
 // PodRecord represents a pod record with event ID.
 type PodRecord struct {
 	gorm.Model
-	EventID   int64
+	EventID   uint
 	PodIP     string
 	PodName   string
 	Namespace string
+	Message   string
 }

@@ -43,7 +43,7 @@ type Event struct {
 	gorm.Model
 	Experiment string
 	Namespace  string
-	Action     string
+	Kind       string
 	Message    string
 	StartTime  *time.Time
 	FinishTime *time.Time

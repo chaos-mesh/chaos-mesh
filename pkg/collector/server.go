@@ -63,50 +63,55 @@ func NewServer(
 	}
 
 	if err = (&ChaosCollector{
-		Client:  s.Mgr.GetClient(),
-		Log:     ctrl.Log.WithName("collector").WithName("PodChaos"),
-		archive: archive,
-		event:   event,
+		Client:    s.Mgr.GetClient(),
+		Log:       ctrl.Log.WithName("collector").WithName("PodChaos"),
+		archive:   archive,
+		event:     event,
+		podRecord: podRecord,
 	}).Setup(s.Mgr, &v1alpha1.PodChaos{}); err != nil {
 		log.Error(err, "unable to create collector", "collector", "PodChaos")
 		os.Exit(1)
 	}
 
 	if err = (&ChaosCollector{
-		Client:  s.Mgr.GetClient(),
-		Log:     ctrl.Log.WithName("collector").WithName("NetworkChaos"),
-		archive: archive,
-		event:   event,
+		Client:    s.Mgr.GetClient(),
+		Log:       ctrl.Log.WithName("collector").WithName("NetworkChaos"),
+		archive:   archive,
+		event:     event,
+		podRecord: podRecord,
 	}).Setup(s.Mgr, &v1alpha1.NetworkChaos{}); err != nil {
 		log.Error(err, "unable to create collector", "collector", "NetworkChaos")
 		os.Exit(1)
 	}
 
 	if err = (&ChaosCollector{
-		Client:  s.Mgr.GetClient(),
-		Log:     ctrl.Log.WithName("collector").WithName("IoChaos"),
-		archive: archive,
-		event:   event,
+		Client:    s.Mgr.GetClient(),
+		Log:       ctrl.Log.WithName("collector").WithName("IoChaos"),
+		archive:   archive,
+		event:     event,
+		podRecord: podRecord,
 	}).Setup(s.Mgr, &v1alpha1.IoChaos{}); err != nil {
 		log.Error(err, "unable to create collector", "collector", "IoChaos")
 		os.Exit(1)
 	}
 
 	if err = (&ChaosCollector{
-		Client:  s.Mgr.GetClient(),
-		Log:     ctrl.Log.WithName("controllers").WithName("TimeChaos"),
-		archive: archive,
-		event:   event,
+		Client:    s.Mgr.GetClient(),
+		Log:       ctrl.Log.WithName("controllers").WithName("TimeChaos"),
+		archive:   archive,
+		event:     event,
+		podRecord: podRecord,
 	}).Setup(s.Mgr, &v1alpha1.TimeChaos{}); err != nil {
 		log.Error(err, "unable to create collector", "collector", "TimeChaos")
 		os.Exit(1)
 	}
 
 	if err = (&ChaosCollector{
-		Client:  s.Mgr.GetClient(),
-		Log:     ctrl.Log.WithName("controllers").WithName("KernelChaos"),
-		archive: archive,
-		event:   event,
+		Client:    s.Mgr.GetClient(),
+		Log:       ctrl.Log.WithName("controllers").WithName("KernelChaos"),
+		archive:   archive,
+		event:     event,
+		podRecord: podRecord,
 	}).Setup(s.Mgr, &v1alpha1.KernelChaos{}); err != nil {
 		log.Error(err, "unable to create collector", "collector", "KernelChaos")
 		os.Exit(1)

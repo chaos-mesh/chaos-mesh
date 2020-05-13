@@ -18,6 +18,7 @@ import (
 
 	"github.com/go-logr/logr"
 
+	"github.com/pingcap/chaos-mesh/api/v1alpha1"
 	"github.com/pingcap/chaos-mesh/controllers/reconciler"
 	"github.com/pingcap/chaos-mesh/pkg/core"
 
@@ -29,10 +30,11 @@ import (
 // ChaosCollector represents a collector for Chaos Object.
 type ChaosCollector struct {
 	client.Client
-	Log     logr.Logger
-	apiType runtime.Object
-	archive core.ExperimentStore
-	event   core.EventStore
+	Log       logr.Logger
+	apiType   runtime.Object
+	archive   core.ExperimentStore
+	event     core.EventStore
+	podRecord core.PodRecordStore
 }
 
 // Reconcile reconciles a chaos collector.
@@ -53,40 +55,13 @@ func (r *ChaosCollector) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		return ctrl.Result{}, nil
 	}
 
-	// TODO: record the events
-	// status := obj.GetStatus()
+	if err := r.recordEvent(req, obj); err != nil {
+		r.Log.Error(err, "failed to record event")
+		return ctrl.Result{}, nil
+	}
 
-	// if status.Experiment.Phase == v1alpha1.ExperimentPhaseRunning {
-	// 	event := Event{
-	// 		Name:      req.Name,
-	// 		Namespace: req.Namespace,
-	// 		Type:      reflect.TypeOf(obj).Elem().Name(),
-	// 		StartTime: &status.Experiment.StartTime.Time,
-	// 		EndTime:   nil,
-	// 	}
-	// 	r.Log.Info("Event started, save to database", "event", event)
+	// TODO: archive experiment
 
-	// 	err := r.databaseClient.WriteEvent(event)
-	// 	if err != nil {
-	// 		r.Log.Error(err, "write event to database error")
-	// 		return ctrl.Result{}, nil
-	// 	}
-	// } else if status.Experiment.Phase == v1alpha1.ExperimentPhaseFinished {
-	// 	event := Event{
-	// 		Name:      req.Name,
-	// 		Namespace: req.Namespace,
-	// 		Type:      reflect.TypeOf(obj).Elem().Name(),
-	// 		StartTime: &status.Experiment.StartTime.Time,
-	// 		EndTime:   &status.Experiment.EndTime.Time,
-	// 	}
-	// 	r.Log.Info("Event finished, save to database", "event", event)
-
-	// 	err := r.databaseClient.UpdateEvent(event)
-	// 	if err != nil {
-	// 		r.Log.Error(err, "write event to database error")
-	// 		return ctrl.Result{}, nil
-	// 	}
-	// }
 	return ctrl.Result{}, nil
 }
 
@@ -97,4 +72,67 @@ func (r *ChaosCollector) Setup(mgr ctrl.Manager, apiType runtime.Object) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(apiType).
 		Complete(r)
+}
+
+func (r *ChaosCollector) recordEvent(req ctrl.Request, obj reconciler.InnerObject) error {
+	status := obj.GetStatus()
+	kind := obj.GetObjectKind().GroupVersionKind().Kind
+
+	switch status.Experiment.Phase {
+	case v1alpha1.ExperimentPhaseRunning:
+		return r.createEvent(req, kind, status)
+	case v1alpha1.ExperimentPhaseFinished, v1alpha1.ExperimentPhasePaused:
+		return r.updateEvent(req, kind, status)
+	}
+
+	return nil
+}
+
+func (r *ChaosCollector) createEvent(req ctrl.Request, kind string, status *v1alpha1.ChaosStatus) error {
+	event := &core.Event{
+		Experiment: req.Name,
+		Namespace:  req.Namespace,
+		Kind:       kind,
+		StartTime:  &status.Experiment.StartTime.Time,
+		FinishTime: nil,
+	}
+
+	if err := r.event.Create(context.Background(), event); err != nil {
+		r.Log.Error(err, "failed to store event", "event", event)
+		return err
+	}
+
+	for _, pod := range status.Experiment.Pods {
+		podRecord := &core.PodRecord{
+			EventID:   event.ID,
+			PodIP:     pod.PodIP,
+			PodName:   pod.Name,
+			Namespace: pod.Namespace,
+			Message:   pod.Message,
+		}
+
+		if err := r.podRecord.Create(context.Background(), podRecord); err != nil {
+			r.Log.Error(err, "failed to store pod record", "podRecord", podRecord)
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (r *ChaosCollector) updateEvent(req ctrl.Request, kind string, status *v1alpha1.ChaosStatus) error {
+	event := &core.Event{
+		Experiment: req.Name,
+		Namespace:  req.Namespace,
+		Kind:       kind,
+		StartTime:  &status.Experiment.StartTime.Time,
+		FinishTime: &status.Experiment.EndTime.Time,
+	}
+
+	if err := r.event.Update(context.Background(), event); err != nil {
+		r.Log.Error(err, "failed to update event", "event", event)
+		return err
+	}
+
+	return nil
 }
