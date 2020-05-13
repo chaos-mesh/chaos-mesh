@@ -35,6 +35,11 @@ type Namespace struct {
 	Name string
 }
 
+// ChaosKind defines the kind information of the chaos
+type ChaosKind struct {
+	Name string
+}
+
 // Service defines a handler service for experiments.
 type Service struct {
 	conf    *config.ChaosServerConfig
@@ -58,6 +63,7 @@ func Register(r *gin.RouterGroup, s *Service) {
 
 	endpoint.GET("/pods/all", s.GetPods)
 	endpoint.GET("/namespaces/all", s.GetNamespaces)
+	endpoint.GET("/kinds/all", s.GetKinds)
 
 }
 
@@ -91,7 +97,6 @@ func (s *Service) GetPods(c *gin.Context) {
 	})
 }
 
-
 // GetNamespaces returns the list of namespaces
 func (s *Service) GetNamespaces(c *gin.Context) {
 	namespaceList :=  make([]Namespace, 0)
@@ -119,5 +124,32 @@ func (s *Service) GetNamespaces(c *gin.Context) {
 		"status": 0,
 		"message": "success",
 		"data": namespaceList,
+	})
+}
+
+// GetNamespaces returns the list of namespaces
+func (s *Service) GetKinds(c *gin.Context) {
+	ChaosKindList :=  make([]ChaosKind, 0)
+
+	ChaosKindList = append(ChaosKindList, ChaosKind{
+		Name: "PodChaos",
+	})
+
+	ChaosKindList = append(ChaosKindList, ChaosKind{
+		Name: "IoChaos",
+	})
+
+	ChaosKindList = append(ChaosKindList, ChaosKind{
+		Name: "NetworkChaos",
+	})
+
+	ChaosKindList = append(ChaosKindList, ChaosKind{
+		Name: "TimeChaos",
+	})
+
+	c.JSON(200, gin.H{
+		"status": 0,
+		"message": "success",
+		"data": ChaosKindList,
 	})
 }
