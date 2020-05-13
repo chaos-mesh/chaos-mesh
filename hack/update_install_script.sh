@@ -4,14 +4,8 @@ tmp_file="chaos-mesh.yaml"
 tmp_install_scipt="install.sh.bak"
 install_scirpt="install.sh"
 
-helm install chaos-mesh helm/chaos-mesh --namespace=chaos-testing --dry-run > ${tmp_file}
+helm template chaos-mesh helm/chaos-mesh --namespace=chaos-testing > ${tmp_file}
 
-num=4
-max=$(sed -n '$=' $tmp_file)
-let sLine=max-num+1
-
-sed -i .bak $sLine',$d' $tmp_file
-sed -i .bak '1,9d' $tmp_file
 sed -i .bak '/helm/d' $tmp_file
 sed -i .bak '/Helm/d' $tmp_file
 sed -i .bak 's/tls.crt:.*/tls.crt: \"\$\{TLS_CRT\}\"/g' $tmp_file
@@ -28,7 +22,6 @@ apiVersion: v1
 kind: Namespace
 metadata:
   name: chaos-testing
----
 EOF
 
 cat $tmp_file.bak >> $tmp_file
