@@ -64,8 +64,8 @@ func (r *Reconciler) commonPodChaos(podchaos *v1alpha1.PodChaos, req ctrl.Reques
 	case v1alpha1.ContainerKillAction:
 		return r.notSupportedResponse(podchaos)
 	case v1alpha1.PodFailureAction:
-		pr = podfailure.NewCommonReconciler(r.Client, r.Log.WithValues("action", "pod-failure"),
-			req, r.EventRecorder)
+		pr = podfailure.NewCommonReconciler(r.Client, r.Log.WithValues("action",
+			"pod-failure"), r.EventRecorder)
 	default:
 		return r.invalidActionResponse(podchaos)
 	}
@@ -76,14 +76,14 @@ func (r *Reconciler) schedulePodChaos(podchaos *v1alpha1.PodChaos, req ctrl.Requ
 	var tr *twophase.Reconciler
 	switch podchaos.Spec.Action {
 	case v1alpha1.PodKillAction:
-		tr = podkill.NewTwoPhaseReconciler(r.Client, r.Log.WithValues("action", "pod-kill"),
-			req, r.EventRecorder)
+		tr = podkill.NewTwoPhaseReconciler(r.Client, r.Log.WithValues("action",
+			"pod-kill"), r.EventRecorder)
 	case v1alpha1.PodFailureAction:
-		tr = podfailure.NewTwoPhaseReconciler(r.Client, r.Log.WithValues("action", "pod-failure"),
-			req, r.EventRecorder)
+		tr = podfailure.NewTwoPhaseReconciler(r.Client, r.Log.WithValues("action",
+			"pod-failure"), r.EventRecorder)
 	case v1alpha1.ContainerKillAction:
 		tr = containerkill.NewTwoPhaseReconciler(r.Client, r.Log.WithValues("action",
-			"container-kill"), req, r.EventRecorder)
+			"container-kill"), r.EventRecorder)
 	default:
 		return r.invalidActionResponse(podchaos)
 	}
