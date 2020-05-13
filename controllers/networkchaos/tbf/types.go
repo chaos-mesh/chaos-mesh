@@ -98,8 +98,7 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos reconcil
 		return err
 	}
 
-	networkchaos.Status.Experiment.Pods = []v1alpha1.PodStatus{}
-
+	networkchaos.Status.Experiment.Pods = make([]v1alpha1.PodStatus, 0, len(pods))
 	for _, pod := range pods {
 		ps := v1alpha1.PodStatus{
 			Namespace: pod.Namespace,
@@ -180,8 +179,7 @@ func (r *Reconciler) Recover(ctx context.Context, req ctrl.Request, chaos reconc
 		return err
 	}
 
-	err := r.cleanFinalizersAndRecover(ctx, networkchaos)
-	if err != nil {
+	if err := r.cleanFinalizersAndRecover(ctx, networkchaos); err != nil {
 		return err
 	}
 	r.Event(networkchaos, v1.EventTypeNormal, utils.EventChaosRecovered, "")

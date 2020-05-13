@@ -88,21 +88,18 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos reconcil
 	}
 
 	pods, err := utils.SelectAndFilterPods(ctx, r.Client, &stresschaos.Spec)
-
 	if err != nil {
 		r.Log.Error(err, "failed to select and generate pods")
 		return err
 	}
 
-	stresschaos.Status.Instances = make(map[string]v1alpha1.StressInstance)
-	err = r.applyAllPods(ctx, pods, stresschaos)
-	if err != nil {
+	stresschaos.Status.Instances = make(map[string]v1alpha1.StressInstance, len(pods))
+	if err = r.applyAllPods(ctx, pods, stresschaos); err != nil {
 		r.Log.Error(err, "failed to apply chaos on all pods")
 		return err
 	}
 
-	stresschaos.Status.Experiment.Pods = []v1alpha1.PodStatus{}
-
+	stresschaos.Status.Experiment.Pods = make([]v1alpha1.PodStatus, 0, len(pods))
 	for _, pod := range pods {
 		ps := v1alpha1.PodStatus{
 			Namespace: pod.Namespace,
@@ -127,8 +124,7 @@ func (r *Reconciler) Recover(ctx context.Context, req ctrl.Request, chaos reconc
 		return err
 	}
 
-	err := r.cleanFinalizersAndRecover(ctx, stresschaos)
-	if err != nil {
+	if err := r.cleanFinalizersAndRecover(ctx, stresschaos); err != nil {
 		return err
 	}
 	r.Event(stresschaos, v1.EventTypeNormal, utils.EventChaosRecovered, "")
