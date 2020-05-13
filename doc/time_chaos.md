@@ -2,9 +2,9 @@
 
 This document describes how to add time chaos experiments in Chaos Mesh.
 
-Time chaos is used to modify the return value of `clock_gettime`, which will lead to time offset on go's `time.Now()`, rust std's 'std::time::Instant::now()' etc.
+Time chaos is used to modify the return value of `clock_gettime`, which causes time offset on Go's `time.Now()` and Rust std's `std::time::Instant::now()` etc.
 
-Below is a sample time chaos configuration file:
+## Configuration file
 
 ```yaml
 apiVersion: pingcap.com/v1alpha1
@@ -20,14 +20,14 @@ spec:
   timeOffset: "-10m100ns"
   clockIds:
     - CLOCK_REALTIME
-  containerNames: 
+  containerNames:
     - pd
   duration: "10s"
   scheduler:
     cron: "@every 15s"
 ```
 
-> For more sample files, see [examples](../examples). You can edit them as needed. 
+For more sample files, see [examples](../examples). You can edit them as needed.
 
 Description:
 
@@ -41,6 +41,7 @@ Description:
 
 ## Limitation
 
-* Time modification will only be injected into the main process of container
+* Time modification only can be injected into the main process of container
 * Time chaos has no effect on pure syscall `clock_gettime`
-* All injected vdso call will use pure syscall to get realtime, so clock related function call will be much slower.
+* All injected vdso call use pure syscall to get realtime, so clock related function call becomes much slower.
+

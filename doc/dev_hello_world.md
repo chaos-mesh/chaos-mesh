@@ -2,11 +2,13 @@
 
 After [preparing the development environment](./setup_env.md), let's develop a new type of chaos, HelloWorldChaos, which only prints a "Hello World!" message to the log. Generally, to add a new chaos type for Chaos Mesh, you need to take the following steps:
 
-1. [Add the chaos object in controller](#add-the-chaos-object-in-controller)
-2. [Register the CRD](#register-the-crd)
-3. [Implement the schema type](#implement-the-schema-type)
-4. [Make the docker image](#make-the-docker-image)
-5. [Run chaos](#run-chaos)
+- [Develop a New Chaos](#develop-a-new-chaos)
+	- [Add the chaos object in controller](#add-the-chaos-object-in-controller)
+	- [Register the CRD](#register-the-crd)
+	- [Implement the schema type](#implement-the-schema-type)
+	- [Make the docker image](#make-the-docker-image)
+	- [Run Chaos](#run-chaos)
+	- [Next steps](#next-steps)
 
 ## Add the chaos object in controller
 
@@ -27,7 +29,6 @@ In Chaos Mesh, all chaos types are managed by the controller manager. To add a n
 ```
 
 2. Under [controllers](https://github.com/pingcap/chaos-mesh/tree/master/controllers), create a `helloworldchaos_controller.go` file and edit it as below:
-
 
 ```golang
 package controllers
@@ -83,7 +84,7 @@ func (r *HelloWorldChaosReconciler) SetupWithManager(mgr ctrl.Manager) error {
 
 ## Register the CRD
 
-The HelloWorldChaos object is a custom resource object in k8s. This means you need to register the corresponding CRD in the K8s API. To do this, modify [kustomization.yaml](https://github.com/pingcap/chaos-mesh/blob/master/config/crd/kustomization.yaml) by adding the corresponding line as shown below:
+The HelloWorldChaos object is a custom resource object in Kubernetes. This means you need to register the corresponding CRD in the Kubernetes API. To do this, modify [kustomization.yaml](https://github.com/pingcap/chaos-mesh/blob/master/config/crd/kustomization.yaml) by adding the corresponding line as shown below:
 
 ```yaml
 resources:
@@ -96,7 +97,6 @@ resources:
 ## Implement the schema type
 
 To implement the schema type for the new chaos object, add `helloworldchaos_types.go` in the [api directory](https://github.com/pingcap/chaos-mesh/tree/master/api/v1alpha1) and modify it as below:
-
 
 ```golang
 package v1alpha1
@@ -127,7 +127,7 @@ func init() {
 }
 ```
 
-With this file added, the `HelloWorldChaos` schema type is defined and can be called by the following yaml lines:
+With this file added, the HelloWorldChaos schema type is defined and can be called by the following YAML lines:
 
 ```yaml
 apiVersion: pingcap.com/v1alpha1
@@ -139,21 +139,22 @@ metadata:
 
 ## Make the docker image
 
-Having the object successfully added, you can make a docker image and push it to your registry:
+Having the object successfully added, you can make a Docker image and push it to your registry:
 
 ```
 make
 make docker-push
 ```
 
-Please note that the default `DOCKER_REGISTRY` is `localhost:5000`, which is preset in `hack/kind-cluster-build.sh`. You can overwrite it to any registry to which you have access permission.
+> **Note:**
+>
+> The default `DOCKER_REGISTRY` is `localhost:5000`, which is preset in `hack/kind-cluster-build.sh`. You can overwrite it to any registry to which you have access permission.
 
 ## Run Chaos
 
 You are almost there. In this step, you will pull the image and apply it for testing.
 
-
-Note that before you pull any image for chaos-mesh (using `helm install` or `helm upgrade`), modify [values.yaml](https://github.com/pingcap/chaos-mesh/blob/master/helm/chaos-mesh/values.yaml) of helm template to replace the default image with what you just pushed to your local registry. 
+Before you pull any image for Chaos Mesh (using `helm install` or `helm upgrade`), modify [values.yaml](https://github.com/pingcap/chaos-mesh/blob/master/helm/chaos-mesh/values.yaml) of Helm template to replace the default image with what you just pushed to your local registry.
 
 In this case, the template uses `pingcap/chaos-mesh:latest` as the default target registry, so you need to replace it with `localhost:5000`, as shown below:
 
@@ -179,7 +180,7 @@ dashboard:
 
 Now take the following steps to run chaos:
 
-1. Get the related custom resource type for chaos-mesh:
+1. Get the related custom resource type for Chaos Mesh:
 
 ```
 kubectl apply -f manifests/
@@ -188,14 +189,14 @@ kubectl get crd podchaos.pingcap.com
 
 2. Install Chaos Mesh:
 
-```
+```bash
 helm install helm/chaos-mesh --name=chaos-mesh --namespace=chaos-testing --set chaosDaemon.runtime=containerd --set chaosDaemon.socketPath=/run/containerd/containerd.sock
 kubectl get pods --namespace chaos-testing -l app.kubernetes.io/instance=chaos-mesh
 ```
 
 The arguments `--set chaosDaemon.runtime=containerd --set chaosDaemon.socketPath=/run/containerd/containerd.sock` is used to to support network chaos on kind.
 
-3. Create chaos.yaml in any location with the lines below:
+3. Create `chaos.yaml` in any location with the lines below:
 
 ```yaml
 apiVersion: pingcap.com/v1alpha1
@@ -205,20 +206,22 @@ metadata:
   namespace: chaos-testing
 ```
 
-4. Apply the chaos.
+4. Apply the chaos:
 
-```
+```bash
 kubectl apply -f /path/to/chaos.yaml
 kubectl get HelloWorldChaos -n chaos-testing
 ```
 
 Now you should be able to check the `Hello World!` result in the log:
 
-```
+```bash
 kubectl logs chaos-controller-manager-{pod-post-fix} -n chaos-testing
-# {pod-post-fix} is a random string generated by k8s, you can check yours
-# by kubectl get po -n chaos-testing
 ```
+
+> **Note:**
+>
+> `{pod-post-fix}` is a random string generated by Kubernetes, you can check it by executing `kubectl get po -n chaos-testing`.
 
 ## Next steps
 

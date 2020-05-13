@@ -1,20 +1,20 @@
 # Pod Chaos Document
 
-This document helps you to build pod chaos experiments. 
+This document introduces how to create pod chaos experiments.
 
-> **note:** 
-> 
-> Chaos mesh does not currently support simulation injection of naked pods. And it only supports some specific pods, such as `deployment` 、`statefulset` 、`daemonset`. 
+> **Note:**
+>
+> Currently, Chaos Mesh does not support simulation injection of naked pods. And it only supports some specific pods, such as `deployment`, `statefulset`, `daemonset`.
 
-Pod chaos allows you to simulate pod faults, specifically `pod failure` and `pod kill`. `pod failure` can be used to simulate a situation where a pod is down. In this case, the pod will be unavailable for a long time.
+Pod chaos allows you to simulate pod faults, specifically `pod failure` and `pod kill`. `pod failure` can be used to simulate a situation where a pod is down. In this case, the pod is unavailable for a long time.
 
 - **Pod Failure** action periodically injects errors to pods. And it will cause the pod to not be created for a while. In another word, the selected pod will be unavailable in a specified period.
 
 - **Pod Kill** action kills the specified pod (ReplicaSet or something similar may be needed to ensure the pod will be restarted).
 
-## Pod Failure Action
+## `pod-failure` configuration file
 
-Below is a sample pod failure configuration file:
+Below is a sample `pod-failure` configuration file:
 
 ```yaml
 apiVersion: pingcap.com/v1alpha1
@@ -34,7 +34,7 @@ spec:
     cron: "@every 2m"
 ```
 
-> For more sample files, see [examples](../examples). You can edit them as needed. 
+For more sample files, see [examples](../examples). You can edit them as needed.
 
 Description:
 
@@ -45,13 +45,9 @@ Description:
 * **selector** is used to select pods that are used to inject chaos actions.
 * **scheduler** defines the scheduler rules for the running time of the chaos experiment. For more rule information, see <https://godoc.org/github.com/robfig/cron>.
 
-## Pod Kill Action
+## `pod-kill` configuration file
 
-> **Note:** 
-> 
-> The detailed description of each field in the configuration template are consistent with that in [Pod Failure](#Pod-Failure-Action).
-
-Below is a sample pod kill configuration file:
+Below is a sample `pod-kill` configuration file:
 
 ```yaml
 apiVersion: pingcap.com/v1alpha1
@@ -71,4 +67,6 @@ spec:
     cron: "@every 1m"
 ```
 
-> For more sample files, see [examples](../examples). You can edit them as needed. 
+The detailed description of each field in the configuration template are consistent with that in [`pod-failure`](#pod-failure-configuration-file).
+
+For more sample files, see [examples](../examples). You can edit them as needed.

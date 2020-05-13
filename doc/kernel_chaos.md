@@ -1,29 +1,20 @@
 # Kernel Chaos Document
 
-This document describes how to add kernel chaos experiments in Chaos Mesh.
+This document describes how to create kernel chaos experiments in Chaos Mesh.
 
-This feature is disabled by default. Please don't use it in a production environment unless
-you know the effect explicitly. BTW, although kernel injection will target a
-certain pod, since all pods on the same host share the same kernel, the
-performance of other pods will have some impact, depending on the specific
-callchain and frequency.
+Although kernel injection targets a certain pod, since all pods of the same host share the same kernel, the performance of other pods are also impacted, depending on the specific callchain and frequency.
+
+> **Warning:**
+>
+> This feature is disabled by default. Don't use it in production environment.
 
 ## Prerequisites
 
-- Linux kernel >= 4.18
+- Linux kernel: version >= 4.18
 - [CONFIG_BPF_KPROBE_OVERRIDE](https://cateee.net/lkddb/web-lkddb/BPF_KPROBE_OVERRIDE.html) enabled
 - `bpfki.create = true` in [values.yaml](../helm/chaos-mesh/values.yaml)
 
-## Usage
-
-Kernel chaos's function is similar to
-[inject.py](https://github.com/iovisor/bcc/blob/master/tools/inject.py), which
-guarantees the appropriate erroneous return of the specified injection mode
-(kmalloc,bio,etc) given a call chain and an optional set of predicates.
-
-You can read
-[inject\_example.txt](https://github.com/iovisor/bcc/blob/master/tools/inject_example.txt)
-to learn more.
+## Configuration file
 
 Below is a sample kernel chaos configuration file:
 
@@ -37,50 +28,12 @@ spec:
   mode: one
   selector:
     namespaces:
-      - chaos-mount 
+      - chaos-mount
   failKernRequest:
     callchain:
         - funcname: "__x64_sys_mount"
     failtype: 0
 ```
-
-And a sample program:
-```c
-#include <sys/mount.h>
-#include <stdio.h>
-#include <string.h>
-#include <errno.h>
-#include <unistd.h>
-
-int main(void) {
-	int ret; 
-	while (1) {
-		ret = mount("/dev/sdc", "/mnt", "ext4", 
-			    MS_MGC_VAL | MS_RDONLY | MS_NOSUID, "");
-		if (ret < 0)
-			fprintf(stderr, "%s\n", strerror(errno));
-		sleep(1);
-		ret = umount("/mnt");
-		if (ret < 0)
-			fprintf(stderr, "%s\n", strerror(errno));
-	}
-}
-```
-
-During the injection, the program will output:
-
-> Cannot allocate memory
-> Invalid argument
-> Cannot allocate memory
-> Invalid argument
-> Cannot allocate memory
-> Invalid argument
-> Cannot allocate memory
-> Invalid argument
-> Cannot allocate memory
-> Invalid argument
-
-> For more sample files, see [examples](https://github.com/chaos-mesh/bpfki/tree/develop/examples). You can edit them as needed. 
 
 Description:
 
@@ -93,44 +46,81 @@ Description:
     - If `1`, indicates alloc_page to fail (should_fail_alloc_page)
     - If `2`, indicates bio to fail (should_fail_bio)
 
-    You can read:
-    1. [fault-injection](https://www.kernel.org/doc/html/latest/fault-injection/fault-injection.html)
-    2. [inject_example](http://github.com/iovisor/bcc/blob/master/tools/inject_example.txt)
+    For more information, you can read [fault-injection](https://www.kernel.org/doc/html/latest/fault-injection/fault-injection.html) and [inject_example](http://github.com/iovisor/bcc/blob/master/tools/inject_example.txt) to learn more.
 
-    to learn more.
   * **callchain** indicates a special call chain, such as:
+
        ```c
      ext4_mount
        -> mount_subtree
           -> ...
              -> should_failslab
        ```
-      With an optional set of predicates and an optional set of parameters,
-      which used with predicates. You can read call chan and predicate
-      examples from https://github.com/chaos-mesh/bpfki/tree/develop/examples
-      to learn more. If no special call chain, just keep callchain empty,
-      which means it will fail at any call chain with slab alloc (eg: kmalloc).
-      
+
+      With an optional set of predicates and an optional set of parameters, which used with predicates. You can read call chan and predicate examples from https://github.com/chaos-mesh/bpfki/tree/develop/examples
+      to learn more. If no special call chain, just keep callchain empty, which means it will fail at any call chain with slab alloc (eg: kmalloc).
+
       The challchain's type is an array of frames, the frame has three fields:
-      **funcname** can be find from kernel source or `/proc/kallsyms`, such as `ext4_mount`
-      **parameters** is used with predicate, for example, if you want to inject
-      slab error in `d_alloc_parallel(struct dentry *parent, const struct qstr
-      *name)` with a special name `bananas`, you need to set it to `struct
-      dentry *parent, const struct qstr *name`otherwise omit it.
-      **predicate** will access the arguments of this frame, example with
-      parameters', you can set it to `STRNCMP(name->name, "bananas", 8)` to
-      make inject only with it, or omit it to inject for all d_alloc_parallel call chain.
+
+      * **funcname** can be find from kernel source or `/proc/kallsyms`, such as `ext4_mount`
+      * **parameters** is used with predicate, for example, if you want to inject slab error in `d_alloc_parallel(struct dentry *parent, const struct qstr
+      *name)` with a special name `bananas`, you need to set it to `struct dentry *parent, const struct qstr *name`otherwise omit it.
+      * **predicate** will access the arguments of this frame, example with parameters's, you can set it to `STRNCMP(name->name, "bananas", 8)` to make inject only with it, or omit it to inject for all d_alloc_parallel call chain.
   * **headers** indicates the appropriate kernel headers you need. Eg: "linux/mmzone.h", "linux/blkdev.h" and so on.
   * **probability** indicates the fails with probability. If you want 1%, please set this field with 1.
   * **times** indicates the max times of fails.
 * **duration** defines the duration for each chaos experiment. In the sample file above, the time chaos lasts for 10 seconds.
 * **scheduler** defines the scheduler rules for the running time of the chaos experiment. For more rule information, see <https://godoc.org/github.com/robfig/cron>.
 
+For more sample files, see [examples](../examples). You can edit them as needed.
+
+## Usage
+
+Kernel chaos's function is similar to [inject.py](https://github.com/iovisor/bcc/blob/master/tools/inject.py), which guarantees the appropriate erroneous return of the specified injection mode (kmalloc, bio, etc.) given a call chain and an optional set of predicates.
+
+You can read [inject\_example.txt](https://github.com/iovisor/bcc/blob/master/tools/inject_example.txt) to learn more.
+
+Below is a sample program:
+
+```c
+#include <sys/mount.h>
+#include <stdio.h>
+#include <string.h>
+#include <errno.h>
+#include <unistd.h>
+
+int main(void) {
+	int ret;
+	while (1) {
+		ret = mount("/dev/sdc", "/mnt", "ext4",
+			    MS_MGC_VAL | MS_RDONLY | MS_NOSUID, "");
+		if (ret < 0)
+			fprintf(stderr, "%s\n", strerror(errno));
+		sleep(1);
+		ret = umount("/mnt");
+		if (ret < 0)
+			fprintf(stderr, "%s\n", strerror(errno));
+	}
+}
+```
+
+During the injection, the output is similar to this:
+
+```
+> Cannot allocate memory
+> Invalid argument
+> Cannot allocate memory
+> Invalid argument
+> Cannot allocate memory
+> Invalid argument
+> Cannot allocate memory
+> Invalid argument
+> Cannot allocate memory
+> Invalid argument
+```
+
 ## Limitation
 
-* Although we use container_id to limit fault injection, but some behaviors may
-  trigger systemic behaviors. For example, when failtype is 1, it means that
-  physical page allocation will fail, and if the behavior is continuous in a 
-  very short time (eg: ``while (1) {memset(malloc(1M), '1', 1M)}`), the system's
-  oom-killer will be awakened to release memory. So the container\_id will lose
-  limit to oom-killer.
+Although we use container_id to limit fault injection, but some behaviors might trigger systemic behaviors. For example:
+
+When failtype is `1`, it means that physical page allocation will fail. If the behavior is continuous in a very short time (eg: ``while (1) {memset(malloc(1M), '1', 1M)}`), the system's oom-killer will be awakened to release memory. So the container\_id will lose limit to oom-killer.
