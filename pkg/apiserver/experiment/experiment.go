@@ -200,5 +200,3 @@ func (s *Service) state (c *gin.Context) {
 		"data": data,
 	})
 }
-
-
