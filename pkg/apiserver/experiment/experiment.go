@@ -22,8 +22,6 @@ import (
 	"github.com/pingcap/chaos-mesh/pkg/config"
 	"github.com/pingcap/chaos-mesh/pkg/core"
 
-	v1 "k8s.io/api/core/v1"
-
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
@@ -251,7 +249,7 @@ func (s *Service) state (c *gin.Context) {
 		c.JSON(200, getChaosWrong)
 		return
 	}
-	
+
 	c.JSON(200, gin.H{
 		"status": 0,
 		"message": "success",
