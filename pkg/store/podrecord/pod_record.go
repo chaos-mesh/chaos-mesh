@@ -39,5 +39,9 @@ func (r *podRecordStore) ListByEvent(context.Context, int64) ([]*core.PodRecord,
 	return nil, nil
 }
 func (r *podRecordStore) Find(context.Context, int64) (*core.PodRecord, error) { return nil, nil }
-func (r *podRecordStore) Create(context.Context, *core.PodRecord) error        { return nil }
 func (r *podRecordStore) Update(context.Context, *core.PodRecord) error        { return nil }
+
+// Create persists a new pod record to the datastore.
+func (r *podRecordStore) Create(_ context.Context, pr *core.PodRecord) error {
+	return r.db.Create(pr).Error
+}

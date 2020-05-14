@@ -31,20 +31,29 @@ type EventStore interface {
 	// Find returns a event from the datastore by ID.
 	Find(context.Context, int64) (*Event, error)
 
+	// FindByExperimentAndStartTime returns a event by the experiment and start time.
+	FindByExperimentAndStartTime(context.Context, string, string, *time.Time) (*Event, error)
+
 	// Create persists a new event to the datastore.
 	Create(context.Context, *Event) error
 
 	// Update persists an updated event to the datastore.
 	Update(context.Context, *Event) error
+
+	// DeleteIncompleteEvent deletes all incomplete events.
+	// If the chaos-server was restarted, some incomplete events would be stored in dbtastore,
+	// which means the event would never save the finish_time.
+	// DeleteIncompleteEvent can be used to delete all incomplete events to avoid this case.
+	DeleteIncompleteEvents(context.Context) error
 }
 
 // Event represents a event instance.
 type Event struct {
 	gorm.Model
-	Experiment string
+	Experiment string `gorm:"index:experiment"`
 	Namespace  string
 	Kind       string
 	Message    string
-	StartTime  *time.Time
+	StartTime  *time.Time `gorm:"index:start_time"`
 	FinishTime *time.Time
 }

@@ -15,8 +15,8 @@ package collector
 
 import (
 	"context"
-
 	"github.com/go-logr/logr"
+	"github.com/jinzhu/gorm"
 
 	"github.com/pingcap/chaos-mesh/api/v1alpha1"
 	"github.com/pingcap/chaos-mesh/controllers/reconciler"
@@ -82,7 +82,7 @@ func (r *ChaosCollector) recordEvent(req ctrl.Request, obj reconciler.InnerObjec
 	case v1alpha1.ExperimentPhaseRunning:
 		return r.createEvent(req, kind, status)
 	case v1alpha1.ExperimentPhaseFinished, v1alpha1.ExperimentPhasePaused:
-		return r.updateEvent(req, kind, status)
+		return r.updateOrCreateEvent(req, kind, status)
 	}
 
 	return nil
@@ -109,6 +109,7 @@ func (r *ChaosCollector) createEvent(req ctrl.Request, kind string, status *v1al
 			PodName:   pod.Name,
 			Namespace: pod.Namespace,
 			Message:   pod.Message,
+			Action:    pod.Action,
 		}
 
 		if err := r.podRecord.Create(context.Background(), podRecord); err != nil {
@@ -120,13 +121,20 @@ func (r *ChaosCollector) createEvent(req ctrl.Request, kind string, status *v1al
 	return nil
 }
 
-func (r *ChaosCollector) updateEvent(req ctrl.Request, kind string, status *v1alpha1.ChaosStatus) error {
+func (r *ChaosCollector) updateOrCreateEvent(req ctrl.Request, kind string, status *v1alpha1.ChaosStatus) error {
 	event := &core.Event{
 		Experiment: req.Name,
 		Namespace:  req.Namespace,
 		Kind:       kind,
 		StartTime:  &status.Experiment.StartTime.Time,
 		FinishTime: &status.Experiment.EndTime.Time,
+	}
+
+	if _, err := r.event.FindByExperimentAndStartTime(
+		context.Background(), event.Experiment, event.Namespace, event.StartTime); err != nil && gorm.IsRecordNotFoundError(err) {
+		if err := r.createEvent(req, kind, status); err != nil {
+			return err
+		}
 	}
 
 	if err := r.event.Update(context.Background(), event); err != nil {

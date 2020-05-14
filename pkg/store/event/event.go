@@ -15,16 +15,28 @@ package event
 
 import (
 	"context"
+	"time"
+
+	"github.com/jinzhu/gorm"
 
 	"github.com/pingcap/chaos-mesh/pkg/core"
 	"github.com/pingcap/chaos-mesh/pkg/store/dbstore"
+
+	ctrl "sigs.k8s.io/controller-runtime"
 )
+
+var log = ctrl.Log.WithName("eventStore")
 
 // NewStore return a new EventStore.
 func NewStore(db *dbstore.DB) core.EventStore {
 	db.AutoMigrate(&core.Event{})
 
-	return &eventStore{db}
+	es := &eventStore{db}
+	if err := es.DeleteIncompleteEvents(context.Background()); err != nil && gorm.IsRecordNotFoundError(err) {
+		log.Error(err, "failed to delete all incomplete events")
+	}
+
+	return es
 }
 
 type eventStore struct {
@@ -38,6 +50,19 @@ func (e *eventStore) ListByExperiment(context.Context, string, string) ([]*core.
 }
 func (e *eventStore) Find(context.Context, int64) (*core.Event, error) { return nil, nil }
 
+func (e *eventStore) FindByExperimentAndStartTime(
+	_ context.Context,
+	name, namespace string,
+	startTime *time.Time,
+) (*core.Event, error) {
+	et := new(core.Event)
+	err := e.db.Where(
+		"namespace = ? and experiment = ? and start_time = ?",
+		namespace, name, startTime).
+		First(et).Error
+	return et, err
+}
+
 // Create persists a new event to the datastore.
 func (e *eventStore) Create(_ context.Context, et *core.Event) error {
 	return e.db.Create(et).Error
@@ -46,7 +71,15 @@ func (e *eventStore) Create(_ context.Context, et *core.Event) error {
 // Update persists an updated event to the datastore.
 func (e *eventStore) Update(_ context.Context, et *core.Event) error {
 	return e.db.Model(core.Event{}).
-		Where("experiment = ? and start_time = ?", et.Experiment, et.StartTime).
+		Where(
+			"namespace = ? and experiment = ? and start_time = ?",
+			et.Namespace, et.Experiment, et.StartTime).
 		Update("finish_time", et.FinishTime).
 		Error
+}
+
+// DeleteIncompleteEvents implement core.EventStore interface.
+func (e *eventStore) DeleteIncompleteEvents(_ context.Context) error {
+	return e.db.Where("finish_time = ?", nil).
+		Delete(core.Event{}).Error
 }
