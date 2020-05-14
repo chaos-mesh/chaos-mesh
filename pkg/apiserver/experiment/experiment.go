@@ -160,6 +160,29 @@ func (s *Service) getTimeChaosState (stateInfo map[string]int) error {
 	return nil
 }
 
+// getKernelChaosState returns the state of KernelChaos
+func (s *Service) getKernelChaosState (stateInfo map[string]int) error {
+	var chaosList v1alpha1.KernelChaosList
+	err := s.kubeCli.List(context.Background(), &chaosList)
+	if err != nil {
+		return err
+	}
+	for _, chaos := range chaosList.Items {
+		stateInfo["Total"]++
+		switch chaos.Status.ChaosStatus.Experiment.Phase {
+		case v1alpha1.ExperimentPhaseRunning:
+			stateInfo["running"]++
+		case v1alpha1.ExperimentPhasePaused:
+			stateInfo["Paused"]++
+		case v1alpha1.ExperimentPhaseFailed:
+			stateInfo["Failed"]++
+		case v1alpha1.ExperimentPhaseFinished:
+			stateInfo["Finished"]++
+		}
+	}
+	return nil
+}
+
 func (s *Service) state (c *gin.Context) {
 	data := make(map[string]int)
 	data["Total"] = 0
@@ -189,6 +212,11 @@ func (s *Service) state (c *gin.Context) {
 		return
 	}
 	err = s.getTimeChaosState(data)
+	if err != nil {
+		c.JSON(200, getChaosWrong)
+		return
+	}
+	err = s.getKernelChaosState(data)
 	if err != nil {
 		c.JSON(200, getChaosWrong)
 		return
