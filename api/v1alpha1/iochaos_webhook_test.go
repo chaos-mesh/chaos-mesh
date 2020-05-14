@@ -40,6 +40,7 @@ var _ = Describe("iochaos_webhook", func() {
 			}
 			duration := "400s"
 			errorDuration := "400S"
+
 			tcs := []TestCase{
 				{
 					name: "simple ValidateCreate",
@@ -259,6 +260,40 @@ var _ = Describe("iochaos_webhook", func() {
 						},
 						Spec: IoChaosSpec{
 							Percent: "num",
+						},
+					},
+					execute: func(chaos *IoChaos) error {
+						return chaos.ValidateCreate()
+					},
+					expect: "error",
+				},
+				{
+					name: "parse the scheduler.cron error",
+					chaos: IoChaos{
+						ObjectMeta: metav1.ObjectMeta{
+							Namespace: metav1.NamespaceDefault,
+							Name:      "foo15",
+						},
+						Spec: IoChaosSpec{
+							Duration:  &duration,
+							Scheduler: &SchedulerSpec{Cron: "xx"},
+						},
+					},
+					execute: func(chaos *IoChaos) error {
+						return chaos.ValidateCreate()
+					},
+					expect: "error",
+				},
+				{
+					name: "validate the duration and the scheduler.cron conflict",
+					chaos: IoChaos{
+						ObjectMeta: metav1.ObjectMeta{
+							Namespace: metav1.NamespaceDefault,
+							Name:      "foo16",
+						},
+						Spec: IoChaosSpec{
+							Duration:  &duration,
+							Scheduler: &SchedulerSpec{Cron: "@every 1m"},
 						},
 					},
 					execute: func(chaos *IoChaos) error {

@@ -18,7 +18,7 @@ import (
 
 	"github.com/go-logr/logr"
 
-	"github.com/pingcap/chaos-mesh/controllers/reconciler"
+	"github.com/pingcap/chaos-mesh/api/v1alpha1"
 	"github.com/pingcap/chaos-mesh/pkg/core"
 
 	"k8s.io/apimachinery/pkg/runtime"
@@ -43,7 +43,7 @@ func (r *ChaosCollector) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	}
 	ctx := context.Background()
 
-	obj, ok := r.apiType.DeepCopyObject().(reconciler.InnerObject)
+	obj, ok := r.apiType.DeepCopyObject().(v1alpha1.InnerObject)
 	if !ok {
 		r.Log.Error(nil, "it's not a stateful object")
 		return ctrl.Result{}, nil
