@@ -49,21 +49,21 @@ var _ reconciler.InnerReconciler = (*fakeReconciler)(nil)
 
 type fakeReconciler struct{}
 
-func (r fakeReconciler) Apply(ctx context.Context, req ctrl.Request, chaos reconciler.InnerObject) error {
+func (r fakeReconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.InnerObject) error {
 	if err := mock.On("MockApplyError"); err != nil {
 		return err.(error)
 	}
 	return nil
 }
 
-func (r fakeReconciler) Recover(ctx context.Context, req ctrl.Request, chaos reconciler.InnerObject) error {
+func (r fakeReconciler) Recover(ctx context.Context, req ctrl.Request, chaos v1alpha1.InnerObject) error {
 	if err := mock.On("MockRecoverError"); err != nil {
 		return err.(error)
 	}
 	return nil
 }
 
-var _ twophase.InnerSchedulerObject = (*fakeTwoPhaseChaos)(nil)
+var _ v1alpha1.InnerSchedulerObject = (*fakeTwoPhaseChaos)(nil)
 
 type fakeTwoPhaseChaos struct {
 	metav1.TypeMeta   `json:",inline"`
@@ -104,7 +104,7 @@ func (in *fakeTwoPhaseChaos) IsPaused() bool {
 	return false
 }
 
-func (r fakeReconciler) Object() reconciler.InnerObject {
+func (r fakeReconciler) Object() v1alpha1.InnerObject {
 	return &fakeTwoPhaseChaos{}
 }
 
@@ -288,7 +288,7 @@ var _ = Describe("TwoPhase", func() {
 			_chaos := r.Object()
 			err = r.Get(context.TODO(), req.NamespacedName, _chaos)
 			Expect(err).ToNot(HaveOccurred())
-			Expect(_chaos.(twophase.InnerSchedulerObject).GetStatus().Experiment.Phase).To(Equal(v1alpha1.ExperimentPhaseFinished))
+			Expect(_chaos.(v1alpha1.InnerSchedulerObject).GetStatus().Experiment.Phase).To(Equal(v1alpha1.ExperimentPhaseFinished))
 
 			defer mock.With("MockRecoverError", errors.New("RecoverError"))()
 
@@ -321,7 +321,7 @@ var _ = Describe("TwoPhase", func() {
 			_chaos := r.Object()
 			err = r.Get(context.TODO(), req.NamespacedName, _chaos)
 			Expect(err).ToNot(HaveOccurred())
-			Expect(_chaos.(twophase.InnerSchedulerObject).GetStatus().Experiment.Phase).To(Equal(v1alpha1.ExperimentPhaseFinished))
+			Expect(_chaos.(v1alpha1.InnerSchedulerObject).GetStatus().Experiment.Phase).To(Equal(v1alpha1.ExperimentPhaseFinished))
 		})
 
 		It("TwoPhase ToRecover Error", func() {
@@ -372,7 +372,7 @@ var _ = Describe("TwoPhase", func() {
 			_chaos := r.Object()
 			err = r.Get(context.TODO(), req.NamespacedName, _chaos)
 			Expect(err).ToNot(HaveOccurred())
-			Expect(_chaos.(twophase.InnerSchedulerObject).GetStatus().Experiment.Phase).To(Equal(v1alpha1.ExperimentPhaseRunning))
+			Expect(_chaos.(v1alpha1.InnerSchedulerObject).GetStatus().Experiment.Phase).To(Equal(v1alpha1.ExperimentPhaseRunning))
 		})
 
 		It("TwoPhase ToApply Error", func() {

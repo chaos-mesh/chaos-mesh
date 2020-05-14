@@ -19,7 +19,6 @@ import (
 	"github.com/jinzhu/gorm"
 
 	"github.com/pingcap/chaos-mesh/api/v1alpha1"
-	"github.com/pingcap/chaos-mesh/controllers/reconciler"
 	"github.com/pingcap/chaos-mesh/pkg/core"
 
 	"k8s.io/apimachinery/pkg/runtime"
@@ -45,7 +44,7 @@ func (r *ChaosCollector) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	}
 	ctx := context.Background()
 
-	obj, ok := r.apiType.DeepCopyObject().(reconciler.InnerObject)
+	obj, ok := r.apiType.DeepCopyObject().(v1alpha1.InnerObject)
 	if !ok {
 		r.Log.Error(nil, "it's not a stateful object")
 		return ctrl.Result{}, nil
@@ -74,7 +73,7 @@ func (r *ChaosCollector) Setup(mgr ctrl.Manager, apiType runtime.Object) error {
 		Complete(r)
 }
 
-func (r *ChaosCollector) recordEvent(req ctrl.Request, obj reconciler.InnerObject) error {
+func (r *ChaosCollector) recordEvent(req ctrl.Request, obj v1alpha1.InnerObject) error {
 	status := obj.GetStatus()
 	kind := obj.GetObjectKind().GroupVersionKind().Kind
 
