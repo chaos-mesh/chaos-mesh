@@ -56,7 +56,7 @@ func Register(r *gin.RouterGroup, s *Service) {
 	endpoint.GET("/", s.listExperiments)
 	endpoint.GET("/detail/:name", s.getExperimentDetail)
 	endpoint.DELETE("/delete/:ns/:name", s.deleteExperiment)
-	endpoint.GET("/test", s.test)
+	endpoint.GET("/state", s.state)
 }
 
 // TODO: need to be implemented
@@ -160,7 +160,7 @@ func (s *Service) getTimeChaosState (stateInfo map[string]int) error {
 	return nil
 }
 
-func (s *Service) test(c *gin.Context) {
+func (s *Service) state (c *gin.Context) {
 	data := make(map[string]int)
 	data["Total"] = 0
 	data["Running"] = 0
