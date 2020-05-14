@@ -16,13 +16,17 @@ package common
 import (
 	"context"
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 
 	"github.com/pingcap/chaos-mesh/pkg/config"
 
-	"sigs.k8s.io/controller-runtime/pkg/client"
+	apiextensionsclientset "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	v1 "k8s.io/api/core/v1"
+	ctrlconfig "sigs.k8s.io/controller-runtime/pkg/client/config"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 // Pod defines the basic information of the pod
@@ -132,29 +136,24 @@ func (s *Service) GetNamespaces(c *gin.Context) {
 func (s *Service) GetKinds(c *gin.Context) {
 	ChaosKindList :=  make([]ChaosKind, 0)
 
-	ChaosKindList = append(ChaosKindList, ChaosKind{
-		Name: "PodChaos",
-	})
+	config, _ := ctrlconfig.GetConfig()
+	apiExtCli, _ := apiextensionsclientset.NewForConfig(config)
 
-	ChaosKindList = append(ChaosKindList, ChaosKind{
-		Name: "IoChaos",
-	})
-
-	ChaosKindList = append(ChaosKindList, ChaosKind{
-		Name: "NetworkChaos",
-	})
-
-	ChaosKindList = append(ChaosKindList, ChaosKind{
-		Name: "TimeChaos",
-	})
-
-	ChaosKindList = append(ChaosKindList, ChaosKind{
-		Name: "KernelChaos",
-	})
-
-	ChaosKindList = append(ChaosKindList, ChaosKind{
-		Name: "StressChaos",
-	})
+	crdList, err := apiExtCli.ApiextensionsV1beta1().CustomResourceDefinitions().List(metav1.ListOptions{})
+	if err != nil {
+		c.JSON(http.StatusOK, gin.H{
+			"status": 1004,
+			"message": "get CRDs wrong",
+			"data": ChaosKindList,
+		})
+	}
+	for _, crd := range crdList.Items {
+		if strings.Contains(crd.Spec.Names.Kind, "Chaos") == true {
+			ChaosKindList = append(ChaosKindList, ChaosKind{
+				Name: crd.Spec.Names.Kind,
+			})
+		}
+	}
 
 	c.JSON(http.StatusOK, gin.H{
 		"status": 0,
