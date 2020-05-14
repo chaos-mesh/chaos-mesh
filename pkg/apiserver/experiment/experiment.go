@@ -15,14 +15,10 @@ package experiment
 
 import (
 	"context"
-	"fmt"
-	"github.com/gin-gonic/gin"
-	"github.com/pingcap/chaos-mesh/api/v1alpha1"
-	"k8s.io/apimachinery/pkg/types"
-	"k8s.io/apimachinery/pkg/util/wait"
-	"k8s.io/kubernetes/test/e2e/framework"
-	"time"
 
+	"github.com/gin-gonic/gin"
+
+	"github.com/pingcap/chaos-mesh/api/v1alpha1"
 	"github.com/pingcap/chaos-mesh/pkg/config"
 	"github.com/pingcap/chaos-mesh/pkg/core"
 
@@ -72,28 +68,136 @@ func (s *Service) getExperimentDetail(c *gin.Context) {}
 // TODO: need to be implemented
 func (s *Service) deleteExperiment(c *gin.Context) {}
 
-func (s *Service) test(c *gin.Context) {
+// getPodChaosState returns the state of PodChaos
+func (s *Service) getPodChaosState (stateInfo map[string]int) error {
+	var chaosList v1alpha1.PodChaosList
+	err := s.kubeCli.List(context.Background(), &chaosList)
+	if err != nil {
+		return err
+	}
+	for _, chaos := range chaosList.Items {
+		stateInfo["Total"]++
+		switch chaos.Status.ChaosStatus.Experiment.Phase {
+		case v1alpha1.ExperimentPhaseRunning:
+			stateInfo["running"]++
+		case v1alpha1.ExperimentPhasePaused:
+			stateInfo["Paused"]++
+		case v1alpha1.ExperimentPhaseFailed:
+			stateInfo["Failed"]++
+		case v1alpha1.ExperimentPhaseFinished:
+			stateInfo["Finished"]++
+		}
+	}
+	return nil
+}
 
-	chaosKey := types.NamespacedName{
-		Namespace: "chaos-testing",
-		Name:      "io-chaos",
+// getIoChaosState returns the state of IoChaos
+func (s *Service) getIoChaosState (stateInfo map[string]int) error {
+	var chaosList v1alpha1.IoChaosList
+	err := s.kubeCli.List(context.Background(), &chaosList)
+	if err != nil {
+		return err
+	}
+	for _, chaos := range chaosList.Items {
+		stateInfo["Total"]++
+		switch chaos.Status.ChaosStatus.Experiment.Phase {
+		case v1alpha1.ExperimentPhaseRunning:
+			stateInfo["running"]++
+		case v1alpha1.ExperimentPhasePaused:
+			stateInfo["Paused"]++
+		case v1alpha1.ExperimentPhaseFailed:
+			stateInfo["Failed"]++
+		case v1alpha1.ExperimentPhaseFinished:
+			stateInfo["Finished"]++
+		}
+	}
+	return nil
+}
+
+// getNetworkChaosState returns the state of NetworkChaos
+func (s *Service) getNetworkChaosState (stateInfo map[string]int) error {
+	var chaosList v1alpha1.NetworkChaosList
+	err := s.kubeCli.List(context.Background(), &chaosList)
+	if err != nil {
+		return err
+	}
+	for _, chaos := range chaosList.Items {
+		stateInfo["Total"]++
+		switch chaos.Status.ChaosStatus.Experiment.Phase {
+		case v1alpha1.ExperimentPhaseRunning:
+			stateInfo["running"]++
+		case v1alpha1.ExperimentPhasePaused:
+			stateInfo["Paused"]++
+		case v1alpha1.ExperimentPhaseFailed:
+			stateInfo["Failed"]++
+		case v1alpha1.ExperimentPhaseFinished:
+			stateInfo["Finished"]++
+		}
+	}
+	return nil
+}
+
+// getTimeChaosState returns the state of TimeChaos
+func (s *Service) getTimeChaosState (stateInfo map[string]int) error {
+	var chaosList v1alpha1.TimeChaosList
+	err := s.kubeCli.List(context.Background(), &chaosList)
+	if err != nil {
+		return err
+	}
+	for _, chaos := range chaosList.Items {
+		stateInfo["Total"]++
+		switch chaos.Status.ChaosStatus.Experiment.Phase {
+		case v1alpha1.ExperimentPhaseRunning:
+			stateInfo["running"]++
+		case v1alpha1.ExperimentPhasePaused:
+			stateInfo["Paused"]++
+		case v1alpha1.ExperimentPhaseFailed:
+			stateInfo["Failed"]++
+		case v1alpha1.ExperimentPhaseFinished:
+			stateInfo["Finished"]++
+		}
+	}
+	return nil
+}
+
+func (s *Service) test(c *gin.Context) {
+	data := make(map[string]int)
+	data["Total"] = 0
+	data["Running"] = 0
+	data["Paused"] = 0
+	data["Failed"] = 0
+	data["Finished"] = 0
+	getChaosWrong := gin.H{
+		"status": 1003,
+		"message": "get chaos wrong",
+		"data": make(map[string]int),
 	}
 
-
-	chaos := &v1alpha1.IoChaos{}
-	err := s.kubeCli.Get(context.Background(), chaosKey, chaos)
-
-
-	err := s.kubeCli.List(context.Background(), &namespace)
-
+	err := s.getPodChaosState(data)
 	if err != nil {
-		fmt.Println("!!!!!!!!!!!! ,eerrerer")
-	} else {
-		fmt.Println(chaos.Status)
+		c.JSON(200, getChaosWrong)
+		return
+	}
+	err = s.getIoChaosState(data)
+	if err != nil {
+		c.JSON(200, getChaosWrong)
+		return
+	}
+	err = s.getNetworkChaosState(data)
+	if err != nil {
+		c.JSON(200, getChaosWrong)
+		return
+	}
+	err = s.getTimeChaosState(data)
+	if err != nil {
+		c.JSON(200, getChaosWrong)
+		return
 	}
 
 	c.JSON(200, gin.H{
-		"Name": "testtest",
+		"status": 0,
+		"message": "success",
+		"data": data,
 	})
 }
 
