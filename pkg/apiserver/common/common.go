@@ -148,6 +148,14 @@ func (s *Service) GetKinds(c *gin.Context) {
 		Name: "TimeChaos",
 	})
 
+	ChaosKindList = append(ChaosKindList, ChaosKind{
+		Name: "KernelChaos",
+	})
+
+	ChaosKindList = append(ChaosKindList, ChaosKind{
+		Name: "StressChaos",
+	})
+
 	c.JSON(http.StatusOK, gin.H{
 		"status": 0,
 		"message": "success",
