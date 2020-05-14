@@ -15,6 +15,7 @@ package common
 
 import (
 	"context"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
 
@@ -75,7 +76,7 @@ func (s *Service) GetPods(c *gin.Context) {
 	err := s.kubeCli.List(context.Background(), &podList)
 
 	if err != nil {
-		c.JSON(200, gin.H{
+		c.JSON(http.StatusOK, gin.H{
 			"status": 1001,
 			"message": "get pods wrong",
 			"data": pods,
@@ -90,7 +91,7 @@ func (s *Service) GetPods(c *gin.Context) {
 		})
 	}
 
-	c.JSON(200, gin.H{
+	c.JSON(http.StatusOK, gin.H{
 			"status": 0,
 			"message": "success",
 			"data": pods,
@@ -106,7 +107,7 @@ func (s *Service) GetNamespaces(c *gin.Context) {
 	err := s.kubeCli.List(context.Background(), &namespace)
 
 	if err != nil {
-		c.JSON(200, gin.H{
+		c.JSON(http.StatusOK, gin.H{
 			"status": 1002,
 			"message": "get namespaces wrong",
 			"data": namespaceList,
@@ -120,7 +121,7 @@ func (s *Service) GetNamespaces(c *gin.Context) {
 		})
 	}
 
-	c.JSON(200, gin.H{
+	c.JSON(http.StatusOK, gin.H{
 		"status": 0,
 		"message": "success",
 		"data": namespaceList,
@@ -147,7 +148,7 @@ func (s *Service) GetKinds(c *gin.Context) {
 		Name: "TimeChaos",
 	})
 
-	c.JSON(200, gin.H{
+	c.JSON(http.StatusOK, gin.H{
 		"status": 0,
 		"message": "success",
 		"data": ChaosKindList,
