@@ -15,6 +15,7 @@ package experiment
 
 import (
 	"context"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
 
@@ -221,36 +222,36 @@ func (s *Service) state (c *gin.Context) {
 
 	err := s.getPodChaosState(data)
 	if err != nil {
-		c.JSON(200, getChaosWrong)
+		c.JSON(http.StatusOK, getChaosWrong)
 		return
 	}
 	err = s.getIoChaosState(data)
 	if err != nil {
-		c.JSON(200, getChaosWrong)
+		c.JSON(http.StatusOK, getChaosWrong)
 		return
 	}
 	err = s.getNetworkChaosState(data)
 	if err != nil {
-		c.JSON(200, getChaosWrong)
+		c.JSON(http.StatusOK, getChaosWrong)
 		return
 	}
 	err = s.getTimeChaosState(data)
 	if err != nil {
-		c.JSON(200, getChaosWrong)
+		c.JSON(http.StatusOK, getChaosWrong)
 		return
 	}
 	err = s.getKernelChaosState(data)
 	if err != nil {
-		c.JSON(200, getChaosWrong)
+		c.JSON(http.StatusOK, getChaosWrong)
 		return
 	}
 	err = s.getStressChaosState(data)
 	if err != nil {
-		c.JSON(200, getChaosWrong)
+		c.JSON(http.StatusOK, getChaosWrong)
 		return
 	}
 
-	c.JSON(200, gin.H{
+	c.JSON(http.StatusOK, gin.H{
 		"status": 0,
 		"message": "success",
 		"data": data,
