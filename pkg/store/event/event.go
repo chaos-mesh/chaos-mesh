@@ -80,6 +80,6 @@ func (e *eventStore) Update(_ context.Context, et *core.Event) error {
 
 // DeleteIncompleteEvents implement core.EventStore interface.
 func (e *eventStore) DeleteIncompleteEvents(_ context.Context) error {
-	return e.db.Where("finish_time = ?", nil).
+	return e.db.Where("finish_time IS NULL").
 		Delete(core.Event{}).Error
 }

@@ -93,7 +93,6 @@ func (r *ChaosCollector) createEvent(req ctrl.Request, kind string, status *v1al
 		Namespace:  req.Namespace,
 		Kind:       kind,
 		StartTime:  &status.Experiment.StartTime.Time,
-		FinishTime: nil,
 	}
 
 	if err := r.event.Create(context.Background(), event); err != nil {
