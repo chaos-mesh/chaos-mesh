@@ -216,7 +216,7 @@ func (s *Service) state (c *gin.Context) {
 	data["Finished"] = 0
 	getChaosWrong := gin.H{
 		"status": 1003,
-		"message": "get chaos wrong",
+		"message": "failed to get chaos state",
 		"data": make(map[string]int),
 	}
 
