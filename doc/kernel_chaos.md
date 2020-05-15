@@ -2,11 +2,11 @@
 
 This document describes how to create KernelChaos experiments in Chaos Mesh.
 
-Although KernelChaos injection targets a certain pod, since all pods of the same host share the same kernel, the performance of other pods are also impacted, depending on the specific callchain and frequency.
+Although KernelChaos targets a certain pod, the performance of other pods are also impacted depending on the specific callchain and frequency. It is because all pods of the same host share the same kernel.
 
 > **Warning:**
 >
-> This feature is disabled by default. Don't use it in production environment.
+> This feature is disabled by default. Do not use it in production environment.
 
 ## Prerequisites
 

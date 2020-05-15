@@ -101,14 +101,14 @@ For more sample files, see [examples](../examples). You can edit them as needed.
 | Field | Description | Sample Value |
 |:------|:------------------|:--------------|
 | **selector** | Selects pods that are used to inject chaos actions.|
-| **action** | Represents the IOChaos actions.| `delay` / `errno` / `mixed`. Refer to [IOChaos available actions](#io-chaos-available-actions) for more details.|
-| **mode** | Defines the mode to run chaos actions.| `one` / `all` / `fixed` / `fixed-percent` / `random-max-percent` |
+| **action** | Represents the IOChaos actions. Refer to [IOChaos available actions](#iochaos-available-actions) for more details. | `delay` / `errno` / `mixed` |
+| **mode** | Defines the mode to run chaos actions. | `one` / `all` / `fixed` / `fixed-percent` / `random-max-percent` |
 | **duration** | Represents the duration of a chaos action. The duration might be a string with the signed sequence of decimal numbers, each with optional fraction and a unit suffix. | `"300ms"`/ `"-1.5h"` / `"2h45m"`|
 | **delay** | Defines the value of IOChaos action delay. The duration might be a string with the signed sequence of decimal numbers, each with optional fraction and a unit suffix. Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", and "h". If `Delay` is empty, the operator will generate a value for it randomly.| `"300ms"`/ `"-1.5h"` / `"2h45m"` |
-| **errno** | Defines the error code that is returned by an IO action. This value and the [errno defined by Linux system](http://man7.org/linux/man-pages/man3/errno.3.html) are consistent. This field needs to be set when you choose an `errno` or `mixed` action. If `errno` is empty, the operator randomly generates an error code for it. See the [common Linux system errors](#common-linux-system-errors) for more Linux system error codes. | An int32 string like `"2"`, which means `No such file or directory`. |
+| **errno** | Defines the error code that is returned by an IO action. This value and the [errno defined by Linux system](http://man7.org/linux/man-pages/man3/errno.3.html) are consistent. This field needs to be set when you choose an `errno` or `mixed` action. If `errno` is empty, the operator randomly generates an error code for it. See the [common Linux system errors](#common-linux-system-errors) for more Linux system error codes. | `"2"` |
 | **percent** | Defines the percentage of injection errors and provides a number from 0-100.| `100` (by default) |
 | **path** | Defines the path of files for injecting IOChaos actions. It should be a regular expression for the path which you want to inject errno or delay. If the path is `""` or not defined, the IOChaos action is injected into all files.| |
-| **methods** | Defines the IO methods for injecting IOChaos actions. It is an array of string, which sets the IO syscalls. See the [available methods](#available-methods) for more details.| `open` / `read` |
+| **methods** | Defines the IO methods for injecting IOChaos actions. It is an array of string, which sets the IO syscalls. | `open` / `read` See the [available methods](#available-methods) for more details. |
 | **addr** | Defines the sidecar HTTP server address for a sidecar container.| `":8080"` |
 | **configName** | Defines the configuration name which is used to inject chaos action into pods. You can refer to [examples/tikv-configmap.yaml](../examples/chaosfs-configmap/tikv-configmap.yaml) to define your configuration.| |
 | **layer** | Represents the layer of the IO action.| `fs` (by default). |

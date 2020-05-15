@@ -2,7 +2,7 @@
 
 ## Question
 
-### Q: If I do not have Kubernetes environment, can I use Chaos Mesh to create chaos experiments?
+### Q: If I do not have Kubernetes clusters deployed, can I use Chaos Mesh to create chaos experiments?
 
 No, you can not use Chaos Mesh in this case. But still you can run chaos experiments using command line. Refer to [Command Line Usages of Chaos](https://github.com/pingcap/tipocket/blob/master/doc/command_line_chaos.md) for details.
 
@@ -44,7 +44,7 @@ The chaosfs sidecar container is continuously restarting, and you might see the 
 github.com/go-logr/zapr.(*zapLogger).Error
 ```
 
-* **Cause**: Chaos Mesh uses FUSE to inject I/O failures. It fails if you specify an existing directory as the source path for chaos. This often happens when you try to reuse a persistent volume (PV) with the `Retain` reclaim policy to request a PersistentVolumeClaims (PVC) resource.
+* **Cause**: Chaos Mesh uses Fuse to inject I/O failures. It fails if you specify an existing directory as the source path for chaos. This often happens when you try to reuse a persistent volume (PV) with the `Retain` reclaim policy to request a PersistentVolumeClaims (PVC) resource.
 * **Solution**: In this case, use the following command to change the reclaim policy to `Delete`:
 
 ```bash

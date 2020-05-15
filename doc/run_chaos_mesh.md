@@ -68,9 +68,7 @@ Chaos Dashboard is currently only available for TiDB clusters. Stay tuned for mo
 
 > **Note:**
 >
-> If Chaos Dashboard was not installed in your earlier deployment, you need to install it by upgrading Chaos Mesh:
->
-> ```helm upgrade chaos-mesh helm/chaos-mesh --namespace=chaos-testing --set dashboard.create=true```
+> If Chaos Dashboard was not installed in your earlier deployment, upgrade Chaos Mesh by executing `helm upgrade chaos-mesh helm/chaos-mesh --namespace=chaos-testing --set dashboard.create=true`.
 
 A typical way to access it is to use `kubectl port-forward`:
 

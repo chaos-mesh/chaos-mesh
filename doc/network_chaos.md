@@ -139,7 +139,7 @@ To inject Network Bandwidth fault, three action specific attributes are required
    limit: 100
 ```
 
-**rate** allows bps, kbps, mbps, gbps, tbps unit. bps means bytes per second.
+**rate** allows "bps", "kbps", "mbps", "gbps", "tbps" unit. "bps" means bytes per second.
 
 **limit** defines the number of bytes that can be queued waiting for tokens to become available.
 
