@@ -2,7 +2,7 @@
 
 ## Question
 
-### Q: If I do not have Kubernetes environment, can I use Chaos Mesh to create chaos experiments
+### Q: If I do not have Kubernetes environment, can I use Chaos Mesh to create chaos experiments?
 
 No, you can not use Chaos Mesh in this case. But still you can run chaos experiments using command line. Refer to [Command Line Usages of Chaos](https://github.com/pingcap/tipocket/blob/master/doc/command_line_chaos.md) for details.
 
@@ -30,7 +30,7 @@ Execute `kubectl describe` to check the specified chaos experiment resource.
 
     For other related errors in controller's log, please file an issue.
 
-If the above steps cannot solve the problem, you can [file an issue](https://github.com/pingcap/chaos-mesh/issues)) or message us in #sig-chaos-mesh channel in the [TiDB Community](https://tidbcommunity.slack.com/join/shared_invite/enQtNzc0MzI4ODExMDc4LWYwYmIzMjZkYzJiNDUxMmZlN2FiMGJkZjAyMzQ5NGU0NGY0NzI3NTYwMjAyNGQ1N2I2ZjAxNzc1OGUwYWM0NzE) slack workspace.
+If the above steps cannot solve the problem, you can [file an issue](https://github.com/pingcap/chaos-mesh/issues)) or message us in #sig-chaos-mesh channel in the [TiDB Community](https://pingcap.com/tidbslack) slack workspace.
 
 ## IOChaos
 

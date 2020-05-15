@@ -15,14 +15,14 @@ This document walks you through the environment setup process for Chaos Mesh dev
 
 Make sure you have the above prerequisites met. Now follow the steps below to prepare the toolchain for compiling Chaos Mesh:
 
-1. Clone the chaos-mesh repo to your local machine.
+1. Clone the Chaos Mesh repo to your local machine.
 
     ```bash
     git clone https://github.com/pingcap/chaos-mesh.git
     cd chaos-mesh
     ```
 
-2. Install the K8s API development framework - [kubebuilder](https://github.com/kubernetes-sigs/kubebuilder) and [kustomize](https://github.com/kubernetes-sigs/kustomize).
+2. Install the Kubernetes API development framework - [kubebuilder](https://github.com/kubernetes-sigs/kubebuilder) and [kustomize](https://github.com/kubernetes-sigs/kustomize).
 
     ```bash
     make install-kubebuilder
@@ -31,12 +31,19 @@ Make sure you have the above prerequisites met. Now follow the steps below to pr
 
 3. Start the docker service. Most Linux distributions use `systemctl` to start services. If you do not have `systemctl`, use the service command.
 
-4. Make sure `${GOPATH}/bin` is in your `PATH` by executing:
- `echo 'export PATH=$(go env GOPATH)/bin:${PATH}' >> ~/.bash_profile` and `source ~/. bash_profile`.
+4. Make sure `${GOPATH}/bin` is in your `PATH`.
+
+    ```bash
+    echo 'export PATH=$(go env GOPATH)/bin:${PATH}' >> ~/.bash_profile
+    ```
+
+    ```bash
+    source ~/. bash_profile
+    ```
 
 > **Note:**
 >
-> If your yarn is newly installed, you may need to restart the terminal to make it available.
+> If your yarn is newly installed, you might need to restart the terminal to make it available.
 
 Now you can test the toolchain by running:
 

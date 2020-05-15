@@ -25,8 +25,8 @@ After executing the above command, you should be able to see the prompt that Cha
 
 Otherwise, check the current environment according to the prompt message or send us an [issue](https://github.com/pingcap/chaos-mesh/issues) for help.
 
-In addition, You also can use [Helm](https://helm.sh/) to [install Chaos Mesh manually](deploy.md).
+You also can use [Helm](https://helm.sh/) to [install Chaos Mesh manually](deploy.md).
 
 ## Next steps
 
-Refer to [Run Chaos Mesh](run_chaos_mesh.md).
+[Run Chaos Mesh](run_chaos_mesh.md).

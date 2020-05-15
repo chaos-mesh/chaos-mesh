@@ -4,7 +4,7 @@ This document guides you to define a specify sidecar ConfigMap for your applicat
 
 ## Why do we need a specified Sidecar ConfigMap?
 
-Chaos Mesh runs a [fuse-daemon](https://www.kernel.org/doc/Documentation/filesystems/fuse.txt) server in [sidecar container](https://www.magalix.com/blog/the-sidecar-pattern) for implementing file system IO Chaos.
+Chaos Mesh runs a [fuse-daemon](https://www.kernel.org/doc/Documentation/filesystems/fuse.txt) server in [sidecar container](https://www.magalix.com/blog/the-sidecar-pattern) for implementing file system IOCChaos.
 
 In sidecar container, fuse-daemon need to mount the data directory of application by [fusermount](http://manpages.ubuntu.com/manpages/bionic/en/man1/fusermount.1.html) before the application starts.
 
@@ -12,7 +12,7 @@ Most applications use different data directories, so you need to defines the dif
 
 ## Configuration file
 
-The following content is the sidecar ConfigMap defined for TiKV:
+The following content is the sidecar ConfigMap defined for tikv:
 
 ```yaml
 ---
@@ -74,7 +74,7 @@ data:
 
 For more sample ConfigMap files, see [examples](https://github.com/pingcap/chaos-mesh/tree/master/examples/chaosfs-configmap).
 
-Description of `chaofs-tikv.yaml`:
+Description:
 
 * **name**: defines the name of the sidecar config, this name should be unique across all sidecar configs.
 * **selector**: is used to filter pods to inject sidecar.
@@ -204,4 +204,4 @@ EXAMPLES:
 
 ## Usage
 
-Refer to [IO Chaos Document](io_chaos.md).
+Refer to [IOChaos Document](io_chaos.md).

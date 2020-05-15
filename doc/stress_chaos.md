@@ -1,16 +1,16 @@
-# Stress Chaos Document
+# StressChaos Document
 
 This document helps you create stress chaos experiments.
 
 Stress chaos can generate plenty of stresses over a collection of pods. The stressors is injected into the target pods via the `chaos-daemon` internally.
 
-## Configuration file
+## Configuration
 
-A `StressChaos` shares common configurations like other chaos, such as how to select pods, how to specify periodic chaos ... (You can refer to other docs for how to use them). It defines stressors in **either** of the following two ways:
+A StressChaos shares common configurations like other chaos, such as how to select pods, how to specify periodic chaos... (You can refer to other docs for how to use them). It defines stressors in **either** of the following two ways:
 
 * `stressors`
 
-  Stressors define plenty of stressors supported to stress system components out. You can use one or more of them to make up various kinds of stresses. At least one of the stressors should be specified. The following is supported stressors for now:
+  `Stressors` defines plenty of stressors supported to stress system components out. You can use one or more of them to make up various kinds of stresses. At least one of the stressors should be specified. The following is supported stressors for now:
 
   1. `memory`
 
@@ -32,7 +32,7 @@ A `StressChaos` shares common configurations like other chaos, such as how to se
 
 * `stressngStressors`
 
-    StressngStressors defines plenty of stressors just like `Stressors` except that it's an experimental feature and more powerful.
+    `StressngStressors` defines plenty of stressors just like `Stressors` except that it's an experimental feature and more powerful.
 
     You can define stressors in `stress-ng` (see also `man stress-ng`) dialect.
 
@@ -40,10 +40,9 @@ A `StressChaos` shares common configurations like other chaos, such as how to se
 
     When both `StressngStressors` and `Stressors` are defined, `StressngStressors` wins.
 
-
 ## Usage
 
-Below is an example YAML file of StressChaos which burns 1 CPU for 30 seconds in every 2 minutes:
+Below is an example YAML file of StressChaos which is set to burn 1 CPU for 30 seconds in every 2 minutes:
 
 ```yaml
 apiVersion: pingcap.com/v1alpha1
@@ -64,7 +63,7 @@ spec:
     cron: "@every 2m"
 ```
 
-1. Create a namespace for your application:
+1. Create a namespace for your application. For example, `tidb-cluster-demo`:
 
     ```bash
     kubectl create ns tidb-cluster-demo
@@ -73,13 +72,13 @@ spec:
 2. Create your pods in the target namespace:
 
     ```bash
-    kubectl apply -f your-pods.yaml
+    kubectl apply -f *your-pods.yaml*
     ```
 
-3. Inject a stress chaos:
+3. Inject a StressChaos:
 
     ```bash
-    kubectl apply -f your-stress-chaos.yaml
+    kubectl apply -f *your-stress-chaos.yaml*
     ```
 
-Then, your pod's CPU will burn for 30s.
+Then, your pod's CPU will burn for 30 seconds.

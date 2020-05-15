@@ -2,13 +2,11 @@
 
 After [preparing the development environment](./setup_env.md), let's develop a new type of chaos, HelloWorldChaos, which only prints a "Hello World!" message to the log. Generally, to add a new chaos type for Chaos Mesh, you need to take the following steps:
 
-- [Develop a New Chaos](#develop-a-new-chaos)
-	- [Add the chaos object in controller](#add-the-chaos-object-in-controller)
-	- [Register the CRD](#register-the-crd)
-	- [Implement the schema type](#implement-the-schema-type)
-	- [Make the docker image](#make-the-docker-image)
-	- [Run Chaos](#run-chaos)
-	- [Next steps](#next-steps)
+1. [Add the chaos object in controller](#add-the-chaos-object-in-controller)
+2. [Register the CRD](#register-the-crd)
+3. [Implement the schema type](#implement-the-schema-type)
+4. [Make the docker image](#make-the-docker-image)
+5. [Run Chaos](#run-chaos)
 
 ## Add the chaos object in controller
 
@@ -18,55 +16,55 @@ In Chaos Mesh, all chaos types are managed by the controller manager. To add a n
 
     You will notice existing chaos types such as PodChaos, NetworkChaos and IOChaos. Add the new type below them:
 
-```golang
-	if err = (&controllers.HelloWorldChaosReconciler{
-		Client: mgr.GetClient(),
-		Log:    ctrl.Log.WithName("controllers").WithName("HelloWorldChaos"),
-	}).SetupWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create controller", "controller", "HelloWorldChaos")
-		os.Exit(1)
-	}
-```
+    ```golang
+    	if err = (&controllers.HelloWorldChaosReconciler{
+    		Client: mgr.GetClient(),
+    		Log:    ctrl.Log.WithName("controllers").WithName("HelloWorldChaos"),
+    	}).SetupWithManager(mgr); err != nil {
+    		setupLog.Error(err, "unable to create controller", "controller", "HelloWorldChaos")
+    		os.Exit(1)
+    	}
+    ```
 
 2. Under [controllers](https://github.com/pingcap/chaos-mesh/tree/master/controllers), create a `helloworldchaos_controller.go` file and edit it as below:
 
-```golang
-package controllers
+    ```golang
+    package controllers
 
-import (
-	"github.com/go-logr/logr"
+    import (
+    	"github.com/go-logr/logr"
 
-	chaosmeshv1alpha1 "github.com/pingcap/chaos-mesh/api/v1alpha1"
+    	chaosmeshv1alpha1 "github.com/pingcap/chaos-mesh/api/v1alpha1"
 
-	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/client"
-)
+    	ctrl "sigs.k8s.io/controller-runtime"
+    	"sigs.k8s.io/controller-runtime/pkg/client"
+    )
 
-// HelloWorldChaosReconciler reconciles a HelloWorldChaos object
-type HelloWorldChaosReconciler struct {
-	client.Client
-	Log logr.Logger
-}
+    // HelloWorldChaosReconciler reconciles a HelloWorldChaos object
+    type HelloWorldChaosReconciler struct {
+    	client.Client
+    	Log logr.Logger
+    }
 
-// +kubebuilder:rbac:groups=pingcap.com,resources=helloworldchaos,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups=pingcap.com,resources=helloworldchaos/status,verbs=get;update;patch
+    // +kubebuilder:rbac:groups=pingcap.com,resources=helloworldchaos,verbs=get;list;watch;create;update;patch;delete
+    // +kubebuilder:rbac:groups=pingcap.com,resources=helloworldchaos/status,verbs=get;update;patch
 
-func (r *HelloWorldChaosReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
-	logger := r.Log.WithValues("reconciler", "helloworldchaos")
+    func (r *HelloWorldChaosReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
+    	logger := r.Log.WithValues("reconciler", "helloworldchaos")
 
-        //  the main logic of `HelloWorldChaos`, it prints a log `Hello World!` and returns nothing.
-	logger.Info("Hello World!")
+            //  the main logic of `HelloWorldChaos`, it prints a log `Hello World!` and returns nothing.
+    	logger.Info("Hello World!")
 
-	return ctrl.Result{}, nil
-}
+    	return ctrl.Result{}, nil
+    }
 
-func (r *HelloWorldChaosReconciler) SetupWithManager(mgr ctrl.Manager) error {
-	return ctrl.NewControllerManagedBy(mgr).
-	//exports `HelloWorldChaos` object, which represents the yaml schema content the user applies.
-		For(&chaosmeshv1alpha1.HelloWorldChaos{}).
-		Complete(r)
-}
-```
+    func (r *HelloWorldChaosReconciler) SetupWithManager(mgr ctrl.Manager) error {
+    	return ctrl.NewControllerManagedBy(mgr).
+    	//exports `HelloWorldChaos` object, which represents the yaml schema content the user applies.
+    		For(&chaosmeshv1alpha1.HelloWorldChaos{}).
+    		Complete(r)
+    }
+    ```
 
 > **Note:**
 >
@@ -141,7 +139,7 @@ metadata:
 
 Having the object successfully added, you can make a Docker image and push it to your registry:
 
-```
+```bash
 make
 make docker-push
 ```
@@ -182,46 +180,46 @@ Now take the following steps to run chaos:
 
 1. Get the related custom resource type for Chaos Mesh:
 
-```
-kubectl apply -f manifests/
-kubectl get crd podchaos.pingcap.com
-```
+    ```bash
+    kubectl apply -f manifests/
+    kubectl get crd podchaos.pingcap.com
+    ```
 
 2. Install Chaos Mesh:
 
-```bash
-helm install helm/chaos-mesh --name=chaos-mesh --namespace=chaos-testing --set chaosDaemon.runtime=containerd --set chaosDaemon.socketPath=/run/containerd/containerd.sock
-kubectl get pods --namespace chaos-testing -l app.kubernetes.io/instance=chaos-mesh
-```
+    ```bash
+    helm install helm/chaos-mesh --name=chaos-mesh --namespace=chaos-testing --set chaosDaemon.runtime=containerd --set chaosDaemon.socketPath=/run/containerd/containerd.sock
+    kubectl get pods --namespace chaos-testing -l app.kubernetes.io/instance=chaos-mesh
+    ```
 
-The arguments `--set chaosDaemon.runtime=containerd --set chaosDaemon.socketPath=/run/containerd/containerd.sock` is used to to support network chaos on kind.
+    The arguments `--set chaosDaemon.runtime=containerd --set chaosDaemon.socketPath=/run/containerd/containerd.sock` is used to to support network chaos on kind.
 
 3. Create `chaos.yaml` in any location with the lines below:
 
-```yaml
-apiVersion: pingcap.com/v1alpha1
-kind: HelloWorldChaos
-metadata:
-  name: hello-world
-  namespace: chaos-testing
-```
+    ```yaml
+    apiVersion: pingcap.com/v1alpha1
+    kind: HelloWorldChaos
+    metadata:
+      name: hello-world
+      namespace: chaos-testing
+    ```
 
 4. Apply the chaos:
 
-```bash
-kubectl apply -f /path/to/chaos.yaml
-kubectl get HelloWorldChaos -n chaos-testing
-```
+    ```bash
+    kubectl apply -f /path/to/chaos.yaml
+    kubectl get HelloWorldChaos -n chaos-testing
+    ```
 
-Now you should be able to check the `Hello World!` result in the log:
+    Now you should be able to check the `Hello World!` result in the log:
 
-```bash
-kubectl logs chaos-controller-manager-{pod-post-fix} -n chaos-testing
-```
+    ```bash
+    kubectl logs chaos-controller-manager-{pod-post-fix} -n chaos-testing
+    ```
 
-> **Note:**
->
-> `{pod-post-fix}` is a random string generated by Kubernetes, you can check it by executing `kubectl get po -n chaos-testing`.
+    > **Note:**
+    >
+    > `{pod-post-fix}` is a random string generated by Kubernetes, you can check it by executing `kubectl get po -n chaos-testing`.
 
 ## Next steps
 

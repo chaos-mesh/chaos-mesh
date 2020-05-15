@@ -4,7 +4,7 @@ This document describes how to pause a running chaos experiment in Chaos Mesh.
 
 Pause is a state suggests that a running chaos experiment has been temporarily hung up but not deleted.
 
-Resume a paused experiment means running the chaos experiment again with same parameters.
+Resume a paused experiment means running the chaos experiment again with the same parameters.
 
 ## Usage
 

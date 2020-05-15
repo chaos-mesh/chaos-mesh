@@ -1,8 +1,8 @@
-# Network Chaos Document
+# NetworkChaos Document
 
-This document describes how to create network chaos experiments in Chaos Mesh.
+This document describes how to create NetworkChaos experiments in Chaos Mesh.
 
-Network Chaos actions are mainly divided into two categories:
+NetworkChaos actions are divided into two categories:
 
 - **Network Partition** action separates pods into several independent subnets by blocking communication between them.
 
@@ -44,9 +44,9 @@ Description:
 * **action** defines the specific chaos action for the pod. In this case, it is network partition.
 * **mode** defines the mode to run chaos action.
 * **selector** specifies the target pods for chaos injection.
-* **direction** specifies the partition direction. Supported directions are from, to, and both.
+* **direction** specifies the partition direction. Supported directions are `from`, `to` and `both`.
 * **target** specifies the target for network partition.
-* **duration** defines the duration for each chaos experiment. In the sample file above, the network partition lasts for 10 seconds.
+* **duration** defines the duration for each chaos experiment. In the sample file above, the network partition lasts for `10` seconds.
 * **scheduler** defines the scheduler rules for the running time of the chaos experiment. For more rule information, see <https://godoc.org/github.com/robfig/cron>.
 
 ## Netem Chaos Actions
@@ -71,7 +71,7 @@ loss:
 
 **loss** defines the percentage of packet loss.
 
-Network chaos variation isn't purely random, so to emulate that there is a correlation value as well.
+NetworkChaos variation isn't purely random, so to emulate that there is a correlation value as well.
 
 ### Network Delay
 
@@ -126,9 +126,11 @@ corrupt:
 
 Network Bandwidth Action is used to limit the network bandwidth. To add a Network Bandwidth Action, locate and edit the corresponding template in [/examples](../examples/network-bandwidth-example.yaml).
 
-Right now *minikube* doesn't support this feature as `CONFIG_NET_SCH_TBF` was disabled in minikube's image.
+> **Note:**
+>
+> Minikube doesn't support this feature as `CONFIG_NET_SCH_TBF` is disabled in Minikube's image.
 
-In this case, three action specific attributes are required - rate, buffer and limit.
+To inject Network Bandwidth fault, three action specific attributes are required - rate, buffer and limit.
 
 ```yaml
  bandwidth:
