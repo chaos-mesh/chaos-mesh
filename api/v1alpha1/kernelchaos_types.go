@@ -60,14 +60,6 @@ type KernelChaosSpec struct {
 	// Scheduler defines some schedule rules to control the running time of the chaos experiment about time.
 	Scheduler *SchedulerSpec `json:"scheduler,omitempty"`
 
-	// Next time when this action will be applied again
-	// +optional
-	NextStart *metav1.Time `json:"nextStart,omitempty"`
-
-	// Next time when this action will be recovered
-	// +optional
-	NextRecover *metav1.Time `json:"nextRecover,omitempty"`
-
 	// If this chaos has been paused
 	// +optional
 	Paused bool `json:"paused"`
@@ -166,44 +158,44 @@ func (in *KernelChaos) GetDuration() (*time.Duration, error) {
 
 // GetNextStart gets NextStart field of KernelChaos
 func (in *KernelChaos) GetNextStart() time.Time {
-	if in.Spec.NextStart == nil {
+	if in.Status.ScheduleStatus.NextStart == nil {
 		return time.Time{}
 	}
-	return in.Spec.NextStart.Time
+	return in.Status.ScheduleStatus.NextStart.Time
 }
 
 // SetNextStart sets NextStart field of KernelChaos
 func (in *KernelChaos) SetNextStart(t time.Time) {
 	if t.IsZero() {
-		in.Spec.NextStart = nil
+		in.Status.ScheduleStatus.NextStart = nil
 		return
 	}
 
-	if in.Spec.NextStart == nil {
-		in.Spec.NextStart = &metav1.Time{}
+	if in.Status.ScheduleStatus.NextStart == nil {
+		in.Status.ScheduleStatus.NextStart = &metav1.Time{}
 	}
-	in.Spec.NextStart.Time = t
+	in.Status.ScheduleStatus.NextStart.Time = t
 }
 
 // GetNextRecover gets NextRecover field of KernelChaos
 func (in *KernelChaos) GetNextRecover() time.Time {
-	if in.Spec.NextRecover == nil {
+	if in.Status.ScheduleStatus.NextRecover == nil {
 		return time.Time{}
 	}
-	return in.Spec.NextRecover.Time
+	return in.Status.ScheduleStatus.NextRecover.Time
 }
 
 // SetNextRecover sets NextRecover field of KernelChaos
 func (in *KernelChaos) SetNextRecover(t time.Time) {
 	if t.IsZero() {
-		in.Spec.NextRecover = nil
+		in.Status.ScheduleStatus.NextRecover = nil
 		return
 	}
 
-	if in.Spec.NextRecover == nil {
-		in.Spec.NextRecover = &metav1.Time{}
+	if in.Status.ScheduleStatus.NextRecover == nil {
+		in.Status.ScheduleStatus.NextRecover = &metav1.Time{}
 	}
-	in.Spec.NextRecover.Time = t
+	in.Status.ScheduleStatus.NextRecover.Time = t
 }
 
 // GetScheduler returns the scheduler of KernelChaos

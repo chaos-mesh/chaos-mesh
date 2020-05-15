@@ -10,11 +10,6 @@ import (
 	"time"
 
 	"github.com/onsi/ginkgo"
-	"github.com/pingcap/chaos-mesh/api/v1alpha1"
-	chaosmeshv1alpha1 "github.com/pingcap/chaos-mesh/api/v1alpha1"
-	e2econfig "github.com/pingcap/chaos-mesh/test/e2e/config"
-	"github.com/pingcap/chaos-mesh/test/e2e/util/portforward"
-	"github.com/pingcap/chaos-mesh/test/pkg/fixture"
 	"github.com/pingcap/errors"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -31,6 +26,12 @@ import (
 	"k8s.io/utils/exec"
 	"k8s.io/utils/pointer"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+
+	"github.com/pingcap/chaos-mesh/api/v1alpha1"
+	chaosmeshv1alpha1 "github.com/pingcap/chaos-mesh/api/v1alpha1"
+	e2econfig "github.com/pingcap/chaos-mesh/test/e2e/config"
+	"github.com/pingcap/chaos-mesh/test/e2e/util/portforward"
+	"github.com/pingcap/chaos-mesh/test/pkg/fixture"
 )
 
 const (
