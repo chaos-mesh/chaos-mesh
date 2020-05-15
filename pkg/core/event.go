@@ -56,4 +56,5 @@ type Event struct {
 	Message    string
 	StartTime  *time.Time `gorm:"index:start_time"`
 	FinishTime *time.Time
+	Pods       []PodRecord `gorm:"-"`
 }
