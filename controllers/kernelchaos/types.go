@@ -22,6 +22,7 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 
 	"github.com/go-logr/logr"
+	"github.com/hashicorp/go-multierror"
 	"golang.org/x/sync/errgroup"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/client-go/tools/cache"
@@ -30,7 +31,6 @@ import (
 
 	"github.com/pingcap/chaos-mesh/api/v1alpha1"
 	"github.com/pingcap/chaos-mesh/controllers/common"
-	"github.com/pingcap/chaos-mesh/controllers/reconciler"
 	"github.com/pingcap/chaos-mesh/controllers/twophase"
 	"github.com/pingcap/chaos-mesh/pkg/utils"
 
@@ -85,7 +85,7 @@ func (r *Reconciler) scheduleKernelChaos(kernelchaos *v1alpha1.KernelChaos, req 
 }
 
 // Apply applies KernelChaos
-func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos reconciler.InnerObject) error {
+func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.InnerObject) error {
 	kernelchaos, ok := chaos.(*v1alpha1.KernelChaos)
 	if !ok {
 		err := errors.New("chaos is not kernelchaos")
@@ -106,8 +106,7 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos reconcil
 		return err
 	}
 
-	kernelchaos.Status.Experiment.Pods = []v1alpha1.PodStatus{}
-
+	kernelchaos.Status.Experiment.Pods = make([]v1alpha1.PodStatus, 0, len(pods))
 	for _, pod := range pods {
 		ps := v1alpha1.PodStatus{
 			Namespace: pod.Namespace,
@@ -124,7 +123,7 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos reconcil
 }
 
 // Recover means the reconciler recovers the chaos action
-func (r *Reconciler) Recover(ctx context.Context, req ctrl.Request, chaos reconciler.InnerObject) error {
+func (r *Reconciler) Recover(ctx context.Context, req ctrl.Request, chaos v1alpha1.InnerObject) error {
 	kernelchaos, ok := chaos.(*v1alpha1.KernelChaos)
 	if !ok {
 		err := errors.New("chaos is not KernelChaos")
@@ -132,23 +131,17 @@ func (r *Reconciler) Recover(ctx context.Context, req ctrl.Request, chaos reconc
 		return err
 	}
 
-	err := r.cleanFinalizersAndRecover(ctx, kernelchaos)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return r.cleanFinalizersAndRecover(ctx, kernelchaos)
 }
 
 func (r *Reconciler) cleanFinalizersAndRecover(ctx context.Context, chaos *v1alpha1.KernelChaos) error {
-	if len(chaos.Finalizers) == 0 {
-		return nil
-	}
+	var result error
 
 	for _, key := range chaos.Finalizers {
 		ns, name, err := cache.SplitMetaNamespaceKey(key)
 		if err != nil {
-			return err
+			result = multierror.Append(result, err)
+			continue
 		}
 
 		var pod v1.Pod
@@ -159,7 +152,8 @@ func (r *Reconciler) cleanFinalizersAndRecover(ctx context.Context, chaos *v1alp
 
 		if err != nil {
 			if !k8serror.IsNotFound(err) {
-				return err
+				result = multierror.Append(result, err)
+				continue
 			}
 
 			r.Log.Info("Pod not found", "namespace", ns, "name", name)
@@ -169,13 +163,20 @@ func (r *Reconciler) cleanFinalizersAndRecover(ctx context.Context, chaos *v1alp
 
 		err = r.recoverPod(ctx, &pod, chaos)
 		if err != nil {
-			return err
+			result = multierror.Append(result, err)
+			continue
 		}
 
 		chaos.Finalizers = utils.RemoveFromFinalizer(chaos.Finalizers, key)
 	}
 
-	return nil
+	if chaos.Annotations[common.AnnotationCleanFinalizer] == common.AnnotationCleanFinalizerForced {
+		r.Log.Info("Force cleanup all finalizers", "chaos", chaos)
+		chaos.Finalizers = chaos.Finalizers[:0]
+		return nil
+	}
+
+	return result
 }
 
 func (r *Reconciler) recoverPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.KernelChaos) error {
@@ -233,7 +234,7 @@ func (r *Reconciler) recoverPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha
 }
 
 // Object would return the instance of chaos
-func (r *Reconciler) Object() reconciler.InnerObject {
+func (r *Reconciler) Object() v1alpha1.InnerObject {
 	return &v1alpha1.KernelChaos{}
 }
 

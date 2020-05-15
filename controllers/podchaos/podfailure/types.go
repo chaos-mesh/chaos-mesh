@@ -17,13 +17,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"time"
 
 	"github.com/go-logr/logr"
+	"github.com/hashicorp/go-multierror"
 	"golang.org/x/sync/errgroup"
 	v1 "k8s.io/api/core/v1"
 	k8serror "k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/tools/cache"
 	"k8s.io/client-go/tools/record"
@@ -32,7 +31,6 @@ import (
 
 	"github.com/pingcap/chaos-mesh/api/v1alpha1"
 	"github.com/pingcap/chaos-mesh/controllers/common"
-	"github.com/pingcap/chaos-mesh/controllers/reconciler"
 	"github.com/pingcap/chaos-mesh/controllers/twophase"
 	"github.com/pingcap/chaos-mesh/pkg/utils"
 )
@@ -42,25 +40,22 @@ const (
 	// Always fails a container
 	pauseImage = "gcr.io/google-containers/pause:latest"
 
-	podFailureActionMsg = "pause pod duration %s"
+	podFailureActionMsg = "pod failure duration %s"
 )
 
 // NewTwoPhaseReconciler would create Reconciler for twophase package
-func NewTwoPhaseReconciler(c client.Client, log logr.Logger, req ctrl.Request,
-	recorder record.EventRecorder) *twophase.Reconciler {
-	r := newReconciler(c, log, req, recorder)
+func NewTwoPhaseReconciler(c client.Client, log logr.Logger, recorder record.EventRecorder) *twophase.Reconciler {
+	r := newReconciler(c, log, recorder)
 	return twophase.NewReconciler(r, r.Client, r.Log)
 }
 
 // NewCommonReconciler would create Reconciler for common package
-func NewCommonReconciler(c client.Client, log logr.Logger, req ctrl.Request,
-	recorder record.EventRecorder) *common.Reconciler {
-	r := newReconciler(c, log, req, recorder)
+func NewCommonReconciler(c client.Client, log logr.Logger, recorder record.EventRecorder) *common.Reconciler {
+	r := newReconciler(c, log, recorder)
 	return common.NewReconciler(r, r.Client, r.Log)
 }
 
-func newReconciler(c client.Client, log logr.Logger, req ctrl.Request,
-	recorder record.EventRecorder) *Reconciler {
+func newReconciler(c client.Client, log logr.Logger, recorder record.EventRecorder) *Reconciler {
 	return &Reconciler{
 		Client:        c,
 		EventRecorder: recorder,
@@ -75,12 +70,12 @@ type Reconciler struct {
 }
 
 // Object implements the reconciler.InnerReconciler.Object
-func (r *Reconciler) Object() reconciler.InnerObject {
+func (r *Reconciler) Object() v1alpha1.InnerObject {
 	return &v1alpha1.PodChaos{}
 }
 
 // Apply implements the reconciler.InnerReconciler.Apply
-func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos reconciler.InnerObject) error {
+func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.InnerObject) error {
 
 	podchaos, ok := chaos.(*v1alpha1.PodChaos)
 	if !ok {
@@ -99,12 +94,7 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos reconcil
 		return err
 	}
 
-	podchaos.Status.Experiment.StartTime = &metav1.Time{
-		Time: time.Now(),
-	}
-	podchaos.Status.Experiment.Pods = []v1alpha1.PodStatus{}
-	podchaos.Status.Experiment.Phase = v1alpha1.ExperimentPhaseRunning
-
+	podchaos.Status.Experiment.Pods = make([]v1alpha1.PodStatus, 0, len(pods))
 	for _, pod := range pods {
 		ps := v1alpha1.PodStatus{
 			Namespace: pod.Namespace,
@@ -123,7 +113,7 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos reconcil
 }
 
 // Recover implements the reconciler.InnerReconciler.Recover
-func (r *Reconciler) Recover(ctx context.Context, req ctrl.Request, obj reconciler.InnerObject) error {
+func (r *Reconciler) Recover(ctx context.Context, req ctrl.Request, obj v1alpha1.InnerObject) error {
 
 	podchaos, ok := obj.(*v1alpha1.PodChaos)
 	if !ok {
@@ -132,26 +122,22 @@ func (r *Reconciler) Recover(ctx context.Context, req ctrl.Request, obj reconcil
 		return err
 	}
 
-	err := r.cleanFinalizersAndRecover(ctx, podchaos)
-	if err != nil {
+	if err := r.cleanFinalizersAndRecover(ctx, podchaos); err != nil {
 		return err
 	}
-	podchaos.Status.Experiment.EndTime = &metav1.Time{
-		Time: time.Now(),
-	}
+
 	r.Event(podchaos, v1.EventTypeNormal, utils.EventChaosRecovered, "")
 	return nil
 }
 
 func (r *Reconciler) cleanFinalizersAndRecover(ctx context.Context, podchaos *v1alpha1.PodChaos) error {
-	if len(podchaos.Finalizers) == 0 {
-		return nil
-	}
+	var result error
 
 	for _, key := range podchaos.Finalizers {
 		ns, name, err := cache.SplitMetaNamespaceKey(key)
 		if err != nil {
-			return err
+			result = multierror.Append(result, err)
+			continue
 		}
 
 		var pod v1.Pod
@@ -162,7 +148,8 @@ func (r *Reconciler) cleanFinalizersAndRecover(ctx context.Context, podchaos *v1
 
 		if err != nil {
 			if !k8serror.IsNotFound(err) {
-				return err
+				result = multierror.Append(result, err)
+				continue
 			}
 
 			r.Log.Info("Pod not found", "namespace", ns, "name", name)
@@ -172,13 +159,20 @@ func (r *Reconciler) cleanFinalizersAndRecover(ctx context.Context, podchaos *v1
 
 		err = r.recoverPod(ctx, &pod, podchaos)
 		if err != nil {
-			return err
+			result = multierror.Append(result, err)
+			continue
 		}
 
 		podchaos.Finalizers = utils.RemoveFromFinalizer(podchaos.Finalizers, key)
 	}
 
-	return nil
+	if podchaos.Annotations[common.AnnotationCleanFinalizer] == common.AnnotationCleanFinalizerForced {
+		r.Log.Info("Force cleanup all finalizers", "chaos", podchaos)
+		podchaos.Finalizers = podchaos.Finalizers[:0]
+		return nil
+	}
+
+	return result
 }
 
 func (r *Reconciler) failAllPods(ctx context.Context, pods []v1.Pod, podchaos *v1alpha1.PodChaos) error {

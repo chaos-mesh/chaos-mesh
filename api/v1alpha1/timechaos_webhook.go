@@ -85,7 +85,7 @@ func (in *TimeChaos) Validate() error {
 
 // ValidateScheduler validates the scheduler and duration
 func (in *TimeChaos) ValidateScheduler(spec *field.Path) field.ErrorList {
-	return ValidateScheduler(in.Spec.Duration, in.Spec.Scheduler, spec)
+	return ValidateScheduler(in, spec)
 }
 
 // ValidatePodMode validates the value with podmode
