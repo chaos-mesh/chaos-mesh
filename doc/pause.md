@@ -9,7 +9,7 @@ Undoing pausing a chaos will run the chaos again with same parameter.
 
 ## How To
 
-For instance, we have a podchaos:
+For instance, we have a pod chaos:
 ```yaml
 apiVersion: pingcap.com/v1alpha1
 kind: PodChaos
@@ -39,7 +39,6 @@ spec:
   mode: one
   nextRecover: "2020-04-15T03:18:14Z"
   nextStart: "2020-04-15T03:18:19Z"
-  paused: false
   scheduler:
     cron: '@every 15s'
   selector:
@@ -70,11 +69,14 @@ chaos-daemon-p9wxd                          1/1     Running             0       
 
 Pause the running chaos:
 ```shell script
-$ kubectl patch podchaos pod-kill-example --namespace chaos-testing --type merge --patch 'spec:
-  paused: true'
-podchaos.pingcap.com/pod-kill-example patched
+$  kubectl annotate podchaos pod-kill-example --namespace chaos-testing admission-webhook.pingcap.com/pause=true
+podchaos.pingcap.com/pod-kill-example annotated
 $ kubectl get podchaos pod-kill-example --namespace chaos-testing --output yaml \
 && kubectl get pods --namespace chaos-testing
+...
+metadata:
+  annotations:
+    admission-webhook.pingcap.com/pause: "true"
 ...
 spec:
   action: pod-kill
@@ -82,7 +84,6 @@ spec:
   duration: 10s
   mode: one
   nextStart: "2020-04-15T03:18:34Z"
-  paused: true
   scheduler:
     cron: '@every 15s'
   selector:
@@ -113,9 +114,8 @@ chaos-daemon-sflc4                          1/1     Running   0          5m5s
 
 Resume this chaos:
 ```shell script
-$ kubectl patch podchaos pod-kill-example --namespace chaos-testing --type merge --patch 'spec:
- paused: false'
-podchaos.pingcap.com/pod-kill-example patched 
+$ kubectl annotate podchaos pod-kill-example --namespace chaos-testing admission-webhook.pingcap.com/pause-
+podchaos.pingcap.com/pod-kill-example annotated
 $ kubectl get podchaos pod-kill-example --namespace chaos-testing --output yaml \
 && kubectl get pods --namespace chaos-testing
 ...
@@ -126,7 +126,6 @@ spec:
   mode: one
   nextRecover: "2020-04-15T03:23:56Z"
   nextStart: "2020-04-15T03:24:01Z"
-  paused: false
   scheduler:
     cron: '@every 15s'
   selector:

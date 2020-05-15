@@ -104,9 +104,6 @@ spec:
               description: Path defines the path of files for injecting I/O chaos
                 action.
               type: string
-            paused:
-              description: If this chaos has been paused
-              type: boolean
             percent:
               description: 'Percent defines the percentage of injection errors and
                 provides a number from 0-100. default: 100.'

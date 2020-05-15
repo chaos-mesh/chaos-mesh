@@ -214,14 +214,9 @@ var _ = ginkgo.Describe("[Basic]", func() {
 				})
 
 				// pause experiment
-				var mergePatch []byte
-				mergePatch, _ = json.Marshal(map[string]interface{}{
-					"spec": map[string]interface{}{
-						"paused": true,
-					},
-				})
-				err = cli.Patch(ctx, podFailureChaos, client.ConstantPatch(types.MergePatchType, mergePatch))
-				framework.ExpectNoError(err, "patch pause pod chaos error")
+				err = pauseChaos(ctx, cli, podFailureChaos)
+				framework.ExpectNoError(err, "pause chaos error")
+
 				err = wait.Poll(5*time.Second, 5*time.Minute, func() (done bool, err error) {
 					chaos := &v1alpha1.PodChaos{}
 					err = cli.Get(ctx, chaosKey, chaos)
@@ -251,13 +246,9 @@ var _ = ginkgo.Describe("[Basic]", func() {
 				framework.ExpectEqual(err.Error(), wait.ErrWaitTimeout.Error())
 
 				// resume experiment
-				mergePatch, _ = json.Marshal(map[string]interface{}{
-					"spec": map[string]interface{}{
-						"paused": false,
-					},
-				})
-				err = cli.Patch(ctx, podFailureChaos, client.ConstantPatch(types.MergePatchType, mergePatch))
-				framework.ExpectNoError(err, "patch resume pod chaos error")
+				err = unPauseChaos(ctx, cli, podFailureChaos)
+				framework.ExpectNoError(err, "resume chaos error")
+
 				err = wait.Poll(5*time.Second, 5*time.Minute, func() (done bool, err error) {
 					chaos := &v1alpha1.PodChaos{}
 					err = cli.Get(ctx, chaosKey, chaos)
@@ -386,14 +377,9 @@ var _ = ginkgo.Describe("[Basic]", func() {
 				framework.ExpectNoError(err, "wait pod killed failed")
 
 				// pause experiment
-				var mergePatch []byte
-				mergePatch, _ = json.Marshal(map[string]interface{}{
-					"spec": map[string]interface{}{
-						"paused": true,
-					},
-				})
-				err = cli.Patch(ctx, podKillChaos, client.ConstantPatch(types.MergePatchType, mergePatch))
-				framework.ExpectNoError(err, "patch pause pod chaos error")
+				err = pauseChaos(ctx, cli, podKillChaos)
+				framework.ExpectNoError(err, "pause chaos error")
+
 				err = wait.Poll(5*time.Second, 5*time.Minute, func() (done bool, err error) {
 					chaos := &v1alpha1.PodChaos{}
 					err = cli.Get(ctx, chaosKey, chaos)
@@ -417,13 +403,9 @@ var _ = ginkgo.Describe("[Basic]", func() {
 				framework.ExpectEqual(err.Error(), wait.ErrWaitTimeout.Error())
 
 				// resume experiment
-				mergePatch, _ = json.Marshal(map[string]interface{}{
-					"spec": map[string]interface{}{
-						"paused": false,
-					},
-				})
-				err = cli.Patch(ctx, podKillChaos, client.ConstantPatch(types.MergePatchType, mergePatch))
-				framework.ExpectNoError(err, "patch resume pod chaos error")
+				err = unPauseChaos(ctx, cli, podKillChaos)
+				framework.ExpectNoError(err, "resume chaos error")
+
 				err = wait.Poll(5*time.Second, 5*time.Minute, func() (done bool, err error) {
 					chaos := &v1alpha1.PodChaos{}
 					err = cli.Get(ctx, chaosKey, chaos)
@@ -596,14 +578,9 @@ var _ = ginkgo.Describe("[Basic]", func() {
 				framework.ExpectNoError(err, "wait container kill failed")
 
 				// pause experiment
-				var mergePatch []byte
-				mergePatch, _ = json.Marshal(map[string]interface{}{
-					"spec": map[string]interface{}{
-						"paused": true,
-					},
-				})
-				err = cli.Patch(ctx, containerKillChaos, client.ConstantPatch(types.MergePatchType, mergePatch))
-				framework.ExpectNoError(err, "patch pause pod chaos error")
+				err = pauseChaos(ctx, cli, containerKillChaos)
+				framework.ExpectNoError(err, "pause chaos error")
+
 				err = wait.Poll(5*time.Second, 5*time.Minute, func() (done bool, err error) {
 					chaos := &v1alpha1.PodChaos{}
 					err = cli.Get(ctx, chaosKey, chaos)
@@ -628,13 +605,9 @@ var _ = ginkgo.Describe("[Basic]", func() {
 				framework.ExpectEqual(err.Error(), wait.ErrWaitTimeout.Error())
 
 				// resume experiment
-				mergePatch, _ = json.Marshal(map[string]interface{}{
-					"spec": map[string]interface{}{
-						"paused": false,
-					},
-				})
-				err = cli.Patch(ctx, containerKillChaos, client.ConstantPatch(types.MergePatchType, mergePatch))
-				framework.ExpectNoError(err, "patch resume pod chaos error")
+				err = unPauseChaos(ctx, cli, containerKillChaos)
+				framework.ExpectNoError(err, "resume chaos error")
+
 				err = wait.Poll(5*time.Second, 5*time.Minute, func() (done bool, err error) {
 					chaos := &v1alpha1.PodChaos{}
 					err = cli.Get(ctx, chaosKey, chaos)
@@ -796,14 +769,9 @@ var _ = ginkgo.Describe("[Basic]", func() {
 				}
 
 				// pause experiment
-				var mergePatch []byte
-				mergePatch, _ = json.Marshal(map[string]interface{}{
-					"spec": map[string]interface{}{
-						"paused": true,
-					},
-				})
-				err = cli.Patch(ctx, timeChaos, client.ConstantPatch(types.MergePatchType, mergePatch))
-				framework.ExpectNoError(err, "patch pause time chaos error")
+				err = pauseChaos(ctx, cli, timeChaos)
+				framework.ExpectNoError(err, "pause chaos error")
+
 				err = wait.Poll(5*time.Second, 5*time.Minute, func() (done bool, err error) {
 					chaos := &v1alpha1.TimeChaos{}
 					err = cli.Get(ctx, chaosKey, chaos)
@@ -829,13 +797,9 @@ var _ = ginkgo.Describe("[Basic]", func() {
 				framework.ExpectEqual(err.Error(), wait.ErrWaitTimeout.Error())
 
 				// resume experiment
-				mergePatch, _ = json.Marshal(map[string]interface{}{
-					"spec": map[string]interface{}{
-						"paused": false,
-					},
-				})
-				err = cli.Patch(ctx, timeChaos, client.ConstantPatch(types.MergePatchType, mergePatch))
-				framework.ExpectNoError(err, "patch resume time chaos error")
+				err = unPauseChaos(ctx, cli, timeChaos)
+				framework.ExpectNoError(err, "resume chaos error")
+
 				err = wait.Poll(5*time.Second, 5*time.Minute, func() (done bool, err error) {
 					chaos := &v1alpha1.TimeChaos{}
 					err = cli.Get(ctx, chaosKey, chaos)
@@ -1027,14 +991,9 @@ var _ = ginkgo.Describe("[Basic]", func() {
 				}
 
 				// pause experiment
-				var mergePatch []byte
-				mergePatch, _ = json.Marshal(map[string]interface{}{
-					"spec": map[string]interface{}{
-						"paused": true,
-					},
-				})
-				err = cli.Patch(ctx, ioChaos, client.ConstantPatch(types.MergePatchType, mergePatch))
-				framework.ExpectNoError(err, "patch pause io chaos error")
+				err = pauseChaos(ctx, cli, ioChaos)
+				framework.ExpectNoError(err, "pause chaos error")
+
 				err = wait.Poll(5*time.Second, 5*time.Minute, func() (done bool, err error) {
 					chaos := &v1alpha1.IoChaos{}
 					err = cli.Get(ctx, chaosKey, chaos)
@@ -1062,13 +1021,9 @@ var _ = ginkgo.Describe("[Basic]", func() {
 				framework.ExpectEqual(err.Error(), wait.ErrWaitTimeout.Error())
 
 				// resume experiment
-				mergePatch, _ = json.Marshal(map[string]interface{}{
-					"spec": map[string]interface{}{
-						"paused": false,
-					},
-				})
-				err = cli.Patch(ctx, ioChaos, client.ConstantPatch(types.MergePatchType, mergePatch))
-				framework.ExpectNoError(err, "patch resume io chaos error")
+				err = unPauseChaos(ctx, cli, ioChaos)
+				framework.ExpectNoError(err, "resume chaos error")
+
 				err = wait.Poll(5*time.Second, 1*time.Minute, func() (done bool, err error) {
 					chaos := &v1alpha1.IoChaos{}
 					err = cli.Get(ctx, chaosKey, chaos)
@@ -1227,14 +1182,9 @@ var _ = ginkgo.Describe("[Basic]", func() {
 				}
 
 				// pause experiment
-				var mergePatch []byte
-				mergePatch, _ = json.Marshal(map[string]interface{}{
-					"spec": map[string]interface{}{
-						"paused": true,
-					},
-				})
-				err = cli.Patch(ctx, ioChaos, client.ConstantPatch(types.MergePatchType, mergePatch))
-				framework.ExpectNoError(err, "patch pause io chaos error")
+				err = pauseChaos(ctx, cli, ioChaos)
+				framework.ExpectNoError(err, "pause chaos error")
+
 				err = wait.Poll(5*time.Second, 5*time.Minute, func() (done bool, err error) {
 					chaos := &v1alpha1.IoChaos{}
 					err = cli.Get(ctx, chaosKey, chaos)
@@ -1258,13 +1208,9 @@ var _ = ginkgo.Describe("[Basic]", func() {
 				framework.ExpectEqual(err.Error(), wait.ErrWaitTimeout.Error())
 
 				// resume experiment
-				mergePatch, _ = json.Marshal(map[string]interface{}{
-					"spec": map[string]interface{}{
-						"paused": false,
-					},
-				})
-				err = cli.Patch(ctx, ioChaos, client.ConstantPatch(types.MergePatchType, mergePatch))
-				framework.ExpectNoError(err, "patch resume io chaos error")
+				err = unPauseChaos(ctx, cli, ioChaos)
+				framework.ExpectNoError(err, "resume chaos error")
+
 				err = wait.Poll(5*time.Second, 1*time.Minute, func() (done bool, err error) {
 					chaos := &v1alpha1.IoChaos{}
 					err = cli.Get(ctx, chaosKey, chaos)
@@ -1399,4 +1345,24 @@ func createIOChaosConfigMap(kubeCli kubernetes.Interface) error {
 	// Wait 15 seconds to let chaos mesh load the config map
 	time.Sleep(15 * time.Second)
 	return nil
+}
+
+func pauseChaos(ctx context.Context, cli client.Client, chaos runtime.Object) error {
+	var mergePatch []byte
+	mergePatch, _ = json.Marshal(map[string]interface{}{
+		"metadata": map[string]interface{}{
+			"annotations": map[string]string{v1alpha1.PauseAnnotationKey: "true"},
+		},
+	})
+	return cli.Patch(ctx, chaos, client.ConstantPatch(types.MergePatchType, mergePatch))
+}
+
+func unPauseChaos(ctx context.Context, cli client.Client, chaos runtime.Object) error {
+	var mergePatch []byte
+	mergePatch, _ = json.Marshal(map[string]interface{}{
+		"metadata": map[string]interface{}{
+			"annotations": map[string]string{v1alpha1.PauseAnnotationKey: "false"},
+		},
+	})
+	return cli.Patch(ctx, chaos, client.ConstantPatch(types.MergePatchType, mergePatch))
 }

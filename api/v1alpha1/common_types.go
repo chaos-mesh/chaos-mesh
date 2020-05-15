@@ -21,6 +21,8 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 )
 
+const PauseAnnotationKey = "admission-webhook.pingcap.com/pause"
+
 // SelectorSpec defines the some selectors to select objects.
 // If the all selectors are empty, all objects will be used in chaos experiment.
 type SelectorSpec struct {
