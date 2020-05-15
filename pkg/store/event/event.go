@@ -30,6 +30,7 @@ var log = ctrl.Log.WithName("eventStore")
 // NewStore return a new EventStore.
 func NewStore(db *dbstore.DB) core.EventStore {
 	db.AutoMigrate(&core.Event{})
+	db.AutoMigrate(&core.PodRecord{})
 
 	es := &eventStore{db}
 	if err := es.DeleteIncompleteEvents(context.Background()); err != nil && gorm.IsRecordNotFoundError(err) {
@@ -48,6 +49,9 @@ func (e *eventStore) List(context.Context) ([]*core.Event, error) { return nil, 
 func (e *eventStore) ListByExperiment(context.Context, string, string) ([]*core.Event, error) {
 	return nil, nil
 }
+func (e *eventStore) ListByPod(context.Context, string, string) ([]*core.Event, error) {
+	return nil, nil
+}
 func (e *eventStore) Find(context.Context, int64) (*core.Event, error) { return nil, nil }
 
 func (e *eventStore) FindByExperimentAndStartTime(
@@ -56,16 +60,38 @@ func (e *eventStore) FindByExperimentAndStartTime(
 	startTime *time.Time,
 ) (*core.Event, error) {
 	et := new(core.Event)
-	err := e.db.Where(
+	if err := e.db.Where(
 		"namespace = ? and experiment = ? and start_time = ?",
 		namespace, name, startTime).
-		First(et).Error
-	return et, err
+		First(et).Error; err != nil {
+		return nil, err
+	}
+
+	var pods []*core.PodRecord
+
+	if err := e.db.Where(
+		"event_id = ?", et.ID).
+		Find(&pods).Error; err != nil && !gorm.IsRecordNotFoundError(err) {
+		return nil, err
+	}
+
+	return et, nil
 }
 
 // Create persists a new event to the datastore.
 func (e *eventStore) Create(_ context.Context, et *core.Event) error {
-	return e.db.Create(et).Error
+	if err := e.db.Create(et).Error; err != nil {
+		return err
+	}
+
+	for _, pod := range et.Pods {
+		pod.EventID = et.ID
+		if err := e.db.Create(pod).Error; err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 // Update persists an updated event to the datastore.

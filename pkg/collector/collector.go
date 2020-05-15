@@ -15,6 +15,7 @@ package collector
 
 import (
 	"context"
+
 	"github.com/go-logr/logr"
 	"github.com/jinzhu/gorm"
 
@@ -29,11 +30,10 @@ import (
 // ChaosCollector represents a collector for Chaos Object.
 type ChaosCollector struct {
 	client.Client
-	Log       logr.Logger
-	apiType   runtime.Object
-	archive   core.ExperimentStore
-	event     core.EventStore
-	podRecord core.PodRecordStore
+	Log     logr.Logger
+	apiType runtime.Object
+	archive core.ExperimentStore
+	event   core.EventStore
 }
 
 // Reconcile reconciles a chaos collector.
@@ -95,11 +95,6 @@ func (r *ChaosCollector) createEvent(req ctrl.Request, kind string, status *v1al
 		StartTime:  &status.Experiment.StartTime.Time,
 	}
 
-	if err := r.event.Create(context.Background(), event); err != nil {
-		r.Log.Error(err, "failed to store event", "event", event)
-		return err
-	}
-
 	for _, pod := range status.Experiment.Pods {
 		podRecord := &core.PodRecord{
 			EventID:   event.ID,
@@ -109,11 +104,11 @@ func (r *ChaosCollector) createEvent(req ctrl.Request, kind string, status *v1al
 			Message:   pod.Message,
 			Action:    pod.Action,
 		}
-
-		if err := r.podRecord.Create(context.Background(), podRecord); err != nil {
-			r.Log.Error(err, "failed to store pod record", "podRecord", podRecord)
-			return err
-		}
+		event.Pods = append(event.Pods, podRecord)
+	}
+	if err := r.event.Create(context.Background(), event); err != nil {
+		r.Log.Error(err, "failed to store event", "event", event)
+		return err
 	}
 
 	return nil

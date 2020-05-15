@@ -28,6 +28,9 @@ type EventStore interface {
 	// ListByExperiment returns a event list by the name and namespace of the experiment.
 	ListByExperiment(context.Context, string, string) ([]*Event, error)
 
+	// ListByPod returns a event list by the name and namespace of the pod.
+	ListByPod(context.Context, string, string) ([]*Event, error)
+
 	// Find returns a event from the datastore by ID.
 	Find(context.Context, int64) (*Event, error)
 
@@ -56,5 +59,16 @@ type Event struct {
 	Message    string
 	StartTime  *time.Time `gorm:"index:start_time"`
 	FinishTime *time.Time
-	Pods       []PodRecord `gorm:"-"`
+	Pods       []*PodRecord `gorm:"-"`
+}
+
+// PodRecord represents a pod record with event ID.
+type PodRecord struct {
+	gorm.Model
+	EventID   uint   `gorm:"index:event_id"`
+	PodIP     string `gorm:"index:pod_id"`
+	PodName   string
+	Namespace string
+	Message   string
+	Action    string
 }
