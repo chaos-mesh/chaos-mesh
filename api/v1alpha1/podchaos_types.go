@@ -74,41 +74,41 @@ func (in *PodChaos) GetDuration() (*time.Duration, error) {
 }
 
 func (in *PodChaos) GetNextStart() time.Time {
-	if in.Status.ScheduleStatus.NextStart == nil {
+	if in.Status.Scheduler.NextStart == nil {
 		return time.Time{}
 	}
-	return in.Status.ScheduleStatus.NextStart.Time
+	return in.Status.Scheduler.NextStart.Time
 }
 
 func (in *PodChaos) SetNextStart(t time.Time) {
 	if t.IsZero() {
-		in.Status.ScheduleStatus.NextStart = nil
+		in.Status.Scheduler.NextStart = nil
 		return
 	}
 
-	if in.Status.ScheduleStatus.NextStart == nil {
-		in.Status.ScheduleStatus.NextStart = &metav1.Time{}
+	if in.Status.Scheduler.NextStart == nil {
+		in.Status.Scheduler.NextStart = &metav1.Time{}
 	}
-	in.Status.ScheduleStatus.NextStart.Time = t
+	in.Status.Scheduler.NextStart.Time = t
 }
 
 func (in *PodChaos) GetNextRecover() time.Time {
-	if in.Status.ScheduleStatus.NextRecover == nil {
+	if in.Status.Scheduler.NextRecover == nil {
 		return time.Time{}
 	}
-	return in.Status.ScheduleStatus.NextRecover.Time
+	return in.Status.Scheduler.NextRecover.Time
 }
 
 func (in *PodChaos) SetNextRecover(t time.Time) {
 	if t.IsZero() {
-		in.Status.ScheduleStatus.NextRecover = nil
+		in.Status.Scheduler.NextRecover = nil
 		return
 	}
 
-	if in.Status.ScheduleStatus.NextRecover == nil {
-		in.Status.ScheduleStatus.NextRecover = &metav1.Time{}
+	if in.Status.Scheduler.NextRecover == nil {
+		in.Status.Scheduler.NextRecover = &metav1.Time{}
 	}
-	in.Status.ScheduleStatus.NextRecover.Time = t
+	in.Status.Scheduler.NextRecover.Time = t
 }
 
 // GetScheduler would return the scheduler for chaos

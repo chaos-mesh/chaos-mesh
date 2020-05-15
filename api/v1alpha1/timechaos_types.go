@@ -124,44 +124,44 @@ func (in *TimeChaos) GetDuration() (*time.Duration, error) {
 
 // GetNextStart gets NextStart field of TimeChaos
 func (in *TimeChaos) GetNextStart() time.Time {
-	if in.Status.ScheduleStatus.NextStart == nil {
+	if in.Status.Scheduler.NextStart == nil {
 		return time.Time{}
 	}
-	return in.Status.ScheduleStatus.NextStart.Time
+	return in.Status.Scheduler.NextStart.Time
 }
 
 // SetNextStart sets NextStart field of TimeChaos
 func (in *TimeChaos) SetNextStart(t time.Time) {
 	if t.IsZero() {
-		in.Status.ScheduleStatus.NextStart = nil
+		in.Status.Scheduler.NextStart = nil
 		return
 	}
 
-	if in.Status.ScheduleStatus.NextStart == nil {
-		in.Status.ScheduleStatus.NextStart = &metav1.Time{}
+	if in.Status.Scheduler.NextStart == nil {
+		in.Status.Scheduler.NextStart = &metav1.Time{}
 	}
-	in.Status.ScheduleStatus.NextStart.Time = t
+	in.Status.Scheduler.NextStart.Time = t
 }
 
 // GetNextRecover get NextRecover field of TimeChaos
 func (in *TimeChaos) GetNextRecover() time.Time {
-	if in.Status.ScheduleStatus.NextRecover == nil {
+	if in.Status.Scheduler.NextRecover == nil {
 		return time.Time{}
 	}
-	return in.Status.ScheduleStatus.NextRecover.Time
+	return in.Status.Scheduler.NextRecover.Time
 }
 
 // SetNextRecover sets NextRecover field of TimeChaos
 func (in *TimeChaos) SetNextRecover(t time.Time) {
 	if t.IsZero() {
-		in.Status.ScheduleStatus.NextRecover = nil
+		in.Status.Scheduler.NextRecover = nil
 		return
 	}
 
-	if in.Status.ScheduleStatus.NextRecover == nil {
-		in.Status.ScheduleStatus.NextRecover = &metav1.Time{}
+	if in.Status.Scheduler.NextRecover == nil {
+		in.Status.Scheduler.NextRecover = &metav1.Time{}
 	}
-	in.Status.ScheduleStatus.NextRecover.Time = t
+	in.Status.Scheduler.NextRecover.Time = t
 }
 
 // GetScheduler returns the scheduler of TimeChaos

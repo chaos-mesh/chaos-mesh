@@ -109,12 +109,13 @@ type ChaosStatus struct {
 	Phase  ChaosPhase `json:"phase"`
 	Reason string     `json:"reason,omitempty"`
 
-	ScheduleStatus ScheduleStatus `json:"scheduler,omitempty"`
+	Scheduler ScheduleStatus `json:"scheduler,omitempty"`
 
 	// Experiment records the last experiment state.
 	Experiment ExperimentStatus `json:"experiment"`
 }
 
+// ScheduleStatus is the current status of chaos scheduler.
 type ScheduleStatus struct {
 	// Next time when this action will be applied again
 	// +optional
