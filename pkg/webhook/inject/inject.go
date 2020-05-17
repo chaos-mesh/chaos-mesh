@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/pingcap/chaos-mesh/controllers/metrics"
 	"github.com/pingcap/chaos-mesh/pkg/utils"
 	"github.com/pingcap/chaos-mesh/pkg/webhook/config"
 
@@ -43,7 +44,7 @@ const (
 	StatusInjected = "injected"
 )
 
-func Inject(res *v1beta1.AdmissionRequest, cli client.Client, cfg *config.Config) *v1beta1.AdmissionResponse {
+func Inject(res *v1beta1.AdmissionRequest, cli client.Client, cfg *config.Config, metrics *metrics.ChaosCollector) *v1beta1.AdmissionResponse {
 	var pod corev1.Pod
 	if err := json.Unmarshal(res.Object.Raw, &pod); err != nil {
 		log.Error(err, "Could not unmarshal raw object")
@@ -74,6 +75,9 @@ func Inject(res *v1beta1.AdmissionRequest, cli client.Client, cfg *config.Config
 		}
 	}
 
+	if metrics != nil {
+		metrics.InjectRequired.WithLabelValues(res.Namespace, requiredKey).Inc()
+	}
 	injectionConfig, err := cfg.GetRequestedConfig(pod.Namespace, requiredKey)
 	if err != nil {
 		log.Error(err, "Error getting injection config, permitting launch of pod with no sidecar injected", "injectionConfig",
@@ -114,6 +118,9 @@ func Inject(res *v1beta1.AdmissionRequest, cli client.Client, cfg *config.Config
 	}
 
 	log.Info("AdmissionResponse: patch", "patchBytes", string(patchBytes))
+	if metrics != nil {
+		metrics.Injections.WithLabelValues(res.Namespace, requiredKey).Inc()
+	}
 	return &v1beta1.AdmissionResponse{
 		Allowed: true,
 		Patch:   patchBytes,

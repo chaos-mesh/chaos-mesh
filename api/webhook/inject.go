@@ -17,6 +17,7 @@ import (
 	"context"
 	"net/http"
 
+	"github.com/pingcap/chaos-mesh/controllers/metrics"
 	"github.com/pingcap/chaos-mesh/pkg/webhook/config"
 	"github.com/pingcap/chaos-mesh/pkg/webhook/inject"
 
@@ -35,6 +36,7 @@ type PodInjector struct {
 	client  client.Client
 	decoder *admission.Decoder
 	Config  *config.Config
+	Metrics *metrics.ChaosCollector
 }
 
 func (v *PodInjector) Handle(ctx context.Context, req admission.Request) admission.Response {
@@ -48,7 +50,7 @@ func (v *PodInjector) Handle(ctx context.Context, req admission.Request) admissi
 	log.Info("Get request from pod:", "pod", pod)
 
 	return admission.Response{
-		AdmissionResponse: *inject.Inject(&req.AdmissionRequest, v.client, v.Config),
+		AdmissionResponse: *inject.Inject(&req.AdmissionRequest, v.client, v.Config, v.Metrics),
 	}
 }
 
