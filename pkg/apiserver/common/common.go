@@ -20,6 +20,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
+	"github.com/pingcap/chaos-mesh/pkg/apiserver"
 	"github.com/pingcap/chaos-mesh/pkg/config"
 
 	apiextensionsclientset "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
@@ -81,7 +82,7 @@ func (s *Service) GetPods(c *gin.Context) {
 
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
-			"status": 1001,
+			"status": apiserver.GetResourcesWrong,
 			"message": "get pods wrong",
 			"data": pods,
 		})
@@ -96,7 +97,7 @@ func (s *Service) GetPods(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-			"status": 0,
+			"status": apiserver.Success,
 			"message": "success",
 			"data": pods,
 	})
@@ -112,7 +113,7 @@ func (s *Service) GetNamespaces(c *gin.Context) {
 
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
-			"status": 1002,
+			"status": apiserver.GetResourcesWrong,
 			"message": "get namespaces wrong",
 			"data": namespaceList,
 		})
@@ -126,7 +127,7 @@ func (s *Service) GetNamespaces(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"status": 0,
+		"status": apiserver.Success,
 		"message": "success",
 		"data": namespaceList,
 	})
@@ -142,7 +143,7 @@ func (s *Service) GetKinds(c *gin.Context) {
 	crdList, err := apiExtCli.ApiextensionsV1beta1().CustomResourceDefinitions().List(metav1.ListOptions{})
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
-			"status": 1004,
+			"status": apiserver.GetResourcesWrong,
 			"message": "get CRDs wrong",
 			"data": ChaosKindList,
 		})
@@ -156,7 +157,7 @@ func (s *Service) GetKinds(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"status": 0,
+		"status": apiserver.Success,
 		"message": "success",
 		"data": ChaosKindList,
 	})
