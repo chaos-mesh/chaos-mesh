@@ -161,6 +161,10 @@ func (in *fakeTwoPhaseChaos) GetScheduler() *v1alpha1.SchedulerSpec {
 	return in.Scheduler
 }
 
+func (in *fakeTwoPhaseChaos) GetChaos() *v1alpha1.ChaosInstance {
+	return nil
+}
+
 func (in *fakeTwoPhaseChaos) DeepCopyInto(out *fakeTwoPhaseChaos) {
 	*out = *in
 	out.TypeMeta = in.TypeMeta

@@ -16,6 +16,7 @@ package common
 import (
 	"context"
 	"net/http"
+	"sort"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -30,14 +31,14 @@ import (
 	ctrlconfig "sigs.k8s.io/controller-runtime/pkg/client/config"
 )
 
-// Pod defines the basic information of the pod
+// Pod defines the basic information of a pod
 type Pod struct {
-	Name      string
-	IP        string
-	Namespace string
+	Name      string `json:"name"`
+	IP        string `json:"ip"`
+	Namespace string `json:"namespace"`
 }
 
-// Service defines a handler service for experiments.
+// Service defines a handler service for cluster common objects.
 type Service struct {
 	conf    *config.ChaosServerConfig
 	kubeCli client.Client
@@ -68,26 +69,25 @@ func Register(r *gin.RouterGroup, s *Service) {
 // @Description Get pods from Kubernetes cluster.
 // @Tags common
 // @Produce json
-// @Param ns query string false "namespace"
+// @Param namespace query string false "namespace"
 // @Success 200 {array} Pod
 // @Router /api/common/pods [get]
 // @Failure 500 {object} utils.APIError
 func (s *Service) getPods(c *gin.Context) {
 	listOptions := &client.ListOptions{}
-	ns := c.Query("ns")
+	ns := c.Query("namespace")
 	if ns != "" {
 		listOptions.Namespace = ns
 	}
 
 	var podList v1.PodList
-	err := s.kubeCli.List(context.Background(), &podList, listOptions)
-	if err != nil {
+	if err := s.kubeCli.List(context.Background(), &podList, listOptions); err != nil {
 		c.Status(http.StatusInternalServerError)
 		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
 		return
 	}
 
-	pods := make([]Pod, 0)
+	pods := make([]Pod, 0, len(podList.Items))
 	for _, pod := range podList.Items {
 		pods = append(pods, Pod{
 			Name:      pod.Name,
@@ -107,19 +107,19 @@ func (s *Service) getPods(c *gin.Context) {
 // @Router /api/common/namespaces [get]
 // @Failure 500 {object} utils.APIError
 func (s *Service) getNamespaces(c *gin.Context) {
-	var namespace v1.NamespaceList
-	err := s.kubeCli.List(context.Background(), &namespace)
-	if err != nil {
+	var nsList v1.NamespaceList
+	if err := s.kubeCli.List(context.Background(), &nsList); err != nil {
 		c.Status(http.StatusInternalServerError)
 		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
 		return
 	}
 
-	var namespaces []string
-	for _, ns := range namespace.Items {
+	namespaces := make(sort.StringSlice, 0, len(nsList.Items))
+	for _, ns := range nsList.Items {
 		namespaces = append(namespaces, ns.Name)
 	}
 
+	sort.Sort(namespaces)
 	c.JSON(http.StatusOK, namespaces)
 }
 
@@ -131,8 +131,8 @@ func (s *Service) getNamespaces(c *gin.Context) {
 // @Router /api/common/kinds [get]
 // @Failure 500 {object} utils.APIError
 func (s *Service) getKinds(c *gin.Context) {
-	config, _ := ctrlconfig.GetConfig()
-	apiExtCli, _ := apicli.NewForConfig(config)
+	conf, _ := ctrlconfig.GetConfig()
+	apiExtCli, _ := apicli.NewForConfig(conf)
 
 	crdList, err := apiExtCli.ApiextensionsV1beta1().CustomResourceDefinitions().List(metav1.ListOptions{})
 	if err != nil {
@@ -141,12 +141,12 @@ func (s *Service) getKinds(c *gin.Context) {
 		return
 	}
 
-	var kinds []string
+	kinds := make(sort.StringSlice, 0, len(crdList.Items))
 	for _, crd := range crdList.Items {
 		if strings.Contains(crd.Spec.Names.Kind, "Chaos") == true {
 			kinds = append(kinds, crd.Spec.Names.Kind)
 		}
 	}
-
+	sort.Sort(kinds)
 	c.JSON(http.StatusOK, kinds)
 }
