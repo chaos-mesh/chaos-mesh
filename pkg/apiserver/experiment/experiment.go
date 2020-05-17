@@ -169,18 +169,10 @@ func (s *Service) getKernelChaosState (stateInfo map[string]int) error {
 		return err
 	}
 	for _, chaos := range chaosList.Items {
-		stateInfo["Total"]++
-		switch chaos.Status.ChaosStatus.Experiment.Phase {
-		case v1alpha1.ExperimentPhaseRunning:
-			stateInfo["running"]++
-		case v1alpha1.ExperimentPhasePaused:
-			stateInfo["Paused"]++
-		case v1alpha1.ExperimentPhaseFailed:
-			stateInfo["Failed"]++
-		case v1alpha1.ExperimentPhaseFinished:
-			stateInfo["Finished"]++
-		}
+		stateInfo[string(chaos.Status.ChaosStatus.Experiment.Phase)]++
 	}
+	stateInfo["Total"] += len(chaosList.Items)
+
 	return nil
 }
 
@@ -219,7 +211,7 @@ func (s *Service) state (c *gin.Context) {
 		"message": "failed to get chaos state",
 		"data": make(map[string]int),
 	}
-
+	
 	err := s.getPodChaosState(data)
 	if err != nil {
 		c.JSON(http.StatusOK, getChaosWrong)
