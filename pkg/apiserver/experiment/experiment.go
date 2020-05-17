@@ -20,6 +20,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/pingcap/chaos-mesh/api/v1alpha1"
+	"github.com/pingcap/chaos-mesh/pkg/apiserver"
 	"github.com/pingcap/chaos-mesh/pkg/config"
 	"github.com/pingcap/chaos-mesh/pkg/core"
 
@@ -207,11 +208,11 @@ func (s *Service) state (c *gin.Context) {
 	data["Failed"] = 0
 	data["Finished"] = 0
 	getChaosWrong := gin.H{
-		"status": 1003,
+		"status": apiserver.GetResourcesWrong,
 		"message": "failed to get chaos state",
 		"data": make(map[string]int),
 	}
-	
+
 	err := s.getPodChaosState(data)
 	if err != nil {
 		c.JSON(http.StatusOK, getChaosWrong)
@@ -244,7 +245,7 @@ func (s *Service) state (c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"status": 0,
+		"status": apiserver.Success,
 		"message": "success",
 		"data": data,
 	})
