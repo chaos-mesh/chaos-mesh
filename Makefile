@@ -216,8 +216,12 @@ generate: controller-gen
 yaml: manifests ensure-kustomize
 	$(KUSTOMIZE_BIN) build config/default > manifests/crd.yaml
 
+# Generate Go files from Chaos Mesh proto files.
+proto:
+	hack/genproto.sh
+
 update-install-script:
-	./hack/update_install_script.sh
+	hack/update_install_script.sh
 
 e2e-build:
 	$(GO) build -trimpath  -o test/image/e2e/bin/ginkgo github.com/onsi/ginkgo/ginkgo
@@ -265,5 +269,5 @@ install-local-coverage-tools:
 .PHONY: all build test install manifests groupimports fmt vet tidy image \
 	binary docker-push lint generate controller-gen yaml \
 	manager chaosfs chaosdaemon chaos-server ensure-all \
-	dashboard dashboard-server-frontend \
-	gosec-scan
+	dashboard dashboard-server-frontend gosec-scan \
+	proto
