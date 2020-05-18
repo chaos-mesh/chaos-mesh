@@ -25,7 +25,6 @@ import (
 
 	apiextensionsclientset "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	//"k8s.io/apimachinery/pkg/fields"
 	v1 "k8s.io/api/core/v1"
 	ctrlconfig "sigs.k8s.io/controller-runtime/pkg/client/config"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -141,11 +140,8 @@ func (s *Service) GetKinds(c *gin.Context) {
 	config, _ := ctrlconfig.GetConfig()
 	apiExtCli, _ := apiextensionsclientset.NewForConfig(config)
 
-	//selector := fields.ParseSelectorOrDie("spec.group==pingcap.com")
+	crdList, err := apiExtCli.ApiextensionsV1beta1().CustomResourceDefinitions().List(metav1.ListOptions{})
 
-	crdList, err := apiExtCli.ApiextensionsV1beta1().CustomResourceDefinitions().List(metav1.ListOptions{
-		//FieldSelector: selector.String(),
-	})
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"status": statuscode.GetResourcesWrong,
