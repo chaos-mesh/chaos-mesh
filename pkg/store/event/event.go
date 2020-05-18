@@ -14,6 +14,7 @@
 package event
 
 import (
+	"fmt"
 	"context"
 	"time"
 
@@ -44,14 +45,40 @@ type eventStore struct {
 	db *dbstore.DB
 }
 
-// TODO: implement core.EventStore interface
-func (e *eventStore) List(context.Context) ([]*core.Event, error) { return nil, nil }
+// List returns the list of events
+func (e *eventStore) List(_ context.Context) ([]*core.Event, error) {
+	var resList []core.Event
+	eventList := make([]*core.Event, 0)
+
+	if err := e.db.Find(&resList).Error; err != nil && !gorm.IsRecordNotFoundError(err) {
+		return nil, err
+	}
+
+	for _, et := range(resList) {
+		/*pods := make([]*core.PodRecord,0)
+		if err := e.db.Where(
+			"event_id = ?", et.ID).
+			Find(&pods).Error; err != nil && !gorm.IsRecordNotFoundError(err) {
+			return nil, err
+		}
+		for _, pod := range(pods) {
+			et.Pods = append(et.Pods, pod)
+		}*/
+		eventList = append(eventList, &et)
+	}
+
+	return eventList, nil
+}
+
 func (e *eventStore) ListByExperiment(context.Context, string, string) ([]*core.Event, error) {
 	return nil, nil
 }
-func (e *eventStore) ListByPod(context.Context, string, string) ([]*core.Event, error) {
+
+// ListByPod returns the list of events according to the pod
+func (e *eventStore) ListByPod(_ context.Context, namespace string, name string) ([]*core.Event, error) {
 	return nil, nil
 }
+
 func (e *eventStore) Find(context.Context, int64) (*core.Event, error) { return nil, nil }
 
 func (e *eventStore) FindByExperimentAndStartTime(

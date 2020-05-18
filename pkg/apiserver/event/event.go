@@ -14,7 +14,10 @@
 package event
 
 import (
+	"context"
 	"github.com/gin-gonic/gin"
+	statuscode "github.com/pingcap/chaos-mesh/pkg/apiserver/status_code"
+	"net/http"
 
 	"github.com/pingcap/chaos-mesh/pkg/config"
 	"github.com/pingcap/chaos-mesh/pkg/core"
@@ -47,11 +50,45 @@ func NewService(
 
 // Register mounts our HTTP handler on the mux.
 func Register(r *gin.RouterGroup, s *Service) {
-	endpoint := r.Group("/event")
+	endpoint := r.Group("/events")
 
 	// TODO: add more api handlers
 	endpoint.GET("/all", s.listEvents)
 }
 
-// TODO: need to be implemented
-func (s *Service) listEvents(c *gin.Context) {}
+func (s *Service) listEvents(c *gin.Context) {
+	name := c.Query("name")
+	namespace := c.Query("namespace")
+	eventList := make([]*core.Event, 0)
+
+	if name == "" && namespace == "" {
+		eventList, err := s.event.List(context.Background())
+		if err != nil {
+			c.JSON(http.StatusOK, gin.H{
+				"status": statuscode.GetResourcesFromDBWrong,
+				"message": "get events wrong",
+				"data": eventList,
+			})
+			return
+		}
+	} else if (name != "" && namespace == "") || (name == "" && namespace != "") {
+		c.JSON(http.StatusOK, gin.H{
+			"status": statuscode.IncompleteField,
+			"message": "one of name and namespace is empty",
+			"data": eventList,
+		})
+		return
+	} else {
+		eventList, err := s.event.ListByPod(context.Background(), namespace, name)
+		if err != nil {
+			c.JSON(http.StatusOK, gin.H{
+				"status": statuscode.GetResourcesFromDBWrong,
+				"message": "get events wrong",
+				"data": eventList,
+			})
+			return
+		}
+	}
+
+	c.JSON(http.StatusOK,gin.H{"name":name})
+}

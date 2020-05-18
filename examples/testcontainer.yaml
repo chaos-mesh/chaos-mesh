@@ -1,0 +1,14 @@
+apiVersion: pingcap.com/v1alpha1
+kind: PodChaos
+metadata:
+  name: container-kill-example
+  namespace: pingcap
+spec:
+  action: container-kill
+  mode: one
+  containerName: "tidb-scheduler"
+  selector:
+    labelSelectors:
+      "app.kubernetes.io/component": "scheduler"
+  scheduler:
+    cron: "@every 30s"
