@@ -160,8 +160,9 @@ func main() {
 	}
 
 	if err = (&controllers.KernelChaosReconciler{
-		Client: mgr.GetClient(),
-		Log:    ctrl.Log.WithName("controllers").WithName("KernelChaos"),
+		Client:        mgr.GetClient(),
+		EventRecorder: mgr.GetEventRecorderFor("kernelchaos-controller"),
+		Log:           ctrl.Log.WithName("controllers").WithName("KernelChaos"),
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "KernelChaos")
 		os.Exit(1)

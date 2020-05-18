@@ -70,8 +70,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	if chaos.IsDeleted() {
 		// This chaos was deleted
 		r.Log.Info("Removing self")
-		err = r.Recover(ctx, req, chaos)
-		if err != nil {
+		if err = r.Recover(ctx, req, chaos); err != nil {
 			r.Log.Error(err, "failed to recover chaos")
 			return ctrl.Result{Requeue: true}, err
 		}
@@ -80,10 +79,12 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		if status.Experiment.Phase == v1alpha1.ExperimentPhaseRunning {
 			r.Log.Info("Pausing")
 
-			err = r.Recover(ctx, req, chaos)
-			if err != nil {
+			if err = r.Recover(ctx, req, chaos); err != nil {
 				r.Log.Error(err, "failed to pause chaos")
 				return ctrl.Result{Requeue: true}, err
+			}
+			status.Experiment.EndTime = &metav1.Time{
+				Time: time.Now(),
 			}
 		}
 		status.Experiment.Phase = v1alpha1.ExperimentPhasePaused
@@ -94,8 +95,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		// Start failure action
 		r.Log.Info("Performing Action")
 
-		err = r.Apply(ctx, req, chaos)
-		if err != nil {
+		if err = r.Apply(ctx, req, chaos); err != nil {
 			r.Log.Error(err, "failed to apply chaos action")
 
 			status.Experiment.Phase = v1alpha1.ExperimentPhaseFailed

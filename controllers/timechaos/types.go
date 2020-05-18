@@ -20,6 +20,7 @@ import (
 	"time"
 
 	"github.com/go-logr/logr"
+	"github.com/hashicorp/go-multierror"
 	"golang.org/x/sync/errgroup"
 	v1 "k8s.io/api/core/v1"
 	k8serror "k8s.io/apimachinery/pkg/api/errors"
@@ -31,7 +32,6 @@ import (
 
 	"github.com/pingcap/chaos-mesh/api/v1alpha1"
 	"github.com/pingcap/chaos-mesh/controllers/common"
-	"github.com/pingcap/chaos-mesh/controllers/reconciler"
 	"github.com/pingcap/chaos-mesh/controllers/twophase"
 	chaosdaemon "github.com/pingcap/chaos-mesh/pkg/chaosdaemon/pb"
 	"github.com/pingcap/chaos-mesh/pkg/utils"
@@ -77,7 +77,7 @@ func (r *Reconciler) scheduleTimeChaos(timechaos *v1alpha1.TimeChaos, req ctrl.R
 }
 
 // Apply applies time-chaos
-func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos reconciler.InnerObject) error {
+func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.InnerObject) error {
 	timechaos, ok := chaos.(*v1alpha1.TimeChaos)
 	if !ok {
 		err := errors.New("chaos is not timechaos")
@@ -94,14 +94,12 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos reconcil
 		return err
 	}
 
-	err = r.applyAllPods(ctx, pods, timechaos)
-	if err != nil {
+	if err = r.applyAllPods(ctx, pods, timechaos); err != nil {
 		r.Log.Error(err, "failed to apply chaos on all pods")
 		return err
 	}
 
-	timechaos.Status.Experiment.Pods = []v1alpha1.PodStatus{}
-
+	timechaos.Status.Experiment.Pods = make([]v1alpha1.PodStatus, 0, len(pods))
 	for _, pod := range pods {
 		ps := v1alpha1.PodStatus{
 			Namespace: pod.Namespace,
@@ -118,7 +116,7 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos reconcil
 }
 
 // Recover means the reconciler recovers the chaos action
-func (r *Reconciler) Recover(ctx context.Context, req ctrl.Request, chaos reconciler.InnerObject) error {
+func (r *Reconciler) Recover(ctx context.Context, req ctrl.Request, chaos v1alpha1.InnerObject) error {
 	timechaos, ok := chaos.(*v1alpha1.TimeChaos)
 	if !ok {
 		err := errors.New("chaos is not TimeChaos")
@@ -126,8 +124,7 @@ func (r *Reconciler) Recover(ctx context.Context, req ctrl.Request, chaos reconc
 		return err
 	}
 
-	err := r.cleanFinalizersAndRecover(ctx, timechaos)
-	if err != nil {
+	if err := r.cleanFinalizersAndRecover(ctx, timechaos); err != nil {
 		return err
 	}
 	r.Event(timechaos, v1.EventTypeNormal, utils.EventChaosRecovered, "")
@@ -136,14 +133,13 @@ func (r *Reconciler) Recover(ctx context.Context, req ctrl.Request, chaos reconc
 }
 
 func (r *Reconciler) cleanFinalizersAndRecover(ctx context.Context, chaos *v1alpha1.TimeChaos) error {
-	if len(chaos.Finalizers) == 0 {
-		return nil
-	}
+	var result error
 
 	for _, key := range chaos.Finalizers {
 		ns, name, err := cache.SplitMetaNamespaceKey(key)
 		if err != nil {
-			return err
+			result = multierror.Append(result, err)
+			continue
 		}
 
 		var pod v1.Pod
@@ -154,7 +150,8 @@ func (r *Reconciler) cleanFinalizersAndRecover(ctx context.Context, chaos *v1alp
 
 		if err != nil {
 			if !k8serror.IsNotFound(err) {
-				return err
+				result = multierror.Append(result, err)
+				continue
 			}
 
 			r.Log.Info("Pod not found", "namespace", ns, "name", name)
@@ -164,13 +161,20 @@ func (r *Reconciler) cleanFinalizersAndRecover(ctx context.Context, chaos *v1alp
 
 		err = r.recoverPod(ctx, &pod, chaos)
 		if err != nil {
-			return err
+			result = multierror.Append(result, err)
+			continue
 		}
 
 		chaos.Finalizers = utils.RemoveFromFinalizer(chaos.Finalizers, key)
 	}
 
-	return nil
+	if chaos.Annotations[common.AnnotationCleanFinalizer] == common.AnnotationCleanFinalizerForced {
+		r.Log.Info("Force cleanup all finalizers", "chaos", chaos)
+		chaos.Finalizers = chaos.Finalizers[:0]
+		return nil
+	}
+
+	return result
 }
 
 func (r *Reconciler) recoverPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.TimeChaos) error {
@@ -223,7 +227,7 @@ func (r *Reconciler) recoverContainer(ctx context.Context, client chaosdaemon.Ch
 }
 
 // Object would return the instance of chaos
-func (r *Reconciler) Object() reconciler.InnerObject {
+func (r *Reconciler) Object() v1alpha1.InnerObject {
 	return &v1alpha1.TimeChaos{}
 }
 

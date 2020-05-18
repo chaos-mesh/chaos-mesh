@@ -16,10 +16,10 @@ package controllers
 import (
 	"github.com/go-logr/logr"
 
+	"github.com/pingcap/chaos-mesh/api/v1alpha1"
 	"github.com/pingcap/chaos-mesh/controllers/kernelchaos"
 
-	v1alpha1 "github.com/pingcap/chaos-mesh/api/v1alpha1"
-
+	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
@@ -28,6 +28,7 @@ import (
 type KernelChaosReconciler struct {
 	client.Client
 	Log logr.Logger
+	record.EventRecorder
 }
 
 // +kubebuilder:rbac:groups=pingcap.com,resources=kernelchaos,verbs=get;list;watch;create;update;patch;delete
@@ -38,8 +39,9 @@ func (r *KernelChaosReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error)
 	logger := r.Log.WithValues("reconciler", "kernelchaos")
 
 	reconciler := kernelchaos.Reconciler{
-		Client: r.Client,
-		Log:    logger,
+		Client:        r.Client,
+		Log:           logger,
+		EventRecorder: r.EventRecorder,
 	}
 
 	return reconciler.Reconcile(req)

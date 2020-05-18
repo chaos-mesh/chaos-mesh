@@ -18,7 +18,6 @@ import (
 
 	"github.com/pingcap/chaos-mesh/pkg/store/event"
 	"github.com/pingcap/chaos-mesh/pkg/store/experiment"
-	"github.com/pingcap/chaos-mesh/pkg/store/podrecord"
 )
 
 // Module includes the providers provided by store.
@@ -26,5 +25,4 @@ var Module = fx.Options(
 	fx.Provide(
 		event.NewStore,
 		experiment.NewStore,
-		podrecord.NewStore,
 	))

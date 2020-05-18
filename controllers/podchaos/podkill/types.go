@@ -25,7 +25,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/pingcap/chaos-mesh/api/v1alpha1"
-	"github.com/pingcap/chaos-mesh/controllers/reconciler"
 	"github.com/pingcap/chaos-mesh/controllers/twophase"
 	"github.com/pingcap/chaos-mesh/pkg/utils"
 )
@@ -40,8 +39,7 @@ type Reconciler struct {
 	Log logr.Logger
 }
 
-func newReconciler(c client.Client, log logr.Logger, req ctrl.Request,
-	recorder record.EventRecorder) *Reconciler {
+func newReconciler(c client.Client, log logr.Logger, recorder record.EventRecorder) *Reconciler {
 	return &Reconciler{
 		Client:        c,
 		EventRecorder: recorder,
@@ -50,14 +48,13 @@ func newReconciler(c client.Client, log logr.Logger, req ctrl.Request,
 }
 
 // NewTwoPhaseReconciler would create Reconciler for twophase package
-func NewTwoPhaseReconciler(c client.Client, log logr.Logger, req ctrl.Request,
-	recorder record.EventRecorder) *twophase.Reconciler {
-	r := newReconciler(c, log, req, recorder)
+func NewTwoPhaseReconciler(c client.Client, log logr.Logger, recorder record.EventRecorder) *twophase.Reconciler {
+	r := newReconciler(c, log, recorder)
 	return twophase.NewReconciler(r, r.Client, r.Log)
 }
 
 // Apply implements the reconciler.InnerReconciler.Apply
-func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos reconciler.InnerObject) error {
+func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.InnerObject) error {
 	podchaos, ok := chaos.(*v1alpha1.PodChaos)
 	if !ok {
 		err := errors.New("chaos is not PodChaos")
@@ -89,7 +86,7 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos reconcil
 	if err := g.Wait(); err != nil {
 		return err
 	}
-	podchaos.Status.Experiment.Pods = []v1alpha1.PodStatus{}
+	podchaos.Status.Experiment.Pods = make([]v1alpha1.PodStatus, 0, len(pods))
 	for _, pod := range pods {
 		ps := v1alpha1.PodStatus{
 			Namespace: pod.Namespace,
@@ -108,11 +105,11 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos reconcil
 }
 
 // Recover implements the reconciler.InnerReconciler.Recover
-func (r *Reconciler) Recover(ctx context.Context, req ctrl.Request, obj reconciler.InnerObject) error {
+func (r *Reconciler) Recover(ctx context.Context, req ctrl.Request, obj v1alpha1.InnerObject) error {
 	return nil
 }
 
 // Object implements the reconciler.InnerReconciler.Object
-func (r *Reconciler) Object() reconciler.InnerObject {
+func (r *Reconciler) Object() v1alpha1.InnerObject {
 	return &v1alpha1.PodChaos{}
 }

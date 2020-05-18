@@ -35,7 +35,6 @@ import (
 	"github.com/pingcap/chaos-mesh/controllers/common"
 	"github.com/pingcap/chaos-mesh/controllers/networkchaos/ipset"
 	"github.com/pingcap/chaos-mesh/controllers/networkchaos/tc"
-	"github.com/pingcap/chaos-mesh/controllers/reconciler"
 	"github.com/pingcap/chaos-mesh/controllers/twophase"
 	pb "github.com/pingcap/chaos-mesh/pkg/chaosdaemon/pb"
 	"github.com/pingcap/chaos-mesh/pkg/utils"
@@ -87,12 +86,12 @@ type Reconciler struct {
 }
 
 // Object implements the reconciler.InnerReconciler.Object
-func (r *Reconciler) Object() reconciler.InnerObject {
+func (r *Reconciler) Object() v1alpha1.InnerObject {
 	return &v1alpha1.NetworkChaos{}
 }
 
 // Apply implements the reconciler.InnerReconciler.Apply
-func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos reconciler.InnerObject) error {
+func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.InnerObject) error {
 	r.Log.Info("netem Apply", "req", req, "chaos", chaos)
 
 	networkchaos, ok := chaos.(*v1alpha1.NetworkChaos)
@@ -142,7 +141,7 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos reconcil
 		}
 	}
 
-	networkchaos.Status.Experiment.Pods = []v1alpha1.PodStatus{}
+	networkchaos.Status.Experiment.Pods = make([]v1alpha1.PodStatus, 0, len(pods))
 	for _, pod := range pods {
 		ps := v1alpha1.PodStatus{
 			Namespace: pod.Namespace,
@@ -163,7 +162,7 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos reconcil
 }
 
 // Recover implements the reconciler.InnerReconciler.Recover
-func (r *Reconciler) Recover(ctx context.Context, req ctrl.Request, chaos reconciler.InnerObject) error {
+func (r *Reconciler) Recover(ctx context.Context, req ctrl.Request, chaos v1alpha1.InnerObject) error {
 	networkchaos, ok := chaos.(*v1alpha1.NetworkChaos)
 	if !ok {
 		err := errors.New("chaos is not NetworkChaos")
@@ -171,8 +170,7 @@ func (r *Reconciler) Recover(ctx context.Context, req ctrl.Request, chaos reconc
 		return err
 	}
 
-	err := r.cleanFinalizersAndRecover(ctx, networkchaos)
-	if err != nil {
+	if err := r.cleanFinalizersAndRecover(ctx, networkchaos); err != nil {
 		return err
 	}
 	r.Event(networkchaos, v1.EventTypeNormal, utils.EventChaosRecovered, "")

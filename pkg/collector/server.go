@@ -47,7 +47,6 @@ func NewServer(
 	conf *config.ChaosServerConfig,
 	archive core.ExperimentStore,
 	event core.EventStore,
-	podRecord core.PodRecordStore,
 ) (*Server, client.Client) {
 	var err error
 	s := &Server{}
