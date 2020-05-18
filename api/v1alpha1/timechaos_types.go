@@ -72,14 +72,6 @@ type TimeChaosSpec struct {
 
 	// Scheduler defines some schedule rules to control the running time of the chaos experiment about time.
 	Scheduler *SchedulerSpec `json:"scheduler,omitempty"`
-
-	// Next time when this action will be applied again
-	// +optional
-	NextStart *metav1.Time `json:"nextStart,omitempty"`
-
-	// Next time when this action will be recovered
-	// +optional
-	NextRecover *metav1.Time `json:"nextRecover,omitempty"`
 }
 
 // SetDefaultValue will set default value for empty fields
@@ -128,44 +120,44 @@ func (in *TimeChaos) GetDuration() (*time.Duration, error) {
 
 // GetNextStart gets NextStart field of TimeChaos
 func (in *TimeChaos) GetNextStart() time.Time {
-	if in.Spec.NextStart == nil {
+	if in.Status.Scheduler.NextStart == nil {
 		return time.Time{}
 	}
-	return in.Spec.NextStart.Time
+	return in.Status.Scheduler.NextStart.Time
 }
 
 // SetNextStart sets NextStart field of TimeChaos
 func (in *TimeChaos) SetNextStart(t time.Time) {
 	if t.IsZero() {
-		in.Spec.NextStart = nil
+		in.Status.Scheduler.NextStart = nil
 		return
 	}
 
-	if in.Spec.NextStart == nil {
-		in.Spec.NextStart = &metav1.Time{}
+	if in.Status.Scheduler.NextStart == nil {
+		in.Status.Scheduler.NextStart = &metav1.Time{}
 	}
-	in.Spec.NextStart.Time = t
+	in.Status.Scheduler.NextStart.Time = t
 }
 
 // GetNextRecover get NextRecover field of TimeChaos
 func (in *TimeChaos) GetNextRecover() time.Time {
-	if in.Spec.NextRecover == nil {
+	if in.Status.Scheduler.NextRecover == nil {
 		return time.Time{}
 	}
-	return in.Spec.NextRecover.Time
+	return in.Status.Scheduler.NextRecover.Time
 }
 
 // SetNextRecover sets NextRecover field of TimeChaos
 func (in *TimeChaos) SetNextRecover(t time.Time) {
 	if t.IsZero() {
-		in.Spec.NextRecover = nil
+		in.Status.Scheduler.NextRecover = nil
 		return
 	}
 
-	if in.Spec.NextRecover == nil {
-		in.Spec.NextRecover = &metav1.Time{}
+	if in.Status.Scheduler.NextRecover == nil {
+		in.Status.Scheduler.NextRecover = &metav1.Time{}
 	}
-	in.Spec.NextRecover.Time = t
+	in.Status.Scheduler.NextRecover.Time = t
 }
 
 // GetScheduler returns the scheduler of TimeChaos

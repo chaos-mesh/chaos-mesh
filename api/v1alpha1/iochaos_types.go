@@ -132,14 +132,6 @@ type IoChaosSpec struct {
 	// ConfigName defines the config name which used to inject pod.
 	// +required
 	ConfigName string `json:"configName"`
-
-	// Next time when this action will be applied again.
-	// +optional
-	NextStart *metav1.Time `json:"nextStart,omitempty"`
-
-	// Next time when this action will be recovered.
-	// +optional
-	NextRecover *metav1.Time `json:"nextRecover,omitempty"`
 }
 
 func (in *IoChaosSpec) GetSelector() SelectorSpec {
@@ -200,41 +192,41 @@ func (in *IoChaos) GetDuration() (*time.Duration, error) {
 }
 
 func (in *IoChaos) GetNextStart() time.Time {
-	if in.Spec.NextStart == nil {
+	if in.Status.Scheduler.NextStart == nil {
 		return time.Time{}
 	}
-	return in.Spec.NextStart.Time
+	return in.Status.Scheduler.NextStart.Time
 }
 
 func (in *IoChaos) SetNextStart(t time.Time) {
 	if t.IsZero() {
-		in.Spec.NextStart = nil
+		in.Status.Scheduler.NextStart = nil
 		return
 	}
 
-	if in.Spec.NextStart == nil {
-		in.Spec.NextStart = &metav1.Time{}
+	if in.Status.Scheduler.NextStart == nil {
+		in.Status.Scheduler.NextStart = &metav1.Time{}
 	}
-	in.Spec.NextStart.Time = t
+	in.Status.Scheduler.NextStart.Time = t
 }
 
 func (in *IoChaos) GetNextRecover() time.Time {
-	if in.Spec.NextRecover == nil {
+	if in.Status.Scheduler.NextRecover == nil {
 		return time.Time{}
 	}
-	return in.Spec.NextRecover.Time
+	return in.Status.Scheduler.NextRecover.Time
 }
 
 func (in *IoChaos) SetNextRecover(t time.Time) {
 	if t.IsZero() {
-		in.Spec.NextRecover = nil
+		in.Status.Scheduler.NextRecover = nil
 		return
 	}
 
-	if in.Spec.NextRecover == nil {
-		in.Spec.NextRecover = &metav1.Time{}
+	if in.Status.Scheduler.NextRecover == nil {
+		in.Status.Scheduler.NextRecover = &metav1.Time{}
 	}
-	in.Spec.NextRecover.Time = t
+	in.Status.Scheduler.NextRecover.Time = t
 }
 
 // GetScheduler would return the scheduler for chaos

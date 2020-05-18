@@ -41,14 +41,6 @@ spec:
               description: 'Mode defines the mode to run chaos action. Supported mode:
                 one / all / fixed / fixed-percent / random-max-percent'
               type: string
-            nextRecover:
-              description: Next time when this action will be recovered
-              format: date-time
-              type: string
-            nextStart:
-              description: Next time when this action will be applied again
-              format: date-time
-              type: string
             scheduler:
               description: Scheduler defines some schedule rules to control the running
                 time of the chaos experiment about time.
@@ -241,6 +233,17 @@ spec:
               type: string
             reason:
               type: string
+            scheduler:
+              properties:
+                nextRecover:
+                  description: Next time when this action will be recovered
+                  format: date-time
+                  type: string
+                nextStart:
+                  description: Next time when this action will be applied again
+                  format: date-time
+                  type: string
+              type: object
           required:
           - experiment
           - phase
