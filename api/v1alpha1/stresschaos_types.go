@@ -76,14 +76,6 @@ type StressChaosSpec struct {
 	// Scheduler defines some schedule rules to control the running time of the chaos experiment about time.
 	// +optional
 	Scheduler *SchedulerSpec `json:"scheduler,omitempty"`
-
-	// Next time when this action will be applied again
-	// +optional
-	NextStart *metav1.Time `json:"nextStart,omitempty"`
-
-	// Next time when this action will be recovered
-	// +optional
-	NextRecover *metav1.Time `json:"nextRecover,omitempty"`
 }
 
 // GetSelector is a getter for Selector (for implementing SelectSpec)
@@ -133,44 +125,44 @@ func (in *StressChaos) GetDuration() (*time.Duration, error) {
 
 // GetNextStart gets NextStart field of StressChaos
 func (in *StressChaos) GetNextStart() time.Time {
-	if in.Spec.NextStart == nil {
+	if in.Status.Scheduler.NextStart == nil {
 		return time.Time{}
 	}
-	return in.Spec.NextStart.Time
+	return in.Status.Scheduler.NextStart.Time
 }
 
 // SetNextStart sets NextStart field of StressChaos
 func (in *StressChaos) SetNextStart(t time.Time) {
 	if t.IsZero() {
-		in.Spec.NextStart = nil
+		in.Status.Scheduler.NextStart = nil
 		return
 	}
 
-	if in.Spec.NextStart == nil {
-		in.Spec.NextStart = &metav1.Time{}
+	if in.Status.Scheduler.NextStart == nil {
+		in.Status.Scheduler.NextStart = &metav1.Time{}
 	}
-	in.Spec.NextStart.Time = t
+	in.Status.Scheduler.NextStart.Time = t
 }
 
 // GetNextRecover get NextRecover field of StressChaos
 func (in *StressChaos) GetNextRecover() time.Time {
-	if in.Spec.NextRecover == nil {
+	if in.Status.Scheduler.NextRecover == nil {
 		return time.Time{}
 	}
-	return in.Spec.NextRecover.Time
+	return in.Status.Scheduler.NextRecover.Time
 }
 
 // SetNextRecover sets NextRecover field of StressChaos
 func (in *StressChaos) SetNextRecover(t time.Time) {
 	if t.IsZero() {
-		in.Spec.NextRecover = nil
+		in.Status.Scheduler.NextRecover = nil
 		return
 	}
 
-	if in.Spec.NextRecover == nil {
-		in.Spec.NextRecover = &metav1.Time{}
+	if in.Status.Scheduler.NextRecover == nil {
+		in.Status.Scheduler.NextRecover = &metav1.Time{}
 	}
-	in.Spec.NextRecover.Time = t
+	in.Status.Scheduler.NextRecover.Time = t
 }
 
 // GetScheduler returns the scheduler of StressChaos

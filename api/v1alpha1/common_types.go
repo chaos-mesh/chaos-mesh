@@ -111,8 +111,21 @@ type ChaosStatus struct {
 	Phase  ChaosPhase `json:"phase"`
 	Reason string     `json:"reason,omitempty"`
 
+	Scheduler ScheduleStatus `json:"scheduler,omitempty"`
+
 	// Experiment records the last experiment state.
 	Experiment ExperimentStatus `json:"experiment"`
+}
+
+// ScheduleStatus is the current status of chaos scheduler.
+type ScheduleStatus struct {
+	// Next time when this action will be applied again
+	// +optional
+	NextStart *metav1.Time `json:"nextStart,omitempty"`
+
+	// Next time when this action will be recovered
+	// +optional
+	NextRecover *metav1.Time `json:"nextRecover,omitempty"`
 }
 
 // ExperimentPhase is the current status of chaos experiment.
