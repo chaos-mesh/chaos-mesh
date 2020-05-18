@@ -81,7 +81,7 @@ func (s *Service) getPodChaosState (stateInfo map[string]int) error {
 		stateInfo["Total"]++
 		switch chaos.Status.ChaosStatus.Experiment.Phase {
 		case v1alpha1.ExperimentPhaseRunning:
-			stateInfo["running"]++
+			stateInfo["Running"]++
 		case v1alpha1.ExperimentPhasePaused:
 			stateInfo["Paused"]++
 		case v1alpha1.ExperimentPhaseFailed:
@@ -104,7 +104,7 @@ func (s *Service) getIoChaosState (stateInfo map[string]int) error {
 		stateInfo["Total"]++
 		switch chaos.Status.ChaosStatus.Experiment.Phase {
 		case v1alpha1.ExperimentPhaseRunning:
-			stateInfo["running"]++
+			stateInfo["Running"]++
 		case v1alpha1.ExperimentPhasePaused:
 			stateInfo["Paused"]++
 		case v1alpha1.ExperimentPhaseFailed:
@@ -127,7 +127,7 @@ func (s *Service) getNetworkChaosState (stateInfo map[string]int) error {
 		stateInfo["Total"]++
 		switch chaos.Status.ChaosStatus.Experiment.Phase {
 		case v1alpha1.ExperimentPhaseRunning:
-			stateInfo["running"]++
+			stateInfo["Running"]++
 		case v1alpha1.ExperimentPhasePaused:
 			stateInfo["Paused"]++
 		case v1alpha1.ExperimentPhaseFailed:
@@ -188,7 +188,7 @@ func (s *Service) getStressChaosState (stateInfo map[string]int) error {
 		stateInfo["Total"]++
 		switch chaos.Status.ChaosStatus.Experiment.Phase {
 		case v1alpha1.ExperimentPhaseRunning:
-			stateInfo["running"]++
+			stateInfo["Running"]++
 		case v1alpha1.ExperimentPhasePaused:
 			stateInfo["Paused"]++
 		case v1alpha1.ExperimentPhaseFailed:
