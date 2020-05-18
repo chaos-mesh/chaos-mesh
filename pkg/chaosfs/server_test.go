@@ -17,6 +17,7 @@ import (
 	"context"
 	"errors"
 
+	"github.com/golang/protobuf/ptypes/empty"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
@@ -162,8 +163,34 @@ var _ = Describe("server", func() {
 				Random: true,
 				Pct:    100,
 			})
+			s.Injected(context.TODO(), &empty.Empty{})
 			_, ok = faultMap.Load(faultInjectMethod)
 			Expect(ok).To(Equal(true))
+		})
+	})
+
+	Context("Injected", func() {
+		It("should return false", func() {
+			s := &server{}
+			faultMap.Range(func(k, v interface{}) bool {
+				faultMap.Delete(k)
+				return true
+			})
+
+			resp, _ := s.Injected(context.TODO(), &empty.Empty{})
+			Expect(resp.Injected).To(Equal(false))
+		})
+
+		It("should return true", func() {
+			s := &server{}
+			faultMap.Range(func(k, v interface{}) bool {
+				faultMap.Delete(k)
+				return true
+			})
+
+			faultMap.Store(faultInjectMethod, &pb.Request{Delay: 1000})
+			resp, _ := s.Injected(context.TODO(), &empty.Empty{})
+			Expect(resp.Injected).To(Equal(true))
 		})
 	})
 })
