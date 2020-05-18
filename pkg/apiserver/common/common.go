@@ -20,11 +20,12 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/pingcap/chaos-mesh/pkg/apiserver"
+	statuscode "github.com/pingcap/chaos-mesh/pkg/apiserver/status_code"
 	"github.com/pingcap/chaos-mesh/pkg/config"
 
 	apiextensionsclientset "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/fields"
 	v1 "k8s.io/api/core/v1"
 	ctrlconfig "sigs.k8s.io/controller-runtime/pkg/client/config"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -82,7 +83,7 @@ func (s *Service) GetPods(c *gin.Context) {
 
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
-			"status": apiserver.GetResourcesWrong,
+			"status": statuscode.GetResourcesWrong,
 			"message": "get pods wrong",
 			"data": pods,
 		})
@@ -97,7 +98,7 @@ func (s *Service) GetPods(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-			"status": apiserver.Success,
+			"status": statuscode.Success,
 			"message": "success",
 			"data": pods,
 	})
@@ -105,7 +106,6 @@ func (s *Service) GetPods(c *gin.Context) {
 
 // GetNamespaces returns the list of namespaces
 func (s *Service) GetNamespaces(c *gin.Context) {
-	namespaceList :=  make([]Namespace, 0)
 
 	var namespace v1.NamespaceList
 
@@ -113,13 +113,14 @@ func (s *Service) GetNamespaces(c *gin.Context) {
 
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
-			"status": apiserver.GetResourcesWrong,
+			"status": statuscode.GetResourcesWrong,
 			"message": "get namespaces wrong",
-			"data": namespaceList,
+			"data": make([]Namespace, 0),
 		})
 		return
 	}
 
+	namespaceList := make([]Namespace, 0, len(namespace.Items))
 	for _, ns := range namespace.Items {
 		namespaceList = append(namespaceList, Namespace{
 			Name: ns.Name,
@@ -127,7 +128,7 @@ func (s *Service) GetNamespaces(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"status": apiserver.Success,
+		"status": statuscode.Success,
 		"message": "success",
 		"data": namespaceList,
 	})
@@ -140,13 +141,18 @@ func (s *Service) GetKinds(c *gin.Context) {
 	config, _ := ctrlconfig.GetConfig()
 	apiExtCli, _ := apiextensionsclientset.NewForConfig(config)
 
-	crdList, err := apiExtCli.ApiextensionsV1beta1().CustomResourceDefinitions().List(metav1.ListOptions{})
+	selector := fields.ParseSelectorOrDie("spec.group==pingcap.com")
+
+	crdList, err := apiExtCli.ApiextensionsV1beta1().CustomResourceDefinitions().List(metav1.ListOptions{
+		FieldSelector: selector.String(),
+	})
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
-			"status": apiserver.GetResourcesWrong,
+			"status": statuscode.GetResourcesWrong,
 			"message": "get CRDs wrong",
 			"data": ChaosKindList,
 		})
+		return
 	}
 	for _, crd := range crdList.Items {
 		if strings.Contains(crd.Spec.Names.Kind, "Chaos") == true {
@@ -157,7 +163,7 @@ func (s *Service) GetKinds(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"status": apiserver.Success,
+		"status": statuscode.Success,
 		"message": "success",
 		"data": ChaosKindList,
 	})
