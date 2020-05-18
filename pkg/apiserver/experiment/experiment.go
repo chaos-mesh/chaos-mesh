@@ -150,7 +150,7 @@ func (s *Service) getTimeChaosState (stateInfo map[string]int) error {
 		stateInfo["Total"]++
 		switch chaos.Status.ChaosStatus.Experiment.Phase {
 		case v1alpha1.ExperimentPhaseRunning:
-			stateInfo["running"]++
+			stateInfo["Running"]++
 		case v1alpha1.ExperimentPhasePaused:
 			stateInfo["Paused"]++
 		case v1alpha1.ExperimentPhaseFailed:
