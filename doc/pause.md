@@ -69,14 +69,14 @@ chaos-daemon-p9wxd                          1/1     Running             0       
 
 Pause the running chaos:
 ```shell script
-$  kubectl annotate podchaos pod-kill-example --namespace chaos-testing admission-webhook.pingcap.com/pause=true
+$  kubectl annotate podchaos pod-kill-example --namespace chaos-testing experiment.pingcap.com/pause=true
 podchaos.pingcap.com/pod-kill-example annotated
 $ kubectl get podchaos pod-kill-example --namespace chaos-testing --output yaml \
 && kubectl get pods --namespace chaos-testing
 ...
 metadata:
   annotations:
-    admission-webhook.pingcap.com/pause: "true"
+    experiment.pingcap.com/pause: "true"
 ...
 spec:
   action: pod-kill
@@ -114,7 +114,7 @@ chaos-daemon-sflc4                          1/1     Running   0          5m5s
 
 Resume this chaos:
 ```shell script
-$ kubectl annotate podchaos pod-kill-example --namespace chaos-testing admission-webhook.pingcap.com/pause-
+$ kubectl annotate podchaos pod-kill-example --namespace chaos-testing experiment.pingcap.com/pause-
 podchaos.pingcap.com/pod-kill-example annotated
 $ kubectl get podchaos pod-kill-example --namespace chaos-testing --output yaml \
 && kubectl get pods --namespace chaos-testing
