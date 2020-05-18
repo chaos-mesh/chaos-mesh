@@ -67,10 +67,6 @@ type KernelChaosSpec struct {
 	// Next time when this action will be recovered
 	// +optional
 	NextRecover *metav1.Time `json:"nextRecover,omitempty"`
-
-	// If this chaos has been paused
-	// +optional
-	Paused bool `json:"paused"`
 }
 
 // GetSelector is a getter for Selector (for implementing SelectSpec)
@@ -223,7 +219,10 @@ func (in *KernelChaos) IsDeleted() bool {
 
 // IsPaused returns whether this resource has been paused
 func (in *KernelChaos) IsPaused() bool {
-	return in.Spec.Paused
+	if in.Annotations == nil || in.Annotations[PauseAnnotationKey] != "true" {
+		return false
+	}
+	return true
 }
 
 // +kubebuilder:object:root=true

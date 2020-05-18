@@ -18,7 +18,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/robfig/cron/v3"
+	cronv3 "github.com/robfig/cron/v3"
 
 	"k8s.io/apimachinery/pkg/util/validation/field"
 )
@@ -34,38 +34,64 @@ const (
 	ValidateValueParseError = "parse value field error:%s"
 )
 
-// ValidateScheduler validates the scheduler and duration
-func ValidateScheduler(duration *string, scheduler *SchedulerSpec, spec *field.Path) field.ErrorList {
+// ValidateScheduler validates the InnerSchedulerObject
+func ValidateScheduler(schedulerObject InnerSchedulerObject, spec *field.Path) field.ErrorList {
+
 	allErrs := field.ErrorList{}
+
 	schedulerField := spec.Child("scheduler")
 	durationField := spec.Child("duration")
-
-	if duration != nil && scheduler != nil {
-		_, err := cron.ParseStandard(scheduler.Cron)
-		if err != nil {
-			allErrs = append(allErrs, field.Invalid(schedulerField.Child("cron"),
-				scheduler.Cron,
-				fmt.Sprintf("parse cron field error:%s", err)))
-		}
-
-		_, err = time.ParseDuration(*duration)
-		if err != nil {
-			allErrs = append(allErrs, field.Invalid(durationField,
-				*duration,
-				fmt.Sprintf("parse duration field error:%s", err)))
-		}
-
-		if len(allErrs) > 0 {
-			return allErrs
-		}
-
-		return nil
-	} else if duration == nil && scheduler == nil {
-		return nil
+	duration, err := schedulerObject.GetDuration()
+	if err != nil {
+		allErrs = append(allErrs, field.Invalid(durationField, nil,
+			fmt.Sprintf("parse duration field error:%s", err)))
 	}
 
-	allErrs = append(allErrs, field.Invalid(schedulerField, scheduler, ValidateSchedulerError))
+	scheduler := schedulerObject.GetScheduler()
+
+	if duration != nil && scheduler != nil {
+		errs := validateSchedulerParams(duration, durationField, scheduler, schedulerField)
+		if len(errs) != 0 {
+			allErrs = append(allErrs, errs...)
+		}
+	} else if (duration == nil && scheduler != nil) || (duration != nil && scheduler == nil) {
+		allErrs = append(allErrs, field.Invalid(schedulerField, scheduler, ValidateSchedulerError))
+	}
 	return allErrs
+}
+
+func validateSchedulerParams(duration *time.Duration, durationField *field.Path, spec *SchedulerSpec, schedulerField *field.Path) field.ErrorList {
+	allErrs := field.ErrorList{}
+	if duration != nil && spec != nil {
+
+		cronField := schedulerField.Child("cron")
+		scheduler, err := ParseCron(spec.Cron, cronField)
+		if len(err) != 0 {
+			allErrs = append(allErrs, err...)
+		}
+
+		if scheduler != nil {
+			tmpTime := time.Time{}
+			nextTime := scheduler.Next(tmpTime)
+			interval := nextTime.Sub(tmpTime)
+			if *duration >= interval {
+				allErrs = append(allErrs, field.Invalid(cronField, spec.Cron,
+					fmt.Sprintf("the scheduling interval:\"%s\" must be greater than the duration:%s", spec.Cron, *duration)))
+			}
+		}
+	}
+	return allErrs
+}
+
+// ParseCron returns a new crontab schedule representing the given standardSpec (https://en.wikipedia.org/wiki/Cron)
+func ParseCron(standardSpec string, cronField *field.Path) (cronv3.Schedule, field.ErrorList) {
+	allErrs := field.ErrorList{}
+	scheduler, err := cronv3.ParseStandard(standardSpec)
+	if err != nil {
+		allErrs = append(allErrs, field.Invalid(cronField, standardSpec,
+			fmt.Sprintf("parse cron field error:%s", err)))
+	}
+	return scheduler, allErrs
 }
 
 // ValidatePodMode validates the value with podmode
