@@ -14,6 +14,7 @@
 package fixture
 
 import (
+	"fmt"
 	"sort"
 
 	appsv1 "k8s.io/api/apps/v1"
@@ -25,16 +26,16 @@ import (
 	"github.com/pingcap/chaos-mesh/test/e2e/config"
 )
 
-const ioTestConfigMap = `name: chaosfs-io
+var ioTestConfigMap = `name: chaosfs-io
 initContainers:
 - name: inject-scripts
-  image: pingcap/chaos-scripts:latest
-  imagePullpolicy: Always
+  image: %s
+  imagePullPolicy: IfNotPresent
   command: ["sh", "-c", "/scripts/init.sh -d /var/run/data/test -f /var/run/data/fuse-data"]
 containers:
 - name: chaosfs
-  image: pingcap/chaos-fs:latest
-  imagePullpolicy: Always
+  image: %s
+  imagePullPolicy: IfNotPresent
   ports:
   - containerPort: 65534
   securityContext:
@@ -230,7 +231,8 @@ func NewIOTestConfigMap(name, namespace string) *corev1.ConfigMap {
 			},
 		},
 		Data: map[string]string{
-			"chaosfs-io.yaml": ioTestConfigMap,
+			"chaosfs-io.yaml": fmt.Sprintf(ioTestConfigMap,
+				config.TestConfig.ChaosScriptsImage, config.TestConfig.ChaosFSImage),
 		},
 	}
 }
@@ -252,6 +254,12 @@ func NewE2EService(name, namespace string) *corev1.Service {
 					Name:       "http",
 					Port:       8080,
 					TargetPort: intstr.IntOrString{IntVal: 8080},
+				},
+				// Only used in io chaos
+				{
+					Name:       "chaosfs",
+					Port:       65534,
+					TargetPort: intstr.IntOrString{IntVal: 65534},
 				},
 			},
 		},
