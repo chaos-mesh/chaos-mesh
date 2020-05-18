@@ -94,9 +94,6 @@ spec:
               description: Path defines the path of files for injecting I/O chaos
                 action.
               type: string
-            paused:
-              description: If this chaos has been paused
-              type: boolean
             percent:
               description: 'Percent defines the percentage of injection errors and
                 provides a number from 0-100. default: 100.'
@@ -380,9 +377,6 @@ spec:
               - fixed-percent
               - random-max-percent
               type: string
-            paused:
-              description: If this chaos has been paused
-              type: boolean
             scheduler:
               description: Scheduler defines some schedule rules to control the running
                 time of the chaos experiment about time.
@@ -716,9 +710,6 @@ spec:
               - fixed-percent
               - random-max-percent
               type: string
-            paused:
-              description: If this chaos has been paused
-              type: boolean
             scheduler:
               description: Scheduler defines some schedule rules to control the running
                 time of the chaos experiment about network.
@@ -1031,9 +1022,6 @@ spec:
               - fixed-percent
               - random-max-percent
               type: string
-            paused:
-              description: If this chaos has been paused
-              type: boolean
             scheduler:
               description: Scheduler defines some schedule rules to control the running
                 time of the chaos experiment about pods.
@@ -1240,9 +1228,6 @@ spec:
               description: 'Mode defines the mode to run chaos action. Supported mode:
                 one / all / fixed / fixed-percent / random-max-percent'
               type: string
-            paused:
-              description: If this chaos has been paused
-              type: boolean
             scheduler:
               description: Scheduler defines some schedule rules to control the running
                 time of the chaos experiment about time.
@@ -1526,9 +1511,6 @@ spec:
               - fixed-percent
               - random-max-percent
               type: string
-            paused:
-              description: If this chaos has been paused
-              type: boolean
             scheduler:
               description: Scheduler defines some schedule rules to control the running
                 time of the chaos experiment about time.

@@ -132,10 +132,6 @@ type IoChaosSpec struct {
 	// ConfigName defines the config name which used to inject pod.
 	// +required
 	ConfigName string `json:"configName"`
-
-	// If this chaos has been paused
-	// +optional
-	Paused bool `json:"paused"`
 }
 
 func (in *IoChaosSpec) GetSelector() SelectorSpec {
@@ -177,7 +173,10 @@ func (in *IoChaos) IsDeleted() bool {
 
 // IsPaused returns whether this resource has been paused
 func (in *IoChaos) IsPaused() bool {
-	return in.Spec.Paused
+	if in.Annotations == nil || in.Annotations[PauseAnnotationKey] != "true" {
+		return false
+	}
+	return true
 }
 
 // GetDuration would return the duration for chaos

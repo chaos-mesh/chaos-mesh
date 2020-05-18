@@ -11,28 +11,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package apiserver
+package statuscode
 
-import (
-	"go.uber.org/fx"
+// StatusCode represents the code of api status
+type StatusCode int
 
-	"github.com/pingcap/chaos-mesh/pkg/apiserver/archive"
-	"github.com/pingcap/chaos-mesh/pkg/apiserver/common"
-	"github.com/pingcap/chaos-mesh/pkg/apiserver/event"
-	"github.com/pingcap/chaos-mesh/pkg/apiserver/experiment"
-)
-
-var handlerModule = fx.Options(
-	fx.Provide(
-		common.NewService,
-		experiment.NewService,
-		event.NewService,
-		archive.NewService,
-	),
-	fx.Invoke(
-		common.Register,
-		experiment.Register,
-		event.Register,
-		archive.Register,
-	),
+const (
+	// Success indicates the successful return of this API interface.
+	Success StatusCode = 0
+	// GetResourcesWrong indicates an error when getting resources
+	GetResourcesWrong StatusCode = 1001
 )

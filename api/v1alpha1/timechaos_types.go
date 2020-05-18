@@ -72,10 +72,6 @@ type TimeChaosSpec struct {
 
 	// Scheduler defines some schedule rules to control the running time of the chaos experiment about time.
 	Scheduler *SchedulerSpec `json:"scheduler,omitempty"`
-
-	// If this chaos has been paused
-	// +optional
-	Paused bool `json:"paused"`
 }
 
 // SetDefaultValue will set default value for empty fields
@@ -181,7 +177,10 @@ func (in *TimeChaos) IsDeleted() bool {
 
 // IsPaused returns whether this resource has been paused
 func (in *TimeChaos) IsPaused() bool {
-	return in.Spec.Paused
+	if in.Annotations == nil || in.Annotations[PauseAnnotationKey] != "true" {
+		return false
+	}
+	return true
 }
 
 // +kubebuilder:object:root=true

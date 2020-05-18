@@ -186,8 +186,8 @@ main() {
     fi
 
     if $template; then
-        gen_crd_manifests $crd
-        gen_chaos_mesh_manifests "${runtime}"
+        ensure gen_crd_manifests "${crd}"
+        ensure gen_chaos_mesh_manifests "${runtime}"
         exit 0
     fi
 
@@ -205,7 +205,7 @@ main() {
 
     check_kubernetes
 
-    install_chaos_mesh "${release_name}" "${namespace}" "${local_kube}" ${force_chaos_mesh} ${docker_mirror} ${crd} ${runtime}
+    install_chaos_mesh "${release_name}" "${namespace}" "${local_kube}" ${force_chaos_mesh} ${docker_mirror} "${crd}" "${runtime}"
     ensure_pods_ready "${namespace}" "app.kubernetes.io/component=controller-manager" 100
     printf "Chaos Mesh %s is installed successfully\n" "${release_name}"
 }
@@ -571,8 +571,8 @@ install_chaos_mesh() {
         fi
     fi
 
-    gen_crd_manifests ${crd} | kubectl apply -f -
-    gen_chaos_mesh_manifests ${runtime} | kubectl apply -f -
+    gen_crd_manifests "${crd}" | kubectl apply -f - || exit 1
+    gen_chaos_mesh_manifests "${runtime}" | kubectl apply -f - || exit 1
 }
 
 version_lt() {
