@@ -15,10 +15,11 @@ package event
 
 import (
 	"context"
-	"github.com/gin-gonic/gin"
-	statuscode "github.com/pingcap/chaos-mesh/pkg/apiserver/status_code"
 	"net/http"
 
+	"github.com/gin-gonic/gin"
+
+	statuscode "github.com/pingcap/chaos-mesh/pkg/apiserver/status_code"
 	"github.com/pingcap/chaos-mesh/pkg/config"
 	"github.com/pingcap/chaos-mesh/pkg/core"
 
@@ -90,5 +91,5 @@ func (s *Service) listEvents(c *gin.Context) {
 		}
 	}
 
-	c.JSON(http.StatusOK,gin.H{"name":name})
+	// TODO: Return required fields in event
 }

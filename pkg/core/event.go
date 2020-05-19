@@ -32,7 +32,7 @@ type EventStore interface {
 	ListByPod(context.Context, string, string) ([]*Event, error)
 
 	// Find returns a event from the datastore by ID.
-	Find(context.Context, int64) (*Event, error)
+	Find(context.Context, uint) (*Event, error)
 
 	// FindByExperimentAndStartTime returns a event by the experiment and start time.
 	FindByExperimentAndStartTime(context.Context, string, string, *time.Time) (*Event, error)
