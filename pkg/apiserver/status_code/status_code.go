@@ -19,6 +19,10 @@ type StatusCode int
 const (
 	// Success indicates the successful return of this API interface.
 	Success StatusCode = 0
-	// GetResourcesWrong indicates an error when getting resources
+	// GetResourcesWrong indicates an error when getting resources.
 	GetResourcesWrong StatusCode = 1001
+	// InvalidParameter indicates an error when getting invalid parameter.
+	InvalidParameter StatusCode = 1002
+	// CreateExperimentFailed indicates an error when creating experiment failed.
+	CreateExperimentFailed = 1003
 )
