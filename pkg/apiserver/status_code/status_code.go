@@ -22,7 +22,7 @@ const (
 	// GetResourcesWrong indicates an error when getting resources
 	GetResourcesWrong StatusCode = 1001
 	// GetResourcesFromDBWrong indicates an error when getting resources from DB
-	GetResourcesFromDBWrong StatusCode = 1002
+	GetResourcesFromDBWrong StatusCode = 1006
 	// IncompleteField indicates that some fields are missing.
-	IncompleteField StatusCode = 1003
+	IncompleteField StatusCode = 1007
 )
