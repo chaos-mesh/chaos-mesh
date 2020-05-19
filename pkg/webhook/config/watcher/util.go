@@ -14,18 +14,18 @@
 package watcher
 
 import (
-	. "github.com/onsi/ginkgo"
-	. "github.com/onsi/gomega"
+	"bytes"
+	"html/template"
 )
 
-var _ = Describe("webhook config watcher", func() {
-	Context("Test webhook config", func() {
-		It("should return NewConfig", func() {
-			config := NewConfig()
-			Expect(config.Namespace).To(Equal(""))
-			Expect(config.ConfigLabels).To(Equal(map[string]string{}))
-			Expect(config.TemplateLabels).To(Equal(map[string]string{}))
-		})
-
-	})
-})
+func renderTemplateWithArgs(tpl *template.Template, args map[string]string) ([]byte, error) {
+	model := make(map[string]interface{}, len(args))
+	for k, v := range args {
+		model[k] = v
+	}
+	buff := new(bytes.Buffer)
+	if err := tpl.Execute(buff, model); err != nil {
+		return nil, err
+	}
+	return buff.Bytes(), nil
+}

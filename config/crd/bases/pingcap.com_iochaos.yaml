@@ -45,10 +45,6 @@ spec:
             addr:
               description: Addr defines the address for sidecar container.
               type: string
-            configName:
-              description: ConfigName defines the config name which used to inject
-                pod.
-              type: string
             delay:
               description: "Delay defines the value of I/O chaos action delay. A delay
                 string is a possibly signed sequence of decimal numbers, each with
@@ -180,7 +176,6 @@ spec:
               type: string
           required:
           - action
-          - configName
           - layer
           - mode
           - selector

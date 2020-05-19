@@ -7,48 +7,14 @@ metadata:
   labels:
     app.kubernetes.io/component: webhook
 data:
-  chaosfs-pd.yaml: |
+  chaosfs-pd: |
     name: chaosfs-pd
     selector:
       labelSelectors:
         "app.kubernetes.io/component": "pd"
-    initContainers:
-    - name: inject-scripts
-      image: pingcap/chaos-scripts:latest
-      imagePullpolicy: Always
-      command: ["sh", "-c", "/scripts/init.sh -d /var/lib/pd/data -f /var/lib/pd/fuse-data"]
-    containers:
-    - name: chaosfs
-      image: pingcap/chaos-fs:latest
-      imagePullpolicy: Always
-      ports:
-      - containerPort: 65534
-      securityContext:
-        privileged: true
-      command:
-        - /usr/local/bin/chaosfs
-        - -addr=:65534
-        - -pidfile=/tmp/fuse/pid
-        - -original=/var/lib/pd/fuse-data
-        - -mountpoint=/var/lib/pd/data
-      volumeMounts:
-        - name: pd
-          mountPath: /var/lib/pd
-          mountPropagation: Bidirectional
-    volumeMounts:
-    - name: pd
-      mountPath: /var/lib/pd
-      mountPropagation: HostToContainer
-    - name: scripts
-      mountPath: /tmp/scripts
-    - name: fuse
-      mountPath: /tmp/fuse
-    volumes:
-    - name: scripts
-      emptyDir: {}
-    - name: fuse
-      emptyDir: {}
-    postStart:
-      pd:
-        command:
-          - /tmp/scripts/wait-fuse.sh
+    template: sidecar-template
+    arguments:
+      ContainerName: "pd"
+      DataPath: "/var/lib/pd/data"
+      MountPath: "/var/lib/pd"
+      VolumeName: "pd"

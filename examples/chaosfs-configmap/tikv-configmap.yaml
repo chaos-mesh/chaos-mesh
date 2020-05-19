@@ -7,48 +7,14 @@ metadata:
   labels:
     app.kubernetes.io/component: webhook
 data:
-  chaosfs-tikv.yaml: |
+  chaosfs-tikv: |
     name: chaosfs-tikv
     selector:
       labelSelectors:
         "app.kubernetes.io/component": "tikv"
-    initContainers:
-    - name: inject-scripts
-      image: pingcap/chaos-scripts:latest
-      imagePullpolicy: Always
-      command: ["sh", "-c", "/scripts/init.sh -d /var/lib/tikv/data -f /var/lib/tikv/fuse-data"]
-    containers:
-    - name: chaosfs
-      image: pingcap/chaos-fs:latest
-      imagePullpolicy: Always
-      ports:
-      - containerPort: 65534
-      securityContext:
-        privileged: true
-      command:
-        - /usr/local/bin/chaosfs
-        - -addr=:65534
-        - -pidfile=/tmp/fuse/pid
-        - -original=/var/lib/tikv/fuse-data
-        - -mountpoint=/var/lib/tikv/data
-      volumeMounts:
-        - name: tikv
-          mountPath: /var/lib/tikv
-          mountPropagation: Bidirectional
-    volumeMounts:
-    - name: tikv
-      mountPath: /var/lib/tikv
-      mountPropagation: HostToContainer
-    - name: scripts
-      mountPath: /tmp/scripts
-    - name: fuse
-      mountPath: /tmp/fuse
-    volumes:
-    - name: scripts
-      emptyDir: {}
-    - name: fuse
-      emptyDir: {}
-    postStart:
-      tikv:
-        command:
-          - /tmp/scripts/wait-fuse.sh
+    template: sidecar-template
+    arguments:
+      ContainerName: "tikv"
+      DataPath: "/var/lib/tikv/data"
+      MountPath: "/var/lib/tikv"
+      VolumeName: "tikv"

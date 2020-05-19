@@ -14,7 +14,6 @@
 package fixture
 
 import (
-	"fmt"
 	"sort"
 
 	appsv1 "k8s.io/api/apps/v1"
@@ -26,47 +25,16 @@ import (
 	"github.com/pingcap/chaos-mesh/test/e2e/config"
 )
 
-var ioTestConfigMap = `name: chaosfs-io
-initContainers:
-- name: inject-scripts
-  image: %s
-  imagePullPolicy: IfNotPresent
-  command: ["sh", "-c", "/scripts/init.sh -d /var/run/data/test -f /var/run/data/fuse-data"]
-containers:
-- name: chaosfs
-  image: %s
-  imagePullPolicy: IfNotPresent
-  ports:
-  - containerPort: 65534
-  securityContext:
-    privileged: true
-  command:
-    - /usr/local/bin/chaosfs
-    - -addr=:65534
-    - -pidfile=/tmp/fuse/pid
-    - -original=/var/run/data/fuse-data
-    - -mountpoint=/var/run/data/test
-  volumeMounts:
-    - name: datadir
-      mountPath: /var/run/data
-      mountPropagation: Bidirectional
-volumeMounts:
-  - name: datadir
-    mountPath: /var/run/data
-    mountPropagation: HostToContainer
-  - name: scripts
-    mountPath: /tmp/scripts
-  - name: fuse
-    mountPath: /tmp/fuse
-volumes:
-  - name: scripts
-    emptyDir: {}
-  - name: fuse
-    emptyDir: {}
-postStart:
-  io:
-    command:
-      - /tmp/scripts/wait-fuse.sh
+const ioTestConfigMap = `name: chaosfs-io
+selector:
+  labelSelectors:
+    app: io
+template: sidecar-template
+arguments:
+  ContainerName: "io"
+  DataPath: "/var/run/data/test"
+  MountPath: "/var/run/data"
+  VolumeName: "datadir"
 `
 
 // NewCommonNginxPod describe that we use common nginx pod to be tested in our chaos-operator test
@@ -231,8 +199,7 @@ func NewIOTestConfigMap(name, namespace string) *corev1.ConfigMap {
 			},
 		},
 		Data: map[string]string{
-			"chaosfs-io.yaml": fmt.Sprintf(ioTestConfigMap,
-				config.TestConfig.ChaosScriptsImage, config.TestConfig.ChaosFSImage),
+			"config": ioTestConfigMap,
 		},
 	}
 }

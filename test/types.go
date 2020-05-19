@@ -101,7 +101,7 @@ func (oi *OperatorConfig) operatorHelmSetString() string {
 }
 
 func (oa *operatorAction) operatorChartPath(tag string) string {
-	return oa.chartPath(operartorChartName, tag)
+	return oa.chartPath(operatorChartName, tag)
 }
 
 func (oa *operatorAction) chartPath(name string, tag string) string {
