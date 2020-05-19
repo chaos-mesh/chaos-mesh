@@ -199,6 +199,7 @@ spec:
             reason:
               type: string
             scheduler:
+              description: ScheduleStatus is the current status of chaos scheduler.
               properties:
                 nextRecover:
                   description: Next time when this action will be recovered

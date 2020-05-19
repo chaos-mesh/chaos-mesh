@@ -29,3 +29,5 @@ test/image/e2e/chaos-mesh
 test/image/e2e/manifests/
 
 /pkg/uiserver/embedded_assets_handler.go
+
+/doc/swagger.*

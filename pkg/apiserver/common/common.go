@@ -20,19 +20,18 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	statuscode "github.com/pingcap/chaos-mesh/pkg/apiserver/status_code"
 	"github.com/pingcap/chaos-mesh/pkg/config"
 
+	v1 "k8s.io/api/core/v1"
 	apiextensionsclientset "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	v1 "k8s.io/api/core/v1"
-	ctrlconfig "sigs.k8s.io/controller-runtime/pkg/client/config"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	ctrlconfig "sigs.k8s.io/controller-runtime/pkg/client/config"
 )
 
 // Pod defines the basic information of the pod
 type Pod struct {
-	Name string
+	Name      string
 	Namespace string
 }
 
@@ -67,25 +66,26 @@ func NewService(
 func Register(r *gin.RouterGroup, s *Service) {
 	endpoint := r.Group("/common")
 
-	endpoint.GET("/pods/all", s.GetPods)
-	endpoint.GET("/namespaces/all", s.GetNamespaces)
-	endpoint.GET("/kinds/all", s.GetKinds)
+	endpoint.GET("/pods", s.getPods)
+	endpoint.GET("/namespaces", s.getNamespaces)
+	endpoint.GET("/kinds", s.getKinds)
 
 }
 
-// GetPods returns the list of pods
-func (s *Service) GetPods(c *gin.Context) {
-	pods :=  make([]Pod, 0)
+// @Summary Get all pods from Kubernetes cluster.
+// @Description Get all pods from Kubernetes cluster.
+// @Produce json
+// @Success 200 {array} Pod
+// @Router /common/pods [get]
+// @Failure 401 {object} utils.APIError "Unauthorized failure"
+func (s *Service) getPods(c *gin.Context) {
+	pods := make([]Pod, 0)
 
 	var podList v1.PodList
 	err := s.kubeCli.List(context.Background(), &podList)
 
 	if err != nil {
-		c.JSON(http.StatusOK, gin.H{
-			"status": statuscode.GetResourcesWrong,
-			"message": "get pods wrong",
-			"data": pods,
-		})
+		_ = c.Error(err)
 		return
 	}
 
@@ -96,26 +96,23 @@ func (s *Service) GetPods(c *gin.Context) {
 		})
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-			"status": statuscode.Success,
-			"message": "success",
-			"data": pods,
-	})
+	c.JSON(http.StatusOK, pods)
 }
 
-// GetNamespaces returns the list of namespaces
-func (s *Service) GetNamespaces(c *gin.Context) {
+// @Summary Get all namespaces from Kubernetes cluster.
+// @Description Get all namespaces from Kubernetes cluster.
+// @Produce json
+// @Success 200 {array} Namespace
+// @Router /common/namespaces [get]
+// @Failure 401 {object} utils.APIError "Unauthorized failure"
+func (s *Service) getNamespaces(c *gin.Context) {
 
 	var namespace v1.NamespaceList
 
 	err := s.kubeCli.List(context.Background(), &namespace)
 
 	if err != nil {
-		c.JSON(http.StatusOK, gin.H{
-			"status": statuscode.GetResourcesWrong,
-			"message": "get namespaces wrong",
-			"data": make([]Namespace, 0),
-		})
+		_ = c.Error(err)
 		return
 	}
 
@@ -126,28 +123,24 @@ func (s *Service) GetNamespaces(c *gin.Context) {
 		})
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"status": statuscode.Success,
-		"message": "success",
-		"data": namespaceList,
-	})
+	c.JSON(http.StatusOK, namespaceList)
 }
 
-// GetKinds returns the list of chaos kinds
-func (s *Service) GetKinds(c *gin.Context) {
-	ChaosKindList :=  make([]ChaosKind, 0)
+// @Summary Get all chaos kinds from Kubernetes cluster.
+// @Description Get all chaos kinds from Kubernetes cluster.
+// @Produce json
+// @Success 200 {array} ChaosKind
+// @Router /common/kinds [get]
+// @Failure 401 {object} utils.APIError "Unauthorized failure"
+func (s *Service) getKinds(c *gin.Context) {
+	ChaosKindList := make([]ChaosKind, 0)
 
 	config, _ := ctrlconfig.GetConfig()
 	apiExtCli, _ := apiextensionsclientset.NewForConfig(config)
 
 	crdList, err := apiExtCli.ApiextensionsV1beta1().CustomResourceDefinitions().List(metav1.ListOptions{})
-
 	if err != nil {
-		c.JSON(http.StatusOK, gin.H{
-			"status": statuscode.GetResourcesWrong,
-			"message": "get CRDs wrong",
-			"data": ChaosKindList,
-		})
+		_ = c.Error(err)
 		return
 	}
 	for _, crd := range crdList.Items {
@@ -158,9 +151,5 @@ func (s *Service) GetKinds(c *gin.Context) {
 		}
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"status": statuscode.Success,
-		"message": "success",
-		"data": ChaosKindList,
-	})
+	c.JSON(http.StatusOK, ChaosKindList)
 }

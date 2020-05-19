@@ -20,7 +20,6 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/pingcap/chaos-mesh/api/v1alpha1"
-	statuscode "github.com/pingcap/chaos-mesh/pkg/apiserver/status_code"
 	"github.com/pingcap/chaos-mesh/pkg/config"
 	"github.com/pingcap/chaos-mesh/pkg/core"
 
@@ -71,7 +70,7 @@ func (s *Service) getExperimentDetail(c *gin.Context) {}
 func (s *Service) deleteExperiment(c *gin.Context) {}
 
 // getPodChaosState returns the state of PodChaos
-func (s *Service) getPodChaosState (stateInfo map[string]int) error {
+func (s *Service) getPodChaosState(stateInfo map[string]int) error {
 	var chaosList v1alpha1.PodChaosList
 	err := s.kubeCli.List(context.Background(), &chaosList)
 	if err != nil {
@@ -94,7 +93,7 @@ func (s *Service) getPodChaosState (stateInfo map[string]int) error {
 }
 
 // getIoChaosState returns the state of IoChaos
-func (s *Service) getIoChaosState (stateInfo map[string]int) error {
+func (s *Service) getIoChaosState(stateInfo map[string]int) error {
 	var chaosList v1alpha1.IoChaosList
 	err := s.kubeCli.List(context.Background(), &chaosList)
 	if err != nil {
@@ -117,7 +116,7 @@ func (s *Service) getIoChaosState (stateInfo map[string]int) error {
 }
 
 // getNetworkChaosState returns the state of NetworkChaos
-func (s *Service) getNetworkChaosState (stateInfo map[string]int) error {
+func (s *Service) getNetworkChaosState(stateInfo map[string]int) error {
 	var chaosList v1alpha1.NetworkChaosList
 	err := s.kubeCli.List(context.Background(), &chaosList)
 	if err != nil {
@@ -140,7 +139,7 @@ func (s *Service) getNetworkChaosState (stateInfo map[string]int) error {
 }
 
 // getTimeChaosState returns the state of TimeChaos
-func (s *Service) getTimeChaosState (stateInfo map[string]int) error {
+func (s *Service) getTimeChaosState(stateInfo map[string]int) error {
 	var chaosList v1alpha1.TimeChaosList
 	err := s.kubeCli.List(context.Background(), &chaosList)
 	if err != nil {
@@ -163,7 +162,7 @@ func (s *Service) getTimeChaosState (stateInfo map[string]int) error {
 }
 
 // getKernelChaosState returns the state of KernelChaos
-func (s *Service) getKernelChaosState (stateInfo map[string]int) error {
+func (s *Service) getKernelChaosState(stateInfo map[string]int) error {
 	var chaosList v1alpha1.KernelChaosList
 	err := s.kubeCli.List(context.Background(), &chaosList)
 	if err != nil {
@@ -178,7 +177,7 @@ func (s *Service) getKernelChaosState (stateInfo map[string]int) error {
 }
 
 // getStressChaosState returns the state of StressChaos
-func (s *Service) getStressChaosState (stateInfo map[string]int) error {
+func (s *Service) getStressChaosState(stateInfo map[string]int) error {
 	var chaosList v1alpha1.StressChaosList
 	err := s.kubeCli.List(context.Background(), &chaosList)
 	if err != nil {
@@ -200,53 +199,44 @@ func (s *Service) getStressChaosState (stateInfo map[string]int) error {
 	return nil
 }
 
-func (s *Service) state (c *gin.Context) {
+func (s *Service) state(c *gin.Context) {
 	data := make(map[string]int)
 	data["Total"] = 0
 	data["Running"] = 0
 	data["Paused"] = 0
 	data["Failed"] = 0
 	data["Finished"] = 0
-	getChaosWrong := gin.H{
-		"status": statuscode.GetResourcesWrong,
-		"message": "failed to get chaos state",
-		"data": make(map[string]int),
-	}
 
 	err := s.getPodChaosState(data)
 	if err != nil {
-		c.JSON(http.StatusOK, getChaosWrong)
+		_ = c.Error(err)
 		return
 	}
 	err = s.getIoChaosState(data)
 	if err != nil {
-		c.JSON(http.StatusOK, getChaosWrong)
+		_ = c.Error(err)
 		return
 	}
 	err = s.getNetworkChaosState(data)
 	if err != nil {
-		c.JSON(http.StatusOK, getChaosWrong)
+		_ = c.Error(err)
 		return
 	}
 	err = s.getTimeChaosState(data)
 	if err != nil {
-		c.JSON(http.StatusOK, getChaosWrong)
+		_ = c.Error(err)
 		return
 	}
 	err = s.getKernelChaosState(data)
 	if err != nil {
-		c.JSON(http.StatusOK, getChaosWrong)
+		_ = c.Error(err)
 		return
 	}
 	err = s.getStressChaosState(data)
 	if err != nil {
-		c.JSON(http.StatusOK, getChaosWrong)
+		_ = c.Error(err)
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"status": statuscode.Success,
-		"message": "success",
-		"data": data,
-	})
+	c.JSON(http.StatusOK, data)
 }
