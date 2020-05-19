@@ -19,6 +19,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 )
 
+// NamespaceSelectorsValid can be used to check whether namespace selectors is valid.
 func NamespaceSelectorsValid(fl validator.FieldLevel) bool {
 	ns, ok := fl.Field().Interface().([]string)
 	if !ok {
@@ -38,6 +39,7 @@ func NamespaceSelectorsValid(fl validator.FieldLevel) bool {
 	return true
 }
 
+// MapSelectorsValid can be used to check whether map selectors is valid.
 func MapSelectorsValid(fl validator.FieldLevel) bool {
 	if fl.Field().IsNil() {
 		return true
@@ -57,6 +59,7 @@ func MapSelectorsValid(fl validator.FieldLevel) bool {
 	return true
 }
 
+// PhaseSelectorsValid can be used to check whether phase selectors is valid.
 func PhaseSelectorsValid(fl validator.FieldLevel) bool {
 	ph, ok := fl.Field().Interface().([]string)
 	if !ok {

@@ -90,14 +90,6 @@ spec:
               - fixed-percent
               - random-max-percent
               type: string
-            nextRecover:
-              description: Next time when this action will be recovered.
-              format: date-time
-              type: string
-            nextStart:
-              description: Next time when this action will be applied again.
-              format: date-time
-              type: string
             path:
               description: Path defines the path of files for injecting I/O chaos
                 action.
@@ -242,6 +234,18 @@ spec:
               type: string
             reason:
               type: string
+            scheduler:
+              description: ScheduleStatus is the current status of chaos scheduler.
+              properties:
+                nextRecover:
+                  description: Next time when this action will be recovered
+                  format: date-time
+                  type: string
+                nextStart:
+                  description: Next time when this action will be applied again
+                  format: date-time
+                  type: string
+              type: object
           required:
           - experiment
           - phase
@@ -373,14 +377,6 @@ spec:
               - fixed
               - fixed-percent
               - random-max-percent
-              type: string
-            nextRecover:
-              description: Next time when this action will be recovered
-              format: date-time
-              type: string
-            nextStart:
-              description: Next time when this action will be applied again
-              format: date-time
               type: string
             scheduler:
               description: Scheduler defines some schedule rules to control the running
@@ -516,6 +512,18 @@ spec:
               type: string
             reason:
               type: string
+            scheduler:
+              description: ScheduleStatus is the current status of chaos scheduler.
+              properties:
+                nextRecover:
+                  description: Next time when this action will be recovered
+                  format: date-time
+                  type: string
+                nextStart:
+                  description: Next time when this action will be applied again
+                  format: date-time
+                  type: string
+              type: object
           required:
           - experiment
           - phase
@@ -703,14 +711,6 @@ spec:
               - fixed
               - fixed-percent
               - random-max-percent
-              type: string
-            nextRecover:
-              description: Next time when this action will be recovered
-              format: date-time
-              type: string
-            nextStart:
-              description: Next time when this action will be applied again
-              format: date-time
               type: string
             scheduler:
               description: Scheduler defines some schedule rules to control the running
@@ -931,6 +931,18 @@ spec:
               type: string
             reason:
               type: string
+            scheduler:
+              description: ScheduleStatus is the current status of chaos scheduler.
+              properties:
+                nextRecover:
+                  description: Next time when this action will be recovered
+                  format: date-time
+                  type: string
+                nextStart:
+                  description: Next time when this action will be applied again
+                  format: date-time
+                  type: string
+              type: object
           required:
           - experiment
           - phase
@@ -1012,14 +1024,6 @@ spec:
               - fixed
               - fixed-percent
               - random-max-percent
-              type: string
-            nextRecover:
-              description: Next time when this action will be recovered
-              format: date-time
-              type: string
-            nextStart:
-              description: Next time when this action will be applied again
-              format: date-time
               type: string
             scheduler:
               description: Scheduler defines some schedule rules to control the running
@@ -1156,6 +1160,18 @@ spec:
               type: string
             reason:
               type: string
+            scheduler:
+              description: ScheduleStatus is the current status of chaos scheduler.
+              properties:
+                nextRecover:
+                  description: Next time when this action will be recovered
+                  format: date-time
+                  type: string
+                nextStart:
+                  description: Next time when this action will be applied again
+                  format: date-time
+                  type: string
+              type: object
           required:
           - experiment
           - phase
@@ -1215,14 +1231,6 @@ spec:
             mode:
               description: 'Mode defines the mode to run chaos action. Supported mode:
                 one / all / fixed / fixed-percent / random-max-percent'
-              type: string
-            nextRecover:
-              description: Next time when this action will be recovered
-              format: date-time
-              type: string
-            nextStart:
-              description: Next time when this action will be applied again
-              format: date-time
               type: string
             scheduler:
               description: Scheduler defines some schedule rules to control the running
@@ -1416,6 +1424,18 @@ spec:
               type: string
             reason:
               type: string
+            scheduler:
+              description: ScheduleStatus is the current status of chaos scheduler.
+              properties:
+                nextRecover:
+                  description: Next time when this action will be recovered
+                  format: date-time
+                  type: string
+                nextStart:
+                  description: Next time when this action will be applied again
+                  format: date-time
+                  type: string
+              type: object
           required:
           - experiment
           - phase
@@ -1495,14 +1515,6 @@ spec:
               - fixed
               - fixed-percent
               - random-max-percent
-              type: string
-            nextRecover:
-              description: Next time when this action will be recovered
-              format: date-time
-              type: string
-            nextStart:
-              description: Next time when this action will be applied again
-              format: date-time
               type: string
             scheduler:
               description: Scheduler defines some schedule rules to control the running
@@ -1644,6 +1656,18 @@ spec:
               type: string
             reason:
               type: string
+            scheduler:
+              description: ScheduleStatus is the current status of chaos scheduler.
+              properties:
+                nextRecover:
+                  description: Next time when this action will be recovered
+                  format: date-time
+                  type: string
+                nextStart:
+                  description: Next time when this action will be applied again
+                  format: date-time
+                  type: string
+              type: object
           required:
           - experiment
           - phase

@@ -54,13 +54,14 @@ func NewService(
 
 // Register mounts our HTTP handler on the mux.
 func Register(r *gin.RouterGroup, s *Service) {
-	endpoint := r.Group("/experiment")
+	endpoint := r.Group("/experiments")
 
 	// TODO: add more api handlers
 	endpoint.GET("/", s.listExperiments)
-	endpoint.GET("/detail", s.getExperimentDetail)
+	endpoint.POST("/", s.createExperiment)
 	endpoint.DELETE("/delete/:ns/:name", s.deleteExperiment)
-	endpoint.POST("/new", s.createExperiment)
+	endpoint.GET("/detail/:name", s.getExperimentDetail)
+	endpoint.GET("/state", s.state)
 }
 
 // TODO: need to be implemented
@@ -81,7 +82,7 @@ type ExperimentInfo struct {
 	Scheduler SchedulerInfo `form:"scheduler"`
 }
 
-// Scope defines the scope of the Experiment.
+// ScopeInfo defines the scope of the Experiment.
 type ScopeInfo struct {
 	NamespaceSelectors  []string          `form:"namespace_selectors" binding:"NamespaceSelectorsValid"`
 	LabelSelectors      map[string]string `form:"label_selectors" binding:"MapSelectorsValid"`
@@ -90,6 +91,35 @@ type ScopeInfo struct {
 	PhaseSelector       []string          `form:"phase_selectors" binding:"PhaseSelectorsValid"`
 
 	Mode string `form:"mode" binding:"required,oneof=one all fixed fixed-percent random-max-percent"`
+}
+
+func (s *ScopeInfo) parseSelector() v1alpha1.SelectorSpec {
+	selector := v1alpha1.SelectorSpec{}
+
+	for _, ns := range s.NamespaceSelectors {
+		selector.Namespaces = append(selector.Namespaces, ns)
+	}
+
+	for key, val := range s.LabelSelectors {
+		selector.LabelSelectors = make(map[string]string)
+		selector.LabelSelectors[key] = val
+	}
+
+	for key, val := range s.AnnotationSelectors {
+		selector.AnnotationSelectors = make(map[string]string)
+		selector.AnnotationSelectors[key] = val
+	}
+
+	for key, val := range s.FieldSelectors {
+		selector.FieldSelectors = make(map[string]string)
+		selector.FieldSelectors[key] = val
+	}
+
+	for _, ph := range s.PhaseSelector {
+		selector.PodPhaseSelectors = append(selector.PodPhaseSelectors, ph)
+	}
+
+	return selector
 }
 
 // TargetInfo defines the information of target objects.
@@ -101,6 +131,11 @@ type TargetInfo struct {
 	KernelChaos  KernelChaosInfo
 	TimeChaos    TimeChaosInfo
 	StressChaos  StressChaosInfo
+}
+
+// SchedulerInfo defines the scheduler information.
+type SchedulerInfo struct {
+	Cron string `form:"cron" binding:"CronValid"`
 }
 
 // PodChaosInfo defines the basic information of pod chaos.
@@ -115,10 +150,6 @@ type IOChaosInfo struct{}
 type KernelChaosInfo struct{}
 type TimeChaosInfo struct{}
 type StressChaosInfo struct{}
-
-type SchedulerInfo struct {
-	Cron string `form:"cron" binding:"CronValid"`
-}
 
 func (s *Service) createExperiment(c *gin.Context) {
 	exp := &ExperimentInfo{}
@@ -160,7 +191,7 @@ func (s *Service) createPodChaos(exp *ExperimentInfo) error {
 			Namespace: exp.Namespace,
 		},
 		Spec: v1alpha1.PodChaosSpec{
-			Selector: s.parseSelector(exp.Scope),
+			Selector: exp.Scope.parseSelector(),
 			Action:   v1alpha1.PodChaosAction(exp.Target.PodChaos.Action),
 			Mode:     v1alpha1.PodMode(exp.Scope.Mode),
 		},
@@ -170,38 +201,186 @@ func (s *Service) createPodChaos(exp *ExperimentInfo) error {
 		chaos.Spec.Scheduler = &v1alpha1.SchedulerSpec{Cron: exp.Scheduler.Cron}
 	}
 
-	if err := s.kubeCli.Create(context.Background(), chaos); err != nil {
+	return s.kubeCli.Create(context.Background(), chaos)
+}
+
+// getPodChaosState returns the state of PodChaos
+func (s *Service) getPodChaosState(stateInfo map[string]int) error {
+	var chaosList v1alpha1.PodChaosList
+	err := s.kubeCli.List(context.Background(), &chaosList)
+	if err != nil {
 		return err
 	}
+	for _, chaos := range chaosList.Items {
+		stateInfo["Total"]++
+		switch chaos.Status.ChaosStatus.Experiment.Phase {
+		case v1alpha1.ExperimentPhaseRunning:
+			stateInfo["Running"]++
+		case v1alpha1.ExperimentPhasePaused:
+			stateInfo["Paused"]++
+		case v1alpha1.ExperimentPhaseFailed:
+			stateInfo["Failed"]++
+		case v1alpha1.ExperimentPhaseFinished:
+			stateInfo["Finished"]++
+		}
+	}
+	return nil
+}
+
+// getIoChaosState returns the state of IoChaos
+func (s *Service) getIoChaosState(stateInfo map[string]int) error {
+	var chaosList v1alpha1.IoChaosList
+	err := s.kubeCli.List(context.Background(), &chaosList)
+	if err != nil {
+		return err
+	}
+	for _, chaos := range chaosList.Items {
+		stateInfo["Total"]++
+		switch chaos.Status.ChaosStatus.Experiment.Phase {
+		case v1alpha1.ExperimentPhaseRunning:
+			stateInfo["Running"]++
+		case v1alpha1.ExperimentPhasePaused:
+			stateInfo["Paused"]++
+		case v1alpha1.ExperimentPhaseFailed:
+			stateInfo["Failed"]++
+		case v1alpha1.ExperimentPhaseFinished:
+			stateInfo["Finished"]++
+		}
+	}
+	return nil
+}
+
+// getNetworkChaosState returns the state of NetworkChaos
+func (s *Service) getNetworkChaosState(stateInfo map[string]int) error {
+	var chaosList v1alpha1.NetworkChaosList
+	err := s.kubeCli.List(context.Background(), &chaosList)
+	if err != nil {
+		return err
+	}
+	for _, chaos := range chaosList.Items {
+		stateInfo["Total"]++
+		switch chaos.Status.ChaosStatus.Experiment.Phase {
+		case v1alpha1.ExperimentPhaseRunning:
+			stateInfo["Running"]++
+		case v1alpha1.ExperimentPhasePaused:
+			stateInfo["Paused"]++
+		case v1alpha1.ExperimentPhaseFailed:
+			stateInfo["Failed"]++
+		case v1alpha1.ExperimentPhaseFinished:
+			stateInfo["Finished"]++
+		}
+	}
+	return nil
+}
+
+// getTimeChaosState returns the state of TimeChaos
+func (s *Service) getTimeChaosState(stateInfo map[string]int) error {
+	var chaosList v1alpha1.TimeChaosList
+	err := s.kubeCli.List(context.Background(), &chaosList)
+	if err != nil {
+		return err
+	}
+	for _, chaos := range chaosList.Items {
+		stateInfo["Total"]++
+		switch chaos.Status.ChaosStatus.Experiment.Phase {
+		case v1alpha1.ExperimentPhaseRunning:
+			stateInfo["Running"]++
+		case v1alpha1.ExperimentPhasePaused:
+			stateInfo["Paused"]++
+		case v1alpha1.ExperimentPhaseFailed:
+			stateInfo["Failed"]++
+		case v1alpha1.ExperimentPhaseFinished:
+			stateInfo["Finished"]++
+		}
+	}
+	return nil
+}
+
+// getKernelChaosState returns the state of KernelChaos
+func (s *Service) getKernelChaosState(stateInfo map[string]int) error {
+	var chaosList v1alpha1.KernelChaosList
+	err := s.kubeCli.List(context.Background(), &chaosList)
+	if err != nil {
+		return err
+	}
+	for _, chaos := range chaosList.Items {
+		stateInfo[string(chaos.Status.ChaosStatus.Experiment.Phase)]++
+	}
+	stateInfo["Total"] += len(chaosList.Items)
 
 	return nil
 }
 
-func (s *Service) parseSelector(scope ScopeInfo) v1alpha1.SelectorSpec {
-	selector := v1alpha1.SelectorSpec{}
+// getStressChaosState returns the state of StressChaos
+func (s *Service) getStressChaosState(stateInfo map[string]int) error {
+	var chaosList v1alpha1.StressChaosList
+	err := s.kubeCli.List(context.Background(), &chaosList)
+	if err != nil {
+		return err
+	}
+	for _, chaos := range chaosList.Items {
+		stateInfo["Total"]++
+		switch chaos.Status.ChaosStatus.Experiment.Phase {
+		case v1alpha1.ExperimentPhaseRunning:
+			stateInfo["Running"]++
+		case v1alpha1.ExperimentPhasePaused:
+			stateInfo["Paused"]++
+		case v1alpha1.ExperimentPhaseFailed:
+			stateInfo["Failed"]++
+		case v1alpha1.ExperimentPhaseFinished:
+			stateInfo["Finished"]++
+		}
+	}
+	return nil
+}
 
-	for _, ns := range scope.NamespaceSelectors {
-		selector.Namespaces = append(selector.Namespaces, ns)
+func (s *Service) state(c *gin.Context) {
+	data := make(map[string]int)
+	data["Total"] = 0
+	data["Running"] = 0
+	data["Paused"] = 0
+	data["Failed"] = 0
+	data["Finished"] = 0
+	getChaosWrong := gin.H{
+		"status":  statuscode.GetResourcesWrong,
+		"message": "failed to get chaos state",
+		"data":    make(map[string]int),
 	}
 
-	for key, val := range scope.LabelSelectors {
-		selector.LabelSelectors = make(map[string]string)
-		selector.LabelSelectors[key] = val
+	err := s.getPodChaosState(data)
+	if err != nil {
+		c.JSON(http.StatusOK, getChaosWrong)
+		return
+	}
+	err = s.getIoChaosState(data)
+	if err != nil {
+		c.JSON(http.StatusOK, getChaosWrong)
+		return
+	}
+	err = s.getNetworkChaosState(data)
+	if err != nil {
+		c.JSON(http.StatusOK, getChaosWrong)
+		return
+	}
+	err = s.getTimeChaosState(data)
+	if err != nil {
+		c.JSON(http.StatusOK, getChaosWrong)
+		return
+	}
+	err = s.getKernelChaosState(data)
+	if err != nil {
+		c.JSON(http.StatusOK, getChaosWrong)
+		return
+	}
+	err = s.getStressChaosState(data)
+	if err != nil {
+		c.JSON(http.StatusOK, getChaosWrong)
+		return
 	}
 
-	for key, val := range scope.AnnotationSelectors {
-		selector.AnnotationSelectors = make(map[string]string)
-		selector.AnnotationSelectors[key] = val
-	}
-
-	for key, val := range scope.FieldSelectors {
-		selector.FieldSelectors = make(map[string]string)
-		selector.FieldSelectors[key] = val
-	}
-
-	for _, ph := range scope.PhaseSelector {
-		selector.PodPhaseSelectors = append(selector.PodPhaseSelectors, ph)
-	}
-
-	return selector
+	c.JSON(http.StatusOK, gin.H{
+		"status":  statuscode.Success,
+		"message": "success",
+		"data":    data,
+	})
 }
