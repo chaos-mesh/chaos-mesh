@@ -102,18 +102,18 @@ func (s *ScopeInfo) parseSelector() v1alpha1.SelectorSpec {
 		selector.Namespaces = append(selector.Namespaces, ns)
 	}
 
+	selector.LabelSelectors = make(map[string]string)
 	for key, val := range s.LabelSelectors {
-		selector.LabelSelectors = make(map[string]string)
 		selector.LabelSelectors[key] = val
 	}
 
+	selector.AnnotationSelectors = make(map[string]string)
 	for key, val := range s.AnnotationSelectors {
-		selector.AnnotationSelectors = make(map[string]string)
 		selector.AnnotationSelectors[key] = val
 	}
 
+	selector.FieldSelectors = make(map[string]string)
 	for key, val := range s.FieldSelectors {
-		selector.FieldSelectors = make(map[string]string)
 		selector.FieldSelectors[key] = val
 	}
 
