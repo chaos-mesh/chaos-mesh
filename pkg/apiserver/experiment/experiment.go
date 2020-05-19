@@ -18,7 +18,6 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/gin-gonic/gin/binding"
 
 	"github.com/pingcap/chaos-mesh/api/v1alpha1"
 	statuscode "github.com/pingcap/chaos-mesh/pkg/apiserver/status_code"
@@ -26,8 +25,11 @@ import (
 	"github.com/pingcap/chaos-mesh/pkg/core"
 
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
+
+var log = ctrl.Log.WithName("experiment api")
 
 // Service defines a handler service for experiments.
 type Service struct {
@@ -54,11 +56,11 @@ func NewService(
 
 // Register mounts our HTTP handler on the mux.
 func Register(r *gin.RouterGroup, s *Service) {
-	endpoint := r.Group("/experiments")
+	endpoint := r.Group("/experiment")
 
 	// TODO: add more api handlers
-	endpoint.GET("/", s.listExperiments)
-	endpoint.POST("/", s.createExperiment)
+	endpoint.GET("/all", s.listExperiments)
+	endpoint.POST("/new", s.createExperiment)
 	endpoint.DELETE("/delete/:ns/:name", s.deleteExperiment)
 	endpoint.GET("/detail/:name", s.getExperimentDetail)
 	endpoint.GET("/state", s.state)
@@ -75,22 +77,22 @@ func (s *Service) deleteExperiment(c *gin.Context) {}
 
 // ExperimentInfo defines a form data of Experiment from API.
 type ExperimentInfo struct {
-	Name      string        `form:"name" binding:"required,NameValid"`
-	Namespace string        `form:"namespace" binding:"required,NameValid"`
-	Scope     ScopeInfo     `form:"scope"`
-	Target    TargetInfo    `form:"target"`
-	Scheduler SchedulerInfo `form:"scheduler"`
+	Name      string        `json:"name" binding:"required,NameValid"`
+	Namespace string        `json:"namespace" binding:"required,NameValid"`
+	Scope     ScopeInfo     `json:"scope"`
+	Target    TargetInfo    `json:"target"`
+	Scheduler SchedulerInfo `json:"scheduler"`
 }
 
 // ScopeInfo defines the scope of the Experiment.
 type ScopeInfo struct {
-	NamespaceSelectors  []string          `form:"namespace_selectors" binding:"NamespaceSelectorsValid"`
-	LabelSelectors      map[string]string `form:"label_selectors" binding:"MapSelectorsValid"`
-	AnnotationSelectors map[string]string `form:"annotation_selectors" binding:"MapSelectorsValid"`
-	FieldSelectors      map[string]string `form:"field_selectors" binding:"MapSelectorsValid"`
-	PhaseSelector       []string          `form:"phase_selectors" binding:"PhaseSelectorsValid"`
+	NamespaceSelectors  []string          `json:"namespace_selectors" binding:"NamespaceSelectorsValid"`
+	LabelSelectors      map[string]string `json:"label_selectors" binding:"MapSelectorsValid"`
+	AnnotationSelectors map[string]string `json:"annotation_selectors" binding:"MapSelectorsValid"`
+	FieldSelectors      map[string]string `json:"field_selectors" binding:"MapSelectorsValid"`
+	PhaseSelector       []string          `json:"phase_selectors" binding:"PhaseSelectorsValid"`
 
-	Mode string `form:"mode" binding:"required,oneof=one all fixed fixed-percent random-max-percent"`
+	Mode string `json:"mode" binding:"required,oneof=one all fixed fixed-percent random-max-percent"`
 }
 
 func (s *ScopeInfo) parseSelector() v1alpha1.SelectorSpec {
@@ -124,9 +126,9 @@ func (s *ScopeInfo) parseSelector() v1alpha1.SelectorSpec {
 
 // TargetInfo defines the information of target objects.
 type TargetInfo struct {
-	Kind         string `form:"kind" binding:"required,oneof=PodChaos NetworkChaos IOChaos KernelChaos TimeChaos StressChaos"`
-	PodChaos     PodChaosInfo
-	NetworkChaos PodChaosInfo
+	Kind         string       `json:"kind" binding:"required,oneof=PodChaos NetworkChaos IOChaos KernelChaos TimeChaos StressChaos"`
+	PodChaos     PodChaosInfo `json:"pod_chaos"`
+	NetworkChaos NetworkChaosInfo
 	IOChaos      IOChaosInfo
 	KernelChaos  KernelChaosInfo
 	TimeChaos    TimeChaosInfo
@@ -135,13 +137,13 @@ type TargetInfo struct {
 
 // SchedulerInfo defines the scheduler information.
 type SchedulerInfo struct {
-	Cron string `form:"cron" binding:"CronValid"`
+	Cron string `json:"cron" binding:"CronValid"`
 }
 
 // PodChaosInfo defines the basic information of pod chaos.
 type PodChaosInfo struct {
-	Action        string `form:"action" binding:"oneof=pod-kill pod-failure container-kill"`
-	ContainerName string `form:"container_name"`
+	Action        string `json:"action" binding:"oneof=pod-kill pod-failure container-kill"`
+	ContainerName string `json:"container_name"`
 }
 
 // TODO: implement these structs
@@ -153,9 +155,9 @@ type StressChaosInfo struct{}
 
 func (s *Service) createExperiment(c *gin.Context) {
 	exp := &ExperimentInfo{}
-	if err := c.ShouldBindWith(exp, binding.Query); err != nil {
+	if err := c.ShouldBindJSON(exp); err != nil {
 		c.JSON(http.StatusOK, gin.H{
-			"message": "Experiment dates are invalid!",
+			"message": err.Error(),
 			"status":  statuscode.InvalidParameter,
 		})
 		return
