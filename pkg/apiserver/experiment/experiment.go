@@ -56,13 +56,13 @@ func NewService(
 
 // Register mounts our HTTP handler on the mux.
 func Register(r *gin.RouterGroup, s *Service) {
-	endpoint := r.Group("/experiment")
+	endpoint := r.Group("/experiments")
 
 	// TODO: add more api handlers
-	endpoint.GET("/all", s.listExperiments)
+	endpoint.GET("", s.listExperiments)
 	endpoint.POST("/new", s.createExperiment)
-	endpoint.DELETE("/delete/:ns/:name", s.deleteExperiment)
-	endpoint.GET("/detail/:name", s.getExperimentDetail)
+	endpoint.DELETE("/detail/:ns/:name", s.deleteExperiment)
+	endpoint.GET("/delete/:ns/:name", s.getExperimentDetail)
 	endpoint.GET("/state", s.state)
 }
 
