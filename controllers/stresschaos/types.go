@@ -98,7 +98,7 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1
 		return err
 	}
 
-	stresschaos.Status.Experiment.Pods = make([]v1alpha1.PodStatus, 0, len(pods))
+	stresschaos.Status.Experiment.PodRecords = make([]v1alpha1.PodStatus, 0, len(pods))
 	for _, pod := range pods {
 		ps := v1alpha1.PodStatus{
 			Namespace: pod.Namespace,
@@ -108,7 +108,7 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1
 			Message:   stressChaosMsg,
 		}
 
-		stresschaos.Status.Experiment.Pods = append(stresschaos.Status.Experiment.Pods, ps)
+		stresschaos.Status.Experiment.PodRecords = append(stresschaos.Status.Experiment.PodRecords, ps)
 	}
 	r.Event(stresschaos, v1.EventTypeNormal, utils.EventChaosInjected, "")
 	return nil

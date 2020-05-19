@@ -99,7 +99,7 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1
 		return err
 	}
 
-	timechaos.Status.Experiment.Pods = make([]v1alpha1.PodStatus, 0, len(pods))
+	timechaos.Status.Experiment.PodRecords = make([]v1alpha1.PodStatus, 0, len(pods))
 	for _, pod := range pods {
 		ps := v1alpha1.PodStatus{
 			Namespace: pod.Namespace,
@@ -109,7 +109,7 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1
 			Message:   fmt.Sprintf(timeChaosMsg, timechaos.Spec.TimeOffset),
 		}
 
-		timechaos.Status.Experiment.Pods = append(timechaos.Status.Experiment.Pods, ps)
+		timechaos.Status.Experiment.PodRecords = append(timechaos.Status.Experiment.PodRecords, ps)
 	}
 	r.Event(timechaos, v1.EventTypeNormal, utils.EventChaosInjected, "")
 	return nil

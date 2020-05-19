@@ -147,8 +147,8 @@ func (in *ExperimentStatus) DeepCopyInto(out *ExperimentStatus) {
 		in, out := &in.EndTime, &out.EndTime
 		*out = (*in).DeepCopy()
 	}
-	if in.Pods != nil {
-		in, out := &in.Pods, &out.Pods
+	if in.PodRecords != nil {
+		in, out := &in.PodRecords, &out.PodRecords
 		*out = make([]PodStatus, len(*in))
 		copy(*out, *in)
 	}
