@@ -35,7 +35,7 @@ import (
 const (
 	operatorChartName = "chaos-mesh"
 	// this hardcoded template is used for replacing images we use in E2E
-	sidecarTemplate   = `initContainers:
+	sidecarTemplate = `initContainers:
 - name: inject-scripts
   image: %s
   imagePullPolicy: IfNotPresent

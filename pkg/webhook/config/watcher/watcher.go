@@ -22,6 +22,7 @@ import (
 	"strings"
 
 	"github.com/ghodss/yaml"
+
 	"github.com/pingcap/chaos-mesh/pkg/webhook/config"
 
 	ctrl "sigs.k8s.io/controller-runtime"
