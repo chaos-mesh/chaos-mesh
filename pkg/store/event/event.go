@@ -44,8 +44,8 @@ type eventStore struct {
 	db *dbstore.DB
 }
 
-// FindPodsByEventID return the list of PodRecords according to the eventID
-func (e *eventStore) FindPodsByEventID(_ context.Context, id uint) ([]*core.PodRecord, error) {
+// FindPodRecordsByEventID return the list of PodRecords according to the eventID
+func (e *eventStore) FindPodRecordsByEventID(_ context.Context, id uint) ([]*core.PodRecord, error) {
 	pods := make([]*core.PodRecord,0)
 	if err := e.db.Where(
 		"event_id = ?", id).
@@ -65,7 +65,7 @@ func (e *eventStore) List(_ context.Context) ([]*core.Event, error) {
 	}
 
 	for _, et := range(resList) {
-		pods, err:= e.FindPodsByEventID(context.Background(), et.ID)
+		pods, err:= e.FindPodRecordsByEventID(context.Background(), et.ID)
 		if err != nil {
 			return nil, err
 		}
@@ -89,7 +89,7 @@ func (e *eventStore) ListByExperiment(_ context.Context, namespace string, exper
 
 	eventList := make([]*core.Event, 0, len(resList))
 	for _, et := range resList {
-		pods, err:= e.FindPodsByEventID(context.Background(), et.ID)
+		pods, err:= e.FindPodRecordsByEventID(context.Background(), et.ID)
 		if err != nil {
 			return nil, err
 		}
@@ -119,7 +119,7 @@ func (e *eventStore) ListByPod(_ context.Context, namespace string, name string)
 			return nil, err
 		}
 
-		pods, err:= e.FindPodsByEventID(context.Background(), et.ID)
+		pods, err:= e.FindPodRecordsByEventID(context.Background(), et.ID)
 		if err != nil {
 			return nil, err
 		}
@@ -137,7 +137,7 @@ func (e *eventStore) Find(_ context.Context, id uint) (*core.Event, error) {
 		First(et).Error; err != nil && !gorm.IsRecordNotFoundError(err) {
 		return nil, err
 	}
-	pods, err:= e.FindPodsByEventID(context.Background(), et.ID)
+	pods, err:= e.FindPodRecordsByEventID(context.Background(), et.ID)
 	if err != nil {
 		return nil, err
 	}
