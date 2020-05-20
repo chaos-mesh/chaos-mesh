@@ -160,7 +160,7 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1
 		}
 	}
 
-	networkchaos.Status.Experiment.Pods = make([]v1alpha1.PodStatus, 0, len(allPods))
+	networkchaos.Status.Experiment.PodRecords = make([]v1alpha1.PodStatus, 0, len(allPods))
 	for _, pod := range allPods {
 		ps := v1alpha1.PodStatus{
 			Namespace: pod.Namespace,
@@ -174,7 +174,7 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1
 			ps.Message = fmt.Sprintf(networkPartitionActionMsg, *networkchaos.Spec.Duration)
 		}
 
-		networkchaos.Status.Experiment.Pods = append(networkchaos.Status.Experiment.Pods, ps)
+		networkchaos.Status.Experiment.PodRecords = append(networkchaos.Status.Experiment.PodRecords, ps)
 	}
 
 	r.Event(networkchaos, v1.EventTypeNormal, utils.EventChaosInjected, "")

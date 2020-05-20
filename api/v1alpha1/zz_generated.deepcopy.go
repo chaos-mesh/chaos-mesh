@@ -147,8 +147,8 @@ func (in *ExperimentStatus) DeepCopyInto(out *ExperimentStatus) {
 		in, out := &in.EndTime, &out.EndTime
 		*out = (*in).DeepCopy()
 	}
-	if in.Pods != nil {
-		in, out := &in.Pods, &out.Pods
+	if in.PodRecords != nil {
+		in, out := &in.PodRecords, &out.PodRecords
 		*out = make([]PodStatus, len(*in))
 		copy(*out, *in)
 	}
@@ -281,14 +281,6 @@ func (in *IoChaosSpec) DeepCopyInto(out *IoChaosSpec) {
 		in, out := &in.Methods, &out.Methods
 		*out = make([]string, len(*in))
 		copy(*out, *in)
-	}
-	if in.NextStart != nil {
-		in, out := &in.NextStart, &out.NextStart
-		*out = (*in).DeepCopy()
-	}
-	if in.NextRecover != nil {
-		in, out := &in.NextRecover, &out.NextRecover
-		*out = (*in).DeepCopy()
 	}
 }
 

@@ -349,7 +349,7 @@ spec:
                 phase:
                   description: ExperimentPhase is the current status of chaos experiment.
                   type: string
-                podChaos:
+                podRecords:
                   items:
                     description: PodStatus represents information about the status
                       of a pod in chaos experiment.
