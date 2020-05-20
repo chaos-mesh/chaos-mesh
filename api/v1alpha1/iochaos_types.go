@@ -230,6 +230,25 @@ func (in *IoChaos) GetScheduler() *SchedulerSpec {
 	return in.Spec.Scheduler
 }
 
+// GetChaos returns a chaos instance
+func (in *IoChaos) GetChaos() *ChaosInstance {
+	instance := &ChaosInstance{
+		Name:      in.Name,
+		Namespace: in.Namespace,
+		Kind:      KindIOChaos,
+		StartTime: in.CreationTimestamp.Time,
+		Action:    string(in.Spec.Action),
+		Status:    string(in.GetStatus().Experiment.Phase),
+	}
+	if in.Spec.Duration != nil {
+		instance.Duration = *in.Spec.Duration
+	}
+	if in.DeletionTimestamp != nil {
+		instance.EndTime = in.DeletionTimestamp.Time
+	}
+	return instance
+}
+
 // +kubebuilder:object:root=true
 
 // IoChaosList contains a list of IoChaos
@@ -237,6 +256,15 @@ type IoChaosList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
 	Items           []IoChaos `json:"items"`
+}
+
+// ListChaos returns a list of io chaos
+func (in *IoChaosList) ListChaos() []*ChaosInstance {
+	res := make([]*ChaosInstance, 0, len(in.Items))
+	for _, item := range in.Items {
+		res = append(res, item.GetChaos())
+	}
+	return res
 }
 
 func init() {

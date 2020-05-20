@@ -217,6 +217,25 @@ func (in *KernelChaos) IsPaused() bool {
 	return true
 }
 
+// GetChaos returns a chaos instance
+func (in *KernelChaos) GetChaos() *ChaosInstance {
+	instance := &ChaosInstance{
+		Name:      in.Name,
+		Namespace: in.Namespace,
+		Kind:      KindKernelChaos,
+		StartTime: in.CreationTimestamp.Time,
+		Action:    "",
+		Status:    string(in.GetStatus().Experiment.Phase),
+	}
+	if in.Spec.Duration != nil {
+		instance.Duration = *in.Spec.Duration
+	}
+	if in.DeletionTimestamp != nil {
+		instance.EndTime = in.DeletionTimestamp.Time
+	}
+	return instance
+}
+
 // +kubebuilder:object:root=true
 
 // KernelChaosList contains a list of KernelChaos
@@ -224,6 +243,15 @@ type KernelChaosList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
 	Items           []KernelChaos `json:"items"`
+}
+
+// ListChaos returns a list of kernel chaos
+func (in *KernelChaosList) ListChaos() []*ChaosInstance {
+	res := make([]*ChaosInstance, 0, len(in.Items))
+	for _, item := range in.Items {
+		res = append(res, item.GetChaos())
+	}
+	return res
 }
 
 func init() {
