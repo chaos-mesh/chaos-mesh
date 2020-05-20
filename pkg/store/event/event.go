@@ -79,7 +79,6 @@ func (e *eventStore) List(_ context.Context) ([]*core.Event, error) {
 // ListByExperiment returns a event list by the name and namespace of the experiment.
 func (e *eventStore) ListByExperiment(_ context.Context, namespace string, experiment string) ([]*core.Event, error) {
 	var resList []core.Event
-	eventList := make([]*core.Event, 0)
 
 	if err := e.db.Where(
 		"namespace = ? and experiment = ? ",
@@ -88,6 +87,7 @@ func (e *eventStore) ListByExperiment(_ context.Context, namespace string, exper
 		return nil, err
 	}
 
+	eventList := make([]*core.Event, 0, len(resList))
 	for _, et := range resList {
 		pods, err:= e.FindPodsByEventID(context.Background(), et.ID)
 		if err != nil {
