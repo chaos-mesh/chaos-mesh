@@ -128,14 +128,6 @@ type IoChaosSpec struct {
 	// Addr defines the address for sidecar container.
 	// +optional
 	Addr string `json:"addr,omitempty"`
-
-	// Next time when this action will be applied again.
-	// +optional
-	NextStart *metav1.Time `json:"nextStart,omitempty"`
-
-	// Next time when this action will be recovered.
-	// +optional
-	NextRecover *metav1.Time `json:"nextRecover,omitempty"`
 }
 
 func (in *IoChaosSpec) GetSelector() SelectorSpec {

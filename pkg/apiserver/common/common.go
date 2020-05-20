@@ -23,16 +23,16 @@ import (
 	statuscode "github.com/pingcap/chaos-mesh/pkg/apiserver/status_code"
 	"github.com/pingcap/chaos-mesh/pkg/config"
 
+	v1 "k8s.io/api/core/v1"
 	apiextensionsclientset "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	v1 "k8s.io/api/core/v1"
-	ctrlconfig "sigs.k8s.io/controller-runtime/pkg/client/config"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	ctrlconfig "sigs.k8s.io/controller-runtime/pkg/client/config"
 )
 
 // Pod defines the basic information of the pod
 type Pod struct {
-	Name string
+	Name      string
 	Namespace string
 }
 
@@ -75,16 +75,16 @@ func Register(r *gin.RouterGroup, s *Service) {
 
 // GetPods returns the list of pods
 func (s *Service) GetPods(c *gin.Context) {
-	pods :=  make([]Pod, 0)
+	pods := make([]Pod, 0)
 
 	var podList v1.PodList
 	err := s.kubeCli.List(context.Background(), &podList)
 
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
-			"status": statuscode.GetResourcesWrong,
+			"status":  statuscode.GetResourcesWrong,
 			"message": "get pods wrong",
-			"data": pods,
+			"data":    pods,
 		})
 		return
 	}
@@ -97,9 +97,9 @@ func (s *Service) GetPods(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-			"status": statuscode.Success,
-			"message": "success",
-			"data": pods,
+		"status":  statuscode.Success,
+		"message": "success",
+		"data":    pods,
 	})
 }
 
@@ -112,9 +112,9 @@ func (s *Service) GetNamespaces(c *gin.Context) {
 
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
-			"status": statuscode.GetResourcesWrong,
+			"status":  statuscode.GetResourcesWrong,
 			"message": "get namespaces wrong",
-			"data": make([]Namespace, 0),
+			"data":    make([]Namespace, 0),
 		})
 		return
 	}
@@ -127,15 +127,15 @@ func (s *Service) GetNamespaces(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"status": statuscode.Success,
+		"status":  statuscode.Success,
 		"message": "success",
-		"data": namespaceList,
+		"data":    namespaceList,
 	})
 }
 
 // GetKinds returns the list of chaos kinds
 func (s *Service) GetKinds(c *gin.Context) {
-	ChaosKindList :=  make([]ChaosKind, 0)
+	ChaosKindList := make([]ChaosKind, 0)
 
 	config, _ := ctrlconfig.GetConfig()
 	apiExtCli, _ := apiextensionsclientset.NewForConfig(config)
@@ -144,9 +144,9 @@ func (s *Service) GetKinds(c *gin.Context) {
 
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
-			"status": statuscode.GetResourcesWrong,
+			"status":  statuscode.GetResourcesWrong,
 			"message": "get CRDs wrong",
-			"data": ChaosKindList,
+			"data":    ChaosKindList,
 		})
 		return
 	}
@@ -159,8 +159,8 @@ func (s *Service) GetKinds(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"status": statuscode.Success,
+		"status":  statuscode.Success,
 		"message": "success",
-		"data": ChaosKindList,
+		"data":    ChaosKindList,
 	})
 }
