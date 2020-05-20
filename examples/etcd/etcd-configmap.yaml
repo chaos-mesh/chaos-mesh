@@ -7,45 +7,14 @@ metadata:
   labels:
     app.kubernetes.io/component: webhook
 data:
-  chaosfs-etcd.yaml: |
+  chaosfs-etcd: |
     name: chaosfs-etcd
-    initContainers:
-    - name: inject-scripts
-      image: pingcap/chaos-scripts:latest
-      imagePullpolicy: Always
-      command: ["sh", "-c", "/scripts/init.sh -d /var/run/etcd/default.etcd -f /var/run/etcd/fuse-data"]
-    containers:
-    - name: chaosfs
-      image: pingcap/chaos-fs:latest
-      imagePullpolicy: Always
-      ports:
-      - containerPort: 65534
-      securityContext:
-        privileged: true
-      command:
-        - /usr/local/bin/chaosfs
-        - -addr=:65534
-        - -pidfile=/tmp/fuse/pid
-        - -original=/var/run/etcd/fuse-data
-        - -mountpoint=/var/run/etcd/default.etcd
-      volumeMounts:
-        - name: datadir
-          mountPath: /var/run/etcd
-          mountPropagation: Bidirectional
-    volumeMounts:
-    - name: datadir
-      mountPath: /var/run/etcd
-      mountPropagation: HostToContainer
-    - name: scripts
-      mountPath: /tmp/scripts
-    - name: fuse
-      mountPath: /tmp/fuse
-    volumes:
-    - name: scripts
-      emptyDir: {}
-    - name: fuse
-      emptyDir: {}
-    postStart:
-      etcd:
-        command:
-          - /tmp/scripts/wait-fuse.sh
+    selector:
+      labelSelectors:
+        app: etcd
+    template: sidecar-template
+    arguments:
+      ContainerName: "etcd"
+      DataPath: "/var/run/etcd/default.etcd"
+      MountPath: "/var/run/etcd"
+      VolumeName: "datadir"

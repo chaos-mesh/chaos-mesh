@@ -48,7 +48,7 @@ func WaitForAPIServicesAvaiable(client aggregatorclientset.Interface, selector l
 
 // WaitForCRDsEstablished waits for all CRDs to be established
 func WaitForCRDsEstablished(client apiextensionsclientset.Interface, selector labels.Selector) error {
-	isEstalbished := func(status apiextensionsv1beta1.CustomResourceDefinitionStatus) bool {
+	isEstablished := func(status apiextensionsv1beta1.CustomResourceDefinitionStatus) bool {
 		if status.Conditions == nil {
 			return false
 		}
@@ -67,7 +67,7 @@ func WaitForCRDsEstablished(client apiextensionsclientset.Interface, selector la
 			return false, err
 		}
 		for _, crd := range crdList.Items {
-			if !isEstalbished(crd.Status) {
+			if !isEstablished(crd.Status) {
 				framework.Logf("CRD %q is not established yet", crd.Name)
 				return false, nil
 			}

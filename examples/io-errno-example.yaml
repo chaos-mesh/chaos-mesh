@@ -7,7 +7,6 @@ spec:
   action: errno
   mode: one
   duration: "400s"
-  configName: "chaosfs-tikv"
   path: ""
   selector:
     labelSelectors:

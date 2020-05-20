@@ -13,16 +13,34 @@
 
 package watcher
 
+import (
+	"github.com/pingcap/errors"
+)
+
 // Config is a configuration struct for the Watcher type
 type Config struct {
-	Namespace       string
-	ConfigMapLabels map[string]string
+	Namespace      string
+	TemplateLabels map[string]string
+	ConfigLabels   map[string]string
 }
 
 // NewConfig returns a new initialized Config
 func NewConfig() *Config {
 	return &Config{
-		Namespace:       "",
-		ConfigMapLabels: map[string]string{},
+		Namespace:      "",
+		TemplateLabels: map[string]string{},
+		ConfigLabels:   map[string]string{},
 	}
+}
+
+// InitLabels initializes labels in Config
+func (c *Config) InitLabels(templateLabels, confLabels map[string]string) error {
+	if len(templateLabels) == 0 {
+		return errors.New("template labels must be set")
+	}
+	if len(confLabels) == 0 {
+		return errors.New("conf labels must be set")
+	}
+	c.TemplateLabels, c.ConfigLabels = templateLabels, confLabels
+	return nil
 }

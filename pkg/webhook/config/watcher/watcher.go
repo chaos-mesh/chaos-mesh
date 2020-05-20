@@ -16,15 +16,16 @@ package watcher
 import (
 	"errors"
 	"fmt"
+	"html/template"
 	"io/ioutil"
 	"os"
 	"strings"
 
+	"github.com/ghodss/yaml"
 	"github.com/pingcap/chaos-mesh/pkg/webhook/config"
 
 	ctrl "sigs.k8s.io/controller-runtime"
 
-	v1 "k8s.io/api/core/v1"
 	apierrs "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
@@ -40,6 +41,7 @@ var kubernetesNewForConfig = kubernetes.NewForConfig
 
 const (
 	serviceAccountNamespaceFilePath = "/var/run/secrets/kubernetes.io/serviceaccount/namespace"
+	templateItemKey                 = "data"
 )
 
 // ErrWatchChannelClosed should restart watcher
@@ -60,17 +62,17 @@ func New(cfg Config) (*K8sConfigMapWatcher, error) {
 		nsBytes, err := ioutil.ReadFile(serviceAccountNamespaceFilePath)
 		if err != nil {
 			if os.IsNotExist(err) {
-				return nil, fmt.Errorf("%s: maybe you should specify --configmap-namespace if you are running outside of kubernetes", err.Error())
+				return nil, fmt.Errorf("%s: maybe you should specify ----template-namespace if you are running outside of kubernetes", err.Error())
 			}
 			return nil, err
 		}
 		ns := strings.TrimSpace(string(nsBytes))
 		if ns != "" {
-			c.Namespace = string(ns)
+			c.Namespace = ns
 			log.Info("Inferred ConfigMap",
 				"namespace", c.Namespace, "filepath", serviceAccountNamespaceFilePath)
 		} else {
-			return nil, fmt.Errorf("can not found namespace. maybe you should specify --configmap-namespace if you are running outside of kubernetes")
+			return nil, errors.New("can not found namespace. maybe you should specify --template-namespace if you are running outside of kubernetes")
 		}
 	}
 
@@ -86,27 +88,30 @@ func New(cfg Config) (*K8sConfigMapWatcher, error) {
 	}
 
 	c.client = clientset.CoreV1()
-	err = validate(&c)
-	if err != nil {
+	if err = validate(&c); err != nil {
 		return nil, fmt.Errorf("validation failed for K8sConfigMapWatcher: %s", err.Error())
 	}
 	log.Info("Created ConfigMap watcher",
-		"apiserver", k8sConfig.Host, "namespaces", c.Namespace, "watchlabels", c.ConfigMapLabels)
+		"apiserver", k8sConfig.Host, "namespaces", c.Namespace,
+		"template labels", c.TemplateLabels, "config labels", c.ConfigLabels)
 	return &c, nil
 }
 
 func validate(c *K8sConfigMapWatcher) error {
 	if c == nil {
-		return fmt.Errorf("configmap watcher was nil")
+		return errors.New("configmap watcher was nil")
 	}
 	if c.Namespace == "" {
-		return fmt.Errorf("namespace is empty")
+		return errors.New("namespace is empty")
 	}
-	if c.ConfigMapLabels == nil {
-		return fmt.Errorf("configmap labels was an uninitialized map")
+	if c.TemplateLabels == nil {
+		return errors.New("template labels was an uninitialized map")
+	}
+	if c.ConfigLabels == nil {
+		return errors.New("config labels was an uninitialized map")
 	}
 	if c.client == nil {
-		return fmt.Errorf("k8s client was not setup properly")
+		return errors.New("k8s client was not setup properly")
 	}
 	return nil
 }
@@ -114,17 +119,51 @@ func validate(c *K8sConfigMapWatcher) error {
 // Watch watches for events impacting watched ConfigMaps and emits their events across a channel
 func (c *K8sConfigMapWatcher) Watch(notifyMe chan<- interface{}, stopCh <-chan struct{}) error {
 	log.Info("Watching for ConfigMaps for changes",
-		"namespace", c.Namespace, "labels", c.ConfigMapLabels)
-	watcher, err := c.client.ConfigMaps(c.Namespace).Watch(metav1.ListOptions{
-		LabelSelector: mapStringStringToLabelSelector(c.ConfigMapLabels),
+		"namespace", c.Namespace, "labels", c.ConfigLabels)
+	templateWatcher, err := c.client.ConfigMaps(c.Namespace).Watch(metav1.ListOptions{
+		LabelSelector: mapStringStringToLabelSelector(c.TemplateLabels),
 	})
 	if err != nil {
-		return fmt.Errorf("unable to create watcher (possible serviceaccount RBAC/ACL failure?): %s", err.Error())
+		return fmt.Errorf("unable to create template watcher (possible serviceaccount RBAC/ACL failure?): %s", err.Error())
 	}
-	defer watcher.Stop()
+
+	configWatcher, err := c.client.ConfigMaps("").Watch(metav1.ListOptions{
+		LabelSelector: mapStringStringToLabelSelector(c.ConfigLabels),
+	})
+	if err != nil {
+		return fmt.Errorf("unable to create config watcher (possible serviceaccount RBAC/ACL failure?): %s", err.Error())
+	}
+	defer func() {
+		configWatcher.Stop()
+		templateWatcher.Stop()
+	}()
 	for {
 		select {
-		case e, ok := <-watcher.ResultChan():
+		case e, ok := <-templateWatcher.ResultChan():
+			// channel may closed caused by HTTP timeout, should restart watcher
+			// detail at https://github.com/kubernetes/client-go/issues/334
+			if !ok {
+				log.Error(nil, "channel has closed, should restart watcher")
+				return ErrWatchChannelClosed
+			}
+			if e.Type == watch.Error {
+				return apierrs.FromObject(e.Object)
+			}
+			log.V(3).Info("type", e.Type, "kind", e.Object.GetObjectKind())
+			switch e.Type {
+			case watch.Added:
+				fallthrough
+			case watch.Modified:
+				fallthrough
+			case watch.Deleted:
+				// signal reconciliation of all InjectionConfigs
+				log.V(3).Info("Signalling event received from watch channel",
+					"type", e.Type, "kind", e.Object.GetObjectKind())
+				notifyMe <- struct{}{}
+			default:
+				log.Error(nil, "got unsupported event! skipping", "type", e.Type, "kind", e.Object.GetObjectKind())
+			}
+		case e, ok := <-configWatcher.ResultChan():
 			// channel may closed caused by HTTP timeout, should restart watcher
 			// detail at https://github.com/kubernetes/client-go/issues/334
 			if !ok {
@@ -163,45 +202,118 @@ func mapStringStringToLabelSelector(m map[string]string) string {
 }
 
 // Get fetches all matching ConfigMaps
-func (c *K8sConfigMapWatcher) Get() (cfgs []*config.InjectionConfig, err error) {
-	log.Info("Fetching ConfigMaps...")
-	clist, err := c.client.ConfigMaps(c.Namespace).List(metav1.ListOptions{
-		LabelSelector: mapStringStringToLabelSelector(c.ConfigMapLabels),
-	})
+func (c *K8sConfigMapWatcher) GetInjectionConfigs() (map[string][]*config.InjectionConfig, error) {
+	templates, err := c.GetTemplates()
 	if err != nil {
-		return cfgs, err
+		return nil, err
+	}
+	// There's no templates
+	if len(templates) == 0 {
+		log.Info("cannot get any injection templates")
+		return nil, nil
 	}
 
-	if clist == nil {
-		return cfgs, nil
+	configs, err := c.GetConfigs()
+	if err != nil {
+		return nil, err
+	}
+	if len(configs) == 0 {
+		log.Info("cannot get any configs")
+		return nil, nil
 	}
 
-	log.Info("Fetched ConfigMaps", "configmap count", len(clist.Items))
-	for _, cm := range clist.Items {
-		injectionConfigsForCM, err := InjectionConfigsFromConfigMap(cm)
-		if err != nil {
-			return cfgs, fmt.Errorf("error getting ConfigMaps from API: %s", err.Error())
+	// TODO: add Prometheus metrics to expose the
+	// count of template match and mismatch
+	injectionConfigs := make(map[string][]*config.InjectionConfig)
+	for _, conf := range configs {
+		temp, ok := templates[conf.Template]
+		if !ok {
+			log.Error(errors.New("cannot find the specified template"), "",
+				"template", conf.Template, "namespace", conf.Namespace, "config", conf.Name)
+			continue
 		}
-		log.V(1).Info("Found InjectionConfigs",
-			"count", len(injectionConfigsForCM), "name", cm.ObjectMeta.Name)
-		cfgs = append(cfgs, injectionConfigsForCM...)
+		yamlTemp, err := template.New("").Parse(temp)
+		if err != nil {
+			log.Error(err, "failed to parse template",
+				"template", conf.Template, "config", conf.Name)
+			continue
+		}
+
+		result, err := renderTemplateWithArgs(yamlTemp, conf.Arguments)
+		if err != nil {
+			log.Error(err, "failed to render template",
+				"template", conf.Template, "config", conf.Name)
+			continue
+		}
+
+		var injectConfig config.InjectionConfig
+		if err := yaml.Unmarshal(result, &injectConfig); err != nil {
+			log.Error(err, "failed to unmarshal injection config", "injection config", string(result))
+			continue
+		}
+
+		injectConfig.Selector = conf.Selector
+		injectConfig.Name = conf.Name
+		if _, ok := injectionConfigs[conf.Namespace]; !ok {
+			injectionConfigs[conf.Namespace] = make([]*config.InjectionConfig, 0)
+		}
+		injectionConfigs[conf.Namespace] = append(injectionConfigs[conf.Namespace], &injectConfig)
 	}
-	return cfgs, nil
+
+	return injectionConfigs, nil
 }
 
-// InjectionConfigsFromConfigMap parse items in a configmap into a list of InjectionConfigs
-func InjectionConfigsFromConfigMap(cm v1.ConfigMap) ([]*config.InjectionConfig, error) {
-	ics := []*config.InjectionConfig{}
-	for name, payload := range cm.Data {
-		log.Info("Parsing InjectionConfig",
-			"namespace", cm.ObjectMeta.Namespace, "meta name", cm.ObjectMeta.Name, "config name", name)
-		ic, err := config.LoadInjectionConfig(strings.NewReader(payload))
-		if err != nil {
-			return nil, fmt.Errorf("error parsing ConfigMap %s item %s into injection config: %s", cm.ObjectMeta.Name, name, err.Error())
-		}
-		log.Info("Loaded InjectionConfig from ConfigMap",
-			"config name", ic.Name, "meta name", cm.ObjectMeta.Name, "config name", name)
-		ics = append(ics, ic)
+// GetTemplates returns a map of common templates
+func (c *K8sConfigMapWatcher) GetTemplates() (map[string]string, error) {
+	log.Info("Fetching Template Configs...")
+	templateList, err := c.client.ConfigMaps(c.Namespace).List(metav1.ListOptions{
+		LabelSelector: mapStringStringToLabelSelector(c.TemplateLabels),
+	})
+	if err != nil {
+		return nil, err
 	}
-	return ics, nil
+
+	log.Info("Fetched templates", "templates count", len(templateList.Items))
+	templates := make(map[string]string, len(templateList.Items))
+	for _, temp := range templateList.Items {
+		templates[temp.Name] = temp.Data[templateItemKey]
+	}
+	return templates, nil
+}
+
+// GetConfigs returns the list of template args config
+func (c *K8sConfigMapWatcher) GetConfigs() ([]*config.TemplateArgs, error) {
+	log.Info("Fetching Configs...")
+	// List all the configs with the required label selector
+	configList, err := c.client.ConfigMaps("").List(metav1.ListOptions{
+		LabelSelector: mapStringStringToLabelSelector(c.ConfigLabels),
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	log.Info("Fetched configs", "configs count", len(configList.Items))
+	configSet := make(map[string]map[string]struct{}, 0)
+	result := make([]*config.TemplateArgs, 0)
+	for _, item := range configList.Items {
+		for _, payload := range item.Data {
+			conf, err := config.LoadTemplateArgs(strings.NewReader(payload))
+			if err != nil {
+				log.Error(err, "failed to load template args", "payload", payload)
+				continue
+			}
+			conf.Namespace = item.Namespace
+			if _, ok := configSet[conf.Namespace]; !ok {
+				configSet[conf.Namespace] = make(map[string]struct{})
+			}
+			if _, ok := configSet[conf.Namespace][conf.Name]; ok {
+				log.Error(errors.New("duplicate config name"), "",
+					"namespace", conf.Namespace, "name", conf.Name)
+				continue
+			}
+			configSet[conf.Namespace][conf.Name] = struct{}{}
+			result = append(result, conf)
+		}
+	}
+	return result, nil
 }

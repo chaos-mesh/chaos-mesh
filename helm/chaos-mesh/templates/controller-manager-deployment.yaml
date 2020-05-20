@@ -38,8 +38,8 @@ spec:
 {{ toYaml .Values.controllerManager.resources | indent 12 }}
         command:
           - /usr/local/bin/chaos-controller-manager
+          - -template-labels=app.kubernetes.io/component=template
           - -configmap-labels=app.kubernetes.io/component=webhook
-          - -conf=/etc/webhook/conf
         {{- if .Values.enableProfiling }}
           - -pprof-addr=:10081
         {{- end }}

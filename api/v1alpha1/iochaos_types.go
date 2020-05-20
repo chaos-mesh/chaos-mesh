@@ -129,9 +129,13 @@ type IoChaosSpec struct {
 	// +optional
 	Addr string `json:"addr,omitempty"`
 
-	// ConfigName defines the config name which used to inject pod.
-	// +required
-	ConfigName string `json:"configName"`
+	// Next time when this action will be applied again.
+	// +optional
+	NextStart *metav1.Time `json:"nextStart,omitempty"`
+
+	// Next time when this action will be recovered.
+	// +optional
+	NextRecover *metav1.Time `json:"nextRecover,omitempty"`
 }
 
 func (in *IoChaosSpec) GetSelector() SelectorSpec {

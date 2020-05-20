@@ -14,184 +14,77 @@
 package config
 
 import (
-	"fmt"
-	"io/ioutil"
-	"os"
-
+	"github.com/ghodss/yaml"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
 
 var _ = Describe("webhook config", func() {
 	Context("Test webhook config", func() {
-		It("should return cfg.Injections", func() {
-			configDir := "/etc/webhook/conf"
-			config, err := LoadConfigDirectory(configDir)
-			Expect(err).To(BeNil())
-			Expect(config.AnnotationNamespace).To(Equal(annotationNamespaceDefault))
-		})
+		It("unmarshal TemplateArgs", func() {
+			template := `
+name: chaosfs-etcd
+selector:
+  labelSelectors:
+    app: etcd
+template: sidecar-template
+arguments:
+  ContainerName: "etcd"
+  DataPath: "/var/run/etcd/default.etcd"
+  MountPath: "/var/run/etcd"
+  VolumeName: "datadir"`
 
-		It("shoud return error on loading injection", func() {
-			configFile := "fake file"
-			InjectionConfig, err := LoadInjectionConfigFromFilePath(configFile)
-			Expect(InjectionConfig).To(BeNil())
-			Expect(err).ToNot(BeNil())
-			Expect(err.Error()).To(ContainSubstring("error loading injection config"))
-		})
-
-		It("shoud return yaml error on loading injection", func() {
-
-			err := ioutil.WriteFile("/tmp/wrong.yaml", []byte(`fake yaml`), 0755)
-			Expect(err).To(BeNil())
-			defer os.Remove("/tmp/wrong.yaml")
-
-			configFile := "/tmp/wrong.yaml"
-			InjectionConfig, err := LoadInjectionConfigFromFilePath(configFile)
-
-			Expect(InjectionConfig).To(BeNil())
-			Expect(err).ToNot(BeNil())
-		})
-
-		It("shoud return ErrMissingName on loading injection", func() {
-
-			err := ioutil.WriteFile("/tmp/MissingName.yaml", []byte(``), 0755)
-			Expect(err).To(BeNil())
-			defer os.Remove("/tmp/MissingName.yaml")
-
-			configFile := "/tmp/MissingName.yaml"
-			InjectionConfig, err := LoadInjectionConfigFromFilePath(configFile)
-
-			Expect(InjectionConfig).To(BeNil())
-			Expect(err).ToNot(BeNil())
-			Expect(err).To(Equal(ErrMissingName))
-		})
-
-		It("shoud return not a valid name or name:version format on loading injection", func() {
-
-			err := ioutil.WriteFile("/tmp/MissingName.yaml", []byte(`name: "testname:test:test:test"`), 0755)
-			Expect(err).To(BeNil())
-			defer os.Remove("/tmp/MissingName.yaml")
-
-			configFile := "/tmp/MissingName.yaml"
-			InjectionConfig, err := LoadInjectionConfigFromFilePath(configFile)
-
-			Expect(InjectionConfig).To(BeNil())
-			Expect(err).ToNot(BeNil())
-			fmt.Println(err)
-		})
-
-		It("shoud return nil on loading injection", func() {
-
-			err := ioutil.WriteFile("/tmp/Name.yaml", []byte(`name: "testname"`), 0755)
-			Expect(err).To(BeNil())
-			defer os.Remove("/tmp/Name.yaml")
-
-			configFile := "/tmp/Name.yaml"
-			InjectionConfig, err := LoadInjectionConfigFromFilePath(configFile)
-
-			Expect(InjectionConfig).ToNot(BeNil())
-			Expect(InjectionConfig.Name).To(Equal("testname"))
+			var cfg TemplateArgs
+			err := yaml.Unmarshal([]byte(template), &cfg)
 			Expect(err).To(BeNil())
 		})
 
-		It("should return testname and defaultVersion on configNameFields", func() {
-			shortName := "testname"
-			name, version, err := configNameFields(shortName)
-			Expect(name).To(Equal("testname"))
-			Expect(version).To(Equal(defaultVersion))
+		It("unmarshal Injection Config", func() {
+			template := `
+initContainers:
+- name: inject-scripts
+  image: pingcap/chaos-scripts:latest
+  imagePullpolicy: Always
+  command: ["sh", "-c", "/scripts/init.sh -d /var/lib/pd/data -f /var/lib/pd/fuse-data"]
+containers:
+- name: chaosfs
+  image: pingcap/chaos-fs:latest
+  imagePullpolicy: Always
+  ports:
+  - containerPort: 65534
+  securityContext:
+    privileged: true
+  command:
+    - /usr/local/bin/chaosfs
+    - -addr=:65534
+    - -pidfile=/tmp/fuse/pid
+    - -original=/var/lib/pd/fuse-data
+    - -mountpoint=/var/lib/pd/data
+  volumeMounts:
+  - name: pd
+    mountPath: /var/lib/pd
+    mountPropagation: Bidirectional
+volumeMounts:
+- name: pd
+  mountPath: /var/lib/pd
+  mountPropagation: HostToContainer
+- name: scripts
+  mountPath: /tmp/scripts
+- name: fuse
+  mountPath: /tmp/fuse
+volumes:
+- name: scripts
+  emptyDir: {}
+- name: fuse
+  emptyDir: {}
+postStart:
+  pd:
+    command:
+      - /tmp/scripts/wait-fuse.sh
+`
+			var cfg InjectionConfig
+			err := yaml.Unmarshal([]byte(template), &cfg)
 			Expect(err).To(BeNil())
-		})
-
-		It("should return testname and defaultVersion on configNameFields", func() {
-			shortName := "testname:"
-			name, version, err := configNameFields(shortName)
-			Expect(name).To(Equal("testname"))
-			Expect(version).To(Equal(defaultVersion))
-			Expect(err).To(BeNil())
-		})
-
-		It("should return testname and testversion on configNameFields", func() {
-			shortName := "testname:testversion"
-			name, version, err := configNameFields(shortName)
-			Expect(name).To(Equal("testname"))
-			Expect(version).To(Equal("testversion"))
-			Expect(err).To(BeNil())
-		})
-
-		It("should return error on configNameFields", func() {
-			shortName := "not:valid:name:"
-			name, version, err := configNameFields(shortName)
-			Expect(name).To(Equal(""))
-			Expect(version).To(Equal(""))
-			Expect(err).ToNot(BeNil())
-			Expect(err.Error()).To(ContainSubstring("not a valid name or name:version format"))
-		})
-
-		It("should return error on LoadInjectionConfig", func() {
-			f, _ := os.Open("fake file")
-			InjectionConfig, err := LoadInjectionConfig(f)
-			Expect(InjectionConfig).To(BeNil())
-			Expect(err).ToNot(BeNil())
-		})
-
-		It("should return error on GetRequestedConfig", func() {
-			var cfg Config
-			InjectionConfig, err := cfg.GetRequestedConfig("not:valid:name")
-			Expect(InjectionConfig).To(BeNil())
-			Expect(err).ToNot(BeNil())
-		})
-
-		It("should return no injection config found on GetRequestedConfig", func() {
-			var cfg Config
-			InjectionConfig, err := cfg.GetRequestedConfig("testname:testversion")
-			Expect(InjectionConfig).To(BeNil())
-			Expect(err).ToNot(BeNil())
-			Expect(err.Error()).To(ContainSubstring("no injection config found"))
-		})
-
-		It("should return for unit test on GetRequestedConfig", func() {
-			var cfg Config
-			ifg := &InjectionConfig{
-				Name: "for unit test",
-			}
-			cfg.Injections = make(map[string]*InjectionConfig)
-			cfg.Injections["testname:testversion"] = ifg
-			InjectionConfig, err := cfg.GetRequestedConfig("testname:testversion")
-			Expect(InjectionConfig).To(Equal(ifg))
-			Expect(err).To(BeNil())
-		})
-
-		It("should return nil on ReplaceInjectionConfigs", func() {
-			var cfg Config
-			ifg := &InjectionConfig{
-				Name:    "testname_origin",
-				version: "testversion_origin",
-			}
-			cfg.Injections = make(map[string]*InjectionConfig)
-			cfg.Injections["testname_origin:testversion_origin"] = ifg
-
-			var replacementConfigs []*InjectionConfig = []*InjectionConfig{
-				{
-					Name:    "testname_after",
-					version: "testversion_after",
-				}}
-
-			cfg.ReplaceInjectionConfigs(replacementConfigs)
-			_, ok := cfg.Injections["testname_after:testversion_after"]
-			Expect(ok).To(Equal(true))
-		})
-
-		It("should return defaultVersion on InjectionConfig.Version()", func() {
-			var ifg InjectionConfig
-			version := ifg.Version()
-			Expect(version).To(Equal(defaultVersion))
-		})
-
-		It("should return testVersion on Version", func() {
-			var ifg InjectionConfig
-			ifg.version = "testVersion"
-			version := ifg.Version()
-			Expect(version).To(Equal("testVersion"))
 		})
 
 		It("should return request on RequestAnnotationKey", func() {
