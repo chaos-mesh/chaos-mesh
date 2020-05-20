@@ -22,11 +22,10 @@ import (
 )
 
 var (
-	ErrNS                    = errorx.NewNamespace("error.api")
-	ErrOther                 = ErrNS.NewType("other")
-	ErrUnauthorized          = ErrNS.NewType("unauthorized")
-	ErrInsufficientPrivilege = ErrNS.NewType("insufficient_privilege")
-	ErrInvalidRequest        = ErrNS.NewType("invalid_request")
+	ErrNS             = errorx.NewNamespace("error.api")
+	ErrOther          = ErrNS.NewType("other")
+	ErrInvalidRequest = ErrNS.NewType("invalid_request")
+	ErrInternalServer = ErrNS.NewType("internal_server_error")
 )
 
 type APIError struct {
