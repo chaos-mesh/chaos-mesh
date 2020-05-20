@@ -66,6 +66,7 @@ func Register(r *gin.RouterGroup, s *Service) {
 
 // @Summary Get pods from Kubernetes cluster.
 // @Description Get pods from Kubernetes cluster.
+// @Tags common
 // @Produce json
 // @Param ns query string false "namespace"
 // @Success 200 {array} Pod
@@ -100,6 +101,7 @@ func (s *Service) getPods(c *gin.Context) {
 
 // @Summary Get all namespaces from Kubernetes cluster.
 // @Description Get all namespaces from Kubernetes cluster.
+// @Tags common
 // @Produce json
 // @Success 200 {array} string
 // @Router /api/common/namespaces [get]
@@ -123,6 +125,7 @@ func (s *Service) getNamespaces(c *gin.Context) {
 
 // @Summary Get all chaos kinds from Kubernetes cluster.
 // @Description Get all chaos kinds from Kubernetes cluster.
+// @Tags common
 // @Produce json
 // @Success 200 {array} string
 // @Router /api/common/kinds [get]
