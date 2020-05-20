@@ -103,7 +103,7 @@ func (r *ChaosCollector) createEvent(req ctrl.Request, kind string, status *v1al
 		StartTime:  &status.Experiment.StartTime.Time,
 	}
 
-	for _, pod := range status.Experiment.Pods {
+	for _, pod := range status.Experiment.PodRecords {
 		podRecord := &core.PodRecord{
 			EventID:   event.ID,
 			PodIP:     pod.PodIP,

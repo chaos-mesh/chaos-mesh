@@ -148,7 +148,7 @@ type ExperimentStatus struct {
 	// +optional
 	EndTime *metav1.Time `json:"endTime,omitempty"`
 	// +optional
-	Pods []PodStatus `json:"podChaos,omitempty"`
+	PodRecords []PodStatus `json:"podRecords,omitempty"`
 }
 
 const (

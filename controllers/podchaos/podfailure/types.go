@@ -94,7 +94,7 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1
 		return err
 	}
 
-	podchaos.Status.Experiment.Pods = make([]v1alpha1.PodStatus, 0, len(pods))
+	podchaos.Status.Experiment.PodRecords = make([]v1alpha1.PodStatus, 0, len(pods))
 	for _, pod := range pods {
 		ps := v1alpha1.PodStatus{
 			Namespace: pod.Namespace,
@@ -106,7 +106,7 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1
 		if podchaos.Spec.Duration != nil {
 			ps.Message = fmt.Sprintf(podFailureActionMsg, *podchaos.Spec.Duration)
 		}
-		podchaos.Status.Experiment.Pods = append(podchaos.Status.Experiment.Pods, ps)
+		podchaos.Status.Experiment.PodRecords = append(podchaos.Status.Experiment.PodRecords, ps)
 	}
 	r.Event(podchaos, v1.EventTypeNormal, utils.EventChaosInjected, "")
 	return nil
@@ -248,7 +248,7 @@ func (r *Reconciler) failPod(ctx context.Context, pod *v1.Pod, podchaos *v1alpha
 		ps.Message = fmt.Sprintf(podFailureActionMsg, *podchaos.Spec.Duration)
 	}
 
-	podchaos.Status.Experiment.Pods = append(podchaos.Status.Experiment.Pods, ps)
+	podchaos.Status.Experiment.PodRecords = append(podchaos.Status.Experiment.PodRecords, ps)
 
 	return nil
 }
