@@ -69,9 +69,7 @@ func (e *eventStore) List(_ context.Context) ([]*core.Event, error) {
 		if err != nil {
 			return nil, err
 		}
-		for _, pod := range(pods) {
-			et.Pods = append(et.Pods, pod)
-		}
+		et.Pods = pods
 		eventList = append(eventList, &et)
 	}
 
@@ -95,9 +93,7 @@ func (e *eventStore) ListByExperiment(_ context.Context, namespace string, exper
 		if err != nil {
 			return nil, err
 		}
-		for _, pod := range(pods) {
-			et.Pods = append(et.Pods, pod)
-		}
+		et.Pods = pods
 		eventList = append(eventList, &et)
 	}
 
@@ -115,7 +111,7 @@ func (e *eventStore) ListByPod(_ context.Context, namespace string, name string)
 	}
 
 	et := new(core.Event)
-	eventList := make([]*core.Event, 0)
+	eventList := make([]*core.Event, 0, len(podRecords))
 	for _, pr := range podRecords {
 		if err := e.db.Where(
 			"id = ?", pr.EventID).
@@ -127,9 +123,7 @@ func (e *eventStore) ListByPod(_ context.Context, namespace string, name string)
 		if err != nil {
 			return nil, err
 		}
-		for _, pod := range pods {
-			et.Pods = append(et.Pods, pod)
-		}
+		et.Pods = pods
 		eventList = append(eventList, et)
 	}
 	return eventList, nil
@@ -147,9 +141,7 @@ func (e *eventStore) Find(_ context.Context, id uint) (*core.Event, error) {
 	if err != nil {
 		return nil, err
 	}
-	for _, pod := range pods {
-		et.Pods = append(et.Pods, pod)
-	}
+	et.Pods = pods
 	return et, nil
 }
 
