@@ -23,7 +23,8 @@ var _ = Describe("webhook config watcher", func() {
 		It("should return NewConfig", func() {
 			config := NewConfig()
 			Expect(config.Namespace).To(Equal(""))
-			Expect(config.ConfigMapLabels).To(Equal(map[string]string{}))
+			Expect(config.ConfigLabels).To(Equal(map[string]string{}))
+			Expect(config.TemplateLabels).To(Equal(map[string]string{}))
 		})
 
 	})

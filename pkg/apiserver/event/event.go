@@ -19,7 +19,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	statuscode "github.com/pingcap/chaos-mesh/pkg/apiserver/status_code"
 	"github.com/pingcap/chaos-mesh/pkg/config"
 	"github.com/pingcap/chaos-mesh/pkg/core"
 
@@ -76,7 +75,7 @@ func (s *Service) listEvents(c *gin.Context) {
 //			_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
 
 			c.JSON(http.StatusOK, gin.H{
-				"status": statuscode.GetResourcesFromDBWrong,
+				//"status": statuscode.GetResourcesFromDBWrong,
 				"message": "get events wrong",
 				"data": eventList,
 			})
@@ -86,7 +85,7 @@ func (s *Service) listEvents(c *gin.Context) {
 		//
 	}else if (name != "" && namespace == "") {
 		c.JSON(http.StatusOK, gin.H{
-			"status": statuscode.IncompleteField,
+			//"status": statuscode.IncompleteField,
 			"message": " namespace is empty",
 			"data": eventList,
 		})
@@ -95,7 +94,7 @@ func (s *Service) listEvents(c *gin.Context) {
 		eventList, err := s.event.ListByPod(context.Background(), namespace, name)
 		if err != nil {
 			c.JSON(http.StatusOK, gin.H{
-				"status": statuscode.GetResourcesFromDBWrong,
+			//	"status": statuscode.GetResourcesFromDBWrong,
 				"message": "get events wrong",
 				"data": eventList,
 			})

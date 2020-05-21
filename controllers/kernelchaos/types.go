@@ -106,7 +106,7 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1
 		return err
 	}
 
-	kernelChaos.Status.Experiment.Pods = make([]v1alpha1.PodStatus, 0, len(pods))
+	kernelChaos.Status.Experiment.PodRecords = make([]v1alpha1.PodStatus, 0, len(pods))
 	for _, pod := range pods {
 		ps := v1alpha1.PodStatus{
 			Namespace: pod.Namespace,
@@ -116,7 +116,7 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1
 			Message:   fmt.Sprintf(kernelChaosMsg, kernelChaos.Spec.FailKernRequest),
 		}
 
-		kernelChaos.Status.Experiment.Pods = append(kernelChaos.Status.Experiment.Pods, ps)
+		kernelChaos.Status.Experiment.PodRecords = append(kernelChaos.Status.Experiment.PodRecords, ps)
 	}
 	r.Event(kernelChaos, v1.EventTypeNormal, utils.EventChaosInjected, "")
 

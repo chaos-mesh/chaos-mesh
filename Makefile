@@ -33,10 +33,8 @@ CGO    := $(CGOENV) go
 GOTEST := TEST_USE_EXISTING_CLUSTER=false NO_PROXY="${NO_PROXY},testhost" go test
 SHELL    := /usr/bin/env bash
 
-PACKAGE_LIST := go list ./... | grep -vE "pkg/client" | grep -vE "zz_generated" | grep -vE "vendor"
+PACKAGE_LIST := go list ./... | grep -vE "chaos-mesh/test|pkg/ptrace|zz_generated|vendor"
 PACKAGE_DIRECTORIES := $(PACKAGE_LIST) | sed 's|github.com/pingcap/chaos-mesh/||'
-FILES := $$(find $$($(PACKAGE_DIRECTORIES)) -name "*.go")
-FAIL_ON_STDOUT := awk '{ print } END { if (NR > 0) { exit 1 } }'
 
 # Produce CRDs that work back to Kubernetes 1.11 (no version conversion)
 CRD_OPTIONS ?= "crd:trivialVersions=true"
@@ -70,7 +68,7 @@ check: fmt vet lint generate yaml tidy gosec-scan
 # Run tests
 test: failpoint-enable generate manifests test-utils
 	rm -rf cover.* cover
-	$(GOTEST) ./api/... ./controllers/... ./pkg/... -coverprofile cover.out.tmp
+	$(GOTEST) $$($(PACKAGE_LIST)) -coverprofile cover.out.tmp
 	cat cover.out.tmp | grep -v "_generated.deepcopy.go" > cover.out
 	@$(FAILPOINT_DISABLE)
 
@@ -108,9 +106,20 @@ ifeq ($(SWAGGER),1)
 	make swagger_spec
 endif
 ifeq ($(UI),1)
-	scripts/embed_ui_assets.sh
+	hack/embed_ui_assets.sh
 endif
 	$(CGO) build -ldflags '$(LDFLAGS)' -tags "${BUILD_TAGS}" -o bin/chaos-server cmd/chaos-server/*.go
+
+swagger_spec:
+	hack/generate_swagger_spec.sh
+
+yarn_dependencies:
+	cd ui &&\
+	yarn install --frozen-lockfile
+
+ui: yarn_dependencies
+	cd ui &&\
+	REACT_APP_DASHBOARD_API_URL="" yarn build
 
 binary: chaosdaemon manager chaosfs chaos-server
 

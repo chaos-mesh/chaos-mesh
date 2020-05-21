@@ -42,6 +42,8 @@ func (e *experimentStore) Find(context.Context, int64) (*core.ArchiveExperiment,
 func (e *experimentStore) FindByName(context.Context, string, string) (*core.ArchiveExperiment, error) {
 	return nil, nil
 }
-func (e *experimentStore) Create(context.Context, *core.ArchiveExperiment) error { return nil }
-func (e *experimentStore) Update(context.Context, *core.ArchiveExperiment) error { return nil }
+func (e *experimentStore) Create(_ context.Context, archive *core.ArchiveExperiment) error {
+	return e.db.Create(archive).Error
+}
+
 func (e *experimentStore) Delete(context.Context, *core.ArchiveExperiment) error { return nil }

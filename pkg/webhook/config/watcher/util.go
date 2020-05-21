@@ -11,8 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package statuscode
+package watcher
 
+<<<<<<< HEAD:pkg/apiserver/status_code/status_code.go
 // StatusCode represents the code of api status
 type StatusCode int
 
@@ -25,4 +26,21 @@ const (
 	GetResourcesFromDBWrong StatusCode = 1006
 	// IncompleteField indicates that some fields are missing.
 	IncompleteField StatusCode = 1007
+=======
+import (
+	"bytes"
+	"html/template"
+>>>>>>> upstream/master:pkg/webhook/config/watcher/util.go
 )
+
+func renderTemplateWithArgs(tpl *template.Template, args map[string]string) ([]byte, error) {
+	model := make(map[string]interface{}, len(args))
+	for k, v := range args {
+		model[k] = v
+	}
+	buff := new(bytes.Buffer)
+	if err := tpl.Execute(buff, model); err != nil {
+		return nil, err
+	}
+	return buff.Bytes(), nil
+}

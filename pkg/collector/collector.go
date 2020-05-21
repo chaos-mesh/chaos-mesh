@@ -15,13 +15,16 @@ package collector
 
 import (
 	"context"
+	"encoding/json"
 
 	"github.com/go-logr/logr"
 	"github.com/jinzhu/gorm"
+	"github.com/pingcap/errors"
 
 	"github.com/pingcap/chaos-mesh/api/v1alpha1"
 	"github.com/pingcap/chaos-mesh/pkg/core"
 
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -54,12 +57,17 @@ func (r *ChaosCollector) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		return ctrl.Result{}, nil
 	}
 
-	if err := r.recordEvent(req, obj); err != nil {
-		r.Log.Error(err, "failed to record event")
-		return ctrl.Result{}, nil
+	if obj.IsDeleted() {
+		if err := r.archiveExperiment(req, obj); err != nil {
+			r.Log.Error(err, "failed to archive experiment")
+			return ctrl.Result{}, nil
+		}
+	} else {
+		if err := r.recordEvent(req, obj); err != nil {
+			r.Log.Error(err, "failed to record event")
+			return ctrl.Result{}, nil
+		}
 	}
-
-	// TODO: archive experiment
 
 	return ctrl.Result{}, nil
 }
@@ -95,7 +103,7 @@ func (r *ChaosCollector) createEvent(req ctrl.Request, kind string, status *v1al
 		StartTime:  &status.Experiment.StartTime.Time,
 	}
 
-	for _, pod := range status.Experiment.Pods {
+	for _, pod := range status.Experiment.PodRecords {
 		podRecord := &core.PodRecord{
 			EventID:   event.ID,
 			PodIP:     pod.PodIP,
@@ -132,6 +140,54 @@ func (r *ChaosCollector) updateOrCreateEvent(req ctrl.Request, kind string, stat
 
 	if err := r.event.Update(context.Background(), event); err != nil {
 		r.Log.Error(err, "failed to update event", "event", event)
+		return err
+	}
+
+	return nil
+}
+
+func (r *ChaosCollector) archiveExperiment(req ctrl.Request, obj v1alpha1.InnerObject) error {
+	archive := &core.ArchiveExperiment{
+		ArchiveExperimentMeta: core.ArchiveExperimentMeta{
+			Namespace: req.Namespace,
+			Name:      req.Name,
+			Kind:      obj.GetObjectKind().GroupVersionKind().Kind,
+		},
+	}
+
+	switch chaos := obj.(type) {
+	case *v1alpha1.PodChaos:
+		archive.Action = string(chaos.Spec.Action)
+	case *v1alpha1.NetworkChaos:
+		archive.Action = string(chaos.Spec.Action)
+	case *v1alpha1.IoChaos:
+		archive.Action = string(chaos.Spec.Action)
+	case *v1alpha1.TimeChaos, *v1alpha1.KernelChaos, *v1alpha1.StressChaos:
+		archive.Action = ""
+	default:
+		return errors.New("unsupported chaos type " + archive.Kind)
+	}
+
+	var (
+		chaosMeta metav1.Object
+		ok        bool
+	)
+	if chaosMeta, ok = obj.(metav1.Object); !ok {
+		return errors.New("failed to case type to " + archive.Kind)
+	}
+	archive.StartTime = chaosMeta.GetCreationTimestamp().Time
+	archive.FinishTime = chaosMeta.GetDeletionTimestamp().Time
+
+	data, err := json.Marshal(chaosMeta)
+	if err != nil {
+		r.Log.Error(err, "failed to marshal chaos", "kind", archive.Kind,
+			"namespace", archive.Namespace, "name", archive.Name)
+		return err
+	}
+
+	archive.Experiment = string(data)
+	if err := r.archive.Create(context.Background(), archive); err != nil {
+		r.Log.Error(err, "failed to store archive", "archive", archive)
 		return err
 	}
 

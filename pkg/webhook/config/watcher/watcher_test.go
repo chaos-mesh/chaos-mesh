@@ -16,8 +16,6 @@ package watcher
 import (
 	"fmt"
 
-	v1 "k8s.io/api/core/v1"
-
 	ctrl "sigs.k8s.io/controller-runtime"
 
 	"k8s.io/client-go/kubernetes"
@@ -85,26 +83,26 @@ var _ = Describe("webhook config watcher", func() {
 			Expect(fmt.Sprintf("%s", err)).To(ContainSubstring("namespace is empty"))
 		})
 
-		It("should return configmap labels was an uninitialized map", func() {
+		It("should return template labels was an uninitialized map", func() {
 			var cmw K8sConfigMapWatcher
 			cmw.Namespace = "testNamespace"
 			err := validate(&cmw)
 			Expect(err).ToNot(BeNil())
-			Expect(fmt.Sprintf("%s", err)).To(ContainSubstring("configmap labels was an uninitialized map"))
+			Expect(fmt.Sprintf("%s", err)).To(ContainSubstring("template labels was an uninitialized map"))
 		})
 
-		It("should return k8s client was not setup properly", func() {
+		It("should return config labels was an uninitialized map", func() {
 			var cmw K8sConfigMapWatcher
 			cmw.Namespace = "testNamespace"
-			cmw.ConfigMapLabels = make(map[string]string)
+			cmw.TemplateLabels = map[string]string{"test": "test"}
 			err := validate(&cmw)
 			Expect(err).ToNot(BeNil())
-			Expect(fmt.Sprintf("%s", err)).To(ContainSubstring("k8s client was not setup properly"))
+			Expect(fmt.Sprintf("%s", err)).To(ContainSubstring("config labels was an uninitialized map"))
 		})
 	})
 
 	Context("Watch error", func() {
-		It("should return unable to create watcher", func() {
+		It("should return unable to create template watcher", func() {
 			var cmw K8sConfigMapWatcher
 			cmw.Config = *NewConfig()
 			cmw.Namespace = "testNamespace"
@@ -115,7 +113,7 @@ var _ = Describe("webhook config watcher", func() {
 			stopCh := ctrl.SetupSignalHandler()
 			err := cmw.Watch(sigChan, stopCh)
 			Expect(err).ToNot(BeNil())
-			Expect(fmt.Sprintf("%s", err)).To(ContainSubstring("unable to create watcher"))
+			Expect(fmt.Sprintf("%s", err)).To(ContainSubstring("unable to create template watcher"))
 		})
 	})
 
@@ -127,33 +125,8 @@ var _ = Describe("webhook config watcher", func() {
 			k8sConfig, _ := MockClusterConfig()
 			clientset, _ := kubernetesNewForConfig(k8sConfig)
 			cmw.client = clientset.CoreV1()
-			_, err := cmw.Get()
+			_, err := cmw.GetConfigs()
 			Expect(err).ToNot(BeNil())
-		})
-	})
-
-	Context("InjectionConfigsFromConfigMap", func() {
-		It("should return nil", func() {
-			var cm v1.ConfigMap
-			_, err := InjectionConfigsFromConfigMap(cm)
-			Expect(err).To(BeNil())
-		})
-
-		It("should return error parsing ConfigMap", func() {
-			var cm v1.ConfigMap
-			cm.Data = make(map[string]string)
-			cm.Data["testkey"] = "testvalue"
-			_, err := InjectionConfigsFromConfigMap(cm)
-			Expect(err).ToNot(BeNil())
-			Expect(fmt.Sprintf("%s", err)).To(ContainSubstring("error parsing ConfigMap"))
-		})
-
-		It("should return nil", func() {
-			var cm v1.ConfigMap
-			cm.Data = make(map[string]string)
-			cm.Data["testkey"] = "name: \"testname\""
-			_, err := InjectionConfigsFromConfigMap(cm)
-			Expect(err).To(BeNil()) //error parsing ConfigMap
 		})
 	})
 })

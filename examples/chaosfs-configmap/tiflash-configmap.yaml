@@ -7,48 +7,14 @@ metadata:
   labels:
     app.kubernetes.io/component: webhook
 data:
-  chaosfs-tiflash.yaml: |
+  chaosfs-tiflash: |
     name: chaosfs-tiflash
     selector:
       labelSelectors:
-        "app": "tiflash"
-    initContainers:
-    - name: inject-scripts
-      image: pingcap/chaos-scripts:latest
-      imagePullpolicy: Always
-      command: ["sh", "-c", "/scripts/init.sh -d /data/db -f /data/fuse-data"]
-    containers:
-    - name: chaosfs
-      image: pingcap/chaos-fs:latest
-      imagePullpolicy: Always
-      ports:
-      - containerPort: 65534
-      securityContext:
-        privileged: true
-      command:
-        - /usr/local/bin/chaosfs
-        - -addr=:65534
-        - -pidfile=/tmp/fuse/pid
-        - -original=/data/fuse-data
-        - -mountpoint=/data/db
-      volumeMounts:
-        - name: data
-          mountPath: /data
-          mountPropagation: Bidirectional
-    volumeMounts:
-    - name: data
-      mountPath: /data
-      mountPropagation: HostToContainer
-    - name: scripts
-      mountPath: /tmp/scripts
-    - name: fuse
-      mountPath: /tmp/fuse
-    volumes:
-    - name: scripts
-      emptyDir: {}
-    - name: fuse
-      emptyDir: {}
-    postStart:
-      tiflash:
-        command:
-          - /tmp/scripts/wait-fuse.sh
+        "app.kubernetes.io/component": "tiflash"
+    template: sidecar-template
+    arguments:
+      ContainerName: "pd"
+      DataPath: "/data/db"
+      MountPath: "/data"
+      VolumeName: "data"

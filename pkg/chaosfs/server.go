@@ -151,11 +151,20 @@ func (s *server) methods() []string {
 	return ms
 }
 
-func (s *server) Methods(ctx context.Context, in *empty.Empty) (*pb.Response, error) {
+func (s *server) Injected(_ context.Context, _ *empty.Empty) (*pb.InjectedResponse, error) {
+	for method := range methods {
+		if _, ok := faultMap.Load(method); ok {
+			return &pb.InjectedResponse{Injected: true}, nil
+		}
+	}
+	return &pb.InjectedResponse{Injected: false}, nil
+}
+
+func (s *server) Methods(_ context.Context, _ *empty.Empty) (*pb.Response, error) {
 	return &pb.Response{Methods: s.methods()}, nil
 }
 
-func (s *server) RecoverAll(ctx context.Context, in *empty.Empty) (*empty.Empty, error) {
+func (s *server) RecoverAll(_ context.Context, _ *empty.Empty) (*empty.Empty, error) {
 	log.Info("Recover all fault")
 	faultMap.Range(func(k, v interface{}) bool {
 		faultMap.Delete(k)
@@ -164,7 +173,7 @@ func (s *server) RecoverAll(ctx context.Context, in *empty.Empty) (*empty.Empty,
 	return &empty.Empty{}, nil
 }
 
-func (s *server) RecoverMethod(ctx context.Context, in *pb.Request) (*empty.Empty, error) {
+func (s *server) RecoverMethod(_ context.Context, in *pb.Request) (*empty.Empty, error) {
 	ms := in.GetMethods()
 	for _, v := range ms {
 		faultMap.Delete(v)
@@ -178,7 +187,7 @@ func (s *server) setFault(ms []string, f *faultContext) {
 	}
 }
 
-func (s *server) SetFault(ctx context.Context, in *pb.Request) (*empty.Empty, error) {
+func (s *server) SetFault(_ context.Context, in *pb.Request) (*empty.Empty, error) {
 	// TODO: use Errno(0), and handle Errno(0) in Hook interfaces
 	log.Info("Set fault", "request", in)
 
