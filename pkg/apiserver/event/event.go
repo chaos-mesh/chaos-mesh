@@ -57,6 +57,13 @@ func Register(r *gin.RouterGroup, s *Service) {
 	endpoint.GET("/all", s.listEvents)
 }
 
+// @Summary Get all events from db.
+// @Description Get all chaos kinds from db.
+// @Tags events
+// @Produce json
+// @Success 200 {array} string
+// @Router /api/events/all [get]
+// @Failure 500 {object} utils.APIError
 func (s *Service) listEvents(c *gin.Context) {
 	name := c.Query("name")
 	namespace := c.Query("namespace")
@@ -65,6 +72,9 @@ func (s *Service) listEvents(c *gin.Context) {
 	if name == "" && namespace == "" {
 		eventList, err := s.event.List(context.Background())
 		if err != nil {
+//			c.Status(http.StatusInternalServerError)
+//			_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
+
 			c.JSON(http.StatusOK, gin.H{
 				"status": statuscode.GetResourcesFromDBWrong,
 				"message": "get events wrong",
@@ -72,10 +82,12 @@ func (s *Service) listEvents(c *gin.Context) {
 			})
 			return
 		}
-	} else if (name != "" && namespace == "") || (name == "" && namespace != "") {
+	} else if (name == "" && namespace != "") {
+		//
+	}else if (name != "" && namespace == "") {
 		c.JSON(http.StatusOK, gin.H{
 			"status": statuscode.IncompleteField,
-			"message": "one of name and namespace is empty",
+			"message": " namespace is empty",
 			"data": eventList,
 		})
 		return
