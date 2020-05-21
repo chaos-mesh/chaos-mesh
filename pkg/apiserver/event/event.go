@@ -78,7 +78,7 @@ func (s *Service) listEvents(c *gin.Context) {
 			return
 		}
 		eventList = resList
-	} else if (name == "" && namespace != "") {
+	} else if name == "" && namespace != "" {
 		resList, err := s.event.ListByNamespace(context.Background(), namespace)
 		if err != nil {
 			c.Status(http.StatusInternalServerError)
@@ -86,7 +86,7 @@ func (s *Service) listEvents(c *gin.Context) {
 			return
 		}
 		eventList = resList
-	}else if (name != "" && namespace == "") {
+	}else if name != "" && namespace == "" {
 		c.Status(http.StatusInternalServerError)
 		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(fmt.Errorf("namespace is empty")))
 		return
