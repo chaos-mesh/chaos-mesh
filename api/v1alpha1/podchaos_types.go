@@ -119,6 +119,25 @@ func (in *PodChaos) GetScheduler() *SchedulerSpec {
 	return in.Spec.Scheduler
 }
 
+// GetChaos returns a chaos instance
+func (in *PodChaos) GetChaos() *ChaosInstance {
+	instance := &ChaosInstance{
+		Name:      in.Name,
+		Namespace: in.Namespace,
+		Kind:      KindPodChaos,
+		StartTime: in.CreationTimestamp.Time,
+		Action:    string(in.Spec.Action),
+		Status:    string(in.GetStatus().Experiment.Phase),
+	}
+	if in.Spec.Duration != nil {
+		instance.Duration = *in.Spec.Duration
+	}
+	if in.DeletionTimestamp != nil {
+		instance.EndTime = in.DeletionTimestamp.Time
+	}
+	return instance
+}
+
 // PodChaosSpec defines the attributes that a user creates on a chaos experiment about pods.
 type PodChaosSpec struct {
 	// Selector is used to select pods that are used to inject chaos action.
@@ -200,6 +219,15 @@ type PodStatus struct {
 	// e.g. "delete this pod" or "pause this pod duration 5m"
 	// +optional
 	Message string `json:"message"`
+}
+
+// ListChaos returns a list of pod chaos
+func (in *PodChaosList) ListChaos() []*ChaosInstance {
+	res := make([]*ChaosInstance, 0, len(in.Items))
+	for _, item := range in.Items {
+		res = append(res, item.GetChaos())
+	}
+	return res
 }
 
 func init() {
