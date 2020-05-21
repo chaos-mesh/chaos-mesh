@@ -71,7 +71,7 @@ loss:
 
 **loss** defines the percentage of packet loss.
 
-NetworkChaos variation isn't purely random, so to emulate that there is a correlation value as well.
+NetworkChaos variation is not purely random, so to emulate that there is a correlation value as well.
 
 ### Network Delay
 
@@ -128,7 +128,7 @@ Network Bandwidth Action is used to limit the network bandwidth. To add a Networ
 
 > **Note:**
 >
-> Minikube doesn't support this feature as `CONFIG_NET_SCH_TBF` is disabled in Minikube's image.
+> Minikube does not support this feature as `CONFIG_NET_SCH_TBF` is disabled in Minikube's image.
 
 To inject Network Bandwidth fault, three action specific attributes are required - rate, buffer and limit.
 

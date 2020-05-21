@@ -5,8 +5,8 @@ After [preparing the development environment](./setup_env.md), let's develop a n
 1. [Add the chaos object in controller](#add-the-chaos-object-in-controller)
 2. [Register the CRD](#register-the-crd)
 3. [Implement the schema type](#implement-the-schema-type)
-4. [Make the docker image](#make-the-docker-image)
-5. [Run Chaos](#run-chaos)
+4. [Make the Docker image](#make-the-docker-image)
+5. [Run chaos](#run-chaos)
 
 ## Add the chaos object in controller
 
@@ -135,7 +135,7 @@ metadata:
   namespace: <ns-of-this-resource>
 ```
 
-## Make the docker image
+## Make the Docker image
 
 Having the object successfully added, you can make a Docker image and push it to your registry:
 
@@ -148,7 +148,7 @@ make docker-push
 >
 > The default `DOCKER_REGISTRY` is `localhost:5000`, which is preset in `hack/kind-cluster-build.sh`. You can overwrite it to any registry to which you have access permission.
 
-## Run Chaos
+## Run chaos
 
 You are almost there. In this step, you will pull the image and apply it for testing.
 

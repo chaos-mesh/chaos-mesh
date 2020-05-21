@@ -8,7 +8,7 @@ This document introduces how to create PodChaos experiments.
 
 PodChaos allows you to simulate pod faults, specifically `pod failure` and `pod kill`. `pod failure` can be used to simulate a situation where a pod is down. In this case, the pod is unavailable for a long time.
 
-- **Pod Failure** action periodically injects errors to pods. And it will cause the pod to not be created for a while. In another word, the selected pod will be unavailable in a specified period.
+- **Pod Failure** action periodically injects errors to pods. And it will cause pod creation failure for a while. In other words, the selected pod will be unavailable in a specified period.
 
 - **Pod Kill** action kills the specified pod (ReplicaSet or something similar might be needed to ensure the pod will be restarted).
 

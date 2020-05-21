@@ -21,9 +21,7 @@ cd chaos-mesh/
 
 `install.sh` is an automation shell script that helps you install dependencies such as `kubectl`, `Helm`, `kind`, and `kubernetes`, and deploy Chaos Mesh itself.
 
-After executing the above command, you should be able to see the prompt that Chaos Mesh is installed successfully.
-
-Otherwise, check the current environment according to the prompt message or send us an [issue](https://github.com/pingcap/chaos-mesh/issues) for help.
+After executing the above command, you should be able to see the prompt that Chaos Mesh is installed successfully. Otherwise, check the current environment according to the prompt message or send us an [issue](https://github.com/pingcap/chaos-mesh/issues) for help.
 
 You also can use [Helm](https://helm.sh/) to [install Chaos Mesh manually](deploy.md).
 

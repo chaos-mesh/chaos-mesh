@@ -56,9 +56,7 @@ ARGS="--pd=${CLUSTER_NAME}-pd:2379 \
 > * If you are testing a TiDB cluster, you need to modify it at [`_start_tikv.sh.tpl`](https://github.com/pingcap/tidb-operator/blob/master/charts/tidb-cluster/templates/scripts/_start_tikv.sh.tpl).
 > * PD has the same issue with TiKV. You need to modify the data directory of PD at [`_start_pd.sh.tpl`](https://github.com/pingcap/tidb-operator/blob/master/charts/tidb-cluster/templates/scripts/_start_pd.sh.tpl).
 
-## Usage
-
-### Configure a ConfigMap
+## ConfigMap configuration
 
 Chaos Mesh uses sidecar container to inject IOChaos. To fulfill this chaos, you need to configure this sidecar container using a [ConfigMap](https://kubernetes.io/docs/tasks/configure-pod-container/configure-pod-configmap/).
 
@@ -70,7 +68,7 @@ You can apply the ConfigMap defined for your application to Kubernetes cluster b
 kubectl apply -f app-configmap.yaml # app-configmap.yaml is the ConfigMap file
 ```
 
-### Define the configuration file
+## Configuration file
 
 Below is a sample YAML file of IOChaos:
 
@@ -113,7 +111,7 @@ For more sample files, see [examples](../examples). You can edit them as needed.
 | **configName** | Defines the configuration name which is used to inject chaos action into pods. You can refer to [examples/tikv-configmap.yaml](../examples/chaosfs-configmap/tikv-configmap.yaml) to define your configuration.| |
 | **layer** | Represents the layer of the IO action.| `fs` (by default). |
 
-### Create a chaos experiment
+## Usage
 
 Before the application created, you need to make admission-webhook enabled using labels and [annotations](https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/) to the application namespace:
 
@@ -140,7 +138,7 @@ kubectl annotate ns app-ns admission-webhook.pingcap.com/init-request=chaosfs-ti
 
 Then, you can start your application and define YAML file to start your chaos experiment.
 
-#### Start a chaos experiment
+### Start a chaos experiment
 
 Assume that you are using `examples/io-mixed-example.yaml`, you can run the following command to create a chaos experiment:
 
@@ -195,7 +193,7 @@ The mix mode defines the **delay** and **errno** actions in one spec.
 
 ## Common Linux system errors
 
-The number represents the errno the Linux system error.
+Common Linux system errors are as below:
 
 * `1`: Operation not permitted
 * `2`: No such file or directory
@@ -209,7 +207,7 @@ The number represents the errno the Linux system error.
 * `24`: Too many open files
 * `28`: No space left on device
 
-For more Linux system errors, refer to [Errors: Linux System Errors](https://www-numi.fnal.gov/offline_software/srt_public_context/WebDocs/Errors/unix_system_errors.html).
+Refer to [Errors: Linux System Errors](https://www-numi.fnal.gov/offline_software/srt_public_context/WebDocs/Errors/unix_system_errors.html) for more.
 
 ## Available methods
 

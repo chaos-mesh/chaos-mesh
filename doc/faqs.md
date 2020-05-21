@@ -28,9 +28,7 @@ Execute `kubectl describe` to check the specified chaos experiment resource.
     kubectl get pods -n yourNamespace --show-labels
     ```
 
-    For other related errors in controller's log, please file an issue.
-
-If the above steps cannot solve the problem, you can [file an issue](https://github.com/pingcap/chaos-mesh/issues)) or message us in #sig-chaos-mesh channel in the [TiDB Community](https://pingcap.com/tidbslack) slack workspace.
+If the above steps cannot solve the problem or you encounter other related errors in controller's log, [file an issue](https://github.com/pingcap/chaos-mesh/issues) or message us in #sig-chaos-mesh channel in the [TiDB Community](https://pingcap.com/tidbslack) slack workspace.
 
 ## IOChaos
 

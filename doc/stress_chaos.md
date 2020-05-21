@@ -1,16 +1,16 @@
 # StressChaos Document
 
-This document helps you create stress chaos experiments.
+This document helps you create StressChaos experiments.
 
-Stress chaos can generate plenty of stresses over a collection of pods. The stressors is injected into the target pods via the `chaos-daemon` internally.
+StressChaos can generate plenty of stresses over a collection of pods. The stressors is injected into the target pods via the `chaos-daemon` internally.
 
 ## Configuration
 
-A StressChaos shares common configurations like other chaos, such as how to select pods, how to specify periodic chaos... (You can refer to other docs for how to use them). It defines stressors in **either** of the following two ways:
+A StressChaos shares common configurations like other chaos, such as how to select pods, how to specify periodic chaos. You can refer to other docs for details. It defines stressors in **either** of the following two ways:
 
 * `stressors`
 
-  `Stressors` defines plenty of stressors supported to stress system components out. You can use one or more of them to make up various kinds of stresses. At least one of the stressors should be specified. The following is supported stressors for now:
+  `Stressors` defines a plenty of stressors supported to stress system components out. You can use one or more of them to make up various kinds of stresses. At least one of the stressors should be specified. The following is supported stressors for now:
 
   1. `memory`
 
@@ -32,11 +32,13 @@ A StressChaos shares common configurations like other chaos, such as how to sele
 
 * `stressngStressors`
 
-    `StressngStressors` defines plenty of stressors just like `Stressors` except that it's an experimental feature and more powerful.
+    `StressngStressors` defines a plenty of stressors just like `Stressors` except that it's an experimental feature and more powerful.
 
     You can define stressors in `stress-ng` (see also `man stress-ng`) dialect.
 
-    However, not all of the supported stressors are well tested. It might be retired in later releases. It is recommended to use `Stressors` to define the stressors and use this only when you want more stressors unsupported by `Stressors`.
+    > **Note:**
+    >
+    > However, not all of the supported stressors are well tested. It might be retired in later releases. Therefore, it is recommended to use `Stressors` to define the stressors and use this only when you want more stressors unsupported by `Stressors`.
 
     When both `StressngStressors` and `Stressors` are defined, `StressngStressors` wins.
 

@@ -58,8 +58,7 @@ Description:
              -> should_failslab
        ```
 
-      With an optional set of predicates and an optional set of parameters, which used with predicates. You can read call chan and predicate examples from https://github.com/chaos-mesh/bpfki/tree/develop/examples
-      to learn more. If no special call chain, just keep callchain empty, which means it will fail at any call chain with slab alloc (eg: kmalloc).
+      With an optional set of predicates and an optional set of parameters, which used with predicates. See [call chain and predicate examples](https://github.com/chaos-mesh/bpfki/tree/develop/examples) to learn more. If there is no special call chain, just keep `callchain` empty, which means it will fail at any call chain with slab alloc (eg: kmalloc).
 
       The challchain's type is an array of frames, the frame has three fields:
 
@@ -121,4 +120,4 @@ During the injection, the output is similar to this:
 
 Although we use container_id to limit fault injection, but some behaviors might trigger systemic behaviors. For example:
 
-When  `failtype` is `1`, it means that physical page allocation will fail. If the behavior is continuous in a very short time (eg: ``while (1) {memset(malloc(1M), '1', 1M)}`), the system's oom-killer will be awakened to release memory. So the container_id will lose limit to oom-killer.
+When `failtype` is `1`, it means that physical page allocation will fail. If the behavior is continuous in a very short time (eg: ``while (1) {memset(malloc(1M), '1', 1M)}`), the system's oom-killer will be awakened to release memory. So the container_id will lose limit to oom-killer.

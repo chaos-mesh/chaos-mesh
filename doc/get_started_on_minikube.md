@@ -43,7 +43,7 @@ cd chaos-mesh
 ./install.sh
 ```
 
->**Note:**
+> **Note:**
 >
 > `install.sh` is a shell script to automate the installation process. See [Install Chaos Mesh manually](deploy.md) for more details.
 
@@ -55,7 +55,7 @@ There are some known restrictions for Chaos Operator deployed in the Minikube cl
 
 - `netem chaos` is only supported for Minikube clusters >= version 1.6.
 
-In Minikube, the default virtual machine driver's image doesn't contain the `sch_netem` kernel module in earlier versions. You can use `none` driver (if your host is Linux with the `sch_netem` kernel module loaded) to try these chaos actions using Minikube or [build an image with sch_netem by yourself](https://minikube.sigs.k8s.io/docs/contributing/iso/).
+In Minikube, the default virtual machine driver's image does not contain the `sch_netem` kernel module in earlier versions. You can use `none` driver (if your host is Linux with the `sch_netem` kernel module loaded) to try these chaos actions using Minikube or [build an image with sch_netem by yourself](https://minikube.sigs.k8s.io/docs/contrib/building/iso/).
 
 ## Next steps
 

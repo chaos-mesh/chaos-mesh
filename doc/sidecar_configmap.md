@@ -1,14 +1,14 @@
 # Sidecar ConfigMap
 
-This document guides you to define a specify sidecar ConfigMap for your application.
+This document guides you to define a specified sidecar ConfigMap for your application.
 
 ## Why do we need a specified Sidecar ConfigMap?
 
 Chaos Mesh runs a [fuse-daemon](https://www.kernel.org/doc/Documentation/filesystems/fuse.txt) server in [sidecar container](https://www.magalix.com/blog/the-sidecar-pattern) for implementing file system IOCChaos.
 
-In sidecar container, fuse-daemon need to mount the data directory of application by [fusermount](http://manpages.ubuntu.com/manpages/bionic/en/man1/fusermount.1.html) before the application starts.
+In sidecar container, fuse-daemon needs to mount the data directory of application by [fusermount](http://manpages.ubuntu.com/manpages/bionic/en/man1/fusermount.1.html) before the application starts.
 
-Most applications use different data directories, so you need to defines the different sidecar configs for different applications.
+Most applications use different data directories, so you need to define the different sidecar configs for different applications.
 
 ## Configuration file
 
@@ -83,6 +83,7 @@ Description:
 * **volumeMounts**: defines the new volumeMounts or overwrite the old volumeMounts of the each containers in target pods.
 * **volume**: defines the new volumes for the target pod or overwrite the old volumes in target pods.
 * **postStart**: called after a container is created first. If the handler fails, the containers will failed.
+
 Key defines for the name of deployment container. Value defines for the Commands for stating container.
 
 ### Containers
@@ -91,9 +92,9 @@ Key defines for the name of deployment container. Value defines for the Commands
 
 `chaosfs` container is designed as a sidecar container and [chaosfs](https://github.com/pingcap/chaos-mesh/tree/master/cmd/chaosfs) process runs in this container.
 
-`chaosfs` uses [fuse libary](https://github.com/hanwen/go-fuse) and [fusermount](https://www.kernel.org/doc/Documentation/filesystems/fuse.txt) tool to implement a fuse-daemon service and mounts the application's data directory. `chaosfs` hijacks all the file system IO cations of the application, so it can be used to simulate various real-world IO faults.
+`chaosfs` uses [fuse libary](https://github.com/hanwen/go-fuse) and [fusermount](https://www.kernel.org/doc/Documentation/filesystems/fuse.txt) tool to implement a fuse-daemon service and mounts the application's data directory. `chaosfs` hijacks all the file system IO actions of the application, so it can be used to simulate various real-world IO faults.
 
-The following config injects `chaosfs` container to target pods and will start a `chaosfs` process in this container.
+The following configuration injects `chaosfs` container to the target pods and starts a `chaosfs` process in this container.
 
 In addition, `chaosfs` container should be run as `privileged` and the [`mountPropagation`](https://kubernetes.io/docs/concepts/storage/volumes/#mount-propagation) field in `chaosfs` Container.volumeMounts should be set to `Bidirectional`.
 
@@ -132,17 +133,18 @@ Description of `chaosfs`:
 * **pidfile**: defines the pid file to record the pid of the `chaosfs` process.
 * **original**: defines the fuse directory. This directory is usually set to the same level directory as the application data directory.
 * **mountpoint**: defines the mountpoint to mount the original directory.
+
 This value should be set to the data directory of the target application.
 
 #### `chaos-scripts`
 
-`chaos-scripts` container is used to inject some scripts to target pods, include [wait-fuse.sh](https://github.com/pingcap/chaos-mesh/blob/master/hack/wait-fuse.sh).
+`chaos-scripts` container is used to inject some scripts to the target pods including [wait-fuse.sh](https://github.com/pingcap/chaos-mesh/blob/master/hack/wait-fuse.sh).
 
 `wait-fuse.sh` is used by application container to ensure that the fuse-daemon server is running normally before the application starts.
 
-`chaos-scripts` is generally used as an initContainer to do some preparation.
+`chaos-scripts` is generally used as an initContainer to do some preparations.
 
-The following config uses `chaos-scripts` container to inject scripts and moves the scripts to `/tmp/scripts` directory using `init.sh`, `/tmp/scripts` is an [emptyDir volume](https://kubernetes.io/docs/concepts/storage/volumes/#emptydir) to shares the scripts with all containers of the pod.
+The following config uses `chaos-scripts` container to inject scripts and moves the scripts to `/tmp/scripts` directory using `init.sh`. `/tmp/scripts` is an [emptyDir volume](https://kubernetes.io/docs/concepts/storage/volumes/#emptydir) used to share the scripts with all containers of the pod.
 
 So you can use `wait-fuse.sh` script in tikv container to ensure that the fuse-daemon server is running normally before the application starts.
 
@@ -175,7 +177,7 @@ EXAMPLES:
 
 ### Tips
 
-1. The application Container.volumeMounts used to define data directory should be set `HostToContainer`.
+1. The application Container.volumeMounts used to define data directory should be set to `HostToContainer`.
 2. `scripts` and `fuse` emptyDir should be created and should be mounted to all container of the pod.
 3. The application uses `wait-fuse.sh` script to ensure that the fuse-daemon server is running normally.
 
@@ -204,4 +206,4 @@ EXAMPLES:
 
 ## Usage
 
-Refer to [IOChaos Document](io_chaos.md).
+See [IOChaos Document](io_chaos.md).
