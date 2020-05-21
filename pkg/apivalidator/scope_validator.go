@@ -15,6 +15,7 @@ package apivalidator
 
 import (
 	"github.com/go-playground/validator/v10"
+	"strconv"
 
 	corev1 "k8s.io/api/core/v1"
 )
@@ -70,6 +71,25 @@ func PhaseSelectorsValid(fl validator.FieldLevel) bool {
 		if !checkPhase(phase) {
 			return false
 		}
+	}
+
+	return true
+}
+
+// ValueValid can be used to check whether the mode value is valid.
+func ValueValid(fl validator.FieldLevel) bool {
+	val := fl.Field().String()
+	if val == "" {
+		return true
+	}
+
+	f, err := strconv.ParseFloat(val, 64)
+	if err != nil {
+		return false
+	}
+
+	if f < 0 {
+		return false
 	}
 
 	return true
