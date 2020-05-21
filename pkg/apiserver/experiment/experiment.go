@@ -124,7 +124,8 @@ type ScopeInfo struct {
 	FieldSelectors      map[string]string `json:"field_selectors" binding:"MapSelectorsValid"`
 	PhaseSelector       []string          `json:"phase_selectors" binding:"PhaseSelectorsValid"`
 
-	Mode string `json:"mode" binding:"required,oneof=one all fixed fixed-percent random-max-percent"`
+	Mode  string `json:"mode" binding:"oneof='' 'one' 'all' 'fixed' 'fixed' 'fixed-percent' 'random-max-percent'"`
+	Value string `json:"value" binding:"ValueValid"`
 }
 
 func (s *ScopeInfo) parseSelector() v1alpha1.SelectorSpec {
@@ -158,13 +159,13 @@ func (s *ScopeInfo) parseSelector() v1alpha1.SelectorSpec {
 
 // TargetInfo defines the information of target objects.
 type TargetInfo struct {
-	Kind         string       `json:"kind" binding:"required,oneof=PodChaos NetworkChaos IOChaos KernelChaos TimeChaos StressChaos"`
-	PodChaos     PodChaosInfo `json:"pod_chaos"`
-	NetworkChaos NetworkChaosInfo
-	IOChaos      IOChaosInfo
-	KernelChaos  KernelChaosInfo
-	TimeChaos    TimeChaosInfo
-	StressChaos  StressChaosInfo
+	Kind         string           `json:"kind" binding:"required,oneof=PodChaos NetworkChaos IOChaos KernelChaos TimeChaos StressChaos"`
+	PodChaos     PodChaosInfo     `json:"pod_chaos"`
+	NetworkChaos NetworkChaosInfo `json:"network_chaos"`
+	IOChaos      IOChaosInfo      `json:"io_chaos"`
+	KernelChaos  KernelChaosInfo  `json:"kernel_chaos"`
+	TimeChaos    TimeChaosInfo    `json:"time_chaos"`
+	StressChaos  StressChaosInfo  `json:"stress_chaos"`
 }
 
 // SchedulerInfo defines the scheduler information.
@@ -173,14 +174,25 @@ type SchedulerInfo struct {
 	Duration string `json:"duration" binding:"DurationValid"`
 }
 
-// PodChaosInfo defines the basic information of pod chaos.
+// PodChaosInfo defines the basic information of pod chaos for creating a new PodChaos.
 type PodChaosInfo struct {
-	Action        string `json:"action" binding:"oneof=pod-kill pod-failure container-kill"`
+	Action        string `json:"action" binding:"oneof='' 'pod-kill' 'pod-failure' 'container-kill'"`
 	ContainerName string `json:"container_name"`
 }
 
+// PodChaosInfo defines the basic information of network chaos for creating a new NetworkChaos.
+type NetworkChaosInfo struct {
+	Action      string                  `json:"action" binding:"oneof='' 'netem' 'delay' 'loss' 'duplicate' 'corrupt' 'partition' 'bandwidth'"`
+	Delay       *v1alpha1.DelaySpec     `json:"delay"`
+	Loss        *v1alpha1.LossSpec      `json:"loss"`
+	Duplicate   *v1alpha1.DuplicateSpec `json:"duplicate"`
+	Corrupt     *v1alpha1.CorruptSpec   `json:"corrupt"`
+	Bandwidth   *v1alpha1.BandwidthSpec `json:"bandwidth"`
+	Direction   string                  `json:"direction" binding:"oneof='' 'to' 'from' 'both'"`
+	TargetScope *ScopeInfo              `json:"target_scope"`
+}
+
 // TODO: implement these structs
-type NetworkChaosInfo struct{}
 type IOChaosInfo struct{}
 type KernelChaosInfo struct{}
 type TimeChaosInfo struct{}
@@ -210,6 +222,12 @@ func (s *Service) createExperiment(c *gin.Context) {
 			_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
 			return
 		}
+	case "NetworkChaos":
+		if err := s.createNetworkChaos(exp); err != nil {
+			c.Status(http.StatusInternalServerError)
+			_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
+			return
+		}
 	default:
 		c.Status(http.StatusBadRequest)
 		_ = c.Error(utils.ErrInvalidRequest.New("Target kind is not available"))
@@ -231,6 +249,7 @@ func (s *Service) createPodChaos(exp *ExperimentInfo) error {
 			Selector: exp.Scope.parseSelector(),
 			Action:   v1alpha1.PodChaosAction(exp.Target.PodChaos.Action),
 			Mode:     v1alpha1.PodMode(exp.Scope.Mode),
+			Value:    exp.Scope.Value,
 		},
 	}
 
@@ -240,6 +259,47 @@ func (s *Service) createPodChaos(exp *ExperimentInfo) error {
 
 	if exp.Scheduler.Duration != "" {
 		chaos.Spec.Duration = &exp.Scheduler.Duration
+	}
+
+	return s.kubeCli.Create(context.Background(), chaos)
+}
+
+func (s *Service) createNetworkChaos(exp *ExperimentInfo) error {
+	chaos := &v1alpha1.NetworkChaos{
+		ObjectMeta: v1.ObjectMeta{
+			Name:        exp.Name,
+			Namespace:   exp.Namespace,
+			Labels:      exp.Labels,
+			Annotations: exp.Annotations,
+		},
+		Spec: v1alpha1.NetworkChaosSpec{
+			Selector:  exp.Scope.parseSelector(),
+			Action:    v1alpha1.NetworkChaosAction(exp.Target.NetworkChaos.Action),
+			Mode:      v1alpha1.PodMode(exp.Scope.Mode),
+			Value:     exp.Scope.Value,
+			Delay:     exp.Target.NetworkChaos.Delay,
+			Loss:      exp.Target.NetworkChaos.Loss,
+			Duplicate: exp.Target.NetworkChaos.Duplicate,
+			Corrupt:   exp.Target.NetworkChaos.Corrupt,
+			Bandwidth: exp.Target.NetworkChaos.Bandwidth,
+			Direction: v1alpha1.Direction(exp.Target.NetworkChaos.Direction),
+		},
+	}
+
+	if exp.Scheduler.Cron != "" {
+		chaos.Spec.Scheduler = &v1alpha1.SchedulerSpec{Cron: exp.Scheduler.Cron}
+	}
+
+	if exp.Scheduler.Duration != "" {
+		chaos.Spec.Duration = &exp.Scheduler.Duration
+	}
+
+	if exp.Target.NetworkChaos.TargetScope != nil {
+		chaos.Spec.Target = &v1alpha1.Target{
+			TargetSelector: exp.Target.NetworkChaos.TargetScope.parseSelector(),
+			TargetMode:     v1alpha1.PodMode(exp.Target.NetworkChaos.TargetScope.Mode),
+			TargetValue:    exp.Target.NetworkChaos.TargetScope.Value,
+		}
 	}
 
 	return s.kubeCli.Create(context.Background(), chaos)

@@ -119,6 +119,7 @@ func newAPIHandlerEngine() (*gin.Engine, *gin.RouterGroup) {
 		v.RegisterValidation("PhaseSelectorsValid", apivalidator.PhaseSelectorsValid)
 		v.RegisterValidation("CronValid", apivalidator.CronValid)
 		v.RegisterValidation("DurationValid", apivalidator.DurationValid)
+		v.RegisterValidation("ValueValid", apivalidator.ValueValid)
 	}
 
 	endpoint := apiHandlerEngine.Group("/api")
