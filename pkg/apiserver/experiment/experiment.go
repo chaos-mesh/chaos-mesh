@@ -107,11 +107,13 @@ func (s *Service) deleteExperiment(c *gin.Context) {}
 
 // ExperimentInfo defines a form data of Experiment from API.
 type ExperimentInfo struct {
-	Name      string        `json:"name" binding:"required,NameValid"`
-	Namespace string        `json:"namespace" binding:"required,NameValid"`
-	Scope     ScopeInfo     `json:"scope"`
-	Target    TargetInfo    `json:"target"`
-	Scheduler SchedulerInfo `json:"scheduler"`
+	Name        string            `json:"name" binding:"required,NameValid"`
+	Namespace   string            `json:"namespace" binding:"required,NameValid"`
+	Labels      map[string]string `json:"labels" binding:"MapSelectorsValid"`
+	Annotations map[string]string `json:"annotations" binding:"MapSelectorsValid"`
+	Scope       ScopeInfo         `json:"scope"`
+	Target      TargetInfo        `json:"target"`
+	Scheduler   SchedulerInfo     `json:"scheduler"`
 }
 
 // ScopeInfo defines the scope of the Experiment.
@@ -167,7 +169,8 @@ type TargetInfo struct {
 
 // SchedulerInfo defines the scheduler information.
 type SchedulerInfo struct {
-	Cron string `json:"cron" binding:"CronValid"`
+	Cron     string `json:"cron" binding:"CronValid"`
+	Duration string `json:"duration" binding:"DurationValid"`
 }
 
 // PodChaosInfo defines the basic information of pod chaos.
@@ -183,6 +186,15 @@ type KernelChaosInfo struct{}
 type TimeChaosInfo struct{}
 type StressChaosInfo struct{}
 
+// @Summary Create a nex chaos experiments.
+// @Description Create a new chaos experiments.
+// @Tags experiments
+// @Produce json
+// @Param request body ExperimentInfo true "Request body"
+// @Success 200 "create ok"
+// @Failure 400 {object} utils.APIError
+// @Failure 500 {object} utils.APIError
+// @Router /api/experiments/new [post]
 func (s *Service) createExperiment(c *gin.Context) {
 	exp := &ExperimentInfo{}
 	if err := c.ShouldBindJSON(exp); err != nil {
@@ -210,8 +222,10 @@ func (s *Service) createExperiment(c *gin.Context) {
 func (s *Service) createPodChaos(exp *ExperimentInfo) error {
 	chaos := &v1alpha1.PodChaos{
 		ObjectMeta: v1.ObjectMeta{
-			Name:      exp.Name,
-			Namespace: exp.Namespace,
+			Name:        exp.Name,
+			Namespace:   exp.Namespace,
+			Labels:      exp.Labels,
+			Annotations: exp.Annotations,
 		},
 		Spec: v1alpha1.PodChaosSpec{
 			Selector: exp.Scope.parseSelector(),
@@ -222,6 +236,10 @@ func (s *Service) createPodChaos(exp *ExperimentInfo) error {
 
 	if exp.Scheduler.Cron != "" {
 		chaos.Spec.Scheduler = &v1alpha1.SchedulerSpec{Cron: exp.Scheduler.Cron}
+	}
+
+	if exp.Scheduler.Duration != "" {
+		chaos.Spec.Duration = &exp.Scheduler.Duration
 	}
 
 	return s.kubeCli.Create(context.Background(), chaos)

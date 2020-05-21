@@ -15,6 +15,7 @@ package apivalidator
 
 import (
 	"regexp"
+	"time"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/robfig/cron/v3"
@@ -54,11 +55,26 @@ func checkName(name string) bool {
 // CronValid can be used to check whether the given cron valid.
 func CronValid(fl validator.FieldLevel) bool {
 	cr := fl.Field().String()
-	if len(cr) == 0 {
+	if cr == "" {
 		return true
 	}
 
 	if _, err := cron.ParseStandard(cr); err != nil {
+		return false
+	}
+
+	return true
+}
+
+// DurationValid can be used to check whether the given duration valid.
+func DurationValid(fl validator.FieldLevel) bool {
+	dur := fl.Field().String()
+	if dur == "" {
+		return true
+	}
+
+	_, err := time.ParseDuration(dur)
+	if err != nil {
 		return false
 	}
 
