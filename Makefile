@@ -108,9 +108,20 @@ ifeq ($(SWAGGER),1)
 	make swagger_spec
 endif
 ifeq ($(UI),1)
-	scripts/embed_ui_assets.sh
+	hack/embed_ui_assets.sh
 endif
 	$(CGO) build -ldflags '$(LDFLAGS)' -tags "${BUILD_TAGS}" -o bin/chaos-server cmd/chaos-server/*.go
+
+swagger_spec:
+	hack/generate_swagger_spec.sh
+
+yarn_dependencies:
+	cd ui &&\
+	yarn install --frozen-lockfile
+
+ui: yarn_dependencies
+	cd ui &&\
+	REACT_APP_DASHBOARD_API_URL="" yarn build
 
 binary: chaosdaemon manager chaosfs chaos-server
 

@@ -20,7 +20,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/pingcap/chaos-mesh/api/v1alpha1"
-	statuscode "github.com/pingcap/chaos-mesh/pkg/apiserver/status_code"
+	"github.com/pingcap/chaos-mesh/pkg/apiserver/utils"
 	"github.com/pingcap/chaos-mesh/pkg/config"
 	"github.com/pingcap/chaos-mesh/pkg/core"
 
@@ -156,34 +156,25 @@ type StressChaosInfo struct{}
 func (s *Service) createExperiment(c *gin.Context) {
 	exp := &ExperimentInfo{}
 	if err := c.ShouldBindJSON(exp); err != nil {
-		c.JSON(http.StatusOK, gin.H{
-			"message": err.Error(),
-			"status":  statuscode.InvalidParameter,
-		})
+		c.Status(http.StatusBadRequest)
+		_ = c.Error(utils.ErrInvalidRequest.WrapWithNoMessage(err))
 		return
 	}
 
 	switch exp.Target.Kind {
 	case "PodChaos":
 		if err := s.createPodChaos(exp); err != nil {
-			c.JSON(http.StatusOK, gin.H{
-				"message": err.Error(),
-				"status":  statuscode.CreateExperimentFailed,
-			})
+			c.Status(http.StatusInternalServerError)
+			_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
 			return
 		}
 	default:
-		c.JSON(http.StatusOK, gin.H{
-			"message": "Target Kind is not supported!",
-			"status":  statuscode.InvalidParameter,
-		})
+		c.Status(http.StatusBadRequest)
+		_ = c.Error(utils.ErrInvalidRequest.New("Target kind is not available"))
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"message": "Create Experiment successfully",
-		"status":  statuscode.Success,
-	})
+	c.JSON(http.StatusOK, nil)
 }
 
 func (s *Service) createPodChaos(exp *ExperimentInfo) error {
@@ -343,46 +334,37 @@ func (s *Service) state(c *gin.Context) {
 	data["Paused"] = 0
 	data["Failed"] = 0
 	data["Finished"] = 0
-	getChaosWrong := gin.H{
-		"status":  statuscode.GetResourcesWrong,
-		"message": "failed to get chaos state",
-		"data":    make(map[string]int),
-	}
 
 	err := s.getPodChaosState(data)
 	if err != nil {
-		c.JSON(http.StatusOK, getChaosWrong)
+		_ = c.Error(err)
 		return
 	}
 	err = s.getIoChaosState(data)
 	if err != nil {
-		c.JSON(http.StatusOK, getChaosWrong)
+		_ = c.Error(err)
 		return
 	}
 	err = s.getNetworkChaosState(data)
 	if err != nil {
-		c.JSON(http.StatusOK, getChaosWrong)
+		_ = c.Error(err)
 		return
 	}
 	err = s.getTimeChaosState(data)
 	if err != nil {
-		c.JSON(http.StatusOK, getChaosWrong)
+		_ = c.Error(err)
 		return
 	}
 	err = s.getKernelChaosState(data)
 	if err != nil {
-		c.JSON(http.StatusOK, getChaosWrong)
+		_ = c.Error(err)
 		return
 	}
 	err = s.getStressChaosState(data)
 	if err != nil {
-		c.JSON(http.StatusOK, getChaosWrong)
+		_ = c.Error(err)
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"status":  statuscode.Success,
-		"message": "success",
-		"data":    data,
-	})
+	c.JSON(http.StatusOK, data)
 }

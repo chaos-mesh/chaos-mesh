@@ -43,10 +43,6 @@ spec:
             addr:
               description: Addr defines the address for sidecar container.
               type: string
-            configName:
-              description: ConfigName defines the config name which used to inject
-                pod.
-              type: string
             delay:
               description: "Delay defines the value of I/O chaos action delay. A delay
                 string is a possibly signed sequence of decimal numbers, each with
@@ -178,7 +174,6 @@ spec:
               type: string
           required:
           - action
-          - configName
           - layer
           - mode
           - selector
@@ -195,7 +190,7 @@ spec:
                 phase:
                   description: ExperimentPhase is the current status of chaos experiment.
                   type: string
-                podChaos:
+                podRecords:
                   items:
                     description: PodStatus represents information about the status
                       of a pod in chaos experiment.
@@ -473,7 +468,7 @@ spec:
                 phase:
                   description: ExperimentPhase is the current status of chaos experiment.
                   type: string
-                podChaos:
+                podRecords:
                   items:
                     description: PodStatus represents information about the status
                       of a pod in chaos experiment.
@@ -892,7 +887,7 @@ spec:
                 phase:
                   description: ExperimentPhase is the current status of chaos experiment.
                   type: string
-                podChaos:
+                podRecords:
                   items:
                     description: PodStatus represents information about the status
                       of a pod in chaos experiment.
@@ -1121,7 +1116,7 @@ spec:
                 phase:
                   description: ExperimentPhase is the current status of chaos experiment.
                   type: string
-                podChaos:
+                podRecords:
                   items:
                     description: PodStatus represents information about the status
                       of a pod in chaos experiment.
@@ -1371,7 +1366,7 @@ spec:
                 phase:
                   description: ExperimentPhase is the current status of chaos experiment.
                   type: string
-                podChaos:
+                podRecords:
                   items:
                     description: PodStatus represents information about the status
                       of a pod in chaos experiment.
@@ -1617,7 +1612,7 @@ spec:
                 phase:
                   description: ExperimentPhase is the current status of chaos experiment.
                   type: string
-                podChaos:
+                podRecords:
                   items:
                     description: PodStatus represents information about the status
                       of a pod in chaos experiment.

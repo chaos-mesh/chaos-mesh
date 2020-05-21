@@ -20,11 +20,11 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	statuscode "github.com/pingcap/chaos-mesh/pkg/apiserver/status_code"
+	"github.com/pingcap/chaos-mesh/pkg/apiserver/utils"
 	"github.com/pingcap/chaos-mesh/pkg/config"
 
 	v1 "k8s.io/api/core/v1"
-	apiextensionsclientset "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
+	apicli "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	ctrlconfig "sigs.k8s.io/controller-runtime/pkg/client/config"
@@ -33,17 +33,8 @@ import (
 // Pod defines the basic information of the pod
 type Pod struct {
 	Name      string
+	IP        string
 	Namespace string
-}
-
-// Namespace defines the basic information of the namespace
-type Namespace struct {
-	Name string
-}
-
-// ChaosKind defines the kind information of the chaos
-type ChaosKind struct {
-	Name string
 }
 
 // Service defines a handler service for experiments.
@@ -67,100 +58,95 @@ func NewService(
 func Register(r *gin.RouterGroup, s *Service) {
 	endpoint := r.Group("/common")
 
-	endpoint.GET("/pods/all", s.GetPods)
-	endpoint.GET("/namespaces/all", s.GetNamespaces)
-	endpoint.GET("/kinds/all", s.GetKinds)
+	endpoint.GET("/pods", s.getPods)
+	endpoint.GET("/namespaces", s.getNamespaces)
+	endpoint.GET("/kinds", s.getKinds)
 
 }
 
-// GetPods returns the list of pods
-func (s *Service) GetPods(c *gin.Context) {
-	pods := make([]Pod, 0)
+// @Summary Get pods from Kubernetes cluster.
+// @Description Get pods from Kubernetes cluster.
+// @Tags common
+// @Produce json
+// @Param ns query string false "namespace"
+// @Success 200 {array} Pod
+// @Router /api/common/pods [get]
+// @Failure 500 {object} utils.APIError
+func (s *Service) getPods(c *gin.Context) {
+	listOptions := &client.ListOptions{}
+	ns := c.Query("ns")
+	if ns != "" {
+		listOptions.Namespace = ns
+	}
 
 	var podList v1.PodList
-	err := s.kubeCli.List(context.Background(), &podList)
-
+	err := s.kubeCli.List(context.Background(), &podList, listOptions)
 	if err != nil {
-		c.JSON(http.StatusOK, gin.H{
-			"status":  statuscode.GetResourcesWrong,
-			"message": "get pods wrong",
-			"data":    pods,
-		})
+		c.Status(http.StatusInternalServerError)
+		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
 		return
 	}
 
+	pods := make([]Pod, 0)
 	for _, pod := range podList.Items {
 		pods = append(pods, Pod{
 			Name:      pod.Name,
+			IP:        pod.Status.PodIP,
 			Namespace: pod.Namespace,
 		})
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"status":  statuscode.Success,
-		"message": "success",
-		"data":    pods,
-	})
+	c.JSON(http.StatusOK, pods)
 }
 
-// GetNamespaces returns the list of namespaces
-func (s *Service) GetNamespaces(c *gin.Context) {
-
+// @Summary Get all namespaces from Kubernetes cluster.
+// @Description Get all namespaces from Kubernetes cluster.
+// @Tags common
+// @Produce json
+// @Success 200 {array} string
+// @Router /api/common/namespaces [get]
+// @Failure 500 {object} utils.APIError
+func (s *Service) getNamespaces(c *gin.Context) {
 	var namespace v1.NamespaceList
-
 	err := s.kubeCli.List(context.Background(), &namespace)
-
 	if err != nil {
-		c.JSON(http.StatusOK, gin.H{
-			"status":  statuscode.GetResourcesWrong,
-			"message": "get namespaces wrong",
-			"data":    make([]Namespace, 0),
-		})
+		c.Status(http.StatusInternalServerError)
+		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
 		return
 	}
 
-	namespaceList := make([]Namespace, 0, len(namespace.Items))
+	var namespaces []string
 	for _, ns := range namespace.Items {
-		namespaceList = append(namespaceList, Namespace{
-			Name: ns.Name,
-		})
+		namespaces = append(namespaces, ns.Name)
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"status":  statuscode.Success,
-		"message": "success",
-		"data":    namespaceList,
-	})
+	c.JSON(http.StatusOK, namespaces)
 }
 
-// GetKinds returns the list of chaos kinds
-func (s *Service) GetKinds(c *gin.Context) {
-	ChaosKindList := make([]ChaosKind, 0)
-
+// @Summary Get all chaos kinds from Kubernetes cluster.
+// @Description Get all chaos kinds from Kubernetes cluster.
+// @Tags common
+// @Produce json
+// @Success 200 {array} string
+// @Router /api/common/kinds [get]
+// @Failure 500 {object} utils.APIError
+func (s *Service) getKinds(c *gin.Context) {
 	config, _ := ctrlconfig.GetConfig()
-	apiExtCli, _ := apiextensionsclientset.NewForConfig(config)
+	apiExtCli, _ := apicli.NewForConfig(config)
 
 	crdList, err := apiExtCli.ApiextensionsV1beta1().CustomResourceDefinitions().List(metav1.ListOptions{})
-
 	if err != nil {
-		c.JSON(http.StatusOK, gin.H{
-			"status":  statuscode.GetResourcesWrong,
-			"message": "get CRDs wrong",
-			"data":    ChaosKindList,
-		})
+		c.Status(http.StatusInternalServerError)
+		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
 		return
 	}
+
+	var kinds []string
 	for _, crd := range crdList.Items {
 		if strings.Contains(crd.Spec.Names.Kind, "Chaos") == true {
-			ChaosKindList = append(ChaosKindList, ChaosKind{
-				Name: crd.Spec.Names.Kind,
-			})
+			kinds = append(kinds, crd.Spec.Names.Kind)
 		}
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"status":  statuscode.Success,
-		"message": "success",
-		"data":    ChaosKindList,
-	})
+	c.JSON(http.StatusOK, kinds)
 }

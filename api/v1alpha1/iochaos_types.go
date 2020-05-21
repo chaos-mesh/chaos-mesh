@@ -128,10 +128,6 @@ type IoChaosSpec struct {
 	// Addr defines the address for sidecar container.
 	// +optional
 	Addr string `json:"addr,omitempty"`
-
-	// ConfigName defines the config name which used to inject pod.
-	// +required
-	ConfigName string `json:"configName"`
 }
 
 func (in *IoChaosSpec) GetSelector() SelectorSpec {

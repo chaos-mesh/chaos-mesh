@@ -27,6 +27,7 @@ import (
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-playground/validator/v10"
 
+	apiutils "github.com/pingcap/chaos-mesh/pkg/apiserver/utils"
 	"github.com/pingcap/chaos-mesh/pkg/apivalidator"
 	"github.com/pingcap/chaos-mesh/pkg/config"
 	"github.com/pingcap/chaos-mesh/pkg/swaggerserver"
@@ -109,6 +110,7 @@ func serverRegister(lx fx.Lifecycle, s *Server, conf *config.ChaosServerConfig) 
 
 func newAPIHandlerEngine() (*gin.Engine, *gin.RouterGroup) {
 	apiHandlerEngine := gin.Default()
+	apiHandlerEngine.Use(apiutils.MWHandleErrors())
 
 	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
 		v.RegisterValidation("NameValid", apivalidator.NameValid)
