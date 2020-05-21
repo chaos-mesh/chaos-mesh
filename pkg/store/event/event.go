@@ -100,6 +100,35 @@ func (e *eventStore) ListByExperiment(_ context.Context, namespace string, exper
 	return eventList, nil
 }
 
+// ListByNamespace returns the list of events according to the namespace
+func (e *eventStore) ListByNamespace(_ context.Context, namespace string) ([]*core.Event, error) {
+	podRecords := make([]*core.PodRecord, 0)
+
+	if err := e.db.Where(
+		&core.PodRecord{Namespace: namespace}).
+		Find(&podRecords).Error; err != nil && !gorm.IsRecordNotFoundError(err) {
+		return nil, err
+	}
+
+	et := new(core.Event)
+	eventList := make([]*core.Event, 0, len(podRecords))
+	for _, pr := range podRecords {
+		if err := e.db.Where(
+			"id = ?", pr.EventID).
+			First(et).Error; err != nil && !gorm.IsRecordNotFoundError(err) {
+			return nil, err
+		}
+
+		pods, err:= e.FindPodRecordsByEventID(context.Background(), et.ID)
+		if err != nil {
+			return nil, err
+		}
+		et.Pods = pods
+		eventList = append(eventList, et)
+	}
+	return eventList, nil
+}
+
 // ListByPod returns the list of events according to the pod
 func (e *eventStore) ListByPod(_ context.Context, namespace string, name string) ([]*core.Event, error) {
 	podRecords := make([]*core.PodRecord, 0)

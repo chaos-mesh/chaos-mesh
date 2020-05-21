@@ -15,10 +15,12 @@ package event
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 
+	"github.com/pingcap/chaos-mesh/pkg/apiserver/utils"
 	"github.com/pingcap/chaos-mesh/pkg/config"
 	"github.com/pingcap/chaos-mesh/pkg/core"
 
@@ -69,38 +71,33 @@ func (s *Service) listEvents(c *gin.Context) {
 	eventList := make([]*core.Event, 0)
 
 	if name == "" && namespace == "" {
-		eventList, err := s.event.List(context.Background())
+		resList, err := s.event.List(context.Background())
 		if err != nil {
-//			c.Status(http.StatusInternalServerError)
-//			_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
-
-			c.JSON(http.StatusOK, gin.H{
-				//"status": statuscode.GetResourcesFromDBWrong,
-				"message": "get events wrong",
-				"data": eventList,
-			})
+			c.Status(http.StatusInternalServerError)
+			_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
 			return
 		}
+		eventList = resList
 	} else if (name == "" && namespace != "") {
-		//
+		resList, err := s.event.ListByNamespace(context.Background(), namespace)
+		if err != nil {
+			c.Status(http.StatusInternalServerError)
+			_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
+			return
+		}
+		eventList = resList
 	}else if (name != "" && namespace == "") {
-		c.JSON(http.StatusOK, gin.H{
-			//"status": statuscode.IncompleteField,
-			"message": " namespace is empty",
-			"data": eventList,
-		})
+		c.Status(http.StatusInternalServerError)
+		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(fmt.Errorf("namespace is empty")))
 		return
 	} else {
-		eventList, err := s.event.ListByPod(context.Background(), namespace, name)
+		resList, err := s.event.ListByPod(context.Background(), namespace, name)
 		if err != nil {
-			c.JSON(http.StatusOK, gin.H{
-			//	"status": statuscode.GetResourcesFromDBWrong,
-				"message": "get events wrong",
-				"data": eventList,
-			})
+			c.Status(http.StatusInternalServerError)
+			_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
 			return
 		}
+		eventList = resList
 	}
-
-	// TODO: Return required fields in event
+	c.JSON(http.StatusOK, eventList)
 }

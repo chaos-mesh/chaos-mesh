@@ -28,6 +28,9 @@ type EventStore interface {
 	// ListByExperiment returns a event list by the name and namespace of the experiment.
 	ListByExperiment(context.Context, string, string) ([]*Event, error)
 
+	// ListByNamespace returns a event list by the namespace of the pod.
+	ListByNamespace(context.Context, string) ([]*Event, error)
+
 	// ListByPod returns a event list by the name and namespace of the pod.
 	ListByPod(context.Context, string, string) ([]*Event, error)
 
