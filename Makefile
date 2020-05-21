@@ -33,10 +33,8 @@ CGO    := $(CGOENV) go
 GOTEST := TEST_USE_EXISTING_CLUSTER=false NO_PROXY="${NO_PROXY},testhost" go test
 SHELL    := /usr/bin/env bash
 
-PACKAGE_LIST := go list ./... | grep -vE "pkg/client" | grep -vE "zz_generated" | grep -vE "vendor"
+PACKAGE_LIST := go list ./... | grep -vE "chaos-mesh/test|pkg/ptrace|zz_generated|vendor"
 PACKAGE_DIRECTORIES := $(PACKAGE_LIST) | sed 's|github.com/pingcap/chaos-mesh/||'
-FILES := $$(find $$($(PACKAGE_DIRECTORIES)) -name "*.go")
-FAIL_ON_STDOUT := awk '{ print } END { if (NR > 0) { exit 1 } }'
 
 # Produce CRDs that work back to Kubernetes 1.11 (no version conversion)
 CRD_OPTIONS ?= "crd:trivialVersions=true"
@@ -70,7 +68,7 @@ check: fmt vet lint generate yaml tidy gosec-scan
 # Run tests
 test: failpoint-enable generate manifests test-utils
 	rm -rf cover.* cover
-	$(GOTEST) ./api/... ./controllers/... ./pkg/... -coverprofile cover.out.tmp
+	$(GOTEST) $$($(PACKAGE_LIST)) -coverprofile cover.out.tmp
 	cat cover.out.tmp | grep -v "_generated.deepcopy.go" > cover.out
 	@$(FAILPOINT_DISABLE)
 
