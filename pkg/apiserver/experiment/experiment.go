@@ -159,7 +159,7 @@ func (s *ScopeInfo) parseSelector() v1alpha1.SelectorSpec {
 
 // TargetInfo defines the information of target objects.
 type TargetInfo struct {
-	Kind         string           `json:"kind" binding:"required,oneof=PodChaos NetworkChaos IOChaos KernelChaos TimeChaos StressChaos"`
+	Kind         string           `json:"kind" binding:"required,oneof=PodChaos NetworkChaos IoChaos KernelChaos TimeChaos StressChaos"`
 	PodChaos     PodChaosInfo     `json:"pod_chaos"`
 	NetworkChaos NetworkChaosInfo `json:"network_chaos"`
 	IOChaos      IOChaosInfo      `json:"io_chaos"`
@@ -192,11 +192,34 @@ type NetworkChaosInfo struct {
 	TargetScope *ScopeInfo              `json:"target_scope"`
 }
 
-// TODO: implement these structs
-type IOChaosInfo struct{}
-type KernelChaosInfo struct{}
-type TimeChaosInfo struct{}
-type StressChaosInfo struct{}
+// IOChaosInfo defines the basic information of io chaos for creating a new IOChaos.
+type IOChaosInfo struct {
+	Action  string   `json:"action" binding:"oneof='' 'delay' 'errno' 'mixed'"`
+	Addr    string   `json:"addr"`
+	Delay   string   `json:"delay"`
+	Errno   string   `json:"errno"`
+	Path    string   `json:"path"`
+	Percent string   `json:"percent"`
+	Methods []string `json:"methods"`
+}
+
+// KernelChaosInfo defines the basic information of kernel chaos for creating a new KernelChaos.
+type KernelChaosInfo struct {
+	FailKernRequest v1alpha1.FailKernRequest `json:"fail_kernel_req"`
+}
+
+// TimeChaosInfo defines the basic information of time chaos for creating a new TimeChaos.
+type TimeChaosInfo struct {
+	TimeOffset     string   `json:"offset"`
+	ClockIDs       []string `json:"clock_ids"`
+	ContainerNames []string `json:"container_names"`
+}
+
+// StressChaosInfo defines the basic information of stress chaos for creating a new StressChaos.
+type StressChaosInfo struct {
+	Stressors         *v1alpha1.Stressors `json:"stressors"`
+	StressngStressors string              `json:"stressng_stressors,omitempty"`
+}
 
 // @Summary Create a nex chaos experiments.
 // @Description Create a new chaos experiments.
@@ -216,14 +239,38 @@ func (s *Service) createExperiment(c *gin.Context) {
 	}
 
 	switch exp.Target.Kind {
-	case "PodChaos":
+	case v1alpha1.KindPodChaos:
 		if err := s.createPodChaos(exp); err != nil {
 			c.Status(http.StatusInternalServerError)
 			_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
 			return
 		}
-	case "NetworkChaos":
+	case v1alpha1.KindNetworkChaos:
 		if err := s.createNetworkChaos(exp); err != nil {
+			c.Status(http.StatusInternalServerError)
+			_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
+			return
+		}
+	case v1alpha1.KindIOChaos:
+		if err := s.createIOChaos(exp); err != nil {
+			c.Status(http.StatusInternalServerError)
+			_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
+			return
+		}
+	case v1alpha1.KindTimeChaos:
+		if err := s.createTimeChaos(exp); err != nil {
+			c.Status(http.StatusInternalServerError)
+			_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
+			return
+		}
+	case v1alpha1.KindKernelChaos:
+		if err := s.createKernelChaos(exp); err != nil {
+			c.Status(http.StatusInternalServerError)
+			_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
+			return
+		}
+	case v1alpha1.KindStressChaos:
+		if err := s.createStressChaos(exp); err != nil {
 			c.Status(http.StatusInternalServerError)
 			_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
 			return
@@ -246,10 +293,11 @@ func (s *Service) createPodChaos(exp *ExperimentInfo) error {
 			Annotations: exp.Annotations,
 		},
 		Spec: v1alpha1.PodChaosSpec{
-			Selector: exp.Scope.parseSelector(),
-			Action:   v1alpha1.PodChaosAction(exp.Target.PodChaos.Action),
-			Mode:     v1alpha1.PodMode(exp.Scope.Mode),
-			Value:    exp.Scope.Value,
+			Selector:      exp.Scope.parseSelector(),
+			Action:        v1alpha1.PodChaosAction(exp.Target.PodChaos.Action),
+			Mode:          v1alpha1.PodMode(exp.Scope.Mode),
+			Value:         exp.Scope.Value,
+			ContainerName: exp.Target.PodChaos.ContainerName,
 		},
 	}
 
@@ -300,6 +348,125 @@ func (s *Service) createNetworkChaos(exp *ExperimentInfo) error {
 			TargetMode:     v1alpha1.PodMode(exp.Target.NetworkChaos.TargetScope.Mode),
 			TargetValue:    exp.Target.NetworkChaos.TargetScope.Value,
 		}
+	}
+
+	return s.kubeCli.Create(context.Background(), chaos)
+}
+
+func (s *Service) createIOChaos(exp *ExperimentInfo) error {
+	chaos := &v1alpha1.IoChaos{
+		ObjectMeta: v1.ObjectMeta{
+			Name:        exp.Name,
+			Namespace:   exp.Namespace,
+			Labels:      exp.Labels,
+			Annotations: exp.Annotations,
+		},
+		Spec: v1alpha1.IoChaosSpec{
+			Selector: exp.Scope.parseSelector(),
+			Action:   v1alpha1.IOChaosAction(exp.Target.IOChaos.Action),
+			Mode:     v1alpha1.PodMode(exp.Scope.Mode),
+			Value:    exp.Scope.Value,
+			// TODO: don't hardcode after we support other layers
+			Layer:   v1alpha1.FileSystemLayer,
+			Addr:    exp.Target.IOChaos.Addr,
+			Delay:   exp.Target.IOChaos.Delay,
+			Errno:   exp.Target.IOChaos.Errno,
+			Path:    exp.Target.IOChaos.Path,
+			Percent: exp.Target.IOChaos.Percent,
+			Methods: exp.Target.IOChaos.Methods,
+		},
+	}
+
+	if exp.Scheduler.Cron != "" {
+		chaos.Spec.Scheduler = &v1alpha1.SchedulerSpec{Cron: exp.Scheduler.Cron}
+	}
+
+	if exp.Scheduler.Duration != "" {
+		chaos.Spec.Duration = &exp.Scheduler.Duration
+	}
+
+	return s.kubeCli.Create(context.Background(), chaos)
+}
+
+func (s *Service) createTimeChaos(exp *ExperimentInfo) error {
+	chaos := &v1alpha1.TimeChaos{
+		ObjectMeta: v1.ObjectMeta{
+			Name:        exp.Name,
+			Namespace:   exp.Namespace,
+			Labels:      exp.Labels,
+			Annotations: exp.Annotations,
+		},
+		Spec: v1alpha1.TimeChaosSpec{
+			Selector:       exp.Scope.parseSelector(),
+			Mode:           v1alpha1.PodMode(exp.Scope.Mode),
+			Value:          exp.Scope.Value,
+			TimeOffset:     exp.Target.TimeChaos.TimeOffset,
+			ClockIds:       exp.Target.TimeChaos.ClockIDs,
+			ContainerNames: exp.Target.TimeChaos.ContainerNames,
+		},
+	}
+
+	if exp.Scheduler.Cron != "" {
+		chaos.Spec.Scheduler = &v1alpha1.SchedulerSpec{Cron: exp.Scheduler.Cron}
+	}
+
+	if exp.Scheduler.Duration != "" {
+		chaos.Spec.Duration = &exp.Scheduler.Duration
+	}
+
+	return s.kubeCli.Create(context.Background(), chaos)
+}
+
+func (s *Service) createKernelChaos(exp *ExperimentInfo) error {
+	chaos := &v1alpha1.KernelChaos{
+		ObjectMeta: v1.ObjectMeta{
+			Name:        exp.Name,
+			Namespace:   exp.Namespace,
+			Labels:      exp.Labels,
+			Annotations: exp.Annotations,
+		},
+		Spec: v1alpha1.KernelChaosSpec{
+			Selector:        exp.Scope.parseSelector(),
+			Mode:            v1alpha1.PodMode(exp.Scope.Mode),
+			Value:           exp.Scope.Value,
+			FailKernRequest: exp.Target.KernelChaos.FailKernRequest,
+		},
+	}
+
+	if exp.Scheduler.Cron != "" {
+		chaos.Spec.Scheduler = &v1alpha1.SchedulerSpec{Cron: exp.Scheduler.Cron}
+	}
+
+	if exp.Scheduler.Duration != "" {
+		chaos.Spec.Duration = &exp.Scheduler.Duration
+	}
+
+	return s.kubeCli.Create(context.Background(), chaos)
+}
+
+func (s *Service) createStressChaos(exp *ExperimentInfo) error {
+	chaos := &v1alpha1.StressChaos{
+		ObjectMeta: v1.ObjectMeta{
+			Name:        exp.Name,
+			Namespace:   exp.Namespace,
+			Labels:      exp.Labels,
+			Annotations: exp.Annotations,
+		},
+		Spec: v1alpha1.StressChaosSpec{
+			Selector:          exp.Scope.parseSelector(),
+			Mode:              v1alpha1.PodMode(exp.Scope.Mode),
+			Value:             exp.Scope.Value,
+			Stressors:         exp.Target.StressChaos.Stressors,
+			StressngStressors: exp.Target.StressChaos.StressngStressors,
+		},
+	}
+
+	if exp.Scheduler.Cron != "" {
+		chaos.Spec.Scheduler = &v1alpha1.SchedulerSpec{Cron: exp.Scheduler.Cron}
+	}
+
+	if exp.Scheduler.Duration != "" {
+		chaos.Spec.Duration = &exp.Scheduler.Duration
 	}
 
 	return s.kubeCli.Create(context.Background(), chaos)
