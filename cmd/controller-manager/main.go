@@ -52,11 +52,11 @@ var (
 	pprofAddr            string
 	enableLeaderElection bool
 	certsDir             string
-	configDir            string
 	printVersion         bool
 
-	cmWatcherLabels = flags.NewMapStringStringFlag()
-	watcherConfig   = watcher.NewConfig()
+	cmWatcherLabels       = flags.NewMapStringStringFlag()
+	templateWatcherLabels = flags.NewMapStringStringFlag()
+	watcherConfig         = watcher.NewConfig()
 )
 
 func init() {
@@ -73,10 +73,10 @@ func parseFlags() {
 		"Enable leader election for controller manager. Enabling this will ensure there is only one active controller manager.")
 	flag.StringVar(&certsDir, "certs", "/etc/webhook/certs",
 		"The directory for storing certs key file and cert file")
-	flag.StringVar(&configDir, "conf", "/etc/webhook/conf",
-		"The directory for storing webhook config files")
-	flag.StringVar(&watcherConfig.Namespace, "configmap-namespace", "",
-		"Namespace to search for ConfigMaps to load Injection Configs from (default: current namespace)")
+	flag.StringVar(&watcherConfig.Namespace, "template-namespace", "",
+		"Namespace to search for Template ConfigMaps to load Injection Configs from (default: current namespace)")
+	flag.Var(&templateWatcherLabels, "template-labels",
+		"Label pairs used to discover common templates in Kubernetes. These should be key1=value[,key2=val2,...]")
 	flag.Var(&cmWatcherLabels, "configmap-labels",
 		"Label pairs used to discover ConfigMaps in Kubernetes. These should be key1=value[,key2=val2,...]")
 	flag.BoolVar(&printVersion, "version", false, "print version information and exit")
@@ -160,8 +160,9 @@ func main() {
 	}
 
 	if err = (&controllers.KernelChaosReconciler{
-		Client: mgr.GetClient(),
-		Log:    ctrl.Log.WithName("controllers").WithName("KernelChaos"),
+		Client:        mgr.GetClient(),
+		EventRecorder: mgr.GetEventRecorderFor("kernelchaos-controller"),
+		Log:           ctrl.Log.WithName("controllers").WithName("KernelChaos"),
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "KernelChaos")
 		os.Exit(1)
@@ -188,12 +189,7 @@ func main() {
 
 	hookServer := mgr.GetWebhookServer()
 	hookServer.CertDir = certsDir
-	webhookConfig, err := config.LoadConfigDirectory(configDir)
-	if err != nil {
-		setupLog.Error(err, "load webhook config error")
-		os.Exit(1)
-	}
-
+	conf := config.NewConfigWatcherConf()
 	stopCh := ctrl.SetupSignalHandler()
 
 	if pprofAddr != "0" {
@@ -205,10 +201,20 @@ func main() {
 		}()
 	}
 
-	watchConfig(webhookConfig, stopCh)
+	if err := watcherConfig.InitLabels(templateWatcherLabels.ToMapStringString(),
+		cmWatcherLabels.ToMapStringString()); err != nil {
+		setupLog.Error(err, "failed to initialize watcher config selected labels")
+		os.Exit(1)
+	}
+	configWatcher, err := watcher.New(*watcherConfig)
+	if err != nil {
+		setupLog.Error(err, "unable to create config watcher")
+		os.Exit(1)
+	}
 
+	watchConfig(configWatcher, conf, stopCh)
 	hookServer.Register("/inject-v1-pod", &webhook.Admission{Handler: &apiWebhook.PodInjector{
-		Config: webhookConfig,
+		Config: conf,
 	}})
 
 	// +kubebuilder:scaffold:builder
@@ -221,16 +227,7 @@ func main() {
 
 }
 
-func watchConfig(cfg *config.Config, stopCh <-chan struct{}) {
-	watcherConfig.ConfigMapLabels = cmWatcherLabels.ToMapStringString()
-	// start up the watcher, and get the first batch of ConfigMaps
-	// to set in the config.
-	// make sure to union this with any file configs we loaded from disk
-	configWatcher, err := watcher.New(*watcherConfig)
-	if err != nil {
-		setupLog.Error(err, "unable to create ConfigMap watchers")
-		os.Exit(1)
-	}
+func watchConfig(configWatcher *watcher.K8sConfigMapWatcher, cfg *config.Config, stopCh <-chan struct{}) {
 	go func() {
 		// watch for reconciliation signals, and grab configmaps, then update the running configuration
 		// for the server
@@ -269,7 +266,7 @@ func watchConfig(cfg *config.Config, stopCh <-chan struct{}) {
 			select {
 			case <-eventsCh:
 				setupLog.Info("Triggering ConfigMap reconciliation")
-				updatedInjectionConfigs, err := configWatcher.Get()
+				updatedInjectionConfigs, err := configWatcher.GetInjectionConfigs()
 				if err != nil {
 					setupLog.Error(err, "unable to get ConfigMaps")
 					continue
@@ -280,24 +277,9 @@ func watchConfig(cfg *config.Config, stopCh <-chan struct{}) {
 					continue
 				}
 
-				setupLog.Info("Got updated InjectionConfigs from reconciliation",
-					"updated config count", len(updatedInjectionConfigs))
-
-				newInjectionConfigs := make([]*config.InjectionConfig, len(updatedInjectionConfigs)+len(cfg.Injections))
-				{
-					i := 0
-					for k := range cfg.Injections {
-						newInjectionConfigs[i] = cfg.Injections[k]
-						i++
-					}
-					for i, watched := range updatedInjectionConfigs {
-						newInjectionConfigs[i+len(cfg.Injections)] = watched
-					}
-				}
-
 				setupLog.Info("Updating server with newly loaded configurations",
-					"origin configs count", len(cfg.Injections), "updated configs count", len(updatedInjectionConfigs))
-				cfg.ReplaceInjectionConfigs(newInjectionConfigs)
+					"original configs count", len(cfg.Injections), "updated configs count", len(updatedInjectionConfigs))
+				cfg.ReplaceInjectionConfigs(updatedInjectionConfigs)
 				setupLog.Info("Configuration replaced")
 			case <-stopCh:
 				break

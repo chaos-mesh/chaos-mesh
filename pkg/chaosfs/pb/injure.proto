@@ -10,6 +10,7 @@ service Injure {
   rpc RecoverMethod (Request) returns (google.protobuf.Empty) {}
   rpc SetFault(Request) returns (google.protobuf.Empty) {}
   rpc SetFaultAll(Request) returns (google.protobuf.Empty) {}
+  rpc Injected (google.protobuf.Empty) returns (InjectedResponse) {}
 }
 
 message Request {
@@ -23,4 +24,8 @@ message Request {
 
 message Response {
   repeated string methods = 1;
+}
+
+message InjectedResponse {
+    bool injected = 1;
 }

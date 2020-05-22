@@ -108,7 +108,7 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, obj v1alpha1.I
 		return err
 	}
 
-	podchaos.Status.Experiment.Pods = make([]v1alpha1.PodStatus, 0, len(pods))
+	podchaos.Status.Experiment.PodRecords = make([]v1alpha1.PodStatus, 0, len(pods))
 	for _, pod := range pods {
 		ps := v1alpha1.PodStatus{
 			Namespace: pod.Namespace,
@@ -119,7 +119,7 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, obj v1alpha1.I
 			Message:   fmt.Sprintf(containerKillActionMsg, podchaos.Spec.ContainerName),
 		}
 
-		podchaos.Status.Experiment.Pods = append(podchaos.Status.Experiment.Pods, ps)
+		podchaos.Status.Experiment.PodRecords = append(podchaos.Status.Experiment.PodRecords, ps)
 	}
 	r.Event(obj, v1.EventTypeNormal, utils.EventChaosInjected, "")
 	return nil

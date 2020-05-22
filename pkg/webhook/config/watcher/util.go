@@ -11,28 +11,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package apiserver
+package watcher
 
 import (
-	"go.uber.org/fx"
-
-	"github.com/pingcap/chaos-mesh/pkg/apiserver/archive"
-	"github.com/pingcap/chaos-mesh/pkg/apiserver/common"
-	"github.com/pingcap/chaos-mesh/pkg/apiserver/event"
-	"github.com/pingcap/chaos-mesh/pkg/apiserver/experiment"
+	"bytes"
+	"html/template"
 )
 
-var handlerModule = fx.Options(
-	fx.Provide(
-		common.NewService,
-		experiment.NewService,
-		event.NewService,
-		archive.NewService,
-	),
-	fx.Invoke(
-		common.Register,
-		experiment.Register,
-		event.Register,
-		archive.Register,
-	),
-)
+func renderTemplateWithArgs(tpl *template.Template, args map[string]string) ([]byte, error) {
+	model := make(map[string]interface{}, len(args))
+	for k, v := range args {
+		model[k] = v
+	}
+	buff := new(bytes.Buffer)
+	if err := tpl.Execute(buff, model); err != nil {
+		return nil, err
+	}
+	return buff.Bytes(), nil
+}

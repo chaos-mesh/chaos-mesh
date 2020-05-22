@@ -59,18 +59,6 @@ type KernelChaosSpec struct {
 
 	// Scheduler defines some schedule rules to control the running time of the chaos experiment about time.
 	Scheduler *SchedulerSpec `json:"scheduler,omitempty"`
-
-	// Next time when this action will be applied again
-	// +optional
-	NextStart *metav1.Time `json:"nextStart,omitempty"`
-
-	// Next time when this action will be recovered
-	// +optional
-	NextRecover *metav1.Time `json:"nextRecover,omitempty"`
-
-	// If this chaos has been paused
-	// +optional
-	Paused bool `json:"paused"`
 }
 
 // GetSelector is a getter for Selector (for implementing SelectSpec)
@@ -166,44 +154,44 @@ func (in *KernelChaos) GetDuration() (*time.Duration, error) {
 
 // GetNextStart gets NextStart field of KernelChaos
 func (in *KernelChaos) GetNextStart() time.Time {
-	if in.Spec.NextStart == nil {
+	if in.Status.Scheduler.NextStart == nil {
 		return time.Time{}
 	}
-	return in.Spec.NextStart.Time
+	return in.Status.Scheduler.NextStart.Time
 }
 
 // SetNextStart sets NextStart field of KernelChaos
 func (in *KernelChaos) SetNextStart(t time.Time) {
 	if t.IsZero() {
-		in.Spec.NextStart = nil
+		in.Status.Scheduler.NextStart = nil
 		return
 	}
 
-	if in.Spec.NextStart == nil {
-		in.Spec.NextStart = &metav1.Time{}
+	if in.Status.Scheduler.NextStart == nil {
+		in.Status.Scheduler.NextStart = &metav1.Time{}
 	}
-	in.Spec.NextStart.Time = t
+	in.Status.Scheduler.NextStart.Time = t
 }
 
 // GetNextRecover gets NextRecover field of KernelChaos
 func (in *KernelChaos) GetNextRecover() time.Time {
-	if in.Spec.NextRecover == nil {
+	if in.Status.Scheduler.NextRecover == nil {
 		return time.Time{}
 	}
-	return in.Spec.NextRecover.Time
+	return in.Status.Scheduler.NextRecover.Time
 }
 
 // SetNextRecover sets NextRecover field of KernelChaos
 func (in *KernelChaos) SetNextRecover(t time.Time) {
 	if t.IsZero() {
-		in.Spec.NextRecover = nil
+		in.Status.Scheduler.NextRecover = nil
 		return
 	}
 
-	if in.Spec.NextRecover == nil {
-		in.Spec.NextRecover = &metav1.Time{}
+	if in.Status.Scheduler.NextRecover == nil {
+		in.Status.Scheduler.NextRecover = &metav1.Time{}
 	}
-	in.Spec.NextRecover.Time = t
+	in.Status.Scheduler.NextRecover.Time = t
 }
 
 // GetScheduler returns the scheduler of KernelChaos
@@ -223,7 +211,29 @@ func (in *KernelChaos) IsDeleted() bool {
 
 // IsPaused returns whether this resource has been paused
 func (in *KernelChaos) IsPaused() bool {
-	return in.Spec.Paused
+	if in.Annotations == nil || in.Annotations[PauseAnnotationKey] != "true" {
+		return false
+	}
+	return true
+}
+
+// GetChaos returns a chaos instance
+func (in *KernelChaos) GetChaos() *ChaosInstance {
+	instance := &ChaosInstance{
+		Name:      in.Name,
+		Namespace: in.Namespace,
+		Kind:      KindKernelChaos,
+		StartTime: in.CreationTimestamp.Time,
+		Action:    "",
+		Status:    string(in.GetStatus().Experiment.Phase),
+	}
+	if in.Spec.Duration != nil {
+		instance.Duration = *in.Spec.Duration
+	}
+	if in.DeletionTimestamp != nil {
+		instance.EndTime = in.DeletionTimestamp.Time
+	}
+	return instance
 }
 
 // +kubebuilder:object:root=true
@@ -233,6 +243,15 @@ type KernelChaosList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
 	Items           []KernelChaos `json:"items"`
+}
+
+// ListChaos returns a list of kernel chaos
+func (in *KernelChaosList) ListChaos() []*ChaosInstance {
+	res := make([]*ChaosInstance, 0, len(in.Items))
+	for _, item := range in.Items {
+		res = append(res, item.GetChaos())
+	}
+	return res
 }
 
 func init() {

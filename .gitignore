@@ -7,6 +7,7 @@ tags
 *.fail.go
 vendor
 .DS_Store
+core.sqlite
 
 # Output of the go coverage tool, specifically when used with LiteIDE
 /cover.*
@@ -28,3 +29,5 @@ test/image/e2e/chaos-mesh
 test/image/e2e/manifests/
 
 /pkg/uiserver/embedded_assets_handler.go
+
+/doc/swagger.*

@@ -128,22 +128,6 @@ type IoChaosSpec struct {
 	// Addr defines the address for sidecar container.
 	// +optional
 	Addr string `json:"addr,omitempty"`
-
-	// ConfigName defines the config name which used to inject pod.
-	// +required
-	ConfigName string `json:"configName"`
-
-	// Next time when this action will be applied again.
-	// +optional
-	NextStart *metav1.Time `json:"nextStart,omitempty"`
-
-	// Next time when this action will be recovered.
-	// +optional
-	NextRecover *metav1.Time `json:"nextRecover,omitempty"`
-
-	// If this chaos has been paused
-	// +optional
-	Paused bool `json:"paused"`
 }
 
 func (in *IoChaosSpec) GetSelector() SelectorSpec {
@@ -185,7 +169,10 @@ func (in *IoChaos) IsDeleted() bool {
 
 // IsPaused returns whether this resource has been paused
 func (in *IoChaos) IsPaused() bool {
-	return in.Spec.Paused
+	if in.Annotations == nil || in.Annotations[PauseAnnotationKey] != "true" {
+		return false
+	}
+	return true
 }
 
 // GetDuration would return the duration for chaos
@@ -201,46 +188,65 @@ func (in *IoChaos) GetDuration() (*time.Duration, error) {
 }
 
 func (in *IoChaos) GetNextStart() time.Time {
-	if in.Spec.NextStart == nil {
+	if in.Status.Scheduler.NextStart == nil {
 		return time.Time{}
 	}
-	return in.Spec.NextStart.Time
+	return in.Status.Scheduler.NextStart.Time
 }
 
 func (in *IoChaos) SetNextStart(t time.Time) {
 	if t.IsZero() {
-		in.Spec.NextStart = nil
+		in.Status.Scheduler.NextStart = nil
 		return
 	}
 
-	if in.Spec.NextStart == nil {
-		in.Spec.NextStart = &metav1.Time{}
+	if in.Status.Scheduler.NextStart == nil {
+		in.Status.Scheduler.NextStart = &metav1.Time{}
 	}
-	in.Spec.NextStart.Time = t
+	in.Status.Scheduler.NextStart.Time = t
 }
 
 func (in *IoChaos) GetNextRecover() time.Time {
-	if in.Spec.NextRecover == nil {
+	if in.Status.Scheduler.NextRecover == nil {
 		return time.Time{}
 	}
-	return in.Spec.NextRecover.Time
+	return in.Status.Scheduler.NextRecover.Time
 }
 
 func (in *IoChaos) SetNextRecover(t time.Time) {
 	if t.IsZero() {
-		in.Spec.NextRecover = nil
+		in.Status.Scheduler.NextRecover = nil
 		return
 	}
 
-	if in.Spec.NextRecover == nil {
-		in.Spec.NextRecover = &metav1.Time{}
+	if in.Status.Scheduler.NextRecover == nil {
+		in.Status.Scheduler.NextRecover = &metav1.Time{}
 	}
-	in.Spec.NextRecover.Time = t
+	in.Status.Scheduler.NextRecover.Time = t
 }
 
 // GetScheduler would return the scheduler for chaos
 func (in *IoChaos) GetScheduler() *SchedulerSpec {
 	return in.Spec.Scheduler
+}
+
+// GetChaos returns a chaos instance
+func (in *IoChaos) GetChaos() *ChaosInstance {
+	instance := &ChaosInstance{
+		Name:      in.Name,
+		Namespace: in.Namespace,
+		Kind:      KindIOChaos,
+		StartTime: in.CreationTimestamp.Time,
+		Action:    string(in.Spec.Action),
+		Status:    string(in.GetStatus().Experiment.Phase),
+	}
+	if in.Spec.Duration != nil {
+		instance.Duration = *in.Spec.Duration
+	}
+	if in.DeletionTimestamp != nil {
+		instance.EndTime = in.DeletionTimestamp.Time
+	}
+	return instance
 }
 
 // +kubebuilder:object:root=true
@@ -250,6 +256,15 @@ type IoChaosList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
 	Items           []IoChaos `json:"items"`
+}
+
+// ListChaos returns a list of io chaos
+func (in *IoChaosList) ListChaos() []*ChaosInstance {
+	res := make([]*ChaosInstance, 0, len(in.Items))
+	for _, item := range in.Items {
+		res = append(res, item.GetChaos())
+	}
+	return res
 }
 
 func init() {

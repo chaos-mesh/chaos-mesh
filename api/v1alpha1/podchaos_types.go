@@ -58,7 +58,10 @@ func (in *PodChaos) IsDeleted() bool {
 
 // IsPaused returns whether this resource has been paused
 func (in *PodChaos) IsPaused() bool {
-	return in.Spec.Paused
+	if in.Annotations == nil || in.Annotations[PauseAnnotationKey] != "true" {
+		return false
+	}
+	return true
 }
 
 // GetDuration would return the duration for chaos
@@ -74,46 +77,65 @@ func (in *PodChaos) GetDuration() (*time.Duration, error) {
 }
 
 func (in *PodChaos) GetNextStart() time.Time {
-	if in.Spec.NextStart == nil {
+	if in.Status.Scheduler.NextStart == nil {
 		return time.Time{}
 	}
-	return in.Spec.NextStart.Time
+	return in.Status.Scheduler.NextStart.Time
 }
 
 func (in *PodChaos) SetNextStart(t time.Time) {
 	if t.IsZero() {
-		in.Spec.NextStart = nil
+		in.Status.Scheduler.NextStart = nil
 		return
 	}
 
-	if in.Spec.NextStart == nil {
-		in.Spec.NextStart = &metav1.Time{}
+	if in.Status.Scheduler.NextStart == nil {
+		in.Status.Scheduler.NextStart = &metav1.Time{}
 	}
-	in.Spec.NextStart.Time = t
+	in.Status.Scheduler.NextStart.Time = t
 }
 
 func (in *PodChaos) GetNextRecover() time.Time {
-	if in.Spec.NextRecover == nil {
+	if in.Status.Scheduler.NextRecover == nil {
 		return time.Time{}
 	}
-	return in.Spec.NextRecover.Time
+	return in.Status.Scheduler.NextRecover.Time
 }
 
 func (in *PodChaos) SetNextRecover(t time.Time) {
 	if t.IsZero() {
-		in.Spec.NextRecover = nil
+		in.Status.Scheduler.NextRecover = nil
 		return
 	}
 
-	if in.Spec.NextRecover == nil {
-		in.Spec.NextRecover = &metav1.Time{}
+	if in.Status.Scheduler.NextRecover == nil {
+		in.Status.Scheduler.NextRecover = &metav1.Time{}
 	}
-	in.Spec.NextRecover.Time = t
+	in.Status.Scheduler.NextRecover.Time = t
 }
 
 // GetScheduler would return the scheduler for chaos
 func (in *PodChaos) GetScheduler() *SchedulerSpec {
 	return in.Spec.Scheduler
+}
+
+// GetChaos returns a chaos instance
+func (in *PodChaos) GetChaos() *ChaosInstance {
+	instance := &ChaosInstance{
+		Name:      in.Name,
+		Namespace: in.Namespace,
+		Kind:      KindPodChaos,
+		StartTime: in.CreationTimestamp.Time,
+		Action:    string(in.Spec.Action),
+		Status:    string(in.GetStatus().Experiment.Phase),
+	}
+	if in.Spec.Duration != nil {
+		instance.Duration = *in.Spec.Duration
+	}
+	if in.DeletionTimestamp != nil {
+		instance.EndTime = in.DeletionTimestamp.Time
+	}
+	return instance
 }
 
 // PodChaosSpec defines the attributes that a user creates on a chaos experiment about pods.
@@ -152,22 +174,10 @@ type PodChaosSpec struct {
 	// +optional
 	Duration *string `json:"duration,omitempty"`
 
-	// Next time when this action will be applied again
-	// +optional
-	NextStart *metav1.Time `json:"nextStart,omitempty"`
-
-	// Next time when this action will be recovered
-	// +optional
-	NextRecover *metav1.Time `json:"nextRecover,omitempty"`
-
 	// ContainerName indicates the name of the container.
 	// Needed in container-kill.
 	// +optional
 	ContainerName string `json:"containerName"`
-
-	// If this chaos has been paused
-	// +optional
-	Paused bool `json:"paused"`
 }
 
 func (in *PodChaosSpec) GetSelector() SelectorSpec {
@@ -209,6 +219,15 @@ type PodStatus struct {
 	// e.g. "delete this pod" or "pause this pod duration 5m"
 	// +optional
 	Message string `json:"message"`
+}
+
+// ListChaos returns a list of pod chaos
+func (in *PodChaosList) ListChaos() []*ChaosInstance {
+	res := make([]*ChaosInstance, 0, len(in.Items))
+	for _, item := range in.Items {
+		res = append(res, item.GetChaos())
+	}
+	return res
 }
 
 func init() {
