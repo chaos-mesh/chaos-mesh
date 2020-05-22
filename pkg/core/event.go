@@ -28,11 +28,14 @@ type EventStore interface {
 	// ListByExperiment returns a event list by the name and namespace of the experiment.
 	ListByExperiment(context.Context, string, string) ([]*Event, error)
 
+	// ListByNamespace returns a event list by the namespace of the pod.
+	ListByNamespace(context.Context, string) ([]*Event, error)
+
 	// ListByPod returns a event list by the name and namespace of the pod.
 	ListByPod(context.Context, string, string) ([]*Event, error)
 
 	// Find returns a event from the datastore by ID.
-	Find(context.Context, int64) (*Event, error)
+	Find(context.Context, uint) (*Event, error)
 
 	// FindByExperimentAndStartTime returns a event by the experiment and start time.
 	FindByExperimentAndStartTime(context.Context, string, string, *time.Time) (*Event, error)
