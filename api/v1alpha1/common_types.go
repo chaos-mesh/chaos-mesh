@@ -24,18 +24,6 @@ import (
 const (
 	// PauseAnnotationKey defines the annotation used to pause a chaos
 	PauseAnnotationKey = "experiment.pingcap.com/pause"
-	// KindPodChaos is the kind for pod chaos
-	KindPodChaos = "PodChaos"
-	// KindNetworkChaos is the kind for network chaos
-	KindNetworkChaos = "NetworkChaos"
-	// KindIOChaos is the kind for io chaos
-	KindIOChaos = "IoChaos"
-	// KindKernelChaos is the kind for kernel chaos
-	KindKernelChaos = "KernelChaos"
-	// KindStressChaos is the kind for stress chaos
-	KindStressChaos = "StressChaos"
-	// KindTimeChaos is the kind for time chaos
-	KindTimeChaos = "TimeChaos"
 )
 
 // SelectorSpec defines the some selectors to select objects.

@@ -27,23 +27,10 @@ import (
 	"github.com/pingcap/chaos-mesh/pkg/config"
 	"github.com/pingcap/chaos-mesh/pkg/core"
 
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	ctrl "sigs.k8s.io/controller-runtime"
+	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-)
-
-var log = ctrl.Log.WithName("experiment api")
-
-var (
-	// TODO(yeya24): don't hardcode this if it is possible
-	kinds = map[string]v1alpha1.ChaosList{
-		v1alpha1.KindPodChaos:     &v1alpha1.PodChaosList{},
-		v1alpha1.KindNetworkChaos: &v1alpha1.NetworkChaosList{},
-		v1alpha1.KindStressChaos:  &v1alpha1.StressChaosList{},
-		v1alpha1.KindIOChaos:      &v1alpha1.IoChaosList{},
-		v1alpha1.KindKernelChaos:  &v1alpha1.KernelChaosList{},
-		v1alpha1.KindTimeChaos:    &v1alpha1.TimeChaosList{},
-	}
 )
 
 // Experiment defines the basic information of an experiment
@@ -94,16 +81,10 @@ func Register(r *gin.RouterGroup, s *Service) {
 	// TODO: add more api handlers
 	endpoint.GET("", s.listExperiments)
 	endpoint.POST("/new", s.createExperiment)
-	endpoint.DELETE("/detail/:ns/:name", s.deleteExperiment)
-	endpoint.GET("/delete/:ns/:name", s.getExperimentDetail)
+	endpoint.GET("/detail/:namespace/:name", s.getExperimentDetail)
+	endpoint.DELETE("/:kind/:namespace/:name", s.deleteExperiment)
 	endpoint.GET("/state", s.state)
 }
-
-// TODO: need to be implemented
-func (s *Service) getExperimentDetail(c *gin.Context) {}
-
-// TODO: need to be implemented
-func (s *Service) deleteExperiment(c *gin.Context) {}
 
 // ExperimentInfo defines a form data of Experiment from API.
 type ExperimentInfo struct {
@@ -490,11 +471,11 @@ func (s *Service) listExperiments(c *gin.Context) {
 	status := c.Query("status")
 
 	data := make([]*Experiment, 0)
-	for key, list := range kinds {
+	for key, list := range v1alpha1.Kinds {
 		if kind != "" && key != kind {
 			continue
 		}
-		if err := s.kubeCli.List(context.Background(), list, &client.ListOptions{Namespace: ns}); err != nil {
+		if err := s.kubeCli.List(context.Background(), list.ChaosList, &client.ListOptions{Namespace: ns}); err != nil {
 			c.Status(http.StatusInternalServerError)
 			_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
 			return
@@ -519,6 +500,62 @@ func (s *Service) listExperiments(c *gin.Context) {
 	c.JSON(http.StatusOK, data)
 }
 
+// TODO: need to be implemented
+func (s *Service) getExperimentDetail(c *gin.Context) {}
+
+// @Summary Delete the specified chaos experiment.
+// @Description Delete the specified chaos experiment.
+// @Tags experiments
+// @Produce json
+// @Param namespace path string true "namespace"
+// @Param name path string true "name"
+// @Param kind path string true "kind" Enums(PodChaos, IoChaos, NetworkChaos, TimeChaos, KernelChaos, StressChaos)
+// @Success 200 "delete ok"
+// @Router /api/experiments/{kind}/{namespace}/{name} [delete]
+// @Failure 400 {object} utils.APIError
+// @Failure 500 {object} utils.APIError
+func (s *Service) deleteExperiment(c *gin.Context) {
+	kind := c.Param("kind")
+	ns := c.Param("namespace")
+	name := c.Param("name")
+
+	ctx := context.TODO()
+	chaosKey := types.NamespacedName{Namespace: ns, Name: name}
+
+	var (
+		chaosKind *v1alpha1.ChaosKind
+		ok        bool
+	)
+	if chaosKind, ok = v1alpha1.Kinds[kind]; !ok {
+		c.Status(http.StatusBadRequest)
+		_ = c.Error(utils.ErrInvalidRequest.New(kind + " is not supported"))
+		return
+	}
+	if err := s.kubeCli.Get(ctx, chaosKey, chaosKind.Chaos); err != nil {
+		if apierrors.IsNotFound(err) {
+			c.Status(http.StatusNotFound)
+			_ = c.Error(utils.ErrNotFound.NewWithNoMessage())
+		} else {
+			c.Status(http.StatusInternalServerError)
+			_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
+		}
+		return
+	}
+
+	if err := s.kubeCli.Delete(ctx, chaosKind.Chaos, &client.DeleteOptions{}); err != nil {
+		if apierrors.IsNotFound(err) {
+			c.Status(http.StatusNotFound)
+			_ = c.Error(utils.ErrNotFound.NewWithNoMessage())
+		} else {
+			c.Status(http.StatusInternalServerError)
+			_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
+		}
+		return
+	}
+
+	c.JSON(http.StatusOK, nil)
+}
+
 // @Summary Get chaos experiments state from Kubernetes cluster.
 // @Description Get chaos experiments state from Kubernetes cluster.
 // @Tags experiments
@@ -531,8 +568,8 @@ func (s *Service) state(c *gin.Context) {
 
 	g, ctx := errgroup.WithContext(context.Background())
 	m := &sync.Mutex{}
-	for index := range kinds {
-		list := kinds[index]
+	for index := range v1alpha1.Kinds {
+		list := v1alpha1.Kinds[index].ChaosList
 		g.Go(func() error {
 			if err := s.kubeCli.List(ctx, list); err != nil {
 				return err
