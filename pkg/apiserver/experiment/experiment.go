@@ -478,8 +478,6 @@ func (s *Service) patchExperiment(exp *ExperimentBase, annotations map[string]st
 		ok        bool
 	)
 
-	log.Info("kinds", "kind", v1alpha1.AllKinds())
-
 	if chaosKind, ok = v1alpha1.AllKinds()[exp.Kind]; !ok {
 		return fmt.Errorf("%s is not supported", exp.Kind)
 	}
