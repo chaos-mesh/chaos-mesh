@@ -39,18 +39,6 @@ import (
 
 var log = ctrl.Log.WithName("experiment api")
 
-var (
-	// TODO(yeya24): don't hardcode this if it is possible
-	kinds = map[string]v1alpha1.ChaosList{
-		v1alpha1.KindPodChaos:     &v1alpha1.PodChaosList{},
-		v1alpha1.KindNetworkChaos: &v1alpha1.NetworkChaosList{},
-		v1alpha1.KindStressChaos:  &v1alpha1.StressChaosList{},
-		v1alpha1.KindIOChaos:      &v1alpha1.IoChaosList{},
-		v1alpha1.KindKernelChaos:  &v1alpha1.KernelChaosList{},
-		v1alpha1.KindTimeChaos:    &v1alpha1.TimeChaosList{},
-	}
-)
-
 // Experiment defines the basic information of an experiment
 type Experiment struct {
 	ExperimentBase
@@ -328,7 +316,7 @@ func (s *Service) listExperiments(c *gin.Context) {
 	status := c.Query("status")
 
 	data := make([]*Experiment, 0)
-	for key, list := range kinds {
+	for key, list := range v1alpha1.AllKinds() {
 		if kind != "" && key != kind {
 			continue
 		}
@@ -371,6 +359,7 @@ func (s *Service) state(c *gin.Context) {
 
 	g, ctx := errgroup.WithContext(context.Background())
 	m := &sync.Mutex{}
+	kinds := v1alpha1.AllKinds()
 	for index := range kinds {
 		list := kinds[index]
 		g.Go(func() error {
@@ -406,9 +395,9 @@ func (s *Service) state(c *gin.Context) {
 
 // ExperimentBase is used to identify the unique experiment from API request.
 type ExperimentBase struct {
-	Kind      string `json:"kind" binding:"required,oneof=PodChaos NetworkChaos IoChaos StressChaos TimeChaos"`
-	Namespace string `json:"namespace" binding:"required,NameValid"`
-	Name      string `json:"name" binding:"required,NameValid"`
+	Kind      string `uri:"kind" binding:"required,oneof=PodChaos NetworkChaos IoChaos StressChaos TimeChaos"`
+	Namespace string `uri:"namespace" binding:"required,NameValid"`
+	Name      string `uri:"name" binding:"required,NameValid"`
 }
 
 // @Summary Pause chaos experiment by API
@@ -421,7 +410,7 @@ type ExperimentBase struct {
 // @Success 200 "pause ok"
 // @Failure 500 {object} utils.APIError
 // @Failure 404 {object} utils.APIError
-// @Router /api/experiments/pause/{kind}/{ns}/{name} [put]
+// @Router /api/experiments/pause/{kind}/{namespace}/{name} [put]
 func (s *Service) pauseExperiment(c *gin.Context) {
 	exp := &ExperimentBase{}
 	if err := c.ShouldBindUri(exp); err != nil {
@@ -488,6 +477,8 @@ func (s *Service) patchExperiment(exp *ExperimentBase, annotations map[string]st
 		chaosKind *v1alpha1.ChaosKind
 		ok        bool
 	)
+
+	log.Info("kinds", "kind", v1alpha1.AllKinds())
 
 	if chaosKind, ok = v1alpha1.AllKinds()[exp.Kind]; !ok {
 		return fmt.Errorf("%s is not supported", exp.Kind)

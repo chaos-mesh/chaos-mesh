@@ -14,8 +14,6 @@
 package v1alpha1
 
 import (
-	"bytes"
-	"encoding/gob"
 	"sync"
 	"time"
 
@@ -43,21 +41,24 @@ func (c *chaosKindMap) register(name string, kind *ChaosKind) {
 	c.kinds[name] = kind
 }
 
-func (c *chaosKindMap) cloneKinds() map[string]*ChaosKind {
+func (c *chaosKindMap) clone() map[string]*ChaosKind {
 	c.RLock()
 	defer c.RUnlock()
 
 	out := make(map[string]*ChaosKind)
-	var buf bytes.Buffer
-	gob.NewEncoder(&buf).Encode(c.kinds)
-	gob.NewDecoder(bytes.NewBuffer(buf.Bytes())).Decode(&out)
+	for key, kind := range c.kinds {
+		out[key] = &ChaosKind{
+			Chaos:     kind.Chaos.DeepCopyObject(),
+			ChaosList: kind.ChaosList,
+		}
+	}
 
 	return out
 }
 
 // AllKinds returns all chaos kinds.
 func AllKinds() map[string]*ChaosKind {
-	return all.cloneKinds()
+	return all.clone()
 }
 
 // all is a ChaosKindMap instance.
