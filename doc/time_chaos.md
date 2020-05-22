@@ -43,6 +43,6 @@ Description:
 
 ## Limitation
 
-* Time modification only can be injected into the main process of container.
-* Time chaos has no effect on pure syscall `clock_gettime`.
-* All injected vdso call use pure syscall to get realtime, so clock-related function call becomes much slower.
+* Time modification can only be injected into the main process of container.
+* Time chaos has no effect on pure system call `clock_gettime`.
+* All injected [vDSO](http://man7.org/linux/man-pages/man7/vdso.7.html) calls use pure system calls to get the real time, so clock-related function calls can be much slower.
