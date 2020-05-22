@@ -22,6 +22,16 @@ import (
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
+// KindIOChaos is the kind for io chaos
+const KindIOChaos = "IoChaos"
+
+func init() {
+	all.register(KindIOChaos, &ChaosKind{
+		Chaos:     &IoChaos{},
+		ChaosList: &IoChaosList{},
+	})
+}
+
 // IOChaosAction represents the chaos action about I/O action.
 type IOChaosAction string
 
@@ -29,14 +39,6 @@ const (
 	IODelayAction IOChaosAction = "delay"
 	IOErrnoAction               = "errno"
 	IOMixedAction               = "mixed"
-)
-
-const (
-	// TODO: add config file
-	WebhookNamespaceLabelKey    = "admission-webhook"
-	WebhookNamespaceLabelValue  = "enabled"
-	WebhookPodAnnotationKey     = "admission-webhook.pingcap.com/request"
-	WebhookInitPodAnnotationKey = "admission-webhook.pingcap.com/init-request"
 )
 
 // IOLayer represents the layer of I/O system.

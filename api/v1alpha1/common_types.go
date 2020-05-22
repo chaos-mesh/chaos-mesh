@@ -14,6 +14,9 @@
 package v1alpha1
 
 import (
+	"bytes"
+	"encoding/gob"
+	"sync"
 	"time"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -24,19 +27,51 @@ import (
 const (
 	// PauseAnnotationKey defines the annotation used to pause a chaos
 	PauseAnnotationKey = "experiment.pingcap.com/pause"
-	// KindPodChaos is the kind for pod chaos
-	KindPodChaos = "PodChaos"
-	// KindNetworkChaos is the kind for network chaos
-	KindNetworkChaos = "NetworkChaos"
-	// KindIOChaos is the kind for io chaos
-	KindIOChaos = "IoChaos"
-	// KindKernelChaos is the kind for kernel chaos
-	KindKernelChaos = "KernelChaos"
-	// KindStressChaos is the kind for stress chaos
-	KindStressChaos = "StressChaos"
-	// KindTimeChaos is the kind for time chaos
-	KindTimeChaos = "TimeChaos"
 )
+
+// +kubebuilder:object:generate=false
+
+// ChaosKindMap defines a map including all chaos kinds.
+type chaosKindMap struct {
+	sync.RWMutex
+	kinds map[string]*ChaosKind
+}
+
+func (c *chaosKindMap) register(name string, kind *ChaosKind) {
+	c.Lock()
+	defer c.Unlock()
+	c.kinds[name] = kind
+}
+
+func (c *chaosKindMap) cloneKinds() map[string]*ChaosKind {
+	c.RLock()
+	defer c.RUnlock()
+
+	out := make(map[string]*ChaosKind)
+	var buf bytes.Buffer
+	gob.NewEncoder(&buf).Encode(c.kinds)
+	gob.NewDecoder(bytes.NewBuffer(buf.Bytes())).Decode(&out)
+
+	return out
+}
+
+// AllKinds returns all chaos kinds.
+func AllKinds() map[string]*ChaosKind {
+	return all.cloneKinds()
+}
+
+// all is a ChaosKindMap instance.
+var all = &chaosKindMap{
+	kinds: make(map[string]*ChaosKind),
+}
+
+// +kubebuilder:object:generate=false
+
+// ChaosKind includes one kind of chaos and its list type
+type ChaosKind struct {
+	Chaos runtime.Object
+	ChaosList
+}
 
 // SelectorSpec defines the some selectors to select objects.
 // If the all selectors are empty, all objects will be used in chaos experiment.
