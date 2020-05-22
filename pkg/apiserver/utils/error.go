@@ -26,7 +26,7 @@ var (
 	ErrOther          = ErrNS.NewType("other")
 	ErrInvalidRequest = ErrNS.NewType("invalid_request")
 	ErrInternalServer = ErrNS.NewType("internal_server_error")
-	ErrNotFound       = ErrNS.NewType("not_found")
+	ErrNotFound       = ErrNS.NewType("resource_not_found")
 )
 
 type APIError struct {

@@ -14,7 +14,6 @@
 package v1alpha1
 
 import (
-	"sync"
 	"time"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -26,53 +25,6 @@ const (
 	// PauseAnnotationKey defines the annotation used to pause a chaos
 	PauseAnnotationKey = "experiment.pingcap.com/pause"
 )
-
-// +kubebuilder:object:generate=false
-
-// ChaosKindMap defines a map including all chaos kinds.
-type chaosKindMap struct {
-	sync.RWMutex
-	kinds map[string]*ChaosKind
-}
-
-func (c *chaosKindMap) register(name string, kind *ChaosKind) {
-	c.Lock()
-	defer c.Unlock()
-	c.kinds[name] = kind
-}
-
-func (c *chaosKindMap) clone() map[string]*ChaosKind {
-	c.RLock()
-	defer c.RUnlock()
-
-	out := make(map[string]*ChaosKind)
-	for key, kind := range c.kinds {
-		out[key] = &ChaosKind{
-			Chaos:     kind.Chaos.DeepCopyObject(),
-			ChaosList: kind.ChaosList,
-		}
-	}
-
-	return out
-}
-
-// AllKinds returns all chaos kinds.
-func AllKinds() map[string]*ChaosKind {
-	return all.clone()
-}
-
-// all is a ChaosKindMap instance.
-var all = &chaosKindMap{
-	kinds: make(map[string]*ChaosKind),
-}
-
-// +kubebuilder:object:generate=false
-
-// ChaosKind includes one kind of chaos and its list type
-type ChaosKind struct {
-	Chaos runtime.Object
-	ChaosList
-}
 
 // SelectorSpec defines the some selectors to select objects.
 // If the all selectors are empty, all objects will be used in chaos experiment.
