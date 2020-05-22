@@ -59,10 +59,10 @@ func Register(r *gin.RouterGroup, s *Service) {
 }
 
 // @Summary Get all events from db.
-// @Description Get all chaos kinds from db.
+// @Description Get all chaos events from db.
 // @Tags events
 // @Produce json
-// @Success 200 {array} string
+// @Success 200 {array} core.Event
 // @Router /api/events/all [get]
 // @Failure 500 {object} utils.APIError
 func (s *Service) listEvents(c *gin.Context) {
@@ -70,7 +70,11 @@ func (s *Service) listEvents(c *gin.Context) {
 	namespace := c.Query("namespace")
 	eventList := make([]*core.Event, 0)
 
-	if name == "" && namespace == "" {
+	if name != "" && namespace == "" {
+		c.Status(http.StatusInternalServerError)
+		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(fmt.Errorf("namespace is empty")))
+		return
+	} else if name == "" && namespace == "" {
 		resList, err := s.event.List(context.Background())
 		if err != nil {
 			c.Status(http.StatusInternalServerError)
@@ -86,10 +90,6 @@ func (s *Service) listEvents(c *gin.Context) {
 			return
 		}
 		eventList = resList
-	}else if name != "" && namespace == "" {
-		c.Status(http.StatusInternalServerError)
-		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(fmt.Errorf("namespace is empty")))
-		return
 	} else {
 		resList, err := s.event.ListByPod(context.Background(), namespace, name)
 		if err != nil {
