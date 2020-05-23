@@ -17,6 +17,8 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 
@@ -56,6 +58,7 @@ func Register(r *gin.RouterGroup, s *Service) {
 
 	// TODO: add more api handlers
 	endpoint.GET("/", s.listEvents)
+	endpoint.GET("/listbyexperiment", s.listEventsByExperiment)
 }
 
 // @Summary Get all events from db.
@@ -63,11 +66,11 @@ func Register(r *gin.RouterGroup, s *Service) {
 // @Tags events
 // @Produce json
 // @Success 200 {array} core.Event
-// @Router /api/events/all [get]
+// @Router /api/events [get]
 // @Failure 500 {object} utils.APIError
 func (s *Service) listEvents(c *gin.Context) {
-	name := c.Query("name")
-	namespace := c.Query("namespace")
+	name := c.Query("podName")
+	namespace := c.Query("podNamespace")
 	//eventList := make([]*core.Event, 0)
 	var eventList []*core.Event
 	var err error
@@ -97,6 +100,50 @@ func (s *Service) listEvents(c *gin.Context) {
 			_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
 			return
 		}
+	}
+	c.JSON(http.StatusOK, eventList)
+}
+
+// @Summary Get the events from db according to the experiment.
+// @Description Get the events from db according to the experiment.
+// @Tags events
+// @Produce json
+// @Success 200 {array} core.Event
+// @Router /api/events/listbyexperiment [get]
+// @Failure 500 {object} utils.APIError
+func (s *Service) listEventsByExperiment(c *gin.Context) {
+	startTimeStr := c.Query("startTime")
+	name := c.Query("experimentName")
+    namespace := c.Query("namespace")
+	var eventList []*core.Event
+	var err error
+	if name == "" || namespace == "" {
+		c.Status(http.StatusInternalServerError)
+		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(fmt.Errorf("chaosName or chaosNamespace is empty")))
+		return
+	} else if startTimeStr == "" {
+		eventList, err = s.event.ListByExperiment(context.Background(), namespace, name)
+		if err != nil {
+			c.Status(http.StatusInternalServerError)
+			_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
+			return
+		}
+	} else {
+		//startTime, err := time.ParseInLocation("2006-01-02 15:04:05", startTimeStr, time.Local)
+		startTime, err := time.Parse(time.RFC3339, strings.Replace(startTimeStr, " ", "+", -1))
+
+		if err != nil {
+			c.Status(http.StatusInternalServerError)
+			_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(fmt.Errorf("the format of the time is wrong")))
+			return
+		}
+		et, err := s.event.FindByExperimentAndStartTime(context.Background(), namespace, name, &startTime)
+		if err != nil {
+			c.Status(http.StatusInternalServerError)
+			_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
+			return
+		}
+		eventList = append(eventList, et)
 	}
 	c.JSON(http.StatusOK, eventList)
 }
