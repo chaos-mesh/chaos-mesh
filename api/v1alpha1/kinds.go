@@ -40,7 +40,7 @@ func (c *chaosKindMap) clone() map[string]*ChaosKind {
 	out := make(map[string]*ChaosKind)
 	for key, kind := range c.kinds {
 		out[key] = &ChaosKind{
-			Chaos:     kind.Chaos.DeepCopyObject(),
+			Chaos:     kind.Chaos,
 			ChaosList: kind.ChaosList,
 		}
 	}

@@ -85,7 +85,7 @@ func Register(r *gin.RouterGroup, s *Service) {
 	endpoint.GET("", s.listExperiments)
 	endpoint.POST("/new", s.createExperiment)
 	endpoint.GET("/detail/:kind/:namespace/:name", s.getExperimentDetail)
-	endpoint.DELETE("/delete/:kind/:namespace/:name", s.deleteExperiment)
+	endpoint.DELETE("/:kind/:namespace/:name", s.deleteExperiment)
 	endpoint.PUT("/pause/:kind/:namespace/:name", s.pauseExperiment)
 	endpoint.PUT("/start/:kind/:namespace/:name", s.startExperiment)
 	endpoint.GET("/state", s.state)
@@ -518,9 +518,10 @@ func (s *Service) getExperimentDetail(c *gin.Context) {}
 // @Param name path string true "name"
 // @Param kind path string true "kind" Enums(PodChaos, IoChaos, NetworkChaos, TimeChaos, KernelChaos, StressChaos)
 // @Success 200 "delete ok"
-// @Router /api/experiments/{kind}/{namespace}/{name} [delete]
 // @Failure 400 {object} utils.APIError
+// @Failure 404 {object} utils.APIError
 // @Failure 500 {object} utils.APIError
+// @Router /api/experiments/{kind}/{namespace}/{name} [delete]
 func (s *Service) deleteExperiment(c *gin.Context) {
 	kind := c.Param("kind")
 	ns := c.Param("namespace")
@@ -611,7 +612,7 @@ func (s *Service) state(c *gin.Context) {
 
 // ExperimentBase is used to identify the unique experiment from API request.
 type ExperimentBase struct {
-	Kind      string `uri:"kind" binding:"required,oneof=PodChaos NetworkChaos IoChaos StressChaos TimeChaos"`
+	Kind      string `uri:"kind" binding:"required,oneof=PodChaos NetworkChaos IoChaos StressChaos TimeChaos KernelChaos"`
 	Namespace string `uri:"namespace" binding:"required,NameValid"`
 	Name      string `uri:"name" binding:"required,NameValid"`
 }
@@ -624,8 +625,9 @@ type ExperimentBase struct {
 // @Param namespace path string true "namespace"
 // @Param name path string true "name"
 // @Success 200 "pause ok"
-// @Failure 500 {object} utils.APIError
+// @Failure 400 {object} utils.APIError
 // @Failure 404 {object} utils.APIError
+// @Failure 500 {object} utils.APIError
 // @Router /api/experiments/pause/{kind}/{namespace}/{name} [put]
 func (s *Service) pauseExperiment(c *gin.Context) {
 	exp := &ExperimentBase{}
@@ -660,9 +662,10 @@ func (s *Service) pauseExperiment(c *gin.Context) {
 // @Param namespace path string true "namespace"
 // @Param name path string true "name"
 // @Success 200 "start ok"
-// @Failure 500 {object} utils.APIError
+// @Failure 400 {object} utils.APIError
 // @Failure 404 {object} utils.APIError
-// @Router /api/experiments/start/{kind}/{ns}/{name} [put]
+// @Failure 500 {object} utils.APIError
+// @Router /api/experiments/start/{kind}/{namespace}/{name} [put]
 func (s *Service) startExperiment(c *gin.Context) {
 	exp := &ExperimentBase{}
 	if err := c.ShouldBindUri(exp); err != nil {
