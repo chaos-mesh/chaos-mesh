@@ -1,37 +1,42 @@
-# IO Chaos Document
+# IOChaos Document
 
-This document helps you to build IO chaos experiments. 
+This document helps you build IOChaos experiments.
 
-IO chaos allows you to simulate file system faults such as IO delay, 
-read/write errors, etc. It can inject delay and errno when you use the IO system calls such as `open`, `read` and `write`.
+IOChaos allows you to simulate file system faults such as IO delay and read/write errors. It can inject delay and errno when you use IO system calls such as `open`, `read` and `write`.
 
-> Note: IO Chaos can only be used if the relevant labels and annotations are set before the application is created. 
-> More info refer [here](#create-a-chaos-experiment)
+> **Note:**
+>
+> IOChaos can only be used if the relevant labels and annotations are set before the application is created. See [Create a chaos experiment](#create-a-chaos-experiment) for more information.
 
 ## Prerequisites
 
-### Commands and args for the application container
+### Commands and arguments for the application container
 
-Chaos Mesh uses [`wait-fush.sh`](https://github.com/pingcap/chaos-mesh/blob/master/doc/sidecar_configmap.md#tips) to ensure that the fuse-daemon server is running normally before the application starts. 
-so `wait-fush.sh` needs to be injected into the startup command of the container. If the application process is not started by the [commands and args of the container](https://kubernetes.io/docs/tasks/inject-data-application/define-command-argument-container/), 
-IO chaos won't work properly. When Kubernetes natively supports [Sidecar Containers](https://github.com/kubernetes/enhancements/issues/753) in future versions, we will remove the `wait-fush.sh` dependency.
+Chaos Mesh uses [`wait-fush.sh`](https://github.com/pingcap/chaos-mesh/blob/master/doc/sidecar_configmap.md#tips) to ensure that the fuse-daemon server is running normally before the application starts.
 
-### Admission Controller
+Therefore, `wait-fush.sh` needs to be injected into the startup command of the container. If the application process is not started by the [commands and arguments of the container](https://kubernetes.io/docs/tasks/inject-data-application/define-command-argument-container/), IOChaos cannot work properly.
 
-IO chaos needs to inject a sidecar container to user pods and the sidecar container can be added to applicable Kubernetes pods 
-using a [mutating webhook admission controller](https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/) provided by Chaos Mesh.
+> **Note:**
+>
+> When Kubernetes natively supports [Sidecar Containers](https://github.com/kubernetes/enhancements/issues/753) in future versions, we will remove the `wait-fush.sh` dependency.
 
-> While admission controllers are enabled by default, some Kubernetes distributions may disable them. 
-> If this is the case, follow the instructions to [turn on admission controllers](https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/#how-do-i-turn-on-an-admission-controller).     
-> [ValidatingAdmissionWebhooks](https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/#validatingadmissionwebhook) and [MutatingAdmissionWebhooks](https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/#mutatingadmissionwebhook) are required by IO chaos.
+### Admission controller
+
+IOChaos needs to inject a sidecar container to user pods and the sidecar container can be added to applicable Kubernetes pods using a [mutating webhook admission controller](https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/) provided by Chaos Mesh.
+
+> **Note:**
+>
+> * While admission controllers are enabled by default, some Kubernetes distributions might disable them. In this case, follow the instructions to [turn on admission controllers](https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/#how-do-i-turn-on-an-admission-controller).
+> * [ValidatingAdmissionWebhooks](https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/#validatingadmissionwebhook) and [MutatingAdmissionWebhooks](https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/#mutatingadmissionwebhook) are required by IOChaos.
 
 ### Data directory
 
 The data directory of the application in the target pod should be a **subdirectory** of `PersistentVolumes`.
 
-example:
+Example:
+
 ```yaml
-# the config about tikv PersistentVolumes 
+# the config about tikv PersistentVolumes
 volumeMounts:
   - name: datadir
     mountPath: /var/lib/tikv
@@ -45,27 +50,27 @@ ARGS="--pd=${CLUSTER_NAME}-pd:2379 \
   --config=/etc/tikv/tikv.toml
 ```
 
-> Node: The default data directory of TiKV is not a subdirectory of `PersistentVolumes`.
-> If your application is TiDB cluster, you need to modify it at [_start_tikv.sh.tpl](https://github.com/pingcap/tidb-operator/blob/master/charts/tidb-cluster/templates/scripts/_start_tikv.sh.tpl). 
-> PD has the same issue with TiKV, you need to modify the data directory of pd at [_start_pd.sh.tpl](https://github.com/pingcap/tidb-operator/blob/master/charts/tidb-cluster/templates/scripts/_start_pd.sh.tpl).
+> **Note:**
+>
+> * The default data directory of TiKV is not a subdirectory of `PersistentVolumes`.
+> * If you are testing a TiDB cluster, you need to modify it at [`_start_tikv.sh.tpl`](https://github.com/pingcap/tidb-operator/blob/master/charts/tidb-cluster/templates/scripts/_start_tikv.sh.tpl).
+> * PD has the same issue with TiKV. You need to modify the data directory of PD at [`_start_pd.sh.tpl`](https://github.com/pingcap/tidb-operator/blob/master/charts/tidb-cluster/templates/scripts/_start_pd.sh.tpl).
 
-## Usage
+## ConfigMap configuration
 
-### Configure a ConfigMap 
+Chaos Mesh uses sidecar container to inject IOChaos. To fulfill this chaos, you need to configure this sidecar container using a [ConfigMap](https://kubernetes.io/docs/tasks/configure-pod-container/configure-pod-configmap/).
 
-Chaos Mesh uses sidecar container to inject IO chaos, 
-to fulfill this chaos you need to configure this sidecar container using a [ConfigMap](https://kubernetes.io/docs/tasks/configure-pod-container/configure-pod-configmap/)
-You can refer this [document](sidecar_configmap.md) to define a ConfigMap for your application before starting your chaos experiment. 
+To define a specified ConfigMap for your application before starting your chaos experiment, refer to this [document](sidecar_configmap.md).
 
-You can apply the ConfigMap defined for your application to Kubernetes cluster by using this command:
+You can apply the ConfigMap defined for your application to Kubernetes cluster by the following command:
 
 ```bash
-kubectl apply -f app-configmap.yaml # app-configmap.yaml is the ConfigMap file 
+kubectl apply -f app-configmap.yaml # app-configmap.yaml is the ConfigMap file
 ```
 
-### Define the Chaos YAML file
+## Configuration file
 
-Below is a sample YAML file of IO chaos:
+Below is a sample YAML file of IOChaos:
 
 ```yaml
 apiVersion: pingcap.com/v1alpha1
@@ -86,34 +91,29 @@ spec:
   percent: "50"
   delay: "1ms"
   scheduler:
-    cron: "@every 10m"	
+    cron: "@every 10m"
 ```
 
-> For more sample files, see [examples](../examples). You can edit them as needed. 
+For more sample files, see [examples](../examples). You can edit them as needed.
 
-Description: 
+| Field | Description | Sample Value |
+|:------|:------------------|:--------------|
+| **selector** | Selects pods that are used to inject chaos actions.|
+| **action** | Represents the IOChaos actions. Refer to [IOChaos available actions](#iochaos-available-actions) for more details. | `delay` / `errno` / `mixed` |
+| **mode** | Defines the mode to run chaos actions. | `one` / `all` / `fixed` / `fixed-percent` / `random-max-percent` |
+| **duration** | Represents the duration of a chaos action. The duration might be a string with the signed sequence of decimal numbers, each with optional fraction and a unit suffix. | `"300ms"`/ `"-1.5h"` / `"2h45m"`|
+| **delay** | Defines the value of IOChaos action delay. The duration might be a string with the signed sequence of decimal numbers, each with optional fraction and a unit suffix. Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", and "h". If `Delay` is empty, the operator will generate a value for it randomly.| `"300ms"`/ `"-1.5h"` / `"2h45m"` |
+| **errno** | Defines the error code that is returned by an IO action. This value and the [errno defined by Linux system](http://man7.org/linux/man-pages/man3/errno.3.html) are consistent. This field needs to be set when you choose an `errno` or `mixed` action. If `errno` is empty, the operator randomly generates an error code for it. See the [common Linux system errors](#common-linux-system-errors) for more Linux system error codes. | `"2"` |
+| **percent** | Defines the percentage of injection errors and provides a number from 0-100.| `100` (by default) |
+| **path** | Defines the path of files for injecting IOChaos actions. It should be a regular expression for the path which you want to inject errno or delay. If the path is `""` or not defined, the IOChaos action is injected into all files.| |
+| **methods** | Defines the IO methods for injecting IOChaos actions. It is an array of string, which sets the IO syscalls. | `open` / `read` See the [available methods](#available-methods) for more details. |
+| **addr** | Defines the sidecar HTTP server address for a sidecar container.| `":8080"` |
+| **configName** | Defines the configuration name which is used to inject chaos action into pods. You can refer to [examples/tikv-configmap.yaml](../examples/chaosfs-configmap/tikv-configmap.yaml) to define your configuration.| |
+| **layer** | Represents the layer of the IO action.| `fs` (by default). |
 
-* **selector**: is used to select pods that are used to inject chaos actions.
+## Usage
 
-* **action**: represents the IO chaos actions. Currently the **delay**, **errno**, and **mixed** actions are supported. You can go to [*IO chaos available actions*](#io-chaos-available-actions) for more details.
-* **mode**: defines the mode to run chaos actions. Supported mode: `one` / `all` / `fixed` / `fixed-percent` / `random-max-percent`.
-* **duration**: represents the duration of a chaos action. The duration might be a string with the signed sequence of decimal numbers, each with optional fraction and a unit suffix, such as `"300ms"`, `"-1.5h"` or `"2h45m"`.
-* **delay**: defines the value of IO chaos action delay. The duration might be a string with the signed sequence of decimal numbers, each with optional fraction and a unit suffix, such as `"300ms"`, `"-1.5h"` or `”2h45m”`. Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", and "h".
-  If `Delay` is empty, the operator will generate a value for it randomly.
-* **errno**: defines the error code that is returned by an IO action. It and the [errno](http://man7.org/linux/man-pages/man3/errno.3.html) defined by Linux system are consistent. It is an int32 string like `"2"`, `"2"` means `No such file or directory`. 
-This field need to be set when you choose an `errno` or `mixed` action. If `errno` is empty, the operator will randomly generate an error code for it. 
-See the [common Linux system errors](#common-linux-system-errors) for more Linux system error codes.
-* **percent**: defines the percentage of injection errors and provides a number from 0-100. The default value is `100`.
-* **path**: defines the path of files for injecting IO chaos actions. It should be a regular expression for the path you want to inject errno or delay. If the path is `""` or not defined, IO chaos actions will be injected into all files.
-* **methods**: defines the IO methods for injecting IO chaos actions. It’s an array of string, which sets the IO syscalls such as `open` and `read`. 
-See the [available methods](#available-methods) for more details.
-* **addr**: defines the sidecar HTTP server address for a sidecar container, such as `":8080"`.
-* **configName**: defines the config name which is used to inject chaos action into pods. You can refer to [examples/tikv-configmap.yaml](../examples/chaosfs-configmap/tikv-configmap.yaml) to define your configuration.
-* **layer**: represents the layer of the IO action. Supported value: `fs` (by default).
-
-### Create a chaos experiment
-
-Before the application created, you need to make admission-webhook enable by label add an [annotation](https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/) to the application namespace:
+Before the application created, you need to make admission-webhook enabled using labels and [annotations](https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/) to the application namespace:
 
 ```bash
 admission-webhook.pingcap.com/init-request:chaosfs-tikv
@@ -138,7 +138,7 @@ kubectl annotate ns app-ns admission-webhook.pingcap.com/init-request=chaosfs-ti
 
 Then, you can start your application and define YAML file to start your chaos experiment.
 
-#### Start a chaos experiment
+### Start a chaos experiment
 
 Assume that you are using `examples/io-mixed-example.yaml`, you can run the following command to create a chaos experiment:
 
@@ -146,12 +146,12 @@ Assume that you are using `examples/io-mixed-example.yaml`, you can run the foll
 kubectl apply -f examples/io-mixed-example.yaml
 ```
 
-## IO chaos available actions
+## IOChaos available actions
 
-IO chaos currently supports the following actions:
+IOChaos currently supports the following actions:
 
 * **delay**: IO delay action. You can specify the latency before the IO operation returns a result.
-* **errno**: IO errno action. In this mode, read/write IO operations will return an error.
+* **errno**: IO errno action. In this mode, read/write IO operations returns an error.
 * **mixed**: Both **delay** and **errno** actions.
 
 ### delay
@@ -164,7 +164,7 @@ spec:
   delay: "1ms"
 ```
 
-If `delay` is not specified, it will be generated randomly on runtime.
+If `delay` is not specified, it is generated randomly on runtime.
 
 ### errno
 
@@ -176,7 +176,7 @@ spec:
   errno: "32"
 ```
 
-If `errno` is not specified, it will be generated randomly on runtime. 
+If `errno` is not specified, it is generated randomly on runtime.
 
 ### mixed
 
@@ -193,6 +193,8 @@ The mix mode defines the **delay** and **errno** actions in one spec.
 
 ## Common Linux system errors
 
+Common Linux system errors are as below:
+
 * `1`: Operation not permitted
 * `2`: No such file or directory
 * `5`: I/O error
@@ -205,8 +207,7 @@ The mix mode defines the **delay** and **errno** actions in one spec.
 * `24`: Too many open files
 * `28`: No space left on device
 
-> The number represents the errno the Linux system error. 
-> More Linux system errors refer to [Errors: Linux System Errors](https://www-numi.fnal.gov/offline_software/srt_public_context/WebDocs/Errors/unix_system_errors.html).
+Refer to [Errors: Linux System Errors](https://www-numi.fnal.gov/offline_software/srt_public_context/WebDocs/Errors/unix_system_errors.html) for more.
 
 ## Available methods
 

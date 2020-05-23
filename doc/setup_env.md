@@ -4,43 +4,50 @@ This document walks you through the environment setup process for Chaos Mesh dev
 
 ## Prerequisites
 
-- [golang](https://golang.org/dl/) (>= v1.13)
+- [golang](https://golang.org/dl/) version >= v1.13
 - [docker](https://www.docker.com/)
 - [gcc](https://gcc.gnu.org/)
-- [Helm](https://helm.sh/) >= v2.8.2
+- [Helm](https://helm.sh/) version >= v2.8.2
 - [kind](https://github.com/kubernetes-sigs/kind)
-- [yarn](https://yarnpkg.com/lang/en/) and [nodejs](https://nodejs.org/en/) (for chaos-dashboard)
+- [yarn](https://yarnpkg.com/lang/en/) and [nodejs](https://nodejs.org/en/) (for Chaos Dashboard)
 
 ## Prepare the toolchain
 
 Make sure you have the above prerequisites met. Now follow the steps below to prepare the toolchain for compiling Chaos Mesh:
 
-1. Clone the chaos-mesh repo to your local machine.
+1. Clone the Chaos Mesh repo to your local machine.
 
-```
-git clone https://github.com/pingcap/chaos-mesh.git
-cd chaos-mesh
-```
+    ```bash
+    git clone https://github.com/pingcap/chaos-mesh.git
+    cd chaos-mesh
+    ```
 
-2. Install the K8s API development framework - [kubebuilder](https://github.com/kubernetes-sigs/kubebuilder) and [kustomize](https://github.com/kubernetes-sigs/kustomize).
+2. Install the Kubernetes API development framework - [kubebuilder](https://github.com/kubernetes-sigs/kubebuilder) and [kustomize](https://github.com/kubernetes-sigs/kustomize).
 
-```
-make install-kubebuilder
-make install-kustomize
-```
+    ```bash
+    make install-kubebuilder
+    make install-kustomize
+    ```
 
 3. Start the docker service. Most Linux distributions use `systemctl` to start services. If you do not have `systemctl`, use the service command.
 
-4. Make sure `${GOPATH}/bin` is in your `PATH` by executing:
- `echo 'export PATH=$(go env GOPATH)/bin:${PATH}' >> ~/.bash_profile` and `source ~/. bash_profile`.
+4. Make sure `${GOPATH}/bin` is in your `PATH`.
+
+    ```bash
+    echo 'export PATH=$(go env GOPATH)/bin:${PATH}' >> ~/.bash_profile
+    ```
+
+    ```bash
+    source ~/. bash_profile
+    ```
 
 > **Note:**
 >
-> If your yarn is newly installed, you may need to restart the terminal to make it available.
+> If your yarn is newly installed, you might need to restart the terminal to make it available.
 
 Now you can test the toolchain by running:
 
-```
+```bash
 make
 ```
 
@@ -48,9 +55,9 @@ If there is no error in the output, the compiling toolchain is successfully conf
 
 ## Prepare the deployment environment
 
-With the toolchain ready, you still need a local Kubernetes cluster as the deployment environment. Because kind is already installed, you can now set up the K8s cluster directly:
+With the toolchain ready, you still need a local Kubernetes cluster as the deployment environment. Because kind is already installed, you can now set up the Kubernetes cluster directly:
 
-```
+```bash
 hack/kind-cluster-build.sh
 ```
 
