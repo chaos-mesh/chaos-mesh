@@ -276,7 +276,7 @@ type MemoryStressor struct {
 
 	// extend stress-ng options
 	// +optional
-	Options []string `json:"options"`
+	Options []string `json:"options,omitempty"`
 }
 
 // CPUStressor defines how to stress CPU out
@@ -289,7 +289,7 @@ type CPUStressor struct {
 
 	// extend stress-ng options
 	// +optional
-	Options []string `json:"options"`
+	Options []string `json:"options,omitempty"`
 }
 
 // +kubebuilder:object:root=true
