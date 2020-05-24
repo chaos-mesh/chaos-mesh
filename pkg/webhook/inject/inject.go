@@ -74,7 +74,7 @@ func Inject(res *v1beta1.AdmissionRequest, cli client.Client, cfg *config.Config
 		}
 	}
 
-	injectionConfig, err := cfg.GetRequestedConfig(requiredKey)
+	injectionConfig, err := cfg.GetRequestedConfig(pod.Namespace, requiredKey)
 	if err != nil {
 		log.Error(err, "Error getting injection config, permitting launch of pod with no sidecar injected", "injectionConfig",
 			injectionConfig)

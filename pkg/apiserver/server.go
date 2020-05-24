@@ -24,7 +24,11 @@ import (
 
 	assetfs "github.com/elazarl/go-bindata-assetfs"
 	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
+	"github.com/go-playground/validator/v10"
 
+	apiutils "github.com/pingcap/chaos-mesh/pkg/apiserver/utils"
+	"github.com/pingcap/chaos-mesh/pkg/apivalidator"
 	"github.com/pingcap/chaos-mesh/pkg/config"
 	"github.com/pingcap/chaos-mesh/pkg/swaggerserver"
 	"github.com/pingcap/chaos-mesh/pkg/uiserver"
@@ -105,7 +109,19 @@ func serverRegister(lx fx.Lifecycle, s *Server, conf *config.ChaosServerConfig) 
 }
 
 func newAPIHandlerEngine() (*gin.Engine, *gin.RouterGroup) {
-	apiHandlerEngine := gin.New()
+	apiHandlerEngine := gin.Default()
+	apiHandlerEngine.Use(apiutils.MWHandleErrors())
+
+	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
+		v.RegisterValidation("NameValid", apivalidator.NameValid)
+		v.RegisterValidation("NamespaceSelectorsValid", apivalidator.NamespaceSelectorsValid)
+		v.RegisterValidation("MapSelectorsValid", apivalidator.MapSelectorsValid)
+		v.RegisterValidation("PhaseSelectorsValid", apivalidator.PhaseSelectorsValid)
+		v.RegisterValidation("CronValid", apivalidator.CronValid)
+		v.RegisterValidation("DurationValid", apivalidator.DurationValid)
+		v.RegisterValidation("ValueValid", apivalidator.ValueValid)
+	}
+
 	endpoint := apiHandlerEngine.Group("/api")
 
 	return apiHandlerEngine, endpoint

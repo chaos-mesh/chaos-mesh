@@ -43,10 +43,6 @@ spec:
             addr:
               description: Addr defines the address for sidecar container.
               type: string
-            configName:
-              description: ConfigName defines the config name which used to inject
-                pod.
-              type: string
             delay:
               description: "Delay defines the value of I/O chaos action delay. A delay
                 string is a possibly signed sequence of decimal numbers, each with
@@ -89,14 +85,6 @@ spec:
               - fixed
               - fixed-percent
               - random-max-percent
-              type: string
-            nextRecover:
-              description: Next time when this action will be recovered.
-              format: date-time
-              type: string
-            nextStart:
-              description: Next time when this action will be applied again.
-              format: date-time
               type: string
             path:
               description: Path defines the path of files for injecting I/O chaos
@@ -186,7 +174,6 @@ spec:
               type: string
           required:
           - action
-          - configName
           - layer
           - mode
           - selector
@@ -203,7 +190,7 @@ spec:
                 phase:
                   description: ExperimentPhase is the current status of chaos experiment.
                   type: string
-                podChaos:
+                podRecords:
                   items:
                     description: PodStatus represents information about the status
                       of a pod in chaos experiment.
@@ -242,6 +229,18 @@ spec:
               type: string
             reason:
               type: string
+            scheduler:
+              description: ScheduleStatus is the current status of chaos scheduler.
+              properties:
+                nextRecover:
+                  description: Next time when this action will be recovered
+                  format: date-time
+                  type: string
+                nextStart:
+                  description: Next time when this action will be applied again
+                  format: date-time
+                  type: string
+              type: object
           required:
           - experiment
           - phase
@@ -374,14 +373,6 @@ spec:
               - fixed-percent
               - random-max-percent
               type: string
-            nextRecover:
-              description: Next time when this action will be recovered
-              format: date-time
-              type: string
-            nextStart:
-              description: Next time when this action will be applied again
-              format: date-time
-              type: string
             scheduler:
               description: Scheduler defines some schedule rules to control the running
                 time of the chaos experiment about time.
@@ -477,7 +468,7 @@ spec:
                 phase:
                   description: ExperimentPhase is the current status of chaos experiment.
                   type: string
-                podChaos:
+                podRecords:
                   items:
                     description: PodStatus represents information about the status
                       of a pod in chaos experiment.
@@ -516,6 +507,18 @@ spec:
               type: string
             reason:
               type: string
+            scheduler:
+              description: ScheduleStatus is the current status of chaos scheduler.
+              properties:
+                nextRecover:
+                  description: Next time when this action will be recovered
+                  format: date-time
+                  type: string
+                nextStart:
+                  description: Next time when this action will be applied again
+                  format: date-time
+                  type: string
+              type: object
           required:
           - experiment
           - phase
@@ -704,14 +707,6 @@ spec:
               - fixed-percent
               - random-max-percent
               type: string
-            nextRecover:
-              description: Next time when this action will be recovered
-              format: date-time
-              type: string
-            nextStart:
-              description: Next time when this action will be applied again
-              format: date-time
-              type: string
             scheduler:
               description: Scheduler defines some schedule rules to control the running
                 time of the chaos experiment about network.
@@ -892,7 +887,7 @@ spec:
                 phase:
                   description: ExperimentPhase is the current status of chaos experiment.
                   type: string
-                podChaos:
+                podRecords:
                   items:
                     description: PodStatus represents information about the status
                       of a pod in chaos experiment.
@@ -931,6 +926,18 @@ spec:
               type: string
             reason:
               type: string
+            scheduler:
+              description: ScheduleStatus is the current status of chaos scheduler.
+              properties:
+                nextRecover:
+                  description: Next time when this action will be recovered
+                  format: date-time
+                  type: string
+                nextStart:
+                  description: Next time when this action will be applied again
+                  format: date-time
+                  type: string
+              type: object
           required:
           - experiment
           - phase
@@ -1012,14 +1019,6 @@ spec:
               - fixed
               - fixed-percent
               - random-max-percent
-              type: string
-            nextRecover:
-              description: Next time when this action will be recovered
-              format: date-time
-              type: string
-            nextStart:
-              description: Next time when this action will be applied again
-              format: date-time
               type: string
             scheduler:
               description: Scheduler defines some schedule rules to control the running
@@ -1117,7 +1116,7 @@ spec:
                 phase:
                   description: ExperimentPhase is the current status of chaos experiment.
                   type: string
-                podChaos:
+                podRecords:
                   items:
                     description: PodStatus represents information about the status
                       of a pod in chaos experiment.
@@ -1156,6 +1155,18 @@ spec:
               type: string
             reason:
               type: string
+            scheduler:
+              description: ScheduleStatus is the current status of chaos scheduler.
+              properties:
+                nextRecover:
+                  description: Next time when this action will be recovered
+                  format: date-time
+                  type: string
+                nextStart:
+                  description: Next time when this action will be applied again
+                  format: date-time
+                  type: string
+              type: object
           required:
           - experiment
           - phase
@@ -1215,14 +1226,6 @@ spec:
             mode:
               description: 'Mode defines the mode to run chaos action. Supported mode:
                 one / all / fixed / fixed-percent / random-max-percent'
-              type: string
-            nextRecover:
-              description: Next time when this action will be recovered
-              format: date-time
-              type: string
-            nextStart:
-              description: Next time when this action will be applied again
-              format: date-time
               type: string
             scheduler:
               description: Scheduler defines some schedule rules to control the running
@@ -1363,7 +1366,7 @@ spec:
                 phase:
                   description: ExperimentPhase is the current status of chaos experiment.
                   type: string
-                podChaos:
+                podRecords:
                   items:
                     description: PodStatus represents information about the status
                       of a pod in chaos experiment.
@@ -1416,6 +1419,18 @@ spec:
               type: string
             reason:
               type: string
+            scheduler:
+              description: ScheduleStatus is the current status of chaos scheduler.
+              properties:
+                nextRecover:
+                  description: Next time when this action will be recovered
+                  format: date-time
+                  type: string
+                nextStart:
+                  description: Next time when this action will be applied again
+                  format: date-time
+                  type: string
+              type: object
           required:
           - experiment
           - phase
@@ -1495,14 +1510,6 @@ spec:
               - fixed
               - fixed-percent
               - random-max-percent
-              type: string
-            nextRecover:
-              description: Next time when this action will be recovered
-              format: date-time
-              type: string
-            nextStart:
-              description: Next time when this action will be applied again
-              format: date-time
               type: string
             scheduler:
               description: Scheduler defines some schedule rules to control the running
@@ -1605,7 +1612,7 @@ spec:
                 phase:
                   description: ExperimentPhase is the current status of chaos experiment.
                   type: string
-                podChaos:
+                podRecords:
                   items:
                     description: PodStatus represents information about the status
                       of a pod in chaos experiment.
@@ -1644,6 +1651,18 @@ spec:
               type: string
             reason:
               type: string
+            scheduler:
+              description: ScheduleStatus is the current status of chaos scheduler.
+              properties:
+                nextRecover:
+                  description: Next time when this action will be recovered
+                  format: date-time
+                  type: string
+                nextStart:
+                  description: Next time when this action will be applied again
+                  format: date-time
+                  type: string
+              type: object
           required:
           - experiment
           - phase

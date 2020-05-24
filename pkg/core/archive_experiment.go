@@ -39,9 +39,6 @@ type ExperimentStore interface {
 	// Create persists a new archive experiment to the datastore.
 	Create(context.Context, *ArchiveExperiment) error
 
-	// Update persists an updated experiment to the datastore.
-	Update(context.Context, *ArchiveExperiment) error
-
 	// Delete deletes the experiment from the datastore.
 	Delete(context.Context, *ArchiveExperiment) error
 }

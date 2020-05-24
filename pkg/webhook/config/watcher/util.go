@@ -11,14 +11,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package statuscode
+package watcher
 
-// StatusCode represents the code of api status
-type StatusCode int
-
-const (
-	// Success indicates the successful return of this API interface.
-	Success StatusCode = 0
-	// GetResourcesWrong indicates an error when getting resources
-	GetResourcesWrong StatusCode = 1001
+import (
+	"bytes"
+	"html/template"
 )
+
+func renderTemplateWithArgs(tpl *template.Template, args map[string]string) ([]byte, error) {
+	model := make(map[string]interface{}, len(args))
+	for k, v := range args {
+		model[k] = v
+	}
+	buff := new(bytes.Buffer)
+	if err := tpl.Execute(buff, model); err != nil {
+		return nil, err
+	}
+	return buff.Bytes(), nil
+}

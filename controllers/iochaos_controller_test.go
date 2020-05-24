@@ -66,12 +66,11 @@ var _ = Describe("IoChaos Controller", func() {
 						Scheduler: &v1alpha1.SchedulerSpec{
 							Cron: "@every 2m",
 						},
-						Action:     actionTp,
-						Mode:       v1alpha1.OnePodMode,
-						Duration:   &duration,
-						Layer:      v1alpha1.FileSystemLayer,
-						Delay:      "10ms",
-						ConfigName: "chaosfs-tikv",
+						Action:   actionTp,
+						Mode:     v1alpha1.OnePodMode,
+						Duration: &duration,
+						Layer:    v1alpha1.FileSystemLayer,
+						Delay:    "10ms",
 					},
 				}
 

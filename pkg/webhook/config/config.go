@@ -14,34 +14,25 @@
 package config
 
 import (
-	"crypto/sha256"
 	"fmt"
 	"io"
 	"io/ioutil"
-	"os"
-	"path/filepath"
-	"strings"
 	"sync"
 
 	"github.com/ghodss/yaml"
 
 	"github.com/pingcap/chaos-mesh/api/v1alpha1"
 
-	ctrl "sigs.k8s.io/controller-runtime"
-
 	corev1 "k8s.io/api/core/v1"
 )
 
-var log = ctrl.Log.WithName("inject-webhook")
-
 var (
-	// ErrMissingName ..
-	ErrMissingName = fmt.Errorf(`name field is required for an injection config`)
+	errMissingName         = fmt.Errorf(`name field is required for template args config`)
+	errMissingTemplateName = fmt.Errorf(`template field is required for template args config`)
 )
 
 const (
 	annotationNamespaceDefault = "admission-webhook.pingcap.com"
-	defaultVersion             = "latest"
 )
 
 // ExecAction describes a "run in container" action.
@@ -57,7 +48,10 @@ type ExecAction struct {
 
 // InjectionConfig is a specific instance of a injected config, for a given annotation
 type InjectionConfig struct {
-	Name                  string               `json:"name"`
+	Name string
+	// Selector is used to select pods that are used to inject sidecar.
+	Selector *v1alpha1.SelectorSpec
+
 	Containers            []corev1.Container   `json:"containers"`
 	Volumes               []corev1.Volume      `json:"volumes"`
 	Environment           []corev1.EnvVar      `json:"env"`
@@ -65,73 +59,38 @@ type InjectionConfig struct {
 	HostAliases           []corev1.HostAlias   `json:"hostAliases"`
 	InitContainers        []corev1.Container   `json:"initContainers"`
 	ShareProcessNamespace bool                 `json:"shareProcessNamespace"`
-	version               string
 	// PostStart is called after a container is created first.
 	// If the handler fails, the containers will failed.
 	// Key defines for the name of deployment container.
 	// Value defines for the Commands for stating container.
 	// +optional
 	PostStart map[string]ExecAction `json:"postStart,omitempty"`
-
-	// Selector is used to select pods that are used to inject sidecar.
-	Selector *v1alpha1.SelectorSpec `json:"selector,omitempty"`
-}
-
-// FullName returns the full identifier of this sidecar - both the Name, and the Version(), formatted like
-// "${.Name}:${.Version}"
-func (c *InjectionConfig) FullName() string {
-	return canonicalizeConfigName(c.Name, c.Version())
-}
-
-func canonicalizeConfigName(name, version string) string {
-	return strings.ToLower(fmt.Sprintf("%s:%s", name, version))
-}
-
-// Version returns the parsed version of this injection config. If no version is specified,
-// "latest" is returned. The version is extracted from the request annotation, i.e.
-// admission-webhook.pingcap.com/request: my-sidecar:1.2, where "1.2" is the version.
-func (c *InjectionConfig) Version() string {
-	if c.version == "" {
-		return defaultVersion
-	}
-
-	return c.version
 }
 
 // Config is a struct indicating how a given injection should be configured
 type Config struct {
 	sync.RWMutex
-	AnnotationNamespace string                      `yaml:"annotationNamespace"`
-	Injections          map[string]*InjectionConfig `yaml:"injections"`
+	AnnotationNamespace string
+	Injections          map[string][]*InjectionConfig
 }
 
-// LoadConfigDirectory loads all configs in a directory and returns the Config
-func LoadConfigDirectory(path string) (*Config, error) {
-	cfg := &Config{
-		Injections: map[string]*InjectionConfig{},
-	}
-	glob := filepath.Join(path, "*.yaml")
-	matches, err := filepath.Glob(glob)
-	if err != nil {
-		return cfg, err
-	}
+// TemplateArgs is a set of arguments to render template
+type TemplateArgs struct {
+	Namespace string
+	Name      string `yaml:"name"`
+	// Name of the template
+	Template  string            `yaml:"template"`
+	Arguments map[string]string `yaml:"arguments"`
+	// Selector is used to select pods that are used to inject sidecar.
+	Selector *v1alpha1.SelectorSpec `json:"selector,omitempty"`
+}
 
-	for _, p := range matches {
-		c, err := LoadInjectionConfigFromFilePath(p)
-		if err != nil {
-			log.Error(err, "Error reading injection config", "from", p)
-			return cfg, err
-		}
-		cfg.Injections[c.FullName()] = c
+// NewConfigWatcherConf creates a configuration for watcher
+func NewConfigWatcherConf() *Config {
+	return &Config{
+		AnnotationNamespace: annotationNamespaceDefault,
+		Injections:          make(map[string][]*InjectionConfig),
 	}
-
-	if cfg.AnnotationNamespace == "" {
-		cfg.AnnotationNamespace = annotationNamespaceDefault
-	}
-
-	log.V(2).Info("Loaded injection configs", "len", len(cfg.Injections), "from", glob)
-
-	return cfg, nil
 }
 
 func (c *Config) RequestAnnotationKey() string {
@@ -147,91 +106,49 @@ func (c *Config) RequestInitAnnotationKey() string {
 }
 
 // GetRequestedConfig returns the InjectionConfig given a requested key
-func (c *Config) GetRequestedConfig(key string) (*InjectionConfig, error) {
+func (c *Config) GetRequestedConfig(namespace, key string) (*InjectionConfig, error) {
 	c.RLock()
 	defer c.RUnlock()
 
-	name, version, err := configNameFields(key)
-	if err != nil {
-		return nil, err
+	if _, ok := c.Injections[namespace]; !ok {
+		return nil, fmt.Errorf("no injection config at ns %s", namespace)
 	}
 
-	fullKey := canonicalizeConfigName(name, version)
-
-	i, ok := c.Injections[fullKey]
-	if !ok {
-		return nil, fmt.Errorf("no injection config found for annotation %s", fullKey)
+	for _, conf := range c.Injections[namespace] {
+		if key == conf.Name {
+			return conf, nil
+		}
 	}
 
-	return i, nil
+	return nil, fmt.Errorf("no injection config found for key %s at ns %s", key, namespace)
 }
 
-// LoadInjectionConfigFromFilePath returns a InjectionConfig given a yaml file on disk
-func LoadInjectionConfigFromFilePath(configFile string) (*InjectionConfig, error) {
-	f, err := os.Open(configFile)
-	if err != nil {
-		return nil, fmt.Errorf("error loading injection config from file %s: %s", configFile, err.Error())
-	}
-	defer f.Close()
-
-	log.V(3).Info("Loading injection config", "file", configFile)
-	return LoadInjectionConfig(f)
-}
-
-// LoadInjectionConfig takes an io.Reader and parses out an injectionconfig
-func LoadInjectionConfig(reader io.Reader) (*InjectionConfig, error) {
+// LoadTemplateArgs takes an io.Reader and parses out an template args
+func LoadTemplateArgs(reader io.Reader) (*TemplateArgs, error) {
 	data, err := ioutil.ReadAll(reader)
 	if err != nil {
 		return nil, err
 	}
 
-	var cfg InjectionConfig
+	var cfg TemplateArgs
 	if err := yaml.Unmarshal(data, &cfg); err != nil {
 		return nil, err
 	}
 
 	if cfg.Name == "" {
-		return nil, ErrMissingName
+		return nil, errMissingName
 	}
 
-	// we need to split the Name field apart into a Name and Version component
-	cfg.Name, cfg.version, err = configNameFields(cfg.Name)
-	if err != nil {
-		return nil, err
+	if cfg.Template == "" {
+		return nil, errMissingTemplateName
 	}
-
-	log.V(3).Info("Loaded injection configx", "name", cfg.Name, "sha256sum", sha256.Sum256(data))
 
 	return &cfg, nil
 }
 
-// given a name of a config, extract the name and version. Format is "name[:version]" where :version
-// is optional, and is assumed to be "latest" if omitted.
-func configNameFields(shortName string) (name, version string, err error) {
-	substrings := strings.Split(shortName, ":")
-
-	switch len(substrings) {
-	case 1:
-		return substrings[0], defaultVersion, nil
-	case 2:
-		if substrings[1] == "" {
-			return substrings[0], defaultVersion, nil
-		}
-
-		return substrings[0], substrings[1], nil
-	default:
-		return "", "", fmt.Errorf(`not a valid name or name:version format`)
-	}
-}
-
-// ReplaceInjectionConfigs will take a list of new InjectionConfigs, and replace the current configuration with them.
-// this blocks waiting on being able to update the configs in place.
-func (c *Config) ReplaceInjectionConfigs(replacementConfigs []*InjectionConfig) {
+// ReplaceInjectionConfigs will update the injection configs.
+func (c *Config) ReplaceInjectionConfigs(updatedConfigs map[string][]*InjectionConfig) {
 	c.Lock()
 	defer c.Unlock()
-	c.Injections = map[string]*InjectionConfig{}
-
-	for _, r := range replacementConfigs {
-		c.Injections[r.FullName()] = r
-	}
+	c.Injections = updatedConfigs
 }

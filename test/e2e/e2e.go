@@ -135,6 +135,8 @@ var _ = ginkgo.SynchronizedBeforeSuite(func() []byte {
 	framework.ExpectNoError(err, "failed to install crd")
 	err = oa.DeployOperator(ocfg)
 	framework.ExpectNoError(err, "failed to install chaos-mesh")
+	err = oa.InstallTemplate(ocfg)
+	framework.ExpectNoError(err, "failed to install sidecar template")
 	return nil
 }, func(data []byte) {
 	// Run on all Ginkgo nodes

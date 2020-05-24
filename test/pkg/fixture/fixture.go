@@ -26,46 +26,15 @@ import (
 )
 
 const ioTestConfigMap = `name: chaosfs-io
-initContainers:
-- name: inject-scripts
-  image: pingcap/chaos-scripts:latest
-  imagePullpolicy: Always
-  command: ["sh", "-c", "/scripts/init.sh -d /var/run/data/test -f /var/run/data/fuse-data"]
-containers:
-- name: chaosfs
-  image: pingcap/chaos-fs:latest
-  imagePullpolicy: Always
-  ports:
-  - containerPort: 65534
-  securityContext:
-    privileged: true
-  command:
-    - /usr/local/bin/chaosfs
-    - -addr=:65534
-    - -pidfile=/tmp/fuse/pid
-    - -original=/var/run/data/fuse-data
-    - -mountpoint=/var/run/data/test
-  volumeMounts:
-    - name: datadir
-      mountPath: /var/run/data
-      mountPropagation: Bidirectional
-volumeMounts:
-  - name: datadir
-    mountPath: /var/run/data
-    mountPropagation: HostToContainer
-  - name: scripts
-    mountPath: /tmp/scripts
-  - name: fuse
-    mountPath: /tmp/fuse
-volumes:
-  - name: scripts
-    emptyDir: {}
-  - name: fuse
-    emptyDir: {}
-postStart:
-  io:
-    command:
-      - /tmp/scripts/wait-fuse.sh
+selector:
+  labelSelectors:
+    app: io
+template: sidecar-template
+arguments:
+  ContainerName: "io"
+  DataPath: "/var/run/data/test"
+  MountPath: "/var/run/data"
+  VolumeName: "datadir"
 `
 
 // NewCommonNginxPod describe that we use common nginx pod to be tested in our chaos-operator test
@@ -230,7 +199,7 @@ func NewIOTestConfigMap(name, namespace string) *corev1.ConfigMap {
 			},
 		},
 		Data: map[string]string{
-			"chaosfs-io.yaml": ioTestConfigMap,
+			"config": ioTestConfigMap,
 		},
 	}
 }
@@ -252,6 +221,12 @@ func NewE2EService(name, namespace string) *corev1.Service {
 					Name:       "http",
 					Port:       8080,
 					TargetPort: intstr.IntOrString{IntVal: 8080},
+				},
+				// Only used in io chaos
+				{
+					Name:       "chaosfs",
+					Port:       65534,
+					TargetPort: intstr.IntOrString{IntVal: 65534},
 				},
 			},
 		},

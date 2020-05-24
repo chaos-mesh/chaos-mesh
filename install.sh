@@ -1031,8 +1031,8 @@ spec:
               memory: 256Mi
         command:
           - /usr/local/bin/chaos-controller-manager
+          - -template-labels=app.kubernetes.io/component=template
           - -configmap-labels=app.kubernetes.io/component=webhook
-          - -conf=/etc/webhook/conf
         env:
           - name: NAMESPACE
             valueFrom:

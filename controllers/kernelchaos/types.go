@@ -106,7 +106,7 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1
 		return err
 	}
 
-	kernelChaos.Status.Experiment.Pods = make([]v1alpha1.PodStatus, 0, len(pods))
+	kernelChaos.Status.Experiment.PodRecords = make([]v1alpha1.PodStatus, 0, len(pods))
 	for _, pod := range pods {
 		ps := v1alpha1.PodStatus{
 			Namespace: pod.Namespace,
@@ -116,7 +116,7 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1
 			Message:   fmt.Sprintf(kernelChaosMsg, kernelChaos.Spec.FailKernRequest),
 		}
 
-		kernelChaos.Status.Experiment.Pods = append(kernelChaos.Status.Experiment.Pods, ps)
+		kernelChaos.Status.Experiment.PodRecords = append(kernelChaos.Status.Experiment.PodRecords, ps)
 	}
 	r.Event(kernelChaos, v1.EventTypeNormal, utils.EventChaosInjected, "")
 
@@ -188,38 +188,34 @@ func (r *Reconciler) cleanFinalizersAndRecover(ctx context.Context, chaos *v1alp
 func (r *Reconciler) recoverPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.KernelChaos) error {
 	r.Log.Info("try to recover pod", "namespace", pod.Namespace, "name", pod.Name)
 
-	c1, err := utils.CreateGrpcConnection(ctx, r.Client, pod, common.Cfg.ChaosDaemonPort)
+	pbClient, err := utils.NewChaosDaemonClient(ctx, r.Client, pod, common.Cfg.ChaosDaemonPort)
 	if err != nil {
 		return err
 	}
-	defer c1.Close()
-
-	daemonClient := pb.NewChaosDaemonClient(c1)
+	defer pbClient.Close()
 
 	if len(pod.Status.ContainerStatuses) == 0 {
 		return fmt.Errorf("%s %s can't get the state of container", pod.Namespace, pod.Name)
 	}
 
-	containerID := pod.Status.ContainerStatuses[0].ContainerID
-
-	containerResponse, err := daemonClient.ContainerGetPid(ctx, &pb.ContainerRequest{
+	containerResponse, err := pbClient.ContainerGetPid(ctx, &pb.ContainerRequest{
 		Action: &pb.ContainerAction{
 			Action: pb.ContainerAction_GETPID,
 		},
-		ContainerId: containerID,
+		ContainerId: pod.Status.ContainerStatuses[0].ContainerID,
 	})
 
 	if err != nil {
 		r.Log.Error(err, "Get container pid error", "namespace", pod.Namespace, "name", pod.Name)
-	} else {
-		r.Log.Info("Get container pid", "namespace", pod.Namespace, "name", pod.Name)
+		return err
 	}
 
-	c2, err := utils.CreateGrpcConnection(ctx, r.Client, pod, common.Cfg.BPFKIPort)
+	r.Log.Info("Get container pid", "namespace", pod.Namespace, "name", pod.Name)
+	conn, err := utils.CreateGrpcConnection(ctx, r.Client, pod, common.Cfg.BPFKIPort)
 	if err != nil {
 		return err
 	}
-	defer c2.Close()
+	defer conn.Close()
 
 	var callchain []*pb_.FailKernRequestFrame
 	for _, frame := range chaos.Spec.FailKernRequest.Callchain {
@@ -230,7 +226,7 @@ func (r *Reconciler) recoverPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha
 		})
 	}
 
-	bpfClient := pb_.NewBPFKIServiceClient(c2)
+	bpfClient := pb_.NewBPFKIServiceClient(conn)
 	_, err = bpfClient.RecoverMMOrBIO(ctx, &pb_.FailKernRequest{
 		Pid:       containerResponse.Pid,
 		Callchain: callchain,
@@ -266,38 +262,33 @@ func (r *Reconciler) applyAllPods(ctx context.Context, pods []v1.Pod, chaos *v1a
 func (r *Reconciler) applyPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.KernelChaos) error {
 	r.Log.Info("Try to inject kernel on pod", "namespace", pod.Namespace, "name", pod.Name)
 
-	c1, err := utils.CreateGrpcConnection(ctx, r.Client, pod, common.Cfg.ChaosDaemonPort)
+	pbClient, err := utils.NewChaosDaemonClient(ctx, r.Client, pod, common.Cfg.ChaosDaemonPort)
 	if err != nil {
 		return err
 	}
-	defer c1.Close()
-
-	pbClient := pb.NewChaosDaemonClient(c1)
+	defer pbClient.Close()
 
 	if len(pod.Status.ContainerStatuses) == 0 {
 		return fmt.Errorf("%s %s can't get the state of container", pod.Namespace, pod.Name)
 	}
 
-	containerID := pod.Status.ContainerStatuses[0].ContainerID
-
 	containerResponse, err := pbClient.ContainerGetPid(ctx, &pb.ContainerRequest{
 		Action: &pb.ContainerAction{
 			Action: pb.ContainerAction_GETPID,
 		},
-		ContainerId: containerID,
+		ContainerId: pod.Status.ContainerStatuses[0].ContainerID,
 	})
-
 	if err != nil {
 		r.Log.Error(err, "Get container pid error", "namespace", pod.Namespace, "name", pod.Name)
-	} else {
-		r.Log.Info("Get container pid", "namespace", pod.Namespace, "name", pod.Name)
+		return err
 	}
 
-	c2, err := utils.CreateGrpcConnection(ctx, r.Client, pod, common.Cfg.BPFKIPort)
+	r.Log.Info("Get container pid", "namespace", pod.Namespace, "name", pod.Name)
+	conn, err := utils.CreateGrpcConnection(ctx, r.Client, pod, common.Cfg.BPFKIPort)
 	if err != nil {
 		return err
 	}
-	defer c2.Close()
+	defer conn.Close()
 
 	var callchain []*pb_.FailKernRequestFrame
 	for _, frame := range chaos.Spec.FailKernRequest.Callchain {
@@ -308,7 +299,7 @@ func (r *Reconciler) applyPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.
 		})
 	}
 
-	bpfClient := pb_.NewBPFKIServiceClient(c2)
+	bpfClient := pb_.NewBPFKIServiceClient(conn)
 	_, err = bpfClient.FailMMOrBIO(ctx, &pb_.FailKernRequest{
 		Pid:         containerResponse.Pid,
 		Ftype:       pb_.FailKernRequest_FAILTYPE(chaos.Spec.FailKernRequest.FailType),

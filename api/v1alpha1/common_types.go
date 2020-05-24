@@ -21,7 +21,10 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 )
 
-const PauseAnnotationKey = "experiment.pingcap.com/pause"
+const (
+	// PauseAnnotationKey defines the annotation used to pause a chaos
+	PauseAnnotationKey = "experiment.pingcap.com/pause"
+)
 
 // SelectorSpec defines the some selectors to select objects.
 // If the all selectors are empty, all objects will be used in chaos experiment.
@@ -111,8 +114,21 @@ type ChaosStatus struct {
 	Phase  ChaosPhase `json:"phase"`
 	Reason string     `json:"reason,omitempty"`
 
+	Scheduler ScheduleStatus `json:"scheduler,omitempty"`
+
 	// Experiment records the last experiment state.
 	Experiment ExperimentStatus `json:"experiment"`
+}
+
+// ScheduleStatus is the current status of chaos scheduler.
+type ScheduleStatus struct {
+	// Next time when this action will be applied again
+	// +optional
+	NextStart *metav1.Time `json:"nextStart,omitempty"`
+
+	// Next time when this action will be recovered
+	// +optional
+	NextRecover *metav1.Time `json:"nextRecover,omitempty"`
 }
 
 // ExperimentPhase is the current status of chaos experiment.
@@ -135,7 +151,7 @@ type ExperimentStatus struct {
 	// +optional
 	EndTime *metav1.Time `json:"endTime,omitempty"`
 	// +optional
-	Pods []PodStatus `json:"podChaos,omitempty"`
+	PodRecords []PodStatus `json:"podRecords,omitempty"`
 }
 
 const (
@@ -166,6 +182,7 @@ type InnerSchedulerObject interface {
 type InnerObject interface {
 	IsDeleted() bool
 	IsPaused() bool
+	GetChaos() *ChaosInstance
 	StatefulObject
 }
 
@@ -175,4 +192,26 @@ type InnerObject interface {
 type StatefulObject interface {
 	runtime.Object
 	GetStatus() *ChaosStatus
+}
+
+// +kubebuilder:object:generate=false
+
+// ChaosInstance defines some common attribute for a chaos
+type ChaosInstance struct {
+	Name      string
+	Namespace string
+	Kind      string
+	StartTime time.Time
+	EndTime   time.Time
+	Action    string
+	Duration  string
+	Status    string
+}
+
+// +kubebuilder:object:generate=false
+
+// ChaosList defines a common interface for chaos lists
+type ChaosList interface {
+	runtime.Object
+	ListChaos() []*ChaosInstance
 }
