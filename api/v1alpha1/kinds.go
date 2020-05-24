@@ -13,34 +13,50 @@
 
 package v1alpha1
 
-import "k8s.io/apimachinery/pkg/runtime"
+import (
+	"sync"
 
-const (
-	// KindPodChaos is the kind for pod chaos
-	KindPodChaos = "PodChaos"
-	// KindNetworkChaos is the kind for network chaos
-	KindNetworkChaos = "NetworkChaos"
-	// KindIOChaos is the kind for io chaos
-	KindIOChaos = "IoChaos"
-	// KindKernelChaos is the kind for kernel chaos
-	KindKernelChaos = "KernelChaos"
-	// KindStressChaos is the kind for stress chaos
-	KindStressChaos = "StressChaos"
-	// KindTimeChaos is the kind for time chaos
-	KindTimeChaos = "TimeChaos"
+	"k8s.io/apimachinery/pkg/runtime"
 )
 
-var (
-	// Kinds is a collection to keep chaos kind name and its type
-	Kinds = map[string]*ChaosKind{
-		KindPodChaos:     {Chaos: &PodChaos{}, ChaosList: &PodChaosList{}},
-		KindNetworkChaos: {Chaos: &NetworkChaos{}, ChaosList: &NetworkChaosList{}},
-		KindIOChaos:      {Chaos: &IoChaos{}, ChaosList: &IoChaosList{}},
-		KindKernelChaos:  {Chaos: &KernelChaos{}, ChaosList: &KernelChaosList{}},
-		KindTimeChaos:    {Chaos: &TimeChaos{}, ChaosList: &TimeChaosList{}},
-		KindStressChaos:  {Chaos: &StressChaos{}, ChaosList: &StressChaosList{}},
+// +kubebuilder:object:generate=false
+
+// ChaosKindMap defines a map including all chaos kinds.
+type chaosKindMap struct {
+	sync.RWMutex
+	kinds map[string]*ChaosKind
+}
+
+func (c *chaosKindMap) register(name string, kind *ChaosKind) {
+	c.Lock()
+	defer c.Unlock()
+	c.kinds[name] = kind
+}
+
+func (c *chaosKindMap) clone() map[string]*ChaosKind {
+	c.RLock()
+	defer c.RUnlock()
+
+	out := make(map[string]*ChaosKind)
+	for key, kind := range c.kinds {
+		out[key] = &ChaosKind{
+			Chaos:     kind.Chaos,
+			ChaosList: kind.ChaosList,
+		}
 	}
-)
+
+	return out
+}
+
+// AllKinds returns all chaos kinds.
+func AllKinds() map[string]*ChaosKind {
+	return all.clone()
+}
+
+// all is a ChaosKindMap instance.
+var all = &chaosKindMap{
+	kinds: make(map[string]*ChaosKind),
+}
 
 // +kubebuilder:object:generate=false
 

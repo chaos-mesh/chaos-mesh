@@ -19,6 +19,16 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+// KindKernelChaos is the kind for kernel chaos
+const KindKernelChaos = "KernelChaos"
+
+func init() {
+	all.register(KindKernelChaos, &ChaosKind{
+		Chaos:     &KernelChaos{},
+		ChaosList: &KernelChaosList{},
+	})
+}
+
 // +kubebuilder:object:root=true
 
 // KernelChaos is the Schema for the kernelchaos API
