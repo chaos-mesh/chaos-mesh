@@ -16,6 +16,8 @@ FROM build_base AS binary_builder
 
 ARG HTTPS_PROXY
 ARG HTTP_PROXY
+ARG UI
+ARG SWAGGER
 
 COPY . /src
 WORKDIR /src
