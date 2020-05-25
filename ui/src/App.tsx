@@ -1,12 +1,11 @@
 import { AppBar, Box, CssBaseline, Drawer, Hidden, IconButton, Toolbar, Typography } from '@material-ui/core'
 import React, { useState } from 'react'
 import { Redirect, Route, BrowserRouter as Router, Switch } from 'react-router-dom'
-import { Theme, createStyles, makeStyles, useTheme } from '@material-ui/core/styles'
-
+import { Theme, ThemeProvider, createStyles, makeStyles, useTheme } from '@material-ui/core/styles'
 import GitHubIcon from '@material-ui/icons/GitHub'
 import MenuIcon from '@material-ui/icons/Menu'
+
 import NavMenu from './components/NavMenu'
-import { ThemeProvider } from '@material-ui/core/styles'
 import chaosMeshRoutes from './routes'
 import chaosMeshTheme from './theme'
 
