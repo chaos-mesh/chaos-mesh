@@ -131,13 +131,12 @@ func (s *Service) listEventsByExperiment(c *gin.Context) {
 	} else {
 		//startTime, err := time.ParseInLocation("2006-01-02 15:04:05", startTimeStr, time.Local)
 		startTime, err := time.Parse(time.RFC3339, strings.Replace(startTimeStr, " ", "+", -1))
-
 		if err != nil {
 			c.Status(http.StatusInternalServerError)
 			_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(fmt.Errorf("the format of the time is wrong")))
 			return
 		}
-		et, err := s.event.FindByExperimentAndStartTime(context.Background(), namespace, name, &startTime)
+		et, err := s.event.FindByExperimentAndStartTime(context.Background(), name, namespace, &startTime)
 		if err != nil {
 			c.Status(http.StatusInternalServerError)
 			_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
