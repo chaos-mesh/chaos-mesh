@@ -453,6 +453,47 @@ func (s *Service) createStressChaos(exp *ExperimentInfo) error {
 	return s.kubeCli.Create(context.Background(), chaos)
 }
 
+func (s *Service) getPodchaosDetail(namespace string, name string) (ExperimentInfo, error){
+	chaos := &v1alpha1.PodChaos{}
+	ctx := context.TODO()
+	chaosKey := types.NamespacedName{Namespace: namespace, Name: name}
+	if err := s.kubeCli.Get(ctx, chaosKey, chaos); err != nil {
+		if apierrors.IsNotFound(err) {
+			return ExperimentInfo{}, utils.ErrNotFound.NewWithNoMessage()
+		} else {
+			return ExperimentInfo{}, err
+		}
+	}
+	info := ExperimentInfo{
+		Name: chaos.Name,
+		Namespace: chaos.Namespace,
+		Labels: chaos.Labels,
+		Annotations: chaos.Annotations,
+		Scope: ScopeInfo{
+			NamespaceSelectors:  chaos.Spec.Selector.Namespaces,
+			LabelSelectors:      chaos.Spec.Selector.LabelSelectors,
+			AnnotationSelectors: chaos.Spec.Selector.AnnotationSelectors,
+			FieldSelectors:      chaos.Spec.Selector.FieldSelectors,
+			PhaseSelector:       chaos.Spec.Selector.PodPhaseSelectors,
+			Mode:                string(chaos.Spec.Mode),
+			Value:               chaos.Spec.Value,
+		},
+		Scheduler: SchedulerInfo{
+			Cron: chaos.Spec.Scheduler.Cron,
+		},
+		Target: TargetInfo{
+			PodChaos: PodChaosInfo{
+				Action: string(chaos.Spec.Action),
+				ContainerName: chaos.Spec.ContainerName,
+			},
+		},
+	}
+	if chaos.Spec.Duration != nil {
+		info.Scheduler.Duration = *chaos.Spec.Duration
+	}
+	return info, nil
+}
+
 // @Summary Get chaos experiments from Kubernetes cluster.
 // @Description Get chaos experiments from Kubernetes cluster.
 // @Tags experiments
@@ -507,7 +548,7 @@ func (s *Service) listExperiments(c *gin.Context) {
 // @Param namespace path string true "namespace"
 // @Param name path string true "name"
 // @Param kind path string true "kind" Enums(PodChaos, IoChaos, NetworkChaos, TimeChaos, KernelChaos, StressChaos)
-// @Success 200 "delete ok"
+// @Success 200 ExperimentInfo
 // @Router /api/experiments/detail/{kind}/{namespace}/{name} [GET]
 // @Failure 400 {object} utils.APIError
 // @Failure 500 {object} utils.APIError
@@ -516,30 +557,27 @@ func (s *Service) getExperimentDetail(c *gin.Context) {
 	ns := c.Param("namespace")
 	name := c.Param("name")
 
-	ctx := context.TODO()
-	chaosKey := types.NamespacedName{Namespace: ns, Name: name}
-
 	var (
-		chaosKind *v1alpha1.ChaosKind
 		ok        bool
+		info      ExperimentInfo
+		err       error
 	)
-	if chaosKind, ok = v1alpha1.Kinds[kind]; !ok {
+	if _, ok = v1alpha1.Kinds[kind]; !ok {
 		c.Status(http.StatusBadRequest)
 		_ = c.Error(utils.ErrInvalidRequest.New(kind + " is not supported"))
 		return
 	}
-	if err := s.kubeCli.Get(ctx, chaosKey, chaosKind.Chaos); err != nil {
-		if apierrors.IsNotFound(err) {
-			c.Status(http.StatusNotFound)
-			_ = c.Error(utils.ErrNotFound.NewWithNoMessage())
-		} else {
-			c.Status(http.StatusInternalServerError)
-			_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
-		}
+	// switch !
+	switch kind {
+	case "PodChaos":
+		info, err = s.getPodchaosDetail(ns,name)
+	}
+	if err != nil {
+		c.Status(http.StatusInternalServerError)
+		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
 		return
 	}
-
-	c.JSON(http.StatusOK, nil)
+	c.JSON(http.StatusOK, info)
 }
 
 // @Summary Delete the specified chaos experiment.
