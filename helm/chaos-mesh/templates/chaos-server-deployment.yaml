@@ -16,7 +16,7 @@ spec:
     matchLabels:
       app.kubernetes.io/name: {{ template "chaos-mesh.name" . }}
       app.kubernetes.io/instance: {{ .Release.Name }}
-      app.kubernetes.io/component: chaosServer
+      app.kubernetes.io/component: chaos-server
   template:
     metadata:
       labels:
@@ -41,7 +41,7 @@ spec:
             - /usr/local/bin/chaos-server
           envFrom:
           - configMapRef:
-            name: {{ template "chaos-mesh.name" . }}-chaos-server
+              name: {{ template "chaos-mesh.name" . }}-chaos-server
           volumeMounts:
           - name: storage-volume
             mountPath: {{ .Values.chaosServer.persistentVolume.mountPath }}
@@ -66,7 +66,7 @@ spec:
         claimName: {{ if .Values.chaosServer.persistentVolume.existingClaim }}{{ .Values.chaosServer.persistentVolume.existingClaim }}{{- else }}{{ template "chaos-mesh.name" . }}-chaos-server{{- end }}
       {{- else }}
         emptyDir: {}
-      {{- end -}}
+      {{- end }}
 ---
 apiVersion: v1
 kind: Service

@@ -147,8 +147,8 @@ chaosServer:
     LISTEN_PORT: 2333
 
     # If you'd like to use a DB other than SQLite (the default), set a driver + DSN here.
-    # DATABASE_DRIVER:
-    # DATABASE_DATASOURCE:
+    DATABASE_DRIVER: sqlite3
+    DATABASE_DATASOURCE: /data/core.sqlite
 
     # If you are going to store build secrets in the Chaos Server database, it is suggested that
     # you set a database encryption secret. This must be set before any secrets are stored
