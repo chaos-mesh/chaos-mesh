@@ -106,6 +106,7 @@ ifeq ($(SWAGGER),1)
 	make swagger_spec
 endif
 ifeq ($(UI),1)
+	make ui
 	hack/embed_ui_assets.sh
 endif
 	$(CGO) build -ldflags '$(LDFLAGS)' -tags "${BUILD_TAGS}" -o bin/chaos-server cmd/chaos-server/*.go

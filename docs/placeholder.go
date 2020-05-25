@@ -11,6 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// This file only ensures `docs` package exist even if swagger is not enabled. This is required for `go mod tidy`.
+// This file only ensures `doc` package exist even if swagger is not enabled. This is required for `go mod tidy`.
 
-package doc
+package docs
