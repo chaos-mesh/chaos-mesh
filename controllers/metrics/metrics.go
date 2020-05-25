@@ -1,3 +1,16 @@
+// Copyright 2020 PingCAP, Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package metrics
 
 import (
@@ -98,22 +111,13 @@ func (c *ChaosCollector) Collect(ch chan<- prometheus.Metric) {
 }
 
 func (c *ChaosCollector) collect() {
-	kinds := map[string]v1alpha1.ChaosList{
-		v1alpha1.KindPodChaos:     &v1alpha1.PodChaosList{},
-		v1alpha1.KindNetworkChaos: &v1alpha1.NetworkChaosList{},
-		v1alpha1.KindStressChaos:  &v1alpha1.StressChaosList{},
-		v1alpha1.KindIOChaos:      &v1alpha1.IoChaosList{},
-		v1alpha1.KindKernelChaos:  &v1alpha1.KernelChaosList{},
-		v1alpha1.KindTimeChaos:    &v1alpha1.TimeChaosList{},
-	}
-
 	// TODO(yeya24) if there is an error in List
 	// the experiment status will be lost
 	c.experimentStatus.Reset()
 
-	for kind, obj := range kinds {
+	for kind, obj := range v1alpha1.AllKinds() {
 		expCache := map[string]map[string]int{}
-		if err := c.store.List(context.TODO(), obj); err != nil {
+		if err := c.store.List(context.TODO(), obj.ChaosList); err != nil {
 			log.Error(err, "failed to list chaos", "kind", kind)
 			return
 		}
