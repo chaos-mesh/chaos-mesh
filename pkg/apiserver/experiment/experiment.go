@@ -81,7 +81,7 @@ func Register(r *gin.RouterGroup, s *Service) {
 	// TODO: add more api handlers
 	endpoint.GET("", s.listExperiments)
 	endpoint.POST("/new", s.createExperiment)
-	endpoint.GET("/detail/:namespace/:name", s.getExperimentDetail)
+	endpoint.GET("/detail/:kind/:namespace/:name", s.getExperimentDetail)
 	endpoint.DELETE("/:kind/:namespace/:name", s.deleteExperiment)
 	endpoint.GET("/state", s.state)
 }
@@ -500,8 +500,47 @@ func (s *Service) listExperiments(c *gin.Context) {
 	c.JSON(http.StatusOK, data)
 }
 
-// TODO: need to be implemented
-func (s *Service) getExperimentDetail(c *gin.Context) {}
+// @Summary Get detailed information about the specified chaos experiment.
+// @Description Get detailed information about the specified chaos experiment.
+// @Tags experiments
+// @Produce json
+// @Param namespace path string true "namespace"
+// @Param name path string true "name"
+// @Param kind path string true "kind" Enums(PodChaos, IoChaos, NetworkChaos, TimeChaos, KernelChaos, StressChaos)
+// @Success 200 "delete ok"
+// @Router /api/experiments/detail/{kind}/{namespace}/{name} [GET]
+// @Failure 400 {object} utils.APIError
+// @Failure 500 {object} utils.APIError
+func (s *Service) getExperimentDetail(c *gin.Context) {
+	kind := c.Param("kind")
+	ns := c.Param("namespace")
+	name := c.Param("name")
+
+	ctx := context.TODO()
+	chaosKey := types.NamespacedName{Namespace: ns, Name: name}
+
+	var (
+		chaosKind *v1alpha1.ChaosKind
+		ok        bool
+	)
+	if chaosKind, ok = v1alpha1.Kinds[kind]; !ok {
+		c.Status(http.StatusBadRequest)
+		_ = c.Error(utils.ErrInvalidRequest.New(kind + " is not supported"))
+		return
+	}
+	if err := s.kubeCli.Get(ctx, chaosKey, chaosKind.Chaos); err != nil {
+		if apierrors.IsNotFound(err) {
+			c.Status(http.StatusNotFound)
+			_ = c.Error(utils.ErrNotFound.NewWithNoMessage())
+		} else {
+			c.Status(http.StatusInternalServerError)
+			_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
+		}
+		return
+	}
+
+	c.JSON(http.StatusOK, nil)
+}
 
 // @Summary Delete the specified chaos experiment.
 // @Description Delete the specified chaos experiment.
