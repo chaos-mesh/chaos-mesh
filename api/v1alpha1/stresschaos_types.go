@@ -23,6 +23,16 @@ import (
 
 // Stress chaos is a chaos to generate plenty of stresses over a collection of pods.
 
+// KindStressChaos is the kind for stress chaos
+const KindStressChaos = "StressChaos"
+
+func init() {
+	all.register(KindStressChaos, &ChaosKind{
+		Chaos:     &StressChaos{},
+		ChaosList: &StressChaosList{},
+	})
+}
+
 // +kubebuilder:object:root=true
 
 // StressChaos is the Schema for the stresschaos API
