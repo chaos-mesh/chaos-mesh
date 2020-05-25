@@ -1,4 +1,4 @@
-# Get started on kind
+# Get Started on kind
 
 This document describes how to deploy Chaos Mesh in Kubernetes on your laptop (Linux or macOS) using kind.
 
@@ -19,14 +19,12 @@ cd chaos-mesh/
 ./install.sh --local kind
 ```
 
-`install.sh` is an automation shell script that helps you install dependencies such as `kubectl`, `Helm`, `kind`, and `kubernetes`, and `Chaos Mesh` itself.
+`install.sh` is an automation shell script that helps you install dependencies such as `kubectl`, `Helm`, `kind`, and `kubernetes`, and deploy Chaos Mesh itself.
 
-After executing the above command, you should be able to see the prompt that Chaos Mesh is installed successfully. 
-Otherwise, please check the current environment according to the prompt message or send us an [issue](https://github.com/pingcap/chaos-mesh/issues) for help. 
-In addition, You also can use [Helm](https://helm.sh/) to [install Chaos Mesh manually](deploy.md).
+After executing the above command, you should be able to see the prompt that Chaos Mesh is installed successfully. Otherwise, check the current environment according to the prompt message or send us an [issue](https://github.com/pingcap/chaos-mesh/issues) for help.
 
+You also can use [Helm](https://helm.sh/) to [install Chaos Mesh manually](deploy.md).
 
 ## Next steps
 
-Refer to [Run Chaos Mesh](run_chaos_mesh.md).
-
+[Run Chaos Mesh](run_chaos_mesh.md).

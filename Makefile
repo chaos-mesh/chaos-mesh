@@ -166,10 +166,26 @@ tidy:
 	GO111MODULE=on go mod tidy
 	git diff --quiet go.mod go.sum
 
+taily-build:
+	if [ "$(shell docker ps --filter=name=$@ -q)" = "" ]; then \
+		docker build -t pingcap/binary ${DOCKER_BUILD_ARGS} .; \
+		docker run --mount type=bind,source=$(shell pwd),target=/src \
+			--name $@ -d pingcap/binary tail -f /dev/null; \
+	fi;
+
+taily-build-clean:
+	docker kill taily-build && docker rm taily-build || exit 0
+
 image: image-chaos-daemon image-chaos-mesh image-chaos-server image-chaos-fs image-chaos-scripts image-chaos-grafana
 
+ifneq ($(TAILY_BUILD),)
+image-binary: taily-build
+	docker exec -it taily-build make binary
+	echo -e "FROM scratch\n COPY . /src/bin" | docker build -t pingcap/binary -f - $(shell pwd)/bin
+else
 image-binary:
 	docker build -t pingcap/binary ${DOCKER_BUILD_ARGS} .
+endif
 
 image-chaos-daemon: image-binary
 	docker build -t ${DOCKER_REGISTRY_PREFIX}pingcap/chaos-daemon:${IMAGE_TAG} ${DOCKER_BUILD_ARGS} images/chaos-daemon

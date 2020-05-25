@@ -19,6 +19,16 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+// KindTimeChaos is the kind for time chaos
+const KindTimeChaos = "TimeChaos"
+
+func init() {
+	all.register(KindTimeChaos, &ChaosKind{
+		Chaos:     &TimeChaos{},
+		ChaosList: &TimeChaosList{},
+	})
+}
+
 // +kubebuilder:object:root=true
 
 // TimeChaos is the Schema for the timechaos API
