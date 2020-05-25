@@ -272,11 +272,6 @@ func watchConfig(configWatcher *watcher.K8sConfigMapWatcher, cfg *config.Config,
 					continue
 				}
 
-				if len(updatedInjectionConfigs) == 0 {
-					setupLog.Info("No updated injection configs")
-					continue
-				}
-
 				setupLog.Info("Updating server with newly loaded configurations",
 					"original configs count", len(cfg.Injections), "updated configs count", len(updatedInjectionConfigs))
 				cfg.ReplaceInjectionConfigs(updatedInjectionConfigs)
