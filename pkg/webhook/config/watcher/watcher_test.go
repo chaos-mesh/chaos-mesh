@@ -36,7 +36,7 @@ var _ = Describe("webhook config watcher", func() {
 			}
 			config := NewConfig()
 			config.Namespace = "testNamespace"
-			configWatcher, err := New(*config)
+			configWatcher, err := New(*config, nil)
 			Expect(configWatcher).To(BeNil())
 			Expect(err).ToNot(BeNil())
 			Expect(fmt.Sprintf("%s", err)).To(ContainSubstring("InClusterConfig"))
@@ -52,7 +52,7 @@ var _ = Describe("webhook config watcher", func() {
 			}
 			config := NewConfig()
 			config.Namespace = "testNamespace"
-			configWatcher, err := New(*config)
+			configWatcher, err := New(*config, nil)
 			Expect(configWatcher).To(BeNil())
 			Expect(err).ToNot(BeNil())
 			Expect(fmt.Sprintf("%s", err)).To(ContainSubstring("NewForConfig"))
@@ -63,7 +63,7 @@ var _ = Describe("webhook config watcher", func() {
 
 			config := NewConfig()
 			config.Namespace = "testNamespace"
-			configWatcher, err := New(*config)
+			configWatcher, err := New(*config, nil)
 			Expect(configWatcher).ToNot(BeNil())
 			Expect(err).To(BeNil())
 		})
