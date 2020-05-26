@@ -269,7 +269,7 @@ func (e *eventStore) ListByFilter(_ context.Context, podName string, podNamespac
 		if experimentNamespace != "" && event.Namespace != experimentNamespace {
 			continue
 		}
-		if startTimeStr != "" && !event.StartTime.Equal(startTime) {
+		if startTimeStr != "" && event.StartTime.Before(startTime) && !event.StartTime.Equal(startTime) {
 			continue
 		}
 		et = event
