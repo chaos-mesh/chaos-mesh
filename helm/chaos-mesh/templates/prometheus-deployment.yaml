@@ -32,6 +32,13 @@ spec:
       {{- if .Values.prometheus.serviceAccount }}
       serviceAccount: {{ .Values.prometheus.serviceAccount }}
       {{- end }}
+      initContainers:
+        - name: data-permission-fix
+          image: busybox
+          command: ["/bin/chmod","-R","777", "/data"]
+          volumeMounts:
+            - name: data
+              mountPath: /data
       containers:
       - name: prometheus
         image: {{ .Values.prometheus.image }}

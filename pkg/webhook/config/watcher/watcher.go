@@ -23,6 +23,7 @@ import (
 
 	"github.com/ghodss/yaml"
 
+	"github.com/pingcap/chaos-mesh/controllers/metrics"
 	"github.com/pingcap/chaos-mesh/pkg/webhook/config"
 
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -51,12 +52,13 @@ var ErrWatchChannelClosed = errors.New("watcher channel has closed")
 // K8sConfigMapWatcher is a struct that connects to the API and collects, parses, and emits sidecar configurations
 type K8sConfigMapWatcher struct {
 	Config
-	client k8sv1.CoreV1Interface
+	client  k8sv1.CoreV1Interface
+	metrics *metrics.ChaosCollector
 }
 
 // New creates a new K8sConfigMapWatcher
-func New(cfg Config) (*K8sConfigMapWatcher, error) {
-	c := K8sConfigMapWatcher{Config: cfg}
+func New(cfg Config, metrics *metrics.ChaosCollector) (*K8sConfigMapWatcher, error) {
+	c := K8sConfigMapWatcher{Config: cfg, metrics: metrics}
 	if strings.TrimSpace(c.Namespace) == "" {
 		// ENHANCEMENT: support downward API/env vars instead? https://github.com/kubernetes/kubernetes/blob/release-1.0/docs/user-guide/downward-api.md
 		// load from file on disk for serviceaccount: /var/run/secrets/kubernetes.io/serviceaccount/namespace
@@ -208,29 +210,28 @@ func (c *K8sConfigMapWatcher) GetInjectionConfigs() (map[string][]*config.Inject
 	if err != nil {
 		return nil, err
 	}
-	// There's no templates
-	if len(templates) == 0 {
-		log.Info("cannot get any injection templates")
-		return nil, nil
-	}
 
 	configs, err := c.GetConfigs()
 	if err != nil {
 		return nil, err
 	}
-	if len(configs) == 0 {
-		log.Info("cannot get any configs")
+	if len(templates) == 0 || len(configs) == 0 {
+		log.Info("cannot get injection configs")
 		return nil, nil
 	}
 
-	// TODO: add Prometheus metrics to expose the
-	// count of template match and mismatch
 	injectionConfigs := make(map[string][]*config.InjectionConfig)
+	if c.metrics != nil {
+		c.metrics.InjectionConfigs.Reset()
+	}
 	for _, conf := range configs {
 		temp, ok := templates[conf.Template]
 		if !ok {
 			log.Error(errors.New("cannot find the specified template"), "",
 				"template", conf.Template, "namespace", conf.Namespace, "config", conf.Name)
+			if c.metrics != nil {
+				c.metrics.TemplateNotExist.WithLabelValues(conf.Namespace, conf.Template).Inc()
+			}
 			continue
 		}
 		yamlTemp, err := template.New("").Parse(temp)
@@ -259,6 +260,9 @@ func (c *K8sConfigMapWatcher) GetInjectionConfigs() (map[string][]*config.Inject
 			injectionConfigs[conf.Namespace] = make([]*config.InjectionConfig, 0)
 		}
 		injectionConfigs[conf.Namespace] = append(injectionConfigs[conf.Namespace], &injectConfig)
+		if c.metrics != nil {
+			c.metrics.InjectionConfigs.WithLabelValues(conf.Namespace, conf.Template).Inc()
+		}
 	}
 
 	return injectionConfigs, nil
@@ -279,6 +283,9 @@ func (c *K8sConfigMapWatcher) GetTemplates() (map[string]string, error) {
 	for _, temp := range templateList.Items {
 		templates[temp.Name] = temp.Data[templateItemKey]
 	}
+	if c.metrics != nil {
+		c.metrics.SidecarTemplates.Set(float64(len(templates)))
+	}
 	return templates, nil
 }
 
@@ -294,6 +301,9 @@ func (c *K8sConfigMapWatcher) GetConfigs() ([]*config.TemplateArgs, error) {
 	}
 
 	log.Info("Fetched configs", "configs count", len(configList.Items))
+	if c.metrics != nil {
+		c.metrics.ConfigTemplates.Reset()
+	}
 	configSet := make(map[string]map[string]struct{}, 0)
 	result := make([]*config.TemplateArgs, 0)
 	for _, item := range configList.Items {
@@ -301,6 +311,9 @@ func (c *K8sConfigMapWatcher) GetConfigs() ([]*config.TemplateArgs, error) {
 			conf, err := config.LoadTemplateArgs(strings.NewReader(payload))
 			if err != nil {
 				log.Error(err, "failed to load template args", "payload", payload)
+				if c.metrics != nil {
+					c.metrics.TemplateLoadError.WithLabelValues(conf.Namespace, conf.Template, conf.Name).Inc()
+				}
 				continue
 			}
 			conf.Namespace = item.Namespace
@@ -310,9 +323,15 @@ func (c *K8sConfigMapWatcher) GetConfigs() ([]*config.TemplateArgs, error) {
 			if _, ok := configSet[conf.Namespace][conf.Name]; ok {
 				log.Error(errors.New("duplicate config name"), "",
 					"namespace", conf.Namespace, "name", conf.Name)
+				if c.metrics != nil {
+					c.metrics.ConfigNameDuplicate.WithLabelValues(conf.Namespace, conf.Name).Inc()
+				}
 				continue
 			}
 			configSet[conf.Namespace][conf.Name] = struct{}{}
+			if c.metrics != nil {
+				c.metrics.ConfigTemplates.WithLabelValues(conf.Namespace, conf.Template).Inc()
+			}
 			result = append(result, conf)
 		}
 	}

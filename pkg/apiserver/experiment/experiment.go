@@ -580,7 +580,7 @@ func (s *Service) state(c *gin.Context) {
 	for index := range kinds {
 		list := kinds[index]
 		g.Go(func() error {
-			if err := s.kubeCli.List(ctx, list); err != nil {
+			if err := s.kubeCli.List(ctx, list.ChaosList); err != nil {
 				return err
 			}
 			m.Lock()
