@@ -260,7 +260,6 @@ func (e *eventStore) ListByFilter(_ context.Context, podName string, podNamespac
 		}
 	}
 
-	et := new(core.Event)
 	eventList := make([]*core.Event, 0)
 	for _, event := range resList {
 		if experimentName != "" && event.Experiment != experimentName {
@@ -272,13 +271,12 @@ func (e *eventStore) ListByFilter(_ context.Context, podName string, podNamespac
 		if startTimeStr != "" && event.StartTime.Before(startTime) && !event.StartTime.Equal(startTime) {
 			continue
 		}
-		et = event
 		pods, err:= e.findPodRecordsByEventID(context.Background(), event.ID)
 		if err != nil {
 			return nil, err
 		}
-		et.Pods = pods
-		eventList = append(eventList, et)
+		event.Pods = pods
+		eventList = append(eventList, event)
 	}
 	return eventList, nil
 }
