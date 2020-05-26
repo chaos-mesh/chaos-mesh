@@ -32,7 +32,7 @@ var _ = Describe("webhook inject", func() {
 		It("should return unexpected end of JSON input", func() {
 			var testClient client.Client
 			var cfg *config.Config
-			res := Inject(&admissionv1beta1.AdmissionRequest{}, testClient, cfg)
+			res := Inject(&admissionv1beta1.AdmissionRequest{}, testClient, cfg, nil)
 			Expect(res.Result.Message).To(ContainSubstring("unexpected end of JSON input"))
 		})
 	})
