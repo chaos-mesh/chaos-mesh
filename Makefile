@@ -63,7 +63,7 @@ all: yaml image
 
 build: binary
 
-check: fmt vet lint generate yaml tidy gosec-scan
+check: fmt vet lint generate yaml tidy
 
 # Run tests
 test: failpoint-enable generate manifests test-utils
