@@ -1,11 +1,11 @@
 <p align="center">
   <img src="public/logo.svg" width="256" alt="Chaos Mesh Logo" />
 </p>
-<h1 align="center">Chaos Mesh Dashboard UI</h1>
+<h1 align="center">Chaos Mesh Dashboard</h1>
 
 > Note: Currently WIP
 
-A Web UI for Chaos Mesh Dashboard. Powered by ⚛️ [Create React App](https://github.com/facebook/create-react-app).
+A Web UI for Chaos Mesh. Powered by ⚛️ [Create React App](https://github.com/facebook/create-react-app).
 
 You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
 
