@@ -606,6 +606,7 @@ func (s *Service) state(c *gin.Context) {
 		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
 		return
 	}
+
 	c.JSON(http.StatusOK, data)
 }
 
