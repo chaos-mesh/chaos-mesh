@@ -57,7 +57,7 @@ func Register(r *gin.RouterGroup, s *Service) {
 	endpoint := r.Group("/events")
 
 	// TODO: add more api handlers
-	endpoint.GET("/", s.listEvents)
+	endpoint.GET("", s.listEvents)
 	endpoint.GET("/listbyexperiment", s.listEventsByExperiment)
 }
 
