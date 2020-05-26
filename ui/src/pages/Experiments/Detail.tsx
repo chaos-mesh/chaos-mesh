@@ -6,9 +6,8 @@ import StopIcon from '@material-ui/icons/Stop'
 import SettingsIcon from '@material-ui/icons/Settings'
 import { makeStyles, Theme, createStyles } from '@material-ui/core/styles'
 
-import PageBar from '../../components/PageBar'
-import ToolBar from '../../components/ToolBar'
-import Container from '../../components/Container'
+import ToolBar from '../../components/StatusBar'
+import Container from '../../components/ContentContainer'
 import InfoList from '../../components/InfoList'
 
 const useStyles = makeStyles((theme: Theme) =>
@@ -36,7 +35,6 @@ export default function ExperimentDetail() {
 
   return (
     <>
-      <PageBar />
       <ToolBar>
         <Button className={classes.button} variant="outlined" startIcon={<StopIcon />}>
           Stop

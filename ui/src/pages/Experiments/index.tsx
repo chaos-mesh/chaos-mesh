@@ -17,9 +17,7 @@ import DeleteOutlineIcon from '@material-ui/icons/DeleteOutline'
 import PauseCircleOutlineIcon from '@material-ui/icons/PauseCircleOutline'
 import { createStyles, Theme, makeStyles } from '@material-ui/core/styles'
 
-import PageBar from '../../components/PageBar'
-import ToolBar from '../../components/ToolBar'
-import Container from '../../components/Container'
+import ContentContainer from '../../components/ContentContainer'
 import InfoList from '../../components/InfoList'
 import NewExperiment from '../../pages/Experiments/New'
 
@@ -111,18 +109,13 @@ export default function Experiments() {
     setIsOpen(isOpen)
   }
 
-  // FIXME: console warning: findDOMNode is deprecated in StrictMode.
-  // https://github.com/mui-org/material-ui/issues/13394
   return (
     <>
-      <PageBar />
-      <ToolBar>
-        <Button variant="outlined" startIcon={<AddIcon />} onClick={toggleDrawer(true)}>
-          New Experiment
-        </Button>
-      </ToolBar>
+      <Button variant="outlined" startIcon={<AddIcon />} onClick={toggleDrawer(true)}>
+        New Experiment
+      </Button>
 
-      <Container>
+      <ContentContainer>
         {fakeList.map((item: { [key: string]: string }, index) => {
           return (
             <ExperimentCard key={item.name + item.namespace} info={item}>
@@ -135,7 +128,7 @@ export default function Experiments() {
             </ExperimentCard>
           )
         })}
-      </Container>
+      </ContentContainer>
 
       {/* New Experiment Stepper Drawer */}
       <Drawer anchor="right" open={isOpen} onClose={toggleDrawer(false)}>

@@ -1,30 +1,15 @@
-import React from 'react'
-import { NavLink } from 'react-router-dom'
-
 import { Divider, List, ListItem, ListItemIcon, ListItemText } from '@material-ui/core'
-import WebIcon from '@material-ui/icons/Web'
-import BlurLinearIcon from '@material-ui/icons/BlurLinear'
-import TuneIcon from '@material-ui/icons/Tune'
+import { Theme, createStyles, makeStyles } from '@material-ui/core/styles'
+
 import ArchiveOutlinedIcon from '@material-ui/icons/ArchiveOutlined'
-import { makeStyles, Theme, createStyles } from '@material-ui/core/styles'
+import BlurLinearIcon from '@material-ui/icons/BlurLinear'
+import { NavLink } from 'react-router-dom'
+import React from 'react'
+import TuneIcon from '@material-ui/icons/Tune'
+import WebIcon from '@material-ui/icons/Web'
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
-    listItem: {
-      '&.active': {
-        color: theme.palette.primary.main,
-        '& svg': {
-          fill: theme.palette.primary.main,
-        },
-        '& .MuiListItemText': {
-          fontWeight: 500,
-        },
-      },
-    },
-    itemIcon: {
-      paddingLeft: theme.spacing(3),
-    },
-    // necessary for content to be below app bar
     toolbar: {
       ...theme.mixins.toolbar,
       display: 'flex',
@@ -32,7 +17,21 @@ const useStyles = makeStyles((theme: Theme) =>
       justifyContent: 'center',
     },
     logo: {
-      width: '12rem',
+      width: '75%',
+    },
+    listItem: {
+      '&.active': {
+        color: theme.palette.primary.main,
+        '& svg': {
+          fill: theme.palette.primary.main,
+        },
+        '& .MuiListItemText-primary': {
+          fontWeight: 'bold',
+        },
+      },
+    },
+    itemIcon: {
+      paddingLeft: theme.spacing(3),
     },
   })
 )
@@ -63,8 +62,8 @@ export default function SideMenu() {
       </NavLink>
       <Divider />
       <List>
-        {listItems.map(({ icon, text }, index) => (
-          <ListItem key={text} button component={NavLink} to={`/${text.toLowerCase()}`} className={classes.listItem}>
+        {listItems.map(({ icon, text }) => (
+          <ListItem key={text} className={classes.listItem} component={NavLink} to={`/${text.toLowerCase()}`} button>
             <ListItemIcon className={classes.itemIcon}>{icon}</ListItemIcon>
             <ListItemText primary={text} />
           </ListItem>

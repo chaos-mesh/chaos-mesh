@@ -1,6 +1,6 @@
 import React from 'react'
 
-import VerticalTabs from '../../../../components/VerticalTabs'
+import VerticalTabs from 'components/VerticalTabs'
 import Pod from './Pod'
 import Network from './Network'
 import { StepProps } from '../../types'
