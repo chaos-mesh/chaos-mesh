@@ -17,18 +17,15 @@ import (
 	"context"
 	"net/http"
 	"sort"
-	"strings"
 
 	"github.com/gin-gonic/gin"
 
+	"github.com/pingcap/chaos-mesh/api/v1alpha1"
 	"github.com/pingcap/chaos-mesh/pkg/apiserver/utils"
 	"github.com/pingcap/chaos-mesh/pkg/config"
 
 	v1 "k8s.io/api/core/v1"
-	apicli "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	ctrlconfig "sigs.k8s.io/controller-runtime/pkg/client/config"
 )
 
 // Pod defines the basic information of a pod
@@ -131,22 +128,13 @@ func (s *Service) getNamespaces(c *gin.Context) {
 // @Router /api/common/kinds [get]
 // @Failure 500 {object} utils.APIError
 func (s *Service) getKinds(c *gin.Context) {
-	conf, _ := ctrlconfig.GetConfig()
-	apiExtCli, _ := apicli.NewForConfig(conf)
+	var kinds []string
 
-	crdList, err := apiExtCli.ApiextensionsV1beta1().CustomResourceDefinitions().List(metav1.ListOptions{})
-	if err != nil {
-		c.Status(http.StatusInternalServerError)
-		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
-		return
+	allKinds := v1alpha1.AllKinds()
+	for name := range allKinds {
+		kinds = append(kinds, name)
 	}
 
-	kinds := make(sort.StringSlice, 0, len(crdList.Items))
-	for _, crd := range crdList.Items {
-		if strings.Contains(crd.Spec.Names.Kind, "Chaos") == true {
-			kinds = append(kinds, crd.Spec.Names.Kind)
-		}
-	}
-	sort.Sort(kinds)
+	sort.Strings(kinds)
 	c.JSON(http.StatusOK, kinds)
 }
