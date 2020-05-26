@@ -16,10 +16,11 @@ package metrics
 import (
 	"context"
 
-	"github.com/pingcap/chaos-mesh/api/v1alpha1"
 	"github.com/prometheus/client_golang/prometheus"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/cache"
+
+	"github.com/pingcap/chaos-mesh/api/v1alpha1"
 )
 
 var log = ctrl.Log.WithName("metrics-collector")
