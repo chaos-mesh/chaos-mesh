@@ -787,23 +787,23 @@ func (s *Service) getExperimentDetail(c *gin.Context) {
 		info ExperimentInfo
 		err  error
 	)
-	if _, ok = v1alpha1.Kinds[kind]; !ok {
+	if _, ok = v1alpha1.AllKinds()[kind]; !ok {
 		c.Status(http.StatusBadRequest)
 		_ = c.Error(utils.ErrInvalidRequest.New(kind + " is not supported"))
 		return
 	}
 	switch kind {
-	case "PodChaos":
+	case v1alpha1.KindPodChaos:
 		info, err = s.getPodChaosDetail(ns, name)
-	case "IoChaos":
+	case v1alpha1.KindIOChaos:
 		info, err = s.getIoChaosDetail(ns, name)
-	case "NetworkChaos":
+	case v1alpha1.KindNetworkChaos:
 		info, err = s.getNetworkChaosDetail(ns, name)
-	case "TimeChaos":
+	case v1alpha1.KindTimeChaos:
 		info, err = s.getTimeChaosDetail(ns, name)
-	case "KernelChaos":
+	case v1alpha1.KindKernelChaos:
 		info, err = s.getKernelChaosDetail(ns, name)
-	case "StressChaos":
+	case v1alpha1.KindStressChaos:
 		info, err = s.getStressChaosDetail(ns, name)
 	}
 	if err != nil {
