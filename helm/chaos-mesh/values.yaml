@@ -160,7 +160,7 @@ prometheus:
 
   serviceAccount: prometheus
 
-  image: prom/prometheus:v2.15.2
+  image: prom/prometheus:v2.18.1
   imagePullPolicy: IfNotPresent
 
   nodeSelector: {}

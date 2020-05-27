@@ -63,7 +63,7 @@ func Register(r *gin.RouterGroup, s *Service) {
 // @Tags events
 // @Produce json
 // @Success 200 {array} core.Event
-// @Router /api/events/all [get]
+// @Router /api/events [get]
 // @Failure 500 {object} utils.APIError
 func (s *Service) listEvents(c *gin.Context) {
 	name := c.Query("name")
