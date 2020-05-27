@@ -69,10 +69,8 @@ func (e *eventStore) List(_ context.Context) ([]*core.Event, error) {
 		if err != nil {
 			return nil, err
 		}
-		var event core.Event
-		event = et
-		event.Pods = pods
-		eventList = append(eventList, &event)
+		et.Pods = pods
+		eventList = append(eventList, &et)
 	}
 
 	return eventList, nil
@@ -85,7 +83,7 @@ func (e *eventStore) ListByExperiment(_ context.Context, namespace string, exper
 	if err := e.db.Where(
 		"namespace = ? and experiment = ? ",
 		namespace, experiment).
-		Find(&resList).Error; err != nil && !gorm.IsRecordNotFoundError(err) {
+		Find(resList).Error; err != nil && !gorm.IsRecordNotFoundError(err) {
 		return nil, err
 	}
 
@@ -95,10 +93,8 @@ func (e *eventStore) ListByExperiment(_ context.Context, namespace string, exper
 		if err != nil {
 			return nil, err
 		}
-		var event core.Event
-		event = et
-		event.Pods = pods
-		eventList = append(eventList, &event)
+		et.Pods = pods
+		eventList = append(eventList, &et)
 	}
 
 	return eventList, nil
