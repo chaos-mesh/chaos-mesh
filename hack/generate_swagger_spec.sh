@@ -21,4 +21,4 @@ echo "+ Clean up go mod"
 go mod tidy
 
 echo "+ Generate swagger spec"
-swag init --output ./doc -g cmd/chaos-server/main.go
+swag init -g cmd/chaos-server/main.go
