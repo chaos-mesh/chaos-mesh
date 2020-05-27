@@ -46,7 +46,7 @@ type eventStore struct {
 
 // findPodRecordsByEventID returns the list of PodRecords according to the eventID
 func (e *eventStore) findPodRecordsByEventID(_ context.Context, id uint) ([]*core.PodRecord, error) {
-	pods := make([]*core.PodRecord,0)
+	pods := make([]*core.PodRecord, 0)
 	if err := e.db.Where(
 		"event_id = ?", id).
 		Find(&pods).Error; err != nil && !gorm.IsRecordNotFoundError(err) {
@@ -64,8 +64,8 @@ func (e *eventStore) List(_ context.Context) ([]*core.Event, error) {
 		return nil, err
 	}
 
-	for _, et := range(resList) {
-		pods, err:= e.findPodRecordsByEventID(context.Background(), et.ID)
+	for _, et := range resList {
+		pods, err := e.findPodRecordsByEventID(context.Background(), et.ID)
 		if err != nil {
 			return nil, err
 		}
@@ -91,7 +91,7 @@ func (e *eventStore) ListByExperiment(_ context.Context, namespace string, exper
 
 	eventList := make([]*core.Event, 0, len(resList))
 	for _, et := range resList {
-		pods, err:= e.findPodRecordsByEventID(context.Background(), et.ID)
+		pods, err := e.findPodRecordsByEventID(context.Background(), et.ID)
 		if err != nil {
 			return nil, err
 		}
@@ -123,7 +123,7 @@ func (e *eventStore) ListByNamespace(_ context.Context, namespace string) ([]*co
 			return nil, err
 		}
 
-		pods, err:= e.findPodRecordsByEventID(context.Background(), et.ID)
+		pods, err := e.findPodRecordsByEventID(context.Background(), et.ID)
 		if err != nil {
 			return nil, err
 		}
@@ -152,7 +152,7 @@ func (e *eventStore) ListByPod(_ context.Context, namespace string, name string)
 			return nil, err
 		}
 
-		pods, err:= e.findPodRecordsByEventID(context.Background(), et.ID)
+		pods, err := e.findPodRecordsByEventID(context.Background(), et.ID)
 		if err != nil {
 			return nil, err
 		}
@@ -170,7 +170,7 @@ func (e *eventStore) Find(_ context.Context, id uint) (*core.Event, error) {
 		First(et).Error; err != nil && !gorm.IsRecordNotFoundError(err) {
 		return nil, err
 	}
-	pods, err:= e.findPodRecordsByEventID(context.Background(), et.ID)
+	pods, err := e.findPodRecordsByEventID(context.Background(), et.ID)
 	if err != nil {
 		return nil, err
 	}

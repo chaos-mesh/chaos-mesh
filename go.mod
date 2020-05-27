@@ -34,9 +34,13 @@ require (
 	github.com/jinzhu/gorm v1.9.12
 	github.com/joomcode/errorx v1.0.1
 	github.com/kelseyhightower/envconfig v1.4.0
+	github.com/kr/pty v1.1.8 // indirect
+	github.com/lib/pq v1.2.0 // indirect
 	github.com/mattn/go-runewidth v0.0.8 // indirect
 	github.com/mgechev/revive v1.0.2-0.20200225072153-6219ca02fffb
 	github.com/morikuni/aec v1.0.0 // indirect
+	github.com/mozilla/tls-observatory v0.0.0-20200317151703-4fa42e1c2dee // indirect
+	github.com/nbutton23/zxcvbn-go v0.0.0-20180912185939-ae427f1e4c1d // indirect
 	github.com/onsi/ginkgo v1.12.0
 	github.com/onsi/gomega v1.9.0
 	github.com/pingcap/check v0.0.0-20191216031241-8a5a85928f12 // indirect
@@ -46,7 +50,6 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.0.0
 	github.com/robfig/cron/v3 v3.0.0
-	github.com/securego/gosec v0.0.0-20200401082031-e946c8c39989
 	github.com/shirou/gopsutil v0.0.0-20180427012116-c95755e4bcd7
 	github.com/spf13/cobra v0.0.6 // indirect
 	github.com/swaggo/http-swagger v0.0.0-20200308142732-58ac5e232fba
@@ -54,6 +57,7 @@ require (
 	github.com/tmc/grpc-websocket-proxy v0.0.0-20200122045848-3419fae592fc // indirect
 	github.com/vishvananda/netlink v1.0.0
 	github.com/vishvananda/netns v0.0.0-20191106174202-0a2b9b5464df
+	github.com/yuin/goldmark v1.1.27 // indirect
 	go.uber.org/fx v1.12.0
 	go.uber.org/multierr v1.5.0 // indirect
 	go.uber.org/zap v1.14.0
@@ -63,7 +67,7 @@ require (
 	golang.org/x/sync v0.0.0-20190911185100-cd5d95a43a6e
 	golang.org/x/sys v0.0.0-20200409092240-59c9f1ba88fa // indirect
 	golang.org/x/time v0.0.0-20191024005414-555d28b269f0 // indirect
-	golang.org/x/tools v0.0.0-20200331202046-9d5940d49312
+	golang.org/x/tools v0.0.0-20200309202150-20ab64c0d93f
 	google.golang.org/genproto v0.0.0-20200323114720-3f67cca34472 // indirect
 	google.golang.org/grpc v1.28.0
 	honnef.co/go/tools v0.0.1-2020.1.3 // indirect

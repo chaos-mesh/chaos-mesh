@@ -114,7 +114,7 @@ func (s *Service) listEvents(c *gin.Context) {
 func (s *Service) listEventsByExperiment(c *gin.Context) {
 	startTimeStr := c.Query("startTime")
 	name := c.Query("experimentName")
-    namespace := c.Query("namespace")
+	namespace := c.Query("namespace")
 	var eventList []*core.Event
 	var err error
 	if name == "" || namespace == "" {
