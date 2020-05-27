@@ -18,7 +18,6 @@ package tools
 import (
 	_ "github.com/mgechev/revive"
 	_ "github.com/pingcap/failpoint/failpoint-ctl"
-	_ "github.com/securego/gosec/cmd/gosec"
 	_ "golang.org/x/tools/cmd/goimports"
 	_ "sigs.k8s.io/controller-tools/cmd/controller-gen"
 )

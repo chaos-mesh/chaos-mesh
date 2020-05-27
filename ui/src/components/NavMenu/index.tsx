@@ -6,7 +6,6 @@ import WebIcon from '@material-ui/icons/Web'
 import BlurLinearIcon from '@material-ui/icons/BlurLinear'
 import TuneIcon from '@material-ui/icons/Tune'
 import ArchiveOutlinedIcon from '@material-ui/icons/ArchiveOutlined'
-
 import { makeStyles, Theme, createStyles } from '@material-ui/core/styles'
 
 const useStyles = makeStyles((theme: Theme) =>

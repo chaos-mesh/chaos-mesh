@@ -23,6 +23,7 @@ import (
 	chaosmeshv1alpha1 "github.com/pingcap/chaos-mesh/api/v1alpha1"
 	apiWebhook "github.com/pingcap/chaos-mesh/api/webhook"
 	"github.com/pingcap/chaos-mesh/controllers"
+	"github.com/pingcap/chaos-mesh/controllers/metrics"
 	"github.com/pingcap/chaos-mesh/pkg/flags"
 	"github.com/pingcap/chaos-mesh/pkg/utils"
 	"github.com/pingcap/chaos-mesh/pkg/version"
@@ -35,6 +36,7 @@ import (
 
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
+	controllermetrics "sigs.k8s.io/controller-runtime/pkg/metrics"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
 	// +kubebuilder:scaffold:imports
 )
@@ -185,6 +187,9 @@ func main() {
 		os.Exit(1)
 	}
 
+	// Init metrics collector
+	metricsCollector := metrics.NewChaosCollector(mgr.GetCache(), controllermetrics.Registry)
+
 	setupLog.Info("Setting up webhook server")
 
 	hookServer := mgr.GetWebhookServer()
@@ -206,16 +211,19 @@ func main() {
 		setupLog.Error(err, "failed to initialize watcher config selected labels")
 		os.Exit(1)
 	}
-	configWatcher, err := watcher.New(*watcherConfig)
+	configWatcher, err := watcher.New(*watcherConfig, metricsCollector)
 	if err != nil {
 		setupLog.Error(err, "unable to create config watcher")
 		os.Exit(1)
 	}
 
 	watchConfig(configWatcher, conf, stopCh)
-	hookServer.Register("/inject-v1-pod", &webhook.Admission{Handler: &apiWebhook.PodInjector{
-		Config: conf,
-	}})
+	hookServer.Register("/inject-v1-pod", &webhook.Admission{
+		Handler: &apiWebhook.PodInjector{
+			Config:  conf,
+			Metrics: metricsCollector,
+		}},
+	)
 
 	// +kubebuilder:scaffold:builder
 
@@ -240,8 +248,7 @@ func watchConfig(configWatcher *watcher.K8sConfigMapWatcher, cfg *config.Config,
 		go func() {
 			for {
 				setupLog.Info("Launching watcher for ConfigMaps")
-				err := configWatcher.Watch(sigChan, stopCh)
-				if err != nil {
+				if err := configWatcher.Watch(sigChan, stopCh); err != nil {
 					switch err {
 					case watcher.ErrWatchChannelClosed:
 						setupLog.Error(err, "watcher got error, try to restart watcher")
@@ -269,11 +276,6 @@ func watchConfig(configWatcher *watcher.K8sConfigMapWatcher, cfg *config.Config,
 				updatedInjectionConfigs, err := configWatcher.GetInjectionConfigs()
 				if err != nil {
 					setupLog.Error(err, "unable to get ConfigMaps")
-					continue
-				}
-
-				if len(updatedInjectionConfigs) == 0 {
-					setupLog.Info("No updated injection configs")
 					continue
 				}
 

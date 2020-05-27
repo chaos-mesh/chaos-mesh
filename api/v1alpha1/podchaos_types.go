@@ -19,6 +19,16 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+// KindPodChaos is the kind for pod chaos
+const KindPodChaos = "PodChaos"
+
+func init() {
+	all.register(KindPodChaos, &ChaosKind{
+		Chaos:     &PodChaos{},
+		ChaosList: &PodChaosList{},
+	})
+}
+
 // PodChaosAction represents the chaos action about pods.
 type PodChaosAction string
 
