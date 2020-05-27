@@ -460,9 +460,8 @@ func (s *Service) getPodChaosDetail(namespace string, name string) (ExperimentIn
 	if err := s.kubeCli.Get(ctx, chaosKey, chaos); err != nil {
 		if apierrors.IsNotFound(err) {
 			return ExperimentInfo{}, utils.ErrNotFound.NewWithNoMessage()
-		} else {
-			return ExperimentInfo{}, err
 		}
+		return ExperimentInfo{}, err
 	}
 	info := ExperimentInfo{
 		Name:        chaos.Name,
@@ -501,9 +500,8 @@ func (s *Service) getIoChaosDetail(namespace string, name string) (ExperimentInf
 	if err := s.kubeCli.Get(ctx, chaosKey, chaos); err != nil {
 		if apierrors.IsNotFound(err) {
 			return ExperimentInfo{}, utils.ErrNotFound.NewWithNoMessage()
-		} else {
-			return ExperimentInfo{}, err
 		}
+		return ExperimentInfo{}, err
 	}
 	info := ExperimentInfo{
 		Name:        chaos.Name,
@@ -547,9 +545,8 @@ func (s *Service) getNetworkChaosDetail(namespace string, name string) (Experime
 	if err := s.kubeCli.Get(ctx, chaosKey, chaos); err != nil {
 		if apierrors.IsNotFound(err) {
 			return ExperimentInfo{}, utils.ErrNotFound.NewWithNoMessage()
-		} else {
-			return ExperimentInfo{}, err
 		}
+		return ExperimentInfo{}, err
 	}
 	info := ExperimentInfo{
 		Name:        chaos.Name,
@@ -602,9 +599,8 @@ func (s *Service) getTimeChaosDetail(namespace string, name string) (ExperimentI
 	if err := s.kubeCli.Get(ctx, chaosKey, chaos); err != nil {
 		if apierrors.IsNotFound(err) {
 			return ExperimentInfo{}, utils.ErrNotFound.NewWithNoMessage()
-		} else {
-			return ExperimentInfo{}, err
 		}
+		return ExperimentInfo{}, err
 	}
 	info := ExperimentInfo{
 		Name:        chaos.Name,
@@ -644,9 +640,8 @@ func (s *Service) getKernelChaosDetail(namespace string, name string) (Experimen
 	if err := s.kubeCli.Get(ctx, chaosKey, chaos); err != nil {
 		if apierrors.IsNotFound(err) {
 			return ExperimentInfo{}, utils.ErrNotFound.NewWithNoMessage()
-		} else {
-			return ExperimentInfo{}, err
 		}
+		return ExperimentInfo{}, err
 	}
 	info := ExperimentInfo{
 		Name:        chaos.Name,
@@ -684,9 +679,8 @@ func (s *Service) getStressChaosDetail(namespace string, name string) (Experimen
 	if err := s.kubeCli.Get(ctx, chaosKey, chaos); err != nil {
 		if apierrors.IsNotFound(err) {
 			return ExperimentInfo{}, utils.ErrNotFound.NewWithNoMessage()
-		} else {
-			return ExperimentInfo{}, err
 		}
+		return ExperimentInfo{}, err
 	}
 	info := ExperimentInfo{
 		Name:        chaos.Name,
