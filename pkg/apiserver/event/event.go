@@ -66,8 +66,8 @@ func Register(r *gin.RouterGroup, s *Service) {
 // @Router /api/events [get]
 // @Failure 500 {object} utils.APIError
 func (s *Service) listEvents(c *gin.Context) {
-	name := c.Query("podName")
-	namespace := c.Query("podNamespace")
+	name := c.Query("name")
+	namespace := c.Query("namespace")
 	//eventList := make([]*core.Event, 0)
 	var eventList []*core.Event
 	var err error
