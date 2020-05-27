@@ -271,7 +271,7 @@ func (e *eventStore) ListByFilter(_ context.Context, podName string, podNamespac
 		if startTimeStr != "" && event.StartTime.Before(startTime) && !event.StartTime.Equal(startTime) {
 			continue
 		}
-		pods, err:= e.findPodRecordsByEventID(context.Background(), event.ID)
+		pods, err := e.findPodRecordsByEventID(context.Background(), event.ID)
 		if err != nil {
 			return nil, err
 		}
