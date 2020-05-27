@@ -1320,6 +1320,11 @@ spec:
                       description: Load specifies P percent loading per CPU worker.
                         0 is effectively a sleep (no load) and 100 is full loading.
                       type: integer
+                    options:
+                      description: extend stress-ng options
+                      items:
+                        type: string
+                      type: array
                     workers:
                       description: Workers specifies N workers to apply the stressor.
                       type: integer
@@ -1329,6 +1334,11 @@ spec:
                 memory:
                   description: MemoryStressor stresses virtual memory out
                   properties:
+                    options:
+                      description: extend stress-ng options
+                      items:
+                        type: string
+                      type: array
                     size:
                       description: Size specifies N bytes consumed per vm worker,
                         default is the total available memory. One can specify the

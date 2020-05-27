@@ -23,6 +23,16 @@ import (
 
 // Stress chaos is a chaos to generate plenty of stresses over a collection of pods.
 
+// KindStressChaos is the kind for stress chaos
+const KindStressChaos = "StressChaos"
+
+func init() {
+	all.register(KindStressChaos, &ChaosKind{
+		Chaos:     &StressChaos{},
+		ChaosList: &StressChaosList{},
+	})
+}
+
 // +kubebuilder:object:root=true
 
 // StressChaos is the Schema for the stresschaos API
@@ -235,12 +245,24 @@ func (in *Stressors) Normalize() (string, error) {
 					in.MemoryStressor.Size)
 			}
 		}
+
+		if in.MemoryStressor.Options != nil {
+			for _, v := range in.MemoryStressor.Options {
+				stressors += fmt.Sprintf(" %v ", v)
+			}
+		}
 	}
 	if in.CPUStressor != nil {
 		stressors += fmt.Sprintf(" --cpu %d", in.CPUStressor.Workers)
 		if in.CPUStressor.Load != nil {
 			stressors += fmt.Sprintf(" --cpu-load %d",
 				*in.CPUStressor.Load)
+		}
+
+		if in.CPUStressor.Options != nil {
+			for _, v := range in.CPUStressor.Options {
+				stressors += fmt.Sprintf(" %v ", v)
+			}
 		}
 	}
 	return stressors, nil
@@ -261,6 +283,10 @@ type MemoryStressor struct {
 	// MB/MiB, GB/GiB, TB/TiB.
 	// +optional
 	Size string `json:"size,omitempty"`
+
+	// extend stress-ng options
+	// +optional
+	Options []string `json:"options,omitempty"`
 }
 
 // CPUStressor defines how to stress CPU out
@@ -270,6 +296,10 @@ type CPUStressor struct {
 	// is full loading.
 	// +optional
 	Load *int `json:"load,omitempty"`
+
+	// extend stress-ng options
+	// +optional
+	Options []string `json:"options,omitempty"`
 }
 
 // +kubebuilder:object:root=true

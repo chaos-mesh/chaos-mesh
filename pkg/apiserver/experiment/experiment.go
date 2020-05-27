@@ -15,6 +15,8 @@ package experiment
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
 	"net/http"
 	"sync"
 	"time"
@@ -30,16 +32,17 @@ import (
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
+	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
+var log = ctrl.Log.WithName("experiment api")
+
 // Experiment defines the basic information of an experiment
 type Experiment struct {
-	Name      string `json:"name"`
-	Namespace string `json:"namespace"`
-	Kind      string `json:"kind"`
-	Created   string `json:"created"`
-	Status    string `json:"status"`
+	ExperimentBase
+	Created string `json:"created"`
+	Status  string `json:"status"`
 }
 
 // ChaosState defines the number of chaos experiments of each phase
@@ -83,6 +86,8 @@ func Register(r *gin.RouterGroup, s *Service) {
 	endpoint.POST("/new", s.createExperiment)
 	endpoint.GET("/detail/:kind/:namespace/:name", s.getExperimentDetail)
 	endpoint.DELETE("/:kind/:namespace/:name", s.deleteExperiment)
+	endpoint.PUT("/pause/:kind/:namespace/:name", s.pauseExperiment)
+	endpoint.PUT("/start/:kind/:namespace/:name", s.startExperiment)
 	endpoint.GET("/state", s.state)
 }
 
@@ -730,7 +735,7 @@ func (s *Service) listExperiments(c *gin.Context) {
 	status := c.Query("status")
 
 	data := make([]*Experiment, 0)
-	for key, list := range v1alpha1.Kinds {
+	for key, list := range v1alpha1.AllKinds() {
 		if kind != "" && key != kind {
 			continue
 		}
@@ -747,11 +752,13 @@ func (s *Service) listExperiments(c *gin.Context) {
 				continue
 			}
 			data = append(data, &Experiment{
-				Name:      chaos.Name,
-				Namespace: chaos.Namespace,
-				Kind:      chaos.Kind,
-				Created:   chaos.StartTime.Format(time.RFC3339),
-				Status:    chaos.Status,
+				ExperimentBase: ExperimentBase{
+					Name:      chaos.Name,
+					Namespace: chaos.Namespace,
+					Kind:      chaos.Kind,
+				},
+				Created: chaos.StartTime.Format(time.RFC3339),
+				Status:  chaos.Status,
 			})
 		}
 	}
@@ -815,9 +822,10 @@ func (s *Service) getExperimentDetail(c *gin.Context) {
 // @Param name path string true "name"
 // @Param kind path string true "kind" Enums(PodChaos, IoChaos, NetworkChaos, TimeChaos, KernelChaos, StressChaos)
 // @Success 200 "delete ok"
-// @Router /api/experiments/{kind}/{namespace}/{name} [delete]
 // @Failure 400 {object} utils.APIError
+// @Failure 404 {object} utils.APIError
 // @Failure 500 {object} utils.APIError
+// @Router /api/experiments/{kind}/{namespace}/{name} [delete]
 func (s *Service) deleteExperiment(c *gin.Context) {
 	kind := c.Param("kind")
 	ns := c.Param("namespace")
@@ -830,7 +838,7 @@ func (s *Service) deleteExperiment(c *gin.Context) {
 		chaosKind *v1alpha1.ChaosKind
 		ok        bool
 	)
-	if chaosKind, ok = v1alpha1.Kinds[kind]; !ok {
+	if chaosKind, ok = v1alpha1.AllKinds()[kind]; !ok {
 		c.Status(http.StatusBadRequest)
 		_ = c.Error(utils.ErrInvalidRequest.New(kind + " is not supported"))
 		return
@@ -872,10 +880,11 @@ func (s *Service) state(c *gin.Context) {
 
 	g, ctx := errgroup.WithContext(context.Background())
 	m := &sync.Mutex{}
-	for index := range v1alpha1.Kinds {
-		list := v1alpha1.Kinds[index].ChaosList
+	kinds := v1alpha1.AllKinds()
+	for index := range kinds {
+		list := kinds[index]
 		g.Go(func() error {
-			if err := s.kubeCli.List(ctx, list); err != nil {
+			if err := s.kubeCli.List(ctx, list.ChaosList); err != nil {
 				return err
 			}
 			m.Lock()
@@ -903,4 +912,112 @@ func (s *Service) state(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, data)
+}
+
+// ExperimentBase is used to identify the unique experiment from API request.
+type ExperimentBase struct {
+	Kind      string `uri:"kind" binding:"required,oneof=PodChaos NetworkChaos IoChaos StressChaos TimeChaos KernelChaos"`
+	Namespace string `uri:"namespace" binding:"required,NameValid"`
+	Name      string `uri:"name" binding:"required,NameValid"`
+}
+
+// @Summary Pause chaos experiment by API
+// @Description Pause chaos experiment by API
+// @Tags experiments
+// @Produce json
+// @Param kind path string true "kind"
+// @Param namespace path string true "namespace"
+// @Param name path string true "name"
+// @Success 200 "pause ok"
+// @Failure 400 {object} utils.APIError
+// @Failure 404 {object} utils.APIError
+// @Failure 500 {object} utils.APIError
+// @Router /api/experiments/pause/{kind}/{namespace}/{name} [put]
+func (s *Service) pauseExperiment(c *gin.Context) {
+	exp := &ExperimentBase{}
+	if err := c.ShouldBindUri(exp); err != nil {
+		c.Status(http.StatusBadRequest)
+		_ = c.Error(utils.ErrInvalidRequest.WrapWithNoMessage(err))
+		return
+	}
+
+	annotations := map[string]string{
+		v1alpha1.PauseAnnotationKey: "true",
+	}
+	if err := s.patchExperiment(exp, annotations); err != nil {
+		if apierrors.IsNotFound(err) {
+			c.Status(http.StatusNotFound)
+			_ = c.Error(utils.ErrNotFound.WrapWithNoMessage(err))
+			return
+		}
+		c.Status(http.StatusInternalServerError)
+		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
+		return
+	}
+
+	c.JSON(http.StatusOK, nil)
+}
+
+// @Summary Start the paused chaos experiment by API
+// @Description Start the paused chaos experiment by API
+// @Tags experiments
+// @Produce json
+// @Param kind path string true "kind"
+// @Param namespace path string true "namespace"
+// @Param name path string true "name"
+// @Success 200 "start ok"
+// @Failure 400 {object} utils.APIError
+// @Failure 404 {object} utils.APIError
+// @Failure 500 {object} utils.APIError
+// @Router /api/experiments/start/{kind}/{namespace}/{name} [put]
+func (s *Service) startExperiment(c *gin.Context) {
+	exp := &ExperimentBase{}
+	if err := c.ShouldBindUri(exp); err != nil {
+		c.Status(http.StatusBadRequest)
+		_ = c.Error(utils.ErrInvalidRequest.WrapWithNoMessage(err))
+		return
+	}
+
+	annotations := map[string]string{
+		v1alpha1.PauseAnnotationKey: "false",
+	}
+	if err := s.patchExperiment(exp, annotations); err != nil {
+		if apierrors.IsNotFound(err) {
+			c.Status(http.StatusNotFound)
+			_ = c.Error(utils.ErrNotFound.WrapWithNoMessage(err))
+			return
+		}
+		c.Status(http.StatusInternalServerError)
+		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
+		return
+	}
+
+	c.JSON(http.StatusOK, nil)
+}
+
+func (s *Service) patchExperiment(exp *ExperimentBase, annotations map[string]string) error {
+	var (
+		chaosKind *v1alpha1.ChaosKind
+		ok        bool
+	)
+
+	if chaosKind, ok = v1alpha1.AllKinds()[exp.Kind]; !ok {
+		return fmt.Errorf("%s is not supported", exp.Kind)
+	}
+
+	key := types.NamespacedName{Namespace: exp.Namespace, Name: exp.Name}
+	if err := s.kubeCli.Get(context.Background(), key, chaosKind.Chaos); err != nil {
+		return err
+	}
+
+	var mergePatch []byte
+	mergePatch, _ = json.Marshal(map[string]interface{}{
+		"metadata": map[string]interface{}{
+			"annotations": annotations,
+		},
+	})
+
+	return s.kubeCli.Patch(context.Background(),
+		chaosKind.Chaos,
+		client.ConstantPatch(types.MergePatchType, mergePatch))
 }
