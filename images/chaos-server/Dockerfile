@@ -2,6 +2,8 @@ FROM alpine:3.10
 
 ARG HTTPS_PROXY
 ARG HTTP_PROXY
+ARG UI
+ARG SWAGGER
 
 RUN apk add tzdata --no-cache
 

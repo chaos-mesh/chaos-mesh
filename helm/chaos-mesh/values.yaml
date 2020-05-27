@@ -83,12 +83,12 @@ chaosDaemon:
 
   tolerations: []
 
-dashboard:
+chaosServer:
   create: false
 
-  serviceAccount: chaos-dashboard
+  serviceAccount: chaos-controller-manager
 
-  image: pingcap/chaos-dashboard:latest
+  image: pingcap/chaos-server:latest
   imagePullPolicy: Always
 
   nodeSelector: {}
@@ -111,9 +111,49 @@ dashboard:
       cpu: 25m
       memory: 256Mi
 
-  volume:
-    storage: 3Gi
+  persistentVolume:
+    # If you are using SQLite as your DB for Chaos Server, it is recommended to enable persistence.
+    # If enable, the chart will create a PersistenceVolumeClaim to store its state in. If you are
+    # using a DB other than SQLite, set this to false to avoid allocating unused storage.
+    # If set to false, Chaos Mesh will use an emptyDir instead, which is ephemeral.
+    enabled: false
+
+    # If you'd like to bring your own PVC for persisting Drone state, pass the name of the
+    # created + ready PVC here. If set, this Chart will not create the default PVC.
+    # Requires server.persistentVolume.enabled: true
+    #
+    existingClaim: ""
+
+    # Chaos Server data Persistent Volume size.
+    size: 8Gi
+
+    # Chaos Server data Persistent Volume Storage Class.
+    # If defined, storageClassName: <storageClass>
     storageClassName: standard
+
+    # Chaos Server data Persistent Volume mount root path
+    #
+    mountPath: /data
+
+    # Subdirectory of Drone server data Persistent Volume to mount
+    # Useful if the volume's root directory is not empty
+    #
+    subPath: ""
+
+
+  # The keys within the "env" map are mounted as environment variables on the Chaos server pod.
+  env:
+    LISTEN_HOST: "0.0.0.0"
+    LISTEN_PORT: 2333
+
+    # If you'd like to use a DB other than SQLite (the default), set a driver + DSN here.
+    DATABASE_DRIVER: sqlite3
+    DATABASE_DATASOURCE: /data/core.sqlite
+
+    # If you are going to store build secrets in the Chaos Server database, it is suggested that
+    # you set a database encryption secret. This must be set before any secrets are stored
+    # in the database.
+    # DATABASE_SECRET:
 
 prometheus:
   create: false
@@ -149,12 +189,6 @@ prometheus:
   volume:
     storage: 2Gi
     storageClassName: standard
-
-preJobs:
-  podAnnotations: {}
-
-postJobs:
-  podAnnotations: {}
 
 webhook:
   # if empty and disable certManager, Helm will auto-generate these fields

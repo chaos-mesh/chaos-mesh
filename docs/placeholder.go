@@ -11,13 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// +build tools
+// This file only ensures `doc` package exist even if swagger is not enabled. This is required for `go mod tidy`.
 
-package tools
-
-import (
-	_ "github.com/mgechev/revive"
-	_ "github.com/pingcap/failpoint/failpoint-ctl"
-	_ "golang.org/x/tools/cmd/goimports"
-	_ "sigs.k8s.io/controller-tools/cmd/controller-gen"
-)
+package docs
