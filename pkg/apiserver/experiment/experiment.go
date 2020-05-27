@@ -453,7 +453,7 @@ func (s *Service) createStressChaos(exp *ExperimentInfo) error {
 	return s.kubeCli.Create(context.Background(), chaos)
 }
 
-// ===========, NetworkChaos, TimeChaos, KernelChaos, StressChaos
+// ===========, TimeChaos, KernelChaos, StressChaos
 func (s *Service) getPodchaosDetail(namespace string, name string) (ExperimentInfo, error){
 	chaos := &v1alpha1.PodChaos{}
 	ctx := context.TODO()
@@ -532,6 +532,72 @@ func (s *Service) getIochaosDetail(namespace string, name string) (ExperimentInf
 				Path: chaos.Spec.Path,
 				Percent: chaos.Spec.Percent,
 				Methods: chaos.Spec.Methods,
+			},
+		},
+	}
+	if chaos.Spec.Duration != nil {
+		info.Scheduler.Duration = *chaos.Spec.Duration
+	}
+	return info, nil
+}
+
+func (s *Service) getNetworkchaosDetail(namespace string, name string) (ExperimentInfo, error){
+	chaos := &v1alpha1.NetworkChaos{}
+	ctx := context.TODO()
+	chaosKey := types.NamespacedName{Namespace: namespace, Name: name}
+	if err := s.kubeCli.Get(ctx, chaosKey, chaos); err != nil {
+		if apierrors.IsNotFound(err) {
+			return ExperimentInfo{}, utils.ErrNotFound.NewWithNoMessage()
+		} else {
+			return ExperimentInfo{}, err
+		}
+	}
+	info := ExperimentInfo{
+		Name: chaos.Name,
+		Namespace: chaos.Namespace,
+		Labels: chaos.Labels,
+		Annotations: chaos.Annotations,
+		Scope: ScopeInfo{
+			NamespaceSelectors:  chaos.Spec.Selector.Namespaces,
+			LabelSelectors:      chaos.Spec.Selector.LabelSelectors,
+			AnnotationSelectors: chaos.Spec.Selector.AnnotationSelectors,
+			FieldSelectors:      chaos.Spec.Selector.FieldSelectors,
+			PhaseSelector:       chaos.Spec.Selector.PodPhaseSelectors,
+			Mode:                string(chaos.Spec.Mode),
+			Value:               chaos.Spec.Value,
+		},
+		Scheduler: SchedulerInfo{
+			Cron: chaos.Spec.Scheduler.Cron,
+		},
+		Target: TargetInfo{
+			NetworkChaos: NetworkChaosInfo{
+				//!!!
+				Action: string(chaos.Spec.Action),
+				Delay: chaos.Spec.Delay,
+				Loss: chaos.Spec.Loss,
+				Duplicate: chaos.Spec.Duplicate,
+				Corrupt: chaos.Spec.Corrupt,
+				Bandwidth: chaos.Spec.Bandwidth,
+				Direction: string(chaos.Spec.Direction),
+				TargetScope: &ScopeInfo{
+					NamespaceSelectors:  ,
+					LabelSelectors:      nil,
+					AnnotationSelectors: nil,
+					FieldSelectors:      nil,
+					PhaseSelector:       nil,
+					Mode:                "",
+					Value:               "",
+				},
+
+/*
+				Action      string                  `json:"action" binding:"oneof='' 'netem' 'delay' 'loss' 'duplicate' 'corrupt' 'partition' 'bandwidth'"`
+				Delay       *v1alpha1.DelaySpec     `json:"delay"`
+				Loss        *v1alpha1.LossSpec      `json:"loss"`
+				Duplicate   *v1alpha1.DuplicateSpec `json:"duplicate"`
+				Corrupt     *v1alpha1.CorruptSpec   `json:"corrupt"`
+				Bandwidth   *v1alpha1.BandwidthSpec `json:"bandwidth"`
+				Direction   string                  `json:"direction" binding:"oneof='' 'to' 'from' 'both'"`
+				TargetScope *ScopeInfo              `json:"target_scope"`*/
 			},
 		},
 	}
