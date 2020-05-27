@@ -14,26 +14,31 @@
 package utils
 
 import (
-	"fmt"
 	"os"
+	"strings"
 
 	ctrl "sigs.k8s.io/controller-runtime"
 )
 
 var (
-	InitLog            = ctrl.Log.WithName("setup")
-	DashboardNamespace string
-	DataSource         string
+	InitLog           = ctrl.Log.WithName("setup")
+	AllowedNamespaces []string
+	IgnoredNamespaces []string
 )
 
 func init() {
-	var ok bool
 
-	DashboardNamespace, ok = os.LookupEnv("NAMESPACE")
-	if !ok {
-		InitLog.Error(nil, "cannot find NAMESPACE")
-		DashboardNamespace = "chaos"
+	ignoredNamespacesText, ok := os.LookupEnv("IGNORED_NAMESPACES")
+	if ok {
+		IgnoredNamespaces = strings.Split(ignoredNamespacesText, ",")
 	}
 
-	DataSource = fmt.Sprintf("root:@tcp(chaos-collector-database.%s:3306)/chaos_operator", DashboardNamespace)
+	allowedNamespacesText, ok := os.LookupEnv("ALLOWED_NAMESPACES")
+	if ok {
+		AllowedNamespaces = strings.Split(allowedNamespacesText, ",")
+	}
+
+	InitLog.Info("init Namespaces",
+		"AllowedNamespaces", AllowedNamespaces,
+		"IgnoredNamespaces", IgnoredNamespaces)
 }

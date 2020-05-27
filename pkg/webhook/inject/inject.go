@@ -141,6 +141,11 @@ func injectRequired(metadata *metav1.ObjectMeta, cli client.Client, cfg *config.
 		}
 	}
 
+	if !utils.IsAllowedNamespaces(metadata.Namespace) {
+		log.Info("Skip mutation for it' in special namespace", "name", metadata.Name, "namespace", metadata.Namespace)
+		return "", false
+	}
+
 	log.V(4).Info("meta", "meta", metadata)
 
 	if checkInjectStatus(metadata, cfg) {

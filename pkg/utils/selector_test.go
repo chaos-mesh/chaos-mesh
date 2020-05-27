@@ -405,7 +405,7 @@ func TestFilterByAnnotations(t *testing.T) {
 	}
 }
 
-func TestFilterNamespace(t *testing.T) {
+func TestFilterNamespaceSelector(t *testing.T) {
 	g := NewGomegaWithT(t)
 
 	type TestCase struct {
@@ -470,7 +470,7 @@ func TestFilterNamespace(t *testing.T) {
 	})
 
 	for _, tc := range tcs {
-		g.Expect(filterByNamespaces(tc.pods, tc.filterSelector)).To(Equal(tc.filteredPods), tc.name)
+		g.Expect(filterByNamespaceSelector(tc.pods, tc.filterSelector)).To(Equal(tc.filteredPods), tc.name)
 	}
 }
 
