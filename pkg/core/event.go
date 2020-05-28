@@ -22,22 +22,25 @@ import (
 
 // EventStore defines operations for working with event.
 type EventStore interface {
-	// List returns a event list from the datastore.
+	// List returns an event list from the datastore.
 	List(context.Context) ([]*Event, error)
 
-	// ListByExperiment returns a event list by the name and namespace of the experiment.
+	// ListByFilter returns an event list by the podName, podNamespace, experimentName, experimentNamespace and the startTime.
+	ListByFilter(context.Context, string, string, string, string, string) ([]*Event, error)
+
+	// ListByExperiment returns an event list by the name and namespace of the experiment.
 	ListByExperiment(context.Context, string, string) ([]*Event, error)
 
-	// ListByNamespace returns a event list by the namespace of the pod.
+	// ListByNamespace returns an event list by the namespace of the pod.
 	ListByNamespace(context.Context, string) ([]*Event, error)
 
-	// ListByPod returns a event list by the name and namespace of the pod.
+	// ListByPod returns an event list by the name and namespace of the pod.
 	ListByPod(context.Context, string, string) ([]*Event, error)
 
-	// Find returns a event from the datastore by ID.
+	// Find returns an event from the datastore by ID.
 	Find(context.Context, uint) (*Event, error)
 
-	// FindByExperimentAndStartTime returns a event by the experiment and start time.
+	// FindByExperimentAndStartTime returns an event by the experiment and start time.
 	FindByExperimentAndStartTime(context.Context, string, string, *time.Time) (*Event, error)
 
 	// Create persists a new event to the datastore.
@@ -53,7 +56,7 @@ type EventStore interface {
 	DeleteIncompleteEvents(context.Context) error
 }
 
-// Event represents a event instance.
+// Event represents an event instance.
 type Event struct {
 	gorm.Model
 	Experiment string `gorm:"index:experiment"`
