@@ -49,7 +49,7 @@ require (
 	github.com/shirou/gopsutil v0.0.0-20180427012116-c95755e4bcd7
 	github.com/spf13/cobra v0.0.6 // indirect
 	github.com/swaggo/http-swagger v0.0.0-20200308142732-58ac5e232fba
-	github.com/swaggo/swag v1.6.5
+	github.com/swaggo/swag v1.6.5 // indirect
 	github.com/tmc/grpc-websocket-proxy v0.0.0-20200122045848-3419fae592fc // indirect
 	github.com/vishvananda/netlink v1.0.0
 	github.com/vishvananda/netns v0.0.0-20191106174202-0a2b9b5464df
