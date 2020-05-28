@@ -11,3 +11,12 @@ resources:
 - group: chaosmesh
   version: v1alpha1
   kind: IoChaos
+- group: chaosmesh
+  version: v1alpha1
+  kind: TimeChaos
+- group: chaosmesh
+  version: v1alpha1
+  kind: KernelChaos
+- group: chaosmesh
+  version: v1alpha1
+  kind: StressChaos
