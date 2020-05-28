@@ -16,6 +16,8 @@ package experiment
 import (
 	"context"
 
+	"github.com/jinzhu/gorm"
+
 	"github.com/pingcap/chaos-mesh/pkg/core"
 	"github.com/pingcap/chaos-mesh/pkg/store/dbstore"
 )
@@ -31,19 +33,78 @@ type experimentStore struct {
 	db *dbstore.DB
 }
 
-// TODO: implement core.EventStore interface
-func (e *experimentStore) List(context.Context) ([]*core.ArchiveExperiment, error) { return nil, nil }
-func (e *experimentStore) ListByKind(context.Context, string) ([]*core.ArchiveExperiment, error) {
-	return nil, nil
+func (e *experimentStore) List(_ context.Context, kind, ns, name string) ([]*core.ArchiveExperiment, error) {
+	archives := make([]*core.ArchiveExperiment, 0)
+	query, args := constructQueryArgs(kind, ns, name)
+
+	// List all experiments
+	if len(args) == 0 {
+		if err := e.db.Find(&archives).Error; err != nil && !gorm.IsRecordNotFoundError(err) {
+			return nil, err
+		}
+	} else {
+		if err := e.db.Where(query, args).Find(&archives).Error; err != nil &&
+			!gorm.IsRecordNotFoundError(err) {
+			return nil, err
+		}
+	}
+
+	return archives, nil
 }
+
+func (e *experimentStore) ListMeta(_ context.Context, kind, ns, name string) ([]*core.ArchiveExperimentMeta, error) {
+	archives := make([]*core.ArchiveExperimentMeta, 0)
+	query, args := constructQueryArgs(kind, ns, name)
+
+	// List all experiment metas
+	if len(args) == 0 {
+		if err := e.db.Table("archive_experiments").Find(&archives).Error; err != nil && !gorm.IsRecordNotFoundError(err) {
+			return nil, err
+		}
+	} else {
+		if err := e.db.Table("archive_experiments").Where(query, args).
+			Find(&archives).Error; err != nil && !gorm.IsRecordNotFoundError(err) {
+			return nil, err
+		}
+	}
+
+	return archives, nil
+}
+
+// TODO: implement the left core.EventStore interfaces
 func (e *experimentStore) Find(context.Context, int64) (*core.ArchiveExperiment, error) {
 	return nil, nil
 }
-func (e *experimentStore) FindByName(context.Context, string, string) (*core.ArchiveExperiment, error) {
-	return nil, nil
-}
+
 func (e *experimentStore) Create(_ context.Context, archive *core.ArchiveExperiment) error {
 	return e.db.Create(archive).Error
 }
 
 func (e *experimentStore) Delete(context.Context, *core.ArchiveExperiment) error { return nil }
+
+func constructQueryArgs(kind, ns, name string) (string, []string) {
+	args := make([]string, 0)
+	query := ""
+	if kind != "" {
+		query += "kind = ?"
+		args = append(args, kind)
+	}
+	if ns != "" {
+		if len(args) > 0 {
+			query += " AND namespace = ?"
+		} else {
+			query += "namespace = ?"
+		}
+		args = append(args, ns)
+	}
+
+	if name != "" {
+		if len(args) > 0 {
+			query += " AND name = ?"
+		} else {
+			query += "name = ?"
+		}
+		args = append(args, name)
+	}
+	return query, args
+}

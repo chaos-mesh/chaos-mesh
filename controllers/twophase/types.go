@@ -19,14 +19,13 @@ import (
 	"time"
 
 	"github.com/go-logr/logr"
+	"k8s.io/client-go/util/retry"
 
 	"github.com/pingcap/chaos-mesh/api/v1alpha1"
 	"github.com/pingcap/chaos-mesh/controllers/reconciler"
 	"github.com/pingcap/chaos-mesh/pkg/utils"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/client-go/util/retry"
-
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
@@ -100,7 +99,6 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 				r.Log.Error(err, "failed to pause chaos")
 				return ctrl.Result{Requeue: true}, err
 			}
-			chaos.SetNextRecover(time.Time{})
 
 			status.Experiment.EndTime = &metav1.Time{
 				Time: time.Now(),
@@ -111,17 +109,32 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		// Start recover
 		r.Log.Info("Recovering")
 
-		err = r.Recover(ctx, req, chaos)
-		if err != nil {
-			r.Log.Error(err, "failed to recover chaos")
-			return ctrl.Result{Requeue: true}, err
+		// Don't need to recover again if chaos was paused before
+		if status.Experiment.Phase != v1alpha1.ExperimentPhasePaused {
+			if err = r.Recover(ctx, req, chaos); err != nil {
+				r.Log.Error(err, "failed to recover chaos")
+				return ctrl.Result{Requeue: true}, err
+			}
 		}
+
 		chaos.SetNextRecover(time.Time{})
 
 		status.Experiment.EndTime = &metav1.Time{
 			Time: time.Now(),
 		}
 		status.Experiment.Phase = v1alpha1.ExperimentPhaseFinished
+
+	} else if status.Experiment.Phase == v1alpha1.ExperimentPhasePaused &&
+		!chaos.GetNextRecover().IsZero() && chaos.GetNextRecover().After(now) {
+		// Only resume chaos in the case when current round is not finished,
+		// which means the current time is before recover time. Otherwise we
+		// don't resume the chaos and just wait for the start of next round.
+
+		r.Log.Info("Resuming")
+		if err := applyAction(ctx, r, req, chaos); err != nil {
+			return ctrl.Result{Requeue: true}, err
+		}
+
 	} else if chaos.GetNextStart().Before(now) {
 		nextStart, err := utils.NextTime(*chaos.GetScheduler(), now)
 		if err != nil {
@@ -130,12 +143,6 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		}
 
 		nextRecover := now.Add(*duration)
-		// TODO(at15): this should be validated in webhook instead of throwing error at runtime.
-		// User can give a cron with interval shorter than duration.
-		// Example:
-		//  duration: "10s"
-		//  scheduler:
-		//    cron: "@every 5s
 		if nextStart.Before(nextRecover) {
 			err := fmt.Errorf("nextRecover shouldn't be later than nextStart")
 			r.Log.Error(err, "nextRecover is later than nextStart. Then recover can never be reached",
@@ -143,31 +150,9 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 			return ctrl.Result{}, err
 		}
 
-		r.Log.Info("Chaos action:", "chaos", chaos)
-
-		// Start to apply action
-		r.Log.Info("Performing Action")
-
-		err = r.Apply(ctx, req, chaos)
-		if err != nil {
-			r.Log.Error(err, "failed to apply chaos action")
-
-			status.Experiment.Phase = v1alpha1.ExperimentPhaseFailed
-
-			updateError := retry.RetryOnConflict(retry.DefaultRetry, func() error {
-				return r.Update(ctx, chaos)
-			})
-			if updateError != nil {
-				r.Log.Error(updateError, "unable to update chaos finalizers")
-			}
-
+		if err := applyAction(ctx, r, req, chaos); err != nil {
 			return ctrl.Result{Requeue: true}, err
 		}
-		status.Experiment.StartTime = &metav1.Time{
-			Time: time.Now(),
-		}
-
-		status.Experiment.Phase = v1alpha1.ExperimentPhaseRunning
 
 		chaos.SetNextStart(*nextStart)
 		chaos.SetNextRecover(nextRecover)
@@ -184,9 +169,36 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	}
 
 	if err := r.Update(ctx, chaos); err != nil {
-		r.Log.Error(err, "unable to update chaosctl status")
+		r.Log.Error(err, "unable to update chaos status")
 		return ctrl.Result{}, err
 	}
 
 	return ctrl.Result{}, nil
+}
+
+func applyAction(ctx context.Context, r *Reconciler, req ctrl.Request, chaos v1alpha1.InnerSchedulerObject) error {
+	status := chaos.GetStatus()
+	r.Log.Info("Chaos action:", "chaos", chaos)
+
+	// Start to apply action
+	r.Log.Info("Performing Action")
+
+	if err := r.Apply(ctx, req, chaos); err != nil {
+		r.Log.Error(err, "failed to apply chaos action")
+
+		status.Experiment.Phase = v1alpha1.ExperimentPhaseFailed
+
+		updateError := retry.RetryOnConflict(retry.DefaultRetry, func() error {
+			return r.Update(ctx, chaos)
+		})
+		if updateError != nil {
+			r.Log.Error(updateError, "unable to update chaos finalizers")
+		}
+
+		return err
+	}
+
+	status.Experiment.StartTime = &metav1.Time{Time: time.Now()}
+	status.Experiment.Phase = v1alpha1.ExperimentPhaseRunning
+	return nil
 }

@@ -14,13 +14,16 @@
 package archive
 
 import (
+	"context"
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 
+	"github.com/pingcap/chaos-mesh/pkg/apiserver/utils"
+	"github.com/pingcap/chaos-mesh/pkg/config"
 	"github.com/pingcap/chaos-mesh/pkg/core"
 
 	"sigs.k8s.io/controller-runtime/pkg/client"
-
-	"github.com/pingcap/chaos-mesh/pkg/config"
 )
 
 // Service defines a handler service for archive experiments.
@@ -48,11 +51,33 @@ func NewService(
 
 // Register mounts our HTTP handler on the mux.
 func Register(r *gin.RouterGroup, s *Service) {
-	endpoint := r.Group("/archive")
+	endpoint := r.Group("/archives")
 
 	// TODO: add more api handlers
-	endpoint.GET("/all", s.listExperiments)
+	endpoint.GET("", s.listExperiments)
 }
 
-// TODO: need to be implemented
-func (s *Service) listExperiments(c *gin.Context) {}
+// @Summary Get archived chaos experiments.
+// @Description Get archived chaos experiments.
+// @Tags archives
+// @Produce json
+// @Param namespace query string false "namespace"
+// @Param name query string false "name"
+// @Param kind query string false "kind" Enums(PodChaos, IoChaos, NetworkChaos, TimeChaos, KernelChaos, StressChaos)
+// @Success 200 {array} core.ArchiveExperimentMeta
+// @Router /api/archives [get]
+// @Failure 500 {object} utils.APIError
+func (s *Service) listExperiments(c *gin.Context) {
+	kind := c.Query("kind")
+	name := c.Query("name")
+	ns := c.Query("namespace")
+
+	data, err := s.archive.ListMeta(context.TODO(), kind, ns, name)
+	if err != nil {
+		c.Status(http.StatusInternalServerError)
+		_ = c.Error(utils.ErrInternalServer.NewWithNoMessage())
+		return
+	}
+
+	c.JSON(http.StatusOK, data)
+}

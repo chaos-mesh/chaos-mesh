@@ -15,6 +15,8 @@ package event
 
 import (
 	"context"
+	"fmt"
+	"strings"
 	"time"
 
 	"github.com/jinzhu/gorm"
@@ -69,21 +71,23 @@ func (e *eventStore) List(_ context.Context) ([]*core.Event, error) {
 		if err != nil {
 			return nil, err
 		}
-		et.Pods = pods
-		eventList = append(eventList, &et)
+		var event core.Event
+		event = et
+		event.Pods = pods
+		eventList = append(eventList, &event)
 	}
 
 	return eventList, nil
 }
 
-// ListByExperiment returns a event list by the name and namespace of the experiment.
+// ListByExperiment returns an event list by the name and namespace of the experiment.
 func (e *eventStore) ListByExperiment(_ context.Context, namespace string, experiment string) ([]*core.Event, error) {
 	var resList []core.Event
 
 	if err := e.db.Where(
 		"namespace = ? and experiment = ? ",
 		namespace, experiment).
-		Find(resList).Error; err != nil && !gorm.IsRecordNotFoundError(err) {
+		Find(&resList).Error; err != nil && !gorm.IsRecordNotFoundError(err) {
 		return nil, err
 	}
 
@@ -93,8 +97,10 @@ func (e *eventStore) ListByExperiment(_ context.Context, namespace string, exper
 		if err != nil {
 			return nil, err
 		}
-		et.Pods = pods
-		eventList = append(eventList, &et)
+		var event core.Event
+		event = et
+		event.Pods = pods
+		eventList = append(eventList, &event)
 	}
 
 	return eventList, nil
@@ -158,7 +164,7 @@ func (e *eventStore) ListByPod(_ context.Context, namespace string, name string)
 	return eventList, nil
 }
 
-// Find returns a event from the datastore by ID.
+// Find returns an event from the datastore by ID.
 func (e *eventStore) Find(_ context.Context, id uint) (*core.Event, error) {
 	et := new(core.Event)
 	if err := e.db.Where(
@@ -228,4 +234,49 @@ func (e *eventStore) Update(_ context.Context, et *core.Event) error {
 func (e *eventStore) DeleteIncompleteEvents(_ context.Context) error {
 	return e.db.Where("finish_time IS NULL").
 		Delete(core.Event{}).Error
+}
+
+// ListByFilter returns an event list by the podName, podNamespace, experimentName, experimentNamespace and the startTime.
+func (e *eventStore) ListByFilter(_ context.Context, podName string, podNamespace string, experimentName string, experimentNamespace string, startTimeStr string) ([]*core.Event, error) {
+	var resList []*core.Event
+	var err error
+	var startTime time.Time
+
+	if podName != "" {
+		resList, err = e.ListByPod(context.Background(), podNamespace, podName)
+	} else if podNamespace != "" {
+		resList, err = e.ListByNamespace(context.Background(), podNamespace)
+	} else {
+		resList, err = e.List(context.Background())
+	}
+	if err != nil {
+		return resList, err
+	}
+
+	if startTimeStr != "" {
+		startTime, err = time.Parse(time.RFC3339, strings.Replace(startTimeStr, " ", "+", -1))
+		if err != nil {
+			return nil, fmt.Errorf("the format of the time is wrong")
+		}
+	}
+
+	eventList := make([]*core.Event, 0)
+	for _, event := range resList {
+		if experimentName != "" && event.Experiment != experimentName {
+			continue
+		}
+		if experimentNamespace != "" && event.Namespace != experimentNamespace {
+			continue
+		}
+		if startTimeStr != "" && event.StartTime.Before(startTime) && !event.StartTime.Equal(startTime) {
+			continue
+		}
+		pods, err := e.findPodRecordsByEventID(context.Background(), event.ID)
+		if err != nil {
+			return nil, err
+		}
+		event.Pods = pods
+		eventList = append(eventList, event)
+	}
+	return eventList, nil
 }
