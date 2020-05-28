@@ -27,7 +27,7 @@ import (
 	"github.com/pingcap/chaos-mesh/pkg/utils"
 )
 
-// IoChaosReconciler reconciles a IoChaos object
+// IoChaosReconciler reconciles an IoChaos object
 type IoChaosReconciler struct {
 	client.Client
 	record.EventRecorder
