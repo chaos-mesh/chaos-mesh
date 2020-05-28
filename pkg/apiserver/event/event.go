@@ -68,7 +68,6 @@ func Register(r *gin.RouterGroup, s *Service) {
 func (s *Service) listEvents(c *gin.Context) {
 	name := c.Query("name")
 	namespace := c.Query("namespace")
-	//eventList := make([]*core.Event, 0)
 	var eventList []*core.Event
 	var err error
 

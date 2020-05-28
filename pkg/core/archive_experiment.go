@@ -25,16 +25,13 @@ import (
 // ExperimentStore defines operations for working with archive experiments
 type ExperimentStore interface {
 	// List returns an archive experiment list from the datastore.
-	List(context.Context) ([]*ArchiveExperiment, error)
+	List(ctx context.Context, kind, namespace, name string) ([]*ArchiveExperiment, error)
 
-	// ListByKind returns an archive experiment list by kind from the datastore.
-	ListByKind(context.Context, string) ([]*ArchiveExperiment, error)
+	// ListMeta returns an archive experiment metadata list from the datastore.
+	ListMeta(ctx context.Context, kind, namespace, name string) ([]*ArchiveExperimentMeta, error)
 
 	// Find returns an archive experiment by ID.
 	Find(context.Context, int64) (*ArchiveExperiment, error)
-
-	// FindByName returns an archive experiment by the name and namespace of the experiment.
-	FindByName(context.Context, string, string) (*ArchiveExperiment, error)
 
 	// Create persists a new archive experiment to the datastore.
 	Create(context.Context, *ArchiveExperiment) error

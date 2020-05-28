@@ -137,24 +137,24 @@ install: manifests
 	bash -c '[[ `$(HELM_BIN) version --client --short` == "Client: v2"* ]] && $(HELM_BIN) install helm/chaos-mesh --name=chaos-mesh --namespace=chaos-testing || $(HELM_BIN) install chaos-mesh helm/chaos-mesh --namespace=chaos-testing;'
 
 # Generate manifests e.g. CRD, RBAC etc.
-manifests: controller-gen
-	$(GOBIN)/controller-gen $(CRD_OPTIONS) rbac:roleName=manager-role webhook paths="./..." output:crd:artifacts:config=config/crd/bases
+manifests: $(GOBIN)/controller-gen
+	$< $(CRD_OPTIONS) rbac:roleName=manager-role webhook paths="./..." output:crd:artifacts:config=config/crd/bases
 
 # Run go fmt against code
 fmt: groupimports
 	$(CGOENV) go fmt ./...
 
-gosec-scan: gosec
-	$(GOENV) $(GOBIN)/gosec ./api/... ./controllers/... ./pkg/... || echo "*** sec-scan failed: known-issues ***"
+gosec-scan: $(GOBIN)/gosec
+	$(GOENV) $< ./api/... ./controllers/... ./pkg/... || echo "*** sec-scan failed: known-issues ***"
 
-groupimports: goimports
-	$(GOBIN)/goimports -w -l -local github.com/pingcap/chaos-mesh $$($(PACKAGE_DIRECTORIES))
+groupimports: $(GOBIN)/goimports
+	$< -w -l -local github.com/pingcap/chaos-mesh $$($(PACKAGE_DIRECTORIES))
 
-failpoint-enable: failpoint-ctl
+failpoint-enable: $(GOBIN)/failpoint-ctl
 # Converting gofail failpoints...
 	@$(FAILPOINT_ENABLE)
 
-failpoint-disable: failpoint-ctl
+failpoint-disable: $(GOBIN)/failpoint-ctl
 # Restoring gofail failpoints...
 	@$(FAILPOINT_DISABLE)
 
@@ -170,7 +170,7 @@ tidy:
 taily-build:
 	if [ "$(shell docker ps --filter=name=$@ -q)" = "" ]; then \
 		docker build -t pingcap/binary ${DOCKER_BUILD_ARGS} .; \
-		docker run --mount type=bind,source=$(shell pwd),target=/src \
+		docker run --rm --mount type=bind,source=$(shell pwd),target=/src \
 			--name $@ -d pingcap/binary tail -f /dev/null; \
 	fi;
 
@@ -182,7 +182,8 @@ image: image-chaos-daemon image-chaos-mesh image-chaos-server image-chaos-fs ima
 ifneq ($(TAILY_BUILD),)
 image-binary: taily-build
 	docker exec -it taily-build make binary
-	echo -e "FROM scratch\n COPY . /src/bin" | docker build -t pingcap/binary -f - $(shell pwd)/bin
+	cp -r scripts ./bin
+	echo -e "FROM scratch\n COPY . /src/bin\n COPY ./scripts /src/scripts" | docker build -t pingcap/binary -f - ./bin
 else
 image-binary:
 	docker build -t pingcap/binary ${DOCKER_BUILD_ARGS} .
@@ -220,24 +221,24 @@ docker-push:
 docker-push-chaos-kernel:
 	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-kernel:${IMAGE_TAG}"
 
-controller-gen:
+$(GOBIN)/controller-gen:
 	$(GO) get sigs.k8s.io/controller-tools/cmd/controller-gen@v0.2.5
-revive:
+$(GOBIN)/revive:
 	$(GO) get github.com/mgechev/revive@v1.0.2-0.20200225072153-6219ca02fffb
-failpoint-ctl:
+$(GOBIN)/failpoint-ctl:
 	$(GO) get github.com/pingcap/failpoint/failpoint-ctl@v0.0.0-20200210140405-f8f9fb234798
-goimports:
+$(GOBIN)/goimports:
 	$(GO) get golang.org/x/tools/cmd/goimports@v0.0.0-20200309202150-20ab64c0d93f
-gosec:
+$(GOBIN)/gosec:
 	$(GO) get github.com/securego/gosec/cmd/gosec@v0.0.0-20200401082031-e946c8c39989
 
-lint: revive
+lint: $(GOBIN)/revive
 	@echo "linting"
-	$(GOBIN)/revive -formatter friendly -config revive.toml $$($(PACKAGE_LIST))
+	$< -formatter friendly -config revive.toml $$($(PACKAGE_LIST))
 
 # Generate code
-generate: controller-gen
-	$(GOBIN)/controller-gen object:headerFile=./hack/boilerplate.go.txt paths="./..."
+generate: $(GOBIN)/controller-gen
+	$< object:headerFile=./hack/boilerplate.go.txt paths="./..."
 
 yaml: manifests ensure-kustomize
 	$(KUSTOMIZE_BIN) build config/default > manifests/crd.yaml
@@ -293,7 +294,7 @@ install-local-coverage-tools:
 	&& go get -u github.com/matm/gocov-html
 
 .PHONY: all build test install manifests groupimports fmt vet tidy image \
-	binary docker-push lint generate controller-gen yaml \
+	binary docker-push lint generate yaml \
 	manager chaosfs chaosdaemon chaos-server ensure-all \
 	dashboard dashboard-server-frontend gosec-scan \
 	proto
