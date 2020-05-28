@@ -86,7 +86,7 @@ type OperatorAction interface {
 	InstallTemplate(config OperatorConfig) error
 }
 
-// NewOperatorAction create a OperatorAction interface instance
+// NewOperatorAction create an OperatorAction interface instance
 func NewOperatorAction(
 	kubeCli kubernetes.Interface,
 	aggrCli aggregatorclientset.Interface,

@@ -46,7 +46,7 @@ type ExecAction struct {
 	Command []string `json:"command,omitempty"`
 }
 
-// InjectionConfig is a specific instance of a injected config, for a given annotation
+// InjectionConfig is a specific instance of an injected config, for a given annotation
 type InjectionConfig struct {
 	Name string
 	// Selector is used to select pods that are used to inject sidecar.
