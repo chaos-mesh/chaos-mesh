@@ -186,9 +186,9 @@ var _ = ginkgo.Describe("[Basic]", func() {
 						},
 						Action:   v1alpha1.PodFailureAction,
 						Mode:     v1alpha1.OnePodMode,
-						Duration: pointer.StringPtr("5s"),
+						Duration: pointer.StringPtr("9m"),
 						Scheduler: &v1alpha1.SchedulerSpec{
-							Cron: "@every 10s",
+							Cron: "@every 10m",
 						},
 					},
 				}
@@ -356,9 +356,9 @@ var _ = ginkgo.Describe("[Basic]", func() {
 						},
 						Action:   v1alpha1.PodKillAction,
 						Mode:     v1alpha1.OnePodMode,
-						Duration: pointer.StringPtr("5s"),
+						Duration: pointer.StringPtr("9m"),
 						Scheduler: &v1alpha1.SchedulerSpec{
-							Cron: "@every 10s",
+							Cron: "@every 10m",
 						},
 					},
 				}
@@ -521,7 +521,7 @@ var _ = ginkgo.Describe("[Basic]", func() {
 
 			ginkgo.It("[Pause]", func() {
 				ctx, cancel := context.WithCancel(context.Background())
-				nd := fixture.NewCommonNginxDeployment("nginx", ns, 3)
+				nd := fixture.NewCommonNginxDeployment("nginx", ns, 1)
 				_, err := kubeCli.AppsV1().Deployments(ns).Create(nd)
 				framework.ExpectNoError(err, "create nginx deployment error")
 				err = waitDeploymentReady("nginx", ns, kubeCli)
@@ -557,9 +557,9 @@ var _ = ginkgo.Describe("[Basic]", func() {
 						Action:        v1alpha1.ContainerKillAction,
 						Mode:          v1alpha1.OnePodMode,
 						ContainerName: "nginx",
-						Duration:      pointer.StringPtr("5s"),
+						Duration:      pointer.StringPtr("9m"),
 						Scheduler: &v1alpha1.SchedulerSpec{
-							Cron: "@every 10s",
+							Cron: "@every 10m",
 						},
 					},
 				}
@@ -745,10 +745,10 @@ var _ = ginkgo.Describe("[Basic]", func() {
 							LabelSelectors: map[string]string{"app": "timer"},
 						},
 						Mode:       v1alpha1.OnePodMode,
-						Duration:   pointer.StringPtr("9s"),
+						Duration:   pointer.StringPtr("9m"),
 						TimeOffset: "-1h",
 						Scheduler: &v1alpha1.SchedulerSpec{
-							Cron: "@every 10s",
+							Cron: "@every 10m",
 						},
 					},
 				}
@@ -977,9 +977,9 @@ var _ = ginkgo.Describe("[Basic]", func() {
 						Delay:    "1s",
 						Percent:  "100",
 						Layer:    v1alpha1.FileSystemLayer,
-						Duration: pointer.StringPtr("9s"),
+						Duration: pointer.StringPtr("9m"),
 						Scheduler: &v1alpha1.SchedulerSpec{
-							Cron: "@every 10s",
+							Cron: "@every 10m",
 						},
 					},
 				}
@@ -1171,9 +1171,9 @@ var _ = ginkgo.Describe("[Basic]", func() {
 						// only inject write method
 						Methods:  []string{"write"},
 						Layer:    v1alpha1.FileSystemLayer,
-						Duration: pointer.StringPtr("9s"),
+						Duration: pointer.StringPtr("9m"),
 						Scheduler: &v1alpha1.SchedulerSpec{
-							Cron: "@every 10s",
+							Cron: "@every 10m",
 						},
 					},
 				}
