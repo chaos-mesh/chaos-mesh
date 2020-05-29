@@ -3,7 +3,7 @@ kind: Deployment
 apiVersion: apps/v1
 metadata:
   name: etcd
-  namespace: chaos-testing
+  namespace: biz
   labels:
     app: etcd
 spec:

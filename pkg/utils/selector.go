@@ -382,7 +382,7 @@ func filterByNamespaces(pods []v1.Pod) []v1.Pod {
 
 // IsAllowedNamespaces return
 func IsAllowedNamespaces(namespace string) bool {
-	if len(AllowedNamespaces) != 0 {
+	if len(AllowedNamespaces) > 0 {
 		for _, ns := range AllowedNamespaces {
 			if strings.HasPrefix(namespace, ns) || strings.HasSuffix(namespace, ns) {
 				return true
@@ -391,7 +391,7 @@ func IsAllowedNamespaces(namespace string) bool {
 		return false
 	}
 
-	if len(IgnoredNamespaces) != 0 {
+	if len(IgnoredNamespaces) > 0 {
 		for _, ns := range IgnoredNamespaces {
 			if strings.HasPrefix(namespace, ns) || strings.HasSuffix(namespace, ns) {
 				return false
