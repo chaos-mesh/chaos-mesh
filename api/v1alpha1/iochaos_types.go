@@ -109,7 +109,7 @@ type IoChaosSpec struct {
 	// Errno defines the error code that returned by I/O action.
 	// refer to: https://www-numi.fnal.gov/offline_software/srt_public_context/WebDocs/Errors/unix_system_errors.html
 	//
-	// If `Errno` is empty, the operator will generate a error code for it randomly.
+	// If `Errno` is empty, the operator will generate an error code for it randomly.
 	// +optional
 	Errno string `json:"errno,omitempty"`
 

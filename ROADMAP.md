@@ -8,6 +8,9 @@ This document defines the roadmap for Chaos Mesh development.
 - [x] Add CPU chaos. Simulate CPU being busy.
 - [x] Add memory chaos. Simulate memory allocation failure.
 - [x] Make scheduler optional. Support single time chaos triggering.
+- [x] Support helm-less install.
+- [x] Support force clean finalizer with annotation.
+- [ ] Support the basic version of Chaos Dashboard.
 
 ## Long-term
 
