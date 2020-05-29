@@ -2,8 +2,8 @@ import React from 'react'
 
 import { Box, MenuItem } from '@material-ui/core'
 
-import { SelectField, TextField } from '../../../../components/FormField'
-import { StepperFormProps } from '../../types'
+import { SelectField, TextField } from 'components/FormField'
+import { StepperFormProps } from 'components/NewExperiment/types'
 
 // TODO: fake data, maybe use object to map option description
 const actions = ['Network delay', 'Losing tcp packets', '...']

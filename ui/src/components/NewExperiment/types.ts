@@ -51,9 +51,19 @@ export interface StepperState {
   activeStep: number
 }
 
-export type StepperAction = { type: 'next' } | { type: 'back' } | { type: 'jump'; step: number } | { type: 'reset' }
+export enum StepperType {
+  NEXT = 'NEXT',
+  BACK = 'BACK',
+  JUMP = 'JUMP',
+  RESET = 'RESET',
+}
 
-export type StepperDispatch = (action: StepperAction) => void
+export type StepperAction = {
+  type: StepperType
+  step?: number
+}
+
+type StepperDispatch = (action: StepperAction) => void
 
 export interface StepperContextProps {
   state: StepperState
@@ -61,7 +71,3 @@ export interface StepperContextProps {
 }
 
 export type StepperFormProps = FormikProps<Experiment>
-
-export interface StepProps {
-  formProps: StepperFormProps
-}

@@ -1,7 +1,7 @@
 import { Drawer, Hidden } from '@material-ui/core'
 import { Theme, createStyles, makeStyles, useTheme } from '@material-ui/core/styles'
 
-import NavMenu from 'components/NavMenu'
+import NavMenu from './Nav'
 import React from 'react'
 
 export const drawerWidth = '14rem'

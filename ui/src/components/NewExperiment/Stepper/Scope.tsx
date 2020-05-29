@@ -1,10 +1,11 @@
+import { Box, FormControlLabel, FormLabel, MenuItem, Radio, RadioGroup } from '@material-ui/core'
+import { SelectField, TextField } from 'components/FormField'
+
 import React from 'react'
-import { Box, MenuItem, FormLabel, FormControlLabel, Radio, RadioGroup } from '@material-ui/core'
-import { SelectField, TextField } from '../../../components/FormField'
+import { StepperFormProps } from '../types'
 
-import { StepProps } from '../types'
-
-interface ScopeProps extends StepProps {
+interface ScopeStepProps {
+  formProps: StepperFormProps
   namespaces: string[]
 }
 // TODO: fake data
@@ -17,7 +18,7 @@ function upperFirst(str: string) {
   return str.charAt(0).toUpperCase() + str.slice(1)
 }
 
-export default function ScopeStep({ formProps, namespaces }: ScopeProps) {
+const ScopeStep: React.FC<ScopeStepProps> = ({ formProps, namespaces }) => {
   const { values, handleChange, handleBlur } = formProps
 
   return (
@@ -95,3 +96,5 @@ export default function ScopeStep({ formProps, namespaces }: ScopeProps) {
     </Box>
   )
 }
+
+export default ScopeStep

@@ -1,9 +1,9 @@
+import { Box, Divider, FormControlLabel, Switch, Typography } from '@material-ui/core'
 import React, { useState } from 'react'
-import { Box, Switch, Divider, FormControlLabel, Typography } from '@material-ui/core'
-import { makeStyles, Theme } from '@material-ui/core/styles'
+import { Theme, makeStyles } from '@material-ui/core/styles'
 
-import { TextField } from '../../../components/FormField'
-import { StepProps } from '../types'
+import { StepperFormProps } from '../types'
+import { TextField } from 'components/FormField'
 
 const useStyles = makeStyles((theme: Theme) => ({
   subtitle: {
@@ -16,7 +16,11 @@ const useStyles = makeStyles((theme: Theme) => ({
   },
 }))
 
-export default function ScheduleStep({ formProps }: StepProps) {
+interface ScheduleStepProps {
+  formProps: StepperFormProps
+}
+
+const ScheduleStep: React.FC<ScheduleStepProps> = ({ formProps }) => {
   const classes = useStyles()
 
   const [isImmediate, setIsImmediate] = useState(true)
@@ -75,3 +79,5 @@ export default function ScheduleStep({ formProps }: StepProps) {
     </Box>
   )
 }
+
+export default ScheduleStep

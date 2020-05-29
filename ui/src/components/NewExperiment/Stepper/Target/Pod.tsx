@@ -1,9 +1,8 @@
-import React from 'react'
-
 import { Box, MenuItem } from '@material-ui/core'
+import { SelectField, TextField } from 'components/FormField'
 
-import { SelectField, TextField } from '../../../../components/FormField'
-import { StepperFormProps } from '../../types'
+import React from 'react'
+import { StepperFormProps } from 'components/NewExperiment/types'
 
 // TODO: fake data, maybe use object to map option description
 const actions = ['Killing Pod', 'Pod unavailable in a specified period of time', 'Killing Container']

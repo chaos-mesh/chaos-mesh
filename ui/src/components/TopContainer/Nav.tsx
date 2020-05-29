@@ -52,7 +52,7 @@ const listItems = [
   },
 ]
 
-export default function SideMenu() {
+export default function Nav() {
   const classes = useStyles()
 
   return (

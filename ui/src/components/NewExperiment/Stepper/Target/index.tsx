@@ -1,9 +1,8 @@
-import React from 'react'
-
-import VerticalTabs from 'components/VerticalTabs'
-import Pod from './Pod'
 import Network from './Network'
-import { StepProps } from '../../types'
+import Pod from './Pod'
+import React from 'react'
+import { StepperFormProps } from 'components/NewExperiment/types'
+import VerticalTabs from 'components/VerticalTabs'
 
 const tabs = [
   { label: 'Pod Lifecycle' },
@@ -14,7 +13,11 @@ const tabs = [
   { label: 'Stress CPU/Memory', disabled: true },
 ]
 
-export default function TargetStep({ formProps }: StepProps) {
+interface TargetStepProps {
+  formProps: StepperFormProps
+}
+
+const TargetStep: React.FC<TargetStepProps> = ({ formProps }) => {
   const tabPanels = [<Pod {...formProps} />, <Network {...formProps} />]
 
   const props = {
@@ -24,3 +27,5 @@ export default function TargetStep({ formProps }: StepProps) {
 
   return <VerticalTabs {...props} />
 }
+
+export default TargetStep

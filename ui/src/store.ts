@@ -1,10 +1,11 @@
 import { configureStore, getDefaultMiddleware } from '@reduxjs/toolkit'
 
-import { Middleware } from 'redux'
 import rootReducer from 'reducers'
 import { useDispatch } from 'react-redux'
 
-const middlewares: Middleware[] = [...getDefaultMiddleware()]
+export type RootState = ReturnType<typeof rootReducer>
+
+const middlewares = [...getDefaultMiddleware()]
 
 const genStore = () => {
   if (process.env.NODE_ENV === 'development') {
@@ -16,14 +17,13 @@ const genStore = () => {
   const store = configureStore({
     reducer: rootReducer,
     middleware: middlewares,
+    devTools: process.env.NODE_ENV !== 'production',
   })
 
   return store
 }
 
 const store = genStore()
-
-export type RootState = ReturnType<typeof rootReducer>
 
 type StoreDispatch = typeof store.dispatch
 export const useStoreDispatch = () => useDispatch<StoreDispatch>()

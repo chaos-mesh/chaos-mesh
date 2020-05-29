@@ -1,14 +1,15 @@
-import React from 'react'
 import { Box, MenuItem } from '@material-ui/core'
-import { TextField, SelectField } from '../../../components/FormField'
+import { SelectField, TextField } from 'components/FormField'
 
-import { StepProps } from '../types'
+import React from 'react'
+import { StepperFormProps } from '../types'
 
-interface BasicProps extends StepProps {
+interface BasicStepProps {
+  formProps: StepperFormProps
   namespaces: string[]
 }
 
-export default function BasicStep({ formProps, namespaces }: BasicProps) {
+const BasicStep: React.FC<BasicStepProps> = ({ formProps, namespaces }) => {
   const { values, handleBlur, handleChange } = formProps
 
   return (
@@ -44,3 +45,5 @@ export default function BasicStep({ formProps, namespaces }: BasicProps) {
     </Box>
   )
 }
+
+export default BasicStep
