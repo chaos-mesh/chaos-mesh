@@ -110,6 +110,11 @@ type ScopeInfo struct {
 	FieldSelectors      map[string]string `json:"field_selectors" binding:"MapSelectorsValid"`
 	PhaseSelector       []string          `json:"phase_selectors" binding:"PhaseSelectorsValid"`
 
+	// Pods is a map of string keys and a set values that used to select pods.
+	// The key defines the namespace which pods belong,
+	// and the each values is a set of pod names.
+	Pods map[string][]string `json:"pods" binding:"PodsValid"`
+
 	Mode  string `json:"mode" binding:"oneof='' 'one' 'all' 'fixed' 'fixed' 'fixed-percent' 'random-max-percent'"`
 	Value string `json:"value" binding:"ValueValid"`
 }
@@ -138,6 +143,10 @@ func (s *ScopeInfo) parseSelector() v1alpha1.SelectorSpec {
 
 	for _, ph := range s.PhaseSelector {
 		selector.PodPhaseSelectors = append(selector.PodPhaseSelectors, ph)
+	}
+
+	if s.Pods != nil {
+		selector.Pods = s.Pods
 	}
 
 	return selector

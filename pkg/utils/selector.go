@@ -29,6 +29,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	v1 "k8s.io/api/core/v1"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/fields"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/selection"
@@ -87,11 +88,17 @@ func selectPods(ctx context.Context, c client.Client, selector v1alpha1.Selector
 					Namespace: ns,
 					Name:      name,
 				}, &pod)
-				if err != nil {
-					return nil, err
+				if err == nil {
+					pods = append(pods, pod)
+					continue
 				}
 
-				pods = append(pods, pod)
+				if apierrors.IsNotFound(err) {
+					log.Error(err, "Pod is not found", "namespace", ns, "pod name", name)
+					continue
+				}
+
+				return nil, err
 			}
 		}
 
