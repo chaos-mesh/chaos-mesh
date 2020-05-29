@@ -19,7 +19,9 @@ import (
 )
 
 var (
+	// AllowedNamespaces the namespace list allow the execution of a chaos task
 	AllowedNamespaces []string
+	// IgnoredNamespaces the namespace list ignore the chaos task
 	IgnoredNamespaces []string
 )
 

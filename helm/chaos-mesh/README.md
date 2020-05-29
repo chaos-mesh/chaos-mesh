@@ -31,6 +31,8 @@ The following tables list the configurable parameters of the Chaos Mesh chart an
 | `controllerManager.tolerations` |  Toleration labels for chaos-controller-manager pod assignment | `[]` |
 | `controllerManager.affinity` |  Map of chaos-controller-manager node/pod affinities | `{}` |
 | `controllerManager.podAnnotations` |  Pod annotations of chaos-controller-manager | `{}`|
+| `controllerManager.allowedNamespaces` |  The namespace list allow the execution of a chaos task. Commas separate multiple namespaces. | ``|
+| `controllerManager.ignoredNamespaces` |  The namespace list ignore the chaos task. Commas separate multiple namespaces. Configuring `allowedNamespaces` at the same time will ignore this configuration. | ``|
 | `chaosDaemon.image` | docker image for chaos-daemon | `pingcap/chaos-mesh:latest` |
 | `chaosDaemon.imagePullPolicy` | image pull policy | `Always` |
 | `chaosDaemon.grpcPort` | The port which grpc server listens on | `31767` |
