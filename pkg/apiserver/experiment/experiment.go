@@ -239,7 +239,7 @@ func (s *Service) createExperiment(c *gin.Context) {
 	f, ok := createFuncs[exp.Target.Kind]
 	if !ok {
 		c.Status(http.StatusBadRequest)
-		_ = c.Error(utils.ErrInvalidRequest.New("Target kind is not available"))
+		_ = c.Error(utils.ErrInvalidRequest.New(exp.Target.Kind + " is not supported"))
 		return
 	}
 
@@ -729,7 +729,7 @@ func (s *Service) updateExperiment(c *gin.Context) {
 	f, ok := updateFuncs[exp.Target.Kind]
 	if !ok {
 		c.Status(http.StatusBadRequest)
-		_ = c.Error(utils.ErrInvalidRequest.New("Target kind is not available"))
+		_ = c.Error(utils.ErrInvalidRequest.New(exp.Target.Kind + " is not supported"))
 		return
 	}
 
