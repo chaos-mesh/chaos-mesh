@@ -2,12 +2,12 @@ apiVersion: pingcap.com/v1alpha1
 kind: PodChaos
 metadata:
   name: pod-kill-example
-  namespace: biz
+  namespace: chaos-testing
 spec:
   action: pod-kill
   mode: one
   selector:
     labelSelectors:
-      app: etcd
+      "app.kubernetes.io/component": "tikv"
   scheduler:
     cron: "@every 1m"

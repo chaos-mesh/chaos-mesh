@@ -16,12 +16,9 @@ package utils
 import (
 	"os"
 	"strings"
-
-	ctrl "sigs.k8s.io/controller-runtime"
 )
 
 var (
-	InitLog           = ctrl.Log.WithName("setup")
 	AllowedNamespaces []string
 	IgnoredNamespaces []string
 )
@@ -37,8 +34,4 @@ func init() {
 	if ok {
 		AllowedNamespaces = strings.Split(allowedNamespacesText, ",")
 	}
-
-	InitLog.Info("init Namespaces",
-		"AllowedNamespaces", AllowedNamespaces,
-		"IgnoredNamespaces", IgnoredNamespaces)
 }

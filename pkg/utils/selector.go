@@ -380,7 +380,7 @@ func filterByNamespaces(pods []v1.Pod) []v1.Pod {
 	return filteredList
 }
 
-// IsAllowedNamespaces return
+// IsAllowedNamespaces return whether namespace allows the execution of a chaos task
 func IsAllowedNamespaces(namespace string) bool {
 	if len(AllowedNamespaces) > 0 {
 		for _, ns := range AllowedNamespaces {
