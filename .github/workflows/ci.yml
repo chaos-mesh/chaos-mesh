@@ -37,7 +37,7 @@ jobs:
           export PATH=$PATH:$GOPATH/bin
           make ensure-kubebuilder || echo 0
           make ensure-kustomize || echo 0
-          make goimports || echo 0
+          make groupimports || echo 0
           #use sh function
 
           if [[ "$job" == "verify" ]]; then
