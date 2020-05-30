@@ -104,17 +104,23 @@ type ExperimentInfo struct {
 
 // ScopeInfo defines the scope of the Experiment.
 type ScopeInfo struct {
+	SelectorInfo
+	Mode  string `json:"mode" binding:"oneof='' 'one' 'all' 'fixed' 'fixed' 'fixed-percent' 'random-max-percent'"`
+	Value string `json:"value" binding:"ValueValid"`
+}
+
+// TODO: consider moving this to a common package
+// SelectorInfo defines the selector options of the Experiment.
+type SelectorInfo struct {
 	NamespaceSelectors  []string          `json:"namespace_selectors" binding:"NamespaceSelectorsValid"`
 	LabelSelectors      map[string]string `json:"label_selectors" binding:"MapSelectorsValid"`
 	AnnotationSelectors map[string]string `json:"annotation_selectors" binding:"MapSelectorsValid"`
 	FieldSelectors      map[string]string `json:"field_selectors" binding:"MapSelectorsValid"`
 	PhaseSelector       []string          `json:"phase_selectors" binding:"PhaseSelectorsValid"`
-
-	Mode  string `json:"mode" binding:"oneof='' 'one' 'all' 'fixed' 'fixed' 'fixed-percent' 'random-max-percent'"`
-	Value string `json:"value" binding:"ValueValid"`
 }
 
-func (s *ScopeInfo) parseSelector() v1alpha1.SelectorSpec {
+// ParseSelector parses SelectorInfo to v1alpha1.SelectorSpec
+func (s *SelectorInfo) ParseSelector() v1alpha1.SelectorSpec {
 	selector := v1alpha1.SelectorSpec{}
 
 	for _, ns := range s.NamespaceSelectors {
@@ -279,7 +285,7 @@ func (s *Service) createPodChaos(exp *ExperimentInfo) error {
 			Annotations: exp.Annotations,
 		},
 		Spec: v1alpha1.PodChaosSpec{
-			Selector:      exp.Scope.parseSelector(),
+			Selector:      exp.Scope.ParseSelector(),
 			Action:        v1alpha1.PodChaosAction(exp.Target.PodChaos.Action),
 			Mode:          v1alpha1.PodMode(exp.Scope.Mode),
 			Value:         exp.Scope.Value,
@@ -307,7 +313,7 @@ func (s *Service) createNetworkChaos(exp *ExperimentInfo) error {
 			Annotations: exp.Annotations,
 		},
 		Spec: v1alpha1.NetworkChaosSpec{
-			Selector:  exp.Scope.parseSelector(),
+			Selector:  exp.Scope.ParseSelector(),
 			Action:    v1alpha1.NetworkChaosAction(exp.Target.NetworkChaos.Action),
 			Mode:      v1alpha1.PodMode(exp.Scope.Mode),
 			Value:     exp.Scope.Value,
@@ -330,7 +336,7 @@ func (s *Service) createNetworkChaos(exp *ExperimentInfo) error {
 
 	if exp.Target.NetworkChaos.TargetScope != nil {
 		chaos.Spec.Target = &v1alpha1.Target{
-			TargetSelector: exp.Target.NetworkChaos.TargetScope.parseSelector(),
+			TargetSelector: exp.Target.NetworkChaos.TargetScope.ParseSelector(),
 			TargetMode:     v1alpha1.PodMode(exp.Target.NetworkChaos.TargetScope.Mode),
 			TargetValue:    exp.Target.NetworkChaos.TargetScope.Value,
 		}
@@ -348,7 +354,7 @@ func (s *Service) createIOChaos(exp *ExperimentInfo) error {
 			Annotations: exp.Annotations,
 		},
 		Spec: v1alpha1.IoChaosSpec{
-			Selector: exp.Scope.parseSelector(),
+			Selector: exp.Scope.ParseSelector(),
 			Action:   v1alpha1.IOChaosAction(exp.Target.IOChaos.Action),
 			Mode:     v1alpha1.PodMode(exp.Scope.Mode),
 			Value:    exp.Scope.Value,
@@ -383,7 +389,7 @@ func (s *Service) createTimeChaos(exp *ExperimentInfo) error {
 			Annotations: exp.Annotations,
 		},
 		Spec: v1alpha1.TimeChaosSpec{
-			Selector:       exp.Scope.parseSelector(),
+			Selector:       exp.Scope.ParseSelector(),
 			Mode:           v1alpha1.PodMode(exp.Scope.Mode),
 			Value:          exp.Scope.Value,
 			TimeOffset:     exp.Target.TimeChaos.TimeOffset,
@@ -412,7 +418,7 @@ func (s *Service) createKernelChaos(exp *ExperimentInfo) error {
 			Annotations: exp.Annotations,
 		},
 		Spec: v1alpha1.KernelChaosSpec{
-			Selector:        exp.Scope.parseSelector(),
+			Selector:        exp.Scope.ParseSelector(),
 			Mode:            v1alpha1.PodMode(exp.Scope.Mode),
 			Value:           exp.Scope.Value,
 			FailKernRequest: exp.Target.KernelChaos.FailKernRequest,
@@ -439,7 +445,7 @@ func (s *Service) createStressChaos(exp *ExperimentInfo) error {
 			Annotations: exp.Annotations,
 		},
 		Spec: v1alpha1.StressChaosSpec{
-			Selector:          exp.Scope.parseSelector(),
+			Selector:          exp.Scope.ParseSelector(),
 			Mode:              v1alpha1.PodMode(exp.Scope.Mode),
 			Value:             exp.Scope.Value,
 			Stressors:         exp.Target.StressChaos.Stressors,
@@ -474,13 +480,15 @@ func (s *Service) getPodChaosDetail(namespace string, name string) (ExperimentIn
 		Labels:      chaos.Labels,
 		Annotations: chaos.Annotations,
 		Scope: ScopeInfo{
-			NamespaceSelectors:  chaos.Spec.Selector.Namespaces,
-			LabelSelectors:      chaos.Spec.Selector.LabelSelectors,
-			AnnotationSelectors: chaos.Spec.Selector.AnnotationSelectors,
-			FieldSelectors:      chaos.Spec.Selector.FieldSelectors,
-			PhaseSelector:       chaos.Spec.Selector.PodPhaseSelectors,
-			Mode:                string(chaos.Spec.Mode),
-			Value:               chaos.Spec.Value,
+			SelectorInfo: SelectorInfo{
+				NamespaceSelectors:  chaos.Spec.Selector.Namespaces,
+				LabelSelectors:      chaos.Spec.Selector.LabelSelectors,
+				AnnotationSelectors: chaos.Spec.Selector.AnnotationSelectors,
+				FieldSelectors:      chaos.Spec.Selector.FieldSelectors,
+				PhaseSelector:       chaos.Spec.Selector.PodPhaseSelectors,
+			},
+			Mode:  string(chaos.Spec.Mode),
+			Value: chaos.Spec.Value,
 		},
 		Scheduler: SchedulerInfo{
 			Cron: chaos.Spec.Scheduler.Cron,
@@ -514,13 +522,15 @@ func (s *Service) getIoChaosDetail(namespace string, name string) (ExperimentInf
 		Labels:      chaos.Labels,
 		Annotations: chaos.Annotations,
 		Scope: ScopeInfo{
-			NamespaceSelectors:  chaos.Spec.Selector.Namespaces,
-			LabelSelectors:      chaos.Spec.Selector.LabelSelectors,
-			AnnotationSelectors: chaos.Spec.Selector.AnnotationSelectors,
-			FieldSelectors:      chaos.Spec.Selector.FieldSelectors,
-			PhaseSelector:       chaos.Spec.Selector.PodPhaseSelectors,
-			Mode:                string(chaos.Spec.Mode),
-			Value:               chaos.Spec.Value,
+			SelectorInfo: SelectorInfo{
+				NamespaceSelectors:  chaos.Spec.Selector.Namespaces,
+				LabelSelectors:      chaos.Spec.Selector.LabelSelectors,
+				AnnotationSelectors: chaos.Spec.Selector.AnnotationSelectors,
+				FieldSelectors:      chaos.Spec.Selector.FieldSelectors,
+				PhaseSelector:       chaos.Spec.Selector.PodPhaseSelectors,
+			},
+			Mode:  string(chaos.Spec.Mode),
+			Value: chaos.Spec.Value,
 		},
 		Scheduler: SchedulerInfo{
 			Cron: chaos.Spec.Scheduler.Cron,
@@ -559,13 +569,15 @@ func (s *Service) getNetworkChaosDetail(namespace string, name string) (Experime
 		Labels:      chaos.Labels,
 		Annotations: chaos.Annotations,
 		Scope: ScopeInfo{
-			NamespaceSelectors:  chaos.Spec.Selector.Namespaces,
-			LabelSelectors:      chaos.Spec.Selector.LabelSelectors,
-			AnnotationSelectors: chaos.Spec.Selector.AnnotationSelectors,
-			FieldSelectors:      chaos.Spec.Selector.FieldSelectors,
-			PhaseSelector:       chaos.Spec.Selector.PodPhaseSelectors,
-			Mode:                string(chaos.Spec.Mode),
-			Value:               chaos.Spec.Value,
+			SelectorInfo: SelectorInfo{
+				NamespaceSelectors:  chaos.Spec.Selector.Namespaces,
+				LabelSelectors:      chaos.Spec.Selector.LabelSelectors,
+				AnnotationSelectors: chaos.Spec.Selector.AnnotationSelectors,
+				FieldSelectors:      chaos.Spec.Selector.FieldSelectors,
+				PhaseSelector:       chaos.Spec.Selector.PodPhaseSelectors,
+			},
+			Mode:  string(chaos.Spec.Mode),
+			Value: chaos.Spec.Value,
 		},
 		Scheduler: SchedulerInfo{
 			Cron: chaos.Spec.Scheduler.Cron,
@@ -580,13 +592,15 @@ func (s *Service) getNetworkChaosDetail(namespace string, name string) (Experime
 				Bandwidth: chaos.Spec.Bandwidth,
 				Direction: string(chaos.Spec.Direction),
 				TargetScope: &ScopeInfo{
-					NamespaceSelectors:  chaos.Spec.Target.TargetSelector.Namespaces,
-					LabelSelectors:      chaos.Spec.Target.TargetSelector.LabelSelectors,
-					AnnotationSelectors: chaos.Spec.Target.TargetSelector.AnnotationSelectors,
-					FieldSelectors:      chaos.Spec.Target.TargetSelector.FieldSelectors,
-					PhaseSelector:       chaos.Spec.Target.TargetSelector.PodPhaseSelectors,
-					Mode:                string(chaos.Spec.Target.TargetMode),
-					Value:               chaos.Spec.Target.TargetValue,
+					SelectorInfo: SelectorInfo{
+						NamespaceSelectors:  chaos.Spec.Selector.Namespaces,
+						LabelSelectors:      chaos.Spec.Selector.LabelSelectors,
+						AnnotationSelectors: chaos.Spec.Selector.AnnotationSelectors,
+						FieldSelectors:      chaos.Spec.Selector.FieldSelectors,
+						PhaseSelector:       chaos.Spec.Selector.PodPhaseSelectors,
+					},
+					Mode:  string(chaos.Spec.Target.TargetMode),
+					Value: chaos.Spec.Target.TargetValue,
 				},
 			},
 		},
@@ -613,13 +627,15 @@ func (s *Service) getTimeChaosDetail(namespace string, name string) (ExperimentI
 		Labels:      chaos.Labels,
 		Annotations: chaos.Annotations,
 		Scope: ScopeInfo{
-			NamespaceSelectors:  chaos.Spec.Selector.Namespaces,
-			LabelSelectors:      chaos.Spec.Selector.LabelSelectors,
-			AnnotationSelectors: chaos.Spec.Selector.AnnotationSelectors,
-			FieldSelectors:      chaos.Spec.Selector.FieldSelectors,
-			PhaseSelector:       chaos.Spec.Selector.PodPhaseSelectors,
-			Mode:                string(chaos.Spec.Mode),
-			Value:               chaos.Spec.Value,
+			SelectorInfo: SelectorInfo{
+				NamespaceSelectors:  chaos.Spec.Selector.Namespaces,
+				LabelSelectors:      chaos.Spec.Selector.LabelSelectors,
+				AnnotationSelectors: chaos.Spec.Selector.AnnotationSelectors,
+				FieldSelectors:      chaos.Spec.Selector.FieldSelectors,
+				PhaseSelector:       chaos.Spec.Selector.PodPhaseSelectors,
+			},
+			Mode:  string(chaos.Spec.Mode),
+			Value: chaos.Spec.Value,
 		},
 		Scheduler: SchedulerInfo{
 			Cron: chaos.Spec.Scheduler.Cron,
@@ -654,13 +670,15 @@ func (s *Service) getKernelChaosDetail(namespace string, name string) (Experimen
 		Labels:      chaos.Labels,
 		Annotations: chaos.Annotations,
 		Scope: ScopeInfo{
-			NamespaceSelectors:  chaos.Spec.Selector.Namespaces,
-			LabelSelectors:      chaos.Spec.Selector.LabelSelectors,
-			AnnotationSelectors: chaos.Spec.Selector.AnnotationSelectors,
-			FieldSelectors:      chaos.Spec.Selector.FieldSelectors,
-			PhaseSelector:       chaos.Spec.Selector.PodPhaseSelectors,
-			Mode:                string(chaos.Spec.Mode),
-			Value:               chaos.Spec.Value,
+			SelectorInfo: SelectorInfo{
+				NamespaceSelectors:  chaos.Spec.Selector.Namespaces,
+				LabelSelectors:      chaos.Spec.Selector.LabelSelectors,
+				AnnotationSelectors: chaos.Spec.Selector.AnnotationSelectors,
+				FieldSelectors:      chaos.Spec.Selector.FieldSelectors,
+				PhaseSelector:       chaos.Spec.Selector.PodPhaseSelectors,
+			},
+			Mode:  string(chaos.Spec.Mode),
+			Value: chaos.Spec.Value,
 		},
 		Scheduler: SchedulerInfo{
 			Cron: chaos.Spec.Scheduler.Cron,
@@ -693,13 +711,15 @@ func (s *Service) getStressChaosDetail(namespace string, name string) (Experimen
 		Labels:      chaos.Labels,
 		Annotations: chaos.Annotations,
 		Scope: ScopeInfo{
-			NamespaceSelectors:  chaos.Spec.Selector.Namespaces,
-			LabelSelectors:      chaos.Spec.Selector.LabelSelectors,
-			AnnotationSelectors: chaos.Spec.Selector.AnnotationSelectors,
-			FieldSelectors:      chaos.Spec.Selector.FieldSelectors,
-			PhaseSelector:       chaos.Spec.Selector.PodPhaseSelectors,
-			Mode:                string(chaos.Spec.Mode),
-			Value:               chaos.Spec.Value,
+			SelectorInfo: SelectorInfo{
+				NamespaceSelectors:  chaos.Spec.Selector.Namespaces,
+				LabelSelectors:      chaos.Spec.Selector.LabelSelectors,
+				AnnotationSelectors: chaos.Spec.Selector.AnnotationSelectors,
+				FieldSelectors:      chaos.Spec.Selector.FieldSelectors,
+				PhaseSelector:       chaos.Spec.Selector.PodPhaseSelectors,
+			},
+			Mode:  string(chaos.Spec.Mode),
+			Value: chaos.Spec.Value,
 		},
 		Scheduler: SchedulerInfo{
 			Cron: chaos.Spec.Scheduler.Cron,
@@ -773,8 +793,8 @@ func (s *Service) listExperiments(c *gin.Context) {
 // @Param namespace path string true "namespace"
 // @Param name path string true "name"
 // @Param kind path string true "kind" Enums(PodChaos, IoChaos, NetworkChaos, TimeChaos, KernelChaos, StressChaos)
-// @Success 200 ExperimentInfo
 // @Router /api/experiments/detail/{kind}/{namespace}/{name} [GET]
+// @Success 200 {object} ExperimentInfo
 // @Failure 400 {object} utils.APIError
 // @Failure 500 {object} utils.APIError
 func (s *Service) getExperimentDetail(c *gin.Context) {
