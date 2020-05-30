@@ -793,8 +793,8 @@ func (s *Service) listExperiments(c *gin.Context) {
 // @Param namespace path string true "namespace"
 // @Param name path string true "name"
 // @Param kind path string true "kind" Enums(PodChaos, IoChaos, NetworkChaos, TimeChaos, KernelChaos, StressChaos)
-// @Success 200 ExperimentInfo
 // @Router /api/experiments/detail/{kind}/{namespace}/{name} [GET]
+// @Success 200 {object} ExperimentInfo
 // @Failure 400 {object} utils.APIError
 // @Failure 500 {object} utils.APIError
 func (s *Service) getExperimentDetail(c *gin.Context) {
