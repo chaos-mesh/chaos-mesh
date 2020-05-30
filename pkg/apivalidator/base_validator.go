@@ -39,17 +39,11 @@ func NameValid(fl validator.FieldLevel) bool {
 	return true
 }
 
-// PATTEN defines allowed characters for name, namespace.
-const PATTEN = "^[-.\\w]*$"
+var namePattern = regexp.MustCompile("^[-.\\w]*$")
 
-// checkName can be used to check whether the given name meets PATTEN.
+// checkName can be used to check resource names.
 func checkName(name string) bool {
-	patten, err := regexp.Compile(PATTEN)
-	if err != nil {
-		return false
-	}
-
-	return patten.MatchString(name)
+	return namePattern.MatchString(name)
 }
 
 // CronValid can be used to check whether the given cron valid.
