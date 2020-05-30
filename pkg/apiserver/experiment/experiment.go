@@ -321,9 +321,12 @@ func (s *Service) createNetworkChaos(exp *ExperimentInfo) error {
 			Loss:      exp.Target.NetworkChaos.Loss,
 			Duplicate: exp.Target.NetworkChaos.Duplicate,
 			Corrupt:   exp.Target.NetworkChaos.Corrupt,
-			Bandwidth: exp.Target.NetworkChaos.Bandwidth,
-			Direction: v1alpha1.Direction(exp.Target.NetworkChaos.Direction),
 		},
+	}
+
+	if exp.Target.NetworkChaos.Action == string(v1alpha1.BandwidthAction) {
+		chaos.Spec.Bandwidth = exp.Target.NetworkChaos.Bandwidth
+		chaos.Spec.Direction = v1alpha1.Direction(exp.Target.NetworkChaos.Direction)
 	}
 
 	if exp.Scheduler.Cron != "" {
