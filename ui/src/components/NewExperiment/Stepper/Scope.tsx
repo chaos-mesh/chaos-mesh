@@ -1,36 +1,47 @@
-import { Box, FormControlLabel, FormLabel, MenuItem, Radio, RadioGroup } from '@material-ui/core'
+import { InputAdornment, MenuItem } from '@material-ui/core'
 import { SelectField, TextField } from 'components/FormField'
 
+import AdvancedOptions from 'components/AdvancedOptions'
 import React from 'react'
 import { StepperFormProps } from '../types'
+import { upperFirst } from 'lib/utils'
 
 interface ScopeStepProps {
   formProps: StepperFormProps
   namespaces: string[]
 }
-// TODO: fake data
-const phases = ['all', 'running', 'pending', 'failed']
-const modes = ['all', 'fixed number', 'fixed percentage', 'max percentage']
 
-function upperFirst(str: string) {
-  if (!str) return ''
-
-  return str.charAt(0).toUpperCase() + str.slice(1)
-}
+const phases = ['all', 'pending', 'running', 'succeeded', 'failed', 'unknown']
+const modes = ['all', 'one', 'fixed number', 'fixed percent', 'random max percent']
+const modesWithAdornment = ['fixed-percent', 'random-max-percent']
 
 const ScopeStep: React.FC<ScopeStepProps> = ({ formProps, namespaces }) => {
-  const { values, handleChange, handleBlur } = formProps
+  const { values, handleChange } = formProps
+
+  const handleChangeIncludeAll = (id: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
+    const lastValues = id.split('.').reduce((acc, cur) => acc[cur], values as any)
+    const currentValues = (e.target.value as unknown) as string[]
+
+    if (!lastValues.includes('all') && currentValues.includes('all')) {
+      e.target.value = ['all'] as any
+    }
+
+    if (lastValues.includes('all') && currentValues.length > 1) {
+      e.target.value = currentValues.filter((v) => v !== 'all') as any
+    }
+
+    handleChange(e)
+  }
 
   return (
-    <Box maxWidth="30rem" mx="auto">
+    <>
       <SelectField
-        id="scope.namespaceSelector"
-        name="scope.namespaceSelector"
-        label="Namespace Selector"
-        labelId="scope.namespaceSelector-label"
-        helperText="Multiple"
+        id="scope.namespace_selectors"
+        name="scope.namespace_selectors"
+        label="Namespace Selectors"
+        helperText="Multiple options"
         multiple
-        value={values.scope.namespaceSelector}
+        value={values.scope.namespace_selectors}
         onChange={handleChange}
       >
         {namespaces.map((option: string) => (
@@ -40,60 +51,67 @@ const ScopeStep: React.FC<ScopeStepProps> = ({ formProps, namespaces }) => {
         ))}
       </SelectField>
 
-      {/* TODO: Label Selector: {[key: string]: string} */}
+      <TextField
+        id="scope.label_selectors"
+        label="Label selectors"
+        helperText="Json of label selectors"
+        multiline
+        value={values.scope.label_selectors}
+        onChange={handleChange}
+      />
 
-      {/* TODO: Annotation Selector: {[key: string]: string} */}
+      {/* TODO: Annotation Selectors: {[key: string]: string} */}
 
-      {/* TODO: Field Selector: {[key: string]: string} */}
+      {/* TODO: Field Selectors: {[key: string]: string} */}
 
       <SelectField
-        id="scope.phaseSelector"
-        name="scope.phaseSelector"
-        label="Phase Selector"
-        labelId="scope.phaseSelector-label"
-        helperText="Multiple"
-        multiple
-        value={values.scope.phaseSelector}
+        id="scope.mode"
+        name="scope.mode"
+        label="Mode"
+        helperText="Select a mode"
+        value={values.scope.mode}
         onChange={handleChange}
       >
-        {phases.map((option: string) => (
-          <MenuItem key={option} value={option}>
+        {modes.map((option: string) => (
+          <MenuItem key={option} value={option.split(' ').join('-')}>
             {upperFirst(option)}
           </MenuItem>
         ))}
       </SelectField>
 
-      <Box mb={4}>
-        <FormLabel component="label">Mode</FormLabel>
-        <Box display="flex" justifyContent="space-between">
-          <RadioGroup
-            id="scope.mode"
-            name="scope.mode"
-            aria-label="mode"
-            style={{ flexBasis: '60%' }}
-            value={values.scope.mode}
-            onChange={handleChange}
-          >
-            {modes.map((m: string) => {
-              return <FormControlLabel key={m} value={m} control={<Radio />} label={upperFirst(m)} />
-            })}
-          </RadioGroup>
+      {values.scope.mode !== 'all' && values.scope.mode !== 'one' && (
+        <TextField
+          id="scope.value"
+          label="Mode Value"
+          helperText="Please fill the mode value"
+          value={values.scope.value}
+          onChange={handleChange}
+          InputProps={{
+            endAdornment: modesWithAdornment.includes(values.scope.mode) && (
+              <InputAdornment position="end">%</InputAdornment>
+            ),
+          }}
+        />
+      )}
 
-          {values.scope.mode !== 'all' && (
-            <TextField
-              id="scope.value"
-              label="Value"
-              type="number"
-              autoComplete="off"
-              helperText="Please input a value"
-              value={values.scope.value}
-              onBlur={handleBlur}
-              onChange={handleChange}
-            />
-          )}
-        </Box>
-      </Box>
-    </Box>
+      <AdvancedOptions>
+        <SelectField
+          id="scope.phase_selectors"
+          name="scope.phase_selectors"
+          label="Phase Selectors"
+          helperText="Multiple options"
+          multiple
+          value={values.scope.phase_selectors}
+          onChange={handleChangeIncludeAll('scope.phase_selectors')}
+        >
+          {phases.map((option: string) => (
+            <MenuItem key={option} value={option}>
+              {upperFirst(option)}
+            </MenuItem>
+          ))}
+        </SelectField>
+      </AdvancedOptions>
+    </>
   )
 }
 

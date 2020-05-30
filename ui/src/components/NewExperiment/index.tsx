@@ -7,9 +7,11 @@ import { Theme, createStyles, makeStyles } from '@material-ui/core/styles'
 
 import AddIcon from '@material-ui/icons/Add'
 import CloudUploadOutlinedIcon from '@material-ui/icons/CloudUploadOutlined'
-import Stepper from './Stepper'
 import PublishIcon from '@material-ui/icons/Publish'
+import Stepper from './Stepper'
+import api from 'api'
 import { defaultExperimentSchema } from './constants'
+import { parseSubmitValues } from 'lib/utils'
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -59,9 +61,16 @@ export default function NewExperiment() {
   const toggleDrawer = () => setIsOpen(!isOpen)
 
   const handleOnSubmit = (values: Experiment, actions: FormikHelpers<Experiment>) => {
-    console.log(values)
+    const parsedValues = parseSubmitValues(values)
 
-    actions.setSubmitting(false)
+    console.log(parsedValues)
+
+    api.experiments
+      .newExperiment(parsedValues)
+      .then((resp) => {
+        console.log(resp.data)
+      })
+      .catch(console.log)
   }
 
   return (

@@ -67,12 +67,12 @@ const Header: React.FC<HeaderProps> = ({ handleDrawerToggle, breadcrumbs }) => {
               breadcrumbs.map((b) => {
                 return b.path ? (
                   <Link key={b.name} to={b.path}>
-                    <Typography className={`${classes.whiteText} ${classes.hoverLink}`} variant="h6">
+                    <Typography className={`${classes.whiteText} ${classes.hoverLink}`} variant="h6" component="h2">
                       {b.name}
                     </Typography>
                   </Link>
                 ) : (
-                  <Typography key={b.name} className={classes.whiteText} variant="h6">
+                  <Typography key={b.name} className={classes.whiteText} variant="h6" component="h2">
                     {b.name}
                   </Typography>
                 )

@@ -5,6 +5,7 @@ import { back, jump, next, reset, useStepperContext } from '../Context'
 
 import BasicStep from './Basic'
 import DoneAllIcon from '@material-ui/icons/DoneAll'
+import Loading from 'components/Loading'
 import ScheduleStep from './Schedule'
 import ScopeStep from './Scope'
 import { StepperFormProps } from '../types'
@@ -16,7 +17,7 @@ const useStyles = makeStyles((theme: Theme) =>
     main: {
       display: 'flex',
       flexDirection: 'column',
-      width: '50%',
+      width: '75%',
       margin: `0 auto`,
       padding: `${theme.spacing(6)} 0`,
       [theme.breakpoints.down('sm')]: {
@@ -108,29 +109,33 @@ const CreateStepper: React.FC<StepperProps> = ({ formProps, toggleDrawer }) => {
         ))}
       </Stepper>
 
-      <Box className={classes.main}>
-        <Box>{getStepContent()}</Box>
-        <Box marginTop={6} textAlign="right">
-          {activeStep === steps.length ? (
-            <Button onClick={handleReset}>Reset</Button>
-          ) : (
-            <>
-              {activeStep === 0 ? (
-                <Button className={classes.backButton} onClick={toggleDrawer}>
-                  Cancel
+      {namespaces.length > 0 && (
+        <Box className={classes.main}>
+          <Box>{getStepContent()}</Box>
+          <Box marginTop={6} textAlign="right">
+            {activeStep === steps.length ? (
+              <Button onClick={handleReset}>Reset</Button>
+            ) : (
+              <>
+                {activeStep === 0 ? (
+                  <Button className={classes.backButton} onClick={toggleDrawer}>
+                    Cancel
+                  </Button>
+                ) : (
+                  <Button className={classes.backButton} onClick={handleBack}>
+                    Back
+                  </Button>
+                )}
+                <Button variant="contained" color="primary" onClick={handleNext}>
+                  {activeStep === steps.length - 1 ? 'Finish' : 'Next'}
                 </Button>
-              ) : (
-                <Button className={classes.backButton} onClick={handleBack}>
-                  Back
-                </Button>
-              )}
-              <Button variant="contained" color="primary" onClick={handleNext}>
-                {activeStep === steps.length - 1 ? 'Finish' : 'Next'}
-              </Button>
-            </>
-          )}
+              </>
+            )}
+          </Box>
         </Box>
-      </Box>
+      )}
+
+      {namespaces.length === 0 && <Loading />}
     </Box>
   )
 }

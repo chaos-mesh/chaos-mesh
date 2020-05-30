@@ -1,45 +1,41 @@
-import { Box, MenuItem } from '@material-ui/core'
 import { SelectField, TextField } from 'components/FormField'
 
+import { MenuItem } from '@material-ui/core'
 import React from 'react'
 import { StepperFormProps } from 'components/NewExperiment/types'
+import { upperFirst } from 'lib/utils'
 
-// TODO: fake data, maybe use object to map option description
-const actions = ['Killing Pod', 'Pod unavailable in a specified period of time', 'Killing Container']
+const actions = ['pod kill', 'pod failure', 'container kill']
 
 export default function PodPanel(props: StepperFormProps) {
-  const { values, handleBlur, handleChange } = props
+  const { values, handleChange } = props
 
   return (
-    <Box maxWidth="30rem" mx="auto">
+    <>
       <SelectField
-        id="target.pod.action"
-        name="target.pod.action"
+        id="target.pod_chaos.action"
+        name="target.pod_chaos.action"
         label="Action"
-        labelId="target.pod.action-label"
-        helperText="Please select the action to attack"
-        value={values.target.pod.action}
+        helperText="Please select a action"
+        value={values.target.pod_chaos.action}
         onChange={handleChange}
       >
         {actions.map((option: string) => (
-          <MenuItem key={option} value={option}>
-            {option}
+          <MenuItem key={option} value={option.split(' ').join('-')}>
+            {upperFirst(option)}
           </MenuItem>
         ))}
       </SelectField>
 
-      {values.target.pod.action === 'Killing Container' && (
+      {values.target.pod_chaos.action === 'container-kill' && (
         <TextField
-          id="target.pod.container"
+          id="target.pod_chaos.container_name"
           label="Container Name"
-          type="text"
-          autoComplete="off"
-          helperText="Please input a container name"
-          value={values.target.pod.container}
-          onBlur={handleBlur}
+          helperText="Input the container name you want to kill"
+          value={values.target.pod_chaos.container_name}
           onChange={handleChange}
         />
       )}
-    </Box>
+    </>
   )
 }

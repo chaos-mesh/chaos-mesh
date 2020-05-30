@@ -58,6 +58,9 @@ export const CurrentStatus: React.FC<CurrentStatusProps> = ({ state }) => {
       <Button className={classes.statusButton} variant="outlined" color="secondary">
         Failed: {state.failed}
       </Button>
+      <Button className={classes.statusButton} variant="outlined">
+        Finished: {state.finished}
+      </Button>
     </Box>
   )
 }
@@ -71,7 +74,7 @@ const StatusBar = () => {
   useEffect(() => {
     dispatch(getStateofExperiments())
 
-    const id = setInterval(() => dispatch(getStateofExperiments()), 30000)
+    const id = setInterval(() => dispatch(getStateofExperiments()), 60000)
 
     return () => clearInterval(id)
     // eslint-disable-next-line react-hooks/exhaustive-deps

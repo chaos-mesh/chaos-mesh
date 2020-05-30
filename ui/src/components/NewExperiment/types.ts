@@ -3,36 +3,63 @@ import { FormikProps } from 'formik'
 export interface ExperimentBasic {
   name: string
   namespace: string
-  labels?: { [key: string]: string }
 }
 
 export interface ExperimentScope {
-  namespaceSelector: string[]
-  phaseSelector: string[]
+  namespace_selectors: string[]
+  label_selectors: string
+  phase_selectors: string[]
   mode: string
   value: string
-  labelSelector?: { [key: string]: string }
 }
 
 export interface ExperimentTargetPod {
   action: string
-  container: string
+  container_name?: string
 }
 
-export interface ExperimentNetworkDelay {
+export interface ExperimentTargetNetworkBandwidth {
+  buffer: number
+  limit: number
+  minburst: number
+  peakrate: number
+  rate: string
+}
+
+export interface ExperimentTargetNetworkCorrupt {
+  correlation: string
+  corrupt: string
+}
+
+export interface ExperimentTargetNetworkDelay {
   latency: string
   correlation: string
   jitter: string
 }
 
+export interface ExperimentTargetNetworkDuplicate {
+  correlation: string
+  duplicate: string
+}
+
+export interface ExperimentTargetNetworkLoss {
+  correlation: string
+  loss: string
+}
+
 export interface ExperimentTargetNetwork {
   action: string
-  delay: ExperimentNetworkDelay
+  bandwidth: ExperimentTargetNetworkBandwidth
+  corrupt: ExperimentTargetNetworkCorrupt
+  delay: ExperimentTargetNetworkDelay
+  duplicate: ExperimentTargetNetworkDuplicate
+  loss: ExperimentTargetNetworkLoss
 }
 
 export interface ExperimentTarget {
-  pod: ExperimentTargetPod
-  network: ExperimentTargetNetwork
+  kind: string
+  pod_chaos: ExperimentTargetPod
+  network_chaos: ExperimentTargetNetwork
 }
 
 export interface ExperimentSchedule {
@@ -40,11 +67,10 @@ export interface ExperimentSchedule {
   duration: string
 }
 
-export interface Experiment {
-  basic: ExperimentBasic
+export interface Experiment extends ExperimentBasic {
   scope: ExperimentScope
   target: ExperimentTarget
-  schedule: ExperimentSchedule
+  scheduler: ExperimentSchedule
 }
 
 export interface StepperState {

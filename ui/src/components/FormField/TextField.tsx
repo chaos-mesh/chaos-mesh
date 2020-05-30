@@ -1,14 +1,14 @@
+import { Box, TextField as MUITextField, TextFieldProps } from '@material-ui/core'
 import React, { FC } from 'react'
-import { Box, TextField, TextFieldProps } from '@material-ui/core'
 
-const TextInput: FC<TextFieldProps> = ({ children, fullWidth = true, ...inputProps }) => {
+const TextField: FC<TextFieldProps> = ({ children, fullWidth = true, ...inputProps }) => {
   return (
-    <Box mb={4}>
-      <TextField fullWidth={fullWidth} {...inputProps}>
+    <Box mb={2}>
+      <MUITextField margin="dense" fullWidth={fullWidth} variant="outlined" {...inputProps}>
         {children}
-      </TextField>
+      </MUITextField>
     </Box>
   )
 }
 
-export default TextInput
+export default TextField

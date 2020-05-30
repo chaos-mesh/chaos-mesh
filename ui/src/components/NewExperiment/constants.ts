@@ -1,31 +1,50 @@
 import { Experiment } from './types'
 
 export const defaultExperimentSchema: Experiment = {
-  basic: {
-    name: '',
-    namespace: '',
-  },
+  name: '',
+  namespace: 'default',
   scope: {
-    namespaceSelector: [],
-    phaseSelector: [],
+    namespace_selectors: ['default'],
+    label_selectors: '',
+    phase_selectors: ['all'],
     mode: 'all',
     value: '',
   },
   target: {
-    pod: {
+    kind: 'PodChaos',
+    pod_chaos: {
       action: '',
-      container: '',
+      container_name: '',
     },
-    network: {
+    network_chaos: {
       action: '',
+      bandwidth: {
+        buffer: 0,
+        limit: 0,
+        minburst: 0,
+        peakrate: 0,
+        rate: '',
+      },
+      corrupt: {
+        correlation: '',
+        corrupt: '',
+      },
       delay: {
         latency: '',
         correlation: '',
         jitter: '',
       },
+      duplicate: {
+        correlation: '',
+        duplicate: '',
+      },
+      loss: {
+        correlation: '',
+        loss: '',
+      },
     },
   },
-  schedule: {
+  scheduler: {
     cron: '',
     duration: '',
   },

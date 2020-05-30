@@ -6,13 +6,15 @@ import { StepperFormProps } from '../types'
 import { TextField } from 'components/FormField'
 
 const useStyles = makeStyles((theme: Theme) => ({
-  subtitle: {
-    margin: `${theme.spacing(4)} 0`,
+  cronTitle: {
+    margin: `${theme.spacing(3)} 0`,
   },
-  description: {
-    margin: `${theme.spacing(4)} 0`,
-    padding: theme.spacing(4),
-    background: theme.palette.background.default,
+  pre: {
+    background: theme.palette.grey[200],
+    overflowX: 'auto',
+    '& code': {
+      whiteSpace: 'pre',
+    },
   },
 }))
 
@@ -24,59 +26,67 @@ const ScheduleStep: React.FC<ScheduleStepProps> = ({ formProps }) => {
   const classes = useStyles()
 
   const [isImmediate, setIsImmediate] = useState(true)
-  const { values, handleBlur, handleChange } = formProps
+  const { values, handleChange } = formProps
 
-  const handleChecked = (event: React.ChangeEvent<HTMLInputElement>, checked: boolean) => {
-    setIsImmediate(checked)
-  }
+  const handleChecked = (_: React.ChangeEvent<HTMLInputElement>, checked: boolean) => setIsImmediate(checked)
 
   return (
-    <Box maxWidth="30rem" mx="auto">
+    <>
       <FormControlLabel
-        control={<Switch checked={isImmediate} onChange={handleChecked} name="immediate" />}
+        control={<Switch name="immediate" color="primary" checked={isImmediate} onChange={handleChecked} />}
         label="Immediate Job"
       />
 
-      <Box hidden={isImmediate} mt={2}>
+      <Box hidden={isImmediate} mt={3}>
         <Divider />
-        <Typography variant="subtitle2" component="h3" className={classes.subtitle}>
-          Crontab Job
+        <Typography variant="subtitle2" component="h3" className={classes.cronTitle}>
+          Cron Job
         </Typography>
-        <Typography className={classes.description}>
+        <pre className={classes.pre}>
           <code>
-            Crontab job xxxxxxx Field name | Mandatory? | Allowed values | Allowed special characters ---------- |
-            ---------- | -------------- | -------------------------- Minutes | Yes | 0-59 | * / , - Hours | Yes | 0-23 |
-            * / , - Day of month | Yes | 1-31 | * / , - ? Month | Yes | 1-12 or JAN-DEC | * / , - Day of week | Yes |
-            0-6 or SUN-SAT | * / , - ? Entry | Description | Equivalent To ----- | ----------- | ------------- @yearly
-            (or @annually) | Run once a year, midnight, Jan. 1st | 0 0 1 1 * @monthly | Run once a month, midnight,
-            first of month | 0 0 1 * * @weekly | Run once a week, midnight between Sat/Sun | 0 0 * * 0 @daily (or
-            @midnight) | Run once a day, midnight | 0 0 * * * @hourly | Run once an hour, beginning of hour | 0 * * * *
+            {`
+  Field name   | Mandatory? | Allowed values  | Allowed special characters
+  ----------   | ---------- | --------------  | --------------------------
+  Seconds      | Yes        | 0-59            | * / , -
+  Minutes      | Yes        | 0-59            | * / , -
+  Hours        | Yes        | 0-23            | * / , -
+  Day of month | Yes        | 1-31            | * / , - ?
+  Month        | Yes        | 1-12 or JAN-DEC | * / , -
+  Day of week  | Yes        | 0-6 or SUN-SAT  | * / , - ?
+          `}
           </code>
-        </Typography>
+        </pre>
+        <pre className={classes.pre}>
+          <code>
+            {`
+  Entry                  | Description                                | Equivalent To
+  -----                  | -----------                                | -------------
+  @yearly (or @annually) | Run once a year, midnight, Jan. 1st        | 0 0 0 1 1 *
+  @monthly               | Run once a month, midnight, first of month | 0 0 0 1 * *
+  @weekly                | Run once a week, midnight between Sat/Sun  | 0 0 0 * * 0
+  @daily (or @midnight)  | Run once a day, midnight                   | 0 0 0 * * *
+  @hourly                | Run once an hour, beginning of hour        | 0 0 * * * *
+          `}
+          </code>
+        </pre>
 
         <TextField
-          id="schedule.cron"
+          id="scheduler.cron"
           label="Cron"
-          type="text"
-          autoComplete="off"
-          helperText="Schedule crontab: 30 * * * *"
-          value={values.schedule.cron}
-          onBlur={handleBlur}
+          helperText="Schedule crontab"
+          value={values.scheduler.cron}
           onChange={handleChange}
         />
 
         <TextField
-          id="schedule.duration"
+          id="scheduler.duration"
           label="Duration"
-          type="text"
-          autoComplete="off"
-          helperText="Schedule Duration: 1h30m"
-          value={values.schedule.duration}
-          onBlur={handleBlur}
+          helperText="Schedule duration"
+          value={values.scheduler.duration}
           onChange={handleChange}
         />
       </Box>
-    </Box>
+    </>
   )
 }
 

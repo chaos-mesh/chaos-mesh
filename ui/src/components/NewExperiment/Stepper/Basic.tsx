@@ -1,6 +1,6 @@
-import { Box, MenuItem } from '@material-ui/core'
 import { SelectField, TextField } from 'components/FormField'
 
+import { MenuItem } from '@material-ui/core'
 import React from 'react'
 import { StepperFormProps } from '../types'
 
@@ -10,39 +10,39 @@ interface BasicStepProps {
 }
 
 const BasicStep: React.FC<BasicStepProps> = ({ formProps, namespaces }) => {
-  const { values, handleBlur, handleChange } = formProps
+  const { values, handleChange } = formProps
+
+  const handleBasicNamespaceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    handleChange(e)
+
+    formProps.setFieldValue('scope.namespace_selectors', [e.target.value])
+  }
 
   return (
-    <Box maxWidth="30rem" mx="auto">
+    <>
       <TextField
-        id="basic.name"
+        id="name"
         label="Name"
-        type="text"
-        autoComplete="off"
         helperText="Please input an experiment name"
-        value={values.basic.name}
-        onBlur={handleBlur}
+        value={values.name}
         onChange={handleChange}
       />
 
       <SelectField
-        id="basic.namespace"
-        name="basic.namespace"
+        id="namespace"
+        name="namespace"
         label="Namespace"
-        labelId="basic.namespace-label"
         helperText="Please select an experiment namespace"
-        value={values.basic.namespace}
-        onChange={handleChange}
+        value={values.namespace}
+        onChange={handleBasicNamespaceChange}
       >
-        {namespaces.map((option: string) => (
-          <MenuItem key={option} value={option}>
-            {option}
+        {namespaces.map((n) => (
+          <MenuItem key={n} value={n}>
+            {n}
           </MenuItem>
         ))}
       </SelectField>
-
-      {/* TODO: Labels: {[key: string]: string} */}
-    </Box>
+    </>
   )
 }
 
