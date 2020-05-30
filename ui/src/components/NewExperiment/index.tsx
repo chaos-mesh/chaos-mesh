@@ -34,7 +34,7 @@ const Actions = ({ isSubmitting = false }: ActionsProps) => {
   const { state } = useStepperContext()
 
   return (
-    <Box display="flex" justifyContent="space-between" mb={6}>
+    <Box display="flex" justifyContent="space-between" marginBottom={6}>
       <Button type="button" variant="outlined" startIcon={<CloudUploadOutlinedIcon />}>
         Yaml File
       </Button>

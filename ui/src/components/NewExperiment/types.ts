@@ -60,7 +60,7 @@ export enum StepperType {
 
 export type StepperAction = {
   type: StepperType
-  step?: number
+  payload?: number
 }
 
 type StepperDispatch = (action: StepperAction) => void

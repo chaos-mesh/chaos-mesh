@@ -1,7 +1,7 @@
 import { Box, Button, Step, StepLabel, Stepper, Typography } from '@material-ui/core'
 import React, { useEffect, useState } from 'react'
 import { Theme, createStyles, makeStyles } from '@material-ui/core/styles'
-import { back, next, reset, useStepperContext } from '../Context'
+import { back, jump, next, reset, useStepperContext } from '../Context'
 
 import BasicStep from './Basic'
 import DoneAllIcon from '@material-ui/icons/DoneAll'
@@ -9,9 +9,29 @@ import ScheduleStep from './Schedule'
 import ScopeStep from './Scope'
 import { StepperFormProps } from '../types'
 import TargetStep from './Target'
+import api from 'api'
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
+    main: {
+      display: 'flex',
+      flexDirection: 'column',
+      width: '50%',
+      margin: `0 auto`,
+      padding: `${theme.spacing(6)} 0`,
+      [theme.breakpoints.down('sm')]: {
+        width: '100%',
+      },
+    },
+    stepper: {
+      [theme.breakpoints.down('sm')]: {
+        paddingLeft: 0,
+        paddingRight: 0,
+      },
+    },
+    stepLabel: {
+      cursor: 'pointer !important',
+    },
     backButton: {
       marginRight: theme.spacing(6),
     },
@@ -28,16 +48,17 @@ interface StepperProps {
 const CreateStepper: React.FC<StepperProps> = ({ formProps, toggleDrawer }) => {
   const classes = useStyles()
 
-  const [namespaces, setNamespaces] = useState<string[]>([])
   const { state, dispatch } = useStepperContext()
   const { activeStep } = state
+  const [namespaces, setNamespaces] = useState<string[]>([])
 
   const fetchNamespaces = () => {
-    // TODO: move mock data
-    setNamespaces(['Default', 'Chaos Testing', 'Others'])
+    api.common
+      .namespaces()
+      .then((resp) => setNamespaces(resp.data))
+      .catch(console.log)
   }
 
-  // fetch namespaces for basic and scope step when drawer is open
   useEffect(fetchNamespaces, [])
 
   const getStepContent = () => {
@@ -63,9 +84,8 @@ const CreateStepper: React.FC<StepperProps> = ({ formProps, toggleDrawer }) => {
   }
 
   const handleNext = () => dispatch(next())
-
   const handleBack = () => dispatch(back())
-
+  const handleJump = (step: number) => () => dispatch(jump(step))
   const handleReset = () => {
     dispatch(reset())
 
@@ -78,18 +98,19 @@ const CreateStepper: React.FC<StepperProps> = ({ formProps, toggleDrawer }) => {
 
   return (
     <Box display="flex" flexDirection="column">
-      <Stepper activeStep={state.activeStep} alternativeLabel>
-        {steps.map((label) => (
+      <Stepper className={classes.stepper} activeStep={state.activeStep} alternativeLabel>
+        {steps.map((label, index) => (
           <Step key={label}>
-            <StepLabel>{label}</StepLabel>
+            <StepLabel className={classes.stepLabel} onClick={handleJump(index)}>
+              {label}
+            </StepLabel>
           </Step>
         ))}
       </Stepper>
 
-      <Box display="flex" flexDirection="column" paddingY={6}>
+      <Box className={classes.main}>
         <Box>{getStepContent()}</Box>
-
-        <Box mt={6} textAlign="right">
+        <Box marginTop={6} textAlign="right">
           {activeStep === steps.length ? (
             <Button onClick={handleReset}>Reset</Button>
           ) : (

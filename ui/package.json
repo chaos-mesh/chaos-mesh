@@ -51,7 +51,6 @@
     "http-proxy-middleware": "^1.0.4",
     "husky": "^4.2.5",
     "lint-staged": "^10.1.7",
-    "node-sass": "^4.13.1",
     "prettier": "^2.0.5",
     "redux-logger": "^3.0.6"
   },

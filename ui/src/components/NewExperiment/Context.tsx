@@ -7,7 +7,7 @@ const initialState = { activeStep: 0 }
 
 export const next = createAction(StepperType.NEXT)
 export const back = createAction(StepperType.BACK)
-export const jump = createAction(StepperType.JUMP)
+export const jump = createAction<number, StepperType>(StepperType.JUMP)
 export const reset = createAction(StepperType.RESET)
 
 const reducer = (state: StepperState, action: StepperAction): StepperState => {
@@ -17,7 +17,7 @@ const reducer = (state: StepperState, action: StepperAction): StepperState => {
     case StepperType.BACK:
       return { ...state, activeStep: state.activeStep - 1 }
     case StepperType.JUMP:
-      return { ...state, activeStep: action.step! }
+      return { ...state, activeStep: action.payload! }
     case StepperType.RESET:
       return { ...state, activeStep: 0 }
     default:
