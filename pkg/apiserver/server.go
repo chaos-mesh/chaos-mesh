@@ -22,7 +22,6 @@ import (
 
 	"go.uber.org/fx"
 
-	assetfs "github.com/elazarl/go-bindata-assetfs"
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-playground/validator/v10"
@@ -56,14 +55,14 @@ type Server struct {
 
 	conf *config.ChaosServerConfig
 
-	uiAssetFS        *assetfs.AssetFS
+	uiAssetFS        http.FileSystem
 	apiHandlerEngine *gin.Engine
 }
 
 // NewServer returns a Server instance.
 func NewServer(
 	conf *config.ChaosServerConfig,
-	uiAssetFS *assetfs.AssetFS,
+	uiAssetFS http.FileSystem,
 	apiHandlerEngine *gin.Engine,
 ) *Server {
 	return &Server{
@@ -77,7 +76,7 @@ func (s *Server) handler(w http.ResponseWriter, r *http.Request) {
 	s.apiHandlerEngine.ServeHTTP(w, r)
 }
 
-func serverRegister(lx fx.Lifecycle, s *Server, conf *config.ChaosServerConfig) {
+func serverRegister(lx fx.Lifecycle, s *Server, conf *config.ChaosServerConfig, assetFs http.FileSystem) {
 	listenAddr := fmt.Sprintf("%s:%d", conf.ListenHost, conf.ListenPort)
 	listener, err := net.Listen("tcp", listenAddr)
 	if err != nil {
@@ -87,7 +86,7 @@ func serverRegister(lx fx.Lifecycle, s *Server, conf *config.ChaosServerConfig) 
 
 	mux := http.DefaultServeMux
 
-	mux.Handle("/", http.StripPrefix("/", uiserver.Handler()))
+	mux.Handle("/", http.StripPrefix("/", uiserver.Handler(assetFs)))
 	mux.Handle("/api/", Handler(s))
 	mux.Handle("/api/swagger/", swaggerserver.Handler())
 
