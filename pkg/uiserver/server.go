@@ -23,7 +23,7 @@ import (
 // Handler returns a FileServer `http.Handler` to handle http request.
 func Handler(root http.FileSystem) http.Handler {
 	if root != nil {
-		return httpgzip.FileServer(root, httpgzip.FileServerOptions{IndexHTML: true, ServeError: fallback(root)})
+		return httpgzip.FileServer(root, httpgzip.FileServerOptions{IndexHTML: true, ServeError: fallback})
 	}
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -36,10 +36,8 @@ func AssetFS() http.FileSystem {
 	return assets
 }
 
-func fallback(fs http.FileSystem) func(w http.ResponseWriter, r *http.Request, _ error) {
-	return func(w http.ResponseWriter, r *http.Request, _ error) {
-		localRedirect(w, r, "index.html")
-	}
+func fallback(w http.ResponseWriter, r *http.Request, _ error) {
+	localRedirect(w, r, ".")
 }
 
 // localRedirect gives a Moved Permanently response.
