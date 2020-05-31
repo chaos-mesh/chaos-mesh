@@ -122,9 +122,6 @@ type SelectorInfo struct {
 	// The key defines the namespace which pods belong,
 	// and the each values is a set of pod names.
 	Pods map[string][]string `json:"pods" binding:"PodsValid"`
-
-	Mode  string `json:"mode" binding:"oneof='' 'one' 'all' 'fixed' 'fixed' 'fixed-percent' 'random-max-percent'"`
-	Value string `json:"value" binding:"ValueValid"`
 }
 
 // ParseSelector parses SelectorInfo to v1alpha1.SelectorSpec
