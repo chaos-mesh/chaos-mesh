@@ -12,7 +12,7 @@ interface ScopeStepProps {
 }
 
 const phases = ['all', 'pending', 'running', 'succeeded', 'failed', 'unknown']
-const modes = ['all', 'one', 'fixed number', 'fixed percent', 'random max percent']
+const modes = ['all', { name: 'Random one', value: 'one' }, 'fixed number', 'fixed percent', 'random max percent']
 const modesWithAdornment = ['fixed-percent', 'random-max-percent']
 
 const ScopeStep: React.FC<ScopeStepProps> = ({ formProps, namespaces }) => {
@@ -72,11 +72,17 @@ const ScopeStep: React.FC<ScopeStepProps> = ({ formProps, namespaces }) => {
         value={values.scope.mode}
         onChange={handleChange}
       >
-        {modes.map((option: string) => (
-          <MenuItem key={option} value={option.split(' ').join('-')}>
-            {upperFirst(option)}
-          </MenuItem>
-        ))}
+        {modes.map((option) =>
+          typeof option === 'string' ? (
+            <MenuItem key={option} value={option.split(' ').join('-')}>
+              {upperFirst(option)}
+            </MenuItem>
+          ) : (
+            <MenuItem key={option.value} value={option.value}>
+              {option.name}
+            </MenuItem>
+          )
+        )}
       </SelectField>
 
       {values.scope.mode !== 'all' && values.scope.mode !== 'one' && (

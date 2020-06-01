@@ -7,7 +7,7 @@ export const defaultExperimentSchema: Experiment = {
     namespace_selectors: ['default'],
     label_selectors: '',
     phase_selectors: ['all'],
-    mode: 'all',
+    mode: 'one',
     value: '',
   },
   target: {

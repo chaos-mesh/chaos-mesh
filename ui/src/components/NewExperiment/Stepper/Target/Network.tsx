@@ -4,6 +4,7 @@ import { MenuItem } from '@material-ui/core'
 import React from 'react'
 import { StepperFormProps } from 'components/NewExperiment/types'
 import { upperFirst } from 'lib/utils'
+import AdvancedOptions from 'components/AdvancedOptions'
 
 const actions = ['bandwidth', 'corrupt', 'delay', 'duplicate', 'loss']
 
@@ -93,26 +94,28 @@ export default function NetworkPanel(props: StepperFormProps) {
       {values.target.network_chaos.action === 'delay' && (
         <>
           <TextField
-            id="target.network_chaos.delay.correlation"
-            label="Correlation"
-            helperText="The correlation of delay"
-            value={values.target.network_chaos.delay.correlation}
-            onChange={handleChange}
-          />
-          <TextField
             id="target.network_chaos.delay.latency"
             label="Latency"
             helperText="The latency of delay"
             value={values.target.network_chaos.delay.latency}
             onChange={handleChange}
           />
-          <TextField
-            id="target.network_chaos.delay.jitter"
-            label="Jitter"
-            helperText="The jitter of delay"
-            value={values.target.network_chaos.delay.jitter}
-            onChange={handleChange}
-          />
+          <AdvancedOptions>
+            <TextField
+              id="target.network_chaos.delay.correlation"
+              label="Correlation"
+              helperText="The correlation of delay"
+              value={values.target.network_chaos.delay.correlation}
+              onChange={handleChange}
+            />
+            <TextField
+              id="target.network_chaos.delay.jitter"
+              label="Jitter"
+              helperText="The jitter of delay"
+              value={values.target.network_chaos.delay.jitter}
+              onChange={handleChange}
+            />
+          </AdvancedOptions>
         </>
       )}
 
