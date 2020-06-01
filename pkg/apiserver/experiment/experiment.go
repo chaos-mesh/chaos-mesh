@@ -117,6 +117,11 @@ type SelectorInfo struct {
 	AnnotationSelectors map[string]string `json:"annotation_selectors" binding:"MapSelectorsValid"`
 	FieldSelectors      map[string]string `json:"field_selectors" binding:"MapSelectorsValid"`
 	PhaseSelector       []string          `json:"phase_selectors" binding:"PhaseSelectorsValid"`
+
+	// Pods is a map of string keys and a set values that used to select pods.
+	// The key defines the namespace which pods belong,
+	// and the each values is a set of pod names.
+	Pods map[string][]string `json:"pods" binding:"PodsValid"`
 }
 
 // ParseSelector parses SelectorInfo to v1alpha1.SelectorSpec
@@ -144,6 +149,10 @@ func (s *SelectorInfo) ParseSelector() v1alpha1.SelectorSpec {
 
 	for _, ph := range s.PhaseSelector {
 		selector.PodPhaseSelectors = append(selector.PodPhaseSelectors, ph)
+	}
+
+	if s.Pods != nil {
+		selector.Pods = s.Pods
 	}
 
 	return selector
