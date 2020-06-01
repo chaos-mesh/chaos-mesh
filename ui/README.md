@@ -13,10 +13,12 @@ To learn React, check out the [React documentation](https://reactjs.org/).
 
 ## How to develop
 
-Into the `ui` folder, run:
+First, you need to provide an API server as a proxy, we will pass it into an env var which named: `REACT_APP_API_URL`.
+
+Then, into the `ui` folder, run:
 
 ```sh
-yarn && yarn start
+REACT_APP_API_URL=PROXY_URL yarn && yarn start
 ```
 
 Your browser will open <localhost:3000> automatically.
@@ -42,9 +44,7 @@ And also, because some of us use vscode to develop the dashboard, we recommend t
 
 Currently, we use `@material-ui/styles` to isolate each component styles.
 
-Maybe we will use `sass` in the future.
-
-But no matter what to use, we hope you can follow this order **(Don't care about their value)** to organize all styles:
+We hope you can follow this order **(Don't care about their value)** to organize all styles:
 
 ```scss
 // Position first
