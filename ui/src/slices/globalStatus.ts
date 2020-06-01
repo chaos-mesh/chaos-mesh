@@ -22,13 +22,20 @@ const globalStatusSlice = createSlice({
   name: 'globalStatus',
   initialState: {
     stateOfExperiments: defaultExperiments,
+    needToRefreshExperiments: false,
   },
-  reducers: {},
+  reducers: {
+    toggleNeedToRefreshExperiments(state) {
+      state.needToRefreshExperiments = !state.needToRefreshExperiments
+    },
+  },
   extraReducers: (builder) => {
     builder.addCase(getStateofExperiments.fulfilled, (state, action: GlobalStatusAction) => {
       state.stateOfExperiments = action.payload
     })
   },
 })
+
+export const { toggleNeedToRefreshExperiments } = globalStatusSlice.actions
 
 export default globalStatusSlice.reducer

@@ -46,7 +46,7 @@ const ExperimentCard: React.FC<ExperimentCardProps> = ({ experiment: e }) => {
         </Typography>
       </CardContent>
       <CardActions>
-        <Button className={classes.detailButton} size="small">
+        <Button className={classes.detailButton} variant="outlined" size="small">
           Detail
         </Button>
       </CardActions>

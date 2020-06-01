@@ -88,13 +88,10 @@ const CreateStepper: React.FC<StepperProps> = ({ formProps, toggleDrawer }) => {
   const handleBack = () => dispatch(back())
   const handleJump = (step: number) => () => dispatch(jump(step))
   const handleReset = () => {
+    const { handleReset: resetForm } = formProps
+
     dispatch(reset())
-
-    const { dirty, handleReset: resetForm } = formProps
-
-    if (dirty) {
-      resetForm()
-    }
+    resetForm()
   }
 
   return (

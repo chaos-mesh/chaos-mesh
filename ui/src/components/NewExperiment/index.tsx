@@ -1,4 +1,4 @@
-import { Box, Button, Container, Drawer } from '@material-ui/core'
+import { Box, Button, Container, Drawer, Snackbar } from '@material-ui/core'
 import { Experiment, StepperFormProps } from './types'
 import { Form, Formik, FormikHelpers } from 'formik'
 import React, { useState } from 'react'
@@ -6,12 +6,16 @@ import { StepperProvider, useStepperContext } from './Context'
 import { Theme, createStyles, makeStyles } from '@material-ui/core/styles'
 
 import AddIcon from '@material-ui/icons/Add'
+import Alert from '@material-ui/lab/Alert'
 import CloudUploadOutlinedIcon from '@material-ui/icons/CloudUploadOutlined'
 import PublishIcon from '@material-ui/icons/Publish'
 import Stepper from './Stepper'
 import api from 'api'
 import { defaultExperimentSchema } from './constants'
 import { parseSubmitValues } from 'lib/utils'
+import { toggleNeedToRefreshExperiments } from 'slices/globalStatus'
+import { useHistory } from 'react-router-dom'
+import { useStoreDispatch } from 'store'
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -54,11 +58,16 @@ const Actions = ({ isSubmitting = false }: ActionsProps) => {
 }
 
 export default function NewExperiment() {
-  const classes = useStyles()
   const initialValues: Experiment = defaultExperimentSchema
 
-  const [isOpen, setIsOpen] = useState(false)
-  const toggleDrawer = () => setIsOpen(!isOpen)
+  const classes = useStyles()
+  const history = useHistory()
+  const dispatch = useStoreDispatch()
+
+  const [open, setOpen] = useState(false)
+  const toggleDrawer = () => setOpen(!open)
+  const [snackOpen, setSnackOpen] = useState(false)
+  const handleSnackClose = () => setSnackOpen(false)
 
   const handleOnSubmit = (values: Experiment, actions: FormikHelpers<Experiment>) => {
     const parsedValues = parseSubmitValues(values)
@@ -68,7 +77,13 @@ export default function NewExperiment() {
     api.experiments
       .newExperiment(parsedValues)
       .then((resp) => {
-        console.log(resp.data)
+        toggleDrawer()
+        setSnackOpen(true)
+        if (history.location.pathname === '/experiments') {
+          dispatch(toggleNeedToRefreshExperiments())
+        } else {
+          history.push('/experiments')
+        }
       })
       .catch(console.log)
   }
@@ -78,7 +93,7 @@ export default function NewExperiment() {
       <Button variant="outlined" startIcon={<AddIcon />} onClick={toggleDrawer}>
         New Experiment
       </Button>
-      <Drawer anchor="right" open={isOpen} onClose={toggleDrawer}>
+      <Drawer anchor="right" open={open} onClose={toggleDrawer}>
         <StepperProvider>
           <Formik initialValues={initialValues} onSubmit={handleOnSubmit}>
             {(props: StepperFormProps) => {
@@ -96,6 +111,19 @@ export default function NewExperiment() {
           </Formik>
         </StepperProvider>
       </Drawer>
+      <Snackbar
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'right',
+        }}
+        autoHideDuration={5000}
+        open={snackOpen}
+        onClose={handleSnackClose}
+      >
+        <Alert variant="outlined" severity="success" onClose={handleSnackClose}>
+          Created successfully!
+        </Alert>
+      </Snackbar>
     </>
   )
 }
