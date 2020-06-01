@@ -32,7 +32,7 @@ const BasicStep: React.FC<BasicStepProps> = ({ formProps, namespaces }) => {
         id="namespace"
         name="namespace"
         label="Namespace"
-        helperText="Please select an experiment namespace"
+        helperText="Select the experiment's namespace"
         value={values.namespace}
         onChange={handleBasicNamespaceChange}
       >

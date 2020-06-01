@@ -1,6 +1,7 @@
-import { GlobalStatusAction, StateOfExperiments } from './globalStatus.type'
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 
+import { GlobalStatusAction } from './globalStatus.type'
+import { StateOfExperiments } from 'api/experiments.type'
 import api from 'api'
 
 const defaultExperiments: StateOfExperiments = {

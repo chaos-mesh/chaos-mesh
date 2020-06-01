@@ -6,6 +6,8 @@ import React from 'react'
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     root: {
+      position: 'relative',
+      flex: 1,
       padding: theme.spacing(6),
     },
   })

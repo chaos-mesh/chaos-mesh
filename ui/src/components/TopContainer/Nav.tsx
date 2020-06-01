@@ -18,6 +18,7 @@ const useStyles = makeStyles((theme: Theme) =>
     },
     logo: {
       width: '75%',
+      marginTop: theme.spacing(1),
     },
     listItem: {
       '&.active': {

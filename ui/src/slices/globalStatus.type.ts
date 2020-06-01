@@ -1,11 +1,4 @@
 import { PayloadAction } from '@reduxjs/toolkit'
-
-export interface StateOfExperiments {
-  total: number
-  running: number
-  paused: number
-  failed: number
-  finished: number
-}
+import { StateOfExperiments } from 'api/experiments.type'
 
 export type GlobalStatusAction = PayloadAction<StateOfExperiments>

@@ -4,7 +4,7 @@ import { RootState, useStoreDispatch } from 'store'
 import { Theme, createStyles, makeStyles } from '@material-ui/core/styles'
 
 import NewExperiment from 'components/NewExperiment'
-import { StateOfExperiments } from 'slices/globalStatus.type'
+import { StateOfExperiments } from 'api/experiments.type'
 import { getStateofExperiments } from 'slices/globalStatus'
 import { useSelector } from 'react-redux'
 
@@ -20,15 +20,18 @@ const useStyles = makeStyles((theme: Theme) => {
       ...theme.mixins.toolbar,
       justifyContent: 'space-between',
       [theme.breakpoints.down('sm')]: {
-        flexDirection: 'column-reverse',
-        alignItems: 'start',
-        paddingTop: sp3,
         paddingBottom: sp3,
       },
     },
     new: {
       [theme.breakpoints.down('sm')]: {
         marginTop: sp3,
+      },
+    },
+    currentStatus: {
+      display: 'flex',
+      [theme.breakpoints.down('sm')]: {
+        display: 'none',
       },
     },
     statusButton: {
@@ -48,7 +51,7 @@ export const CurrentStatus: React.FC<CurrentStatusProps> = ({ state }) => {
   const classes = useStyles()
 
   return (
-    <Box display="flex">
+    <Box className={classes.currentStatus}>
       <Button className={classes.statusButton} variant="outlined">
         Total: {state.total}
       </Button>
@@ -57,9 +60,6 @@ export const CurrentStatus: React.FC<CurrentStatusProps> = ({ state }) => {
       </Button>
       <Button className={classes.statusButton} variant="outlined" color="secondary">
         Failed: {state.failed}
-      </Button>
-      <Button className={classes.statusButton} variant="outlined">
-        Finished: {state.finished}
       </Button>
     </Box>
   )

@@ -76,7 +76,7 @@ const CreateStepper: React.FC<StepperProps> = ({ formProps, toggleDrawer }) => {
         return (
           <Box textAlign="center">
             <DoneAllIcon fontSize="large" />
-            <Typography variant="h6">All steps completed.</Typography>
+            <Typography variant="h6">All steps are completed.</Typography>
           </Box>
         )
       default:

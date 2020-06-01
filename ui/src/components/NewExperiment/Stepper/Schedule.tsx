@@ -39,9 +39,7 @@ const ScheduleStep: React.FC<ScheduleStepProps> = ({ formProps }) => {
 
       <Box hidden={isImmediate} mt={3}>
         <Divider />
-        <Typography variant="subtitle2" component="h3" className={classes.cronTitle}>
-          Cron Job
-        </Typography>
+        <Typography className={classes.cronTitle}>Cron Job</Typography>
         <pre className={classes.pre}>
           <code>
             {`
