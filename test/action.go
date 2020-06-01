@@ -142,7 +142,7 @@ func (oa *operatorAction) DeployOperator(info OperatorConfig) error {
 	if err != nil {
 		return err
 	}
-	return e2eutil.WaitForAPIServicesAvaiable(oa.aggrCli, labels.Everything())
+	return e2eutil.WaitForAPIServicesAvailable(oa.aggrCli, labels.Everything())
 }
 
 func (oa *operatorAction) InstallCRD(info OperatorConfig) error {
