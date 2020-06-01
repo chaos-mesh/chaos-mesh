@@ -17,18 +17,13 @@ import (
 	"io"
 	"net/http"
 
-	assetfs "github.com/elazarl/go-bindata-assetfs"
-)
-
-var (
-	fs = assetFS()
+	"github.com/shurcooL/httpgzip"
 )
 
 // Handler returns a FileServer `http.Handler` to handle http request.
-func Handler() http.Handler {
-	if fs != nil {
-		fileServer := http.FileServer(fs)
-		return fileServer
+func Handler(root http.FileSystem) http.Handler {
+	if root != nil {
+		return httpgzip.FileServer(root, httpgzip.FileServerOptions{IndexHTML: true, ServeError: fallback})
 	}
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -36,7 +31,21 @@ func Handler() http.Handler {
 	})
 }
 
-// AssetFS returns fs
-func AssetFS() *assetfs.AssetFS {
-	return fs
+// AssetFS returns assets.
+func AssetFS() http.FileSystem {
+	return assets
+}
+
+func fallback(w http.ResponseWriter, r *http.Request, _ error) {
+	localRedirect(w, r, ".")
+}
+
+// localRedirect gives a Moved Permanently response.
+// It does not convert relative paths to absolute paths like http.Redirect does.
+func localRedirect(w http.ResponseWriter, req *http.Request, newPath string) {
+	if req.URL.RawQuery != "" {
+		newPath += "?" + req.URL.RawQuery
+	}
+	w.Header().Set("Location", newPath)
+	w.WriteHeader(http.StatusMovedPermanently)
 }

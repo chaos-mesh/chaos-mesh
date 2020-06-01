@@ -10,18 +10,30 @@
 // distributed under the License is distributed on an "AS IS" BASIS,
 // See the License for the specific language governing permissions and
 // limitations under the License.
-// +build !swagger_server
 
-package swaggerserver
+package main
 
 import (
-	"io"
+	"log"
 	"net/http"
+	"os"
+
+	"github.com/shurcooL/vfsgen"
 )
 
-// Handler returns an empty `http.Handler`.
-func Handler() http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		_, _ = io.WriteString(w, "Swagger UI is not built. Use `SWAGGER=1 make`.\n")
+func main() {
+	buildTag := ""
+	if len(os.Args) > 1 {
+		buildTag = os.Args[1]
+	}
+
+	fs := http.Dir("ui/build")
+	err := vfsgen.Generate(fs, vfsgen.Options{
+		BuildTags:    buildTag,
+		PackageName:  "uiserver",
+		VariableName: "assets",
 	})
+	if err != nil {
+		log.Fatalln(err)
+	}
 }
