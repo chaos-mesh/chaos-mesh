@@ -82,6 +82,10 @@ func SelectPods(ctx context.Context, c client.Client, selector v1alpha1.Selector
 	// pods are specifically specified
 	if len(selector.Pods) > 0 {
 		for ns, names := range selector.Pods {
+			if !IsAllowedNamespaces(ns) {
+				log.Info("filter pod by namespaces", "namespace", ns)
+			}
+
 			for _, name := range names {
 				var pod v1.Pod
 				err := c.Get(ctx, types.NamespacedName{
@@ -96,13 +100,6 @@ func SelectPods(ctx context.Context, c client.Client, selector v1alpha1.Selector
 				if apierrors.IsNotFound(err) {
 					log.Error(err, "Pod is not found", "namespace", ns, "pod name", name)
 					continue
-				}
-        
-        if IsAllowedNamespaces(pod.Namespace) {
-					pods = append(pods, pod)
-				} else {
-					log.Info("filter pod by namespaces",
-						"pod", pod.Name, "namespace", pod.Namespace)
 				}
 
 				return nil, err
