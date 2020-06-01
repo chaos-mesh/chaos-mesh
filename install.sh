@@ -1,5 +1,18 @@
 #!/usr/bin/env bash
 
+# Copyright 2020 PingCAP, Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 # This is a script to quickly install chaos-mesh.
 # This script will check if docker and kubernetes are installed. If local mode is set and kubernetes is not installed,
 # it will use kind or minikube to install the kubernetes cluster according to the configuration.

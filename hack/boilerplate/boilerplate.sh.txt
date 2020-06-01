@@ -1,6 +1,4 @@
-#!/usr/bin/env bash
-
-# Copyright 2020 PingCAP, Inc.
+# Copyright YEAR PingCAP, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,23 +10,3 @@
 # distributed under the License is distributed on an "AS IS" BASIS,
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-# Generate all protobuf bindings.
-# Run from repository root.
-set -eu
-
-PROTOC_BIN=${PROTOC_BIN:-protoc}
-
-if ! [[ "$0" =~ "hack/genproto.sh" ]]; then
-	echo "must be run from repository root"
-	exit 255
-fi
-
-DIRS="pkg/chaosdaemon/pb pkg/chaosfs/pb"
-
-echo "generating code"
-for dir in ${DIRS}; do
-	pushd ${dir}
-		${PROTOC_BIN} --go_out=plugins=grpc:. -I=. *.proto
-	popd
-done
