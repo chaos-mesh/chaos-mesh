@@ -29,6 +29,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	v1 "k8s.io/api/core/v1"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/fields"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/selection"
@@ -54,7 +55,7 @@ func SelectAndFilterPods(ctx context.Context, c client.Client, spec SelectSpec) 
 	mode := spec.GetMode()
 	value := spec.GetValue()
 
-	pods, err := selectPods(ctx, c, selector)
+	pods, err := SelectPods(ctx, c, selector)
 	if err != nil {
 		return nil, err
 	}
@@ -72,10 +73,10 @@ func SelectAndFilterPods(ctx context.Context, c client.Client, spec SelectSpec) 
 	return filteredPod, nil
 }
 
-// selectPods returns the list of pods that are available for pod chaos action.
+// SelectPods returns the list of pods that are available for pod chaos action.
 // It returns all pods that match the configured label, annotation and namespace selectors.
 // If pods are specifically specified by `selector.Pods`, it just returns the selector.Pods.
-func selectPods(ctx context.Context, c client.Client, selector v1alpha1.SelectorSpec) ([]v1.Pod, error) {
+func SelectPods(ctx context.Context, c client.Client, selector v1alpha1.SelectorSpec) ([]v1.Pod, error) {
 	var pods []v1.Pod
 
 	// pods are specifically specified
@@ -87,15 +88,24 @@ func selectPods(ctx context.Context, c client.Client, selector v1alpha1.Selector
 					Namespace: ns,
 					Name:      name,
 				}, &pod)
-				if err != nil {
-					return nil, err
+				if err == nil {
+					pods = append(pods, pod)
+					continue
 				}
-				if IsAllowedNamespaces(pod.Namespace) {
+
+				if apierrors.IsNotFound(err) {
+					log.Error(err, "Pod is not found", "namespace", ns, "pod name", name)
+					continue
+				}
+        
+        if IsAllowedNamespaces(pod.Namespace) {
 					pods = append(pods, pod)
 				} else {
 					log.Info("filter pod by namespaces",
 						"pod", pod.Name, "namespace", pod.Namespace)
 				}
+
+				return nil, err
 			}
 		}
 
@@ -111,9 +121,7 @@ func selectPods(ctx context.Context, c client.Client, selector v1alpha1.Selector
 	if len(selector.FieldSelectors) > 0 {
 		listOptions.FieldSelector = fields.SelectorFromSet(selector.FieldSelectors)
 	}
-	err := c.List(ctx, &podList, &listOptions)
-
-	if err != nil {
+	if err := c.List(ctx, &podList, &listOptions); err != nil {
 		return nil, err
 	}
 

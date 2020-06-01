@@ -11,14 +11,29 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// +build tools
-
-package tools
+package main
 
 import (
-	_ "github.com/mgechev/revive"
-	_ "github.com/pingcap/failpoint/failpoint-ctl"
-	_ "github.com/swaggo/swag/cmd/swag"
-	_ "golang.org/x/tools/cmd/goimports"
-	_ "sigs.k8s.io/controller-tools/cmd/controller-gen"
+	"log"
+	"net/http"
+	"os"
+
+	"github.com/shurcooL/vfsgen"
 )
+
+func main() {
+	buildTag := ""
+	if len(os.Args) > 1 {
+		buildTag = os.Args[1]
+	}
+
+	fs := http.Dir("ui/build")
+	err := vfsgen.Generate(fs, vfsgen.Options{
+		BuildTags:    buildTag,
+		PackageName:  "uiserver",
+		VariableName: "assets",
+	})
+	if err != nil {
+		log.Fatalln(err)
+	}
+}
