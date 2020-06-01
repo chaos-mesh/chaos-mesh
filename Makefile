@@ -162,10 +162,13 @@ failpoint-disable: $(GOBIN)/failpoint-ctl
 vet:
 	$(CGOENV) go vet ./...
 
-tidy:
+tidy: clean
 	@echo "go mod tidy"
 	GO111MODULE=on go mod tidy
 	git diff --quiet go.mod go.sum
+
+clean:
+	rm -rf docs/docs.go
 
 taily-build:
 	if [ "$(shell docker ps --filter=name=$@ -q)" = "" ]; then \
