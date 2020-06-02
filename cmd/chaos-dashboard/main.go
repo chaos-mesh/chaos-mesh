@@ -63,6 +63,7 @@ func main() {
 	ctrl.SetLogger(zap.Logger(true))
 
 	stopCh := ctrl.SetupSignalHandler()
+
 	app := fx.New(
 		fx.Provide(
 			func() (<-chan struct{}, *config.ChaosServerConfig) {
