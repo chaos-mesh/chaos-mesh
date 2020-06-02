@@ -83,12 +83,14 @@ chaosDaemon:
 
   tolerations: []
 
-chaosServer:
+dashboard:
   create: false
+
+  replicaCount: 1
 
   serviceAccount: chaos-controller-manager
 
-  image: pingcap/chaos-server:latest
+  image: pingcap/chaos-dashboard:latest
   imagePullPolicy: Always
 
   nodeSelector: {}
@@ -112,36 +114,36 @@ chaosServer:
       memory: 256Mi
 
   persistentVolume:
-    # If you are using SQLite as your DB for Chaos Server, it is recommended to enable persistence.
+    # If you are using SQLite as your DB for Chaos Dashboard, it is recommended to enable persistence.
     # If enable, the chart will create a PersistenceVolumeClaim to store its state in. If you are
     # using a DB other than SQLite, set this to false to avoid allocating unused storage.
     # If set to false, Chaos Mesh will use an emptyDir instead, which is ephemeral.
     enabled: false
 
-    # If you'd like to bring your own PVC for persisting Drone state, pass the name of the
+    # If you'd like to bring your own PVC for persisting chaos event, pass the name of the
     # created + ready PVC here. If set, this Chart will not create the default PVC.
     # Requires server.persistentVolume.enabled: true
     #
     existingClaim: ""
 
-    # Chaos Server data Persistent Volume size.
+    # Chaos Dashboard data Persistent Volume size.
     size: 8Gi
 
-    # Chaos Server data Persistent Volume Storage Class.
+    # Chaos Dashboard data Persistent Volume Storage Class.
     # If defined, storageClassName: <storageClass>
     storageClassName: standard
 
-    # Chaos Server data Persistent Volume mount root path
+    # Chaos Dashboard data Persistent Volume mount root path
     #
     mountPath: /data
 
-    # Subdirectory of Drone server data Persistent Volume to mount
+    # Subdirectory of Chaos Dashboard data Persistent Volume to mount
     # Useful if the volume's root directory is not empty
     #
     subPath: ""
 
 
-  # The keys within the "env" map are mounted as environment variables on the Chaos server pod.
+  # The keys within the "env" map are mounted as environment variables on the Chaos Dashboard pod.
   env:
     LISTEN_HOST: "0.0.0.0"
     LISTEN_PORT: 2333
@@ -150,7 +152,7 @@ chaosServer:
     DATABASE_DRIVER: sqlite3
     DATABASE_DATASOURCE: /data/core.sqlite
 
-    # If you are going to store build secrets in the Chaos Server database, it is suggested that
+    # If you are going to store build secrets in the Chaos Dashboard database, it is suggested that
     # you set a database encryption secret. This must be set before any secrets are stored
     # in the database.
     # DATABASE_SECRET:
