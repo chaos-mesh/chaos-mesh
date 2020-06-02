@@ -146,6 +146,7 @@ var _ = ginkgo.Describe("[Basic]", func() {
 					}
 					return false, nil
 				})
+				framework.ExpectNoError(err,"faild to verify PodFailure")
 
 				err = cli.Delete(ctx, podFailureChaos)
 				framework.ExpectNoError(err, "failed to delete pod failure chaos")
