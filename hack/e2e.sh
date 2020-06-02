@@ -32,6 +32,7 @@ This script is entrypoint to run e2e tests.
 Usage: hack/e2e.sh [-h] -- [extra test args]
     -h      show this message and exit
 Environments:
+    PROVIDER                    Kubernetes provider, e.g. kind, gke, eks, defaults: kind
     HELM_IMAGE                  image for helm tiller
     DOCKER_REGISTRY             image docker registry
     IMAGE_TAG                   image tag
@@ -87,17 +88,19 @@ hack::ensure_kubectl
 hack::ensure_helm
 hack::ensure_kubebuilder
 hack::ensure_kustomize
+hack::ensure_kubetest2
 
+PROVIDER=${PROVIDER:-kind}
 HELM_IMAGE=${HELM_IMAGE:-gcr.io/kubernetes-helm/tiller:v2.9.1}
 DOCKER_REGISTRY=${DOCKER_REGISTRY:-localhost:5000}
 IMAGE_TAG=${IMAGE_TAG:-latest}
 CLUSTER=${CLUSTER:-chaos-mesh}
 KUBECONFIG=${KUBECONFIG:-~/.kube/config}
-KUBECONTEXT=kind-$CLUSTER
 SKIP_BUILD=${SKIP_BUILD:-}
 SKIP_IMAGE_BUILD=${SKIP_IMAGE_BUILD:-}
 SKIP_UP=${SKIP_UP:-}
 SKIP_DOWN=${SKIP_DOWN:-}
+SKIP_DUMP=${SKIP_DUMP:-}
 REUSE_CLUSTER=${REUSE_CLUSTER:-}
 KIND_DATA_HOSTPATH=${KIND_DATA_HOSTPATH:-none}
 KUBE_VERSION=${KUBE_VERSION:-v1.12.10}
@@ -105,21 +108,24 @@ KUBE_WORKERS=${KUBE_WORKERS:-3}
 DOCKER_IO_MIRROR=${DOCKER_IO_MIRROR:-}
 GCR_IO_MIRROR=${GCR_IO_MIRROR:-}
 QUAY_IO_MIRROR=${QUAY_IO_MIRROR:-}
+ARTIFACTS=${ARTIFACTS:-}
 
+echo "PROVIDER: $PROVIDER"
 echo "DOCKER_REGISTRY: $DOCKER_REGISTRY"
 echo "IMAGE_TAG: $IMAGE_TAG"
 echo "CLUSTER: $CLUSTER"
 echo "KUBECONFIG: $KUBECONFIG"
-echo "KUBECONTEXT: $KUBECONTEXT"
 echo "SKIP_BUILD: $SKIP_BUILD"
 echo "SKIP_IMAGE_BUILD: $SKIP_IMAGE_BUILD"
 echo "SKIP_UP: $SKIP_UP"
 echo "SKIP_DOWN: $SKIP_DOWN"
+echo "SKIP_DUMP: $SKIP_DUMP"
 echo "KIND_DATA_HOSTPATH: $KIND_DATA_HOSTPATH"
 echo "KUBE_VERSION: $KUBE_VERSION"
 echo "DOCKER_IO_MIRROR: $DOCKER_IO_MIRROR"
 echo "GCR_IO_MIRROR: $GCR_IO_MIRROR"
 echo "QUAY_IO_MIRROR: $QUAY_IO_MIRROR"
+echo "ARTIFACTS: $ARTIFACTS"
 
 # https://github.com/kubernetes-sigs/kind/releases/tag/v0.6.1
 declare -A kind_node_images
@@ -148,85 +154,46 @@ function e2e::image_build() {
     DOCKER_REGISTRY=${DOCKER_REGISTRY} make image-e2e-helper
 }
 
-function e2e::image_load() {
-    local names=(
-        pingcap/chaos-mesh
-        pingcap/chaos-daemon
-        pingcap/chaos-fs
-        pingcap/chaos-scripts
-        pingcap/e2e-helper
-    )
-    for n in ${names[@]}; do
-        $KIND_BIN load docker-image --name $CLUSTER ${DOCKER_REGISTRY}/$n:$IMAGE_TAG
-    done
-}
-
-function e2e::cluster_exists() {
-    local name="$1"
-    $KIND_BIN get clusters | grep $CLUSTER &>/dev/null
-}
-
-function e2e::__restart_docker() {
-    echo "info: restarting docker"
-    service docker restart
-    # the service can be started but the docker socket not ready, wait for ready
-    local WAIT_N=0
-    local MAX_WAIT=5
-    while true; do
-        # docker ps -q should only work if the daemon is ready
-        docker ps -q > /dev/null 2>&1 && break
-        if [[ ${WAIT_N} -lt ${MAX_WAIT} ]]; then
-            WAIT_N=$((WAIT_N+1))
-            echo "info; Waiting for docker to be ready, sleeping for ${WAIT_N} seconds."
-            sleep ${WAIT_N}
-        else
-            echo "info: Reached maximum attempts, not waiting any longer..."
-            break
-        fi
-    done
-    echo "info: done restarting docker"
-}
-
-# e2e::__cluster_is_alive checks if the cluster is alive or not
-function e2e::__cluster_is_alive() {
-    local ret=0
-    echo "info: checking the cluster version"
-    $KUBECTL_BIN --context $KUBECONTEXT version --short || ret=$?
-    return $ret
-}
-
-function e2e::up() {
-    if [ -n "$SKIP_UP" ]; then
-        echo "info: skip starting a new cluster"
-        return
-    fi
-    if [ -n "$DOCKER_IO_MIRROR" -a -n "${DOCKER_IN_DOCKER_ENABLED:-}" ]; then
-        echo "info: configure docker.io mirror '$DOCKER_IO_MIRROR' for DinD"
-cat <<EOF > /etc/docker/daemon.json
-{
-    "registry-mirrors": ["$DOCKER_IO_MIRROR"]
-}
-EOF
-        e2e::__restart_docker
-    fi
-    if e2e::cluster_exists $CLUSTER; then
-        if [ -n "$REUSE_CLUSTER" ]; then
-            if e2e::__cluster_is_alive; then
-                echo "info: REUSE_CLUSTER is enabled and the cluster is alive, reusing it"
-                return
-            else
-                echo "info: REUSE_CLUSTER is enabled but the cluster is not alive, trying to recreate it"
-            fi
-        fi
-        echo "info: deleting the cluster '$CLUSTER'"
-        $KIND_BIN delete cluster --name $CLUSTER
-    fi
-    echo "info: starting a new cluster"
-    tmpfile=$(mktemp)
-    trap "test -f $tmpfile && rm $tmpfile" RETURN
+function e2e::create_kindconfig() {
+    local tmpfile=${1}
     cat <<EOF > $tmpfile
 kind: Cluster
 apiVersion: kind.x-k8s.io/v1alpha4
+kubeadmConfigPatches:
+- |
+  kind: ClusterConfiguration
+  apiVersion: kubeadm.k8s.io/v1beta1
+  apiServer:
+    extraArgs:
+      v: "4"
+  scheduler:
+    extraArgs:
+      v: "4"
+  controllerManager:
+    extraArgs:
+      v: "4"
+- |
+  kind: ClusterConfiguration
+  apiVersion: kubeadm.k8s.io/v1beta2
+  apiServer:
+    extraArgs:
+      v: "4"
+  scheduler:
+    extraArgs:
+      v: "4"
+  controllerManager:
+    extraArgs:
+      v: "4"
+- |
+  # backward compatibility for Kubernetes 1.12 and prior versions
+  kind: ClusterConfiguration
+  apiVersion: kubeadm.k8s.io/v1alpha3
+  apiServerExtraArgs:
+    v: "4"
+  schedulerExtraArgs:
+    v: "4"
+  controllerManagerExtraArgs:
+    v: "4"
 EOF
     if [ -n "$DOCKER_IO_MIRROR" -o -n "$GCR_IO_MIRROR" -o -n "$QUAY_IO_MIRROR" ]; then
 cat <<EOF >> $tmpfile
@@ -291,89 +258,70 @@ EOF
 EOF
         fi
     }
+}
+
+e2e::image_build
+
+kubetest2_args=(
+    $PROVIDER
+)
+
+if [ -z "$SKIP_UP" ]; then
+    kubetest2_args+=(--up)
+fi
+
+if [ -z "$SKIP_DOWN" ]; then
+    kubetest2_args+=(--down)
+fi
+
+if [ "$PROVIDER" == "kind" ]; then
+    tmpfile=$(mktemp)
+    trap "test -f $tmpfile && rm $tmpfile" EXIT
+    e2e::create_kindconfig $tmpfile
     echo "info: print the contents of kindconfig"
     cat $tmpfile
-    echo "info: end of the contents of kindconfig"
-    echo "info: creating the cluster '$CLUSTER'"
-    local image=""
+    image=""
     for v in ${!kind_node_images[*]}; do
-        if [[ "$KUBE_VERSION" == "$v" ]]; then
+        if [[ "$KUBE_VERSION" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ && "$KUBE_VERSION" == "$v" ]]; then
             image=${kind_node_images[$v]}
             echo "info: image for $KUBE_VERSION: $image"
-            break
+        elif [[ "$KUBE_VERSION" =~ ^v[0-9]+\.[0-9]+$ && "$KUBE_VERSION" == "${v%.*}" ]]; then
+            image=${kind_node_images[$v]}
+            echo "info: image for $KUBE_VERSION: $image"
         fi
     done
     if [ -z "$image" ]; then
         echo "error: no image for $KUBE_VERSION, exit"
         exit 1
     fi
-    $KIND_BIN create cluster --config $KUBECONFIG --name $CLUSTER --image $image --config $tmpfile -v 4
-    # make it able to schedule pods on control-plane, then less resources we required
-    # This is disabled because when hostNetwork is used, pd requires 2379/2780
-    # which may conflict with etcd on control-plane.
-    #echo "info: remove 'node-role.kubernetes.io/master' taint from $CLUSTER-control-plane"
-    #kubectl taint nodes $CLUSTER-control-plane node-role.kubernetes.io/master-
-}
+    kubetest2_args+=(--image-name $image)
+    kubetest2_args+=(
+        # add some retires because kind may fail to start the cluster when the
+        # load is high
+        --up-retries 3
+        --cluster-name "$CLUSTER"
+        --config "$tmpfile"
+        --verbosity 4
+    )
+fi
 
-
-function e2e::__wait_for_deploy() {
-    local ns="$1"
-    local name="$2"
-    local retries="${3:-300}"
-    echo "info: waiting for pods of deployment $ns/$name are ready (retries: $retries, interval: 1s)"
-    for ((i = 0; i < retries; i++)) {
-        read a b <<<$($KUBECTL_BIN --context $KUBECONTEXT -n $ns get deploy/$name -ojsonpath='{.spec.replicas} {.status.readyReplicas}{"\n"}')
-        if [[ "$a" -gt 0 && "$a" -eq "$b" ]]; then
-            echo "info: all pods of deployment $ns/$name are ready (desired: $a, ready: $b)"
-            return 0
-        fi
-        echo "info: pods of deployment $ns/$name (desired: $a, ready: $b)"
-        sleep 1
-    }
-    echo "info: timed out waiting for pods of deployment $ns/$name are ready"
-    return 1
-}
-
-function e2e::setup_helm_server() {
-    $KUBECTL_BIN --context $KUBECONTEXT apply -f ${ROOT}/manifests/tiller-rbac.yaml
-    if hack::version_ge $KUBE_VERSION "v1.16.0"; then
-        # workaround for https://github.com/helm/helm/issues/6374
-        # TODO remove this when we can upgrade to helm 2.15+, see https://github.com/helm/helm/pull/6462
-        $HELM_BIN init -i ${HELM_IMAGE} --service-account tiller --output yaml \
-            | sed 's@apiVersion: extensions/v1beta1@apiVersion: apps/v1@' \
-            | sed 's@  replicas: 1@  replicas: 1\n  selector: {"matchLabels": {"app": "helm", "name": "tiller"}}@' \
-            | $KUBECTL_BIN --context $KUBECONTEXT apply -f -
-        echo "info: wait for tiller to be ready"
-        e2e::__wait_for_deploy kube-system tiller-deploy
-    else
-        $HELM_BIN init --service-account=tiller --wait
-    fi
-    $HELM_BIN version
-}
-
-function e2e::down() {
-    if [ -n "$SKIP_DOWN" ]; then
-        echo "info: skip shutting down the cluster '$CLUSTER'"
-        return
-    fi
-    if ! e2e::cluster_exists $CLUSTER; then
-        echo "info: cluster '$CLUSTER' does not exist, skip shutting down the cluster"
-        return
-    fi
-    $KIND_BIN delete cluster --name $CLUSTER
-}
-
-trap "e2e::down" EXIT
-
-e2e::up
-e2e::setup_helm_server
-e2e::image_build
-e2e::image_load
-
+export PROVIDER
+export CLUSTER
 export KUBECONFIG
-export KUBECONTEXT
 export E2E_IMAGE=${DOCKER_REGISTRY}/pingcap/chaos-mesh-e2e:${IMAGE_TAG}
 export DOCKER_REGISTRY=${DOCKER_REGISTRY}
 export IMAGE_TAG=${IMAGE_TAG}
+export PATH=$OUTPUT_BIN:$PATH
 
-hack/run-e2e.sh "$@"
+if [ -n "${ARTIFACTS}" ]; then
+    export REPORT_DIR=${ARTIFACTS}
+fi
+
+if [ -n "${ARTIFACTS}" -a -z "$SKIP_DUMP" ]; then
+    kubetest2_args+=(--dump)
+fi
+
+
+
+echo "info: run 'kubetest2 ${kubetest2_args[@]} -- hack/run-e2e.sh $@'"
+$KUBETSTS2_BIN ${kubetest2_args[@]} -- hack/run-e2e.sh "$@"
