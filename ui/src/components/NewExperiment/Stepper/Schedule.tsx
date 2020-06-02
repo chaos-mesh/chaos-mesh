@@ -4,6 +4,7 @@ import { Theme, makeStyles } from '@material-ui/core/styles'
 
 import { StepperFormProps } from '../types'
 import { TextField } from 'components/FormField'
+import { mustImmediate } from 'lib/formikhelpers'
 
 const useStyles = makeStyles((theme: Theme) => ({
   cronTitle: {
@@ -28,18 +29,27 @@ const ScheduleStep: React.FC<ScheduleStepProps> = ({ formProps }) => {
   const [isImmediate, setIsImmediate] = useState(true)
   const { values, handleChange } = formProps
 
-  const handleChecked = (_: React.ChangeEvent<HTMLInputElement>, checked: boolean) => setIsImmediate(checked)
+  const handleChecked = (_: React.ChangeEvent<HTMLInputElement>, checked: boolean) => {
+    if (!mustImmediate(values)) {
+      setIsImmediate(checked)
+    }
+  }
 
   return (
     <>
       <FormControlLabel
         control={<Switch name="immediate" color="primary" checked={isImmediate} onChange={handleChecked} />}
-        label="Immediate Job"
+        label="Immediate"
       />
+      {mustImmediate(values) && (
+        <Typography variant="subtitle2" color="textSecondary">
+          The action you chose must be immediate.
+        </Typography>
+      )}
 
       <Box hidden={isImmediate} mt={3}>
         <Divider />
-        <Typography className={classes.cronTitle}>Cron Job</Typography>
+        <Typography className={classes.cronTitle}>Cron</Typography>
         <pre className={classes.pre}>
           <code>
             {`

@@ -66,10 +66,6 @@ const ScopeStep: React.FC<ScopeStepProps> = ({ formProps, namespaces }) => {
         onChangeCallback={handleJsonChangeCallback}
       />
 
-      {/* TODO: Annotation Selectors: {[key: string]: string} */}
-
-      {/* TODO: Field Selectors: {[key: string]: string} */}
-
       <SelectField
         id="scope.mode"
         name="scope.mode"
