@@ -16,6 +16,7 @@ package collector
 import (
 	"context"
 	"encoding/json"
+
 	"github.com/go-logr/logr"
 	"github.com/jinzhu/gorm"
 	"github.com/pingcap/errors"
@@ -45,6 +46,7 @@ func (r *ChaosCollector) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		return ctrl.Result{}, nil
 	}
 	ctx := context.Background()
+
 	obj, ok := r.apiType.DeepCopyObject().(v1alpha1.InnerObject)
 	if !ok {
 		r.Log.Error(nil, "it's not a stateful object")

@@ -26,7 +26,7 @@ import (
 
 const (
 	// databaseTTLResyncPeriod defines the time interval to synchronize data in the database.
-	databaseTTLResyncPeriod = 3 * time.Second
+	databaseTTLResyncPeriod = 8 * time.Hour
 	eventTTL = 7 * 24 * time.Hour
 	archiveExperimentTTL = 14 * 24 * time.Hour
 )
