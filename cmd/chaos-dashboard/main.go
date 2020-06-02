@@ -26,6 +26,7 @@ import (
 	"github.com/pingcap/chaos-mesh/pkg/config"
 	"github.com/pingcap/chaos-mesh/pkg/store"
 	"github.com/pingcap/chaos-mesh/pkg/store/dbstore"
+	"github.com/pingcap/chaos-mesh/pkg/ttlcontroller"
 	"github.com/pingcap/chaos-mesh/pkg/version"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -62,7 +63,6 @@ func main() {
 	ctrl.SetLogger(zap.Logger(true))
 
 	stopCh := ctrl.SetupSignalHandler()
-
 	app := fx.New(
 		fx.Provide(
 			func() (<-chan struct{}, *config.ChaosServerConfig) {
@@ -70,10 +70,13 @@ func main() {
 			},
 			dbstore.NewDBStore,
 			collector.NewServer,
+			ttlcontroller.NewController,
 		),
 		store.Module,
 		apiserver.Module,
-		fx.Invoke(collector.Register))
+		fx.Invoke(collector.Register),
+		fx.Invoke(ttlcontroller.Register),
+	)
 
 	startCtx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()

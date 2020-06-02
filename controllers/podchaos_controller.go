@@ -15,7 +15,6 @@ package controllers
 
 import (
 	"context"
-
 	"github.com/go-logr/logr"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/client-go/tools/record"

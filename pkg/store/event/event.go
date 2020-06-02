@@ -232,7 +232,7 @@ func (e *eventStore) Update(_ context.Context, et *core.Event) error {
 
 // DeleteIncompleteEvents implement core.EventStore interface.
 func (e *eventStore) DeleteIncompleteEvents(_ context.Context) error {
-	return e.db.Where("finish_time IS NULL").
+	return e.db.Where("finish_time IS NULL").Unscoped().
 		Delete(core.Event{}).Error
 }
 
@@ -279,4 +279,26 @@ func (e *eventStore) ListByFilter(_ context.Context, podName string, podNamespac
 		eventList = append(eventList, event)
 	}
 	return eventList, nil
+}
+
+// DeleteByFinishTime deletes events and podrecords whose time difference is greater than the given time from FinishTime.
+func (e *eventStore) DeleteByFinishTime (_ context.Context, ttl time.Duration) error {
+	eventList, err := e.List(context.Background())
+	if err != nil {
+		return err
+	}
+	nowTime := time.Now()
+	for _, et := range eventList {
+		if et.FinishTime.Add(ttl).Before(nowTime) {
+			_ = e.db.Model(core.Event{}).
+				Where(
+					"namespace = ? and experiment = ? and start_time = ? and finish_time = ? ",
+					et.Namespace, et.Experiment, et.StartTime, et.FinishTime).Unscoped().Delete(core.Event{})
+			_ = e.db.Model(core.PodRecord{}).
+				Where(
+					"event_id = ? ",
+					et.ID).Unscoped().Delete(core.PodRecord{})
+		}
+	}
+	return nil
 }
