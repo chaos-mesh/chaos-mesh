@@ -15,6 +15,7 @@ package experiment
 
 import (
 	"context"
+	"time"
 
 	"github.com/jinzhu/gorm"
 
@@ -81,6 +82,23 @@ func (e *experimentStore) Create(_ context.Context, archive *core.ArchiveExperim
 }
 
 func (e *experimentStore) Delete(context.Context, *core.ArchiveExperiment) error { return nil }
+
+// DeleteByFinishTime deletes experiments whose time difference is greater than the given time from FinishTime.
+func (e *experimentStore) DeleteByFinishTime(_ context.Context, ttl time.Duration) error {
+	expList, err := e.List(context.Background(), "", "", "")
+	if err != nil {
+		return err
+	}
+	nowTime := time.Now()
+	for _, exp := range expList {
+		if exp.FinishTime.Add(ttl).Before(nowTime) {
+			_ = e.db.Table("archive_experiments").
+				Where("namespace = ? and name = ? and kind = ? and start_time = ? and finish_time = ? ",
+				exp.Namespace, exp.Name, exp.Kind, exp.StartTime, exp.FinishTime).Unscoped().Delete(core.ArchiveExperiment{})
+		}
+	}
+	return nil
+}
 
 func constructQueryArgs(kind, ns, name string) (string, []string) {
 	args := make([]string, 0)
