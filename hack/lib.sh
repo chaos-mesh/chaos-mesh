@@ -135,6 +135,23 @@ function hack::ensure_kustomize() {
     chmod +x $KUSTOMIZE_BIN
 }
 
+function hack::__ensure_kubetest2() {
+    local n="$1"
+    if hack::__verify_kubetest2 $n $KUBETEST2_VERSION; then
+        return 0
+    fi
+    local tmpfile=$(mktemp)
+    trap "test -f $tmpfile && rm $tmpfile" RETURN
+    echo "info: downloading $n $KUBETEST2_VERSION"
+    curl --retry 10 -L -o - https://github.com/cofyc/kubetest2/releases/download/$KUBETEST2_VERSION/$n-$OS-$ARCH.gz | gunzip > $tmpfile
+    mv $tmpfile $OUTPUT_BIN/$n
+    chmod +x $OUTPUT_BIN/$n
+}
+
+function hack::ensure_kubetest2() {
+    hack::__ensure_kubetest2 kubetest2
+}
+
 # hack::version_ge "$v1" "$v2" checks whether "v1" is greater or equal to "v2"
 function hack::version_ge() {
     [ "$(printf '%s\n' "$1" "$2" | sort -V | head -n1)" = "$2" ]
