@@ -15,10 +15,12 @@ package ttlcontroller
 
 import (
 	"context"
+	"time"
+
+	"k8s.io/apimachinery/pkg/util/wait"
+
 	"github.com/pingcap/chaos-mesh/pkg/config"
 	"github.com/pingcap/chaos-mesh/pkg/core"
-	"k8s.io/apimachinery/pkg/util/wait"
-	"time"
 
 	log "github.com/sirupsen/logrus"
 	runtimeutil "k8s.io/apimachinery/pkg/util/runtime"
@@ -27,13 +29,13 @@ import (
 const (
 	// databaseTTLResyncPeriod defines the time interval to synchronize data in the database.
 	databaseTTLResyncPeriod = 8 * time.Hour
-	eventTTL = 7 * 24 * time.Hour
-	archiveExperimentTTL = 14 * 24 * time.Hour
+	eventTTL                = 7 * 24 * time.Hour
+	archiveExperimentTTL    = 14 * 24 * time.Hour
 )
 
 type Controller struct {
-	archive      core.ExperimentStore
-	event        core.EventStore
+	archive core.ExperimentStore
+	event   core.EventStore
 }
 
 // NewController returns a new database ttl controller
@@ -43,14 +45,14 @@ func NewController(
 	event core.EventStore,
 ) *Controller {
 	controller := &Controller{
-		archive:      archive,
-		event:        event,
+		archive: archive,
+		event:   event,
 	}
 	return controller
 }
 
 // Register periodically calls function runWorker to delete the data.
-func Register (c *Controller, stopCh <-chan struct{}) error {
+func Register(c *Controller, stopCh <-chan struct{}) error {
 	defer runtimeutil.HandleCrash()
 	log.Infof("starting database TTL controller")
 	go wait.Until(c.runWorker, databaseTTLResyncPeriod, stopCh)

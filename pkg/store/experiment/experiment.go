@@ -94,7 +94,7 @@ func (e *experimentStore) DeleteByFinishTime(_ context.Context, ttl time.Duratio
 		if exp.FinishTime.Add(ttl).Before(nowTime) {
 			_ = e.db.Table("archive_experiments").
 				Where("namespace = ? and name = ? and kind = ? and start_time = ? and finish_time = ? ",
-				exp.Namespace, exp.Name, exp.Kind, exp.StartTime, exp.FinishTime).Unscoped().Delete(core.ArchiveExperiment{})
+					exp.Namespace, exp.Name, exp.Kind, exp.StartTime, exp.FinishTime).Unscoped().Delete(core.ArchiveExperiment{})
 		}
 	}
 	return nil
