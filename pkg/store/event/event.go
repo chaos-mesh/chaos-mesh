@@ -36,7 +36,9 @@ func NewStore(db *dbstore.DB) core.EventStore {
 
 	es := &eventStore{db}
 
-	_ = es.DeleteIncompleteEvents(context.Background())
+	if err := es.DeleteIncompleteEvents(context.Background()); err != nil && gorm.IsRecordNotFoundError(err) {
+		log.Error(err, "failed to delete all incomplete events")
+	}
 
 	return es
 }
@@ -289,12 +291,16 @@ func (e *eventStore) DeleteByFinishTime(_ context.Context, ttl time.Duration) er
 	nowTime := time.Now()
 	for _, et := range eventList {
 		if et.FinishTime.Add(ttl).Before(nowTime) {
-			_ = e.db.Model(core.Event{}).Unscoped().Delete(*et)
+			if err := e.db.Model(core.Event{}).Unscoped().Delete(*et).Error; err != nil {
+				return err
+			}
 
-			_ = e.db.Model(core.PodRecord{}).
+			if err := e.db.Model(core.PodRecord{}).
 				Where(
 					"event_id = ? ",
-					et.ID).Unscoped().Delete(core.PodRecord{})
+					et.ID).Unscoped().Delete(core.PodRecord{}).Error; err != nil {
+				return err
+			}
 		}
 	}
 	return nil
