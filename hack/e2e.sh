@@ -40,7 +40,6 @@ Environments:
     SKIP_IMAGE_BUILD            skip build and push images
     SKIP_UP                     skip starting the cluster
     SKIP_DOWN                   skip shutting down the cluster
-    REUSE_CLUSTER               reuse existing cluster if found
     KUBE_VERSION                the version of Kubernetes to test against
     KUBE_WORKERS                the number of worker nodes (excludes master nodes), defaults: 3
     DOCKER_IO_MIRROR            configure mirror for docker.io
@@ -61,7 +60,7 @@ Examples:
     ./hack/e2e.sh -- --ginkgo.focus='Backup\sand\srestore'
     See https://onsi.github.io/ginkgo/ for more ginkgo options.
 3) reuse the cluster and don't tear down it after the testing
-    REUSE_CLUSTER=y SKIP_DOWN=y ./hack/e2e.sh -- <e2e args>
+    SKIP_UP=y SKIP_DOWN=y ./hack/e2e.sh -- <e2e args>
 4) use registry mirrors
     DOCKER_IO_MIRROR=https://dockerhub.azk8s.cn QUAY_IO_MIRROR=https://quay.azk8s.cn GCR_IO_MIRROR=https://gcr.azk8s.cn ./hack/e2e.sh -- <e2e args>
 5) use mirror helm image
@@ -84,11 +83,17 @@ if [ "${1:-}" == "--" ]; then
 fi
 
 hack::ensure_kind
+echo "ensured kind"
 hack::ensure_kubectl
+echo "ensured kubectl"
 hack::ensure_helm
+echo "ensured helm"
 hack::ensure_kubebuilder
+echo "ensured kubebuilder"
 hack::ensure_kustomize
+echo "ensured kustomize"
 hack::ensure_kubetest2
+echo "ensured kubetest2"
 
 PROVIDER=${PROVIDER:-kind}
 HELM_IMAGE=${HELM_IMAGE:-gcr.io/kubernetes-helm/tiller:v2.9.1}
@@ -101,7 +106,6 @@ SKIP_IMAGE_BUILD=${SKIP_IMAGE_BUILD:-}
 SKIP_UP=${SKIP_UP:-}
 SKIP_DOWN=${SKIP_DOWN:-}
 SKIP_DUMP=${SKIP_DUMP:-}
-REUSE_CLUSTER=${REUSE_CLUSTER:-}
 KIND_DATA_HOSTPATH=${KIND_DATA_HOSTPATH:-none}
 KUBE_VERSION=${KUBE_VERSION:-v1.12.10}
 KUBE_WORKERS=${KUBE_WORKERS:-3}
@@ -147,11 +151,11 @@ function e2e::image_build() {
         return
     fi
     DOCKER_REGISTRY=${DOCKER_REGISTRY} GOOS=linux GOARCH=amd64 make e2e-docker
-    DOCKER_REGISTRY=${DOCKER_REGISTRY} make image-chaos-scripts
-    DOCKER_REGISTRY=${DOCKER_REGISTRY} make image-chaos-fs
-    DOCKER_REGISTRY=${DOCKER_REGISTRY} make image-chaos-mesh
-    DOCKER_REGISTRY=${DOCKER_REGISTRY} make image-chaos-daemon
-    DOCKER_REGISTRY=${DOCKER_REGISTRY} make image-e2e-helper
+#    DOCKER_REGISTRY=${DOCKER_REGISTRY} make image-chaos-scripts
+#    DOCKER_REGISTRY=${DOCKER_REGISTRY} make image-chaos-fs
+#    DOCKER_REGISTRY=${DOCKER_REGISTRY} make image-chaos-mesh
+#    DOCKER_REGISTRY=${DOCKER_REGISTRY} make image-chaos-daemon
+#    DOCKER_REGISTRY=${DOCKER_REGISTRY} make image-e2e-helper
 }
 
 function e2e::create_kindconfig() {
@@ -324,4 +328,5 @@ fi
 
 
 echo "info: run 'kubetest2 ${kubetest2_args[@]} -- hack/run-e2e.sh $@'"
-$KUBETSTS2_BIN ${kubetest2_args[@]} -- hack/run-e2e.sh "$@"
+$KUBETSTS2_BIN ${kubetest2_args[@]}
+hack/run-e2e.sh "$@"

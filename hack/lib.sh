@@ -33,10 +33,12 @@ HELM_VERSION=2.9.1
 KIND_VERSION=0.7.0
 KIND_BIN=$OUTPUT_BIN/kind
 KUBEBUILDER_PATH=$OUTPUT_BIN/kubebuilder
-KUBEBUILDER_BIN=$KUBEBUILDER_PATH/bin/kubebuilder
+KUBEBUILDER_BIN=$KUBEBUILDER_PATH
 KUBEBUILDER_VERSION=2.2.0
 KUSTOMIZE_BIN=$OUTPUT_BIN/kustomize
 KUSTOMIZE_VERSION=3.5.4
+KUBETEST2_VERSION=v0.1.0
+KUBETSTS2_BIN=$OUTPUT_BIN/kubetest2
 
 test -d "$OUTPUT_BIN" || mkdir -p "$OUTPUT_BIN"
 
@@ -96,8 +98,10 @@ function hack::ensure_kind() {
 }
 
 function hack::verify_kubebuilder() {
+    echo "$KUBEBUILDER_BIN"
     if test -x "$KUBEBUILDER_BIN"; then
         v=$($KUBEBUILDER_BIN version | grep -o -E '[0-9]+\.[0-9]+\.[0-9]+' | head -n 1)
+        echo v
         [[ "${v}" == "${KUBEBUILDER_VERSION}" ]]
         return
     fi
@@ -105,6 +109,7 @@ function hack::verify_kubebuilder() {
 }
 
 function hack::ensure_kubebuilder() {
+    echo "hello"
     if hack::verify_kubebuilder; then
         return 0
     fi
@@ -112,7 +117,7 @@ function hack::ensure_kubebuilder() {
     trap "test -f $tmpfile && rm $tmpfile" RETURN
     curl --retry 10 -L -o ${tmpfile} https://go.kubebuilder.io/dl/$KUBEBUILDER_VERSION/$OS/$ARCH
     tar -C ${OUTPUT_BIN} -xzf ${tmpfile}
-    mv ${OUTPUT_BIN}/kubebuilder_${KUBEBUILDER_VERSION}_${OS}_${ARCH} ${KUBEBUILDER_PATH}
+    mv ${OUTPUT_BIN}/kubebuilder_${KUBEBUILDER_VERSION}_${OS}_${ARCH}/bin/kubebuilder ${KUBEBUILDER_PATH}
 }
 
 function hack::verify_kustomize() {
@@ -125,6 +130,7 @@ function hack::verify_kustomize() {
 }
 
 function hack::ensure_kustomize() {
+    echo "here"
     if hack::verify_kustomize; then
         return 0
     fi
@@ -133,6 +139,17 @@ function hack::ensure_kustomize() {
     curl --retry 10 -L -o ${tmpfile} "https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv${KUSTOMIZE_VERSION}/kustomize_v${KUSTOMIZE_VERSION}_${OS}_${ARCH}.tar.gz"
     tar -C $OUTPUT_BIN -zxf ${tmpfile}
     chmod +x $KUSTOMIZE_BIN
+}
+
+function hack::__verify_kubetest2() {
+    local n="$1"
+    local v="$2"
+    if test -x "$OUTPUT_BIN/$n"; then
+        local tmpv=$($OUTPUT_BIN/$n --version 2>&1 | awk '{print $2}')
+        [[ "$tmpv" == "$v" ]]
+        return
+    fi
+    return 1
 }
 
 function hack::__ensure_kubetest2() {
@@ -150,6 +167,7 @@ function hack::__ensure_kubetest2() {
 
 function hack::ensure_kubetest2() {
     hack::__ensure_kubetest2 kubetest2
+    hack::__ensure_kubetest2 kubetest2-kind
 }
 
 # hack::version_ge "$v1" "$v2" checks whether "v1" is greater or equal to "v2"
