@@ -1,5 +1,5 @@
 import { InputAdornment, MenuItem } from '@material-ui/core'
-import { SelectField, TextField } from 'components/FormField'
+import { JsonField, SelectField, TextField } from 'components/FormField'
 
 import AdvancedOptions from 'components/AdvancedOptions'
 import React from 'react'
@@ -33,6 +33,12 @@ const ScopeStep: React.FC<ScopeStepProps> = ({ formProps, namespaces }) => {
     handleChange(e)
   }
 
+  const handleJsonChangeCallback = (e: React.ChangeEvent<HTMLInputElement>, formatted: string) => {
+    e.target.value = formatted
+
+    handleChange(e)
+  }
+
   return (
     <>
       <SelectField
@@ -51,13 +57,13 @@ const ScopeStep: React.FC<ScopeStepProps> = ({ formProps, namespaces }) => {
         ))}
       </SelectField>
 
-      <TextField
+      <JsonField
         id="scope.label_selectors"
         label="Label selectors"
         helperText="Json of label selectors"
         multiline
         value={values.scope.label_selectors}
-        onChange={handleChange}
+        onChangeCallback={handleJsonChangeCallback}
       />
 
       {/* TODO: Annotation Selectors: {[key: string]: string} */}

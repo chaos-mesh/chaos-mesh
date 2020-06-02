@@ -1,22 +1,16 @@
 import { Container, ContainerProps } from '@material-ui/core'
-import { Theme, createStyles, makeStyles } from '@material-ui/core/styles'
 
 import React from 'react'
+import { styled } from '@material-ui/core/styles'
 
-const useStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    root: {
-      position: 'relative',
-      flex: 1,
-      padding: theme.spacing(6),
-    },
+type ContentContainerProps = Omit<ContainerProps, 'maxWidth'>
+
+const ContentContainer = styled((props: ContentContainerProps) => <Container maxWidth="xl" {...props} />)(
+  ({ theme }) => ({
+    position: 'relative',
+    flex: 1,
+    padding: theme.spacing(6),
   })
 )
-
-const ContentContainer: React.FC<ContainerProps> = (props) => {
-  const classes = useStyles()
-
-  return <Container className={classes.root} maxWidth="xl" {...props} />
-}
 
 export default ContentContainer

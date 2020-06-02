@@ -44,26 +44,23 @@ const useStyles = makeStyles((theme: Theme) => {
 })
 
 interface CurrentStatusProps {
+  classes: Record<'currentStatus' | 'statusButton', string>
   state: StateOfExperiments
 }
 
-export const CurrentStatus: React.FC<CurrentStatusProps> = ({ state }) => {
-  const classes = useStyles()
-
-  return (
-    <Box className={classes.currentStatus}>
-      <Button className={classes.statusButton} variant="outlined">
-        Total: {state.total}
-      </Button>
-      <Button className={classes.statusButton} variant="outlined" color="primary">
-        Running: {state.running}
-      </Button>
-      <Button className={classes.statusButton} variant="outlined" color="secondary">
-        Failed: {state.failed}
-      </Button>
-    </Box>
-  )
-}
+export const CurrentStatus: React.FC<CurrentStatusProps> = ({ classes, state }) => (
+  <Box className={classes.currentStatus}>
+    <Button className={classes.statusButton} variant="outlined">
+      Total: {state.total}
+    </Button>
+    <Button className={classes.statusButton} variant="outlined" color="primary">
+      Running: {state.running}
+    </Button>
+    <Button className={classes.statusButton} variant="outlined" color="secondary">
+      Failed: {state.failed}
+    </Button>
+  </Box>
+)
 
 const StatusBar = () => {
   const classes = useStyles()
@@ -87,7 +84,7 @@ const StatusBar = () => {
           <NewExperiment />
         </Box>
 
-        <CurrentStatus state={stateOfExperiments} />
+        <CurrentStatus classes={classes} state={stateOfExperiments} />
       </Toolbar>
     </Paper>
   )

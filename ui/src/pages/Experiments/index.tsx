@@ -16,7 +16,7 @@ export default function Experiments() {
   const dispatch = useStoreDispatch()
 
   const [loading, setLoading] = useState(false)
-  const [experiments, setExperiments] = useState<Experiment[]>([])
+  const [experiments, setExperiments] = useState<Experiment[] | null>(null)
 
   const fetchExperiments = () => {
     setLoading(true)
@@ -27,7 +27,10 @@ export default function Experiments() {
         setExperiments(resp.data)
       })
       .catch(console.log)
-      .finally(() => setLoading(false))
+      .finally(() => {
+        setLoading(false)
+        setExperiments([])
+      })
   }
 
   useEffect(fetchExperiments, [])
@@ -42,7 +45,8 @@ export default function Experiments() {
   return (
     <ContentContainer>
       <Grid container spacing={3}>
-        {experiments.length > 0 &&
+        {experiments &&
+          experiments.length > 0 &&
           experiments.map((e) => (
             <Grid key={e.Name} item xs={12} sm={3}>
               <ExperimentCard experiment={e} />
@@ -50,7 +54,7 @@ export default function Experiments() {
           ))}
       </Grid>
 
-      {!loading && experiments.length === 0 && (
+      {!loading && experiments && experiments.length === 0 && (
         <Box display="flex" flexDirection="column" justifyContent="center" alignItems="center" height="100%">
           <InboxIcon fontSize="large" />
           <Typography variant="h6">No experiments found. Try to create one.</Typography>

@@ -39,12 +39,13 @@ const useStyles = makeStyles((theme: Theme) =>
 const TopContainer = () => {
   const classes = useStyles()
 
-  const [openMobileDrawer, setOpenMobileDrawer] = useState(false)
-  const handleDrawerToggle = () => setOpenMobileDrawer(!openMobileDrawer)
-
   const { pathname } = useLocation()
+
   const { breadcrumbs } = useSelector((state: RootState) => state.navigation)
   const dispatch = useStoreDispatch()
+
+  const [openMobileDrawer, setOpenMobileDrawer] = useState(false)
+  const handleDrawerToggle = () => setOpenMobileDrawer(!openMobileDrawer)
 
   useEffect(() => {
     dispatch(setNavigationBreadcrumbs(pathname))

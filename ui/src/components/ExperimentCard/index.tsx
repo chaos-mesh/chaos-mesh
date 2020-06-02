@@ -35,7 +35,7 @@ const ExperimentCard: React.FC<ExperimentCardProps> = ({ experiment: e }) => {
             <IconButton color="primary" aria-label="Pause experiment" component="span">
               <PauseCircleOutlineIcon />
             </IconButton>
-            <IconButton color="primary" aria-label="Pause experiment" component="span">
+            <IconButton color="primary" aria-label="Delete experiment" component="span">
               <DeleteOutlineIcon />
             </IconButton>
           </Box>

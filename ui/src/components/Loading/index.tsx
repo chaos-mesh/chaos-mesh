@@ -1,22 +1,20 @@
 import { Box, CircularProgress } from '@material-ui/core'
-import { createStyles, makeStyles } from '@material-ui/core/styles'
 
 import React from 'react'
+import { makeStyles } from '@material-ui/core/styles'
 
-const useStyles = makeStyles(() =>
-  createStyles({
-    root: {
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      width: '100%',
-      height: '100%',
-    },
-  })
-)
+const useStyles = makeStyles({
+  root: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: '100%',
+    height: '100%',
+  },
+})
 
 const Loading = () => {
   const classes = useStyles()
