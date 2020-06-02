@@ -63,7 +63,7 @@ all: yaml image
 
 build: binary
 
-check: fmt vet lint generate yaml tidy
+check: fmt vet boilerplate lint generate yaml tidy
 
 # Run tests
 test: failpoint-enable generate manifests test-utils
@@ -170,6 +170,9 @@ tidy: clean
 clean:
 	rm -rf docs/docs.go
 
+boilerplate:
+	./hack/verify-boilerplate.sh
+
 taily-build:
 	if [ "$(shell docker ps --filter=name=$@ -q)" = "" ]; then \
 		docker build -t pingcap/binary ${DOCKER_BUILD_ARGS} .; \
@@ -241,7 +244,7 @@ lint: $(GOBIN)/revive
 
 # Generate code
 generate: $(GOBIN)/controller-gen
-	$< object:headerFile=./hack/boilerplate.go.txt paths="./..."
+	$< object:headerFile=./hack/boilerplate/boilerplate.generatego.txt paths="./..."
 
 yaml: manifests ensure-kustomize
 	$(KUSTOMIZE_BIN) build config/default > manifests/crd.yaml

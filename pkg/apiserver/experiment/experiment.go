@@ -573,9 +573,6 @@ func (s *Service) getNetworkChaosDetail(namespace string, name string) (Experime
 			Mode:  string(chaos.Spec.Mode),
 			Value: chaos.Spec.Value,
 		},
-		Scheduler: SchedulerInfo{
-			Cron: chaos.Spec.Scheduler.Cron,
-		},
 		Target: TargetInfo{
 			NetworkChaos: NetworkChaosInfo{
 				Action:    string(chaos.Spec.Action),
@@ -599,6 +596,11 @@ func (s *Service) getNetworkChaosDetail(namespace string, name string) (Experime
 			},
 		},
 	}
+
+	if chaos.Spec.Scheduler != nil {
+		info.Scheduler.Cron = chaos.Spec.Scheduler.Cron
+	}
+
 	if chaos.Spec.Duration != nil {
 		info.Scheduler.Duration = *chaos.Spec.Duration
 	}

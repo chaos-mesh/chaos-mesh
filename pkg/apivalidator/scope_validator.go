@@ -115,3 +115,29 @@ func checkPhase(ph string) bool {
 
 	return false
 }
+
+// PodsValid can be used to check whether the pod name is valid.
+func PodsValid(fl validator.FieldLevel) bool {
+	if fl.Field().IsNil() {
+		return true
+	}
+
+	pods, ok := fl.Field().Interface().(map[string][]string)
+	if !ok {
+		return false
+	}
+
+	for ns, ps := range pods {
+		if !checkName(ns) {
+			return false
+		}
+
+		for _, p := range ps {
+			if !checkName(p) {
+				return false
+			}
+		}
+	}
+
+	return true
+}
