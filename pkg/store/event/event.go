@@ -282,7 +282,7 @@ func (e *eventStore) ListByFilter(_ context.Context, podName string, podNamespac
 }
 
 // DeleteByFinishTime deletes events and podrecords whose time difference is greater than the given time from FinishTime.
-func (e *eventStore) DeleteByFinishTime (_ context.Context, ttl time.Duration) error {
+func (e *eventStore) DeleteByFinishTime(_ context.Context, ttl time.Duration) error {
 	eventList, err := e.List(context.Background())
 	if err != nil {
 		return err
