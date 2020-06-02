@@ -29,7 +29,6 @@ export default function Experiments() {
       .catch(console.log)
       .finally(() => {
         setLoading(false)
-        setExperiments([])
       })
   }
 
@@ -48,7 +47,7 @@ export default function Experiments() {
         {experiments &&
           experiments.length > 0 &&
           experiments.map((e) => (
-            <Grid key={e.Name} item xs={12} sm={3}>
+            <Grid key={e.Name} item xs={12} sm={12} md={6} lg={4} xl={3}>
               <ExperimentCard experiment={e} />
             </Grid>
           ))}

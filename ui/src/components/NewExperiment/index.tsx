@@ -7,6 +7,7 @@ import { Theme, createStyles, makeStyles } from '@material-ui/core/styles'
 
 import AddIcon from '@material-ui/icons/Add'
 import Alert from '@material-ui/lab/Alert'
+import CancelIcon from '@material-ui/icons/Cancel'
 import CloudUploadOutlinedIcon from '@material-ui/icons/CloudUploadOutlined'
 import PublishIcon from '@material-ui/icons/Publish'
 import Stepper from './Stepper'
@@ -25,7 +26,7 @@ const useStyles = makeStyles((theme: Theme) =>
       width: '50vw',
       height: '100%',
       padding: theme.spacing(6),
-      [theme.breakpoints.down('sm')]: {
+      [theme.breakpoints.down('md')]: {
         width: '100vw',
       },
     },
@@ -34,25 +35,33 @@ const useStyles = makeStyles((theme: Theme) =>
 
 interface ActionsProps {
   isSubmitting?: boolean
+  toggleDrawer: () => void
 }
 
-const Actions = ({ isSubmitting = false }: ActionsProps) => {
+const Actions = ({ isSubmitting = false, toggleDrawer }: ActionsProps) => {
   const { state } = useStepperContext()
 
   return (
     <Box display="flex" justifyContent="space-between" marginBottom={6}>
-      <Button type="button" variant="outlined" startIcon={<CloudUploadOutlinedIcon />}>
-        Yaml File
+      <Button variant="outlined" startIcon={<CancelIcon />} onClick={toggleDrawer}>
+        Cancel
       </Button>
-      <Button
-        type="submit"
-        variant="contained"
-        color="primary"
-        startIcon={<PublishIcon />}
-        disabled={state.activeStep < 4 || isSubmitting}
-      >
-        Submit
-      </Button>
+      <Box display="flex">
+        <Box mr={3}>
+          <Button variant="outlined" startIcon={<CloudUploadOutlinedIcon />}>
+            Yaml File
+          </Button>
+        </Box>
+        <Button
+          type="submit"
+          variant="contained"
+          color="primary"
+          startIcon={<PublishIcon />}
+          disabled={state.activeStep < 4 || isSubmitting}
+        >
+          Submit
+        </Button>
+      </Box>
     </Box>
   )
 }
@@ -76,7 +85,7 @@ export default function NewExperiment() {
 
     api.experiments
       .newExperiment(parsedValues)
-      .then((resp) => {
+      .then(() => {
         toggleDrawer()
         setSnackOpen(true)
         if (history.location.pathname === '/experiments') {
@@ -102,8 +111,8 @@ export default function NewExperiment() {
               return (
                 <Container className={classes.container}>
                   <Form>
-                    <Actions isSubmitting={isSubmitting} />
-                    <Stepper formProps={props} toggleDrawer={toggleDrawer} />
+                    <Actions isSubmitting={isSubmitting} toggleDrawer={toggleDrawer} />
+                    <Stepper formProps={props} />
                   </Form>
                 </Container>
               )
