@@ -10,7 +10,7 @@ interface BasicStepProps {
 }
 
 const BasicStep: React.FC<BasicStepProps> = ({ formProps, namespaces }) => {
-  const { values, handleChange } = formProps
+  const { values, errors, handleChange, handleBlur } = formProps
 
   const handleBasicNamespaceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     handleChange(e)
@@ -26,6 +26,8 @@ const BasicStep: React.FC<BasicStepProps> = ({ formProps, namespaces }) => {
         helperText="Please input an experiment name"
         value={values.name}
         onChange={handleChange}
+        onBlur={handleBlur}
+        error={errors.name ? true : false}
       />
 
       <SelectField

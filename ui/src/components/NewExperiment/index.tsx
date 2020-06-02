@@ -1,20 +1,19 @@
-import { Box, Button, Container, Drawer, Snackbar } from '@material-ui/core'
+import { Box, Button, Container, Drawer } from '@material-ui/core'
 import { Experiment, StepperFormProps } from './types'
 import { Form, Formik, FormikHelpers } from 'formik'
 import React, { useState } from 'react'
 import { StepperProvider, useStepperContext } from './Context'
 import { Theme, createStyles, makeStyles } from '@material-ui/core/styles'
+import { defaultExperimentSchema, validationSchema } from './constants'
+import { setAlert, setAlertOpen, setNeedToRefreshExperiments } from 'slices/globalStatus'
 
 import AddIcon from '@material-ui/icons/Add'
-import Alert from '@material-ui/lab/Alert'
 import CancelIcon from '@material-ui/icons/Cancel'
 import CloudUploadOutlinedIcon from '@material-ui/icons/CloudUploadOutlined'
 import PublishIcon from '@material-ui/icons/Publish'
 import Stepper from './Stepper'
 import api from 'api'
-import { defaultExperimentSchema } from './constants'
 import { parseSubmitValues } from 'lib/formikhelpers'
-import { toggleNeedToRefreshExperiments } from 'slices/globalStatus'
 import { useHistory } from 'react-router-dom'
 import { useStoreDispatch } from 'store'
 
@@ -75,26 +74,33 @@ export default function NewExperiment() {
 
   const [open, setOpen] = useState(false)
   const toggleDrawer = () => setOpen(!open)
-  const [snackOpen, setSnackOpen] = useState(false)
-  const handleSnackClose = () => setSnackOpen(false)
 
   const handleOnSubmit = (values: Experiment, actions: FormikHelpers<Experiment>) => {
     const parsedValues = parseSubmitValues(values)
 
-    console.log(parsedValues)
+    if (process.env.NODE_ENV === 'development') {
+      console.debug('Debug parsedValues:', parsedValues)
+    }
 
     api.experiments
       .newExperiment(parsedValues)
       .then(() => {
-        toggleDrawer()
-        setSnackOpen(true)
+        dispatch(
+          setAlert({
+            type: 'success',
+            message: 'Created successfully!',
+          })
+        )
+        dispatch(setAlertOpen(true))
+
         if (history.location.pathname === '/experiments') {
-          dispatch(toggleNeedToRefreshExperiments())
+          dispatch(setNeedToRefreshExperiments(true))
         } else {
           history.push('/experiments')
         }
       })
       .catch(console.log)
+      .finally(toggleDrawer)
   }
 
   return (
@@ -104,7 +110,7 @@ export default function NewExperiment() {
       </Button>
       <Drawer anchor="right" open={open} onClose={toggleDrawer}>
         <StepperProvider>
-          <Formik initialValues={initialValues} onSubmit={handleOnSubmit}>
+          <Formik initialValues={initialValues} validationSchema={validationSchema} onSubmit={handleOnSubmit}>
             {(props: StepperFormProps) => {
               const { isSubmitting } = props
 
@@ -120,19 +126,6 @@ export default function NewExperiment() {
           </Formik>
         </StepperProvider>
       </Drawer>
-      <Snackbar
-        anchorOrigin={{
-          vertical: 'bottom',
-          horizontal: 'right',
-        }}
-        autoHideDuration={5000}
-        open={snackOpen}
-        onClose={handleSnackClose}
-      >
-        <Alert variant="outlined" severity="success" onClose={handleSnackClose}>
-          Created successfully!
-        </Alert>
-      </Snackbar>
     </>
   )
 }

@@ -1,4 +1,5 @@
 import { Experiment } from './types'
+import * as Yup from 'yup'
 
 export const defaultExperimentSchema: Experiment = {
   name: '',
@@ -49,3 +50,7 @@ export const defaultExperimentSchema: Experiment = {
     duration: '',
   },
 }
+
+export const validationSchema = Yup.object().shape({
+  name: Yup.string().required(),
+})
