@@ -49,6 +49,7 @@ func NewController(
 	return controller
 }
 
+// Register periodically calls function runWorker to delete the data.
 func Register (c *Controller, stopCh <-chan struct{}) error {
 	defer runtimeutil.HandleCrash()
 	log.Infof("starting database TTL controller")
