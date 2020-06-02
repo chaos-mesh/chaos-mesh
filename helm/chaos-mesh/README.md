@@ -60,11 +60,11 @@ The following tables list the configurable parameters of the Chaos Mesh chart an
 | `dashboard.persistentVolume.storageClassName` | Chaos Dashboard data Persistent Volume Storage Class | `standard` |
 | `dashboard.persistentVolume.mountPath` | Chaos Dashboard data Persistent Volume mount root path | `/data` |
 | `dashboard.persistentVolume.subPath` | Subdirectory of  Chaos Dashboard data Persistent Volume to mount | `` |
-| `dashboard.persistentVolume.env` | The keys within the `env` map are mounted as environment variables on the Chaos Dashboard pod | `` |
-| `dashboard.persistentVolume.env.LISTEN_HOST` | | `0.0.0.0` |
-| `dashboard.persistentVolume.env.LISTEN_PORT` | | `2333` |
-| `dashboard.persistentVolume.env.DATABASE_DRIVER`| The db drive used for Chaos Dashboard, support db: sqlite3, mysql| `sqlite3` |
-| `dashboard.persistentVolume.env.DATABASE_DATASOURCE`| The db dsn used for Chaos Dashboard | `/data/core.sqlite` |
+| `dashboard.env` | The keys within the `env` map are mounted as environment variables on the Chaos Dashboard pod | `` |
+| `dashboard.env.LISTEN_HOST` | | `0.0.0.0` |
+| `dashboard.env.LISTEN_PORT` | | `2333` |
+| `dashboard.env.DATABASE_DRIVER`| The db drive used for Chaos Dashboard, support db: sqlite3, mysql| `sqlite3` |
+| `dashboard.env.DATABASE_DATASOURCE`| The db dsn used for Chaos Dashboard | `/data/core.sqlite` |
 | `prometheus.create` | Enable prometheus | `false` |
 | `prometheus.serviceAccount` | The serviceAccount for prometheus | `prometheus` |
 | `prometheus.image` | Docker image for prometheus | `prom/prometheus:v2.15.2` |
