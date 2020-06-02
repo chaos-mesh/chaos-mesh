@@ -247,7 +247,7 @@ func (in *Stressors) Normalize() (string, error) {
 		}
 
 		if in.MemoryStressor.Options != nil {
-			for _,v := range in.MemoryStressor.Options{
+			for _, v := range in.MemoryStressor.Options {
 				stressors += fmt.Sprintf(" %v ", v)
 			}
 		}
@@ -260,7 +260,7 @@ func (in *Stressors) Normalize() (string, error) {
 		}
 
 		if in.CPUStressor.Options != nil {
-			for _,v := range in.CPUStressor.Options{
+			for _, v := range in.CPUStressor.Options {
 				stressors += fmt.Sprintf(" %v ", v)
 			}
 		}

@@ -92,7 +92,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		r.Log.Info("The common chaos is already running", "name", req.Name, "namespace", req.Namespace)
 		return ctrl.Result{}, nil
 	} else {
-		// Start failure action
+		// Start chaos action
 		r.Log.Info("Performing Action")
 
 		if err = r.Apply(ctx, req, chaos); err != nil {
@@ -116,7 +116,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	}
 
 	if err := r.Update(ctx, chaos); err != nil {
-		r.Log.Error(err, "unable to update chaosctl status")
+		r.Log.Error(err, "unable to update chaos status")
 		return ctrl.Result{}, err
 	}
 

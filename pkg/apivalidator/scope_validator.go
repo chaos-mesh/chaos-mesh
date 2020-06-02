@@ -17,8 +17,8 @@ import (
 	"strconv"
 
 	"github.com/go-playground/validator/v10"
-
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/util/validation"
 )
 
 // NamespaceSelectorsValid can be used to check whether namespace selectors is valid.
@@ -53,7 +53,8 @@ func MapSelectorsValid(fl validator.FieldLevel) bool {
 	}
 
 	for k, v := range ms {
-		if !checkName(k) || !checkName(v) {
+		if len(validation.IsQualifiedName(k)) != 0 ||
+			len(validation.IsValidLabelValue(v)) != 0 {
 			return false
 		}
 	}
@@ -113,4 +114,30 @@ func checkPhase(ph string) bool {
 	}
 
 	return false
+}
+
+// PodsValid can be used to check whether the pod name is valid.
+func PodsValid(fl validator.FieldLevel) bool {
+	if fl.Field().IsNil() {
+		return true
+	}
+
+	pods, ok := fl.Field().Interface().(map[string][]string)
+	if !ok {
+		return false
+	}
+
+	for ns, ps := range pods {
+		if !checkName(ns) {
+			return false
+		}
+
+		for _, p := range ps {
+			if !checkName(p) {
+				return false
+			}
+		}
+	}
+
+	return true
 }

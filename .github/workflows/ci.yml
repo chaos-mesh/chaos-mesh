@@ -37,12 +37,13 @@ jobs:
           export PATH=$PATH:$GOPATH/bin
           make ensure-kubebuilder || echo 0
           make ensure-kustomize || echo 0
-          make goimports || echo 0
+          make groupimports || echo 0
           #use sh function
 
           if [[ "$job" == "verify" ]]; then
             make check
-            git diff -- . ':(exclude)go.mod' ':(exclude)go.sum' || (git diff --quiet -- . ':(exclude)go.mod' ':(exclude)go.sum'; echo Please make check before creating a PR; exit 1)
+            echo "Please make check before creating a PR"
+            git diff --quiet -- .
           elif [[ "$job" == "build" ]]; then
             make image
           elif [[ "$job" == "test" ]]; then

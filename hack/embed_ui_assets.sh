@@ -1,5 +1,18 @@
 #!/usr/bin/env bash
 
+# Copyright 2020 PingCAP, Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 # This script embeds UI assets into Golang source file. UI assets must be already built
 # before calling this script.
 #
@@ -21,28 +34,23 @@ cd "$PROJECT_DIR"
 export GOBIN=$PROJECT_DIR/bin
 export PATH=$GOBIN:$PATH
 
-if [ "${NO_ASSET_BUILD_TAG:-}" = "1" ]; then
-  BUILD_TAG_PARAMETER=""
-else
-  BUILD_TAG_PARAMETER="-tags ${ASSET_BUILD_TAG:-ui_server}"
-fi
-
 echo "+ Preflight check"
 if [ ! -d "ui/build" ]; then
   echo "  - Error: UI assets must be built first"
   exit 1
 fi
 
-echo "+ Install bindata tools"
-go install github.com/elazarl/go-bindata-assetfs/go-bindata-assetfs
-go install github.com/go-bindata/go-bindata/v3/go-bindata
-
-echo "+ Clean up go mod"
-go mod tidy
+if [ "${NO_ASSET_BUILD_TAG:-}" = "1" ]; then
+  BUILD_TAG_PARAMETER=""
+else
+  BUILD_TAG_PARAMETER=${ASSET_BUILD_TAG:-ui_server}
+fi
 
 echo "+ Embed UI assets"
 
-go-bindata-assetfs -pkg uiserver -prefix ui $BUILD_TAG_PARAMETER ui/build/...
+go run tools/assets_generate/main.go $BUILD_TAG_PARAMETER
+
+
 HANDLER_PATH=pkg/uiserver/embedded_assets_handler.go
-mv bindata_assetfs.go $HANDLER_PATH
+mv assets_vfsdata.go $HANDLER_PATH
 echo "  - Assets handler written to $HANDLER_PATH"

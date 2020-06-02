@@ -86,7 +86,7 @@ type OperatorAction interface {
 	InstallTemplate(config OperatorConfig) error
 }
 
-// NewOperatorAction create a OperatorAction interface instance
+// NewOperatorAction create an OperatorAction interface instance
 func NewOperatorAction(
 	kubeCli kubernetes.Interface,
 	aggrCli aggregatorclientset.Interface,
@@ -142,7 +142,7 @@ func (oa *operatorAction) DeployOperator(info OperatorConfig) error {
 	if err != nil {
 		return err
 	}
-	return e2eutil.WaitForAPIServicesAvaiable(oa.aggrCli, labels.Everything())
+	return e2eutil.WaitForAPIServicesAvailable(oa.aggrCli, labels.Everything())
 }
 
 func (oa *operatorAction) InstallCRD(info OperatorConfig) error {

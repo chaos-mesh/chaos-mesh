@@ -35,7 +35,7 @@ type Service struct {
 	event   core.EventStore
 }
 
-// NewService return a event service instance.
+// NewService return an event service instance.
 func NewService(
 	conf *config.ChaosServerConfig,
 	cli client.Client,
@@ -55,7 +55,7 @@ func Register(r *gin.RouterGroup, s *Service) {
 	endpoint := r.Group("/events")
 
 	// TODO: add more api handlers
-	endpoint.GET("/", s.listEvents)
+	endpoint.GET("", s.listEvents)
 }
 
 // @Summary Get all events from db.
@@ -63,40 +63,27 @@ func Register(r *gin.RouterGroup, s *Service) {
 // @Tags events
 // @Produce json
 // @Success 200 {array} core.Event
-// @Router /api/events/all [get]
+// @Router /api/events [get]
 // @Failure 500 {object} utils.APIError
 func (s *Service) listEvents(c *gin.Context) {
-	name := c.Query("name")
-	namespace := c.Query("namespace")
-	//eventList := make([]*core.Event, 0)
-	var eventList []*core.Event
-	var err error
+	podName := c.Query("podName")
+	podNamespace := c.Query("podNamespace")
+	startTimeStr := c.Query("startTime")
+	experimentName := c.Query("experimentName")
+	experimentNamespace := c.Query("experimentNamespace")
 
-	if name != "" && namespace == "" {
+	if podName != "" && podNamespace == "" {
 		c.Status(http.StatusInternalServerError)
-		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(fmt.Errorf("namespace is empty")))
+		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(fmt.Errorf("when podName is not empty, podNamespace cannot be empty")))
 		return
-	} else if name == "" && namespace == "" {
-		eventList, err = s.event.List(context.Background())
-		if err != nil {
-			c.Status(http.StatusInternalServerError)
-			_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
-			return
-		}
-	} else if name == "" && namespace != "" {
-		eventList, err = s.event.ListByNamespace(context.Background(), namespace)
-		if err != nil {
-			c.Status(http.StatusInternalServerError)
-			_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
-			return
-		}
-	} else {
-		eventList, err = s.event.ListByPod(context.Background(), namespace, name)
-		if err != nil {
-			c.Status(http.StatusInternalServerError)
-			_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
-			return
-		}
 	}
+
+	eventList, err := s.event.ListByFilter(context.Background(), podName, podNamespace, experimentName, experimentNamespace, startTimeStr)
+	if err != nil {
+		c.Status(http.StatusInternalServerError)
+		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
+		return
+	}
+
 	c.JSON(http.StatusOK, eventList)
 }
