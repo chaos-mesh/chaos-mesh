@@ -36,6 +36,7 @@ var (
 	log = ctrl.Log.WithName("database ttl controller")
 )
 
+// Controller defines the database ttl controller
 type Controller struct {
 	archive core.ExperimentStore
 	event   core.EventStore
