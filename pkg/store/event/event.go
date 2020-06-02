@@ -35,9 +35,8 @@ func NewStore(db *dbstore.DB) core.EventStore {
 	db.AutoMigrate(&core.PodRecord{})
 
 	es := &eventStore{db}
-	if err := es.DeleteIncompleteEvents(context.Background()); err != nil && gorm.IsRecordNotFoundError(err) {
-		log.Error(err, "failed to delete all incomplete events")
-	}
+
+	_ = es.DeleteIncompleteEvents(context.Background())
 
 	return es
 }
@@ -290,10 +289,8 @@ func (e *eventStore) DeleteByFinishTime(_ context.Context, ttl time.Duration) er
 	nowTime := time.Now()
 	for _, et := range eventList {
 		if et.FinishTime.Add(ttl).Before(nowTime) {
-			_ = e.db.Model(core.Event{}).
-				Where(
-					"namespace = ? and experiment = ? and start_time = ? and finish_time = ? ",
-					et.Namespace, et.Experiment, et.StartTime, et.FinishTime).Unscoped().Delete(core.Event{})
+			_ = e.db.Model(core.Event{}).Unscoped().Delete(*et)
+
 			_ = e.db.Model(core.PodRecord{}).
 				Where(
 					"event_id = ? ",
