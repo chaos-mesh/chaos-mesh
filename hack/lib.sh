@@ -33,7 +33,7 @@ HELM_VERSION=2.9.1
 KIND_VERSION=0.7.0
 KIND_BIN=$OUTPUT_BIN/kind
 KUBEBUILDER_PATH=$OUTPUT_BIN/kubebuilder
-KUBEBUILDER_BIN=$KUBEBUILDER_PATH
+KUBEBUILDER_BIN=$KUBEBUILDER_PATH/bin/kubebuilder
 KUBEBUILDER_VERSION=2.2.0
 KUSTOMIZE_BIN=$OUTPUT_BIN/kustomize
 KUSTOMIZE_VERSION=3.5.4
@@ -78,6 +78,17 @@ function hack::ensure_helm() {
     curl --retry 10 -L -s "$HELM_URL" | tar --strip-components 1 -C $OUTPUT_BIN -zxf - ${OS}-${ARCH}/helm
 }
 
+#
+# Concatenates the elements with a separator between them.
+#
+# Usage: hack::join ',' a b c
+#
+function hack::join() {
+	local IFS="$1"
+	shift
+	echo "$*"
+}
+
 function hack::verify_kind() {
     if test -x "$KIND_BIN"; then
         [[ "$($KIND_BIN --version 2>&1 | cut -d ' ' -f 3)" == "$KIND_VERSION" ]]
@@ -114,7 +125,7 @@ function hack::ensure_kubebuilder() {
     trap "test -f $tmpfile && rm $tmpfile" RETURN
     curl --retry 10 -L -o ${tmpfile} https://go.kubebuilder.io/dl/$KUBEBUILDER_VERSION/$OS/$ARCH
     tar -C ${OUTPUT_BIN} -xzf ${tmpfile}
-    mv ${OUTPUT_BIN}/kubebuilder_${KUBEBUILDER_VERSION}_${OS}_${ARCH}/bin/kubebuilder ${KUBEBUILDER_PATH}
+    mv ${OUTPUT_BIN}/kubebuilder_${KUBEBUILDER_VERSION}_${OS}_${ARCH}/bin/kubebuilder ${KUBEBUILDER_BIN}
 }
 
 function hack::verify_kustomize() {
