@@ -42,16 +42,38 @@ var (
 )
 
 var (
-	printVersion bool
+	printVersion                  bool
+	databaseTTLResyncPeriodString string
+	eventTTLString                string
+	archiveExperimentTTLString    string
 )
 
 func main() {
 	flag.BoolVar(&printVersion, "version", false, "print version information and exit")
+	flag.StringVar(&databaseTTLResyncPeriodString, "databaseTTLResyncPeriod", "8h", "the time interval to synchronize data in the database")
+	flag.StringVar(&eventTTLString, "eventTTL", "72h", "the ttl of events")
+	flag.StringVar(&archiveExperimentTTLString, "archiveExperimentTTL", "168h", "the ttl of archive experiments")
 	flag.Parse()
 
 	conf, err := config.EnvironChaosServer()
 	if err != nil {
 		log.Error(err, "main: invalid configuration")
+		os.Exit(1)
+	}
+
+	databaseTTLResyncPeriod, err := time.ParseDuration(databaseTTLResyncPeriodString)
+	if err != nil {
+		log.Error(err, "main: invalid databaseTTLResyncPeriod")
+		os.Exit(1)
+	}
+	eventTTL, err := time.ParseDuration(eventTTLString)
+	if err != nil {
+		log.Error(err, "main: invalid eventTTL")
+		os.Exit(1)
+	}
+	archiveExperimentTTL, err := time.ParseDuration(archiveExperimentTTLString)
+	if err != nil {
+		log.Error(err, "main: invalid archiveExperimentTTL")
 		os.Exit(1)
 	}
 
@@ -66,8 +88,12 @@ func main() {
 
 	app := fx.New(
 		fx.Provide(
-			func() (<-chan struct{}, *config.ChaosServerConfig) {
-				return stopCh, &conf
+			func() (<-chan struct{}, *config.ChaosServerConfig, ttlcontroller.TTLconfig) {
+				return stopCh, &conf, ttlcontroller.TTLconfig{
+					DatabaseTTLResyncPeriod: databaseTTLResyncPeriod,
+					EventTTL:                eventTTL,
+					ArchiveExperimentTTL:    archiveExperimentTTL,
+				}
 			},
 			dbstore.NewDBStore,
 			collector.NewServer,
