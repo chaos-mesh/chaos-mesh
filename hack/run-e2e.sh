@@ -63,17 +63,29 @@ echo "DELETE_NAMESPACE_ON_FAILURE: $DELETE_NAMESPACE_ON_FAILURE"
 echo "DOCKER_REGISTRY: $DOCKER_REGISTRY"
 
 function e2e::image_load() {
-    local names=(
+    local images=(
         pingcap/chaos-mesh
         pingcap/chaos-daemon
         pingcap/chaos-fs
         pingcap/chaos-scripts
         pingcap/e2e-helper
     )
-    for n in ${names[@]}; do
-        $KIND_BIN load docker-image --name $CLUSTER ${DOCKER_REGISTRY}/$n:$IMAGE_TAG
+    echo "info: pull if images do not exist"
+    for image in ${images[@]}; do
+        if ! docker inspect -f '{{.Id}}' $image &>/dev/null; then
+            echo "info: pulling ${DOCKER_REGISTRY}/$image:$IMAGE_TAG"
+            docker pull $image
+        fi
     done
+    if [ "$PROVIDER" == "kind" ]; then
+        local nodes=$($KIND_BIN get nodes --name $CLUSTER | grep -v 'control-plane$')
+        echo "info: load images ${images[@]}"
+        for image in ${images[@]}; do
+            $KIND_BIN load docker-image --name $CLUSTER ${DOCKER_REGISTRY}/$image:$IMAGE_TAG --nodes $(hack::join ',' ${nodes[@]})
+        done
+    fi
 }
+
 
 function e2e::get_kube_version() {
     $KUBECTL_BIN --context $KUBECONTEXT version --short | awk '/Server Version:/ {print $3}'
@@ -107,7 +119,9 @@ if [ -z "$KUBECONTEXT" ]; then
 fi
 
 e2e::image_load
+echo "info: image loaded"
 e2e::setup_helm_server
+echo "info: helm server setuped"
 
 if [ -n "$SKIP_GINKGO" ]; then
     echo "info: skipping ginkgo"
