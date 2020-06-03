@@ -122,7 +122,6 @@ def build(SHELL_CODE, ARTIFACTS = "") {
 							ansiColor('xterm') {
 								sh """
 								export GOPATH=${WORKSPACE}/go
-								export RUNNER_SUITE_NAME=${name}
 								${SHELL_CODE}
 								"""
 							}
