@@ -131,15 +131,16 @@ echo "GCR_IO_MIRROR: $GCR_IO_MIRROR"
 echo "QUAY_IO_MIRROR: $QUAY_IO_MIRROR"
 echo "ARTIFACTS: $ARTIFACTS"
 
-# https://github.com/kubernetes-sigs/kind/releases/tag/v0.6.1
+# https://github.com/kubernetes-sigs/kind/releases/tag/v0.8.1
 declare -A kind_node_images
-kind_node_images["v1.11.10"]="kindest/node:v1.11.10@sha256:8ebe805201da0a988ee9bbcc2de2ac0031f9264ac24cf2a598774f1e7b324fe1"
-kind_node_images["v1.12.10"]="kindest/node:v1.12.10@sha256:c5aeca1433e3230e6c1a96b5e1cd79c90139fd80242189b370a3248a05d77118"
-kind_node_images["v1.13.12"]="kindest/node:v1.13.12@sha256:1fe072c080ee129a2a440956a65925ab3bbd1227cf154e2ade145b8e59a584ad"
-kind_node_images["v1.14.9"]="kindest/node:v1.14.9@sha256:bdd3731588fa3ce8f66c7c22f25351362428964b6bca13048659f68b9e665b72"
-kind_node_images["v1.15.6"]="kindest/node:v1.15.6@sha256:18c4ab6b61c991c249d29df778e651f443ac4bcd4e6bdd37e0c83c0d33eaae78"
-kind_node_images["v1.16.3"]="kindest/node:v1.16.3@sha256:70ce6ce09bee5c34ab14aec2b84d6edb260473a60638b1b095470a3a0f95ebec"
-kind_node_images["v1.17.0"]="kindest/node:v1.17.0@sha256:190c97963ec4f4121c3f1e96ca6eb104becda5bae1df3a13f01649b2dd372f6d"
+kind_node_images["v1.11.10"]="kindest/node:v1.11.10@sha256:74c8740710649a3abb169e7f348312deff88fc97d74cfb874c5095ab3866bb42"
+kind_node_images["v1.12.10"]="kindest/node:v1.12.10@sha256:faeb82453af2f9373447bb63f50bae02b8020968e0889c7fa308e19b348916cb"
+kind_node_images["v1.13.12"]="kindest/node:v1.13.12@sha256:214476f1514e47fe3f6f54d0f9e24cfb1e4cda449529791286c7161b7f9c08e7"
+kind_node_images["v1.14.10"]="kindest/node:v1.14.10@sha256:6cd43ff41ae9f02bb46c8f455d5323819aec858b99534a290517ebc181b443c6"
+kind_node_images["v1.15.11"]="kindest/node:v1.15.11@sha256:6cc31f3533deb138792db2c7d1ffc36f7456a06f1db5556ad3b6927641016f50"
+kind_node_images["v1.16.9"]="kindest/node:v1.16.9@sha256:7175872357bc85847ec4b1aba46ed1d12fa054c83ac7a8a11f5c268957fd5765"
+kind_node_images["v1.17.5"]="kindest/node:v1.17.5@sha256:ab3f9e6ec5ad8840eeb1f76c89bb7948c77bbf76bcebe1a8b59790b8ae9a283a"
+kind_node_images["v1.18.2"]="kindest/node:v1.18.2@sha256:7b27a6d0f2517ff88ba444025beae41491b016bc6af573ba467b70c5e8e0d85f"
 
 function e2e::image_build() {
     if [ -n "$SKIP_BUILD" ]; then
