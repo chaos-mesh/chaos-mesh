@@ -130,6 +130,7 @@ echo "DOCKER_IO_MIRROR: $DOCKER_IO_MIRROR"
 echo "GCR_IO_MIRROR: $GCR_IO_MIRROR"
 echo "QUAY_IO_MIRROR: $QUAY_IO_MIRROR"
 echo "ARTIFACTS: $ARTIFACTS"
+echo "KUBE_WORKERS: $KUBE_WORKERS"
 
 # https://github.com/kubernetes-sigs/kind/releases/tag/v0.8.1
 declare -A kind_node_images
