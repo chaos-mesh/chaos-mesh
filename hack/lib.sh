@@ -32,7 +32,8 @@ HELM_BIN=$OUTPUT_BIN/helm
 HELM_VERSION=2.9.1
 KIND_VERSION=${KIND_VERSION:-0.8.1}
 KIND_BIN=$OUTPUT_BIN/kind
-KUBEBUILDER_BIN=$OUTPUT_BIN/kubebuilder
+KUBEBUILDER_PATH=$OUTPUT_BIN/kubebuilder
+KUBEBUILDER_BIN=$KUBEBUILDER_PATH/bin/kubebuilder
 KUBEBUILDER_VERSION=2.2.0
 KUSTOMIZE_BIN=$OUTPUT_BIN/kustomize
 KUSTOMIZE_VERSION=3.5.4
@@ -124,7 +125,7 @@ function hack::ensure_kubebuilder() {
     trap "test -f $tmpfile && rm $tmpfile" RETURN
     curl --retry 10 -L -o ${tmpfile} https://go.kubebuilder.io/dl/$KUBEBUILDER_VERSION/$OS/$ARCH
     tar -C ${OUTPUT_BIN} -xzf ${tmpfile}
-    mv ${OUTPUT_BIN}/kubebuilder_${KUBEBUILDER_VERSION}_${OS}_${ARCH}/bin/kubebuilder ${KUBEBUILDER_BIN}
+    mv ${OUTPUT_BIN}/kubebuilder_${KUBEBUILDER_VERSION}_${OS}_${ARCH} ${KUBEBUILDER_PATH}
 }
 
 function hack::verify_kustomize() {

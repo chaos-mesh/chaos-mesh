@@ -112,6 +112,7 @@ KUBE_WORKERS=${KUBE_WORKERS:-3}
 DOCKER_IO_MIRROR=${DOCKER_IO_MIRROR:-}
 GCR_IO_MIRROR=${GCR_IO_MIRROR:-}
 QUAY_IO_MIRROR=${QUAY_IO_MIRROR:-}
+RUNNER_SUITE_NAME=${RUNNER_SUITE_NAME:-}
 ARTIFACTS=${ARTIFACTS:-}
 
 echo "PROVIDER: $PROVIDER"
@@ -268,9 +269,11 @@ EOF
 
 e2e::image_build
 
-kubetest2_args=(
-    $PROVIDER
-)
+if [ -n "$RUNNER_SUITE_NAME" ]; then
+    kubetest2_args+=(
+        --suite-name "$RUNNER_SUITE_NAME"
+    )
+fi
 
 if [ -z "$SKIP_UP" ]; then
     kubetest2_args+=(--up)
@@ -278,6 +281,10 @@ fi
 
 if [ -z "$SKIP_DOWN" ]; then
     kubetest2_args+=(--down)
+fi
+
+if [ -z "$SKIP_TEST" ]; then
+    kubetest2_args+=(--test exec)
 fi
 
 if [ "$PROVIDER" == "kind" ]; then
