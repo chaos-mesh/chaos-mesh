@@ -73,7 +73,6 @@ function e2e::image_load() {
     if [ "$PROVIDER" == "kind" ]; then
         local nodes=$($KIND_BIN get nodes --name $CLUSTER | grep -v 'control-plane$')
         echo $nodes
-        sleep 3600s
         echo "info: load images ${images[@]}"
         for image in ${images[@]}; do
             $KIND_BIN load docker-image --name $CLUSTER ${DOCKER_REGISTRY}/$image:$IMAGE_TAG --nodes $(hack::join ',' ${nodes[@]})
