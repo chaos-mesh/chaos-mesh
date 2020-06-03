@@ -1,11 +1,12 @@
 import { Experiment } from './types'
+import * as Yup from 'yup'
 
 export const defaultExperimentSchema: Experiment = {
   name: '',
   namespace: 'default',
   scope: {
     namespace_selectors: ['default'],
-    label_selectors: '',
+    label_selectors: '{}',
     phase_selectors: ['all'],
     mode: 'one',
     value: '',
@@ -49,3 +50,7 @@ export const defaultExperimentSchema: Experiment = {
     duration: '',
   },
 }
+
+export const validationSchema = Yup.object().shape({
+  name: Yup.string().required(),
+})

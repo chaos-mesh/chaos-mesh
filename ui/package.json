@@ -17,7 +17,8 @@
     "react-router-dom": "^5.1.2",
     "react-scripts": "3.4.1",
     "redux": "^4.0.5",
-    "typescript": "^3.8.3"
+    "typescript": "^3.8.3",
+    "yup": "^0.29.1"
   },
   "scripts": {
     "start": "react-scripts start",
@@ -50,6 +51,7 @@
     "@types/react-dom": "^16.9.6",
     "@types/react-redux": "^7.1.9",
     "@types/react-router-dom": "^5.1.4",
+    "@types/yup": "^0.29.1",
     "http-proxy-middleware": "^1.0.4",
     "husky": "^4.2.5",
     "lint-staged": "^10.1.7",

@@ -3,7 +3,7 @@ import Pod from './Pod'
 import React from 'react'
 import { StepperFormProps } from 'components/NewExperiment/types'
 import VerticalTabs from 'components/VerticalTabs'
-import { tabKinds } from 'lib/utils'
+import { targetVerticalTabsKinds as tabKinds } from 'lib/formikhelpers'
 
 const tabs = [
   { label: 'Pod Lifecycle' },
@@ -28,7 +28,7 @@ const Target: React.FC<TargetProps> = ({ formProps }) => {
   const props = {
     tabs,
     tabPanels,
-    handleChangeCallback: handleVerticalTabsChangeCallback,
+    onChangeCallback: handleVerticalTabsChangeCallback,
   }
 
   return <VerticalTabs {...props} />

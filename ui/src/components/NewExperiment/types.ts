@@ -7,7 +7,7 @@ export interface ExperimentBasic {
 
 export interface ExperimentScope {
   namespace_selectors: string[]
-  label_selectors: string
+  label_selectors: string | object
   phase_selectors: string[]
   mode: string
   value: string
@@ -60,6 +60,10 @@ export interface ExperimentTarget {
   kind: string
   pod_chaos: ExperimentTargetPod
   network_chaos: ExperimentTargetNetwork
+  io_chaos?: any
+  kernel_chaos?: any
+  time_chaos?: any
+  stress_chaos?: any
 }
 
 export interface ExperimentSchedule {

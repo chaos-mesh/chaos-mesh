@@ -21,10 +21,21 @@ const useStyles = makeStyles((theme: Theme) =>
 
 interface ExperimentCardProps {
   experiment: Experiment
+  handleSelect: (info: { namespace: string; name: string; kind: string }) => void
+  handleDialogOpen: (open: boolean) => void
 }
 
-const ExperimentCard: React.FC<ExperimentCardProps> = ({ experiment: e }) => {
+const ExperimentCard: React.FC<ExperimentCardProps> = ({ experiment: e, handleSelect, handleDialogOpen }) => {
   const classes = useStyles()
+
+  const handleDelete = (e: Experiment) => () => {
+    handleDialogOpen(true)
+    handleSelect({
+      namespace: e.Namespace,
+      name: e.Name,
+      kind: e.Kind,
+    })
+  }
 
   return (
     <Card className={classes.card} variant="outlined">
@@ -35,7 +46,7 @@ const ExperimentCard: React.FC<ExperimentCardProps> = ({ experiment: e }) => {
             <IconButton color="primary" aria-label="Pause experiment" component="span">
               <PauseCircleOutlineIcon />
             </IconButton>
-            <IconButton color="primary" aria-label="Pause experiment" component="span">
+            <IconButton color="primary" aria-label="Delete experiment" component="span" onClick={handleDelete(e)}>
               <DeleteOutlineIcon />
             </IconButton>
           </Box>
