@@ -98,7 +98,6 @@ function hack::ensure_kind() {
 }
 
 function hack::verify_kubebuilder() {
-    echo "$KUBEBUILDER_BIN"
     if test -x "$KUBEBUILDER_BIN"; then
         v=$($KUBEBUILDER_BIN version | grep -o -E '[0-9]+\.[0-9]+\.[0-9]+' | head -n 1)
         echo v
@@ -109,7 +108,6 @@ function hack::verify_kubebuilder() {
 }
 
 function hack::ensure_kubebuilder() {
-    echo "hello"
     if hack::verify_kubebuilder; then
         return 0
     fi
@@ -130,7 +128,6 @@ function hack::verify_kustomize() {
 }
 
 function hack::ensure_kustomize() {
-    echo "here"
     if hack::verify_kustomize; then
         return 0
     fi

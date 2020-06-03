@@ -27,7 +27,6 @@ hack::ensure_helm
 hack::ensure_kind
 
 
-HELM_IMAGE=${HELM_IMAGE:-registry.cn-hangzhou.aliyuncs.com/google_containers/tiller:v2.12.3}
 PROVIDER=${PROVIDER:-}
 CLUSTER=${CLUSTER:-}
 IMAGE_TAG=${IMAGE_TAG:-}
@@ -71,10 +70,9 @@ function e2e::image_load() {
         pingcap/chaos-scripts
         pingcap/e2e-helper
     )
-#    for n in ${names[@]}; do
-#        $KIND_BIN load docker-image --name $CLUSTER ${DOCKER_REGISTRY}/$n:$IMAGE_TAG
-#    done
-    echo "image load"
+    for n in ${names[@]}; do
+        $KIND_BIN load docker-image --name $CLUSTER ${DOCKER_REGISTRY}/$n:$IMAGE_TAG
+    done
 }
 
 function e2e::get_kube_version() {
@@ -86,14 +84,14 @@ function e2e::setup_helm_server() {
     if hack::version_ge $(e2e::get_kube_version) "v1.16.0"; then
         # workaround for https://github.com/helm/helm/issues/6374
         # TODO remove this when we can upgrade to helm 2.15+, see https://github.com/helm/helm/pull/6462
-        $HELM_BIN init -i ${HELM_IMAGE} --service-account tiller --output yaml \
+        $HELM_BIN init --service-account tiller --output yaml \
             | sed 's@apiVersion: extensions/v1beta1@apiVersion: apps/v1@' \
             | sed 's@  replicas: 1@  replicas: 1\n  selector: {"matchLabels": {"app": "helm", "name": "tiller"}}@' \
             | $KUBECTL_BIN --context $KUBECONTEXT apply -f -
         echo "info: wait for tiller to be ready"
         e2e::__wait_for_deploy kube-system tiller-deploy
     else
-        $HELM_BIN init -i ${HELM_IMAGE} --service-account=tiller --wait
+        $HELM_BIN init --service-account=tiller --wait
     fi
     $HELM_BIN version
 }
