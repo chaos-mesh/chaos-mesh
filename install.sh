@@ -836,6 +836,21 @@ data:
   tls.crt: "${TLS_CRT}"
   tls.key: "${TLS_KEY}"
 ---
+# Source: chaos-mesh/templates/chaos-server-configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: chaos-mesh-chaos-dashboard
+  labels:
+    app.kubernetes.io/name: chaos-mesh
+    app.kubernetes.io/instance: chaos-mesh
+    app.kubernetes.io/component: chaos-dashboard
+data:
+  DATABASE_DATASOURCE: "/data/core.sqlite"
+  DATABASE_DRIVER: "sqlite3"
+  LISTEN_HOST: "0.0.0.0"
+  LISTEN_PORT: "2333"
+---
 # Source: chaos-mesh/templates/controller-manager-rbac.yaml
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1beta1
@@ -922,6 +937,27 @@ roleRef:
   name: chaos-mesh:chaos-controller-manager
   apiGroup: rbac.authorization.k8s.io
 ---
+# Source: chaos-mesh/templates/chaos-server-deployment.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: chaos-testing
+  name: chaos-mesh-chaos-dashboard
+  labels:
+    app.kubernetes.io/name: chaos-mesh
+    app.kubernetes.io/instance: chaos-mesh
+    app.kubernetes.io/component: chaos-dashboard
+spec:
+  selector:
+    app.kubernetes.io/name: chaos-mesh
+    app.kubernetes.io/instance: chaos-mesh
+    app.kubernetes.io/component: chaos-dashboard
+  type: NodePort
+  ports:
+    - protocol: TCP
+      port: 2333
+      targetPort: 2333
+---
 # Source: chaos-mesh/templates/controller-manager-service.yaml
 apiVersion: v1
 kind: Service
@@ -1007,6 +1043,53 @@ spec:
         - name: sys-path
           hostPath:
             path: /sys
+---
+# Source: chaos-mesh/templates/chaos-server-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: chaos-testing
+  name: chaos-dashboard
+  labels:
+    app.kubernetes.io/name: chaos-mesh
+    app.kubernetes.io/instance: chaos-mesh
+    app.kubernetes.io/component: chaos-dashboard
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: chaos-mesh
+      app.kubernetes.io/instance: chaos-mesh
+      app.kubernetes.io/component: chaos-dashboard
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: chaos-mesh
+        app.kubernetes.io/instance: chaos-mesh
+        app.kubernetes.io/component: chaos-dashboard
+    spec:
+      serviceAccount: chaos-controller-manager
+      containers:
+        - name: chaos-dashboard
+          image: pingcap/chaos-dashboard:latest
+          imagePullPolicy: Always
+          resources:
+            limits: {}
+            requests:
+              cpu: 25m
+              memory: 256Mi
+          command:
+            - /usr/local/bin/chaos-dashboard
+          envFrom:
+          - configMapRef:
+              name: chaos-mesh-chaos-dashboard
+          volumeMounts:
+          - name: storage-volume
+            mountPath: /data
+            subPath: ""
+      volumes:
+      - name: storage-volume
+        emptyDir: {}
 ---
 # Source: chaos-mesh/templates/controller-manager-deployment.yaml
 apiVersion: apps/v1
