@@ -270,6 +270,10 @@ EOF
 
 e2e::image_build
 
+kubetest2_args=(
+    $PROVIDER
+)
+
 if [ -n "$RUNNER_SUITE_NAME" ]; then
     kubetest2_args+=(
         --suite-name "$RUNNER_SUITE_NAME"
