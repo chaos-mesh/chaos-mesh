@@ -70,13 +70,6 @@ function e2e::image_load() {
         pingcap/chaos-scripts
         pingcap/e2e-helper
     )
-    echo "info: pull if images do not exist"
-    for image in ${images[@]}; do
-        if ! docker inspect -f '{{.Id}}' $image &>/dev/null; then
-            echo "info: pulling ${DOCKER_REGISTRY}/$image:$IMAGE_TAG"
-            docker pull $image
-        fi
-    done
     if [ "$PROVIDER" == "kind" ]; then
         local nodes=$($KIND_BIN get nodes --name $CLUSTER | grep -v 'control-plane$')
         echo "info: load images ${images[@]}"
