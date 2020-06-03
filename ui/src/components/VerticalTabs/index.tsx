@@ -26,14 +26,14 @@ function a11yProps(index: number) {
 interface VerticalTabsProps {
   tabs: TabProps[]
   tabPanels: React.ReactNode[]
-  handleChangeCallback: (index: number) => void
+  onChangeCallback: (index: number) => void
 }
 
-const VerticalTabs: React.FC<VerticalTabsProps> = ({ tabs, tabPanels, handleChangeCallback: callback }) => {
+const VerticalTabs: React.FC<VerticalTabsProps> = ({ tabs, tabPanels, onChangeCallback: callback }) => {
   const classes = useStyles()
   const [value, setValue] = useState(0)
 
-  const handleChange = (_: React.ChangeEvent<{}>, newValue: number) => {
+  const onChange = (_: React.ChangeEvent<{}>, newValue: number) => {
     setValue(newValue)
 
     if (typeof callback === 'function') {
@@ -43,7 +43,7 @@ const VerticalTabs: React.FC<VerticalTabsProps> = ({ tabs, tabPanels, handleChan
 
   return (
     <Box className={classes.root}>
-      <Tabs className={classes.tabs} orientation="vertical" variant="scrollable" value={value} onChange={handleChange}>
+      <Tabs className={classes.tabs} orientation="vertical" value={value} onChange={onChange}>
         {tabs.map(({ label, ...other }: TabProps, index: number) => {
           return <Tab key={index} label={label} {...a11yProps(index)} {...other} />
         })}

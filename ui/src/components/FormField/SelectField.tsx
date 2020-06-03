@@ -1,11 +1,12 @@
 import { Box, Chip, TextField, TextFieldProps } from '@material-ui/core'
-import React, { FC } from 'react'
 
-const SelectField: FC<TextFieldProps & { multiple?: boolean }> = ({
+import React from 'react'
+
+const SelectField: React.FC<TextFieldProps & { multiple?: boolean }> = ({
   children,
   fullWidth = true,
   multiple = false,
-  ...selectProps
+  ...props
 }) => {
   const SelectProps = {
     multiple,
@@ -24,14 +25,7 @@ const SelectField: FC<TextFieldProps & { multiple?: boolean }> = ({
 
   return (
     <Box mb={2}>
-      <TextField
-        select
-        margin="dense"
-        fullWidth={fullWidth}
-        variant="outlined"
-        SelectProps={SelectProps}
-        {...selectProps}
-      >
+      <TextField select margin="dense" fullWidth={fullWidth} variant="outlined" SelectProps={SelectProps} {...props}>
         {children}
       </TextField>
     </Box>

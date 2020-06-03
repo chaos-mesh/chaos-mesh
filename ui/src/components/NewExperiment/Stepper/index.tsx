@@ -43,14 +43,14 @@ const steps = ['Basic', 'Scope', 'Target', 'Schedule']
 
 interface StepperProps {
   formProps: StepperFormProps
-  toggleDrawer: () => void
 }
 
-const CreateStepper: React.FC<StepperProps> = ({ formProps, toggleDrawer }) => {
+const CreateStepper: React.FC<StepperProps> = ({ formProps }) => {
   const classes = useStyles()
 
   const { state, dispatch } = useStepperContext()
   const { activeStep } = state
+
   const [namespaces, setNamespaces] = useState<string[]>([])
 
   const fetchNamespaces = () => {
@@ -61,6 +61,16 @@ const CreateStepper: React.FC<StepperProps> = ({ formProps, toggleDrawer }) => {
   }
 
   useEffect(fetchNamespaces, [])
+
+  const handleNext = () => dispatch(next())
+  const handleBack = () => dispatch(back())
+  const handleJump = (step: number) => () => dispatch(jump(step))
+  const handleReset = () => {
+    const { handleReset: resetForm } = formProps
+
+    dispatch(reset())
+    resetForm()
+  }
 
   const getStepContent = () => {
     switch (activeStep) {
@@ -84,16 +94,6 @@ const CreateStepper: React.FC<StepperProps> = ({ formProps, toggleDrawer }) => {
     }
   }
 
-  const handleNext = () => dispatch(next())
-  const handleBack = () => dispatch(back())
-  const handleJump = (step: number) => () => dispatch(jump(step))
-  const handleReset = () => {
-    const { handleReset: resetForm } = formProps
-
-    dispatch(reset())
-    resetForm()
-  }
-
   return (
     <Box display="flex" flexDirection="column">
       <Stepper className={classes.stepper} activeStep={state.activeStep} alternativeLabel>
@@ -109,16 +109,12 @@ const CreateStepper: React.FC<StepperProps> = ({ formProps, toggleDrawer }) => {
       {namespaces.length > 0 && (
         <Box className={classes.main}>
           <Box>{getStepContent()}</Box>
-          <Box marginTop={6} textAlign="right">
+          <Box mt={6} textAlign="right">
             {activeStep === steps.length ? (
               <Button onClick={handleReset}>Reset</Button>
             ) : (
               <>
-                {activeStep === 0 ? (
-                  <Button className={classes.backButton} onClick={toggleDrawer}>
-                    Cancel
-                  </Button>
-                ) : (
+                {activeStep !== 0 && (
                   <Button className={classes.backButton} onClick={handleBack}>
                     Back
                   </Button>
