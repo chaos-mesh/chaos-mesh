@@ -100,7 +100,6 @@ function hack::ensure_kind() {
 function hack::verify_kubebuilder() {
     if test -x "$KUBEBUILDER_BIN"; then
         v=$($KUBEBUILDER_BIN version | grep -o -E '[0-9]+\.[0-9]+\.[0-9]+' | head -n 1)
-        echo v
         [[ "${v}" == "${KUBEBUILDER_VERSION}" ]]
         return
     fi
