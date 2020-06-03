@@ -217,7 +217,7 @@ def call(BUILD_BRANCH, CREDENTIALS_ID) {
 		def MIRRORS = "DOCKER_IO_MIRROR=http://172.16.4.143:5000 QUAY_IO_MIRROR=http://172.16.4.143:5001"
 		def builds = [:]
 		builds["E2E v1.12.10"] = {
-                build("${MIRRORS} IMAGE_TAG=${GITHASH} SKIP_BUILD=y GINKGO_NODES=6 KUBE_VERSION=v1.12.10 REPORT_DIR=\$(pwd)/artifacts REPORT_PREFIX=v1.12.10_ ./hack/e2e.sh -- --ginkgo.focus='Basic'", artifacts)
+                build("${MIRRORS} IMAGE_TAG=${GITHASH} GINKGO_NODES=6 KUBE_VERSION=v1.12.10 REPORT_DIR=\$(pwd)/artifacts REPORT_PREFIX=v1.12.10_ ./hack/e2e.sh -- --ginkgo.focus='Basic'", artifacts)
         }
 		builds.failFast = false
 		parallel builds
