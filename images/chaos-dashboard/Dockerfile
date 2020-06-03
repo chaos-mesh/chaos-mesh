@@ -7,4 +7,4 @@ ARG SWAGGER
 
 RUN apk add tzdata --no-cache
 
-COPY --from=pingcap/binary /src/bin/chaos-server /usr/local/bin/chaos-server
+COPY --from=pingcap/binary /src/bin/chaos-dashboard /usr/local/bin/chaos-dashboard
