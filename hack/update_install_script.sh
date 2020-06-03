@@ -17,7 +17,7 @@ tmp_file="chaos-mesh.yaml"
 tmp_install_scipt="install.sh.bak"
 install_scirpt="install.sh"
 
-helm template chaos-mesh helm/chaos-mesh --namespace=chaos-testing > ${tmp_file}
+helm template chaos-mesh helm/chaos-mesh --namespace=chaos-testing --set dashboard.create=true > ${tmp_file}
 
 sed -i .bak '/helm/d' $tmp_file
 sed -i .bak '/Helm/d' $tmp_file
