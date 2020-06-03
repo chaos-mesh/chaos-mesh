@@ -836,10 +836,11 @@ data:
   tls.crt: "${TLS_CRT}"
   tls.key: "${TLS_KEY}"
 ---
-# Source: chaos-mesh/templates/chaos-server-configmap.yaml
+# Source: chaos-mesh/templates/chaos-dashboard-configmap.yaml
 apiVersion: v1
 kind: ConfigMap
 metadata:
+  namespace: chaos-testing
   name: chaos-mesh-chaos-dashboard
   labels:
     app.kubernetes.io/name: chaos-mesh
@@ -937,7 +938,7 @@ roleRef:
   name: chaos-mesh:chaos-controller-manager
   apiGroup: rbac.authorization.k8s.io
 ---
-# Source: chaos-mesh/templates/chaos-server-deployment.yaml
+# Source: chaos-mesh/templates/chaos-dashboard-deployment.yaml
 apiVersion: v1
 kind: Service
 metadata:
@@ -1044,7 +1045,7 @@ spec:
           hostPath:
             path: /sys
 ---
-# Source: chaos-mesh/templates/chaos-server-deployment.yaml
+# Source: chaos-mesh/templates/chaos-dashboard-deployment.yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
