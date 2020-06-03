@@ -106,6 +106,7 @@ SKIP_IMAGE_BUILD=${SKIP_IMAGE_BUILD:-}
 SKIP_UP=${SKIP_UP:-}
 SKIP_DOWN=${SKIP_DOWN:-}
 SKIP_DUMP=${SKIP_DUMP:-}
+SKIP_TEST=${SKIP_TEST:-}
 KIND_DATA_HOSTPATH=${KIND_DATA_HOSTPATH:-none}
 KUBE_VERSION=${KUBE_VERSION:-v1.12.10}
 KUBE_WORKERS=${KUBE_WORKERS:-3}
@@ -337,5 +338,4 @@ fi
 
 
 echo "info: run 'kubetest2 ${kubetest2_args[@]} -- hack/run-e2e.sh $@'"
-$KUBETSTS2_BIN ${kubetest2_args[@]}
-hack/run-e2e.sh "$@"
+$KUBETSTS2_BIN ${kubetest2_args[@]} -- hack/run-e2e.sh "$@"
