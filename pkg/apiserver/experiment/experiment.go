@@ -590,8 +590,6 @@ func (s *Service) getNetworkChaosDetail(namespace string, name string) (Experime
 						FieldSelectors:      chaos.Spec.Selector.FieldSelectors,
 						PhaseSelector:       chaos.Spec.Selector.PodPhaseSelectors,
 					},
-					Mode:  string(chaos.Spec.Target.TargetMode),
-					Value: chaos.Spec.Target.TargetValue,
 				},
 			},
 		},
@@ -604,6 +602,12 @@ func (s *Service) getNetworkChaosDetail(namespace string, name string) (Experime
 	if chaos.Spec.Duration != nil {
 		info.Scheduler.Duration = *chaos.Spec.Duration
 	}
+
+	if chaos.Spec.Target != nil {
+		info.Target.NetworkChaos.TargetScope.Mode = string(chaos.Spec.Target.TargetMode)
+		info.Target.NetworkChaos.TargetScope.Value = chaos.Spec.Target.TargetValue
+	}
+
 	return info, nil
 }
 
