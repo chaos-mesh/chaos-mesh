@@ -39,9 +39,9 @@ spec:
       value: "true"
     resources:
       requests:
-        memory: "8000Mi"
-        cpu: 8000m
-        ephemeral-storage: "50Gi"
+        memory: "4Gi"
+        cpu: 4
+        ephemeral-storage: "10Gi"
       limits:
         memory: "8000Mi"
         cpu: 8000m
