@@ -9,6 +9,8 @@ import ExperimentCard from 'components/ExperimentCard'
 import InboxIcon from '@material-ui/icons/Inbox'
 import Loading from 'components/Loading'
 import api from 'api'
+import day from 'lib/dayjs'
+import { getStateofExperiments } from 'slices/globalStatus'
 import { setNeedToRefreshExperiments } from 'slices/globalStatus'
 import { useSelector } from 'react-redux'
 
@@ -30,13 +32,40 @@ export default function Experiments() {
 
     api.experiments
       .experiments()
-      .then((resp) => {
-        setExperiments(resp.data)
-      })
+      .then(({ data }) => setExperiments(data))
       .catch(console.log)
       .finally(() => {
         setLoading(false)
       })
+  }
+
+  const fetchEvents = (experiments: Experiment[]) => {
+    api.events
+      .events()
+      .then(({ data }) => {
+        setExperiments(
+          experiments.map((e) => {
+            e.events = data
+              .filter((d) => d.Experiment === e.Name)
+              .sort((a, b) => {
+                if (day(a.CreateAt).isBefore(b.CreateAt)) {
+                  return -1
+                }
+
+                if (day(a.CreateAt).isAfter(b.CreateAt)) {
+                  return 1
+                }
+
+                return 0
+              })
+
+            e.events = e.events.length > 3 ? e.events.reverse().slice(0, 3).reverse() : e.events
+
+            return e
+          })
+        )
+      })
+      .catch(console.log)
   }
 
   useEffect(fetchExperiments, [])
@@ -48,6 +77,12 @@ export default function Experiments() {
     }
   }, [dispatch, needToRefreshExperiments])
 
+  useEffect(() => {
+    if (experiments && experiments.length > 0 && !experiments[0].events) {
+      fetchEvents(experiments)
+    }
+  }, [experiments])
+
   const handleDeleteExperiment = () => {
     setDialogOpen(false)
 
@@ -56,6 +91,7 @@ export default function Experiments() {
     api.experiments
       .deleteExperiment(namespace, name, kind)
       .then(() => {
+        dispatch(getStateofExperiments())
         fetchExperiments()
       })
       .catch(console.log)
@@ -76,7 +112,9 @@ export default function Experiments() {
       {!loading && experiments && experiments.length === 0 && (
         <Box display="flex" flexDirection="column" justifyContent="center" alignItems="center" height="100%">
           <InboxIcon fontSize="large" />
-          <Typography variant="h6">No experiments found. Try to create one.</Typography>
+          <Typography variant="h6" align="center">
+            No experiments found. Try to create one.
+          </Typography>
         </Box>
       )}
 
