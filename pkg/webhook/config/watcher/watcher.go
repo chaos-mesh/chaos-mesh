@@ -312,7 +312,7 @@ func (c *K8sConfigMapWatcher) GetConfigs() ([]*config.TemplateArgs, error) {
 			if err != nil {
 				log.Error(err, "failed to load template args", "payload", payload)
 				if c.metrics != nil {
-					c.metrics.TemplateLoadError.WithLabelValues(conf.Namespace, conf.Template, conf.Name).Inc()
+					c.metrics.TemplateLoadError.Inc()
 				}
 				continue
 			}
