@@ -17,13 +17,16 @@ import (
 	"github.com/kelseyhightower/envconfig"
 )
 
-// ChaosServerConfig defines the configuration for Chaos Dashboard
-type ChaosServerConfig struct {
-	ListenHost           string `envconfig:"LISTEN_HOST" default:"0.0.0.0"`
-	ListenPort           int    `envconfig:"LISTEN_PORT" default:"2333"`
-	MetricAddress        string `envconfig:"METRIC_ADDRESS"`
-	EnableLeaderElection bool   `envconfig:"ENABLE_LEADER_ELECTION"`
-	Database             *DatabaseConfig
+// ChaosDashboardConfig defines the configuration for Chaos Dashboard
+type ChaosDashboardConfig struct {
+	ListenHost                    string `envconfig:"LISTEN_HOST" default:"0.0.0.0"`
+	ListenPort                    int    `envconfig:"LISTEN_PORT" default:"2333"`
+	MetricAddress                 string `envconfig:"METRIC_ADDRESS"`
+	EnableLeaderElection          bool   `envconfig:"ENABLE_LEADER_ELECTION"`
+	Database                      *DatabaseConfig
+	DatabaseTTLResyncPeriodString string `envconfig:"databaseTTLResyncPeriod" default:"8h"`
+	EventTTLString                string `envconfig:"eventTTL" default:"72h"`
+	ArchiveExperimentTTLString    string `envconfig:"archiveExperimentTTL" default:"168h"`
 }
 
 // DatabaseConfig defines the configuration for databases
@@ -35,9 +38,9 @@ type DatabaseConfig struct {
 	Secret     string `envconfig:"DATABASE_SECRET"`
 }
 
-// EnvironChaosServer returns the settings from the environment.
-func EnvironChaosServer() (ChaosServerConfig, error) {
-	cfg := ChaosServerConfig{}
+// EnvironChaosDashboard returns the settings from the environment.
+func EnvironChaosDashboard() (ChaosDashboardConfig, error) {
+	cfg := ChaosDashboardConfig{}
 	err := envconfig.Process("", &cfg)
 	return cfg, err
 }

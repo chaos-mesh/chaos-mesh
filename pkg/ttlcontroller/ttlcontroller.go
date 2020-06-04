@@ -48,31 +48,30 @@ type TTLconfig struct {
 
 // NewController returns a new database ttl controller
 func NewController(
-	config *config.ChaosServerConfig,
+	config *config.ChaosDashboardConfig,
 	archive core.ExperimentStore,
 	event core.EventStore,
 	ttlc TTLconfig,
 ) *Controller {
-	controller := &Controller{
+	return &Controller{
 		archive:   archive,
 		event:     event,
 		ttlconfig: ttlc,
 	}
-	return controller
 }
 
 // Register periodically calls function runWorker to delete the data.
-func Register(c *Controller, stopCh <-chan struct{}) error {
+func Register(c *Controller, stopCh <-chan struct{}) {
 	defer runtimeutil.HandleCrash()
 	log.Info("starting database TTL controller")
 	go wait.Until(c.runWorker, c.ttlconfig.DatabaseTTLResyncPeriod, stopCh)
 	log.Info("shutting database TTL controller")
-	return nil
 }
 
 // runWorker is a long-running function that will continually call the
 // function in order to delete the events and archives.
 func (c *Controller) runWorker() {
+	log.Info("deleting expired data from the database")
 	c.event.DeleteByFinishTime(context.Background(), c.ttlconfig.EventTTL)
 	c.archive.DeleteByFinishTime(context.Background(), c.ttlconfig.ArchiveExperimentTTL)
 }
