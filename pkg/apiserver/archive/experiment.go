@@ -28,7 +28,7 @@ import (
 
 // Service defines a handler service for archive experiments.
 type Service struct {
-	conf    *config.ChaosServerConfig
+	conf    *config.ChaosDashboardConfig
 	kubeCli client.Client
 	archive core.ExperimentStore
 	event   core.EventStore
@@ -36,7 +36,7 @@ type Service struct {
 
 // NewService returns an archive experiment service instance.
 func NewService(
-	conf *config.ChaosServerConfig,
+	conf *config.ChaosDashboardConfig,
 	cli client.Client,
 	archive core.ExperimentStore,
 	event core.EventStore,
