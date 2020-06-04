@@ -129,6 +129,7 @@ func (r *ChaosCollector) updateOrCreateEvent(req ctrl.Request, kind string, stat
 		Kind:       kind,
 		StartTime:  &status.Experiment.StartTime.Time,
 		FinishTime: &status.Experiment.EndTime.Time,
+		Duration:   status.Experiment.Duration,
 	}
 
 	if _, err := r.event.FindByExperimentAndStartTime(

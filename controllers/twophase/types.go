@@ -123,7 +123,6 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 			Time: time.Now(),
 		}
 		status.Experiment.Phase = v1alpha1.ExperimentPhaseFinished
-
 	} else if status.Experiment.Phase == v1alpha1.ExperimentPhasePaused &&
 		!chaos.GetNextRecover().IsZero() && chaos.GetNextRecover().After(now) {
 		// Only resume chaos in the case when current round is not finished,
@@ -200,5 +199,6 @@ func applyAction(ctx context.Context, r *Reconciler, req ctrl.Request, chaos v1a
 
 	status.Experiment.StartTime = &metav1.Time{Time: time.Now()}
 	status.Experiment.Phase = v1alpha1.ExperimentPhaseRunning
+	status.Experiment.Duration = chaos.GetChaos().Duration
 	return nil
 }
