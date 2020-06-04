@@ -97,7 +97,7 @@ spec:
           topologyKey: kubernetes.io/hostname
 '''
 
-def build(SHELL_CODE, ARTIFACTS = "") {
+def build(String name, String code) {
 	podTemplate(yaml: podYAML) {
 		node(POD_LABEL) {
 			container('main') {
@@ -123,7 +123,7 @@ def build(SHELL_CODE, ARTIFACTS = "") {
 								sh """
 								export GOPATH=${WORKSPACE}/go
 								export ARTIFACTS=${ARTIFACTS}
-								${SHELL_CODE}
+								${code}
 								"""
 							}
 						}
