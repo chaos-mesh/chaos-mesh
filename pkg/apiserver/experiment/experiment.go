@@ -484,9 +484,6 @@ func (s *Service) getPodChaosDetail(namespace string, name string) (ExperimentIn
 			Mode:  string(chaos.Spec.Mode),
 			Value: chaos.Spec.Value,
 		},
-		Scheduler: SchedulerInfo{
-			Cron: chaos.Spec.Scheduler.Cron,
-		},
 		Target: TargetInfo{
 			PodChaos: PodChaosInfo{
 				Action:        string(chaos.Spec.Action),
@@ -494,6 +491,11 @@ func (s *Service) getPodChaosDetail(namespace string, name string) (ExperimentIn
 			},
 		},
 	}
+
+	if chaos.Spec.Scheduler != nil {
+		info.Scheduler.Cron = chaos.Spec.Scheduler.Cron
+	}
+
 	if chaos.Spec.Duration != nil {
 		info.Scheduler.Duration = *chaos.Spec.Duration
 	}
@@ -526,9 +528,6 @@ func (s *Service) getIoChaosDetail(namespace string, name string) (ExperimentInf
 			Mode:  string(chaos.Spec.Mode),
 			Value: chaos.Spec.Value,
 		},
-		Scheduler: SchedulerInfo{
-			Cron: chaos.Spec.Scheduler.Cron,
-		},
 		Target: TargetInfo{
 			IOChaos: IOChaosInfo{
 				Action:  string(chaos.Spec.Action),
@@ -541,6 +540,11 @@ func (s *Service) getIoChaosDetail(namespace string, name string) (ExperimentInf
 			},
 		},
 	}
+
+	if chaos.Spec.Scheduler != nil {
+		info.Scheduler.Cron = chaos.Spec.Scheduler.Cron
+	}
+
 	if chaos.Spec.Duration != nil {
 		info.Scheduler.Duration = *chaos.Spec.Duration
 	}
@@ -590,8 +594,6 @@ func (s *Service) getNetworkChaosDetail(namespace string, name string) (Experime
 						FieldSelectors:      chaos.Spec.Selector.FieldSelectors,
 						PhaseSelector:       chaos.Spec.Selector.PodPhaseSelectors,
 					},
-					Mode:  string(chaos.Spec.Target.TargetMode),
-					Value: chaos.Spec.Target.TargetValue,
 				},
 			},
 		},
@@ -604,6 +606,12 @@ func (s *Service) getNetworkChaosDetail(namespace string, name string) (Experime
 	if chaos.Spec.Duration != nil {
 		info.Scheduler.Duration = *chaos.Spec.Duration
 	}
+
+	if chaos.Spec.Target != nil {
+		info.Target.NetworkChaos.TargetScope.Mode = string(chaos.Spec.Target.TargetMode)
+		info.Target.NetworkChaos.TargetScope.Value = chaos.Spec.Target.TargetValue
+	}
+
 	return info, nil
 }
 
@@ -633,9 +641,6 @@ func (s *Service) getTimeChaosDetail(namespace string, name string) (ExperimentI
 			Mode:  string(chaos.Spec.Mode),
 			Value: chaos.Spec.Value,
 		},
-		Scheduler: SchedulerInfo{
-			Cron: chaos.Spec.Scheduler.Cron,
-		},
 		Target: TargetInfo{
 			TimeChaos: TimeChaosInfo{
 				TimeOffset:     chaos.Spec.TimeOffset,
@@ -644,6 +649,11 @@ func (s *Service) getTimeChaosDetail(namespace string, name string) (ExperimentI
 			},
 		},
 	}
+
+	if chaos.Spec.Scheduler != nil {
+		info.Scheduler.Cron = chaos.Spec.Scheduler.Cron
+	}
+
 	if chaos.Spec.Duration != nil {
 		info.Scheduler.Duration = *chaos.Spec.Duration
 	}
@@ -676,15 +686,17 @@ func (s *Service) getKernelChaosDetail(namespace string, name string) (Experimen
 			Mode:  string(chaos.Spec.Mode),
 			Value: chaos.Spec.Value,
 		},
-		Scheduler: SchedulerInfo{
-			Cron: chaos.Spec.Scheduler.Cron,
-		},
 		Target: TargetInfo{
 			KernelChaos: KernelChaosInfo{
 				FailKernRequest: chaos.Spec.FailKernRequest,
 			},
 		},
 	}
+
+	if chaos.Spec.Scheduler != nil {
+		info.Scheduler.Cron = chaos.Spec.Scheduler.Cron
+	}
+
 	if chaos.Spec.Duration != nil {
 		info.Scheduler.Duration = *chaos.Spec.Duration
 	}
@@ -717,9 +729,6 @@ func (s *Service) getStressChaosDetail(namespace string, name string) (Experimen
 			Mode:  string(chaos.Spec.Mode),
 			Value: chaos.Spec.Value,
 		},
-		Scheduler: SchedulerInfo{
-			Cron: chaos.Spec.Scheduler.Cron,
-		},
 		Target: TargetInfo{
 			StressChaos: StressChaosInfo{
 				Stressors:         chaos.Spec.Stressors,
@@ -727,6 +736,11 @@ func (s *Service) getStressChaosDetail(namespace string, name string) (Experimen
 			},
 		},
 	}
+
+	if chaos.Spec.Scheduler != nil {
+		info.Scheduler.Cron = chaos.Spec.Scheduler.Cron
+	}
+
 	if chaos.Spec.Duration != nil {
 		info.Scheduler.Duration = *chaos.Spec.Duration
 	}
