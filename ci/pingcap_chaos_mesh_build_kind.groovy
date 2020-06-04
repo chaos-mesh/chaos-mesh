@@ -102,6 +102,7 @@ def build(String name, String code) {
 		node(POD_LABEL) {
 			container('main') {
 				def WORKSPACE = pwd()
+				def ARTIFACTS = "${WORKSPACE}/go/src/github.com/pingcap/chaos-mesh/_artifacts"
 				try {
 					dir("${WORKSPACE}/go/src/github.com/pingcap/chaos-mesh") {
 						unstash 'chaos-mesh'
