@@ -2,13 +2,15 @@
 // E2E Jenkins file.
 //
 
-import groovy.text.SimpleTemplateEngine
+import groovy.transform.Field
 
-podYAML = '''\
+@Field
+def podYAML = '''
 apiVersion: v1
 kind: Pod
 metadata:
   labels:
+    # we pretend as tidb-operator in order not to meet tidb-operator-e2e job in the same node
     app: tidb-operator-e2e
 spec:
   containers:
@@ -24,7 +26,7 @@ spec:
     - |
       function clean() {
         echo "info: clean all containers to avoid cgroup leaking"
-        docker kill `docker ps -q` || true
+        docker kill $(docker ps -q) || true
         docker system prune -af || true
       }
       trap clean TERM
@@ -35,21 +37,15 @@ spec:
     env:
     - name: DOCKER_IN_DOCKER_ENABLED
       value: "true"
-<% if (resources && (resources.requests || resources.limits)) { %>
     resources:
-    <% if (resources.requests) { %>
       requests:
-        cpu: <%= resources.requests.cpu %>
-        memory: <%= resources.requests.memory %>
-        ephemeral-storage: 70Gi
-    <% } %>
-    <% if (resources.limits) { %>
+        memory: "8000Mi"
+        cpu: 8000m
+        ephemeral-storage: "50Gi"
       limits:
-        cpu: <%= resources.limits.cpu %>
-        memory: <%= resources.limits.memory %>
-        ephemeral-storage: 70Gi
-    <% } %>
-<% } %>
+        memory: "8000Mi"
+        cpu: 8000m
+        ephemeral-storage: "50Gi"
     # kind needs /lib/modules and cgroups from the host
     volumeMounts:
     - mountPath: /lib/modules
@@ -76,14 +72,8 @@ spec:
     emptyDir: {}
   - name: docker-graph
     emptyDir: {}
-  tolerations:
-  - effect: NoSchedule
-    key: tidb-operator
-    operator: Exists
   affinity:
-<% if (!any) { %>
-    # run on nodes prepared for tidb-operator by default
-    # https://github.com/pingcap/tidb-operator/issues/1603
+    # running on nodes for chaos-mesh only
     nodeAffinity:
       requiredDuringSchedulingIgnoredDuringExecution:
         nodeSelectorTerms:
@@ -91,8 +81,8 @@ spec:
           - key: ci.pingcap.com
             operator: In
             values:
+            # we pretend as tidb-operator in order not to meet tidb-operator-e2e job in the same node
             - tidb-operator
-<% } %>
     podAntiAffinity:
       preferredDuringSchedulingIgnoredDuringExecution:
       - weight: 100
@@ -102,46 +92,16 @@ spec:
             - key: app
               operator: In
               values:
+              # we pretend as tidb-operator in order not to meet tidb-operator-e2e job in the same node
               - tidb-operator-e2e
           topologyKey: kubernetes.io/hostname
 '''
 
-String buildPodYAML(Map m = [:]) {
-	m.putIfAbsent("resources", [:])
-	m.putIfAbsent("any", false)
-	def engine = new groovy.text.SimpleTemplateEngine()
-	def template = engine.createTemplate(podYAML).make(m)
-	return template.toString()
-}
-
-e2ePodResources = [
-		requests: [
-			cpu: "8",
-			memory: "8G"
-		],
-		limits: [
-			cpu: "8",
-			memory: "8G"
-		],
-	]
-
-e2eSerialResources = [
-		requests: [
-			cpu: "4",
-			memory: "8G"
-		],
-		limits: [
-			cpu: "4",
-			memory: "8G"
-		],
-	]
-
-def build(String name, String code, Map resources = e2ePodResources) {
-	podTemplate(yaml: buildPodYAML(resources: resources)) {
+def build(SHELL_CODE, ARTIFACTS = "") {
+	podTemplate(yaml: podYAML) {
 		node(POD_LABEL) {
 			container('main') {
 				def WORKSPACE = pwd()
-				def ARTIFACTS = "${WORKSPACE}/go/src/github.com/pingcap/chaos-mesh/_artifacts"
 				try {
 					dir("${WORKSPACE}/go/src/github.com/pingcap/chaos-mesh") {
 						unstash 'chaos-mesh'
@@ -159,16 +119,17 @@ def build(String name, String code, Map resources = e2ePodResources) {
 							"""
 						}
 						stage('Run') {
-							sh """#!/bin/bash
-							export GOPATH=${WORKSPACE}/go
-							export ARTIFACTS=${ARTIFACTS}
-							export RUNNER_SUITE_NAME=${name}
-							${code}
-							"""
+							ansiColor('xterm') {
+								sh """
+								export GOPATH=${WORKSPACE}/go
+								export ARTIFACTS=${ARTIFACTS}
+								${SHELL_CODE}
+								"""
+							}
 						}
 					}
 				} finally {
-					dir(ARTIFACTS) {
+                    dir(ARTIFACTS) {
 						sh """#!/bin/bash
 						echo "info: change ownerships for jenkins"
 						chown -R 1000:1000 .
@@ -261,10 +222,11 @@ def call(BUILD_BRANCH, CREDENTIALS_ID) {
 			}
 		}
 
-		def GLOBALS = "SKIP_BUILD=y IMAGE_TAG=${GITHASH} GINKGO_NO_COLOR=y GINKGO_NODES=6"
+		def GLOBALS = "SKIP_BUILD=y IMAGE_TAG=${GITHASH} GINKGO_NO_COLOR=y"
+		def artifacts = "go/src/github.com/pingcap/chaos-mesh/artifacts"
 		def builds = [:]
 		builds["E2E v1.12.10"] = {
-                build("${GLOBALS} KUBE_VERSION=v1.12.10 ./hack/e2e.sh -- --ginkgo.focus='Basic'")
+                build("E2E V1.12", "${GLOBALS} GINKGO_NODES=6 KUBE_VERSION=v1.12.10 ./hack/e2e.sh -- --ginkgo.focus='Basic'")
         }
 		builds.failFast = false
 		parallel builds
@@ -273,23 +235,23 @@ def call(BUILD_BRANCH, CREDENTIALS_ID) {
 	}
 
 	stage('Summary') {
-    		def CHANGELOG = getChangeLogText()
-    		def duration = ((System.currentTimeMillis() - currentBuild.startTimeInMillis) / 1000 / 60).setScale(2, BigDecimal.ROUND_HALF_UP)
-    		def slackmsg = "[#${env.ghprbPullId}: ${env.ghprbPullTitle}]" + "\n" +
-    		"${env.ghprbPullLink}" + "\n" +
-    		"${env.ghprbPullDescription}" + "\n" +
-    		"Integration Common Test Result: `${currentBuild.result}`" + "\n" +
-    		"Elapsed Time: `${duration} mins` " + "\n" +
-    		"${CHANGELOG}" + "\n" +
-    		"${env.RUN_DISPLAY_URL}"
+		def CHANGELOG = getChangeLogText()
+		def duration = ((System.currentTimeMillis() - currentBuild.startTimeInMillis) / 1000 / 60).setScale(2, BigDecimal.ROUND_HALF_UP)
+		def slackmsg = "[#${env.ghprbPullId}: ${env.ghprbPullTitle}]" + "\n" +
+		"${env.ghprbPullLink}" + "\n" +
+		"${env.ghprbPullDescription}" + "\n" +
+		"Integration Common Test Result: `${currentBuild.result}`" + "\n" +
+		"Elapsed Time: `${duration} mins` " + "\n" +
+		"${CHANGELOG}" + "\n" +
+		"${env.RUN_DISPLAY_URL}"
 
-    		if (currentBuild.result != "SUCCESS") {
-    			slackSend channel: '#cloud_jenkins', color: 'danger', teamDomain: 'pingcap', tokenCredentialId: 'slack-pingcap-token', message: "${slackmsg}"
-    			return
-    		}
+		if (currentBuild.result != "SUCCESS") {
+			slackSend channel: '#cloud_jenkins', color: 'danger', teamDomain: 'pingcap', tokenCredentialId: 'slack-pingcap-token', message: "${slackmsg}"
+			return
+		}
 
-    		slackSend channel: '#cloud_jenkins', color: 'good', teamDomain: 'pingcap', tokenCredentialId: 'slack-pingcap-token', message: "${slackmsg}"
-    	}
+		slackSend channel: '#cloud_jenkins', color: 'good', teamDomain: 'pingcap', tokenCredentialId: 'slack-pingcap-token', message: "${slackmsg}"
+	}
 
     }
 }
