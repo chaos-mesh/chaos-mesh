@@ -55,17 +55,17 @@ func main() {
 		os.Exit(1)
 	}
 
-	databaseTTLResyncPeriod, err := time.ParseDuration(conf.DatabaseTTLResyncPeriodString)
+	databaseTTLResyncPeriod, err := time.ParseDuration(conf.PersistTTL.SyncPeriod)
 	if err != nil {
 		log.Error(err, "main: invalid databaseTTLResyncPeriod")
 		os.Exit(1)
 	}
-	eventTTL, err := time.ParseDuration(conf.EventTTLString)
+	eventTTL, err := time.ParseDuration(conf.PersistTTL.Event)
 	if err != nil {
 		log.Error(err, "main: invalid eventTTL")
 		os.Exit(1)
 	}
-	archiveExperimentTTL, err := time.ParseDuration(conf.ArchiveExperimentTTLString)
+	archiveExperimentTTL, err := time.ParseDuration(conf.PersistTTL.Experiment)
 	if err != nil {
 		log.Error(err, "main: invalid archiveExperimentTTL")
 		os.Exit(1)

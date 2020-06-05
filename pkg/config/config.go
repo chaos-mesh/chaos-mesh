@@ -19,14 +19,19 @@ import (
 
 // ChaosDashboardConfig defines the configuration for Chaos Dashboard
 type ChaosDashboardConfig struct {
-	ListenHost                    string `envconfig:"LISTEN_HOST" default:"0.0.0.0"`
-	ListenPort                    int    `envconfig:"LISTEN_PORT" default:"2333"`
-	MetricAddress                 string `envconfig:"METRIC_ADDRESS"`
-	EnableLeaderElection          bool   `envconfig:"ENABLE_LEADER_ELECTION"`
-	Database                      *DatabaseConfig
-	DatabaseTTLResyncPeriodString string `envconfig:"databaseTTLResyncPeriod" default:"8h"`
-	EventTTLString                string `envconfig:"eventTTL" default:"72h"`
-	ArchiveExperimentTTLString    string `envconfig:"archiveExperimentTTL" default:"168h"`
+	ListenHost           string `envconfig:"LISTEN_HOST" default:"0.0.0.0"`
+	ListenPort           int    `envconfig:"LISTEN_PORT" default:"2333"`
+	MetricAddress        string `envconfig:"METRIC_ADDRESS"`
+	EnableLeaderElection bool   `envconfig:"ENABLE_LEADER_ELECTION"`
+	Database             *DatabaseConfig
+	PersistTTL           PersistTTLConfig
+}
+
+// PersistTTLConfig defines the configuration of ttl
+type PersistTTLConfig struct {
+	SyncPeriod string `envconfig:"TTL_SYNC_PERIOD" default: "12h"`
+	Event      string `envconfig:"TTL_EVENT" default: "7*24h"`
+	Experiment string `envconfig: TTL_EXPERIMENT default: "14*24h"`
 }
 
 // DatabaseConfig defines the configuration for databases
