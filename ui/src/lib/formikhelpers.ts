@@ -73,7 +73,7 @@ export function parseSubmitValues(values: Experiment) {
   return values
 }
 
-export function mustImmediate(formikValues: Experiment) {
+export function mustSchedule(formikValues: Experiment) {
   if (
     formikValues.target.pod_chaos.action === 'pod-kill' ||
     formikValues.target.pod_chaos.action === 'container-kill'
