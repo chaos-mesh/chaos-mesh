@@ -8,6 +8,9 @@ const useStyles = makeStyles((theme: Theme) => ({
   },
   tabs: {
     borderRight: `1px solid ${theme.palette.divider}`,
+    '& .MuiTabs-indicator': {
+      backgroundColor: theme.palette.primary.main,
+    },
   },
   main: {
     flex: 1,

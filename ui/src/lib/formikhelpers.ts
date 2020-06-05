@@ -1,4 +1,6 @@
-import { Experiment, ExperimentTarget } from 'components/NewExperiment/types'
+import { Experiment, ExperimentTarget, StepperFormProps } from 'components/NewExperiment/types'
+
+import { defaultExperimentSchema } from 'components/NewExperiment/constants'
 
 export const targetVerticalTabsKinds: {
   kind: string
@@ -82,4 +84,26 @@ export function mustSchedule(formikValues: Experiment) {
   }
 
   return false
+}
+
+export function resetOtherChaos(formProps: StepperFormProps, action: string) {
+  const { values, setFieldValue } = formProps
+
+  const selectedChaosKind = values.target.kind
+  const selectedChaosKey = targetVerticalTabsKinds.filter((d) => d.kind === selectedChaosKind)[0].key
+
+  const updatedTarget = {
+    ...defaultExperimentSchema.target,
+    ...{
+      kind: selectedChaosKind,
+      [selectedChaosKey]: {
+        ...values.target[selectedChaosKey],
+        ...{
+          action,
+        },
+      },
+    },
+  }
+
+  setFieldValue('target', updatedTarget)
 }
