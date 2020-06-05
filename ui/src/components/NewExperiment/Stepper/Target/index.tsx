@@ -4,7 +4,6 @@ import React from 'react'
 import { StepperFormProps } from 'components/NewExperiment/types'
 import VerticalTabs from 'components/VerticalTabs'
 import { resetOtherChaos } from 'lib/formikhelpers'
-import { targetVerticalTabsKinds as tabKinds } from 'lib/formikhelpers'
 
 const tabs = [
   { label: 'Pod Lifecycle' },
@@ -17,26 +16,24 @@ const tabs = [
 
 interface TargetProps {
   formProps: StepperFormProps
+  tabIndex: number
+  setTabIndex: (index: number) => void
 }
 
-const Target: React.FC<TargetProps> = ({ formProps }) => {
-  const { setFieldValue } = formProps
-
-  const handleVerticalTabsChangeCallback = (index: number) => {
-    setFieldValue('target.kind', tabKinds.map((k) => k.kind)[index])
-  }
-
-  const handleActionChange = (e: React.ChangeEvent<HTMLInputElement>) => resetOtherChaos(formProps, e.target.value)
+const Target: React.FC<TargetProps> = ({ formProps, tabIndex, setTabIndex }) => {
+  const handleActionChange = (kind: string) => (e: React.ChangeEvent<HTMLInputElement>) =>
+    resetOtherChaos(formProps, kind, e.target.value)
 
   const tabPanels = [
-    <Pod {...formProps} handleActionChange={handleActionChange} />,
-    <Network {...formProps} handleActionChange={handleActionChange} />,
+    <Pod {...formProps} handleActionChange={handleActionChange('PodChaos')} />,
+    <Network {...formProps} handleActionChange={handleActionChange('NetworkChaos')} />,
   ]
 
   const props = {
     tabs,
     tabPanels,
-    onChangeCallback: handleVerticalTabsChangeCallback,
+    tabIndex,
+    setTabIndex,
   }
 
   return <VerticalTabs {...props} />

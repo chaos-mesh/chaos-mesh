@@ -2,7 +2,7 @@ import { Experiment, ExperimentTarget, StepperFormProps } from 'components/NewEx
 
 import { defaultExperimentSchema } from 'components/NewExperiment/constants'
 
-export const targetVerticalTabsKinds: {
+const ChaosKindsAndKeys: {
   kind: string
   key: Exclude<keyof ExperimentTarget, 'kind'>
 }[] = [
@@ -50,8 +50,7 @@ export function parseSubmitValues(values: Experiment) {
 
   // Remove unrelated chaos
   const kind = values.target.kind
-  targetVerticalTabsKinds
-    .filter((k) => k.kind !== kind)
+  ChaosKindsAndKeys.filter((k) => k.kind !== kind)
     .map((k) => k.key)
     .forEach((k) => delete values.target[k])
 
@@ -86,11 +85,11 @@ export function mustSchedule(formikValues: Experiment) {
   return false
 }
 
-export function resetOtherChaos(formProps: StepperFormProps, action: string) {
+export function resetOtherChaos(formProps: StepperFormProps, kind: string, action: string) {
   const { values, setFieldValue } = formProps
 
-  const selectedChaosKind = values.target.kind
-  const selectedChaosKey = targetVerticalTabsKinds.filter((d) => d.kind === selectedChaosKind)[0].key
+  const selectedChaosKind = kind
+  const selectedChaosKey = ChaosKindsAndKeys.filter((d) => d.kind === selectedChaosKind)[0].key
 
   const updatedTarget = {
     ...defaultExperimentSchema.target,
