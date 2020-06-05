@@ -17,3 +17,6 @@ export const experiments: (
 
 export const deleteExperiment = (namespace: string, name: string, kind: string) =>
   http.delete(`/experiments/${kind}/${namespace}/${name}`)
+
+export const detail = (namespace: string, name: string, kind: string) =>
+  http.get(`/experiments/detail/${kind}/${namespace}/${name}`)
