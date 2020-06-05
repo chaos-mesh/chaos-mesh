@@ -1,146 +1,132 @@
-import React, { FC, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Box, Grid, Typography } from '@material-ui/core'
+import React, { useEffect, useState } from 'react'
+import { RootState, useStoreDispatch } from 'store'
 
-import {
-  Button,
-  Box,
-  Card,
-  CardContent,
-  CardActions,
-  Drawer,
-  IconButton,
-  LinearProgress,
-  Typography,
-} from '@material-ui/core'
-import AddIcon from '@material-ui/icons/Add'
-import DeleteOutlineIcon from '@material-ui/icons/DeleteOutline'
-import PauseCircleOutlineIcon from '@material-ui/icons/PauseCircleOutline'
-import { createStyles, Theme, makeStyles } from '@material-ui/core/styles'
-
-import PageBar from '../../components/PageBar'
-import ToolBar from '../../components/ToolBar'
-import Container from '../../components/Container'
-import InfoList from '../../components/InfoList'
-import NewExperiment from '../../pages/Experiments/New'
-
-const useStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    card: {
-      marginBottom: theme.spacing(4),
-      '&:last-child': {
-        marginBottom: 0,
-      },
-    },
-    cardContent: {
-      display: 'flex',
-      maxHeight: '20rem',
-      padding: theme.spacing(4),
-      overflow: 'auto',
-    },
-    cardActions: {
-      justifyContent: 'space-between',
-      padding: `0 ${theme.spacing(4)} ${theme.spacing(2)}`,
-    },
-    linearProgress: {
-      flex: 1,
-      minWidth: '6rem',
-      height: '1rem',
-      margin: `${theme.spacing(2)} ${theme.spacing(4)} ${theme.spacing(2)} 0`,
-    },
-  })
-)
-
-interface ExperimentProps {
-  info: { [key: string]: string }
-}
-// TODO: ui polish
-const ExperimentCard: FC<ExperimentProps> = ({ info, children }) => {
-  const classes = useStyles()
-
-  return (
-    <Card className={classes.card}>
-      <CardContent className={classes.cardContent}>
-        <Box flexBasis="20rem">
-          <InfoList info={info} />
-        </Box>
-        <Box flexGrow={1} px={4} py={2}>
-          <Typography variant="h5">Events</Typography>
-          <Box display="flex" flexWrap="wrap" mt={2}>
-            {children}
-          </Box>
-        </Box>
-      </CardContent>
-      <CardActions className={classes.cardActions}>
-        <Button size="large" color="primary" component={Link} to={`/experiments/${info.name}`}>
-          Detail
-        </Button>
-        <Box>
-          <IconButton aria-label="pause">
-            <PauseCircleOutlineIcon fontSize="large" />
-          </IconButton>
-          <IconButton aria-label="delete">
-            <DeleteOutlineIcon fontSize="large" />
-          </IconButton>
-        </Box>
-      </CardActions>
-    </Card>
-  )
-}
+import ConfirmDialog from 'components/ConfirmDialog'
+import ContentContainer from '../../components/ContentContainer'
+import { Experiment } from 'api/experiments.type'
+import ExperimentCard from 'components/ExperimentCard'
+import InboxIcon from '@material-ui/icons/Inbox'
+import Loading from 'components/Loading'
+import api from 'api'
+import day from 'lib/dayjs'
+import { getStateofExperiments } from 'slices/globalStatus'
+import { setNeedToRefreshExperiments } from 'slices/globalStatus'
+import { useSelector } from 'react-redux'
 
 export default function Experiments() {
-  const classes = useStyles()
+  const needToRefreshExperiments = useSelector((state: RootState) => state.globalStatus.needToRefreshExperiments)
+  const dispatch = useStoreDispatch()
 
-  const [isOpen, setIsOpen] = useState(false)
-  // TODO: interval to fetch experiment list
-  const fakeList = [
-    {
-      name: 'tikv-failure',
-      namespace: 'tidb-demo',
-      kind: 'PodChaos',
-      created: '1 day ago',
-    },
-    {
-      name: 'tidb-failure',
-      namespace: 'tidb-demo',
-      kind: 'PodChaos',
-      created: '2 days ago',
-    },
-  ]
+  const [loading, setLoading] = useState(false)
+  const [experiments, setExperiments] = useState<Experiment[] | null>(null)
+  const [selected, setSelected] = useState({
+    namespace: '',
+    name: '',
+    kind: '',
+  })
+  const [dialogOpen, setDialogOpen] = useState(false)
 
-  const toggleDrawer = (isOpen: boolean) => () => {
-    setIsOpen(isOpen)
+  const fetchExperiments = () => {
+    setLoading(true)
+
+    api.experiments
+      .experiments()
+      .then(({ data }) => setExperiments(data))
+      .catch(console.log)
+      .finally(() => {
+        setLoading(false)
+      })
   }
 
-  // FIXME: console warning: findDOMNode is deprecated in StrictMode.
-  // https://github.com/mui-org/material-ui/issues/13394
+  const fetchEvents = (experiments: Experiment[]) => {
+    api.events
+      .events()
+      .then(({ data }) => {
+        setExperiments(
+          experiments.map((e) => {
+            e.events = data
+              .filter((d) => d.Experiment === e.Name)
+              .sort((a, b) => {
+                if (day(a.CreateAt).isBefore(b.CreateAt)) {
+                  return -1
+                }
+
+                if (day(a.CreateAt).isAfter(b.CreateAt)) {
+                  return 1
+                }
+
+                return 0
+              })
+
+            e.events = e.events.length > 3 ? e.events.reverse().slice(0, 3).reverse() : e.events
+
+            return e
+          })
+        )
+      })
+      .catch(console.log)
+  }
+
+  useEffect(fetchExperiments, [])
+
+  useEffect(() => {
+    if (needToRefreshExperiments) {
+      fetchExperiments()
+      dispatch(setNeedToRefreshExperiments(false))
+    }
+  }, [dispatch, needToRefreshExperiments])
+
+  useEffect(() => {
+    if (experiments && experiments.length > 0 && !experiments[0].events) {
+      fetchEvents(experiments)
+    }
+  }, [experiments])
+
+  const handleDeleteExperiment = () => {
+    setDialogOpen(false)
+
+    const { namespace, name, kind } = selected
+
+    api.experiments
+      .deleteExperiment(namespace, name, kind)
+      .then(() => {
+        dispatch(getStateofExperiments())
+        fetchExperiments()
+      })
+      .catch(console.log)
+  }
+
   return (
-    <>
-      <PageBar />
-      <ToolBar>
-        <Button variant="outlined" startIcon={<AddIcon />} onClick={toggleDrawer(true)}>
-          New Experiment
-        </Button>
-      </ToolBar>
+    <ContentContainer>
+      <Grid container spacing={3}>
+        {experiments &&
+          experiments.length > 0 &&
+          experiments.map((e) => (
+            <Grid key={e.Name} item xs={12} sm={12} md={6} lg={4} xl={3}>
+              <ExperimentCard experiment={e} handleSelect={setSelected} handleDialogOpen={setDialogOpen} />
+            </Grid>
+          ))}
+      </Grid>
 
-      <Container>
-        {fakeList.map((item: { [key: string]: string }, index) => {
-          return (
-            <ExperimentCard key={item.name + item.namespace} info={item}>
-              {/* TODO: fake event progress, polish ui with tooltip as a component */}
-              <LinearProgress variant="determinate" color="primary" value={20} className={classes.linearProgress} />
-              <LinearProgress variant="determinate" color="secondary" value={50} className={classes.linearProgress} />
-              {index === 0 && (
-                <LinearProgress variant="determinate" color="primary" value={100} className={classes.linearProgress} />
-              )}
-            </ExperimentCard>
-          )
-        })}
-      </Container>
+      {!loading && experiments && experiments.length === 0 && (
+        <Box display="flex" flexDirection="column" justifyContent="center" alignItems="center" height="100%">
+          <InboxIcon fontSize="large" />
+          <Typography variant="h6" align="center">
+            No experiments found. Try to create one.
+          </Typography>
+        </Box>
+      )}
 
-      {/* New Experiment Stepper Drawer */}
-      <Drawer anchor="right" open={isOpen} onClose={toggleDrawer(false)}>
-        <NewExperiment />
-      </Drawer>
-    </>
+      {loading && <Loading />}
+
+      <ConfirmDialog
+        open={dialogOpen}
+        setOpen={setDialogOpen}
+        title={`Delete ${selected.name}?`}
+        description="Once you delete this experiment, it can't be recovered."
+        handleConfirm={handleDeleteExperiment}
+      />
+    </ContentContainer>
   )
 }

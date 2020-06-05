@@ -27,7 +27,7 @@ name: chaosfs-etcd
 selector:
   labelSelectors:
     app: etcd
-template: sidecar-template
+template: chaosfs-sidecar
 arguments:
   ContainerName: "etcd"
   DataPath: "/var/run/etcd/default.etcd"

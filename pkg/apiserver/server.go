@@ -80,7 +80,7 @@ func serverRegister(lx fx.Lifecycle, s *Server, conf *config.ChaosServerConfig, 
 	listenAddr := fmt.Sprintf("%s:%d", conf.ListenHost, conf.ListenPort)
 	listener, err := net.Listen("tcp", listenAddr)
 	if err != nil {
-		log.Error(err, "chaos-server listen failed", "host", conf.ListenHost, "port", conf.ListenPort)
+		log.Error(err, "chaos-dashboard listen failed", "host", conf.ListenHost, "port", conf.ListenPort)
 		os.Exit(1)
 	}
 
@@ -96,7 +96,7 @@ func serverRegister(lx fx.Lifecycle, s *Server, conf *config.ChaosServerConfig, 
 		OnStart: func(context.Context) error {
 			go func() {
 				if err := srv.Serve(listener); err != http.ErrServerClosed {
-					log.Error(err, "chaos-server aborted with an error")
+					log.Error(err, "chaos-dashboard aborted with an error")
 				}
 			}()
 			return nil
@@ -119,6 +119,7 @@ func newAPIHandlerEngine() (*gin.Engine, *gin.RouterGroup) {
 		v.RegisterValidation("CronValid", apivalidator.CronValid)
 		v.RegisterValidation("DurationValid", apivalidator.DurationValid)
 		v.RegisterValidation("ValueValid", apivalidator.ValueValid)
+		v.RegisterValidation("PodsValid", apivalidator.PodsValid)
 	}
 
 	endpoint := apiHandlerEngine.Group("/api")

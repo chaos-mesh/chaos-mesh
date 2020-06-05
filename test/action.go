@@ -142,7 +142,7 @@ func (oa *operatorAction) DeployOperator(info OperatorConfig) error {
 	if err != nil {
 		return err
 	}
-	return e2eutil.WaitForAPIServicesAvaiable(oa.aggrCli, labels.Everything())
+	return e2eutil.WaitForAPIServicesAvailable(oa.aggrCli, labels.Everything())
 }
 
 func (oa *operatorAction) InstallCRD(info OperatorConfig) error {
@@ -164,7 +164,7 @@ func (oa *operatorAction) InstallTemplate(info OperatorConfig) error {
 	templateCM := &corev1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: info.Namespace,
-			Name:      "sidecar-template",
+			Name:      "chaosfs-sidecar",
 			Labels: map[string]string{
 				"app.kubernetes.io/component": "template",
 			},

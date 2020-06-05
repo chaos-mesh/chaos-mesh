@@ -1,21 +1,33 @@
-import React, { FC } from 'react'
-import { Box, Select, SelectProps, InputLabel, FormHelperText } from '@material-ui/core'
+import { Box, Chip, TextField, TextFieldProps } from '@material-ui/core'
 
-const SelectField: FC<SelectProps & { helperText?: string }> = ({
+import React from 'react'
+
+const SelectField: React.FC<TextFieldProps & { multiple?: boolean }> = ({
   children,
-  id,
-  label,
-  helperText,
   fullWidth = true,
-  ...selectProps
+  multiple = false,
+  ...props
 }) => {
+  const SelectProps = {
+    multiple,
+    renderValue: multiple
+      ? (selected: any) => (
+          <Box display="flex" flexWrap="wrap">
+            {(selected as string[]).map((value) => (
+              <Box key={value} m={0.5}>
+                <Chip label={value} color="primary" />
+              </Box>
+            ))}
+          </Box>
+        )
+      : undefined,
+  }
+
   return (
-    <Box mb={4}>
-      {label && <InputLabel id={`${id}-label`}>{label}</InputLabel>}
-      <Select id={id} fullWidth={fullWidth} {...selectProps}>
+    <Box mb={2}>
+      <TextField select margin="dense" fullWidth={fullWidth} variant="outlined" SelectProps={SelectProps} {...props}>
         {children}
-      </Select>
-      {helperText && <FormHelperText id={`${id}-helper-text`}>{helperText}</FormHelperText>}
+      </TextField>
     </Box>
   )
 }

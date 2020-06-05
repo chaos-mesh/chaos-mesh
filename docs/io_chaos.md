@@ -29,6 +29,19 @@ IOChaos needs to inject a sidecar container to user pods and the sidecar contain
 > * While admission controllers are enabled by default, some Kubernetes distributions might disable them. In this case, follow the instructions to [turn on admission controllers](https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/#how-do-i-turn-on-an-admission-controller).
 > * [ValidatingAdmissionWebhooks](https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/#validatingadmissionwebhook) and [MutatingAdmissionWebhooks](https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/#mutatingadmissionwebhook) are required by IOChaos.
 
+### Template Configuration
+
+Chaos Mesh uses a template mechanism to simplify the configuration of sidecar injection.
+
+Because of the `Go Template` conflict with `Helm`, the common template is not included in the [Helm Chart](../helm/chaos-mesh). 
+However, it will be deployed automatically if you install Chaos Mesh via the [install script](../install.sh).
+
+By default, the common template ConfigMaps should be deployed in the same namespace as Chaos Mesh.
+
+```bash
+kubectl apply -f manifests/chaosfs-sidecar.yaml -n <Chaos Mesh namespace>
+```
+
 ### Data directory
 
 The data directory of the application in the target pod should be a **subdirectory** of `PersistentVolumes`.
@@ -56,11 +69,11 @@ ARGS="--pd=${CLUSTER_NAME}-pd:2379 \
 > * If you are testing a TiDB cluster, you need to modify it at [`_start_tikv.sh.tpl`](https://github.com/pingcap/tidb-operator/blob/master/charts/tidb-cluster/templates/scripts/_start_tikv.sh.tpl).
 > * PD has the same issue with TiKV. You need to modify the data directory of PD at [`_start_pd.sh.tpl`](https://github.com/pingcap/tidb-operator/blob/master/charts/tidb-cluster/templates/scripts/_start_pd.sh.tpl).
 
-## ConfigMap configuration
+## Injection configuration
 
-Chaos Mesh uses sidecar container to inject IOChaos. To fulfill this chaos, you need to configure this sidecar container using a [ConfigMap](https://kubernetes.io/docs/tasks/configure-pod-container/configure-pod-configmap/).
+Injection configuration is another [ConfigMap](https://kubernetes.io/docs/tasks/configure-pod-container/configure-pod-configmap/) and is required to fulfill IO Chaos.
 
-To define a specified ConfigMap for your application before starting your chaos experiment, refer to this [document](sidecar_configmap.md).
+To define a specified ConfigMap for your application before starting your chaos experiment, please refer to this [document](./sidecar_configmap.md).
 
 You can apply the ConfigMap defined for your application to Kubernetes cluster by the following command:
 
@@ -82,7 +95,6 @@ spec:
   action: mixed
   mode: one
   duration: "400s"
-  configName: "chaosfs-tikv"
   path: ""
   selector:
     labelSelectors:
@@ -108,27 +120,22 @@ For more sample files, see [examples](../examples). You can edit them as needed.
 | **path** | Defines the path of files for injecting IOChaos actions. It should be a regular expression for the path which you want to inject errno or delay. If the path is `""` or not defined, the IOChaos action is injected into all files.| |
 | **methods** | Defines the IO methods for injecting IOChaos actions. It is an array of string, which sets the IO syscalls. | `open` / `read` See the [available methods](#available-methods) for more details. |
 | **addr** | Defines the sidecar HTTP server address for a sidecar container.| `":8080"` |
-| **configName** | Defines the configuration name which is used to inject chaos action into pods. You can refer to [examples/tikv-configmap.yaml](../examples/chaosfs-configmap/tikv-configmap.yaml) to define your configuration.| |
 | **layer** | Represents the layer of the IO action.| `fs` (by default). |
 
 ## Usage
 
-Before the application created, you need to make admission-webhook enabled using labels and [annotations](https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/) to the application namespace:
+Before the application created, you need to enable admission-webhook enabled on the application namespace:
 
 ```bash
-admission-webhook.pingcap.com/init-request:chaosfs-tikv
+kubectl create ns app-ns
+kubectl label ns app-ns admission-webhook=enabled
 ```
 
-You can use the following commands to set labels and annotations of the application namespace:
+Then we have two ways to mark the pods we want to inject IO Chaos:
+
+1. Set annotation `admission-webhook.pingcap.com/init-request` on the namespace, then all pods in this namespace meet the selector requirements will be injected.
 
 ```bash
-# If the application namespace does not exist. you can exec this command to create one,
-# otherwise ignore this command.
-kubectl create ns app-ns # "app-ns" is the application namespace
-
-# enable admission-webhook
-kubectl label ns app-ns admission-webhook=enabled
-
 # set annotation
 kubectl annotate ns app-ns admission-webhook.pingcap.com/init-request=chaosfs-tikv
 
@@ -136,7 +143,13 @@ kubectl annotate ns app-ns admission-webhook.pingcap.com/init-request=chaosfs-ti
 ...
 ```
 
+2. Set annotation `admission-webhook.pingcap.com/request` on the pods, you can check this [example](../examples/etcd/etcd.yaml).
+
 Then, you can start your application and define YAML file to start your chaos experiment.
+
+> **Note:**
+>
+> The value of the annotation in the above examples, `chaos-tikv` is the name filed in your injection config.
 
 ### Start a chaos experiment
 

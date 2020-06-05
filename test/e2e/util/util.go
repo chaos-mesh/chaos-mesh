@@ -1,3 +1,16 @@
+// Copyright 2020 PingCAP, Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package util
 
 import (
@@ -13,9 +26,9 @@ import (
 	"k8s.io/kubernetes/test/e2e/framework"
 )
 
-// WaitForAPIServicesAvaiable waits for apiservices to be available
-func WaitForAPIServicesAvaiable(client aggregatorclientset.Interface, selector labels.Selector) error {
-	isAvaiable := func(status apiregistrationv1.APIServiceStatus) bool {
+// WaitForAPIServicesAvailable waits for apiservices to be available
+func WaitForAPIServicesAvailable(client aggregatorclientset.Interface, selector labels.Selector) error {
+	isAvailable := func(status apiregistrationv1.APIServiceStatus) bool {
 		if status.Conditions == nil {
 			return false
 		}
@@ -34,7 +47,7 @@ func WaitForAPIServicesAvaiable(client aggregatorclientset.Interface, selector l
 			return false, err
 		}
 		for _, apiService := range apiServiceList.Items {
-			if !isAvaiable(apiService.Status) {
+			if !isAvailable(apiService.Status) {
 				framework.Logf("APIService %q is not available yet", apiService.Name)
 				return false, nil
 			}

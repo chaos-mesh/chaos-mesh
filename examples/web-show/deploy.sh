@@ -1,5 +1,18 @@
 #!/usr/bin/env bash
 
+# Copyright 2020 PingCAP, Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 set -e
 
 usage() {
@@ -9,11 +22,13 @@ USAGE:
     install.sh [FLAGS] [OPTIONS]
 FLAGS:
     -h, --help              Prints help information
+    -d, --delete            Delete web-show application
         --docker-mirror     Use docker mirror to pull image
 EOF
 }
 
 DOCKER_MIRROR=false
+DELETE_APP=false
 
 while [[ $# -gt 0 ]]
 do
@@ -22,6 +37,10 @@ key="$1"
 case $key in
     --docker-mirror)
         DOCKER_MIRROR=true
+        shift
+        ;;
+    -d|--delete)
+        DELETE_APP=true
         shift
         ;;
     -h|--help)
@@ -36,9 +55,13 @@ case $key in
 esac
 done
 
-TARGET_IP=$(kubectl get pod -n kube-system -o wide| grep kube-controller | head -n 1 | awk '{print $6}')
+if [ ${DELETE_APP} == "true" ]; then
+    kubectl delete deployments web-show
+    kubectl delete service web-show
+    exit 0
+fi
 
-sed "s/TARGETIP/$TARGET_IP/g" deployment.yaml > deployment-target.yaml
+TARGET_IP=$(kubectl get pod -n kube-system -o wide| grep kube-controller | head -n 1 | awk '{print $6}')
 
 if [ ${DOCKER_MIRROR} == "true" ]; then
     docker pull dockerhub.azk8s.cn/pingcap/web-show || true
@@ -46,10 +69,51 @@ if [ ${DOCKER_MIRROR} == "true" ]; then
     kind load docker-image pingcap/web-show > /dev/null 2>&1 || true
 fi
 
-kubectl apply -f service.yaml
-kubectl apply -f deployment-target.yaml
+cat <<EOF | kubectl apply -f -
+apiVersion: v1
+kind: Service
+metadata:
+  name: web-show
+  labels:
+    app: web-show
+spec:
+  selector:
+    app: web-show
+  ports:
+    - protocol: TCP
+      port: 8081
+      targetPort: 8081
+EOF
 
-rm -rf deployment-target.yaml
+cat <<EOF | kubectl apply -f -
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web-show
+  labels:
+    app: web-show
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: web-show
+  template:
+    metadata:
+      labels:
+        app: web-show
+    spec:
+      containers:
+        - name: web-show
+          image: pingcap/web-show
+          imagePullPolicy: Always
+          command:
+            - /usr/local/bin/web-show
+            - --target-ip=${TARGET_IP}
+          ports:
+            - name: web-port
+              containerPort: 8081
+              hostPort: 8081
+EOF
 
 while [[ $(kubectl get pods -l app=web-show -o 'jsonpath={..status.conditions[?(@.type=="Ready")].status}') != "True" ]]; do echo "Waiting for pod running" && sleep 10; done
 

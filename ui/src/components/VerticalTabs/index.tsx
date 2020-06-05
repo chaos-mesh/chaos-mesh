@@ -1,11 +1,18 @@
-import React from 'react'
-import { Box, Tabs, Tab, TabProps } from '@material-ui/core'
-import { makeStyles, Theme } from '@material-ui/core/styles'
+import { Box, Tab, TabProps, Tabs } from '@material-ui/core'
+import React, { useState } from 'react'
+import { Theme, makeStyles } from '@material-ui/core/styles'
 
 const useStyles = makeStyles((theme: Theme) => ({
+  root: {
+    display: 'flex',
+  },
   tabs: {
-    flexShrink: 0,
     borderRight: `1px solid ${theme.palette.divider}`,
+  },
+  main: {
+    flex: 1,
+    paddingLeft: theme.spacing(6),
+    paddingRight: theme.spacing(3),
   },
 }))
 
@@ -19,39 +26,46 @@ function a11yProps(index: number) {
 interface VerticalTabsProps {
   tabs: TabProps[]
   tabPanels: React.ReactNode[]
+  onChangeCallback: (index: number) => void
 }
 
-export default function VerticalTabs({ tabs, tabPanels }: VerticalTabsProps) {
+const VerticalTabs: React.FC<VerticalTabsProps> = ({ tabs, tabPanels, onChangeCallback: callback }) => {
   const classes = useStyles()
-  const [value, setValue] = React.useState(0)
+  const [value, setValue] = useState(0)
 
-  const handleChange = (event: React.ChangeEvent<{}>, newValue: number) => {
+  const onChange = (_: React.ChangeEvent<{}>, newValue: number) => {
     setValue(newValue)
+
+    if (typeof callback === 'function') {
+      callback(newValue)
+    }
   }
 
   return (
-    <Box display="flex" height="100%">
-      <Tabs className={classes.tabs} orientation="vertical" variant="scrollable" value={value} onChange={handleChange}>
+    <Box className={classes.root}>
+      <Tabs className={classes.tabs} orientation="vertical" value={value} onChange={onChange}>
         {tabs.map(({ label, ...other }: TabProps, index: number) => {
           return <Tab key={index} label={label} {...a11yProps(index)} {...other} />
         })}
       </Tabs>
 
-      {tabPanels.map((panel: React.ReactNode, index: number) => {
-        return (
-          <Box
-            key={index}
-            role="tabpanel"
-            hidden={value !== index}
-            id={`vertical-tabpanel-${index}`}
-            aria-labelledby={`vertical-tab-${index}`}
-            flexGrow={1}
-            p={{ sm: 3, md: 6 }}
-          >
-            {value === index && panel}
-          </Box>
-        )
-      })}
+      <Box className={classes.main}>
+        {tabPanels.map((panel: React.ReactNode, index: number) => {
+          return (
+            <Box
+              key={index}
+              role="tabpanel"
+              id={`vertical-tabpanel-${index}`}
+              aria-labelledby={`vertical-tab-${index}`}
+              hidden={value !== index}
+            >
+              {value === index && panel}
+            </Box>
+          )
+        })}
+      </Box>
     </Box>
   )
 }
+
+export default VerticalTabs

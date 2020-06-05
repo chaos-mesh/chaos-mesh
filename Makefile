@@ -63,7 +63,7 @@ all: yaml image
 
 build: binary
 
-check: fmt vet lint generate yaml tidy
+check: fmt vet boilerplate lint generate yaml tidy
 
 # Run tests
 test: failpoint-enable generate manifests test-utils
@@ -101,7 +101,7 @@ manager: generate
 chaosfs: generate
 	$(GO) build -ldflags '$(LDFLAGS)' -o bin/chaosfs ./cmd/chaosfs/*.go
 
-chaos-server: generate
+chaos-dashboard: generate
 ifeq ($(SWAGGER),1)
 	make swagger_spec
 endif
@@ -109,7 +109,7 @@ ifeq ($(UI),1)
 	make ui
 	hack/embed_ui_assets.sh
 endif
-	$(CGO) build -ldflags '$(LDFLAGS)' -tags "${BUILD_TAGS}" -o bin/chaos-server cmd/chaos-server/*.go
+	$(CGO) build -ldflags '$(LDFLAGS)' -tags "${BUILD_TAGS}" -o bin/chaos-dashboard cmd/chaos-dashboard/*.go
 
 swagger_spec:
 	hack/generate_swagger_spec.sh
@@ -122,7 +122,7 @@ ui: yarn_dependencies
 	cd ui &&\
 	REACT_APP_DASHBOARD_API_URL="" yarn build
 
-binary: chaosdaemon manager chaosfs chaos-server
+binary: chaosdaemon manager chaosfs chaos-dashboard
 
 watchmaker:
 	$(CGOENV) go build -ldflags '$(LDFLAGS)' -o bin/watchmaker ./cmd/watchmaker/...
@@ -170,6 +170,9 @@ tidy: clean
 clean:
 	rm -rf docs/docs.go
 
+boilerplate:
+	./hack/verify-boilerplate.sh
+
 taily-build:
 	if [ "$(shell docker ps --filter=name=$@ -q)" = "" ]; then \
 		docker build -t pingcap/binary ${DOCKER_BUILD_ARGS} .; \
@@ -180,7 +183,7 @@ taily-build:
 taily-build-clean:
 	docker kill taily-build && docker rm taily-build || exit 0
 
-image: image-chaos-daemon image-chaos-mesh image-chaos-server image-chaos-fs image-chaos-scripts image-chaos-grafana
+image: image-chaos-daemon image-chaos-mesh image-chaos-dashboard image-chaos-fs image-chaos-scripts image-chaos-grafana
 
 ifneq ($(TAILY_BUILD),)
 image-binary: taily-build
@@ -204,8 +207,8 @@ image-chaos-fs: image-binary
 image-chaos-scripts: image-binary
 	docker build -t ${DOCKER_REGISTRY_PREFIX}pingcap/chaos-scripts:${IMAGE_TAG} ${DOCKER_BUILD_ARGS} images/chaos-scripts
 
-image-chaos-server: image-binary
-	docker build -t ${DOCKER_REGISTRY_PREFIX}pingcap/chaos-server:${IMAGE_TAG} ${DOCKER_BUILD_ARGS} images/chaos-server
+image-chaos-dashboard: image-binary
+	docker build -t ${DOCKER_REGISTRY_PREFIX}pingcap/chaos-dashboard:${IMAGE_TAG} ${DOCKER_BUILD_ARGS} images/chaos-dashboard
 
 image-chaos-grafana:
 	docker build -t ${DOCKER_REGISTRY_PREFIX}pingcap/chaos-grafana:${IMAGE_TAG} ${DOCKER_BUILD_ARGS} images/grafana
@@ -215,7 +218,7 @@ image-chaos-kernel:
 
 docker-push:
 	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-mesh:${IMAGE_TAG}"
-	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-server:${IMAGE_TAG}"
+	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-dashboard:${IMAGE_TAG}"
 	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-fs:${IMAGE_TAG}"
 	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-daemon:${IMAGE_TAG}"
 	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-scripts:${IMAGE_TAG}"
@@ -241,7 +244,7 @@ lint: $(GOBIN)/revive
 
 # Generate code
 generate: $(GOBIN)/controller-gen
-	$< object:headerFile=./hack/boilerplate.go.txt paths="./..."
+	$< object:headerFile=./hack/boilerplate/boilerplate.generatego.txt paths="./..."
 
 yaml: manifests ensure-kustomize
 	$(KUSTOMIZE_BIN) build config/default > manifests/crd.yaml
@@ -298,6 +301,6 @@ install-local-coverage-tools:
 
 .PHONY: all build test install manifests groupimports fmt vet tidy image \
 	binary docker-push lint generate yaml \
-	manager chaosfs chaosdaemon chaos-server ensure-all \
+	manager chaosfs chaosdaemon chaos-dashboard ensure-all \
 	dashboard dashboard-server-frontend gosec-scan \
 	proto

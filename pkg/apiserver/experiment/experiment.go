@@ -86,6 +86,7 @@ func Register(r *gin.RouterGroup, s *Service) {
 	endpoint.POST("/new", s.createExperiment)
 	endpoint.GET("/detail/:kind/:namespace/:name", s.getExperimentDetail)
 	endpoint.DELETE("/:kind/:namespace/:name", s.deleteExperiment)
+	endpoint.PUT("/update", s.updateExperiment)
 	endpoint.PUT("/pause/:kind/:namespace/:name", s.pauseExperiment)
 	endpoint.PUT("/start/:kind/:namespace/:name", s.startExperiment)
 	endpoint.GET("/state", s.state)
@@ -222,6 +223,8 @@ type StressChaosInfo struct {
 	StressngStressors string              `json:"stressng_stressors,omitempty"`
 }
 
+type actionFunc func(info *ExperimentInfo) error
+
 // @Summary Create a nex chaos experiments.
 // @Description Create a new chaos experiments.
 // @Tags experiments
@@ -239,46 +242,25 @@ func (s *Service) createExperiment(c *gin.Context) {
 		return
 	}
 
-	switch exp.Target.Kind {
-	case v1alpha1.KindPodChaos:
-		if err := s.createPodChaos(exp); err != nil {
-			c.Status(http.StatusInternalServerError)
-			_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
-			return
-		}
-	case v1alpha1.KindNetworkChaos:
-		if err := s.createNetworkChaos(exp); err != nil {
-			c.Status(http.StatusInternalServerError)
-			_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
-			return
-		}
-	case v1alpha1.KindIOChaos:
-		if err := s.createIOChaos(exp); err != nil {
-			c.Status(http.StatusInternalServerError)
-			_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
-			return
-		}
-	case v1alpha1.KindTimeChaos:
-		if err := s.createTimeChaos(exp); err != nil {
-			c.Status(http.StatusInternalServerError)
-			_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
-			return
-		}
-	case v1alpha1.KindKernelChaos:
-		if err := s.createKernelChaos(exp); err != nil {
-			c.Status(http.StatusInternalServerError)
-			_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
-			return
-		}
-	case v1alpha1.KindStressChaos:
-		if err := s.createStressChaos(exp); err != nil {
-			c.Status(http.StatusInternalServerError)
-			_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
-			return
-		}
-	default:
+	createFuncs := map[string]actionFunc{
+		v1alpha1.KindPodChaos:     s.createPodChaos,
+		v1alpha1.KindNetworkChaos: s.createNetworkChaos,
+		v1alpha1.KindIOChaos:      s.createIOChaos,
+		v1alpha1.KindStressChaos:  s.createStressChaos,
+		v1alpha1.KindTimeChaos:    s.createTimeChaos,
+		v1alpha1.KindKernelChaos:  s.createKernelChaos,
+	}
+
+	f, ok := createFuncs[exp.Target.Kind]
+	if !ok {
 		c.Status(http.StatusBadRequest)
-		_ = c.Error(utils.ErrInvalidRequest.New("Target kind is not available"))
+		_ = c.Error(utils.ErrInvalidRequest.New(exp.Target.Kind + " is not supported"))
+		return
+	}
+
+	if err := f(exp); err != nil {
+		c.Status(http.StatusInternalServerError)
+		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
 		return
 	}
 
@@ -502,9 +484,6 @@ func (s *Service) getPodChaosDetail(namespace string, name string) (ExperimentIn
 			Mode:  string(chaos.Spec.Mode),
 			Value: chaos.Spec.Value,
 		},
-		Scheduler: SchedulerInfo{
-			Cron: chaos.Spec.Scheduler.Cron,
-		},
 		Target: TargetInfo{
 			PodChaos: PodChaosInfo{
 				Action:        string(chaos.Spec.Action),
@@ -512,6 +491,11 @@ func (s *Service) getPodChaosDetail(namespace string, name string) (ExperimentIn
 			},
 		},
 	}
+
+	if chaos.Spec.Scheduler != nil {
+		info.Scheduler.Cron = chaos.Spec.Scheduler.Cron
+	}
+
 	if chaos.Spec.Duration != nil {
 		info.Scheduler.Duration = *chaos.Spec.Duration
 	}
@@ -544,9 +528,6 @@ func (s *Service) getIoChaosDetail(namespace string, name string) (ExperimentInf
 			Mode:  string(chaos.Spec.Mode),
 			Value: chaos.Spec.Value,
 		},
-		Scheduler: SchedulerInfo{
-			Cron: chaos.Spec.Scheduler.Cron,
-		},
 		Target: TargetInfo{
 			IOChaos: IOChaosInfo{
 				Action:  string(chaos.Spec.Action),
@@ -559,6 +540,11 @@ func (s *Service) getIoChaosDetail(namespace string, name string) (ExperimentInf
 			},
 		},
 	}
+
+	if chaos.Spec.Scheduler != nil {
+		info.Scheduler.Cron = chaos.Spec.Scheduler.Cron
+	}
+
 	if chaos.Spec.Duration != nil {
 		info.Scheduler.Duration = *chaos.Spec.Duration
 	}
@@ -591,9 +577,6 @@ func (s *Service) getNetworkChaosDetail(namespace string, name string) (Experime
 			Mode:  string(chaos.Spec.Mode),
 			Value: chaos.Spec.Value,
 		},
-		Scheduler: SchedulerInfo{
-			Cron: chaos.Spec.Scheduler.Cron,
-		},
 		Target: TargetInfo{
 			NetworkChaos: NetworkChaosInfo{
 				Action:    string(chaos.Spec.Action),
@@ -611,15 +594,24 @@ func (s *Service) getNetworkChaosDetail(namespace string, name string) (Experime
 						FieldSelectors:      chaos.Spec.Selector.FieldSelectors,
 						PhaseSelector:       chaos.Spec.Selector.PodPhaseSelectors,
 					},
-					Mode:  string(chaos.Spec.Target.TargetMode),
-					Value: chaos.Spec.Target.TargetValue,
 				},
 			},
 		},
 	}
+
+	if chaos.Spec.Scheduler != nil {
+		info.Scheduler.Cron = chaos.Spec.Scheduler.Cron
+	}
+
 	if chaos.Spec.Duration != nil {
 		info.Scheduler.Duration = *chaos.Spec.Duration
 	}
+
+	if chaos.Spec.Target != nil {
+		info.Target.NetworkChaos.TargetScope.Mode = string(chaos.Spec.Target.TargetMode)
+		info.Target.NetworkChaos.TargetScope.Value = chaos.Spec.Target.TargetValue
+	}
+
 	return info, nil
 }
 
@@ -649,9 +641,6 @@ func (s *Service) getTimeChaosDetail(namespace string, name string) (ExperimentI
 			Mode:  string(chaos.Spec.Mode),
 			Value: chaos.Spec.Value,
 		},
-		Scheduler: SchedulerInfo{
-			Cron: chaos.Spec.Scheduler.Cron,
-		},
 		Target: TargetInfo{
 			TimeChaos: TimeChaosInfo{
 				TimeOffset:     chaos.Spec.TimeOffset,
@@ -660,6 +649,11 @@ func (s *Service) getTimeChaosDetail(namespace string, name string) (ExperimentI
 			},
 		},
 	}
+
+	if chaos.Spec.Scheduler != nil {
+		info.Scheduler.Cron = chaos.Spec.Scheduler.Cron
+	}
+
 	if chaos.Spec.Duration != nil {
 		info.Scheduler.Duration = *chaos.Spec.Duration
 	}
@@ -692,15 +686,17 @@ func (s *Service) getKernelChaosDetail(namespace string, name string) (Experimen
 			Mode:  string(chaos.Spec.Mode),
 			Value: chaos.Spec.Value,
 		},
-		Scheduler: SchedulerInfo{
-			Cron: chaos.Spec.Scheduler.Cron,
-		},
 		Target: TargetInfo{
 			KernelChaos: KernelChaosInfo{
 				FailKernRequest: chaos.Spec.FailKernRequest,
 			},
 		},
 	}
+
+	if chaos.Spec.Scheduler != nil {
+		info.Scheduler.Cron = chaos.Spec.Scheduler.Cron
+	}
+
 	if chaos.Spec.Duration != nil {
 		info.Scheduler.Duration = *chaos.Spec.Duration
 	}
@@ -733,9 +729,6 @@ func (s *Service) getStressChaosDetail(namespace string, name string) (Experimen
 			Mode:  string(chaos.Spec.Mode),
 			Value: chaos.Spec.Value,
 		},
-		Scheduler: SchedulerInfo{
-			Cron: chaos.Spec.Scheduler.Cron,
-		},
 		Target: TargetInfo{
 			StressChaos: StressChaosInfo{
 				Stressors:         chaos.Spec.Stressors,
@@ -743,6 +736,11 @@ func (s *Service) getStressChaosDetail(namespace string, name string) (Experimen
 			},
 		},
 	}
+
+	if chaos.Spec.Scheduler != nil {
+		info.Scheduler.Cron = chaos.Spec.Scheduler.Cron
+	}
+
 	if chaos.Spec.Duration != nil {
 		info.Scheduler.Duration = *chaos.Spec.Duration
 	}
@@ -1052,4 +1050,245 @@ func (s *Service) patchExperiment(exp *ExperimentBase, annotations map[string]st
 	return s.kubeCli.Patch(context.Background(),
 		chaosKind.Chaos,
 		client.ConstantPatch(types.MergePatchType, mergePatch))
+}
+
+// @Summary Update the chaos experiment by API
+// @Description Update the chaos experiment by API
+// @Tags experiments
+// @Produce json
+// @Param request body ExperimentInfo true "Request body"
+// @Success 200 "update ok"
+// @Failure 400 {object} utils.APIError
+// @Failure 500 {object} utils.APIError
+// @Router /api/experiments/update [put]
+func (s *Service) updateExperiment(c *gin.Context) {
+	exp := &ExperimentInfo{}
+	if err := c.ShouldBindJSON(exp); err != nil {
+		c.Status(http.StatusBadRequest)
+		_ = c.Error(utils.ErrInvalidRequest.WrapWithNoMessage(err))
+		return
+	}
+
+	updateFuncs := map[string]actionFunc{
+		v1alpha1.KindPodChaos:     s.updatePodChaos,
+		v1alpha1.KindNetworkChaos: s.updateNetworkChaos,
+		v1alpha1.KindIOChaos:      s.updateIOChaos,
+		v1alpha1.KindStressChaos:  s.updateStressChaos,
+		v1alpha1.KindTimeChaos:    s.updateTimeChaos,
+		v1alpha1.KindKernelChaos:  s.updateKernelChaos,
+	}
+
+	f, ok := updateFuncs[exp.Target.Kind]
+	if !ok {
+		c.Status(http.StatusBadRequest)
+		_ = c.Error(utils.ErrInvalidRequest.New(exp.Target.Kind + " is not supported"))
+		return
+	}
+
+	if err := f(exp); err != nil {
+		if apierrors.IsNotFound(err) {
+			c.Status(http.StatusNotFound)
+			_ = c.Error(utils.ErrNotFound.WrapWithNoMessage(err))
+		} else {
+			c.Status(http.StatusInternalServerError)
+			_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
+		}
+		return
+	}
+
+	c.JSON(http.StatusOK, nil)
+}
+
+func (s *Service) updatePodChaos(exp *ExperimentInfo) error {
+	chaos := &v1alpha1.PodChaos{}
+	key := types.NamespacedName{Namespace: exp.Namespace, Name: exp.Name}
+
+	if err := s.kubeCli.Get(context.Background(), key, chaos); err != nil {
+		return err
+	}
+
+	chaos.SetLabels(exp.Labels)
+	chaos.SetAnnotations(exp.Annotations)
+	chaos.Spec = v1alpha1.PodChaosSpec{
+		Selector:      exp.Scope.ParseSelector(),
+		Action:        v1alpha1.PodChaosAction(exp.Target.PodChaos.Action),
+		Mode:          v1alpha1.PodMode(exp.Scope.Mode),
+		Value:         exp.Scope.Value,
+		ContainerName: exp.Target.PodChaos.ContainerName,
+	}
+
+	if exp.Scheduler.Cron != "" {
+		chaos.Spec.Scheduler = &v1alpha1.SchedulerSpec{Cron: exp.Scheduler.Cron}
+	}
+
+	if exp.Scheduler.Duration != "" {
+		chaos.Spec.Duration = &exp.Scheduler.Duration
+	}
+
+	return s.kubeCli.Update(context.Background(), chaos)
+}
+
+func (s *Service) updateNetworkChaos(exp *ExperimentInfo) error {
+	chaos := &v1alpha1.NetworkChaos{}
+	key := types.NamespacedName{Namespace: exp.Namespace, Name: exp.Name}
+
+	if err := s.kubeCli.Get(context.Background(), key, chaos); err != nil {
+		return err
+	}
+
+	chaos.SetLabels(exp.Labels)
+	chaos.SetAnnotations(exp.Annotations)
+	chaos.Spec = v1alpha1.NetworkChaosSpec{
+		Selector:  exp.Scope.ParseSelector(),
+		Action:    v1alpha1.NetworkChaosAction(exp.Target.NetworkChaos.Action),
+		Mode:      v1alpha1.PodMode(exp.Scope.Mode),
+		Value:     exp.Scope.Value,
+		Delay:     exp.Target.NetworkChaos.Delay,
+		Loss:      exp.Target.NetworkChaos.Loss,
+		Duplicate: exp.Target.NetworkChaos.Duplicate,
+		Corrupt:   exp.Target.NetworkChaos.Corrupt,
+		Bandwidth: exp.Target.NetworkChaos.Bandwidth,
+		Direction: v1alpha1.Direction(exp.Target.NetworkChaos.Direction),
+	}
+
+	if exp.Scheduler.Cron != "" {
+		chaos.Spec.Scheduler = &v1alpha1.SchedulerSpec{Cron: exp.Scheduler.Cron}
+	}
+
+	if exp.Scheduler.Duration != "" {
+		chaos.Spec.Duration = &exp.Scheduler.Duration
+	}
+
+	if exp.Target.NetworkChaos.TargetScope != nil {
+		chaos.Spec.Target = &v1alpha1.Target{
+			TargetSelector: exp.Target.NetworkChaos.TargetScope.ParseSelector(),
+			TargetMode:     v1alpha1.PodMode(exp.Target.NetworkChaos.TargetScope.Mode),
+			TargetValue:    exp.Target.NetworkChaos.TargetScope.Value,
+		}
+	}
+
+	return s.kubeCli.Update(context.Background(), chaos)
+}
+
+func (s *Service) updateIOChaos(exp *ExperimentInfo) error {
+	chaos := &v1alpha1.IoChaos{}
+	key := types.NamespacedName{Namespace: exp.Namespace, Name: exp.Name}
+
+	if err := s.kubeCli.Get(context.Background(), key, chaos); err != nil {
+		return err
+	}
+
+	chaos.SetLabels(exp.Labels)
+	chaos.SetAnnotations(exp.Annotations)
+	chaos.Spec = v1alpha1.IoChaosSpec{
+		Selector: exp.Scope.ParseSelector(),
+		Action:   v1alpha1.IOChaosAction(exp.Target.IOChaos.Action),
+		Mode:     v1alpha1.PodMode(exp.Scope.Mode),
+		Value:    exp.Scope.Value,
+		// TODO: don't hardcode after we support other layers
+		Layer:   v1alpha1.FileSystemLayer,
+		Addr:    exp.Target.IOChaos.Addr,
+		Delay:   exp.Target.IOChaos.Delay,
+		Errno:   exp.Target.IOChaos.Errno,
+		Path:    exp.Target.IOChaos.Path,
+		Percent: exp.Target.IOChaos.Percent,
+		Methods: exp.Target.IOChaos.Methods,
+	}
+
+	if exp.Scheduler.Cron != "" {
+		chaos.Spec.Scheduler = &v1alpha1.SchedulerSpec{Cron: exp.Scheduler.Cron}
+	}
+
+	if exp.Scheduler.Duration != "" {
+		chaos.Spec.Duration = &exp.Scheduler.Duration
+	}
+
+	return s.kubeCli.Update(context.Background(), chaos)
+}
+
+func (s *Service) updateKernelChaos(exp *ExperimentInfo) error {
+	chaos := &v1alpha1.KernelChaos{}
+	key := types.NamespacedName{Namespace: exp.Namespace, Name: exp.Name}
+
+	if err := s.kubeCli.Get(context.Background(), key, chaos); err != nil {
+		return err
+	}
+
+	chaos.SetLabels(exp.Labels)
+	chaos.SetAnnotations(exp.Annotations)
+	chaos.Spec = v1alpha1.KernelChaosSpec{
+		Selector:        exp.Scope.ParseSelector(),
+		Mode:            v1alpha1.PodMode(exp.Scope.Mode),
+		Value:           exp.Scope.Value,
+		FailKernRequest: exp.Target.KernelChaos.FailKernRequest,
+	}
+
+	if exp.Scheduler.Cron != "" {
+		chaos.Spec.Scheduler = &v1alpha1.SchedulerSpec{Cron: exp.Scheduler.Cron}
+	}
+
+	if exp.Scheduler.Duration != "" {
+		chaos.Spec.Duration = &exp.Scheduler.Duration
+	}
+
+	return s.kubeCli.Update(context.Background(), chaos)
+}
+
+func (s *Service) updateTimeChaos(exp *ExperimentInfo) error {
+	chaos := &v1alpha1.TimeChaos{}
+	key := types.NamespacedName{Namespace: exp.Namespace, Name: exp.Name}
+
+	if err := s.kubeCli.Get(context.Background(), key, chaos); err != nil {
+		return err
+	}
+
+	chaos.SetLabels(exp.Labels)
+	chaos.SetAnnotations(exp.Annotations)
+	chaos.Spec = v1alpha1.TimeChaosSpec{
+		Selector:       exp.Scope.ParseSelector(),
+		Mode:           v1alpha1.PodMode(exp.Scope.Mode),
+		Value:          exp.Scope.Value,
+		TimeOffset:     exp.Target.TimeChaos.TimeOffset,
+		ClockIds:       exp.Target.TimeChaos.ClockIDs,
+		ContainerNames: exp.Target.TimeChaos.ContainerNames,
+	}
+
+	if exp.Scheduler.Cron != "" {
+		chaos.Spec.Scheduler = &v1alpha1.SchedulerSpec{Cron: exp.Scheduler.Cron}
+	}
+
+	if exp.Scheduler.Duration != "" {
+		chaos.Spec.Duration = &exp.Scheduler.Duration
+	}
+
+	return s.kubeCli.Update(context.Background(), chaos)
+}
+
+func (s *Service) updateStressChaos(exp *ExperimentInfo) error {
+	chaos := &v1alpha1.StressChaos{}
+	key := types.NamespacedName{Namespace: exp.Namespace, Name: exp.Name}
+
+	if err := s.kubeCli.Get(context.Background(), key, chaos); err != nil {
+		return err
+	}
+
+	chaos.SetLabels(exp.Labels)
+	chaos.SetAnnotations(exp.Annotations)
+	chaos.Spec = v1alpha1.StressChaosSpec{
+		Selector:          exp.Scope.ParseSelector(),
+		Mode:              v1alpha1.PodMode(exp.Scope.Mode),
+		Value:             exp.Scope.Value,
+		Stressors:         exp.Target.StressChaos.Stressors,
+		StressngStressors: exp.Target.StressChaos.StressngStressors,
+	}
+
+	if exp.Scheduler.Cron != "" {
+		chaos.Spec.Scheduler = &v1alpha1.SchedulerSpec{Cron: exp.Scheduler.Cron}
+	}
+
+	if exp.Scheduler.Duration != "" {
+		chaos.Spec.Duration = &exp.Scheduler.Duration
+	}
+
+	return s.kubeCli.Create(context.Background(), chaos)
 }
