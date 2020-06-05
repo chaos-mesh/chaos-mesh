@@ -1,4 +1,4 @@
-import { configureStore, getDefaultMiddleware } from '@reduxjs/toolkit'
+import { AnyAction, configureStore, getDefaultMiddleware } from '@reduxjs/toolkit'
 
 import rootReducer from 'reducers'
 import { useDispatch } from 'react-redux'
@@ -9,7 +9,12 @@ const middlewares = [...getDefaultMiddleware()]
 
 const genStore = () => {
   if (process.env.NODE_ENV === 'development') {
-    const { logger } = require('redux-logger')
+    const { createLogger } = require('redux-logger')
+
+    const logger = createLogger({
+      predicate: (_: any, action: AnyAction) =>
+        !['experiments/state/pending', 'experiments/state/fulfilled'].includes(action.type),
+    })
 
     middlewares.push(logger)
   }

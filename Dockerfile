@@ -22,5 +22,4 @@ ARG SWAGGER
 
 COPY . /src
 WORKDIR /src
-RUN git checkout .
 RUN make binary

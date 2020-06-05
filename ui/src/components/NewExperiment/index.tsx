@@ -1,4 +1,4 @@
-import { Box, Button, Container, Drawer } from '@material-ui/core'
+import { Box, Button, Container, Drawer, Fab, useMediaQuery, useTheme } from '@material-ui/core'
 import { Experiment, StepperFormProps } from './types'
 import { Form, Formik, FormikHelpers } from 'formik'
 import React, { useState } from 'react'
@@ -29,6 +29,23 @@ const useStyles = makeStyles((theme: Theme) =>
         width: '100vw',
       },
     },
+    new: {
+      [theme.breakpoints.down('sm')]: {
+        display: 'none',
+      },
+    },
+    fab: {
+      [theme.breakpoints.up('md')]: {
+        display: 'none',
+      },
+      [theme.breakpoints.down('sm')]: {
+        position: 'fixed',
+        bottom: theme.spacing(3),
+        right: theme.spacing(3),
+        display: 'flex',
+        zIndex: 999,
+      },
+    },
   })
 )
 
@@ -38,22 +55,27 @@ interface ActionsProps {
 }
 
 const Actions = ({ isSubmitting = false, toggleDrawer }: ActionsProps) => {
+  const theme = useTheme()
+  const isMobileScreen = useMediaQuery(theme.breakpoints.down('sm'))
+  const size = isMobileScreen ? ('small' as 'small') : ('medium' as 'medium')
+
   const { state } = useStepperContext()
 
   return (
     <Box display="flex" justifyContent="space-between" marginBottom={6}>
-      <Button variant="outlined" startIcon={<CancelIcon />} onClick={toggleDrawer}>
+      <Button variant="outlined" size={size} startIcon={<CancelIcon />} onClick={toggleDrawer}>
         Cancel
       </Button>
       <Box display="flex">
         <Box mr={3}>
-          <Button variant="outlined" startIcon={<CloudUploadOutlinedIcon />}>
+          <Button variant="outlined" size={size} startIcon={<CloudUploadOutlinedIcon />}>
             Yaml File
           </Button>
         </Box>
         <Button
           type="submit"
           variant="contained"
+          size={size}
           color="primary"
           startIcon={<PublishIcon />}
           disabled={state.activeStep < 4 || isSubmitting}
@@ -105,9 +127,12 @@ export default function NewExperiment() {
 
   return (
     <>
-      <Button variant="outlined" startIcon={<AddIcon />} onClick={toggleDrawer}>
+      <Button className={classes.new} variant="outlined" startIcon={<AddIcon />} onClick={toggleDrawer}>
         New Experiment
       </Button>
+      <Fab className={classes.fab} color="secondary" size="medium" aria-label="new">
+        <AddIcon onClick={toggleDrawer} />
+      </Fab>
       <Drawer anchor="right" open={open} onClose={toggleDrawer}>
         <StepperProvider>
           <Formik initialValues={initialValues} validationSchema={validationSchema} onSubmit={handleOnSubmit}>

@@ -1,3 +1,5 @@
+import { Event } from './events.type'
+
 export interface StateOfExperiments {
   total: number
   running: number
@@ -12,4 +14,5 @@ export interface Experiment {
   Name: string
   created: string
   status: keyof StateOfExperiments
+  events?: Event[]
 }
