@@ -31,7 +31,7 @@ type ChaosDashboardConfig struct {
 type PersistTTLConfig struct {
 	SyncPeriod string `envconfig:"TTL_SYNC_PERIOD" default: "12h"`
 	Event      string `envconfig:"TTL_EVENT" default: "7*24h"`
-	Experiment string `envconfig: TTL_EXPERIMENT default: "14*24h"`
+	Experiment string `envconfig:"TTL_EXPERIMENT" default: "14*24h"`
 }
 
 // DatabaseConfig defines the configuration for databases
