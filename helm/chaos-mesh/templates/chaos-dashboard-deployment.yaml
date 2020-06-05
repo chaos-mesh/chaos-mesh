@@ -40,12 +40,15 @@ spec:
           command:
             - /usr/local/bin/chaos-dashboard
           envFrom:
-          - configMapRef:
-              name: {{ template "chaos-mesh.name" . }}-chaos-dashboard
+            - configMapRef:
+                name: {{ template "chaos-mesh.name" . }}-chaos-dashboard
           volumeMounts:
-          - name: storage-volume
-            mountPath: {{ .Values.dashboard.persistentVolume.mountPath }}
-            subPath: "{{ .Values.dashboard.persistentVolume.subPath }}"
+            - name: storage-volume
+              mountPath: {{ .Values.dashboard.persistentVolume.mountPath }}
+              subPath: "{{ .Values.dashboard.persistentVolume.subPath }}"
+          ports:
+            - name: http
+              containerPort: {{ .Values.dashboard.env.LISTEN_PORT }}
         {{- with .Values.dashboard.nodeSelector }}
       nodeSelector:
 {{ toYaml . | indent 8 }}
@@ -86,7 +89,7 @@ spec:
   type: NodePort
   ports:
     - protocol: TCP
-      port: 2333
-      targetPort: 2333
-
+      port: {{ .Values.dashboard.env.LISTEN_PORT }}
+      targetPort: {{ .Values.dashboard.env.LISTEN_PORT }}
+      name: http
 {{- end }}
