@@ -29,7 +29,7 @@ const ioTestConfigMap = `name: chaosfs-io
 selector:
   labelSelectors:
     app: io
-template: sidecar-template
+template: chaosfs-sidecar
 arguments:
   ContainerName: "io"
   DataPath: "/var/run/data/test"
