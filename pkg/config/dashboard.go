@@ -14,25 +14,8 @@
 package config
 
 import (
-	"os"
-
 	"github.com/kelseyhightower/envconfig"
-	ctrl "sigs.k8s.io/controller-runtime"
 )
-
-var log = ctrl.Log.WithName("setup")
-
-//ControllerCfg is a global variable to keep the configuration for Chaos Controller
-var ControllerCfg *ChaosControllerConfig
-
-func init() {
-	conf, err := EnvironChaosController()
-	if err != nil {
-		log.Error(err, "Chaos Controller: invalid environment configuration")
-		os.Exit(1)
-	}
-	ControllerCfg = &conf
-}
 
 // ChaosServerConfig defines the configuration for Chaos Dashboard
 type ChaosServerConfig struct {
@@ -55,19 +38,6 @@ type DatabaseConfig struct {
 // EnvironChaosServer returns the settings from the environment.
 func EnvironChaosServer() (ChaosServerConfig, error) {
 	cfg := ChaosServerConfig{}
-	err := envconfig.Process("", &cfg)
-	return cfg, err
-}
-
-// ChaosControllerConfig defines the configuration for Chaos Controller
-type ChaosControllerConfig struct {
-	ChaosDaemonPort int `envconfig:"CHAOS_DAEMON_PORT" default:"31767"`
-	BPFKIPort       int `envconfig:"BPFKI_PORT" default:"50051"`
-}
-
-// EnvironChaosController returns the settings from the environment.
-func EnvironChaosController() (ChaosControllerConfig, error) {
-	cfg := ChaosControllerConfig{}
 	err := envconfig.Process("", &cfg)
 	return cfg, err
 }
