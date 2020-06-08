@@ -15,7 +15,10 @@ package common
 
 import (
 	"context"
+	"os"
 	"time"
+
+	"github.com/pingcap/chaos-mesh/pkg/config"
 
 	"github.com/go-logr/logr"
 
@@ -35,6 +38,20 @@ const (
 	// AnnotationCleanFinalizerForced value
 	AnnotationCleanFinalizerForced = `forced`
 )
+
+var log = ctrl.Log.WithName("controller")
+
+//ControllerCfg is a global variable to keep the configuration for Chaos Controller
+var ControllerCfg *config.ChaosControllerConfig
+
+func init() {
+	conf, err := config.EnvironChaosController()
+	if err != nil {
+		log.Error(err, "Chaos Controller: invalid environment configuration")
+		os.Exit(1)
+	}
+	ControllerCfg = &conf
+}
 
 // Reconciler for common chaos
 type Reconciler struct {

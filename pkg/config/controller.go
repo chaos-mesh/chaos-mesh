@@ -14,25 +14,8 @@
 package config
 
 import (
-	"os"
-
 	"github.com/kelseyhightower/envconfig"
-	ctrl "sigs.k8s.io/controller-runtime"
 )
-
-var controllerLog = ctrl.Log.WithName("conf")
-
-//ControllerCfg is a global variable to keep the configuration for Chaos Controller
-var ControllerCfg *ChaosControllerConfig
-
-func init() {
-	conf, err := EnvironChaosController()
-	if err != nil {
-		controllerLog.Error(err, "Chaos Controller: invalid environment configuration")
-		os.Exit(1)
-	}
-	ControllerCfg = &conf
-}
 
 // ChaosControllerConfig defines the configuration for Chaos Controller
 type ChaosControllerConfig struct {
