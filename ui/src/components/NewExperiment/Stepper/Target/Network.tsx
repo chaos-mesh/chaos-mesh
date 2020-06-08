@@ -1,15 +1,15 @@
 import { SelectField, TextField } from 'components/FormField'
 
+import AdvancedOptions from 'components/AdvancedOptions'
 import { MenuItem } from '@material-ui/core'
 import React from 'react'
-import { StepperFormProps } from 'components/NewExperiment/types'
+import { StepperFormTargetProps } from 'components/NewExperiment/types'
 import { upperFirst } from 'lib/utils'
-import AdvancedOptions from 'components/AdvancedOptions'
 
 const actions = ['bandwidth', 'corrupt', 'delay', 'duplicate', 'loss']
 
-export default function NetworkPanel(props: StepperFormProps) {
-  const { values, handleChange } = props
+export default function NetworkPanel(props: StepperFormTargetProps) {
+  const { values, handleChange, handleActionChange } = props
 
   return (
     <>
@@ -19,7 +19,7 @@ export default function NetworkPanel(props: StepperFormProps) {
         label="Action"
         helperText="Please select a action"
         value={values.target.network_chaos.action}
-        onChange={handleChange}
+        onChange={handleActionChange}
       >
         {actions.map((option: string) => (
           <MenuItem key={option} value={option}>

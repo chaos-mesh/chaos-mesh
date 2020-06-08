@@ -18,7 +18,7 @@ First, you need to provide an API server as a proxy, we will pass it into an env
 Then, into the `ui` folder, run:
 
 ```sh
-REACT_APP_API_URL=PROXY_URL yarn && yarn start
+yarn && REACT_APP_API_URL=PROXY_URL yarn start
 ```
 
 Your browser will open <localhost:3000> automatically.
