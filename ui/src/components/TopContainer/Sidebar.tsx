@@ -8,7 +8,7 @@ export const drawerWidth = '14rem'
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     drawer: {
-      [theme.breakpoints.up('sm')]: {
+      [theme.breakpoints.up('md')]: {
         width: drawerWidth,
       },
     },
@@ -30,7 +30,7 @@ const Sidebar: React.FC<SidebarProps> = ({ openMobileDrawer, handleDrawerToggle 
   return (
     <nav className={classes.drawer}>
       {/* The implementation can be swapped with js to avoid SEO duplication of links. */}
-      <Hidden implementation="css" smUp>
+      <Hidden implementation="css" mdUp>
         <Drawer
           classes={{
             paper: classes.drawerPaper,
@@ -46,7 +46,7 @@ const Sidebar: React.FC<SidebarProps> = ({ openMobileDrawer, handleDrawerToggle 
           <NavMenu />
         </Drawer>
       </Hidden>
-      <Hidden implementation="css" xsDown>
+      <Hidden implementation="css" smDown>
         <Drawer
           classes={{
             paper: classes.drawerPaper,

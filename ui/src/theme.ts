@@ -1,4 +1,5 @@
 import { createMuiTheme, responsiveFontSizes } from '@material-ui/core/styles'
+import { green, pink } from '@material-ui/core/colors'
 
 // Design system
 // https://material-ui.com/system/basics/
@@ -13,13 +14,16 @@ const theme = responsiveFontSizes(
         main: '#172d72',
       },
       secondary: {
-        main: '#72172d',
+        main: pink[900],
+      },
+      success: {
+        main: green[700],
       },
       background: {
         default: '#f5f5f5',
       },
     },
-    spacing: (factor) => `${0.25 * factor}rem`, // (Bootstrap strategy)
+    spacing: (factor) => `${0.25 * factor}rem`,
   })
 )
 

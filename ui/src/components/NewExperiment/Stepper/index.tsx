@@ -43,15 +43,16 @@ const steps = ['Basic', 'Scope', 'Target', 'Schedule']
 
 interface StepperProps {
   formProps: StepperFormProps
-  toggleDrawer: () => void
 }
 
-const CreateStepper: React.FC<StepperProps> = ({ formProps, toggleDrawer }) => {
+const CreateStepper: React.FC<StepperProps> = ({ formProps }) => {
   const classes = useStyles()
 
   const { state, dispatch } = useStepperContext()
   const { activeStep } = state
+
   const [namespaces, setNamespaces] = useState<string[]>([])
+  const [targetTabIndex, setTargetTabIndex] = useState(0)
 
   const fetchNamespaces = () => {
     api.common
@@ -62,6 +63,16 @@ const CreateStepper: React.FC<StepperProps> = ({ formProps, toggleDrawer }) => {
 
   useEffect(fetchNamespaces, [])
 
+  const handleNext = () => dispatch(next())
+  const handleBack = () => dispatch(back())
+  const handleJump = (step: number) => () => dispatch(jump(step))
+  const handleReset = () => {
+    const { handleReset: resetForm } = formProps
+
+    dispatch(reset())
+    resetForm()
+  }
+
   const getStepContent = () => {
     switch (activeStep) {
       case 0:
@@ -69,7 +80,7 @@ const CreateStepper: React.FC<StepperProps> = ({ formProps, toggleDrawer }) => {
       case 1:
         return <ScopeStep formProps={formProps} namespaces={namespaces} />
       case 2:
-        return <TargetStep formProps={formProps} />
+        return <TargetStep formProps={formProps} tabIndex={targetTabIndex} setTabIndex={setTargetTabIndex} />
       case 3:
         return <ScheduleStep formProps={formProps} />
       case 4:
@@ -82,16 +93,6 @@ const CreateStepper: React.FC<StepperProps> = ({ formProps, toggleDrawer }) => {
       default:
         return <BasicStep formProps={formProps} namespaces={namespaces} />
     }
-  }
-
-  const handleNext = () => dispatch(next())
-  const handleBack = () => dispatch(back())
-  const handleJump = (step: number) => () => dispatch(jump(step))
-  const handleReset = () => {
-    const { handleReset: resetForm } = formProps
-
-    dispatch(reset())
-    resetForm()
   }
 
   return (
@@ -109,16 +110,12 @@ const CreateStepper: React.FC<StepperProps> = ({ formProps, toggleDrawer }) => {
       {namespaces.length > 0 && (
         <Box className={classes.main}>
           <Box>{getStepContent()}</Box>
-          <Box marginTop={6} textAlign="right">
+          <Box mt={6} textAlign="right">
             {activeStep === steps.length ? (
               <Button onClick={handleReset}>Reset</Button>
             ) : (
               <>
-                {activeStep === 0 ? (
-                  <Button className={classes.backButton} onClick={toggleDrawer}>
-                    Cancel
-                  </Button>
-                ) : (
+                {activeStep !== 0 && (
                   <Button className={classes.backButton} onClick={handleBack}>
                     Back
                   </Button>

@@ -12,7 +12,7 @@ data:
     selector:
       labelSelectors:
         "app.kubernetes.io/component": "tiflash"
-    template: sidecar-template
+    template: chaosfs-sidecar
     arguments:
       ContainerName: "pd"
       DataPath: "/data/db"

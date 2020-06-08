@@ -4,9 +4,10 @@ import { Theme, makeStyles } from '@material-ui/core/styles'
 
 import { StepperFormProps } from '../types'
 import { TextField } from 'components/FormField'
+import { mustSchedule } from 'lib/formikhelpers'
 
 const useStyles = makeStyles((theme: Theme) => ({
-  cronTitle: {
+  scheduleTitle: {
     margin: `${theme.spacing(3)} 0`,
   },
   pre: {
@@ -25,21 +26,33 @@ interface ScheduleStepProps {
 const ScheduleStep: React.FC<ScheduleStepProps> = ({ formProps }) => {
   const classes = useStyles()
 
-  const [isImmediate, setIsImmediate] = useState(true)
   const { values, handleChange } = formProps
+  const mustBeScheduled = mustSchedule(values)
+  const [isImmediate, setIsImmediate] = useState(!mustBeScheduled)
 
-  const handleChecked = (_: React.ChangeEvent<HTMLInputElement>, checked: boolean) => setIsImmediate(checked)
+  const handleChecked = (_: React.ChangeEvent<HTMLInputElement>, checked: boolean) => {
+    if (mustBeScheduled) {
+      setIsImmediate(false)
+    } else {
+      setIsImmediate(checked)
+    }
+  }
 
   return (
     <>
       <FormControlLabel
         control={<Switch name="immediate" color="primary" checked={isImmediate} onChange={handleChecked} />}
-        label="Immediate Job"
+        label="Immediate"
       />
+      {mustBeScheduled && (
+        <Typography variant="subtitle2" color="textSecondary">
+          The action you chose must be scheduled.
+        </Typography>
+      )}
 
       <Box hidden={isImmediate} mt={3}>
         <Divider />
-        <Typography className={classes.cronTitle}>Cron Job</Typography>
+        <Typography className={classes.scheduleTitle}>Schedule</Typography>
         <pre className={classes.pre}>
           <code>
             {`
@@ -71,7 +84,7 @@ const ScheduleStep: React.FC<ScheduleStepProps> = ({ formProps }) => {
         <TextField
           id="scheduler.cron"
           label="Cron"
-          helperText="Schedule crontab"
+          helperText="You can use https://crontab.guru/ to help generate your cron syntax and confirm what time it will run"
           value={values.scheduler.cron}
           onChange={handleChange}
         />
@@ -79,7 +92,7 @@ const ScheduleStep: React.FC<ScheduleStepProps> = ({ formProps }) => {
         <TextField
           id="scheduler.duration"
           label="Duration"
-          helperText="Schedule duration"
+          helperText="The Experiment duration"
           value={values.scheduler.duration}
           onChange={handleChange}
         />

@@ -8,11 +8,19 @@ Chaos Mesh runs a [fuse-daemon](https://www.kernel.org/doc/Documentation/filesys
 
 In sidecar container, fuse-daemon needs to mount the data directory of application by [fusermount](http://manpages.ubuntu.com/manpages/bionic/en/man1/fusermount.1.html) before the application starts.
 
-Most applications use different data directories, so you need to define the different sidecar configs for different applications.
+## How it works?
 
-## Configuration file
+Currently, Chaos Mesh supports two types of ConfigMaps:
 
-The following content is the sidecar ConfigMap defined for tikv:
+1. Template config. The skeleton of each sidecar config is similar, in order to fulfill different requirements and make the configuration simplified,
+Chaos Mesh supports creating common templates to be used by different applications. For the details of template configuration, please refer to [template config](./template_config.md).
+
+2. Injection config. This configuration will be combined with template config and finally generate a config to inject to the selected pods. 
+Since most applications use different data directories, volume name or container name, you can define different parameters based on the common template created in the first step.
+
+## Injection Configuration
+
+The following content is an injection ConfigMap defined for tikv:
 
 ```yaml
 ---
@@ -24,21 +32,46 @@ metadata:
   labels:
     app.kubernetes.io/component: webhook
 data:
-  # the real content of config
-  chaosfs-tikv.yaml: |
+  chaosfs-tikv: |
     name: chaosfs-tikv
     selector:
       labelSelectors:
         "app.kubernetes.io/component": "tikv"
+    template: chaosfs-sidecar
+    arguments:
+      ContainerName: "tikv"
+      DataPath: "/var/lib/tikv/data"
+      MountPath: "/var/lib/tikv"
+      VolumeName: "tikv"
+```
+
+Injection config defines some injection arguments for different applications, and it is based on the common template created beforehand.
+
+For fields defined in this config, we have some brief descriptions below:
+
+* **name**: injection config name, uniquely identifies a injection config in one namespace. 
+  However, you can have the same name in different namespaces so this is useful to implement multi-tenancy.
+* **selector**: is used to filter pods to inject sidecar.
+* **template**: the template config map name used to render the injection config.
+* **arguments**: the arguments you should define to be used in the template.
+
+The final injection config content is rendered by `template` and `arguments` via `Go Template` and 
+will be injected to the selected pods. In this example, the final injection config is:
+
+```
+    name: chaosfs-tikv
+    selector:
+      labelSelectors:
+        "app.kubernetes.io/component": "tikv"    
     initContainers:
     - name: inject-scripts
       image: pingcap/chaos-scripts:latest
-      imagePullpolicy: Always
+      imagePullPolicy: Always
       command: ["sh", "-c", "/scripts/init.sh -d /var/lib/tikv/data -f /var/lib/tikv/fuse-data"]
     containers:
     - name: chaosfs
       image: pingcap/chaos-fs:latest
-      imagePullpolicy: Always
+      imagePullPolicy: Always
       ports:
       - containerPort: 65534
       securityContext:
@@ -72,19 +105,7 @@ data:
           - /tmp/scripts/wait-fuse.sh
 ```
 
-For more sample ConfigMap files, see [examples](https://github.com/pingcap/chaos-mesh/tree/master/examples/chaosfs-configmap).
-
-Description:
-
-* **name**: defines the name of the sidecar config, this name should be unique across all sidecar configs.
-* **selector**: is used to filter pods to inject sidecar.
-* **initContainers**: defines the [initContainer](https://kubernetes.io/docs/concepts/workloads/pods/init-containers/) need to be injected.
-* **container**: defines the sidecar container need to be injected.
-* **volumeMounts**: defines the new volumeMounts or overwrite the old volumeMounts of the each containers in target pods.
-* **volume**: defines the new volumes for the target pod or overwrite the old volumes in target pods.
-* **postStart**: called after a container is created first. If the handler fails, the containers will failed.
-
-Key defines for the name of deployment container. Value defines for the Commands for stating container.
+For more sample ConfigMap files, see [examples](../examples/chaosfs-configmap).
 
 ### Containers
 

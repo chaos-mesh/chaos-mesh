@@ -54,8 +54,17 @@ The following tables list the configurable parameters of the Chaos Mesh chart an
 | `dashboard.affinity` | Map of chaos-dashboard node/pod affinities | `{}` |
 | `dashboard.podAnnotations` | Deployment chaos-dashboard annotations | `{}` |
 | `dashboard.resources` | CPU/Memory resource requests/limits for chaos-dashboard pod  | `requests: { cpu: "250m", memory: "512Mi" }, limits:{ cpu: "500m", memory: "1024Mi" }`  |
-| `dashboard.volume.storage` | | `3Gi` |
-| `dashboard.volume.storageClassName` | | `standard` |
+| `dashboard.persistentVolume.enable` | Enable storage volume for chaos-dashboard. If you are using SQLite as your DB for Chaos Dashboard, it is recommended to enable persistence| `false` |
+| `dashboard.persistentVolume.existingClaim` | Use the existing PVC for persisting chaos event| `` |
+| `dashboard.persistentVolume.size` | Chaos Dashboard data Persistent Volume size | `8Gi` |
+| `dashboard.persistentVolume.storageClassName` | Chaos Dashboard data Persistent Volume Storage Class | `standard` |
+| `dashboard.persistentVolume.mountPath` | Chaos Dashboard data Persistent Volume mount root path | `/data` |
+| `dashboard.persistentVolume.subPath` | Subdirectory of  Chaos Dashboard data Persistent Volume to mount | `` |
+| `dashboard.env` | The keys within the `env` map are mounted as environment variables on the Chaos Dashboard pod | `` |
+| `dashboard.env.LISTEN_HOST` | | `0.0.0.0` |
+| `dashboard.env.LISTEN_PORT` | | `2333` |
+| `dashboard.env.DATABASE_DRIVER`| The db drive used for Chaos Dashboard, support db: sqlite3, mysql| `sqlite3` |
+| `dashboard.env.DATABASE_DATASOURCE`| The db dsn used for Chaos Dashboard | `/data/core.sqlite` |
 | `prometheus.create` | Enable prometheus | `false` |
 | `prometheus.serviceAccount` | The serviceAccount for prometheus | `prometheus` |
 | `prometheus.image` | Docker image for prometheus | `prom/prometheus:v2.15.2` |
