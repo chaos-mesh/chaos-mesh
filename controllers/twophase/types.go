@@ -100,8 +100,12 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 				return ctrl.Result{Requeue: true}, err
 			}
 
+			now := time.Now()
 			status.Experiment.EndTime = &metav1.Time{
-				Time: time.Now(),
+				Time: now,
+			}
+			if status.Experiment.StartTime != nil {
+				status.Experiment.Duration = now.Sub(status.Experiment.StartTime.Time).String()
 			}
 		}
 		status.Experiment.Phase = v1alpha1.ExperimentPhasePaused
