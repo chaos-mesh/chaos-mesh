@@ -4,7 +4,7 @@ The following content is the common template ConfigMap defined for injecting IO 
 
 ```yaml
 ---
-apiVersion: v0
+apiVersion: v1
 kind: ConfigMap
 metadata:
   name: chaosfs-sidecar
