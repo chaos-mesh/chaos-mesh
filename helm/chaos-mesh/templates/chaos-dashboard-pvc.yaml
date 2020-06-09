@@ -1,0 +1,28 @@
+{{- if .Values.dashboard.create }}
+{{- if .Values.dashboard.persistentVolume.enabled -}}
+{{- if not .Values.dashboard.persistentVolume.existingClaim -}}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  namespace: {{ .Release.Namespace }}
+  name: {{ template "chaos-mesh.name" . }}-chaos-dashboard
+  labels:
+    app.kubernetes.io/name: {{ template "chaos-mesh.name" . }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/component: chaos-dashboard
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+"  "_" }}
+spec:
+{{- if .Values.dashboard.persistentVolume.storageClass }}
+{{- if (eq "-" .Values.dashboard.persistentVolume.storageClass) }}
+  storageClassName: ""
+{{- else }}
+  storageClassName: "{{ .Values.dashboard.persistentVolume.storageClass }}"
+{{- end }}
+{{- end }}
+  resources:
+    requests:
+      storage: "{{ .Values.dashboard.persistentVolume.size }}"
+{{- end -}}
+{{- end -}}
+{{- end -}}

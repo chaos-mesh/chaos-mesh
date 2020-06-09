@@ -1,4 +1,4 @@
-import { Box, Button, Paper, Toolbar } from '@material-ui/core'
+import { Box, Button, Paper, Toolbar, useMediaQuery, useTheme } from '@material-ui/core'
 import React, { useEffect } from 'react'
 import { RootState, useStoreDispatch } from 'store'
 import { Theme, createStyles, makeStyles } from '@material-ui/core/styles'
@@ -23,15 +23,10 @@ const useStyles = makeStyles((theme: Theme) => {
         paddingBottom: sp3,
       },
     },
-    new: {
-      [theme.breakpoints.down('sm')]: {
-        marginTop: sp3,
-      },
-    },
     currentStatus: {
       display: 'flex',
       [theme.breakpoints.down('sm')]: {
-        display: 'none',
+        marginTop: sp3,
       },
     },
     statusButton: {
@@ -44,21 +39,27 @@ const useStyles = makeStyles((theme: Theme) => {
 })
 
 interface CurrentStatusProps {
+  classes: Record<'currentStatus' | 'statusButton', string>
   state: StateOfExperiments
 }
 
-export const CurrentStatus: React.FC<CurrentStatusProps> = ({ state }) => {
-  const classes = useStyles()
+export const CurrentStatus: React.FC<CurrentStatusProps> = ({ classes, state }) => {
+  const theme = useTheme()
+  const isMobileScreen = useMediaQuery(theme.breakpoints.down('sm'))
+
+  const props = {
+    className: classes.statusButton,
+    variant: 'outlined' as 'outlined',
+    size: isMobileScreen ? ('small' as 'small') : ('medium' as 'medium'),
+  }
 
   return (
     <Box className={classes.currentStatus}>
-      <Button className={classes.statusButton} variant="outlined">
-        Total: {state.total}
-      </Button>
-      <Button className={classes.statusButton} variant="outlined" color="primary">
+      <Button {...props} color="primary">
         Running: {state.running}
       </Button>
-      <Button className={classes.statusButton} variant="outlined" color="secondary">
+      <Button {...props}>Finished: {state.finished}</Button>
+      <Button {...props} color="secondary">
         Failed: {state.failed}
       </Button>
     </Box>
@@ -83,11 +84,9 @@ const StatusBar = () => {
   return (
     <Paper className={classes.root} elevation={0}>
       <Toolbar className={classes.toolbar}>
-        <Box className={classes.new}>
-          <NewExperiment />
-        </Box>
+        <NewExperiment />
 
-        <CurrentStatus state={stateOfExperiments} />
+        <CurrentStatus classes={classes} state={stateOfExperiments} />
       </Toolbar>
     </Paper>
   )

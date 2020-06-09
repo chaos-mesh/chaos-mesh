@@ -12,7 +12,7 @@ data:
     selector:
       labelSelectors:
         "app.kubernetes.io/component": "pd"
-    template: sidecar-template
+    template: chaosfs-sidecar
     arguments:
       ContainerName: "pd"
       DataPath: "/var/lib/pd/data"

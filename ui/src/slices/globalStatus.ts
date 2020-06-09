@@ -1,10 +1,10 @@
+import { Alert, GlobalStatusAction } from './globalStatus.type'
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 
-import { GlobalStatusAction } from './globalStatus.type'
 import { StateOfExperiments } from 'api/experiments.type'
 import api from 'api'
 
-const defaultExperiments: StateOfExperiments = {
+const defaultExperiments = {
   total: 0,
   running: 0,
   paused: 0,
@@ -18,15 +18,33 @@ export const getStateofExperiments = createAsyncThunk('experiments/state', async
   return resp.data
 })
 
+const initialState: {
+  alert: Alert
+  alertOpen: boolean
+  stateOfExperiments: StateOfExperiments
+  needToRefreshExperiments: boolean
+} = {
+  alert: {
+    type: 'success',
+    message: '',
+  },
+  alertOpen: false,
+  stateOfExperiments: defaultExperiments,
+  needToRefreshExperiments: false,
+}
+
 const globalStatusSlice = createSlice({
   name: 'globalStatus',
-  initialState: {
-    stateOfExperiments: defaultExperiments,
-    needToRefreshExperiments: false,
-  },
+  initialState,
   reducers: {
-    toggleNeedToRefreshExperiments(state) {
-      state.needToRefreshExperiments = !state.needToRefreshExperiments
+    setAlert(state, action) {
+      state.alert = action.payload
+    },
+    setAlertOpen(state, action) {
+      state.alertOpen = action.payload
+    },
+    setNeedToRefreshExperiments(state, action) {
+      state.needToRefreshExperiments = action.payload
     },
   },
   extraReducers: (builder) => {
@@ -36,6 +54,6 @@ const globalStatusSlice = createSlice({
   },
 })
 
-export const { toggleNeedToRefreshExperiments } = globalStatusSlice.actions
+export const { setAlert, setAlertOpen, setNeedToRefreshExperiments } = globalStatusSlice.actions
 
 export default globalStatusSlice.reducer

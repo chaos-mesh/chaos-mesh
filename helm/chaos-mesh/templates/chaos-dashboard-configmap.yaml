@@ -1,0 +1,17 @@
+{{- if .Values.dashboard.create }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  namespace: {{ .Release.Namespace }}
+  name: {{ template "chaos-mesh.name" . }}-chaos-dashboard
+  labels:
+    app.kubernetes.io/name: {{ template "chaos-mesh.name" . }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/component: chaos-dashboard
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+"  "_" }}
+data:
+  {{- range $envKey, $envVal := .Values.dashboard.env }}
+  {{ $envKey | upper }}: {{ $envVal | quote }}
+  {{- end }}
+{{- end }}

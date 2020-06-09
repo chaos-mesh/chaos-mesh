@@ -12,7 +12,7 @@ data:
     selector:
       labelSelectors:
         "app.kubernetes.io/component": "tikv"
-    template: sidecar-template
+    template: chaosfs-sidecar
     arguments:
       ContainerName: "tikv"
       DataPath: "/var/lib/tikv/data"

@@ -3,7 +3,7 @@ import Pod from './Pod'
 import React from 'react'
 import { StepperFormProps } from 'components/NewExperiment/types'
 import VerticalTabs from 'components/VerticalTabs'
-import { tabKinds } from 'lib/utils'
+import { resetOtherChaos } from 'lib/formikhelpers'
 
 const tabs = [
   { label: 'Pod Lifecycle' },
@@ -16,19 +16,24 @@ const tabs = [
 
 interface TargetProps {
   formProps: StepperFormProps
+  tabIndex: number
+  setTabIndex: (index: number) => void
 }
 
-const Target: React.FC<TargetProps> = ({ formProps }) => {
-  const tabPanels = [<Pod {...formProps} />, <Network {...formProps} />]
+const Target: React.FC<TargetProps> = ({ formProps, tabIndex, setTabIndex }) => {
+  const handleActionChange = (kind: string) => (e: React.ChangeEvent<HTMLInputElement>) =>
+    resetOtherChaos(formProps, kind, e.target.value)
 
-  const handleVerticalTabsChangeCallback = (index: number) => {
-    formProps.setFieldValue('target.kind', tabKinds.map((k) => k.kind)[index])
-  }
+  const tabPanels = [
+    <Pod {...formProps} handleActionChange={handleActionChange('PodChaos')} />,
+    <Network {...formProps} handleActionChange={handleActionChange('NetworkChaos')} />,
+  ]
 
   const props = {
     tabs,
     tabPanels,
-    handleChangeCallback: handleVerticalTabsChangeCallback,
+    tabIndex,
+    setTabIndex,
   }
 
   return <VerticalTabs {...props} />
