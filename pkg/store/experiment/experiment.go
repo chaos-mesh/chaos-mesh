@@ -71,6 +71,18 @@ func (e *experimentStore) ListMeta(_ context.Context, kind, ns, name string) ([]
 	return archives, nil
 }
 
+func (e *experimentStore) Report(ctx context.Context, kind, namespace, name string) (*core.ArchiveExperiment, error) {
+	archive := new(core.ArchiveExperiment)
+
+	if err := e.db.Where(
+		"namespace = ? and name = ? and kind = ?", namespace, name, kind).
+		First(archive).Error; err != nil && !gorm.IsRecordNotFoundError(err) {
+		return nil, err
+	}
+
+	return archive, nil
+}
+
 // TODO: implement the left core.EventStore interfaces
 func (e *experimentStore) Find(context.Context, int64) (*core.ArchiveExperiment, error) {
 	return nil, nil

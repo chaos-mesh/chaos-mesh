@@ -55,6 +55,7 @@ func Register(r *gin.RouterGroup, s *Service) {
 
 	// TODO: add more api handlers
 	endpoint.GET("", s.listExperiments)
+	endpoint.GET("/report", s.experimentReport)
 }
 
 // @Summary Get archived chaos experiments.
@@ -73,6 +74,37 @@ func (s *Service) listExperiments(c *gin.Context) {
 	ns := c.Query("namespace")
 
 	data, err := s.archive.ListMeta(context.TODO(), kind, ns, name)
+	if err != nil {
+		c.Status(http.StatusInternalServerError)
+		_ = c.Error(utils.ErrInternalServer.NewWithNoMessage())
+		return
+	}
+
+	c.JSON(http.StatusOK, data)
+}
+
+// @Summary Get the report of chaos experiment.
+// @Description Get the report of chaos experiment.
+// @Tags archives
+// @Produce json
+// @Param namespace query string false "namespace"
+// @Param name query string false "name"
+// @Param kind query string false "kind" Enums(PodChaos, IoChaos, NetworkChaos, TimeChaos, KernelChaos, StressChaos)
+// @Success 200 {array} core.ArchiveExperiment
+// @Router /api/archives/report [get]
+// @Failure 500 {object} utils.APIError
+func (s *Service) experimentReport(c *gin.Context) {
+	kind := c.Query("kind")
+	name := c.Query("name")
+	ns := c.Query("namespace")
+
+	if kind == "" || name == "" || ns == "" {
+		c.Status(http.StatusBadRequest)
+		_ = c.Error(utils.ErrInvalidRequest.New("kind, name or namespace is empty"))
+		return
+	}
+
+	data, err := s.archive.Report(context.TODO(), kind, ns, name)
 	if err != nil {
 		c.Status(http.StatusInternalServerError)
 		_ = c.Error(utils.ErrInternalServer.NewWithNoMessage())
