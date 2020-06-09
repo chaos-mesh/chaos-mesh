@@ -110,12 +110,11 @@ func (s *Service) experimentReport(c *gin.Context) {
 		if !gorm.IsRecordNotFoundError(err) {
 			c.Status(http.StatusInternalServerError)
 			_ = c.Error(utils.ErrInternalServer.NewWithNoMessage())
-			return
 		} else {
 			c.Status(http.StatusInternalServerError)
 			_ = c.Error(utils.ErrInvalidRequest.New("the archive is not found"))
-			return
 		}
+		return
 	}
 
 	c.JSON(http.StatusOK, data)
