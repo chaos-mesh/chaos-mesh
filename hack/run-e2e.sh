@@ -30,7 +30,7 @@ hack::ensure_kind
 PROVIDER=${PROVIDER:-}
 CLUSTER=${CLUSTER:-}
 IMAGE_TAG=${IMAGE_TAG:-}
-E2E_IMAGE=${E2E_IMAGE:-localhost:5000/pingcap/tidb-operator-e2e:latest}
+E2E_IMAGE=${E2E_IMAGE:-localhost:5000/pingcap/chaos-mesh-e2e:latest}
 KUBECONFIG=${KUBECONFIG:-$HOME/.kube/config}
 KUBECONTEXT=${KUBECONTEXT:-kind-chaos-mesh}
 REPORT_DIR=${REPORT_DIR:-}
