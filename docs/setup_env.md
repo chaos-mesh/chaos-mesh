@@ -25,8 +25,7 @@ Make sure you have the above prerequisites met. Now follow the steps below to pr
 2. Install the Kubernetes API development framework - [kubebuilder](https://github.com/kubernetes-sigs/kubebuilder) and [kustomize](https://github.com/kubernetes-sigs/kustomize).
 
     ```bash
-    make install-kubebuilder
-    make install-kustomize
+    make ensure-all
     ```
 
 3. Start the docker service. Most Linux distributions use `systemctl` to start services. If you do not have `systemctl`, use the service command.
