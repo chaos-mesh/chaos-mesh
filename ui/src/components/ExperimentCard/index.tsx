@@ -3,6 +3,8 @@ import { Theme, createStyles, makeStyles } from '@material-ui/core/styles'
 
 import DeleteOutlineIcon from '@material-ui/icons/DeleteOutline'
 import { Experiment } from 'api/experiments.type'
+import ExperimentEventsPreview from 'components/ExperimentEventsPreview'
+import { Link } from 'react-router-dom'
 import PauseCircleOutlineIcon from '@material-ui/icons/PauseCircleOutline'
 import React from 'react'
 import day from 'lib/dayjs'
@@ -12,9 +14,12 @@ const useStyles = makeStyles((theme: Theme) =>
     card: {
       padding: theme.spacing(3),
     },
+    actions: {
+      display: 'flex',
+      justifyContent: 'space-between',
+    },
     detailButton: {
-      marginLeft: 'auto',
-      marginRight: theme.spacing(6),
+      marginRight: theme.spacing(4),
     },
   })
 )
@@ -56,8 +61,17 @@ const ExperimentCard: React.FC<ExperimentCardProps> = ({ experiment: e, handleSe
           {e.Kind}
         </Typography>
       </CardContent>
-      <CardActions>
-        <Button className={classes.detailButton} variant="outlined" size="small">
+      <CardActions className={classes.actions}>
+        <Box>
+          <ExperimentEventsPreview events={e.events} />
+        </Box>
+        <Button
+          className={classes.detailButton}
+          component={Link}
+          to={`/experiments/${e.Name}?namespace=${e.Namespace}&kind=${e.Kind}`}
+          variant="outlined"
+          size="small"
+        >
           Detail
         </Button>
       </CardActions>

@@ -164,7 +164,7 @@ func (oa *operatorAction) InstallTemplate(info OperatorConfig) error {
 	templateCM := &corev1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: info.Namespace,
-			Name:      "sidecar-template",
+			Name:      "chaosfs-sidecar",
 			Labels: map[string]string{
 				"app.kubernetes.io/component": "template",
 			},

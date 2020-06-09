@@ -1,4 +1,4 @@
-FROM golang:alpine3.10 AS build_base
+FROM golang:1.14.4-alpine3.12 AS build_base
 
 ARG HTTPS_PROXY
 ARG HTTP_PROXY
@@ -22,5 +22,4 @@ ARG SWAGGER
 
 COPY . /src
 WORKDIR /src
-RUN git checkout .
 RUN make binary

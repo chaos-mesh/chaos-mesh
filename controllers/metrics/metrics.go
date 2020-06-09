@@ -33,7 +33,7 @@ type ChaosCollector struct {
 	ConfigTemplates     *prometheus.GaugeVec
 	InjectionConfigs    *prometheus.GaugeVec
 	TemplateNotExist    *prometheus.CounterVec
-	TemplateLoadError   *prometheus.CounterVec
+	TemplateLoadError   prometheus.Counter
 	ConfigNameDuplicate *prometheus.CounterVec
 	InjectRequired      *prometheus.CounterVec
 	Injections          *prometheus.CounterVec
@@ -67,10 +67,10 @@ func NewChaosCollector(store cache.Cache, registerer prometheus.Registerer) *Cha
 			Name: "chaos_mesh_config_name_duplicate_total",
 			Help: "Total number of config name duplication error",
 		}, []string{"namespace", "config"}),
-		TemplateLoadError: prometheus.NewCounterVec(prometheus.CounterOpts{
+		TemplateLoadError: prometheus.NewCounter(prometheus.CounterOpts{
 			Name: "chaos_mesh_template_load_failed_total",
 			Help: "Total number of failures when rendering config args to template",
-		}, []string{"namespace", "template", "config"}),
+		}),
 		InjectRequired: prometheus.NewCounterVec(prometheus.CounterOpts{
 			Name: "chaos_mesh_inject_required_total",
 			Help: "Total number of injections required",
