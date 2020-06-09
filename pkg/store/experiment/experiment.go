@@ -76,7 +76,7 @@ func (e *experimentStore) Report(ctx context.Context, kind, namespace, name stri
 
 	if err := e.db.Where(
 		"namespace = ? and name = ? and kind = ?", namespace, name, kind).
-		First(archive).Error; err != nil && !gorm.IsRecordNotFoundError(err) {
+		First(archive).Error; err != nil {
 		return nil, err
 	}
 
