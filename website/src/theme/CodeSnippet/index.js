@@ -1,7 +1,5 @@
 /*jshint esversion: 6 */
-
-import React, {useEffect, useState} from 'react';
-
+import React, {useEffect, useState} from 'react'
 import styles from './styles.module.css';
 import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
 import useThemeContext from '@theme/hooks/useThemeContext';
