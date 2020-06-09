@@ -49,25 +49,26 @@ which correspond to the following major actions (experiments):
 
 ## Quick start
 
-* [Get Started on kind](https://github.com/pingcap/chaos-mesh/wiki/Get-started-on-kind)
-* [Get Started on minikube](https://github.com/pingcap/chaos-mesh/wiki/Get-started-on-minikube)
+* [Get Started on kind](https://chaos-mesh.org/docs/installation/get_started_on_kind)
+* [Get Started on minikube](https://chaos-mesh.org/docs/installation/get_started_on_minikube)
 
 ## Deploy and use
 
-See [Docs](https://github.com/pingcap/chaos-mesh/wiki/Deploy-Chaos-Mesh)
+See [Docs](https://chaos-mesh.org/docs/)
 
 ## FAQs
 
-See [FAQs](https://github.com/pingcap/chaos-mesh/wiki/FAQs).
+See [FAQs](https://chaos-mesh.org/docs/faqs).
 
 ## Blogs
 
 - [Chaos Mesh - Your Chaos Engineering Solution for System Resiliency on Kubernetes](https://pingcap.com/blog/chaos-mesh-your-chaos-engineering-solution-for-system-resiliency-on-kubernetes/) 
 - [Run Your First Chaos Experiment in 10 Minutes](https://pingcap.com/blog/run-first-chaos-experiment-in-ten-minutes/)
+- [Simulating Clock Skew in K8s Without Affecting Other Containers on the Node](https://pingcap.com/blog/simulating-clock-skew-in-k8s-without-affecting-other-containers-on-node/)
 
 ## Contribute
 
-See [Development Guide](https://github.com/pingcap/chaos-mesh/wiki/Development-Overview).
+See [Development Guide](https://chaos-mesh.org/docs/development_guides/development_overview).
 
 ## Community
 
