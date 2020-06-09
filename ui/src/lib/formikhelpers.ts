@@ -64,6 +64,11 @@ export function parseSubmitValues(values: Experiment) {
           continue
         }
 
+        // Handle container-kill action
+        if (chaos.action === 'container-kill' && action === 'container_name') {
+          continue
+        }
+
         if (action !== chaos.action) {
           delete chaos[action]
         }
