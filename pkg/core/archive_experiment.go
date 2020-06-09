@@ -39,8 +39,8 @@ type ExperimentStore interface {
 	// Delete deletes the experiment from the datastore.
 	Delete(context.Context, *ArchiveExperiment) error
 
-	// Report returns an archive experiment from the datastore.
-	Report(ctx context.Context, kind, namespace, name string) (*ArchiveExperiment, error)
+	// Detail returns an archive experiment from the datastore.
+	Detail(ctx context.Context, kind, namespace, name string) (*ArchiveExperiment, error)
 }
 
 // ArchiveExperiment represents an experiment instance.

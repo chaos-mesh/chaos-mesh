@@ -56,7 +56,7 @@ func Register(r *gin.RouterGroup, s *Service) {
 
 	// TODO: add more api handlers
 	endpoint.GET("", s.listExperiments)
-	endpoint.GET("/report", s.experimentReport)
+	endpoint.GET("/detail", s.experimentDetail)
 }
 
 // @Summary Get archived chaos experiments.
@@ -84,8 +84,8 @@ func (s *Service) listExperiments(c *gin.Context) {
 	c.JSON(http.StatusOK, data)
 }
 
-// @Summary Get the report of chaos experiment.
-// @Description Get the report of chaos experiment.
+// @Summary Get the details of chaos experiment.
+// @Description Get the details of chaos experiment.
 // @Tags archives
 // @Produce json
 // @Param namespace query string false "namespace"
@@ -94,7 +94,7 @@ func (s *Service) listExperiments(c *gin.Context) {
 // @Success 200 {array} core.ArchiveExperiment
 // @Router /api/archives/report [get]
 // @Failure 500 {object} utils.APIError
-func (s *Service) experimentReport(c *gin.Context) {
+func (s *Service) experimentDetail(c *gin.Context) {
 	kind := c.Query("kind")
 	name := c.Query("name")
 	ns := c.Query("namespace")
@@ -105,7 +105,7 @@ func (s *Service) experimentReport(c *gin.Context) {
 		return
 	}
 
-	data, err := s.archive.Report(context.TODO(), kind, ns, name)
+	data, err := s.archive.Detail(context.TODO(), kind, ns, name)
 	if err != nil {
 		if !gorm.IsRecordNotFoundError(err) {
 			c.Status(http.StatusInternalServerError)

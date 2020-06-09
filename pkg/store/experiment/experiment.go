@@ -71,7 +71,7 @@ func (e *experimentStore) ListMeta(_ context.Context, kind, ns, name string) ([]
 	return archives, nil
 }
 
-func (e *experimentStore) Report(ctx context.Context, kind, namespace, name string) (*core.ArchiveExperiment, error) {
+func (e *experimentStore) Detail(ctx context.Context, kind, namespace, name string) (*core.ArchiveExperiment, error) {
 	archive := new(core.ArchiveExperiment)
 
 	if err := e.db.Where(
