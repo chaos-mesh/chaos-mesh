@@ -72,16 +72,23 @@ func (e *experimentStore) ListMeta(_ context.Context, kind, ns, name string) ([]
 	return archives, nil
 }
 
-// TODO: implement the left core.EventStore interfaces
-func (e *experimentStore) Find(context.Context, int64) (*core.ArchiveExperiment, error) {
-	return nil, nil
+func (e *experimentStore) Find(_ context.Context, id int64) (*core.ArchiveExperiment, error) {
+	archive := new(core.ArchiveExperiment)
+	if err := e.db.Where(
+		"id = ?", id).
+		First(archive).Error; err != nil {
+		return nil, err
+	}
+	return archive, nil
 }
 
 func (e *experimentStore) Create(_ context.Context, archive *core.ArchiveExperiment) error {
 	return e.db.Create(archive).Error
 }
 
-func (e *experimentStore) Delete(context.Context, *core.ArchiveExperiment) error { return nil }
+func (e *experimentStore) Delete(_ context.Context, archive *core.ArchiveExperiment) error {
+	return e.db.Model(core.ArchiveExperiment{}).Unscoped().Delete(archive).Error
+}
 
 // DeleteByFinishTime deletes experiments whose time difference is greater than the given time from FinishTime.
 func (e *experimentStore) DeleteByFinishTime(_ context.Context, ttl time.Duration) error {
