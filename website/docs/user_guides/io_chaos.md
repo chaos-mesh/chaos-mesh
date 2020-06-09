@@ -77,7 +77,7 @@ ARGS="--pd=${CLUSTER_NAME}-pd:2379 \
 
 Injection configuration is another [ConfigMap](https://kubernetes.io/docs/tasks/configure-pod-container/configure-pod-configmap/) and is required to fulfill IO Chaos.
 
-To define a specified ConfigMap for your application before starting your chaos experiment, please refer to this [document](./sidecar_configmap.md).
+To define a specified ConfigMap for your application before starting your chaos experiment, please refer to this [document](sidecar_configmap).
 
 You can apply the ConfigMap defined for your application to Kubernetes cluster by the following command:
 
@@ -110,7 +110,7 @@ spec:
     cron: "@every 10m"
 ```
 
-For more sample files, see [examples](../examples). You can edit them as needed.
+For more sample files, see [examples](https://github.com/pingcap/chaos-mesh/tree/master/examples). You can edit them as needed.
 
 | Field | Description | Sample Value |
 |:------|:------------------|:--------------|
@@ -147,7 +147,7 @@ kubectl annotate ns app-ns admission-webhook.pingcap.com/init-request=chaosfs-ti
 ...
 ```
 
-2. Set annotation `admission-webhook.pingcap.com/request` on the pods, you can check this [example](../examples/etcd/etcd.yaml).
+2. Set annotation `admission-webhook.pingcap.com/request` on the pods, you can check this [example](https://github.com/pingcap/chaos-mesh/blob/master/examples/etcd/etcd.yaml).
 
 Then, you can start your application and define YAML file to start your chaos experiment.
 

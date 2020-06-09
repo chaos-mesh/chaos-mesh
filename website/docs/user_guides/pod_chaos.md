@@ -38,7 +38,7 @@ spec:
     cron: "@every 2m"
 ```
 
-For more sample files, see [examples](../examples). You can edit them as needed.
+For more sample files, see [examples](https://github.com/pingcap/chaos-mesh/tree/master/examples). You can edit them as needed.
 
 Description:
 

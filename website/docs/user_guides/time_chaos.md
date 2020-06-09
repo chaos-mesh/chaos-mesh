@@ -33,7 +33,7 @@ spec:
     cron: "@every 15s"
 ```
 
-For more sample files, see [examples](../examples). You can edit them as needed.
+For more sample files, see [examples](https://github.com/pingcap/chaos-mesh/tree/master/examples). You can edit them as needed.
 
 Description:
 
