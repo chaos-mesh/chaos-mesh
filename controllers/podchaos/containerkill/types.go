@@ -18,8 +18,6 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/pingcap/chaos-mesh/controllers/common"
-
 	"github.com/go-logr/logr"
 	"golang.org/x/sync/errgroup"
 	v1 "k8s.io/api/core/v1"
@@ -28,6 +26,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/pingcap/chaos-mesh/api/v1alpha1"
+	"github.com/pingcap/chaos-mesh/controllers/common"
 	"github.com/pingcap/chaos-mesh/controllers/twophase"
 	pb "github.com/pingcap/chaos-mesh/pkg/chaosdaemon/pb"
 	"github.com/pingcap/chaos-mesh/pkg/utils"
