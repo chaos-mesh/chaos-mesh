@@ -66,7 +66,7 @@ The following tables list the configurable parameters of the Chaos Mesh chart an
 | `dashboard.env.DATABASE_DRIVER`| The db drive used for Chaos Dashboard, support db: sqlite3, mysql| `sqlite3` |
 | `dashboard.env.DATABASE_DATASOURCE`| The db dsn used for Chaos Dashboard | `/data/core.sqlite` |
 | `dashboard.ingress.enabled`                   | Enable the use of the ingress controller to access the dashboard                         | `false`             |
-| `dashboard.ingress.certManager`               | Add annotations for cert-manager                                                      | `false`             |
+| `dashboard.ingress.certManager`               | Enable Cert-Manager for ingress                                                      | `false`             |
 | `dashboard.ingress.annotations`               | Annotations for the dashboard Ingress                                                   | `{}`                |
 | `dashboard.ingress.hosts[0].name`             | Hostname to your dashboard installation                                                 | `dashboard.local`     |
 | `dashboard.ingress.hosts[0].paths`            | Path within the url structure                                                         | `["/"]`             |
