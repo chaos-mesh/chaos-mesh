@@ -11,6 +11,10 @@ module.exports = {
     algolia: {
       apiKey: '1d330c3dae1c5376607ecee61b4e2271',
       indexName: 'chaos mesh',
+      "appId": 'UYWCTY17DM'
+    },
+    googleAnalytics: {
+      trackingID: 'UA-90760217-2',
     },
     navbar: {
       logo: {
