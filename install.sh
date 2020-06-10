@@ -73,6 +73,7 @@ main() {
     local crd="https://raw.githubusercontent.com/pingcap/chaos-mesh/master/manifests/crd.yaml"
     local runtime="docker"
     local template=false
+    local sidecar_template=true
 
     while [[ $# -gt 0 ]]
     do
@@ -176,6 +177,11 @@ main() {
                 shift
                 shift
                 ;;
+            --sidecar_template)
+                sidecar_template=true
+                shift
+                shift
+                ;;
             *)
                 echo "unknown flag or option $key"
                 usage
@@ -201,6 +207,9 @@ main() {
     if $template; then
         ensure gen_crd_manifests "${crd}"
         ensure gen_chaos_mesh_manifests "${runtime}"
+        if $sidecar_template; then
+            ensure gen_default_sidecar_template
+        fi
         exit 0
     fi
 
@@ -569,6 +578,7 @@ install_chaos_mesh() {
     local docker_mirror=$5
     local crd=$6
     local runtime=$7
+    local sidecar_template=$8
 
     printf "Install Chaos Mesh %s\n" "${release_name}"
 
@@ -586,6 +596,9 @@ install_chaos_mesh() {
 
     gen_crd_manifests "${crd}" | kubectl apply -f - || exit 1
     gen_chaos_mesh_manifests "${runtime}" | kubectl apply -f - || exit 1
+    if [ "$sidecar_template" == "true" ]; then
+        gen_default_sidecar_template | kubectl apply -f - || exit 1
+    fi
 }
 
 version_lt() {
@@ -754,6 +767,12 @@ gen_crd_manifests() {
         need_cmd curl
         ensure curl -sSL $crd
     fi
+}
+
+gen_default_sidecar_template() {
+    local template_path="manifests/chaosfs-sidecar.yaml"
+
+    ensure cat "$template_path"
 }
 
 gen_chaos_mesh_manifests() {

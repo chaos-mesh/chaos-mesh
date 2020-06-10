@@ -1,6 +1,8 @@
-import { Experiment, ExperimentTarget } from 'components/NewExperiment/types'
+import { Experiment, ExperimentTarget, StepperFormProps } from 'components/NewExperiment/types'
 
-export const targetVerticalTabsKinds: {
+import { defaultExperimentSchema } from 'components/NewExperiment/constants'
+
+const ChaosKindsAndKeys: {
   kind: string
   key: Exclude<keyof ExperimentTarget, 'kind'>
 }[] = [
@@ -48,8 +50,7 @@ export function parseSubmitValues(values: Experiment) {
 
   // Remove unrelated chaos
   const kind = values.target.kind
-  targetVerticalTabsKinds
-    .filter((k) => k.kind !== kind)
+  ChaosKindsAndKeys.filter((k) => k.kind !== kind)
     .map((k) => k.key)
     .forEach((k) => delete values.target[k])
 
@@ -63,6 +64,11 @@ export function parseSubmitValues(values: Experiment) {
           continue
         }
 
+        // Handle container-kill action
+        if (chaos.action === 'container-kill' && action === 'container_name') {
+          continue
+        }
+
         if (action !== chaos.action) {
           delete chaos[action]
         }
@@ -73,7 +79,7 @@ export function parseSubmitValues(values: Experiment) {
   return values
 }
 
-export function mustImmediate(formikValues: Experiment) {
+export function mustSchedule(formikValues: Experiment) {
   if (
     formikValues.target.pod_chaos.action === 'pod-kill' ||
     formikValues.target.pod_chaos.action === 'container-kill'
@@ -82,4 +88,26 @@ export function mustImmediate(formikValues: Experiment) {
   }
 
   return false
+}
+
+export function resetOtherChaos(formProps: StepperFormProps, kind: string, action: string) {
+  const { values, setFieldValue } = formProps
+
+  const selectedChaosKind = kind
+  const selectedChaosKey = ChaosKindsAndKeys.filter((d) => d.kind === selectedChaosKind)[0].key
+
+  const updatedTarget = {
+    ...defaultExperimentSchema.target,
+    ...{
+      kind: selectedChaosKind,
+      [selectedChaosKey]: {
+        ...values.target[selectedChaosKey],
+        ...{
+          action,
+        },
+      },
+    },
+  }
+
+  setFieldValue('target', updatedTarget)
 }

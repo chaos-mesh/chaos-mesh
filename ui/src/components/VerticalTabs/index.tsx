@@ -1,6 +1,7 @@
 import { Box, Tab, TabProps, Tabs } from '@material-ui/core'
-import React, { useState } from 'react'
 import { Theme, makeStyles } from '@material-ui/core/styles'
+
+import React from 'react'
 
 const useStyles = makeStyles((theme: Theme) => ({
   root: {
@@ -8,6 +9,9 @@ const useStyles = makeStyles((theme: Theme) => ({
   },
   tabs: {
     borderRight: `1px solid ${theme.palette.divider}`,
+    '& .MuiTabs-indicator': {
+      backgroundColor: theme.palette.primary.main,
+    },
   },
   main: {
     flex: 1,
@@ -26,20 +30,14 @@ function a11yProps(index: number) {
 interface VerticalTabsProps {
   tabs: TabProps[]
   tabPanels: React.ReactNode[]
-  onChangeCallback: (index: number) => void
+  tabIndex: number
+  setTabIndex: (index: number) => void
 }
 
-const VerticalTabs: React.FC<VerticalTabsProps> = ({ tabs, tabPanels, onChangeCallback: callback }) => {
+const VerticalTabs: React.FC<VerticalTabsProps> = ({ tabs, tabPanels, tabIndex: value, setTabIndex: setValue }) => {
   const classes = useStyles()
-  const [value, setValue] = useState(0)
 
-  const onChange = (_: React.ChangeEvent<{}>, newValue: number) => {
-    setValue(newValue)
-
-    if (typeof callback === 'function') {
-      callback(newValue)
-    }
-  }
+  const onChange = (_: React.ChangeEvent<{}>, newValue: number) => setValue(newValue)
 
   return (
     <Box className={classes.root}>

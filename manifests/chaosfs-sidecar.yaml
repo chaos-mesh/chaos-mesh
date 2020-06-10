@@ -1,0 +1,50 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: chaosfs-sidecar
+  namespace: chaos-testing
+  labels:
+    app.kubernetes.io/component: template
+data:
+  data: |
+    initContainers:
+    - name: inject-scripts
+      image: pingcap/chaos-scripts:latest
+      imagePullPolicy: Always
+      command: ["sh", "-c", "/scripts/init.sh -d {{.DataPath}} -f {{.MountPath}}/fuse-data"]
+    containers:
+    - name: chaosfs
+      image: pingcap/chaos-fs:latest
+      imagePullPolicy: Always
+      ports:
+      - containerPort: 65534
+      securityContext:
+        privileged: true
+      command:
+        - /usr/local/bin/chaosfs
+        - -addr=:65534
+        - -pidfile=/tmp/fuse/pid
+        - -original={{.MountPath}}/fuse-data
+        - -mountpoint={{.DataPath}}
+      volumeMounts:
+        - name: {{.VolumeName}}
+          mountPath: {{.MountPath}}
+          mountPropagation: Bidirectional
+    volumeMounts:
+    - name: {{.VolumeName}}
+      mountPath: {{.MountPath}}
+      mountPropagation: HostToContainer
+    - name: scripts
+      mountPath: /tmp/scripts
+    - name: fuse
+      mountPath: /tmp/fuse
+    volumes:
+    - name: scripts
+      emptyDir: {}
+    - name: fuse
+      emptyDir: {}
+    postStart:
+      {{.ContainerName}}:
+        command:
+          - /tmp/scripts/wait-fuse.sh

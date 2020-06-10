@@ -101,3 +101,7 @@ export interface StepperContextProps {
 }
 
 export type StepperFormProps = FormikProps<Experiment>
+
+export type StepperFormTargetProps = StepperFormProps & {
+  handleActionChange: (e: React.ChangeEvent<any>) => void
+}
