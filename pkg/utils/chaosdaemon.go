@@ -42,7 +42,7 @@ func (c *GrpcChaosDaemonClient) Close() error {
 }
 
 // NewChaosDaemonClient would create ChaosDaemonClient
-func NewChaosDaemonClient(ctx context.Context, c client.Client, pod *v1.Pod, port string) (ChaosDaemonClientInterface, error) {
+func NewChaosDaemonClient(ctx context.Context, c client.Client, pod *v1.Pod, port int) (ChaosDaemonClientInterface, error) {
 	if cli := mock.On("MockChaosDaemonClient"); cli != nil {
 		return cli.(ChaosDaemonClientInterface), nil
 	}
