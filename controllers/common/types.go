@@ -15,6 +15,7 @@ package common
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"time"
 
@@ -38,15 +39,13 @@ const (
 	AnnotationCleanFinalizerForced = `forced`
 )
 
-var log = ctrl.Log.WithName("controller")
-
 //ControllerCfg is a global variable to keep the configuration for Chaos Controller
 var ControllerCfg *config.ChaosControllerConfig
 
 func init() {
 	conf, err := config.EnvironChaosController()
 	if err != nil {
-		log.Error(err, "Chaos Controller: invalid environment configuration")
+		fmt.Println(fmt.Sprintf("Chaos Controller: invalid environment configuration. err: %s", err))
 		os.Exit(1)
 	}
 	ControllerCfg = &conf
