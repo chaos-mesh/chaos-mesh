@@ -29,7 +29,7 @@ import (
 
 // Service defines a handler service for events.
 type Service struct {
-	conf    *config.ChaosServerConfig
+	conf    *config.ChaosDashboardConfig
 	kubeCli client.Client
 	archive core.ExperimentStore
 	event   core.EventStore
@@ -37,7 +37,7 @@ type Service struct {
 
 // NewService return an event service instance.
 func NewService(
-	conf *config.ChaosServerConfig,
+	conf *config.ChaosDashboardConfig,
 	cli client.Client,
 	archive core.ExperimentStore,
 	event core.EventStore,

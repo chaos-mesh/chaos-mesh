@@ -44,7 +44,7 @@ type Server struct {
 
 // NewServer returns a CollectorServer and Client.
 func NewServer(
-	conf *config.ChaosServerConfig,
+	conf *config.ChaosDashboardConfig,
 	archive core.ExperimentStore,
 	event core.EventStore,
 ) (*Server, client.Client) {

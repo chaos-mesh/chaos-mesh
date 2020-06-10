@@ -17,13 +17,21 @@ import (
 	"github.com/kelseyhightower/envconfig"
 )
 
-// ChaosServerConfig defines the configuration for Chaos Dashboard
-type ChaosServerConfig struct {
+// ChaosDashboardConfig defines the configuration for Chaos Dashboard
+type ChaosDashboardConfig struct {
 	ListenHost           string `envconfig:"LISTEN_HOST" default:"0.0.0.0"`
 	ListenPort           int    `envconfig:"LISTEN_PORT" default:"2333"`
 	MetricAddress        string `envconfig:"METRIC_ADDRESS"`
 	EnableLeaderElection bool   `envconfig:"ENABLE_LEADER_ELECTION"`
 	Database             *DatabaseConfig
+	PersistTTL           PersistTTLConfig
+}
+
+// PersistTTLConfig defines the configuration of ttl
+type PersistTTLConfig struct {
+	SyncPeriod string `envconfig:"CLEAN_SYNC_PERIOD" default:"12h"`
+	Event      string `envconfig:"TTL_EVENT"       default:"168h"`
+	Experiment string `envconfig:"TTL_EXPERIMENT"  default:"336h"`
 }
 
 // DatabaseConfig defines the configuration for databases
@@ -35,9 +43,9 @@ type DatabaseConfig struct {
 	Secret     string `envconfig:"DATABASE_SECRET"`
 }
 
-// EnvironChaosServer returns the settings from the environment.
-func EnvironChaosServer() (ChaosServerConfig, error) {
-	cfg := ChaosServerConfig{}
+// EnvironChaosDashboard returns the settings from the environment.
+func EnvironChaosDashboard() (ChaosDashboardConfig, error) {
+	cfg := ChaosDashboardConfig{}
 	err := envconfig.Process("", &cfg)
 	return cfg, err
 }

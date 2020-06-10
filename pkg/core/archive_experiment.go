@@ -38,6 +38,9 @@ type ExperimentStore interface {
 
 	// Delete deletes the experiment from the datastore.
 	Delete(context.Context, *ArchiveExperiment) error
+
+	// DeleteByFinishTime deletes experiments whose time difference is greater than the given time from FinishTime.
+	DeleteByFinishTime(context.Context, time.Duration) error
 }
 
 // ArchiveExperiment represents an experiment instance.

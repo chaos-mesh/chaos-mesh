@@ -56,7 +56,7 @@ type ChaosState struct {
 
 // Service defines a handler service for experiments.
 type Service struct {
-	conf    *config.ChaosServerConfig
+	conf    *config.ChaosDashboardConfig
 	kubeCli client.Client
 	archive core.ExperimentStore
 	event   core.EventStore
@@ -64,7 +64,7 @@ type Service struct {
 
 // NewService returns an experiment service instance.
 func NewService(
-	conf *config.ChaosServerConfig,
+	conf *config.ChaosDashboardConfig,
 	cli client.Client,
 	archive core.ExperimentStore,
 	event core.EventStore,
