@@ -17,7 +17,6 @@ import (
 	"context"
 	"time"
 
-	"github.com/pingcap/chaos-mesh/pkg/config"
 	"github.com/pingcap/chaos-mesh/pkg/core"
 
 	runtimeutil "k8s.io/apimachinery/pkg/util/runtime"
@@ -38,7 +37,7 @@ type Controller struct {
 
 // TTLconfig defines the ttl
 type TTLconfig struct {
-	// databaseTTLResyncPeriod defines the time interval to synchronize data in the database.
+	// databaseTTLResyncPeriod defines the time interval to cleanup data in the database.
 	DatabaseTTLResyncPeriod time.Duration
 	// EventTTL defines the ttl of events
 	EventTTL time.Duration
@@ -48,7 +47,6 @@ type TTLconfig struct {
 
 // NewController returns a new database ttl controller
 func NewController(
-	config *config.ChaosDashboardConfig,
 	archive core.ExperimentStore,
 	event core.EventStore,
 	ttlc TTLconfig,
@@ -65,10 +63,9 @@ func Register(c *Controller, stopCh <-chan struct{}) {
 	defer runtimeutil.HandleCrash()
 	log.Info("starting database TTL controller")
 	go wait.Until(c.runWorker, c.ttlconfig.DatabaseTTLResyncPeriod, stopCh)
-	log.Info("shutting database TTL controller")
 }
 
-// runWorker is a long-running function that will continually call the
+// runWorker is a long-running function that will call the
 // function in order to delete the events and archives.
 func (c *Controller) runWorker() {
 	log.Info("deleting expired data from the database")

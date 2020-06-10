@@ -29,7 +29,7 @@ type ChaosDashboardConfig struct {
 
 // PersistTTLConfig defines the configuration of ttl
 type PersistTTLConfig struct {
-	SyncPeriod string `envconfig:"TTL_SYNC_PERIOD" default:"12h"`
+	SyncPeriod string `envconfig:"CLEAN_SYNC_PERIOD" default:"12h"`
 	Event      string `envconfig:"TTL_EVENT"       default:"168h"`
 	Experiment string `envconfig:"TTL_EXPERIMENT"  default:"336h"`
 }
