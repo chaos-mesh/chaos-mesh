@@ -179,7 +179,7 @@ func (r *Reconciler) cleanFinalizersAndRecover(ctx context.Context, chaos *v1alp
 func (r *Reconciler) recoverPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.StressChaos) error {
 	r.Log.Info("Try to recover pod", "namespace", pod.Namespace, "name", pod.Name)
 	daemonClient, err := utils.NewChaosDaemonClient(ctx, r.Client,
-		pod, common.Cfg.ChaosDaemonPort)
+		pod, common.ControllerCfg.ChaosDaemonPort)
 	if err != nil {
 		return err
 	}
@@ -229,7 +229,7 @@ func (r *Reconciler) applyPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.
 	r.Log.Info("Try to apply stress chaos", "namespace",
 		pod.Namespace, "name", pod.Name)
 	daemonClient, err := utils.NewChaosDaemonClient(ctx, r.Client,
-		pod, common.Cfg.ChaosDaemonPort)
+		pod, common.ControllerCfg.ChaosDaemonPort)
 	if err != nil {
 		return err
 	}

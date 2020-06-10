@@ -140,7 +140,7 @@ func (r *Reconciler) Object() v1alpha1.InnerObject {
 func (r *Reconciler) KillContainer(ctx context.Context, pod *v1.Pod, containerID string) error {
 	r.Log.Info("Try to kill container", "namespace", pod.Namespace, "podName", pod.Name, "containerID", containerID)
 
-	pbClient, err := utils.NewChaosDaemonClient(ctx, r.Client, pod, common.Cfg.ChaosDaemonPort)
+	pbClient, err := utils.NewChaosDaemonClient(ctx, r.Client, pod, common.ControllerCfg.ChaosDaemonPort)
 	if err != nil {
 		return err
 	}
