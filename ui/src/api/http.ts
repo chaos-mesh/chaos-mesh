@@ -8,6 +8,10 @@ const http = axios.create({
 })
 
 http.interceptors.response.use(undefined, (error: AxiosError) => {
+  if (error.response?.config.url === '/experiments/state') {
+    return
+  }
+
   const data = error.response?.data
 
   if (data) {

@@ -10,6 +10,7 @@ import { Experiment } from 'components/NewExperiment/types'
 import Loading from 'components/Loading'
 import ReactJson from 'react-json-view'
 import api from 'api'
+import clsx from 'clsx'
 import genEventsChart from 'lib/eventsChart'
 
 const useStyles = makeStyles((theme: Theme) =>
@@ -102,7 +103,7 @@ export default function ExperimentDetail() {
           <Grid item xs={12} sm={12} md={8}>
             <Box display="flex" flexDirection="column" height="100%">
               <Paper ref={chartRef} className={classes.eventsChart}></Paper>
-              <Paper className={`${classes.height100} ${classes.experimentPaper}`}>
+              <Paper className={clsx(classes.height100, classes.experimentPaper)}>
                 <Box pb={3}>
                   <Typography variant="h6">Event</Typography>
                 </Box>
@@ -114,7 +115,7 @@ export default function ExperimentDetail() {
             </Box>
           </Grid>
           <Grid item xs={12} sm={12} md={4}>
-            <Paper className={`${classes.height100} ${classes.experimentPaper}`}>
+            <Paper className={clsx(classes.height100, classes.experimentPaper)}>
               <Box pb={3}>
                 <Typography variant="h6">Configuration</Typography>
               </Box>
