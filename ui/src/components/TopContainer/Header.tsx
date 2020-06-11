@@ -80,7 +80,7 @@ const Header: React.FC<HeaderProps> = ({ openDrawer, handleDrawerToggle, breadcr
             {breadcrumbs.length > 0 &&
               breadcrumbs.map((b) => {
                 return b.path ? (
-                  <Link key={b.name} to={b.path}>
+                  <Link key={b.name} to={b.path} style={{ textDecoration: 'none' }}>
                     <Typography className={clsx(classes.whiteText, classes.hoverLink)} variant="h6" component="h2">
                       {b.name}
                     </Typography>

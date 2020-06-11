@@ -11,7 +11,7 @@ import Loading from 'components/Loading'
 import ReactJson from 'react-json-view'
 import api from 'api'
 import clsx from 'clsx'
-import genEventsChart from 'lib/eventsChart'
+import genEventsChart from 'lib/d3/eventsChart'
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -20,9 +20,12 @@ const useStyles = makeStyles((theme: Theme) =>
         height: '100%',
       },
     },
+    timelinePaper: {
+      marginBottom: theme.spacing(3),
+      padding: theme.spacing(3),
+    },
     eventsChart: {
       height: 300,
-      marginBottom: theme.spacing(3),
     },
     experimentPaper: {
       flex: 1,
@@ -88,8 +91,6 @@ export default function ExperimentDetail() {
 
       genEventsChart({
         root: chart,
-        width: chart.offsetWidth,
-        height: chart.offsetHeight,
         events,
         selectEvent: setSelectedEvent,
       })
@@ -102,7 +103,15 @@ export default function ExperimentDetail() {
         <Grid className={classes.height100} container spacing={3}>
           <Grid item xs={12} sm={12} md={8}>
             <Box display="flex" flexDirection="column" height="100%">
-              <Paper ref={chartRef} className={classes.eventsChart}></Paper>
+              <Paper className={classes.timelinePaper}>
+                <Box pb={3}>
+                  <Typography variant="h6">Timeline</Typography>
+                </Box>
+                <Box pb={3}>
+                  <Divider />
+                </Box>
+                <div ref={chartRef} className={classes.eventsChart} />
+              </Paper>
               <Paper className={clsx(classes.height100, classes.experimentPaper)}>
                 <Box pb={3}>
                   <Typography variant="h6">Event</Typography>
@@ -110,7 +119,7 @@ export default function ExperimentDetail() {
                 <Box pb={3}>
                   <Divider />
                 </Box>
-                {selectedEvent && <ReactJson src={selectedEvent} collapsed={1} />}
+                {selectedEvent && <ReactJson src={selectedEvent} collapsed={1} displayObjectSize={false} />}
               </Paper>
             </Box>
           </Grid>
@@ -122,7 +131,7 @@ export default function ExperimentDetail() {
               <Box pb={3}>
                 <Divider />
               </Box>
-              {detail && <ReactJson src={detail} collapsed={1} />}
+              {detail && <ReactJson src={detail} collapsed={1} displayObjectSize={false} />}
             </Paper>
           </Grid>
         </Grid>
