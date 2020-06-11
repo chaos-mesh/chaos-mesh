@@ -1,7 +1,8 @@
 import * as d3 from 'd3'
 
 import { Event } from 'api/events.type'
-import day from './dayjs'
+import day from 'lib/dayjs'
+import style from './style'
 
 const margin = {
   top: 30,
@@ -12,27 +13,19 @@ const margin = {
 
 export default function gen({
   root,
-  width,
-  height,
   events,
   selectEvent,
 }: {
   root: HTMLElement
-  width: number
-  height: number
   events: Event[]
   selectEvent: (e: Event) => void
 }) {
-  document.head.insertAdjacentHTML(
-    'beforeend',
-    `<style>
-      .x-axis text {
-        font-weight: bold
-      }
-    </style>`
-  )
+  style()
 
-  const svg = d3.select(root).append('svg').attr('viewBox', `0, 0, ${width}, ${height}`)
+  const width = root.offsetWidth
+  const height = root.offsetHeight
+
+  const svg = d3.select(root).append('svg').attr('width', width).attr('height', height)
 
   const now = day()
 
@@ -40,15 +33,20 @@ export default function gen({
     .scaleLinear()
     .domain([now.subtract(1, 'h'), now])
     .range([margin.left, width - margin.right])
-  const xAxis = d3.axisBottom(x)
+  const xAxis = d3
+    .axisBottom(x)
+    .ticks(6)
+    .tickFormat(d3.timeFormat('%H:%M') as any)
 
   const gXAxis = svg
     .append('g')
     .attr('class', 'x-axis')
     .attr('transform', `translate(0, ${height - margin.bottom})`)
-    .call(xAxis.tickFormat(d3.timeFormat('%H:%M') as any))
+    .call(xAxis)
 
-  const rects = svg
+  const gMain = svg.append('g')
+
+  const rects = gMain
     .selectAll()
     .data(events)
     .enter()
@@ -56,8 +54,8 @@ export default function gen({
     .attr('x', (d) => x(day(d.StartTime)))
     .attr('y', height / 3)
     .attr('width', (d) => (d.FinishTime ? x(day(d.FinishTime)) - x(day(d.StartTime)) : x(day()) - x(day(d.StartTime))))
-    .attr('height', 30)
-    .attr('fill', (d) => (d.FinishTime ? '#388e3c' : '#172d72'))
+    .attr('height', height / 3)
+    .attr('fill', '#172d72')
     .style('cursor', 'pointer')
 
   const zoom = d3.zoom().on('zoom', zoomd)
@@ -97,7 +95,9 @@ export default function gen({
   function genTooltipContent(d: Event) {
     return `<b>Experiment: ${d.Experiment}</b>
             <br />
-            StartTime: ${day(d.StartTime).format('YYYY-MM-DD HH:mm:ss')}
+            <span style="color: rgba(0, 0, 0, 0.67);">StartTime: ${day(d.StartTime).format(
+              'YYYY-MM-DD HH:mm:ss A'
+            )}</span>
             <br />
             <br />
             <b>Pods:</b>
@@ -118,17 +118,32 @@ export default function gen({
       tooltip.style('opacity', 0)
     })
 
-  svg.on('mousemove', function (d) {
+  svg.on('mousemove', function () {
     let [x, y] = d3.mouse(this)
 
-    x += 30
-    y += 45
-    if (x > width / 2) {
-      x -= 120
+    x += 50
+    y += 100
+    if (x > (root.offsetWidth / 3) * 2) {
+      x -= 325
     }
 
     tooltip.style('left', x + 'px').style('top', y + 'px')
   })
 
   root.appendChild(tooltip.node()!)
+
+  function reGen() {
+    const newWidth = root.offsetWidth
+
+    svg.attr('width', newWidth)
+    x.range([margin.left, newWidth - margin.right])
+    gXAxis.call(xAxis)
+    rects
+      .attr('x', (d) => x(day(d.StartTime)))
+      .attr('width', (d) =>
+        d.FinishTime ? x(day(d.FinishTime)) - x(day(d.StartTime)) : x(day()) - x(day(d.StartTime))
+      )
+  }
+
+  d3.select(window).on('resize', reGen)
 }

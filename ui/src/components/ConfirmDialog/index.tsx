@@ -33,7 +33,7 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({ open, setOpen, title, des
         <Button color="primary" onClick={handleClose}>
           Cancel
         </Button>
-        <Button variant="contained" color="primary" autoFocus onClick={_handleConfirm}>
+        <Button color="primary" autoFocus onClick={_handleConfirm}>
           Confirm
         </Button>
       </DialogActions>
