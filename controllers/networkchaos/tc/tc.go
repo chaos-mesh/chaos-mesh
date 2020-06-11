@@ -27,7 +27,7 @@ import (
 
 // AddQdisc makes grpc call to chaosdaemon to add qdisc
 func AddQdisc(ctx context.Context, c client.Client, pod *v1.Pod, qdisc *pb.Qdisc) error {
-	pbClient, err := utils.NewChaosDaemonClient(ctx, c, pod, common.Cfg.ChaosDaemonPort)
+	pbClient, err := utils.NewChaosDaemonClient(ctx, c, pod, common.ControllerCfg.ChaosDaemonPort)
 	if err != nil {
 		return err
 	}
@@ -48,7 +48,7 @@ func AddQdisc(ctx context.Context, c client.Client, pod *v1.Pod, qdisc *pb.Qdisc
 
 // AddEmatchFilter makes grpc call to chaosdaemon to add ematch filter
 func AddEmatchFilter(ctx context.Context, c client.Client, pod *v1.Pod, filter *pb.EmatchFilter) error {
-	pbClient, err := utils.NewChaosDaemonClient(ctx, c, pod, common.Cfg.ChaosDaemonPort)
+	pbClient, err := utils.NewChaosDaemonClient(ctx, c, pod, common.ControllerCfg.ChaosDaemonPort)
 	if err != nil {
 		return err
 	}
@@ -69,7 +69,7 @@ func AddEmatchFilter(ctx context.Context, c client.Client, pod *v1.Pod, filter *
 
 // DelQdisc makes grpc to chaosdaemon to delete tc filter
 func DelQdisc(ctx context.Context, c client.Client, pod *v1.Pod, filter *pb.TcFilter) error {
-	pbClient, err := utils.NewChaosDaemonClient(ctx, c, pod, common.Cfg.ChaosDaemonPort)
+	pbClient, err := utils.NewChaosDaemonClient(ctx, c, pod, common.ControllerCfg.ChaosDaemonPort)
 	if err != nil {
 		return err
 	}
