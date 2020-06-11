@@ -96,7 +96,12 @@ const TopContainer = () => {
           </Switch>
         </Box>
 
-        {isMobileScreen && <MobileNavigation />}
+        {isMobileScreen && (
+          <>
+            <div className={classes.toolbar} />
+            <MobileNavigation />
+          </>
+        )}
 
         <Snackbar
           anchorOrigin={{
