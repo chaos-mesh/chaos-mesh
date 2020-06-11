@@ -8,17 +8,13 @@ const http = axios.create({
 })
 
 http.interceptors.response.use(undefined, (error: AxiosError) => {
-  if (error.response?.config.url === '/experiments/state') {
-    return
-  }
-
   const data = error.response?.data
 
   if (data) {
     store.dispatch(
       setAlert({
         type: 'error',
-        message: data.message,
+        message: data.message || 'An unknown error occurred.',
       })
     )
     store.dispatch(setAlertOpen(true))
