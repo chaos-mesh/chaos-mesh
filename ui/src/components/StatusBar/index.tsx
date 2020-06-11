@@ -1,4 +1,4 @@
-import { Box, Button, Paper, Toolbar, useMediaQuery, useTheme } from '@material-ui/core'
+import { Box, Button, Paper, Toolbar } from '@material-ui/core'
 import React, { useEffect } from 'react'
 import { RootState, useStoreDispatch } from 'store'
 import { Theme, createStyles, makeStyles } from '@material-ui/core/styles'
@@ -54,10 +54,6 @@ interface CurrentStatusProps {
 }
 
 export const CurrentStatus: React.FC<CurrentStatusProps> = ({ classes, state }) => {
-  const theme = useTheme()
-  const isTabletScreen = useMediaQuery(theme.breakpoints.down('sm'))
-  const size = isTabletScreen ? ('small' as 'small') : ('medium' as 'medium')
-
   const data = [
     {
       label: 'Running',
@@ -86,7 +82,7 @@ export const CurrentStatus: React.FC<CurrentStatusProps> = ({ classes, state }) 
           key={d.label}
           className={classes.statusButton}
           variant="outlined"
-          size={size}
+          size="small"
           color={d.color ? d.color : undefined}
         >
           {d.label}: {d.value}
