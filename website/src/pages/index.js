@@ -42,9 +42,9 @@ function Home() {
               <p>
                 No special dependencies, Chaos Mesh can be easily deployed directly on Kubernetes
                 clusters, including <a href="https://github.com/kubernetes/minikube">Minikube</a> and <a href="https://kind.sigs.k8s.io/docs/user/quick-start/">Kind</a>.
-                - Require no modification to the deployment logic of the system under test (SUT).
-                - Easily orchestrate fault injection behaviors in chaos experiments.
-                - Hide underlying implementation details so that users can focus on orchestrating the chaos experiments.
+                - Require no modification to the deployment logic of the system under test (SUT)
+                - Easily orchestrate fault injection behaviors in chaos experiments
+                - Hide underlying implementation details so that users can focus on orchestrating the chaos experiments
               </p>
               <CodeSnippet snippet={install} lang="bash"></CodeSnippet>
             </div>
