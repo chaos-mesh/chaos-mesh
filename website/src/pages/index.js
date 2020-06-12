@@ -18,7 +18,7 @@ function Home() {
     <Layout
       title={`Hello from ${siteConfig.title}`}
       description="Description will go into a meta tag in <head />">
-      <header className={classnames('hero hero--primary', styles.heroBanner)}>
+      <header className={classnames('hero hero--primary', styles.heroBanner)} style={{ background: 'linear-gradient(to right, #0b2050, #00b7ef, #0b2050)' }}>
         <div className="container">
           <h1 className="hero__title">{siteConfig.title}</h1>
           <p className="hero__subtitle">{siteConfig.tagline}</p>
@@ -39,7 +39,7 @@ function Home() {
           <div className="row">
             <div className={classnames(`${styles.pitch} col col--6`)}>
               <h2>Easy to Use</h2>
-              <p>
+              <div>
                 No special dependencies, Chaos Mesh can be easily deployed directly on Kubernetes
                 clusters, including <a href="https://github.com/kubernetes/minikube">Minikube</a> and <a href="https://kind.sigs.k8s.io/docs/user/quick-start/">Kind</a>.
                 <ul>
@@ -47,7 +47,7 @@ function Home() {
                   <li>Easily orchestrate fault injection behaviors in chaos experiments</li>
                   <li>Hide underlying implementation details so that users can focus on orchestrating the chaos experiments</li>
                 </ul>
-              </p>
+              </div>
               <CodeSnippet snippet={install} lang="bash"></CodeSnippet>
             </div>
             <div className={classnames(`${styles.pitch} col col--6`)}>

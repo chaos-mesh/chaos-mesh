@@ -1,4 +1,4 @@
-<img src="static/logo.png" alt="chaos_logo" width="450"/>
+<img src="static/logo.svg" alt="chaos_logo" width="450"/>
 
 [![Build Status](https://internal.pingcap.net/idc-jenkins/job/build_chaos_mesh_master/badge/icon)](https://internal.pingcap.net/idc-jenkins/view/chaos-mesh/job/build_chaos_mesh_master/)
 [![codecov](https://codecov.io/gh/pingcap/chaos-mesh/branch/master/graph/badge.svg)](https://codecov.io/gh/pingcap/chaos-mesh)
@@ -14,8 +14,7 @@
 Chaos Mesh is a cloud-native Chaos Engineering platform that orchestrates chaos on Kubernetes environments. At the current stage, it has the following components:
 
 - **Chaos Operator**: the core component for chaos orchestration. Fully open sourced.
-- **Chaos Dashboard**: a visualized panel that shows the impacts of chaos experiments on the online services of the system; under development; 
-currently only supports chaos experiments on TiDB(https://github.com/pingcap/tidb).
+- **Chaos Dashboard**: a Web UI for managing, designing, monitoring Chaos Experiments; under development.
 
 See the following demo video for a quick view of Chaos Mesh:
 
@@ -35,7 +34,7 @@ custom definitions for chaos experiments and automatic orchestration. There are 
 ![Chaos Operator](./static/chaos-mesh.svg)
 
 Chaos Operator uses [Custom Resource Definition (CRD)](https://kubernetes.io/docs/tasks/access-kubernetes-api/custom-resources/custom-resource-definitions/) to define chaos objects. 
-The current implementation supports three types of CRD objects for fault injection, namely PodChaos, NetworkChaos, IOChaos, and TimeChaos, 
+The current implementation supports six types of CRD objects for fault injection, namely PodChaos, NetworkChaos, IOChaos, TimeChaos, StressChaos, and KernelChaos, 
 which correspond to the following major actions (experiments):
 
 - pod-kill: The selected pod is killed (ReplicaSet or something similar may be needed to ensure the pod will be restarted).
@@ -45,6 +44,8 @@ which correspond to the following major actions (experiments):
 - network-partition: Simulate network partition.
 - IO chaos: Simulate file system faults such as I/O delay, read/write errors, etc.
 - time chaos: The selected pod will be injected clock skew.
+- cpu-burn: Simulate the cpu of the selected pod stress.
+- memory-burn: Simulate the memory of the selected pod stress.
 - kernel chaos: The selected pod will be injected with (slab, bio, etc) errors.
 
 ## Quick start
