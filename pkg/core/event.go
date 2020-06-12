@@ -66,6 +66,7 @@ type Event struct {
 	Namespace  string
 	Kind       string
 	Message    string
+	UID        string     `gorm:"index:uid"`
 	StartTime  *time.Time `gorm:"index:start_time"`
 	FinishTime *time.Time
 	Pods       []*PodRecord `gorm:"-"`
