@@ -1,5 +1,5 @@
 module.exports = {
-  title: 'Chaos Mesh™',
+  title: 'Chaos Mesh®',
   tagline: 'A Powerful Chaos Engineering Platform for Kubernetes',
   url: 'https://chaos-mesh.github.io',
   baseUrl: '/',
@@ -19,7 +19,7 @@ module.exports = {
       logo: {
         alt: 'Chaos Mesh Logo',
         src: 'img/logo.svg',
-        srcDark: 'img/logo_dark.png'
+        srcDark: 'img/logo_dark.svg'
       },
       links: [
         {
