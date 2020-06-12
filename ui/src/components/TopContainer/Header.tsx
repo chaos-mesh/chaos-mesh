@@ -1,27 +1,40 @@
 import { AppBar, Box, Breadcrumbs, IconButton, Toolbar, Typography } from '@material-ui/core'
 import { Theme, createStyles, makeStyles } from '@material-ui/core/styles'
+import { drawerCloseWidth, drawerWidth } from './Sidebar'
 
 import GitHubIcon from '@material-ui/icons/GitHub'
 import { Link } from 'react-router-dom'
 import MenuIcon from '@material-ui/icons/Menu'
 import { NavigationBreadCrumbProps } from 'slices/navigation.type'
 import React from 'react'
-import { drawerWidth } from './Sidebar'
+import clsx from 'clsx'
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     appBar: {
-      [theme.breakpoints.up('md')]: {
-        width: `calc(100% - ${drawerWidth})`,
-        marginLeft: drawerWidth,
-        boxShadow: 'none',
+      marginLeft: drawerCloseWidth,
+      width: `calc(100% - ${drawerCloseWidth})`,
+      transition: theme.transitions.create(['width', 'margin'], {
+        easing: theme.transitions.easing.sharp,
+        duration: theme.transitions.duration.leavingScreen,
+      }),
+      [theme.breakpoints.down('xs')]: {
+        width: '100%',
       },
     },
+    appBarShift: {
+      marginLeft: drawerWidth,
+      width: `calc(100% - ${drawerWidth})`,
+      transition: theme.transitions.create(['width', 'margin'], {
+        easing: theme.transitions.easing.sharp,
+        duration: theme.transitions.duration.enteringScreen,
+      }),
+    },
     menuButton: {
-      [theme.breakpoints.up('md')]: {
+      marginLeft: theme.spacing(0),
+      [theme.breakpoints.down('sm')]: {
         display: 'none',
       },
-      marginLeft: theme.spacing(0),
     },
     nav: {
       marginLeft: theme.spacing(3),
@@ -42,32 +55,33 @@ const useStyles = makeStyles((theme: Theme) =>
 )
 
 interface HeaderProps {
+  openDrawer: boolean
   handleDrawerToggle: () => void
   breadcrumbs: NavigationBreadCrumbProps[]
 }
 
-const Header: React.FC<HeaderProps> = ({ handleDrawerToggle, breadcrumbs }) => {
+const Header: React.FC<HeaderProps> = ({ openDrawer, handleDrawerToggle, breadcrumbs }) => {
   const classes = useStyles()
 
   return (
-    <AppBar className={classes.appBar} position="fixed">
+    <AppBar className={openDrawer ? classes.appBarShift : classes.appBar} position="fixed">
       <Toolbar>
         <IconButton
           className={classes.menuButton}
           color="inherit"
           edge="start"
+          aria-label="Toggle drawer"
           onClick={handleDrawerToggle}
-          aria-label="Open drawer"
         >
           <MenuIcon />
         </IconButton>
         <Box display="flex" justifyContent="space-between" alignItems="center" width="100%">
-          <Breadcrumbs className={classes.nav} aria-label="breadcrumb">
+          <Breadcrumbs className={classes.nav}>
             {breadcrumbs.length > 0 &&
               breadcrumbs.map((b) => {
                 return b.path ? (
-                  <Link key={b.name} to={b.path}>
-                    <Typography className={`${classes.whiteText} ${classes.hoverLink}`} variant="h6" component="h2">
+                  <Link key={b.name} to={b.path} style={{ textDecoration: 'none' }}>
+                    <Typography className={clsx(classes.whiteText, classes.hoverLink)} variant="h6" component="h2">
                       {b.name}
                     </Typography>
                   </Link>

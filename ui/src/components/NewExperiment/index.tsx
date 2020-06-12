@@ -30,20 +30,22 @@ const useStyles = makeStyles((theme: Theme) =>
       },
     },
     new: {
-      [theme.breakpoints.down('sm')]: {
+      [theme.breakpoints.down('xs')]: {
         display: 'none',
       },
     },
     fab: {
-      [theme.breakpoints.up('md')]: {
+      [theme.breakpoints.up('sm')]: {
         display: 'none',
       },
-      [theme.breakpoints.down('sm')]: {
+      [theme.breakpoints.down('xs')]: {
         position: 'fixed',
-        bottom: theme.spacing(3),
+        bottom: theme.spacing(7.5),
         right: theme.spacing(3),
         display: 'flex',
-        zIndex: 999,
+        background: '#fff',
+        color: theme.palette.primary.main,
+        zIndex: 1101,
       },
     },
   })
@@ -56,8 +58,8 @@ interface ActionsProps {
 
 const Actions = ({ isSubmitting = false, toggleDrawer }: ActionsProps) => {
   const theme = useTheme()
-  const isMobileScreen = useMediaQuery(theme.breakpoints.down('sm'))
-  const size = isMobileScreen ? ('small' as 'small') : ('medium' as 'medium')
+  const isTabletScreen = useMediaQuery(theme.breakpoints.down('sm'))
+  const size = isTabletScreen ? ('small' as 'small') : ('medium' as 'medium')
 
   const { state } = useStepperContext()
 
@@ -91,6 +93,8 @@ export default function NewExperiment() {
   const initialValues: Experiment = defaultExperimentSchema
 
   const classes = useStyles()
+  const theme = useTheme()
+  const isTabletScreen = useMediaQuery(theme.breakpoints.down('sm'))
   const history = useHistory()
   const dispatch = useStoreDispatch()
 
@@ -127,10 +131,16 @@ export default function NewExperiment() {
 
   return (
     <>
-      <Button className={classes.new} variant="outlined" startIcon={<AddIcon />} onClick={toggleDrawer}>
+      <Button
+        className={classes.new}
+        variant="outlined"
+        size={isTabletScreen ? ('small' as 'small') : ('medium' as 'medium')}
+        startIcon={<AddIcon />}
+        onClick={toggleDrawer}
+      >
         New Experiment
       </Button>
-      <Fab className={classes.fab} color="secondary" size="medium" aria-label="new">
+      <Fab className={classes.fab} color="inherit" size="medium" aria-label="New experiment">
         <AddIcon onClick={toggleDrawer} />
       </Fab>
       <Drawer anchor="right" open={open} onClose={toggleDrawer}>

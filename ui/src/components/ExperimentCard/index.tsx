@@ -17,9 +17,10 @@ const useStyles = makeStyles((theme: Theme) =>
     actions: {
       display: 'flex',
       justifyContent: 'space-between',
+      alignItems: 'center',
     },
     detailButton: {
-      marginRight: theme.spacing(4),
+      marginRight: theme.spacing(5),
     },
   })
 )
@@ -45,7 +46,7 @@ const ExperimentCard: React.FC<ExperimentCardProps> = ({ experiment: e, handleSe
   return (
     <Card className={classes.card} variant="outlined">
       <CardContent>
-        <Box display="flex" justifyContent="space-between" alignItems="center">
+        <Box className={classes.actions}>
           <Typography variant="subtitle2">Created at {day(e.created).fromNow()}</Typography>
           <Box>
             <IconButton color="primary" aria-label="Pause experiment" component="span">
