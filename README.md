@@ -35,7 +35,7 @@ custom definitions for chaos experiments and automatic orchestration. There are 
 ![Chaos Operator](./static/chaos-mesh.svg)
 
 Chaos Operator uses [Custom Resource Definition (CRD)](https://kubernetes.io/docs/tasks/access-kubernetes-api/custom-resources/custom-resource-definitions/) to define chaos objects. 
-The current implementation supports three types of CRD objects for fault injection, namely PodChaos, NetworkChaos, IOChaos, and TimeChaos, 
+The current implementation supports four types of CRD objects for fault injection, namely PodChaos, NetworkChaos, IOChaos, and TimeChaos,
 which correspond to the following major actions (experiments):
 
 - pod-kill: The selected pod is killed (ReplicaSet or something similar may be needed to ensure the pod will be restarted).
