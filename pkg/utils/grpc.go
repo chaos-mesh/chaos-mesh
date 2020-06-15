@@ -32,7 +32,7 @@ const DefaultRPCTimeout = 60 * time.Second
 var RPCTimeout = DefaultRPCTimeout
 
 // CreateGrpcConnection create a grpc connection with given port
-func CreateGrpcConnection(ctx context.Context, c client.Client, pod *v1.Pod, port string) (*grpc.ClientConn, error) {
+func CreateGrpcConnection(ctx context.Context, c client.Client, pod *v1.Pod, port int) (*grpc.ClientConn, error) {
 	nodeName := pod.Spec.NodeName
 	log.Info("Creating client to chaos-daemon", "node", nodeName)
 
@@ -44,7 +44,7 @@ func CreateGrpcConnection(ctx context.Context, c client.Client, pod *v1.Pod, por
 		return nil, err
 	}
 
-	conn, err := grpc.Dial(fmt.Sprintf("%s:%s", node.Status.Addresses[0].Address, port),
+	conn, err := grpc.Dial(fmt.Sprintf("%s:%d", node.Status.Addresses[0].Address, port),
 		grpc.WithInsecure(),
 		grpc.WithUnaryInterceptor(TimeoutClientInterceptor))
 	if err != nil {
