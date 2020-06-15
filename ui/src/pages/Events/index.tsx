@@ -1,6 +1,99 @@
+import { Box, Grow, Paper, Typography } from '@material-ui/core'
+import React, { useEffect, useRef, useState } from 'react'
+import { Theme, createStyles, makeStyles } from '@material-ui/core/styles'
+
+import BlurLinearIcon from '@material-ui/icons/BlurLinear'
 import ContentContainer from 'components/ContentContainer'
-import React from 'react'
+import { Event } from 'api/events.type'
+import EventsTable from 'components/EventsTable'
+import Loading from 'components/Loading'
+import api from 'api'
+import clsx from 'clsx'
+import genEventsChart from 'lib/d3/eventsChart'
+
+const useStyles = makeStyles((theme: Theme) =>
+  createStyles({
+    height100: {
+      [theme.breakpoints.up('md')]: {
+        height: '100%',
+      },
+    },
+    timelinePaper: {
+      marginBottom: theme.spacing(3),
+      padding: theme.spacing(3),
+    },
+    eventsChart: {
+      height: 300,
+    },
+    paper: {
+      padding: theme.spacing(3),
+    },
+  })
+)
 
 export default function Events() {
-  return <ContentContainer>Events</ContentContainer>
+  const classes = useStyles()
+
+  const chartRef = useRef<HTMLDivElement>(null)
+  const [loading, setLoading] = useState(false)
+  const [events, setEvents] = useState<Event[] | null>(null)
+
+  const fetchEvents = () => {
+    api.events
+      .events()
+      .then(({ data }) => setEvents(data))
+      .catch(console.log)
+      .finally(() => {
+        setLoading(false)
+      })
+  }
+
+  useEffect(fetchEvents, [])
+
+  useEffect(() => {
+    if (events && events.length) {
+      const chart = chartRef.current!
+
+      genEventsChart({
+        root: chart,
+        events,
+      })
+    }
+  }, [events])
+
+  return (
+    <ContentContainer>
+      {events && events.length > 0 && (
+        <Grow in={!loading} style={{ transformOrigin: '0 0 0' }}>
+          <Box display="flex" flexDirection="column" height="100%">
+            <Paper className={classes.timelinePaper}>
+              <Box mb={3}>
+                <Typography variant="h6">Timeline</Typography>
+              </Box>
+              <div ref={chartRef} className={classes.eventsChart} />
+            </Paper>
+            <Paper className={clsx(classes.height100, classes.paper)}>
+              <Box mb={3}>
+                <Typography variant="h6">Events</Typography>
+              </Box>
+              <EventsTable events={events} />
+            </Paper>
+          </Box>
+        </Grow>
+      )}
+
+      {!loading && events && events.length === 0 && (
+        <Box display="flex" flexDirection="column" justifyContent="center" alignItems="center" height="100%">
+          <Box mb={3}>
+            <BlurLinearIcon fontSize="large" />
+          </Box>
+          <Typography variant="h6" align="center">
+            No events found. Try to create a new experiment.
+          </Typography>
+        </Box>
+      )}
+
+      {loading && <Loading />}
+    </ContentContainer>
+  )
 }

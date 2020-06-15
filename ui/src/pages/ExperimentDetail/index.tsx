@@ -1,4 +1,4 @@
-import { Box, Divider, Grid, Grow, Paper, Typography } from '@material-ui/core'
+import { Box, Grid, Grow, Paper, Typography } from '@material-ui/core'
 import React, { useEffect, useRef, useState } from 'react'
 import { Theme, createStyles, makeStyles } from '@material-ui/core/styles'
 import { useLocation, useParams } from 'react-router-dom'
@@ -6,6 +6,7 @@ import { useLocation, useParams } from 'react-router-dom'
 import ContentContainer from 'components/ContentContainer'
 import ErrorOutlineIcon from '@material-ui/icons/ErrorOutline'
 import { Event } from 'api/events.type'
+import EventsTable from 'components/EventsTable'
 import { Experiment } from 'components/NewExperiment/types'
 import Loading from 'components/Loading'
 import ReactJson from 'react-json-view'
@@ -27,8 +28,7 @@ const useStyles = makeStyles((theme: Theme) =>
     eventsChart: {
       height: 300,
     },
-    experimentPaper: {
-      flex: 1,
+    paper: {
       padding: theme.spacing(3),
     },
   })
@@ -47,7 +47,6 @@ export default function ExperimentDetail() {
   const [loading, setLoading] = useState(false)
   const [detail, setDetail] = useState<Experiment | null>(null)
   const [events, setEvents] = useState<Event[] | null>(null)
-  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null)
 
   const fetchExperimentDetail = () => {
     setLoading(true)
@@ -61,9 +60,7 @@ export default function ExperimentDetail() {
   const fetchEventsByName = (name: string) => {
     api.events
       .events()
-      .then(({ data }) => {
-        setEvents(data.filter((d) => d.Experiment === name))
-      })
+      .then(({ data }) => setEvents(data.filter((d) => d.Experiment === name)))
       .catch(console.log)
       .finally(() => {
         setLoading(false)
@@ -85,14 +82,11 @@ export default function ExperimentDetail() {
 
   useEffect(() => {
     if (events) {
-      setSelectedEvent(events[events.length - 1])
-
       const chart = chartRef.current!
 
       genEventsChart({
         root: chart,
         events,
-        selectEvent: setSelectedEvent,
       })
     }
   }, [events])
@@ -104,32 +98,23 @@ export default function ExperimentDetail() {
           <Grid item xs={12} sm={12} md={8}>
             <Box display="flex" flexDirection="column" height="100%">
               <Paper className={classes.timelinePaper}>
-                <Box pb={3}>
+                <Box mb={3}>
                   <Typography variant="h6">Timeline</Typography>
-                </Box>
-                <Box pb={3}>
-                  <Divider />
                 </Box>
                 <div ref={chartRef} className={classes.eventsChart} />
               </Paper>
-              <Paper className={clsx(classes.height100, classes.experimentPaper)}>
-                <Box pb={3}>
-                  <Typography variant="h6">Event</Typography>
+              <Paper className={clsx(classes.height100, classes.paper)}>
+                <Box mb={3}>
+                  <Typography variant="h6">Events</Typography>
                 </Box>
-                <Box pb={3}>
-                  <Divider />
-                </Box>
-                {selectedEvent && <ReactJson src={selectedEvent} collapsed={1} displayObjectSize={false} />}
+                <EventsTable events={events} />
               </Paper>
             </Box>
           </Grid>
           <Grid item xs={12} sm={12} md={4}>
-            <Paper className={clsx(classes.height100, classes.experimentPaper)}>
-              <Box pb={3}>
+            <Paper className={clsx(classes.height100, classes.paper)}>
+              <Box mb={3}>
                 <Typography variant="h6">Configuration</Typography>
-              </Box>
-              <Box pb={3}>
-                <Divider />
               </Box>
               {detail && <ReactJson src={detail} collapsed={1} displayObjectSize={false} />}
             </Paper>
@@ -139,7 +124,9 @@ export default function ExperimentDetail() {
 
       {(!namespace || !kind || !name) && (
         <Box display="flex" flexDirection="column" justifyContent="center" alignItems="center" height="100%">
-          <ErrorOutlineIcon fontSize="large" />
+          <Box mb={3}>
+            <ErrorOutlineIcon fontSize="large" />
+          </Box>
           <Typography variant="h6" align="center">
             Please check the URL params and queries to provide the correct params.
           </Typography>

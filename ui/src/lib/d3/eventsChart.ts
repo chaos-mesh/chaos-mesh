@@ -2,7 +2,7 @@ import * as d3 from 'd3'
 
 import { Event } from 'api/events.type'
 import day from 'lib/dayjs'
-import style from './style'
+import insertCommonStyle from './insertCommonStyle'
 
 const margin = {
   top: 30,
@@ -18,9 +18,9 @@ export default function gen({
 }: {
   root: HTMLElement
   events: Event[]
-  selectEvent: (e: Event) => void
+  selectEvent?: (e: Event) => void
 }) {
-  style()
+  insertCommonStyle()
 
   const width = root.offsetWidth
   const height = root.offsetHeight
@@ -37,14 +37,68 @@ export default function gen({
     .axisBottom(x)
     .ticks(6)
     .tickFormat(d3.timeFormat('%H:%M') as any)
-
   const gXAxis = svg
     .append('g')
-    .attr('class', 'x-axis')
+    .attr('class', 'axis')
     .attr('transform', `translate(0, ${height - margin.bottom})`)
     .call(xAxis)
 
-  const gMain = svg.append('g')
+  const allExperiments = [...new Set(events.map((d) => d.Experiment))]
+  const y = d3
+    .scaleBand()
+    .domain(allExperiments)
+    .range([0, height - margin.top - margin.bottom])
+    .padding(0.1)
+  const yAxis = d3.axisLeft(y).tickFormat('' as any)
+  // eslint-disable-next-line
+  const gYAxis = svg
+    .append('g')
+    .attr('class', 'axis')
+    .attr('transform', `translate(${margin.left}, ${margin.top})`)
+    .call(yAxis)
+
+  // eslint-disable-next-line
+  const clipX = svg
+    .append('clipPath')
+    .attr('id', 'clip-x-axis')
+    .append('rect')
+    .attr('x', margin.left)
+    .attr('y', 0)
+    .attr('width', width - margin.left - margin.right)
+    .attr('height', height - margin.bottom)
+  const gMain = svg.append('g').attr('clip-path', 'url(#clip-x-axis)')
+
+  const colorPalette = d3
+    .scaleOrdinal<string, string>()
+    .domain(events.map((d) => d.Experiment))
+    .range(d3.schemeTableau10)
+
+  const legendsRoot = d3
+    .select(document.createElement('div'))
+    .attr('style', `position: absolute; top: 0; left: 50%; display: flex; transform: translateX(-50%);`)
+  const legends = legendsRoot
+    .selectAll()
+    .data(allExperiments)
+    .enter()
+    .append('div')
+    .attr('style', 'display: flex; margin-right: 12px;')
+  legends
+    .append('div')
+    .attr('style', (d) => `width: 12px; height: 12px; margin-right: 8px; background: ${colorPalette(d)}`)
+  legends
+    .insert('div')
+    .attr('style', 'color: rgba(0, 0, 0, 0.72); font-size: 0.625rem;')
+    .text((d) => d)
+
+  function genRectWidth(d: Event) {
+    let width = d.FinishTime ? x(day(d.FinishTime)) - x(day(d.StartTime)) : x(day()) - x(day(d.StartTime))
+
+    if (width === 0) {
+      width = 20
+    }
+
+    return width
+  }
 
   const rects = gMain
     .selectAll()
@@ -52,27 +106,21 @@ export default function gen({
     .enter()
     .append('rect')
     .attr('x', (d) => x(day(d.StartTime)))
-    .attr('y', height / 3)
-    .attr('width', (d) => (d.FinishTime ? x(day(d.FinishTime)) - x(day(d.StartTime)) : x(day()) - x(day(d.StartTime))))
-    .attr('height', height / 3)
-    .attr('fill', '#172d72')
+    .attr('y', (d) => y(d.Experiment)! + margin.top)
+    .attr('width', genRectWidth)
+    .attr('height', y.bandwidth())
+    .attr('fill', (d) => colorPalette(d.Experiment))
     .style('cursor', 'pointer')
 
   const zoom = d3.zoom().on('zoom', zoomd)
-
   svg.call(zoom as any)
-
   function zoomd() {
     const eventTransform = d3.event.transform
 
     const newX = eventTransform.rescaleX(x)
 
     gXAxis.call(xAxis.scale(newX))
-    rects
-      .attr('x', (d) => newX(day(d.StartTime)))
-      .attr('width', (d) =>
-        d.FinishTime ? newX(day(d.FinishTime)) - newX(day(d.StartTime)) : newX(day()) - newX(day(d.StartTime))
-      )
+    rects.attr('x', (d) => newX(day(d.StartTime))).attr('width', genRectWidth)
   }
 
   const tooltip = d3
@@ -95,21 +143,28 @@ export default function gen({
   function genTooltipContent(d: Event) {
     return `<b>Experiment: ${d.Experiment}</b>
             <br />
-            <span style="color: rgba(0, 0, 0, 0.67);">StartTime: ${day(d.StartTime).format(
+            <b>Status: ${d.FinishTime ? 'Finished' : 'Running'}</b>
+            <br />
+            <br />
+            <span style="color: rgba(0, 0, 0, 0.67);">Start Time: ${day(d.StartTime).format(
               'YYYY-MM-DD HH:mm:ss A'
             )}</span>
             <br />
-            <br />
-            <b>Pods:</b>
-            <ul style="margin-top: 0.25rem; margin-bottom: 0;">
-              ${d.Pods.map((p) => `<li><b>ip:</b> ${p.PodIP}<br /><b>name:</b> ${p.PodName}</li>`).join('')}
-            </ul>
+            ${
+              d.FinishTime
+                ? `<span style="color: rgba(0, 0, 0, 0.67);">Finish Time: ${day(d.FinishTime).format(
+                    'YYYY-MM-DD HH:mm:ss A'
+                  )}</span>`
+                : ''
+            }
             `
   }
 
   rects
     .on('click', function (d) {
-      selectEvent(d)
+      if (typeof selectEvent === 'function') {
+        selectEvent(d)
+      }
     })
     .on('mouseover', function (d) {
       tooltip.style('opacity', 1).html(genTooltipContent(d))
@@ -121,16 +176,15 @@ export default function gen({
   svg.on('mousemove', function () {
     let [x, y] = d3.mouse(this)
 
-    x += 50
-    y += 100
+    const { width } = tooltip.node()!.getBoundingClientRect()
+
+    y += 50
     if (x > (root.offsetWidth / 3) * 2) {
-      x -= 325
+      x -= width
     }
 
     tooltip.style('left', x + 'px').style('top', y + 'px')
   })
-
-  root.appendChild(tooltip.node()!)
 
   function reGen() {
     const newWidth = root.offsetWidth
@@ -138,12 +192,12 @@ export default function gen({
     svg.attr('width', newWidth)
     x.range([margin.left, newWidth - margin.right])
     gXAxis.call(xAxis)
-    rects
-      .attr('x', (d) => x(day(d.StartTime)))
-      .attr('width', (d) =>
-        d.FinishTime ? x(day(d.FinishTime)) - x(day(d.StartTime)) : x(day()) - x(day(d.StartTime))
-      )
+    rects.attr('x', (d) => x(day(d.StartTime))).attr('width', genRectWidth)
   }
 
   d3.select(window).on('resize', reGen)
+
+  root.appendChild(legendsRoot.node()!)
+  root.appendChild(tooltip.node()!)
+  root.style.position = 'relative'
 }
