@@ -78,8 +78,6 @@ const headCells: { id: keyof SortedEvent; label: string }[] = [
   { id: 'Experiment', label: 'Experiment' },
   { id: 'Kind', label: 'Kind' },
   { id: 'Namespace', label: 'Namespace' },
-  { id: 'CreatedAt', label: 'Created At' },
-  { id: 'UpdatedAt', label: 'Updated At' },
   { id: 'StartTime', label: 'Start Time' },
   { id: 'FinishTime', label: 'Finish Time' },
 ]
@@ -194,10 +192,8 @@ const EventsTable: React.FC<EventsTableProps> = ({ events }) => {
                   <TableCell>{e.Experiment}</TableCell>
                   <TableCell>{e.Kind}</TableCell>
                   <TableCell>{e.Namespace}</TableCell>
-                  <TableCell>{format(e.CreatedAt)}</TableCell>
-                  <TableCell>{format(e.UpdatedAt)}</TableCell>
                   <TableCell>{format(e.StartTime)}</TableCell>
-                  <TableCell>{format(e.FinishTime)}</TableCell>
+                  <TableCell>{e.FinishTime ? format(e.FinishTime) : 'Not Done'}</TableCell>
                 </TableRow>
               ))}
         </TableBody>
