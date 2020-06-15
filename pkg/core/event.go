@@ -54,6 +54,9 @@ type EventStore interface {
 	// which means the event would never save the finish_time.
 	// DeleteIncompleteEvent can be used to delete all incomplete events to avoid this case.
 	DeleteIncompleteEvents(context.Context) error
+
+	// DeleteByFinishTime deletes events and podrecords whose time difference is greater than the given time from FinishTime.
+	DeleteByFinishTime(context.Context, time.Duration) error
 }
 
 // Event represents an event instance.
@@ -63,6 +66,7 @@ type Event struct {
 	Namespace  string
 	Kind       string
 	Message    string
+	UID        string     `gorm:"index:uid"`
 	StartTime  *time.Time `gorm:"index:start_time"`
 	FinishTime *time.Time
 	Pods       []*PodRecord `gorm:"-"`

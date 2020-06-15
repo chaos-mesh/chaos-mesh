@@ -40,13 +40,13 @@ type Pod struct {
 
 // Service defines a handler service for cluster common objects.
 type Service struct {
-	conf    *config.ChaosServerConfig
+	conf    *config.ChaosDashboardConfig
 	kubeCli client.Client
 }
 
 // NewService returns an experiment service instance.
 func NewService(
-	conf *config.ChaosServerConfig,
+	conf *config.ChaosDashboardConfig,
 	cli client.Client,
 ) *Service {
 	return &Service{

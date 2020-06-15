@@ -14,7 +14,7 @@ http.interceptors.response.use(undefined, (error: AxiosError) => {
     store.dispatch(
       setAlert({
         type: 'error',
-        message: data.message,
+        message: data.message || 'An unknown error occurred.',
       })
     )
     store.dispatch(setAlertOpen(true))

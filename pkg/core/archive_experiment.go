@@ -41,6 +41,9 @@ type ExperimentStore interface {
 
 	// Detail returns an archive experiment from the datastore.
 	Detail(ctx context.Context, kind, namespace, name string) (*ArchiveExperiment, error)
+
+	// DeleteByFinishTime deletes experiments whose time difference is greater than the given time from FinishTime.
+	DeleteByFinishTime(context.Context, time.Duration) error
 }
 
 // ArchiveExperiment represents an experiment instance.
@@ -56,6 +59,7 @@ type ArchiveExperimentMeta struct {
 	Namespace  string
 	Kind       string
 	Action     string
+	UID        string
 	StartTime  time.Time
 	FinishTime time.Time
 }
