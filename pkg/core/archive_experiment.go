@@ -40,7 +40,7 @@ type ExperimentStore interface {
 	Delete(context.Context, *ArchiveExperiment) error
 
 	// Detail returns an archive experiment from the datastore.
-	Detail(ctx context.Context, kind, namespace, name , uid string) (*ArchiveExperiment, error)
+	Detail(ctx context.Context, kind, namespace, name, uid string) (*ArchiveExperiment, error)
 
 	// DeleteByFinishTime deletes experiments whose time difference is greater than the given time from FinishTime.
 	DeleteByFinishTime(context.Context, time.Duration) error

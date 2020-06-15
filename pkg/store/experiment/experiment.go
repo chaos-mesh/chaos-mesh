@@ -89,7 +89,7 @@ func (e *experimentStore) getUID(_ context.Context, kind, ns, name string) (stri
 	UID := archives[0].UID
 	st := archives[0].StartTime
 
-	for _ ,archive := range archives {
+	for _, archive := range archives {
 		if st.Before(archive.StartTime) {
 			st = archive.StartTime
 			UID = archive.UID
@@ -105,7 +105,7 @@ func (e *experimentStore) Detail(ctx context.Context, kind, namespace, name, uid
 		var err error
 		uid, err = e.getUID(context.TODO(), kind, namespace, name)
 		if err != nil {
-			return nil,err
+			return nil, err
 		}
 	}
 
