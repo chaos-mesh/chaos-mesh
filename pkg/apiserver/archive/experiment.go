@@ -98,6 +98,7 @@ func (s *Service) experimentDetail(c *gin.Context) {
 	kind := c.Query("kind")
 	name := c.Query("name")
 	ns := c.Query("namespace")
+	uid := c.Query("uid")
 
 	if kind == "" || name == "" || ns == "" {
 		c.Status(http.StatusBadRequest)
@@ -105,7 +106,7 @@ func (s *Service) experimentDetail(c *gin.Context) {
 		return
 	}
 
-	data, err := s.archive.Detail(context.TODO(), kind, ns, name)
+	data, err := s.archive.Detail(context.TODO(), kind, ns, name, uid)
 	if err != nil {
 		if !gorm.IsRecordNotFoundError(err) {
 			c.Status(http.StatusInternalServerError)

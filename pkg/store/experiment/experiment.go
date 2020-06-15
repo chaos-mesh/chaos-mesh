@@ -15,6 +15,7 @@ package experiment
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/jinzhu/gorm"
@@ -72,11 +73,44 @@ func (e *experimentStore) ListMeta(_ context.Context, kind, ns, name string) ([]
 	return archives, nil
 }
 
-func (e *experimentStore) Detail(ctx context.Context, kind, namespace, name string) (*core.ArchiveExperiment, error) {
+func (e *experimentStore) getUID(_ context.Context, kind, ns, name string) (string, error) {
+	archives := make([]*core.ArchiveExperimentMeta, 0)
+
+	if err := e.db.Table("archive_experiments").Where(
+		"namespace = ? and name = ? and kind = ?", ns, name, kind).
+		Find(&archives).Error; err != nil {
+		return "", err
+	}
+
+	if len(archives) == 0 {
+		return "", fmt.Errorf("get UID failure")
+	}
+
+	UID := archives[0].UID
+	st := archives[0].StartTime
+
+	for _ ,archive := range archives {
+		if st.Before(archive.StartTime) {
+			st = archive.StartTime
+			UID = archive.UID
+		}
+	}
+	return UID, nil
+}
+
+func (e *experimentStore) Detail(ctx context.Context, kind, namespace, name, uid string) (*core.ArchiveExperiment, error) {
 	archive := new(core.ArchiveExperiment)
 
+	if uid == "" {
+		var err error
+		uid, err = e.getUID(context.TODO(), kind, namespace, name)
+		if err != nil {
+			return nil,err
+		}
+	}
+
 	if err := e.db.Where(
-		"namespace = ? and name = ? and kind = ?", namespace, name, kind).
+		"namespace = ? and name = ? and kind = ? and uid = ?", namespace, name, kind, uid).
 		First(archive).Error; err != nil {
 		return nil, err
 	}
