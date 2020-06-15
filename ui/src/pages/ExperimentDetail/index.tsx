@@ -9,6 +9,7 @@ import { Event } from 'api/events.type'
 import EventsTable from 'components/EventsTable'
 import { Experiment } from 'components/NewExperiment/types'
 import Loading from 'components/Loading'
+import PageTitle from 'components/PageTitle'
 import ReactJson from 'react-json-view'
 import api from 'api'
 import clsx from 'clsx'
@@ -98,25 +99,23 @@ export default function ExperimentDetail() {
           <Grid item xs={12} sm={12} md={8}>
             <Box display="flex" flexDirection="column" height="100%">
               <Paper className={classes.timelinePaper}>
-                <Box mb={3}>
-                  <Typography variant="h6">Timeline</Typography>
-                </Box>
+                <PageTitle>Timeline</PageTitle>
                 <div ref={chartRef} className={classes.eventsChart} />
               </Paper>
               <Paper className={clsx(classes.height100, classes.paper)}>
-                <Box mb={3}>
-                  <Typography variant="h6">Events</Typography>
-                </Box>
+                <PageTitle>Events</PageTitle>
                 <EventsTable events={events} />
               </Paper>
             </Box>
           </Grid>
           <Grid item xs={12} sm={12} md={4}>
             <Paper className={clsx(classes.height100, classes.paper)}>
-              <Box mb={3}>
-                <Typography variant="h6">Configuration</Typography>
-              </Box>
-              {detail && <ReactJson src={detail} collapsed={1} displayObjectSize={false} />}
+              <PageTitle>Configuration</PageTitle>
+              {detail && (
+                <Box ml={3}>
+                  <ReactJson src={detail} collapsed={1} displayObjectSize={false} />
+                </Box>
+              )}
             </Paper>
           </Grid>
         </Grid>

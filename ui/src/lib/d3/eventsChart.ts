@@ -48,7 +48,7 @@ export default function gen({
     .scaleBand()
     .domain(allExperiments)
     .range([0, height - margin.top - margin.bottom])
-    .padding(0.1)
+    .padding(0.25)
   const yAxis = d3.axisLeft(y).tickFormat('' as any)
   // eslint-disable-next-line
   const gYAxis = svg
@@ -84,7 +84,10 @@ export default function gen({
     .attr('style', 'display: flex; margin-right: 12px;')
   legends
     .append('div')
-    .attr('style', (d) => `width: 12px; height: 12px; margin-right: 8px; background: ${colorPalette(d)}`)
+    .attr(
+      'style',
+      (d) => `width: 12px; height: 12px; margin-right: 8px; background: ${colorPalette(d)}; border-radius: 3px;`
+    )
   legends
     .insert('div')
     .attr('style', 'color: rgba(0, 0, 0, 0.72); font-size: 0.625rem;')
