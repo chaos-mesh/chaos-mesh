@@ -107,11 +107,11 @@ func (r *ChaosCollector) recordEvent(req ctrl.Request, obj v1alpha1.InnerObject)
 
 func (r *ChaosCollector) createEvent(req ctrl.Request, kind string, status *v1alpha1.ChaosStatus, UID string) error {
 	event := &core.Event{
-		Experiment: req.Name,
-		Namespace:  req.Namespace,
-		Kind:       kind,
-		StartTime:  &status.Experiment.StartTime.Time,
-		UID:        UID,
+		Experiment:   req.Name,
+		Namespace:    req.Namespace,
+		Kind:         kind,
+		StartTime:    &status.Experiment.StartTime.Time,
+		ExperimentID: UID,
 	}
 
 	for _, pod := range status.Experiment.PodRecords {
@@ -135,12 +135,12 @@ func (r *ChaosCollector) createEvent(req ctrl.Request, kind string, status *v1al
 
 func (r *ChaosCollector) updateOrCreateEvent(req ctrl.Request, kind string, status *v1alpha1.ChaosStatus, UID string) error {
 	event := &core.Event{
-		Experiment: req.Name,
-		Namespace:  req.Namespace,
-		Kind:       kind,
-		StartTime:  &status.Experiment.StartTime.Time,
-		FinishTime: &status.Experiment.EndTime.Time,
-		UID:        UID,
+		Experiment:   req.Name,
+		Namespace:    req.Namespace,
+		Kind:         kind,
+		StartTime:    &status.Experiment.StartTime.Time,
+		FinishTime:   &status.Experiment.EndTime.Time,
+		ExperimentID: UID,
 	}
 
 	if _, err := r.event.FindByExperimentAndStartTime(
