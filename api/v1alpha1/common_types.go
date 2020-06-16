@@ -151,6 +151,8 @@ type ExperimentStatus struct {
 	// +optional
 	EndTime *metav1.Time `json:"endTime,omitempty"`
 	// +optional
+	Duration string `json:"duration,omitempty"`
+	// +optional
 	PodRecords []PodStatus `json:"podRecords,omitempty"`
 }
 
