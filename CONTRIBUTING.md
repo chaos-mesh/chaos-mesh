@@ -83,13 +83,14 @@ Run the following command to run all e2e test:
 $ ./hack/e2e.sh
 ```
 
-It's possible to limit specs to run, for example:
+It's possible to limit the specs to run, for example:
 
 ```bash
 $ ./hack/e2e.sh -- --ginkgo.focus='Basic'
 ```
 
 Run the following command to see help:
+
 ```bash
 $ ./hack/e2e.sh -h
 ```
@@ -100,9 +101,11 @@ $ ./hack/e2e.sh -h
 
   - Use [kind](https://kind.sigs.k8s.io/docs/user/quick-start/#installation) to start a Kubernetes cluster locally and and [kubectl](https://kubernetes.io/docs/reference/kubectl/overview/) to access the cluster. If you install these manually, run `kind`: `kind create cluster`to start the cluster.
 
-  -  Install the above dependencies in `~/local/bin` using [`install.sh`](https://github.com/pingcap/chaos-mesh/blob/master/install.sh):
+  - Install the above dependencies in `~/local/bin` using [`install.sh`](https://github.com/pingcap/chaos-mesh/blob/master/install.sh):
 
-  $ ./install.sh --local kind --dependency-only
+   ```bash
+   $ ./install.sh --local kind --dependency-only
+   ```
 
 2. Make sure the installation in step 1 is successful:
 
