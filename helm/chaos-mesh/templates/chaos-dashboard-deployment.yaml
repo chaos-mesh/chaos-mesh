@@ -39,9 +39,11 @@ spec:
 {{ toYaml .Values.dashboard.resources | indent 12 }}
           command:
             - /usr/local/bin/chaos-dashboard
-          envFrom:
-            - configMapRef:
-                name: {{ template "chaos-mesh.name" . }}-chaos-dashboard
+          env:
+            {{- range $envKey, $envVal := .Values.dashboard.env }}
+            - name: {{ $envKey | upper }}
+              value: {{ $envVal | quote }}
+            {{- end }}
           volumeMounts:
             - name: storage-volume
               mountPath: {{ .Values.dashboard.persistentVolume.mountPath }}
