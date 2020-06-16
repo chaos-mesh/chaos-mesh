@@ -1,27 +1,35 @@
-# Contributing to Chaos Mesh 
+# Contributing to Chaos Mesh
 
-Thanks for your interest in improving the project! This document provides a step-by-step guide for general contributions to Chaos Mesh. 
+Thanks for your interest in improving the project! This document provides a step-by-step guide for general contributions to Chaos Mesh.
 
 ## Communications
 
 Before starting work on something major, please reach out to us via GitHub, Slack, email, etc. We will make sure no one else is already working on it and ask you to open a GitHub issue. Also, we will provide necessary guidance should you need it.
 
-Specifically, if you want to develop a specific chaos type, you may also find [Development Guide](https://chaos-mesh.org/docs/development_guides/development_overview) useful.
+Specifically, if you want to develop a specific chaos type, åyou may also find [Development Guide](https://chaos-mesh.org/docs/development_guides/development_overview) useful.
 
 ## Submitting a PR
 
 If you have a specific idea of a fix or update, follow these steps below to submit a PR:
 
+- [Step 1: Make the change](#step-1-make-the-change)
+- [Step 2: Run unit tests](#step-2-run-unit-tests)
+- [Step 3: Run e2e test](#step-3-run-e2e-test)
+- [Step 4: Start Chaos Mesh locally and do manual tests](#step-4-start-chaos-mesh-locally-and-do-manual-tests)
+- [Step 5: Commit and push your changes](#step-5-commit-and-push-your-changes)
+- [Step 6: Create a pull request](#step-6-create-a-pull-request)
+- [Step 7: Get a code review](#step-7-get-a-code-review)
+
 ### Step 1: Make the change
 
 1. Fork the Chaos Mesh repo, and then clone it to your local:
-  
+
 ```bash
 $ export user={your github. profile name}
 $ git clone https://github.com/${user}/chaos-mesh.git
 ```
 
-2. Set your cloned local to track the upstream repository:
+1. Set your cloned local to track the upstream repository:
 
 ```bash
 $ cd chaos-mesh
@@ -32,16 +40,16 @@ $ git remote add upstream https://github.com/pingcap/chaos-mesh
 
 ```bash
 $ git fetch upstream
-$ git checkout master 
+$ git checkout master
 $ git rebase upstream/master
 $ git checkout -b myfeature
 ```
 
-4. Make the change on the code 
+4. Make the change on the code
 
 You can new edit the code on the `myfeature` branch.
 
-If you want to update the `crd.yam` according the the CRD structs, run the following commands: 
+If you want to update the `crd.yam` according the the CRD structs, run the following commands:
 
 ```bash
 $ make generate
@@ -91,9 +99,9 @@ $ ./hack/e2e.sh -h
 1. Start a Kubernetes cluster locally. There are two options:
 
   - Use [kind](https://kind.sigs.k8s.io/docs/user/quick-start/#installation) to start a Kubernetes cluster locally and and [kubectl](https://kubernetes.io/docs/reference/kubectl/overview/) to access the cluster. If you install these manually, run `kind`: `kind create cluster`to start the cluster.
-  
+
   -  Install the above dependencies in `~/local/bin` using [`install.sh`](https://github.com/pingcap/chaos-mesh/blob/master/install.sh):
-  
+
   $ ./install.sh --local kind --dependency-only
 
 2. Make sure the installation in step 1 is successful:
@@ -134,21 +142,20 @@ Now you can test your code update on the deployed cluster.
 
 ### Step 5: Commit and push your changes
 
-Congratulations! Now you have finished all tests and are ready to commit your code. 
+Congratulations! Now you have finished all tests and are ready to commit your code.
 
-1. Run the following commands to keep your branch in sync: 
+1. Run the following commands to keep your branch in sync:
 
 ```bash
 $ git fetch upstream
 $ git rebase upstream/master
 ```
 
-2. Commit your changes: 
+2. Commit your changes:
 ```bash
 $ git add -A
 $ git commit
 ```
- 
 3. Push your changes to the remote branch:
 
 ```bash
