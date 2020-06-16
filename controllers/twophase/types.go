@@ -100,8 +100,12 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 				return ctrl.Result{Requeue: true}, err
 			}
 
+			now := time.Now()
 			status.Experiment.EndTime = &metav1.Time{
-				Time: time.Now(),
+				Time: now,
+			}
+			if status.Experiment.StartTime != nil {
+				status.Experiment.Duration = now.Sub(status.Experiment.StartTime.Time).String()
 			}
 		}
 		status.Experiment.Phase = v1alpha1.ExperimentPhasePaused
@@ -123,7 +127,6 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 			Time: time.Now(),
 		}
 		status.Experiment.Phase = v1alpha1.ExperimentPhaseFinished
-
 	} else if status.Experiment.Phase == v1alpha1.ExperimentPhasePaused &&
 		!chaos.GetNextRecover().IsZero() && chaos.GetNextRecover().After(now) {
 		// Only resume chaos in the case when current round is not finished,
@@ -131,7 +134,9 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		// don't resume the chaos and just wait for the start of next round.
 
 		r.Log.Info("Resuming")
-		if err := applyAction(ctx, r, req, chaos); err != nil {
+
+		dur := chaos.GetNextRecover().Sub(now)
+		if err := applyAction(ctx, r, req, dur, chaos); err != nil {
 			return ctrl.Result{Requeue: true}, err
 		}
 
@@ -150,7 +155,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 			return ctrl.Result{}, err
 		}
 
-		if err := applyAction(ctx, r, req, chaos); err != nil {
+		if err := applyAction(ctx, r, req, *duration, chaos); err != nil {
 			return ctrl.Result{Requeue: true}, err
 		}
 
@@ -176,7 +181,13 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	return ctrl.Result{}, nil
 }
 
-func applyAction(ctx context.Context, r *Reconciler, req ctrl.Request, chaos v1alpha1.InnerSchedulerObject) error {
+func applyAction(
+	ctx context.Context,
+	r *Reconciler,
+	req ctrl.Request,
+	duration time.Duration,
+	chaos v1alpha1.InnerSchedulerObject,
+) error {
 	status := chaos.GetStatus()
 	r.Log.Info("Chaos action:", "chaos", chaos)
 
@@ -200,5 +211,6 @@ func applyAction(ctx context.Context, r *Reconciler, req ctrl.Request, chaos v1a
 
 	status.Experiment.StartTime = &metav1.Time{Time: time.Now()}
 	status.Experiment.Phase = v1alpha1.ExperimentPhaseRunning
+	status.Experiment.Duration = duration.String()
 	return nil
 }
