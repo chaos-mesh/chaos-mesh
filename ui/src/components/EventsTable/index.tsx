@@ -11,6 +11,8 @@ import {
   TablePagination,
   TableRow,
   TableSortLabel,
+  Collapse,
+  Typography,
 } from '@material-ui/core'
 import React, { useState } from 'react'
 import { createStyles, makeStyles } from '@material-ui/core/styles'
@@ -18,8 +20,10 @@ import day, { dayComparator } from 'lib/dayjs'
 
 import { Event } from 'api/events.type'
 import FirstPageIcon from '@material-ui/icons/FirstPage'
+import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown'
 import KeyboardArrowLeftIcon from '@material-ui/icons/KeyboardArrowLeft'
 import KeyboardArrowRightIcon from '@material-ui/icons/KeyboardArrowRight'
+import KeyboardArrowUpIcon from '@material-ui/icons/KeyboardArrowUp'
 import LastPageIcon from '@material-ui/icons/LastPage'
 import { Link } from 'react-router-dom'
 
@@ -75,6 +79,7 @@ function stableSort<T>(data: T[], comparator: (a: T, b: T) => number) {
 }
 
 type SortedEvent = Omit<Event, 'DeletedAt' | 'Pods'>
+type SortedEventWithPods = Omit<Event, 'DeletedAt'>
 
 const headCells: { id: keyof SortedEvent; label: string }[] = [
   { id: 'Experiment', label: 'Experiment' },
@@ -101,6 +106,7 @@ const EventsTableHead: React.FC<EventsTableHeadProps> = ({ order, orderBy, onSor
   return (
     <TableHead>
       <TableRow>
+        <TableCell />
         {cells.map((cell) => (
           <TableCell
             key={cell.id}
@@ -159,6 +165,81 @@ const TablePaginationActions: React.FC<TablePaginationActionsProps> = ({ count, 
 
 const format = (date: string) => day(date).format('YYYY-MM-DD HH:mm:ss')
 
+interface EventsTableRowProps {
+  event: SortedEventWithPods
+  detailed?: boolean
+}
+
+const EventsTableRow: React.FC<EventsTableRowProps> = ({ event: e, detailed }) => {
+  const [open, setOpen] = useState(false)
+
+  const handleToggle = () => setOpen(!open)
+
+  return (
+    <>
+      <TableRow hover>
+        <TableCell>
+          <IconButton aria-label="Expand row" size="small" onClick={handleToggle}>
+            {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
+          </IconButton>
+        </TableCell>
+        <TableCell>{e.Experiment}</TableCell>
+        <TableCell>{e.Kind}</TableCell>
+        <TableCell>{e.Namespace}</TableCell>
+        <TableCell>{format(e.StartTime)}</TableCell>
+        <TableCell>{e.FinishTime ? format(e.FinishTime) : 'Not Done'}</TableCell>
+        {detailed && (
+          <TableCell>
+            <Button
+              component={Link}
+              to={`/experiments/${e.Experiment}?namespace=${e.Namespace}&kind=${e.Kind}`}
+              variant="outlined"
+              size="small"
+              color="primary"
+            >
+              Detail
+            </Button>
+          </TableCell>
+        )}
+      </TableRow>
+      <TableRow>
+        <TableCell style={{ paddingTop: 0, paddingBottom: 0, borderBottom: 0 }} colSpan={12}>
+          <Collapse in={open} timeout="auto" unmountOnExit>
+            <Box margin={3}>
+              <Typography variant="h6" gutterBottom>
+                Pods
+              </Typography>
+              <Table size="small">
+                <TableHead>
+                  <TableRow>
+                    <TableCell>IP</TableCell>
+                    <TableCell>Name</TableCell>
+                    <TableCell>Namespace</TableCell>
+                    <TableCell>Action</TableCell>
+                    <TableCell>Message</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {e.Pods &&
+                    e.Pods.map((pod) => (
+                      <TableRow key={pod.ID}>
+                        <TableCell>{pod.PodIP}</TableCell>
+                        <TableCell>{pod.PodName}</TableCell>
+                        <TableCell>{pod.Namespace}</TableCell>
+                        <TableCell>{pod.Action}</TableCell>
+                        <TableCell>{pod.Message}</TableCell>
+                      </TableRow>
+                    ))}
+                </TableBody>
+              </Table>
+            </Box>
+          </Collapse>
+        </TableCell>
+      </TableRow>
+    </>
+  )
+}
+
 interface EventsTableProps {
   events: Event[] | null
   detailed?: boolean
@@ -195,28 +276,7 @@ const EventsTable: React.FC<EventsTableProps> = ({ events, detailed }) => {
           {events &&
             stableSort<SortedEvent>(events, getComparator(order, orderBy))
               .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-              .map((e) => (
-                <TableRow key={e.ID} hover>
-                  <TableCell>{e.Experiment}</TableCell>
-                  <TableCell>{e.Kind}</TableCell>
-                  <TableCell>{e.Namespace}</TableCell>
-                  <TableCell>{format(e.StartTime)}</TableCell>
-                  <TableCell>{e.FinishTime ? format(e.FinishTime) : 'Not Done'}</TableCell>
-                  {detailed && (
-                    <TableCell>
-                      <Button
-                        component={Link}
-                        to={`/experiments/${e.Experiment}?namespace=${e.Namespace}&kind=${e.Kind}`}
-                        variant="outlined"
-                        size="small"
-                        color="primary"
-                      >
-                        Detail
-                      </Button>
-                    </TableCell>
-                  )}
-                </TableRow>
-              ))}
+              .map((e) => <EventsTableRow key={e.ID} event={e as SortedEventWithPods} detailed={detailed} />)}
         </TableBody>
 
         <TableFooter>
