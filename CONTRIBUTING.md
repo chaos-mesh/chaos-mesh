@@ -99,13 +99,13 @@ $ ./hack/e2e.sh -h
 
 1. Start a Kubernetes cluster locally. There are two options:
 
-  - Use [kind](https://kind.sigs.k8s.io/docs/user/quick-start/#installation) to start a Kubernetes cluster locally and and [kubectl](https://kubernetes.io/docs/reference/kubectl/overview/) to access the cluster. If you install these manually, run `kind`: `kind create cluster`to start the cluster.
+    - Use [kind](https://kind.sigs.k8s.io/docs/user/quick-start/#installation) to start a Kubernetes cluster locally and and [kubectl](https://kubernetes.io/docs/reference/kubectl/overview/) to access the cluster. If you install these manually, run `kind`: `kind create cluster`to start the cluster.
 
-  - Install the above dependencies in `~/local/bin` using [`install.sh`](https://github.com/pingcap/chaos-mesh/blob/master/install.sh):
+    - Install the above dependencies in `~/local/bin` using [`install.sh`](https://github.com/pingcap/chaos-mesh/blob/master/install.sh):
 
-   ```bash
-   $ ./install.sh --local kind --dependency-only
-   ```
+      ```bash
+      $ ./install.sh --local kind --dependency-only
+      ```
 
 2. Make sure the installation in step 1 is successful:
 
