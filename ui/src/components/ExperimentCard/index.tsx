@@ -6,6 +6,7 @@ import { Experiment } from 'api/experiments.type'
 import ExperimentEventsPreview from 'components/ExperimentEventsPreview'
 import { Link } from 'react-router-dom'
 import PauseCircleOutlineIcon from '@material-ui/icons/PauseCircleOutline'
+import PlayCircleOutlineIcon from '@material-ui/icons/PlayCircleOutline'
 import React from 'react'
 import day from 'lib/dayjs'
 
@@ -27,7 +28,14 @@ const useStyles = makeStyles((theme: Theme) =>
 
 interface ExperimentCardProps {
   experiment: Experiment
-  handleSelect: (info: { namespace: string; name: string; kind: string }) => void
+  handleSelect: (info: {
+    namespace: string
+    name: string
+    kind: string
+    title: string
+    description: string
+    action: string
+  }) => void
   handleDialogOpen: (open: boolean) => void
 }
 
@@ -40,6 +48,33 @@ const ExperimentCard: React.FC<ExperimentCardProps> = ({ experiment: e, handleSe
       namespace: e.Namespace,
       name: e.Name,
       kind: e.Kind,
+      title: `Delete ${e.Name}?`,
+      description: "Once you delete this experiment, it can't be recovered.",
+      action: 'delete',
+    })
+  }
+
+  const handlePause = (e: Experiment) => () => {
+    handleDialogOpen(true)
+    handleSelect({
+      namespace: e.Namespace,
+      name: e.Name,
+      kind: e.Kind,
+      title: `Pause ${e.Name}?`,
+      description: 'You can restart the experiment in the same position.',
+      action: 'pause',
+    })
+  }
+
+  const handleStart = (e: Experiment) => () => {
+    handleDialogOpen(true)
+    handleSelect({
+      namespace: e.Namespace,
+      name: e.Name,
+      kind: e.Kind,
+      title: `Start ${e.Name}?`,
+      description: 'The operation will take effect immediately.',
+      action: 'start',
     })
   }
 
@@ -49,9 +84,15 @@ const ExperimentCard: React.FC<ExperimentCardProps> = ({ experiment: e, handleSe
         <Box className={classes.actions}>
           <Typography variant="subtitle2">Created at {day(e.created).fromNow()}</Typography>
           <Box>
-            <IconButton color="primary" aria-label="Pause experiment" component="span">
-              <PauseCircleOutlineIcon />
-            </IconButton>
+            {e.status.toLowerCase() === 'paused' ? (
+              <IconButton color="primary" aria-label="Pause experiment" component="span" onClick={handleStart(e)}>
+                <PlayCircleOutlineIcon />
+              </IconButton>
+            ) : (
+              <IconButton color="primary" aria-label="Pause experiment" component="span" onClick={handlePause(e)}>
+                <PauseCircleOutlineIcon />
+              </IconButton>
+            )}
             <IconButton color="primary" aria-label="Delete experiment" component="span" onClick={handleDelete(e)}>
               <DeleteOutlineIcon />
             </IconButton>

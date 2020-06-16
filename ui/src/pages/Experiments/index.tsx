@@ -24,6 +24,9 @@ export default function Experiments() {
     namespace: '',
     name: '',
     kind: '',
+    title: '',
+    description: '',
+    action: 'delete',
   })
   const [dialogOpen, setDialogOpen] = useState(false)
 
@@ -72,13 +75,35 @@ export default function Experiments() {
     }
   }, [experiments])
 
-  const handleDeleteExperiment = () => {
+  const handleExperiment = (action: string) => () => {
+    let actionFunc: any
+
+    switch (action) {
+      case 'delete':
+        actionFunc = api.experiments.deleteExperiment
+
+        break
+      case 'pause':
+        actionFunc = api.experiments.pauseExperiment
+
+        break
+      case 'start':
+        actionFunc = api.experiments.startExperiment
+
+        break
+      default:
+        actionFunc = null
+    }
+
+    if (actionFunc === null) {
+      return
+    }
+
     setDialogOpen(false)
 
     const { namespace, name, kind } = selected
 
-    api.experiments
-      .deleteExperiment(namespace, name, kind)
+    actionFunc(namespace, name, kind)
       .then(() => {
         dispatch(getStateofExperiments())
         fetchExperiments()
@@ -114,9 +139,9 @@ export default function Experiments() {
       <ConfirmDialog
         open={dialogOpen}
         setOpen={setDialogOpen}
-        title={`Delete ${selected.name}?`}
-        description="Once you delete this experiment, it can't be recovered."
-        handleConfirm={handleDeleteExperiment}
+        title={selected.title}
+        description={selected.description}
+        handleConfirm={handleExperiment(selected.action)}
       />
     </ContentContainer>
   )
