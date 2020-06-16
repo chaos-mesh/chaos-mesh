@@ -1,5 +1,6 @@
 import {
   Box,
+  Button,
   IconButton,
   Table,
   TableBody,
@@ -20,6 +21,7 @@ import FirstPageIcon from '@material-ui/icons/FirstPage'
 import KeyboardArrowLeftIcon from '@material-ui/icons/KeyboardArrowLeft'
 import KeyboardArrowRightIcon from '@material-ui/icons/KeyboardArrowRight'
 import LastPageIcon from '@material-ui/icons/LastPage'
+import { Link } from 'react-router-dom'
 
 const useStyles = makeStyles(() =>
   createStyles({
@@ -86,15 +88,20 @@ interface EventsTableHeadProps {
   order: Order
   orderBy: keyof SortedEvent
   onSort: (e: React.MouseEvent<unknown>, k: keyof SortedEvent) => void
+  detailed?: boolean
 }
 
-const EventsTableHead: React.FC<EventsTableHeadProps> = ({ order, orderBy, onSort }) => {
+const EventsTableHead: React.FC<EventsTableHeadProps> = ({ order, orderBy, onSort, detailed }) => {
   const handleSortEvents = (k: keyof SortedEvent) => (e: React.MouseEvent<unknown>) => onSort(e, k)
+
+  const cells = detailed
+    ? headCells.concat([{ id: 'Detail' as keyof SortedEvent, label: 'Experiment Detail' }])
+    : headCells
 
   return (
     <TableHead>
       <TableRow>
-        {headCells.map((cell) => (
+        {cells.map((cell) => (
           <TableCell
             key={cell.id}
             sortDirection={orderBy === cell.id ? order : false}
@@ -154,9 +161,10 @@ const format = (date: string) => day(date).format('YYYY-MM-DD HH:mm:ss')
 
 interface EventsTableProps {
   events: Event[] | null
+  detailed?: boolean
 }
 
-const EventsTable: React.FC<EventsTableProps> = ({ events }) => {
+const EventsTable: React.FC<EventsTableProps> = ({ events, detailed }) => {
   const classes = useStyles()
 
   const [order, setOrder] = useState<Order>('desc')
@@ -181,7 +189,7 @@ const EventsTable: React.FC<EventsTableProps> = ({ events }) => {
   return (
     <TableContainer className={classes.tableContainer}>
       <Table>
-        <EventsTableHead order={order} orderBy={orderBy} onSort={handleSortEvents} />
+        <EventsTableHead order={order} orderBy={orderBy} onSort={handleSortEvents} detailed={detailed} />
 
         <TableBody>
           {events &&
@@ -194,6 +202,19 @@ const EventsTable: React.FC<EventsTableProps> = ({ events }) => {
                   <TableCell>{e.Namespace}</TableCell>
                   <TableCell>{format(e.StartTime)}</TableCell>
                   <TableCell>{e.FinishTime ? format(e.FinishTime) : 'Not Done'}</TableCell>
+                  {detailed && (
+                    <TableCell>
+                      <Button
+                        component={Link}
+                        to={`/experiments/${e.Experiment}?namespace=${e.Namespace}&kind=${e.Kind}`}
+                        variant="outlined"
+                        size="small"
+                        color="primary"
+                      >
+                        Detail
+                      </Button>
+                    </TableCell>
+                  )}
                 </TableRow>
               ))}
         </TableBody>
@@ -209,6 +230,8 @@ const EventsTable: React.FC<EventsTableProps> = ({ events }) => {
                 onChangePage={handleChangePage}
                 onChangeRowsPerPage={handleChangeRowsPerPage}
                 ActionsComponent={TablePaginationActions as any}
+                labelDisplayedRows={({ from, to, count }) => `${from} - ${to} of ${count}`}
+                labelRowsPerPage="Events per page"
               />
             )}
           </TableRow>

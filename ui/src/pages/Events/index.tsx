@@ -73,7 +73,7 @@ export default function Events() {
             </Paper>
             <Paper className={clsx(classes.height100, classes.paper)}>
               <PageTitle>Events</PageTitle>
-              <EventsTable events={events} />
+              <EventsTable events={events} detailed />
             </Paper>
           </Box>
         </Grow>
