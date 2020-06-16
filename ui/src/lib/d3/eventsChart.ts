@@ -25,7 +25,12 @@ export default function gen({
   const width = root.offsetWidth
   const height = root.offsetHeight
 
-  const svg = d3.select(root).append('svg').attr('width', width).attr('height', height)
+  const svg = d3
+    .select(root)
+    .append('svg')
+    .attr('class', 'chaos-events-chart')
+    .attr('width', width)
+    .attr('height', height)
 
   const now = day()
 
@@ -73,15 +78,8 @@ export default function gen({
     .domain(events.map((d) => d.Experiment))
     .range(d3.schemeTableau10)
 
-  const legendsRoot = d3
-    .select(document.createElement('div'))
-    .attr('style', `position: absolute; top: 0; left: 50%; display: flex; transform: translateX(-50%);`)
-  const legends = legendsRoot
-    .selectAll()
-    .data(allExperiments)
-    .enter()
-    .append('div')
-    .attr('style', 'display: flex; margin-right: 12px;')
+  const legendsRoot = d3.select(document.createElement('div')).attr('class', 'chaos-events-legends')
+  const legends = legendsRoot.selectAll().data(allExperiments).enter().append('div')
   legends
     .append('div')
     .attr(

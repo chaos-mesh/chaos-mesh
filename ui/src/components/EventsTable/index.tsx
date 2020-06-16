@@ -24,7 +24,7 @@ import LastPageIcon from '@material-ui/icons/LastPage'
 const useStyles = makeStyles(() =>
   createStyles({
     tableContainer: {
-      maxHeight: 500,
+      maxHeight: 768,
     },
   })
 )
