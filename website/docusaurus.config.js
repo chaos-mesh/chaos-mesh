@@ -1,5 +1,5 @@
 module.exports = {
-  title: 'Chaos Mesh™',
+  title: 'Chaos Mesh®',
   tagline: 'A Powerful Chaos Engineering Platform for Kubernetes',
   url: 'https://chaos-mesh.github.io',
   baseUrl: '/',
@@ -9,14 +9,17 @@ module.exports = {
   themeConfig: {
     defaultDarkMode: false,
     algolia: {
-      apiKey: '1d330c3dae1c5376607ecee61b4e2271',
-      indexName: 'chaos mesh',
+      apiKey: '49739571d4f89670b12f39d5ad135f5a',
+      indexName: 'chaos-mesh',
+    },
+    googleAnalytics: {
+      trackingID: 'UA-90760217-2',
     },
     navbar: {
       logo: {
         alt: 'Chaos Mesh Logo',
         src: 'img/logo.svg',
-        srcDark: 'img/logo_dark.png'
+        srcDark: 'img/logo_dark.svg'
       },
       links: [
         {

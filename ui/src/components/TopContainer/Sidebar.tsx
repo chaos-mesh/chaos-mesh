@@ -1,63 +1,126 @@
-import { Drawer, Hidden } from '@material-ui/core'
-import { Theme, createStyles, makeStyles, useTheme } from '@material-ui/core/styles'
+import { Divider, Drawer, List, ListItem, ListItemIcon, ListItemText } from '@material-ui/core'
+import { Theme, createStyles, makeStyles } from '@material-ui/core/styles'
 
-import NavMenu from './Nav'
+import ArchiveOutlinedIcon from '@material-ui/icons/ArchiveOutlined'
+import BlurLinearIcon from '@material-ui/icons/BlurLinear'
+import { NavLink } from 'react-router-dom'
 import React from 'react'
+import TuneIcon from '@material-ui/icons/Tune'
+import WebIcon from '@material-ui/icons/Web'
+import clsx from 'clsx'
 
 export const drawerWidth = '14rem'
+export const drawerCloseWidth = '5.25rem'
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     drawer: {
-      [theme.breakpoints.up('md')]: {
-        width: drawerWidth,
+      width: drawerWidth,
+    },
+    drawerOpen: {
+      width: drawerWidth,
+      transition: theme.transitions.create('width', {
+        easing: theme.transitions.easing.sharp,
+        duration: theme.transitions.duration.enteringScreen,
+      }),
+    },
+    drawerClose: {
+      width: drawerCloseWidth,
+      transition: theme.transitions.create('width', {
+        easing: theme.transitions.easing.sharp,
+        duration: theme.transitions.duration.leavingScreen,
+      }),
+      overflowX: 'hidden',
+      [theme.breakpoints.down('xs')]: {
+        display: 'none',
       },
     },
-    drawerPaper: {
-      width: drawerWidth,
+    toolbar: {
+      ...theme.mixins.toolbar,
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    logo: {
+      width: '75%',
+    },
+    logoMini: {
+      width: 36,
+    },
+    listItem: {
+      '&.active': {
+        color: theme.palette.primary.main,
+        '& svg': {
+          fill: theme.palette.primary.main,
+        },
+        '& .MuiListItemText-primary': {
+          fontWeight: 'bold',
+        },
+      },
+    },
+    listItemIcon: {
+      paddingLeft: theme.spacing(3),
+      paddingRight: theme.spacing(9),
+    },
+    hidden: {
+      display: 'none',
     },
   })
 )
 
+const listItems = [
+  { icon: <WebIcon />, text: 'Overview' },
+  {
+    icon: <TuneIcon />,
+    text: 'Experiments',
+  },
+  {
+    icon: <BlurLinearIcon />,
+    text: 'Events',
+  },
+  {
+    icon: <ArchiveOutlinedIcon />,
+    text: 'Archives',
+  },
+]
+
 interface SidebarProps {
-  openMobileDrawer: boolean
-  handleDrawerToggle: () => void
+  open: boolean
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ openMobileDrawer, handleDrawerToggle }) => {
-  const theme = useTheme()
+const Sidebar: React.FC<SidebarProps> = ({ open }) => {
   const classes = useStyles()
 
   return (
-    <nav className={classes.drawer}>
-      {/* The implementation can be swapped with js to avoid SEO duplication of links. */}
-      <Hidden implementation="css" mdUp>
-        <Drawer
-          classes={{
-            paper: classes.drawerPaper,
-          }}
-          ModalProps={{
-            keepMounted: true, // Better open performance on mobile.
-          }}
-          anchor={theme.direction === 'rtl' ? 'right' : 'left'}
-          variant="temporary"
-          open={openMobileDrawer}
-          onClose={handleDrawerToggle}
-        >
-          <NavMenu />
-        </Drawer>
-      </Hidden>
-      <Hidden implementation="css" smDown>
-        <Drawer
-          classes={{
-            paper: classes.drawerPaper,
-          }}
-          variant="permanent"
-          open
-        >
-          <NavMenu />
-        </Drawer>
-      </Hidden>
-    </nav>
+    <Drawer
+      className={clsx(classes.drawer, {
+        [classes.drawerOpen]: open,
+        [classes.drawerClose]: !open,
+      })}
+      classes={{
+        paper: clsx({
+          [classes.drawerOpen]: open,
+          [classes.drawerClose]: !open,
+        }),
+      }}
+      variant="permanent"
+    >
+      <NavLink to="/" className={classes.toolbar}>
+        <img
+          className={open ? classes.logo : classes.logoMini}
+          src={open ? '/logo.svg' : '/logo-mini.svg'}
+          alt="Chaos Mesh Logo"
+        />
+      </NavLink>
+      <Divider />
+      <List>
+        {listItems.map(({ icon, text }) => (
+          <ListItem key={text} className={classes.listItem} component={NavLink} to={`/${text.toLowerCase()}`} button>
+            <ListItemIcon className={classes.listItemIcon}>{icon}</ListItemIcon>
+            <ListItemText primary={text} />
+          </ListItem>
+        ))}
+      </List>
+    </Drawer>
   )
 }
 
