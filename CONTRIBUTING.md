@@ -94,7 +94,6 @@ $ ./hack/e2e.sh -h
   
   -  Install the above dependencies in `~/local/bin` using [`install.sh`](https://github.com/pingcap/chaos-mesh/blob/master/install.sh):
   
-  # this command will install kind, kubectl, and a local Kubernetes cluster.
   $ ./install.sh --local kind --dependency-only
 
 2. Make sure the installation in step 1 is successful:
