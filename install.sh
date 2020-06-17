@@ -855,22 +855,6 @@ data:
   tls.crt: "${TLS_CRT}"
   tls.key: "${TLS_KEY}"
 ---
-# Source: chaos-mesh/templates/chaos-dashboard-configmap.yaml
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  namespace: chaos-testing
-  name: chaos-mesh-chaos-dashboard
-  labels:
-    app.kubernetes.io/name: chaos-mesh
-    app.kubernetes.io/instance: chaos-mesh
-    app.kubernetes.io/component: chaos-dashboard
-data:
-  DATABASE_DATASOURCE: "/data/core.sqlite"
-  DATABASE_DRIVER: "sqlite3"
-  LISTEN_HOST: "0.0.0.0"
-  LISTEN_PORT: "2333"
----
 # Source: chaos-mesh/templates/controller-manager-rbac.yaml
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1beta1
@@ -962,7 +946,7 @@ apiVersion: v1
 kind: Service
 metadata:
   namespace: chaos-testing
-  name: chaos-mesh-chaos-dashboard
+  name: chaos-dashboard
   labels:
     app.kubernetes.io/name: chaos-mesh
     app.kubernetes.io/instance: chaos-mesh
@@ -977,6 +961,7 @@ spec:
     - protocol: TCP
       port: 2333
       targetPort: 2333
+      name: http
 ---
 # Source: chaos-mesh/templates/controller-manager-service.yaml
 apiVersion: v1
@@ -1100,13 +1085,22 @@ spec:
               memory: 256Mi
           command:
             - /usr/local/bin/chaos-dashboard
-          envFrom:
-          - configMapRef:
-              name: chaos-mesh-chaos-dashboard
+          env:
+            - name: DATABASE_DATASOURCE
+              value: "/data/core.sqlite"
+            - name: DATABASE_DRIVER
+              value: "sqlite3"
+            - name: LISTEN_HOST
+              value: "0.0.0.0"
+            - name: LISTEN_PORT
+              value: "2333"
           volumeMounts:
-          - name: storage-volume
-            mountPath: /data
-            subPath: ""
+            - name: storage-volume
+              mountPath: /data
+              subPath: ""
+          ports:
+            - name: http
+              containerPort: 2333
       volumes:
       - name: storage-volume
         emptyDir: {}

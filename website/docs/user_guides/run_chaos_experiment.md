@@ -77,7 +77,7 @@ Chaos Dashboard is a Web UI for managing, designing, monitoring Chaos Experiment
 A typical way to access it is to use `kubectl port-forward`:
 
 ```bash
-kubectl port-forward -n chaos-testing svc/chaos-mesh-chaos-dashboard 2333:2333
+kubectl port-forward -n chaos-testing svc/chaos-dashboard 2333:2333
 ```
 
 Then you can access [`http://localhost:2333`](http://localhost:2333) in the browser.
