@@ -14,11 +14,10 @@ If you have a specific idea of a fix or update, follow these steps below to subm
 
 - [Step 1: Make the change](#step-1-make-the-change)
 - [Step 2: Run unit tests](#step-2-run-unit-tests)
-- [Step 3: Run e2e test](#step-3-run-e2e-test)
-- [Step 4: Start Chaos Mesh locally and do manual tests](#step-4-start-chaos-mesh-locally-and-do-manual-tests)
-- [Step 5: Commit and push your changes](#step-5-commit-and-push-your-changes)
-- [Step 6: Create a pull request](#step-6-create-a-pull-request)
-- [Step 7: Get a code review](#step-7-get-a-code-review)
+- [Step 3: Start Chaos Mesh locally and do manual tests](#step-3-start-chaos-mesh-locally-and-do-manual-tests)
+- [Step 4: Commit and push your changes](#step-4-commit-and-push-your-changes)
+- [Step 5: Create a pull request](#step-5-create-a-pull-request)
+- [Step 6: Get a code review](#step-6-get-a-code-review)
 
 ### Step 1: Make the change
 
