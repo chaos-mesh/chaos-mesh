@@ -13,7 +13,7 @@ Before deployment, make sure [Docker](https://docs.docker.com/install/) is insta
 ## Install Chaos Mesh
 
 ```bash
-curl -sSL https://raw.githubusercontent.com/pingcap/chaos-mesh/master/install.sh | sh -s -- --local kind
+curl -sSL https://raw.githubusercontent.com/pingcap/chaos-mesh/master/install.sh | bash -s -- --local kind
 ```
 
 `install.sh` is an automation shell script that helps you install dependencies such as `kubectl`, `Helm`, `kind`, and `kubernetes`, and deploy Chaos Mesh itself.
