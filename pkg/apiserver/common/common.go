@@ -65,6 +65,7 @@ func Register(r *gin.RouterGroup, s *Service) {
 	endpoint.GET("/namespaces", s.getNamespaces)
 	endpoint.GET("/kinds", s.getKinds)
 	endpoint.GET("/labels", s.getLabels)
+	endpoint.GET("/annotations", s.getAnnotations)
 
 }
 
@@ -147,8 +148,8 @@ func (s *Service) getKinds(c *gin.Context) {
 	c.JSON(http.StatusOK, kinds)
 }
 
-// @Summary Get the labels of the specified pod from Kubernetes cluster.
-// @Description Get the labels of the specified pod from Kubernetes cluster.
+// @Summary Get the labels of the pods in the specified namespace from Kubernetes cluster.
+// @Description Get the labels of the pods in the specified namespace from Kubernetes cluster.
 // @Tags common
 // @Produce json
 // @Success 200 {array} map[string][]string
@@ -180,6 +181,51 @@ func (s *Service) getLabels(c *gin.Context) {
 
 	for _, pod := range filteredPods {
 		for k, v := range pod.Labels {
+			if _, ok := labels[k]; ok {
+				if inSlice(v, labels[k]) == false {
+					labels[k] = append(labels[k], v)
+				}
+			} else {
+				labels[k] = []string{v}
+			}
+		}
+	}
+	c.JSON(http.StatusOK, labels)
+}
+
+// @Summary Get the annotations of the pods in the specified namespace from Kubernetes cluster.
+// @Description Get the annotations of the pods in the specified namespace from Kubernetes cluster.
+// @Tags common
+// @Produce json
+// @Success 200 {array} map[string][]string
+// @Router /api/common/annotations [get]
+// @Failure 500 {object} utils.APIError
+func (s *Service) getAnnotations(c *gin.Context) {
+	podNamespaceList := c.Query("podNamespaceList")
+
+	if podNamespaceList == "" {
+		c.Status(http.StatusInternalServerError)
+		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(fmt.Errorf("podNamespaceList cannot be empty")))
+		return
+	}
+
+	exp := &experiment.SelectorInfo{}
+	nsList := strings.Split(podNamespaceList, ",")
+	exp.NamespaceSelectors = make([]string, len(nsList))
+	_ = copy(exp.NamespaceSelectors, nsList)
+
+	ctx := context.TODO()
+	filteredPods, err := pkgutils.SelectPods(ctx, s.kubeCli, exp.ParseSelector())
+	if err != nil {
+		c.Status(http.StatusInternalServerError)
+		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
+		return
+	}
+
+	labels := make(map[string][]string)
+
+	for _, pod := range filteredPods {
+		for k, v := range pod.Annotations {
 			if _, ok := labels[k]; ok {
 				if inSlice(v, labels[k]) == false {
 					labels[k] = append(labels[k], v)
