@@ -1,6 +1,7 @@
 import { Box, Grid, Typography } from '@material-ui/core'
 import React, { useEffect, useState } from 'react'
 import { RootState, useStoreDispatch } from 'store'
+import { setAlert, setAlertOpen, setNeedToRefreshExperiments } from 'slices/globalStatus'
 
 import ConfirmDialog from 'components/ConfirmDialog'
 import ContentContainer from '../../components/ContentContainer'
@@ -11,7 +12,7 @@ import TuneIcon from '@material-ui/icons/Tune'
 import api from 'api'
 import { dayComparator } from 'lib/dayjs'
 import { getStateofExperiments } from 'slices/globalStatus'
-import { setNeedToRefreshExperiments } from 'slices/globalStatus'
+import { upperFirst } from 'lib/utils'
 import { useSelector } from 'react-redux'
 
 export default function Experiments() {
@@ -105,6 +106,13 @@ export default function Experiments() {
 
     actionFunc(namespace, name, kind)
       .then(() => {
+        dispatch(
+          setAlert({
+            type: 'success',
+            message: `${upperFirst(action)}${action === 'start' ? 'ed' : 'd'} successfully!`,
+          })
+        )
+        dispatch(setAlertOpen(true))
         dispatch(getStateofExperiments())
         fetchExperiments()
       })

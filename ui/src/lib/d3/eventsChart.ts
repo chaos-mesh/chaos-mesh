@@ -139,6 +139,7 @@ export default function gen({
       .style('border', '1px solid rgba(0, 0, 0, 0.12)')
       .style('border-radius', '4px')
       .style('opacity', 0)
+      .style('z-index', 999)
   }
 
   function genTooltipContent(d: Event) {

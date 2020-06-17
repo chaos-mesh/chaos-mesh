@@ -99,9 +99,7 @@ interface EventsTableHeadProps {
 const EventsTableHead: React.FC<EventsTableHeadProps> = ({ order, orderBy, onSort, detailed }) => {
   const handleSortEvents = (k: keyof SortedEvent) => (e: React.MouseEvent<unknown>) => onSort(e, k)
 
-  const cells = detailed
-    ? headCells.concat([{ id: 'Detail' as keyof SortedEvent, label: 'Experiment Detail' }])
-    : headCells
+  const cells = detailed ? headCells.concat([{ id: 'Detail' as keyof SortedEvent, label: 'Event Detail' }]) : headCells
 
   return (
     <TableHead>
@@ -192,7 +190,7 @@ const EventsTableRow: React.FC<EventsTableRowProps> = ({ event: e, detailed }) =
           <TableCell>
             <Button
               component={Link}
-              to={`/experiments/${e.Experiment}?namespace=${e.Namespace}&kind=${e.Kind}`}
+              to={`/experiments/${e.Experiment}?namespace=${e.Namespace}&kind=${e.Kind}&event=${e.ID}`}
               variant="outlined"
               size="small"
               color="primary"
