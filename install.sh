@@ -28,6 +28,7 @@ USAGE:
     install.sh [FLAGS] [OPTIONS]
 FLAGS:
     -h, --help               Prints help information
+    -d, --dependency-only    Install dependencies only, including kind, kubectl, local-kube.
         --force              Force reinstall all components if they are already installed, include: kind, local-kube, chaos-mesh
         --force-chaos-mesh   Force reinstall chaos-mesh if it is already installed
         --force-local-kube   Force reinstall local Kubernetes cluster if it is already installed
@@ -74,6 +75,7 @@ main() {
     local runtime="docker"
     local template=false
     local sidecar_template=true
+    local install_dependency_only=false
 
     while [[ $# -gt 0 ]]
     do
@@ -105,6 +107,11 @@ main() {
                 ;;
             -r|--runtime)
                 runtime="$2"
+                shift
+                shift
+                ;;
+            -d|--dependency-only)
+                install_dependency_only=true
                 shift
                 shift
                 ;;
@@ -223,6 +230,10 @@ main() {
         check_docker
         install_kind "${kind_version}" ${force_kind}
         install_kubernetes_by_kind "${kind_name}" "${k8s_version}" "${node_num}" "${volume_num}" ${force_local_kube} ${docker_mirror} ${volume_provisioner} ${local_registry}
+    fi
+
+    if [ "${install_dependency_only}" = true ]; then
+        exit 0
     fi
 
     check_kubernetes
@@ -855,22 +866,6 @@ data:
   tls.crt: "${TLS_CRT}"
   tls.key: "${TLS_KEY}"
 ---
-# Source: chaos-mesh/templates/chaos-dashboard-configmap.yaml
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  namespace: chaos-testing
-  name: chaos-mesh-chaos-dashboard
-  labels:
-    app.kubernetes.io/name: chaos-mesh
-    app.kubernetes.io/instance: chaos-mesh
-    app.kubernetes.io/component: chaos-dashboard
-data:
-  DATABASE_DATASOURCE: "/data/core.sqlite"
-  DATABASE_DRIVER: "sqlite3"
-  LISTEN_HOST: "0.0.0.0"
-  LISTEN_PORT: "2333"
----
 # Source: chaos-mesh/templates/controller-manager-rbac.yaml
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1beta1
@@ -977,6 +972,7 @@ spec:
     - protocol: TCP
       port: 2333
       targetPort: 2333
+      name: http
 ---
 # Source: chaos-mesh/templates/controller-manager-service.yaml
 apiVersion: v1
@@ -1100,13 +1096,22 @@ spec:
               memory: 256Mi
           command:
             - /usr/local/bin/chaos-dashboard
-          envFrom:
-          - configMapRef:
-              name: chaos-mesh-chaos-dashboard
+          env:
+            - name: DATABASE_DATASOURCE
+              value: "/data/core.sqlite"
+            - name: DATABASE_DRIVER
+              value: "sqlite3"
+            - name: LISTEN_HOST
+              value: "0.0.0.0"
+            - name: LISTEN_PORT
+              value: "2333"
           volumeMounts:
-          - name: storage-volume
-            mountPath: /data
-            subPath: ""
+            - name: storage-volume
+              mountPath: /data
+              subPath: ""
+          ports:
+            - name: http
+              containerPort: 2333
       volumes:
       - name: storage-volume
         emptyDir: {}
