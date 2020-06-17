@@ -28,6 +28,7 @@ USAGE:
     install.sh [FLAGS] [OPTIONS]
 FLAGS:
     -h, --help               Prints help information
+    -d, --dependency-only    Install dependencies only, including kind, kubectl, local-kube.
         --force              Force reinstall all components if they are already installed, include: kind, local-kube, chaos-mesh
         --force-chaos-mesh   Force reinstall chaos-mesh if it is already installed
         --force-local-kube   Force reinstall local Kubernetes cluster if it is already installed
@@ -74,6 +75,7 @@ main() {
     local runtime="docker"
     local template=false
     local sidecar_template=true
+    local install_dependency_only=false
 
     while [[ $# -gt 0 ]]
     do
@@ -105,6 +107,11 @@ main() {
                 ;;
             -r|--runtime)
                 runtime="$2"
+                shift
+                shift
+                ;;
+            -d|--dependency-only)
+                install_dependency_only=true
                 shift
                 shift
                 ;;
@@ -223,6 +230,10 @@ main() {
         check_docker
         install_kind "${kind_version}" ${force_kind}
         install_kubernetes_by_kind "${kind_name}" "${k8s_version}" "${node_num}" "${volume_num}" ${force_local_kube} ${docker_mirror} ${volume_provisioner} ${local_registry}
+    fi
+
+    if [ "${install_dependency_only}" = true ]; then
+        exit 0
     fi
 
     check_kubernetes
