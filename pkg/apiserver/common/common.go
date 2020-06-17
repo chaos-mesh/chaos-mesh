@@ -15,6 +15,7 @@ package common
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"sort"
 
@@ -62,6 +63,7 @@ func Register(r *gin.RouterGroup, s *Service) {
 	endpoint.POST("/pods", s.listPods)
 	endpoint.GET("/namespaces", s.getNamespaces)
 	endpoint.GET("/kinds", s.getKinds)
+	endpoint.GET("/labels", s.getLabels)
 
 }
 
@@ -142,4 +144,36 @@ func (s *Service) getKinds(c *gin.Context) {
 
 	sort.Strings(kinds)
 	c.JSON(http.StatusOK, kinds)
+}
+
+// @Summary Get the labels of the specified pod from Kubernetes cluster.
+// @Description Get the labels of the specified pod from Kubernetes cluster.
+// @Tags common
+// @Produce json
+// @Success 200 {array} Label
+// @Router /api/common/labels [get]
+// @Failure 500 {object} utils.APIError
+func (s *Service) getLabels(c *gin.Context) {
+	podName := c.Query("podName")
+	podNamespace := c.Query("podNamespace")
+
+	if podName == "" || podNamespace == "" {
+		c.Status(http.StatusInternalServerError)
+		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(fmt.Errorf("podName and podNamespace cannot be empty")))
+		return
+	}
+
+	exp := &experiment.SelectorInfo{}
+	exp.NamespaceSelectors = append(exp.NamespaceSelectors, podNamespace)
+	exp.Pods = make(map[string][]string)
+	exp.Pods[podNamespace] = []string{podName}
+	ctx := context.TODO()
+	filteredPod, err := pkgutils.SelectPods(ctx, s.kubeCli, exp.ParseSelector())
+	if err != nil || len(filteredPod) == 0 {
+		c.Status(http.StatusInternalServerError)
+		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
+		return
+	}
+
+	c.JSON(http.StatusOK, filteredPod[0].Labels)
 }
