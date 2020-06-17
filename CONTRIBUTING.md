@@ -6,7 +6,7 @@ Thanks for your interest in improving the project! This document provides a step
 
 Before starting work on something major, please reach out to us via GitHub, Slack, email, etc. We will make sure no one else is already working on it and ask you to open a GitHub issue. Also, we will provide necessary guidance should you need it.
 
-Specifically, if you want to develop a specific chaos type, åyou may also find [Development Guide](https://chaos-mesh.org/docs/development_guides/development_overview) useful.
+Specifically, if you want to develop a specific chaos type, you may also find [Development Guide](https://chaos-mesh.org/docs/development_guides/development_overview) useful.
 
 ## Submitting a PR
 
@@ -22,11 +22,11 @@ If you have a specific idea of a fix or update, follow these steps below to subm
 
 ### Step 1: Make the change
 
-1. Fork the Chaos Mesh repo, and then clone it to your local:
+1. Fork the Chaos Mesh repo, and then clone it:
 
 ```bash
 $ export user={your github. profile name}
-$ git clone https://github.com/${user}/chaos-mesh.git
+$ git clone git@github.com:${user}/chaos-mesh.git
 ```
 
 1. Set your cloned local to track the upstream repository:
@@ -34,6 +34,22 @@ $ git clone https://github.com/${user}/chaos-mesh.git
 ```bash
 $ cd chaos-mesh
 $ git remote add upstream https://github.com/pingcap/chaos-mesh
+```
+
+2. Disable pushing to upstream master:
+
+```bash
+$ git remote set-url --push upstream no_push
+$ git remote -v
+```
+
+The output should look like:
+
+```bash
+origin    git@github.com:$(user)/chaos-mesh.git (fetch)
+origin    git@github.com:$(user)/chaos-mesh.git (push)
+upstream  https://github.com/pingcap/chaos-mesh (fetch)
+upstream  no_push (push)
 ```
 
 3. Get your local master up-to-date and create your working branch:
@@ -73,33 +89,11 @@ $ make ensure-kubebuilder # install some test dependencies
 $ make test
 ```
 
-### Step 3: Run e2e test
-
-Chaos Mesh code must pass e2e test before being submitted. Before started, you must have [Docker](https://www.docker.com/get-started/) installed and running.
-
-Run the following command to run all e2e test:
-
-```bash
-$ ./hack/e2e.sh
-```
-
-It's possible to limit the specs to run, for example:
-
-```bash
-$ ./hack/e2e.sh -- --ginkgo.focus='Basic'
-```
-
-Run the following command to see help:
-
-```bash
-$ ./hack/e2e.sh -h
-```
-
-### Step 4: Start Chaos Mesh locally and do manual tests
+### Step 3: Start Chaos Mesh locally and do manual tests
 
 1. Start a Kubernetes cluster locally. There are two options:
 
-    - Use [kind](https://kind.sigs.k8s.io/docs/user/quick-start/#installation) to start a Kubernetes cluster locally and and [kubectl](https://kubernetes.io/docs/reference/kubectl/overview/) to access the cluster. If you install these manually, run `kind`: `kind create cluster`to start the cluster.
+    - Use [kind](https://kind.sigs.k8s.io/docs/user/quick-start/#installation) to start a Kubernetes cluster locally and [kubectl](https://kubernetes.io/docs/reference/kubectl/overview/) to access the cluster. If you install these manually, run `kind`: `kind create cluster`to start the cluster.
 
     - Install the above dependencies in `~/local/bin` using [`install.sh`](https://github.com/pingcap/chaos-mesh/blob/master/install.sh):
 
@@ -143,7 +137,7 @@ $ ./install.sh --runtime containerd
 
 Now you can test your code update on the deployed cluster.
 
-### Step 5: Commit and push your changes
+### Step 4: Commit and push your changes
 
 Congratulations! Now you have finished all tests and are ready to commit your code.
 
@@ -165,13 +159,13 @@ $ git commit
 $ git push -f origin myfeature
 ```
 
-### Step 6: Create a pull request
+### Step 5: Create a pull request
 
 1. Visit your fork at https://github.com/$user/chaos-mesh (replace $user with your name).
 2. Click the Compare & pull request button next to your `myfeature` branch.
 3. Edit the description of the pull request to match your changes.
 
-### Step 7: Get a code review
+### Step 6: Get a code review
 
 Once your pull request has been opened, it will be assigned to at least two reviewers. The reviewers will do a thorough code review, looking for correctness, bugs, opportunities for improvement, documentation and comments, and style.
 
