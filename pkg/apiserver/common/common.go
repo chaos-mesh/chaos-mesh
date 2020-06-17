@@ -18,6 +18,7 @@ import (
 	"fmt"
 	"net/http"
 	"sort"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 
@@ -150,30 +151,53 @@ func (s *Service) getKinds(c *gin.Context) {
 // @Description Get the labels of the specified pod from Kubernetes cluster.
 // @Tags common
 // @Produce json
-// @Success 200 {array} Label
+// @Success 200 {array} map[string][]string
 // @Router /api/common/labels [get]
 // @Failure 500 {object} utils.APIError
 func (s *Service) getLabels(c *gin.Context) {
-	podName := c.Query("podName")
-	podNamespace := c.Query("podNamespace")
+	podNamespaceList := c.Query("podNamespaceList")
 
-	if podName == "" || podNamespace == "" {
+	if podNamespaceList == "" {
 		c.Status(http.StatusInternalServerError)
-		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(fmt.Errorf("podName and podNamespace cannot be empty")))
+		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(fmt.Errorf("podNamespaceList cannot be empty")))
 		return
 	}
 
 	exp := &experiment.SelectorInfo{}
-	exp.NamespaceSelectors = append(exp.NamespaceSelectors, podNamespace)
-	exp.Pods = make(map[string][]string)
-	exp.Pods[podNamespace] = []string{podName}
+	nsList := strings.Split(podNamespaceList, ",")
+	exp.NamespaceSelectors = make([]string, len(nsList))
+	_ = copy(exp.NamespaceSelectors, nsList)
+
 	ctx := context.TODO()
-	filteredPod, err := pkgutils.SelectPods(ctx, s.kubeCli, exp.ParseSelector())
-	if err != nil || len(filteredPod) == 0 {
+	filteredPods, err := pkgutils.SelectPods(ctx, s.kubeCli, exp.ParseSelector())
+	if err != nil {
 		c.Status(http.StatusInternalServerError)
 		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
 		return
 	}
 
-	c.JSON(http.StatusOK, filteredPod[0].Labels)
+	labels := make(map[string][]string)
+
+	for _, pod := range filteredPods {
+		for k, v := range pod.Labels {
+			if _, ok := labels[k]; ok {
+				if inSlice(v, labels[k]) == false {
+					labels[k] = append(labels[k], v)
+				}
+			} else {
+				labels[k] = []string{v}
+			}
+		}
+	}
+	c.JSON(http.StatusOK, labels)
+}
+
+// inSlice checks given string in string slice or not.
+func inSlice(v string, sl []string) bool {
+	for _, vv := range sl {
+		if vv == v {
+			return true
+		}
+	}
+	return false
 }
