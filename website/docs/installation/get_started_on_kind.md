@@ -18,7 +18,7 @@ curl -sSL https://raw.githubusercontent.com/pingcap/chaos-mesh/master/install.sh
 
 `install.sh` is an automation shell script that helps you install dependencies such as `kubectl`, `Helm`, `kind`, and `kubernetes`, and deploy Chaos Mesh itself.
 
-After executing the above command, you need to verify if the Chaos Mesh is installed correctly. 
+After executing the above command, you need to verify if the Chaos Mesh is installed correctly.
 
 You also can use [Helm](https://helm.sh/) to [install Chaos Mesh manually](installation#install-by-helm).
 
@@ -30,7 +30,7 @@ Verify if the chaos mesh is running
 kubectl get pod -n chaos-testing
 ```
 
-Expected output: 
+Expected output:
 
 ```bash
 NAME                                        READY   STATUS    RESTARTS   AGE
