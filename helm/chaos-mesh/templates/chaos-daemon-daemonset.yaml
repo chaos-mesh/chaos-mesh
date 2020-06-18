@@ -26,6 +26,7 @@ spec:
 {{ toYaml . | indent 8 }}
     {{- end }}
     spec:
+      hostNetwork: true
       hostIPC: true
       hostPID: true
       containers:
