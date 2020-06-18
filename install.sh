@@ -1022,6 +1022,7 @@ spec:
         app.kubernetes.io/instance: chaos-mesh
         app.kubernetes.io/component: chaos-daemon
     spec:
+      hostNetwork: true
       hostIPC: true
       hostPID: true
       containers:
