@@ -957,7 +957,7 @@ apiVersion: v1
 kind: Service
 metadata:
   namespace: chaos-testing
-  name: chaos-mesh-chaos-dashboard
+  name: chaos-dashboard
   labels:
     app.kubernetes.io/name: chaos-mesh
     app.kubernetes.io/instance: chaos-mesh
