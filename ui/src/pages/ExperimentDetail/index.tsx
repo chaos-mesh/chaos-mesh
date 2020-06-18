@@ -129,7 +129,7 @@ export default function ExperimentDetail() {
     <ContentContainer>
       <Grow in={!loading} style={{ transformOrigin: '0 0 0' }}>
         <Grid className={classes.height100} container spacing={3}>
-          <Grid item xs={12} sm={12} md={8}>
+          <Grid item xs={12} sm={12} md={9}>
             <Box display="flex" flexDirection="column" height="100%">
               <Paper className={classes.timelinePaper}>
                 <PageTitle>Timeline</PageTitle>
@@ -160,7 +160,7 @@ export default function ExperimentDetail() {
               </Box>
             </Box>
           </Grid>
-          <Grid item xs={12} sm={12} md={4}>
+          <Grid item xs={12} sm={12} md={3}>
             <Paper className={clsx(classes.height100, classes.paper)}>
               <PageTitle>Configuration</PageTitle>
               {detail && (
