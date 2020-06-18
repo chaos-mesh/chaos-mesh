@@ -3,11 +3,12 @@ import * as d3 from 'd3'
 import { Event } from 'api/events.type'
 import day from 'lib/dayjs'
 import insertCommonStyle from './insertCommonStyle'
+import wrapText from './wrapText'
 
 const margin = {
   top: 30,
   right: 30,
-  bottom: 30,
+  bottom: 45,
   left: 30,
 }
 
@@ -40,13 +41,15 @@ export default function gen({
     .range([margin.left, width - margin.right])
   const xAxis = d3
     .axisBottom(x)
-    .ticks(6)
-    .tickFormat(d3.timeFormat('%H:%M') as any)
+    .tickFormat(d3.timeFormat('%m-%d %H:%M') as (dv: Date | { valueOf(): number }, i: number) => string)
   const gXAxis = svg
     .append('g')
     .attr('class', 'axis')
     .attr('transform', `translate(0, ${height - margin.bottom})`)
     .call(xAxis)
+
+  // Wrap long text, also used in zoom() and reGen()
+  svg.selectAll('.tick text').call(wrapText, 30)
 
   const allExperiments = [...new Set(events.map((d) => d.Experiment))]
   const y = d3
@@ -55,15 +58,11 @@ export default function gen({
     .range([0, height - margin.top - margin.bottom])
     .padding(0.25)
   const yAxis = d3.axisLeft(y).tickFormat('' as any)
-  // eslint-disable-next-line
-  const gYAxis = svg
-    .append('g')
-    .attr('class', 'axis')
-    .attr('transform', `translate(${margin.left}, ${margin.top})`)
-    .call(yAxis)
+  // gYAxis
+  svg.append('g').attr('class', 'axis').attr('transform', `translate(${margin.left}, ${margin.top})`).call(yAxis)
 
-  // eslint-disable-next-line
-  const clipX = svg
+  // clipX
+  svg
     .append('clipPath')
     .attr('id', 'clip-x-axis')
     .append('rect')
@@ -121,6 +120,7 @@ export default function gen({
     const newX = eventTransform.rescaleX(x)
 
     gXAxis.call(xAxis.scale(newX))
+    svg.selectAll('.tick text').call(wrapText, 30)
     rects.attr('x', (d) => newX(day(d.StartTime))).attr('width', genRectWidth)
   }
 
@@ -194,6 +194,7 @@ export default function gen({
     svg.attr('width', newWidth)
     x.range([margin.left, newWidth - margin.right])
     gXAxis.call(xAxis)
+    svg.selectAll('.tick text').call(wrapText, 30)
     rects.attr('x', (d) => x(day(d.StartTime))).attr('width', genRectWidth)
   }
 
