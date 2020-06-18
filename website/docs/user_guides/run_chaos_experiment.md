@@ -68,16 +68,18 @@ kubectl delete -f pod-failure-example.yaml
 
 ### Watch your chaos experiments in Chaos Dashboard
 
-Chaos Dashboard is currently only available for TiDB clusters. Stay tuned for more supports or join us in making it happen.
+Chaos Dashboard is a Web UI for managing, designing, monitoring Chaos Experiments. Stay tuned for more supports or join us in making it happen.
 
 > **Note:**
->
+> 
 > If Chaos Dashboard was not installed, upgrade Chaos Mesh by executing `helm upgrade chaos-mesh helm/chaos-mesh --namespace=chaos-testing --set dashboard.create=true`.
 
 A typical way to access it is to use `kubectl port-forward`:
 
 ```bash
-kubectl port-forward -n chaos-testing svc/chaos-dashboard 8080:80
+kubectl port-forward -n chaos-testing svc/chaos-dashboard 2333:2333
 ```
 
-Then you can access [`http://localhost:8080`](http://localhost:8080) in the browser.
+Then you can access [`http://localhost:2333`](http://localhost:2333) in the browser.
+
+![Chaos Dashboard](/img/chaos-dashboard.gif)

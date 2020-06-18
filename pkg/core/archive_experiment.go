@@ -56,6 +56,7 @@ type ArchiveExperimentMeta struct {
 	Namespace  string
 	Kind       string
 	Action     string
+	UID        string
 	StartTime  time.Time
 	FinishTime time.Time
 }

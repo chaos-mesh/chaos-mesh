@@ -62,13 +62,15 @@ type EventStore interface {
 // Event represents an event instance.
 type Event struct {
 	gorm.Model
-	Experiment string `gorm:"index:experiment"`
-	Namespace  string
-	Kind       string
-	Message    string
-	StartTime  *time.Time `gorm:"index:start_time"`
-	FinishTime *time.Time
-	Pods       []*PodRecord `gorm:"-"`
+	Experiment   string `gorm:"index:experiment"`
+	Namespace    string
+	Kind         string
+	Message      string
+	StartTime    *time.Time `gorm:"index:start_time"`
+	FinishTime   *time.Time
+	Duration     string
+	Pods         []*PodRecord `gorm:"-"`
+	ExperimentID string       `gorm:"index:experiment_id"`
 }
 
 // PodRecord represents a pod record with event ID.
