@@ -39,6 +39,13 @@ Define the svc's name
 {{- end -}}
 
 {{/*
+Define the chaos-dashboard svc's name
+*/}}
+{{- define "chaos-dashboard.svc" -}}
+{{- printf "chaos-dashboard" -}}
+{{- end -}}
+
+{{/*
 Define the secret's name of certs
 */}}
 {{- define "chaos-mesh.certs" -}}
