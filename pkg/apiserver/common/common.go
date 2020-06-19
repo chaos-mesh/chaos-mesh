@@ -148,14 +148,14 @@ func (s *Service) getKinds(c *gin.Context) {
 	c.JSON(http.StatusOK, kinds)
 }
 
-// Map defines a common map
-type Map map[string][]string
+// MapSlice defines a common map
+type MapSlice map[string][]string
 
 // @Summary Get the labels of the pods in the specified namespace from Kubernetes cluster.
 // @Description Get the labels of the pods in the specified namespace from Kubernetes cluster.
 // @Tags common
 // @Produce json
-// @Success 200 {object} Map
+// @Success 200 {object} MapSlice
 // @Router /api/common/labels [get]
 // @Failure 500 {object} utils.APIError
 func (s *Service) getLabels(c *gin.Context) {
@@ -169,8 +169,7 @@ func (s *Service) getLabels(c *gin.Context) {
 
 	exp := &experiment.SelectorInfo{}
 	nsList := strings.Split(podNamespaceList, ",")
-	exp.NamespaceSelectors = make([]string, len(nsList))
-	_ = copy(exp.NamespaceSelectors, nsList)
+	exp.NamespaceSelectors = nsList
 
 	ctx := context.TODO()
 	filteredPods, err := pkgutils.SelectPods(ctx, s.kubeCli, exp.ParseSelector())
@@ -185,7 +184,7 @@ func (s *Service) getLabels(c *gin.Context) {
 	for _, pod := range filteredPods {
 		for k, v := range pod.Labels {
 			if _, ok := labels[k]; ok {
-				if inSlice(v, labels[k]) == false {
+				if !inSlice(v, labels[k]) {
 					labels[k] = append(labels[k], v)
 				}
 			} else {
@@ -200,7 +199,7 @@ func (s *Service) getLabels(c *gin.Context) {
 // @Description Get the annotations of the pods in the specified namespace from Kubernetes cluster.
 // @Tags common
 // @Produce json
-// @Success 200 {object} Map
+// @Success 200 {object} MapSlice
 // @Router /api/common/annotations [get]
 // @Failure 500 {object} utils.APIError
 func (s *Service) getAnnotations(c *gin.Context) {
@@ -214,8 +213,7 @@ func (s *Service) getAnnotations(c *gin.Context) {
 
 	exp := &experiment.SelectorInfo{}
 	nsList := strings.Split(podNamespaceList, ",")
-	exp.NamespaceSelectors = make([]string, len(nsList))
-	_ = copy(exp.NamespaceSelectors, nsList)
+	exp.NamespaceSelectors = nsList
 
 	ctx := context.TODO()
 	filteredPods, err := pkgutils.SelectPods(ctx, s.kubeCli, exp.ParseSelector())
@@ -225,20 +223,20 @@ func (s *Service) getAnnotations(c *gin.Context) {
 		return
 	}
 
-	labels := make(map[string][]string)
+	annotations := make(map[string][]string)
 
 	for _, pod := range filteredPods {
 		for k, v := range pod.Annotations {
-			if _, ok := labels[k]; ok {
-				if inSlice(v, labels[k]) == false {
-					labels[k] = append(labels[k], v)
+			if _, ok := annotations[k]; ok {
+				if !inSlice(v, annotations[k]) {
+					annotations[k] = append(annotations[k], v)
 				}
 			} else {
-				labels[k] = []string{v}
+				annotations[k] = []string{v}
 			}
 		}
 	}
-	c.JSON(http.StatusOK, labels)
+	c.JSON(http.StatusOK, annotations)
 }
 
 // inSlice checks given string in string slice or not.
