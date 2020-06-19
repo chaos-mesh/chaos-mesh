@@ -23,7 +23,7 @@ import (
 // Handler returns a FileServer `http.Handler` to handle http request.
 func Handler(root http.FileSystem) http.Handler {
 	if root != nil {
-		return httpgzip.FileServer(root, httpgzip.FileServerOptions{IndexHTML: true, ServeError: fallback})
+		return httpgzip.FileServer(root, httpgzip.FileServerOptions{IndexHTML: true})
 	}
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -34,18 +34,4 @@ func Handler(root http.FileSystem) http.Handler {
 // AssetFS returns assets.
 func AssetFS() http.FileSystem {
 	return assets
-}
-
-func fallback(w http.ResponseWriter, r *http.Request, _ error) {
-	localRedirect(w, r, ".")
-}
-
-// localRedirect gives a Moved Permanently response.
-// It does not convert relative paths to absolute paths like http.Redirect does.
-func localRedirect(w http.ResponseWriter, req *http.Request, newPath string) {
-	if req.URL.RawQuery != "" {
-		newPath += "?" + req.URL.RawQuery
-	}
-	w.Header().Set("Location", newPath)
-	w.WriteHeader(http.StatusMovedPermanently)
 }
