@@ -138,7 +138,7 @@ func (e *experimentStore) DeleteByFinishTime(_ context.Context, ttl time.Duratio
 	return nil
 }
 
-func (e *experimentStore) FindByUID (_ context.Context, uid string) (*core.ArchiveExperiment, error) {
+func (e *experimentStore) FindByUID(_ context.Context, uid string) (*core.ArchiveExperiment, error) {
 	archive := new(core.ArchiveExperiment)
 
 	if err := e.db.Where(
