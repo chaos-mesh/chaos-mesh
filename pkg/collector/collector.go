@@ -98,7 +98,7 @@ func (r *ChaosCollector) recordEvent(req ctrl.Request, obj v1alpha1.InnerObject)
 	switch status.Experiment.Phase {
 	case v1alpha1.ExperimentPhaseRunning:
 		return r.createEvent(req, kind, status, string(UID))
-	case v1alpha1.ExperimentPhaseFinished, v1alpha1.ExperimentPhasePaused:
+	case v1alpha1.ExperimentPhaseFinished, v1alpha1.ExperimentPhasePaused, v1alpha1.ExperimentPhaseWaiting:
 		return r.updateOrCreateEvent(req, kind, status, string(UID))
 	}
 
