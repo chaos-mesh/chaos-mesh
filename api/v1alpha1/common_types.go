@@ -136,6 +136,7 @@ type ExperimentPhase string
 
 const (
 	ExperimentPhaseRunning  ExperimentPhase = "Running"
+	ExperimentPhaseWaiting  ExperimentPhase = "Waiting"
 	ExperimentPhasePaused   ExperimentPhase = "Paused"
 	ExperimentPhaseFailed   ExperimentPhase = "Failed"
 	ExperimentPhaseFinished ExperimentPhase = "Finished"
