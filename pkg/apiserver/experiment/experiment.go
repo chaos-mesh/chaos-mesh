@@ -49,6 +49,7 @@ type Experiment struct {
 type ChaosState struct {
 	Total    int `json:"total"`
 	Running  int `json:"running"`
+	Waiting  int `json:"waiting"`
 	Paused   int `json:"paused"`
 	Failed   int `json:"failed"`
 	Finished int `json:"finished"`
@@ -922,6 +923,8 @@ func (s *Service) state(c *gin.Context) {
 				switch chaos.Status {
 				case string(v1alpha1.ExperimentPhaseRunning):
 					data.Running++
+				case string(v1alpha1.ExperimentPhaseWaiting):
+					data.Waiting++
 				case string(v1alpha1.ExperimentPhasePaused):
 					data.Paused++
 				case string(v1alpha1.ExperimentPhaseFailed):
