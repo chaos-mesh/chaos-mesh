@@ -45,7 +45,7 @@ var ControllerCfg *config.ChaosControllerConfig
 func init() {
 	conf, err := config.EnvironChaosController()
 	if err != nil {
-		fmt.Println(fmt.Sprintf("Chaos Controller: invalid environment configuration. err: %s", err))
+		fmt.Println("Chaos Controller: invalid environment configuration. err:", err)
 		os.Exit(1)
 	}
 	ControllerCfg = &conf
