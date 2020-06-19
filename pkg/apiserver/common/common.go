@@ -148,11 +148,14 @@ func (s *Service) getKinds(c *gin.Context) {
 	c.JSON(http.StatusOK, kinds)
 }
 
+// Map defines a common map
+type Map map[string][]string
+
 // @Summary Get the labels of the pods in the specified namespace from Kubernetes cluster.
 // @Description Get the labels of the pods in the specified namespace from Kubernetes cluster.
 // @Tags common
 // @Produce json
-// @Success 200 {array} map[string][]string
+// @Success 200 {object} Map
 // @Router /api/common/labels [get]
 // @Failure 500 {object} utils.APIError
 func (s *Service) getLabels(c *gin.Context) {
@@ -197,7 +200,7 @@ func (s *Service) getLabels(c *gin.Context) {
 // @Description Get the annotations of the pods in the specified namespace from Kubernetes cluster.
 // @Tags common
 // @Produce json
-// @Success 200 {array} map[string][]string
+// @Success 200 {object} Map
 // @Router /api/common/annotations [get]
 // @Failure 500 {object} utils.APIError
 func (s *Service) getAnnotations(c *gin.Context) {
