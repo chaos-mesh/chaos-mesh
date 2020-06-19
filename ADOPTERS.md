@@ -8,3 +8,4 @@ This is a list of known adopters of Chaos Mesh. Some have already gone into prod
 - [JuiceFS](http://juicefs.com/?hl=en)
 - [Meituan-Dianping](https://about.meituan.com/en)
 - [PingCAP](www.pingcap.com)
+- [Xpeng Motors](https://en.xiaopeng.com/)
