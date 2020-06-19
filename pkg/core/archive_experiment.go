@@ -42,6 +42,9 @@ type ExperimentStore interface {
 	// Detail returns an archive experiment from the datastore.
 	Detail(ctx context.Context, kind, namespace, name, uid string) (*ArchiveExperiment, error)
 
+	// FindByUID returns an archive experiment by UID.
+	FindByUID(context.Context, string) (*ArchiveExperiment, error)
+
 	// DeleteByFinishTime deletes experiments whose time difference is greater than the given time from FinishTime.
 	DeleteByFinishTime(context.Context, time.Duration) error
 }

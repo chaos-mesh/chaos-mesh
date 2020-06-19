@@ -99,8 +99,6 @@ func (e *experimentStore) getUID(_ context.Context, kind, ns, name string) (stri
 }
 
 func (e *experimentStore) Detail(ctx context.Context, kind, namespace, name, uid string) (*core.ArchiveExperiment, error) {
-	archive := new(core.ArchiveExperiment)
-
 	if uid == "" {
 		var err error
 		uid, err = e.getUID(context.TODO(), kind, namespace, name)
@@ -109,13 +107,7 @@ func (e *experimentStore) Detail(ctx context.Context, kind, namespace, name, uid
 		}
 	}
 
-	if err := e.db.Where(
-		"namespace = ? and name = ? and kind = ? and uid = ?", namespace, name, kind, uid).
-		First(archive).Error; err != nil {
-		return nil, err
-	}
-
-	return archive, nil
+	return e.FindByUID(context.TODO(), uid)
 }
 
 // TODO: implement the left core.EventStore interfaces
@@ -144,6 +136,18 @@ func (e *experimentStore) DeleteByFinishTime(_ context.Context, ttl time.Duratio
 		}
 	}
 	return nil
+}
+
+func (e *experimentStore) FindByUID (_ context.Context, uid string) (*core.ArchiveExperiment, error) {
+	archive := new(core.ArchiveExperiment)
+
+	if err := e.db.Where(
+		"uid = ?", uid).
+		First(archive).Error; err != nil {
+		return nil, err
+	}
+
+	return archive, nil
 }
 
 func constructQueryArgs(kind, ns, name string) (string, []string) {
