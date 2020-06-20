@@ -81,6 +81,33 @@ func (e *eventStore) List(_ context.Context) ([]*core.Event, error) {
 	return eventList, nil
 }
 
+// ListByUID returns an event list by the uid of the experiment.
+func (e *eventStore) ListByUID(_ context.Context, uid string) ([]*core.Event, error) {
+	var resList []core.Event
+	eventList := make([]*core.Event, 0)
+
+	// experiment_id
+
+	if err := e.db.Where(
+		"experiment_id = ?", uid).
+		Find(resList).Error; err != nil && !gorm.IsRecordNotFoundError(err) {
+		return nil, err
+	}
+
+	for _, et := range resList {
+		pods, err := e.findPodRecordsByEventID(context.Background(), et.ID)
+		if err != nil {
+			return nil, err
+		}
+		var event core.Event
+		event = et
+		event.Pods = pods
+		eventList = append(eventList, &event)
+	}
+
+	return eventList, nil
+}
+
 // ListByExperiment returns an event list by the name and namespace of the experiment.
 func (e *eventStore) ListByExperiment(_ context.Context, namespace string, experiment string) ([]*core.Event, error) {
 	var resList []core.Event
@@ -254,6 +281,8 @@ func (e *eventStore) ListByFilter(_ context.Context, podName string, podNamespac
 		resList, err = e.ListByPod(context.Background(), podNamespace, podName)
 	} else if podNamespace != "" {
 		resList, err = e.ListByNamespace(context.Background(), podNamespace)
+	} else if uid != "" {
+		resList, err = e.ListByUID(context.Background(), uid)
 	} else {
 		resList, err = e.List(context.Background())
 	}
