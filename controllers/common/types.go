@@ -15,7 +15,6 @@ package common
 
 import (
 	"context"
-	"fmt"
 	"os"
 	"time"
 
@@ -30,6 +29,7 @@ import (
 
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 )
 
 const (
@@ -39,15 +39,20 @@ const (
 	AnnotationCleanFinalizerForced = `forced`
 )
 
+var log = ctrl.Log.WithName("controller")
+
 //ControllerCfg is a global variable to keep the configuration for Chaos Controller
 var ControllerCfg *config.ChaosControllerConfig
 
 func init() {
 	conf, err := config.EnvironChaosController()
 	if err != nil {
-		fmt.Println("Chaos Controller: invalid environment configuration. err:", err)
+		ctrl.SetLogger(zap.Logger(true))
+		log.Error(err, "Chaos Controller: invalid environment configuration")
+
 		os.Exit(1)
 	}
+
 	ControllerCfg = &conf
 }
 
