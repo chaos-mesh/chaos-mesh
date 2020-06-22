@@ -27,5 +27,18 @@ var _ = Describe("webhook config watcher", func() {
 			Expect(config.TemplateLabels).To(Equal(map[string]string{}))
 		})
 
+		It("verift the parameter", func() {
+			config := NewConfig()
+			Expect(config.Verify()).Should(HaveOccurred())
+
+			config.TemplateLabels = make(map[string]string)
+			config.TemplateLabels["bar"] = "foo"
+			Expect(config.Verify()).Should(HaveOccurred())
+
+			config.ConfigLabels = make(map[string]string)
+			config.ConfigLabels["bar"] = "foo"
+			Expect(config.Verify()).ShouldNot(HaveOccurred())
+		})
+
 	})
 })

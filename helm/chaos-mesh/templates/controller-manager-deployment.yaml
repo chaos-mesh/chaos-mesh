@@ -38,11 +38,6 @@ spec:
 {{ toYaml .Values.controllerManager.resources | indent 12 }}
         command:
           - /usr/local/bin/chaos-controller-manager
-          - -template-labels=app.kubernetes.io/component=template
-          - -configmap-labels=app.kubernetes.io/component=webhook
-        {{- if .Values.enableProfiling }}
-          - -pprof-addr=:10081
-        {{- end }}
         env:
           - name: NAMESPACE
             valueFrom:
@@ -54,6 +49,14 @@ spec:
             value: !!str {{ .Values.chaosDaemon.grpcPort }}
           - name: BPFKI_PORT
             value: !!str {{ .Values.bpfki.grpcPort }}
+          - name: TEMPLATE_LABELS
+            value: "app.kubernetes.io/component:template"
+          - name: CONFIGMAP_LABELS
+            value: "app.kubernetes.io/component:webhook"
+          {{- if .Values.enableProfiling }}
+          - name: PPROF_ADDR
+            value: ":10081"
+          {{- end }}
         volumeMounts:
           - name: webhook-certs
             mountPath: /etc/webhook/certs
