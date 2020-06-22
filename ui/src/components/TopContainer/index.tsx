@@ -67,14 +67,22 @@ const TopContainer = () => {
   const dispatch = useStoreDispatch()
   const handleSnackClose = () => dispatch(setAlertOpen(false))
 
-  const [openDrawer, setOpenDrawer] = useState(!isTabletScreen)
-  const handleDrawerToggle = () => setOpenDrawer(!openDrawer)
+  const miniSidebar = window.localStorage.getItem('chaos-mesh-mini-sidebar') === 'y'
+  const [openDrawer, setOpenDrawer] = useState(!miniSidebar)
+  const handleDrawerToggle = () => {
+    setOpenDrawer(!openDrawer)
+    window.localStorage.setItem('chaos-mesh-mini-sidebar', openDrawer ? 'y' : 'n')
+  }
 
   useEffect(() => {
     dispatch(setNavigationBreadcrumbs(pathname))
   }, [dispatch, pathname])
 
-  useEffect(() => setOpenDrawer(!isTabletScreen), [isTabletScreen])
+  useEffect(() => {
+    if (isTabletScreen) {
+      setOpenDrawer(false)
+    }
+  }, [isTabletScreen])
 
   return (
     <Box className={openDrawer ? classes.rootShift : classes.root}>

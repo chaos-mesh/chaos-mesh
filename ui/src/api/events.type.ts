@@ -1,8 +1,8 @@
 export interface Event {
-  ID: string
-  CreateAt: string
-  UpdateAt: string
-  DeleteAt: string | null
+  ID: number
+  CreatedAt: string
+  UpdatedAt: string
+  DeletedAt: string | null
   Experiment: string
   Namespace: string
   Kind: string
