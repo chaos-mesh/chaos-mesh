@@ -268,13 +268,6 @@ func (e *eventStore) ListByFilter(_ context.Context, podName string, podNamespac
 	var err error
 	var startTime time.Time
 
-	if uid == "" && experimentName != "" && experimentNamespace != "" {
-		uid, err = e.getUID(context.Background(), experimentNamespace, experimentName)
-		if err != nil {
-			return resList, err
-		}
-	}
-
 	if podName != "" {
 		resList, err = e.ListByPod(context.Background(), podNamespace, podName)
 	} else if podNamespace != "" {
@@ -353,7 +346,7 @@ func (e *eventStore) getUID(_ context.Context, ns, name string) (string, error) 
 	}
 
 	if len(events) == 0 {
-		return "", fmt.Errorf("get UID failure")
+		return "", fmt.Errorf("get UID failure, maybe name or namespace is wrong")
 	}
 
 	UID := events[0].ExperimentID
