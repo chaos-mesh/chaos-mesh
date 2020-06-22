@@ -49,7 +49,6 @@ func init() {
 	if err != nil {
 		ctrl.SetLogger(zap.Logger(true))
 		log.Error(err, "Chaos Controller: invalid environment configuration")
-
 		os.Exit(1)
 	}
 
