@@ -226,8 +226,8 @@ type StressChaosInfo struct {
 
 type actionFunc func(info *ExperimentInfo) error
 
-// @Summary Create a nex chaos experiments.
-// @Description Create a new chaos experiments.
+// @Summary Create a new chaos experiment.
+// @Description Create a new chaos experiment.
 // @Tags experiments
 // @Produce json
 // @Param request body ExperimentInfo true "Request body"
