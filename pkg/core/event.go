@@ -25,8 +25,8 @@ type EventStore interface {
 	// List returns an event list from the datastore.
 	List(context.Context) ([]*Event, error)
 
-	// ListByFilter returns an event list by the podName, podNamespace, experimentName, experimentNamespace and the startTime.
-	ListByFilter(context.Context, string, string, string, string, string) ([]*Event, error)
+	// ListByFilter returns an event list by the podName, podNamespace, experimentName, experimentNamespace, uid and the startTime.
+	ListByFilter(context.Context, string, string, string, string, string, string) ([]*Event, error)
 
 	// ListByExperiment returns an event list by the name and namespace of the experiment.
 	ListByExperiment(context.Context, string, string) ([]*Event, error)
