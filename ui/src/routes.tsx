@@ -2,7 +2,7 @@ import { RouteProps } from 'react-router'
 
 import Overview from './pages/Overview'
 import Experiments from './pages/Experiments'
-import ExperimentDetail from './pages/Experiments/Detail'
+import ExperimentDetail from './pages/ExperimentDetail'
 import Events from './pages/Events'
 import Archives from './pages/Archives'
 
