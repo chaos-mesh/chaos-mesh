@@ -39,9 +39,11 @@ spec:
 {{ toYaml .Values.dashboard.resources | indent 12 }}
           command:
             - /usr/local/bin/chaos-dashboard
-          envFrom:
-            - configMapRef:
-                name: {{ template "chaos-mesh.name" . }}-chaos-dashboard
+          env:
+            {{- range $envKey, $envVal := .Values.dashboard.env }}
+            - name: {{ $envKey | upper }}
+              value: {{ $envVal | quote }}
+            {{- end }}
           volumeMounts:
             - name: storage-volume
               mountPath: {{ .Values.dashboard.persistentVolume.mountPath }}
@@ -74,7 +76,7 @@ apiVersion: v1
 kind: Service
 metadata:
   namespace: {{ .Release.Namespace }}
-  name: {{ template "chaos-mesh.name" . }}-chaos-dashboard
+  name: {{ template "chaos-dashboard.svc" . }}
   labels:
     app.kubernetes.io/name: {{ template "chaos-mesh.name" . }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
