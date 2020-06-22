@@ -11,7 +11,7 @@
 >
 > This readme and related documentation are Work in Progress.
 
-Chaos Mesh is a cloud-native Chaos Engineering platform that orchestrates chaos on Kubernetes environments. At the current stage, it has the following components:
+Chaos Mesh® is a cloud-native Chaos Engineering platform that orchestrates chaos on Kubernetes environments. At the current stage, it has the following components:
 
 - **Chaos Operator**: the core component for chaos orchestration. Fully open sourced.
 - **Chaos Dashboard**: a Web UI for managing, designing, monitoring Chaos Experiments; under development.
@@ -79,6 +79,10 @@ Please reach out for bugs, feature requests, and other issues via:
 - The #sig-chaos-mesh channel in the [TiDB Community](https://pingcap.com/tidbslack) slack workspace.
 - Filing an issue or opening a PR against this repo.
 
+## Adopters
+
+See [Adopters](./ADOPTERS.md) 
+
 ### Community meeting
 
 On the fourth Thursday of every month (unless otherwise specified), the Chaos Mesh community holds a monthly meeting by video conference to discuss the status of Chaos Mesh.
@@ -98,4 +102,4 @@ Chaos Mesh is licensed under the Apache License, Version 2.0. See [LICENSE](/LIC
 
 ## Trademark
 
-Chaos Mesh™ is a trademark of Beijing PingCap Xingchen Technology and Development Co., Ltd. © 2020 Beijing PingCap Xingchen Technology and Development Co., Ltd. All rights reserved.
+Chaos Mesh® is a trademark of Beijing PingCap Xingchen Technology and Development Co., Ltd. © 2020 Beijing PingCap Xingchen Technology and Development Co., Ltd. All rights reserved.
