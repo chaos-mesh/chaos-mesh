@@ -155,6 +155,7 @@ type MapSlice map[string][]string
 // @Description Get the labels of the pods in the specified namespace from Kubernetes cluster.
 // @Tags common
 // @Produce json
+// @Param podNamespaceList query string true "The pod's namespace list, split by ,"
 // @Success 200 {object} MapSlice
 // @Router /api/common/labels [get]
 // @Failure 500 {object} utils.APIError
@@ -199,6 +200,7 @@ func (s *Service) getLabels(c *gin.Context) {
 // @Description Get the annotations of the pods in the specified namespace from Kubernetes cluster.
 // @Tags common
 // @Produce json
+// @Param podNamespaceList query string true "The pod's namespace list, split by ,"
 // @Success 200 {object} MapSlice
 // @Router /api/common/annotations [get]
 // @Failure 500 {object} utils.APIError
