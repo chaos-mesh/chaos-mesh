@@ -11,7 +11,7 @@ import EventDetail from 'components/EventDetail'
 import EventsTable from 'components/EventsTable'
 import { Experiment } from 'components/NewExperiment/types'
 import Loading from 'components/Loading'
-import PageTitle from 'components/PageTitle'
+import PaperTitle from 'components/PaperTitle'
 import ReactJson from 'react-json-view'
 import api from 'api'
 import clsx from 'clsx'
@@ -131,18 +131,18 @@ export default function ExperimentDetail() {
           <Grid item xs={12} sm={12} md={9}>
             <Box display="flex" flexDirection="column" height="100%">
               <Paper className={clsx(classes.paper, classes.timelinePaper)}>
-                <PageTitle>Timeline</PageTitle>
+                <PaperTitle>Timeline</PaperTitle>
                 <div ref={chartRef} className={classes.eventsChart} />
               </Paper>
               <Box className={classes.height100} position="relative">
                 <Paper className={clsx(classes.height100, classes.paper)}>
-                  <PageTitle>Events</PageTitle>
+                  <PaperTitle>Events</PaperTitle>
                   <EventsTable events={events} detailed />
                 </Paper>
                 {eventDetailOpen && (
                   <Paper className={clsx(classes.paper, classes.detailPaper)}>
                     <Box display="flex" justifyContent="space-between">
-                      <PageTitle>Event</PageTitle>
+                      <PaperTitle>Event</PaperTitle>
                       <IconButton color="primary" onClick={() => setEventDetailOpen(false)}>
                         <CloseIcon />
                       </IconButton>
@@ -161,7 +161,7 @@ export default function ExperimentDetail() {
           </Grid>
           <Grid item xs={12} sm={12} md={3}>
             <Paper className={clsx(classes.height100, classes.paper)}>
-              <PageTitle>Configuration</PageTitle>
+              <PaperTitle>Configuration</PaperTitle>
               {detail && (
                 <Box ml={1.5}>
                   <ReactJson src={detail} collapsed={1} displayObjectSize={false} />

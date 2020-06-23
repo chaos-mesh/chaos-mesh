@@ -7,7 +7,7 @@ import ContentContainer from 'components/ContentContainer'
 import { Event } from 'api/events.type'
 import EventsTable from 'components/EventsTable'
 import Loading from 'components/Loading'
-import PageTitle from 'components/PageTitle'
+import PaperTitle from 'components/PaperTitle'
 import api from 'api'
 import clsx from 'clsx'
 import genEventsChart from 'lib/d3/eventsChart'
@@ -68,11 +68,11 @@ export default function Events() {
         <Grow in={!loading} style={{ transformOrigin: '0 0 0' }}>
           <Box display="flex" flexDirection="column" height="100%">
             <Paper className={classes.timelinePaper}>
-              <PageTitle>Timeline</PageTitle>
+              <PaperTitle>Timeline</PaperTitle>
               <div ref={chartRef} className={classes.eventsChart} />
             </Paper>
             <Paper className={clsx(classes.height100, classes.paper)}>
-              <PageTitle>Events</PageTitle>
+              <PaperTitle>Events</PaperTitle>
               <EventsTable events={events} detailed />
             </Paper>
           </Box>
