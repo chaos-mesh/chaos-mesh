@@ -1,5 +1,5 @@
 {
-  "name": "chaos-mesh-dashboard-ui",
+  "name": "chaos-mesh-dashboard",
   "version": "0.1.0",
   "description": "A Web UI for Chaos Mesh",
   "private": true,
@@ -13,6 +13,7 @@
     "d3": "^5.16.0",
     "dayjs": "^1.8.28",
     "formik": "^2.1.4",
+    "js-yaml": "^3.14.0",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
     "react-json-view": "^1.19.1",
@@ -50,6 +51,7 @@
     "@testing-library/user-event": "^7.1.2",
     "@types/d3": "^5.7.2",
     "@types/jest": "^25.2.1",
+    "@types/js-yaml": "^3.12.4",
     "@types/node": "^12.12.36",
     "@types/react": "^16.9.34",
     "@types/react-dom": "^16.9.6",
