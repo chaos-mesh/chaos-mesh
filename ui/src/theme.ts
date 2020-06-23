@@ -20,7 +20,7 @@ const theme = responsiveFontSizes(
         main: green[700],
       },
       background: {
-        default: '#f5f5f5',
+        default: 'rgba(0, 0, 0, 0.04)',
       },
     },
     spacing: (factor) => `${0.25 * factor}rem`,

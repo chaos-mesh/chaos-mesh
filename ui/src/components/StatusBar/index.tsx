@@ -26,10 +26,10 @@ const useStyles = makeStyles((theme: Theme) => {
         flexDirection: 'column',
         alignItems: 'start',
         '& > *': {
-          marginTop: theme.spacing(2),
-        },
-        '& > :last-child': {
-          marginBottom: theme.spacing(2),
+          marginTop: sp3,
+          '&:last-child': {
+            marginBottom: sp3,
+          },
         },
       },
     },
@@ -63,10 +63,6 @@ export const CurrentStatus: React.FC<CurrentStatusProps> = ({ classes, state }) 
     {
       label: 'Paused',
       value: state.paused,
-    },
-    {
-      label: 'Finished',
-      value: state.finished,
     },
     {
       label: 'Failed',

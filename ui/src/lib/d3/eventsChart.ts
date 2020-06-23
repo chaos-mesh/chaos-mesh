@@ -7,9 +7,9 @@ import wrapText from './wrapText'
 
 const margin = {
   top: 30,
-  right: 30,
+  right: 15,
   bottom: 45,
-  left: 30,
+  left: 15,
 }
 
 export default function gen({
@@ -41,6 +41,7 @@ export default function gen({
     .range([margin.left, width - margin.right])
   const xAxis = d3
     .axisBottom(x)
+    .ticks(6)
     .tickFormat(d3.timeFormat('%m-%d %H:%M') as (dv: Date | { valueOf(): number }, i: number) => string)
   const gXAxis = svg
     .append('g')
@@ -183,6 +184,9 @@ export default function gen({
     y += 50
     if (x > (root.offsetWidth / 3) * 2) {
       x -= width
+    }
+    if (y > (root.offsetHeight / 3) * 2) {
+      y -= 200
     }
 
     tooltip.style('left', x + 'px').style('top', y + 'px')

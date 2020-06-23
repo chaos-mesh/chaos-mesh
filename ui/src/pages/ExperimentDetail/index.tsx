@@ -27,7 +27,6 @@ const useStyles = makeStyles((theme: Theme) =>
     },
     timelinePaper: {
       marginBottom: theme.spacing(3),
-      padding: theme.spacing(3),
     },
     eventsChart: {
       height: 300,
@@ -131,7 +130,7 @@ export default function ExperimentDetail() {
         <Grid className={classes.height100} container spacing={3}>
           <Grid item xs={12} sm={12} md={9}>
             <Box display="flex" flexDirection="column" height="100%">
-              <Paper className={classes.timelinePaper}>
+              <Paper className={clsx(classes.paper, classes.timelinePaper)}>
                 <PageTitle>Timeline</PageTitle>
                 <div ref={chartRef} className={classes.eventsChart} />
               </Paper>
@@ -149,7 +148,7 @@ export default function ExperimentDetail() {
                       </IconButton>
                     </Box>
                     {selectedEvent && !detailLoading ? (
-                      <Box ml={3} mb={3}>
+                      <Box ml={1.5} mb={3}>
                         <EventDetail event={selectedEvent} />
                       </Box>
                     ) : (
@@ -164,7 +163,7 @@ export default function ExperimentDetail() {
             <Paper className={clsx(classes.height100, classes.paper)}>
               <PageTitle>Configuration</PageTitle>
               {detail && (
-                <Box ml={3}>
+                <Box ml={1.5}>
                   <ReactJson src={detail} collapsed={1} displayObjectSize={false} />
                 </Box>
               )}

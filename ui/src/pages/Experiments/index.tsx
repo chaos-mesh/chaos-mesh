@@ -6,7 +6,7 @@ import { setAlert, setAlertOpen, setNeedToRefreshExperiments } from 'slices/glob
 import ConfirmDialog from 'components/ConfirmDialog'
 import ContentContainer from '../../components/ContentContainer'
 import { Experiment } from 'api/experiments.type'
-import ExperimentCard from 'components/ExperimentCard'
+import ExperimentPaper from 'components/ExperimentPaper'
 import Loading from 'components/Loading'
 import TuneIcon from '@material-ui/icons/Tune'
 import api from 'api'
@@ -49,10 +49,9 @@ export default function Experiments() {
       .then(({ data }) => {
         setExperiments(
           experiments.map((e) => {
-            e.events = data
-              .filter((d) => d.Experiment === e.Name)
-              .sort((a, b) => dayComparator(a.CreatedAt, b.CreatedAt))
-            e.events = e.events.length > 3 ? e.events.reverse().slice(0, 3).reverse() : e.events
+            e.events = [
+              data.filter((d) => d.Experiment === e.Name).sort((a, b) => dayComparator(a.CreatedAt, b.CreatedAt))[0],
+            ]
 
             return e
           })
@@ -125,8 +124,8 @@ export default function Experiments() {
         {experiments &&
           experiments.length > 0 &&
           experiments.map((e) => (
-            <Grid key={e.Name} item xs={12} sm={12} md={6} lg={4} xl={3}>
-              <ExperimentCard experiment={e} handleSelect={setSelected} handleDialogOpen={setDialogOpen} />
+            <Grid key={e.Name} item xs={12}>
+              <ExperimentPaper experiment={e} handleSelect={setSelected} handleDialogOpen={setDialogOpen} />
             </Grid>
           ))}
       </Grid>

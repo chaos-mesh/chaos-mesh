@@ -2,7 +2,7 @@ import React from 'react'
 import { Box, Typography } from '@material-ui/core'
 
 const PageTitle: React.FC = ({ children }) => (
-  <Box m={3} mt={1.5}>
+  <Box ml={1.5} mb={3}>
     <Typography variant="h6">{children}</Typography>
   </Box>
 )

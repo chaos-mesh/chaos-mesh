@@ -16,18 +16,13 @@ import api from 'api'
 import { parseSubmitValues } from 'lib/formikhelpers'
 import { useHistory } from 'react-router-dom'
 import { useStoreDispatch } from 'store'
+import yaml from 'js-yaml'
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     container: {
-      display: 'flex',
-      flexDirection: 'column',
-      width: '50vw',
       height: '100%',
       padding: theme.spacing(6),
-      [theme.breakpoints.down('md')]: {
-        width: '100vw',
-      },
     },
     new: {
       [theme.breakpoints.down('xs')]: {
@@ -43,8 +38,8 @@ const useStyles = makeStyles((theme: Theme) =>
         bottom: theme.spacing(7.5),
         right: theme.spacing(3),
         display: 'flex',
-        background: '#fff',
-        color: theme.palette.primary.main,
+        background: theme.palette.primary.main,
+        color: '#fff',
         zIndex: 1101,
       },
     },
@@ -63,6 +58,21 @@ const Actions = ({ isSubmitting = false, toggleDrawer }: ActionsProps) => {
 
   const { state } = useStepperContext()
 
+  const handleUploadYAML = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files![0]
+
+    const reader = new FileReader()
+    reader.onload = function (e) {
+      try {
+        const y = yaml.safeLoad(e.target!.result as string)
+        console.log(y)
+      } catch (e) {
+        console.log(e)
+      }
+    }
+    reader.readAsText(f)
+  }
+
   return (
     <Box display="flex" justifyContent="space-between" marginBottom={6}>
       <Button variant="outlined" size={size} startIcon={<CancelIcon />} onClick={toggleDrawer}>
@@ -70,8 +80,9 @@ const Actions = ({ isSubmitting = false, toggleDrawer }: ActionsProps) => {
       </Button>
       <Box display="flex">
         <Box mr={3}>
-          <Button variant="outlined" size={size} startIcon={<CloudUploadOutlinedIcon />}>
+          <Button variant="outlined" component="label" size={size} startIcon={<CloudUploadOutlinedIcon />}>
             Yaml File
+            <input type="file" style={{ display: 'none' }} onChange={handleUploadYAML} />
           </Button>
         </Box>
         <Button
@@ -143,7 +154,7 @@ export default function NewExperiment() {
       <Fab className={classes.fab} color="inherit" size="medium" aria-label="New experiment">
         <AddIcon onClick={toggleDrawer} />
       </Fab>
-      <Drawer anchor="right" open={open} onClose={toggleDrawer}>
+      <Drawer anchor="right" open={open} onClose={toggleDrawer} PaperProps={{ style: { width: '50vw' } }}>
         <StepperProvider>
           <Formik initialValues={initialValues} validationSchema={validationSchema} onSubmit={handleOnSubmit}>
             {(props: StepperFormProps) => {
