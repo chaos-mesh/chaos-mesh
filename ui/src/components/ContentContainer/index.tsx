@@ -5,9 +5,11 @@ import { styled } from '@material-ui/core/styles'
 
 type ContentContainerProps = Omit<ContainerProps, 'maxWidth'>
 
-const ContentContainer = styled((props: ContentContainerProps) => <Container {...props} />)(({ theme }) => ({
-  position: 'relative',
-  padding: theme.spacing(6),
-}))
+const ContentContainer = styled((props: ContentContainerProps) => <Container maxWidth="xl" {...props} />)(
+  ({ theme }) => ({
+    position: 'relative',
+    padding: theme.spacing(6),
+  })
+)
 
 export default ContentContainer
