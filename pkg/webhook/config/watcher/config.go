@@ -19,9 +19,11 @@ import (
 
 // Config is a configuration struct for the Watcher type
 type Config struct {
-	Namespace      string
-	TemplateLabels map[string]string
-	ConfigLabels   map[string]string
+	Namespace string `envconfig:"TEMPLATE_NAMESPACE" default:""`
+	// TemplateLabels is label pairs used to discover common templates in Kubernetes. These should be key1:value[,key2:val2,...]
+	TemplateLabels map[string]string `envconfig:"TEMPLATE_LABELS"`
+	// ConfigLabels is label pairs used to discover ConfigMaps in Kubernetes. These should be key1:value[,key2:val2,...]
+	ConfigLabels map[string]string `envconfig:"CONFIGMAP_LABELS"`
 }
 
 // NewConfig returns a new initialized Config
@@ -33,14 +35,13 @@ func NewConfig() *Config {
 	}
 }
 
-// InitLabels initializes labels in Config
-func (c *Config) InitLabels(templateLabels, confLabels map[string]string) error {
-	if len(templateLabels) == 0 {
-		return errors.New("template labels must be set")
+// Verify will verify the parameter configuration is correct
+func (c *Config) Verify() error {
+	if len(c.TemplateLabels) == 0 {
+		return errors.New("envconfig:\"TEMPLATE_LABELS\" template labels must be set")
 	}
-	if len(confLabels) == 0 {
-		return errors.New("conf labels must be set")
+	if len(c.ConfigLabels) == 0 {
+		return errors.New("envconfig:\"CONFIGMAP_LABELS\" conf labels must be set")
 	}
-	c.TemplateLabels, c.ConfigLabels = templateLabels, confLabels
 	return nil
 }

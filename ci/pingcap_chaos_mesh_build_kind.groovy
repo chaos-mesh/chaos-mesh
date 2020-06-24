@@ -39,12 +39,12 @@ spec:
       value: "true"
     resources:
       requests:
-        memory: "8000Mi"
-        cpu: 8000m
-        ephemeral-storage: "50Gi"
+        memory: "4Gi"
+        cpu: 4
+        ephemeral-storage: "10Gi"
       limits:
-        memory: "8000Mi"
-        cpu: 8000m
+        memory: "8Gi"
+        cpu: 8
         ephemeral-storage: "50Gi"
     # kind needs /lib/modules and cgroups from the host
     volumeMounts:
@@ -97,16 +97,17 @@ spec:
           topologyKey: kubernetes.io/hostname
 '''
 
-def build(SHELL_CODE, ARTIFACTS = "") {
+def build(String name, String code) {
 	podTemplate(yaml: podYAML) {
 		node(POD_LABEL) {
 			container('main') {
 				def WORKSPACE = pwd()
+				def ARTIFACTS = "${WORKSPACE}/go/src/github.com/pingcap/chaos-mesh/_artifacts"
 				try {
 					dir("${WORKSPACE}/go/src/github.com/pingcap/chaos-mesh") {
 						unstash 'chaos-mesh'
 						stage("Debug Info") {
-							println "debug host: 172.16.5.5"
+							println "debug host: 172.16.5.15"
 							println "debug command: kubectl -n jenkins-ci exec -ti ${NODE_NAME} bash"
 							sh """
 							echo "====== shell env ======"
@@ -122,17 +123,28 @@ def build(SHELL_CODE, ARTIFACTS = "") {
 							ansiColor('xterm') {
 								sh """
 								export GOPATH=${WORKSPACE}/go
-								${SHELL_CODE}
+								export ARTIFACTS=${ARTIFACTS}
+								${code}
 								"""
 							}
 						}
 					}
 				} finally {
-					if (ARTIFACTS != "") {
-						dir(ARTIFACTS) {
-							archiveArtifacts artifacts: "**", allowEmptyArchive: true
-							junit testResults: "*.xml", allowEmptyResults: true
-						}
+                    dir(ARTIFACTS) {
+						sh """#!/bin/bash
+						echo "info: change ownerships for jenkins"
+						chown -R 1000:1000 .
+						echo "info: print total size of artifacts"
+						du -sh .
+						echo "info: list all files"
+						find .
+						echo "info: moving all artifacts into a sub-directory"
+						shopt -s extglob
+						mkdir ${name}
+						mv !(${name}) ${name}/
+						"""
+						archiveArtifacts artifacts: "${name}/**", allowEmptyArchive: true
+						junit testResults: "${name}/*.xml", allowEmptyResults: true
 					}
 				}
 			}
@@ -211,13 +223,11 @@ def call(BUILD_BRANCH, CREDENTIALS_ID) {
 			}
 		}
 
+		def GLOBALS = "SKIP_BUILD=y IMAGE_TAG=${GITHASH} GINKGO_NO_COLOR=y"
 		def artifacts = "go/src/github.com/pingcap/chaos-mesh/artifacts"
-		// unstable in our IDC, disable temporarily
-		//def MIRRORS = "DOCKER_IO_MIRROR=https://dockerhub.azk8s.cn GCR_IO_MIRROR=https://gcr.azk8s.cn QUAY_IO_MIRROR=https://quay.azk8s.cn"
-		def MIRRORS = "DOCKER_IO_MIRROR=http://172.16.4.143:5000 QUAY_IO_MIRROR=http://172.16.4.143:5001"
 		def builds = [:]
 		builds["E2E v1.12.10"] = {
-                build("${MIRRORS} IMAGE_TAG=${GITHASH} SKIP_BUILD=y GINKGO_NODES=6 KUBE_VERSION=v1.12.10 REPORT_DIR=\$(pwd)/artifacts REPORT_PREFIX=v1.12.10_ ./hack/e2e.sh -- --ginkgo.focus='Basic'", artifacts)
+                build("v1.12", "${GLOBALS} GINKGO_NODES=6 KUBE_VERSION=v1.12.10 ./hack/e2e.sh -- --ginkgo.focus='Basic'")
         }
 		builds.failFast = false
 		parallel builds

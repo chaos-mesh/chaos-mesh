@@ -1,15 +1,16 @@
-import { Box, CssBaseline, Snackbar } from '@material-ui/core'
+import { Box, CssBaseline, Snackbar, useMediaQuery, useTheme } from '@material-ui/core'
 import React, { useEffect, useState } from 'react'
 import { Redirect, Route, Switch } from 'react-router-dom'
 import { RootState, useStoreDispatch } from 'store'
 import { Theme, createStyles, makeStyles } from '@material-ui/core/styles'
+import { drawerCloseWidth, drawerWidth } from './Sidebar'
 
 import Alert from '@material-ui/lab/Alert'
 import Header from './Header'
+import MobileNavigation from './MobileNavigation'
 import Sidebar from './Sidebar'
 import StatusBar from 'components/StatusBar'
 import chaosMeshRoutes from 'routes'
-import { drawerWidth } from './Sidebar'
 import { setAlertOpen } from 'slices/globalStatus'
 import { setNavigationBreadcrumbs } from 'slices/navigation'
 import { useLocation } from 'react-router-dom'
@@ -20,17 +21,31 @@ const useStyles = makeStyles((theme: Theme) =>
     root: {
       display: 'flex',
       flexDirection: 'column',
-      [theme.breakpoints.up('md')]: {
-        width: `calc(100% - ${drawerWidth})`,
-        marginLeft: drawerWidth,
+      marginLeft: drawerCloseWidth,
+      width: `calc(100% - ${drawerCloseWidth})`,
+      transition: theme.transitions.create(['width', 'margin'], {
+        easing: theme.transitions.easing.sharp,
+        duration: theme.transitions.duration.leavingScreen,
+      }),
+      [theme.breakpoints.down('xs')]: {
+        width: '100%',
+        marginLeft: 0,
       },
     },
-    toolbar: theme.mixins.toolbar,
+    rootShift: {
+      marginLeft: drawerWidth,
+      width: `calc(100% - ${drawerWidth})`,
+      transition: theme.transitions.create(['width', 'margin'], {
+        easing: theme.transitions.easing.sharp,
+        duration: theme.transitions.duration.enteringScreen,
+      }),
+    },
     main: {
       display: 'flex',
       flexDirection: 'column',
       minHeight: '100vh',
     },
+    toolbar: theme.mixins.toolbar,
     switchContent: {
       display: 'flex',
       flex: 1,
@@ -39,6 +54,9 @@ const useStyles = makeStyles((theme: Theme) =>
 )
 
 const TopContainer = () => {
+  const theme = useTheme()
+  const isTabletScreen = useMediaQuery(theme.breakpoints.down('sm'))
+  const isMobileScreen = useMediaQuery(theme.breakpoints.down('xs'))
   const classes = useStyles()
 
   const { pathname } = useLocation()
@@ -49,19 +67,29 @@ const TopContainer = () => {
   const dispatch = useStoreDispatch()
   const handleSnackClose = () => dispatch(setAlertOpen(false))
 
-  const [openMobileDrawer, setOpenMobileDrawer] = useState(false)
-  const handleDrawerToggle = () => setOpenMobileDrawer(!openMobileDrawer)
+  const miniSidebar = window.localStorage.getItem('chaos-mesh-mini-sidebar') === 'y'
+  const [openDrawer, setOpenDrawer] = useState(!miniSidebar)
+  const handleDrawerToggle = () => {
+    setOpenDrawer(!openDrawer)
+    window.localStorage.setItem('chaos-mesh-mini-sidebar', openDrawer ? 'y' : 'n')
+  }
 
   useEffect(() => {
     dispatch(setNavigationBreadcrumbs(pathname))
   }, [dispatch, pathname])
 
+  useEffect(() => {
+    if (isTabletScreen) {
+      setOpenDrawer(false)
+    }
+  }, [isTabletScreen])
+
   return (
-    <Box className={classes.root}>
+    <Box className={openDrawer ? classes.rootShift : classes.root}>
       {/* CssBaseline: kickstart an elegant, consistent, and simple baseline to build upon. */}
       <CssBaseline />
-      <Header handleDrawerToggle={handleDrawerToggle} breadcrumbs={breadcrumbs} />
-      <Sidebar openMobileDrawer={openMobileDrawer} handleDrawerToggle={handleDrawerToggle} />
+      <Header openDrawer={openDrawer} handleDrawerToggle={handleDrawerToggle} breadcrumbs={breadcrumbs} />
+      {!isMobileScreen && <Sidebar open={openDrawer} />}
       <main className={classes.main}>
         <div className={classes.toolbar} />
 
@@ -75,6 +103,13 @@ const TopContainer = () => {
             ))}
           </Switch>
         </Box>
+
+        {isMobileScreen && (
+          <>
+            <div className={classes.toolbar} />
+            <MobileNavigation />
+          </>
+        )}
 
         <Snackbar
           anchorOrigin={{

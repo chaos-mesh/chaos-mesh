@@ -82,25 +82,36 @@ func (r *ChaosCollector) Setup(mgr ctrl.Manager, apiType runtime.Object) error {
 }
 
 func (r *ChaosCollector) recordEvent(req ctrl.Request, obj v1alpha1.InnerObject) error {
+	var (
+		chaosMeta metav1.Object
+		ok        bool
+	)
+
+	if chaosMeta, ok = obj.(metav1.Object); !ok {
+		return errors.New("failed to get chaos meta information")
+	}
+
+	UID := chaosMeta.GetUID()
 	status := obj.GetStatus()
 	kind := obj.GetObjectKind().GroupVersionKind().Kind
 
 	switch status.Experiment.Phase {
 	case v1alpha1.ExperimentPhaseRunning:
-		return r.createEvent(req, kind, status)
-	case v1alpha1.ExperimentPhaseFinished, v1alpha1.ExperimentPhasePaused:
-		return r.updateOrCreateEvent(req, kind, status)
+		return r.createEvent(req, kind, status, string(UID))
+	case v1alpha1.ExperimentPhaseFinished, v1alpha1.ExperimentPhasePaused, v1alpha1.ExperimentPhaseWaiting:
+		return r.updateOrCreateEvent(req, kind, status, string(UID))
 	}
 
 	return nil
 }
 
-func (r *ChaosCollector) createEvent(req ctrl.Request, kind string, status *v1alpha1.ChaosStatus) error {
+func (r *ChaosCollector) createEvent(req ctrl.Request, kind string, status *v1alpha1.ChaosStatus, UID string) error {
 	event := &core.Event{
-		Experiment: req.Name,
-		Namespace:  req.Namespace,
-		Kind:       kind,
-		StartTime:  &status.Experiment.StartTime.Time,
+		Experiment:   req.Name,
+		Namespace:    req.Namespace,
+		Kind:         kind,
+		StartTime:    &status.Experiment.StartTime.Time,
+		ExperimentID: UID,
 	}
 
 	for _, pod := range status.Experiment.PodRecords {
@@ -122,18 +133,20 @@ func (r *ChaosCollector) createEvent(req ctrl.Request, kind string, status *v1al
 	return nil
 }
 
-func (r *ChaosCollector) updateOrCreateEvent(req ctrl.Request, kind string, status *v1alpha1.ChaosStatus) error {
+func (r *ChaosCollector) updateOrCreateEvent(req ctrl.Request, kind string, status *v1alpha1.ChaosStatus, UID string) error {
 	event := &core.Event{
-		Experiment: req.Name,
-		Namespace:  req.Namespace,
-		Kind:       kind,
-		StartTime:  &status.Experiment.StartTime.Time,
-		FinishTime: &status.Experiment.EndTime.Time,
+		Experiment:   req.Name,
+		Namespace:    req.Namespace,
+		Kind:         kind,
+		StartTime:    &status.Experiment.StartTime.Time,
+		FinishTime:   &status.Experiment.EndTime.Time,
+		Duration:     status.Experiment.Duration,
+		ExperimentID: UID,
 	}
 
 	if _, err := r.event.FindByExperimentAndStartTime(
 		context.Background(), event.Experiment, event.Namespace, event.StartTime); err != nil && gorm.IsRecordNotFoundError(err) {
-		if err := r.createEvent(req, kind, status); err != nil {
+		if err := r.createEvent(req, kind, status, UID); err != nil {
 			return err
 		}
 	}
@@ -147,11 +160,22 @@ func (r *ChaosCollector) updateOrCreateEvent(req ctrl.Request, kind string, stat
 }
 
 func (r *ChaosCollector) archiveExperiment(req ctrl.Request, obj v1alpha1.InnerObject) error {
+	var (
+		chaosMeta metav1.Object
+		ok        bool
+	)
+
+	if chaosMeta, ok = obj.(metav1.Object); !ok {
+		r.Log.Error(nil, "failed to get chaos meta information")
+	}
+	UID := chaosMeta.GetUID()
+
 	archive := &core.ArchiveExperiment{
 		ArchiveExperimentMeta: core.ArchiveExperimentMeta{
 			Namespace: req.Namespace,
 			Name:      req.Name,
 			Kind:      obj.GetObjectKind().GroupVersionKind().Kind,
+			UID:       string(UID),
 		},
 	}
 
@@ -168,13 +192,6 @@ func (r *ChaosCollector) archiveExperiment(req ctrl.Request, obj v1alpha1.InnerO
 		return errors.New("unsupported chaos type " + archive.Kind)
 	}
 
-	var (
-		chaosMeta metav1.Object
-		ok        bool
-	)
-	if chaosMeta, ok = obj.(metav1.Object); !ok {
-		return errors.New("failed to case type to " + archive.Kind)
-	}
 	archive.StartTime = chaosMeta.GetCreationTimestamp().Time
 	archive.FinishTime = chaosMeta.GetDeletionTimestamp().Time
 

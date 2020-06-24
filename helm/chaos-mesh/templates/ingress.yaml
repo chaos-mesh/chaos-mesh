@@ -1,0 +1,52 @@
+{{- if .Values.dashboard.ingress.enabled -}}
+{{- $name := include "chaos-mesh.name" . -}}
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  namespace: {{ .Release.Namespace }}
+  name: {{ template "chaos-dashboard.svc" . }}
+  labels:
+    app.kubernetes.io/name: {{ template "chaos-mesh.name" . }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/component: chaos-dashboard
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+"  "_" }}
+{{- if .Values.dashboard.ingress.labels }}
+{{ toYaml .Values.dashboard.ingress.labels | indent 4 }}
+{{- end }}
+  annotations:
+    {{- if .Values.dashboard.ingress.certManager }}
+    kubernetes.io/tls-acme: "true"
+    {{- end }}
+    {{- with .Values.dashboard.ingress.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  rules:
+  {{- range .Values.dashboard.ingress.hosts }}
+    - host: {{ .name | quote }}
+      http:
+        paths:
+        {{- $paths := default (list "/") .paths }}
+        {{- range $paths }}
+          - path: {{ . }}
+            backend:
+              serviceName: {{ $name }}-chaos-dashboard
+              servicePort: http
+        {{- end }}
+  {{- end }}
+  tls:
+  {{- range .Values.dashboard.ingress.hosts }}
+  {{- if .tls }}
+    - hosts:
+    {{- if .tlsHosts }}
+      {{- range $host := .tlsHosts }}
+        - {{ $host }}
+      {{- end }}
+    {{- else }}
+        - {{ .name }}
+    {{- end }}
+      secretName: {{ .tlsSecret }}
+  {{- end }}
+  {{- end }}
+{{- end }}

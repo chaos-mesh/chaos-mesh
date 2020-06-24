@@ -53,7 +53,7 @@ var (
 type Server struct {
 	ctx context.Context
 
-	conf *config.ChaosServerConfig
+	conf *config.ChaosDashboardConfig
 
 	uiAssetFS        http.FileSystem
 	apiHandlerEngine *gin.Engine
@@ -61,7 +61,7 @@ type Server struct {
 
 // NewServer returns a Server instance.
 func NewServer(
-	conf *config.ChaosServerConfig,
+	conf *config.ChaosDashboardConfig,
 	uiAssetFS http.FileSystem,
 	apiHandlerEngine *gin.Engine,
 ) *Server {
@@ -76,7 +76,7 @@ func (s *Server) handler(w http.ResponseWriter, r *http.Request) {
 	s.apiHandlerEngine.ServeHTTP(w, r)
 }
 
-func serverRegister(lx fx.Lifecycle, s *Server, conf *config.ChaosServerConfig, assetFs http.FileSystem) {
+func serverRegister(lx fx.Lifecycle, s *Server, conf *config.ChaosDashboardConfig, assetFs http.FileSystem) {
 	listenAddr := fmt.Sprintf("%s:%d", conf.ListenHost, conf.ListenPort)
 	listener, err := net.Listen("tcp", listenAddr)
 	if err != nil {
@@ -89,6 +89,7 @@ func serverRegister(lx fx.Lifecycle, s *Server, conf *config.ChaosServerConfig, 
 	mux.Handle("/", http.StripPrefix("/", uiserver.Handler(assetFs)))
 	mux.Handle("/api/", Handler(s))
 	mux.Handle("/api/swagger/", swaggerserver.Handler())
+	mux.HandleFunc("/ping", pingHandler)
 
 	srv := &http.Server{Handler: mux}
 
@@ -132,4 +133,9 @@ func Handler(s *Server) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		s.handler(w, r)
 	})
+}
+
+func pingHandler(w http.ResponseWriter, _ *http.Request) {
+	w.WriteHeader(http.StatusOK)
+	fmt.Fprintf(w, "pong\n")
 }

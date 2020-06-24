@@ -15,8 +15,10 @@ package common
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"sort"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 
@@ -40,13 +42,13 @@ type Pod struct {
 
 // Service defines a handler service for cluster common objects.
 type Service struct {
-	conf    *config.ChaosServerConfig
+	conf    *config.ChaosDashboardConfig
 	kubeCli client.Client
 }
 
 // NewService returns an experiment service instance.
 func NewService(
-	conf *config.ChaosServerConfig,
+	conf *config.ChaosDashboardConfig,
 	cli client.Client,
 ) *Service {
 	return &Service{
@@ -62,6 +64,8 @@ func Register(r *gin.RouterGroup, s *Service) {
 	endpoint.POST("/pods", s.listPods)
 	endpoint.GET("/namespaces", s.getNamespaces)
 	endpoint.GET("/kinds", s.getKinds)
+	endpoint.GET("/labels", s.getLabels)
+	endpoint.GET("/annotations", s.getAnnotations)
 
 }
 
@@ -142,4 +146,107 @@ func (s *Service) getKinds(c *gin.Context) {
 
 	sort.Strings(kinds)
 	c.JSON(http.StatusOK, kinds)
+}
+
+// MapSlice defines a common map
+type MapSlice map[string][]string
+
+// @Summary Get the labels of the pods in the specified namespace from Kubernetes cluster.
+// @Description Get the labels of the pods in the specified namespace from Kubernetes cluster.
+// @Tags common
+// @Produce json
+// @Param podNamespaceList query string true "The pod's namespace list, split by ,"
+// @Success 200 {object} MapSlice
+// @Router /api/common/labels [get]
+// @Failure 500 {object} utils.APIError
+func (s *Service) getLabels(c *gin.Context) {
+	podNamespaceList := c.Query("podNamespaceList")
+
+	if podNamespaceList == "" {
+		c.Status(http.StatusInternalServerError)
+		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(fmt.Errorf("podNamespaceList cannot be empty")))
+		return
+	}
+
+	exp := &experiment.SelectorInfo{}
+	nsList := strings.Split(podNamespaceList, ",")
+	exp.NamespaceSelectors = nsList
+
+	ctx := context.TODO()
+	filteredPods, err := pkgutils.SelectPods(ctx, s.kubeCli, exp.ParseSelector())
+	if err != nil {
+		c.Status(http.StatusInternalServerError)
+		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
+		return
+	}
+
+	labels := make(map[string][]string)
+
+	for _, pod := range filteredPods {
+		for k, v := range pod.Labels {
+			if _, ok := labels[k]; ok {
+				if !inSlice(v, labels[k]) {
+					labels[k] = append(labels[k], v)
+				}
+			} else {
+				labels[k] = []string{v}
+			}
+		}
+	}
+	c.JSON(http.StatusOK, labels)
+}
+
+// @Summary Get the annotations of the pods in the specified namespace from Kubernetes cluster.
+// @Description Get the annotations of the pods in the specified namespace from Kubernetes cluster.
+// @Tags common
+// @Produce json
+// @Param podNamespaceList query string true "The pod's namespace list, split by ,"
+// @Success 200 {object} MapSlice
+// @Router /api/common/annotations [get]
+// @Failure 500 {object} utils.APIError
+func (s *Service) getAnnotations(c *gin.Context) {
+	podNamespaceList := c.Query("podNamespaceList")
+
+	if podNamespaceList == "" {
+		c.Status(http.StatusInternalServerError)
+		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(fmt.Errorf("podNamespaceList cannot be empty")))
+		return
+	}
+
+	exp := &experiment.SelectorInfo{}
+	nsList := strings.Split(podNamespaceList, ",")
+	exp.NamespaceSelectors = nsList
+
+	ctx := context.TODO()
+	filteredPods, err := pkgutils.SelectPods(ctx, s.kubeCli, exp.ParseSelector())
+	if err != nil {
+		c.Status(http.StatusInternalServerError)
+		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
+		return
+	}
+
+	annotations := make(map[string][]string)
+
+	for _, pod := range filteredPods {
+		for k, v := range pod.Annotations {
+			if _, ok := annotations[k]; ok {
+				if !inSlice(v, annotations[k]) {
+					annotations[k] = append(annotations[k], v)
+				}
+			} else {
+				annotations[k] = []string{v}
+			}
+		}
+	}
+	c.JSON(http.StatusOK, annotations)
+}
+
+// inSlice checks given string in string slice or not.
+func inSlice(v string, sl []string) bool {
+	for _, vv := range sl {
+		if vv == v {
+			return true
+		}
+	}
+	return false
 }

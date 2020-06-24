@@ -18,5 +18,11 @@ export const experiments: (
 export const deleteExperiment = (namespace: string, name: string, kind: string) =>
   http.delete(`/experiments/${kind}/${namespace}/${name}`)
 
+export const pauseExperiment = (namespace: string, name: string, kind: string) =>
+  http.put(`/experiments/pause/${kind}/${namespace}/${name}`)
+
+export const startExperiment = (namespace: string, name: string, kind: string) =>
+  http.put(`/experiments/start/${kind}/${namespace}/${name}`)
+
 export const detail = (namespace: string, name: string, kind: string) =>
   http.get(`/experiments/detail/${kind}/${namespace}/${name}`)

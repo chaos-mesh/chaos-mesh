@@ -136,6 +136,7 @@ type ExperimentPhase string
 
 const (
 	ExperimentPhaseRunning  ExperimentPhase = "Running"
+	ExperimentPhaseWaiting  ExperimentPhase = "Waiting"
 	ExperimentPhasePaused   ExperimentPhase = "Paused"
 	ExperimentPhaseFailed   ExperimentPhase = "Failed"
 	ExperimentPhaseFinished ExperimentPhase = "Finished"
@@ -150,6 +151,8 @@ type ExperimentStatus struct {
 	StartTime *metav1.Time `json:"startTime,omitempty"`
 	// +optional
 	EndTime *metav1.Time `json:"endTime,omitempty"`
+	// +optional
+	Duration string `json:"duration,omitempty"`
 	// +optional
 	PodRecords []PodStatus `json:"podRecords,omitempty"`
 }

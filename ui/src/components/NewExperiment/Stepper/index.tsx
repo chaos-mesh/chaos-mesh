@@ -52,6 +52,7 @@ const CreateStepper: React.FC<StepperProps> = ({ formProps }) => {
   const { activeStep } = state
 
   const [namespaces, setNamespaces] = useState<string[]>([])
+  const [targetTabIndex, setTargetTabIndex] = useState(0)
 
   const fetchNamespaces = () => {
     api.common
@@ -79,7 +80,7 @@ const CreateStepper: React.FC<StepperProps> = ({ formProps }) => {
       case 1:
         return <ScopeStep formProps={formProps} namespaces={namespaces} />
       case 2:
-        return <TargetStep formProps={formProps} />
+        return <TargetStep formProps={formProps} tabIndex={targetTabIndex} setTabIndex={setTargetTabIndex} />
       case 3:
         return <ScheduleStep formProps={formProps} />
       case 4:

@@ -156,6 +156,8 @@ spec:
             experiment:
               description: Experiment records the last experiment state.
               properties:
+                duration:
+                  type: string
                 endTime:
                   format: date-time
                   type: string
