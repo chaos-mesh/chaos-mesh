@@ -16,7 +16,7 @@ export default function PodPanel(props: StepperFormTargetProps) {
         id="target.pod_chaos.action"
         name="target.pod_chaos.action"
         label="Action"
-        helperText="Please select a action"
+        helperText="Please select an action"
         value={values.target.pod_chaos.action}
         onChange={handleActionChange}
       >

@@ -17,7 +17,7 @@ export default function NetworkPanel(props: StepperFormTargetProps) {
         id="target.network_chaos.action"
         name="target.network_chaos.action"
         label="Action"
-        helperText="Please select a action"
+        helperText="Please select an action"
         value={values.target.network_chaos.action}
         onChange={handleActionChange}
       >
