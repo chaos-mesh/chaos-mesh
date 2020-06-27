@@ -81,6 +81,31 @@ func (e *eventStore) List(_ context.Context) ([]*core.Event, error) {
 	return eventList, nil
 }
 
+// ListByUID returns an event list by the uid of the experiment.
+func (e *eventStore) ListByUID(_ context.Context, uid string) ([]*core.Event, error) {
+	var resList []core.Event
+	eventList := make([]*core.Event, 0)
+
+	if err := e.db.Where(
+		"experiment_id = ?", uid).
+		Find(resList).Error; err != nil && !gorm.IsRecordNotFoundError(err) {
+		return nil, err
+	}
+
+	for _, et := range resList {
+		pods, err := e.findPodRecordsByEventID(context.Background(), et.ID)
+		if err != nil {
+			return nil, err
+		}
+		var event core.Event
+		event = et
+		event.Pods = pods
+		eventList = append(eventList, &event)
+	}
+
+	return eventList, nil
+}
+
 // ListByExperiment returns an event list by the name and namespace of the experiment.
 func (e *eventStore) ListByExperiment(_ context.Context, namespace string, experiment string) ([]*core.Event, error) {
 	var resList []core.Event
@@ -237,8 +262,8 @@ func (e *eventStore) DeleteIncompleteEvents(_ context.Context) error {
 		Delete(core.Event{}).Error
 }
 
-// ListByFilter returns an event list by the podName, podNamespace, experimentName, experimentNamespace and the startTime.
-func (e *eventStore) ListByFilter(_ context.Context, podName string, podNamespace string, experimentName string, experimentNamespace string, startTimeStr string) ([]*core.Event, error) {
+// ListByFilter returns an event list by the podName, podNamespace, experimentName, experimentNamespace, uid and the startTime.
+func (e *eventStore) ListByFilter(_ context.Context, podName string, podNamespace string, experimentName string, experimentNamespace string, uid string, startTimeStr string) ([]*core.Event, error) {
 	var resList []*core.Event
 	var err error
 	var startTime time.Time
@@ -247,6 +272,8 @@ func (e *eventStore) ListByFilter(_ context.Context, podName string, podNamespac
 		resList, err = e.ListByPod(context.Background(), podNamespace, podName)
 	} else if podNamespace != "" {
 		resList, err = e.ListByNamespace(context.Background(), podNamespace)
+	} else if uid != "" {
+		resList, err = e.ListByUID(context.Background(), uid)
 	} else {
 		resList, err = e.List(context.Background())
 	}
@@ -267,6 +294,9 @@ func (e *eventStore) ListByFilter(_ context.Context, podName string, podNamespac
 			continue
 		}
 		if experimentNamespace != "" && event.Namespace != experimentNamespace {
+			continue
+		}
+		if uid != "" && event.ExperimentID != uid {
 			continue
 		}
 		if startTimeStr != "" && event.StartTime.Before(startTime) && !event.StartTime.Equal(startTime) {
@@ -304,4 +334,29 @@ func (e *eventStore) DeleteByFinishTime(_ context.Context, ttl time.Duration) er
 		}
 	}
 	return nil
+}
+
+func (e *eventStore) getUID(_ context.Context, ns, name string) (string, error) {
+	events := make([]*core.Event, 0)
+
+	if err := e.db.Where(
+		&core.Event{Experiment: name, Namespace: ns}).
+		Find(&events).Error; err != nil {
+		return "", err
+	}
+
+	if len(events) == 0 {
+		return "", fmt.Errorf("get UID failure, maybe name or namespace is wrong")
+	}
+
+	UID := events[0].ExperimentID
+	st := events[0].StartTime
+
+	for _, et := range events {
+		if st.Before(*et.StartTime) {
+			st = et.StartTime
+			UID = et.ExperimentID
+		}
+	}
+	return UID, nil
 }
