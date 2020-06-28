@@ -33,7 +33,7 @@ export default function gen({
     .attr('width', width)
     .attr('height', height)
 
-  const now = day()
+  const now = day(events[events.length - 1].StartTime).add(0.5, 'h')
 
   const x = d3
     .scaleLinear()
@@ -113,7 +113,7 @@ export default function gen({
     .attr('fill', (d) => colorPalette(d.Experiment))
     .style('cursor', 'pointer')
 
-  const zoom = d3.zoom().on('zoom', zoomd)
+  const zoom = d3.zoom().scaleExtent([0.5, 5]).on('zoom', zoomd)
   svg.call(zoom as any)
   function zoomd() {
     const eventTransform = d3.event.transform
