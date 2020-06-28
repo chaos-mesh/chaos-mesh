@@ -39,14 +39,20 @@ export function parseSubmitValues(values: Experiment) {
     values.scope.phase_selectors = []
   }
 
-  // Parse label_selectors to object
-  let labelSelectors = values.scope.label_selectors
-  try {
-    labelSelectors = JSON.parse(labelSelectors as string)
-  } catch {
-    labelSelectors = {}
+  // Parse label_selectors and annotation_selectors to object
+  function helper1(selectors: string[]) {
+    return selectors.length > 0
+      ? selectors.reduce((acc: { [key: string]: string }, d) => {
+          const splited = d.split(', ')
+
+          acc[splited[0]] = splited[1]
+
+          return acc
+        }, {})
+      : {}
   }
-  values.scope.label_selectors = labelSelectors
+  values.scope.label_selectors = helper1(values.scope.label_selectors as string[])
+  values.scope.annotation_selectors = helper1(values.scope.annotation_selectors as string[])
 
   // Remove unrelated chaos
   const kind = values.target.kind

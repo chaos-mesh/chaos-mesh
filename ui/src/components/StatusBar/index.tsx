@@ -5,7 +5,7 @@ import { Theme, createStyles, makeStyles } from '@material-ui/core/styles'
 
 import NewExperiment from 'components/NewExperiment'
 import { StateOfExperiments } from 'api/experiments.type'
-import { getStateofExperiments } from 'slices/globalStatus'
+import { getStateofExperiments } from 'slices/experiments'
 import { useSelector } from 'react-redux'
 
 const useStyles = makeStyles((theme: Theme) => {
@@ -91,7 +91,7 @@ export const CurrentStatus: React.FC<CurrentStatusProps> = ({ classes, state }) 
 const StatusBar = () => {
   const classes = useStyles()
 
-  const stateOfExperiments = useSelector((state: RootState) => state.globalStatus.stateOfExperiments)
+  const stateOfExperiments = useSelector((state: RootState) => state.experiments.stateOfExperiments)
   const dispatch = useStoreDispatch()
 
   useEffect(() => {

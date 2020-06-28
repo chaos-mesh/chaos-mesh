@@ -1,7 +1,8 @@
 import { Box, Grid, Typography } from '@material-ui/core'
 import React, { useEffect, useState } from 'react'
 import { RootState, useStoreDispatch } from 'store'
-import { setAlert, setAlertOpen, setNeedToRefreshExperiments } from 'slices/globalStatus'
+import { getStateofExperiments, setNeedToRefreshExperiments } from 'slices/experiments'
+import { setAlert, setAlertOpen } from 'slices/globalStatus'
 
 import ConfirmDialog from 'components/ConfirmDialog'
 import ContentContainer from '../../components/ContentContainer'
@@ -11,12 +12,11 @@ import Loading from 'components/Loading'
 import TuneIcon from '@material-ui/icons/Tune'
 import api from 'api'
 import { dayComparator } from 'lib/dayjs'
-import { getStateofExperiments } from 'slices/globalStatus'
 import { upperFirst } from 'lib/utils'
 import { useSelector } from 'react-redux'
 
 export default function Experiments() {
-  const needToRefreshExperiments = useSelector((state: RootState) => state.globalStatus.needToRefreshExperiments)
+  const needToRefreshExperiments = useSelector((state: RootState) => state.experiments.needToRefreshExperiments)
   const dispatch = useStoreDispatch()
 
   const [loading, setLoading] = useState(false)

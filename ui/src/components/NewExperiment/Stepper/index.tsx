@@ -1,7 +1,9 @@
 import { Box, Button, Step, StepLabel, Stepper, Typography } from '@material-ui/core'
 import React, { useEffect, useState } from 'react'
+import { RootState, useStoreDispatch } from 'store'
 import { Theme, createStyles, makeStyles } from '@material-ui/core/styles'
 import { back, jump, next, reset, useStepperContext } from '../Context'
+import { getAnnotations, getLabels, getNamespaces } from 'slices/experiments'
 
 import BasicStep from './Basic'
 import DoneAllIcon from '@material-ui/icons/DoneAll'
@@ -10,7 +12,7 @@ import ScheduleStep from './Schedule'
 import ScopeStep from './Scope'
 import { StepperFormProps } from '../types'
 import TargetStep from './Target'
-import api from 'api'
+import { useSelector } from 'react-redux'
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -48,20 +50,26 @@ interface StepperProps {
 const CreateStepper: React.FC<StepperProps> = ({ formProps }) => {
   const classes = useStyles()
 
+  const { namespaces, labels, annotations } = useSelector((state: RootState) => state.experiments)
+  const storeDispatch = useStoreDispatch()
+
   const { state, dispatch } = useStepperContext()
   const { activeStep } = state
 
-  const [namespaces, setNamespaces] = useState<string[]>([])
   const [targetTabIndex, setTargetTabIndex] = useState(0)
 
-  const fetchNamespaces = () => {
-    api.common
-      .namespaces()
-      .then((resp) => setNamespaces(resp.data))
-      .catch(console.log)
-  }
+  useEffect(() => {
+    storeDispatch(getNamespaces())
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
-  useEffect(fetchNamespaces, [])
+  useEffect(() => {
+    if (namespaces.length > 0) {
+      storeDispatch(getLabels(namespaces.join(',')))
+      storeDispatch(getAnnotations(namespaces.join(',')))
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [namespaces])
 
   const handleNext = () => dispatch(next())
   const handleBack = () => dispatch(back())
@@ -78,7 +86,7 @@ const CreateStepper: React.FC<StepperProps> = ({ formProps }) => {
       case 0:
         return <BasicStep formProps={formProps} namespaces={namespaces} />
       case 1:
-        return <ScopeStep formProps={formProps} namespaces={namespaces} />
+        return <ScopeStep formProps={formProps} namespaces={namespaces} labels={labels} annotations={annotations} />
       case 2:
         return <TargetStep formProps={formProps} tabIndex={targetTabIndex} setTabIndex={setTargetTabIndex} />
       case 3:

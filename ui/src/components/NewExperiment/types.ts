@@ -7,7 +7,8 @@ export interface ExperimentBasic {
 
 export interface ExperimentScope {
   namespace_selectors: string[]
-  label_selectors: string | object
+  label_selectors: object | string[]
+  annotation_selectors: object | string[]
   phase_selectors: string[]
   mode: string
   value: string

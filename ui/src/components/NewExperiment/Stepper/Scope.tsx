@@ -1,22 +1,27 @@
 import { InputAdornment, MenuItem } from '@material-ui/core'
-import { JsonField, SelectField, TextField } from 'components/FormField'
+import React, { useMemo } from 'react'
+import { SelectField, TextField } from 'components/FormField'
+import { joinObjKVs, upperFirst } from 'lib/utils'
 
 import AdvancedOptions from 'components/AdvancedOptions'
-import React from 'react'
 import { StepperFormProps } from '../types'
-import { upperFirst } from 'lib/utils'
 
 interface ScopeStepProps {
   formProps: StepperFormProps
   namespaces: string[]
+  labels: { [key: string]: string[] }
+  annotations: { [key: string]: string[] }
 }
 
 const phases = ['all', 'pending', 'running', 'succeeded', 'failed', 'unknown']
 const modes = ['all', { name: 'Random one', value: 'one' }, 'fixed number', 'fixed percent', 'random max percent']
 const modesWithAdornment = ['fixed-percent', 'random-max-percent']
 
-const ScopeStep: React.FC<ScopeStepProps> = ({ formProps, namespaces }) => {
+const ScopeStep: React.FC<ScopeStepProps> = ({ formProps, namespaces, labels, annotations }) => {
   const { values, handleChange } = formProps
+
+  const labelKVs = useMemo(() => joinObjKVs(labels, ': '), [labels])
+  const annotationKVs = useMemo(() => joinObjKVs(annotations, ': '), [annotations])
 
   const handleChangeIncludeAll = (id: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
     const lastValues = id.split('.').reduce((acc, cur) => acc[cur], values as any)
@@ -29,12 +34,6 @@ const ScopeStep: React.FC<ScopeStepProps> = ({ formProps, namespaces }) => {
     if (lastValues.includes('all') && currentValues.length > 1) {
       e.target.value = currentValues.filter((v) => v !== 'all') as any
     }
-
-    handleChange(e)
-  }
-
-  const handleJsonChangeCallback = (e: React.ChangeEvent<HTMLInputElement>, formatted: string) => {
-    e.target.value = formatted
 
     handleChange(e)
   }
@@ -57,14 +56,21 @@ const ScopeStep: React.FC<ScopeStepProps> = ({ formProps, namespaces }) => {
         ))}
       </SelectField>
 
-      <JsonField
+      <SelectField
         id="scope.label_selectors"
-        label="Label selectors"
-        helperText="Json of label selectors"
-        multiline
+        name="scope.label_selectors"
+        label="Label Selectors"
+        helperText="Multiple options"
+        multiple
         value={values.scope.label_selectors}
-        onChangeCallback={handleJsonChangeCallback}
-      />
+        onChange={handleChange}
+      >
+        {labelKVs.map((option: string) => (
+          <MenuItem key={option} value={option}>
+            {option}
+          </MenuItem>
+        ))}
+      </SelectField>
 
       <SelectField
         id="scope.mode"
@@ -103,6 +109,22 @@ const ScopeStep: React.FC<ScopeStepProps> = ({ formProps, namespaces }) => {
       )}
 
       <AdvancedOptions>
+        <SelectField
+          id="scope.annotation_selectors"
+          name="scope.annotation_selectors"
+          label="Annotation Selectors"
+          helperText="Multiple options"
+          multiple
+          value={values.scope.annotation_selectors}
+          onChange={handleChange}
+        >
+          {annotationKVs.map((option: string) => (
+            <MenuItem key={option} value={option}>
+              {option}
+            </MenuItem>
+          ))}
+        </SelectField>
+
         <SelectField
           id="scope.phase_selectors"
           name="scope.phase_selectors"

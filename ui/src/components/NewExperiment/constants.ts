@@ -6,7 +6,8 @@ export const defaultExperimentSchema: Experiment = {
   namespace: 'default',
   scope: {
     namespace_selectors: ['default'],
-    label_selectors: '{}',
+    label_selectors: [],
+    annotation_selectors: [],
     phase_selectors: ['all'],
     mode: 'one',
     value: '',
