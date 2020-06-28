@@ -17,13 +17,13 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/shurcooL/httpgzip"
+	"github.com/pingcap/chaos-mesh/pkg/httpfs"
 )
 
 // Handler returns a FileServer `http.Handler` to handle http request.
 func Handler(root http.FileSystem) http.Handler {
 	if root != nil {
-		return httpgzip.FileServer(root, httpgzip.FileServerOptions{IndexHTML: true})
+		return httpfs.FileServer(root, httpfs.FileServerOptions{IndexHTML: true, Fallback: "/index.html"})
 	}
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
