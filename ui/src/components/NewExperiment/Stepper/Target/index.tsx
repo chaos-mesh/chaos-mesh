@@ -2,16 +2,16 @@ import Network from './Network'
 import Pod from './Pod'
 import React from 'react'
 import { StepperFormProps } from 'components/NewExperiment/types'
-import VerticalTabs from 'components/VerticalTabs'
+import Tabs from 'components/Tabs'
 import { resetOtherChaos } from 'lib/formikhelpers'
 
 const tabs = [
   { label: 'Pod Lifecycle' },
   { label: 'Network' },
-  { label: 'File system I/O', disabled: true },
-  { label: 'Linux Kernel', disabled: true },
-  { label: 'Clock', disabled: true },
-  { label: 'Stress CPU/Memory', disabled: true },
+  { label: 'File system I/O' },
+  { label: 'Linux Kernel' },
+  { label: 'Clock' },
+  { label: 'Stress CPU/Memory' },
 ]
 
 interface TargetProps {
@@ -36,7 +36,7 @@ const Target: React.FC<TargetProps> = ({ formProps, tabIndex, setTabIndex }) => 
     setTabIndex,
   }
 
-  return <VerticalTabs {...props} />
+  return <Tabs {...props} />
 }
 
 export default Target

@@ -14,7 +14,7 @@ const SelectField: React.FC<TextFieldProps & { multiple?: boolean }> = ({
       ? (selected: any) => (
           <Box display="flex" flexWrap="wrap">
             {(selected as string[]).map((value) => (
-              <Box key={value} mx={0.5}>
+              <Box key={value} m={0.5}>
                 <Chip label={value} color="primary" style={{ height: 24 }} />
               </Box>
             ))}

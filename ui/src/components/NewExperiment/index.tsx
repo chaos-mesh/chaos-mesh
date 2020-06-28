@@ -155,7 +155,12 @@ export default function NewExperiment() {
       <Fab className={classes.fab} color="inherit" size="medium" aria-label="New experiment">
         <AddIcon onClick={toggleDrawer} />
       </Fab>
-      <Drawer anchor="right" open={open} onClose={toggleDrawer} PaperProps={{ style: { width: '50vw' } }}>
+      <Drawer
+        anchor="right"
+        open={open}
+        onClose={toggleDrawer}
+        PaperProps={{ style: { width: isTabletScreen ? '100vw' : '50vw' } }}
+      >
         <StepperProvider>
           <Formik initialValues={initialValues} validationSchema={validationSchema} onSubmit={handleOnSubmit}>
             {(props: StepperFormProps) => {

@@ -1,4 +1,4 @@
-import { Box, Button, Step, StepLabel, Stepper, Typography } from '@material-ui/core'
+import { Box, Button, Step, StepLabel, Stepper, Typography, useMediaQuery, useTheme } from '@material-ui/core'
 import React, { useEffect, useState } from 'react'
 import { RootState, useStoreDispatch } from 'store'
 import { Theme, createStyles, makeStyles } from '@material-ui/core/styles'
@@ -27,6 +27,14 @@ const useStyles = makeStyles((theme: Theme) =>
       },
     },
     stepper: {
+      '& > .MuiStep-horizontal': {
+        '&:first-child': {
+          paddingLeft: 0,
+        },
+        '&:last-child': {
+          paddingRight: 0,
+        },
+      },
       [theme.breakpoints.down('sm')]: {
         paddingLeft: 0,
         paddingRight: 0,
@@ -48,6 +56,9 @@ interface StepperProps {
 }
 
 const CreateStepper: React.FC<StepperProps> = ({ formProps }) => {
+  const theme = useTheme()
+  const isTabletScreen = useMediaQuery(theme.breakpoints.down('sm'))
+  const size = isTabletScreen ? ('small' as 'small') : ('medium' as 'medium')
   const classes = useStyles()
 
   const { namespaces, labels, annotations } = useSelector((state: RootState) => state.experiments)
@@ -120,15 +131,17 @@ const CreateStepper: React.FC<StepperProps> = ({ formProps }) => {
           <Box>{getStepContent()}</Box>
           <Box mt={6} textAlign="right">
             {activeStep === steps.length ? (
-              <Button onClick={handleReset}>Reset</Button>
+              <Button size={size} onClick={handleReset}>
+                Reset
+              </Button>
             ) : (
               <>
                 {activeStep !== 0 && (
-                  <Button className={classes.backButton} onClick={handleBack}>
+                  <Button className={classes.backButton} size={size} onClick={handleBack}>
                     Back
                   </Button>
                 )}
-                <Button variant="contained" color="primary" onClick={handleNext}>
+                <Button variant="contained" color="primary" size={size} onClick={handleNext}>
                   {activeStep === steps.length - 1 ? 'Finish' : 'Next'}
                 </Button>
               </>
