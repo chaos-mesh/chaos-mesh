@@ -43,7 +43,7 @@ export function parseSubmitValues(values: Experiment) {
   function helper1(selectors: string[]) {
     return selectors.length > 0
       ? selectors.reduce((acc: { [key: string]: string }, d) => {
-          const splited = d.split(', ')
+          const splited = d.split(': ')
 
           acc[splited[0]] = splited[1]
 
