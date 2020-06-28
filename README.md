@@ -57,6 +57,19 @@ which correspond to the following major actions (experiments):
 
 See [Docs](https://chaos-mesh.org/docs/)
 
+## Adopters
+
+This is a list of known adopters of Chaos Mesh. Some have already gone into production, and others are at various stages of testing.
+
+- [Celo](https://celo.org/)
+- [Dailymotion](https://www.dailymotion.com/)
+- [DataStax Fallout](https://github.com/datastax/fallout)
+- [NetEase Fuxi Lab](https://www.crunchbase.com/organization/netease-fuxi-lab)
+- [JuiceFS](https://juicefs.com/?hl=en)
+- [Meituan-Dianping](https://about.meituan.com/en)
+- [PingCAP](https://www.pingcap.com)
+- [Xpeng Motors](https://en.xiaopeng.com/)
+
 ## FAQs
 
 See [FAQs](https://chaos-mesh.org/docs/faqs).
@@ -78,10 +91,6 @@ Please reach out for bugs, feature requests, and other issues via:
 - Following us on Twitter at [@chaos_mesh](https://twitter.com/chaos_mesh).
 - The #sig-chaos-mesh channel in the [TiDB Community](https://pingcap.com/tidbslack) slack workspace.
 - Filing an issue or opening a PR against this repo.
-
-## Adopters
-
-See [Adopters](./ADOPTERS.md) 
 
 ### Community meeting
 
