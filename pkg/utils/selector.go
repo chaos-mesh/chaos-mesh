@@ -19,8 +19,11 @@ import (
 	"fmt"
 	"math"
 	"math/rand"
+	"regexp"
 	"strconv"
 	"strings"
+
+	"github.com/pingcap/chaos-mesh/controllers/common"
 
 	"github.com/pingcap/chaos-mesh/api/v1alpha1"
 	"github.com/pingcap/chaos-mesh/pkg/label"
@@ -387,21 +390,20 @@ func filterByNamespaces(pods []v1.Pod) []v1.Pod {
 
 // IsAllowedNamespaces return whether namespace allows the execution of a chaos task
 func IsAllowedNamespaces(namespace string) bool {
-	if len(AllowedNamespaces) > 0 {
-		for _, ns := range AllowedNamespaces {
-			if strings.HasPrefix(namespace, ns) || strings.HasSuffix(namespace, ns) {
-				return true
-			}
+	if common.ControllerCfg.AllowedNamespaces != "" {
+		matched, err := regexp.MatchString(common.ControllerCfg.AllowedNamespaces, namespace)
+		if err != nil {
+			return false
 		}
-		return false
+		return matched
 	}
 
-	if len(IgnoredNamespaces) > 0 {
-		for _, ns := range IgnoredNamespaces {
-			if strings.HasPrefix(namespace, ns) || strings.HasSuffix(namespace, ns) {
-				return false
-			}
+	if common.ControllerCfg.IgnoredNamespaces != "" {
+		matched, err := regexp.MatchString(common.ControllerCfg.IgnoredNamespaces, namespace)
+		if err != nil {
+			return false
 		}
+		return !matched
 	}
 
 	return true

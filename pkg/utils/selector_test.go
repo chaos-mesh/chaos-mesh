@@ -18,6 +18,8 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/pingcap/chaos-mesh/controllers/common"
+
 	. "github.com/onsi/gomega"
 
 	"github.com/pingcap/chaos-mesh/api/v1alpha1"
@@ -411,8 +413,8 @@ func TestIsAllowedNamespaces(t *testing.T) {
 		name   string
 		pods   []v1.Pod
 		ret    []bool
-		allow  []string
-		ignore []string
+		allow  string
+		ignore string
 	}
 	pods := []v1.Pod{
 		newPod("p1", v1.PodRunning, "allow", nil, nil),
@@ -430,32 +432,32 @@ func TestIsAllowedNamespaces(t *testing.T) {
 		name:  "only set allow",
 		pods:  pods,
 		ret:   allowRet,
-		allow: []string{"allow"},
+		allow: "allow",
 	})
 
 	tcs = append(tcs, TestCase{
 		name:   "only set ignore",
 		pods:   pods,
 		ret:    allowRet,
-		ignore: []string{"ignore"},
+		ignore: "ignore",
 	})
 
 	tcs = append(tcs, TestCase{
 		name:   "only set allow",
 		pods:   pods,
 		ret:    allowRet,
-		allow:  []string{"allow"},
-		ignore: []string{"ignore"},
+		allow:  "allow",
+		ignore: "ignore",
 	})
 
-	setRule := func(allow []string, ignore []string) {
-		AllowedNamespaces = allow
-		IgnoredNamespaces = ignore
+	setRule := func(allow string, ignore string) {
+		common.ControllerCfg.AllowedNamespaces = allow
+		common.ControllerCfg.IgnoredNamespaces = ignore
 	}
 
 	clean := func() {
-		AllowedNamespaces = []string{}
-		IgnoredNamespaces = []string{}
+		common.ControllerCfg.AllowedNamespaces = ""
+		common.ControllerCfg.IgnoredNamespaces = ""
 	}
 
 	for _, tc := range tcs {
