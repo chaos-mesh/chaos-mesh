@@ -388,7 +388,7 @@ func filterByNamespaces(pods []v1.Pod) []v1.Pod {
 	return filteredList
 }
 
-// IsAllowedNamespaces return whether namespace allows the execution of a chaos task
+// IsAllowedNamespaces returns whether namespace allows the execution of a chaos task
 func IsAllowedNamespaces(namespace string) bool {
 	if common.ControllerCfg.AllowedNamespaces != "" {
 		matched, err := regexp.MatchString(common.ControllerCfg.AllowedNamespaces, namespace)
