@@ -144,14 +144,14 @@ func (fs *fileServer) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		// Use contents of index.html for directory, if present.
 		if fi.IsDir() {
 			indexPath := pathpkg.Join(path, "index.html")
-			f0, err := fs.root.Open(indexPath)
+			indexFile, err := fs.root.Open(indexPath)
 			if err == nil {
-				defer f0.Close()
-				fi0, err := f0.Stat()
+				defer indexFile.Close()
+				fileInfo, err := indexFile.Stat()
 				if err == nil {
 					path = indexPath
-					f = f0
-					fi = fi0
+					f = indexFile
+					fi = fileInfo
 				}
 			}
 		}
