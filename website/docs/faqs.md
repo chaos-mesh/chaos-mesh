@@ -21,7 +21,7 @@ When I get chaos-controller-manager's log, as shown below.
 You can try use the parameters: `hostNetwork`. Usage is as follows:
 
 ```
-\# vim helm/chaos-mesh/values.yaml, change hostNetwork from false to true
+# vim helm/chaos-mesh/values.yaml, change hostNetwork from false to true
 hostNetwork: true
 ```
 
