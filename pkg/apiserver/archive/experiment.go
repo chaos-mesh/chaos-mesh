@@ -101,14 +101,8 @@ func (s *Service) experimentDetailSearch(c *gin.Context) {
 	name := c.Query("name")
 	ns := c.Query("namespace")
 	uid := c.Query("uid")
-
-	if uid == "" && (kind == "" || name == "" || ns == "") {
-		c.Status(http.StatusBadRequest)
-		_ = c.Error(utils.ErrInvalidRequest.New("when uid is empty, kind, name and namespace cannot empty"))
-		return
-	}
-
-	data, err := s.archive.Detail(context.TODO(), kind, ns, name, uid)
+	
+	data, err := s.archive.DetailList(context.TODO(), kind, ns, name, uid)
 	if err != nil {
 		if !gorm.IsRecordNotFoundError(err) {
 			c.Status(http.StatusInternalServerError)
