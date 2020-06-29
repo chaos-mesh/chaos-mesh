@@ -2,6 +2,7 @@ import { Box, Button, Collapse, IconButton, Paper, Typography, useMediaQuery, us
 import React, { useState } from 'react'
 import { Theme, createStyles, makeStyles } from '@material-ui/core/styles'
 
+import { Archive } from 'api/archives.type'
 import DeleteOutlineIcon from '@material-ui/icons/DeleteOutline'
 import { Experiment } from 'api/experiments.type'
 import ExperimentEventsPreview from 'components/ExperimentEventsPreview'
@@ -10,6 +11,7 @@ import KeyboardArrowUpIcon from '@material-ui/icons/KeyboardArrowUp'
 import { Link } from 'react-router-dom'
 import PauseCircleOutlineIcon from '@material-ui/icons/PauseCircleOutline'
 import PlayCircleOutlineIcon from '@material-ui/icons/PlayCircleOutline'
+import RefreshIcon from '@material-ui/icons/Refresh'
 import day from 'lib/dayjs'
 
 const useStyles = makeStyles((theme: Theme) =>
@@ -26,7 +28,8 @@ const useStyles = makeStyles((theme: Theme) =>
 )
 
 interface ExperimentPaperProps {
-  experiment: Experiment
+  experiment: Experiment | Archive
+  isArchive?: boolean
   handleSelect: (info: {
     namespace: string
     name: string
@@ -38,7 +41,12 @@ interface ExperimentPaperProps {
   handleDialogOpen: (open: boolean) => void
 }
 
-const ExperimentPaper: React.FC<ExperimentPaperProps> = ({ experiment: e, handleSelect, handleDialogOpen }) => {
+const ExperimentPaper: React.FC<ExperimentPaperProps> = ({
+  experiment: e,
+  isArchive = false,
+  handleSelect,
+  handleDialogOpen,
+}) => {
   const theme = useTheme()
   const isTabletScreen = useMediaQuery(theme.breakpoints.down('sm'))
   const classes = useStyles()
@@ -85,41 +93,48 @@ const ExperimentPaper: React.FC<ExperimentPaperProps> = ({ experiment: e, handle
 
   const Actions = () => (
     <Box display="flex" alignItems="center" className={classes.marginRight}>
-      <Typography variant="body1">Created {day(e.created).fromNow()}</Typography>
-      {e.status.toLowerCase() === 'paused' ? (
+      {!isArchive && <Typography variant="body1">Created {day((e as Experiment).created).fromNow()}</Typography>}
+      {!isArchive &&
+        ((e as Experiment).status.toLowerCase() === 'paused' ? (
+          <IconButton
+            color="primary"
+            aria-label="Pause experiment"
+            component="span"
+            size="small"
+            onClick={handleStart(e as Experiment)}
+          >
+            <PlayCircleOutlineIcon />
+          </IconButton>
+        ) : (
+          <IconButton
+            color="primary"
+            aria-label="Pause experiment"
+            component="span"
+            size="small"
+            onClick={handlePause(e as Experiment)}
+          >
+            <PauseCircleOutlineIcon />
+          </IconButton>
+        ))}
+      {!isArchive && (
         <IconButton
           color="primary"
-          aria-label="Pause experiment"
+          aria-label="Delete experiment"
           component="span"
           size="small"
-          onClick={handleStart(e)}
+          onClick={handleDelete(e as Experiment)}
         >
-          <PlayCircleOutlineIcon />
-        </IconButton>
-      ) : (
-        <IconButton
-          color="primary"
-          aria-label="Pause experiment"
-          component="span"
-          size="small"
-          onClick={handlePause(e)}
-        >
-          <PauseCircleOutlineIcon />
+          <DeleteOutlineIcon />
         </IconButton>
       )}
-      <IconButton
-        color="primary"
-        aria-label="Delete experiment"
-        component="span"
-        size="small"
-        onClick={handleDelete(e)}
-      >
-        <DeleteOutlineIcon />
-      </IconButton>
-
+      {isArchive && (
+        <IconButton color="primary" aria-label="Recreate experiment" component="span" size="small">
+          <RefreshIcon />
+        </IconButton>
+      )}
       <Button
         component={Link}
-        to={`/experiments/${e.Name}?namespace=${e.Namespace}&kind=${e.Kind}`}
+        to={isArchive ? `` : `/experiments/${e.Name}?namespace=${e.Namespace}&kind=${e.Kind}`}
         variant="outlined"
         color="primary"
         size="small"
@@ -133,7 +148,7 @@ const ExperimentPaper: React.FC<ExperimentPaperProps> = ({ experiment: e, handle
     <Paper>
       <Box display="flex" justifyContent="space-between" alignItems="center" p={3}>
         <Box display="flex" className={classes.marginRight}>
-          <ExperimentEventsPreview events={e.events} />
+          {!isArchive && <ExperimentEventsPreview events={(e as Experiment).events} />}
           <Typography variant="body1">
             {e.Name}
             {isTabletScreen && (
