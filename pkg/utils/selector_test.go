@@ -18,11 +18,10 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/pingcap/chaos-mesh/controllers/common"
-
 	. "github.com/onsi/gomega"
 
 	"github.com/pingcap/chaos-mesh/api/v1alpha1"
+	"github.com/pingcap/chaos-mesh/controllers/common"
 	"github.com/pingcap/chaos-mesh/pkg/label"
 
 	v1 "k8s.io/api/core/v1"

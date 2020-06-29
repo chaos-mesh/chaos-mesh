@@ -23,9 +23,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/pingcap/chaos-mesh/controllers/common"
-
 	"github.com/pingcap/chaos-mesh/api/v1alpha1"
+	"github.com/pingcap/chaos-mesh/controllers/common"
 	"github.com/pingcap/chaos-mesh/pkg/label"
 	"github.com/pingcap/chaos-mesh/pkg/mock"
 
