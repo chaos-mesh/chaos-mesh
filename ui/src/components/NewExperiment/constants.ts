@@ -32,9 +32,9 @@ export const defaultExperimentSchema: Experiment = {
         corrupt: '',
       },
       delay: {
-        latency: '',
         correlation: '',
         jitter: '',
+        latency: '',
       },
       duplicate: {
         correlation: '',
