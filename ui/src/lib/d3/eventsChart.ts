@@ -6,9 +6,9 @@ import insertCommonStyle from './insertCommonStyle'
 import wrapText from './wrapText'
 
 const margin = {
-  top: 30,
+  top: 0,
   right: 15,
-  bottom: 45,
+  bottom: 30,
   left: 15,
 }
 
@@ -23,7 +23,7 @@ export default function gen({
 }) {
   insertCommonStyle()
 
-  const width = root.offsetWidth
+  let width = root.offsetWidth
   const height = root.offsetHeight
 
   const svg = d3
@@ -81,15 +81,15 @@ export default function gen({
   const legendsRoot = d3.select(document.createElement('div')).attr('class', 'chaos-events-legends')
   const legends = legendsRoot.selectAll().data(allExperiments).enter().append('div')
   legends
-    .append('div')
-    .attr(
-      'style',
-      (d) => `width: 12px; height: 12px; margin-right: 8px; background: ${colorPalette(d)}; border-radius: 3px;`
-    )
-  legends
     .insert('div')
     .attr('style', 'color: rgba(0, 0, 0, 0.72); font-size: 0.625rem;')
     .text((d) => d)
+  legends
+    .append('div')
+    .attr(
+      'style',
+      (d) => `width: 12px; height: 12px; margin-left: 8px; background: ${colorPalette(d)}; border-radius: 3px;`
+    )
 
   function genRectWidth(d: Event) {
     let width = d.FinishTime ? x(day(d.FinishTime)) - x(day(d.StartTime)) : x(day()) - x(day(d.StartTime))
@@ -140,6 +140,7 @@ export default function gen({
       .style('border', '1px solid rgba(0, 0, 0, 0.12)')
       .style('border-radius', '4px')
       .style('opacity', 0)
+      .style('transition', 'top 0.25s ease, left 0.25s ease')
       .style('z-index', 999)
   }
 
@@ -168,35 +169,47 @@ export default function gen({
       if (typeof selectEvent === 'function') {
         selectEvent(d)
       }
+
+      svg
+        .transition()
+        .duration(750)
+        .call(
+          zoom.transform as any,
+          d3.zoomIdentity
+            .translate(width / 2, 0)
+            .scale(5)
+            .translate(-x(day(d.StartTime)), 0)
+        )
     })
     .on('mouseover', function (d) {
-      tooltip.style('opacity', 1).html(genTooltipContent(d))
+      let [x, y] = d3.mouse(this)
+
+      tooltip.html(genTooltipContent(d))
+      const { width } = tooltip.node()!.getBoundingClientRect()
+
+      y += 50
+      if (x > (root.offsetWidth / 3) * 2) {
+        x -= width
+      }
+      if (y > (root.offsetHeight / 3) * 2) {
+        y -= 200
+      }
+
+      tooltip
+        .style('left', x + 'px')
+        .style('top', y + 'px')
+        .style('opacity', 1)
     })
     .on('mouseleave', function () {
       tooltip.style('opacity', 0)
     })
 
-  svg.on('mousemove', function () {
-    let [x, y] = d3.mouse(this)
-
-    const { width } = tooltip.node()!.getBoundingClientRect()
-
-    y += 50
-    if (x > (root.offsetWidth / 3) * 2) {
-      x -= width
-    }
-    if (y > (root.offsetHeight / 3) * 2) {
-      y -= 200
-    }
-
-    tooltip.style('left', x + 'px').style('top', y + 'px')
-  })
-
   function reGen() {
     const newWidth = root.offsetWidth
+    width = newWidth
 
-    svg.attr('width', newWidth)
-    x.range([margin.left, newWidth - margin.right])
+    svg.attr('width', width)
+    x.range([margin.left, width - margin.right])
     gXAxis.call(xAxis)
     svg.selectAll('.tick text').call(wrapText, 30)
     rects.attr('x', (d) => x(day(d.StartTime))).attr('width', genRectWidth)

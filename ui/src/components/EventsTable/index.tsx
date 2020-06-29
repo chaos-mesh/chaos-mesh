@@ -1,7 +1,9 @@
 import {
   Box,
   Button,
+  Collapse,
   IconButton,
+  InputAdornment,
   Table,
   TableBody,
   TableCell,
@@ -11,7 +13,7 @@ import {
   TablePagination,
   TableRow,
   TableSortLabel,
-  Collapse,
+  TextField,
   Typography,
 } from '@material-ui/core'
 import React, { useState } from 'react'
@@ -26,6 +28,8 @@ import KeyboardArrowRightIcon from '@material-ui/icons/KeyboardArrowRight'
 import KeyboardArrowUpIcon from '@material-ui/icons/KeyboardArrowUp'
 import LastPageIcon from '@material-ui/icons/LastPage'
 import { Link } from 'react-router-dom'
+import PaperTop from 'components/PaperTop'
+import SearchIcon from '@material-ui/icons/Search'
 
 const useStyles = makeStyles(() =>
   createStyles({
@@ -248,13 +252,19 @@ const EventsTableRow: React.FC<EventsTableRowProps> = ({ event: e, detailed, noE
   )
 }
 
-interface EventsTableProps {
+export interface EventsTableProps {
+  title?: string
   events: Event[] | null
   detailed?: boolean
   noExperiment?: boolean
 }
 
-const EventsTable: React.FC<EventsTableProps> = ({ events, detailed = false, noExperiment = false }) => {
+const EventsTable: React.FC<EventsTableProps> = ({
+  title = 'Events',
+  events,
+  detailed = false,
+  noExperiment = false,
+}) => {
   const classes = useStyles()
 
   const [order, setOrder] = useState<Order>('desc')
@@ -277,49 +287,66 @@ const EventsTable: React.FC<EventsTableProps> = ({ events, detailed = false, noE
   }
 
   return (
-    <TableContainer className={classes.tableContainer}>
-      <Table stickyHeader>
-        <EventsTableHead
-          order={order}
-          orderBy={orderBy}
-          onSort={handleSortEvents}
-          detailed={detailed}
-          noExperiment={noExperiment}
+    <>
+      <PaperTop title={title}>
+        <TextField
+          placeholder="Search events ..."
+          style={{ width: '200px', minWidth: '30%', margin: 0 }}
+          margin="dense"
+          variant="outlined"
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <SearchIcon color="primary" />
+              </InputAdornment>
+            ),
+          }}
         />
+      </PaperTop>
+      <TableContainer className={classes.tableContainer}>
+        <Table stickyHeader>
+          <EventsTableHead
+            order={order}
+            orderBy={orderBy}
+            onSort={handleSortEvents}
+            detailed={detailed}
+            noExperiment={noExperiment}
+          />
 
-        <TableBody>
-          {events &&
-            stableSort<SortedEvent>(events, getComparator(order, orderBy))
-              .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-              .map((e) => (
-                <EventsTableRow
-                  key={e.ID}
-                  event={e as SortedEventWithPods}
-                  detailed={detailed}
-                  noExperiment={noExperiment}
+          <TableBody>
+            {events &&
+              stableSort<SortedEvent>(events, getComparator(order, orderBy))
+                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                .map((e) => (
+                  <EventsTableRow
+                    key={e.ID}
+                    event={e as SortedEventWithPods}
+                    detailed={detailed}
+                    noExperiment={noExperiment}
+                  />
+                ))}
+          </TableBody>
+
+          <TableFooter>
+            <TableRow>
+              {events && (
+                <TablePagination
+                  count={events.length}
+                  page={page}
+                  rowsPerPageOptions={[5, 10, 25]}
+                  rowsPerPage={rowsPerPage}
+                  onChangePage={handleChangePage}
+                  onChangeRowsPerPage={handleChangeRowsPerPage}
+                  ActionsComponent={TablePaginationActions as any}
+                  labelDisplayedRows={({ from, to, count }) => `${from} - ${to} of ${count}`}
+                  labelRowsPerPage="Events per page"
                 />
-              ))}
-        </TableBody>
-
-        <TableFooter>
-          <TableRow>
-            {events && (
-              <TablePagination
-                count={events.length}
-                page={page}
-                rowsPerPageOptions={[5, 10, 25]}
-                rowsPerPage={rowsPerPage}
-                onChangePage={handleChangePage}
-                onChangeRowsPerPage={handleChangeRowsPerPage}
-                ActionsComponent={TablePaginationActions as any}
-                labelDisplayedRows={({ from, to, count }) => `${from} - ${to} of ${count}`}
-                labelRowsPerPage="Events per page"
-              />
-            )}
-          </TableRow>
-        </TableFooter>
-      </Table>
-    </TableContainer>
+              )}
+            </TableRow>
+          </TableFooter>
+        </Table>
+      </TableContainer>
+    </>
   )
 }
 

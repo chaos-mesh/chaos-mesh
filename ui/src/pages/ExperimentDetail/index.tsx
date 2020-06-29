@@ -11,7 +11,7 @@ import EventDetail from 'components/EventDetail'
 import EventsTable from 'components/EventsTable'
 import { Experiment } from 'components/NewExperiment/types'
 import Loading from 'components/Loading'
-import PaperTitle from 'components/PaperTitle'
+import PaperTop from 'components/PaperTop'
 import ReactJson from 'react-json-view'
 import api from 'api'
 import clsx from 'clsx'
@@ -33,6 +33,7 @@ const useStyles = makeStyles((theme: Theme) =>
     },
     paper: {
       padding: theme.spacing(3),
+      paddingTop: 0,
     },
     detailPaper: {
       position: 'absolute',
@@ -131,22 +132,25 @@ export default function ExperimentDetail() {
           <Grid item xs={12} sm={12} md={9}>
             <Box display="flex" flexDirection="column" height="100%">
               <Paper className={clsx(classes.paper, classes.timelinePaper)}>
-                <PaperTitle>Timeline</PaperTitle>
+                <PaperTop title="Timeline" />
                 <div ref={chartRef} className={classes.eventsChart} />
               </Paper>
               <Box className={classes.height100} position="relative">
                 <Paper className={clsx(classes.height100, classes.paper)}>
-                  <PaperTitle>Events</PaperTitle>
                   <EventsTable events={events} detailed noExperiment />
                 </Paper>
                 {eventDetailOpen && (
-                  <Paper className={clsx(classes.paper, classes.detailPaper)}>
-                    <Box display="flex" justifyContent="space-between">
-                      <PaperTitle>Event</PaperTitle>
+                  <Paper
+                    className={clsx(classes.paper, classes.detailPaper)}
+                    style={{
+                      zIndex: 3, // .MuiTableCell-stickyHeader z-index: 2
+                    }}
+                  >
+                    <PaperTop title="Event">
                       <IconButton color="primary" onClick={() => setEventDetailOpen(false)}>
                         <CloseIcon />
                       </IconButton>
-                    </Box>
+                    </PaperTop>
                     {selectedEvent && !detailLoading ? (
                       <Box ml={1.5} mb={3}>
                         <EventDetail event={selectedEvent} />
@@ -161,7 +165,7 @@ export default function ExperimentDetail() {
           </Grid>
           <Grid item xs={12} sm={12} md={3}>
             <Paper className={clsx(classes.height100, classes.paper)}>
-              <PaperTitle>Configuration</PaperTitle>
+              <PaperTop title="Configuration" />
               {detail && (
                 <Box ml={1.5}>
                   <ReactJson src={detail} collapsed={1} displayObjectSize={false} />
