@@ -27,8 +27,10 @@ const ScheduleStep: React.FC<ScheduleStepProps> = ({ formProps }) => {
   const classes = useStyles()
 
   const { values, handleChange } = formProps
+  const hasScheduled = values.scheduler.cron !== '' || values.scheduler.duration !== ''
   const mustBeScheduled = mustSchedule(values)
-  const [isImmediate, setIsImmediate] = useState(!mustBeScheduled)
+  const immediate = mustBeScheduled ? false : hasScheduled ? false : true
+  const [isImmediate, setIsImmediate] = useState(immediate)
 
   const handleChecked = (_: React.ChangeEvent<HTMLInputElement>, checked: boolean) => {
     if (mustBeScheduled) {

@@ -1,9 +1,10 @@
+import { ChaosKindKeyMap, resetOtherChaos } from 'lib/formikhelpers'
+import React, { useEffect, useState } from 'react'
+
 import Network from './Network'
 import Pod from './Pod'
-import React from 'react'
 import { StepperFormProps } from 'components/NewExperiment/types'
 import Tabs from 'components/Tabs'
-import { resetOtherChaos } from 'lib/formikhelpers'
 
 const tabs = [
   { label: 'Pod Lifecycle' },
@@ -16,11 +17,20 @@ const tabs = [
 
 interface TargetProps {
   formProps: StepperFormProps
-  tabIndex: number
-  setTabIndex: (index: number) => void
 }
 
-const Target: React.FC<TargetProps> = ({ formProps, tabIndex, setTabIndex }) => {
+const Target: React.FC<TargetProps> = ({ formProps }) => {
+  const [tabIndex, setTabIndex] = useState(0)
+
+  useEffect(() => {
+    const kind = formProps.values.target.kind
+
+    if (kind) {
+      setTabIndex(Object.keys(ChaosKindKeyMap).indexOf(kind))
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
   const handleActionChange = (kind: string) => (e: React.ChangeEvent<HTMLInputElement>) =>
     resetOtherChaos(formProps, kind, e.target.value)
 

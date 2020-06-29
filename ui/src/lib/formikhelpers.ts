@@ -2,35 +2,16 @@ import { Experiment, ExperimentTarget, StepperFormProps } from 'components/NewEx
 
 import { defaultExperimentSchema } from 'components/NewExperiment/constants'
 
-const ChaosKindsAndKeys: {
-  kind: string
-  key: Exclude<keyof ExperimentTarget, 'kind'>
-}[] = [
-  {
-    kind: 'PodChaos',
-    key: 'pod_chaos',
-  },
-  {
-    kind: 'NetworkChaos',
-    key: 'network_chaos',
-  },
-  {
-    kind: 'IoChaos',
-    key: 'io_chaos',
-  },
-  {
-    kind: 'KernelChaos',
-    key: 'kernel_chaos',
-  },
-  {
-    kind: 'TimeChaos',
-    key: 'time_chaos',
-  },
-  {
-    kind: 'StressChaos',
-    key: 'stress_chaos',
-  },
-]
+export const ChaosKindKeyMap: {
+  [kind: string]: { [key: string]: Exclude<keyof ExperimentTarget, 'kind'> }
+} = {
+  PodChaos: { key: 'pod_chaos' },
+  NetworkChaos: { key: 'network_chaos' },
+  IoChaos: { key: 'io_chaos' },
+  KernelChaos: { key: 'kernel_chaos' },
+  TimeChaos: { key: 'time_chaos' },
+  StressChaos: { key: 'stress_chaos' },
+}
 
 export function parseSubmitValues(values: Experiment) {
   // Parse phase_selectors
@@ -56,8 +37,9 @@ export function parseSubmitValues(values: Experiment) {
 
   // Remove unrelated chaos
   const kind = values.target.kind
-  ChaosKindsAndKeys.filter((k) => k.kind !== kind)
-    .map((k) => k.key)
+  Object.entries(ChaosKindKeyMap)
+    .filter((k) => k[0] !== kind)
+    .map((k) => k[1].key)
     .forEach((k) => delete values.target[k])
 
   // Remove unrelated actions
@@ -100,7 +82,7 @@ export function resetOtherChaos(formProps: StepperFormProps, kind: string, actio
   const { values, setFieldValue } = formProps
 
   const selectedChaosKind = kind
-  const selectedChaosKey = ChaosKindsAndKeys.filter((d) => d.kind === selectedChaosKind)[0].key
+  const selectedChaosKey = ChaosKindKeyMap[selectedChaosKind].key
 
   const updatedTarget = {
     ...defaultExperimentSchema.target,
@@ -116,4 +98,46 @@ export function resetOtherChaos(formProps: StepperFormProps, kind: string, actio
   }
 
   setFieldValue('target', updatedTarget)
+}
+
+export function yamlToExperiments(yamlObj: any): Experiment {
+  const { kind, metadata, spec } = yamlObj
+
+  let halfResult = {
+    ...defaultExperimentSchema,
+    ...metadata,
+    scope: {
+      ...defaultExperimentSchema.scope,
+      label_selectors: spec.selector.labelSelectors
+        ? Object.entries(spec.selector.labelSelectors).map(([key, val]) => `${key}: ${val}`)
+        : [],
+      annotation_selectors: spec.selector.annotationSelectors
+        ? Object.entries(spec.selector.annotationSelectors).map(([key, val]) => `${key}: ${val}`)
+        : [],
+      mode: spec.mode,
+    },
+    scheduler: {
+      cron: spec.scheduler.cron,
+      duration: spec.duration,
+    },
+  }
+
+  delete spec.selector
+  delete spec.mode
+  delete spec.scheduler
+  delete spec.duration
+
+  const action = Object.keys(spec).filter((k) => k === spec.action)[0]
+
+  return {
+    ...halfResult,
+    target: {
+      ...defaultExperimentSchema.target,
+      kind,
+      [ChaosKindKeyMap[kind].key]: {
+        action: spec.action,
+        [action]: spec[action],
+      },
+    },
+  }
 }

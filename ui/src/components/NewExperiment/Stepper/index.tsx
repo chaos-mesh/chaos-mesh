@@ -1,5 +1,5 @@
 import { Box, Button, Step, StepLabel, Stepper, Typography, useMediaQuery, useTheme } from '@material-ui/core'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect } from 'react'
 import { RootState, useStoreDispatch } from 'store'
 import { Theme, createStyles, makeStyles } from '@material-ui/core/styles'
 import { back, jump, next, reset, useStepperContext } from '../Context'
@@ -67,8 +67,6 @@ const CreateStepper: React.FC<StepperProps> = ({ formProps }) => {
   const { state, dispatch } = useStepperContext()
   const { activeStep } = state
 
-  const [targetTabIndex, setTargetTabIndex] = useState(0)
-
   useEffect(() => {
     storeDispatch(getNamespaces())
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -86,10 +84,8 @@ const CreateStepper: React.FC<StepperProps> = ({ formProps }) => {
   const handleBack = () => dispatch(back())
   const handleJump = (step: number) => () => dispatch(jump(step))
   const handleReset = () => {
-    const { handleReset: resetForm } = formProps
-
     dispatch(reset())
-    resetForm()
+    formProps.resetForm()
   }
 
   const getStepContent = () => {
@@ -99,7 +95,7 @@ const CreateStepper: React.FC<StepperProps> = ({ formProps }) => {
       case 1:
         return <ScopeStep formProps={formProps} namespaces={namespaces} labels={labels} annotations={annotations} />
       case 2:
-        return <TargetStep formProps={formProps} tabIndex={targetTabIndex} setTabIndex={setTargetTabIndex} />
+        return <TargetStep formProps={formProps} />
       case 3:
         return <ScheduleStep formProps={formProps} />
       case 4:

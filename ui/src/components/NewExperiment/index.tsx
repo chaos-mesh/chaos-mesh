@@ -5,6 +5,7 @@ import React, { useState } from 'react'
 import { StepperProvider, useStepperContext } from './Context'
 import { Theme, createStyles, makeStyles } from '@material-ui/core/styles'
 import { defaultExperimentSchema, validationSchema } from './constants'
+import { parseSubmitValues, yamlToExperiments } from 'lib/formikhelpers'
 import { setAlert, setAlertOpen } from 'slices/globalStatus'
 
 import AddIcon from '@material-ui/icons/Add'
@@ -13,7 +14,6 @@ import CloudUploadOutlinedIcon from '@material-ui/icons/CloudUploadOutlined'
 import PublishIcon from '@material-ui/icons/Publish'
 import Stepper from './Stepper'
 import api from 'api'
-import { parseSubmitValues } from 'lib/formikhelpers'
 import { setNeedToRefreshExperiments } from 'slices/experiments'
 import { useHistory } from 'react-router-dom'
 import { useStoreDispatch } from 'store'
@@ -41,23 +41,35 @@ const useStyles = makeStyles((theme: Theme) =>
         display: 'flex',
         background: theme.palette.primary.main,
         color: '#fff',
-        zIndex: 1101,
+        zIndex: 1101, // .MuiAppBar-root z-index: 1100
       },
+    },
+    cancel: {
+      zIndex: 1,
     },
   })
 )
 
 interface ActionsProps {
-  isSubmitting?: boolean
+  formProps: StepperFormProps
   toggleDrawer: () => void
+  setInitialValues: (initialValues: Experiment) => void
 }
 
-const Actions = ({ isSubmitting = false, toggleDrawer }: ActionsProps) => {
+const Actions = ({ formProps: { isSubmitting, resetForm }, toggleDrawer, setInitialValues }: ActionsProps) => {
   const theme = useTheme()
   const isTabletScreen = useMediaQuery(theme.breakpoints.down('sm'))
   const size = isTabletScreen ? ('small' as 'small') : ('medium' as 'medium')
+  const classes = useStyles()
+
+  const dispatch = useStoreDispatch()
 
   const { state } = useStepperContext()
+
+  const handleCancel = () => {
+    toggleDrawer()
+    resetForm()
+  }
 
   const handleUploadYAML = (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files![0]
@@ -65,10 +77,24 @@ const Actions = ({ isSubmitting = false, toggleDrawer }: ActionsProps) => {
     const reader = new FileReader()
     reader.onload = function (e) {
       try {
-        const y = yaml.safeLoad(e.target!.result as string)
-        console.log(y)
+        const y = yamlToExperiments(yaml.safeLoad(e.target!.result as string))
+        setInitialValues(y)
+        dispatch(
+          setAlert({
+            type: 'success',
+            message: `Imported successfully!`,
+          })
+        )
       } catch (e) {
-        console.log(e)
+        console.error(e)
+        dispatch(
+          setAlert({
+            type: 'error',
+            message: `An error occurred: ${e}`,
+          })
+        )
+      } finally {
+        dispatch(setAlertOpen(true))
       }
     }
     reader.readAsText(f)
@@ -76,7 +102,13 @@ const Actions = ({ isSubmitting = false, toggleDrawer }: ActionsProps) => {
 
   return (
     <Box display="flex" justifyContent="space-between" marginBottom={6}>
-      <Button variant="outlined" size={size} startIcon={<CancelIcon />} onClick={toggleDrawer}>
+      <Button
+        className={classes.cancel}
+        variant="outlined"
+        size={size}
+        startIcon={<CancelIcon />}
+        onClick={handleCancel}
+      >
         Cancel
       </Button>
       <Box display="flex">
@@ -102,14 +134,13 @@ const Actions = ({ isSubmitting = false, toggleDrawer }: ActionsProps) => {
 }
 
 export default function NewExperiment() {
-  const initialValues: Experiment = defaultExperimentSchema
-
-  const classes = useStyles()
   const theme = useTheme()
   const isTabletScreen = useMediaQuery(theme.breakpoints.down('sm'))
+  const classes = useStyles()
   const history = useHistory()
   const dispatch = useStoreDispatch()
 
+  const [initialValues, setInitialValues] = useState<Experiment>(defaultExperimentSchema)
   const [open, setOpen] = useState(false)
   const toggleDrawer = () => setOpen(!open)
 
@@ -162,14 +193,17 @@ export default function NewExperiment() {
         PaperProps={{ style: { width: isTabletScreen ? '100vw' : '50vw' } }}
       >
         <StepperProvider>
-          <Formik initialValues={initialValues} validationSchema={validationSchema} onSubmit={handleOnSubmit}>
+          <Formik
+            enableReinitialize
+            initialValues={initialValues}
+            validationSchema={validationSchema}
+            onSubmit={handleOnSubmit}
+          >
             {(props: StepperFormProps) => {
-              const { isSubmitting } = props
-
               return (
                 <Container className={classes.container}>
                   <Form>
-                    <Actions isSubmitting={isSubmitting} toggleDrawer={toggleDrawer} />
+                    <Actions formProps={props} toggleDrawer={toggleDrawer} setInitialValues={setInitialValues} />
                     <Stepper formProps={props} />
                   </Form>
                 </Container>
