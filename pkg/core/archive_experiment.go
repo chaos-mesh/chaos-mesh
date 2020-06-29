@@ -41,6 +41,9 @@ type ExperimentStore interface {
 
 	// DeleteByFinishTime deletes experiments whose time difference is greater than the given time from FinishTime.
 	DeleteByFinishTime(context.Context, time.Duration) error
+
+	// Archive archives experiments whose "archived" field is false,
+	Archive(ctx context.Context, namespace, name string) error
 }
 
 // ArchiveExperiment represents an experiment instance.
@@ -59,6 +62,7 @@ type ArchiveExperimentMeta struct {
 	UID        string
 	StartTime  time.Time
 	FinishTime time.Time
+	Archived   bool
 }
 
 // TODO: implement parse functions

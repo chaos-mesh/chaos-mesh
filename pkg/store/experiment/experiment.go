@@ -38,16 +38,15 @@ func (e *experimentStore) List(_ context.Context, kind, ns, name string) ([]*cor
 	archives := make([]*core.ArchiveExperiment, 0)
 	query, args := constructQueryArgs(kind, ns, name)
 
+	db := e.db.DB
+	if len(args) > 0 {
+		db = db.Where(query, args)
+	}
+
 	// List all experiments
-	if len(args) == 0 {
-		if err := e.db.Find(&archives).Error; err != nil && !gorm.IsRecordNotFoundError(err) {
-			return nil, err
-		}
-	} else {
-		if err := e.db.Where(query, args).Find(&archives).Error; err != nil &&
-			!gorm.IsRecordNotFoundError(err) {
-			return nil, err
-		}
+	if err := db.Where("archived = ?", true).Find(&archives).Error; err != nil &&
+		!gorm.IsRecordNotFoundError(err) {
+		return nil, err
 	}
 
 	return archives, nil
@@ -57,19 +56,26 @@ func (e *experimentStore) ListMeta(_ context.Context, kind, ns, name string) ([]
 	archives := make([]*core.ArchiveExperimentMeta, 0)
 	query, args := constructQueryArgs(kind, ns, name)
 
-	// List all experiment metas
-	if len(args) == 0 {
-		if err := e.db.Table("archive_experiments").Find(&archives).Error; err != nil && !gorm.IsRecordNotFoundError(err) {
-			return nil, err
-		}
-	} else {
-		if err := e.db.Table("archive_experiments").Where(query, args).
-			Find(&archives).Error; err != nil && !gorm.IsRecordNotFoundError(err) {
-			return nil, err
-		}
+	db := e.db.Table("archive_experiments")
+	if len(args) > 0 {
+		db = db.Where(query, args)
+	}
+
+	if err := db.Where("archived = ?", true).
+		Find(&archives).Error; err != nil && !gorm.IsRecordNotFoundError(err) {
+		return nil, err
 	}
 
 	return archives, nil
+}
+
+func (e *experimentStore) Archive(_ context.Context, ns, name string) error {
+	if err := e.db.Table("archive_experiments").Where("archived = ?", false).
+		Update("archived", true).Error; err != nil && !gorm.IsRecordNotFoundError(err) {
+		return err
+	}
+
+	return nil
 }
 
 // TODO: implement the left core.EventStore interfaces

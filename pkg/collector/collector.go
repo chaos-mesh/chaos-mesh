@@ -16,14 +16,15 @@ package collector
 import (
 	"context"
 	"encoding/json"
+	"errors"
 
 	"github.com/go-logr/logr"
 	"github.com/jinzhu/gorm"
-	"github.com/pingcap/errors"
 
 	"github.com/pingcap/chaos-mesh/api/v1alpha1"
 	"github.com/pingcap/chaos-mesh/pkg/core"
 
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -52,21 +53,29 @@ func (r *ChaosCollector) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		r.Log.Error(nil, "it's not a stateful object")
 		return ctrl.Result{}, nil
 	}
-	if err := r.Get(ctx, req.NamespacedName, obj); err != nil {
-		r.Log.Error(err, "unable to get chaos")
-		return ctrl.Result{}, nil
-	}
 
-	if obj.IsDeleted() {
-		if err := r.archiveExperiment(req, obj); err != nil {
+	err := r.Get(ctx, req.NamespacedName, obj)
+	if apierrors.IsNotFound(err) {
+		if err = r.archiveExperiment(req.Namespace, req.Name); err != nil {
 			r.Log.Error(err, "failed to archive experiment")
 			return ctrl.Result{}, nil
 		}
-	} else {
-		if err := r.recordEvent(req, obj); err != nil {
-			r.Log.Error(err, "failed to record event")
+	}
+
+	if err != nil {
+		r.Log.Error(err, "failed to get chaos object", "request", req.NamespacedName)
+		return ctrl.Result{}, nil
+	}
+
+	if obj.GetStatus() == nil || obj.GetStatus().Experiment.Phase == "" {
+		if err := r.storeExperiment(req, obj); err != nil {
+			r.Log.Error(err, "failed to archive experiment")
 			return ctrl.Result{}, nil
 		}
+	}
+
+	if err := r.recordEvent(req, obj); err != nil {
+		r.Log.Error(err, "failed to record event")
 	}
 
 	return ctrl.Result{}, nil
@@ -159,7 +168,7 @@ func (r *ChaosCollector) updateOrCreateEvent(req ctrl.Request, kind string, stat
 	return nil
 }
 
-func (r *ChaosCollector) archiveExperiment(req ctrl.Request, obj v1alpha1.InnerObject) error {
+func (r *ChaosCollector) storeExperiment(req ctrl.Request, obj v1alpha1.InnerObject) error {
 	var (
 		chaosMeta metav1.Object
 		ok        bool
@@ -176,6 +185,7 @@ func (r *ChaosCollector) archiveExperiment(req ctrl.Request, obj v1alpha1.InnerO
 			Name:      req.Name,
 			Kind:      obj.GetObjectKind().GroupVersionKind().Kind,
 			UID:       string(UID),
+			Archived:  false,
 		},
 	}
 
@@ -205,6 +215,15 @@ func (r *ChaosCollector) archiveExperiment(req ctrl.Request, obj v1alpha1.InnerO
 	archive.Experiment = string(data)
 	if err := r.archive.Create(context.Background(), archive); err != nil {
 		r.Log.Error(err, "failed to store archive", "archive", archive)
+		return err
+	}
+
+	return nil
+}
+
+func (r *ChaosCollector) archiveExperiment(ns, name string) error {
+	if err := r.archive.Archive(context.Background(), ns, name); err != nil {
+		r.Log.Error(err, "failed to archive experiment", "namespace", ns, "name", name)
 		return err
 	}
 
