@@ -83,8 +83,8 @@ type SortedEventWithPods = Omit<Event, 'DeletedAt'>
 
 const headCells: { id: keyof SortedEvent; label: string }[] = [
   { id: 'Experiment', label: 'Experiment' },
-  { id: 'Kind', label: 'Kind' },
   { id: 'Namespace', label: 'Namespace' },
+  { id: 'Kind', label: 'Kind' },
   { id: 'StartTime', label: 'Start Time' },
   { id: 'FinishTime', label: 'Finish Time' },
 ]
@@ -93,18 +93,24 @@ interface EventsTableHeadProps {
   order: Order
   orderBy: keyof SortedEvent
   onSort: (e: React.MouseEvent<unknown>, k: keyof SortedEvent) => void
-  detailed?: boolean
+  detailed: boolean
+  noExperiment: boolean
 }
 
-const EventsTableHead: React.FC<EventsTableHeadProps> = ({ order, orderBy, onSort, detailed }) => {
+const EventsTableHead: React.FC<EventsTableHeadProps> = ({ order, orderBy, onSort, detailed, noExperiment }) => {
   const handleSortEvents = (k: keyof SortedEvent) => (e: React.MouseEvent<unknown>) => onSort(e, k)
 
-  const cells = detailed ? headCells.concat([{ id: 'Detail' as keyof SortedEvent, label: 'Event Detail' }]) : headCells
+  let cells = headCells
+  if (detailed) {
+    cells = cells.concat([{ id: 'Detail' as keyof SortedEvent, label: 'Event Detail' }])
+  }
+  if (noExperiment) {
+    cells = cells.slice(1)
+  }
 
   return (
     <TableHead>
       <TableRow>
-        <TableCell />
         {cells.map((cell) => (
           <TableCell
             key={cell.id}
@@ -116,6 +122,8 @@ const EventsTableHead: React.FC<EventsTableHeadProps> = ({ order, orderBy, onSor
             </TableSortLabel>
           </TableCell>
         ))}
+
+        <TableCell />
       </TableRow>
     </TableHead>
   )
@@ -165,10 +173,11 @@ const format = (date: string) => day(date).format('YYYY-MM-DD HH:mm:ss')
 
 interface EventsTableRowProps {
   event: SortedEventWithPods
-  detailed?: boolean
+  detailed: boolean
+  noExperiment: boolean
 }
 
-const EventsTableRow: React.FC<EventsTableRowProps> = ({ event: e, detailed }) => {
+const EventsTableRow: React.FC<EventsTableRowProps> = ({ event: e, detailed, noExperiment }) => {
   const [open, setOpen] = useState(false)
 
   const handleToggle = () => setOpen(!open)
@@ -176,14 +185,9 @@ const EventsTableRow: React.FC<EventsTableRowProps> = ({ event: e, detailed }) =
   return (
     <>
       <TableRow hover>
-        <TableCell>
-          <IconButton aria-label="Expand row" size="small" onClick={handleToggle}>
-            {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
-          </IconButton>
-        </TableCell>
-        <TableCell>{e.Experiment}</TableCell>
-        <TableCell>{e.Kind}</TableCell>
+        {!noExperiment && <TableCell>{e.Experiment}</TableCell>}
         <TableCell>{e.Namespace}</TableCell>
+        <TableCell>{e.Kind}</TableCell>
         <TableCell>{format(e.StartTime)}</TableCell>
         <TableCell>{e.FinishTime ? format(e.FinishTime) : 'Not Done'}</TableCell>
         {detailed && (
@@ -199,13 +203,19 @@ const EventsTableRow: React.FC<EventsTableRowProps> = ({ event: e, detailed }) =
             </Button>
           </TableCell>
         )}
+
+        <TableCell align="right">
+          <IconButton aria-label="Expand row" size="small" onClick={handleToggle}>
+            {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
+          </IconButton>
+        </TableCell>
       </TableRow>
       <TableRow>
         <TableCell style={{ paddingTop: 0, paddingBottom: 0, borderBottom: 0 }} colSpan={12}>
           <Collapse in={open} timeout="auto" unmountOnExit>
-            <Box margin={3}>
+            <Box my={6}>
               <Typography variant="h6" gutterBottom>
-                Pods
+                Affected Pods
               </Typography>
               <Table size="small">
                 <TableHead>
@@ -241,9 +251,10 @@ const EventsTableRow: React.FC<EventsTableRowProps> = ({ event: e, detailed }) =
 interface EventsTableProps {
   events: Event[] | null
   detailed?: boolean
+  noExperiment?: boolean
 }
 
-const EventsTable: React.FC<EventsTableProps> = ({ events, detailed }) => {
+const EventsTable: React.FC<EventsTableProps> = ({ events, detailed = false, noExperiment = false }) => {
   const classes = useStyles()
 
   const [order, setOrder] = useState<Order>('desc')
@@ -267,14 +278,27 @@ const EventsTable: React.FC<EventsTableProps> = ({ events, detailed }) => {
 
   return (
     <TableContainer className={classes.tableContainer}>
-      <Table>
-        <EventsTableHead order={order} orderBy={orderBy} onSort={handleSortEvents} detailed={detailed} />
+      <Table stickyHeader>
+        <EventsTableHead
+          order={order}
+          orderBy={orderBy}
+          onSort={handleSortEvents}
+          detailed={detailed}
+          noExperiment={noExperiment}
+        />
 
         <TableBody>
           {events &&
             stableSort<SortedEvent>(events, getComparator(order, orderBy))
               .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-              .map((e) => <EventsTableRow key={e.ID} event={e as SortedEventWithPods} detailed={detailed} />)}
+              .map((e) => (
+                <EventsTableRow
+                  key={e.ID}
+                  event={e as SortedEventWithPods}
+                  detailed={detailed}
+                  noExperiment={noExperiment}
+                />
+              ))}
         </TableBody>
 
         <TableFooter>
