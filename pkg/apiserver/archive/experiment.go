@@ -101,7 +101,7 @@ func (s *Service) experimentDetailSearch(c *gin.Context) {
 	name := c.Query("name")
 	ns := c.Query("namespace")
 	uid := c.Query("uid")
-	
+
 	data, err := s.archive.DetailList(context.TODO(), kind, ns, name, uid)
 	if err != nil {
 		if !gorm.IsRecordNotFoundError(err) {
