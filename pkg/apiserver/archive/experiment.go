@@ -56,7 +56,7 @@ func Register(r *gin.RouterGroup, s *Service) {
 
 	// TODO: add more api handlers
 	endpoint.GET("", s.listExperiments)
-	endpoint.GET("/detailSearch", s.experimentDetailSearch)
+	endpoint.GET("/detail/search", s.experimentDetailSearch)
 	endpoint.GET("/detail", s.experimentDetail)
 }
 

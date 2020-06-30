@@ -98,6 +98,7 @@ func (e *experimentStore) getUID(_ context.Context, kind, ns, name string) (stri
 	return UID, nil
 }
 
+// DetailList returns a list of archive experiments from the datastore.
 func (e *experimentStore) DetailList(ctx context.Context, kind, namespace, name, uid string) ([]*core.ArchiveExperiment, error) {
 	if kind != "" && namespace != "" && name != "" && uid == "" {
 		var err error
