@@ -58,8 +58,8 @@ func (r *ChaosCollector) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	if apierrors.IsNotFound(err) {
 		if err = r.archiveExperiment(req.Namespace, req.Name); err != nil {
 			r.Log.Error(err, "failed to archive experiment")
-			return ctrl.Result{}, nil
 		}
+		return ctrl.Result{}, nil
 	}
 
 	if err != nil {
@@ -67,11 +67,16 @@ func (r *ChaosCollector) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		return ctrl.Result{}, nil
 	}
 
-	if obj.GetStatus() == nil || obj.GetStatus().Experiment.Phase == "" {
-		if err := r.storeExperiment(req, obj); err != nil {
+	if obj.IsDeleted() {
+		if err = r.archiveExperiment(req.Namespace, req.Name); err != nil {
 			r.Log.Error(err, "failed to archive experiment")
-			return ctrl.Result{}, nil
 		}
+		return ctrl.Result{}, nil
+	}
+
+	if err := r.setUnarchivedExperiment(req, obj); err != nil {
+		r.Log.Error(err, "failed to archive experiment")
+		// ignore error here
 	}
 
 	if err := r.recordEvent(req, obj); err != nil {
@@ -168,7 +173,7 @@ func (r *ChaosCollector) updateOrCreateEvent(req ctrl.Request, kind string, stat
 	return nil
 }
 
-func (r *ChaosCollector) storeExperiment(req ctrl.Request, obj v1alpha1.InnerObject) error {
+func (r *ChaosCollector) setUnarchivedExperiment(req ctrl.Request, obj v1alpha1.InnerObject) error {
 	var (
 		chaosMeta metav1.Object
 		ok        bool
@@ -177,14 +182,14 @@ func (r *ChaosCollector) storeExperiment(req ctrl.Request, obj v1alpha1.InnerObj
 	if chaosMeta, ok = obj.(metav1.Object); !ok {
 		r.Log.Error(nil, "failed to get chaos meta information")
 	}
-	UID := chaosMeta.GetUID()
+	UID := string(chaosMeta.GetUID())
 
 	archive := &core.ArchiveExperiment{
 		ArchiveExperimentMeta: core.ArchiveExperimentMeta{
 			Namespace: req.Namespace,
 			Name:      req.Name,
 			Kind:      obj.GetObjectKind().GroupVersionKind().Kind,
-			UID:       string(UID),
+			UID:       UID,
 			Archived:  false,
 		},
 	}
@@ -203,7 +208,9 @@ func (r *ChaosCollector) storeExperiment(req ctrl.Request, obj v1alpha1.InnerObj
 	}
 
 	archive.StartTime = chaosMeta.GetCreationTimestamp().Time
-	archive.FinishTime = chaosMeta.GetDeletionTimestamp().Time
+	if chaosMeta.GetDeletionTimestamp() != nil {
+		archive.FinishTime = chaosMeta.GetDeletionTimestamp().Time
+	}
 
 	data, err := json.Marshal(chaosMeta)
 	if err != nil {
@@ -213,8 +220,21 @@ func (r *ChaosCollector) storeExperiment(req ctrl.Request, obj v1alpha1.InnerObj
 	}
 
 	archive.Experiment = string(data)
-	if err := r.archive.Create(context.Background(), archive); err != nil {
-		r.Log.Error(err, "failed to store archive", "archive", archive)
+
+	find, err := r.archive.FindByUID(context.Background(), UID)
+	if err != nil {
+		r.Log.Error(err, "failed to find experiment", "UID", UID)
+		return err
+	}
+
+	if find != nil && find.ID != 0 {
+		archive.ID = find.ID
+		archive.CreatedAt = find.CreatedAt
+		archive.UpdatedAt = find.UpdatedAt
+	}
+
+	if err := r.archive.Set(context.Background(), archive); err != nil {
+		r.Log.Error(err, "failed to update experiment", "archive", archive)
 		return err
 	}
 
