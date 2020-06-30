@@ -10,6 +10,22 @@ sidebar_label: FAQs
 
 No, you can not use Chaos Mesh in this case. But still you can run chaos experiments using command line. Refer to [Command Line Usages of Chaos](https://github.com/pingcap/tipocket/blob/master/doc/command_line_chaos.md) for details.
 
+### Q: When I deploy Chaos-mesh successfully, Then I create PodChaos experiments successfully, but create NetworkChaos/TimeChaos Experiment failed. The log is shown below, what's the matter？
+
+I get chaos-controller-manager's log, as shown below.
+
+```
+2020-06-18T01:05:26.207Z	ERROR	controllers.TimeChaos	failed to apply chaos on all pods	{"reconciler": "timechaos", "error": "rpc error: code = Unavailable desc = connection error: desc = \"transport: Error while dialing dial tcp xx.xx.xx.xx:xxxxx: connect: connection refused\""}
+```
+
+You can try use the parameters: `hostNetwork`. Usage is as follows:
+
+```
+# vim helm/chaos-mesh/values.yaml, change hostNetwork from false to true
+hostNetwork: true
+```
+
+
 ## Debug
 
 ### Q: Experiment not working after chaos is applied

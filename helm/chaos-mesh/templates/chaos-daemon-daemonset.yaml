@@ -26,6 +26,9 @@ spec:
 {{ toYaml . | indent 8 }}
     {{- end }}
     spec:
+  {{- if .Values.chaosDaemon.hostNetwork }}
+      hostNetwork: true
+  {{- end }}
       hostIPC: true
       hostPID: true
       containers:

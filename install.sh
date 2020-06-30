@@ -1152,8 +1152,6 @@ spec:
               memory: 256Mi
         command:
           - /usr/local/bin/chaos-controller-manager
-          - -template-labels=app.kubernetes.io/component=template
-          - -configmap-labels=app.kubernetes.io/component=webhook
         env:
           - name: NAMESPACE
             valueFrom:
@@ -1165,6 +1163,10 @@ spec:
             value: !!str 31767
           - name: BPFKI_PORT
             value: !!str 50051
+          - name: TEMPLATE_LABELS
+            value: "app.kubernetes.io/component:template"
+          - name: CONFIGMAP_LABELS
+            value: "app.kubernetes.io/component:webhook"
         volumeMounts:
           - name: webhook-certs
             mountPath: /etc/webhook/certs
