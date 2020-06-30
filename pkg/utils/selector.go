@@ -19,10 +19,12 @@ import (
 	"fmt"
 	"math"
 	"math/rand"
+	"regexp"
 	"strconv"
 	"strings"
 
 	"github.com/pingcap/chaos-mesh/api/v1alpha1"
+	"github.com/pingcap/chaos-mesh/controllers/common"
 	"github.com/pingcap/chaos-mesh/pkg/label"
 	"github.com/pingcap/chaos-mesh/pkg/mock"
 
@@ -82,6 +84,9 @@ func SelectPods(ctx context.Context, c client.Client, selector v1alpha1.Selector
 	// pods are specifically specified
 	if len(selector.Pods) > 0 {
 		for ns, names := range selector.Pods {
+			if !IsAllowedNamespaces(ns) {
+				log.Info("filter pod by namespaces", "namespace", ns)
+			}
 			for _, name := range names {
 				var pod v1.Pod
 				err := c.Get(ctx, types.NamespacedName{
@@ -120,11 +125,13 @@ func SelectPods(ctx context.Context, c client.Client, selector v1alpha1.Selector
 
 	pods = append(pods, podList.Items...)
 
+	pods = filterByNamespaces(pods)
+
 	namespaceSelector, err := parseSelector(strings.Join(selector.Namespaces, ","))
 	if err != nil {
 		return nil, err
 	}
-	pods, err = filterByNamespaces(pods, namespaceSelector)
+	pods, err = filterByNamespaceSelector(pods, namespaceSelector)
 	if err != nil {
 		return nil, err
 	}
@@ -193,7 +200,7 @@ func CheckPodMeetSelector(pod v1.Pod, selector v1alpha1.SelectorSpec) (bool, err
 		return false, err
 	}
 
-	pods, err = filterByNamespaces(pods, namespaceSelector)
+	pods, err = filterByNamespaceSelector(pods, namespaceSelector)
 	if err != nil {
 		return false, err
 	}
@@ -365,8 +372,43 @@ func filterByPhaseSelector(pods []v1.Pod, phases labels.Selector) ([]v1.Pod, err
 	return filteredList, nil
 }
 
-// filterByNamespaces filters a list of pods by a given namespace selector.
-func filterByNamespaces(pods []v1.Pod, namespaces labels.Selector) ([]v1.Pod, error) {
+func filterByNamespaces(pods []v1.Pod) []v1.Pod {
+	var filteredList []v1.Pod
+
+	for _, pod := range pods {
+		if IsAllowedNamespaces(pod.Namespace) {
+			filteredList = append(filteredList, pod)
+		} else {
+			log.Info("filter pod by namespaces",
+				"pod", pod.Name, "namespace", pod.Namespace)
+		}
+	}
+	return filteredList
+}
+
+// IsAllowedNamespaces returns whether namespace allows the execution of a chaos task
+func IsAllowedNamespaces(namespace string) bool {
+	if common.ControllerCfg.AllowedNamespaces != "" {
+		matched, err := regexp.MatchString(common.ControllerCfg.AllowedNamespaces, namespace)
+		if err != nil {
+			return false
+		}
+		return matched
+	}
+
+	if common.ControllerCfg.IgnoredNamespaces != "" {
+		matched, err := regexp.MatchString(common.ControllerCfg.IgnoredNamespaces, namespace)
+		if err != nil {
+			return false
+		}
+		return !matched
+	}
+
+	return true
+}
+
+// filterByNamespaceSelector filters a list of pods by a given namespace selector.
+func filterByNamespaceSelector(pods []v1.Pod, namespaces labels.Selector) ([]v1.Pod, error) {
 	// empty filter returns original list
 	if namespaces.Empty() {
 		return pods, nil
