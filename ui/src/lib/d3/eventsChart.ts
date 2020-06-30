@@ -80,7 +80,26 @@ export default function gen({
     .range(d3.schemeTableau10)
 
   const legendsRoot = d3.select(document.createElement('div')).attr('class', 'chaos-events-legends')
-  const legends = legendsRoot.selectAll().data(allExperiments).enter().append('div')
+  const legends = legendsRoot
+    .selectAll()
+    .data(allExperiments)
+    .enter()
+    .append('div')
+    .on('click', function (d) {
+      const _events = events.filter((e) => e.Experiment === d)
+      const event = _events[_events.length - 1]
+
+      svg
+        .transition()
+        .duration(750)
+        .call(
+          zoom.transform as any,
+          d3.zoomIdentity
+            .translate(width / 2, 0)
+            .scale(2)
+            .translate(-x(day(event.StartTime)), 0)
+        )
+    })
   legends
     .insert('div')
     .attr('style', 'color: rgba(0, 0, 0, 0.72); font-size: 0.625rem;')
@@ -114,7 +133,7 @@ export default function gen({
     .attr('fill', (d) => colorPalette(d.Experiment))
     .style('cursor', 'pointer')
 
-  const zoom = d3.zoom().scaleExtent([0.5, 5]).on('zoom', zoomd)
+  const zoom = d3.zoom().scaleExtent([0.25, 5]).on('zoom', zoomd)
   svg.call(zoom as any)
   function zoomd() {
     const eventTransform = d3.event.transform
@@ -178,7 +197,7 @@ export default function gen({
           zoom.transform as any,
           d3.zoomIdentity
             .translate(width / 2, 0)
-            .scale(5)
+            .scale(2)
             .translate(-x(day(d.StartTime)), 0)
         )
     })
