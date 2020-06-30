@@ -21,6 +21,7 @@ import (
 	. "github.com/onsi/gomega"
 
 	"github.com/pingcap/chaos-mesh/api/v1alpha1"
+	"github.com/pingcap/chaos-mesh/controllers/common"
 	"github.com/pingcap/chaos-mesh/pkg/label"
 
 	v1 "k8s.io/api/core/v1"
@@ -405,7 +406,69 @@ func TestFilterByAnnotations(t *testing.T) {
 	}
 }
 
-func TestFilterNamespace(t *testing.T) {
+func TestIsAllowedNamespaces(t *testing.T) {
+	g := NewGomegaWithT(t)
+	type TestCase struct {
+		name   string
+		pods   []v1.Pod
+		ret    []bool
+		allow  string
+		ignore string
+	}
+	pods := []v1.Pod{
+		newPod("p1", v1.PodRunning, "allow", nil, nil),
+		newPod("p1", v1.PodRunning, "allow-app", nil, nil),
+		newPod("p1", v1.PodRunning, "app-allow", nil, nil),
+		newPod("p1", v1.PodRunning, "ignore", nil, nil),
+		newPod("p1", v1.PodRunning, "ignore-app", nil, nil),
+		newPod("p1", v1.PodRunning, "app-ignore", nil, nil),
+	}
+
+	allowRet := []bool{true, true, true, false, false, false}
+
+	var tcs []TestCase
+	tcs = append(tcs, TestCase{
+		name:  "only set allow",
+		pods:  pods,
+		ret:   allowRet,
+		allow: "allow",
+	})
+
+	tcs = append(tcs, TestCase{
+		name:   "only set ignore",
+		pods:   pods,
+		ret:    allowRet,
+		ignore: "ignore",
+	})
+
+	tcs = append(tcs, TestCase{
+		name:   "only set allow",
+		pods:   pods,
+		ret:    allowRet,
+		allow:  "allow",
+		ignore: "ignore",
+	})
+
+	setRule := func(allow string, ignore string) {
+		common.ControllerCfg.AllowedNamespaces = allow
+		common.ControllerCfg.IgnoredNamespaces = ignore
+	}
+
+	clean := func() {
+		common.ControllerCfg.AllowedNamespaces = ""
+		common.ControllerCfg.IgnoredNamespaces = ""
+	}
+
+	for _, tc := range tcs {
+		setRule(tc.allow, tc.ignore)
+		for index, pod := range tc.pods {
+			g.Expect(IsAllowedNamespaces(pod.Namespace)).Should(Equal(tc.ret[index]))
+		}
+		clean()
+	}
+}
+
+func TestFilterNamespaceSelector(t *testing.T) {
 	g := NewGomegaWithT(t)
 
 	type TestCase struct {
@@ -470,7 +533,7 @@ func TestFilterNamespace(t *testing.T) {
 	})
 
 	for _, tc := range tcs {
-		g.Expect(filterByNamespaces(tc.pods, tc.filterSelector)).To(Equal(tc.filteredPods), tc.name)
+		g.Expect(filterByNamespaceSelector(tc.pods, tc.filterSelector)).To(Equal(tc.filteredPods), tc.name)
 	}
 }
 
