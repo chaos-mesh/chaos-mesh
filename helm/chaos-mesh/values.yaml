@@ -55,6 +55,8 @@ chaosDaemon:
   grpcPort: 31767
   httpPort: 31766
 
+  hostNetwork: false
+
   podAnnotations: {}
 
   # runtime specifies which container runtime to use. Currently

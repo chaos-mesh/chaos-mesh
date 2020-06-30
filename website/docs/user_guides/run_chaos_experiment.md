@@ -12,8 +12,8 @@ The first step is always to deploy a testing cluster. For illustration purposes,
 
 You can follow the instructions in the following two documents to deploy a TiDB cluster:
 
-* [Deploy using kind](https://pingcap.com/docs/tidb-in-kubernetes/stable/deploy-tidb-from-kubernetes-kind/)
-* [Deploy using Minikube](https://pingcap.com/docs/tidb-in-kubernetes/stable/deploy-tidb-from-kubernetes-minikube/)
+* [Deploy using kind](https://docs.pingcap.com/tidb-in-kubernetes/v1.1/get-started#create-a-kubernetes-cluster-using-kind/)
+* [Deploy using Minikube](https://docs.pingcap.com/tidb-in-kubernetes/v1.1/get-started#create-a-kubernetes-cluster-using-minikube/)
 
 ## Step 2: Define the experiment configuration file
 

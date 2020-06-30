@@ -71,6 +71,7 @@ func (s *Service) listEvents(c *gin.Context) {
 	startTimeStr := c.Query("startTime")
 	experimentName := c.Query("experimentName")
 	experimentNamespace := c.Query("experimentNamespace")
+	uid := c.Query("uid")
 
 	if podName != "" && podNamespace == "" {
 		c.Status(http.StatusInternalServerError)
@@ -78,7 +79,7 @@ func (s *Service) listEvents(c *gin.Context) {
 		return
 	}
 
-	eventList, err := s.event.ListByFilter(context.Background(), podName, podNamespace, experimentName, experimentNamespace, startTimeStr)
+	eventList, err := s.event.ListByFilter(context.Background(), podName, podNamespace, experimentName, experimentNamespace, uid, startTimeStr)
 	if err != nil {
 		c.Status(http.StatusInternalServerError)
 		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
