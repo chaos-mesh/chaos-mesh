@@ -50,7 +50,7 @@ export default function Experiments() {
         setExperiments(
           experiments.map((e) => {
             e.events = [
-              data.filter((d) => d.Experiment === e.Name).sort((a, b) => dayComparator(a.CreatedAt, b.CreatedAt))[0],
+              data.filter((d) => d.Experiment === e.Name).sort((a, b) => dayComparator(a.StartTime, b.StartTime))[0],
             ]
 
             return e

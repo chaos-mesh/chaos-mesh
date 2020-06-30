@@ -268,7 +268,7 @@ const EventsTable: React.FC<EventsTableProps> = ({
   const classes = useStyles()
 
   const [order, setOrder] = useState<Order>('desc')
-  const [orderBy, setOrderBy] = useState<keyof SortedEvent>('CreatedAt')
+  const [orderBy, setOrderBy] = useState<keyof SortedEvent>('StartTime')
   const [page, setPage] = React.useState(0)
   const [rowsPerPage, setRowsPerPage] = React.useState(5)
 
