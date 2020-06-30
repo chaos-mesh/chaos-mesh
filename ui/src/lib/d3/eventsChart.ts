@@ -1,6 +1,7 @@
 import * as d3 from 'd3'
 
 import { Event } from 'api/events.type'
+import _debounce from 'lodash.debounce'
 import day from 'lib/dayjs'
 import insertCommonStyle from './insertCommonStyle'
 import wrapText from './wrapText'
@@ -215,7 +216,7 @@ export default function gen({
     rects.attr('x', (d) => x(day(d.StartTime))).attr('width', genRectWidth)
   }
 
-  d3.select(window).on('resize', reGen)
+  d3.select(window).on('resize', _debounce(reGen, 250))
 
   root.appendChild(legendsRoot.node()!)
   root.appendChild(tooltip.node()!)

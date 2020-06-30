@@ -16,7 +16,7 @@ import {
   TextField,
   Typography,
 } from '@material-ui/core'
-import React, { useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { createStyles, makeStyles } from '@material-ui/core/styles'
 import day, { dayComparator } from 'lib/dayjs'
 
@@ -30,6 +30,9 @@ import LastPageIcon from '@material-ui/icons/LastPage'
 import { Link } from 'react-router-dom'
 import PaperTop from 'components/PaperTop'
 import SearchIcon from '@material-ui/icons/Search'
+import _debounce from 'lodash.debounce'
+import { searchEvents } from 'lib/search'
+import { usePrevious } from 'lib/hooks'
 
 const useStyles = makeStyles(() =>
   createStyles({
@@ -254,23 +257,26 @@ const EventsTableRow: React.FC<EventsTableRowProps> = ({ event: e, detailed, noE
 
 export interface EventsTableProps {
   title?: string
-  events: Event[] | null
+  events: Event[]
   detailed?: boolean
   noExperiment?: boolean
 }
 
 const EventsTable: React.FC<EventsTableProps> = ({
   title = 'Events',
-  events,
+  events: allEvents,
   detailed = false,
   noExperiment = false,
 }) => {
   const classes = useStyles()
 
+  const [events, setEvents] = useState(allEvents)
   const [order, setOrder] = useState<Order>('desc')
   const [orderBy, setOrderBy] = useState<keyof SortedEvent>('StartTime')
-  const [page, setPage] = React.useState(0)
-  const [rowsPerPage, setRowsPerPage] = React.useState(5)
+  const [page, setPage] = useState(0)
+  const [rowsPerPage, setRowsPerPage] = useState(5)
+  const [search, setSearch] = useState('')
+  const previousSearch = usePrevious(search)
 
   const handleSortEvents = (_: React.MouseEvent<unknown>, k: keyof SortedEvent) => {
     const isAsc = orderBy === k && order === 'asc'
@@ -286,13 +292,28 @@ const EventsTable: React.FC<EventsTableProps> = ({
     setPage(0)
   }
 
+  const debounceSetSearch = useCallback(_debounce(setSearch, 500), [])
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => debounceSetSearch(e.target.value)
+
+  useEffect(() => {
+    if (search && allEvents) {
+      setEvents(searchEvents(allEvents, search))
+    }
+
+    if (previousSearch !== '' && search === '') {
+      setEvents(allEvents)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [search])
+
   return (
     <>
       <PaperTop title={title}>
         <TextField
-          placeholder="Search events ..."
           style={{ width: '200px', minWidth: '30%', margin: 0 }}
           margin="dense"
+          placeholder="Search events ..."
+          disabled={!allEvents}
           variant="outlined"
           InputProps={{
             startAdornment: (
@@ -301,6 +322,7 @@ const EventsTable: React.FC<EventsTableProps> = ({
               </InputAdornment>
             ),
           }}
+          onChange={handleSearchChange}
         />
       </PaperTop>
       <TableContainer className={classes.tableContainer}>
