@@ -25,6 +25,13 @@ You can try use the parameters: `hostNetwork`. Usage is as follows:
 hostNetwork: true
 ```
 
+### Q: If install with kind reports `ERROR: failed to get cluster internal kubeconfig: command "docker exec --privileged kind-control-plane cat /etc/kubernetes/admin.conf" failed with error: exit status 1`, how can I fix it
+You can try
+```
+kind delete cluster
+```
+then deploy again
+
 
 ## Debug
 
