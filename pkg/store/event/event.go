@@ -272,10 +272,22 @@ func (e *eventStore) ListByFilter(_ context.Context, podName string, podNamespac
 		resList, err = e.ListByPod(context.Background(), podNamespace, podName)
 	} else if podNamespace != "" {
 		resList, err = e.ListByNamespace(context.Background(), podNamespace)
-	} else if uid != "" {
-		resList, err = e.ListByUID(context.Background(), uid)
 	} else {
-		resList, err = e.List(context.Background())
+		query, args := constructQueryArgs(experimentName, experimentNamespace, uid)
+		// List all events
+		if len(args) == 0 {
+			if err := e.db.Model(core.Event{}).Find(&resList).Error; err != nil && !gorm.IsRecordNotFoundError(err) {
+				return resList, err
+			}
+		} else {
+			fmt.Println(query)
+			fmt.Println(args)
+			fmt.Println(len(args))
+			if err := e.db.Where(query, args).Find(&resList).Error; err != nil &&
+				!gorm.IsRecordNotFoundError(err) {
+				return resList, err
+			}
+		}
 	}
 	if err != nil {
 		return resList, err
@@ -362,4 +374,31 @@ func (e *eventStore) getUID(_ context.Context, ns, name string) (string, error) 
 		}
 	}
 	return UID, nil
+}
+
+func constructQueryArgs(experimentName, experimentNamespace, uid string) (string, []string) {
+	args := make([]string, 0)
+	query := ""
+	if experimentName != "" {
+		query += "experiment = ?"
+		args = append(args, experimentName)
+	}
+	if experimentNamespace != "" {
+		if len(args) > 0 {
+			query += " AND namespace = ?"
+		} else {
+			query += "namespace = ?"
+		}
+		args = append(args, experimentNamespace)
+	}
+
+	if uid != "" {
+		if len(args) > 0 {
+			query += " AND experiment_id = ?"
+		} else {
+			query += "experiment_id = ?"
+		}
+		args = append(args, uid)
+	}
+	return query, args
 }
