@@ -102,37 +102,37 @@ $ make test
 
 2. Make sure the installation in step 1 is successful:
 
-```bash
-$ source ~/.bash_profile
-$ kind --version 
-...
-$ kubectl version 
-...
-```
+    ```bash
+    $ source ~/.bash_profile
+    $ kind --version
+    ...
+    $ kubectl version
+    ...
+    ```
 
 3. Build the image:
 
-```bash
-$ make image-chaos-mesh
-$ make image-chaos-dahsboard
-$ make image-chaos-daemon
-# or build all images
-$ make image
-```
+    ```bash
+    $ make image-chaos-mesh
+    $ make image-chaos-dahsboard
+    $ make image-chaos-daemon
+    # or build all images
+    $ make image
+    ```
 
 4. Load image into Kubernetes nodes:
 
-```bash
-$ kind load docker-image pingcap/chaos-mesh:latest 
-$ kind load docker-image pingcap/chaos-dashboard:latest 
-$ kind load docker-image pingcap/chaos-daemon:latest 
-```
+    ```bash
+    $ kind load docker-image pingcap/chaos-mesh:latest 
+    $ kind load docker-image pingcap/chaos-dashboard:latest 
+    $ kind load docker-image pingcap/chaos-daemon:latest 
+    ```
 
 5. Deploy Chaos Mesh:
 
-```bash
-$ ./install.sh --runtime containerd
-```
+    ```bash
+    $ ./install.sh --runtime containerd
+    ```
 
 Now you can test your code update on the deployed cluster.
 
@@ -142,21 +142,23 @@ Congratulations! Now you have finished all tests and are ready to commit your co
 
 1. Run the following commands to keep your branch in sync:
 
-```bash
-$ git fetch upstream
-$ git rebase upstream/master
-```
+    ```bash
+    $ git fetch upstream
+    $ git rebase upstream/master
+    ```
 
 2. Commit your changes:
-```bash
-$ git add -A
-$ git commit
-```
+
+    ```bash
+    $ git add -A
+    $ git commit
+    ```
+
 3. Push your changes to the remote branch:
 
-```bash
-$ git push -f origin myfeature
-```
+    ```bash
+    $ git push -f origin myfeature
+    ```
 
 ### Step 5: Create a pull request
 
@@ -166,9 +168,6 @@ $ git push -f origin myfeature
 
 ### Step 6: Get a code review
 
-Once your pull request has been opened, it will be assigned to at least two reviewers. The reviewers will do a thorough code review, looking for correctness, bugs, opportunities for improvement, documentation and comments, and style.
+Once your pull request has been opened, it will be assigned to at least two reviewers. The reviewers will do a thorough code review of correctness, bugs, opportunities for improvement, documentation and comments, and style.
 
 Commit changes made in response to review comments to the same branch on your fork.
-
-
-
