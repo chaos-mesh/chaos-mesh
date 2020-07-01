@@ -94,7 +94,7 @@ func (s *Service) listExperiments(c *gin.Context) {
 // @Param kind query string false "kind" Enums(PodChaos, IoChaos, NetworkChaos, TimeChaos, KernelChaos, StressChaos)
 // @Param uid query string false "uid"
 // @Success 200 {array} core.ArchiveExperiment
-// @Router /api/archives/detailSearch [get]
+// @Router /api/archives/detail/search [get]
 // @Failure 500 {object} utils.APIError
 func (s *Service) experimentDetailSearch(c *gin.Context) {
 	kind := c.Query("kind")
