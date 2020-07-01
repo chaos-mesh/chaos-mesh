@@ -83,7 +83,7 @@ func (e *experimentStore) FindByUID(_ context.Context, UID string) (*core.Archiv
 	expr := new(core.ArchiveExperiment)
 
 	if err := e.db.Model(core.ArchiveExperiment{}).
-		Where("uid = ?", UID).First(expr).Error; err != nil && !gorm.IsRecordNotFoundError(err) {
+		Where("uid = ?", UID).First(expr).Error; err != nil {
 		return nil, err
 	}
 

@@ -222,12 +222,12 @@ func (r *ChaosCollector) setUnarchivedExperiment(req ctrl.Request, obj v1alpha1.
 	archive.Experiment = string(data)
 
 	find, err := r.archive.FindByUID(context.Background(), UID)
-	if err != nil {
+	if err != nil && !gorm.IsRecordNotFoundError(err) {
 		r.Log.Error(err, "failed to find experiment", "UID", UID)
 		return err
 	}
 
-	if find != nil && find.ID != 0 {
+	if find != nil {
 		archive.ID = find.ID
 		archive.CreatedAt = find.CreatedAt
 		archive.UpdatedAt = find.UpdatedAt
