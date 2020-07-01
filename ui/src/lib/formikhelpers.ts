@@ -1,4 +1,4 @@
-import { Experiment, ExperimentTarget, StepperFormProps } from 'components/NewExperiment/types'
+import { Experiment, ExperimentTarget, FormikCtx } from 'components/NewExperiment/types'
 
 import { defaultExperimentSchema } from 'components/NewExperiment/constants'
 
@@ -13,7 +13,9 @@ export const ChaosKindKeyMap: {
   StressChaos: { key: 'stress_chaos' },
 }
 
-export function parseSubmitValues(values: Experiment) {
+export function parseSubmitValues(e: Experiment) {
+  const values = JSON.parse(JSON.stringify(e))
+
   // Parse phase_selectors
   const phaseSelectors = values.scope.phase_selectors
   if (phaseSelectors.length === 1 && phaseSelectors[0] === 'all') {
@@ -78,7 +80,7 @@ export function mustSchedule(formikValues: Experiment) {
   return false
 }
 
-export function resetOtherChaos(formProps: StepperFormProps, kind: string, action: string) {
+export function resetOtherChaos(formProps: FormikCtx, kind: string, action: string) {
   const { values, setFieldValue } = formProps
 
   const selectedChaosKind = kind

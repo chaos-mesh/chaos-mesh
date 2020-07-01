@@ -1,5 +1,7 @@
 import { Box, Chip, TextField, TextFieldProps } from '@material-ui/core'
+import { Field, getIn, useFormikContext } from 'formik'
 
+import { Experiment } from 'components/NewExperiment/types'
 import React from 'react'
 
 const SelectField: React.FC<TextFieldProps & { multiple?: boolean }> = ({
@@ -8,14 +10,29 @@ const SelectField: React.FC<TextFieldProps & { multiple?: boolean }> = ({
   multiple = false,
   ...props
 }) => {
+  const { values, setFieldValue } = useFormikContext<Experiment>()
+
+  const onDelete = (val: string) => () =>
+    setFieldValue(
+      props.name!,
+      getIn(values, props.name!).filter((d: string) => d !== val)
+    )
+
   const SelectProps = {
     multiple,
     renderValue: multiple
       ? (selected: any) => (
           <Box display="flex" flexWrap="wrap">
-            {(selected as string[]).map((value) => (
-              <Box key={value} m={0.5}>
-                <Chip label={value} color="primary" style={{ height: 24 }} />
+            {(selected as string[]).map((val) => (
+              <Box key={val} m={0.5}>
+                <Chip
+                  label={val}
+                  color="primary"
+                  style={{ height: 24 }}
+                  clickable
+                  onDelete={onDelete(val)}
+                  onMouseDown={(e) => e.stopPropagation()}
+                />
               </Box>
             ))}
           </Box>
@@ -25,9 +42,17 @@ const SelectField: React.FC<TextFieldProps & { multiple?: boolean }> = ({
 
   return (
     <Box mb={2}>
-      <TextField select margin="dense" fullWidth={fullWidth} variant="outlined" SelectProps={SelectProps} {...props}>
+      <Field
+        as={TextField}
+        select
+        margin="dense"
+        fullWidth={fullWidth}
+        variant="outlined"
+        SelectProps={SelectProps}
+        {...props}
+      >
         {children}
-      </TextField>
+      </Field>
     </Box>
   )
 }

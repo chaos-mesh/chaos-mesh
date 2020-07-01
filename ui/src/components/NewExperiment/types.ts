@@ -1,4 +1,4 @@
-import { FormikProps } from 'formik'
+import { FormikContextType } from 'formik'
 
 export interface ExperimentBasic {
   name: string
@@ -101,8 +101,8 @@ export interface StepperContextProps {
   dispatch: StepperDispatch
 }
 
-export type StepperFormProps = FormikProps<Experiment>
+export type FormikCtx = FormikContextType<Experiment>
 
-export type StepperFormTargetProps = StepperFormProps & {
+export type StepperFormTargetProps = FormikCtx & {
   handleActionChange: (e: React.ChangeEvent<any>) => void
 }

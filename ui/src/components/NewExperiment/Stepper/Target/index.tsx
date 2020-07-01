@@ -1,10 +1,11 @@
 import { ChaosKindKeyMap, resetOtherChaos } from 'lib/formikhelpers'
 import React, { useEffect, useState } from 'react'
 
+import { Experiment } from 'components/NewExperiment/types'
 import Network from './Network'
 import Pod from './Pod'
-import { StepperFormProps } from 'components/NewExperiment/types'
 import Tabs from 'components/Tabs'
+import { useFormikContext } from 'formik'
 
 const tabs = [
   { label: 'Pod Lifecycle' },
@@ -15,15 +16,13 @@ const tabs = [
   { label: 'Stress CPU/Memory' },
 ]
 
-interface TargetProps {
-  formProps: StepperFormProps
-}
+const Target: React.FC = () => {
+  const formikCtx = useFormikContext<Experiment>()
 
-const Target: React.FC<TargetProps> = ({ formProps }) => {
   const [tabIndex, setTabIndex] = useState(0)
 
   useEffect(() => {
-    const kind = formProps.values.target.kind
+    const kind = formikCtx.values.target.kind
 
     if (kind) {
       setTabIndex(Object.keys(ChaosKindKeyMap).indexOf(kind))
@@ -32,11 +31,11 @@ const Target: React.FC<TargetProps> = ({ formProps }) => {
   }, [])
 
   const handleActionChange = (kind: string) => (e: React.ChangeEvent<HTMLInputElement>) =>
-    resetOtherChaos(formProps, kind, e.target.value)
+    resetOtherChaos(formikCtx, kind, e.target.value)
 
   const tabPanels = [
-    <Pod {...formProps} handleActionChange={handleActionChange('PodChaos')} />,
-    <Network {...formProps} handleActionChange={handleActionChange('NetworkChaos')} />,
+    <Pod {...formikCtx} handleActionChange={handleActionChange('PodChaos')} />,
+    <Network {...formikCtx} handleActionChange={handleActionChange('NetworkChaos')} />,
   ]
 
   const props = {

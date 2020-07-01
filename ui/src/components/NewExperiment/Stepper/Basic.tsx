@@ -1,32 +1,30 @@
 import { SelectField, TextField } from 'components/FormField'
 
+import { Experiment } from 'components/NewExperiment/types'
 import { MenuItem } from '@material-ui/core'
 import React from 'react'
-import { StepperFormProps } from '../types'
+import { useFormikContext } from 'formik'
 
 interface BasicStepProps {
-  formProps: StepperFormProps
   namespaces: string[]
 }
 
-const BasicStep: React.FC<BasicStepProps> = ({ formProps, namespaces }) => {
-  const { values, errors, handleChange, handleBlur } = formProps
+const BasicStep: React.FC<BasicStepProps> = ({ namespaces }) => {
+  const { errors, handleChange, setFieldValue } = useFormikContext<Experiment>()
 
   const handleBasicNamespaceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     handleChange(e)
 
-    formProps.setFieldValue('scope.namespace_selectors', [e.target.value])
+    setFieldValue('scope.namespace_selectors', [e.target.value])
   }
 
   return (
     <>
       <TextField
         id="name"
+        name="name"
         label="Name"
         helperText="Please input an experiment name"
-        value={values.name}
-        onChange={handleChange}
-        onBlur={handleBlur}
         error={errors.name ? true : false}
       />
 
@@ -35,7 +33,6 @@ const BasicStep: React.FC<BasicStepProps> = ({ formProps, namespaces }) => {
         name="namespace"
         label="Namespace"
         helperText="Select the experiment's namespace"
-        value={values.namespace}
         onChange={handleBasicNamespaceChange}
       >
         {namespaces.map((n) => (

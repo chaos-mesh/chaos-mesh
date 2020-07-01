@@ -10,8 +10,8 @@ import DoneAllIcon from '@material-ui/icons/DoneAll'
 import Loading from 'components/Loading'
 import ScheduleStep from './Schedule'
 import ScopeStep from './Scope'
-import { StepperFormProps } from '../types'
 import TargetStep from './Target'
+import { useFormikContext } from 'formik'
 import { useSelector } from 'react-redux'
 
 const useStyles = makeStyles((theme: Theme) =>
@@ -51,15 +51,13 @@ const useStyles = makeStyles((theme: Theme) =>
 
 const steps = ['Basic', 'Scope', 'Target', 'Schedule']
 
-interface StepperProps {
-  formProps: StepperFormProps
-}
-
-const CreateStepper: React.FC<StepperProps> = ({ formProps }) => {
+const CreateStepper: React.FC = () => {
   const theme = useTheme()
   const isTabletScreen = useMediaQuery(theme.breakpoints.down('sm'))
   const size = isTabletScreen ? ('small' as 'small') : ('medium' as 'medium')
   const classes = useStyles()
+
+  const { resetForm } = useFormikContext()
 
   const { namespaces, labels, annotations } = useSelector((state: RootState) => state.experiments)
   const storeDispatch = useStoreDispatch()
@@ -85,19 +83,19 @@ const CreateStepper: React.FC<StepperProps> = ({ formProps }) => {
   const handleJump = (step: number) => () => dispatch(jump(step))
   const handleReset = () => {
     dispatch(reset())
-    formProps.resetForm()
+    resetForm()
   }
 
   const getStepContent = () => {
     switch (activeStep) {
       case 0:
-        return <BasicStep formProps={formProps} namespaces={namespaces} />
+        return <BasicStep namespaces={namespaces} />
       case 1:
-        return <ScopeStep formProps={formProps} namespaces={namespaces} labels={labels} annotations={annotations} />
+        return <ScopeStep namespaces={namespaces} labels={labels} annotations={annotations} />
       case 2:
-        return <TargetStep formProps={formProps} />
+        return <TargetStep />
       case 3:
-        return <ScheduleStep formProps={formProps} />
+        return <ScheduleStep />
       case 4:
         return (
           <Box textAlign="center">
@@ -106,7 +104,7 @@ const CreateStepper: React.FC<StepperProps> = ({ formProps }) => {
           </Box>
         )
       default:
-        return <BasicStep formProps={formProps} namespaces={namespaces} />
+        return <BasicStep namespaces={namespaces} />
     }
   }
 

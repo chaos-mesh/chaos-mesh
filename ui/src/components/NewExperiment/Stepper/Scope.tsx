@@ -4,10 +4,10 @@ import { SelectField, TextField } from 'components/FormField'
 import { joinObjKVs, upperFirst } from 'lib/utils'
 
 import AdvancedOptions from 'components/AdvancedOptions'
-import { StepperFormProps } from '../types'
+import { Experiment } from '../types'
+import { useFormikContext } from 'formik'
 
 interface ScopeStepProps {
-  formProps: StepperFormProps
   namespaces: string[]
   labels: { [key: string]: string[] }
   annotations: { [key: string]: string[] }
@@ -17,8 +17,8 @@ const phases = ['all', 'pending', 'running', 'succeeded', 'failed', 'unknown']
 const modes = ['all', { name: 'Random one', value: 'one' }, 'fixed number', 'fixed percent', 'random max percent']
 const modesWithAdornment = ['fixed-percent', 'random-max-percent']
 
-const ScopeStep: React.FC<ScopeStepProps> = ({ formProps, namespaces, labels, annotations }) => {
-  const { values, handleChange } = formProps
+const ScopeStep: React.FC<ScopeStepProps> = ({ namespaces, labels, annotations }) => {
+  const { values, handleChange } = useFormikContext<Experiment>()
 
   const labelKVs = useMemo(() => joinObjKVs(labels, ': '), [labels])
   const annotationKVs = useMemo(() => joinObjKVs(annotations, ': '), [annotations])
@@ -46,8 +46,6 @@ const ScopeStep: React.FC<ScopeStepProps> = ({ formProps, namespaces, labels, an
         label="Namespace Selectors"
         helperText="Multiple options"
         multiple
-        value={values.scope.namespace_selectors}
-        onChange={handleChange}
       >
         {namespaces.map((option: string) => (
           <MenuItem key={option} value={option}>
@@ -62,8 +60,6 @@ const ScopeStep: React.FC<ScopeStepProps> = ({ formProps, namespaces, labels, an
         label="Label Selectors"
         helperText="Multiple options"
         multiple
-        value={values.scope.label_selectors}
-        onChange={handleChange}
       >
         {labelKVs.map((option: string) => (
           <MenuItem key={option} value={option}>
@@ -72,14 +68,7 @@ const ScopeStep: React.FC<ScopeStepProps> = ({ formProps, namespaces, labels, an
         ))}
       </SelectField>
 
-      <SelectField
-        id="scope.mode"
-        name="scope.mode"
-        label="Mode"
-        helperText="Select a mode"
-        value={values.scope.mode}
-        onChange={handleChange}
-      >
+      <SelectField id="scope.mode" name="scope.mode" label="Mode" helperText="Select a mode">
         {modes.map((option) =>
           typeof option === 'string' ? (
             <MenuItem key={option} value={option.split(' ').join('-')}>
@@ -96,10 +85,9 @@ const ScopeStep: React.FC<ScopeStepProps> = ({ formProps, namespaces, labels, an
       {values.scope.mode !== 'all' && values.scope.mode !== 'one' && (
         <TextField
           id="scope.value"
+          name="scope.value"
           label="Mode Value"
           helperText="Please fill the mode value"
-          value={values.scope.value}
-          onChange={handleChange}
           InputProps={{
             endAdornment: modesWithAdornment.includes(values.scope.mode) && (
               <InputAdornment position="end">%</InputAdornment>
@@ -115,8 +103,6 @@ const ScopeStep: React.FC<ScopeStepProps> = ({ formProps, namespaces, labels, an
           label="Annotation Selectors"
           helperText="Multiple options"
           multiple
-          value={values.scope.annotation_selectors}
-          onChange={handleChange}
         >
           {annotationKVs.map((option: string) => (
             <MenuItem key={option} value={option}>
@@ -131,7 +117,6 @@ const ScopeStep: React.FC<ScopeStepProps> = ({ formProps, namespaces, labels, an
           label="Phase Selectors"
           helperText="Multiple options"
           multiple
-          value={values.scope.phase_selectors}
           onChange={handleChangeIncludeAll('scope.phase_selectors')}
         >
           {phases.map((option: string) => (

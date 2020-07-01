@@ -1,6 +1,5 @@
 import { Box, Button, Container, Drawer, Fab, useMediaQuery, useTheme } from '@material-ui/core'
-import { Experiment, StepperFormProps } from './types'
-import { Form, Formik, FormikHelpers } from 'formik'
+import { Form, Formik, FormikHelpers, useFormikContext } from 'formik'
 import React, { useState } from 'react'
 import { StepperProvider, useStepperContext } from './Context'
 import { Theme, createStyles, makeStyles } from '@material-ui/core/styles'
@@ -11,6 +10,7 @@ import { setAlert, setAlertOpen } from 'slices/globalStatus'
 import AddIcon from '@material-ui/icons/Add'
 import CancelIcon from '@material-ui/icons/Cancel'
 import CloudUploadOutlinedIcon from '@material-ui/icons/CloudUploadOutlined'
+import { Experiment } from './types'
 import PublishIcon from '@material-ui/icons/Publish'
 import Stepper from './Stepper'
 import api from 'api'
@@ -51,16 +51,17 @@ const useStyles = makeStyles((theme: Theme) =>
 )
 
 interface ActionsProps {
-  formProps: StepperFormProps
   toggleDrawer: () => void
   setInitialValues: (initialValues: Experiment) => void
 }
 
-const Actions = ({ formProps: { isSubmitting, resetForm }, toggleDrawer, setInitialValues }: ActionsProps) => {
+const Actions = ({ toggleDrawer, setInitialValues }: ActionsProps) => {
   const theme = useTheme()
   const isTabletScreen = useMediaQuery(theme.breakpoints.down('sm'))
   const size = isTabletScreen ? ('small' as 'small') : ('medium' as 'medium')
   const classes = useStyles()
+
+  const { isSubmitting, resetForm } = useFormikContext()
 
   const dispatch = useStoreDispatch()
 
@@ -69,6 +70,7 @@ const Actions = ({ formProps: { isSubmitting, resetForm }, toggleDrawer, setInit
   const handleCancel = () => {
     toggleDrawer()
     resetForm()
+    setInitialValues(defaultExperimentSchema)
   }
 
   const handleUploadYAML = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -199,16 +201,12 @@ export default function NewExperiment() {
             validationSchema={validationSchema}
             onSubmit={handleOnSubmit}
           >
-            {(props: StepperFormProps) => {
-              return (
-                <Container className={classes.container}>
-                  <Form>
-                    <Actions formProps={props} toggleDrawer={toggleDrawer} setInitialValues={setInitialValues} />
-                    <Stepper formProps={props} />
-                  </Form>
-                </Container>
-              )
-            }}
+            <Container className={classes.container}>
+              <Form>
+                <Actions toggleDrawer={toggleDrawer} setInitialValues={setInitialValues} />
+                <Stepper />
+              </Form>
+            </Container>
           </Formik>
         </StepperProvider>
       </Drawer>
