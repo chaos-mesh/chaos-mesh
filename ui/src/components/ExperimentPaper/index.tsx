@@ -6,6 +6,7 @@ import { Archive } from 'api/archives.type'
 import DeleteOutlineIcon from '@material-ui/icons/DeleteOutline'
 import { Experiment } from 'api/experiments.type'
 import ExperimentEventsPreview from 'components/ExperimentEventsPreview'
+import HighlightOffIcon from '@material-ui/icons/HighlightOff'
 import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown'
 import KeyboardArrowUpIcon from '@material-ui/icons/KeyboardArrowUp'
 import { Link } from 'react-router-dom'
@@ -138,6 +139,7 @@ const ExperimentPaper: React.FC<ExperimentPaperProps> = ({
         variant="outlined"
         color="primary"
         size="small"
+        disabled={!isArchive && (e as Experiment).status.toLowerCase() === 'failed'}
       >
         Detail
       </Button>
@@ -148,6 +150,7 @@ const ExperimentPaper: React.FC<ExperimentPaperProps> = ({
     <Paper>
       <Box display="flex" justifyContent="space-between" alignItems="center" p={3}>
         <Box display="flex" className={classes.marginRight}>
+          {!isArchive && (e as Experiment).status.toLowerCase() === 'failed' && <HighlightOffIcon color="secondary" />}
           {!isArchive && <ExperimentEventsPreview events={(e as Experiment).events} />}
           <Typography variant="body1">
             {e.Name}

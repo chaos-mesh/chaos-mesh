@@ -48,13 +48,18 @@ export default function Experiments() {
       .events()
       .then(({ data }) => {
         setExperiments(
-          experiments.map((e) => {
-            e.events = [
-              data.filter((d) => d.Experiment === e.Name).sort((a, b) => dayComparator(a.StartTime, b.StartTime))[0],
-            ]
-
-            return e
-          })
+          experiments.map((e) =>
+            e.status.toLowerCase() === 'failed'
+              ? { ...e, events: [] }
+              : {
+                  ...e,
+                  events: [
+                    data
+                      .filter((d) => d.Experiment === e.Name)
+                      .sort((a, b) => dayComparator(a.StartTime, b.StartTime))[0],
+                  ],
+                }
+          )
         )
       })
       .catch(console.log)
@@ -67,7 +72,8 @@ export default function Experiments() {
       fetchExperiments()
       dispatch(setNeedToRefreshExperiments(false))
     }
-  }, [dispatch, needToRefreshExperiments])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [needToRefreshExperiments])
 
   useEffect(() => {
     if (experiments && experiments.length > 0 && !experiments[0].events) {

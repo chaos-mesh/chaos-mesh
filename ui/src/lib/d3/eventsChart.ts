@@ -108,7 +108,10 @@ export default function gen({
     .append('div')
     .attr(
       'style',
-      (d) => `width: 12px; height: 12px; margin-left: 8px; background: ${colorPalette(d)}; border-radius: 3px;`
+      (d) =>
+        `width: 12px; height: 12px; margin-left: 8px; background: ${colorPalette(
+          d
+        )}; border-radius: 3px; cursor: pointer;`
     )
 
   function genRectWidth(d: Event) {

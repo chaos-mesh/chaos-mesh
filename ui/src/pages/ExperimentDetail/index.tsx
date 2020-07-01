@@ -123,7 +123,8 @@ export default function ExperimentDetail() {
     if (prevEventID !== eventID && eventID !== null && events) {
       onSelectEvent(events.filter((e) => e.ID === parseInt(eventID))[0])
     }
-  }, [prevEvents, events, prevEventID, eventID])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [events, eventID])
 
   return (
     <ContentContainer>
