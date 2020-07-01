@@ -17,11 +17,11 @@ export default function insertCommonStyle() {
         right: 15px;
         display: flex;
         flex-direction: column;
+        align-items: end;
       }
 
       .chaos-events-legends > div {
         display: flex;
-        justify-content: end;
         align-items: center;
       }
     </style>`
