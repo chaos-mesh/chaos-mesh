@@ -66,20 +66,26 @@ func Register(r *gin.RouterGroup, s *Service) {
 // @Router /api/events [get]
 // @Failure 500 {object} utils.APIError
 func (s *Service) listEvents(c *gin.Context) {
-	podName := c.Query("podName")
-	podNamespace := c.Query("podNamespace")
-	startTimeStr := c.Query("startTime")
-	experimentName := c.Query("experimentName")
-	experimentNamespace := c.Query("experimentNamespace")
-	uid := c.Query("uid")
+	filter := core.Filter{
+		PodName:             c.Query("podName"),
+		PodNamespace:        c.Query("podNamespace"),
+		StartTimeBeginStr:   c.Query("startTimeBegin"),
+		StartTimeEndStr:     c.Query("startTimeEnd"),
+		FinishTimeBeginStr:  c.Query("finishTimeBegin"),
+		FinishTimeEndStr:    c.Query("finishTimeEnd"),
+		ExperimentName:      c.Query("experimentName"),
+		ExperimentNamespace: c.Query("experimentNamespace"),
+		Uid:                 c.Query("uid"),
+		Kind:                c.Query("kind"),
+	}
 
-	if podName != "" && podNamespace == "" {
+	if filter.PodName != "" && filter.PodNamespace == "" {
 		c.Status(http.StatusInternalServerError)
 		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(fmt.Errorf("when podName is not empty, podNamespace cannot be empty")))
 		return
 	}
 
-	eventList, err := s.event.ListByFilter(context.Background(), podName, podNamespace, experimentName, experimentNamespace, uid, startTimeStr)
+	eventList, err := s.event.ListByFilter(context.Background(), filter)
 	if err != nil {
 		c.Status(http.StatusInternalServerError)
 		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
