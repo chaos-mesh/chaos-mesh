@@ -273,7 +273,7 @@ func (e *eventStore) ListByFilter(_ context.Context, filter core.Filter) ([]*cor
 	} else if filter.PodNamespace != "" {
 		resList, err = e.ListByNamespace(context.Background(), filter.PodNamespace)
 	} else {
-		query, args := constructQueryArgs(filter.ExperimentName, filter.ExperimentNamespace, filter.Uid, filter.Kind)
+		query, args := constructQueryArgs(filter.ExperimentName, filter.ExperimentNamespace, filter.UID, filter.Kind)
 		// List all events
 		if len(args) == 0 {
 			if err := e.db.Model(core.Event{}).Find(&resList).Error; err != nil && !gorm.IsRecordNotFoundError(err) {
@@ -323,7 +323,7 @@ func (e *eventStore) ListByFilter(_ context.Context, filter core.Filter) ([]*cor
 		if filter.ExperimentNamespace != "" && event.Namespace != filter.ExperimentNamespace {
 			continue
 		}
-		if filter.Uid != "" && event.ExperimentID != filter.Uid {
+		if filter.UID != "" && event.ExperimentID != filter.UID {
 			continue
 		}
 		if filter.Kind != "" && event.Kind != filter.Kind {

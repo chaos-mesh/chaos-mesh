@@ -94,6 +94,6 @@ type Filter struct {
 	FinishTimeEndStr    string
 	ExperimentName      string
 	ExperimentNamespace string
-	Uid                 string
+	UID                 string
 	Kind                string
 }

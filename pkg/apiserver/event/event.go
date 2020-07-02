@@ -75,7 +75,7 @@ func (s *Service) listEvents(c *gin.Context) {
 		FinishTimeEndStr:    c.Query("finishTimeEnd"),
 		ExperimentName:      c.Query("experimentName"),
 		ExperimentNamespace: c.Query("experimentNamespace"),
-		Uid:                 c.Query("uid"),
+		UID:                 c.Query("uid"),
 		Kind:                c.Query("kind"),
 	}
 
