@@ -1,36 +1,48 @@
 import { AppBar, Box, Breadcrumbs, IconButton, Toolbar, Typography } from '@material-ui/core'
 import { Theme, createStyles, makeStyles } from '@material-ui/core/styles'
+import { drawerCloseWidth, drawerWidth } from './Sidebar'
 
 import GitHubIcon from '@material-ui/icons/GitHub'
 import { Link } from 'react-router-dom'
 import MenuIcon from '@material-ui/icons/Menu'
 import { NavigationBreadCrumbProps } from 'slices/navigation.type'
 import React from 'react'
-import { drawerWidth } from './Sidebar'
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
+    appBarCommon: {
+      borderBottom: `1px solid ${theme.palette.divider}`,
+    },
     appBar: {
-      [theme.breakpoints.up('md')]: {
-        width: `calc(100% - ${drawerWidth})`,
-        marginLeft: drawerWidth,
-        boxShadow: 'none',
+      marginLeft: drawerCloseWidth,
+      width: `calc(100% - ${drawerCloseWidth})`,
+      transition: theme.transitions.create(['width', 'margin'], {
+        easing: theme.transitions.easing.sharp,
+        duration: theme.transitions.duration.leavingScreen,
+      }),
+      [theme.breakpoints.down('xs')]: {
+        width: '100%',
       },
     },
+    appBarShift: {
+      marginLeft: drawerWidth,
+      width: `calc(100% - ${drawerWidth})`,
+      transition: theme.transitions.create(['width', 'margin'], {
+        easing: theme.transitions.easing.sharp,
+        duration: theme.transitions.duration.enteringScreen,
+      }),
+    },
     menuButton: {
-      [theme.breakpoints.up('md')]: {
+      marginLeft: theme.spacing(0),
+      [theme.breakpoints.down('sm')]: {
         display: 'none',
       },
-      marginLeft: theme.spacing(0),
     },
     nav: {
       marginLeft: theme.spacing(3),
       '& .MuiBreadcrumbs-separator': {
-        color: '#fff',
+        color: theme.palette.primary.main,
       },
-    },
-    whiteText: {
-      color: '#fff',
     },
     hoverLink: {
       '&:hover': {
@@ -42,37 +54,43 @@ const useStyles = makeStyles((theme: Theme) =>
 )
 
 interface HeaderProps {
+  openDrawer: boolean
   handleDrawerToggle: () => void
   breadcrumbs: NavigationBreadCrumbProps[]
 }
 
-const Header: React.FC<HeaderProps> = ({ handleDrawerToggle, breadcrumbs }) => {
+const Header: React.FC<HeaderProps> = ({ openDrawer, handleDrawerToggle, breadcrumbs }) => {
   const classes = useStyles()
 
   return (
-    <AppBar className={classes.appBar} position="fixed">
+    <AppBar
+      className={`${openDrawer ? classes.appBarShift : classes.appBar} ${classes.appBarCommon}`}
+      position="fixed"
+      color="inherit"
+      elevation={0}
+    >
       <Toolbar>
         <IconButton
           className={classes.menuButton}
-          color="inherit"
+          color="primary"
           edge="start"
+          aria-label="Toggle drawer"
           onClick={handleDrawerToggle}
-          aria-label="Open drawer"
         >
           <MenuIcon />
         </IconButton>
         <Box display="flex" justifyContent="space-between" alignItems="center" width="100%">
-          <Breadcrumbs className={classes.nav} aria-label="breadcrumb">
+          <Breadcrumbs className={classes.nav}>
             {breadcrumbs.length > 0 &&
               breadcrumbs.map((b) => {
                 return b.path ? (
-                  <Link key={b.name} to={b.path}>
-                    <Typography className={`${classes.whiteText} ${classes.hoverLink}`} variant="h6" component="h2">
+                  <Link key={b.name} to={b.path} style={{ textDecoration: 'none' }}>
+                    <Typography className={classes.hoverLink} variant="h6" component="h2" color="primary">
                       {b.name}
                     </Typography>
                   </Link>
                 ) : (
-                  <Typography key={b.name} className={classes.whiteText} variant="h6" component="h2">
+                  <Typography key={b.name} variant="h6" component="h2" color="primary">
                     {b.name}
                   </Typography>
                 )
@@ -82,8 +100,8 @@ const Header: React.FC<HeaderProps> = ({ handleDrawerToggle, breadcrumbs }) => {
             component="a"
             href="https://github.com/pingcap/chaos-mesh"
             target="_blank"
-            color="inherit"
-            aria-label="Chaos Mesh GitHub link"
+            color="primary"
+            aria-label="Chaos Mesh GitHub"
           >
             <GitHubIcon />
           </IconButton>

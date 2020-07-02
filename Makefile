@@ -165,7 +165,7 @@ vet:
 tidy: clean
 	@echo "go mod tidy"
 	GO111MODULE=on go mod tidy
-	git diff --quiet go.mod go.sum
+	git diff -U --exit-code go.mod go.sum
 
 clean:
 	rm -rf docs/docs.go
@@ -183,7 +183,7 @@ taily-build:
 taily-build-clean:
 	docker kill taily-build && docker rm taily-build || exit 0
 
-image: image-chaos-daemon image-chaos-mesh image-chaos-dashboard image-chaos-fs image-chaos-scripts image-chaos-grafana
+image: image-chaos-daemon image-chaos-mesh image-chaos-dashboard image-chaos-fs image-chaos-scripts
 
 ifneq ($(TAILY_BUILD),)
 image-binary: taily-build
@@ -210,9 +210,6 @@ image-chaos-scripts: image-binary
 image-chaos-dashboard: image-binary
 	docker build -t ${DOCKER_REGISTRY_PREFIX}pingcap/chaos-dashboard:${IMAGE_TAG} ${DOCKER_BUILD_ARGS} images/chaos-dashboard
 
-image-chaos-grafana:
-	docker build -t ${DOCKER_REGISTRY_PREFIX}pingcap/chaos-grafana:${IMAGE_TAG} ${DOCKER_BUILD_ARGS} images/grafana
-
 image-chaos-kernel:
 	docker build -t ${DOCKER_REGISTRY_PREFIX}pingcap/chaos-kernel ${DOCKER_BUILD_ARGS} --build-arg MAKE_JOBS=${MAKE_JOBS} --build-arg MIRROR=${UBUNTU_MIRROR} images/chaos-kernel
 
@@ -222,7 +219,6 @@ docker-push:
 	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-fs:${IMAGE_TAG}"
 	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-daemon:${IMAGE_TAG}"
 	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-scripts:${IMAGE_TAG}"
-	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-grafana:${IMAGE_TAG}"
 
 docker-push-chaos-kernel:
 	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-kernel:${IMAGE_TAG}"

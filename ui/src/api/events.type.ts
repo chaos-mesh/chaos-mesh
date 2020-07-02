@@ -1,8 +1,6 @@
 export interface Event {
-  ID: string
-  CreateAt: string
-  UpdateAt: string
-  DeleteAt: string | null
+  ID: number
+  DeletedAt: string | null
   Experiment: string
   Namespace: string
   Kind: string
@@ -11,8 +9,6 @@ export interface Event {
   FinishTime: string
   Pods: {
     ID: string
-    CreateAt: string
-    UpdateAt: string
     DeleteAt: string | null
     EventID: number
     PodIP: string

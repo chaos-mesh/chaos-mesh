@@ -49,6 +49,7 @@ type Experiment struct {
 type ChaosState struct {
 	Total    int `json:"total"`
 	Running  int `json:"running"`
+	Waiting  int `json:"waiting"`
 	Paused   int `json:"paused"`
 	Failed   int `json:"failed"`
 	Finished int `json:"finished"`
@@ -56,7 +57,7 @@ type ChaosState struct {
 
 // Service defines a handler service for experiments.
 type Service struct {
-	conf    *config.ChaosServerConfig
+	conf    *config.ChaosDashboardConfig
 	kubeCli client.Client
 	archive core.ExperimentStore
 	event   core.EventStore
@@ -64,7 +65,7 @@ type Service struct {
 
 // NewService returns an experiment service instance.
 func NewService(
-	conf *config.ChaosServerConfig,
+	conf *config.ChaosDashboardConfig,
 	cli client.Client,
 	archive core.ExperimentStore,
 	event core.EventStore,
@@ -225,8 +226,8 @@ type StressChaosInfo struct {
 
 type actionFunc func(info *ExperimentInfo) error
 
-// @Summary Create a nex chaos experiments.
-// @Description Create a new chaos experiments.
+// @Summary Create a new chaos experiment.
+// @Description Create a new chaos experiment.
 // @Tags experiments
 // @Produce json
 // @Param request body ExperimentInfo true "Request body"
@@ -922,6 +923,8 @@ func (s *Service) state(c *gin.Context) {
 				switch chaos.Status {
 				case string(v1alpha1.ExperimentPhaseRunning):
 					data.Running++
+				case string(v1alpha1.ExperimentPhaseWaiting):
+					data.Waiting++
 				case string(v1alpha1.ExperimentPhasePaused):
 					data.Paused++
 				case string(v1alpha1.ExperimentPhaseFailed):

@@ -39,13 +39,18 @@ spec:
 {{ toYaml .Values.dashboard.resources | indent 12 }}
           command:
             - /usr/local/bin/chaos-dashboard
-          envFrom:
-          - configMapRef:
-              name: {{ template "chaos-mesh.name" . }}-chaos-dashboard
+          env:
+            {{- range $envKey, $envVal := .Values.dashboard.env }}
+            - name: {{ $envKey | upper }}
+              value: {{ $envVal | quote }}
+            {{- end }}
           volumeMounts:
-          - name: storage-volume
-            mountPath: {{ .Values.dashboard.persistentVolume.mountPath }}
-            subPath: "{{ .Values.dashboard.persistentVolume.subPath }}"
+            - name: storage-volume
+              mountPath: {{ .Values.dashboard.persistentVolume.mountPath }}
+              subPath: "{{ .Values.dashboard.persistentVolume.subPath }}"
+          ports:
+            - name: http
+              containerPort: {{ .Values.dashboard.env.LISTEN_PORT }}
         {{- with .Values.dashboard.nodeSelector }}
       nodeSelector:
 {{ toYaml . | indent 8 }}
@@ -71,7 +76,7 @@ apiVersion: v1
 kind: Service
 metadata:
   namespace: {{ .Release.Namespace }}
-  name: {{ template "chaos-mesh.name" . }}-chaos-dashboard
+  name: {{ template "chaos-dashboard.svc" . }}
   labels:
     app.kubernetes.io/name: {{ template "chaos-mesh.name" . }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
@@ -86,7 +91,7 @@ spec:
   type: NodePort
   ports:
     - protocol: TCP
-      port: 2333
-      targetPort: 2333
-
+      port: {{ .Values.dashboard.env.LISTEN_PORT }}
+      targetPort: {{ .Values.dashboard.env.LISTEN_PORT }}
+      name: http
 {{- end }}

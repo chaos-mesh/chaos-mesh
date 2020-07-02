@@ -1,21 +1,22 @@
 import { Box, Grid, Typography } from '@material-ui/core'
 import React, { useEffect, useState } from 'react'
 import { RootState, useStoreDispatch } from 'store'
+import { getStateofExperiments, setNeedToRefreshExperiments } from 'slices/experiments'
+import { setAlert, setAlertOpen } from 'slices/globalStatus'
 
 import ConfirmDialog from 'components/ConfirmDialog'
 import ContentContainer from '../../components/ContentContainer'
 import { Experiment } from 'api/experiments.type'
-import ExperimentCard from 'components/ExperimentCard'
-import InboxIcon from '@material-ui/icons/Inbox'
+import ExperimentPaper from 'components/ExperimentPaper'
 import Loading from 'components/Loading'
+import TuneIcon from '@material-ui/icons/Tune'
 import api from 'api'
-import day from 'lib/dayjs'
-import { getStateofExperiments } from 'slices/globalStatus'
-import { setNeedToRefreshExperiments } from 'slices/globalStatus'
+import { dayComparator } from 'lib/dayjs'
+import { upperFirst } from 'lib/utils'
 import { useSelector } from 'react-redux'
 
 export default function Experiments() {
-  const needToRefreshExperiments = useSelector((state: RootState) => state.globalStatus.needToRefreshExperiments)
+  const needToRefreshExperiments = useSelector((state: RootState) => state.experiments.needToRefreshExperiments)
   const dispatch = useStoreDispatch()
 
   const [loading, setLoading] = useState(false)
@@ -24,6 +25,9 @@ export default function Experiments() {
     namespace: '',
     name: '',
     kind: '',
+    title: '',
+    description: '',
+    action: 'delete',
   })
   const [dialogOpen, setDialogOpen] = useState(false)
 
@@ -44,25 +48,18 @@ export default function Experiments() {
       .events()
       .then(({ data }) => {
         setExperiments(
-          experiments.map((e) => {
-            e.events = data
-              .filter((d) => d.Experiment === e.Name)
-              .sort((a, b) => {
-                if (day(a.CreateAt).isBefore(b.CreateAt)) {
-                  return -1
+          experiments.map((e) =>
+            e.status.toLowerCase() === 'failed'
+              ? { ...e, events: [] }
+              : {
+                  ...e,
+                  events: [
+                    data
+                      .filter((d) => d.Experiment === e.Name)
+                      .sort((a, b) => dayComparator(a.StartTime, b.StartTime))[0],
+                  ],
                 }
-
-                if (day(a.CreateAt).isAfter(b.CreateAt)) {
-                  return 1
-                }
-
-                return 0
-              })
-
-            e.events = e.events.length > 3 ? e.events.reverse().slice(0, 3).reverse() : e.events
-
-            return e
-          })
+          )
         )
       })
       .catch(console.log)
@@ -75,7 +72,8 @@ export default function Experiments() {
       fetchExperiments()
       dispatch(setNeedToRefreshExperiments(false))
     }
-  }, [dispatch, needToRefreshExperiments])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [needToRefreshExperiments])
 
   useEffect(() => {
     if (experiments && experiments.length > 0 && !experiments[0].events) {
@@ -83,14 +81,43 @@ export default function Experiments() {
     }
   }, [experiments])
 
-  const handleDeleteExperiment = () => {
+  const handleExperiment = (action: string) => () => {
+    let actionFunc: any
+
+    switch (action) {
+      case 'delete':
+        actionFunc = api.experiments.deleteExperiment
+
+        break
+      case 'pause':
+        actionFunc = api.experiments.pauseExperiment
+
+        break
+      case 'start':
+        actionFunc = api.experiments.startExperiment
+
+        break
+      default:
+        actionFunc = null
+    }
+
+    if (actionFunc === null) {
+      return
+    }
+
     setDialogOpen(false)
 
     const { namespace, name, kind } = selected
 
-    api.experiments
-      .deleteExperiment(namespace, name, kind)
+    actionFunc(namespace, name, kind)
       .then(() => {
+        dispatch(
+          setAlert({
+            type: 'success',
+            message: `${upperFirst(action)}${action === 'start' ? 'ed' : 'd'} successfully!`,
+          })
+        )
+        dispatch(setAlertOpen(true))
         dispatch(getStateofExperiments())
         fetchExperiments()
       })
@@ -103,15 +130,17 @@ export default function Experiments() {
         {experiments &&
           experiments.length > 0 &&
           experiments.map((e) => (
-            <Grid key={e.Name} item xs={12} sm={12} md={6} lg={4} xl={3}>
-              <ExperimentCard experiment={e} handleSelect={setSelected} handleDialogOpen={setDialogOpen} />
+            <Grid key={e.Name} item xs={12}>
+              <ExperimentPaper experiment={e} handleSelect={setSelected} handleDialogOpen={setDialogOpen} />
             </Grid>
           ))}
       </Grid>
 
       {!loading && experiments && experiments.length === 0 && (
         <Box display="flex" flexDirection="column" justifyContent="center" alignItems="center" height="100%">
-          <InboxIcon fontSize="large" />
+          <Box mb={3}>
+            <TuneIcon fontSize="large" />
+          </Box>
           <Typography variant="h6" align="center">
             No experiments found. Try to create one.
           </Typography>
@@ -123,9 +152,9 @@ export default function Experiments() {
       <ConfirmDialog
         open={dialogOpen}
         setOpen={setDialogOpen}
-        title={`Delete ${selected.name}?`}
-        description="Once you delete this experiment, it can't be recovered."
-        handleConfirm={handleDeleteExperiment}
+        title={selected.title}
+        description={selected.description}
+        handleConfirm={handleExperiment(selected.action)}
       />
     </ContentContainer>
   )

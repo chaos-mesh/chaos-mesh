@@ -25,8 +25,8 @@ type EventStore interface {
 	// List returns an event list from the datastore.
 	List(context.Context) ([]*Event, error)
 
-	// ListByFilter returns an event list by the podName, podNamespace, experimentName, experimentNamespace and the startTime.
-	ListByFilter(context.Context, string, string, string, string, string) ([]*Event, error)
+	// ListByFilter returns an event list by the podName, podNamespace, experimentName, experimentNamespace, uid and the startTime.
+	ListByFilter(context.Context, string, string, string, string, string, string) ([]*Event, error)
 
 	// ListByExperiment returns an event list by the name and namespace of the experiment.
 	ListByExperiment(context.Context, string, string) ([]*Event, error)
@@ -54,18 +54,23 @@ type EventStore interface {
 	// which means the event would never save the finish_time.
 	// DeleteIncompleteEvent can be used to delete all incomplete events to avoid this case.
 	DeleteIncompleteEvents(context.Context) error
+
+	// DeleteByFinishTime deletes events and podrecords whose time difference is greater than the given time from FinishTime.
+	DeleteByFinishTime(context.Context, time.Duration) error
 }
 
 // Event represents an event instance.
 type Event struct {
 	gorm.Model
-	Experiment string `gorm:"index:experiment"`
-	Namespace  string
-	Kind       string
-	Message    string
-	StartTime  *time.Time `gorm:"index:start_time"`
-	FinishTime *time.Time
-	Pods       []*PodRecord `gorm:"-"`
+	Experiment   string `gorm:"index:experiment"`
+	Namespace    string
+	Kind         string
+	Message      string
+	StartTime    *time.Time `gorm:"index:start_time"`
+	FinishTime   *time.Time
+	Duration     string
+	Pods         []*PodRecord `gorm:"-"`
+	ExperimentID string       `gorm:"index:experiment_id"`
 }
 
 // PodRecord represents a pod record with event ID.

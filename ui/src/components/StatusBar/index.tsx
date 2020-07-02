@@ -1,11 +1,11 @@
-import { Box, Button, Paper, Toolbar, useMediaQuery, useTheme } from '@material-ui/core'
+import { Box, Button, Paper, Toolbar } from '@material-ui/core'
 import React, { useEffect } from 'react'
 import { RootState, useStoreDispatch } from 'store'
 import { Theme, createStyles, makeStyles } from '@material-ui/core/styles'
 
 import NewExperiment from 'components/NewExperiment'
 import { StateOfExperiments } from 'api/experiments.type'
-import { getStateofExperiments } from 'slices/globalStatus'
+import { getStateofExperiments } from 'slices/experiments'
 import { useSelector } from 'react-redux'
 
 const useStyles = makeStyles((theme: Theme) => {
@@ -15,18 +15,28 @@ const useStyles = makeStyles((theme: Theme) => {
     root: {
       paddingLeft: sp3,
       paddingRight: sp3,
+      [theme.breakpoints.down('xs')]: {
+        height: 0,
+      },
     },
     toolbar: {
       ...theme.mixins.toolbar,
       justifyContent: 'space-between',
-      [theme.breakpoints.down('sm')]: {
-        paddingBottom: sp3,
+      [theme.breakpoints.down(700)]: {
+        flexDirection: 'column',
+        alignItems: 'start',
+        '& > *': {
+          marginTop: sp3,
+          '&:last-child': {
+            marginBottom: sp3,
+          },
+        },
       },
     },
     currentStatus: {
       display: 'flex',
-      [theme.breakpoints.down('sm')]: {
-        marginTop: sp3,
+      [theme.breakpoints.down('xs')]: {
+        display: 'none',
       },
     },
     statusButton: {
@@ -44,24 +54,36 @@ interface CurrentStatusProps {
 }
 
 export const CurrentStatus: React.FC<CurrentStatusProps> = ({ classes, state }) => {
-  const theme = useTheme()
-  const isMobileScreen = useMediaQuery(theme.breakpoints.down('sm'))
-
-  const props = {
-    className: classes.statusButton,
-    variant: 'outlined' as 'outlined',
-    size: isMobileScreen ? ('small' as 'small') : ('medium' as 'medium'),
-  }
+  const data = [
+    {
+      label: 'Running',
+      value: state.running,
+      color: 'primary' as 'primary',
+    },
+    {
+      label: 'Paused',
+      value: state.paused,
+    },
+    {
+      label: 'Failed',
+      value: state.failed,
+      color: 'secondary' as 'secondary',
+    },
+  ]
 
   return (
     <Box className={classes.currentStatus}>
-      <Button {...props} color="primary">
-        Running: {state.running}
-      </Button>
-      <Button {...props}>Finished: {state.finished}</Button>
-      <Button {...props} color="secondary">
-        Failed: {state.failed}
-      </Button>
+      {data.map((d) => (
+        <Button
+          key={d.label}
+          className={classes.statusButton}
+          variant="outlined"
+          size="small"
+          color={d.color ? d.color : undefined}
+        >
+          {d.label}: {d.value}
+        </Button>
+      ))}
     </Box>
   )
 }
@@ -69,7 +91,7 @@ export const CurrentStatus: React.FC<CurrentStatusProps> = ({ classes, state }) 
 const StatusBar = () => {
   const classes = useStyles()
 
-  const stateOfExperiments = useSelector((state: RootState) => state.globalStatus.stateOfExperiments)
+  const stateOfExperiments = useSelector((state: RootState) => state.experiments.stateOfExperiments)
   const dispatch = useStoreDispatch()
 
   useEffect(() => {

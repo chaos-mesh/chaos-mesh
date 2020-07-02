@@ -184,6 +184,8 @@ spec:
             experiment:
               description: Experiment records the last experiment state.
               properties:
+                duration:
+                  type: string
                 endTime:
                   format: date-time
                   type: string
@@ -462,6 +464,8 @@ spec:
             experiment:
               description: Experiment records the last experiment state.
               properties:
+                duration:
+                  type: string
                 endTime:
                   format: date-time
                   type: string
@@ -881,6 +885,8 @@ spec:
             experiment:
               description: Experiment records the last experiment state.
               properties:
+                duration:
+                  type: string
                 endTime:
                   format: date-time
                   type: string
@@ -1010,6 +1016,14 @@ spec:
                 fraction and a unit suffix, such as "300ms", "-1.5h" or "2h45m". Valid
                 time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
               type: string
+            gracePeriod:
+              description: GracePeriod is used in pod-kill action. It represents the
+                duration in seconds before the pod should be deleted. Value must be
+                non-negative integer. The default value is zero that indicates delete
+                immediately.
+              format: int64
+              minimum: 0
+              type: integer
             mode:
               description: 'Mode defines the mode to run chaos action. Supported mode:
                 one / all / fixed / fixed-percent / random-max-percent'
@@ -1110,6 +1124,8 @@ spec:
             experiment:
               description: Experiment records the last experiment state.
               properties:
+                duration:
+                  type: string
                 endTime:
                   format: date-time
                   type: string
@@ -1370,6 +1386,8 @@ spec:
             experiment:
               description: Experiment records the last experiment state.
               properties:
+                duration:
+                  type: string
                 endTime:
                   format: date-time
                   type: string
@@ -1616,6 +1634,8 @@ spec:
             experiment:
               description: Experiment records the last experiment state.
               properties:
+                duration:
+                  type: string
                 endTime:
                   format: date-time
                   type: string

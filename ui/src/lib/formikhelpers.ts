@@ -1,57 +1,47 @@
-import { Experiment, ExperimentTarget, StepperFormProps } from 'components/NewExperiment/types'
+import { Experiment, ExperimentTarget, FormikCtx } from 'components/NewExperiment/types'
 
 import { defaultExperimentSchema } from 'components/NewExperiment/constants'
 
-const ChaosKindsAndKeys: {
-  kind: string
-  key: Exclude<keyof ExperimentTarget, 'kind'>
-}[] = [
-  {
-    kind: 'PodChaos',
-    key: 'pod_chaos',
-  },
-  {
-    kind: 'NetworkChaos',
-    key: 'network_chaos',
-  },
-  {
-    kind: 'IoChaos',
-    key: 'io_chaos',
-  },
-  {
-    kind: 'KernelChaos',
-    key: 'kernel_chaos',
-  },
-  {
-    kind: 'TimeChaos',
-    key: 'time_chaos',
-  },
-  {
-    kind: 'StressChaos',
-    key: 'stress_chaos',
-  },
-]
+export const ChaosKindKeyMap: {
+  [kind: string]: { [key: string]: Exclude<keyof ExperimentTarget, 'kind'> }
+} = {
+  PodChaos: { key: 'pod_chaos' },
+  NetworkChaos: { key: 'network_chaos' },
+  IoChaos: { key: 'io_chaos' },
+  KernelChaos: { key: 'kernel_chaos' },
+  TimeChaos: { key: 'time_chaos' },
+  StressChaos: { key: 'stress_chaos' },
+}
 
-export function parseSubmitValues(values: Experiment) {
+export function parseSubmitValues(e: Experiment) {
+  const values = JSON.parse(JSON.stringify(e))
+
   // Parse phase_selectors
   const phaseSelectors = values.scope.phase_selectors
   if (phaseSelectors.length === 1 && phaseSelectors[0] === 'all') {
     values.scope.phase_selectors = []
   }
 
-  // Parse label_selectors to object
-  let labelSelectors = values.scope.label_selectors
-  try {
-    labelSelectors = JSON.parse(labelSelectors as string)
-  } catch {
-    labelSelectors = {}
+  // Parse label_selectors and annotation_selectors to object
+  function helper1(selectors: string[]) {
+    return selectors.length > 0
+      ? selectors.reduce((acc: { [key: string]: string }, d) => {
+          const splited = d.split(': ')
+
+          acc[splited[0]] = splited[1]
+
+          return acc
+        }, {})
+      : {}
   }
-  values.scope.label_selectors = labelSelectors
+  values.scope.label_selectors = helper1(values.scope.label_selectors as string[])
+  values.scope.annotation_selectors = helper1(values.scope.annotation_selectors as string[])
 
   // Remove unrelated chaos
   const kind = values.target.kind
-  ChaosKindsAndKeys.filter((k) => k.kind !== kind)
-    .map((k) => k.key)
+  Object.entries(ChaosKindKeyMap)
+    .filter((k) => k[0] !== kind)
+    .map((k) => k[1].key)
     .forEach((k) => delete values.target[k])
 
   // Remove unrelated actions
@@ -61,6 +51,11 @@ export function parseSubmitValues(values: Experiment) {
 
       for (const action in chaos) {
         if (action === 'action') {
+          continue
+        }
+
+        // Handle container-kill action
+        if (chaos.action === 'container-kill' && action === 'container_name') {
           continue
         }
 
@@ -85,11 +80,11 @@ export function mustSchedule(formikValues: Experiment) {
   return false
 }
 
-export function resetOtherChaos(formProps: StepperFormProps, kind: string, action: string) {
+export function resetOtherChaos(formProps: FormikCtx, kind: string, action: string) {
   const { values, setFieldValue } = formProps
 
   const selectedChaosKind = kind
-  const selectedChaosKey = ChaosKindsAndKeys.filter((d) => d.kind === selectedChaosKind)[0].key
+  const selectedChaosKey = ChaosKindKeyMap[selectedChaosKind].key
 
   const updatedTarget = {
     ...defaultExperimentSchema.target,
@@ -105,4 +100,46 @@ export function resetOtherChaos(formProps: StepperFormProps, kind: string, actio
   }
 
   setFieldValue('target', updatedTarget)
+}
+
+export function yamlToExperiments(yamlObj: any): Experiment {
+  const { kind, metadata, spec } = yamlObj
+
+  let halfResult = {
+    ...defaultExperimentSchema,
+    ...metadata,
+    scope: {
+      ...defaultExperimentSchema.scope,
+      label_selectors: spec.selector.labelSelectors
+        ? Object.entries(spec.selector.labelSelectors).map(([key, val]) => `${key}: ${val}`)
+        : [],
+      annotation_selectors: spec.selector.annotationSelectors
+        ? Object.entries(spec.selector.annotationSelectors).map(([key, val]) => `${key}: ${val}`)
+        : [],
+      mode: spec.mode,
+    },
+    scheduler: {
+      cron: spec.scheduler.cron,
+      duration: spec.duration,
+    },
+  }
+
+  delete spec.selector
+  delete spec.mode
+  delete spec.scheduler
+  delete spec.duration
+
+  const action = Object.keys(spec).filter((k) => k === spec.action)[0]
+
+  return {
+    ...halfResult,
+    target: {
+      ...defaultExperimentSchema.target,
+      kind,
+      [ChaosKindKeyMap[kind].key]: {
+        action: spec.action,
+        [action]: spec[action],
+      },
+    },
+  }
 }

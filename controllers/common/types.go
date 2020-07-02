@@ -15,18 +15,21 @@ package common
 
 import (
 	"context"
+	"os"
 	"time"
 
 	"github.com/go-logr/logr"
 
 	"github.com/pingcap/chaos-mesh/api/v1alpha1"
 	"github.com/pingcap/chaos-mesh/controllers/reconciler"
+	"github.com/pingcap/chaos-mesh/pkg/config"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/util/retry"
 
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 )
 
 const (
@@ -35,6 +38,22 @@ const (
 	// AnnotationCleanFinalizerForced value
 	AnnotationCleanFinalizerForced = `forced`
 )
+
+var log = ctrl.Log.WithName("controller")
+
+//ControllerCfg is a global variable to keep the configuration for Chaos Controller
+var ControllerCfg *config.ChaosControllerConfig
+
+func init() {
+	conf, err := config.EnvironChaosController()
+	if err != nil {
+		ctrl.SetLogger(zap.Logger(true))
+		log.Error(err, "Chaos Controller: invalid environment configuration")
+		os.Exit(1)
+	}
+
+	ControllerCfg = &conf
+}
 
 // Reconciler for common chaos
 type Reconciler struct {
@@ -83,8 +102,12 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 				r.Log.Error(err, "failed to pause chaos")
 				return ctrl.Result{Requeue: true}, err
 			}
+			now := time.Now()
 			status.Experiment.EndTime = &metav1.Time{
-				Time: time.Now(),
+				Time: now,
+			}
+			if status.Experiment.StartTime != nil {
+				status.Experiment.Duration = now.Sub(status.Experiment.StartTime.Time).String()
 			}
 		}
 		status.Experiment.Phase = v1alpha1.ExperimentPhasePaused

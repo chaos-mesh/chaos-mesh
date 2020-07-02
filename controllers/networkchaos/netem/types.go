@@ -225,7 +225,7 @@ func (r *Reconciler) cleanFinalizersAndRecover(ctx context.Context, networkchaos
 func (r *Reconciler) recoverPod(ctx context.Context, pod *v1.Pod, _ *v1alpha1.NetworkChaos) error {
 	r.Log.Info("Try to recover pod", "namespace", pod.Namespace, "name", pod.Name)
 
-	pbClient, err := utils.NewChaosDaemonClient(ctx, r.Client, pod, common.Cfg.ChaosDaemonPort)
+	pbClient, err := utils.NewChaosDaemonClient(ctx, r.Client, pod, common.ControllerCfg.ChaosDaemonPort)
 	if err != nil {
 		return err
 	}
@@ -273,7 +273,7 @@ func (r *Reconciler) applyPod(ctx context.Context, pod *v1.Pod, networkchaos *v1
 		return err
 	}
 
-	pbClient, err := utils.NewChaosDaemonClient(ctx, r.Client, pod, common.Cfg.ChaosDaemonPort)
+	pbClient, err := utils.NewChaosDaemonClient(ctx, r.Client, pod, common.ControllerCfg.ChaosDaemonPort)
 	if err != nil {
 		return err
 	}

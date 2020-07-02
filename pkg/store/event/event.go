@@ -35,6 +35,7 @@ func NewStore(db *dbstore.DB) core.EventStore {
 	db.AutoMigrate(&core.PodRecord{})
 
 	es := &eventStore{db}
+
 	if err := es.DeleteIncompleteEvents(context.Background()); err != nil && gorm.IsRecordNotFoundError(err) {
 		log.Error(err, "failed to delete all incomplete events")
 	}
@@ -63,6 +64,31 @@ func (e *eventStore) List(_ context.Context) ([]*core.Event, error) {
 	eventList := make([]*core.Event, 0)
 
 	if err := e.db.Find(&resList).Error; err != nil && !gorm.IsRecordNotFoundError(err) {
+		return nil, err
+	}
+
+	for _, et := range resList {
+		pods, err := e.findPodRecordsByEventID(context.Background(), et.ID)
+		if err != nil {
+			return nil, err
+		}
+		var event core.Event
+		event = et
+		event.Pods = pods
+		eventList = append(eventList, &event)
+	}
+
+	return eventList, nil
+}
+
+// ListByUID returns an event list by the uid of the experiment.
+func (e *eventStore) ListByUID(_ context.Context, uid string) ([]*core.Event, error) {
+	var resList []core.Event
+	eventList := make([]*core.Event, 0)
+
+	if err := e.db.Where(
+		"experiment_id = ?", uid).
+		Find(resList).Error; err != nil && !gorm.IsRecordNotFoundError(err) {
 		return nil, err
 	}
 
@@ -232,12 +258,12 @@ func (e *eventStore) Update(_ context.Context, et *core.Event) error {
 
 // DeleteIncompleteEvents implement core.EventStore interface.
 func (e *eventStore) DeleteIncompleteEvents(_ context.Context) error {
-	return e.db.Where("finish_time IS NULL").
+	return e.db.Where("finish_time IS NULL").Unscoped().
 		Delete(core.Event{}).Error
 }
 
-// ListByFilter returns an event list by the podName, podNamespace, experimentName, experimentNamespace and the startTime.
-func (e *eventStore) ListByFilter(_ context.Context, podName string, podNamespace string, experimentName string, experimentNamespace string, startTimeStr string) ([]*core.Event, error) {
+// ListByFilter returns an event list by the podName, podNamespace, experimentName, experimentNamespace, uid and the startTime.
+func (e *eventStore) ListByFilter(_ context.Context, podName string, podNamespace string, experimentName string, experimentNamespace string, uid string, startTimeStr string) ([]*core.Event, error) {
 	var resList []*core.Event
 	var err error
 	var startTime time.Time
@@ -246,6 +272,8 @@ func (e *eventStore) ListByFilter(_ context.Context, podName string, podNamespac
 		resList, err = e.ListByPod(context.Background(), podNamespace, podName)
 	} else if podNamespace != "" {
 		resList, err = e.ListByNamespace(context.Background(), podNamespace)
+	} else if uid != "" {
+		resList, err = e.ListByUID(context.Background(), uid)
 	} else {
 		resList, err = e.List(context.Background())
 	}
@@ -268,6 +296,9 @@ func (e *eventStore) ListByFilter(_ context.Context, podName string, podNamespac
 		if experimentNamespace != "" && event.Namespace != experimentNamespace {
 			continue
 		}
+		if uid != "" && event.ExperimentID != uid {
+			continue
+		}
 		if startTimeStr != "" && event.StartTime.Before(startTime) && !event.StartTime.Equal(startTime) {
 			continue
 		}
@@ -279,4 +310,56 @@ func (e *eventStore) ListByFilter(_ context.Context, podName string, podNamespac
 		eventList = append(eventList, event)
 	}
 	return eventList, nil
+}
+
+// DeleteByFinishTime deletes events and podrecords whose time difference is greater than the given time from FinishTime.
+func (e *eventStore) DeleteByFinishTime(_ context.Context, ttl time.Duration) error {
+	eventList, err := e.List(context.Background())
+	if err != nil {
+		return err
+	}
+	nowTime := time.Now()
+	for _, et := range eventList {
+		if et.FinishTime == nil {
+			continue
+		}
+		if et.FinishTime.Add(ttl).Before(nowTime) {
+			if err := e.db.Model(core.Event{}).Unscoped().Delete(*et).Error; err != nil {
+				return err
+			}
+
+			if err := e.db.Model(core.PodRecord{}).
+				Where(
+					"event_id = ? ",
+					et.ID).Unscoped().Delete(core.PodRecord{}).Error; err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+func (e *eventStore) getUID(_ context.Context, ns, name string) (string, error) {
+	events := make([]*core.Event, 0)
+
+	if err := e.db.Where(
+		&core.Event{Experiment: name, Namespace: ns}).
+		Find(&events).Error; err != nil {
+		return "", err
+	}
+
+	if len(events) == 0 {
+		return "", fmt.Errorf("get UID failure, maybe name or namespace is wrong")
+	}
+
+	UID := events[0].ExperimentID
+	st := events[0].StartTime
+
+	for _, et := range events {
+		if st.Before(*et.StartTime) {
+			st = et.StartTime
+			UID = et.ExperimentID
+		}
+	}
+	return UID, nil
 }

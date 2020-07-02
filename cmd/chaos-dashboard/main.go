@@ -26,6 +26,7 @@ import (
 	"github.com/pingcap/chaos-mesh/pkg/config"
 	"github.com/pingcap/chaos-mesh/pkg/store"
 	"github.com/pingcap/chaos-mesh/pkg/store/dbstore"
+	"github.com/pingcap/chaos-mesh/pkg/ttlcontroller"
 	"github.com/pingcap/chaos-mesh/pkg/version"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -48,9 +49,25 @@ func main() {
 	flag.BoolVar(&printVersion, "version", false, "print version information and exit")
 	flag.Parse()
 
-	conf, err := config.EnvironChaosServer()
+	conf, err := config.EnvironChaosDashboard()
 	if err != nil {
 		log.Error(err, "main: invalid configuration")
+		os.Exit(1)
+	}
+
+	databaseTTLResyncPeriod, err := time.ParseDuration(conf.PersistTTL.SyncPeriod)
+	if err != nil {
+		log.Error(err, "main: invalid databaseTTLResyncPeriod")
+		os.Exit(1)
+	}
+	eventTTL, err := time.ParseDuration(conf.PersistTTL.Event)
+	if err != nil {
+		log.Error(err, "main: invalid eventTTL")
+		os.Exit(1)
+	}
+	archiveExperimentTTL, err := time.ParseDuration(conf.PersistTTL.Experiment)
+	if err != nil {
+		log.Error(err, "main: invalid archiveExperimentTTL")
 		os.Exit(1)
 	}
 
@@ -65,15 +82,22 @@ func main() {
 
 	app := fx.New(
 		fx.Provide(
-			func() (<-chan struct{}, *config.ChaosServerConfig) {
-				return stopCh, &conf
+			func() (<-chan struct{}, *config.ChaosDashboardConfig, ttlcontroller.TTLconfig) {
+				return stopCh, &conf, ttlcontroller.TTLconfig{
+					DatabaseTTLResyncPeriod: databaseTTLResyncPeriod,
+					EventTTL:                eventTTL,
+					ArchiveExperimentTTL:    archiveExperimentTTL,
+				}
 			},
 			dbstore.NewDBStore,
 			collector.NewServer,
+			ttlcontroller.NewController,
 		),
 		store.Module,
 		apiserver.Module,
-		fx.Invoke(collector.Register))
+		fx.Invoke(collector.Register),
+		fx.Invoke(ttlcontroller.Register),
+	)
 
 	startCtx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()

@@ -23,8 +23,8 @@ import (
 	chaosmeshv1alpha1 "github.com/pingcap/chaos-mesh/api/v1alpha1"
 	apiWebhook "github.com/pingcap/chaos-mesh/api/webhook"
 	"github.com/pingcap/chaos-mesh/controllers"
+	"github.com/pingcap/chaos-mesh/controllers/common"
 	"github.com/pingcap/chaos-mesh/controllers/metrics"
-	"github.com/pingcap/chaos-mesh/pkg/flags"
 	"github.com/pingcap/chaos-mesh/pkg/utils"
 	"github.com/pingcap/chaos-mesh/pkg/version"
 	"github.com/pingcap/chaos-mesh/pkg/webhook/config"
@@ -50,15 +50,7 @@ var (
 )
 
 var (
-	metricsAddr          string
-	pprofAddr            string
-	enableLeaderElection bool
-	certsDir             string
-	printVersion         bool
-
-	cmWatcherLabels       = flags.NewMapStringStringFlag()
-	templateWatcherLabels = flags.NewMapStringStringFlag()
-	watcherConfig         = watcher.NewConfig()
+	printVersion bool
 )
 
 func init() {
@@ -69,39 +61,26 @@ func init() {
 }
 
 func parseFlags() {
-	flag.StringVar(&metricsAddr, "metrics-addr", ":10080", "The address the metric endpoint binds to.")
-	flag.StringVar(&pprofAddr, "pprof-addr", "0", "The address the pprof endpoint binds to.")
-	flag.BoolVar(&enableLeaderElection, "enable-leader-election", false,
-		"Enable leader election for controller manager. Enabling this will ensure there is only one active controller manager.")
-	flag.StringVar(&certsDir, "certs", "/etc/webhook/certs",
-		"The directory for storing certs key file and cert file")
-	flag.StringVar(&watcherConfig.Namespace, "template-namespace", "",
-		"Namespace to search for Template ConfigMaps to load Injection Configs from (default: current namespace)")
-	flag.Var(&templateWatcherLabels, "template-labels",
-		"Label pairs used to discover common templates in Kubernetes. These should be key1=value[,key2=val2,...]")
-	flag.Var(&cmWatcherLabels, "configmap-labels",
-		"Label pairs used to discover ConfigMaps in Kubernetes. These should be key1=value[,key2=val2,...]")
 	flag.BoolVar(&printVersion, "version", false, "print version information and exit")
-	flag.DurationVar(&utils.RPCTimeout, "rpc-timeout", utils.DefaultRPCTimeout,
-		"Specify timeout of RPC between controllers and chaos-operator.")
-
 	flag.Parse()
 }
 
 func main() {
 	parseFlags()
-
 	version.PrintVersionInfo("Controller manager")
 	if printVersion {
 		os.Exit(0)
 	}
 
+	// set RPCTimeout config
+	utils.RPCTimeout = common.ControllerCfg.RPCTimeout
+
 	ctrl.SetLogger(zap.Logger(true))
 
 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
 		Scheme:             scheme,
-		MetricsBindAddress: metricsAddr,
-		LeaderElection:     enableLeaderElection,
+		MetricsBindAddress: common.ControllerCfg.MetricsAddr,
+		LeaderElection:     common.ControllerCfg.EnableLeaderElection,
 		Port:               9443,
 	})
 	if err != nil {
@@ -193,25 +172,24 @@ func main() {
 	setupLog.Info("Setting up webhook server")
 
 	hookServer := mgr.GetWebhookServer()
-	hookServer.CertDir = certsDir
+	hookServer.CertDir = common.ControllerCfg.CertsDir
 	conf := config.NewConfigWatcherConf()
 	stopCh := ctrl.SetupSignalHandler()
 
-	if pprofAddr != "0" {
+	if common.ControllerCfg.PprofAddr != "0" {
 		go func() {
-			if err := http.ListenAndServe(pprofAddr, nil); err != nil {
+			if err := http.ListenAndServe(common.ControllerCfg.PprofAddr, nil); err != nil {
 				setupLog.Error(err, "unable to start pprof server")
 				os.Exit(1)
 			}
 		}()
 	}
 
-	if err := watcherConfig.InitLabels(templateWatcherLabels.ToMapStringString(),
-		cmWatcherLabels.ToMapStringString()); err != nil {
-		setupLog.Error(err, "failed to initialize watcher config selected labels")
+	if err = common.ControllerCfg.WatcherConfig.Verify(); err != nil {
+		setupLog.Error(err, "invalid environment configuration")
 		os.Exit(1)
 	}
-	configWatcher, err := watcher.New(*watcherConfig, metricsCollector)
+	configWatcher, err := watcher.New(*common.ControllerCfg.WatcherConfig, metricsCollector)
 	if err != nil {
 		setupLog.Error(err, "unable to create config watcher")
 		os.Exit(1)
