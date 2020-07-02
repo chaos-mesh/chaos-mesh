@@ -25,11 +25,13 @@ import (
 	"golang.org/x/sync/errgroup"
 
 	"github.com/pingcap/chaos-mesh/api/v1alpha1"
+	"github.com/pingcap/chaos-mesh/controllers/common"
 	"github.com/pingcap/chaos-mesh/pkg/apiserver/utils"
 	"github.com/pingcap/chaos-mesh/pkg/config"
 	"github.com/pingcap/chaos-mesh/pkg/core"
 
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -86,7 +88,7 @@ func Register(r *gin.RouterGroup, s *Service) {
 	endpoint.GET("", s.listExperiments)
 	endpoint.POST("/new", s.createExperiment)
 	endpoint.GET("/detail/:kind/:namespace/:name", s.getExperimentDetail)
-	endpoint.DELETE("/:kind/:namespace/:name", s.deleteExperiment)
+	endpoint.DELETE("/:kind/:namespace/:name/:force", s.deleteExperiment)
 	endpoint.PUT("/update", s.updateExperiment)
 	endpoint.PUT("/pause/:kind/:namespace/:name", s.pauseExperiment)
 	endpoint.PUT("/start/:kind/:namespace/:name", s.startExperiment)
@@ -852,6 +854,7 @@ func (s *Service) getExperimentDetail(c *gin.Context) {
 // @Param namespace path string true "namespace"
 // @Param name path string true "name"
 // @Param kind path string true "kind" Enums(PodChaos, IoChaos, NetworkChaos, TimeChaos, KernelChaos, StressChaos)
+// @Param force path string true "force" Enums(true, false)
 // @Success 200 "delete ok"
 // @Failure 400 {object} utils.APIError
 // @Failure 404 {object} utils.APIError
@@ -861,12 +864,14 @@ func (s *Service) deleteExperiment(c *gin.Context) {
 	kind := c.Param("kind")
 	ns := c.Param("namespace")
 	name := c.Param("name")
+	force := c.Param("force")
 
 	ctx := context.TODO()
 	chaosKey := types.NamespacedName{Namespace: ns, Name: name}
 
 	var (
 		chaosKind *v1alpha1.ChaosKind
+		chaosMeta metav1.Object
 		ok        bool
 	)
 	if chaosKind, ok = v1alpha1.AllKinds()[kind]; !ok {
@@ -883,6 +888,26 @@ func (s *Service) deleteExperiment(c *gin.Context) {
 			_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
 		}
 		return
+	}
+
+	if force == "true" {
+		if chaosMeta, ok = chaosKind.Chaos.(metav1.Object); !ok {
+			c.Status(http.StatusInternalServerError)
+			_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(fmt.Errorf("failed to get chaos meta information")))
+			return
+		}
+
+		annotations := chaosMeta.GetAnnotations()
+		if annotations == nil {
+			annotations = make(map[string]string)
+		}
+		annotations[common.AnnotationCleanFinalizer] = common.AnnotationCleanFinalizerForced
+		chaosMeta.SetAnnotations(annotations)
+		if err := s.kubeCli.Update(context.Background(), chaosKind.Chaos); err != nil {
+			c.Status(http.StatusInternalServerError)
+			_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(fmt.Errorf("update chaos annotation error")))
+			return
+		}
 	}
 
 	if err := s.kubeCli.Delete(ctx, chaosKind.Chaos, &client.DeleteOptions{}); err != nil {
