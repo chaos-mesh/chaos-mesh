@@ -22,20 +22,18 @@ See the following demo video for a quick view of Chaos Mesh:
 
 ## Chaos Operator
 
-Chaos Operator injects chaos into the applications and Kubernetes infrastructure in a manageable way, which provides easy, 
-custom definitions for chaos experiments and automatic orchestration. There are three components at play:
+Chaos Operator injects chaos into the applications and Kubernetes infrastructure in a manageable way, which provides easy, custom definitions for chaos experiments and automatic orchestration. There are three components at play:
 
 **Controller-manager**: used to schedule and manage the lifecycle of CRD objects
 
 **Chaos-daemon**: runs as daemonset with privileged system permissions over network, Cgroup, etc. for a specific node
 
-**Sidecar**: a special type of container that is dynamically injected into the target Pod by the webhook-server, which can be used for hijacking I/O of the application container.
+**Sidecar**: a special type of container that is dynamically injected into the target Pod by the webhook-server, which can be used for hijacking I/O of the application container
 
 ![Chaos Operator](./static/chaos-mesh.svg)
 
-Chaos Operator uses [Custom Resource Definition (CRD)](https://kubernetes.io/docs/tasks/access-kubernetes-api/custom-resources/custom-resource-definitions/) to define chaos objects. 
-The current implementation supports six types of CRD objects for fault injection, namely PodChaos, NetworkChaos, IOChaos, TimeChaos, StressChaos, and KernelChaos, 
-which correspond to the following major actions (experiments):
+Chaos Operator uses [Custom Resource Definition (CRD)](https://kubernetes.io/docs/tasks/access-kubernetes-api/custom-resources/custom-resource-definitions/) to define chaos objects.
+The current implementation supports six types of CRD objects for fault injection, namely PodChaos, NetworkChaos, IOChaos, TimeChaos, StressChaos, and KernelChaos, which correspond to the following major actions (experiments):
 
 - pod-kill: The selected pod is killed (ReplicaSet or something similar may be needed to ensure the pod will be restarted).
 - pod-failure: The selected pod will be unavailable in a specified period of time.
@@ -43,8 +41,8 @@ which correspond to the following major actions (experiments):
 - netem chaos: Network chaos such as delay, duplication, etc.
 - network-partition: Simulate network partition.
 - IO chaos: Simulate file system faults such as I/O delay, read/write errors, etc.
-- time chaos: The selected pod will be injected clock skew.
-- cpu-burn: Simulate the cpu of the selected pod stress.
+- time chaos: The selected pod will be injected with clock skew.
+- cpu-burn: Simulate the CPU of the selected pod stress.
 - memory-burn: Simulate the memory of the selected pod stress.
 - kernel chaos: The selected pod will be injected with (slab, bio, etc) errors.
 
@@ -55,7 +53,7 @@ which correspond to the following major actions (experiments):
 
 ## Deploy and use
 
-See [Docs](https://chaos-mesh.org/docs/)
+See [Docs](https://chaos-mesh.org/docs/).
 
 ## Adopters
 
@@ -76,21 +74,21 @@ See [FAQs](https://chaos-mesh.org/docs/faqs).
 
 ## Blogs
 
-- [Chaos Mesh - Your Chaos Engineering Solution for System Resiliency on Kubernetes](https://pingcap.com/blog/chaos-mesh-your-chaos-engineering-solution-for-system-resiliency-on-kubernetes/) 
+- [Chaos Mesh - Your Chaos Engineering Solution for System Resiliency on Kubernetes](https://pingcap.com/blog/chaos-mesh-your-chaos-engineering-solution-for-system-resiliency-on-kubernetes/)
 - [Run Your First Chaos Experiment in 10 Minutes](https://pingcap.com/blog/run-first-chaos-experiment-in-ten-minutes/)
 - [Simulating Clock Skew in K8s Without Affecting Other Containers on the Node](https://pingcap.com/blog/simulating-clock-skew-in-k8s-without-affecting-other-containers-on-node/)
 
 ## Contribute
 
-See [Development Guide](https://chaos-mesh.org/docs/development_guides/development_overview).
+See the [contributing guide](/CONTRIBUTING.md) and [development guide](https://chaos-mesh.org/docs/development_guides/development_overview).
 
 ## Community
 
 Please reach out for bugs, feature requests, and other issues via:
 
 - Following us on Twitter at [@chaos_mesh](https://twitter.com/chaos_mesh).
-- The #sig-chaos-mesh channel in the [TiDB Community](https://pingcap.com/tidbslack) slack workspace.
-- Filing an issue or opening a PR against this repo.
+- Joining the #sig-chaos-mesh channel in the [TiDB Community](https://slack.tidb.io/invite?team=tidb-community&channel=sig-chaos-mesh&ref=pingcap-chaos-mesh) Slack workspace.
+- Filing an issue or opening a PR against this repository.
 
 ### Community meeting
 
@@ -103,7 +101,7 @@ On the fourth Thursday of every month (unless otherwise specified), the Chaos Me
 
 ## Roadmap
 
-See [ROADMAP](/ROADMAP.md)
+See [ROADMAP](/ROADMAP.md).
 
 ## License
 
