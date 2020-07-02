@@ -21,7 +21,7 @@ const Loading = () => {
 
   return (
     <Box className={classes.root}>
-      <CircularProgress />
+      <CircularProgress size={25} />
     </Box>
   )
 }

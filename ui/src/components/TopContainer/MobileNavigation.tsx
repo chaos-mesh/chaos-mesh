@@ -14,9 +14,6 @@ const useStyles = makeStyles((theme: Theme) =>
       top: 'auto',
       bottom: 0,
     },
-    iconButton: {
-      color: '#fff',
-    },
   })
 )
 
@@ -40,11 +37,11 @@ const MobileNavigation = () => {
   const classes = useStyles()
 
   return (
-    <AppBar position="fixed" color="primary" className={classes.appBar}>
+    <AppBar className={classes.appBar} position="fixed" color="inherit">
       <Toolbar>
         {items.map((i) => (
           <NavLink key={i.href} to={i.href}>
-            <IconButton className={classes.iconButton}>{i.icon}</IconButton>
+            <IconButton color="primary">{i.icon}</IconButton>
           </NavLink>
         ))}
       </Toolbar>

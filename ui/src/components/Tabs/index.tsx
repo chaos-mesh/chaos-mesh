@@ -1,24 +1,6 @@
 import { Box, Tab, TabProps, Tabs } from '@material-ui/core'
-import { Theme, makeStyles } from '@material-ui/core/styles'
 
 import React from 'react'
-
-const useStyles = makeStyles((theme: Theme) => ({
-  root: {
-    display: 'flex',
-  },
-  tabs: {
-    borderRight: `1px solid ${theme.palette.divider}`,
-    '& .MuiTabs-indicator': {
-      backgroundColor: theme.palette.primary.main,
-    },
-  },
-  main: {
-    flex: 1,
-    paddingLeft: theme.spacing(6),
-    paddingRight: theme.spacing(3),
-  },
-}))
 
 function a11yProps(index: number) {
   return {
@@ -35,19 +17,17 @@ interface VerticalTabsProps {
 }
 
 const VerticalTabs: React.FC<VerticalTabsProps> = ({ tabs, tabPanels, tabIndex: value, setTabIndex: setValue }) => {
-  const classes = useStyles()
-
   const onChange = (_: React.ChangeEvent<{}>, newValue: number) => setValue(newValue)
 
   return (
-    <Box className={classes.root}>
-      <Tabs className={classes.tabs} orientation="vertical" value={value} onChange={onChange}>
+    <>
+      <Tabs variant="scrollable" indicatorColor="primary" textColor="primary" value={value} onChange={onChange}>
         {tabs.map(({ label, ...other }: TabProps, index: number) => {
           return <Tab key={index} label={label} {...a11yProps(index)} {...other} />
         })}
       </Tabs>
 
-      <Box className={classes.main}>
+      <Box flex={1} mt={3} px={3}>
         {tabPanels.map((panel: React.ReactNode, index: number) => {
           return (
             <Box
@@ -62,7 +42,7 @@ const VerticalTabs: React.FC<VerticalTabsProps> = ({ tabs, tabPanels, tabIndex: 
           )
         })}
       </Box>
-    </Box>
+    </>
   )
 }
 

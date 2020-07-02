@@ -8,7 +8,7 @@ import { upperFirst } from 'lib/utils'
 const actions = ['pod kill', 'pod failure', 'container kill']
 
 export default function PodPanel(props: StepperFormTargetProps) {
-  const { values, handleChange, handleActionChange } = props
+  const { values, handleActionChange } = props
 
   return (
     <>
@@ -16,7 +16,7 @@ export default function PodPanel(props: StepperFormTargetProps) {
         id="target.pod_chaos.action"
         name="target.pod_chaos.action"
         label="Action"
-        helperText="Please select a action"
+        helperText="Please select an action"
         value={values.target.pod_chaos.action}
         onChange={handleActionChange}
       >
@@ -30,10 +30,9 @@ export default function PodPanel(props: StepperFormTargetProps) {
       {values.target.pod_chaos.action === 'container-kill' && (
         <TextField
           id="target.pod_chaos.container_name"
+          name="target.pod_chaos.container_name"
           label="Container Name"
           helperText="Input the container name you want to kill"
-          value={values.target.pod_chaos.container_name}
-          onChange={handleChange}
         />
       )}
     </>
