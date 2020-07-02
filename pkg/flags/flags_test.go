@@ -27,7 +27,6 @@ func TestNewMapStringStringFlag(t *testing.T) {
 }
 
 func TestMapStringStringFlag_String(t *testing.T) {
-
 	g := NewGomegaWithT(t)
 	flag := NewMapStringStringFlag()
 

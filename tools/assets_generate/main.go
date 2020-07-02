@@ -18,7 +18,7 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/cwen0/vfsgen"
+	"github.com/shurcooL/vfsgen"
 )
 
 func main() {
@@ -32,7 +32,6 @@ func main() {
 		BuildTags:    buildTag,
 		PackageName:  "uiserver",
 		VariableName: "assets",
-		Fallback:     "index.html",
 	})
 	if err != nil {
 		log.Fatalln(err)

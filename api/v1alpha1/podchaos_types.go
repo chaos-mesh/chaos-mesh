@@ -188,6 +188,12 @@ type PodChaosSpec struct {
 	// Needed in container-kill.
 	// +optional
 	ContainerName string `json:"containerName"`
+
+	// GracePeriod is used in pod-kill action. It represents the duration in seconds before the pod should be deleted.
+	// Value must be non-negative integer. The default value is zero that indicates delete immediately.
+	// +optional
+	// +kubebuilder:validation:Minimum=0
+	GracePeriod int64 `json:"gracePeriod"`
 }
 
 func (in *PodChaosSpec) GetSelector() SelectorSpec {
