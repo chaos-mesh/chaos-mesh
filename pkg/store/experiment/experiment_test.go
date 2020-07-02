@@ -23,6 +23,7 @@ func TestConstructQueryArgs(t *testing.T) {
 		kind          string
 		ns            string
 		name          string
+		uid           string
 		expectedQuery string
 		expectedArgs  []string
 	}{
@@ -30,6 +31,7 @@ func TestConstructQueryArgs(t *testing.T) {
 			kind:          "",
 			ns:            "",
 			name:          "",
+			uid:           "",
 			expectedQuery: "",
 			expectedArgs:  []string{},
 		},
@@ -37,6 +39,7 @@ func TestConstructQueryArgs(t *testing.T) {
 			kind:          "PodChaos",
 			ns:            "",
 			name:          "",
+			uid:           "",
 			expectedQuery: "kind = ?",
 			expectedArgs:  []string{"PodChaos"},
 		},
@@ -44,6 +47,7 @@ func TestConstructQueryArgs(t *testing.T) {
 			kind:          "",
 			ns:            "test-ns",
 			name:          "",
+			uid:           "",
 			expectedQuery: "namespace = ?",
 			expectedArgs:  []string{"test-ns"},
 		},
@@ -51,6 +55,7 @@ func TestConstructQueryArgs(t *testing.T) {
 			kind:          "",
 			ns:            "",
 			name:          "test-name",
+			uid:           "",
 			expectedQuery: "name = ?",
 			expectedArgs:  []string{"test-name"},
 		},
@@ -58,6 +63,7 @@ func TestConstructQueryArgs(t *testing.T) {
 			kind:          "PodChaos",
 			ns:            "test-ns",
 			name:          "",
+			uid:           "",
 			expectedQuery: "kind = ? AND namespace = ?",
 			expectedArgs:  []string{"PodChaos", "test-ns"},
 		},
@@ -65,13 +71,62 @@ func TestConstructQueryArgs(t *testing.T) {
 			kind:          "PodChaos",
 			ns:            "test-ns",
 			name:          "test-name",
+			uid:           "",
 			expectedQuery: "kind = ? AND namespace = ? AND name = ?",
 			expectedArgs:  []string{"PodChaos", "test-ns", "test-name"},
+		},
+		{
+			kind:          "",
+			ns:            "",
+			name:          "",
+			uid:           "test-uid",
+			expectedQuery: "uid = ?",
+			expectedArgs:  []string{"test-uid"},
+		},
+		{
+			kind:          "PodChaos",
+			ns:            "",
+			name:          "",
+			uid:           "test-uid",
+			expectedQuery: "kind = ? AND uid = ?",
+			expectedArgs:  []string{"PodChaos", "test-uid"},
+		},
+		{
+			kind:          "",
+			ns:            "test-ns",
+			name:          "",
+			uid:           "test-uid",
+			expectedQuery: "namespace = ? AND uid = ?",
+			expectedArgs:  []string{"test-ns", "test-uid"},
+		},
+		{
+			kind:          "",
+			ns:            "",
+			name:          "test-name",
+			uid:           "test-uid",
+			expectedQuery: "name = ? AND uid = ?",
+			expectedArgs:  []string{"test-name", "test-uid"},
+		},
+		{
+			kind:          "PodChaos",
+			ns:            "test-ns",
+			name:          "",
+			uid:           "test-uid",
+			expectedQuery: "kind = ? AND namespace = ? AND uid = ?",
+			expectedArgs:  []string{"PodChaos", "test-ns", "test-uid"},
+		},
+		{
+			kind:          "PodChaos",
+			ns:            "test-ns",
+			name:          "test-name",
+			uid:           "test-uid",
+			expectedQuery: "kind = ? AND namespace = ? AND name = ? AND uid = ?",
+			expectedArgs:  []string{"PodChaos", "test-ns", "test-name", "test-uid"},
 		},
 	}
 
 	for _, c := range cases {
-		query, args := constructQueryArgs(c.kind, c.ns, c.name)
+		query, args := constructQueryArgs(c.kind, c.ns, c.name, c.uid)
 		if query != c.expectedQuery {
 			t.Errorf("expected query %s but got %s", c.expectedQuery, query)
 		}
