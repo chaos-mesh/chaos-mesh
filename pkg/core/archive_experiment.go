@@ -39,6 +39,12 @@ type ExperimentStore interface {
 	// Delete deletes the experiment from the datastore.
 	Delete(context.Context, *ArchiveExperiment) error
 
+	// DetailList returns a list of archive experiments from the datastore.
+	DetailList(ctx context.Context, kind, namespace, name, uid string) ([]*ArchiveExperiment, error)
+
+	// FindByUID returns an archive experiment by UID.
+	FindByUID(context.Context, string) (*ArchiveExperiment, error)
+
 	// DeleteByFinishTime deletes experiments whose time difference is greater than the given time from FinishTime.
 	DeleteByFinishTime(context.Context, time.Duration) error
 }
@@ -56,7 +62,7 @@ type ArchiveExperimentMeta struct {
 	Namespace  string
 	Kind       string
 	Action     string
-	UID        string
+	UID        string `gorm:"index:uid"`
 	StartTime  time.Time
 	FinishTime time.Time
 }
