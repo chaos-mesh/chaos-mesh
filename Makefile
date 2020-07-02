@@ -165,7 +165,7 @@ vet:
 tidy: clean
 	@echo "go mod tidy"
 	GO111MODULE=on go mod tidy
-	git diff --quiet go.mod go.sum
+	git diff -U --exit-code go.mod go.sum
 
 clean:
 	rm -rf docs/docs.go
