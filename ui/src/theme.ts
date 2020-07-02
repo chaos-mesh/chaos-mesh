@@ -19,9 +19,6 @@ const theme = responsiveFontSizes(
       success: {
         main: green[700],
       },
-      background: {
-        default: '#f5f5f5',
-      },
     },
     spacing: (factor) => `${0.25 * factor}rem`,
   })

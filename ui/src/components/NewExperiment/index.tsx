@@ -1,33 +1,29 @@
 import { Box, Button, Container, Drawer, Fab, useMediaQuery, useTheme } from '@material-ui/core'
-import { Experiment, StepperFormProps } from './types'
-import { Form, Formik, FormikHelpers } from 'formik'
+import { Form, Formik, FormikHelpers, useFormikContext } from 'formik'
 import React, { useState } from 'react'
 import { StepperProvider, useStepperContext } from './Context'
 import { Theme, createStyles, makeStyles } from '@material-ui/core/styles'
 import { defaultExperimentSchema, validationSchema } from './constants'
-import { setAlert, setAlertOpen, setNeedToRefreshExperiments } from 'slices/globalStatus'
+import { parseSubmitValues, yamlToExperiments } from 'lib/formikhelpers'
+import { setAlert, setAlertOpen } from 'slices/globalStatus'
 
 import AddIcon from '@material-ui/icons/Add'
 import CancelIcon from '@material-ui/icons/Cancel'
 import CloudUploadOutlinedIcon from '@material-ui/icons/CloudUploadOutlined'
+import { Experiment } from './types'
 import PublishIcon from '@material-ui/icons/Publish'
 import Stepper from './Stepper'
 import api from 'api'
-import { parseSubmitValues } from 'lib/formikhelpers'
+import { setNeedToRefreshExperiments } from 'slices/experiments'
 import { useHistory } from 'react-router-dom'
 import { useStoreDispatch } from 'store'
+import yaml from 'js-yaml'
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     container: {
-      display: 'flex',
-      flexDirection: 'column',
-      width: '50vw',
       height: '100%',
       padding: theme.spacing(6),
-      [theme.breakpoints.down('md')]: {
-        width: '100vw',
-      },
     },
     new: {
       [theme.breakpoints.down('xs')]: {
@@ -43,35 +39,85 @@ const useStyles = makeStyles((theme: Theme) =>
         bottom: theme.spacing(7.5),
         right: theme.spacing(3),
         display: 'flex',
-        background: '#fff',
-        color: theme.palette.primary.main,
-        zIndex: 1101,
+        background: theme.palette.primary.main,
+        color: '#fff',
+        zIndex: 1101, // .MuiAppBar-root z-index: 1100
       },
+    },
+    cancel: {
+      zIndex: 1,
     },
   })
 )
 
 interface ActionsProps {
-  isSubmitting?: boolean
   toggleDrawer: () => void
+  setInitialValues: (initialValues: Experiment) => void
 }
 
-const Actions = ({ isSubmitting = false, toggleDrawer }: ActionsProps) => {
+const Actions = ({ toggleDrawer, setInitialValues }: ActionsProps) => {
   const theme = useTheme()
   const isTabletScreen = useMediaQuery(theme.breakpoints.down('sm'))
   const size = isTabletScreen ? ('small' as 'small') : ('medium' as 'medium')
+  const classes = useStyles()
+
+  const { isSubmitting, resetForm } = useFormikContext()
+
+  const dispatch = useStoreDispatch()
 
   const { state } = useStepperContext()
 
+  const handleCancel = () => {
+    toggleDrawer()
+    resetForm()
+    setInitialValues(defaultExperimentSchema)
+  }
+
+  const handleUploadYAML = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files![0]
+
+    const reader = new FileReader()
+    reader.onload = function (e) {
+      try {
+        const y = yamlToExperiments(yaml.safeLoad(e.target!.result as string))
+        setInitialValues(y)
+        dispatch(
+          setAlert({
+            type: 'success',
+            message: `Imported successfully!`,
+          })
+        )
+      } catch (e) {
+        console.error(e)
+        dispatch(
+          setAlert({
+            type: 'error',
+            message: `An error occurred: ${e}`,
+          })
+        )
+      } finally {
+        dispatch(setAlertOpen(true))
+      }
+    }
+    reader.readAsText(f)
+  }
+
   return (
     <Box display="flex" justifyContent="space-between" marginBottom={6}>
-      <Button variant="outlined" size={size} startIcon={<CancelIcon />} onClick={toggleDrawer}>
+      <Button
+        className={classes.cancel}
+        variant="outlined"
+        size={size}
+        startIcon={<CancelIcon />}
+        onClick={handleCancel}
+      >
         Cancel
       </Button>
       <Box display="flex">
         <Box mr={3}>
-          <Button variant="outlined" size={size} startIcon={<CloudUploadOutlinedIcon />}>
+          <Button variant="outlined" component="label" size={size} startIcon={<CloudUploadOutlinedIcon />}>
             Yaml File
+            <input type="file" style={{ display: 'none' }} onChange={handleUploadYAML} />
           </Button>
         </Box>
         <Button
@@ -90,14 +136,13 @@ const Actions = ({ isSubmitting = false, toggleDrawer }: ActionsProps) => {
 }
 
 export default function NewExperiment() {
-  const initialValues: Experiment = defaultExperimentSchema
-
-  const classes = useStyles()
   const theme = useTheme()
   const isTabletScreen = useMediaQuery(theme.breakpoints.down('sm'))
+  const classes = useStyles()
   const history = useHistory()
   const dispatch = useStoreDispatch()
 
+  const [initialValues, setInitialValues] = useState<Experiment>(defaultExperimentSchema)
   const [open, setOpen] = useState(false)
   const toggleDrawer = () => setOpen(!open)
 
@@ -143,21 +188,25 @@ export default function NewExperiment() {
       <Fab className={classes.fab} color="inherit" size="medium" aria-label="New experiment">
         <AddIcon onClick={toggleDrawer} />
       </Fab>
-      <Drawer anchor="right" open={open} onClose={toggleDrawer}>
+      <Drawer
+        anchor="right"
+        open={open}
+        onClose={toggleDrawer}
+        PaperProps={{ style: { width: isTabletScreen ? '100vw' : '50vw' } }}
+      >
         <StepperProvider>
-          <Formik initialValues={initialValues} validationSchema={validationSchema} onSubmit={handleOnSubmit}>
-            {(props: StepperFormProps) => {
-              const { isSubmitting } = props
-
-              return (
-                <Container className={classes.container}>
-                  <Form>
-                    <Actions isSubmitting={isSubmitting} toggleDrawer={toggleDrawer} />
-                    <Stepper formProps={props} />
-                  </Form>
-                </Container>
-              )
-            }}
+          <Formik
+            enableReinitialize
+            initialValues={initialValues}
+            validationSchema={validationSchema}
+            onSubmit={handleOnSubmit}
+          >
+            <Container className={classes.container}>
+              <Form>
+                <Actions toggleDrawer={toggleDrawer} setInitialValues={setInitialValues} />
+                <Stepper />
+              </Form>
+            </Container>
           </Formik>
         </StepperProvider>
       </Drawer>

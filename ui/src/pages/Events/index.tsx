@@ -7,7 +7,7 @@ import ContentContainer from 'components/ContentContainer'
 import { Event } from 'api/events.type'
 import EventsTable from 'components/EventsTable'
 import Loading from 'components/Loading'
-import PageTitle from 'components/PageTitle'
+import PaperTop from 'components/PaperTop'
 import api from 'api'
 import clsx from 'clsx'
 import genEventsChart from 'lib/d3/eventsChart'
@@ -21,13 +21,13 @@ const useStyles = makeStyles((theme: Theme) =>
     },
     timelinePaper: {
       marginBottom: theme.spacing(3),
-      padding: theme.spacing(3),
     },
     eventsChart: {
       height: 300,
     },
     paper: {
       padding: theme.spacing(3),
+      paddingTop: 0,
     },
   })
 )
@@ -40,6 +40,8 @@ export default function Events() {
   const [events, setEvents] = useState<Event[] | null>(null)
 
   const fetchEvents = () => {
+    setLoading(true)
+
     api.events
       .events()
       .then(({ data }) => setEvents(data))
@@ -67,12 +69,11 @@ export default function Events() {
       {events && events.length > 0 && (
         <Grow in={!loading} style={{ transformOrigin: '0 0 0' }}>
           <Box display="flex" flexDirection="column" height="100%">
-            <Paper className={classes.timelinePaper}>
-              <PageTitle>Timeline</PageTitle>
+            <Paper className={clsx(classes.paper, classes.timelinePaper)}>
+              <PaperTop title="Timeline" />
               <div ref={chartRef} className={classes.eventsChart} />
             </Paper>
             <Paper className={clsx(classes.height100, classes.paper)}>
-              <PageTitle>Events</PageTitle>
               <EventsTable events={events} detailed />
             </Paper>
           </Box>
