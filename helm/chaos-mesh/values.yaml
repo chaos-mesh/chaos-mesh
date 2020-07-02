@@ -26,6 +26,9 @@ controllerManager:
   nameOverride: ""
   fullnameOverride: ""
 
+  allowedNamespaces: ""
+  ignoredNamespaces: ""
+
   service:
     type: ClusterIP
 
@@ -54,6 +57,8 @@ chaosDaemon:
   imagePullPolicy: Always
   grpcPort: 31767
   httpPort: 31766
+
+  hostNetwork: false
 
   podAnnotations: {}
 

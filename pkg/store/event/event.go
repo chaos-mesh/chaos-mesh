@@ -320,6 +320,9 @@ func (e *eventStore) DeleteByFinishTime(_ context.Context, ttl time.Duration) er
 	}
 	nowTime := time.Now()
 	for _, et := range eventList {
+		if et.FinishTime == nil {
+			continue
+		}
 		if et.FinishTime.Add(ttl).Before(nowTime) {
 			if err := e.db.Model(core.Event{}).Unscoped().Delete(*et).Error; err != nil {
 				return err

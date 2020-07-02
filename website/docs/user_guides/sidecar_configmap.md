@@ -8,7 +8,7 @@ This document guides you to define a specified sidecar ConfigMap for your applic
 
 ## Why do we need a specified Sidecar ConfigMap?
 
-Chaos Mesh runs a [fuse-daemon](https://www.kernel.org/doc/Documentation/filesystems/fuse.txt) server in [sidecar container](https://www.magalix.com/blog/the-sidecar-pattern) for implementing file system IOCChaos.
+Chaos Mesh runs a [fuse-daemon](https://www.kernel.org/doc/Documentation/filesystems/fuse.txt) server in [sidecar container](https://www.magalix.com/blog/the-sidecar-pattern) for implementing file system IOChaos.
 
 In sidecar container, fuse-daemon needs to mount the data directory of application by [fusermount](http://manpages.ubuntu.com/manpages/bionic/en/man1/fusermount.1.html) before the application starts.
 
