@@ -37,6 +37,13 @@ module.exports = {
     },
     {
       type: "category",
+      label: "Use Cases",
+      items: [
+        "use_cases/multi_data_center",
+      ]
+    },
+    {
+      type: "category",
       label: "Development Guide",
       items:[
         "development_guides/development_overview",
