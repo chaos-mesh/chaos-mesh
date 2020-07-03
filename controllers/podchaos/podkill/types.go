@@ -74,7 +74,7 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1
 			r.Log.Info("Deleting", "namespace", pod.Namespace, "name", pod.Name)
 
 			if err := r.Delete(ctx, pod, &client.DeleteOptions{
-				GracePeriodSeconds: new(int64), // PeriodSeconds has to be set specifically
+				GracePeriodSeconds: &podchaos.Spec.GracePeriod, // PeriodSeconds has to be set specifically
 			}); err != nil {
 				r.Log.Error(err, "unable to delete pod")
 				return err

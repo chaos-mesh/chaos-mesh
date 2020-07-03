@@ -26,6 +26,9 @@ controllerManager:
   nameOverride: ""
   fullnameOverride: ""
 
+  allowedNamespaces: ""
+  ignoredNamespaces: ""
+
   service:
     type: ClusterIP
 

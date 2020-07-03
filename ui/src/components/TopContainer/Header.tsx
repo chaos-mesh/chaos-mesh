@@ -7,10 +7,12 @@ import { Link } from 'react-router-dom'
 import MenuIcon from '@material-ui/icons/Menu'
 import { NavigationBreadCrumbProps } from 'slices/navigation.type'
 import React from 'react'
-import clsx from 'clsx'
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
+    appBarCommon: {
+      borderBottom: `1px solid ${theme.palette.divider}`,
+    },
     appBar: {
       marginLeft: drawerCloseWidth,
       width: `calc(100% - ${drawerCloseWidth})`,
@@ -39,11 +41,8 @@ const useStyles = makeStyles((theme: Theme) =>
     nav: {
       marginLeft: theme.spacing(3),
       '& .MuiBreadcrumbs-separator': {
-        color: '#fff',
+        color: theme.palette.primary.main,
       },
-    },
-    whiteText: {
-      color: '#fff',
     },
     hoverLink: {
       '&:hover': {
@@ -64,11 +63,16 @@ const Header: React.FC<HeaderProps> = ({ openDrawer, handleDrawerToggle, breadcr
   const classes = useStyles()
 
   return (
-    <AppBar className={openDrawer ? classes.appBarShift : classes.appBar} position="fixed">
+    <AppBar
+      className={`${openDrawer ? classes.appBarShift : classes.appBar} ${classes.appBarCommon}`}
+      position="fixed"
+      color="inherit"
+      elevation={0}
+    >
       <Toolbar>
         <IconButton
           className={classes.menuButton}
-          color="inherit"
+          color="primary"
           edge="start"
           aria-label="Toggle drawer"
           onClick={handleDrawerToggle}
@@ -81,12 +85,12 @@ const Header: React.FC<HeaderProps> = ({ openDrawer, handleDrawerToggle, breadcr
               breadcrumbs.map((b) => {
                 return b.path ? (
                   <Link key={b.name} to={b.path} style={{ textDecoration: 'none' }}>
-                    <Typography className={clsx(classes.whiteText, classes.hoverLink)} variant="h6" component="h2">
+                    <Typography className={classes.hoverLink} variant="h6" component="h2" color="primary">
                       {b.name}
                     </Typography>
                   </Link>
                 ) : (
-                  <Typography key={b.name} className={classes.whiteText} variant="h6" component="h2">
+                  <Typography key={b.name} variant="h6" component="h2" color="primary">
                     {b.name}
                   </Typography>
                 )
@@ -96,8 +100,8 @@ const Header: React.FC<HeaderProps> = ({ openDrawer, handleDrawerToggle, breadcr
             component="a"
             href="https://github.com/pingcap/chaos-mesh"
             target="_blank"
-            color="inherit"
-            aria-label="Chaos Mesh GitHub link"
+            color="primary"
+            aria-label="Chaos Mesh GitHub"
           >
             <GitHubIcon />
           </IconButton>

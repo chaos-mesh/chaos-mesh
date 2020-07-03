@@ -14,19 +14,15 @@ export default function insertCommonStyle() {
       .chaos-events-legends {
         position: absolute;
         top: 0;
-        left: 50%;
+        right: 15px;
         display: flex;
-        transform: translateX(-50%);
+        flex-direction: column;
+        align-items: end;
       }
 
       .chaos-events-legends > div {
         display: flex;
         align-items: center;
-        margin-right: 12px;
-      }
-
-      .chaos-events-legends > div:last-child {
-        margin-right: 0;
       }
     </style>`
   )

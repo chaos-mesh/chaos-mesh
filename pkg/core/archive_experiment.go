@@ -36,6 +36,9 @@ type ExperimentStore interface {
 	// Delete deletes the experiment from the datastore.
 	Delete(context.Context, *ArchiveExperiment) error
 
+	// DetailList returns a list of archive experiments from the datastore.
+	DetailList(ctx context.Context, kind, namespace, name, uid string) ([]*ArchiveExperiment, error)
+
 	// DeleteByFinishTime deletes experiments whose time difference is greater than the given time from FinishTime.
 	DeleteByFinishTime(context.Context, time.Duration) error
 
@@ -45,7 +48,7 @@ type ExperimentStore interface {
 	// Set sets the experiment.
 	Set(context.Context, *ArchiveExperiment) error
 
-	// FindByUID returns a set of experiment by the UID of the experiment.
+	// FindByUID returns an experiment record by the UID of the experiment.
 	FindByUID(ctx context.Context, UID string) (*ArchiveExperiment, error)
 }
 

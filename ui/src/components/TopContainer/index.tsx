@@ -97,10 +97,11 @@ const TopContainer = () => {
 
         <Box className={classes.switchContent}>
           <Switch>
-            <Redirect path="/" to="/overview" exact />
+            <Redirect exact path="/" to="/overview" />
             {chaosMeshRoutes.map((route) => (
               <Route key={route.path! as string} {...route} />
             ))}
+            <Redirect exact path="*" to="/overview" />
           </Switch>
         </Box>
 
