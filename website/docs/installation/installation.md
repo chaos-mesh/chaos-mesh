@@ -1,15 +1,14 @@
 ---
 id: installation
 title: Installation
-sidebar_label: Installation
 ---
 
 This document describes how to install Chaos Mesh to perform chaos experiments against your application in Kubernetes.
 
 If you want to try Chaos Mesh on your your laptop (Linux or macOS), you can refer the following two documents:
 
-- [Get started on kind](get_started_on_kind)
-- [Get started on minikube](get_started_on_minikube)
+- [Get started on kind](get_started_on_kind.md)
+- [Get started on minikube](get_started_on_minikube.md)
 
 ## Prerequisites
 
