@@ -4,6 +4,8 @@ import * as Yup from 'yup'
 export const defaultExperimentSchema: Experiment = {
   name: '',
   namespace: 'default',
+  labels: [],
+  annotations: [],
   scope: {
     namespace_selectors: ['default'],
     label_selectors: [],

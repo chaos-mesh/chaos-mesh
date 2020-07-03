@@ -22,7 +22,7 @@ export function parseSubmitValues(e: Experiment) {
     values.scope.phase_selectors = []
   }
 
-  // Parse label_selectors and annotation_selectors to object
+  // Parse labels, label_selectors, annotations and annotation_selectors to object
   function helper1(selectors: string[]) {
     return selectors.reduce((acc: { [key: string]: string }, d) => {
       const splited = d.split(': ')
@@ -32,6 +32,8 @@ export function parseSubmitValues(e: Experiment) {
       return acc
     }, {})
   }
+  values.labels = helper1(values.labels)
+  values.annotations = helper1(values.annotations)
   values.scope.label_selectors = helper1(values.scope.label_selectors as string[])
   values.scope.annotation_selectors = helper1(values.scope.annotation_selectors as string[])
 

@@ -3,6 +3,8 @@ import { FormikContextType } from 'formik'
 export interface ExperimentBasic {
   name: string
   namespace: string
+  labels: object | string[]
+  annotations: object | string[]
 }
 
 export interface ExperimentScope {
