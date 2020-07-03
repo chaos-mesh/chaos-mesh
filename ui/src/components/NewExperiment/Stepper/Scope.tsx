@@ -1,7 +1,7 @@
 import { InputAdornment, MenuItem } from '@material-ui/core'
 import React, { useMemo } from 'react'
 import { SelectField, TextField } from 'components/FormField'
-import { joinObjKVs, upperFirst } from 'lib/utils'
+import { joinObjKVs, toTitleCase } from 'lib/utils'
 
 import AdvancedOptions from 'components/AdvancedOptions'
 import { Experiment } from '../types'
@@ -14,7 +14,7 @@ interface ScopeStepProps {
 }
 
 const phases = ['all', 'pending', 'running', 'succeeded', 'failed', 'unknown']
-const modes = ['all', { name: 'Random one', value: 'one' }, 'fixed number', 'fixed percent', 'random max percent']
+const modes = ['all', { name: 'Random One', value: 'one' }, 'fixed number', 'fixed percent', 'random max percent']
 const modesWithAdornment = ['fixed-percent', 'random-max-percent']
 
 const ScopeStep: React.FC<ScopeStepProps> = ({ namespaces, labels, annotations }) => {
@@ -68,11 +68,11 @@ const ScopeStep: React.FC<ScopeStepProps> = ({ namespaces, labels, annotations }
         ))}
       </SelectField>
 
-      <SelectField id="scope.mode" name="scope.mode" label="Mode" helperText="Select a mode">
+      <SelectField id="scope.mode" name="scope.mode" label="Mode" helperText="Select the experiment mode">
         {modes.map((option) =>
           typeof option === 'string' ? (
             <MenuItem key={option} value={option.split(' ').join('-')}>
-              {upperFirst(option)}
+              {toTitleCase(option)}
             </MenuItem>
           ) : (
             <MenuItem key={option.value} value={option.value}>
@@ -121,7 +121,7 @@ const ScopeStep: React.FC<ScopeStepProps> = ({ namespaces, labels, annotations }
         >
           {phases.map((option: string) => (
             <MenuItem key={option} value={option}>
-              {upperFirst(option)}
+              {toTitleCase(option)}
             </MenuItem>
           ))}
         </SelectField>

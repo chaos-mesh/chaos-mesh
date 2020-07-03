@@ -24,15 +24,13 @@ export function parseSubmitValues(e: Experiment) {
 
   // Parse label_selectors and annotation_selectors to object
   function helper1(selectors: string[]) {
-    return selectors.length > 0
-      ? selectors.reduce((acc: { [key: string]: string }, d) => {
-          const splited = d.split(': ')
+    return selectors.reduce((acc: { [key: string]: string }, d) => {
+      const splited = d.split(': ')
 
-          acc[splited[0]] = splited[1]
+      acc[splited[0]] = splited[1]
 
-          return acc
-        }, {})
-      : {}
+      return acc
+    }, {})
   }
   values.scope.label_selectors = helper1(values.scope.label_selectors as string[])
   values.scope.annotation_selectors = helper1(values.scope.annotation_selectors as string[])

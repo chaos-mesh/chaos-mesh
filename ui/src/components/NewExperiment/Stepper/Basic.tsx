@@ -24,7 +24,7 @@ const BasicStep: React.FC<BasicStepProps> = ({ namespaces }) => {
         id="name"
         name="name"
         label="Name"
-        helperText="Please input an experiment name"
+        helperText="The experiment name"
         error={errors.name ? true : false}
       />
 

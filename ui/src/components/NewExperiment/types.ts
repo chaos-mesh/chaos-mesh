@@ -15,7 +15,7 @@ export interface ExperimentScope {
 }
 
 export interface ExperimentTargetPod {
-  action: string
+  action: 'pod-failure' | 'pod-kill' | 'container-kill' | ''
   container_name?: string
 }
 
@@ -49,7 +49,7 @@ export interface ExperimentTargetNetworkLoss {
 }
 
 export interface ExperimentTargetNetwork {
-  action: string
+  action: 'loss' | 'delay' | 'duplicate' | 'corrupt' | 'bandwidth' | ''
   bandwidth: ExperimentTargetNetworkBandwidth
   corrupt: ExperimentTargetNetworkCorrupt
   delay: ExperimentTargetNetworkDelay
@@ -57,11 +57,27 @@ export interface ExperimentTargetNetwork {
   loss: ExperimentTargetNetworkLoss
 }
 
+export interface ExperimentTargetIO {
+  action: 'delay' | 'errno' | 'mixed' | ''
+  addr: string
+  delay: string
+  errno: string
+  methods: string[]
+  path: string
+  percent: string
+}
+
+export interface ExperimentTargetKernel {}
+
+export interface ExperimentTargetTime {}
+
+export interface ExperimentTargetStress {}
+
 export interface ExperimentTarget {
   kind: string
   pod_chaos: ExperimentTargetPod
   network_chaos: ExperimentTargetNetwork
-  io_chaos?: any
+  io_chaos: ExperimentTargetIO
   kernel_chaos?: any
   time_chaos?: any
   stress_chaos?: any

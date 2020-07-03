@@ -45,6 +45,15 @@ export const defaultExperimentSchema: Experiment = {
         loss: '',
       },
     },
+    io_chaos: {
+      action: '',
+      addr: '',
+      delay: '',
+      errno: '',
+      methods: [],
+      path: '',
+      percent: '100',
+    },
   },
   scheduler: {
     cron: '',
