@@ -25,6 +25,13 @@ You can try use the parameters: `hostNetwork`. Usage is as follows:
 hostNetwork: true
 ```
 
+### Q: If you see an error message like this `ERROR: failed to get cluster internal kubeconfig: command "docker exec --privileged kind-control-plane cat /etc/kubernetes/admin.conf" failed with error: exit status 1` when installing Chaos Mesh with kind. How to fix it?
+You can try the following command to fix it:
+```
+kind delete cluster
+```
+then deploy again
+
 
 ## Debug
 
