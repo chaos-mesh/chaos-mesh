@@ -38,7 +38,9 @@ export default function Kernel(props: StepperFormTargetProps) {
       <Box>
         {callchain.map((frame, i) => (
           <Box key={i}>
-            <Typography variant="body2">Frame {i + 1}</Typography>
+            <Typography variant="body2" gutterBottom>
+              Frame {i + 1}
+            </Typography>
             <TextField
               id={`target.kernel_chaos.fail_kernel_req.callchain[${i}].funcname`}
               name={`target.kernel_chaos.fail_kernel_req.callchain[${i}].funcname`}
@@ -76,7 +78,7 @@ export default function Kernel(props: StepperFormTargetProps) {
         id="target.kernel_chaos.fail_kernel_req.headers"
         name="target.kernel_chaos.fail_kernel_req.headers"
         label="Headers"
-        helperText="Type string and end with a space to generate the appropriate kernel headers you need"
+        helperText="Type string and end with a space to generate the appropriate kernel headers"
       />
       <TextField
         type="number"

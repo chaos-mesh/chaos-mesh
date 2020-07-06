@@ -7,6 +7,7 @@ import Kernel from './Kernel'
 import Network from './Network'
 import Pod from './Pod'
 import Tabs from 'components/Tabs'
+import Time from './Time'
 import { useFormikContext } from 'formik'
 
 const tabs = [
@@ -40,6 +41,7 @@ const Target: React.FC = () => {
     <Network {...formikCtx} handleActionChange={handleActionChange('NetworkChaos')} />,
     <IO {...formikCtx} handleActionChange={handleActionChange('IoChaos')} />,
     <Kernel {...formikCtx} />,
+    <Time {...formikCtx} />,
   ]
 
   const props = {

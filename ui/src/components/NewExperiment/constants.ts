@@ -65,6 +65,11 @@ export const defaultExperimentSchema: Experiment = {
         times: 0,
       },
     },
+    time_chaos: {
+      clock_ids: [],
+      container_names: [],
+      offset: '',
+    },
   },
   scheduler: {
     cron: '',

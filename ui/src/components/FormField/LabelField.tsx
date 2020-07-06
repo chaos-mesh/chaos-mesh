@@ -25,18 +25,20 @@ const LabelField: React.FC<LabelFieldProps & TextFieldProps> = ({ children, isKV
 
   const onKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === ' ') {
-      if (isKV && !/^[\w-]+:[\w-]+$/.test(text)) {
+      const t = text.trim()
+
+      if (isKV && !/^[\w-]+:[\w-]+$/.test(t)) {
         setError('Invalid key:value format')
 
         return
       }
 
-      const duplicate = labels.some((d) => d === text)
+      const duplicate = labels.some((d) => d === t)
 
       setText('')
 
       if (!duplicate) {
-        setLabels(labels.concat([text]))
+        setLabels(labels.concat([t]))
 
         if (error) {
           setError('')
@@ -65,7 +67,7 @@ const LabelField: React.FC<LabelFieldProps & TextFieldProps> = ({ children, isKV
       >
         {children}
       </TextField>
-      <Box display="flex" flexWrap="wrap" mt={2}>
+      <Box display="flex" flexWrap="wrap">
         {labels.map((val) => (
           <Box key={val} m={0.5}>
             <Chip label={val} color="primary" style={{ height: 24 }} clickable onDelete={onDelete(val)} />

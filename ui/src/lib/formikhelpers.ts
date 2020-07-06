@@ -25,7 +25,7 @@ export function parseSubmitValues(e: Experiment) {
   // Parse labels, label_selectors, annotations and annotation_selectors to object
   function helper1(selectors: string[]) {
     return selectors.reduce((acc: { [key: string]: string }, d) => {
-      const splited = d.split(': ')
+      const splited = d.replace(/\s/g, '').split(':')
 
       acc[splited[0]] = splited[1]
 
@@ -45,7 +45,7 @@ export function parseSubmitValues(e: Experiment) {
     .forEach((k) => delete values.target[k])
 
   // Remove unrelated actions
-  if (kind !== 'KernelChaos') {
+  if (!['KernelChaos', 'TimeChaos', 'StressChaos'].includes(kind)) {
     for (const key in values.target) {
       if (key !== 'kind') {
         const chaos = (values.target as any)[key]

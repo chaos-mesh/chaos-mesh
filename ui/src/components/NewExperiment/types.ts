@@ -87,7 +87,11 @@ export interface ExperimentTargetKernel {
   fail_kernel_req: FailKernelReq
 }
 
-export interface ExperimentTargetTime {}
+export interface ExperimentTargetTime {
+  clock_ids: string[]
+  container_names: string[]
+  offset: string
+}
 
 export interface ExperimentTargetStress {}
 
@@ -97,7 +101,7 @@ export interface ExperimentTarget {
   network_chaos: ExperimentTargetNetwork
   io_chaos: ExperimentTargetIO
   kernel_chaos: ExperimentTargetKernel
-  time_chaos?: any
+  time_chaos: ExperimentTargetTime
   stress_chaos?: any
 }
 
