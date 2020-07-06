@@ -31,6 +31,7 @@ module.exports = {
             "user_guides/kernelchaos_experiment"
           ]
         },
+        "user_guides/experiment_scope",
         "user_guides/sidecar_configmap",
         "user_guides/sidecar_template"
       ]
