@@ -40,6 +40,14 @@ var (
 		"cpuset", "cpuacct", "pids", "hugetlb"}
 )
 
+type infiniteReader struct{}
+
+func (r infiniteReader) Read([]byte) (int, error) {
+	return 0, nil
+}
+
+var globalInfiniteReader = infiniteReader{}
+
 func (s *daemonServer) ExecStressors(ctx context.Context,
 	req *pb.ExecStressRequest) (*pb.ExecStressResponse, error) {
 	log.Info("Executing stressors", "request", req)
@@ -63,7 +71,10 @@ func (s *daemonServer) ExecStressors(ctx context.Context,
 	if err != nil {
 		return nil, err
 	}
-	cmd := exec.Command("stress-ng", strings.Fields(req.Stressors)...)
+
+	cmd := withPidNS(ctx, GetNsPath(pid, pidNS), "stress-ng", strings.Fields(req.Stressors)...)
+	cmd.Stdin = globalInfiniteReader
+
 	if err := cmd.Start(); err != nil {
 		return nil, err
 	}

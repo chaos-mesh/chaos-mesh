@@ -30,7 +30,7 @@ func applyTc(ctx context.Context, pid uint32, args ...string) error {
 		}
 	}
 
-	nsPath := GenNetnsPath(pid)
+	nsPath := GetNsPath(pid, netNS)
 
 	cmd := withNetNS(ctx, nsPath, "tc", args...)
 	log.Info("tc command", "command", cmd.String(), "args", args)

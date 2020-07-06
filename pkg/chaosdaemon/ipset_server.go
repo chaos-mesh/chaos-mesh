@@ -38,7 +38,7 @@ func (s *daemonServer) FlushIpSet(ctx context.Context, req *pb.IpSetRequest) (*e
 		return nil, err
 	}
 
-	nsPath := GenNetnsPath(pid)
+	nsPath := GetNsPath(pid, netNS)
 
 	// TODO: lock every ipset when working on it
 
