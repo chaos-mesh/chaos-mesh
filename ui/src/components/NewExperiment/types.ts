@@ -93,7 +93,21 @@ export interface ExperimentTargetTime {
   offset: string
 }
 
-export interface ExperimentTargetStress {}
+export interface ExperimentTargetStress {
+  stressng_stressors: string
+  stressors: {
+    cpu: {
+      load: number
+      options: string[]
+      workers: number
+    }
+    memory: {
+      options: string[]
+      size: string
+      workers: number
+    }
+  }
+}
 
 export interface ExperimentTarget {
   kind: string
@@ -102,7 +116,7 @@ export interface ExperimentTarget {
   io_chaos: ExperimentTargetIO
   kernel_chaos: ExperimentTargetKernel
   time_chaos: ExperimentTargetTime
-  stress_chaos?: any
+  stress_chaos: ExperimentTargetStress
 }
 
 export interface ExperimentSchedule {

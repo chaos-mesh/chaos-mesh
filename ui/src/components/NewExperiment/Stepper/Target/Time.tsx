@@ -5,7 +5,7 @@ import AdvancedOptions from 'components/AdvancedOptions'
 import { StepperFormTargetProps } from 'components/NewExperiment/types'
 import { resetOtherChaos } from 'lib/formikhelpers'
 
-export default function Kernel(props: StepperFormTargetProps) {
+export default function Time(props: StepperFormTargetProps) {
   useEffect(() => {
     resetOtherChaos(props, 'TimeChaos', false)
     // eslint-disable-next-line react-hooks/exhaustive-deps

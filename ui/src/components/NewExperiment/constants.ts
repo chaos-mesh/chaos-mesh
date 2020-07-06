@@ -70,6 +70,21 @@ export const defaultExperimentSchema: Experiment = {
       container_names: [],
       offset: '',
     },
+    stress_chaos: {
+      stressng_stressors: '',
+      stressors: {
+        cpu: {
+          load: 0,
+          options: [],
+          workers: 0,
+        },
+        memory: {
+          options: [],
+          size: '',
+          workers: 0,
+        },
+      },
+    },
   },
   scheduler: {
     cron: '',
