@@ -40,13 +40,22 @@ var (
 		"cpuset", "cpuacct", "pids", "hugetlb"}
 )
 
-type infiniteReader struct{}
-
-func (r infiniteReader) Read([]byte) (int, error) {
-	return 0, nil
+type infiniteReader struct {
+	Stop <-chan struct{}
 }
 
-var globalInfiniteReader = infiniteReader{}
+func (r infiniteReader) Read([]byte) (int, error) {
+	for {
+		select {
+		case <-r.Stop:
+			return 0, io.EOF
+		default:
+			return 0, nil
+		}
+	}
+}
+
+var stopChannels = make(map[int]chan<- struct{})
 
 func (s *daemonServer) ExecStressors(ctx context.Context,
 	req *pb.ExecStressRequest) (*pb.ExecStressResponse, error) {
@@ -73,11 +82,20 @@ func (s *daemonServer) ExecStressors(ctx context.Context,
 	}
 
 	cmd := withPidNS(ctx, GetNsPath(pid, pidNS), "stress-ng", strings.Fields(req.Stressors)...)
-	cmd.Stdin = globalInfiniteReader
+	stop := make(chan struct{})
+	cmd.Stdin = infiniteReader{
+		Stop: stop,
+	}
 
 	if err := cmd.Start(); err != nil {
 		return nil, err
 	}
+	log.Info("Start process successfully")
+
+	// As described in the document of `command.Stdin`, we have to manually stop the goroutine which copies
+	// the reader to stdin.
+	stopChannels[cmd.Process.Pid] = stop
+
 	procState, err := process.NewProcess(int32(cmd.Process.Pid))
 	if err != nil {
 		return nil, err
@@ -119,6 +137,12 @@ func (s *daemonServer) CancelStressors(ctx context.Context,
 		return nil, err
 	}
 	log.Info("Canceling stressors", "request", req)
+
+	stop, ok := stopChannels[pid]
+	if ok {
+		stop <- struct{}{}
+	}
+
 	ins, err := process.NewProcess(int32(pid))
 	if err != nil {
 		return &empty.Empty{}, nil
@@ -128,6 +152,8 @@ func (s *daemonServer) CancelStressors(ctx context.Context,
 			return nil, err
 		}
 	}
+
+	log.Info("Successfully canceled stressors")
 	return &empty.Empty{}, nil
 }
 
