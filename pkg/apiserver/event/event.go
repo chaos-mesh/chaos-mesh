@@ -62,6 +62,14 @@ func Register(r *gin.RouterGroup, s *Service) {
 // @Description Get all chaos events from db.
 // @Tags events
 // @Produce json
+// @Param podName query string false "The pod's name"
+// @Param podNamespace query string false "The pod's namespace"
+// @Param startTime query string false "The start time of events"
+// @Param endTime query string false "The end time of events"
+// @Param experimentName query string false "The name of the experiment"
+// @Param experimentNamespace query string false "The namespace of the experiment"
+// @Param uid query string false "The UID of the experiment"
+// @Param kind query string false "kind" Enums(PodChaos, IoChaos, NetworkChaos, TimeChaos, KernelChaos, StressChaos)
 // @Success 200 {array} core.Event
 // @Router /api/events [get]
 // @Failure 500 {object} utils.APIError
@@ -69,10 +77,8 @@ func (s *Service) listEvents(c *gin.Context) {
 	filter := core.Filter{
 		PodName:             c.Query("podName"),
 		PodNamespace:        c.Query("podNamespace"),
-		StartTimeBeginStr:   c.Query("startTimeBegin"),
-		StartTimeEndStr:     c.Query("startTimeEnd"),
-		FinishTimeBeginStr:  c.Query("finishTimeBegin"),
-		FinishTimeEndStr:    c.Query("finishTimeEnd"),
+		StartTimeBeginStr:   c.Query("startTime"),
+		FinishTimeEndStr:    c.Query("finishTime"),
 		ExperimentName:      c.Query("experimentName"),
 		ExperimentNamespace: c.Query("experimentNamespace"),
 		UID:                 c.Query("uid"),

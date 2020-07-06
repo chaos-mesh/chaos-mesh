@@ -89,8 +89,6 @@ type Filter struct {
 	PodName             string
 	PodNamespace        string
 	StartTimeBeginStr   string
-	StartTimeEndStr     string
-	FinishTimeBeginStr  string
 	FinishTimeEndStr    string
 	ExperimentName      string
 	ExperimentNamespace string

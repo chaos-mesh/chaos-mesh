@@ -266,14 +266,27 @@ func (e *eventStore) DeleteIncompleteEvents(_ context.Context) error {
 func (e *eventStore) ListByFilter(_ context.Context, filter core.Filter) ([]*core.Event, error) {
 	var resList []*core.Event
 	var err error
-	var startTimeBegin, startTimeEnd, finishTimeBegin, finishTimeEnd time.Time
+	var startTimeBegin, finishTimeEnd time.Time
+
+	if filter.StartTimeBeginStr != "" {
+		startTimeBegin, err = time.Parse(time.RFC3339, strings.Replace(filter.StartTimeBeginStr, " ", "+", -1))
+		if err != nil {
+			return nil, fmt.Errorf("the format of the startTimeBegin is wrong")
+		}
+	}
+	if filter.FinishTimeEndStr != "" {
+		finishTimeEnd, err = time.Parse(time.RFC3339, strings.Replace(filter.FinishTimeEndStr, " ", "+", -1))
+		if err != nil {
+			return nil, fmt.Errorf("the format of the finishTimeEnd is wrong")
+		}
+	}
 
 	if filter.PodName != "" {
 		resList, err = e.ListByPod(context.Background(), filter.PodNamespace, filter.PodName)
 	} else if filter.PodNamespace != "" {
 		resList, err = e.ListByNamespace(context.Background(), filter.PodNamespace)
 	} else {
-		query, args := constructQueryArgs(filter.ExperimentName, filter.ExperimentNamespace, filter.UID, filter.Kind)
+		query, args := constructQueryArgs(filter.ExperimentName, filter.ExperimentNamespace, filter.UID, filter.Kind, filter.StartTimeBeginStr, filter.FinishTimeEndStr)
 		// List all events
 		if len(args) == 0 {
 			if err := e.db.Model(core.Event{}).Find(&resList).Error; err != nil && !gorm.IsRecordNotFoundError(err) {
@@ -288,31 +301,6 @@ func (e *eventStore) ListByFilter(_ context.Context, filter core.Filter) ([]*cor
 	}
 	if err != nil {
 		return resList, err
-	}
-
-	if filter.StartTimeBeginStr != "" {
-		startTimeBegin, err = time.Parse(time.RFC3339, strings.Replace(filter.StartTimeBeginStr, " ", "+", -1))
-		if err != nil {
-			return nil, fmt.Errorf("the format of the startTimeBegin is wrong")
-		}
-	}
-	if filter.StartTimeEndStr != "" {
-		startTimeEnd, err = time.Parse(time.RFC3339, strings.Replace(filter.StartTimeEndStr, " ", "+", -1))
-		if err != nil {
-			return nil, fmt.Errorf("the format of the startTimeEnd is wrong")
-		}
-	}
-	if filter.FinishTimeBeginStr != "" {
-		finishTimeBegin, err = time.Parse(time.RFC3339, strings.Replace(filter.FinishTimeBeginStr, " ", "+", -1))
-		if err != nil {
-			return nil, fmt.Errorf("the format of the FinishTimeBegin is wrong")
-		}
-	}
-	if filter.FinishTimeEndStr != "" {
-		finishTimeEnd, err = time.Parse(time.RFC3339, strings.Replace(filter.FinishTimeEndStr, " ", "+", -1))
-		if err != nil {
-			return nil, fmt.Errorf("the format of the finishTimeEnd is wrong")
-		}
 	}
 
 	eventList := make([]*core.Event, 0)
@@ -330,12 +318,6 @@ func (e *eventStore) ListByFilter(_ context.Context, filter core.Filter) ([]*cor
 			continue
 		}
 		if filter.StartTimeBeginStr != "" && event.StartTime.Before(startTimeBegin) && !event.StartTime.Equal(startTimeBegin) {
-			continue
-		}
-		if filter.StartTimeEndStr != "" && event.StartTime.After(startTimeEnd) && !event.StartTime.Equal(startTimeEnd) {
-			continue
-		}
-		if filter.FinishTimeBeginStr != "" && event.FinishTime.Before(finishTimeBegin) && !event.FinishTime.Equal(finishTimeBegin) {
 			continue
 		}
 		if filter.FinishTimeEndStr != "" && event.FinishTime.After(finishTimeEnd) && !event.FinishTime.Equal(finishTimeEnd) {
@@ -403,7 +385,7 @@ func (e *eventStore) getUID(_ context.Context, ns, name string) (string, error) 
 	return UID, nil
 }
 
-func constructQueryArgs(experimentName, experimentNamespace, uid, kind string) (string, []interface{}) {
+func constructQueryArgs(experimentName, experimentNamespace, uid, kind, startTime, finishTime string) (string, []interface{}) {
 	args := make([]interface{}, 0)
 	query := ""
 	if experimentName != "" {
@@ -433,6 +415,22 @@ func constructQueryArgs(experimentName, experimentNamespace, uid, kind string) (
 			query += "kind = ?"
 		}
 		args = append(args, kind)
+	}
+	if startTime != "" {
+		if len(args) > 0 {
+			query += " AND start_time >= ?"
+		} else {
+			query += "start_time >= ?"
+		}
+		args = append(args, strings.Replace(startTime, "T", " ", -1))
+	}
+	if finishTime != "" {
+		if len(args) > 0 {
+			query += " AND finish_time <= ?"
+		} else {
+			query += "finish_time <= ?"
+		}
+		args = append(args, strings.Replace(finishTime, "T", " ", -1))
 	}
 
 	return query, args
