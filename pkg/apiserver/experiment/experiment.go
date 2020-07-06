@@ -88,7 +88,7 @@ func Register(r *gin.RouterGroup, s *Service) {
 	endpoint.GET("", s.listExperiments)
 	endpoint.POST("/new", s.createExperiment)
 	endpoint.GET("/detail/:kind/:namespace/:name", s.getExperimentDetail)
-	endpoint.DELETE("/:kind/:namespace/:name/:force", s.deleteExperiment)
+	endpoint.DELETE("/:kind/:namespace/:name", s.deleteExperiment)
 	endpoint.PUT("/update", s.updateExperiment)
 	endpoint.PUT("/pause/:kind/:namespace/:name", s.pauseExperiment)
 	endpoint.PUT("/start/:kind/:namespace/:name", s.startExperiment)
@@ -854,7 +854,7 @@ func (s *Service) getExperimentDetail(c *gin.Context) {
 // @Param namespace path string true "namespace"
 // @Param name path string true "name"
 // @Param kind path string true "kind" Enums(PodChaos, IoChaos, NetworkChaos, TimeChaos, KernelChaos, StressChaos)
-// @Param force path string true "force" Enums(true, false)
+// @Param force query string true "force" Enums(true, false)
 // @Success 200 "delete ok"
 // @Failure 400 {object} utils.APIError
 // @Failure 404 {object} utils.APIError
@@ -864,7 +864,7 @@ func (s *Service) deleteExperiment(c *gin.Context) {
 	kind := c.Param("kind")
 	ns := c.Param("namespace")
 	name := c.Param("name")
-	force := c.Param("force")
+	force := c.DefaultQuery("force", "false")
 
 	ctx := context.TODO()
 	chaosKey := types.NamespacedName{Namespace: ns, Name: name}
@@ -905,7 +905,7 @@ func (s *Service) deleteExperiment(c *gin.Context) {
 		chaosMeta.SetAnnotations(annotations)
 		if err := s.kubeCli.Update(context.Background(), chaosKind.Chaos); err != nil {
 			c.Status(http.StatusInternalServerError)
-			_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(fmt.Errorf("update chaos annotation error")))
+			_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(fmt.Errorf("forced deletion of chaos failed, because update chaos annotation error")))
 			return
 		}
 	}
