@@ -1,12 +1,12 @@
 ---
-id: multi_data_center 
-title: Simulate multi-data center
-sidebar_label: Simulate multi-data centers
+id: multi_data_centers
+title: Network latency simulation across multiple data centers
+sidebar_label: Network latency simulation across multiple data centers
 ---
 
-This document helps you simulate multi-data center scenarios. 
+This document helps you simulate multiple data centers scenarios. 
 
-## Characteristics of multi-data center scenarios 
+## Characteristics of multiple data centers scenarios 
 
 * The latency between different data centers
 * The bandwidth limitations between data centers 
@@ -19,7 +19,7 @@ This document helps you simulate multi-data center scenarios.
 ## Experiment environment
 
 Suppose our application will be deployed in three data centers in a production environment 
-adn these data centers are still under construction. Now we want to test the impact of 
+and these data centers are still under construction. Now we want to test the impact of 
 such a deployment topology on the business in advance. 
 
 Here we use TiDB cluster as an example. Suppose we already install the [TiBD cluster](https://docs.pingcap.com/tidb-in-kubernetes/v1.1/) and [Chaos Mesh](../installation/installation)
