@@ -5,7 +5,11 @@ import { Experiment } from 'components/NewExperiment/types'
 import TextField from './TextField'
 import { useFormikContext } from 'formik'
 
-const LabelField: React.FC<TextFieldProps> = ({ children, ...props }) => {
+interface LabelFieldProps {
+  isKV?: boolean
+}
+
+const LabelField: React.FC<LabelFieldProps & TextFieldProps> = ({ children, isKV = false, ...props }) => {
   const { setFieldValue } = useFormikContext<Experiment>()
 
   const [text, setText] = useState('')
@@ -21,7 +25,7 @@ const LabelField: React.FC<TextFieldProps> = ({ children, ...props }) => {
 
   const onKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === ' ') {
-      if (!/^[\w-]+:[\w-]+$/.test(text)) {
+      if (isKV && !/^[\w-]+:[\w-]+$/.test(text)) {
         setError('Invalid key:value format')
 
         return
@@ -47,7 +51,13 @@ const LabelField: React.FC<TextFieldProps> = ({ children, ...props }) => {
     <Box mb={2}>
       <TextField
         {...props}
-        helperText={error !== '' ? error : 'Type key:value and end with a space to generate a key/value pair'}
+        helperText={
+          error !== ''
+            ? error
+            : isKV
+            ? 'Type key:value and end with a space to generate a key/value pair'
+            : props.helperText
+        }
         value={text}
         onChange={onChange}
         onKeyDown={onKeyDown}

@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react'
 
 import { Experiment } from 'components/NewExperiment/types'
 import IO from './IO'
+import Kernel from './Kernel'
 import Network from './Network'
 import Pod from './Pod'
 import Tabs from 'components/Tabs'
@@ -38,6 +39,7 @@ const Target: React.FC = () => {
     <Pod {...formikCtx} handleActionChange={handleActionChange('PodChaos')} />,
     <Network {...formikCtx} handleActionChange={handleActionChange('NetworkChaos')} />,
     <IO {...formikCtx} handleActionChange={handleActionChange('IoChaos')} />,
+    <Kernel {...formikCtx} />,
   ]
 
   const props = {

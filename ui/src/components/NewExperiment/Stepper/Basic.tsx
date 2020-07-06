@@ -45,8 +45,8 @@ const BasicStep: React.FC<BasicStepProps> = ({ namespaces }) => {
       </SelectField>
 
       <AdvancedOptions isOpen>
-        <LabelField id="labels" name="labels" label="Labels" />
-        <LabelField id="annotations" name="annotations" label="annotations" />
+        <LabelField id="labels" name="labels" label="Labels" isKV />
+        <LabelField id="annotations" name="annotations" label="Annotations" isKV />
       </AdvancedOptions>
     </>
   )

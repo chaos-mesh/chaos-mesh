@@ -69,7 +69,23 @@ export interface ExperimentTargetIO {
   percent: string
 }
 
-export interface ExperimentTargetKernel {}
+export interface CallchainFrame {
+  funcname: string
+  parameters: string
+  predicate: string
+}
+
+export interface FailKernelReq {
+  callchain: CallchainFrame[]
+  failtype: number
+  headers: string[]
+  probability: number
+  times: number
+}
+
+export interface ExperimentTargetKernel {
+  fail_kernel_req: FailKernelReq
+}
 
 export interface ExperimentTargetTime {}
 
@@ -80,7 +96,7 @@ export interface ExperimentTarget {
   pod_chaos: ExperimentTargetPod
   network_chaos: ExperimentTargetNetwork
   io_chaos: ExperimentTargetIO
-  kernel_chaos?: any
+  kernel_chaos: ExperimentTargetKernel
   time_chaos?: any
   stress_chaos?: any
 }
@@ -122,5 +138,5 @@ export interface StepperContextProps {
 export type FormikCtx = FormikContextType<Experiment>
 
 export type StepperFormTargetProps = FormikCtx & {
-  handleActionChange: (e: React.ChangeEvent<any>) => void
+  handleActionChange?: (e: React.ChangeEvent<any>) => void
 }

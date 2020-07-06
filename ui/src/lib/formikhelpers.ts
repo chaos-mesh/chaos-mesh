@@ -45,22 +45,24 @@ export function parseSubmitValues(e: Experiment) {
     .forEach((k) => delete values.target[k])
 
   // Remove unrelated actions
-  for (const key in values.target) {
-    if (key !== 'kind') {
-      const chaos = (values.target as any)[key]
+  if (kind !== 'KernelChaos') {
+    for (const key in values.target) {
+      if (key !== 'kind') {
+        const chaos = (values.target as any)[key]
 
-      for (const action in chaos) {
-        if (action === 'action') {
-          continue
-        }
+        for (const action in chaos) {
+          if (action === 'action') {
+            continue
+          }
 
-        // Handle container-kill action
-        if (chaos.action === 'container-kill' && action === 'container_name') {
-          continue
-        }
+          // Handle container-kill action
+          if (chaos.action === 'container-kill' && action === 'container_name') {
+            continue
+          }
 
-        if (action !== chaos.action) {
-          delete chaos[action]
+          if (action !== chaos.action) {
+            delete chaos[action]
+          }
         }
       }
     }
@@ -80,7 +82,7 @@ export function mustSchedule(formikValues: Experiment) {
   return false
 }
 
-export function resetOtherChaos(formProps: FormikCtx, kind: string, action: string) {
+export function resetOtherChaos(formProps: FormikCtx, kind: string, action: string | boolean) {
   const { values, setFieldValue } = formProps
 
   const selectedChaosKind = kind
@@ -92,9 +94,11 @@ export function resetOtherChaos(formProps: FormikCtx, kind: string, action: stri
       kind: selectedChaosKind,
       [selectedChaosKey]: {
         ...values.target[selectedChaosKey],
-        ...{
-          action,
-        },
+        ...(action
+          ? {
+              action,
+            }
+          : {}),
       },
     },
   }

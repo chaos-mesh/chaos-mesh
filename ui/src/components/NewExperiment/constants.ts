@@ -56,6 +56,15 @@ export const defaultExperimentSchema: Experiment = {
       path: '',
       percent: '100',
     },
+    kernel_chaos: {
+      fail_kernel_req: {
+        callchain: [],
+        failtype: 0,
+        headers: [],
+        probability: 0,
+        times: 0,
+      },
+    },
   },
   scheduler: {
     cron: '',
