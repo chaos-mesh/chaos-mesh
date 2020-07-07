@@ -266,16 +266,16 @@ func (e *eventStore) DeleteIncompleteEvents(_ context.Context) error {
 func (e *eventStore) ListByFilter(_ context.Context, filter core.Filter) ([]*core.Event, error) {
 	var resList []*core.Event
 	var err error
-	var startTimeBegin, finishTimeEnd time.Time
+	var startTime, finishTime time.Time
 
-	if filter.StartTimeBeginStr != "" {
-		startTimeBegin, err = time.Parse(time.RFC3339, strings.Replace(filter.StartTimeBeginStr, " ", "+", -1))
+	if filter.StartTimeStr != "" {
+		startTime, err = time.Parse(time.RFC3339, strings.Replace(filter.StartTimeStr, " ", "+", -1))
 		if err != nil {
 			return nil, fmt.Errorf("the format of the startTimeBegin is wrong")
 		}
 	}
-	if filter.FinishTimeEndStr != "" {
-		finishTimeEnd, err = time.Parse(time.RFC3339, strings.Replace(filter.FinishTimeEndStr, " ", "+", -1))
+	if filter.FinishTimeStr != "" {
+		finishTime, err = time.Parse(time.RFC3339, strings.Replace(filter.FinishTimeStr, " ", "+", -1))
 		if err != nil {
 			return nil, fmt.Errorf("the format of the finishTimeEnd is wrong")
 		}
@@ -286,7 +286,7 @@ func (e *eventStore) ListByFilter(_ context.Context, filter core.Filter) ([]*cor
 	} else if filter.PodNamespace != "" {
 		resList, err = e.ListByNamespace(context.Background(), filter.PodNamespace)
 	} else {
-		query, args := constructQueryArgs(filter.ExperimentName, filter.ExperimentNamespace, filter.UID, filter.Kind, filter.StartTimeBeginStr, filter.FinishTimeEndStr)
+		query, args := constructQueryArgs(filter.ExperimentName, filter.ExperimentNamespace, filter.UID, filter.Kind, filter.StartTimeStr, filter.FinishTimeStr)
 		// List all events
 		if len(args) == 0 {
 			if err := e.db.Model(core.Event{}).Find(&resList).Error; err != nil && !gorm.IsRecordNotFoundError(err) {
@@ -317,10 +317,10 @@ func (e *eventStore) ListByFilter(_ context.Context, filter core.Filter) ([]*cor
 		if filter.Kind != "" && event.Kind != filter.Kind {
 			continue
 		}
-		if filter.StartTimeBeginStr != "" && event.StartTime.Before(startTimeBegin) && !event.StartTime.Equal(startTimeBegin) {
+		if filter.StartTimeStr != "" && event.StartTime.Before(startTime) && !event.StartTime.Equal(startTime) {
 			continue
 		}
-		if filter.FinishTimeEndStr != "" && event.FinishTime.After(finishTimeEnd) && !event.FinishTime.Equal(finishTimeEnd) {
+		if filter.FinishTimeStr != "" && event.FinishTime.After(finishTime) && !event.FinishTime.Equal(finishTime) {
 			continue
 		}
 		pods, err := e.findPodRecordsByEventID(context.Background(), event.ID)

@@ -88,8 +88,8 @@ type PodRecord struct {
 type Filter struct {
 	PodName             string
 	PodNamespace        string
-	StartTimeBeginStr   string
-	FinishTimeEndStr    string
+	StartTimeStr        string
+	FinishTimeStr       string
 	ExperimentName      string
 	ExperimentNamespace string
 	UID                 string

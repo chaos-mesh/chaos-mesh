@@ -77,8 +77,8 @@ func (s *Service) listEvents(c *gin.Context) {
 	filter := core.Filter{
 		PodName:             c.Query("podName"),
 		PodNamespace:        c.Query("podNamespace"),
-		StartTimeBeginStr:   c.Query("startTime"),
-		FinishTimeEndStr:    c.Query("finishTime"),
+		StartTimeStr:        c.Query("startTime"),
+		FinishTimeStr:       c.Query("finishTime"),
 		ExperimentName:      c.Query("experimentName"),
 		ExperimentNamespace: c.Query("experimentNamespace"),
 		UID:                 c.Query("uid"),
