@@ -3,11 +3,9 @@ import { Box, TextField as MUITextField, TextFieldProps } from '@material-ui/cor
 import { Field } from 'formik'
 import React from 'react'
 
-const TextField: React.FC<TextFieldProps> = ({ children, ...props }) => (
+const TextField: React.FC<TextFieldProps> = (props) => (
   <Box mb={2}>
-    <Field as={MUITextField} margin="dense" fullWidth variant="outlined" {...props}>
-      {children}
-    </Field>
+    <Field {...props} as={MUITextField} variant="outlined" margin="dense" fullWidth />
   </Box>
 )
 

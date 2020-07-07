@@ -74,14 +74,14 @@ export const defaultExperimentSchema: Experiment = {
       stressng_stressors: '',
       stressors: {
         cpu: {
+          workers: 0,
           load: 0,
           options: [],
-          workers: 0,
         },
         memory: {
-          options: [],
-          size: '',
           workers: 0,
+          size: '',
+          options: [],
         },
       },
     },

@@ -59,7 +59,7 @@ export default function Kernel(props: StepperFormTargetProps) {
           </Box>
         ))}
       </Box>
-      <Box mb={3}>
+      <Box my={6}>
         <Divider />
       </Box>
       <SelectField

@@ -97,14 +97,14 @@ export interface ExperimentTargetStress {
   stressng_stressors: string
   stressors: {
     cpu: {
+      workers: number
       load: number
       options: string[]
-      workers: number
     }
     memory: {
-      options: string[]
-      size: string
       workers: number
+      size: string
+      options: string[]
     }
   }
 }
