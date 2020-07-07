@@ -27,5 +27,6 @@ func resolveIPAddress(name string) (string, error) {
 		return "", err
 	}
 
+	// TODO: support IPv6
 	return addrs[0].String(), nil
 }

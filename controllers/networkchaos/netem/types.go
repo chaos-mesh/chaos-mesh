@@ -126,9 +126,9 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1
 		if err != nil {
 			r.Log.Error(err, "failed to resolve ip", "name", target)
 			return err
-		} else {
-			externalIPAddresses = append(externalIPAddresses, ip)
 		}
+
+		externalIPAddresses = append(externalIPAddresses, ip)
 	}
 
 	switch networkchaos.Spec.Direction {
@@ -382,7 +382,7 @@ func (r *Reconciler) applyNetem(ctx context.Context, sources, targets []v1.Pod, 
 	}
 
 	// create ipset contains all target ips
-	dstIpset := ipset.BuildIpSet(targets, externalTargets, networkchaos, ipsetPostFix)
+	dstIpset := ipset.BuildIPSet(targets, externalTargets, networkchaos, ipsetPostFix)
 	r.Log.Info("apply netem with filter", "sources", sources, "ipset", dstIpset)
 
 	for index := range sources {
