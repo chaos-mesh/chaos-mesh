@@ -135,6 +135,6 @@ Depending on your environment, there are two methods of installing Chaos Mesh:
 
 > **Note:**
 >
-> Currently, Chaos Dashboard is not installed by default. If you want to try it out, add `--set dashboard.create=true` in the Helm commands above. Refer to [Configuration](../helm/chaos-mesh/README.md#configuration) for more information.
+> Currently, Chaos Dashboard is not installed by default. If you want to try it out, add `--set dashboard.create=true` in the Helm commands above. Refer to [Configuration](https://github.com/pingcap/chaos-mesh/tree/master/helm/chaos-mesh#configuration) for more information.
 
 After executing the above commands, you should be able to see the output indicating that all Chaos Mesh pods are up and running. Otherwise, check the current environment according to the prompt message or create an [issue](https://github.com/pingcap/chaos-mesh/issues) for help.

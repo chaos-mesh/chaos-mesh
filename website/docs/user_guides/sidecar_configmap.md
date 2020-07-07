@@ -17,7 +17,7 @@ In sidecar container, fuse-daemon needs to mount the data directory of applicati
 Currently, Chaos Mesh supports two types of ConfigMaps:
 
 1. Template config. The skeleton of each sidecar config is similar, in order to fulfill different requirements and make the configuration simplified,
-Chaos Mesh supports creating common templates to be used by different applications. For the details of template configuration, please refer to [template config](sidecar_template).
+Chaos Mesh supports creating common templates to be used by different applications. For the details of template configuration, please refer to [template config](sidecar_template.md).
 
 2. Injection config. This configuration will be combined with template config and finally generate a config to inject to the selected pods. 
 Since most applications use different data directories, volume name or container name, you can define different parameters based on the common template created in the first step.
@@ -64,6 +64,6 @@ For more sample ConfigMap files, see [examples](https://github.com/pingcap/chaos
 
 ## Usage
 
-See [IOChaos Document](iochaos_experiment).
+See [IOChaos Document](io_chaos.md).
 
 
