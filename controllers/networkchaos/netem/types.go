@@ -120,21 +120,32 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1
 
 	pods := append(sources, targets...)
 
+	externalIPAddresses := []string{}
+	for _, target := range networkchaos.Spec.ExternalTargets {
+		ip, err := resolveIPAddress(target)
+		if err != nil {
+			r.Log.Error(err, "failed to resolve ip", "name", target)
+			return err
+		} else {
+			externalIPAddresses = append(externalIPAddresses, ip)
+		}
+	}
+
 	switch networkchaos.Spec.Direction {
 	case v1alpha1.To:
-		err = r.applyNetem(ctx, sources, targets, networkchaos)
+		err = r.applyNetem(ctx, sources, targets, externalIPAddresses, networkchaos)
 		if err != nil {
 			r.Log.Error(err, "failed to apply netem", "sources", sources, "targets", targets)
 			return err
 		}
 	case v1alpha1.From:
-		err = r.applyNetem(ctx, targets, sources, networkchaos)
+		err = r.applyNetem(ctx, targets, sources, []string{}, networkchaos)
 		if err != nil {
 			r.Log.Error(err, "failed to apply netem", "sources", targets, "targets", sources)
 			return err
 		}
 	case v1alpha1.Both:
-		err = r.applyNetem(ctx, pods, pods, networkchaos)
+		err = r.applyNetem(ctx, pods, pods, externalIPAddresses, networkchaos)
 		if err != nil {
 			r.Log.Error(err, "failed to apply netem", "sources", pods, "targets", pods)
 			return err
@@ -333,7 +344,7 @@ func mergeNetem(spec v1alpha1.NetworkChaosSpec) (*pb.Netem, error) {
 	return merged, nil
 }
 
-func (r *Reconciler) applyNetem(ctx context.Context, sources, targets []v1.Pod, networkchaos *v1alpha1.NetworkChaos) error {
+func (r *Reconciler) applyNetem(ctx context.Context, sources, targets []v1.Pod, externalTargets []string, networkchaos *v1alpha1.NetworkChaos) error {
 
 	g := errgroup.Group{}
 
@@ -349,7 +360,7 @@ func (r *Reconciler) applyNetem(ctx context.Context, sources, targets []v1.Pod, 
 	}
 
 	// if we don't specify targets, then sources pods apply netem on all egress traffic
-	if len(targets) == 0 {
+	if len(targets)+len(externalTargets) == 0 {
 		r.Log.Info("apply netem", "sources", sources)
 		for index := range sources {
 			pod := &sources[index]
@@ -371,7 +382,7 @@ func (r *Reconciler) applyNetem(ctx context.Context, sources, targets []v1.Pod, 
 	}
 
 	// create ipset contains all target ips
-	dstIpset := ipset.BuildIpSet(targets, networkchaos, ipsetPostFix)
+	dstIpset := ipset.BuildIpSet(targets, externalTargets, networkchaos, ipsetPostFix)
 	r.Log.Info("apply netem with filter", "sources", sources, "ipset", dstIpset)
 
 	for index := range sources {

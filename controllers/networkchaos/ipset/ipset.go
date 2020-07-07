@@ -32,9 +32,9 @@ const (
 )
 
 // BuildIpSet builds an ipset with provided pod ip list
-func BuildIpSet(pods []v1.Pod, networkchaos *v1alpha1.NetworkChaos, namePostFix string) pb.IpSet {
+func BuildIpSet(pods []v1.Pod, externalIps []string, networkchaos *v1alpha1.NetworkChaos, namePostFix string) pb.IpSet {
 	name := generateIpSetName(networkchaos, namePostFix)
-	ips := make([]string, 0, len(pods))
+	ips := externalIps
 
 	for _, pod := range pods {
 		if len(pod.Status.PodIP) > 0 {
