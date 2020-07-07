@@ -153,25 +153,25 @@ export default function NewExperiment() {
       console.debug('Debug parsedValues:', parsedValues)
     }
 
-    // api.experiments
-    //   .newExperiment(parsedValues)
-    //   .then(() => {
-    //     dispatch(
-    //       setAlert({
-    //         type: 'success',
-    //         message: 'Created successfully!',
-    //       })
-    //     )
-    //     dispatch(setAlertOpen(true))
+    api.experiments
+      .newExperiment(parsedValues)
+      .then(() => {
+        dispatch(
+          setAlert({
+            type: 'success',
+            message: 'Created successfully!',
+          })
+        )
+        dispatch(setAlertOpen(true))
 
-    //     if (history.location.pathname === '/experiments') {
-    //       dispatch(setNeedToRefreshExperiments(true))
-    //     } else {
-    //       history.push('/experiments')
-    //     }
-    //   })
-    //   .catch(console.log)
-    //   .finally(toggleDrawer)
+        if (history.location.pathname === '/experiments') {
+          dispatch(setNeedToRefreshExperiments(true))
+        } else {
+          history.push('/experiments')
+        }
+      })
+      .catch(console.log)
+      .finally(toggleDrawer)
   }
 
   return (
