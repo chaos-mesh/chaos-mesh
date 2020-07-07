@@ -1,7 +1,6 @@
 ---
 id: installation
 title: Installation
-sidebar_label: Installation
 ---
 
 This document describes how to install Chaos Mesh to perform chaos experiments against your application in Kubernetes.

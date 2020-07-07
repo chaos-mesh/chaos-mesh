@@ -1,7 +1,6 @@
 ---
 id: get_started_on_minikube
-title: Get Started on Minikube
-sidebar_label: Get started on Minikube
+title: Get started on Minikube
 ---
 
 This document describes how to deploy Chaos Mesh in Kubernetes on your laptop (Linux or macOS) using Minikube.

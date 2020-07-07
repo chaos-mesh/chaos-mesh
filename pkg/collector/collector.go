@@ -16,14 +16,15 @@ package collector
 import (
 	"context"
 	"encoding/json"
+	"errors"
 
 	"github.com/go-logr/logr"
 	"github.com/jinzhu/gorm"
-	"github.com/pingcap/errors"
 
 	"github.com/pingcap/chaos-mesh/api/v1alpha1"
 	"github.com/pingcap/chaos-mesh/pkg/core"
 
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -52,21 +53,34 @@ func (r *ChaosCollector) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		r.Log.Error(nil, "it's not a stateful object")
 		return ctrl.Result{}, nil
 	}
-	if err := r.Get(ctx, req.NamespacedName, obj); err != nil {
-		r.Log.Error(err, "unable to get chaos")
+
+	err := r.Get(ctx, req.NamespacedName, obj)
+	if apierrors.IsNotFound(err) {
+		if err = r.archiveExperiment(req.Namespace, req.Name); err != nil {
+			r.Log.Error(err, "failed to archive experiment")
+		}
+		return ctrl.Result{}, nil
+	}
+
+	if err != nil {
+		r.Log.Error(err, "failed to get chaos object", "request", req.NamespacedName)
 		return ctrl.Result{}, nil
 	}
 
 	if obj.IsDeleted() {
-		if err := r.archiveExperiment(req, obj); err != nil {
+		if err = r.archiveExperiment(req.Namespace, req.Name); err != nil {
 			r.Log.Error(err, "failed to archive experiment")
-			return ctrl.Result{}, nil
 		}
-	} else {
-		if err := r.recordEvent(req, obj); err != nil {
-			r.Log.Error(err, "failed to record event")
-			return ctrl.Result{}, nil
-		}
+		return ctrl.Result{}, nil
+	}
+
+	if err := r.setUnarchivedExperiment(req, obj); err != nil {
+		r.Log.Error(err, "failed to archive experiment")
+		// ignore error here
+	}
+
+	if err := r.recordEvent(req, obj); err != nil {
+		r.Log.Error(err, "failed to record event")
 	}
 
 	return ctrl.Result{}, nil
@@ -159,7 +173,7 @@ func (r *ChaosCollector) updateOrCreateEvent(req ctrl.Request, kind string, stat
 	return nil
 }
 
-func (r *ChaosCollector) archiveExperiment(req ctrl.Request, obj v1alpha1.InnerObject) error {
+func (r *ChaosCollector) setUnarchivedExperiment(req ctrl.Request, obj v1alpha1.InnerObject) error {
 	var (
 		chaosMeta metav1.Object
 		ok        bool
@@ -168,14 +182,15 @@ func (r *ChaosCollector) archiveExperiment(req ctrl.Request, obj v1alpha1.InnerO
 	if chaosMeta, ok = obj.(metav1.Object); !ok {
 		r.Log.Error(nil, "failed to get chaos meta information")
 	}
-	UID := chaosMeta.GetUID()
+	UID := string(chaosMeta.GetUID())
 
 	archive := &core.ArchiveExperiment{
 		ArchiveExperimentMeta: core.ArchiveExperimentMeta{
 			Namespace: req.Namespace,
 			Name:      req.Name,
 			Kind:      obj.GetObjectKind().GroupVersionKind().Kind,
-			UID:       string(UID),
+			UID:       UID,
+			Archived:  false,
 		},
 	}
 
@@ -193,7 +208,9 @@ func (r *ChaosCollector) archiveExperiment(req ctrl.Request, obj v1alpha1.InnerO
 	}
 
 	archive.StartTime = chaosMeta.GetCreationTimestamp().Time
-	archive.FinishTime = chaosMeta.GetDeletionTimestamp().Time
+	if chaosMeta.GetDeletionTimestamp() != nil {
+		archive.FinishTime = chaosMeta.GetDeletionTimestamp().Time
+	}
 
 	data, err := json.Marshal(chaosMeta)
 	if err != nil {
@@ -203,8 +220,30 @@ func (r *ChaosCollector) archiveExperiment(req ctrl.Request, obj v1alpha1.InnerO
 	}
 
 	archive.Experiment = string(data)
-	if err := r.archive.Create(context.Background(), archive); err != nil {
-		r.Log.Error(err, "failed to store archive", "archive", archive)
+
+	find, err := r.archive.FindByUID(context.Background(), UID)
+	if err != nil && !gorm.IsRecordNotFoundError(err) {
+		r.Log.Error(err, "failed to find experiment", "UID", UID)
+		return err
+	}
+
+	if find != nil {
+		archive.ID = find.ID
+		archive.CreatedAt = find.CreatedAt
+		archive.UpdatedAt = find.UpdatedAt
+	}
+
+	if err := r.archive.Set(context.Background(), archive); err != nil {
+		r.Log.Error(err, "failed to update experiment", "archive", archive)
+		return err
+	}
+
+	return nil
+}
+
+func (r *ChaosCollector) archiveExperiment(ns, name string) error {
+	if err := r.archive.Archive(context.Background(), ns, name); err != nil {
+		r.Log.Error(err, "failed to archive experiment", "namespace", ns, "name", name)
 		return err
 	}
 
