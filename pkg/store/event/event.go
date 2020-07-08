@@ -271,13 +271,13 @@ func (e *eventStore) ListByFilter(_ context.Context, filter core.Filter) ([]*cor
 	if filter.StartTimeStr != "" {
 		startTime, err = time.Parse(time.RFC3339, strings.Replace(filter.StartTimeStr, " ", "+", -1))
 		if err != nil {
-			return nil, fmt.Errorf("the format of the startTimeBegin is wrong")
+			return nil, fmt.Errorf("the format of the startTime is wrong")
 		}
 	}
 	if filter.FinishTimeStr != "" {
 		finishTime, err = time.Parse(time.RFC3339, strings.Replace(filter.FinishTimeStr, " ", "+", -1))
 		if err != nil {
-			return nil, fmt.Errorf("the format of the finishTimeEnd is wrong")
+			return nil, fmt.Errorf("the format of the finishTime is wrong")
 		}
 	}
 
