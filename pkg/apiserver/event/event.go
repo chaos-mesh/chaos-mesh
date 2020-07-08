@@ -56,10 +56,11 @@ func Register(r *gin.RouterGroup, s *Service) {
 
 	// TODO: add more api handlers
 	endpoint.GET("", s.listEvents)
+	endpoint.GET("/dry", s.listDryEvents)
 }
 
-// @Summary Get all events from db.
-// @Description Get all chaos events from db.
+// @Summary Get the list of events from db.
+// @Description Get the list of events from db.
 // @Tags events
 // @Produce json
 // @Param podName query string false "The pod's name"
@@ -92,6 +93,37 @@ func (s *Service) listEvents(c *gin.Context) {
 	}
 
 	eventList, err := s.event.ListByFilter(context.Background(), filter)
+	if err != nil {
+		c.Status(http.StatusInternalServerError)
+		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
+		return
+	}
+
+	c.JSON(http.StatusOK, eventList)
+}
+
+// @Summary Get the list of events without pod records from db.
+// @Description Get the list of events without pod records from db.
+// @Tags events
+// @Produce json
+// @Param startTime query string false "The start time of events"
+// @Param endTime query string false "The end time of events"
+// @Param experimentName query string false "The name of the experiment"
+// @Param experimentNamespace query string false "The namespace of the experiment"
+// @Param kind query string false "kind" Enums(PodChaos, IoChaos, NetworkChaos, TimeChaos, KernelChaos, StressChaos)
+// @Success 200 {array} core.Event
+// @Router /api/events/dry [get]
+// @Failure 500 {object} utils.APIError
+func (s *Service) listDryEvents(c *gin.Context) {
+	filter := core.Filter{
+		StartTimeStr:        c.Query("startTime"),
+		FinishTimeStr:       c.Query("finishTime"),
+		ExperimentName:      c.Query("experimentName"),
+		ExperimentNamespace: c.Query("experimentNamespace"),
+		Kind:                c.Query("kind"),
+	}
+
+	eventList, err := s.event.DryListByFilter(context.Background(), filter)
 	if err != nil {
 		c.Status(http.StatusInternalServerError)
 		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))

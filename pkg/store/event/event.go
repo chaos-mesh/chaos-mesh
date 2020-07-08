@@ -335,6 +335,40 @@ func (e *eventStore) ListByFilter(_ context.Context, filter core.Filter) ([]*cor
 	return eventList, nil
 }
 
+// DryListByFilter returns an event list by experimentName, experimentNamespace, uid, kind, startTime and finishTime.
+func (e *eventStore) DryListByFilter(_ context.Context, filter core.Filter) ([]*core.Event, error) {
+	var resList []*core.Event
+	var err error
+
+	if filter.StartTimeStr != "" {
+		_, err = time.Parse(time.RFC3339, strings.Replace(filter.StartTimeStr, " ", "+", -1))
+		if err != nil {
+			return nil, fmt.Errorf("the format of the startTime is wrong")
+		}
+	}
+	if filter.FinishTimeStr != "" {
+		_, err = time.Parse(time.RFC3339, strings.Replace(filter.FinishTimeStr, " ", "+", -1))
+		if err != nil {
+			return nil, fmt.Errorf("the format of the finishTime is wrong")
+		}
+	}
+
+	query, args := constructQueryArgs(filter.ExperimentName, filter.ExperimentNamespace, filter.UID, filter.Kind, filter.StartTimeStr, filter.FinishTimeStr)
+	// List all events
+	if len(args) == 0 {
+		if err := e.db.Model(core.Event{}).Find(&resList).Error; err != nil && !gorm.IsRecordNotFoundError(err) {
+			return resList, err
+		}
+	} else {
+		if err := e.db.Where(query, args...).Find(&resList).Error; err != nil &&
+			!gorm.IsRecordNotFoundError(err) {
+			return resList, err
+		}
+	}
+
+	return resList, err
+}
+
 // DeleteByFinishTime deletes events and podrecords whose time difference is greater than the given time from FinishTime.
 func (e *eventStore) DeleteByFinishTime(_ context.Context, ttl time.Duration) error {
 	eventList, err := e.List(context.Background())
