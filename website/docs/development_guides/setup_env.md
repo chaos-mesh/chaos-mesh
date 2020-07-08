@@ -68,5 +68,5 @@ hack/kind-cluster-build.sh
 
 Congratulations! You are now all set up for Chaos Mesh development. Try the following tasks:
 
-- [Develop a New Chaos Type](develop_a_new_chaos)
-- [ ] [Add facilities to chaos daemon]
+- [Develop a New Chaos Type](dev_hello_world.md)
+- [ ] Add facilities to chaos daemon

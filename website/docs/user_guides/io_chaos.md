@@ -37,8 +37,8 @@ IOChaos needs to inject a sidecar container to user pods and the sidecar contain
 
 Chaos Mesh uses a template mechanism to simplify the configuration of sidecar injection.
 
-Because of the `Go Template` conflict with `Helm`, the common template is not included in the [Helm Chart](../installation/installation#install-chaos-mesh). 
-However, it will be deployed automatically if you install Chaos Mesh via the [install script](../installation/installation#install-chaos-mesh).
+Because of the `Go Template` conflict with `Helm`, the common template is not included in the [Helm Chart](../installation/installation.md#install-by-helm).
+However, it will be deployed automatically if you install Chaos Mesh via the [install script](../installation/installation.md#install-chaos-mesh).
 
 By default, the common template ConfigMaps should be deployed in the same namespace as Chaos Mesh.
 
@@ -77,7 +77,7 @@ ARGS="--pd=${CLUSTER_NAME}-pd:2379 \
 
 Injection configuration is another [ConfigMap](https://kubernetes.io/docs/tasks/configure-pod-container/configure-pod-configmap/) and is required to fulfill IO Chaos.
 
-To define a specified ConfigMap for your application before starting your chaos experiment, please refer to this [document](sidecar_configmap).
+To define a specified ConfigMap for your application before starting your chaos experiment, please refer to this [document](sidecar_configmap.md).
 
 You can apply the ConfigMap defined for your application to Kubernetes cluster by the following command:
 

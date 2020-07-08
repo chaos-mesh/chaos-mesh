@@ -16,7 +16,7 @@ Although KernelChaos targets a certain pod, the performance of other pods are al
 
 - Linux kernel: version >= 4.18
 - [CONFIG_BPF_KPROBE_OVERRIDE](https://cateee.net/lkddb/web-lkddb/BPF_KPROBE_OVERRIDE.html) enabled
-- `bpfki.create = true` in [values.yaml](../helm/chaos-mesh/values.yaml)
+- `bpfki.create = true` in [values.yaml](https://github.com/pingcap/chaos-mesh/blob/master/helm/chaos-mesh/values.yaml)
 
 ## Configuration file
 
