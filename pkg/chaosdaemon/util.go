@@ -248,7 +248,7 @@ func withNS(ctx context.Context, options []nsOption, cmd string, args ...string)
 		return f(ctx, options, cmd, args...)
 	}
 
-	args = append([]string{"-F", "--", cmd}, args...)
+	args = append([]string{"--", cmd}, args...)
 	for _, option := range options {
 		args = append([]string{"-" + nsArgMap[option.Typ] + option.Path}, args...)
 	}

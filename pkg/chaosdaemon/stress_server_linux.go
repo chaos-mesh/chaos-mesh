@@ -95,7 +95,7 @@ func (s *daemonServer) ExecStressors(ctx context.Context,
 		if err, ok := cmd.Wait().(*exec.ExitError); ok {
 			status := err.Sys().(syscall.WaitStatus)
 			if status.Signaled() && status.Signal() == syscall.SIGKILL {
-				log.Info("Stressors cancelled", "request", req)
+				log.Info("Stressors cancelled", "request", req, "exitStatus", status.ExitStatus())
 			} else {
 				log.Error(err, "stressors exited accidentally", "request", req)
 			}
