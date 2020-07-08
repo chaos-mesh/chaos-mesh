@@ -262,6 +262,23 @@ var _ = Describe("networkchaos_webhook", func() {
 					},
 					expect: "error",
 				},
+				{
+					name: "validate direction and externalTargets",
+					chaos: NetworkChaos{
+						ObjectMeta: metav1.ObjectMeta{
+							Namespace: metav1.NamespaceDefault,
+							Name:      "foo12",
+						},
+						Spec: NetworkChaosSpec{
+							Direction: From,
+							ExternalTargets: []string{"8.8.8.8"},
+						},
+					},
+					execute: func(chaos *NetworkChaos) error {
+						return chaos.ValidateCreate()
+					},
+					expect: "error",
+				}
 			}
 
 			for _, tc := range tcs {
