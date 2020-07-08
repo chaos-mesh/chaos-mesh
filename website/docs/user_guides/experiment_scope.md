@@ -4,7 +4,7 @@ title: Define the Scope of Chaos Experiment
 sidebar_label: Define the Scope of Chaos Experiment
 ---
 
-This document describes how to define the chaos experiment scope.
+This document describes how to define the scope of a chaos experiment.
 
 Chaos Mesh provides a lot of selectors for users and you can use them to define the scope of our chaos experiment. 
 These selectors are defined in the `spec.selector` field of the chaos object.
@@ -85,4 +85,3 @@ spec:
         - basic-tikv-0
         - basic-tikv-1
 ```
-
