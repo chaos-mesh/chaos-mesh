@@ -1,0 +1,17 @@
+apiVersion: pingcap.com/v1alpha1
+kind: NetworkChaos
+metadata:
+  name: network-partition-example
+  namespace: chaos-testing
+spec:
+  action: partition
+  mode: one
+  selector:
+    labelSelectors:
+      "app.kubernetes.io/component": "tikv"
+  direction: to
+  externalTargets:
+    - "8.8.8.8"
+  duration: "10s"
+  scheduler:
+    cron: "@every 15s"

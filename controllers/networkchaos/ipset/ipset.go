@@ -33,7 +33,7 @@ const (
 
 // BuildIPSet builds an ipset with provided pod ip list
 func BuildIPSet(pods []v1.Pod, externalIps []string, networkchaos *v1alpha1.NetworkChaos, namePostFix string) pb.IpSet {
-	name := generateIpSetName(networkchaos, namePostFix)
+	name := GenerateIPSetName(networkchaos, namePostFix)
 	ips := externalIps
 
 	for _, pod := range pods {
@@ -48,7 +48,8 @@ func BuildIPSet(pods []v1.Pod, externalIps []string, networkchaos *v1alpha1.Netw
 	}
 }
 
-func generateIpSetName(networkchaos *v1alpha1.NetworkChaos, namePostFix string) string {
+// GenerateIPSetName generates name for ipset
+func GenerateIPSetName(networkchaos *v1alpha1.NetworkChaos, namePostFix string) string {
 	originalName := networkchaos.Name
 
 	var ipsetName string

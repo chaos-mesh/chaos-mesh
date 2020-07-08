@@ -45,3 +45,12 @@ func FlushIptables(ctx context.Context, c client.Client, pod *v1.Pod, rule pb.Ru
 	})
 	return err
 }
+
+// GenerateIPTables generates iptables protobuf rule
+func GenerateIPTables(action pb.Rule_Action, direction pb.Rule_Direction, set string) pb.Rule {
+	return pb.Rule{
+		Action:    action,
+		Direction: direction,
+		Set:       set,
+	}
+}
