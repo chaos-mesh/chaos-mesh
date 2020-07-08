@@ -305,23 +305,25 @@ func (e *eventStore) ListByFilter(_ context.Context, filter core.Filter) ([]*cor
 
 	eventList := make([]*core.Event, 0)
 	for _, event := range resList {
-		if filter.ExperimentName != "" && event.Experiment != filter.ExperimentName {
-			continue
-		}
-		if filter.ExperimentNamespace != "" && event.Namespace != filter.ExperimentNamespace {
-			continue
-		}
-		if filter.UID != "" && event.ExperimentID != filter.UID {
-			continue
-		}
-		if filter.Kind != "" && event.Kind != filter.Kind {
-			continue
-		}
-		if filter.StartTimeStr != "" && event.StartTime.Before(startTime) && !event.StartTime.Equal(startTime) {
-			continue
-		}
-		if filter.FinishTimeStr != "" && event.FinishTime.After(finishTime) && !event.FinishTime.Equal(finishTime) {
-			continue
+		if filter.PodName != "" || filter.PodNamespace != "" {
+			if filter.ExperimentName != "" && event.Experiment != filter.ExperimentName {
+				continue
+			}
+			if filter.ExperimentNamespace != "" && event.Namespace != filter.ExperimentNamespace {
+				continue
+			}
+			if filter.UID != "" && event.ExperimentID != filter.UID {
+				continue
+			}
+			if filter.Kind != "" && event.Kind != filter.Kind {
+				continue
+			}
+			if filter.StartTimeStr != "" && event.StartTime.Before(startTime) && !event.StartTime.Equal(startTime) {
+				continue
+			}
+			if filter.FinishTimeStr != "" && event.FinishTime.After(finishTime) && !event.FinishTime.Equal(finishTime) {
+				continue
+			}
 		}
 		pods, err := e.findPodRecordsByEventID(context.Background(), event.ID)
 		if err != nil {
