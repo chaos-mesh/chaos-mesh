@@ -45,6 +45,9 @@ type ExperimentStore interface {
 	// FindByUID returns an archive experiment by UID.
 	FindByUID(context.Context, string) (*ArchiveExperiment, error)
 
+	// FindMetaByUID returns an archive experiment by UID.
+	FindMetaByUID(context.Context, string) (*ArchiveExperimentMeta, error)
+
 	// DeleteByFinishTime deletes experiments whose time difference is greater than the given time from FinishTime.
 	DeleteByFinishTime(context.Context, time.Duration) error
 }

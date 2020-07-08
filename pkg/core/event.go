@@ -37,6 +37,9 @@ type EventStore interface {
 	// ListByPod returns an event list by the name and namespace of the pod.
 	ListByPod(context.Context, string, string) ([]*Event, error)
 
+	// ListByUID returns an event list by the UID.
+	ListByUID(context.Context, string) ([]*Event, error)
+
 	// Find returns an event from the datastore by ID.
 	Find(context.Context, uint) (*Event, error)
 
