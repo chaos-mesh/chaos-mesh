@@ -122,6 +122,7 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1
 
 	externalIPAddresses := []string{}
 	for _, target := range networkchaos.Spec.ExternalTargets {
+		// TODO: resolve ip on every pods but not in controller, in case the dns server of these pods differ
 		ip, err := resolveIPAddress(target)
 		if err != nil {
 			r.Log.Error(err, "failed to resolve ip", "name", target)
