@@ -270,7 +270,7 @@ var _ = Describe("networkchaos_webhook", func() {
 							Name:      "foo12",
 						},
 						Spec: NetworkChaosSpec{
-							Direction: From,
+							Direction:       From,
 							ExternalTargets: []string{"8.8.8.8"},
 						},
 					},
@@ -278,7 +278,7 @@ var _ = Describe("networkchaos_webhook", func() {
 						return chaos.ValidateCreate()
 					},
 					expect: "error",
-				}
+				},
 			}
 
 			for _, tc := range tcs {
