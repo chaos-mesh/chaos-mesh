@@ -46,7 +46,6 @@ type Config struct {
 // Server represents a grpc server for tc daemon
 type daemonServer struct {
 	crClient ContainerRuntimeInfoClient
-	pb.UnimplementedChaosDaemonServer
 }
 
 func newDaemonServer(containerRuntime string) (*daemonServer, error) {

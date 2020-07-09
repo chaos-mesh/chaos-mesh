@@ -30,7 +30,7 @@ import (
 var _ = Describe("ipset server", func() {
 	defer mock.With("MockContainerdClient", &MockClient{})()
 	c, _ := CreateContainerRuntimeInfoClient(containerRuntimeContainerd)
-	s := &daemonServer{c, pb.UnimplementedChaosDaemonServer{}}
+	s := &daemonServer{c}
 
 	Context("createIPSet", func() {
 		It("should work", func() {

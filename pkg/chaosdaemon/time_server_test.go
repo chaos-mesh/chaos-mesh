@@ -27,7 +27,7 @@ import (
 var _ = Describe("time server", func() {
 	defer mock.With("MockContainerdClient", &MockClient{})()
 	c, _ := CreateContainerRuntimeInfoClient(containerRuntimeContainerd)
-	s := &daemonServer{c, pb.UnimplementedChaosDaemonServer{}}
+	s := &daemonServer{c}
 
 	Context("SetTimeOffset", func() {
 		It("should work", func() {

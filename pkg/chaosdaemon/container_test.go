@@ -27,7 +27,7 @@ import (
 var _ = Describe("container kill", func() {
 	defer mock.With("MockContainerdClient", &MockClient{})()
 	c, _ := CreateContainerRuntimeInfoClient(containerRuntimeContainerd)
-	s := &daemonServer{c, pb.UnimplementedChaosDaemonServer{}}
+	s := &daemonServer{c}
 
 	Context("ContainerKill", func() {
 		It("should work", func() {

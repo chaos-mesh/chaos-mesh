@@ -29,7 +29,7 @@ func commonTcTest(t *testing.T, fpname, errString string, tcFunc func(s *daemonS
 
 	defer mock.With("MockContainerdClient", &MockClient{})()
 	c, _ := CreateContainerRuntimeInfoClient(containerRuntimeContainerd)
-	s := &daemonServer{c, pb.UnimplementedChaosDaemonServer{}}
+	s := &daemonServer{c}
 
 	if errString == "" {
 		defer mock.With(fpname, true)()

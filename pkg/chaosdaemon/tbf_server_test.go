@@ -27,7 +27,7 @@ import (
 var _ = Describe("netem server", func() {
 	defer mock.With("MockContainerdClient", &MockClient{})()
 	c, _ := CreateContainerRuntimeInfoClient(containerRuntimeContainerd)
-	s := &daemonServer{c, pb.UnimplementedChaosDaemonServer{}}
+	s := &daemonServer{c}
 
 	Context("SetTbf", func() {
 		It("should work", func() {
