@@ -33,6 +33,7 @@ import (
 	"github.com/pingcap/chaos-mesh/controllers/common"
 	"github.com/pingcap/chaos-mesh/controllers/networkchaos/ipset"
 	"github.com/pingcap/chaos-mesh/controllers/networkchaos/iptable"
+	"github.com/pingcap/chaos-mesh/controllers/networkchaos/netutils"
 	"github.com/pingcap/chaos-mesh/controllers/twophase"
 	pb "github.com/pingcap/chaos-mesh/pkg/chaosdaemon/pb"
 	"github.com/pingcap/chaos-mesh/pkg/utils"
@@ -113,7 +114,12 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1
 	}
 
 	sourceSet := ipset.BuildIPSet(sources, []string{}, networkchaos, sourceIpSetPostFix)
-	targetSet := ipset.BuildIPSet(targets, networkchaos.Spec.ExternalTargets, networkchaos, targetIpSetPostFix)
+	externalCidrs, err := netutils.ResolveCidrs(networkchaos.Spec.ExternalTargets)
+	if err != nil {
+		r.Log.Error(err, "failed to resolve external targets")
+		return err
+	}
+	targetSet := ipset.BuildIPSet(targets, externalCidrs, networkchaos, targetIpSetPostFix)
 
 	allPods := append(sources, targets...)
 

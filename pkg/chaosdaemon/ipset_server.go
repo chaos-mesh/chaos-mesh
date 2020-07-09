@@ -55,7 +55,7 @@ func (s *daemonServer) FlushIpSet(ctx context.Context, req *pb.IpSetRequest) (*e
 	}
 
 	// add ips to the temp ipset
-	if err := s.addIpsToIPSet(ctx, nsPath, tmpName, set.Ips); err != nil {
+	if err := s.addCIDRsToIPSet(ctx, nsPath, tmpName, set.Cidrs); err != nil {
 		return nil, err
 	}
 
@@ -74,7 +74,7 @@ func (s *daemonServer) createIPSet(ctx context.Context, nsPath string, name stri
 		name = name[:31]
 	}
 
-	cmd := withNetNS(ctx, nsPath, "ipset", "create", name, "hash:ip")
+	cmd := withNetNS(ctx, nsPath, "ipset", "create", name, "hash:net")
 
 	log.Info("create ipset", "command", cmd.String())
 
@@ -100,11 +100,11 @@ func (s *daemonServer) createIPSet(ctx context.Context, nsPath string, name stri
 	return nil
 }
 
-func (s *daemonServer) addIpsToIPSet(ctx context.Context, nsPath string, name string, ips []string) error {
-	for _, ip := range ips {
-		cmd := withNetNS(ctx, nsPath, "ipset", "add", name, ip)
+func (s *daemonServer) addCIDRsToIPSet(ctx context.Context, nsPath string, name string, cidrs []string) error {
+	for _, cidr := range cidrs {
+		cmd := withNetNS(ctx, nsPath, "ipset", "add", name, cidr)
 
-		log.Info("add ip to ipset", "command", cmd.String())
+		log.Info("add CIDR to ipset", "command", cmd.String())
 
 		out, err := cmd.CombinedOutput()
 		if err != nil {

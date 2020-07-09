@@ -34,6 +34,7 @@ import (
 	"github.com/pingcap/chaos-mesh/api/v1alpha1"
 	"github.com/pingcap/chaos-mesh/controllers/common"
 	"github.com/pingcap/chaos-mesh/controllers/networkchaos/ipset"
+	"github.com/pingcap/chaos-mesh/controllers/networkchaos/netutils"
 	"github.com/pingcap/chaos-mesh/controllers/networkchaos/tc"
 	"github.com/pingcap/chaos-mesh/controllers/twophase"
 	pb "github.com/pingcap/chaos-mesh/pkg/chaosdaemon/pb"
@@ -120,21 +121,15 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1
 
 	pods := append(sources, targets...)
 
-	externalIPAddresses := []string{}
-	for _, target := range networkchaos.Spec.ExternalTargets {
-		// TODO: resolve ip on every pods but not in controller, in case the dns server of these pods differ
-		ip, err := resolveIPAddress(target)
-		if err != nil {
-			r.Log.Error(err, "failed to resolve ip", "name", target)
-			return err
-		}
-
-		externalIPAddresses = append(externalIPAddresses, ip)
+	externalCidrs, err := netutils.ResolveCidrs(networkchaos.Spec.ExternalTargets)
+	if err != nil {
+		r.Log.Error(err, "failed to resolve external targets")
+		return err
 	}
 
 	switch networkchaos.Spec.Direction {
 	case v1alpha1.To:
-		err = r.applyNetem(ctx, sources, targets, externalIPAddresses, networkchaos)
+		err = r.applyNetem(ctx, sources, targets, externalCidrs, networkchaos)
 		if err != nil {
 			r.Log.Error(err, "failed to apply netem", "sources", sources, "targets", targets)
 			return err
@@ -146,7 +141,7 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1
 			return err
 		}
 	case v1alpha1.Both:
-		err = r.applyNetem(ctx, pods, pods, externalIPAddresses, networkchaos)
+		err = r.applyNetem(ctx, pods, pods, externalCidrs, networkchaos)
 		if err != nil {
 			r.Log.Error(err, "failed to apply netem", "sources", pods, "targets", pods)
 			return err

@@ -101,7 +101,7 @@ exit 1
 			defer mock.With("MockWithNetNs", func(context.Context, string, string, ...string) *exec.Cmd {
 				return exec.Command("echo", "mock command")
 			})()
-			err := s.addIpsToIPSet(context.TODO(), "nsPath", "name", []string{"1.1.1.1"})
+			err := s.addCIDRsToIPSet(context.TODO(), "nsPath", "name", []string{"1.1.1.1"})
 			Expect(err).To(BeNil())
 		})
 
@@ -116,7 +116,7 @@ exit 1
 			defer mock.With("MockWithNetNs", func(context.Context, string, string, ...string) *exec.Cmd {
 				return exec.Command("/tmp/mockfail.sh", ipExistErr)
 			})()
-			err = s.addIpsToIPSet(context.TODO(), "nsPath", "name", []string{"1.1.1.1"})
+			err = s.addCIDRsToIPSet(context.TODO(), "nsPath", "name", []string{"1.1.1.1"})
 			Expect(err).To(BeNil())
 		})
 
@@ -131,7 +131,7 @@ exit 1
 			defer mock.With("MockWithNetNs", func(context.Context, string, string, ...string) *exec.Cmd {
 				return exec.Command("/tmp/mockfail.sh", "fail msg")
 			})()
-			err = s.addIpsToIPSet(context.TODO(), "nsPath", "name", []string{"1.1.1.1"})
+			err = s.addCIDRsToIPSet(context.TODO(), "nsPath", "name", []string{"1.1.1.1"})
 			Expect(err).ToNot(BeNil())
 		})
 	})

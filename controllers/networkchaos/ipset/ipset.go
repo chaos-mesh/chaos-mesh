@@ -23,6 +23,7 @@ import (
 
 	"github.com/pingcap/chaos-mesh/api/v1alpha1"
 	"github.com/pingcap/chaos-mesh/controllers/common"
+	"github.com/pingcap/chaos-mesh/controllers/networkchaos/netutils"
 	pb "github.com/pingcap/chaos-mesh/pkg/chaosdaemon/pb"
 	"github.com/pingcap/chaos-mesh/pkg/utils"
 )
@@ -32,19 +33,19 @@ const (
 )
 
 // BuildIPSet builds an ipset with provided pod ip list
-func BuildIPSet(pods []v1.Pod, externalIps []string, networkchaos *v1alpha1.NetworkChaos, namePostFix string) pb.IpSet {
+func BuildIPSet(pods []v1.Pod, externalCidrs []string, networkchaos *v1alpha1.NetworkChaos, namePostFix string) pb.IpSet {
 	name := GenerateIPSetName(networkchaos, namePostFix)
-	ips := externalIps
+	cidrs := externalCidrs
 
 	for _, pod := range pods {
 		if len(pod.Status.PodIP) > 0 {
-			ips = append(ips, pod.Status.PodIP)
+			cidrs = append(cidrs, netutils.IpToCidr(pod.Status.PodIP))
 		}
 	}
 
 	return pb.IpSet{
-		Name: name,
-		Ips:  ips,
+		Name:  name,
+		Cidrs: cidrs,
 	}
 }
 

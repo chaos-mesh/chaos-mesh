@@ -11,22 +11,41 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package netem
+package netutils
 
-import (
-	"net"
+import "net"
 
-	"github.com/pingcap/chaos-mesh/controllers/networkchaos/netutils"
-)
+// IpToCidr converts from an ip to a full mask cidr
+func IpToCidr(ip string) string {
+	// TODO: support IPv6
+	return ip + "/32"
+}
 
-func resolveCidrs(name string) (string, error) {
+// ResolveCidrs converts multiple cidrs/ips/domains into cidr
+func ResolveCidrs(names []string) ([]string, error) {
+	cidrs := []string{}
+	for _, target := range names {
+		// TODO: resolve ip on every pods but not in controller, in case the dns server of these pods differ
+		cidr, err := ResolveCidr(target)
+		if err != nil {
+			return nil, err
+		}
+
+		cidrs = append(cidrs, cidr)
+	}
+
+	return cidrs, nil
+}
+
+// ResolveCidr converts cidr/ip/domain into cidr
+func ResolveCidr(name string) (string, error) {
 	_, ipnet, err := net.ParseCIDR(name)
 	if err == nil {
 		return ipnet.String(), nil
 	}
 
 	if net.ParseIP(name) != nil {
-		return netutils.IpToCidr(name), nil
+		return IpToCidr(name), nil
 	}
 
 	addrs, err := net.LookupIP(name)
@@ -35,5 +54,5 @@ func resolveCidrs(name string) (string, error) {
 	}
 
 	// TODO: support IPv6
-	return addrs[0].String(), nil
+	return IpToCidr(addrs[0].String()), nil
 }
