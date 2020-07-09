@@ -361,7 +361,7 @@ func (e *eventStore) DryListByFilter(_ context.Context, filter core.Filter) ([]*
 	if len(args) == 0 {
 		db = e.db
 	} else {
-		db = &dbstore.DB{e.db.Where(query, args...)}
+		db = &dbstore.DB{DB: e.db.Where(query, args...)}
 	}
 	if err := db.Where(query, args...).Find(&resList).Error; err != nil &&
 		!gorm.IsRecordNotFoundError(err) {
