@@ -125,6 +125,30 @@ func SelectPods(ctx context.Context, c client.Client, selector v1alpha1.Selector
 
 	pods = append(pods, podList.Items...)
 
+	var (
+		nodes           []v1.Node
+		nodeList        v1.NodeList
+		nodeListOptions = client.ListOptions{}
+	)
+
+	if len(selector.NodeSelectors) > 0 {
+		nodeListOptions.LabelSelector = labels.SelectorFromSet(selector.NodeSelectors)
+		if err := c.List(ctx, &nodeList, &nodeListOptions); err != nil {
+			return nil, err
+		}
+		nodes = append(nodes, nodeList.Items...)
+		pods = filterPodByNodeSelector(pods, nodes)
+	}
+
+	nodeSelector, err := parseSelector(strings.Join(selector.Nodes, ","))
+	if err != nil {
+		return nil, err
+	}
+	pods, err = filterByNodes(pods, nodeSelector)
+	if err != nil {
+		return nil, err
+	}
+
 	pods = filterByNamespaces(pods)
 
 	namespaceSelector, err := parseSelector(strings.Join(selector.Namespaces, ","))
@@ -226,6 +250,79 @@ func CheckPodMeetSelector(pod v1.Pod, selector v1alpha1.SelectorSpec) (bool, err
 	}
 
 	return false, nil
+}
+
+// filterByNode filters a list of pods by a given node selector.
+func filterByNodes(pods []v1.Pod, nodes labels.Selector) ([]v1.Pod, error) {
+	// empty filter returns original list
+	if nodes.Empty() {
+		return pods, nil
+	}
+	// split requirements into including and excluding groups
+	reqs, _ := nodes.Requirements()
+
+	var (
+		reqIncl []labels.Requirement
+		reqExcl []labels.Requirement
+
+		filteredList []v1.Pod
+	)
+
+	for _, req := range reqs {
+		switch req.Operator() {
+		case selection.Exists:
+			reqIncl = append(reqIncl, req)
+		case selection.DoesNotExist:
+			reqExcl = append(reqExcl, req)
+		default:
+			return nil, fmt.Errorf("unsupported operator: %s", req.Operator())
+		}
+	}
+
+	for _, pod := range pods {
+		// if there aren't any including requirements, we're in by default
+		included := len(reqIncl) == 0
+
+		// convert the pod's nodename to an equivalent label selector
+		selector := labels.Set{pod.Spec.NodeName: ""}
+
+		// include pod if one including requirement matches
+		for _, req := range reqIncl {
+			if req.Matches(selector) {
+				included = true
+				break
+			}
+		}
+
+		// exclude pod if it is filtered out by at least one excluding requirement
+		for _, req := range reqExcl {
+			if !req.Matches(selector) {
+				included = false
+				break
+			}
+		}
+
+		if included {
+			filteredList = append(filteredList, pod)
+		}
+	}
+
+	return filteredList, nil
+}
+
+func filterPodByNodeSelector(pods []v1.Pod, nodes []v1.Node) []v1.Pod {
+	if len(nodes) == 0 {
+		return nil
+	}
+	var filteredList []v1.Pod
+	for _, pod := range pods {
+		for _, node := range nodes {
+			if pod.Spec.NodeName == node.Name {
+				filteredList = append(filteredList, pod)
+			}
+		}
+	}
+	return filteredList
 }
 
 // filterPodsByMode filters pods by mode from pod list
