@@ -65,6 +65,7 @@ func (s *daemonServer) ExecStressors(ctx context.Context,
 	}
 
 	cmd := withPidNS(ctx, GetNsPath(pid, pidNS), "stress-ng", strings.Fields(req.Stressors)...)
+	cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true, Pgid: 0}
 
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
