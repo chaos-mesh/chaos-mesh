@@ -11,7 +11,7 @@ rbac:
   create: true
 
 # enableProfiling is a flag to enable pprof in controller-manager and chaos-daemon.
-enableProfiling: true
+enableProfiling: false
 
 kubectlImage: bitnami/kubectl:latest
 
@@ -64,15 +64,15 @@ chaosDaemon:
 
   # runtime specifies which container runtime to use. Currently
   # we only supports docker and containerd.
-  # runtime: docker
+  runtime: docker
 
   # socketPath specifies the container runtime socket.
-  # socketPath: /var/run/docker.sock
+  socketPath: /var/run/docker.sock
 
   # If you are using Kind or using containerd as CRI, you can use the
   # config below to use containerd as the runtime in chaos-daemon.
-  runtime: containerd
-  socketPath: /run/containerd/containerd.sock
+  # runtime: containerd
+  # socketPath: /run/containerd/containerd.sock
 
   resources: {}
     # We usually recommend not to specify default resources and to leave this as a conscious
