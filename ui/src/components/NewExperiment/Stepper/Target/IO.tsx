@@ -62,21 +62,21 @@ export default function IO(props: StepperFormTargetProps) {
 
       {values.target.io_chaos.action !== '' && (
         <AdvancedOptions>
-          {values.target.io_chaos.action === ('delay' || 'mixed') && (
+          {values.target.io_chaos.action !== 'errno' && (
             <TextField
               id="target.io_chaos.delay"
               name="target.io_chaos.delay"
               label="Delay"
-              helperText="The value of delay action"
+              helperText="Optional. The value of delay of I/O operations. If it's empty, the operator will generate a value for it randomly."
             />
           )}
 
-          {values.target.io_chaos.action === ('errno' || 'mixed') && (
+          {values.target.io_chaos.action !== 'delay' && (
             <TextField
               id="target.io_chaos.errno"
               name="target.io_chaos.errno"
               label="Errno"
-              helperText="The value of errno action"
+              helperText="Optional. The error code returned by I/O operators. By default, it returns a random error code"
             />
           )}
           <TextField
@@ -98,7 +98,7 @@ export default function IO(props: StepperFormTargetProps) {
             id="target.io_chaos.methods"
             name="target.io_chaos.methods"
             label="Methods"
-            helperText="The IO methods for injecting"
+            helperText="Optional. The IO methods for injecting IOChaos actions"
             multiple
           >
             {methods.map((option: string) => (
@@ -111,7 +111,7 @@ export default function IO(props: StepperFormTargetProps) {
             id="target.io_chaos.addr"
             name="target.io_chaos.addr"
             label="Addr"
-            helperText="The sidecar HTTP server address"
+            helperText="Optional. The sidecar HTTP server address. By default, it will be set to :65534"
           />
         </AdvancedOptions>
       )}

@@ -93,7 +93,7 @@ export default function Kernel(props: StepperFormTargetProps) {
         type="number"
         id="target.kernel_chaos.fail_kernel_req.times"
         name="target.kernel_chaos.fail_kernel_req.times"
-        helperText="The max times of fails"
+        helperText="The max times of failures"
       />
     </>
   )

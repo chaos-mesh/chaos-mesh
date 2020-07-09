@@ -32,7 +32,7 @@ export default function Stress(props: StepperFormTargetProps) {
       <LabelField
         id="target.stress_chaos.stressors.cpu.options"
         name="target.stress_chaos.stressors.cpu.options"
-        label="Options of stress-ng"
+        label="Options of CPU stressors"
         helperText="Type string and end with a space to generate the stress-ng options"
       />
 
@@ -53,7 +53,7 @@ export default function Stress(props: StepperFormTargetProps) {
       <LabelField
         id="target.stress_chaos.stressors.memory.options"
         name="target.stress_chaos.stressors.memory.options"
-        label="Options of stress-ng"
+        label="Options of Memory stressors"
         helperText="Type string and end with a space to generate the stress-ng options"
       />
 

@@ -17,7 +17,7 @@ export default function Time(props: StepperFormTargetProps) {
         id="target.time_chaos.clock_ids"
         name="target.time_chaos.clock_ids"
         label="Clock ids"
-        helperText="Type string and end with a space to generate the clock ids"
+        helperText="Optional. Type string and end with a space to generate the clock ids. If it's empty, it will be set to ['CLOCK_REALTIME']"
       />
       <TextField
         id="target.time_chaos.offset"
