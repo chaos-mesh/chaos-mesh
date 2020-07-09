@@ -32,7 +32,7 @@ Make sure you have the above prerequisites met. Now follow the steps below to pr
     make ensure-all
     ```
 
-3. Start the docker service. Most Linux distributions use `systemctl` to start services. If you do not have `systemctl`, use the service command.
+3. Make sure [Docker](https://docs.docker.com/install/) is installed and running on your local machine.
 
 4. Make sure `${GOPATH}/bin` is in your `PATH`.
 
@@ -64,7 +64,13 @@ With the toolchain ready, you still need a local Kubernetes cluster as the deplo
 hack/kind-cluster-build.sh
 ```
 
-## Next steps
+The above script will create a Kubernetes cluster by kind. When you don't need this cluster, you can run the following command to delete it: 
+
+```bash
+kind delete cluster --name=kind
+```
+
+## Next step
 
 Congratulations! You are now all set up for Chaos Mesh development. Try the following tasks:
 
