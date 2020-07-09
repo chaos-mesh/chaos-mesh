@@ -6,13 +6,11 @@ sidebar_label: Define the Scope of Chaos Experiment
 
 This document describes how to define the scope of a chaos experiment.
 
-Chaos Mesh provides a lot of selectors for users and you can use them to define the scope of our chaos experiment. 
-These selectors are defined in the `spec.selector` field of the chaos object.
+Chaos Mesh provides a variety of selectors, which you can use to define the scope of your chaos experiment. These selectors are defined in the `spec.selector` field of the chaos object.
 
 ## Namespace selectors
 
-Namespace selectors are used to filtering the chaos experiment targets by the namespaces and defined as a set of string. If this selector is empty, 
-Chaos Mesh will use the namespace of the chaos experiment object as the default namespace selector. For example:
+Namespace selectors filter the chaos experiment targets by the namespace. Defined as a set of strings. The default namespace selector for Chaos Mesh is the chaos experiment object. For example:
 
 ```yaml
 spec: 
@@ -23,7 +21,7 @@ spec:
 
 ## Label selectors
 
-Label selectors are used to filtering the chaos experiment targets by the labels and defined as a map of string keys and values. For example:
+Label selectors filter chaos experiment targets by the label. Defined as a map of string keys and values. For example:
 
 ```yaml
 spec: 
@@ -34,7 +32,7 @@ spec:
 
 ## Annotation selectors
 
-Annotation selectors are used to filtering the chaos experiment targets by the annotations and defined as a map of string keys and values. For example:
+Annotation selectors filter chaos experiment targets by the annotation. Defined as a map of string keys and values. For example:
 
 ```yaml
 spec: 
@@ -45,8 +43,7 @@ spec:
 
 ## Field selectors 
 
-Field selectors are used to filtering the chaos experiment targets by the resource fields and defined as a map of string keys and values. 
-This selector lets you select Kubernetes resources based on the value of one or more resource fields. For example: 
+Field selectors filter chaos experiment targets by the resource field. Defined as a map of string keys and values. For example:
 
 ```yaml
 spec: 
@@ -55,13 +52,11 @@ spec:
       "metadata.name": "my-pod"
 ```
 
-More details about field selectors, you can refer to the [Kubernetes document](https://kubernetes.io/docs/concepts/overview/working-with-objects/field-selectors/).
-
+For more details about field selectors, refer to the [Kubernetes document](https://kubernetes.io/docs/concepts/overview/working-with-objects/field-selectors/).
 
 ## Pod phase selectors
 
-Pod Phase selectors are used to filtering the chaos experiment targets by the condition and defined as a set of string. 
-Supported condition: `Pending`, `Running`, `Succeeded`, `Failed`, `Unknown`. For example: 
+Pod Phase selectors filter chaos experiment targets by the condition. Defined as a set of string. Supported conditions: `Pending`, `Running`, `Succeeded`, `Failed`, `Unknown`. For example:
 
 ```yaml
 spec: 
@@ -72,8 +67,7 @@ spec:
 
 ## Pod selectors
 
-Pod selectors specify specific pods and defined as a map of string keys and a set values. The key of this map defines the namespace which pods belong to, 
-and each value is a set of pod names. If this selector is not empty, these pod defined in this map are used directly and ignore the other selectors. For example: 
+Pod selectors filter chaos experiment targets by the pod. Defined as a map of string keys and values. The key in this map specifies the namespace which the pods belong to, and each value under the key is a pod. If this selector is not empty, these pod defined in this map are used directly and other defined selectors will be ignored. For example:
 
 ```yaml
 spec: 
