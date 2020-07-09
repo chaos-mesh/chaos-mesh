@@ -12,6 +12,8 @@ spec:
   direction: to
   externalTargets:
     - "8.8.8.8"
+    - "www.google.com"
+    - "8.8.0.0/16"
   duration: "10s"
   scheduler:
     cron: "@every 15s"
