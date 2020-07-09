@@ -1,8 +1,9 @@
-import { Box, Button, Divider, InputAdornment, MenuItem, Typography } from '@material-ui/core'
+import { Box, Button, Divider, IconButton, InputAdornment, MenuItem, Typography } from '@material-ui/core'
 import { LabelField, SelectField, TextField } from 'components/FormField'
 import React, { useEffect } from 'react'
 
 import AddIcon from '@material-ui/icons/Add'
+import RemoveCircleOutlineIcon from '@material-ui/icons/RemoveCircleOutline'
 import { StepperFormTargetProps } from 'components/NewExperiment/types'
 import { resetOtherChaos } from 'lib/formikhelpers'
 
@@ -27,6 +28,13 @@ export default function Kernel(props: StepperFormTargetProps) {
       ])
     )
 
+  const removeFrame = (index: number) => () => {
+    setFieldValue(
+      'target.kernel_chaos.fail_kernel_req.callchain',
+      callchain.filter((_, i) => index !== i)
+    )
+  }
+
   return (
     <>
       <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
@@ -36,11 +44,16 @@ export default function Kernel(props: StepperFormTargetProps) {
         </Button>
       </Box>
       <Box>
-        {callchain.map((frame, i) => (
-          <Box key={i}>
-            <Typography variant="body2" gutterBottom>
-              Frame {i + 1}
-            </Typography>
+        {callchain.map((_, i) => (
+          <Box key={'frame' + i}>
+            <Box display="flex" justifyContent="space-between" alignItems="center">
+              <Typography variant="body2" gutterBottom>
+                Frame {i + 1}
+              </Typography>
+              <IconButton color="secondary" component="span" onClick={removeFrame(i)}>
+                <RemoveCircleOutlineIcon />
+              </IconButton>
+            </Box>
             <TextField
               id={`target.kernel_chaos.fail_kernel_req.callchain[${i}].funcname`}
               name={`target.kernel_chaos.fail_kernel_req.callchain[${i}].funcname`}
