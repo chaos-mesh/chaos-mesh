@@ -39,7 +39,7 @@ var _ = Describe("ipset server", func() {
 				Expect(cmd).To(Equal("ipset"))
 				Expect(args[0]).To(Equal("create"))
 				Expect(args[1]).To(Equal("name"))
-				Expect(args[2]).To(Equal("hash:ip"))
+				Expect(args[2]).To(Equal("hash:net"))
 				return exec.Command("echo", "mock command")
 			})()
 			err := s.createIPSet(context.TODO(), "nsPath", "name")
