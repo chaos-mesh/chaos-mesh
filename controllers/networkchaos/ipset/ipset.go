@@ -39,7 +39,7 @@ func BuildIPSet(pods []v1.Pod, externalCidrs []string, networkchaos *v1alpha1.Ne
 
 	for _, pod := range pods {
 		if len(pod.Status.PodIP) > 0 {
-			cidrs = append(cidrs, netutils.IpToCidr(pod.Status.PodIP))
+			cidrs = append(cidrs, netutils.IPToCidr(pod.Status.PodIP))
 		}
 	}
 

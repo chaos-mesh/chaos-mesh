@@ -15,8 +15,8 @@ package netutils
 
 import "net"
 
-// IpToCidr converts from an ip to a full mask cidr
-func IpToCidr(ip string) string {
+// IPToCidr converts from an ip to a full mask cidr
+func IPToCidr(ip string) string {
 	// TODO: support IPv6
 	return ip + "/32"
 }
@@ -45,7 +45,7 @@ func ResolveCidr(name string) (string, error) {
 	}
 
 	if net.ParseIP(name) != nil {
-		return IpToCidr(name), nil
+		return IPToCidr(name), nil
 	}
 
 	addrs, err := net.LookupIP(name)
@@ -54,5 +54,5 @@ func ResolveCidr(name string) (string, error) {
 	}
 
 	// TODO: support IPv6
-	return IpToCidr(addrs[0].String()), nil
+	return IPToCidr(addrs[0].String()), nil
 }

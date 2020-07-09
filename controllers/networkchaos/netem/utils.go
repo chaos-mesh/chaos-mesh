@@ -26,7 +26,7 @@ func resolveCidrs(name string) (string, error) {
 	}
 
 	if net.ParseIP(name) != nil {
-		return netutils.IpToCidr(name), nil
+		return netutils.IPToCidr(name), nil
 	}
 
 	addrs, err := net.LookupIP(name)
