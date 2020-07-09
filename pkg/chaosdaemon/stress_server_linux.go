@@ -64,11 +64,7 @@ func (s *daemonServer) ExecStressors(ctx context.Context,
 		return nil, err
 	}
 
-	cmd := withPidNS(ctx, GetNsPath(pid, pidNS), "stress-ng", strings.Fields(req.Stressors)...)
-	cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true, Pgid: 0}
-
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
+	cmd := withPidNS(context.Background(), GetNsPath(pid, pidNS), "stress-ng", strings.Fields(req.Stressors)...)
 
 	if err := cmd.Start(); err != nil {
 		return nil, err
@@ -122,8 +118,15 @@ func (s *daemonServer) CancelStressors(ctx context.Context,
 		return &empty.Empty{}, nil
 	}
 	if ct, err := ins.CreateTime(); err == nil && ct == req.StartTime {
-		if err := ins.Kill(); err != nil {
+		children, err := ins.Children()
+		if err != nil {
 			return nil, err
+		}
+		for _, child := range children {
+			log.Info("killing children for nsenter", "pid", child.Pid)
+			if err := child.Kill(); err != nil {
+				return nil, err
+			}
 		}
 	}
 
