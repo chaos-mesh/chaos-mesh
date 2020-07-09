@@ -6,7 +6,7 @@ import Autocomplete from '@material-ui/lab/Autocomplete'
 import { Experiment } from 'components/NewExperiment/types'
 
 interface LabelFieldProps {
-  isKV?: boolean
+  isKV?: boolean // whether to use the key: value format
 }
 
 const LabelField: React.FC<LabelFieldProps & TextFieldProps> = ({ isKV = false, ...props }) => {
@@ -15,7 +15,11 @@ const LabelField: React.FC<LabelFieldProps & TextFieldProps> = ({ isKV = false, 
   const [text, setText] = useState('')
   const [error, setError] = useState('')
   const labelsRef = useRef(getIn(values, props.name!))
-  const [labels, setLabels] = useState<string[]>(labelsRef.current)
+  const [labels, _setLabels] = useState<string[]>(labelsRef.current)
+  const setLabels = (newVal: string[]) => {
+    labelsRef.current = newVal
+    _setLabels(labelsRef.current)
+  }
 
   useEffect(
     () => () => setFieldValue(props.name!, labelsRef.current),
@@ -23,7 +27,13 @@ const LabelField: React.FC<LabelFieldProps & TextFieldProps> = ({ isKV = false, 
     []
   )
 
-  const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const onChange = (_: any, __: any, reason: string) => {
+    if (reason === 'clear') {
+      setLabels([])
+    }
+  }
+
+  const onInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value
 
     if (val === ' ') {
@@ -48,8 +58,7 @@ const LabelField: React.FC<LabelFieldProps & TextFieldProps> = ({ isKV = false, 
       const duplicate = labels.some((d) => d === t)
 
       if (!duplicate) {
-        labelsRef.current = labels.concat([t])
-        setLabels(labelsRef.current)
+        setLabels(labels.concat([t]))
 
         if (error) {
           setError('')
@@ -58,12 +67,13 @@ const LabelField: React.FC<LabelFieldProps & TextFieldProps> = ({ isKV = false, 
 
       setText('')
     }
+
+    if (e.key === 'Backspace' && text === '') {
+      setLabels(labels.slice(0, labels.length - 1))
+    }
   }
 
-  const onDelete = (val: string) => () => {
-    labelsRef.current = labels.filter((d) => d !== val)
-    setLabels(labelsRef.current)
-  }
+  const onDelete = (val: string) => () => setLabels(labels.filter((d) => d !== val))
 
   return (
     <Box mb={2}>
@@ -74,6 +84,7 @@ const LabelField: React.FC<LabelFieldProps & TextFieldProps> = ({ isKV = false, 
         // make popup always closed
         open={false}
         forcePopupIcon={false}
+        onChange={onChange}
         inputValue={text}
         renderTags={(value: string[], getTagProps) =>
           value.map((val: string, index: number) => (
@@ -90,9 +101,9 @@ const LabelField: React.FC<LabelFieldProps & TextFieldProps> = ({ isKV = false, 
           <TextField
             {...params}
             {...props}
+            variant="outlined"
             margin="dense"
             fullWidth
-            variant="outlined"
             helperText={
               error !== ''
                 ? error
@@ -100,7 +111,7 @@ const LabelField: React.FC<LabelFieldProps & TextFieldProps> = ({ isKV = false, 
                 ? 'Type key:value and end with a space to generate a key/value pair'
                 : props.helperText
             }
-            onChange={onChange}
+            onChange={onInputChange}
             onKeyDown={onKeyDown}
             error={error !== ''}
           />

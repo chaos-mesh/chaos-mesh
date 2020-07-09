@@ -1,6 +1,6 @@
+import { AutocompleteMultipleField, SelectField, TextField } from 'components/FormField'
 import { InputAdornment, MenuItem } from '@material-ui/core'
 import React, { useMemo } from 'react'
-import { SelectField, TextField } from 'components/FormField'
 import { joinObjKVs, toTitleCase } from 'lib/utils'
 
 import AdvancedOptions from 'components/AdvancedOptions'
@@ -40,33 +40,21 @@ const ScopeStep: React.FC<ScopeStepProps> = ({ namespaces, labels, annotations }
 
   return (
     <>
-      <SelectField
+      <AutocompleteMultipleField
         id="scope.namespace_selectors"
         name="scope.namespace_selectors"
         label="Namespace Selectors"
         helperText="Multiple options"
-        multiple
-      >
-        {namespaces.map((option: string) => (
-          <MenuItem key={option} value={option}>
-            {option}
-          </MenuItem>
-        ))}
-      </SelectField>
+        options={namespaces}
+      />
 
-      <SelectField
+      <AutocompleteMultipleField
         id="scope.label_selectors"
         name="scope.label_selectors"
         label="Label Selectors"
         helperText="Multiple options"
-        multiple
-      >
-        {labelKVs.map((option: string) => (
-          <MenuItem key={option} value={option}>
-            {option}
-          </MenuItem>
-        ))}
-      </SelectField>
+        options={labelKVs}
+      />
 
       <SelectField id="scope.mode" name="scope.mode" label="Mode" helperText="Select the experiment mode">
         {modes.map((option) =>
@@ -97,19 +85,13 @@ const ScopeStep: React.FC<ScopeStepProps> = ({ namespaces, labels, annotations }
       )}
 
       <AdvancedOptions>
-        <SelectField
+        <AutocompleteMultipleField
           id="scope.annotation_selectors"
           name="scope.annotation_selectors"
           label="Annotation Selectors"
           helperText="Multiple options"
-          multiple
-        >
-          {annotationKVs.map((option: string) => (
-            <MenuItem key={option} value={option}>
-              {option}
-            </MenuItem>
-          ))}
-        </SelectField>
+          options={annotationKVs}
+        />
 
         <SelectField
           id="scope.phase_selectors"

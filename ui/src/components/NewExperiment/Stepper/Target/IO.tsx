@@ -1,5 +1,5 @@
+import { AutocompleteMultipleField, SelectField, TextField } from 'components/FormField'
 import { InputAdornment, MenuItem } from '@material-ui/core'
-import { SelectField, TextField } from 'components/FormField'
 
 import AdvancedOptions from 'components/AdvancedOptions'
 import React from 'react'
@@ -94,19 +94,13 @@ export default function IO(props: StepperFormTargetProps) {
             label="Path"
             helperText="The path of files for injecting"
           />
-          <SelectField
+          <AutocompleteMultipleField
             id="target.io_chaos.methods"
             name="target.io_chaos.methods"
             label="Methods"
             helperText="Optional. The IO methods for injecting IOChaos actions"
-            multiple
-          >
-            {methods.map((option: string) => (
-              <MenuItem key={option} value={option}>
-                {option}
-              </MenuItem>
-            ))}
-          </SelectField>
+            options={methods}
+          />
           <TextField
             id="target.io_chaos.addr"
             name="target.io_chaos.addr"
