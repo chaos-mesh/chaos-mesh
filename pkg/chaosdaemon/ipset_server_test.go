@@ -30,7 +30,7 @@ import (
 var _ = Describe("ipset server", func() {
 	defer mock.With("MockContainerdClient", &MockClient{})()
 	c, _ := CreateContainerRuntimeInfoClient(containerRuntimeContainerd)
-	s := &daemonServer{c}
+	s := &daemonServer{c, pb.UnimplementedChaosDaemonServer{}}
 
 	Context("createIPSet", func() {
 		It("should work", func() {
@@ -202,8 +202,8 @@ exit 1
 			})()
 			_, err := s.FlushIpSet(context.TODO(), &pb.IpSetRequest{
 				Ipset: &pb.IpSet{
-					Name: "ipset-name",
-					Ips:  []string{"1.1.1.1"},
+					Name:  "ipset-name",
+					Cidrs: []string{"1.1.1.1/32"},
 				},
 				ContainerId: "containerd://container-id",
 			})
@@ -215,8 +215,8 @@ exit 1
 			defer mock.With("TaskError", errors.New(errorStr))()
 			_, err := s.FlushIpSet(context.TODO(), &pb.IpSetRequest{
 				Ipset: &pb.IpSet{
-					Name: "ipset-name",
-					Ips:  []string{"1.1.1.1"},
+					Name:  "ipset-name",
+					Cidrs: []string{"1.1.1.1/32"},
 				},
 				ContainerId: "containerd://container-id",
 			})

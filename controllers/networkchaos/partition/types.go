@@ -129,13 +129,13 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1
 		pod := allPods[index]
 		r.Log.Info("PODS", "name", pod.Name, "namespace", pod.Namespace)
 		g.Go(func() error {
-			err = ipset.FlushIpSet(ctx, r.Client, &pod, sourceSet)
+			err = ipset.FlushIpSet(ctx, r.Client, &pod, &sourceSet)
 			if err != nil {
 				return err
 			}
 
 			r.Log.Info("Flush ipset on pod", "name", pod.Name, "namespace", pod.Namespace)
-			return ipset.FlushIpSet(ctx, r.Client, &pod, targetSet)
+			return ipset.FlushIpSet(ctx, r.Client, &pod, &targetSet)
 		})
 	}
 
@@ -145,24 +145,24 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1
 	}
 
 	if networkchaos.Spec.Direction == v1alpha1.To || networkchaos.Spec.Direction == v1alpha1.Both {
-		if err := r.BlockSet(ctx, sources, targetSet, pb.Rule_OUTPUT, networkchaos); err != nil {
+		if err := r.BlockSet(ctx, sources, &targetSet, pb.Rule_OUTPUT, networkchaos); err != nil {
 			r.Log.Error(err, "set source iptables failed")
 			return err
 		}
 
-		if err := r.BlockSet(ctx, targets, sourceSet, pb.Rule_INPUT, networkchaos); err != nil {
+		if err := r.BlockSet(ctx, targets, &sourceSet, pb.Rule_INPUT, networkchaos); err != nil {
 			r.Log.Error(err, "set target iptables failed")
 			return err
 		}
 	}
 
 	if networkchaos.Spec.Direction == v1alpha1.From || networkchaos.Spec.Direction == v1alpha1.Both {
-		if err := r.BlockSet(ctx, sources, targetSet, pb.Rule_INPUT, networkchaos); err != nil {
+		if err := r.BlockSet(ctx, sources, &targetSet, pb.Rule_INPUT, networkchaos); err != nil {
 			r.Log.Error(err, "set source iptables failed")
 			return err
 		}
 
-		if err := r.BlockSet(ctx, targets, sourceSet, pb.Rule_OUTPUT, networkchaos); err != nil {
+		if err := r.BlockSet(ctx, targets, &sourceSet, pb.Rule_OUTPUT, networkchaos); err != nil {
 			r.Log.Error(err, "set target iptables failed")
 			return err
 		}
@@ -190,7 +190,7 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1
 }
 
 // BlockSet blocks ipset for pods
-func (r *Reconciler) BlockSet(ctx context.Context, pods []v1.Pod, set pb.IpSet, direction pb.Rule_Direction, networkchaos *v1alpha1.NetworkChaos) error {
+func (r *Reconciler) BlockSet(ctx context.Context, pods []v1.Pod, set *pb.IpSet, direction pb.Rule_Direction, networkchaos *v1alpha1.NetworkChaos) error {
 	g := errgroup.Group{}
 	sourceRule := iptable.GenerateIPTables(pb.Rule_ADD, direction, set.Name)
 
@@ -210,7 +210,7 @@ func (r *Reconciler) BlockSet(ctx context.Context, pods []v1.Pod, set pb.IpSet, 
 		}
 
 		g.Go(func() error {
-			return iptable.FlushIptables(ctx, r.Client, pod, sourceRule)
+			return iptable.FlushIptables(ctx, r.Client, pod, &sourceRule)
 		})
 	}
 	return g.Wait()
@@ -277,7 +277,7 @@ func (r *Reconciler) cleanFinalizersAndRecover(ctx context.Context, networkchaos
 				rule = iptable.GenerateIPTables(pb.Rule_DELETE, pb.Rule_INPUT, set)
 			}
 
-			err = iptable.FlushIptables(ctx, r.Client, &pod, rule)
+			err = iptable.FlushIptables(ctx, r.Client, &pod, &rule)
 			if err != nil {
 				r.Log.Error(err, "error while deleting iptables rules")
 				result = multierror.Append(result, err)
@@ -295,7 +295,7 @@ func (r *Reconciler) cleanFinalizersAndRecover(ctx context.Context, networkchaos
 				rule = iptable.GenerateIPTables(pb.Rule_DELETE, pb.Rule_INPUT, set)
 			}
 
-			err = iptable.FlushIptables(ctx, r.Client, &pod, rule)
+			err = iptable.FlushIptables(ctx, r.Client, &pod, &rule)
 			if err != nil {
 				r.Log.Error(err, "error while deleting iptables rules")
 				result = multierror.Append(result, err)

@@ -30,7 +30,7 @@ import (
 var _ = Describe("iptables server", func() {
 	defer mock.With("MockContainerdClient", &MockClient{})()
 	c, _ := CreateContainerRuntimeInfoClient(containerRuntimeContainerd)
-	s := &daemonServer{c}
+	s := &daemonServer{c, pb.UnimplementedChaosDaemonServer{}}
 
 	Context("addIptablesRule", func() {
 		It("should work", func() {
