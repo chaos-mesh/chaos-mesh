@@ -337,8 +337,11 @@ func (e *eventStore) ListByFilter(_ context.Context, filter core.Filter) ([]*cor
 
 // DryListByFilter returns an event list by experimentName, experimentNamespace, uid, kind, startTime and finishTime.
 func (e *eventStore) DryListByFilter(_ context.Context, filter core.Filter) ([]*core.Event, error) {
-	var resList []*core.Event
-	var err error
+	var (
+		resList []*core.Event
+		err     error
+		db      *dbstore.DB
+	)
 
 	if filter.StartTimeStr != "" {
 		_, err = time.Parse(time.RFC3339, strings.Replace(filter.StartTimeStr, " ", "+", -1))
@@ -356,14 +359,13 @@ func (e *eventStore) DryListByFilter(_ context.Context, filter core.Filter) ([]*
 	query, args := constructQueryArgs(filter.ExperimentName, filter.ExperimentNamespace, filter.UID, filter.Kind, filter.StartTimeStr, filter.FinishTimeStr)
 	// List all events
 	if len(args) == 0 {
-		if err := e.db.Model(core.Event{}).Find(&resList).Error; err != nil && !gorm.IsRecordNotFoundError(err) {
-			return resList, err
-		}
+		db = e.db
 	} else {
-		if err := e.db.Where(query, args...).Find(&resList).Error; err != nil &&
-			!gorm.IsRecordNotFoundError(err) {
-			return resList, err
-		}
+		db = &dbstore.DB{e.db.Where(query, args...)}
+	}
+	if err := db.Where(query, args...).Find(&resList).Error; err != nil &&
+		!gorm.IsRecordNotFoundError(err) {
+		return resList, err
 	}
 
 	return resList, err
