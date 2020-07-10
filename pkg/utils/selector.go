@@ -131,22 +131,26 @@ func SelectPods(ctx context.Context, c client.Client, selector v1alpha1.Selector
 		nodeListOptions = client.ListOptions{}
 	)
 
+	if len(selector.Nodes) > 0 {
+		for _, nodename := range selector.Nodes {
+			var node v1.Node
+			err := c.Get(ctx, types.NamespacedName{
+				Name: nodename,
+			}, &node)
+			if err == nil {
+				nodes = append(nodes, node)
+				continue
+			}
+		}
+		pods = filterPodByNode(pods, nodes)
+	}
 	if len(selector.NodeSelectors) > 0 {
 		nodeListOptions.LabelSelector = labels.SelectorFromSet(selector.NodeSelectors)
 		if err := c.List(ctx, &nodeList, &nodeListOptions); err != nil {
 			return nil, err
 		}
 		nodes = append(nodes, nodeList.Items...)
-		pods = filterPodByNodeSelector(pods, nodes)
-	}
-
-	nodeSelector, err := parseSelector(strings.Join(selector.Nodes, ","))
-	if err != nil {
-		return nil, err
-	}
-	pods, err = filterByNodes(pods, nodeSelector)
-	if err != nil {
-		return nil, err
+		pods = filterPodByNode(pods, nodes)
 	}
 
 	pods = filterByNamespaces(pods)
@@ -252,65 +256,7 @@ func CheckPodMeetSelector(pod v1.Pod, selector v1alpha1.SelectorSpec) (bool, err
 	return false, nil
 }
 
-// filterByNode filters a list of pods by a given node selector.
-func filterByNodes(pods []v1.Pod, nodes labels.Selector) ([]v1.Pod, error) {
-	// empty filter returns original list
-	if nodes.Empty() {
-		return pods, nil
-	}
-	// split requirements into including and excluding groups
-	reqs, _ := nodes.Requirements()
-
-	var (
-		reqIncl []labels.Requirement
-		reqExcl []labels.Requirement
-
-		filteredList []v1.Pod
-	)
-
-	for _, req := range reqs {
-		switch req.Operator() {
-		case selection.Exists:
-			reqIncl = append(reqIncl, req)
-		case selection.DoesNotExist:
-			reqExcl = append(reqExcl, req)
-		default:
-			return nil, fmt.Errorf("unsupported operator: %s", req.Operator())
-		}
-	}
-
-	for _, pod := range pods {
-		// if there aren't any including requirements, we're in by default
-		included := len(reqIncl) == 0
-
-		// convert the pod's nodename to an equivalent label selector
-		selector := labels.Set{pod.Spec.NodeName: ""}
-
-		// include pod if one including requirement matches
-		for _, req := range reqIncl {
-			if req.Matches(selector) {
-				included = true
-				break
-			}
-		}
-
-		// exclude pod if it is filtered out by at least one excluding requirement
-		for _, req := range reqExcl {
-			if !req.Matches(selector) {
-				included = false
-				break
-			}
-		}
-
-		if included {
-			filteredList = append(filteredList, pod)
-		}
-	}
-
-	return filteredList, nil
-}
-
-func filterPodByNodeSelector(pods []v1.Pod, nodes []v1.Node) []v1.Pod {
+func filterPodByNode(pods []v1.Pod, nodes []v1.Node) []v1.Pod {
 	if len(nodes) == 0 {
 		return nil
 	}

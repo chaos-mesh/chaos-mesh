@@ -563,76 +563,7 @@ func TestFilterNamespaceSelector(t *testing.T) {
 	}
 }
 
-func TestFilterByNode(t *testing.T) {
-	g := NewGomegaWithT(t)
-
-	type TestCase struct {
-		name           string
-		pods           []v1.Pod
-		filterSelector labels.Selector
-		filteredPods   []v1.Pod
-	}
-
-	pods := []v1.Pod{
-		newPod("p1", v1.PodRunning, "", nil, nil, "node1"),
-		newPod("p2", v1.PodRunning, "", nil, nil, "node2"),
-		newPod("p3", v1.PodRunning, "", nil, nil, "node2"),
-		newPod("p4", v1.PodRunning, "", nil, nil, "node3"),
-	}
-
-	var tcs []TestCase
-	n2Selector, err := parseSelector(pods[1].Spec.NodeName)
-	g.Expect(err).ShouldNot(HaveOccurred())
-
-	tcs = append(tcs, TestCase{
-		name:           "filter node2",
-		pods:           pods,
-		filterSelector: n2Selector,
-		filteredPods:   []v1.Pod{pods[1], pods[2]},
-	})
-
-	emptySelector, err := parseSelector("")
-	g.Expect(err).ShouldNot(HaveOccurred())
-	tcs = append(tcs, TestCase{
-		name:           "filter empty selector",
-		pods:           pods,
-		filterSelector: emptySelector,
-		filteredPods:   pods,
-	})
-
-	tcs = append(tcs, TestCase{
-		name:           "filter no pods",
-		pods:           []v1.Pod{},
-		filterSelector: n2Selector,
-		filteredPods:   nil,
-	})
-
-	n2AndN3Selector, err := parseSelector("node2,node3")
-	g.Expect(err).ShouldNot(HaveOccurred())
-
-	tcs = append(tcs, TestCase{
-		name:           "filter node2 and node3",
-		pods:           pods,
-		filterSelector: n2AndN3Selector,
-		filteredPods:   []v1.Pod{pods[1], pods[2], pods[3]},
-	})
-
-	n2AndN4Selector, err := parseSelector("node2,node4")
-	g.Expect(err).ShouldNot(HaveOccurred())
-
-	tcs = append(tcs, TestCase{
-		name:           "filter node2 and node4",
-		pods:           pods,
-		filterSelector: n2AndN4Selector,
-		filteredPods:   []v1.Pod{pods[1], pods[2]},
-	})
-
-	for _, tc := range tcs {
-		g.Expect(filterByNodes(tc.pods, tc.filterSelector)).To(Equal(tc.filteredPods), tc.name)
-	}
-}
-
-func TestFilterPodByNodeSelector(t *testing.T) {
+func TestFilterPodByNode(t *testing.T) {
 	g := NewGomegaWithT(t)
 
 	type TestCase struct {
@@ -671,7 +602,7 @@ func TestFilterPodByNodeSelector(t *testing.T) {
 	})
 
 	for _, tc := range tcs {
-		g.Expect(filterPodByNodeSelector(tc.pods, tc.nodes)).To(Equal(tc.filteredPods), tc.name)
+		g.Expect(filterPodByNode(tc.pods, tc.nodes)).To(Equal(tc.filteredPods), tc.name)
 	}
 
 }
