@@ -131,28 +131,38 @@ func SelectPods(ctx context.Context, c client.Client, selector v1alpha1.Selector
 		nodeListOptions = client.ListOptions{}
 	)
 
-	if len(selector.Nodes) > 0 {
-		for _, nodename := range selector.Nodes {
-			var node v1.Node
-			err := c.Get(ctx, types.NamespacedName{
-				Name: nodename,
-			}, &node)
-			if err == nil {
-				nodes = append(nodes, node)
-				continue
+	if len(selector.Nodes) > 0 || len(selector.NodeSelectors) > 0 {
+		if len(selector.Nodes) > 0 {
+			for _, nodename := range selector.Nodes {
+				var node v1.Node
+				err := c.Get(ctx, types.NamespacedName{
+					Name: nodename,
+				}, &node)
+				if err == nil {
+					nodes = append(nodes, node)
+					continue
+				}
 			}
 		}
-		pods = filterPodByNode(pods, nodes)
-	}
-	if len(selector.NodeSelectors) > 0 {
-		nodeListOptions.LabelSelector = labels.SelectorFromSet(selector.NodeSelectors)
-		if err := c.List(ctx, &nodeList, &nodeListOptions); err != nil {
-			return nil, err
+		if len(selector.NodeSelectors) > 0 {
+			nodeListOptions.LabelSelector = labels.SelectorFromSet(selector.NodeSelectors)
+			if err := c.List(ctx, &nodeList, &nodeListOptions); err != nil {
+				return nil, err
+			}
+			nodes = append(nodes, nodeList.Items...)
 		}
-		nodes = append(nodes, nodeList.Items...)
 		pods = filterPodByNode(pods, nodes)
+		//pods = filterPodByNode(pods, nodes)
 	}
-
+	/*	if len(selector.NodeSelectors) > 0 {
+			nodeListOptions.LabelSelector = labels.SelectorFromSet(selector.NodeSelectors)
+			if err := c.List(ctx, &nodeList, &nodeListOptions); err != nil {
+				return nil, err
+			}
+			nodes = append(nodes, nodeList.Items...)
+			pods = filterPodByNode(pods, nodes)
+		}
+	*/
 	pods = filterByNamespaces(pods)
 
 	namespaceSelector, err := parseSelector(strings.Join(selector.Namespaces, ","))
