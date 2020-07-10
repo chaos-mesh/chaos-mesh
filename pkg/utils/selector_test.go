@@ -111,6 +111,14 @@ func TestSelectPods(t *testing.T) {
 			},
 			expectedPods: []v1.Pod{pods[5], pods[6]},
 		},
+		{
+			name: "filter pods by node and nodeSelector",
+			selector: v1alpha1.SelectorSpec{
+				NodeSelectors: map[string]string{"zone": "az1"},
+				Nodes:         []string{"az2-node1"},
+			},
+			expectedPods: []v1.Pod{pods[0], pods[1], pods[2], pods[3], pods[4], pods[5], pods[6]},
+		},
 	}
 
 	for _, tc := range tcs {
