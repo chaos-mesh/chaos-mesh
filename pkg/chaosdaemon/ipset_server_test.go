@@ -39,7 +39,7 @@ var _ = Describe("ipset server", func() {
 				Expect(cmd).To(Equal("ipset"))
 				Expect(args[0]).To(Equal("create"))
 				Expect(args[1]).To(Equal("name"))
-				Expect(args[2]).To(Equal("hash:ip"))
+				Expect(args[2]).To(Equal("hash:net"))
 				return exec.Command("echo", "mock command")
 			})()
 			err := s.createIPSet(context.TODO(), "nsPath", "name")
@@ -101,7 +101,7 @@ exit 1
 			defer mock.With("MockWithNetNs", func(context.Context, string, string, ...string) *exec.Cmd {
 				return exec.Command("echo", "mock command")
 			})()
-			err := s.addIpsToIPSet(context.TODO(), "nsPath", "name", []string{"1.1.1.1"})
+			err := s.addCIDRsToIPSet(context.TODO(), "nsPath", "name", []string{"1.1.1.1"})
 			Expect(err).To(BeNil())
 		})
 
@@ -116,7 +116,7 @@ exit 1
 			defer mock.With("MockWithNetNs", func(context.Context, string, string, ...string) *exec.Cmd {
 				return exec.Command("/tmp/mockfail.sh", ipExistErr)
 			})()
-			err = s.addIpsToIPSet(context.TODO(), "nsPath", "name", []string{"1.1.1.1"})
+			err = s.addCIDRsToIPSet(context.TODO(), "nsPath", "name", []string{"1.1.1.1"})
 			Expect(err).To(BeNil())
 		})
 
@@ -131,7 +131,7 @@ exit 1
 			defer mock.With("MockWithNetNs", func(context.Context, string, string, ...string) *exec.Cmd {
 				return exec.Command("/tmp/mockfail.sh", "fail msg")
 			})()
-			err = s.addIpsToIPSet(context.TODO(), "nsPath", "name", []string{"1.1.1.1"})
+			err = s.addCIDRsToIPSet(context.TODO(), "nsPath", "name", []string{"1.1.1.1"})
 			Expect(err).ToNot(BeNil())
 		})
 	})
@@ -202,8 +202,8 @@ exit 1
 			})()
 			_, err := s.FlushIpSet(context.TODO(), &pb.IpSetRequest{
 				Ipset: &pb.IpSet{
-					Name: "ipset-name",
-					Ips:  []string{"1.1.1.1"},
+					Name:  "ipset-name",
+					Cidrs: []string{"1.1.1.1/32"},
 				},
 				ContainerId: "containerd://container-id",
 			})
@@ -215,8 +215,8 @@ exit 1
 			defer mock.With("TaskError", errors.New(errorStr))()
 			_, err := s.FlushIpSet(context.TODO(), &pb.IpSetRequest{
 				Ipset: &pb.IpSet{
-					Name: "ipset-name",
-					Ips:  []string{"1.1.1.1"},
+					Name:  "ipset-name",
+					Cidrs: []string{"1.1.1.1/32"},
 				},
 				ContainerId: "containerd://container-id",
 			})
