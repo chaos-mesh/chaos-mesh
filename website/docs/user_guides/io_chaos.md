@@ -37,7 +37,7 @@ IOChaos needs to inject a sidecar container to user pods and the sidecar contain
 
 Chaos Mesh uses a template mechanism to simplify the configuration of sidecar injection.
 
-Because of the `Go Template` conflict with `Helm`, the common template is not included in the [Helm Chart](../installation/installation.md#install-by-helm).
+Because of the `Go Template` conflict with `helm`, the common template is not included in the [helm chart](../installation/installation.md#install-by-helm).
 However, it will be deployed automatically if you install Chaos Mesh via the [install script](../installation/installation.md#install-chaos-mesh).
 
 By default, the common template ConfigMaps should be deployed in the same namespace as Chaos Mesh.

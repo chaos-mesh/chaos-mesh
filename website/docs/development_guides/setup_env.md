@@ -11,7 +11,7 @@ This document walks you through the environment setup process for Chaos Mesh dev
 - [golang](https://golang.org/dl/) version >= v1.13
 - [docker](https://www.docker.com/)
 - [gcc](https://gcc.gnu.org/)
-- [Helm](https://helm.sh/) version >= v2.8.2
+- [helm](https://helm.sh/) version >= v2.8.2
 - [kind](https://github.com/kubernetes-sigs/kind)
 - [yarn](https://yarnpkg.com/lang/en/) and [nodejs](https://nodejs.org/en/) (for Chaos Dashboard)
 

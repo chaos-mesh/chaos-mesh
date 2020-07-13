@@ -23,14 +23,14 @@ Perform the following steps to set up the local Kubernetes environment:
     >
     > It is recommended to allocate enough RAM (more than 8192 MiB) to the Virtual Machine (VM) using the `--cpus` and `--memory` flag.
 
-2. Install Helm:
+2. Install helm:
 
    ```bash
    curl https://raw.githubusercontent.com/helm/helm/master/scripts/get | bash
    helm init
    ```
 
-3. Check whether the Helm tiller pod is running:
+3. Check whether the helm tiller pod is running:
 
    ```bash
    kubectl -n kube-system get pods -l app=helm
@@ -45,7 +45,7 @@ curl -sSL https://raw.githubusercontent.com/pingcap/chaos-mesh/master/install.sh
 The above command install all the CRDs, required service account configuration, and all components.
 Before you start running a chaos experiment, verify if Chaos Mesh is installed correctly.
 
-You also can use [Helm](https://helm.sh/) to [install Chaos Mesh manually](installation.md#install-by-helm).
+You also can use [helm](https://helm.sh/) to [install Chaos Mesh manually](installation.md#install-by-helm).
 
 ### Verify your installation
 
