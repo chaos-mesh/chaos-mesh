@@ -166,6 +166,10 @@ type NetworkChaosSpec struct {
 	// Target represents network target, this applies on netem and network partition action
 	// +optional
 	Target *Target `json:"target,omitempty"`
+
+	// ExternalTargets represents network targets outside k8s
+	// +optional
+	ExternalTargets []string `json:"externalTargets,omitempty"`
 }
 
 // GetSelector is a getter for Selector (for implementing SelectSpec)

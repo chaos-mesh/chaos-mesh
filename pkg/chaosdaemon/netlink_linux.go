@@ -25,7 +25,7 @@ type toQdiscFunc func(*netlink.Handle, netlink.Link) netlink.Qdisc
 func applyQdisc(pid uint32, toQdisc toQdiscFunc) error {
 	log.Info("Apply qdisc on PID", "pid", pid)
 
-	ns, err := netns.GetFromPath(GenNetnsPath(pid))
+	ns, err := netns.GetFromPath(GetNsPath(pid, netNS))
 	if err != nil {
 		log.Error(err, "failed to find network namespace", "pid", pid)
 		return err
@@ -60,7 +60,7 @@ func applyQdisc(pid uint32, toQdisc toQdiscFunc) error {
 func deleteQdisc(pid uint32, toQdisc toQdiscFunc) error {
 	log.Info("Delete qdisc on PID", "pid", pid)
 
-	ns, err := netns.GetFromPath(GenNetnsPath(pid))
+	ns, err := netns.GetFromPath(GetNsPath(pid, netNS))
 	if err != nil {
 		log.Error(err, "failed to find network namespace", "pid", pid)
 		return err

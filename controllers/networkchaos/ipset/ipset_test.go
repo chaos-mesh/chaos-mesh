@@ -35,7 +35,7 @@ func Test_generateIpSetName(t *testing.T) {
 			},
 		}
 
-		name := generateIpSetName(networkChaos, postfix)
+		name := GenerateIPSetName(networkChaos, postfix)
 
 		g.Expect(name).Should(Equal(chaosName + "_" + postfix))
 	})
@@ -47,7 +47,7 @@ func Test_generateIpSetName(t *testing.T) {
 			},
 		}
 
-		name := generateIpSetName(networkChaos, postfix)
+		name := GenerateIPSetName(networkChaos, postfix)
 
 		g.Expect(len(name)).Should(Equal(27))
 	})

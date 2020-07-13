@@ -106,6 +106,7 @@ func (in *NetworkChaos) Validate() error {
 	specField := field.NewPath("spec")
 	allErrs := in.ValidateScheduler(specField)
 	allErrs = append(allErrs, in.ValidatePodMode(specField)...)
+	allErrs = append(allErrs, in.ValidateExternalTargets(specField)...)
 
 	if in.Spec.Delay != nil {
 		allErrs = append(allErrs, in.Spec.Delay.validateDelay(specField.Child("delay"))...)
@@ -141,6 +142,21 @@ func (in *NetworkChaos) ValidateScheduler(spec *field.Path) field.ErrorList {
 // ValidatePodMode validates the value with podmode
 func (in *NetworkChaos) ValidatePodMode(spec *field.Path) field.ErrorList {
 	return ValidatePodMode(in.Spec.Value, in.Spec.Mode, spec.Child("value"))
+}
+
+// ValidateExternalTargets validates externalTargets must be with `to` direction
+func (in *NetworkChaos) ValidateExternalTargets(target *field.Path) field.ErrorList {
+	allErrs := field.ErrorList{}
+
+	if in.Spec.ExternalTargets != nil && in.Spec.Direction == From && in.Spec.Action != PartitionAction {
+		allErrs = append(allErrs,
+			field.Invalid(target.Child("direction"), in.Spec.Direction,
+				fmt.Sprintf("external targets cannot be used with `from` direction in netem action yet")))
+	}
+
+	// TODO: validate externalTargets are in ip or domain form
+
+	return allErrs
 }
 
 // validateDelay validates the delay

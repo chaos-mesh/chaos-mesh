@@ -23,6 +23,7 @@ import (
 
 	"github.com/pingcap/chaos-mesh/api/v1alpha1"
 	"github.com/pingcap/chaos-mesh/controllers/common"
+	"github.com/pingcap/chaos-mesh/controllers/networkchaos/netutils"
 	pb "github.com/pingcap/chaos-mesh/pkg/chaosdaemon/pb"
 	"github.com/pingcap/chaos-mesh/pkg/utils"
 )
@@ -31,24 +32,25 @@ const (
 	ipsetLen = 27
 )
 
-// BuildIpSet builds an ipset with provided pod ip list
-func BuildIpSet(pods []v1.Pod, networkchaos *v1alpha1.NetworkChaos, namePostFix string) pb.IpSet {
-	name := generateIpSetName(networkchaos, namePostFix)
-	ips := make([]string, 0, len(pods))
+// BuildIPSet builds an ipset with provided pod ip list
+func BuildIPSet(pods []v1.Pod, externalCidrs []string, networkchaos *v1alpha1.NetworkChaos, namePostFix string) pb.IpSet {
+	name := GenerateIPSetName(networkchaos, namePostFix)
+	cidrs := externalCidrs
 
 	for _, pod := range pods {
 		if len(pod.Status.PodIP) > 0 {
-			ips = append(ips, pod.Status.PodIP)
+			cidrs = append(cidrs, netutils.IPToCidr(pod.Status.PodIP))
 		}
 	}
 
 	return pb.IpSet{
-		Name: name,
-		Ips:  ips,
+		Name:  name,
+		Cidrs: cidrs,
 	}
 }
 
-func generateIpSetName(networkchaos *v1alpha1.NetworkChaos, namePostFix string) string {
+// GenerateIPSetName generates name for ipset
+func GenerateIPSetName(networkchaos *v1alpha1.NetworkChaos, namePostFix string) string {
 	originalName := networkchaos.Name
 
 	var ipsetName string
@@ -70,7 +72,7 @@ func generateIpSetName(networkchaos *v1alpha1.NetworkChaos, namePostFix string) 
 }
 
 // FlushIpSet makes grpc calls to chaosdaemon to save ipset
-func FlushIpSet(ctx context.Context, c client.Client, pod *v1.Pod, ipset pb.IpSet) error {
+func FlushIpSet(ctx context.Context, c client.Client, pod *v1.Pod, ipset *pb.IpSet) error {
 	pbClient, err := utils.NewChaosDaemonClient(ctx, c, pod, common.ControllerCfg.ChaosDaemonPort)
 	if err != nil {
 		return err
@@ -84,7 +86,7 @@ func FlushIpSet(ctx context.Context, c client.Client, pod *v1.Pod, ipset pb.IpSe
 	containerID := pod.Status.ContainerStatuses[0].ContainerID
 
 	_, err = pbClient.FlushIpSet(ctx, &pb.IpSetRequest{
-		Ipset:       &ipset,
+		Ipset:       ipset,
 		ContainerId: containerID,
 	})
 	return err
