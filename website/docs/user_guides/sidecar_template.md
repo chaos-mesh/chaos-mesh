@@ -78,7 +78,7 @@ For fields defined in this template, we have some brief descriptions below:
 > **Note:**
 >
 > Chaos controller-manager only watches template config map with the label selector specified by its flag `--template-labels`, by default this label 
-> is `app.kubernetes.io/component=template` if your Chaos Mesh is deployed by Helm.
+> is `app.kubernetes.io/component=template` if your Chaos Mesh is deployed by helm.
 >
 > Each template config map should be deployed in the same namespace as Chaos Mesh, and it is identified by the name of the config map, which is `chaosfs-sidecar` in the above example.
 >
