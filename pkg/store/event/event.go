@@ -262,45 +262,68 @@ func (e *eventStore) DeleteIncompleteEvents(_ context.Context) error {
 		Delete(core.Event{}).Error
 }
 
-// ListByFilter returns an event list by the podName, podNamespace, experimentName, experimentNamespace, uid and the startTime.
-func (e *eventStore) ListByFilter(_ context.Context, podName string, podNamespace string, experimentName string, experimentNamespace string, uid string, startTimeStr string) ([]*core.Event, error) {
+// ListByFilter returns an event list by podName, podNamespace, experimentName, experimentNamespace, uid, kind, startTime and finishTime.
+func (e *eventStore) ListByFilter(_ context.Context, filter core.Filter) ([]*core.Event, error) {
 	var resList []*core.Event
 	var err error
-	var startTime time.Time
+	var startTime, finishTime time.Time
 
-	if podName != "" {
-		resList, err = e.ListByPod(context.Background(), podNamespace, podName)
-	} else if podNamespace != "" {
-		resList, err = e.ListByNamespace(context.Background(), podNamespace)
-	} else if uid != "" {
-		resList, err = e.ListByUID(context.Background(), uid)
+	if filter.StartTimeStr != "" {
+		startTime, err = time.Parse(time.RFC3339, strings.Replace(filter.StartTimeStr, " ", "+", -1))
+		if err != nil {
+			return nil, fmt.Errorf("the format of the startTime is wrong")
+		}
+	}
+	if filter.FinishTimeStr != "" {
+		finishTime, err = time.Parse(time.RFC3339, strings.Replace(filter.FinishTimeStr, " ", "+", -1))
+		if err != nil {
+			return nil, fmt.Errorf("the format of the finishTime is wrong")
+		}
+	}
+
+	if filter.PodName != "" {
+		resList, err = e.ListByPod(context.Background(), filter.PodNamespace, filter.PodName)
+	} else if filter.PodNamespace != "" {
+		resList, err = e.ListByNamespace(context.Background(), filter.PodNamespace)
 	} else {
-		resList, err = e.List(context.Background())
+		query, args := constructQueryArgs(filter.ExperimentName, filter.ExperimentNamespace, filter.UID, filter.Kind, filter.StartTimeStr, filter.FinishTimeStr)
+		// List all events
+		if len(args) == 0 {
+			if err := e.db.Model(core.Event{}).Find(&resList).Error; err != nil && !gorm.IsRecordNotFoundError(err) {
+				return resList, err
+			}
+		} else {
+			if err := e.db.Where(query, args...).Find(&resList).Error; err != nil &&
+				!gorm.IsRecordNotFoundError(err) {
+				return resList, err
+			}
+		}
 	}
 	if err != nil {
 		return resList, err
 	}
 
-	if startTimeStr != "" {
-		startTime, err = time.Parse(time.RFC3339, strings.Replace(startTimeStr, " ", "+", -1))
-		if err != nil {
-			return nil, fmt.Errorf("the format of the time is wrong")
-		}
-	}
-
 	eventList := make([]*core.Event, 0)
 	for _, event := range resList {
-		if experimentName != "" && event.Experiment != experimentName {
-			continue
-		}
-		if experimentNamespace != "" && event.Namespace != experimentNamespace {
-			continue
-		}
-		if uid != "" && event.ExperimentID != uid {
-			continue
-		}
-		if startTimeStr != "" && event.StartTime.Before(startTime) && !event.StartTime.Equal(startTime) {
-			continue
+		if filter.PodName != "" || filter.PodNamespace != "" {
+			if filter.ExperimentName != "" && event.Experiment != filter.ExperimentName {
+				continue
+			}
+			if filter.ExperimentNamespace != "" && event.Namespace != filter.ExperimentNamespace {
+				continue
+			}
+			if filter.UID != "" && event.ExperimentID != filter.UID {
+				continue
+			}
+			if filter.Kind != "" && event.Kind != filter.Kind {
+				continue
+			}
+			if filter.StartTimeStr != "" && event.StartTime.Before(startTime) && !event.StartTime.Equal(startTime) {
+				continue
+			}
+			if filter.FinishTimeStr != "" && event.FinishTime.After(finishTime) && !event.FinishTime.Equal(finishTime) {
+				continue
+			}
 		}
 		pods, err := e.findPodRecordsByEventID(context.Background(), event.ID)
 		if err != nil {
@@ -310,6 +333,42 @@ func (e *eventStore) ListByFilter(_ context.Context, podName string, podNamespac
 		eventList = append(eventList, event)
 	}
 	return eventList, nil
+}
+
+// DryListByFilter returns an event list by experimentName, experimentNamespace, uid, kind, startTime and finishTime.
+func (e *eventStore) DryListByFilter(_ context.Context, filter core.Filter) ([]*core.Event, error) {
+	var (
+		resList []*core.Event
+		err     error
+		db      *dbstore.DB
+	)
+
+	if filter.StartTimeStr != "" {
+		_, err = time.Parse(time.RFC3339, strings.Replace(filter.StartTimeStr, " ", "+", -1))
+		if err != nil {
+			return nil, fmt.Errorf("the format of the startTime is wrong")
+		}
+	}
+	if filter.FinishTimeStr != "" {
+		_, err = time.Parse(time.RFC3339, strings.Replace(filter.FinishTimeStr, " ", "+", -1))
+		if err != nil {
+			return nil, fmt.Errorf("the format of the finishTime is wrong")
+		}
+	}
+
+	query, args := constructQueryArgs(filter.ExperimentName, filter.ExperimentNamespace, filter.UID, filter.Kind, filter.StartTimeStr, filter.FinishTimeStr)
+	// List all events
+	if len(args) == 0 {
+		db = e.db
+	} else {
+		db = &dbstore.DB{DB: e.db.Where(query, args...)}
+	}
+	if err := db.Where(query, args...).Find(&resList).Error; err != nil &&
+		!gorm.IsRecordNotFoundError(err) {
+		return resList, err
+	}
+
+	return resList, err
 }
 
 // DeleteByFinishTime deletes events and podrecords whose time difference is greater than the given time from FinishTime.
@@ -362,4 +421,55 @@ func (e *eventStore) getUID(_ context.Context, ns, name string) (string, error) 
 		}
 	}
 	return UID, nil
+}
+
+func constructQueryArgs(experimentName, experimentNamespace, uid, kind, startTime, finishTime string) (string, []interface{}) {
+	args := make([]interface{}, 0)
+	query := ""
+	if experimentName != "" {
+		query += "experiment = ?"
+		args = append(args, experimentName)
+	}
+	if experimentNamespace != "" {
+		if len(args) > 0 {
+			query += " AND namespace = ?"
+		} else {
+			query += "namespace = ?"
+		}
+		args = append(args, experimentNamespace)
+	}
+	if uid != "" {
+		if len(args) > 0 {
+			query += " AND experiment_id = ?"
+		} else {
+			query += "experiment_id = ?"
+		}
+		args = append(args, uid)
+	}
+	if kind != "" {
+		if len(args) > 0 {
+			query += " AND kind = ?"
+		} else {
+			query += "kind = ?"
+		}
+		args = append(args, kind)
+	}
+	if startTime != "" {
+		if len(args) > 0 {
+			query += " AND start_time >= ?"
+		} else {
+			query += "start_time >= ?"
+		}
+		args = append(args, strings.Replace(startTime, "T", " ", -1))
+	}
+	if finishTime != "" {
+		if len(args) > 0 {
+			query += " AND finish_time <= ?"
+		} else {
+			query += "finish_time <= ?"
+		}
+		args = append(args, strings.Replace(finishTime, "T", " ", -1))
+	}
+
+	return query, args
 }

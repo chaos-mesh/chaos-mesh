@@ -40,7 +40,7 @@ func (s *daemonServer) FlushIptables(ctx context.Context, req *pb.IpTablesReques
 		return nil, err
 	}
 
-	nsPath := GenNetnsPath(pid)
+	nsPath := GetNsPath(pid, netNS)
 	rule := req.Rule
 
 	format := ""
