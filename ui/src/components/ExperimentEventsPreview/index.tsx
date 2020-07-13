@@ -15,7 +15,7 @@ const useStyles = makeStyles((theme: Theme) =>
       marginLeft: theme.spacing(3),
       cursor: 'pointer',
       '&:first-child': {
-        marginLeft: theme.spacing(1.5),
+        marginLeft: 0,
       },
     },
     success: {

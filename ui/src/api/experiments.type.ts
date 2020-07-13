@@ -3,6 +3,7 @@ import { Event } from './events.type'
 export interface StateOfExperiments {
   total: number
   running: number
+  waiting: number
   paused: number
   failed: number
   finished: number

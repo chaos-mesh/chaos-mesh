@@ -1,32 +1,41 @@
+import { ChaosKindKeyMap, resetOtherChaos } from 'lib/formikhelpers'
+import React, { useEffect, useState } from 'react'
+
+import { Experiment } from 'components/NewExperiment/types'
 import Network from './Network'
 import Pod from './Pod'
-import React from 'react'
-import { StepperFormProps } from 'components/NewExperiment/types'
-import VerticalTabs from 'components/VerticalTabs'
-import { resetOtherChaos } from 'lib/formikhelpers'
+import Tabs from 'components/Tabs'
+import { useFormikContext } from 'formik'
 
 const tabs = [
   { label: 'Pod Lifecycle' },
   { label: 'Network' },
-  { label: 'File system I/O', disabled: true },
-  { label: 'Linux Kernel', disabled: true },
-  { label: 'Clock', disabled: true },
-  { label: 'Stress CPU/Memory', disabled: true },
+  { label: 'File system I/O' },
+  { label: 'Linux Kernel' },
+  { label: 'Clock' },
+  { label: 'Stress CPU/Memory' },
 ]
 
-interface TargetProps {
-  formProps: StepperFormProps
-  tabIndex: number
-  setTabIndex: (index: number) => void
-}
+const Target: React.FC = () => {
+  const formikCtx = useFormikContext<Experiment>()
 
-const Target: React.FC<TargetProps> = ({ formProps, tabIndex, setTabIndex }) => {
+  const [tabIndex, setTabIndex] = useState(0)
+
+  useEffect(() => {
+    const kind = formikCtx.values.target.kind
+
+    if (kind) {
+      setTabIndex(Object.keys(ChaosKindKeyMap).indexOf(kind))
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
   const handleActionChange = (kind: string) => (e: React.ChangeEvent<HTMLInputElement>) =>
-    resetOtherChaos(formProps, kind, e.target.value)
+    resetOtherChaos(formikCtx, kind, e.target.value)
 
   const tabPanels = [
-    <Pod {...formProps} handleActionChange={handleActionChange('PodChaos')} />,
-    <Network {...formProps} handleActionChange={handleActionChange('NetworkChaos')} />,
+    <Pod {...formikCtx} handleActionChange={handleActionChange('PodChaos')} />,
+    <Network {...formikCtx} handleActionChange={handleActionChange('NetworkChaos')} />,
   ]
 
   const props = {
@@ -36,7 +45,7 @@ const Target: React.FC<TargetProps> = ({ formProps, tabIndex, setTabIndex }) => 
     setTabIndex,
   }
 
-  return <VerticalTabs {...props} />
+  return <Tabs {...props} />
 }
 
 export default Target

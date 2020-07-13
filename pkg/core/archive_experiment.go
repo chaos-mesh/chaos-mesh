@@ -33,14 +33,23 @@ type ExperimentStore interface {
 	// Find returns an archive experiment by ID.
 	Find(context.Context, int64) (*ArchiveExperiment, error)
 
-	// Create persists a new archive experiment to the datastore.
-	Create(context.Context, *ArchiveExperiment) error
-
 	// Delete deletes the experiment from the datastore.
 	Delete(context.Context, *ArchiveExperiment) error
 
+	// DetailList returns a list of archive experiments from the datastore.
+	DetailList(ctx context.Context, kind, namespace, name, uid string) ([]*ArchiveExperiment, error)
+
 	// DeleteByFinishTime deletes experiments whose time difference is greater than the given time from FinishTime.
 	DeleteByFinishTime(context.Context, time.Duration) error
+
+	// Archive archives experiments whose "archived" field is false,
+	Archive(ctx context.Context, namespace, name string) error
+
+	// Set sets the experiment.
+	Set(context.Context, *ArchiveExperiment) error
+
+	// FindByUID returns an experiment record by the UID of the experiment.
+	FindByUID(ctx context.Context, UID string) (*ArchiveExperiment, error)
 }
 
 // ArchiveExperiment represents an experiment instance.
@@ -56,9 +65,10 @@ type ArchiveExperimentMeta struct {
 	Namespace  string
 	Kind       string
 	Action     string
-	UID        string
+	UID        string `gorm:"index:uid"`
 	StartTime  time.Time
 	FinishTime time.Time
+	Archived   bool
 }
 
 // TODO: implement parse functions

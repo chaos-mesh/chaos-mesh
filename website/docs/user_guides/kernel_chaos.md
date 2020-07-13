@@ -16,7 +16,7 @@ Although KernelChaos targets a certain pod, the performance of other pods are al
 
 - Linux kernel: version >= 4.18
 - [CONFIG_BPF_KPROBE_OVERRIDE](https://cateee.net/lkddb/web-lkddb/BPF_KPROBE_OVERRIDE.html) enabled
-- `bpfki.create = true` in [values.yaml](../helm/chaos-mesh/values.yaml)
+- `bpfki.create = true` in [values.yaml](https://github.com/pingcap/chaos-mesh/blob/master/helm/chaos-mesh/values.yaml)
 
 ## Configuration file
 
@@ -44,7 +44,7 @@ For more sample files, see [examples](https://github.com/pingcap/chaos-mesh/tree
 Description:
 
 * **mode** defines the mode to select pods.
-* **selector** specifies the target pods for chaos injection.
+* **selector** specifies the target pods for chaos injection. For more details, see [Define the Scope of Chaos Experiment](experiment_scope.md).
 * **failkernRequest** defines the specified injection mode (kmalloc, bio, etc.) with a call chain and an optional set of predicates. The fields are:
   * **failtype** indicates what to fail, can be set to `0` / `1` / `2`.
     - If `0`, indicates slab to fail (should_failslab)

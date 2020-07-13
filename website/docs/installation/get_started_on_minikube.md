@@ -1,7 +1,6 @@
 ---
 id: get_started_on_minikube
-title: Get Started on Minikube
-sidebar_label: Get started on Minikube
+title: Get started on Minikube
 ---
 
 This document describes how to deploy Chaos Mesh in Kubernetes on your laptop (Linux or macOS) using Minikube.
@@ -46,7 +45,7 @@ curl -sSL https://raw.githubusercontent.com/pingcap/chaos-mesh/master/install.sh
 The above command install all the CRDs, required service account configuration, and all components.
 Before you start running a chaos experiment, verify if Chaos Mesh is installed correctly.
 
-You also can use [Helm](https://helm.sh/) to [install Chaos Mesh manually](installation#install-by-helm).
+You also can use [Helm](https://helm.sh/) to [install Chaos Mesh manually](installation.md#install-by-helm).
 
 ### Verify your installation
 

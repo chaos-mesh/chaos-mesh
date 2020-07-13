@@ -1,7 +1,6 @@
 ---
 id: get_started_on_kind
-title: Get Started on kind
-sidebar_label: Get Started on kind
+title: Get started on kind
 ---
 
 This document describes how to deploy Chaos Mesh in Kubernetes on your laptop (Linux or macOS) using kind.
@@ -20,7 +19,7 @@ curl -sSL https://raw.githubusercontent.com/pingcap/chaos-mesh/master/install.sh
 
 After executing the above command, you need to verify if the Chaos Mesh is installed correctly.
 
-You also can use [Helm](https://helm.sh/) to [install Chaos Mesh manually](installation#install-by-helm).
+You also can use [Helm](https://helm.sh/) to [install Chaos Mesh manually](installation.md#install-by-helm).
 
 ### Verify your installation
 
