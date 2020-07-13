@@ -42,10 +42,14 @@ chaos-dashboard-d998856f6-vgrjs             1/1     Running   0          3m40s
 
 ## Uninstallation
 
-You can uninstall Chaos Mesh by deleting the namespace.
-
 ```bash
 curl -sSL https://raw.githubusercontent.com/pingcap/chaos-mesh/master/install.sh | bash -s -- --template | kubectl delete -f -
+```
+
+In addition, you also can uninstall Chaos Mesh by deleting directly the namespace.
+
+```bash
+kubectl delete ns chaos-testing
 ```
 
 ## Clean kind cluster
