@@ -1,4 +1,15 @@
 apiVersion: v1
-description: A Helm chart for Kubernetes
+appVersion: "v1.0.0"
+description: Chaos Mesh® is a cloud-native Chaos Engineering platform that orchestrates chaos on Kubernetes environments.
+home: https://chaos-mesh.org
+icon: https://raw.githubusercontent.com/pingcap/chaos-mesh/master/static/logo.svg
+sources:
+  - https://github.com/pingcap/chaos-mesh
 name: chaos-mesh
-version: dev
+version: v0.1.0
+keywords:
+  - chaos-engineering
+  - resiliency
+  - fault-injection
+  - kubernetes
+  - testing

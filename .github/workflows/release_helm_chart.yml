@@ -1,0 +1,20 @@
+name: Release helm chart files
+
+on:
+  push:
+    tags: 'chart-*'
+
+jobs:
+  release-chart:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Publish Helm chart
+        uses: stefanprodan/helm-gh-pages@master
+        with:
+          token: ${{ secrets.CR_TOKEN }}
+          charts_dir: helm
+          owner: chaos-mesh
+          repository: charts
+          branch: gh-pages
+
