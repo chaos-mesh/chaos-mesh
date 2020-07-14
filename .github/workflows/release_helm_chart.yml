@@ -14,6 +14,7 @@ jobs:
         with:
           token: ${{ secrets.CR_TOKEN }}
           charts_dir: helm
+          charts_url: https://charts.chaos-mesh.org
           owner: chaos-mesh
           repository: charts
           branch: gh-pages
