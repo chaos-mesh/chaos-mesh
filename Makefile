@@ -256,7 +256,7 @@ proto:
 	done
 else
 proto: image-chaos-mesh-protoc
-	docker run -it --rm --workdir /mnt/ --volume $(shell pwd):/mnt \
+	docker run --rm --workdir /mnt/ --volume $(shell pwd):/mnt \
 		--user $(shell id -u):$(shell id -g) --env IN_DOCKER=1 pingcap/chaos-mesh-protoc \
 		/usr/bin/make proto
 	
