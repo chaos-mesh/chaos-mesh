@@ -45,6 +45,7 @@ OPTIONS:
     -n, --name               Name of Kubernetes cluster, default value: kind
     -c  --crd                The URL of the crd files, default value: https://raw.githubusercontent.com/pingcap/chaos-mesh/master/manifests/crd.yaml
     -r  --runtime            Runtime specifies which container runtime to use. Currently we only supports docker and containerd. default value: docker
+    -f  --chaosfs-sidecar    The URL of the chaosfs sidecar configmap files, default value: https://raw.githubusercontent.com/pingcap/chaos-mesh/master/manifests/chaosfs-sidecar.yaml
         --kind-version       Version of the Kind tool, default value: v0.7.0
         --node-num           The count of the cluster nodes,default value: 3
         --k8s-version        Version of the Kubernetes cluster,default value: v1.17.2
@@ -72,6 +73,7 @@ main() {
     local volume_provisioner=false
     local local_registry=false
     local crd="https://raw.githubusercontent.com/pingcap/chaos-mesh/master/manifests/crd.yaml"
+    local chaosfs="https://raw.githubusercontent.com/pingcap/chaos-mesh/master/manifests/chaosfs-sidecar.yaml"
     local runtime="docker"
     local template=false
     local sidecar_template=true
@@ -102,6 +104,11 @@ main() {
                 ;;
             -c|--crd)
                 crd="$2"
+                shift
+                shift
+                ;;
+            -f|--chaosfs-sidecar)
+                chaosfs="$2"
                 shift
                 shift
                 ;;
@@ -215,7 +222,7 @@ main() {
         ensure gen_crd_manifests "${crd}"
         ensure gen_chaos_mesh_manifests "${runtime}"
         if $sidecar_template; then
-            ensure gen_default_sidecar_template
+            ensure gen_default_sidecar_template "${chaosfs}"
         fi
         exit 0
     fi
@@ -238,7 +245,7 @@ main() {
 
     check_kubernetes
 
-    install_chaos_mesh "${release_name}" "${namespace}" "${local_kube}" ${force_chaos_mesh} ${docker_mirror} "${crd}" "${runtime}"
+    install_chaos_mesh "${release_name}" "${namespace}" "${local_kube}" ${force_chaos_mesh} ${docker_mirror} "${crd}" "${runtime}" "${chaosfs}"
     ensure_pods_ready "${namespace}" "app.kubernetes.io/component=controller-manager" 100
     printf "Chaos Mesh %s is installed successfully\n" "${release_name}"
 }
@@ -590,6 +597,7 @@ install_chaos_mesh() {
     local crd=$6
     local runtime=$7
     local sidecar_template=$8
+    local chaosfs=$9
 
     printf "Install Chaos Mesh %s\n" "${release_name}"
 
@@ -608,7 +616,7 @@ install_chaos_mesh() {
     gen_crd_manifests "${crd}" | kubectl apply -f - || exit 1
     gen_chaos_mesh_manifests "${runtime}" | kubectl apply -f - || exit 1
     if [ "$sidecar_template" == "true" ]; then
-        gen_default_sidecar_template | kubectl apply -f - || exit 1
+        gen_default_sidecar_template "${chaosfs}"| kubectl apply -f - || exit 1
     fi
 }
 
@@ -770,20 +778,45 @@ azk8spull() {
 
 gen_crd_manifests() {
     local crd=$1
-    local local_crd_path="manifests/crd.yaml"
 
-    if [ "${crd}" == "" ]; then
-        ensure cat "$local_crd_path"
-    else
+    if check_url "$crd"; then
         need_cmd curl
-        ensure curl -sSL $crd
+        ensure curl -sSL "$crd"
+        return
     fi
+
+    if [ "$crd" == "" ]; then
+        crd="manifests/crd.yaml"
+    fi
+
+    ensure cat "$crd"
 }
 
 gen_default_sidecar_template() {
-    local template_path="manifests/chaosfs-sidecar.yaml"
+    local chaosfs=$1
 
-    ensure cat "$template_path"
+    if check_url "$chaosfs"; then
+        need_cmd curl
+        ensure curl -sSL "$chaosfs"
+        return
+    fi
+
+
+    if [ "$chaosfs" == "" ]; then
+        chaosfs="manifests/chaosfs-sidecar.yaml"
+    fi
+
+    ensure cat "$chaosfs"
+}
+
+check_url() {
+    local url=$1
+    local regex='^(https?|ftp|file)://[-A-Za-z0-9\+&@#/%?=~_|!:,.;]*[-A-Za-z0-9\+&@#/%=~_|]\.[-A-Za-z0-9\+&@#/%?=~_|!:,.;]*[-A-Za-z0-9\+&@#/%=~_|]$'
+    if [[ $url =~ $regex ]];then
+        return 0
+    else
+        return 1
+    fi
 }
 
 gen_chaos_mesh_manifests() {
