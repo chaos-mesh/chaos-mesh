@@ -1,27 +1,38 @@
 import { AutocompleteMultipleField, SelectField, TextField } from 'components/FormField'
 import { InputAdornment, MenuItem } from '@material-ui/core'
 import React, { useMemo } from 'react'
+import { RootState, useStoreDispatch } from 'store'
+import { getAnnotations, getLabels } from 'slices/experiments'
 import { joinObjKVs, toTitleCase } from 'lib/utils'
 
 import AdvancedOptions from 'components/AdvancedOptions'
 import { Experiment } from '../types'
 import { useFormikContext } from 'formik'
+import { useSelector } from 'react-redux'
 
 interface ScopeStepProps {
   namespaces: string[]
-  labels: { [key: string]: string[] }
-  annotations: { [key: string]: string[] }
 }
 
 const phases = ['all', 'pending', 'running', 'succeeded', 'failed', 'unknown']
 const modes = ['all', { name: 'Random One', value: 'one' }, 'fixed number', 'fixed percent', 'random max percent']
 const modesWithAdornment = ['fixed-percent', 'random-max-percent']
 
-const ScopeStep: React.FC<ScopeStepProps> = ({ namespaces, labels, annotations }) => {
+const ScopeStep: React.FC<ScopeStepProps> = ({ namespaces }) => {
   const { values, handleChange } = useFormikContext<Experiment>()
+
+  const { labels, annotations } = useSelector((state: RootState) => state.experiments)
+  const storeDispatch = useStoreDispatch()
 
   const labelKVs = useMemo(() => joinObjKVs(labels, ': '), [labels])
   const annotationKVs = useMemo(() => joinObjKVs(annotations, ': '), [annotations])
+
+  const handleNamespaceSelectorsChangeCallback = (labels: string[]) => {
+    const _labels = labels.length !== 0 ? labels : namespaces
+
+    storeDispatch(getLabels(_labels.join(',')))
+    storeDispatch(getAnnotations(_labels.join(',')))
+  }
 
   const handleChangeIncludeAll = (id: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
     const lastValues = id.split('.').reduce((acc, cur) => acc[cur], values as any)
@@ -46,6 +57,7 @@ const ScopeStep: React.FC<ScopeStepProps> = ({ namespaces, labels, annotations }
         label="Namespace Selectors"
         helperText="Multiple options"
         options={namespaces}
+        onChangeCallback={handleNamespaceSelectorsChangeCallback}
       />
 
       <AutocompleteMultipleField

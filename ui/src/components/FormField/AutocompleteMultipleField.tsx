@@ -7,10 +7,12 @@ import { Experiment } from 'components/NewExperiment/types'
 
 interface AutocompleteMultipleFieldProps {
   options: string[]
+  onChangeCallback?: (labels: string[]) => void
 }
 
 const AutocompleteMultipleField: React.FC<AutocompleteMultipleFieldProps & TextFieldProps> = ({
   options,
+  onChangeCallback,
   ...props
 }) => {
   const { values, setFieldValue } = useFormikContext<Experiment>()
@@ -39,6 +41,13 @@ const AutocompleteMultipleField: React.FC<AutocompleteMultipleFieldProps & TextF
       setLabels(newVal as string[])
     }
   }
+
+  useEffect(() => {
+    if (typeof onChangeCallback === 'function') {
+      onChangeCallback(labels)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [labels])
 
   const onDelete = (val: string) => () => setLabels(labels.filter((d) => d !== val))
 
