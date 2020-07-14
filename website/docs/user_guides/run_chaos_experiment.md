@@ -66,7 +66,7 @@ In this section, you will learn some follow-up operations when the chaos experim
 ### Update a chaos experiment
 
 ```bash
-vim network-delay.yaml # modify pod-failure-example.yaml to what you want
+vim network-delay.yaml # modify network-delay.yaml to what you want
 kubectl apply -f network-delay.yaml
 ```
 
@@ -88,7 +88,7 @@ kubectl annotate networkchaos web-show-network-delay experiment.pingcap.com/paus
 kubectl delete -f network-delay.yaml
 ```
 
-If you encounter a situation that the delete action is blocked, it means that there are some target pods fail to recover. You can check the log of Chaos Mesh or just feel free to file an issue. In addition, you also can force delete the chaos experiment by the following command:
+If you encounter a situation that the delete action is blocked, it means that there are some target pods fail to recover. You can check the log of Chaos Mesh or just feel free to file an [issue](https://github.com/pingcap/chaos-mesh/issues). In addition, you also can force delete the chaos experiment by the following command:
 
 ```bash
 kubectl annotate networkchaos web-show-network-delay chaos-mesh.pingcap.com/cleanFinalizer=forced
