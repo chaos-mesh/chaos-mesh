@@ -3,11 +3,11 @@ import { SelectField, TextField } from 'components/FormField'
 import { MenuItem } from '@material-ui/core'
 import React from 'react'
 import { StepperFormTargetProps } from 'components/NewExperiment/types'
-import { upperFirst } from 'lib/utils'
+import { toTitleCase } from 'lib/utils'
 
-const actions = ['pod kill', 'pod failure', 'container kill']
+const actions = ['pod failure', 'pod kill', 'container kill']
 
-export default function PodPanel(props: StepperFormTargetProps) {
+export default function Pod(props: StepperFormTargetProps) {
   const { values, handleActionChange } = props
 
   return (
@@ -16,13 +16,13 @@ export default function PodPanel(props: StepperFormTargetProps) {
         id="target.pod_chaos.action"
         name="target.pod_chaos.action"
         label="Action"
-        helperText="Please select an action"
+        helperText="Select a PodChaos action"
         value={values.target.pod_chaos.action}
         onChange={handleActionChange}
       >
         {actions.map((option: string) => (
           <MenuItem key={option} value={option.split(' ').join('-')}>
-            {upperFirst(option)}
+            {toTitleCase(option)}
           </MenuItem>
         ))}
       </SelectField>
@@ -32,7 +32,7 @@ export default function PodPanel(props: StepperFormTargetProps) {
           id="target.pod_chaos.container_name"
           name="target.pod_chaos.container_name"
           label="Container Name"
-          helperText="Input the container name you want to kill"
+          helperText="Fill the container name you want to kill"
         />
       )}
     </>
