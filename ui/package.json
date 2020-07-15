@@ -22,6 +22,7 @@
     "react-router-dom": "^5.1.2",
     "react-scripts": "3.4.1",
     "redux": "^4.0.5",
+    "snakecase-keys": "^3.2.0",
     "typescript": "^3.8.3",
     "yup": "^0.29.1"
   },
