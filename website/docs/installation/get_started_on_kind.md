@@ -1,7 +1,6 @@
 ---
 id: get_started_on_kind
-title: Get Started on kind
-sidebar_label: Get Started on kind
+title: Get started on kind
 ---
 
 This document describes how to deploy Chaos Mesh in Kubernetes on your laptop (Linux or macOS) using kind.
@@ -16,11 +15,11 @@ Before deployment, make sure [Docker](https://docs.docker.com/install/) is insta
 curl -sSL https://raw.githubusercontent.com/pingcap/chaos-mesh/master/install.sh | bash -s -- --local kind
 ```
 
-`install.sh` is an automation shell script that helps you install dependencies such as `kubectl`, `Helm`, `kind`, and `kubernetes`, and deploy Chaos Mesh itself.
+`install.sh` is an automation shell script that helps you install dependencies such as `kubectl`, `helm`, `kind`, and `kubernetes`, and deploy Chaos Mesh itself.
 
 After executing the above command, you need to verify if the Chaos Mesh is installed correctly.
 
-You also can use [Helm](https://helm.sh/) to [install Chaos Mesh manually](installation#install-by-helm).
+You also can use [helm](https://helm.sh/) to [install Chaos Mesh manually](installation.md#install-by-helm).
 
 ### Verify your installation
 
@@ -43,10 +42,14 @@ chaos-dashboard-d998856f6-vgrjs             1/1     Running   0          3m40s
 
 ## Uninstallation
 
-You can uninstall Chaos Mesh by deleting the namespace.
-
 ```bash
 curl -sSL https://raw.githubusercontent.com/pingcap/chaos-mesh/master/install.sh | bash -s -- --template | kubectl delete -f -
+```
+
+In addition, you also can uninstall Chaos Mesh by deleting the namespace directly.
+
+```bash
+kubectl delete ns chaos-testing
 ```
 
 ## Clean kind cluster

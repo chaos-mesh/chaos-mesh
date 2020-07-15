@@ -4,7 +4,7 @@ title: Develop a New Chaos
 sidebar_label: Develop a New Chaos
 ---
 
-After [preparing the development environment](./setup_env.md), let's develop a new type of chaos, HelloWorldChaos, which only prints a "Hello World!" message to the log. Generally, to add a new chaos type for Chaos Mesh, you need to take the following steps:
+After [preparing the development environment](setup_env.md), let's develop a new type of chaos, HelloWorldChaos, which only prints a "Hello World!" message to the log. Generally, to add a new chaos type for Chaos Mesh, you need to take the following steps:
 
 1. [Add the chaos object in controller](#add-the-chaos-object-in-controller)
 2. [Register the CRD](#register-the-crd)
@@ -156,7 +156,7 @@ make docker-push
 
 You are almost there. In this step, you will pull the image and apply it for testing.
 
-Before you pull any image for Chaos Mesh (using `helm install` or `helm upgrade`), modify [values.yaml](https://github.com/pingcap/chaos-mesh/blob/master/helm/chaos-mesh/values.yaml) of Helm template to replace the default image with what you just pushed to your local registry.
+Before you pull any image for Chaos Mesh (using `helm install` or `helm upgrade`), modify [values.yaml](https://github.com/pingcap/chaos-mesh/blob/master/helm/chaos-mesh/values.yaml) of helm template to replace the default image with what you just pushed to your local registry.
 
 In this case, the template uses `pingcap/chaos-mesh:latest` as the default target registry, so you need to replace it with `localhost:5000`, as shown below:
 
@@ -227,4 +227,4 @@ Now take the following steps to run chaos:
 
 ## Next steps
 
-Congratulations! You have just added a chaos type for Chaos Mesh successfully. Let us know if you run into any issues during the process. If you feel like doing other types of contributions, refer to [Add facilities to chaos daemon (WIP)].
+Congratulations! You have just added a chaos type for Chaos Mesh successfully. Let us know if you run into any issues during the process. If you feel like doing other types of contributions, refer to Add facilities to chaos daemon (WIP).

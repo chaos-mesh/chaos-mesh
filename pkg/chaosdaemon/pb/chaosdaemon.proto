@@ -123,7 +123,7 @@ message IpSetRequest {
 
 message IpSet {
   string name = 1;
-  repeated string ips = 2;
+  repeated string cidrs = 2;
 }
 
 message IpTablesRequest {

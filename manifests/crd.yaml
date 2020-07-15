@@ -690,6 +690,11 @@ spec:
             duration:
               description: Duration represents the duration of the chaos action
               type: string
+            externalTargets:
+              description: ExternalTargets represents network targets outside k8s
+              items:
+                type: string
+              type: array
             loss:
               description: Loss represents the detail about loss action
               properties:
