@@ -242,6 +242,11 @@ func (r *ChaosCollector) setUnarchivedExperiment(req ctrl.Request, obj v1alpha1.
 }
 
 func (r *ChaosCollector) archiveExperiment(ns, name string) error {
+	if err := r.event.UpdateIncompleteEvents(context.Background(), ns, name); err != nil {
+		r.Log.Error(err, "failed to update incomplete events", "namespace", ns, "name", name)
+		return err
+	}
+
 	if err := r.archive.Archive(context.Background(), ns, name); err != nil {
 		r.Log.Error(err, "failed to archive experiment", "namespace", ns, "name", name)
 		return err
