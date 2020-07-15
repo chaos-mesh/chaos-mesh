@@ -9,8 +9,11 @@ The maintainers of Chaos Mesh, along with their email and focus area,
 
 Name | Email | Focus
 ----|---|---
-[Siddon Tang](https://github.com/siddontang) | [tl@pingcap.com](mailto:tl@pingcap.com) | Project Lead
-[Qiang Zhou](https://github.com/zhouqiang-cl) | [zhouqiang@pingcap.com](mailto:zhouqiang@pingcap.com) | Project Lead
-[CWen](https://github.com/cwen0) | [cwen@pingcap.com](mailto:cwen@pingcap.com) | Operator, Dashboard
-[YangKeao](https://github.com/YangKeao) | [yangkeao@pingcap.com](mailto:yangkeao@pingcap.com) | Operator, Dashboard
-[Yisaer](https://github.com/Yisaer) | [gaosong@pingcap.com](mailto:gaosong@pingcap.com) | Operator
+Siddon Tang ([@siddontang](https://github.com/siddontang)) | [tl@pingcap.com](mailto:tl@pingcap.com) | General Chaos Mesh
+Qiang Zhou ([@zhouqiang-cl](https://github.com/zhouqiang-cl)) | [zhouqiang@pingcap.com](mailto:zhouqiang@pingcap.com) | General Chaos Mesh
+Cwen Yin ([@cwen0](https://github.com/cwen0)) | [cwen@pingcap.com](mailto:cwen@pingcap.com) | Operator, Dashboard 
+Keao Yang ([@YangKeao](https://github.com/YangKeao)) | [yangkeao@pingcap.com](mailto:yangkeao@pingcap.com) | Operator, Dashboard
+Song Gao ([@Yisear](https://github.com/Yisear)) | [gaosong@pingcap.com](mailto:gaosong@pingcap.com) | Operator
+Calvin Weng ([@dcalvin](https://github.com/dcalvin)) | [dcalvin@pingcap.com](mailto:dcalvin@pingcap.com) | Community, Document
+Ben Ye ([@yeya24](https://github.com/yeya24)) | [yb532204897@gmail.com](mailto:yb532204897@gmail.com) | Operator, Dashboard
+Hengliang Tan ([@Gallardot](https://github.com/Gallardot)) | [tttick@gmail.com](mailto:tttick@gmail.com) | Helm charts, Operator
