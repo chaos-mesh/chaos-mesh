@@ -44,7 +44,7 @@ For more sample files, see [examples](https://github.com/pingcap/chaos-mesh/tree
 Description:
 
 * **mode** defines the mode to select pods.
-* **selector** specifies the target pods for chaos injection.
+* **selector** specifies the target pods for chaos injection. For more details, see [Define the Scope of Chaos Experiment](experiment_scope.md).
 * **failkernRequest** defines the specified injection mode (kmalloc, bio, etc.) with a call chain and an optional set of predicates. The fields are:
   * **failtype** indicates what to fail, can be set to `0` / `1` / `2`.
     - If `0`, indicates slab to fail (should_failslab)

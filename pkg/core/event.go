@@ -25,8 +25,8 @@ type EventStore interface {
 	// List returns an event list from the datastore.
 	List(context.Context) ([]*Event, error)
 
-	// ListByFilter returns an event list by the podName, podNamespace, experimentName, experimentNamespace, uid and the startTime.
-	ListByFilter(context.Context, string, string, string, string, string, string) ([]*Event, error)
+	// ListByFilter returns an event list by podName, podNamespace, experimentName, experimentNamespace, uid, kind, startTime and finishTime.
+	ListByFilter(context.Context, Filter) ([]*Event, error)
 
 	// ListByExperiment returns an event list by the name and namespace of the experiment.
 	ListByExperiment(context.Context, string, string) ([]*Event, error)
@@ -39,6 +39,9 @@ type EventStore interface {
 
 	// ListByUID returns an event list by the UID.
 	ListByUID(context.Context, string) ([]*Event, error)
+
+	// DryListByFilter returns an event list by experimentName, experimentNamespace, uid, kind, startTime and finishTime.
+	DryListByFilter(context.Context, Filter) ([]*Event, error)
 
 	// Find returns an event from the datastore by ID.
 	Find(context.Context, uint) (*Event, error)
@@ -85,4 +88,16 @@ type PodRecord struct {
 	Namespace string
 	Message   string
 	Action    string
+}
+
+// Filter represents the filter to list events
+type Filter struct {
+	PodName             string
+	PodNamespace        string
+	StartTimeStr        string
+	FinishTimeStr       string
+	ExperimentName      string
+	ExperimentNamespace string
+	UID                 string
+	Kind                string
 }

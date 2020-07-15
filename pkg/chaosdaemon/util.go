@@ -21,6 +21,7 @@ import (
 	"os"
 	"os/exec"
 	"strconv"
+	"strings"
 	"sync"
 	"syscall"
 
@@ -184,9 +185,29 @@ func CreateContainerRuntimeInfoClient(containerRuntime string) (ContainerRuntime
 	return cli, nil
 }
 
-// GetNetnsPath returns network namespace path
-func GenNetnsPath(pid uint32) string {
-	return fmt.Sprintf("%s/%d/ns/net", defaultProcPrefix, pid)
+type nsType string
+
+const (
+	mountNS nsType = "mnt"
+	utsNS   nsType = "uts"
+	ipcNS   nsType = "ipc"
+	netNS   nsType = "net"
+	pidNS   nsType = "pid"
+	userNS  nsType = "user"
+)
+
+var nsArgMap = map[nsType]string{
+	mountNS: "m",
+	utsNS:   "u",
+	ipcNS:   "i",
+	netNS:   "n",
+	pidNS:   "p",
+	userNS:  "U",
+}
+
+// GetNsPath returns corresponding namespace path
+func GetNsPath(pid uint32, typ nsType) string {
+	return fmt.Sprintf("%s/%d/ns/%s", defaultProcPrefix, pid, string(typ))
 }
 
 func withNetNS(ctx context.Context, nsPath string, cmd string, args ...string) *exec.Cmd {
@@ -196,8 +217,43 @@ func withNetNS(ctx context.Context, nsPath string, cmd string, args ...string) *
 		return f(ctx, nsPath, cmd, args...)
 	}
 
-	// BusyBox's nsenter is very confusing. This usage is found by several attempts
-	args = append([]string{"-n" + nsPath, "--", cmd}, args...)
+	return withNS(ctx, []nsOption{{
+		Typ:  netNS,
+		Path: nsPath,
+	}}, cmd, args...)
+}
+
+func withPidNS(ctx context.Context, nsPath string, cmd string, args ...string) *exec.Cmd {
+	// Mock point to return mock Cmd in unit test
+	if c := mock.On("MockWithPidNs"); c != nil {
+		f := c.(func(context.Context, string, string, ...string) *exec.Cmd)
+		return f(ctx, nsPath, cmd, args...)
+	}
+
+	return withNS(ctx, []nsOption{{
+		Typ:  pidNS,
+		Path: nsPath,
+	}}, cmd, args...)
+}
+
+type nsOption struct {
+	Typ  nsType
+	Path string
+}
+
+func withNS(ctx context.Context, options []nsOption, cmd string, args ...string) *exec.Cmd {
+	// Mock point to return mock Cmd in unit test
+	if c := mock.On("MockWithNs"); c != nil {
+		f := c.(func(context.Context, []nsOption, string, ...string) *exec.Cmd)
+		return f(ctx, options, cmd, args...)
+	}
+
+	args = append([]string{"--", cmd}, args...)
+	for _, option := range options {
+		args = append([]string{"-" + nsArgMap[option.Typ] + option.Path}, args...)
+	}
+
+	log.Info("running command", "command", "nsenter "+strings.Join(args, " "))
 
 	return exec.CommandContext(ctx, "nsenter", args...)
 }

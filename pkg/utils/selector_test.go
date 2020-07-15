@@ -35,11 +35,16 @@ import (
 func TestSelectPods(t *testing.T) {
 	g := NewGomegaWithT(t)
 
-	objects, pods := generateNPods("p", 5, v1.PodRunning, metav1.NamespaceDefault, nil, map[string]string{"l1": "l1"})
+	objects, pods := generateNPods("p", 5, v1.PodRunning, metav1.NamespaceDefault, nil, map[string]string{"l1": "l1"}, "az1-node1")
+	objects2, pods2 := generateNPods("s", 2, v1.PodRunning, "test-s", nil, map[string]string{"l2": "l2"}, "az2-node1")
 
-	objects2, pods2 := generateNPods("s", 2, v1.PodRunning, "test-s", nil, map[string]string{"l2": "l2"})
+	objects3, _ := generateNNodes("az1-node", 3, map[string]string{"disktype": "ssd", "zone": "az1"})
+	objects4, _ := generateNNodes("az2-node", 2, map[string]string{"disktype": "hdd", "zone": "az2"})
 
 	objects = append(objects, objects2...)
+	objects = append(objects, objects3...)
+	objects = append(objects, objects4...)
+
 	pods = append(pods, pods2...)
 
 	c := fake.NewFakeClient(objects...)
@@ -84,6 +89,36 @@ func TestSelectPods(t *testing.T) {
 			},
 			expectedPods: nil,
 		},
+		{
+			name: "filter by specified node",
+			selector: v1alpha1.SelectorSpec{
+				Nodes: []string{"az1-node1"},
+			},
+			expectedPods: []v1.Pod{pods[0], pods[1], pods[2], pods[3], pods[4]},
+		},
+		{
+			name: "filter node and labels",
+			selector: v1alpha1.SelectorSpec{
+				LabelSelectors: map[string]string{"l1": "l1"},
+				Nodes:          []string{"az2-node1"},
+			},
+			expectedPods: nil,
+		},
+		{
+			name: "filter pods by nodeSelector",
+			selector: v1alpha1.SelectorSpec{
+				NodeSelectors: map[string]string{"disktype": "hdd"},
+			},
+			expectedPods: []v1.Pod{pods[5], pods[6]},
+		},
+		{
+			name: "filter pods by node and nodeSelector",
+			selector: v1alpha1.SelectorSpec{
+				NodeSelectors: map[string]string{"zone": "az1"},
+				Nodes:         []string{"az2-node1"},
+			},
+			expectedPods: []v1.Pod{pods[0], pods[1], pods[2], pods[3], pods[4], pods[5], pods[6]},
+		},
 	}
 
 	for _, tc := range tcs {
@@ -106,7 +141,7 @@ func TestCheckPodMeetSelector(t *testing.T) {
 	tcs := []TestCase{
 		{
 			name: "meet label",
-			pod:  newPod("t1", v1.PodPending, metav1.NamespaceDefault, nil, map[string]string{"app": "tikv", "ss": "t1"}),
+			pod:  newPod("t1", v1.PodPending, metav1.NamespaceDefault, nil, map[string]string{"app": "tikv", "ss": "t1"}, ""),
 			selector: v1alpha1.SelectorSpec{
 				LabelSelectors: map[string]string{"app": "tikv"},
 			},
@@ -114,15 +149,14 @@ func TestCheckPodMeetSelector(t *testing.T) {
 		},
 		{
 			name: "not meet label",
-			pod:  newPod("t1", v1.PodRunning, metav1.NamespaceDefault, nil, map[string]string{"app": "tidb", "ss": "t1"}),
-			selector: v1alpha1.SelectorSpec{
+			pod:  newPod("t1", v1.PodRunning, metav1.NamespaceDefault, nil, map[string]string{"app": "tidb", "ss": "t1"}, ""), selector: v1alpha1.SelectorSpec{
 				LabelSelectors: map[string]string{"app": "tikv"},
 			},
 			expectedValue: false,
 		},
 		{
 			name: "pod labels is empty",
-			pod:  newPod("t1", v1.PodRunning, metav1.NamespaceDefault, nil, nil),
+			pod:  newPod("t1", v1.PodRunning, metav1.NamespaceDefault, nil, nil, ""),
 			selector: v1alpha1.SelectorSpec{
 				LabelSelectors: map[string]string{"app": "tikv"},
 			},
@@ -130,13 +164,13 @@ func TestCheckPodMeetSelector(t *testing.T) {
 		},
 		{
 			name:          "selector is empty",
-			pod:           newPod("t1", v1.PodRunning, metav1.NamespaceDefault, nil, map[string]string{"app": "tidb"}),
+			pod:           newPod("t1", v1.PodRunning, metav1.NamespaceDefault, nil, map[string]string{"app": "tidb"}, ""),
 			selector:      v1alpha1.SelectorSpec{},
 			expectedValue: true,
 		},
 		{
 			name: "meet namespace",
-			pod:  newPod("t1", v1.PodRunning, metav1.NamespaceDefault, nil, nil),
+			pod:  newPod("t1", v1.PodRunning, metav1.NamespaceDefault, nil, nil, ""),
 			selector: v1alpha1.SelectorSpec{
 				Namespaces: []string{metav1.NamespaceDefault},
 			},
@@ -144,7 +178,7 @@ func TestCheckPodMeetSelector(t *testing.T) {
 		},
 		{
 			name: "meet namespace and meet labels",
-			pod:  newPod("t1", v1.PodRunning, metav1.NamespaceDefault, nil, map[string]string{"app": "tikv"}),
+			pod:  newPod("t1", v1.PodRunning, metav1.NamespaceDefault, nil, map[string]string{"app": "tikv"}, ""),
 			selector: v1alpha1.SelectorSpec{
 				Namespaces:     []string{metav1.NamespaceDefault},
 				LabelSelectors: map[string]string{"app": "tikv"},
@@ -153,7 +187,7 @@ func TestCheckPodMeetSelector(t *testing.T) {
 		},
 		{
 			name: "meet namespace and not meet labels",
-			pod:  newPod("t1", v1.PodRunning, metav1.NamespaceDefault, nil, map[string]string{"app": "tidb"}),
+			pod:  newPod("t1", v1.PodRunning, metav1.NamespaceDefault, nil, map[string]string{"app": "tidb"}, ""),
 			selector: v1alpha1.SelectorSpec{
 				Namespaces:     []string{metav1.NamespaceDefault},
 				LabelSelectors: map[string]string{"app": "tikv"},
@@ -162,7 +196,7 @@ func TestCheckPodMeetSelector(t *testing.T) {
 		},
 		{
 			name: "meet pods",
-			pod:  newPod("t1", v1.PodRunning, metav1.NamespaceDefault, nil, map[string]string{"app": "tidb"}),
+			pod:  newPod("t1", v1.PodRunning, metav1.NamespaceDefault, nil, map[string]string{"app": "tidb"}, ""),
 			selector: v1alpha1.SelectorSpec{
 				Pods: map[string][]string{
 					metav1.NamespaceDefault: {"t1"},
@@ -172,7 +206,7 @@ func TestCheckPodMeetSelector(t *testing.T) {
 		},
 		{
 			name: "meet annotation",
-			pod:  newPod("t1", v1.PodRunning, metav1.NamespaceDefault, map[string]string{"an": "n1", "an2": "n2"}, map[string]string{"app": "tidb"}),
+			pod:  newPod("t1", v1.PodRunning, metav1.NamespaceDefault, map[string]string{"an": "n1", "an2": "n2"}, map[string]string{"app": "tidb"}, ""),
 			selector: v1alpha1.SelectorSpec{
 				Namespaces: []string{metav1.NamespaceDefault},
 				AnnotationSelectors: map[string]string{
@@ -183,7 +217,7 @@ func TestCheckPodMeetSelector(t *testing.T) {
 		},
 		{
 			name: "not meet annotation",
-			pod:  newPod("t1", v1.PodRunning, metav1.NamespaceDefault, map[string]string{"an": "n1"}, map[string]string{"app": "tidb"}),
+			pod:  newPod("t1", v1.PodRunning, metav1.NamespaceDefault, map[string]string{"an": "n1"}, map[string]string{"app": "tidb"}, ""),
 			selector: v1alpha1.SelectorSpec{
 				Namespaces: []string{metav1.NamespaceDefault},
 				AnnotationSelectors: map[string]string{
@@ -194,7 +228,7 @@ func TestCheckPodMeetSelector(t *testing.T) {
 		},
 		{
 			name: "meet pod selector",
-			pod:  newPod("t1", v1.PodRunning, metav1.NamespaceDefault, nil, map[string]string{"app": "tidb"}),
+			pod:  newPod("t1", v1.PodRunning, metav1.NamespaceDefault, nil, map[string]string{"app": "tidb"}, ""),
 			selector: v1alpha1.SelectorSpec{
 				Pods: map[string][]string{
 					metav1.NamespaceDefault: {"t1", "t2"},
@@ -204,7 +238,7 @@ func TestCheckPodMeetSelector(t *testing.T) {
 		},
 		{
 			name: "not meet pod selector",
-			pod:  newPod("t1", v1.PodRunning, metav1.NamespaceDefault, nil, map[string]string{"app": "tidb"}),
+			pod:  newPod("t1", v1.PodRunning, metav1.NamespaceDefault, nil, map[string]string{"app": "tidb"}, ""),
 			selector: v1alpha1.SelectorSpec{
 				Pods: map[string][]string{
 					metav1.NamespaceDefault: {"t2"},
@@ -214,7 +248,7 @@ func TestCheckPodMeetSelector(t *testing.T) {
 		},
 		{
 			name: "meet pod selector and not meet labels",
-			pod:  newPod("t1", v1.PodRunning, metav1.NamespaceDefault, nil, map[string]string{"app": "tidb"}),
+			pod:  newPod("t1", v1.PodRunning, metav1.NamespaceDefault, nil, map[string]string{"app": "tidb"}, ""),
 			selector: v1alpha1.SelectorSpec{
 				Pods: map[string][]string{
 					metav1.NamespaceDefault: {"t1", "t2"},
@@ -289,10 +323,10 @@ func TestFilterByPhaseSelector(t *testing.T) {
 	}
 
 	pods := []v1.Pod{
-		newPod("p1", v1.PodRunning, metav1.NamespaceDefault, nil, nil),
-		newPod("p2", v1.PodRunning, metav1.NamespaceDefault, nil, nil),
-		newPod("p3", v1.PodPending, metav1.NamespaceDefault, nil, nil),
-		newPod("p4", v1.PodFailed, metav1.NamespaceDefault, nil, nil),
+		newPod("p1", v1.PodRunning, metav1.NamespaceDefault, nil, nil, ""),
+		newPod("p2", v1.PodRunning, metav1.NamespaceDefault, nil, nil, ""),
+		newPod("p3", v1.PodPending, metav1.NamespaceDefault, nil, nil, ""),
+		newPod("p4", v1.PodFailed, metav1.NamespaceDefault, nil, nil, ""),
 	}
 
 	var tcs []TestCase
@@ -368,10 +402,10 @@ func TestFilterByAnnotations(t *testing.T) {
 	}
 
 	pods := []v1.Pod{
-		newPod("p1", v1.PodRunning, metav1.NamespaceDefault, map[string]string{"p1": "p1"}, nil),
-		newPod("p2", v1.PodRunning, metav1.NamespaceDefault, map[string]string{"p2": "p2"}, nil),
-		newPod("p3", v1.PodRunning, metav1.NamespaceDefault, map[string]string{"t": "t"}, nil),
-		newPod("p4", v1.PodRunning, metav1.NamespaceDefault, map[string]string{"t": "t"}, nil),
+		newPod("p1", v1.PodRunning, metav1.NamespaceDefault, map[string]string{"p1": "p1"}, nil, ""),
+		newPod("p2", v1.PodRunning, metav1.NamespaceDefault, map[string]string{"p2": "p2"}, nil, ""),
+		newPod("p3", v1.PodRunning, metav1.NamespaceDefault, map[string]string{"t": "t"}, nil, ""),
+		newPod("p4", v1.PodRunning, metav1.NamespaceDefault, map[string]string{"t": "t"}, nil, ""),
 	}
 
 	var tcs []TestCase
@@ -416,12 +450,12 @@ func TestIsAllowedNamespaces(t *testing.T) {
 		ignore string
 	}
 	pods := []v1.Pod{
-		newPod("p1", v1.PodRunning, "allow", nil, nil),
-		newPod("p1", v1.PodRunning, "allow-app", nil, nil),
-		newPod("p1", v1.PodRunning, "app-allow", nil, nil),
-		newPod("p1", v1.PodRunning, "ignore", nil, nil),
-		newPod("p1", v1.PodRunning, "ignore-app", nil, nil),
-		newPod("p1", v1.PodRunning, "app-ignore", nil, nil),
+		newPod("p1", v1.PodRunning, "allow", nil, nil, ""),
+		newPod("p1", v1.PodRunning, "allow-app", nil, nil, ""),
+		newPod("p1", v1.PodRunning, "app-allow", nil, nil, ""),
+		newPod("p1", v1.PodRunning, "ignore", nil, nil, ""),
+		newPod("p1", v1.PodRunning, "ignore-app", nil, nil, ""),
+		newPod("p1", v1.PodRunning, "app-ignore", nil, nil, ""),
 	}
 
 	allowRet := []bool{true, true, true, false, false, false}
@@ -479,10 +513,10 @@ func TestFilterNamespaceSelector(t *testing.T) {
 	}
 
 	pods := []v1.Pod{
-		newPod("p1", v1.PodRunning, "n1", nil, nil),
-		newPod("p2", v1.PodRunning, "n2", nil, nil),
-		newPod("p3", v1.PodRunning, "n2", nil, nil),
-		newPod("p4", v1.PodRunning, "n4", nil, nil),
+		newPod("p1", v1.PodRunning, "n1", nil, nil, ""),
+		newPod("p2", v1.PodRunning, "n2", nil, nil, ""),
+		newPod("p3", v1.PodRunning, "n2", nil, nil, ""),
+		newPod("p4", v1.PodRunning, "n4", nil, nil, ""),
 	}
 
 	var tcs []TestCase
@@ -537,12 +571,57 @@ func TestFilterNamespaceSelector(t *testing.T) {
 	}
 }
 
+func TestFilterPodByNode(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	type TestCase struct {
+		name         string
+		pods         []v1.Pod
+		nodes        []v1.Node
+		filteredPods []v1.Pod
+	}
+
+	var tcs []TestCase
+
+	pods := []v1.Pod{
+		newPod("p1", v1.PodRunning, "n1", nil, nil, "node1"),
+		newPod("p2", v1.PodRunning, "n2", nil, nil, "node1"),
+		newPod("p3", v1.PodRunning, "n2", nil, nil, "node2"),
+		newPod("p4", v1.PodRunning, "n4", nil, nil, "node3"),
+	}
+
+	nodes := []v1.Node{
+		newNode("node1", map[string]string{"disktype": "ssd", "zone": "az1"}),
+		newNode("node2", map[string]string{"disktype": "hdd", "zone": "az1"}),
+	}
+
+	tcs = append(tcs, TestCase{
+		name:         "filter pods from node1 and node2",
+		pods:         pods,
+		nodes:        nodes,
+		filteredPods: []v1.Pod{pods[0], pods[1], pods[2]},
+	})
+
+	tcs = append(tcs, TestCase{
+		name:         "filter no nodes",
+		pods:         pods,
+		nodes:        []v1.Node{},
+		filteredPods: nil,
+	})
+
+	for _, tc := range tcs {
+		g.Expect(filterPodByNode(tc.pods, tc.nodes)).To(Equal(tc.filteredPods), tc.name)
+	}
+
+}
+
 func newPod(
 	name string,
 	status v1.PodPhase,
 	namespace string,
 	ans map[string]string,
 	ls map[string]string,
+	nodename string,
 ) v1.Pod {
 	return v1.Pod{
 		TypeMeta: metav1.TypeMeta{
@@ -554,6 +633,9 @@ func newPod(
 			Namespace:   namespace,
 			Labels:      ls,
 			Annotations: ans,
+		},
+		Spec: v1.PodSpec{
+			NodeName: nodename,
 		},
 		Status: v1.PodStatus{
 			Phase: status,
@@ -568,14 +650,47 @@ func generateNPods(
 	ns string,
 	ans map[string]string,
 	ls map[string]string,
+	nodename string,
 ) ([]runtime.Object, []v1.Pod) {
 	var podObjects []runtime.Object
 	var pods []v1.Pod
 	for i := 0; i < n; i++ {
-		pod := newPod(fmt.Sprintf("%s%d", namePrefix, i), status, ns, ans, ls)
+		pod := newPod(fmt.Sprintf("%s%d", namePrefix, i), status, ns, ans, ls, nodename)
 		podObjects = append(podObjects, &pod)
 		pods = append(pods, pod)
 	}
 
 	return podObjects, pods
+}
+
+func newNode(
+	name string,
+	label map[string]string,
+) v1.Node {
+	return v1.Node{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "Node",
+			APIVersion: "v1",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Name:   name,
+			Labels: label,
+		},
+	}
+}
+
+func generateNNodes(
+	namePrefix string,
+	n int,
+	label map[string]string,
+) ([]runtime.Object, []v1.Node) {
+	var nodeObjects []runtime.Object
+	var nodes []v1.Node
+
+	for i := 0; i < n; i++ {
+		node := newNode(fmt.Sprintf("%s%d", namePrefix, i), label)
+		nodeObjects = append(nodeObjects, &node)
+		nodes = append(nodes, node)
+	}
+	return nodeObjects, nodes
 }

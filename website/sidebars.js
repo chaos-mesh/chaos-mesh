@@ -7,7 +7,11 @@ module.exports = {
     {
       type: 'category',
       label: 'Getting Started',
-      items: ['installation/installation', 'installation/get_started_on_kind', 'installation/get_started_on_minikube'],
+      items: [
+        'installation/installation',
+        'installation/get_started_on_kind',
+        'installation/get_started_on_minikube'
+      ],
     },
     {
       type: 'category',
@@ -27,9 +31,17 @@ module.exports = {
             'user_guides/kernelchaos_experiment',
           ],
         },
+        'user_guides/experiment_scope',
         'user_guides/sidecar_configmap',
         'user_guides/sidecar_template',
       ],
+    },
+    {
+      type: "category",
+      label: "Use Cases",
+      items: [
+        "use_cases/multi_data_centers",
+      ]
     },
     {
       type: 'category',
@@ -38,7 +50,7 @@ module.exports = {
         'development_guides/development_overview',
         'development_guides/set_up_the_development_environment',
         'development_guides/develop_a_new_chaos',
-      ],
+      ]
     },
     {
       type: 'doc',
