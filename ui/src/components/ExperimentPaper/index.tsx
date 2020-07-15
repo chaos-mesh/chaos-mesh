@@ -56,7 +56,7 @@ const ExperimentPaper: React.FC<ExperimentPaperProps> = ({
 
   const handleToggle = () => setOpen(!open)
 
-  const handleDelete = (e: Experiment) => () => {
+  const handleDelete = () => {
     handleDialogOpen(true)
     handleSelect({
       namespace: e.Namespace,
@@ -68,7 +68,7 @@ const ExperimentPaper: React.FC<ExperimentPaperProps> = ({
     })
   }
 
-  const handlePause = (e: Experiment) => () => {
+  const handlePause = () => {
     handleDialogOpen(true)
     handleSelect({
       namespace: e.Namespace,
@@ -80,7 +80,7 @@ const ExperimentPaper: React.FC<ExperimentPaperProps> = ({
     })
   }
 
-  const handleStart = (e: Experiment) => () => {
+  const handleStart = () => {
     handleDialogOpen(true)
     handleSelect({
       namespace: e.Namespace,
@@ -93,40 +93,41 @@ const ExperimentPaper: React.FC<ExperimentPaperProps> = ({
   }
 
   const Actions = () => (
-    <Box display="flex" alignItems="center" className={classes.marginRight}>
-      {!isArchive && <Typography variant="body1">Created {day((e as Experiment).created).fromNow()}</Typography>}
-      {!isArchive &&
-        ((e as Experiment).status.toLowerCase() === 'paused' ? (
-          <IconButton
-            color="primary"
-            aria-label="Pause experiment"
-            component="span"
-            size="small"
-            onClick={handleStart(e as Experiment)}
-          >
-            <PlayCircleOutlineIcon />
-          </IconButton>
-        ) : (
-          <IconButton
-            color="primary"
-            aria-label="Pause experiment"
-            component="span"
-            size="small"
-            onClick={handlePause(e as Experiment)}
-          >
-            <PauseCircleOutlineIcon />
-          </IconButton>
-        ))}
+    <Box display="flex" justifyContent="flex-end" alignItems="center" className={classes.marginRight}>
       {!isArchive && (
-        <IconButton
-          color="primary"
-          aria-label="Delete experiment"
-          component="span"
-          size="small"
-          onClick={handleDelete(e as Experiment)}
-        >
-          <DeleteOutlineIcon />
-        </IconButton>
+        <>
+          <Typography variant="body1">Created {day((e as Experiment).created).fromNow()}</Typography>
+          {(e as Experiment).status.toLowerCase() === 'paused' ? (
+            <IconButton
+              color="primary"
+              aria-label="Start experiment"
+              component="span"
+              size="small"
+              onClick={handleStart}
+            >
+              <PlayCircleOutlineIcon />
+            </IconButton>
+          ) : (
+            <IconButton
+              color="primary"
+              aria-label="Pause experiment"
+              component="span"
+              size="small"
+              onClick={handlePause}
+            >
+              <PauseCircleOutlineIcon />
+            </IconButton>
+          )}
+          <IconButton
+            color="primary"
+            aria-label="Delete experiment"
+            component="span"
+            size="small"
+            onClick={handleDelete}
+          >
+            <DeleteOutlineIcon />
+          </IconButton>
+        </>
       )}
       {isArchive && (
         <IconButton color="primary" aria-label="Recreate experiment" component="span" size="small">
@@ -135,7 +136,13 @@ const ExperimentPaper: React.FC<ExperimentPaperProps> = ({
       )}
       <Button
         component={Link}
-        to={isArchive ? `` : `/experiments/${e.Name}?namespace=${e.Namespace}&kind=${e.Kind}`}
+        to={
+          isArchive
+            ? ``
+            : `/experiments/${e.Name}?namespace=${e.Namespace}&kind=${
+                e.Kind
+              }&status=${(e as Experiment).status.toLowerCase()}`
+        }
         variant="outlined"
         color="primary"
         size="small"
@@ -147,21 +154,25 @@ const ExperimentPaper: React.FC<ExperimentPaperProps> = ({
   )
 
   return (
-    <Paper>
+    <Paper variant="outlined">
       <Box display="flex" justifyContent="space-between" alignItems="center" p={3}>
-        <Box display="flex" className={classes.marginRight}>
-          {!isArchive && (e as Experiment).status.toLowerCase() === 'failed' && <HighlightOffIcon color="secondary" />}
-          {!isArchive && <ExperimentEventsPreview events={(e as Experiment).events} />}
-          <Typography variant="body1">
+        <Box display="flex" alignItems="center" className={classes.marginRight}>
+          {!isArchive && (
+            <>
+              {(e as Experiment).status.toLowerCase() === 'failed' && <HighlightOffIcon color="secondary" />}
+              <ExperimentEventsPreview events={(e as Experiment).events} />
+            </>
+          )}
+          <Typography variant="body1" component="div">
             {e.Name}
             {isTabletScreen && (
-              <Typography variant="subtitle1" color="textSecondary">
+              <Typography variant="body2" color="textSecondary">
                 {e.Kind}
               </Typography>
             )}
           </Typography>
           {!isTabletScreen && (
-            <Typography variant="body1" color="textSecondary">
+            <Typography variant="body2" color="textSecondary">
               {e.Kind}
             </Typography>
           )}
@@ -176,7 +187,7 @@ const ExperimentPaper: React.FC<ExperimentPaperProps> = ({
       </Box>
       {isTabletScreen && (
         <Collapse in={open} timeout="auto">
-          <Box display="flex" justifyContent="end" p={3}>
+          <Box p={3}>
             <Actions />
           </Box>
         </Collapse>

@@ -11,6 +11,7 @@ import MobileNavigation from './MobileNavigation'
 import Sidebar from './Sidebar'
 import StatusBar from 'components/StatusBar'
 import chaosMeshRoutes from 'routes'
+import insertCommonStyle from 'lib/d3/insertCommonStyle'
 import { setAlertOpen } from 'slices/globalStatus'
 import { setNavigationBreadcrumbs } from 'slices/navigation'
 import { useLocation } from 'react-router-dom'
@@ -74,6 +75,8 @@ const TopContainer = () => {
     window.localStorage.setItem('chaos-mesh-mini-sidebar', openDrawer ? 'y' : 'n')
   }
 
+  useEffect(insertCommonStyle, [])
+
   useEffect(() => {
     dispatch(setNavigationBreadcrumbs(pathname))
   }, [dispatch, pathname])
@@ -121,7 +124,7 @@ const TopContainer = () => {
           open={alertOpen}
           onClose={handleSnackClose}
         >
-          <Alert variant="outlined" severity={alert.type} onClose={handleSnackClose}>
+          <Alert severity={alert.type} onClose={handleSnackClose}>
             {alert.message}
           </Alert>
         </Snackbar>

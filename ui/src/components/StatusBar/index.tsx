@@ -74,13 +74,7 @@ export const CurrentStatus: React.FC<CurrentStatusProps> = ({ classes, state }) 
   return (
     <Box className={classes.currentStatus}>
       {data.map((d) => (
-        <Button
-          key={d.label}
-          className={classes.statusButton}
-          variant="outlined"
-          size="small"
-          color={d.color ? d.color : undefined}
-        >
+        <Button key={d.label} className={classes.statusButton} variant="outlined" size="small" color={d.color}>
           {d.label}: {d.value}
         </Button>
       ))}

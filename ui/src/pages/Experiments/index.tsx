@@ -21,6 +21,7 @@ export default function Experiments() {
 
   const [loading, setLoading] = useState(false)
   const [experiments, setExperiments] = useState<Experiment[] | null>(null)
+  const [dialogOpen, setDialogOpen] = useState(false)
   const [selected, setSelected] = useState({
     namespace: '',
     name: '',
@@ -29,7 +30,6 @@ export default function Experiments() {
     description: '',
     action: 'delete',
   })
-  const [dialogOpen, setDialogOpen] = useState(false)
 
   const fetchExperiments = () => {
     setLoading(true)
@@ -38,14 +38,12 @@ export default function Experiments() {
       .experiments()
       .then(({ data }) => setExperiments(data))
       .catch(console.log)
-      .finally(() => {
-        setLoading(false)
-      })
+      .finally(() => setLoading(false))
   }
 
   const fetchEvents = (experiments: Experiment[]) => {
     api.events
-      .events()
+      .dryEvents()
       .then(({ data }) => {
         setExperiments(
           experiments.map((e) =>
@@ -65,8 +63,10 @@ export default function Experiments() {
       .catch(console.log)
   }
 
+  // Get all experiments after mount
   useEffect(fetchExperiments, [])
 
+  // Refresh experiments after some actions are completed
   useEffect(() => {
     if (needToRefreshExperiments) {
       fetchExperiments()
@@ -75,6 +75,7 @@ export default function Experiments() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [needToRefreshExperiments])
 
+  // Refresh every experiments' events after experiments state updated
   useEffect(() => {
     if (experiments && experiments.length > 0 && !experiments[0].events) {
       fetchEvents(experiments)

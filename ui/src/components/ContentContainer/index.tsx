@@ -8,7 +8,7 @@ type ContentContainerProps = Omit<ContainerProps, 'maxWidth'>
 const ContentContainer = styled((props: ContentContainerProps) => <Container maxWidth="xl" {...props} />)(
   ({ theme }) => ({
     position: 'relative',
-    padding: theme.spacing(6),
+    padding: `${theme.spacing(3)} ${theme.spacing(6)}`,
   })
 )
 

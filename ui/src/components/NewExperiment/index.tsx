@@ -176,13 +176,7 @@ export default function NewExperiment() {
 
   return (
     <>
-      <Button
-        className={classes.new}
-        variant="outlined"
-        size={isTabletScreen ? ('small' as 'small') : ('medium' as 'medium')}
-        startIcon={<AddIcon />}
-        onClick={toggleDrawer}
-      >
+      <Button className={classes.new} variant="outlined" size="small" startIcon={<AddIcon />} onClick={toggleDrawer}>
         New Experiment
       </Button>
       <Fab className={classes.fab} color="inherit" size="medium" aria-label="New experiment">

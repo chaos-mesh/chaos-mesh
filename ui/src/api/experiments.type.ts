@@ -9,6 +9,15 @@ export interface StateOfExperiments {
   finished: number
 }
 
+export enum StateOfExperimentsEnum {
+  total = 'total',
+  running = 'running',
+  waiting = 'waiting',
+  paused = 'paused',
+  failed = 'failed',
+  finished = 'finished',
+}
+
 export interface Experiment {
   Kind: string
   Namespace: string

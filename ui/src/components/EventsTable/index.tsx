@@ -17,7 +17,7 @@ import {
   Typography,
 } from '@material-ui/core'
 import React, { useCallback, useEffect, useState } from 'react'
-import { createStyles, makeStyles } from '@material-ui/core/styles'
+import { Theme, createStyles, makeStyles } from '@material-ui/core/styles'
 import day, { dayComparator } from 'lib/dayjs'
 
 import { Event } from 'api/events.type'
@@ -33,8 +33,9 @@ import SearchIcon from '@material-ui/icons/Search'
 import _debounce from 'lodash.debounce'
 import { searchEvents } from 'lib/search'
 import { usePrevious } from 'lib/hooks'
+import useRunningLabelStyles from 'lib/styles/runningLabel'
 
-const useStyles = makeStyles(() =>
+const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     tableContainer: {
       maxHeight: 768,
@@ -185,6 +186,8 @@ interface EventsTableRowProps {
 }
 
 const EventsTableRow: React.FC<EventsTableRowProps> = ({ event: e, detailed, noExperiment }) => {
+  const classes = useRunningLabelStyles()
+
   const [open, setOpen] = useState(false)
 
   const handleToggle = () => setOpen(!open)
@@ -196,7 +199,7 @@ const EventsTableRow: React.FC<EventsTableRowProps> = ({ event: e, detailed, noE
         <TableCell>{e.Namespace}</TableCell>
         <TableCell>{e.Kind}</TableCell>
         <TableCell>{format(e.StartTime)}</TableCell>
-        <TableCell>{e.FinishTime ? format(e.FinishTime) : 'Not Done'}</TableCell>
+        <TableCell>{e.FinishTime ? format(e.FinishTime) : <span className={classes.root}>Running</span>}</TableCell>
         {detailed && (
           <TableCell>
             <Button
@@ -221,9 +224,7 @@ const EventsTableRow: React.FC<EventsTableRowProps> = ({ event: e, detailed, noE
         <TableCell style={{ paddingTop: 0, paddingBottom: 0, borderBottom: 0 }} colSpan={12}>
           <Collapse in={open} timeout="auto" unmountOnExit>
             <Box my={6}>
-              <Typography variant="h6" gutterBottom>
-                Affected Pods
-              </Typography>
+              <Typography gutterBottom>Affected Pods</Typography>
               <Table size="small">
                 <TableHead>
                   <TableRow>
@@ -321,6 +322,9 @@ const EventsTable: React.FC<EventsTableProps> = ({
                 <SearchIcon color="primary" />
               </InputAdornment>
             ),
+          }}
+          inputProps={{
+            style: { paddingTop: 8, paddingBottom: 8 },
           }}
           onChange={handleSearchChange}
         />
