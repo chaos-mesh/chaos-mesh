@@ -427,8 +427,8 @@ func (e *eventStore) getUID(_ context.Context, ns, name string) (string, error) 
 func (e *eventStore) UpdateIncompleteEvents(_ context.Context, ns, name string) error {
 	return e.db.Model(core.Event{}).
 		Where(
-		"namespace = ? and experiment = ? and finish_time IS NULL",
-		ns, name ).
+			"namespace = ? and experiment = ? and finish_time IS NULL",
+			ns, name).
 		Update("finish_time", time.Now()).
 		Error
 }
