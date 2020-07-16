@@ -318,23 +318,18 @@ export default function ExperimentDetail() {
             </Paper>
             {eventDetailOpen && (
               <Paper
+                variant="outlined"
                 className={classes.eventDetailPaper}
                 style={{
                   zIndex: 3, // .MuiTableCell-stickyHeader z-index: 2
                 }}
               >
-                <PaperTop title="Event">
+                <PaperTop title="Event Detail">
                   <IconButton color="primary" onClick={closeEventDetail}>
                     <CloseIcon />
                   </IconButton>
                 </PaperTop>
-                {selectedEvent && !detailLoading ? (
-                  <Box ml={1.5} mb={3}>
-                    <EventDetail event={selectedEvent} />
-                  </Box>
-                ) : (
-                  <Loading />
-                )}
+                {selectedEvent && !detailLoading ? <EventDetail event={selectedEvent} /> : <Loading />}
               </Paper>
             )}
           </Box>
