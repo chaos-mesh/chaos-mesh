@@ -16,7 +16,7 @@ IOChaos allows you to simulate file system faults such as IO delay and read/writ
 
 ### Commands and arguments for the application container
 
-Chaos Mesh uses [`wait-fush.sh`](https://github.com/chaos-mesh/chaos-mesh/blob/master/doc/sidecar_configmap.md#tips) to ensure that the fuse-daemon server is running normally before the application starts.
+Chaos Mesh uses [`wait-fush.sh`](https://chaos-mesh.org/docs/user_guides/sidecar_template/#tips) to ensure that the fuse-daemon server is running normally before the application starts.
 
 Therefore, `wait-fush.sh` needs to be injected into the startup command of the container. If the application process is not started by the [commands and arguments of the container](https://kubernetes.io/docs/tasks/inject-data-application/define-command-argument-container/), IOChaos cannot work properly.
 
