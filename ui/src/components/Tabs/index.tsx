@@ -27,7 +27,7 @@ const VerticalTabs: React.FC<VerticalTabsProps> = ({ tabs, tabPanels, tabIndex: 
         })}
       </Tabs>
 
-      <Box flex={1} mt={3} px={3}>
+      <Box flex={1} mt={6} px={3}>
         {tabPanels.map((panel: React.ReactNode, index: number) => {
           return (
             <Box
