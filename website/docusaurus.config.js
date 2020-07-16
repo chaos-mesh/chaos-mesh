@@ -83,7 +83,7 @@ module.exports = {
           ],
         },
       ],
-      copyright: `Copyright © ${new Date().getFullYear()} PingCAP, Inc. Built with Docusaurus.`,
+      copyright: `Copyright © ${new Date().getFullYear()} Chaos Mesh Authors. Built with Docusaurus.`,
     },
   },
   presets: [
