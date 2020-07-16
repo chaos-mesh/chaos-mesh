@@ -488,6 +488,7 @@ func (s *Service) getPodChaosDetail(namespace string, name string) (ExperimentIn
 			Value: chaos.Spec.Value,
 		},
 		Target: TargetInfo{
+			Kind: v1alpha1.KindPodChaos,
 			PodChaos: PodChaosInfo{
 				Action:        string(chaos.Spec.Action),
 				ContainerName: chaos.Spec.ContainerName,
@@ -532,6 +533,7 @@ func (s *Service) getIoChaosDetail(namespace string, name string) (ExperimentInf
 			Value: chaos.Spec.Value,
 		},
 		Target: TargetInfo{
+			Kind: v1alpha1.KindIOChaos,
 			IOChaos: IOChaosInfo{
 				Action:  string(chaos.Spec.Action),
 				Addr:    chaos.Spec.Addr,
@@ -581,6 +583,7 @@ func (s *Service) getNetworkChaosDetail(namespace string, name string) (Experime
 			Value: chaos.Spec.Value,
 		},
 		Target: TargetInfo{
+			Kind: v1alpha1.KindNetworkChaos,
 			NetworkChaos: NetworkChaosInfo{
 				Action:    string(chaos.Spec.Action),
 				Delay:     chaos.Spec.Delay,
@@ -645,6 +648,7 @@ func (s *Service) getTimeChaosDetail(namespace string, name string) (ExperimentI
 			Value: chaos.Spec.Value,
 		},
 		Target: TargetInfo{
+			Kind: v1alpha1.KindTimeChaos,
 			TimeChaos: TimeChaosInfo{
 				TimeOffset:     chaos.Spec.TimeOffset,
 				ClockIDs:       chaos.Spec.ClockIds,
@@ -690,6 +694,7 @@ func (s *Service) getKernelChaosDetail(namespace string, name string) (Experimen
 			Value: chaos.Spec.Value,
 		},
 		Target: TargetInfo{
+			Kind: v1alpha1.KindKernelChaos,
 			KernelChaos: KernelChaosInfo{
 				FailKernRequest: chaos.Spec.FailKernRequest,
 			},
@@ -733,6 +738,7 @@ func (s *Service) getStressChaosDetail(namespace string, name string) (Experimen
 			Value: chaos.Spec.Value,
 		},
 		Target: TargetInfo{
+			Kind: v1alpha1.KindStressChaos,
 			StressChaos: StressChaosInfo{
 				Stressors:         chaos.Spec.Stressors,
 				StressngStressors: chaos.Spec.StressngStressors,

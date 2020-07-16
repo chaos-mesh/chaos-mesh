@@ -4,12 +4,7 @@ import { Field, getIn, useFormikContext } from 'formik'
 import { Experiment } from 'components/NewExperiment/types'
 import React from 'react'
 
-const SelectField: React.FC<TextFieldProps & { multiple?: boolean }> = ({
-  children,
-  fullWidth = true,
-  multiple = false,
-  ...props
-}) => {
+const SelectField: React.FC<TextFieldProps & { multiple?: boolean }> = ({ multiple = false, ...props }) => {
   const { values, setFieldValue } = useFormikContext<Experiment>()
 
   const onDelete = (val: string) => () =>
@@ -26,10 +21,9 @@ const SelectField: React.FC<TextFieldProps & { multiple?: boolean }> = ({
             {(selected as string[]).map((val) => (
               <Box key={val} m={0.5}>
                 <Chip
+                  style={{ height: 24 }}
                   label={val}
                   color="primary"
-                  style={{ height: 24 }}
-                  clickable
                   onDelete={onDelete(val)}
                   onMouseDown={(e) => e.stopPropagation()}
                 />
@@ -42,17 +36,7 @@ const SelectField: React.FC<TextFieldProps & { multiple?: boolean }> = ({
 
   return (
     <Box mb={2}>
-      <Field
-        as={TextField}
-        select
-        margin="dense"
-        fullWidth={fullWidth}
-        variant="outlined"
-        SelectProps={SelectProps}
-        {...props}
-      >
-        {children}
-      </Field>
+      <Field {...props} as={TextField} variant="outlined" select margin="dense" fullWidth SelectProps={SelectProps} />
     </Box>
   )
 }

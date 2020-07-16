@@ -1,27 +1,38 @@
+import { AutocompleteMultipleField, SelectField, TextField } from 'components/FormField'
 import { InputAdornment, MenuItem } from '@material-ui/core'
 import React, { useMemo } from 'react'
-import { SelectField, TextField } from 'components/FormField'
-import { joinObjKVs, upperFirst } from 'lib/utils'
+import { RootState, useStoreDispatch } from 'store'
+import { getAnnotations, getLabels } from 'slices/experiments'
+import { joinObjKVs, toTitleCase } from 'lib/utils'
 
 import AdvancedOptions from 'components/AdvancedOptions'
 import { Experiment } from '../types'
 import { useFormikContext } from 'formik'
+import { useSelector } from 'react-redux'
 
 interface ScopeStepProps {
   namespaces: string[]
-  labels: { [key: string]: string[] }
-  annotations: { [key: string]: string[] }
 }
 
 const phases = ['all', 'pending', 'running', 'succeeded', 'failed', 'unknown']
-const modes = ['all', { name: 'Random one', value: 'one' }, 'fixed number', 'fixed percent', 'random max percent']
+const modes = ['all', { name: 'Random One', value: 'one' }, 'fixed number', 'fixed percent', 'random max percent']
 const modesWithAdornment = ['fixed-percent', 'random-max-percent']
 
-const ScopeStep: React.FC<ScopeStepProps> = ({ namespaces, labels, annotations }) => {
+const ScopeStep: React.FC<ScopeStepProps> = ({ namespaces }) => {
   const { values, handleChange } = useFormikContext<Experiment>()
+
+  const { labels, annotations } = useSelector((state: RootState) => state.experiments)
+  const storeDispatch = useStoreDispatch()
 
   const labelKVs = useMemo(() => joinObjKVs(labels, ': '), [labels])
   const annotationKVs = useMemo(() => joinObjKVs(annotations, ': '), [annotations])
+
+  const handleNamespaceSelectorsChangeCallback = (labels: string[]) => {
+    const _labels = labels.length !== 0 ? labels : namespaces
+
+    storeDispatch(getLabels(_labels.join(',')))
+    storeDispatch(getAnnotations(_labels.join(',')))
+  }
 
   const handleChangeIncludeAll = (id: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
     const lastValues = id.split('.').reduce((acc, cur) => acc[cur], values as any)
@@ -40,39 +51,28 @@ const ScopeStep: React.FC<ScopeStepProps> = ({ namespaces, labels, annotations }
 
   return (
     <>
-      <SelectField
+      <AutocompleteMultipleField
         id="scope.namespace_selectors"
         name="scope.namespace_selectors"
         label="Namespace Selectors"
         helperText="Multiple options"
-        multiple
-      >
-        {namespaces.map((option: string) => (
-          <MenuItem key={option} value={option}>
-            {option}
-          </MenuItem>
-        ))}
-      </SelectField>
+        options={namespaces}
+        onChangeCallback={handleNamespaceSelectorsChangeCallback}
+      />
 
-      <SelectField
+      <AutocompleteMultipleField
         id="scope.label_selectors"
         name="scope.label_selectors"
         label="Label Selectors"
         helperText="Multiple options"
-        multiple
-      >
-        {labelKVs.map((option: string) => (
-          <MenuItem key={option} value={option}>
-            {option}
-          </MenuItem>
-        ))}
-      </SelectField>
+        options={labelKVs}
+      />
 
-      <SelectField id="scope.mode" name="scope.mode" label="Mode" helperText="Select a mode">
+      <SelectField id="scope.mode" name="scope.mode" label="Mode" helperText="Select the experiment mode">
         {modes.map((option) =>
           typeof option === 'string' ? (
             <MenuItem key={option} value={option.split(' ').join('-')}>
-              {upperFirst(option)}
+              {toTitleCase(option)}
             </MenuItem>
           ) : (
             <MenuItem key={option.value} value={option.value}>
@@ -97,19 +97,13 @@ const ScopeStep: React.FC<ScopeStepProps> = ({ namespaces, labels, annotations }
       )}
 
       <AdvancedOptions>
-        <SelectField
+        <AutocompleteMultipleField
           id="scope.annotation_selectors"
           name="scope.annotation_selectors"
           label="Annotation Selectors"
           helperText="Multiple options"
-          multiple
-        >
-          {annotationKVs.map((option: string) => (
-            <MenuItem key={option} value={option}>
-              {option}
-            </MenuItem>
-          ))}
-        </SelectField>
+          options={annotationKVs}
+        />
 
         <SelectField
           id="scope.phase_selectors"
@@ -121,7 +115,7 @@ const ScopeStep: React.FC<ScopeStepProps> = ({ namespaces, labels, annotations }
         >
           {phases.map((option: string) => (
             <MenuItem key={option} value={option}>
-              {upperFirst(option)}
+              {toTitleCase(option)}
             </MenuItem>
           ))}
         </SelectField>
