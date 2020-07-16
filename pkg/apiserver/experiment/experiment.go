@@ -738,7 +738,7 @@ func (s *Service) getStressChaosDetail(namespace string, name string) (Experimen
 			Value: chaos.Spec.Value,
 		},
 		Target: TargetInfo{
-			Kind: v1alpha1.KindKernelChaos,
+			Kind: v1alpha1.KindStressChaos,
 			StressChaos: &StressChaosInfo{
 				Stressors:         chaos.Spec.Stressors,
 				StressngStressors: chaos.Spec.StressngStressors,
