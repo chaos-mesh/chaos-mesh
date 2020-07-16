@@ -2,15 +2,19 @@ import { ChaosKindKeyMap, resetOtherChaos } from 'lib/formikhelpers'
 import React, { useEffect, useState } from 'react'
 
 import { Experiment } from 'components/NewExperiment/types'
+import IO from './IO'
+import Kernel from './Kernel'
 import Network from './Network'
 import Pod from './Pod'
+import Stress from './Stress'
 import Tabs from 'components/Tabs'
+import Time from './Time'
 import { useFormikContext } from 'formik'
 
 const tabs = [
   { label: 'Pod Lifecycle' },
   { label: 'Network' },
-  { label: 'File system I/O' },
+  { label: 'File System I/O' },
   { label: 'Linux Kernel' },
   { label: 'Clock' },
   { label: 'Stress CPU/Memory' },
@@ -36,6 +40,10 @@ const Target: React.FC = () => {
   const tabPanels = [
     <Pod {...formikCtx} handleActionChange={handleActionChange('PodChaos')} />,
     <Network {...formikCtx} handleActionChange={handleActionChange('NetworkChaos')} />,
+    <IO {...formikCtx} handleActionChange={handleActionChange('IoChaos')} />,
+    <Kernel {...formikCtx} />,
+    <Time {...formikCtx} />,
+    <Stress {...formikCtx} />,
   ]
 
   const props = {
