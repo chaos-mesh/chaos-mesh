@@ -186,7 +186,7 @@ interface EventsTableRowProps {
 }
 
 const EventsTableRow: React.FC<EventsTableRowProps> = ({ event: e, detailed, noExperiment }) => {
-  const classes = useRunningLabelStyles()
+  const runningLabel = useRunningLabelStyles()
 
   const [open, setOpen] = useState(false)
 
@@ -199,7 +199,9 @@ const EventsTableRow: React.FC<EventsTableRowProps> = ({ event: e, detailed, noE
         <TableCell>{e.Namespace}</TableCell>
         <TableCell>{e.Kind}</TableCell>
         <TableCell>{format(e.StartTime)}</TableCell>
-        <TableCell>{e.FinishTime ? format(e.FinishTime) : <span className={classes.root}>Running</span>}</TableCell>
+        <TableCell>
+          {e.FinishTime ? format(e.FinishTime) : <span className={runningLabel.root}>Running</span>}
+        </TableCell>
         {detailed && (
           <TableCell>
             <Button

@@ -24,6 +24,7 @@ import api from 'api'
 import genEventsChart from 'lib/d3/eventsChart'
 import { getStateofExperiments } from 'slices/experiments'
 import { toTitleCase } from 'lib/utils'
+import useErrorButtonStyles from 'lib/styles/errorButton'
 import { usePrevious } from 'lib/hooks'
 import { useStoreDispatch } from 'store'
 
@@ -74,6 +75,7 @@ const useStyles = makeStyles((theme: Theme) =>
 
 export default function ExperimentDetail() {
   const classes = useStyles()
+  const errorButton = useErrorButtonStyles()
 
   const history = useHistory()
   const { search } = history.location
@@ -267,9 +269,9 @@ export default function ExperimentDetail() {
             <Box display="flex">
               <Box mr={3}>
                 <Button
+                  className={errorButton.root}
                   variant="outlined"
                   size="small"
-                  color="secondary"
                   startIcon={<DeleteOutlineIcon />}
                   onClick={handleAction('delete')}
                 >

@@ -5,7 +5,9 @@ import { Theme, createStyles, makeStyles } from '@material-ui/core/styles'
 
 import NewExperiment from 'components/NewExperiment'
 import { StateOfExperiments } from 'api/experiments.type'
+import clsx from 'clsx'
 import { getStateofExperiments } from 'slices/experiments'
+import useErrorButtonStyles from 'lib/styles/errorButton'
 import { useSelector } from 'react-redux'
 
 const useStyles = makeStyles((theme: Theme) => {
@@ -49,11 +51,13 @@ const useStyles = makeStyles((theme: Theme) => {
 })
 
 interface CurrentStatusProps {
-  classes: Record<'currentStatus' | 'statusButton', string>
   state: StateOfExperiments
 }
 
-export const CurrentStatus: React.FC<CurrentStatusProps> = ({ classes, state }) => {
+export const CurrentStatus: React.FC<CurrentStatusProps> = ({ state }) => {
+  const classes = useStyles()
+  const errorButton = useErrorButtonStyles()
+
   const data = [
     {
       label: 'Running',
@@ -67,14 +71,20 @@ export const CurrentStatus: React.FC<CurrentStatusProps> = ({ classes, state }) 
     {
       label: 'Failed',
       value: state.failed,
-      color: 'secondary' as 'secondary',
+      className: errorButton.root,
     },
   ]
 
   return (
     <Box className={classes.currentStatus}>
       {data.map((d) => (
-        <Button key={d.label} className={classes.statusButton} variant="outlined" size="small" color={d.color}>
+        <Button
+          key={d.label}
+          className={clsx(classes.statusButton, d.className)}
+          variant="outlined"
+          size="small"
+          color={d.color}
+        >
           {d.label}: {d.value}
         </Button>
       ))}
@@ -102,7 +112,7 @@ const StatusBar = () => {
       <Toolbar className={classes.toolbar}>
         <NewExperiment />
 
-        <CurrentStatus classes={classes} state={stateOfExperiments} />
+        <CurrentStatus state={stateOfExperiments} />
       </Toolbar>
     </Paper>
   )

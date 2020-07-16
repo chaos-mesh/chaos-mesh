@@ -63,7 +63,7 @@ export default function Overview() {
       <Grow in={!loading} style={{ transformOrigin: '0 0 0' }}>
         <Grid container spacing={3}>
           <Grid item xs={12} md={4}>
-            <Paper>
+            <Paper variant="outlined">
               <PaperTop title="Total Experiments" />
               <div ref={chaosChartRef} className={classes.chaosChart} />
             </Paper>
