@@ -23,8 +23,8 @@ import (
 
 	"github.com/ghodss/yaml"
 
-	"github.com/pingcap/chaos-mesh/controllers/metrics"
-	"github.com/pingcap/chaos-mesh/pkg/webhook/config"
+	"github.com/chaos-mesh/chaos-mesh/controllers/metrics"
+	"github.com/chaos-mesh/chaos-mesh/pkg/webhook/config"
 
 	ctrl "sigs.k8s.io/controller-runtime"
 

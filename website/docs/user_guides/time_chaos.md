@@ -13,7 +13,7 @@ TimeChaos is used to modify the return value of `clock_gettime`, which causes ti
 Below is a sample TimeChaos configuration file:
 
 ```yaml
-apiVersion: pingcap.com/v1alpha1
+apiVersion: chaos-mesh.org/v1alpha1
 kind: TimeChaos
 metadata:
   name: time-shift-example
@@ -33,7 +33,7 @@ spec:
     cron: "@every 15s"
 ```
 
-For more sample files, see [examples](https://github.com/pingcap/chaos-mesh/tree/master/examples). You can edit them as needed.
+For more sample files, see [examples](https://github.com/chaos-mesh/chaos-mesh/tree/master/examples). You can edit them as needed.
 
 Description:
 

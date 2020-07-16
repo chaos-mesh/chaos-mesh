@@ -18,7 +18,7 @@ import (
 
 	"github.com/kelseyhightower/envconfig"
 
-	"github.com/pingcap/chaos-mesh/pkg/webhook/config/watcher"
+	"github.com/chaos-mesh/chaos-mesh/pkg/webhook/config/watcher"
 )
 
 // ChaosControllerConfig defines the configuration for Chaos Controller

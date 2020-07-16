@@ -20,9 +20,9 @@ import (
 
 	"github.com/go-logr/logr"
 
-	"github.com/pingcap/chaos-mesh/pkg/mapreader"
-	"github.com/pingcap/chaos-mesh/pkg/mock"
-	"github.com/pingcap/chaos-mesh/pkg/ptrace"
+	"github.com/chaos-mesh/chaos-mesh/pkg/mapreader"
+	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
+	"github.com/chaos-mesh/chaos-mesh/pkg/ptrace"
 
 	ctrl "sigs.k8s.io/controller-runtime"
 )

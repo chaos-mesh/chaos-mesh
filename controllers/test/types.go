@@ -23,9 +23,9 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 
-	chaosdaemon "github.com/pingcap/chaos-mesh/pkg/chaosdaemon/pb"
-	"github.com/pingcap/chaos-mesh/pkg/mock"
-	"github.com/pingcap/chaos-mesh/pkg/utils"
+	chaosdaemon "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
+	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
+	"github.com/chaos-mesh/chaos-mesh/pkg/utils"
 )
 
 // Assert *MockChaosDaemonClient implements chaosdaemon.ChaosDaemonClientInterface.

@@ -21,7 +21,7 @@ import (
 
 	"github.com/golang/protobuf/ptypes/empty"
 
-	pb "github.com/pingcap/chaos-mesh/pkg/chaosdaemon/pb"
+	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
 )
 
 func (s *daemonServer) SetTbf(ctx context.Context, in *pb.TbfRequest) (*empty.Empty, error) {

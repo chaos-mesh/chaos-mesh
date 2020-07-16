@@ -12,15 +12,15 @@ The first step is always to deploy a testing cluster. For illustration purposes,
 
 You can follow the instructions in the following two documents to deploy a TiDB cluster:
 
-* [Deploy using kind](https://docs.pingcap.com/tidb-in-kubernetes/v1.1/get-started#create-a-kubernetes-cluster-using-kind/)
-* [Deploy using Minikube](https://docs.pingcap.com/tidb-in-kubernetes/v1.1/get-started#create-a-kubernetes-cluster-using-minikube/)
+* [Deploy using kind](https://docs.chaos-mesh.org/tidb-in-kubernetes/v1.1/get-started#create-a-kubernetes-cluster-using-kind/)
+* [Deploy using Minikube](https://docs.chaos-mesh.org/tidb-in-kubernetes/v1.1/get-started#create-a-kubernetes-cluster-using-minikube/)
 
 ## Step 2: Define the experiment configuration file
 
 The chaos experiment configuration is defined in a YAML file. You need to create your own experiment configuration file based on the available fields in the sample below:
 
 ```yaml
-apiVersion: pingcap.com/v1alpha1
+apiVersion: chaos-mesh.org/v1alpha1
 kind: PodChaos
 metadata:
   name: pod-failure-example

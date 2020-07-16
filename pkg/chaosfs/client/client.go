@@ -14,7 +14,7 @@
 package client
 
 import (
-	chaosfs "github.com/pingcap/chaos-mesh/pkg/chaosfs/pb"
+	chaosfs "github.com/chaos-mesh/chaos-mesh/pkg/chaosfs/pb"
 
 	"google.golang.org/grpc"
 )
