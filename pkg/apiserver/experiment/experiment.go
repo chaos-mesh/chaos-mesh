@@ -164,7 +164,7 @@ func (s *SelectorInfo) ParseSelector() v1alpha1.SelectorSpec {
 
 // TargetInfo defines the information of target objects.
 type TargetInfo struct {
-	Kind         string           `json:"kind" binding:"required,oneof=PodChaos NetworkChaos IoChaos KernelChaos TimeChaos StressChaos"`
+	Kind         string            `json:"kind" binding:"required,oneof=PodChaos NetworkChaos IoChaos KernelChaos TimeChaos StressChaos"`
 	PodChaos     *PodChaosInfo     `json:"pod_chaos,omitempty"`
 	NetworkChaos *NetworkChaosInfo `json:"network_chaos,omitempty"`
 	IOChaos      *IOChaosInfo      `json:"io_chaos,omitempty"`
