@@ -21,7 +21,7 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	pb "github.com/pingcap/chaos-mesh/pkg/chaosfs/pb"
+	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosfs/pb"
 )
 
 var _ = Describe("server", func() {

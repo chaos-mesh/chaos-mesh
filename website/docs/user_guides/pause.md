@@ -15,7 +15,7 @@ Resume a paused experiment means running the chaos experiment again with the sam
 Below is a sample configuration file of PodChaos:
 
 ```yaml
-apiVersion: pingcap.com/v1alpha1
+apiVersion: chaos-mesh.org/v1alpha1
 kind: PodChaos
 metadata:
   name: pod-kill-example
@@ -81,8 +81,8 @@ spec:
 2. Pause the running chaos:
 
     ```shell
-    $  kubectl annotate podchaos pod-kill-example --namespace chaos-testing experiment.pingcap.com/pause=true
-    podchaos.pingcap.com/pod-kill-example annotated
+    $  kubectl annotate podchaos pod-kill-example --namespace chaos-testing experiment.chaos-mesh.org/pause=true
+    podchaos.chaos-mesh.org/pod-kill-example annotated
     $ kubectl get podchaos pod-kill-example --namespace chaos-testing --output yaml \
     && kubectl get pods --namespace chaos-testing
     ```
@@ -93,7 +93,7 @@ spec:
     ...
     metadata:
       annotations:
-        experiment.pingcap.com/pause: "true"
+        experiment.chaos-mesh.org/pause: "true"
     ...
     spec:
       action: pod-kill
@@ -133,8 +133,8 @@ spec:
 3. Resume this chaos:
 
     ```shell
-    $ kubectl annotate podchaos pod-kill-example --namespace chaos-testing experiment.pingcap.com/pause-
-    podchaos.pingcap.com/pod-kill-example annotated
+    $ kubectl annotate podchaos pod-kill-example --namespace chaos-testing experiment.chaos-mesh.org/pause-
+    podchaos.chaos-mesh.org/pod-kill-example annotated
     ```
 
     The output is like this:

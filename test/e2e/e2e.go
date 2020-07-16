@@ -30,8 +30,8 @@ import (
 	e2epod "k8s.io/kubernetes/test/e2e/framework/pod"
 	utilnet "k8s.io/utils/net"
 
-	"github.com/pingcap/chaos-mesh/test"
-	e2econfig "github.com/pingcap/chaos-mesh/test/e2e/config"
+	"github.com/chaos-mesh/chaos-mesh/test"
+	e2econfig "github.com/chaos-mesh/chaos-mesh/test/e2e/config"
 
 	// ensure auth plugins are loaded
 	_ "k8s.io/client-go/plugin/pkg/client/auth"

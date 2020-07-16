@@ -18,7 +18,7 @@ import (
 
 	. "github.com/onsi/gomega"
 
-	chaosdaemonpb "github.com/pingcap/chaos-mesh/pkg/chaosdaemon/pb"
+	chaosdaemonpb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
 )
 
 func TestMergeNetem(t *testing.T) {

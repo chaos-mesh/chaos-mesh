@@ -22,9 +22,9 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/pingcap/chaos-mesh/api/v1alpha1"
-	"github.com/pingcap/chaos-mesh/controllers/networkchaos"
-	"github.com/pingcap/chaos-mesh/pkg/utils"
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/controllers/networkchaos"
+	"github.com/chaos-mesh/chaos-mesh/pkg/utils"
 )
 
 // NetworkChaosReconciler reconciles a NetworkChaos object
@@ -34,8 +34,8 @@ type NetworkChaosReconciler struct {
 	Log logr.Logger
 }
 
-// +kubebuilder:rbac:groups=pingcap.com,resources=networkchaos,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups=pingcap.com,resources=networkchaos/status,verbs=get;update;patch
+// +kubebuilder:rbac:groups=chaos-mesh.org,resources=networkchaos,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=chaos-mesh.org,resources=networkchaos/status,verbs=get;update;patch
 
 // Reconcile reconciles a NetworkChaos resource
 func (r *NetworkChaosReconciler) Reconcile(req ctrl.Request) (result ctrl.Result, err error) {

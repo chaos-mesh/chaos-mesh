@@ -43,9 +43,9 @@ OPTIONS:
     -l, --local [kind]       Choose a way to run a local kubernetes cluster, supported value: kind,
                              If this value is not set and the Kubernetes is not installed, this script will exit with 1.
     -n, --name               Name of Kubernetes cluster, default value: kind
-    -c  --crd                The URL of the crd files, default value: https://raw.githubusercontent.com/pingcap/chaos-mesh/master/manifests/crd.yaml
+    -c  --crd                The URL of the crd files, default value: https://raw.githubusercontent.com/chaos-mesh/chaos-mesh/master/manifests/crd.yaml
     -r  --runtime            Runtime specifies which container runtime to use. Currently we only supports docker and containerd. default value: docker
-    -f  --chaosfs-sidecar    The URL of the chaosfs sidecar configmap files, default value: https://raw.githubusercontent.com/pingcap/chaos-mesh/master/manifests/chaosfs-sidecar.yaml
+    -f  --chaosfs-sidecar    The URL of the chaosfs sidecar configmap files, default value: https://raw.githubusercontent.com/chaos-mesh/chaos-mesh/master/manifests/chaosfs-sidecar.yaml
         --kind-version       Version of the Kind tool, default value: v0.7.0
         --node-num           The count of the cluster nodes,default value: 3
         --k8s-version        Version of the Kubernetes cluster,default value: v1.17.2
@@ -72,8 +72,8 @@ main() {
     local docker_mirror=false
     local volume_provisioner=false
     local local_registry=false
-    local crd="https://raw.githubusercontent.com/pingcap/chaos-mesh/master/manifests/crd.yaml"
-    local chaosfs="https://raw.githubusercontent.com/pingcap/chaos-mesh/master/manifests/chaosfs-sidecar.yaml"
+    local crd="https://raw.githubusercontent.com/chaos-mesh/chaos-mesh/master/manifests/crd.yaml"
+    local chaosfs="https://raw.githubusercontent.com/chaos-mesh/chaos-mesh/master/manifests/chaosfs-sidecar.yaml"
     local runtime="docker"
     local template=false
     local sidecar_template=true
@@ -957,7 +957,7 @@ rules:
 - apiGroups: ["admissionregistration.k8s.io"]
   resources: ["mutatingwebhookconfigurations","validatingwebhookconfigurations"]
   verbs: ["get", "create", "delete", "update", "patch"]
-- apiGroups: ["pingcap.com"]
+- apiGroups: ["chaos-mesh.org"]
   resources:
     - podchaos
     - networkchaos
@@ -1224,7 +1224,7 @@ metadata:
     app.kubernetes.io/instance: chaos-mesh
     app.kubernetes.io/component: admission-webhook
 webhooks:
-  - name: admission-webhook.pingcap.com
+  - name: admission-webhook.chaos-mesh.org
     clientConfig:
       caBundle: "${CA_BUNDLE}"
       service:
@@ -1245,12 +1245,12 @@ webhooks:
       service:
         name: chaos-mesh-controller-manager
         namespace: chaos-testing
-        path: /mutate-pingcap-com-v1alpha1-podchaos
+        path: /mutate-chaos-mesh-org-v1alpha1-podchaos
     failurePolicy: Fail
     name: mpodchaos.kb.io
     rules:
       - apiGroups:
-          - pingcap.com
+          - chaos-mesh.org
         apiVersions:
           - v1alpha1
         operations:
@@ -1263,12 +1263,12 @@ webhooks:
       service:
         name: chaos-mesh-controller-manager
         namespace: chaos-testing
-        path: /mutate-pingcap-com-v1alpha1-iochaos
+        path: /mutate-chaos-mesh-org-v1alpha1-iochaos
     failurePolicy: Fail
     name: miochaos.kb.io
     rules:
       - apiGroups:
-          - pingcap.com
+          - chaos-mesh.org
         apiVersions:
           - v1alpha1
         operations:
@@ -1281,12 +1281,12 @@ webhooks:
       service:
         name: chaos-mesh-controller-manager
         namespace: chaos-testing
-        path: /mutate-pingcap-com-v1alpha1-timechaos
+        path: /mutate-chaos-mesh-org-v1alpha1-timechaos
     failurePolicy: Fail
     name: mtimechaos.kb.io
     rules:
       - apiGroups:
-          - pingcap.com
+          - chaos-mesh.org
         apiVersions:
           - v1alpha1
         operations:
@@ -1299,12 +1299,12 @@ webhooks:
       service:
         name: chaos-mesh-controller-manager
         namespace: chaos-testing
-        path: /mutate-pingcap-com-v1alpha1-networkchaos
+        path: /mutate-chaos-mesh-org-v1alpha1-networkchaos
     failurePolicy: Fail
     name: mnetworkchaos.kb.io
     rules:
       - apiGroups:
-          - pingcap.com
+          - chaos-mesh.org
         apiVersions:
           - v1alpha1
         operations:
@@ -1317,12 +1317,12 @@ webhooks:
       service:
         name: chaos-mesh-controller-manager
         namespace: chaos-testing
-        path: /mutate-pingcap-com-v1alpha1-kernelchaos
+        path: /mutate-chaos-mesh-org-v1alpha1-kernelchaos
     failurePolicy: Fail
     name: mkernelchaos.kb.io
     rules:
       - apiGroups:
-          - pingcap.com
+          - chaos-mesh.org
         apiVersions:
           - v1alpha1
         operations:
@@ -1335,12 +1335,12 @@ webhooks:
       service:
         name: chaos-mesh-controller-manager
         namespace: chaos-testing
-        path: /mutate-pingcap-com-v1alpha1-stresschaos
+        path: /mutate-chaos-mesh-org-v1alpha1-stresschaos
     failurePolicy: Fail
     name: mstresschaos.kb.io
     rules:
       - apiGroups:
-          - pingcap.com
+          - chaos-mesh.org
         apiVersions:
           - v1alpha1
         operations:
@@ -1364,12 +1364,12 @@ webhooks:
       service:
         name: chaos-mesh-controller-manager
         namespace: chaos-testing
-        path: /validate-pingcap-com-v1alpha1-podchaos
+        path: /validate-chaos-mesh-org-v1alpha1-podchaos
     failurePolicy: Fail
     name: vpodchaos.kb.io
     rules:
       - apiGroups:
-          - pingcap.com
+          - chaos-mesh.org
         apiVersions:
           - v1alpha1
         operations:
@@ -1382,12 +1382,12 @@ webhooks:
       service:
         name: chaos-mesh-controller-manager
         namespace: chaos-testing
-        path: /validate-pingcap-com-v1alpha1-iochaos
+        path: /validate-chaos-mesh-org-v1alpha1-iochaos
     failurePolicy: Fail
     name: viochaos.kb.io
     rules:
       - apiGroups:
-          - pingcap.com
+          - chaos-mesh.org
         apiVersions:
           - v1alpha1
         operations:
@@ -1400,12 +1400,12 @@ webhooks:
       service:
         name: chaos-mesh-controller-manager
         namespace: chaos-testing
-        path: /validate-pingcap-com-v1alpha1-timechaos
+        path: /validate-chaos-mesh-org-v1alpha1-timechaos
     failurePolicy: Fail
     name: vtimechaos.kb.io
     rules:
       - apiGroups:
-          - pingcap.com
+          - chaos-mesh.org
         apiVersions:
           - v1alpha1
         operations:
@@ -1418,12 +1418,12 @@ webhooks:
       service:
         name: chaos-mesh-controller-manager
         namespace: chaos-testing
-        path: /validate-pingcap-com-v1alpha1-networkchaos
+        path: /validate-chaos-mesh-org-v1alpha1-networkchaos
     failurePolicy: Fail
     name: vnetworkchaos.kb.io
     rules:
       - apiGroups:
-          - pingcap.com
+          - chaos-mesh.org
         apiVersions:
           - v1alpha1
         operations:
@@ -1436,12 +1436,12 @@ webhooks:
       service:
         name: chaos-mesh-controller-manager
         namespace: chaos-testing
-        path: /validate-pingcap-com-v1alpha1-kernelchaos
+        path: /validate-chaos-mesh-org-v1alpha1-kernelchaos
     failurePolicy: Fail
     name: vkernelchaos.kb.io
     rules:
       - apiGroups:
-          - pingcap.com
+          - chaos-mesh.org
         apiVersions:
           - v1alpha1
         operations:
@@ -1454,12 +1454,12 @@ webhooks:
       service:
         name: chaos-mesh-controller-manager
         namespace: chaos-testing
-        path: /validate-pingcap-com-v1alpha1-stresschaos
+        path: /validate-chaos-mesh-org-v1alpha1-stresschaos
     failurePolicy: Fail
     name: vstresschaos.kb.io
     rules:
       - apiGroups:
-          - pingcap.com
+          - chaos-mesh.org
         apiVersions:
           - v1alpha1
         operations:

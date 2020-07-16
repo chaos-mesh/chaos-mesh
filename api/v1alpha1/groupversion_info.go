@@ -13,7 +13,7 @@
 
 // Package v1alpha1 contains API Schema definitions for the chaosmesh v1alpha1 API group
 // +kubebuilder:object:generate=true
-// +groupName=pingcap.com
+// +groupName=chaos-mesh.org
 package v1alpha1
 
 import (
@@ -23,7 +23,7 @@ import (
 
 var (
 	// GroupVersion is group version used to register these objects
-	GroupVersion = schema.GroupVersion{Group: "pingcap.com", Version: "v1alpha1"}
+	GroupVersion = schema.GroupVersion{Group: "chaos-mesh.org", Version: "v1alpha1"}
 
 	// SchemeBuilder is used to add go types to the GroupVersionKind scheme
 	SchemeBuilder = &scheme.Builder{GroupVersion: GroupVersion}

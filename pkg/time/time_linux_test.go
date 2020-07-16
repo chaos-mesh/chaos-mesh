@@ -24,7 +24,7 @@ import (
 	. "github.com/onsi/gomega"
 	"sigs.k8s.io/controller-runtime/pkg/envtest"
 
-	"github.com/pingcap/chaos-mesh/test/pkg/timer"
+	"github.com/chaos-mesh/chaos-mesh/test/pkg/timer"
 )
 
 func TestModifyTime(t *testing.T) {

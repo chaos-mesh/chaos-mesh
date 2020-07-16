@@ -16,7 +16,7 @@ package chaosdaemon
 import (
 	"github.com/vishvananda/netlink"
 
-	pb "github.com/pingcap/chaos-mesh/pkg/chaosdaemon/pb"
+	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
 )
 
 func ToNetlinkNetemAttrs(netem *pb.Netem) netlink.NetemQdiscAttrs {
