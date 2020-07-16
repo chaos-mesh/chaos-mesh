@@ -5,7 +5,6 @@ const searchRegex = /(namespace:\S+)?\s?(kind:\S+)?\s?(time:\d{1,4}-\d{1,2}-\d{1
 
 function parseSearch(search: string) {
   const matches = search.match(searchRegex)!
-  console.log(matches)
   const namespace = matches[1] ? matches[1].split(':')[1].toLowerCase() : undefined
   const kind = matches[2] ? matches[2].split(':')[1].toLowerCase() : undefined
   const time = matches[3] ? matches[3].split(':')[1].toLowerCase() : undefined

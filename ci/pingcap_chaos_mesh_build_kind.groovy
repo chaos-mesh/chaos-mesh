@@ -102,9 +102,9 @@ def build(String name, String code) {
 		node(POD_LABEL) {
 			container('main') {
 				def WORKSPACE = pwd()
-				def ARTIFACTS = "${WORKSPACE}/go/src/github.com/pingcap/chaos-mesh/_artifacts"
+				def ARTIFACTS = "${WORKSPACE}/go/src/github.com/chaos-mesh/chaos-mesh/_artifacts"
 				try {
-					dir("${WORKSPACE}/go/src/github.com/pingcap/chaos-mesh") {
+					dir("${WORKSPACE}/go/src/github.com/chaos-mesh/chaos-mesh") {
 						unstash 'chaos-mesh'
 						stage("Debug Info") {
 							println "debug host: 172.16.5.15"
@@ -170,7 +170,7 @@ def call(BUILD_BRANCH, CREDENTIALS_ID) {
 	def GITHASH
 	def UCLOUD_OSS_URL = "http://pingcap-dev.hk.ufileos.com"
 	def BUILD_URL = "git@github.com:pingcap/chaos-mesh.git"
-	def PROJECT_DIR = "go/src/github.com/pingcap/chaos-mesh"
+	def PROJECT_DIR = "go/src/github.com/chaos-mesh/chaos-mesh"
 
 	catchError {
 		node('build_go1130_memvolume') {
@@ -224,7 +224,7 @@ def call(BUILD_BRANCH, CREDENTIALS_ID) {
 		}
 
 		def GLOBALS = "SKIP_BUILD=y IMAGE_TAG=${GITHASH} GINKGO_NO_COLOR=y"
-		def artifacts = "go/src/github.com/pingcap/chaos-mesh/artifacts"
+		def artifacts = "go/src/github.com/chaos-mesh/chaos-mesh/artifacts"
 		def builds = [:]
 		builds["E2E v1.12.10"] = {
                 build("v1.12", "${GLOBALS} GINKGO_NODES=6 KUBE_VERSION=v1.12.10 ./hack/e2e.sh -- --ginkgo.focus='Basic'")

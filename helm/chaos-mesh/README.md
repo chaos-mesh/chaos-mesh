@@ -1,10 +1,10 @@
 # Chaos Mesh
 
-[Chaos Mesh](https://github.com/pingcap/chaos-mesh) is a cloud-native Chaos Engineering platform that orchestrates chaos on Kubernetes environments.
+[Chaos Mesh](https://github.com/chaos-mesh/chaos-mesh) is a cloud-native Chaos Engineering platform that orchestrates chaos on Kubernetes environments.
 
 ## Introduction
 
-This chart bootstraps a [Chaos Mesh](https://github.com/pingcap/chaos-mesh) deployment on a [Kubernetes](http://kubernetes.io) cluster using the [Helm](https://helm.sh) package manager.
+This chart bootstraps a [Chaos Mesh](https://github.com/chaos-mesh/chaos-mesh) deployment on a [Kubernetes](http://kubernetes.io) cluster using the [Helm](https://helm.sh) package manager.
 
 ## Deploy
 

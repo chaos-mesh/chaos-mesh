@@ -68,12 +68,12 @@ webhooks:
       service:
         name: {{ template "chaos-mesh.svc" $ }}
         namespace: {{ $.Release.Namespace }}
-        path: /mutate-pingcap-com-v1alpha1-{{ $crd }}
+        path: /mutate-chaos-mesh-org-v1alpha1-{{ $crd }}
     failurePolicy: Fail
     name: m{{ $crd }}.kb.io
     rules:
       - apiGroups:
-          - pingcap.com
+          - chaos-mesh.org
         apiVersions:
           - v1alpha1
         operations:
@@ -109,12 +109,12 @@ webhooks:
       service:
         name: {{ template "chaos-mesh.svc" $ }}
         namespace: {{ $.Release.Namespace }}
-        path: /validate-pingcap-com-v1alpha1-{{ $crd }}
+        path: /validate-chaos-mesh-org-v1alpha1-{{ $crd }}
     failurePolicy: Fail
     name: v{{ $crd }}.kb.io
     rules:
       - apiGroups:
-          - pingcap.com
+          - chaos-mesh.org
         apiVersions:
           - v1alpha1
         operations:

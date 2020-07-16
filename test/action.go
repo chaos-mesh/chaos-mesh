@@ -1,4 +1,4 @@
-// Copyright 2020 PingCAP, Inc.
+// Copyright 2020 Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ import (
 	"k8s.io/klog"
 	aggregatorclientset "k8s.io/kube-aggregator/pkg/client/clientset_generated/clientset"
 
-	e2eutil "github.com/pingcap/chaos-mesh/test/e2e/util"
+	e2eutil "github.com/chaos-mesh/chaos-mesh/test/e2e/util"
 )
 
 const (

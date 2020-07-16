@@ -51,7 +51,7 @@ A StressChaos shares common configurations like other chaos, such as how to sele
 Below is an example YAML file of StressChaos which is set to burn 1 CPU for 30 seconds in every 2 minutes:
 
 ```yaml
-apiVersion: pingcap.com/v1alpha1
+apiVersion: chaos-mesh.org/v1alpha1
 kind: StressChaos
 metadata:
   name: burn-cpu

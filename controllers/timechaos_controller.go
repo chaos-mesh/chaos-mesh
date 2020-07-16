@@ -1,4 +1,4 @@
-// Copyright 2020 PingCAP, Inc.
+// Copyright 2020 Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -22,9 +22,9 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/pingcap/chaos-mesh/api/v1alpha1"
-	"github.com/pingcap/chaos-mesh/controllers/timechaos"
-	"github.com/pingcap/chaos-mesh/pkg/utils"
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/controllers/timechaos"
+	"github.com/chaos-mesh/chaos-mesh/pkg/utils"
 )
 
 // TimeChaosReconciler reconciles a TimeChaos object
@@ -34,8 +34,8 @@ type TimeChaosReconciler struct {
 	Log logr.Logger
 }
 
-// +kubebuilder:rbac:groups=pingcap.com,resources=timechaos,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups=pingcap.com,resources=timechaos/status,verbs=get;update;patch
+// +kubebuilder:rbac:groups=chaos-mesh.org,resources=timechaos,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=chaos-mesh.org,resources=timechaos/status,verbs=get;update;patch
 
 // Reconcile reconciles a TimeChaos resource
 func (r *TimeChaosReconciler) Reconcile(req ctrl.Request) (result ctrl.Result, err error) {

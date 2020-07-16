@@ -16,7 +16,7 @@ IOChaos allows you to simulate file system faults such as IO delay and read/writ
 
 ### Commands and arguments for the application container
 
-Chaos Mesh uses [`wait-fush.sh`](https://github.com/pingcap/chaos-mesh/blob/master/doc/sidecar_configmap.md#tips) to ensure that the fuse-daemon server is running normally before the application starts.
+Chaos Mesh uses [`wait-fush.sh`](https://github.com/chaos-mesh/chaos-mesh/blob/master/doc/sidecar_configmap.md#tips) to ensure that the fuse-daemon server is running normally before the application starts.
 
 Therefore, `wait-fush.sh` needs to be injected into the startup command of the container. If the application process is not started by the [commands and arguments of the container](https://kubernetes.io/docs/tasks/inject-data-application/define-command-argument-container/), IOChaos cannot work properly.
 
@@ -90,7 +90,7 @@ kubectl apply -f app-configmap.yaml # app-configmap.yaml is the ConfigMap file
 Below is a sample YAML file of IOChaos:
 
 ```yaml
-apiVersion: pingcap.com/v1alpha1
+apiVersion: chaos-mesh.org/v1alpha1
 kind: IoChaos
 metadata:
   name: io-delay-example
@@ -110,7 +110,7 @@ spec:
     cron: "@every 10m"
 ```
 
-For more sample files, see [examples](https://github.com/pingcap/chaos-mesh/tree/master/examples). You can edit them as needed.
+For more sample files, see [examples](https://github.com/chaos-mesh/chaos-mesh/tree/master/examples). You can edit them as needed.
 
 | Field | Description | Sample Value |
 |:------|:------------------|:--------------|
@@ -137,17 +137,17 @@ kubectl label ns app-ns admission-webhook=enabled
 
 Then we have two ways to mark the pods we want to inject IO Chaos:
 
-1. Set annotation `admission-webhook.pingcap.com/init-request` on the namespace, then all pods in this namespace meet the selector requirements will be injected.
+1. Set annotation `admission-webhook.chaos-mesh.org/init-request` on the namespace, then all pods in this namespace meet the selector requirements will be injected.
 
 ```bash
 # set annotation
-kubectl annotate ns app-ns admission-webhook.pingcap.com/init-request=chaosfs-tikv
+kubectl annotate ns app-ns admission-webhook.chaos-mesh.org/init-request=chaosfs-tikv
 
 # create your application
 ...
 ```
 
-2. Set annotation `admission-webhook.pingcap.com/request` on the pods, you can check this [example](https://github.com/pingcap/chaos-mesh/blob/master/examples/etcd/etcd.yaml).
+2. Set annotation `admission-webhook.chaos-mesh.org/request` on the pods, you can check this [example](https://github.com/chaos-mesh/chaos-mesh/blob/master/examples/etcd/etcd.yaml).
 
 Then, you can start your application and define YAML file to start your chaos experiment.
 

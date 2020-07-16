@@ -4,8 +4,12 @@ import React, { useState } from 'react'
 import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown'
 import ArrowDropUpIcon from '@material-ui/icons/ArrowDropUp'
 
-const AdvancedOptions: React.FC = ({ children }) => {
-  const [open, setOpen] = useState(false)
+interface AdvancedOptionsProps {
+  isOpen?: boolean
+}
+
+const AdvancedOptions: React.FC<AdvancedOptionsProps> = ({ isOpen = false, children }) => {
+  const [open, setOpen] = useState(isOpen)
 
   return (
     <Box display="flex" flexDirection="column">

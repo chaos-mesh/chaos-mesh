@@ -11,12 +11,12 @@ webhooks:
     service:
       name: webhook-service
       namespace: system
-      path: /mutate-pingcap-com-v1alpha1-iochaos
+      path: /mutate-chaos-mesh-org-v1alpha1-iochaos
   failurePolicy: Fail
   name: miochaos.kb.io
   rules:
   - apiGroups:
-    - pingcap.com
+    - chaos-mesh.org
     apiVersions:
     - v1alpha1
     operations:
@@ -29,12 +29,12 @@ webhooks:
     service:
       name: webhook-service
       namespace: system
-      path: /mutate-pingcap-com-v1alpha1-kernelchaos
+      path: /mutate-chaos-mesh-org-v1alpha1-kernelchaos
   failurePolicy: Fail
   name: mkernelchaos.kb.io
   rules:
   - apiGroups:
-    - pingcap.com
+    - chaos-mesh.org
     apiVersions:
     - v1alpha1
     operations:
@@ -47,12 +47,12 @@ webhooks:
     service:
       name: webhook-service
       namespace: system
-      path: /mutate-pingcap-com-v1alpha1-networkchaos
+      path: /mutate-chaos-mesh-org-v1alpha1-networkchaos
   failurePolicy: Fail
   name: mnetworkchaos.kb.io
   rules:
   - apiGroups:
-    - pingcap.com
+    - chaos-mesh.org
     apiVersions:
     - v1alpha1
     operations:
@@ -65,12 +65,12 @@ webhooks:
     service:
       name: webhook-service
       namespace: system
-      path: /mutate-pingcap-com-v1alpha1-podchaos
+      path: /mutate-chaos-mesh-org-v1alpha1-podchaos
   failurePolicy: Fail
   name: mpodchaos.kb.io
   rules:
   - apiGroups:
-    - pingcap.com
+    - chaos-mesh.org
     apiVersions:
     - v1alpha1
     operations:
@@ -83,12 +83,12 @@ webhooks:
     service:
       name: webhook-service
       namespace: system
-      path: /mutate-pingcap-com-v1alpha1-stresschaos
+      path: /mutate-chaos-mesh-org-v1alpha1-stresschaos
   failurePolicy: Fail
   name: mstresschaos.kb.io
   rules:
   - apiGroups:
-    - pingcap.com
+    - chaos-mesh.org
     apiVersions:
     - v1alpha1
     operations:
@@ -101,12 +101,12 @@ webhooks:
     service:
       name: webhook-service
       namespace: system
-      path: /mutate-pingcap-com-v1alpha1-timechaos
+      path: /mutate-chaos-mesh-org-v1alpha1-timechaos
   failurePolicy: Fail
   name: mtimechaos.kb.io
   rules:
   - apiGroups:
-    - pingcap.com
+    - chaos-mesh.org
     apiVersions:
     - v1alpha1
     operations:
@@ -127,12 +127,12 @@ webhooks:
     service:
       name: webhook-service
       namespace: system
-      path: /validate-pingcap-com-v1alpha1-iochaos
+      path: /validate-chaos-mesh-org-v1alpha1-iochaos
   failurePolicy: Fail
   name: viochaos.kb.io
   rules:
   - apiGroups:
-    - pingcap.com
+    - chaos-mesh.org
     apiVersions:
     - v1alpha1
     operations:
@@ -145,12 +145,12 @@ webhooks:
     service:
       name: webhook-service
       namespace: system
-      path: /validate-pingcap-com-v1alpha1-kernelchaos
+      path: /validate-chaos-mesh-org-v1alpha1-kernelchaos
   failurePolicy: Fail
   name: vkernelchaos.kb.io
   rules:
   - apiGroups:
-    - pingcap.com
+    - chaos-mesh.org
     apiVersions:
     - v1alpha1
     operations:
@@ -163,12 +163,12 @@ webhooks:
     service:
       name: webhook-service
       namespace: system
-      path: /validate-pingcap-com-v1alpha1-networkchaos
+      path: /validate-chaos-mesh-org-v1alpha1-networkchaos
   failurePolicy: Fail
   name: vnetworkchaos.kb.io
   rules:
   - apiGroups:
-    - pingcap.com
+    - chaos-mesh.org
     apiVersions:
     - v1alpha1
     operations:
@@ -181,12 +181,12 @@ webhooks:
     service:
       name: webhook-service
       namespace: system
-      path: /validate-pingcap-com-v1alpha1-podchaos
+      path: /validate-chaos-mesh-org-v1alpha1-podchaos
   failurePolicy: Fail
   name: vpodchaos.kb.io
   rules:
   - apiGroups:
-    - pingcap.com
+    - chaos-mesh.org
     apiVersions:
     - v1alpha1
     operations:
@@ -199,12 +199,12 @@ webhooks:
     service:
       name: webhook-service
       namespace: system
-      path: /validate-pingcap-com-v1alpha1-stresschaos
+      path: /validate-chaos-mesh-org-v1alpha1-stresschaos
   failurePolicy: Fail
   name: vstresschaos.kb.io
   rules:
   - apiGroups:
-    - pingcap.com
+    - chaos-mesh.org
     apiVersions:
     - v1alpha1
     operations:
@@ -217,12 +217,12 @@ webhooks:
     service:
       name: webhook-service
       namespace: system
-      path: /validate-pingcap-com-v1alpha1-timechaos
+      path: /validate-chaos-mesh-org-v1alpha1-timechaos
   failurePolicy: Fail
   name: vtimechaos.kb.io
   rules:
   - apiGroups:
-    - pingcap.com
+    - chaos-mesh.org
     apiVersions:
     - v1alpha1
     operations:

@@ -1,4 +1,4 @@
-// Copyright 2020 PingCAP, Inc.
+// Copyright 2020 Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,11 +16,11 @@ package chaosdaemon
 import (
 	"context"
 
-	"github.com/pingcap/chaos-mesh/pkg/time"
+	"github.com/chaos-mesh/chaos-mesh/pkg/time"
 
 	"github.com/golang/protobuf/ptypes/empty"
 
-	pb "github.com/pingcap/chaos-mesh/pkg/chaosdaemon/pb"
+	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
 )
 
 func (s *daemonServer) SetTimeOffset(ctx context.Context, req *pb.TimeRequest) (*empty.Empty, error) {
