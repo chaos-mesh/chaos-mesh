@@ -24,9 +24,9 @@ import (
 
 	"github.com/ethercflow/hookfs/hookfs"
 
-	"github.com/pingcap/chaos-mesh/pkg/chaosfs"
-	"github.com/pingcap/chaos-mesh/pkg/pidfile"
-	"github.com/pingcap/chaos-mesh/pkg/version"
+	"github.com/chaos-mesh/chaos-mesh/pkg/chaosfs"
+	"github.com/chaos-mesh/chaos-mesh/pkg/pidfile"
+	"github.com/chaos-mesh/chaos-mesh/pkg/version"
 
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"

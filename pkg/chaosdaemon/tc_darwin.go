@@ -16,7 +16,7 @@ package chaosdaemon
 import (
 	"context"
 
-	"github.com/pingcap/chaos-mesh/pkg/mock"
+	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
 )
 
 func applyTc(ctx context.Context, pid uint32, args ...string) error {

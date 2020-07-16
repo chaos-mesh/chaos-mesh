@@ -3,6 +3,8 @@ import { FormikContextType } from 'formik'
 export interface ExperimentBasic {
   name: string
   namespace: string
+  labels: object | string[]
+  annotations: object | string[]
 }
 
 export interface ExperimentScope {
@@ -15,7 +17,7 @@ export interface ExperimentScope {
 }
 
 export interface ExperimentTargetPod {
-  action: string
+  action: 'pod-failure' | 'pod-kill' | 'container-kill' | ''
   container_name?: string
 }
 
@@ -49,7 +51,7 @@ export interface ExperimentTargetNetworkLoss {
 }
 
 export interface ExperimentTargetNetwork {
-  action: string
+  action: 'loss' | 'delay' | 'duplicate' | 'corrupt' | 'bandwidth' | ''
   bandwidth: ExperimentTargetNetworkBandwidth
   corrupt: ExperimentTargetNetworkCorrupt
   delay: ExperimentTargetNetworkDelay
@@ -57,14 +59,64 @@ export interface ExperimentTargetNetwork {
   loss: ExperimentTargetNetworkLoss
 }
 
+export interface ExperimentTargetIO {
+  action: 'delay' | 'errno' | 'mixed' | ''
+  addr: string
+  delay: string
+  errno: string
+  methods: string[]
+  path: string
+  percent: string
+}
+
+export interface CallchainFrame {
+  funcname: string
+  parameters: string
+  predicate: string
+}
+
+export interface FailKernelReq {
+  callchain: CallchainFrame[]
+  failtype: number
+  headers: string[]
+  probability: number
+  times: number
+}
+
+export interface ExperimentTargetKernel {
+  fail_kernel_req: FailKernelReq
+}
+
+export interface ExperimentTargetTime {
+  clock_ids: string[]
+  container_names: string[]
+  offset: string
+}
+
+export interface ExperimentTargetStress {
+  stressng_stressors: string
+  stressors: {
+    cpu: {
+      workers: number
+      load: number
+      options: string[]
+    }
+    memory: {
+      workers: number
+      size: string
+      options: string[]
+    }
+  }
+}
+
 export interface ExperimentTarget {
   kind: string
   pod_chaos: ExperimentTargetPod
   network_chaos: ExperimentTargetNetwork
-  io_chaos?: any
-  kernel_chaos?: any
-  time_chaos?: any
-  stress_chaos?: any
+  io_chaos: ExperimentTargetIO
+  kernel_chaos: ExperimentTargetKernel
+  time_chaos: ExperimentTargetTime
+  stress_chaos: ExperimentTargetStress
 }
 
 export interface ExperimentSchedule {
@@ -104,5 +156,5 @@ export interface StepperContextProps {
 export type FormikCtx = FormikContextType<Experiment>
 
 export type StepperFormTargetProps = FormikCtx & {
-  handleActionChange: (e: React.ChangeEvent<any>) => void
+  handleActionChange?: (e: React.ChangeEvent<any>) => void
 }

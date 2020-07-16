@@ -20,9 +20,9 @@ import (
 
 	"github.com/go-logr/logr"
 
-	"github.com/pingcap/chaos-mesh/api/v1alpha1"
-	"github.com/pingcap/chaos-mesh/controllers/reconciler"
-	"github.com/pingcap/chaos-mesh/pkg/config"
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/controllers/reconciler"
+	"github.com/chaos-mesh/chaos-mesh/pkg/config"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/util/retry"
@@ -34,7 +34,7 @@ import (
 
 const (
 	// AnnotationCleanFinalizer key
-	AnnotationCleanFinalizer = `chaos-mesh.pingcap.com/cleanFinalizer`
+	AnnotationCleanFinalizer = `chaos-mesh.chaos-mesh.org/cleanFinalizer`
 	// AnnotationCleanFinalizerForced value
 	AnnotationCleanFinalizerForced = `forced`
 )

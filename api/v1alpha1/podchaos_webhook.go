@@ -33,7 +33,7 @@ func (in *PodChaos) SetupWebhookWithManager(mgr ctrl.Manager) error {
 		Complete()
 }
 
-// +kubebuilder:webhook:path=/mutate-pingcap-com-v1alpha1-podchaos,mutating=true,failurePolicy=fail,groups=pingcap.com,resources=podchaos,verbs=create;update,versions=v1alpha1,name=mpodchaos.kb.io
+// +kubebuilder:webhook:path=/mutate-chaos-mesh-org-v1alpha1-podchaos,mutating=true,failurePolicy=fail,groups=chaos-mesh.org,resources=podchaos,verbs=create;update,versions=v1alpha1,name=mpodchaos.kb.io
 
 var _ webhook.Defaulter = &PodChaos{}
 
@@ -44,7 +44,7 @@ func (in *PodChaos) Default() {
 	in.Spec.Selector.DefaultNamespace(in.GetNamespace())
 }
 
-// +kubebuilder:webhook:verbs=create;update,path=/validate-pingcap-com-v1alpha1-podchaos,mutating=false,failurePolicy=fail,groups=pingcap.com,resources=podchaos,versions=v1alpha1,name=vpodchaos.kb.io
+// +kubebuilder:webhook:verbs=create;update,path=/validate-chaos-mesh-org-v1alpha1-podchaos,mutating=false,failurePolicy=fail,groups=chaos-mesh.org,resources=podchaos,versions=v1alpha1,name=vpodchaos.kb.io
 
 var _ ChaosValidator = &PodChaos{}
 

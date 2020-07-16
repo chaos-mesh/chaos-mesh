@@ -21,7 +21,7 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	"github.com/pingcap/chaos-mesh/pkg/mock"
+	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
 )
 
 var _ = Describe("chaosdaemon util", func() {

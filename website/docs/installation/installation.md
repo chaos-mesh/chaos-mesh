@@ -20,7 +20,7 @@ Before deploying Chaos Mesh, make sure the following items have been installed:
 ## Install Chaos Mesh
 
 ```bash
-curl -sSL https://raw.githubusercontent.com/pingcap/chaos-mesh/master/install.sh | bash
+curl -sSL https://raw.githubusercontent.com/chaos-mesh/chaos-mesh/master/install.sh | bash
 ```
 
 The above command install all the CRDs, required service account configuration, and all components.
@@ -50,7 +50,7 @@ chaos-dashboard-d998856f6-vgrjs             1/1     Running   0          3m40s
 You can uninstall Chaos Mesh by deleting the namespace.
 
 ```bash
-curl -sSL https://raw.githubusercontent.com/pingcap/chaos-mesh/master/install.sh | sh -s -- --template | kubectl delete -f -
+curl -sSL https://raw.githubusercontent.com/chaos-mesh/chaos-mesh/master/install.sh | sh -s -- --template | kubectl delete -f -
 ```
 
 ## Install by helm
@@ -61,7 +61,7 @@ Before you start installing, make sure that helm v2 or helm v3 is installed corr
 ### Step 1: Get Chaos Mesh
 
 ```bash
-git clone https://github.com/pingcap/chaos-mesh.git
+git clone https://github.com/chaos-mesh/chaos-mesh.git
 cd chaos-mesh/
 ```
 
@@ -135,6 +135,6 @@ Depending on your environment, there are two methods of installing Chaos Mesh:
 
 > **Note:**
 >
-> Currently, Chaos Dashboard is not installed by default. If you want to try it out, add `--set dashboard.create=true` in the helm commands above. Refer to [Configuration](https://github.com/pingcap/chaos-mesh/tree/master/helm/chaos-mesh#configuration) for more information.
+> Currently, Chaos Dashboard is not installed by default. If you want to try it out, add `--set dashboard.create=true` in the helm commands above. Refer to [Configuration](https://github.com/chaos-mesh/chaos-mesh/tree/master/helm/chaos-mesh#configuration) for more information.
 
-After executing the above commands, you should be able to see the output indicating that all Chaos Mesh pods are up and running. Otherwise, check the current environment according to the prompt message or create an [issue](https://github.com/pingcap/chaos-mesh/issues) for help.
+After executing the above commands, you should be able to see the output indicating that all Chaos Mesh pods are up and running. Otherwise, check the current environment according to the prompt message or create an [issue](https://github.com/chaos-mesh/chaos-mesh/issues) for help.

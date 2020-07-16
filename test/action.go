@@ -29,7 +29,7 @@ import (
 	"k8s.io/klog"
 	aggregatorclientset "k8s.io/kube-aggregator/pkg/client/clientset_generated/clientset"
 
-	e2eutil "github.com/pingcap/chaos-mesh/test/e2e/util"
+	e2eutil "github.com/chaos-mesh/chaos-mesh/test/e2e/util"
 )
 
 const (

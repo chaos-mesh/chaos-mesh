@@ -2,12 +2,12 @@
 # since it depends on service name and namespace that are out of this kustomize package.
 # It should be run by config/default
 resources:
-- bases/pingcap.com_podchaos.yaml
-- bases/pingcap.com_networkchaos.yaml
-- bases/pingcap.com_iochaos.yaml
-- bases/pingcap.com_timechaos.yaml
-- bases/pingcap.com_kernelchaos.yaml
-- bases/pingcap.com_stresschaos.yaml
+- bases/chaos-mesh.org_podchaos.yaml
+- bases/chaos-mesh.org_networkchaos.yaml
+- bases/chaos-mesh.org_iochaos.yaml
+- bases/chaos-mesh.org_timechaos.yaml
+- bases/chaos-mesh.org_kernelchaos.yaml
+- bases/chaos-mesh.org_stresschaos.yaml
 # +kubebuilder:scaffold:crdkustomizeresource
 
 patchesStrategicMerge:

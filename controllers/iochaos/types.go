@@ -21,10 +21,10 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/pingcap/chaos-mesh/api/v1alpha1"
-	"github.com/pingcap/chaos-mesh/controllers/common"
-	"github.com/pingcap/chaos-mesh/controllers/iochaos/fs"
-	"github.com/pingcap/chaos-mesh/controllers/twophase"
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/controllers/common"
+	"github.com/chaos-mesh/chaos-mesh/controllers/iochaos/fs"
+	"github.com/chaos-mesh/chaos-mesh/controllers/twophase"
 )
 
 type Reconciler struct {

@@ -17,7 +17,7 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/pingcap/chaos-mesh/pkg/httpfs"
+	"github.com/chaos-mesh/chaos-mesh/pkg/httpfs"
 )
 
 // Handler returns a FileServer `http.Handler` to handle http request.

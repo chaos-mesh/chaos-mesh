@@ -23,7 +23,7 @@ import (
 
 const (
 	// PauseAnnotationKey defines the annotation used to pause a chaos
-	PauseAnnotationKey = "experiment.pingcap.com/pause"
+	PauseAnnotationKey = "experiment.chaos-mesh.org/pause"
 )
 
 // SelectorSpec defines the some selectors to select objects.

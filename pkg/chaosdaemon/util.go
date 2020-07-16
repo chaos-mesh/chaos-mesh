@@ -29,8 +29,8 @@ import (
 	"github.com/docker/docker/api/types"
 	dockerclient "github.com/docker/docker/client"
 
-	"github.com/pingcap/chaos-mesh/pkg/mock"
-	"github.com/pingcap/chaos-mesh/pkg/utils"
+	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
+	"github.com/chaos-mesh/chaos-mesh/pkg/utils"
 )
 
 const (

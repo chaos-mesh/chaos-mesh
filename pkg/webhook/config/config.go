@@ -21,7 +21,7 @@ import (
 
 	"github.com/ghodss/yaml"
 
-	"github.com/pingcap/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 
 	corev1 "k8s.io/api/core/v1"
 )
@@ -32,7 +32,7 @@ var (
 )
 
 const (
-	annotationNamespaceDefault = "admission-webhook.pingcap.com"
+	annotationNamespaceDefault = "admission-webhook.chaos-mesh.org"
 )
 
 // ExecAction describes a "run in container" action.

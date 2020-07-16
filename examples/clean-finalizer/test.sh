@@ -14,6 +14,6 @@
 # limitations under the License.
 
 kubectl get networkchaos
-kubectl annotate networkchaos network-netem-example chaos-mesh.pingcap.com/cleanFinalizer=forced
+kubectl annotate networkchaos network-netem-example chaos-mesh.chaos-mesh.org/cleanFinalizer=forced
 sleep 3
 kubectl get networkchaos

@@ -16,10 +16,10 @@ package apiserver
 import (
 	"go.uber.org/fx"
 
-	"github.com/pingcap/chaos-mesh/pkg/apiserver/archive"
-	"github.com/pingcap/chaos-mesh/pkg/apiserver/common"
-	"github.com/pingcap/chaos-mesh/pkg/apiserver/event"
-	"github.com/pingcap/chaos-mesh/pkg/apiserver/experiment"
+	"github.com/chaos-mesh/chaos-mesh/pkg/apiserver/archive"
+	"github.com/chaos-mesh/chaos-mesh/pkg/apiserver/common"
+	"github.com/chaos-mesh/chaos-mesh/pkg/apiserver/event"
+	"github.com/chaos-mesh/chaos-mesh/pkg/apiserver/experiment"
 )
 
 var handlerModule = fx.Options(

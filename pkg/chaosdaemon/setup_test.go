@@ -26,7 +26,7 @@ import (
 
 	"github.com/prometheus/client_golang/prometheus"
 
-	"github.com/pingcap/chaos-mesh/pkg/mock"
+	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
 
 	"sigs.k8s.io/controller-runtime/pkg/envtest"
 )

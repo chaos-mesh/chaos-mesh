@@ -16,8 +16,8 @@ package controllers
 import (
 	"github.com/go-logr/logr"
 
-	"github.com/pingcap/chaos-mesh/api/v1alpha1"
-	"github.com/pingcap/chaos-mesh/controllers/kernelchaos"
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/controllers/kernelchaos"
 
 	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -31,8 +31,8 @@ type KernelChaosReconciler struct {
 	record.EventRecorder
 }
 
-// +kubebuilder:rbac:groups=pingcap.com,resources=kernelchaos,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups=pingcap.com,resources=kernelchaos/status,verbs=get;update;patch
+// +kubebuilder:rbac:groups=chaos-mesh.org,resources=kernelchaos,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=chaos-mesh.org,resources=kernelchaos/status,verbs=get;update;patch
 
 // Reconcile reconciles a request from controller
 func (r *KernelChaosReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {

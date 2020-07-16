@@ -32,10 +32,10 @@ import (
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
-	"github.com/pingcap/chaos-mesh/api/v1alpha1"
-	. "github.com/pingcap/chaos-mesh/controllers/test"
-	. "github.com/pingcap/chaos-mesh/controllers/timechaos"
-	"github.com/pingcap/chaos-mesh/pkg/mock"
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	. "github.com/chaos-mesh/chaos-mesh/controllers/test"
+	. "github.com/chaos-mesh/chaos-mesh/controllers/timechaos"
+	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
 )
 
 func TestTimechaos(t *testing.T) {

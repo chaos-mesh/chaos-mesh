@@ -19,16 +19,16 @@ import (
 	"os"
 	"strings"
 
-	"github.com/pingcap/chaos-mesh/pkg/utils"
+	"github.com/chaos-mesh/chaos-mesh/pkg/utils"
 
 	"github.com/go-logr/zapr"
 	"go.uber.org/zap"
 
-	"github.com/pingcap/chaos-mesh/pkg/ptrace"
+	"github.com/chaos-mesh/chaos-mesh/pkg/ptrace"
 
-	"github.com/pingcap/chaos-mesh/pkg/version"
+	"github.com/chaos-mesh/chaos-mesh/pkg/version"
 
-	"github.com/pingcap/chaos-mesh/pkg/time"
+	"github.com/chaos-mesh/chaos-mesh/pkg/time"
 )
 
 var (

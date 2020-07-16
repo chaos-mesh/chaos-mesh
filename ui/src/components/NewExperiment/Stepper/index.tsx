@@ -3,7 +3,6 @@ import React, { useEffect } from 'react'
 import { RootState, useStoreDispatch } from 'store'
 import { Theme, createStyles, makeStyles } from '@material-ui/core/styles'
 import { back, jump, next, reset, useStepperContext } from '../Context'
-import { getAnnotations, getLabels, getNamespaces } from 'slices/experiments'
 
 import BasicStep from './Basic'
 import DoneAllIcon from '@material-ui/icons/DoneAll'
@@ -11,6 +10,7 @@ import Loading from 'components/Loading'
 import ScheduleStep from './Schedule'
 import ScopeStep from './Scope'
 import TargetStep from './Target'
+import { getNamespaces } from 'slices/experiments'
 import { useFormikContext } from 'formik'
 import { useSelector } from 'react-redux'
 
@@ -59,7 +59,7 @@ const CreateStepper: React.FC = () => {
 
   const { resetForm } = useFormikContext()
 
-  const { namespaces, labels, annotations } = useSelector((state: RootState) => state.experiments)
+  const { namespaces } = useSelector((state: RootState) => state.experiments)
   const storeDispatch = useStoreDispatch()
 
   const { state, dispatch } = useStepperContext()
@@ -69,14 +69,6 @@ const CreateStepper: React.FC = () => {
     storeDispatch(getNamespaces())
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
-
-  useEffect(() => {
-    if (namespaces.length > 0) {
-      storeDispatch(getLabels(namespaces.join(',')))
-      storeDispatch(getAnnotations(namespaces.join(',')))
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [namespaces])
 
   const handleNext = () => dispatch(next())
   const handleBack = () => dispatch(back())
@@ -91,7 +83,7 @@ const CreateStepper: React.FC = () => {
       case 0:
         return <BasicStep namespaces={namespaces} />
       case 1:
-        return <ScopeStep namespaces={namespaces} labels={labels} annotations={annotations} />
+        return <ScopeStep namespaces={namespaces} />
       case 2:
         return <TargetStep />
       case 3:

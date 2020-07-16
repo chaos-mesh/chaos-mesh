@@ -18,8 +18,8 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/pingcap/chaos-mesh/api/v1alpha1"
-	fspb "github.com/pingcap/chaos-mesh/pkg/chaosfs/pb"
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	fspb "github.com/chaos-mesh/chaos-mesh/pkg/chaosfs/pb"
 )
 
 const (

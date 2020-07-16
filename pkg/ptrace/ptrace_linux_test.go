@@ -25,7 +25,7 @@ import (
 	"github.com/go-logr/zapr"
 	"go.uber.org/zap"
 
-	"github.com/pingcap/chaos-mesh/test/pkg/timer"
+	"github.com/chaos-mesh/chaos-mesh/test/pkg/timer"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"

@@ -167,7 +167,7 @@ function hack::__ensure_kubetest2() {
     local tmpfile=$(mktemp)
     trap "test -f $tmpfile && rm $tmpfile" RETURN
     echo "info: downloading $n $KUBETEST2_VERSION"
-    curl --retry 10 -L -o - https://github.com/cofyc/kubetest2/releases/download/$KUBETEST2_VERSION/$n-$OS-$ARCH.gz | gunzip > $tmpfile
+    curl --retry 10 -L -o - https://github.com/cofyc/kubetest2-release/releases/download/$KUBETEST2_VERSION/$n-$OS-$ARCH.gz | gunzip > $tmpfile
     mv $tmpfile $OUTPUT_BIN/$n
     chmod +x $OUTPUT_BIN/$n
 }

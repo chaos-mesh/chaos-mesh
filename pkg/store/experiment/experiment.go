@@ -20,8 +20,8 @@ import (
 
 	"github.com/jinzhu/gorm"
 
-	"github.com/pingcap/chaos-mesh/pkg/core"
-	"github.com/pingcap/chaos-mesh/pkg/store/dbstore"
+	"github.com/chaos-mesh/chaos-mesh/pkg/core"
+	"github.com/chaos-mesh/chaos-mesh/pkg/store/dbstore"
 )
 
 // NewStore returns a new ExperimentStore.

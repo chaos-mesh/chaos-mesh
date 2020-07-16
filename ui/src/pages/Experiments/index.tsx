@@ -12,7 +12,7 @@ import Loading from 'components/Loading'
 import TuneIcon from '@material-ui/icons/Tune'
 import api from 'api'
 import { dayComparator } from 'lib/dayjs'
-import { upperFirst } from 'lib/utils'
+import { toTitleCase } from 'lib/utils'
 import { useSelector } from 'react-redux'
 
 export default function Experiments() {
@@ -114,7 +114,7 @@ export default function Experiments() {
         dispatch(
           setAlert({
             type: 'success',
-            message: `${upperFirst(action)}${action === 'start' ? 'ed' : 'd'} successfully!`,
+            message: `${toTitleCase(action)}${action === 'start' ? 'ed' : 'd'} successfully!`,
           })
         )
         dispatch(setAlertOpen(true))

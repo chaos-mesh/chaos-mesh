@@ -22,7 +22,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 	"k8s.io/utils/pointer"
 
-	"github.com/pingcap/chaos-mesh/test/e2e/config"
+	"github.com/chaos-mesh/chaos-mesh/test/e2e/config"
 )
 
 const ioTestConfigMap = `name: chaosfs-io
@@ -157,7 +157,7 @@ func NewIOTestDeployment(name, namespace string) *appsv1.Deployment {
 						"app": "io",
 					},
 					Annotations: map[string]string{
-						"admission-webhook.pingcap.com/request": "chaosfs-io",
+						"admission-webhook.chaos-mesh.org/request": "chaosfs-io",
 					},
 				},
 				Spec: corev1.PodSpec{
