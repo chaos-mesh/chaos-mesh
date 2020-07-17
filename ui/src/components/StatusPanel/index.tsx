@@ -25,9 +25,6 @@ const useStyles = makeStyles((theme: Theme) =>
       height: '100%',
       textAlign: 'center',
     },
-    failed: {
-      color: theme.palette.error.dark,
-    },
     finished: {
       color: theme.palette.success.main,
     },
@@ -64,17 +61,17 @@ const StatusPanel = () => {
     paused: {
       label: 'Paused',
       value: state.paused,
-      Icon: <PauseCircleOutlineIcon fontSize="large" />,
+      Icon: <PauseCircleOutlineIcon color="primary" fontSize="large" />,
     },
     failed: {
       label: 'Failed',
       value: state.failed,
-      Icon: <ErrorOutlineIcon fontSize="large" className={classes.failed} />,
+      Icon: <ErrorOutlineIcon color="error" fontSize="large" />,
     },
     waiting: {
       label: 'Waiting',
       value: state.waiting,
-      Icon: <SnoozeIcon fontSize="large" />,
+      Icon: <SnoozeIcon color="primary" fontSize="large" />,
     },
     finished: {
       label: 'Finished',

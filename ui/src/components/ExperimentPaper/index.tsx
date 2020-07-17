@@ -4,9 +4,9 @@ import { Theme, createStyles, makeStyles } from '@material-ui/core/styles'
 
 import { Archive } from 'api/archives.type'
 import DeleteOutlineIcon from '@material-ui/icons/DeleteOutline'
+import ErrorOutlineIcon from '@material-ui/icons/ErrorOutline'
 import { Experiment } from 'api/experiments.type'
 import ExperimentEventsPreview from 'components/ExperimentEventsPreview'
-import HighlightOffIcon from '@material-ui/icons/HighlightOff'
 import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown'
 import KeyboardArrowUpIcon from '@material-ui/icons/KeyboardArrowUp'
 import { Link } from 'react-router-dom'
@@ -159,7 +159,7 @@ const ExperimentPaper: React.FC<ExperimentPaperProps> = ({
         <Box display="flex" alignItems="center" className={classes.marginRight}>
           {!isArchive && (
             <>
-              {(e as Experiment).status.toLowerCase() === 'failed' && <HighlightOffIcon color="secondary" />}
+              {(e as Experiment).status.toLowerCase() === 'failed' && <ErrorOutlineIcon color="error" />}
               <ExperimentEventsPreview events={(e as Experiment).events} />
             </>
           )}
