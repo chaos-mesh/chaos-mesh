@@ -209,6 +209,7 @@ type ChaosInstance struct {
 	Action    string
 	Duration  string
 	Status    string
+	UID       string
 }
 
 // +kubebuilder:object:generate=false
