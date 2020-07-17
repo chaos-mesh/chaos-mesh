@@ -1,4 +1,4 @@
-// Copyright 2020 PingCAP, Inc.
+// Copyright 2020 Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -41,12 +41,12 @@ import (
 	"k8s.io/utils/pointer"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/pingcap/chaos-mesh/api/v1alpha1"
-	fscli "github.com/pingcap/chaos-mesh/pkg/chaosfs/client"
-	chaosfs "github.com/pingcap/chaos-mesh/pkg/chaosfs/pb"
-	e2econfig "github.com/pingcap/chaos-mesh/test/e2e/config"
-	"github.com/pingcap/chaos-mesh/test/e2e/util/portforward"
-	"github.com/pingcap/chaos-mesh/test/pkg/fixture"
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	fscli "github.com/chaos-mesh/chaos-mesh/pkg/chaosfs/client"
+	chaosfs "github.com/chaos-mesh/chaos-mesh/pkg/chaosfs/pb"
+	e2econfig "github.com/chaos-mesh/chaos-mesh/test/e2e/config"
+	"github.com/chaos-mesh/chaos-mesh/test/e2e/util/portforward"
+	"github.com/chaos-mesh/chaos-mesh/test/pkg/fixture"
 )
 
 const (

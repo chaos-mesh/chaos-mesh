@@ -32,7 +32,7 @@ If you have a specific idea of a fix or update, follow these steps below to subm
 
     ```bash
     $ cd chaos-mesh
-    $ git remote add upstream https://github.com/pingcap/chaos-mesh
+    $ git remote add upstream https://github.com/chaos-mesh/chaos-mesh
     ```
 
 3. Disable pushing to upstream master:
@@ -47,7 +47,7 @@ If you have a specific idea of a fix or update, follow these steps below to subm
     ```bash
     origin    git@github.com:$(user)/chaos-mesh.git (fetch)
     origin    git@github.com:$(user)/chaos-mesh.git (push)
-    upstream  https://github.com/pingcap/chaos-mesh (fetch)
+    upstream  https://github.com/chaos-mesh/chaos-mesh (fetch)
     upstream  no_push (push)
     ```
 
@@ -94,7 +94,7 @@ $ make test
 
     - Use [kind](https://kind.sigs.k8s.io/docs/user/quick-start/#installation) to start a Kubernetes cluster locally and [kubectl](https://kubernetes.io/docs/reference/kubectl/overview/) to access the cluster. If you install these manually, run `kind`: `kind create cluster`to start the cluster.
 
-    - Install the above dependencies in `~/local/bin` using [`install.sh`](https://github.com/pingcap/chaos-mesh/blob/master/install.sh):
+    - Install the above dependencies in `~/local/bin` using [`install.sh`](https://github.com/chaos-mesh/chaos-mesh/blob/master/install.sh):
 
       ```bash
       $ ./install.sh --local kind --dependency-only

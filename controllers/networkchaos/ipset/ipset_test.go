@@ -1,4 +1,4 @@
-// Copyright 2020 PingCAP, Inc.
+// Copyright 2020 Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ import (
 	. "github.com/onsi/gomega"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	cmv1alpha1 "github.com/pingcap/chaos-mesh/api/v1alpha1"
+	cmv1alpha1 "github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 )
 
 func Test_generateIpSetName(t *testing.T) {

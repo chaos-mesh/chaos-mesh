@@ -9,7 +9,7 @@ import styles from './styles.module.css';
 import CodeSnippet from "@site/src/theme/CodeSnippet";
 
 const install = `# Install on Kubernetes 
-curl -sSL https://raw.githubusercontent.com/pingcap/chaos-mesh/master/install.sh | bash`
+curl -sSL https://raw.githubusercontent.com/chaos-mesh/chaos-mesh/master/install.sh | bash`
 
 function Home() {
   const context = useDocusaurusContext();

@@ -10,7 +10,7 @@ tags: [Chaos Mesh, Chaos Engineering, Kubernetes, Distributed system]
 
 ![Clock synchronization in distributed system](/img/clock-sync-chaos-engineering-k8s.jpg)
 
-[Chaos Mesh™](https://github.com/pingcap/chaos-mesh), an easy-to-use, open-source, cloud-native chaos engineering platform for Kubernetes (K8s), has a new feature, TimeChaos, which simulates the [clock skew](https://en.wikipedia.org/wiki/Clock_skew#On_a_network) phenomenon. Usually, when we modify clocks in a container, we want a [minimized blast radius](https://learning.oreilly.com/library/view/chaos-engineering/9781491988459/ch07.html), and we don't want the change to affect the other containers on the node. In reality, however, implementing this can be harder than you think. How does Chaos Mesh solve this problem?
+[Chaos Mesh™](https://github.com/chaos-mesh/chaos-mesh), an easy-to-use, open-source, cloud-native chaos engineering platform for Kubernetes (K8s), has a new feature, TimeChaos, which simulates the [clock skew](https://en.wikipedia.org/wiki/Clock_skew#On_a_network) phenomenon. Usually, when we modify clocks in a container, we want a [minimized blast radius](https://learning.oreilly.com/library/view/chaos-engineering/9781491988459/ch07.html), and we don't want the change to affect the other containers on the node. In reality, however, implementing this can be harder than you think. How does Chaos Mesh solve this problem?
 
 <!--truncate-->
 
@@ -24,7 +24,7 @@ Currently, there are well-recognized [solutions to synchronize clocks](https://p
 
 Then how can we test global snapshot consistency in a distributed system? The answer is obvious: we can simulate clock skew to test whether distributed systems can keep a consistent global snapshot under abnormal clock conditions. Some testing tools support simulating clock skew in containers, but they have an impact on physical nodes.
 
-[TimeChaos](https://github.com/pingcap/chaos-mesh/wiki/Time-Chaos) is a tool that **simulates clock skew in containers to test how it impacts your application without affecting the whole node**. This way, we can precisely identify the potential consequences of clock skew and take measures accordingly.
+[TimeChaos](https://github.com/chaos-mesh/chaos-mesh/wiki/Time-Chaos) is a tool that **simulates clock skew in containers to test how it impacts your application without affecting the whole node**. This way, we can precisely identify the potential consequences of clock skew and take measures accordingly.
 
 ## Various approaches for simulating clock skew we've explored
 
@@ -96,7 +96,7 @@ The chart above is the process of **TimeChaos**, an implementation of clock skew
 4. Use ptrace to modify the `clock_gettime` function in vDSO and redirect to the `fake_clock_gettime` function.
 5. Use ptrace to detach the PID process.
 
-If you are interested in the details, see the [Chaos Mesh GitHub repository](https://github.com/pingcap/chaos-mesh/blob/master/pkg/time/time_linux.go).
+If you are interested in the details, see the [Chaos Mesh GitHub repository](https://github.com/chaos-mesh/chaos-mesh/blob/master/pkg/time/time_linux.go).
 
 ## Simulating clock skew on a distributed SQL database
 
@@ -109,7 +109,7 @@ To better perform the testing, we use [bank](https://github.com/cwen0/bank) as t
 This is our test configuration:
 
 ```
-apiVersion: pingcap.com/v1alpha1
+apiVersion: chaos-mesh.org/v1alpha1
 kind: TimeChaos
 metadata:
   name: time-skew-example
@@ -128,7 +128,7 @@ spec:
     cron: "@every 1m"
 ```
 
-During this test, Chaos Mesh injects TimeChaos into a chosen PD Pod every 1 millisecond for 10 seconds. Within the duration, the time acquired by PD will have a 600 second offset from the actual time. For further details, see [Chaos Mesh Wiki](https://github.com/pingcap/chaos-mesh/wiki/Time-Chaos).
+During this test, Chaos Mesh injects TimeChaos into a chosen PD Pod every 1 millisecond for 10 seconds. Within the duration, the time acquired by PD will have a 600 second offset from the actual time. For further details, see [Chaos Mesh Wiki](https://github.com/chaos-mesh/chaos-mesh/wiki/Time-Chaos).
 
 Let's create a TimeChaos experiment using the `kubectl apply` command:
 
@@ -177,4 +177,4 @@ It's clear that in the monitor, TimeChaos was injected every 1 millisecond and t
 
 As a cloud-native chaos engineering platform, Chaos Mesh features all-around [fault injection methods for complex systems on Kubernetes](https://pingcap.com/blog/chaos-mesh-your-chaos-engineering-solution-for-system-resiliency-on-kubernetes/), covering faults in Pods, the network, the file system, and even the kernel.
 
-Wanna have some hands-on experience in chaos engineering? Welcome to [Chaos Mesh](https://github.com/pingcap/chaos-mesh). This [10-minute tutorial](https://pingcap.com/blog/run-first-chaos-experiment-in-ten-minutes/) will help you quickly get started with chaos engineering and run your first chaos experiment with Chaos Mesh.
+Wanna have some hands-on experience in chaos engineering? Welcome to [Chaos Mesh](https://github.com/chaos-mesh/chaos-mesh). This [10-minute tutorial](https://pingcap.com/blog/run-first-chaos-experiment-in-ten-minutes/) will help you quickly get started with chaos engineering and run your first chaos experiment with Chaos Mesh.
