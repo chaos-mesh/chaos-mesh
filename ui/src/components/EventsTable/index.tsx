@@ -15,7 +15,7 @@ import {
   TextField,
 } from '@material-ui/core'
 import React, { useCallback, useEffect, useState } from 'react'
-import { Theme, createStyles, makeStyles } from '@material-ui/core/styles'
+import { createStyles, makeStyles } from '@material-ui/core/styles'
 import day, { dayComparator } from 'lib/dayjs'
 
 import { Event } from 'api/events.type'
@@ -31,7 +31,7 @@ import { searchEvents } from 'lib/search'
 import { usePrevious } from 'lib/hooks'
 import useRunningLabelStyles from 'lib/styles/runningLabel'
 
-const useStyles = makeStyles((theme: Theme) =>
+const useStyles = makeStyles(() =>
   createStyles({
     tableContainer: {
       maxHeight: 768,
