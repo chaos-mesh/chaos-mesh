@@ -138,7 +138,7 @@ const ExperimentPaper: React.FC<ExperimentPaperProps> = ({
         component={Link}
         to={
           isArchive
-            ? ``
+            ? `/`
             : `/experiments/${e.Name}?namespace=${e.Namespace}&kind=${
                 e.Kind
               }&status=${(e as Experiment).status.toLowerCase()}`

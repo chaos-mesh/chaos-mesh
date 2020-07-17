@@ -6,7 +6,6 @@ import { useHistory, useParams } from 'react-router-dom'
 
 import CloseIcon from '@material-ui/icons/Close'
 import ConfirmDialog from 'components/ConfirmDialog'
-import ContentContainer from 'components/ContentContainer'
 import DeleteOutlineIcon from '@material-ui/icons/DeleteOutline'
 import ErrorOutlineIcon from '@material-ui/icons/ErrorOutline'
 import { Event } from 'api/events.type'
@@ -262,7 +261,7 @@ export default function ExperimentDetail() {
   }
 
   return (
-    <ContentContainer>
+    <>
       <Grow in={!loading} style={{ transformOrigin: '0 0 0' }}>
         <Box display="flex" flexDirection="column" height="100%">
           <Box display="flex" justifyContent="space-between" mb={3}>
@@ -365,6 +364,6 @@ export default function ExperimentDetail() {
       />
 
       {loading && <Loading />}
-    </ContentContainer>
+    </>
   )
 }

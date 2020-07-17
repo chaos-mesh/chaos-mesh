@@ -5,7 +5,6 @@ import { getStateofExperiments, setNeedToRefreshExperiments } from 'slices/exper
 import { setAlert, setAlertOpen } from 'slices/globalStatus'
 
 import ConfirmDialog from 'components/ConfirmDialog'
-import ContentContainer from '../../components/ContentContainer'
 import { Experiment } from 'api/experiments.type'
 import ExperimentPaper from 'components/ExperimentPaper'
 import Loading from 'components/Loading'
@@ -126,7 +125,7 @@ export default function Experiments() {
   }
 
   return (
-    <ContentContainer>
+    <>
       <Grid container spacing={3}>
         {experiments &&
           experiments.length > 0 &&
@@ -157,6 +156,6 @@ export default function Experiments() {
         description={selected.description}
         handleConfirm={handleExperiment(selected.action)}
       />
-    </ContentContainer>
+    </>
   )
 }

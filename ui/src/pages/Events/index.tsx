@@ -3,7 +3,6 @@ import React, { useEffect, useRef, useState } from 'react'
 import { Theme, createStyles, makeStyles } from '@material-ui/core/styles'
 
 import BlurLinearIcon from '@material-ui/icons/BlurLinear'
-import ContentContainer from 'components/ContentContainer'
 import { Event } from 'api/events.type'
 import EventsTable from 'components/EventsTable'
 import Loading from 'components/Loading'
@@ -61,7 +60,7 @@ export default function Events() {
   }, [events])
 
   return (
-    <ContentContainer>
+    <>
       {events && events.length > 0 && (
         <Grow in={!loading} style={{ transformOrigin: '0 0 0' }}>
           <Box display="flex" flexDirection="column" height="100%">
@@ -88,6 +87,6 @@ export default function Events() {
       )}
 
       {loading && <Loading />}
-    </ContentContainer>
+    </>
   )
 }

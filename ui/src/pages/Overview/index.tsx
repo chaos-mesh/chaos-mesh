@@ -2,10 +2,10 @@ import { Grid, Grow, Paper } from '@material-ui/core'
 import React, { useEffect, useRef, useState } from 'react'
 import { Theme, createStyles, makeStyles } from '@material-ui/core/styles'
 
-import ContentContainer from 'components/ContentContainer'
 import { Experiment } from 'api/experiments.type'
 import Loading from 'components/Loading'
 import PaperTop from 'components/PaperTop'
+import StatusPanel from 'components/StatusPanel'
 import api from 'api'
 import genChaosChart from 'lib/d3/chaosBarChart'
 
@@ -59,19 +59,23 @@ export default function Overview() {
   }, [experiments])
 
   return (
-    <ContentContainer>
+    <>
       <Grow in={!loading} style={{ transformOrigin: '0 0 0' }}>
         <Grid container spacing={3}>
-          <Grid item xs={12} md={4}>
+          <Grid item xs={12} md={6}>
             <Paper variant="outlined">
               <PaperTop title="Total Experiments" />
               <div ref={chaosChartRef} className={classes.chaosChart} />
             </Paper>
           </Grid>
+
+          <Grid item xs={12} md={6}>
+            <StatusPanel />
+          </Grid>
         </Grid>
       </Grow>
 
       {loading && <Loading />}
-    </ContentContainer>
+    </>
   )
 }

@@ -6,10 +6,10 @@ import { Theme, createStyles, makeStyles } from '@material-ui/core/styles'
 import { drawerCloseWidth, drawerWidth } from './Sidebar'
 
 import Alert from '@material-ui/lab/Alert'
+import ContentContainer from 'components/ContentContainer'
 import Header from './Header'
 import MobileNavigation from './MobileNavigation'
 import Sidebar from './Sidebar'
-import StatusBar from 'components/StatusBar'
 import chaosMeshRoutes from 'routes'
 import insertCommonStyle from 'lib/d3/insertCommonStyle'
 import { setAlertOpen } from 'slices/globalStatus'
@@ -96,16 +96,16 @@ const TopContainer = () => {
       <main className={classes.main}>
         <div className={classes.toolbar} />
 
-        <StatusBar />
-
         <Box className={classes.switchContent}>
-          <Switch>
-            <Redirect exact path="/" to="/overview" />
-            {chaosMeshRoutes.map((route) => (
-              <Route key={route.path! as string} {...route} />
-            ))}
-            <Redirect exact path="*" to="/overview" />
-          </Switch>
+          <ContentContainer>
+            <Switch>
+              <Redirect exact path="/" to="/overview" />
+              {chaosMeshRoutes.map((route) => (
+                <Route key={route.path! as string} {...route} />
+              ))}
+              <Redirect exact path="*" to="/overview" />
+            </Switch>
+          </ContentContainer>
         </Box>
 
         {isMobileScreen && (

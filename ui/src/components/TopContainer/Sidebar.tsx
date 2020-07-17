@@ -1,8 +1,10 @@
-import { Divider, Drawer, List, ListItem, ListItemIcon, ListItemText } from '@material-ui/core'
+import { Box, Button, Divider, Drawer, List, ListItem, ListItemIcon, ListItemText } from '@material-ui/core'
 import { Theme, createStyles, makeStyles } from '@material-ui/core/styles'
 
+import AddIcon from '@material-ui/icons/Add'
 import ArchiveOutlinedIcon from '@material-ui/icons/ArchiveOutlined'
 import BlurLinearIcon from '@material-ui/icons/BlurLinear'
+import { Link } from 'react-router-dom'
 import { NavLink } from 'react-router-dom'
 import React from 'react'
 import TuneIcon from '@material-ui/icons/Tune'
@@ -112,6 +114,22 @@ const Sidebar: React.FC<SidebarProps> = ({ open }) => {
         />
       </NavLink>
       <Divider />
+
+      <Box display="flex" justifyContent="center" px={3} py="8px">
+        <Button
+          component={Link}
+          to="/newExperiment"
+          style={{ width: '100%' }}
+          variant="outlined"
+          color="primary"
+          startIcon={open && <AddIcon />}
+        >
+          {open ? 'New Experiment' : <AddIcon />}
+        </Button>
+      </Box>
+
+      <Divider />
+
       <List>
         {listItems.map(({ icon, text }) => (
           <ListItem key={text} className={classes.listItem} component={NavLink} to={`/${text.toLowerCase()}`} button>
