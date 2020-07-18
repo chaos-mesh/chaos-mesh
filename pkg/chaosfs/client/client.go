@@ -1,4 +1,4 @@
-// Copyright 2019 PingCAP, Inc.
+// Copyright 2019 Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
 package client
 
 import (
-	chaosfs "github.com/pingcap/chaos-mesh/pkg/chaosfs/pb"
+	chaosfs "github.com/chaos-mesh/chaos-mesh/pkg/chaosfs/pb"
 
 	"google.golang.org/grpc"
 )

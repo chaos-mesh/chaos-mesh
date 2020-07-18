@@ -1,4 +1,4 @@
-// Copyright 2019 PingCAP, Inc.
+// Copyright 2019 Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@ package utils
 import (
 	"fmt"
 
-	"github.com/pingcap/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 )
 
 const (

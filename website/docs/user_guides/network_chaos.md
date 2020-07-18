@@ -17,7 +17,7 @@ NetworkChaos actions are divided into two categories:
 Below is a sample network partition configuration file:
 
 ```yaml
-apiVersion: pingcap.com/v1alpha1
+apiVersion: chaos-mesh.org/v1alpha1
 kind: NetworkChaos
 metadata:
   name: network-partition-example
@@ -41,7 +41,7 @@ spec:
     cron: "@every 15s"
 ```
 
-For more sample files, see [examples](https://github.com/pingcap/chaos-mesh/tree/master/examples). You can edit them as needed.
+For more sample files, see [examples](https://github.com/chaos-mesh/chaos-mesh/tree/master/examples). You can edit them as needed.
 
 Description:
 
@@ -63,7 +63,7 @@ There are 4 cases for netem chaos actions, namely loss, delay, duplicate, and co
 
 ### Network Loss
 
-A Network Loss action causes network packets to drop randomly. To add a Network Loss action, locate and edit the corresponding template in [/examples](https://github.com/pingcap/chaos-mesh/blob/master/examples/network-loss-example.yaml).
+A Network Loss action causes network packets to drop randomly. To add a Network Loss action, locate and edit the corresponding template in [/examples](https://github.com/chaos-mesh/chaos-mesh/blob/master/examples/network-loss-example.yaml).
 
 In this case, two action specific attributes are required - loss and correlation.
 
@@ -79,7 +79,7 @@ NetworkChaos variation is not purely random, so to emulate that there is a corre
 
 ### Network Delay
 
-A Network Delay action causes delays in message sending. To add a Network Delay action, locate and edit the corresponding template in [/examples](https://github.com/pingcap/chaos-mesh/blob/master/examples/network-delay-example.yaml).
+A Network Delay action causes delays in message sending. To add a Network Delay action, locate and edit the corresponding template in [/examples](https://github.com/chaos-mesh/chaos-mesh/blob/master/examples/network-delay-example.yaml).
 
 In this case, three action specific attributes are required - correlation, jitter, and latency.
 
@@ -100,7 +100,7 @@ In the above example, the network latency is 90ms ± 90ms with 25% correlation.
 
 ### Network Duplicate
 
-A Network Duplicate action causes packet duplication. To add a Network Duplicate action, locate and edit the corresponding template in [/examples](https://github.com/pingcap/chaos-mesh/blob/master/examples/network-duplicate-example.yaml).
+A Network Duplicate action causes packet duplication. To add a Network Duplicate action, locate and edit the corresponding template in [/examples](https://github.com/chaos-mesh/chaos-mesh/blob/master/examples/network-duplicate-example.yaml).
 
 In this case, two attributes are required - correlation and duplicate.
 
@@ -114,7 +114,7 @@ duplicate:
 
 ### Network Corrupt
 
-A Network Corrupt action causes packet corruption. To add a Network Corrupt action, locate and edit the corresponding template in [/examples](https://github.com/pingcap/chaos-mesh/blob/master/examples/network-corrupt-example.yaml).
+A Network Corrupt action causes packet corruption. To add a Network Corrupt action, locate and edit the corresponding template in [/examples](https://github.com/chaos-mesh/chaos-mesh/blob/master/examples/network-corrupt-example.yaml).
 
 In this case, two action specific attributes are required - correlation and corrupt.
 
@@ -128,7 +128,7 @@ corrupt:
 
 ## Network Bandwidth Action
 
-Network Bandwidth Action is used to limit the network bandwidth. To add a Network Bandwidth Action, locate and edit the corresponding template in [/examples](https://github.com/pingcap/chaos-mesh/blob/master/examples/network-bandwidth-example.yaml).
+Network Bandwidth Action is used to limit the network bandwidth. To add a Network Bandwidth Action, locate and edit the corresponding template in [/examples](https://github.com/chaos-mesh/chaos-mesh/blob/master/examples/network-bandwidth-example.yaml).
 
 > **Note:**
 >
