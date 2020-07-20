@@ -44,20 +44,24 @@ export default function Experiments() {
     api.events
       .dryEvents()
       .then(({ data }) => {
-        setExperiments(
-          experiments.map((e) =>
-            e.status.toLowerCase() === 'failed'
-              ? { ...e, events: [] }
-              : {
+        if (data.length) {
+          setExperiments(
+            experiments.map((e) => {
+              if (e.status.toLowerCase() === 'failed') {
+                return { ...e, events: [] }
+              } else {
+                const events = data
+                  .filter((d) => d.Experiment === e.Name)
+                  .sort((a, b) => dayComparator(a.StartTime, b.StartTime))
+
+                return {
                   ...e,
-                  events: [
-                    data
-                      .filter((d) => d.Experiment === e.Name)
-                      .sort((a, b) => dayComparator(a.StartTime, b.StartTime))[0],
-                  ],
+                  events: events.length > 0 ? [events[0]] : [],
                 }
+              }
+            })
           )
-        )
+        }
       })
       .catch(console.log)
   }

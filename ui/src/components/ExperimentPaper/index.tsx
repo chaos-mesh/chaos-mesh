@@ -157,12 +157,12 @@ const ExperimentPaper: React.FC<ExperimentPaperProps> = ({
     <Paper variant="outlined">
       <Box display="flex" justifyContent="space-between" alignItems="center" p={3}>
         <Box display="flex" alignItems="center" className={classes.marginRight}>
-          {!isArchive && (
-            <>
-              {(e as Experiment).status.toLowerCase() === 'failed' && <ErrorOutlineIcon color="error" />}
+          {!isArchive &&
+            ((e as Experiment).status.toLowerCase() === 'failed' ? (
+              <ErrorOutlineIcon color="error" />
+            ) : (
               <ExperimentEventsPreview events={(e as Experiment).events} />
-            </>
-          )}
+            ))}
           <Typography variant="body1" component="div">
             {e.Name}
             {isTabletScreen && (
