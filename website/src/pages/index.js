@@ -62,6 +62,10 @@ function Home() {
             </div>
           </div>
         </div>
+          <div className="text--center">
+            <p className={styles.cncfTitle}>Chaos Mesh® is a <a href="https://cncf.io/">Cloud Native Computing Foundation</a> sandbox project</p>
+            <img className={styles.cncfLogo} src="img/cncf-color.svg" alt="cncf" />
+          </div>
       </main>
     </Layout>
   );
