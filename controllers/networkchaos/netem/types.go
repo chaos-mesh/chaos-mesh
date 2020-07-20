@@ -378,7 +378,7 @@ func (r *Reconciler) applyNetem(ctx context.Context, sources, targets []v1.Pod, 
 	}
 
 	// create ipset contains all target ips
-	dstIpset := ipset.BuildIPSet(targets, externalTargets, networkchaos, ipsetPostFix)
+	dstIpset := ipset.BuildIpSet(targets, externalTargets, networkchaos, ipsetPostFix)
 	r.Log.Info("apply netem with filter", "sources", sources, "ipset", dstIpset.String())
 
 	for index := range sources {
@@ -410,7 +410,7 @@ func (r *Reconciler) applyNetem(ctx context.Context, sources, targets []v1.Pod, 
 			// $tc qdisc add dev eth0 parent 1:4 handle 40: netem delay 10ms
 			// $tc filter add dev eth0 parent 1: basic match 'ipset(myset dst)' classid 1:4
 
-			err := ipset.FlushIpSet(ctx, r.Client, pod, &dstIpset)
+			err := ipset.FlushIpSets(ctx, r.Client, pod, []*pb.IpSet{&dstIpset})
 			if err != nil {
 				return err
 			}

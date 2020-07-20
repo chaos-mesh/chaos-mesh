@@ -25,8 +25,8 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/utils"
 )
 
-// FlushIptables makes grpc call to chaosdaemon to flush iptable
-func FlushIptables(ctx context.Context, c client.Client, pod *v1.Pod, rule *pb.Rule) error {
+// FlushIptablesChain makes grpc call to chaosdaemon to flush iptable
+func FlushIptablesChains(ctx context.Context, c client.Client, pod *v1.Pod, chainsName string, direction pb.Chain_Direction, set []string) error {
 	pbClient, err := utils.NewChaosDaemonClient(ctx, c, pod, common.ControllerCfg.ChaosDaemonPort)
 	if err != nil {
 		return err
@@ -39,18 +39,13 @@ func FlushIptables(ctx context.Context, c client.Client, pod *v1.Pod, rule *pb.R
 
 	containerID := pod.Status.ContainerStatuses[0].ContainerID
 
-	_, err = pbClient.FlushIptables(ctx, &pb.IpTablesRequest{
-		Rule:        rule,
+	_, err = pbClient.FlushIptablesChains(ctx, &pb.IptablesChainsRequest{
+		Chains: []*pb.Chain{{
+			Name:      chainsName,
+			Direction: direction,
+			Ipsets:    set,
+		}},
 		ContainerId: containerID,
 	})
 	return err
-}
-
-// GenerateIPTables generates iptables protobuf rule
-func GenerateIPTables(action pb.Rule_Action, direction pb.Rule_Direction, set string) pb.Rule {
-	return pb.Rule{
-		Action:    action,
-		Direction: direction,
-		Set:       set,
-	}
 }

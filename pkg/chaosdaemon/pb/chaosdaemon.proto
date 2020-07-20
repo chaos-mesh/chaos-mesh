@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package chaosdaemon;
+package pb;
 
 import "google/protobuf/empty.proto";
 
@@ -19,8 +19,9 @@ service ChaosDaemon {
   // generic tc filter del command
   rpc DelTcFilter(TcFilterRequest) returns (google.protobuf.Empty) {}
 
-  rpc FlushIpSet(IpSetRequest) returns (google.protobuf.Empty) {}
-  rpc FlushIptables(IpTablesRequest) returns (google.protobuf.Empty) {}
+  rpc FlushIpSets(IpSetsRequest) returns (google.protobuf.Empty) {}
+  
+  rpc FlushIptablesChains(IptablesChainsRequest) returns (google.protobuf.Empty) {}
 
   rpc SetTimeOffset(TimeRequest) returns (google.protobuf.Empty) {}
   rpc RecoverTimeOffset(TimeRequest) returns (google.protobuf.Empty) {}
@@ -116,8 +117,8 @@ message TcFilter {
   TcHandle parent = 1;
 }
 
-message IpSetRequest {
-  IpSet ipset = 1;
+message IpSetsRequest {
+  repeated IpSet ipsets = 1;
   string container_id = 2;
 }
 
@@ -126,23 +127,19 @@ message IpSet {
   repeated string cidrs = 2;
 }
 
-message IpTablesRequest {
-  Rule rule = 1;
+message IptablesChainsRequest {
+  repeated Chain chains = 1;
   string container_id = 2;
 }
 
-message Rule {
-  enum Action {
-    ADD = 0;
-    DELETE = 1;
-  }
-  Action action = 1;
+message Chain {
+  string name = 1;
   enum Direction {
     INPUT = 0;
     OUTPUT = 1;
   }
   Direction direction = 2;
-  string set = 3;
+  repeated string ipsets = 3;
 }
 
 message TimeRequest {

@@ -90,12 +90,12 @@ func (c *MockChaosDaemonClient) DelTcFilter(ctx context.Context, in *chaosdaemon
 	return nil, mockError("DelTcFilter")
 }
 
-func (c *MockChaosDaemonClient) FlushIpSet(ctx context.Context, in *chaosdaemon.IpSetRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
-	return nil, mockError("FlushIpSet")
+func (c *MockChaosDaemonClient) FlushIpSets(ctx context.Context, in *chaosdaemon.IpSetsRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
+	return nil, mockError("FlushIpSets")
 }
 
-func (c *MockChaosDaemonClient) FlushIptables(ctx context.Context, in *chaosdaemon.IpTablesRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
-	return nil, mockError("FlushIptables")
+func (c *MockChaosDaemonClient) FlushIptablesChains(ctx context.Context, in *chaosdaemon.IptablesChainsRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
+	return nil, mockError("FlushIptablesChains")
 }
 
 func (c *MockChaosDaemonClient) SetTimeOffset(ctx context.Context, in *chaosdaemon.TimeRequest, opts ...grpc.CallOption) (*empty.Empty, error) {

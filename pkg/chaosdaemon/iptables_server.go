@@ -1,4 +1,4 @@
-// Copyright 2019 Chaos Mesh Authors.
+// Copyright 2019 PingCAP, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@ package chaosdaemon
 import (
 	"context"
 	"fmt"
-	"os/exec"
 	"strings"
 
 	"github.com/golang/protobuf/ptypes/empty"
@@ -31,8 +30,8 @@ const (
 	iptablesIPSetNotExistErr = "doesn't exist."
 )
 
-func (s *daemonServer) FlushIptables(ctx context.Context, req *pb.IpTablesRequest) (*empty.Empty, error) {
-	log.Info("Flush iptables rules", "request", req)
+func (s *daemonServer) FlushIptablesChains(ctx context.Context, req *pb.IptablesChainsRequest) (*empty.Empty, error) {
+	log.Info("Flush iptables chains", "request", req)
 
 	pid, err := s.crClient.GetPidFromContainerID(ctx, req.ContainerId)
 	if err != nil {
@@ -41,31 +40,8 @@ func (s *daemonServer) FlushIptables(ctx context.Context, req *pb.IpTablesReques
 	}
 
 	nsPath := GetNsPath(pid, netNS)
-	rule := req.Rule
 
-	format := ""
-	switch rule.Direction {
-	case pb.Rule_INPUT:
-		format = "%s INPUT -m set --match-set %s src -j DROP -w 5"
-	case pb.Rule_OUTPUT:
-		format = "%s OUTPUT -m set --match-set %s dst -j DROP -w 5"
-	default:
-		return nil, fmt.Errorf("unknown rule direction")
-	}
-
-	switch rule.Action {
-	case pb.Rule_ADD:
-		command := fmt.Sprintf(format, "-A", rule.Set)
-		cmd := withNetNS(ctx, nsPath, iptablesCmd, strings.Split(command, " ")...)
-		err = s.addIptablesRules(ctx, cmd)
-	case pb.Rule_DELETE:
-		command := fmt.Sprintf(format, "-D", rule.Set)
-		cmd := withNetNS(ctx, nsPath, iptablesCmd, strings.Split(command, " ")...)
-		err = s.deleteIptablesRules(ctx, cmd)
-	default:
-		return nil, fmt.Errorf("unknown rule action")
-	}
-
+	err = flushIptablesChains(ctx, nsPath, req.Chains)
 	if err != nil {
 		return nil, err
 	}
@@ -73,29 +49,75 @@ func (s *daemonServer) FlushIptables(ctx context.Context, req *pb.IpTablesReques
 	return &empty.Empty{}, nil
 }
 
-func (s *daemonServer) addIptablesRules(ctx context.Context, cmd *exec.Cmd) error {
-	log.Info("Add iptables rules", "command", cmd.String())
-
-	out, err := cmd.CombinedOutput()
-	if err != nil {
-		log.Error(err, "failed to add iptables rules", "command", cmd.String(), "stdout", string(out))
-		return err
-	}
-
-	return nil
-}
-
-func (s *daemonServer) deleteIptablesRules(ctx context.Context, cmd *exec.Cmd) error {
-	log.Info("Delete iptables rules", "command", cmd.String())
-
-	out, err := cmd.CombinedOutput()
-	if err != nil {
-		output := string(out)
-		if !(strings.Contains(output, iptablesBadRuleErr) || strings.Contains(output, iptablesIPSetNotExistErr)) {
-			log.Error(err, "failed to delete iptables rules", "command", cmd.String(), "output", output)
+func flushIptablesChains(ctx context.Context, nsPath string, chains []*pb.Chain) error {
+	for _, chain := range chains {
+		err := flushIptablesChain(ctx, nsPath, chain)
+		if err != nil {
 			return err
 		}
 	}
 
 	return nil
+}
+
+func flushIptablesChain(ctx context.Context, nsPath string, chain *pb.Chain) error {
+	cmd := withNetNS(ctx, nsPath, iptablesCmd, "-N", chain.Name)
+	out, err := cmd.CombinedOutput()
+	if err == nil && len(out) == 0 {
+		initializeChain(ctx, nsPath, chain)
+	}
+	if err != nil {
+		if strings.Contains(string(out), "iptables: Chain already exists.") {
+			cmd = withNetNS(ctx, nsPath, iptablesCmd, "-F", chain.Name)
+			out, err = cmd.CombinedOutput()
+			if err != nil {
+				return encodeOutputToError(out, err)
+			}
+		} else {
+			return encodeOutputToError(out, err)
+		}
+	}
+
+	var matchPart string
+	if chain.Direction == pb.Chain_INPUT {
+		matchPart = "src"
+	} else if chain.Direction == pb.Chain_OUTPUT {
+		matchPart = "dst"
+	} else {
+		return fmt.Errorf("unknown direction %d", chain.Direction)
+	}
+
+	for _, ipset := range chain.Ipsets {
+		cmd = withNetNS(ctx, nsPath, iptablesCmd, "-A", chain.Name, "-m", "set", "--match-set", ipset, matchPart, "-j", "DROP", "-w", "5")
+		out, err = cmd.CombinedOutput()
+		if err != nil {
+			return encodeOutputToError(out, err)
+		}
+	}
+
+	return nil
+}
+
+func initializeChain(ctx context.Context, nsPath string, chain *pb.Chain) error {
+	if chain.Direction == pb.Chain_INPUT {
+		cmd := withNetNS(ctx, nsPath, iptablesCmd, "-A", "INPUT", "-j", chain.Name)
+		_, err := cmd.CombinedOutput()
+		if err != nil {
+			return err
+		}
+	} else if chain.Direction == pb.Chain_OUTPUT {
+		cmd := withNetNS(ctx, nsPath, iptablesCmd, "-A", "OUTPUT", "-j", chain.Name)
+		_, err := cmd.CombinedOutput()
+		if err != nil {
+			return err
+		}
+	} else {
+		return fmt.Errorf("unknown direction %d", chain.Direction)
+	}
+
+	return nil
+}
+
+func encodeOutputToError(output []byte, err error) error {
+	return fmt.Errorf("error code: %d, msg: %s", err, string(output))
 }

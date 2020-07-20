@@ -15,7 +15,6 @@ package ipset
 
 import (
 	"context"
-	"crypto/sha1"
 	"fmt"
 
 	v1 "k8s.io/api/core/v1"
@@ -32,9 +31,9 @@ const (
 	ipsetLen = 27
 )
 
-// BuildIPSet builds an ipset with provided pod ip list
-func BuildIPSet(pods []v1.Pod, externalCidrs []string, networkchaos *v1alpha1.NetworkChaos, namePostFix string) pb.IpSet {
-	name := GenerateIPSetName(networkchaos, namePostFix)
+// BuildIpSet builds an ipset with provided pod ip list
+func BuildIpSet(pods []v1.Pod, externalCidrs []string, networkchaos *v1alpha1.NetworkChaos, namePostFix string) pb.IpSet {
+	name := GenerateIpSetName(networkchaos, namePostFix)
 	cidrs := externalCidrs
 
 	for _, pod := range pods {
@@ -49,30 +48,13 @@ func BuildIPSet(pods []v1.Pod, externalCidrs []string, networkchaos *v1alpha1.Ne
 	}
 }
 
-// GenerateIPSetName generates name for ipset
-func GenerateIPSetName(networkchaos *v1alpha1.NetworkChaos, namePostFix string) string {
-	originalName := networkchaos.Name
-
-	var ipsetName string
-	if len(originalName) < 6 {
-		ipsetName = originalName + "_" + namePostFix
-	} else {
-		namePrefix := originalName[0:5]
-		nameRest := originalName[5:]
-
-		hasher := sha1.New()
-		hasher.Write([]byte(nameRest))
-		hashValue := fmt.Sprintf("%x", hasher.Sum(nil))
-
-		// keep the length does not exceed 27
-		ipsetName = namePrefix + "_" + hashValue[0:ipsetLen-7-len(namePostFix)] + "_" + namePostFix
-	}
-
-	return ipsetName
+// GenerateIpSetName generates name for ipset
+func GenerateIpSetName(networkchaos *v1alpha1.NetworkChaos, namePostFix string) string {
+	return netutils.CompressName(networkchaos.Name, 27, namePostFix)
 }
 
-// FlushIpSet makes grpc calls to chaosdaemon to save ipset
-func FlushIpSet(ctx context.Context, c client.Client, pod *v1.Pod, ipset *pb.IpSet) error {
+// FlushIpSets makes grpc calls to chaosdaemon to save ipset
+func FlushIpSets(ctx context.Context, c client.Client, pod *v1.Pod, ipsets []*pb.IpSet) error {
 	pbClient, err := utils.NewChaosDaemonClient(ctx, c, pod, common.ControllerCfg.ChaosDaemonPort)
 	if err != nil {
 		return err
@@ -85,8 +67,8 @@ func FlushIpSet(ctx context.Context, c client.Client, pod *v1.Pod, ipset *pb.IpS
 
 	containerID := pod.Status.ContainerStatuses[0].ContainerID
 
-	_, err = pbClient.FlushIpSet(ctx, &pb.IpSetRequest{
-		Ipset:       ipset,
+	_, err = pbClient.FlushIpSets(ctx, &pb.IpSetsRequest{
+		Ipsets:      ipsets,
 		ContainerId: containerID,
 	})
 	return err
