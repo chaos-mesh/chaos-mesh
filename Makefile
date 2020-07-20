@@ -185,6 +185,9 @@ taily-build-clean:
 
 image: image-chaos-daemon image-chaos-mesh image-chaos-dashboard image-chaos-fs image-chaos-scripts
 
+image-chaos-mesh-protoc:
+	docker build -t pingcap/chaos-mesh-protoc ${DOCKER_BUILD_ARGS} ./hack/protoc
+
 ifneq ($(TAILY_BUILD),)
 image-binary: taily-build
 	docker exec -it taily-build make binary
@@ -246,8 +249,19 @@ yaml: manifests ensure-kustomize
 	$(KUSTOMIZE_BIN) build config/default > manifests/crd.yaml
 
 # Generate Go files from Chaos Mesh proto files.
+ifeq ($(IN_DOCKER),1)
 proto:
-	hack/genproto.sh
+	for dir in pkg/chaosdaemon pkg/chaosfs; do\
+		protoc -I $$dir/pb $$dir/pb/*.proto --go_out=plugins=grpc:$$dir/pb --go_out=./$$dir/pb ;\
+	done
+else
+proto: image-chaos-mesh-protoc
+	docker run --rm --workdir /mnt/ --volume $(shell pwd):/mnt \
+		--user $(shell id -u):$(shell id -g) --env IN_DOCKER=1 pingcap/chaos-mesh-protoc \
+		/usr/bin/make proto
+	
+	make fmt
+endif
 
 update-install-script:
 	hack/update_install_script.sh
