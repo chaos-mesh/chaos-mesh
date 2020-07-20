@@ -807,7 +807,7 @@ func (s *Service) listExperiments(c *gin.Context) {
 // @Tags experiments
 // @Produce json
 // @Param uid path string true "uid"
-// @Router /api/experiments/detail/{uuid} [GET]
+// @Router /api/experiments/detail/{uid} [GET]
 // @Success 200 {object} ExperimentInfo
 // @Failure 400 {object} utils.APIError
 // @Failure 500 {object} utils.APIError
@@ -875,7 +875,7 @@ func (s *Service) deleteExperiment(c *gin.Context) {
 		exp       *core.ArchiveExperiment
 	)
 
-	uid := c.Param("uuid")
+	uid := c.Param("uid")
 	if exp, err = s.archive.FindByUID(context.Background(), uid); err != nil {
 		if !gorm.IsRecordNotFoundError(err) {
 			c.Status(http.StatusInternalServerError)
