@@ -120,6 +120,11 @@ export function parseLoaded(e: Experiment): Experiment {
     : []
   result.scope.phase_selectors = result.scope.phase_selectors ? result.scope.phase_selectors : ['all']
 
+  result.target = {
+    ...defaultExperimentSchema.target,
+    ...result.target,
+  }
+
   return result
 }
 
