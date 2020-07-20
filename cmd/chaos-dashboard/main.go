@@ -1,4 +1,4 @@
-// Copyright 2020 PingCAP, Inc.
+// Copyright 2020 Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,13 +21,13 @@ import (
 
 	"go.uber.org/fx"
 
-	"github.com/pingcap/chaos-mesh/pkg/apiserver"
-	"github.com/pingcap/chaos-mesh/pkg/collector"
-	"github.com/pingcap/chaos-mesh/pkg/config"
-	"github.com/pingcap/chaos-mesh/pkg/store"
-	"github.com/pingcap/chaos-mesh/pkg/store/dbstore"
-	"github.com/pingcap/chaos-mesh/pkg/ttlcontroller"
-	"github.com/pingcap/chaos-mesh/pkg/version"
+	"github.com/chaos-mesh/chaos-mesh/pkg/apiserver"
+	"github.com/chaos-mesh/chaos-mesh/pkg/collector"
+	"github.com/chaos-mesh/chaos-mesh/pkg/config"
+	"github.com/chaos-mesh/chaos-mesh/pkg/store"
+	"github.com/chaos-mesh/chaos-mesh/pkg/store/dbstore"
+	"github.com/chaos-mesh/chaos-mesh/pkg/ttlcontroller"
+	"github.com/chaos-mesh/chaos-mesh/pkg/version"
 
 	_ "github.com/go-sql-driver/mysql"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"

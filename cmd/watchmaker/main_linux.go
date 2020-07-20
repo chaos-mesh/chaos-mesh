@@ -1,4 +1,4 @@
-// Copyright 2020 PingCAP, Inc.
+// Copyright 2020 Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,16 +19,16 @@ import (
 	"os"
 	"strings"
 
-	"github.com/pingcap/chaos-mesh/pkg/utils"
+	"github.com/chaos-mesh/chaos-mesh/pkg/utils"
 
 	"github.com/go-logr/zapr"
 	"go.uber.org/zap"
 
-	"github.com/pingcap/chaos-mesh/pkg/ptrace"
+	"github.com/chaos-mesh/chaos-mesh/pkg/ptrace"
 
-	"github.com/pingcap/chaos-mesh/pkg/version"
+	"github.com/chaos-mesh/chaos-mesh/pkg/version"
 
-	"github.com/pingcap/chaos-mesh/pkg/time"
+	"github.com/chaos-mesh/chaos-mesh/pkg/time"
 )
 
 var (

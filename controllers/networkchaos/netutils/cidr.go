@@ -1,4 +1,4 @@
-// Copyright 2020 PingCAP, Inc.
+// Copyright 2020 Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,7 +13,10 @@
 
 package netutils
 
-import "net"
+import (
+	"net"
+	"strings"
+)
 
 // IPToCidr converts from an ip to a full mask cidr
 func IPToCidr(ip string) string {
@@ -31,28 +34,36 @@ func ResolveCidrs(names []string) ([]string, error) {
 			return nil, err
 		}
 
-		cidrs = append(cidrs, cidr)
+		cidrs = append(cidrs, cidr...)
 	}
 
 	return cidrs, nil
 }
 
 // ResolveCidr converts cidr/ip/domain into cidr
-func ResolveCidr(name string) (string, error) {
+func ResolveCidr(name string) ([]string, error) {
 	_, ipnet, err := net.ParseCIDR(name)
 	if err == nil {
-		return ipnet.String(), nil
+		return []string{ipnet.String()}, nil
 	}
 
 	if net.ParseIP(name) != nil {
-		return IPToCidr(name), nil
+		return []string{IPToCidr(name)}, nil
 	}
 
 	addrs, err := net.LookupIP(name)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	// TODO: support IPv6
-	return IPToCidr(addrs[0].String()), nil
+	cidrs := []string{}
+	for _, addr := range addrs {
+		addr := addr.String()
+
+		// TODO: support IPv6
+		if strings.Contains(addr, ".") {
+			cidrs = append(cidrs, IPToCidr(addr))
+		}
+	}
+	return cidrs, nil
 }

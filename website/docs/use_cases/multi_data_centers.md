@@ -22,7 +22,7 @@ Suppose our application will be deployed in three data centers in a production e
 and these data centers are still under construction. Now we want to test the impact of 
 such a deployment topology on the business in advance. 
 
-Here we use TiDB cluster as an example. Suppose we already install the [TiBD cluster](https://docs.pingcap.com/tidb-in-kubernetes/v1.1/) and [Chaos Mesh](../installation/installation)
+Here we use TiDB cluster as an example. Suppose we already install the [TiBD cluster](https://docs.chaos-mesh.org/tidb-in-kubernetes/v1.1/) and [Chaos Mesh](../installation/installation)
 in our Kubernetes environment. In this TiDB cluster, we have three TiDB pods, three PD pods and seven TiKV pods: 
 
 ```bash
@@ -93,7 +93,7 @@ and the latency between `dc-b` and `dc-c` is `2ms`.
 According to the injection rules, we define the chaos experiment as following: 
 
 ```yaml
-apiVersion: pingcap.com/v1alpha1
+apiVersion: chaos-mesh.org/v1alpha1
 kind: NetworkChaos
 metadata:
   name: network-delay-a
@@ -127,7 +127,7 @@ spec:
     mode: all
 
 ---
-apiVersion: pingcap.com/v1alpha1
+apiVersion: chaos-mesh.org/v1alpha1
 kind: NetworkChaos
 metadata:
   name: network-delay-b
@@ -157,7 +157,7 @@ spec:
     mode: all
 
 ---
-apiVersion: pingcap.com/v1alpha1
+apiVersion: chaos-mesh.org/v1alpha1
 kind: NetworkChaos
 metadata:
   name: network-delay-c

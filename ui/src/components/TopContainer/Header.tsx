@@ -98,7 +98,7 @@ const Header: React.FC<HeaderProps> = ({ openDrawer, handleDrawerToggle, breadcr
           </Breadcrumbs>
           <IconButton
             component="a"
-            href="https://github.com/pingcap/chaos-mesh"
+            href="https://github.com/chaos-mesh/chaos-mesh"
             target="_blank"
             color="primary"
             aria-label="Chaos Mesh GitHub"

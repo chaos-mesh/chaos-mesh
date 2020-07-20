@@ -1,4 +1,4 @@
-// Copyright 2020 PingCAP, Inc.
+// Copyright 2020 Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ func (in *IoChaos) SetupWebhookWithManager(mgr ctrl.Manager) error {
 		Complete()
 }
 
-// +kubebuilder:webhook:path=/mutate-pingcap-com-v1alpha1-iochaos,mutating=true,failurePolicy=fail,groups=pingcap.com,resources=iochaos,verbs=create;update,versions=v1alpha1,name=miochaos.kb.io
+// +kubebuilder:webhook:path=/mutate-chaos-mesh-org-v1alpha1-iochaos,mutating=true,failurePolicy=fail,groups=chaos-mesh.org,resources=iochaos,verbs=create;update,versions=v1alpha1,name=miochaos.kb.io
 
 var _ webhook.Defaulter = &IoChaos{}
 
@@ -46,7 +46,7 @@ func (in *IoChaos) Default() {
 	in.Spec.Selector.DefaultNamespace(in.GetNamespace())
 }
 
-// +kubebuilder:webhook:verbs=create;update,path=/validate-pingcap-com-v1alpha1-iochaos,mutating=false,failurePolicy=fail,groups=pingcap.com,resources=iochaos,versions=v1alpha1,name=viochaos.kb.io
+// +kubebuilder:webhook:verbs=create;update,path=/validate-chaos-mesh-org-v1alpha1-iochaos,mutating=false,failurePolicy=fail,groups=chaos-mesh.org,resources=iochaos,versions=v1alpha1,name=viochaos.kb.io
 
 var _ ChaosValidator = &IoChaos{}
 

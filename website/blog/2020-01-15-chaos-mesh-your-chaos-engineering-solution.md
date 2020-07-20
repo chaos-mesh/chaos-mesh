@@ -16,9 +16,9 @@ In the world of distributed computing, faults can happen to your clusters unpred
 
 <!--truncate-->
 
-At [PingCAP](https://pingcap.com/), we are facing the same problem while building [TiDB](https://github.com/pingcap/tidb), an open source distributed NewSQL database. To be fault tolerant, or resilient holds especially true to us, because the most important asset for any database users, the data itself, is at stake. To ensure resilience, we started [practicing Chaos Engineering](https://pingcap.com/blog/chaos-practice-in-tidb/) internally in our testing framework from a very early stage. However, as TiDB grew, so did the testing requirements. We realized that we needed a universal chaos testing platform, not just for TiDB, but also for other distributed systems.
+At [PingCAP](https://chaos-mesh.org/), we are facing the same problem while building [TiDB](https://github.com/pingcap/tidb), an open source distributed NewSQL database. To be fault tolerant, or resilient holds especially true to us, because the most important asset for any database users, the data itself, is at stake. To ensure resilience, we started [practicing Chaos Engineering](https://pingcap.com/blog/chaos-practice-in-tidb/) internally in our testing framework from a very early stage. However, as TiDB grew, so did the testing requirements. We realized that we needed a universal chaos testing platform, not just for TiDB, but also for other distributed systems.
 
-Therefore, we present to you Chaos Mesh, a cloud-native Chaos Engineering platform that orchestrates chaos experiments on Kubernetes environments. It's an open source project available at [https://github.com/pingcap/chaos-mesh](https://github.com/pingcap/chaos-mesh).
+Therefore, we present to you Chaos Mesh, a cloud-native Chaos Engineering platform that orchestrates chaos experiments on Kubernetes environments. It's an open source project available at [https://github.com/chaos-mesh/chaos-mesh](https://github.com/chaos-mesh/chaos-mesh).
 
 In the following sections, I will share with you what Chaos Mesh is, how we design and implement it, and finally I will show you how you can use it in your environment.
 
@@ -107,7 +107,7 @@ This code does the following:
 * The `selector` attribute limits the scope of chaos experiment to a specific scope. In this case, the scope is TiKV Pods for the TiDB cluster with the `tidb-cluster-demo` namespace.
 * The `scheduler` attribute defines the interval for each chaos fault action.
 
-For more details on CRD objects such as NetworkChaos and IOChaos, see the [Chaos-mesh documentation](https://github.com/pingcap/chaos-mesh).
+For more details on CRD objects such as NetworkChaos and IOChaos, see the [Chaos-mesh documentation](https://github.com/chaos-mesh/chaos-mesh).
 
 ## How does Chaos Mesh work?
 
@@ -151,7 +151,7 @@ Chaos Mesh runs on Kubernetes v1.12 or later. Helm, a Kubernetes package managem
     mv ./kind /some-dir-in-your-PATH/kind
 
     // get script
-    git clone https://github.com/pingcap/chaos-mesh
+    git clone https://github.com/chaos-mesh/chaos-mesh
     cd chaos-mesh
     // start cluster
     hack/kind-cluster-build.sh
@@ -162,7 +162,7 @@ Chaos Mesh runs on Kubernetes v1.12 or later. Helm, a Kubernetes package managem
 2. If the Kubernetes cluster is ready, use [Helm](https://helm.sh/) and [Kubectl](https://kubernetes.io/docs/reference/kubectl/overview/) to deploy Chaos Mesh:
 
     ```bash
-    git clone https://github.com/pingcap/chaos-mesh.git
+    git clone https://github.com/chaos-mesh/chaos-mesh.git
     cd chaos-mesh
     // create CRD resource
     kubectl apply -f manifests/
@@ -191,7 +191,7 @@ You can define your own chaos experiments through the YAML file method, which pr
 2. Create the YAML file named `kill-tikv.yaml` and add the following content:
 
     ```yml
-    apiVersion: pingcap.com/v1alpha1
+    apiVersion: chaos-mesh.org/v1alpha1
     kind: PodChaos
     metadata:
       name: pod-kill-chaos-demo
@@ -218,7 +218,7 @@ The following chaos experiment simulates the TiKV Pods being frequently killed i
 
 We use a sysbench program to monitor the real-time QPS changes in the TiDB cluster. When errors are injected into the cluster, the QPS show a drastic jitter, which means a specific TiKV Pod has been deleted, and Kubernetes then re-creates a new TiKV Pod.
 
-For more YAML file examples, see <https://github.com/pingcap/chaos-mesh/tree/master/examples>.
+For more YAML file examples, see <https://github.com/chaos-mesh/chaos-mesh/tree/master/examples>.
 
 ### Running chaos using the Kubernetes API
 
@@ -232,7 +232,7 @@ The following is a Chaos Mesh sample script using the Kubernetes API:
 import (
     "context"
 
- "github.com/pingcap/chaos-mesh/api/v1alpha1"
+ "github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
     "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
@@ -260,6 +260,6 @@ Moving forward, we will continuously improve the Chaos Mesh Dashboard, so that u
 
 If any of these sound interesting to you, join us in building a world class Chaos Engineering platform. May our applications dance in chaos on Kubernetes!
 
-If you find a bug or think something is missing, feel free to file an [issue](https://github.com/pingcap/chaos-mesh/issues), open a PR, or join us on the #sig-chaos-mesh channel in the [TiDB Community](https://pingcap.com/tidbslack) slack workspace.
+If you find a bug or think something is missing, feel free to file an [issue](https://github.com/chaos-mesh/chaos-mesh/issues), open a PR, or join us on the #sig-chaos-mesh channel in the [TiDB Community](https://chaos-mesh.org/tidbslack) slack workspace.
 
-GitHub: [https://github.com/pingcap/chaos-mesh](https://github.com/pingcap/chaos-mesh)
+GitHub: [https://github.com/chaos-mesh/chaos-mesh](https://github.com/chaos-mesh/chaos-mesh)

@@ -16,7 +16,7 @@ spec:
       labels:
         app: etcd
       annotations:
-        "admission-webhook.pingcap.com/request": "chaosfs-etcd"
+        "admission-webhook.chaos-mesh.org/request": "chaosfs-etcd"
     spec:
       containers:
         - name: etcd

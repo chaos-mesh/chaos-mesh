@@ -22,7 +22,7 @@ Make sure you have the above prerequisites met. Now follow the steps below to pr
 1. Clone the Chaos Mesh repo to your local machine.
 
     ```bash
-    git clone https://github.com/pingcap/chaos-mesh.git
+    git clone https://github.com/chaos-mesh/chaos-mesh.git
     cd chaos-mesh
     ```
 

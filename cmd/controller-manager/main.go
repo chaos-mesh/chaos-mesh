@@ -1,4 +1,4 @@
-// Copyright 2019 PingCAP, Inc.
+// Copyright 2019 Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,15 +20,15 @@ import (
 	"os"
 	"time"
 
-	chaosmeshv1alpha1 "github.com/pingcap/chaos-mesh/api/v1alpha1"
-	apiWebhook "github.com/pingcap/chaos-mesh/api/webhook"
-	"github.com/pingcap/chaos-mesh/controllers"
-	"github.com/pingcap/chaos-mesh/controllers/common"
-	"github.com/pingcap/chaos-mesh/controllers/metrics"
-	"github.com/pingcap/chaos-mesh/pkg/utils"
-	"github.com/pingcap/chaos-mesh/pkg/version"
-	"github.com/pingcap/chaos-mesh/pkg/webhook/config"
-	"github.com/pingcap/chaos-mesh/pkg/webhook/config/watcher"
+	chaosmeshv1alpha1 "github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	apiWebhook "github.com/chaos-mesh/chaos-mesh/api/webhook"
+	"github.com/chaos-mesh/chaos-mesh/controllers"
+	"github.com/chaos-mesh/chaos-mesh/controllers/common"
+	"github.com/chaos-mesh/chaos-mesh/controllers/metrics"
+	"github.com/chaos-mesh/chaos-mesh/pkg/utils"
+	"github.com/chaos-mesh/chaos-mesh/pkg/version"
+	"github.com/chaos-mesh/chaos-mesh/pkg/webhook/config"
+	"github.com/chaos-mesh/chaos-mesh/pkg/webhook/config/watcher"
 
 	"k8s.io/apimachinery/pkg/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"

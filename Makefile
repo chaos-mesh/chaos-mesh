@@ -34,7 +34,7 @@ GOTEST := TEST_USE_EXISTING_CLUSTER=false NO_PROXY="${NO_PROXY},testhost" go tes
 SHELL    := /usr/bin/env bash
 
 PACKAGE_LIST := go list ./... | grep -vE "chaos-mesh/test|pkg/ptrace|zz_generated|vendor"
-PACKAGE_DIRECTORIES := $(PACKAGE_LIST) | sed 's|github.com/pingcap/chaos-mesh/||'
+PACKAGE_DIRECTORIES := $(PACKAGE_LIST) | sed 's|github.com/chaos-mesh/chaos-mesh/||'
 
 # Produce CRDs that work back to Kubernetes 1.11 (no version conversion)
 CRD_OPTIONS ?= "crd:trivialVersions=true"
@@ -148,7 +148,7 @@ gosec-scan: $(GOBIN)/gosec
 	$(GOENV) $< ./api/... ./controllers/... ./pkg/... || echo "*** sec-scan failed: known-issues ***"
 
 groupimports: $(GOBIN)/goimports
-	$< -w -l -local github.com/pingcap/chaos-mesh $$($(PACKAGE_DIRECTORIES))
+	$< -w -l -local github.com/chaos-mesh/chaos-mesh $$($(PACKAGE_DIRECTORIES))
 
 failpoint-enable: $(GOBIN)/failpoint-ctl
 # Converting gofail failpoints...
