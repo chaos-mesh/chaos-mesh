@@ -43,8 +43,8 @@ var log = ctrl.Log.WithName("experiment api")
 // Experiment defines the basic information of an experiment
 type Experiment struct {
 	ExperimentBase
-	Created string `json:"Created"`
-	Status  string `json:"Status"`
+	Created string `json:"created"`
+	Status  string `json:"status"`
 }
 
 // ChaosState defines the number of chaos experiments of each phase
