@@ -49,12 +49,12 @@ type Experiment struct {
 
 // ChaosState defines the number of chaos experiments of each phase
 type ChaosState struct {
-	Total    int `json:"total"`
-	Running  int `json:"running"`
-	Waiting  int `json:"waiting"`
-	Paused   int `json:"paused"`
-	Failed   int `json:"failed"`
-	Finished int `json:"finished"`
+	Total    int `json:"Total"`
+	Running  int `json:"Running"`
+	Waiting  int `json:"Waiting"`
+	Paused   int `json:"Paused"`
+	Failed   int `json:"Failed"`
+	Finished int `json:"Finished"`
 }
 
 // Service defines a handler service for experiments.
