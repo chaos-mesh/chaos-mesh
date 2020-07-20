@@ -4,9 +4,9 @@ metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.2.5
   creationTimestamp: null
-  name: iochaos.pingcap.com
+  name: iochaos.chaos-mesh.org
 spec:
-  group: pingcap.com
+  group: chaos-mesh.org
   names:
     kind: IoChaos
     listKind: IoChaosList
@@ -266,9 +266,9 @@ metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.2.5
   creationTimestamp: null
-  name: kernelchaos.pingcap.com
+  name: kernelchaos.chaos-mesh.org
 spec:
-  group: pingcap.com
+  group: chaos-mesh.org
   names:
     kind: KernelChaos
     listKind: KernelChaosList
@@ -548,9 +548,9 @@ metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.2.5
   creationTimestamp: null
-  name: networkchaos.pingcap.com
+  name: networkchaos.chaos-mesh.org
 spec:
-  group: pingcap.com
+  group: chaos-mesh.org
   names:
     kind: NetworkChaos
     listKind: NetworkChaosList
@@ -974,9 +974,9 @@ metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.2.5
   creationTimestamp: null
-  name: podchaos.pingcap.com
+  name: podchaos.chaos-mesh.org
 spec:
-  group: pingcap.com
+  group: chaos-mesh.org
   names:
     kind: PodChaos
     listKind: PodChaosList
@@ -1213,9 +1213,9 @@ metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.2.5
   creationTimestamp: null
-  name: stresschaos.pingcap.com
+  name: stresschaos.chaos-mesh.org
 spec:
-  group: pingcap.com
+  group: chaos-mesh.org
   names:
     kind: StressChaos
     listKind: StressChaosList
@@ -1489,9 +1489,9 @@ metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.2.5
   creationTimestamp: null
-  name: timechaos.pingcap.com
+  name: timechaos.chaos-mesh.org
 spec:
-  group: pingcap.com
+  group: chaos-mesh.org
   names:
     kind: TimeChaos
     listKind: TimeChaosList

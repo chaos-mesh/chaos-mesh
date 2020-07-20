@@ -1,4 +1,4 @@
-// Copyright 2020 PingCAP, Inc.
+// Copyright 2020 Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ import (
 	. "github.com/onsi/gomega"
 	"sigs.k8s.io/controller-runtime/pkg/envtest"
 
-	"github.com/pingcap/chaos-mesh/test/pkg/timer"
+	"github.com/chaos-mesh/chaos-mesh/test/pkg/timer"
 )
 
 func TestModifyTime(t *testing.T) {

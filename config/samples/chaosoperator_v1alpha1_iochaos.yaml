@@ -1,4 +1,4 @@
-apiVersion: chaosmesh.pingcap.com/v1alpha1
+apiVersion: chaosmesh.chaos-mesh.org/v1alpha1
 kind: IoChaos
 metadata:
   name: iochaos-sample

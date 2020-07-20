@@ -1,6 +1,6 @@
 version: "2"
-domain: pingcap.com
-repo: github.com/pingcap/chaos-mesh
+domain: chaos-mesh.org
+repo: github.com/chaos-mesh/chaos-mesh
 resources:
 - group: chaosmesh
   version: v1alpha1
