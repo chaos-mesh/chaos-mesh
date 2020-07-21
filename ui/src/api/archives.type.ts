@@ -1,5 +1,5 @@
 export interface Archive {
-  UID: string
+  UID: uuid
   Kind: string
   Namespace: string
   Name: string

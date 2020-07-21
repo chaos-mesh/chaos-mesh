@@ -87,7 +87,7 @@ const ScheduleStep: React.FC = () => {
           helperText="You can use https://crontab.guru/ to help generate your cron syntax and confirm what time it will run"
         />
 
-        {values.target.pod_chaos.action !== 'pod-failure' && (
+        {values.target.pod_chaos.action !== 'pod-kill' && values.target.pod_chaos.action !== 'container-kill' && (
           <TextField
             id="scheduler.duration"
             name="scheduler.duration"

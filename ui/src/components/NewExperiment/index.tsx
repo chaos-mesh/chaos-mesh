@@ -1,77 +1,85 @@
-import { Box, Button, Container, Drawer, Fab, useMediaQuery, useTheme } from '@material-ui/core'
-import { Form, Formik, FormikHelpers, useFormikContext } from 'formik'
-import React, { useState } from 'react'
-import { StepperProvider, useStepperContext } from './Context'
-import { Theme, createStyles, makeStyles } from '@material-ui/core/styles'
+import { Box, Button, Divider, FormControlLabel, Grid, Paper, Radio, RadioGroup, Typography } from '@material-ui/core'
+import { Form, Formik, FormikHelpers } from 'formik'
+import React, { useEffect, useState } from 'react'
 import { defaultExperimentSchema, validationSchema } from './constants'
-import { parseSubmitValues, yamlToExperiments } from 'lib/formikhelpers'
+import { parseLoaded, parseSubmit, yamlToExperiment } from 'lib/formikhelpers'
 import { setAlert, setAlertOpen } from 'slices/globalStatus'
 
-import AddIcon from '@material-ui/icons/Add'
-import CancelIcon from '@material-ui/icons/Cancel'
+// import { Archive } from 'api/archives.type'
 import CloudUploadOutlinedIcon from '@material-ui/icons/CloudUploadOutlined'
 import { Experiment } from './types'
-import PublishIcon from '@material-ui/icons/Publish'
+import { Experiment as ExperimentResponse } from 'api/experiments.type'
+import PaperTop from 'components/PaperTop'
+import SkeletonN from 'components/SkeletonN'
 import Stepper from './Stepper'
+import { StepperProvider } from './Context'
 import api from 'api'
 import { setNeedToRefreshExperiments } from 'slices/experiments'
 import { useHistory } from 'react-router-dom'
 import { useStoreDispatch } from 'store'
 import yaml from 'js-yaml'
 
-const useStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    container: {
-      height: '100%',
-      padding: theme.spacing(6),
-    },
-    new: {
-      [theme.breakpoints.down('xs')]: {
-        display: 'none',
-      },
-    },
-    fab: {
-      [theme.breakpoints.up('sm')]: {
-        display: 'none',
-      },
-      [theme.breakpoints.down('xs')]: {
-        position: 'fixed',
-        bottom: theme.spacing(7.5),
-        right: theme.spacing(3),
-        display: 'flex',
-        background: theme.palette.primary.main,
-        color: '#fff',
-        zIndex: 1101, // .MuiAppBar-root z-index: 1100
-      },
-    },
-    cancel: {
-      zIndex: 1,
-    },
-  })
+const Skeleton3 = () => <SkeletonN n={3} />
+
+const LoadWrapper: React.FC<{ title: string }> = ({ title, children }) => (
+  <Box mb={6}>
+    <Box mb={6}>
+      <Typography>{title}</Typography>
+    </Box>
+    {children}
+  </Box>
 )
 
 interface ActionsProps {
-  toggleDrawer: () => void
   setInitialValues: (initialValues: Experiment) => void
 }
 
-const Actions = ({ toggleDrawer, setInitialValues }: ActionsProps) => {
-  const theme = useTheme()
-  const isTabletScreen = useMediaQuery(theme.breakpoints.down('sm'))
-  const size = isTabletScreen ? ('small' as 'small') : ('medium' as 'medium')
-  const classes = useStyles()
-
-  const { isSubmitting, resetForm } = useFormikContext()
-
+const Actions = ({ setInitialValues }: ActionsProps) => {
   const dispatch = useStoreDispatch()
 
-  const { state } = useStepperContext()
+  const [experiments, setExperiments] = useState<ExperimentResponse[] | null>(null)
+  // const [archives, setArchives] = useState<Archive[] | null>(null)
+  const [experimentRadio, setExperimentRadio] = useState('')
+  // const [archiveRadio, setArchiveRadio] = useState('')
 
-  const handleCancel = () => {
-    toggleDrawer()
-    resetForm()
-    setInitialValues(defaultExperimentSchema)
+  const onExperimentRadioChange = (e: any) => {
+    const kindNamespaceName = e.target.value
+    const [kind, namespace, name] = kindNamespaceName.split('/')
+
+    setExperimentRadio(kindNamespaceName)
+
+    api.experiments
+      .detail(namespace, name, kind)
+      .then(({ data }) => {
+        setInitialValues(parseLoaded(data))
+      })
+      .catch(console.log)
   }
+
+  // const onArchiveRadioChange = (e: any) => {
+  //   const uuid = e.target.value
+
+  //   setArchiveRadio(uuid)
+  // }
+
+  const fetchExperiments = () => {
+    api.experiments
+      .experiments()
+      .then(({ data }) => setExperiments(data))
+      .catch(console.log)
+  }
+
+  // const fetchArchives = () => {
+  //   api.archives
+  //     .archives()
+  //     .then(({ data }) => setArchives(data))
+  //     .catch(console.log)
+  // }
+
+  useEffect(() => {
+    fetchExperiments()
+    // fetchArchives()
+  }, [])
 
   const handleUploadYAML = (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files![0]
@@ -79,7 +87,7 @@ const Actions = ({ toggleDrawer, setInitialValues }: ActionsProps) => {
     const reader = new FileReader()
     reader.onload = function (e) {
       try {
-        const y = yamlToExperiments(yaml.safeLoad(e.target!.result as string))
+        const y = yamlToExperiment(yaml.safeLoad(e.target!.result as string))
         setInitialValues(y)
         dispatch(
           setAlert({
@@ -103,51 +111,66 @@ const Actions = ({ toggleDrawer, setInitialValues }: ActionsProps) => {
   }
 
   return (
-    <Box display="flex" justifyContent="space-between" marginBottom={6}>
-      <Button
-        className={classes.cancel}
-        variant="outlined"
-        size={size}
-        startIcon={<CancelIcon />}
-        onClick={handleCancel}
-      >
-        Cancel
-      </Button>
-      <Box display="flex">
-        <Box mr={3}>
-          <Button variant="outlined" component="label" size={size} startIcon={<CloudUploadOutlinedIcon />}>
-            Yaml File
-            <input type="file" style={{ display: 'none' }} onChange={handleUploadYAML} />
-          </Button>
-        </Box>
-        <Button
-          type="submit"
-          variant="contained"
-          size={size}
-          color="primary"
-          startIcon={<PublishIcon />}
-          disabled={state.activeStep < 4 || isSubmitting}
-        >
-          Submit
-        </Button>
+    <Box p={6}>
+      <LoadWrapper title="Load From Existing Experiments">
+        <RadioGroup value={experimentRadio} onChange={onExperimentRadioChange}>
+          {experiments && experiments.length > 0 ? (
+            experiments.map((e) => (
+              <FormControlLabel
+                key={e.Name}
+                value={`${e.Kind}/${e.Namespace}/${e.Name}`}
+                control={<Radio color="primary" />}
+                label={e.Name}
+              />
+            ))
+          ) : experiments?.length === 0 ? (
+            <Typography variant="body2">No experiments found.</Typography>
+          ) : (
+            <Skeleton3 />
+          )}
+        </RadioGroup>
+      </LoadWrapper>
+
+      {/* <Box my={6}>
+        <Divider />
       </Box>
+
+      <LoadWrapper title="Load From Archives">
+        <RadioGroup>
+          {archives && archives.length > 0 ? (
+            archives.map((a) => (
+              <FormControlLabel key={a.UID} value={a.Name} control={<Radio color="primary" />} label={a.Name} />
+            ))
+          ) : archives?.length === 0 ? (
+            <Typography variant="body2">No archives found.</Typography>
+          ) : (
+            <Skeleton3 />
+          )}
+        </RadioGroup>
+      </LoadWrapper> */}
+
+      <Box my={6}>
+        <Divider />
+      </Box>
+
+      <LoadWrapper title="Load From YAML File">
+        <Button component="label" variant="outlined" size="small" startIcon={<CloudUploadOutlinedIcon />}>
+          Upload
+          <input type="file" style={{ display: 'none' }} onChange={handleUploadYAML} />
+        </Button>
+      </LoadWrapper>
     </Box>
   )
 }
 
 export default function NewExperiment() {
-  const theme = useTheme()
-  const isTabletScreen = useMediaQuery(theme.breakpoints.down('sm'))
-  const classes = useStyles()
   const history = useHistory()
   const dispatch = useStoreDispatch()
 
   const [initialValues, setInitialValues] = useState<Experiment>(defaultExperimentSchema)
-  const [open, setOpen] = useState(false)
-  const toggleDrawer = () => setOpen(!open)
 
   const handleOnSubmit = (values: Experiment, actions: FormikHelpers<Experiment>) => {
-    const parsedValues = parseSubmitValues(values)
+    const parsedValues = parseSubmit(values)
 
     if (process.env.NODE_ENV === 'development') {
       console.debug('Debug parsedValues:', parsedValues)
@@ -171,45 +194,30 @@ export default function NewExperiment() {
         }
       })
       .catch(console.log)
-      .finally(toggleDrawer)
   }
 
   return (
-    <>
-      <Button
-        className={classes.new}
-        variant="outlined"
-        size={isTabletScreen ? ('small' as 'small') : ('medium' as 'medium')}
-        startIcon={<AddIcon />}
-        onClick={toggleDrawer}
+    <StepperProvider>
+      <Formik
+        enableReinitialize
+        initialValues={initialValues}
+        validationSchema={validationSchema}
+        onSubmit={handleOnSubmit}
       >
-        New Experiment
-      </Button>
-      <Fab className={classes.fab} color="inherit" size="medium" aria-label="New experiment">
-        <AddIcon onClick={toggleDrawer} />
-      </Fab>
-      <Drawer
-        anchor="right"
-        open={open}
-        onClose={toggleDrawer}
-        PaperProps={{ style: { width: isTabletScreen ? '100vw' : '50vw' } }}
-      >
-        <StepperProvider>
-          <Formik
-            enableReinitialize
-            initialValues={initialValues}
-            validationSchema={validationSchema}
-            onSubmit={handleOnSubmit}
-          >
-            <Container className={classes.container}>
+        <Paper variant="outlined" style={{ height: '100%' }}>
+          <PaperTop title="New Experiment" />
+          <Grid container>
+            <Grid item xs={12} sm={8}>
               <Form>
-                <Actions toggleDrawer={toggleDrawer} setInitialValues={setInitialValues} />
                 <Stepper />
               </Form>
-            </Container>
-          </Formik>
-        </StepperProvider>
-      </Drawer>
-    </>
+            </Grid>
+            <Grid item xs={12} sm={4}>
+              <Actions setInitialValues={setInitialValues} />
+            </Grid>
+          </Grid>
+        </Paper>
+      </Formik>
+    </StepperProvider>
   )
 }
