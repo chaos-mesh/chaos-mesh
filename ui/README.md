@@ -74,13 +74,13 @@ box-shadow: none;
 
 ### Be Compact
 
-**Don't include no used deps.**
+**Don't include unused deps.**
 
 **Don't let your code be too long-winded, there will be a lot of elegant writing.**
 
 ### Necessary Test
 
-**Every new features must have a unit test.**
+**Every new feature must have a unit test.**
 
 ## Authors
 
@@ -88,4 +88,4 @@ Originally designed by PingCAP FE.
 
 ## License
 
-Same as chaos mesh
+Same as chaos mesh.
