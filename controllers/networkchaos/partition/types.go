@@ -217,7 +217,7 @@ func (r *Reconciler) BlockSet(ctx context.Context, pods []v1.Pod, set *pb.IpSet,
 		}
 
 		g.Go(func() error {
-			return iptable.FlushIptablesChains(ctx, r.Client, pod, chainName, direction, []string{set.Name})
+			return iptable.SetIptablesChains(ctx, r.Client, pod, chainName, direction, []string{set.Name})
 		})
 	}
 	return g.Wait()
@@ -283,7 +283,7 @@ func (r *Reconciler) cleanFinalizersAndRecover(ctx context.Context, networkchaos
 			chainDirection = pb.Chain_OUTPUT
 		}
 
-		err = iptable.FlushIptablesChains(ctx, r.Client, &pod, chainName, chainDirection, nil)
+		err = iptable.SetIptablesChains(ctx, r.Client, &pod, chainName, chainDirection, nil)
 		if err != nil {
 			r.Log.Error(err, "error while deleting iptables rules")
 			result = multierror.Append(result, err)

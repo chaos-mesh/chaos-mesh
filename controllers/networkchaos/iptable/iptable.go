@@ -26,7 +26,7 @@ import (
 )
 
 // FlushIptablesChain makes grpc call to chaosdaemon to flush iptable
-func FlushIptablesChains(ctx context.Context, c client.Client, pod *v1.Pod, chainsName string, direction pb.Chain_Direction, set []string) error {
+func SetIptablesChains(ctx context.Context, c client.Client, pod *v1.Pod, chainsName string, direction pb.Chain_Direction, set []string) error {
 	pbClient, err := utils.NewChaosDaemonClient(ctx, c, pod, common.ControllerCfg.ChaosDaemonPort)
 	if err != nil {
 		return err
@@ -39,7 +39,7 @@ func FlushIptablesChains(ctx context.Context, c client.Client, pod *v1.Pod, chai
 
 	containerID := pod.Status.ContainerStatuses[0].ContainerID
 
-	_, err = pbClient.FlushIptablesChains(ctx, &pb.IptablesChainsRequest{
+	_, err = pbClient.SetIptablesChains(ctx, &pb.IptablesChainsRequest{
 		Chains: []*pb.Chain{{
 			Name:      chainsName,
 			Direction: direction,

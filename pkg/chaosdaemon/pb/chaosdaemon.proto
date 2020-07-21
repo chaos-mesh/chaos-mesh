@@ -21,7 +21,7 @@ service ChaosDaemon {
 
   rpc FlushIpSets(IpSetsRequest) returns (google.protobuf.Empty) {}
   
-  rpc FlushIptablesChains(IptablesChainsRequest) returns (google.protobuf.Empty) {}
+  rpc SetIptablesChains(IptablesChainsRequest) returns (google.protobuf.Empty) {}
 
   rpc SetTimeOffset(TimeRequest) returns (google.protobuf.Empty) {}
   rpc RecoverTimeOffset(TimeRequest) returns (google.protobuf.Empty) {}

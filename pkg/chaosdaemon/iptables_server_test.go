@@ -40,7 +40,7 @@ var _ = Describe("iptables server", func() {
 				Expect(cmd).To(Equal(iptablesCmd))
 				return exec.Command("echo", "mock command")
 			})()
-			_, err := s.FlushIptablesChains(context.TODO(), &pb.IptablesChainsRequest{
+			_, err := s.SetIptablesChains(context.TODO(), &pb.IptablesChainsRequest{
 				Chains: []*pb.Chain{{
 					Name:      "TEST",
 					Direction: pb.Chain_INPUT,
@@ -54,7 +54,7 @@ var _ = Describe("iptables server", func() {
 		It("should fail on get pid", func() {
 			const errorStr = "mock error on Task()"
 			defer mock.With("TaskError", errors.New(errorStr))()
-			_, err := s.FlushIptablesChains(context.TODO(), &pb.IptablesChainsRequest{
+			_, err := s.SetIptablesChains(context.TODO(), &pb.IptablesChainsRequest{
 				Chains: []*pb.Chain{{
 					Name:      "TEST",
 					Direction: pb.Chain_INPUT,
@@ -67,7 +67,7 @@ var _ = Describe("iptables server", func() {
 		})
 
 		It("should fail on unknown rule direction", func() {
-			_, err := s.FlushIptablesChains(context.TODO(), &pb.IptablesChainsRequest{
+			_, err := s.SetIptablesChains(context.TODO(), &pb.IptablesChainsRequest{
 				Chains: []*pb.Chain{{
 					Name:      "TEST",
 					Direction: pb.Chain_INPUT,
@@ -80,7 +80,7 @@ var _ = Describe("iptables server", func() {
 		})
 
 		It("should fail on unknow rule action", func() {
-			_, err := s.FlushIptablesChains(context.TODO(), &pb.IptablesChainsRequest{
+			_, err := s.SetIptablesChains(context.TODO(), &pb.IptablesChainsRequest{
 				Chains: []*pb.Chain{{
 					Name:      "TEST",
 					Direction: pb.Chain_INPUT,
@@ -102,7 +102,7 @@ exit 1
 			defer mock.With("MockWithNetNs", func(ctx context.Context, ns, cmd string, args ...string) *exec.Cmd {
 				return exec.Command("mockfail.sh")
 			})()
-			_, err = s.FlushIptablesChains(context.TODO(), &pb.IptablesChainsRequest{
+			_, err = s.SetIptablesChains(context.TODO(), &pb.IptablesChainsRequest{
 				Chains: []*pb.Chain{{
 					Name:      "TEST",
 					Direction: pb.Chain_INPUT,
