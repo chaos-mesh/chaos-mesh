@@ -9,7 +9,7 @@ import styles from './styles.module.css';
 import CodeSnippet from "@site/src/theme/CodeSnippet";
 
 const install = `# Install on Kubernetes 
-curl -sSL https://raw.githubusercontent.com/pingcap/chaos-mesh/master/install.sh | bash`
+curl -sSL https://raw.githubusercontent.com/chaos-mesh/chaos-mesh/master/install.sh | bash`
 
 function Home() {
   const context = useDocusaurusContext();
@@ -62,6 +62,10 @@ function Home() {
             </div>
           </div>
         </div>
+          <div className="text--center">
+            <p className={styles.cncfTitle}>Chaos Mesh® is a <a href="https://cncf.io/">Cloud Native Computing Foundation</a> sandbox project</p>
+            <img className={styles.cncfLogo} src="img/cncf-color.svg" alt="cncf" />
+          </div>
       </main>
     </Layout>
   );

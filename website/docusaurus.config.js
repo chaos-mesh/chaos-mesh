@@ -30,7 +30,7 @@ module.exports = {
         },
         {to: 'blog', label: 'Blog', position: 'left'},
         {
-          href: 'https://github.com/pingcap/chaos-mesh',
+          href: 'https://github.com/chaos-mesh/chaos-mesh',
           label: 'GitHub',
           position: 'right',
         },
@@ -61,7 +61,7 @@ module.exports = {
             },
             {
               label: 'Slack',
-              href: 'https://pingcap.com/tidbslack',
+              href: 'https://chaos-mesh.org/tidbslack',
             },
             {
               label: 'Stack Overflow',
@@ -78,12 +78,12 @@ module.exports = {
             },
             {
               label: 'GitHub',
-              href: 'https://github.com/pingcap/chaos-mesh',
+              href: 'https://github.com/chaos-mesh/chaos-mesh',
             },
           ],
         },
       ],
-      copyright: `Copyright © ${new Date().getFullYear()} PingCAP, Inc. Built with Docusaurus.`,
+      copyright: `<strong>© Chaos Mesh® Authors ${new Date().getFullYear()} | Documentation Distributed under CC-BY-4.0 </strong> <br> <br> © ${new Date().getFullYear()} The Linux Foundation. All rights reserved. The Linux Foundation has registered trademarks and uses trademarks. For a list of trademarks of The Linux Foundation, please see our <a href="https://www.linuxfoundation.org/trademark-usage/"> Trademark Usage page</a>.`,
     },
   },
   presets: [
@@ -96,13 +96,13 @@ module.exports = {
           sidebarPath: require.resolve('./sidebars.js'),
           // Please change this to your repo.
           editUrl:
-            'https://github.com/pingcap/chaos-mesh/edit/master/website/',
+            'https://github.com/chaos-mesh/chaos-mesh/edit/master/website/',
         },
         blog: {
           showReadingTime: true,
           // Please change this to your repo.
           editUrl:
-            'https://github.com/pingcap/chaos-mesh/edit/master/website/blog/',
+            'https://github.com/chaos-mesh/chaos-mesh/edit/master/website/blog/',
         },
         theme: {
           customCss: require.resolve('./src/css/custom.css'),

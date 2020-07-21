@@ -34,7 +34,7 @@ GOTEST := TEST_USE_EXISTING_CLUSTER=false NO_PROXY="${NO_PROXY},testhost" go tes
 SHELL    := /usr/bin/env bash
 
 PACKAGE_LIST := go list ./... | grep -vE "chaos-mesh/test|pkg/ptrace|zz_generated|vendor"
-PACKAGE_DIRECTORIES := $(PACKAGE_LIST) | sed 's|github.com/pingcap/chaos-mesh/||'
+PACKAGE_DIRECTORIES := $(PACKAGE_LIST) | sed 's|github.com/chaos-mesh/chaos-mesh/||'
 
 # Produce CRDs that work back to Kubernetes 1.11 (no version conversion)
 CRD_OPTIONS ?= "crd:trivialVersions=true"
@@ -148,7 +148,7 @@ gosec-scan: $(GOBIN)/gosec
 	$(GOENV) $< ./api/... ./controllers/... ./pkg/... || echo "*** sec-scan failed: known-issues ***"
 
 groupimports: $(GOBIN)/goimports
-	$< -w -l -local github.com/pingcap/chaos-mesh $$($(PACKAGE_DIRECTORIES))
+	$< -w -l -local github.com/chaos-mesh/chaos-mesh $$($(PACKAGE_DIRECTORIES))
 
 failpoint-enable: $(GOBIN)/failpoint-ctl
 # Converting gofail failpoints...
@@ -184,6 +184,9 @@ taily-build-clean:
 	docker kill taily-build && docker rm taily-build || exit 0
 
 image: image-chaos-daemon image-chaos-mesh image-chaos-dashboard image-chaos-fs image-chaos-scripts
+
+image-chaos-mesh-protoc:
+	docker build -t pingcap/chaos-mesh-protoc ${DOCKER_BUILD_ARGS} ./hack/protoc
 
 ifneq ($(TAILY_BUILD),)
 image-binary: taily-build
@@ -246,8 +249,19 @@ yaml: manifests ensure-kustomize
 	$(KUSTOMIZE_BIN) build config/default > manifests/crd.yaml
 
 # Generate Go files from Chaos Mesh proto files.
+ifeq ($(IN_DOCKER),1)
 proto:
-	hack/genproto.sh
+	for dir in pkg/chaosdaemon pkg/chaosfs; do\
+		protoc -I $$dir/pb $$dir/pb/*.proto --go_out=plugins=grpc:$$dir/pb --go_out=./$$dir/pb ;\
+	done
+else
+proto: image-chaos-mesh-protoc
+	docker run --rm --workdir /mnt/ --volume $(shell pwd):/mnt \
+		--user $(shell id -u):$(shell id -g) --env IN_DOCKER=1 pingcap/chaos-mesh-protoc \
+		/usr/bin/make proto
+	
+	make fmt
+endif
 
 update-install-script:
 	hack/update_install_script.sh

@@ -1,4 +1,4 @@
-// Copyright 2020 PingCAP, Inc.
+// Copyright 2020 Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -26,11 +26,11 @@ import (
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-playground/validator/v10"
 
-	apiutils "github.com/pingcap/chaos-mesh/pkg/apiserver/utils"
-	"github.com/pingcap/chaos-mesh/pkg/apivalidator"
-	"github.com/pingcap/chaos-mesh/pkg/config"
-	"github.com/pingcap/chaos-mesh/pkg/swaggerserver"
-	"github.com/pingcap/chaos-mesh/pkg/uiserver"
+	apiutils "github.com/chaos-mesh/chaos-mesh/pkg/apiserver/utils"
+	"github.com/chaos-mesh/chaos-mesh/pkg/apivalidator"
+	"github.com/chaos-mesh/chaos-mesh/pkg/config"
+	"github.com/chaos-mesh/chaos-mesh/pkg/swaggerserver"
+	"github.com/chaos-mesh/chaos-mesh/pkg/uiserver"
 
 	ctrl "sigs.k8s.io/controller-runtime"
 )

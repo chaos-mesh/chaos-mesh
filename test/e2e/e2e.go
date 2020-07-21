@@ -1,4 +1,4 @@
-// Copyright 2020 PingCAP, Inc.
+// Copyright 2020 Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -30,8 +30,8 @@ import (
 	e2epod "k8s.io/kubernetes/test/e2e/framework/pod"
 	utilnet "k8s.io/utils/net"
 
-	"github.com/pingcap/chaos-mesh/test"
-	e2econfig "github.com/pingcap/chaos-mesh/test/e2e/config"
+	"github.com/chaos-mesh/chaos-mesh/test"
+	e2econfig "github.com/chaos-mesh/chaos-mesh/test/e2e/config"
 
 	// ensure auth plugins are loaded
 	_ "k8s.io/client-go/plugin/pkg/client/auth"

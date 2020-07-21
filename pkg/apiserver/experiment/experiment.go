@@ -1,4 +1,4 @@
-// Copyright 2020 PingCAP, Inc.
+// Copyright 2020 Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -25,11 +25,11 @@ import (
 	"github.com/jinzhu/gorm"
 	"golang.org/x/sync/errgroup"
 
-	"github.com/pingcap/chaos-mesh/api/v1alpha1"
-	"github.com/pingcap/chaos-mesh/controllers/common"
-	"github.com/pingcap/chaos-mesh/pkg/apiserver/utils"
-	"github.com/pingcap/chaos-mesh/pkg/config"
-	"github.com/pingcap/chaos-mesh/pkg/core"
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/controllers/common"
+	"github.com/chaos-mesh/chaos-mesh/pkg/apiserver/utils"
+	"github.com/chaos-mesh/chaos-mesh/pkg/config"
+	"github.com/chaos-mesh/chaos-mesh/pkg/core"
 
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -51,12 +51,12 @@ type Experiment struct {
 
 // ChaosState defines the number of chaos experiments of each phase
 type ChaosState struct {
-	Total    int `json:"total"`
-	Running  int `json:"running"`
-	Waiting  int `json:"waiting"`
-	Paused   int `json:"paused"`
-	Failed   int `json:"failed"`
-	Finished int `json:"finished"`
+	Total    int `json:"Total"`
+	Running  int `json:"Running"`
+	Waiting  int `json:"Waiting"`
+	Paused   int `json:"Paused"`
+	Failed   int `json:"Failed"`
+	Finished int `json:"Finished"`
 }
 
 // Service defines a handler service for experiments.
@@ -166,13 +166,13 @@ func (s *SelectorInfo) ParseSelector() v1alpha1.SelectorSpec {
 
 // TargetInfo defines the information of target objects.
 type TargetInfo struct {
-	Kind         string           `json:"kind" binding:"required,oneof=PodChaos NetworkChaos IoChaos KernelChaos TimeChaos StressChaos"`
-	PodChaos     PodChaosInfo     `json:"pod_chaos"`
-	NetworkChaos NetworkChaosInfo `json:"network_chaos"`
-	IOChaos      IOChaosInfo      `json:"io_chaos"`
-	KernelChaos  KernelChaosInfo  `json:"kernel_chaos"`
-	TimeChaos    TimeChaosInfo    `json:"time_chaos"`
-	StressChaos  StressChaosInfo  `json:"stress_chaos"`
+	Kind         string            `json:"kind" binding:"required,oneof=PodChaos NetworkChaos IoChaos KernelChaos TimeChaos StressChaos"`
+	PodChaos     *PodChaosInfo     `json:"pod_chaos,omitempty"`
+	NetworkChaos *NetworkChaosInfo `json:"network_chaos,omitempty"`
+	IOChaos      *IOChaosInfo      `json:"io_chaos,omitempty"`
+	KernelChaos  *KernelChaosInfo  `json:"kernel_chaos,omitempty"`
+	TimeChaos    *TimeChaosInfo    `json:"time_chaos,omitempty"`
+	StressChaos  *StressChaosInfo  `json:"stress_chaos,omitempty"`
 }
 
 // SchedulerInfo defines the scheduler information.
@@ -490,7 +490,8 @@ func (s *Service) getPodChaosDetail(namespace string, name string) (ExperimentIn
 			Value: chaos.Spec.Value,
 		},
 		Target: TargetInfo{
-			PodChaos: PodChaosInfo{
+			Kind: v1alpha1.KindPodChaos,
+			PodChaos: &PodChaosInfo{
 				Action:        string(chaos.Spec.Action),
 				ContainerName: chaos.Spec.ContainerName,
 			},
@@ -534,7 +535,8 @@ func (s *Service) getIoChaosDetail(namespace string, name string) (ExperimentInf
 			Value: chaos.Spec.Value,
 		},
 		Target: TargetInfo{
-			IOChaos: IOChaosInfo{
+			Kind: v1alpha1.KindIOChaos,
+			IOChaos: &IOChaosInfo{
 				Action:  string(chaos.Spec.Action),
 				Addr:    chaos.Spec.Addr,
 				Delay:   chaos.Spec.Delay,
@@ -583,7 +585,8 @@ func (s *Service) getNetworkChaosDetail(namespace string, name string) (Experime
 			Value: chaos.Spec.Value,
 		},
 		Target: TargetInfo{
-			NetworkChaos: NetworkChaosInfo{
+			Kind: v1alpha1.KindNetworkChaos,
+			NetworkChaos: &NetworkChaosInfo{
 				Action:    string(chaos.Spec.Action),
 				Delay:     chaos.Spec.Delay,
 				Loss:      chaos.Spec.Loss,
@@ -647,7 +650,8 @@ func (s *Service) getTimeChaosDetail(namespace string, name string) (ExperimentI
 			Value: chaos.Spec.Value,
 		},
 		Target: TargetInfo{
-			TimeChaos: TimeChaosInfo{
+			Kind: v1alpha1.KindTimeChaos,
+			TimeChaos: &TimeChaosInfo{
 				TimeOffset:     chaos.Spec.TimeOffset,
 				ClockIDs:       chaos.Spec.ClockIds,
 				ContainerNames: chaos.Spec.ContainerNames,
@@ -692,7 +696,8 @@ func (s *Service) getKernelChaosDetail(namespace string, name string) (Experimen
 			Value: chaos.Spec.Value,
 		},
 		Target: TargetInfo{
-			KernelChaos: KernelChaosInfo{
+			Kind: v1alpha1.KindKernelChaos,
+			KernelChaos: &KernelChaosInfo{
 				FailKernRequest: chaos.Spec.FailKernRequest,
 			},
 		},
@@ -735,7 +740,8 @@ func (s *Service) getStressChaosDetail(namespace string, name string) (Experimen
 			Value: chaos.Spec.Value,
 		},
 		Target: TargetInfo{
-			StressChaos: StressChaosInfo{
+			Kind: v1alpha1.KindStressChaos,
+			StressChaos: &StressChaosInfo{
 				Stressors:         chaos.Spec.Stressors,
 				StressngStressors: chaos.Spec.StressngStressors,
 			},

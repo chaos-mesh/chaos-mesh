@@ -1,4 +1,4 @@
-// Copyright 2020 PingCAP, Inc.
+// Copyright 2020 Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,8 +21,8 @@ import (
 
 	"github.com/jinzhu/gorm"
 
-	"github.com/pingcap/chaos-mesh/pkg/core"
-	"github.com/pingcap/chaos-mesh/pkg/store/dbstore"
+	"github.com/chaos-mesh/chaos-mesh/pkg/core"
+	"github.com/chaos-mesh/chaos-mesh/pkg/store/dbstore"
 
 	ctrl "sigs.k8s.io/controller-runtime"
 )
@@ -421,6 +421,16 @@ func (e *eventStore) getUID(_ context.Context, ns, name string) (string, error) 
 		}
 	}
 	return UID, nil
+}
+
+// UpdateIncompleteEvents updates the incomplete event by the namespace and name
+func (e *eventStore) UpdateIncompleteEvents(_ context.Context, ns, name string) error {
+	return e.db.Model(core.Event{}).
+		Where(
+			"namespace = ? and experiment = ? and finish_time IS NULL",
+			ns, name).
+		Update("finish_time", time.Now()).
+		Error
 }
 
 func constructQueryArgs(experimentName, experimentNamespace, uid, kind, startTime, finishTime string) (string, []interface{}) {

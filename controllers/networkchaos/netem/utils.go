@@ -1,4 +1,4 @@
-// Copyright 2020 PingCAP, Inc.
+// Copyright 2020 Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@ package netem
 import (
 	"net"
 
-	"github.com/pingcap/chaos-mesh/controllers/networkchaos/netutils"
+	"github.com/chaos-mesh/chaos-mesh/controllers/networkchaos/netutils"
 )
 
 func resolveCidrs(name string) (string, error) {

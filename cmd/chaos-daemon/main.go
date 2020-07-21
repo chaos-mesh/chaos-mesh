@@ -1,4 +1,4 @@
-// Copyright 2019 PingCAP, Inc.
+// Copyright 2019 Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,8 +19,8 @@ import (
 
 	"github.com/prometheus/client_golang/prometheus"
 
-	"github.com/pingcap/chaos-mesh/pkg/chaosdaemon"
-	"github.com/pingcap/chaos-mesh/pkg/version"
+	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon"
+	"github.com/chaos-mesh/chaos-mesh/pkg/version"
 
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"

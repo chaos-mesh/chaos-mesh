@@ -1,4 +1,4 @@
-apiVersion: pingcap.com/v1alpha1
+apiVersion: chaos-mesh.org/v1alpha1
 kind: NetworkChaos
 metadata:
   name: network-loss-example
