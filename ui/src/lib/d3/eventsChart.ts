@@ -3,7 +3,6 @@ import * as d3 from 'd3'
 import { Event } from 'api/events.type'
 import _debounce from 'lodash.debounce'
 import day from 'lib/dayjs'
-import insertCommonStyle from './insertCommonStyle'
 import wrapText from './wrapText'
 
 const margin = {
@@ -22,17 +21,10 @@ export default function gen({
   events: Event[]
   selectEvent?: (e: Event) => void
 }) {
-  insertCommonStyle()
-
   let width = root.offsetWidth
   const height = root.offsetHeight
 
-  const svg = d3
-    .select(root)
-    .append('svg')
-    .attr('class', 'chaos-events-chart')
-    .attr('width', width)
-    .attr('height', height)
+  const svg = d3.select(root).append('svg').attr('class', 'chaos-chart').attr('width', width).attr('height', height)
 
   const now = day(events[events.length - 1].StartTime).add(0.5, 'h')
 
@@ -58,10 +50,15 @@ export default function gen({
     .scaleBand()
     .domain(allExperiments)
     .range([0, height - margin.top - margin.bottom])
-    .padding(0.25)
+    .padding(0.5)
   const yAxis = d3.axisLeft(y).tickFormat('' as any)
   // gYAxis
-  svg.append('g').attr('class', 'axis').attr('transform', `translate(${margin.left}, ${margin.top})`).call(yAxis)
+  svg
+    .append('g')
+    .attr('class', 'axis')
+    .attr('transform', `translate(${margin.left}, ${margin.top})`)
+    .call(yAxis)
+    .call((g) => g.select('.domain').remove())
 
   // clipX
   svg
@@ -102,23 +99,20 @@ export default function gen({
     })
   legends
     .insert('div')
-    .attr('style', 'color: rgba(0, 0, 0, 0.72); font-size: 0.625rem;')
+    .attr('style', 'color: rgba(0, 0, 0, 0.72); font-size: 0.75rem;')
     .text((d) => d)
   legends
     .append('div')
     .attr(
       'style',
-      (d) =>
-        `width: 12px; height: 12px; margin-left: 8px; background: ${colorPalette(
-          d
-        )}; border-radius: 3px; cursor: pointer;`
+      (d) => `width: 14px; height: 14px; margin-left: 8px; background: ${colorPalette(d)}; cursor: pointer;`
     )
 
   function genRectWidth(d: Event) {
     let width = d.FinishTime ? x(day(d.FinishTime)) - x(day(d.StartTime)) : x(day()) - x(day(d.StartTime))
 
     if (width === 0) {
-      width = 20
+      width = 1
     }
 
     return width
@@ -136,8 +130,7 @@ export default function gen({
     .attr('fill', (d) => colorPalette(d.Experiment))
     .style('cursor', 'pointer')
 
-  const zoom = d3.zoom().scaleExtent([0.25, 5]).on('zoom', zoomd)
-  svg.call(zoom as any)
+  const zoom = d3.zoom().scaleExtent([0.1, 5]).on('zoom', zoomd)
   function zoomd() {
     const eventTransform = d3.event.transform
 
@@ -147,6 +140,7 @@ export default function gen({
     svg.selectAll('.tick text').call(wrapText, 30)
     rects.attr('x', (d) => newX(day(d.StartTime))).attr('width', genRectWidth)
   }
+  svg.call(zoom as any)
 
   const tooltip = d3
     .select(document.createElement('div'))

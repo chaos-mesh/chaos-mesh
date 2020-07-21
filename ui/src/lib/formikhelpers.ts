@@ -14,7 +14,7 @@ export const ChaosKindKeyMap: {
   StressChaos: { key: 'stress_chaos' },
 }
 
-export function parseSubmitValues(e: Experiment) {
+export function parseSubmit(e: Experiment) {
   const values = JSON.parse(JSON.stringify(e))
 
   // Parse phase_selectors
@@ -107,12 +107,39 @@ export function resetOtherChaos(formProps: FormikCtx, kind: string, action: stri
   setFieldValue('target', updatedTarget)
 }
 
-export function yamlToExperiments(yamlObj: any): Experiment {
+export function parseLoaded(e: Experiment): Experiment {
+  const result = e
+
+  result.labels = result.labels ? Object.entries(result.labels).map(([key, val]) => `${key}:${val}`) : []
+  result.annotations = result.annotations ? Object.entries(result.annotations).map(([key, val]) => `${key}:${val}`) : []
+  result.scope.label_selectors = result.scope.label_selectors
+    ? Object.entries(result.scope.label_selectors).map(([key, val]) => `${key}: ${val}`)
+    : []
+  result.scope.annotation_selectors = result.scope.annotation_selectors
+    ? Object.entries(result.scope.annotation_selectors).map(([key, val]) => `${key}: ${val}`)
+    : []
+  result.scope.phase_selectors = result.scope.phase_selectors ? result.scope.phase_selectors : ['all']
+
+  result.target = {
+    ...defaultExperimentSchema.target,
+    ...result.target,
+  }
+
+  return result
+}
+
+export function yamlToExperiment(yamlObj: any): Experiment {
   const { kind, metadata, spec } = snakeCaseKeys(yamlObj)
 
   let halfResult = {
     ...defaultExperimentSchema,
-    ...metadata,
+    ...{
+      ...metadata,
+      labels: metadata.labels ? Object.entries(metadata.labels).map(([key, val]) => `${key}:${val}`) : [],
+      annotations: metadata.annotations
+        ? Object.entries(metadata.annotations).map(([key, val]) => `${key}:${val}`)
+        : [],
+    },
     scope: {
       ...defaultExperimentSchema.scope,
       label_selectors: spec.selector?.label_selectors
