@@ -38,7 +38,7 @@ var _ = Describe("iptables server", func() {
 			defer mock.With("MockWithNetNs", func(ctx context.Context, ns, cmd string, args ...string) *exec.Cmd {
 				Expect(ns).To(Equal("/proc/9527/ns/net"))
 				Expect(cmd).To(Equal(iptablesCmd))
-				return exec.Command("echo", "mock command")
+				return exec.Command("echo", "iptables: Chain already exists.")
 			})()
 			_, err := s.SetIptablesChains(context.TODO(), &pb.IptablesChainsRequest{
 				Chains: []*pb.Chain{{
