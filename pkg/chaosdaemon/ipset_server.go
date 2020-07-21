@@ -69,11 +69,9 @@ func flushIpSet(ctx context.Context, nsPath string, set *pb.IpSet) error {
 
 	// rename the temp ipset with the target name of ipset if the taget ipset not exists,
 	// otherwise swap  them with each other.
-	if err := renameIPSet(ctx, nsPath, tmpName, name); err != nil {
-		return err
-	}
+	err := renameIPSet(ctx, nsPath, tmpName, name)
 
-	return nil
+	return err
 }
 
 func createIPSet(ctx context.Context, nsPath string, name string) error {
