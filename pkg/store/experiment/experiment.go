@@ -150,6 +150,9 @@ func (e *experimentStore) DeleteByFinishTime(_ context.Context, ttl time.Duratio
 	}
 	nowTime := time.Now()
 	for _, exp := range expList {
+		if exp.Archived == false {
+			continue
+		}
 		if exp.FinishTime.Add(ttl).Before(nowTime) {
 			if err := e.db.Table("archive_experiments").Unscoped().Delete(*exp).Error; err != nil {
 				return err
