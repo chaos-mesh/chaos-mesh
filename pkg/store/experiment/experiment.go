@@ -174,6 +174,19 @@ func (e *experimentStore) FindByUID(_ context.Context, uid string) (*core.Archiv
 	return archive, nil
 }
 
+// FindMetaByUID returns an archive experiment by UID.
+func (e *experimentStore) FindMetaByUID(_ context.Context, uid string) (*core.ArchiveExperimentMeta, error) {
+	archive := new(core.ArchiveExperimentMeta)
+
+	if err := e.db.Table("archive_experiments").Where(
+		"uid = ?", uid).
+		First(archive).Error; err != nil {
+		return nil, err
+	}
+
+	return archive, nil
+}
+
 func constructQueryArgs(kind, ns, name, uid string) (string, []string) {
 	args := make([]string, 0)
 	query := ""
