@@ -66,30 +66,24 @@ var _ = Describe("iptables server", func() {
 			Expect(err.Error()).To(Equal(errorStr))
 		})
 
-		It("should fail on unknown rule direction", func() {
-			_, err := s.SetIptablesChains(context.TODO(), &pb.IptablesChainsRequest{
-				Chains: []*pb.Chain{{
-					Name:      "TEST",
-					Direction: pb.Chain_INPUT,
-					Ipsets:    []string{},
-				}},
-				ContainerId: "containerd://container-id",
-			})
-			Expect(err).ToNot(BeNil())
-			Expect(err.Error()).To(Equal("unknown rule direction"))
-		})
+		It("should fail on unknown chain direction", func() {
+			defer mock.With("pid", 9527)()
+			defer mock.With("MockWithNetNs", func(ctx context.Context, ns, cmd string, args ...string) *exec.Cmd {
+				Expect(ns).To(Equal("/proc/9527/ns/net"))
+				Expect(cmd).To(Equal(iptablesCmd))
+				return exec.Command("echo", "-n")
+			})()
 
-		It("should fail on unknow rule action", func() {
 			_, err := s.SetIptablesChains(context.TODO(), &pb.IptablesChainsRequest{
 				Chains: []*pb.Chain{{
 					Name:      "TEST",
-					Direction: pb.Chain_INPUT,
+					Direction: pb.Chain_Direction(233),
 					Ipsets:    []string{},
 				}},
 				ContainerId: "containerd://container-id",
 			})
 			Expect(err).ToNot(BeNil())
-			Expect(err.Error()).To(Equal("unknown rule action"))
+			Expect(err.Error()).To(Equal("unknown chain direction 233"))
 		})
 
 		It("should fail on command error", func() {

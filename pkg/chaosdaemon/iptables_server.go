@@ -91,7 +91,7 @@ func (iptables *iptablesClient) setIptablesChain(chain *pb.Chain) error {
 	} else if chain.Direction == pb.Chain_OUTPUT {
 		matchPart = "dst"
 	} else {
-		return fmt.Errorf("unknown direction %d", chain.Direction)
+		return fmt.Errorf("unknown chain direction %d", chain.Direction)
 	}
 
 	rules := []string{}
