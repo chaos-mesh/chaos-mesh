@@ -1,4 +1,4 @@
-// Copyright 2020 PingCAP, Inc.
+// Copyright 2020 Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -31,11 +31,11 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/pingcap/chaos-mesh/api/v1alpha1"
-	"github.com/pingcap/chaos-mesh/controllers/common"
-	"github.com/pingcap/chaos-mesh/controllers/twophase"
-	pb "github.com/pingcap/chaos-mesh/pkg/chaosdaemon/pb"
-	"github.com/pingcap/chaos-mesh/pkg/utils"
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/controllers/common"
+	"github.com/chaos-mesh/chaos-mesh/controllers/twophase"
+	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
+	"github.com/chaos-mesh/chaos-mesh/pkg/utils"
 )
 
 const stressChaosMsg = "stress out pod"

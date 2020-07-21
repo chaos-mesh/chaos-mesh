@@ -2,7 +2,6 @@ import { AppBar, Box, Breadcrumbs, IconButton, Toolbar, Typography } from '@mate
 import { Theme, createStyles, makeStyles } from '@material-ui/core/styles'
 import { drawerCloseWidth, drawerWidth } from './Sidebar'
 
-import GitHubIcon from '@material-ui/icons/GitHub'
 import { Link } from 'react-router-dom'
 import MenuIcon from '@material-ui/icons/Menu'
 import { NavigationBreadCrumbProps } from 'slices/navigation.type'
@@ -96,15 +95,6 @@ const Header: React.FC<HeaderProps> = ({ openDrawer, handleDrawerToggle, breadcr
                 )
               })}
           </Breadcrumbs>
-          <IconButton
-            component="a"
-            href="https://github.com/pingcap/chaos-mesh"
-            target="_blank"
-            color="primary"
-            aria-label="Chaos Mesh GitHub"
-          >
-            <GitHubIcon />
-          </IconButton>
         </Box>
       </Toolbar>
     </AppBar>

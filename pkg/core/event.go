@@ -1,4 +1,4 @@
-// Copyright 2020 PingCAP, Inc.
+// Copyright 2020 Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -63,6 +63,12 @@ type EventStore interface {
 
 	// DeleteByFinishTime deletes events and podrecords whose time difference is greater than the given time from FinishTime.
 	DeleteByFinishTime(context.Context, time.Duration) error
+
+	// UpdateIncompleteEvents updates the incomplete event by the namespace and name
+	// If chaos is deleted before an event is over, then the incomplete event would be stored in dbtastore,
+	// which means the event would never save the finish_time.
+	// UpdateIncompleteEvents can update the finish_time when the chaos is deleted.
+	UpdateIncompleteEvents(context.Context, string, string) error
 }
 
 // Event represents an event instance.

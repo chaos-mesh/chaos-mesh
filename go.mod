@@ -1,4 +1,4 @@
-module github.com/pingcap/chaos-mesh
+module github.com/chaos-mesh/chaos-mesh
 
 require (
 	github.com/containerd/cgroups v0.0.0-20200404012852-53ba5634dc0f

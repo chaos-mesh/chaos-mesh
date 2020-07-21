@@ -1,5 +1,6 @@
 export interface Event {
   ID: number
+  ExperimentID: uuid
   DeletedAt: string | null
   Experiment: string
   Namespace: string
@@ -7,14 +8,16 @@ export interface Event {
   Message: string
   StartTime: string
   FinishTime: string
-  Pods: {
-    ID: string
-    DeleteAt: string | null
-    EventID: number
-    PodIP: string
-    PodName: string
-    Namespace: string
-    Message: string
-    Action: string
-  }[]
+  Pods:
+    | {
+        ID: string
+        DeleteAt: string | null
+        EventID: number
+        PodIP: string
+        PodName: string
+        Namespace: string
+        Message: string
+        Action: string
+      }[]
+    | null
 }

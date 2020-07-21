@@ -70,5 +70,5 @@ Define the ValidationWebhookConfiguration's name
 Define the webhook's name
 */}}
 {{- define "chaos-mesh.webhook" -}}
-{{- printf "admission-webhook.pingcap.com" -}}
+{{- printf "admission-webhook.chaos-mesh.org" -}}
 {{- end -}}

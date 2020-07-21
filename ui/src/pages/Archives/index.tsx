@@ -4,7 +4,6 @@ import React, { useEffect, useState } from 'react'
 import { Archive } from 'api/archives.type'
 import ArchiveOutlinedIcon from '@material-ui/icons/ArchiveOutlined'
 import ConfirmDialog from 'components/ConfirmDialog'
-import ContentContainer from 'components/ContentContainer'
 import ExperimentPaper from 'components/ExperimentPaper'
 import Loading from 'components/Loading'
 import api from 'api'
@@ -47,7 +46,7 @@ export default function Archives() {
   }
 
   return (
-    <ContentContainer>
+    <>
       <Grid container spacing={3}>
         {archives &&
           archives.length > 0 &&
@@ -78,6 +77,6 @@ export default function Archives() {
         description={selected.description}
         handleConfirm={handleArchive(selected.action)}
       />
-    </ContentContainer>
+    </>
   )
 }

@@ -21,7 +21,7 @@ PodChaos allows you to simulate pod faults, specifically `pod failure` and `pod 
 Below is a sample `pod-failure` configuration file:
 
 ```yaml
-apiVersion: pingcap.com/v1alpha1
+apiVersion: chaos-mesh.org/v1alpha1
 kind: PodChaos
 metadata:
   name: pod-failure-example
@@ -38,7 +38,7 @@ spec:
     cron: "@every 2m"
 ```
 
-For more sample files, see [examples](https://github.com/pingcap/chaos-mesh/tree/master/examples). You can edit them as needed.
+For more sample files, see [examples](https://github.com/chaos-mesh/chaos-mesh/tree/master/examples). You can edit them as needed.
 
 Description:
 
@@ -54,7 +54,7 @@ Description:
 Below is a sample `pod-kill` configuration file:
 
 ```yaml
-apiVersion: pingcap.com/v1alpha1
+apiVersion: chaos-mesh.org/v1alpha1
 kind: PodChaos
 metadata:
   name: pod-kill-example

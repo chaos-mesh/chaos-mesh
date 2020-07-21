@@ -1,4 +1,4 @@
-// Copyright 2020 PingCAP, Inc.
+// Copyright 2020 Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,9 +16,9 @@ package collector
 import (
 	"os"
 
-	"github.com/pingcap/chaos-mesh/api/v1alpha1"
-	"github.com/pingcap/chaos-mesh/pkg/config"
-	"github.com/pingcap/chaos-mesh/pkg/core"
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/pkg/config"
+	"github.com/chaos-mesh/chaos-mesh/pkg/core"
 
 	"k8s.io/apimachinery/pkg/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"

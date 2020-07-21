@@ -6,9 +6,9 @@ metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.2.5
   creationTimestamp: null
-  name: podchaos.pingcap.com
+  name: podchaos.chaos-mesh.org
 spec:
-  group: pingcap.com
+  group: chaos-mesh.org
   names:
     kind: PodChaos
     listKind: PodChaosList

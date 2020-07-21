@@ -1,4 +1,4 @@
-// Copyright 2020 PingCAP, Inc.
+// Copyright 2020 Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,8 +16,8 @@ package store
 import (
 	"go.uber.org/fx"
 
-	"github.com/pingcap/chaos-mesh/pkg/store/event"
-	"github.com/pingcap/chaos-mesh/pkg/store/experiment"
+	"github.com/chaos-mesh/chaos-mesh/pkg/store/event"
+	"github.com/chaos-mesh/chaos-mesh/pkg/store/experiment"
 )
 
 // Module includes the providers provided by store.

@@ -3,13 +3,11 @@ import React, { useEffect, useRef, useState } from 'react'
 import { Theme, createStyles, makeStyles } from '@material-ui/core/styles'
 
 import BlurLinearIcon from '@material-ui/icons/BlurLinear'
-import ContentContainer from 'components/ContentContainer'
 import { Event } from 'api/events.type'
 import EventsTable from 'components/EventsTable'
 import Loading from 'components/Loading'
 import PaperTop from 'components/PaperTop'
 import api from 'api'
-import clsx from 'clsx'
 import genEventsChart from 'lib/d3/eventsChart'
 
 const useStyles = makeStyles((theme: Theme) =>
@@ -24,10 +22,7 @@ const useStyles = makeStyles((theme: Theme) =>
     },
     eventsChart: {
       height: 300,
-    },
-    paper: {
-      padding: theme.spacing(3),
-      paddingTop: 0,
+      margin: theme.spacing(3),
     },
   })
 )
@@ -65,15 +60,15 @@ export default function Events() {
   }, [events])
 
   return (
-    <ContentContainer>
+    <>
       {events && events.length > 0 && (
         <Grow in={!loading} style={{ transformOrigin: '0 0 0' }}>
           <Box display="flex" flexDirection="column" height="100%">
-            <Paper className={clsx(classes.paper, classes.timelinePaper)}>
+            <Paper className={classes.timelinePaper} variant="outlined">
               <PaperTop title="Timeline" />
               <div ref={chartRef} className={classes.eventsChart} />
             </Paper>
-            <Paper className={clsx(classes.height100, classes.paper)}>
+            <Paper className={classes.height100} variant="outlined">
               <EventsTable events={events} detailed />
             </Paper>
           </Box>
@@ -92,6 +87,6 @@ export default function Events() {
       )}
 
       {loading && <Loading />}
-    </ContentContainer>
+    </>
   )
 }

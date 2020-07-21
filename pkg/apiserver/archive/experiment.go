@@ -1,4 +1,4 @@
-// Copyright 2020 PingCAP, Inc.
+// Copyright 2020 Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,9 +21,9 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
 
-	"github.com/pingcap/chaos-mesh/pkg/apiserver/utils"
-	"github.com/pingcap/chaos-mesh/pkg/config"
-	"github.com/pingcap/chaos-mesh/pkg/core"
+	"github.com/chaos-mesh/chaos-mesh/pkg/apiserver/utils"
+	"github.com/chaos-mesh/chaos-mesh/pkg/config"
+	"github.com/chaos-mesh/chaos-mesh/pkg/core"
 
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )

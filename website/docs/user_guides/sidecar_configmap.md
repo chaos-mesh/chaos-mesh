@@ -59,7 +59,7 @@ For fields defined in this config, we have some brief descriptions below:
 * **template**: the template config map name used to render the injection config. "chaosfs-sidecar" template is used for injecting fuse-server sidecar.
 * **arguments**: the arguments you should define to be used in the template.
 
-For more sample ConfigMap files, see [examples](https://github.com/pingcap/chaos-mesh/tree/master/examples/chaosfs-configmap).
+For more sample ConfigMap files, see [examples](https://github.com/chaos-mesh/chaos-mesh/tree/master/examples/chaosfs-configmap).
 
 
 ## Usage

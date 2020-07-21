@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Copyright 2020 PingCAP, Inc.
+# Copyright 2020 Chaos Mesh Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -74,7 +74,7 @@ function chaos_mesh::version::ldflag() {
   local key=${1}
   local val=${2}
 
-  echo "-X 'github.com/pingcap/chaos-mesh/pkg/version.${key}=${val}'"
+  echo "-X 'github.com/chaos-mesh/chaos-mesh/pkg/version.${key}=${val}'"
 }
 
 # Prints the value that needs to be passed to the -ldflags parameter of go build

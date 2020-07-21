@@ -1,4 +1,4 @@
-// Copyright 2020 PingCAP, Inc.
+// Copyright 2020 Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -22,11 +22,11 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/pingcap/chaos-mesh/api/v1alpha1"
-	"github.com/pingcap/chaos-mesh/pkg/apiserver/experiment"
-	"github.com/pingcap/chaos-mesh/pkg/apiserver/utils"
-	"github.com/pingcap/chaos-mesh/pkg/config"
-	pkgutils "github.com/pingcap/chaos-mesh/pkg/utils"
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/pkg/apiserver/experiment"
+	"github.com/chaos-mesh/chaos-mesh/pkg/apiserver/utils"
+	"github.com/chaos-mesh/chaos-mesh/pkg/config"
+	pkgutils "github.com/chaos-mesh/chaos-mesh/pkg/utils"
 
 	v1 "k8s.io/api/core/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
