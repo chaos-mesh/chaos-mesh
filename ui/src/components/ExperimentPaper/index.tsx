@@ -97,7 +97,7 @@ const ExperimentPaper: React.FC<ExperimentPaperProps> = ({
       {!isArchive && (
         <>
           <Typography variant="body1">Created {day((e as Experiment).created).fromNow()}</Typography>
-          {(e as Experiment).status.toLowerCase() === 'paused' ? (
+          {(e as Experiment).status === 'Paused' ? (
             <IconButton
               color="primary"
               aria-label="Start experiment"
@@ -139,14 +139,12 @@ const ExperimentPaper: React.FC<ExperimentPaperProps> = ({
         to={
           isArchive
             ? `/`
-            : `/experiments/${e.Name}?namespace=${e.Namespace}&kind=${
-                e.Kind
-              }&status=${(e as Experiment).status.toLowerCase()}`
+            : `/experiments/${e.Name}?namespace=${e.Namespace}&kind=${e.Kind}&status=${(e as Experiment).status}`
         }
         variant="outlined"
         color="primary"
         size="small"
-        disabled={!isArchive && (e as Experiment).status.toLowerCase() === 'failed'}
+        disabled={!isArchive && (e as Experiment).status === 'Failed'}
       >
         Detail
       </Button>
@@ -158,7 +156,7 @@ const ExperimentPaper: React.FC<ExperimentPaperProps> = ({
       <Box display="flex" justifyContent="space-between" alignItems="center" p={3}>
         <Box display="flex" alignItems="center" className={classes.marginRight}>
           {!isArchive &&
-            ((e as Experiment).status.toLowerCase() === 'failed' ? (
+            ((e as Experiment).status === 'Failed' ? (
               <ErrorOutlineIcon color="error" />
             ) : (
               <ExperimentEventsPreview events={(e as Experiment).events} />

@@ -102,7 +102,7 @@ export default function ExperimentDetail() {
     description: '',
     action: 'delete',
   })
-  const [paused, setPaused] = useState(status === 'paused' ? true : false)
+  const [paused, setPaused] = useState(status === 'Paused' ? true : false)
 
   const fetchExperimentDetail = () => {
     setLoading(true)
@@ -245,12 +245,12 @@ export default function ExperimentDetail() {
 
         if (action === 'pause') {
           setPaused(true)
-          searchParams.set('status', StateOfExperimentsEnum.paused)
+          searchParams.set('status', StateOfExperimentsEnum.Paused)
         }
 
         if (action === 'start') {
           setPaused(false)
-          searchParams.set('status', StateOfExperimentsEnum.running)
+          searchParams.set('status', StateOfExperimentsEnum.Running)
         }
 
         if (action === 'pause' || action === 'start') {

@@ -47,7 +47,7 @@ export default function Experiments() {
         if (data.length) {
           setExperiments(
             experiments.map((e) => {
-              if (e.status.toLowerCase() === 'failed') {
+              if (e.status === 'Failed') {
                 return { ...e, events: [] }
               } else {
                 const events = data
