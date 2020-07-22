@@ -45,10 +45,17 @@ export default function gen({
   // Wrap long text, also used in zoom() and reGen()
   svg.selectAll('.tick text').call(wrapText, 30)
 
-  const allExperiments = [...new Set(events.map((d) => d.Experiment))]
+  const allUniqueExperiments = [...new Set(events.map((d) => d.Experiment + '/' + d.ExperimentID))].map((d) => {
+    const [name, uuid] = d.split('/')
+
+    return {
+      name,
+      uuid,
+    }
+  })
   const y = d3
     .scaleBand()
-    .domain(allExperiments)
+    .domain(allUniqueExperiments.map((d) => d.uuid))
     .range([0, height - margin.top - margin.bottom])
     .padding(0.5)
   const yAxis = d3.axisLeft(y).tickFormat('' as any)
@@ -79,11 +86,11 @@ export default function gen({
   const legendsRoot = d3.select(document.createElement('div')).attr('class', 'chaos-events-legends')
   const legends = legendsRoot
     .selectAll()
-    .data(allExperiments)
+    .data(allUniqueExperiments)
     .enter()
     .append('div')
     .on('click', function (d) {
-      const _events = events.filter((e) => e.Experiment === d)
+      const _events = events.filter((e) => e.ExperimentID === d.uuid)
       const event = _events[_events.length - 1]
 
       svg
@@ -100,12 +107,12 @@ export default function gen({
   legends
     .insert('div')
     .attr('style', 'color: rgba(0, 0, 0, 0.72); font-size: 0.75rem;')
-    .text((d) => d)
+    .text((d) => d.name)
   legends
     .append('div')
     .attr(
       'style',
-      (d) => `width: 14px; height: 14px; margin-left: 8px; background: ${colorPalette(d)}; cursor: pointer;`
+      (d) => `width: 14px; height: 14px; margin-left: 8px; background: ${colorPalette(d.uuid)}; cursor: pointer;`
     )
 
   function genRectWidth(d: Event) {
@@ -124,10 +131,10 @@ export default function gen({
     .enter()
     .append('rect')
     .attr('x', (d) => x(day(d.StartTime)))
-    .attr('y', (d) => y(d.Experiment)! + margin.top)
+    .attr('y', (d) => y(d.ExperimentID)! + margin.top)
     .attr('width', genRectWidth)
     .attr('height', y.bandwidth())
-    .attr('fill', (d) => colorPalette(d.Experiment))
+    .attr('fill', (d) => colorPalette(d.ExperimentID))
     .style('cursor', 'pointer')
 
   const zoom = d3.zoom().scaleExtent([0.1, 5]).on('zoom', zoomd)

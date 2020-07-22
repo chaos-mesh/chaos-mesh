@@ -23,7 +23,7 @@ const routes: RouteProps[] = [
   },
   {
     component: ExperimentDetail,
-    path: '/experiments/:name',
+    path: '/experiments/:uuid',
   },
   {
     component: Events,
