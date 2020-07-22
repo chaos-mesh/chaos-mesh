@@ -49,6 +49,9 @@ type ExperimentStore interface {
 
 	// FindByUID returns an experiment record by the UID of the experiment.
 	FindByUID(ctx context.Context, UID string) (*ArchiveExperiment, error)
+
+	// FindMetaByUID returns an archive experiment by UID.
+	FindMetaByUID(context.Context, string) (*ArchiveExperimentMeta, error)
 }
 
 // ArchiveExperiment represents an experiment instance.

@@ -16,6 +16,7 @@ package archive
 import (
 	"context"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
@@ -27,6 +28,14 @@ import (
 
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
+
+// Report defines the report of archive experiments.
+type Report struct {
+	Meta           *core.ArchiveExperimentMeta
+	Events         []*core.Event
+	TotalTime      string
+	TotalFaultTime string
+}
 
 // Service defines a handler service for archive experiments.
 type Service struct {
@@ -59,6 +68,7 @@ func Register(r *gin.RouterGroup, s *Service) {
 	endpoint.GET("", s.listExperiments)
 	endpoint.GET("/detail/search", s.experimentDetailSearch)
 	endpoint.GET("/detail", s.experimentDetail)
+	endpoint.GET("/report", s.experimentReport)
 }
 
 // ArchiveExperimentDetail represents an experiment instance.
@@ -240,4 +250,55 @@ func (s *Service) experimentDetail(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, expDetail)
+}
+
+// @Summary Get the report of chaos experiment.
+// @Description Get the report of chaos experiment.
+// @Tags archives
+// @Produce json
+// @Param uid query string true "uid"
+// @Success 200 {array} Report
+// @Router /api/archives/report [get]
+// @Failure 500 {object} utils.APIError
+func (s *Service) experimentReport(c *gin.Context) {
+	var (
+		report    Report
+		err       error
+		timeNow   time.Time
+		timeAfter time.Time
+	)
+	uid := c.Query("uid")
+
+	if uid == "" {
+		c.Status(http.StatusBadRequest)
+		_ = c.Error(utils.ErrInvalidRequest.New("uid cannot be empty"))
+		return
+	}
+
+	report.Meta, err = s.archive.FindMetaByUID(context.TODO(), uid)
+	if err != nil {
+		if !gorm.IsRecordNotFoundError(err) {
+			c.Status(http.StatusInternalServerError)
+			_ = c.Error(utils.ErrInternalServer.NewWithNoMessage())
+		} else {
+			c.Status(http.StatusInternalServerError)
+			_ = c.Error(utils.ErrInvalidRequest.New("the archive is not found"))
+		}
+		return
+	}
+	report.TotalTime = report.Meta.FinishTime.Sub(report.Meta.StartTime).String()
+	report.Events, err = s.event.ListByUID(context.TODO(), uid)
+	if err != nil {
+		c.Status(http.StatusInternalServerError)
+		_ = c.Error(utils.ErrInternalServer.NewWithNoMessage())
+		return
+	}
+	timeNow = time.Now()
+	timeAfter = timeNow
+	for _, et := range report.Events {
+		timeAfter = timeAfter.Add(et.FinishTime.Sub(*et.StartTime))
+	}
+	report.TotalFaultTime = timeAfter.Sub(timeNow).String()
+
+	c.JSON(http.StatusOK, report)
 }

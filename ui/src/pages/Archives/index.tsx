@@ -12,9 +12,7 @@ export default function Archives() {
   const [loading, setLoading] = useState(false)
   const [archives, setArchives] = useState<Archive[] | null>(null)
   const [selected, setSelected] = useState({
-    namespace: '',
-    name: '',
-    kind: '',
+    uuid: '',
     title: '',
     description: '',
     action: 'recover',

@@ -43,16 +43,13 @@ const Actions = ({ setInitialValues }: ActionsProps) => {
   // const [archiveRadio, setArchiveRadio] = useState('')
 
   const onExperimentRadioChange = (e: any) => {
-    const kindNamespaceName = e.target.value
-    const [kind, namespace, name] = kindNamespaceName.split('/')
+    const uuid = e.target.value
 
-    setExperimentRadio(kindNamespaceName)
+    setExperimentRadio(uuid)
 
     api.experiments
-      .detail(namespace, name, kind)
-      .then(({ data }) => {
-        setInitialValues(parseLoaded(data))
-      })
+      .detail(uuid)
+      .then(({ data }) => setInitialValues(parseLoaded(data)))
       .catch(console.log)
   }
 
@@ -62,19 +59,17 @@ const Actions = ({ setInitialValues }: ActionsProps) => {
   //   setArchiveRadio(uuid)
   // }
 
-  const fetchExperiments = () => {
+  const fetchExperiments = () =>
     api.experiments
       .experiments()
       .then(({ data }) => setExperiments(data))
       .catch(console.log)
-  }
 
-  // const fetchArchives = () => {
+  // const fetchArchives = () =>
   //   api.archives
   //     .archives()
   //     .then(({ data }) => setArchives(data))
   //     .catch(console.log)
-  // }
 
   useEffect(() => {
     fetchExperiments()
@@ -116,12 +111,7 @@ const Actions = ({ setInitialValues }: ActionsProps) => {
         <RadioGroup value={experimentRadio} onChange={onExperimentRadioChange}>
           {experiments && experiments.length > 0 ? (
             experiments.map((e) => (
-              <FormControlLabel
-                key={e.Name}
-                value={`${e.Kind}/${e.Namespace}/${e.Name}`}
-                control={<Radio color="primary" />}
-                label={e.Name}
-              />
+              <FormControlLabel key={e.uid} value={e.uid} control={<Radio color="primary" />} label={e.Name} />
             ))
           ) : experiments?.length === 0 ? (
             <Typography variant="body2">No experiments found.</Typography>

@@ -196,7 +196,7 @@ const EventsTableRow: React.FC<EventsTableRowProps> = ({ event: e, detailed, noE
           <TableCell>
             <Button
               component={Link}
-              to={`/experiments/${e.Experiment}?namespace=${e.Namespace}&kind=${e.Kind}&event=${e.ID}`}
+              to={`/experiments/${e.ExperimentID}?name=${e.Experiment}&event=${e.ID}`}
               variant="outlined"
               size="small"
               color="primary"
