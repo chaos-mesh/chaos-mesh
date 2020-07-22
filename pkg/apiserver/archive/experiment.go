@@ -115,8 +115,8 @@ func (s *Service) listExperiments(c *gin.Context) {
 // @Failure 500 {object} utils.APIError
 func (s *Service) experimentDetailSearch(c *gin.Context) {
 	var (
-		err       error
-		info      core.ExperimentInfo
+		err           error
+		info          core.ExperimentInfo
 		expDetailList []ArchiveExperimentDetail
 	)
 	kind := c.Query("kind")
@@ -156,7 +156,7 @@ func (s *Service) experimentDetailSearch(c *gin.Context) {
 			_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
 			return
 		}
-		expDetailList = append(expDetailList,ArchiveExperimentDetail{
+		expDetailList = append(expDetailList, ArchiveExperimentDetail{
 			ArchiveExperimentMeta: core.ArchiveExperimentMeta{
 				ID:         data.ID,
 				CreatedAt:  data.CreatedAt,

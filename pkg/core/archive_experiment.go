@@ -62,18 +62,18 @@ type ArchiveExperiment struct {
 
 // ArchiveExperimentMeta defines the meta data for ArchiveExperiment.
 type ArchiveExperimentMeta struct {
-	ID        uint `gorm:"primary_key" json:"id"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
-	DeletedAt *time.Time `sql:"index" json:"deleted_at"`
-	Name       string `json:"name"`
-	Namespace  string `json:"namespace"`
-	Kind       string `json:"kind"`
-	Action     string `json:"action"`
-	UID        string `gorm:"index:uid" json:"uid"`
-	StartTime  time.Time `json:"start_time"`
-	FinishTime time.Time `json:"finish_time"`
-	Archived   bool `json:"archived"`
+	ID         uint       `gorm:"primary_key" json:"id"`
+	CreatedAt  time.Time  `json:"created_at"`
+	UpdatedAt  time.Time  `json:"updated_at"`
+	DeletedAt  *time.Time `sql:"index" json:"deleted_at"`
+	Name       string     `json:"name"`
+	Namespace  string     `json:"namespace"`
+	Kind       string     `json:"kind"`
+	Action     string     `json:"action"`
+	UID        string     `gorm:"index:uid" json:"uid"`
+	StartTime  time.Time  `json:"start_time"`
+	FinishTime time.Time  `json:"finish_time"`
+	Archived   bool       `json:"archived"`
 }
 
 // ExperimentInfo defines a form data of Experiment from API.
@@ -208,8 +208,8 @@ type StressChaosInfo struct {
 }
 
 func (e *ArchiveExperiment) ParsePodChaos() (ExperimentInfo, error) {
-	chaos:=&v1alpha1.PodChaos{}
-	if err:=json.Unmarshal([]byte(e.Experiment),&chaos); err!= nil{
+	chaos := &v1alpha1.PodChaos{}
+	if err := json.Unmarshal([]byte(e.Experiment), &chaos); err != nil {
 		return ExperimentInfo{}, err
 	}
 
@@ -250,8 +250,8 @@ func (e *ArchiveExperiment) ParsePodChaos() (ExperimentInfo, error) {
 }
 
 func (e *ArchiveExperiment) ParseNetworkChaos() (ExperimentInfo, error) {
-	chaos:=&v1alpha1.NetworkChaos{}
-	if err:=json.Unmarshal([]byte(e.Experiment),&chaos); err!= nil{
+	chaos := &v1alpha1.NetworkChaos{}
+	if err := json.Unmarshal([]byte(e.Experiment), &chaos); err != nil {
 		return ExperimentInfo{}, err
 	}
 
@@ -310,8 +310,8 @@ func (e *ArchiveExperiment) ParseNetworkChaos() (ExperimentInfo, error) {
 	return info, nil
 }
 func (e *ArchiveExperiment) ParseIOChaos() (ExperimentInfo, error) {
-	chaos:=&v1alpha1.IoChaos{}
-	if err:=json.Unmarshal([]byte(e.Experiment),&chaos); err!= nil{
+	chaos := &v1alpha1.IoChaos{}
+	if err := json.Unmarshal([]byte(e.Experiment), &chaos); err != nil {
 		return ExperimentInfo{}, err
 	}
 
@@ -356,8 +356,8 @@ func (e *ArchiveExperiment) ParseIOChaos() (ExperimentInfo, error) {
 	return info, nil
 }
 func (e *ArchiveExperiment) ParseTimeChaos() (ExperimentInfo, error) {
-	chaos:=&v1alpha1.TimeChaos{}
-	if err:=json.Unmarshal([]byte(e.Experiment),&chaos); err!= nil{
+	chaos := &v1alpha1.TimeChaos{}
+	if err := json.Unmarshal([]byte(e.Experiment), &chaos); err != nil {
 		return ExperimentInfo{}, err
 	}
 
@@ -398,8 +398,8 @@ func (e *ArchiveExperiment) ParseTimeChaos() (ExperimentInfo, error) {
 	return info, nil
 }
 func (e *ArchiveExperiment) ParseKernelChaos() (ExperimentInfo, error) {
-	chaos:=&v1alpha1.KernelChaos{}
-	if err:=json.Unmarshal([]byte(e.Experiment),&chaos); err!= nil{
+	chaos := &v1alpha1.KernelChaos{}
+	if err := json.Unmarshal([]byte(e.Experiment), &chaos); err != nil {
 		return ExperimentInfo{}, err
 	}
 
@@ -438,8 +438,8 @@ func (e *ArchiveExperiment) ParseKernelChaos() (ExperimentInfo, error) {
 	return info, nil
 }
 func (e *ArchiveExperiment) ParseStressChaos() (ExperimentInfo, error) {
-	chaos:=&v1alpha1.StressChaos{}
-	if err:=json.Unmarshal([]byte(e.Experiment),&chaos); err!= nil{
+	chaos := &v1alpha1.StressChaos{}
+	if err := json.Unmarshal([]byte(e.Experiment), &chaos); err != nil {
 		return ExperimentInfo{}, err
 	}
 
