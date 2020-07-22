@@ -5,12 +5,12 @@ import { StateOfExperiments } from 'api/experiments.type'
 import api from 'api'
 
 const defaultExperiments = {
-  total: 0,
-  running: 0,
-  waiting: 0,
-  paused: 0,
-  failed: 0,
-  finished: 0,
+  Total: 0,
+  Running: 0,
+  Waiting: 0,
+  Paused: 0,
+  Failed: 0,
+  Finished: 0,
 }
 
 export const getStateofExperiments = createAsyncThunk(
