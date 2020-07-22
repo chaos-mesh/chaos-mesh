@@ -22,9 +22,7 @@ export default function Experiments() {
   const [experiments, setExperiments] = useState<Experiment[] | null>(null)
   const [dialogOpen, setDialogOpen] = useState(false)
   const [selected, setSelected] = useState({
-    namespace: '',
-    name: '',
-    kind: '',
+    uuid: '',
     title: '',
     description: '',
     action: 'delete',
@@ -51,7 +49,7 @@ export default function Experiments() {
                 return { ...e, events: [] }
               } else {
                 const events = data
-                  .filter((d) => d.Experiment === e.Name)
+                  .filter((d) => d.ExperimentID === e.uid)
                   .sort((a, b) => dayComparator(a.StartTime, b.StartTime))
 
                 return {
@@ -111,9 +109,9 @@ export default function Experiments() {
 
     setDialogOpen(false)
 
-    const { namespace, name, kind } = selected
+    const { uuid } = selected
 
-    actionFunc(namespace, name, kind)
+    actionFunc(uuid)
       .then(() => {
         dispatch(
           setAlert({

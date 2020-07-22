@@ -31,14 +31,7 @@ const useStyles = makeStyles((theme: Theme) =>
 interface ExperimentPaperProps {
   experiment: Experiment | Archive
   isArchive?: boolean
-  handleSelect: (info: {
-    namespace: string
-    name: string
-    kind: string
-    title: string
-    description: string
-    action: string
-  }) => void
+  handleSelect: (info: { uuid: uuid; title: string; description: string; action: string }) => void
   handleDialogOpen: (open: boolean) => void
 }
 
@@ -59,9 +52,7 @@ const ExperimentPaper: React.FC<ExperimentPaperProps> = ({
   const handleDelete = () => {
     handleDialogOpen(true)
     handleSelect({
-      namespace: e.Namespace,
-      name: e.Name,
-      kind: e.Kind,
+      uuid: (e as Experiment).uid,
       title: `Delete ${e.Name}?`,
       description: "Once you delete this experiment, it can't be recovered.",
       action: 'delete',
@@ -71,9 +62,7 @@ const ExperimentPaper: React.FC<ExperimentPaperProps> = ({
   const handlePause = () => {
     handleDialogOpen(true)
     handleSelect({
-      namespace: e.Namespace,
-      name: e.Name,
-      kind: e.Kind,
+      uuid: (e as Experiment).uid,
       title: `Pause ${e.Name}?`,
       description: 'You can restart the experiment in the same position.',
       action: 'pause',
@@ -83,9 +72,7 @@ const ExperimentPaper: React.FC<ExperimentPaperProps> = ({
   const handleStart = () => {
     handleDialogOpen(true)
     handleSelect({
-      namespace: e.Namespace,
-      name: e.Name,
-      kind: e.Kind,
+      uuid: (e as Experiment).uid,
       title: `Start ${e.Name}?`,
       description: 'The operation will take effect immediately.',
       action: 'start',
@@ -136,11 +123,7 @@ const ExperimentPaper: React.FC<ExperimentPaperProps> = ({
       )}
       <Button
         component={Link}
-        to={
-          isArchive
-            ? `/`
-            : `/experiments/${e.Name}?namespace=${e.Namespace}&kind=${e.Kind}&status=${(e as Experiment).status}`
-        }
+        to={isArchive ? `/` : `/experiments/${(e as Experiment).uid}?name=${e.Name}&status=${(e as Experiment).status}`}
         variant="outlined"
         color="primary"
         size="small"

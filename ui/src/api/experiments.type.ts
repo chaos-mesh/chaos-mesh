@@ -24,5 +24,6 @@ export interface Experiment {
   Name: string
   created: string
   status: keyof StateOfExperiments
+  uid: uuid
   events?: Event[]
 }

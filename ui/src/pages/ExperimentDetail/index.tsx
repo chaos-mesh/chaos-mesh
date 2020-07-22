@@ -79,11 +79,10 @@ export default function ExperimentDetail() {
   const history = useHistory()
   const { search } = history.location
   const searchParams = new URLSearchParams(search)
-  const namespace = searchParams.get('namespace')
-  const kind = searchParams.get('kind')
+  const name = searchParams.get('name')
   const eventID = searchParams.get('event')
   const status = searchParams.get('status')
-  const { name } = useParams()
+  const { uuid } = useParams()
 
   const dispatch = useStoreDispatch()
 
@@ -108,20 +107,19 @@ export default function ExperimentDetail() {
     setLoading(true)
 
     api.experiments
-      .detail(namespace!, name!, kind!)
+      .detail(uuid)
       .then(({ data }) => setDetail(data))
       .catch(console.log)
   }
 
-  const fetchEventsByName = (name: string) => {
+  const fetchEvents = () =>
     api.events
       .events()
-      .then(({ data }) => setEvents(data.filter((d) => d.Experiment === name)))
+      .then(({ data }) => setEvents(data.filter((d) => d.ExperimentID === uuid)))
       .catch(console.log)
       .finally(() => {
         setLoading(false)
       })
-  }
 
   const onSelectEvent = (e: Event) => {
     setDetailLoading(true)
@@ -137,17 +135,10 @@ export default function ExperimentDetail() {
   }
 
   useEffect(() => {
-    if (namespace && kind && name) {
-      fetchExperimentDetail()
-    }
+    fetchExperimentDetail()
+    fetchEvents()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [namespace, kind, name])
-
-  useEffect(() => {
-    if (detail) {
-      fetchEventsByName(detail.name)
-    }
-  }, [detail])
+  }, [])
 
   useEffect(() => {
     if (prevEvents !== events && events) {
@@ -228,7 +219,7 @@ export default function ExperimentDetail() {
 
     setDialogOpen(false)
 
-    actionFunc(namespace, name, kind)
+    actionFunc(uuid)
       .then(() => {
         dispatch(
           setAlert({
@@ -344,7 +335,7 @@ export default function ExperimentDetail() {
         </Paper>
       </Modal>
 
-      {(!namespace || !kind || !name) && (
+      {(!name || !uuid) && (
         <Box display="flex" flexDirection="column" justifyContent="center" alignItems="center" height="100%">
           <Box mb={3}>
             <ErrorOutlineIcon fontSize="large" />
