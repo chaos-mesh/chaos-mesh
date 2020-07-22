@@ -15,24 +15,11 @@
 
 set -euo pipefail
 
-# -----------------------------------------------------------------------------
-# Version management helpers.  These functions help to set the
-# following variables:
-#
-#    GIT_COMMIT - The git commit id corresponding to this
-#          source code.
-#    GIT_VERSION - "vX.Y" used to indicate the last release version.
 function chaos_mesh::version::get_version_vars() {
   if [[ -n ${GIT_COMMIT-} ]] || GIT_COMMIT=$(git rev-parse "HEAD^{commit}" 2>/dev/null); then
 
     # Use git describe to find the version based on tags.
     if [[ -n ${GIT_VERSION-} ]] || GIT_VERSION=$(git describe --tags --abbrev=14 "${GIT_COMMIT}^{commit}" 2>/dev/null); then
-      # This translates the "git describe" to an actual semver.org
-      # compatible semantic version that looks something like this:
-      #   v1.0.0-beta.0.10+4c183422345d8f
-      #
-      # TODO: We continue calling this "git version" because so many
-      # downstream consumers are expecting it there.
       DASHES_IN_VERSION=$(echo "${GIT_VERSION}" | sed "s/[^-]//g")
       if [[ "${DASHES_IN_VERSION}" == "---" ]] ; then
         # We have distance to subversion (v1.1.0-subversion-1-gCommitHash)

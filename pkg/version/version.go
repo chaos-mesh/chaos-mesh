@@ -19,8 +19,8 @@ import (
 )
 
 var (
-	gitVersion   = "v0.0.0-master+$Format:%h$"
-	gitCommit    = "$Format:%H$" // sha1 from git, output of $(git rev-parse HEAD)
+	gitVersion = "v0.0.0-master+$Format:%h$"
+	gitCommit  = "$Format:%H$" // sha1 from git, output of $(git rev-parse HEAD)
 
 	buildDate = "1970-01-01T00:00:00Z" // build date in ISO8601 format, output of $(date -u +'%Y-%m-%dT%H:%M:%SZ')
 )
@@ -35,11 +35,11 @@ func PrintVersionInfo(name string) {
 func Get() Info {
 	// These variables typically come from -ldflags settings and in
 	return Info{
-		GitVersion:   gitVersion,
-		GitCommit:    gitCommit,
-		BuildDate:    buildDate,
-		GoVersion:    runtime.Version(),
-		Compiler:     runtime.Compiler,
-		Platform:     fmt.Sprintf("%s/%s", runtime.GOOS, runtime.GOARCH),
+		GitVersion: gitVersion,
+		GitCommit:  gitCommit,
+		BuildDate:  buildDate,
+		GoVersion:  runtime.Version(),
+		Compiler:   runtime.Compiler,
+		Platform:   fmt.Sprintf("%s/%s", runtime.GOOS, runtime.GOARCH),
 	}
 }
