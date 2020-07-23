@@ -3,7 +3,6 @@ import * as d3 from 'd3'
 import { Event } from 'api/events.type'
 import _debounce from 'lodash.debounce'
 import day from 'lib/dayjs'
-import insertCommonStyle from './insertCommonStyle'
 import wrapText from './wrapText'
 
 const margin = {
@@ -22,17 +21,10 @@ export default function gen({
   events: Event[]
   selectEvent?: (e: Event) => void
 }) {
-  insertCommonStyle()
-
   let width = root.offsetWidth
   const height = root.offsetHeight
 
-  const svg = d3
-    .select(root)
-    .append('svg')
-    .attr('class', 'chaos-events-chart')
-    .attr('width', width)
-    .attr('height', height)
+  const svg = d3.select(root).append('svg').attr('class', 'chaos-chart').attr('width', width).attr('height', height)
 
   const now = day(events[events.length - 1].StartTime).add(0.5, 'h')
 
@@ -53,15 +45,27 @@ export default function gen({
   // Wrap long text, also used in zoom() and reGen()
   svg.selectAll('.tick text').call(wrapText, 30)
 
-  const allExperiments = [...new Set(events.map((d) => d.Experiment))]
+  const allUniqueExperiments = [...new Set(events.map((d) => d.Experiment + '/' + d.ExperimentID))].map((d) => {
+    const [name, uuid] = d.split('/')
+
+    return {
+      name,
+      uuid,
+    }
+  })
   const y = d3
     .scaleBand()
-    .domain(allExperiments)
+    .domain(allUniqueExperiments.map((d) => d.uuid))
     .range([0, height - margin.top - margin.bottom])
-    .padding(0.25)
+    .padding(0.5)
   const yAxis = d3.axisLeft(y).tickFormat('' as any)
   // gYAxis
-  svg.append('g').attr('class', 'axis').attr('transform', `translate(${margin.left}, ${margin.top})`).call(yAxis)
+  svg
+    .append('g')
+    .attr('class', 'axis')
+    .attr('transform', `translate(${margin.left}, ${margin.top})`)
+    .call(yAxis)
+    .call((g) => g.select('.domain').remove())
 
   // clipX
   svg
@@ -82,11 +86,11 @@ export default function gen({
   const legendsRoot = d3.select(document.createElement('div')).attr('class', 'chaos-events-legends')
   const legends = legendsRoot
     .selectAll()
-    .data(allExperiments)
+    .data(allUniqueExperiments)
     .enter()
     .append('div')
     .on('click', function (d) {
-      const _events = events.filter((e) => e.Experiment === d)
+      const _events = events.filter((e) => e.ExperimentID === d.uuid)
       const event = _events[_events.length - 1]
 
       svg
@@ -102,23 +106,20 @@ export default function gen({
     })
   legends
     .insert('div')
-    .attr('style', 'color: rgba(0, 0, 0, 0.72); font-size: 0.625rem;')
-    .text((d) => d)
+    .attr('style', 'color: rgba(0, 0, 0, 0.72); font-size: 0.75rem;')
+    .text((d) => d.name)
   legends
     .append('div')
     .attr(
       'style',
-      (d) =>
-        `width: 12px; height: 12px; margin-left: 8px; background: ${colorPalette(
-          d
-        )}; border-radius: 3px; cursor: pointer;`
+      (d) => `width: 14px; height: 14px; margin-left: 8px; background: ${colorPalette(d.uuid)}; cursor: pointer;`
     )
 
   function genRectWidth(d: Event) {
     let width = d.FinishTime ? x(day(d.FinishTime)) - x(day(d.StartTime)) : x(day()) - x(day(d.StartTime))
 
     if (width === 0) {
-      width = 20
+      width = 1
     }
 
     return width
@@ -130,14 +131,13 @@ export default function gen({
     .enter()
     .append('rect')
     .attr('x', (d) => x(day(d.StartTime)))
-    .attr('y', (d) => y(d.Experiment)! + margin.top)
+    .attr('y', (d) => y(d.ExperimentID)! + margin.top)
     .attr('width', genRectWidth)
     .attr('height', y.bandwidth())
-    .attr('fill', (d) => colorPalette(d.Experiment))
+    .attr('fill', (d) => colorPalette(d.ExperimentID))
     .style('cursor', 'pointer')
 
-  const zoom = d3.zoom().scaleExtent([0.25, 5]).on('zoom', zoomd)
-  svg.call(zoom as any)
+  const zoom = d3.zoom().scaleExtent([0.1, 5]).on('zoom', zoomd)
   function zoomd() {
     const eventTransform = d3.event.transform
 
@@ -147,6 +147,7 @@ export default function gen({
     svg.selectAll('.tick text').call(wrapText, 30)
     rects.attr('x', (d) => newX(day(d.StartTime))).attr('width', genRectWidth)
   }
+  svg.call(zoom as any)
 
   const tooltip = d3
     .select(document.createElement('div'))

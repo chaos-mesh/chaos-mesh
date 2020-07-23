@@ -1,10 +1,25 @@
 import { Box, Chip, TextField, TextFieldProps } from '@material-ui/core'
 import { Field, getIn, useFormikContext } from 'formik'
+import { createStyles, makeStyles } from '@material-ui/core/styles'
 
 import { Experiment } from 'components/NewExperiment/types'
 import React from 'react'
+import clsx from 'clsx'
+
+const useStyles = makeStyles(() =>
+  createStyles({
+    muiSelectRoot: {
+      '& .MuiSelect-root': {
+        padding: 6,
+        paddingTop: 8,
+      },
+    },
+  })
+)
 
 const SelectField: React.FC<TextFieldProps & { multiple?: boolean }> = ({ multiple = false, ...props }) => {
+  const classes = useStyles()
+
   const { values, setFieldValue } = useFormikContext<Experiment>()
 
   const onDelete = (val: string) => () =>
@@ -21,7 +36,7 @@ const SelectField: React.FC<TextFieldProps & { multiple?: boolean }> = ({ multip
             {(selected as string[]).map((val) => (
               <Box key={val} m={0.5}>
                 <Chip
-                  style={{ height: 24 }}
+                  style={{ height: 24, margin: 1 }}
                   label={val}
                   color="primary"
                   onDelete={onDelete(val)}
@@ -36,7 +51,16 @@ const SelectField: React.FC<TextFieldProps & { multiple?: boolean }> = ({ multip
 
   return (
     <Box mb={2}>
-      <Field {...props} as={TextField} variant="outlined" select margin="dense" fullWidth SelectProps={SelectProps} />
+      <Field
+        {...props}
+        as={TextField}
+        className={clsx(multiple && classes.muiSelectRoot, props.className)}
+        variant="outlined"
+        select
+        margin="dense"
+        fullWidth
+        SelectProps={SelectProps}
+      />
     </Box>
   )
 }

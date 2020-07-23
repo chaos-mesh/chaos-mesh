@@ -22,6 +22,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/jinzhu/gorm"
 	"golang.org/x/sync/errgroup"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
@@ -45,16 +46,17 @@ type Experiment struct {
 	ExperimentBase
 	Created string `json:"created"`
 	Status  string `json:"status"`
+	UID     string `json:"uid"`
 }
 
 // ChaosState defines the number of chaos experiments of each phase
 type ChaosState struct {
-	Total    int `json:"total"`
-	Running  int `json:"running"`
-	Waiting  int `json:"waiting"`
-	Paused   int `json:"paused"`
-	Failed   int `json:"failed"`
-	Finished int `json:"finished"`
+	Total    int `json:"Total"`
+	Running  int `json:"Running"`
+	Waiting  int `json:"Waiting"`
+	Paused   int `json:"Paused"`
+	Failed   int `json:"Failed"`
+	Finished int `json:"Finished"`
 }
 
 // Service defines a handler service for experiments.
@@ -87,11 +89,11 @@ func Register(r *gin.RouterGroup, s *Service) {
 	// TODO: add more api handlers
 	endpoint.GET("", s.listExperiments)
 	endpoint.POST("/new", s.createExperiment)
-	endpoint.GET("/detail/:kind/:namespace/:name", s.getExperimentDetail)
-	endpoint.DELETE("/:kind/:namespace/:name", s.deleteExperiment)
+	endpoint.GET("/detail/:uid", s.getExperimentDetail)
+	endpoint.DELETE("/:uid", s.deleteExperiment)
 	endpoint.PUT("/update", s.updateExperiment)
-	endpoint.PUT("/pause/:kind/:namespace/:name", s.pauseExperiment)
-	endpoint.PUT("/start/:kind/:namespace/:name", s.startExperiment)
+	endpoint.PUT("/pause/:uid", s.pauseExperiment)
+	endpoint.PUT("/start/:uid", s.startExperiment)
 	endpoint.GET("/state", s.state)
 }
 
@@ -164,13 +166,13 @@ func (s *SelectorInfo) ParseSelector() v1alpha1.SelectorSpec {
 
 // TargetInfo defines the information of target objects.
 type TargetInfo struct {
-	Kind         string           `json:"kind" binding:"required,oneof=PodChaos NetworkChaos IoChaos KernelChaos TimeChaos StressChaos"`
-	PodChaos     PodChaosInfo     `json:"pod_chaos"`
-	NetworkChaos NetworkChaosInfo `json:"network_chaos"`
-	IOChaos      IOChaosInfo      `json:"io_chaos"`
-	KernelChaos  KernelChaosInfo  `json:"kernel_chaos"`
-	TimeChaos    TimeChaosInfo    `json:"time_chaos"`
-	StressChaos  StressChaosInfo  `json:"stress_chaos"`
+	Kind         string            `json:"kind" binding:"required,oneof=PodChaos NetworkChaos IoChaos KernelChaos TimeChaos StressChaos"`
+	PodChaos     *PodChaosInfo     `json:"pod_chaos,omitempty"`
+	NetworkChaos *NetworkChaosInfo `json:"network_chaos,omitempty"`
+	IOChaos      *IOChaosInfo      `json:"io_chaos,omitempty"`
+	KernelChaos  *KernelChaosInfo  `json:"kernel_chaos,omitempty"`
+	TimeChaos    *TimeChaosInfo    `json:"time_chaos,omitempty"`
+	StressChaos  *StressChaosInfo  `json:"stress_chaos,omitempty"`
 }
 
 // SchedulerInfo defines the scheduler information.
@@ -489,7 +491,7 @@ func (s *Service) getPodChaosDetail(namespace string, name string) (ExperimentIn
 		},
 		Target: TargetInfo{
 			Kind: v1alpha1.KindPodChaos,
-			PodChaos: PodChaosInfo{
+			PodChaos: &PodChaosInfo{
 				Action:        string(chaos.Spec.Action),
 				ContainerName: chaos.Spec.ContainerName,
 			},
@@ -534,7 +536,7 @@ func (s *Service) getIoChaosDetail(namespace string, name string) (ExperimentInf
 		},
 		Target: TargetInfo{
 			Kind: v1alpha1.KindIOChaos,
-			IOChaos: IOChaosInfo{
+			IOChaos: &IOChaosInfo{
 				Action:  string(chaos.Spec.Action),
 				Addr:    chaos.Spec.Addr,
 				Delay:   chaos.Spec.Delay,
@@ -584,7 +586,7 @@ func (s *Service) getNetworkChaosDetail(namespace string, name string) (Experime
 		},
 		Target: TargetInfo{
 			Kind: v1alpha1.KindNetworkChaos,
-			NetworkChaos: NetworkChaosInfo{
+			NetworkChaos: &NetworkChaosInfo{
 				Action:    string(chaos.Spec.Action),
 				Delay:     chaos.Spec.Delay,
 				Loss:      chaos.Spec.Loss,
@@ -649,7 +651,7 @@ func (s *Service) getTimeChaosDetail(namespace string, name string) (ExperimentI
 		},
 		Target: TargetInfo{
 			Kind: v1alpha1.KindTimeChaos,
-			TimeChaos: TimeChaosInfo{
+			TimeChaos: &TimeChaosInfo{
 				TimeOffset:     chaos.Spec.TimeOffset,
 				ClockIDs:       chaos.Spec.ClockIds,
 				ContainerNames: chaos.Spec.ContainerNames,
@@ -695,7 +697,7 @@ func (s *Service) getKernelChaosDetail(namespace string, name string) (Experimen
 		},
 		Target: TargetInfo{
 			Kind: v1alpha1.KindKernelChaos,
-			KernelChaos: KernelChaosInfo{
+			KernelChaos: &KernelChaosInfo{
 				FailKernRequest: chaos.Spec.FailKernRequest,
 			},
 		},
@@ -739,7 +741,7 @@ func (s *Service) getStressChaosDetail(namespace string, name string) (Experimen
 		},
 		Target: TargetInfo{
 			Kind: v1alpha1.KindStressChaos,
-			StressChaos: StressChaosInfo{
+			StressChaos: &StressChaosInfo{
 				Stressors:         chaos.Spec.Stressors,
 				StressngStressors: chaos.Spec.StressngStressors,
 			},
@@ -798,6 +800,7 @@ func (s *Service) listExperiments(c *gin.Context) {
 				},
 				Created: chaos.StartTime.Format(time.RFC3339),
 				Status:  chaos.Status,
+				UID:     chaos.UID,
 			})
 		}
 	}
@@ -809,28 +812,33 @@ func (s *Service) listExperiments(c *gin.Context) {
 // @Description Get detailed information about the specified chaos experiment.
 // @Tags experiments
 // @Produce json
-// @Param namespace path string true "namespace"
-// @Param name path string true "name"
-// @Param kind path string true "kind" Enums(PodChaos, IoChaos, NetworkChaos, TimeChaos, KernelChaos, StressChaos)
-// @Router /api/experiments/detail/{kind}/{namespace}/{name} [GET]
+// @Param uid path string true "uid"
+// @Router /api/experiments/detail/{uid} [GET]
 // @Success 200 {object} ExperimentInfo
 // @Failure 400 {object} utils.APIError
 // @Failure 500 {object} utils.APIError
 func (s *Service) getExperimentDetail(c *gin.Context) {
-	kind := c.Param("kind")
-	ns := c.Param("namespace")
-	name := c.Param("name")
-
 	var (
-		ok   bool
 		info ExperimentInfo
 		err  error
+		exp  *core.ArchiveExperiment
 	)
-	if _, ok = v1alpha1.AllKinds()[kind]; !ok {
-		c.Status(http.StatusBadRequest)
-		_ = c.Error(utils.ErrInvalidRequest.New(kind + " is not supported"))
-		return
+
+	uid := c.Param("uid")
+	if exp, err = s.archive.FindByUID(context.Background(), uid); err != nil {
+		if !gorm.IsRecordNotFoundError(err) {
+			c.Status(http.StatusInternalServerError)
+			_ = c.Error(utils.ErrInternalServer.NewWithNoMessage())
+		} else {
+			c.Status(http.StatusInternalServerError)
+			_ = c.Error(utils.ErrInvalidRequest.New("the experiment is not found"))
+		}
 	}
+
+	kind := exp.Kind
+	ns := exp.Namespace
+	name := exp.Name
+
 	switch kind {
 	case v1alpha1.KindPodChaos:
 		info, err = s.getPodChaosDetail(ns, name)
@@ -857,29 +865,41 @@ func (s *Service) getExperimentDetail(c *gin.Context) {
 // @Description Delete the specified chaos experiment.
 // @Tags experiments
 // @Produce json
-// @Param namespace path string true "namespace"
-// @Param name path string true "name"
-// @Param kind path string true "kind" Enums(PodChaos, IoChaos, NetworkChaos, TimeChaos, KernelChaos, StressChaos)
+// @Param uid path string true "uid"
 // @Param force query string true "force" Enums(true, false)
 // @Success 200 "delete ok"
 // @Failure 400 {object} utils.APIError
 // @Failure 404 {object} utils.APIError
 // @Failure 500 {object} utils.APIError
-// @Router /api/experiments/{kind}/{namespace}/{name} [delete]
+// @Router /api/experiments/{uid} [delete]
 func (s *Service) deleteExperiment(c *gin.Context) {
-	kind := c.Param("kind")
-	ns := c.Param("namespace")
-	name := c.Param("name")
+	var (
+		chaosKind *v1alpha1.ChaosKind
+		chaosMeta metav1.Object
+		ok        bool
+		err       error
+		exp       *core.ArchiveExperiment
+	)
+
+	uid := c.Param("uid")
+	if exp, err = s.archive.FindByUID(context.Background(), uid); err != nil {
+		if !gorm.IsRecordNotFoundError(err) {
+			c.Status(http.StatusInternalServerError)
+			_ = c.Error(utils.ErrInternalServer.NewWithNoMessage())
+		} else {
+			c.Status(http.StatusInternalServerError)
+			_ = c.Error(utils.ErrInvalidRequest.New("the experiment is not found"))
+		}
+	}
+
+	kind := exp.Kind
+	ns := exp.Namespace
+	name := exp.Name
 	force := c.DefaultQuery("force", "false")
 
 	ctx := context.TODO()
 	chaosKey := types.NamespacedName{Namespace: ns, Name: name}
 
-	var (
-		chaosKind *v1alpha1.ChaosKind
-		chaosMeta metav1.Object
-		ok        bool
-	)
 	if chaosKind, ok = v1alpha1.AllKinds()[kind]; !ok {
 		c.Status(http.StatusBadRequest)
 		_ = c.Error(utils.ErrInvalidRequest.New(kind + " is not supported"))
@@ -989,20 +1009,33 @@ type ExperimentBase struct {
 // @Description Pause chaos experiment by API
 // @Tags experiments
 // @Produce json
-// @Param kind path string true "kind"
-// @Param namespace path string true "namespace"
-// @Param name path string true "name"
+// @Param uid path string true "uid"
 // @Success 200 "pause ok"
 // @Failure 400 {object} utils.APIError
 // @Failure 404 {object} utils.APIError
 // @Failure 500 {object} utils.APIError
-// @Router /api/experiments/pause/{kind}/{namespace}/{name} [put]
+// @Router /api/experiments/pause/{uid} [put]
 func (s *Service) pauseExperiment(c *gin.Context) {
-	exp := &ExperimentBase{}
-	if err := c.ShouldBindUri(exp); err != nil {
-		c.Status(http.StatusBadRequest)
-		_ = c.Error(utils.ErrInvalidRequest.WrapWithNoMessage(err))
-		return
+	var (
+		err        error
+		experiment *core.ArchiveExperiment
+	)
+
+	uid := c.Param("uid")
+	if experiment, err = s.archive.FindByUID(context.Background(), uid); err != nil {
+		if !gorm.IsRecordNotFoundError(err) {
+			c.Status(http.StatusInternalServerError)
+			_ = c.Error(utils.ErrInternalServer.NewWithNoMessage())
+		} else {
+			c.Status(http.StatusInternalServerError)
+			_ = c.Error(utils.ErrInvalidRequest.New("the experiment is not found"))
+		}
+	}
+
+	exp := &ExperimentBase{
+		Kind:      experiment.Kind,
+		Name:      experiment.Name,
+		Namespace: experiment.Namespace,
 	}
 
 	annotations := map[string]string{
@@ -1026,20 +1059,33 @@ func (s *Service) pauseExperiment(c *gin.Context) {
 // @Description Start the paused chaos experiment by API
 // @Tags experiments
 // @Produce json
-// @Param kind path string true "kind"
-// @Param namespace path string true "namespace"
-// @Param name path string true "name"
+// @Param uid path string true "uid"
 // @Success 200 "start ok"
 // @Failure 400 {object} utils.APIError
 // @Failure 404 {object} utils.APIError
 // @Failure 500 {object} utils.APIError
-// @Router /api/experiments/start/{kind}/{namespace}/{name} [put]
+// @Router /api/experiments/start/{uid} [put]
 func (s *Service) startExperiment(c *gin.Context) {
-	exp := &ExperimentBase{}
-	if err := c.ShouldBindUri(exp); err != nil {
-		c.Status(http.StatusBadRequest)
-		_ = c.Error(utils.ErrInvalidRequest.WrapWithNoMessage(err))
-		return
+	var (
+		err        error
+		experiment *core.ArchiveExperiment
+	)
+
+	uid := c.Param("uid")
+	if experiment, err = s.archive.FindByUID(context.Background(), uid); err != nil {
+		if !gorm.IsRecordNotFoundError(err) {
+			c.Status(http.StatusInternalServerError)
+			_ = c.Error(utils.ErrInternalServer.NewWithNoMessage())
+		} else {
+			c.Status(http.StatusInternalServerError)
+			_ = c.Error(utils.ErrInvalidRequest.New("the experiment is not found"))
+		}
+	}
+
+	exp := &ExperimentBase{
+		Kind:      experiment.Kind,
+		Name:      experiment.Name,
+		Namespace: experiment.Namespace,
 	}
 
 	annotations := map[string]string{

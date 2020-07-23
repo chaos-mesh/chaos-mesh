@@ -1,7 +1,6 @@
 import {
   Box,
   Button,
-  Collapse,
   IconButton,
   InputAdornment,
   Table,
@@ -14,7 +13,6 @@ import {
   TableRow,
   TableSortLabel,
   TextField,
-  Typography,
 } from '@material-ui/core'
 import React, { useCallback, useEffect, useState } from 'react'
 import { createStyles, makeStyles } from '@material-ui/core/styles'
@@ -22,10 +20,8 @@ import day, { dayComparator } from 'lib/dayjs'
 
 import { Event } from 'api/events.type'
 import FirstPageIcon from '@material-ui/icons/FirstPage'
-import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown'
 import KeyboardArrowLeftIcon from '@material-ui/icons/KeyboardArrowLeft'
 import KeyboardArrowRightIcon from '@material-ui/icons/KeyboardArrowRight'
-import KeyboardArrowUpIcon from '@material-ui/icons/KeyboardArrowUp'
 import LastPageIcon from '@material-ui/icons/LastPage'
 import { Link } from 'react-router-dom'
 import PaperTop from 'components/PaperTop'
@@ -33,6 +29,7 @@ import SearchIcon from '@material-ui/icons/Search'
 import _debounce from 'lodash.debounce'
 import { searchEvents } from 'lib/search'
 import { usePrevious } from 'lib/hooks'
+import useRunningLabelStyles from 'lib/styles/runningLabel'
 
 const useStyles = makeStyles(() =>
   createStyles({
@@ -129,8 +126,6 @@ const EventsTableHead: React.FC<EventsTableHeadProps> = ({ order, orderBy, onSor
             </TableSortLabel>
           </TableCell>
         ))}
-
-        <TableCell />
       </TableRow>
     </TableHead>
   )
@@ -185,9 +180,7 @@ interface EventsTableRowProps {
 }
 
 const EventsTableRow: React.FC<EventsTableRowProps> = ({ event: e, detailed, noExperiment }) => {
-  const [open, setOpen] = useState(false)
-
-  const handleToggle = () => setOpen(!open)
+  const runningLabel = useRunningLabelStyles()
 
   return (
     <>
@@ -196,12 +189,14 @@ const EventsTableRow: React.FC<EventsTableRowProps> = ({ event: e, detailed, noE
         <TableCell>{e.Namespace}</TableCell>
         <TableCell>{e.Kind}</TableCell>
         <TableCell>{format(e.StartTime)}</TableCell>
-        <TableCell>{e.FinishTime ? format(e.FinishTime) : 'Not Done'}</TableCell>
+        <TableCell>
+          {e.FinishTime ? format(e.FinishTime) : <span className={runningLabel.root}>Running</span>}
+        </TableCell>
         {detailed && (
           <TableCell>
             <Button
               component={Link}
-              to={`/experiments/${e.Experiment}?namespace=${e.Namespace}&kind=${e.Kind}&event=${e.ID}`}
+              to={`/experiments/${e.ExperimentID}?name=${e.Experiment}&event=${e.ID}`}
               variant="outlined"
               size="small"
               color="primary"
@@ -210,46 +205,6 @@ const EventsTableRow: React.FC<EventsTableRowProps> = ({ event: e, detailed, noE
             </Button>
           </TableCell>
         )}
-
-        <TableCell align="right">
-          <IconButton aria-label="Expand row" size="small" onClick={handleToggle}>
-            {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
-          </IconButton>
-        </TableCell>
-      </TableRow>
-      <TableRow>
-        <TableCell style={{ paddingTop: 0, paddingBottom: 0, borderBottom: 0 }} colSpan={12}>
-          <Collapse in={open} timeout="auto" unmountOnExit>
-            <Box my={6}>
-              <Typography variant="h6" gutterBottom>
-                Affected Pods
-              </Typography>
-              <Table size="small">
-                <TableHead>
-                  <TableRow>
-                    <TableCell>IP</TableCell>
-                    <TableCell>Name</TableCell>
-                    <TableCell>Namespace</TableCell>
-                    <TableCell>Action</TableCell>
-                    <TableCell>Message</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {e.Pods &&
-                    e.Pods.map((pod) => (
-                      <TableRow key={pod.ID}>
-                        <TableCell>{pod.PodIP}</TableCell>
-                        <TableCell>{pod.PodName}</TableCell>
-                        <TableCell>{pod.Namespace}</TableCell>
-                        <TableCell>{pod.Action}</TableCell>
-                        <TableCell>{pod.Message}</TableCell>
-                      </TableRow>
-                    ))}
-                </TableBody>
-              </Table>
-            </Box>
-          </Collapse>
-        </TableCell>
       </TableRow>
     </>
   )
@@ -321,6 +276,9 @@ const EventsTable: React.FC<EventsTableProps> = ({
                 <SearchIcon color="primary" />
               </InputAdornment>
             ),
+          }}
+          inputProps={{
+            style: { paddingTop: 8, paddingBottom: 8 },
           }}
           onChange={handleSearchChange}
         />

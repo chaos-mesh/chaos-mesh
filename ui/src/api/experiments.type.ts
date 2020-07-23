@@ -1,12 +1,21 @@
 import { Event } from './events.type'
 
 export interface StateOfExperiments {
-  total: number
-  running: number
-  waiting: number
-  paused: number
-  failed: number
-  finished: number
+  Total: number
+  Running: number
+  Waiting: number
+  Paused: number
+  Failed: number
+  Finished: number
+}
+
+export enum StateOfExperimentsEnum {
+  Total = 'total',
+  Running = 'running',
+  Waiting = 'waiting',
+  Paused = 'paused',
+  Failed = 'failed',
+  Finished = 'finished',
 }
 
 export interface Experiment {
@@ -15,5 +24,6 @@ export interface Experiment {
   Name: string
   created: string
   status: keyof StateOfExperiments
+  uid: uuid
   events?: Event[]
 }

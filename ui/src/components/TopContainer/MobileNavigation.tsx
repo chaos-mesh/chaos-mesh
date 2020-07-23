@@ -1,6 +1,8 @@
-import { AppBar, IconButton, Toolbar } from '@material-ui/core'
+import { AppBar, IconButton, Toolbar, Fab } from '@material-ui/core'
 import { Theme, createStyles, makeStyles } from '@material-ui/core/styles'
 
+import AddIcon from '@material-ui/icons/Add'
+import { Link } from 'react-router-dom'
 import ArchiveOutlinedIcon from '@material-ui/icons/ArchiveOutlined'
 import BlurLinearIcon from '@material-ui/icons/BlurLinear'
 import { NavLink } from 'react-router-dom'
@@ -13,6 +15,12 @@ const useStyles = makeStyles((theme: Theme) =>
     appBar: {
       top: 'auto',
       bottom: 0,
+    },
+    fab: {
+      position: 'fixed',
+      bottom: theme.spacing(7.5),
+      right: theme.spacing(3),
+      zIndex: 1101, // .MuiAppBar-root z-index: 1100
     },
   })
 )
@@ -44,6 +52,16 @@ const MobileNavigation = () => {
             <IconButton color="primary">{i.icon}</IconButton>
           </NavLink>
         ))}
+        <Fab
+          component={Link}
+          to="/newExperiment"
+          className={classes.fab}
+          color="primary"
+          size="medium"
+          aria-label="New experiment"
+        >
+          <AddIcon />
+        </Fab>
       </Toolbar>
     </AppBar>
   )

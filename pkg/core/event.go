@@ -37,6 +37,9 @@ type EventStore interface {
 	// ListByPod returns an event list by the name and namespace of the pod.
 	ListByPod(context.Context, string, string) ([]*Event, error)
 
+	// ListByUID returns an event list by the UID.
+	ListByUID(context.Context, string) ([]*Event, error)
+
 	// DryListByFilter returns an event list by experimentName, experimentNamespace, uid, kind, startTime and finishTime.
 	DryListByFilter(context.Context, Filter) ([]*Event, error)
 
@@ -60,6 +63,12 @@ type EventStore interface {
 
 	// DeleteByFinishTime deletes events and podrecords whose time difference is greater than the given time from FinishTime.
 	DeleteByFinishTime(context.Context, time.Duration) error
+
+	// UpdateIncompleteEvents updates the incomplete event by the namespace and name
+	// If chaos is deleted before an event is over, then the incomplete event would be stored in dbtastore,
+	// which means the event would never save the finish_time.
+	// UpdateIncompleteEvents can update the finish_time when the chaos is deleted.
+	UpdateIncompleteEvents(context.Context, string, string) error
 }
 
 // Event represents an event instance.

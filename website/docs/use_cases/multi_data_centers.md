@@ -13,8 +13,7 @@ This document helps you simulate multiple data centers scenarios.
 
 > **Note**: 
 > 
-> Currently, Chaos Mesh can't simulate the scenario of the bandwidth limitations between data centers. So in this case, 
-> only simulate the scenario of the latency between different data centers.
+> Currently, Chaos Mesh cannot simulate the scenario of the bandwidth limitations between data centers. So in this case, only simulate the scenario of the latency between different data centers.
 
 ## Experiment environment
 
@@ -51,7 +50,7 @@ basic-tikv-6                       1/1     Running   0          29m
 
 ### Grouping
 
-`dc-a`, `dc-b` and `dc-c` are the three data centers we will use later. So we will split the pods to these data centers:
+`dc-a`, `dc-b`, and `dc-c` are the three data centers we will use later. So we will split the pods to these data centers:
 
 |  dc-a   | dc-b  | dc-c |
 |  :----:  | :----:  | :----:  |
@@ -209,7 +208,8 @@ Use `ping` command to check the latency between three centers.
 kubectl exec -it -n tidb-cluster basic-tidb-0 -c tidb -- ping -c 2 basic-tikv-0.basic-tikv-peer.tidb-cluster.svc
 ```
 
-output: 
+output:
+
 ```bash
 PING basic-tikv-0.basic-tikv-peer.tidb-cluster.svc (10.244.1.229): 56 data bytes
 64 bytes from 10.244.1.229: seq=0 ttl=63 time=0.095 ms
@@ -224,7 +224,8 @@ From the output, we can see that the latency between the pods belong to `dc-a` i
 kubectl exec -it -n tidb-cluster basic-tidb-0 -c tidb -- ping -c 2 basic-tidb-1.basic-tidb-peer.tidb-cluster.svc
 ```
 
-output: 
+output:
+
 ```bash
 PING basic-tidb-1.basic-tidb-peer.tidb-cluster.svc (10.244.3.3): 56 data bytes
 64 bytes from 10.244.3.3: seq=0 ttl=62 time=1.193 ms
@@ -239,7 +240,8 @@ From the output, we can see that the latency between `dc-a` and `dc-c` is around
 kubectl exec -it -n tidb-cluster basic-tidb-0 -c tidb -- ping -c 2 basic-tidb-2.basic-tidb-peer.tidb-cluster.svc
 ```
 
-output: 
+output:
+
 ```bash
 PING basic-tidb-2.basic-tidb-peer.tidb-cluster.svc (10.244.2.27): 56 data bytes
 64 bytes from 10.244.2.27: seq=0 ttl=62 time=2.200 ms
