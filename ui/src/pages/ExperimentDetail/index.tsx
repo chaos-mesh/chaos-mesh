@@ -304,7 +304,7 @@ export default function ExperimentDetail() {
           </Paper>
           <Box className={classes.height100} position="relative">
             <Paper className={classes.height100} variant="outlined">
-              {events && <EventsTable events={events} detailed noExperiment />}
+              {events && <EventsTable events={events} detailed />}
             </Paper>
             {eventDetailOpen && (
               <Paper
