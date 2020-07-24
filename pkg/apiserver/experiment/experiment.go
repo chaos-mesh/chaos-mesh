@@ -187,7 +187,7 @@ type PodChaosInfo struct {
 	ContainerName string `json:"container_name"`
 }
 
-// PodChaosInfo defines the basic information of network chaos for creating a new NetworkChaos.
+// NetworkChaosInfo defines the basic information of network chaos for creating a new NetworkChaos.
 type NetworkChaosInfo struct {
 	Action      string                  `json:"action" binding:"oneof='' 'netem' 'delay' 'loss' 'duplicate' 'corrupt' 'partition' 'bandwidth'"`
 	Delay       *v1alpha1.DelaySpec     `json:"delay"`
@@ -196,7 +196,7 @@ type NetworkChaosInfo struct {
 	Corrupt     *v1alpha1.CorruptSpec   `json:"corrupt"`
 	Bandwidth   *v1alpha1.BandwidthSpec `json:"bandwidth"`
 	Direction   string                  `json:"direction" binding:"oneof='' 'to' 'from' 'both'"`
-	TargetScope *ScopeInfo              `json:"target_scope"`
+	TargetScope *ScopeInfo              `json:"target"`
 }
 
 // IOChaosInfo defines the basic information of io chaos for creating a new IOChaos.
@@ -212,12 +212,12 @@ type IOChaosInfo struct {
 
 // KernelChaosInfo defines the basic information of kernel chaos for creating a new KernelChaos.
 type KernelChaosInfo struct {
-	FailKernRequest v1alpha1.FailKernRequest `json:"fail_kernel_req"`
+	FailKernRequest v1alpha1.FailKernRequest `json:"fail_kern_request"`
 }
 
 // TimeChaosInfo defines the basic information of time chaos for creating a new TimeChaos.
 type TimeChaosInfo struct {
-	TimeOffset     string   `json:"offset"`
+	TimeOffset     string   `json:"time_offset"`
 	ClockIDs       []string `json:"clock_ids"`
 	ContainerNames []string `json:"container_names"`
 }

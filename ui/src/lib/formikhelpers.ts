@@ -1,4 +1,10 @@
-import { CallchainFrame, Experiment, ExperimentTarget, FormikCtx } from 'components/NewExperiment/types'
+import {
+  CallchainFrame,
+  Experiment,
+  ExperimentScope,
+  ExperimentTarget,
+  FormikCtx,
+} from 'components/NewExperiment/types'
 
 import { defaultExperimentSchema } from 'components/NewExperiment/constants'
 import snakeCaseKeys from 'snakecase-keys'
@@ -15,7 +21,7 @@ export const ChaosKindKeyMap: {
 }
 
 export function parseSubmit(e: Experiment) {
-  const values = JSON.parse(JSON.stringify(e))
+  const values: Experiment = JSON.parse(JSON.stringify(e))
 
   // Parse phase_selectors
   const phaseSelectors = values.scope.phase_selectors
@@ -33,10 +39,22 @@ export function parseSubmit(e: Experiment) {
       return acc
     }, {})
   }
-  values.labels = helper1(values.labels)
-  values.annotations = helper1(values.annotations)
-  values.scope.label_selectors = helper1(values.scope.label_selectors as string[])
-  values.scope.annotation_selectors = helper1(values.scope.annotation_selectors as string[])
+  function helper2(scope: ExperimentScope) {
+    scope.label_selectors = helper1(scope.label_selectors as string[])
+    scope.annotation_selectors = helper1(scope.annotation_selectors as string[])
+  }
+  values.labels = helper1(values.labels as string[])
+  values.annotations = helper1(values.annotations as string[])
+  helper2(values.scope)
+  // Handle NetworkChaos target
+  const networkTarget = values.target.network_chaos.target
+  if (networkTarget) {
+    if (networkTarget.mode) {
+      helper2(values.target.network_chaos.target!)
+    } else {
+      values.target.network_chaos.target = undefined
+    }
+  }
 
   // Remove unrelated chaos
   const kind = values.target.kind
@@ -52,12 +70,15 @@ export function parseSubmit(e: Experiment) {
         const chaos = (values.target as any)[key]
 
         for (const action in chaos) {
-          if (action === 'action') {
-            continue
-          }
-
-          // Handle container-kill action
-          if (chaos.action === 'container-kill' && action === 'container_name') {
+          if (
+            action === 'action' ||
+            // Handle PodChaos container-kill action
+            (chaos.action === 'container-kill' && action === 'container_name') ||
+            // Pass NetworkChaos target
+            action === 'target' ||
+            // Handle NetworkChaos partition action
+            (chaos.action === 'partition' && action === 'direction')
+          ) {
             continue
           }
 
@@ -91,38 +112,47 @@ export function resetOtherChaos(formProps: FormikCtx, kind: string, action: stri
 
   const updatedTarget = {
     ...defaultExperimentSchema.target,
-    ...{
-      kind: selectedChaosKind,
-      [selectedChaosKey]: {
-        ...values.target[selectedChaosKey],
-        ...(action
-          ? {
-              action,
-            }
-          : {}),
-      },
+    kind: selectedChaosKind,
+    [selectedChaosKey]: {
+      ...values.target[selectedChaosKey],
+      ...(action
+        ? {
+            action,
+          }
+        : {}),
     },
   }
 
   setFieldValue('target', updatedTarget)
 }
 
+function selectorsToArr(selectors: Object, separator: string) {
+  return Object.entries(selectors).map(([key, val]) => `${key}${separator}${val}`)
+}
+
 export function parseLoaded(e: Experiment): Experiment {
   const result = e
 
-  result.labels = result.labels ? Object.entries(result.labels).map(([key, val]) => `${key}:${val}`) : []
-  result.annotations = result.annotations ? Object.entries(result.annotations).map(([key, val]) => `${key}:${val}`) : []
-  result.scope.label_selectors = result.scope.label_selectors
-    ? Object.entries(result.scope.label_selectors).map(([key, val]) => `${key}: ${val}`)
-    : []
+  result.labels = result.labels ? selectorsToArr(result.labels, ':') : []
+  result.annotations = result.annotations ? selectorsToArr(result.annotations, ':') : []
+  result.scope.label_selectors = result.scope.label_selectors ? selectorsToArr(result.scope.label_selectors, ': ') : []
   result.scope.annotation_selectors = result.scope.annotation_selectors
-    ? Object.entries(result.scope.annotation_selectors).map(([key, val]) => `${key}: ${val}`)
+    ? selectorsToArr(result.scope.annotation_selectors, ': ')
     : []
   result.scope.phase_selectors = result.scope.phase_selectors ? result.scope.phase_selectors : ['all']
 
   result.target = {
     ...defaultExperimentSchema.target,
     ...result.target,
+  }
+
+  if (result.target.kind === 'NetworkChaos' && result.target.network_chaos.target) {
+    result.target.network_chaos.target.label_selectors = result.target.network_chaos.target.label_selectors
+      ? selectorsToArr(result.target.network_chaos.target.label_selectors, ': ')
+      : []
+    result.target.network_chaos.target.annotation_selectors = result.target.network_chaos.target.annotation_selectors
+      ? selectorsToArr(result.target.network_chaos.target.annotation_selectors, ': ')
+      : []
   }
 
   return result
@@ -133,20 +163,14 @@ export function yamlToExperiment(yamlObj: any): Experiment {
 
   let halfResult = {
     ...defaultExperimentSchema,
-    ...{
-      ...metadata,
-      labels: metadata.labels ? Object.entries(metadata.labels).map(([key, val]) => `${key}:${val}`) : [],
-      annotations: metadata.annotations
-        ? Object.entries(metadata.annotations).map(([key, val]) => `${key}:${val}`)
-        : [],
-    },
+    ...metadata,
+    labels: metadata.labels ? selectorsToArr(metadata.labels, ':') : [],
+    annotations: metadata.annotations ? selectorsToArr(metadata.annotations, ':') : [],
     scope: {
       ...defaultExperimentSchema.scope,
-      label_selectors: spec.selector?.label_selectors
-        ? Object.entries(spec.selector.label_selectors).map(([key, val]) => `${key}: ${val}`)
-        : [],
+      label_selectors: spec.selector?.label_selectors ? selectorsToArr(spec.selector.label_selectors, ': ') : [],
       annotation_selectors: spec.selector?.annotation_selectors
-        ? Object.entries(spec.selector.annotation_selectors).map(([key, val]) => `${key}: ${val}`)
+        ? selectorsToArr(spec.selector.annotation_selectors, ': ')
         : [],
       mode: spec.mode,
     },
@@ -161,16 +185,8 @@ export function yamlToExperiment(yamlObj: any): Experiment {
   delete spec.scheduler
   delete spec.duration
 
-  if (kind === 'TimeChaos' && spec.time_offset) {
-    spec.offset = spec.time_offset
-    delete spec.time_offset
-  }
-
   if (kind === 'KernelChaos' && spec.fail_kern_request) {
-    spec.fail_kernel_req = spec.fail_kern_request
-    delete spec.fail_kern_request
-
-    spec.fail_kernel_req.callchain = spec.fail_kernel_req.callchain.map((frame: CallchainFrame) => {
+    spec.fail_kern_request.callchain = spec.fail_kern_request.callchain.map((frame: CallchainFrame) => {
       if (!frame.parameters) {
         frame.parameters = ''
       }
@@ -182,9 +198,9 @@ export function yamlToExperiment(yamlObj: any): Experiment {
       return frame
     })
 
-    spec.fail_kernel_req = {
-      ...defaultExperimentSchema.target.kernel_chaos.fail_kernel_req,
-      ...spec.fail_kernel_req,
+    spec.fail_kern_request = {
+      ...defaultExperimentSchema.target.kernel_chaos.fail_kern_request,
+      ...spec.fail_kern_request,
     }
   }
 
@@ -201,7 +217,7 @@ export function yamlToExperiment(yamlObj: any): Experiment {
   }
 
   if (['IoChaos', 'KernelChaos', 'TimeChaos', 'StressChaos'].includes(kind)) {
-    const result = {
+    return {
       ...halfResult,
       target: {
         ...defaultExperimentSchema.target,
@@ -212,22 +228,51 @@ export function yamlToExperiment(yamlObj: any): Experiment {
         },
       },
     }
-
-    if (process.env.NODE_ENV === 'development') {
-      console.debug('Debug result:', result)
-    }
-
-    return result
   }
 
   const action = Object.keys(spec).filter((k) => k === spec.action)[0]
 
+  if (kind === 'NetworkChaos') {
+    const label_selectors = spec.target?.selector?.label_selectors
+      ? selectorsToArr(spec.target.selector.label_selectors, ': ')
+      : []
+    const annotation_selectors = spec.target?.selector?.annotation_selectors
+      ? selectorsToArr(spec.target.selector.annotation_selectors, ': ')
+      : []
+
+    spec.target?.selector && delete spec.target.selector
+
+    return {
+      ...halfResult,
+      target: {
+        ...defaultExperimentSchema.target,
+        kind,
+        network_chaos: {
+          action: spec.action,
+          ...(spec.action === 'partition'
+            ? { direction: spec.direction }
+            : {
+                [action]: spec[action],
+              }),
+          target: spec.target
+            ? {
+                ...defaultExperimentSchema.scope,
+                ...spec.target,
+                label_selectors,
+                annotation_selectors,
+              }
+            : undefined,
+        },
+      },
+    }
+  }
+
+  // PodChaos
   return {
     ...halfResult,
     target: {
       ...defaultExperimentSchema.target,
-      kind,
-      [ChaosKindKeyMap[kind].key]: {
+      pod_chaos: {
         action: spec.action,
         [action]: spec[action],
       },

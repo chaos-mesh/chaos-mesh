@@ -1,15 +1,49 @@
 import { InputAdornment, MenuItem } from '@material-ui/core'
+import React, { useEffect } from 'react'
 import { SelectField, TextField } from 'components/FormField'
 
 import AdvancedOptions from 'components/AdvancedOptions'
-import React from 'react'
+import { RootState } from 'store'
+import ScopeStep from '../Scope'
 import { StepperFormTargetProps } from 'components/NewExperiment/types'
+import { defaultExperimentSchema } from 'components/NewExperiment/constants'
+import { getIn } from 'formik'
 import { toTitleCase } from 'lib/utils'
+import { useSelector } from 'react-redux'
 
-const actions = ['loss', 'delay', 'duplicate', 'corrupt', 'bandwidth']
+const actions = ['partition', 'loss', 'delay', 'duplicate', 'corrupt', 'bandwidth']
+const direction = ['from', 'to', 'both']
 
 export default function Network(props: StepperFormTargetProps) {
-  const { values, handleActionChange } = props
+  const { values, setFieldValue, handleActionChange } = props
+
+  const { namespaces } = useSelector((state: RootState) => state.experiments)
+
+  const initTarget = () => setFieldValue('target.network_chaos.target', defaultExperimentSchema.scope)
+  const initPartitionTarget = () => {
+    const target = getIn(values, 'target.network_chaos.target')
+
+    setFieldValue(
+      'target.network_chaos.target',
+      Object.assign(
+        {
+          ...defaultExperimentSchema.scope,
+          mode: 'all',
+        },
+        target
+      )
+    )
+  }
+  const beforeTargetOpen = initTarget
+  const afterTargetClose = () => setFieldValue('target.network_chaos.target', undefined)
+
+  // Special operations for partition
+  useEffect(() => {
+    if (values.target.network_chaos.action === 'partition') {
+      initPartitionTarget()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [values.target.network_chaos.action])
 
   return (
     <>
@@ -20,12 +54,27 @@ export default function Network(props: StepperFormTargetProps) {
         helperText="Please select a NetworkChaos action"
         onChange={handleActionChange}
       >
-        {actions.map((option: string) => (
+        {actions.map((option) => (
           <MenuItem key={option} value={option}>
             {toTitleCase(option)}
           </MenuItem>
         ))}
       </SelectField>
+
+      {values.target.network_chaos.action === 'partition' && (
+        <SelectField
+          id="target.network_chaos.direction"
+          name="target.network_chaos.direction"
+          label="Direction"
+          helperText="Specifies the partition direction"
+        >
+          {direction.map((option) => (
+            <MenuItem key={option} value={option}>
+              {toTitleCase(option)}
+            </MenuItem>
+          ))}
+        </SelectField>
+      )}
 
       {values.target.network_chaos.action === 'bandwidth' && (
         <>
@@ -161,6 +210,19 @@ export default function Network(props: StepperFormTargetProps) {
             }}
           />
         </>
+      )}
+
+      {values.target.network_chaos.action !== '' && (
+        <AdvancedOptions
+          title="Target"
+          isOpen={values.target.network_chaos.action === 'partition' ? true : false}
+          beforeOpen={beforeTargetOpen}
+          afterClose={afterTargetClose}
+        >
+          {values.target.network_chaos.target && values.target.network_chaos.target.mode && (
+            <ScopeStep namespaces={namespaces} scope="target.network_chaos.target" />
+          )}
+        </AdvancedOptions>
       )}
     </>
   )
