@@ -20,13 +20,15 @@ import (
 	v1 "k8s.io/api/core/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/common"
+	"github.com/chaos-mesh/chaos-mesh/controllers/networkchaos/netutils"
 	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
 	"github.com/chaos-mesh/chaos-mesh/pkg/utils"
 )
 
-// FlushIptablesChain makes grpc call to chaosdaemon to flush iptable
-func SetIptablesChains(ctx context.Context, c client.Client, pod *v1.Pod, chainsName string, direction pb.Chain_Direction, set []string) error {
+// SetIptablesChains makes grpc call to chaosdaemon to flush iptable
+func SetIptablesChains(ctx context.Context, c client.Client, pod *v1.Pod, chains []*pb.Chain) error {
 	pbClient, err := utils.NewChaosDaemonClient(ctx, c, pod, common.ControllerCfg.ChaosDaemonPort)
 	if err != nil {
 		return err
@@ -40,12 +42,20 @@ func SetIptablesChains(ctx context.Context, c client.Client, pod *v1.Pod, chains
 	containerID := pod.Status.ContainerStatuses[0].ContainerID
 
 	_, err = pbClient.SetIptablesChains(ctx, &pb.IptablesChainsRequest{
-		Chains: []*pb.Chain{{
-			Name:      chainsName,
-			Direction: direction,
-			Ipsets:    set,
-		}},
+		Chains:      chains,
 		ContainerId: containerID,
 	})
 	return err
+}
+
+// GenerateName generates chain name for network chaos
+func GenerateName(direction pb.Chain_Direction, networkchaos *v1alpha1.NetworkChaos) (chainName string) {
+	switch direction {
+	case pb.Chain_INPUT:
+		chainName = "INPUT/" + netutils.CompressName(networkchaos.Name, 21, "")
+	case pb.Chain_OUTPUT:
+		chainName = "OUTPUT/" + netutils.CompressName(networkchaos.Name, 20, "")
+	}
+
+	return
 }

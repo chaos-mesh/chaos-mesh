@@ -98,7 +98,7 @@ func (iptables *iptablesClient) setIptablesChain(chain *pb.Chain) error {
 	for _, ipset := range chain.Ipsets {
 		rules = append(rules, fmt.Sprintf("-A %s -m set --match-set %s %s -j DROP -w 5", chain.Name, ipset, matchPart))
 	}
-	err := iptables.ensureChain(&iptablesChain{
+	err := iptables.createNewChain(&iptablesChain{
 		Name:  chain.Name,
 		Rules: rules,
 	})
@@ -115,7 +115,7 @@ func (iptables *iptablesClient) setIptablesChain(chain *pb.Chain) error {
 		}
 	} else if chain.Direction == pb.Chain_OUTPUT {
 		iptables.ensureRule(&iptablesChain{
-			Name: "",
+			Name: "CHAOS-OUTPUT",
 		}, "-A CHAOS-OUTPUT -j "+chain.Name)
 		if err != nil {
 			return err
@@ -130,7 +130,7 @@ func (iptables *iptablesClient) initializeEnv() error {
 	for _, direction := range []string{"INPUT", "OUTPUT"} {
 		chainName := "CHAOS-" + direction
 
-		err := iptables.ensureChain(&iptablesChain{
+		err := iptables.createNewChain(&iptablesChain{
 			Name:  chainName,
 			Rules: []string{},
 		})
@@ -147,20 +147,24 @@ func (iptables *iptablesClient) initializeEnv() error {
 	return nil
 }
 
-func (iptables *iptablesClient) ensureChain(chain *iptablesChain) error {
+// createNewChain will cover existing chain
+func (iptables *iptablesClient) createNewChain(chain *iptablesChain) error {
 	cmd := withNetNS(iptables.ctx, iptables.nsPath, iptablesCmd, "-N", chain.Name)
 	out, err := cmd.CombinedOutput()
 
 	if (err == nil && len(out) == 0) ||
 		(err != nil && strings.Contains(string(out), iptablesChainAlreadyExistErr)) {
 		// Successfully create a new chain
-		return iptables.ensureRules(chain)
+		return iptables.deleteAndWriteRules(chain)
 	}
 
 	return encodeOutputToError(out, err)
 }
 
-func (iptables *iptablesClient) ensureRules(chain *iptablesChain) error {
+// deleteAndWriteRules will remove all existing function in the chain
+// and replace with the new settings
+func (iptables *iptablesClient) deleteAndWriteRules(chain *iptablesChain) error {
+
 	// This chain should already exist
 	err := iptables.flushIptablesChain(chain)
 	if err != nil {

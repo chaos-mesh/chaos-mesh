@@ -144,28 +144,44 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1
 		return err
 	}
 
+	sourcesChains := []*pb.Chain{}
+	targetsChains := []*pb.Chain{}
 	if networkchaos.Spec.Direction == v1alpha1.To || networkchaos.Spec.Direction == v1alpha1.Both {
-		if err := r.BlockSet(ctx, sources, &targetSet, pb.Chain_OUTPUT, networkchaos); err != nil {
-			r.Log.Error(err, "set source iptables failed")
-			return err
-		}
+		sourcesChains = append(sourcesChains, &pb.Chain{
+			Name:      iptable.GenerateName(pb.Chain_OUTPUT, networkchaos),
+			Direction: pb.Chain_OUTPUT,
+			Ipsets:    []string{targetSet.Name},
+		})
 
-		if err := r.BlockSet(ctx, targets, &sourceSet, pb.Chain_INPUT, networkchaos); err != nil {
-			r.Log.Error(err, "set target iptables failed")
-			return err
-		}
+		targetsChains = append(targetsChains, &pb.Chain{
+			Name:      iptable.GenerateName(pb.Chain_INPUT, networkchaos),
+			Direction: pb.Chain_INPUT,
+			Ipsets:    []string{sourceSet.Name},
+		})
 	}
 
 	if networkchaos.Spec.Direction == v1alpha1.From || networkchaos.Spec.Direction == v1alpha1.Both {
-		if err := r.BlockSet(ctx, sources, &targetSet, pb.Chain_INPUT, networkchaos); err != nil {
-			r.Log.Error(err, "set source iptables failed")
-			return err
-		}
+		sourcesChains = append(sourcesChains, &pb.Chain{
+			Name:      iptable.GenerateName(pb.Chain_INPUT, networkchaos),
+			Direction: pb.Chain_OUTPUT,
+			Ipsets:    []string{targetSet.Name},
+		})
 
-		if err := r.BlockSet(ctx, targets, &sourceSet, pb.Chain_OUTPUT, networkchaos); err != nil {
-			r.Log.Error(err, "set target iptables failed")
-			return err
-		}
+		targetsChains = append(targetsChains, &pb.Chain{
+			Name:      iptable.GenerateName(pb.Chain_OUTPUT, networkchaos),
+			Direction: pb.Chain_INPUT,
+			Ipsets:    []string{sourceSet.Name},
+		})
+	}
+
+	err = r.SetChains(ctx, sources, sourcesChains, networkchaos)
+	if err != nil {
+		return err
+	}
+
+	err = r.SetChains(ctx, targets, targetsChains, networkchaos)
+	if err != nil {
+		return err
 	}
 
 	networkchaos.Status.Experiment.PodRecords = make([]v1alpha1.PodStatus, 0, len(allPods))
@@ -189,17 +205,9 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1
 	return nil
 }
 
-// BlockSet blocks ipset for pods
-func (r *Reconciler) BlockSet(ctx context.Context, pods []v1.Pod, set *pb.IpSet, direction pb.Chain_Direction, networkchaos *v1alpha1.NetworkChaos) error {
+// SetChains sets iptables chains for pods
+func (r *Reconciler) SetChains(ctx context.Context, pods []v1.Pod, chains []*pb.Chain, networkchaos *v1alpha1.NetworkChaos) error {
 	g := errgroup.Group{}
-
-	var chainName string
-	switch direction {
-	case pb.Chain_INPUT:
-		chainName = "INPUT/" + netutils.CompressName(networkchaos.Name, 21, "")
-	case pb.Chain_OUTPUT:
-		chainName = "OUTPUT/" + netutils.CompressName(networkchaos.Name, 20, "")
-	}
 
 	for index := range pods {
 		pod := &pods[index]
@@ -209,15 +217,10 @@ func (r *Reconciler) BlockSet(ctx context.Context, pods []v1.Pod, set *pb.IpSet,
 			return err
 		}
 
-		switch direction {
-		case pb.Chain_INPUT:
-			networkchaos.Finalizers = utils.InsertFinalizer(networkchaos.Finalizers, "input-"+key)
-		case pb.Chain_OUTPUT:
-			networkchaos.Finalizers = utils.InsertFinalizer(networkchaos.Finalizers, "output"+key)
-		}
+		networkchaos.Finalizers = utils.InsertFinalizer(networkchaos.Finalizers, key)
 
 		g.Go(func() error {
-			return iptable.SetIptablesChains(ctx, r.Client, pod, chainName, direction, []string{set.Name})
+			return iptable.SetIptablesChains(ctx, r.Client, pod, chains)
 		})
 	}
 	return g.Wait()
@@ -246,10 +249,7 @@ func (r *Reconciler) cleanFinalizersAndRecover(ctx context.Context, networkchaos
 	var result error
 
 	for _, key := range networkchaos.Finalizers {
-		direction := key[0:6]
-
-		podKey := key[6:]
-		ns, name, err := cache.SplitMetaNamespaceKey(podKey)
+		ns, name, err := cache.SplitMetaNamespaceKey(key)
 		if err != nil {
 			result = multierror.Append(result, err)
 			continue
@@ -272,18 +272,27 @@ func (r *Reconciler) cleanFinalizersAndRecover(ctx context.Context, networkchaos
 			continue
 		}
 
-		var chainName string
-		var chainDirection pb.Chain_Direction
-		switch direction {
-		case "input-":
-			chainName = "INPUT/" + netutils.CompressName(networkchaos.Name, 21, "")
-			chainDirection = pb.Chain_INPUT
-		case "output":
-			chainName = "OUTPUT/" + netutils.CompressName(networkchaos.Name, 20, "")
-			chainDirection = pb.Chain_OUTPUT
+		chains := []*pb.Chain{}
+		for _, direction := range []string{"INPUT", "OUTPUT"} {
+			var chainName string
+			var chainDirection pb.Chain_Direction
+
+			switch direction {
+			case "INPUT":
+				chainName = "INPUT/" + netutils.CompressName(networkchaos.Name, 21, "")
+				chainDirection = pb.Chain_INPUT
+			case "OUTPUT":
+				chainName = "OUTPUT/" + netutils.CompressName(networkchaos.Name, 20, "")
+				chainDirection = pb.Chain_OUTPUT
+			}
+
+			chains = append(chains, &pb.Chain{
+				Name:      chainName,
+				Direction: chainDirection,
+			})
 		}
 
-		err = iptable.SetIptablesChains(ctx, r.Client, &pod, chainName, chainDirection, nil)
+		err = iptable.SetIptablesChains(ctx, r.Client, &pod, chains)
 		if err != nil {
 			r.Log.Error(err, "error while deleting iptables rules")
 			result = multierror.Append(result, err)
