@@ -42,8 +42,8 @@ import (
 const (
 	networkPartitionActionMsg = "partition network duration %s"
 
-	sourceIpSetPostFix = "src"
-	targetIpSetPostFix = "tgt"
+	sourceIPSetPostFix = "src"
+	targetIPSetPostFix = "tgt"
 )
 
 func newReconciler(c client.Client, log logr.Logger, req ctrl.Request,
@@ -113,13 +113,13 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1
 		}
 	}
 
-	sourceSet := ipset.BuildIpSet(sources, []string{}, networkchaos, sourceIpSetPostFix)
+	sourceSet := ipset.BuildIPSet(sources, []string{}, networkchaos, sourceIPSetPostFix)
 	externalCidrs, err := netutils.ResolveCidrs(networkchaos.Spec.ExternalTargets)
 	if err != nil {
 		r.Log.Error(err, "failed to resolve external targets")
 		return err
 	}
-	targetSet := ipset.BuildIpSet(targets, externalCidrs, networkchaos, targetIpSetPostFix)
+	targetSet := ipset.BuildIPSet(targets, externalCidrs, networkchaos, targetIPSetPostFix)
 
 	allPods := append(sources, targets...)
 
@@ -129,13 +129,13 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1
 		pod := allPods[index]
 		r.Log.Info("PODS", "name", pod.Name, "namespace", pod.Namespace)
 		g.Go(func() error {
-			err = ipset.FlushIpSets(ctx, r.Client, &pod, []*pb.IpSet{&sourceSet})
+			err = ipset.FlushIPSets(ctx, r.Client, &pod, []*pb.IPSet{&sourceSet})
 			if err != nil {
 				return err
 			}
 
 			r.Log.Info("Flush ipset on pod", "name", pod.Name, "namespace", pod.Namespace)
-			return ipset.FlushIpSets(ctx, r.Client, &pod, []*pb.IpSet{&targetSet})
+			return ipset.FlushIPSets(ctx, r.Client, &pod, []*pb.IPSet{&targetSet})
 		})
 	}
 

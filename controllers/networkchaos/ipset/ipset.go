@@ -31,9 +31,9 @@ const (
 	ipsetLen = 27
 )
 
-// BuildIpSet builds an ipset with provided pod ip list
-func BuildIpSet(pods []v1.Pod, externalCidrs []string, networkchaos *v1alpha1.NetworkChaos, namePostFix string) pb.IpSet {
-	name := GenerateIpSetName(networkchaos, namePostFix)
+// BuildIPSet builds an ipset with provided pod ip list
+func BuildIPSet(pods []v1.Pod, externalCidrs []string, networkchaos *v1alpha1.NetworkChaos, namePostFix string) pb.IPSet {
+	name := GenerateIPSetName(networkchaos, namePostFix)
 	cidrs := externalCidrs
 
 	for _, pod := range pods {
@@ -42,19 +42,19 @@ func BuildIpSet(pods []v1.Pod, externalCidrs []string, networkchaos *v1alpha1.Ne
 		}
 	}
 
-	return pb.IpSet{
+	return pb.IPSet{
 		Name:  name,
 		Cidrs: cidrs,
 	}
 }
 
-// GenerateIpSetName generates name for ipset
-func GenerateIpSetName(networkchaos *v1alpha1.NetworkChaos, namePostFix string) string {
+// GenerateIPSetName generates name for ipset
+func GenerateIPSetName(networkchaos *v1alpha1.NetworkChaos, namePostFix string) string {
 	return netutils.CompressName(networkchaos.Name, 27, namePostFix)
 }
 
-// FlushIpSets makes grpc calls to chaosdaemon to save ipset
-func FlushIpSets(ctx context.Context, c client.Client, pod *v1.Pod, ipsets []*pb.IpSet) error {
+// FlushIPSets makes grpc calls to chaosdaemon to save ipset
+func FlushIPSets(ctx context.Context, c client.Client, pod *v1.Pod, ipsets []*pb.IPSet) error {
 	pbClient, err := utils.NewChaosDaemonClient(ctx, c, pod, common.ControllerCfg.ChaosDaemonPort)
 	if err != nil {
 		return err
@@ -67,7 +67,7 @@ func FlushIpSets(ctx context.Context, c client.Client, pod *v1.Pod, ipsets []*pb
 
 	containerID := pod.Status.ContainerStatuses[0].ContainerID
 
-	_, err = pbClient.FlushIpSets(ctx, &pb.IpSetsRequest{
+	_, err = pbClient.FlushIPSets(ctx, &pb.IPSetsRequest{
 		Ipsets:      ipsets,
 		ContainerId: containerID,
 	})

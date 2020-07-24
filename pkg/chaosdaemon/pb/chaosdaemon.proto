@@ -19,7 +19,7 @@ service ChaosDaemon {
   // generic tc filter del command
   rpc DelTcFilter(TcFilterRequest) returns (google.protobuf.Empty) {}
 
-  rpc FlushIpSets(IpSetsRequest) returns (google.protobuf.Empty) {}
+  rpc FlushIPSets(IPSetsRequest) returns (google.protobuf.Empty) {}
   
   rpc SetIptablesChains(IptablesChainsRequest) returns (google.protobuf.Empty) {}
 
@@ -117,12 +117,12 @@ message TcFilter {
   TcHandle parent = 1;
 }
 
-message IpSetsRequest {
-  repeated IpSet ipsets = 1;
+message IPSetsRequest {
+  repeated IPSet ipsets = 1;
   string container_id = 2;
 }
 
-message IpSet {
+message IPSet {
   string name = 1;
   repeated string cidrs = 2;
 }

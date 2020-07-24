@@ -29,7 +29,7 @@ const (
 	ipsetNewNameExistErr = "a set with the new name already exists"
 )
 
-func (s *daemonServer) FlushIpSets(ctx context.Context, req *pb.IpSetsRequest) (*empty.Empty, error) {
+func (s *daemonServer) FlushIPSets(ctx context.Context, req *pb.IPSetsRequest) (*empty.Empty, error) {
 	log.Info("flush ipset", "request", req)
 
 	pid, err := s.crClient.GetPidFromContainerID(ctx, req.ContainerId)
@@ -41,7 +41,7 @@ func (s *daemonServer) FlushIpSets(ctx context.Context, req *pb.IpSetsRequest) (
 	nsPath := GetNsPath(pid, netNS)
 
 	for _, ipset := range req.Ipsets {
-		err := flushIpSet(ctx, nsPath, ipset)
+		err := flushIPSet(ctx, nsPath, ipset)
 		if err != nil {
 			return nil, err
 		}
@@ -50,7 +50,7 @@ func (s *daemonServer) FlushIpSets(ctx context.Context, req *pb.IpSetsRequest) (
 	return &empty.Empty{}, nil
 }
 
-func flushIpSet(ctx context.Context, nsPath string, set *pb.IpSet) error {
+func flushIPSet(ctx context.Context, nsPath string, set *pb.IPSet) error {
 	name := set.Name
 
 	// If the ipset already exists, the ipset will be renamed to this temp name.

@@ -195,13 +195,13 @@ exit 1
 		})
 	})
 
-	Context("FlushIpSets", func() {
+	Context("FlushIPSets", func() {
 		It("should work", func() {
 			defer mock.With("MockWithNetNs", func(context.Context, string, string, ...string) *exec.Cmd {
 				return exec.Command("echo", "mock command")
 			})()
-			_, err := s.FlushIpSets(context.TODO(), &pb.IpSetsRequest{
-				Ipsets: []*pb.IpSet{{
+			_, err := s.FlushIPSets(context.TODO(), &pb.IPSetsRequest{
+				Ipsets: []*pb.IPSet{{
 					Name:  "ipset-name",
 					Cidrs: []string{"1.1.1.1/32"},
 				}},
@@ -213,8 +213,8 @@ exit 1
 		It("should fail on get pid", func() {
 			const errorStr = "mock get pid error"
 			defer mock.With("TaskError", errors.New(errorStr))()
-			_, err := s.FlushIpSets(context.TODO(), &pb.IpSetsRequest{
-				Ipsets: []*pb.IpSet{{
+			_, err := s.FlushIPSets(context.TODO(), &pb.IPSetsRequest{
+				Ipsets: []*pb.IPSet{{
 					Name:  "ipset-name",
 					Cidrs: []string{"1.1.1.1/32"},
 				}},

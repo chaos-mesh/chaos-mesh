@@ -22,7 +22,7 @@ import (
 	cmv1alpha1 "github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 )
 
-func Test_generateIpSetName(t *testing.T) {
+func Test_generateIPSetName(t *testing.T) {
 	g := NewWithT(t)
 	postfix := "alongpostfix"
 
@@ -35,7 +35,7 @@ func Test_generateIpSetName(t *testing.T) {
 			},
 		}
 
-		name := GenerateIpSetName(networkChaos, postfix)
+		name := GenerateIPSetName(networkChaos, postfix)
 
 		g.Expect(name).Should(Equal(chaosName + "_" + postfix))
 	})
@@ -47,7 +47,7 @@ func Test_generateIpSetName(t *testing.T) {
 			},
 		}
 
-		name := GenerateIpSetName(networkChaos, postfix)
+		name := GenerateIPSetName(networkChaos, postfix)
 
 		g.Expect(len(name)).Should(Equal(27))
 	})
