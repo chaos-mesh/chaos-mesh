@@ -241,6 +241,7 @@ func (in *IoChaos) GetChaos() *ChaosInstance {
 		StartTime: in.CreationTimestamp.Time,
 		Action:    string(in.Spec.Action),
 		Status:    string(in.GetStatus().Experiment.Phase),
+		UID:       string(in.UID),
 	}
 	if in.Spec.Duration != nil {
 		instance.Duration = *in.Spec.Duration

@@ -55,27 +55,27 @@ const StatusPanel = () => {
   const data: { [k: string]: d } = {
     running: {
       label: 'Running',
-      value: state.running,
+      value: state.Running,
       Icon: <TimelineIcon color="primary" fontSize="large" />,
     },
     paused: {
       label: 'Paused',
-      value: state.paused,
+      value: state.Paused,
       Icon: <PauseCircleOutlineIcon color="primary" fontSize="large" />,
     },
     failed: {
       label: 'Failed',
-      value: state.failed,
+      value: state.Failed,
       Icon: <ErrorOutlineIcon color="error" fontSize="large" />,
     },
     waiting: {
       label: 'Waiting',
-      value: state.waiting,
+      value: state.Waiting,
       Icon: <SnoozeIcon color="primary" fontSize="large" />,
     },
     finished: {
       label: 'Finished',
-      value: state.finished,
+      value: state.Finished,
       Icon: <CheckCircleOutlineIcon fontSize="large" className={classes.finished} />,
     },
   }

@@ -98,18 +98,14 @@ interface EventsTableHeadProps {
   orderBy: keyof SortedEvent
   onSort: (e: React.MouseEvent<unknown>, k: keyof SortedEvent) => void
   detailed: boolean
-  noExperiment: boolean
 }
 
-const EventsTableHead: React.FC<EventsTableHeadProps> = ({ order, orderBy, onSort, detailed, noExperiment }) => {
+const EventsTableHead: React.FC<EventsTableHeadProps> = ({ order, orderBy, onSort, detailed }) => {
   const handleSortEvents = (k: keyof SortedEvent) => (e: React.MouseEvent<unknown>) => onSort(e, k)
 
   let cells = headCells
   if (detailed) {
     cells = cells.concat([{ id: 'Detail' as keyof SortedEvent, label: 'Event Detail' }])
-  }
-  if (noExperiment) {
-    cells = cells.slice(1)
   }
 
   return (
@@ -176,16 +172,15 @@ const format = (date: string) => day(date).format('YYYY-MM-DD HH:mm:ss')
 interface EventsTableRowProps {
   event: SortedEventWithPods
   detailed: boolean
-  noExperiment: boolean
 }
 
-const EventsTableRow: React.FC<EventsTableRowProps> = ({ event: e, detailed, noExperiment }) => {
+const EventsTableRow: React.FC<EventsTableRowProps> = ({ event: e, detailed }) => {
   const runningLabel = useRunningLabelStyles()
 
   return (
     <>
       <TableRow hover>
-        {!noExperiment && <TableCell>{e.Experiment}</TableCell>}
+        <TableCell>{e.Experiment}</TableCell>
         <TableCell>{e.Namespace}</TableCell>
         <TableCell>{e.Kind}</TableCell>
         <TableCell>{format(e.StartTime)}</TableCell>
@@ -196,7 +191,7 @@ const EventsTableRow: React.FC<EventsTableRowProps> = ({ event: e, detailed, noE
           <TableCell>
             <Button
               component={Link}
-              to={`/experiments/${e.Experiment}?namespace=${e.Namespace}&kind=${e.Kind}&event=${e.ID}`}
+              to={`/experiments/${e.ExperimentID}?name=${e.Experiment}&event=${e.ID}`}
               variant="outlined"
               size="small"
               color="primary"
@@ -214,15 +209,9 @@ export interface EventsTableProps {
   title?: string
   events: Event[]
   detailed?: boolean
-  noExperiment?: boolean
 }
 
-const EventsTable: React.FC<EventsTableProps> = ({
-  title = 'Events',
-  events: allEvents,
-  detailed = false,
-  noExperiment = false,
-}) => {
+const EventsTable: React.FC<EventsTableProps> = ({ title = 'Events', events: allEvents, detailed = false }) => {
   const classes = useStyles()
 
   const [events, setEvents] = useState(allEvents)
@@ -285,26 +274,13 @@ const EventsTable: React.FC<EventsTableProps> = ({
       </PaperTop>
       <TableContainer className={classes.tableContainer}>
         <Table stickyHeader>
-          <EventsTableHead
-            order={order}
-            orderBy={orderBy}
-            onSort={handleSortEvents}
-            detailed={detailed}
-            noExperiment={noExperiment}
-          />
+          <EventsTableHead order={order} orderBy={orderBy} onSort={handleSortEvents} detailed={detailed} />
 
           <TableBody>
             {events &&
               stableSort<SortedEvent>(events, getComparator(order, orderBy))
                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                .map((e) => (
-                  <EventsTableRow
-                    key={e.ID}
-                    event={e as SortedEventWithPods}
-                    detailed={detailed}
-                    noExperiment={noExperiment}
-                  />
-                ))}
+                .map((e) => <EventsTableRow key={e.ID} event={e as SortedEventWithPods} detailed={detailed} />)}
           </TableBody>
 
           <TableFooter>

@@ -88,7 +88,7 @@ func (e *eventStore) ListByUID(_ context.Context, uid string) ([]*core.Event, er
 
 	if err := e.db.Where(
 		"experiment_id = ?", uid).
-		Find(resList).Error; err != nil && !gorm.IsRecordNotFoundError(err) {
+		Find(&resList).Error; err != nil && !gorm.IsRecordNotFoundError(err) {
 		return nil, err
 	}
 

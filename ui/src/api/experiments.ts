@@ -15,14 +15,10 @@ export const experiments: (
 ) => Promise<AxiosResponse<ExperimentReponse[]>> = (namespace = '', name = '', kind = '', status = '') =>
   http.get(`/experiments?namespace=${namespace}&name=${name}&kind=${kind}&status=${status}`)
 
-export const deleteExperiment = (namespace: string, name: string, kind: string) =>
-  http.delete(`/experiments/${kind}/${namespace}/${name}`)
+export const deleteExperiment = (uuid: uuid) => http.delete(`/experiments/${uuid}`)
 
-export const pauseExperiment = (namespace: string, name: string, kind: string) =>
-  http.put(`/experiments/pause/${kind}/${namespace}/${name}`)
+export const pauseExperiment = (uuid: uuid) => http.put(`/experiments/pause/${uuid}`)
 
-export const startExperiment = (namespace: string, name: string, kind: string) =>
-  http.put(`/experiments/start/${kind}/${namespace}/${name}`)
+export const startExperiment = (uuid: uuid) => http.put(`/experiments/start/${uuid}`)
 
-export const detail = (namespace: string, name: string, kind: string) =>
-  http.get(`/experiments/detail/${kind}/${namespace}/${name}`)
+export const detail = (uuid: uuid) => http.get(`/experiments/detail/${uuid}`)
