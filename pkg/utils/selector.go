@@ -86,6 +86,7 @@ func SelectPods(ctx context.Context, c client.Client, selector v1alpha1.Selector
 		for ns, names := range selector.Pods {
 			if !IsAllowedNamespaces(ns) {
 				log.Info("filter pod by namespaces", "namespace", ns)
+				continue
 			}
 			for _, name := range names {
 				var pod v1.Pod
