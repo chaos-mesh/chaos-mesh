@@ -16,6 +16,7 @@ package event
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"strings"
 	"time"
 
@@ -336,13 +337,20 @@ func (e *eventStore) ListByFilter(_ context.Context, filter core.Filter) ([]*cor
 }
 
 // DryListByFilter returns an event list by experimentName, experimentNamespace, uid, kind, startTime and finishTime.
-func (e *eventStore) DryListByFilter(_ context.Context, filter core.Filter) ([]*core.Event, error) {
+func (e *eventStore) DryListByFilter(_ context.Context, filter core.Filter, limitStr string) ([]*core.Event, error) {
 	var (
 		resList []*core.Event
 		err     error
 		db      *dbstore.DB
+		limit   int
 	)
 
+	if limitStr != "" {
+		limit, err = strconv.Atoi(limitStr)
+		if err != nil {
+			return nil, fmt.Errorf("the format of the limitStr is wrong")
+		}
+	}
 	if filter.StartTimeStr != "" {
 		_, err = time.Parse(time.RFC3339, strings.Replace(filter.StartTimeStr, " ", "+", -1))
 		if err != nil {
@@ -362,6 +370,9 @@ func (e *eventStore) DryListByFilter(_ context.Context, filter core.Filter) ([]*
 		db = e.db
 	} else {
 		db = &dbstore.DB{DB: e.db.Where(query, args...)}
+	}
+	if limitStr != "" {
+		db = &dbstore.DB{DB: db.Order("created_at desc").Limit(limit)}
 	}
 	if err := db.Where(query, args...).Find(&resList).Error; err != nil &&
 		!gorm.IsRecordNotFoundError(err) {

@@ -111,6 +111,7 @@ func (s *Service) listEvents(c *gin.Context) {
 // @Param experimentName query string false "The name of the experiment"
 // @Param experimentNamespace query string false "The namespace of the experiment"
 // @Param kind query string false "kind" Enums(PodChaos, IoChaos, NetworkChaos, TimeChaos, KernelChaos, StressChaos)
+// @Param limit query string false "The max length of events list"
 // @Success 200 {array} core.Event
 // @Router /api/events/dry [get]
 // @Failure 500 {object} utils.APIError
@@ -122,8 +123,9 @@ func (s *Service) listDryEvents(c *gin.Context) {
 		ExperimentNamespace: c.Query("experimentNamespace"),
 		Kind:                c.Query("kind"),
 	}
+	limitStr := c.Query("limit")
 
-	eventList, err := s.event.DryListByFilter(context.Background(), filter)
+	eventList, err := s.event.DryListByFilter(context.Background(), filter, limitStr)
 	if err != nil {
 		c.Status(http.StatusInternalServerError)
 		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))

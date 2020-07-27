@@ -41,7 +41,7 @@ type EventStore interface {
 	ListByUID(context.Context, string) ([]*Event, error)
 
 	// DryListByFilter returns an event list by experimentName, experimentNamespace, uid, kind, startTime and finishTime.
-	DryListByFilter(context.Context, Filter) ([]*Event, error)
+	DryListByFilter(context.Context, Filter, string) ([]*Event, error)
 
 	// Find returns an event from the datastore by ID.
 	Find(context.Context, uint) (*Event, error)
@@ -74,26 +74,26 @@ type EventStore interface {
 // Event represents an event instance.
 type Event struct {
 	gorm.Model
-	Experiment   string `gorm:"index:experiment"`
-	Namespace    string
-	Kind         string
-	Message      string
-	StartTime    *time.Time `gorm:"index:start_time"`
-	FinishTime   *time.Time
-	Duration     string
-	Pods         []*PodRecord `gorm:"-"`
-	ExperimentID string       `gorm:"index:experiment_id"`
+	Experiment   string `gorm:"index:experiment" json:"experiment"`
+	Namespace    string `json:"namespace"`
+	Kind         string `json:"kind"`
+	Message      string `json:"message"`
+	StartTime    *time.Time `gorm:"index:start_time" json:"start_time"`
+	FinishTime   *time.Time `json:"finish_time"`
+	Duration     string `json:"duration"`
+	Pods         []*PodRecord `gorm:"-" json:"pods"`
+	ExperimentID string       `gorm:"index:experiment_id" json:"experiment_id"`
 }
 
 // PodRecord represents a pod record with event ID.
 type PodRecord struct {
 	gorm.Model
-	EventID   uint   `gorm:"index:event_id"`
-	PodIP     string `gorm:"index:pod_id"`
-	PodName   string
-	Namespace string
-	Message   string
-	Action    string
+	EventID   uint   `gorm:"index:event_id" json:"event_id"`
+	PodIP     string `gorm:"index:pod_id" json:"pod_ip"`
+	PodName   string `json:"pod_name"`
+	Namespace string `json:"namespace"`
+	Message   string `json:"message"`
+	Action    string `json:"action"`
 }
 
 // Filter represents the filter to list events
