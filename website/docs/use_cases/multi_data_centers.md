@@ -4,31 +4,31 @@ title: Network latency simulation across multiple data centers
 sidebar_label: Network latency simulation across multiple data centers
 ---
 
-This document helps you simulate multiple data centers scenarios. 
+This document helps you simulate multiple data centers scenarios.
 
-## Characteristics of multiple data centers scenarios 
+## Characteristics of multiple data centers scenarios
 
-* The latency between different data centers
-* The bandwidth limitations between data centers 
+- The latency between different data centers
+- The bandwidth limitations between data centers
 
-> **Note**: 
-> 
+> **Note**:
+>
 > Currently, Chaos Mesh cannot simulate the scenario of the bandwidth limitations between data centers. So in this case, only simulate the scenario of the latency between different data centers.
 
 ## Experiment environment
 
-Suppose our application will be deployed in three data centers in a production environment 
-and these data centers are still under construction. Now we want to test the impact of 
-such a deployment topology on the business in advance. 
+Suppose our application will be deployed in three data centers in a production environment
+and these data centers are still under construction. Now we want to test the impact of
+such a deployment topology on the business in advance.
 
-Here we use TiDB cluster as an example. Suppose we already install the [TiBD cluster](https://docs.chaos-mesh.org/tidb-in-kubernetes/v1.1/) and [Chaos Mesh](../installation/installation)
-in our Kubernetes environment. In this TiDB cluster, we have three TiDB pods, three PD pods and seven TiKV pods: 
+Here we use TiDB cluster as an example. Suppose we already install the [TiBD cluster](https://docs.pingcap.com/tidb-in-kubernetes/stable/) and [Chaos Mesh](installation/installation.md)
+in our Kubernetes environment. In this TiDB cluster, we have three TiDB pods, three PD pods and seven TiKV pods:
 
 ```bash
 kubectl get pod -n tidb-cluster # "tidb-cluster" is the namespace of TiDB cluster
-``` 
+```
 
-Output: 
+Output:
 
 ```bash
 NAME                               READY   STATUS    RESTARTS   AGE
@@ -52,44 +52,44 @@ basic-tikv-6                       1/1     Running   0          29m
 
 `dc-a`, `dc-b`, and `dc-c` are the three data centers we will use later. So we will split the pods to these data centers:
 
-|  dc-a   | dc-b  | dc-c |
-|  :----:  | :----:  | :----:  |
-| basic-pd-0  | basic-pd-1 | basic-pd-2 |
-| basic-tidb-0 | basic-tidb-1 | basic-tidb-2 |
-| basic-tikv-0/1| basic-tikv-2/3 | basic-tikv-4/5/6 |
+|      dc-a      |      dc-b      |       dc-c       |
+| :------------: | :------------: | :--------------: |
+|   basic-pd-0   |   basic-pd-1   |    basic-pd-2    |
+|  basic-tidb-0  |  basic-tidb-1  |   basic-tidb-2   |
+| basic-tikv-0/1 | basic-tikv-2/3 | basic-tikv-4/5/6 |
 
 ### Latency between three data centers
 
-|  | latency |
-|  :----:  | :----:  |
-| dc-a <--> dc-b  | 1ms |
-| db-a <--> dc-c | 2ms | 
-| dc-b <--> dc-c | 2ms |
+|                | latency |
+| :------------: | :-----: |
+| dc-a <--> dc-b |   1ms   |
+| db-a <--> dc-c |   2ms   |
+| dc-b <--> dc-c |   2ms   |
 
 ## Inject network latency
 
 ### Design injection rules
 
-Chaos Mesh provides [`NetworkChaos`](../user_guides/networkchaos_experiment) to inject network latency, 
+Chaos Mesh provides [`NetworkChaos`](user_guides/network_chaos.md) to inject network latency,
 so we can use it to simulate the latency between three data centers.
 
-At present, `NetworkChaos` has a limitation that each target pod only has one configuration of `netem` in effect. 
-So we can use the following rules: 
+At present, `NetworkChaos` has a limitation that each target pod only has one configuration of `netem` in effect.
+So we can use the following rules:
 
 | source pods | latency | target pods |
-| :----: | :----: | :----: |
-| dc-a | 1ms | dc-b |
-| dc-a | 1ms | dc-c |
-| dc-b | 1ms | dc-c |
-| dc-c | 1ms | dc-a |
-| dc-c | 1ms | dc-b |
+| :---------: | :-----: | :---------: |
+|    dc-a     |   1ms   |    dc-b     |
+|    dc-a     |   1ms   |    dc-c     |
+|    dc-b     |   1ms   |    dc-c     |
+|    dc-c     |   1ms   |    dc-a     |
+|    dc-c     |   1ms   |    dc-b     |
 
-According to to above rules, the latency between `dc-a` and `dc-b` is `1ms`, the latency between `dc-a` and `dc-c` is `2ms` 
+According to to above rules, the latency between `dc-a` and `dc-b` is `1ms`, the latency between `dc-a` and `dc-c` is `2ms`
 and the latency between `dc-b` and `dc-c` is `2ms`.
 
 ### Define the chaos experiment
 
-According to the injection rules, we define the chaos experiment as following: 
+According to the injection rules, we define the chaos experiment as following:
 
 ```yaml
 apiVersion: chaos-mesh.org/v1alpha1
@@ -111,7 +111,7 @@ spec:
     latency: "1ms"
   direction: to
   target:
-    selector: # define the pods belong to dc-b and dc-c 
+    selector: # define the pods belong to dc-b and dc-c
       pods:
         tidb-cluster: # namespace of the target pods
           - basic-tidb-1
@@ -192,7 +192,7 @@ spec:
 
 ### Apply the chaos experiment
 
-Define the above chaos experiment as `delay.yaml` and apply this file: 
+Define the above chaos experiment as `delay.yaml` and apply this file:
 
 ```bash
 kubectl apply -f delay.yaml
@@ -216,7 +216,7 @@ PING basic-tikv-0.basic-tikv-peer.tidb-cluster.svc (10.244.1.229): 56 data bytes
 64 bytes from 10.244.1.229: seq=1 ttl=63 time=0.100 ms
 ```
 
-From the output, we can see that the latency between the pods belong to `dc-a` is around `0.1ms`. 
+From the output, we can see that the latency between the pods belong to `dc-a` is around `0.1ms`.
 
 #### Check the latency between `dc-a` and `dc-c`
 
@@ -234,7 +234,7 @@ PING basic-tidb-1.basic-tidb-peer.tidb-cluster.svc (10.244.3.3): 56 data bytes
 
 From the output, we can see that the latency between `dc-a` and `dc-c` is around `1ms`.
 
-#### Check the latency between `dc-b` and `dc-c` 
+#### Check the latency between `dc-b` and `dc-c`
 
 ```bash
 kubectl exec -it -n tidb-cluster basic-tidb-0 -c tidb -- ping -c 2 basic-tidb-2.basic-tidb-peer.tidb-cluster.svc
@@ -255,4 +255,3 @@ From the output, we can see that the latency between `dc-a` and `dc-c` is around
 ```bash
 kubectl delete -f delay.yaml
 ```
-
