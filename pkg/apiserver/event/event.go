@@ -71,6 +71,7 @@ func Register(r *gin.RouterGroup, s *Service) {
 // @Param experimentNamespace query string false "The namespace of the experiment"
 // @Param uid query string false "The UID of the experiment"
 // @Param kind query string false "kind" Enums(PodChaos, IoChaos, NetworkChaos, TimeChaos, KernelChaos, StressChaos)
+// @Param limit query string false "The max length of events list"
 // @Success 200 {array} core.Event
 // @Router /api/events [get]
 // @Failure 500 {object} utils.APIError
