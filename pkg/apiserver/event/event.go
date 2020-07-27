@@ -84,6 +84,7 @@ func (s *Service) listEvents(c *gin.Context) {
 		ExperimentNamespace: c.Query("experimentNamespace"),
 		UID:                 c.Query("uid"),
 		Kind:                c.Query("kind"),
+		LimitStr:            c.Query("limit"),
 	}
 
 	if filter.PodName != "" && filter.PodNamespace == "" {
@@ -122,10 +123,10 @@ func (s *Service) listDryEvents(c *gin.Context) {
 		ExperimentName:      c.Query("experimentName"),
 		ExperimentNamespace: c.Query("experimentNamespace"),
 		Kind:                c.Query("kind"),
+		LimitStr:            c.Query("limit"),
 	}
-	limitStr := c.Query("limit")
 
-	eventList, err := s.event.DryListByFilter(context.Background(), filter, limitStr)
+	eventList, err := s.event.DryListByFilter(context.Background(), filter)
 	if err != nil {
 		c.Status(http.StatusInternalServerError)
 		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
