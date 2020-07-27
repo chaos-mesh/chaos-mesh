@@ -15,6 +15,7 @@ package archive
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -150,6 +151,8 @@ func (s *Service) experimentDetailSearch(c *gin.Context) {
 			info, err = data.ParseKernelChaos()
 		case v1alpha1.KindStressChaos:
 			info, err = data.ParseStressChaos()
+		default:
+			err = fmt.Errorf("kind %s is not support", data.Kind)
 		}
 		if err != nil {
 			c.Status(http.StatusInternalServerError)
@@ -225,6 +228,8 @@ func (s *Service) experimentDetail(c *gin.Context) {
 		info, err = data.ParseKernelChaos()
 	case v1alpha1.KindStressChaos:
 		info, err = data.ParseStressChaos()
+	default:
+		err = fmt.Errorf("kind %s is not support", data.Kind)
 	}
 	if err != nil {
 		c.Status(http.StatusInternalServerError)
