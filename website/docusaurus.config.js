@@ -20,6 +20,7 @@ module.exports = {
       logo: {
         alt: 'Chaos Mesh Logo',
         src: 'img/logos/logo-mini.svg',
+        srcDark: 'img/logos/logo-mini-white.svg',
       },
       items: [
         {
