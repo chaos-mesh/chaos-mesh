@@ -1,6 +1,6 @@
 {
-  "name": "chaos-mesh",
-  "version": "0.0.0",
+  "name": "chaos-mesh-website",
+  "version": "0.8.0",
   "private": true,
   "scripts": {
     "start": "docusaurus start",
@@ -9,9 +9,10 @@
     "deploy": "docusaurus deploy"
   },
   "dependencies": {
-    "@docusaurus/core": "^2.0.0-alpha.56",
-    "@docusaurus/preset-classic": "^2.0.0-alpha.56",
-    "classnames": "^2.2.6",
+    "@docusaurus/core": "^2.0.0-alpha.58",
+    "@docusaurus/preset-classic": "^2.0.0-alpha.58",
+    "clsx": "^1.1.1",
+    "docusaurus-plugin-sass": "^0.1.9",
     "react": "^16.8.4",
     "react-dom": "^16.8.4"
   },

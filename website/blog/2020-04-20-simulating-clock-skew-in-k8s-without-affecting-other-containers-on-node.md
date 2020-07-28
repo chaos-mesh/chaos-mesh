@@ -5,7 +5,7 @@ author: Cwen Yin
 author_title: Maintainer of Chaos Mesh
 author_url: https://github.com/cwen0
 author_image_url: https://avatars1.githubusercontent.com/u/22956341?v=4
-tags: [Chaos Mesh, Chaos Engineering, Kubernetes, Distributed system]
+tags: [Chaos Mesh, Chaos Engineering, Kubernetes, Distributed System]
 ---
 
 ![Clock synchronization in distributed system](/img/clock-sync-chaos-engineering-k8s.jpg)
