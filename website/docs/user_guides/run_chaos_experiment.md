@@ -12,8 +12,8 @@ The first step is always to deploy a testing cluster. For illustration purposes,
 
 You can follow the instructions in the following two documents to deploy a TiDB cluster:
 
-* [Deploy using kind](https://docs.chaos-mesh.org/tidb-in-kubernetes/v1.1/get-started#create-a-kubernetes-cluster-using-kind/)
-* [Deploy using Minikube](https://docs.chaos-mesh.org/tidb-in-kubernetes/v1.1/get-started#create-a-kubernetes-cluster-using-minikube/)
+- [Deploy using kind](https://docs.pingcap.com/tidb-in-kubernetes/stable/get-started/#create-a-kubernetes-cluster-using-kind)
+- [Deploy using Minikube](https://docs.pingcap.com/tidb-in-kubernetes/stable/get-started#create-a-kubernetes-cluster-using-minikube)
 
 ## Step 2: Define the experiment configuration file
 
@@ -71,7 +71,7 @@ kubectl delete -f pod-failure-example.yaml
 Chaos Dashboard is a Web UI for managing, designing, monitoring Chaos Experiments. Stay tuned for more supports or join us in making it happen.
 
 > **Note:**
-> 
+>
 > If Chaos Dashboard was not installed, upgrade Chaos Mesh by executing `helm upgrade chaos-mesh helm/chaos-mesh --namespace=chaos-testing --set dashboard.create=true`.
 
 A typical way to access it is to use `kubectl port-forward`:
