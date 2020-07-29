@@ -1060,7 +1060,7 @@ spec:
       containers:
         - name: chaos-daemon
           image: pingcap/chaos-daemon:latest
-          imagePullPolicy: Never
+          imagePullPolicy: Always
           command:
             - /usr/local/bin/chaos-daemon
             - --runtime
@@ -1121,7 +1121,7 @@ spec:
       containers:
         - name: chaos-dashboard
           image: pingcap/chaos-dashboard:latest
-          imagePullPolicy: Never
+          imagePullPolicy: Always
           resources:
             limits: {}
             requests:
@@ -1177,7 +1177,7 @@ spec:
       containers:
       - name: chaos-mesh
         image: pingcap/chaos-mesh:latest
-        imagePullPolicy: Never
+        imagePullPolicy: Always
         resources:
             limits: {}
             requests:
