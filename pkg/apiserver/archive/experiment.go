@@ -32,10 +32,10 @@ import (
 
 // Report defines the report of archive experiments.
 type Report struct {
-	Meta           *core.ArchiveExperimentMeta
-	Events         []*core.Event
-	TotalTime      string
-	TotalFaultTime string
+	Meta           *core.ArchiveExperimentMeta `json:"meta"`
+	Events         []*core.Event               `json:"events"`
+	TotalTime      string                      `json:"total_time"`
+	TotalFaultTime string                      `json:"total_fault_time"`
 }
 
 // Service defines a handler service for archive experiments.
