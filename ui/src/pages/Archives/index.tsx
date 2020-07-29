@@ -49,7 +49,7 @@ export default function Archives() {
         {archives &&
           archives.length > 0 &&
           archives.map((a) => (
-            <Grid key={a.Name} item xs={12}>
+            <Grid key={a.name} item xs={12}>
               <ExperimentPaper experiment={a} isArchive handleSelect={setSelected} handleDialogOpen={setDialogOpen} />
             </Grid>
           ))}

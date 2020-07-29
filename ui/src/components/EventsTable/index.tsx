@@ -82,15 +82,15 @@ function stableSort<T>(data: T[], comparator: (a: T, b: T) => number) {
   return indexed.map((el) => el[0])
 }
 
-type SortedEvent = Omit<Event, 'DeletedAt' | 'Pods'>
-type SortedEventWithPods = Omit<Event, 'DeletedAt'>
+type SortedEvent = Omit<Event, 'deleted_at' | 'pods'>
+type SortedEventWithPods = Omit<Event, 'deleted_at'>
 
 const headCells: { id: keyof SortedEvent; label: string }[] = [
-  { id: 'Experiment', label: 'Experiment' },
-  { id: 'Namespace', label: 'Namespace' },
-  { id: 'Kind', label: 'Kind' },
-  { id: 'StartTime', label: 'Start Time' },
-  { id: 'FinishTime', label: 'Finish Time' },
+  { id: 'experiment', label: 'Experiment' },
+  { id: 'namespace', label: 'Namespace' },
+  { id: 'kind', label: 'Kind' },
+  { id: 'start_time', label: 'Start Time' },
+  { id: 'finish_time', label: 'Finish Time' },
 ]
 
 interface EventsTableHeadProps {
@@ -180,18 +180,18 @@ const EventsTableRow: React.FC<EventsTableRowProps> = ({ event: e, detailed }) =
   return (
     <>
       <TableRow hover>
-        <TableCell>{e.Experiment}</TableCell>
-        <TableCell>{e.Namespace}</TableCell>
-        <TableCell>{e.Kind}</TableCell>
-        <TableCell>{format(e.StartTime)}</TableCell>
+        <TableCell>{e.experiment}</TableCell>
+        <TableCell>{e.namespace}</TableCell>
+        <TableCell>{e.kind}</TableCell>
+        <TableCell>{format(e.start_time)}</TableCell>
         <TableCell>
-          {e.FinishTime ? format(e.FinishTime) : <span className={runningLabel.root}>Running</span>}
+          {e.finish_time ? format(e.finish_time) : <span className={runningLabel.root}>Running</span>}
         </TableCell>
         {detailed && (
           <TableCell>
             <Button
               component={Link}
-              to={`/experiments/${e.ExperimentID}?name=${e.Experiment}&event=${e.ID}`}
+              to={`/experiments/${e.experiment_id}?name=${e.experiment}&event=${e.id}`}
               variant="outlined"
               size="small"
               color="primary"
@@ -216,7 +216,7 @@ const EventsTable: React.FC<EventsTableProps> = ({ title = 'Events', events: all
 
   const [events, setEvents] = useState(allEvents)
   const [order, setOrder] = useState<Order>('desc')
-  const [orderBy, setOrderBy] = useState<keyof SortedEvent>('StartTime')
+  const [orderBy, setOrderBy] = useState<keyof SortedEvent>('start_time')
   const [page, setPage] = useState(0)
   const [rowsPerPage, setRowsPerPage] = useState(5)
   const [search, setSearch] = useState('')
@@ -280,7 +280,7 @@ const EventsTable: React.FC<EventsTableProps> = ({ title = 'Events', events: all
             {events &&
               stableSort<SortedEvent>(events, getComparator(order, orderBy))
                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                .map((e) => <EventsTableRow key={e.ID} event={e as SortedEventWithPods} detailed={detailed} />)}
+                .map((e) => <EventsTableRow key={e.id} event={e as SortedEventWithPods} detailed={detailed} />)}
           </TableBody>
 
           <TableFooter>

@@ -48,8 +48,8 @@ const ExperimentEventsPreview: React.FC<ExperimentEventsPreviewProps> = ({ event
   return events ? (
     <Box display="flex">
       {events.map((e) => (
-        <Box key={e.ID} className={classes.root}>
-          {e.FinishTime ? (
+        <Box key={e.id} className={classes.root}>
+          {e.finish_time ? (
             <CheckCircleOutlineIcon className={classes.success} />
           ) : (
             <Box display="flex" alignItems="center">

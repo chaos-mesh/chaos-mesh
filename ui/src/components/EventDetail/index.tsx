@@ -21,7 +21,7 @@ const EventDetail: React.FC<EventDetailProps> = ({ event: e }) => {
           <TableCell>Experiment ID</TableCell>
           <TableCell>
             <Typography variant="body2" color="textSecondary">
-              {e.ExperimentID}
+              {e.experiment_id}
             </Typography>
           </TableCell>
         </TableRow>
@@ -30,7 +30,7 @@ const EventDetail: React.FC<EventDetailProps> = ({ event: e }) => {
           <TableCell>Experiment Name</TableCell>
           <TableCell>
             <Typography variant="body2" color="textSecondary">
-              {e.Experiment}
+              {e.experiment}
             </Typography>
           </TableCell>
         </TableRow>
@@ -39,7 +39,7 @@ const EventDetail: React.FC<EventDetailProps> = ({ event: e }) => {
           <TableCell>Namespace</TableCell>
           <TableCell>
             <Typography variant="body2" color="textSecondary">
-              {e.Namespace}
+              {e.namespace}
             </Typography>
           </TableCell>
         </TableRow>
@@ -48,7 +48,7 @@ const EventDetail: React.FC<EventDetailProps> = ({ event: e }) => {
           <TableCell>Kind</TableCell>
           <TableCell>
             <Typography variant="body2" color="textSecondary">
-              {e.Kind}
+              {e.kind}
             </Typography>
           </TableCell>
         </TableRow>
@@ -57,7 +57,7 @@ const EventDetail: React.FC<EventDetailProps> = ({ event: e }) => {
           <TableCell>Start Time</TableCell>
           <TableCell>
             <Typography variant="body2" color="textSecondary">
-              {format(e.StartTime)}
+              {format(e.start_time)}
             </Typography>
           </TableCell>
         </TableRow>
@@ -66,7 +66,7 @@ const EventDetail: React.FC<EventDetailProps> = ({ event: e }) => {
           <TableCell>Finish Time</TableCell>
           <TableCell>
             <Typography variant="body2" color="textSecondary">
-              {e.FinishTime ? format(e.FinishTime) : <span className={runningLabel.root}>Running</span>}
+              {e.finish_time ? format(e.finish_time) : <span className={runningLabel.root}>Running</span>}
             </Typography>
           </TableCell>
         </TableRow>
@@ -86,14 +86,14 @@ const EventDetail: React.FC<EventDetailProps> = ({ event: e }) => {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {e.Pods &&
-                    e.Pods.map((pod) => (
-                      <TableRow key={pod.ID}>
-                        <TableCell>{pod.PodIP}</TableCell>
-                        <TableCell>{pod.PodName}</TableCell>
-                        <TableCell>{pod.Namespace}</TableCell>
-                        <TableCell>{pod.Action}</TableCell>
-                        <TableCell>{pod.Message}</TableCell>
+                  {e.pods &&
+                    e.pods.map((pod) => (
+                      <TableRow key={pod.id}>
+                        <TableCell>{pod.pod_ip}</TableCell>
+                        <TableCell>{pod.pod_name}</TableCell>
+                        <TableCell>{pod.namespace}</TableCell>
+                        <TableCell>{pod.action}</TableCell>
+                        <TableCell>{pod.message}</TableCell>
                       </TableRow>
                     ))}
                 </TableBody>

@@ -108,14 +108,14 @@ export default function ExperimentDetail() {
 
     api.experiments
       .detail(uuid)
-      .then(({ data }) => setDetail(data))
+      .then(({ data }) => setDetail(data.experiment_info))
       .catch(console.log)
   }
 
   const fetchEvents = () =>
     api.events
       .events()
-      .then(({ data }) => setEvents(data.filter((d) => d.ExperimentID === uuid)))
+      .then(({ data }) => setEvents(data.filter((d) => d.experiment_id === uuid)))
       .catch(console.log)
       .finally(() => {
         setLoading(false)
@@ -152,7 +152,7 @@ export default function ExperimentDetail() {
     }
 
     if (eventID !== null && eventID !== 'null' && events) {
-      onSelectEvent(events.filter((e) => e.ID === parseInt(eventID))[0])
+      onSelectEvent(events.filter((e) => e.id === parseInt(eventID))[0])
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [events, eventID])
