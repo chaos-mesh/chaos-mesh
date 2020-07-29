@@ -49,7 +49,7 @@ const Actions = ({ setInitialValues }: ActionsProps) => {
 
     api.experiments
       .detail(uuid)
-      .then(({ data }) => setInitialValues(parseLoaded(data)))
+      .then(({ data }) => setInitialValues(parseLoaded(data.experiment_info)))
       .catch(console.log)
   }
 
