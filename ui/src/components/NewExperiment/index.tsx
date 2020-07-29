@@ -49,7 +49,7 @@ const Actions = ({ setInitialValues }: ActionsProps) => {
 
     api.experiments
       .detail(uuid)
-      .then(({ data }) => setInitialValues(parseLoaded(data)))
+      .then(({ data }) => setInitialValues(parseLoaded(data.experiment_info)))
       .catch(console.log)
   }
 
@@ -111,7 +111,7 @@ const Actions = ({ setInitialValues }: ActionsProps) => {
         <RadioGroup value={experimentRadio} onChange={onExperimentRadioChange}>
           {experiments && experiments.length > 0 ? (
             experiments.map((e) => (
-              <FormControlLabel key={e.uid} value={e.uid} control={<Radio color="primary" />} label={e.Name} />
+              <FormControlLabel key={e.uid} value={e.uid} control={<Radio color="primary" />} label={e.name} />
             ))
           ) : experiments?.length === 0 ? (
             <Typography variant="body2">No experiments found.</Typography>

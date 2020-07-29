@@ -53,7 +53,7 @@ const ExperimentPaper: React.FC<ExperimentPaperProps> = ({
     handleDialogOpen(true)
     handleSelect({
       uuid: (e as Experiment).uid,
-      title: `Delete ${e.Name}?`,
+      title: `Delete ${e.name}?`,
       description: "Once you delete this experiment, it can't be recovered.",
       action: 'delete',
     })
@@ -63,7 +63,7 @@ const ExperimentPaper: React.FC<ExperimentPaperProps> = ({
     handleDialogOpen(true)
     handleSelect({
       uuid: (e as Experiment).uid,
-      title: `Pause ${e.Name}?`,
+      title: `Pause ${e.name}?`,
       description: 'You can restart the experiment in the same position.',
       action: 'pause',
     })
@@ -73,7 +73,7 @@ const ExperimentPaper: React.FC<ExperimentPaperProps> = ({
     handleDialogOpen(true)
     handleSelect({
       uuid: (e as Experiment).uid,
-      title: `Start ${e.Name}?`,
+      title: `Start ${e.name}?`,
       description: 'The operation will take effect immediately.',
       action: 'start',
     })
@@ -123,7 +123,7 @@ const ExperimentPaper: React.FC<ExperimentPaperProps> = ({
       )}
       <Button
         component={Link}
-        to={isArchive ? `/` : `/experiments/${(e as Experiment).uid}?name=${e.Name}&status=${(e as Experiment).status}`}
+        to={isArchive ? `/` : `/experiments/${(e as Experiment).uid}?name=${e.name}&status=${(e as Experiment).status}`}
         variant="outlined"
         color="primary"
         size="small"
@@ -145,16 +145,16 @@ const ExperimentPaper: React.FC<ExperimentPaperProps> = ({
               <ExperimentEventsPreview events={(e as Experiment).events} />
             ))}
           <Typography variant="body1" component="div">
-            {e.Name}
+            {e.name}
             {isTabletScreen && (
               <Typography variant="body2" color="textSecondary">
-                {e.Kind}
+                {e.kind}
               </Typography>
             )}
           </Typography>
           {!isTabletScreen && (
             <Typography variant="body2" color="textSecondary">
-              {e.Kind}
+              {e.kind}
             </Typography>
           )}
         </Box>
