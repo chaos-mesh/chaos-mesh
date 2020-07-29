@@ -1,6 +1,6 @@
 ---
 id: get_started_on_kind
-title: Get started on Kind
+title: Get started on kind
 ---
 
 This document describes how to deploy Chaos Mesh in Kubernetes on your laptop (Linux or macOS) using kind.

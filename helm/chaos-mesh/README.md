@@ -8,7 +8,7 @@ This chart bootstraps a [Chaos Mesh](https://github.com/chaos-mesh/chaos-mesh) d
 
 ## Deploy
 
-Before deploying Chaos Mesh, make sure you have installed the [Prerequisites](../../doc/deploy.md#prerequisites). And then follow the [deploy](../../doc/deploy.md) doc step by step.
+Before deploying Chaos Mesh, make sure you have installed the [Prerequisites](../../website/docs/installation/installation.md#prerequisites). And then follow the [install-by-helm](../../website/docs/installation/installation.md#install-by-helm) doc step by step.
 
 ## Configuration
 
