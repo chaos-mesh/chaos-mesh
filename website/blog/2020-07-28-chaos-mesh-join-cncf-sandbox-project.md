@@ -5,6 +5,7 @@ author: Chaos Mesh Authors
 author_title: Maintainer of Chaos Mesh
 author_url: https://github.com/chaos-mesh
 author_image_url: https://avatars1.githubusercontent.com/u/59082378?v=4
+image: /img/chaos-mesh-cncf.png
 tags: [Chaos Mesh, Chaos Engineering, Kubernetes, CNCF, Cloud Native]
 ---
 

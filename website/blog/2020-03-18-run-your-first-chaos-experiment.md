@@ -5,6 +5,7 @@ author: Cwen Yin
 author_title: Maintainer of Chaos Mesh
 author_url: https://github.com/cwen0
 author_image_url: https://avatars1.githubusercontent.com/u/22956341?v=4
+image: /img/run-first-chaos-experiment-in-ten-minutes.jpg
 tags: [Chaos Mesh, Chaos Engineering, Kubernetes]
 ---
 
@@ -66,7 +67,7 @@ Before moving forward, make sure you have [Git](https://git-scm.com/) and [Docke
 >
 > * Depending on your network, these steps might take a few minutes.
 > * If you see an error message like this:
->  
+>
 >     ```bash
 >     ERROR: failed to create cluster: failed to generate kubeadm config content: failed to get kubernetes version from node: failed to get file: command "docker exec --privileged kind-control-plane cat /kind/version" failed with error: exit status 1
 >     ```
@@ -188,4 +189,4 @@ Congratulations on your first successful journey into Chaos Engineering. How doe
 If you find a bug or think something is missing, feel free to file an issue, open a pull request (PR), or join us on the #sig-chaos-mesh channel in the [TiDB Community](https://chaos-mesh.org/tidbslack) slack workspace.
 
 GitHub: [https://github.com/chaos-mesh/chaos-mesh](https://github.com/chaos-mesh/chaos-mesh)
- 
+
