@@ -79,6 +79,7 @@ type StressChaosSpec struct {
 	// +optional
 	StressngStressors string `json:"stressngStressors,omitempty"`
 
+	// ContainerName indicates the target container to inject stress in
 	// +optional
 	ContainerName *string `json:"containerName,omitempty"`
 
