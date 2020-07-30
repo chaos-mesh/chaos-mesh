@@ -80,7 +80,7 @@ type StressChaosSpec struct {
 	StressngStressors string `json:"stressngStressors,omitempty"`
 
 	// +optional
-	ContainerName *string `json:"containerName"`
+	ContainerName *string `json:"containerName,omitempty"`
 
 	// Duration represents the duration of the chaos action
 	// +optional
