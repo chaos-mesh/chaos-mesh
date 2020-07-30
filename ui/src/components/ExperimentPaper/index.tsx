@@ -12,7 +12,6 @@ import KeyboardArrowUpIcon from '@material-ui/icons/KeyboardArrowUp'
 import { Link } from 'react-router-dom'
 import PauseCircleOutlineIcon from '@material-ui/icons/PauseCircleOutline'
 import PlayCircleOutlineIcon from '@material-ui/icons/PlayCircleOutline'
-import RefreshIcon from '@material-ui/icons/Refresh'
 import day from 'lib/dayjs'
 
 const useStyles = makeStyles((theme: Theme) =>
@@ -116,20 +115,14 @@ const ExperimentPaper: React.FC<ExperimentPaperProps> = ({
           </IconButton>
         </>
       )}
-      {isArchive && (
-        <IconButton color="primary" aria-label="Recreate experiment" component="span" size="small">
-          <RefreshIcon />
-        </IconButton>
-      )}
       <Button
         component={Link}
-        to={isArchive ? `/` : `/experiments/${(e as Experiment).uid}?name=${e.name}&status=${(e as Experiment).status}`}
+        to={isArchive ? `/` : `/experiments/${(e as Experiment).uid}`}
         variant="outlined"
         color="primary"
         size="small"
-        disabled={!isArchive && (e as Experiment).status === 'Failed'}
       >
-        Detail
+        {isArchive ? 'Report' : 'Detail'}
       </Button>
     </Box>
   )
