@@ -28,7 +28,7 @@ Before you start running a chaos experiment, verify if Chaos Mesh is installed c
 
 ### Verify your installation
 
-Verify if the chaos mesh is running (If you are not familiar with *kubectl*, you can read the [documentation](https://kubernetes.io/docs/reference/generated/kubectl/kubectl-commands).)
+Verify if the chaos mesh is running (For the use of *kubectl*, you can refer to the [documentation](https://kubernetes.io/docs/reference/generated/kubectl/kubectl-commands).)
 
 ```bash
 kubectl get pod -n chaos-testing
