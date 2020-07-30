@@ -1,3 +1,7 @@
+export interface EventsParams {
+  limit?: number
+}
+
 export interface Event {
   id: number
   experiment_id: uuid

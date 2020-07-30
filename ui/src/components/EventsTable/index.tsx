@@ -87,6 +87,7 @@ type SortedEventWithPods = Omit<Event, 'deleted_at'>
 
 const headCells: { id: keyof SortedEvent; label: string }[] = [
   { id: 'experiment', label: 'Experiment' },
+  { id: 'experiment_id', label: 'UUID' },
   { id: 'namespace', label: 'Namespace' },
   { id: 'kind', label: 'Kind' },
   { id: 'start_time', label: 'Start Time' },
@@ -181,6 +182,7 @@ const EventsTableRow: React.FC<EventsTableRowProps> = ({ event: e, detailed }) =
     <>
       <TableRow hover>
         <TableCell>{e.experiment}</TableCell>
+        <TableCell>{e.experiment_id}</TableCell>
         <TableCell>{e.namespace}</TableCell>
         <TableCell>{e.kind}</TableCell>
         <TableCell>{format(e.start_time)}</TableCell>
