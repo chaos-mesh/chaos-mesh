@@ -26,7 +26,7 @@ export default function gen({
 
   const svg = d3.select(root).append('svg').attr('class', 'chaos-chart').attr('width', width).attr('height', height)
 
-  const now = day(events[events.length - 1].StartTime).add(0.5, 'h')
+  const now = day(events[events.length - 1].start_time).add(0.5, 'h')
 
   const x = d3
     .scaleLinear()
@@ -45,7 +45,7 @@ export default function gen({
   // Wrap long text, also used in zoom() and reGen()
   svg.selectAll('.tick text').call(wrapText, 30)
 
-  const allUniqueExperiments = [...new Set(events.map((d) => d.Experiment + '/' + d.ExperimentID))].map((d) => {
+  const allUniqueExperiments = [...new Set(events.map((d) => d.experiment + '/' + d.experiment_id))].map((d) => {
     const [name, uuid] = d.split('/')
 
     return {
@@ -80,7 +80,7 @@ export default function gen({
 
   const colorPalette = d3
     .scaleOrdinal<string, string>()
-    .domain(events.map((d) => d.Experiment))
+    .domain(events.map((d) => d.experiment))
     .range(d3.schemeTableau10)
 
   const legendsRoot = d3.select(document.createElement('div')).attr('class', 'chaos-events-legends')
@@ -90,7 +90,7 @@ export default function gen({
     .enter()
     .append('div')
     .on('click', function (d) {
-      const _events = events.filter((e) => e.ExperimentID === d.uuid)
+      const _events = events.filter((e) => e.experiment_id === d.uuid)
       const event = _events[_events.length - 1]
 
       svg
@@ -101,7 +101,7 @@ export default function gen({
           d3.zoomIdentity
             .translate(width / 2, 0)
             .scale(2)
-            .translate(-x(day(event.StartTime)), 0)
+            .translate(-x(day(event.start_time)), 0)
         )
     })
   legends
@@ -116,7 +116,7 @@ export default function gen({
     )
 
   function genRectWidth(d: Event) {
-    let width = d.FinishTime ? x(day(d.FinishTime)) - x(day(d.StartTime)) : x(day()) - x(day(d.StartTime))
+    let width = d.finish_time ? x(day(d.finish_time)) - x(day(d.start_time)) : x(day()) - x(day(d.start_time))
 
     if (width === 0) {
       width = 1
@@ -130,11 +130,11 @@ export default function gen({
     .data(events)
     .enter()
     .append('rect')
-    .attr('x', (d) => x(day(d.StartTime)))
-    .attr('y', (d) => y(d.ExperimentID)! + margin.top)
+    .attr('x', (d) => x(day(d.start_time)))
+    .attr('y', (d) => y(d.experiment_id)! + margin.top)
     .attr('width', genRectWidth)
     .attr('height', y.bandwidth())
-    .attr('fill', (d) => colorPalette(d.ExperimentID))
+    .attr('fill', (d) => colorPalette(d.experiment_id))
     .style('cursor', 'pointer')
 
   const zoom = d3.zoom().scaleExtent([0.1, 5]).on('zoom', zoomd)
@@ -145,7 +145,7 @@ export default function gen({
 
     gXAxis.call(xAxis.scale(newX))
     svg.selectAll('.tick text').call(wrapText, 30)
-    rects.attr('x', (d) => newX(day(d.StartTime))).attr('width', genRectWidth)
+    rects.attr('x', (d) => newX(day(d.start_time))).attr('width', genRectWidth)
   }
   svg.call(zoom as any)
 
@@ -169,18 +169,18 @@ export default function gen({
   }
 
   function genTooltipContent(d: Event) {
-    return `<b>Experiment: ${d.Experiment}</b>
+    return `<b>Experiment: ${d.experiment}</b>
             <br />
-            <b>Status: ${d.FinishTime ? 'Finished' : 'Running'}</b>
+            <b>Status: ${d.finish_time ? 'Finished' : 'Running'}</b>
             <br />
             <br />
-            <span style="color: rgba(0, 0, 0, 0.67);">Start Time: ${day(d.StartTime).format(
+            <span style="color: rgba(0, 0, 0, 0.67);">Start Time: ${day(d.start_time).format(
               'YYYY-MM-DD HH:mm:ss A'
             )}</span>
             <br />
             ${
-              d.FinishTime
-                ? `<span style="color: rgba(0, 0, 0, 0.67);">Finish Time: ${day(d.FinishTime).format(
+              d.finish_time
+                ? `<span style="color: rgba(0, 0, 0, 0.67);">Finish Time: ${day(d.finish_time).format(
                     'YYYY-MM-DD HH:mm:ss A'
                   )}</span>`
                 : ''
@@ -202,7 +202,7 @@ export default function gen({
           d3.zoomIdentity
             .translate(width / 2, 0)
             .scale(2)
-            .translate(-x(day(d.StartTime)), 0)
+            .translate(-x(day(d.start_time)), 0)
         )
     })
     .on('mouseover', function (d) {
@@ -236,7 +236,7 @@ export default function gen({
     x.range([margin.left, width - margin.right])
     gXAxis.call(xAxis)
     svg.selectAll('.tick text').call(wrapText, 30)
-    rects.attr('x', (d) => x(day(d.StartTime))).attr('width', genRectWidth)
+    rects.attr('x', (d) => x(day(d.start_time))).attr('width', genRectWidth)
   }
 
   d3.select(window).on('resize', _debounce(reGen, 250))

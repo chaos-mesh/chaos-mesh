@@ -22,19 +22,19 @@ export function searchEvents(events: Event[], search: string) {
   const { namespace, kind, pod, content } = parseSearch(search)
 
   if (namespace) {
-    result = result.filter((d) => d.Namespace.toLowerCase().includes(namespace))
+    result = result.filter((d) => d.namespace.toLowerCase().includes(namespace))
   }
 
   if (kind) {
-    result = result.filter((d) => d.Kind.toLowerCase().includes(kind))
+    result = result.filter((d) => d.kind.toLowerCase().includes(kind))
   }
 
   if (pod) {
-    result = result.filter((d) => d.Pods?.some((d) => d.PodName.toLowerCase().includes(pod)))
+    result = result.filter((d) => d.pods?.some((d) => d.pod_name.toLowerCase().includes(pod)))
   }
 
   if (content) {
-    result = result.filter((d) => d.Experiment.toLowerCase().includes(content))
+    result = result.filter((d) => d.experiment.toLowerCase().includes(content))
   }
 
   return result
