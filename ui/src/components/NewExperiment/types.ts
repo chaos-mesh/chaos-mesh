@@ -102,12 +102,12 @@ export interface ExperimentTargetStress {
       workers: number
       load: number
       options: string[]
-    }
+    } | null
     memory: {
       workers: number
       size: string
       options: string[]
-    }
+    } | null
   }
 }
 
