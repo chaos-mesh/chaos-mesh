@@ -79,6 +79,9 @@ type StressChaosSpec struct {
 	// +optional
 	StressngStressors string `json:"stressngStressors,omitempty"`
 
+	// +optional
+	ContainerName *string `json:"containerName"`
+
 	// Duration represents the duration of the chaos action
 	// +optional
 	Duration *string `json:"duration,omitempty"`
