@@ -10,5 +10,5 @@ This guide prepares you for the development of Chaos Mesh from scratch. Before y
 
 The development flow starts from [Set up your development environment](setup_env.md). After this, you can choose any of the following procedures to contribute:
 
-- [Develop a new chaos](dev_hello_world.md)
+- [Develop a New Chaos Type](dev_hello_world.md)
 - [ ] Add facilities to chaos daemon
