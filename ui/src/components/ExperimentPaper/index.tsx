@@ -140,15 +140,29 @@ const ExperimentPaper: React.FC<ExperimentPaperProps> = ({
           <Typography variant="body1" component="div">
             {e.name}
             {isTabletScreen && (
-              <Typography variant="body2" color="textSecondary">
-                {e.kind}
-              </Typography>
+              <>
+                <Typography variant="body2" color="textSecondary">
+                  {e.namespace}
+                </Typography>
+                {isArchive && (
+                  <Typography variant="body2" color="textSecondary">
+                    {e.uid}
+                  </Typography>
+                )}
+              </>
             )}
           </Typography>
           {!isTabletScreen && (
-            <Typography variant="body2" color="textSecondary">
-              {e.kind}
-            </Typography>
+            <>
+              <Typography variant="body2" color="textSecondary">
+                {e.namespace}
+              </Typography>
+              {isArchive && (
+                <Typography variant="body2" color="textSecondary">
+                  UUID: {e.uid}
+                </Typography>
+              )}
+            </>
           )}
         </Box>
         {isTabletScreen ? (
