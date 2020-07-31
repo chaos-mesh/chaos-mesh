@@ -22,6 +22,7 @@ export const defaultExperimentSchema: Experiment = {
     },
     network_chaos: {
       action: '',
+      direction: '',
       bandwidth: {
         buffer: 0,
         limit: 0,
@@ -46,6 +47,7 @@ export const defaultExperimentSchema: Experiment = {
         correlation: '',
         loss: '',
       },
+      target: undefined,
     },
     io_chaos: {
       action: '',
@@ -57,7 +59,7 @@ export const defaultExperimentSchema: Experiment = {
       percent: '100',
     },
     kernel_chaos: {
-      fail_kernel_req: {
+      fail_kern_request: {
         callchain: [],
         failtype: 0,
         headers: [],
@@ -68,7 +70,7 @@ export const defaultExperimentSchema: Experiment = {
     time_chaos: {
       clock_ids: [],
       container_names: [],
-      offset: '',
+      time_offset: '',
     },
     stress_chaos: {
       stressng_stressors: '',

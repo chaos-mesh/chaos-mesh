@@ -90,6 +90,9 @@ const Actions = ({ setInitialValues }: ActionsProps) => {
     reader.onload = function (e) {
       try {
         const y = yamlToExperiment(yaml.safeLoad(e.target!.result as string))
+        if (process.env.NODE_ENV === 'development') {
+          console.debug('Debug yamlToExperiment:', y)
+        }
         setInitialValues(y)
         dispatch(
           setAlert({
