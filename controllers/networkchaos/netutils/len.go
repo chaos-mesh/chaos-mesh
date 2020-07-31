@@ -16,22 +16,35 @@ package netutils
 import (
 	"crypto/sha1"
 	"fmt"
+	"log"
 )
 
+// CompressName compresses name to targetLength with specified postfix
+// targetLength < 7 or targetLength-7-len(namePostFix) < 0 are not allowed
 func CompressName(originalName string, targetLength int, namePostFix string) (name string) {
-	if len(originalName) < 6 {
-		name = originalName + "_" + namePostFix
-	} else {
-		namePrefix := originalName[0:5]
-		nameRest := originalName[5:]
-
-		hasher := sha1.New()
-		hasher.Write([]byte(nameRest))
-		hashValue := fmt.Sprintf("%x", hasher.Sum(nil))
-
-		// keep the length does not exceed targetLength
-		name = namePrefix + "_" + hashValue[0:targetLength-7-len(namePostFix)] + "_" + namePostFix
+	if targetLength < 7 {
+		log.Fatal("targetLength shouldn't be less than 7")
 	}
+	if targetLength-7-len(namePostFix) < 0 {
+		log.Fatalf("namePostFix longer than (targetLength-7) = %d: %s", targetLength-7, namePostFix)
+	}
+
+	if len(originalName) < 6 {
+		// len(originalName) < 6 && 7 + len(namePostFix) < targetlength
+		// => 1 + len(originalName) + len(namePostFix) < targetLength
+		name = originalName + "_" + namePostFix
+		return
+	}
+
+	namePrefix := originalName[0:5]
+	nameRest := originalName[5:]
+
+	hasher := sha1.New()
+	hasher.Write([]byte(nameRest))
+	hashValue := fmt.Sprintf("%x", hasher.Sum(nil))
+
+	// keep the length does not exceed targetLength
+	name = namePrefix + "_" + hashValue[0:targetLength-7-len(namePostFix)] + "_" + namePostFix
 
 	return
 }
