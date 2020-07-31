@@ -82,7 +82,7 @@ spec:
 
     ```shell
     kubectl annotate podchaos pod-kill-example --namespace chaos-testing experiment.chaos-mesh.org/pause=true
-    podchaos.chaos-mesh.org/pod-kill-example annotated
+    # podchaos.chaos-mesh.org/pod-kill-example annotated
     kubectl get podchaos pod-kill-example --namespace chaos-testing --output yaml \
     && kubectl get pods --namespace chaos-testing
     ```
@@ -134,7 +134,7 @@ spec:
 
     ```shell
     kubectl annotate podchaos pod-kill-example --namespace chaos-testing experiment.chaos-mesh.org/pause-
-    podchaos.chaos-mesh.org/pod-kill-example annotated
+    # podchaos.chaos-mesh.org/pod-kill-example annotated
     ```
 
     The output is like this:
