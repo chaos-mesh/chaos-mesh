@@ -897,6 +897,11 @@ func (in *StressChaosSpec) DeepCopyInto(out *StressChaosSpec) {
 		*out = new(Stressors)
 		(*in).DeepCopyInto(*out)
 	}
+	if in.ContainerName != nil {
+		in, out := &in.ContainerName, &out.ContainerName
+		*out = new(string)
+		**out = **in
+	}
 	if in.Duration != nil {
 		in, out := &in.Duration, &out.Duration
 		*out = new(string)

@@ -40,7 +40,7 @@ export default function Experiments() {
 
   const fetchEvents = (experiments: Experiment[]) => {
     api.events
-      .dryEvents()
+      .dryEvents({ limit: 10 })
       .then(({ data }) => {
         if (data.length) {
           setExperiments(
