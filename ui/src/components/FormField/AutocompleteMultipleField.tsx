@@ -79,9 +79,7 @@ const AutocompleteMultipleField: React.FC<AutocompleteMultipleFieldProps & TextF
             InputProps={{
               ...params.InputProps,
               ...props.InputProps,
-              ...{
-                style: { paddingTop: 8 },
-              },
+              style: { paddingTop: 8 },
             }}
           />
         )}

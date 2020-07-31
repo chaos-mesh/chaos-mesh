@@ -34,6 +34,10 @@ spec:
         spec:
           description: Spec defines the behavior of a time chaos experiment
           properties:
+            containerName:
+              description: ContainerName indicates the target container to inject
+                stress in
+              type: string
             duration:
               description: Duration represents the duration of the chaos action
               type: string

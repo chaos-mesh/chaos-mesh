@@ -3,12 +3,13 @@ export default function insertCommonStyle() {
     'beforeend',
     `<style>
       .chaos-chart text {
-        fill: rgba(0, 0, 0, 0.87);
+        fill: rgba(0, 0, 0, 0.54);
+        font-weight: bold;
       }
 
       .chaos-chart .axis path,
       .chaos-chart .axis line {
-        stroke: rgba(0, 0, 0, 0.38);
+        stroke: rgba(0, 0, 0, 0.12);
       }
 
       .chaos-events-legends {

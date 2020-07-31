@@ -14,8 +14,8 @@ export default function Time(props: StepperFormTargetProps) {
   return (
     <>
       <TextField
-        id="target.time_chaos.offset"
-        name="target.time_chaos.offset"
+        id="target.time_chaos.time_offset"
+        name="target.time_chaos.time_offset"
         label="Offset"
         helperText="The time offset"
       />

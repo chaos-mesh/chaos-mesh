@@ -51,12 +51,14 @@ export interface ExperimentTargetNetworkLoss {
 }
 
 export interface ExperimentTargetNetwork {
-  action: 'loss' | 'delay' | 'duplicate' | 'corrupt' | 'bandwidth' | ''
+  action: 'partition' | 'loss' | 'delay' | 'duplicate' | 'corrupt' | 'bandwidth' | ''
   bandwidth: ExperimentTargetNetworkBandwidth
   corrupt: ExperimentTargetNetworkCorrupt
   delay: ExperimentTargetNetworkDelay
   duplicate: ExperimentTargetNetworkDuplicate
   loss: ExperimentTargetNetworkLoss
+  direction: 'from' | 'to' | 'both' | ''
+  target?: ExperimentScope
 }
 
 export interface ExperimentTargetIO {
@@ -84,13 +86,13 @@ export interface FailKernelReq {
 }
 
 export interface ExperimentTargetKernel {
-  fail_kernel_req: FailKernelReq
+  fail_kern_request: FailKernelReq
 }
 
 export interface ExperimentTargetTime {
   clock_ids: string[]
   container_names: string[]
-  offset: string
+  time_offset: string
 }
 
 export interface ExperimentTargetStress {
@@ -100,17 +102,17 @@ export interface ExperimentTargetStress {
       workers: number
       load: number
       options: string[]
-    }
+    } | null
     memory: {
       workers: number
       size: string
       options: string[]
-    }
+    } | null
   }
 }
 
 export interface ExperimentTarget {
-  kind: string
+  kind: 'PodChaos' | 'NetworkChaos' | 'IoChaos' | 'KernelChaos' | 'TimeChaos' | 'StressChaos'
   pod_chaos: ExperimentTargetPod
   network_chaos: ExperimentTargetNetwork
   io_chaos: ExperimentTargetIO

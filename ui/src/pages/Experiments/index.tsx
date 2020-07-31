@@ -40,7 +40,7 @@ export default function Experiments() {
 
   const fetchEvents = (experiments: Experiment[]) => {
     api.events
-      .dryEvents()
+      .dryEvents({ limit: 10 })
       .then(({ data }) => {
         if (data.length) {
           setExperiments(
@@ -49,8 +49,8 @@ export default function Experiments() {
                 return { ...e, events: [] }
               } else {
                 const events = data
-                  .filter((d) => d.ExperimentID === e.uid)
-                  .sort((a, b) => dayComparator(a.StartTime, b.StartTime))
+                  .filter((d) => d.experiment_id === e.uid)
+                  .sort((a, b) => dayComparator(a.start_time, b.start_time))
 
                 return {
                   ...e,
@@ -132,7 +132,7 @@ export default function Experiments() {
         {experiments &&
           experiments.length > 0 &&
           experiments.map((e) => (
-            <Grid key={e.Name} item xs={12}>
+            <Grid key={e.name} item xs={12}>
               <ExperimentPaper experiment={e} handleSelect={setSelected} handleDialogOpen={setDialogOpen} />
             </Grid>
           ))}

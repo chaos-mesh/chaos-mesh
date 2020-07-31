@@ -22,17 +22,15 @@ const tabs = [
 
 const Target: React.FC = () => {
   const formikCtx = useFormikContext<Experiment>()
+  const kind = formikCtx.values.target.kind
 
   const [tabIndex, setTabIndex] = useState(0)
 
   useEffect(() => {
-    const kind = formikCtx.values.target.kind
-
     if (kind) {
       setTabIndex(Object.keys(ChaosKindKeyMap).indexOf(kind))
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [kind])
 
   const handleActionChange = (kind: string) => (e: React.ChangeEvent<HTMLInputElement>) =>
     resetOtherChaos(formikCtx, kind, e.target.value)
