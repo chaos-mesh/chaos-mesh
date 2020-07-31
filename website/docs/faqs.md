@@ -10,28 +10,27 @@ sidebar_label: FAQs
 
 No, you can not use Chaos Mesh in this case. But still you can run chaos experiments using command line. Refer to [Command Line Usages of Chaos](https://github.com/pingcap/tipocket/blob/master/doc/command_line_chaos.md) for details.
 
-### Q: When I deploy Chaos-mesh successfully, Then I create PodChaos experiments successfully, but create NetworkChaos/TimeChaos Experiment failed. The log is shown below, what's the matter？
-
-I get chaos-controller-manager's log, as shown below.
+### Q: I have deployed Chaos Mesh and created PodChaos experiments successfully, but I still failed in creating NetworkChaos/TimeChaos Experiment. The log is shown below:
 
 ```
 2020-06-18T01:05:26.207Z	ERROR	controllers.TimeChaos	failed to apply chaos on all pods	{"reconciler": "timechaos", "error": "rpc error: code = Unavailable desc = connection error: desc = \"transport: Error while dialing dial tcp xx.xx.xx.xx:xxxxx: connect: connection refused\""}
 ```
 
-You can try use the parameters: `hostNetwork`. Usage is as follows:
+You can try using the parameter: `hostNetwork`,  as shown below:
 
 ```
 # vim helm/chaos-mesh/values.yaml, change hostNetwork from false to true
 hostNetwork: true
 ```
 
-### Q: If you see an error message like this `ERROR: failed to get cluster internal kubeconfig: command "docker exec --privileged kind-control-plane cat /etc/kubernetes/admin.conf" failed with error: exit status 1` when installing Chaos Mesh with kind. How to fix it?
+### Q: I just saw `ERROR: failed to get cluster internal kubeconfig: command "docker exec --privileged kind-control-plane cat /etc/kubernetes/admin.conf" failed with error: exit status 1` when installing Chaos Mesh with kind. How to fix it?
+
 You can try the following command to fix it:
 ```
 kind delete cluster
 ```
-then deploy again
 
+then deploy again.
 
 ## Debug
 
