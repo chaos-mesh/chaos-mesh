@@ -28,7 +28,7 @@ Before you start running a chaos experiment, verify if Chaos Mesh is installed c
 
 ### Verify your installation
 
-Verify if the chaos mesh is running
+Verify if the chaos mesh is running (For the use of *kubectl*, you can refer to the [documentation](https://kubernetes.io/docs/reference/generated/kubectl/kubectl-commands).)
 
 ```bash
 kubectl get pod -n chaos-testing
@@ -129,7 +129,7 @@ Depending on your environment, there are two methods of installing Chaos Mesh:
   
   - Install in k3s environment
   
-       - for helm 2.X
+     - for helm 2.X
 
      ```bash
      helm install helm/chaos-mesh --name=chaos-mesh --namespace=chaos-testing --set chaosDaemon.runtime=containerd --set chaosDaemon.socketPath=/run/k3s/containerd/containerd.sock
@@ -145,6 +145,17 @@ Depending on your environment, there are two methods of installing Chaos Mesh:
 
      ```bash
      kubectl get pods --namespace chaos-testing -l app.kubernetes.io/instance=chaos-mesh
+     ```
+     
+     Expected output:
+     
+     ```bash
+     NAME                                        READY   STATUS    RESTARTS   AGE
+     chaos-controller-manager-6d6d95cd94-kl8gs   1/1     Running   0          3m40s
+     chaos-daemon-5shkv                          1/1     Running   0          3m40s
+     chaos-daemon-jpqhd                          1/1     Running   0          3m40s
+     chaos-daemon-n6mfq                          1/1     Running   0          3m40s
+     chaos-dashboard-d998856f6-vgrjs             1/1     Running   0          3m40s
      ```
 
 > **Note:**
