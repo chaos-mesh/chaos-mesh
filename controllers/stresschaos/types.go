@@ -237,7 +237,20 @@ func (r *Reconciler) applyPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.
 	if len(pod.Status.ContainerStatuses) == 0 {
 		return fmt.Errorf("%s %s can't get the state of container", pod.Namespace, pod.Name)
 	}
+
 	target := pod.Status.ContainerStatuses[0].ContainerID
+	if chaos.Spec.ContainerName != nil {
+		target = ""
+		for _, container := range pod.Status.ContainerStatuses {
+			if container.Name == *chaos.Spec.ContainerName {
+				target = container.ContainerID
+			}
+		}
+		if len(target) == 0 {
+			return fmt.Errorf("cannot find container with name %s", *chaos.Spec.ContainerName)
+		}
+	}
+
 	stressors := chaos.Spec.StressngStressors
 	if len(stressors) == 0 {
 		stressors, err = chaos.Spec.Stressors.Normalize()
@@ -246,7 +259,7 @@ func (r *Reconciler) applyPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.
 		}
 	}
 	res, err := daemonClient.ExecStressors(ctx, &pb.ExecStressRequest{
-		Scope:     pb.ExecStressRequest_POD,
+		Scope:     pb.ExecStressRequest_CONTAINER,
 		Target:    target,
 		Stressors: stressors,
 	})

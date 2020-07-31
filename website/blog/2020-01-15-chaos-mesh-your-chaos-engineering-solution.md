@@ -5,6 +5,7 @@ author: Cwen Yin
 author_title: Maintainer of Chaos Mesh
 author_url: https://github.com/cwen0
 author_image_url: https://avatars1.githubusercontent.com/u/22956341?v=4
+image: /img/chaos-engineering.png
 tags: [Chaos Mesh, Chaos Engineering, Kubernetes]
 ---
 
@@ -170,7 +171,7 @@ Chaos Mesh runs on Kubernetes v1.12 or later. Helm, a Kubernetes package managem
     helm install helm/chaos-mesh --name=chaos-mesh --namespace=chaos-testing
     ```
 
-    Wait until all components are installed, and check the installation status using:  
+    Wait until all components are installed, and check the installation status using:
 
     ``` bash
     // check chaos-mesh status

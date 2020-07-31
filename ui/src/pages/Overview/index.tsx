@@ -45,10 +45,10 @@ export default function Overview() {
         root: chart,
         chaos: Object.entries(
           experiments.reduce((acc, e) => {
-            if (acc[e.Kind]) {
-              acc[e.Kind] += 1
+            if (acc[e.kind]) {
+              acc[e.kind] += 1
             } else {
-              acc[e.Kind] = 1
+              acc[e.kind] = 1
             }
 
             return acc

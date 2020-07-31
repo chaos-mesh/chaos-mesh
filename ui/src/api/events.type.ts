@@ -1,23 +1,27 @@
+export interface EventsParams {
+  limit?: number
+}
+
 export interface Event {
-  ID: number
-  ExperimentID: uuid
-  DeletedAt: string | null
-  Experiment: string
-  Namespace: string
-  Kind: string
-  Message: string
-  StartTime: string
-  FinishTime: string
-  Pods:
+  id: number
+  experiment_id: uuid
+  deleted_at: string | null
+  experiment: string
+  namespace: string
+  kind: string
+  message: string
+  start_time: string
+  finish_time: string
+  pods:
     | {
-        ID: string
-        DeleteAt: string | null
-        EventID: number
-        PodIP: string
-        PodName: string
-        Namespace: string
-        Message: string
-        Action: string
+        id: string
+        delete_at: string | null
+        event_id: number
+        pod_ip: string
+        pod_name: string
+        namespace: string
+        message: string
+        action: string
       }[]
     | null
 }
