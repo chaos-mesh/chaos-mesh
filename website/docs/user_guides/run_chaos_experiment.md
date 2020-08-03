@@ -73,13 +73,13 @@ kubectl apply -f network-delay.yaml
 ### Pause a chaos experiment
 
 ```bash
-kubectl annotate networkchaos web-show-network-delay experiment.pingcap.com/pause=true
+kubectl annotate networkchaos web-show-network-delay experiment.chaos-mesh.org/pause=true
 ```
 
 ### Resume a chaos experiment
 
 ```bash
-kubectl annotate networkchaos web-show-network-delay experiment.pingcap.com/pause-
+kubectl annotate networkchaos web-show-network-delay experiment.chaos-mesh.org/pause-
 ```
 
 ### Delete a chaos experiment
@@ -91,7 +91,7 @@ kubectl delete -f network-delay.yaml
 If you encounter a situation that the delete action is blocked, it means that there are some target pods fail to recover. You can check the log of Chaos Mesh or just feel free to file an [issue](https://github.com/pingcap/chaos-mesh/issues). In addition, you also can force delete the chaos experiment by the following command:
 
 ```bash
-kubectl annotate networkchaos web-show-network-delay chaos-mesh.pingcap.com/cleanFinalizer=forced
+kubectl annotate networkchaos web-show-network-delay chaos-mesh.chaos-mesh.org/cleanFinalizer=forced
 ```
 
 ### Watch your chaos experiments in Chaos Dashboard
