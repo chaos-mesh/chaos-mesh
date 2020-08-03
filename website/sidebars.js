@@ -14,7 +14,6 @@ module.exports = {
       label: 'User Guide',
       items: [
         'user_guides/run_chaos_experiment',
-        'user_guides/pause_experiment',
         {
           type: 'category',
           label: 'Configure Chaos',
