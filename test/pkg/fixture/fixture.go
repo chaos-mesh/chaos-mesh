@@ -134,6 +134,44 @@ func NewTimerDeployment(name, namespace string) *appsv1.Deployment {
 	}
 }
 
+// NewNetworkTestDeployment creates a deployment for e2e test
+func NewNetworkTestDeployment(name, namespace string, extraLabels map[string]string) *appsv1.Deployment {
+	labels := map[string]string{
+		"app": name,
+	}
+	for key, val := range extraLabels {
+		labels[key] = val
+	}
+	return &appsv1.Deployment{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      name,
+			Namespace: namespace,
+			Labels:    labels,
+		},
+		Spec: appsv1.DeploymentSpec{
+			Replicas: pointer.Int32Ptr(1),
+			Selector: &metav1.LabelSelector{
+				MatchLabels: labels,
+			},
+			Template: corev1.PodTemplateSpec{
+				ObjectMeta: metav1.ObjectMeta{
+					Labels: labels,
+				},
+				Spec: corev1.PodSpec{
+					Containers: []corev1.Container{
+						{
+							Image:           config.TestConfig.E2EImage,
+							ImagePullPolicy: corev1.PullIfNotPresent,
+							Name:            "network",
+							Command:         []string{"/bin/test"},
+						},
+					},
+				},
+			},
+		},
+	}
+}
+
 // NewIOTestDeployment creates a deployment for e2e test
 func NewIOTestDeployment(name, namespace string) *appsv1.Deployment {
 	return &appsv1.Deployment{
@@ -221,6 +259,12 @@ func NewE2EService(name, namespace string) *corev1.Service {
 					Name:       "http",
 					Port:       8080,
 					TargetPort: intstr.IntOrString{IntVal: 8080},
+				},
+				// Only used in network chaos
+				{
+					Name:       "nc-port",
+					Port:       1070,
+					TargetPort: intstr.IntOrString{IntVal: 8000},
 				},
 				// Only used in io chaos
 				{

@@ -11,7 +11,7 @@ const styles = {
     '& .jsoneditor': {
       borderColor: '#172d72',
     },
-    '& .jsoneditor-menu': {
+    '& .jsoneditor > .jsoneditor-menu': {
       background: '#172d72',
       borderColor: '#172d72',
     },
@@ -20,7 +20,9 @@ const styles = {
 
 interface JSONEditorProps {
   classes: Record<'root', string>
+  name?: string
   json: object | null
+  mountEditor?: (editor: _JSONEditor) => void
 }
 
 class JSONEditor extends React.Component<JSONEditorProps> {
@@ -31,13 +33,16 @@ class JSONEditor extends React.Component<JSONEditorProps> {
     const options = {
       enableSort: false,
       enableTransform: false,
-      mode: 'form' as 'form',
+      name: this.props.name,
+      mode: 'tree' as 'tree',
       search: false,
     }
 
     this.editor = new _JSONEditor(this.editorRef.current!, options)
     this.editor.set(this.props.json)
-    this.editor?.expandAll()
+    this.editor.expandAll()
+
+    typeof this.props.mountEditor === 'function' && this.props.mountEditor(this.editor)
   }
 
   componentWillUnmount() {

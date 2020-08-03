@@ -42,8 +42,8 @@ import (
 const (
 	networkPartitionActionMsg = "partition network duration %s"
 
-	sourceIpSetPostFix = "src"
-	targetIpSetPostFix = "tgt"
+	sourceIPSetPostFix = "src"
+	targetIPSetPostFix = "tgt"
 )
 
 func newReconciler(c client.Client, log logr.Logger, req ctrl.Request,
@@ -113,13 +113,13 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1
 		}
 	}
 
-	sourceSet := ipset.BuildIPSet(sources, []string{}, networkchaos, sourceIpSetPostFix)
+	sourceSet := ipset.BuildIPSet(sources, []string{}, networkchaos, sourceIPSetPostFix)
 	externalCidrs, err := netutils.ResolveCidrs(networkchaos.Spec.ExternalTargets)
 	if err != nil {
 		r.Log.Error(err, "failed to resolve external targets")
 		return err
 	}
-	targetSet := ipset.BuildIPSet(targets, externalCidrs, networkchaos, targetIpSetPostFix)
+	targetSet := ipset.BuildIPSet(targets, externalCidrs, networkchaos, targetIPSetPostFix)
 
 	allPods := append(sources, targets...)
 
@@ -129,13 +129,13 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1
 		pod := allPods[index]
 		r.Log.Info("PODS", "name", pod.Name, "namespace", pod.Namespace)
 		g.Go(func() error {
-			err = ipset.FlushIpSet(ctx, r.Client, &pod, &sourceSet)
+			err = ipset.FlushIPSets(ctx, r.Client, &pod, []*pb.IPSet{&sourceSet})
 			if err != nil {
 				return err
 			}
 
 			r.Log.Info("Flush ipset on pod", "name", pod.Name, "namespace", pod.Namespace)
-			return ipset.FlushIpSet(ctx, r.Client, &pod, &targetSet)
+			return ipset.FlushIPSets(ctx, r.Client, &pod, []*pb.IPSet{&targetSet})
 		})
 	}
 
@@ -144,28 +144,44 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1
 		return err
 	}
 
+	sourcesChains := []*pb.Chain{}
+	targetsChains := []*pb.Chain{}
 	if networkchaos.Spec.Direction == v1alpha1.To || networkchaos.Spec.Direction == v1alpha1.Both {
-		if err := r.BlockSet(ctx, sources, &targetSet, pb.Rule_OUTPUT, networkchaos); err != nil {
-			r.Log.Error(err, "set source iptables failed")
-			return err
-		}
+		sourcesChains = append(sourcesChains, &pb.Chain{
+			Name:      iptable.GenerateName(pb.Chain_OUTPUT, networkchaos),
+			Direction: pb.Chain_OUTPUT,
+			Ipsets:    []string{targetSet.Name},
+		})
 
-		if err := r.BlockSet(ctx, targets, &sourceSet, pb.Rule_INPUT, networkchaos); err != nil {
-			r.Log.Error(err, "set target iptables failed")
-			return err
-		}
+		targetsChains = append(targetsChains, &pb.Chain{
+			Name:      iptable.GenerateName(pb.Chain_INPUT, networkchaos),
+			Direction: pb.Chain_INPUT,
+			Ipsets:    []string{sourceSet.Name},
+		})
 	}
 
 	if networkchaos.Spec.Direction == v1alpha1.From || networkchaos.Spec.Direction == v1alpha1.Both {
-		if err := r.BlockSet(ctx, sources, &targetSet, pb.Rule_INPUT, networkchaos); err != nil {
-			r.Log.Error(err, "set source iptables failed")
-			return err
-		}
+		sourcesChains = append(sourcesChains, &pb.Chain{
+			Name:      iptable.GenerateName(pb.Chain_INPUT, networkchaos),
+			Direction: pb.Chain_INPUT,
+			Ipsets:    []string{targetSet.Name},
+		})
 
-		if err := r.BlockSet(ctx, targets, &sourceSet, pb.Rule_OUTPUT, networkchaos); err != nil {
-			r.Log.Error(err, "set target iptables failed")
-			return err
-		}
+		targetsChains = append(targetsChains, &pb.Chain{
+			Name:      iptable.GenerateName(pb.Chain_OUTPUT, networkchaos),
+			Direction: pb.Chain_OUTPUT,
+			Ipsets:    []string{sourceSet.Name},
+		})
+	}
+
+	err = r.SetChains(ctx, sources, sourcesChains, networkchaos)
+	if err != nil {
+		return err
+	}
+
+	err = r.SetChains(ctx, targets, targetsChains, networkchaos)
+	if err != nil {
+		return err
 	}
 
 	networkchaos.Status.Experiment.PodRecords = make([]v1alpha1.PodStatus, 0, len(allPods))
@@ -189,10 +205,11 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1
 	return nil
 }
 
-// BlockSet blocks ipset for pods
-func (r *Reconciler) BlockSet(ctx context.Context, pods []v1.Pod, set *pb.IpSet, direction pb.Rule_Direction, networkchaos *v1alpha1.NetworkChaos) error {
+// SetChains sets iptables chains for pods
+func (r *Reconciler) SetChains(ctx context.Context, pods []v1.Pod, chains []*pb.Chain, networkchaos *v1alpha1.NetworkChaos) error {
+	r.Log.Info("setting chains", "chains", chains, "pods", pods)
+
 	g := errgroup.Group{}
-	sourceRule := iptable.GenerateIPTables(pb.Rule_ADD, direction, set.Name)
 
 	for index := range pods {
 		pod := &pods[index]
@@ -202,15 +219,10 @@ func (r *Reconciler) BlockSet(ctx context.Context, pods []v1.Pod, set *pb.IpSet,
 			return err
 		}
 
-		switch direction {
-		case pb.Rule_INPUT:
-			networkchaos.Finalizers = utils.InsertFinalizer(networkchaos.Finalizers, "input-"+key)
-		case pb.Rule_OUTPUT:
-			networkchaos.Finalizers = utils.InsertFinalizer(networkchaos.Finalizers, "output"+key)
-		}
+		networkchaos.Finalizers = utils.InsertFinalizer(networkchaos.Finalizers, key)
 
 		g.Go(func() error {
-			return iptable.FlushIptables(ctx, r.Client, pod, &sourceRule)
+			return iptable.SetIptablesChains(ctx, r.Client, pod, chains)
 		})
 	}
 	return g.Wait()
@@ -239,10 +251,7 @@ func (r *Reconciler) cleanFinalizersAndRecover(ctx context.Context, networkchaos
 	var result error
 
 	for _, key := range networkchaos.Finalizers {
-		direction := key[0:6]
-
-		podKey := key[6:]
-		ns, name, err := cache.SplitMetaNamespaceKey(podKey)
+		ns, name, err := cache.SplitMetaNamespaceKey(key)
 		if err != nil {
 			result = multierror.Append(result, err)
 			continue
@@ -265,42 +274,31 @@ func (r *Reconciler) cleanFinalizersAndRecover(ctx context.Context, networkchaos
 			continue
 		}
 
-		var rule pb.Rule
+		chains := []*pb.Chain{}
+		for _, direction := range []string{"INPUT", "OUTPUT"} {
+			var chainName string
+			var chainDirection pb.Chain_Direction
 
-		if networkchaos.Spec.Direction != v1alpha1.From {
 			switch direction {
-			case "output":
-				set := ipset.GenerateIPSetName(networkchaos, targetIpSetPostFix)
-				rule = iptable.GenerateIPTables(pb.Rule_DELETE, pb.Rule_OUTPUT, set)
-			case "input-":
-				set := ipset.GenerateIPSetName(networkchaos, sourceIpSetPostFix)
-				rule = iptable.GenerateIPTables(pb.Rule_DELETE, pb.Rule_INPUT, set)
+			case "INPUT":
+				chainName = "INPUT/" + netutils.CompressName(networkchaos.Name, 21, "")
+				chainDirection = pb.Chain_INPUT
+			case "OUTPUT":
+				chainName = "OUTPUT/" + netutils.CompressName(networkchaos.Name, 20, "")
+				chainDirection = pb.Chain_OUTPUT
 			}
 
-			err = iptable.FlushIptables(ctx, r.Client, &pod, &rule)
-			if err != nil {
-				r.Log.Error(err, "error while deleting iptables rules")
-				result = multierror.Append(result, err)
-				continue
-			}
+			chains = append(chains, &pb.Chain{
+				Name:      chainName,
+				Direction: chainDirection,
+			})
 		}
 
-		if networkchaos.Spec.Direction != v1alpha1.To {
-			switch direction {
-			case "output":
-				set := ipset.GenerateIPSetName(networkchaos, sourceIpSetPostFix)
-				rule = iptable.GenerateIPTables(pb.Rule_DELETE, pb.Rule_OUTPUT, set)
-			case "input-":
-				set := ipset.GenerateIPSetName(networkchaos, targetIpSetPostFix)
-				rule = iptable.GenerateIPTables(pb.Rule_DELETE, pb.Rule_INPUT, set)
-			}
-
-			err = iptable.FlushIptables(ctx, r.Client, &pod, &rule)
-			if err != nil {
-				r.Log.Error(err, "error while deleting iptables rules")
-				result = multierror.Append(result, err)
-				continue
-			}
+		err = iptable.SetIptablesChains(ctx, r.Client, &pod, chains)
+		if err != nil {
+			r.Log.Error(err, "error while deleting iptables rules")
+			result = multierror.Append(result, err)
+			continue
 		}
 
 		networkchaos.Finalizers = utils.RemoveFromFinalizer(networkchaos.Finalizers, key)

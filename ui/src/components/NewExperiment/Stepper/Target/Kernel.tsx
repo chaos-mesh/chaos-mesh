@@ -9,7 +9,7 @@ import { resetOtherChaos } from 'lib/formikhelpers'
 
 export default function Kernel(props: StepperFormTargetProps) {
   const { values, setFieldValue } = props
-  const callchain = values.target.kernel_chaos.fail_kernel_req.callchain
+  const callchain = values.target.kernel_chaos.fail_kern_request.callchain
 
   useEffect(() => {
     resetOtherChaos(props, 'KernelChaos', false)
@@ -18,7 +18,7 @@ export default function Kernel(props: StepperFormTargetProps) {
 
   const addFrame = () =>
     setFieldValue(
-      'target.kernel_chaos.fail_kernel_req.callchain',
+      'target.kernel_chaos.fail_kern_request.callchain',
       callchain.concat([
         {
           funcname: '',
@@ -30,14 +30,14 @@ export default function Kernel(props: StepperFormTargetProps) {
 
   const removeFrame = (index: number) => () => {
     setFieldValue(
-      'target.kernel_chaos.fail_kernel_req.callchain',
+      'target.kernel_chaos.fail_kern_request.callchain',
       callchain.filter((_, i) => index !== i)
     )
   }
 
   return (
     <>
-      <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
+      <Box display="flex" justifyContent="space-between" alignItems="center">
         <Typography>Callchain</Typography>
         <Button variant="outlined" color="primary" size="small" startIcon={<AddIcon />} onClick={addFrame}>
           Add
@@ -55,18 +55,18 @@ export default function Kernel(props: StepperFormTargetProps) {
               </IconButton>
             </Box>
             <TextField
-              id={`target.kernel_chaos.fail_kernel_req.callchain[${i}].funcname`}
-              name={`target.kernel_chaos.fail_kernel_req.callchain[${i}].funcname`}
+              id={`target.kernel_chaos.fail_kern_request.callchain[${i}].funcname`}
+              name={`target.kernel_chaos.fail_kern_request.callchain[${i}].funcname`}
               label="funcname"
             />
             <TextField
-              id={`target.kernel_chaos.fail_kernel_req.callchain[${i}].parameters`}
-              name={`target.kernel_chaos.fail_kernel_req.callchain[${i}].parameters`}
+              id={`target.kernel_chaos.fail_kern_request.callchain[${i}].parameters`}
+              name={`target.kernel_chaos.fail_kern_request.callchain[${i}].parameters`}
               label="parameters"
             />
             <TextField
-              id={`target.kernel_chaos.fail_kernel_req.callchain[${i}].predicate`}
-              name={`target.kernel_chaos.fail_kernel_req.callchain[${i}].predicate`}
+              id={`target.kernel_chaos.fail_kern_request.callchain[${i}].predicate`}
+              name={`target.kernel_chaos.fail_kern_request.callchain[${i}].predicate`}
               label="predicate"
             />
           </Box>
@@ -76,8 +76,8 @@ export default function Kernel(props: StepperFormTargetProps) {
         <Divider />
       </Box>
       <SelectField
-        id="target.kernel_chaos.fail_kernel_req.failtype"
-        name="target.kernel_chaos.fail_kernel_req.failtype"
+        id="target.kernel_chaos.fail_kern_request.failtype"
+        name="target.kernel_chaos.fail_kern_request.failtype"
         label="Failtype"
         helperText="What to fail, can be set to 0 / 1 / 2"
       >
@@ -88,15 +88,15 @@ export default function Kernel(props: StepperFormTargetProps) {
         ))}
       </SelectField>
       <LabelField
-        id="target.kernel_chaos.fail_kernel_req.headers"
-        name="target.kernel_chaos.fail_kernel_req.headers"
+        id="target.kernel_chaos.fail_kern_request.headers"
+        name="target.kernel_chaos.fail_kern_request.headers"
         label="Headers"
         helperText="Type string and end with a space to generate the appropriate kernel headers"
       />
       <TextField
         type="number"
-        id="target.kernel_chaos.fail_kernel_req.probability"
-        name="target.kernel_chaos.fail_kernel_req.probability"
+        id="target.kernel_chaos.fail_kern_request.probability"
+        name="target.kernel_chaos.fail_kern_request.probability"
         helperText="The fails with probability"
         InputProps={{
           endAdornment: <InputAdornment position="end">%</InputAdornment>,
@@ -104,8 +104,8 @@ export default function Kernel(props: StepperFormTargetProps) {
       />
       <TextField
         type="number"
-        id="target.kernel_chaos.fail_kernel_req.times"
-        name="target.kernel_chaos.fail_kernel_req.times"
+        id="target.kernel_chaos.fail_kern_request.times"
+        name="target.kernel_chaos.fail_kern_request.times"
         helperText="The max times of failures"
       />
     </>

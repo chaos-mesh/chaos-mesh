@@ -186,6 +186,11 @@ The usage of `init.sh`:
 
 ```bash
 $ ./scripts/init.sh -h
+```
+
+Expected output:
+
+```bash
 USAGE: ./scripts/init.sh [-d data directory] [-f fuse directory]
 Used to do some preparation
 OPTIONS:
@@ -214,6 +219,11 @@ The usage of `wait-fuse.sh`:
 
 ```bash
 $ ./scripts/wait-fuse.sh -h
+```
+
+Expected output:
+
+```bash
 ./scripts/wait-fuse.sh: option requires an argument -- h
 USAGE: ./scripts/wait-fuse.sh [-a <host>] [-p <port>]
 Waiting for fuse server ready

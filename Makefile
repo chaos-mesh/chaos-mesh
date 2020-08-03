@@ -91,17 +91,17 @@ else
 endif
 
 # Build chaos-daemon binary
-chaosdaemon: generate
+chaosdaemon:
 	$(CGOENV) go build -ldflags '$(LDFLAGS)' -o bin/chaos-daemon ./cmd/chaos-daemon/main.go
 
 # Build manager binary
-manager: generate
+manager:
 	$(GO) build -ldflags '$(LDFLAGS)' -o bin/chaos-controller-manager ./cmd/controller-manager/*.go
 
-chaosfs: generate
+chaosfs:
 	$(GO) build -ldflags '$(LDFLAGS)' -o bin/chaosfs ./cmd/chaosfs/*.go
 
-chaos-dashboard: generate
+chaos-dashboard:
 ifeq ($(SWAGGER),1)
 	make swagger_spec
 endif
@@ -195,7 +195,7 @@ image-binary: taily-build
 	echo -e "FROM scratch\n COPY . /src/bin\n COPY ./scripts /src/scripts" | docker build -t pingcap/binary -f - ./bin
 else
 image-binary:
-	docker build -t pingcap/binary ${DOCKER_BUILD_ARGS} .
+	DOCKER_BUILDKIT=1 docker build -t pingcap/binary ${DOCKER_BUILD_ARGS} .
 endif
 
 image-chaos-daemon: image-binary

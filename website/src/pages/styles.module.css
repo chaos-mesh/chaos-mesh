@@ -5,45 +5,90 @@
  * and scoped locally.
  */
 
-.heroBanner {
-  padding: 4rem 0;
-  text-align: center;
-  position: relative;
-  overflow: hidden;
+.hero {
+  box-shadow: var(--ifm-navbar-shadow);
 }
 
-@media screen and (max-width: 966px) {
-  .heroBanner {
-    padding: 2rem;
+.heroLogoWrapper {
+  position: relative;
+  left: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 256px;
+  height: 256px;
+  margin-bottom: 1.5rem;
+  background: #fff;
+  border-radius: 48px;
+  transform: translateX(-50%);
+}
+
+.heroLogo {
+  width: 80%;
+  height: 80%;
+}
+
+.heroTitle {
+  padding-left: 1.5rem;
+}
+
+.install {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 3rem 0;
+  box-shadow: var(--ifm-navbar-shadow);
+}
+
+.installTextWrapper {
+  width: 60%;
+}
+
+@media screen and (max-width: 768px) {
+  .installTextWrapper {
+    width: 90%;
   }
 }
 
-.buttons {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.main {
+  margin-top: 4.5rem;
 }
 
-.features {
-  display: flex;
-  align-items: center;
-  padding: 2rem 0;
-  width: 100%;
+.feature {
+  margin-bottom: 4.5rem;
+}
+
+@media screen and (max-width: 768px) {
+  .feature {
+    margin-bottom: 1.5rem;
+  }
+}
+
+.featureReverse {
+  flex-direction: row-reverse;
 }
 
 .featureImage {
-  height: 200px;
-  width: 200px;
+  height: 256px;
 }
 
-.pitch {
-  margin: 40px 0;
+@media screen and (max-width: 768px) {
+  .featureImage {
+    margin-bottom: 1.5rem;
+  }
 }
 
-.cncfTitle {
-  font-size: 1.5rem;
+.featureDesc {
+  display: flex !important;
+  align-items: center;
 }
 
 .cncfLogo {
-  width: 30%;
+  height: 128px;
+}
+
+@media screen and (max-width: 768px) {
+  .cncfLogo {
+    height: 64px;
+  }
 }
