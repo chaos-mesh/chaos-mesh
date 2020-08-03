@@ -83,6 +83,7 @@ export default function gen({
     .domain(events.map((d) => d.experiment))
     .range(d3.schemeTableau10)
 
+  // legends
   const legendsRoot = d3.select(document.createElement('div')).attr('class', 'chaos-events-legends')
   const legends = legendsRoot
     .selectAll()
@@ -104,22 +105,22 @@ export default function gen({
             .translate(-x(day(event.start_time)), 0)
         )
     })
-  legends
-    .append('div')
-    .attr('style', (d) => `width: 14px; height: 14px; background: ${colorPalette(d.uuid)}; cursor: pointer;`)
+  legends.append('div').attr('style', (d) => `width: 14px; height: 14px; background: ${colorPalette(d.uuid)};`)
   legends
     .insert('div')
     .attr('style', 'margin-left: 8px; color: rgba(0, 0, 0, 0.54); font-size: 0.75rem; font-weight: bold;')
     .text((d) => d.name)
 
-  function genRectWidth(d: Event) {
-    let width = d.finish_time ? x(day(d.finish_time)) - x(day(d.start_time)) : x(day()) - x(day(d.start_time))
+  function genRectWidth(x: d3.ScaleLinear<number, number>) {
+    return (d: Event) => {
+      let width = d.finish_time ? x(day(d.finish_time)) - x(day(d.start_time)) : x(day()) - x(day(d.start_time))
 
-    if (width === 0) {
-      width = 1
+      if (width === 0) {
+        width = 2
+      }
+
+      return width
     }
-
-    return width
   }
 
   const rects = gMain
@@ -129,20 +130,20 @@ export default function gen({
     .append('rect')
     .attr('x', (d) => x(day(d.start_time)))
     .attr('y', (d) => y(d.experiment_id)! + margin.top)
-    .attr('width', genRectWidth)
+    .attr('width', genRectWidth(x))
     .attr('height', y.bandwidth())
     .attr('fill', (d) => colorPalette(d.experiment_id))
     .style('cursor', 'pointer')
 
-  const zoom = d3.zoom().scaleExtent([0.1, 5]).on('zoom', zoomd)
-  function zoomd() {
+  const zoom = d3.zoom().scaleExtent([0.1, 5]).on('zoom', zoomed)
+  function zoomed() {
     const eventTransform = d3.event.transform
 
     const newX = eventTransform.rescaleX(x)
 
     gXAxis.call(xAxis.scale(newX))
     svg.selectAll('.tick text').call(wrapText, 30)
-    rects.attr('x', (d) => newX(day(d.start_time))).attr('width', genRectWidth)
+    rects.attr('x', (d) => newX(day(d.start_time))).attr('width', genRectWidth(newX))
   }
   svg.call(zoom as any)
 
@@ -233,7 +234,7 @@ export default function gen({
     x.range([margin.left, width - margin.right])
     gXAxis.call(xAxis)
     svg.selectAll('.tick text').call(wrapText, 30)
-    rects.attr('x', (d) => x(day(d.start_time))).attr('width', genRectWidth)
+    rects.attr('x', (d) => x(day(d.start_time))).attr('width', genRectWidth(x))
   }
 
   d3.select(window).on('resize', _debounce(reGen, 250))

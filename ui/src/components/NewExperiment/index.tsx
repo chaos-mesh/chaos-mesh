@@ -26,7 +26,7 @@ const LoadWrapper: React.FC<{ title: string }> = ({ title, children }) => (
     <Box mb={6}>
       <Typography>{title}</Typography>
     </Box>
-    <Box maxHeight="300px" overflow="scroll">
+    <Box maxHeight="300px" style={{ overflowY: 'scroll' }}>
       {children}
     </Box>
   </Box>

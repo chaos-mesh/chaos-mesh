@@ -50,7 +50,7 @@ const useStyles = makeStyles((theme: Theme) =>
       left: 0,
       width: '100%',
       height: '100%',
-      overflow: 'scroll',
+      overflowY: 'scroll',
     },
     configPaper: {
       position: 'absolute',
@@ -144,7 +144,7 @@ export default function ExperimentDetail() {
   }, [detail])
 
   useEffect(() => {
-    if (prevEvents !== events && events) {
+    if (prevEvents !== events && prevEvents?.length !== events?.length && events) {
       const chart = chartRef.current!
 
       genEventsChart({

@@ -116,16 +116,14 @@ const ExperimentDetailPanel: React.FC<ExperimentDetailPanelProps> = ({ experimen
                 </TableCell>
               </TableRow>
 
-              {e.experiment_info.scheduler.duration && (
-                <TableRow>
-                  <TableCell>Duration</TableCell>
-                  <TableCell>
-                    <Typography variant="body2" color="textSecondary">
-                      {e.experiment_info.scheduler.duration}
-                    </Typography>
-                  </TableCell>
-                </TableRow>
-              )}
+              <TableRow>
+                <TableCell>Duration</TableCell>
+                <TableCell>
+                  <Typography variant="body2" color="textSecondary">
+                    {e.experiment_info.scheduler.duration ? e.experiment_info.scheduler.duration : 'immediate'}
+                  </Typography>
+                </TableCell>
+              </TableRow>
             </>
           ) : (
             <TableRow>
