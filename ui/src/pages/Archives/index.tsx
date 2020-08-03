@@ -6,6 +6,7 @@ import ArchiveOutlinedIcon from '@material-ui/icons/ArchiveOutlined'
 import ConfirmDialog from 'components/ConfirmDialog'
 import ExperimentPaper from 'components/ExperimentPaper'
 import Loading from 'components/Loading'
+import _groupBy from 'lodash.groupby'
 import api from 'api'
 
 export default function Archives() {
@@ -45,15 +46,30 @@ export default function Archives() {
 
   return (
     <>
-      <Grid container spacing={3}>
-        {archives &&
-          archives.length > 0 &&
-          archives.map((a) => (
-            <Grid key={a.name} item xs={12}>
-              <ExperimentPaper experiment={a} isArchive handleSelect={setSelected} handleDialogOpen={setDialogOpen} />
-            </Grid>
+      {archives &&
+        archives.length > 0 &&
+        Object.entries(_groupBy(archives, 'kind'))
+          .sort((a, b) => (a[0] > b[0] ? 1 : -1))
+          .map(([kind, archivesByKind]) => (
+            <Box mb={6}>
+              <Box mb={6}>
+                <Typography variant="button">{kind}</Typography>
+              </Box>
+              <Grid container spacing={3}>
+                {archivesByKind.length > 0 &&
+                  archivesByKind.map((e) => (
+                    <Grid key={e.name} item xs={12}>
+                      <ExperimentPaper
+                        experiment={e}
+                        isArchive
+                        handleSelect={setSelected}
+                        handleDialogOpen={setDialogOpen}
+                      />
+                    </Grid>
+                  ))}
+              </Grid>
+            </Box>
           ))}
-      </Grid>
 
       {!loading && archives && archives.length === 0 && (
         <Box display="flex" flexDirection="column" justifyContent="center" alignItems="center" height="100%">

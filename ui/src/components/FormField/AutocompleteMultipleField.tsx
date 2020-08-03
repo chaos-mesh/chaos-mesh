@@ -24,6 +24,7 @@ const AutocompleteMultipleField: React.FC<AutocompleteMultipleFieldProps & TextF
     _setLabels(labelsRef.current)
   }
 
+  // For performance consider, setFieldValue before compoennt unmount
   useEffect(
     () => () => setFieldValue(props.name!, labelsRef.current),
     // eslint-disable-next-line react-hooks/exhaustive-deps

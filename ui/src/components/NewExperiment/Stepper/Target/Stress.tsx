@@ -71,9 +71,7 @@ export default function Stress(props: StepperFormTargetProps) {
 
       {(action === 'CPU' || action === 'Mixed') && (
         <>
-          <Box ml={1}>
-            <Typography gutterBottom>CPU</Typography>
-          </Box>
+          <Typography gutterBottom>CPU</Typography>
           <TextField
             type="number"
             id="target.stress_chaos.stressors.cpu.workers"
@@ -99,9 +97,7 @@ export default function Stress(props: StepperFormTargetProps) {
 
       {(action === 'Memory' || action === 'Mixed') && (
         <>
-          <Box ml={1}>
-            <Typography gutterBottom>Memory</Typography>
-          </Box>
+          <Typography gutterBottom>Memory</Typography>
           <TextField
             type="number"
             id="target.stress_chaos.stressors.memory.workers"

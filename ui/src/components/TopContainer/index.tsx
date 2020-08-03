@@ -117,8 +117,8 @@ const TopContainer = () => {
 
         <Snackbar
           anchorOrigin={{
-            vertical: 'bottom',
-            horizontal: 'right',
+            vertical: 'top',
+            horizontal: 'center',
           }}
           autoHideDuration={10000}
           open={alertOpen}

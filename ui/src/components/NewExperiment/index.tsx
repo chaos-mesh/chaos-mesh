@@ -26,7 +26,9 @@ const LoadWrapper: React.FC<{ title: string }> = ({ title, children }) => (
     <Box mb={6}>
       <Typography>{title}</Typography>
     </Box>
-    {children}
+    <Box maxHeight="300px" overflow="scroll">
+      {children}
+    </Box>
   </Box>
 )
 
@@ -205,7 +207,7 @@ export default function NewExperiment() {
         onSubmit={handleOnSubmit}
       >
         <Paper variant="outlined" style={{ height: '100%' }}>
-          <PaperTop title="New Experiment" />
+          <PaperTop title="Create a New Experiment" />
           <Grid container>
             <Grid item xs={12} sm={8}>
               <Form>
