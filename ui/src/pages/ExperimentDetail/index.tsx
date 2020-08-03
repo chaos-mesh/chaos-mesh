@@ -1,4 +1,4 @@
-import { Box, Button, Grow, IconButton, Modal, Paper, Typography } from '@material-ui/core'
+import { Box, Button, Grow, IconButton, Modal, Paper } from '@material-ui/core'
 import React, { useEffect, useRef, useState } from 'react'
 import { Theme, createStyles, makeStyles } from '@material-ui/core/styles'
 import { setAlert, setAlertOpen } from 'slices/globalStatus'
@@ -7,10 +7,10 @@ import { useHistory, useParams } from 'react-router-dom'
 import CloseIcon from '@material-ui/icons/Close'
 import ConfirmDialog from 'components/ConfirmDialog'
 import DeleteOutlineIcon from '@material-ui/icons/DeleteOutline'
-import ErrorOutlineIcon from '@material-ui/icons/ErrorOutline'
 import { Event } from 'api/events.type'
 import EventDetail from 'components/EventDetail'
 import EventsTable from 'components/EventsTable'
+import ExperimentDetailPanel from 'components/ExperimentDetailPanel'
 import { ExperimentDetail as ExperimentDetailType } from 'api/experiments.type'
 import JSONEditor from 'components/JSONEditor'
 import Loading from 'components/Loading'
@@ -34,11 +34,14 @@ const useStyles = makeStyles((theme: Theme) =>
         height: '100%',
       },
     },
-    timelinePaper: {
+    mb3: {
       marginBottom: theme.spacing(3),
     },
+    mb6: {
+      marginBottom: theme.spacing(6),
+    },
     eventsChart: {
-      height: 350,
+      height: 200,
       margin: theme.spacing(3),
     },
     eventDetailPaper: {
@@ -85,14 +88,14 @@ export default function ExperimentDetail() {
   const dispatch = useStoreDispatch()
 
   const chartRef = useRef<HTMLDivElement>(null)
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(true)
   const [detailLoading, setDetailLoading] = useState(false)
-  const [detail, setDetail] = useState<ExperimentDetailType | null>(null)
-  const [events, setEvents] = useState<Event[] | null>(null)
+  const [detail, setDetail] = useState<ExperimentDetailType>()
+  const [events, setEvents] = useState<Event[]>()
   const prevEvents = usePrevious(events)
-  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null)
+  const [selectedEvent, setSelectedEvent] = useState<Event>()
   const [eventDetailOpen, setEventDetailOpen] = useState(false)
-  const [infoEditor, setInfoEditor] = useState<_JSONEditor | null>(null)
+  const [infoEditor, setInfoEditor] = useState<_JSONEditor>()
   const [configOpen, setConfigOpen] = useState(false)
   const [dialogOpen, setDialogOpen] = useState(false)
   const [dialogInfo, setDialogInfo] = useState({
@@ -102,8 +105,6 @@ export default function ExperimentDetail() {
   })
 
   const fetchExperimentDetail = () => {
-    setLoading(true)
-
     api.experiments
       .detail(uuid)
       .then(({ data }) => setDetail(data))
@@ -266,7 +267,7 @@ export default function ExperimentDetail() {
     <>
       <Grow in={!loading} style={{ transformOrigin: '0 0 0' }}>
         <Box display="flex" flexDirection="column" height="100%">
-          <Box display="flex" justifyContent="space-between" mb={3}>
+          <Box display="flex" mb={6}>
             <Box display="flex">
               <Box mr={3}>
                 <Button
@@ -279,40 +280,50 @@ export default function ExperimentDetail() {
                   Delete
                 </Button>
               </Box>
-              {detail?.status === 'Paused' ? (
-                <Button
-                  variant="outlined"
-                  size="small"
-                  startIcon={<PlayCircleOutlineIcon />}
-                  onClick={handleAction('start')}
-                >
-                  Start
-                </Button>
-              ) : (
-                <Button
-                  variant="outlined"
-                  size="small"
-                  startIcon={<PauseCircleOutlineIcon />}
-                  onClick={handleAction('pause')}
-                >
-                  Pause
-                </Button>
-              )}
+              <Box>
+                {detail?.status === 'Paused' ? (
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    startIcon={<PlayCircleOutlineIcon />}
+                    onClick={handleAction('start')}
+                  >
+                    Start
+                  </Button>
+                ) : (
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    startIcon={<PauseCircleOutlineIcon />}
+                    onClick={handleAction('pause')}
+                  >
+                    Pause
+                  </Button>
+                )}
+              </Box>
             </Box>
-            <Button
-              variant="outlined"
-              size="small"
-              color="primary"
-              startIcon={<NoteOutlinedIcon />}
-              onClick={onModalOpen}
-            >
-              Configuration
-            </Button>
           </Box>
-          <Paper className={classes.timelinePaper} variant="outlined">
+
+          <Paper className={classes.mb6} variant="outlined">
+            <PaperTop title="Configuration">
+              <Button
+                variant="outlined"
+                size="small"
+                color="primary"
+                startIcon={<NoteOutlinedIcon />}
+                onClick={onModalOpen}
+              >
+                Update
+              </Button>
+            </PaperTop>
+            {detail && <ExperimentDetailPanel experimentDetail={detail} />}
+          </Paper>
+
+          <Paper className={classes.mb3} variant="outlined">
             <PaperTop title="Timeline" />
             <div ref={chartRef} className={classes.eventsChart} />
           </Paper>
+
           <Box className={classes.height100} position="relative">
             <Paper className={classes.height100} variant="outlined">
               {events && <EventsTable events={events} detailed />}
@@ -346,21 +357,10 @@ export default function ExperimentDetail() {
             size="small"
             onClick={handleUpdateExperiment}
           >
-            Update
+            Confirm
           </Button>
         </Paper>
       </Modal>
-
-      {!uuid && (
-        <Box display="flex" flexDirection="column" justifyContent="center" alignItems="center" height="100%">
-          <Box mb={3}>
-            <ErrorOutlineIcon fontSize="large" />
-          </Box>
-          <Typography variant="h6" align="center">
-            Please check the URL params and queries to provide the correct params.
-          </Typography>
-        </Box>
-      )}
 
       <ConfirmDialog
         open={dialogOpen}

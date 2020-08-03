@@ -117,7 +117,7 @@ const ExperimentPaper: React.FC<ExperimentPaperProps> = ({
       )}
       <Button
         component={Link}
-        to={isArchive ? `/` : `/experiments/${(e as Experiment).uid}`}
+        to={isArchive ? `/archives/${e.uid}` : `/experiments/${(e as Experiment).uid}`}
         variant="outlined"
         color="primary"
         size="small"

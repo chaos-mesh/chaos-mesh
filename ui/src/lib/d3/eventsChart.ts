@@ -26,11 +26,11 @@ export default function gen({
 
   const svg = d3.select(root).append('svg').attr('class', 'chaos-chart').attr('width', width).attr('height', height)
 
-  const now = day(events[events.length - 1].start_time).add(0.5, 'h')
+  const halfHourLater = day(events[events.length - 1].start_time).add(0.5, 'h')
 
   const x = d3
     .scaleLinear()
-    .domain([now.subtract(1, 'h'), now])
+    .domain([halfHourLater.subtract(1, 'h'), halfHourLater])
     .range([margin.left, width - margin.right])
   const xAxis = d3
     .axisBottom(x)
@@ -100,7 +100,7 @@ export default function gen({
           zoom.transform as any,
           d3.zoomIdentity
             .translate(width / 2, 0)
-            .scale(0.2)
+            .scale(2)
             .translate(-x(day(event.start_time)), 0)
         )
     })

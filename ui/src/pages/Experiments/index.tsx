@@ -134,14 +134,14 @@ export default function Experiments() {
         Object.entries(_groupBy(experiments, 'kind'))
           .sort((a, b) => (a[0] > b[0] ? 1 : -1))
           .map(([kind, experimentsByKind]) => (
-            <Box mb={6}>
+            <Box key={kind} mb={6}>
               <Box mb={6}>
                 <Typography variant="button">{kind}</Typography>
               </Box>
               <Grid container spacing={3}>
                 {experimentsByKind.length > 0 &&
                   experimentsByKind.map((e) => (
-                    <Grid key={e.name} item xs={12}>
+                    <Grid key={e.uid} item xs={12}>
                       <ExperimentPaper experiment={e} handleSelect={setSelected} handleDialogOpen={setDialogOpen} />
                     </Grid>
                   ))}

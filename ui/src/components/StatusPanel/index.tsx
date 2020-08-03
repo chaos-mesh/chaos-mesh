@@ -15,7 +15,6 @@ const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     container: {
       height: `calc(50% + ${theme.spacing(2.25)})`,
-      minHeight: 100,
     },
     item: {
       display: 'flex',
