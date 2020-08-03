@@ -104,6 +104,17 @@ Depending on your environment, there are two methods of installing Chaos Mesh:
      ```bash
      kubectl get pods --namespace chaos-testing -l app.kubernetes.io/instance=chaos-mesh
      ```
+     
+     Expected output:
+          
+      ```bash
+      NAME                                        READY   STATUS    RESTARTS   AGE
+      chaos-controller-manager-6d6d95cd94-kl8gs   1/1     Running   0          3m40s
+      chaos-daemon-5shkv                          1/1     Running   0          3m40s
+      chaos-daemon-jpqhd                          1/1     Running   0          3m40s
+      chaos-daemon-n6mfq                          1/1     Running   0          3m40s
+      chaos-dashboard-d998856f6-vgrjs             1/1     Running   0          3m40s
+      ```
 
 - Install in containerd environment (kind)
 
@@ -126,9 +137,34 @@ Depending on your environment, there are two methods of installing Chaos Mesh:
      ```bash
      helm install chaos-mesh helm/chaos-mesh --namespace=chaos-testing --set chaosDaemon.runtime=containerd --set chaosDaemon.socketPath=/run/containerd/containerd.sock
      ```
-  
-  - Install in k3s environment
-  
+
+  3. Check whether Chaos Mesh pods are installed:
+
+     ```bash
+     kubectl get pods --namespace chaos-testing -l app.kubernetes.io/instance=chaos-mesh
+     ```
+     
+     Expected output:
+     
+     ```bash
+     NAME                                        READY   STATUS    RESTARTS   AGE
+     chaos-controller-manager-6d6d95cd94-kl8gs   1/1     Running   0          3m40s
+     chaos-daemon-5shkv                          1/1     Running   0          3m40s
+     chaos-daemon-jpqhd                          1/1     Running   0          3m40s
+     chaos-daemon-n6mfq                          1/1     Running   0          3m40s
+     chaos-dashboard-d998856f6-vgrjs             1/1     Running   0          3m40s
+     ```
+     
+- Install in containerd environment (k3s)
+
+  1. Create namespace `chaos-testing`:
+
+     ```bash
+     kubectl create ns chaos-testing
+     ```
+
+  2. Install Chaos Mesh using helm:
+
      - for helm 2.X
 
      ```bash
