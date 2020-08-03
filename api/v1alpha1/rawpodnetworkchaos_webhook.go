@@ -1,4 +1,4 @@
-// Copyright 2020 PingCAP, Inc.
+// Copyright 2020 Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -38,12 +38,13 @@ func (in *RawPodNetworkChaos) SetupWebhookWithManager(mgr ctrl.Manager) error {
 		Client: mgr.GetClient(),
 		Log:    ctrl.Log.WithName("controllers").WithName("RawPodNetworkChaos"),
 	}
+
 	return ctrl.NewWebhookManagedBy(mgr).
 		For(in).
 		Complete()
 }
 
-// +kubebuilder:webhook:path=/mutate-pingcap-com-v1alpha1-rawpodnetworkchaos,mutating=true,failurePolicy=fail,groups=pingcap.com,resources=rawpodnetworkchaos,verbs=create;update,versions=v1alpha1,name=mrawpodnetworkchaos.kb.io
+// +kubebuilder:webhook:path=/mutate-chaos-mesh-org-v1alpha1-rawpodnetworkchaos,mutating=true,failurePolicy=fail,groups=chaos-mesh.org,resources=rawpodnetworkchaos,verbs=create;update,versions=v1alpha1,name=mrawpodnetworkchaos.kb.io
 
 var _ webhook.Defaulter = &RawPodNetworkChaos{}
 
@@ -54,11 +55,13 @@ func (in *RawPodNetworkChaos) Default() {
 	// Do nothing here
 }
 
-// +kubebuilder:webhook:verbs=create;update,path=/validate-pingcap-com-v1alpha1-rawpodnetworkchaos,mutating=false,failurePolicy=fail,groups=pingcap.com,resources=rawpodnetworkchaos,versions=v1alpha1,name=vrawpodnetworkchaos.kb.io
+// +kubebuilder:webhook:verbs=create;update,path=/validate-chaos-mesh-org-v1alpha1-rawpodnetworkchaos,mutating=false,failurePolicy=fail,groups=chaos-mesh.org,resources=rawpodnetworkchaos,versions=v1alpha1,name=vrawpodnetworkchaos.kb.io
 
 // ValidateCreate implements webhook.Validator so a webhook will be registered for the type
 func (in *RawPodNetworkChaos) ValidateCreate() error {
 	rawpodnetworkchaoslog.Info("validate create", "name", in.Name)
+
+	handler.Apply(in)
 
 	return nil
 }
@@ -66,6 +69,8 @@ func (in *RawPodNetworkChaos) ValidateCreate() error {
 // ValidateUpdate implements webhook.Validator so a webhook will be registered for the type
 func (in *RawPodNetworkChaos) ValidateUpdate(old runtime.Object) error {
 	rawpodnetworkchaoslog.Info("validate update", "name", in.Name)
+
+	handler.Apply(in)
 
 	return nil
 }
@@ -78,5 +83,7 @@ func (in *RawPodNetworkChaos) ValidateDelete() error {
 }
 
 func (handler *rawPodNetworkChaosHandler) Apply(chaos *RawPodNetworkChaos) error {
+	handler.Log.Info("updating network chaos on pod", "pod", chaos.Namespace+"/"+chaos.Name, "spec", chaos.Spec)
 
+	return nil
 }
