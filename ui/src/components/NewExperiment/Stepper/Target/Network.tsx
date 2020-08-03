@@ -1,15 +1,49 @@
+import { InputAdornment, MenuItem } from '@material-ui/core'
+import React, { useEffect } from 'react'
 import { SelectField, TextField } from 'components/FormField'
 
 import AdvancedOptions from 'components/AdvancedOptions'
-import { MenuItem } from '@material-ui/core'
-import React from 'react'
+import { RootState } from 'store'
+import ScopeStep from '../Scope'
 import { StepperFormTargetProps } from 'components/NewExperiment/types'
-import { upperFirst } from 'lib/utils'
+import { defaultExperimentSchema } from 'components/NewExperiment/constants'
+import { getIn } from 'formik'
+import { toTitleCase } from 'lib/utils'
+import { useSelector } from 'react-redux'
 
-const actions = ['bandwidth', 'corrupt', 'delay', 'duplicate', 'loss']
+const actions = ['partition', 'loss', 'delay', 'duplicate', 'corrupt', 'bandwidth']
+const direction = ['from', 'to', 'both']
 
-export default function NetworkPanel(props: StepperFormTargetProps) {
-  const { values, handleActionChange } = props
+export default function Network(props: StepperFormTargetProps) {
+  const { values, setFieldValue, handleActionChange } = props
+
+  const { namespaces } = useSelector((state: RootState) => state.experiments)
+
+  const initTarget = () => setFieldValue('target.network_chaos.target', defaultExperimentSchema.scope)
+  const initPartitionTarget = () => {
+    const target = getIn(values, 'target.network_chaos.target')
+
+    setFieldValue(
+      'target.network_chaos.target',
+      Object.assign(
+        {
+          ...defaultExperimentSchema.scope,
+          mode: 'all',
+        },
+        target
+      )
+    )
+  }
+  const beforeTargetOpen = initTarget
+  const afterTargetClose = () => setFieldValue('target.network_chaos.target', undefined)
+
+  // Special operations for partition
+  useEffect(() => {
+    if (values.target.network_chaos.action === 'partition') {
+      initPartitionTarget()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [values.target.network_chaos.action])
 
   return (
     <>
@@ -17,51 +51,66 @@ export default function NetworkPanel(props: StepperFormTargetProps) {
         id="target.network_chaos.action"
         name="target.network_chaos.action"
         label="Action"
-        helperText="Please select an action"
+        helperText="Please select a NetworkChaos action"
         onChange={handleActionChange}
       >
-        {actions.map((option: string) => (
+        {actions.map((option) => (
           <MenuItem key={option} value={option}>
-            {upperFirst(option)}
+            {toTitleCase(option)}
           </MenuItem>
         ))}
       </SelectField>
 
+      {values.target.network_chaos.action === 'partition' && (
+        <SelectField
+          id="target.network_chaos.direction"
+          name="target.network_chaos.direction"
+          label="Direction"
+          helperText="Specifies the partition direction"
+        >
+          {direction.map((option) => (
+            <MenuItem key={option} value={option}>
+              {toTitleCase(option)}
+            </MenuItem>
+          ))}
+        </SelectField>
+      )}
+
       {values.target.network_chaos.action === 'bandwidth' && (
         <>
+          <TextField
+            id="target.network_chaos.bandwidth.rate"
+            name="target.network_chaos.bandwidth.rate"
+            label="Rate"
+            helperText="The rate allows bps, kbps, mbps, gbps, tbps unit. For example, bps means bytes per second"
+          />
           <TextField
             type="number"
             id="target.network_chaos.bandwidth.buffer"
             name="target.network_chaos.bandwidth.buffer"
             label="Buffer"
-            helperText="The buffer of bandwidth"
+            helperText="The maximum amount of bytes that tokens can be available instantaneously"
           />
           <TextField
             type="number"
             id="target.network_chaos.bandwidth.limit"
             name="target.network_chaos.bandwidth.limit"
             label="Limit"
-            helperText="The limit of bandwidth"
-          />
-          <TextField
-            type="number"
-            id="target.network_chaos.bandwidth.minburst"
-            name="target.network_chaos.bandwidth.minburst"
-            label="Minburst"
-            helperText="The minburst of bandwidth"
+            helperText="The number of bytes that can be queued waiting for tokens to become available"
           />
           <TextField
             type="number"
             id="target.network_chaos.bandwidth.peakrate"
             name="target.network_chaos.bandwidth.peakrate"
             label="Peakrate"
-            helperText="The peakrate of bandwidth"
+            helperText="The maximum depletion rate of the bucket"
           />
           <TextField
-            id="target.network_chaos.bandwidth.rate"
-            name="target.network_chaos.bandwidth.rate"
-            label="Rate"
-            helperText="The rate of bandwidth"
+            type="number"
+            id="target.network_chaos.bandwidth.minburst"
+            name="target.network_chaos.bandwidth.minburst"
+            label="Minburst"
+            helperText="The size of the peakrate bucket"
           />
         </>
       )}
@@ -72,13 +121,19 @@ export default function NetworkPanel(props: StepperFormTargetProps) {
             id="target.network_chaos.corrupt.corrupt"
             name="target.network_chaos.corrupt.corrupt"
             label="Corrupt"
-            helperText="The corrupt"
+            helperText="The percentage of packet corruption"
+            InputProps={{
+              endAdornment: <InputAdornment position="end">%</InputAdornment>,
+            }}
           />
           <TextField
             id="target.network_chaos.corrupt.correlation"
             name="target.network_chaos.corrupt.correlation"
             label="Correlation"
             helperText="The correlation of corrupt"
+            InputProps={{
+              endAdornment: <InputAdornment position="end">%</InputAdornment>,
+            }}
           />
         </>
       )}
@@ -93,16 +148,19 @@ export default function NetworkPanel(props: StepperFormTargetProps) {
           />
           <AdvancedOptions>
             <TextField
-              id="target.network_chaos.delay.correlation"
-              name="target.network_chaos.delay.correlation"
-              label="Correlation"
-              helperText="The correlation of delay"
-            />
-            <TextField
               id="target.network_chaos.delay.jitter"
               name="target.network_chaos.delay.jitter"
               label="Jitter"
               helperText="The jitter of delay"
+            />
+            <TextField
+              id="target.network_chaos.delay.correlation"
+              name="target.network_chaos.delay.correlation"
+              label="Correlation"
+              helperText="The correlation of delay"
+              InputProps={{
+                endAdornment: <InputAdornment position="end">%</InputAdornment>,
+              }}
             />
           </AdvancedOptions>
         </>
@@ -114,13 +172,19 @@ export default function NetworkPanel(props: StepperFormTargetProps) {
             id="target.network_chaos.duplicate.duplicate"
             name="target.network_chaos.duplicate.duplicate"
             label="Duplicate"
-            helperText="The duplicate"
+            helperText="The percentage of packet duplication"
+            InputProps={{
+              endAdornment: <InputAdornment position="end">%</InputAdornment>,
+            }}
           />
           <TextField
             id="target.network_chaos.duplicate.correlation"
             name="target.network_chaos.duplicate.correlation"
             label="Correlation"
             helperText="The correlation of duplicate"
+            InputProps={{
+              endAdornment: <InputAdornment position="end">%</InputAdornment>,
+            }}
           />
         </>
       )}
@@ -131,15 +195,34 @@ export default function NetworkPanel(props: StepperFormTargetProps) {
             id="target.network_chaos.loss.loss"
             name="target.network_chaos.loss.loss"
             label="Loss"
-            helperText="The loss"
+            helperText="The percentage of packet loss"
+            InputProps={{
+              endAdornment: <InputAdornment position="end">%</InputAdornment>,
+            }}
           />
           <TextField
             id="target.network_chaos.loss.correlation"
             name="target.network_chaos.loss.correlation"
             label="Correlation"
             helperText="The correlation of loss"
+            InputProps={{
+              endAdornment: <InputAdornment position="end">%</InputAdornment>,
+            }}
           />
         </>
+      )}
+
+      {values.target.network_chaos.action !== '' && (
+        <AdvancedOptions
+          title="Target"
+          isOpen={values.target.network_chaos.action === 'partition' ? true : false}
+          beforeOpen={beforeTargetOpen}
+          afterClose={afterTargetClose}
+        >
+          {values.target.network_chaos.target && values.target.network_chaos.target.mode && (
+            <ScopeStep namespaces={namespaces} scope="target.network_chaos.target" />
+          )}
+        </AdvancedOptions>
       )}
     </>
   )

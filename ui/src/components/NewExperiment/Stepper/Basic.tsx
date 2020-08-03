@@ -1,5 +1,6 @@
-import { SelectField, TextField } from 'components/FormField'
+import { SelectField, TextField, LabelField } from 'components/FormField'
 
+import AdvancedOptions from 'components/AdvancedOptions'
 import { Experiment } from 'components/NewExperiment/types'
 import { MenuItem } from '@material-ui/core'
 import React from 'react'
@@ -10,7 +11,7 @@ interface BasicStepProps {
 }
 
 const BasicStep: React.FC<BasicStepProps> = ({ namespaces }) => {
-  const { errors, handleChange, setFieldValue } = useFormikContext<Experiment>()
+  const { errors, touched, handleChange, setFieldValue } = useFormikContext<Experiment>()
 
   const handleBasicNamespaceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     handleChange(e)
@@ -24,8 +25,9 @@ const BasicStep: React.FC<BasicStepProps> = ({ namespaces }) => {
         id="name"
         name="name"
         label="Name"
-        helperText="Please input an experiment name"
-        error={errors.name ? true : false}
+        helperText="The experiment name"
+        autoFocus
+        error={errors.name && touched.name ? true : false}
       />
 
       <SelectField
@@ -41,6 +43,11 @@ const BasicStep: React.FC<BasicStepProps> = ({ namespaces }) => {
           </MenuItem>
         ))}
       </SelectField>
+
+      <AdvancedOptions isOpen>
+        <LabelField id="labels" name="labels" label="Labels" isKV />
+        <LabelField id="annotations" name="annotations" label="Annotations" isKV />
+      </AdvancedOptions>
     </>
   )
 }

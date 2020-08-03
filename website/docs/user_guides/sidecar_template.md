@@ -4,7 +4,7 @@ title: Sidecar Template
 sidebar_label: Sidecar Template
 ---
 
-The following content is the common template ConfigMap defined for injecting IOChaos sidecar, you can also find this example [here](https://github.com/pingcap/chaos-mesh/blob/master/manifests/chaosfs-sidecar.yaml):
+The following content is the common template ConfigMap defined for injecting IOChaos sidecar, you can also find this example [here](https://github.com/chaos-mesh/chaos-mesh/blob/master/manifests/chaosfs-sidecar.yaml):
 
 ## Template ConfigMap
 
@@ -112,7 +112,7 @@ data:
 
 #### `chaosfs`
 
-`chaosfs` container is designed as a sidecar container and [chaosfs](https://github.com/pingcap/chaos-mesh/tree/master/cmd/chaosfs) process runs in this container.
+`chaosfs` container is designed as a sidecar container and [chaosfs](https://github.com/chaos-mesh/chaos-mesh/tree/master/cmd/chaosfs) process runs in this container.
 
 `chaosfs` uses [fuse libary](https://github.com/hanwen/go-fuse) and [fusermount](https://www.kernel.org/doc/Documentation/filesystems/fuse.txt) tool to implement a fuse-daemon service and mounts the application's data directory. `chaosfs` hijacks all the file system IO actions of the application, so it can be used to simulate various real-world IO faults.
 
@@ -160,7 +160,7 @@ This value should be set to the data directory of the target application.
 
 #### `chaos-scripts`
 
-`chaos-scripts` container is used to inject some scripts to the target pods including [wait-fuse.sh](https://github.com/pingcap/chaos-mesh/blob/master/hack/wait-fuse.sh).
+`chaos-scripts` container is used to inject some scripts to the target pods including [wait-fuse.sh](https://github.com/chaos-mesh/chaos-mesh/blob/master/hack/wait-fuse.sh).
 
 `wait-fuse.sh` is used by application container to ensure that the fuse-daemon server is running normally before the application starts.
 
@@ -186,6 +186,11 @@ The usage of `init.sh`:
 
 ```bash
 $ ./scripts/init.sh -h
+```
+
+Expected output:
+
+```bash
 USAGE: ./scripts/init.sh [-d data directory] [-f fuse directory]
 Used to do some preparation
 OPTIONS:
@@ -214,6 +219,11 @@ The usage of `wait-fuse.sh`:
 
 ```bash
 $ ./scripts/wait-fuse.sh -h
+```
+
+Expected output:
+
+```bash
 ./scripts/wait-fuse.sh: option requires an argument -- h
 USAGE: ./scripts/wait-fuse.sh [-a <host>] [-p <port>]
 Waiting for fuse server ready

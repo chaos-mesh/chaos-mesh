@@ -1,4 +1,4 @@
-// Copyright 2020 PingCAP, Inc.
+// Copyright 2020 Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -31,11 +31,11 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/pingcap/chaos-mesh/api/v1alpha1"
-	"github.com/pingcap/chaos-mesh/controllers/common"
-	"github.com/pingcap/chaos-mesh/controllers/twophase"
-	pb "github.com/pingcap/chaos-mesh/pkg/chaosdaemon/pb"
-	"github.com/pingcap/chaos-mesh/pkg/utils"
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/controllers/common"
+	"github.com/chaos-mesh/chaos-mesh/controllers/twophase"
+	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
+	"github.com/chaos-mesh/chaos-mesh/pkg/utils"
 )
 
 const stressChaosMsg = "stress out pod"
@@ -237,7 +237,20 @@ func (r *Reconciler) applyPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.
 	if len(pod.Status.ContainerStatuses) == 0 {
 		return fmt.Errorf("%s %s can't get the state of container", pod.Namespace, pod.Name)
 	}
+
 	target := pod.Status.ContainerStatuses[0].ContainerID
+	if chaos.Spec.ContainerName != nil {
+		target = ""
+		for _, container := range pod.Status.ContainerStatuses {
+			if container.Name == *chaos.Spec.ContainerName {
+				target = container.ContainerID
+			}
+		}
+		if len(target) == 0 {
+			return fmt.Errorf("cannot find container with name %s", *chaos.Spec.ContainerName)
+		}
+	}
+
 	stressors := chaos.Spec.StressngStressors
 	if len(stressors) == 0 {
 		stressors, err = chaos.Spec.Stressors.Normalize()
@@ -246,7 +259,7 @@ func (r *Reconciler) applyPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.
 		}
 	}
 	res, err := daemonClient.ExecStressors(ctx, &pb.ExecStressRequest{
-		Scope:     pb.ExecStressRequest_POD,
+		Scope:     pb.ExecStressRequest_CONTAINER,
 		Target:    target,
 		Stressors: stressors,
 	})

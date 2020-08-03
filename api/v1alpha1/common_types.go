@@ -1,4 +1,4 @@
-// Copyright 2019 PingCAP, Inc.
+// Copyright 2019 Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ import (
 
 const (
 	// PauseAnnotationKey defines the annotation used to pause a chaos
-	PauseAnnotationKey = "experiment.pingcap.com/pause"
+	PauseAnnotationKey = "experiment.chaos-mesh.org/pause"
 )
 
 // SelectorSpec defines the some selectors to select objects.
@@ -209,6 +209,7 @@ type ChaosInstance struct {
 	Action    string
 	Duration  string
 	Status    string
+	UID       string
 }
 
 // +kubebuilder:object:generate=false

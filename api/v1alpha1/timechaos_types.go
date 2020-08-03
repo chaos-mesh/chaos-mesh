@@ -1,4 +1,4 @@
-// Copyright 2020 PingCAP, Inc.
+// Copyright 2020 Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -202,6 +202,7 @@ func (in *TimeChaos) GetChaos() *ChaosInstance {
 		StartTime: in.CreationTimestamp.Time,
 		Action:    "",
 		Status:    string(in.GetStatus().Experiment.Phase),
+		UID:       string(in.UID),
 	}
 	if in.Spec.Duration != nil {
 		instance.Duration = *in.Spec.Duration

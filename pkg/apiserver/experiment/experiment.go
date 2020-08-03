@@ -1,4 +1,4 @@
-// Copyright 2020 PingCAP, Inc.
+// Copyright 2020 Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -22,13 +22,14 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/jinzhu/gorm"
 	"golang.org/x/sync/errgroup"
 
-	"github.com/pingcap/chaos-mesh/api/v1alpha1"
-	"github.com/pingcap/chaos-mesh/controllers/common"
-	"github.com/pingcap/chaos-mesh/pkg/apiserver/utils"
-	"github.com/pingcap/chaos-mesh/pkg/config"
-	"github.com/pingcap/chaos-mesh/pkg/core"
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/controllers/common"
+	"github.com/chaos-mesh/chaos-mesh/pkg/apiserver/utils"
+	"github.com/chaos-mesh/chaos-mesh/pkg/config"
+	"github.com/chaos-mesh/chaos-mesh/pkg/core"
 
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -40,21 +41,14 @@ import (
 
 var log = ctrl.Log.WithName("experiment api")
 
-// Experiment defines the basic information of an experiment
-type Experiment struct {
-	ExperimentBase
-	Created string `json:"created"`
-	Status  string `json:"status"`
-}
-
 // ChaosState defines the number of chaos experiments of each phase
 type ChaosState struct {
-	Total    int `json:"total"`
-	Running  int `json:"running"`
-	Waiting  int `json:"waiting"`
-	Paused   int `json:"paused"`
-	Failed   int `json:"failed"`
-	Finished int `json:"finished"`
+	Total    int `json:"Total"`
+	Running  int `json:"Running"`
+	Waiting  int `json:"Waiting"`
+	Paused   int `json:"Paused"`
+	Failed   int `json:"Failed"`
+	Finished int `json:"Finished"`
 }
 
 // Service defines a handler service for experiments.
@@ -87,158 +81,48 @@ func Register(r *gin.RouterGroup, s *Service) {
 	// TODO: add more api handlers
 	endpoint.GET("", s.listExperiments)
 	endpoint.POST("/new", s.createExperiment)
-	endpoint.GET("/detail/:kind/:namespace/:name", s.getExperimentDetail)
-	endpoint.DELETE("/:kind/:namespace/:name", s.deleteExperiment)
+	endpoint.GET("/detail/:uid", s.getExperimentDetail)
+	endpoint.DELETE("/:uid", s.deleteExperiment)
 	endpoint.PUT("/update", s.updateExperiment)
-	endpoint.PUT("/pause/:kind/:namespace/:name", s.pauseExperiment)
-	endpoint.PUT("/start/:kind/:namespace/:name", s.startExperiment)
+	endpoint.PUT("/pause/:uid", s.pauseExperiment)
+	endpoint.PUT("/start/:uid", s.startExperiment)
 	endpoint.GET("/state", s.state)
 }
 
-// ExperimentInfo defines a form data of Experiment from API.
-type ExperimentInfo struct {
-	Name        string            `json:"name" binding:"required,NameValid"`
-	Namespace   string            `json:"namespace" binding:"required,NameValid"`
-	Labels      map[string]string `json:"labels" binding:"MapSelectorsValid"`
-	Annotations map[string]string `json:"annotations" binding:"MapSelectorsValid"`
-	Scope       ScopeInfo         `json:"scope"`
-	Target      TargetInfo        `json:"target"`
-	Scheduler   SchedulerInfo     `json:"scheduler"`
+// Experiment defines the basic information of an experiment
+type Experiment struct {
+	ExperimentBase
+	Created string `json:"created"`
+	Status  string `json:"status"`
+	UID     string `json:"uid"`
 }
 
-// ScopeInfo defines the scope of the Experiment.
-type ScopeInfo struct {
-	SelectorInfo
-	Mode  string `json:"mode" binding:"oneof='' 'one' 'all' 'fixed' 'fixed' 'fixed-percent' 'random-max-percent'"`
-	Value string `json:"value" binding:"ValueValid"`
+// ExperimentBase is used to identify the unique experiment from API request.
+type ExperimentBase struct {
+	Kind      string `uri:"kind" binding:"required,oneof=PodChaos NetworkChaos IoChaos StressChaos TimeChaos KernelChaos" json:"kind"`
+	Namespace string `uri:"namespace" binding:"required,NameValid" json:"namespace"`
+	Name      string `uri:"name" binding:"required,NameValid" json:"name"`
 }
 
-// TODO: consider moving this to a common package
-// SelectorInfo defines the selector options of the Experiment.
-type SelectorInfo struct {
-	NamespaceSelectors  []string          `json:"namespace_selectors" binding:"NamespaceSelectorsValid"`
-	LabelSelectors      map[string]string `json:"label_selectors" binding:"MapSelectorsValid"`
-	AnnotationSelectors map[string]string `json:"annotation_selectors" binding:"MapSelectorsValid"`
-	FieldSelectors      map[string]string `json:"field_selectors" binding:"MapSelectorsValid"`
-	PhaseSelector       []string          `json:"phase_selectors" binding:"PhaseSelectorsValid"`
-
-	// Pods is a map of string keys and a set values that used to select pods.
-	// The key defines the namespace which pods belong,
-	// and the each values is a set of pod names.
-	Pods map[string][]string `json:"pods" binding:"PodsValid"`
+// ExperimentDetail represents an experiment instance.
+type ExperimentDetail struct {
+	Experiment
+	ExperimentInfo core.ExperimentInfo `json:"experiment_info"`
 }
 
-// ParseSelector parses SelectorInfo to v1alpha1.SelectorSpec
-func (s *SelectorInfo) ParseSelector() v1alpha1.SelectorSpec {
-	selector := v1alpha1.SelectorSpec{}
-
-	for _, ns := range s.NamespaceSelectors {
-		selector.Namespaces = append(selector.Namespaces, ns)
-	}
-
-	selector.LabelSelectors = make(map[string]string)
-	for key, val := range s.LabelSelectors {
-		selector.LabelSelectors[key] = val
-	}
-
-	selector.AnnotationSelectors = make(map[string]string)
-	for key, val := range s.AnnotationSelectors {
-		selector.AnnotationSelectors[key] = val
-	}
-
-	selector.FieldSelectors = make(map[string]string)
-	for key, val := range s.FieldSelectors {
-		selector.FieldSelectors[key] = val
-	}
-
-	for _, ph := range s.PhaseSelector {
-		selector.PodPhaseSelectors = append(selector.PodPhaseSelectors, ph)
-	}
-
-	if s.Pods != nil {
-		selector.Pods = s.Pods
-	}
-
-	return selector
-}
-
-// TargetInfo defines the information of target objects.
-type TargetInfo struct {
-	Kind         string           `json:"kind" binding:"required,oneof=PodChaos NetworkChaos IoChaos KernelChaos TimeChaos StressChaos"`
-	PodChaos     PodChaosInfo     `json:"pod_chaos"`
-	NetworkChaos NetworkChaosInfo `json:"network_chaos"`
-	IOChaos      IOChaosInfo      `json:"io_chaos"`
-	KernelChaos  KernelChaosInfo  `json:"kernel_chaos"`
-	TimeChaos    TimeChaosInfo    `json:"time_chaos"`
-	StressChaos  StressChaosInfo  `json:"stress_chaos"`
-}
-
-// SchedulerInfo defines the scheduler information.
-type SchedulerInfo struct {
-	Cron     string `json:"cron" binding:"CronValid"`
-	Duration string `json:"duration" binding:"DurationValid"`
-}
-
-// PodChaosInfo defines the basic information of pod chaos for creating a new PodChaos.
-type PodChaosInfo struct {
-	Action        string `json:"action" binding:"oneof='' 'pod-kill' 'pod-failure' 'container-kill'"`
-	ContainerName string `json:"container_name"`
-}
-
-// PodChaosInfo defines the basic information of network chaos for creating a new NetworkChaos.
-type NetworkChaosInfo struct {
-	Action      string                  `json:"action" binding:"oneof='' 'netem' 'delay' 'loss' 'duplicate' 'corrupt' 'partition' 'bandwidth'"`
-	Delay       *v1alpha1.DelaySpec     `json:"delay"`
-	Loss        *v1alpha1.LossSpec      `json:"loss"`
-	Duplicate   *v1alpha1.DuplicateSpec `json:"duplicate"`
-	Corrupt     *v1alpha1.CorruptSpec   `json:"corrupt"`
-	Bandwidth   *v1alpha1.BandwidthSpec `json:"bandwidth"`
-	Direction   string                  `json:"direction" binding:"oneof='' 'to' 'from' 'both'"`
-	TargetScope *ScopeInfo              `json:"target_scope"`
-}
-
-// IOChaosInfo defines the basic information of io chaos for creating a new IOChaos.
-type IOChaosInfo struct {
-	Action  string   `json:"action" binding:"oneof='' 'delay' 'errno' 'mixed'"`
-	Addr    string   `json:"addr"`
-	Delay   string   `json:"delay"`
-	Errno   string   `json:"errno"`
-	Path    string   `json:"path"`
-	Percent string   `json:"percent"`
-	Methods []string `json:"methods"`
-}
-
-// KernelChaosInfo defines the basic information of kernel chaos for creating a new KernelChaos.
-type KernelChaosInfo struct {
-	FailKernRequest v1alpha1.FailKernRequest `json:"fail_kernel_req"`
-}
-
-// TimeChaosInfo defines the basic information of time chaos for creating a new TimeChaos.
-type TimeChaosInfo struct {
-	TimeOffset     string   `json:"offset"`
-	ClockIDs       []string `json:"clock_ids"`
-	ContainerNames []string `json:"container_names"`
-}
-
-// StressChaosInfo defines the basic information of stress chaos for creating a new StressChaos.
-type StressChaosInfo struct {
-	Stressors         *v1alpha1.Stressors `json:"stressors"`
-	StressngStressors string              `json:"stressng_stressors,omitempty"`
-}
-
-type actionFunc func(info *ExperimentInfo) error
+type actionFunc func(info *core.ExperimentInfo) error
 
 // @Summary Create a new chaos experiment.
 // @Description Create a new chaos experiment.
 // @Tags experiments
 // @Produce json
-// @Param request body ExperimentInfo true "Request body"
+// @Param request body core.ExperimentInfo true "Request body"
 // @Success 200 "create ok"
 // @Failure 400 {object} utils.APIError
 // @Failure 500 {object} utils.APIError
 // @Router /api/experiments/new [post]
 func (s *Service) createExperiment(c *gin.Context) {
-	exp := &ExperimentInfo{}
+	exp := &core.ExperimentInfo{}
 	if err := c.ShouldBindJSON(exp); err != nil {
 		c.Status(http.StatusBadRequest)
 		_ = c.Error(utils.ErrInvalidRequest.WrapWithNoMessage(err))
@@ -270,7 +154,7 @@ func (s *Service) createExperiment(c *gin.Context) {
 	c.JSON(http.StatusOK, nil)
 }
 
-func (s *Service) createPodChaos(exp *ExperimentInfo) error {
+func (s *Service) createPodChaos(exp *core.ExperimentInfo) error {
 	chaos := &v1alpha1.PodChaos{
 		ObjectMeta: v1.ObjectMeta{
 			Name:        exp.Name,
@@ -298,7 +182,7 @@ func (s *Service) createPodChaos(exp *ExperimentInfo) error {
 	return s.kubeCli.Create(context.Background(), chaos)
 }
 
-func (s *Service) createNetworkChaos(exp *ExperimentInfo) error {
+func (s *Service) createNetworkChaos(exp *core.ExperimentInfo) error {
 	chaos := &v1alpha1.NetworkChaos{
 		ObjectMeta: v1.ObjectMeta{
 			Name:        exp.Name,
@@ -342,7 +226,7 @@ func (s *Service) createNetworkChaos(exp *ExperimentInfo) error {
 	return s.kubeCli.Create(context.Background(), chaos)
 }
 
-func (s *Service) createIOChaos(exp *ExperimentInfo) error {
+func (s *Service) createIOChaos(exp *core.ExperimentInfo) error {
 	chaos := &v1alpha1.IoChaos{
 		ObjectMeta: v1.ObjectMeta{
 			Name:        exp.Name,
@@ -377,7 +261,7 @@ func (s *Service) createIOChaos(exp *ExperimentInfo) error {
 	return s.kubeCli.Create(context.Background(), chaos)
 }
 
-func (s *Service) createTimeChaos(exp *ExperimentInfo) error {
+func (s *Service) createTimeChaos(exp *core.ExperimentInfo) error {
 	chaos := &v1alpha1.TimeChaos{
 		ObjectMeta: v1.ObjectMeta{
 			Name:        exp.Name,
@@ -406,7 +290,7 @@ func (s *Service) createTimeChaos(exp *ExperimentInfo) error {
 	return s.kubeCli.Create(context.Background(), chaos)
 }
 
-func (s *Service) createKernelChaos(exp *ExperimentInfo) error {
+func (s *Service) createKernelChaos(exp *core.ExperimentInfo) error {
 	chaos := &v1alpha1.KernelChaos{
 		ObjectMeta: v1.ObjectMeta{
 			Name:        exp.Name,
@@ -433,7 +317,7 @@ func (s *Service) createKernelChaos(exp *ExperimentInfo) error {
 	return s.kubeCli.Create(context.Background(), chaos)
 }
 
-func (s *Service) createStressChaos(exp *ExperimentInfo) error {
+func (s *Service) createStressChaos(exp *core.ExperimentInfo) error {
 	chaos := &v1alpha1.StressChaos{
 		ObjectMeta: v1.ObjectMeta{
 			Name:        exp.Name,
@@ -461,34 +345,36 @@ func (s *Service) createStressChaos(exp *ExperimentInfo) error {
 	return s.kubeCli.Create(context.Background(), chaos)
 }
 
-func (s *Service) getPodChaosDetail(namespace string, name string) (ExperimentInfo, error) {
+func (s *Service) getPodChaosDetail(namespace string, name string) (ExperimentDetail, error) {
 	chaos := &v1alpha1.PodChaos{}
 	ctx := context.TODO()
 	chaosKey := types.NamespacedName{Namespace: namespace, Name: name}
 	if err := s.kubeCli.Get(ctx, chaosKey, chaos); err != nil {
 		if apierrors.IsNotFound(err) {
-			return ExperimentInfo{}, utils.ErrNotFound.NewWithNoMessage()
+			return ExperimentDetail{}, utils.ErrNotFound.NewWithNoMessage()
 		}
-		return ExperimentInfo{}, err
+		return ExperimentDetail{}, err
 	}
-	info := ExperimentInfo{
+	info := core.ExperimentInfo{
 		Name:        chaos.Name,
 		Namespace:   chaos.Namespace,
 		Labels:      chaos.Labels,
 		Annotations: chaos.Annotations,
-		Scope: ScopeInfo{
-			SelectorInfo: SelectorInfo{
+		Scope: core.ScopeInfo{
+			SelectorInfo: core.SelectorInfo{
 				NamespaceSelectors:  chaos.Spec.Selector.Namespaces,
 				LabelSelectors:      chaos.Spec.Selector.LabelSelectors,
 				AnnotationSelectors: chaos.Spec.Selector.AnnotationSelectors,
 				FieldSelectors:      chaos.Spec.Selector.FieldSelectors,
 				PhaseSelector:       chaos.Spec.Selector.PodPhaseSelectors,
+				Pods:                chaos.Spec.Selector.Pods,
 			},
 			Mode:  string(chaos.Spec.Mode),
 			Value: chaos.Spec.Value,
 		},
-		Target: TargetInfo{
-			PodChaos: PodChaosInfo{
+		Target: core.TargetInfo{
+			Kind: v1alpha1.KindPodChaos,
+			PodChaos: &core.PodChaosInfo{
 				Action:        string(chaos.Spec.Action),
 				ContainerName: chaos.Spec.ContainerName,
 			},
@@ -502,37 +388,52 @@ func (s *Service) getPodChaosDetail(namespace string, name string) (ExperimentIn
 	if chaos.Spec.Duration != nil {
 		info.Scheduler.Duration = *chaos.Spec.Duration
 	}
-	return info, nil
+
+	return ExperimentDetail{
+		Experiment: Experiment{
+			ExperimentBase: ExperimentBase{
+				Kind:      chaos.Kind,
+				Namespace: chaos.Namespace,
+				Name:      chaos.Name,
+			},
+			Created: chaos.GetChaos().StartTime.Format(time.RFC3339),
+			Status:  chaos.GetChaos().Status,
+			UID:     chaos.GetChaos().UID,
+		},
+		ExperimentInfo: info,
+	}, nil
 }
 
-func (s *Service) getIoChaosDetail(namespace string, name string) (ExperimentInfo, error) {
+func (s *Service) getIoChaosDetail(namespace string, name string) (ExperimentDetail, error) {
 	chaos := &v1alpha1.IoChaos{}
 	ctx := context.TODO()
 	chaosKey := types.NamespacedName{Namespace: namespace, Name: name}
 	if err := s.kubeCli.Get(ctx, chaosKey, chaos); err != nil {
 		if apierrors.IsNotFound(err) {
-			return ExperimentInfo{}, utils.ErrNotFound.NewWithNoMessage()
+			return ExperimentDetail{}, utils.ErrNotFound.NewWithNoMessage()
 		}
-		return ExperimentInfo{}, err
+		return ExperimentDetail{}, err
 	}
-	info := ExperimentInfo{
+	info := core.ExperimentInfo{
 		Name:        chaos.Name,
 		Namespace:   chaos.Namespace,
 		Labels:      chaos.Labels,
 		Annotations: chaos.Annotations,
-		Scope: ScopeInfo{
-			SelectorInfo: SelectorInfo{
+		Scope: core.ScopeInfo{
+			SelectorInfo: core.SelectorInfo{
 				NamespaceSelectors:  chaos.Spec.Selector.Namespaces,
 				LabelSelectors:      chaos.Spec.Selector.LabelSelectors,
 				AnnotationSelectors: chaos.Spec.Selector.AnnotationSelectors,
 				FieldSelectors:      chaos.Spec.Selector.FieldSelectors,
 				PhaseSelector:       chaos.Spec.Selector.PodPhaseSelectors,
+				Pods:                chaos.Spec.Selector.Pods,
 			},
 			Mode:  string(chaos.Spec.Mode),
 			Value: chaos.Spec.Value,
 		},
-		Target: TargetInfo{
-			IOChaos: IOChaosInfo{
+		Target: core.TargetInfo{
+			Kind: v1alpha1.KindIOChaos,
+			IOChaos: &core.IOChaosInfo{
 				Action:  string(chaos.Spec.Action),
 				Addr:    chaos.Spec.Addr,
 				Delay:   chaos.Spec.Delay,
@@ -551,37 +452,52 @@ func (s *Service) getIoChaosDetail(namespace string, name string) (ExperimentInf
 	if chaos.Spec.Duration != nil {
 		info.Scheduler.Duration = *chaos.Spec.Duration
 	}
-	return info, nil
+
+	return ExperimentDetail{
+		Experiment: Experiment{
+			ExperimentBase: ExperimentBase{
+				Kind:      chaos.Kind,
+				Namespace: chaos.Namespace,
+				Name:      chaos.Name,
+			},
+			Created: chaos.GetChaos().StartTime.Format(time.RFC3339),
+			Status:  chaos.GetChaos().Status,
+			UID:     chaos.GetChaos().UID,
+		},
+		ExperimentInfo: info,
+	}, nil
 }
 
-func (s *Service) getNetworkChaosDetail(namespace string, name string) (ExperimentInfo, error) {
+func (s *Service) getNetworkChaosDetail(namespace string, name string) (ExperimentDetail, error) {
 	chaos := &v1alpha1.NetworkChaos{}
 	ctx := context.TODO()
 	chaosKey := types.NamespacedName{Namespace: namespace, Name: name}
 	if err := s.kubeCli.Get(ctx, chaosKey, chaos); err != nil {
 		if apierrors.IsNotFound(err) {
-			return ExperimentInfo{}, utils.ErrNotFound.NewWithNoMessage()
+			return ExperimentDetail{}, utils.ErrNotFound.NewWithNoMessage()
 		}
-		return ExperimentInfo{}, err
+		return ExperimentDetail{}, err
 	}
-	info := ExperimentInfo{
+	info := core.ExperimentInfo{
 		Name:        chaos.Name,
 		Namespace:   chaos.Namespace,
 		Labels:      chaos.Labels,
 		Annotations: chaos.Annotations,
-		Scope: ScopeInfo{
-			SelectorInfo: SelectorInfo{
+		Scope: core.ScopeInfo{
+			SelectorInfo: core.SelectorInfo{
 				NamespaceSelectors:  chaos.Spec.Selector.Namespaces,
 				LabelSelectors:      chaos.Spec.Selector.LabelSelectors,
 				AnnotationSelectors: chaos.Spec.Selector.AnnotationSelectors,
 				FieldSelectors:      chaos.Spec.Selector.FieldSelectors,
 				PhaseSelector:       chaos.Spec.Selector.PodPhaseSelectors,
+				Pods:                chaos.Spec.Selector.Pods,
 			},
 			Mode:  string(chaos.Spec.Mode),
 			Value: chaos.Spec.Value,
 		},
-		Target: TargetInfo{
-			NetworkChaos: NetworkChaosInfo{
+		Target: core.TargetInfo{
+			Kind: v1alpha1.KindNetworkChaos,
+			NetworkChaos: &core.NetworkChaosInfo{
 				Action:    string(chaos.Spec.Action),
 				Delay:     chaos.Spec.Delay,
 				Loss:      chaos.Spec.Loss,
@@ -589,8 +505,8 @@ func (s *Service) getNetworkChaosDetail(namespace string, name string) (Experime
 				Corrupt:   chaos.Spec.Corrupt,
 				Bandwidth: chaos.Spec.Bandwidth,
 				Direction: string(chaos.Spec.Direction),
-				TargetScope: &ScopeInfo{
-					SelectorInfo: SelectorInfo{
+				TargetScope: &core.ScopeInfo{
+					SelectorInfo: core.SelectorInfo{
 						NamespaceSelectors:  chaos.Spec.Selector.Namespaces,
 						LabelSelectors:      chaos.Spec.Selector.LabelSelectors,
 						AnnotationSelectors: chaos.Spec.Selector.AnnotationSelectors,
@@ -615,37 +531,51 @@ func (s *Service) getNetworkChaosDetail(namespace string, name string) (Experime
 		info.Target.NetworkChaos.TargetScope.Value = chaos.Spec.Target.TargetValue
 	}
 
-	return info, nil
+	return ExperimentDetail{
+		Experiment: Experiment{
+			ExperimentBase: ExperimentBase{
+				Kind:      chaos.Kind,
+				Namespace: chaos.Namespace,
+				Name:      chaos.Name,
+			},
+			Created: chaos.GetChaos().StartTime.Format(time.RFC3339),
+			Status:  chaos.GetChaos().Status,
+			UID:     chaos.GetChaos().UID,
+		},
+		ExperimentInfo: info,
+	}, nil
 }
 
-func (s *Service) getTimeChaosDetail(namespace string, name string) (ExperimentInfo, error) {
+func (s *Service) getTimeChaosDetail(namespace string, name string) (ExperimentDetail, error) {
 	chaos := &v1alpha1.TimeChaos{}
 	ctx := context.TODO()
 	chaosKey := types.NamespacedName{Namespace: namespace, Name: name}
 	if err := s.kubeCli.Get(ctx, chaosKey, chaos); err != nil {
 		if apierrors.IsNotFound(err) {
-			return ExperimentInfo{}, utils.ErrNotFound.NewWithNoMessage()
+			return ExperimentDetail{}, utils.ErrNotFound.NewWithNoMessage()
 		}
-		return ExperimentInfo{}, err
+		return ExperimentDetail{}, err
 	}
-	info := ExperimentInfo{
+	info := core.ExperimentInfo{
 		Name:        chaos.Name,
 		Namespace:   chaos.Namespace,
 		Labels:      chaos.Labels,
 		Annotations: chaos.Annotations,
-		Scope: ScopeInfo{
-			SelectorInfo: SelectorInfo{
+		Scope: core.ScopeInfo{
+			SelectorInfo: core.SelectorInfo{
 				NamespaceSelectors:  chaos.Spec.Selector.Namespaces,
 				LabelSelectors:      chaos.Spec.Selector.LabelSelectors,
 				AnnotationSelectors: chaos.Spec.Selector.AnnotationSelectors,
 				FieldSelectors:      chaos.Spec.Selector.FieldSelectors,
 				PhaseSelector:       chaos.Spec.Selector.PodPhaseSelectors,
+				Pods:                chaos.Spec.Selector.Pods,
 			},
 			Mode:  string(chaos.Spec.Mode),
 			Value: chaos.Spec.Value,
 		},
-		Target: TargetInfo{
-			TimeChaos: TimeChaosInfo{
+		Target: core.TargetInfo{
+			Kind: v1alpha1.KindTimeChaos,
+			TimeChaos: &core.TimeChaosInfo{
 				TimeOffset:     chaos.Spec.TimeOffset,
 				ClockIDs:       chaos.Spec.ClockIds,
 				ContainerNames: chaos.Spec.ContainerNames,
@@ -660,37 +590,52 @@ func (s *Service) getTimeChaosDetail(namespace string, name string) (ExperimentI
 	if chaos.Spec.Duration != nil {
 		info.Scheduler.Duration = *chaos.Spec.Duration
 	}
-	return info, nil
+
+	return ExperimentDetail{
+		Experiment: Experiment{
+			ExperimentBase: ExperimentBase{
+				Kind:      chaos.Kind,
+				Namespace: chaos.Namespace,
+				Name:      chaos.Name,
+			},
+			Created: chaos.GetChaos().StartTime.Format(time.RFC3339),
+			Status:  chaos.GetChaos().Status,
+			UID:     chaos.GetChaos().UID,
+		},
+		ExperimentInfo: info,
+	}, nil
 }
 
-func (s *Service) getKernelChaosDetail(namespace string, name string) (ExperimentInfo, error) {
+func (s *Service) getKernelChaosDetail(namespace string, name string) (ExperimentDetail, error) {
 	chaos := &v1alpha1.KernelChaos{}
 	ctx := context.TODO()
 	chaosKey := types.NamespacedName{Namespace: namespace, Name: name}
 	if err := s.kubeCli.Get(ctx, chaosKey, chaos); err != nil {
 		if apierrors.IsNotFound(err) {
-			return ExperimentInfo{}, utils.ErrNotFound.NewWithNoMessage()
+			return ExperimentDetail{}, utils.ErrNotFound.NewWithNoMessage()
 		}
-		return ExperimentInfo{}, err
+		return ExperimentDetail{}, err
 	}
-	info := ExperimentInfo{
+	info := core.ExperimentInfo{
 		Name:        chaos.Name,
 		Namespace:   chaos.Namespace,
 		Labels:      chaos.Labels,
 		Annotations: chaos.Annotations,
-		Scope: ScopeInfo{
-			SelectorInfo: SelectorInfo{
+		Scope: core.ScopeInfo{
+			SelectorInfo: core.SelectorInfo{
 				NamespaceSelectors:  chaos.Spec.Selector.Namespaces,
 				LabelSelectors:      chaos.Spec.Selector.LabelSelectors,
 				AnnotationSelectors: chaos.Spec.Selector.AnnotationSelectors,
 				FieldSelectors:      chaos.Spec.Selector.FieldSelectors,
 				PhaseSelector:       chaos.Spec.Selector.PodPhaseSelectors,
+				Pods:                chaos.Spec.Selector.Pods,
 			},
 			Mode:  string(chaos.Spec.Mode),
 			Value: chaos.Spec.Value,
 		},
-		Target: TargetInfo{
-			KernelChaos: KernelChaosInfo{
+		Target: core.TargetInfo{
+			Kind: v1alpha1.KindKernelChaos,
+			KernelChaos: &core.KernelChaosInfo{
 				FailKernRequest: chaos.Spec.FailKernRequest,
 			},
 		},
@@ -703,37 +648,52 @@ func (s *Service) getKernelChaosDetail(namespace string, name string) (Experimen
 	if chaos.Spec.Duration != nil {
 		info.Scheduler.Duration = *chaos.Spec.Duration
 	}
-	return info, nil
+
+	return ExperimentDetail{
+		Experiment: Experiment{
+			ExperimentBase: ExperimentBase{
+				Kind:      chaos.Kind,
+				Namespace: chaos.Namespace,
+				Name:      chaos.Name,
+			},
+			Created: chaos.GetChaos().StartTime.Format(time.RFC3339),
+			Status:  chaos.GetChaos().Status,
+			UID:     chaos.GetChaos().UID,
+		},
+		ExperimentInfo: info,
+	}, nil
 }
 
-func (s *Service) getStressChaosDetail(namespace string, name string) (ExperimentInfo, error) {
+func (s *Service) getStressChaosDetail(namespace string, name string) (ExperimentDetail, error) {
 	chaos := &v1alpha1.StressChaos{}
 	ctx := context.TODO()
 	chaosKey := types.NamespacedName{Namespace: namespace, Name: name}
 	if err := s.kubeCli.Get(ctx, chaosKey, chaos); err != nil {
 		if apierrors.IsNotFound(err) {
-			return ExperimentInfo{}, utils.ErrNotFound.NewWithNoMessage()
+			return ExperimentDetail{}, utils.ErrNotFound.NewWithNoMessage()
 		}
-		return ExperimentInfo{}, err
+		return ExperimentDetail{}, err
 	}
-	info := ExperimentInfo{
+	info := core.ExperimentInfo{
 		Name:        chaos.Name,
 		Namespace:   chaos.Namespace,
 		Labels:      chaos.Labels,
 		Annotations: chaos.Annotations,
-		Scope: ScopeInfo{
-			SelectorInfo: SelectorInfo{
+		Scope: core.ScopeInfo{
+			SelectorInfo: core.SelectorInfo{
 				NamespaceSelectors:  chaos.Spec.Selector.Namespaces,
 				LabelSelectors:      chaos.Spec.Selector.LabelSelectors,
 				AnnotationSelectors: chaos.Spec.Selector.AnnotationSelectors,
 				FieldSelectors:      chaos.Spec.Selector.FieldSelectors,
 				PhaseSelector:       chaos.Spec.Selector.PodPhaseSelectors,
+				Pods:                chaos.Spec.Selector.Pods,
 			},
 			Mode:  string(chaos.Spec.Mode),
 			Value: chaos.Spec.Value,
 		},
-		Target: TargetInfo{
-			StressChaos: StressChaosInfo{
+		Target: core.TargetInfo{
+			Kind: v1alpha1.KindStressChaos,
+			StressChaos: &core.StressChaosInfo{
 				Stressors:         chaos.Spec.Stressors,
 				StressngStressors: chaos.Spec.StressngStressors,
 			},
@@ -747,7 +707,20 @@ func (s *Service) getStressChaosDetail(namespace string, name string) (Experimen
 	if chaos.Spec.Duration != nil {
 		info.Scheduler.Duration = *chaos.Spec.Duration
 	}
-	return info, nil
+
+	return ExperimentDetail{
+		Experiment: Experiment{
+			ExperimentBase: ExperimentBase{
+				Kind:      chaos.Kind,
+				Namespace: chaos.Namespace,
+				Name:      chaos.Name,
+			},
+			Created: chaos.GetChaos().StartTime.Format(time.RFC3339),
+			Status:  chaos.GetChaos().Status,
+			UID:     chaos.GetChaos().UID,
+		},
+		ExperimentInfo: info,
+	}, nil
 }
 
 // @Summary Get chaos experiments from Kubernetes cluster.
@@ -792,6 +765,7 @@ func (s *Service) listExperiments(c *gin.Context) {
 				},
 				Created: chaos.StartTime.Format(time.RFC3339),
 				Status:  chaos.Status,
+				UID:     chaos.UID,
 			})
 		}
 	}
@@ -803,77 +777,95 @@ func (s *Service) listExperiments(c *gin.Context) {
 // @Description Get detailed information about the specified chaos experiment.
 // @Tags experiments
 // @Produce json
-// @Param namespace path string true "namespace"
-// @Param name path string true "name"
-// @Param kind path string true "kind" Enums(PodChaos, IoChaos, NetworkChaos, TimeChaos, KernelChaos, StressChaos)
-// @Router /api/experiments/detail/{kind}/{namespace}/{name} [GET]
-// @Success 200 {object} ExperimentInfo
+// @Param uid path string true "uid"
+// @Router /api/experiments/detail/{uid} [GET]
+// @Success 200 {object} ExperimentDetail
 // @Failure 400 {object} utils.APIError
 // @Failure 500 {object} utils.APIError
 func (s *Service) getExperimentDetail(c *gin.Context) {
-	kind := c.Param("kind")
-	ns := c.Param("namespace")
-	name := c.Param("name")
-
 	var (
-		ok   bool
-		info ExperimentInfo
-		err  error
+		err       error
+		exp       *core.ArchiveExperiment
+		expDetail ExperimentDetail
 	)
-	if _, ok = v1alpha1.AllKinds()[kind]; !ok {
-		c.Status(http.StatusBadRequest)
-		_ = c.Error(utils.ErrInvalidRequest.New(kind + " is not supported"))
-		return
+
+	uid := c.Param("uid")
+	if exp, err = s.archive.FindByUID(context.Background(), uid); err != nil {
+		if !gorm.IsRecordNotFoundError(err) {
+			c.Status(http.StatusInternalServerError)
+			_ = c.Error(utils.ErrInternalServer.NewWithNoMessage())
+		} else {
+			c.Status(http.StatusInternalServerError)
+			_ = c.Error(utils.ErrInvalidRequest.New("the experiment is not found"))
+		}
 	}
+
+	kind := exp.Kind
+	ns := exp.Namespace
+	name := exp.Name
+
 	switch kind {
 	case v1alpha1.KindPodChaos:
-		info, err = s.getPodChaosDetail(ns, name)
+		expDetail, err = s.getPodChaosDetail(ns, name)
 	case v1alpha1.KindIOChaos:
-		info, err = s.getIoChaosDetail(ns, name)
+		expDetail, err = s.getIoChaosDetail(ns, name)
 	case v1alpha1.KindNetworkChaos:
-		info, err = s.getNetworkChaosDetail(ns, name)
+		expDetail, err = s.getNetworkChaosDetail(ns, name)
 	case v1alpha1.KindTimeChaos:
-		info, err = s.getTimeChaosDetail(ns, name)
+		expDetail, err = s.getTimeChaosDetail(ns, name)
 	case v1alpha1.KindKernelChaos:
-		info, err = s.getKernelChaosDetail(ns, name)
+		expDetail, err = s.getKernelChaosDetail(ns, name)
 	case v1alpha1.KindStressChaos:
-		info, err = s.getStressChaosDetail(ns, name)
+		expDetail, err = s.getStressChaosDetail(ns, name)
 	}
 	if err != nil {
 		c.Status(http.StatusInternalServerError)
 		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
 		return
 	}
-	c.JSON(http.StatusOK, info)
+
+	c.JSON(http.StatusOK, expDetail)
 }
 
 // @Summary Delete the specified chaos experiment.
 // @Description Delete the specified chaos experiment.
 // @Tags experiments
 // @Produce json
-// @Param namespace path string true "namespace"
-// @Param name path string true "name"
-// @Param kind path string true "kind" Enums(PodChaos, IoChaos, NetworkChaos, TimeChaos, KernelChaos, StressChaos)
+// @Param uid path string true "uid"
 // @Param force query string true "force" Enums(true, false)
 // @Success 200 "delete ok"
 // @Failure 400 {object} utils.APIError
 // @Failure 404 {object} utils.APIError
 // @Failure 500 {object} utils.APIError
-// @Router /api/experiments/{kind}/{namespace}/{name} [delete]
+// @Router /api/experiments/{uid} [delete]
 func (s *Service) deleteExperiment(c *gin.Context) {
-	kind := c.Param("kind")
-	ns := c.Param("namespace")
-	name := c.Param("name")
+	var (
+		chaosKind *v1alpha1.ChaosKind
+		chaosMeta metav1.Object
+		ok        bool
+		err       error
+		exp       *core.ArchiveExperiment
+	)
+
+	uid := c.Param("uid")
+	if exp, err = s.archive.FindByUID(context.Background(), uid); err != nil {
+		if !gorm.IsRecordNotFoundError(err) {
+			c.Status(http.StatusInternalServerError)
+			_ = c.Error(utils.ErrInternalServer.NewWithNoMessage())
+		} else {
+			c.Status(http.StatusInternalServerError)
+			_ = c.Error(utils.ErrInvalidRequest.New("the experiment is not found"))
+		}
+	}
+
+	kind := exp.Kind
+	ns := exp.Namespace
+	name := exp.Name
 	force := c.DefaultQuery("force", "false")
 
 	ctx := context.TODO()
 	chaosKey := types.NamespacedName{Namespace: ns, Name: name}
 
-	var (
-		chaosKind *v1alpha1.ChaosKind
-		chaosMeta metav1.Object
-		ok        bool
-	)
 	if chaosKind, ok = v1alpha1.AllKinds()[kind]; !ok {
 		c.Status(http.StatusBadRequest)
 		_ = c.Error(utils.ErrInvalidRequest.New(kind + " is not supported"))
@@ -972,31 +964,37 @@ func (s *Service) state(c *gin.Context) {
 	c.JSON(http.StatusOK, data)
 }
 
-// ExperimentBase is used to identify the unique experiment from API request.
-type ExperimentBase struct {
-	Kind      string `uri:"kind" binding:"required,oneof=PodChaos NetworkChaos IoChaos StressChaos TimeChaos KernelChaos"`
-	Namespace string `uri:"namespace" binding:"required,NameValid"`
-	Name      string `uri:"name" binding:"required,NameValid"`
-}
-
 // @Summary Pause chaos experiment by API
 // @Description Pause chaos experiment by API
 // @Tags experiments
 // @Produce json
-// @Param kind path string true "kind"
-// @Param namespace path string true "namespace"
-// @Param name path string true "name"
+// @Param uid path string true "uid"
 // @Success 200 "pause ok"
 // @Failure 400 {object} utils.APIError
 // @Failure 404 {object} utils.APIError
 // @Failure 500 {object} utils.APIError
-// @Router /api/experiments/pause/{kind}/{namespace}/{name} [put]
+// @Router /api/experiments/pause/{uid} [put]
 func (s *Service) pauseExperiment(c *gin.Context) {
-	exp := &ExperimentBase{}
-	if err := c.ShouldBindUri(exp); err != nil {
-		c.Status(http.StatusBadRequest)
-		_ = c.Error(utils.ErrInvalidRequest.WrapWithNoMessage(err))
-		return
+	var (
+		err        error
+		experiment *core.ArchiveExperiment
+	)
+
+	uid := c.Param("uid")
+	if experiment, err = s.archive.FindByUID(context.Background(), uid); err != nil {
+		if !gorm.IsRecordNotFoundError(err) {
+			c.Status(http.StatusInternalServerError)
+			_ = c.Error(utils.ErrInternalServer.NewWithNoMessage())
+		} else {
+			c.Status(http.StatusInternalServerError)
+			_ = c.Error(utils.ErrInvalidRequest.New("the experiment is not found"))
+		}
+	}
+
+	exp := &ExperimentBase{
+		Kind:      experiment.Kind,
+		Name:      experiment.Name,
+		Namespace: experiment.Namespace,
 	}
 
 	annotations := map[string]string{
@@ -1020,20 +1018,33 @@ func (s *Service) pauseExperiment(c *gin.Context) {
 // @Description Start the paused chaos experiment by API
 // @Tags experiments
 // @Produce json
-// @Param kind path string true "kind"
-// @Param namespace path string true "namespace"
-// @Param name path string true "name"
+// @Param uid path string true "uid"
 // @Success 200 "start ok"
 // @Failure 400 {object} utils.APIError
 // @Failure 404 {object} utils.APIError
 // @Failure 500 {object} utils.APIError
-// @Router /api/experiments/start/{kind}/{namespace}/{name} [put]
+// @Router /api/experiments/start/{uid} [put]
 func (s *Service) startExperiment(c *gin.Context) {
-	exp := &ExperimentBase{}
-	if err := c.ShouldBindUri(exp); err != nil {
-		c.Status(http.StatusBadRequest)
-		_ = c.Error(utils.ErrInvalidRequest.WrapWithNoMessage(err))
-		return
+	var (
+		err        error
+		experiment *core.ArchiveExperiment
+	)
+
+	uid := c.Param("uid")
+	if experiment, err = s.archive.FindByUID(context.Background(), uid); err != nil {
+		if !gorm.IsRecordNotFoundError(err) {
+			c.Status(http.StatusInternalServerError)
+			_ = c.Error(utils.ErrInternalServer.NewWithNoMessage())
+		} else {
+			c.Status(http.StatusInternalServerError)
+			_ = c.Error(utils.ErrInvalidRequest.New("the experiment is not found"))
+		}
+	}
+
+	exp := &ExperimentBase{
+		Kind:      experiment.Kind,
+		Name:      experiment.Name,
+		Namespace: experiment.Namespace,
 	}
 
 	annotations := map[string]string{
@@ -1084,13 +1095,13 @@ func (s *Service) patchExperiment(exp *ExperimentBase, annotations map[string]st
 // @Description Update the chaos experiment by API
 // @Tags experiments
 // @Produce json
-// @Param request body ExperimentInfo true "Request body"
+// @Param request body core.ExperimentInfo true "Request body"
 // @Success 200 "update ok"
 // @Failure 400 {object} utils.APIError
 // @Failure 500 {object} utils.APIError
 // @Router /api/experiments/update [put]
 func (s *Service) updateExperiment(c *gin.Context) {
-	exp := &ExperimentInfo{}
+	exp := &core.ExperimentInfo{}
 	if err := c.ShouldBindJSON(exp); err != nil {
 		c.Status(http.StatusBadRequest)
 		_ = c.Error(utils.ErrInvalidRequest.WrapWithNoMessage(err))
@@ -1127,7 +1138,7 @@ func (s *Service) updateExperiment(c *gin.Context) {
 	c.JSON(http.StatusOK, nil)
 }
 
-func (s *Service) updatePodChaos(exp *ExperimentInfo) error {
+func (s *Service) updatePodChaos(exp *core.ExperimentInfo) error {
 	chaos := &v1alpha1.PodChaos{}
 	key := types.NamespacedName{Namespace: exp.Namespace, Name: exp.Name}
 
@@ -1156,7 +1167,7 @@ func (s *Service) updatePodChaos(exp *ExperimentInfo) error {
 	return s.kubeCli.Update(context.Background(), chaos)
 }
 
-func (s *Service) updateNetworkChaos(exp *ExperimentInfo) error {
+func (s *Service) updateNetworkChaos(exp *core.ExperimentInfo) error {
 	chaos := &v1alpha1.NetworkChaos{}
 	key := types.NamespacedName{Namespace: exp.Namespace, Name: exp.Name}
 
@@ -1198,7 +1209,7 @@ func (s *Service) updateNetworkChaos(exp *ExperimentInfo) error {
 	return s.kubeCli.Update(context.Background(), chaos)
 }
 
-func (s *Service) updateIOChaos(exp *ExperimentInfo) error {
+func (s *Service) updateIOChaos(exp *core.ExperimentInfo) error {
 	chaos := &v1alpha1.IoChaos{}
 	key := types.NamespacedName{Namespace: exp.Namespace, Name: exp.Name}
 
@@ -1234,7 +1245,7 @@ func (s *Service) updateIOChaos(exp *ExperimentInfo) error {
 	return s.kubeCli.Update(context.Background(), chaos)
 }
 
-func (s *Service) updateKernelChaos(exp *ExperimentInfo) error {
+func (s *Service) updateKernelChaos(exp *core.ExperimentInfo) error {
 	chaos := &v1alpha1.KernelChaos{}
 	key := types.NamespacedName{Namespace: exp.Namespace, Name: exp.Name}
 
@@ -1262,7 +1273,7 @@ func (s *Service) updateKernelChaos(exp *ExperimentInfo) error {
 	return s.kubeCli.Update(context.Background(), chaos)
 }
 
-func (s *Service) updateTimeChaos(exp *ExperimentInfo) error {
+func (s *Service) updateTimeChaos(exp *core.ExperimentInfo) error {
 	chaos := &v1alpha1.TimeChaos{}
 	key := types.NamespacedName{Namespace: exp.Namespace, Name: exp.Name}
 
@@ -1292,7 +1303,7 @@ func (s *Service) updateTimeChaos(exp *ExperimentInfo) error {
 	return s.kubeCli.Update(context.Background(), chaos)
 }
 
-func (s *Service) updateStressChaos(exp *ExperimentInfo) error {
+func (s *Service) updateStressChaos(exp *core.ExperimentInfo) error {
 	chaos := &v1alpha1.StressChaos{}
 	key := types.NamespacedName{Namespace: exp.Namespace, Name: exp.Name}
 

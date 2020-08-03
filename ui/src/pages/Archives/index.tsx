@@ -4,7 +4,6 @@ import React, { useEffect, useState } from 'react'
 import { Archive } from 'api/archives.type'
 import ArchiveOutlinedIcon from '@material-ui/icons/ArchiveOutlined'
 import ConfirmDialog from 'components/ConfirmDialog'
-import ContentContainer from 'components/ContentContainer'
 import ExperimentPaper from 'components/ExperimentPaper'
 import Loading from 'components/Loading'
 import api from 'api'
@@ -13,9 +12,7 @@ export default function Archives() {
   const [loading, setLoading] = useState(false)
   const [archives, setArchives] = useState<Archive[] | null>(null)
   const [selected, setSelected] = useState({
-    namespace: '',
-    name: '',
-    kind: '',
+    uuid: '',
     title: '',
     description: '',
     action: 'recover',
@@ -47,12 +44,12 @@ export default function Archives() {
   }
 
   return (
-    <ContentContainer>
+    <>
       <Grid container spacing={3}>
         {archives &&
           archives.length > 0 &&
           archives.map((a) => (
-            <Grid key={a.Name} item xs={12}>
+            <Grid key={a.name} item xs={12}>
               <ExperimentPaper experiment={a} isArchive handleSelect={setSelected} handleDialogOpen={setDialogOpen} />
             </Grid>
           ))}
@@ -78,6 +75,6 @@ export default function Archives() {
         description={selected.description}
         handleConfirm={handleArchive(selected.action)}
       />
-    </ContentContainer>
+    </>
   )
 }

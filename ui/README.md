@@ -5,9 +5,7 @@
 
 > Note: Currently WIP
 
-A Web UI for Chaos Mesh. Powered by ⚛️ [Create React App](https://github.com/facebook/create-react-app).
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+A Web UI for Chaos Mesh. Powered by ⚛️ [Create React App](https://github.com/facebook/create-react-app). You can learn more from [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
 
 To learn React, check out the [React documentation](https://reactjs.org/).
 
@@ -74,13 +72,13 @@ box-shadow: none;
 
 ### Be Compact
 
-**Don't include no used deps.**
+**Don't include unused deps.**
 
 **Don't let your code be too long-winded, there will be a lot of elegant writing.**
 
 ### Necessary Test
 
-**Every new features must have a unit test.**
+**Every new feature must have a unit test.**
 
 ## Authors
 
@@ -88,4 +86,4 @@ Originally designed by PingCAP FE.
 
 ## License
 
-Same as chaos mesh
+Same as Chaos Mesh.

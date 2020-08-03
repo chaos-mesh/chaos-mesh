@@ -1,4 +1,4 @@
-// Copyright 2020 PingCAP, Inc.
+// Copyright 2020 Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,9 +20,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/pingcap/chaos-mesh/pkg/apiserver/utils"
-	"github.com/pingcap/chaos-mesh/pkg/config"
-	"github.com/pingcap/chaos-mesh/pkg/core"
+	"github.com/chaos-mesh/chaos-mesh/pkg/apiserver/utils"
+	"github.com/chaos-mesh/chaos-mesh/pkg/config"
+	"github.com/chaos-mesh/chaos-mesh/pkg/core"
 
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
@@ -71,6 +71,7 @@ func Register(r *gin.RouterGroup, s *Service) {
 // @Param experimentNamespace query string false "The namespace of the experiment"
 // @Param uid query string false "The UID of the experiment"
 // @Param kind query string false "kind" Enums(PodChaos, IoChaos, NetworkChaos, TimeChaos, KernelChaos, StressChaos)
+// @Param limit query string false "The max length of events list"
 // @Success 200 {array} core.Event
 // @Router /api/events [get]
 // @Failure 500 {object} utils.APIError
@@ -84,6 +85,7 @@ func (s *Service) listEvents(c *gin.Context) {
 		ExperimentNamespace: c.Query("experimentNamespace"),
 		UID:                 c.Query("uid"),
 		Kind:                c.Query("kind"),
+		LimitStr:            c.Query("limit"),
 	}
 
 	if filter.PodName != "" && filter.PodNamespace == "" {
@@ -111,6 +113,7 @@ func (s *Service) listEvents(c *gin.Context) {
 // @Param experimentName query string false "The name of the experiment"
 // @Param experimentNamespace query string false "The namespace of the experiment"
 // @Param kind query string false "kind" Enums(PodChaos, IoChaos, NetworkChaos, TimeChaos, KernelChaos, StressChaos)
+// @Param limit query string false "The max length of events list"
 // @Success 200 {array} core.Event
 // @Router /api/events/dry [get]
 // @Failure 500 {object} utils.APIError
@@ -121,6 +124,7 @@ func (s *Service) listDryEvents(c *gin.Context) {
 		ExperimentName:      c.Query("experimentName"),
 		ExperimentNamespace: c.Query("experimentNamespace"),
 		Kind:                c.Query("kind"),
+		LimitStr:            c.Query("limit"),
 	}
 
 	eventList, err := s.event.DryListByFilter(context.Background(), filter)

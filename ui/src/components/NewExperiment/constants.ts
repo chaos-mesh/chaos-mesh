@@ -4,6 +4,8 @@ import * as Yup from 'yup'
 export const defaultExperimentSchema: Experiment = {
   name: '',
   namespace: 'default',
+  labels: [],
+  annotations: [],
   scope: {
     namespace_selectors: ['default'],
     label_selectors: [],
@@ -20,6 +22,7 @@ export const defaultExperimentSchema: Experiment = {
     },
     network_chaos: {
       action: '',
+      direction: '',
       bandwidth: {
         buffer: 0,
         limit: 0,
@@ -43,6 +46,45 @@ export const defaultExperimentSchema: Experiment = {
       loss: {
         correlation: '',
         loss: '',
+      },
+      target: undefined,
+    },
+    io_chaos: {
+      action: '',
+      addr: '',
+      delay: '',
+      errno: '',
+      methods: [],
+      path: '',
+      percent: '100',
+    },
+    kernel_chaos: {
+      fail_kern_request: {
+        callchain: [],
+        failtype: 0,
+        headers: [],
+        probability: 0,
+        times: 0,
+      },
+    },
+    time_chaos: {
+      clock_ids: [],
+      container_names: [],
+      time_offset: '',
+    },
+    stress_chaos: {
+      stressng_stressors: '',
+      stressors: {
+        cpu: {
+          workers: 0,
+          load: 0,
+          options: [],
+        },
+        memory: {
+          workers: 0,
+          size: '',
+          options: [],
+        },
       },
     },
   },

@@ -1,19 +1,34 @@
 import { Event } from './events.type'
+import { Experiment as ExperimentInfo } from 'components/NewExperiment/types'
 
 export interface StateOfExperiments {
-  total: number
-  running: number
-  waiting: number
-  paused: number
-  failed: number
-  finished: number
+  Total: number
+  Running: number
+  Waiting: number
+  Paused: number
+  Failed: number
+  Finished: number
+}
+
+export enum StateOfExperimentsEnum {
+  Total = 'Total',
+  Running = 'Running',
+  Waiting = 'Waiting',
+  Paused = 'Paused',
+  Failed = 'Failed',
+  Finished = 'Finished',
 }
 
 export interface Experiment {
-  Kind: string
-  Namespace: string
-  Name: string
+  kind: string
+  namespace: string
+  name: string
   created: string
   status: keyof StateOfExperiments
+  uid: uuid
   events?: Event[]
+}
+
+export interface ExperimentDetail extends Experiment {
+  experiment_info: ExperimentInfo
 }

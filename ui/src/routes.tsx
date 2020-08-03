@@ -1,10 +1,10 @@
-import { RouteProps } from 'react-router'
-
-import Overview from './pages/Overview'
-import Experiments from './pages/Experiments'
-import ExperimentDetail from './pages/ExperimentDetail'
-import Events from './pages/Events'
 import Archives from './pages/Archives'
+import Events from './pages/Events'
+import ExperimentDetail from './pages/ExperimentDetail'
+import Experiments from './pages/Experiments'
+import NewExperiment from 'components/NewExperiment'
+import Overview from './pages/Overview'
+import { RouteProps } from 'react-router'
 
 const routes: RouteProps[] = [
   {
@@ -13,13 +13,17 @@ const routes: RouteProps[] = [
     exact: true,
   },
   {
+    component: NewExperiment,
+    path: '/newExperiment',
+  },
+  {
     component: Experiments,
     path: '/experiments',
     exact: true,
   },
   {
     component: ExperimentDetail,
-    path: '/experiments/:name',
+    path: '/experiments/:uuid',
   },
   {
     component: Events,

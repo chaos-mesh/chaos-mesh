@@ -6,9 +6,9 @@ metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.2.5
   creationTimestamp: null
-  name: stresschaos.pingcap.com
+  name: stresschaos.chaos-mesh.org
 spec:
-  group: pingcap.com
+  group: chaos-mesh.org
   names:
     kind: StressChaos
     listKind: StressChaosList
@@ -34,6 +34,10 @@ spec:
         spec:
           description: Spec defines the behavior of a time chaos experiment
           properties:
+            containerName:
+              description: ContainerName indicates the target container to inject
+                stress in
+              type: string
             duration:
               description: Duration represents the duration of the chaos action
               type: string

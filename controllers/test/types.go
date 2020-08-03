@@ -1,4 +1,4 @@
-// Copyright 2020 PingCAP, Inc.
+// Copyright 2020 Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -23,9 +23,9 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 
-	chaosdaemon "github.com/pingcap/chaos-mesh/pkg/chaosdaemon/pb"
-	"github.com/pingcap/chaos-mesh/pkg/mock"
-	"github.com/pingcap/chaos-mesh/pkg/utils"
+	chaosdaemon "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
+	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
+	"github.com/chaos-mesh/chaos-mesh/pkg/utils"
 )
 
 // Assert *MockChaosDaemonClient implements chaosdaemon.ChaosDaemonClientInterface.
@@ -90,12 +90,12 @@ func (c *MockChaosDaemonClient) DelTcFilter(ctx context.Context, in *chaosdaemon
 	return nil, mockError("DelTcFilter")
 }
 
-func (c *MockChaosDaemonClient) FlushIpSet(ctx context.Context, in *chaosdaemon.IpSetRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
-	return nil, mockError("FlushIpSet")
+func (c *MockChaosDaemonClient) FlushIPSets(ctx context.Context, in *chaosdaemon.IPSetsRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
+	return nil, mockError("FlushIPSets")
 }
 
-func (c *MockChaosDaemonClient) FlushIptables(ctx context.Context, in *chaosdaemon.IpTablesRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
-	return nil, mockError("FlushIptables")
+func (c *MockChaosDaemonClient) SetIptablesChains(ctx context.Context, in *chaosdaemon.IptablesChainsRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
+	return nil, mockError("SetIptablesChains")
 }
 
 func (c *MockChaosDaemonClient) SetTimeOffset(ctx context.Context, in *chaosdaemon.TimeRequest, opts ...grpc.CallOption) (*empty.Empty, error) {

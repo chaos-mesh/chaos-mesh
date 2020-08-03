@@ -25,7 +25,7 @@ After executing the above command, you can access [`http://localhost:8081`](http
 The chaos experiment configuration is defined in a YAML file. You need to create your own experiment configuration file based on the available fields in the sample below:
 
 ```yaml
-apiVersion: pingcap.com/v1alpha1
+apiVersion: chaos-mesh.org/v1alpha1
 kind: NetworkChaos
 metadata:
   name: web-show-network-delay
@@ -99,7 +99,7 @@ kubectl annotate networkchaos web-show-network-delay chaos-mesh.pingcap.com/clea
 Chaos Dashboard is a Web UI for managing, designing, monitoring Chaos Experiments. Stay tuned for more supports or join us in making it happen.
 
 > **Note:**
-> 
+>
 > If Chaos Dashboard was not installed, upgrade Chaos Mesh by executing `helm upgrade chaos-mesh helm/chaos-mesh --namespace=chaos-testing --set dashboard.create=true`.
 
 A typical way to access it is to use `kubectl port-forward`:

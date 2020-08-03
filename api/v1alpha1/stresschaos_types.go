@@ -1,4 +1,4 @@
-// Copyright 2020 PingCAP, Inc.
+// Copyright 2020 Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -78,6 +78,10 @@ type StressChaosSpec struct {
 	// wins.
 	// +optional
 	StressngStressors string `json:"stressngStressors,omitempty"`
+
+	// ContainerName indicates the target container to inject stress in
+	// +optional
+	ContainerName *string `json:"containerName,omitempty"`
 
 	// Duration represents the duration of the chaos action
 	// +optional
@@ -207,6 +211,7 @@ func (in *StressChaos) GetChaos() *ChaosInstance {
 		StartTime: in.CreationTimestamp.Time,
 		Action:    "",
 		Status:    string(in.GetStatus().Experiment.Phase),
+		UID:       string(in.UID),
 	}
 	if in.Spec.Duration != nil {
 		instance.Duration = *in.Spec.Duration

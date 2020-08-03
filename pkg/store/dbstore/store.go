@@ -1,4 +1,4 @@
-// Copyright 2020 PingCAP, Inc.
+// Copyright 2020 Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ import (
 	"github.com/jinzhu/gorm"
 	"go.uber.org/fx"
 
-	"github.com/pingcap/chaos-mesh/pkg/config"
+	"github.com/chaos-mesh/chaos-mesh/pkg/config"
 
 	ctrl "sigs.k8s.io/controller-runtime"
 )

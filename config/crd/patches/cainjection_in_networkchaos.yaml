@@ -5,4 +5,4 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     certmanager.k8s.io/inject-ca-from: $(CERTIFICATE_NAMESPACE)/$(CERTIFICATE_NAME)
-  name: networkchaos.pingcap.com
+  name: networkchaos.chaos-mesh.org

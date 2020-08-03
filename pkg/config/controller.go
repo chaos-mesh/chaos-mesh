@@ -1,4 +1,4 @@
-// Copyright 2020 PingCAP, Inc.
+// Copyright 2020 Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ import (
 
 	"github.com/kelseyhightower/envconfig"
 
-	"github.com/pingcap/chaos-mesh/pkg/webhook/config/watcher"
+	"github.com/chaos-mesh/chaos-mesh/pkg/webhook/config/watcher"
 )
 
 // ChaosControllerConfig defines the configuration for Chaos Controller

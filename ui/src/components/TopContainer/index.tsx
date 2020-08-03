@@ -6,11 +6,12 @@ import { Theme, createStyles, makeStyles } from '@material-ui/core/styles'
 import { drawerCloseWidth, drawerWidth } from './Sidebar'
 
 import Alert from '@material-ui/lab/Alert'
+import ContentContainer from 'components/ContentContainer'
 import Header from './Header'
 import MobileNavigation from './MobileNavigation'
 import Sidebar from './Sidebar'
-import StatusBar from 'components/StatusBar'
 import chaosMeshRoutes from 'routes'
+import insertCommonStyle from 'lib/d3/insertCommonStyle'
 import { setAlertOpen } from 'slices/globalStatus'
 import { setNavigationBreadcrumbs } from 'slices/navigation'
 import { useLocation } from 'react-router-dom'
@@ -74,6 +75,8 @@ const TopContainer = () => {
     window.localStorage.setItem('chaos-mesh-mini-sidebar', openDrawer ? 'y' : 'n')
   }
 
+  useEffect(insertCommonStyle, [])
+
   useEffect(() => {
     dispatch(setNavigationBreadcrumbs(pathname))
   }, [dispatch, pathname])
@@ -93,16 +96,16 @@ const TopContainer = () => {
       <main className={classes.main}>
         <div className={classes.toolbar} />
 
-        <StatusBar />
-
         <Box className={classes.switchContent}>
-          <Switch>
-            <Redirect exact path="/" to="/overview" />
-            {chaosMeshRoutes.map((route) => (
-              <Route key={route.path! as string} {...route} />
-            ))}
-            <Redirect exact path="*" to="/overview" />
-          </Switch>
+          <ContentContainer>
+            <Switch>
+              <Redirect exact path="/" to="/overview" />
+              {chaosMeshRoutes.map((route) => (
+                <Route key={route.path! as string} {...route} />
+              ))}
+              <Redirect exact path="*" to="/overview" />
+            </Switch>
+          </ContentContainer>
         </Box>
 
         {isMobileScreen && (
@@ -121,7 +124,7 @@ const TopContainer = () => {
           open={alertOpen}
           onClose={handleSnackClose}
         >
-          <Alert variant="outlined" severity={alert.type} onClose={handleSnackClose}>
+          <Alert severity={alert.type} onClose={handleSnackClose}>
             {alert.message}
           </Alert>
         </Snackbar>

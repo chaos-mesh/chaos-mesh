@@ -3,14 +3,15 @@ import React, { useEffect } from 'react'
 import { RootState, useStoreDispatch } from 'store'
 import { Theme, createStyles, makeStyles } from '@material-ui/core/styles'
 import { back, jump, next, reset, useStepperContext } from '../Context'
-import { getAnnotations, getLabels, getNamespaces } from 'slices/experiments'
 
 import BasicStep from './Basic'
 import DoneAllIcon from '@material-ui/icons/DoneAll'
-import Loading from 'components/Loading'
+import PublishIcon from '@material-ui/icons/Publish'
 import ScheduleStep from './Schedule'
 import ScopeStep from './Scope'
+import SkeletonN from 'components/SkeletonN'
 import TargetStep from './Target'
+import { getNamespaces } from 'slices/experiments'
 import { useFormikContext } from 'formik'
 import { useSelector } from 'react-redux'
 
@@ -19,31 +20,32 @@ const useStyles = makeStyles((theme: Theme) =>
     main: {
       display: 'flex',
       flexDirection: 'column',
-      width: '75%',
-      margin: `0 auto`,
-      padding: `${theme.spacing(6)} 0`,
+      margin: '0 auto',
+      padding: theme.spacing(6),
+      width: '80%',
       [theme.breakpoints.down('sm')]: {
         width: '100%',
       },
     },
     stepper: {
-      '& > .MuiStep-horizontal': {
-        '&:first-child': {
-          paddingLeft: 0,
-        },
-        '&:last-child': {
-          paddingRight: 0,
-        },
-      },
+      background: 'none',
       [theme.breakpoints.down('sm')]: {
         paddingLeft: 0,
         paddingRight: 0,
+        '& > .MuiStep-horizontal': {
+          '&:first-child': {
+            paddingLeft: 0,
+          },
+          '&:last-child': {
+            paddingRight: 0,
+          },
+        },
       },
     },
     stepLabel: {
       cursor: 'pointer !important',
     },
-    backButton: {
+    marginRight6: {
       marginRight: theme.spacing(6),
     },
   })
@@ -57,9 +59,9 @@ const CreateStepper: React.FC = () => {
   const size = isTabletScreen ? ('small' as 'small') : ('medium' as 'medium')
   const classes = useStyles()
 
-  const { resetForm } = useFormikContext()
+  const { resetForm, isSubmitting } = useFormikContext()
 
-  const { namespaces, labels, annotations } = useSelector((state: RootState) => state.experiments)
+  const { namespaces } = useSelector((state: RootState) => state.experiments)
   const storeDispatch = useStoreDispatch()
 
   const { state, dispatch } = useStepperContext()
@@ -69,14 +71,6 @@ const CreateStepper: React.FC = () => {
     storeDispatch(getNamespaces())
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
-
-  useEffect(() => {
-    if (namespaces.length > 0) {
-      storeDispatch(getLabels(namespaces.join(',')))
-      storeDispatch(getAnnotations(namespaces.join(',')))
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [namespaces])
 
   const handleNext = () => dispatch(next())
   const handleBack = () => dispatch(back())
@@ -91,14 +85,14 @@ const CreateStepper: React.FC = () => {
       case 0:
         return <BasicStep namespaces={namespaces} />
       case 1:
-        return <ScopeStep namespaces={namespaces} labels={labels} annotations={annotations} />
+        return <ScopeStep namespaces={namespaces} />
       case 2:
         return <TargetStep />
       case 3:
         return <ScheduleStep />
       case 4:
         return (
-          <Box textAlign="center">
+          <Box textAlign="center" my={6}>
             <DoneAllIcon fontSize="large" />
             <Typography variant="h6">All steps are completed.</Typography>
           </Box>
@@ -109,7 +103,7 @@ const CreateStepper: React.FC = () => {
   }
 
   return (
-    <Box display="flex" flexDirection="column">
+    <Box display="flex" flexDirection="column" mt={6}>
       <Stepper className={classes.stepper} activeStep={state.activeStep} alternativeLabel>
         {steps.map((label, index) => (
           <Step key={label}>
@@ -120,31 +114,45 @@ const CreateStepper: React.FC = () => {
         ))}
       </Stepper>
 
-      {namespaces.length > 0 && (
-        <Box className={classes.main}>
-          <Box>{getStepContent()}</Box>
-          <Box mt={6} textAlign="right">
-            {activeStep === steps.length ? (
-              <Button size={size} onClick={handleReset}>
-                Reset
-              </Button>
-            ) : (
-              <>
-                {activeStep !== 0 && (
-                  <Button className={classes.backButton} size={size} onClick={handleBack}>
-                    Back
+      <Box className={classes.main}>
+        {namespaces.length > 0 ? (
+          <>
+            <Box>{getStepContent()}</Box>
+            <Box mt={6} textAlign="right">
+              {activeStep === steps.length ? (
+                <Box>
+                  <Button className={classes.marginRight6} size={size} onClick={handleReset}>
+                    Reset
                   </Button>
-                )}
-                <Button variant="contained" color="primary" size={size} onClick={handleNext}>
-                  {activeStep === steps.length - 1 ? 'Finish' : 'Next'}
-                </Button>
-              </>
-            )}
-          </Box>
-        </Box>
-      )}
-
-      {namespaces.length === 0 && <Loading />}
+                  <Button
+                    type="submit"
+                    variant="contained"
+                    color="primary"
+                    size={size}
+                    startIcon={<PublishIcon />}
+                    disabled={activeStep < 4 || isSubmitting}
+                  >
+                    Submit
+                  </Button>
+                </Box>
+              ) : (
+                <>
+                  {activeStep !== 0 && (
+                    <Button className={classes.marginRight6} size={size} onClick={handleBack}>
+                      Back
+                    </Button>
+                  )}
+                  <Button variant="contained" color="primary" size={size} onClick={handleNext}>
+                    {activeStep === steps.length - 1 ? 'Finish' : 'Next'}
+                  </Button>
+                </>
+              )}
+            </Box>
+          </>
+        ) : (
+          <SkeletonN n={6} />
+        )}
+      </Box>
     </Box>
   )
 }

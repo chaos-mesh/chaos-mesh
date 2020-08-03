@@ -1,4 +1,4 @@
-// Copyright 2020 PingCAP, Inc.
+// Copyright 2020 Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 	"k8s.io/utils/pointer"
 
-	"github.com/pingcap/chaos-mesh/test/e2e/config"
+	"github.com/chaos-mesh/chaos-mesh/test/e2e/config"
 )
 
 const ioTestConfigMap = `name: chaosfs-io
@@ -134,6 +134,44 @@ func NewTimerDeployment(name, namespace string) *appsv1.Deployment {
 	}
 }
 
+// NewNetworkTestDeployment creates a deployment for e2e test
+func NewNetworkTestDeployment(name, namespace string) *appsv1.Deployment {
+	return &appsv1.Deployment{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      name,
+			Namespace: namespace,
+			Labels: map[string]string{
+				"app": name,
+			},
+		},
+		Spec: appsv1.DeploymentSpec{
+			Replicas: pointer.Int32Ptr(1),
+			Selector: &metav1.LabelSelector{
+				MatchLabels: map[string]string{
+					"app": name,
+				},
+			},
+			Template: corev1.PodTemplateSpec{
+				ObjectMeta: metav1.ObjectMeta{
+					Labels: map[string]string{
+						"app": name,
+					},
+				},
+				Spec: corev1.PodSpec{
+					Containers: []corev1.Container{
+						{
+							Image:           config.TestConfig.E2EImage,
+							ImagePullPolicy: corev1.PullIfNotPresent,
+							Name:            "network",
+							Command:         []string{"/bin/test"},
+						},
+					},
+				},
+			},
+		},
+	}
+}
+
 // NewIOTestDeployment creates a deployment for e2e test
 func NewIOTestDeployment(name, namespace string) *appsv1.Deployment {
 	return &appsv1.Deployment{
@@ -157,7 +195,7 @@ func NewIOTestDeployment(name, namespace string) *appsv1.Deployment {
 						"app": "io",
 					},
 					Annotations: map[string]string{
-						"admission-webhook.pingcap.com/request": "chaosfs-io",
+						"admission-webhook.chaos-mesh.org/request": "chaosfs-io",
 					},
 				},
 				Spec: corev1.PodSpec{
@@ -221,6 +259,12 @@ func NewE2EService(name, namespace string) *corev1.Service {
 					Name:       "http",
 					Port:       8080,
 					TargetPort: intstr.IntOrString{IntVal: 8080},
+				},
+				// Only used in network chaos
+				{
+					Name:       "nc-port",
+					Port:       1070,
+					TargetPort: intstr.IntOrString{IntVal: 8000},
 				},
 				// Only used in io chaos
 				{

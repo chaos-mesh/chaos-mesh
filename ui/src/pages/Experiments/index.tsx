@@ -5,14 +5,13 @@ import { getStateofExperiments, setNeedToRefreshExperiments } from 'slices/exper
 import { setAlert, setAlertOpen } from 'slices/globalStatus'
 
 import ConfirmDialog from 'components/ConfirmDialog'
-import ContentContainer from '../../components/ContentContainer'
 import { Experiment } from 'api/experiments.type'
 import ExperimentPaper from 'components/ExperimentPaper'
 import Loading from 'components/Loading'
 import TuneIcon from '@material-ui/icons/Tune'
 import api from 'api'
 import { dayComparator } from 'lib/dayjs'
-import { upperFirst } from 'lib/utils'
+import { toTitleCase } from 'lib/utils'
 import { useSelector } from 'react-redux'
 
 export default function Experiments() {
@@ -21,15 +20,13 @@ export default function Experiments() {
 
   const [loading, setLoading] = useState(false)
   const [experiments, setExperiments] = useState<Experiment[] | null>(null)
+  const [dialogOpen, setDialogOpen] = useState(false)
   const [selected, setSelected] = useState({
-    namespace: '',
-    name: '',
-    kind: '',
+    uuid: '',
     title: '',
     description: '',
     action: 'delete',
   })
-  const [dialogOpen, setDialogOpen] = useState(false)
 
   const fetchExperiments = () => {
     setLoading(true)
@@ -38,35 +35,39 @@ export default function Experiments() {
       .experiments()
       .then(({ data }) => setExperiments(data))
       .catch(console.log)
-      .finally(() => {
-        setLoading(false)
-      })
+      .finally(() => setLoading(false))
   }
 
   const fetchEvents = (experiments: Experiment[]) => {
     api.events
-      .events()
+      .dryEvents({ limit: 10 })
       .then(({ data }) => {
-        setExperiments(
-          experiments.map((e) =>
-            e.status.toLowerCase() === 'failed'
-              ? { ...e, events: [] }
-              : {
+        if (data.length) {
+          setExperiments(
+            experiments.map((e) => {
+              if (e.status === 'Failed') {
+                return { ...e, events: [] }
+              } else {
+                const events = data
+                  .filter((d) => d.experiment_id === e.uid)
+                  .sort((a, b) => dayComparator(a.start_time, b.start_time))
+
+                return {
                   ...e,
-                  events: [
-                    data
-                      .filter((d) => d.Experiment === e.Name)
-                      .sort((a, b) => dayComparator(a.StartTime, b.StartTime))[0],
-                  ],
+                  events: events.length > 0 ? [events[0]] : [],
                 }
+              }
+            })
           )
-        )
+        }
       })
       .catch(console.log)
   }
 
+  // Get all experiments after mount
   useEffect(fetchExperiments, [])
 
+  // Refresh experiments after some actions are completed
   useEffect(() => {
     if (needToRefreshExperiments) {
       fetchExperiments()
@@ -75,6 +76,7 @@ export default function Experiments() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [needToRefreshExperiments])
 
+  // Refresh every experiments' events after experiments state updated
   useEffect(() => {
     if (experiments && experiments.length > 0 && !experiments[0].events) {
       fetchEvents(experiments)
@@ -107,14 +109,14 @@ export default function Experiments() {
 
     setDialogOpen(false)
 
-    const { namespace, name, kind } = selected
+    const { uuid } = selected
 
-    actionFunc(namespace, name, kind)
+    actionFunc(uuid)
       .then(() => {
         dispatch(
           setAlert({
             type: 'success',
-            message: `${upperFirst(action)}${action === 'start' ? 'ed' : 'd'} successfully!`,
+            message: `${toTitleCase(action)}${action === 'start' ? 'ed' : 'd'} successfully!`,
           })
         )
         dispatch(setAlertOpen(true))
@@ -125,12 +127,12 @@ export default function Experiments() {
   }
 
   return (
-    <ContentContainer>
+    <>
       <Grid container spacing={3}>
         {experiments &&
           experiments.length > 0 &&
           experiments.map((e) => (
-            <Grid key={e.Name} item xs={12}>
+            <Grid key={e.name} item xs={12}>
               <ExperimentPaper experiment={e} handleSelect={setSelected} handleDialogOpen={setDialogOpen} />
             </Grid>
           ))}
@@ -156,6 +158,6 @@ export default function Experiments() {
         description={selected.description}
         handleConfirm={handleExperiment(selected.action)}
       />
-    </ContentContainer>
+    </>
   )
 }

@@ -1,4 +1,4 @@
-// Copyright 2020 PingCAP, Inc.
+// Copyright 2020 Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ import (
 	clientcmdapi "k8s.io/client-go/tools/clientcmd/api"
 	"k8s.io/kubernetes/test/e2e/framework"
 
-	"github.com/pingcap/chaos-mesh/test"
+	"github.com/chaos-mesh/chaos-mesh/test"
 )
 
 // TestConfig for the test config
