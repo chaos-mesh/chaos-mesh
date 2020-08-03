@@ -13,6 +13,7 @@ export const defaultExperimentSchema: Experiment = {
     phase_selectors: ['all'],
     mode: 'one',
     value: '',
+    pods: {},
   },
   target: {
     kind: 'PodChaos',

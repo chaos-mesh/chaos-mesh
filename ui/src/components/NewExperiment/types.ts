@@ -14,6 +14,7 @@ export interface ExperimentScope {
   phase_selectors: string[]
   mode: string
   value: string
+  pods: { [key: string]: string[] }
 }
 
 export interface ExperimentTargetPod {
