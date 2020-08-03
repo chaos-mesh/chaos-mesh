@@ -166,6 +166,11 @@ func main() {
 		os.Exit(1)
 	}
 
+	if err = (&chaosmeshv1alpha1.RawPodNetworkChaos{}).SetupWebhookWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create webhook", "webhook", "RawPodNetworkChaos")
+		os.Exit(1)
+	}
+
 	// Init metrics collector
 	metricsCollector := metrics.NewChaosCollector(mgr.GetCache(), controllermetrics.Registry)
 
