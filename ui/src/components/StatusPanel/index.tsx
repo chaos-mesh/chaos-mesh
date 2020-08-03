@@ -1,4 +1,4 @@
-import { Box, Grid, Paper, Typography } from '@material-ui/core'
+import { Box, Grid, Paper, Typography, useMediaQuery, useTheme } from '@material-ui/core'
 import React, { useEffect } from 'react'
 import { RootState, useStoreDispatch } from 'store'
 import { Theme, createStyles, makeStyles } from '@material-ui/core/styles'
@@ -19,8 +19,6 @@ const useStyles = makeStyles((theme: Theme) =>
     },
     item: {
       display: 'flex',
-      flexDirection: 'column',
-      justifyContent: 'center',
       alignItems: 'center',
       height: '100%',
       textAlign: 'center',
@@ -38,6 +36,8 @@ interface d {
 }
 
 const StatusPanel = () => {
+  const theme = useTheme()
+  const isTabletScreen = useMediaQuery(theme.breakpoints.down('sm'))
   const classes = useStyles()
 
   const state = useSelector((state: RootState) => state.experiments.stateOfExperiments)
@@ -52,46 +52,53 @@ const StatusPanel = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
+  const fontSize = isTabletScreen ? undefined : 'large'
   const data: { [k: string]: d } = {
     running: {
       label: 'Running',
       value: state.Running,
-      Icon: <TimelineIcon color="primary" fontSize="large" />,
+      Icon: <TimelineIcon color="primary" fontSize={fontSize} />,
     },
     paused: {
       label: 'Paused',
       value: state.Paused,
-      Icon: <PauseCircleOutlineIcon color="primary" fontSize="large" />,
+      Icon: <PauseCircleOutlineIcon color="primary" fontSize={fontSize} />,
     },
     failed: {
       label: 'Failed',
       value: state.Failed,
-      Icon: <ErrorOutlineIcon color="error" fontSize="large" />,
+      Icon: <ErrorOutlineIcon color="error" fontSize={fontSize} />,
     },
     waiting: {
       label: 'Waiting',
       value: state.Waiting,
-      Icon: <SnoozeIcon color="primary" fontSize="large" />,
+      Icon: <SnoozeIcon color="primary" fontSize={fontSize} />,
     },
     finished: {
       label: 'Finished',
       value: state.Finished,
-      Icon: <CheckCircleOutlineIcon fontSize="large" className={classes.finished} />,
+      Icon: <CheckCircleOutlineIcon fontSize={fontSize} className={classes.finished} />,
     },
   }
 
   const StatusGrid: React.FC<{ data: d }> = ({ data }) => (
     <Grid item xs>
       <Paper variant="outlined" className={classes.item}>
-        <Box display="flex" justifyContent="space-between" alignItems="center" width="50%">
-          {data.Icon}
-          <Box>
-            <Typography color="textSecondary" gutterBottom>
-              {data.label}
-            </Typography>
-            <Typography variant="h6">{data.value}</Typography>
-          </Box>
-        </Box>
+        <Grid container>
+          <Grid item xs>
+            <Box display="flex" justifyContent="center" alignItems="center" height="100%">
+              {data.Icon}
+            </Box>
+          </Grid>
+          <Grid item xs>
+            <Box>
+              <Typography variant="button" color="textSecondary" gutterBottom>
+                {data.label}
+              </Typography>
+              <Typography variant="h6">{data.value}</Typography>
+            </Box>
+          </Grid>
+        </Grid>
       </Paper>
     </Grid>
   )

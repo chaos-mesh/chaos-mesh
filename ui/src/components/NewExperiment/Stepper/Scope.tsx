@@ -1,13 +1,14 @@
 import { AutocompleteMultipleField, SelectField, TextField } from 'components/FormField'
-import { InputAdornment, MenuItem } from '@material-ui/core'
+import { Box, Divider, InputAdornment, MenuItem, Typography } from '@material-ui/core'
 import React, { useMemo } from 'react'
 import { RootState, useStoreDispatch } from 'store'
-import { getAnnotations, getLabels } from 'slices/experiments'
+import { getAnnotations, getLabels, getPodsByNamespaces } from 'slices/experiments'
 import { getIn, useFormikContext } from 'formik'
 import { joinObjKVs, toTitleCase } from 'lib/utils'
 
 import AdvancedOptions from 'components/AdvancedOptions'
 import { Experiment } from '../types'
+import ScopePodsTable from './ScopePodsTable'
 import { useSelector } from 'react-redux'
 
 interface ScopeStepProps {
@@ -19,20 +20,23 @@ const phases = ['all', 'pending', 'running', 'succeeded', 'failed', 'unknown']
 const modes = ['all', { name: 'Random One', value: 'one' }, 'fixed number', 'fixed percent', 'random max percent']
 const modesWithAdornment = ['fixed-percent', 'random-max-percent']
 
+const labelFilters = ['pod-template-hash']
+
 const ScopeStep: React.FC<ScopeStepProps> = ({ namespaces, scope = 'scope' }) => {
   const { values, handleChange } = useFormikContext<Experiment>()
 
-  const { labels, annotations } = useSelector((state: RootState) => state.experiments)
+  const { labels, annotations, pods } = useSelector((state: RootState) => state.experiments)
   const storeDispatch = useStoreDispatch()
 
-  const labelKVs = useMemo(() => joinObjKVs(labels, ': '), [labels])
+  const labelKVs = useMemo(() => joinObjKVs(labels, ': ', labelFilters), [labels])
   const annotationKVs = useMemo(() => joinObjKVs(annotations, ': '), [annotations])
 
   const handleNamespaceSelectorsChangeCallback = (labels: string[]) => {
     const _labels = labels.length !== 0 ? labels : namespaces
 
-    storeDispatch(getLabels(_labels.join(',')))
-    storeDispatch(getAnnotations(_labels.join(',')))
+    storeDispatch(getLabels(_labels))
+    storeDispatch(getAnnotations(_labels))
+    storeDispatch(getPodsByNamespaces({ namespace_selectors: _labels }))
   }
 
   const handleChangeIncludeAll = (id: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -121,6 +125,21 @@ const ScopeStep: React.FC<ScopeStepProps> = ({ namespaces, scope = 'scope' }) =>
           ))}
         </SelectField>
       </AdvancedOptions>
+
+      {pods.length > 0 && (
+        <>
+          <Box my={6}>
+            <Divider />
+          </Box>
+          <Box mb={6}>
+            <Typography>Pods</Typography>
+            <Typography variant="body2" color="textSecondary">
+              This will overide Label Selectors and Annotation Selectors
+            </Typography>
+          </Box>
+          <ScopePodsTable scope={scope} pods={pods} />
+        </>
+      )}
     </>
   )
 }

@@ -6,7 +6,7 @@ import day from 'lib/dayjs'
 import wrapText from './wrapText'
 
 const margin = {
-  top: 0,
+  top: 15,
   right: 15,
   bottom: 30,
   left: 15,
@@ -100,20 +100,17 @@ export default function gen({
           zoom.transform as any,
           d3.zoomIdentity
             .translate(width / 2, 0)
-            .scale(2)
+            .scale(0.2)
             .translate(-x(day(event.start_time)), 0)
         )
     })
   legends
-    .insert('div')
-    .attr('style', 'color: rgba(0, 0, 0, 0.72); font-size: 0.75rem;')
-    .text((d) => d.name)
-  legends
     .append('div')
-    .attr(
-      'style',
-      (d) => `width: 14px; height: 14px; margin-left: 8px; background: ${colorPalette(d.uuid)}; cursor: pointer;`
-    )
+    .attr('style', (d) => `width: 14px; height: 14px; background: ${colorPalette(d.uuid)}; cursor: pointer;`)
+  legends
+    .insert('div')
+    .attr('style', 'margin-left: 8px; color: rgba(0, 0, 0, 0.54); font-size: 0.75rem; font-weight: bold;')
+    .text((d) => d.name)
 
   function genRectWidth(d: Event) {
     let width = d.finish_time ? x(day(d.finish_time)) - x(day(d.start_time)) : x(day()) - x(day(d.start_time))
