@@ -1,3 +1,4 @@
+# syntax=docker/dockerfile:experimental
 FROM golang:1.14.4-alpine3.12 AS build_base
 
 ARG HTTPS_PROXY
@@ -22,4 +23,5 @@ ARG SWAGGER
 
 COPY . /src
 WORKDIR /src
-RUN make binary
+RUN --mount=type=cache,target=/root/.cache/go-build \
+    make binary

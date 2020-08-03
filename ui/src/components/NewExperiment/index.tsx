@@ -5,7 +5,7 @@ import { defaultExperimentSchema, validationSchema } from './constants'
 import { parseLoaded, parseSubmit, yamlToExperiment } from 'lib/formikhelpers'
 import { setAlert, setAlertOpen } from 'slices/globalStatus'
 
-// import { Archive } from 'api/archives.type'
+import { Archive } from 'api/archives.type'
 import CloudUploadOutlinedIcon from '@material-ui/icons/CloudUploadOutlined'
 import { Experiment } from './types'
 import { Experiment as ExperimentResponse } from 'api/experiments.type'
@@ -26,7 +26,9 @@ const LoadWrapper: React.FC<{ title: string }> = ({ title, children }) => (
     <Box mb={6}>
       <Typography>{title}</Typography>
     </Box>
-    {children}
+    <Box maxHeight="300px" overflow="scroll">
+      {children}
+    </Box>
   </Box>
 )
 
@@ -38,26 +40,33 @@ const Actions = ({ setInitialValues }: ActionsProps) => {
   const dispatch = useStoreDispatch()
 
   const [experiments, setExperiments] = useState<ExperimentResponse[] | null>(null)
-  // const [archives, setArchives] = useState<Archive[] | null>(null)
+  const [archives, setArchives] = useState<Archive[] | null>(null)
   const [experimentRadio, setExperimentRadio] = useState('')
-  // const [archiveRadio, setArchiveRadio] = useState('')
+  const [archiveRadio, setArchiveRadio] = useState('')
 
   const onExperimentRadioChange = (e: any) => {
     const uuid = e.target.value
 
     setExperimentRadio(uuid)
+    setArchiveRadio('')
 
     api.experiments
       .detail(uuid)
-      .then(({ data }) => setInitialValues(parseLoaded(data)))
+      .then(({ data }) => setInitialValues(parseLoaded(data.experiment_info)))
       .catch(console.log)
   }
 
-  // const onArchiveRadioChange = (e: any) => {
-  //   const uuid = e.target.value
+  const onArchiveRadioChange = (e: any) => {
+    const uuid = e.target.value
 
-  //   setArchiveRadio(uuid)
-  // }
+    setArchiveRadio(uuid)
+    setExperimentRadio('')
+
+    api.archives
+      .detail(uuid)
+      .then(({ data }) => setInitialValues(parseLoaded(data.experiment_info)))
+      .catch(console.log)
+  }
 
   const fetchExperiments = () =>
     api.experiments
@@ -65,15 +74,15 @@ const Actions = ({ setInitialValues }: ActionsProps) => {
       .then(({ data }) => setExperiments(data))
       .catch(console.log)
 
-  // const fetchArchives = () =>
-  //   api.archives
-  //     .archives()
-  //     .then(({ data }) => setArchives(data))
-  //     .catch(console.log)
+  const fetchArchives = () =>
+    api.archives
+      .archives()
+      .then(({ data }) => setArchives(data))
+      .catch(console.log)
 
   useEffect(() => {
     fetchExperiments()
-    // fetchArchives()
+    fetchArchives()
   }, [])
 
   const handleUploadYAML = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -83,6 +92,9 @@ const Actions = ({ setInitialValues }: ActionsProps) => {
     reader.onload = function (e) {
       try {
         const y = yamlToExperiment(yaml.safeLoad(e.target!.result as string))
+        if (process.env.NODE_ENV === 'development') {
+          console.debug('Debug yamlToExperiment:', y)
+        }
         setInitialValues(y)
         dispatch(
           setAlert({
@@ -111,7 +123,7 @@ const Actions = ({ setInitialValues }: ActionsProps) => {
         <RadioGroup value={experimentRadio} onChange={onExperimentRadioChange}>
           {experiments && experiments.length > 0 ? (
             experiments.map((e) => (
-              <FormControlLabel key={e.uid} value={e.uid} control={<Radio color="primary" />} label={e.Name} />
+              <FormControlLabel key={e.uid} value={e.uid} control={<Radio color="primary" />} label={e.name} />
             ))
           ) : experiments?.length === 0 ? (
             <Typography variant="body2">No experiments found.</Typography>
@@ -121,15 +133,15 @@ const Actions = ({ setInitialValues }: ActionsProps) => {
         </RadioGroup>
       </LoadWrapper>
 
-      {/* <Box my={6}>
+      <Box my={6}>
         <Divider />
       </Box>
 
       <LoadWrapper title="Load From Archives">
-        <RadioGroup>
+        <RadioGroup value={archiveRadio} onChange={onArchiveRadioChange}>
           {archives && archives.length > 0 ? (
             archives.map((a) => (
-              <FormControlLabel key={a.UID} value={a.Name} control={<Radio color="primary" />} label={a.Name} />
+              <FormControlLabel key={a.uid} value={a.uid} control={<Radio color="primary" />} label={a.name} />
             ))
           ) : archives?.length === 0 ? (
             <Typography variant="body2">No archives found.</Typography>
@@ -137,7 +149,7 @@ const Actions = ({ setInitialValues }: ActionsProps) => {
             <Skeleton3 />
           )}
         </RadioGroup>
-      </LoadWrapper> */}
+      </LoadWrapper>
 
       <Box my={6}>
         <Divider />
@@ -195,7 +207,7 @@ export default function NewExperiment() {
         onSubmit={handleOnSubmit}
       >
         <Paper variant="outlined" style={{ height: '100%' }}>
-          <PaperTop title="New Experiment" />
+          <PaperTop title="Create a New Experiment" />
           <Grid container>
             <Grid item xs={12} sm={8}>
               <Form>

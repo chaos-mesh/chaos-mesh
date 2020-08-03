@@ -34,7 +34,7 @@ spec:
 1. When the chaos is running, run the following command to get its status:
 
     ```shell
-    $ kubectl get podchaos pod-kill-example --namespace chaos-testing --output yaml \
+    kubectl get podchaos pod-kill-example --namespace chaos-testing --output yaml \
     && kubectl get pods --namespace chaos-testing
     ```
 
@@ -81,9 +81,9 @@ spec:
 2. Pause the running chaos:
 
     ```shell
-    $  kubectl annotate podchaos pod-kill-example --namespace chaos-testing experiment.chaos-mesh.org/pause=true
-    podchaos.chaos-mesh.org/pod-kill-example annotated
-    $ kubectl get podchaos pod-kill-example --namespace chaos-testing --output yaml \
+    kubectl annotate podchaos pod-kill-example --namespace chaos-testing experiment.chaos-mesh.org/pause=true
+    # podchaos.chaos-mesh.org/pod-kill-example annotated
+    kubectl get podchaos pod-kill-example --namespace chaos-testing --output yaml \
     && kubectl get pods --namespace chaos-testing
     ```
 
@@ -133,8 +133,8 @@ spec:
 3. Resume this chaos:
 
     ```shell
-    $ kubectl annotate podchaos pod-kill-example --namespace chaos-testing experiment.chaos-mesh.org/pause-
-    podchaos.chaos-mesh.org/pod-kill-example annotated
+    kubectl annotate podchaos pod-kill-example --namespace chaos-testing experiment.chaos-mesh.org/pause-
+    # podchaos.chaos-mesh.org/pod-kill-example annotated
     ```
 
     The output is like this:

@@ -1,37 +1,42 @@
 import { AutocompleteMultipleField, SelectField, TextField } from 'components/FormField'
-import { InputAdornment, MenuItem } from '@material-ui/core'
+import { Box, Divider, InputAdornment, MenuItem, Typography } from '@material-ui/core'
 import React, { useMemo } from 'react'
 import { RootState, useStoreDispatch } from 'store'
-import { getAnnotations, getLabels } from 'slices/experiments'
+import { getAnnotations, getLabels, getPodsByNamespaces } from 'slices/experiments'
+import { getIn, useFormikContext } from 'formik'
 import { joinObjKVs, toTitleCase } from 'lib/utils'
 
 import AdvancedOptions from 'components/AdvancedOptions'
 import { Experiment } from '../types'
-import { useFormikContext } from 'formik'
+import ScopePodsTable from './ScopePodsTable'
 import { useSelector } from 'react-redux'
 
 interface ScopeStepProps {
   namespaces: string[]
+  scope?: string
 }
 
 const phases = ['all', 'pending', 'running', 'succeeded', 'failed', 'unknown']
 const modes = ['all', { name: 'Random One', value: 'one' }, 'fixed number', 'fixed percent', 'random max percent']
 const modesWithAdornment = ['fixed-percent', 'random-max-percent']
 
-const ScopeStep: React.FC<ScopeStepProps> = ({ namespaces }) => {
+const labelFilters = ['pod-template-hash']
+
+const ScopeStep: React.FC<ScopeStepProps> = ({ namespaces, scope = 'scope' }) => {
   const { values, handleChange } = useFormikContext<Experiment>()
 
-  const { labels, annotations } = useSelector((state: RootState) => state.experiments)
+  const { labels, annotations, pods } = useSelector((state: RootState) => state.experiments)
   const storeDispatch = useStoreDispatch()
 
-  const labelKVs = useMemo(() => joinObjKVs(labels, ': '), [labels])
+  const labelKVs = useMemo(() => joinObjKVs(labels, ': ', labelFilters), [labels])
   const annotationKVs = useMemo(() => joinObjKVs(annotations, ': '), [annotations])
 
   const handleNamespaceSelectorsChangeCallback = (labels: string[]) => {
     const _labels = labels.length !== 0 ? labels : namespaces
 
-    storeDispatch(getLabels(_labels.join(',')))
-    storeDispatch(getAnnotations(_labels.join(',')))
+    storeDispatch(getLabels(_labels))
+    storeDispatch(getAnnotations(_labels))
+    storeDispatch(getPodsByNamespaces({ namespace_selectors: _labels }))
   }
 
   const handleChangeIncludeAll = (id: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -52,8 +57,8 @@ const ScopeStep: React.FC<ScopeStepProps> = ({ namespaces }) => {
   return (
     <>
       <AutocompleteMultipleField
-        id="scope.namespace_selectors"
-        name="scope.namespace_selectors"
+        id={`${scope}.namespace_selectors`}
+        name={`${scope}.namespace_selectors`}
         label="Namespace Selectors"
         helperText="Multiple options"
         options={namespaces}
@@ -61,14 +66,14 @@ const ScopeStep: React.FC<ScopeStepProps> = ({ namespaces }) => {
       />
 
       <AutocompleteMultipleField
-        id="scope.label_selectors"
-        name="scope.label_selectors"
+        id={`${scope}.label_selectors`}
+        name={`${scope}.label_selectors`}
         label="Label Selectors"
         helperText="Multiple options"
         options={labelKVs}
       />
 
-      <SelectField id="scope.mode" name="scope.mode" label="Mode" helperText="Select the experiment mode">
+      <SelectField id={`${scope}.mode`} name={`${scope}.mode`} label="Mode" helperText="Select the experiment mode">
         {modes.map((option) =>
           typeof option === 'string' ? (
             <MenuItem key={option} value={option.split(' ').join('-')}>
@@ -82,14 +87,14 @@ const ScopeStep: React.FC<ScopeStepProps> = ({ namespaces }) => {
         )}
       </SelectField>
 
-      {values.scope.mode !== 'all' && values.scope.mode !== 'one' && (
+      {getIn(values, scope).mode !== 'all' && getIn(values, scope).mode !== 'one' && (
         <TextField
-          id="scope.value"
-          name="scope.value"
+          id={`${scope}.value`}
+          name={`${scope}.value`}
           label="Mode Value"
           helperText="Please fill the mode value"
           InputProps={{
-            endAdornment: modesWithAdornment.includes(values.scope.mode) && (
+            endAdornment: modesWithAdornment.includes(getIn(values, scope).mode) && (
               <InputAdornment position="end">%</InputAdornment>
             ),
           }}
@@ -98,20 +103,20 @@ const ScopeStep: React.FC<ScopeStepProps> = ({ namespaces }) => {
 
       <AdvancedOptions>
         <AutocompleteMultipleField
-          id="scope.annotation_selectors"
-          name="scope.annotation_selectors"
+          id={`${scope}.annotation_selectors`}
+          name={`${scope}.annotation_selectors`}
           label="Annotation Selectors"
           helperText="Multiple options"
           options={annotationKVs}
         />
 
         <SelectField
-          id="scope.phase_selectors"
-          name="scope.phase_selectors"
+          id={`${scope}.phase_selectors`}
+          name={`${scope}.phase_selectors`}
           label="Phase Selectors"
           helperText="Multiple options"
           multiple
-          onChange={handleChangeIncludeAll('scope.phase_selectors')}
+          onChange={handleChangeIncludeAll(`${scope}.phase_selectors`)}
         >
           {phases.map((option: string) => (
             <MenuItem key={option} value={option}>
@@ -120,6 +125,21 @@ const ScopeStep: React.FC<ScopeStepProps> = ({ namespaces }) => {
           ))}
         </SelectField>
       </AdvancedOptions>
+
+      {pods.length > 0 && (
+        <>
+          <Box my={6}>
+            <Divider />
+          </Box>
+          <Box mb={6}>
+            <Typography>Pods</Typography>
+            <Typography variant="body2" color="textSecondary">
+              This will overide Label Selectors and Annotation Selectors
+            </Typography>
+          </Box>
+          <ScopePodsTable scope={scope} pods={pods} />
+        </>
+      )}
     </>
   )
 }

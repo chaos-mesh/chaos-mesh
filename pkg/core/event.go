@@ -16,8 +16,6 @@ package core
 import (
 	"context"
 	"time"
-
-	"github.com/jinzhu/gorm"
 )
 
 // EventStore defines operations for working with event.
@@ -73,27 +71,33 @@ type EventStore interface {
 
 // Event represents an event instance.
 type Event struct {
-	gorm.Model
-	Experiment   string `gorm:"index:experiment"`
-	Namespace    string
-	Kind         string
-	Message      string
-	StartTime    *time.Time `gorm:"index:start_time"`
-	FinishTime   *time.Time
-	Duration     string
-	Pods         []*PodRecord `gorm:"-"`
-	ExperimentID string       `gorm:"index:experiment_id"`
+	ID           uint         `gorm:"primary_key" json:"id"`
+	CreatedAt    time.Time    `json:"created_at"`
+	UpdatedAt    time.Time    `json:"updated_at"`
+	DeletedAt    *time.Time   `sql:"index" json:"deleted_at"`
+	Experiment   string       `gorm:"index:experiment" json:"experiment"`
+	Namespace    string       `json:"namespace"`
+	Kind         string       `json:"kind"`
+	Message      string       `json:"message"`
+	StartTime    *time.Time   `gorm:"index:start_time" json:"start_time"`
+	FinishTime   *time.Time   `json:"finish_time"`
+	Duration     string       `json:"duration"`
+	Pods         []*PodRecord `gorm:"-" json:"pods"`
+	ExperimentID string       `gorm:"index:experiment_id" json:"experiment_id"`
 }
 
 // PodRecord represents a pod record with event ID.
 type PodRecord struct {
-	gorm.Model
-	EventID   uint   `gorm:"index:event_id"`
-	PodIP     string `gorm:"index:pod_id"`
-	PodName   string
-	Namespace string
-	Message   string
-	Action    string
+	ID        uint       `gorm:"primary_key" json:"id"`
+	CreatedAt time.Time  `json:"created_at"`
+	UpdatedAt time.Time  `json:"updated_at"`
+	DeletedAt *time.Time `sql:"index" json:"deleted_at"`
+	EventID   uint       `gorm:"index:event_id" json:"event_id"`
+	PodIP     string     `gorm:"index:pod_id" json:"pod_ip"`
+	PodName   string     `json:"pod_name"`
+	Namespace string     `json:"namespace"`
+	Message   string     `json:"message"`
+	Action    string     `json:"action"`
 }
 
 // Filter represents the filter to list events
@@ -106,4 +110,5 @@ type Filter struct {
 	ExperimentNamespace string
 	UID                 string
 	Kind                string
+	LimitStr            string
 }

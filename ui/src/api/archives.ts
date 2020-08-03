@@ -7,3 +7,5 @@ export const archives: (namespace?: string, name?: string, kind?: string) => Pro
   name = '',
   kind = ''
 ) => http.get(`/archives?namespace=${namespace}&name=${name}&kind=${kind}`)
+
+export const detail = (uuid: uuid) => http.get(`/archives/detail?uid=${uuid}`)
