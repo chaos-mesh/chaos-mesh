@@ -177,9 +177,9 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 			r.Log.Info("Requeue request", "after", duration)
 
 			return ctrl.Result{RequeueAfter: duration}, nil
-		} else {
-			chaos.SetNextStart(time.Now())
 		}
+
+		chaos.SetNextStart(time.Now())
 	}
 
 	if err := r.Update(ctx, chaos); err != nil {
