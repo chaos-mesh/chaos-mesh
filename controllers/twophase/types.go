@@ -162,15 +162,24 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		chaos.SetNextStart(*nextStart)
 		chaos.SetNextRecover(nextRecover)
 	} else {
+		nextStart, err := utils.NextTime(*chaos.GetScheduler(), status.Experiment.StartTime.Time)
+		if err != nil {
+			r.Log.Error(err, "failed to get next start time")
+			return ctrl.Result{}, err
+		}
 		nextTime := chaos.GetNextStart()
 
-		if !chaos.GetNextRecover().IsZero() && chaos.GetNextRecover().Before(nextTime) {
-			nextTime = chaos.GetNextRecover()
-		}
-		duration := nextTime.Sub(now)
-		r.Log.Info("Requeue request", "after", duration)
+		if nextStart.Equal(nextTime) {
+			if !chaos.GetNextRecover().IsZero() && chaos.GetNextRecover().Before(nextTime) {
+				nextTime = chaos.GetNextRecover()
+			}
+			duration := nextTime.Sub(now)
+			r.Log.Info("Requeue request", "after", duration)
 
-		return ctrl.Result{RequeueAfter: duration}, nil
+			return ctrl.Result{RequeueAfter: duration}, nil
+		} else {
+			chaos.SetNextStart(time.Now())
+		}
 	}
 
 	if err := r.Update(ctx, chaos); err != nil {
