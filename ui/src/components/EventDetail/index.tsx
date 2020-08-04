@@ -1,14 +1,6 @@
-import {
-  TableCell as MUITableCell,
-  Paper,
-  Table,
-  TableBody,
-  TableHead,
-  TableRow,
-  Typography,
-  withStyles,
-} from '@material-ui/core'
+import { TableCell as MUITableCell, Paper, Table, TableBody, TableRow, Typography, withStyles } from '@material-ui/core'
 
+import AffectedPods from 'components/AffectedPods'
 import { Event } from 'api/events.type'
 import React from 'react'
 import { format } from 'lib/dayjs'
@@ -67,7 +59,7 @@ const EventDetail: React.FC<EventDetailProps> = ({ event: e }) => {
         </TableRow>
 
         <TableRow>
-          <TableCell>Start Time</TableCell>
+          <TableCell>Started</TableCell>
           <TableCell>
             <Typography variant="body2" color="textSecondary">
               {format(e.start_time)}
@@ -76,7 +68,7 @@ const EventDetail: React.FC<EventDetailProps> = ({ event: e }) => {
         </TableRow>
 
         <TableRow>
-          <TableCell>Finish Time</TableCell>
+          <TableCell>Ended</TableCell>
           <TableCell>
             <Typography variant="body2" color="textSecondary">
               {e.finish_time ? format(e.finish_time) : <span className={runningLabel.root}>Running</span>}
@@ -88,29 +80,7 @@ const EventDetail: React.FC<EventDetailProps> = ({ event: e }) => {
           <TableCell>Affected Pods</TableCell>
           <TableCell>
             <Paper variant="outlined">
-              <Table size="small">
-                <TableHead>
-                  <TableRow>
-                    <TableCell>IP</TableCell>
-                    <TableCell>Name</TableCell>
-                    <TableCell>Namespace</TableCell>
-                    <TableCell>Action</TableCell>
-                    <TableCell>Message</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {e.pods &&
-                    e.pods.map((pod) => (
-                      <TableRow key={pod.id}>
-                        <TableCell>{pod.pod_ip}</TableCell>
-                        <TableCell>{pod.pod_name}</TableCell>
-                        <TableCell>{pod.namespace}</TableCell>
-                        <TableCell>{pod.action}</TableCell>
-                        <TableCell>{pod.message}</TableCell>
-                      </TableRow>
-                    ))}
-                </TableBody>
-              </Table>
+              <AffectedPods pods={e.pods!} />
             </Paper>
           </TableCell>
         </TableRow>

@@ -2,7 +2,7 @@ import * as d3 from 'd3'
 
 import { Event } from 'api/events.type'
 import _debounce from 'lodash.debounce'
-import day from 'lib/dayjs'
+import day, { format } from 'lib/dayjs'
 import wrapText from './wrapText'
 
 const margin = {
@@ -172,17 +172,9 @@ export default function gen({
             <b>Status: ${d.finish_time ? 'Ended' : 'Running'}</b>
             <br />
             <br />
-            <span style="color: rgba(0, 0, 0, 0.67);">Started: ${day(d.start_time).format(
-              'YYYY-MM-DD HH:mm:ss A'
-            )}</span>
+            <span style="color: rgba(0, 0, 0, 0.67);">Started: ${format(d.start_time)}</span>
             <br />
-            ${
-              d.finish_time
-                ? `<span style="color: rgba(0, 0, 0, 0.67);">Ended: ${day(d.finish_time).format(
-                    'YYYY-MM-DD HH:mm:ss A'
-                  )}</span>`
-                : ''
-            }
+            ${d.finish_time ? `<span style="color: rgba(0, 0, 0, 0.67);">Ended: ${format(d.finish_time)}</span>` : ''}
             `
   }
 

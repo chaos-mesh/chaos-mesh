@@ -209,9 +209,15 @@ export interface EventsTableProps {
   title?: string
   events: Event[]
   detailed?: boolean
+  hasSearch?: boolean
 }
 
-const EventsTable: React.FC<EventsTableProps> = ({ title = 'Events', events: allEvents, detailed = false }) => {
+const EventsTable: React.FC<EventsTableProps> = ({
+  title = 'Events',
+  events: allEvents,
+  detailed = false,
+  hasSearch = true,
+}) => {
   const classes = useStyles()
 
   const [events, setEvents] = useState(allEvents)
@@ -253,24 +259,26 @@ const EventsTable: React.FC<EventsTableProps> = ({ title = 'Events', events: all
   return (
     <>
       <PaperTop title={title}>
-        <TextField
-          style={{ width: '200px', minWidth: '30%', margin: 0 }}
-          margin="dense"
-          placeholder="Search events ..."
-          disabled={!allEvents}
-          variant="outlined"
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <SearchIcon color="primary" />
-              </InputAdornment>
-            ),
-          }}
-          inputProps={{
-            style: { paddingTop: 8, paddingBottom: 8 },
-          }}
-          onChange={handleSearchChange}
-        />
+        {hasSearch && (
+          <TextField
+            style={{ width: '200px', minWidth: '30%', margin: 0 }}
+            margin="dense"
+            placeholder="Search events ..."
+            disabled={!allEvents}
+            variant="outlined"
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon color="primary" />
+                </InputAdornment>
+              ),
+            }}
+            inputProps={{
+              style: { paddingTop: 8, paddingBottom: 8 },
+            }}
+            onChange={handleSearchChange}
+          />
+        )}
       </PaperTop>
       <TableContainer className={classes.tableContainer}>
         <Table stickyHeader>

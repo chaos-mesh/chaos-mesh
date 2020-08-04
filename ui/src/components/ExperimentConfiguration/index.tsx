@@ -9,6 +9,7 @@ import {
   withStyles,
 } from '@material-ui/core'
 
+import { ArchiveDetail } from 'api/archives.type'
 import { ChaosKindKeyMap } from 'lib/formikhelpers'
 import { ExperimentDetail } from 'api/experiments.type'
 import React from 'react'
@@ -21,7 +22,7 @@ const TableCell = withStyles({
 })(MUITableCell)
 
 interface ExperimentConfigurationProps {
-  experimentDetail: ExperimentDetail
+  experimentDetail: ExperimentDetail | ArchiveDetail
 }
 
 const ExperimentConfiguration: React.FC<ExperimentConfigurationProps> = ({ experimentDetail: e }) => (
@@ -94,14 +95,16 @@ const ExperimentConfiguration: React.FC<ExperimentConfigurationProps> = ({ exper
             </TableCell>
           </TableRow>
 
-          <TableRow>
-            <TableCell>Created</TableCell>
-            <TableCell>
-              <Typography variant="body2" color="textSecondary">
-                {format(e.created)}
-              </Typography>
-            </TableCell>
-          </TableRow>
+          {(e as ExperimentDetail).created && (
+            <TableRow>
+              <TableCell>Created</TableCell>
+              <TableCell>
+                <Typography variant="body2" color="textSecondary">
+                  {format((e as ExperimentDetail).created)}
+                </Typography>
+              </TableCell>
+            </TableRow>
+          )}
         </TableBody>
       </Table>
     </Grid>

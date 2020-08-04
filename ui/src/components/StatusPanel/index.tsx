@@ -15,7 +15,7 @@ const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     container: {
       [theme.breakpoints.up('sm')]: {
-        height: `calc(50% + ${theme.spacing(2.25)})`,
+        height: `calc(100% + ${theme.spacing(3)})`,
       },
     },
     item: {
@@ -82,8 +82,8 @@ const StatusPanel = () => {
     },
   }
 
-  const StatusGrid: React.FC<{ data: d }> = ({ data }) => (
-    <Grid item xs={6} sm>
+  const StatusGrid: React.FC<{ data: d; sm: any }> = ({ data, sm }) => (
+    <Grid item xs={6} sm={sm}>
       <Paper variant="outlined" className={classes.item}>
         <Grid container>
           <Grid item xs>
@@ -93,10 +93,8 @@ const StatusPanel = () => {
           </Grid>
           <Grid item xs>
             <Box>
-              <Typography variant="button" color="textSecondary" gutterBottom>
-                {data.label}
-              </Typography>
-              <Typography variant="h6">{data.value}</Typography>
+              <Typography variant="overline">{data.label}</Typography>
+              <Typography variant="h5">{data.value}</Typography>
             </Box>
           </Grid>
         </Grid>
@@ -107,13 +105,11 @@ const StatusPanel = () => {
   return (
     <Box height="100%">
       <Grid container spacing={3} className={classes.container}>
-        <StatusGrid data={data.running} />
-        <StatusGrid data={data.paused} />
-        <StatusGrid data={data.failed} />
-      </Grid>
-      <Grid container spacing={3} className={classes.container}>
-        <StatusGrid data={data.waiting} />
-        <StatusGrid data={data.finished} />
+        <StatusGrid data={data.running} sm={4} />
+        <StatusGrid data={data.paused} sm={4} />
+        <StatusGrid data={data.failed} sm={4} />
+        <StatusGrid data={data.waiting} sm={6} />
+        <StatusGrid data={data.finished} sm={6} />
       </Grid>
     </Box>
   )

@@ -54,7 +54,10 @@ const ExperimentPaper: React.FC<ExperimentPaperProps> = ({
 
   const [open, setOpen] = useState(false)
 
-  const handleToggle = () => setOpen(!open)
+  const handleToggle = (e: any) => {
+    e.stopPropagation()
+    setOpen(!open)
+  }
 
   const handleAction = (action: string) => (event: React.MouseEvent<HTMLSpanElement>) => {
     event.stopPropagation()

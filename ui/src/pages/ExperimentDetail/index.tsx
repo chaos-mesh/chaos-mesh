@@ -10,7 +10,7 @@ import ConfirmDialog from 'components/ConfirmDialog'
 import { Event } from 'api/events.type'
 import EventDetail from 'components/EventDetail'
 import EventsTable from 'components/EventsTable'
-import ExperimentDetailPanel from 'components/ExperimentConfiguration'
+import ExperimentConfiguration from 'components/ExperimentConfiguration'
 import { ExperimentDetail as ExperimentDetailType } from 'api/experiments.type'
 import JSONEditor from 'components/JSONEditor'
 import Loading from 'components/Loading'
@@ -253,7 +253,7 @@ export default function ExperimentDetail() {
   return (
     <>
       <Grow in={!loading} style={{ transformOrigin: '0 0 0' }}>
-        <Grid container direction="column" spacing={3}>
+        <Grid container spacing={6}>
           <Grid item xs={12}>
             <Box display="flex">
               <Box mr={3}>
@@ -303,7 +303,7 @@ export default function ExperimentDetail() {
                   Update
                 </Button>
               </PaperTop>
-              <Box p={3}>{detail && <ExperimentDetailPanel experimentDetail={detail} />}</Box>
+              <Box p={3}>{detail && <ExperimentConfiguration experimentDetail={detail} />}</Box>
             </Paper>
           </Grid>
 
@@ -316,7 +316,7 @@ export default function ExperimentDetail() {
 
           <Grid item xs={12}>
             <Box position="relative">
-              <Paper variant="outlined">{events && <EventsTable events={events} detailed />}</Paper>
+              <Paper variant="outlined">{events && <EventsTable events={events} detailed hasSearch={false} />}</Paper>
               {eventDetailOpen && (
                 <Paper
                   variant="outlined"

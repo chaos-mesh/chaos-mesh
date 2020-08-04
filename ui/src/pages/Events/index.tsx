@@ -13,7 +13,7 @@ import genEventsChart from 'lib/d3/eventsChart'
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     timelinePaper: {
-      marginBottom: theme.spacing(3),
+      marginBottom: theme.spacing(6),
     },
     eventsChart: {
       height: 350,

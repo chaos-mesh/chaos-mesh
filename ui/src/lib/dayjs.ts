@@ -18,6 +18,6 @@ export function dayComparator(a: string, b: string) {
   return 0
 }
 
-export const format = (date: string) => dayjs(date).format('YYYY-MM-DD HH:mm:ss')
+export const format = (date: string) => dayjs(date).format('YYYY-MM-DD HH:mm:ss A')
 
 export default dayjs
