@@ -14,10 +14,10 @@
 package v1alpha1
 
 import (
-	"github.com/go-logr/logr"
+	"context"
+
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
 )
@@ -25,20 +25,18 @@ import (
 // log is for logging in this package.
 var rawpodnetworkchaoslog = logf.Log.WithName("rawpodnetwork-resource")
 
-type rawPodNetworkChaosHandler struct {
-	client.Client
-	Log logr.Logger
+type RawPodNetworkChaosHandler interface {
+	Apply(context.Context, *RawPodNetworkChaos) error
 }
 
-var handler *rawPodNetworkChaosHandler
+var handler RawPodNetworkChaosHandler
+
+func RegisterRawPodNetworkHandler(newHandler RawPodNetworkChaosHandler) {
+	handler = newHandler
+}
 
 // SetupWebhookWithManager setup RawPodNetworkChaos's webhook with manager
 func (in *RawPodNetworkChaos) SetupWebhookWithManager(mgr ctrl.Manager) error {
-	handler = &rawPodNetworkChaosHandler{
-		Client: mgr.GetClient(),
-		Log:    ctrl.Log.WithName("controllers").WithName("RawPodNetworkChaos"),
-	}
-
 	return ctrl.NewWebhookManagedBy(mgr).
 		For(in).
 		Complete()
@@ -61,7 +59,9 @@ func (in *RawPodNetworkChaos) Default() {
 func (in *RawPodNetworkChaos) ValidateCreate() error {
 	rawpodnetworkchaoslog.Info("validate create", "name", in.Name)
 
-	handler.Apply(in)
+	if handler != nil {
+		handler.Apply(context.TODO(), in)
+	}
 
 	return nil
 }
@@ -70,7 +70,9 @@ func (in *RawPodNetworkChaos) ValidateCreate() error {
 func (in *RawPodNetworkChaos) ValidateUpdate(old runtime.Object) error {
 	rawpodnetworkchaoslog.Info("validate update", "name", in.Name)
 
-	handler.Apply(in)
+	if handler != nil {
+		handler.Apply(context.TODO(), in)
+	}
 
 	return nil
 }
@@ -78,12 +80,6 @@ func (in *RawPodNetworkChaos) ValidateUpdate(old runtime.Object) error {
 // ValidateDelete implements webhook.Validator so a webhook will be registered for the type
 func (in *RawPodNetworkChaos) ValidateDelete() error {
 	rawpodnetworkchaoslog.Info("validate delete", "name", in.Name)
-
-	return nil
-}
-
-func (handler *rawPodNetworkChaosHandler) Apply(chaos *RawPodNetworkChaos) error {
-	handler.Log.Info("updating network chaos on pod", "pod", chaos.Namespace+"/"+chaos.Name, "spec", chaos.Spec)
 
 	return nil
 }
