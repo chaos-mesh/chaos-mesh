@@ -7,13 +7,13 @@
 static void handler() {}
 
 int main(int argc, char* argv[]) {
-    signal(SIGCONT, handler);
-    pause();
+  signal(SIGCONT, handler);
+  pause();
 
-    int ret = execvp(argv[1], &argv[1]);
-    if (ret == -1) {
-		fprintf(stderr, "%s", strerror(errno));
-		return -1;
-	}
-	return 0;
+  int ret = execvp(argv[1], &argv[1]);
+  if (ret == -1) {
+    fprintf(stderr, "%s", strerror(errno));
+    return -1;
+  }
+  return 0;
 }
