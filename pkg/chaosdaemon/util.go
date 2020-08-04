@@ -45,7 +45,7 @@ const (
 	containerdProtocolPrefix = "containerd://"
 	containerdDefaultNS      = "k8s.io"
 
-	pausePath = "/use/local/bin/pause"
+	pausePath = "/usr/local/bin/pause"
 
 	defaultProcPrefix = "/proc"
 )
