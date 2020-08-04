@@ -4,9 +4,9 @@ import { Theme, createStyles, makeStyles } from '@material-ui/core/styles'
 import { setAlert, setAlertOpen } from 'slices/globalStatus'
 import { useHistory, useParams } from 'react-router-dom'
 
+import ArchiveOutlinedIcon from '@material-ui/icons/ArchiveOutlined'
 import CloseIcon from '@material-ui/icons/Close'
 import ConfirmDialog from 'components/ConfirmDialog'
-import DeleteOutlineIcon from '@material-ui/icons/DeleteOutline'
 import { Event } from 'api/events.type'
 import EventDetail from 'components/EventDetail'
 import EventsTable from 'components/EventsTable'
@@ -23,7 +23,6 @@ import api from 'api'
 import genEventsChart from 'lib/d3/eventsChart'
 import { getStateofExperiments } from 'slices/experiments'
 import { toTitleCase } from 'lib/utils'
-import useErrorButtonStyles from 'lib/styles/errorButton'
 import { usePrevious } from 'lib/hooks'
 import { useStoreDispatch } from 'store'
 
@@ -77,7 +76,6 @@ const useStyles = makeStyles((theme: Theme) =>
 
 export default function ExperimentDetail() {
   const classes = useStyles()
-  const errorButton = useErrorButtonStyles()
 
   const history = useHistory()
   const { search } = history.location
@@ -167,8 +165,8 @@ export default function ExperimentDetail() {
     switch (action) {
       case 'delete':
         setDialogInfo({
-          title: `Delete ${detail!.name}?`,
-          description: "Once you delete this experiment, it can't be recovered.",
+          title: `Archive ${detail!.name}?`,
+          description: 'You can still find this experiment in the archives.',
           action: 'delete',
         })
 
@@ -271,13 +269,12 @@ export default function ExperimentDetail() {
             <Box display="flex">
               <Box mr={3}>
                 <Button
-                  className={errorButton.root}
                   variant="outlined"
                   size="small"
-                  startIcon={<DeleteOutlineIcon />}
+                  startIcon={<ArchiveOutlinedIcon />}
                   onClick={handleAction('delete')}
                 >
-                  Delete
+                  Archive
                 </Button>
               </Box>
               <Box>
@@ -316,7 +313,7 @@ export default function ExperimentDetail() {
                 Update
               </Button>
             </PaperTop>
-            {detail && <ExperimentDetailPanel experimentDetail={detail} />}
+            <Box p={3}>{detail && <ExperimentDetailPanel experimentDetail={detail} />}</Box>
           </Paper>
 
           <Paper className={classes.mb3} variant="outlined">

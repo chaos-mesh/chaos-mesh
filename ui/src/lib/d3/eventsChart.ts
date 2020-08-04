@@ -80,7 +80,7 @@ export default function gen({
 
   const colorPalette = d3
     .scaleOrdinal<string, string>()
-    .domain(events.map((d) => d.experiment))
+    .domain(events.map((d) => d.experiment_id))
     .range(d3.schemeTableau10)
 
   // legends
@@ -116,7 +116,7 @@ export default function gen({
       let width = d.finish_time ? x(day(d.finish_time)) - x(day(d.start_time)) : x(day()) - x(day(d.start_time))
 
       if (width === 0) {
-        width = 2
+        width = 1
       }
 
       return width
