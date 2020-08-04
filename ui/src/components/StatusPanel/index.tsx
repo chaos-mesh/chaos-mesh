@@ -14,7 +14,9 @@ import { useSelector } from 'react-redux'
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     container: {
-      height: `calc(50% + ${theme.spacing(2.25)})`,
+      [theme.breakpoints.up('sm')]: {
+        height: `calc(50% + ${theme.spacing(2.25)})`,
+      },
     },
     item: {
       display: 'flex',
@@ -81,7 +83,7 @@ const StatusPanel = () => {
   }
 
   const StatusGrid: React.FC<{ data: d }> = ({ data }) => (
-    <Grid item xs>
+    <Grid item xs={6} sm>
       <Paper variant="outlined" className={classes.item}>
         <Grid container>
           <Grid item xs>

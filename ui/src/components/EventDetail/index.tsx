@@ -1,9 +1,24 @@
-import { Paper, Table, TableBody, TableCell, TableHead, TableRow, Typography } from '@material-ui/core'
+import {
+  TableCell as MUITableCell,
+  Paper,
+  Table,
+  TableBody,
+  TableHead,
+  TableRow,
+  Typography,
+  withStyles,
+} from '@material-ui/core'
 
 import { Event } from 'api/events.type'
 import React from 'react'
 import day from 'lib/dayjs'
 import useRunningLabelStyles from 'lib/styles/runningLabel'
+
+const TableCell = withStyles({
+  root: {
+    borderBottom: 'none',
+  },
+})(MUITableCell)
 
 const format = (date: string) => day(date).format('YYYY-MM-DD HH:mm:ss')
 

@@ -1,4 +1,4 @@
-import { Box, Button, Grow, IconButton, Modal, Paper } from '@material-ui/core'
+import { Box, Button, Grid, Grow, IconButton, Modal, Paper } from '@material-ui/core'
 import React, { useEffect, useRef, useState } from 'react'
 import { Theme, createStyles, makeStyles } from '@material-ui/core/styles'
 import { setAlert, setAlertOpen } from 'slices/globalStatus'
@@ -28,17 +28,6 @@ import { useStoreDispatch } from 'store'
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
-    height100: {
-      [theme.breakpoints.up('md')]: {
-        height: '100%',
-      },
-    },
-    mb3: {
-      marginBottom: theme.spacing(3),
-    },
-    mb6: {
-      marginBottom: theme.spacing(6),
-    },
     eventsChart: {
       height: 200,
       margin: theme.spacing(3),
@@ -56,9 +45,9 @@ const useStyles = makeStyles((theme: Theme) =>
       top: '50%',
       left: '50%',
       width: '50vw',
-      height: '70vh',
+      height: '80vh',
       transform: 'translate(-50%, -50%)',
-      [theme.breakpoints.down('xs')]: {
+      [theme.breakpoints.down('sm')]: {
         width: '90vw',
       },
     },
@@ -264,8 +253,8 @@ export default function ExperimentDetail() {
   return (
     <>
       <Grow in={!loading} style={{ transformOrigin: '0 0 0' }}>
-        <Box display="flex" flexDirection="column" height="100%">
-          <Box display="flex" mb={6}>
+        <Grid container direction="column" spacing={3}>
+          <Grid item xs={12}>
             <Box display="flex">
               <Box mr={3}>
                 <Button
@@ -299,50 +288,54 @@ export default function ExperimentDetail() {
                 )}
               </Box>
             </Box>
-          </Box>
+          </Grid>
 
-          <Paper className={classes.mb6} variant="outlined">
-            <PaperTop title="Configuration">
-              <Button
-                variant="outlined"
-                size="small"
-                color="primary"
-                startIcon={<NoteOutlinedIcon />}
-                onClick={onModalOpen}
-              >
-                Update
-              </Button>
-            </PaperTop>
-            <Box p={3}>{detail && <ExperimentDetailPanel experimentDetail={detail} />}</Box>
-          </Paper>
-
-          <Paper className={classes.mb3} variant="outlined">
-            <PaperTop title="Timeline" />
-            <div ref={chartRef} className={classes.eventsChart} />
-          </Paper>
-
-          <Box className={classes.height100} position="relative">
-            <Paper className={classes.height100} variant="outlined">
-              {events && <EventsTable events={events} detailed />}
+          <Grid item xs={12}>
+            <Paper variant="outlined">
+              <PaperTop title="Configuration">
+                <Button
+                  variant="outlined"
+                  size="small"
+                  color="primary"
+                  startIcon={<NoteOutlinedIcon />}
+                  onClick={onModalOpen}
+                >
+                  Update
+                </Button>
+              </PaperTop>
+              <Box p={3}>{detail && <ExperimentDetailPanel experimentDetail={detail} />}</Box>
             </Paper>
-            {eventDetailOpen && (
-              <Paper
-                variant="outlined"
-                className={classes.eventDetailPaper}
-                style={{
-                  zIndex: 3, // .MuiTableCell-stickyHeader z-index: 2
-                }}
-              >
-                <PaperTop title="Event Detail">
-                  <IconButton color="primary" onClick={closeEventDetail}>
-                    <CloseIcon />
-                  </IconButton>
-                </PaperTop>
-                {selectedEvent && !detailLoading ? <EventDetail event={selectedEvent} /> : <Loading />}
-              </Paper>
-            )}
-          </Box>
-        </Box>
+          </Grid>
+
+          <Grid item xs={12}>
+            <Paper variant="outlined">
+              <PaperTop title="Timeline" />
+              <div ref={chartRef} className={classes.eventsChart} />
+            </Paper>
+          </Grid>
+
+          <Grid item xs={12}>
+            <Box position="relative">
+              <Paper variant="outlined">{events && <EventsTable events={events} detailed />}</Paper>
+              {eventDetailOpen && (
+                <Paper
+                  variant="outlined"
+                  className={classes.eventDetailPaper}
+                  style={{
+                    zIndex: 3, // .MuiTableCell-stickyHeader z-index: 2
+                  }}
+                >
+                  <PaperTop title="Event Detail">
+                    <IconButton color="primary" onClick={closeEventDetail}>
+                      <CloseIcon />
+                    </IconButton>
+                  </PaperTop>
+                  {selectedEvent && !detailLoading ? <EventDetail event={selectedEvent} /> : <Loading />}
+                </Paper>
+              )}
+            </Box>
+          </Grid>
+        </Grid>
       </Grow>
 
       <Modal open={configOpen} onClose={onModalClose}>
