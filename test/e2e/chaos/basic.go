@@ -1348,7 +1348,7 @@ var _ = ginkgo.Describe("[Basic]", func() {
 
 				baseNetworkPartition := &v1alpha1.NetworkChaos{
 					ObjectMeta: metav1.ObjectMeta{
-						Name:      "network-chaos",
+						Name:      "network-chaos-1",
 						Namespace: ns,
 					},
 					Spec: v1alpha1.NetworkChaosSpec{
@@ -1413,6 +1413,26 @@ var _ = ginkgo.Describe("[Basic]", func() {
 				framework.ExpectEqual(allBlockedConnection(), [][]int{{0, 1}, {0, 3}, {1, 0}, {3, 0}})
 
 				err = cli.Delete(ctx, baseNetworkPartition.DeepCopy())
+				framework.ExpectNoError(err, "delete network chaos error")
+				time.Sleep(5 * time.Second)
+				framework.ExpectEqual(len(allBlockedConnection()), 0)
+
+				// Multiple network partition chaos on peer-0
+				anotherNetworkPartition := baseNetworkPartition.DeepCopy()
+				anotherNetworkPartition.Name = "network-chaos-2"
+				anotherNetworkPartition.Spec.Direction = v1alpha1.To
+				anotherNetworkPartition.Spec.Target.TargetSelector.LabelSelectors = map[string]string{"partition": "0"}
+				anotherNetworkPartition.Spec.Target.TargetMode = v1alpha1.AllPodMode
+				err = cli.Create(ctx, baseNetworkPartition.DeepCopy())
+				framework.ExpectNoError(err, "create network chaos error")
+				err = cli.Create(ctx, anotherNetworkPartition.DeepCopy())
+				framework.ExpectNoError(err, "create network chaos error")
+				time.Sleep(5 * time.Second)
+				framework.ExpectEqual(allBlockedConnection(), [][]int{{0, 1}, {0, 2}, {0, 3}, {1, 0}, {3, 0}})
+
+				err = cli.Delete(ctx, baseNetworkPartition.DeepCopy())
+				framework.ExpectNoError(err, "delete network chaos error")
+				err = cli.Delete(ctx, anotherNetworkPartition.DeepCopy())
 				framework.ExpectNoError(err, "delete network chaos error")
 				time.Sleep(5 * time.Second)
 				framework.ExpectEqual(len(allBlockedConnection()), 0)
