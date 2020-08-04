@@ -169,16 +169,16 @@ export default function gen({
   function genTooltipContent(d: Event) {
     return `<b>Experiment: ${d.experiment}</b>
             <br />
-            <b>Status: ${d.finish_time ? 'Finished' : 'Running'}</b>
+            <b>Status: ${d.finish_time ? 'Ended' : 'Running'}</b>
             <br />
             <br />
-            <span style="color: rgba(0, 0, 0, 0.67);">Start Time: ${day(d.start_time).format(
+            <span style="color: rgba(0, 0, 0, 0.67);">Started: ${day(d.start_time).format(
               'YYYY-MM-DD HH:mm:ss A'
             )}</span>
             <br />
             ${
               d.finish_time
-                ? `<span style="color: rgba(0, 0, 0, 0.67);">Finish Time: ${day(d.finish_time).format(
+                ? `<span style="color: rgba(0, 0, 0, 0.67);">Ended: ${day(d.finish_time).format(
                     'YYYY-MM-DD HH:mm:ss A'
                   )}</span>`
                 : ''

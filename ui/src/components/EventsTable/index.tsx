@@ -16,7 +16,7 @@ import {
 } from '@material-ui/core'
 import React, { useCallback, useEffect, useState } from 'react'
 import { createStyles, makeStyles } from '@material-ui/core/styles'
-import day, { dayComparator } from 'lib/dayjs'
+import { dayComparator, format } from 'lib/dayjs'
 
 import { Event } from 'api/events.type'
 import FirstPageIcon from '@material-ui/icons/FirstPage'
@@ -90,8 +90,8 @@ const headCells: { id: keyof SortedEvent; label: string }[] = [
   { id: 'experiment_id', label: 'UUID' },
   { id: 'namespace', label: 'Namespace' },
   { id: 'kind', label: 'Kind' },
-  { id: 'start_time', label: 'Start Time' },
-  { id: 'finish_time', label: 'Finish Time' },
+  { id: 'start_time', label: 'Started' },
+  { id: 'finish_time', label: 'Ended' },
 ]
 
 interface EventsTableHeadProps {
@@ -106,7 +106,7 @@ const EventsTableHead: React.FC<EventsTableHeadProps> = ({ order, orderBy, onSor
 
   let cells = headCells
   if (detailed) {
-    cells = cells.concat([{ id: 'Detail' as keyof SortedEvent, label: 'Event Detail' }])
+    cells = cells.concat([{ id: 'Detail' as keyof SortedEvent, label: 'Detail' }])
   }
 
   return (
@@ -167,8 +167,6 @@ const TablePaginationActions: React.FC<TablePaginationActionsProps> = ({ count, 
     </Box>
   )
 }
-
-const format = (date: string) => day(date).format('YYYY-MM-DD HH:mm:ss')
 
 interface EventsTableRowProps {
   event: SortedEventWithPods

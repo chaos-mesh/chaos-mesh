@@ -11,7 +11,7 @@ import {
 
 import { Event } from 'api/events.type'
 import React from 'react'
-import day from 'lib/dayjs'
+import { format } from 'lib/dayjs'
 import useRunningLabelStyles from 'lib/styles/runningLabel'
 
 const TableCell = withStyles({
@@ -19,8 +19,6 @@ const TableCell = withStyles({
     borderBottom: 'none',
   },
 })(MUITableCell)
-
-const format = (date: string) => day(date).format('YYYY-MM-DD HH:mm:ss')
 
 interface EventDetailProps {
   event: Event

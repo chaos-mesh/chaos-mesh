@@ -12,6 +12,7 @@ import {
 import { ChaosKindKeyMap } from 'lib/formikhelpers'
 import { ExperimentDetail } from 'api/experiments.type'
 import React from 'react'
+import { format } from 'lib/dayjs'
 
 const TableCell = withStyles({
   root: {
@@ -19,11 +20,11 @@ const TableCell = withStyles({
   },
 })(MUITableCell)
 
-interface ExperimentDetailPanelProps {
+interface ExperimentConfigurationProps {
   experimentDetail: ExperimentDetail
 }
 
-const ExperimentDetailPanel: React.FC<ExperimentDetailPanelProps> = ({ experimentDetail: e }) => (
+const ExperimentConfiguration: React.FC<ExperimentConfigurationProps> = ({ experimentDetail: e }) => (
   <Grid container>
     <Grid item md={4}>
       <Box mt={3} ml="16px">
@@ -92,6 +93,15 @@ const ExperimentDetailPanel: React.FC<ExperimentDetailPanelProps> = ({ experimen
               </Typography>
             </TableCell>
           </TableRow>
+
+          <TableRow>
+            <TableCell>Created</TableCell>
+            <TableCell>
+              <Typography variant="body2" color="textSecondary">
+                {format(e.created)}
+              </Typography>
+            </TableCell>
+          </TableRow>
         </TableBody>
       </Table>
     </Grid>
@@ -136,4 +146,4 @@ const ExperimentDetailPanel: React.FC<ExperimentDetailPanelProps> = ({ experimen
   </Grid>
 )
 
-export default ExperimentDetailPanel
+export default ExperimentConfiguration
