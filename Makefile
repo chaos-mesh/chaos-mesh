@@ -94,6 +94,9 @@ endif
 chaosdaemon:
 	$(CGOENV) go build -ldflags '$(LDFLAGS)' -o bin/chaos-daemon ./cmd/chaos-daemon/main.go
 
+pause:
+	cc ./hack/pause.c -o bin/pause
+
 # Build manager binary
 manager:
 	$(GO) build -ldflags '$(LDFLAGS)' -o bin/chaos-controller-manager ./cmd/controller-manager/*.go
@@ -122,7 +125,7 @@ ui: yarn_dependencies
 	cd ui &&\
 	REACT_APP_DASHBOARD_API_URL="" yarn build
 
-binary: chaosdaemon manager chaosfs chaos-dashboard
+binary: chaosdaemon manager chaosfs chaos-dashboard pause
 
 watchmaker:
 	$(CGOENV) go build -ldflags '$(LDFLAGS)' -o bin/watchmaker ./cmd/watchmaker/...
