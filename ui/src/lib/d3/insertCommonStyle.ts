@@ -15,15 +15,17 @@ export default function insertCommonStyle() {
       .chaos-events-legends {
         position: absolute;
         top: 0;
-        right: 1rem;
+        left: 0;
         display: flex;
-        flex-direction: column;
-        align-items: end;
+        max-width: 100%;
+        max-height: 36px;
+        flex-wrap: wrap;
       }
 
       .chaos-events-legends > div {
         display: flex;
         align-items: center;
+        margin-left: 1rem;
       }
     </style>`
   )

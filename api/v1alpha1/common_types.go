@@ -66,6 +66,7 @@ type SelectorSpec struct {
 
 	// PodPhaseSelectors is a set of condition of a pod at the current time.
 	// supported value: Pending / Running / Succeeded / Failed / Unknown
+	// +optional
 	PodPhaseSelectors []string `json:"podPhaseSelectors,omitempty"`
 }
 

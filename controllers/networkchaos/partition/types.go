@@ -163,13 +163,13 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1
 	if networkchaos.Spec.Direction == v1alpha1.From || networkchaos.Spec.Direction == v1alpha1.Both {
 		sourcesChains = append(sourcesChains, &pb.Chain{
 			Name:      iptable.GenerateName(pb.Chain_INPUT, networkchaos),
-			Direction: pb.Chain_OUTPUT,
+			Direction: pb.Chain_INPUT,
 			Ipsets:    []string{targetSet.Name},
 		})
 
 		targetsChains = append(targetsChains, &pb.Chain{
 			Name:      iptable.GenerateName(pb.Chain_OUTPUT, networkchaos),
-			Direction: pb.Chain_INPUT,
+			Direction: pb.Chain_OUTPUT,
 			Ipsets:    []string{sourceSet.Name},
 		})
 	}
@@ -207,6 +207,8 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1
 
 // SetChains sets iptables chains for pods
 func (r *Reconciler) SetChains(ctx context.Context, pods []v1.Pod, chains []*pb.Chain, networkchaos *v1alpha1.NetworkChaos) error {
+	r.Log.Info("setting chains", "chains", chains, "pods", pods)
+
 	g := errgroup.Group{}
 
 	for index := range pods {

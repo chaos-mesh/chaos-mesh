@@ -22,6 +22,8 @@ ARG UI
 ARG SWAGGER
 ARG LDFLAGS
 
+RUN if [[ -n "$HTTP_PROXY" ]]; then yarn config set proxy $HTTP_PROXY; fi
+
 COPY . /src
 WORKDIR /src
 RUN --mount=type=cache,target=/root/.cache/go-build \
