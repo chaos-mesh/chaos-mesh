@@ -18,22 +18,23 @@ import (
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/go-logr/logr"
+	k8sError "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 // PodNetworkMap will save all the related podnetworkchaos
 type PodNetworkMap struct {
-	Name string
-	Log  logr.Logger
+	Source string
+	Log    logr.Logger
 	client.Client
 	Resources map[types.NamespacedName]*v1alpha1.PodNetworkChaos
 }
 
 // New creates a new PodNetworkMap
-func New(name string, logger logr.Logger, client client.Client) *PodNetworkMap {
+func New(source string, logger logr.Logger, client client.Client) *PodNetworkMap {
 	return &PodNetworkMap{
-		Name:      name,
+		Source:    source,
 		Log:       logger,
 		Client:    client,
 		Resources: make(map[types.NamespacedName]*v1alpha1.PodNetworkChaos),
@@ -50,7 +51,19 @@ func (m *PodNetworkMap) Get(ctx context.Context, key types.NamespacedName) (*v1a
 	chaos = &v1alpha1.PodNetworkChaos{}
 	err := m.Client.Get(ctx, key, chaos)
 	if err != nil {
-		return nil, err
+		if !k8sError.IsNotFound(err) {
+			m.Log.Error(err, "error while getting podnetworkchaos")
+			return nil, err
+		}
+
+		chaos.Name = key.Name
+		chaos.Namespace = key.Namespace
+		err = m.Client.Create(ctx, chaos)
+
+		if err != nil {
+			m.Log.Error(err, "error while creating podnetworkchaos")
+			return nil, err
+		}
 	}
 
 	m.Resources[key] = chaos
@@ -72,7 +85,7 @@ func (m *PodNetworkMap) GetAndClear(ctx context.Context, key types.NamespacedNam
 
 	ipsets := []v1alpha1.RawIPSet{}
 	for _, ipset := range chaos.Spec.IPSets {
-		if ipset.Source != m.Name {
+		if ipset.Source != m.Source {
 			ipsets = append(ipsets, ipset)
 		}
 	}
@@ -80,7 +93,7 @@ func (m *PodNetworkMap) GetAndClear(ctx context.Context, key types.NamespacedNam
 
 	chains := []v1alpha1.RawIptables{}
 	for _, chain := range chaos.Spec.Iptables {
-		if chain.Source != m.Name {
+		if chain.Source != m.Source {
 			chains = append(chains, chain)
 		}
 	}
@@ -88,7 +101,7 @@ func (m *PodNetworkMap) GetAndClear(ctx context.Context, key types.NamespacedNam
 
 	qdiscs := []v1alpha1.RawQdisc{}
 	for _, qdisc := range chaos.Spec.Qdiscs {
-		if qdisc.Source != m.Name {
+		if qdisc.Source != m.Source {
 			qdiscs = append(qdiscs, qdisc)
 		}
 	}

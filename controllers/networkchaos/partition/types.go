@@ -22,7 +22,6 @@ import (
 	"github.com/hashicorp/go-multierror"
 	"golang.org/x/sync/errgroup"
 	v1 "k8s.io/api/core/v1"
-	k8sError "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/tools/cache"
 	"k8s.io/client-go/tools/record"
@@ -31,10 +30,10 @@ import (
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/common"
-	"github.com/chaos-mesh/chaos-mesh/controllers/networkchaos/iptable"
 	"github.com/chaos-mesh/chaos-mesh/controllers/networkchaos/netutils"
 	"github.com/chaos-mesh/chaos-mesh/controllers/networkchaos/podnetworkmap"
 	"github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos/ipset"
+	"github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos/iptable"
 	"github.com/chaos-mesh/chaos-mesh/controllers/twophase"
 	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
 	"github.com/chaos-mesh/chaos-mesh/pkg/utils"
@@ -151,12 +150,18 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1
 			Name:      iptable.GenerateName(pb.Chain_OUTPUT, networkchaos),
 			Direction: v1alpha1.Output,
 			IPSets:    []string{targetSet.Name},
+			RawRuleSource: v1alpha1.RawRuleSource{
+				Source: source,
+			},
 		})
 
 		targetsChains = append(targetsChains, v1alpha1.RawIptables{
 			Name:      iptable.GenerateName(pb.Chain_INPUT, networkchaos),
 			Direction: v1alpha1.Input,
 			IPSets:    []string{sourceSet.Name},
+			RawRuleSource: v1alpha1.RawRuleSource{
+				Source: source,
+			},
 		})
 	}
 
@@ -165,14 +170,21 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1
 			Name:      iptable.GenerateName(pb.Chain_INPUT, networkchaos),
 			Direction: v1alpha1.Input,
 			IPSets:    []string{targetSet.Name},
+			RawRuleSource: v1alpha1.RawRuleSource{
+				Source: source,
+			},
 		})
 
 		targetsChains = append(targetsChains, v1alpha1.RawIptables{
 			Name:      iptable.GenerateName(pb.Chain_OUTPUT, networkchaos),
 			Direction: v1alpha1.Output,
 			IPSets:    []string{sourceSet.Name},
+			RawRuleSource: v1alpha1.RawRuleSource{
+				Source: source,
+			},
 		})
 	}
+	r.Log.Info("chains prepared", "sourcesChains", sourcesChains, "targetsChains", targetsChains)
 
 	err = r.SetChains(ctx, sources, sourcesChains, m, networkchaos)
 	if err != nil {
@@ -260,6 +272,9 @@ func (r *Reconciler) Recover(ctx context.Context, req ctrl.Request, chaos v1alph
 func (r *Reconciler) cleanFinalizersAndRecover(ctx context.Context, networkchaos *v1alpha1.NetworkChaos) error {
 	var result error
 
+	source := networkchaos.Namespace + "/" + networkchaos.Name
+	m := podnetworkmap.New(source, r.Log, r.Client)
+
 	for _, key := range networkchaos.Finalizers {
 		ns, name, err := cache.SplitMetaNamespaceKey(key)
 		if err != nil {
@@ -267,48 +282,19 @@ func (r *Reconciler) cleanFinalizersAndRecover(ctx context.Context, networkchaos
 			continue
 		}
 
-		var pod v1.Pod
-		err = r.Get(ctx, types.NamespacedName{
+		_, err = m.GetAndClear(ctx, types.NamespacedName{
 			Namespace: ns,
 			Name:      name,
-		}, &pod)
+		})
 
 		if err != nil {
-			if !k8sError.IsNotFound(err) {
-				result = multierror.Append(result, err)
-				continue
-			}
-
-			r.Log.Info("Pod not found", "namespace", ns, "name", name)
-			networkchaos.Finalizers = utils.RemoveFromFinalizer(networkchaos.Finalizers, key)
-			continue
-		}
-
-		chains := []*pb.Chain{}
-		for _, direction := range []string{"INPUT", "OUTPUT"} {
-			var chainName string
-			var chainDirection pb.Chain_Direction
-
-			switch direction {
-			case "INPUT":
-				chainName = "INPUT/" + netutils.CompressName(networkchaos.Name, 21, "")
-				chainDirection = pb.Chain_INPUT
-			case "OUTPUT":
-				chainName = "OUTPUT/" + netutils.CompressName(networkchaos.Name, 20, "")
-				chainDirection = pb.Chain_OUTPUT
-			}
-
-			chains = append(chains, &pb.Chain{
-				Name:      chainName,
-				Direction: chainDirection,
-			})
-		}
-
-		err = iptable.SetIptablesChains(ctx, r.Client, &pod, chains)
-		if err != nil {
-			r.Log.Error(err, "error while deleting iptables rules")
 			result = multierror.Append(result, err)
 			continue
+		}
+
+		err = m.Commit(ctx)
+		if err != nil {
+			r.Log.Error(err, "fail to commit")
 		}
 
 		networkchaos.Finalizers = utils.RemoveFromFinalizer(networkchaos.Finalizers, key)
