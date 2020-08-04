@@ -1437,25 +1437,21 @@ var _ = ginkgo.Describe("[Basic]", func() {
 
 					return delay
 				}
-				assertDelay := func(delay int64, injected bool) {
-					if injected {
-						if delay < 200*1e6 {
-							framework.Fail(
-								fmt.Sprintf("the delay %d is less than latency 200ms", delay),
-							)
-						}
-					} else {
-						if delay > 100*1e6 {
-							framework.Fail(
-								fmt.Sprintf("the delay %d without chaos is too big", delay),
-							)
+				allSlowConnection := func() [][]int {
+					var result [][]int
+					for source := 0; source < len(networkPeers); source++ {
+						for target := source + 1; target < len(networkPeers); target++ {
+							delay := testDelay(source, target)
+							if delay > 200*1e6 {
+								result = append(result, []int{source, target})
+							}
 						}
 					}
 
+					return result
 				}
 
-				normalDelay := testDelay(0, 1)
-				assertDelay(normalDelay, false)
+				framework.ExpectEqual(len(allSlowConnection()), 0)
 
 				// normal delay chaos
 				networkDelay := &v1alpha1.NetworkChaos{
@@ -1485,18 +1481,12 @@ var _ = ginkgo.Describe("[Basic]", func() {
 				err = cli.Create(ctx, networkDelay.DeepCopy())
 				framework.ExpectNoError(err, "create network chaos error")
 				time.Sleep(5 * time.Second)
-				delay := testDelay(0, 1)
-				assertDelay(delay, true)
-				delay = testDelay(0, 2)
-				assertDelay(delay, true)
+				framework.ExpectEqual(allSlowConnection(), [][]int{{0, 1}, {0, 2}, {0, 3}})
 
 				err = cli.Delete(ctx, networkDelay.DeepCopy())
 				framework.ExpectNoError(err, "delete network chaos error")
 				time.Sleep(5 * time.Second)
-				delay = testDelay(0, 1)
-				assertDelay(delay, false)
-				delay = testDelay(0, 2)
-				assertDelay(delay, false)
+				framework.ExpectEqual(len(allSlowConnection()), 0)
 
 				networkDelay.Spec.Target = &v1alpha1.Target{
 					TargetSelector: v1alpha1.SelectorSpec{
@@ -1509,18 +1499,12 @@ var _ = ginkgo.Describe("[Basic]", func() {
 				err = cli.Create(ctx, networkDelay.DeepCopy())
 				framework.ExpectNoError(err, "create network chaos error")
 				time.Sleep(5 * time.Second)
-				delay = testDelay(0, 1)
-				assertDelay(delay, true)
-				delay = testDelay(0, 2)
-				assertDelay(delay, false)
+				framework.ExpectEqual(allSlowConnection(), [][]int{{0, 1}})
 
 				err = cli.Delete(ctx, networkDelay.DeepCopy())
 				framework.ExpectNoError(err, "delete network chaos error")
 				time.Sleep(5 * time.Second)
-				delay = testDelay(0, 1)
-				assertDelay(delay, false)
-				delay = testDelay(0, 2)
-				assertDelay(delay, false)
+				framework.ExpectEqual(len(allSlowConnection()), 0)
 
 				cancel()
 			})
