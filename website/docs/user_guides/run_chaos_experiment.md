@@ -8,12 +8,17 @@ Now that you have deployed Chaos Mesh in your environment, it's time to use it f
 
 ## Step 1: Deploy the target cluster
 
-The first step is always to deploy a testing cluster. For illustration purposes, TiDB is used as a sample cluster.
+The first step is always to deploy a testing cluster. For illustration purposes, [web-show](https://github.com/chaos-mesh/web-show) is used as a example cluster because it allows us to directly observe the effect of network chaos. You can also deploy your own application for testing.
 
-You can follow the instructions in the following two documents to deploy a TiDB cluster:
+```bash
+curl -sSl https://raw.githubusercontent.com/pingcap/chaos-mesh/master/examples/web-show/deploy.sh | sh
+```
 
-- [Deploy using kind](https://docs.pingcap.com/tidb-in-kubernetes/stable/get-started/#create-a-kubernetes-cluster-using-kind)
-- [Deploy using Minikube](https://docs.pingcap.com/tidb-in-kubernetes/stable/get-started#create-a-kubernetes-cluster-using-minikube)
+After executing the above command, you can access [`http://localhost:8081`](http://localhost:8081) in the browser to check the web-show application.
+
+> **Note:**
+>
+> If the web-show is deployed on the server, you need use the host ip to access the application.
 
 ## Step 2: Define the experiment configuration file
 
@@ -21,19 +26,22 @@ The chaos experiment configuration is defined in a YAML file. You need to create
 
 ```yaml
 apiVersion: chaos-mesh.org/v1alpha1
-kind: PodChaos
+kind: NetworkChaos
 metadata:
-  name: pod-failure-example
-  namespace: chaos-testing
+  name: web-show-network-delay
 spec:
-  action: pod-failure # the specific chaos action to inject; supported actions: pod-kill/pod-failure
+  action: delay # the specific chaos action to inject
   mode: one # the mode to run chaos action; supported modes are one/all/fixed/fixed-percent/random-max-percent
-  duration: "60s" # duration for the injected chaos experiment
   selector: # pods where to inject chaos actions
+    namespaces:
+      - default
     labelSelectors:
-      "app.kubernetes.io/component": "tikv" # the label of the pod for chaos injection
+      "app": "web-show"  # the label of the pod for chaos injection
+  delay:
+    latency: "10ms"
+  duration: "30s" # duration for the injected chaos experiment
   scheduler: # scheduler rules for the running time of the chaos experiments about pods.
-    cron: "@every 5m"
+    cron: "@every 60s"
 ```
 
 ## Step 3: Apply a chaos experiment
@@ -41,13 +49,15 @@ spec:
 Run the following commands to apply the experiment:
 
 ```bash
-kubectl apply -f pod-failure-example.yaml
-kubectl get podchaos --namespace=chaos-testing
+# Make sure you are in the chaos-mesh/examples/web-show directory
+kubectl apply -f network-delay.yaml
 ```
 
-By [running a benchmark against the cluster](https://pingcap.com/docs/stable/benchmark/how-to-run-sysbench/), you can check the QPS performance affected by the chaos experiment:
+Then you can access [`http://localhost:8081`](http://localhost:8081) in the browser to check the result of the chaos experiment.
 
-![tikv-pod-failure](/img/tikv-pod-failure.png)
+![network-delay](/img/using-chaos-mesh-to-insert-delays-in-web-show.png)
+
+From the line graph, you can tell that there is a 10 ms network delay every 60 seconds. If you are intrigued and want to try out more chaos experiments with Chaos Mesh, check out [examples/web-show](https://github.com/pingcap/chaos-mesh/tree/master/examples/web-show).
 
 ## Regular operations on chaos experiments
 
@@ -56,14 +66,32 @@ In this section, you will learn some follow-up operations when the chaos experim
 ### Update a chaos experiment
 
 ```bash
-vim pod-failure-example.yaml # modify pod-failure-example.yaml to what you want
-kubectl apply -f pod-failure-example.yaml
+vim network-delay.yaml # modify network-delay.yaml to what you want
+kubectl apply -f network-delay.yaml
+```
+
+### Pause a chaos experiment
+
+```bash
+kubectl annotate networkchaos web-show-network-delay experiment.chaos-mesh.org/pause=true
+```
+
+### Resume a chaos experiment
+
+```bash
+kubectl annotate networkchaos web-show-network-delay experiment.chaos-mesh.org/pause-
 ```
 
 ### Delete a chaos experiment
 
 ```bash
-kubectl delete -f pod-failure-example.yaml
+kubectl delete -f network-delay.yaml
+```
+
+If you encounter a situation that the delete action is blocked, it means that there are some target pods fail to recover. You can check the log of Chaos Mesh or just feel free to file an [issue](https://github.com/pingcap/chaos-mesh/issues). In addition, you also can force delete the chaos experiment by the following command:
+
+```bash
+kubectl annotate networkchaos web-show-network-delay chaos-mesh.chaos-mesh.org/cleanFinalizer=forced
 ```
 
 ### Watch your chaos experiments in Chaos Dashboard

@@ -135,27 +135,27 @@ func NewTimerDeployment(name, namespace string) *appsv1.Deployment {
 }
 
 // NewNetworkTestDeployment creates a deployment for e2e test
-func NewNetworkTestDeployment(name, namespace string) *appsv1.Deployment {
+func NewNetworkTestDeployment(name, namespace string, extraLabels map[string]string) *appsv1.Deployment {
+	labels := map[string]string{
+		"app": name,
+	}
+	for key, val := range extraLabels {
+		labels[key] = val
+	}
 	return &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
 			Namespace: namespace,
-			Labels: map[string]string{
-				"app": name,
-			},
+			Labels:    labels,
 		},
 		Spec: appsv1.DeploymentSpec{
 			Replicas: pointer.Int32Ptr(1),
 			Selector: &metav1.LabelSelector{
-				MatchLabels: map[string]string{
-					"app": name,
-				},
+				MatchLabels: labels,
 			},
 			Template: corev1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{
-					Labels: map[string]string{
-						"app": name,
-					},
+					Labels: labels,
 				},
 				Spec: corev1.PodSpec{
 					Containers: []corev1.Container{
