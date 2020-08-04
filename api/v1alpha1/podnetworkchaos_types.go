@@ -20,41 +20,41 @@ import (
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
-// KindRawPodNetworkChaos is the kind for network chaos
-const KindRawPodNetworkChaos = "RawPodNetworkChaos"
+// KindPodNetworkChaos is the kind for network chaos
+const KindPodNetworkChaos = "PodNetworkChaos"
 
 // +kubebuilder:object:root=true
 
-// RawPodNetworkChaos is the Schema for the networkchaos API
-type RawPodNetworkChaos struct {
+// PodNetworkChaos is the Schema for the networkchaos API
+type PodNetworkChaos struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
 	// Spec defines the behavior of a pod chaos experiment
-	Spec RawPodNetworkChaosSpec `json:"spec"`
+	Spec PodNetworkChaosSpec `json:"spec"`
 
 	// +optional
 	// Most recently observed status of the chaos experiment about pods
-	Status RawPodNetworkChaosStatus `json:"status"`
+	Status PodNetworkChaosStatus `json:"status"`
 }
 
-// RawPodNetworkChaosSpec defines the desired state of RawPodNetworkChaos
-type RawPodNetworkChaosSpec struct {
+// PodNetworkChaosSpec defines the desired state of PodNetworkChaos
+type PodNetworkChaosSpec struct {
 	// The ipset on the pod
 	// +optional
-	IpSets []RawIpSet `json:"ipsets,omitempty"`
+	IPSets []RawIPSet `json:"ipsets,omitempty"`
 
 	// The iptables rules on the pod
 	// +optional
-	Iptables []RawIpTables `json:"iptables,omitempty"`
+	Iptables []RawIptables `json:"iptables,omitempty"`
 
 	// The qdisc rules on the pod
 	// +optional
 	Qdiscs []RawQdisc `json:"qdiscs,omitempty"`
 }
 
-// RawIpSet represents an ipset on specific pod
-type RawIpSet struct {
+// RawIPSet represents an ipset on specific pod
+type RawIPSet struct {
 	// The name of ipset
 	Name string `json:"name"`
 
@@ -65,13 +65,27 @@ type RawIpSet struct {
 	RawRuleSource `json:",inline"`
 }
 
-// RawIpTables represents the iptables rules on specific pod
-type RawIpTables struct {
+// ChainDirection represents the direction of chain
+type ChainDirection string
+
+const (
+	// Input means this chain is linked with INPUT chain
+	Input ChainDirection = "input"
+
+	// Output means this chain is linked with OUTPUT chain
+	Output ChainDirection = "output"
+)
+
+// RawIptables represents the iptables rules on specific pod
+type RawIptables struct {
+	// The name of iptables chain
+	Name string `json:"name"`
+
 	// The name of related ipset
-	IpSet string `json:"ipset"`
+	IPSets []string `json:"ipset"`
 
 	// The block direction of this iptables rule
-	Direction Direction `json:"direction"`
+	Direction ChainDirection `json:"direction"`
 
 	RawRuleSource `json:",inline"`
 }
@@ -123,27 +137,27 @@ type RawRuleSource struct {
 	Source string `json:"source"`
 }
 
-// RawPodNetworkChaosStatus defines the observed state of RawPodNetworkChaos
-type RawPodNetworkChaosStatus struct {
+// PodNetworkChaosStatus defines the observed state of PodNetworkChaos
+type PodNetworkChaosStatus struct {
 	ChaosStatus `json:",inline"`
 }
 
 // +kubebuilder:object:root=true
 
-// RawPodNetworkChaosList contains a list of NetworkChaos
-type RawPodNetworkChaosList struct {
+// PodNetworkChaosList contains a list of NetworkChaos
+type PodNetworkChaosList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
-	Items           []RawPodNetworkChaos `json:"items"`
+	Items           []PodNetworkChaos `json:"items"`
 }
 
 // GetStatus returns the status of chaos
-func (in *RawPodNetworkChaos) GetStatus() *ChaosStatus {
+func (in *PodNetworkChaos) GetStatus() *ChaosStatus {
 	return &in.Status.ChaosStatus
 }
 
 // GetChaos returns a chaos instance
-func (in *RawPodNetworkChaos) GetChaos() *ChaosInstance {
+func (in *PodNetworkChaos) GetChaos() *ChaosInstance {
 	instance := &ChaosInstance{
 		Name:      in.Name,
 		Namespace: in.Namespace,
@@ -158,7 +172,7 @@ func (in *RawPodNetworkChaos) GetChaos() *ChaosInstance {
 }
 
 // ListChaos returns a list of network chaos
-func (in *RawPodNetworkChaosList) ListChaos() []*ChaosInstance {
+func (in *PodNetworkChaosList) ListChaos() []*ChaosInstance {
 	if len(in.Items) == 0 {
 		return nil
 	}
@@ -170,5 +184,5 @@ func (in *RawPodNetworkChaosList) ListChaos() []*ChaosInstance {
 }
 
 func init() {
-	SchemeBuilder.Register(&RawPodNetworkChaos{}, &RawPodNetworkChaosList{})
+	SchemeBuilder.Register(&PodNetworkChaos{}, &PodNetworkChaosList{})
 }

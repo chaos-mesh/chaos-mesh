@@ -31,9 +31,10 @@ import (
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/common"
-	"github.com/chaos-mesh/chaos-mesh/controllers/networkchaos/ipset"
 	"github.com/chaos-mesh/chaos-mesh/controllers/networkchaos/iptable"
 	"github.com/chaos-mesh/chaos-mesh/controllers/networkchaos/netutils"
+	"github.com/chaos-mesh/chaos-mesh/controllers/networkchaos/podnetworkmap"
+	"github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos/ipset"
 	"github.com/chaos-mesh/chaos-mesh/controllers/twophase"
 	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
 	"github.com/chaos-mesh/chaos-mesh/pkg/utils"
@@ -96,6 +97,9 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1
 		return err
 	}
 
+	source := networkchaos.Namespace + "/" + networkchaos.Name
+	m := podnetworkmap.New(source, r.Log, r.Client)
+
 	sources, err := utils.SelectAndFilterPods(ctx, r.Client, &networkchaos.Spec)
 
 	if err != nil {
@@ -113,73 +117,74 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1
 		}
 	}
 
-	sourceSet := ipset.BuildIPSet(sources, []string{}, networkchaos, sourceIPSetPostFix)
+	sourceSet := ipset.BuildIPSet(sources, []string{}, networkchaos, sourceIPSetPostFix, source)
 	externalCidrs, err := netutils.ResolveCidrs(networkchaos.Spec.ExternalTargets)
 	if err != nil {
 		r.Log.Error(err, "failed to resolve external targets")
 		return err
 	}
-	targetSet := ipset.BuildIPSet(targets, externalCidrs, networkchaos, targetIPSetPostFix)
+	targetSet := ipset.BuildIPSet(targets, externalCidrs, networkchaos, targetIPSetPostFix, source)
 
 	allPods := append(sources, targets...)
 
 	// Set up ipset in every related pods
-	g := errgroup.Group{}
 	for index := range allPods {
 		pod := allPods[index]
 		r.Log.Info("PODS", "name", pod.Name, "namespace", pod.Namespace)
-		g.Go(func() error {
-			err = ipset.FlushIPSets(ctx, r.Client, &pod, []*pb.IPSet{&sourceSet})
-			if err != nil {
-				return err
-			}
 
-			r.Log.Info("Flush ipset on pod", "name", pod.Name, "namespace", pod.Namespace)
-			return ipset.FlushIPSets(ctx, r.Client, &pod, []*pb.IPSet{&targetSet})
+		chaos, err := m.GetAndClear(ctx, types.NamespacedName{
+			Name:      pod.Name,
+			Namespace: pod.Namespace,
 		})
+		if err != nil {
+			r.Log.Error(err, "failed to get related podnetworkchaos")
+			return err
+		}
+
+		chaos.Spec.IPSets = append(chaos.Spec.IPSets, sourceSet, targetSet)
 	}
 
-	if err = g.Wait(); err != nil {
-		r.Log.Error(err, "flush pod ipset error")
-		return err
-	}
-
-	sourcesChains := []*pb.Chain{}
-	targetsChains := []*pb.Chain{}
+	sourcesChains := []v1alpha1.RawIptables{}
+	targetsChains := []v1alpha1.RawIptables{}
 	if networkchaos.Spec.Direction == v1alpha1.To || networkchaos.Spec.Direction == v1alpha1.Both {
-		sourcesChains = append(sourcesChains, &pb.Chain{
+		sourcesChains = append(sourcesChains, v1alpha1.RawIptables{
 			Name:      iptable.GenerateName(pb.Chain_OUTPUT, networkchaos),
-			Direction: pb.Chain_OUTPUT,
-			Ipsets:    []string{targetSet.Name},
+			Direction: v1alpha1.Output,
+			IPSets:    []string{targetSet.Name},
 		})
 
-		targetsChains = append(targetsChains, &pb.Chain{
+		targetsChains = append(targetsChains, v1alpha1.RawIptables{
 			Name:      iptable.GenerateName(pb.Chain_INPUT, networkchaos),
-			Direction: pb.Chain_INPUT,
-			Ipsets:    []string{sourceSet.Name},
+			Direction: v1alpha1.Input,
+			IPSets:    []string{sourceSet.Name},
 		})
 	}
 
 	if networkchaos.Spec.Direction == v1alpha1.From || networkchaos.Spec.Direction == v1alpha1.Both {
-		sourcesChains = append(sourcesChains, &pb.Chain{
+		sourcesChains = append(sourcesChains, v1alpha1.RawIptables{
 			Name:      iptable.GenerateName(pb.Chain_INPUT, networkchaos),
-			Direction: pb.Chain_OUTPUT,
-			Ipsets:    []string{targetSet.Name},
+			Direction: v1alpha1.Input,
+			IPSets:    []string{targetSet.Name},
 		})
 
-		targetsChains = append(targetsChains, &pb.Chain{
+		targetsChains = append(targetsChains, v1alpha1.RawIptables{
 			Name:      iptable.GenerateName(pb.Chain_OUTPUT, networkchaos),
-			Direction: pb.Chain_INPUT,
-			Ipsets:    []string{sourceSet.Name},
+			Direction: v1alpha1.Output,
+			IPSets:    []string{sourceSet.Name},
 		})
 	}
 
-	err = r.SetChains(ctx, sources, sourcesChains, networkchaos)
+	err = r.SetChains(ctx, sources, sourcesChains, m, networkchaos)
 	if err != nil {
 		return err
 	}
 
-	err = r.SetChains(ctx, targets, targetsChains, networkchaos)
+	err = r.SetChains(ctx, targets, targetsChains, m, networkchaos)
+	if err != nil {
+		return err
+	}
+
+	err = m.Commit(ctx)
 	if err != nil {
 		return err
 	}
@@ -206,7 +211,7 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1
 }
 
 // SetChains sets iptables chains for pods
-func (r *Reconciler) SetChains(ctx context.Context, pods []v1.Pod, chains []*pb.Chain, networkchaos *v1alpha1.NetworkChaos) error {
+func (r *Reconciler) SetChains(ctx context.Context, pods []v1.Pod, chains []v1alpha1.RawIptables, m *podnetworkmap.PodNetworkMap, networkchaos *v1alpha1.NetworkChaos) error {
 	g := errgroup.Group{}
 
 	for index := range pods {
@@ -217,11 +222,18 @@ func (r *Reconciler) SetChains(ctx context.Context, pods []v1.Pod, chains []*pb.
 			return err
 		}
 
+		chaos, err := m.GetAndClear(ctx, types.NamespacedName{
+			Name:      pod.Name,
+			Namespace: pod.Namespace,
+		})
+		if err != nil {
+			r.Log.Error(err, "failed to get related podnetworkchaos")
+			return err
+		}
+		chaos.Spec.Iptables = append(chaos.Spec.Iptables, chains...)
+
 		networkchaos.Finalizers = utils.InsertFinalizer(networkchaos.Finalizers, key)
 
-		g.Go(func() error {
-			return iptable.SetIptablesChains(ctx, r.Client, pod, chains)
-		})
 	}
 	return g.Wait()
 }

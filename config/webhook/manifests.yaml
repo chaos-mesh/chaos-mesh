@@ -83,9 +83,9 @@ webhooks:
     service:
       name: webhook-service
       namespace: system
-      path: /mutate-chaos-mesh-org-v1alpha1-rawpodnetworkchaos
+      path: /mutate-chaos-mesh-org-v1alpha1-podnetworkchaos
   failurePolicy: Fail
-  name: mrawpodnetworkchaos.kb.io
+  name: mpodnetworkchaos.kb.io
   rules:
   - apiGroups:
     - chaos-mesh.org
@@ -95,7 +95,7 @@ webhooks:
     - CREATE
     - UPDATE
     resources:
-    - rawpodnetworkchaos
+    - podnetworkchaos
 - clientConfig:
     caBundle: Cg==
     service:
@@ -217,9 +217,9 @@ webhooks:
     service:
       name: webhook-service
       namespace: system
-      path: /validate-chaos-mesh-org-v1alpha1-rawpodnetworkchaos
+      path: /validate-chaos-mesh-org-v1alpha1-podnetworkchaos
   failurePolicy: Fail
-  name: vrawpodnetworkchaos.kb.io
+  name: vpodnetworkchaos.kb.io
   rules:
   - apiGroups:
     - chaos-mesh.org
@@ -229,7 +229,7 @@ webhooks:
     - CREATE
     - UPDATE
     resources:
-    - rawpodnetworkchaos
+    - podnetworkchaos
 - clientConfig:
     caBundle: Cg==
     service:

@@ -6,18 +6,18 @@ metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.2.5
   creationTimestamp: null
-  name: rawpodnetworkchaos.chaos-mesh.org
+  name: podnetworkchaos.chaos-mesh.org
 spec:
   group: chaos-mesh.org
   names:
-    kind: RawPodNetworkChaos
-    listKind: RawPodNetworkChaosList
-    plural: rawpodnetworkchaos
-    singular: rawpodnetworkchaos
+    kind: PodNetworkChaos
+    listKind: PodNetworkChaosList
+    plural: podnetworkchaos
+    singular: podnetworkchaos
   scope: Namespaced
   validation:
     openAPIV3Schema:
-      description: RawPodNetworkChaos is the Schema for the networkchaos API
+      description: PodNetworkChaos is the Schema for the networkchaos API
       properties:
         apiVersion:
           description: 'APIVersion defines the versioned schema of this representation
@@ -37,7 +37,7 @@ spec:
             ipsets:
               description: The ipset on the pod
               items:
-                description: RawIpSet represents an ipset on specific pod
+                description: RawIPSet represents an ipset on specific pod
                 properties:
                   items:
                     description: The contents of ipset
@@ -58,7 +58,7 @@ spec:
             iptables:
               description: The iptables rules on the pod
               items:
-                description: RawIpTables represents the iptables rules on specific
+                description: RawIptables represents the iptables rules on specific
                   pod
                 properties:
                   direction:
@@ -66,12 +66,18 @@ spec:
                     type: string
                   ipset:
                     description: The name of related ipset
+                    items:
+                      type: string
+                    type: array
+                  name:
+                    description: The name of iptables chain
                     type: string
                   source:
                     type: string
                 required:
                 - direction
                 - ipset
+                - name
                 - source
                 type: object
               type: array

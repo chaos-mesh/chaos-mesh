@@ -26,7 +26,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/controllers"
 	"github.com/chaos-mesh/chaos-mesh/controllers/common"
 	"github.com/chaos-mesh/chaos-mesh/controllers/metrics"
-	"github.com/chaos-mesh/chaos-mesh/controllers/rawpodnetworkchaos"
+	"github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos"
 	"github.com/chaos-mesh/chaos-mesh/pkg/utils"
 	"github.com/chaos-mesh/chaos-mesh/pkg/version"
 	"github.com/chaos-mesh/chaos-mesh/pkg/webhook/config"
@@ -168,12 +168,12 @@ func main() {
 		os.Exit(1)
 	}
 
-	v1alpha1.RegisterRawPodNetworkHandler(&rawpodnetworkchaos.Handler{
+	v1alpha1.RegisterRawPodNetworkHandler(&podnetworkchaos.Handler{
 		Client: mgr.GetClient(),
-		Log:    ctrl.Log.WithName("handler").WithName("RawPodNetworkChaos"),
+		Log:    ctrl.Log.WithName("handler").WithName("PodNetworkChaos"),
 	})
-	if err = (&chaosmeshv1alpha1.RawPodNetworkChaos{}).SetupWebhookWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create webhook", "webhook", "RawPodNetworkChaos")
+	if err = (&chaosmeshv1alpha1.PodNetworkChaos{}).SetupWebhookWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create webhook", "webhook", "PodNetworkChaos")
 		os.Exit(1)
 	}
 
