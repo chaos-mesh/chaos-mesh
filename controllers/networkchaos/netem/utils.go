@@ -16,7 +16,7 @@ package netem
 import (
 	"net"
 
-	"github.com/chaos-mesh/chaos-mesh/controllers/networkchaos/netutils"
+	"github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos/netutils"
 )
 
 func resolveCidrs(name string) (string, error) {

@@ -20,7 +20,6 @@ import (
 
 	"github.com/go-logr/logr"
 	"github.com/hashicorp/go-multierror"
-	"golang.org/x/sync/errgroup"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/tools/cache"
@@ -30,9 +29,9 @@ import (
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/common"
-	"github.com/chaos-mesh/chaos-mesh/controllers/networkchaos/netutils"
 	"github.com/chaos-mesh/chaos-mesh/controllers/networkchaos/podnetworkmap"
 	"github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos/ipset"
+	"github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos/netutils"
 	"github.com/chaos-mesh/chaos-mesh/controllers/twophase"
 	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
 	"github.com/chaos-mesh/chaos-mesh/pkg/utils"
@@ -232,9 +231,6 @@ func (r *Reconciler) cleanFinalizersAndRecover(ctx context.Context, networkchaos
 }
 
 func (r *Reconciler) applyNetem(ctx context.Context, sources, targets []v1.Pod, externalTargets []string, m *podnetworkmap.PodNetworkMap, networkchaos *v1alpha1.NetworkChaos) error {
-
-	g := errgroup.Group{}
-
 	for index := range sources {
 		pod := &sources[index]
 
@@ -293,5 +289,5 @@ func (r *Reconciler) applyNetem(ctx context.Context, sources, targets []v1.Pod, 
 		})
 	}
 
-	return g.Wait()
+	return nil
 }
