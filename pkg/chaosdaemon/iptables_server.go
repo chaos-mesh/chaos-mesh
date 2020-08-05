@@ -45,11 +45,13 @@ func (s *daemonServer) SetIptablesChains(ctx context.Context, req *pb.IptablesCh
 	iptables := buildIptablesClient(ctx, nsPath)
 	err = iptables.initializeEnv()
 	if err != nil {
+		log.Error(err, "error while initializing iptables")
 		return nil, err
 	}
 
 	err = iptables.setIptablesChains(req.Chains)
 	if err != nil {
+		log.Error(err, "error while setting iptables chains")
 		return nil, err
 	}
 
@@ -149,7 +151,7 @@ func (iptables *iptablesClient) initializeEnv() error {
 
 // createNewChain will cover existing chain
 func (iptables *iptablesClient) createNewChain(chain *iptablesChain) error {
-	cmd := withNetNS(iptables.ctx, iptables.nsPath, iptablesCmd, "-N", chain.Name)
+	cmd := withNetNS(iptables.ctx, iptables.nsPath, iptablesCmd, "-w", "-N", chain.Name)
 	out, err := cmd.CombinedOutput()
 
 	if (err == nil && len(out) == 0) ||
@@ -182,7 +184,7 @@ func (iptables *iptablesClient) deleteAndWriteRules(chain *iptablesChain) error 
 }
 
 func (iptables *iptablesClient) ensureRule(chain *iptablesChain, rule string) error {
-	cmd := withNetNS(iptables.ctx, iptables.nsPath, iptablesCmd, "-S", chain.Name)
+	cmd := withNetNS(iptables.ctx, iptables.nsPath, iptablesCmd, "-w", "-S", chain.Name)
 	out, err := cmd.CombinedOutput()
 	if err != nil {
 		return encodeOutputToError(out, err)
@@ -193,7 +195,8 @@ func (iptables *iptablesClient) ensureRule(chain *iptablesChain, rule string) er
 		return nil
 	}
 
-	cmd = withNetNS(iptables.ctx, iptables.nsPath, iptablesCmd, strings.Split(rule, " ")...)
+	// TODO: lock on every container but not on chaos-daemon's `/run/xtables.lock`
+	cmd = withNetNS(iptables.ctx, iptables.nsPath, iptablesCmd, strings.Split("-w "+rule, " ")...)
 	out, err = cmd.CombinedOutput()
 	if err != nil {
 		return encodeOutputToError(out, err)
@@ -203,7 +206,7 @@ func (iptables *iptablesClient) ensureRule(chain *iptablesChain, rule string) er
 }
 
 func (iptables *iptablesClient) flushIptablesChain(chain *iptablesChain) error {
-	cmd := withNetNS(iptables.ctx, iptables.nsPath, iptablesCmd, "-F", chain.Name)
+	cmd := withNetNS(iptables.ctx, iptables.nsPath, iptablesCmd, "-w", "-F", chain.Name)
 	out, err := cmd.CombinedOutput()
 	if err != nil {
 		return encodeOutputToError(out, err)

@@ -20,6 +20,8 @@ spec:
   storageClassName: "{{ .Values.dashboard.persistentVolume.storageClass }}"
 {{- end }}
 {{- end }}
+  accessModes:
+    - ReadWriteOnce
   resources:
     requests:
       storage: "{{ .Values.dashboard.persistentVolume.size }}"

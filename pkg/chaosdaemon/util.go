@@ -45,6 +45,8 @@ const (
 	containerdProtocolPrefix = "containerd://"
 	containerdDefaultNS      = "k8s.io"
 
+	pausePath = "/usr/local/bin/pause"
+
 	defaultProcPrefix = "/proc"
 )
 
@@ -208,6 +210,13 @@ var nsArgMap = map[nsType]string{
 // GetNsPath returns corresponding namespace path
 func GetNsPath(pid uint32, typ nsType) string {
 	return fmt.Sprintf("%s/%d/ns/%s", defaultProcPrefix, pid, string(typ))
+}
+
+func withPause(cmd exec.Cmd) exec.Cmd {
+	cmd.Path = pausePath
+	cmd.Args = append([]string{pausePath}, cmd.Args...)
+
+	return cmd
 }
 
 func withNetNS(ctx context.Context, nsPath string, cmd string, args ...string) *exec.Cmd {
