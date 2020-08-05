@@ -84,9 +84,7 @@ const ArchiveReport: React.FC = () => {
               </Grid>
 
               <Grid item xs={12}>
-                <Paper variant="outlined">
-                  {events.length > 0 && <EventsTable events={events} hasSearch={false} />}
-                </Paper>
+                {events.length > 0 && <EventsTable events={events} hasSearch={false} detailed />}
               </Grid>
             </>
           )}
