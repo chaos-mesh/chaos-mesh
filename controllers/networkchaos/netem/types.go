@@ -17,14 +17,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"reflect"
-	"strings"
 
 	"github.com/go-logr/logr"
 	"github.com/hashicorp/go-multierror"
 	"golang.org/x/sync/errgroup"
 	v1 "k8s.io/api/core/v1"
-	k8serror "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/tools/cache"
 	"k8s.io/client-go/tools/record"
@@ -33,9 +30,9 @@ import (
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/common"
-	"github.com/chaos-mesh/chaos-mesh/controllers/networkchaos/ipset"
 	"github.com/chaos-mesh/chaos-mesh/controllers/networkchaos/netutils"
-	"github.com/chaos-mesh/chaos-mesh/controllers/networkchaos/tc"
+	"github.com/chaos-mesh/chaos-mesh/controllers/networkchaos/podnetworkmap"
+	"github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos/ipset"
 	"github.com/chaos-mesh/chaos-mesh/controllers/twophase"
 	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
 	"github.com/chaos-mesh/chaos-mesh/pkg/utils"
@@ -102,6 +99,9 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1
 		return err
 	}
 
+	source := networkchaos.Namespace + "/" + networkchaos.Name
+	m := podnetworkmap.New(source, r.Log, r.Client)
+
 	sources, err := utils.SelectAndFilterPods(ctx, r.Client, &networkchaos.Spec)
 	if err != nil {
 		r.Log.Error(err, "failed to select and filter pods")
@@ -129,23 +129,29 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1
 
 	switch networkchaos.Spec.Direction {
 	case v1alpha1.To:
-		err = r.applyNetem(ctx, sources, targets, externalCidrs, networkchaos)
+		err = r.applyNetem(ctx, sources, targets, externalCidrs, m, networkchaos)
 		if err != nil {
 			r.Log.Error(err, "failed to apply netem", "sources", sources, "targets", targets)
 			return err
 		}
 	case v1alpha1.From:
-		err = r.applyNetem(ctx, targets, sources, []string{}, networkchaos)
+		err = r.applyNetem(ctx, targets, sources, []string{}, m, networkchaos)
 		if err != nil {
 			r.Log.Error(err, "failed to apply netem", "sources", targets, "targets", sources)
 			return err
 		}
 	case v1alpha1.Both:
-		err = r.applyNetem(ctx, pods, pods, externalCidrs, networkchaos)
+		err = r.applyNetem(ctx, pods, pods, externalCidrs, m, networkchaos)
 		if err != nil {
 			r.Log.Error(err, "failed to apply netem", "sources", pods, "targets", pods)
 			return err
 		}
+	}
+
+	err = m.Commit(ctx)
+	if err != nil {
+		r.Log.Error(err, "fail to commit")
+		return err
 	}
 
 	networkchaos.Status.Experiment.PodRecords = make([]v1alpha1.PodStatus, 0, len(pods))
@@ -187,6 +193,9 @@ func (r *Reconciler) Recover(ctx context.Context, req ctrl.Request, chaos v1alph
 func (r *Reconciler) cleanFinalizersAndRecover(ctx context.Context, networkchaos *v1alpha1.NetworkChaos) error {
 	var result error
 
+	source := networkchaos.Namespace + "/" + networkchaos.Name
+	m := podnetworkmap.New(source, r.Log, r.Client)
+
 	for _, key := range networkchaos.Finalizers {
 		ns, name, err := cache.SplitMetaNamespaceKey(key)
 		if err != nil {
@@ -194,31 +203,24 @@ func (r *Reconciler) cleanFinalizersAndRecover(ctx context.Context, networkchaos
 			continue
 		}
 
-		var pod v1.Pod
-		err = r.Get(ctx, types.NamespacedName{
+		_, err = m.GetAndClear(ctx, types.NamespacedName{
 			Namespace: ns,
 			Name:      name,
-		}, &pod)
+		})
 
-		if err != nil {
-			if !k8serror.IsNotFound(err) {
-				result = multierror.Append(result, err)
-				continue
-			}
-
-			r.Log.Info("Pod not found", "namespace", ns, "name", name)
-			networkchaos.Finalizers = utils.RemoveFromFinalizer(networkchaos.Finalizers, key)
-			continue
-		}
-
-		err = r.recoverPod(ctx, &pod, networkchaos)
 		if err != nil {
 			result = multierror.Append(result, err)
 			continue
 		}
 
+		err = m.Commit(ctx)
+		if err != nil {
+			r.Log.Error(err, "fail to commit")
+		}
+
 		networkchaos.Finalizers = utils.RemoveFromFinalizer(networkchaos.Finalizers, key)
 	}
+	r.Log.Info("After recovering", "finalizers", networkchaos.Finalizers)
 
 	if networkchaos.Annotations[common.AnnotationCleanFinalizer] == common.AnnotationCleanFinalizerForced {
 		r.Log.Info("Force cleanup all finalizers", "chaos", networkchaos)
@@ -229,118 +231,7 @@ func (r *Reconciler) cleanFinalizersAndRecover(ctx context.Context, networkchaos
 	return result
 }
 
-func (r *Reconciler) recoverPod(ctx context.Context, pod *v1.Pod, _ *v1alpha1.NetworkChaos) error {
-	r.Log.Info("Try to recover pod", "namespace", pod.Namespace, "name", pod.Name)
-
-	pbClient, err := utils.NewChaosDaemonClient(ctx, r.Client, pod, common.ControllerCfg.ChaosDaemonPort)
-	if err != nil {
-		return err
-	}
-	defer pbClient.Close()
-
-	if len(pod.Status.ContainerStatuses) == 0 {
-		return fmt.Errorf("%s %s can't get the state of container", pod.Namespace, pod.Name)
-	}
-
-	containerID := pod.Status.ContainerStatuses[0].ContainerID
-
-	_, err = pbClient.DeleteNetem(ctx, &pb.NetemRequest{
-		ContainerId: containerID,
-		Netem:       nil,
-	})
-
-	if err != nil {
-		r.Log.Error(err, "recover pod error", "namespace", pod.Namespace, "name", pod.Name)
-	} else {
-		r.Log.Info("Recover pod finished", "namespace", pod.Namespace, "name", pod.Name)
-	}
-
-	return err
-}
-
-func (r *Reconciler) applyPod(ctx context.Context, pod *v1.Pod, networkchaos *v1alpha1.NetworkChaos, parent, handle *pb.TcHandle) error {
-	r.Log.Info("Try to apply netem on pod", "namespace", pod.Namespace, "name", pod.Name)
-
-	var (
-		netem *pb.Netem
-		err   error
-	)
-	switch networkchaos.Spec.Action {
-	case v1alpha1.NetemAction:
-		netem, err = mergeNetem(networkchaos.Spec)
-	default:
-		action := strings.Title(string(networkchaos.Spec.Action))
-		spec, ok := reflect.Indirect(reflect.ValueOf(networkchaos.Spec)).FieldByName(action).Interface().(NetemSpec)
-		if !ok {
-			return fmt.Errorf("spec %s is not a NetemSpec", action)
-		}
-		netem, err = spec.ToNetem()
-	}
-	if err != nil {
-		return err
-	}
-
-	pbClient, err := utils.NewChaosDaemonClient(ctx, r.Client, pod, common.ControllerCfg.ChaosDaemonPort)
-	if err != nil {
-		return err
-	}
-	defer pbClient.Close()
-
-	if len(pod.Status.ContainerStatuses) == 0 {
-		return fmt.Errorf("%s %s can't get the state of container", pod.Namespace, pod.Name)
-	}
-
-	containerID := pod.Status.ContainerStatuses[0].ContainerID
-
-	netem.Parent = parent
-	netem.Handle = handle
-
-	_, err = pbClient.SetNetem(ctx, &pb.NetemRequest{
-		ContainerId: containerID,
-		Netem:       netem,
-	})
-
-	return err
-}
-
-// mergeNetem calls ToNetem on all non nil network emulation specs and merges them into one request.
-func mergeNetem(spec v1alpha1.NetworkChaosSpec) (*pb.Netem, error) {
-	// NOTE: a cleaner way like
-	// emSpecs = []NetemSpec{spec.Delay, spec.Loss} won't work.
-	// Because in the for _, spec := range emSpecs loop,
-	// spec != nil would always be true.
-	// See https://stackoverflow.com/questions/13476349/check-for-nil-and-nil-interface-in-go
-	// And https://groups.google.com/forum/#!topic/golang-nuts/wnH302gBa4I/discussion
-	// > In short: If you never store (*T)(nil) in an interface, then you can reliably use comparison against nil
-	var emSpecs []NetemSpec
-	if spec.Delay != nil {
-		emSpecs = append(emSpecs, spec.Delay)
-	}
-	if spec.Loss != nil {
-		emSpecs = append(emSpecs, spec.Loss)
-	}
-	if spec.Duplicate != nil {
-		emSpecs = append(emSpecs, spec.Duplicate)
-	}
-	if spec.Corrupt != nil {
-		emSpecs = append(emSpecs, spec.Corrupt)
-	}
-	if len(emSpecs) == 0 {
-		return nil, errors.New(invalidNetemSpecMsg)
-	}
-
-	merged := &pb.Netem{}
-	for _, spec := range emSpecs {
-		em, err := spec.ToNetem()
-		if err != nil {
-			return nil, err
-		}
-		merged = utils.MergeNetem(merged, em)
-	}
-	return merged, nil
-}
-
-func (r *Reconciler) applyNetem(ctx context.Context, sources, targets []v1.Pod, externalTargets []string, networkchaos *v1alpha1.NetworkChaos) error {
+func (r *Reconciler) applyNetem(ctx context.Context, sources, targets []v1.Pod, externalTargets []string, m *podnetworkmap.PodNetworkMap, networkchaos *v1alpha1.NetworkChaos) error {
 
 	g := errgroup.Group{}
 
@@ -361,151 +252,44 @@ func (r *Reconciler) applyNetem(ctx context.Context, sources, targets []v1.Pod, 
 		for index := range sources {
 			pod := &sources[index]
 
-			g.Go(func() error {
-				parent := &pb.TcHandle{
-					Major: 1,
-					Minor: 0,
-				}
-
-				handle := &pb.TcHandle{
-					Major: 1,
-					Minor: 0,
-				}
-				return r.applyPod(ctx, pod, networkchaos, parent, handle)
+			chaos, err := m.GetAndClear(ctx, types.NamespacedName{
+				Name:      pod.Name,
+				Namespace: pod.Namespace,
+			})
+			if err != nil {
+				r.Log.Error(err, "failed to get related podnetworkchaos")
+				return err
+			}
+			chaos.Spec.TrafficControls = append(chaos.Spec.TrafficControls, v1alpha1.RawTrafficControl{
+				Type:        v1alpha1.Netem,
+				TcParameter: networkchaos.Spec.TcParameter,
+				Source:      m.Source,
 			})
 		}
-		return g.Wait()
+		return nil
 	}
 
 	// create ipset contains all target ips
-	dstIpset := ipset.BuildIPSet(targets, externalTargets, networkchaos, ipsetPostFix)
-	r.Log.Info("apply netem with filter", "sources", sources, "ipset", dstIpset.String())
+	dstIpset := ipset.BuildIPSet(targets, externalTargets, networkchaos, ipsetPostFix, m.Source)
+	r.Log.Info("apply netem with filter", "sources", sources, "ipset", dstIpset)
 
 	for index := range sources {
 		pod := &sources[index]
 
-		g.Go(func() error {
-			// NOTE: this is core logic of filtering:
-			// we need handle both filtered traffic with netem actions like delay, loss etc,
-			// and keep rest traffic as normal.
-			// To filter traffic, use tc filter to classify traffic and route to netem qdisc.
-			// Because the default qdisc pfifo_fast is classless, which we can't use here,
-			// using prio with proper priomap as a replacement of pfifo_fast.
-			//
-			// Here's the qdisc tree:
-			//           root 1:
-			//         /  |   |  \
-			//       1:1 1:2 1:3 1:4
-			//        |   |   |   |
-			//       10: 20: 30: 40:
-			//
-			// The code logic is equivalent with raw command line commands like following
-			// $ipset create myset hash:ip
-			// $ipset flush
-			// $ipset add myset 180.101.49.11
-			// $tc qdisc add dev eth0 root handle 1: prio bands 4 priomap 1 2 2 2 1 2 0 0 1 1 1 1 1 1 1 1
-			// $tc qdisc add dev eth0 parent 1:1 handle 10: sfq
-			// $tc qdisc add dev eth0 parent 1:2 handle 20: sfq
-			// $tc qdisc add dev eth0 parent 1:3 handle 30: sfq
-			// $tc qdisc add dev eth0 parent 1:4 handle 40: netem delay 10ms
-			// $tc filter add dev eth0 parent 1: basic match 'ipset(myset dst)' classid 1:4
-
-			err := ipset.FlushIPSets(ctx, r.Client, pod, []*pb.IPSet{&dstIpset})
-			if err != nil {
-				return err
-			}
-
-			err = tc.AddQdisc(ctx, r.Client, pod, &pb.Qdisc{
-				Parent: &pb.TcHandle{
-					Major: 1,
-					Minor: 0,
-				},
-				Handle: &pb.TcHandle{
-					Major: 1,
-					Minor: 0,
-				},
-				Type: "prio",
-				// NOTE: priomap is the same as pfifo_fast qdisc,
-				// so that it keeps the same behavior when handling non-classified traffic.
-				// http://tldp.org/HOWTO/Adv-Routing-HOWTO/lartc.qdisc.classless.html
-				// bands 4 = 3 + 1:
-				// 3 is for default bands setting, similar with priomap,
-				// 1 is for holding netem qdisc.
-				Args: []string{"bands", "4", "priomap", "1", "2", "2", "2", "1", "2", "0", "0", "1", "1", "1", "1", "1", "1", "1", "1"},
-			})
-			if err != nil {
-				return err
-			}
-
-			err = tc.AddQdisc(ctx, r.Client, pod, &pb.Qdisc{
-				Parent: &pb.TcHandle{
-					Major: 1,
-					Minor: 1,
-				},
-				Handle: &pb.TcHandle{
-					Major: 10,
-					Minor: 0,
-				},
-				Type: "sfq",
-			})
-			if err != nil {
-				return err
-			}
-
-			err = tc.AddQdisc(ctx, r.Client, pod, &pb.Qdisc{
-				Parent: &pb.TcHandle{
-					Major: 1,
-					Minor: 2,
-				},
-				Handle: &pb.TcHandle{
-					Major: 20,
-					Minor: 0,
-				},
-				Type: "sfq",
-			})
-			if err != nil {
-				return err
-			}
-
-			err = tc.AddQdisc(ctx, r.Client, pod, &pb.Qdisc{
-				Parent: &pb.TcHandle{
-					Major: 1,
-					Minor: 3,
-				},
-				Handle: &pb.TcHandle{
-					Major: 30,
-					Minor: 0,
-				},
-				Type: "sfq",
-			})
-			if err != nil {
-				return err
-			}
-
-			parent := &pb.TcHandle{
-				Major: 1,
-				Minor: 4,
-			}
-			handle := &pb.TcHandle{
-				Major: 40,
-				Minor: 0,
-			}
-			err = r.applyPod(ctx, pod, networkchaos, parent, handle)
-			if err != nil {
-				return err
-			}
-
-			return tc.AddEmatchFilter(ctx, r.Client, pod, &pb.EmatchFilter{
-				Match: fmt.Sprintf("ipset(%s dst)", dstIpset.Name),
-				Parent: &pb.TcHandle{
-					Major: 1,
-					Minor: 0,
-				},
-				Classid: &pb.TcHandle{
-					Major: 1,
-					Minor: 4,
-				},
-			})
+		chaos, err := m.GetAndClear(ctx, types.NamespacedName{
+			Name:      pod.Name,
+			Namespace: pod.Namespace,
+		})
+		if err != nil {
+			r.Log.Error(err, "failed to get related podnetworkchaos")
+			return err
+		}
+		chaos.Spec.IPSets = append(chaos.Spec.IPSets, dstIpset)
+		chaos.Spec.TrafficControls = append(chaos.Spec.TrafficControls, v1alpha1.RawTrafficControl{
+			Type:        v1alpha1.Netem,
+			TcParameter: networkchaos.Spec.TcParameter,
+			Source:      m.Source,
+			IPSet:       dstIpset.Name,
 		})
 	}
 

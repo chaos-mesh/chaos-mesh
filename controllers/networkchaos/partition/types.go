@@ -20,7 +20,6 @@ import (
 
 	"github.com/go-logr/logr"
 	"github.com/hashicorp/go-multierror"
-	"golang.org/x/sync/errgroup"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/tools/cache"
@@ -198,6 +197,7 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1
 
 	err = m.Commit(ctx)
 	if err != nil {
+		r.Log.Error(err, "fail to commit")
 		return err
 	}
 
@@ -224,8 +224,6 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1
 
 // SetChains sets iptables chains for pods
 func (r *Reconciler) SetChains(ctx context.Context, pods []v1.Pod, chains []v1alpha1.RawIptables, m *podnetworkmap.PodNetworkMap, networkchaos *v1alpha1.NetworkChaos) error {
-	g := errgroup.Group{}
-
 	for index := range pods {
 		pod := &pods[index]
 
@@ -247,7 +245,7 @@ func (r *Reconciler) SetChains(ctx context.Context, pods []v1.Pod, chains []v1al
 		networkchaos.Finalizers = utils.InsertFinalizer(networkchaos.Finalizers, key)
 
 	}
-	return g.Wait()
+	return nil
 }
 
 // Recover implements the reconciler.InnerReconciler.Recover

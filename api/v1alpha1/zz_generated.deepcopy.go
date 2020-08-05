@@ -524,31 +524,7 @@ func (in *NetworkChaosSpec) DeepCopyInto(out *NetworkChaosSpec) {
 		*out = new(SchedulerSpec)
 		**out = **in
 	}
-	if in.Delay != nil {
-		in, out := &in.Delay, &out.Delay
-		*out = new(DelaySpec)
-		(*in).DeepCopyInto(*out)
-	}
-	if in.Loss != nil {
-		in, out := &in.Loss, &out.Loss
-		*out = new(LossSpec)
-		**out = **in
-	}
-	if in.Duplicate != nil {
-		in, out := &in.Duplicate, &out.Duplicate
-		*out = new(DuplicateSpec)
-		**out = **in
-	}
-	if in.Corrupt != nil {
-		in, out := &in.Corrupt, &out.Corrupt
-		*out = new(CorruptSpec)
-		**out = **in
-	}
-	if in.Bandwidth != nil {
-		in, out := &in.Bandwidth, &out.Bandwidth
-		*out = new(BandwidthSpec)
-		(*in).DeepCopyInto(*out)
-	}
+	in.TcParameter.DeepCopyInto(&out.TcParameter)
 	if in.Target != nil {
 		in, out := &in.Target, &out.Target
 		*out = new(Target)

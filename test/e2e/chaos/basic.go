@@ -1486,10 +1486,12 @@ var _ = ginkgo.Describe("[Basic]", func() {
 							LabelSelectors: map[string]string{"app": "network-peer-0"},
 						},
 						Mode: v1alpha1.OnePodMode,
-						Delay: &v1alpha1.DelaySpec{
-							Latency:     "200ms",
-							Correlation: "25",
-							Jitter:      "0ms",
+						TcParameter: v1alpha1.TcParameter{
+							Delay: &v1alpha1.DelaySpec{
+								Latency:     "200ms",
+								Correlation: "25",
+								Jitter:      "0ms",
+							},
 						},
 						Duration: pointer.StringPtr("9m"),
 						Scheduler: &v1alpha1.SchedulerSpec{
