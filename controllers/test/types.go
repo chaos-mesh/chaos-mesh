@@ -110,6 +110,10 @@ func (c *MockChaosDaemonClient) ContainerKill(ctx context.Context, in *chaosdaem
 	return nil, mockError("ContainerKill")
 }
 
+func (c *MockChaosDaemonClient) SetTcs(ctx context.Context, in *chaosdaemon.TcsRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
+	return nil, mockError("SetTcs")
+}
+
 func (c *MockChaosDaemonClient) Close() error {
 	return mockError("CloseChaosDaemonClient")
 }

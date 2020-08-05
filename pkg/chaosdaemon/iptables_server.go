@@ -214,7 +214,3 @@ func (iptables *iptablesClient) flushIptablesChain(chain *iptablesChain) error {
 
 	return nil
 }
-
-func encodeOutputToError(output []byte, err error) error {
-	return fmt.Errorf("error code: %v, msg: %s", err, string(output))
-}

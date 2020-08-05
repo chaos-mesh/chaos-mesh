@@ -1271,7 +1271,7 @@ spec:
                   direction:
                     description: The block direction of this iptables rule
                     type: string
-                  ipset:
+                  ipsets:
                     description: The name of related ipset
                     items:
                       type: string
@@ -1283,15 +1283,16 @@ spec:
                     type: string
                 required:
                 - direction
-                - ipset
+                - ipsets
                 - name
                 - source
                 type: object
               type: array
-            qdiscs:
-              description: The qdisc rules on the pod
+            tcs:
+              description: The tc rules on the pod
               items:
-                description: RawQdisc represents the qdiscs on specific pod
+                description: RawTrafficControl represents the traffic control chaos
+                  on specific pod
                 properties:
                   bandwidth:
                     description: Bandwidth represents the detail about bandwidth control
@@ -1382,6 +1383,9 @@ spec:
                     - correlation
                     - duplicate
                     type: object
+                  ipset:
+                    description: The name of target ipset
+                    type: string
                   loss:
                     description: Loss represents the detail about loss action
                     properties:
@@ -1397,7 +1401,7 @@ spec:
                     description: The name and namespace of the source network chaos
                     type: string
                   type:
-                    description: The type of qdisc
+                    description: The type of traffic control
                     type: string
                 required:
                 - source

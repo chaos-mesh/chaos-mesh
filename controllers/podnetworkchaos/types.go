@@ -15,12 +15,15 @@ package podnetworkchaos
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos/ipset"
 	"github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos/iptable"
+	"github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos/tc"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
+	"github.com/chaos-mesh/chaos-mesh/pkg/utils"
 
 	"github.com/go-logr/logr"
 	corev1 "k8s.io/api/core/v1"
@@ -28,11 +31,17 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
+const (
+	invalidNetemSpecMsg = "invalid spec for netem action, at least one is required from delay, loss, duplicate, corrupt"
+)
+
+// Handler applys podnetworkchaos
 type Handler struct {
 	client.Client
 	Log logr.Logger
 }
 
+// Apply flushes network configuration on pod
 func (h *Handler) Apply(ctx context.Context, chaos *v1alpha1.PodNetworkChaos) error {
 	h.Log.Info("updating network chaos", "pod", chaos.Namespace+"/"+chaos.Name, "spec", chaos.Spec)
 
@@ -47,6 +56,26 @@ func (h *Handler) Apply(ctx context.Context, chaos *v1alpha1.PodNetworkChaos) er
 		return err
 	}
 
+	err = h.SetIPSets(ctx, pod, chaos)
+	if err != nil {
+		return err
+	}
+
+	err = h.SetIptables(ctx, pod, chaos)
+	if err != nil {
+		return err
+	}
+
+	err = h.SetTcs(ctx, pod, chaos)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// SetIPSets set ipset on pod
+func (h *Handler) SetIPSets(ctx context.Context, pod *corev1.Pod, chaos *v1alpha1.PodNetworkChaos) error {
 	ipsets := []*pb.IPSet{}
 	for _, ipset := range chaos.Spec.IPSets {
 		ipsets = append(ipsets, &pb.IPSet{
@@ -54,8 +83,11 @@ func (h *Handler) Apply(ctx context.Context, chaos *v1alpha1.PodNetworkChaos) er
 			Cidrs: ipset.Cidrs,
 		})
 	}
-	ipset.FlushIPSets(ctx, h.Client, pod, ipsets)
+	return ipset.FlushIPSets(ctx, h.Client, pod, ipsets)
+}
 
+// SetIptables set iptables on pod
+func (h *Handler) SetIptables(ctx context.Context, pod *corev1.Pod, chaos *v1alpha1.PodNetworkChaos) error {
 	chains := []*pb.Chain{}
 	for _, chain := range chaos.Spec.Iptables {
 		var direction pb.Chain_Direction
@@ -74,6 +106,80 @@ func (h *Handler) Apply(ctx context.Context, chaos *v1alpha1.PodNetworkChaos) er
 			Direction: direction,
 		})
 	}
-	iptable.SetIptablesChains(ctx, h.Client, pod, chains)
-	return nil
+	return iptable.SetIptablesChains(ctx, h.Client, pod, chains)
+}
+
+// SetTcs set traffic control related chaos on pod
+func (h *Handler) SetTcs(ctx context.Context, pod *corev1.Pod, chaos *v1alpha1.PodNetworkChaos) error {
+	tcs := []*pb.Tc{}
+	for _, tc := range chaos.Spec.TrafficControls {
+		if tc.Type == v1alpha1.Bandwidth {
+			tbf, err := tc.Bandwidth.ToTbf()
+			if err != nil {
+				return err
+			}
+			tcs = append(tcs, &pb.Tc{
+				Type:  pb.Tc_BANDWIDTH,
+				Tbf:   tbf,
+				Ipset: tc.IPSet,
+			})
+		} else if tc.Type == v1alpha1.Netem {
+			netem, err := mergeNetem(tc.TcParameter)
+			if err != nil {
+				return err
+			}
+			tcs = append(tcs, &pb.Tc{
+				Type:  pb.Tc_NETEM,
+				Netem: netem,
+				Ipset: tc.IPSet,
+			})
+		} else {
+			return fmt.Errorf("unknown tc type")
+		}
+	}
+
+	h.Log.Info("setting tcs", "tcs", tcs)
+	return tc.SetTcs(ctx, h.Client, pod, tcs)
+}
+
+// NetemSpec defines the interface to convert to a Netem protobuf
+type NetemSpec interface {
+	ToNetem() (*pb.Netem, error)
+}
+
+// mergeNetem calls ToNetem on all non nil network emulation specs and merges them into one request.
+func mergeNetem(spec v1alpha1.TcParameter) (*pb.Netem, error) {
+	// NOTE: a cleaner way like
+	// emSpecs = []NetemSpec{spec.Delay, spec.Loss} won't work.
+	// Because in the for _, spec := range emSpecs loop,
+	// spec != nil would always be true.
+	// See https://stackoverflow.com/questions/13476349/check-for-nil-and-nil-interface-in-go
+	// And https://groups.google.com/forum/#!topic/golang-nuts/wnH302gBa4I/discussion
+	// > In short: If you never store (*T)(nil) in an interface, then you can reliably use comparison against nil
+	var emSpecs []NetemSpec
+	if spec.Delay != nil {
+		emSpecs = append(emSpecs, spec.Delay)
+	}
+	if spec.Loss != nil {
+		emSpecs = append(emSpecs, spec.Loss)
+	}
+	if spec.Duplicate != nil {
+		emSpecs = append(emSpecs, spec.Duplicate)
+	}
+	if spec.Corrupt != nil {
+		emSpecs = append(emSpecs, spec.Corrupt)
+	}
+	if len(emSpecs) == 0 {
+		return nil, errors.New(invalidNetemSpecMsg)
+	}
+
+	merged := &pb.Netem{}
+	for _, spec := range emSpecs {
+		em, err := spec.ToNetem()
+		if err != nil {
+			return nil, err
+		}
+		merged = utils.MergeNetem(merged, em)
+	}
+	return merged, nil
 }

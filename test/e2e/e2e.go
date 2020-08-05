@@ -136,20 +136,20 @@ var _ = ginkgo.SynchronizedBeforeSuite(func() []byte {
 	framework.ExpectNoError(err, "failed to create clientset")
 	apiExtCli, err := apiextensionsclientset.NewForConfig(config)
 	framework.ExpectNoError(err, "failed to create clientset")
-	oa := test.NewOperatorAction(kubeCli, aggrCli, apiExtCli, e2econfig.TestConfig)
+	_ = test.NewOperatorAction(kubeCli, aggrCli, apiExtCli, e2econfig.TestConfig)
 	ocfg := test.NewDefaultOperatorConfig()
 	ocfg.Manager.Image = e2econfig.TestConfig.ManagerImage
 	ocfg.Manager.Tag = e2econfig.TestConfig.ManagerTag
 	ocfg.Daemon.Image = e2econfig.TestConfig.DaemonImage
 	ocfg.Daemon.Tag = e2econfig.TestConfig.DaemonTag
 
-	oa.CleanCRDOrDie()
-	err = oa.InstallCRD(ocfg)
-	framework.ExpectNoError(err, "failed to install crd")
-	err = oa.DeployOperator(ocfg)
-	framework.ExpectNoError(err, "failed to install chaos-mesh")
-	err = oa.InstallTemplate(ocfg)
-	framework.ExpectNoError(err, "failed to install sidecar template")
+	// oa.CleanCRDOrDie()
+	// err = oa.InstallCRD(ocfg)
+	// framework.ExpectNoError(err, "failed to install crd")
+	// err = oa.DeployOperator(ocfg)
+	// framework.ExpectNoError(err, "failed to install chaos-mesh")
+	// err = oa.InstallTemplate(ocfg)
+	// framework.ExpectNoError(err, "failed to install sidecar template")
 	return nil
 }, func(data []byte) {
 	// Run on all Ginkgo nodes

@@ -48,9 +48,9 @@ type PodNetworkChaosSpec struct {
 	// +optional
 	Iptables []RawIptables `json:"iptables,omitempty"`
 
-	// The qdisc rules on the pod
+	// The tc rules on the pod
 	// +optional
-	Qdiscs []RawQdisc `json:"qdiscs,omitempty"`
+	TrafficControls []RawTrafficControl `json:"tcs,omitempty"`
 }
 
 // RawIPSet represents an ipset on specific pod
@@ -82,7 +82,7 @@ type RawIptables struct {
 	Name string `json:"name"`
 
 	// The name of related ipset
-	IPSets []string `json:"ipset"`
+	IPSets []string `json:"ipsets"`
 
 	// The block direction of this iptables rule
 	Direction ChainDirection `json:"direction"`
@@ -90,30 +90,34 @@ type RawIptables struct {
 	RawRuleSource `json:",inline"`
 }
 
-// QdiscType the type of a qdisc
-type QdiscType string
+// TcType the type of traffic control
+type TcType string
 
 const (
-	// Netem represents netem qdisc
-	Netem QdiscType = "netem"
+	// Netem represents netem traffic control
+	Netem TcType = "netem"
 
-	// Bandwidth represents bandwidth shape qdisc
-	Bandwidth QdiscType = "bandwidth"
+	// Bandwidth represents bandwidth shape traffic control
+	Bandwidth TcType = "bandwidth"
 )
 
-// RawQdisc represents the qdiscs on specific pod
-type RawQdisc struct {
-	// The type of qdisc
-	Type QdiscType `json:"type"`
+// RawTrafficControl represents the traffic control chaos on specific pod
+type RawTrafficControl struct {
+	// The type of traffic control
+	Type TcType `json:"type"`
 
-	QdiscParameter `json:",inline"`
+	TcParameter `json:",inline"`
+
+	// The name of target ipset
+	// +optional
+	IPSet string `json:"ipset,omitempty"`
 
 	// The name and namespace of the source network chaos
 	Source string `json:"source"`
 }
 
-// QdiscParameter represents the parameters for a qdisc
-type QdiscParameter struct {
+// TcParameter represents the parameters for a traffic control chaos
+type TcParameter struct {
 	// Delay represents the detail about delay action
 	// +optional
 	Delay *DelaySpec `json:"delay,omitempty"`

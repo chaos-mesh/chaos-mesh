@@ -16,11 +16,12 @@ package podnetworkmap
 import (
 	"context"
 
-	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/go-logr/logr"
 	k8sError "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 )
 
 // PodNetworkMap will save all the related podnetworkchaos
@@ -99,13 +100,13 @@ func (m *PodNetworkMap) GetAndClear(ctx context.Context, key types.NamespacedNam
 	}
 	chaos.Spec.Iptables = chains
 
-	qdiscs := []v1alpha1.RawQdisc{}
-	for _, qdisc := range chaos.Spec.Qdiscs {
+	qdiscs := []v1alpha1.RawTrafficControl{}
+	for _, qdisc := range chaos.Spec.TrafficControls {
 		if qdisc.Source != m.Source {
 			qdiscs = append(qdiscs, qdisc)
 		}
 	}
-	chaos.Spec.Qdiscs = qdiscs
+	chaos.Spec.TrafficControls = qdiscs
 
 	return chaos, nil
 }
