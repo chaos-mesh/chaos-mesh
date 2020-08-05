@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package tbf
+package trafficcontrol
 
 import (
 	"context"
@@ -37,22 +37,11 @@ import (
 )
 
 const (
-	networkTbfActionMsg = "network tbf action duration %s"
-	ipsetPostFix        = "tbf"
+	networkTcActionMsg = "network traffic control action duration %s"
 )
 
-type Reconciler struct {
-	client.Client
-	record.EventRecorder
-	Log logr.Logger
-}
-
-// Object implements the reconciler.InnerReconciler.Object
-func (r *Reconciler) Object() v1alpha1.InnerObject {
-	return &v1alpha1.NetworkChaos{}
-}
-
-func newReconciler(c client.Client, log logr.Logger, req ctrl.Request, recorder record.EventRecorder) twophase.Reconciler {
+func newReconciler(c client.Client, log logr.Logger, req ctrl.Request,
+	recorder record.EventRecorder) twophase.Reconciler {
 	return twophase.Reconciler{
 		InnerReconciler: &Reconciler{
 			Client:        c,
@@ -65,20 +54,33 @@ func newReconciler(c client.Client, log logr.Logger, req ctrl.Request, recorder 
 }
 
 // NewTwoPhaseReconciler would create Reconciler for twophase package
-func NewTwoPhaseReconciler(c client.Client, log logr.Logger, req ctrl.Request, recorder record.EventRecorder) *twophase.Reconciler {
+func NewTwoPhaseReconciler(c client.Client, log logr.Logger, req ctrl.Request,
+	recorder record.EventRecorder) *twophase.Reconciler {
 	r := newReconciler(c, log, req, recorder)
 	return twophase.NewReconciler(r, r.Client, r.Log)
 }
 
 // NewCommonReconciler would create Reconciler for common package
-func NewCommonReconciler(c client.Client, log logr.Logger, req ctrl.Request, recorder record.EventRecorder) *common.Reconciler {
+func NewCommonReconciler(c client.Client, log logr.Logger, req ctrl.Request,
+	recorder record.EventRecorder) *common.Reconciler {
 	r := newReconciler(c, log, req, recorder)
 	return common.NewReconciler(r, r.Client, r.Log)
 }
 
+type Reconciler struct {
+	client.Client
+	record.EventRecorder
+	Log logr.Logger
+}
+
+// Object implements the reconciler.InnerReconciler.Object
+func (r *Reconciler) Object() v1alpha1.InnerObject {
+	return &v1alpha1.NetworkChaos{}
+}
+
 // Apply implements the reconciler.InnerReconciler.Apply
 func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.InnerObject) error {
-	r.Log.Info("tbf Apply", "req", req, "chaos", chaos)
+	r.Log.Info("traffic control Apply", "req", req, "chaos", chaos)
 
 	networkchaos, ok := chaos.(*v1alpha1.NetworkChaos)
 	if !ok {
@@ -117,21 +119,21 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1
 
 	switch networkchaos.Spec.Direction {
 	case v1alpha1.To:
-		err = r.applyTbf(ctx, sources, targets, externalCidrs, m, networkchaos)
+		err = r.applyTc(ctx, sources, targets, externalCidrs, m, networkchaos)
 		if err != nil {
-			r.Log.Error(err, "failed to apply tbf", "sources", sources, "targets", targets)
+			r.Log.Error(err, "failed to apply traffic control", "sources", sources, "targets", targets)
 			return err
 		}
 	case v1alpha1.From:
-		err = r.applyTbf(ctx, targets, sources, []string{}, m, networkchaos)
+		err = r.applyTc(ctx, targets, sources, []string{}, m, networkchaos)
 		if err != nil {
-			r.Log.Error(err, "failed to apply tbf", "sources", targets, "targets", sources)
+			r.Log.Error(err, "failed to apply traffic control", "sources", targets, "targets", sources)
 			return err
 		}
 	case v1alpha1.Both:
-		err = r.applyTbf(ctx, pods, pods, externalCidrs, m, networkchaos)
+		err = r.applyTc(ctx, pods, pods, externalCidrs, m, networkchaos)
 		if err != nil {
-			r.Log.Error(err, "failed to apply tbf", "sources", pods, "targets", pods)
+			r.Log.Error(err, "failed to apply traffic control", "sources", pods, "targets", pods)
 			return err
 		}
 	}
@@ -153,7 +155,7 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1
 		}
 
 		if networkchaos.Spec.Duration != nil {
-			ps.Message = fmt.Sprintf(networkTbfActionMsg, *networkchaos.Spec.Duration)
+			ps.Message = fmt.Sprintf(networkTcActionMsg, *networkchaos.Spec.Duration)
 		}
 
 		networkchaos.Status.Experiment.PodRecords = append(networkchaos.Status.Experiment.PodRecords, ps)
@@ -208,17 +210,18 @@ func (r *Reconciler) cleanFinalizersAndRecover(ctx context.Context, networkchaos
 
 		networkchaos.Finalizers = utils.RemoveFromFinalizer(networkchaos.Finalizers, key)
 	}
+	r.Log.Info("After recovering", "finalizers", networkchaos.Finalizers)
 
 	if networkchaos.Annotations[common.AnnotationCleanFinalizer] == common.AnnotationCleanFinalizerForced {
 		r.Log.Info("Force cleanup all finalizers", "chaos", networkchaos)
-		networkchaos.Finalizers = networkchaos.Finalizers[:0]
+		networkchaos.Finalizers = make([]string, 0)
 		return nil
 	}
 
 	return result
 }
 
-func (r *Reconciler) applyTbf(ctx context.Context, sources, targets []v1.Pod, externalTargets []string, m *podnetworkmap.PodNetworkMap, networkchaos *v1alpha1.NetworkChaos) error {
+func (r *Reconciler) applyTc(ctx context.Context, sources, targets []v1.Pod, externalTargets []string, m *podnetworkmap.PodNetworkMap, networkchaos *v1alpha1.NetworkChaos) error {
 	for index := range sources {
 		pod := &sources[index]
 
@@ -230,9 +233,19 @@ func (r *Reconciler) applyTbf(ctx context.Context, sources, targets []v1.Pod, ex
 		networkchaos.Finalizers = utils.InsertFinalizer(networkchaos.Finalizers, key)
 	}
 
-	// if we don't specify targets, then sources pods apply tbf on all egress traffic
+	tcType := v1alpha1.Bandwidth
+	switch networkchaos.Spec.Action {
+	case v1alpha1.NetemAction, v1alpha1.DelayAction, v1alpha1.DuplicateAction, v1alpha1.CorruptAction, v1alpha1.LossAction:
+		tcType = v1alpha1.Netem
+	case v1alpha1.BandwidthAction:
+		tcType = v1alpha1.Bandwidth
+	default:
+		return fmt.Errorf("unknown action")
+	}
+
+	// if we don't specify targets, then sources pods apply traffic control on all egress traffic
 	if len(targets)+len(externalTargets) == 0 {
-		r.Log.Info("apply tbf", "sources", sources)
+		r.Log.Info("apply traffic control", "sources", sources)
 		for index := range sources {
 			pod := &sources[index]
 
@@ -245,7 +258,7 @@ func (r *Reconciler) applyTbf(ctx context.Context, sources, targets []v1.Pod, ex
 				return err
 			}
 			chaos.Spec.TrafficControls = append(chaos.Spec.TrafficControls, v1alpha1.RawTrafficControl{
-				Type:        v1alpha1.Bandwidth,
+				Type:        tcType,
 				TcParameter: networkchaos.Spec.TcParameter,
 				Source:      m.Source,
 			})
@@ -254,8 +267,8 @@ func (r *Reconciler) applyTbf(ctx context.Context, sources, targets []v1.Pod, ex
 	}
 
 	// create ipset contains all target ips
-	dstIpset := ipset.BuildIPSet(targets, externalTargets, networkchaos, ipsetPostFix, m.Source)
-	r.Log.Info("apply tbf with filter", "sources", sources, "ipset", dstIpset)
+	dstIpset := ipset.BuildIPSet(targets, externalTargets, networkchaos, string(tcType)[0:5], m.Source)
+	r.Log.Info("apply traffic control with filter", "sources", sources, "ipset", dstIpset)
 
 	for index := range sources {
 		pod := &sources[index]
@@ -270,7 +283,7 @@ func (r *Reconciler) applyTbf(ctx context.Context, sources, targets []v1.Pod, ex
 		}
 		chaos.Spec.IPSets = append(chaos.Spec.IPSets, dstIpset)
 		chaos.Spec.TrafficControls = append(chaos.Spec.TrafficControls, v1alpha1.RawTrafficControl{
-			Type:        v1alpha1.Bandwidth,
+			Type:        tcType,
 			TcParameter: networkchaos.Spec.TcParameter,
 			Source:      m.Source,
 			IPSet:       dstIpset.Name,
