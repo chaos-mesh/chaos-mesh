@@ -38,13 +38,14 @@ const useStyles = makeStyles((theme: Theme) =>
       },
     },
     nav: {
-      marginLeft: theme.spacing(3),
+      marginLeft: theme.spacing(4),
       '& .MuiBreadcrumbs-separator': {
         color: theme.palette.primary.main,
       },
     },
     hoverLink: {
       '&:hover': {
+        color: theme.palette.primary.main,
         textDecoration: 'underline',
         cursor: 'pointer',
       },
@@ -84,7 +85,7 @@ const Header: React.FC<HeaderProps> = ({ openDrawer, handleDrawerToggle, breadcr
               breadcrumbs.map((b) => {
                 return b.path ? (
                   <Link key={b.name} to={b.path} style={{ textDecoration: 'none' }}>
-                    <Typography className={classes.hoverLink} variant="h6" component="h2" color="primary">
+                    <Typography className={classes.hoverLink} variant="h6" component="h2" color="textSecondary">
                       {b.name}
                     </Typography>
                   </Link>

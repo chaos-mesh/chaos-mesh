@@ -12,13 +12,8 @@ import genEventsChart from 'lib/d3/eventsChart'
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
-    height100: {
-      [theme.breakpoints.up('md')]: {
-        height: '100%',
-      },
-    },
     timelinePaper: {
-      marginBottom: theme.spacing(3),
+      marginBottom: theme.spacing(6),
     },
     eventsChart: {
       height: 350,
@@ -63,12 +58,12 @@ export default function Events() {
     <>
       {events && events.length > 0 && (
         <Grow in={!loading} style={{ transformOrigin: '0 0 0' }}>
-          <Box display="flex" flexDirection="column" height="100%">
+          <Box display="flex" flexDirection="column">
             <Paper className={classes.timelinePaper} variant="outlined">
               <PaperTop title="Timeline" />
               <div ref={chartRef} className={classes.eventsChart} />
             </Paper>
-            <Paper className={classes.height100} variant="outlined">
+            <Paper variant="outlined">
               <EventsTable events={events} detailed />
             </Paper>
           </Box>
