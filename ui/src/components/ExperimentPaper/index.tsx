@@ -100,9 +100,11 @@ const ExperimentPaper: React.FC<ExperimentPaperProps> = ({
 
   const Actions = () => (
     <Box display="flex" justifyContent="flex-end" alignItems="center" className={classes.marginRight}>
+      <Typography variant="body2">
+        Created {day(isArchive ? (e as Archive).start_time : (e as Experiment).created).fromNow()}
+      </Typography>
       {!isArchive && (
         <>
-          <Typography variant="body2">Created {day((e as Experiment).created).fromNow()}</Typography>
           {(e as Experiment).status === 'Paused' ? (
             <IconButton
               color="primary"
