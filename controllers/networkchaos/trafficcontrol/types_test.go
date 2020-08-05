@@ -43,16 +43,20 @@ func TestReconciler_applyNetem(t *testing.T) {
 		v1.ContainerStatus{ContainerID: "fake-container-id"},
 	)
 
+	v1alpha1.SchemeBuilder.AddToScheme(scheme.Scheme)
+	scheme, err := v1alpha1.SchemeBuilder.Build()
+	g.Expect(err).ToNot(HaveOccurred())
+
 	r := Reconciler{
-		Client:        fake.NewFakeClientWithScheme(scheme.Scheme, podObjects...),
+		Client:        fake.NewFakeClientWithScheme(scheme, podObjects...),
 		EventRecorder: &record.FakeRecorder{},
-		Log:           ctrl.Log.WithName("controllers").WithName("TimeChaos"),
+		Log:           ctrl.Log.WithName("controllers").WithName("NetworkCHaos"),
 	}
 
 	t.Run("netem without filter", func(t *testing.T) {
 		networkChaos := v1alpha1.NetworkChaos{
 			TypeMeta: metav1.TypeMeta{
-				Kind:       "TimeChaos",
+				Kind:       "NetworkCHaos",
 				APIVersion: "v1",
 			},
 			Spec: v1alpha1.NetworkChaosSpec{
