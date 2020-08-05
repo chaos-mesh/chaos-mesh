@@ -5,24 +5,7 @@ package pb;
 import "google/protobuf/empty.proto";
 
 service ChaosDaemon {
-  rpc SetNetem(NetemRequest) returns (google.protobuf.Empty) {}
-  rpc DeleteNetem(NetemRequest) returns (google.protobuf.Empty) {}
-
   rpc SetTcs(TcsRequest) returns (google.protobuf.Empty) {}
-
-  // TODO: delete it
-  rpc SetTbf(TbfRequest) returns (google.protobuf.Empty) {}
-  rpc DeleteTbf(TbfRequest) returns (google.protobuf.Empty) {}
-
-  // TODO: delete it
-  rpc AddQdisc(QdiscRequest) returns (google.protobuf.Empty) {}
-  rpc DelQdisc(QdiscRequest) returns (google.protobuf.Empty) {}
-
-  // TODO: delete it
-  rpc AddEmatchFilter(EmatchFilterRequest) returns (google.protobuf.Empty) {}
-
-  // generic tc filter del command
-  rpc DelTcFilter(TcFilterRequest) returns (google.protobuf.Empty) {}
 
   rpc FlushIPSets(IPSetsRequest) returns (google.protobuf.Empty) {}
   
