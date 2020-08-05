@@ -16,9 +16,10 @@ package podnetworkchaos
 import (
 	"testing"
 
+	. "github.com/onsi/gomega"
+
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
-	. "github.com/onsi/gomega"
 )
 
 func TestMergenetem(t *testing.T) {

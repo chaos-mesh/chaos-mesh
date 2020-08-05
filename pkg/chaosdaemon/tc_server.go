@@ -205,7 +205,7 @@ func (s *daemonServer) SetTcs(ctx context.Context, in *pb.TcsRequest) (*empty.Em
 	}
 
 	index := 0
-	currentHandler := parent
+	currentHandler := parent + 3 // 3 handlers for sfq on prio qdisc
 	for ipset, tcs := range filterTc {
 		for i, tc := range tcs {
 			parentArg := fmt.Sprintf("parent %d:%d", parent, index+4)
@@ -307,7 +307,7 @@ func (c *tcClient) addPrio(parent int, band int) error {
 	}
 
 	for index := 1; index <= 3; index++ {
-		args := fmt.Sprintf("qdisc add dev eth0 parent %d:%d handle %d: sfq", parent+1, index, index*10)
+		args := fmt.Sprintf("qdisc add dev eth0 parent %d:%d handle %d: sfq", parent+1, index, parent+1+index)
 		cmd := withNetNS(c.ctx, c.nsPath, "tc", strings.Split(args, " ")...)
 		output, err := cmd.CombinedOutput()
 		if err != nil {
