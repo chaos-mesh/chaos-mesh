@@ -39,6 +39,7 @@ const ScopePodsTable: React.FC<ScopePodsTableProps> = ({ scope = 'scope', pods }
 
   useEffect(
     () => () => {
+      // If all pods are checked, then only need to pass selectors
       if (selectedRef.current.length === podsCountRef.current) {
         return
       }
