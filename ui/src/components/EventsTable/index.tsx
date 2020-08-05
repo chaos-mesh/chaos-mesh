@@ -82,8 +82,8 @@ function stableSort<T>(data: T[], comparator: (a: T, b: T) => number) {
   return indexed.map((el) => el[0])
 }
 
-type SortedEvent = Omit<Event, 'deleted_at' | 'pods'>
-type SortedEventWithPods = Omit<Event, 'deleted_at'>
+type SortedEvent = Omit<Event, 'pods'>
+type SortedEventWithPods = Event
 
 const headCells: { id: keyof SortedEvent; label: string }[] = [
   { id: 'experiment', label: 'Experiment' },
