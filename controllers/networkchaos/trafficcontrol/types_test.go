@@ -44,11 +44,9 @@ func TestReconciler_applyNetem(t *testing.T) {
 	)
 
 	v1alpha1.SchemeBuilder.AddToScheme(scheme.Scheme)
-	scheme, err := v1alpha1.SchemeBuilder.Build()
-	g.Expect(err).ToNot(HaveOccurred())
 
 	r := Reconciler{
-		Client:        fake.NewFakeClientWithScheme(scheme, podObjects...),
+		Client:        fake.NewFakeClientWithScheme(scheme.Scheme, podObjects...),
 		EventRecorder: &record.FakeRecorder{},
 		Log:           ctrl.Log.WithName("controllers").WithName("NetworkCHaos"),
 	}
