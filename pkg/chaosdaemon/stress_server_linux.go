@@ -64,7 +64,7 @@ func (s *daemonServer) ExecStressors(ctx context.Context,
 		return nil, err
 	}
 
-	cmd := withPidNS(context.Background(), GetNsPath(pid, pidNS), "stress-ng", strings.Fields(req.Stressors)...)
+	cmd := withPause(*withPidNS(context.Background(), GetNsPath(pid, pidNS), "stress-ng", strings.Fields(req.Stressors)...))
 
 	if err := cmd.Start(); err != nil {
 		return nil, err
@@ -86,6 +86,10 @@ func (s *daemonServer) ExecStressors(ctx context.Context,
 		if kerr := cmd.Process.Kill(); kerr != nil {
 			log.Error(kerr, "kill stressors failed", "request", req)
 		}
+		return nil, err
+	}
+
+	if err := procState.Resume(); err != nil {
 		return nil, err
 	}
 	go func() {

@@ -16,7 +16,7 @@ import {
 } from '@material-ui/core'
 import React, { useCallback, useEffect, useState } from 'react'
 import { createStyles, makeStyles } from '@material-ui/core/styles'
-import day, { dayComparator } from 'lib/dayjs'
+import { dayComparator, format } from 'lib/dayjs'
 
 import { Event } from 'api/events.type'
 import FirstPageIcon from '@material-ui/icons/FirstPage'
@@ -90,8 +90,8 @@ const headCells: { id: keyof SortedEvent; label: string }[] = [
   { id: 'experiment_id', label: 'UUID' },
   { id: 'namespace', label: 'Namespace' },
   { id: 'kind', label: 'Kind' },
-  { id: 'start_time', label: 'Start Time' },
-  { id: 'finish_time', label: 'Finish Time' },
+  { id: 'start_time', label: 'Started' },
+  { id: 'finish_time', label: 'Ended' },
 ]
 
 interface EventsTableHeadProps {
@@ -106,7 +106,7 @@ const EventsTableHead: React.FC<EventsTableHeadProps> = ({ order, orderBy, onSor
 
   let cells = headCells
   if (detailed) {
-    cells = cells.concat([{ id: 'Detail' as keyof SortedEvent, label: 'Event Detail' }])
+    cells = cells.concat([{ id: 'Detail' as keyof SortedEvent, label: 'Detail' }])
   }
 
   return (
@@ -168,8 +168,6 @@ const TablePaginationActions: React.FC<TablePaginationActionsProps> = ({ count, 
   )
 }
 
-const format = (date: string) => day(date).format('YYYY-MM-DD HH:mm:ss')
-
 interface EventsTableRowProps {
   event: SortedEventWithPods
   detailed: boolean
@@ -211,9 +209,15 @@ export interface EventsTableProps {
   title?: string
   events: Event[]
   detailed?: boolean
+  hasSearch?: boolean
 }
 
-const EventsTable: React.FC<EventsTableProps> = ({ title = 'Events', events: allEvents, detailed = false }) => {
+const EventsTable: React.FC<EventsTableProps> = ({
+  title = 'Events',
+  events: allEvents,
+  detailed = false,
+  hasSearch = true,
+}) => {
   const classes = useStyles()
 
   const [events, setEvents] = useState(allEvents)
@@ -255,24 +259,26 @@ const EventsTable: React.FC<EventsTableProps> = ({ title = 'Events', events: all
   return (
     <>
       <PaperTop title={title}>
-        <TextField
-          style={{ width: '200px', minWidth: '30%', margin: 0 }}
-          margin="dense"
-          placeholder="Search events ..."
-          disabled={!allEvents}
-          variant="outlined"
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <SearchIcon color="primary" />
-              </InputAdornment>
-            ),
-          }}
-          inputProps={{
-            style: { paddingTop: 8, paddingBottom: 8 },
-          }}
-          onChange={handleSearchChange}
-        />
+        {hasSearch && (
+          <TextField
+            style={{ width: '200px', minWidth: '30%', margin: 0 }}
+            margin="dense"
+            placeholder="Search events ..."
+            disabled={!allEvents}
+            variant="outlined"
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon color="primary" />
+                </InputAdornment>
+              ),
+            }}
+            inputProps={{
+              style: { paddingTop: 8, paddingBottom: 8 },
+            }}
+            onChange={handleSearchChange}
+          />
+        )}
       </PaperTop>
       <TableContainer className={classes.tableContainer}>
         <Table stickyHeader>

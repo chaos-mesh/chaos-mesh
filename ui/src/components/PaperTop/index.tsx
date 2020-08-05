@@ -10,8 +10,11 @@ const useStyles = makeStyles((theme: Theme) =>
       justifyContent: 'space-between',
       alignItems: 'center',
       width: '100%',
-      height: '64px',
+      height: '56px',
       borderBottom: `1px solid ${theme.palette.divider}`,
+    },
+    title: {
+      fontSize: '1rem',
     },
   })
 )
@@ -25,7 +28,9 @@ const PaperTop: React.FC<PaperTopProps> = ({ title, children }) => {
 
   return (
     <Box className={classes.root} px={3}>
-      <Typography variant="h6">{title}</Typography>
+      <Typography className={classes.title} variant="button">
+        {title}
+      </Typography>
       {children}
     </Box>
   )
