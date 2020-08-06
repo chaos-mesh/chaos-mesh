@@ -1246,7 +1246,7 @@ spec:
               items:
                 description: RawIPSet represents an ipset on specific pod
                 properties:
-                  items:
+                  cidrs:
                     description: The contents of ipset
                     items:
                       type: string
@@ -1257,7 +1257,7 @@ spec:
                   source:
                     type: string
                 required:
-                - items
+                - cidrs
                 - name
                 - source
                 type: object

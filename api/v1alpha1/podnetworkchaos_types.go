@@ -59,7 +59,7 @@ type RawIPSet struct {
 	Name string `json:"name"`
 
 	// The contents of ipset
-	Cidrs []string `json:"items"`
+	Cidrs []string `json:"cidrs"`
 
 	// The name and namespace of the source network chaos
 	RawRuleSource `json:",inline"`
