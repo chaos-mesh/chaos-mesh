@@ -16,12 +16,13 @@ package podnetworkmanager
 import (
 	"context"
 
-	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/go-logr/logr"
 	k8sError "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/util/retry"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 )
 
 // PodNetworkManager will save all the related podnetworkchaos
