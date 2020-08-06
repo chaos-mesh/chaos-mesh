@@ -17,7 +17,7 @@ const AutocompleteMultipleField: React.FC<AutocompleteMultipleFieldProps & TextF
 }) => {
   const { values, setFieldValue } = useFormikContext<Experiment>()
 
-  const firstRenderRef = useRef(false) // This ref prevent to exec the callback function when labels are empty in the first render
+  const firstRenderRef = useRef(false) // This ref prevents to exec the callback function when labels are empty in the first render
   const labelsRef = useRef(getIn(values, props.name!))
   const [labels, _setLabels] = useState<string[]>(labelsRef.current)
   const setLabels = (newVal: string[]) => {
