@@ -29,7 +29,7 @@ import (
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/common"
-	"github.com/chaos-mesh/chaos-mesh/controllers/networkchaos/podnetworkmap"
+	"github.com/chaos-mesh/chaos-mesh/controllers/networkchaos/podnetworkmanager"
 	"github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos/ipset"
 	"github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos/iptable"
 	"github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos/netutils"
@@ -96,7 +96,7 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1
 	}
 
 	source := networkchaos.Namespace + "/" + networkchaos.Name
-	m := podnetworkmap.New(source, r.Log, r.Client)
+	m := podnetworkmanager.New(source, r.Log, r.Client)
 
 	sources, err := utils.SelectAndFilterPods(ctx, r.Client, &networkchaos.Spec)
 
@@ -130,16 +130,13 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1
 		pod := allPods[index]
 		r.Log.Info("PODS", "name", pod.Name, "namespace", pod.Namespace)
 
-		chaos, err := m.GetAndClear(ctx, types.NamespacedName{
+		t := m.WithInit(types.NamespacedName{
 			Name:      pod.Name,
 			Namespace: pod.Namespace,
 		})
-		if err != nil {
-			r.Log.Error(err, "failed to get related podnetworkchaos")
-			return err
-		}
 
-		chaos.Spec.IPSets = append(chaos.Spec.IPSets, sourceSet, targetSet)
+		t.Append(sourceSet)
+		t.Append(targetSet)
 	}
 
 	sourcesChains := []v1alpha1.RawIptables{}
@@ -223,7 +220,7 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1
 }
 
 // SetChains sets iptables chains for pods
-func (r *Reconciler) SetChains(ctx context.Context, pods []v1.Pod, chains []v1alpha1.RawIptables, m *podnetworkmap.PodNetworkMap, networkchaos *v1alpha1.NetworkChaos) error {
+func (r *Reconciler) SetChains(ctx context.Context, pods []v1.Pod, chains []v1alpha1.RawIptables, m *podnetworkmanager.PodNetworkManager, networkchaos *v1alpha1.NetworkChaos) error {
 	for index := range pods {
 		pod := &pods[index]
 
@@ -232,7 +229,7 @@ func (r *Reconciler) SetChains(ctx context.Context, pods []v1.Pod, chains []v1al
 			return err
 		}
 
-		chaos, err := m.GetAndClear(ctx, types.NamespacedName{
+		t := m.WithInit(types.NamespacedName{
 			Name:      pod.Name,
 			Namespace: pod.Namespace,
 		})
@@ -240,7 +237,9 @@ func (r *Reconciler) SetChains(ctx context.Context, pods []v1.Pod, chains []v1al
 			r.Log.Error(err, "failed to get related podnetworkchaos")
 			return err
 		}
-		chaos.Spec.Iptables = append(chaos.Spec.Iptables, chains...)
+		for _, chain := range chains {
+			t.Append(chain)
+		}
 
 		networkchaos.Finalizers = utils.InsertFinalizer(networkchaos.Finalizers, key)
 
@@ -271,7 +270,7 @@ func (r *Reconciler) cleanFinalizersAndRecover(ctx context.Context, networkchaos
 	var result error
 
 	source := networkchaos.Namespace + "/" + networkchaos.Name
-	m := podnetworkmap.New(source, r.Log, r.Client)
+	m := podnetworkmanager.New(source, r.Log, r.Client)
 
 	for _, key := range networkchaos.Finalizers {
 		ns, name, err := cache.SplitMetaNamespaceKey(key)
@@ -280,7 +279,7 @@ func (r *Reconciler) cleanFinalizersAndRecover(ctx context.Context, networkchaos
 			continue
 		}
 
-		_, err = m.GetAndClear(ctx, types.NamespacedName{
+		_ = m.WithInit(types.NamespacedName{
 			Namespace: ns,
 			Name:      name,
 		})

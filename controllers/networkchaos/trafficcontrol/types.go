@@ -29,7 +29,7 @@ import (
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/common"
-	"github.com/chaos-mesh/chaos-mesh/controllers/networkchaos/podnetworkmap"
+	"github.com/chaos-mesh/chaos-mesh/controllers/networkchaos/podnetworkmanager"
 	"github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos/ipset"
 	"github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos/netutils"
 	"github.com/chaos-mesh/chaos-mesh/controllers/twophase"
@@ -90,7 +90,7 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1
 	}
 
 	source := networkchaos.Namespace + "/" + networkchaos.Name
-	m := podnetworkmap.New(source, r.Log, r.Client)
+	m := podnetworkmanager.New(source, r.Log, r.Client)
 
 	sources, err := utils.SelectAndFilterPods(ctx, r.Client, &networkchaos.Spec)
 	if err != nil {
@@ -184,7 +184,7 @@ func (r *Reconciler) cleanFinalizersAndRecover(ctx context.Context, networkchaos
 	var result error
 
 	source := networkchaos.Namespace + "/" + networkchaos.Name
-	m := podnetworkmap.New(source, r.Log, r.Client)
+	m := podnetworkmanager.New(source, r.Log, r.Client)
 
 	for _, key := range networkchaos.Finalizers {
 		ns, name, err := cache.SplitMetaNamespaceKey(key)
@@ -193,15 +193,10 @@ func (r *Reconciler) cleanFinalizersAndRecover(ctx context.Context, networkchaos
 			continue
 		}
 
-		_, err = m.GetAndClear(ctx, types.NamespacedName{
+		_ = m.WithInit(types.NamespacedName{
 			Namespace: ns,
 			Name:      name,
 		})
-
-		if err != nil {
-			result = multierror.Append(result, err)
-			continue
-		}
 
 		err = m.Commit(ctx)
 		if err != nil {
@@ -221,7 +216,7 @@ func (r *Reconciler) cleanFinalizersAndRecover(ctx context.Context, networkchaos
 	return result
 }
 
-func (r *Reconciler) applyTc(ctx context.Context, sources, targets []v1.Pod, externalTargets []string, m *podnetworkmap.PodNetworkMap, networkchaos *v1alpha1.NetworkChaos) error {
+func (r *Reconciler) applyTc(ctx context.Context, sources, targets []v1.Pod, externalTargets []string, m *podnetworkmanager.PodNetworkManager, networkchaos *v1alpha1.NetworkChaos) error {
 	for index := range sources {
 		pod := &sources[index]
 
@@ -249,15 +244,11 @@ func (r *Reconciler) applyTc(ctx context.Context, sources, targets []v1.Pod, ext
 		for index := range sources {
 			pod := &sources[index]
 
-			chaos, err := m.GetAndClear(ctx, types.NamespacedName{
+			t := m.WithInit(types.NamespacedName{
 				Name:      pod.Name,
 				Namespace: pod.Namespace,
 			})
-			if err != nil {
-				r.Log.Error(err, "failed to get related podnetworkchaos")
-				return err
-			}
-			chaos.Spec.TrafficControls = append(chaos.Spec.TrafficControls, v1alpha1.RawTrafficControl{
+			t.Append(v1alpha1.RawTrafficControl{
 				Type:        tcType,
 				TcParameter: networkchaos.Spec.TcParameter,
 				Source:      m.Source,
@@ -273,16 +264,12 @@ func (r *Reconciler) applyTc(ctx context.Context, sources, targets []v1.Pod, ext
 	for index := range sources {
 		pod := &sources[index]
 
-		chaos, err := m.GetAndClear(ctx, types.NamespacedName{
+		t := m.WithInit(types.NamespacedName{
 			Name:      pod.Name,
 			Namespace: pod.Namespace,
 		})
-		if err != nil {
-			r.Log.Error(err, "failed to get related podnetworkchaos")
-			return err
-		}
-		chaos.Spec.IPSets = append(chaos.Spec.IPSets, dstIpset)
-		chaos.Spec.TrafficControls = append(chaos.Spec.TrafficControls, v1alpha1.RawTrafficControl{
+		t.Append(dstIpset)
+		t.Append(v1alpha1.RawTrafficControl{
 			Type:        tcType,
 			TcParameter: networkchaos.Spec.TcParameter,
 			Source:      m.Source,
