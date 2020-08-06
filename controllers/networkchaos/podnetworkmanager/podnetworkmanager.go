@@ -37,22 +37,11 @@ type PodNetworkManager struct {
 // New creates a new PodNetworkMap
 func New(source string, logger logr.Logger, client client.Client) *PodNetworkManager {
 	return &PodNetworkManager{
-		Source: source,
-		Log:    logger,
-		Client: client,
+		Source:        source,
+		Log:           logger,
+		Client:        client,
+		Modifications: make(map[types.NamespacedName]*PodNetworkTransaction),
 	}
-}
-
-// Get gets or starts a transaction on podnetworkchaos
-func (m *PodNetworkManager) Get(key types.NamespacedName) *PodNetworkTransaction {
-	t, ok := m.Modifications[key]
-	if ok {
-		return t
-	}
-
-	t = &PodNetworkTransaction{}
-	m.Modifications[key] = t
-	return t
 }
 
 // WithInit will get a transaction or start a transaction with initially clear
@@ -73,6 +62,7 @@ func (m *PodNetworkManager) Commit(ctx context.Context) error {
 
 	// TODO: parallel update
 	for key, t := range m.Modifications {
+		m.Log.Info("running modification on pod", "key", key, "modification", t)
 		updateError := retry.RetryOnConflict(retry.DefaultRetry, func() error {
 			chaos := &v1alpha1.PodNetworkChaos{}
 

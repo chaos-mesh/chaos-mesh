@@ -96,6 +96,9 @@ func (t *PodNetworkTransaction) Clear(source string) {
 func (t *PodNetworkTransaction) Append(item interface{}) error {
 	switch item.(type) {
 	case v1alpha1.RawIPSet, v1alpha1.RawIptables, v1alpha1.RawTrafficControl:
+		t.Steps = append(t.Steps, &Append{
+			Item: item,
+		})
 		return nil
 	default:
 		return fmt.Errorf("unknown type of item")
