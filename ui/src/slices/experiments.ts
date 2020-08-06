@@ -30,7 +30,7 @@ export const getAnnotations = createAsyncThunk(
 )
 export const getPodsByNamespaces = createAsyncThunk(
   'common/pods',
-  async (data: Pick<ExperimentScope, 'namespace_selectors'>) => (await api.common.pods(data)).data
+  async (data: Partial<ExperimentScope>) => (await api.common.pods(data)).data
 )
 
 const initialState: {

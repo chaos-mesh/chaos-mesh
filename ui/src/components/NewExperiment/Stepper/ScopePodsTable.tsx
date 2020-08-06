@@ -1,8 +1,10 @@
 import { Checkbox, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@material-ui/core'
 import React, { useEffect, useMemo, useRef, useState } from 'react'
-import { getIn, useFormikContext } from 'formik'
+import { setAlert, setAlertOpen } from 'slices/globalStatus'
 
 import { Experiment } from 'components/NewExperiment/types'
+import { useFormikContext } from 'formik'
+import { useStoreDispatch } from 'store'
 
 const PaperOutlined: React.FC = ({ children }) => <Paper variant="outlined">{children}</Paper>
 
@@ -12,31 +14,36 @@ interface ScopePodsTableProps {
 }
 
 const ScopePodsTable: React.FC<ScopePodsTableProps> = ({ scope = 'scope', pods }) => {
-  const { values, setFieldValue } = useFormikContext<Experiment>()
+  const { setFieldValue } = useFormikContext<Experiment>()
 
-  const podsCount = pods.length
+  const dispatch = useStoreDispatch()
 
-  const originFormPods = getIn(values, `${scope}.pods`)
-  const formPods = useMemo(
-    () =>
-      originFormPods
-        ? Object.entries<string[]>(originFormPods)
-            .map((d) => d[1])
-            .reduce((acc, d) => acc.concat(d), [])
-        : [],
-    [originFormPods]
-  )
+  const formPods = useMemo(() => pods.map((d) => d.name).reduce((acc, d) => acc.concat(d), []), [pods])
+  const podsCount = formPods.length
+  const podsCountRef = useRef(podsCount)
+
   const selectedRef = useRef(formPods)
   const [selected, _setSelected] = useState<string[]>(selectedRef.current)
   const setSelected = (newVal: string[]) => {
     selectedRef.current = newVal
     _setSelected(selectedRef.current)
   }
+
   const numSelected = selected.length
   const isSelected = (name: string) => selected.indexOf(name) !== -1
 
+  useEffect(() => {
+    setSelected(formPods)
+    podsCountRef.current = formPods.length
+  }, [formPods])
+
   useEffect(
-    () => () =>
+    () => () => {
+      // If all pods are checked, then only need to pass selectors
+      if (selectedRef.current.length === podsCountRef.current) {
+        return
+      }
+
       setFieldValue(
         `${scope}.pods`,
         pods
@@ -50,7 +57,8 @@ const ScopePodsTable: React.FC<ScopePodsTableProps> = ({ scope = 'scope', pods }
 
             return acc
           }, {})
-      ),
+      )
+    },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   )
@@ -79,6 +87,18 @@ const ScopePodsTable: React.FC<ScopePodsTableProps> = ({ scope = 'scope', pods }
       newSelected = selected.slice(0, -1)
     } else if (selectedIndex > 0) {
       newSelected = [...selected.slice(0, selectedIndex), ...selected.slice(selectedIndex + 1)]
+    }
+
+    if (newSelected.length === 0) {
+      dispatch(
+        setAlert({
+          type: 'warning',
+          message: 'Please select at least one pod.',
+        })
+      )
+      dispatch(setAlertOpen(true))
+
+      return
     }
 
     setSelected(newSelected)
