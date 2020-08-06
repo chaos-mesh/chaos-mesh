@@ -1374,34 +1374,34 @@ var _ = ginkgo.Describe("[Basic]", func() {
 				}
 				err = cli.Create(ctx, baseNetworkPartition.DeepCopy())
 				framework.ExpectNoError(err, "create network chaos error")
-				time.Sleep(2 * time.Second)
+				time.Sleep(5 * time.Second)
 				framework.ExpectEqual(allBlockedConnection(), [][]int{{0, 1}})
 
 				err = cli.Delete(ctx, baseNetworkPartition.DeepCopy())
 				framework.ExpectNoError(err, "delete network chaos error")
-				time.Sleep(2 * time.Second)
+				time.Sleep(5 * time.Second)
 				framework.ExpectEqual(len(allBlockedConnection()), 0)
 
 				baseNetworkPartition.Spec.Direction = v1alpha1.Both
 				err = cli.Create(ctx, baseNetworkPartition.DeepCopy())
 				framework.ExpectNoError(err, "create network chaos error")
-				time.Sleep(2 * time.Second)
+				time.Sleep(5 * time.Second)
 				framework.ExpectEqual(allBlockedConnection(), [][]int{{0, 1}, {1, 0}})
 
 				err = cli.Delete(ctx, baseNetworkPartition.DeepCopy())
 				framework.ExpectNoError(err, "delete network chaos error")
-				time.Sleep(2 * time.Second)
+				time.Sleep(5 * time.Second)
 				framework.ExpectEqual(len(allBlockedConnection()), 0)
 
 				baseNetworkPartition.Spec.Direction = v1alpha1.From
 				err = cli.Create(ctx, baseNetworkPartition.DeepCopy())
 				framework.ExpectNoError(err, "create network chaos error")
-				time.Sleep(2 * time.Second)
+				time.Sleep(5 * time.Second)
 				framework.ExpectEqual(allBlockedConnection(), [][]int{{1, 0}})
 
 				err = cli.Delete(ctx, baseNetworkPartition.DeepCopy())
 				framework.ExpectNoError(err, "delete network chaos error")
-				time.Sleep(2 * time.Second)
+				time.Sleep(5 * time.Second)
 				framework.ExpectEqual(len(allBlockedConnection()), 0)
 
 				baseNetworkPartition.Spec.Direction = v1alpha1.Both
@@ -1409,12 +1409,12 @@ var _ = ginkgo.Describe("[Basic]", func() {
 				baseNetworkPartition.Spec.Target.TargetMode = v1alpha1.AllPodMode
 				err = cli.Create(ctx, baseNetworkPartition.DeepCopy())
 				framework.ExpectNoError(err, "create network chaos error")
-				time.Sleep(2 * time.Second)
+				time.Sleep(5 * time.Second)
 				framework.ExpectEqual(allBlockedConnection(), [][]int{{0, 1}, {0, 3}, {1, 0}, {3, 0}})
 
 				err = cli.Delete(ctx, baseNetworkPartition.DeepCopy())
 				framework.ExpectNoError(err, "delete network chaos error")
-				time.Sleep(2 * time.Second)
+				time.Sleep(5 * time.Second)
 				framework.ExpectEqual(len(allBlockedConnection()), 0)
 
 				// Multiple network partition chaos on peer-0
@@ -1427,14 +1427,14 @@ var _ = ginkgo.Describe("[Basic]", func() {
 				framework.ExpectNoError(err, "create network chaos error")
 				err = cli.Create(ctx, anotherNetworkPartition.DeepCopy())
 				framework.ExpectNoError(err, "create network chaos error")
-				time.Sleep(2 * time.Second)
+				time.Sleep(5 * time.Second)
 				framework.ExpectEqual(allBlockedConnection(), [][]int{{0, 1}, {0, 2}, {0, 3}, {1, 0}, {3, 0}})
 
 				err = cli.Delete(ctx, baseNetworkPartition.DeepCopy())
 				framework.ExpectNoError(err, "delete network chaos error")
 				err = cli.Delete(ctx, anotherNetworkPartition.DeepCopy())
 				framework.ExpectNoError(err, "delete network chaos error")
-				time.Sleep(2 * time.Second)
+				time.Sleep(5 * time.Second)
 				framework.ExpectEqual(len(allBlockedConnection()), 0)
 
 				cancel()
@@ -1503,12 +1503,12 @@ var _ = ginkgo.Describe("[Basic]", func() {
 				klog.Infof("Injecting delay for 0")
 				err = cli.Create(ctx, networkDelay.DeepCopy())
 				framework.ExpectNoError(err, "create network chaos error")
-				time.Sleep(2 * time.Second)
+				time.Sleep(5 * time.Second)
 				framework.ExpectEqual(allSlowConnection(), [][]int{{0, 1}, {0, 2}, {0, 3}})
 
 				err = cli.Delete(ctx, networkDelay.DeepCopy())
 				framework.ExpectNoError(err, "delete network chaos error")
-				time.Sleep(2 * time.Second)
+				time.Sleep(5 * time.Second)
 				framework.ExpectEqual(len(allSlowConnection()), 0)
 
 				networkDelay.Spec.Target = &v1alpha1.Target{
@@ -1521,12 +1521,12 @@ var _ = ginkgo.Describe("[Basic]", func() {
 				klog.Infof("Injecting delay for 0 -> 1")
 				err = cli.Create(ctx, networkDelay.DeepCopy())
 				framework.ExpectNoError(err, "create network chaos error")
-				time.Sleep(2 * time.Second)
+				time.Sleep(5 * time.Second)
 				framework.ExpectEqual(allSlowConnection(), [][]int{{0, 1}})
 
 				err = cli.Delete(ctx, networkDelay.DeepCopy())
 				framework.ExpectNoError(err, "delete network chaos error")
-				time.Sleep(2 * time.Second)
+				time.Sleep(5 * time.Second)
 				framework.ExpectEqual(len(allSlowConnection()), 0)
 
 				evenNetworkDelay := networkDelay.DeepCopy()
@@ -1536,22 +1536,22 @@ var _ = ginkgo.Describe("[Basic]", func() {
 				klog.Infof("Injecting delay for 0 -> even partition")
 				err = cli.Create(ctx, evenNetworkDelay.DeepCopy())
 				framework.ExpectNoError(err, "create network chaos error")
-				time.Sleep(2 * time.Second)
+				time.Sleep(5 * time.Second)
 				framework.ExpectEqual(allSlowConnection(), [][]int{{0, 2}})
 
 				klog.Infof("Injecting delay for 0 -> 1")
 				err = cli.Create(ctx, networkDelay.DeepCopy())
 				framework.ExpectNoError(err, "create network chaos error")
-				time.Sleep(2 * time.Second)
+				time.Sleep(5 * time.Second)
 				framework.ExpectEqual(allSlowConnection(), [][]int{{0, 1}, {0, 2}})
 
 				err = cli.Delete(ctx, networkDelay.DeepCopy())
 				framework.ExpectNoError(err, "delete network chaos error")
-				time.Sleep(2 * time.Second)
+				time.Sleep(5 * time.Second)
 				framework.ExpectEqual(allSlowConnection(), [][]int{{0, 2}})
 				err = cli.Delete(ctx, evenNetworkDelay.DeepCopy())
 				framework.ExpectNoError(err, "delete network chaos error")
-				time.Sleep(2 * time.Second)
+				time.Sleep(5 * time.Second)
 				framework.ExpectEqual(len(allSlowConnection()), 0)
 
 				complicateNetem := &v1alpha1.NetworkChaos{
@@ -1594,7 +1594,7 @@ var _ = ginkgo.Describe("[Basic]", func() {
 				klog.Infof("Injecting delay for 0")
 				err = cli.Create(ctx, complicateNetem.DeepCopy())
 				framework.ExpectNoError(err, "create network chaos error")
-				time.Sleep(2 * time.Second)
+				time.Sleep(5 * time.Second)
 				framework.ExpectEqual(allSlowConnection(), [][]int{{0, 1}, {0, 2}, {0, 3}})
 
 				cancel()
