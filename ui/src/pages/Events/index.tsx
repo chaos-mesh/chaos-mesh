@@ -4,7 +4,7 @@ import { Theme, createStyles, makeStyles } from '@material-ui/core/styles'
 
 import BlurLinearIcon from '@material-ui/icons/BlurLinear'
 import { Event } from 'api/events.type'
-import EventsTable from 'components/EventsTable'
+import EventsTable, { EventsTableHandles } from 'components/EventsTable'
 import Loading from 'components/Loading'
 import PaperTop from 'components/PaperTop'
 import api from 'api'
@@ -26,6 +26,8 @@ export default function Events() {
   const classes = useStyles()
 
   const chartRef = useRef<HTMLDivElement>(null)
+  const eventsTableRef = useRef<EventsTableHandles>(null)
+
   const [loading, setLoading] = useState(false)
   const [events, setEvents] = useState<Event[] | null>(null)
 
@@ -50,6 +52,7 @@ export default function Events() {
       genEventsChart({
         root: chart,
         events,
+        onSelectEvent: eventsTableRef.current!.onSelectEvent,
       })
     }
   }, [events])
@@ -63,9 +66,7 @@ export default function Events() {
               <PaperTop title="Timeline" />
               <div ref={chartRef} className={classes.eventsChart} />
             </Paper>
-            <Paper variant="outlined">
-              <EventsTable events={events} detailed />
-            </Paper>
+            <EventsTable ref={eventsTableRef} events={events} detailed />
           </Box>
         </Grow>
       )}

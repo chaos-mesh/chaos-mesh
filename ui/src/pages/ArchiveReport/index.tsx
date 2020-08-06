@@ -1,11 +1,11 @@
 import { Box, Grid, Grow, Paper } from '@material-ui/core'
+import { Event, EventPod } from 'api/events.type'
 import React, { useEffect, useMemo, useState } from 'react'
 
 import AffectedPods from 'components/AffectedPods'
 import { ArchiveDetail } from 'api/archives.type'
 import ArchiveDuration from 'components/ArchiveDuration'
 import ArchiveNumberOf from 'components/ArchiveNumberOf'
-import { Event } from 'api/events.type'
 import EventsTable from 'components/EventsTable'
 import ExperimentConfiguration from 'components/ExperimentConfiguration'
 import Loading from 'components/Loading'
@@ -21,7 +21,24 @@ const ArchiveReport: React.FC = () => {
   const [report, setReport] = useState<{ events: Event[] }>({ events: [] })
 
   const events = report.events
-  const affectedPods = useMemo(() => [...new Set(events.reduce<any[]>((acc, e) => acc.concat(e.pods!), []))], [events])
+  const affectedPods = useMemo(
+    () =>
+      [
+        ...new Set(
+          events
+            .reduce<EventPod[]>((acc, e) => acc.concat(e.pods!), [])
+            .map((d) => ({
+              pod_ip: d.pod_ip,
+              pod_name: d.pod_name,
+              namespace: d.namespace,
+              action: d.action,
+              message: d.message,
+            }))
+            .map((d) => JSON.stringify(d))
+        ),
+      ].map((d) => JSON.parse(d)),
+    [events]
+  )
 
   const fetchDetail = () => api.archives.detail(uuid).then(({ data }) => setDetail(data))
   const fetchReport = () => api.archives.report(uuid).then(({ data }) => setReport(data))
@@ -67,9 +84,7 @@ const ArchiveReport: React.FC = () => {
               </Grid>
 
               <Grid item xs={12}>
-                <Paper variant="outlined">
-                  {events.length > 0 && <EventsTable events={events} hasSearch={false} />}
-                </Paper>
+                {events.length > 0 && <EventsTable events={events} hasSearch={false} detailed />}
               </Grid>
             </>
           )}

@@ -17,8 +17,8 @@ const AffectedPods: React.FC<{ pods: EventPod[] }> = ({ pods }) => (
       </TableHead>
       <TableBody>
         {pods &&
-          pods.map((pod) => (
-            <TableRow key={pod.id}>
+          pods.map((pod, i) => (
+            <TableRow key={i}>
               <TableCell>{pod.pod_ip}</TableCell>
               <TableCell>{pod.pod_name}</TableCell>
               <TableCell>{pod.namespace}</TableCell>

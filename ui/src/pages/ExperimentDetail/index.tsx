@@ -1,15 +1,13 @@
-import { Box, Button, Grid, Grow, IconButton, Modal, Paper } from '@material-ui/core'
+import { Box, Button, Grid, Grow, Modal, Paper } from '@material-ui/core'
 import React, { useEffect, useRef, useState } from 'react'
 import { Theme, createStyles, makeStyles } from '@material-ui/core/styles'
 import { setAlert, setAlertOpen } from 'slices/globalStatus'
 import { useHistory, useParams } from 'react-router-dom'
 
 import ArchiveOutlinedIcon from '@material-ui/icons/ArchiveOutlined'
-import CloseIcon from '@material-ui/icons/Close'
 import ConfirmDialog from 'components/ConfirmDialog'
 import { Event } from 'api/events.type'
-import EventDetail from 'components/EventDetail'
-import EventsTable from 'components/EventsTable'
+import EventsTable, { EventsTableHandles } from 'components/EventsTable'
 import ExperimentConfiguration from 'components/ExperimentConfiguration'
 import { ExperimentDetail as ExperimentDetailType } from 'api/experiments.type'
 import JSONEditor from 'components/JSONEditor'
@@ -67,21 +65,17 @@ export default function ExperimentDetail() {
   const classes = useStyles()
 
   const history = useHistory()
-  const { search } = history.location
-  const searchParams = new URLSearchParams(search)
-  const eventID = searchParams.get('event')
   const { uuid } = useParams()
 
   const dispatch = useStoreDispatch()
 
   const chartRef = useRef<HTMLDivElement>(null)
+  const eventsTableRef = useRef<EventsTableHandles>(null)
+
   const [loading, setLoading] = useState(true)
-  const [detailLoading, setDetailLoading] = useState(false)
   const [detail, setDetail] = useState<ExperimentDetailType>()
   const [events, setEvents] = useState<Event[]>()
   const prevEvents = usePrevious(events)
-  const [selectedEvent, setSelectedEvent] = useState<Event>()
-  const [eventDetailOpen, setEventDetailOpen] = useState(false)
   const [infoEditor, setInfoEditor] = useState<_JSONEditor>()
   const [configOpen, setConfigOpen] = useState(false)
   const [dialogOpen, setDialogOpen] = useState(false)
@@ -107,19 +101,6 @@ export default function ExperimentDetail() {
         setLoading(false)
       })
 
-  const onSelectEvent = (e: Event) => {
-    setDetailLoading(true)
-    setSelectedEvent(e)
-    setEventDetailOpen(true)
-    setTimeout(() => setDetailLoading(false), 500)
-  }
-
-  const closeEventDetail = () => {
-    setEventDetailOpen(false)
-    searchParams.set('event', 'null')
-    history.replace(window.location.pathname + '?' + searchParams.toString())
-  }
-
   useEffect(() => {
     fetchExperimentDetail()
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -137,15 +118,12 @@ export default function ExperimentDetail() {
       genEventsChart({
         root: chart,
         events,
-        selectEvent: onSelectEvent,
+        onSelectEvent: eventsTableRef.current!.onSelectEvent,
       })
     }
 
-    if (eventID !== null && eventID !== 'null' && events) {
-      onSelectEvent(events.filter((e) => e.id === parseInt(eventID))[0])
-    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [events, eventID])
+  }, [events])
 
   const onModalOpen = () => setConfigOpen(true)
   const onModalClose = () => setConfigOpen(false)
@@ -315,25 +293,7 @@ export default function ExperimentDetail() {
           </Grid>
 
           <Grid item xs={12}>
-            <Box position="relative">
-              <Paper variant="outlined">{events && <EventsTable events={events} detailed hasSearch={false} />}</Paper>
-              {eventDetailOpen && (
-                <Paper
-                  variant="outlined"
-                  className={classes.eventDetailPaper}
-                  style={{
-                    zIndex: 3, // .MuiTableCell-stickyHeader z-index: 2
-                  }}
-                >
-                  <PaperTop title="Event Detail">
-                    <IconButton color="primary" onClick={closeEventDetail}>
-                      <CloseIcon />
-                    </IconButton>
-                  </PaperTop>
-                  {selectedEvent && !detailLoading ? <EventDetail event={selectedEvent} /> : <Loading />}
-                </Paper>
-              )}
-            </Box>
+            {events && <EventsTable ref={eventsTableRef} events={events} detailed hasSearch={false} />}
           </Grid>
         </Grid>
       </Grow>

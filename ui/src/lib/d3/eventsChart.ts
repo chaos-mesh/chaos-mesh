@@ -15,11 +15,11 @@ const margin = {
 export default function gen({
   root,
   events,
-  selectEvent,
+  onSelectEvent,
 }: {
   root: HTMLElement
   events: Event[]
-  selectEvent?: (e: Event) => void
+  onSelectEvent?: (e: Event) => () => void
 }) {
   let width = root.offsetWidth
   const height = root.offsetHeight
@@ -180,8 +180,8 @@ export default function gen({
 
   rects
     .on('click', function (d) {
-      if (typeof selectEvent === 'function') {
-        selectEvent(d)
+      if (typeof onSelectEvent === 'function') {
+        onSelectEvent(d)()
       }
 
       svg
