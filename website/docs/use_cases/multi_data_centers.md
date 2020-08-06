@@ -84,7 +84,7 @@ So we can use the following rules:
 |    dc-c     |   1ms   |    dc-a     |
 |    dc-c     |   1ms   |    dc-b     |
 
-According to to above rules, the latency between `dc-a` and `dc-b` is `1ms`, the latency between `dc-a` and `dc-c` is `2ms`
+According to above rules, the latency between `dc-a` and `dc-b` is `1ms`, the latency between `dc-a` and `dc-c` is `2ms`
 and the latency between `dc-b` and `dc-c` is `2ms`.
 
 ### Define the chaos experiment

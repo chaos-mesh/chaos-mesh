@@ -8,7 +8,7 @@ Now that you have deployed Chaos Mesh in your environment, it's time to use it f
 
 ## Step 1: Deploy the target cluster
 
-The first step is always to deploy a testing cluster. For illustration purposes, [web-show](https://github.com/chaos-mesh/web-show) is used as a example cluster because it allows us to directly observe the effect of network chaos. You can also deploy your own application for testing.
+The first step is always to deploy a testing cluster. For illustration purposes, [web-show](https://github.com/chaos-mesh/web-show) is used as an example cluster because it allows us to directly observe the effect of network chaos. You can also deploy your own application for testing.
 
 ```bash
 curl -sSl https://raw.githubusercontent.com/pingcap/chaos-mesh/master/examples/web-show/deploy.sh | sh
@@ -18,7 +18,7 @@ After executing the above command, you can access [`http://localhost:8081`](http
 
 > **Note:**
 >
-> If the web-show is deployed on the server, you need use the host ip to access the application.
+> If the web-show is deployed on the server, you need to use the host ip to access the application.
 
 ## Step 2: Define the experiment configuration file
 
