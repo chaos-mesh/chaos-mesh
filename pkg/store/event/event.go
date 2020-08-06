@@ -382,6 +382,7 @@ func (e *eventStore) DryListByFilter(_ context.Context, filter core.Filter) ([]*
 			return nil, fmt.Errorf("the format of the finishTime is wrong")
 		}
 	}
+	
 	query, args := constructQueryArgs(filter.ExperimentName, filter.ExperimentNamespace, filter.UID, filter.Kind, filter.StartTimeStr, filter.FinishTimeStr)
 	// List all events
 	if len(args) == 0 {
