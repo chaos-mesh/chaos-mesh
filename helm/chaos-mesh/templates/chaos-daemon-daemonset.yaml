@@ -50,6 +50,15 @@ spec:
           {{- if .Values.enableProfiling }}
             - --pprof
           {{- end }}
+          env:
+            {{- range $envKey, $envVal := .Values.chaosDaemon.env }}
+            - name: {{ $envKey | upper }}
+              value: {{ $envVal | quote }}
+            {{- end }}
+            {{- if not .Values.chaosDaemon.env.TZ }}
+            - name: TZ
+              value: {{ .Values.timezone | default "UTC" }}
+            {{- end }}
           securityContext:
             privileged: true
             capabilities:
