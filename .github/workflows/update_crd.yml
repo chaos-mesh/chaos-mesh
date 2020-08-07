@@ -1,0 +1,32 @@
+name: Update chaos mesh crd
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - manifests/crd.yaml
+      - manifests/chaosfs-sidecar.yaml
+jobs:
+  run:
+    name: Upload media files
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+        with:
+          # Must use at least depth 2!
+          fetch-depth: 2
+      - name: Download cloud_assets_utils
+        run: |
+          curl -L https://github.com/pingcap/cloud-assets-utils/releases/download/v0.2.0/cloud_assets_utils-ubuntu-latest -o cloud_assets_utils
+          chmod +x cloud_assets_utils
+          sudo mv cloud_assets_utils /usr/local/bin/cloud-assets-utils
+      - name: Configure awscli
+        run: |
+          pip3 install --upgrade setuptools
+          pip3 install awscli
+          printf "%s\n" ${{ secrets.AWS_ACCESS_KEY }} ${{ secrets.AWS_SECRET_KEY }} ${{ secrets.AWS_REGION }} "json" | aws configure
+      - name: Upload crd file
+        run: cloud-assets-utils verify-and-sync manifests/crd.yaml -aws true -aws-bucket ${{ secrets.AWS_BUCKET_NAME }}
+      # TODO: delete it
+      - name: Upload chaosfs file
+        run: cloud-assets-utils verify-and-sync manifests/chaosfs-sidecar.yaml -aws true -aws-bucket ${{ secrets.AWS_BUCKET_NAME }}
