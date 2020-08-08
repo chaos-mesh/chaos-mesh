@@ -18,8 +18,8 @@ The following tables list the configurable parameters of the Chaos Mesh chart an
 |--------------------------------------------|----------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------|
 | `clusterScoped`                            | whether chaos-mesh should manage kubernetes cluster wide chaos.Also see rbac.create and controllerManager.serviceAccount | `true` |
 | `rbac.create` |  | `true`                                                |
-| `timezone` | The timezone where controller-manager and dashboard uses. For example: `UTC`, `Asia/Shanghai` | `UTC` |
-| `enableProfiling` | A flag to enable pprof in controller-manager and chaos-daemon  | `false` |
+| `timezone` | The timezone where controller-manager, chaos-daemon and dashboard uses. For example: `UTC`, `Asia/Shanghai` | `UTC` |
+| `enableProfiling` | A flag to enable pprof in controller-manager and chaos-daemon  | `true` |
 | `controllerManager.serviceAccount` | The serviceAccount for chaos-controller-manager | `chaos-controller-manager` |
 | `controllerManager.replicaCount` | Replicas for chaos-controller-manager | `1` |
 | `controllerManager.image` | docker image for chaos-controller-manager  | `pingcap/chaos-mesh:latest` |
