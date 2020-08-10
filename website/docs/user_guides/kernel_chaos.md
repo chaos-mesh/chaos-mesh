@@ -73,7 +73,7 @@ Description:
   * **probability** indicates the fails with probability. If you want 1%, please set this field with `1`.
   * **times** indicates the max times of fails.
 * **duration** defines the duration for each chaos experiment. In the sample file above, the time chaos lasts for 10 seconds.
-* **scheduler** defines the scheduler rules for the running time of the chaos experiment. For more rule information, see <https://godoc.org/github.com/robfig/cron>
+* **scheduler** defines the scheduler rules for the running time of the chaos experiment. For more rule information, see [robfig/cron](https://godoc.org/github.com/robfig/cron)
 
 ## Usage
 
