@@ -153,7 +153,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		tempRecover := now.Add(*duration)
 		if tempStart.Before(tempRecover) {
 			err := fmt.Errorf("nextRecover shouldn't be later than nextStart.")
-			r.Log.Error(err, "Then recover can never be reached. It may be because cron is greater than duration.")
+			r.Log.Error(err, "Then recover can never be reached. It may be because cron is greater than duration")
 			return ctrl.Result{}, err
 		}
 
