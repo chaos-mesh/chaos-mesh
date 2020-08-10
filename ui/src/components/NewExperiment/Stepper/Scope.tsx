@@ -2,9 +2,9 @@ import { AutocompleteMultipleField, SelectField, TextField } from 'components/Fo
 import { Box, Divider, InputAdornment, MenuItem, Typography } from '@material-ui/core'
 import React, { useMemo } from 'react'
 import { RootState, useStoreDispatch } from 'store'
+import { arrToObjBySep, joinObjKVs, toTitleCase } from 'lib/utils'
 import { getAnnotations, getLabels, getPodsByNamespaces } from 'slices/experiments'
 import { getIn, useFormikContext } from 'formik'
-import { joinObjKVs, toTitleCase } from 'lib/utils'
 
 import AdvancedOptions from 'components/AdvancedOptions'
 import { Experiment } from '../types'
@@ -39,6 +39,24 @@ const ScopeStep: React.FC<ScopeStepProps> = ({ namespaces, scope = 'scope' }) =>
     storeDispatch(getPodsByNamespaces({ namespace_selectors: _labels }))
   }
 
+  const handleLabelSelectorsChangeCallback = (labels: string[]) =>
+    storeDispatch(
+      getPodsByNamespaces({
+        namespace_selectors: namespaces,
+        label_selectors: arrToObjBySep(labels, ': '),
+        annotation_selectors: annotations,
+      })
+    )
+
+  const handleAnnotationSelectorsChangeCallback = (labels: string[]) =>
+    storeDispatch(
+      getPodsByNamespaces({
+        namespace_selectors: namespaces,
+        label_selectors: labels,
+        annotation_selectors: arrToObjBySep(labels, ': '),
+      })
+    )
+
   const handleChangeIncludeAll = (id: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
     const lastValues = id.split('.').reduce((acc, cur) => acc[cur], values as any)
     const currentValues = (e.target.value as unknown) as string[]
@@ -71,6 +89,7 @@ const ScopeStep: React.FC<ScopeStepProps> = ({ namespaces, scope = 'scope' }) =>
         label="Label Selectors"
         helperText="Multiple options"
         options={labelKVs}
+        onChangeCallback={handleLabelSelectorsChangeCallback}
       />
 
       <SelectField id={`${scope}.mode`} name={`${scope}.mode`} label="Mode" helperText="Select the experiment mode">
@@ -108,6 +127,7 @@ const ScopeStep: React.FC<ScopeStepProps> = ({ namespaces, scope = 'scope' }) =>
           label="Annotation Selectors"
           helperText="Multiple options"
           options={annotationKVs}
+          onChangeCallback={handleAnnotationSelectorsChangeCallback}
         />
 
         <SelectField
@@ -132,9 +152,9 @@ const ScopeStep: React.FC<ScopeStepProps> = ({ namespaces, scope = 'scope' }) =>
             <Divider />
           </Box>
           <Box mb={6}>
-            <Typography>Pods</Typography>
-            <Typography variant="body2" color="textSecondary">
-              This will overide Label Selectors and Annotation Selectors
+            <Typography>Affected Pods Preview</Typography>
+            <Typography variant="subtitle2" color="textSecondary">
+              You can further limit the scope of the experiment by checking pods
             </Typography>
           </Box>
           <ScopePodsTable scope={scope} pods={pods} />

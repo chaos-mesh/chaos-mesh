@@ -1,16 +1,14 @@
-import { Box, Button, Grow, IconButton, Modal, Paper, Typography } from '@material-ui/core'
+import { Box, Button, Grid, Grow, Modal, Paper } from '@material-ui/core'
 import React, { useEffect, useRef, useState } from 'react'
 import { Theme, createStyles, makeStyles } from '@material-ui/core/styles'
 import { setAlert, setAlertOpen } from 'slices/globalStatus'
 import { useHistory, useParams } from 'react-router-dom'
 
-import CloseIcon from '@material-ui/icons/Close'
+import ArchiveOutlinedIcon from '@material-ui/icons/ArchiveOutlined'
 import ConfirmDialog from 'components/ConfirmDialog'
-import DeleteOutlineIcon from '@material-ui/icons/DeleteOutline'
-import ErrorOutlineIcon from '@material-ui/icons/ErrorOutline'
 import { Event } from 'api/events.type'
-import EventDetail from 'components/EventDetail'
-import EventsTable from 'components/EventsTable'
+import EventsTable, { EventsTableHandles } from 'components/EventsTable'
+import ExperimentConfiguration from 'components/ExperimentConfiguration'
 import { ExperimentDetail as ExperimentDetailType } from 'api/experiments.type'
 import JSONEditor from 'components/JSONEditor'
 import Loading from 'components/Loading'
@@ -23,22 +21,13 @@ import api from 'api'
 import genEventsChart from 'lib/d3/eventsChart'
 import { getStateofExperiments } from 'slices/experiments'
 import { toTitleCase } from 'lib/utils'
-import useErrorButtonStyles from 'lib/styles/errorButton'
 import { usePrevious } from 'lib/hooks'
 import { useStoreDispatch } from 'store'
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
-    height100: {
-      [theme.breakpoints.up('md')]: {
-        height: '100%',
-      },
-    },
-    timelinePaper: {
-      marginBottom: theme.spacing(3),
-    },
     eventsChart: {
-      height: 350,
+      height: 200,
       margin: theme.spacing(3),
     },
     eventDetailPaper: {
@@ -47,16 +36,16 @@ const useStyles = makeStyles((theme: Theme) =>
       left: 0,
       width: '100%',
       height: '100%',
-      overflow: 'scroll',
+      overflowY: 'scroll',
     },
     configPaper: {
       position: 'absolute',
       top: '50%',
       left: '50%',
       width: '50vw',
-      height: '70vh',
+      height: '80vh',
       transform: 'translate(-50%, -50%)',
-      [theme.breakpoints.down('xs')]: {
+      [theme.breakpoints.down('sm')]: {
         width: '90vw',
       },
     },
@@ -74,25 +63,20 @@ const useStyles = makeStyles((theme: Theme) =>
 
 export default function ExperimentDetail() {
   const classes = useStyles()
-  const errorButton = useErrorButtonStyles()
 
   const history = useHistory()
-  const { search } = history.location
-  const searchParams = new URLSearchParams(search)
-  const eventID = searchParams.get('event')
   const { uuid } = useParams()
 
   const dispatch = useStoreDispatch()
 
   const chartRef = useRef<HTMLDivElement>(null)
-  const [loading, setLoading] = useState(false)
-  const [detailLoading, setDetailLoading] = useState(false)
-  const [detail, setDetail] = useState<ExperimentDetailType | null>(null)
-  const [events, setEvents] = useState<Event[] | null>(null)
+  const eventsTableRef = useRef<EventsTableHandles>(null)
+
+  const [loading, setLoading] = useState(true)
+  const [detail, setDetail] = useState<ExperimentDetailType>()
+  const [events, setEvents] = useState<Event[]>()
   const prevEvents = usePrevious(events)
-  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null)
-  const [eventDetailOpen, setEventDetailOpen] = useState(false)
-  const [infoEditor, setInfoEditor] = useState<_JSONEditor | null>(null)
+  const [infoEditor, setInfoEditor] = useState<_JSONEditor>()
   const [configOpen, setConfigOpen] = useState(false)
   const [dialogOpen, setDialogOpen] = useState(false)
   const [dialogInfo, setDialogInfo] = useState({
@@ -102,8 +86,6 @@ export default function ExperimentDetail() {
   })
 
   const fetchExperimentDetail = () => {
-    setLoading(true)
-
     api.experiments
       .detail(uuid)
       .then(({ data }) => setDetail(data))
@@ -119,19 +101,6 @@ export default function ExperimentDetail() {
         setLoading(false)
       })
 
-  const onSelectEvent = (e: Event) => {
-    setDetailLoading(true)
-    setSelectedEvent(e)
-    setEventDetailOpen(true)
-    setTimeout(() => setDetailLoading(false), 500)
-  }
-
-  const closeEventDetail = () => {
-    setEventDetailOpen(false)
-    searchParams.set('event', 'null')
-    history.replace(window.location.pathname + '?' + searchParams.toString())
-  }
-
   useEffect(() => {
     fetchExperimentDetail()
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -143,21 +112,18 @@ export default function ExperimentDetail() {
   }, [detail])
 
   useEffect(() => {
-    if (prevEvents !== events && events) {
+    if (prevEvents !== events && prevEvents?.length !== events?.length && events) {
       const chart = chartRef.current!
 
       genEventsChart({
         root: chart,
         events,
-        selectEvent: onSelectEvent,
+        onSelectEvent: eventsTableRef.current!.onSelectEvent,
       })
     }
 
-    if (eventID !== null && eventID !== 'null' && events) {
-      onSelectEvent(events.filter((e) => e.id === parseInt(eventID))[0])
-    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [events, eventID])
+  }, [events])
 
   const onModalOpen = () => setConfigOpen(true)
   const onModalClose = () => setConfigOpen(false)
@@ -166,8 +132,8 @@ export default function ExperimentDetail() {
     switch (action) {
       case 'delete':
         setDialogInfo({
-          title: `Delete ${detail!.name}?`,
-          description: "Once you delete this experiment, it can't be recovered.",
+          title: `Archive ${detail!.name}?`,
+          description: 'You can still find this experiment in the archives.',
           action: 'delete',
         })
 
@@ -265,76 +231,71 @@ export default function ExperimentDetail() {
   return (
     <>
       <Grow in={!loading} style={{ transformOrigin: '0 0 0' }}>
-        <Box display="flex" flexDirection="column" height="100%">
-          <Box display="flex" justifyContent="space-between" mb={3}>
+        <Grid container spacing={6}>
+          <Grid item xs={12}>
             <Box display="flex">
               <Box mr={3}>
                 <Button
-                  className={errorButton.root}
                   variant="outlined"
                   size="small"
-                  startIcon={<DeleteOutlineIcon />}
+                  startIcon={<ArchiveOutlinedIcon />}
                   onClick={handleAction('delete')}
                 >
-                  Delete
+                  Archive
                 </Button>
               </Box>
-              {detail?.status === 'Paused' ? (
-                <Button
-                  variant="outlined"
-                  size="small"
-                  startIcon={<PlayCircleOutlineIcon />}
-                  onClick={handleAction('start')}
-                >
-                  Start
-                </Button>
-              ) : (
-                <Button
-                  variant="outlined"
-                  size="small"
-                  startIcon={<PauseCircleOutlineIcon />}
-                  onClick={handleAction('pause')}
-                >
-                  Pause
-                </Button>
-              )}
+              <Box>
+                {detail?.status === 'Paused' ? (
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    startIcon={<PlayCircleOutlineIcon />}
+                    onClick={handleAction('start')}
+                  >
+                    Start
+                  </Button>
+                ) : (
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    startIcon={<PauseCircleOutlineIcon />}
+                    onClick={handleAction('pause')}
+                  >
+                    Pause
+                  </Button>
+                )}
+              </Box>
             </Box>
-            <Button
-              variant="outlined"
-              size="small"
-              color="primary"
-              startIcon={<NoteOutlinedIcon />}
-              onClick={onModalOpen}
-            >
-              Configuration
-            </Button>
-          </Box>
-          <Paper className={classes.timelinePaper} variant="outlined">
-            <PaperTop title="Timeline" />
-            <div ref={chartRef} className={classes.eventsChart} />
-          </Paper>
-          <Box className={classes.height100} position="relative">
-            <Paper className={classes.height100} variant="outlined">
-              {events && <EventsTable events={events} detailed />}
+          </Grid>
+
+          <Grid item xs={12}>
+            <Paper variant="outlined">
+              <PaperTop title="Configuration">
+                <Button
+                  variant="outlined"
+                  size="small"
+                  color="primary"
+                  startIcon={<NoteOutlinedIcon />}
+                  onClick={onModalOpen}
+                >
+                  Update
+                </Button>
+              </PaperTop>
+              <Box p={3}>{detail && <ExperimentConfiguration experimentDetail={detail} />}</Box>
             </Paper>
-            {eventDetailOpen && (
-              <Paper
-                variant="outlined"
-                className={classes.eventDetailPaper}
-                style={{
-                  zIndex: 3, // .MuiTableCell-stickyHeader z-index: 2
-                }}
-              >
-                <PaperTop title="Event Detail">
-                  <IconButton color="primary" onClick={closeEventDetail}>
-                    <CloseIcon />
-                  </IconButton>
-                </PaperTop>
-                {selectedEvent && !detailLoading ? <EventDetail event={selectedEvent} /> : <Loading />}
-              </Paper>
-            )}
-          </Box>
-        </Box>
+          </Grid>
+
+          <Grid item xs={12}>
+            <Paper variant="outlined">
+              <PaperTop title="Timeline" />
+              <div ref={chartRef} className={classes.eventsChart} />
+            </Paper>
+          </Grid>
+
+          <Grid item xs={12}>
+            {events && <EventsTable ref={eventsTableRef} events={events} detailed hasSearch={false} />}
+          </Grid>
+        </Grid>
       </Grow>
 
       <Modal open={configOpen} onClose={onModalClose}>
@@ -346,21 +307,10 @@ export default function ExperimentDetail() {
             size="small"
             onClick={handleUpdateExperiment}
           >
-            Update
+            Confirm
           </Button>
         </Paper>
       </Modal>
-
-      {!uuid && (
-        <Box display="flex" flexDirection="column" justifyContent="center" alignItems="center" height="100%">
-          <Box mb={3}>
-            <ErrorOutlineIcon fontSize="large" />
-          </Box>
-          <Typography variant="h6" align="center">
-            Please check the URL params and queries to provide the correct params.
-          </Typography>
-        </Box>
-      )}
 
       <ConfirmDialog
         open={dialogOpen}

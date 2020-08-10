@@ -92,7 +92,9 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, obj v1alpha1.I
 				g.Go(func() error {
 					err = r.KillContainer(ctx, pod, containerID)
 					if err != nil {
-						r.Log.Error(err, "failed to kill container")
+						r.Log.Error(err, fmt.Sprintf(
+							"failed to kill container: %s, pod: %s, namespace: %s",
+							containerName, pod.Name, pod.Namespace))
 					}
 					return err
 				})

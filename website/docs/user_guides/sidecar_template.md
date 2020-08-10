@@ -160,7 +160,7 @@ This value should be set to the data directory of the target application.
 
 #### `chaos-scripts`
 
-`chaos-scripts` container is used to inject some scripts to the target pods including [wait-fuse.sh](https://github.com/chaos-mesh/chaos-mesh/blob/master/hack/wait-fuse.sh).
+`chaos-scripts` container is used to inject some scripts to the target pods including [wait-fuse.sh](https://github.com/chaos-mesh/chaos-mesh/blob/master/scripts/wait-fuse.sh).
 
 `wait-fuse.sh` is used by application container to ensure that the fuse-daemon server is running normally before the application starts.
 
