@@ -18,7 +18,9 @@ import (
 
 	"github.com/go-logr/logr"
 	"golang.org/x/sync/errgroup"
+	v1 "k8s.io/api/core/v1"
 	k8sError "k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/util/retry"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -74,8 +76,22 @@ func (m *PodNetworkManager) Commit(ctx context.Context) error {
 						return err
 					}
 
+					pod := v1.Pod{}
+					err = m.Client.Get(ctx, key, &pod)
+					if err != nil {
+						m.Log.Error(err, "error while finding pod", "key", key)
+					}
+
 					chaos.Name = key.Name
 					chaos.Namespace = key.Namespace
+					chaos.OwnerReferences = []metav1.OwnerReference{
+						{
+							APIVersion: pod.APIVersion,
+							Kind:       pod.Kind,
+							Name:       pod.Name,
+							UID:        pod.UID,
+						},
+					}
 					err = m.Client.Create(ctx, chaos)
 
 					if err != nil {
