@@ -273,7 +273,6 @@ func (e *eventStore) DeleteIncompleteEvents(_ context.Context) error {
 // ListByFilter returns an event list by podName, podNamespace, experimentName, experimentNamespace, uid, kind, startTime and finishTime.
 func (e *eventStore) ListByFilter(_ context.Context, filter core.Filter) ([]*core.Event, error) {
 	var (
-		db                    *dbstore.DB
 		resList               []*core.Event
 		err                   error
 		startTime, finishTime time.Time
@@ -316,20 +315,7 @@ func (e *eventStore) ListByFilter(_ context.Context, filter core.Filter) ([]*cor
 			resList = resList[:min(limit, len(resList))]
 		}
 	} else {
-		query, args := constructQueryArgs(filter.ExperimentName, filter.ExperimentNamespace, filter.UID, filter.Kind, filter.StartTimeStr, filter.FinishTimeStr)
-		// List all events
-		if len(args) == 0 {
-			db = e.db
-		} else {
-			db = &dbstore.DB{DB: e.db.Where(query, args...)}
-		}
-		if filter.LimitStr != "" {
-			db = &dbstore.DB{DB: db.Order("created_at desc").Limit(limit)}
-		}
-		if err := db.Where(query, args...).Find(&resList).Error; err != nil &&
-			!gorm.IsRecordNotFoundError(err) {
-			return resList, err
-		}
+		resList, err = e.DryListByFilter(context.Background(), filter)
 	}
 	if err != nil {
 		return resList, err
