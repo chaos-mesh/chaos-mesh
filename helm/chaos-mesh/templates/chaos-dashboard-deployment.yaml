@@ -44,9 +44,7 @@ spec:
             - name: {{ $envKey | upper }}
               value: {{ $envVal | quote }}
             {{- end }}
-            {{- if .Values.dashboard.env.TZ }}
-            # do nothing
-            {{- else }}
+            {{- if not .Values.dashboard.env.TZ }}
             - name: TZ
               value: {{ .Values.timezone | default "UTC" }}
             {{- end }}
