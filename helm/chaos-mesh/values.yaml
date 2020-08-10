@@ -10,7 +10,7 @@ clusterScoped: true
 rbac:
   create: true
 
-# timezone is the timezone where controller-manager and dashboard uses.
+# timezone is the timezone where controller-manager, chaos-daemon and dashboard uses.
 # For example: "UTC" or "Asia/Shanghai"
 # This value will be set on controller-manager and dashboard container's
 # environment variable TZ.
@@ -19,7 +19,7 @@ rbac:
 timezone: "UTC"
 
 # enableProfiling is a flag to enable pprof in controller-manager and chaos-daemon.
-enableProfiling: false
+enableProfiling: true
 
 kubectlImage: bitnami/kubectl:latest
 
@@ -65,7 +65,7 @@ chaosDaemon:
   imagePullPolicy: Always
   grpcPort: 31767
   httpPort: 31766
-
+  env: {}
   hostNetwork: false
 
   podAnnotations: {}
