@@ -17,6 +17,7 @@ import (
 	"context"
 
 	"github.com/go-logr/logr"
+	"golang.org/x/sync/errgroup"
 	k8sError "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/util/retry"
@@ -59,43 +60,46 @@ func (m *PodNetworkManager) WithInit(key types.NamespacedName) *PodNetworkTransa
 
 // Commit will update all modifications to the cluster
 func (m *PodNetworkManager) Commit(ctx context.Context) error {
-
-	// TODO: parallel update
+	g := errgroup.Group{}
 	for key, t := range m.Modifications {
-		m.Log.Info("running modification on pod", "key", key, "modification", t)
-		updateError := retry.RetryOnConflict(retry.DefaultRetry, func() error {
-			chaos := &v1alpha1.PodNetworkChaos{}
+		g.Go(func() error {
+			m.Log.Info("running modification on pod", "key", key, "modification", t)
+			updateError := retry.RetryOnConflict(retry.DefaultRetry, func() error {
+				chaos := &v1alpha1.PodNetworkChaos{}
 
-			err := m.Client.Get(ctx, key, chaos)
-			if err != nil {
-				if !k8sError.IsNotFound(err) {
-					m.Log.Error(err, "error while getting podnetworkchaos")
-					return err
-				}
-
-				chaos.Name = key.Name
-				chaos.Namespace = key.Namespace
-				err = m.Client.Create(ctx, chaos)
-
+				err := m.Client.Get(ctx, key, chaos)
 				if err != nil {
-					m.Log.Error(err, "error while creating podnetworkchaos")
+					if !k8sError.IsNotFound(err) {
+						m.Log.Error(err, "error while getting podnetworkchaos")
+						return err
+					}
+
+					chaos.Name = key.Name
+					chaos.Namespace = key.Namespace
+					err = m.Client.Create(ctx, chaos)
+
+					if err != nil {
+						m.Log.Error(err, "error while creating podnetworkchaos")
+						return err
+					}
+				}
+
+				err = t.Apply(chaos)
+				if err != nil {
+					m.Log.Error(err, "error while applying transactions", "transaction", t)
 					return err
 				}
+
+				return m.Client.Update(ctx, chaos)
+			})
+			if updateError != nil {
+				m.Log.Error(updateError, "error while updating")
+				return updateError
 			}
 
-			err = t.Apply(chaos)
-			if err != nil {
-				m.Log.Error(err, "error while applying transactions", "transaction", t)
-				return err
-			}
-
-			return m.Client.Update(ctx, chaos)
+			return nil
 		})
-		if updateError != nil {
-			m.Log.Error(updateError, "error while updating")
-			return updateError
-		}
 	}
 
-	return nil
+	return g.Wait()
 }
