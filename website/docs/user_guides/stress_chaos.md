@@ -22,7 +22,7 @@ A StressChaos shares common configurations like other chaos, such as how to sele
 
      | Option    | Type    | Required | Description                                                  |
      | --------- | ------- | -------- | ------------------------------------------------------------ |
-     | `workers` | Integer | True     | Specifies concurrent stressing instance                      |
+     | `workers` | Integer | True     | Specifies concurrent stressing instance.                      |
      | `size`   | String  | False    | Specifies memory size consumed per worker, default is the total available memory. One can also specify the size as *%* of total available memory or in units of *B, KB/KiB, MB/MiB, GB/GiB, TB/TiB*. |
 
   2. `cpu`
@@ -32,7 +32,7 @@ A StressChaos shares common configurations like other chaos, such as how to sele
      | Option    | Type    | Required | Description                                                  |
      | --------- | ------- | -------- | ------------------------------------------------------------ |
      | `workers` | Integer | True     | Specifies concurrent stressing instance. Actually it specifies how many CPUs to stress when it's less than available CPUs. |
-     | `load`    | Integer | False    | Specifies  percent loading per worker. 0 is effectively a sleep (no load) and 100 is full loading |
+     | `load`    | Integer | False    | Specifies  percent loading per worker. 0 is effectively a sleep (no load) and 100 is full loading. |
 
 * `stressngStressors`
 
