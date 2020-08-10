@@ -48,6 +48,7 @@ func NewReconciler(r reconciler.InnerReconciler, client client.Client, log logr.
 
 func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	var err error
+	var startTime time.Time
 	now := time.Now()
 
 	r.Log.Info("Reconciling a two phase chaos", "name", req.Name, "namespace", req.Namespace)
@@ -136,28 +137,34 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		r.Log.Info("Resuming")
 
 		dur := chaos.GetNextRecover().Sub(now)
-		if err := applyAction(ctx, r, req, dur, chaos); err != nil {
+		if startTime, err = applyAction(ctx, r, req, dur, chaos); err != nil {
 			return ctrl.Result{Requeue: true}, err
 		}
 
 	} else if chaos.GetNextStart().Before(now) {
-		nextStart, err := utils.NextTime(*chaos.GetScheduler(), now)
+		tempStart, err := utils.NextTime(*chaos.GetScheduler(), now)
 		if err != nil {
-			r.Log.Error(err, "failed to get next start time")
+			r.Log.Error(err, "failed to calculate the temp start time")
 			return ctrl.Result{}, err
 		}
 
-		nextRecover := now.Add(*duration)
-		if nextStart.Before(nextRecover) {
-			err := fmt.Errorf("nextRecover shouldn't be later than nextStart")
-			r.Log.Error(err, "nextRecover is later than nextStart. Then recover can never be reached",
-				"nextRecover", nextRecover, "nextStart", nextStart)
+		tempRecover := now.Add(*duration)
+		if tempStart.Before(tempRecover) {
+			err := fmt.Errorf("nextRecover shouldn't be later than nextStart.")
+			r.Log.Error(err, "Then recover can never be reached. It may be because cron is greater than duration.")
 			return ctrl.Result{}, err
 		}
 
-		if err := applyAction(ctx, r, req, *duration, chaos); err != nil {
+		if startTime, err = applyAction(ctx, r, req, *duration, chaos); err != nil {
 			return ctrl.Result{Requeue: true}, err
 		}
+
+		nextStart, err := utils.NextTime(*chaos.GetScheduler(), startTime)
+		if err != nil {
+			r.Log.Error(err, "failed to get the next start time")
+			return ctrl.Result{}, err
+		}
+		nextRecover := startTime.Add(*duration)
 
 		chaos.SetNextStart(*nextStart)
 		chaos.SetNextRecover(nextRecover)
@@ -196,7 +203,7 @@ func applyAction(
 	req ctrl.Request,
 	duration time.Duration,
 	chaos v1alpha1.InnerSchedulerObject,
-) error {
+) (time.Time, error) {
 	status := chaos.GetStatus()
 	r.Log.Info("Chaos action:", "chaos", chaos)
 
@@ -215,11 +222,11 @@ func applyAction(
 			r.Log.Error(updateError, "unable to update chaos finalizers")
 		}
 
-		return err
+		return time.Time{}, err
 	}
 
 	status.Experiment.StartTime = &metav1.Time{Time: time.Now()}
 	status.Experiment.Phase = v1alpha1.ExperimentPhaseRunning
 	status.Experiment.Duration = duration.String()
-	return nil
+	return status.Experiment.StartTime.Time, nil
 }
