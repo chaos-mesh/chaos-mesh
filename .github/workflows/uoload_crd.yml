@@ -1,8 +1,10 @@
-name: Update chaos mesh crd
+name: Upload chaos mesh crd
 on:
   push:
     branches:
       - master
+    tags:
+      - v*
     paths:
       - manifests/crd.yaml
       - manifests/chaosfs-sidecar.yaml
@@ -26,7 +28,11 @@ jobs:
           pip3 install awscli
           printf "%s\n" ${{ secrets.AWS_ACCESS_KEY }} ${{ secrets.AWS_SECRET_KEY }} ${{ secrets.AWS_REGION }} "json" | aws configure
       - name: Upload crd file
-        run: cloud-assets-utils verify-and-sync manifests/crd.yaml -aws true -aws-bucket ${{ secrets.AWS_BUCKET_NAME }}
-      # TODO: delete it
-      - name: Upload chaosfs file
-        run: cloud-assets-utils verify-and-sync manifests/chaosfs-sidecar.yaml -aws true -aws-bucket ${{ secrets.AWS_BUCKET_NAME }}
+        run: |
+          GIT_TAG=${GITHUB_REF##*/}
+          if [[ "$GIT_TAG" == "master" ]]; then
+            GIT_TAG="latest"
+          fi
+          cloud-assets-utils verify-and-sync manifests/crd.yaml -aws true -aws-bucket ${{ secrets.AWS_BUCKET_NAME }} -replace-first-path-to ${GIT_TAG}/crd.yaml
+          # TODO: delete it
+          cloud-assets-utils verify-and-sync manifests/chaosfs-sidecar.yaml -aws true -aws-bucket ${{ secrets.AWS_BUCKET_NAME }} -replace-first-path-to ${GIT_TAG}/chaosfs-sidecar.yaml

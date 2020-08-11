@@ -1,8 +1,10 @@
-name: Update install script
+name: Upload install script
 on:
   push:
     branches:
       - master
+    tags:
+      - v*
     paths:
       - install.sh
 jobs:
@@ -26,4 +28,9 @@ jobs:
           pip3 install awscli
           printf "%s\n" ${{ secrets.AWS_ACCESS_KEY }} ${{ secrets.AWS_SECRET_KEY }} ${{ secrets.AWS_REGION }} "json" | aws configure
       - name: Upload
-        run: cloud-assets-utils verify-and-sync install.sh -aws true -aws-bucket ${{ secrets.AWS_BUCKET_NAME }}
+        run: |
+          GIT_TAG=${GITHUB_REF##*/}
+          if [[ "$GIT_TAG" == "master" ]]; then
+            GIT_TAG="latest"
+          fi
+          cloud-assets-utils verify-and-sync install.sh -aws true -aws-bucket ${{ secrets.AWS_BUCKET_NAME }} -replace-first-path-to ${GIT_TAG}/install.sh
