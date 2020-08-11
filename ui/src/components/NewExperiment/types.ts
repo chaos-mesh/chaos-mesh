@@ -110,6 +110,7 @@ export interface ExperimentTargetStress {
       options: string[]
     } | null
   }
+  container_name: string
 }
 
 export interface ExperimentTarget {

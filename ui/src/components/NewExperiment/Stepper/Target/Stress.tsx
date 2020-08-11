@@ -123,6 +123,12 @@ export default function Stress(props: StepperFormTargetProps) {
       {action !== '' && (
         <AdvancedOptions>
           <TextField
+            id="target.stress_chaos.container_name"
+            name="target.stress_chaos.container_name"
+            label="Container Name"
+            helperText="Optional. Fill the container name you want to inject stress in"
+          />
+          <TextField
             id="target.stress_chaos.stressng_stressors"
             name="target.stress_chaos.stressng_stressors"
             label="Options of stress-ng"

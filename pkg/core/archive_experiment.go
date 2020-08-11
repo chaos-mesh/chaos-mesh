@@ -205,6 +205,7 @@ type TimeChaosInfo struct {
 type StressChaosInfo struct {
 	Stressors         *v1alpha1.Stressors `json:"stressors"`
 	StressngStressors string              `json:"stressng_stressors,omitempty"`
+	ContainerName     *string             `json:"container_name,omitempty"`
 }
 
 func (e *ArchiveExperiment) ParsePodChaos() (ExperimentInfo, error) {
@@ -480,6 +481,10 @@ func (e *ArchiveExperiment) ParseStressChaos() (ExperimentInfo, error) {
 
 	if chaos.Spec.Duration != nil {
 		info.Scheduler.Duration = *chaos.Spec.Duration
+	}
+
+	if chaos.Spec.ContainerName != nil {
+		info.Target.StressChaos.ContainerName = chaos.Spec.ContainerName
 	}
 
 	return info, nil
