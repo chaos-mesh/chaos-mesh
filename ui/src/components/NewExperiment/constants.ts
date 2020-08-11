@@ -86,6 +86,7 @@ export const defaultExperimentSchema: Experiment = {
           options: [],
         },
       },
+      container_name: '',
     },
   },
   scheduler: {
