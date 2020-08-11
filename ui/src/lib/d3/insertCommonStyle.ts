@@ -26,6 +26,7 @@ export default function insertCommonStyle() {
         display: flex;
         align-items: center;
         margin-left: 1rem;
+        cursor: pointer;
       }
     </style>`
   )

@@ -19,20 +19,13 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({ open, setOpen, title, des
   }
 
   return (
-    <Dialog
-      open={open}
-      onClose={handleClose}
-      aria-labelledby="alert-dialog-title"
-      aria-describedby="alert-dialog-description"
-    >
-      <DialogTitle id="alert-dialog-title">{title}</DialogTitle>
+    <Dialog open={open} onClose={handleClose} aria-labelledby="dialog-title" aria-describedby="dialog-description">
+      <DialogTitle id="dialog-title">{title}</DialogTitle>
       <DialogContent>
-        <DialogContentText id="alert-dialog-description">{description}</DialogContentText>
+        <DialogContentText id="dialog-description">{description}</DialogContentText>
       </DialogContent>
       <DialogActions>
-        <Button color="primary" onClick={handleClose}>
-          Cancel
-        </Button>
+        <Button onClick={handleClose}>Cancel</Button>
         <Button color="primary" autoFocus onClick={_handleConfirm}>
           Confirm
         </Button>

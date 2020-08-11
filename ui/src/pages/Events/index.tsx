@@ -4,7 +4,7 @@ import { Theme, createStyles, makeStyles } from '@material-ui/core/styles'
 
 import BlurLinearIcon from '@material-ui/icons/BlurLinear'
 import { Event } from 'api/events.type'
-import EventsTable from 'components/EventsTable'
+import EventsTable, { EventsTableHandles } from 'components/EventsTable'
 import Loading from 'components/Loading'
 import PaperTop from 'components/PaperTop'
 import api from 'api'
@@ -12,13 +12,8 @@ import genEventsChart from 'lib/d3/eventsChart'
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
-    height100: {
-      [theme.breakpoints.up('md')]: {
-        height: '100%',
-      },
-    },
     timelinePaper: {
-      marginBottom: theme.spacing(3),
+      marginBottom: theme.spacing(6),
     },
     eventsChart: {
       height: 350,
@@ -31,6 +26,8 @@ export default function Events() {
   const classes = useStyles()
 
   const chartRef = useRef<HTMLDivElement>(null)
+  const eventsTableRef = useRef<EventsTableHandles>(null)
+
   const [loading, setLoading] = useState(false)
   const [events, setEvents] = useState<Event[] | null>(null)
 
@@ -55,6 +52,7 @@ export default function Events() {
       genEventsChart({
         root: chart,
         events,
+        onSelectEvent: eventsTableRef.current!.onSelectEvent,
       })
     }
   }, [events])
@@ -63,14 +61,12 @@ export default function Events() {
     <>
       {events && events.length > 0 && (
         <Grow in={!loading} style={{ transformOrigin: '0 0 0' }}>
-          <Box display="flex" flexDirection="column" height="100%">
+          <Box display="flex" flexDirection="column">
             <Paper className={classes.timelinePaper} variant="outlined">
               <PaperTop title="Timeline" />
               <div ref={chartRef} className={classes.eventsChart} />
             </Paper>
-            <Paper className={classes.height100} variant="outlined">
-              <EventsTable events={events} detailed />
-            </Paper>
+            <EventsTable ref={eventsTableRef} events={events} detailed />
           </Box>
         </Grow>
       )}

@@ -43,7 +43,7 @@ Description:
 * **clockIds** defines all affected `clk_id`. `clk_id` refers to the first argument of `clock_gettime` call. For most application, `CLOCK_REALTIME` is enough.
 * **containerNames** selects affected containers' names. If not set, all containers will be injected.
 * **duration** defines the duration for each chaos experiment. In the sample file above, the time chaos lasts for 10 seconds.
-* **scheduler** defines the scheduler rules for the running time of the chaos experiment. For more rule information, see <https://godoc.org/github.com/robfig/cron>.
+* **scheduler** defines the scheduler rules for the running time of the chaos experiment. For more rule information, see [robfig/cron](https://godoc.org/github.com/robfig/cron).
 
 ## Limitation
 

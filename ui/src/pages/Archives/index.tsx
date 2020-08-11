@@ -51,14 +51,14 @@ export default function Archives() {
         Object.entries(_groupBy(archives, 'kind'))
           .sort((a, b) => (a[0] > b[0] ? 1 : -1))
           .map(([kind, archivesByKind]) => (
-            <Box mb={6}>
+            <Box key={kind} mb={6}>
               <Box mb={6}>
                 <Typography variant="button">{kind}</Typography>
               </Box>
               <Grid container spacing={3}>
                 {archivesByKind.length > 0 &&
                   archivesByKind.map((e) => (
-                    <Grid key={e.name} item xs={12}>
+                    <Grid key={e.uid} item xs={12}>
                       <ExperimentPaper
                         experiment={e}
                         isArchive

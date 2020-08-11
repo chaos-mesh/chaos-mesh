@@ -48,7 +48,7 @@ const MobileNavigation = () => {
     <AppBar className={classes.appBar} position="fixed" color="inherit">
       <Toolbar>
         {items.map((i) => (
-          <NavLink key={i.href} to={i.href}>
+          <NavLink key={i.href} to={`/${i.href}`}>
             <IconButton color="primary">{i.icon}</IconButton>
           </NavLink>
         ))}
