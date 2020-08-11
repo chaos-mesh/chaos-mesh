@@ -83,7 +83,6 @@ export const defaultExperimentSchema: Experiment = {
         },
         memory: {
           workers: 0,
-          size: '',
           options: [],
         },
       },
