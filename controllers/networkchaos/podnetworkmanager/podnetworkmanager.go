@@ -64,6 +64,8 @@ func (m *PodNetworkManager) WithInit(key types.NamespacedName) *PodNetworkTransa
 func (m *PodNetworkManager) Commit(ctx context.Context) error {
 	g := errgroup.Group{}
 	for key, t := range m.Modifications {
+		key := key
+		t := t
 		g.Go(func() error {
 			m.Log.Info("running modification on pod", "key", key, "modification", t)
 			updateError := retry.RetryOnConflict(retry.DefaultRetry, func() error {
