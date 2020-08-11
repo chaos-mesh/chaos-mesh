@@ -105,12 +105,6 @@ export default function Stress(props: StepperFormTargetProps) {
             label="Workers"
             helperText="Memory workers"
           />
-          <TextField
-            id="target.stress_chaos.stressors.memory.size"
-            name="target.stress_chaos.stressors.memory.size"
-            label="Size"
-            helperText="Memory size"
-          />
           <LabelField
             id="target.stress_chaos.stressors.memory.options"
             name="target.stress_chaos.stressors.memory.options"
