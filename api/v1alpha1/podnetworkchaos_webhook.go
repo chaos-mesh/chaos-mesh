@@ -66,7 +66,10 @@ func (in *PodNetworkChaos) ValidateCreate() error {
 	podnetworkchaoslog.Info("validate create", "name", in.Name)
 
 	if handler != nil {
-		handler.Apply(context.TODO(), in)
+		err := handler.Apply(context.TODO(), in)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
@@ -79,7 +82,10 @@ func (in *PodNetworkChaos) ValidateUpdate(old runtime.Object) error {
 	podnetworkchaoslog.Info("validate update", "name", in.Name)
 
 	if handler != nil {
-		handler.Apply(context.TODO(), in)
+		err := handler.Apply(context.TODO(), in)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
