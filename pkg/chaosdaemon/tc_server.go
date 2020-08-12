@@ -220,7 +220,7 @@ func (s *daemonServer) SetTcs(ctx context.Context, in *pb.TcsRequest) (*empty.Em
 	}
 
 	parent := len(globalTc)
-	band := 3 + len(filterTc)
+	band := 3 + len(filterTc) // 3 handlers for normal sfq on prio qdisc
 	err = client.addPrio(parent, band)
 	if err != nil {
 		log.Error(err, "error while adding prio")
