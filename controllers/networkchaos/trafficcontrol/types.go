@@ -136,6 +136,10 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1
 			r.Log.Error(err, "failed to apply traffic control", "sources", pods, "targets", pods)
 			return err
 		}
+	default:
+		err = fmt.Errorf("unknown direction %s", networkchaos.Spec.Direction)
+		r.Log.Error(err, "unknown direction", "direction", networkchaos.Spec.Direction)
+		return err
 	}
 
 	err = m.Commit(ctx)
