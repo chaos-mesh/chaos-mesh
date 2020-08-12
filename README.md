@@ -87,7 +87,7 @@ See the [contributing guide](/CONTRIBUTING.md) and [development guide](https://c
 Please reach out for bugs, feature requests, and other issues via:
 
 - Following us on Twitter at [@chaos_mesh](https://twitter.com/chaos_mesh).
-- Joining the #sig-chaos-mesh channel in the [TiDB Community](https://slack.tidb.io/invite?team=tidb-community&channel=sig-chaos-mesh&ref=pingcap-chaos-mesh) Slack workspace.
+- Joining the #project-chaos-mesh channel in the [CNCF Slack](https://join.slack.com/t/cloud-native/shared_invite/zt-fyy3b8up-qHeDNVqbz1j8HDY6g1cY4w) workspace.
 - Filing an issue or opening a PR against this repository.
 
 ### Community meeting
