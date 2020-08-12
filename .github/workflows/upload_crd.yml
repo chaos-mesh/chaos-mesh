@@ -5,9 +5,6 @@ on:
       - master
     tags:
       - v*
-    paths:
-      - manifests/crd.yaml
-      - manifests/chaosfs-sidecar.yaml
 jobs:
   run:
     name: Upload crd file

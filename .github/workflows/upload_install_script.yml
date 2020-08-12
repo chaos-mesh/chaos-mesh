@@ -5,8 +5,6 @@ on:
       - master
     tags:
       - v*
-    paths:
-      - install.sh
 jobs:
   run:
     name: Upload install script file
@@ -16,7 +14,6 @@ jobs:
         with:
           # Must use at least depth 2!
           fetch-depth: 2
-
       - name: Download cloud_assets_utils
         run: |
           curl -L https://github.com/pingcap/cloud-assets-utils/releases/download/v0.2.0/cloud_assets_utils-ubuntu-latest -o cloud_assets_utils
