@@ -342,6 +342,10 @@ func (s *Service) createStressChaos(exp *core.ExperimentInfo) error {
 		chaos.Spec.Duration = &exp.Scheduler.Duration
 	}
 
+	if exp.Target.StressChaos.ContainerName != nil {
+		chaos.Spec.ContainerName = exp.Target.StressChaos.ContainerName
+	}
+
 	return s.kubeCli.Create(context.Background(), chaos)
 }
 
@@ -706,6 +710,10 @@ func (s *Service) getStressChaosDetail(namespace string, name string) (Experimen
 
 	if chaos.Spec.Duration != nil {
 		info.Scheduler.Duration = *chaos.Spec.Duration
+	}
+
+	if chaos.Spec.ContainerName != nil {
+		info.Target.StressChaos.ContainerName = chaos.Spec.ContainerName
 	}
 
 	return ExperimentDetail{
@@ -1327,6 +1335,10 @@ func (s *Service) updateStressChaos(exp *core.ExperimentInfo) error {
 
 	if exp.Scheduler.Duration != "" {
 		chaos.Spec.Duration = &exp.Scheduler.Duration
+	}
+
+	if exp.Target.StressChaos.ContainerName != nil {
+		chaos.Spec.ContainerName = exp.Target.StressChaos.ContainerName
 	}
 
 	return s.kubeCli.Create(context.Background(), chaos)

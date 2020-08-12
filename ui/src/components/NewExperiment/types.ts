@@ -106,10 +106,10 @@ export interface ExperimentTargetStress {
     } | null
     memory: {
       workers: number
-      size: string
       options: string[]
     } | null
   }
+  container_name: string
 }
 
 export interface ExperimentTarget {
