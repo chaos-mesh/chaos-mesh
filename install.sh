@@ -873,6 +873,17 @@ kind: Namespace
 metadata:
   name: chaos-testing
 ---
+# Source: chaos-mesh/templates/controller-manager-rbac.yaml
+kind: ServiceAccount
+apiVersion: v1
+metadata:
+  namespace: chaos-testing
+  name: chaos-controller-manager
+  labels:
+    app.kubernetes.io/name: chaos-mesh
+    app.kubernetes.io/instance: chaos-mesh
+    app.kubernetes.io/component: controller-manager
+---
 # Source: chaos-mesh/templates/webhook-configuration.yaml
 kind: Secret
 apiVersion: v1
@@ -887,17 +898,6 @@ type: Opaque
 data:
   tls.crt: "${TLS_CRT}"
   tls.key: "${TLS_KEY}"
----
-# Source: chaos-mesh/templates/controller-manager-rbac.yaml
-kind: ServiceAccount
-apiVersion: v1
-metadata:
-  namespace: chaos-testing
-  name: chaos-controller-manager
-  labels:
-    app.kubernetes.io/name: chaos-mesh
-    app.kubernetes.io/instance: chaos-mesh
-    app.kubernetes.io/component: controller-manager
 ---
 # Source: chaos-mesh/templates/controller-manager-rbac.yaml
 kind: ClusterRole
@@ -965,6 +965,7 @@ rules:
     - timechaos
     - kernelchaos
     - stresschaos
+    - podnetworkchaos
   verbs: ["*"]
 ---
 # Source: chaos-mesh/templates/controller-manager-rbac.yaml
@@ -1232,7 +1233,7 @@ spec:
 apiVersion: admissionregistration.k8s.io/v1beta1
 kind: MutatingWebhookConfiguration
 metadata:
-  name: chaos-mesh-sidecar-injector
+  name: chaos-mesh-mutation
   labels:
     app.kubernetes.io/name: chaos-mesh
     app.kubernetes.io/instance: chaos-mesh
@@ -1362,6 +1363,24 @@ webhooks:
           - UPDATE
         resources:
           - stresschaos
+  - clientConfig:
+      caBundle: "${CA_BUNDLE}"
+      service:
+        name: chaos-mesh-controller-manager
+        namespace: chaos-testing
+        path: /mutate-chaos-mesh-org-v1alpha1-podnetworkchaos
+    failurePolicy: Fail
+    name: mpodnetworkchaos.kb.io
+    rules:
+      - apiGroups:
+          - chaos-mesh.org
+        apiVersions:
+          - v1alpha1
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - podnetworkchaos
 ---
 # Source: chaos-mesh/templates/webhook-configuration.yaml
 apiVersion: admissionregistration.k8s.io/v1beta1
@@ -1481,6 +1500,24 @@ webhooks:
           - UPDATE
         resources:
           - stresschaos
+  - clientConfig:
+      caBundle: "${CA_BUNDLE}"
+      service:
+        name: chaos-mesh-controller-manager
+        namespace: chaos-testing
+        path: /validate-chaos-mesh-org-v1alpha1-podnetworkchaos
+    failurePolicy: Fail
+    name: vpodnetworkchaos.kb.io
+    rules:
+      - apiGroups:
+          - chaos-mesh.org
+        apiVersions:
+          - v1alpha1
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - podnetworkchaos
 EOF
     # chaos-mesh.yaml end
 }
