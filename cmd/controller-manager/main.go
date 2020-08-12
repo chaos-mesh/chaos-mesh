@@ -168,6 +168,8 @@ func main() {
 		os.Exit(1)
 	}
 
+	// We only setup webhook for podnetworkchaos, and the logic of applying chaos are in the validation
+	// webhook, because we need to get the running result synchronously in network chaos reconciler
 	v1alpha1.RegisterRawPodNetworkHandler(&podnetworkchaos.Handler{
 		Client: mgr.GetClient(),
 		Log:    ctrl.Log.WithName("handler").WithName("PodNetworkChaos"),
