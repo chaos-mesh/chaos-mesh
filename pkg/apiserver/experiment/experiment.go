@@ -155,6 +155,10 @@ func (s *Service) createExperiment(c *gin.Context) {
 }
 
 func (s *Service) createPodChaos(exp *core.ExperimentInfo) error {
+	if exp.Target.PodChaos == nil {
+		return fmt.Errorf("target.PodChaos is empty")
+	}
+
 	chaos := &v1alpha1.PodChaos{
 		ObjectMeta: v1.ObjectMeta{
 			Name:        exp.Name,
@@ -183,6 +187,10 @@ func (s *Service) createPodChaos(exp *core.ExperimentInfo) error {
 }
 
 func (s *Service) createNetworkChaos(exp *core.ExperimentInfo) error {
+	if exp.Target.NetworkChaos == nil {
+		return fmt.Errorf("target.NetworkChaos is empty")
+	}
+
 	chaos := &v1alpha1.NetworkChaos{
 		ObjectMeta: v1.ObjectMeta{
 			Name:        exp.Name,
@@ -200,6 +208,26 @@ func (s *Service) createNetworkChaos(exp *core.ExperimentInfo) error {
 			Duplicate: exp.Target.NetworkChaos.Duplicate,
 			Corrupt:   exp.Target.NetworkChaos.Corrupt,
 		},
+	}
+
+	if exp.Target.NetworkChaos.Action == string(v1alpha1.DelayAction) &&  exp.Target.NetworkChaos.Delay == nil {
+		return fmt.Errorf("target.NetworkChaos.Delay is empty")
+	}
+
+	if exp.Target.NetworkChaos.Action == string(v1alpha1.LossAction) &&  exp.Target.NetworkChaos.Loss == nil {
+		return fmt.Errorf("target.NetworkChaos.Loss is empty")
+	}
+
+	if exp.Target.NetworkChaos.Action == string(v1alpha1.DuplicateAction) &&  exp.Target.NetworkChaos.Duplicate == nil {
+		return fmt.Errorf("target.NetworkChaos.Duplicate is empty")
+	}
+
+	if exp.Target.NetworkChaos.Action == string(v1alpha1.CorruptAction) &&  exp.Target.NetworkChaos.Corrupt == nil {
+		return fmt.Errorf("target.NetworkChaos.Corrupt is empty")
+	}
+
+	if exp.Target.NetworkChaos.Action == string(v1alpha1.BandwidthAction) &&  exp.Target.NetworkChaos.Bandwidth == nil {
+		return fmt.Errorf("target.NetworkChaos.Bandwidth is empty")
 	}
 
 	if exp.Target.NetworkChaos.Action == string(v1alpha1.BandwidthAction) {
@@ -227,6 +255,10 @@ func (s *Service) createNetworkChaos(exp *core.ExperimentInfo) error {
 }
 
 func (s *Service) createIOChaos(exp *core.ExperimentInfo) error {
+	if exp.Target.IOChaos == nil {
+		return fmt.Errorf("target.IOChaos is empty")
+	}
+
 	chaos := &v1alpha1.IoChaos{
 		ObjectMeta: v1.ObjectMeta{
 			Name:        exp.Name,
@@ -262,6 +294,10 @@ func (s *Service) createIOChaos(exp *core.ExperimentInfo) error {
 }
 
 func (s *Service) createTimeChaos(exp *core.ExperimentInfo) error {
+	if exp.Target.TimeChaos == nil {
+		return fmt.Errorf("target.TimeChaos is empty")
+	}
+
 	chaos := &v1alpha1.TimeChaos{
 		ObjectMeta: v1.ObjectMeta{
 			Name:        exp.Name,
@@ -291,6 +327,10 @@ func (s *Service) createTimeChaos(exp *core.ExperimentInfo) error {
 }
 
 func (s *Service) createKernelChaos(exp *core.ExperimentInfo) error {
+	if exp.Target.KernelChaos == nil {
+		return fmt.Errorf("target.KernelChaos is empty")
+	}
+
 	chaos := &v1alpha1.KernelChaos{
 		ObjectMeta: v1.ObjectMeta{
 			Name:        exp.Name,
@@ -318,6 +358,10 @@ func (s *Service) createKernelChaos(exp *core.ExperimentInfo) error {
 }
 
 func (s *Service) createStressChaos(exp *core.ExperimentInfo) error {
+	if exp.Target.StressChaos == nil {
+		return fmt.Errorf("target.StressChaos is empty")
+	}
+
 	chaos := &v1alpha1.StressChaos{
 		ObjectMeta: v1.ObjectMeta{
 			Name:        exp.Name,
