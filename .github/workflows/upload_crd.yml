@@ -10,7 +10,7 @@ on:
       - manifests/chaosfs-sidecar.yaml
 jobs:
   run:
-    name: Upload media files
+    name: Upload crd file
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@master
@@ -33,6 +33,6 @@ jobs:
           if [[ "$GIT_TAG" == "master" ]]; then
             GIT_TAG="latest"
           fi
-          cloud-assets-utils verify-and-sync manifests/crd.yaml -aws true -aws-bucket ${{ secrets.AWS_BUCKET_NAME }} -replace-first-path-to ${GIT_TAG}/crd.yaml
+          cloud-assets-utils verify-and-sync manifests/crd.yaml -aws true -aws-bucket ${{ secrets.AWS_BUCKET_NAME }} -replace-first-path-to ${GIT_TAG}
           # TODO: delete it
-          cloud-assets-utils verify-and-sync manifests/chaosfs-sidecar.yaml -aws true -aws-bucket ${{ secrets.AWS_BUCKET_NAME }} -replace-first-path-to ${GIT_TAG}/chaosfs-sidecar.yaml
+          cloud-assets-utils verify-and-sync manifests/chaosfs-sidecar.yaml -aws true -aws-bucket ${{ secrets.AWS_BUCKET_NAME }} -replace-first-path-to ${GIT_TAG}

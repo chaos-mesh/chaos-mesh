@@ -9,7 +9,7 @@ on:
       - install.sh
 jobs:
   run:
-    name: Upload media files
+    name: Upload install script file
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@master
