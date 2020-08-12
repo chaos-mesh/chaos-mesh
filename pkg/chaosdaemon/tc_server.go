@@ -168,6 +168,30 @@ func (s *daemonServer) SetTcs(ctx context.Context, in *pb.TcsRequest) (*empty.Em
 		return &empty.Empty{}, err
 	}
 
+	// tc rules are split into two different kinds according to whether it has filter.
+	// all tc rules without filter are called `globalTc` and the tc rules with filter will be called `filterTc`.
+	// the `globalTc` rules will be piped one by one from root, and the last `globalTc` will be connected with a PRIO
+	// qdisc, which has `3 + len(filterTc)` bands. Then the 4.. bands will be connected to `filterTc` and a filter will
+	// be setuped to flow packet from PRIO qdisc to it.
+
+	// for example, four tc rules:
+	// - NETEM: 50ms latency without filter
+	// - NETEM: 100ms latency without filter
+	// - NETEM: 50ms latency with filter ipset A
+	// - NETEM: 100ms latency with filter ipset B
+	// will generate tc rules:
+	//	tc qdisc del dev eth0 root
+	//  tc qdisc add dev eth0 root handle 1: netem delay 50000
+	//  tc qdisc add dev eth0 parent 1: handle 2: netem delay 100000
+	//  tc qdisc add dev eth0 parent 2: handle 3: prio bands 5 priomap 1 2 2 2 1 2 0 0 1 1 1 1 1 1 1 1
+	//  tc qdisc add dev eth0 parent 3:1 handle 4: sfq
+	//  tc qdisc add dev eth0 parent 3:2 handle 5: sfq
+	//  tc qdisc add dev eth0 parent 3:3 handle 6: sfq
+	//  tc qdisc add dev eth0 parent 3:4 handle 7: netem delay 50000
+	//  tc filter add dev eth0 parent 3: basic match ipset(A dst) classid 3:4
+	//  tc qdisc add dev eth0 parent 3:5 handle 8: netem delay 100000
+	//  tc filter add dev eth0 parent 3: basic match ipset(B dst) classid 3:5
+
 	globalTc := []*pb.Tc{}
 	filterTc := map[string][]*pb.Tc{}
 
