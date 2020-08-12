@@ -123,12 +123,15 @@ type TcParameter struct {
 	Delay *DelaySpec `json:"delay,omitempty"`
 
 	// Loss represents the detail about loss action
+	// +optional
 	Loss *LossSpec `json:"loss,omitempty"`
 
 	// DuplicateSpec represents the detail about loss action
+	// +optional
 	Duplicate *DuplicateSpec `json:"duplicate,omitempty"`
 
 	// Corrupt represents the detail about corrupt action
+	// +optional
 	Corrupt *CorruptSpec `json:"corrupt,omitempty"`
 
 	// Bandwidth represents the detail about bandwidth control action
