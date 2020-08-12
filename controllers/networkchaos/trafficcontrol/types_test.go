@@ -58,7 +58,8 @@ func TestReconciler_applyNetem(t *testing.T) {
 				APIVersion: "v1",
 			},
 			Spec: v1alpha1.NetworkChaosSpec{
-				Action: "netem",
+				Action:    "netem",
+				Direction: v1alpha1.To,
 				TcParameter: v1alpha1.TcParameter{
 					Delay: &v1alpha1.DelaySpec{
 						Latency:     "90ms",
