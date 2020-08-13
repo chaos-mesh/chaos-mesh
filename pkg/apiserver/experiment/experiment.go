@@ -191,23 +191,23 @@ func (s *Service) createNetworkChaos(exp *core.ExperimentInfo) error {
 		return fmt.Errorf("target.NetworkChaos is empty")
 	}
 
-	if exp.Target.NetworkChaos.Action == string(v1alpha1.DelayAction) &&  exp.Target.NetworkChaos.Delay == nil {
+	if exp.Target.NetworkChaos.Action == string(v1alpha1.DelayAction) && exp.Target.NetworkChaos.Delay == nil {
 		return fmt.Errorf("target.NetworkChaos.Delay is empty")
 	}
 
-	if exp.Target.NetworkChaos.Action == string(v1alpha1.LossAction) &&  exp.Target.NetworkChaos.Loss == nil {
+	if exp.Target.NetworkChaos.Action == string(v1alpha1.LossAction) && exp.Target.NetworkChaos.Loss == nil {
 		return fmt.Errorf("target.NetworkChaos.Loss is empty")
 	}
 
-	if exp.Target.NetworkChaos.Action == string(v1alpha1.DuplicateAction) &&  exp.Target.NetworkChaos.Duplicate == nil {
+	if exp.Target.NetworkChaos.Action == string(v1alpha1.DuplicateAction) && exp.Target.NetworkChaos.Duplicate == nil {
 		return fmt.Errorf("target.NetworkChaos.Duplicate is empty")
 	}
 
-	if exp.Target.NetworkChaos.Action == string(v1alpha1.CorruptAction) &&  exp.Target.NetworkChaos.Corrupt == nil {
+	if exp.Target.NetworkChaos.Action == string(v1alpha1.CorruptAction) && exp.Target.NetworkChaos.Corrupt == nil {
 		return fmt.Errorf("target.NetworkChaos.Corrupt is empty")
 	}
 
-	if exp.Target.NetworkChaos.Action == string(v1alpha1.BandwidthAction) &&  exp.Target.NetworkChaos.Bandwidth == nil {
+	if exp.Target.NetworkChaos.Action == string(v1alpha1.BandwidthAction) && exp.Target.NetworkChaos.Bandwidth == nil {
 		return fmt.Errorf("target.NetworkChaos.Bandwidth is empty")
 	}
 
@@ -1191,6 +1191,10 @@ func (s *Service) updateExperiment(c *gin.Context) {
 }
 
 func (s *Service) updatePodChaos(exp *core.ExperimentInfo) error {
+	if exp.Target.PodChaos == nil {
+		return fmt.Errorf("target.PodChaos is empty")
+	}
+
 	chaos := &v1alpha1.PodChaos{}
 	key := types.NamespacedName{Namespace: exp.Namespace, Name: exp.Name}
 
@@ -1220,6 +1224,30 @@ func (s *Service) updatePodChaos(exp *core.ExperimentInfo) error {
 }
 
 func (s *Service) updateNetworkChaos(exp *core.ExperimentInfo) error {
+	if exp.Target.NetworkChaos == nil {
+		return fmt.Errorf("target.NetworkChaos is empty")
+	}
+
+	if exp.Target.NetworkChaos.Action == string(v1alpha1.DelayAction) && exp.Target.NetworkChaos.Delay == nil {
+		return fmt.Errorf("target.NetworkChaos.Delay is empty")
+	}
+
+	if exp.Target.NetworkChaos.Action == string(v1alpha1.LossAction) && exp.Target.NetworkChaos.Loss == nil {
+		return fmt.Errorf("target.NetworkChaos.Loss is empty")
+	}
+
+	if exp.Target.NetworkChaos.Action == string(v1alpha1.DuplicateAction) && exp.Target.NetworkChaos.Duplicate == nil {
+		return fmt.Errorf("target.NetworkChaos.Duplicate is empty")
+	}
+
+	if exp.Target.NetworkChaos.Action == string(v1alpha1.CorruptAction) && exp.Target.NetworkChaos.Corrupt == nil {
+		return fmt.Errorf("target.NetworkChaos.Corrupt is empty")
+	}
+
+	if exp.Target.NetworkChaos.Action == string(v1alpha1.BandwidthAction) && exp.Target.NetworkChaos.Bandwidth == nil {
+		return fmt.Errorf("target.NetworkChaos.Bandwidth is empty")
+	}
+
 	chaos := &v1alpha1.NetworkChaos{}
 	key := types.NamespacedName{Namespace: exp.Namespace, Name: exp.Name}
 
@@ -1262,6 +1290,10 @@ func (s *Service) updateNetworkChaos(exp *core.ExperimentInfo) error {
 }
 
 func (s *Service) updateIOChaos(exp *core.ExperimentInfo) error {
+	if exp.Target.IOChaos == nil {
+		return fmt.Errorf("target.IOChaos is empty")
+	}
+
 	chaos := &v1alpha1.IoChaos{}
 	key := types.NamespacedName{Namespace: exp.Namespace, Name: exp.Name}
 
@@ -1298,6 +1330,10 @@ func (s *Service) updateIOChaos(exp *core.ExperimentInfo) error {
 }
 
 func (s *Service) updateKernelChaos(exp *core.ExperimentInfo) error {
+	if exp.Target.KernelChaos == nil {
+		return fmt.Errorf("target.KernelChaos is empty")
+	}
+
 	chaos := &v1alpha1.KernelChaos{}
 	key := types.NamespacedName{Namespace: exp.Namespace, Name: exp.Name}
 
@@ -1326,6 +1362,10 @@ func (s *Service) updateKernelChaos(exp *core.ExperimentInfo) error {
 }
 
 func (s *Service) updateTimeChaos(exp *core.ExperimentInfo) error {
+	if exp.Target.TimeChaos == nil {
+		return fmt.Errorf("target.TimeChaos is empty")
+	}
+
 	chaos := &v1alpha1.TimeChaos{}
 	key := types.NamespacedName{Namespace: exp.Namespace, Name: exp.Name}
 
@@ -1356,6 +1396,10 @@ func (s *Service) updateTimeChaos(exp *core.ExperimentInfo) error {
 }
 
 func (s *Service) updateStressChaos(exp *core.ExperimentInfo) error {
+	if exp.Target.StressChaos == nil {
+		return fmt.Errorf("target.StressChaos is empty")
+	}
+
 	chaos := &v1alpha1.StressChaos{}
 	key := types.NamespacedName{Namespace: exp.Namespace, Name: exp.Name}
 
