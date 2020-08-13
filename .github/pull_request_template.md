@@ -14,12 +14,6 @@ Tests
 - [ ] Manual test (add detailed scripts or steps below)
 - [ ] No code
 
-Code changes
-
-- [ ] Has Go code change
-- [ ] Has CI related scripts change
-- [ ] Has Terraform scripts change
-
 Side effects
 
 - [ ] Breaking backward compatibility
