@@ -1,23 +1,25 @@
-name: Upload chaos mesh crd
+name: Upload tagged install related files to CDN
 on:
   push:
     tags:
       - v*
 jobs:
   run:
-    name: Upload crd file
+    name: Upload
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@master
         with:
           # Must use at least depth 2!
           fetch-depth: 2
+
+      - uses: actions/setup-python@v2
       - name: Configure awscli
         run: |
-          pip3 install --upgrade setuptools
           pip3 install awscli
           printf "%s\n" ${{ secrets.AWS_ACCESS_KEY }} ${{ secrets.AWS_SECRET_KEY }} ${{ secrets.AWS_REGION }} "json" | aws configure
-      - name: Upload crd file
+
+      - name: Upload files
         run: |
           GIT_TAG=${GITHUB_REF##*/}
           if [[ "$GIT_TAG" == "master" ]]; then
