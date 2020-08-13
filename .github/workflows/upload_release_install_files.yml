@@ -22,9 +22,6 @@ jobs:
       - name: Upload files
         run: |
           GIT_TAG=${GITHUB_REF##*/}
-          if [[ "$GIT_TAG" == "master" ]]; then
-            GIT_TAG="latest"
-          fi
           aws s3 cp install.sh ${{ secrets.AWS_BUCKET_NAME }}/${GIT_TAG}/install.sh
           aws s3 cp manifests/crd.yaml ${{ secrets.AWS_BUCKET_NAME }}/${GIT_TAG}/crd.yaml
           aws s3 cp examples/web-show/deploy.sh ${{ secrets.AWS_BUCKET_NAME }}/${GIT_TAG}/web-show/deploy.sh
