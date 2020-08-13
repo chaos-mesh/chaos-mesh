@@ -191,25 +191,6 @@ func (s *Service) createNetworkChaos(exp *core.ExperimentInfo) error {
 		return fmt.Errorf("target.NetworkChaos is empty")
 	}
 
-	chaos := &v1alpha1.NetworkChaos{
-		ObjectMeta: v1.ObjectMeta{
-			Name:        exp.Name,
-			Namespace:   exp.Namespace,
-			Labels:      exp.Labels,
-			Annotations: exp.Annotations,
-		},
-		Spec: v1alpha1.NetworkChaosSpec{
-			Selector:  exp.Scope.ParseSelector(),
-			Action:    v1alpha1.NetworkChaosAction(exp.Target.NetworkChaos.Action),
-			Mode:      v1alpha1.PodMode(exp.Scope.Mode),
-			Value:     exp.Scope.Value,
-			Delay:     exp.Target.NetworkChaos.Delay,
-			Loss:      exp.Target.NetworkChaos.Loss,
-			Duplicate: exp.Target.NetworkChaos.Duplicate,
-			Corrupt:   exp.Target.NetworkChaos.Corrupt,
-		},
-	}
-
 	if exp.Target.NetworkChaos.Action == string(v1alpha1.DelayAction) &&  exp.Target.NetworkChaos.Delay == nil {
 		return fmt.Errorf("target.NetworkChaos.Delay is empty")
 	}
@@ -228,6 +209,25 @@ func (s *Service) createNetworkChaos(exp *core.ExperimentInfo) error {
 
 	if exp.Target.NetworkChaos.Action == string(v1alpha1.BandwidthAction) &&  exp.Target.NetworkChaos.Bandwidth == nil {
 		return fmt.Errorf("target.NetworkChaos.Bandwidth is empty")
+	}
+
+	chaos := &v1alpha1.NetworkChaos{
+		ObjectMeta: v1.ObjectMeta{
+			Name:        exp.Name,
+			Namespace:   exp.Namespace,
+			Labels:      exp.Labels,
+			Annotations: exp.Annotations,
+		},
+		Spec: v1alpha1.NetworkChaosSpec{
+			Selector:  exp.Scope.ParseSelector(),
+			Action:    v1alpha1.NetworkChaosAction(exp.Target.NetworkChaos.Action),
+			Mode:      v1alpha1.PodMode(exp.Scope.Mode),
+			Value:     exp.Scope.Value,
+			Delay:     exp.Target.NetworkChaos.Delay,
+			Loss:      exp.Target.NetworkChaos.Loss,
+			Duplicate: exp.Target.NetworkChaos.Duplicate,
+			Corrupt:   exp.Target.NetworkChaos.Corrupt,
+		},
 	}
 
 	if exp.Target.NetworkChaos.Action == string(v1alpha1.BandwidthAction) {
