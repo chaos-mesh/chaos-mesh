@@ -96,6 +96,17 @@ chaosDaemon:
 
   tolerations: []
 
+coredns:
+  create: false
+  image: coredns/coredns:latest
+  imagePullPolicy: Always
+  runtime: docker
+  name: coredns
+
+  env:
+    LISTEN_HOST: "0.0.0.0"
+    LISTEN_PORT: 53
+
 dashboard:
   create: false
 
@@ -260,6 +271,7 @@ webhook:
     - networkchaos
     - kernelchaos
     - stresschaos
+    - dnschaos
 
 bpfki:
   create: false

@@ -1,0 +1,79 @@
+{{- if .Values.coredns.create }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: {{ .Release.Namespace }}
+  name: chaos-dns
+  labels:
+    app.kubernetes.io/name: {{ template "chaos-mesh.name" . }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/component: coredns
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+"  "_" }}
+spec:
+  replicas: {{ .Values.coredns.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ template "chaos-mesh.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+      app.kubernetes.io/component: chaos-dns
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ template "chaos-mesh.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        app.kubernetes.io/component: chaos-dns
+    {{- with .Values.coredns.podAnnotations }}
+      annotations:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    spec:
+      {{- if .Values.coredns.serviceAccount }}
+      serviceAccount: {{ .Values.coredns.serviceAccount }}
+      {{- end }}
+      containers:
+        - name: chaos-dns
+          image: {{ .Values.coredns.image }}
+          imagePullPolicy: {{ .Values.coredns.imagePullPolicy | default "IfNotPresent" }}
+          resources:
+{{ toYaml .Values.coredns.resources | indent 12 }}
+          command:
+            - ./coredns
+          env:
+            {{- range $envKey, $envVal := .Values.coredns.env }}
+            - name: {{ $envKey | upper }}
+              value: {{ $envVal | quote }}
+            {{- end }}
+            {{- if not .Values.coredns.env.TZ }}
+            - name: TZ
+              value: {{ .Values.timezone | default "UTC" }}
+            {{- end }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.coredns.env.LISTEN_PORT }}
+        {{- with .Values.coredns.nodeSelector }}
+        {{- end }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: {{ .Release.Namespace }}
+  name: chaosdns-service
+  labels:
+    app.kubernetes.io/name: {{ template "chaos-mesh.name" . }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/component: chaos-coredns
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+"  "_" }}
+spec:
+  selector:
+    app.kubernetes.io/name: {{ template "chaos-mesh.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/component: chaos-coredns
+  type: NodePort
+  ports:
+    - protocol: TCP
+      port: {{ .Values.coredns.env.LISTEN_PORT }}
+      targetPort: {{ .Values.coredns.env.LISTEN_PORT }}
+      name: http
+{{- end }}

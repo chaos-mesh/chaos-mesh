@@ -166,6 +166,19 @@ func main() {
 		os.Exit(1)
 	}
 
+	if err = (&controllers.DNSChaosReconciler{
+		Client:        mgr.GetClient(),
+		EventRecorder: mgr.GetEventRecorderFor("dnschaos-controller"),
+		Log:           ctrl.Log.WithName("controllers").WithName("DNSChaos"),
+	}).SetupWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create controller", "controller", "DNSChaos")
+		os.Exit(1)
+	}
+	if err = (&chaosmeshv1alpha1.NetworkChaos{}).SetupWebhookWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create webhook", "webhook", "DNSChaos")
+		os.Exit(1)
+	}
+
 	// Init metrics collector
 	metricsCollector := metrics.NewChaosCollector(mgr.GetCache(), controllermetrics.Registry)
 

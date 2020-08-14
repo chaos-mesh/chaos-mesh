@@ -8,6 +8,7 @@ resources:
 - bases/chaos-mesh.org_timechaos.yaml
 - bases/chaos-mesh.org_kernelchaos.yaml
 - bases/chaos-mesh.org_stresschaos.yaml
+- bases/chaos-mesh.org_dnschaos.yaml
 # +kubebuilder:scaffold:crdkustomizeresource
 
 patchesStrategicMerge:
