@@ -90,7 +90,7 @@ type ExperimentInfo struct {
 // ScopeInfo defines the scope of the Experiment.
 type ScopeInfo struct {
 	SelectorInfo
-	Mode  string `json:"mode" binding:"oneof='' 'one' 'all' 'fixed' 'fixed' 'fixed-percent' 'random-max-percent'"`
+	Mode  string `json:"mode" binding:"oneof='' 'one' 'all' 'fixed' 'fixed-percent' 'random-max-percent'"`
 	Value string `json:"value" binding:"ValueValid"`
 }
 
