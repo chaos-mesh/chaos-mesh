@@ -17,7 +17,13 @@ interface ScopeStepProps {
 }
 
 const phases = ['all', 'pending', 'running', 'succeeded', 'failed', 'unknown']
-const modes = ['all', { name: 'Random One', value: 'one' }, 'fixed number', 'fixed percent', 'random max percent']
+const modes = [
+  'all',
+  { name: 'Random One', value: 'one' },
+  { name: 'Fixed Number', value: 'fixed' },
+  'fixed percent',
+  'random max percent',
+]
 const modesWithAdornment = ['fixed-percent', 'random-max-percent']
 
 const labelFilters = ['pod-template-hash']
