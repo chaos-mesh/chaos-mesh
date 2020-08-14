@@ -11,9 +11,11 @@ tags: [Chaos Mesh, Chaos Engineering, Test Automation]
 
 ![TiPocket - Automated Testing Framework](/img/automated_testing_framework.png)
 
-[Chaos Mesh](https://github.com/chaos-mesh/chaos-mesh)® is an open-source chaos engineering platform for Kubernetes. Although it provides rich capabilities to simulate abnormal system conditions, it still only solves a fraction of the Chaos Engineering puzzle. Besides fault injection, a full chaos engineering application consists of hypothesizing around defined steady states, running experiments in production, validating the system via test cases, and automating the testing. 
+[Chaos Mesh](https://github.com/chaos-mesh/chaos-mesh)® is an open-source chaos engineering platform for Kubernetes. Although it provides rich capabilities to simulate abnormal system conditions, it still only solves a fraction of the Chaos Engineering puzzle. Besides fault injection, a full chaos engineering application consists of hypothesizing around defined steady states, running experiments in production, validating the system via test cases, and automating the testing.
 
 This article describes how we use [TiPocket](https://github.com/pingcap/tipocket), an automated testing framework to build a full Chaos Engineering testing loop for TiDB, our distributed database.
+
+<!--truncate-->
 
 ## Why do we need TiPocket?
 
@@ -113,7 +115,6 @@ In this example, we use the workflow template and nemesis parameters to define t
 Besides [TiPocket’s](https://github.com/pingcap/tipocket/tree/master/argo/workflow) sample workflows and templates, the design also allows you to add your own failure injection flows. Handling complicated logics using codable workflows makes Argo developer-friendly and an ideal choice for our scenarios.
 
 Now, our chaos experiment is running automatically. But if our results do not meet our expectations? How do we locate the problem? TiDB saves a variety of monitoring information, which makes log collecting essential for enabling observability in TiPocket.
-
 
 ## Visualizing the results: Loki
 
