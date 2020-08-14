@@ -1,3 +1,4 @@
+import ArchiveReport from './pages/ArchiveReport'
 import Archives from './pages/Archives'
 import Events from './pages/Events'
 import ExperimentDetail from './pages/ExperimentDetail'
@@ -33,6 +34,11 @@ const routes: RouteProps[] = [
   {
     component: Archives,
     path: '/archives',
+    exact: true,
+  },
+  {
+    component: ArchiveReport,
+    path: '/archives/:uuid',
     exact: true,
   },
 ]

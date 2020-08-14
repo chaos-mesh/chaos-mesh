@@ -1,5 +1,6 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 
+import { ExperimentScope } from 'components/NewExperiment/types'
 import { ExperimentsAction } from './experiments.type'
 import { StateOfExperiments } from 'api/experiments.type'
 import api from 'api'
@@ -21,26 +22,34 @@ export const getStateofExperiments = createAsyncThunk(
 export const getNamespaces = createAsyncThunk('common/namespaces', async () => (await api.common.namespaces()).data)
 export const getLabels = createAsyncThunk(
   'common/labels',
-  async (podNamespaceList: string) => (await api.common.labels(podNamespaceList)).data
+  async (podNamespaceList: string[]) => (await api.common.labels(podNamespaceList)).data
 )
 export const getAnnotations = createAsyncThunk(
   'common/annotations',
-  async (podNamespaceList: string) => (await api.common.annotations(podNamespaceList)).data
+  async (podNamespaceList: string[]) => (await api.common.annotations(podNamespaceList)).data
+)
+export const getPodsByNamespaces = createAsyncThunk(
+  'common/pods',
+  async (data: Partial<ExperimentScope>) => (await api.common.pods(data)).data
 )
 
 const initialState: {
   namespaces: string[]
   labels: { [key: string]: string[] }
   annotations: { [key: string]: string[] }
+  pods: any[]
   stateOfExperiments: StateOfExperiments
   needToRefreshExperiments: boolean
 } = {
   namespaces: [],
   labels: {},
   annotations: {},
+  pods: [],
   stateOfExperiments: defaultExperiments,
   needToRefreshExperiments: false,
 }
+
+const namespaceFilters = ['kube-system', 'chaos-testing']
 
 const experimentsSlice = createSlice({
   name: 'experiments',
@@ -55,13 +64,16 @@ const experimentsSlice = createSlice({
       state.stateOfExperiments = action.payload as StateOfExperiments
     })
     builder.addCase(getNamespaces.fulfilled, (state, action: ExperimentsAction) => {
-      state.namespaces = action.payload as string[]
+      state.namespaces = (action.payload as string[]).filter((d) => !namespaceFilters.includes(d))
     })
     builder.addCase(getLabels.fulfilled, (state, action: ExperimentsAction) => {
       state.labels = action.payload as { [key: string]: string[] }
     })
     builder.addCase(getAnnotations.fulfilled, (state, action: ExperimentsAction) => {
       state.annotations = action.payload as { [key: string]: string[] }
+    })
+    builder.addCase(getPodsByNamespaces.fulfilled, (state, action) => {
+      state.pods = action.payload as any[]
     })
   },
 })

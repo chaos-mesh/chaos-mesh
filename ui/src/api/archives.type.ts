@@ -1,8 +1,14 @@
+import { Experiment } from 'components/NewExperiment/types'
+
 export interface Archive {
-  UID: uuid
-  Kind: string
-  Namespace: string
-  Name: string
-  StartTime: string
-  FinishTime: string
+  uid: uuid
+  kind: string
+  namespace: string
+  name: string
+  start_time: string
+  finish_time: string
+}
+
+export interface ArchiveDetail extends Archive {
+  experiment_info: Experiment
 }

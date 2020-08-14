@@ -8,7 +8,7 @@ This chart bootstraps a [Chaos Mesh](https://github.com/chaos-mesh/chaos-mesh) d
 
 ## Deploy
 
-Before deploying Chaos Mesh, make sure you have installed the [Prerequisites](../../doc/deploy.md#prerequisites). And then follow the [deploy](../../doc/deploy.md) doc step by step.
+Before deploying Chaos Mesh, make sure you have installed the [Prerequisites](../../website/docs/installation/installation.md#prerequisites). And then follow the [install-by-helm](../../website/docs/installation/installation.md#install-by-helm) doc step by step.
 
 ## Configuration
 
@@ -18,7 +18,8 @@ The following tables list the configurable parameters of the Chaos Mesh chart an
 |--------------------------------------------|----------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------|
 | `clusterScoped`                            | whether chaos-mesh should manage kubernetes cluster wide chaos.Also see rbac.create and controllerManager.serviceAccount | `true` |
 | `rbac.create` |  | `true`                                                |
-| `enableProfiling` | A flag to enable pprof in controller-manager and chaos-daemon  | `false` |
+| `timezone` | The timezone where controller-manager, chaos-daemon and dashboard uses. For example: `UTC`, `Asia/Shanghai` | `UTC` |
+| `enableProfiling` | A flag to enable pprof in controller-manager and chaos-daemon  | `true` |
 | `controllerManager.serviceAccount` | The serviceAccount for chaos-controller-manager | `chaos-controller-manager` |
 | `controllerManager.replicaCount` | Replicas for chaos-controller-manager | `1` |
 | `controllerManager.image` | docker image for chaos-controller-manager  | `pingcap/chaos-mesh:latest` |

@@ -17,6 +17,7 @@ const AutocompleteMultipleField: React.FC<AutocompleteMultipleFieldProps & TextF
 }) => {
   const { values, setFieldValue } = useFormikContext<Experiment>()
 
+  const firstRenderRef = useRef(false) // This ref prevents to exec the callback function when labels are empty in the first render
   const labelsRef = useRef(getIn(values, props.name!))
   const [labels, _setLabels] = useState<string[]>(labelsRef.current)
   const setLabels = (newVal: string[]) => {
@@ -24,6 +25,7 @@ const AutocompleteMultipleField: React.FC<AutocompleteMultipleFieldProps & TextF
     _setLabels(labelsRef.current)
   }
 
+  // For performance consider, setFieldValue before compoennt unmount
   useEffect(
     () => () => setFieldValue(props.name!, labelsRef.current),
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -43,8 +45,12 @@ const AutocompleteMultipleField: React.FC<AutocompleteMultipleFieldProps & TextF
   }
 
   useEffect(() => {
-    if (typeof onChangeCallback === 'function') {
+    if (typeof onChangeCallback === 'function' && (labels.length > 0 || firstRenderRef.current)) {
       onChangeCallback(labels)
+
+      if (!firstRenderRef.current) {
+        firstRenderRef.current = true
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [labels])
@@ -79,9 +85,7 @@ const AutocompleteMultipleField: React.FC<AutocompleteMultipleFieldProps & TextF
             InputProps={{
               ...params.InputProps,
               ...props.InputProps,
-              ...{
-                style: { paddingTop: 8 },
-              },
+              style: { paddingTop: 8 },
             }}
           />
         )}

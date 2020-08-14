@@ -1,18 +1,48 @@
 import { Box, TextField as MUITextField, MenuItem, Typography } from '@material-ui/core'
 import { LabelField, TextField } from 'components/FormField'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 
 import AdvancedOptions from 'components/AdvancedOptions'
 import { StepperFormTargetProps } from 'components/NewExperiment/types'
+import { defaultExperimentSchema } from 'components/NewExperiment/constants'
+import { getIn } from 'formik'
 import { resetOtherChaos } from 'lib/formikhelpers'
 
 const actions = ['CPU', 'Memory', 'Mixed']
 
 export default function Stress(props: StepperFormTargetProps) {
-  const [action, setAction] = useState('')
+  const { values, setFieldValue } = props
+
+  const actionRef = useRef('')
+  const [action, _setAction] = useState('')
+  const setAction = (newVal: string) => {
+    actionRef.current = newVal
+    _setAction(newVal)
+  }
 
   useEffect(() => {
     resetOtherChaos(props, 'StressChaos', false)
+
+    if (getIn(values, 'target.stress_chaos.stressors.cpu') === null) {
+      setFieldValue('target.stress_chaos.stressors.cpu', defaultExperimentSchema.target.stress_chaos.stressors.cpu)
+    }
+
+    if (getIn(values, 'target.stress_chaos.stressors.memory') === null) {
+      setFieldValue(
+        'target.stress_chaos.stressors.memory',
+        defaultExperimentSchema.target.stress_chaos.stressors.memory
+      )
+    }
+
+    // Remove another when choosing a single action
+    return () => {
+      if (actionRef.current === 'CPU') {
+        // Because LabelField will set value when before unmount, it's needed to wrap setFieldValue into setTimeout
+        setTimeout(() => setFieldValue('target.stress_chaos.stressors.memory', null))
+      } else if (actionRef.current === 'Memory') {
+        setTimeout(() => setFieldValue('target.stress_chaos.stressors.cpu', null))
+      }
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
@@ -41,9 +71,7 @@ export default function Stress(props: StepperFormTargetProps) {
 
       {(action === 'CPU' || action === 'Mixed') && (
         <>
-          <Box ml={1}>
-            <Typography gutterBottom>CPU</Typography>
-          </Box>
+          <Typography gutterBottom>CPU</Typography>
           <TextField
             type="number"
             id="target.stress_chaos.stressors.cpu.workers"
@@ -69,21 +97,13 @@ export default function Stress(props: StepperFormTargetProps) {
 
       {(action === 'Memory' || action === 'Mixed') && (
         <>
-          <Box ml={1}>
-            <Typography gutterBottom>Memory</Typography>
-          </Box>
+          <Typography gutterBottom>Memory</Typography>
           <TextField
             type="number"
             id="target.stress_chaos.stressors.memory.workers"
             name="target.stress_chaos.stressors.memory.workers"
             label="Workers"
             helperText="Memory workers"
-          />
-          <TextField
-            id="target.stress_chaos.stressors.memory.size"
-            name="target.stress_chaos.stressors.memory.size"
-            label="Size"
-            helperText="Memory size"
           />
           <LabelField
             id="target.stress_chaos.stressors.memory.options"
@@ -96,6 +116,12 @@ export default function Stress(props: StepperFormTargetProps) {
 
       {action !== '' && (
         <AdvancedOptions>
+          <TextField
+            id="target.stress_chaos.container_name"
+            name="target.stress_chaos.container_name"
+            label="Container Name"
+            helperText="Optional. Fill the container name you want to inject stress in"
+          />
           <TextField
             id="target.stress_chaos.stressng_stressors"
             name="target.stress_chaos.stressng_stressors"

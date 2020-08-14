@@ -16,7 +16,7 @@ export default function gen({
   chaos,
 }: {
   root: HTMLElement
-  chaos: { kind: Experiment['Kind']; sum: number }[]
+  chaos: { kind: Experiment['kind']; sum: number }[]
 }) {
   const sumArr = chaos.map((c) => c.sum)
 

@@ -1,11 +1,16 @@
-import { Paper, Table, TableBody, TableCell, TableHead, TableRow, Typography } from '@material-ui/core'
+import { TableCell as MUITableCell, Paper, Table, TableBody, TableRow, Typography, withStyles } from '@material-ui/core'
 
+import AffectedPods from 'components/AffectedPods'
 import { Event } from 'api/events.type'
 import React from 'react'
-import day from 'lib/dayjs'
+import { format } from 'lib/dayjs'
 import useRunningLabelStyles from 'lib/styles/runningLabel'
 
-const format = (date: string) => day(date).format('YYYY-MM-DD HH:mm:ss')
+const TableCell = withStyles({
+  root: {
+    borderBottom: 'none',
+  },
+})(MUITableCell)
 
 interface EventDetailProps {
   event: Event
@@ -21,7 +26,7 @@ const EventDetail: React.FC<EventDetailProps> = ({ event: e }) => {
           <TableCell>Experiment ID</TableCell>
           <TableCell>
             <Typography variant="body2" color="textSecondary">
-              {e.ExperimentID}
+              {e.experiment_id}
             </Typography>
           </TableCell>
         </TableRow>
@@ -30,7 +35,7 @@ const EventDetail: React.FC<EventDetailProps> = ({ event: e }) => {
           <TableCell>Experiment Name</TableCell>
           <TableCell>
             <Typography variant="body2" color="textSecondary">
-              {e.Experiment}
+              {e.experiment}
             </Typography>
           </TableCell>
         </TableRow>
@@ -39,7 +44,7 @@ const EventDetail: React.FC<EventDetailProps> = ({ event: e }) => {
           <TableCell>Namespace</TableCell>
           <TableCell>
             <Typography variant="body2" color="textSecondary">
-              {e.Namespace}
+              {e.namespace}
             </Typography>
           </TableCell>
         </TableRow>
@@ -48,25 +53,25 @@ const EventDetail: React.FC<EventDetailProps> = ({ event: e }) => {
           <TableCell>Kind</TableCell>
           <TableCell>
             <Typography variant="body2" color="textSecondary">
-              {e.Kind}
+              {e.kind}
             </Typography>
           </TableCell>
         </TableRow>
 
         <TableRow>
-          <TableCell>Start Time</TableCell>
+          <TableCell>Started</TableCell>
           <TableCell>
             <Typography variant="body2" color="textSecondary">
-              {format(e.StartTime)}
+              {format(e.start_time)}
             </Typography>
           </TableCell>
         </TableRow>
 
         <TableRow>
-          <TableCell>Finish Time</TableCell>
+          <TableCell>Ended</TableCell>
           <TableCell>
             <Typography variant="body2" color="textSecondary">
-              {e.FinishTime ? format(e.FinishTime) : <span className={runningLabel.root}>Running</span>}
+              {e.finish_time ? format(e.finish_time) : <span className={runningLabel.root}>Running</span>}
             </Typography>
           </TableCell>
         </TableRow>
@@ -75,29 +80,7 @@ const EventDetail: React.FC<EventDetailProps> = ({ event: e }) => {
           <TableCell>Affected Pods</TableCell>
           <TableCell>
             <Paper variant="outlined">
-              <Table size="small">
-                <TableHead>
-                  <TableRow>
-                    <TableCell>IP</TableCell>
-                    <TableCell>Name</TableCell>
-                    <TableCell>Namespace</TableCell>
-                    <TableCell>Action</TableCell>
-                    <TableCell>Message</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {e.Pods &&
-                    e.Pods.map((pod) => (
-                      <TableRow key={pod.ID}>
-                        <TableCell>{pod.PodIP}</TableCell>
-                        <TableCell>{pod.PodName}</TableCell>
-                        <TableCell>{pod.Namespace}</TableCell>
-                        <TableCell>{pod.Action}</TableCell>
-                        <TableCell>{pod.Message}</TableCell>
-                      </TableRow>
-                    ))}
-                </TableBody>
-              </Table>
+              <AffectedPods pods={e.pods!} />
             </Paper>
           </TableCell>
         </TableRow>

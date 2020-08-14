@@ -16,6 +16,8 @@ package event
 import (
 	"context"
 	"fmt"
+	"sort"
+	"strconv"
 	"strings"
 	"time"
 
@@ -45,6 +47,13 @@ func NewStore(db *dbstore.DB) core.EventStore {
 
 type eventStore struct {
 	db *dbstore.DB
+}
+
+func min(x, y int) int {
+	if x > y {
+		return y
+	}
+	return x
 }
 
 // findPodRecordsByEventID returns the list of PodRecords according to the eventID
@@ -142,15 +151,14 @@ func (e *eventStore) ListByNamespace(_ context.Context, namespace string) ([]*co
 		return nil, err
 	}
 
-	et := new(core.Event)
 	eventList := make([]*core.Event, 0, len(podRecords))
 	for _, pr := range podRecords {
+		et := new(core.Event)
 		if err := e.db.Where(
 			"id = ?", pr.EventID).
 			First(et).Error; err != nil && !gorm.IsRecordNotFoundError(err) {
 			return nil, err
 		}
-
 		pods, err := e.findPodRecordsByEventID(context.Background(), et.ID)
 		if err != nil {
 			return nil, err
@@ -171,9 +179,9 @@ func (e *eventStore) ListByPod(_ context.Context, namespace string, name string)
 		return nil, err
 	}
 
-	et := new(core.Event)
 	eventList := make([]*core.Event, 0, len(podRecords))
 	for _, pr := range podRecords {
+		et := new(core.Event)
 		if err := e.db.Where(
 			"id = ?", pr.EventID).
 			First(et).Error; err != nil && !gorm.IsRecordNotFoundError(err) {
@@ -264,10 +272,19 @@ func (e *eventStore) DeleteIncompleteEvents(_ context.Context) error {
 
 // ListByFilter returns an event list by podName, podNamespace, experimentName, experimentNamespace, uid, kind, startTime and finishTime.
 func (e *eventStore) ListByFilter(_ context.Context, filter core.Filter) ([]*core.Event, error) {
-	var resList []*core.Event
-	var err error
-	var startTime, finishTime time.Time
+	var (
+		resList               []*core.Event
+		err                   error
+		startTime, finishTime time.Time
+		limit                 int
+	)
 
+	if filter.LimitStr != "" {
+		limit, err = strconv.Atoi(filter.LimitStr)
+		if err != nil {
+			return nil, fmt.Errorf("the format of the limitStr is wrong")
+		}
+	}
 	if filter.StartTimeStr != "" {
 		startTime, err = time.Parse(time.RFC3339, strings.Replace(filter.StartTimeStr, " ", "+", -1))
 		if err != nil {
@@ -283,21 +300,22 @@ func (e *eventStore) ListByFilter(_ context.Context, filter core.Filter) ([]*cor
 
 	if filter.PodName != "" {
 		resList, err = e.ListByPod(context.Background(), filter.PodNamespace, filter.PodName)
+		if err == nil && filter.LimitStr != "" {
+			sort.Slice(resList, func(i, j int) bool {
+				return resList[i].CreatedAt.After(resList[j].CreatedAt)
+			})
+			resList = resList[:min(limit, len(resList))]
+		}
 	} else if filter.PodNamespace != "" {
 		resList, err = e.ListByNamespace(context.Background(), filter.PodNamespace)
-	} else {
-		query, args := constructQueryArgs(filter.ExperimentName, filter.ExperimentNamespace, filter.UID, filter.Kind, filter.StartTimeStr, filter.FinishTimeStr)
-		// List all events
-		if len(args) == 0 {
-			if err := e.db.Model(core.Event{}).Find(&resList).Error; err != nil && !gorm.IsRecordNotFoundError(err) {
-				return resList, err
-			}
-		} else {
-			if err := e.db.Where(query, args...).Find(&resList).Error; err != nil &&
-				!gorm.IsRecordNotFoundError(err) {
-				return resList, err
-			}
+		if err == nil && filter.LimitStr != "" {
+			sort.Slice(resList, func(i, j int) bool {
+				return resList[i].CreatedAt.After(resList[j].CreatedAt)
+			})
+			resList = resList[:min(limit, len(resList))]
 		}
+	} else {
+		resList, err = e.DryListByFilter(context.Background(), filter)
 	}
 	if err != nil {
 		return resList, err
@@ -325,11 +343,13 @@ func (e *eventStore) ListByFilter(_ context.Context, filter core.Filter) ([]*cor
 				continue
 			}
 		}
-		pods, err := e.findPodRecordsByEventID(context.Background(), event.ID)
-		if err != nil {
-			return nil, err
+		if filter.PodNamespace == "" {
+			pods, err := e.findPodRecordsByEventID(context.Background(), event.ID)
+			if err != nil {
+				return nil, err
+			}
+			event.Pods = pods
 		}
-		event.Pods = pods
 		eventList = append(eventList, event)
 	}
 	return eventList, nil
@@ -341,8 +361,15 @@ func (e *eventStore) DryListByFilter(_ context.Context, filter core.Filter) ([]*
 		resList []*core.Event
 		err     error
 		db      *dbstore.DB
+		limit   int
 	)
 
+	if filter.LimitStr != "" {
+		limit, err = strconv.Atoi(filter.LimitStr)
+		if err != nil {
+			return nil, fmt.Errorf("the format of the limitStr is wrong")
+		}
+	}
 	if filter.StartTimeStr != "" {
 		_, err = time.Parse(time.RFC3339, strings.Replace(filter.StartTimeStr, " ", "+", -1))
 		if err != nil {
@@ -362,6 +389,9 @@ func (e *eventStore) DryListByFilter(_ context.Context, filter core.Filter) ([]*
 		db = e.db
 	} else {
 		db = &dbstore.DB{DB: e.db.Where(query, args...)}
+	}
+	if filter.LimitStr != "" {
+		db = &dbstore.DB{DB: db.Order("created_at desc").Limit(limit)}
 	}
 	if err := db.Where(query, args...).Find(&resList).Error; err != nil &&
 		!gorm.IsRecordNotFoundError(err) {

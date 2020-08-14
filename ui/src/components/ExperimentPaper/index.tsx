@@ -3,20 +3,25 @@ import React, { useState } from 'react'
 import { Theme, createStyles, makeStyles } from '@material-ui/core/styles'
 
 import { Archive } from 'api/archives.type'
-import DeleteOutlineIcon from '@material-ui/icons/DeleteOutline'
+import ArchiveOutlinedIcon from '@material-ui/icons/ArchiveOutlined'
 import ErrorOutlineIcon from '@material-ui/icons/ErrorOutline'
 import { Experiment } from 'api/experiments.type'
 import ExperimentEventsPreview from 'components/ExperimentEventsPreview'
 import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown'
 import KeyboardArrowUpIcon from '@material-ui/icons/KeyboardArrowUp'
-import { Link } from 'react-router-dom'
 import PauseCircleOutlineIcon from '@material-ui/icons/PauseCircleOutline'
 import PlayCircleOutlineIcon from '@material-ui/icons/PlayCircleOutline'
-import RefreshIcon from '@material-ui/icons/Refresh'
 import day from 'lib/dayjs'
+import { useHistory } from 'react-router-dom'
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
+    root: {
+      '&:hover': {
+        backgroundColor: theme.palette.action.hover,
+        cursor: 'pointer',
+      },
+    },
     marginRight: {
       '& > *': {
         marginRight: theme.spacing(3),
@@ -45,97 +50,104 @@ const ExperimentPaper: React.FC<ExperimentPaperProps> = ({
   const isTabletScreen = useMediaQuery(theme.breakpoints.down('sm'))
   const classes = useStyles()
 
+  const history = useHistory()
+
   const [open, setOpen] = useState(false)
 
-  const handleToggle = () => setOpen(!open)
-
-  const handleDelete = () => {
-    handleDialogOpen(true)
-    handleSelect({
-      uuid: (e as Experiment).uid,
-      title: `Delete ${e.Name}?`,
-      description: "Once you delete this experiment, it can't be recovered.",
-      action: 'delete',
-    })
+  const handleToggle = (e: any) => {
+    e.stopPropagation()
+    setOpen(!open)
   }
 
-  const handlePause = () => {
+  const handleAction = (action: string) => (event: React.MouseEvent<HTMLSpanElement>) => {
+    event.stopPropagation()
+
     handleDialogOpen(true)
-    handleSelect({
-      uuid: (e as Experiment).uid,
-      title: `Pause ${e.Name}?`,
-      description: 'You can restart the experiment in the same position.',
-      action: 'pause',
-    })
+    switch (action) {
+      case 'delete':
+        handleSelect({
+          uuid: (e as Experiment).uid,
+          title: `Archive ${e.name}?`,
+          description: 'You can still find this experiment in the archives.',
+          action: 'delete',
+        })
+
+        return
+      case 'pause':
+        handleSelect({
+          uuid: (e as Experiment).uid,
+          title: `Pause ${e.name}?`,
+          description: 'You can restart the experiment in the same position.',
+          action: 'pause',
+        })
+
+        return
+      case 'start':
+        handleSelect({
+          uuid: (e as Experiment).uid,
+          title: `Start ${e.name}?`,
+          description: 'The operation will take effect immediately.',
+          action: 'start',
+        })
+
+        return
+      default:
+        return
+    }
   }
 
-  const handleStart = () => {
-    handleDialogOpen(true)
-    handleSelect({
-      uuid: (e as Experiment).uid,
-      title: `Start ${e.Name}?`,
-      description: 'The operation will take effect immediately.',
-      action: 'start',
-    })
-  }
+  const handleJumpTo = () => history.push(isArchive ? `/archives/${e.uid}` : `/experiments/${(e as Experiment).uid}`)
 
   const Actions = () => (
     <Box display="flex" justifyContent="flex-end" alignItems="center" className={classes.marginRight}>
+      <Typography variant="body2">
+        Created {day(isArchive ? (e as Archive).start_time : (e as Experiment).created).fromNow()}
+      </Typography>
       {!isArchive && (
         <>
-          <Typography variant="body1">Created {day((e as Experiment).created).fromNow()}</Typography>
           {(e as Experiment).status === 'Paused' ? (
             <IconButton
               color="primary"
+              title="Start experiment"
               aria-label="Start experiment"
               component="span"
               size="small"
-              onClick={handleStart}
+              onClick={handleAction('start')}
             >
               <PlayCircleOutlineIcon />
             </IconButton>
           ) : (
             <IconButton
               color="primary"
+              title="Pause experiment"
               aria-label="Pause experiment"
               component="span"
               size="small"
-              onClick={handlePause}
+              onClick={handleAction('pause')}
             >
               <PauseCircleOutlineIcon />
             </IconButton>
           )}
           <IconButton
             color="primary"
-            aria-label="Delete experiment"
+            title="Archive experiment"
+            aria-label="Archive experiment"
             component="span"
             size="small"
-            onClick={handleDelete}
+            onClick={handleAction('delete')}
           >
-            <DeleteOutlineIcon />
+            <ArchiveOutlinedIcon />
           </IconButton>
         </>
       )}
-      {isArchive && (
-        <IconButton color="primary" aria-label="Recreate experiment" component="span" size="small">
-          <RefreshIcon />
-        </IconButton>
-      )}
-      <Button
-        component={Link}
-        to={isArchive ? `/` : `/experiments/${(e as Experiment).uid}?name=${e.Name}&status=${(e as Experiment).status}`}
-        variant="outlined"
-        color="primary"
-        size="small"
-        disabled={!isArchive && (e as Experiment).status === 'Failed'}
-      >
-        Detail
+      <Button variant="outlined" color="primary" size="small">
+        {isArchive ? 'Report' : 'Detail'}
       </Button>
     </Box>
   )
 
   return (
-    <Paper variant="outlined">
+    <Paper variant="outlined" className={classes.root} onClick={handleJumpTo}>
       <Box display="flex" justifyContent="space-between" alignItems="center" p={3}>
         <Box display="flex" alignItems="center" className={classes.marginRight}>
           {!isArchive &&
@@ -145,16 +157,16 @@ const ExperimentPaper: React.FC<ExperimentPaperProps> = ({
               <ExperimentEventsPreview events={(e as Experiment).events} />
             ))}
           <Typography variant="body1" component="div">
-            {e.Name}
+            {e.name}
             {isTabletScreen && (
               <Typography variant="body2" color="textSecondary">
-                {e.Kind}
+                {e.uid}
               </Typography>
             )}
           </Typography>
           {!isTabletScreen && (
             <Typography variant="body2" color="textSecondary">
-              {e.Kind}
+              {e.uid}
             </Typography>
           )}
         </Box>

@@ -1,9 +1,9 @@
 # Set DEBUGGER=1 to build debug symbols
-LDFLAGS = $(if $(DEBUGGER),,-s -w) $(shell ./hack/version.sh)
+LDFLAGS = $(if $(IMG_LDFLAGS),$(IMG_LDFLAGS),$(if $(DEBUGGER),,-s -w) $(shell ./hack/version.sh))
 
 # SET DOCKER_REGISTRY to change the docker registry
 DOCKER_REGISTRY_PREFIX := $(if $(DOCKER_REGISTRY),$(DOCKER_REGISTRY)/,)
-DOCKER_BUILD_ARGS := --build-arg HTTP_PROXY=${HTTP_PROXY} --build-arg HTTPS_PROXY=${HTTPS_PROXY} --build-arg UI=${UI} --build-arg SWAGGER=${SWAGGER}
+DOCKER_BUILD_ARGS := --build-arg HTTP_PROXY=${HTTP_PROXY} --build-arg HTTPS_PROXY=${HTTPS_PROXY} --build-arg UI=${UI} --build-arg SWAGGER=${SWAGGER} --build-arg LDFLAGS="${LDFLAGS}"
 
 GOVER_MAJOR := $(shell go version | sed -E -e "s/.*go([0-9]+)[.]([0-9]+).*/\1/")
 GOVER_MINOR := $(shell go version | sed -E -e "s/.*go([0-9]+)[.]([0-9]+).*/\2/")
@@ -91,17 +91,20 @@ else
 endif
 
 # Build chaos-daemon binary
-chaosdaemon: generate
+chaosdaemon:
 	$(CGOENV) go build -ldflags '$(LDFLAGS)' -o bin/chaos-daemon ./cmd/chaos-daemon/main.go
 
+pause:
+	cc ./hack/pause.c -o bin/pause
+
 # Build manager binary
-manager: generate
+manager:
 	$(GO) build -ldflags '$(LDFLAGS)' -o bin/chaos-controller-manager ./cmd/controller-manager/*.go
 
-chaosfs: generate
+chaosfs:
 	$(GO) build -ldflags '$(LDFLAGS)' -o bin/chaosfs ./cmd/chaosfs/*.go
 
-chaos-dashboard: generate
+chaos-dashboard:
 ifeq ($(SWAGGER),1)
 	make swagger_spec
 endif
@@ -122,7 +125,7 @@ ui: yarn_dependencies
 	cd ui &&\
 	REACT_APP_DASHBOARD_API_URL="" yarn build
 
-binary: chaosdaemon manager chaosfs chaos-dashboard
+binary: chaosdaemon manager chaosfs chaos-dashboard pause
 
 watchmaker:
 	$(CGOENV) go build -ldflags '$(LDFLAGS)' -o bin/watchmaker ./cmd/watchmaker/...
@@ -195,7 +198,7 @@ image-binary: taily-build
 	echo -e "FROM scratch\n COPY . /src/bin\n COPY ./scripts /src/scripts" | docker build -t pingcap/binary -f - ./bin
 else
 image-binary:
-	docker build -t pingcap/binary ${DOCKER_BUILD_ARGS} .
+	DOCKER_BUILDKIT=1 docker build -t pingcap/binary ${DOCKER_BUILD_ARGS} .
 endif
 
 image-chaos-daemon: image-binary
