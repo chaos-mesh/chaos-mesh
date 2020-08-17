@@ -1,3 +1,4 @@
+
 {{- if .Values.rbac.create }}
 kind: ServiceAccount
 apiVersion: v1
@@ -80,6 +81,7 @@ rules:
     - timechaos
     - kernelchaos
     - stresschaos
+    - httpfaultchaos
   verbs: ["*"]
 ---
 kind: ClusterRoleBinding
@@ -146,6 +148,7 @@ rules:
   - timechaos
   - kernelchaos
   - stresschaos
+  - httpfaultchaos
   verbs: ["*"]
 ---
 kind: RoleBinding

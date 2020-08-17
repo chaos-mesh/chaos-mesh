@@ -1,3 +1,4 @@
+
 // Copyright 2019 Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -163,6 +164,14 @@ func main() {
 	}
 	if err = (&chaosmeshv1alpha1.StressChaos{}).SetupWebhookWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create webhook", "webhook", "StressChaos")
+		os.Exit(1)
+	}
+
+	if err = (&controllers.HttpFaultChaosReconciler{
+		Client: mgr.GetClient(),
+		Log:    ctrl.Log.WithName("controllers").WithName("HttpFaultChaos"),
+	}).SetupWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create controller", "controller", "HttpFaultChaos")
 		os.Exit(1)
 	}
 
