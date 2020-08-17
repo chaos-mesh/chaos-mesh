@@ -146,12 +146,12 @@ func (s *SelectorInfo) ParseSelector() v1alpha1.SelectorSpec {
 // TargetInfo defines the information of target objects.
 type TargetInfo struct {
 	Kind         string            `json:"kind" binding:"required,oneof=PodChaos NetworkChaos IoChaos KernelChaos TimeChaos StressChaos"`
-	PodChaos     *PodChaosInfo     `json:"pod_chaos,omitempty"`
-	NetworkChaos *NetworkChaosInfo `json:"network_chaos,omitempty"`
-	IOChaos      *IOChaosInfo      `json:"io_chaos,omitempty"`
-	KernelChaos  *KernelChaosInfo  `json:"kernel_chaos,omitempty"`
-	TimeChaos    *TimeChaosInfo    `json:"time_chaos,omitempty"`
-	StressChaos  *StressChaosInfo  `json:"stress_chaos,omitempty"`
+	PodChaos     *PodChaosInfo     `json:"pod_chaos,omitempty" binding:"required_field_equal=Kind:PodChaos"`
+	NetworkChaos *NetworkChaosInfo `json:"network_chaos,omitempty" binding:"required_field_equal=Kind:NetworkChaos"`
+	IOChaos      *IOChaosInfo      `json:"io_chaos,omitempty" binding:"required_field_equal=Kind:IoChaos"`
+	KernelChaos  *KernelChaosInfo  `json:"kernel_chaos,omitempty" binding:"required_field_equal=Kind:KernelChaos"`
+	TimeChaos    *TimeChaosInfo    `json:"time_chaos,omitempty" binding:"required_field_equal=Kind:TimeChaos"`
+	StressChaos  *StressChaosInfo  `json:"stress_chaos,omitempty" binding:"required_field_equal=Kind:StressChaos"`
 }
 
 // SchedulerInfo defines the scheduler information.
@@ -169,11 +169,11 @@ type PodChaosInfo struct {
 // NetworkChaosInfo defines the basic information of network chaos for creating a new NetworkChaos.
 type NetworkChaosInfo struct {
 	Action      string                  `json:"action" binding:"oneof='' 'netem' 'delay' 'loss' 'duplicate' 'corrupt' 'partition' 'bandwidth'"`
-	Delay       *v1alpha1.DelaySpec     `json:"delay"`
-	Loss        *v1alpha1.LossSpec      `json:"loss"`
-	Duplicate   *v1alpha1.DuplicateSpec `json:"duplicate"`
-	Corrupt     *v1alpha1.CorruptSpec   `json:"corrupt"`
-	Bandwidth   *v1alpha1.BandwidthSpec `json:"bandwidth"`
+	Delay       *v1alpha1.DelaySpec     `json:"delay" binding:"required_field_equal=Action:delay"`
+	Loss        *v1alpha1.LossSpec      `json:"loss" binding:"required_field_equal=Action:loss"`
+	Duplicate   *v1alpha1.DuplicateSpec `json:"duplicate" binding:"required_field_equal=Action:duplicate"`
+	Corrupt     *v1alpha1.CorruptSpec   `json:"corrupt" binding:"required_field_equal=Action:corrupt"`
+	Bandwidth   *v1alpha1.BandwidthSpec `json:"bandwidth" binding:"required_field_equal=Action:bandwidth"`
 	Direction   string                  `json:"direction" binding:"oneof='' 'to' 'from' 'both'"`
 	TargetScope *ScopeInfo              `json:"target_scope"`
 }
