@@ -17,6 +17,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 
 	"github.com/go-logr/logr"
 	"github.com/jinzhu/gorm"
@@ -148,6 +149,10 @@ func (r *ChaosCollector) createEvent(req ctrl.Request, kind string, status *v1al
 }
 
 func (r *ChaosCollector) updateOrCreateEvent(req ctrl.Request, kind string, status *v1alpha1.ChaosStatus, UID string) error {
+	if status.Experiment.StartTime == nil || status.Experiment.EndTime == nil {
+		return fmt.Errorf("failed to get experiment time, startTime or endTime is empty")
+	}
+
 	event := &core.Event{
 		Experiment:   req.Name,
 		Namespace:    req.Namespace,

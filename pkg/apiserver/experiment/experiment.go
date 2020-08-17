@@ -1341,5 +1341,5 @@ func (s *Service) updateStressChaos(exp *core.ExperimentInfo) error {
 		chaos.Spec.ContainerName = exp.Target.StressChaos.ContainerName
 	}
 
-	return s.kubeCli.Create(context.Background(), chaos)
+	return s.kubeCli.Update(context.Background(), chaos)
 }
