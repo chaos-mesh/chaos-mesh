@@ -1132,3 +1132,11 @@ func (in *TimeChaosStatus) DeepCopy() *TimeChaosStatus {
 	in.DeepCopyInto(out)
 	return out
 }
+
+func (h HttpFaultChaos) DeepCopyObject() runtime.Object {
+	panic("implement me")
+}
+
+func (h HttpFaultChaosList) DeepCopyObject() runtime.Object {
+	panic("implement me")
+}
