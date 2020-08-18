@@ -1,10 +1,22 @@
-import { Box, Button, Divider, FormControlLabel, Grid, Paper, Radio, RadioGroup, Typography } from '@material-ui/core'
-import { Form, Formik, FormikHelpers } from 'formik'
+import {
+  Box,
+  Button,
+  Divider,
+  FormControlLabel,
+  Grid,
+  Paper,
+  Radio,
+  RadioGroup,
+  Snackbar,
+  Typography,
+} from '@material-ui/core'
+import { Form, Formik } from 'formik'
 import React, { useEffect, useState } from 'react'
 import { defaultExperimentSchema, validationSchema } from './constants'
 import { parseLoaded, parseSubmit, yamlToExperiment } from 'lib/formikhelpers'
 import { setAlert, setAlertOpen } from 'slices/globalStatus'
 
+import Alert from '@material-ui/lab/Alert'
 import { Archive } from 'api/archives.type'
 import CloudUploadOutlinedIcon from '@material-ui/icons/CloudUploadOutlined'
 import { Experiment } from './types'
@@ -14,6 +26,7 @@ import SkeletonN from 'components/SkeletonN'
 import Stepper from './Stepper'
 import { StepperProvider } from './Context'
 import api from 'api'
+import flat from 'flat'
 import { setNeedToRefreshExperiments } from 'slices/experiments'
 import { useHistory } from 'react-router-dom'
 import { useStoreDispatch } from 'store'
@@ -171,7 +184,7 @@ export default function NewExperiment() {
 
   const [initialValues, setInitialValues] = useState<Experiment>(defaultExperimentSchema)
 
-  const handleOnSubmit = (values: Experiment, actions: FormikHelpers<Experiment>) => {
+  const handleOnSubmit = (values: Experiment) => {
     const parsedValues = parseSubmit(values)
 
     if (process.env.NODE_ENV === 'development') {
@@ -204,21 +217,34 @@ export default function NewExperiment() {
         enableReinitialize
         initialValues={initialValues}
         validationSchema={validationSchema}
+        validateOnChange={false}
         onSubmit={handleOnSubmit}
       >
-        <Paper variant="outlined" style={{ height: '100%' }}>
-          <PaperTop title="Create a New Experiment" />
-          <Grid container>
-            <Grid item xs={12} sm={8}>
-              <Form>
-                <Stepper />
-              </Form>
+        {({ errors }) => (
+          <Paper variant="outlined" style={{ height: '100%' }}>
+            <PaperTop title="Create a New Experiment" />
+            <Grid container>
+              <Grid item xs={12} sm={8}>
+                <Form>
+                  <Stepper />
+                </Form>
+              </Grid>
+              <Grid item xs={12} sm={4}>
+                <Actions setInitialValues={setInitialValues} />
+              </Grid>
             </Grid>
-            <Grid item xs={12} sm={4}>
-              <Actions setInitialValues={setInitialValues} />
-            </Grid>
-          </Grid>
-        </Paper>
+
+            <Snackbar
+              anchorOrigin={{
+                vertical: 'top',
+                horizontal: 'center',
+              }}
+              open={Object.keys(flat(errors)).length > 0}
+            >
+              <Alert severity="error">{Object.values<string>(flat(errors))[0]}</Alert>
+            </Snackbar>
+          </Paper>
+        )}
       </Formik>
     </StepperProvider>
   )
