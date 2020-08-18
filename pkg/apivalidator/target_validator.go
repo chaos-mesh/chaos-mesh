@@ -28,6 +28,8 @@ func RequiredFieldEqualValid(fl validator.FieldLevel) bool {
 	paramField := param[0]
 	paramValue := param[1]
 
+	fmt.Println(paramField + "    @@@@   " + paramValue)
+
 	if paramField == `` {
 		return true
 	}
@@ -39,6 +41,9 @@ func RequiredFieldEqualValid(fl validator.FieldLevel) bool {
 	} else {
 		paramFieldValue = fl.Parent().FieldByName(paramField)
 	}
+
+	fmt.Println(paramFieldValue)
+	fmt.Println("!!!!!!!!!!!")
 
 	if isEq(paramFieldValue, paramValue) == false {
 		return true
