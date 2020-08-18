@@ -21,10 +21,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/go-playground/validator/v10"
-
-	"github.com/chaos-mesh/chaos-mesh/pkg/apivalidator"
-
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
 	"golang.org/x/sync/errgroup"
@@ -128,13 +124,6 @@ type actionFunc func(info *core.ExperimentInfo) error
 func (s *Service) createExperiment(c *gin.Context) {
 	exp := &core.ExperimentInfo{}
 	if err := c.ShouldBindJSON(exp); err != nil {
-		c.Status(http.StatusBadRequest)
-		_ = c.Error(utils.ErrInvalidRequest.WrapWithNoMessage(err))
-		return
-	}
-	validate := validator.New()
-	validate.RegisterValidation("required_field_equal", apivalidator.RequiredFieldEqualValid)
-	if err := validate.Struct(exp); err != nil {
 		c.Status(http.StatusBadRequest)
 		_ = c.Error(utils.ErrInvalidRequest.WrapWithNoMessage(err))
 		return
