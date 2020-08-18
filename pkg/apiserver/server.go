@@ -121,7 +121,7 @@ func newAPIHandlerEngine() (*gin.Engine, *gin.RouterGroup) {
 		v.RegisterValidation("DurationValid", apivalidator.DurationValid)
 		v.RegisterValidation("ValueValid", apivalidator.ValueValid)
 		v.RegisterValidation("PodsValid", apivalidator.PodsValid)
-		v.RegisterValidation("Required_field_equal", apivalidator.RequiredFieldEqualValid, true)
+		v.RegisterValidation("RequiredFieldEqual", apivalidator.RequiredFieldEqualValid, true)
 	}
 
 	endpoint := apiHandlerEngine.Group("/api")
