@@ -74,7 +74,7 @@ func (h *Handler) Apply(ctx context.Context, chaos *v1alpha1.PodNetworkChaos) er
 	return nil
 }
 
-// SetIPSets set ipset on pod
+// SetIPSets sets ipset on pod
 func (h *Handler) SetIPSets(ctx context.Context, pod *corev1.Pod, chaos *v1alpha1.PodNetworkChaos) error {
 	ipsets := []*pb.IPSet{}
 	for _, ipset := range chaos.Spec.IPSets {
@@ -86,7 +86,7 @@ func (h *Handler) SetIPSets(ctx context.Context, pod *corev1.Pod, chaos *v1alpha
 	return ipset.FlushIPSets(ctx, h.Client, pod, ipsets)
 }
 
-// SetIptables set iptables on pod
+// SetIptables sets iptables on pod
 func (h *Handler) SetIptables(ctx context.Context, pod *corev1.Pod, chaos *v1alpha1.PodNetworkChaos) error {
 	chains := []*pb.Chain{}
 	for _, chain := range chaos.Spec.Iptables {
@@ -109,7 +109,7 @@ func (h *Handler) SetIptables(ctx context.Context, pod *corev1.Pod, chaos *v1alp
 	return iptable.SetIptablesChains(ctx, h.Client, pod, chains)
 }
 
-// SetTcs set traffic control related chaos on pod
+// SetTcs sets traffic control related chaos on pod
 func (h *Handler) SetTcs(ctx context.Context, pod *corev1.Pod, chaos *v1alpha1.PodNetworkChaos) error {
 	tcs := []*pb.Tc{}
 	for _, tc := range chaos.Spec.TrafficControls {

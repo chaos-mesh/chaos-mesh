@@ -233,10 +233,6 @@ func (r *Reconciler) SetChains(ctx context.Context, pods []v1.Pod, chains []v1al
 			Name:      pod.Name,
 			Namespace: pod.Namespace,
 		})
-		if err != nil {
-			r.Log.Error(err, "failed to get related podnetworkchaos")
-			return err
-		}
 		for _, chain := range chains {
 			t.Append(chain)
 		}

@@ -239,7 +239,7 @@ func (r *Reconciler) applyTc(ctx context.Context, sources, targets []v1.Pod, ext
 	case v1alpha1.BandwidthAction:
 		tcType = v1alpha1.Bandwidth
 	default:
-		return fmt.Errorf("unknown action")
+		return fmt.Errorf("unknown action %s", networkchaos.Spec.Action)
 	}
 
 	// if we don't specify targets, then sources pods apply traffic control on all egress traffic

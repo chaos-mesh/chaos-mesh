@@ -48,13 +48,13 @@ func TestReconciler_applyNetem(t *testing.T) {
 	r := Reconciler{
 		Client:        fake.NewFakeClientWithScheme(scheme.Scheme, podObjects...),
 		EventRecorder: &record.FakeRecorder{},
-		Log:           ctrl.Log.WithName("controllers").WithName("NetworkCHaos"),
+		Log:           ctrl.Log.WithName("controllers").WithName("NetworkChaos"),
 	}
 
 	t.Run("netem without filter", func(t *testing.T) {
 		networkChaos := v1alpha1.NetworkChaos{
 			TypeMeta: metav1.TypeMeta{
-				Kind:       "NetworkCHaos",
+				Kind:       "NetworkChaos",
 				APIVersion: "v1",
 			},
 			Spec: v1alpha1.NetworkChaosSpec{
