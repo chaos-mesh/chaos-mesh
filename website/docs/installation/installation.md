@@ -61,7 +61,7 @@ Before you start installing, make sure that helm v2 or helm v3 is installed corr
 ### Step 1: Add Chaos Mesh repository to Helm repos
 
 ```bash
-helm repo add chaos-mesh https://chaorts.chaos-mesh.org
+helm repo add chaos-mesh https://charts.chaos-mesh.org
 ```
 
 After adding the repository successfully, you can search available version by the following command:
