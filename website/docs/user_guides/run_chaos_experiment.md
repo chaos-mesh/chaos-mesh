@@ -11,7 +11,7 @@ Now that you have deployed Chaos Mesh in your environment, it's time to use it f
 The first step is always to deploy a testing cluster. For illustration purposes, [web-show](https://github.com/chaos-mesh/web-show) is used as an example cluster because it allows us to directly observe the effect of network chaos. You can also deploy your own application for testing.
 
 ```bash
-curl -sSl https://raw.githubusercontent.com/pingcap/chaos-mesh/master/examples/web-show/deploy.sh | sh
+curl -sSL https://mirrors.chaos-mesh.org/latest/web-show/deploy.sh | sh
 ```
 
 After executing the above command, you can access [`http://localhost:8081`](http://localhost:8081) in the browser to check the web-show application.
