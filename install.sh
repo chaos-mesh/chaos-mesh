@@ -873,17 +873,6 @@ kind: Namespace
 metadata:
   name: chaos-testing
 ---
-# Source: chaos-mesh/templates/controller-manager-rbac.yaml
-kind: ServiceAccount
-apiVersion: v1
-metadata:
-  namespace: chaos-testing
-  name: chaos-controller-manager
-  labels:
-    app.kubernetes.io/name: chaos-mesh
-    app.kubernetes.io/instance: chaos-mesh
-    app.kubernetes.io/component: controller-manager
----
 # Source: chaos-mesh/templates/webhook-configuration.yaml
 kind: Secret
 apiVersion: v1
@@ -898,6 +887,17 @@ type: Opaque
 data:
   tls.crt: "${TLS_CRT}"
   tls.key: "${TLS_KEY}"
+---
+# Source: chaos-mesh/templates/controller-manager-rbac.yaml
+kind: ServiceAccount
+apiVersion: v1
+metadata:
+  namespace: chaos-testing
+  name: chaos-controller-manager
+  labels:
+    app.kubernetes.io/name: chaos-mesh
+    app.kubernetes.io/instance: chaos-mesh
+    app.kubernetes.io/component: controller-manager
 ---
 # Source: chaos-mesh/templates/controller-manager-rbac.yaml
 kind: ClusterRole
@@ -1020,6 +1020,10 @@ metadata:
 spec:
   type: ClusterIP
   ports:
+    - port: 10081
+      targetPort: pprof
+      protocol: TCP
+      name: pprof
     - port: 10080
       targetPort: http
       protocol: TCP
@@ -1069,6 +1073,10 @@ spec:
             - !!str 31766
             - --grpc-port
             - !!str 31767
+            - --pprof
+          env:
+            - name: TZ
+              value: UTC
           securityContext:
             privileged: true
             capabilities:
@@ -1138,6 +1146,8 @@ spec:
               value: "0.0.0.0"
             - name: LISTEN_PORT
               value: "2333"
+            - name: TZ
+              value: UTC
           volumeMounts:
             - name: storage-volume
               mountPath: /data
@@ -1200,6 +1210,8 @@ spec:
             value: "app.kubernetes.io/component:template"
           - name: CONFIGMAP_LABELS
             value: "app.kubernetes.io/component:webhook"
+          - name: PPROF_ADDR
+            value: ":10081"
         volumeMounts:
           - name: webhook-certs
             mountPath: /etc/webhook/certs
@@ -1209,6 +1221,8 @@ spec:
             containerPort: 9443 # Customize containerPort
           - name: http
             containerPort: 10080
+          - name: pprof
+            containerPort: 10081
       volumes:
         - name: webhook-certs
           secret:
