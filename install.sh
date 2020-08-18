@@ -43,9 +43,9 @@ OPTIONS:
     -l, --local [kind]       Choose a way to run a local kubernetes cluster, supported value: kind,
                              If this value is not set and the Kubernetes is not installed, this script will exit with 1.
     -n, --name               Name of Kubernetes cluster, default value: kind
-    -c  --crd                The URL of the crd files, default value: https://raw.githubusercontent.com/chaos-mesh/chaos-mesh/master/manifests/crd.yaml
+    -c  --crd                The URL of the crd files, default value: https://mirrors.chaos-mesh.org/latest/manifests/crd.yaml
     -r  --runtime            Runtime specifies which container runtime to use. Currently we only supports docker and containerd. default value: docker
-    -f  --chaosfs-sidecar    The URL of the chaosfs sidecar configmap files, default value: https://raw.githubusercontent.com/chaos-mesh/chaos-mesh/master/manifests/chaosfs-sidecar.yaml
+    -f  --chaosfs-sidecar    The URL of the chaosfs sidecar configmap files, default value: https://mirrors.chaos-mesh.org/latest/chaosfs-sidecar.yaml
         --kind-version       Version of the Kind tool, default value: v0.7.0
         --node-num           The count of the cluster nodes,default value: 3
         --k8s-version        Version of the Kubernetes cluster,default value: v1.17.2
@@ -72,8 +72,8 @@ main() {
     local docker_mirror=false
     local volume_provisioner=false
     local local_registry=false
-    local crd="https://raw.githubusercontent.com/chaos-mesh/chaos-mesh/master/manifests/crd.yaml"
-    local chaosfs="https://raw.githubusercontent.com/chaos-mesh/chaos-mesh/master/manifests/chaosfs-sidecar.yaml"
+    local crd="https://mirrors.chaos-mesh.org/latest/crd.yaml"
+    local chaosfs="https://mirrors.chaos-mesh.org/latest/chaosfs-sidecar.yaml"
     local runtime="docker"
     local template=false
     local sidecar_template=true

@@ -39,7 +39,7 @@ Perform the following steps to set up the local Kubernetes environment:
 ## Setp 2: Install Chaos Mesh
 
 ```bash
-curl -sSL https://raw.githubusercontent.com/chaos-mesh/chaos-mesh/master/install.sh | bash
+curl -sSL https://mirrors.chaos-mesh.org/latest/install.sh | bash
 ```
 
 The above command install all the CRDs, required service account configuration, and all components.
@@ -55,7 +55,7 @@ Verify if the chaos mesh is running
 kubectl get pod -n chaos-testing
 ```
 
-Expected output: 
+Expected output:
 
 ```bash
 NAME                                        READY   STATUS    RESTARTS   AGE
@@ -71,7 +71,7 @@ chaos-dashboard-d998856f6-vgrjs             1/1     Running   0          3m40s
 You can uninstall Chaos Mesh by deleting the namespace.
 
 ```bash
-curl -sSL https://raw.githubusercontent.com/chaos-mesh/chaos-mesh/master/install.sh | bash -s -- --template | kubectl delete -f -
+curl -sSL https://mirrors.chaos-mesh.org/latest/install.sh | bash -s -- --template | kubectl delete -f -
 ```
 
 ## Limitations
