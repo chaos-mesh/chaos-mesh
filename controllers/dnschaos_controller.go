@@ -37,7 +37,7 @@ type DNSChaosReconciler struct {
 // +kubebuilder:rbac:groups=chaos-mesh.org,resources=dnschaos,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=chaos-mesh.org,resources=dnschaos/status,verbs=get;update;patch
 
-// Reconcile reconciles an IOChaos resource
+// Reconcile reconciles an DNSChaos resource
 func (r *DNSChaosReconciler) Reconcile(req ctrl.Request) (result ctrl.Result, err error) {
 	logger := r.Log.WithValues("dnschaos", req.NamespacedName)
 

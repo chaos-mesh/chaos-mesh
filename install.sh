@@ -965,6 +965,7 @@ rules:
     - timechaos
     - kernelchaos
     - stresschaos
+    - dnschaos
   verbs: ["*"]
 ---
 # Source: chaos-mesh/templates/controller-manager-rbac.yaml
@@ -1255,6 +1256,24 @@ webhooks:
         admission-webhook: enabled
     failurePolicy: Ignore
   - clientConfig:
+      caBundle: Cg==
+      service:
+        name: webhook-service
+        namespace: system
+        path: /mutate-chaos-mesh-org-v1alpha1-dnschaos
+    failurePolicy: Fail
+    name: mdnschaos.kb.io
+    rules:
+    - apiGroups:
+      - chaos-mesh.org
+      apiVersions:
+      - v1alpha1
+      operations:
+      - CREATE
+      - UPDATE
+      resources:
+      - dnschaos
+  - clientConfig:
       caBundle: "${CA_BUNDLE}"
       service:
         name: chaos-mesh-controller-manager
@@ -1391,6 +1410,24 @@ webhooks:
           - UPDATE
         resources:
           - podchaos
+  - clientConfig:
+      caBundle: Cg==
+      service:
+        name: webhook-service
+        namespace: system
+        path: /validate-chaos-mesh-org-v1alpha1-dnschaos
+    failurePolicy: Fail
+    name: vdnschaos.kb.io
+    rules:
+    - apiGroups:
+      - chaos-mesh.org
+      apiVersions:
+      - v1alpha1
+      operations:
+      - CREATE
+      - UPDATE
+      resources:
+      - dnschaos
   - clientConfig:
       caBundle: "${CA_BUNDLE}"
       service:

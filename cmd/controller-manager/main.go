@@ -174,7 +174,7 @@ func main() {
 		setupLog.Error(err, "unable to create controller", "controller", "DNSChaos")
 		os.Exit(1)
 	}
-	if err = (&chaosmeshv1alpha1.NetworkChaos{}).SetupWebhookWithManager(mgr); err != nil {
+	if err = (&chaosmeshv1alpha1.DNSChaos{}).SetupWebhookWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create webhook", "webhook", "DNSChaos")
 		os.Exit(1)
 	}
