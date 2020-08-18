@@ -110,6 +110,7 @@ func (c ContainerdClient) FormatContainerID(ctx context.Context, containerID str
 	}
 	if containerID[0:len(containerdProtocolPrefix)] != containerdProtocolPrefix {
 		return "", fmt.Errorf("expected %s but got %s", containerdProtocolPrefix, containerID[0:len(containerdProtocolPrefix)])
+		//containerID = strings.ReplaceAll(containerID, "docker", "containerd")
 	}
 	return containerID[len(containerdProtocolPrefix):], nil
 }
@@ -241,6 +242,19 @@ func withPidNS(ctx context.Context, nsPath string, cmd string, args ...string) *
 
 	return withNS(ctx, []nsOption{{
 		Typ:  pidNS,
+		Path: nsPath,
+	}}, cmd, args...)
+}
+
+func withMountNS(ctx context.Context, nsPath string, cmd string, args ...string) *exec.Cmd {
+	// Mock point to return mock Cmd in unit test
+	if c := mock.On("MockWithMountNs"); c != nil {
+		f := c.(func(context.Context, string, string, ...string) *exec.Cmd)
+		return f(ctx, nsPath, cmd, args...)
+	}
+
+	return withNS(ctx, []nsOption{{
+		Typ:  mountNS,
 		Path: nsPath,
 	}}, cmd, args...)
 }

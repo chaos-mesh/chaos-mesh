@@ -75,6 +75,17 @@ func SelectAndFilterPods(ctx context.Context, c client.Client, spec SelectSpec) 
 	return filteredPod, nil
 }
 
+// SelectAndFilterSevice ...
+func SelectAndFilterSevice(ctx context.Context, c client.Client, namespace string, name string) (v1.Service, error) {
+	var service v1.Service
+	err := c.Get(ctx, types.NamespacedName{
+		Namespace: namespace,
+		Name:      name,
+	}, &service)
+
+	return service, err
+}
+
 // SelectPods returns the list of pods that are available for pod chaos action.
 // It returns all pods that match the configured label, annotation and namespace selectors.
 // If pods are specifically specified by `selector.Pods`, it just returns the selector.Pods.

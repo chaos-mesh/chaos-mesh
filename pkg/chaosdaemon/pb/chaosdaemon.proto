@@ -31,6 +31,8 @@ service ChaosDaemon {
 
   rpc ExecStressors (ExecStressRequest) returns (ExecStressResponse) {}
   rpc CancelStressors (CancelStressRequest) returns (google.protobuf.Empty) {}
+
+  rpc SetDNSServer (SetDNSServerRequest) returns (google.protobuf.Empty) {}
 }
 
 message TcHandle {
@@ -177,3 +179,6 @@ message CancelStressRequest {
   int64 startTime = 2;
 }
 
+message SetDNSServerRequest {
+  string container_id = 1;
+}
