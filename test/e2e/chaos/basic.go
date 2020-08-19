@@ -1348,7 +1348,7 @@ var _ = ginkgo.Describe("[Basic]", func() {
 
 				baseNetworkPartition := &v1alpha1.NetworkChaos{
 					ObjectMeta: metav1.ObjectMeta{
-						Name:      "network-chaos",
+						Name:      "network-chaos-1",
 						Namespace: ns,
 					},
 					Spec: v1alpha1.NetworkChaosSpec{
@@ -1417,6 +1417,26 @@ var _ = ginkgo.Describe("[Basic]", func() {
 				time.Sleep(5 * time.Second)
 				framework.ExpectEqual(len(allBlockedConnection()), 0)
 
+				// Multiple network partition chaos on peer-0
+				anotherNetworkPartition := baseNetworkPartition.DeepCopy()
+				anotherNetworkPartition.Name = "network-chaos-2"
+				anotherNetworkPartition.Spec.Direction = v1alpha1.To
+				anotherNetworkPartition.Spec.Target.TargetSelector.LabelSelectors = map[string]string{"partition": "0"}
+				anotherNetworkPartition.Spec.Target.TargetMode = v1alpha1.AllPodMode
+				err = cli.Create(ctx, baseNetworkPartition.DeepCopy())
+				framework.ExpectNoError(err, "create network chaos error")
+				err = cli.Create(ctx, anotherNetworkPartition.DeepCopy())
+				framework.ExpectNoError(err, "create network chaos error")
+				time.Sleep(5 * time.Second)
+				framework.ExpectEqual(allBlockedConnection(), [][]int{{0, 1}, {0, 2}, {0, 3}, {1, 0}, {3, 0}})
+
+				err = cli.Delete(ctx, baseNetworkPartition.DeepCopy())
+				framework.ExpectNoError(err, "delete network chaos error")
+				err = cli.Delete(ctx, anotherNetworkPartition.DeepCopy())
+				framework.ExpectNoError(err, "delete network chaos error")
+				time.Sleep(5 * time.Second)
+				framework.ExpectEqual(len(allBlockedConnection()), 0)
+
 				cancel()
 			})
 		})
@@ -1437,30 +1457,27 @@ var _ = ginkgo.Describe("[Basic]", func() {
 
 					return delay
 				}
-				assertDelay := func(delay int64, injected bool) {
-					if injected {
-						if delay < 200*1e6 {
-							framework.Fail(
-								fmt.Sprintf("the delay %d is less than latency 200ms", delay),
-							)
-						}
-					} else {
-						if delay > 100*1e6 {
-							framework.Fail(
-								fmt.Sprintf("the delay %d without chaos is too big", delay),
-							)
+				allSlowConnection := func() [][]int {
+					var result [][]int
+					for source := 0; source < len(networkPeers); source++ {
+						for target := source + 1; target < len(networkPeers); target++ {
+							delay := testDelay(source, target)
+							klog.Infof("delay from %d to %d: %d", source, target, delay)
+							if delay > 100*1e6 {
+								result = append(result, []int{source, target})
+							}
 						}
 					}
 
+					return result
 				}
 
-				normalDelay := testDelay(0, 1)
-				assertDelay(normalDelay, false)
+				framework.ExpectEqual(len(allSlowConnection()), 0)
 
 				// normal delay chaos
 				networkDelay := &v1alpha1.NetworkChaos{
 					ObjectMeta: metav1.ObjectMeta{
-						Name:      "network-chaos",
+						Name:      "network-chaos-1",
 						Namespace: ns,
 					},
 					Spec: v1alpha1.NetworkChaosSpec{
@@ -1470,10 +1487,12 @@ var _ = ginkgo.Describe("[Basic]", func() {
 							LabelSelectors: map[string]string{"app": "network-peer-0"},
 						},
 						Mode: v1alpha1.OnePodMode,
-						Delay: &v1alpha1.DelaySpec{
-							Latency:     "200ms",
-							Correlation: "25",
-							Jitter:      "0ms",
+						TcParameter: v1alpha1.TcParameter{
+							Delay: &v1alpha1.DelaySpec{
+								Latency:     "200ms",
+								Correlation: "25",
+								Jitter:      "0ms",
+							},
 						},
 						Duration: pointer.StringPtr("9m"),
 						Scheduler: &v1alpha1.SchedulerSpec{
@@ -1485,18 +1504,12 @@ var _ = ginkgo.Describe("[Basic]", func() {
 				err = cli.Create(ctx, networkDelay.DeepCopy())
 				framework.ExpectNoError(err, "create network chaos error")
 				time.Sleep(5 * time.Second)
-				delay := testDelay(0, 1)
-				assertDelay(delay, true)
-				delay = testDelay(0, 2)
-				assertDelay(delay, true)
+				framework.ExpectEqual(allSlowConnection(), [][]int{{0, 1}, {0, 2}, {0, 3}})
 
 				err = cli.Delete(ctx, networkDelay.DeepCopy())
 				framework.ExpectNoError(err, "delete network chaos error")
 				time.Sleep(5 * time.Second)
-				delay = testDelay(0, 1)
-				assertDelay(delay, false)
-				delay = testDelay(0, 2)
-				assertDelay(delay, false)
+				framework.ExpectEqual(len(allSlowConnection()), 0)
 
 				networkDelay.Spec.Target = &v1alpha1.Target{
 					TargetSelector: v1alpha1.SelectorSpec{
@@ -1509,18 +1522,80 @@ var _ = ginkgo.Describe("[Basic]", func() {
 				err = cli.Create(ctx, networkDelay.DeepCopy())
 				framework.ExpectNoError(err, "create network chaos error")
 				time.Sleep(5 * time.Second)
-				delay = testDelay(0, 1)
-				assertDelay(delay, true)
-				delay = testDelay(0, 2)
-				assertDelay(delay, false)
+				framework.ExpectEqual(allSlowConnection(), [][]int{{0, 1}})
 
 				err = cli.Delete(ctx, networkDelay.DeepCopy())
 				framework.ExpectNoError(err, "delete network chaos error")
 				time.Sleep(5 * time.Second)
-				delay = testDelay(0, 1)
-				assertDelay(delay, false)
-				delay = testDelay(0, 2)
-				assertDelay(delay, false)
+				framework.ExpectEqual(len(allSlowConnection()), 0)
+
+				evenNetworkDelay := networkDelay.DeepCopy()
+				evenNetworkDelay.Name = "network-chaos-2"
+				evenNetworkDelay.Spec.Target.TargetSelector.LabelSelectors = map[string]string{"partition": "0"}
+				evenNetworkDelay.Spec.Target.TargetMode = v1alpha1.AllPodMode
+				klog.Infof("Injecting delay for 0 -> even partition")
+				err = cli.Create(ctx, evenNetworkDelay.DeepCopy())
+				framework.ExpectNoError(err, "create network chaos error")
+				time.Sleep(5 * time.Second)
+				framework.ExpectEqual(allSlowConnection(), [][]int{{0, 2}})
+
+				klog.Infof("Injecting delay for 0 -> 1")
+				err = cli.Create(ctx, networkDelay.DeepCopy())
+				framework.ExpectNoError(err, "create network chaos error")
+				time.Sleep(5 * time.Second)
+				framework.ExpectEqual(allSlowConnection(), [][]int{{0, 1}, {0, 2}})
+
+				err = cli.Delete(ctx, networkDelay.DeepCopy())
+				framework.ExpectNoError(err, "delete network chaos error")
+				time.Sleep(5 * time.Second)
+				framework.ExpectEqual(allSlowConnection(), [][]int{{0, 2}})
+				err = cli.Delete(ctx, evenNetworkDelay.DeepCopy())
+				framework.ExpectNoError(err, "delete network chaos error")
+				time.Sleep(5 * time.Second)
+				framework.ExpectEqual(len(allSlowConnection()), 0)
+
+				complicateNetem := &v1alpha1.NetworkChaos{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      "network-chaos-3",
+						Namespace: ns,
+					},
+					Spec: v1alpha1.NetworkChaosSpec{
+						Action: v1alpha1.DelayAction,
+						Selector: v1alpha1.SelectorSpec{
+							Namespaces:     []string{ns},
+							LabelSelectors: map[string]string{"app": "network-peer-0"},
+						},
+						Mode: v1alpha1.OnePodMode,
+						TcParameter: v1alpha1.TcParameter{
+							Delay: &v1alpha1.DelaySpec{
+								Latency:     "200ms",
+								Correlation: "25",
+								Jitter:      "0ms",
+							},
+							Loss: &v1alpha1.LossSpec{
+								Loss:        "25",
+								Correlation: "25",
+							},
+							Duplicate: &v1alpha1.DuplicateSpec{
+								Duplicate:   "25",
+								Correlation: "25",
+							},
+							Corrupt: &v1alpha1.CorruptSpec{
+								Corrupt:     "25",
+								Correlation: "25",
+							},
+						},
+						Duration: pointer.StringPtr("9m"),
+						Scheduler: &v1alpha1.SchedulerSpec{
+							Cron: "@every 10m",
+						},
+					},
+				}
+				klog.Infof("Injecting delay for 0")
+				err = cli.Create(ctx, complicateNetem.DeepCopy())
+				framework.ExpectNoError(err, "create network chaos error")
+				time.Sleep(5 * time.Second)
+				framework.ExpectEqual(allSlowConnection(), [][]int{{0, 1}, {0, 2}, {0, 3}})
 
 				cancel()
 			})

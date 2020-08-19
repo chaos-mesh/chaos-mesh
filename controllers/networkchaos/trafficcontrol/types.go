@@ -1,4 +1,4 @@
-// Copyright 2019 Chaos Mesh Authors.
+// Copyright 2020 Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package partition
+package trafficcontrol
 
 import (
 	"context"
@@ -31,18 +31,13 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/controllers/common"
 	"github.com/chaos-mesh/chaos-mesh/controllers/networkchaos/podnetworkmanager"
 	"github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos/ipset"
-	"github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos/iptable"
 	"github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos/netutils"
 	"github.com/chaos-mesh/chaos-mesh/controllers/twophase"
-	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
 	"github.com/chaos-mesh/chaos-mesh/pkg/utils"
 )
 
 const (
-	networkPartitionActionMsg = "partition network duration %s"
-
-	sourceIPSetPostFix = "src"
-	targetIPSetPostFix = "tgt"
+	networkTcActionMsg = "network traffic control action duration %s"
 )
 
 func newReconciler(c client.Client, log logr.Logger, req ctrl.Request,
@@ -85,13 +80,12 @@ func (r *Reconciler) Object() v1alpha1.InnerObject {
 
 // Apply implements the reconciler.InnerReconciler.Apply
 func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.InnerObject) error {
-	r.Log.Info("Applying network partition")
+	r.Log.Info("traffic control Apply", "req", req, "chaos", chaos)
 
 	networkchaos, ok := chaos.(*v1alpha1.NetworkChaos)
 	if !ok {
 		err := errors.New("chaos is not NetworkChaos")
 		r.Log.Error(err, "chaos is not NetworkChaos", "chaos", chaos)
-
 		return err
 	}
 
@@ -99,7 +93,6 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1
 	m := podnetworkmanager.New(source, r.Log, r.Client)
 
 	sources, err := utils.SelectAndFilterPods(ctx, r.Client, &networkchaos.Spec)
-
 	if err != nil {
 		r.Log.Error(err, "failed to select and filter pods")
 		return err
@@ -107,6 +100,7 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1
 
 	var targets []v1.Pod
 
+	// We should only apply filter when we specify targets
 	if networkchaos.Spec.Target != nil {
 		targets, err = utils.SelectAndFilterPods(ctx, r.Client, networkchaos.Spec.Target)
 		if err != nil {
@@ -115,80 +109,36 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1
 		}
 	}
 
-	sourceSet := ipset.BuildIPSet(sources, []string{}, networkchaos, sourceIPSetPostFix, source)
+	pods := append(sources, targets...)
+
 	externalCidrs, err := netutils.ResolveCidrs(networkchaos.Spec.ExternalTargets)
 	if err != nil {
 		r.Log.Error(err, "failed to resolve external targets")
 		return err
 	}
-	targetSet := ipset.BuildIPSet(targets, externalCidrs, networkchaos, targetIPSetPostFix, source)
 
-	allPods := append(sources, targets...)
-
-	// Set up ipset in every related pods
-	for index := range allPods {
-		pod := allPods[index]
-		r.Log.Info("PODS", "name", pod.Name, "namespace", pod.Namespace)
-
-		t := m.WithInit(types.NamespacedName{
-			Name:      pod.Name,
-			Namespace: pod.Namespace,
-		})
-
-		t.Append(sourceSet)
-		t.Append(targetSet)
-	}
-
-	sourcesChains := []v1alpha1.RawIptables{}
-	targetsChains := []v1alpha1.RawIptables{}
-	if networkchaos.Spec.Direction == v1alpha1.To || networkchaos.Spec.Direction == v1alpha1.Both {
-		sourcesChains = append(sourcesChains, v1alpha1.RawIptables{
-			Name:      iptable.GenerateName(pb.Chain_OUTPUT, networkchaos),
-			Direction: v1alpha1.Output,
-			IPSets:    []string{targetSet.Name},
-			RawRuleSource: v1alpha1.RawRuleSource{
-				Source: source,
-			},
-		})
-
-		targetsChains = append(targetsChains, v1alpha1.RawIptables{
-			Name:      iptable.GenerateName(pb.Chain_INPUT, networkchaos),
-			Direction: v1alpha1.Input,
-			IPSets:    []string{sourceSet.Name},
-			RawRuleSource: v1alpha1.RawRuleSource{
-				Source: source,
-			},
-		})
-	}
-
-	if networkchaos.Spec.Direction == v1alpha1.From || networkchaos.Spec.Direction == v1alpha1.Both {
-		sourcesChains = append(sourcesChains, v1alpha1.RawIptables{
-			Name:      iptable.GenerateName(pb.Chain_INPUT, networkchaos),
-			Direction: v1alpha1.Input,
-			IPSets:    []string{targetSet.Name},
-			RawRuleSource: v1alpha1.RawRuleSource{
-				Source: source,
-			},
-		})
-
-		targetsChains = append(targetsChains, v1alpha1.RawIptables{
-			Name:      iptable.GenerateName(pb.Chain_OUTPUT, networkchaos),
-			Direction: v1alpha1.Output,
-			IPSets:    []string{sourceSet.Name},
-			RawRuleSource: v1alpha1.RawRuleSource{
-				Source: source,
-			},
-		})
-	}
-	r.Log.Info("chains prepared", "sourcesChains", sourcesChains, "targetsChains", targetsChains)
-
-	err = r.SetChains(ctx, sources, sourcesChains, m, networkchaos)
-	if err != nil {
-		return err
-	}
-
-	err = r.SetChains(ctx, targets, targetsChains, m, networkchaos)
-	if err != nil {
+	switch networkchaos.Spec.Direction {
+	case v1alpha1.To:
+		err = r.applyTc(ctx, sources, targets, externalCidrs, m, networkchaos)
+		if err != nil {
+			r.Log.Error(err, "failed to apply traffic control", "sources", sources, "targets", targets)
+			return err
+		}
+	case v1alpha1.From:
+		err = r.applyTc(ctx, targets, sources, []string{}, m, networkchaos)
+		if err != nil {
+			r.Log.Error(err, "failed to apply traffic control", "sources", targets, "targets", sources)
+			return err
+		}
+	case v1alpha1.Both:
+		err = r.applyTc(ctx, pods, pods, externalCidrs, m, networkchaos)
+		if err != nil {
+			r.Log.Error(err, "failed to apply traffic control", "sources", pods, "targets", pods)
+			return err
+		}
+	default:
+		err = fmt.Errorf("unknown direction %s", networkchaos.Spec.Direction)
+		r.Log.Error(err, "unknown direction", "direction", networkchaos.Spec.Direction)
 		return err
 	}
 
@@ -198,8 +148,8 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1
 		return err
 	}
 
-	networkchaos.Status.Experiment.PodRecords = make([]v1alpha1.PodStatus, 0, len(allPods))
-	for _, pod := range allPods {
+	networkchaos.Status.Experiment.PodRecords = make([]v1alpha1.PodStatus, 0, len(pods))
+	for _, pod := range pods {
 		ps := v1alpha1.PodStatus{
 			Namespace: pod.Namespace,
 			Name:      pod.Name,
@@ -209,37 +159,12 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1
 		}
 
 		if networkchaos.Spec.Duration != nil {
-			ps.Message = fmt.Sprintf(networkPartitionActionMsg, *networkchaos.Spec.Duration)
+			ps.Message = fmt.Sprintf(networkTcActionMsg, *networkchaos.Spec.Duration)
 		}
 
 		networkchaos.Status.Experiment.PodRecords = append(networkchaos.Status.Experiment.PodRecords, ps)
 	}
-
 	r.Event(networkchaos, v1.EventTypeNormal, utils.EventChaosInjected, "")
-	return nil
-}
-
-// SetChains sets iptables chains for pods
-func (r *Reconciler) SetChains(ctx context.Context, pods []v1.Pod, chains []v1alpha1.RawIptables, m *podnetworkmanager.PodNetworkManager, networkchaos *v1alpha1.NetworkChaos) error {
-	for index := range pods {
-		pod := &pods[index]
-
-		key, err := cache.MetaNamespaceKeyFunc(pod)
-		if err != nil {
-			return err
-		}
-
-		t := m.WithInit(types.NamespacedName{
-			Name:      pod.Name,
-			Namespace: pod.Namespace,
-		})
-		for _, chain := range chains {
-			t.Append(chain)
-		}
-
-		networkchaos.Finalizers = utils.InsertFinalizer(networkchaos.Finalizers, key)
-
-	}
 	return nil
 }
 
@@ -249,16 +174,13 @@ func (r *Reconciler) Recover(ctx context.Context, req ctrl.Request, chaos v1alph
 	if !ok {
 		err := errors.New("chaos is not NetworkChaos")
 		r.Log.Error(err, "chaos is not NetworkChaos", "chaos", chaos)
-
 		return err
 	}
 
 	if err := r.cleanFinalizersAndRecover(ctx, networkchaos); err != nil {
-		r.Log.Error(err, "cleanFinalizersAndRecover failed")
 		return err
 	}
 	r.Event(networkchaos, v1.EventTypeNormal, utils.EventChaosRecovered, "")
-
 	return nil
 }
 
@@ -280,11 +202,6 @@ func (r *Reconciler) cleanFinalizersAndRecover(ctx context.Context, networkchaos
 			Name:      name,
 		})
 
-		if err != nil {
-			result = multierror.Append(result, err)
-			continue
-		}
-
 		err = m.Commit(ctx)
 		if err != nil {
 			r.Log.Error(err, "fail to commit")
@@ -296,9 +213,73 @@ func (r *Reconciler) cleanFinalizersAndRecover(ctx context.Context, networkchaos
 
 	if networkchaos.Annotations[common.AnnotationCleanFinalizer] == common.AnnotationCleanFinalizerForced {
 		r.Log.Info("Force cleanup all finalizers", "chaos", networkchaos)
-		networkchaos.Finalizers = networkchaos.Finalizers[:0]
+		networkchaos.Finalizers = make([]string, 0)
 		return nil
 	}
 
 	return result
+}
+
+func (r *Reconciler) applyTc(ctx context.Context, sources, targets []v1.Pod, externalTargets []string, m *podnetworkmanager.PodNetworkManager, networkchaos *v1alpha1.NetworkChaos) error {
+	for index := range sources {
+		pod := &sources[index]
+
+		key, err := cache.MetaNamespaceKeyFunc(pod)
+		if err != nil {
+			return err
+		}
+
+		networkchaos.Finalizers = utils.InsertFinalizer(networkchaos.Finalizers, key)
+	}
+
+	tcType := v1alpha1.Bandwidth
+	switch networkchaos.Spec.Action {
+	case v1alpha1.NetemAction, v1alpha1.DelayAction, v1alpha1.DuplicateAction, v1alpha1.CorruptAction, v1alpha1.LossAction:
+		tcType = v1alpha1.Netem
+	case v1alpha1.BandwidthAction:
+		tcType = v1alpha1.Bandwidth
+	default:
+		return fmt.Errorf("unknown action %s", networkchaos.Spec.Action)
+	}
+
+	// if we don't specify targets, then sources pods apply traffic control on all egress traffic
+	if len(targets)+len(externalTargets) == 0 {
+		r.Log.Info("apply traffic control", "sources", sources)
+		for index := range sources {
+			pod := &sources[index]
+
+			t := m.WithInit(types.NamespacedName{
+				Name:      pod.Name,
+				Namespace: pod.Namespace,
+			})
+			t.Append(v1alpha1.RawTrafficControl{
+				Type:        tcType,
+				TcParameter: networkchaos.Spec.TcParameter,
+				Source:      m.Source,
+			})
+		}
+		return nil
+	}
+
+	// create ipset contains all target ips
+	dstIpset := ipset.BuildIPSet(targets, externalTargets, networkchaos, string(tcType)[0:5], m.Source)
+	r.Log.Info("apply traffic control with filter", "sources", sources, "ipset", dstIpset)
+
+	for index := range sources {
+		pod := &sources[index]
+
+		t := m.WithInit(types.NamespacedName{
+			Name:      pod.Name,
+			Namespace: pod.Namespace,
+		})
+		t.Append(dstIpset)
+		t.Append(v1alpha1.RawTrafficControl{
+			Type:        tcType,
+			TcParameter: networkchaos.Spec.TcParameter,
+			Source:      m.Source,
+			IPSet:       dstIpset.Name,
+		})
+	}
+
+	return nil
 }

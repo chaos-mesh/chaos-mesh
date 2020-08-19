@@ -22,7 +22,7 @@ import (
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/common"
-	"github.com/chaos-mesh/chaos-mesh/controllers/networkchaos/netutils"
+	"github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos/netutils"
 	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
 	"github.com/chaos-mesh/chaos-mesh/pkg/utils"
 )
@@ -32,7 +32,7 @@ const (
 )
 
 // BuildIPSet builds an ipset with provided pod ip list
-func BuildIPSet(pods []v1.Pod, externalCidrs []string, networkchaos *v1alpha1.NetworkChaos, namePostFix string) pb.IPSet {
+func BuildIPSet(pods []v1.Pod, externalCidrs []string, networkchaos *v1alpha1.NetworkChaos, namePostFix string, source string) v1alpha1.RawIPSet {
 	name := GenerateIPSetName(networkchaos, namePostFix)
 	cidrs := externalCidrs
 
@@ -42,9 +42,12 @@ func BuildIPSet(pods []v1.Pod, externalCidrs []string, networkchaos *v1alpha1.Ne
 		}
 	}
 
-	return pb.IPSet{
+	return v1alpha1.RawIPSet{
 		Name:  name,
 		Cidrs: cidrs,
+		RawRuleSource: v1alpha1.RawRuleSource{
+			Source: source,
+		},
 	}
 }
 
