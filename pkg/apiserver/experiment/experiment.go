@@ -191,14 +191,16 @@ func (s *Service) createNetworkChaos(exp *core.ExperimentInfo) error {
 			Annotations: exp.Annotations,
 		},
 		Spec: v1alpha1.NetworkChaosSpec{
-			Selector:  exp.Scope.ParseSelector(),
-			Action:    v1alpha1.NetworkChaosAction(exp.Target.NetworkChaos.Action),
-			Mode:      v1alpha1.PodMode(exp.Scope.Mode),
-			Value:     exp.Scope.Value,
-			Delay:     exp.Target.NetworkChaos.Delay,
-			Loss:      exp.Target.NetworkChaos.Loss,
-			Duplicate: exp.Target.NetworkChaos.Duplicate,
-			Corrupt:   exp.Target.NetworkChaos.Corrupt,
+			Selector: exp.Scope.ParseSelector(),
+			Action:   v1alpha1.NetworkChaosAction(exp.Target.NetworkChaos.Action),
+			Mode:     v1alpha1.PodMode(exp.Scope.Mode),
+			Value:    exp.Scope.Value,
+			TcParameter: v1alpha1.TcParameter{
+				Delay:     exp.Target.NetworkChaos.Delay,
+				Loss:      exp.Target.NetworkChaos.Loss,
+				Duplicate: exp.Target.NetworkChaos.Duplicate,
+				Corrupt:   exp.Target.NetworkChaos.Corrupt,
+			},
 		},
 	}
 
@@ -1186,15 +1188,17 @@ func (s *Service) updateNetworkChaos(exp *core.ExperimentInfo) error {
 	chaos.SetLabels(exp.Labels)
 	chaos.SetAnnotations(exp.Annotations)
 	chaos.Spec = v1alpha1.NetworkChaosSpec{
-		Selector:  exp.Scope.ParseSelector(),
-		Action:    v1alpha1.NetworkChaosAction(exp.Target.NetworkChaos.Action),
-		Mode:      v1alpha1.PodMode(exp.Scope.Mode),
-		Value:     exp.Scope.Value,
-		Delay:     exp.Target.NetworkChaos.Delay,
-		Loss:      exp.Target.NetworkChaos.Loss,
-		Duplicate: exp.Target.NetworkChaos.Duplicate,
-		Corrupt:   exp.Target.NetworkChaos.Corrupt,
-		Bandwidth: exp.Target.NetworkChaos.Bandwidth,
+		Selector: exp.Scope.ParseSelector(),
+		Action:   v1alpha1.NetworkChaosAction(exp.Target.NetworkChaos.Action),
+		Mode:     v1alpha1.PodMode(exp.Scope.Mode),
+		Value:    exp.Scope.Value,
+		TcParameter: v1alpha1.TcParameter{
+			Delay:     exp.Target.NetworkChaos.Delay,
+			Loss:      exp.Target.NetworkChaos.Loss,
+			Duplicate: exp.Target.NetworkChaos.Duplicate,
+			Corrupt:   exp.Target.NetworkChaos.Corrupt,
+			Bandwidth: exp.Target.NetworkChaos.Bandwidth,
+		},
 		Direction: v1alpha1.Direction(exp.Target.NetworkChaos.Direction),
 	}
 
