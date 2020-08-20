@@ -33,8 +33,10 @@ var _ = Describe("networkchaos_webhook", func() {
 			networkchaos := &NetworkChaos{
 				ObjectMeta: metav1.ObjectMeta{Namespace: metav1.NamespaceDefault},
 				Spec: NetworkChaosSpec{
-					Delay: &DelaySpec{
-						Latency: "90ms",
+					TcParameter: TcParameter{
+						Delay: &DelaySpec{
+							Latency: "90ms",
+						},
 					},
 				},
 			}
@@ -135,10 +137,12 @@ var _ = Describe("networkchaos_webhook", func() {
 							Name:      "foo6",
 						},
 						Spec: NetworkChaosSpec{
-							Delay: &DelaySpec{
-								Latency:     "1S",
-								Jitter:      "1S",
-								Correlation: "num",
+							TcParameter: TcParameter{
+								Delay: &DelaySpec{
+									Latency:     "1S",
+									Jitter:      "1S",
+									Correlation: "num",
+								},
 							},
 						},
 					},
@@ -155,10 +159,12 @@ var _ = Describe("networkchaos_webhook", func() {
 							Name:      "foo7",
 						},
 						Spec: NetworkChaosSpec{
-							Delay: &DelaySpec{
-								Reorder: &ReorderSpec{
-									Reorder:     "num",
-									Correlation: "num",
+							TcParameter: TcParameter{
+								Delay: &DelaySpec{
+									Reorder: &ReorderSpec{
+										Reorder:     "num",
+										Correlation: "num",
+									},
 								},
 							},
 						},
@@ -176,9 +182,11 @@ var _ = Describe("networkchaos_webhook", func() {
 							Name:      "foo8",
 						},
 						Spec: NetworkChaosSpec{
-							Loss: &LossSpec{
-								Loss:        "num",
-								Correlation: "num",
+							TcParameter: TcParameter{
+								Loss: &LossSpec{
+									Loss:        "num",
+									Correlation: "num",
+								},
 							},
 						},
 					},
@@ -195,9 +203,11 @@ var _ = Describe("networkchaos_webhook", func() {
 							Name:      "foo9",
 						},
 						Spec: NetworkChaosSpec{
-							Duplicate: &DuplicateSpec{
-								Duplicate:   "num",
-								Correlation: "num",
+							TcParameter: TcParameter{
+								Duplicate: &DuplicateSpec{
+									Duplicate:   "num",
+									Correlation: "num",
+								},
 							},
 						},
 					},
@@ -214,9 +224,11 @@ var _ = Describe("networkchaos_webhook", func() {
 							Name:      "foo10",
 						},
 						Spec: NetworkChaosSpec{
-							Corrupt: &CorruptSpec{
-								Corrupt:     "num",
-								Correlation: "num",
+							TcParameter: TcParameter{
+								Corrupt: &CorruptSpec{
+									Corrupt:     "num",
+									Correlation: "num",
+								},
 							},
 						},
 					},
@@ -233,8 +245,10 @@ var _ = Describe("networkchaos_webhook", func() {
 							Name:      "foo11",
 						},
 						Spec: NetworkChaosSpec{
-							Bandwidth: &BandwidthSpec{
-								Rate: "10",
+							TcParameter: TcParameter{
+								Bandwidth: &BandwidthSpec{
+									Rate: "10",
+								},
 							},
 						},
 					},

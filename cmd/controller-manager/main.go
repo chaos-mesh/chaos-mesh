@@ -20,11 +20,13 @@ import (
 	"os"
 	"time"
 
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	chaosmeshv1alpha1 "github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	apiWebhook "github.com/chaos-mesh/chaos-mesh/api/webhook"
 	"github.com/chaos-mesh/chaos-mesh/controllers"
 	"github.com/chaos-mesh/chaos-mesh/controllers/common"
 	"github.com/chaos-mesh/chaos-mesh/controllers/metrics"
+	"github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos"
 	"github.com/chaos-mesh/chaos-mesh/pkg/utils"
 	"github.com/chaos-mesh/chaos-mesh/pkg/version"
 	"github.com/chaos-mesh/chaos-mesh/pkg/webhook/config"
@@ -163,6 +165,17 @@ func main() {
 	}
 	if err = (&chaosmeshv1alpha1.StressChaos{}).SetupWebhookWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create webhook", "webhook", "StressChaos")
+		os.Exit(1)
+	}
+
+	// We only setup webhook for podnetworkchaos, and the logic of applying chaos are in the validation
+	// webhook, because we need to get the running result synchronously in network chaos reconciler
+	v1alpha1.RegisterRawPodNetworkHandler(&podnetworkchaos.Handler{
+		Client: mgr.GetClient(),
+		Log:    ctrl.Log.WithName("handler").WithName("PodNetworkChaos"),
+	})
+	if err = (&chaosmeshv1alpha1.PodNetworkChaos{}).SetupWebhookWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create webhook", "webhook", "PodNetworkChaos")
 		os.Exit(1)
 	}
 

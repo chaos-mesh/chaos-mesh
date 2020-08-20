@@ -19,14 +19,14 @@ install_scirpt="install.sh"
 
 helm template chaos-mesh helm/chaos-mesh --namespace=chaos-testing --set dashboard.create=true > ${tmp_file}
 
-sed -i .bak '/helm/d' $tmp_file
-sed -i .bak '/Helm/d' $tmp_file
-sed -i .bak 's/tls.crt:.*/tls.crt: \"\$\{TLS_CRT\}\"/g' $tmp_file
-sed -i .bak 's/tls.key:.*/tls.key: \"\$\{TLS_KEY\}\"/g' $tmp_file
-sed -i .bak 's/caBundle:.*/caBundle: \"\$\{CA_BUNDLE\}\"/g' $tmp_file
-sed -i .bak 's/mountPath: \/var\/run\/docker.sock/mountPath: \$\{mountPath\}/g' $tmp_file
-sed -i .bak 's/path: \/var\/run\/docker.sock/path: \$\{socketPath\}/g' $tmp_file
-sed -i .bak 's/- docker/- $\{runtime\}/g' $tmp_file
+sed -i.bak '/helm/d' $tmp_file
+sed -i.bak '/Helm/d' $tmp_file
+sed -i.bak 's/tls.crt:.*/tls.crt: \"\$\{TLS_CRT\}\"/g' $tmp_file
+sed -i.bak 's/tls.key:.*/tls.key: \"\$\{TLS_KEY\}\"/g' $tmp_file
+sed -i.bak 's/caBundle:.*/caBundle: \"\$\{CA_BUNDLE\}\"/g' $tmp_file
+sed -i.bak 's/mountPath: \/var\/run\/docker.sock/mountPath: \$\{mountPath\}/g' $tmp_file
+sed -i.bak 's/path: \/var\/run\/docker.sock/path: \$\{socketPath\}/g' $tmp_file
+sed -i.bak 's/- docker/- $\{runtime\}/g' $tmp_file
 mv $tmp_file $tmp_file.bak
 
 cat <<EOF > $tmp_file
