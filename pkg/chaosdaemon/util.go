@@ -369,3 +369,7 @@ func GetChildProcesses(ppid uint32) ([]uint32, error) {
 		}
 	}
 }
+
+func encodeOutputToError(output []byte, err error) error {
+	return fmt.Errorf("error code: %v, msg: %s", err, string(output))
+}

@@ -5,19 +5,7 @@ package pb;
 import "google/protobuf/empty.proto";
 
 service ChaosDaemon {
-  rpc SetNetem(NetemRequest) returns (google.protobuf.Empty) {}
-  rpc DeleteNetem(NetemRequest) returns (google.protobuf.Empty) {}
-
-  rpc SetTbf(TbfRequest) returns (google.protobuf.Empty) {}
-  rpc DeleteTbf(TbfRequest) returns (google.protobuf.Empty) {}
-
-  rpc AddQdisc(QdiscRequest) returns (google.protobuf.Empty) {}
-  rpc DelQdisc(QdiscRequest) returns (google.protobuf.Empty) {}
-
-  rpc AddEmatchFilter(EmatchFilterRequest) returns (google.protobuf.Empty) {}
-
-  // generic tc filter del command
-  rpc DelTcFilter(TcFilterRequest) returns (google.protobuf.Empty) {}
+  rpc SetTcs(TcsRequest) returns (google.protobuf.Empty) {}
 
   rpc FlushIPSets(IPSetsRequest) returns (google.protobuf.Empty) {}
   
@@ -177,3 +165,18 @@ message CancelStressRequest {
   int64 startTime = 2;
 }
 
+message TcsRequest {
+  repeated Tc tcs = 1;
+  string container_id = 2;
+}
+
+message Tc {
+  enum Type {
+    NETEM = 0;
+    BANDWIDTH = 1;
+  }
+  Type type = 1;
+  Netem netem = 2;
+  Tbf tbf = 3;
+  string ipset = 4;
+}

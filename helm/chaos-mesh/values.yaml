@@ -260,6 +260,7 @@ webhook:
     - networkchaos
     - kernelchaos
     - stresschaos
+    - podnetworkchaos
 
 bpfki:
   create: false

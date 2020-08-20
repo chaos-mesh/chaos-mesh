@@ -26,7 +26,7 @@ export default function gen({
 
   const svg = d3.select(root).append('svg').attr('class', 'chaos-chart').attr('width', width).attr('height', height)
 
-  const halfHourLater = day(events[events.length - 1].start_time).add(0.5, 'h')
+  const halfHourLater = (events.length ? day(events[events.length - 1].start_time) : day()).add(0.5, 'h')
 
   const x = d3
     .scaleLinear()
