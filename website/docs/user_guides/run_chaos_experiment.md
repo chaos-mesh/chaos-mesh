@@ -111,3 +111,4 @@ kubectl port-forward -n chaos-testing svc/chaos-dashboard 2333:2333
 Then you can access [`http://localhost:2333`](http://localhost:2333) in the browser.
 
 ![Chaos Dashboard](/img/chaos-dashboard.gif)
+
