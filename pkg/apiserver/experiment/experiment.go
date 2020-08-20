@@ -18,6 +18,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
 	"sync"
 	"time"
 
@@ -238,17 +239,17 @@ func (s *Service) createIOChaos(exp *core.ExperimentInfo) error {
 		},
 		Spec: v1alpha1.IoChaosSpec{
 			Selector: exp.Scope.ParseSelector(),
-			Action:   v1alpha1.IOChaosAction(exp.Target.IOChaos.Action),
-			Mode:     v1alpha1.PodMode(exp.Scope.Mode),
-			Value:    exp.Scope.Value,
+			// Action:   v1alpha1.IOChaosAction(exp.Target.IOChaos.Action),
+			Mode:  v1alpha1.PodMode(exp.Scope.Mode),
+			Value: exp.Scope.Value,
 			// TODO: don't hardcode after we support other layers
-			Layer:   v1alpha1.FileSystemLayer,
-			Addr:    exp.Target.IOChaos.Addr,
-			Delay:   exp.Target.IOChaos.Delay,
-			Errno:   exp.Target.IOChaos.Errno,
-			Path:    exp.Target.IOChaos.Path,
-			Percent: exp.Target.IOChaos.Percent,
-			Methods: exp.Target.IOChaos.Methods,
+			// Layer:   v1alpha1.FileSystemLayer,
+			// Addr:    exp.Target.IOChaos.Addr,
+			// Delay:   exp.Target.IOChaos.Delay,
+			// Errno:   exp.Target.IOChaos.Errno,
+			// Path:    exp.Target.IOChaos.Path,
+			// Percent: exp.Target.IOChaos.Percent,
+			// Methods: exp.Target.IOChaos.Methods,
 		},
 	}
 
@@ -420,6 +421,11 @@ func (s *Service) getIoChaosDetail(namespace string, name string) (ExperimentDet
 		}
 		return ExperimentDetail{}, err
 	}
+
+	var methods []string
+	for _, method := range chaos.Spec.Methods {
+		methods = append(methods, string(method))
+	}
 	info := core.ExperimentInfo{
 		Name:        chaos.Name,
 		Namespace:   chaos.Namespace,
@@ -441,12 +447,11 @@ func (s *Service) getIoChaosDetail(namespace string, name string) (ExperimentDet
 			Kind: v1alpha1.KindIOChaos,
 			IOChaos: &core.IOChaosInfo{
 				Action:  string(chaos.Spec.Action),
-				Addr:    chaos.Spec.Addr,
 				Delay:   chaos.Spec.Delay,
-				Errno:   chaos.Spec.Errno,
+				Errno:   fmt.Sprintf("%d", chaos.Spec.Errno),
 				Path:    chaos.Spec.Path,
-				Percent: chaos.Spec.Percent,
-				Methods: chaos.Spec.Methods,
+				Percent: strconv.Itoa(chaos.Spec.Percent),
+				Methods: methods,
 			},
 		},
 	}
@@ -1231,19 +1236,30 @@ func (s *Service) updateIOChaos(exp *core.ExperimentInfo) error {
 
 	chaos.SetLabels(exp.Labels)
 	chaos.SetAnnotations(exp.Annotations)
+
+	errno, err := strconv.Atoi(exp.Target.IOChaos.Errno)
+	if err != nil {
+		return err
+	}
+	var methods []v1alpha1.IoMethod
+	for _, method := range exp.Target.IOChaos.Methods {
+		methods = append(methods, v1alpha1.IoMethod(method))
+	}
+
+	percent, err := strconv.Atoi(exp.Target.IOChaos.Percent)
+	if err != nil {
+		return err
+	}
 	chaos.Spec = v1alpha1.IoChaosSpec{
 		Selector: exp.Scope.ParseSelector(),
-		Action:   v1alpha1.IOChaosAction(exp.Target.IOChaos.Action),
+		Action:   v1alpha1.IoChaosType(exp.Target.IOChaos.Action),
 		Mode:     v1alpha1.PodMode(exp.Scope.Mode),
 		Value:    exp.Scope.Value,
-		// TODO: don't hardcode after we support other layers
-		Layer:   v1alpha1.FileSystemLayer,
-		Addr:    exp.Target.IOChaos.Addr,
-		Delay:   exp.Target.IOChaos.Delay,
-		Errno:   exp.Target.IOChaos.Errno,
-		Path:    exp.Target.IOChaos.Path,
-		Percent: exp.Target.IOChaos.Percent,
-		Methods: exp.Target.IOChaos.Methods,
+		Delay:    exp.Target.IOChaos.Delay,
+		Errno:    uint32(errno),
+		Path:     exp.Target.IOChaos.Path,
+		Percent:  percent,
+		Methods:  methods,
 	}
 
 	if exp.Scheduler.Cron != "" {

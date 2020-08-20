@@ -1,4 +1,4 @@
-FROM alpine:3.10
+FROM alpine:3.12
 
 ARG HTTPS_PROXY
 ARG HTTP_PROXY
@@ -7,4 +7,4 @@ ARG SWAGGER
 
 RUN apk add tzdata --no-cache
 
-COPY --from=pingcap/binary /src/bin/chaos-dashboard /usr/local/bin/chaos-dashboard
+COPY --from=pingcap/binary /bin/chaos-dashboard /usr/local/bin/chaos-dashboard

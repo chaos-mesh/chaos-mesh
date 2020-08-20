@@ -119,7 +119,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		r.Log.Info("Performing Action")
 
 		if err = r.Apply(ctx, req, chaos); err != nil {
-			r.Log.Error(err, "failed to apply chaos action")
+			r.Log.Error(err, "failed to apply chaos action", "chaos", chaos)
 
 			status.Experiment.Phase = v1alpha1.ExperimentPhaseFailed
 

@@ -226,40 +226,7 @@ var _ = Describe("iochaos_webhook", func() {
 						},
 						Spec: IoChaosSpec{
 							Delay:  "1S",
-							Action: IODelayAction,
-						},
-					},
-					execute: func(chaos *IoChaos) error {
-						return chaos.ValidateCreate()
-					},
-					expect: "error",
-				},
-				{
-					name: "validate errno",
-					chaos: IoChaos{
-						ObjectMeta: metav1.ObjectMeta{
-							Namespace: metav1.NamespaceDefault,
-							Name:      "foo13",
-						},
-						Spec: IoChaosSpec{
-							Errno:  "num",
-							Action: IOMixedAction,
-						},
-					},
-					execute: func(chaos *IoChaos) error {
-						return chaos.ValidateCreate()
-					},
-					expect: "error",
-				},
-				{
-					name: "validate percent",
-					chaos: IoChaos{
-						ObjectMeta: metav1.ObjectMeta{
-							Namespace: metav1.NamespaceDefault,
-							Name:      "foo14",
-						},
-						Spec: IoChaosSpec{
-							Percent: "num",
+							Action: IoLatency,
 						},
 					},
 					execute: func(chaos *IoChaos) error {

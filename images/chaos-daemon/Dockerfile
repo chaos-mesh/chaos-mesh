@@ -1,9 +1,13 @@
-FROM alpine:3.10
+FROM debian:buster-slim
 
 ARG HTTPS_PROXY
 ARG HTTP_PROXY
 
-RUN apk add --no-cache tzdata iptables ipset stress-ng iproute2 util-linux
+RUN apt-get update
+RUN apt-get install -y tzdata iptables ipset stress-ng iproute2 fuse util-linux
 
-COPY --from=pingcap/binary /src/bin/chaos-daemon /usr/local/bin/chaos-daemon
-COPY --from=pingcap/binary /src/bin/pause /usr/local/bin/pause
+ENV RUST_BACKTRACE 1
+
+COPY --from=pingcap/binary /bin/chaos-daemon /usr/local/bin/chaos-daemon
+COPY --from=pingcap/binary /bin/toda /usr/local/bin/toda
+COPY --from=pingcap/binary /bin/pause /usr/local/bin/pause

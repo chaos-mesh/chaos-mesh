@@ -15,6 +15,7 @@ package controllers
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/go-logr/logr"
 	v1 "k8s.io/api/core/v1"
@@ -39,20 +40,25 @@ type IoChaosReconciler struct {
 
 // Reconcile reconciles an IOChaos resource
 func (r *IoChaosReconciler) Reconcile(req ctrl.Request) (result ctrl.Result, err error) {
-	logger := r.Log.WithValues("iochaos", req.NamespacedName)
 
-	reconciler := iochaos.Reconciler{
-		Client:        r.Client,
-		EventRecorder: r.EventRecorder,
-		Log:           logger,
-	}
 	chaos := &v1alpha1.IoChaos{}
 	if err := r.Get(context.Background(), req.NamespacedName, chaos); err != nil {
 		r.Log.Error(err, "unable to get iochaos")
 		return ctrl.Result{}, nil
 	}
 
-	result, err = reconciler.Reconcile(req, chaos)
+	scheduler := chaos.GetScheduler()
+	duration, err := chaos.GetDuration()
+	if err != nil {
+		r.Log.Error(err, fmt.Sprintf("unable to get iochaos[%s/%s]'s duration", chaos.Namespace, chaos.Name))
+		return ctrl.Result{}, err
+	}
+	if scheduler == nil && duration == nil {
+		return r.commonIoChaos(chaos, req)
+	} else if scheduler != nil && duration != nil {
+		return r.scheduleIoChaos(chaos, req)
+	}
+
 	if err != nil {
 		if chaos.IsDeleted() || chaos.IsPaused() {
 			r.Event(chaos, v1.EventTypeWarning, utils.EventChaosRecoverFailed, err.Error())
@@ -61,6 +67,16 @@ func (r *IoChaosReconciler) Reconcile(req ctrl.Request) (result ctrl.Result, err
 		}
 	}
 	return result, nil
+}
+
+func (r *IoChaosReconciler) commonIoChaos(chaos *v1alpha1.IoChaos, req ctrl.Request) (ctrl.Result, error) {
+	cr := iochaos.NewCommonReconciler(r.Client, r.Log.WithValues("iochaos", req.NamespacedName), req, r.EventRecorder)
+	return cr.Reconcile(req)
+}
+
+func (r *IoChaosReconciler) scheduleIoChaos(chaos *v1alpha1.IoChaos, req ctrl.Request) (ctrl.Result, error) {
+	sr := iochaos.NewTwoPhaseReconciler(r.Client, r.Log.WithValues("iochaos", req.NamespacedName), req, r.EventRecorder)
+	return sr.Reconcile(req)
 }
 
 func (r *IoChaosReconciler) SetupWithManager(mgr ctrl.Manager) error {

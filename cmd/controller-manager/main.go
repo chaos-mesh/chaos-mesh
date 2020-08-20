@@ -26,6 +26,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/controllers"
 	"github.com/chaos-mesh/chaos-mesh/controllers/common"
 	"github.com/chaos-mesh/chaos-mesh/controllers/metrics"
+	"github.com/chaos-mesh/chaos-mesh/controllers/podiochaos"
 	"github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos"
 	"github.com/chaos-mesh/chaos-mesh/pkg/utils"
 	"github.com/chaos-mesh/chaos-mesh/pkg/version"
@@ -165,6 +166,17 @@ func main() {
 	}
 	if err = (&chaosmeshv1alpha1.StressChaos{}).SetupWebhookWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create webhook", "webhook", "StressChaos")
+		os.Exit(1)
+	}
+
+	// We only setup webhook for podiochaos, and the logic of applying chaos are in the mutation
+	// webhook, because we need to get the running result synchronously in io chaos reconciler
+	v1alpha1.RegisterPodIoHandler(&podiochaos.Handler{
+		Client: mgr.GetClient(),
+		Log:    ctrl.Log.WithName("handler").WithName("PodIoChaos"),
+	})
+	if err = (&chaosmeshv1alpha1.PodIoChaos{}).SetupWebhookWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create webhook", "webhook", "PodIoChaos")
 		os.Exit(1)
 	}
 
