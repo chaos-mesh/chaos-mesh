@@ -100,7 +100,7 @@ Chaos Dashboard is a Web UI for managing, designing, monitoring Chaos Experiment
 
 > **Note:**
 >
-> If Chaos Dashboard was not installed, upgrade Chaos Mesh by executing `helm upgrade chaos-mesh helm/chaos-mesh --namespace=chaos-testing --set dashboard.create=true`.
+> If Chaos Dashboard was not installed, upgrade Chaos Mesh by executing `helm upgrade chaos-mesh chaos-mesh/chaos-mesh --namespace=chaos-testing --set dashboard.create=true`.
 
 A typical way to access it is to use `kubectl port-forward`:
 
