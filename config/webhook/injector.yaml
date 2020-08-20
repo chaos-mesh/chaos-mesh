@@ -1,0 +1,6 @@
+policy: enabled
+alwaysInjectSelector:
+  []
+neverInjectSelector:
+  []
+injectedAnnotations:

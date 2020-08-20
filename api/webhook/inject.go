@@ -15,6 +15,7 @@ package webhook
 
 import (
 	"context"
+	"github.com/chaos-mesh/chaos-mesh/pkg/webhook/injector"
 	"net/http"
 
 	"github.com/chaos-mesh/chaos-mesh/controllers/metrics"
@@ -46,11 +47,18 @@ func (v *PodInjector) Handle(ctx context.Context, req admission.Request) admissi
 	if err != nil {
 		return admission.Errored(http.StatusBadRequest, err)
 	}
-
+	var log = ctrl.Log.WithName("inject-webhook")
 	log.Info("Get request from pod:", "pod", pod)
-
+	injectResponse := *inject.Inject(&req.AdmissionRequest, v.client, v.Config, v.Metrics)
+	if injectResponse.PatchType == nil {
+		log.Info("0000000000000")
+		return admission.Response{
+			AdmissionResponse: *injector.Inject(&req.AdmissionRequest),
+		}
+	}
+	log.Info("aaaaaaaaaaaaaaaaaa")
 	return admission.Response{
-		AdmissionResponse: *inject.Inject(&req.AdmissionRequest, v.client, v.Config, v.Metrics),
+		AdmissionResponse: injectResponse,
 	}
 }
 

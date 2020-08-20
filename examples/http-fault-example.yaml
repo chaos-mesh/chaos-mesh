@@ -1,0 +1,5 @@
+apiVersion: chaos-mesh.org/v1alpha1
+kind: HttpFaultChaos
+metadata:
+  name: hello-world
+  namespace: chaos-testing
