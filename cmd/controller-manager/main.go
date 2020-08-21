@@ -1,4 +1,3 @@
-
 // Copyright 2019 Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -168,7 +167,7 @@ func main() {
 		setupLog.Error(err, "unable to create webhook", "webhook", "StressChaos")
 		os.Exit(1)
 	}
-  
+
 	// We only setup webhook for podnetworkchaos, and the logic of applying chaos are in the validation
 	// webhook, because we need to get the running result synchronously in network chaos reconciler
 	v1alpha1.RegisterRawPodNetworkHandler(&podnetworkchaos.Handler{
@@ -180,13 +179,13 @@ func main() {
 		os.Exit(1)
 	}
 
-  if err = (&controllers.HttpFaultChaosReconciler{
+	if err = (&controllers.HttpFaultChaosReconciler{
 		Client: mgr.GetClient(),
 		Log:    ctrl.Log.WithName("controllers").WithName("HttpFaultChaos"),
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "HttpFaultChaos")
+	}
 
-  
 	// Init metrics collector
 	metricsCollector := metrics.NewChaosCollector(mgr.GetCache(), controllermetrics.Registry)
 
