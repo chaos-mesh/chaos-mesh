@@ -118,24 +118,6 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1
 		return err
 	}
 
-	// get coredns's ip
-	service, err := utils.SelectAndFilterSevice(ctx, r.Client, "kube-system", "kube-dns")
-	if err != nil {
-		r.Log.Error(err, "failed to select service")
-		return err
-	}
-	r.Log.Info("get dns service", "service", service.String(), "ip", service.ClusterIP)
-
-	// get dns server's ip used for chaos
-	/*
-		service, err := utils.SelectAndFilterSevice(ctx, r.Client, "kube-system", "kube-dns")
-		if err != nil {
-			r.Log.Error(err, "failed to select service")
-			return err
-		}
-		r.Log.Info("get dns service", "service", service.String(), "ip", service.ClusterIP)
-	*/
-
 	pods, err := utils.SelectAndFilterPods(ctx, r.Client, &dnschaos.Spec)
 	if err != nil {
 		r.Log.Error(err, "failed to select and generate pods")
@@ -262,6 +244,24 @@ func (r *Reconciler) Object() v1alpha1.InnerObject {
 }
 
 func (r *Reconciler) applyAllPods(ctx context.Context, pods []v1.Pod, chaos *v1alpha1.DNSChaos) error {
+	// get coredns's ip
+	/*
+		service, err := utils.SelectAndFilterSevice(ctx, r.Client, "kube-system", "kube-dns")
+		if err != nil {
+			r.Log.Error(err, "failed to select service")
+			return err
+		}
+		r.Log.Info("get dns service", "service", service.String(), "ip", service.ClusterIP)
+	*/
+
+	// get dns server's ip used for chaos
+	service, err := utils.SelectAndFilterSevice(ctx, r.Client, "chaos-testing", "coredns")
+	if err != nil {
+		r.Log.Error(err, "failed to select service")
+		return err
+	}
+	r.Log.Info("get dns service", "service", service.String(), "ip", service.Spec.ClusterIP)
+
 	g := errgroup.Group{}
 	for index := range pods {
 		pod := &pods[index]
@@ -274,10 +274,10 @@ func (r *Reconciler) applyAllPods(ctx context.Context, pods []v1.Pod, chaos *v1a
 		chaos.Finalizers = utils.InsertFinalizer(chaos.Finalizers, key)
 
 		g.Go(func() error {
-			return r.applyPod(ctx, pod, chaos)
+			return r.applyPod(ctx, pod, chaos, service.Spec.ClusterIP)
 		})
 	}
-	err := g.Wait()
+	err = g.Wait()
 	if err != nil {
 		r.Log.Error(err, "g.Wait")
 		return err
@@ -285,7 +285,7 @@ func (r *Reconciler) applyAllPods(ctx context.Context, pods []v1.Pod, chaos *v1a
 	return nil
 }
 
-func (r *Reconciler) applyPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.DNSChaos) error {
+func (r *Reconciler) applyPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.DNSChaos, dnsServerIP string) error {
 	r.Log.Info("Try to apply dns chaos", "namespace",
 		pod.Namespace, "name", pod.Name)
 	daemonClient, err := utils.NewChaosDaemonClient(ctx, r.Client,
@@ -326,6 +326,7 @@ func (r *Reconciler) applyPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.
 
 	_, err = daemonClient.SetDNSServer(ctx, &pb.SetDNSServerRequest{
 		ContainerId: target,
+		DnsServer:   dnsServerIP,
 		//Scope:  pb.ExecStressRequest_CONTAINER,
 		//Target: target,
 		//Stressors: stressors,

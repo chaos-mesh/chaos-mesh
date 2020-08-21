@@ -15,10 +15,16 @@ package chaosdaemon
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/golang/protobuf/ptypes/empty"
 
 	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
+)
+
+const (
+	// DNSServerConfFile is the default config file for DNS server
+	DNSServerConfFile = "/etc/resolv.conf"
 )
 
 func (s *daemonServer) SetDNSServer(ctx context.Context,
@@ -56,7 +62,24 @@ func (s *daemonServer) SetDNSServer(ctx context.Context,
 		}
 	*/
 
-	cmd := withMountNS(context.Background(), GetNsPath(pid, mountNS), "cp", "/etc/hosts", "/tmp/")
+	cmd := withMountNS(context.Background(), GetNsPath(pid, mountNS), "cp", DNSServerConfFile, DNSServerConfFile+".chaos.bak")
+	out, err := cmd.Output()
+	if err != nil {
+		return nil, err
+	}
+	if len(out) != 0 {
+		log.Info("cmd output", "output", string(out))
+	}
+
+	cmd = withMountNS(context.Background(), GetNsPath(pid, mountNS), "echo", fmt.Sprintf("nameserver %s", req.DnsServer), ">", DNSServerConfFile)
+	out, err = cmd.Output()
+	if err != nil {
+		return nil, err
+	}
+	if len(out) != 0 {
+		log.Info("cmd output", "output", string(out))
+	}
+	//fmt.Sprintf("cp echo \"nameserver %s\" > /etc/resolve.conf")
 
 	//cmd := exec.CommandContext(ctx, "cp", "/etc/hosts /tmp/")
 	/*
@@ -65,13 +88,6 @@ func (s *daemonServer) SetDNSServer(ctx context.Context,
 			return nil, err
 		}
 	*/
-	log.Info("Start process successfully")
-	out, err := cmd.Output()
-	if err != nil {
-		log.Error(err, "cmd output")
-		return nil, err
-	}
-	log.Info(string(out))
 
 	/*
 		procState, err := process.NewProcess(int32(cmd.Process.Pid))
