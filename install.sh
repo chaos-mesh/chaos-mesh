@@ -38,6 +38,7 @@ FLAGS:
         --volume-provisioner Deploy volume provisioner in local Kubernetes cluster
         --local-registry     Deploy local docker registry in local Kubernetes cluster
         --template           Locally render templates
+        --k3s                Install chaos-mesh in k3s environment
 OPTIONS:
     -v, --version            Version of chaos-mesh, default value: latest
     -l, --local [kind]       Choose a way to run a local kubernetes cluster, supported value: kind,
@@ -78,6 +79,7 @@ main() {
     local template=false
     local sidecar_template=true
     local install_dependency_only=false
+    local k3s=false
 
     while [[ $# -gt 0 ]]
     do
@@ -196,6 +198,11 @@ main() {
                 shift
                 shift
                 ;;
+            --k3s)
+                k3s=true
+                shift
+                shift
+                ;;
             *)
                 echo "unknown flag or option $key"
                 usage
@@ -218,9 +225,13 @@ main() {
         runtime="containerd"
     fi
 
+    if [ "${k3s}" == "true" ]; then
+        runtime="containerd"
+    fi
+
     if $template; then
         ensure gen_crd_manifests "${crd}"
-        ensure gen_chaos_mesh_manifests "${runtime}"
+        ensure gen_chaos_mesh_manifests "${runtime}" "${k3s}"
         if $sidecar_template; then
             ensure gen_default_sidecar_template "${chaosfs}"
         fi
@@ -245,8 +256,10 @@ main() {
 
     check_kubernetes
 
-    install_chaos_mesh "${release_name}" "${namespace}" "${local_kube}" ${force_chaos_mesh} ${docker_mirror} "${crd}" "${runtime}" "${chaosfs}"
+    install_chaos_mesh "${release_name}" "${namespace}" "${local_kube}" ${force_chaos_mesh} ${docker_mirror} "${crd}" "${runtime}" "${chaosfs}" "${sidecar_template}" "${k3s}"
     ensure_pods_ready "${namespace}" "app.kubernetes.io/component=controller-manager" 100
+    ensure_pods_ready "${namespace}" "app.kubernetes.io/component=chaos-daemon" 100
+    ensure_pods_ready "${namespace}" "app.kubernetes.io/component=chaos-dashboard" 100
     printf "Chaos Mesh %s is installed successfully\n" "${release_name}"
 }
 
@@ -598,6 +611,7 @@ install_chaos_mesh() {
     local runtime=$7
     local sidecar_template=$8
     local chaosfs=$9
+    local k3s=${10}
 
     printf "Install Chaos Mesh %s\n" "${release_name}"
 
@@ -614,7 +628,7 @@ install_chaos_mesh() {
     fi
 
     gen_crd_manifests "${crd}" | kubectl apply -f - || exit 1
-    gen_chaos_mesh_manifests "${runtime}" | kubectl apply -f - || exit 1
+    gen_chaos_mesh_manifests "${runtime}" "${k3s}" | kubectl apply -f - || exit 1
     if [ "$sidecar_template" == "true" ]; then
         gen_default_sidecar_template "${chaosfs}"| kubectl apply -f - || exit 1
     fi
@@ -821,10 +835,17 @@ check_url() {
 
 gen_chaos_mesh_manifests() {
     local runtime=$1
+    local k3s=$2
+
     local socketPath="/var/run/docker.sock"
     local mountPath="/var/run/docker.sock"
     if [ "${runtime}" == "containerd" ]; then
         socketPath="/run/containerd/containerd.sock"
+        mountPath="/run/containerd/containerd.sock"
+    fi
+
+    if [ "${k3s}" == "true" ]; then
+        socketPath="/run/k3s/containerd/containerd.sock"
         mountPath="/run/containerd/containerd.sock"
     fi
 
