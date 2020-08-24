@@ -306,7 +306,7 @@ func (b *processBuilder) Build(ctx context.Context) *exec.Cmd {
 	}
 
 	if c := mock.On("MockProcessBuild"); c != nil {
-		f := c.(func(context.Context, string, string, ...string) *exec.Cmd)
+		f := c.(func(context.Context, string, ...string) *exec.Cmd)
 		return f(ctx, cmd, args...)
 	}
 

@@ -60,7 +60,7 @@ exit 1
 			`), 0755)
 			Expect(err).To(BeNil())
 			defer os.Remove("/tmp/mockfail.sh")
-			defer mock.With("MockProcessBuild", func(ctx context.Context, string, ...string) *exec.Cmd {
+			defer mock.With("MockProcessBuild", func(ctx context.Context, cmd string, args ...string) *exec.Cmd {
 				return exec.Command("/tmp/mockfail.sh", ipsetExistErr)
 			})()
 			err = createIPSet(context.TODO(), "nsPath", "name")
