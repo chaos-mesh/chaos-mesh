@@ -26,6 +26,12 @@ curl -sSL https://mirrors.chaos-mesh.org/latest/install.sh | bash
 The above command install all the CRDs, required service account configuration, and all components.
 Before you start running a chaos experiment, verify if Chaos Mesh is installed correctly.
 
+If you are using k3s or k3d, please also specify `--k3s` flag.
+
+```bash
+curl -sSL https://mirrors.chaos-mesh.org/latest/install.sh --k3s | bash
+```
+
 ### Verify your installation
 
 Verify if the chaos mesh is running (For the use of *kubectl*, you can refer to the [documentation](https://kubernetes.io/docs/reference/generated/kubectl/kubectl-commands).)
