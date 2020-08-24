@@ -65,7 +65,6 @@ func (s *daemonServer) ExecStressors(ctx context.Context,
 
 	cmd := defaultProcessBuilder("stress-ng", strings.Fields(req.Stressors)...).
 		EnablePause().
-		EnableSubReaper().
 		EnableSuicide().
 		SetPidNS(GetNsPath(pid, pidNS)).
 		Build(context.Background())

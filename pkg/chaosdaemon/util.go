@@ -44,9 +44,8 @@ const (
 	containerdProtocolPrefix = "containerd://"
 	containerdDefaultNS      = "k8s.io"
 
-	pausePath     = "/usr/local/bin/pause"
-	suicidePath   = "/usr/local/bin/suicide"
-	subreaperPath = "/usr/local/bin/subreaper"
+	pausePath   = "/usr/local/bin/pause"
+	suicidePath = "/usr/local/bin/suicide"
 
 	defaultProcPrefix = "/proc"
 )
@@ -220,9 +219,8 @@ type processBuilder struct {
 
 	nsOptions []nsOption
 
-	pause     bool
-	suicide   bool
-	subreaper bool
+	pause   bool
+	suicide bool
 }
 
 func defaultProcessBuilder(cmd string, args ...string) *processBuilder {
@@ -232,7 +230,6 @@ func defaultProcessBuilder(cmd string, args ...string) *processBuilder {
 		nsOptions: []nsOption{},
 		pause:     false,
 		suicide:   false,
-		subreaper: false,
 	}
 }
 
@@ -268,23 +265,17 @@ func (b *processBuilder) EnableSuicide() *processBuilder {
 	return b
 }
 
-func (b *processBuilder) EnableSubReaper() *processBuilder {
-	b.subreaper = true
-
-	return b
-}
-
 func (b *processBuilder) Build(ctx context.Context) *exec.Cmd {
-	// The call routine is subreaper -> pause -> nsenter -> suicide -> process
-	// so that when chaos-daemon killed subreaper, the suicide process will
+	// The call routine is suicide -> pause -> nsenter --(fork)-> suicide -> process
+	// so that when chaos-daemon killed the suicide process, the sub suicide process will
 	// receive a signal and exit.
 	// For example:
 	// If you call `nsenter -p/proc/.../ns/pid bash -c "while true; do sleep 1; date; done"`
 	// then even you kill the nsenter process, the subprocess of it will continue running
 	// until it gets killed. The suicide program is used to make sure that the subprocess will
 	// be terminated when its parent died.
-	// However, the "process" may also create "subprocess", so a subreaper is needed to kill
-	// the tree.
+	// But the `./bin/suicide nsenter -p/proc/.../ns/pid ./bin/suicide bash -c "while true; do sleep 1; date; done"`
+	// can fix this problem. The first suicide is used to ensure when chaos-daemon is dead, the process is killed
 
 	// I'm not sure this method is 100% reliable, but half a loaf is better than none.
 
@@ -309,9 +300,9 @@ func (b *processBuilder) Build(ctx context.Context) *exec.Cmd {
 		cmd = pausePath
 	}
 
-	if b.subreaper {
+	if b.suicide {
 		args = append([]string{cmd}, args...)
-		cmd = subreaperPath
+		cmd = suicidePath
 	}
 
 	return exec.CommandContext(ctx, cmd, args...)
@@ -367,10 +358,10 @@ func GetParentProcess(pid int) (int, error) {
 
 	var _pid int
 	var _comm string
-	var _state string
+	var _state int
 	var ppid int
 	// read according to procfs manual page
-	_, err = fmt.Fscanf(f, "%d %s %c %d", _pid, _comm, _state, ppid)
+	_, err = fmt.Fscanf(f, "%d %s %c %d", &_pid, &_comm, &_state, &ppid)
 	if err != nil {
 		return 0, err
 	}
