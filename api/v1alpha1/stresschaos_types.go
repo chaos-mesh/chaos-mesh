@@ -119,9 +119,6 @@ type StressInstance struct {
 	// UID is the instance identifier
 	// +optional
 	UID string `json:"uid"`
-	// StartTime specifies when the instance starts
-	// +optional
-	StartTime *metav1.Time `json:"startTime"`
 }
 
 // GetDuration gets the duration of StressChaos

@@ -97,6 +97,12 @@ chaosdaemon:
 pause:
 	cc ./hack/pause.c -o bin/pause
 
+suicide:
+	cc ./hack/suicide.c -o bin/suicide
+
+subreaper:
+	cc ./hack/subreaper.c -o bin/subreaper
+
 # Build manager binary
 manager:
 	$(GO) build -ldflags '$(LDFLAGS)' -o bin/chaos-controller-manager ./cmd/controller-manager/*.go
@@ -125,7 +131,7 @@ ui: yarn_dependencies
 	cd ui &&\
 	REACT_APP_DASHBOARD_API_URL="" yarn build
 
-binary: chaosdaemon manager chaosfs chaos-dashboard pause
+binary: chaosdaemon manager chaosfs chaos-dashboard pause suicide subreaper
 
 watchmaker:
 	$(CGOENV) go build -ldflags '$(LDFLAGS)' -o bin/watchmaker ./cmd/watchmaker/...

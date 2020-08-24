@@ -17,14 +17,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"time"
 
 	"github.com/go-logr/logr"
 	"github.com/hashicorp/go-multierror"
 	"golang.org/x/sync/errgroup"
 	v1 "k8s.io/api/core/v1"
 	k8serror "k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/tools/cache"
 	"k8s.io/client-go/tools/record"
@@ -193,8 +191,7 @@ func (r *Reconciler) recoverPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha
 		return nil
 	}
 	if _, err = daemonClient.CancelStressors(ctx, &pb.CancelStressRequest{
-		Instance:  instance.UID,
-		StartTime: instance.StartTime.UnixNano() / int64(time.Millisecond),
+		Instance: instance.UID,
 	}); err != nil {
 		return err
 	}
@@ -268,9 +265,6 @@ func (r *Reconciler) applyPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.
 	}
 	chaos.Status.Instances[fmt.Sprintf("%s/%s", pod.Namespace, pod.Name)] = v1alpha1.StressInstance{
 		UID: res.Instance,
-		StartTime: &metav1.Time{
-			Time: time.Unix(res.StartTime/1000, (res.StartTime%1000)*int64(time.Millisecond)),
-		},
 	}
 	return nil
 }

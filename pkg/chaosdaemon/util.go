@@ -21,7 +21,6 @@ import (
 	"os"
 	"os/exec"
 	"strconv"
-	"strings"
 	"sync"
 	"syscall"
 
@@ -45,7 +44,9 @@ const (
 	containerdProtocolPrefix = "containerd://"
 	containerdDefaultNS      = "k8s.io"
 
-	pausePath = "/usr/local/bin/pause"
+	pausePath     = "/usr/local/bin/pause"
+	suicidePath   = "/usr/local/bin/suicide"
+	subreaperPath = "/usr/local/bin/subreaper"
 
 	defaultProcPrefix = "/proc"
 )
@@ -212,59 +213,113 @@ func GetNsPath(pid uint32, typ nsType) string {
 	return fmt.Sprintf("%s/%d/ns/%s", defaultProcPrefix, pid, string(typ))
 }
 
-func withPause(cmd exec.Cmd) exec.Cmd {
-	cmd.Path = pausePath
-	cmd.Args = append([]string{pausePath}, cmd.Args...)
+// processBuilder builds a exec.Cmd for daemon
+type processBuilder struct {
+	cmd  string
+	args []string
 
-	return cmd
+	nsOptions []nsOption
+
+	pause     bool
+	suicide   bool
+	subreaper bool
 }
 
-func withNetNS(ctx context.Context, nsPath string, cmd string, args ...string) *exec.Cmd {
-	// Mock point to return mock Cmd in unit test
-	if c := mock.On("MockWithNetNs"); c != nil {
-		f := c.(func(context.Context, string, string, ...string) *exec.Cmd)
-		return f(ctx, nsPath, cmd, args...)
+func defaultProcessBuilder(cmd string, args ...string) *processBuilder {
+	return &processBuilder{
+		cmd:       cmd,
+		args:      args,
+		nsOptions: []nsOption{},
+		pause:     false,
+		suicide:   false,
+		subreaper: false,
 	}
+}
 
-	return withNS(ctx, []nsOption{{
+func (b *processBuilder) SetNetNS(nsPath string) *processBuilder {
+	return b.SetNS([]nsOption{{
 		Typ:  netNS,
 		Path: nsPath,
-	}}, cmd, args...)
+	}})
 }
 
-func withPidNS(ctx context.Context, nsPath string, cmd string, args ...string) *exec.Cmd {
-	// Mock point to return mock Cmd in unit test
-	if c := mock.On("MockWithPidNs"); c != nil {
-		f := c.(func(context.Context, string, string, ...string) *exec.Cmd)
-		return f(ctx, nsPath, cmd, args...)
-	}
-
-	return withNS(ctx, []nsOption{{
+func (b *processBuilder) SetPidNS(nsPath string) *processBuilder {
+	return b.SetNS([]nsOption{{
 		Typ:  pidNS,
 		Path: nsPath,
-	}}, cmd, args...)
+	}})
+}
+
+func (b *processBuilder) SetNS(options []nsOption) *processBuilder {
+	b.nsOptions = append(b.nsOptions, options...)
+
+	return b
+}
+
+func (b *processBuilder) EnablePause() *processBuilder {
+	b.pause = true
+
+	return b
+}
+
+func (b *processBuilder) EnableSuicide() *processBuilder {
+	b.suicide = true
+
+	return b
+}
+
+func (b *processBuilder) EnableSubReaper() *processBuilder {
+	b.subreaper = true
+
+	return b
+}
+
+func (b *processBuilder) Build(ctx context.Context) *exec.Cmd {
+	// The call routine is subreaper -> pause -> nsenter -> suicide -> process
+	// so that when chaos-daemon killed subreaper, the suicide process will
+	// receive a signal and exit.
+	// For example:
+	// If you call `nsenter -p/proc/.../ns/pid bash -c "while true; do sleep 1; date; done"`
+	// then even you kill the nsenter process, the subprocess of it will continue running
+	// until it gets killed. The suicide program is used to make sure that the subprocess will
+	// be terminated when its parent died.
+	// However, the "process" may also create "subprocess", so a subreaper is needed to kill
+	// the tree.
+
+	// I'm not sure this method is 100% reliable, but half a loaf is better than none.
+
+	args := b.args
+	cmd := b.cmd
+
+	if b.suicide {
+		args = append([]string{cmd}, args...)
+		cmd = suicidePath
+	}
+
+	if len(b.nsOptions) > 0 {
+		args = append([]string{"--", cmd}, args...)
+		for _, option := range b.nsOptions {
+			args = append([]string{"-" + nsArgMap[option.Typ] + option.Path}, args...)
+		}
+		cmd = "nsenter"
+	}
+
+	if b.pause {
+		args = append([]string{cmd}, args...)
+		cmd = pausePath
+	}
+
+	if b.subreaper {
+		args = append([]string{cmd}, args...)
+		cmd = subreaperPath
+	}
+
+	return exec.CommandContext(ctx, cmd, args...)
 }
 
 type nsOption struct {
 	Typ  nsType
 	Path string
-}
-
-func withNS(ctx context.Context, options []nsOption, cmd string, args ...string) *exec.Cmd {
-	// Mock point to return mock Cmd in unit test
-	if c := mock.On("MockWithNs"); c != nil {
-		f := c.(func(context.Context, []nsOption, string, ...string) *exec.Cmd)
-		return f(ctx, options, cmd, args...)
-	}
-
-	args = append([]string{"--", cmd}, args...)
-	for _, option := range options {
-		args = append([]string{"-" + nsArgMap[option.Typ] + option.Path}, args...)
-	}
-
-	log.Info("running command", "command", "nsenter "+strings.Join(args, " "))
-
-	return exec.CommandContext(ctx, "nsenter", args...)
 }
 
 // ContainerKillByContainerID kills container according to container id
@@ -303,7 +358,28 @@ func (c ContainerdClient) ContainerKillByContainerID(ctx context.Context, contai
 	return err
 }
 
+// GetParentProcess returns the ppid of a process
+func GetParentProcess(pid int) (int, error) {
+	f, err := os.Open(fmt.Sprintf("%s/%d/stat", defaultProcPrefix, pid))
+	if err != nil {
+		return 0, err
+	}
+
+	var _pid int
+	var _comm string
+	var _state string
+	var ppid int
+	// read according to procfs manual page
+	_, err = fmt.Fscanf(f, "%d %s %c %d", _pid, _comm, _state, ppid)
+	if err != nil {
+		return 0, err
+	}
+
+	return ppid, nil
+}
+
 // GetChildProcesses will return all child processes's pid. Include all generations.
+// only return error when /proc/pid/tasks cannot be read
 func GetChildProcesses(ppid uint32) ([]uint32, error) {
 	procs, err := ioutil.ReadDir(defaultProcPrefix)
 	if err != nil {

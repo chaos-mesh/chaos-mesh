@@ -228,10 +228,6 @@ spec:
               additionalProperties:
                 description: StressInstance is an instance generates stresses
                 properties:
-                  startTime:
-                    description: StartTime specifies when the instance starts
-                    format: date-time
-                    type: string
                   uid:
                     description: UID is the instance identifier
                     type: string

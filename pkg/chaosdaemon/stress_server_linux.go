@@ -28,7 +28,6 @@ import (
 	"github.com/containerd/cgroups"
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/pkg/errors"
-	"github.com/shirou/gopsutil/process"
 
 	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
 )
@@ -64,24 +63,18 @@ func (s *daemonServer) ExecStressors(ctx context.Context,
 		return nil, err
 	}
 
-	cmd := withPause(*withPidNS(context.Background(), GetNsPath(pid, pidNS), "stress-ng", strings.Fields(req.Stressors)...))
+	cmd := defaultProcessBuilder("stress-ng", strings.Fields(req.Stressors)...).
+		EnablePause().
+		EnableSubReaper().
+		EnableSuicide().
+		SetPidNS(GetNsPath(pid, pidNS)).
+		Build(context.Background())
 
 	if err := cmd.Start(); err != nil {
 		return nil, err
 	}
 	log.Info("Start process successfully")
 
-	procState, err := process.NewProcess(int32(cmd.Process.Pid))
-	if err != nil {
-		return nil, err
-	}
-	ct, err := procState.CreateTime()
-	if err != nil {
-		if kerr := cmd.Process.Kill(); kerr != nil {
-			log.Error(kerr, "kill stressors failed", "request", req)
-		}
-		return nil, err
-	}
 	if err = control.Add(cgroups.Process{Pid: cmd.Process.Pid}); err != nil {
 		if kerr := cmd.Process.Kill(); kerr != nil {
 			log.Error(kerr, "kill stressors failed", "request", req)
@@ -89,13 +82,13 @@ func (s *daemonServer) ExecStressors(ctx context.Context,
 		return nil, err
 	}
 
-	if err := procState.Resume(); err != nil {
+	if err := cmd.Process.Signal(syscall.SIGCONT); err != nil {
 		return nil, err
 	}
 	go func() {
 		if err, ok := cmd.Wait().(*exec.ExitError); ok {
 			status := err.Sys().(syscall.WaitStatus)
-			if status.Signaled() && status.Signal() == syscall.SIGKILL {
+			if status.Signaled() && status.Signal() == syscall.SIGTERM {
 				log.Info("Stressors cancelled", "request", req)
 			} else {
 				log.Error(err, "stressors exited accidentally", "request", req)
@@ -104,10 +97,11 @@ func (s *daemonServer) ExecStressors(ctx context.Context,
 	}()
 
 	return &pb.ExecStressResponse{
-		Instance:  strconv.Itoa(cmd.Process.Pid),
-		StartTime: ct,
+		Instance: strconv.Itoa(cmd.Process.Pid),
 	}, nil
 }
+
+var errFinished = "os: process already finished"
 
 func (s *daemonServer) CancelStressors(ctx context.Context,
 	req *pb.CancelStressRequest) (*empty.Empty, error) {
@@ -117,21 +111,25 @@ func (s *daemonServer) CancelStressors(ctx context.Context,
 	}
 	log.Info("Canceling stressors", "request", req)
 
-	ins, err := process.NewProcess(int32(pid))
+	process, err := os.FindProcess(pid)
 	if err != nil {
+		log.Error(err, "unreachable path. `os.FindProcess` will never return an error on unix", "pid", pid)
+		return nil, err
+	}
+	ppid, err := GetParentProcess(pid)
+	if err != nil {
+		log.Error(err, "fail to read parent id", "pid", pid)
+		return nil, err
+	}
+	if ppid != os.Getpid() {
+		log.Info("process has already been killed", "pid", pid, "ppid", ppid)
 		return &empty.Empty{}, nil
 	}
-	if ct, err := ins.CreateTime(); err == nil && ct == req.StartTime {
-		children, err := ins.Children()
-		if err != nil {
-			return nil, err
-		}
-		for _, child := range children {
-			log.Info("killing children for nsenter", "pid", child.Pid)
-			if err := child.Kill(); err != nil {
-				return nil, err
-			}
-		}
+
+	err = process.Signal(syscall.SIGTERM)
+	if err != nil && err.Error() != "os: process already finished" {
+		log.Error(err, "error while killing process", "pid", pid)
+		return nil, err
 	}
 
 	log.Info("Successfully canceled stressors")
