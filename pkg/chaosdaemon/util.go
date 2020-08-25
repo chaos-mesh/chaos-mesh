@@ -267,7 +267,7 @@ func (b *processBuilder) EnableSuicide() *processBuilder {
 }
 
 func (b *processBuilder) Build(ctx context.Context) *exec.Cmd {
-	// The call routine is suicide -> pause -> nsenter --(fork)-> suicide -> process
+	// The call routine is pause -> suicide -> nsenter --(fork)-> suicide -> process
 	// so that when chaos-daemon killed the suicide process, the sub suicide process will
 	// receive a signal and exit.
 	// For example:
@@ -354,26 +354,6 @@ func (c ContainerdClient) ContainerKillByContainerID(ctx context.Context, contai
 	err = task.Kill(ctx, syscall.SIGKILL)
 
 	return err
-}
-
-// GetParentProcess returns the ppid of a process
-func GetParentProcess(pid int) (int, error) {
-	f, err := os.Open(fmt.Sprintf("%s/%d/stat", defaultProcPrefix, pid))
-	if err != nil {
-		return 0, err
-	}
-
-	var _pid int
-	var _comm string
-	var _state int
-	var ppid int
-	// read according to procfs manual page
-	_, err = fmt.Fscanf(f, "%d %s %c %d", &_pid, &_comm, &_state, &ppid)
-	if err != nil {
-		return 0, err
-	}
-
-	return ppid, nil
 }
 
 // ReadCommName returns the command name of process

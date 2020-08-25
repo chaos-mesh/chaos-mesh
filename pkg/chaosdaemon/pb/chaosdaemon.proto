@@ -157,10 +157,12 @@ message ExecStressRequest {
 
 message ExecStressResponse {
   string instance = 1;
+  int64 startTime = 2;
 }
 
 message CancelStressRequest {
   string instance = 1;
+  int64 startTime = 2;
 }
 
 message TcsRequest {

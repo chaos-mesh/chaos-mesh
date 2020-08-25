@@ -29,6 +29,7 @@ import (
 	"github.com/containerd/cgroups"
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/pkg/errors"
+	"github.com/shirou/gopsutil/process"
 
 	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
 )
@@ -75,6 +76,12 @@ func (s *daemonServer) ExecStressors(ctx context.Context,
 	}
 	log.Info("Start process successfully")
 
+	procState, err := process.NewProcess(int32(cmd.Process.Pid))
+	if err != nil {
+		return nil, err
+	}
+	ct, err := procState.CreateTime()
+
 	if err = control.Add(cgroups.Process{Pid: cmd.Process.Pid}); err != nil {
 		if kerr := cmd.Process.Kill(); kerr != nil {
 			log.Error(kerr, "kill stressors failed", "request", req)
@@ -99,7 +106,7 @@ func (s *daemonServer) ExecStressors(ctx context.Context,
 			log.Info("pause has been resumed", "comm", comm)
 			break
 		}
-		log.Info("the process hasn't resumed, step into the following loop")
+		log.Info("the process hasn't resumed, step into the following loop", "comm", comm)
 	}
 	go func() {
 		if err, ok := cmd.Wait().(*exec.ExitError); ok {
@@ -113,7 +120,8 @@ func (s *daemonServer) ExecStressors(ctx context.Context,
 	}()
 
 	return &pb.ExecStressResponse{
-		Instance: strconv.Itoa(cmd.Process.Pid),
+		Instance:  strconv.Itoa(cmd.Process.Pid),
+		StartTime: ct,
 	}, nil
 }
 
@@ -127,24 +135,42 @@ func (s *daemonServer) CancelStressors(ctx context.Context,
 	}
 	log.Info("Canceling stressors", "request", req)
 
-	process, err := os.FindProcess(pid)
+	p, err := os.FindProcess(pid)
 	if err != nil {
 		log.Error(err, "unreachable path. `os.FindProcess` will never return an error on unix", "pid", pid)
 		return nil, err
 	}
-	ppid, err := GetParentProcess(pid)
+
+	procState, err := process.NewProcess(int32(pid))
+	if err != nil {
+		// return successfully as the process has exited
+		return &empty.Empty{}, nil
+	}
+	ct, err := procState.CreateTime()
+	if err != nil {
+		log.Error(err, "fail to read create time", "pid", pid)
+		// return successfully as the process has exited
+		return &empty.Empty{}, nil
+	}
+	if req.StartTime != ct {
+		log.Info("process has already been killed", "pid", pid, "startTime", ct, "expectedStartTime", req.StartTime)
+		// return successfully as the process has exited
+		return &empty.Empty{}, nil
+	}
+
+	ppid, err := procState.Ppid()
 	if err != nil {
 		log.Error(err, "fail to read parent id", "pid", pid)
 		// return successfully as the process has exited
 		return &empty.Empty{}, nil
 	}
-	if ppid != os.Getpid() {
+	if ppid != int32(os.Getpid()) {
 		log.Info("process has already been killed", "pid", pid, "ppid", ppid)
 		// return successfully as the process has exited
 		return &empty.Empty{}, nil
 	}
 
-	err = process.Signal(syscall.SIGTERM)
+	err = p.Signal(syscall.SIGTERM)
 	if err != nil && err.Error() != "os: process already finished" {
 		log.Error(err, "error while killing process", "pid", pid)
 		return nil, err
