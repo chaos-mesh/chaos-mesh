@@ -17,6 +17,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/go-logr/logr"
@@ -239,7 +240,8 @@ func (r *Reconciler) applyPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.
 	}
 
 	target := pod.Status.ContainerStatuses[0].ContainerID
-	if chaos.Spec.ContainerName != nil {
+	if chaos.Spec.ContainerName != nil &&
+		len(strings.TrimSpace(*chaos.Spec.ContainerName)) != 0 {
 		target = ""
 		for _, container := range pod.Status.ContainerStatuses {
 			if container.Name == *chaos.Spec.ContainerName {
