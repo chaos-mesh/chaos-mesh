@@ -1,7 +1,6 @@
 ---
 id: run_chaos_experiment
 title: Run Chaos Experiment
-sidebar_label: Run Chaos Experiment
 ---
 
 Now that you have deployed Chaos Mesh in your environment, it's time to use it for your chaos experiments. This document walks you through the process of running chaos experiments. It also describes the regular operations on chaos experiments.
@@ -24,6 +23,7 @@ After executing the above command, you can access [`http://localhost:8081`](http
 
 The chaos experiment configuration is defined in a YAML file. You need to create your own experiment configuration file based on the available fields in the sample below:
 
+<!-- prettier-ignore -->
 ```yaml
 apiVersion: chaos-mesh.org/v1alpha1
 kind: NetworkChaos
@@ -110,4 +110,6 @@ kubectl port-forward -n chaos-testing svc/chaos-dashboard 2333:2333
 
 Then you can access [`http://localhost:2333`](http://localhost:2333) in the browser.
 
-![Chaos Dashboard](/img/chaos-dashboard.gif)
+To get a quick look of Chaos Dashboard workflow, check out the following articles:
+
+- [Craig Morten: K8s Chaos Dive: Chaos-Mesh Part 1](https://dev.to/craigmorten/k8s-chaos-dive-2-chaos-mesh-part-1-2i96)
