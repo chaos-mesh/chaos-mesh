@@ -110,6 +110,6 @@ kubectl port-forward -n chaos-testing svc/chaos-dashboard 2333:2333
 
 Then you can access [`http://localhost:2333`](http://localhost:2333) in the browser.
 
-To get a quick look of Chaos Dashboard workflow,  check out the following article:
+To get a quick look of Chaos Dashboard workflow, check out the following articles:
 
 - [Craig Morten: K8s Chaos Dive: Chaos-Mesh Part 1](https://dev.to/craigmorten/k8s-chaos-dive-2-chaos-mesh-part-1-2i96)
