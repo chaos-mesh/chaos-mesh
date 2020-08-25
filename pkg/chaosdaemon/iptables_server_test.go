@@ -35,9 +35,11 @@ var _ = Describe("iptables server", func() {
 	Context("FlushIptables", func() {
 		It("should work", func() {
 			defer mock.With("pid", 9527)()
-			defer mock.With("MockWithNetNs", func(ctx context.Context, ns, cmd string, args ...string) *exec.Cmd {
-				Expect(ns).To(Equal("/proc/9527/ns/net"))
-				Expect(cmd).To(Equal(iptablesCmd))
+			defer mock.With("MockProcessBuild", func(ctx context.Context, cmd string, args ...string) *exec.Cmd {
+				Expect(cmd).To(Equal("nsenter"))
+				Expect(args[0]).To(Equal("-n/proc/9527/ns/net"))
+				Expect(args[1]).To(Equal("--"))
+				Expect(args[2]).To(Equal(iptablesCmd))
 				return exec.Command("echo", "-n")
 			})()
 			_, err := s.SetIptablesChains(context.TODO(), &pb.IptablesChainsRequest{
@@ -68,9 +70,11 @@ var _ = Describe("iptables server", func() {
 
 		It("should fail on unknown chain direction", func() {
 			defer mock.With("pid", 9527)()
-			defer mock.With("MockWithNetNs", func(ctx context.Context, ns, cmd string, args ...string) *exec.Cmd {
-				Expect(ns).To(Equal("/proc/9527/ns/net"))
-				Expect(cmd).To(Equal(iptablesCmd))
+			defer mock.With("MockProcessBuild", func(ctx context.Context, cmd string, args ...string) *exec.Cmd {
+				Expect(cmd).To(Equal("nsenter"))
+				Expect(args[0]).To(Equal("-n/proc/9527/ns/net"))
+				Expect(args[1]).To(Equal("--"))
+				Expect(args[2]).To(Equal(iptablesCmd))
 				return exec.Command("echo", "-n")
 			})()
 
@@ -93,7 +97,7 @@ exit 1
 			`), 0755)
 			Expect(err).To(BeNil())
 			defer os.Remove("/tmp/mockfail.sh")
-			defer mock.With("MockWithNetNs", func(ctx context.Context, ns, cmd string, args ...string) *exec.Cmd {
+			defer mock.With("MockProcessBuild", func(ctx context.Context, cmd string, args ...string) *exec.Cmd {
 				return exec.Command("mockfail.sh")
 			})()
 			_, err = s.SetIptablesChains(context.TODO(), &pb.IptablesChainsRequest{
