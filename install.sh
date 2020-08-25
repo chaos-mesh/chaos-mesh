@@ -724,9 +724,11 @@ ensure_pods_ready() {
     fi
 
     count=0
-    while [[ "$(kubectl get pods -n "${namespace}" ${labels} -o 'jsonpath={..status.conditions[?(@.type=="Ready")].status}')" != "True" ]];
+    while [ -n "$(kubectl get pods -n "${namespace}" ${labels} --no-headers | grep -v Running)" ];
     do
-        echo "Waiting for pod running" && sleep 20;
+        echo "Waiting for pod running" && sleep 10;
+
+        kubectl get pods -n "${namespace}" ${labels} --no-headers | >&2 grep -v Running || true
 
         ((count=count+1))
         if [ $count -gt $limit ]; then
