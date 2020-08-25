@@ -55,7 +55,7 @@ Below is the creating page:
 
 The left half is the form of create experiment. You have to walk through four steps to create an experiment.
 
-- Basic `(Basic info of the experiment, same as kubenetes object metadata)`
+- Basic `(Basic info of the experiment, same as kubernetes object metadata)`
 - Scope `(Limit the scope of the experiment)`
 - Target `(Choose the chaos you want)`
 - Schedule `(How to run the experiment you defined)`
@@ -74,11 +74,11 @@ If you do not fill in any fields, the scope will be applied to all pods by defau
 
 Also, like the `label selectors`, you can select the existing labels in the k8s system, all selectors will filter out the system objects with the same labels.
 
-Because we only have a single pods at this example, we can click next directly. For more detail about `Scope`, you can view [Define the Scope of Chaos Experiment](experiment_scope).
+Because we only have a single pod at this example, we can click next directly. For more detail about `Scope`, you can view [Define the Scope of Chaos Experiment](experiment_scope).
 
 #### Target
 
-In this overview we will select a `NetworkChaos` with `delay` `10ms latency`, that's very simple. Just select the tab of `Network`, choose action to Delay, then fill `Lantency` to `10ms`.
+In this overview we will select a `NetworkChaos` with `delay` `10ms latency`, that's very simple. Just select the tab of `Network`, choose action to Delay, then fill `Latency` to `10ms`.
 
 Below is the result:
 
@@ -108,7 +108,7 @@ Click the detail button of experiment in the `Experiments` page, we can view our
 
 ![Experiment Detail](/img/chaos-dashboard/experiment-detail.png)
 
-You can exec `Archive`, `Pause (Start)`, `Update` operation to the experiment, the detail page also shows the timeline and events with this experiments. You can explore more after this overview.
+You can exec `Archive`, `Pause (Start)`, `Update` operation to the experiment, the detail page also shows the timeline and events with this experiment. You can explore more after this overview.
 
 ## Events
 
@@ -135,7 +135,7 @@ To introduce this section, I have already archived the experiment we just define
 
 ![Archive](/img/chaos-dashboard/archive.png)
 
-We define the content of the archive page as `report`. All of your experiments will not be lost, their final form is archive. If you want to stop a experiment, just archive it.
+We define the content of the archive page as `report`. All of your experiments will not be lost, their final form is archive. If you want to stop an experiment, just archive it.
 
 And you can recover(duplicate) the archive anytime.
 
