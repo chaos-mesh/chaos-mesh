@@ -21,6 +21,7 @@ import (
 	"os"
 	"os/exec"
 	"strconv"
+	"strings"
 	"sync"
 	"syscall"
 
@@ -295,14 +296,14 @@ func (b *processBuilder) Build(ctx context.Context) *exec.Cmd {
 		cmd = "nsenter"
 	}
 
-	if b.pause {
-		args = append([]string{cmd}, args...)
-		cmd = pausePath
-	}
-
 	if b.suicide {
 		args = append([]string{cmd}, args...)
 		cmd = suicidePath
+	}
+
+	if b.pause {
+		args = append([]string{cmd}, args...)
+		cmd = pausePath
 	}
 
 	if c := mock.On("MockProcessBuild"); c != nil {
@@ -310,6 +311,7 @@ func (b *processBuilder) Build(ctx context.Context) *exec.Cmd {
 		return f(ctx, cmd, args...)
 	}
 
+	log.Info("build command", "command", cmd+" "+strings.Join(args, " "))
 	return exec.CommandContext(ctx, cmd, args...)
 }
 
@@ -372,6 +374,21 @@ func GetParentProcess(pid int) (int, error) {
 	}
 
 	return ppid, nil
+}
+
+// ReadCommName returns the command name of process
+func ReadCommName(pid int) (string, error) {
+	f, err := os.Open(fmt.Sprintf("%s/%d/comm", defaultProcPrefix, pid))
+	if err != nil {
+		return "", err
+	}
+
+	b, err := ioutil.ReadAll(f)
+	if err != nil {
+		return "", err
+	}
+
+	return string(b), nil
 }
 
 // GetChildProcesses will return all child processes's pid. Include all generations.

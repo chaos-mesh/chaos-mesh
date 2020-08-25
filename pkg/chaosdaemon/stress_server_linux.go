@@ -24,6 +24,7 @@ import (
 	"strconv"
 	"strings"
 	"syscall"
+	"time"
 
 	"github.com/containerd/cgroups"
 	"github.com/golang/protobuf/ptypes/empty"
@@ -81,8 +82,24 @@ func (s *daemonServer) ExecStressors(ctx context.Context,
 		return nil, err
 	}
 
-	if err := cmd.Process.Signal(syscall.SIGCONT); err != nil {
-		return nil, err
+	for {
+		// TODO: find a better way to resume pause process
+		if err := cmd.Process.Signal(syscall.SIGCONT); err != nil {
+			return nil, err
+		}
+
+		log.Info("send signal to resume process")
+		time.Sleep(time.Millisecond)
+
+		comm, err := ReadCommName(cmd.Process.Pid)
+		if err != nil {
+			return nil, err
+		}
+		if comm != "pause\n" {
+			log.Info("pause has been resumed", "comm", comm)
+			break
+		}
+		log.Info("the process hasn't resumed, step into the following loop")
 	}
 	go func() {
 		if err, ok := cmd.Wait().(*exec.ExitError); ok {
@@ -118,10 +135,12 @@ func (s *daemonServer) CancelStressors(ctx context.Context,
 	ppid, err := GetParentProcess(pid)
 	if err != nil {
 		log.Error(err, "fail to read parent id", "pid", pid)
-		return nil, err
+		// return successfully as the process has exited
+		return &empty.Empty{}, nil
 	}
 	if ppid != os.Getpid() {
 		log.Info("process has already been killed", "pid", pid, "ppid", ppid)
+		// return successfully as the process has exited
 		return &empty.Empty{}, nil
 	}
 
