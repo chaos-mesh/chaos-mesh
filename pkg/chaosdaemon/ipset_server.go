@@ -80,7 +80,7 @@ func createIPSet(ctx context.Context, nsPath string, name string) error {
 		name = name[:31]
 	}
 
-	cmd := withNetNS(ctx, nsPath, "ipset", "create", name, "hash:net")
+	cmd := defaultProcessBuilder("ipset", "create", name, "hash:net").SetNetNS(nsPath).Build(ctx)
 
 	log.Info("create ipset", "command", cmd.String())
 
@@ -92,7 +92,7 @@ func createIPSet(ctx context.Context, nsPath string, name string) error {
 			return err
 		}
 
-		cmd := withNetNS(ctx, nsPath, "ipset", "flush", name)
+		cmd := defaultProcessBuilder("ipset", "flush", name).SetNetNS(nsPath).Build(ctx)
 
 		log.Info("flush ipset", "command", cmd.String())
 
@@ -108,7 +108,7 @@ func createIPSet(ctx context.Context, nsPath string, name string) error {
 
 func addCIDRsToIPSet(ctx context.Context, nsPath string, name string, cidrs []string) error {
 	for _, cidr := range cidrs {
-		cmd := withNetNS(ctx, nsPath, "ipset", "add", name, cidr)
+		cmd := defaultProcessBuilder("ipset", "add", name, cidr).SetNetNS(nsPath).Build(ctx)
 
 		log.Info("add CIDR to ipset", "command", cmd.String())
 
@@ -126,7 +126,7 @@ func addCIDRsToIPSet(ctx context.Context, nsPath string, name string, cidrs []st
 }
 
 func renameIPSet(ctx context.Context, nsPath string, oldName string, newName string) error {
-	cmd := withNetNS(ctx, nsPath, "ipset", "rename", oldName, newName)
+	cmd := defaultProcessBuilder("ipset", "rename", oldName, newName).SetNetNS(nsPath).Build(ctx)
 
 	log.Info("rename ipset", "command", cmd.String())
 
@@ -139,7 +139,7 @@ func renameIPSet(ctx context.Context, nsPath string, oldName string, newName str
 		}
 
 		// swap the old ipset and the new ipset if the new ipset already exist.
-		cmd := withNetNS(ctx, nsPath, "ipset", "swap", oldName, newName)
+		cmd := defaultProcessBuilder("ipset", "swap", oldName, newName).SetNetNS(nsPath).Build(ctx)
 
 		log.Info("swap ipset", "command", cmd.String())
 
