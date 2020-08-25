@@ -16,7 +16,6 @@ package twophase_test
 import (
 	"context"
 	"errors"
-	"fmt"
 	"testing"
 	"time"
 
@@ -417,12 +416,26 @@ var _ = Describe("TwoPhase", func() {
 			_chaos := r.Object()
 			err = r.Get(context.TODO(), req.NamespacedName, _chaos)
 			Expect(err).ToNot(HaveOccurred())
-			Expect(err).To(HaveOccurred())
 			Expect(_chaos.(v1alpha1.InnerSchedulerObject).GetStatus().Experiment.Phase).To(Equal(v1alpha1.ExperimentPhaseRunning))
 
-			fmt.Println(chaos.NextStart)
-			fmt.Println("!!!!!!!")
+			chaos.Status.Experiment.StartTime = &metav1.Time{Time: pastTime}
+			chaos.Scheduler = &v1alpha1.SchedulerSpec{Cron: "@every 20h"}
+			chaos.SetNextStart(futureTime)
+			_ = c.Update(context.TODO(), &chaos)
 
+			_, err = r.Reconcile(req)
+			Expect(err).ToNot(HaveOccurred())
+			err = r.Get(context.TODO(), req.NamespacedName, _chaos)
+			Expect(err).ToNot(HaveOccurred())
+			Expect(_chaos.(v1alpha1.InnerSchedulerObject).GetStatus().Experiment.Phase).To(Equal(v1alpha1.ExperimentPhaseRunning))
+			d, _ := time.ParseDuration("10h")
+			exp := time.Now().Add(d)
+			Expect(chaos.NextStart.Time.Year()).To(Equal(exp.Year()))
+			Expect(chaos.NextStart.Time.Month()).To(Equal(exp.Month()))
+			Expect(chaos.NextStart.Time.Day()).To(Equal(exp.Day()))
+			Expect(chaos.NextStart.Time.Hour()).To(Equal(exp.Hour()))
+			Expect(chaos.NextStart.Time.Minute()).To(Equal(exp.Minute()))
+			Expect(chaos.NextStart.Time.Second()).To(Equal(exp.Second()))
 		})
 
 		It("TwoPhase ToApply Error", func() {
