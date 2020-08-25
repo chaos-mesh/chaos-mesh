@@ -1087,8 +1087,8 @@ spec:
       hostPID: true
       containers:
         - name: chaos-daemon
-          image: pingcap/chaos-daemon:latest
-          imagePullPolicy: Always
+          image: pingcap/chaos-daemon:v0.9.0
+          imagePullPolicy: IfNotPresent
           command:
             - /usr/local/bin/chaos-daemon
             - --runtime
@@ -1152,8 +1152,8 @@ spec:
       serviceAccount: chaos-controller-manager
       containers:
         - name: chaos-dashboard
-          image: pingcap/chaos-dashboard:latest
-          imagePullPolicy: Always
+          image: pingcap/chaos-dashboard:v0.9.0
+          imagePullPolicy: IfNotPresent
           resources:
             limits: {}
             requests:
@@ -1210,8 +1210,8 @@ spec:
       serviceAccount: chaos-controller-manager
       containers:
       - name: chaos-mesh
-        image: pingcap/chaos-mesh:latest
-        imagePullPolicy: Always
+        image: pingcap/chaos-mesh:v0.9.0
+        imagePullPolicy: IfNotPresent
         resources:
             limits: {}
             requests:
