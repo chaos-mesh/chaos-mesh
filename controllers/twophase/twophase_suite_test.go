@@ -16,6 +16,7 @@ package twophase_test
 import (
 	"context"
 	"errors"
+	"fmt"
 	"testing"
 	"time"
 
@@ -390,6 +391,38 @@ var _ = Describe("TwoPhase", func() {
 			err = r.Client.Get(context.TODO(), req.NamespacedName, _chaos)
 			Expect(err).ToNot(HaveOccurred())
 			Expect(_chaos.(v1alpha1.InnerSchedulerObject).GetStatus().Experiment.Phase).To(Equal(v1alpha1.ExperimentPhaseRunning))
+		})
+
+		It("TwoPhase ToApplyAgain", func() {
+			chaos := fakeTwoPhaseChaos{
+				TypeMeta:   typeMeta,
+				ObjectMeta: objectMeta,
+				Scheduler:  &v1alpha1.SchedulerSpec{Cron: "@hourly"},
+			}
+
+			chaos.SetNextRecover(futureTime)
+			chaos.SetNextStart(pastTime)
+
+			c := fake.NewFakeClientWithScheme(scheme.Scheme, &chaos)
+
+			r := twophase.Reconciler{
+				InnerReconciler: fakeReconciler{},
+				Client:          c,
+				Log:             ctrl.Log.WithName("controllers").WithName("TwoPhase"),
+			}
+
+			_, err = r.Reconcile(req)
+
+			Expect(err).ToNot(HaveOccurred())
+			_chaos := r.Object()
+			err = r.Get(context.TODO(), req.NamespacedName, _chaos)
+			Expect(err).ToNot(HaveOccurred())
+			Expect(err).To(HaveOccurred())
+			Expect(_chaos.(v1alpha1.InnerSchedulerObject).GetStatus().Experiment.Phase).To(Equal(v1alpha1.ExperimentPhaseRunning))
+
+			fmt.Println(chaos.NextStart)
+			fmt.Println("!!!!!!!")
+
 		})
 
 		It("TwoPhase ToApply Error", func() {
