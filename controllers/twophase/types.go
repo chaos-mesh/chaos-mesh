@@ -146,14 +146,14 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	} else if chaos.GetNextStart().Before(now) {
 		tempStart, err := utils.NextTime(*chaos.GetScheduler(), now)
 		if err != nil {
-			r.Log.Error(err, "failed to calculate the temp start time")
+			r.Log.Error(err, "failed to calculate the start time")
 			return ctrl.Result{}, err
 		}
 
 		tempRecover := now.Add(*duration)
 		if tempStart.Before(tempRecover) {
 			err := fmt.Errorf("nextRecover shouldn't be later than nextStart")
-			r.Log.Error(err, "Then recover can never be reached. It may be because cron is greater than duration.")
+			r.Log.Error(err, "Then recover can never be reached.", "scheduler", *chaos.GetScheduler(), "duration", *duration)
 			return ctrl.Result{}, err
 		}
 
