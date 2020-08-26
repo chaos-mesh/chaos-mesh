@@ -1088,6 +1088,7 @@ func (in *StressChaosSpec) DeepCopy() *StressChaosSpec {
 func (in *StressChaosStatus) DeepCopyInto(out *StressChaosStatus) {
 	*out = *in
 	in.ChaosStatus.DeepCopyInto(&out.ChaosStatus)
+	out.InstancesLock = in.InstancesLock
 	if in.Instances != nil {
 		in, out := &in.Instances, &out.Instances
 		*out = make(map[string]StressInstance, len(*in))

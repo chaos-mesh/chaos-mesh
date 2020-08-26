@@ -268,6 +268,8 @@ func (r *Reconciler) applyPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.
 	if err != nil {
 		return err
 	}
+	chaos.Status.InstancesLock.Lock()
+	defer chaos.Status.InstancesLock.Unlock()
 	chaos.Status.Instances[fmt.Sprintf("%s/%s", pod.Namespace, pod.Name)] = v1alpha1.StressInstance{
 		UID: res.Instance,
 		StartTime: &metav1.Time{
