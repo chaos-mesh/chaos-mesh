@@ -1207,7 +1207,7 @@ spec:
         app.kubernetes.io/instance: chaos-mesh
         app.kubernetes.io/component: controller-manager
       annotations:
-        rollme: "SHW0n"
+        rollme: "install.sh"
     spec:
       serviceAccount: chaos-controller-manager
       containers:
