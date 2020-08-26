@@ -15,6 +15,7 @@ package v1alpha1
 
 import (
 	"fmt"
+	"sync"
 	"time"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -108,7 +109,8 @@ func (in *StressChaosSpec) GetValue() string {
 
 // StressChaosStatus defines the observed state of StressChaos
 type StressChaosStatus struct {
-	ChaosStatus `json:",inline"`
+	ChaosStatus   `json:",inline"`
+	InstancesLock sync.Mutex `json:"-"`
 	// Instances always specifies stressing instances
 	// +optional
 	Instances map[string]StressInstance `json:"instances,omitempty"`
