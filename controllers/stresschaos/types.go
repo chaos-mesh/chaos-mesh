@@ -235,10 +235,17 @@ func (r *Reconciler) applyPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.
 		return err
 	}
 	defer daemonClient.Close()
+
+	key := fmt.Sprintf("%s/%s", pod.Namespace, pod.Name)
+	_, ok := chaos.Status.Instances[key]
+	if ok {
+		// an stress-ng instance is running for this pod
+		return nil
+	}
+
 	if len(pod.Status.ContainerStatuses) == 0 {
 		return fmt.Errorf("%s %s can't get the state of container", pod.Namespace, pod.Name)
 	}
-
 	target := pod.Status.ContainerStatuses[0].ContainerID
 	if chaos.Spec.ContainerName != nil &&
 		len(strings.TrimSpace(*chaos.Spec.ContainerName)) != 0 {
@@ -270,7 +277,7 @@ func (r *Reconciler) applyPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.
 	}
 	chaos.Status.InstancesLock.Lock()
 	defer chaos.Status.InstancesLock.Unlock()
-	chaos.Status.Instances[fmt.Sprintf("%s/%s", pod.Namespace, pod.Name)] = v1alpha1.StressInstance{
+	chaos.Status.Instances[key] = v1alpha1.StressInstance{
 		UID: res.Instance,
 		StartTime: &metav1.Time{
 			Time: time.Unix(res.StartTime/1000, (res.StartTime%1000)*int64(time.Millisecond)),
