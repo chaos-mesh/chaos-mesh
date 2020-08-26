@@ -71,7 +71,7 @@ func (s *daemonServer) SetDNSServer(ctx context.Context,
 		log.Info("cmd output", "output", string(out))
 	}
 
-	cmd = withMountNS(context.Background(), GetNsPath(pid, mountNS), "echo", fmt.Sprintf("nameserver %s", req.DnsServer), ">", DNSServerConfFile)
+	cmd = withMountNS(context.Background(), GetNsPath(pid, mountNS), "sh", "-c", fmt.Sprintf("echo \"nameserver %s\" > %s", req.DnsServer, DNSServerConfFile))
 	out, err = cmd.Output()
 	if err != nil {
 		return nil, err

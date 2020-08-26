@@ -17,10 +17,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/go-logr/logr"
 	multierror "github.com/hashicorp/go-multierror"
 	"golang.org/x/sync/errgroup"
+	"google.golang.org/grpc"
 	v1 "k8s.io/api/core/v1"
 	k8serror "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
@@ -33,6 +35,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/controllers/common"
 	"github.com/chaos-mesh/chaos-mesh/controllers/twophase"
 	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
+	dnspb "github.com/chaos-mesh/chaos-mesh/pkg/dns/pb"
 	"github.com/chaos-mesh/chaos-mesh/pkg/utils"
 )
 
@@ -124,8 +127,22 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1
 		return err
 	}
 
+	// get dns server's ip used for chaos
+	service, err := utils.SelectAndFilterSevice(ctx, r.Client, "chaos-testing", "chaosdns-service")
+	if err != nil {
+		r.Log.Error(err, "failed to select service")
+		return err
+	}
+	r.Log.Info("get dns service", "service", service.String(), "ip", service.Spec.ClusterIP)
+
+	err = r.setDNSServerRules(service.Spec.ClusterIP, 9288, dnschaos.Name, pods, "RANDOM")
+	if err != nil {
+		r.Log.Error(err, "fail to set DNS server rules")
+		return err
+	}
+
 	//dnschaos.Status.Instances = make(map[string]v1alpha1.StressInstance, len(pods))
-	if err = r.applyAllPods(ctx, pods, dnschaos); err != nil {
+	if err = r.applyAllPods(ctx, pods, dnschaos, service.Spec.ClusterIP); err != nil {
 		r.Log.Error(err, "failed to apply chaos on all pods")
 		return err
 	}
@@ -154,6 +171,16 @@ func (r *Reconciler) Recover(ctx context.Context, req ctrl.Request, chaos v1alph
 		r.Log.Error(err, "chaos is not DNSChaos", "chaos", chaos)
 		return err
 	}
+
+	// get dns server's ip used for chaos
+	service, err := utils.SelectAndFilterSevice(ctx, r.Client, "chaos-testing", "chaosdns-service")
+	if err != nil {
+		r.Log.Error(err, "failed to select service")
+		return err
+	}
+	r.Log.Info("Recover get dns service", "service", service.String(), "ip", service.Spec.ClusterIP)
+
+	r.cancelDNSServerRules(service.Spec.ClusterIP, 9288, dnschaos.Name)
 
 	if err := r.cleanFinalizersAndRecover(ctx, dnschaos); err != nil {
 		return err
@@ -243,7 +270,7 @@ func (r *Reconciler) Object() v1alpha1.InnerObject {
 	return &v1alpha1.DNSChaos{}
 }
 
-func (r *Reconciler) applyAllPods(ctx context.Context, pods []v1.Pod, chaos *v1alpha1.DNSChaos) error {
+func (r *Reconciler) applyAllPods(ctx context.Context, pods []v1.Pod, chaos *v1alpha1.DNSChaos, dnsServerIP string) error {
 	// get coredns's ip
 	/*
 		service, err := utils.SelectAndFilterSevice(ctx, r.Client, "kube-system", "kube-dns")
@@ -253,14 +280,6 @@ func (r *Reconciler) applyAllPods(ctx context.Context, pods []v1.Pod, chaos *v1a
 		}
 		r.Log.Info("get dns service", "service", service.String(), "ip", service.ClusterIP)
 	*/
-
-	// get dns server's ip used for chaos
-	service, err := utils.SelectAndFilterSevice(ctx, r.Client, "chaos-testing", "coredns")
-	if err != nil {
-		r.Log.Error(err, "failed to select service")
-		return err
-	}
-	r.Log.Info("get dns service", "service", service.String(), "ip", service.Spec.ClusterIP)
 
 	g := errgroup.Group{}
 	for index := range pods {
@@ -274,10 +293,10 @@ func (r *Reconciler) applyAllPods(ctx context.Context, pods []v1.Pod, chaos *v1a
 		chaos.Finalizers = utils.InsertFinalizer(chaos.Finalizers, key)
 
 		g.Go(func() error {
-			return r.applyPod(ctx, pod, chaos, service.Spec.ClusterIP)
+			return r.applyPod(ctx, pod, chaos, dnsServerIP)
 		})
 	}
-	err = g.Wait()
+	err := g.Wait()
 	if err != nil {
 		r.Log.Error(err, "g.Wait")
 		return err
@@ -349,4 +368,72 @@ func (r *Reconciler) applyPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.
 func (r *Reconciler) invalidActionResponse(dnschaos *v1alpha1.DNSChaos) (ctrl.Result, error) {
 	r.Log.Error(nil, "dnschaos action is invalid", "action", dnschaos.Spec.Action)
 	return ctrl.Result{}, fmt.Errorf("invalid dnschaos action")
+}
+
+func (r *Reconciler) setDNSServerRules(dnsServerIP string, port int64, name string, pods []v1.Pod, mode string) error {
+	r.Log.Info("setDNSServerRules")
+	defer r.Log.Info("setDNSServerRules finished")
+	pbPods := make([]*dnspb.Pod, len(pods))
+	for i, pod := range pods {
+		pbPods[i] = &dnspb.Pod{
+			Name:      pod.Name,
+			Namespace: pod.Namespace,
+		}
+	}
+
+	conn, err := grpc.Dial(fmt.Sprintf("%s:%d", dnsServerIP, port), grpc.WithInsecure())
+	if err != nil {
+		return err
+	}
+	defer conn.Close()
+
+	c := dnspb.NewDNSClient(conn)
+	request := &dnspb.SetDNSChaosRequest{
+		Name: name,
+		Mode: mode,
+		Pods: pbPods,
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	response, err := c.SetDNSChaos(ctx, request)
+	if err != nil {
+		return err
+	}
+
+	if !response.Result {
+		return fmt.Errorf("set dns chaos to dns server error %s", response.Msg)
+	}
+
+	return nil
+}
+
+func (r *Reconciler) cancelDNSServerRules(dnsServerIP string, port int64, name string) error {
+	r.Log.Info("cancelDNSServerRules")
+	defer r.Log.Info("cancelDNSServerRules finished")
+
+	conn, err := grpc.Dial(fmt.Sprintf("%s:%d", dnsServerIP, port), grpc.WithInsecure())
+	if err != nil {
+		return err
+	}
+	defer conn.Close()
+	r.Log.Info("setDNSServerRules create conn")
+
+	c := dnspb.NewDNSClient(conn)
+	request := &dnspb.CancelDNSChaosRequest{
+		Name: name,
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	response, err := c.CancelDNSChaos(ctx, request)
+	if err != nil {
+		return err
+	}
+
+	if !response.Result {
+		return fmt.Errorf("set dns chaos to dns server error %s", response.Msg)
+	}
+
+	return nil
 }
