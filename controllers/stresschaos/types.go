@@ -18,6 +18,7 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/go-logr/logr"
@@ -210,6 +211,8 @@ func (r *Reconciler) Object() v1alpha1.InnerObject {
 
 func (r *Reconciler) applyAllPods(ctx context.Context, pods []v1.Pod, chaos *v1alpha1.StressChaos) error {
 	g := errgroup.Group{}
+
+	instancesLock := &sync.RWMutex{}
 	for index := range pods {
 		pod := &pods[index]
 
@@ -220,13 +223,13 @@ func (r *Reconciler) applyAllPods(ctx context.Context, pods []v1.Pod, chaos *v1a
 		chaos.Finalizers = utils.InsertFinalizer(chaos.Finalizers, key)
 
 		g.Go(func() error {
-			return r.applyPod(ctx, pod, chaos)
+			return r.applyPod(ctx, pod, chaos, instancesLock)
 		})
 	}
 	return g.Wait()
 }
 
-func (r *Reconciler) applyPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.StressChaos) error {
+func (r *Reconciler) applyPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.StressChaos, instancesLock *sync.RWMutex) error {
 	r.Log.Info("Try to apply stress chaos", "namespace",
 		pod.Namespace, "name", pod.Name)
 	daemonClient, err := utils.NewChaosDaemonClient(ctx, r.Client,
@@ -237,9 +240,9 @@ func (r *Reconciler) applyPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.
 	defer daemonClient.Close()
 
 	key := fmt.Sprintf("%s/%s", pod.Namespace, pod.Name)
-	chaos.Status.InstancesLock.RLock()
+	instancesLock.RLock()
 	_, ok := chaos.Status.Instances[key]
-	chaos.Status.InstancesLock.RUnlock()
+	instancesLock.RUnlock()
 	if ok {
 		r.Log.Info("an stress-ng instance is running for this pod")
 		return nil
@@ -278,13 +281,13 @@ func (r *Reconciler) applyPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.
 		return err
 	}
 
-	chaos.Status.InstancesLock.Lock()
+	instancesLock.Lock()
 	chaos.Status.Instances[key] = v1alpha1.StressInstance{
 		UID: res.Instance,
 		StartTime: &metav1.Time{
 			Time: time.Unix(res.StartTime/1000, (res.StartTime%1000)*int64(time.Millisecond)),
 		},
 	}
-	chaos.Status.InstancesLock.Unlock()
+	instancesLock.Unlock()
 	return nil
 }
