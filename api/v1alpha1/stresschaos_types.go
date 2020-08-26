@@ -110,7 +110,7 @@ func (in *StressChaosSpec) GetValue() string {
 // StressChaosStatus defines the observed state of StressChaos
 type StressChaosStatus struct {
 	ChaosStatus   `json:",inline"`
-	InstancesLock sync.Mutex `json:"-"`
+	InstancesLock sync.RWMutex `json:"-"`
 	// Instances always specifies stressing instances
 	// +optional
 	Instances map[string]StressInstance `json:"instances,omitempty"`

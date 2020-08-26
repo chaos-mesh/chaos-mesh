@@ -237,7 +237,9 @@ func (r *Reconciler) applyPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.
 	defer daemonClient.Close()
 
 	key := fmt.Sprintf("%s/%s", pod.Namespace, pod.Name)
+	chaos.Status.InstancesLock.RLock()
 	_, ok := chaos.Status.Instances[key]
+	chaos.Status.InstancesLock.RUnlock()
 	if ok {
 		// an stress-ng instance is running for this pod
 		return nil
@@ -275,13 +277,14 @@ func (r *Reconciler) applyPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.
 	if err != nil {
 		return err
 	}
+
 	chaos.Status.InstancesLock.Lock()
-	defer chaos.Status.InstancesLock.Unlock()
 	chaos.Status.Instances[key] = v1alpha1.StressInstance{
 		UID: res.Instance,
 		StartTime: &metav1.Time{
 			Time: time.Unix(res.StartTime/1000, (res.StartTime%1000)*int64(time.Millisecond)),
 		},
 	}
+	chaos.Status.InstancesLock.Unlock()
 	return nil
 }
