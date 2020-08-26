@@ -44,9 +44,9 @@ OPTIONS:
     -l, --local [kind]       Choose a way to run a local kubernetes cluster, supported value: kind,
                              If this value is not set and the Kubernetes is not installed, this script will exit with 1.
     -n, --name               Name of Kubernetes cluster, default value: kind
-    -c  --crd                The URL of the crd files, default value: https://mirrors.chaos-mesh.org/latest/crd.yaml
+    -c  --crd                The URL of the crd files, default value: https://mirrors.chaos-mesh.org/v0.9.0/crd.yaml
     -r  --runtime            Runtime specifies which container runtime to use. Currently we only supports docker and containerd. default value: docker
-    -f  --chaosfs-sidecar    The URL of the chaosfs sidecar configmap files, default value: https://mirrors.chaos-mesh.org/latest/chaosfs-sidecar.yaml
+    -f  --chaosfs-sidecar    The URL of the chaosfs sidecar configmap files, default value: https://mirrors.chaos-mesh.org/v0.9.0/chaosfs-sidecar.yaml
         --kind-version       Version of the Kind tool, default value: v0.7.0
         --node-num           The count of the cluster nodes,default value: 3
         --k8s-version        Version of the Kubernetes cluster,default value: v1.17.2
@@ -73,8 +73,8 @@ main() {
     local docker_mirror=false
     local volume_provisioner=false
     local local_registry=false
-    local crd="https://mirrors.chaos-mesh.org/latest/crd.yaml"
-    local chaosfs="https://mirrors.chaos-mesh.org/latest/chaosfs-sidecar.yaml"
+    local crd="https://mirrors.chaos-mesh.org/v0.9.0/crd.yaml"
+    local chaosfs="https://mirrors.chaos-mesh.org/v0.9.0/chaosfs-sidecar.yaml"
     local runtime="docker"
     local template=false
     local sidecar_template=true
@@ -724,9 +724,11 @@ ensure_pods_ready() {
     fi
 
     count=0
-    while [[ "$(kubectl get pods -n "${namespace}" ${labels} -o 'jsonpath={..status.conditions[?(@.type=="Ready")].status}')" != "True" ]];
+    while [ -n "$(kubectl get pods -n "${namespace}" ${labels} --no-headers | grep -v Running)" ];
     do
-        echo "Waiting for pod running" && sleep 20;
+        echo "Waiting for pod running" && sleep 10;
+
+        kubectl get pods -n "${namespace}" ${labels} --no-headers | >&2 grep -v Running || true
 
         ((count=count+1))
         if [ $count -gt $limit ]; then
@@ -1085,8 +1087,8 @@ spec:
       hostPID: true
       containers:
         - name: chaos-daemon
-          image: pingcap/chaos-daemon:latest
-          imagePullPolicy: Always
+          image: pingcap/chaos-daemon:v0.9.0
+          imagePullPolicy: IfNotPresent
           command:
             - /usr/local/bin/chaos-daemon
             - --runtime
@@ -1150,8 +1152,8 @@ spec:
       serviceAccount: chaos-controller-manager
       containers:
         - name: chaos-dashboard
-          image: pingcap/chaos-dashboard:latest
-          imagePullPolicy: Always
+          image: pingcap/chaos-dashboard:v0.9.0
+          imagePullPolicy: IfNotPresent
           resources:
             limits: {}
             requests:
@@ -1208,8 +1210,8 @@ spec:
       serviceAccount: chaos-controller-manager
       containers:
       - name: chaos-mesh
-        image: pingcap/chaos-mesh:latest
-        imagePullPolicy: Always
+        image: pingcap/chaos-mesh:v0.9.0
+        imagePullPolicy: IfNotPresent
         resources:
             limits: {}
             requests:
