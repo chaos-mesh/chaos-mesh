@@ -1,13 +1,10 @@
-import CodeBlock from '../theme/CodeBlock'
 import Layout from '@theme/Layout'
+import PickVersion from '../components/PickVersion'
 import React from 'react'
 import clsx from 'clsx'
 import styles from './styles.module.css'
 import useBaseUrl from '@docusaurus/useBaseUrl'
 import useDocusaurusContext from '@docusaurus/useDocusaurusContext'
-import { usePickVersion } from '../components/PickVersion'
-
-const installChaosMesh = (version) => `curl -sSL https://mirrors.chaos-mesh.org/${version}/install.sh | bash`
 
 const features = [
   {
@@ -75,7 +72,6 @@ function Feature({ imageUrl, title, description, reverse }) {
 function Home() {
   const context = useDocusaurusContext()
   const { siteConfig } = context
-  const version = usePickVersion()
 
   return (
     <Layout title={siteConfig.tagline} description={siteConfig.tagline}>
@@ -92,7 +88,7 @@ function Home() {
       <div className={clsx('text--center', styles.install)}>
         <h2>Start By One Line</h2>
         <div className={styles.installTextWrapper}>
-          <CodeBlock className="language-bash">{installChaosMesh(version)}</CodeBlock>
+          <PickVersion>curl -sSL https://mirrors.chaos-mesh.org/latest/install.sh | bash</PickVersion>
         </div>
       </div>
 

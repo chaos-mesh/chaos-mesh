@@ -14,7 +14,7 @@ Before deployment, make sure [Docker](https://docs.docker.com/install/) is insta
 ## Install Chaos Mesh
 
 <PickVersion className="language-bash">
-  curl -sSL https://mirrors.chaos-mesh.org/version/install.sh | bash -s -- --local kind
+  curl -sSL https://mirrors.chaos-mesh.org/latest/install.sh | bash -s -- --local kind
 </PickVersion>
 
 `install.sh` is an automation shell script that helps you install dependencies such as `kubectl`, `helm`, `kind`, and `kubernetes`, and deploy Chaos Mesh itself.
@@ -45,7 +45,7 @@ chaos-dashboard-d998856f6-vgrjs             1/1     Running   0          3m40s
 ## Uninstallation
 
 <PickVersion className="language-bash">
-  curl -sSL https://mirrors.chaos-mesh.org/version/install.sh | bash -s -- --template | kubectl delete -f -
+  curl -sSL https://mirrors.chaos-mesh.org/latest/install.sh | bash -s -- --template | kubectl delete -f -
 </PickVersion>
 
 In addition, you also can uninstall Chaos Mesh by deleting the namespace directly.

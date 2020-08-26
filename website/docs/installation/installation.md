@@ -22,7 +22,7 @@ Before deploying Chaos Mesh, make sure the following items have been installed:
 ## Install Chaos Mesh
 
 <PickVersion className="language-bash">
-  curl -sSL https://mirrors.chaos-mesh.org/version/install.sh | bash
+  curl -sSL https://mirrors.chaos-mesh.org/latest/install.sh | bash
 </PickVersion>
 
 The above command install all the CRDs, required service account configuration, and all components.
@@ -31,7 +31,7 @@ Before you start running a chaos experiment, verify if Chaos Mesh is installed c
 If you are using k3s or k3d, please also specify `--k3s` flag.
 
 <PickVersion className="language-bash">
-  curl -sSL https://mirrors.chaos-mesh.org/version/install.sh --k3s | bash
+  curl -sSL https://mirrors.chaos-mesh.org/latest/install.sh --k3s | bash
 </PickVersion>
 
 ### Verify your installation
@@ -58,7 +58,7 @@ chaos-dashboard-d998856f6-vgrjs             1/1     Running   0          3m40s
 You can uninstall Chaos Mesh by deleting the namespace.
 
 <PickVersion className="language-bash">
-  curl -sSL https://mirrors.chaos-mesh.org/version/install.sh | bash -s -- --template | kubectl delete -f -
+  curl -sSL https://mirrors.chaos-mesh.org/latest/install.sh | bash -s -- --template | kubectl delete -f -
 </PickVersion>
 
 ## Install by helm
@@ -83,7 +83,7 @@ helm search repo chaos-mesh
 To use Chaos Mesh, you must create the related custom resource type first.
 
 <PickVersion className="language-bash">
-  curl -sSL https://mirrors.chaos-mesh.org/version/crd.yaml | kubectl apply -f -
+  curl -sSL https://mirrors.chaos-mesh.org/latest/crd.yaml | kubectl apply -f -
 </PickVersion>
 
 ### Step 3: Install Chaos Mesh

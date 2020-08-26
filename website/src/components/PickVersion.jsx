@@ -1,3 +1,4 @@
+import BrowserOnly from '@docusaurus/BrowserOnly'
 import CodeBlock from '../theme/CodeBlock'
 import React from 'react'
 import { usePluginData } from '@docusaurus/useGlobalData'
@@ -16,13 +17,19 @@ export const usePickVersion = () => {
 }
 
 const PickVersion = ({ children, className }) => {
-  const version = usePickVersion()
-  const rendered = children.replace('version', version)
-
   return (
-    <div style={{ marginBottom: '1.25rem' }}>
-      <CodeBlock className={className}>{rendered}</CodeBlock>
-    </div>
+    <BrowserOnly fallback={<CodeBlock className={className}>{children}</CodeBlock>}>
+      {() => {
+        const version = usePickVersion()
+        const rendered = children.replace('latest', version)
+
+        return (
+          <div style={{ marginBottom: '1.25rem' }}>
+            <CodeBlock className={className}>{rendered}</CodeBlock>
+          </div>
+        )
+      }}
+    </BrowserOnly>
   )
 }
 
