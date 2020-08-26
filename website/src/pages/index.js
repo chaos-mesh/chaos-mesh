@@ -5,8 +5,9 @@ import clsx from 'clsx'
 import styles from './styles.module.css'
 import useBaseUrl from '@docusaurus/useBaseUrl'
 import useDocusaurusContext from '@docusaurus/useDocusaurusContext'
+import { usePickVersion } from '../components/PickVersion'
 
-const installChaosMesh = 'curl -sSL https://mirrors.chaos-mesh.org/latest/install.sh | bash'
+const installChaosMesh = (version) => `curl -sSL https://mirrors.chaos-mesh.org/${version}/install.sh | bash`
 
 const features = [
   {
@@ -64,7 +65,7 @@ function Feature({ imageUrl, title, description, reverse }) {
       <div className={clsx('col col--6', styles.featureDesc)}>
         <div>
           <h3>{title}</h3>
-          <p>{description}</p>
+          <div>{description}</div>
         </div>
       </div>
     </div>
@@ -74,6 +75,7 @@ function Feature({ imageUrl, title, description, reverse }) {
 function Home() {
   const context = useDocusaurusContext()
   const { siteConfig } = context
+  const version = usePickVersion()
 
   return (
     <Layout title={siteConfig.tagline} description={siteConfig.tagline}>
@@ -90,7 +92,7 @@ function Home() {
       <div className={clsx('text--center', styles.install)}>
         <h2>Start By One Line</h2>
         <div className={styles.installTextWrapper}>
-          <CodeBlock className="language-bash">{installChaosMesh}</CodeBlock>
+          <CodeBlock className="language-bash">{installChaosMesh(version)}</CodeBlock>
         </div>
       </div>
 

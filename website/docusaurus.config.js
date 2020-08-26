@@ -7,7 +7,7 @@ module.exports = {
   organizationName: 'chaos-mesh', // Usually your GitHub org/user name.
   projectName: 'chaos-mesh.github.io', // Usually your repo name.
   themeConfig: {
-    image: "img/logos/logo-mini.svg",
+    image: 'img/logos/logo-mini.svg',
     algolia: {
       apiKey: '49739571d4f89670b12f39d5ad135f5a',
       indexName: 'chaos-mesh',
@@ -24,6 +24,10 @@ module.exports = {
         srcDark: 'img/logos/logo-mini-white.svg',
       },
       items: [
+        {
+          type: 'docsVersionDropdown',
+          position: 'left',
+        },
         {
           to: 'docs',
           activeBasePath: 'docs',
