@@ -241,7 +241,7 @@ func (r *Reconciler) applyPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.
 	_, ok := chaos.Status.Instances[key]
 	chaos.Status.InstancesLock.RUnlock()
 	if ok {
-		// an stress-ng instance is running for this pod
+		r.Log.Info("an stress-ng instance is running for this pod")
 		return nil
 	}
 
