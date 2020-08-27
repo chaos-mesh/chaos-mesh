@@ -20,6 +20,7 @@ import (
 
 	. "github.com/onsi/gomega"
 
+	"github.com/chaos-mesh/chaos-mesh/pkg/bpm"
 	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
 	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
 )
@@ -29,7 +30,8 @@ func commonTcTest(t *testing.T, fpname, errString string, tcFunc func(s *daemonS
 
 	defer mock.With("MockContainerdClient", &MockClient{})()
 	c, _ := CreateContainerRuntimeInfoClient(containerRuntimeContainerd)
-	s := &daemonServer{c}
+	m := bpm.NewBackgroundProcessManager()
+	s := &daemonServer{c, m}
 
 	if errString == "" {
 		defer mock.With(fpname, true)()

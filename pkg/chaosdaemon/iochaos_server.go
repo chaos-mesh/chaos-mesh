@@ -18,14 +18,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
-	"os/exec"
 	"strings"
-	"time"
 
 	"github.com/shirou/gopsutil/process"
-	"golang.org/x/sys/unix"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/pkg/bpm"
 	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
 )
 
@@ -61,12 +59,15 @@ func (s *daemonServer) ApplyIoChaos(ctx context.Context, in *pb.ApplyIoChaosRequ
 
 	args := fmt.Sprintf("--path %s --pid %d --verbose info", in.Volume, pid)
 	log.Info("executing", "cmd", todaBin+" "+args)
-	cmd := exec.CommandContext(context.Background(), todaBin, strings.Split(args, " ")...)
+	cmd := bpm.DefaultProcessBuilder(todaBin, strings.Split(args, " ")...).
+		EnableSuicide().
+		SetIdentifier(in.ContainerId).
+		Build()
 	cmd.Stdin = strings.NewReader(in.Actions)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 
-	err = cmd.Start()
+	err = s.backgroundProcessManager.StartProcess(cmd)
 	if err != nil {
 		return nil, err
 	}
@@ -92,31 +93,10 @@ func (s *daemonServer) ApplyIoChaos(ctx context.Context, in *pb.ApplyIoChaosRequ
 func (s *daemonServer) killIoChaos(ctx context.Context, pid int64, startTime int64) error {
 	log.Info("killing toda", "pid", pid)
 
-	ins, err := process.NewProcess(int32(pid))
+	err := s.backgroundProcessManager.KillBackgroundProcess(ctx, int(pid), startTime)
 	if err != nil {
-		log.Info("cannot find process", "pid", pid)
-		return nil
+		return err
 	}
-	if ct, err := ins.CreateTime(); err == nil && ct == startTime {
-		_, err := ins.Status()
-		for err != nil {
-			log.Error(err, "get status error", "pid", pid)
-			// FIXME: only ignore NOT FOUND error
-			return nil
-		}
-
-		err = ins.SendSignal(unix.SIGTERM)
-		if err != nil {
-			log.Error(err, "kill error", "pid", pid)
-			// FIXME: only ignore NOT FOUND error
-			return nil
-		}
-
-		log.Info("kill process and wait 1 second", "pid", pid)
-		time.Sleep(1 * time.Second)
-	} else {
-		log.Info("find different process", "createTime", ct, "expectedCreateTime", startTime)
-	}
-
+	log.Info("killing toda successfully")
 	return nil
 }

@@ -11,3 +11,4 @@ ENV RUST_BACKTRACE 1
 COPY --from=pingcap/binary /bin/chaos-daemon /usr/local/bin/chaos-daemon
 COPY --from=pingcap/binary /bin/toda /usr/local/bin/toda
 COPY --from=pingcap/binary /bin/pause /usr/local/bin/pause
+COPY --from=pingcap/binary /bin/suicide /usr/local/bin/suicide
