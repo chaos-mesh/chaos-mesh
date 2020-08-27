@@ -27,7 +27,7 @@ const PickVersion = ({ children, className }) => {
     <BrowserOnly fallback={<Result>{children}</Result>}>
       {() => {
         const version = usePickVersion()
-        const rendered = version === 'latest' ? children : children.replace('latest', version)
+        const rendered = version === 'latest' ? children : children.replace('latest', 'v' + version)
 
         return <Result>{rendered}</Result>
       }}
