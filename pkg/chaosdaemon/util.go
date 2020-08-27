@@ -110,7 +110,6 @@ func (c ContainerdClient) FormatContainerID(ctx context.Context, containerID str
 	}
 	if containerID[0:len(containerdProtocolPrefix)] != containerdProtocolPrefix {
 		return "", fmt.Errorf("expected %s but got %s", containerdProtocolPrefix, containerID[0:len(containerdProtocolPrefix)])
-		//containerID = strings.ReplaceAll(containerID, "docker", "containerd")
 	}
 	return containerID[len(containerdProtocolPrefix):], nil
 }

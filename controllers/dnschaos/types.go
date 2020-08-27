@@ -35,8 +35,8 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/controllers/common"
 	"github.com/chaos-mesh/chaos-mesh/controllers/twophase"
 	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
-	dnspb "github.com/chaos-mesh/chaos-mesh/pkg/dns/pb"
 	"github.com/chaos-mesh/chaos-mesh/pkg/utils"
+	dnspb "github.com/chaos-mesh/k8s_dns_chaos/pb"
 )
 
 type Reconciler struct {
@@ -70,43 +70,12 @@ func (r *Reconciler) Reconcile(req ctrl.Request, chaos *v1alpha1.DNSChaos) (ctrl
 
 func (r *Reconciler) commonDNSChaos(dnschaos *v1alpha1.DNSChaos, req ctrl.Request) (ctrl.Result, error) {
 	r.Log.Info("commonDNSChaos")
-	/*
-		var cr *common.Reconciler
-		switch dnschaos.Spec.Action {
-		case v1alpha1.NetemAction, v1alpha1.DelayAction, v1alpha1.DuplicateAction, v1alpha1.CorruptAction, v1alpha1.LossAction:
-			cr = netem.NewCommonReconciler(r.Client, r.Log.WithValues("action", "netem"),
-				req, r.EventRecorder)
-		case v1alpha1.PartitionAction:
-			cr = partition.NewCommonReconciler(r.Client, r.Log.WithValues("action", "partition"),
-				req, r.EventRecorder)
-		case v1alpha1.BandwidthAction:
-			cr = tbf.NewCommonReconciler(r.Client, r.Log.WithValues("action", "bandwidth"), req, r.EventRecorder)
-		default:
-			return r.invalidActionResponse(dnschaos)
-		}
-	*/
 	cr := common.NewReconciler(r, r.Client, r.Log)
 	return cr.Reconcile(req)
 }
 
 func (r *Reconciler) scheduleDNSChaos(dnschaos *v1alpha1.DNSChaos, req ctrl.Request) (ctrl.Result, error) {
 	r.Log.Info("scheduleDNSChaos")
-	/*
-		var sr *twophase.Reconciler
-
-		switch dnschaos.Spec.Action {
-		case v1alpha1.NetemAction, v1alpha1.DelayAction, v1alpha1.DuplicateAction, v1alpha1.CorruptAction, v1alpha1.LossAction:
-			sr = netem.NewTwoPhaseReconciler(r.Client, r.Log.WithValues("action", "netem"),
-				req, r.EventRecorder)
-		case v1alpha1.PartitionAction:
-			sr = partition.NewTwoPhaseReconciler(r.Client, r.Log.WithValues("action", "partition"),
-				req, r.EventRecorder)
-		case v1alpha1.BandwidthAction:
-			sr = tbf.NewTwoPhaseReconciler(r.Client, r.Log.WithValues("action", "bandwidth"), req, r.EventRecorder)
-		default:
-			return r.invalidActionResponse(dnschaos)
-		}
-	*/
 	sr := twophase.NewReconciler(r, r.Client, r.Log)
 	return sr.Reconcile(req)
 }
@@ -236,32 +205,9 @@ func (r *Reconciler) cleanFinalizersAndRecover(ctx context.Context, chaos *v1alp
 }
 
 func (r *Reconciler) recoverPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.DNSChaos) error {
-	// TODO: recover /etc/hosts file
+	// TODO: recover /etc/resolv.conf file
 	r.Log.Info("Try to recover pod", "namespace", pod.Namespace, "name", pod.Name)
 
-	/*
-		daemonClient, err := utils.NewChaosDaemonClient(ctx, r.Client,
-			pod, common.ControllerCfg.ChaosDaemonPort)
-		if err != nil {
-			return err
-		}
-		defer daemonClient.Close()
-		if len(pod.Status.ContainerStatuses) == 0 {
-			return fmt.Errorf("%s/%s can't get the state of container", pod.Namespace, pod.Name)
-		}
-		instance, ok := chaos.Status.Instances[fmt.Sprintf("%s/%s", pod.Namespace, pod.Name)]
-		if !ok {
-			r.Log.Info("Pod seems already recovered", "pod", pod.UID)
-			return nil
-		}
-		if _, err = daemonClient.CancelStressors(ctx, &pb.CancelDNSRequest{
-			Instance:  instance.UID,
-			StartTime: instance.StartTime.UnixNano() / int64(time.Millisecond),
-		}); err != nil {
-			return err
-		}
-		delete(chaos.Status.Instances, fmt.Sprintf("%s/%s", pod.Namespace, pod.Name))
-	*/
 	return nil
 }
 
@@ -272,14 +218,6 @@ func (r *Reconciler) Object() v1alpha1.InnerObject {
 
 func (r *Reconciler) applyAllPods(ctx context.Context, pods []v1.Pod, chaos *v1alpha1.DNSChaos, dnsServerIP string) error {
 	// get coredns's ip
-	/*
-		service, err := utils.SelectAndFilterSevice(ctx, r.Client, "kube-system", "kube-dns")
-		if err != nil {
-			r.Log.Error(err, "failed to select service")
-			return err
-		}
-		r.Log.Info("get dns service", "service", service.String(), "ip", service.ClusterIP)
-	*/
 
 	g := errgroup.Group{}
 	for index := range pods {
@@ -319,49 +257,16 @@ func (r *Reconciler) applyPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.
 	}
 
 	target := pod.Status.ContainerStatuses[0].ContainerID
-	/*
-		if chaos.Spec.ContainerName != nil {
-			target = ""
-			for _, container := range pod.Status.ContainerStatuses {
-				if container.Name == *chaos.Spec.ContainerName {
-					target = container.ContainerID
-				}
-			}
-			if len(target) == 0 {
-				return fmt.Errorf("cannot find container with name %s", *chaos.Spec.ContainerName)
-			}
-		}
-	*/
-
-	/*
-		stressors := chaos.Spec.StressngStressors
-		if len(stressors) == 0 {
-			stressors, err = chaos.Spec.Stressors.Normalize()
-			if err != nil {
-				return err
-			}
-		}
-	*/
 
 	_, err = daemonClient.SetDNSServer(ctx, &pb.SetDNSServerRequest{
 		ContainerId: target,
 		DnsServer:   dnsServerIP,
-		//Scope:  pb.ExecStressRequest_CONTAINER,
-		//Target: target,
-		//Stressors: stressors,
 	})
 	if err != nil {
 		r.Log.Error(err, "SetDNSServer")
 		return err
 	}
-	/*
-		chaos.Status.Instances[fmt.Sprintf("%s/%s", pod.Namespace, pod.Name)] = v1alpha1.StressInstance{
-			UID: res.Instance,
-			StartTime: &metav1.Time{
-				Time: time.Unix(res.StartTime/1000, (res.StartTime%1000)*int64(time.Millisecond)),
-			},
-		}
-	*/
+
 	return nil
 }
 

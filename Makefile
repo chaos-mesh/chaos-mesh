@@ -254,7 +254,7 @@ yaml: manifests ensure-kustomize
 # Generate Go files from Chaos Mesh proto files.
 ifeq ($(IN_DOCKER),1)
 proto:
-	for dir in pkg/chaosdaemon pkg/chaosfs pkg/dns; do\
+	for dir in pkg/chaosdaemon pkg/chaosfs; do\
 		protoc -I $$dir/pb $$dir/pb/*.proto --go_out=plugins=grpc:$$dir/pb --go_out=./$$dir/pb ;\
 	done
 else
