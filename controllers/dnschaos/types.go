@@ -39,6 +39,11 @@ import (
 	dnspb "github.com/chaos-mesh/k8s_dns_chaos/pb"
 )
 
+const (
+	// DNSServerName is the chaos DNS server's name
+	DNSServerName = "chaos-mesh-dns-service"
+)
+
 type Reconciler struct {
 	client.Client
 	record.EventRecorder
@@ -97,13 +102,15 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1
 	}
 
 	// get dns server's ip used for chaos
-	service, err := utils.SelectAndFilterSevice(ctx, r.Client, "chaos-testing", "chaosdns-service")
+	// TODO: use chaos-mesh's namespace instead of "chaos-testing"
+	service, err := utils.SelectAndFilterSevice(ctx, r.Client, "chaos-testing", DNSServerName)
 	if err != nil {
 		r.Log.Error(err, "failed to select service")
 		return err
 	}
 	r.Log.Info("get dns service", "service", service.String(), "ip", service.Spec.ClusterIP)
 
+	// TODO: set port and mode
 	err = r.setDNSServerRules(service.Spec.ClusterIP, 9288, dnschaos.Name, pods, "RANDOM")
 	if err != nil {
 		r.Log.Error(err, "fail to set DNS server rules")
@@ -142,7 +149,7 @@ func (r *Reconciler) Recover(ctx context.Context, req ctrl.Request, chaos v1alph
 	}
 
 	// get dns server's ip used for chaos
-	service, err := utils.SelectAndFilterSevice(ctx, r.Client, "chaos-testing", "chaosdns-service")
+	service, err := utils.SelectAndFilterSevice(ctx, r.Client, "chaos-testing", DNSServerName)
 	if err != nil {
 		r.Log.Error(err, "failed to select service")
 		return err
@@ -208,6 +215,28 @@ func (r *Reconciler) recoverPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha
 	// TODO: recover /etc/resolv.conf file
 	r.Log.Info("Try to recover pod", "namespace", pod.Namespace, "name", pod.Name)
 
+	daemonClient, err := utils.NewChaosDaemonClient(ctx, r.Client,
+		pod, common.ControllerCfg.ChaosDaemonPort)
+	if err != nil {
+		r.Log.Error(err, "MetaNamespaceKeyFunc")
+		return err
+	}
+	defer daemonClient.Close()
+	if len(pod.Status.ContainerStatuses) == 0 {
+		return fmt.Errorf("%s %s can't get the state of container", pod.Namespace, pod.Name)
+	}
+
+	target := pod.Status.ContainerStatuses[0].ContainerID
+
+	_, err = daemonClient.SetDNSServer(ctx, &pb.SetDNSServerRequest{
+		ContainerId: target,
+		Enable:      false,
+	})
+	if err != nil {
+		r.Log.Error(err, "SetDNSServer")
+		return err
+	}
+
 	return nil
 }
 
@@ -261,6 +290,7 @@ func (r *Reconciler) applyPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.
 	_, err = daemonClient.SetDNSServer(ctx, &pb.SetDNSServerRequest{
 		ContainerId: target,
 		DnsServer:   dnsServerIP,
+		Enable:      true,
 	})
 	if err != nil {
 		r.Log.Error(err, "SetDNSServer")

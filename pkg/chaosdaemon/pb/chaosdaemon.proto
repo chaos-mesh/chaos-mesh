@@ -182,4 +182,5 @@ message CancelStressRequest {
 message SetDNSServerRequest {
   string container_id = 1;
   string dns_server = 2;
+  bool enable = 3;
 }

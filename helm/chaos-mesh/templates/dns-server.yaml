@@ -129,7 +129,7 @@ spec:
       nodeSelector:
         kubernetes.io/os: linux
       containers:
-      - name: chaos-mesh-dns
+      - name: chaos-dns
         image: localhost:5000/coredns:latest
         imagePullPolicy: IfNotPresent
         resources:
@@ -188,7 +188,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: chaosdns-service
+  name: chaos-mesh-dns-service
   namespace: {{ .Release.Namespace }}
   annotations:
     prometheus.io/port: "9153"
