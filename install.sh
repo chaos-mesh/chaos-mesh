@@ -77,7 +77,6 @@ main() {
     local chaosfs="https://mirrors.chaos-mesh.org/v0.9.0/chaosfs-sidecar.yaml"
     local runtime="docker"
     local template=false
-    local sidecar_template=true
     local install_dependency_only=false
     local k3s=false
 
@@ -193,11 +192,6 @@ main() {
                 shift
                 shift
                 ;;
-            --sidecar_template)
-                sidecar_template=true
-                shift
-                shift
-                ;;
             --k3s)
                 k3s=true
                 shift
@@ -232,9 +226,7 @@ main() {
     if $template; then
         ensure gen_crd_manifests "${crd}"
         ensure gen_chaos_mesh_manifests "${runtime}" "${k3s}"
-        if $sidecar_template; then
-            ensure gen_default_sidecar_template "${chaosfs}"
-        fi
+        ensure gen_sidecar_template "${chaosfs}"
         exit 0
     fi
 
@@ -256,7 +248,7 @@ main() {
 
     check_kubernetes
 
-    install_chaos_mesh "${release_name}" "${namespace}" "${local_kube}" ${force_chaos_mesh} ${docker_mirror} "${crd}" "${runtime}" "${chaosfs}" "${sidecar_template}" "${k3s}"
+    install_chaos_mesh "${release_name}" "${namespace}" "${local_kube}" ${force_chaos_mesh} ${docker_mirror} "${crd}" "${runtime}" "${chaosfs}" "${k3s}"
     ensure_pods_ready "${namespace}" "app.kubernetes.io/component=controller-manager" 100
     ensure_pods_ready "${namespace}" "app.kubernetes.io/component=chaos-daemon" 100
     ensure_pods_ready "${namespace}" "app.kubernetes.io/component=chaos-dashboard" 100
@@ -609,9 +601,8 @@ install_chaos_mesh() {
     local docker_mirror=$5
     local crd=$6
     local runtime=$7
-    local sidecar_template=$8
-    local chaosfs=$9
-    local k3s=${10}
+    local chaosfs=$8
+    local k3s=$9
 
     printf "Install Chaos Mesh %s\n" "${release_name}"
 
@@ -629,9 +620,7 @@ install_chaos_mesh() {
 
     gen_crd_manifests "${crd}" | kubectl apply -f - || exit 1
     gen_chaos_mesh_manifests "${runtime}" "${k3s}" | kubectl apply -f - || exit 1
-    if [ "$sidecar_template" == "true" ]; then
-        gen_default_sidecar_template "${chaosfs}"| kubectl apply -f - || exit 1
-    fi
+    gen_sidecar_template "${chaosfs}"| kubectl apply -f - || exit 1
 }
 
 version_lt() {
@@ -808,7 +797,7 @@ gen_crd_manifests() {
     ensure cat "$crd"
 }
 
-gen_default_sidecar_template() {
+gen_sidecar_template() {
     local chaosfs=$1
 
     if check_url "$chaosfs"; then
