@@ -103,7 +103,7 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1
 
 	// get dns server's ip used for chaos
 	// TODO: use chaos-mesh's namespace instead of "chaos-testing"
-	service, err := utils.SelectAndFilterSevice(ctx, r.Client, "chaos-testing", DNSServerName)
+	service, err := utils.SelectService(ctx, r.Client, "chaos-testing", DNSServerName)
 	if err != nil {
 		r.Log.Error(err, "failed to select service")
 		return err
@@ -149,7 +149,7 @@ func (r *Reconciler) Recover(ctx context.Context, req ctrl.Request, chaos v1alph
 	}
 
 	// get dns server's ip used for chaos
-	service, err := utils.SelectAndFilterSevice(ctx, r.Client, "chaos-testing", DNSServerName)
+	service, err := utils.SelectService(ctx, r.Client, "chaos-testing", DNSServerName)
 	if err != nil {
 		r.Log.Error(err, "failed to select service")
 		return err
@@ -246,8 +246,6 @@ func (r *Reconciler) Object() v1alpha1.InnerObject {
 }
 
 func (r *Reconciler) applyAllPods(ctx context.Context, pods []v1.Pod, chaos *v1alpha1.DNSChaos, dnsServerIP string) error {
-	// get coredns's ip
-
 	g := errgroup.Group{}
 	for index := range pods {
 		pod := &pods[index]
@@ -298,11 +296,6 @@ func (r *Reconciler) applyPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.
 	}
 
 	return nil
-}
-
-func (r *Reconciler) invalidActionResponse(dnschaos *v1alpha1.DNSChaos) (ctrl.Result, error) {
-	r.Log.Error(nil, "dnschaos action is invalid", "action", dnschaos.Spec.Action)
-	return ctrl.Result{}, fmt.Errorf("invalid dnschaos action")
 }
 
 func (r *Reconciler) setDNSServerRules(dnsServerIP string, port int64, name string, pods []v1.Pod, mode string) error {

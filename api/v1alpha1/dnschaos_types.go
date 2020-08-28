@@ -64,32 +64,6 @@ type DNSChaosSpec struct {
 	// Scheduler defines some schedule rules to control the running time of the chaos experiment about network.
 	Scheduler *SchedulerSpec `json:"scheduler,omitempty"`
 
-	// Delay represents the detail about delay action
-	// +optional
-	Delay *DelaySpec `json:"delay,omitempty"`
-
-	// Loss represents the detail about loss action
-	Loss *LossSpec `json:"loss,omitempty"`
-
-	// DuplicateSpec represents the detail about loss action
-	Duplicate *DuplicateSpec `json:"duplicate,omitempty"`
-
-	// Corrupt represents the detail about corrupt action
-	Corrupt *CorruptSpec `json:"corrupt,omitempty"`
-
-	// Bandwidth represents the detail about bandwidth control action
-	// +optional
-	Bandwidth *BandwidthSpec `json:"bandwidth,omitempty"`
-
-	// Direction represents the direction, this applies on netem and network partition action
-	// +optional
-	// +kubebuilder:validation:Enum=to;from;both;""
-	Direction Direction `json:"direction,omitempty"`
-
-	// Target represents network target, this applies on netem and network partition action
-	// +optional
-	Target *Target `json:"target,omitempty"`
-
 	// ExternalTargets represents network targets outside k8s
 	// +optional
 	ExternalTargets []string `json:"externalTargets,omitempty"`

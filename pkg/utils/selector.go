@@ -75,15 +75,19 @@ func SelectAndFilterPods(ctx context.Context, c client.Client, spec SelectSpec) 
 	return filteredPod, nil
 }
 
-// SelectAndFilterSevice ...
-func SelectAndFilterSevice(ctx context.Context, c client.Client, namespace string, name string) (v1.Service, error) {
-	var service v1.Service
+// SelectService returns the service by namespace and name
+func SelectService(ctx context.Context, c client.Client, namespace string, name string) (v1.Service, error) {
+	var service *v1.Service
 	err := c.Get(ctx, types.NamespacedName{
 		Namespace: namespace,
 		Name:      name,
-	}, &service)
+	}, service)
 
-	return service, err
+	if service == nil {
+		return v1.Service{}, fmt.Errorf("service not found, namespace: %s, name: %s", namespace, name)
+	}
+
+	return *service, err
 }
 
 // SelectPods returns the list of pods that are available for pod chaos action.
