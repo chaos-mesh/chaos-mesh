@@ -21,8 +21,9 @@ import (
 	"sync"
 	"syscall"
 
-	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
 	"github.com/shirou/gopsutil/process"
+
+	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
 
 	ctrl "sigs.k8s.io/controller-runtime"
 )
@@ -63,15 +64,15 @@ type ProcessPair struct {
 
 // BackgroundProcessManager manages all background processes
 type BackgroundProcessManager struct {
-	deathSig    sync.Map
-	identifiers sync.Map
+	deathSig    *sync.Map
+	identifiers *sync.Map
 }
 
 // NewBackgroundProcessManager creates a background process manager
 func NewBackgroundProcessManager() BackgroundProcessManager {
 	return BackgroundProcessManager{
-		deathSig:    sync.Map{},
-		identifiers: sync.Map{},
+		deathSig:    &sync.Map{},
+		identifiers: &sync.Map{},
 	}
 }
 
