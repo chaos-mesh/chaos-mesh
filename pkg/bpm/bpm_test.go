@@ -15,6 +15,7 @@ package bpm
 
 import (
 	"context"
+	"math/rand"
 	"testing"
 	"time"
 
@@ -32,6 +33,38 @@ func TestBpm(t *testing.T) {
 		[]Reporter{envtest.NewlineReporter{}})
 }
 
+func RandomeIdentifier() string {
+	var letters = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
+
+	s := make([]rune, 10)
+	for i := range s {
+		s[i] = letters[rand.Intn(len(letters))]
+	}
+	return string(s)
+}
+
+func WaitProcess(m *BackgroundProcessManager, cmd *ManagedProcess, exceedTime time.Duration) {
+	pid := cmd.Process.Pid
+	procState, err := process.NewProcess(int32(pid))
+	Expect(err).To(BeNil())
+	ct, err := procState.CreateTime()
+	pair := ProcessPair{
+		Pid:        pid,
+		CreateTime: ct,
+	}
+	channel, ok := m.deathSig.Load(pair)
+	Expect(ok).To(BeTrue())
+	deathChannel := channel.(chan bool)
+
+	timeExceed := false
+	select {
+	case <-deathChannel:
+	case <-time.Tick(exceedTime):
+		timeExceed = true
+	}
+	Expect(timeExceed).To(BeFalse())
+}
+
 var _ = Describe("background process manager", func() {
 	m := NewBackgroundProcessManager()
 
@@ -41,20 +74,21 @@ var _ = Describe("background process manager", func() {
 			err := m.StartProcess(cmd)
 			Expect(err).To(BeNil())
 
-			err = cmd.Wait()
-			Expect(err).To(BeNil())
+			WaitProcess(&m, cmd, time.Second*5)
 		})
 
 		It("processes with the same identifier", func() {
+			identifier := RandomeIdentifier()
+
 			cmd := DefaultProcessBuilder("sleep", "2").
-				SetIdentifier("nep").
+				SetIdentifier(identifier).
 				Build()
 			err := m.StartProcess(cmd)
 			Expect(err).To(BeNil())
 
 			startTime := time.Now()
 			cmd2 := DefaultProcessBuilder("sleep", "2").
-				SetIdentifier("nep").
+				SetIdentifier(identifier).
 				Build()
 			err = m.StartProcess(cmd2)
 			costedTime := time.Now().Sub(startTime)
@@ -64,8 +98,7 @@ var _ = Describe("background process manager", func() {
 			_, err = process.NewProcess(int32(cmd.Process.Pid))
 			Expect(err).NotTo(BeNil()) // The first process should have exited
 
-			err = cmd2.Wait()
-			Expect(err).To(BeNil())
+			WaitProcess(&m, cmd2, time.Second*5)
 		})
 	})
 
@@ -89,8 +122,10 @@ var _ = Describe("background process manager", func() {
 		})
 
 		It("process with the same identifier", func() {
+			identifier := RandomeIdentifier()
+
 			cmd := DefaultProcessBuilder("sleep", "2").
-				SetIdentifier("kp").
+				SetIdentifier(identifier).
 				Build()
 			err := m.StartProcess(cmd)
 			Expect(err).To(BeNil())
@@ -102,7 +137,7 @@ var _ = Describe("background process manager", func() {
 			Expect(err).To(BeNil())
 
 			cmd2 := DefaultProcessBuilder("sleep", "2").
-				SetIdentifier("kp").
+				SetIdentifier(identifier).
 				Build()
 
 			go func() {

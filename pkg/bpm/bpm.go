@@ -52,6 +52,7 @@ var nsArgMap = map[NsType]string{
 const (
 	pausePath   = "/usr/local/bin/pause"
 	suicidePath = "/usr/local/bin/suicide"
+	ignorePath  = "/usr/local/bin/ignore"
 )
 
 // ProcessPair is an identifier for process
@@ -62,8 +63,6 @@ type ProcessPair struct {
 
 // BackgroundProcessManager manages all background processes
 type BackgroundProcessManager struct {
-	*sync.Mutex
-
 	deathSig    sync.Map
 	identifiers sync.Map
 }
@@ -71,7 +70,6 @@ type BackgroundProcessManager struct {
 // NewBackgroundProcessManager creates a background process manager
 func NewBackgroundProcessManager() BackgroundProcessManager {
 	return BackgroundProcessManager{
-		Mutex:       &sync.Mutex{},
 		deathSig:    sync.Map{},
 		identifiers: sync.Map{},
 	}
@@ -114,7 +112,7 @@ func (m *BackgroundProcessManager) StartProcess(cmd *ManagedProcess) error {
 	go func() {
 		err := cmd.Wait()
 		if err != nil {
-			err, ok := cmd.Wait().(*exec.ExitError)
+			err, ok := err.(*exec.ExitError)
 			if ok {
 				status := err.Sys().(syscall.WaitStatus)
 				if status.Signaled() && status.Signal() == syscall.SIGTERM {
@@ -313,11 +311,6 @@ func (b *ProcessBuilder) Build() *ManagedProcess {
 		cmd = "nsenter"
 	}
 
-	if b.suicide {
-		args = append([]string{cmd}, args...)
-		cmd = suicidePath
-	}
-
 	if b.pause {
 		args = append([]string{cmd}, args...)
 		cmd = pausePath
@@ -334,6 +327,11 @@ func (b *ProcessBuilder) Build() *ManagedProcess {
 	log.Info("build command", "command", cmd+" "+strings.Join(args, " "))
 
 	command := exec.CommandContext(b.ctx, cmd, args...)
+	command.SysProcAttr = &syscall.SysProcAttr{}
+
+	if b.suicide {
+		command.SysProcAttr.Pdeathsig = syscall.SIGTERM
+	}
 
 	return &ManagedProcess{
 		Cmd:        command,

@@ -205,7 +205,7 @@ image-binary: submodules
 endif
 
 submodules:
-	git submodule update --init
+	# git submodule update --init
 
 image-chaos-daemon: image-binary
 	docker build -t ${DOCKER_REGISTRY_PREFIX}pingcap/chaos-daemon:${IMAGE_TAG} ${DOCKER_BUILD_ARGS} images/chaos-daemon
