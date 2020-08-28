@@ -38,13 +38,13 @@ Perform the following steps to set up the local Kubernetes environment:
    kubectl -n kube-system get pods -l app=helm
    ```
 
-## Setp 2: Install Chaos Mesh
+## Step 2: Install Chaos Mesh
 
 <PickVersion className="language-bash">
   curl -sSL https://mirrors.chaos-mesh.org/latest/install.sh | bash
 </PickVersion>
 
-The above command install all the CRDs, required service account configuration, and all components.
+The above command installs all the CRDs, required service account configuration, and all components.
 Before you start running a chaos experiment, verify if Chaos Mesh is installed correctly.
 
 You also can use [helm](https://helm.sh/) to [install Chaos Mesh manually](installation.md#install-by-helm).

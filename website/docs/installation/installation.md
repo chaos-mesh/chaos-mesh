@@ -25,7 +25,7 @@ Before deploying Chaos Mesh, make sure the following items have been installed:
   curl -sSL https://mirrors.chaos-mesh.org/latest/install.sh | bash
 </PickVersion>
 
-The above command install all the CRDs, required service account configuration, and all components.
+The above command installs all the CRDs, required service account configuration, and all components.
 Before you start running a chaos experiment, verify if Chaos Mesh is installed correctly.
 
 If you are using k3s or k3d, please also specify `--k3s` flag.

@@ -1,3 +1,4 @@
+<!-- markdownlint-disable MD001 -->
 # Chaos Mesh Website
 
 This website is built using [Docusaurus 2](https://v2.docusaurus.io/), a modern static website generator.
