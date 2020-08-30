@@ -14,6 +14,7 @@ import {
   TableRow,
   TableSortLabel,
   TextField,
+  Typography,
 } from '@material-ui/core'
 import React, { useCallback, useEffect, useImperativeHandle, useState } from 'react'
 import { createStyles, makeStyles } from '@material-ui/core/styles'
@@ -23,12 +24,14 @@ import CloseIcon from '@material-ui/icons/Close'
 import { Event } from 'api/events.type'
 import EventDetail from 'components/EventDetail'
 import FirstPageIcon from '@material-ui/icons/FirstPage'
+import HelpOutlineIcon from '@material-ui/icons/HelpOutline'
 import KeyboardArrowLeftIcon from '@material-ui/icons/KeyboardArrowLeft'
 import KeyboardArrowRightIcon from '@material-ui/icons/KeyboardArrowRight'
 import LastPageIcon from '@material-ui/icons/LastPage'
 import Loading from 'components/Loading'
 import PaperTop from 'components/PaperTop'
 import SearchIcon from '@material-ui/icons/Search'
+import Tooltip from 'components/Tooltip'
 import _debounce from 'lodash.debounce'
 import { searchEvents } from 'lib/search'
 import { usePrevious } from 'lib/hooks'
@@ -288,13 +291,41 @@ const EventsTable: React.ForwardRefRenderFunction<EventsTableHandles, EventsTabl
             <TextField
               style={{ width: '200px', minWidth: '30%', margin: 0 }}
               margin="dense"
-              placeholder="Search events ..."
+              placeholder="Search events..."
               disabled={!allEvents}
               variant="outlined"
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
                     <SearchIcon color="primary" />
+                  </InputAdornment>
+                ),
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <Tooltip
+                      title={
+                        <Typography variant="body2">
+                          You can use the following search syntax to quickly locate the events:
+                          <ul style={{ paddingLeft: '1rem' }}>
+                            <li>namespace:default xxx will search for events with namespace default.</li>
+                            <li>
+                              kind:NetworkChaos xxx will search for events with kind NetworkChaos, you can also type
+                              kind:net because the search is fuzzy.
+                            </li>
+                            <li>pod:echoserver-774cdcc8b6-nrm65 will search for events by affected pod.</li>
+                            <li>ip:172.17.0.6 is similar to pod:xxx, filter by pod IP.</li>
+                            <li>
+                              uuid:2f79a4d6-1952-45b5-b2d5-ce715823c7a7 will search for events by experimental uuid.
+                            </li>
+                          </ul>
+                        </Typography>
+                      }
+                      style={{ verticalAlign: 'sub' }}
+                      arrow
+                      interactive
+                    >
+                      <HelpOutlineIcon fontSize="small" />
+                    </Tooltip>
                   </InputAdornment>
                 ),
               }}
