@@ -43,7 +43,7 @@ const ScheduleStep: React.FC = () => {
             <Tooltip
               title={
                 <Typography variant="body2">
-                  We use{' '}
+                  Chaos Mesh use{' '}
                   <Link
                     href="https://github.com/robfig/cron/v3"
                     target="_blank"

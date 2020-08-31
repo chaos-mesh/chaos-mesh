@@ -305,7 +305,7 @@ const EventsTable: React.ForwardRefRenderFunction<EventsTableHandles, EventsTabl
                     <Tooltip
                       title={
                         <Typography variant="body2">
-                          You can use the following search syntax to quickly locate the events:
+                          The following search syntax can help to locate the events quickly:
                           <ul style={{ paddingLeft: '1rem' }}>
                             <li>namespace:default xxx will search for events with namespace default.</li>
                             <li>
