@@ -82,6 +82,10 @@ func (c *MockChaosDaemonClient) SetTcs(ctx context.Context, in *chaosdaemon.TcsR
 	return nil, mockError("SetTcs")
 }
 
+func (c *MockChaosDaemonClient) SetDNSServer(ctx context.Context, in *SetDNSServerRequest) (*empty.Empty, error) {
+	return nil, mockError("SetDNSServer")
+}
+
 func (c *MockChaosDaemonClient) Close() error {
 	return mockError("CloseChaosDaemonClient")
 }
