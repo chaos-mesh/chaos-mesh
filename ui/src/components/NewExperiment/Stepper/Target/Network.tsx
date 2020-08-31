@@ -15,7 +15,7 @@ const actions = ['partition', 'loss', 'delay', 'duplicate', 'corrupt', 'bandwidt
 const direction = ['from', 'to', 'both']
 
 export default function Network(props: StepperFormTargetProps) {
-  const { values, setFieldValue, handleActionChange } = props
+  const { errors, touched, values, setFieldValue, handleActionChange } = props
 
   const { namespaces } = useSelector((state: RootState) => state.experiments)
 
@@ -53,6 +53,7 @@ export default function Network(props: StepperFormTargetProps) {
         label="Action"
         helperText="Please select a NetworkChaos action"
         onChange={handleActionChange}
+        onBlur={() => {}} // Delay the form validation with an empty func. If don’t do this, errors will appear early
       >
         {actions.map((option) => (
           <MenuItem key={option} value={option}>
@@ -67,6 +68,7 @@ export default function Network(props: StepperFormTargetProps) {
           name="target.network_chaos.direction"
           label="Direction"
           helperText="Specifies the partition direction"
+          error={errors.target?.network_chaos?.direction && touched.target?.network_chaos?.direction ? true : false}
         >
           {direction.map((option) => (
             <MenuItem key={option} value={option}>
@@ -83,6 +85,11 @@ export default function Network(props: StepperFormTargetProps) {
             name="target.network_chaos.bandwidth.rate"
             label="Rate"
             helperText="The rate allows bps, kbps, mbps, gbps, tbps unit. For example, bps means bytes per second"
+            error={
+              errors.target?.network_chaos?.bandwidth?.rate && touched.target?.network_chaos?.bandwidth?.rate
+                ? true
+                : false
+            }
           />
           <TextField
             type="number"
@@ -125,6 +132,11 @@ export default function Network(props: StepperFormTargetProps) {
             InputProps={{
               endAdornment: <InputAdornment position="end">%</InputAdornment>,
             }}
+            error={
+              errors.target?.network_chaos?.corrupt?.corrupt && touched.target?.network_chaos?.corrupt?.corrupt
+                ? true
+                : false
+            }
           />
           <TextField
             id="target.network_chaos.corrupt.correlation"
@@ -134,6 +146,11 @@ export default function Network(props: StepperFormTargetProps) {
             InputProps={{
               endAdornment: <InputAdornment position="end">%</InputAdornment>,
             }}
+            error={
+              errors.target?.network_chaos?.corrupt?.correlation && touched.target?.network_chaos?.corrupt?.correlation
+                ? true
+                : false
+            }
           />
         </>
       )}
@@ -145,6 +162,12 @@ export default function Network(props: StepperFormTargetProps) {
             name="target.network_chaos.delay.latency"
             label="Latency"
             helperText="The latency of delay"
+            autoFocus
+            error={
+              errors.target?.network_chaos?.delay?.latency && touched.target?.network_chaos?.delay?.latency
+                ? true
+                : false
+            }
           />
           <AdvancedOptions>
             <TextField
@@ -176,6 +199,11 @@ export default function Network(props: StepperFormTargetProps) {
             InputProps={{
               endAdornment: <InputAdornment position="end">%</InputAdornment>,
             }}
+            error={
+              errors.target?.network_chaos?.duplicate?.duplicate && touched.target?.network_chaos?.duplicate?.duplicate
+                ? true
+                : false
+            }
           />
           <TextField
             id="target.network_chaos.duplicate.correlation"
@@ -185,6 +213,12 @@ export default function Network(props: StepperFormTargetProps) {
             InputProps={{
               endAdornment: <InputAdornment position="end">%</InputAdornment>,
             }}
+            error={
+              errors.target?.network_chaos?.duplicate?.correlation &&
+              touched.target?.network_chaos?.duplicate?.correlation
+                ? true
+                : false
+            }
           />
         </>
       )}
@@ -199,6 +233,7 @@ export default function Network(props: StepperFormTargetProps) {
             InputProps={{
               endAdornment: <InputAdornment position="end">%</InputAdornment>,
             }}
+            error={errors.target?.network_chaos?.loss?.loss && touched.target?.network_chaos?.loss?.loss ? true : false}
           />
           <TextField
             id="target.network_chaos.loss.correlation"
@@ -208,6 +243,11 @@ export default function Network(props: StepperFormTargetProps) {
             InputProps={{
               endAdornment: <InputAdornment position="end">%</InputAdornment>,
             }}
+            error={
+              errors.target?.network_chaos?.loss?.correlation && touched.target?.network_chaos?.loss?.correlation
+                ? true
+                : false
+            }
           />
         </>
       )}

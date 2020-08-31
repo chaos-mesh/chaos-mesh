@@ -44,7 +44,9 @@ func (s *daemonServer) SetDNSServer(ctx context.Context,
 		}
 
 		// backup the /etc/resolv.conf
-		cmd := withMountNS(context.Background(), GetNsPath(pid, mountNS), "cp", DNSServerConfFile, DNSServerConfFile+".chaos.bak")
+		cmd := defaultProcessBuilder("cp", DNSServerConfFile, DNSServerConfFile+".chaos.bak").
+			SetMountNS(GetNsPath(pid, mountNS)).
+			Build(context.Background())
 		out, err := cmd.Output()
 		if err != nil {
 			return nil, err
@@ -55,8 +57,9 @@ func (s *daemonServer) SetDNSServer(ctx context.Context,
 
 		// add chaos dns server to the first line of /etc/resolv.conf
 		// Note: can not use sed, will execute with error `Device or resource busy`
-		cmd = withMountNS(context.Background(), GetNsPath(pid, mountNS), "sh", "-c", fmt.Sprintf("echo 'nameserver %s' | cat - %s > temp && cat temp > %s", req.DnsServer, DNSServerConfFile, DNSServerConfFile))
-
+		cmd = defaultProcessBuilder("sh", "-c", fmt.Sprintf("echo 'nameserver %s' | cat - %s > temp && cat temp > %s", req.DnsServer, DNSServerConfFile, DNSServerConfFile)).
+			SetMountNS(GetNsPath(pid, mountNS)).
+			Build(context.Background())
 		out, err = cmd.Output()
 		if err != nil {
 			return nil, err
@@ -66,7 +69,9 @@ func (s *daemonServer) SetDNSServer(ctx context.Context,
 		}
 	} else {
 		// recover the dns server's address
-		cmd := withMountNS(context.Background(), GetNsPath(pid, mountNS), "sh", "-c", fmt.Sprintf("ls %s && cat %s.chaos.bak > %s || true", DNSServerConfFile, DNSServerConfFile, DNSServerConfFile))
+		cmd := defaultProcessBuilder("sh", "-c", fmt.Sprintf("ls %s && cat %s.chaos.bak > %s || true", DNSServerConfFile, DNSServerConfFile, DNSServerConfFile)).
+			SetMountNS(GetNsPath(pid, mountNS)).
+			Build(context.Background())
 		out, err := cmd.Output()
 		if err != nil {
 			return nil, err

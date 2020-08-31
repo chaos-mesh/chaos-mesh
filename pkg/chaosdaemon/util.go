@@ -45,7 +45,8 @@ const (
 	containerdProtocolPrefix = "containerd://"
 	containerdDefaultNS      = "k8s.io"
 
-	pausePath = "/usr/local/bin/pause"
+	pausePath   = "/usr/local/bin/pause"
+	suicidePath = "/usr/local/bin/suicide"
 
 	defaultProcPrefix = "/proc"
 )
@@ -212,72 +213,118 @@ func GetNsPath(pid uint32, typ nsType) string {
 	return fmt.Sprintf("%s/%d/ns/%s", defaultProcPrefix, pid, string(typ))
 }
 
-func withPause(cmd exec.Cmd) exec.Cmd {
-	cmd.Path = pausePath
-	cmd.Args = append([]string{pausePath}, cmd.Args...)
+// processBuilder builds a exec.Cmd for daemon
+type processBuilder struct {
+	cmd  string
+	args []string
 
-	return cmd
+	nsOptions []nsOption
+
+	pause   bool
+	suicide bool
 }
 
-func withNetNS(ctx context.Context, nsPath string, cmd string, args ...string) *exec.Cmd {
-	// Mock point to return mock Cmd in unit test
-	if c := mock.On("MockWithNetNs"); c != nil {
-		f := c.(func(context.Context, string, string, ...string) *exec.Cmd)
-		return f(ctx, nsPath, cmd, args...)
+func defaultProcessBuilder(cmd string, args ...string) *processBuilder {
+	return &processBuilder{
+		cmd:       cmd,
+		args:      args,
+		nsOptions: []nsOption{},
+		pause:     false,
+		suicide:   false,
 	}
+}
 
-	return withNS(ctx, []nsOption{{
+func (b *processBuilder) SetNetNS(nsPath string) *processBuilder {
+	return b.SetNS([]nsOption{{
 		Typ:  netNS,
 		Path: nsPath,
-	}}, cmd, args...)
+	}})
 }
 
-func withPidNS(ctx context.Context, nsPath string, cmd string, args ...string) *exec.Cmd {
-	// Mock point to return mock Cmd in unit test
-	if c := mock.On("MockWithPidNs"); c != nil {
-		f := c.(func(context.Context, string, string, ...string) *exec.Cmd)
-		return f(ctx, nsPath, cmd, args...)
-	}
-
-	return withNS(ctx, []nsOption{{
+func (b *processBuilder) SetPidNS(nsPath string) *processBuilder {
+	return b.SetNS([]nsOption{{
 		Typ:  pidNS,
 		Path: nsPath,
-	}}, cmd, args...)
+	}})
 }
 
-func withMountNS(ctx context.Context, nsPath string, cmd string, args ...string) *exec.Cmd {
-	// Mock point to return mock Cmd in unit test
-	if c := mock.On("MockWithMountNs"); c != nil {
-		f := c.(func(context.Context, string, string, ...string) *exec.Cmd)
-		return f(ctx, nsPath, cmd, args...)
-	}
-
-	return withNS(ctx, []nsOption{{
+func (b *processBuilder) SetMountNS(nsPath string) *processBuilder {
+	return b.SetNS([]nsOption{{
 		Typ:  mountNS,
 		Path: nsPath,
-	}}, cmd, args...)
+	}})
+}
+
+func (b *processBuilder) SetNS(options []nsOption) *processBuilder {
+	b.nsOptions = append(b.nsOptions, options...)
+
+	return b
+}
+
+func (b *processBuilder) EnablePause() *processBuilder {
+	b.pause = true
+
+	return b
+}
+
+func (b *processBuilder) EnableSuicide() *processBuilder {
+	b.suicide = true
+
+	return b
+}
+
+func (b *processBuilder) Build(ctx context.Context) *exec.Cmd {
+	// The call routine is pause -> suicide -> nsenter --(fork)-> suicide -> process
+	// so that when chaos-daemon killed the suicide process, the sub suicide process will
+	// receive a signal and exit.
+	// For example:
+	// If you call `nsenter -p/proc/.../ns/pid bash -c "while true; do sleep 1; date; done"`
+	// then even you kill the nsenter process, the subprocess of it will continue running
+	// until it gets killed. The suicide program is used to make sure that the subprocess will
+	// be terminated when its parent died.
+	// But the `./bin/suicide nsenter -p/proc/.../ns/pid ./bin/suicide bash -c "while true; do sleep 1; date; done"`
+	// can fix this problem. The first suicide is used to ensure when chaos-daemon is dead, the process is killed
+
+	// I'm not sure this method is 100% reliable, but half a loaf is better than none.
+
+	args := b.args
+	cmd := b.cmd
+
+	if b.suicide {
+		args = append([]string{cmd}, args...)
+		cmd = suicidePath
+	}
+
+	if len(b.nsOptions) > 0 {
+		args = append([]string{"--", cmd}, args...)
+		for _, option := range b.nsOptions {
+			args = append([]string{"-" + nsArgMap[option.Typ] + option.Path}, args...)
+		}
+		cmd = "nsenter"
+	}
+
+	if b.suicide {
+		args = append([]string{cmd}, args...)
+		cmd = suicidePath
+	}
+
+	if b.pause {
+		args = append([]string{cmd}, args...)
+		cmd = pausePath
+	}
+
+	if c := mock.On("MockProcessBuild"); c != nil {
+		f := c.(func(context.Context, string, ...string) *exec.Cmd)
+		return f(ctx, cmd, args...)
+	}
+
+	log.Info("build command", "command", cmd+" "+strings.Join(args, " "))
+	return exec.CommandContext(ctx, cmd, args...)
 }
 
 type nsOption struct {
 	Typ  nsType
 	Path string
-}
-
-func withNS(ctx context.Context, options []nsOption, cmd string, args ...string) *exec.Cmd {
-	// Mock point to return mock Cmd in unit test
-	if c := mock.On("MockWithNs"); c != nil {
-		f := c.(func(context.Context, []nsOption, string, ...string) *exec.Cmd)
-		return f(ctx, options, cmd, args...)
-	}
-
-	args = append([]string{"--", cmd}, args...)
-	for _, option := range options {
-		args = append([]string{"-" + nsArgMap[option.Typ] + option.Path}, args...)
-	}
-
-	log.Info("running command", "command", "nsenter "+strings.Join(args, " "))
-
-	return exec.CommandContext(ctx, "nsenter", args...)
 }
 
 // ContainerKillByContainerID kills container according to container id
@@ -316,7 +363,23 @@ func (c ContainerdClient) ContainerKillByContainerID(ctx context.Context, contai
 	return err
 }
 
+// ReadCommName returns the command name of process
+func ReadCommName(pid int) (string, error) {
+	f, err := os.Open(fmt.Sprintf("%s/%d/comm", defaultProcPrefix, pid))
+	if err != nil {
+		return "", err
+	}
+
+	b, err := ioutil.ReadAll(f)
+	if err != nil {
+		return "", err
+	}
+
+	return string(b), nil
+}
+
 // GetChildProcesses will return all child processes's pid. Include all generations.
+// only return error when /proc/pid/tasks cannot be read
 func GetChildProcesses(ppid uint32) ([]uint32, error) {
 	procs, err := ioutil.ReadDir(defaultProcPrefix)
 	if err != nil {
@@ -381,4 +444,8 @@ func GetChildProcesses(ppid uint32) ([]uint32, error) {
 			return processGraph.Flatten(ppid), nil
 		}
 	}
+}
+
+func encodeOutputToError(output []byte, err error) error {
+	return fmt.Errorf("error code: %v, msg: %s", err, string(output))
 }

@@ -151,7 +151,7 @@ func (iptables *iptablesClient) initializeEnv() error {
 
 // createNewChain will cover existing chain
 func (iptables *iptablesClient) createNewChain(chain *iptablesChain) error {
-	cmd := withNetNS(iptables.ctx, iptables.nsPath, iptablesCmd, "-w", "-N", chain.Name)
+	cmd := defaultProcessBuilder(iptablesCmd, "-w", "-N", chain.Name).SetNetNS(iptables.nsPath).Build(iptables.ctx)
 	out, err := cmd.CombinedOutput()
 
 	if (err == nil && len(out) == 0) ||
@@ -184,7 +184,7 @@ func (iptables *iptablesClient) deleteAndWriteRules(chain *iptablesChain) error 
 }
 
 func (iptables *iptablesClient) ensureRule(chain *iptablesChain, rule string) error {
-	cmd := withNetNS(iptables.ctx, iptables.nsPath, iptablesCmd, "-w", "-S", chain.Name)
+	cmd := defaultProcessBuilder(iptablesCmd, "-w", "-S", chain.Name).SetNetNS(iptables.nsPath).Build(iptables.ctx)
 	out, err := cmd.CombinedOutput()
 	if err != nil {
 		return encodeOutputToError(out, err)
@@ -196,7 +196,7 @@ func (iptables *iptablesClient) ensureRule(chain *iptablesChain, rule string) er
 	}
 
 	// TODO: lock on every container but not on chaos-daemon's `/run/xtables.lock`
-	cmd = withNetNS(iptables.ctx, iptables.nsPath, iptablesCmd, strings.Split("-w "+rule, " ")...)
+	cmd = defaultProcessBuilder(iptablesCmd, strings.Split("-w "+rule, " ")...).SetNetNS(iptables.nsPath).Build(iptables.ctx)
 	out, err = cmd.CombinedOutput()
 	if err != nil {
 		return encodeOutputToError(out, err)
@@ -206,15 +206,11 @@ func (iptables *iptablesClient) ensureRule(chain *iptablesChain, rule string) er
 }
 
 func (iptables *iptablesClient) flushIptablesChain(chain *iptablesChain) error {
-	cmd := withNetNS(iptables.ctx, iptables.nsPath, iptablesCmd, "-w", "-F", chain.Name)
+	cmd := defaultProcessBuilder(iptablesCmd, "-w", "-F", chain.Name).SetNetNS(iptables.nsPath).Build(iptables.ctx)
 	out, err := cmd.CombinedOutput()
 	if err != nil {
 		return encodeOutputToError(out, err)
 	}
 
 	return nil
-}
-
-func encodeOutputToError(output []byte, err error) error {
-	return fmt.Errorf("error code: %v, msg: %s", err, string(output))
 }

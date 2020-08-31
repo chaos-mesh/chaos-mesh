@@ -70,10 +70,12 @@ var _ = Describe("NetworkChaos Controller", func() {
 						},
 						Action: action,
 						Mode:   v1alpha1.OnePodMode,
-						Delay: &v1alpha1.DelaySpec{
-							Latency:     "10ms",
-							Correlation: "0.15",
-							Jitter:      "2ms",
+						TcParameter: v1alpha1.TcParameter{
+							Delay: &v1alpha1.DelaySpec{
+								Latency:     "10ms",
+								Correlation: "0.15",
+								Jitter:      "2ms",
+							},
 						},
 					},
 				}

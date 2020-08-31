@@ -6,6 +6,8 @@ import { StepperFormTargetProps } from 'components/NewExperiment/types'
 import { resetOtherChaos } from 'lib/formikhelpers'
 
 export default function Time(props: StepperFormTargetProps) {
+  const { errors, touched } = props
+
   useEffect(() => {
     resetOtherChaos(props, 'TimeChaos', false)
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -18,6 +20,7 @@ export default function Time(props: StepperFormTargetProps) {
         name="target.time_chaos.time_offset"
         label="Offset"
         helperText="The time offset"
+        error={errors.target?.time_chaos?.time_offset && touched.target?.time_chaos?.time_offset ? true : false}
       />
 
       <AdvancedOptions>
