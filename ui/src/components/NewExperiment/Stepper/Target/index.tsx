@@ -13,10 +13,10 @@ import Network from './Network'
 import PanToolOutlinedIcon from '@material-ui/icons/PanToolOutlined'
 import Pod from './Pod'
 import { ReactComponent as PodLifecycleIcon } from './images/pod-lifecycle.svg'
-import PortableWifiOffOutlinedIcon from '@material-ui/icons/PortableWifiOffOutlined'
 import SelectAllOutlinedIcon from '@material-ui/icons/SelectAllOutlined'
 import Stress from './Stress'
 import Time from './Time'
+import WifiTetheringIcon from '@material-ui/icons/WifiTethering'
 import { resetOtherChaos } from 'lib/formikhelpers'
 import { useFormikContext } from 'formik'
 
@@ -33,7 +33,7 @@ const tabs = [
   {
     key: 'NetworkChaos',
     label: 'Network',
-    icon: <PortableWifiOffOutlinedIcon fontSize="large" />,
+    icon: <WifiTetheringIcon fontSize="large" />,
   },
   { key: 'IoChaos', label: 'File System I/O', icon: <PanToolOutlinedIcon fontSize="large" /> },
   {
