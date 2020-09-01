@@ -64,7 +64,7 @@ If you have a specific idea of a fix or update, follow these steps below to subm
 
     You can new edit the code on the `myfeature` branch.
 
-    If you want to update the `crd.yam` according the the CRD structs, run the following commands:
+    If you want to update the `crd.yaml` according the the CRD structs, run the following commands:
 
     ```bash
     $ make generate
