@@ -57,7 +57,7 @@ func (s *daemonServer) ApplyIoChaos(ctx context.Context, in *pb.ApplyIoChaosRequ
 		return nil, err
 	}
 
-	args := fmt.Sprintf("--path %s --pid %d --verbose trace", in.Volume, pid)
+	args := fmt.Sprintf("--path %s --pid %d --verbose info", in.Volume, pid)
 	log.Info("executing", "cmd", todaBin+" "+args)
 	cmd := bpm.DefaultProcessBuilder(todaBin, strings.Split(args, " ")...).
 		EnableSuicide().
