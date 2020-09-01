@@ -6,4 +6,4 @@ ARG HTTP_PROXY
 ENV TZ /etc/localtime
 RUN apk add --no-cache tzdata fuse
 
-COPY --from=pingcap/binary /bin/chaosfs /usr/local/bin/chaosfs
+COPY --from=pingcap/chaos-binary /bin/chaosfs /usr/local/bin/chaosfs

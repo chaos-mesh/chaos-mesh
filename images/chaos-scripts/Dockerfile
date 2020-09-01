@@ -6,5 +6,5 @@ ARG HTTP_PROXY
 RUN apk add tzdata --no-cache
 RUN mkdir -p /scripts
 
-COPY --from=pingcap/binary /scripts/wait-fuse.sh /scripts/wait-fuse.sh
-COPY --from=pingcap/binary /scripts/init.sh /scripts/init.sh
+COPY --from=pingcap/chaos-binary /scripts/wait-fuse.sh /scripts/wait-fuse.sh
+COPY --from=pingcap/chaos-binary /scripts/init.sh /scripts/init.sh

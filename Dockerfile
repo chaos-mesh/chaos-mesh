@@ -1,13 +1,6 @@
 # syntax=docker/dockerfile:experimental
 
-FROM debian:buster-slim AS build_base
-
-ENV DEBIAN_FRONTEND noninteractive
-
-RUN apt-get update
-RUN apt-get install build-essential curl git pkg-config libfuse-dev fuse -y
-
-FROM build_base AS go_build
+FROM pingcap/chaos-build-base AS go_build
 
 RUN curl https://dl.google.com/go/go1.14.6.linux-amd64.tar.gz | tar -xz -C /usr/local
 ENV PATH "/usr/local/go/bin:${PATH}"
@@ -15,9 +8,8 @@ ENV GO111MODULE=on
 
 ARG HTTPS_PROXY
 ARG HTTP_PROXY
-# ARG UI
-# ARG SWAGGER
-# TODO: compile frontend
+
+RUN if [[ -n "$HTTP_PROXY" ]]; then yarn config set proxy $HTTP_PROXY; fi
 
 WORKDIR /src
 
@@ -29,9 +21,10 @@ ARG LDFLAGS
 
 RUN --mount=type=cache,target=/root/go/pkg \
     --mount=type=cache,target=/root/.cache/go-build \
+    --mount=type=cache,target=/src/ui/node_modules \
     IMG_LDFLAGS=$LDFLAGS make binary
 
-FROM build_base AS rust_build
+FROM pingcap/chaos-build-base AS rust_build
 
 ARG HTTPS_PROXY
 ARG HTTP_PROXY

@@ -3,12 +3,11 @@ FROM debian:buster-slim
 ARG HTTPS_PROXY
 ARG HTTP_PROXY
 
-RUN apt-get update
-RUN apt-get install -y tzdata iptables ipset stress-ng iproute2 fuse util-linux
+RUN apt-get update && apt-get install -y tzdata iptables ipset stress-ng iproute2 fuse util-linux && rm -rf /var/lib/apt/lists/*
 
 ENV RUST_BACKTRACE 1
 
-COPY --from=pingcap/binary /bin/chaos-daemon /usr/local/bin/chaos-daemon
-COPY --from=pingcap/binary /bin/toda /usr/local/bin/toda
-COPY --from=pingcap/binary /bin/pause /usr/local/bin/pause
-COPY --from=pingcap/binary /bin/suicide /usr/local/bin/suicide
+COPY --from=pingcap/chaos-binary /bin/chaos-daemon /usr/local/bin/chaos-daemon
+COPY --from=pingcap/chaos-binary /bin/toda /usr/local/bin/toda
+COPY --from=pingcap/chaos-binary /bin/pause /usr/local/bin/pause
+COPY --from=pingcap/chaos-binary /bin/suicide /usr/local/bin/suicide

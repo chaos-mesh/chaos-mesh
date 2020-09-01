@@ -181,9 +181,9 @@ boilerplate:
 
 taily-build:
 	if [ "$(shell docker ps --filter=name=$@ -q)" = "" ]; then \
-		docker build -t pingcap/binary ${DOCKER_BUILD_ARGS} .; \
+		docker build -t pingcap/chaos-binary ${DOCKER_BUILD_ARGS} .; \
 		docker run --rm --mount type=bind,source=$(shell pwd),target=/src \
-			--name $@ -d pingcap/binary tail -f /dev/null; \
+			--name $@ -d pingcap/chaos-binary tail -f /dev/null; \
 	fi;
 
 taily-build-clean:
@@ -195,14 +195,17 @@ image-chaos-mesh-protoc:
 	docker build -t pingcap/chaos-mesh-protoc ${DOCKER_BUILD_ARGS} ./hack/protoc
 
 ifneq ($(TAILY_BUILD),)
-image-binary: taily-build submodules
+image-binary: taily-build image-build-base submodules
 	docker exec -it taily-build make binary
 	cp -r scripts ./bin
-	echo -e "FROM scratch\n COPY . /src/bin\n COPY ./scripts /src/scripts" | docker build -t pingcap/binary -f - ./bin
+	echo -e "FROM scratch\n COPY . /src/bin\n COPY ./scripts /src/scripts" | docker build -t pingcap/chaos-binary -f - ./bin
 else
-image-binary: submodules
-	DOCKER_BUILDKIT=1 docker build -t pingcap/binary ${DOCKER_BUILD_ARGS} .
+image-binary: image-build-base submodules
+	DOCKER_BUILDKIT=1 docker build -t pingcap/chaos-binary ${DOCKER_BUILD_ARGS} .
 endif
+
+image-build-base:
+	DOCKER_BUILDKIT=0 docker build --ulimit nofile=65536:65536 -t pingcap/chaos-build-base ${DOCKER_BUILD_ARGS} images/build-base
 
 submodules:
 	git submodule update --init
