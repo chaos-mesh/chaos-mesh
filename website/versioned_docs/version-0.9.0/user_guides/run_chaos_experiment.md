@@ -20,8 +20,7 @@ After executing the above command, you can access [`http://localhost:8081`](http
 > **Note:**
 >
 > If the web-show is deployed on the server, you need to use the host ip to access the application.
-> However by executing script below enables you to view web-show application by accessing [`http://localhost:8081`](http://localhost:8081). 
-> ```kubectl port-forward -n default svc/web-show 8081:8081```
+
 ## Step 2: Define the experiment configuration file
 
 The chaos experiment configuration is defined in a YAML file. You need to create your own experiment configuration file based on the available fields in the sample below:
@@ -103,7 +102,7 @@ Chaos Dashboard is a Web UI for managing, designing, monitoring Chaos Experiment
 
 > **Note:**
 >
-> If Chaos Dashboard was not installed, upgrade Chaos Mesh by executing `helm upgrade chaos-mesh chaos-mesh/chaos-mesh --namespace=chaos-testing --set dashboard.create=true`.
+> If Chaos Dashboard was not installed, upgrade Chaos Mesh by executing `helm upgrade chaos-mesh helm/chaos-mesh --namespace=chaos-testing --set dashboard.create=true`.
 
 A typical way to access it is to use `kubectl port-forward`:
 
