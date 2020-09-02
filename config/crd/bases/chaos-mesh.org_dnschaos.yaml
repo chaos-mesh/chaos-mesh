@@ -35,22 +35,11 @@ spec:
           description: Spec defines the behavior of a pod chaos experiment
           properties:
             action:
-              description: 'Action defines the specific network chaos action. Supported
-                action: partition, netem, delay, loss, duplicate, corrupt Default
-                action: delay'
+              description: 'Action defines the specific DNS chaos action. Supported
+                action: error, random Default action: error'
               enum:
-              - netem
-              - delay
-              - loss
-              - duplicate
-              - corrupt
-              - partition
-              - bandwidth
-              type: string
-            chaosMode:
-              description: 'the value of chaos mode can be "RANDOM" or "ERROR":   "RANDOM":
-                return random IP for DNS request   "ERROR":  return error for DNS
-                request'
+              - error
+              - random
               type: string
             duration:
               description: Duration represents the duration of the chaos action
@@ -79,11 +68,12 @@ spec:
               - cron
               type: object
             scope:
-              description: 'scope means the chaos scope, values can be "INNER", "OUTER"
-                or "ALL":   "INNER": chaos only works on the inner host in Kubernetes
-                cluster   "OUTER": chaos only works on the outer host of Kubernetes
-                cluster   "ALL":   chaos works on all host TODO: maybe we can support
-                set the RegExp for the host'
+              description: 'Action defines the scope which the DNS chaos works. Supported
+                action: outer, inner, all Default action: outer'
+              enum:
+              - outer
+              - inner
+              - all
               type: string
             selector:
               description: Selector is used to select pods that are used to inject
@@ -152,7 +142,6 @@ spec:
               type: string
           required:
           - action
-          - chaosMode
           - mode
           - scope
           - selector

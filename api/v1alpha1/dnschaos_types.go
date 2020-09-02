@@ -25,6 +25,33 @@ import (
 // KindDNSChaos is the kind for network chaos
 const KindDNSChaos = "DNSChaos"
 
+// DNSChaosAction represents the chaos action about DNS.
+type DNSChaosAction string
+
+const (
+	// ErrorAction represents get error when send DNS request.
+	ErrorAction DNSChaosAction = "error"
+
+	// RandomAction represents get random IP when send DNS request.
+	RandomAction DNSChaosAction = "random"
+)
+
+// DNSChaosScope is the scope which the DNS chaos works.
+type DNSChaosScope string
+
+const (
+	// OuterScope represents DNS chaos only works on the inner host in Kubernetes cluster
+	OuterScope DNSChaosScope = "outer"
+
+	// InnerScope represents DNS chaos only works on the outer host of Kubernetes cluster
+	InnerScope DNSChaosScope = "inner"
+
+	// AllScope represents DNS chaos works on host
+	AllScope DNSChaosScope = "all"
+
+	// TODO: maybe we can support set the RegExp for the host
+)
+
 func init() {
 	all.register(KindDNSChaos, &ChaosKind{
 		Chaos:     &DNSChaos{},
@@ -32,15 +59,12 @@ func init() {
 	})
 }
 
-// ChaosAction represents the chaos action about pods.
-type DNSChaosAction string
-
 // DNSChaosSpec defines the desired state of DNSChaos
 type DNSChaosSpec struct {
-	// Action defines the specific network chaos action.
-	// Supported action: partition, netem, delay, loss, duplicate, corrupt
-	// Default action: delay
-	// +kubebuilder:validation:Enum=netem;delay;loss;duplicate;corrupt;partition;bandwidth
+	// Action defines the specific DNS chaos action.
+	// Supported action: error, random
+	// Default action: error
+	// +kubebuilder:validation:Enum=error;random
 	Action DNSChaosAction `json:"action"`
 
 	// Mode defines the mode to run chaos action.
@@ -64,17 +88,11 @@ type DNSChaosSpec struct {
 	// Scheduler defines some schedule rules to control the running time of the chaos experiment about network.
 	Scheduler *SchedulerSpec `json:"scheduler,omitempty"`
 
-	// scope means the chaos scope, values can be "INNER", "OUTER" or "ALL":
-	//   "INNER": chaos only works on the inner host in Kubernetes cluster
-	//   "OUTER": chaos only works on the outer host of Kubernetes cluster
-	//   "ALL":   chaos works on all host
-	// TODO: maybe we can support set the RegExp for the host
-	Scope string `json:"scope"`
-
-	// the value of chaos mode can be "RANDOM" or "ERROR":
-	//   "RANDOM": return random IP for DNS request
-	//   "ERROR":  return error for DNS request
-	ChaosMode string `json:"chaosMode"`
+	// Action defines the scope which the DNS chaos works.
+	// Supported action: outer, inner, all
+	// Default action: outer
+	// +kubebuilder:validation:Enum=outer;inner;all
+	Scope DNSChaosScope `json:"scope"`
 }
 
 // GetSelector is a getter for Selector (for implementing SelectSpec)

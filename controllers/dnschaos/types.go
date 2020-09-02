@@ -124,7 +124,7 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1
 	r.Log.Info("get dns service", "service", service.String(), "ip", service.Spec.ClusterIP)
 
 	// TODO: set port and mode
-	err = r.setDNSServerRules(service.Spec.ClusterIP, 9288, dnschaos.Name, pods, dnschaos.Spec.ChaosMode, dnschaos.Spec.Scope)
+	err = r.setDNSServerRules(service.Spec.ClusterIP, 9288, dnschaos.Name, pods, dnschaos.Spec.Action, dnschaos.Spec.Scope)
 	if err != nil {
 		r.Log.Error(err, "fail to set DNS server rules")
 		return err
@@ -315,7 +315,7 @@ func (r *Reconciler) applyPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.
 	return nil
 }
 
-func (r *Reconciler) setDNSServerRules(dnsServerIP string, port int64, name string, pods []v1.Pod, mode string, scope string) error {
+func (r *Reconciler) setDNSServerRules(dnsServerIP string, port int64, name string, pods []v1.Pod, action v1alpha1.DNSChaosAction, scope v1alpha1.DNSChaosScope) error {
 	r.Log.Info("setDNSServerRules")
 	defer r.Log.Info("setDNSServerRules finished")
 	pbPods := make([]*dnspb.Pod, len(pods))
@@ -334,10 +334,10 @@ func (r *Reconciler) setDNSServerRules(dnsServerIP string, port int64, name stri
 
 	c := dnspb.NewDNSClient(conn)
 	request := &dnspb.SetDNSChaosRequest{
-		Name:  name,
-		Mode:  mode,
-		Pods:  pbPods,
-		Scope: scope,
+		Name:   name,
+		Action: string(action),
+		Pods:   pbPods,
+		Scope:  string(scope),
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)

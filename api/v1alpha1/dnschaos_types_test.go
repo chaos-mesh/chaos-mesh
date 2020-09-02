@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package controllers
+package v1alpha1
 
 import (
 	"context"
@@ -20,13 +20,19 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 )
 
-var _ = Describe("DNSChaos Controller", func() {
+// These tests are written in BDD-style using Ginkgo framework. Refer to
+// http://onsi.github.io/ginkgo to learn more.
+
+var _ = Describe("DNSChaos", func() {
+	var (
+		key              types.NamespacedName
+		created, fetched *DNSChaos
+	)
+
 	BeforeEach(func() {
 		// Add any setup steps that needs to be executed before each test
 	})
@@ -35,42 +41,49 @@ var _ = Describe("DNSChaos Controller", func() {
 		// Add any teardown steps that needs to be executed after each test
 	})
 
-	// Add Tests for OpenAPI validation (or additional CRD features) specified in
-	// your API definition.
-	// Avoid adding tests for vanilla CRUD operations because they would
-	// test Kubernetes API server, which isn't the goal here.
-	Context("DNSChaos Item", func() {
-		It("should create successfully", func() {
-			key := types.NamespacedName{
-				Name:      "dns-chaos" + "-" + randomStringWithCharset(10, charset),
+	Context("Create API", func() {
+		It("should create an object successfully", func() {
+			key = types.NamespacedName{
+				Name:      "foo",
 				Namespace: "default",
 			}
 
-			created := &v1alpha1.DNSChaos{
+			created = &DNSChaos{
 				ObjectMeta: metav1.ObjectMeta{
-					Name:      key.Name,
-					Namespace: key.Namespace,
+					Name:      "foo",
+					Namespace: "default",
 				},
-				Spec: v1alpha1.DNSChaosSpec{
-					Selector: v1alpha1.SelectorSpec{
-						Namespaces: []string{"default"},
-					},
-					Scheduler: &v1alpha1.SchedulerSpec{
-						Cron: "@every 2m",
-					},
-					Mode:      v1alpha1.OnePodMode,
-					Scope:     v1alpha1.OuterScope,
-					ChaosMode: v1alpha1.ErrorAction,
+				Spec: DNSChaosSpec{
+					Action: ErrorAction,
+					Mode:   OnePodMode,
+					Scope:  OuterScope,
 				},
 			}
 
 			By("creating an API obj")
-			Expect(k8sClient.Create(context.TODO(), created)).Should(Succeed())
+			Expect(k8sClient.Create(context.TODO(), created)).To(Succeed())
+
+			fetched = &DNSChaos{}
+			Expect(k8sClient.Get(context.TODO(), key, fetched)).To(Succeed())
+			Expect(fetched).To(Equal(created))
 
 			By("deleting the created object")
 			Expect(k8sClient.Delete(context.TODO(), created)).To(Succeed())
-			time.Sleep(1 * time.Second)
 			Expect(k8sClient.Get(context.TODO(), key, created)).ToNot(Succeed())
+		})
+
+		It("should set next start time successfully", func() {
+			dnschaos := &DNSChaos{}
+			nTime := time.Now()
+			dnschaos.SetNextStart(nTime)
+			Expect(dnschaos.GetNextStart()).To(Equal(nTime))
+		})
+
+		It("should set recover time successfully", func() {
+			dnschaos := &DNSChaos{}
+			nTime := time.Now()
+			dnschaos.SetNextRecover(nTime)
+			Expect(dnschaos.GetNextRecover()).To(Equal(nTime))
 		})
 	})
 })
