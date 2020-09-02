@@ -131,7 +131,7 @@ const Actions = ({ setInitialValues }: ActionsProps) => {
   }
 
   return (
-    <Box p={6}>
+    <Box p={6} pt={12}>
       <LoadWrapper title="Load From Existing Experiments">
         <RadioGroup value={experimentRadio} onChange={onExperimentRadioChange}>
           {experiments && experiments.length > 0 ? (
