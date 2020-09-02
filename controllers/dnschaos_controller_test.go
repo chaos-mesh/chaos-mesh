@@ -58,9 +58,9 @@ var _ = Describe("DNSChaos Controller", func() {
 					Scheduler: &v1alpha1.SchedulerSpec{
 						Cron: "@every 2m",
 					},
-					Mode:      v1alpha1.OnePodMode,
-					Scope:     v1alpha1.OuterScope,
-					ChaosMode: v1alpha1.ErrorAction,
+					Mode:   v1alpha1.OnePodMode,
+					Scope:  v1alpha1.OuterScope,
+					Action: v1alpha1.ErrorAction,
 				},
 			}
 

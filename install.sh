@@ -896,6 +896,17 @@ metadata:
     app.kubernetes.io/instance: chaos-mesh
     app.kubernetes.io/component: controller-manager
 ---
+# Source: chaos-mesh/templates/dns-rbac.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: chaos-dns-server
+  namespace: chaos-testing
+  labels:
+    app.kubernetes.io/name: chaos-mesh
+    app.kubernetes.io/instance: chaos-mesh
+    app.kubernetes.io/component: dns-server
+---
 # Source: chaos-mesh/templates/webhook-configuration.yaml
 kind: Secret
 apiVersion: v1
@@ -981,6 +992,33 @@ rules:
     - podnetworkchaos
   verbs: ["*"]
 ---
+# Source: chaos-mesh/templates/dns-rbac.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: chaos-mesh:chaos-dns-server
+  labels:
+    app.kubernetes.io/name: chaos-mesh
+    app.kubernetes.io/instance: chaos-mesh
+    app.kubernetes.io/component: dns-server
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - endpoints
+  - services
+  - pods
+  - namespaces
+  verbs:
+  - list
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - nodes
+  verbs:
+  - get
+---
 # Source: chaos-mesh/templates/controller-manager-rbac.yaml
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1beta1
@@ -998,6 +1036,26 @@ roleRef:
   kind: ClusterRole
   name: chaos-mesh:chaos-controller-manager
   apiGroup: rbac.authorization.k8s.io
+---
+# Source: chaos-mesh/templates/dns-rbac.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: chaos-mesh:chaos-dns-server
+  annotations:
+    rbac.authorization.kubernetes.io/autoupdate: "true"
+  labels:
+    app.kubernetes.io/name: chaos-mesh
+    app.kubernetes.io/instance: chaos-mesh
+    app.kubernetes.io/component: dns-server
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: chaos-mesh:chaos-dns-server
+subjects:
+- kind: ServiceAccount
+  name: chaos-dns-server
+  namespace: chaos-testing
 ---
 # Source: chaos-mesh/templates/chaos-dashboard-deployment.yaml
 apiVersion: v1
@@ -1271,24 +1329,6 @@ webhooks:
         admission-webhook: enabled
     failurePolicy: Ignore
   - clientConfig:
-      caBundle: Cg==
-      service:
-        name: webhook-service
-        namespace: system
-        path: /mutate-chaos-mesh-org-v1alpha1-dnschaos
-    failurePolicy: Fail
-    name: mdnschaos.kb.io
-    rules:
-    - apiGroups:
-      - chaos-mesh.org
-      apiVersions:
-      - v1alpha1
-      operations:
-      - CREATE
-      - UPDATE
-      resources:
-      - dnschaos
-  - clientConfig:
       caBundle: "${CA_BUNDLE}"
       service:
         name: chaos-mesh-controller-manager
@@ -1414,6 +1454,24 @@ webhooks:
           - UPDATE
         resources:
           - podnetworkchaos
+  - clientConfig:
+      caBundle: "${CA_BUNDLE}"
+      service:
+        name: chaos-mesh-controller-manager
+        namespace: chaos-testing
+        path: /mutate-chaos-mesh-org-v1alpha1-dnschaos
+    failurePolicy: Fail
+    name: mdnschaos.kb.io
+    rules:
+      - apiGroups:
+          - chaos-mesh.org
+        apiVersions:
+          - v1alpha1
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - dnschaos
 ---
 # Source: chaos-mesh/templates/webhook-configuration.yaml
 apiVersion: admissionregistration.k8s.io/v1beta1
@@ -1443,24 +1501,6 @@ webhooks:
           - UPDATE
         resources:
           - podchaos
-  - clientConfig:
-      caBundle: Cg==
-      service:
-        name: webhook-service
-        namespace: system
-        path: /validate-chaos-mesh-org-v1alpha1-dnschaos
-    failurePolicy: Fail
-    name: vdnschaos.kb.io
-    rules:
-    - apiGroups:
-      - chaos-mesh.org
-      apiVersions:
-      - v1alpha1
-      operations:
-      - CREATE
-      - UPDATE
-      resources:
-      - dnschaos
   - clientConfig:
       caBundle: "${CA_BUNDLE}"
       service:
@@ -1569,6 +1609,24 @@ webhooks:
           - UPDATE
         resources:
           - podnetworkchaos
+  - clientConfig:
+      caBundle: "${CA_BUNDLE}"
+      service:
+        name: chaos-mesh-controller-manager
+        namespace: chaos-testing
+        path: /validate-chaos-mesh-org-v1alpha1-dnschaos
+    failurePolicy: Fail
+    name: vdnschaos.kb.io
+    rules:
+      - apiGroups:
+          - chaos-mesh.org
+        apiVersions:
+          - v1alpha1
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - dnschaos
 EOF
     # chaos-mesh.yaml end
 }
