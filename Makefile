@@ -126,7 +126,7 @@ yarn_dependencies:
 
 ui: yarn_dependencies
 	cd ui &&\
-	REACT_APP_DASHBOARD_API_URL="" yarn build
+	yarn build
 
 binary: chaosdaemon manager chaosfs chaos-dashboard bin/pause bin/suicide
 
