@@ -392,6 +392,18 @@ func convertNetemToArgs(netem *pb.Netem) string {
 				args = fmt.Sprintf("%s %f", args, netem.DelayCorr)
 			}
 		}
+
+		// reordering not possible without specifying some delay
+		if netem.Reorder > 0 {
+			args = fmt.Sprintf("%s reorder %f", args, netem.Reorder)
+			if netem.ReorderCorr > 0 {
+				args = fmt.Sprintf("%s %f", args, netem.ReorderCorr)
+			}
+
+			if netem.Gap > 0 {
+				args = fmt.Sprintf("%s gap %d", args, netem.Gap)
+			}
+		}
 	}
 
 	if netem.Limit > 0 {
@@ -402,17 +414,6 @@ func convertNetemToArgs(netem *pb.Netem) string {
 		args = fmt.Sprintf("%s loss %f", args, netem.Loss)
 		if netem.LossCorr > 0 {
 			args = fmt.Sprintf("%s %f", args, netem.LossCorr)
-		}
-	}
-
-	if netem.Reorder > 0 {
-		args = fmt.Sprintf("%s reorder %f", args, netem.Reorder)
-		if netem.ReorderCorr > 0 {
-			args = fmt.Sprintf("%s %f", args, netem.ReorderCorr)
-		}
-
-		if netem.Gap > 0 {
-			args = fmt.Sprintf("%s gap %d", args, netem.Gap)
 		}
 	}
 
