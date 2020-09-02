@@ -244,27 +244,36 @@ func Test_convertNetemToArgs(t *testing.T) {
 			Reorder:     5,
 			ReorderCorr: 10,
 		})
-		g.Expect(args).To(Equal("reorder 5 10"))
+		g.Expect(args).To(Equal(""))
 
 		args = convertNetemToArgs(&pb.Netem{
+			Time:        1000,
+			Jitter:      10000,
+			DelayCorr:   25,
 			Reorder:     5,
 			ReorderCorr: 10,
 			Gap:         10,
 		})
-		g.Expect(args).To(Equal("reorder 5 10 gap 10"))
+		g.Expect(args).To(Equal("delay 1000 10000 25 reorder 5 10 gap 10"))
 
 		args = convertNetemToArgs(&pb.Netem{
+			Time:        1000,
+			Jitter:      10000,
+			DelayCorr:   25,
 			Reorder:     5,
 			ReorderCorr: 10,
 			Gap:         10,
 		})
-		g.Expect(args).To(Equal("reorder 5 10 gap 10"))
+		g.Expect(args).To(Equal("delay 1000 10000 25 reorder 5 10 gap 10"))
 
 		args = convertNetemToArgs(&pb.Netem{
-			Reorder: 5,
-			Gap:     10,
+			Time:      1000,
+			Jitter:    10000,
+			DelayCorr: 25,
+			Reorder:   5,
+			Gap:       10,
 		})
-		g.Expect(args).To(Equal("reorder 5 gap 10"))
+		g.Expect(args).To(Equal("delay 1000 10000 25 reorder 5 gap 10"))
 	})
 
 	t.Run("convert packet duplication", func(t *testing.T) {
