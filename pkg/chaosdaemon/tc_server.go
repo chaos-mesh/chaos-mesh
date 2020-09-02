@@ -387,9 +387,10 @@ func convertNetemToArgs(netem *pb.Netem) string {
 		args = fmt.Sprintf("delay %d", netem.Time)
 		if netem.Jitter > 0 {
 			args = fmt.Sprintf("%s %d", args, netem.Jitter)
-		}
-		if netem.DelayCorr > 0 {
-			args = fmt.Sprintf("%s %f", args, netem.DelayCorr)
+
+			if netem.DelayCorr > 0 {
+				args = fmt.Sprintf("%s %f", args, netem.DelayCorr)
+			}
 		}
 	}
 
@@ -429,7 +430,15 @@ func convertNetemToArgs(netem *pb.Netem) string {
 		}
 	}
 
-	return args
+	trimedArgs := []string{}
+
+	for _, part := range strings.Split(args, " ") {
+		if len(part) > 0 {
+			trimedArgs = append(trimedArgs, part)
+		}
+	}
+
+	return strings.Join(trimedArgs, " ")
 }
 
 func convertTbfToArgs(tbf *pb.Tbf) string {

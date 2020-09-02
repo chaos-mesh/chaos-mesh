@@ -195,3 +195,113 @@ func Test_generateQdiscArgs(t *testing.T) {
 		g.Expect(args).To(Equal([]string{"qdisc", "add", "dev", "eth0", "parent", "1:1", "handle", "10:0", typ}))
 	})
 }
+
+func Test_convertNetemToArgs(t *testing.T) {
+	g := NewWithT(t)
+
+	t.Run("convert network delay", func(t *testing.T) {
+		args := convertNetemToArgs(&pb.Netem{
+			Time: 1000,
+		})
+		g.Expect(args).To(Equal("delay 1000"))
+
+		args = convertNetemToArgs(&pb.Netem{
+			Time:      1000,
+			DelayCorr: 25,
+		})
+		g.Expect(args).To(Equal("delay 1000"))
+
+		args = convertNetemToArgs(&pb.Netem{
+			Time:      1000,
+			Jitter:    10000,
+			DelayCorr: 25,
+		})
+		g.Expect(args).To(Equal("delay 1000 10000 25"))
+	})
+
+	t.Run("convert packet limit", func(t *testing.T) {
+		args := convertNetemToArgs(&pb.Netem{
+			Limit: 1000,
+		})
+		g.Expect(args).To(Equal("limit 1000"))
+	})
+
+	t.Run("convert packet loss", func(t *testing.T) {
+		args := convertNetemToArgs(&pb.Netem{
+			Loss: 100,
+		})
+		g.Expect(args).To(Equal("loss 100"))
+
+		args = convertNetemToArgs(&pb.Netem{
+			Loss:     50,
+			LossCorr: 12,
+		})
+		g.Expect(args).To(Equal("loss 50 12"))
+	})
+
+	t.Run("convert packet reorder", func(t *testing.T) {
+		args := convertNetemToArgs(&pb.Netem{
+			Reorder:     5,
+			ReorderCorr: 10,
+		})
+		g.Expect(args).To(Equal("reorder 5 10"))
+
+		args = convertNetemToArgs(&pb.Netem{
+			Reorder:     5,
+			ReorderCorr: 10,
+			Gap:         10,
+		})
+		g.Expect(args).To(Equal("reorder 5 10 gap 10"))
+
+		args = convertNetemToArgs(&pb.Netem{
+			Reorder:     5,
+			ReorderCorr: 10,
+			Gap:         10,
+		})
+		g.Expect(args).To(Equal("reorder 5 10 gap 10"))
+
+		args = convertNetemToArgs(&pb.Netem{
+			Reorder: 5,
+			Gap:     10,
+		})
+		g.Expect(args).To(Equal("reorder 5 gap 10"))
+	})
+
+	t.Run("convert packet duplication", func(t *testing.T) {
+		args := convertNetemToArgs(&pb.Netem{
+			Duplicate: 10,
+		})
+		g.Expect(args).To(Equal("duplicate 10"))
+
+		args = convertNetemToArgs(&pb.Netem{
+			Duplicate:     10,
+			DuplicateCorr: 50,
+		})
+		g.Expect(args).To(Equal("duplicate 10 50"))
+	})
+
+	t.Run("convert packet corrupt", func(t *testing.T) {
+		args := convertNetemToArgs(&pb.Netem{
+			Corrupt: 10,
+		})
+		g.Expect(args).To(Equal("corrupt 10"))
+
+		args = convertNetemToArgs(&pb.Netem{
+			Corrupt:     10,
+			CorruptCorr: 50,
+		})
+		g.Expect(args).To(Equal("corrupt 10 50"))
+	})
+
+	t.Run("complicate cases", func(t *testing.T) {
+		args := convertNetemToArgs(&pb.Netem{
+			Time:        1000,
+			Jitter:      10000,
+			Reorder:     5,
+			Gap:         10,
+			Corrupt:     10,
+			CorruptCorr: 50,
+		})
+		g.Expect(args).To(Equal("delay 1000 10000 reorder 5 gap 10 corrupt 10 50"))
+	})
+}
