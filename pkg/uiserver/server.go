@@ -27,7 +27,7 @@ func Handler(root http.FileSystem) http.Handler {
 	}
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		_, _ = io.WriteString(w, "Dashboard UI is not built. Use `UI=1 make`.\n")
+		_, _ = io.WriteString(w, "Dashboard UI is not built. Please run `UI=1 make`.\n")
 	})
 }
 

@@ -115,7 +115,7 @@ ifeq ($(UI),1)
 	make ui
 	hack/embed_ui_assets.sh
 endif
-	$(CGO) build -ldflags '$(LDFLAGS)' -tags "${BUILD_TAGS}" -o bin/chaos-dashboard cmd/chaos-dashboard/*.go
+	$(CGO) build -ldflags "$(LDFLAGS)" -tags "${BUILD_TAGS}" -o bin/chaos-dashboard cmd/chaos-dashboard/*.go
 
 swagger_spec:
 	hack/generate_swagger_spec.sh
