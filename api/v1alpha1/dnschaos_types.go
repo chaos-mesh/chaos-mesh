@@ -51,7 +51,7 @@ type DNSChaosSpec struct {
 	// Value is required when the mode is set to `FixedPodMode` / `FixedPercentPodMod` / `RandomMaxPercentPodMod`.
 	// If `FixedPodMode`, provide an integer of pods to do chaos action.
 	// If `FixedPercentPodMod`, provide a number from 0-100 to specify the percent of pods the server can do chaos action.
-	// If `RandomMaxPercentPodMod`,  provide a number from 0-100 to specify the max percent of pods to do chaos action
+	// If `RandomMaxPercentPodMod`, provide a number from 0-100 to specify the max percent of pods to do chaos action
 	// +optional
 	Value string `json:"value"`
 
@@ -64,9 +64,17 @@ type DNSChaosSpec struct {
 	// Scheduler defines some schedule rules to control the running time of the chaos experiment about network.
 	Scheduler *SchedulerSpec `json:"scheduler,omitempty"`
 
-	// ExternalTargets represents network targets outside k8s
-	// +optional
-	ExternalTargets []string `json:"externalTargets,omitempty"`
+	// scope means the chaos scope, values can be "INNER", "OUTER" or "ALL":
+	//   "INNER": chaos only works on the inner host in Kubernetes cluster
+	//   "OUTER": chaos only works on the outer host of Kubernetes cluster
+	//   "ALL":   chaos works on all host
+	// TODO: maybe we can support set the RegExp for the host
+	Scope string `json:"scope"`
+
+	// the value of chaos mode can be "RANDOM" or "ERROR":
+	//   "RANDOM": return random IP for DNS request
+	//   "ERROR":  return error for DNS request
+	ChaosMode string `json:"chaosMode"`
 }
 
 // GetSelector is a getter for Selector (for implementing SelectSpec)

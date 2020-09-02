@@ -40,9 +40,15 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/utils"
 )
 
-const (
+var (
 	// DNSServerName is the chaos DNS server's name
 	DNSServerName = "chaos-mesh-dns-service"
+
+	// DNSServerSelectorLabels is the labels used to select the DNS server
+	DNSServerSelectorLabels = map[string]string{
+		"app.kubernetes.io/component": "dns-server",
+		"app.kubernetes.io/instance":  "chaos-mesh",
+	}
 )
 
 type Reconciler struct {
@@ -104,21 +110,26 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1
 
 	// get dns server's ip used for chaos
 	// TODO: use chaos-mesh's namespace instead of "chaos-testing"
-	service, err := utils.SelectService(ctx, r.Client, "chaos-testing", DNSServerName)
+	services, err := utils.SelectAndFilterService(ctx, r.Client, DNSServerSelectorLabels)
 	if err != nil {
-		r.Log.Error(err, "failed to select service")
+		r.Log.Error(err, "fail to select service", "labels", DNSServerSelectorLabels)
 		return err
 	}
+	if len(services.Items) != 1 {
+		err = fmt.Errorf("get %d services from the labels %v", len(services.Items), DNSServerSelectorLabels)
+		r.Log.Error(err, "fail to select service")
+		return err
+	}
+	service := services.Items[0]
 	r.Log.Info("get dns service", "service", service.String(), "ip", service.Spec.ClusterIP)
 
 	// TODO: set port and mode
-	err = r.setDNSServerRules(service.Spec.ClusterIP, 9288, dnschaos.Name, pods, "RANDOM")
+	err = r.setDNSServerRules(service.Spec.ClusterIP, 9288, dnschaos.Name, pods, dnschaos.Spec.ChaosMode, dnschaos.Spec.Scope)
 	if err != nil {
 		r.Log.Error(err, "fail to set DNS server rules")
 		return err
 	}
 
-	//dnschaos.Status.Instances = make(map[string]v1alpha1.StressInstance, len(pods))
 	if err = r.applyAllPods(ctx, pods, dnschaos, service.Spec.ClusterIP); err != nil {
 		r.Log.Error(err, "failed to apply chaos on all pods")
 		return err
@@ -131,7 +142,6 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1
 			Name:      pod.Name,
 			HostIP:    pod.Status.HostIP,
 			PodIP:     pod.Status.PodIP,
-			//Message:   stressChaosMsg,
 		}
 
 		dnschaos.Status.Experiment.PodRecords = append(dnschaos.Status.Experiment.PodRecords, ps)
@@ -150,11 +160,17 @@ func (r *Reconciler) Recover(ctx context.Context, req ctrl.Request, chaos v1alph
 	}
 
 	// get dns server's ip used for chaos
-	service, err := utils.SelectService(ctx, r.Client, "chaos-testing", DNSServerName)
+	services, err := utils.SelectAndFilterService(ctx, r.Client, DNSServerSelectorLabels)
 	if err != nil {
-		r.Log.Error(err, "failed to select service")
+		r.Log.Error(err, "fail to select service", "labels", DNSServerSelectorLabels)
 		return err
 	}
+	if len(services.Items) != 1 {
+		err = fmt.Errorf("get %d services from the labels %v", len(services.Items), DNSServerSelectorLabels)
+		r.Log.Error(err, "fail to select service")
+		return err
+	}
+	service := services.Items[0]
 	r.Log.Info("Recover get dns service", "service", service.String(), "ip", service.Spec.ClusterIP)
 
 	r.cancelDNSServerRules(service.Spec.ClusterIP, 9288, dnschaos.Name)
@@ -299,7 +315,7 @@ func (r *Reconciler) applyPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.
 	return nil
 }
 
-func (r *Reconciler) setDNSServerRules(dnsServerIP string, port int64, name string, pods []v1.Pod, mode string) error {
+func (r *Reconciler) setDNSServerRules(dnsServerIP string, port int64, name string, pods []v1.Pod, mode string, scope string) error {
 	r.Log.Info("setDNSServerRules")
 	defer r.Log.Info("setDNSServerRules finished")
 	pbPods := make([]*dnspb.Pod, len(pods))
@@ -318,9 +334,10 @@ func (r *Reconciler) setDNSServerRules(dnsServerIP string, port int64, name stri
 
 	c := dnspb.NewDNSClient(conn)
 	request := &dnspb.SetDNSChaosRequest{
-		Name: name,
-		Mode: mode,
-		Pods: pbPods,
+		Name:  name,
+		Mode:  mode,
+		Pods:  pbPods,
+		Scope: scope,
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
