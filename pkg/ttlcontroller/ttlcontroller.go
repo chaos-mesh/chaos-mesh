@@ -32,7 +32,7 @@ var (
 type Controller struct {
 	archive   core.ExperimentStore
 	event     core.EventStore
-	ttlconfig TTLconfig
+	ttlconfig *TTLconfig
 }
 
 // TTLconfig defines the ttl
@@ -49,7 +49,7 @@ type TTLconfig struct {
 func NewController(
 	archive core.ExperimentStore,
 	event core.EventStore,
-	ttlc TTLconfig,
+	ttlc *TTLconfig,
 ) *Controller {
 	return &Controller{
 		archive:   archive,
@@ -59,10 +59,10 @@ func NewController(
 }
 
 // Register periodically calls function runWorker to delete the data.
-func Register(c *Controller, stopCh <-chan struct{}) {
+func Register(c *Controller, controllerRuntimeStopCh <-chan struct{}) {
 	defer runtimeutil.HandleCrash()
 	log.Info("starting database TTL controller")
-	go wait.Until(c.runWorker, c.ttlconfig.DatabaseTTLResyncPeriod, stopCh)
+	go wait.Until(c.runWorker, c.ttlconfig.DatabaseTTLResyncPeriod, controllerRuntimeStopCh)
 }
 
 // runWorker is a long-running function that will call the

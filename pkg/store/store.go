@@ -25,4 +25,5 @@ var Module = fx.Options(
 	fx.Provide(
 		event.NewStore,
 		experiment.NewStore,
-	))
+	),
+)

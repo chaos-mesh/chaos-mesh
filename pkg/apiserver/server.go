@@ -44,7 +44,8 @@ var (
 			NewServer,
 		),
 		fx.Invoke(serverRegister),
-		handlerModule)
+		handlerModule,
+	)
 
 	log = ctrl.Log.WithName("apiserver")
 )
@@ -89,7 +90,6 @@ func serverRegister(lx fx.Lifecycle, s *Server, conf *config.ChaosDashboardConfi
 	mux.Handle("/", http.StripPrefix("/", uiserver.Handler(assetFs)))
 	mux.Handle("/api/", Handler(s))
 	mux.Handle("/api/swagger/", swaggerserver.Handler())
-	mux.HandleFunc("/ping", pingHandler)
 
 	srv := &http.Server{Handler: mux}
 
@@ -134,9 +134,4 @@ func Handler(s *Server) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		s.handler(w, r)
 	})
-}
-
-func pingHandler(w http.ResponseWriter, _ *http.Request) {
-	w.WriteHeader(http.StatusOK)
-	fmt.Fprintf(w, "pong\n")
 }

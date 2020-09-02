@@ -14,12 +14,16 @@
 package main
 
 import (
-	"context"
 	"flag"
 	"os"
-	"time"
 
 	"go.uber.org/fx"
+
+	_ "github.com/jinzhu/gorm/dialects/sqlite"
+
+	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
+	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/apiserver"
 	"github.com/chaos-mesh/chaos-mesh/pkg/collector"
@@ -28,13 +32,6 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/store/dbstore"
 	"github.com/chaos-mesh/chaos-mesh/pkg/ttlcontroller"
 	"github.com/chaos-mesh/chaos-mesh/pkg/version"
-
-	_ "github.com/go-sql-driver/mysql"
-	_ "github.com/jinzhu/gorm/dialects/sqlite"
-
-	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
-	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 )
 
 var (
@@ -45,49 +42,46 @@ var (
 	printVersion bool
 )
 
+// @title Chaos Mesh Dashboard API
+// @version 0.9
+// @description Swagger docs for Chaos Mesh Dashboard. If you encounter any problems with API, please click on the issues link below to report bugs or questions.
+
+// @contact.name Issues
+// @contact.url https://github.com/chaos-mesh/chaos-mesh/issues
+
+// @license.name Apache 2.0
+// @license.url http://www.apache.org/licenses/LICENSE-2.0.html
+
+// @host localhost:2333
+// @BasePath /api
 func main() {
 	flag.BoolVar(&printVersion, "version", false, "print version information and exit")
 	flag.Parse()
-
-	conf, err := config.EnvironChaosDashboard()
-	if err != nil {
-		log.Error(err, "main: invalid configuration")
-		os.Exit(1)
-	}
-
-	databaseTTLResyncPeriod, err := time.ParseDuration(conf.PersistTTL.SyncPeriod)
-	if err != nil {
-		log.Error(err, "main: invalid databaseTTLResyncPeriod")
-		os.Exit(1)
-	}
-	eventTTL, err := time.ParseDuration(conf.PersistTTL.Event)
-	if err != nil {
-		log.Error(err, "main: invalid eventTTL")
-		os.Exit(1)
-	}
-	archiveExperimentTTL, err := time.ParseDuration(conf.PersistTTL.Experiment)
-	if err != nil {
-		log.Error(err, "main: invalid archiveExperimentTTL")
-		os.Exit(1)
-	}
 
 	version.PrintVersionInfo("Chaos Dashboard")
 	if printVersion {
 		os.Exit(0)
 	}
 
-	ctrl.SetLogger(zap.Logger(true))
+	ctrl.SetLogger(zap.New(zap.UseDevMode(true)))
 
-	stopCh := ctrl.SetupSignalHandler()
+	dashboardConfig, err := config.EnvironChaosDashboard()
+	if err != nil {
+		log.Error(err, "main: invalid ChaosDashboardConfig")
+		os.Exit(1)
+	}
 
+	persistTTLConfigParsed, err := config.ParsePersistTTLConfig(dashboardConfig.PersistTTL)
+	if err != nil {
+		log.Error(err, "main: invalid PersistTTLConfig")
+		os.Exit(1)
+	}
+
+	controllerRuntimeStopCh := ctrl.SetupSignalHandler()
 	app := fx.New(
 		fx.Provide(
-			func() (<-chan struct{}, *config.ChaosDashboardConfig, ttlcontroller.TTLconfig) {
-				return stopCh, &conf, ttlcontroller.TTLconfig{
-					DatabaseTTLResyncPeriod: databaseTTLResyncPeriod,
-					EventTTL:                eventTTL,
-					ArchiveExperimentTTL:    archiveExperimentTTL,
-				}
+			func() (<-chan struct{}, *config.ChaosDashboardConfig, *ttlcontroller.TTLconfig) {
+				return controllerRuntimeStopCh, dashboardConfig, persistTTLConfigParsed
 			},
 			dbstore.NewDBStore,
 			collector.NewServer,
@@ -99,18 +93,6 @@ func main() {
 		fx.Invoke(ttlcontroller.Register),
 	)
 
-	startCtx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
-	defer cancel()
-	if err := app.Start(startCtx); err != nil {
-		log.Error(err, "failed to start app")
-		os.Exit(1)
-	}
-
-	<-stopCh
-	stopCtx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
-	defer cancel()
-	if err := app.Stop(stopCtx); err != nil {
-		log.Error(err, "failed to stop app")
-		os.Exit(1)
-	}
+	app.Run()
+	<-controllerRuntimeStopCh
 }
