@@ -123,9 +123,9 @@ $ make test
 4. Load image into Kubernetes nodes:
 
     ```bash
-    $ kind load docker-image pingcap/chaos-mesh:latest 
-    $ kind load docker-image pingcap/chaos-dashboard:latest 
-    $ kind load docker-image pingcap/chaos-daemon:latest 
+    $ kind load docker-image pingcap/chaos-mesh:latest
+    $ kind load docker-image pingcap/chaos-dashboard:latest
+    $ kind load docker-image pingcap/chaos-daemon:latest
     ```
 
 5. Deploy Chaos Mesh:
@@ -151,7 +151,7 @@ Congratulations! Now you have finished all tests and are ready to commit your co
 
     ```bash
     $ git add -A
-    $ git commit
+    $ git commit --signoff
     ```
 
 3. Push your changes to the remote branch:
