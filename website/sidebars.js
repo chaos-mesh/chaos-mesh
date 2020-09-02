@@ -52,7 +52,7 @@ module.exports = {
     {
       type: 'category',
       label: 'Releases',
-      items: ['releases/v0.8.0'],
+      items: ['releases/v0.9.0', 'releases/v0.8.0'],
     },
   ],
 }
