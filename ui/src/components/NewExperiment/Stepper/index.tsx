@@ -5,7 +5,10 @@ import { Theme, createStyles, makeStyles } from '@material-ui/core/styles'
 import { back, jump, next, reset, useStepperContext } from '../Context'
 
 import BasicStep from './Basic'
+import ChevronLeftIcon from '@material-ui/icons/ChevronLeft'
+import ChevronRightIcon from '@material-ui/icons/ChevronRight'
 import DoneAllIcon from '@material-ui/icons/DoneAll'
+import DoneIcon from '@material-ui/icons/Done'
 import PublishIcon from '@material-ui/icons/Publish'
 import ScheduleStep from './Schedule'
 import ScopeStep from './Scope'
@@ -138,11 +141,22 @@ const CreateStepper: React.FC = () => {
               ) : (
                 <>
                   {activeStep !== 0 && (
-                    <Button className={classes.marginRight6} size={size} onClick={handleBack}>
+                    <Button
+                      className={classes.marginRight6}
+                      size={size}
+                      startIcon={<ChevronLeftIcon />}
+                      onClick={handleBack}
+                    >
                       Back
                     </Button>
                   )}
-                  <Button variant="contained" color="primary" size={size} onClick={handleNext}>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    size={size}
+                    endIcon={activeStep === steps.length - 1 ? <DoneIcon /> : <ChevronRightIcon />}
+                    onClick={handleNext}
+                  >
                     {activeStep === steps.length - 1 ? 'Finish' : 'Next'}
                   </Button>
                 </>

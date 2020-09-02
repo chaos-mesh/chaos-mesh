@@ -17,9 +17,9 @@ export const defaultExperimentSchema: Experiment = {
     pods: {},
   },
   target: {
-    kind: 'PodChaos',
+    kind: '',
     pod_chaos: {
-      action: 'pod-failure',
+      action: '',
       container_name: '',
     },
     network_chaos: {
@@ -119,44 +119,54 @@ export const validationSchema = Yup.object({
                   direction: Yup.string().when('action', (action: string, schema: Yup.StringSchema) =>
                     action === 'partition' ? schema.required('The direction is required.') : schema
                   ),
-                  bandwidth: Yup.object().when('action', (action: string, schema: Yup.ObjectSchema) =>
-                    action === 'bandwidth'
-                      ? Yup.object({
-                          rate: Yup.string().required('The rate of bandwidth is required.'),
-                        })
-                      : schema
-                  ),
-                  corrupt: Yup.object().when('action', (action: string, schema: Yup.ObjectSchema) =>
-                    action === 'corrupt'
-                      ? Yup.object({
-                          corrupt: Yup.string().required('The corrupt is required.'),
-                          correlation: Yup.string().required('The correlation of corrupt is required.'),
-                        })
-                      : schema
-                  ),
-                  delay: Yup.object().when('action', (action: string, schema: Yup.ObjectSchema) =>
-                    action === 'delay'
-                      ? Yup.object({
-                          latency: Yup.string().required('The latency of delay is required.'),
-                        })
-                      : schema
-                  ),
-                  duplicate: Yup.object().when('action', (action: string, schema: Yup.ObjectSchema) =>
-                    action === 'duplicate'
-                      ? Yup.object({
-                          duplicate: Yup.string().required('The duplicate is required.'),
-                          correlation: Yup.string().required('The correlation of duplicate is required.'),
-                        })
-                      : schema
-                  ),
-                  loss: Yup.object().when('action', (action: string, schema: Yup.ObjectSchema) =>
-                    action === 'loss'
-                      ? Yup.object({
-                          loss: Yup.string().required('The loss is required.'),
-                          correlation: Yup.string().required('The correlation of loss is required.'),
-                        })
-                      : schema
-                  ),
+                  bandwidth: Yup.object()
+                    .nullable()
+                    .when('action', (action: string, schema: Yup.ObjectSchema) =>
+                      action === 'bandwidth'
+                        ? Yup.object({
+                            rate: Yup.string().required('The rate of bandwidth is required.'),
+                          })
+                        : schema
+                    ),
+                  corrupt: Yup.object()
+                    .nullable()
+                    .when('action', (action: string, schema: Yup.ObjectSchema) =>
+                      action === 'corrupt'
+                        ? Yup.object({
+                            corrupt: Yup.string().required('The corrupt is required.'),
+                            correlation: Yup.string().required('The correlation of corrupt is required.'),
+                          })
+                        : schema
+                    ),
+                  delay: Yup.object()
+                    .nullable()
+                    .when('action', (action: string, schema: Yup.ObjectSchema) =>
+                      action === 'delay'
+                        ? Yup.object({
+                            latency: Yup.string().required('The latency of delay is required.'),
+                          })
+                        : schema
+                    ),
+                  duplicate: Yup.object()
+                    .nullable()
+                    .when('action', (action: string, schema: Yup.ObjectSchema) =>
+                      action === 'duplicate'
+                        ? Yup.object({
+                            duplicate: Yup.string().required('The duplicate is required.'),
+                            correlation: Yup.string().required('The correlation of duplicate is required.'),
+                          })
+                        : schema
+                    ),
+                  loss: Yup.object()
+                    .nullable()
+                    .when('action', (action: string, schema: Yup.ObjectSchema) =>
+                      action === 'loss'
+                        ? Yup.object({
+                            loss: Yup.string().required('The loss is required.'),
+                            correlation: Yup.string().required('The correlation of loss is required.'),
+                          })
+                        : schema
+                    ),
                 })
               : schema
           ),

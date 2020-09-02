@@ -1,3 +1,4 @@
+import { FormikCtx, StepperFormTargetProps } from 'components/NewExperiment/types'
 import { InputAdornment, MenuItem } from '@material-ui/core'
 import React, { useEffect } from 'react'
 import { SelectField, TextField } from 'components/FormField'
@@ -5,17 +6,18 @@ import { SelectField, TextField } from 'components/FormField'
 import AdvancedOptions from 'components/AdvancedOptions'
 import { RootState } from 'store'
 import ScopeStep from '../Scope'
-import { StepperFormTargetProps } from 'components/NewExperiment/types'
 import { defaultExperimentSchema } from 'components/NewExperiment/constants'
 import { getIn } from 'formik'
 import { toTitleCase } from 'lib/utils'
+import { useFormikContext } from 'formik'
 import { useSelector } from 'react-redux'
 
 const actions = ['partition', 'loss', 'delay', 'duplicate', 'corrupt', 'bandwidth']
 const direction = ['from', 'to', 'both']
 
 export default function Network(props: StepperFormTargetProps) {
-  const { errors, touched, values, setFieldValue, handleActionChange } = props
+  const { errors, touched, values, setFieldValue }: FormikCtx = useFormikContext()
+  const { handleActionChange } = props
 
   const { namespaces } = useSelector((state: RootState) => state.experiments)
 
