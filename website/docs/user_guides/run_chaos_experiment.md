@@ -20,7 +20,7 @@ After executing the above command, you can access [`http://localhost:8081`](http
 > **Note:**
 >
 > If the web-show is deployed on the server, you need to use the host ip to access the application.
-> However by executing script below enables you to view web-show application by accessing [`http://localhost:8081`](http://localhost:8081). 
+> However by executing script below enables you to view web-show application by accessing [`http://localhost:8081`](http://localhost:8081).
 > ```kubectl port-forward -n default svc/web-show 8081:8081```
 ## Step 2: Define the experiment configuration file
 
