@@ -104,15 +104,15 @@ export function mustSchedule(formikValues: Experiment) {
   return false
 }
 
-export function resetOtherChaos(formProps: FormikCtx, kind: string, action: string | boolean) {
-  const { values, setFieldValue } = formProps
+export function resetOtherChaos(ctx: FormikCtx, selectedChaosKind: string, action: string | boolean) {
+  const { values, setFieldValue } = ctx
 
-  const selectedChaosKind = kind
-  const selectedChaosKey = ChaosKindKeyMap[selectedChaosKind].key
+  const kind = selectedChaosKind
+  const selectedChaosKey = ChaosKindKeyMap[kind].key
 
   const updatedTarget = {
     ...defaultExperimentSchema.target,
-    kind: selectedChaosKind,
+    kind,
     [selectedChaosKey]: {
       ...values.target[selectedChaosKey],
       ...(action

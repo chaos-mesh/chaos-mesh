@@ -1,14 +1,16 @@
+import { FormikCtx, StepperFormTargetProps } from 'components/NewExperiment/types'
 import { SelectField, TextField } from 'components/FormField'
 
 import { MenuItem } from '@material-ui/core'
 import React from 'react'
-import { StepperFormTargetProps } from 'components/NewExperiment/types'
 import { toTitleCase } from 'lib/utils'
+import { useFormikContext } from 'formik'
 
 const actions = ['pod failure', 'pod kill', 'container kill']
 
 export default function Pod(props: StepperFormTargetProps) {
-  const { errors, touched, values, handleActionChange } = props
+  const { errors, touched, values }: FormikCtx = useFormikContext()
+  const { handleActionChange } = props
 
   return (
     <>

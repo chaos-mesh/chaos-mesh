@@ -1,10 +1,11 @@
 import { AutocompleteMultipleField, SelectField, TextField } from 'components/FormField'
+import { FormikCtx, StepperFormTargetProps } from 'components/NewExperiment/types'
 import { InputAdornment, MenuItem } from '@material-ui/core'
 
 import AdvancedOptions from 'components/AdvancedOptions'
 import React from 'react'
-import { StepperFormTargetProps } from 'components/NewExperiment/types'
 import { toTitleCase } from 'lib/utils'
+import { useFormikContext } from 'formik'
 
 const actions = ['delay', 'errno', 'mixed']
 const methods = [
@@ -42,7 +43,8 @@ const methods = [
 ]
 
 export default function IO(props: StepperFormTargetProps) {
-  const { values, handleActionChange } = props
+  const { values }: FormikCtx = useFormikContext()
+  const { handleActionChange } = props
 
   return (
     <>

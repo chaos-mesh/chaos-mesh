@@ -1,18 +1,21 @@
-import { Box, Button, Divider, IconButton, InputAdornment, MenuItem, Typography } from '@material-ui/core'
+import { Box, Button, Divider, InputAdornment, MenuItem, Paper, Typography } from '@material-ui/core'
 import { LabelField, SelectField, TextField } from 'components/FormField'
 import React, { useEffect } from 'react'
 
 import AddIcon from '@material-ui/icons/Add'
-import RemoveCircleOutlineIcon from '@material-ui/icons/RemoveCircleOutline'
-import { StepperFormTargetProps } from 'components/NewExperiment/types'
+import { FormikCtx } from 'components/NewExperiment/types'
+import RemoveIcon from '@material-ui/icons/Remove'
 import { resetOtherChaos } from 'lib/formikhelpers'
+import { useFormikContext } from 'formik'
+import PaperTop from 'components/PaperTop'
 
-export default function Kernel(props: StepperFormTargetProps) {
-  const { values, setFieldValue } = props
+export default function Kernel() {
+  const formikCtx: FormikCtx = useFormikContext()
+  const { values, setFieldValue } = formikCtx
   const callchain = values.target.kernel_chaos.fail_kern_request.callchain
 
   useEffect(() => {
-    resetOtherChaos(props, 'KernelChaos', false)
+    resetOtherChaos(formikCtx, 'KernelChaos', false)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
@@ -37,41 +40,48 @@ export default function Kernel(props: StepperFormTargetProps) {
 
   return (
     <>
-      <Box display="flex" justifyContent="space-between" alignItems="center">
-        <Typography>Callchain</Typography>
-        <Button variant="outlined" color="primary" size="small" startIcon={<AddIcon />} onClick={addFrame}>
-          Add
-        </Button>
-      </Box>
-      <Box>
-        {callchain.map((_, i) => (
-          <Box key={'frame' + i}>
-            <Box display="flex" justifyContent="space-between" alignItems="center">
-              <Typography variant="body2" gutterBottom>
-                Frame {i + 1}
-              </Typography>
-              <IconButton color="secondary" component="span" onClick={removeFrame(i)}>
-                <RemoveCircleOutlineIcon />
-              </IconButton>
+      <Paper variant="outlined">
+        <PaperTop title="Callchain">
+          <Button variant="outlined" color="primary" startIcon={<AddIcon />} onClick={addFrame}>
+            Add
+          </Button>
+        </PaperTop>
+        <Box>
+          {callchain.map((_, i) => (
+            <Box key={'frame' + i} p={3}>
+              <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
+                <Typography variant="body2" gutterBottom>
+                  Frame {i + 1}
+                </Typography>
+                <Button
+                  variant="outlined"
+                  size="small"
+                  color="secondary"
+                  startIcon={<RemoveIcon />}
+                  onClick={removeFrame(i)}
+                >
+                  Remove
+                </Button>
+              </Box>
+              <TextField
+                id={`target.kernel_chaos.fail_kern_request.callchain[${i}].funcname`}
+                name={`target.kernel_chaos.fail_kern_request.callchain[${i}].funcname`}
+                label="funcname"
+              />
+              <TextField
+                id={`target.kernel_chaos.fail_kern_request.callchain[${i}].parameters`}
+                name={`target.kernel_chaos.fail_kern_request.callchain[${i}].parameters`}
+                label="parameters"
+              />
+              <TextField
+                id={`target.kernel_chaos.fail_kern_request.callchain[${i}].predicate`}
+                name={`target.kernel_chaos.fail_kern_request.callchain[${i}].predicate`}
+                label="predicate"
+              />
             </Box>
-            <TextField
-              id={`target.kernel_chaos.fail_kern_request.callchain[${i}].funcname`}
-              name={`target.kernel_chaos.fail_kern_request.callchain[${i}].funcname`}
-              label="funcname"
-            />
-            <TextField
-              id={`target.kernel_chaos.fail_kern_request.callchain[${i}].parameters`}
-              name={`target.kernel_chaos.fail_kern_request.callchain[${i}].parameters`}
-              label="parameters"
-            />
-            <TextField
-              id={`target.kernel_chaos.fail_kern_request.callchain[${i}].predicate`}
-              name={`target.kernel_chaos.fail_kern_request.callchain[${i}].predicate`}
-              label="predicate"
-            />
-          </Box>
-        ))}
-      </Box>
+          ))}
+        </Box>
+      </Paper>
       <Box my={6}>
         <Divider />
       </Box>

@@ -4,7 +4,7 @@ import { Theme, createStyles, makeStyles } from '@material-ui/core/styles'
 import AddIcon from '@material-ui/icons/Add'
 import ArchiveOutlinedIcon from '@material-ui/icons/ArchiveOutlined'
 import BlurLinearIcon from '@material-ui/icons/BlurLinear'
-import FindInPageIcon from '@material-ui/icons/FindInPage'
+import DescriptionOutlinedIcon from '@material-ui/icons/DescriptionOutlined'
 import GitHubIcon from '@material-ui/icons/GitHub'
 import { Link } from 'react-router-dom'
 import { NavLink } from 'react-router-dom'
@@ -164,7 +164,7 @@ const Sidebar: React.FC<SidebarProps> = ({ open }) => {
             button
           >
             <ListItemIcon className={classes.listItemIcon}>
-              <FindInPageIcon />
+              <DescriptionOutlinedIcon />
             </ListItemIcon>
             <ListItemText primary="Documentation" />
           </ListItem>
