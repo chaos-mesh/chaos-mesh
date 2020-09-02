@@ -25,5 +25,7 @@ import (
 
 // Handler returns a swagger `http.Handler`.
 func Handler() http.Handler {
-	return httpSwagger.Handler()
+	return httpSwagger.Handler(
+		httpSwagger.URL("./doc.json"),
+	)
 }

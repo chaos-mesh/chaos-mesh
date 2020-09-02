@@ -52,7 +52,6 @@ var (
 // @license.name Apache 2.0
 // @license.url http://www.apache.org/licenses/LICENSE-2.0.html
 
-// @host localhost:2333
 // @BasePath /api
 func main() {
 	flag.BoolVar(&printVersion, "version", false, "print version information and exit")

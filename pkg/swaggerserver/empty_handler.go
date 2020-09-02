@@ -23,6 +23,6 @@ import (
 // Handler returns an empty `http.Handler`.
 func Handler() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		_, _ = io.WriteString(w, "Swagger UI is not built. Use `SWAGGER=1 make`.\n")
+		_, _ = io.WriteString(w, "Swagger UI is not built. Please run `SWAGGER=1 make`.\n")
 	})
 }
