@@ -69,7 +69,7 @@ func (s *daemonServer) SetDNSServer(ctx context.Context,
 		}
 	} else {
 		// recover the dns server's address
-		cmd := defaultProcessBuilder("sh", "-c", fmt.Sprintf("ls %s && cat %s.chaos.bak > %s || true", DNSServerConfFile, DNSServerConfFile, DNSServerConfFile)).
+		cmd := defaultProcessBuilder("sh", "-c", fmt.Sprintf("ls %s.chaos.bak && cat %s.chaos.bak > %s || true", DNSServerConfFile, DNSServerConfFile, DNSServerConfFile)).
 			SetMountNS(GetNsPath(pid, mountNS)).
 			Build(context.Background())
 		out, err := cmd.Output()

@@ -15,8 +15,9 @@ metadata:
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+"  "_" }}
 spec:
   selector:
-    app.kubernetes.io/component: dns-server
+    app.kubernetes.io/name: {{ template "chaos-mesh.name" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/component: chaos-dns-server
   ports:
   - name: dns
     port: 53

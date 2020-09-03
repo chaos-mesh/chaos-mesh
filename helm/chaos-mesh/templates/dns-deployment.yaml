@@ -102,7 +102,6 @@ spec:
         - name: config-volume
           configMap:
             name: dns-server-config
-            namespace: {{ .Release.Namespace }}
             items:
             - key: Corefile
               path: Corefile

@@ -123,7 +123,7 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1
 	service := services.Items[0]
 	r.Log.Info("get dns service", "service", service.String(), "ip", service.Spec.ClusterIP)
 
-	// TODO: set port and mode
+	// TODO: get port from dns service to instead 9288
 	err = r.setDNSServerRules(service.Spec.ClusterIP, 9288, dnschaos.Name, pods, dnschaos.Spec.Action, dnschaos.Spec.Scope)
 	if err != nil {
 		r.Log.Error(err, "fail to set DNS server rules")
@@ -173,6 +173,7 @@ func (r *Reconciler) Recover(ctx context.Context, req ctrl.Request, chaos v1alph
 	service := services.Items[0]
 	r.Log.Info("Recover get dns service", "service", service.String(), "ip", service.Spec.ClusterIP)
 
+	// TODO: get port from dns service to instead 9288
 	r.cancelDNSServerRules(service.Spec.ClusterIP, 9288, dnschaos.Name)
 
 	if err := r.cleanFinalizersAndRecover(ctx, dnschaos); err != nil {
@@ -326,6 +327,7 @@ func (r *Reconciler) setDNSServerRules(dnsServerIP string, port int64, name stri
 		}
 	}
 
+	r.Log.Info("cancelDNSServerRules create conn", "address", fmt.Sprintf("%s:%d", dnsServerIP, port))
 	conn, err := grpc.Dial(fmt.Sprintf("%s:%d", dnsServerIP, port), grpc.WithInsecure())
 	if err != nil {
 		return err
@@ -363,7 +365,7 @@ func (r *Reconciler) cancelDNSServerRules(dnsServerIP string, port int64, name s
 		return err
 	}
 	defer conn.Close()
-	r.Log.Info("setDNSServerRules create conn")
+	r.Log.Info("cancelDNSServerRules create conn")
 
 	c := dnspb.NewDNSClient(conn)
 	request := &dnspb.CancelDNSChaosRequest{
