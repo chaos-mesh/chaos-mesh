@@ -14,6 +14,8 @@
 package v1alpha1
 
 import (
+	"fmt"
+
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -68,18 +70,16 @@ func (in *DNSChaos) ValidateDelete() error {
 
 // Validate validates chaos object
 func (in *DNSChaos) Validate() error {
-	/*
-		specField := field.NewPath("spec")
-		allErrs := in.ValidateScheduler(specField)
-		allErrs = append(allErrs, in.ValidatePodMode(specField)...)
-		allErrs = append(allErrs, in.Spec.validateDelay(specField.Child("delay"))...)
-		allErrs = append(allErrs, in.Spec.validateErrno(specField.Child("errno"))...)
-		allErrs = append(allErrs, in.Spec.validatePercent(specField.Child("percent"))...)
+	specField := field.NewPath("spec")
+	allErrs := in.ValidateScheduler(specField)
+	allErrs = append(allErrs, in.ValidatePodMode(specField)...)
+	allErrs = append(allErrs, in.Spec.validateAction(specField.Child("action"))...)
+	allErrs = append(allErrs, in.Spec.validateScope(specField.Child("scope"))...)
 
-		if len(allErrs) > 0 {
-			return fmt.Errorf(allErrs.ToAggregate().Error())
-		}
-	*/
+	if len(allErrs) > 0 {
+		return fmt.Errorf(allErrs.ToAggregate().Error())
+	}
+
 	return nil
 }
 
@@ -91,4 +91,24 @@ func (in *DNSChaos) ValidateScheduler(spec *field.Path) field.ErrorList {
 // ValidatePodMode validates the value with podmode
 func (in *DNSChaos) ValidatePodMode(spec *field.Path) field.ErrorList {
 	return ValidatePodMode(in.Spec.Value, in.Spec.Mode, spec.Child("value"))
+}
+
+func (in *DNSChaosSpec) validateAction(action *field.Path) field.ErrorList {
+	allErrs := field.ErrorList{}
+
+	if in.Action != ErrorAction && in.Action != RandomAction {
+		allErrs = append(allErrs, field.Invalid(action, in.Action,
+			fmt.Sprintf("action %s not supported", in.Action)))
+	}
+
+	return allErrs
+}
+
+func (in *DNSChaosSpec) validateScope(scope *field.Path) field.ErrorList {
+	allErrs := field.ErrorList{}
+	if in.Scope != OuterScope && in.Scope != InnerScope && in.Scope != AllScope {
+		allErrs = append(allErrs, field.Invalid(scope, in.Scope,
+			fmt.Sprintf("scope %s not supported", in.Scope)))
+	}
+	return allErrs
 }
