@@ -16,16 +16,17 @@
 package swaggerserver
 
 import (
-	"net/http"
-
-	httpSwagger "github.com/swaggo/http-swagger"
+	"github.com/gin-gonic/gin"
+	swaggerFiles "github.com/swaggo/files"
+	"github.com/swaggo/gin-swagger"
 
 	_ "github.com/chaos-mesh/chaos-mesh/docs" // for swagger api
 )
 
 // Handler returns a swagger `http.Handler`.
-func Handler() http.Handler {
-	return httpSwagger.Handler(
-		httpSwagger.URL("./doc.json"),
+func Handler() gin.HandlerFunc {
+	return ginSwagger.WrapHandler(
+		swaggerFiles.Handler,
+		ginSwagger.URL("./doc.json"),
 	)
 }

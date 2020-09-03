@@ -13,25 +13,9 @@
 
 package uiserver
 
-import (
-	"io"
-	"net/http"
+import "net/http"
 
-	"github.com/chaos-mesh/chaos-mesh/pkg/httpfs"
-)
-
-// Handler returns a FileServer `http.Handler` to handle http request.
-func Handler(root http.FileSystem) http.Handler {
-	if root != nil {
-		return httpfs.FileServer(root, httpfs.FileServerOptions{IndexHTML: true, Fallback: "/index.html"})
-	}
-
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		_, _ = io.WriteString(w, "Dashboard UI is not built. Please run `UI=1 make`.\n")
-	})
-}
-
-// AssetFS returns assets.
-func AssetFS() http.FileSystem {
+// AssetsFS returns assets.
+func AssetsFS() http.FileSystem {
 	return assets
 }
