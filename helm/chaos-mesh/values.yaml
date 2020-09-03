@@ -137,7 +137,6 @@ dashboard:
   serviceAccount: chaos-controller-manager
 
   image: pingcap/chaos-dashboard:latest
-
   imagePullPolicy: IfNotPresent
 
   nodeSelector: {}
@@ -299,7 +298,7 @@ webhook:
 
 bpfki:
   create: false
-  image: pingcap/chaos-kernel:v0.9.0
+  image: pingcap/chaos-kernel:latest
   imagePullPolicy: IfNotPresent
   grpcPort: 50051
   resources: {}

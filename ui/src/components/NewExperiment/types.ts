@@ -112,8 +112,10 @@ export interface ExperimentTargetStress {
   container_name: string
 }
 
+export type ExperimentKind = 'PodChaos' | 'NetworkChaos' | 'IoChaos' | 'KernelChaos' | 'TimeChaos' | 'StressChaos'
+
 export interface ExperimentTarget {
-  kind: 'PodChaos' | 'NetworkChaos' | 'IoChaos' | 'KernelChaos' | 'TimeChaos' | 'StressChaos'
+  kind: ExperimentKind | ''
   pod_chaos: ExperimentTargetPod
   network_chaos: ExperimentTargetNetwork
   io_chaos: ExperimentTargetIO
@@ -158,6 +160,6 @@ export interface StepperContextProps {
 
 export type FormikCtx = FormikContextType<Experiment>
 
-export type StepperFormTargetProps = FormikCtx & {
+export type StepperFormTargetProps = {
   handleActionChange?: (e: React.ChangeEvent<any>) => void
 }
