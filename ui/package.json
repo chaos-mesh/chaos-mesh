@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "description": "A Web UI for Chaos Mesh",
   "private": true,
+  "homepage": ".",
   "dependencies": {
     "@material-ui/core": "^4.9.11",
     "@material-ui/icons": "^4.9.1",

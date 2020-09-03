@@ -118,7 +118,7 @@ const Sidebar: React.FC<SidebarProps> = ({ open }) => {
           <NavLink to="/" className={classes.toolbar}>
             <img
               className={open ? classes.logo : classes.logoMini}
-              src={open ? '/logo.svg' : '/logo-mini.svg'}
+              src={'/dashboard' + (open ? '/logo.svg' : '/logo-mini.svg')}
               alt="Chaos Mesh Logo"
             />
           </NavLink>
