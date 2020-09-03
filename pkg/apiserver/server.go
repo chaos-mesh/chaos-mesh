@@ -77,7 +77,7 @@ func newEngine() *gin.Engine {
 		r.StaticFS("/dashboard", ui)
 	} else {
 		r.GET("/dashboard", func(c *gin.Context) {
-			c.String(http.StatusOK, "Swagger UI is not built. Please run `UI=1 make`.")
+			c.String(http.StatusOK, "Dashboard UI is not built. Please run `UI=1 make`.")
 		})
 	}
 	r.NoRoute(moveToUIRoot)
