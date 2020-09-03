@@ -10,12 +10,12 @@ data:
   data: |
     initContainers:
     - name: inject-scripts
-      image: pingcap/chaos-scripts:v0.9.0
+      image: pingcap/chaos-scripts:latest
       imagePullPolicy: IfNotPresent
       command: ["sh", "-c", "/scripts/init.sh -d {{.DataPath}} -f {{.MountPath}}/fuse-data"]
     containers:
     - name: chaosfs
-      image: pingcap/chaos-fs:v0.9.0
+      image: pingcap/chaos-fs:latest
       imagePullPolicy: IfNotPresent
       ports:
       - containerPort: 65534
