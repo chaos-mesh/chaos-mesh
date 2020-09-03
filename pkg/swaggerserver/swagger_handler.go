@@ -18,7 +18,7 @@ package swaggerserver
 import (
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
-	"github.com/swaggo/gin-swagger"
+	ginSwagger "github.com/swaggo/gin-swagger"
 
 	_ "github.com/chaos-mesh/chaos-mesh/docs" // for swagger api
 )
