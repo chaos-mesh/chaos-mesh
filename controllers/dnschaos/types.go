@@ -81,20 +81,17 @@ func (r *Reconciler) Reconcile(req ctrl.Request, chaos *v1alpha1.DNSChaos) (ctrl
 }
 
 func (r *Reconciler) commonDNSChaos(dnschaos *v1alpha1.DNSChaos, req ctrl.Request) (ctrl.Result, error) {
-	r.Log.Info("commonDNSChaos")
 	cr := common.NewReconciler(r, r.Client, r.Log)
 	return cr.Reconcile(req)
 }
 
 func (r *Reconciler) scheduleDNSChaos(dnschaos *v1alpha1.DNSChaos, req ctrl.Request) (ctrl.Result, error) {
-	r.Log.Info("scheduleDNSChaos")
 	sr := twophase.NewReconciler(r, r.Client, r.Log)
 	return sr.Reconcile(req)
 }
 
 // Apply applies dns-chaos
 func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.InnerObject) error {
-	r.Log.Info("apply dns chaos")
 	dnschaos, ok := chaos.(*v1alpha1.DNSChaos)
 	if !ok {
 		err := errors.New("chaos is not dnschaos")
@@ -109,7 +106,6 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1
 	}
 
 	// get dns server's ip used for chaos
-	// TODO: use chaos-mesh's namespace instead of "chaos-testing"
 	services, err := utils.SelectAndFilterService(ctx, r.Client, DNSServerSelectorLabels)
 	if err != nil {
 		r.Log.Error(err, "fail to select service", "labels", DNSServerSelectorLabels)
@@ -121,7 +117,6 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1
 		return err
 	}
 	service := services.Items[0]
-	r.Log.Info("get dns service", "service", service.String(), "ip", service.Spec.ClusterIP)
 
 	// TODO: get port from dns service to instead 9288
 	err = r.setDNSServerRules(service.Spec.ClusterIP, 9288, dnschaos.Name, pods, dnschaos.Spec.Action, dnschaos.Spec.Scope)
@@ -230,13 +225,12 @@ func (r *Reconciler) cleanFinalizersAndRecover(ctx context.Context, chaos *v1alp
 }
 
 func (r *Reconciler) recoverPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.DNSChaos) error {
-	// TODO: recover /etc/resolv.conf file
 	r.Log.Info("Try to recover pod", "namespace", pod.Namespace, "name", pod.Name)
 
 	daemonClient, err := utils.NewChaosDaemonClient(ctx, r.Client,
 		pod, common.ControllerCfg.ChaosDaemonPort)
 	if err != nil {
-		r.Log.Error(err, "MetaNamespaceKeyFunc")
+		r.Log.Error(err, "get chaos daemon client")
 		return err
 	}
 	defer daemonClient.Close()
@@ -251,7 +245,7 @@ func (r *Reconciler) recoverPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha
 		Enable:      false,
 	})
 	if err != nil {
-		r.Log.Error(err, "SetDNSServer")
+		r.Log.Error(err, "recover pod for DNS chaos")
 		return err
 	}
 
@@ -270,7 +264,7 @@ func (r *Reconciler) applyAllPods(ctx context.Context, pods []v1.Pod, chaos *v1a
 
 		key, err := cache.MetaNamespaceKeyFunc(pod)
 		if err != nil {
-			r.Log.Error(err, "MetaNamespaceKeyFunc")
+			r.Log.Error(err, "get meta namespace key")
 			return err
 		}
 		chaos.Finalizers = utils.InsertFinalizer(chaos.Finalizers, key)
@@ -293,7 +287,7 @@ func (r *Reconciler) applyPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.
 	daemonClient, err := utils.NewChaosDaemonClient(ctx, r.Client,
 		pod, common.ControllerCfg.ChaosDaemonPort)
 	if err != nil {
-		r.Log.Error(err, "MetaNamespaceKeyFunc")
+		r.Log.Error(err, "get chaos daemon client")
 		return err
 	}
 	defer daemonClient.Close()
@@ -309,7 +303,7 @@ func (r *Reconciler) applyPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.
 		Enable:      true,
 	})
 	if err != nil {
-		r.Log.Error(err, "SetDNSServer")
+		r.Log.Error(err, "set dns server")
 		return err
 	}
 
@@ -327,7 +321,6 @@ func (r *Reconciler) setDNSServerRules(dnsServerIP string, port int64, name stri
 		}
 	}
 
-	r.Log.Info("cancelDNSServerRules create conn", "address", fmt.Sprintf("%s:%d", dnsServerIP, port))
 	conn, err := grpc.Dial(fmt.Sprintf("%s:%d", dnsServerIP, port), grpc.WithInsecure())
 	if err != nil {
 		return err
@@ -357,15 +350,11 @@ func (r *Reconciler) setDNSServerRules(dnsServerIP string, port int64, name stri
 }
 
 func (r *Reconciler) cancelDNSServerRules(dnsServerIP string, port int64, name string) error {
-	r.Log.Info("cancelDNSServerRules")
-	defer r.Log.Info("cancelDNSServerRules finished")
-
 	conn, err := grpc.Dial(fmt.Sprintf("%s:%d", dnsServerIP, port), grpc.WithInsecure())
 	if err != nil {
 		return err
 	}
 	defer conn.Close()
-	r.Log.Info("cancelDNSServerRules create conn")
 
 	c := dnspb.NewDNSClient(conn)
 	request := &dnspb.CancelDNSChaosRequest{
