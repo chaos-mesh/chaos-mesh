@@ -49,9 +49,7 @@ var (
 func serverRegister(r *gin.Engine, conf *config.ChaosDashboardConfig) {
 	listenAddr := fmt.Sprintf("%s:%d", conf.ListenHost, conf.ListenPort)
 
-	go func() {
-		r.Run(listenAddr)
-	}()
+	go r.Run(listenAddr)
 }
 
 func newEngine() *gin.Engine {
