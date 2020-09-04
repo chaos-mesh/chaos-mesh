@@ -387,9 +387,22 @@ func convertNetemToArgs(netem *pb.Netem) string {
 		args = fmt.Sprintf("delay %d", netem.Time)
 		if netem.Jitter > 0 {
 			args = fmt.Sprintf("%s %d", args, netem.Jitter)
+
+			if netem.DelayCorr > 0 {
+				args = fmt.Sprintf("%s %f", args, netem.DelayCorr)
+			}
 		}
-		if netem.DelayCorr > 0 {
-			args = fmt.Sprintf("%s %f", args, netem.DelayCorr)
+
+		// reordering not possible without specifying some delay
+		if netem.Reorder > 0 {
+			args = fmt.Sprintf("%s reorder %f", args, netem.Reorder)
+			if netem.ReorderCorr > 0 {
+				args = fmt.Sprintf("%s %f", args, netem.ReorderCorr)
+			}
+
+			if netem.Gap > 0 {
+				args = fmt.Sprintf("%s gap %d", args, netem.Gap)
+			}
 		}
 	}
 
@@ -401,17 +414,6 @@ func convertNetemToArgs(netem *pb.Netem) string {
 		args = fmt.Sprintf("%s loss %f", args, netem.Loss)
 		if netem.LossCorr > 0 {
 			args = fmt.Sprintf("%s %f", args, netem.LossCorr)
-		}
-	}
-
-	if netem.Reorder > 0 {
-		args = fmt.Sprintf("%s reorder %f", args, netem.Reorder)
-		if netem.ReorderCorr > 0 {
-			args = fmt.Sprintf("%s %f", args, netem.ReorderCorr)
-		}
-
-		if netem.Gap > 0 {
-			args = fmt.Sprintf("%s gap %d", args, netem.Gap)
 		}
 	}
 
@@ -429,7 +431,15 @@ func convertNetemToArgs(netem *pb.Netem) string {
 		}
 	}
 
-	return args
+	trimedArgs := []string{}
+
+	for _, part := range strings.Split(args, " ") {
+		if len(part) > 0 {
+			trimedArgs = append(trimedArgs, part)
+		}
+	}
+
+	return strings.Join(trimedArgs, " ")
 }
 
 func convertTbfToArgs(tbf *pb.Tbf) string {

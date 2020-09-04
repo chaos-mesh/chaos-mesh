@@ -6,9 +6,7 @@
 </p>
 <h1 align="center">Chaos Mesh Dashboard</h1>
 
-> Note: Currently WIP
-
-A Web UI for Chaos Mesh. Powered by ⚛️ [Create React App](https://github.com/facebook/create-react-app). You can learn more from [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+A Web UI for Chaos Mesh. Powered by ⚛️ [Create React App](https://github.com/facebook/create-react-app).
 
 To learn React, check out the [React documentation](https://reactjs.org/).
 
@@ -28,10 +26,10 @@ Your browser will open <localhost:3000> automatically.
 
 For better collaboration and review, we have developed a few rules to help us develop better.
 
-- [Ts or JS](#ts-or-js)
+- [TS or JS](#ts-or-js)
 - [Styles](#styles)
 - [Be Compact](#be-compact)
-- [Necessary Test](#necessary-test)
+- [Tests](#tests)
 
 **Before you contribute, you must read the following carefully.**
 
@@ -75,13 +73,12 @@ box-shadow: none;
 
 ### Be Compact
 
-**Don't include unused deps.**
+- **Don't include unused deps.**
+- **Don't let your code be too long-winded, there will be a lot of elegant writing.**
 
-**Don't let your code be too long-winded, there will be a lot of elegant writing.**
+### Tests
 
-### Necessary Test
-
-**Every new feature must have a unit test.**
+- **Every new feature must have a unit test.**
 
 ## Authors
 

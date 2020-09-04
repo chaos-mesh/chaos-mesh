@@ -13,9 +13,6 @@ const useStyles = makeStyles((theme: Theme) =>
       height: '56px',
       borderBottom: `1px solid ${theme.palette.divider}`,
     },
-    title: {
-      fontSize: '1rem',
-    },
   })
 )
 
@@ -28,9 +25,7 @@ const PaperTop: React.FC<PaperTopProps> = ({ title, children }) => {
 
   return (
     <Box className={classes.root} px={3}>
-      <Typography className={classes.title} variant="button">
-        {title}
-      </Typography>
+      <Typography variant="button">{title}</Typography>
       {children}
     </Box>
   )
