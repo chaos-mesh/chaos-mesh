@@ -15,7 +15,10 @@ package common
 
 import (
 	"context"
+	"fmt"
 	"os"
+	"regexp"
+	"strings"
 	"time"
 
 	"github.com/go-logr/logr"
@@ -52,7 +55,48 @@ func init() {
 		os.Exit(1)
 	}
 
+	err = validate(&conf)
+	if err != nil {
+		ctrl.SetLogger(zap.Logger(true))
+		log.Error(err, "Chaos Controller: invalid configuration")
+		os.Exit(1)
+	}
+
 	ControllerCfg = &conf
+}
+
+func validate(config *config.ChaosControllerConfig) error {
+	if !config.ClusterScoped {
+		if strings.TrimSpace(config.Namespace) == "" {
+			return fmt.Errorf("no target namespace specified with namespace scoped mode")
+		}
+		if !isAllowedNamespaces(config.Namespace, config.AllowedNamespaces, config.IgnoredNamespaces) {
+			return fmt.Errorf("target namespace %s is not allowed with filter, please check config AllowedNamespaces and IgnoredNamespaces", config.Namespace)
+		}
+	}
+
+	return nil
+}
+
+// FIXME: duplicated with utils.IsAllowedNamespaces, it should considered with some dependency problems.
+func isAllowedNamespaces(namespace, allowedNamespace, ignoredNamespace string) bool {
+	if allowedNamespace != "" {
+		matched, err := regexp.MatchString(allowedNamespace, namespace)
+		if err != nil {
+			return false
+		}
+		return matched
+	}
+
+	if ignoredNamespace != "" {
+		matched, err := regexp.MatchString(ignoredNamespace, namespace)
+		if err != nil {
+			return false
+		}
+		return !matched
+	}
+
+	return true
 }
 
 // Reconciler for common chaos

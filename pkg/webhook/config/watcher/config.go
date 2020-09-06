@@ -19,7 +19,6 @@ import (
 
 // Config is a configuration struct for the Watcher type
 type Config struct {
-	// Deprecated. Use Namespace in config.ChaosControllerConfig.
 	Namespace string `envconfig:"TEMPLATE_NAMESPACE" default:""`
 	// TemplateLabels is label pairs used to discover common templates in Kubernetes. These should be key1:value[,key2:val2,...]
 	TemplateLabels map[string]string `envconfig:"TEMPLATE_LABELS"`
