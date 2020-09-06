@@ -44,6 +44,8 @@ spec:
             valueFrom:
               fieldRef:
                 fieldPath: metadata.namespace
+          - name: CLUSTER_SCOPED
+            value: "{{ .Values.clusterScoped }}"
           - name: TZ
             value: {{ .Values.timezone | default "UTC" }}
           - name: CHAOS_DAEMON_PORT
