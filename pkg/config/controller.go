@@ -43,6 +43,11 @@ type ChaosControllerConfig struct {
 	// RPCTimeout is timeout of RPC between controllers and chaos-operator
 	RPCTimeout    time.Duration `envconfig:"RPC_TIMEOUT" default:"1m"`
 	WatcherConfig *watcher.Config
+	// ClusterScoped means control Chaos Object in cluster level(all namespace),
+	ClusterScoped bool `envconfig:"CLUSTER_SCOPED" default:"true"`
+	// Namespace is the target namespace to injecting chaos.
+	// It only works with ClusterScoped is false;
+	Namespace string `envconfig:"NAMESPACE" default:""`
 }
 
 // EnvironChaosController returns the settings from the environment.
