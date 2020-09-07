@@ -1,0 +1,130 @@
+{
+  "version-0.9.1/docs": [
+    {
+      "type": "doc",
+      "id": "version-0.9.1/overview"
+    },
+    {
+      "collapsed": true,
+      "type": "category",
+      "label": "Getting Started",
+      "items": [
+        {
+          "type": "doc",
+          "id": "version-0.9.1/installation/installation"
+        },
+        {
+          "type": "doc",
+          "id": "version-0.9.1/installation/get_started_on_kind"
+        },
+        {
+          "type": "doc",
+          "id": "version-0.9.1/installation/get_started_on_minikube"
+        }
+      ]
+    },
+    {
+      "collapsed": true,
+      "type": "category",
+      "label": "User Guide",
+      "items": [
+        {
+          "type": "doc",
+          "id": "version-0.9.1/user_guides/run_chaos_experiment"
+        },
+        {
+          "collapsed": true,
+          "type": "category",
+          "label": "Configure Chaos",
+          "items": [
+            {
+              "type": "doc",
+              "id": "version-0.9.1/user_guides/podchaos_experiment"
+            },
+            {
+              "type": "doc",
+              "id": "version-0.9.1/user_guides/networkchaos_experiment"
+            },
+            {
+              "type": "doc",
+              "id": "version-0.9.1/user_guides/stresschaos_experiment"
+            },
+            {
+              "type": "doc",
+              "id": "version-0.9.1/user_guides/timechaos_experiment"
+            },
+            {
+              "type": "doc",
+              "id": "version-0.9.1/user_guides/iochaos_experiment"
+            },
+            {
+              "type": "doc",
+              "id": "version-0.9.1/user_guides/kernelchaos_experiment"
+            }
+          ]
+        },
+        {
+          "type": "doc",
+          "id": "version-0.9.1/user_guides/experiment_scope"
+        },
+        {
+          "type": "doc",
+          "id": "version-0.9.1/user_guides/sidecar_configmap"
+        },
+        {
+          "type": "doc",
+          "id": "version-0.9.1/user_guides/sidecar_template"
+        }
+      ]
+    },
+    {
+      "collapsed": true,
+      "type": "category",
+      "label": "Use Cases",
+      "items": [
+        {
+          "type": "doc",
+          "id": "version-0.9.1/use_cases/multi_data_centers"
+        }
+      ]
+    },
+    {
+      "collapsed": true,
+      "type": "category",
+      "label": "Development Guide",
+      "items": [
+        {
+          "type": "doc",
+          "id": "version-0.9.1/development_guides/development_overview"
+        },
+        {
+          "type": "doc",
+          "id": "version-0.9.1/development_guides/set_up_the_development_environment"
+        },
+        {
+          "type": "doc",
+          "id": "version-0.9.1/development_guides/develop_a_new_chaos"
+        }
+      ]
+    },
+    {
+      "type": "doc",
+      "id": "version-0.9.1/faqs"
+    },
+    {
+      "collapsed": true,
+      "type": "category",
+      "label": "Releases",
+      "items": [
+        {
+          "type": "doc",
+          "id": "version-0.9.1/releases/v0.9.0"
+        },
+        {
+          "type": "doc",
+          "id": "version-0.9.1/releases/v0.8.0"
+        }
+      ]
+    }
+  ]
+}

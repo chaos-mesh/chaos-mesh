@@ -45,6 +45,19 @@ const LoadWrapper: React.FC<{ title: string }> = ({ title, children }) => (
   </Box>
 )
 
+const CustomRadioLabel = (e: ExperimentResponse | Archive) => (
+  <Box display="flex" justifyContent="space-between" alignItems="center">
+    <Typography variant="body1" component="div">
+      {e.name}
+    </Typography>
+    <Box ml={3}>
+      <Typography variant="body2" color="textSecondary">
+        {e.uid}
+      </Typography>
+    </Box>
+  </Box>
+)
+
 interface ActionsProps {
   setInitialValues: (initialValues: Experiment) => void
 }
@@ -131,12 +144,17 @@ const Actions = ({ setInitialValues }: ActionsProps) => {
   }
 
   return (
-    <Box p={6}>
+    <Box p={6} pt={12}>
       <LoadWrapper title="Load From Existing Experiments">
         <RadioGroup value={experimentRadio} onChange={onExperimentRadioChange}>
           {experiments && experiments.length > 0 ? (
             experiments.map((e) => (
-              <FormControlLabel key={e.uid} value={e.uid} control={<Radio color="primary" />} label={e.name} />
+              <FormControlLabel
+                key={e.uid}
+                value={e.uid}
+                control={<Radio color="primary" />}
+                label={CustomRadioLabel(e)}
+              />
             ))
           ) : experiments?.length === 0 ? (
             <Typography variant="body2">No experiments found.</Typography>
@@ -154,7 +172,12 @@ const Actions = ({ setInitialValues }: ActionsProps) => {
         <RadioGroup value={archiveRadio} onChange={onArchiveRadioChange}>
           {archives && archives.length > 0 ? (
             archives.map((a) => (
-              <FormControlLabel key={a.uid} value={a.uid} control={<Radio color="primary" />} label={a.name} />
+              <FormControlLabel
+                key={a.uid}
+                value={a.uid}
+                control={<Radio color="primary" />}
+                label={CustomRadioLabel(a)}
+              />
             ))
           ) : archives?.length === 0 ? (
             <Typography variant="body2">No archives found.</Typography>
