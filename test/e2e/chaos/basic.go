@@ -861,10 +861,6 @@ var _ = ginkgo.Describe("[Basic]", func() {
 		)
 
 		ginkgo.JustBeforeEach(func() {
-			err = createIOChaosConfigMap(kubeCli, ns)
-			framework.ExpectNoError(err, "create io chaos configmap error")
-			err = enableWebhook(ns)
-			framework.ExpectNoError(err, "enable webhook on ns error")
 			svc := fixture.NewE2EService("io", ns)
 			_, err = kubeCli.CoreV1().Services(ns).Create(svc)
 			framework.ExpectNoError(err, "create service error")
@@ -898,15 +894,6 @@ var _ = ginkgo.Describe("[Basic]", func() {
 				err = waitE2EHelperReady(c, port)
 				framework.ExpectNoError(err, "wait e2e helper ready error")
 
-				listOption := metav1.ListOptions{
-					LabelSelector: labels.SelectorFromSet(map[string]string{
-						"app": "io",
-					}).String(),
-				}
-				pods, err := kubeCli.CoreV1().Pods(ns).List(listOption)
-				framework.ExpectNoError(err, "failed to get io-test pod")
-				framework.ExpectEqual(len(pods.Items[0].Spec.Containers), 2, "sidecar should be injected")
-
 				ioChaos := &v1alpha1.IoChaos{
 					ObjectMeta: metav1.ObjectMeta{
 						Name:      "io-chaos",
@@ -917,12 +904,13 @@ var _ = ginkgo.Describe("[Basic]", func() {
 							Namespaces:     []string{ns},
 							LabelSelectors: map[string]string{"app": "io"},
 						},
-						Action:   v1alpha1.IoLatency,
-						Mode:     v1alpha1.OnePodMode,
-						Path:     "",
-						Delay:    "1s",
-						Percent:  100,
-						Duration: pointer.StringPtr("9m"),
+						Action:     v1alpha1.IoLatency,
+						Mode:       v1alpha1.OnePodMode,
+						VolumePath: "/run/data",
+						Path:       "/run/data/*",
+						Delay:      "1s",
+						Percent:    100,
+						Duration:   pointer.StringPtr("9m"),
 						Scheduler: &v1alpha1.SchedulerSpec{
 							Cron: "@every 10m",
 						},
@@ -965,306 +953,282 @@ var _ = ginkgo.Describe("[Basic]", func() {
 				cancel()
 			})
 
-			ginkgo.It("[Pause]", func() {
-				ctx, cancel := context.WithCancel(context.Background())
-				err = waitE2EHelperReady(c, port)
-				framework.ExpectNoError(err, "wait e2e helper ready error")
+			// ginkgo.It("[Pause]", func() {
+			// 	ctx, cancel := context.WithCancel(context.Background())
+			// 	err = waitE2EHelperReady(c, port)
+			// 	framework.ExpectNoError(err, "wait e2e helper ready error")
 
-				listOption := metav1.ListOptions{
-					LabelSelector: labels.SelectorFromSet(map[string]string{
-						"app": "io",
-					}).String(),
-				}
-				pods, err := kubeCli.CoreV1().Pods(ns).List(listOption)
-				framework.ExpectNoError(err, "failed to get io-test pod")
-				framework.ExpectEqual(len(pods.Items[0].Spec.Containers), 2, "sidecar should be injected")
+			// 	ioChaos := &v1alpha1.IoChaos{
+			// 		ObjectMeta: metav1.ObjectMeta{
+			// 			Name:      "io-chaos",
+			// 			Namespace: ns,
+			// 		},
+			// 		Spec: v1alpha1.IoChaosSpec{
+			// 			Selector: v1alpha1.SelectorSpec{
+			// 				Namespaces:     []string{ns},
+			// 				LabelSelectors: map[string]string{"app": "io"},
+			// 			},
+			// 			Action:     v1alpha1.IoLatency,
+			// 			Mode:       v1alpha1.OnePodMode,
+			// 			VolumePath: "/run/data",
+			// 			Path:       "/run/data/*",
+			// 			Delay:      "1s",
+			// 			Percent:    100,
+			// 			Duration:   pointer.StringPtr("9m"),
+			// 			Scheduler: &v1alpha1.SchedulerSpec{
+			// 				Cron: "@every 10m",
+			// 			},
+			// 		},
+			// 	}
+			// 	err = cli.Create(ctx, ioChaos)
+			// 	framework.ExpectNoError(err, "create io chaos error")
 
-				ioChaos := &v1alpha1.IoChaos{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "io-chaos",
-						Namespace: ns,
-					},
-					Spec: v1alpha1.IoChaosSpec{
-						Selector: v1alpha1.SelectorSpec{
-							Namespaces:     []string{ns},
-							LabelSelectors: map[string]string{"app": "io"},
-						},
-						Action:   v1alpha1.IoLatency,
-						Mode:     v1alpha1.OnePodMode,
-						Path:     "",
-						Delay:    "1s",
-						Percent:  100,
-						Duration: pointer.StringPtr("9m"),
-						Scheduler: &v1alpha1.SchedulerSpec{
-							Cron: "@every 10m",
-						},
-					},
-				}
-				err = cli.Create(ctx, ioChaos)
-				framework.ExpectNoError(err, "create io chaos error")
+			// 	err = wait.PollImmediate(5*time.Second, 1*time.Minute, func() (done bool, err error) {
+			// 		dur, err := getPodIODelay(c, port)
+			// 		framework.ExpectNoError(err, "failed to get pod io delay")
+			// 		// IO Delay > 1s
+			// 		if dur.Seconds() > 1 {
+			// 			return true, nil
+			// 		}
+			// 		return false, nil
+			// 	})
+			// 	framework.ExpectNoError(err, "io chaos doesn't work as expected")
 
-				err = wait.PollImmediate(5*time.Second, 1*time.Minute, func() (done bool, err error) {
-					dur, err := getPodIODelay(c, port)
-					framework.ExpectNoError(err, "failed to get pod io delay")
-					// IO Delay > 1s
-					if dur.Seconds() > 1 {
-						return true, nil
-					}
-					return false, nil
-				})
-				framework.ExpectNoError(err, "io chaos doesn't work as expected")
+			// 	chaosKey := types.NamespacedName{
+			// 		Namespace: ns,
+			// 		Name:      "io-chaos",
+			// 	}
 
-				chaosKey := types.NamespacedName{
-					Namespace: ns,
-					Name:      "io-chaos",
-				}
+			// 	// pause experiment
+			// 	err = pauseChaos(ctx, cli, ioChaos)
+			// 	framework.ExpectNoError(err, "pause chaos error")
 
-				// pause experiment
-				err = pauseChaos(ctx, cli, ioChaos)
-				framework.ExpectNoError(err, "pause chaos error")
+			// 	err = wait.Poll(5*time.Second, 5*time.Minute, func() (done bool, err error) {
+			// 		chaos := &v1alpha1.IoChaos{}
+			// 		err = cli.Get(ctx, chaosKey, chaos)
+			// 		framework.ExpectNoError(err, "get io chaos error")
+			// 		if chaos.Status.Experiment.Phase == v1alpha1.ExperimentPhasePaused {
+			// 			return true, nil
+			// 		}
+			// 		return false, err
+			// 	})
+			// 	framework.ExpectNoError(err, "check paused chaos failed")
 
-				err = wait.Poll(5*time.Second, 5*time.Minute, func() (done bool, err error) {
-					chaos := &v1alpha1.IoChaos{}
-					err = cli.Get(ctx, chaosKey, chaos)
-					framework.ExpectNoError(err, "get io chaos error")
-					if chaos.Status.Experiment.Phase == v1alpha1.ExperimentPhasePaused {
-						return true, nil
-					}
-					return false, err
-				})
-				framework.ExpectNoError(err, "check paused chaos failed")
+			// 	err = waitSidecarFaultRecovery(ctx, sidecarClient)
+			// 	framework.ExpectNoError(err, "wait chaosfs recover fault error")
 
-				err = waitSidecarFaultRecovery(ctx, sidecarClient)
-				framework.ExpectNoError(err, "wait chaosfs recover fault error")
+			// 	// wait 1 min to check whether io delay still exists
+			// 	err = wait.PollImmediate(5*time.Second, 1*time.Minute, func() (done bool, err error) {
+			// 		dur, err := getPodIODelay(c, port)
+			// 		framework.ExpectNoError(err, "failed to get pod io delay")
+			// 		// io delay shouldn't > 1s, which is expected
+			// 		if dur.Seconds() > 1 {
+			// 			return true, nil
+			// 		}
+			// 		return false, nil
+			// 	})
+			// 	framework.ExpectError(err, "wait no io chaos error")
+			// 	framework.ExpectEqual(err.Error(), wait.ErrWaitTimeout.Error())
 
-				// wait 1 min to check whether io delay still exists
-				err = wait.PollImmediate(5*time.Second, 1*time.Minute, func() (done bool, err error) {
-					dur, err := getPodIODelay(c, port)
-					framework.ExpectNoError(err, "failed to get pod io delay")
-					// io delay shouldn't > 1s, which is expected
-					if dur.Seconds() > 1 {
-						return true, nil
-					}
-					return false, nil
-				})
-				framework.ExpectError(err, "wait no io chaos error")
-				framework.ExpectEqual(err.Error(), wait.ErrWaitTimeout.Error())
+			// 	// resume experiment
+			// 	err = unPauseChaos(ctx, cli, ioChaos)
+			// 	framework.ExpectNoError(err, "resume chaos error")
 
-				// resume experiment
-				err = unPauseChaos(ctx, cli, ioChaos)
-				framework.ExpectNoError(err, "resume chaos error")
+			// 	err = wait.Poll(5*time.Second, 1*time.Minute, func() (done bool, err error) {
+			// 		chaos := &v1alpha1.IoChaos{}
+			// 		err = cli.Get(ctx, chaosKey, chaos)
+			// 		framework.ExpectNoError(err, "get io chaos error")
+			// 		if chaos.Status.Experiment.Phase == v1alpha1.ExperimentPhaseRunning {
+			// 			return true, nil
+			// 		}
+			// 		return false, err
+			// 	})
+			// 	framework.ExpectNoError(err, "check resumed chaos failed")
 
-				err = wait.Poll(5*time.Second, 1*time.Minute, func() (done bool, err error) {
-					chaos := &v1alpha1.IoChaos{}
-					err = cli.Get(ctx, chaosKey, chaos)
-					framework.ExpectNoError(err, "get io chaos error")
-					if chaos.Status.Experiment.Phase == v1alpha1.ExperimentPhaseRunning {
-						return true, nil
-					}
-					return false, err
-				})
-				framework.ExpectNoError(err, "check resumed chaos failed")
+			// 	err = wait.PollImmediate(5*time.Second, 1*time.Minute, func() (done bool, err error) {
+			// 		dur, err := getPodIODelay(c, port)
+			// 		framework.ExpectNoError(err, "failed to get pod io delay")
+			// 		// IO Delay > 1s
+			// 		if dur.Seconds() > 1 {
+			// 			return true, nil
+			// 		}
+			// 		return false, nil
+			// 	})
+			// 	framework.ExpectNoError(err, "io chaos doesn't work as expected")
 
-				err = wait.PollImmediate(5*time.Second, 1*time.Minute, func() (done bool, err error) {
-					dur, err := getPodIODelay(c, port)
-					framework.ExpectNoError(err, "failed to get pod io delay")
-					// IO Delay > 1s
-					if dur.Seconds() > 1 {
-						return true, nil
-					}
-					return false, nil
-				})
-				framework.ExpectNoError(err, "io chaos doesn't work as expected")
-
-				// cleanup
-				cli.Delete(ctx, ioChaos)
-				cancel()
-			})
+			// 	// cleanup
+			// 	cli.Delete(ctx, ioChaos)
+			// 	cancel()
+			// })
 		})
 
-		// io chaos case in [IOError] context
-		ginkgo.Context("[IOErrno]", func() {
+		// // io chaos case in [IOError] context
+		// ginkgo.Context("[IOErrno]", func() {
 
-			ginkgo.It("[Schedule]", func() {
-				ctx, cancel := context.WithCancel(context.Background())
-				err = waitE2EHelperReady(c, port)
-				framework.ExpectNoError(err, "wait e2e helper ready error")
+		// 	ginkgo.It("[Schedule]", func() {
+		// 		ctx, cancel := context.WithCancel(context.Background())
+		// 		err = waitE2EHelperReady(c, port)
+		// 		framework.ExpectNoError(err, "wait e2e helper ready error")
 
-				listOption := metav1.ListOptions{
-					LabelSelector: labels.SelectorFromSet(map[string]string{
-						"app": "io",
-					}).String(),
-				}
-				pods, err := kubeCli.CoreV1().Pods(ns).List(listOption)
-				framework.ExpectNoError(err, "failed to get io-test pod")
-				framework.ExpectEqual(len(pods.Items[0].Spec.Containers), 2, "sidecar should be injected")
+		// 		ioChaos := &v1alpha1.IoChaos{
+		// 			ObjectMeta: metav1.ObjectMeta{
+		// 				Name:      "io-chaos",
+		// 				Namespace: ns,
+		// 			},
+		// 			Spec: v1alpha1.IoChaosSpec{
+		// 				Selector: v1alpha1.SelectorSpec{
+		// 					Namespaces:     []string{ns},
+		// 					LabelSelectors: map[string]string{"app": "io"},
+		// 				},
+		// 				Action:     v1alpha1.IoFaults,
+		// 				Mode:       v1alpha1.OnePodMode,
+		// 				VolumePath: "/var/run/data",
+		// 				Path:       "/var/run/data/*",
+		// 				Percent:    100,
+		// 				// errno 5 is EIO -> I/O error
+		// 				Errno: 5,
+		// 				// only inject write method
+		// 				Methods:  []v1alpha1.IoMethod{v1alpha1.Write},
+		// 				Duration: pointer.StringPtr("9m"),
+		// 				Scheduler: &v1alpha1.SchedulerSpec{
+		// 					Cron: "@every 10m",
+		// 				},
+		// 			},
+		// 		}
+		// 		err = cli.Create(ctx, ioChaos)
+		// 		framework.ExpectNoError(err, "create io chaos error")
 
-				ioChaos := &v1alpha1.IoChaos{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "io-chaos",
-						Namespace: ns,
-					},
-					Spec: v1alpha1.IoChaosSpec{
-						Selector: v1alpha1.SelectorSpec{
-							Namespaces:     []string{ns},
-							LabelSelectors: map[string]string{"app": "io"},
-						},
-						Action:  v1alpha1.IoFaults,
-						Mode:    v1alpha1.OnePodMode,
-						Path:    "",
-						Percent: 100,
-						// errno 5 is EIO -> I/O error
-						Errno: 5,
-						// only inject write method
-						Methods:  []v1alpha1.IoMethod{v1alpha1.Write},
-						Duration: pointer.StringPtr("9m"),
-						Scheduler: &v1alpha1.SchedulerSpec{
-							Cron: "@every 10m",
-						},
-					},
-				}
-				err = cli.Create(ctx, ioChaos)
-				framework.ExpectNoError(err, "create io chaos error")
+		// 		err = wait.PollImmediate(5*time.Second, 1*time.Minute, func() (done bool, err error) {
+		// 			_, err = getPodIODelay(c, port)
+		// 			// input/output error is errno 5
+		// 			if err != nil && strings.Contains(err.Error(), "input/output error") {
+		// 				return true, nil
+		// 			}
+		// 			return false, nil
+		// 		})
+		// 		framework.ExpectNoError(err, "io chaos doesn't work as expected")
 
-				err = wait.PollImmediate(5*time.Second, 1*time.Minute, func() (done bool, err error) {
-					_, err = getPodIODelay(c, port)
-					// input/output error is errno 5
-					if err != nil && strings.Contains(err.Error(), "input/output error") {
-						return true, nil
-					}
-					return false, nil
-				})
-				framework.ExpectNoError(err, "io chaos doesn't work as expected")
+		// 		err = cli.Delete(ctx, ioChaos)
+		// 		framework.ExpectNoError(err, "failed to delete io chaos")
 
-				err = cli.Delete(ctx, ioChaos)
-				framework.ExpectNoError(err, "failed to delete io chaos")
+		// 		err = waitSidecarFaultRecovery(ctx, sidecarClient)
+		// 		framework.ExpectNoError(err, "wait chaosfs recover fault error")
 
-				err = waitSidecarFaultRecovery(ctx, sidecarClient)
-				framework.ExpectNoError(err, "wait chaosfs recover fault error")
+		// 		klog.Infof("success to perform io chaos")
+		// 		err = wait.PollImmediate(5*time.Second, 1*time.Minute, func() (done bool, err error) {
+		// 			_, err = getPodIODelay(c, port)
+		// 			framework.ExpectNoError(err, "failed to get pod io delay")
+		// 			return false, nil
+		// 		})
+		// 		framework.ExpectError(err, "wait no io chaos error")
+		// 		framework.ExpectEqual(err.Error(), wait.ErrWaitTimeout.Error())
 
-				klog.Infof("success to perform io chaos")
-				err = wait.PollImmediate(5*time.Second, 1*time.Minute, func() (done bool, err error) {
-					_, err = getPodIODelay(c, port)
-					framework.ExpectNoError(err, "failed to get pod io delay")
-					return false, nil
-				})
-				framework.ExpectError(err, "wait no io chaos error")
-				framework.ExpectEqual(err.Error(), wait.ErrWaitTimeout.Error())
+		// 		cancel()
+		// 	})
 
-				cancel()
-			})
+		// 	ginkgo.It("[Pause]", func() {
+		// 		ctx, cancel := context.WithCancel(context.Background())
+		// 		err = waitE2EHelperReady(c, port)
+		// 		framework.ExpectNoError(err, "wait e2e helper ready error")
 
-			ginkgo.It("[Pause]", func() {
-				ctx, cancel := context.WithCancel(context.Background())
-				err = waitE2EHelperReady(c, port)
-				framework.ExpectNoError(err, "wait e2e helper ready error")
+		// 		ioChaos := &v1alpha1.IoChaos{
+		// 			ObjectMeta: metav1.ObjectMeta{
+		// 				Name:      "io-chaos",
+		// 				Namespace: ns,
+		// 			},
+		// 			Spec: v1alpha1.IoChaosSpec{
+		// 				Selector: v1alpha1.SelectorSpec{
+		// 					Namespaces:     []string{ns},
+		// 					LabelSelectors: map[string]string{"app": "io"},
+		// 				},
+		// 				Action:     v1alpha1.IoFaults,
+		// 				Mode:       v1alpha1.OnePodMode,
+		// 				VolumePath: "/var/run/data",
+		// 				Path:       "/var/run/data/*",
+		// 				Percent:    100,
+		// 				// errno 5 is EIO -> I/O error
+		// 				Errno: 5,
+		// 				// only inject write method
+		// 				Methods:  []v1alpha1.IoMethod{v1alpha1.Write},
+		// 				Duration: pointer.StringPtr("9m"),
+		// 				Scheduler: &v1alpha1.SchedulerSpec{
+		// 					Cron: "@every 10m",
+		// 				},
+		// 			},
+		// 		}
+		// 		err = cli.Create(ctx, ioChaos)
+		// 		framework.ExpectNoError(err, "create io chaos error")
 
-				listOption := metav1.ListOptions{
-					LabelSelector: labels.SelectorFromSet(map[string]string{
-						"app": "io",
-					}).String(),
-				}
-				pods, err := kubeCli.CoreV1().Pods(ns).List(listOption)
-				framework.ExpectNoError(err, "failed to get io-test pod")
-				framework.ExpectEqual(len(pods.Items[0].Spec.Containers), 2, "sidecar should be injected")
+		// 		err = wait.PollImmediate(5*time.Second, 1*time.Minute, func() (done bool, err error) {
+		// 			_, err = getPodIODelay(c, port)
+		// 			if err != nil && strings.Contains(err.Error(), "input/output error") {
+		// 				return true, nil
+		// 			}
+		// 			return false, nil
+		// 		})
+		// 		framework.ExpectNoError(err, "io chaos doesn't work as expected")
 
-				ioChaos := &v1alpha1.IoChaos{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "io-chaos",
-						Namespace: ns,
-					},
-					Spec: v1alpha1.IoChaosSpec{
-						Selector: v1alpha1.SelectorSpec{
-							Namespaces:     []string{ns},
-							LabelSelectors: map[string]string{"app": "io"},
-						},
-						Action:  v1alpha1.IoFaults,
-						Mode:    v1alpha1.OnePodMode,
-						Path:    "",
-						Percent: 100,
-						// errno 5 is EIO -> I/O error
-						Errno: 5,
-						// only inject write method
-						Methods:  []v1alpha1.IoMethod{v1alpha1.Write},
-						Duration: pointer.StringPtr("9m"),
-						Scheduler: &v1alpha1.SchedulerSpec{
-							Cron: "@every 10m",
-						},
-					},
-				}
-				err = cli.Create(ctx, ioChaos)
-				framework.ExpectNoError(err, "create io chaos error")
+		// 		chaosKey := types.NamespacedName{
+		// 			Namespace: ns,
+		// 			Name:      "io-chaos",
+		// 		}
 
-				err = wait.PollImmediate(5*time.Second, 1*time.Minute, func() (done bool, err error) {
-					_, err = getPodIODelay(c, port)
-					if err != nil && strings.Contains(err.Error(), "input/output error") {
-						return true, nil
-					}
-					return false, nil
-				})
-				framework.ExpectNoError(err, "io chaos doesn't work as expected")
+		// 		// pause experiment
+		// 		err = pauseChaos(ctx, cli, ioChaos)
+		// 		framework.ExpectNoError(err, "pause chaos error")
 
-				chaosKey := types.NamespacedName{
-					Namespace: ns,
-					Name:      "io-chaos",
-				}
+		// 		err = wait.Poll(5*time.Second, 5*time.Minute, func() (done bool, err error) {
+		// 			chaos := &v1alpha1.IoChaos{}
+		// 			err = cli.Get(ctx, chaosKey, chaos)
+		// 			framework.ExpectNoError(err, "get io chaos error")
+		// 			if chaos.Status.Experiment.Phase == v1alpha1.ExperimentPhasePaused {
+		// 				return true, nil
+		// 			}
+		// 			return false, err
+		// 		})
+		// 		framework.ExpectNoError(err, "check paused chaos failed")
 
-				// pause experiment
-				err = pauseChaos(ctx, cli, ioChaos)
-				framework.ExpectNoError(err, "pause chaos error")
+		// 		err = waitSidecarFaultRecovery(ctx, sidecarClient)
+		// 		framework.ExpectNoError(err, "wait chaosfs recover fault error")
 
-				err = wait.Poll(5*time.Second, 5*time.Minute, func() (done bool, err error) {
-					chaos := &v1alpha1.IoChaos{}
-					err = cli.Get(ctx, chaosKey, chaos)
-					framework.ExpectNoError(err, "get io chaos error")
-					if chaos.Status.Experiment.Phase == v1alpha1.ExperimentPhasePaused {
-						return true, nil
-					}
-					return false, err
-				})
-				framework.ExpectNoError(err, "check paused chaos failed")
+		// 		// wait 1 min to check whether io delay still exists
+		// 		err = wait.PollImmediate(5*time.Second, 1*time.Minute, func() (done bool, err error) {
+		// 			_, err = getPodIODelay(c, port)
+		// 			framework.ExpectNoError(err, "failed to get pod io delay")
+		// 			return false, nil
+		// 		})
+		// 		framework.ExpectError(err, "wait no io chaos error")
+		// 		framework.ExpectEqual(err.Error(), wait.ErrWaitTimeout.Error())
 
-				err = waitSidecarFaultRecovery(ctx, sidecarClient)
-				framework.ExpectNoError(err, "wait chaosfs recover fault error")
+		// 		// resume experiment
+		// 		err = unPauseChaos(ctx, cli, ioChaos)
+		// 		framework.ExpectNoError(err, "resume chaos error")
 
-				// wait 1 min to check whether io delay still exists
-				err = wait.PollImmediate(5*time.Second, 1*time.Minute, func() (done bool, err error) {
-					_, err = getPodIODelay(c, port)
-					framework.ExpectNoError(err, "failed to get pod io delay")
-					return false, nil
-				})
-				framework.ExpectError(err, "wait no io chaos error")
-				framework.ExpectEqual(err.Error(), wait.ErrWaitTimeout.Error())
+		// 		err = wait.Poll(5*time.Second, 1*time.Minute, func() (done bool, err error) {
+		// 			chaos := &v1alpha1.IoChaos{}
+		// 			err = cli.Get(ctx, chaosKey, chaos)
+		// 			framework.ExpectNoError(err, "get io chaos error")
+		// 			if chaos.Status.Experiment.Phase == v1alpha1.ExperimentPhaseRunning {
+		// 				return true, nil
+		// 			}
+		// 			return false, err
+		// 		})
+		// 		framework.ExpectNoError(err, "check resumed chaos failed")
 
-				// resume experiment
-				err = unPauseChaos(ctx, cli, ioChaos)
-				framework.ExpectNoError(err, "resume chaos error")
+		// 		err = wait.PollImmediate(5*time.Second, 1*time.Minute, func() (done bool, err error) {
+		// 			_, err = getPodIODelay(c, port)
+		// 			if err != nil && strings.Contains(err.Error(), "input/output error") {
+		// 				return true, nil
+		// 			}
+		// 			return false, nil
+		// 		})
+		// 		framework.ExpectNoError(err, "io chaos doesn't work as expected")
 
-				err = wait.Poll(5*time.Second, 1*time.Minute, func() (done bool, err error) {
-					chaos := &v1alpha1.IoChaos{}
-					err = cli.Get(ctx, chaosKey, chaos)
-					framework.ExpectNoError(err, "get io chaos error")
-					if chaos.Status.Experiment.Phase == v1alpha1.ExperimentPhaseRunning {
-						return true, nil
-					}
-					return false, err
-				})
-				framework.ExpectNoError(err, "check resumed chaos failed")
-
-				err = wait.PollImmediate(5*time.Second, 1*time.Minute, func() (done bool, err error) {
-					_, err = getPodIODelay(c, port)
-					if err != nil && strings.Contains(err.Error(), "input/output error") {
-						return true, nil
-					}
-					return false, nil
-				})
-				framework.ExpectNoError(err, "io chaos doesn't work as expected")
-
-				// cleanup
-				cli.Delete(ctx, ioChaos)
-				cancel()
-			})
-		})
+		// 		// cleanup
+		// 		cli.Delete(ctx, ioChaos)
+		// 		cancel()
+		// 	})
+		// })
 	})
 
 	ginkgo.Context("[NetworkChaos]", func() {

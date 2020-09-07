@@ -20,11 +20,9 @@ import (
 
 	"github.com/onsi/ginkgo"
 	v1 "k8s.io/api/core/v1"
-	apiextensionsclientset "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/klog"
-	aggregatorclientset "k8s.io/kube-aggregator/pkg/client/clientset_generated/clientset"
 	"k8s.io/kubernetes/test/e2e/framework"
 	e2elog "k8s.io/kubernetes/test/e2e/framework/log"
 	e2epod "k8s.io/kubernetes/test/e2e/framework/pod"
@@ -128,28 +126,28 @@ var _ = ginkgo.SynchronizedBeforeSuite(func() []byte {
 	setupSuite()
 
 	// Get clients
-	config, err := framework.LoadConfig()
-	framework.ExpectNoError(err, "failed to load config")
-	kubeCli, err := kubernetes.NewForConfig(config)
-	framework.ExpectNoError(err, "failed to create clientset")
-	aggrCli, err := aggregatorclientset.NewForConfig(config)
-	framework.ExpectNoError(err, "failed to create clientset")
-	apiExtCli, err := apiextensionsclientset.NewForConfig(config)
-	framework.ExpectNoError(err, "failed to create clientset")
-	oa := test.NewOperatorAction(kubeCli, aggrCli, apiExtCli, e2econfig.TestConfig)
+	// config, err := framework.LoadConfig()
+	// framework.ExpectNoError(err, "failed to load config")
+	// kubeCli, err := kubernetes.NewForConfig(config)
+	// framework.ExpectNoError(err, "failed to create clientset")
+	// aggrCli, err := aggregatorclientset.NewForConfig(config)
+	// framework.ExpectNoError(err, "failed to create clientset")
+	// apiExtCli, err := apiextensionsclientset.NewForConfig(config)
+	// framework.ExpectNoError(err, "failed to create clientset")
+	// oa := test.NewOperatorAction(kubeCli, aggrCli, apiExtCli, e2econfig.TestConfig)
 	ocfg := test.NewDefaultOperatorConfig()
 	ocfg.Manager.Image = e2econfig.TestConfig.ManagerImage
 	ocfg.Manager.Tag = e2econfig.TestConfig.ManagerTag
 	ocfg.Daemon.Image = e2econfig.TestConfig.DaemonImage
 	ocfg.Daemon.Tag = e2econfig.TestConfig.DaemonTag
 
-	oa.CleanCRDOrDie()
-	err = oa.InstallCRD(ocfg)
-	framework.ExpectNoError(err, "failed to install crd")
-	err = oa.DeployOperator(ocfg)
-	framework.ExpectNoError(err, "failed to install chaos-mesh")
-	err = oa.InstallTemplate(ocfg)
-	framework.ExpectNoError(err, "failed to install sidecar template")
+	// oa.CleanCRDOrDie()
+	// err = oa.InstallCRD(ocfg)
+	// framework.ExpectNoError(err, "failed to install crd")
+	// err = oa.DeployOperator(ocfg)
+	// framework.ExpectNoError(err, "failed to install chaos-mesh")
+	// err = oa.InstallTemplate(ocfg)
+	// framework.ExpectNoError(err, "failed to install sidecar template")
 	return nil
 }, func(data []byte) {
 	// Run on all Ginkgo nodes
@@ -157,7 +155,7 @@ var _ = ginkgo.SynchronizedBeforeSuite(func() []byte {
 })
 
 var _ = ginkgo.SynchronizedAfterSuite(func() {
-	framework.CleanupSuite()
+	// framework.CleanupSuite()
 }, func() {
 	framework.AfterSuiteActions()
 })
