@@ -99,25 +99,13 @@ func newAPIRouter(r *gin.Engine) *gin.RouterGroup {
 }
 
 func newDashboardRouter(r *gin.Engine, ui http.FileSystem) {
-	renderIndex := func(c *gin.Context) {
-		c.FileFromFS("/", ui)
-	}
 	renderRequest := func(c *gin.Context) {
 		c.FileFromFS(c.Request.URL.Path, ui)
 	}
 
-	dashboard := r.Group("/dashboard")
-	{
-		dashboard.GET("/", renderIndex)
-		dashboard.GET("/overview", renderIndex)
-		dashboard.GET("/newExperiment", renderIndex)
-		dashboard.GET("/experiments", renderIndex)
-		dashboard.GET("/experiments/:uuid", renderIndex)
-		dashboard.GET("/events", renderIndex)
-		dashboard.GET("/archives", renderIndex)
-		dashboard.GET("/archives/:uuid", renderIndex)
-	}
-
+	r.GET("dashboard/*any", func(c *gin.Context) {
+		c.FileFromFS("/", ui)
+	})
 	r.GET("/static/*any", renderRequest)
 	r.GET("/favicon.ico", renderRequest)
 }
