@@ -21,13 +21,13 @@ In Chaos Mesh, all chaos types are managed by the controller manager. To add a n
     You will notice existing chaos types such as PodChaos, NetworkChaos and IOChaos. Add the new type below them:
 
     ```go
-    	if err = (&controllers.HelloWorldChaosReconciler{
-    		Client: mgr.GetClient(),
-    		Log:    ctrl.Log.WithName("controllers").WithName("HelloWorldChaos"),
-    	}).SetupWithManager(mgr); err != nil {
-    		setupLog.Error(err, "unable to create controller", "controller", "HelloWorldChaos")
-    		os.Exit(1)
-    	}
+      if err = (&controllers.HelloWorldChaosReconciler{
+        Client: mgr.GetClient(),
+        Log:    ctrl.Log.WithName("controllers").WithName("HelloWorldChaos"),
+      }).SetupWithManager(mgr); err != nil {
+        setupLog.Error(err, "unable to create controller", "controller", "HelloWorldChaos")
+        os.Exit(1)
+      }
     ```
 
 2. Under [controllers](https://github.com/chaos-mesh/chaos-mesh/tree/master/controllers), create a `helloworldchaos_controller.go` file and edit it as below:
@@ -104,28 +104,28 @@ To implement the schema type for the new chaos object, add `helloworldchaos_type
 package v1alpha1
 
 import (
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+  metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // +kubebuilder:object:root=true
 
 // HelloWorldChaos is the Schema for the helloworldchaos API
 type HelloWorldChaos struct {
-	metav1.TypeMeta   `json:",inline"`
-	metav1.ObjectMeta `json:"metadata,omitempty"`
+  metav1.TypeMeta   `json:",inline"`
+  metav1.ObjectMeta `json:"metadata,omitempty"`
 }
 
 // +kubebuilder:object:root=true
 
 // HelloWorldChaosList contains a list of HelloWorldChaos
 type HelloWorldChaosList struct {
-	metav1.TypeMeta `json:",inline"`
-	metav1.ListMeta `json:"metadata,omitempty"`
-	Items           []HelloWorldChaos `json:"items"`
+  metav1.TypeMeta `json:",inline"`
+  metav1.ListMeta `json:"metadata,omitempty"`
+  Items           []HelloWorldChaos `json:"items"`
 }
 
 func init() {
-	SchemeBuilder.Register(&HelloWorldChaos{}, &HelloWorldChaosList{})
+  SchemeBuilder.Register(&HelloWorldChaos{}, &HelloWorldChaosList{})
 }
 ```
 
@@ -139,26 +139,37 @@ metadata:
   namespace: <ns-of-this-resource>
 ```
 
+## Generate deepcopy code
+
+Need to generate deepcopy code for type `HelloWorldChaos` and `HelloWorldChaosList`.
+
+```bash
+make generate
+```
+
+Then you can see there are some codes generated in [zz_generated.deepcopy.go](https://github.com/chaos-mesh/chaos-mesh/blob/master/api/v1alpha1/zz_generated.deepcopy.go).
+
 ## Make the Docker image
 
-Having the object successfully added, you can make a Docker image and push it to your registry:
+Having the object successfully added, you can make a Docker image:
 
 ```bash
 make
-make docker-push
 ```
 
-> **Note:**
->
-> The default `DOCKER_REGISTRY` is `localhost:5000`, which is preset in `hack/kind-cluster-build.sh`. You can overwrite it to any registry to which you have access permission.
+Then push it to your registry:
+
+```bash
+make docker-push
+```
 
 ## Run chaos
 
 You are almost there. In this step, you will pull the image and apply it for testing.
 
-Before you pull any image for Chaos Mesh (using `helm install` or `helm upgrade`), modify [values.yaml](https://github.com/chaos-mesh/chaos-mesh/blob/master/helm/chaos-mesh/values.yaml) of helm template to replace the default image with what you just pushed to your local registry.
+Before you pull any image for Chaos Mesh (using `helm install` or `helm upgrade`), modify [values.yaml](https://github.com/chaos-mesh/chaos-mesh/blob/master/helm/chaos-mesh/values.yaml) of the helm template to replace the default image with what you just pushed to your local registry.
 
-In this case, the template uses `pingcap/chaos-mesh:latest` as the default target registry, so you need to replace it with `localhost:5000`, as shown below:
+In this case, the template uses `pingcap/chaos-mesh:latest` as the default target registry, so you need to replace it with the environment variable `DOCKER_REGISTRY`'s value(default `localhost:5000`), as shown below:
 
 ```yaml
 clusterScoped: true
@@ -182,23 +193,55 @@ dashboard:
 
 Now take the following steps to run chaos:
 
-1. Get the related custom resource type for Chaos Mesh:
+1. Create namespace `chaos-testing`
+
+    ```bash
+    kubectl create namespace chaos-testing
+    ```
+
+2. Get the related custom resource type for Chaos Mesh:
 
     ```bash
     kubectl apply -f manifests/
-    kubectl get crd podchaos.chaos-mesh.org
     ```
 
-2. Install Chaos Mesh:
+    You can see CRD `helloworldchaos` is created:
+
+    ```log
+    customresourcedefinition.apiextensions.k8s.io/helloworldchaos.chaos-mesh.org created
+    ```
+
+    And then you can get it as follows:
 
     ```bash
-    helm install helm/chaos-mesh --name=chaos-mesh --namespace=chaos-testing --set chaosDaemon.runtime=containerd --set chaosDaemon.socketPath=/run/containerd/containerd.sock
+    kubectl get crd helloworldchaos.chaos-mesh.org
+    ```
+
+3. Install Chaos Mesh:
+
+    - For helm 3.X
+
+      ```bash
+      helm install chaos-mesh helm/chaos-mesh --namespace=chaos-testing --set chaosDaemon.runtime=containerd --set chaosDaemon.socketPath=/run/containerd/containerd.sock
+      ```
+
+    - For helm 2.X
+
+      ```bash
+      helm install helm/chaos-mesh --name=chaos-mesh --namespace=chaos-testing --set chaosDaemon.runtime=containerd --set chaosDaemon.socketPath=/run/containerd/containerd.sock
+      ```
+
+    Then you get pods from namespace `chaos-testing` to make sure chaos-mesh is installed:
+
+    ```bash
     kubectl get pods --namespace chaos-testing -l app.kubernetes.io/instance=chaos-mesh
     ```
 
-    The arguments `--set chaosDaemon.runtime=containerd --set chaosDaemon.socketPath=/run/containerd/containerd.sock` is used to to support network chaos on kind.
+    > **Note:**
+    >
+    > The arguments `--set chaosDaemon.runtime=containerd --set chaosDaemon.socketPath=/run/containerd/containerd.sock` is used to to support network chaos on kind.
 
-3. Create `chaos.yaml` in any location with the lines below:
+4. Create `chaos.yaml` in any location with the lines below:
 
     ```yaml
     apiVersion: chaos-mesh.org/v1alpha1
@@ -208,22 +251,34 @@ Now take the following steps to run chaos:
       namespace: chaos-testing
     ```
 
-4. Apply the chaos:
+5. Apply the chaos:
 
     ```bash
     kubectl apply -f /path/to/chaos.yaml
+    ```
+
+    ```bash
     kubectl get HelloWorldChaos -n chaos-testing
     ```
 
     Now you should be able to check the `Hello World!` result in the log:
 
+    Now you can check the log of `chaos-controller-manager`:
+
     ```bash
     kubectl logs chaos-controller-manager-{pod-post-fix} -n chaos-testing
     ```
 
+    The log is as follows:
+
+    ```log
+    2020-09-07T09:21:29.301Z        INFO    controllers.HelloWorldChaos     Hello World!    {"reconciler": "helloworldchaos"}
+    2020-09-07T09:21:29.308Z        DEBUG   controller-runtime.controller   Successfully Reconciled {"controller": "helloworldchaos", "request": "chaos-testing/hello-world"}
+    ```
+
     > **Note:**
     >
-    > `{pod-post-fix}` is a random string generated by Kubernetes, you can check it by executing `kubectl get po -n chaos-testing`.
+    > `{pod-post-fix}` is a random string generated by Kubernetes, you can check it by executing `kubectl get pod -n chaos-testing`.
 
 ## Next steps
 
