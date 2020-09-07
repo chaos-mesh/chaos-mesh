@@ -55,6 +55,8 @@ func serverRegister(r *gin.Engine, conf *config.ChaosDashboardConfig) {
 func newEngine() *gin.Engine {
 	r := gin.Default()
 
+	r.Use(gin.Logger())
+	r.Use(gin.Recovery())
 	r.Use(apiutils.MWHandleErrors())
 
 	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
@@ -69,10 +71,14 @@ func newEngine() *gin.Engine {
 		v.RegisterValidation("RequiredFieldEqual", apivalidator.RequiredFieldEqualValid, true)
 	}
 
+	moveToUIRoot := func(c *gin.Context) {
+		c.Redirect(http.StatusMovedPermanently, "/dashboard")
+	}
+
 	r.GET("/", moveToUIRoot)
 	ui := uiserver.AssetsFS()
 	if ui != nil {
-		r.StaticFS("/dashboard", ui)
+		newDashboardRouter(r, ui)
 	} else {
 		r.GET("/dashboard", func(c *gin.Context) {
 			c.String(http.StatusOK, "Dashboard UI is not built. Please run `UI=1 make`.")
@@ -92,6 +98,26 @@ func newAPIRouter(r *gin.Engine) *gin.RouterGroup {
 	return api
 }
 
-func moveToUIRoot(c *gin.Context) {
-	c.Redirect(http.StatusMovedPermanently, "/dashboard")
+func newDashboardRouter(r *gin.Engine, ui http.FileSystem) {
+	renderIndex := func(c *gin.Context) {
+		c.FileFromFS("/", ui)
+	}
+	renderRequest := func(c *gin.Context) {
+		c.FileFromFS(c.Request.URL.Path, ui)
+	}
+
+	dashboard := r.Group("/dashboard")
+	{
+		dashboard.GET("/", renderIndex)
+		dashboard.GET("/overview", renderIndex)
+		dashboard.GET("/newExperiment", renderIndex)
+		dashboard.GET("/experiments", renderIndex)
+		dashboard.GET("/experiments/:uuid", renderIndex)
+		dashboard.GET("/events", renderIndex)
+		dashboard.GET("/archives", renderIndex)
+		dashboard.GET("/archives/:uuid", renderIndex)
+	}
+
+	r.GET("/static/*any", renderRequest)
+	r.GET("/favicon.ico", renderRequest)
 }

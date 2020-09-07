@@ -12,6 +12,8 @@ import React from 'react'
 import TuneIcon from '@material-ui/icons/Tune'
 import WebIcon from '@material-ui/icons/Web'
 import clsx from 'clsx'
+import logo from 'images/logo.svg'
+import logoMini from 'images/logo-mini.svg'
 
 export const drawerWidth = '14rem'
 export const drawerCloseWidth = '5.25rem'
@@ -118,7 +120,7 @@ const Sidebar: React.FC<SidebarProps> = ({ open }) => {
           <NavLink to="/" className={classes.toolbar}>
             <img
               className={open ? classes.logo : classes.logoMini}
-              src={'/dashboard' + (open ? '/logo.svg' : '/logo-mini.svg')}
+              src={open ? logo : logoMini}
               alt="Chaos Mesh Logo"
             />
           </NavLink>
