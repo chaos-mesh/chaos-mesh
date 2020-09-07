@@ -55,8 +55,6 @@ func serverRegister(r *gin.Engine, conf *config.ChaosDashboardConfig) {
 func newEngine() *gin.Engine {
 	r := gin.Default()
 
-	r.Use(gin.Logger())
-	r.Use(gin.Recovery())
 	r.Use(apiutils.MWHandleErrors())
 
 	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
