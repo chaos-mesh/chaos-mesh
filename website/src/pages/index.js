@@ -13,7 +13,7 @@ const features = [
     description: (
       <>
         <p>
-          No special dependencies, Chaos Mesh can be easily deployed directly on Kubernetes clusters, including{' '}
+          No special dependencies, Chaos Mesh can be easily and directly deployed on Kubernetes clusters, including{' '}
           <a href="https://github.com/kubernetes/minikube">Minikube</a> and{' '}
           <a href="https://kind.sigs.k8s.io/docs/user/quick-start/">Kind</a>.
         </p>

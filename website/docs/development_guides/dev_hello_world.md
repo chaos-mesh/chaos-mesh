@@ -63,10 +63,10 @@ In Chaos Mesh, all chaos types are managed by the controller manager. To add a n
     }
 
     func (r *HelloWorldChaosReconciler) SetupWithManager(mgr ctrl.Manager) error {
-    // exports `HelloWorldChaos` object, which represents the yaml schema content the user applies.
-    return ctrl.NewControllerManagedBy(mgr).
-      For(&chaosmeshv1alpha1.HelloWorldChaos{}).
-      Complete(r)
+      // exports `HelloWorldChaos` object, which represents the yaml schema content the user applies.
+      return ctrl.NewControllerManagedBy(mgr).
+        For(&chaosmeshv1alpha1.HelloWorldChaos{}).
+        Complete(r)
     }
     ```
 
