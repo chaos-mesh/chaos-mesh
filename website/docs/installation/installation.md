@@ -88,6 +88,10 @@ To use Chaos Mesh, you must create the related custom resource type first.
 
 ### Step 3: Install Chaos Mesh
 
+> **Note:**
+>
+> Currently, Chaos Dashboard is not installed by default. If you want to try it out, add `--set dashboard.create=true` in the helm commands above. Refer to [Configuration](https://github.com/chaos-mesh/chaos-mesh/tree/master/helm/chaos-mesh#configuration) for more information.
+
 Depending on your environment, there are two methods of installing Chaos Mesh:
 
 - Install in Docker environment
@@ -206,9 +210,5 @@ Depending on your environment, there are two methods of installing Chaos Mesh:
      chaos-daemon-n6mfq                          1/1     Running   0          3m40s
      chaos-dashboard-d998856f6-vgrjs             1/1     Running   0          3m40s
      ```
-
-> **Note:**
->
-> Currently, Chaos Dashboard is not installed by default. If you want to try it out, add `--set dashboard.create=true` in the helm commands above. Refer to [Configuration](https://github.com/chaos-mesh/chaos-mesh/tree/master/helm/chaos-mesh#configuration) for more information.
 
 After executing the above commands, you should be able to see the output indicating that all Chaos Mesh pods are up and running. Otherwise, check the current environment according to the prompt message or create an [issue](https://github.com/chaos-mesh/chaos-mesh/issues) for help.
