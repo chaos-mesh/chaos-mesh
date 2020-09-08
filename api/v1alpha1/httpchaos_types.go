@@ -121,8 +121,8 @@ type HTTPChaos struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	Spec   HTTPChaosSpec `json:"spec,omitempty"`
-	Status IoChaosStatus `json:"status,omitempty"`
+	Spec   HTTPChaosSpec   `json:"spec,omitempty"`
+	Status HTTPChaosStatus `json:"status,omitempty"`
 }
 
 func (in *HTTPChaos) GetStatus() *ChaosStatus {

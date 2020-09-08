@@ -169,7 +169,6 @@ spec:
           - selector
           type: object
         status:
-          description: IoChaosStatus defines the observed state of IoChaos
           properties:
             experiment:
               description: Experiment records the last experiment state.

@@ -17,7 +17,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"net/http"
 
 	"github.com/go-logr/logr"
 	"golang.org/x/sync/errgroup"
@@ -59,7 +58,7 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1
 }
 
 func (r *Reconciler) Recover(ctx context.Context, req ctrl.Request, chaos v1alpha1.InnerObject) error {
-	httpFaultChaos, ok := chaos.(*v1alpha1.KernelChaos)
+	httpFaultChaos, ok := chaos.(*v1alpha1.HTTPChaos)
 	if !ok {
 		err := errors.New("chaos is not HttpChaos")
 		r.Log.Error(err, "chaos is not HttpChaos", "chaos", chaos)
@@ -117,7 +116,6 @@ func (r *Reconciler) applyAllPods(ctx context.Context, pods []v1.Pod, chaos *v1a
 
 func (r *Reconciler) applyPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.HTTPChaos) error {
 	//TODO: The way to connect with sidecar need be discussed & It will work after the sidecar add to the repo.
-	r.Log.Info("Try to inject kernel on pod", "namespace", pod.Namespace, "name", pod.Name)
-	_, err := http.Get("http://" + pod.Status.PodIP + ":15000/delay?" + "open=true&duration=" + *chaos.Spec.Duration)
-	return err
+	r.Log.Info("Try to inject Http chaos on pod", "namespace", pod.Namespace, "name", pod.Name)
+	return nil
 }

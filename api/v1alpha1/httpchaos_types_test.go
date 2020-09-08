@@ -72,17 +72,17 @@ var _ = Describe("HTTPChaos", func() {
 		})
 
 		It("should set next start time successfully", func() {
-			iochaos := &HTTPChaos{}
+			httpChaos := &HTTPChaos{}
 			nTime := time.Now()
-			iochaos.SetNextStart(nTime)
-			Expect(iochaos.GetNextStart()).To(Equal(nTime))
+			httpChaos.SetNextStart(nTime)
+			Expect(httpChaos.GetNextStart()).To(Equal(nTime))
 		})
 
 		It("should set recover time successfully", func() {
-			iochaos := &HTTPChaos{}
+			httpChaos := &HTTPChaos{}
 			nTime := time.Now()
-			iochaos.SetNextRecover(nTime)
-			Expect(iochaos.GetNextRecover()).To(Equal(nTime))
+			httpChaos.SetNextRecover(nTime)
+			Expect(httpChaos.GetNextRecover()).To(Equal(nTime))
 		})
 	})
 })
