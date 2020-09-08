@@ -195,20 +195,17 @@ image-chaos-mesh-protoc:
 	docker build -t pingcap/chaos-mesh-protoc ${DOCKER_BUILD_ARGS} ./hack/protoc
 
 ifneq ($(TAILY_BUILD),)
-image-binary: taily-build image-build-base submodules
+image-binary: taily-build image-build-base
 	docker exec -it taily-build make binary
 	cp -r scripts ./bin
 	echo -e "FROM scratch\n COPY . /src/bin\n COPY ./scripts /src/scripts" | docker build -t pingcap/chaos-binary -f - ./bin
 else
-image-binary: image-build-base submodules
+image-binary: image-build-base
 	DOCKER_BUILDKIT=1 docker build -t pingcap/chaos-binary ${DOCKER_BUILD_ARGS} .
 endif
 
 image-build-base:
 	DOCKER_BUILDKIT=0 docker build --ulimit nofile=65536:65536 -t pingcap/chaos-build-base ${DOCKER_BUILD_ARGS} images/build-base
-
-submodules:
-	git submodule update --init
 
 image-chaos-daemon: image-binary
 	docker build -t ${DOCKER_REGISTRY_PREFIX}pingcap/chaos-daemon:${IMAGE_TAG} ${DOCKER_BUILD_ARGS} images/chaos-daemon
