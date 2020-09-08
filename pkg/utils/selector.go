@@ -86,7 +86,7 @@ func SelectPods(ctx context.Context, c client.Client, selector v1alpha1.Selector
 	if len(selector.Pods) > 0 {
 		for ns, names := range selector.Pods {
 			if !common.ControllerCfg.ClusterScoped {
-				if common.ControllerCfg.Namespace != ns {
+				if common.ControllerCfg.TargetNamespace != ns {
 					log.Info("skip namespace because ns is out of scope within namespace scoped mode", "namespace", ns)
 					continue
 				}
@@ -122,7 +122,7 @@ func SelectPods(ctx context.Context, c client.Client, selector v1alpha1.Selector
 		if len(selector.Namespaces) > 1 {
 			return nil, fmt.Errorf("could NOT use more than 1 namespace selector within namespace scoped mode")
 		} else if len(selector.Namespaces) == 1 {
-			if selector.Namespaces[0] != common.ControllerCfg.Namespace {
+			if selector.Namespaces[0] != common.ControllerCfg.TargetNamespace {
 				return nil, fmt.Errorf("could NOT list pods from out of scoped namespace: %s", selector.Namespaces[0])
 			}
 		}
@@ -139,7 +139,7 @@ func SelectPods(ctx context.Context, c client.Client, selector v1alpha1.Selector
 	}
 
 	if !common.ControllerCfg.ClusterScoped {
-		listOptions.Namespace = common.ControllerCfg.Namespace
+		listOptions.Namespace = common.ControllerCfg.TargetNamespace
 	}
 
 	if err := c.List(ctx, &podList, &listOptions); err != nil {

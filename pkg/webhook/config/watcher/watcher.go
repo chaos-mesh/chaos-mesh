@@ -59,7 +59,7 @@ type K8sConfigMapWatcher struct {
 // New creates a new K8sConfigMapWatcher
 func New(cfg Config, metrics *metrics.ChaosCollector) (*K8sConfigMapWatcher, error) {
 	c := K8sConfigMapWatcher{Config: cfg, metrics: metrics}
-	if strings.TrimSpace(c.Namespace) == "" {
+	if strings.TrimSpace(c.TemplateNamespace) == "" {
 		// ENHANCEMENT: support downward API/env vars instead? https://github.com/kubernetes/kubernetes/blob/release-1.0/docs/user-guide/downward-api.md
 		// load from file on disk for serviceaccount: /var/run/secrets/kubernetes.io/serviceaccount/namespace
 		nsBytes, err := ioutil.ReadFile(serviceAccountNamespaceFilePath)
@@ -71,9 +71,9 @@ func New(cfg Config, metrics *metrics.ChaosCollector) (*K8sConfigMapWatcher, err
 		}
 		ns := strings.TrimSpace(string(nsBytes))
 		if ns != "" {
-			c.Namespace = ns
+			c.TemplateNamespace = ns
 			log.Info("Inferred ConfigMap",
-				"namespace", c.Namespace, "filepath", serviceAccountNamespaceFilePath)
+				"template namespace", c.TemplateNamespace, "filepath", serviceAccountNamespaceFilePath)
 		} else {
 			return nil, errors.New("can not found namespace. maybe you should specify --template-namespace if you are running outside of kubernetes")
 		}
@@ -95,7 +95,7 @@ func New(cfg Config, metrics *metrics.ChaosCollector) (*K8sConfigMapWatcher, err
 		return nil, fmt.Errorf("validation failed for K8sConfigMapWatcher: %s", err.Error())
 	}
 	log.Info("Created ConfigMap watcher",
-		"apiserver", k8sConfig.Host, "namespaces", c.Namespace,
+		"apiserver", k8sConfig.Host, "template namespaces", c.TemplateNamespace,
 		"template labels", c.TemplateLabels, "config labels", c.ConfigLabels)
 	return &c, nil
 }
@@ -104,7 +104,7 @@ func validate(c *K8sConfigMapWatcher) error {
 	if c == nil {
 		return errors.New("configmap watcher was nil")
 	}
-	if c.Namespace == "" {
+	if c.TemplateNamespace == "" {
 		return errors.New("namespace is empty")
 	}
 	if c.TemplateLabels == nil {
@@ -122,15 +122,20 @@ func validate(c *K8sConfigMapWatcher) error {
 // Watch watches for events impacting watched ConfigMaps and emits their events across a channel
 func (c *K8sConfigMapWatcher) Watch(notifyMe chan<- interface{}, stopCh <-chan struct{}) error {
 	log.Info("Watching for ConfigMaps for changes",
-		"namespace", c.Namespace, "labels", c.ConfigLabels)
-	templateWatcher, err := c.client.ConfigMaps(c.Namespace).Watch(metav1.ListOptions{
+		"template namespace", c.TemplateNamespace, "labels", c.ConfigLabels)
+	templateWatcher, err := c.client.ConfigMaps(c.TemplateNamespace).Watch(metav1.ListOptions{
 		LabelSelector: mapStringStringToLabelSelector(c.TemplateLabels),
 	})
 	if err != nil {
 		return fmt.Errorf("unable to create template watcher (possible serviceaccount RBAC/ACL failure?): %s", err.Error())
 	}
 
-	configWatcher, err := c.client.ConfigMaps("").Watch(metav1.ListOptions{
+	targetNamespace := ""
+	if !c.Config.ClusterScoped {
+		targetNamespace = c.TargetNamespace
+	}
+
+	configWatcher, err := c.client.ConfigMaps(targetNamespace).Watch(metav1.ListOptions{
 		LabelSelector: mapStringStringToLabelSelector(c.ConfigLabels),
 	})
 	if err != nil {
@@ -271,7 +276,7 @@ func (c *K8sConfigMapWatcher) GetInjectionConfigs() (map[string][]*config.Inject
 // GetTemplates returns a map of common templates
 func (c *K8sConfigMapWatcher) GetTemplates() (map[string]string, error) {
 	log.Info("Fetching Template Configs...")
-	templateList, err := c.client.ConfigMaps(c.Namespace).List(metav1.ListOptions{
+	templateList, err := c.client.ConfigMaps(c.TemplateNamespace).List(metav1.ListOptions{
 		LabelSelector: mapStringStringToLabelSelector(c.TemplateLabels),
 	})
 	if err != nil {

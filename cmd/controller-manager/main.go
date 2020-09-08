@@ -20,8 +20,6 @@ import (
 	"os"
 	"time"
 
-	"sigs.k8s.io/controller-runtime/pkg/manager"
-
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	chaosmeshv1alpha1 "github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	apiWebhook "github.com/chaos-mesh/chaos-mesh/api/webhook"
@@ -81,29 +79,22 @@ func main() {
 
 	ctrl.SetLogger(zap.Logger(true))
 
-	var mgr manager.Manager
-	var err error
+	options := ctrl.Options{
+		Scheme:             scheme,
+		MetricsBindAddress: common.ControllerCfg.MetricsAddr,
+		LeaderElection:     common.ControllerCfg.EnableLeaderElection,
+		Port:               9443,
+	}
 
 	if common.ControllerCfg.ClusterScoped {
 		setupLog.Info("Chaos controller manager is running in cluster scoped mode.")
-		mgr, err = ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
-			Scheme:             scheme,
-			MetricsBindAddress: common.ControllerCfg.MetricsAddr,
-			LeaderElection:     common.ControllerCfg.EnableLeaderElection,
-			Port:               9443,
-		})
+		// will not specific a certain namespace
 	} else {
-		setupLog.Info("Chaos controller manager is running in namespace scoped mode.", "namespace", common.ControllerCfg.Namespace)
-		mgr, err = ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
-			Scheme: scheme,
-			// one more thing is the specific namespace
-			Namespace:          common.ControllerCfg.Namespace,
-			MetricsBindAddress: common.ControllerCfg.MetricsAddr,
-			LeaderElection:     common.ControllerCfg.EnableLeaderElection,
-			Port:               9443,
-		})
+		setupLog.Info("Chaos controller manager is running in namespace scoped mode.", "targetNamespace", common.ControllerCfg.TargetNamespace)
+		options.Namespace = common.ControllerCfg.TargetNamespace
 	}
 
+	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), options)
 	if err != nil {
 		setupLog.Error(err, "unable to start manager")
 		os.Exit(1)

@@ -67,11 +67,15 @@ func init() {
 
 func validate(config *config.ChaosControllerConfig) error {
 	if !config.ClusterScoped {
-		if strings.TrimSpace(config.Namespace) == "" {
+		if strings.TrimSpace(config.TargetNamespace) == "" {
 			return fmt.Errorf("no target namespace specified with namespace scoped mode")
 		}
-		if !isAllowedNamespaces(config.Namespace, config.AllowedNamespaces, config.IgnoredNamespaces) {
-			return fmt.Errorf("target namespace %s is not allowed with filter, please check config AllowedNamespaces and IgnoredNamespaces", config.Namespace)
+		if !isAllowedNamespaces(config.TargetNamespace, config.AllowedNamespaces, config.IgnoredNamespaces) {
+			return fmt.Errorf("target namespace %s is not allowed with filter, please check config AllowedNamespaces and IgnoredNamespaces", config.TargetNamespace)
+		}
+
+		if config.TargetNamespace != config.WatcherConfig.TargetNamespace {
+			return fmt.Errorf("K8sConfigMapWatcher config TargertNamespace is not same with controller-manager TargetNamespace. k8s configmap watcher: %s, controller manager: %s", config.WatcherConfig.TargetNamespace, config.TargetNamespace)
 		}
 	}
 

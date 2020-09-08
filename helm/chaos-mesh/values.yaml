@@ -37,6 +37,10 @@ controllerManager:
   allowedNamespaces: ""
   ignoredNamespaces: ""
 
+  # targetNamespace only works with clusterScoped is false(namespace scoped mode).
+  # It means namespace which will be injected chaos
+  targetNamespace: chaos-testing
+
   service:
     type: ClusterIP
 
