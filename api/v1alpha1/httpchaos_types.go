@@ -30,12 +30,12 @@ func init() {
 }
 
 // HTTPAction represents the chaos action about I/O action.
-type HTTPAction string
+type HTTPChaosAction string
 
 const (
-	HTTPDelayAction HTTPAction = "delay"
-	HTTPAbortAction            = "abort"
-	HTTPMixedAction            = "mixed"
+	HTTPDelayAction HTTPChaosAction = "delay"
+	HTTPAbortAction                 = "abort"
+	HTTPMixedAction                 = "mixed"
 )
 
 type Matcher struct {
@@ -50,7 +50,7 @@ type Matcher struct {
 	InvertMatch    string `json:"invert_match"`
 }
 
-type HTTPSpec struct {
+type HTTPChaosSpec struct {
 	// Selector is used to select pods that are used to inject chaos action.
 	Selector SelectorSpec `json:"selector"`
 
@@ -62,7 +62,7 @@ type HTTPSpec struct {
 	// Supported action: delay | abort | mixed
 	// Default action: delay
 	// +kubebuilder:validation:Enum=delay;abort;mixed
-	Action HTTPAction `json:"action"`
+	Action HTTPChaosAction `json:"action"`
 
 	// Mode defines the mode to run chaos action.
 	// Supported mode: one
@@ -94,19 +94,19 @@ type HTTPSpec struct {
 	Headers []Matcher `json:"headers,omitempty"`
 }
 
-func (in *HTTPSpec) GetHeaders() []Matcher {
+func (in *HTTPChaosSpec) GetHeaders() []Matcher {
 	return in.Headers
 }
 
-func (in *HTTPSpec) GetMode() PodMode {
+func (in *HTTPChaosSpec) GetMode() PodMode {
 	return in.Mode
 }
 
-func (in *HTTPSpec) GetValue() string {
+func (in *HTTPChaosSpec) GetValue() string {
 	return in.Value
 }
 
-func (in *HTTPSpec) GetSelector() SelectorSpec {
+func (in *HTTPChaosSpec) GetSelector() SelectorSpec {
 	return in.Selector
 }
 
@@ -121,7 +121,7 @@ type HTTPChaos struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	Spec   HTTPSpec      `json:"spec,omitempty"`
+	Spec   HTTPChaosSpec `json:"spec,omitempty"`
 	Status IoChaosStatus `json:"status,omitempty"`
 }
 

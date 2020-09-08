@@ -40,19 +40,19 @@ type Reconciler struct {
 }
 
 func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.InnerObject) error {
-	HttpFaultChaos, ok := chaos.(*v1alpha1.HTTPChaos)
+	httpFaultChaos, ok := chaos.(*v1alpha1.HTTPChaos)
 	if !ok {
 		err := errors.New("chaos is not HttpFaultChaos")
 		r.Log.Error(err, "chaos is not HttpFaultChaos", "chaos", chaos)
 		return err
 	}
 
-	pods, err := utils.SelectAndFilterPods(ctx, r.Client, &HttpFaultChaos.Spec)
+	pods, err := utils.SelectAndFilterPods(ctx, r.Client, &httpFaultChaos.Spec)
 	if err != nil {
 		r.Log.Error(err, "failed to select and filter pods")
 		return err
 	}
-	if err = r.applyAllPods(ctx, pods, HttpFaultChaos); err != nil {
+	if err = r.applyAllPods(ctx, pods, httpFaultChaos); err != nil {
 		r.Log.Error(err, "failed to apply chaos on all pods")
 		return err
 	}
@@ -60,13 +60,13 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1
 }
 
 func (r *Reconciler) Recover(ctx context.Context, req ctrl.Request, chaos v1alpha1.InnerObject) error {
-	HttpFaultChaos, ok := chaos.(*v1alpha1.KernelChaos)
+	httpFaultChaos, ok := chaos.(*v1alpha1.KernelChaos)
 	if !ok {
 		err := errors.New("chaos is not KernelChaos")
 		r.Log.Error(err, "chaos is not KernelChaos", "chaos", chaos)
 		return err
 	}
-	r.Event(HttpFaultChaos, v1.EventTypeNormal, utils.EventChaosRecovered, "")
+	r.Event(httpFaultChaos, v1.EventTypeNormal, utils.EventChaosRecovered, "")
 	return nil
 }
 
@@ -92,7 +92,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request, chaos *v1alpha1.HTTPChaos) (ctr
 	return ctrl.Result{}, err
 }
 
-func (r *Reconciler) commonHttpFaultChaos(HttpFaultChaos *v1alpha1.HTTPChaos, req ctrl.Request) (ctrl.Result, error) {
+func (r *Reconciler) commonHttpFaultChaos(httpFaultChaos *v1alpha1.HTTPChaos, req ctrl.Request) (ctrl.Result, error) {
 	cr := common.NewReconciler(r, r.Client, r.Log)
 	return cr.Reconcile(req)
 }
