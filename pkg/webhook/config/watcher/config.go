@@ -36,6 +36,7 @@ type Config struct {
 // NewConfig returns a new initialized Config
 func NewConfig() *Config {
 	return &Config{
+		ClusterScoped:     true,
 		TemplateNamespace: "",
 		TargetNamespace:   "",
 		TemplateLabels:    map[string]string{},
