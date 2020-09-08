@@ -27,8 +27,6 @@ import (
 const (
 	iptablesCmd = "iptables"
 
-	iptablesBadRuleErr           = "Bad rule (does a matching rule exist in that chain?)."
-	iptablesIPSetNotExistErr     = "doesn't exist."
 	iptablesChainAlreadyExistErr = "iptables: Chain already exists."
 )
 

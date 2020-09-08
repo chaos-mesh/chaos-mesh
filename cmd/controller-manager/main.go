@@ -186,6 +186,8 @@ func main() {
 	}
 
 	setupLog.Info("Setting up webhook server")
+	hookServer := mgr.GetWebhookServer()
+	hookServer.CertDir = common.ControllerCfg.CertsDir
 
 	stopCh := ctrl.SetupSignalHandler()
 

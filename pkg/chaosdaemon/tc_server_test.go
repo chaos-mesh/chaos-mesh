@@ -14,7 +14,6 @@
 package chaosdaemon
 
 import (
-	"context"
 	"errors"
 	"testing"
 
@@ -46,124 +45,6 @@ func commonTcTest(t *testing.T, fpname, errString string, tcFunc func(s *daemonS
 	} else {
 		g.Expect(err).ToNot(BeNil())
 		g.Expect(err.Error()).To(ContainSubstring(errString))
-	}
-}
-
-func Test_daemonServer_AddQdisc(t *testing.T) {
-	req := &pb.QdiscRequest{
-		Qdisc: &pb.Qdisc{
-			Type: "netem",
-		},
-		ContainerId: "containerd://container-id",
-	}
-
-	tests := []struct {
-		tname     string
-		fpname    string
-		errString string
-	}{
-		{"should work", "TcApplyError", ""},
-		{"should fail on get pid", "TaskError", "mock error on Task()"},
-		{"should fail on apply tc", "TcApplyError", "mock error on applyTc()"},
-	}
-
-	for i := range tests {
-		tt := tests[i]
-		t.Run(tt.tname, func(t *testing.T) {
-			commonTcTest(t, tt.fpname, tt.errString, func(s *daemonServer) error {
-				_, err := s.AddQdisc(context.TODO(), req)
-				return err
-			})
-		})
-	}
-}
-
-func Test_daemonServer_DelQdisc(t *testing.T) {
-	req := &pb.QdiscRequest{
-		Qdisc: &pb.Qdisc{
-			Type: "netem",
-		},
-		ContainerId: "containerd://container-id",
-	}
-
-	tests := []struct {
-		tname     string
-		fpname    string
-		errString string
-	}{
-		{"should work", "TcApplyError", ""},
-		{"should fail on get pid", "TaskError", "mock error on Task()"},
-		{"should fail on apply tc", "TcApplyError", "mock error on applyTc()"},
-	}
-
-	for i := range tests {
-		tt := tests[i]
-		t.Run(tt.tname, func(t *testing.T) {
-			commonTcTest(t, tt.fpname, tt.errString, func(s *daemonServer) error {
-				_, err := s.DelQdisc(context.TODO(), req)
-				return err
-			})
-		})
-	}
-}
-
-func Test_daemonServer_AddEmatchFilter(t *testing.T) {
-	req := &pb.EmatchFilterRequest{
-		Filter: &pb.EmatchFilter{
-			Match:   "test",
-			Parent:  &pb.TcHandle{Major: 1, Minor: 0},
-			Classid: &pb.TcHandle{Major: 10, Minor: 0},
-		},
-		ContainerId: "containerd://container-id",
-	}
-
-	tests := []struct {
-		tname     string
-		fpname    string
-		errString string
-	}{
-		{"should work", "TcApplyError", ""},
-		{"should fail on get pid", "TaskError", "mock error on Task()"},
-		{"should fail on apply tc", "TcApplyError", "mock error on applyTc()"},
-	}
-
-	for i := range tests {
-		tt := tests[i]
-		t.Run(tt.tname, func(t *testing.T) {
-			commonTcTest(t, tt.fpname, tt.errString, func(s *daemonServer) error {
-				_, err := s.AddEmatchFilter(context.TODO(), req)
-				return err
-			})
-		})
-	}
-}
-
-func Test_daemonServer_DelTcFilter(t *testing.T) {
-	req := &pb.TcFilterRequest{
-		Filter: &pb.TcFilter{
-			Parent: &pb.TcHandle{Major: 1, Minor: 0},
-		},
-		ContainerId: "containerd://container-id",
-	}
-
-	tests := []struct {
-		tname     string
-		fpname    string
-		errString string
-	}{
-		{"should work", "TcApplyError", ""},
-		{"should fail on get pid", "TaskError", "mock error on Task()"},
-		{"should fail on apply tc", "TcApplyError", "mock error on applyTc()"},
-	}
-
-	for i := range tests {
-		tt := tests[i]
-		t.Run(tt.tname, func(t *testing.T) {
-			commonTcTest(t, tt.fpname, tt.errString, func(s *daemonServer) error {
-				_, err := s.DelTcFilter(context.TODO(), req)
-				return err
-			})
-		})
 	}
 }
 

@@ -5,6 +5,8 @@ ARG HTTP_PROXY
 
 RUN apt-get update && apt-get install -y tzdata iptables ipset stress-ng iproute2 fuse util-linux && rm -rf /var/lib/apt/lists/*
 
+RUN update-alternatives --set iptables /usr/sbin/iptables-legacy
+
 ENV RUST_BACKTRACE 1
 
 COPY --from=pingcap/chaos-binary /bin/chaos-daemon /usr/local/bin/chaos-daemon

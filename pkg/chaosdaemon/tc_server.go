@@ -28,97 +28,8 @@ import (
 )
 
 const (
-	RULE_NOT_EXIST = "RTNETLINK answers: No such file or directory"
+	ruleNotExist = "Cannot delete qdisc with handle of zero."
 )
-
-func (s *daemonServer) AddQdisc(ctx context.Context, in *pb.QdiscRequest) (*empty.Empty, error) {
-	log.Info("Add Qdisc", "Request", in)
-
-	pid, err := s.crClient.GetPidFromContainerID(ctx, in.ContainerId)
-
-	if err != nil {
-		return nil, status.Errorf(codes.Internal, "get pid from containerID error: %v", err)
-	}
-
-	args, err := generateQdiscArgs("add", in.Qdisc)
-
-	if err != nil {
-		return nil, status.Errorf(codes.Internal, "generate qdisc args error: %v", err)
-	}
-
-	if err := applyTc(ctx, pid, args...); err != nil {
-		return nil, status.Errorf(codes.Internal, "tbf apply error: %v", err)
-	}
-
-	return &empty.Empty{}, nil
-}
-
-func (s *daemonServer) DelQdisc(ctx context.Context, in *pb.QdiscRequest) (*empty.Empty, error) {
-	log.Info("Del Qdisc", "Request", in)
-
-	pid, err := s.crClient.GetPidFromContainerID(ctx, in.ContainerId)
-
-	if err != nil {
-		return nil, status.Errorf(codes.Internal, "get pid from containerID error: %v", err)
-	}
-
-	args, err := generateQdiscArgs("del", in.Qdisc)
-
-	if err != nil {
-		return nil, status.Errorf(codes.Internal, "generate qdisc args error: %v", err)
-	}
-
-	if err := applyTc(ctx, pid, args...); err != nil {
-		return nil, status.Errorf(codes.Internal, "tbf apply error: %v", err)
-	}
-
-	return &empty.Empty{}, nil
-}
-
-func (s *daemonServer) AddEmatchFilter(ctx context.Context, in *pb.EmatchFilterRequest) (*empty.Empty, error) {
-	log.Info("Add ematch filter", "Request", in)
-
-	pid, err := s.crClient.GetPidFromContainerID(ctx, in.ContainerId)
-
-	if err != nil {
-		return nil, status.Errorf(codes.Internal, "get pid from containerID error: %v", err)
-	}
-
-	args := []string{"filter", "add", "dev", "eth0"}
-
-	args = append(args, "parent", fmt.Sprintf("%d:%d", in.Filter.Parent.Major, in.Filter.Parent.Minor))
-
-	args = append(args, "basic", "match", in.Filter.Match)
-
-	args = append(args, "classid", fmt.Sprintf("%d:%d", in.Filter.Classid.Major, in.Filter.Classid.Minor))
-
-	if err := applyTc(ctx, pid, args...); err != nil {
-		return nil, status.Errorf(codes.Internal, "tbf apply error: %v", err)
-	}
-
-	return &empty.Empty{}, nil
-
-}
-
-func (s *daemonServer) DelTcFilter(ctx context.Context, in *pb.TcFilterRequest) (*empty.Empty, error) {
-	log.Info("Del tc filter", "Request", in)
-
-	pid, err := s.crClient.GetPidFromContainerID(ctx, in.ContainerId)
-
-	if err != nil {
-		return nil, status.Errorf(codes.Internal, "get pid from containerID error: %v", err)
-	}
-
-	args := []string{"filter", "del", "dev", "eth0"}
-
-	args = append(args, "parent", fmt.Sprintf("%d:%d", in.Filter.Parent.Major, in.Filter.Parent.Minor))
-
-	if err := applyTc(ctx, pid, args...); err != nil {
-		return nil, status.Errorf(codes.Internal, "tbf apply error: %v", err)
-	}
-
-	return &empty.Empty{}, nil
-}
 
 func generateQdiscArgs(action string, qdisc *pb.Qdisc) ([]string, error) {
 
@@ -166,6 +77,7 @@ func (s *daemonServer) SetTcs(ctx context.Context, in *pb.TcsRequest) (*empty.Em
 	client := buildTcClient(ctx, nsPath)
 	err = client.flush()
 	if err != nil {
+		log.Error(err, "error while flushing client")
 		return &empty.Empty{}, err
 	}
 
@@ -280,9 +192,8 @@ func (c *tcClient) flush() error {
 	cmd := bpm.DefaultProcessBuilder("tc", "qdisc", "del", "dev", "eth0", "root").SetNetNS(c.nsPath).SetContext(c.ctx).Build()
 	output, err := cmd.CombinedOutput()
 	if err != nil {
-		output := string(output)
-		if !strings.Contains(output, RULE_NOT_EXIST) {
-			return err
+		if !strings.Contains(string(output), ruleNotExist) {
+			return encodeOutputToError(output, err)
 		}
 	}
 	return nil
