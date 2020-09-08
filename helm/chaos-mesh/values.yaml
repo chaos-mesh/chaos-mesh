@@ -24,6 +24,7 @@ enableProfiling: true
 kubectlImage: bitnami/kubectl:latest
 
 controllerManager:
+  hostNetwork: false
   serviceAccount: chaos-controller-manager
 
   replicaCount: 1
@@ -154,7 +155,6 @@ dashboard:
     # Useful if the volume's root directory is not empty
     #
     subPath: ""
-
 
   # The keys within the "env" map are mounted as environment variables on the Chaos Dashboard pod.
   env:
