@@ -1,5 +1,5 @@
 ---
-id: run_your_first_chaos_experiment
+slug: /run_your_first_chaos_experiment
 title: Run Your First Chaos Experiment in 10 Minutes
 author: Cwen Yin
 author_title: Maintainer of Chaos Mesh

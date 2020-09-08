@@ -1,5 +1,5 @@
 ---
-id: chaos-mesh-join-cncf-sandbox-project
+slug: /chaos-mesh-join-cncf-sandbox-project
 title: Chaos Mesh® Joins CNCF as a Sandbox Project
 author: Chaos Mesh Authors
 author_title: Maintainer of Chaos Mesh
