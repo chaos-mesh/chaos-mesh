@@ -70,15 +70,7 @@ spec:
                   suffix_match:
                     type: string
                 required:
-                - exact_match
-                - invert_match
                 - name
-                - prefix_match
-                - present_match
-                - range_match
-                - regex_match
-                - safe_regex_match
-                - suffix_match
                 type: object
               type: array
             mode:
