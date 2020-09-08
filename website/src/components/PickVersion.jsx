@@ -5,15 +5,16 @@ import { usePluginData } from '@docusaurus/useGlobalData'
 
 export const usePickVersion = () => {
   const locationHref = window.location.href
-  const contentDocsData = usePluginData('docusaurus-plugin-content-docs')
-  const latestVersion = contentDocsData.latestVersionName
-  let activeVersion = contentDocsData.versions.filter((d) => locationHref.includes(d.path)).map((d) => d.name)[0]
+  const { versions } = usePluginData('docusaurus-plugin-content-docs')
 
-  if (activeVersion === 'next') {
+  const latestStableVersion = versions.filter((d) => d.isLast)[0].name
+  let activeVersion = versions.filter((d) => locationHref.includes(d.name)).map((d) => d.name)[0]
+
+  if (locationHref.includes('/docs/next')) {
     activeVersion = 'latest'
   }
 
-  return activeVersion || latestVersion
+  return activeVersion || latestStableVersion
 }
 
 const PickVersion = ({ children, className }) => {
