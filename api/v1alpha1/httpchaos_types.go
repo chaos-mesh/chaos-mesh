@@ -40,14 +40,14 @@ const (
 
 type Matcher struct {
 	Name           string `json:"name"`
-	ExactMatch     string `json:"exact_match"`
-	RegexMatch     string `json:"regex_match"`
-	SafeRegexMatch string `json:"safe_regex_match"`
-	RangeMatch     string `json:"range_match"`
-	PresentMatch   string `json:"present_match"`
-	PrefixMatch    string `json:"prefix_match"`
-	SuffixMatch    string `json:"suffix_match"`
-	InvertMatch    string `json:"invert_match"`
+	ExactMatch     string `json:"exact_match,omitempty"`
+	RegexMatch     string `json:"regex_match,omitempty"`
+	SafeRegexMatch string `json:"safe_regex_match,omitempty"`
+	RangeMatch     string `json:"range_match,omitempty"`
+	PresentMatch   string `json:"present_match,omitempty"`
+	PrefixMatch    string `json:"prefix_match,omitempty"`
+	SuffixMatch    string `json:"suffix_match,omitempty"`
+	InvertMatch    string `json:"invert_match,omitempty"`
 }
 
 type HTTPChaosSpec struct {
