@@ -28,7 +28,8 @@ import (
 )
 
 const (
-	ruleNotExist = "Cannot delete qdisc with handle of zero."
+	ruleNotExist             = "Cannot delete qdisc with handle of zero."
+	ruleNotExistLowerVersion = "RTNETLINK answers: No such file or directory"
 )
 
 func generateQdiscArgs(action string, qdisc *pb.Qdisc) ([]string, error) {
@@ -192,7 +193,7 @@ func (c *tcClient) flush() error {
 	cmd := bpm.DefaultProcessBuilder("tc", "qdisc", "del", "dev", "eth0", "root").SetNetNS(c.nsPath).SetContext(c.ctx).Build()
 	output, err := cmd.CombinedOutput()
 	if err != nil {
-		if !strings.Contains(string(output), ruleNotExist) {
+		if (!strings.Contains(string(output), ruleNotExistLowerVersion)) && (!strings.Contains(string(output), ruleNotExist)) {
 			return encodeOutputToError(output, err)
 		}
 	}
