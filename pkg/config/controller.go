@@ -17,8 +17,6 @@ import (
 	"time"
 
 	"github.com/kelseyhightower/envconfig"
-
-	"github.com/chaos-mesh/chaos-mesh/pkg/webhook/config/watcher"
 )
 
 // ChaosControllerConfig defines the configuration for Chaos Controller
@@ -41,8 +39,7 @@ type ChaosControllerConfig struct {
 	// AllowedNamespaces is a regular expression, and the chaos task will be ignored by a matching namespace
 	IgnoredNamespaces string `envconfig:"IGNORED_NAMESPACES" default:""`
 	// RPCTimeout is timeout of RPC between controllers and chaos-operator
-	RPCTimeout    time.Duration `envconfig:"RPC_TIMEOUT" default:"1m"`
-	WatcherConfig *watcher.Config
+	RPCTimeout time.Duration `envconfig:"RPC_TIMEOUT" default:"1m"`
 }
 
 // EnvironChaosController returns the settings from the environment.

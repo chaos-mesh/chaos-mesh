@@ -22,16 +22,12 @@ import (
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	chaosmeshv1alpha1 "github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	apiWebhook "github.com/chaos-mesh/chaos-mesh/api/webhook"
 	"github.com/chaos-mesh/chaos-mesh/controllers"
 	"github.com/chaos-mesh/chaos-mesh/controllers/common"
-	"github.com/chaos-mesh/chaos-mesh/controllers/metrics"
 	"github.com/chaos-mesh/chaos-mesh/controllers/podiochaos"
 	"github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos"
 	"github.com/chaos-mesh/chaos-mesh/pkg/utils"
 	"github.com/chaos-mesh/chaos-mesh/pkg/version"
-	"github.com/chaos-mesh/chaos-mesh/pkg/webhook/config"
-	"github.com/chaos-mesh/chaos-mesh/pkg/webhook/config/watcher"
 
 	"k8s.io/apimachinery/pkg/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
@@ -39,8 +35,6 @@ import (
 
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
-	controllermetrics "sigs.k8s.io/controller-runtime/pkg/metrics"
-	"sigs.k8s.io/controller-runtime/pkg/webhook"
 	// +kubebuilder:scaffold:imports
 )
 
@@ -191,14 +185,8 @@ func main() {
 		os.Exit(1)
 	}
 
-	// Init metrics collector
-	metricsCollector := metrics.NewChaosCollector(mgr.GetCache(), controllermetrics.Registry)
-
 	setupLog.Info("Setting up webhook server")
 
-	hookServer := mgr.GetWebhookServer()
-	hookServer.CertDir = common.ControllerCfg.CertsDir
-	conf := config.NewConfigWatcherConf()
 	stopCh := ctrl.SetupSignalHandler()
 
 	if common.ControllerCfg.PprofAddr != "0" {
@@ -210,24 +198,6 @@ func main() {
 		}()
 	}
 
-	if err = common.ControllerCfg.WatcherConfig.Verify(); err != nil {
-		setupLog.Error(err, "invalid environment configuration")
-		os.Exit(1)
-	}
-	configWatcher, err := watcher.New(*common.ControllerCfg.WatcherConfig, metricsCollector)
-	if err != nil {
-		setupLog.Error(err, "unable to create config watcher")
-		os.Exit(1)
-	}
-
-	watchConfig(configWatcher, conf, stopCh)
-	hookServer.Register("/inject-v1-pod", &webhook.Admission{
-		Handler: &apiWebhook.PodInjector{
-			Config:  conf,
-			Metrics: metricsCollector,
-		}},
-	)
-
 	// +kubebuilder:scaffold:builder
 
 	setupLog.Info("Starting manager")
@@ -236,60 +206,4 @@ func main() {
 		os.Exit(1)
 	}
 
-}
-
-func watchConfig(configWatcher *watcher.K8sConfigMapWatcher, cfg *config.Config, stopCh <-chan struct{}) {
-	go func() {
-		// watch for reconciliation signals, and grab configmaps, then update the running configuration
-		// for the server
-		sigChan := make(chan interface{}, 10)
-		//debouncedChan := make(chan interface{}, 10)
-
-		// debounce events from sigChan, so we dont hammer apiserver on reconciliation
-		eventsCh := utils.Coalescer(EventCoalesceWindow, sigChan, stopCh)
-
-		go func() {
-			for {
-				setupLog.Info("Launching watcher for ConfigMaps")
-				if err := configWatcher.Watch(sigChan, stopCh); err != nil {
-					switch err {
-					case watcher.ErrWatchChannelClosed:
-						setupLog.Error(err, "watcher got error, try to restart watcher")
-					default:
-						setupLog.Error(err, "unable to watch new ConfigMaps")
-						os.Exit(1)
-					}
-				}
-
-				select {
-				case <-stopCh:
-					close(sigChan)
-					return
-				default:
-					// sleep 2 seconds to prevent excessive log due to infinite restart
-					time.Sleep(2 * time.Second)
-				}
-			}
-		}()
-
-		for {
-			select {
-			case <-eventsCh:
-				setupLog.Info("Triggering ConfigMap reconciliation")
-				updatedInjectionConfigs, err := configWatcher.GetInjectionConfigs()
-				if err != nil {
-					setupLog.Error(err, "unable to get ConfigMaps")
-					continue
-				}
-
-				setupLog.Info("Updating server with newly loaded configurations",
-					"original configs count", len(cfg.Injections), "updated configs count", len(updatedInjectionConfigs))
-				cfg.ReplaceInjectionConfigs(updatedInjectionConfigs)
-				setupLog.Info("Configuration replaced")
-			case <-stopCh:
-				break
-			}
-		}
-
-	}()
 }

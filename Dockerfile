@@ -50,9 +50,6 @@ replace-with = 'mirror'\n\
 registry = \"$CRATES_MIRROR\"\n\
 "> /root/.cargo/config ; fi
 
-ENV CARGO_LOG trace
-ENV CARGO_HTTP_DEBUG true
-ENV CARGO_HTTP_MULTIPLEXING false
 ENV RUSTFLAGS "-Z relro-level=full"
 RUN --mount=type=cache,target=/toda-build/target \
     --mount=type=cache,target=/root/.cargo/registry \
