@@ -73,18 +73,6 @@ ARGS="--pd=${CLUSTER_NAME}-pd:2379 \
 > * If you are testing a TiDB cluster, you need to modify it at [`_start_tikv.sh.tpl`](https://github.com/pingcap/tidb-operator/blob/master/charts/tidb-cluster/templates/scripts/_start_tikv.sh.tpl).
 > * PD has the same issue with TiKV. You need to modify the data directory of PD at [`_start_pd.sh.tpl`](https://github.com/pingcap/tidb-operator/blob/master/charts/tidb-cluster/templates/scripts/_start_pd.sh.tpl).
 
-## Injection configuration
-
-Injection configuration is another [ConfigMap](https://kubernetes.io/docs/tasks/configure-pod-container/configure-pod-configmap/) and is required to fulfill IO Chaos.
-
-To define a specified ConfigMap for your application before starting your chaos experiment, please refer to this [document](sidecar_configmap.md).
-
-You can apply the ConfigMap defined for your application to Kubernetes cluster by the following command:
-
-```bash
-kubectl apply -f app-configmap.yaml # app-configmap.yaml is the ConfigMap file
-```
-
 ## Configuration file
 
 Below is a sample YAML file of IOChaos:
