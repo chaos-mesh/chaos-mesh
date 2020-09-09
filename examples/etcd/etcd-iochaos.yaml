@@ -3,14 +3,12 @@ kind: IoChaos
 metadata:
   name: io-delay-example
 spec:
-  action: delay
+  action: latency
   mode: one
-  duration: "400s"
-  path: ""
+  path: "/var/run/etcd/**/*"
   selector:
     labelSelectors:
       app: etcd
-  layer: "fs"
-  delay: "100ms"
-  scheduler:
-    cron: "@every 10m"
+  volumePath: /var/run/etcd
+  delay: "20ms"
+  percent: 10
