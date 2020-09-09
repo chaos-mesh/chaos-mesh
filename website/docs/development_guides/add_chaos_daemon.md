@@ -48,6 +48,10 @@ We need to implement `InnerObject` interface for `HelloWorldChaos`, just do noth
     }
     ```
 
+> **Notes:**
+>
+> The `HelloWorldChaos` is just a demo, and we do nothing in these functions. Don't forget implement them in development.
+
 And then implement `SelectSpec` interface for `HelloWorldSpec`:
 
     ```golang
@@ -158,7 +162,7 @@ Create a dir named `helloworldchaos` under [controllers](https://github.com/chao
         return ctrl.Result{}, err
     }
 
-    // Apply applies dns-chaos
+    // Apply applies helloworld chaos
     func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.InnerObject) error {
         r.Log.Info("Apply helloworld chaos")
         helloworldchaos, ok := chaos.(*v1alpha1.HelloWorldChaos)
@@ -209,7 +213,7 @@ Create a dir named `helloworldchaos` under [controllers](https://github.com/chao
 
 > **Notes:**
 >
-> We do nothing in `Recover` function because `HelloWorldChaos` doesn't change anything.
+> We do nothing in `Recover` function because `HelloWorldChaos` only print some log and doesn't change anything. Don't forget implement the `Recover` function in your development.
 
 Modify the `controllers/helloworldchaos_controller.go` file created in [Dev a new chaos](dev_hello_world.md), the `Reconcile` function updated to below:
 
