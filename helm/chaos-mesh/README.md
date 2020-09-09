@@ -20,6 +20,7 @@ The following tables list the configurable parameters of the Chaos Mesh chart an
 | `rbac.create` |  | `true`                                                |
 | `timezone` | The timezone where controller-manager, chaos-daemon and dashboard uses. For example: `UTC`, `Asia/Shanghai` | `UTC` |
 | `enableProfiling` | A flag to enable pprof in controller-manager and chaos-daemon  | `true` |
+| `controllerManager.hostNetwork` | running chaos-controller-manager on host network | `false` |
 | `controllerManager.serviceAccount` | The serviceAccount for chaos-controller-manager | `chaos-controller-manager` |
 | `controllerManager.replicaCount` | Replicas for chaos-controller-manager | `1` |
 | `controllerManager.image` | docker image for chaos-controller-manager  | `pingcap/chaos-mesh:latest` |
@@ -38,6 +39,8 @@ The following tables list the configurable parameters of the Chaos Mesh chart an
 | `chaosDaemon.imagePullPolicy` | image pull policy | `Always` |
 | `chaosDaemon.grpcPort` | The port which grpc server listens on | `31767` |
 | `chaosDaemon.httpPort` | The port which http server listens on | `31766` |
+| `chaosDaemon.env` | chaosDaemon envs | `{}` |
+| `chaosDaemon.hostNetwork` | running chaosDaemon on host network | `false` |
 | `chaosDaemon.podAnnotations` | Pod annotations of chaos-daemon | `{}` |
 | `chaosDaemon.runtime` | Runtime specifies which container runtime to use. Currently we only supports docker and containerd. | `docker` |
 | `chaosDaemon.socketPath` | Specifies the container runtime socket | `/var/run/docker.sock` |

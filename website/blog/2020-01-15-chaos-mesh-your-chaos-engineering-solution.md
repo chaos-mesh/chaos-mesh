@@ -1,5 +1,5 @@
 ---
-id: chaos_mesh_your_chaos_engineering_solution
+slug: /chaos_mesh_your_chaos_engineering_solution
 title: Chaos Mesh - Your Chaos Engineering Solution for System Resiliency on Kubernetes
 author: Cwen Yin
 author_title: Maintainer of Chaos Mesh
