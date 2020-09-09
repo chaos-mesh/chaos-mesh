@@ -30,6 +30,7 @@ import (
 // TimeChaosReconciler reconciles a TimeChaos object
 type TimeChaosReconciler struct {
 	client.Client
+	client.Reader
 	record.EventRecorder
 	Log logr.Logger
 }
@@ -43,6 +44,7 @@ func (r *TimeChaosReconciler) Reconcile(req ctrl.Request) (result ctrl.Result, e
 
 	reconciler := timechaos.Reconciler{
 		Client:        r.Client,
+		Reader:        r.Reader,
 		EventRecorder: r.EventRecorder,
 		Log:           logger,
 	}

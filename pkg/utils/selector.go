@@ -120,8 +120,14 @@ func SelectPods(ctx context.Context, c client.Client, r client.Reader, selector 
 	if len(selector.FieldSelectors) > 0 {
 		listOptions.FieldSelector = fields.SelectorFromSet(selector.FieldSelectors)
 	}
-	if err := r.List(ctx, &podList, &listOptions); err != nil {
-		return nil, err
+	if len(selector.FieldSelectors) > 0 {
+		if err := r.List(ctx, &podList, &listOptions); err != nil {
+			return nil, err
+		}
+	} else {
+		if err := c.List(ctx, &podList, &listOptions); err != nil {
+			return nil, err
+		}
 	}
 	pods = append(pods, podList.Items...)
 	var (
