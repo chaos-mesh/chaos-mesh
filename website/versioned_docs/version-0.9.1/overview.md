@@ -1,5 +1,6 @@
 ---
-id: overview 
+slug: /
+id: overview
 title: Chaos Mesh
 sidebar_label: Overview
 ---

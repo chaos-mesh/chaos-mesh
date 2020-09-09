@@ -1,6 +1,6 @@
 import { AutocompleteMultipleField, SelectField, TextField } from 'components/FormField'
 import { Box, Divider, InputAdornment, MenuItem, Typography } from '@material-ui/core'
-import React, { useMemo } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { RootState, useStoreDispatch } from 'store'
 import { arrToObjBySep, joinObjKVs, toTitleCase } from 'lib/utils'
 import { getAnnotations, getLabels, getPodsByNamespaces } from 'slices/experiments'
@@ -37,6 +37,9 @@ const ScopeStep: React.FC<ScopeStepProps> = ({ namespaces, scope = 'scope' }) =>
   const labelKVs = useMemo(() => joinObjKVs(labels, ': ', labelFilters), [labels])
   const annotationKVs = useMemo(() => joinObjKVs(annotations, ': '), [annotations])
 
+  const [currentLabels, setCurrentLabels] = useState<string[]>([])
+  const [currentAnnotations, setCurrentAnnotations] = useState<string[]>([])
+
   const handleNamespaceSelectorsChangeCallback = (labels: string[]) => {
     const _labels = labels.length !== 0 ? labels : namespaces
 
@@ -45,23 +48,8 @@ const ScopeStep: React.FC<ScopeStepProps> = ({ namespaces, scope = 'scope' }) =>
     storeDispatch(getPodsByNamespaces({ namespace_selectors: _labels }))
   }
 
-  const handleLabelSelectorsChangeCallback = (labels: string[]) =>
-    storeDispatch(
-      getPodsByNamespaces({
-        namespace_selectors: namespaces,
-        label_selectors: arrToObjBySep(labels, ': '),
-        annotation_selectors: annotations,
-      })
-    )
-
-  const handleAnnotationSelectorsChangeCallback = (labels: string[]) =>
-    storeDispatch(
-      getPodsByNamespaces({
-        namespace_selectors: namespaces,
-        label_selectors: labels,
-        annotation_selectors: arrToObjBySep(labels, ': '),
-      })
-    )
+  const handleLabelSelectorsChangeCallback = (labels: string[]) => setCurrentLabels(labels)
+  const handleAnnotationSelectorsChangeCallback = (labels: string[]) => setCurrentAnnotations(labels)
 
   const handleChangeIncludeAll = (id: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
     const lastValues = id.split('.').reduce((acc, cur) => acc[cur], values as any)
@@ -77,6 +65,17 @@ const ScopeStep: React.FC<ScopeStepProps> = ({ namespaces, scope = 'scope' }) =>
 
     handleChange(e)
   }
+
+  useEffect(() => {
+    storeDispatch(
+      getPodsByNamespaces({
+        namespace_selectors: namespaces,
+        label_selectors: arrToObjBySep(currentLabels, ': '),
+        annotation_selectors: arrToObjBySep(currentAnnotations, ': '),
+      })
+    )
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentLabels, currentAnnotations])
 
   return (
     <>
