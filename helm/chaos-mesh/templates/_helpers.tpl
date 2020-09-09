@@ -56,7 +56,7 @@ Define the secret's name of certs
 Define the MutatingWebhookConfiguration's name
 */}}
 {{- define "chaos-mesh.mutation" -}}
-{{- printf "chaos-mesh-sidecar-injector" -}}
+{{- printf "chaos-mesh-mutation" -}}
 {{- end -}}
 
 {{/*

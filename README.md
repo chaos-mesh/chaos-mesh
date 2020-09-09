@@ -1,4 +1,4 @@
-<img src="static/logo.svg" alt="chaos_logo" width="450"/>
+<img src="static/logo.svg" alt="chaos-mesh-logo" width="450"/>
 
 [![Build Status](https://internal.pingcap.net/idc-jenkins/job/build_chaos_mesh_master/badge/icon)](https://internal.pingcap.net/idc-jenkins/view/chaos-mesh/job/build_chaos_mesh_master/)
 [![codecov](https://codecov.io/gh/pingcap/chaos-mesh/branch/master/graph/badge.svg)](https://codecov.io/gh/pingcap/chaos-mesh)
@@ -48,8 +48,8 @@ The current implementation supports six types of CRD objects for fault injection
 
 ## Quick start
 
-* [Get Started on kind](https://chaos-mesh.org/docs/installation/get_started_on_kind)
-* [Get Started on minikube](https://chaos-mesh.org/docs/installation/get_started_on_minikube)
+- [Get Started on kind](https://chaos-mesh.org/docs/installation/get_started_on_kind)
+- [Get Started on minikube](https://chaos-mesh.org/docs/installation/get_started_on_minikube)
 
 ## Deploy and use
 
@@ -104,7 +104,6 @@ On the fourth Thursday of every month (unless otherwise specified), the Chaos Me
 - [Integrate your Reliability Toolkit with Your World, Part 2](https://medium.com/chaosiq/integrate-your-reliability-toolkit-with-your-world-part-2-e012f2c2a7f6)
 - [Streake: Chaos Mesh によるカオスエンジニアリング](https://medium.com/sreake-jp/chaos-mesh-%E3%81%AB%E3%82%88%E3%82%8B%E3%82%AB%E3%82%AA%E3%82%B9%E3%82%A8%E3%83%B3%E3%82%B8%E3%83%8B%E3%82%A2%E3%83%AA%E3%83%B3%E3%82%B0-46fa2897c742)
 - [Chaos Mesh : un générateur de chaos pour Kubernetes](https://www.cowboysysop.com/post/chaos-mesh-un-generateur-de-chaos-pour-kubernetes/)
-
 
 ## Roadmap
 

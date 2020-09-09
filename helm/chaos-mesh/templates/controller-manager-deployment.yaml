@@ -22,11 +22,15 @@ spec:
         app.kubernetes.io/name: {{ template "chaos-mesh.name" . }}
         app.kubernetes.io/instance: {{ .Release.Name }}
         app.kubernetes.io/component: controller-manager
-    {{- with .Values.controllerManager.podAnnotations }}
       annotations:
+        rollme: {{ randAlphaNum 5 | quote }}
+    {{- with .Values.controllerManager.podAnnotations }}
 {{ toYaml . | indent 8 }}
     {{- end }}
     spec:
+    {{- if .Values.controllerManager.hostNetwork }}
+      hostNetwork: true
+    {{- end }}
     {{- if .Values.controllerManager.serviceAccount }}
       serviceAccount: {{ .Values.controllerManager.serviceAccount }}
     {{- end }}
