@@ -282,4 +282,4 @@ Now take the following steps to run chaos:
 
 ## Next steps
 
-Congratulations! You have just added a chaos type for Chaos Mesh successfully. Let us know if you run into any issues during the process. If you feel like doing other types of contributions, refer to Add facilities to chaos daemon (WIP).
+Congratulations! You have just added a chaos type for Chaos Mesh successfully. Let us know if you run into any issues during the process. If you feel like doing other types of contributions, refer to [Add facilities to chaos daemon](add_chaos_daemon.md).
