@@ -387,7 +387,7 @@ var _ = Describe("TwoPhase", func() {
 
 			Expect(err).ToNot(HaveOccurred())
 			_chaos := r.Object()
-			err = r.Get(context.TODO(), req.NamespacedName, _chaos)
+			err = r.Client.Get(context.TODO(), req.NamespacedName, _chaos)
 			Expect(err).ToNot(HaveOccurred())
 			Expect(_chaos.(v1alpha1.InnerSchedulerObject).GetStatus().Experiment.Phase).To(Equal(v1alpha1.ExperimentPhaseRunning))
 		})
