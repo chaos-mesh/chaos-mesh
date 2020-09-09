@@ -28,8 +28,6 @@
   background: center no-repeat url('/img/logos/cncf-color.svg');
 }
 
-html[data-theme='dark'] {
-  .cncf-logo {
-    background: center no-repeat url('/img/logos/cncf-white.svg');
-  }
+html[data-theme='dark'] .cncf-logo {
+  background: center no-repeat url('/img/logos/cncf-white.svg');
 }
