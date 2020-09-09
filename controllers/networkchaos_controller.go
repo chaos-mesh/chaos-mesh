@@ -30,6 +30,7 @@ import (
 // NetworkChaosReconciler reconciles a NetworkChaos object
 type NetworkChaosReconciler struct {
 	client.Client
+	client.Reader
 	record.EventRecorder
 	Log logr.Logger
 }
@@ -43,6 +44,7 @@ func (r *NetworkChaosReconciler) Reconcile(req ctrl.Request) (result ctrl.Result
 
 	reconciler := networkchaos.Reconciler{
 		Client:        r.Client,
+		Reader:        r.Reader,
 		EventRecorder: r.EventRecorder,
 		Log:           logger,
 	}

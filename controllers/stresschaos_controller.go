@@ -31,6 +31,7 @@ import (
 // StressChaosReconciler reconciles a StressChaos object
 type StressChaosReconciler struct {
 	client.Client
+	client.Reader
 	record.EventRecorder
 	Log logr.Logger
 }
@@ -44,6 +45,7 @@ func (r *StressChaosReconciler) Reconcile(req ctrl.Request) (result ctrl.Result,
 
 	reconciler := stresschaos.Reconciler{
 		Client:        r.Client,
+		Reader:        r.Reader,
 		EventRecorder: r.EventRecorder,
 		Log:           logger,
 	}
