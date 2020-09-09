@@ -22,7 +22,7 @@ type Config struct {
 	// ClusterScoped means control Chaos Object in cluster level(all namespace);
 	ClusterScoped bool `envconfig:"CLUSTER_SCOPED" default:"true"`
 	// TemplateNamespace is the namespace which holds the template configmap.
-	// If controller-manager is running with in-cluster mode, it will be overwrite to namespace which the pod belongs to.
+	// If controller-manager is running with in-cluster mode. If is set to empty string, it will be overwrite to namespace which the pod belongs.
 	TemplateNamespace string `envconfig:"TEMPLATE_NAMESPACE" default:""`
 	// TargetNamespace means configmaps in this namespace will be controlled by this controller.
 	// It SHOULD be the same with TargetNamespace in config.ChaosControllerConfig while clusterScoped is false.
