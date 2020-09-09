@@ -47,7 +47,7 @@ func (r *IoChaosReconciler) Reconcile(req ctrl.Request) (result ctrl.Result, err
 		Log:           logger,
 	}
 	chaos := &v1alpha1.IoChaos{}
-	if err := r.Get(context.Background(), req.NamespacedName, chaos); err != nil {
+	if err := r.Client.Get(context.Background(), req.NamespacedName, chaos); err != nil {
 		r.Log.Error(err, "unable to get iochaos")
 		return ctrl.Result{}, nil
 	}
