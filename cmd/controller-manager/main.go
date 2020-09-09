@@ -92,6 +92,7 @@ func main() {
 
 	if err = (&controllers.PodChaosReconciler{
 		Client:        mgr.GetClient(),
+		Reader:        mgr.GetAPIReader(),
 		EventRecorder: mgr.GetEventRecorderFor("podchaos-controller"),
 		Log:           ctrl.Log.WithName("controllers").WithName("PodChaos"),
 	}).SetupWithManager(mgr); err != nil {
@@ -180,7 +181,30 @@ func main() {
 	}
 
 	// Init metrics collector
+	/*cache := mgr.GetCache()
+	indexFunc := func(obj runtime.Object) []string {
+		return []string{obj.(*v1.Pod).Name}
+	}
+
+	if err := cache.IndexField(&v1.Pod{}, "metadata.name", indexFunc); err != nil {
+		panic(err)
+	}
+	*/
 	metricsCollector := metrics.NewChaosCollector(mgr.GetCache(), controllermetrics.Registry)
+	/*
+		if err := mgr.GetFieldIndexer().IndexField(&v1.Pod{}, "metadata.name", func(rawObj runtime.Object) []string {
+			pod := rawObj.(*v1.Pod)
+			return []string{pod.Name}
+		}); err != nil {
+			setupLog.Error(err, "unable to set index")
+		}
+
+		if err := mgr.GetFieldIndexer().IndexField(&v1.Pod{}, "metadata.namespace", func(rawObj runtime.Object) []string {
+			pod := rawObj.(*v1.Pod)
+			return []string{pod.Namespace}
+		}); err != nil {
+			setupLog.Error(err, "unable to set index")
+		}*/
 
 	setupLog.Info("Setting up webhook server")
 

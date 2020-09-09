@@ -44,16 +44,19 @@ type Pod struct {
 type Service struct {
 	conf    *config.ChaosDashboardConfig
 	kubeCli client.Client
+	Reader  client.Reader
 }
 
 // NewService returns an experiment service instance.
 func NewService(
 	conf *config.ChaosDashboardConfig,
 	cli client.Client,
+	reader client.Reader,
 ) *Service {
 	return &Service{
 		conf:    conf,
 		kubeCli: cli,
+		Reader:  reader,
 	}
 }
 
@@ -85,7 +88,7 @@ func (s *Service) listPods(c *gin.Context) {
 		return
 	}
 	ctx := context.TODO()
-	filteredPods, err := pkgutils.SelectPods(ctx, s.kubeCli, exp.ParseSelector())
+	filteredPods, err := pkgutils.SelectPods(ctx, s.kubeCli, s.Reader, exp.ParseSelector())
 	if err != nil {
 		c.Status(http.StatusInternalServerError)
 		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
@@ -173,7 +176,7 @@ func (s *Service) getLabels(c *gin.Context) {
 	exp.NamespaceSelectors = nsList
 
 	ctx := context.TODO()
-	filteredPods, err := pkgutils.SelectPods(ctx, s.kubeCli, exp.ParseSelector())
+	filteredPods, err := pkgutils.SelectPods(ctx, s.kubeCli, s.Reader, exp.ParseSelector())
 	if err != nil {
 		c.Status(http.StatusInternalServerError)
 		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
@@ -218,7 +221,7 @@ func (s *Service) getAnnotations(c *gin.Context) {
 	exp.NamespaceSelectors = nsList
 
 	ctx := context.TODO()
-	filteredPods, err := pkgutils.SelectPods(ctx, s.kubeCli, exp.ParseSelector())
+	filteredPods, err := pkgutils.SelectPods(ctx, s.kubeCli, s.Reader, exp.ParseSelector())
 	if err != nil {
 		c.Status(http.StatusInternalServerError)
 		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))

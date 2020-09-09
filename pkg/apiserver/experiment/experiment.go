@@ -55,6 +55,7 @@ type ChaosState struct {
 type Service struct {
 	conf    *config.ChaosDashboardConfig
 	kubeCli client.Client
+	Reader  client.Reader
 	archive core.ExperimentStore
 	event   core.EventStore
 }

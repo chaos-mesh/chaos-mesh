@@ -45,7 +45,7 @@ type SelectSpec interface {
 }
 
 // SelectAndFilterPods returns the list of pods that filtered by selector and PodMode
-func SelectAndFilterPods(ctx context.Context, c client.Client, spec SelectSpec) ([]v1.Pod, error) {
+func SelectAndFilterPods(ctx context.Context, c client.Client, r client.Reader, spec SelectSpec) ([]v1.Pod, error) {
 	if pods := mock.On("MockSelectAndFilterPods"); pods != nil {
 		return pods.(func() []v1.Pod)(), nil
 	}
@@ -57,7 +57,7 @@ func SelectAndFilterPods(ctx context.Context, c client.Client, spec SelectSpec) 
 	mode := spec.GetMode()
 	value := spec.GetValue()
 
-	pods, err := SelectPods(ctx, c, selector)
+	pods, err := SelectPods(ctx, c, r, selector)
 	if err != nil {
 		return nil, err
 	}
@@ -78,7 +78,7 @@ func SelectAndFilterPods(ctx context.Context, c client.Client, spec SelectSpec) 
 // SelectPods returns the list of pods that are available for pod chaos action.
 // It returns all pods that match the configured label, annotation and namespace selectors.
 // If pods are specifically specified by `selector.Pods`, it just returns the selector.Pods.
-func SelectPods(ctx context.Context, c client.Client, selector v1alpha1.SelectorSpec) ([]v1.Pod, error) {
+func SelectPods(ctx context.Context, c client.Client, r client.Reader, selector v1alpha1.SelectorSpec) ([]v1.Pod, error) {
 	var pods []v1.Pod
 
 	// pods are specifically specified
@@ -120,7 +120,7 @@ func SelectPods(ctx context.Context, c client.Client, selector v1alpha1.Selector
 	if len(selector.FieldSelectors) > 0 {
 		listOptions.FieldSelector = fields.SelectorFromSet(selector.FieldSelectors)
 	}
-	if err := c.List(ctx, &podList, &listOptions); err != nil {
+	if err := r.List(ctx, &podList, &listOptions); err != nil {
 		return nil, err
 	}
 	pods = append(pods, podList.Items...)

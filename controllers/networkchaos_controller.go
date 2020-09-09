@@ -48,7 +48,7 @@ func (r *NetworkChaosReconciler) Reconcile(req ctrl.Request) (result ctrl.Result
 	}
 
 	chaos := &v1alpha1.NetworkChaos{}
-	if err := r.Get(context.Background(), req.NamespacedName, chaos); err != nil {
+	if err := r.Client.Get(context.Background(), req.NamespacedName, chaos); err != nil {
 		r.Log.Error(err, "unable to get network chaos")
 		return ctrl.Result{}, nil
 	}

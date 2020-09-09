@@ -29,6 +29,7 @@ import (
 
 type Reconciler struct {
 	client.Client
+	client.Reader
 	record.EventRecorder
 	Log logr.Logger
 }
@@ -60,7 +61,7 @@ func (r *Reconciler) commonIOChaos(iochaos *v1alpha1.IoChaos, req ctrl.Request) 
 	var cr *common.Reconciler
 	switch iochaos.Spec.Layer {
 	case v1alpha1.FileSystemLayer:
-		cr = fs.NewCommonReconciler(r.Client, r.Log.WithValues("reconciler", "chaosfs"),
+		cr = fs.NewCommonReconciler(r.Client, r.Reader, r.Log.WithValues("reconciler", "chaosfs"),
 			req, r.EventRecorder)
 	default:
 		return r.invalidActionResponse(iochaos)
@@ -72,7 +73,7 @@ func (r *Reconciler) scheduleIOChaos(iochaos *v1alpha1.IoChaos, req ctrl.Request
 	var sr *twophase.Reconciler
 	switch iochaos.Spec.Layer {
 	case v1alpha1.FileSystemLayer:
-		sr = fs.NewTwoPhaseReconciler(r.Client, r.Log.WithValues("reconciler", "chaosfs"),
+		sr = fs.NewTwoPhaseReconciler(r.Client, r.Reader, r.Log.WithValues("reconciler", "chaosfs"),
 			req, r.EventRecorder)
 	default:
 		return r.invalidActionResponse(iochaos)
