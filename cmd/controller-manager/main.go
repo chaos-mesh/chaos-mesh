@@ -176,6 +176,7 @@ func main() {
 
 	if err = (&controllers.HTTPChaosReconciler{
 		Client: mgr.GetClient(),
+		Reader: mgr.GetAPIReader(),
 		Log:    ctrl.Log.WithName("controllers").WithName("HTTPChaos"),
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "HTTPChaos")
