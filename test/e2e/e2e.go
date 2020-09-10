@@ -115,7 +115,7 @@ func setupSuite() {
 
 var _ = ginkgo.SynchronizedBeforeSuite(func() []byte {
 	ginkgo.By("Clear all helm releases")
-	helmClearCmd := "helm ls --all --short | xargs -n 1 -r helm delete --purge"
+	helmClearCmd := "helm ls --all --short | xargs -n 1 helm delete --purge"
 	if err := exec.Command("sh", "-c", helmClearCmd).Run(); err != nil {
 		framework.Failf("failed to clear helm releases (cmd: %q, error: %v", helmClearCmd, err)
 	}
@@ -142,6 +142,7 @@ var _ = ginkgo.SynchronizedBeforeSuite(func() []byte {
 	ocfg.Manager.Tag = e2econfig.TestConfig.ManagerTag
 	ocfg.Daemon.Image = e2econfig.TestConfig.DaemonImage
 	ocfg.Daemon.Tag = e2econfig.TestConfig.DaemonTag
+	ocfg.DNSImage = e2econfig.TestConfig.ChaosDNSImage
 
 	oa.CleanCRDOrDie()
 	err = oa.InstallCRD(ocfg)
@@ -150,7 +151,9 @@ var _ = ginkgo.SynchronizedBeforeSuite(func() []byte {
 	framework.ExpectNoError(err, "failed to install chaos-mesh")
 	err = oa.InstallTemplate(ocfg)
 	framework.ExpectNoError(err, "failed to install sidecar template")
+
 	return nil
+
 }, func(data []byte) {
 	// Run on all Ginkgo nodes
 	setupSuitePerGinkgoNode()

@@ -851,6 +851,199 @@ var _ = ginkgo.Describe("[Basic]", func() {
 	})
 
 	// io chaos case in [IOChaos] context
+	ginkgo.Context("[DNSChaos]", func() {
+		var err error
+
+		var networkPeers []*v1.Pod
+		var ports []uint16
+		var pfCancels []context.CancelFunc
+		ginkgo.JustBeforeEach(func() {
+			ports = []uint16{}
+			networkPeers = []*v1.Pod{}
+			for index := 0; index <= 3; index++ {
+				name := fmt.Sprintf("network-peer-%d", index)
+
+				svc := fixture.NewE2EService(name, ns)
+				_, err = kubeCli.CoreV1().Services(ns).Create(svc)
+				framework.ExpectNoError(err, "create service error")
+				nd := fixture.NewNetworkTestDeployment(name, ns, map[string]string{"partition": strconv.Itoa(index % 2)})
+				_, err = kubeCli.AppsV1().Deployments(ns).Create(nd)
+				framework.ExpectNoError(err, "create network-peer deployment error")
+				err = waitDeploymentReady(name, ns, kubeCli)
+				framework.ExpectNoError(err, "wait network-peer deployment ready error")
+
+				pod, err := getPod(kubeCli, ns, name)
+				framework.ExpectNoError(err, "select network-peer pod error")
+				networkPeers = append(networkPeers, pod)
+
+				_, port, pfCancel, err := portforward.ForwardOnePort(fw, ns, "svc/"+svc.Name, 8080)
+				ports = append(ports, port)
+				pfCancels = append(pfCancels, pfCancel)
+				framework.ExpectNoError(err, "create helper io port port-forward failed")
+			}
+		})
+		ginkgo.It("[Schedule]", func() {
+			ctx, cancel := context.WithCancel(context.Background())
+
+			for index := range networkPeers {
+				err = waitE2EHelperReady(c, ports[index])
+
+				framework.ExpectNoError(err, "wait e2e helper ready error")
+			}
+			connect := func(source, target int) bool {
+				err := sendUDPPacket(c, ports[source], networkPeers[target].Status.PodIP)
+				if err != nil {
+					klog.Infof("Error: %v", err)
+					return false
+				}
+
+				data, err := recvUDPPacket(c, ports[target])
+				if err != nil || data != "ping\n" {
+					klog.Infof("Error: %v, Data: %s", err, data)
+					return false
+				}
+
+				return true
+			}
+			allBlockedConnection := func() [][]int {
+				var result [][]int
+				for source := range networkPeers {
+					for target := range networkPeers {
+						if source == target {
+							continue
+						}
+
+						if !connect(source, target) {
+							result = append(result, []int{source, target})
+						}
+					}
+				}
+
+				return result
+			}
+			framework.ExpectEqual(len(allBlockedConnection()), 0)
+
+			dnsChaos := &v1alpha1.DNSChaos{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "DNS-chaos",
+					Namespace: ns,
+				},
+				Spec: v1alpha1.DNSChaosSpec{
+					Action: v1alpha1.ErrorAction,
+					Mode:   v1alpha1.AllPodMode,
+					Scope:  v1alpha1.AllScope,
+					Selector: v1alpha1.SelectorSpec{
+						Namespaces:     []string{ns},
+						LabelSelectors: map[string]string{"app": "network-peer-0"},
+					},
+				},
+			}
+
+			/*
+				baseNetworkPartition := &v1alpha1.NetworkChaos{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      "network-chaos-1",
+						Namespace: ns,
+					},
+					Spec: v1alpha1.NetworkChaosSpec{
+						Action: v1alpha1.PartitionAction,
+						Selector: v1alpha1.SelectorSpec{
+							Namespaces:     []string{ns},
+							LabelSelectors: map[string]string{"app": "network-peer-0"},
+						},
+						Mode:      v1alpha1.OnePodMode,
+						Direction: v1alpha1.To,
+						Target: &v1alpha1.Target{
+							TargetSelector: v1alpha1.SelectorSpec{
+								Namespaces:     []string{ns},
+								LabelSelectors: map[string]string{"app": "network-peer-1"},
+							},
+							TargetMode: v1alpha1.OnePodMode,
+						},
+						Duration: pointer.StringPtr("9m"),
+						Scheduler: &v1alpha1.SchedulerSpec{
+							Cron: "@every 10m",
+						},
+					},
+				}
+			*/
+			err = cli.Create(ctx, dnsChaos.DeepCopy())
+			framework.ExpectNoError(err, "create dns chaos error")
+			time.Sleep(5 * time.Second)
+			framework.ExpectEqual(allBlockedConnection(), [][]int{{0, 2}})
+
+			/*
+				err = cli.Delete(ctx, baseNetworkPartition.DeepCopy())
+				framework.ExpectNoError(err, "delete network chaos error")
+				time.Sleep(5 * time.Second)
+				framework.ExpectEqual(len(allBlockedConnection()), 0)
+
+				baseNetworkPartition.Spec.Direction = v1alpha1.Both
+				err = cli.Create(ctx, baseNetworkPartition.DeepCopy())
+				framework.ExpectNoError(err, "create network chaos error")
+				time.Sleep(5 * time.Second)
+				framework.ExpectEqual(allBlockedConnection(), [][]int{{0, 1}, {1, 0}})
+
+				err = cli.Delete(ctx, baseNetworkPartition.DeepCopy())
+				framework.ExpectNoError(err, "delete network chaos error")
+				time.Sleep(5 * time.Second)
+				framework.ExpectEqual(len(allBlockedConnection()), 0)
+
+				baseNetworkPartition.Spec.Direction = v1alpha1.From
+				err = cli.Create(ctx, baseNetworkPartition.DeepCopy())
+				framework.ExpectNoError(err, "create network chaos error")
+				time.Sleep(5 * time.Second)
+				framework.ExpectEqual(allBlockedConnection(), [][]int{{1, 0}})
+
+				err = cli.Delete(ctx, baseNetworkPartition.DeepCopy())
+				framework.ExpectNoError(err, "delete network chaos error")
+				time.Sleep(5 * time.Second)
+				framework.ExpectEqual(len(allBlockedConnection()), 0)
+
+				baseNetworkPartition.Spec.Direction = v1alpha1.Both
+				baseNetworkPartition.Spec.Target.TargetSelector.LabelSelectors = map[string]string{"partition": "1"}
+				baseNetworkPartition.Spec.Target.TargetMode = v1alpha1.AllPodMode
+				err = cli.Create(ctx, baseNetworkPartition.DeepCopy())
+				framework.ExpectNoError(err, "create network chaos error")
+				time.Sleep(5 * time.Second)
+				framework.ExpectEqual(allBlockedConnection(), [][]int{{0, 1}, {0, 3}, {1, 0}, {3, 0}})
+
+				err = cli.Delete(ctx, baseNetworkPartition.DeepCopy())
+				framework.ExpectNoError(err, "delete network chaos error")
+				time.Sleep(5 * time.Second)
+				framework.ExpectEqual(len(allBlockedConnection()), 0)
+
+				// Multiple network partition chaos on peer-0
+				anotherNetworkPartition := baseNetworkPartition.DeepCopy()
+				anotherNetworkPartition.Name = "network-chaos-2"
+				anotherNetworkPartition.Spec.Direction = v1alpha1.To
+				anotherNetworkPartition.Spec.Target.TargetSelector.LabelSelectors = map[string]string{"partition": "0"}
+				anotherNetworkPartition.Spec.Target.TargetMode = v1alpha1.AllPodMode
+				err = cli.Create(ctx, baseNetworkPartition.DeepCopy())
+				framework.ExpectNoError(err, "create network chaos error")
+				err = cli.Create(ctx, anotherNetworkPartition.DeepCopy())
+				framework.ExpectNoError(err, "create network chaos error")
+				time.Sleep(5 * time.Second)
+				framework.ExpectEqual(allBlockedConnection(), [][]int{{0, 1}, {0, 2}, {0, 3}, {1, 0}, {3, 0}})
+
+				err = cli.Delete(ctx, baseNetworkPartition.DeepCopy())
+				framework.ExpectNoError(err, "delete network chaos error")
+				err = cli.Delete(ctx, anotherNetworkPartition.DeepCopy())
+				framework.ExpectNoError(err, "delete network chaos error")
+				time.Sleep(5 * time.Second)
+				framework.ExpectEqual(len(allBlockedConnection()), 1)
+
+			*/
+			cancel()
+		})
+	})
+	// create DNS server
+	//err = createCoreDNSServer(kubeCli, ns)
+
+	//return true
+	//}
+
+	// io chaos case in [IOChaos] context
 	ginkgo.Context("[IOChaos]", func() {
 
 		var (
@@ -1435,7 +1628,7 @@ var _ = ginkgo.Describe("[Basic]", func() {
 				err = cli.Delete(ctx, anotherNetworkPartition.DeepCopy())
 				framework.ExpectNoError(err, "delete network chaos error")
 				time.Sleep(5 * time.Second)
-				framework.ExpectEqual(len(allBlockedConnection()), 0)
+				framework.ExpectEqual(len(allBlockedConnection()), 1)
 
 				cancel()
 			})
@@ -1790,6 +1983,69 @@ selector:
 		})
 	})
 
+	// io chaos case in [IOChaos] context
+	ginkgo.Context("[DNSChaos]", func() {
+		var err error
+		var port uint16
+
+		ginkgo.JustBeforeEach(func() {
+			name := fmt.Sprintf("network-peer")
+
+			svc := fixture.NewE2EService(name, ns)
+			_, err = kubeCli.CoreV1().Services(ns).Create(svc)
+			framework.ExpectNoError(err, "create service error")
+			nd := fixture.NewNetworkTestDeployment(name, ns, map[string]string{"partition": "0"})
+			_, err = kubeCli.AppsV1().Deployments(ns).Create(nd)
+			framework.ExpectNoError(err, "create network-peer deployment error")
+			err = waitDeploymentReady(name, ns, kubeCli)
+			framework.ExpectNoError(err, "wait network-peer deployment ready error")
+
+			_, err := getPod(kubeCli, ns, name)
+			framework.ExpectNoError(err, "select network-peer pod error")
+
+			_, port, _, err = portforward.ForwardOnePort(fw, ns, "svc/"+svc.Name, 8080)
+			framework.ExpectNoError(err, "create helper io port port-forward failed")
+		})
+		ginkgo.It("[RANDOM]", func() {
+			ctx, cancel := context.WithCancel(context.Background())
+
+			err = waitE2EHelperReady(c, port)
+
+			framework.ExpectNoError(err, "wait e2e helper ready error")
+
+			// get IP of a non exists host, and will get error
+			_, err := testDNSServer(c, port)
+			framework.ExpectError(err, "test DNS server failed")
+
+			dnsChaos := &v1alpha1.DNSChaos{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "dns-chaos",
+					Namespace: ns,
+				},
+				Spec: v1alpha1.DNSChaosSpec{
+					Action: v1alpha1.RandomAction,
+					Mode:   v1alpha1.AllPodMode,
+					Scope:  v1alpha1.AllScope,
+					Selector: v1alpha1.SelectorSpec{
+						Namespaces:     []string{ns},
+						LabelSelectors: map[string]string{"app": "network-peer"},
+					},
+				},
+			}
+
+			err = cli.Create(ctx, dnsChaos.DeepCopy())
+			framework.ExpectNoError(err, "create dns chaos error")
+			time.Sleep(5 * time.Second)
+
+			// get IP of a non exists host, because chaos DNS server will return a random IP,
+			// so err should be nil
+			_, err = testDNSServer(c, port)
+			framework.ExpectNoError(err, "test DNS server failed")
+
+			cancel()
+		})
+	})
+
 })
 
 func waitPodRunning(name, namespace string, cli kubernetes.Interface) error {
@@ -1928,6 +2184,29 @@ func recvUDPPacket(c http.Client, port uint16) (string, error) {
 	}
 
 	result := string(out)
+	return result, nil
+}
+
+func testDNSServer(c http.Client, port uint16) (string, error) {
+	klog.Infof("sending request to http://localhost:%d/dns", port)
+
+	resp, err := c.Get(fmt.Sprintf("http://localhost:%d/dns", port))
+	if err != nil {
+		return "", err
+	}
+
+	out, err := ioutil.ReadAll(resp.Body)
+	defer resp.Body.Close()
+	if err != nil {
+		return "", err
+	}
+
+	result := string(out)
+	klog.Infof("testDNSServer result: %s", result)
+	if strings.Contains(result, "failed") {
+		return "", fmt.Errorf("test DNS server failed")
+	}
+
 	return result, nil
 }
 
