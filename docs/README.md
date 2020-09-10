@@ -1,3 +1,3 @@
 # Documents
 
-This directory was moved to [here](../website/docs). 
+This directory was moved to [here](../website/docs).
