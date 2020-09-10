@@ -9,6 +9,8 @@ import GitHubIcon from '@material-ui/icons/GitHub'
 import { Link } from 'react-router-dom'
 import { NavLink } from 'react-router-dom'
 import React from 'react'
+import SettingsIcon from '@material-ui/icons/Settings'
+import T from 'components/T'
 import TuneIcon from '@material-ui/icons/Tune'
 import WebIcon from '@material-ui/icons/Web'
 import clsx from 'clsx'
@@ -79,18 +81,22 @@ const useStyles = makeStyles((theme: Theme) => {
 })
 
 const listItems = [
-  { icon: <WebIcon />, text: 'Overview' },
+  { icon: <WebIcon />, text: 'overview' },
   {
     icon: <TuneIcon />,
-    text: 'Experiments',
+    text: 'experiments',
   },
   {
     icon: <BlurLinearIcon />,
-    text: 'Events',
+    text: 'events',
   },
   {
     icon: <ArchiveOutlinedIcon />,
-    text: 'Archives',
+    text: 'archives',
+  },
+  {
+    icon: <SettingsIcon />,
+    text: 'settings',
   },
 ]
 
@@ -135,7 +141,7 @@ const Sidebar: React.FC<SidebarProps> = ({ open }) => {
               color="primary"
               startIcon={open && <AddIcon />}
             >
-              {open ? 'New Experiment' : <AddIcon />}
+              {open ? T('newE.title') : <AddIcon />}
             </Button>
           </Box>
 
@@ -143,15 +149,9 @@ const Sidebar: React.FC<SidebarProps> = ({ open }) => {
 
           <List>
             {listItems.map(({ icon, text }) => (
-              <ListItem
-                key={text}
-                className={classes.listItem}
-                component={NavLink}
-                to={`/${text.toLowerCase()}`}
-                button
-              >
+              <ListItem key={text} className={classes.listItem} component={NavLink} to={`/${text}`} button>
                 <ListItemIcon className={classes.listItemIcon}>{icon}</ListItemIcon>
-                <ListItemText primary={text} />
+                <ListItemText primary={T(`${text}.title`)} />
               </ListItem>
             ))}
           </List>
@@ -168,7 +168,7 @@ const Sidebar: React.FC<SidebarProps> = ({ open }) => {
             <ListItemIcon className={classes.listItemIcon}>
               <DescriptionOutlinedIcon />
             </ListItemIcon>
-            <ListItemText primary="Documentation" />
+            <ListItemText primary={T('common.doc')} />
           </ListItem>
 
           <ListItem

@@ -306,7 +306,7 @@ const EventsTable: React.ForwardRefRenderFunction<EventsTableHandles, EventsTabl
                       title={
                         <Typography variant="body2">
                           The following search syntax can help to locate the events quickly:
-                          <ul style={{ paddingLeft: '1rem' }}>
+                          <ul style={{ marginBottom: 0, paddingLeft: '1rem' }}>
                             <li>namespace:default xxx will search for events with namespace default.</li>
                             <li>
                               kind:NetworkChaos xxx will search for events with kind NetworkChaos, you can also type

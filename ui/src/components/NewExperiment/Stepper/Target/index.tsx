@@ -15,6 +15,7 @@ import Pod from './Pod'
 import { ReactComponent as PodLifecycleIcon } from './images/pod-lifecycle.svg'
 import SelectAllOutlinedIcon from '@material-ui/icons/SelectAllOutlined'
 import Stress from './Stress'
+import T from 'components/T'
 import Time from './Time'
 import WifiTetheringIcon from '@material-ui/icons/WifiTethering'
 import { resetOtherChaos } from 'lib/formikhelpers'
@@ -23,7 +24,7 @@ import { useFormikContext } from 'formik'
 const tabs = [
   {
     key: 'PodChaos',
-    label: 'Pod Lifecycle',
+    label: T('newE.target.pod.title'),
     icon: (
       <SvgIcon fontSize="large">
         <PodLifecycleIcon />
@@ -32,23 +33,23 @@ const tabs = [
   },
   {
     key: 'NetworkChaos',
-    label: 'Network',
+    label: T('newE.target.network.title'),
     icon: <WifiTetheringIcon fontSize="large" />,
   },
-  { key: 'IoChaos', label: 'File System I/O', icon: <PanToolOutlinedIcon fontSize="large" /> },
+  { key: 'IoChaos', label: T('newE.target.io.title'), icon: <PanToolOutlinedIcon fontSize="large" /> },
   {
     key: 'KernelChaos',
-    label: 'Linux Kernel',
+    label: T('newE.target.kernel.title'),
     icon: (
       <SvgIcon fontSize="large">
         <LinuxKernelIcon />
       </SvgIcon>
     ),
   },
-  { key: 'TimeChaos', label: 'Clock', icon: <AccessTimeIcon fontSize="large" /> },
+  { key: 'TimeChaos', label: T('newE.target.time.title'), icon: <AccessTimeIcon fontSize="large" /> },
   {
     key: 'StressChaos',
-    label: 'Stress CPU/Memory',
+    label: T('newE.target.stress.title'),
     icon: <SelectAllOutlinedIcon fontSize="large" />,
   },
 ]

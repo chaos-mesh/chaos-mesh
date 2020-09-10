@@ -1,12 +1,13 @@
 import { Box, Grow, Paper, Typography } from '@material-ui/core'
+import EventsTable, { EventsTableHandles } from 'components/EventsTable'
 import React, { useEffect, useRef, useState } from 'react'
 import { Theme, createStyles, makeStyles } from '@material-ui/core/styles'
 
 import BlurLinearIcon from '@material-ui/icons/BlurLinear'
 import { Event } from 'api/events.type'
-import EventsTable, { EventsTableHandles } from 'components/EventsTable'
 import Loading from 'components/Loading'
 import PaperTop from 'components/PaperTop'
+import T from 'components/T'
 import api from 'api'
 import genEventsChart from 'lib/d3/eventsChart'
 
@@ -77,7 +78,7 @@ export default function Events() {
             <BlurLinearIcon fontSize="large" />
           </Box>
           <Typography variant="h6" align="center">
-            No events found. Try to create a new experiment.
+            {T('events.noEventsFound')}
           </Typography>
         </Box>
       )}

@@ -9,9 +9,7 @@ import {
 import { defaultExperimentSchema } from 'components/NewExperiment/constants'
 import snakeCaseKeys from 'snakecase-keys'
 
-export const ChaosKindKeyMap: {
-  [kind: string]: { [key: string]: Exclude<keyof ExperimentTarget, 'kind'> }
-} = {
+export const ChaosKindKeyMap: Record<string, Record<string, Exclude<keyof ExperimentTarget, 'kind'>>> = {
   PodChaos: { key: 'pod_chaos' },
   NetworkChaos: { key: 'network_chaos' },
   IoChaos: { key: 'io_chaos' },
@@ -31,7 +29,7 @@ export function parseSubmit(e: Experiment) {
 
   // Parse labels, label_selectors, annotations and annotation_selectors to object
   function helper1(selectors: string[]) {
-    return selectors.reduce((acc: { [key: string]: string }, d) => {
+    return selectors.reduce((acc: Record<string, string>, d) => {
       const splited = d.replace(/\s/g, '').split(':')
 
       acc[splited[0]] = splited[1]

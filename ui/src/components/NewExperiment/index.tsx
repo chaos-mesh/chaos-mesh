@@ -12,6 +12,7 @@ import {
 } from '@material-ui/core'
 import { Form, Formik } from 'formik'
 import React, { useEffect, useState } from 'react'
+import { RootState, useStoreDispatch } from 'store'
 import { defaultExperimentSchema, validationSchema } from './constants'
 import { parseLoaded, parseSubmit, yamlToExperiment } from 'lib/formikhelpers'
 import { setAlert, setAlertOpen } from 'slices/globalStatus'
@@ -25,16 +26,17 @@ import PaperTop from 'components/PaperTop'
 import SkeletonN from 'components/SkeletonN'
 import Stepper from './Stepper'
 import { StepperProvider } from './Context'
+import T from 'components/T'
 import api from 'api'
 import flat from 'flat'
 import { setNeedToRefreshExperiments } from 'slices/experiments'
 import { useHistory } from 'react-router-dom'
-import { useStoreDispatch } from 'store'
+import { useSelector } from 'react-redux'
 import yaml from 'js-yaml'
 
 const Skeleton3 = () => <SkeletonN n={3} />
 
-const LoadWrapper: React.FC<{ title: string }> = ({ title, children }) => (
+const LoadWrapper: React.FC<{ title: string | JSX.Element }> = ({ title, children }) => (
   <Box mb={6}>
     <Box mb={6}>
       <Typography>{title}</Typography>
@@ -145,7 +147,7 @@ const Actions = ({ setInitialValues }: ActionsProps) => {
 
   return (
     <Box p={6} pt={12}>
-      <LoadWrapper title="Load From Existing Experiments">
+      <LoadWrapper title={T('newE.loadFromExistingExperiments')}>
         <RadioGroup value={experimentRadio} onChange={onExperimentRadioChange}>
           {experiments && experiments.length > 0 ? (
             experiments.map((e) => (
@@ -157,7 +159,7 @@ const Actions = ({ setInitialValues }: ActionsProps) => {
               />
             ))
           ) : experiments?.length === 0 ? (
-            <Typography variant="body2">No experiments found.</Typography>
+            <Typography variant="body2">{T('experiments.noExperimentsFound')}</Typography>
           ) : (
             <Skeleton3 />
           )}
@@ -168,7 +170,7 @@ const Actions = ({ setInitialValues }: ActionsProps) => {
         <Divider />
       </Box>
 
-      <LoadWrapper title="Load From Archives">
+      <LoadWrapper title={T('newE.loadFromArchives')}>
         <RadioGroup value={archiveRadio} onChange={onArchiveRadioChange}>
           {archives && archives.length > 0 ? (
             archives.map((a) => (
@@ -180,7 +182,7 @@ const Actions = ({ setInitialValues }: ActionsProps) => {
               />
             ))
           ) : archives?.length === 0 ? (
-            <Typography variant="body2">No archives found.</Typography>
+            <Typography variant="body2">{T('archives.no_archives_found')}</Typography>
           ) : (
             <Skeleton3 />
           )}
@@ -191,9 +193,9 @@ const Actions = ({ setInitialValues }: ActionsProps) => {
         <Divider />
       </Box>
 
-      <LoadWrapper title="Load From YAML File">
+      <LoadWrapper title={T('newE.loadFromYamlFile')}>
         <Button component="label" variant="outlined" size="small" startIcon={<CloudUploadOutlinedIcon />}>
-          Upload
+          {T('common.upload')}
           <input type="file" style={{ display: 'none' }} onChange={handleUploadYAML} />
         </Button>
       </LoadWrapper>
@@ -203,6 +205,8 @@ const Actions = ({ setInitialValues }: ActionsProps) => {
 
 export default function NewExperiment() {
   const history = useHistory()
+
+  const { intl } = useSelector((state: RootState) => state.globalStatus)
   const dispatch = useStoreDispatch()
 
   const [initialValues, setInitialValues] = useState<Experiment>(defaultExperimentSchema)
@@ -239,13 +243,13 @@ export default function NewExperiment() {
       <Formik
         enableReinitialize
         initialValues={initialValues}
-        validationSchema={validationSchema}
+        validationSchema={validationSchema(intl!)}
         validateOnChange={false}
         onSubmit={handleOnSubmit}
       >
         {({ errors }) => (
           <Paper variant="outlined" style={{ height: '100%' }}>
-            <PaperTop title="Create a New Experiment" />
+            <PaperTop title={T('newE.create')} />
             <Grid container>
               <Grid item xs={12} sm={8}>
                 <Form>

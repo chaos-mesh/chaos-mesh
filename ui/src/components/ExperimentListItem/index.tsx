@@ -11,6 +11,7 @@ import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown'
 import KeyboardArrowUpIcon from '@material-ui/icons/KeyboardArrowUp'
 import PauseCircleOutlineIcon from '@material-ui/icons/PauseCircleOutline'
 import PlayCircleOutlineIcon from '@material-ui/icons/PlayCircleOutline'
+import T from 'components/T'
 import day from 'lib/dayjs'
 import { useHistory } from 'react-router-dom'
 
@@ -33,14 +34,14 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 )
 
-interface ExperimentPaperProps {
+interface ExperimentListItemProps {
   experiment: Experiment | Archive
   isArchive?: boolean
   handleSelect: (info: { uuid: uuid; title: string; description: string; action: string }) => void
   handleDialogOpen: (open: boolean) => void
 }
 
-const ExperimentPaper: React.FC<ExperimentPaperProps> = ({
+const ExperimentListItem: React.FC<ExperimentListItemProps> = ({
   experiment: e,
   isArchive = false,
   handleSelect,
@@ -108,8 +109,8 @@ const ExperimentPaper: React.FC<ExperimentPaperProps> = ({
           {(e as Experiment).status === 'Paused' ? (
             <IconButton
               color="primary"
-              title="Start experiment"
-              aria-label="Start experiment"
+              title="Start"
+              aria-label="Start"
               component="span"
               size="small"
               onClick={handleAction('start')}
@@ -119,8 +120,8 @@ const ExperimentPaper: React.FC<ExperimentPaperProps> = ({
           ) : (
             <IconButton
               color="primary"
-              title="Pause experiment"
-              aria-label="Pause experiment"
+              title="Pause"
+              aria-label="Pause"
               component="span"
               size="small"
               onClick={handleAction('pause')}
@@ -130,8 +131,8 @@ const ExperimentPaper: React.FC<ExperimentPaperProps> = ({
           )}
           <IconButton
             color="primary"
-            title="Archive experiment"
-            aria-label="Archive experiment"
+            title="Archive"
+            aria-label="Archive"
             component="span"
             size="small"
             onClick={handleAction('delete')}
@@ -141,7 +142,7 @@ const ExperimentPaper: React.FC<ExperimentPaperProps> = ({
         </>
       )}
       <Button variant="outlined" color="primary" size="small">
-        {isArchive ? 'Report' : 'Detail'}
+        {isArchive ? T('common.report') : T('common.detail')}
       </Button>
     </Box>
   )
@@ -189,4 +190,4 @@ const ExperimentPaper: React.FC<ExperimentPaperProps> = ({
   )
 }
 
-export default ExperimentPaper
+export default ExperimentListItem

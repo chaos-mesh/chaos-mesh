@@ -6,6 +6,7 @@ import { Experiment } from 'api/experiments.type'
 import Loading from 'components/Loading'
 import PaperTop from 'components/PaperTop'
 import StatusPanel from 'components/StatusPanel'
+import T from 'components/T'
 import api from 'api'
 import genChaosChart from 'lib/d3/chaosBarChart'
 
@@ -52,7 +53,7 @@ export default function Overview() {
             }
 
             return acc
-          }, {} as { [key: string]: number })
+          }, {} as Record<string, number>)
         ).map(([k, v]) => ({ kind: k, sum: v })),
       })
     }
@@ -64,7 +65,7 @@ export default function Overview() {
         <Grid container spacing={3}>
           <Grid item xs={12} md={6}>
             <Paper variant="outlined">
-              <PaperTop title="Total Experiments" />
+              <PaperTop title={T('overview.totalExperiments')} />
               <div ref={chaosChartRef} className={classes.chaosChart} />
             </Paper>
           </Grid>

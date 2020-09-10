@@ -7,13 +7,13 @@ import chaosMeshTheme from 'theme'
 import store from './store'
 
 const App = () => (
-  <Provider store={store}>
-    <Router basename="/dashboard">
-      <ThemeProvider theme={chaosMeshTheme}>
+  <ThemeProvider theme={chaosMeshTheme}>
+    <Provider store={store}>
+      <Router basename="/dashboard">
         <TopContainer />
-      </ThemeProvider>
-    </Router>
-  </Provider>
+      </Router>
+    </Provider>
+  </ThemeProvider>
 )
 
 export default App

@@ -14,7 +14,7 @@ export interface ExperimentScope {
   phase_selectors: string[]
   mode: string
   value: string
-  pods: { [key: string]: string[] }
+  pods: Record<string, string[]>
 }
 
 export interface ExperimentTargetPod {
