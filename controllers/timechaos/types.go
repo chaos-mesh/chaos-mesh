@@ -42,6 +42,7 @@ const timeChaosMsg = "time is shifted with %v"
 // Reconciler is time-chaos reconciler
 type Reconciler struct {
 	client.Client
+	client.Reader
 	record.EventRecorder
 	Log logr.Logger
 }
@@ -67,12 +68,12 @@ func (r *Reconciler) Reconcile(req ctrl.Request, chaos *v1alpha1.TimeChaos) (ctr
 }
 
 func (r *Reconciler) commonTimeChaos(timechaos *v1alpha1.TimeChaos, req ctrl.Request) (ctrl.Result, error) {
-	cr := common.NewReconciler(r, r.Client, r.Log)
+	cr := common.NewReconciler(r, r.Client, r.Reader, r.Log)
 	return cr.Reconcile(req)
 }
 
 func (r *Reconciler) scheduleTimeChaos(timechaos *v1alpha1.TimeChaos, req ctrl.Request) (ctrl.Result, error) {
-	sr := twophase.NewReconciler(r, r.Client, r.Log)
+	sr := twophase.NewReconciler(r, r.Client, r.Reader, r.Log)
 	return sr.Reconcile(req)
 }
 
@@ -87,7 +88,7 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1
 
 	timechaos.SetDefaultValue()
 
-	pods, err := utils.SelectAndFilterPods(ctx, r.Client, &timechaos.Spec)
+	pods, err := utils.SelectAndFilterPods(ctx, r.Client, r.Reader, &timechaos.Spec)
 
 	if err != nil {
 		r.Log.Error(err, "failed to select and filter pods")
@@ -143,7 +144,7 @@ func (r *Reconciler) cleanFinalizersAndRecover(ctx context.Context, chaos *v1alp
 		}
 
 		var pod v1.Pod
-		err = r.Get(ctx, types.NamespacedName{
+		err = r.Client.Get(ctx, types.NamespacedName{
 			Namespace: ns,
 			Name:      name,
 		}, &pod)
