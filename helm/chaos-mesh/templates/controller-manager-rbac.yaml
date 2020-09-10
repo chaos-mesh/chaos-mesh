@@ -142,7 +142,7 @@ roleRef:
   name: {{ .Release.Name }}:chaos-controller-manager-target-namespace
 subjects:
   - kind: ServiceAccount
-    name: s{{ .Values.controllerManager.serviceAccount }}
+    name: {{ .Values.controllerManager.serviceAccount }}
     namespace: {{ .Release.Namespace }}
 {{- end }}
 
