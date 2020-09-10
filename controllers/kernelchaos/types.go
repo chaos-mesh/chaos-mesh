@@ -44,6 +44,7 @@ const kernelChaosMsg = "kernel is injected with %v"
 // Reconciler is KernelChaos reconciler
 type Reconciler struct {
 	client.Client
+	client.Reader
 	Log logr.Logger
 	record.EventRecorder
 }
@@ -54,7 +55,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	ctx := context.Background()
 
 	var kernelChaos v1alpha1.KernelChaos
-	if err := r.Get(ctx, req.NamespacedName, &kernelChaos); err != nil {
+	if err := r.Client.Get(ctx, req.NamespacedName, &kernelChaos); err != nil {
 		r.Log.Error(err, "unable to get kernelChaos")
 		return ctrl.Result{}, nil
 	}
@@ -77,12 +78,12 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 }
 
 func (r *Reconciler) commonKernelChaos(kernelChaos *v1alpha1.KernelChaos, req ctrl.Request) (ctrl.Result, error) {
-	cr := common.NewReconciler(r, r.Client, r.Log)
+	cr := common.NewReconciler(r, r.Client, r.Reader, r.Log)
 	return cr.Reconcile(req)
 }
 
 func (r *Reconciler) scheduleKernelChaos(kernelChaos *v1alpha1.KernelChaos, req ctrl.Request) (ctrl.Result, error) {
-	sr := twophase.NewReconciler(r, r.Client, r.Log)
+	sr := twophase.NewReconciler(r, r.Client, r.Reader, r.Log)
 	return sr.Reconcile(req)
 }
 
@@ -95,7 +96,7 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1
 		return err
 	}
 
-	pods, err := utils.SelectAndFilterPods(ctx, r.Client, &kernelChaos.Spec)
+	pods, err := utils.SelectAndFilterPods(ctx, r.Client, r.Reader, &kernelChaos.Spec)
 	if err != nil {
 		r.Log.Error(err, "failed to select and filter pods")
 		return err
@@ -151,7 +152,7 @@ func (r *Reconciler) cleanFinalizersAndRecover(ctx context.Context, chaos *v1alp
 		}
 
 		var pod v1.Pod
-		err = r.Get(ctx, types.NamespacedName{
+		err = r.Client.Get(ctx, types.NamespacedName{
 			Namespace: ns,
 			Name:      name,
 		}, &pod)

@@ -23,38 +23,35 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	"github.com/chaos-mesh/chaos-mesh/controllers/timechaos"
+	"github.com/chaos-mesh/chaos-mesh/controllers/httpchaos"
 	"github.com/chaos-mesh/chaos-mesh/pkg/utils"
 )
 
-// TimeChaosReconciler reconciles a TimeChaos object
-type TimeChaosReconciler struct {
+// HTTPChaosReconciler reconciles a HTTPChaos object
+type HTTPChaosReconciler struct {
 	client.Client
 	client.Reader
 	record.EventRecorder
 	Log logr.Logger
 }
 
-// +kubebuilder:rbac:groups=chaos-mesh.org,resources=timechaos,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups=chaos-mesh.org,resources=timechaos/status,verbs=get;update;patch
+// +kubebuilder:rbac:groups=chaos-mesh.org,resources=httpchaos,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=chaos-mesh.org,resources=httpchaos/status,verbs=get;update;patch
 
-// Reconcile reconciles a TimeChaos resource
-func (r *TimeChaosReconciler) Reconcile(req ctrl.Request) (result ctrl.Result, err error) {
-	logger := r.Log.WithValues("reconciler", "timechaos")
+func (r *HTTPChaosReconciler) Reconcile(req ctrl.Request) (result ctrl.Result, err error) {
+	logger := r.Log.WithValues("reconciler", "httpfaultchaos")
 
-	reconciler := timechaos.Reconciler{
+	reconciler := httpchaos.Reconciler{
 		Client:        r.Client,
 		Reader:        r.Reader,
 		EventRecorder: r.EventRecorder,
 		Log:           logger,
 	}
-
-	chaos := &v1alpha1.TimeChaos{}
+	chaos := &v1alpha1.HTTPChaos{}
 	if err := r.Client.Get(context.Background(), req.NamespacedName, chaos); err != nil {
-		r.Log.Error(err, "unable to get time chaos")
+		r.Log.Error(err, "unable to get httpfaultchaos")
 		return ctrl.Result{}, nil
 	}
-
 	result, err = reconciler.Reconcile(req, chaos)
 	if err != nil {
 		if chaos.IsDeleted() || chaos.IsPaused() {
@@ -63,13 +60,12 @@ func (r *TimeChaosReconciler) Reconcile(req ctrl.Request) (result ctrl.Result, e
 			r.Event(chaos, v1.EventTypeWarning, utils.EventChaosInjectFailed, err.Error())
 		}
 	}
-
 	return result, nil
 }
 
-// SetupWithManager setups a time chaos reconciler on controller-manager
-func (r *TimeChaosReconciler) SetupWithManager(mgr ctrl.Manager) error {
+func (r *HTTPChaosReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
-		For(&v1alpha1.TimeChaos{}).
+		//exports `HttpFaultChaos` object, which represents the yaml schema content the user applies.
+		For(&v1alpha1.HTTPChaos{}).
 		Complete(r)
 }

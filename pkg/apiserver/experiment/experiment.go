@@ -120,7 +120,7 @@ type actionFunc func(info *core.ExperimentInfo) error
 // @Success 200 "create ok"
 // @Failure 400 {object} utils.APIError
 // @Failure 500 {object} utils.APIError
-// @Router /api/experiments/new [post]
+// @Router /experiments/new [post]
 func (s *Service) createExperiment(c *gin.Context) {
 	exp := &core.ExperimentInfo{}
 	if err := c.ShouldBindJSON(exp); err != nil {
@@ -742,7 +742,7 @@ func (s *Service) getStressChaosDetail(namespace string, name string) (Experimen
 // @Param kind query string false "kind" Enums(PodChaos, IoChaos, NetworkChaos, TimeChaos, KernelChaos, StressChaos)
 // @Param status query string false "status" Enums(Running, Paused, Failed, Finished)
 // @Success 200 {array} Experiment
-// @Router /api/experiments [get]
+// @Router /experiments [get]
 // @Failure 500 {object} utils.APIError
 func (s *Service) listExperiments(c *gin.Context) {
 	kind := c.Query("kind")
@@ -788,7 +788,7 @@ func (s *Service) listExperiments(c *gin.Context) {
 // @Tags experiments
 // @Produce json
 // @Param uid path string true "uid"
-// @Router /api/experiments/detail/{uid} [GET]
+// @Router /experiments/detail/{uid} [GET]
 // @Success 200 {object} ExperimentDetail
 // @Failure 400 {object} utils.APIError
 // @Failure 500 {object} utils.APIError
@@ -847,7 +847,7 @@ func (s *Service) getExperimentDetail(c *gin.Context) {
 // @Failure 400 {object} utils.APIError
 // @Failure 404 {object} utils.APIError
 // @Failure 500 {object} utils.APIError
-// @Router /api/experiments/{uid} [delete]
+// @Router /experiments/{uid} [delete]
 func (s *Service) deleteExperiment(c *gin.Context) {
 	var (
 		chaosKind *v1alpha1.ChaosKind
@@ -931,7 +931,7 @@ func (s *Service) deleteExperiment(c *gin.Context) {
 // @Tags experiments
 // @Produce json
 // @Success 200 {object} ChaosState
-// @Router /api/experiments/state [get]
+// @Router /experiments/state [get]
 // @Failure 500 {object} utils.APIError
 func (s *Service) state(c *gin.Context) {
 	data := new(ChaosState)
@@ -983,7 +983,7 @@ func (s *Service) state(c *gin.Context) {
 // @Failure 400 {object} utils.APIError
 // @Failure 404 {object} utils.APIError
 // @Failure 500 {object} utils.APIError
-// @Router /api/experiments/pause/{uid} [put]
+// @Router /experiments/pause/{uid} [put]
 func (s *Service) pauseExperiment(c *gin.Context) {
 	var (
 		err        error
@@ -1033,7 +1033,7 @@ func (s *Service) pauseExperiment(c *gin.Context) {
 // @Failure 400 {object} utils.APIError
 // @Failure 404 {object} utils.APIError
 // @Failure 500 {object} utils.APIError
-// @Router /api/experiments/start/{uid} [put]
+// @Router /experiments/start/{uid} [put]
 func (s *Service) startExperiment(c *gin.Context) {
 	var (
 		err        error
@@ -1109,7 +1109,7 @@ func (s *Service) patchExperiment(exp *ExperimentBase, annotations map[string]st
 // @Success 200 "update ok"
 // @Failure 400 {object} utils.APIError
 // @Failure 500 {object} utils.APIError
-// @Router /api/experiments/update [put]
+// @Router /experiments/update [put]
 func (s *Service) updateExperiment(c *gin.Context) {
 	exp := &core.ExperimentInfo{}
 	if err := c.ShouldBindJSON(exp); err != nil {

@@ -14,11 +14,8 @@
 package apiserver
 
 import (
-	"context"
 	"fmt"
-	"net"
 	"net/http"
-	"os"
 
 	"go.uber.org/fx"
 
@@ -39,78 +36,26 @@ var (
 	// Module includes the providers and registers provided by apiserver and handlers.
 	Module = fx.Options(
 		fx.Provide(
-			uiserver.AssetFS,
-			newAPIHandlerEngine,
-			NewServer,
+			newEngine,
+			newAPIRouter,
 		),
+		handlerModule,
 		fx.Invoke(serverRegister),
-		handlerModule)
+	)
 
 	log = ctrl.Log.WithName("apiserver")
 )
 
-// Server is a server to run API service.
-type Server struct {
-	ctx context.Context
-
-	conf *config.ChaosDashboardConfig
-
-	uiAssetFS        http.FileSystem
-	apiHandlerEngine *gin.Engine
-}
-
-// NewServer returns a Server instance.
-func NewServer(
-	conf *config.ChaosDashboardConfig,
-	uiAssetFS http.FileSystem,
-	apiHandlerEngine *gin.Engine,
-) *Server {
-	return &Server{
-		conf:             conf,
-		uiAssetFS:        uiAssetFS,
-		apiHandlerEngine: apiHandlerEngine,
-	}
-}
-
-func (s *Server) handler(w http.ResponseWriter, r *http.Request) {
-	s.apiHandlerEngine.ServeHTTP(w, r)
-}
-
-func serverRegister(lx fx.Lifecycle, s *Server, conf *config.ChaosDashboardConfig, assetFs http.FileSystem) {
+func serverRegister(r *gin.Engine, conf *config.ChaosDashboardConfig) {
 	listenAddr := fmt.Sprintf("%s:%d", conf.ListenHost, conf.ListenPort)
-	listener, err := net.Listen("tcp", listenAddr)
-	if err != nil {
-		log.Error(err, "chaos-dashboard listen failed", "host", conf.ListenHost, "port", conf.ListenPort)
-		os.Exit(1)
-	}
 
-	mux := http.DefaultServeMux
-
-	mux.Handle("/", http.StripPrefix("/", uiserver.Handler(assetFs)))
-	mux.Handle("/api/", Handler(s))
-	mux.Handle("/api/swagger/", swaggerserver.Handler())
-	mux.HandleFunc("/ping", pingHandler)
-
-	srv := &http.Server{Handler: mux}
-
-	lx.Append(fx.Hook{
-		OnStart: func(context.Context) error {
-			go func() {
-				if err := srv.Serve(listener); err != http.ErrServerClosed {
-					log.Error(err, "chaos-dashboard aborted with an error")
-				}
-			}()
-			return nil
-		},
-		OnStop: func(ctx context.Context) error {
-			return srv.Close()
-		},
-	})
+	go r.Run(listenAddr)
 }
 
-func newAPIHandlerEngine() (*gin.Engine, *gin.RouterGroup) {
-	apiHandlerEngine := gin.Default()
-	apiHandlerEngine.Use(apiutils.MWHandleErrors())
+func newEngine() *gin.Engine {
+	r := gin.Default()
+
+	r.Use(apiutils.MWHandleErrors())
 
 	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
 		v.RegisterValidation("NameValid", apivalidator.NameValid)
@@ -124,19 +69,41 @@ func newAPIHandlerEngine() (*gin.Engine, *gin.RouterGroup) {
 		v.RegisterValidation("RequiredFieldEqual", apivalidator.RequiredFieldEqualValid, true)
 	}
 
-	endpoint := apiHandlerEngine.Group("/api")
+	moveToUIRoot := func(c *gin.Context) {
+		c.Redirect(http.StatusMovedPermanently, "/dashboard")
+	}
 
-	return apiHandlerEngine, endpoint
+	r.GET("/", moveToUIRoot)
+	ui := uiserver.AssetsFS()
+	if ui != nil {
+		newDashboardRouter(r, ui)
+	} else {
+		r.GET("/dashboard", func(c *gin.Context) {
+			c.String(http.StatusOK, "Dashboard UI is not built. Please run `UI=1 make`.")
+		})
+	}
+	r.NoRoute(moveToUIRoot)
+
+	return r
 }
 
-// Handler returns a `http.Handler`
-func Handler(s *Server) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		s.handler(w, r)
+func newAPIRouter(r *gin.Engine) *gin.RouterGroup {
+	api := r.Group("/api")
+	{
+		api.GET("/swagger/*any", swaggerserver.Handler())
+	}
+
+	return api
+}
+
+func newDashboardRouter(r *gin.Engine, ui http.FileSystem) {
+	renderRequest := func(c *gin.Context) {
+		c.FileFromFS(c.Request.URL.Path, ui)
+	}
+
+	r.GET("dashboard/*any", func(c *gin.Context) {
+		c.FileFromFS("/", ui)
 	})
-}
-
-func pingHandler(w http.ResponseWriter, _ *http.Request) {
-	w.WriteHeader(http.StatusOK)
-	fmt.Fprintf(w, "pong\n")
+	r.GET("/static/*any", renderRequest)
+	r.GET("/favicon.ico", renderRequest)
 }

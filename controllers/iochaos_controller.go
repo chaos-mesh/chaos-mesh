@@ -30,6 +30,7 @@ import (
 // IoChaosReconciler reconciles an IoChaos object
 type IoChaosReconciler struct {
 	client.Client
+	client.Reader
 	record.EventRecorder
 	Log logr.Logger
 }
@@ -43,11 +44,12 @@ func (r *IoChaosReconciler) Reconcile(req ctrl.Request) (result ctrl.Result, err
 
 	reconciler := iochaos.Reconciler{
 		Client:        r.Client,
+		Reader:        r.Reader,
 		EventRecorder: r.EventRecorder,
 		Log:           logger,
 	}
 	chaos := &v1alpha1.IoChaos{}
-	if err := r.Get(context.Background(), req.NamespacedName, chaos); err != nil {
+	if err := r.Client.Get(context.Background(), req.NamespacedName, chaos); err != nil {
 		r.Log.Error(err, "unable to get iochaos")
 		return ctrl.Result{}, nil
 	}
