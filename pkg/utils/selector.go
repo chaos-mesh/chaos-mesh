@@ -118,11 +118,13 @@ func SelectPods(ctx context.Context, c client.Client, r client.Reader, selector 
 		listOptions.LabelSelector = labels.SelectorFromSet(selector.LabelSelectors)
 	}
 	if len(selector.FieldSelectors) > 0 {
+		// Since FieldSelectors need to implement index creation, Reader.List is used to get the pod list.
 		listOptions.FieldSelector = fields.SelectorFromSet(selector.FieldSelectors)
 		if err := r.List(ctx, &podList, &listOptions); err != nil {
 			return nil, err
 		}
 	} else {
+		// Otherwise, just call Client.List directly, which can be obtained through cache.
 		if err := c.List(ctx, &podList, &listOptions); err != nil {
 			return nil, err
 		}
