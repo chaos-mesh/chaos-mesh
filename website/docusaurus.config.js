@@ -85,14 +85,11 @@ module.exports = {
       theme: require('prism-react-renderer/themes/dracula'),
     },
   },
-  plugins: ['docusaurus-plugin-sass'],
   presets: [
     [
       '@docusaurus/preset-classic',
       {
         docs: {
-          // It is recommended to set document id as docs home page (`docs/` path).
-          homePageId: 'overview',
           sidebarPath: require.resolve('./sidebars.js'),
           // Please change this to your repo.
           editUrl: 'https://github.com/chaos-mesh/chaos-mesh/edit/master/website/',
@@ -103,7 +100,7 @@ module.exports = {
           editUrl: 'https://github.com/chaos-mesh/chaos-mesh/edit/master/website/',
         },
         theme: {
-          customCss: require.resolve('./src/styles/custom.scss'),
+          customCss: require.resolve('./src/styles/custom.css'),
         },
       },
     ],

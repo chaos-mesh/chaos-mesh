@@ -101,6 +101,7 @@ replace (
 	k8s.io/legacy-cloud-providers => k8s.io/legacy-cloud-providers v0.17.0
 	k8s.io/metrics => k8s.io/metrics v0.17.0
 	k8s.io/sample-apiserver => k8s.io/sample-apiserver v0.17.0
+	vbom.ml/util => github.com/fvbommel/util v0.0.2
 )
 
 go 1.13
