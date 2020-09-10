@@ -153,7 +153,7 @@ Then, you can start your application and define YAML file to start your chaos ex
 
 > **Note:**
 >
-> The value of the annotation in the above examples, `chaos-tikv` is the name filed in your injection config.
+> The value of the annotation in the above examples, `chaos-tikv` is the name field in your injection config.
 
 ### Start a chaos experiment
 

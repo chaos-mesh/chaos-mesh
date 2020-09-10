@@ -8,7 +8,7 @@ After [Develop a new chaos](dev_hello_world.md), we add a new chaos type `HelloW
 
 ## Add selector for HelloWorldChaos
 
-Since we need to select some pods to do `HelloWorld` chaos, we need to add a filed in `HelloWorldChaos`:
+Since we need to select some pods to do `HelloWorld` chaos, we need to add a field in `HelloWorldChaos`:
 
     ```golang
     // HelloWorldChaos is the Schema for the helloworldchaos API
