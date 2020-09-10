@@ -48,7 +48,7 @@ func (r *HTTPChaosReconciler) Reconcile(req ctrl.Request) (result ctrl.Result, e
 		Log:           logger,
 	}
 	chaos := &v1alpha1.HTTPChaos{}
-	if err := r.Get(context.Background(), req.NamespacedName, chaos); err != nil {
+	if err := r.Client.Get(context.Background(), req.NamespacedName, chaos); err != nil {
 		r.Log.Error(err, "unable to get httpfaultchaos")
 		return ctrl.Result{}, nil
 	}
