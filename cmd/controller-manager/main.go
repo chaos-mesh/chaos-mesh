@@ -163,6 +163,14 @@ func main() {
 		os.Exit(1)
 	}
 
+	if err = (&controllers.HTTPChaosReconciler{
+		Client: mgr.GetClient(),
+		Log:    ctrl.Log.WithName("controllers").WithName("HTTPChaos"),
+	}).SetupWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create controller", "controller", "HTTPChaos")
+		os.Exit(1)
+	}
+
 	// We only setup webhook for podiochaos, and the logic of applying chaos are in the mutation
 	// webhook, because we need to get the running result synchronously in io chaos reconciler
 	v1alpha1.RegisterPodIoHandler(&podiochaos.Handler{

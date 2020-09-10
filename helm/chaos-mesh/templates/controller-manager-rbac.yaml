@@ -82,6 +82,7 @@ rules:
     - stresschaos
     - podiochaos
     - podnetworkchaos
+    - httpchaos
   verbs: ["*"]
 ---
 kind: ClusterRoleBinding
@@ -150,6 +151,7 @@ rules:
   - stresschaos
   - podiochaos
   - podnetworkchaos
+  - httpchaos
   verbs: ["*"]
 ---
 kind: RoleBinding
