@@ -92,7 +92,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request, chaos *v1alpha1.HTTPChaos) (ctr
 }
 
 func (r *Reconciler) commonHttpFaultChaos(httpFaultChaos *v1alpha1.HTTPChaos, req ctrl.Request) (ctrl.Result, error) {
-	cr := common.NewReconciler(r, r.Client, r.Log)
+	cr := common.NewReconciler(r, r.Client, r.Reader, r.Log)
 	return cr.Reconcile(req)
 }
 
