@@ -1,5 +1,5 @@
 ---
-id: simulating-clock-skew-in-k8s-without-affecting-other-containers-on-node
+slug: /simulating-clock-skew-in-k8s-without-affecting-other-containers-on-node
 title: Simulating Clock Skew in K8s Without Affecting Other Containers on the Node
 author: Cwen Yin
 author_title: Maintainer of Chaos Mesh
