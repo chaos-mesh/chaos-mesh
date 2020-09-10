@@ -16,8 +16,9 @@ package dbstore
 import (
 	"context"
 
-	"github.com/jinzhu/gorm"
 	"go.uber.org/fx"
+
+	"github.com/jinzhu/gorm"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/config"
 

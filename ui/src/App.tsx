@@ -8,7 +8,7 @@ import store from './store'
 
 const App = () => (
   <Provider store={store}>
-    <Router>
+    <Router basename="/dashboard">
       <ThemeProvider theme={chaosMeshTheme}>
         <TopContainer />
       </ThemeProvider>
