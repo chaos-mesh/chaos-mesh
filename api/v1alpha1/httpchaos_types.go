@@ -29,7 +29,7 @@ func init() {
 	})
 }
 
-// HTTPAction represents the chaos action about I/O action.
+// HTTPChaosAction represents the chaos action about HTTP.
 type HTTPChaosAction string
 
 const (
@@ -65,8 +65,8 @@ type HTTPChaosSpec struct {
 	Action HTTPChaosAction `json:"action"`
 
 	// Mode defines the mode to run chaos action.
-	// Supported mode: one
-	// +kubebuilder:validation:Enum=one
+	// Supported mode: one / all / fixed / fixed-percent / random-max-percent
+	// +kubebuilder:validation:Enum=one;all;fixed;fixed-percent;random-max-percent
 	Mode PodMode `json:"mode"`
 
 	// Value is required when the mode is set to `FixedPodMode` / `FixedPercentPodMod` / `RandomMaxPercentPodMod`.

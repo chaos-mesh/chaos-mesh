@@ -75,9 +75,13 @@ spec:
               type: array
             mode:
               description: 'Mode defines the mode to run chaos action. Supported mode:
-                one'
+                one / all / fixed / fixed-percent / random-max-percent'
               enum:
               - one
+              - all
+              - fixed
+              - fixed-percent
+              - random-max-percent
               type: string
             percent:
               description: 'Percent defines the percentage of injection errors and
