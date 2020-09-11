@@ -1329,24 +1329,6 @@ webhooks:
       service:
         name: chaos-mesh-controller-manager
         namespace: chaos-testing
-        path: /mutate-chaos-mesh-org-v1alpha1-httpchaos
-    failurePolicy: Fail
-    name: mhttpchaos.kb.io
-    rules:
-      - apiGroups:
-          - chaos-mesh.org
-        apiVersions:
-          - v1alpha1
-        operations:
-          - CREATE
-          - UPDATE
-        resources:
-          - httpchaos
-  - clientConfig:
-      caBundle: "${CA_BUNDLE}"
-      service:
-        name: chaos-mesh-controller-manager
-        namespace: chaos-testing
         path: /mutate-chaos-mesh-org-v1alpha1-networkchaos
     failurePolicy: Fail
     name: mnetworkchaos.kb.io
@@ -1479,24 +1461,6 @@ webhooks:
           - UPDATE
         resources:
           - timechaos
-  - clientConfig:
-      caBundle: "${CA_BUNDLE}"
-      service:
-        name: chaos-mesh-controller-manager
-        namespace: chaos-testing
-        path: /validate-chaos-mesh-org-v1alpha1-httpchaos
-    failurePolicy: Fail
-    name: vhttpchaos.kb.io
-    rules:
-      - apiGroups:
-          - chaos-mesh.org
-        apiVersions:
-          - v1alpha1
-        operations:
-          - CREATE
-          - UPDATE
-        resources:
-          - httpchaos
   - clientConfig:
       caBundle: "${CA_BUNDLE}"
       service:
