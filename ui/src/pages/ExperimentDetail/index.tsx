@@ -1,4 +1,5 @@
 import { Box, Button, Grid, Grow, Modal, Paper } from '@material-ui/core'
+import EventsTable, { EventsTableHandles } from 'components/EventsTable'
 import React, { useEffect, useRef, useState } from 'react'
 import { Theme, createStyles, makeStyles } from '@material-ui/core/styles'
 import { setAlert, setAlertOpen } from 'slices/globalStatus'
@@ -7,7 +8,6 @@ import { useHistory, useParams } from 'react-router-dom'
 import ArchiveOutlinedIcon from '@material-ui/icons/ArchiveOutlined'
 import ConfirmDialog from 'components/ConfirmDialog'
 import { Event } from 'api/events.type'
-import EventsTable, { EventsTableHandles } from 'components/EventsTable'
 import ExperimentConfiguration from 'components/ExperimentConfiguration'
 import { ExperimentDetail as ExperimentDetailType } from 'api/experiments.type'
 import JSONEditor from 'components/JSONEditor'
@@ -16,6 +16,7 @@ import NoteOutlinedIcon from '@material-ui/icons/NoteOutlined'
 import PaperTop from 'components/PaperTop'
 import PauseCircleOutlineIcon from '@material-ui/icons/PauseCircleOutline'
 import PlayCircleOutlineIcon from '@material-ui/icons/PlayCircleOutline'
+import T from 'components/T'
 import _JSONEditor from 'jsoneditor'
 import api from 'api'
 import genEventsChart from 'lib/d3/eventsChart'
@@ -241,7 +242,7 @@ export default function ExperimentDetail() {
                   startIcon={<ArchiveOutlinedIcon />}
                   onClick={handleAction('delete')}
                 >
-                  Archive
+                  {T('archives.single')}
                 </Button>
               </Box>
               <Box>
@@ -252,7 +253,7 @@ export default function ExperimentDetail() {
                     startIcon={<PlayCircleOutlineIcon />}
                     onClick={handleAction('start')}
                   >
-                    Start
+                    {T('common.start')}
                   </Button>
                 ) : (
                   <Button
@@ -261,7 +262,7 @@ export default function ExperimentDetail() {
                     startIcon={<PauseCircleOutlineIcon />}
                     onClick={handleAction('pause')}
                   >
-                    Pause
+                    {T('common.pause')}
                   </Button>
                 )}
               </Box>
@@ -270,7 +271,7 @@ export default function ExperimentDetail() {
 
           <Grid item xs={12}>
             <Paper variant="outlined">
-              <PaperTop title="Configuration">
+              <PaperTop title={T('common.configuration')}>
                 <Button
                   variant="outlined"
                   size="small"
@@ -278,7 +279,7 @@ export default function ExperimentDetail() {
                   startIcon={<NoteOutlinedIcon />}
                   onClick={onModalOpen}
                 >
-                  Update
+                  {T('common.update')}
                 </Button>
               </PaperTop>
               <Box p={3}>{detail && <ExperimentConfiguration experimentDetail={detail} />}</Box>
@@ -287,7 +288,7 @@ export default function ExperimentDetail() {
 
           <Grid item xs={12}>
             <Paper variant="outlined">
-              <PaperTop title="Timeline" />
+              <PaperTop title={T('common.timeline')} />
               <div ref={chartRef} className={classes.eventsChart} />
             </Paper>
           </Grid>

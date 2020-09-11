@@ -9,8 +9,11 @@ import Loading from 'components/Loading'
 import T from 'components/T'
 import _groupBy from 'lodash.groupby'
 import api from 'api'
+import { useIntl } from 'react-intl'
 
 export default function Archives() {
+  const intl = useIntl()
+
   const [loading, setLoading] = useState(false)
   const [archives, setArchives] = useState<Archive[] | null>(null)
   const [selected, setSelected] = useState({
@@ -65,6 +68,7 @@ export default function Archives() {
                         isArchive
                         handleSelect={setSelected}
                         handleDialogOpen={setDialogOpen}
+                        intl={intl}
                       />
                     </Grid>
                   ))}

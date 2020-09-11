@@ -11,8 +11,8 @@ import {
   Typography,
 } from '@material-ui/core'
 import { Form, Formik } from 'formik'
+import { IntlShape, useIntl } from 'react-intl'
 import React, { useEffect, useState } from 'react'
-import { RootState, useStoreDispatch } from 'store'
 import { defaultExperimentSchema, validationSchema } from './constants'
 import { parseLoaded, parseSubmit, yamlToExperiment } from 'lib/formikhelpers'
 import { setAlert, setAlertOpen } from 'slices/globalStatus'
@@ -31,7 +31,7 @@ import api from 'api'
 import flat from 'flat'
 import { setNeedToRefreshExperiments } from 'slices/experiments'
 import { useHistory } from 'react-router-dom'
-import { useSelector } from 'react-redux'
+import { useStoreDispatch } from 'store'
 import yaml from 'js-yaml'
 
 const Skeleton3 = () => <SkeletonN n={3} />
@@ -62,9 +62,10 @@ const CustomRadioLabel = (e: ExperimentResponse | Archive) => (
 
 interface ActionsProps {
   setInitialValues: (initialValues: Experiment) => void
+  intl: IntlShape
 }
 
-const Actions = ({ setInitialValues }: ActionsProps) => {
+const Actions = ({ setInitialValues, intl }: ActionsProps) => {
   const dispatch = useStoreDispatch()
 
   const [experiments, setExperiments] = useState<ExperimentResponse[] | null>(null)
@@ -127,7 +128,7 @@ const Actions = ({ setInitialValues }: ActionsProps) => {
         dispatch(
           setAlert({
             type: 'success',
-            message: `Imported successfully!`,
+            message: intl.formatMessage({ id: 'common.importedSuccessfully' }),
           })
         )
       } catch (e) {
@@ -135,7 +136,7 @@ const Actions = ({ setInitialValues }: ActionsProps) => {
         dispatch(
           setAlert({
             type: 'error',
-            message: `An error occurred: ${e}`,
+            message: e,
           })
         )
       } finally {
@@ -206,7 +207,7 @@ const Actions = ({ setInitialValues }: ActionsProps) => {
 export default function NewExperiment() {
   const history = useHistory()
 
-  const { intl } = useSelector((state: RootState) => state.globalStatus)
+  const intl = useIntl()
   const dispatch = useStoreDispatch()
 
   const [initialValues, setInitialValues] = useState<Experiment>(defaultExperimentSchema)
@@ -224,7 +225,7 @@ export default function NewExperiment() {
         dispatch(
           setAlert({
             type: 'success',
-            message: 'Created successfully!',
+            message: intl.formatMessage({ id: 'common.createdSuccessfully' }),
           })
         )
         dispatch(setAlertOpen(true))
@@ -257,7 +258,7 @@ export default function NewExperiment() {
                 </Form>
               </Grid>
               <Grid item xs={12} sm={4}>
-                <Actions setInitialValues={setInitialValues} />
+                <Actions setInitialValues={setInitialValues} intl={intl} />
               </Grid>
             </Grid>
 

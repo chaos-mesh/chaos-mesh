@@ -69,6 +69,7 @@
   },
   "experiments": {
     "title": "Experiments",
+    "single": "Experiment",
     "status": {
       "running": "Running",
       "paused": "Paused",
@@ -76,14 +77,27 @@
       "waiting": "Waiting",
       "finished": "Finished"
     },
-    "noExperimentsFound": "No experiments found"
+    "noExperimentsFound": "No experiments found",
+    "deleteDesc": "You can still find this experiment in the archives",
+    "pauseDesc": "You can restart the experiment in the same position",
+    "startDesc": "The operation will take effect immediately"
   },
   "events": {
     "title": "Events",
-    "noEventsFound": "No events found"
+    "noEventsFound": "No events found",
+    "table": "Events",
+    "event": {
+      "experiment": "Experiment",
+      "uuid": "UUID",
+      "namespace": "Namespace",
+      "kind": "Kind",
+      "started": "Started",
+      "ended": "Ended"
+    }
   },
   "archives": {
     "title": "Archives",
+    "single": "Archive",
     "no_archives_found": "No archives found"
   },
   "settings": {
@@ -108,7 +122,15 @@
     "detail": "Detail",
     "report": "Report",
     "start": "Start",
-    "pause": "Pause"
+    "pause": "Pause",
+    "update": "Update",
+    "configuration": "Configuration",
+    "confirm": "Confirm",
+    "cancel": "Cancel",
+    "createedSuccessfully": "Created successfully",
+    "importedSuccessfully": "Imported successfully",
+    "timeline": "Timeline",
+    "search": "Search"
   },
   "k8s": {
     "labels": "Labels",

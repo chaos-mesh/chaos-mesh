@@ -31,9 +31,11 @@ import LastPageIcon from '@material-ui/icons/LastPage'
 import Loading from 'components/Loading'
 import PaperTop from 'components/PaperTop'
 import SearchIcon from '@material-ui/icons/Search'
+import T from 'components/T'
 import Tooltip from 'components/Tooltip'
 import _debounce from 'lodash.debounce'
 import { searchEvents } from 'lib/search'
+import { useIntl } from 'react-intl'
 import { usePrevious } from 'lib/hooks'
 import useRunningLabelStyles from 'lib/styles/runningLabel'
 
@@ -100,12 +102,12 @@ type SortedEvent = Omit<Event, 'pods'>
 type SortedEventWithPods = Event
 
 const headCells: { id: keyof SortedEvent; label: string }[] = [
-  { id: 'experiment', label: 'Experiment' },
-  { id: 'experiment_id', label: 'UUID' },
-  { id: 'namespace', label: 'Namespace' },
-  { id: 'kind', label: 'Kind' },
-  { id: 'start_time', label: 'Started' },
-  { id: 'finish_time', label: 'Ended' },
+  { id: 'experiment', label: 'experiment' },
+  { id: 'experiment_id', label: 'uuid' },
+  { id: 'namespace', label: 'namespace' },
+  { id: 'kind', label: 'kind' },
+  { id: 'start_time', label: 'started' },
+  { id: 'finish_time', label: 'ended' },
 ]
 
 interface EventsTableHeadProps {
@@ -120,7 +122,7 @@ const EventsTableHead: React.FC<EventsTableHeadProps> = ({ order, orderBy, onSor
 
   let cells = headCells
   if (detailed) {
-    cells = cells.concat([{ id: 'Detail' as keyof SortedEvent, label: 'Detail' }])
+    cells = cells.concat([{ id: 'Detail' as keyof SortedEvent, label: '' }])
   }
 
   return (
@@ -133,7 +135,7 @@ const EventsTableHead: React.FC<EventsTableHeadProps> = ({ order, orderBy, onSor
             onClick={handleSortEvents(cell.id)}
           >
             <TableSortLabel active={orderBy === cell.id} direction={orderBy === cell.id ? order : 'desc'}>
-              {cell.label}
+              {cell.label && T(`events.event.${cell.label}`)}
             </TableSortLabel>
           </TableCell>
         ))}
@@ -205,7 +207,7 @@ const EventsTableRow: React.FC<EventsTableRowProps> = ({ event: e, detailed, onS
         {detailed && (
           <TableCell>
             <Button variant="outlined" size="small" color="primary" onClick={onSelectEvent(e)}>
-              Detail
+              {T('common.detail')}
             </Button>
           </TableCell>
         )}
@@ -219,17 +221,18 @@ export interface EventsTableHandles {
 }
 
 interface EventsTableProps {
-  title?: string
   events: Event[]
   detailed?: boolean
   hasSearch?: boolean
 }
 
 const EventsTable: React.ForwardRefRenderFunction<EventsTableHandles, EventsTableProps> = (
-  { title = 'Events', events: allEvents, detailed = false, hasSearch = true },
+  { events: allEvents, detailed = false, hasSearch = true },
   ref
 ) => {
   const classes = useStyles()
+
+  const intl = useIntl()
 
   const [events, setEvents] = useState(allEvents)
   const [order, setOrder] = useState<Order>('desc')
@@ -286,12 +289,12 @@ const EventsTable: React.ForwardRefRenderFunction<EventsTableHandles, EventsTabl
   return (
     <Box position="relative">
       <Paper variant="outlined">
-        <PaperTop title={title}>
+        <PaperTop title={T('events.table')}>
           {hasSearch && (
             <TextField
-              style={{ width: '200px', minWidth: '30%', margin: 0 }}
+              style={{ width: 200, minWidth: '30%', margin: 0 }}
               margin="dense"
-              placeholder="Search events..."
+              placeholder={intl.formatMessage({ id: 'common.search' })}
               disabled={!allEvents}
               variant="outlined"
               InputProps={{

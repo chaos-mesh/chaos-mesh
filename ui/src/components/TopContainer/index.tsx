@@ -4,7 +4,6 @@ import { Redirect, Route, Switch } from 'react-router-dom'
 import { RootState, useStoreDispatch } from 'store'
 import { Theme, createStyles, makeStyles } from '@material-ui/core/styles'
 import { drawerCloseWidth, drawerWidth } from './Sidebar'
-import { setAlertOpen, setIntl } from 'slices/globalStatus'
 
 import Alert from '@material-ui/lab/Alert'
 import ContentContainer from 'components/ContentContainer'
@@ -16,8 +15,8 @@ import chaosMeshRoutes from 'routes'
 import flat from 'flat'
 import insertCommonStyle from 'lib/d3/insertCommonStyle'
 import messages from 'i18n/messages'
+import { setAlertOpen } from 'slices/globalStatus'
 import { setNavigationBreadcrumbs } from 'slices/navigation'
-import { useIntl } from 'react-intl'
 import { useLocation } from 'react-router-dom'
 import { useSelector } from 'react-redux'
 
@@ -66,8 +65,6 @@ const TopContainer = () => {
 
   const { pathname } = useLocation()
 
-  const intl = useIntl()
-
   const { settings, globalStatus, navigation } = useSelector((state: RootState) => state)
   const { alert, alertOpen } = globalStatus
   const { breadcrumbs } = navigation
@@ -82,10 +79,6 @@ const TopContainer = () => {
   }
 
   useEffect(insertCommonStyle, [])
-
-  useEffect(() => {
-    dispatch(setIntl(intl))
-  }, [dispatch, intl])
 
   useEffect(() => {
     dispatch(setNavigationBreadcrumbs(pathname))

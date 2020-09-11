@@ -64,7 +64,7 @@ export default function Events() {
         <Grow in={!loading} style={{ transformOrigin: '0 0 0' }}>
           <Box display="flex" flexDirection="column">
             <Paper className={classes.timelinePaper} variant="outlined">
-              <PaperTop title="Timeline" />
+              <PaperTop title={T('common.timeline')} />
               <div ref={chartRef} className={classes.eventsChart} />
             </Paper>
             <EventsTable ref={eventsTableRef} events={events} detailed />

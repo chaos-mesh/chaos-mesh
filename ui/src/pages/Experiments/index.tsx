@@ -14,9 +14,12 @@ import _groupBy from 'lodash.groupby'
 import api from 'api'
 import { dayComparator } from 'lib/dayjs'
 import { toTitleCase } from 'lib/utils'
+import { useIntl } from 'react-intl'
 import { useSelector } from 'react-redux'
 
 export default function Experiments() {
+  const intl = useIntl()
+
   const needToRefreshExperiments = useSelector((state: RootState) => state.experiments.needToRefreshExperiments)
   const dispatch = useStoreDispatch()
 
@@ -143,7 +146,12 @@ export default function Experiments() {
                 {experimentsByKind.length > 0 &&
                   experimentsByKind.map((e) => (
                     <Grid key={e.uid} item xs={12}>
-                      <ExperimentListItem experiment={e} handleSelect={setSelected} handleDialogOpen={setDialogOpen} />
+                      <ExperimentListItem
+                        experiment={e}
+                        handleSelect={setSelected}
+                        handleDialogOpen={setDialogOpen}
+                        intl={intl}
+                      />
                     </Grid>
                   ))}
               </Grid>

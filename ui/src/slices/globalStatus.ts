@@ -1,11 +1,9 @@
 import { Alert } from './globalStatus.type'
-import { IntlShape } from 'react-intl'
 import { createSlice } from '@reduxjs/toolkit'
 
 const initialState: {
   alert: Alert
   alertOpen: boolean
-  intl?: IntlShape
 } = {
   alert: {
     type: 'success',
@@ -24,12 +22,9 @@ const globalStatusSlice = createSlice({
     setAlertOpen(state, action) {
       state.alertOpen = action.payload
     },
-    setIntl(state, action) {
-      state.intl = action.payload
-    },
   },
 })
 
-export const { setAlert, setAlertOpen, setIntl } = globalStatusSlice.actions
+export const { setAlert, setAlertOpen } = globalStatusSlice.actions
 
 export default globalStatusSlice.reducer

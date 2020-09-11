@@ -69,6 +69,7 @@
   },
   "experiments": {
     "title": "实验",
+    "single": "实验",
     "status": {
       "running": "运行中",
       "paused": "暂停",
@@ -76,14 +77,27 @@
       "waiting": "等待中",
       "finished": "完成"
     },
-    "noExperimentsFound": "未发现实验"
+    "noExperimentsFound": "未发现实验",
+    "deleteDesc": "你仍然可以在归档中找到此实验",
+    "pauseDesc": "你可以在同一位置重启这个实验",
+    "startDesc": "此操作将立即生效"
   },
   "events": {
     "title": "事件",
-    "noEventsFound": "未发现事件"
+    "noEventsFound": "未发现事件",
+    "table": "事件列表",
+    "event": {
+      "experiment": "实验",
+      "uuid": "UUID",
+      "namespace": "命名空间",
+      "kind": "类别",
+      "started": "开始时间",
+      "ended": "结束时间" 
+    }
   },
   "archives": {
     "title": "归档",
+    "single": "归档",
     "no_archives_found": "未发现归档"
   },
   "settings": {
@@ -107,8 +121,16 @@
     "noOptions": "无选项",
     "detail": "详细信息",
     "report": "报告",
-    "start": "开始",
-    "pause": "暂停"
+    "start": "启动",
+    "pause": "暂停",
+    "update": "更新",
+    "configuration": "配置",
+    "confirm": "确认",
+    "cancel": "取消",
+    "createedSuccessfully": "创建成功",
+    "importedSuccessfully": "导入成功",
+    "timeline": "时间线",
+    "search": "搜索"
   },
   "k8s": {
     "labels": "标签",
