@@ -978,6 +978,7 @@ rules:
     - kernelchaos
     - stresschaos
     - podnetworkchaos
+    - httpchaos
   verbs: ["*"]
 ---
 # Source: chaos-mesh/templates/controller-manager-rbac.yaml
