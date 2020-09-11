@@ -10,6 +10,7 @@ import PaperTop from 'components/PaperTop'
 import T from 'components/T'
 import api from 'api'
 import genEventsChart from 'lib/d3/eventsChart'
+import { useIntl } from 'react-intl'
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -25,6 +26,8 @@ const useStyles = makeStyles((theme: Theme) =>
 
 export default function Events() {
   const classes = useStyles()
+
+  const intl = useIntl()
 
   const chartRef = useRef<HTMLDivElement>(null)
   const eventsTableRef = useRef<EventsTableHandles>(null)
@@ -54,8 +57,10 @@ export default function Events() {
         root: chart,
         events,
         onSelectEvent: eventsTableRef.current!.onSelectEvent,
+        intl,
       })
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [events])
 
   return (

@@ -202,7 +202,11 @@ const EventsTableRow: React.FC<EventsTableRowProps> = ({ event: e, detailed, onS
         <TableCell>{e.kind}</TableCell>
         <TableCell>{format(e.start_time)}</TableCell>
         <TableCell>
-          {e.finish_time ? format(e.finish_time) : <span className={runningLabel.root}>Running</span>}
+          {e.finish_time ? (
+            format(e.finish_time)
+          ) : (
+            <span className={runningLabel.root}>{T('experiments.status.running')}</span>
+          )}
         </TableCell>
         {detailed && (
           <TableCell>
@@ -369,7 +373,7 @@ const EventsTable: React.ForwardRefRenderFunction<EventsTableHandles, EventsTabl
                     onChangeRowsPerPage={handleChangeRowsPerPage}
                     ActionsComponent={TablePaginationActions as any}
                     labelDisplayedRows={({ from, to, count }) => `${from} - ${to} of ${count}`}
-                    labelRowsPerPage="Events per page"
+                    labelRowsPerPage={intl.formatMessage({ id: 'events.eventsPerPage' })}
                   />
                 )}
               </TableRow>

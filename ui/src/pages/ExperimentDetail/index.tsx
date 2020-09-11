@@ -22,6 +22,7 @@ import api from 'api'
 import genEventsChart from 'lib/d3/eventsChart'
 import { getStateofExperiments } from 'slices/experiments'
 import { toTitleCase } from 'lib/utils'
+import { useIntl } from 'react-intl'
 import { usePrevious } from 'lib/hooks'
 import { useStoreDispatch } from 'store'
 
@@ -64,6 +65,8 @@ const useStyles = makeStyles((theme: Theme) =>
 
 export default function ExperimentDetail() {
   const classes = useStyles()
+
+  const intl = useIntl()
 
   const history = useHistory()
   const { uuid } = useParams()
@@ -120,6 +123,7 @@ export default function ExperimentDetail() {
         root: chart,
         events,
         onSelectEvent: eventsTableRef.current!.onSelectEvent,
+        intl,
       })
     }
 

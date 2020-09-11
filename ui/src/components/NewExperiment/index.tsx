@@ -128,7 +128,7 @@ const Actions = ({ setInitialValues, intl }: ActionsProps) => {
         dispatch(
           setAlert({
             type: 'success',
-            message: intl.formatMessage({ id: 'common.importedSuccessfully' }),
+            message: intl.formatMessage({ id: 'common.importSuccessfully' }),
           })
         )
       } catch (e) {
@@ -225,7 +225,7 @@ export default function NewExperiment() {
         dispatch(
           setAlert({
             type: 'success',
-            message: intl.formatMessage({ id: 'common.createdSuccessfully' }),
+            message: intl.formatMessage({ id: 'common.createSuccessfully' }),
           })
         )
         dispatch(setAlertOpen(true))

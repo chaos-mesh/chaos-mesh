@@ -1,8 +1,10 @@
 import * as d3 from 'd3'
 
-import { Event } from 'api/events.type'
-import _debounce from 'lodash.debounce'
 import day, { format } from 'lib/dayjs'
+
+import { Event } from 'api/events.type'
+import { IntlShape } from 'react-intl'
+import _debounce from 'lodash.debounce'
 import wrapText from './wrapText'
 
 const margin = {
@@ -16,10 +18,12 @@ export default function gen({
   root,
   events,
   onSelectEvent,
+  intl,
 }: {
   root: HTMLElement
   events: Event[]
   onSelectEvent?: (e: Event) => () => void
+  intl: IntlShape
 }) {
   let width = root.offsetWidth
   const height = root.offsetHeight
@@ -167,14 +171,28 @@ export default function gen({
   }
 
   function genTooltipContent(d: Event) {
-    return `<b>Experiment: ${d.experiment}</b>
+    return `<b>${intl.formatMessage({ id: 'events.event.experiment' })}: ${d.experiment}</b>
             <br />
-            <b>Status: ${d.finish_time ? 'Ended' : 'Running'}</b>
+            <b>
+              ${intl.formatMessage({ id: 'common.status' })}: ${
+      d.finish_time
+        ? intl.formatMessage({ id: 'experiments.status.finished' })
+        : intl.formatMessage({ id: 'experiments.status.running' })
+    }
+            </b>
             <br />
             <br />
-            <span style="color: rgba(0, 0, 0, 0.67);">Started: ${format(d.start_time)}</span>
+            <span style="color: rgba(0, 0, 0, 0.67);">
+              ${intl.formatMessage({ id: 'events.event.started' })}: ${format(d.start_time)}
+            </span>
             <br />
-            ${d.finish_time ? `<span style="color: rgba(0, 0, 0, 0.67);">Ended: ${format(d.finish_time)}</span>` : ''}
+            ${
+              d.finish_time
+                ? `<span style="color: rgba(0, 0, 0, 0.67);">${intl.formatMessage({
+                    id: 'events.event.ended',
+                  })}: ${format(d.finish_time)}</span>`
+                : ''
+            }
             `
   }
 

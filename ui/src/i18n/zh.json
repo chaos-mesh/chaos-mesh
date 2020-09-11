@@ -86,13 +86,14 @@
     "title": "事件",
     "noEventsFound": "未发现事件",
     "table": "事件列表",
+    "eventsPerPage": "每页事件数",
     "event": {
       "experiment": "实验",
       "uuid": "UUID",
       "namespace": "命名空间",
       "kind": "类别",
       "started": "开始时间",
-      "ended": "结束时间" 
+      "ended": "结束时间"
     }
   },
   "archives": {
@@ -124,11 +125,15 @@
     "start": "启动",
     "pause": "暂停",
     "update": "更新",
+    "status": "状态",
     "configuration": "配置",
     "confirm": "确认",
     "cancel": "取消",
-    "createedSuccessfully": "创建成功",
-    "importedSuccessfully": "导入成功",
+    "createSuccessfully": "创建成功",
+    "importSuccessfully": "导入成功",
+    "deleteSuccessfully": "归档成功",
+    "startSuccessfully": "启动成功",
+    "pauseSuccessfully": "暂停成功",
     "timeline": "时间线",
     "search": "搜索"
   },

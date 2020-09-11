@@ -13,7 +13,6 @@ import TuneIcon from '@material-ui/icons/Tune'
 import _groupBy from 'lodash.groupby'
 import api from 'api'
 import { dayComparator } from 'lib/dayjs'
-import { toTitleCase } from 'lib/utils'
 import { useIntl } from 'react-intl'
 import { useSelector } from 'react-redux'
 
@@ -121,7 +120,7 @@ export default function Experiments() {
         dispatch(
           setAlert({
             type: 'success',
-            message: `${toTitleCase(action)}${action === 'start' ? 'ed' : 'd'} successfully!`,
+            message: intl.formatMessage({ id: `common.${action}Successfully` }),
           })
         )
         dispatch(setAlertOpen(true))
