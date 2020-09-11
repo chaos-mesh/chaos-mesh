@@ -38,6 +38,7 @@ const (
 // Handler applys podnetworkchaos
 type Handler struct {
 	client.Client
+	client.Reader
 	Log logr.Logger
 }
 

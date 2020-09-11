@@ -73,7 +73,7 @@ func Register(r *gin.RouterGroup, s *Service) {
 // @Param kind query string false "kind" Enums(PodChaos, IoChaos, NetworkChaos, TimeChaos, KernelChaos, StressChaos)
 // @Param limit query string false "The max length of events list"
 // @Success 200 {array} core.Event
-// @Router /api/events [get]
+// @Router /events [get]
 // @Failure 500 {object} utils.APIError
 func (s *Service) listEvents(c *gin.Context) {
 	filter := core.Filter{
@@ -115,7 +115,7 @@ func (s *Service) listEvents(c *gin.Context) {
 // @Param kind query string false "kind" Enums(PodChaos, IoChaos, NetworkChaos, TimeChaos, KernelChaos, StressChaos)
 // @Param limit query string false "The max length of events list"
 // @Success 200 {array} core.Event
-// @Router /api/events/dry [get]
+// @Router /events/dry [get]
 // @Failure 500 {object} utils.APIError
 func (s *Service) listDryEvents(c *gin.Context) {
 	filter := core.Filter{

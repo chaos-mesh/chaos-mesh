@@ -14,15 +14,13 @@ require (
 	github.com/docker/go-events v0.0.0-20190806004212-e31b211e4f1c // indirect
 	github.com/ethercflow/hookfs v0.3.0
 	github.com/ghodss/yaml v1.0.0
-	github.com/gin-gonic/gin v1.6.2
+	github.com/gin-gonic/gin v1.6.3
 	github.com/go-logr/logr v0.1.0
 	github.com/go-logr/zapr v0.1.0
-	github.com/go-playground/validator/v10 v10.2.0
-	github.com/go-sql-driver/mysql v1.4.1
+	github.com/go-playground/validator/v10 v10.3.0
 	github.com/gogo/googleapis v1.3.2 // indirect
 	github.com/golang/groupcache v0.0.0-20200121045136-8c9f03a8e57e // indirect
-	github.com/golang/protobuf v1.3.3
-	github.com/google/go-cmp v0.4.0 // indirect
+	github.com/golang/protobuf v1.4.2
 	github.com/gorilla/websocket v1.4.1 // indirect
 	github.com/grpc-ecosystem/go-grpc-middleware v1.2.0
 	github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0
@@ -50,21 +48,20 @@ require (
 	github.com/shurcooL/httpfs v0.0.0-20190707220628-8d4bc4ba7749 // indirect
 	github.com/shurcooL/vfsgen v0.0.0-20181202132449-6a9ea43bcacd
 	github.com/spf13/cobra v0.0.6 // indirect
-	github.com/swaggo/http-swagger v0.0.0-20200308142732-58ac5e232fba
-	github.com/swaggo/swag v1.6.5
+	github.com/swaggo/files v0.0.0-20190704085106-630677cd5c14
+	github.com/swaggo/gin-swagger v1.2.0
+	github.com/swaggo/swag v1.6.7
 	github.com/tmc/grpc-websocket-proxy v0.0.0-20200122045848-3419fae592fc // indirect
 	github.com/vishvananda/netlink v1.0.0
 	go.uber.org/fx v1.12.0
-	go.uber.org/multierr v1.5.0 // indirect
-	go.uber.org/zap v1.14.0
-	golang.org/x/crypto v0.0.0-20200302210943-78000ba7a073 // indirect
+	go.uber.org/zap v1.15.0
 	golang.org/x/lint v0.0.0-20200302205851-738671d3881b // indirect
 	golang.org/x/net v0.0.0-20200320220750-118fecf932d8
 	golang.org/x/sync v0.0.0-20190911185100-cd5d95a43a6e
 	golang.org/x/sys v0.0.0-20200409092240-59c9f1ba88fa // indirect
 	golang.org/x/time v0.0.0-20191024005414-555d28b269f0 // indirect
 	golang.org/x/tools v0.0.0-20200309202150-20ab64c0d93f
-	google.golang.org/grpc v1.24.0
+	google.golang.org/grpc v1.27.0
 	honnef.co/go/tools v0.0.1-2020.1.3 // indirect
 	k8s.io/api v0.17.0
 	k8s.io/apiextensions-apiserver v0.17.0
@@ -105,6 +102,7 @@ replace (
 	k8s.io/legacy-cloud-providers => k8s.io/legacy-cloud-providers v0.17.0
 	k8s.io/metrics => k8s.io/metrics v0.17.0
 	k8s.io/sample-apiserver => k8s.io/sample-apiserver v0.17.0
+	vbom.ml/util => github.com/fvbommel/util v0.0.2
 )
 
 go 1.13

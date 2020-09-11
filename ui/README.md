@@ -2,9 +2,9 @@
 <!-- markdownlint-disable-file MD041 -->
 
 <p align="center">
-  <img src="public/logo.svg" width="256" alt="Chaos Mesh Logo" />
+  <img src="../static/logo.svg" width="256" alt="Chaos Mesh Logo" />
 </p>
-<h1 align="center">Chaos Mesh Dashboard</h1>
+<h1 align="center">Dashboard</h1>
 
 A Web UI for Chaos Mesh. Powered by ⚛️ [Create React App](https://github.com/facebook/create-react-app).
 
