@@ -132,6 +132,24 @@ webhooks:
     - UPDATE
     resources:
     - timechaos
+- clientConfig:
+    caBundle: Cg==
+    service:
+      name: webhook-service
+      namespace: system
+      path: /mutate-chaos-mesh-org-v1alpha1-httpchaos
+  failurePolicy: Fail
+  name: mhttpchaos.kb.io
+  rules:
+    - apiGroups:
+        - chaos-mesh.org
+      apiVersions:
+        - v1alpha1
+      operations:
+        - CREATE
+        - UPDATE
+      resources:
+        - httpchaos
 
 ---
 apiVersion: admissionregistration.k8s.io/v1beta1
@@ -266,6 +284,24 @@ webhooks:
     - UPDATE
     resources:
     - timechaos
+- clientConfig:
+    caBundle: Cg==
+    service:
+      name: webhook-service
+      namespace: system
+      path: /validate-chaos-mesh-org-v1alpha1-httpchaos
+  failurePolicy: Fail
+  name: vhttpchaos.kb.io
+  rules:
+    - apiGroups:
+        - chaos-mesh.org
+      apiVersions:
+        - v1alpha1
+      operations:
+        - CREATEhttpchaos
+        - UPDATE
+      resources:
+        -
 - clientConfig:
     caBundle: Cg==
     service:
