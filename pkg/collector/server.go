@@ -74,7 +74,7 @@ func NewServer(
 		}
 	}
 
-	return s, s.Mgr.GetClient(), s.Mgr.GetAPIReader()
+	return s, s.Manager.GetClient(), s.Manager.GetAPIReader()
 }
 
 // Register starts collectors manager.
