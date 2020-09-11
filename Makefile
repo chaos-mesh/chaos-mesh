@@ -115,7 +115,7 @@ ifeq ($(UI),1)
 	make ui
 	hack/embed_ui_assets.sh
 endif
-	$(CGO) build -ldflags '$(LDFLAGS)' -tags "${BUILD_TAGS}" -o bin/chaos-dashboard cmd/chaos-dashboard/*.go
+	$(CGO) build -ldflags "$(LDFLAGS)" -tags "${BUILD_TAGS}" -o bin/chaos-dashboard cmd/chaos-dashboard/*.go
 
 swagger_spec:
 	hack/generate_swagger_spec.sh
@@ -126,7 +126,7 @@ yarn_dependencies:
 
 ui: yarn_dependencies
 	cd ui &&\
-	REACT_APP_DASHBOARD_API_URL="" yarn build
+	yarn build
 
 binary: chaosdaemon manager chaosfs chaos-dashboard bin/pause bin/suicide
 

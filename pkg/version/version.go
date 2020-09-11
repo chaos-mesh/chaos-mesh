@@ -33,7 +33,7 @@ func PrintVersionInfo(name string) {
 // Get returns the overall codebase version. It's for detecting
 // what code a binary was built from.
 func Get() Info {
-	// These variables typically come from -ldflags settings and in
+	// These variables typically come from -ldflags settings
 	return Info{
 		GitVersion: gitVersion,
 		GitCommit:  gitCommit,

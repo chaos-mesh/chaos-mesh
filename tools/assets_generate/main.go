@@ -29,9 +29,8 @@ func main() {
 
 	fs := http.Dir("ui/build")
 	err := vfsgen.Generate(fs, vfsgen.Options{
-		BuildTags:    buildTag,
-		PackageName:  "uiserver",
-		VariableName: "assets",
+		BuildTags:   buildTag,
+		PackageName: "uiserver",
 	})
 	if err != nil {
 		log.Fatalln(err)

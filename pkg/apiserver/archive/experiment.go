@@ -86,7 +86,7 @@ type ArchiveExperimentDetail struct {
 // @Param name query string false "name"
 // @Param kind query string false "kind" Enums(PodChaos, IoChaos, NetworkChaos, TimeChaos, KernelChaos, StressChaos)
 // @Success 200 {array} core.ArchiveExperimentMeta
-// @Router /api/archives [get]
+// @Router /archives [get]
 // @Failure 500 {object} utils.APIError
 func (s *Service) listExperiments(c *gin.Context) {
 	kind := c.Query("kind")
@@ -112,7 +112,7 @@ func (s *Service) listExperiments(c *gin.Context) {
 // @Param kind query string false "kind" Enums(PodChaos, IoChaos, NetworkChaos, TimeChaos, KernelChaos, StressChaos)
 // @Param uid query string false "uid"
 // @Success 200 {array} ArchiveExperimentDetail
-// @Router /api/archives/detail/search [get]
+// @Router /archives/detail/search [get]
 // @Failure 500 {object} utils.APIError
 func (s *Service) experimentDetailSearch(c *gin.Context) {
 	var (
@@ -187,7 +187,7 @@ func (s *Service) experimentDetailSearch(c *gin.Context) {
 // @Produce json
 // @Param uid query string true "uid"
 // @Success 200 {object} ArchiveExperimentDetail
-// @Router /api/archives/detail [get]
+// @Router /archives/detail [get]
 // @Failure 500 {object} utils.APIError
 func (s *Service) experimentDetail(c *gin.Context) {
 	var (
@@ -263,7 +263,7 @@ func (s *Service) experimentDetail(c *gin.Context) {
 // @Produce json
 // @Param uid query string true "uid"
 // @Success 200 {array} Report
-// @Router /api/archives/report [get]
+// @Router /archives/report [get]
 // @Failure 500 {object} utils.APIError
 func (s *Service) experimentReport(c *gin.Context) {
 	var (
