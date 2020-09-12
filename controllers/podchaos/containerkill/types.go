@@ -36,9 +36,10 @@ const (
 	containerKillActionMsg = "delete container %s"
 )
 
-func newReconciler(c client.Client, log logr.Logger, recorder record.EventRecorder) *Reconciler {
+func newReconciler(c client.Client, r client.Reader, log logr.Logger, recorder record.EventRecorder) *Reconciler {
 	return &Reconciler{
 		Client:        c,
+		Reader:        r,
 		EventRecorder: recorder,
 		Log:           log,
 	}
@@ -46,14 +47,15 @@ func newReconciler(c client.Client, log logr.Logger, recorder record.EventRecord
 
 type Reconciler struct {
 	client.Client
+	client.Reader
 	record.EventRecorder
 	Log logr.Logger
 }
 
 // NewTwoPhaseReconciler would create Reconciler for twophase package
-func NewTwoPhaseReconciler(c client.Client, log logr.Logger, recorder record.EventRecorder) *twophase.Reconciler {
-	r := newReconciler(c, log, recorder)
-	return twophase.NewReconciler(r, r.Client, r.Log)
+func NewTwoPhaseReconciler(c client.Client, reader client.Reader, log logr.Logger, recorder record.EventRecorder) *twophase.Reconciler {
+	r := newReconciler(c, reader, log, recorder)
+	return twophase.NewReconciler(r, r.Client, r.Reader, r.Log)
 }
 
 // Apply implements the reconciler.InnerReconciler.Apply
@@ -72,7 +74,7 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, obj v1alpha1.I
 		return fmt.Errorf("podchaos[%s/%s] the name of container is empty", podchaos.Namespace, podchaos.Name)
 	}
 
-	pods, err := utils.SelectAndFilterPods(ctx, r.Client, &podchaos.Spec)
+	pods, err := utils.SelectAndFilterPods(ctx, r.Client, r.Reader, &podchaos.Spec)
 	if err != nil {
 		r.Log.Error(err, "fail to select and filter pods")
 		return err

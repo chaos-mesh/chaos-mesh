@@ -92,6 +92,7 @@ func main() {
 
 	if err = (&controllers.PodChaosReconciler{
 		Client:        mgr.GetClient(),
+		Reader:        mgr.GetAPIReader(),
 		EventRecorder: mgr.GetEventRecorderFor("podchaos-controller"),
 		Log:           ctrl.Log.WithName("controllers").WithName("PodChaos"),
 	}).SetupWithManager(mgr); err != nil {
@@ -105,6 +106,7 @@ func main() {
 
 	if err = (&controllers.NetworkChaosReconciler{
 		Client:        mgr.GetClient(),
+		Reader:        mgr.GetAPIReader(),
 		EventRecorder: mgr.GetEventRecorderFor("networkchaos-controller"),
 		Log:           ctrl.Log.WithName("controllers").WithName("NetworkChaos"),
 	}).SetupWithManager(mgr); err != nil {
@@ -118,6 +120,7 @@ func main() {
 
 	if err = (&controllers.IoChaosReconciler{
 		Client:        mgr.GetClient(),
+		Reader:        mgr.GetAPIReader(),
 		EventRecorder: mgr.GetEventRecorderFor("iochaos-controller"),
 		Log:           ctrl.Log.WithName("controllers").WithName("IoChaos"),
 	}).SetupWithManager(mgr); err != nil {
@@ -131,6 +134,7 @@ func main() {
 
 	if err = (&controllers.TimeChaosReconciler{
 		Client:        mgr.GetClient(),
+		Reader:        mgr.GetAPIReader(),
 		EventRecorder: mgr.GetEventRecorderFor("timechaos-controller"),
 		Log:           ctrl.Log.WithName("controllers").WithName("TimeChaos"),
 	}).SetupWithManager(mgr); err != nil {
@@ -144,6 +148,7 @@ func main() {
 
 	if err = (&controllers.KernelChaosReconciler{
 		Client:        mgr.GetClient(),
+		Reader:        mgr.GetAPIReader(),
 		EventRecorder: mgr.GetEventRecorderFor("kernelchaos-controller"),
 		Log:           ctrl.Log.WithName("controllers").WithName("KernelChaos"),
 	}).SetupWithManager(mgr); err != nil {
@@ -157,6 +162,7 @@ func main() {
 
 	if err = (&controllers.StressChaosReconciler{
 		Client:        mgr.GetClient(),
+		Reader:        mgr.GetAPIReader(),
 		EventRecorder: mgr.GetEventRecorderFor("stresschaos-controller"),
 		Log:           ctrl.Log.WithName("controllers").WithName("StressChaos"),
 	}).SetupWithManager(mgr); err != nil {
@@ -172,6 +178,7 @@ func main() {
 	// webhook, because we need to get the running result synchronously in network chaos reconciler
 	v1alpha1.RegisterRawPodNetworkHandler(&podnetworkchaos.Handler{
 		Client: mgr.GetClient(),
+		Reader: mgr.GetAPIReader(),
 		Log:    ctrl.Log.WithName("handler").WithName("PodNetworkChaos"),
 	})
 	if err = (&chaosmeshv1alpha1.PodNetworkChaos{}).SetupWebhookWithManager(mgr); err != nil {

@@ -40,11 +40,12 @@ const (
 	networkTcActionMsg = "network traffic control action duration %s"
 )
 
-func newReconciler(c client.Client, log logr.Logger, req ctrl.Request,
+func newReconciler(c client.Client, r client.Reader, log logr.Logger, req ctrl.Request,
 	recorder record.EventRecorder) twophase.Reconciler {
 	return twophase.Reconciler{
 		InnerReconciler: &Reconciler{
 			Client:        c,
+			Reader:        r,
 			EventRecorder: recorder,
 			Log:           log,
 		},
@@ -54,21 +55,22 @@ func newReconciler(c client.Client, log logr.Logger, req ctrl.Request,
 }
 
 // NewTwoPhaseReconciler would create Reconciler for twophase package
-func NewTwoPhaseReconciler(c client.Client, log logr.Logger, req ctrl.Request,
+func NewTwoPhaseReconciler(c client.Client, reader client.Reader, log logr.Logger, req ctrl.Request,
 	recorder record.EventRecorder) *twophase.Reconciler {
-	r := newReconciler(c, log, req, recorder)
-	return twophase.NewReconciler(r, r.Client, r.Log)
+	r := newReconciler(c, reader, log, req, recorder)
+	return twophase.NewReconciler(r, r.Client, r.Reader, r.Log)
 }
 
 // NewCommonReconciler would create Reconciler for common package
-func NewCommonReconciler(c client.Client, log logr.Logger, req ctrl.Request,
+func NewCommonReconciler(c client.Client, reader client.Reader, log logr.Logger, req ctrl.Request,
 	recorder record.EventRecorder) *common.Reconciler {
-	r := newReconciler(c, log, req, recorder)
-	return common.NewReconciler(r, r.Client, r.Log)
+	r := newReconciler(c, reader, log, req, recorder)
+	return common.NewReconciler(r, r.Client, r.Reader, r.Log)
 }
 
 type Reconciler struct {
 	client.Client
+	client.Reader
 	record.EventRecorder
 	Log logr.Logger
 }
@@ -90,9 +92,9 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1
 	}
 
 	source := networkchaos.Namespace + "/" + networkchaos.Name
-	m := podnetworkmanager.New(source, r.Log, r.Client)
+	m := podnetworkmanager.New(source, r.Log, r.Client, r.Reader)
 
-	sources, err := utils.SelectAndFilterPods(ctx, r.Client, &networkchaos.Spec)
+	sources, err := utils.SelectAndFilterPods(ctx, r.Client, r.Reader, &networkchaos.Spec)
 	if err != nil {
 		r.Log.Error(err, "failed to select and filter pods")
 		return err
@@ -102,7 +104,7 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1
 
 	// We should only apply filter when we specify targets
 	if networkchaos.Spec.Target != nil {
-		targets, err = utils.SelectAndFilterPods(ctx, r.Client, networkchaos.Spec.Target)
+		targets, err = utils.SelectAndFilterPods(ctx, r.Client, r.Reader, networkchaos.Spec.Target)
 		if err != nil {
 			r.Log.Error(err, "failed to select and filter pods")
 			return err
@@ -188,7 +190,7 @@ func (r *Reconciler) cleanFinalizersAndRecover(ctx context.Context, networkchaos
 	var result error
 
 	source := networkchaos.Namespace + "/" + networkchaos.Name
-	m := podnetworkmanager.New(source, r.Log, r.Client)
+	m := podnetworkmanager.New(source, r.Log, r.Client, r.Reader)
 
 	for _, key := range networkchaos.Finalizers {
 		ns, name, err := cache.SplitMetaNamespaceKey(key)

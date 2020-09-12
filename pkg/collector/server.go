@@ -47,7 +47,7 @@ func NewServer(
 	conf *config.ChaosDashboardConfig,
 	archive core.ExperimentStore,
 	event core.EventStore,
-) (*Server, client.Client) {
+) (*Server, client.Client, client.Reader) {
 	s := &Server{}
 
 	var err error
@@ -74,7 +74,7 @@ func NewServer(
 		}
 	}
 
-	return s, s.Manager.GetClient()
+	return s, s.Manager.GetClient(), s.Manager.GetAPIReader()
 }
 
 // Register starts collectors manager.
