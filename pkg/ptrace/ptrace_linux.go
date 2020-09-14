@@ -13,19 +13,7 @@
 
 package ptrace
 
-/*
-#define _GNU_SOURCE
-#include <sys/wait.h>
-#include <sys/uio.h>
-#include <errno.h>
-#include <stdint.h>
-#include <string.h>
-#include <stdlib.h>
-
-void* Uint64ToPointer(uint64_t addr) {
-	return (void*) addr;
-}
-*/
+// #include <sys/uio.h>
 import "C"
 
 import (
@@ -319,31 +307,22 @@ func (p *TracedProgram) Mmap(length uint64, fd uint64) (uint64, error) {
 func (p *TracedProgram) ReadSlice(addr uint64, size uint64) (*[]byte, error) {
 	buffer := make([]byte, size)
 
-	tmpBuffer := C.malloc(C.ulong(size))
-	defer C.free(tmpBuffer)
 	localIov := C.struct_iovec{
-		iov_base: unsafe.Pointer(tmpBuffer),
+		iov_base: unsafe.Pointer(&buffer[0]),
 		iov_len:  C.ulong(size),
 	}
 
-	remoteIovBuf := C.malloc(C.sizeof_struct_iovec)
-	defer C.free(remoteIovBuf)
-	remoteIov := (*C.struct_iovec)(remoteIovBuf)
-	remoteIov.iov_base = C.Uint64ToPointer(C.ulong(addr))
-	remoteIov.iov_len = C.ulong(size)
+	remoteIov := C.struct_iovec{
+		iov_base: unsafe.Pointer(uintptr(addr)),
+		iov_len:  C.ulong(size),
+	}
 
-	ret, err := C.process_vm_readv(C.int(p.pid),
-		(*C.struct_iovec)(unsafe.Pointer(&localIov)),
-		1,
-		remoteIov,
-		1,
-		0,
-	)
-	if ret == -1 {
-		return nil, errors.WithStack(err)
+	// process_vm_readv syscall number is 310
+	_, _, errno := syscall.Syscall6(310, uintptr(p.pid), uintptr(unsafe.Pointer(&localIov)), uintptr(1), uintptr(unsafe.Pointer(&remoteIov)), uintptr(1), uintptr(0))
+	if errno != 0 {
+		return nil, errors.WithStack(errno)
 	}
 	// TODO: check size and warn
-	C.memcpy(unsafe.Pointer(&buffer[0]), tmpBuffer, C.ulong(size))
 
 	return &buffer, nil
 }
@@ -352,30 +331,20 @@ func (p *TracedProgram) ReadSlice(addr uint64, size uint64) (*[]byte, error) {
 func (p *TracedProgram) WriteSlice(addr uint64, buffer []byte) error {
 	size := len(buffer)
 
-	tmpBuffer := C.malloc(C.ulong(size))
-	defer C.free(tmpBuffer)
-	C.memcpy(tmpBuffer, unsafe.Pointer(&buffer[0]), C.ulong(size))
-
 	localIov := C.struct_iovec{
-		iov_base: tmpBuffer,
+		iov_base: unsafe.Pointer(&buffer[0]),
 		iov_len:  C.ulong(size),
 	}
 
-	remoteIovBuf := C.malloc(C.sizeof_struct_iovec)
-	defer C.free(remoteIovBuf)
-	remoteIov := (*C.struct_iovec)(remoteIovBuf)
-	remoteIov.iov_base = C.Uint64ToPointer(C.ulong(addr))
-	remoteIov.iov_len = C.ulong(size)
+	remoteIov := C.struct_iovec{
+		iov_base: unsafe.Pointer(uintptr(addr)),
+		iov_len:  C.ulong(size),
+	}
 
-	ret, err := C.process_vm_writev(C.int(p.pid),
-		(*C.struct_iovec)(unsafe.Pointer(&localIov)),
-		1,
-		remoteIov,
-		1,
-		0,
-	)
-	if ret == -1 {
-		return errors.WithStack(err)
+	// process_vm_writev syscall number is 311
+	_, _, errno := syscall.Syscall6(311, uintptr(p.pid), uintptr(unsafe.Pointer(&localIov)), uintptr(1), uintptr(unsafe.Pointer(&remoteIov)), uintptr(1), uintptr(0))
+	if errno != 0 {
+		return errors.WithStack(errno)
 	}
 	// TODO: check size and warn
 
