@@ -6,7 +6,7 @@ sidebar_label: IOChaos Experiment
 
 This document helps you run IOChaos experiments.
 
-IOChaos allows you to simulate file system faults such as IO delay and read/write errors. It can inject delay and errno when your program are running IO system calls such as `open`, `read` and `write`.
+IOChaos allows you to simulate file system faults such as IO delay and read/write errors. It can inject delay and errno when your program is running IO system calls such as `open`, `read` and `write`.
 
 ## Configuration file
 
@@ -39,9 +39,9 @@ For more sample files, see [examples](https://github.com/chaos-mesh/chaos-mesh/t
 | **mode** | Defines the mode for selector. | `one` / `all` / `fixed` / `fixed-percent` / `random-max-percent` |
 | **selector** | Selects pods which will be injected with io chaos.|
 | **action** | Represents the IOChaos actions. Refer to [IOChaos available actions](#iochaos-available-actions) for more details. | `delay` / `fault` / `attrOverride` |
-| **delay** | Specify the latency of injection. The duration might be a string with signed sequence of decimal numbers, each with optional fraction and a unit suffix. Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", and "h". | `"300ms"` / `"2h45m"` |
+| **delay** | Specify the latency of injection. The duration might be a string with signed sequence of decimal numbers, each with an optional fraction and a unit suffix. Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", and "h". | `"300ms"` / `"2h45m"` |
 | **errno** | Defines the error code returned by an IO action. See the [common Linux system errors](#common-linux-system-errors) for more Linux system error codes. | `2` |
-| **attr** | Defines the attribute which will be overrided and the corresponding value | [examples](https://github.com/chaos-mesh/chaos-mesh/tree/master/examples/io-attr-example.yaml) |
+| **attr** | Defines the attribute which will be overridden and the corresponding value | [examples](https://github.com/chaos-mesh/chaos-mesh/tree/master/examples/io-attr-example.yaml) |
 | **percent** | Defines the probability of injecting errors. It's represented as a percent, which means the domain of it should be 1-100. | `100` (by default) |
 | **path** | Defines the path of files for injecting IOChaos actions. It should be a glob for the files which you want to inject errno or delay. | "/var/run/etcd/*\*/\*" |
 | **methods** | Defines the IO methods for injecting IOChaos actions. It is represented as an array of string. | `open` / `read` See the [available methods](#available-methods) for more details. |
@@ -99,7 +99,7 @@ spec:
     perm: 72
 ```
 
-Then the permission of selected files will be overrided with 110 in octal, which means nobody can read or modify it (without CAP_DAC_OVERRIDE). See [available attributes](#available-attributes) for a list of all possible attributes to override.
+Then the permission of selected files will be overridden with 110 in octal, which means nobody can read or modify it (without CAP_DAC_OVERRIDE). See [available attributes](#available-attributes) for a list of all possible attributes to override.
 
 **Note: attributes could be cached by linux kernel, so it could have no effect if your program has accessed to it before.**
 
