@@ -45,6 +45,7 @@ const stressChaosMsg = "stress out pod"
 // Reconciler is stresschaos reconciler
 type Reconciler struct {
 	client.Client
+	client.Reader
 	record.EventRecorder
 	Log logr.Logger
 }
@@ -70,12 +71,12 @@ func (r *Reconciler) Reconcile(req ctrl.Request, chaos *v1alpha1.StressChaos) (c
 }
 
 func (r *Reconciler) commonStressChaos(stresschaos *v1alpha1.StressChaos, req ctrl.Request) (ctrl.Result, error) {
-	cr := common.NewReconciler(r, r.Client, r.Log)
+	cr := common.NewReconciler(r, r.Client, r.Reader, r.Log)
 	return cr.Reconcile(req)
 }
 
 func (r *Reconciler) scheduleStressChaos(stresschaos *v1alpha1.StressChaos, req ctrl.Request) (ctrl.Result, error) {
-	sr := twophase.NewReconciler(r, r.Client, r.Log)
+	sr := twophase.NewReconciler(r, r.Client, r.Reader, r.Log)
 	return sr.Reconcile(req)
 }
 
@@ -88,7 +89,7 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1
 		return err
 	}
 
-	pods, err := utils.SelectAndFilterPods(ctx, r.Client, &stresschaos.Spec)
+	pods, err := utils.SelectAndFilterPods(ctx, r.Client, r.Reader, &stresschaos.Spec)
 	if err != nil {
 		r.Log.Error(err, "failed to select and generate pods")
 		return err
@@ -144,7 +145,7 @@ func (r *Reconciler) cleanFinalizersAndRecover(ctx context.Context, chaos *v1alp
 		}
 
 		var pod v1.Pod
-		err = r.Get(ctx, types.NamespacedName{
+		err = r.Client.Get(ctx, types.NamespacedName{
 			Namespace: ns,
 			Name:      name,
 		}, &pod)

@@ -59,14 +59,16 @@ func init() {
 type Reconciler struct {
 	reconciler.InnerReconciler
 	client.Client
+	client.Reader
 	Log logr.Logger
 }
 
 // NewReconciler would create Reconciler for common chaos
-func NewReconciler(reconcile reconciler.InnerReconciler, c client.Client, log logr.Logger) *Reconciler {
+func NewReconciler(reconcile reconciler.InnerReconciler, c client.Client, r client.Reader, log logr.Logger) *Reconciler {
 	return &Reconciler{
 		InnerReconciler: reconcile,
 		Client:          c,
+		Reader:          r,
 		Log:             log,
 	}
 }
@@ -79,7 +81,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	ctx := context.Background()
 
 	chaos := r.Object()
-	if err = r.Get(ctx, req.NamespacedName, chaos); err != nil {
+	if err = r.Client.Get(ctx, req.NamespacedName, chaos); err != nil {
 		r.Log.Error(err, "unable to get chaos")
 		return ctrl.Result{}, err
 	}

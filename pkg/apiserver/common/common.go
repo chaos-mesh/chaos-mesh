@@ -44,16 +44,19 @@ type Pod struct {
 type Service struct {
 	conf    *config.ChaosDashboardConfig
 	kubeCli client.Client
+	reader  client.Reader
 }
 
 // NewService returns an experiment service instance.
 func NewService(
 	conf *config.ChaosDashboardConfig,
 	cli client.Client,
+	reader client.Reader,
 ) *Service {
 	return &Service{
 		conf:    conf,
 		kubeCli: cli,
+		reader:  reader,
 	}
 }
 
@@ -66,7 +69,6 @@ func Register(r *gin.RouterGroup, s *Service) {
 	endpoint.GET("/kinds", s.getKinds)
 	endpoint.GET("/labels", s.getLabels)
 	endpoint.GET("/annotations", s.getAnnotations)
-
 }
 
 // @Summary Get pods from Kubernetes cluster.
@@ -75,7 +77,7 @@ func Register(r *gin.RouterGroup, s *Service) {
 // @Produce json
 // @Param request body core.SelectorInfo true "Request body"
 // @Success 200 {array} Pod
-// @Router /api/common/pods [post]
+// @Router /common/pods [post]
 // @Failure 500 {object} utils.APIError
 func (s *Service) listPods(c *gin.Context) {
 	exp := &core.SelectorInfo{}
@@ -85,7 +87,7 @@ func (s *Service) listPods(c *gin.Context) {
 		return
 	}
 	ctx := context.TODO()
-	filteredPods, err := pkgutils.SelectPods(ctx, s.kubeCli, exp.ParseSelector())
+	filteredPods, err := pkgutils.SelectPods(ctx, s.kubeCli, s.reader, exp.ParseSelector())
 	if err != nil {
 		c.Status(http.StatusInternalServerError)
 		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
@@ -110,7 +112,7 @@ func (s *Service) listPods(c *gin.Context) {
 // @Tags common
 // @Produce json
 // @Success 200 {array} string
-// @Router /api/common/namespaces [get]
+// @Router /common/namespaces [get]
 // @Failure 500 {object} utils.APIError
 func (s *Service) getNamespaces(c *gin.Context) {
 	var nsList v1.NamespaceList
@@ -134,7 +136,7 @@ func (s *Service) getNamespaces(c *gin.Context) {
 // @Tags common
 // @Produce json
 // @Success 200 {array} string
-// @Router /api/common/kinds [get]
+// @Router /common/kinds [get]
 // @Failure 500 {object} utils.APIError
 func (s *Service) getKinds(c *gin.Context) {
 	var kinds []string
@@ -157,7 +159,7 @@ type MapSlice map[string][]string
 // @Produce json
 // @Param podNamespaceList query string true "The pod's namespace list, split by ,"
 // @Success 200 {object} MapSlice
-// @Router /api/common/labels [get]
+// @Router /common/labels [get]
 // @Failure 500 {object} utils.APIError
 func (s *Service) getLabels(c *gin.Context) {
 	podNamespaceList := c.Query("podNamespaceList")
@@ -173,7 +175,7 @@ func (s *Service) getLabels(c *gin.Context) {
 	exp.NamespaceSelectors = nsList
 
 	ctx := context.TODO()
-	filteredPods, err := pkgutils.SelectPods(ctx, s.kubeCli, exp.ParseSelector())
+	filteredPods, err := pkgutils.SelectPods(ctx, s.kubeCli, s.reader, exp.ParseSelector())
 	if err != nil {
 		c.Status(http.StatusInternalServerError)
 		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
@@ -202,7 +204,7 @@ func (s *Service) getLabels(c *gin.Context) {
 // @Produce json
 // @Param podNamespaceList query string true "The pod's namespace list, split by ,"
 // @Success 200 {object} MapSlice
-// @Router /api/common/annotations [get]
+// @Router /common/annotations [get]
 // @Failure 500 {object} utils.APIError
 func (s *Service) getAnnotations(c *gin.Context) {
 	podNamespaceList := c.Query("podNamespaceList")
@@ -218,7 +220,7 @@ func (s *Service) getAnnotations(c *gin.Context) {
 	exp.NamespaceSelectors = nsList
 
 	ctx := context.TODO()
-	filteredPods, err := pkgutils.SelectPods(ctx, s.kubeCli, exp.ParseSelector())
+	filteredPods, err := pkgutils.SelectPods(ctx, s.kubeCli, s.reader, exp.ParseSelector())
 	if err != nil {
 		c.Status(http.StatusInternalServerError)
 		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
