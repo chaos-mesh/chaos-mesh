@@ -27,6 +27,7 @@
       "modeHelper": "选择实验模式",
       "modeValue": "模式值",
       "modeValuehelper": "请填写实验值",
+      "affectedPods": "受到实验作用的 Pods",
       "affectedPodsPreview": "预览将要受到实验作用的 Pods",
       "affectedPodsPreviewHelper": "通过勾选 Pods 来进一步限制实验的范围",
       "noPodsFound": "未发现 Pods",
@@ -38,8 +39,13 @@
       }
     },
     "target": {
+      "kind": "类别",
+      "action": "行为",
       "pod": {
-        "title": "Pod 生命周期"
+        "title": "Pod 生命周期",
+        "actionHelper": "选择 PodChaos 行为",
+        "containerName": "容器名称",
+        "containerNameHelper": "填写你想要杀死的容器名称"
       },
       "network": {
         "title": "网络"
@@ -78,6 +84,7 @@
       "finished": "完成"
     },
     "noExperimentsFound": "未发现实验",
+    "createdAt": "创建于",
     "deleteDesc": "你仍然可以在归档中找到此实验",
     "pauseDesc": "你可以在同一位置重启这个实验",
     "startDesc": "此操作将立即生效"
@@ -93,13 +100,22 @@
       "namespace": "命名空间",
       "kind": "类别",
       "started": "开始时间",
-      "ended": "结束时间"
+      "ended": "结束时间",
+      "pod": {
+        "ip": "IP",
+        "name": "名称",
+        "namespace": "命名空间",
+        "action": "行为",
+        "message": "信息"
+      }
     }
   },
   "archives": {
     "title": "归档",
     "single": "归档",
-    "no_archives_found": "未发现归档"
+    "no_archives_found": "未发现归档",
+    "numberOfRuns": "运行次数",
+    "numberOfAffectedPods": "受到实验作用的 Pod 数目"
   },
   "settings": {
     "title": "设置",
@@ -135,7 +151,9 @@
     "startSuccessfully": "启动成功",
     "pauseSuccessfully": "暂停成功",
     "timeline": "时间线",
-    "search": "搜索"
+    "search": "搜索",
+    "meta": "元信息",
+    "uuid": "UUID"
   },
   "k8s": {
     "labels": "标签",

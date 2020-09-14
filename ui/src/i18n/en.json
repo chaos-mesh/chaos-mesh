@@ -27,6 +27,7 @@
       "modeHelper": "Select the experiment mode",
       "modeValue": "Mode Value",
       "modeValuehelper": "Please fill the mode value",
+      "affectedPods": "Affected Pods",
       "affectedPodsPreview": "Affected Pods Preview",
       "affectedPodsPreviewHelper": "Checking or unchecking Pods to further limit the scope of the experiment",
       "noPodsFound": "No pods found",
@@ -38,8 +39,13 @@
       }
     },
     "target": {
+      "kind": "Kind",
+      "action": "Action",
       "pod": {
-        "title": "Pod Lifecycle"
+        "title": "Pod Lifecycle",
+        "actionHelper": "Select a PodChaos action",
+        "containerName": "Container Name",
+        "containerNameHelper": "Fill the container name you want to kill"
       },
       "network": {
         "title": "Network"
@@ -78,6 +84,7 @@
       "finished": "Finished"
     },
     "noExperimentsFound": "No experiments found",
+    "createdAt": "Created",
     "deleteDesc": "You can still find this experiment in the archives",
     "pauseDesc": "You can restart the experiment in the same position",
     "startDesc": "The operation will take effect immediately"
@@ -93,13 +100,22 @@
       "namespace": "Namespace",
       "kind": "Kind",
       "started": "Started",
-      "ended": "Ended"
+      "ended": "Ended",
+      "pod": {
+        "ip": "IP",
+        "name": "Name",
+        "namespace": "Namespace",
+        "action": "Action",
+        "message": "Message"
+      }
     }
   },
   "archives": {
     "title": "Archives",
     "single": "Archive",
-    "no_archives_found": "No archives found"
+    "no_archives_found": "No archives found",
+    "numberOfRuns": "Number of Runs",
+    "numberOfAffectedPods": "Number of Affected Pods"
   },
   "settings": {
     "title": "Settings",
@@ -135,7 +151,9 @@
     "startSuccessfully": "Started successfully",
     "pauseSuccessfully": "Paused successfully",
     "timeline": "Timeline",
-    "search": "Search"
+    "search": "Search",
+    "meta": "Meta",
+    "uuid": "UUID"
   },
   "k8s": {
     "labels": "Labels",

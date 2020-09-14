@@ -3,6 +3,7 @@ import { SelectField, TextField } from 'components/FormField'
 
 import { MenuItem } from '@material-ui/core'
 import React from 'react'
+import T from 'components/T'
 import { toTitleCase } from 'lib/utils'
 import { useFormikContext } from 'formik'
 
@@ -17,8 +18,8 @@ export default function Pod(props: StepperFormTargetProps) {
       <SelectField
         id="target.pod_chaos.action"
         name="target.pod_chaos.action"
-        label="Action"
-        helperText="Select a PodChaos action"
+        label={T('newE.target.action')}
+        helperText={T('newE.target.pod.actionHelper')}
         value={values.target.pod_chaos.action}
         onChange={handleActionChange}
         onBlur={() => {}} // Delay the form validation with an empty func. If don’t do this, errors will appear early
@@ -34,8 +35,8 @@ export default function Pod(props: StepperFormTargetProps) {
         <TextField
           id="target.pod_chaos.container_name"
           name="target.pod_chaos.container_name"
-          label="Container Name"
-          helperText="Fill the container name you want to kill"
+          label={T('newE.target.pod.containerName')}
+          helperText={T('newE.target.pod.containerNameHelper')}
           error={errors.target?.pod_chaos?.container_name && touched.target?.pod_chaos?.container_name ? true : false}
         />
       )}

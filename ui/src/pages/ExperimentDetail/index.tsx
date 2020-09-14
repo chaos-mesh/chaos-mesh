@@ -69,7 +69,7 @@ export default function ExperimentDetail() {
   const intl = useIntl()
 
   const history = useHistory()
-  const { uuid } = useParams()
+  const { uuid } = useParams<{ uuid: string }>()
 
   const dispatch = useStoreDispatch()
 
@@ -137,24 +137,24 @@ export default function ExperimentDetail() {
     switch (action) {
       case 'delete':
         setDialogInfo({
-          title: `Archive ${detail!.name}?`,
-          description: 'You can still find this experiment in the archives.',
+          title: `${intl.formatMessage({ id: 'archives.single' })} ${detail!.name}?`,
+          description: intl.formatMessage({ id: 'experiments.deleteDesc' }),
           action: 'delete',
         })
 
         break
       case 'pause':
         setDialogInfo({
-          title: `Pause ${detail!.name}?`,
-          description: 'You can restart the experiment in the same position.',
+          title: `${intl.formatMessage({ id: 'common.pause' })} ${detail!.name}?`,
+          description: intl.formatMessage({ id: 'experiments.pauseDesc' }),
           action: 'pause',
         })
 
         break
       case 'start':
         setDialogInfo({
-          title: `Start ${detail!.name}?`,
-          description: 'The operation will take effect immediately.',
+          title: `${intl.formatMessage({ id: 'common.start' })} ${detail!.name}?`,
+          description: intl.formatMessage({ id: 'experiments.startDesc' }),
           action: 'start',
         })
 
@@ -312,7 +312,7 @@ export default function ExperimentDetail() {
             size="small"
             onClick={handleUpdateExperiment}
           >
-            Confirm
+            {T('common.confirm')}
           </Button>
         </Paper>
       </Modal>

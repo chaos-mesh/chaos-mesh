@@ -314,15 +314,15 @@ const EventsTable: React.ForwardRefRenderFunction<EventsTableHandles, EventsTabl
                         <Typography variant="body2">
                           The following search syntax can help to locate the events quickly:
                           <ul style={{ marginBottom: 0, paddingLeft: '1rem' }}>
-                            <li>namespace:default xxx will search for events with namespace default.</li>
+                            <li>namespace:default xxx will search for events with namespace default</li>
                             <li>
                               kind:NetworkChaos xxx will search for events with kind NetworkChaos, you can also type
-                              kind:net because the search is fuzzy.
+                              kind:net because the search is fuzzy
                             </li>
-                            <li>pod:echoserver-774cdcc8b6-nrm65 will search for events by affected pod.</li>
-                            <li>ip:172.17.0.6 is similar to pod:xxx, filter by pod IP.</li>
+                            <li>pod:echoserver-774cdcc8b6-nrm65 will search for events by affected pod</li>
+                            <li>ip:172.17.0.6 is similar to pod:xxx, filter by pod IP</li>
                             <li>
-                              uuid:2f79a4d6-1952-45b5-b2d5-ce715823c7a7 will search for events by experimental uuid.
+                              uuid:2f79a4d6-1952-45b5-b2d5-ce715823c7a7 will search for events by experimental uuid
                             </li>
                           </ul>
                         </Typography>

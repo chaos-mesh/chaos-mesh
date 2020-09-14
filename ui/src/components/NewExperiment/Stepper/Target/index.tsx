@@ -126,7 +126,7 @@ const Target: React.FC = () => {
       {selected !== '' && (
         <Box mb={3}>
           <Button startIcon={<ChevronLeftIcon />} onClick={() => setSelected('')}>
-            Back
+            {T('common.back')}
           </Button>
         </Box>
       )}

@@ -12,9 +12,11 @@ import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown'
 import KeyboardArrowUpIcon from '@material-ui/icons/KeyboardArrowUp'
 import PauseCircleOutlineIcon from '@material-ui/icons/PauseCircleOutline'
 import PlayCircleOutlineIcon from '@material-ui/icons/PlayCircleOutline'
+import { RootState } from 'store'
 import T from 'components/T'
 import day from 'lib/dayjs'
 import { useHistory } from 'react-router-dom'
+import { useSelector } from 'react-redux'
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -55,6 +57,8 @@ const ExperimentListItem: React.FC<ExperimentListItemProps> = ({
   const classes = useStyles()
 
   const history = useHistory()
+
+  const { lang } = useSelector((state: RootState) => state.settings)
 
   const [open, setOpen] = useState(false)
 
@@ -105,7 +109,10 @@ const ExperimentListItem: React.FC<ExperimentListItemProps> = ({
   const Actions = () => (
     <Box display="flex" justifyContent="flex-end" alignItems="center" className={classes.marginRight}>
       <Typography variant="body2">
-        Created {day(isArchive ? (e as Archive).start_time : (e as Experiment).created).fromNow()}
+        {T('experiments.createdAt')}{' '}
+        {day(isArchive ? (e as Archive).start_time : (e as Experiment).created)
+          .locale(lang)
+          .fromNow()}
       </Typography>
       {!isArchive && (
         <>

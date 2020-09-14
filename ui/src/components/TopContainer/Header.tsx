@@ -96,7 +96,7 @@ const Header: React.FC<HeaderProps> = ({ openDrawer, handleDrawerToggle, breadcr
                   </Link>
                 ) : (
                   <Typography key={b.name} variant="h6" component="h2" color="primary">
-                    {hasLocalBreadcrumb(b.name) ? T(`${b.name}.title`) : b.name}
+                    {hasLocalBreadcrumb(b.name) ? T(`${b.name === 'newExperiment' ? 'newE' : b.name}.title`) : b.name}
                   </Typography>
                 )
               })}
