@@ -38,7 +38,7 @@ For more sample files, see [examples](https://github.com/chaos-mesh/chaos-mesh/t
 |:------|:------------------|:--------------|
 | **mode** | Defines the mode for selector. | `one` / `all` / `fixed` / `fixed-percent` / `random-max-percent` |
 | **selector** | Selects pods which will be injected with io chaos.|
-| **action** | Represents the IOChaos actions. Refer to [IOChaos available actions](#iochaos-available-actions) for more details. | `delay` / `errno` / `mixed` |
+| **action** | Represents the IOChaos actions. Refer to [IOChaos available actions](#iochaos-available-actions) for more details. | `delay` / `fault` / `attrOverride` |
 | **delay** | Specify the latency of injection. The duration might be a string with signed sequence of decimal numbers, each with optional fraction and a unit suffix. Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", and "h". | `"300ms"` / `"2h45m"` |
 | **errno** | Defines the error code returned by an IO action. See the [common Linux system errors](#common-linux-system-errors) for more Linux system error codes. | `2` |
 | **attr** | Defines the attribute which will be overrided and the corresponding value | [examples](https://github.com/chaos-mesh/chaos-mesh/tree/master/examples/io-attr-example.yaml) |
