@@ -519,6 +519,8 @@ func (s *Service) getNetworkChaosDetail(namespace string, name string) (Experime
 						FieldSelectors:      chaos.Spec.Selector.FieldSelectors,
 						PhaseSelector:       chaos.Spec.Selector.PodPhaseSelectors,
 					},
+					Mode:  string(chaos.Spec.Mode),
+					Value: chaos.Spec.Value,
 				},
 			},
 		},

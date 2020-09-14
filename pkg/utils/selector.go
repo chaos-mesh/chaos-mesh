@@ -282,6 +282,12 @@ func filterPodsByMode(pods []v1.Pod, mode v1alpha1.PodMode, value string) ([]v1.
 		return nil, errors.New("cannot generate pods from empty list")
 	}
 
+	fmt.Println("mode === " + mode)
+	if mode == "" {
+		log.Info("mode is empty !!!!!!!!!!!")
+		fmt.Println("mode is empty !!!!!!!!!!!!!!!!!!!")
+	}
+
 	switch mode {
 	case v1alpha1.OnePodMode:
 		index := rand.Intn(len(pods))
