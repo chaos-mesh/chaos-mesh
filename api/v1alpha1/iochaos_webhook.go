@@ -76,6 +76,7 @@ func (in *IoChaos) Validate() error {
 	allErrs = append(allErrs, in.ValidatePodMode(specField)...)
 	allErrs = append(allErrs, in.Spec.validateDelay(specField.Child("delay"))...)
 	allErrs = append(allErrs, in.Spec.validateErrno(specField.Child("errno"))...)
+	allErrs = append(allErrs, in.Spec.validatePercent(specField.Child("percent"))...)
 
 	if len(allErrs) > 0 {
 		return fmt.Errorf(allErrs.ToAggregate().Error())
@@ -110,8 +111,18 @@ func (in *IoChaosSpec) validateErrno(errno *field.Path) field.ErrorList {
 	if in.Action == IoFaults {
 		if in.Errno == 0 {
 			allErrs = append(allErrs, field.Invalid(errno, in.Errno,
-				fmt.Sprintf("errno field error:0 for action:%s", in.Action)))
+				fmt.Sprintf("action %s: errno 0 is not supported", in.Action)))
 		}
 	}
+	return allErrs
+}
+
+func (in *IoChaosSpec) validatePercent(percentField *field.Path) field.ErrorList {
+	allErrs := field.ErrorList{}
+	if in.Percent > 100 || in.Percent < 0 {
+		allErrs = append(allErrs, field.Invalid(percentField, in.Percent,
+			"percent field should be in 0-100"))
+	}
+
 	return allErrs
 }

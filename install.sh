@@ -950,7 +950,9 @@ rules:
     - timechaos
     - kernelchaos
     - stresschaos
+    - podiochaos
     - podnetworkchaos
+    - httpchaos
   verbs: ["*"]
 ---
 # Source: chaos-mesh/templates/controller-manager-rbac.yaml
@@ -1196,8 +1198,6 @@ spec:
             value: !!str 50051
           - name: TEMPLATE_LABELS
             value: "app.kubernetes.io/component:template"
-          - name: CONFIGMAP_LABELS
-            value: "app.kubernetes.io/component:webhook"
           - name: PPROF_ADDR
             value: ":10081"
         volumeMounts:
@@ -1350,6 +1350,24 @@ webhooks:
           - UPDATE
         resources:
           - stresschaos
+  - clientConfig:
+      caBundle: "${CA_BUNDLE}"
+      service:
+        name: chaos-mesh-controller-manager
+        namespace: chaos-testing
+        path: /mutate-chaos-mesh-org-v1alpha1-podiochaos
+    failurePolicy: Fail
+    name: mpodiochaos.kb.io
+    rules:
+      - apiGroups:
+          - chaos-mesh.org
+        apiVersions:
+          - v1alpha1
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - podiochaos
   - clientConfig:
       caBundle: "${CA_BUNDLE}"
       service:
