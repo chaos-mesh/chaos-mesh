@@ -57,7 +57,7 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1
 	source := iochaos.Namespace + "/" + iochaos.Name
 	m := podiochaosmanager.New(source, r.Log, r.Client)
 
-	pods, err := utils.SelectAndFilterPods(ctx, r.Client, &iochaos.Spec)
+	pods, err := utils.SelectAndFilterPods(ctx, r.Client, r.Reader, &iochaos.Spec)
 	if err != nil {
 		r.Log.Error(err, "failed to select and filter pods")
 		return err
@@ -167,24 +167,25 @@ func (r *Reconciler) invalidActionResponse(iochaos *v1alpha1.IoChaos) (ctrl.Resu
 }
 
 // NewTwoPhaseReconciler would create Reconciler for twophase package
-func NewTwoPhaseReconciler(c client.Client, log logr.Logger, req ctrl.Request,
+func NewTwoPhaseReconciler(c client.Client, r client.Reader, log logr.Logger, req ctrl.Request,
 	recorder record.EventRecorder) *twophase.Reconciler {
-	r := newReconciler(c, log, req, recorder)
-	return twophase.NewReconciler(r, r.Client, r.Log)
+	reconciler := newReconciler(c, r, log, req, recorder)
+	return twophase.NewReconciler(reconciler, reconciler.Client, reconciler.Reader, reconciler.Log)
 }
 
 // NewCommonReconciler would create Reconciler for common package
-func NewCommonReconciler(c client.Client, log logr.Logger, req ctrl.Request,
+func NewCommonReconciler(c client.Client, r client.Reader, log logr.Logger, req ctrl.Request,
 	recorder record.EventRecorder) *common.Reconciler {
-	r := newReconciler(c, log, req, recorder)
-	return common.NewReconciler(r, r.Client, r.Log)
+	reconciler := newReconciler(c, r, log, req, recorder)
+	return common.NewReconciler(reconciler, reconciler.Client, reconciler.Reader, reconciler.Log)
 }
 
-func newReconciler(c client.Client, log logr.Logger, req ctrl.Request,
+func newReconciler(c client.Client, r client.Reader, log logr.Logger, req ctrl.Request,
 	recorder record.EventRecorder) twophase.Reconciler {
 	return twophase.Reconciler{
 		InnerReconciler: &Reconciler{
 			Client:        c,
+			Reader:        r,
 			EventRecorder: recorder,
 			Log:           log,
 		},

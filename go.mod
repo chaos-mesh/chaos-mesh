@@ -12,7 +12,6 @@ require (
 	github.com/docker/go-connections v0.4.0 // indirect
 	github.com/docker/go-events v0.0.0-20190806004212-e31b211e4f1c // indirect
 	github.com/ethercflow/hookfs v0.3.0
-	github.com/ghodss/yaml v1.0.0
 	github.com/gin-gonic/gin v1.6.3
 	github.com/go-logr/logr v0.1.0
 	github.com/go-logr/zapr v0.1.0

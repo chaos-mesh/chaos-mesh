@@ -42,13 +42,6 @@ type IoChaosReconciler struct {
 // Reconcile reconciles an IOChaos resource
 func (r *IoChaosReconciler) Reconcile(req ctrl.Request) (result ctrl.Result, err error) {
 
-	reconciler := iochaos.Reconciler{
-		Client:        r.Client,
-		Reader:        r.Reader,
-		EventRecorder: r.EventRecorder,
-		Log:           logger,
-	}
-
 	chaos := &v1alpha1.IoChaos{}
 	if err := r.Client.Get(context.Background(), req.NamespacedName, chaos); err != nil {
 		r.Log.Error(err, "unable to get iochaos")
@@ -78,12 +71,12 @@ func (r *IoChaosReconciler) Reconcile(req ctrl.Request) (result ctrl.Result, err
 }
 
 func (r *IoChaosReconciler) commonIoChaos(chaos *v1alpha1.IoChaos, req ctrl.Request) (ctrl.Result, error) {
-	cr := iochaos.NewCommonReconciler(r.Client, r.Log.WithValues("iochaos", req.NamespacedName), req, r.EventRecorder)
+	cr := iochaos.NewCommonReconciler(r.Client, r.Reader, r.Log.WithValues("iochaos", req.NamespacedName), req, r.EventRecorder)
 	return cr.Reconcile(req)
 }
 
 func (r *IoChaosReconciler) scheduleIoChaos(chaos *v1alpha1.IoChaos, req ctrl.Request) (ctrl.Result, error) {
-	sr := iochaos.NewTwoPhaseReconciler(r.Client, r.Log.WithValues("iochaos", req.NamespacedName), req, r.EventRecorder)
+	sr := iochaos.NewTwoPhaseReconciler(r.Client, r.Reader, r.Log.WithValues("iochaos", req.NamespacedName), req, r.EventRecorder)
 	return sr.Reconcile(req)
 }
 
