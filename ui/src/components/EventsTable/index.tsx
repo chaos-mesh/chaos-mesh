@@ -389,7 +389,7 @@ const EventsTable: React.ForwardRefRenderFunction<EventsTableHandles, EventsTabl
             zIndex: 3, // .MuiTableCell-stickyHeader z-index: 2
           }}
         >
-          <PaperTop title="Event Detail">
+          <PaperTop title={T('common.detail')}>
             <IconButton color="primary" onClick={closeEventDetail}>
               <CloseIcon />
             </IconButton>
