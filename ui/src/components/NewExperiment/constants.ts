@@ -53,12 +53,13 @@ export const defaultExperimentSchema: Experiment = {
     },
     io_chaos: {
       action: '',
-      addr: '',
       delay: '',
-      errno: '',
+      errno: undefined,
+      attr: [],
       methods: [],
       path: '',
-      percent: '100',
+      percent: 100,
+      volume_path: '',
     },
     kernel_chaos: {
       fail_kern_request: {

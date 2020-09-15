@@ -16,8 +16,6 @@ package core
 import (
 	"context"
 	"encoding/json"
-	"fmt"
-	"strconv"
 	"time"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
@@ -182,12 +180,14 @@ type NetworkChaosInfo struct {
 
 // IOChaosInfo defines the basic information of io chaos for creating a new IOChaos.
 type IOChaosInfo struct {
-	Action  string   `json:"action" binding:"oneof='' 'faults' 'latency' 'attrOverride'"`
-	Delay   string   `json:"delay"`
-	Errno   string   `json:"errno"`
-	Path    string   `json:"path"`
-	Percent string   `json:"percent"`
-	Methods []string `json:"methods"`
+	Action     string                     `json:"action" binding:"oneof='' 'faults' 'latency' 'attrOverride'"`
+	Delay      string                     `json:"delay"`
+	Errno      uint32                     `json:"errno"`
+	Attr       *v1alpha1.AttrOverrideSpec `json:"attr"`
+	Path       string                     `json:"path"`
+	Percent    int                        `json:"percent"`
+	Methods    []v1alpha1.IoMethod        `json:"methods"`
+	VolumePath string                     `json:"volume_path"`
 }
 
 // KernelChaosInfo defines the basic information of kernel chaos for creating a new KernelChaos.
@@ -343,12 +343,14 @@ func (e *ArchiveExperiment) ParseIOChaos() (ExperimentInfo, error) {
 		Target: TargetInfo{
 			Kind: v1alpha1.KindIOChaos,
 			IOChaos: &IOChaosInfo{
-				Action:  string(chaos.Spec.Action),
-				Delay:   chaos.Spec.Delay,
-				Errno:   fmt.Sprintf("%d", chaos.Spec.Errno),
-				Path:    chaos.Spec.Path,
-				Percent: strconv.Itoa(chaos.Spec.Percent),
-				Methods: methods,
+				Action:     string(chaos.Spec.Action),
+				Delay:      chaos.Spec.Delay,
+				Errno:      chaos.Spec.Errno,
+				Attr:       chaos.Spec.Attr,
+				Path:       chaos.Spec.Path,
+				Percent:    chaos.Spec.Percent,
+				Methods:    chaos.Spec.Methods,
+				VolumePath: chaos.Spec.VolumePath,
 			},
 		},
 	}
