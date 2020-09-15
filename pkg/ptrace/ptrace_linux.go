@@ -13,7 +13,13 @@
 
 package ptrace
 
-// #include <sys/uio.h>
+/*
+#include <stdint.h>
+struct iovec {
+	intptr_t iov_base;
+	size_t iov_len;
+};
+*/
 import "C"
 
 import (
@@ -308,12 +314,12 @@ func (p *TracedProgram) ReadSlice(addr uint64, size uint64) (*[]byte, error) {
 	buffer := make([]byte, size)
 
 	localIov := C.struct_iovec{
-		iov_base: unsafe.Pointer(&buffer[0]),
+		iov_base: C.long(uintptr(unsafe.Pointer(&buffer[0]))),
 		iov_len:  C.ulong(size),
 	}
 
 	remoteIov := C.struct_iovec{
-		iov_base: unsafe.Pointer(uintptr(addr)),
+		iov_base: C.long(addr),
 		iov_len:  C.ulong(size),
 	}
 
@@ -332,12 +338,12 @@ func (p *TracedProgram) WriteSlice(addr uint64, buffer []byte) error {
 	size := len(buffer)
 
 	localIov := C.struct_iovec{
-		iov_base: unsafe.Pointer(&buffer[0]),
+		iov_base: C.long(uintptr(unsafe.Pointer(&buffer[0]))),
 		iov_len:  C.ulong(size),
 	}
 
 	remoteIov := C.struct_iovec{
-		iov_base: unsafe.Pointer(uintptr(addr)),
+		iov_base: C.long(addr),
 		iov_len:  C.ulong(size),
 	}
 
