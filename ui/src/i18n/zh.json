@@ -115,7 +115,7 @@
     "single": "归档",
     "no_archives_found": "未发现归档",
     "numberOfRuns": "运行次数",
-    "numberOfAffectedPods": "受到实验作用的 Pod 数目"
+    "numberOfAffectedPods": "受到实验作用的 Pods 数目"
   },
   "settings": {
     "title": "设置",
