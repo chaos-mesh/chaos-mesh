@@ -298,12 +298,12 @@ func (e *ArchiveExperiment) ParseNetworkChaos() (ExperimentInfo, error) {
 
 	if chaos.Spec.Target != nil {
 		info.Target.NetworkChaos.TargetScope.SelectorInfo = SelectorInfo{
-				NamespaceSelectors:  chaos.Spec.Selector.Namespaces,
-				LabelSelectors:      chaos.Spec.Selector.LabelSelectors,
-				AnnotationSelectors: chaos.Spec.Selector.AnnotationSelectors,
-				FieldSelectors:      chaos.Spec.Selector.FieldSelectors,
-				PhaseSelector:       chaos.Spec.Selector.PodPhaseSelectors,
-			}
+			NamespaceSelectors:  chaos.Spec.Target.TargetSelector.Namespaces,
+			LabelSelectors:      chaos.Spec.Target.TargetSelector.LabelSelectors,
+			AnnotationSelectors: chaos.Spec.Target.TargetSelector.AnnotationSelectors,
+			FieldSelectors:      chaos.Spec.Target.TargetSelector.FieldSelectors,
+			PhaseSelector:       chaos.Spec.Target.TargetSelector.PodPhaseSelectors,
+		}
 		info.Target.NetworkChaos.TargetScope.Mode = string(chaos.Spec.Target.TargetMode)
 		info.Target.NetworkChaos.TargetScope.Value = chaos.Spec.Target.TargetValue
 	}
