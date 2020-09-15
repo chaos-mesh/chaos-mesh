@@ -44,7 +44,7 @@ const methods = [
 ]
 
 export default function IO(props: StepperFormTargetProps) {
-  const { values }: FormikCtx = useFormikContext()
+  const { values, errors, touched }: FormikCtx = useFormikContext()
   const { handleActionChange } = props
 
   return (
@@ -66,35 +66,46 @@ export default function IO(props: StepperFormTargetProps) {
 
       {values.target.io_chaos.action !== '' && (
         <>
+          {values.target.io_chaos.action === 'latency' && (
+            <TextField
+              id="target.io_chaos.delay"
+              name="target.io_chaos.delay"
+              label="Delay"
+              helperText="The value of delay of I/O operations. If it's empty, the operator will generate a value for it randomly."
+              error={errors.target?.io_chaos?.delay && touched.target?.io_chaos?.delay ? true : false}
+            />
+          )}
+
+          {values.target.io_chaos.action === 'fault' && (
+            <TextField
+              type="number"
+              inputProps={{ min: 0 }}
+              id="target.io_chaos.errno"
+              name="target.io_chaos.errno"
+              label="Errno"
+              helperText="The error code returned by I/O operators. By default, it returns a random error code"
+              error={errors.target?.io_chaos?.errno && touched.target?.io_chaos?.errno ? true : false}
+            />
+          )}
+
+          {values.target.io_chaos.action === 'attrOverride' && (
+            <LabelField
+              id="target.io_chaos.attr"
+              name="target.io_chaos.attr"
+              label="Attr"
+              isKV
+              error={errors.target?.io_chaos?.attr && touched.target?.io_chaos?.attr ? true : false}
+            />
+          )}
+
           <TextField
             id="target.io_chaos.volume_path"
             name="target.io_chaos.volume_path"
             label="Volume Path"
             helperText="The mount path of injected volume"
           />
+
           <AdvancedOptions>
-            {values.target.io_chaos.action === 'latency' && (
-              <TextField
-                id="target.io_chaos.delay"
-                name="target.io_chaos.delay"
-                label="Delay"
-                helperText="Optional. The value of delay of I/O operations. If it's empty, the operator will generate a value for it randomly."
-              />
-            )}
-
-            {values.target.io_chaos.action === 'fault' && (
-              <TextField
-                id="target.io_chaos.errno"
-                name="target.io_chaos.errno"
-                label="Errno"
-                helperText="Optional. The error code returned by I/O operators. By default, it returns a random error code"
-              />
-            )}
-
-            {values.target.io_chaos.action === 'attrOverride' && (
-              <LabelField id="target.io_chaos.attr" name="target.io_chaos.attr" label="Attr" isKV />
-            )}
-
             <TextField
               type="number"
               id="target.io_chaos.percent"

@@ -180,7 +180,7 @@ type NetworkChaosInfo struct {
 
 // IOChaosInfo defines the basic information of io chaos for creating a new IOChaos.
 type IOChaosInfo struct {
-	Action     string                     `json:"action" binding:"oneof='' 'faults' 'latency' 'attrOverride'"`
+	Action     string                     `json:"action" binding:"oneof='' 'latency' 'fault' 'attrOverride'"`
 	Delay      string                     `json:"delay"`
 	Errno      uint32                     `json:"errno"`
 	Attr       *v1alpha1.AttrOverrideSpec `json:"attr"`
