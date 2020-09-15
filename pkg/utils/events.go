@@ -21,6 +21,9 @@ const (
 	// The chaos just started
 	EventChaosInjected string = "ChaosInjected"
 
+	// The chaos just failed when renewing select items. The message should include detailed error
+	EventChaosRenewFailed string = "ChaosRenewFailed"
+
 	// The chaos just failed when injecting. The message should include detailed error
 	EventChaosInjectFailed string = "ChaosInjectFailed"
 

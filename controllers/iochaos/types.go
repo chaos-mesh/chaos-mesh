@@ -66,7 +66,7 @@ func (r *Reconciler) commonIOChaos(iochaos *v1alpha1.IoChaos, req ctrl.Request) 
 	default:
 		return r.invalidActionResponse(iochaos)
 	}
-	return cr.Reconcile(req)
+	return cr.Reconcile(iochaos, req)
 }
 
 func (r *Reconciler) scheduleIOChaos(iochaos *v1alpha1.IoChaos, req ctrl.Request) (ctrl.Result, error) {
@@ -78,7 +78,7 @@ func (r *Reconciler) scheduleIOChaos(iochaos *v1alpha1.IoChaos, req ctrl.Request
 	default:
 		return r.invalidActionResponse(iochaos)
 	}
-	return sr.Reconcile(req)
+	return sr.Reconcile(iochaos, req)
 }
 
 func (r *Reconciler) invalidActionResponse(iochaos *v1alpha1.IoChaos) (ctrl.Result, error) {

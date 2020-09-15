@@ -110,6 +110,7 @@ const (
 	ChaosPhaseAbnormal ChaosPhase = "Abnormal"
 )
 
+// ChaosStatus is common chaos status
 type ChaosStatus struct {
 	// Phase is the chaos status.
 	Phase  ChaosPhase `json:"phase"`
@@ -132,7 +133,7 @@ type ScheduleStatus struct {
 	NextRecover *metav1.Time `json:"nextRecover,omitempty"`
 }
 
-// ExperimentPhase is the current status of chaos experiment.
+// ExperimentPhase is the current phase of chaos experiment.
 type ExperimentPhase string
 
 const (
@@ -143,6 +144,7 @@ const (
 	ExperimentPhaseFinished ExperimentPhase = "Finished"
 )
 
+// ExperimentStatus is the current status of chaos experiment.
 type ExperimentStatus struct {
 	// +optional
 	Phase ExperimentPhase `json:"phase,omitempty"`
@@ -156,6 +158,18 @@ type ExperimentStatus struct {
 	Duration string `json:"duration,omitempty"`
 	// +optional
 	PodRecords []PodStatus `json:"podRecords,omitempty"`
+	// +optional
+	SourcePodRecords []PodStatus `json:"sourcePodRecords,omitempty"`
+	// +optional
+	TargetPodRecords []PodStatus `json:"targetPodRecords,omitempty"`
+	// +optional
+	ExternalCIDRs []string `json:"externalCidrs,omitempty"`
+	// +optional
+	StagingSourcePodRecords []PodStatus `json:"stagingSourcePodRecords,omitempty"`
+	// +optional
+	StagingTargetPodRecords []PodStatus `json:"stagingTargetPodRecords,omitempty"`
+	// +optional
+	StagingExternalCIDRs []string `json:"stagingExternalCidrs,omitempty"`
 }
 
 const (
@@ -186,6 +200,8 @@ type InnerSchedulerObject interface {
 type InnerObject interface {
 	IsDeleted() bool
 	IsPaused() bool
+	IsRenewed() bool
+	PromoteSelectItems() error
 	GetChaos() *ChaosInstance
 	StatefulObject
 }

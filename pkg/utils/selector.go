@@ -38,10 +38,17 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 )
 
+// SelectSpec is chaos selector spec
 type SelectSpec interface {
 	GetSelector() v1alpha1.SelectorSpec
 	GetMode() v1alpha1.PodMode
 	GetValue() string
+}
+
+// SelectAndFilterNetworkChaosByPod returns the list of network chaos that filtered by the pod selectors
+func SelectAndFilterNetworkChaosByPod(ctx context.Context, c client.Client, pod *v1.Pod) ([]*v1alpha1.NetworkChaos, error) {
+	// TODO.
+	return []*v1alpha1.NetworkChaos{}, nil
 }
 
 // SelectAndFilterPods returns the list of pods that filtered by selector and PodMode

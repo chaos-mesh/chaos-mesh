@@ -132,6 +132,17 @@ func (r *Reconciler) Recover(ctx context.Context, req ctrl.Request, obj v1alpha1
 	return nil
 }
 
+// Promotes means reconciler promotes staging select items to production
+func (r *Reconciler) Promotes(ctx context.Context, req ctrl.Request, chaos v1alpha1.InnerObject) error {
+	podchaos, ok := chaos.(*v1alpha1.PodChaos)
+	if !ok {
+		err := errors.New("chaos is not PodChaos")
+		r.Log.Error(err, "chaos is not PodChaos", "chaos", chaos)
+		return err
+	}
+	return podchaos.PromoteSelectItems()
+}
+
 func (r *Reconciler) cleanFinalizersAndRecover(ctx context.Context, podchaos *v1alpha1.PodChaos) error {
 	var result error
 

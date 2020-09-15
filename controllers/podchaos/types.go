@@ -70,7 +70,7 @@ func (r *Reconciler) commonPodChaos(podchaos *v1alpha1.PodChaos, req ctrl.Reques
 	default:
 		return r.invalidActionResponse(podchaos)
 	}
-	return pr.Reconcile(req)
+	return pr.Reconcile(podchaos, req)
 }
 
 func (r *Reconciler) schedulePodChaos(podchaos *v1alpha1.PodChaos, req ctrl.Request) (ctrl.Result, error) {
@@ -88,7 +88,7 @@ func (r *Reconciler) schedulePodChaos(podchaos *v1alpha1.PodChaos, req ctrl.Requ
 	default:
 		return r.invalidActionResponse(podchaos)
 	}
-	return tr.Reconcile(req)
+	return tr.Reconcile(podchaos, req)
 }
 
 func (r *Reconciler) invalidActionResponse(podchaos *v1alpha1.PodChaos) (ctrl.Result, error) {

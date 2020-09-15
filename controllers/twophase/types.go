@@ -48,7 +48,8 @@ func NewReconciler(r reconciler.InnerReconciler, client client.Client, reader cl
 	}
 }
 
-func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
+// Reconcile is two phase reconcile
+func (r *Reconciler) Reconcile(chaos v1alpha1.InnerObject, req ctrl.Request) (ctrl.Result, error) {
 	var err error
 	now := time.Now()
 
@@ -56,20 +57,14 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	_chaos := r.Object()
-	if err = r.Client.Get(ctx, req.NamespacedName, _chaos); err != nil {
-		r.Log.Error(err, "unable to get chaos")
-		return ctrl.Result{}, err
-	}
-	chaos := _chaos.(v1alpha1.InnerSchedulerObject)
-
-	duration, err := chaos.GetDuration()
+	schedChaos := chaos.(v1alpha1.InnerSchedulerObject)
+	duration, err := schedChaos.GetDuration()
 	if err != nil {
 		r.Log.Error(err, "failed to get chaos duration")
 		return ctrl.Result{}, err
 	}
 
-	scheduler := chaos.GetScheduler()
+	scheduler := schedChaos.GetScheduler()
 	if scheduler == nil {
 		r.Log.Info("Scheduler should be defined currently")
 		return ctrl.Result{}, fmt.Errorf("misdefined scheduler")
@@ -80,23 +75,63 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		duration = &zero
 	}
 
-	status := chaos.GetStatus()
+	status := schedChaos.GetStatus()
 
-	if chaos.IsDeleted() {
+	if schedChaos.IsDeleted() {
 		// This chaos was deleted
 		r.Log.Info("Removing self")
-		err = r.Recover(ctx, req, chaos)
+		err = r.Recover(ctx, req, schedChaos)
 		if err != nil {
 			r.Log.Error(err, "failed to recover chaos")
 			return ctrl.Result{Requeue: true}, err
 		}
 
 		status.Experiment.Phase = v1alpha1.ExperimentPhaseFinished
-	} else if chaos.IsPaused() {
+
+		if err := r.Update(ctx, schedChaos); err != nil {
+			r.Log.Error(err, "unable to update chaos status")
+			return ctrl.Result{}, err
+		}
+
+		return ctrl.Result{}, nil
+	}
+
+	// if it is renewed, do recover first and promotes the select items.
+	isRenewed := schedChaos.IsRenewed()
+	if isRenewed {
+		r.Log.Info("Renewing self")
+
+		if err = r.Recover(ctx, req, chaos); err != nil {
+			r.Log.Error(err, "failed to pause chaos while renewing")
+			return ctrl.Result{Requeue: true}, err
+		}
+
+		// promote staging items to production.
+		if err = r.Promotes(ctx, req, chaos); err != nil {
+			r.Log.Error(err, "failed to promote chaos select items from staging to prod(renew)")
+			return ctrl.Result{Requeue: true}, err
+		}
+
+		// if the experiment is still running, update the endtime(renew is more likely to did pause and resume).
+		if status.Experiment.Phase == v1alpha1.ExperimentPhaseRunning {
+			now := time.Now()
+			status.Experiment.EndTime = &metav1.Time{
+				Time: now,
+			}
+			if status.Experiment.StartTime != nil {
+				status.Experiment.Duration = now.Sub(status.Experiment.StartTime.Time).String()
+			}
+		}
+
+		// mark phase at ExperimentPhaseWaiting to leave it enter the following steps
+		status.Experiment.Phase = v1alpha1.ExperimentPhaseWaiting
+	}
+
+	if schedChaos.IsPaused() {
 		if status.Experiment.Phase == v1alpha1.ExperimentPhaseRunning {
 			r.Log.Info("Pausing")
 
-			err = r.Recover(ctx, req, chaos)
+			err = r.Recover(ctx, req, schedChaos)
 			if err != nil {
 				r.Log.Error(err, "failed to pause chaos")
 				return ctrl.Result{Requeue: true}, err
@@ -111,39 +146,39 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 			}
 		}
 		status.Experiment.Phase = v1alpha1.ExperimentPhasePaused
-	} else if !chaos.GetNextRecover().IsZero() && chaos.GetNextRecover().Before(now) {
+	} else if !schedChaos.GetNextRecover().IsZero() && schedChaos.GetNextRecover().Before(now) {
 		// Start recover
 		r.Log.Info("Recovering")
 
-		// Don't need to recover again if chaos was paused before
-		if status.Experiment.Phase != v1alpha1.ExperimentPhasePaused {
-			if err = r.Recover(ctx, req, chaos); err != nil {
+		// Don't need to recover again if chaos was paused or renewed before
+		if !isRenewed || status.Experiment.Phase != v1alpha1.ExperimentPhasePaused {
+			if err = r.Recover(ctx, req, schedChaos); err != nil {
 				r.Log.Error(err, "failed to recover chaos")
 				return ctrl.Result{Requeue: true}, err
 			}
 		}
 
-		chaos.SetNextRecover(time.Time{})
+		schedChaos.SetNextRecover(time.Time{})
 
 		status.Experiment.EndTime = &metav1.Time{
 			Time: time.Now(),
 		}
 		status.Experiment.Phase = v1alpha1.ExperimentPhaseWaiting
 	} else if status.Experiment.Phase == v1alpha1.ExperimentPhasePaused &&
-		!chaos.GetNextRecover().IsZero() && chaos.GetNextRecover().After(now) {
+		!schedChaos.GetNextRecover().IsZero() && schedChaos.GetNextRecover().After(now) {
 		// Only resume chaos in the case when current round is not finished,
 		// which means the current time is before recover time. Otherwise we
 		// don't resume the chaos and just wait for the start of next round.
 
 		r.Log.Info("Resuming")
 
-		dur := chaos.GetNextRecover().Sub(now)
-		if err := applyAction(ctx, r, req, dur, chaos); err != nil {
+		dur := schedChaos.GetNextRecover().Sub(now)
+		if err := applyAction(ctx, r, req, dur, schedChaos); err != nil {
 			return ctrl.Result{Requeue: true}, err
 		}
 
-	} else if chaos.GetNextStart().Before(now) {
-		nextStart, err := utils.NextTime(*chaos.GetScheduler(), now)
+	} else if schedChaos.GetNextStart().Before(now) {
+		nextStart, err := utils.NextTime(*schedChaos.GetScheduler(), now)
 		if err != nil {
 			r.Log.Error(err, "failed to get next start time")
 			return ctrl.Result{}, err
@@ -157,17 +192,17 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 			return ctrl.Result{}, err
 		}
 
-		if err := applyAction(ctx, r, req, *duration, chaos); err != nil {
+		if err := applyAction(ctx, r, req, *duration, schedChaos); err != nil {
 			return ctrl.Result{Requeue: true}, err
 		}
 
-		chaos.SetNextStart(*nextStart)
-		chaos.SetNextRecover(nextRecover)
+		schedChaos.SetNextStart(*nextStart)
+		schedChaos.SetNextRecover(nextRecover)
 	} else {
-		nextTime := chaos.GetNextStart()
+		nextTime := schedChaos.GetNextStart()
 
-		if !chaos.GetNextRecover().IsZero() && chaos.GetNextRecover().Before(nextTime) {
-			nextTime = chaos.GetNextRecover()
+		if !schedChaos.GetNextRecover().IsZero() && schedChaos.GetNextRecover().Before(nextTime) {
+			nextTime = schedChaos.GetNextRecover()
 		}
 		duration := nextTime.Sub(now)
 		r.Log.Info("Requeue request", "after", duration)
@@ -175,7 +210,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		return ctrl.Result{RequeueAfter: duration}, nil
 	}
 
-	if err := r.Update(ctx, chaos); err != nil {
+	if err := r.Update(ctx, schedChaos); err != nil {
 		r.Log.Error(err, "unable to update chaos status")
 		return ctrl.Result{}, err
 	}

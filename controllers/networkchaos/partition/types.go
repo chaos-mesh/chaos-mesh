@@ -73,6 +73,7 @@ func NewCommonReconciler(c client.Client, reader client.Reader, log logr.Logger,
 	return common.NewReconciler(r, r.Client, r.Reader, r.Log)
 }
 
+// Reconciler is network partition chaos reconciler
 type Reconciler struct {
 	client.Client
 	client.Reader
@@ -262,6 +263,17 @@ func (r *Reconciler) Recover(ctx context.Context, req ctrl.Request, chaos v1alph
 	r.Event(networkchaos, v1.EventTypeNormal, utils.EventChaosRecovered, "")
 
 	return nil
+}
+
+// Promotes means reconciler promotes staging select items to production
+func (r *Reconciler) Promotes(ctx context.Context, req ctrl.Request, chaos v1alpha1.InnerObject) error {
+	networkchaos, ok := chaos.(*v1alpha1.NetworkChaos)
+	if !ok {
+		err := errors.New("chaos is not NetworkChaos")
+		r.Log.Error(err, "chaos is not NetworkChaos", "chaos", chaos)
+		return err
+	}
+	return networkchaos.PromoteSelectItems()
 }
 
 func (r *Reconciler) cleanFinalizersAndRecover(ctx context.Context, networkchaos *v1alpha1.NetworkChaos) error {

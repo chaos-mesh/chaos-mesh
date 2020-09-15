@@ -15,12 +15,14 @@ package v1alpha1
 
 import (
 	"errors"
+	"fmt"
 	"strconv"
 	"strings"
 	"time"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
+	"github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos/netutils"
 	chaosdaemonpb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
 )
 
@@ -193,6 +195,7 @@ type NetworkChaos struct {
 	Status NetworkChaosStatus `json:"status"`
 }
 
+// GetStatus get networkchaos resource status
 func (in *NetworkChaos) GetStatus() *ChaosStatus {
 	return &in.Status.ChaosStatus
 }
@@ -210,6 +213,123 @@ func (in *NetworkChaos) IsPaused() bool {
 	return true
 }
 
+// PromoteSelectItems promotes the staging select items to production
+func (in *NetworkChaos) PromoteSelectItems() error {
+	copied := in.Status.Experiment.DeepCopy()
+	in.Status.Experiment.SourcePodRecords = copied.StagingSourcePodRecords
+	in.Status.Experiment.TargetPodRecords = copied.StagingTargetPodRecords
+	in.Status.Experiment.ExternalCIDRs = copied.StagingExternalCIDRs
+	return nil
+}
+
+// IsSameTwoExternalCIDRs check whether two cidr list is same one or not
+func IsSameTwoExternalCIDRs(a, b []string) bool {
+	aCIDRs, err := netutils.ResolveCidrs(a)
+	if err != nil {
+		return false
+	}
+
+	bCIDRs, err := netutils.ResolveCidrs(b)
+	if err != nil {
+		return false
+	}
+
+	if len(aCIDRs) != len(bCIDRs) {
+		return false
+	}
+
+	aVisitMap := make(map[string]bool)
+	for _, cidr := range aCIDRs {
+		aVisitMap[cidr] = false
+	}
+
+	for _, cidr := range bCIDRs {
+		if _, exists := aVisitMap[cidr]; !exists {
+			return false
+		}
+		aVisitMap[cidr] = true
+	}
+
+	for _, visited := range aVisitMap {
+		if !visited {
+			return false
+		}
+	}
+
+	return true
+}
+
+// IsSamePodStatus check whether two pod status is same one or not
+func IsSamePodStatus(a PodStatus, b PodStatus) bool {
+	if a.Namespace == b.Namespace && a.Name == b.Name && a.PodIP == b.PodIP && a.HostIP == b.HostIP && a.Action == b.Action {
+		return true
+	}
+	return false
+}
+
+// IsSameTwoPodStatuses check whether two pod status list is same one or not
+func IsSameTwoPodStatuses(a []PodStatus, b []PodStatus) bool {
+	var (
+		aVisitKeyMap = make(map[string]bool)
+		aMap         = make(map[string]*PodStatus)
+	)
+
+	if len(a) != len(b) {
+		return false
+	}
+
+	for _, ps := range a {
+		podKey := fmt.Sprintf("%s-%s", ps.Namespace, ps.Name)
+		aMap[podKey] = &ps
+		aVisitKeyMap[podKey] = false
+	}
+
+	created := make(map[string]*PodStatus)
+	updated := make(map[string][]*PodStatus)
+	deleted := make(map[string]*PodStatus)
+
+	for _, ps := range b {
+		podKey := fmt.Sprintf("%s-%s", ps.Namespace, ps.Name)
+		if _, exists := aMap[podKey]; !exists {
+			created[podKey] = &ps
+			continue
+		}
+		aVisitKeyMap[podKey] = true
+		prev := aMap[podKey]
+		current := &ps
+		if !IsSamePodStatus(*prev, *current) {
+			updated[podKey] = []*PodStatus{
+				prev, current,
+			}
+		}
+	}
+
+	for podKey, visited := range aVisitKeyMap {
+		if !visited {
+			deleted[podKey] = aMap[podKey]
+		}
+	}
+
+	if len(created) == 0 && len(updated) == 0 && len(deleted) == 0 {
+		return true
+	}
+
+	return false
+}
+
+// IsRenewed returns whether this resource selected source/target item has been changed
+func (in *NetworkChaos) IsRenewed() bool {
+	// check chaos status experiment select items with its staging values.
+	// if there is a differ, return true.
+	experiment := in.Status.Experiment
+	if !IsSameTwoPodStatuses(experiment.SourcePodRecords, experiment.StagingSourcePodRecords) ||
+		!IsSameTwoPodStatuses(experiment.TargetPodRecords, experiment.StagingTargetPodRecords) ||
+		!IsSameTwoExternalCIDRs(experiment.ExternalCIDRs, experiment.StagingExternalCIDRs) {
+		return true
+	}
+	return false
+}
+
 // GetDuration would return the duration for chaos
 func (in *NetworkChaos) GetDuration() (*time.Duration, error) {
 	if in.Spec.Duration == nil {
@@ -222,6 +342,7 @@ func (in *NetworkChaos) GetDuration() (*time.Duration, error) {
 	return &duration, nil
 }
 
+// GetNextStart get next start time from scheduler
 func (in *NetworkChaos) GetNextStart() time.Time {
 	if in.Status.Scheduler.NextStart == nil {
 		return time.Time{}
@@ -229,6 +350,7 @@ func (in *NetworkChaos) GetNextStart() time.Time {
 	return in.Status.Scheduler.NextStart.Time
 }
 
+// SetNextStart set next start time in status
 func (in *NetworkChaos) SetNextStart(t time.Time) {
 	if t.IsZero() {
 		in.Status.Scheduler.NextStart = nil
@@ -241,6 +363,7 @@ func (in *NetworkChaos) SetNextStart(t time.Time) {
 	in.Status.Scheduler.NextStart.Time = t
 }
 
+// GetNextRecover get next recover time from scheduler
 func (in *NetworkChaos) GetNextRecover() time.Time {
 	if in.Status.Scheduler.NextRecover == nil {
 		return time.Time{}
@@ -248,6 +371,7 @@ func (in *NetworkChaos) GetNextRecover() time.Time {
 	return in.Status.Scheduler.NextRecover.Time
 }
 
+// SetNextRecover set next recover time in status
 func (in *NetworkChaos) SetNextRecover(t time.Time) {
 	if t.IsZero() {
 		in.Status.Scheduler.NextRecover = nil

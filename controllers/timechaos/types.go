@@ -69,12 +69,12 @@ func (r *Reconciler) Reconcile(req ctrl.Request, chaos *v1alpha1.TimeChaos) (ctr
 
 func (r *Reconciler) commonTimeChaos(timechaos *v1alpha1.TimeChaos, req ctrl.Request) (ctrl.Result, error) {
 	cr := common.NewReconciler(r, r.Client, r.Reader, r.Log)
-	return cr.Reconcile(req)
+	return cr.Reconcile(timechaos, req)
 }
 
 func (r *Reconciler) scheduleTimeChaos(timechaos *v1alpha1.TimeChaos, req ctrl.Request) (ctrl.Result, error) {
 	sr := twophase.NewReconciler(r, r.Client, r.Reader, r.Log)
-	return sr.Reconcile(req)
+	return sr.Reconcile(timechaos, req)
 }
 
 // Apply applies time-chaos
@@ -131,6 +131,17 @@ func (r *Reconciler) Recover(ctx context.Context, req ctrl.Request, chaos v1alph
 	r.Event(timechaos, v1.EventTypeNormal, utils.EventChaosRecovered, "")
 
 	return nil
+}
+
+// Promotes means reconciler promotes staging select items to production
+func (r *Reconciler) Promotes(ctx context.Context, req ctrl.Request, chaos v1alpha1.InnerObject) error {
+	timechaos, ok := chaos.(*v1alpha1.PodChaos)
+	if !ok {
+		err := errors.New("chaos is not TimeChaos")
+		r.Log.Error(err, "chaos is not TimeChaos", "chaos", chaos)
+		return err
+	}
+	return timechaos.PromoteSelectItems()
 }
 
 func (r *Reconciler) cleanFinalizersAndRecover(ctx context.Context, chaos *v1alpha1.TimeChaos) error {

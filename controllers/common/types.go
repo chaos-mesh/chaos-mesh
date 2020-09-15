@@ -74,18 +74,11 @@ func NewReconciler(reconcile reconciler.InnerReconciler, c client.Client, r clie
 }
 
 // Reconcile the common chaos
-func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
+func (r *Reconciler) Reconcile(chaos v1alpha1.InnerObject, req ctrl.Request) (ctrl.Result, error) {
 	var err error
 
 	r.Log.Info("Reconciling a common chaos", "name", req.Name, "namespace", req.Namespace)
 	ctx := context.Background()
-
-	chaos := r.Object()
-	if err = r.Client.Get(ctx, req.NamespacedName, chaos); err != nil {
-		r.Log.Error(err, "unable to get chaos")
-		return ctrl.Result{}, err
-	}
-
 	status := chaos.GetStatus()
 
 	if chaos.IsDeleted() {
@@ -96,7 +89,46 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 			return ctrl.Result{Requeue: true}, err
 		}
 		status.Experiment.Phase = v1alpha1.ExperimentPhaseFinished
-	} else if chaos.IsPaused() {
+
+		if err := r.Update(ctx, chaos); err != nil {
+			r.Log.Error(err, "unable to update chaos status")
+			return ctrl.Result{}, err
+		}
+
+		return ctrl.Result{}, nil
+	}
+
+	// if it is renewed, do recover first and promotes the select items.
+	if chaos.IsRenewed() {
+		r.Log.Info("Renewing self")
+
+		if err = r.Recover(ctx, req, chaos); err != nil {
+			r.Log.Error(err, "failed to pause chaos while renewing")
+			return ctrl.Result{Requeue: true}, err
+		}
+
+		// promote staging items to production.
+		if err = r.Promotes(ctx, req, chaos); err != nil {
+			r.Log.Error(err, "failed to promote chaos select items from staging to prod(renew)")
+			return ctrl.Result{Requeue: true}, err
+		}
+
+		// if the experiment is still running, update the endtime(renew is more likely to did pause and resume).
+		if status.Experiment.Phase == v1alpha1.ExperimentPhaseRunning {
+			now := time.Now()
+			status.Experiment.EndTime = &metav1.Time{
+				Time: now,
+			}
+			if status.Experiment.StartTime != nil {
+				status.Experiment.Duration = now.Sub(status.Experiment.StartTime.Time).String()
+			}
+		}
+
+		// mark phase at ExperimentPhaseWaiting to leave it enter the following steps
+		status.Experiment.Phase = v1alpha1.ExperimentPhaseWaiting
+	}
+
+	if chaos.IsPaused() {
 		if status.Experiment.Phase == v1alpha1.ExperimentPhaseRunning {
 			r.Log.Info("Pausing")
 

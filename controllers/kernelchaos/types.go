@@ -79,12 +79,12 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 
 func (r *Reconciler) commonKernelChaos(kernelChaos *v1alpha1.KernelChaos, req ctrl.Request) (ctrl.Result, error) {
 	cr := common.NewReconciler(r, r.Client, r.Reader, r.Log)
-	return cr.Reconcile(req)
+	return cr.Reconcile(kernelChaos, req)
 }
 
 func (r *Reconciler) scheduleKernelChaos(kernelChaos *v1alpha1.KernelChaos, req ctrl.Request) (ctrl.Result, error) {
 	sr := twophase.NewReconciler(r, r.Client, r.Reader, r.Log)
-	return sr.Reconcile(req)
+	return sr.Reconcile(kernelChaos, req)
 }
 
 // Apply applies KernelChaos
@@ -139,6 +139,17 @@ func (r *Reconciler) Recover(ctx context.Context, req ctrl.Request, chaos v1alph
 	r.Event(kernelChaos, v1.EventTypeNormal, utils.EventChaosRecovered, "")
 
 	return nil
+}
+
+// Promotes means reconciler promotes staging select items to production
+func (r *Reconciler) Promotes(ctx context.Context, req ctrl.Request, chaos v1alpha1.InnerObject) error {
+	kernelChaos, ok := chaos.(*v1alpha1.KernelChaos)
+	if !ok {
+		err := errors.New("chaos is not KernelChaos")
+		r.Log.Error(err, "chaos is not KernelChaos", "chaos", chaos)
+		return err
+	}
+	return kernelChaos.PromoteSelectItems()
 }
 
 func (r *Reconciler) cleanFinalizersAndRecover(ctx context.Context, chaos *v1alpha1.KernelChaos) error {

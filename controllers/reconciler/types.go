@@ -30,6 +30,9 @@ type InnerReconciler interface {
 	// Recover means the reconciler recovers the chaos action
 	Recover(ctx context.Context, req ctrl.Request, chaos v1alpha1.InnerObject) error
 
+	// Promotes means the reconciler promote staging selectors to production
+	Promotes(ctx context.Context, req ctrl.Request, chaos v1alpha1.InnerObject) error
+
 	// Object would return the instance of chaos
 	Object() v1alpha1.InnerObject
 }

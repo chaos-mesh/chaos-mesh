@@ -14,6 +14,7 @@
 package v1alpha1
 
 import (
+	"errors"
 	"time"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -72,6 +73,24 @@ func (in *PodChaos) IsPaused() bool {
 		return false
 	}
 	return true
+}
+
+// PromoteSelectItems promotes the staging select items to production
+func (in *PodChaos) PromoteSelectItems() error {
+	return errors.New("not implemented yet")
+}
+
+// IsRenewed returns whether this resource selected source/target item has been changed
+func (in *PodChaos) IsRenewed() bool {
+	// check chaos status experiment select items with its staging values.
+	// if there is a differ, return true.
+	experiment := in.Status.Experiment
+	if !IsSameTwoPodStatuses(experiment.SourcePodRecords, experiment.StagingSourcePodRecords) ||
+		!IsSameTwoPodStatuses(experiment.TargetPodRecords, experiment.StagingTargetPodRecords) ||
+		!IsSameTwoExternalCIDRs(experiment.ExternalCIDRs, experiment.StagingExternalCIDRs) {
+		return true
+	}
+	return false
 }
 
 // GetDuration would return the duration for chaos

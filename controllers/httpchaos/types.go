@@ -69,6 +69,17 @@ func (r *Reconciler) Recover(ctx context.Context, req ctrl.Request, chaos v1alph
 	return nil
 }
 
+// Promotes means reconciler promotes staging select items to production
+func (r *Reconciler) Promotes(ctx context.Context, req ctrl.Request, chaos v1alpha1.InnerObject) error {
+	httpFaultChaos, ok := chaos.(*v1alpha1.HTTPChaos)
+	if !ok {
+		err := errors.New("chaos is not HttpChaos")
+		r.Log.Error(err, "chaos is not HttpChaos", "chaos", chaos)
+		return err
+	}
+	return httpFaultChaos.PromoteSelectItems()
+}
+
 func (r *Reconciler) Object() v1alpha1.InnerObject {
 	return &v1alpha1.HTTPChaos{}
 }
@@ -93,7 +104,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request, chaos *v1alpha1.HTTPChaos) (ctr
 
 func (r *Reconciler) commonHttpFaultChaos(httpFaultChaos *v1alpha1.HTTPChaos, req ctrl.Request) (ctrl.Result, error) {
 	cr := common.NewReconciler(r, r.Client, r.Reader, r.Log)
-	return cr.Reconcile(req)
+	return cr.Reconcile(httpFaultChaos, req)
 }
 
 func (r *Reconciler) applyAllPods(ctx context.Context, pods []v1.Pod, chaos *v1alpha1.HTTPChaos) error {

@@ -28,6 +28,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/controllers/twophase"
 )
 
+// Reconciler is networkchaos reconciler
 type Reconciler struct {
 	client.Client
 	client.Reader
@@ -69,7 +70,7 @@ func (r *Reconciler) commonNetworkChaos(networkchaos *v1alpha1.NetworkChaos, req
 	default:
 		return r.invalidActionResponse(networkchaos)
 	}
-	return cr.Reconcile(req)
+	return cr.Reconcile(networkchaos, req)
 }
 
 func (r *Reconciler) scheduleNetworkChaos(networkchaos *v1alpha1.NetworkChaos, req ctrl.Request) (ctrl.Result, error) {
@@ -84,7 +85,7 @@ func (r *Reconciler) scheduleNetworkChaos(networkchaos *v1alpha1.NetworkChaos, r
 	default:
 		return r.invalidActionResponse(networkchaos)
 	}
-	return sr.Reconcile(req)
+	return sr.Reconcile(networkchaos, req)
 }
 
 func (r *Reconciler) invalidActionResponse(networkchaos *v1alpha1.NetworkChaos) (ctrl.Result, error) {
