@@ -36,7 +36,7 @@ For more sample files, see [examples](https://github.com/chaos-mesh/chaos-mesh/t
 
 | Field | Description | Sample Value |
 |:------|:------------------|:--------------|
-| **mode** | Defines the mode for selector. | `one` / `all` / `fixed` / `fixed-percent` / `random-max-percent` |
+| **mode** | Define the mode for selector. | `one` / `all` / `fixed` / `fixed-percent` / `random-max-percent` |
 | **selector** | Selects pods which will be injected with io chaos.|
 | **action** | Represents the IOChaos actions. Refer to [IOChaos available actions](#iochaos-available-actions) for more details. | `delay` / `fault` / `attrOverride` |
 | **volumePath** | The mount path of the target volume | `"/var/run/etcd"` |
