@@ -990,6 +990,7 @@ rules:
     - stresschaos
     - dnschaos
     - podnetworkchaos
+    - httpchaos
   verbs: ["*"]
 ---
 # Source: chaos-mesh/templates/dns-rbac.yaml
