@@ -55,6 +55,8 @@ spec:
             value: !!str {{ .Values.bpfki.grpcPort }}
           - name: TEMPLATE_LABELS
             value: "app.kubernetes.io/component:template"
+          - name: CONFIGMAP_LABELS
+            value: "app.kubernetes.io/component:webhook"
           {{- if .Values.controllerManager.allowedNamespaces }}
           - name: ALLOWED_NAMESPACES
             value: {{ .Values.controllerManager.allowedNamespaces }}
