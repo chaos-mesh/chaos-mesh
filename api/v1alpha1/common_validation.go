@@ -97,11 +97,6 @@ func ParseCron(standardSpec string, cronField *field.Path) (cronv3.Schedule, fie
 // ValidatePodMode validates the value with podmode
 func ValidatePodMode(value string, mode PodMode, valueField *field.Path) field.ErrorList {
 	allErrs := field.ErrorList{}
-	if mode != OnePodMode && mode != AllPodMode && mode != FixedPodMode && mode != FixedPercentPodMode && mode != RandomMaxPercentPodMode {
-		allErrs = append(allErrs, field.Invalid(valueField, value,
-			fmt.Sprintf("mode %s not supported", mode)))
-		return allErrs
-	}
 
 	switch mode {
 	case FixedPodMode:
