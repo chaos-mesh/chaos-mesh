@@ -281,7 +281,7 @@ func (in *BandwidthSpec) validateBandwidth(bandwidth *field.Path) field.ErrorLis
 
 // validateTarget validates the target
 func (in *Target) validateTarget(target *field.Path) field.ErrorList {
-	if in != nil && in.TargetMode!= OnePodMode && in.TargetMode != AllPodMode && in.TargetMode != FixedPodMode && in.TargetMode != FixedPercentPodMode && in.TargetMode != RandomMaxPercentPodMode {
+	if in != nil && in.TargetMode != OnePodMode && in.TargetMode != AllPodMode && in.TargetMode != FixedPodMode && in.TargetMode != FixedPercentPodMode && in.TargetMode != RandomMaxPercentPodMode {
 		allErrs := field.ErrorList{}
 		allErrs = append(allErrs,
 			field.Invalid(target.Child("mode"), in.TargetMode,
