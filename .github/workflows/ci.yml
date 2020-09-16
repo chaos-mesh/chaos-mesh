@@ -30,6 +30,11 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha }}
           path: go/src/github.com/${{ github.repository }}
 
+      - name: Setup Helm
+        uses: azure/setup-helm@v1
+        with:
+          version: v3.3.0
+
       - name: ${{ matrix.job }}
         run: |
           # workaround for https://github.com/actions/setup-go/issues/14
@@ -44,6 +49,7 @@ jobs:
             make check
             echo "Please make check before creating a PR"
             git diff --quiet -- .
+            make check-install-script
           elif [[ "$job" == "build" ]]; then
             make image
           elif [[ "$job" == "test" ]]; then
