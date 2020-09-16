@@ -173,6 +173,12 @@ tidy: clean
 	GO111MODULE=on go mod tidy
 	git diff -U --exit-code go.mod go.sum
 
+update-install-scipt:
+	./hack/update_install_script.sh
+
+check-install-script: update-install-scipt
+	git diff -U --exit-code install.sh
+
 clean:
 	rm -rf docs/docs.go
 
