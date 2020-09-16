@@ -104,7 +104,7 @@ dnsServer:
   
   image: pingcap/coredns:latest
   
-  imagePullPolicy: Always
+  imagePullPolicy: IfNotPresent
 
   nodeSelector: {}
   

@@ -49,6 +49,7 @@ func (s *daemonServer) SetDNSServer(ctx context.Context,
 			Build(context.Background())
 		out, err := cmd.Output()
 		if err != nil {
+			log.Error(err, "execute command")
 			return nil, err
 		}
 		if len(out) != 0 {
@@ -56,12 +57,13 @@ func (s *daemonServer) SetDNSServer(ctx context.Context,
 		}
 
 		// add chaos dns server to the first line of /etc/resolv.conf
-		// Note: can not use sed, will execute with error `Device or resource busy`
-		cmd = defaultProcessBuilder("sh", "-c", fmt.Sprintf("echo 'nameserver %s' | cat - %s > temp && cat temp > %s", req.DnsServer, DNSServerConfFile, DNSServerConfFile)).
+		// Note: can not replace the /etc/resolv.conf like `mv temp resolv.conf`, will execute with error `Device or resource busy`
+		cmd = defaultProcessBuilder("sh", "-c", fmt.Sprintf("cp %s temp && sed -i 's/.*nameserver.*/nameserver %s/' temp && cat temp > %s", DNSServerConfFile, req.DnsServer, DNSServerConfFile)).
 			SetMountNS(GetNsPath(pid, mountNS)).
 			Build(context.Background())
 		out, err = cmd.Output()
 		if err != nil {
+			log.Error(err, "execute command")
 			return nil, err
 		}
 		if len(out) != 0 {
@@ -74,6 +76,7 @@ func (s *daemonServer) SetDNSServer(ctx context.Context,
 			Build(context.Background())
 		out, err := cmd.Output()
 		if err != nil {
+			log.Error(err, "execute command")
 			return nil, err
 		}
 		if len(out) != 0 {
