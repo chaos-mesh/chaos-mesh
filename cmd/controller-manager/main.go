@@ -258,7 +258,8 @@ func watchConfig(configWatcher *watcher.K8sConfigMapWatcher, cfg *config.Config,
 				if err := configWatcher.Watch(sigChan, stopCh); err != nil {
 					switch err {
 					case watcher.ErrWatchChannelClosed:
-						setupLog.Error(err, "watcher got error, try to restart watcher")
+						// known issue: https://github.com/kubernetes/client-go/issues/334
+						setupLog.Info("watcher channel has closed, restart watcher")
 					default:
 						setupLog.Error(err, "unable to watch new ConfigMaps")
 						os.Exit(1)
