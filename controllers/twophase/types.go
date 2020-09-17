@@ -50,7 +50,6 @@ func NewReconciler(r reconciler.InnerReconciler, client client.Client, reader cl
 
 func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	var err error
-	var startTime time.Time
 	now := time.Now()
 
 	r.Log.Info("Reconciling a two phase chaos", "name", req.Name, "namespace", req.Namespace)
@@ -139,7 +138,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		r.Log.Info("Resuming")
 
 		dur := chaos.GetNextRecover().Sub(now)
-		if startTime, err = applyAction(ctx, r, req, dur, chaos); err != nil {
+		if err = applyAction(ctx, r, req, dur, chaos); err != nil {
 			return ctrl.Result{Requeue: true}, err
 		}
 
@@ -157,16 +156,16 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 			return ctrl.Result{}, err
 		}
 
-		if startTime, err = applyAction(ctx, r, req, *duration, chaos); err != nil {
+		if err = applyAction(ctx, r, req, *duration, chaos); err != nil {
 			return ctrl.Result{Requeue: true}, err
 		}
 
-		nextStart, err := utils.NextTime(*chaos.GetScheduler(), startTime)
+		nextStart, err := utils.NextTime(*chaos.GetScheduler(), status.Experiment.StartTime.Time)
 		if err != nil {
 			r.Log.Error(err, "failed to get the next start time")
 			return ctrl.Result{}, err
 		}
-		nextRecover := startTime.Add(*duration)
+		nextRecover := status.Experiment.StartTime.Time.Add(*duration)
 
 		chaos.SetNextStart(*nextStart)
 		chaos.SetNextRecover(nextRecover)
@@ -207,7 +206,7 @@ func applyAction(
 	req ctrl.Request,
 	duration time.Duration,
 	chaos v1alpha1.InnerSchedulerObject,
-) (time.Time, error) {
+) error {
 	status := chaos.GetStatus()
 	r.Log.Info("Chaos action:", "chaos", chaos)
 
@@ -226,11 +225,11 @@ func applyAction(
 			r.Log.Error(updateError, "unable to update chaos finalizers")
 		}
 
-		return time.Time{}, err
+		return err
 	}
 
 	status.Experiment.StartTime = &metav1.Time{Time: time.Now()}
 	status.Experiment.Phase = v1alpha1.ExperimentPhaseRunning
 	status.Experiment.Duration = duration.String()
-	return status.Experiment.StartTime.Time, nil
+	return nil
 }
