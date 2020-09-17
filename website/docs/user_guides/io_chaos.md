@@ -6,7 +6,7 @@ sidebar_label: IOChaos Experiment
 
 This document helps you run IOChaos experiments.
 
-IOChaos allows you to simulate file system faults such as IO delay and read/write errors. It can inject delay and errno when your program is running IO system calls such as `open`, `read` and `write`.
+IOChaos allows you to simulate file system faults such as IO delay and read/write errors. It can inject delay and fault when your program is running IO system calls such as `open`, `read` and `write`.
 
 ## Configuration file
 
@@ -44,7 +44,7 @@ For more sample files, see [examples](https://github.com/chaos-mesh/chaos-mesh/t
 | **errno** | Defines the error code returned by an IO action. See the [common Linux system errors](#common-linux-system-errors) for more Linux system error codes. | `2` |
 | **attr** | Defines the attribute which will be overridden and the corresponding value | [examples](https://github.com/chaos-mesh/chaos-mesh/tree/master/examples/io-attr-example.yaml) |
 | **percent** | Defines the probability of injecting errors. It's represented as a percent, which means the domain of it should be 1-100. | `100` (by default) |
-| **path** | Defines the path of files for injecting IOChaos actions. It should be a glob for the files which you want to inject errno or delay. | "/var/run/etcd/*\*/\*" |
+| **path** | Defines the path of files for injecting IOChaos actions. It should be a glob for the files which you want to inject fault or delay. | "/var/run/etcd/*\*/\*" |
 | **methods** | Defines the IO methods for injecting IOChaos actions. It is represented as an array of string. | `open` / `read` See the [available methods](#available-methods) for more details. |
 | **duration** | Represents the duration of a chaos action. The duration might be a string with the signed sequence of decimal numbers, each with an optional fraction and a unit suffix. | `"300ms"` / `"2h45m"`|
 | **scheduler** | defines the scheduler rules for the running time of the chaos experiment. | see [robfig/cron](https://godoc.org/github.com/robfig/cron) |
@@ -67,7 +67,7 @@ IOChaos currently supports the following actions:
 
 ### delay
 
-If you are using the delay mode, you can edit spec as below:
+If you are using the delay action, you can edit spec as below:
 
 ```yaml
 spec:
@@ -77,13 +77,13 @@ spec:
 
 It will inject 1ms latency for selected methods.
 
-### errno
+### fault
 
-If you are using the errno mode, you can edit spec as below:
+If you are using the fault action, you can edit spec as below:
 
 ```yaml
 spec:
-  action: errno
+  action: fault
   errno: 32
 ```
 
