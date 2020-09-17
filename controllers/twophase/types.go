@@ -166,7 +166,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 			return ctrl.Result{}, err
 		}
 
-		if err := applyAction(ctx, r, req, *duration, chaos); err != nil {
+		if err = applyAction(ctx, r, req, *duration, chaos); err != nil {
 			updateFailedMessage(ctx, r, chaos, err.Error())
 			return ctrl.Result{Requeue: true}, err
 		}
@@ -200,6 +200,8 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 
 			return ctrl.Result{RequeueAfter: duration}, nil
 		}
+
+		chaos.SetNextStart(time.Now())
 		duration := nextTime.Sub(now)
 		r.Log.Info("Requeue request", "after", duration)
 		return ctrl.Result{RequeueAfter: duration}, nil
