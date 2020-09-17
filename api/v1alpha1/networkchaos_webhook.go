@@ -281,9 +281,14 @@ func (in *BandwidthSpec) validateBandwidth(bandwidth *field.Path) field.ErrorLis
 
 // validateTarget validates the target
 func (in *Target) validateTarget(target *field.Path) field.ErrorList {
-	if in.TargetMode != OnePodMode && in.TargetMode != AllPodMode && in.TargetMode != FixedPodMode && in.TargetMode != FixedPercentPodMode && in.TargetMode != RandomMaxPercentPodMode {
-		return field.ErrorList{field.Invalid(target.Child("mode"), in.TargetMode,
-			fmt.Sprintf("mode %s not supported", in.TargetMode))}
+	modes := []PodMode{OnePodMode, AllPodMode, FixedPodMode, FixedPercentPodMode, RandomMaxPercentPodMode}
+
+	for _, mode := range modes {
+		if in.TargetMode == mode {
+			return ValidatePodMode(in.TargetValue, in.TargetMode, target.Child("value"))
+		}
 	}
-	return ValidatePodMode(in.TargetValue, in.TargetMode, target.Child("value"))
+
+	return field.ErrorList{field.Invalid(target.Child("mode"), in.TargetMode,
+		fmt.Sprintf("mode %s not supported", in.TargetMode))}
 }
