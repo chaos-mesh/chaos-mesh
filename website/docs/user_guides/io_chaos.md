@@ -87,7 +87,7 @@ spec:
   errno: 32
 ```
 
-Selected methods will return error number 32, which means `Broken pipe`.
+The selected methods return error 32, which means `broken pipe`.
 
 ### attrOverride
 
