@@ -7,10 +7,12 @@ import BlurLinearIcon from '@material-ui/icons/BlurLinear'
 import { Event } from 'api/events.type'
 import Loading from 'components/Loading'
 import PaperTop from 'components/PaperTop'
+import { RootState } from 'store'
 import T from 'components/T'
 import api from 'api'
 import genEventsChart from 'lib/d3/eventsChart'
 import { useIntl } from 'react-intl'
+import { useSelector } from 'react-redux'
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -28,6 +30,8 @@ export default function Events() {
   const classes = useStyles()
 
   const intl = useIntl()
+
+  const { theme } = useSelector((state: RootState) => state.settings)
 
   const chartRef = useRef<HTMLDivElement>(null)
   const eventsTableRef = useRef<EventsTableHandles>(null)
@@ -58,6 +62,7 @@ export default function Events() {
         events,
         onSelectEvent: eventsTableRef.current!.onSelectEvent,
         intl,
+        theme,
       })
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

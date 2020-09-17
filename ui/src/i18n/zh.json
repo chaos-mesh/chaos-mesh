@@ -45,10 +45,32 @@
         "title": "Pod 生命周期",
         "actionHelper": "选择 PodChaos 行为",
         "containerName": "容器名称",
-        "containerNameHelper": "填写你想要杀死的容器名称"
+        "containerNameHelper": "填写容器名称"
       },
       "network": {
-        "title": "网络"
+        "title": "网络",
+        "actionHelper": "选择 NetworkChaos 行为",
+        "target": {
+          "title": "目标",
+          "podsPreview": "预览目标 Pods",
+          "podsPreviewHelper": "通过勾选 Pods 来进一步限制目标的范围"
+        },
+        "partition": {
+          "direction": "方向",
+          "directionHelper": "定义隔离的方向"
+        },
+        "bandwidth": {
+          "rate": "Rate",
+          "rateHelper": "The rate allows bps, kbps, mbps, gbps, tbps unit. For example, bps means bytes per second",
+          "buffer": "Buffer",
+          "bufferHelper": "The maximum amount of bytes that tokens can be available instantaneously",
+          "limit": "Limit",
+          "limitHelper": "The number of bytes that can be queued waiting for tokens to become available",
+          "peakrate": "Peak rate",
+          "peakrateHelper": "The maximum depletion rate of the bucket",
+          "minburst": "Min Burst",
+          "minburstHelper": "The size of the peakrate bucket"
+        }
       },
       "io": {
         "title": "文件系统 I/O"
@@ -57,17 +79,20 @@
         "title": "Linux 内核"
       },
       "time": {
-        "title": "时钟"
+        "title": "时钟",
+        "offset": "偏移量",
+        "offsetHelper": "填写时间偏移量"
       },
       "stress": {
-        "title": "CPU/Memory 压力测试"
+        "title": "CPU/Memory 压力测试",
+        "actionHelper": "选择 StressChaos 行为"
       }
     },
     "schedule": {
       "tooltip": "Chaos Mesh 使用 {cronv3} 来定义计划。参考其文档以获取更详细的信息。",
       "immediate": "立即执行",
       "mustBeScheduled": "选择的实验操作必须按计划执行",
-      "cronHelper": "使用 {crontabguru} 来帮助生成 cron job 并确认它将在什么时间运行",
+      "cronHelper": "使用 {crontabguru} 来帮助生成 cron job 并确认它将在何时运行",
       "duration": "持续时间",
       "durationHelper": "实验的持续时间"
     },
@@ -119,7 +144,11 @@
   },
   "settings": {
     "title": "设置",
-    "languages": "语言",
+    "theme": "主题",
+    "chooseTheme": "选择主题",
+    "themeLight": "浅色",
+    "themeDark": "暗色",
+    "language": "语言",
     "chooseInterfaceLanguage": "选择界面语言",
     "en": "英语",
     "zh": "简体中文"
@@ -143,6 +172,7 @@
     "update": "更新",
     "status": "状态",
     "configuration": "配置",
+    "configured": "已配置",
     "confirm": "确认",
     "cancel": "取消",
     "createSuccessfully": "创建成功",
@@ -170,7 +200,7 @@
       },
       "network_chaos": {
         "action": "请填写 NetworkChaos 操作",
-        "direction": "请选择 direction",
+        "direction": "请选择隔离方向",
         "bandwidth": {
           "rate": "请填写带宽速率"
         },

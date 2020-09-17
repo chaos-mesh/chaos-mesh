@@ -3,6 +3,7 @@ import React, { useEffect } from 'react'
 
 import AdvancedOptions from 'components/AdvancedOptions'
 import { FormikCtx } from 'components/NewExperiment/types'
+import T from 'components/T'
 import { resetOtherChaos } from 'lib/formikhelpers'
 import { useFormikContext } from 'formik'
 
@@ -20,8 +21,8 @@ export default function Time() {
       <TextField
         id="target.time_chaos.time_offset"
         name="target.time_chaos.time_offset"
-        label="Offset"
-        helperText="The time offset"
+        label={T('newE.target.time.offset')}
+        helperText={T('newE.target.time.offsetHelper')}
         error={errors.target?.time_chaos?.time_offset && touched.target?.time_chaos?.time_offset ? true : false}
       />
 

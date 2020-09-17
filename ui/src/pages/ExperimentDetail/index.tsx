@@ -1,6 +1,7 @@
 import { Box, Button, Grid, Grow, Modal, Paper } from '@material-ui/core'
 import EventsTable, { EventsTableHandles } from 'components/EventsTable'
 import React, { useEffect, useRef, useState } from 'react'
+import { RootState, useStoreDispatch } from 'store'
 import { Theme, createStyles, makeStyles } from '@material-ui/core/styles'
 import { setAlert, setAlertOpen } from 'slices/globalStatus'
 import { useHistory, useParams } from 'react-router-dom'
@@ -24,7 +25,7 @@ import { getStateofExperiments } from 'slices/experiments'
 import { toTitleCase } from 'lib/utils'
 import { useIntl } from 'react-intl'
 import { usePrevious } from 'lib/hooks'
-import { useStoreDispatch } from 'store'
+import { useSelector } from 'react-redux'
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -71,6 +72,7 @@ export default function ExperimentDetail() {
   const history = useHistory()
   const { uuid } = useParams<{ uuid: string }>()
 
+  const { theme } = useSelector((state: RootState) => state.settings)
   const dispatch = useStoreDispatch()
 
   const chartRef = useRef<HTMLDivElement>(null)
@@ -124,6 +126,7 @@ export default function ExperimentDetail() {
         events,
         onSelectEvent: eventsTableRef.current!.onSelectEvent,
         intl,
+        theme,
       })
     }
 

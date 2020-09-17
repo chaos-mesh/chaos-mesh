@@ -269,7 +269,7 @@ export default function NewExperiment() {
               }}
               open={Object.keys(flat(errors)).length > 0}
             >
-              <Alert severity="error">{Object.values<string>(flat(errors))[0]}</Alert>
+              <Alert severity="error">{Object.values<string>(flat(errors)).join('/')}</Alert>
             </Snackbar>
           </Paper>
         )}

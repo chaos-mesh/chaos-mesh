@@ -9,7 +9,7 @@ interface AdvancedOptionsProps {
   isOpen?: boolean
   beforeOpen?: () => void
   afterClose?: () => void
-  title?: string
+  title?: string | JSX.Element
 }
 
 const AdvancedOptions: React.FC<AdvancedOptionsProps> = ({

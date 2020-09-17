@@ -6,6 +6,7 @@ import { SelectField, TextField } from 'components/FormField'
 import AdvancedOptions from 'components/AdvancedOptions'
 import { RootState } from 'store'
 import ScopeStep from '../Scope'
+import T from 'components/T'
 import { defaultExperimentSchema } from 'components/NewExperiment/constants'
 import { getIn } from 'formik'
 import { toTitleCase } from 'lib/utils'
@@ -52,8 +53,8 @@ export default function Network(props: StepperFormTargetProps) {
       <SelectField
         id="target.network_chaos.action"
         name="target.network_chaos.action"
-        label="Action"
-        helperText="Please select a NetworkChaos action"
+        label={T('newE.target.action')}
+        helperText={T('newE.target.network.actionHelper')}
         onChange={handleActionChange}
         onBlur={() => {}} // Delay the form validation with an empty func. If don’t do this, errors will appear early
       >
@@ -68,8 +69,8 @@ export default function Network(props: StepperFormTargetProps) {
         <SelectField
           id="target.network_chaos.direction"
           name="target.network_chaos.direction"
-          label="Direction"
-          helperText="Specifies the partition direction"
+          label={T('newE.target.network.partition.direction')}
+          helperText={T('newE.target.network.partition.directionHelper')}
           error={errors.target?.network_chaos?.direction && touched.target?.network_chaos?.direction ? true : false}
         >
           {direction.map((option) => (
@@ -85,8 +86,8 @@ export default function Network(props: StepperFormTargetProps) {
           <TextField
             id="target.network_chaos.bandwidth.rate"
             name="target.network_chaos.bandwidth.rate"
-            label="Rate"
-            helperText="The rate allows bps, kbps, mbps, gbps, tbps unit. For example, bps means bytes per second"
+            label={T('newE.target.network.bandwidth.rate')}
+            helperText={T('newE.target.network.bandwidth.rateHelper')}
             error={
               errors.target?.network_chaos?.bandwidth?.rate && touched.target?.network_chaos?.bandwidth?.rate
                 ? true
@@ -97,29 +98,29 @@ export default function Network(props: StepperFormTargetProps) {
             type="number"
             id="target.network_chaos.bandwidth.buffer"
             name="target.network_chaos.bandwidth.buffer"
-            label="Buffer"
-            helperText="The maximum amount of bytes that tokens can be available instantaneously"
+            label={T('newE.target.network.bandwidth.buffer')}
+            helperText={T('newE.target.network.bandwidth.bufferHelper')}
           />
           <TextField
             type="number"
             id="target.network_chaos.bandwidth.limit"
             name="target.network_chaos.bandwidth.limit"
-            label="Limit"
-            helperText="The number of bytes that can be queued waiting for tokens to become available"
+            label={T('newE.target.network.bandwidth.limit')}
+            helperText={T('newE.target.network.bandwidth.limitHelper')}
           />
           <TextField
             type="number"
             id="target.network_chaos.bandwidth.peakrate"
             name="target.network_chaos.bandwidth.peakrate"
-            label="Peakrate"
-            helperText="The maximum depletion rate of the bucket"
+            label={T('newE.target.network.bandwidth.peakrate')}
+            helperText={T('newE.target.network.bandwidth.peakrateHelper')}
           />
           <TextField
             type="number"
             id="target.network_chaos.bandwidth.minburst"
             name="target.network_chaos.bandwidth.minburst"
-            label="Minburst"
-            helperText="The size of the peakrate bucket"
+            label={T('newE.target.network.bandwidth.minburst')}
+            helperText={T('newE.target.network.bandwidth.minburstHelper')}
           />
         </>
       )}
@@ -256,13 +257,18 @@ export default function Network(props: StepperFormTargetProps) {
 
       {values.target.network_chaos.action !== '' && (
         <AdvancedOptions
-          title="Target"
+          title={T('newE.target.network.target.title')}
           isOpen={values.target.network_chaos.action === 'partition' ? true : false}
           beforeOpen={beforeTargetOpen}
           afterClose={afterTargetClose}
         >
           {values.target.network_chaos.target && values.target.network_chaos.target.mode && (
-            <ScopeStep namespaces={namespaces} scope="target.network_chaos.target" />
+            <ScopeStep
+              namespaces={namespaces}
+              scope="target.network_chaos.target"
+              podsPreviewTitle={T('newE.target.network.target.podsPreview')}
+              podsPreviewDesc={T('newE.target.network.target.podsPreviewHelper')}
+            />
           )}
         </AdvancedOptions>
       )}

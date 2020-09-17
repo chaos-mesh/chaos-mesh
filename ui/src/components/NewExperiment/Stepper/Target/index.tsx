@@ -115,7 +115,12 @@ const Target: React.FC = () => {
                 </Box>
                 {kind === tab.key && (
                   <Box position="absolute" top="0.5rem" right="0.5rem">
-                    <Chip label="Configured" icon={<CheckCircleOutlineIcon />} size="small" color="primary" />
+                    <Chip
+                      label={T('common.configured')}
+                      icon={<CheckCircleOutlineIcon />}
+                      size="small"
+                      color="primary"
+                    />
                   </Box>
                 )}
               </Card>

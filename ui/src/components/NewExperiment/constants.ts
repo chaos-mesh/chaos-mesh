@@ -122,7 +122,7 @@ export const validationSchema = (intl: IntlShape) => {
                     action: Yup.string().required(intl.formatMessage({ id: 'validation.target.network_chaos.action' })),
                     direction: Yup.string().when('action', (action: string, schema: Yup.StringSchema) =>
                       action === 'partition'
-                        ? schema.required(intl.formatMessage({ id: 'validation.target.network_chaos.action' }))
+                        ? schema.required(intl.formatMessage({ id: 'validation.target.network_chaos.direction' }))
                         : schema
                     ),
                     bandwidth: Yup.object()

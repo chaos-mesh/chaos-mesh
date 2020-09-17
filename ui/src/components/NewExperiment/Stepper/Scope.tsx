@@ -15,21 +15,22 @@ import { useSelector } from 'react-redux'
 interface ScopeStepProps {
   namespaces: string[]
   scope?: string
+  podsPreviewTitle?: string | JSX.Element
+  podsPreviewDesc?: string | JSX.Element
 }
 
 const phases = ['all', 'pending', 'running', 'succeeded', 'failed', 'unknown']
 const modes = [
-  'all',
   { name: 'Random One', value: 'one' },
   { name: 'Fixed Number', value: 'fixed' },
-  'fixed percent',
-  'random max percent',
+  { name: 'Fixed Percent', value: 'fixed-percent' },
+  { name: 'Random Max Percent', value: 'random-max-percent' },
 ]
 const modesWithAdornment = ['fixed-percent', 'random-max-percent']
 
 const labelFilters = ['pod-template-hash']
 
-const ScopeStep: React.FC<ScopeStepProps> = ({ namespaces, scope = 'scope' }) => {
+const ScopeStep: React.FC<ScopeStepProps> = ({ namespaces, scope = 'scope', podsPreviewTitle, podsPreviewDesc }) => {
   const { values, handleChange } = useFormikContext<Experiment>()
 
   const { labels, annotations, pods } = useSelector((state: RootState) => state.experiments)
@@ -104,17 +105,12 @@ const ScopeStep: React.FC<ScopeStepProps> = ({ namespaces, scope = 'scope' }) =>
         label={T('newE.scope.mode')}
         helperText={T('newE.scope.modeHelper')}
       >
-        {modes.map((option) =>
-          typeof option === 'string' ? (
-            <MenuItem key={option} value={option.split(' ').join('-')}>
-              {toTitleCase(option)}
-            </MenuItem>
-          ) : (
-            <MenuItem key={option.value} value={option.value}>
-              {option.name}
-            </MenuItem>
-          )
-        )}
+        <MenuItem value="all">All</MenuItem>
+        {modes.map((option) => (
+          <MenuItem key={option.value} value={option.value}>
+            {option.name}
+          </MenuItem>
+        ))}
       </SelectField>
 
       {getIn(values, scope).mode !== 'all' && getIn(values, scope).mode !== 'one' && (
@@ -162,9 +158,9 @@ const ScopeStep: React.FC<ScopeStepProps> = ({ namespaces, scope = 'scope' }) =>
       </Box>
 
       <Box mb={6}>
-        <Typography>{T('newE.scope.affectedPodsPreview')}</Typography>
+        <Typography>{podsPreviewTitle || T('newE.scope.affectedPodsPreview')}</Typography>
         <Typography variant="subtitle2" color="textSecondary">
-          {T('newE.scope.affectedPodsPreviewHelper')}
+          {podsPreviewDesc || T('newE.scope.affectedPodsPreviewHelper')}
         </Typography>
       </Box>
 

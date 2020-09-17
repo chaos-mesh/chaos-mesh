@@ -9,6 +9,7 @@ import GitHubIcon from '@material-ui/icons/GitHub'
 import { Link } from 'react-router-dom'
 import { NavLink } from 'react-router-dom'
 import React from 'react'
+import { RootState } from 'store'
 import SettingsIcon from '@material-ui/icons/Settings'
 import T from 'components/T'
 import TuneIcon from '@material-ui/icons/Tune'
@@ -16,6 +17,9 @@ import WebIcon from '@material-ui/icons/Web'
 import clsx from 'clsx'
 import logo from 'images/logo.svg'
 import logoMini from 'images/logo-mini.svg'
+import logoMiniWhite from 'images/logo-mini-white.svg'
+import logoWhite from 'images/logo-white.svg'
+import { useSelector } from 'react-redux'
 
 export const drawerWidth = '14rem'
 export const drawerCloseWidth = '5.25rem'
@@ -107,6 +111,8 @@ interface SidebarProps {
 const Sidebar: React.FC<SidebarProps> = ({ open }) => {
   const classes = useStyles()
 
+  const { theme } = useSelector((state: RootState) => state.settings)
+
   return (
     <Drawer
       className={clsx(classes.drawer, {
@@ -126,7 +132,7 @@ const Sidebar: React.FC<SidebarProps> = ({ open }) => {
           <NavLink to="/" className={classes.toolbar}>
             <img
               className={open ? classes.logo : classes.logoMini}
-              src={open ? logo : logoMini}
+              src={open ? (theme === 'light' ? logo : logoWhite) : theme === 'light' ? logoMini : logoMiniWhite}
               alt="Chaos Mesh Logo"
             />
           </NavLink>

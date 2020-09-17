@@ -4,6 +4,7 @@ import day, { format } from 'lib/dayjs'
 
 import { Event } from 'api/events.type'
 import { IntlShape } from 'react-intl'
+import { Theme } from 'slices/settings'
 import _debounce from 'lodash.debounce'
 import wrapText from './wrapText'
 
@@ -19,16 +20,23 @@ export default function gen({
   events,
   onSelectEvent,
   intl,
+  theme,
 }: {
   root: HTMLElement
   events: Event[]
   onSelectEvent?: (e: Event) => () => void
   intl: IntlShape
+  theme: Theme
 }) {
   let width = root.offsetWidth
   const height = root.offsetHeight
 
-  const svg = d3.select(root).append('svg').attr('class', 'chaos-chart').attr('width', width).attr('height', height)
+  const svg = d3
+    .select(root)
+    .append('svg')
+    .attr('class', theme === 'light' ? 'chaos-chart' : 'chaos-chart-dark')
+    .attr('width', width)
+    .attr('height', height)
 
   const halfHourLater = (events.length ? day(events[events.length - 1].start_time) : day()).add(0.5, 'h')
 
@@ -112,7 +120,12 @@ export default function gen({
   legends.append('div').attr('style', (d) => `width: 14px; height: 14px; background: ${colorPalette(d.uuid)};`)
   legends
     .insert('div')
-    .attr('style', 'margin-left: 8px; color: rgba(0, 0, 0, 0.54); font-size: 0.75rem; font-weight: bold;')
+    .attr(
+      'style',
+      `margin-left: 8px; color: ${
+        theme === 'light' ? 'rgba(0, 0, 0, 0.54)' : 'rgba(255, 255, 255, 0.7)'
+      }; font-size: 0.75rem; font-weight: bold;`
+    )
     .text((d) => d.name)
 
   function genRectWidth(x: d3.ScaleLinear<number, number>) {
@@ -161,9 +174,9 @@ export default function gen({
       .style('top', 0)
       .style('left', 0)
       .style('padding', '0.25rem 0.75rem')
-      .style('background', '#fff')
+      .style('background', theme === 'light' ? '#fff' : 'rgba(0, 0, 0, 0.54)')
       .style('font', '1rem')
-      .style('border', '1px solid rgba(0, 0, 0, 0.12)')
+      .style('border', `1px solid ${theme === 'light' ? 'rgba(0, 0, 0, 0.12)' : 'rgba(255, 255, 255, 0.12)'}`)
       .style('border-radius', '4px')
       .style('opacity', 0)
       .style('transition', 'top 0.25s ease, left 0.25s ease')
@@ -182,13 +195,13 @@ export default function gen({
             </b>
             <br />
             <br />
-            <span style="color: rgba(0, 0, 0, 0.67);">
+            <span style="color: ${theme === 'light' ? 'rgba(0, 0, 0, 0.54)' : '#fff'};">
               ${intl.formatMessage({ id: 'events.event.started' })}: ${format(d.start_time)}
             </span>
             <br />
             ${
               d.finish_time
-                ? `<span style="color: rgba(0, 0, 0, 0.67);">${intl.formatMessage({
+                ? `<span style="color: ${theme === 'light' ? 'rgba(0, 0, 0, 0.54)' : '#fff'};">${intl.formatMessage({
                     id: 'events.event.ended',
                   })}: ${format(d.finish_time)}</span>`
                 : ''
