@@ -7,7 +7,7 @@ module.exports = {
   organizationName: 'chaos-mesh', // Usually your GitHub org/user name.
   projectName: 'chaos-mesh.github.io', // Usually your repo name.
   themeConfig: {
-    image: "img/logos/logo-mini.svg",
+    image: 'img/logos/logo-mini.svg',
     algolia: {
       apiKey: '49739571d4f89670b12f39d5ad135f5a',
       indexName: 'chaos-mesh',
@@ -24,6 +24,10 @@ module.exports = {
         srcDark: 'img/logos/logo-mini-white.svg',
       },
       items: [
+        {
+          type: 'docsVersionDropdown',
+          position: 'left',
+        },
         {
           to: 'docs',
           activeBasePath: 'docs',
@@ -81,14 +85,11 @@ module.exports = {
       theme: require('prism-react-renderer/themes/dracula'),
     },
   },
-  plugins: ['docusaurus-plugin-sass'],
   presets: [
     [
       '@docusaurus/preset-classic',
       {
         docs: {
-          // It is recommended to set document id as docs home page (`docs/` path).
-          homePageId: 'overview',
           sidebarPath: require.resolve('./sidebars.js'),
           // Please change this to your repo.
           editUrl: 'https://github.com/chaos-mesh/chaos-mesh/edit/master/website/',
@@ -99,7 +100,7 @@ module.exports = {
           editUrl: 'https://github.com/chaos-mesh/chaos-mesh/edit/master/website/',
         },
         theme: {
-          customCss: require.resolve('./src/styles/custom.scss'),
+          customCss: require.resolve('./src/styles/custom.css'),
         },
       },
     ],

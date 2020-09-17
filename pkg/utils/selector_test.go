@@ -29,6 +29,7 @@ import (
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime"
 
+	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 )
 
@@ -48,6 +49,7 @@ func TestSelectPods(t *testing.T) {
 	pods = append(pods, pods2...)
 
 	c := fake.NewFakeClient(objects...)
+	var r client.Reader
 
 	type TestCase struct {
 		name         string
@@ -122,7 +124,7 @@ func TestSelectPods(t *testing.T) {
 	}
 
 	for _, tc := range tcs {
-		filteredPods, err := SelectPods(context.Background(), c, tc.selector)
+		filteredPods, err := SelectPods(context.Background(), c, r, tc.selector)
 		g.Expect(err).ShouldNot(HaveOccurred(), tc.name)
 		g.Expect(len(filteredPods)).To(Equal(len(tc.expectedPods)), tc.name)
 	}

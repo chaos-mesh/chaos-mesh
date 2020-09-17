@@ -10,18 +10,27 @@ clusterScoped: true
 rbac:
   create: true
 
+# timezone is the timezone where controller-manager, chaos-daemon and dashboard uses.
+# For example: "UTC" or "Asia/Shanghai"
+# This value will be set on controller-manager and dashboard container's
+# environment variable TZ.
+# You may need to set the timezone to be consistent with your Grafana configuration,
+# otherwise the query Grafana used to retrieve event maybe in wrong timezone.
+timezone: "UTC"
+
 # enableProfiling is a flag to enable pprof in controller-manager and chaos-daemon.
-enableProfiling: false
+enableProfiling: true
 
 kubectlImage: bitnami/kubectl:latest
 
 controllerManager:
+  hostNetwork: false
   serviceAccount: chaos-controller-manager
 
   replicaCount: 1
 
   image: pingcap/chaos-mesh:latest
-  imagePullPolicy: Always
+  imagePullPolicy: IfNotPresent
 
   nameOverride: ""
   fullnameOverride: ""
@@ -54,10 +63,10 @@ controllerManager:
 
 chaosDaemon:
   image: pingcap/chaos-daemon:latest
-  imagePullPolicy: Always
+  imagePullPolicy: IfNotPresent
   grpcPort: 31767
   httpPort: 31766
-
+  env: {}
   hostNetwork: false
 
   podAnnotations: {}
@@ -96,7 +105,7 @@ dashboard:
   serviceAccount: chaos-controller-manager
 
   image: pingcap/chaos-dashboard:latest
-  imagePullPolicy: Always
+  imagePullPolicy: IfNotPresent
 
   nodeSelector: {}
 
@@ -146,7 +155,6 @@ dashboard:
     # Useful if the volume's root directory is not empty
     #
     subPath: ""
-
 
   # The keys within the "env" map are mounted as environment variables on the Chaos Dashboard pod.
   env:
@@ -252,11 +260,12 @@ webhook:
     - networkchaos
     - kernelchaos
     - stresschaos
+    - podnetworkchaos
 
 bpfki:
   create: false
   image: pingcap/chaos-kernel:latest
-  imagePullPolicy: Always
+  imagePullPolicy: IfNotPresent
   grpcPort: 50051
   resources: {}
     # We usually recommend not to specify default resources and to leave this as a conscious

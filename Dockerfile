@@ -1,3 +1,4 @@
+# syntax=docker/dockerfile:experimental
 FROM golang:1.14.4-alpine3.12 AS build_base
 
 ARG HTTPS_PROXY
@@ -19,7 +20,11 @@ ARG HTTPS_PROXY
 ARG HTTP_PROXY
 ARG UI
 ARG SWAGGER
+ARG LDFLAGS
+
+RUN if [[ -n "$HTTP_PROXY" ]]; then yarn config set proxy $HTTP_PROXY; fi
 
 COPY . /src
 WORKDIR /src
-RUN make binary
+RUN --mount=type=cache,target=/root/.cache/go-build \
+    IMG_LDFLAGS=$LDFLAGS make binary

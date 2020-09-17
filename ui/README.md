@@ -1,13 +1,12 @@
-<p align="center">
-  <img src="public/logo.svg" width="256" alt="Chaos Mesh Logo" />
-</p>
-<h1 align="center">Chaos Mesh Dashboard</h1>
+<!-- markdownlint-disable-file MD033 -->
+<!-- markdownlint-disable-file MD041 -->
 
-> Note: Currently WIP
+<p align="center">
+  <img src="../static/logo.svg" width="256" alt="Chaos Mesh Logo" />
+</p>
+<h1 align="center">Dashboard</h1>
 
 A Web UI for Chaos Mesh. Powered by ⚛️ [Create React App](https://github.com/facebook/create-react-app).
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
 
 To learn React, check out the [React documentation](https://reactjs.org/).
 
@@ -27,10 +26,10 @@ Your browser will open <localhost:3000> automatically.
 
 For better collaboration and review, we have developed a few rules to help us develop better.
 
-- [Ts or JS](#ts-or-js)
+- [TS or JS](#ts-or-js)
 - [Styles](#styles)
 - [Be Compact](#be-compact)
-- [Necessary Test](#necessary-test)
+- [Tests](#tests)
 
 **Before you contribute, you must read the following carefully.**
 
@@ -74,13 +73,12 @@ box-shadow: none;
 
 ### Be Compact
 
-**Don't include unused deps.**
+- **Don't include unused deps.**
+- **Don't let your code be too long-winded, there will be a lot of elegant writing.**
 
-**Don't let your code be too long-winded, there will be a lot of elegant writing.**
+### Tests
 
-### Necessary Test
-
-**Every new feature must have a unit test.**
+- **Every new feature must have a unit test.**
 
 ## Authors
 
@@ -88,4 +86,4 @@ Originally designed by PingCAP FE.
 
 ## License
 
-Same as chaos mesh.
+Same as Chaos Mesh.

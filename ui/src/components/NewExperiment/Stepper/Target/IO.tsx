@@ -1,10 +1,11 @@
 import { AutocompleteMultipleField, SelectField, TextField } from 'components/FormField'
+import { FormikCtx, StepperFormTargetProps } from 'components/NewExperiment/types'
 import { InputAdornment, MenuItem } from '@material-ui/core'
 
 import AdvancedOptions from 'components/AdvancedOptions'
 import React from 'react'
-import { StepperFormTargetProps } from 'components/NewExperiment/types'
 import { toTitleCase } from 'lib/utils'
+import { useFormikContext } from 'formik'
 
 const actions = ['delay', 'errno', 'mixed']
 const methods = [
@@ -42,7 +43,8 @@ const methods = [
 ]
 
 export default function IO(props: StepperFormTargetProps) {
-  const { values, handleActionChange } = props
+  const { values }: FormikCtx = useFormikContext()
+  const { handleActionChange } = props
 
   return (
     <>
@@ -52,6 +54,7 @@ export default function IO(props: StepperFormTargetProps) {
         label="Action"
         helperText="Please select an action"
         onChange={handleActionChange}
+        onBlur={() => {}} // Delay the form validation with an empty func. If don’t do this, errors will appear early
       >
         {actions.map((option: string) => (
           <MenuItem key={option} value={option}>
@@ -60,25 +63,26 @@ export default function IO(props: StepperFormTargetProps) {
         ))}
       </SelectField>
 
+      {(values.target.io_chaos.action === 'delay' || values.target.io_chaos.action === 'mixed') && (
+        <TextField
+          id="target.io_chaos.delay"
+          name="target.io_chaos.delay"
+          label="Delay"
+          helperText="Optional. The value of delay of I/O operations. If it's empty, the operator will generate a value for it randomly."
+        />
+      )}
+
+      {(values.target.io_chaos.action === 'errno' || values.target.io_chaos.action === 'mixed') && (
+        <TextField
+          id="target.io_chaos.errno"
+          name="target.io_chaos.errno"
+          label="Errno"
+          helperText="Optional. The error code returned by I/O operators. By default, it returns a random error code"
+        />
+      )}
+
       {values.target.io_chaos.action !== '' && (
         <AdvancedOptions>
-          {values.target.io_chaos.action !== 'errno' && (
-            <TextField
-              id="target.io_chaos.delay"
-              name="target.io_chaos.delay"
-              label="Delay"
-              helperText="Optional. The value of delay of I/O operations. If it's empty, the operator will generate a value for it randomly."
-            />
-          )}
-
-          {values.target.io_chaos.action !== 'delay' && (
-            <TextField
-              id="target.io_chaos.errno"
-              name="target.io_chaos.errno"
-              label="Errno"
-              helperText="Optional. The error code returned by I/O operators. By default, it returns a random error code"
-            />
-          )}
           <TextField
             id="target.io_chaos.percent"
             name="target.io_chaos.percent"
@@ -92,7 +96,7 @@ export default function IO(props: StepperFormTargetProps) {
             id="target.io_chaos.path"
             name="target.io_chaos.path"
             label="Path"
-            helperText="The path of files for injecting"
+            helperText="The path of files for injecting. If it's empty, the IOChaos action will inject into all files."
           />
           <AutocompleteMultipleField
             id="target.io_chaos.methods"

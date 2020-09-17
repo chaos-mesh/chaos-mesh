@@ -80,6 +80,8 @@ rules:
     - timechaos
     - kernelchaos
     - stresschaos
+    - podnetworkchaos
+    - httpchaos
   verbs: ["*"]
 ---
 kind: ClusterRoleBinding
@@ -146,6 +148,8 @@ rules:
   - timechaos
   - kernelchaos
   - stresschaos
+  - podnetworkchaos
+  - httpchaos
   verbs: ["*"]
 ---
 kind: RoleBinding

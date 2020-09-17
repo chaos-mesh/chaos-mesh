@@ -1,4 +1,4 @@
-// Copyright 2019 Chaos Mesh Authors.
+// Copyright 2020 Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ const (
 	ipsetNewNameExistErr = "a set with the new name already exists"
 )
 
-func (s *daemonServer) FlushIpSet(ctx context.Context, req *pb.IpSetRequest) (*empty.Empty, error) {
+func (s *daemonServer) FlushIPSets(ctx context.Context, req *pb.IPSetsRequest) (*empty.Empty, error) {
 	log.Info("flush ipset", "request", req)
 
 	pid, err := s.crClient.GetPidFromContainerID(ctx, req.ContainerId)
@@ -40,9 +40,17 @@ func (s *daemonServer) FlushIpSet(ctx context.Context, req *pb.IpSetRequest) (*e
 
 	nsPath := GetNsPath(pid, netNS)
 
-	// TODO: lock every ipset when working on it
+	for _, ipset := range req.Ipsets {
+		err := flushIPSet(ctx, nsPath, ipset)
+		if err != nil {
+			return nil, err
+		}
+	}
 
-	set := req.Ipset
+	return &empty.Empty{}, nil
+}
+
+func flushIPSet(ctx context.Context, nsPath string, set *pb.IPSet) error {
 	name := set.Name
 
 	// If the ipset already exists, the ipset will be renamed to this temp name.
@@ -50,31 +58,29 @@ func (s *daemonServer) FlushIpSet(ctx context.Context, req *pb.IpSetRequest) (*e
 
 	// the ipset while existing iptables rules are using them can not be deleted,.
 	// so we creates an temp ipset and swap it with existing one.
-	if err := s.createIPSet(ctx, nsPath, tmpName); err != nil {
-		return nil, err
+	if err := createIPSet(ctx, nsPath, tmpName); err != nil {
+		return err
 	}
 
 	// add ips to the temp ipset
-	if err := s.addCIDRsToIPSet(ctx, nsPath, tmpName, set.Cidrs); err != nil {
-		return nil, err
+	if err := addCIDRsToIPSet(ctx, nsPath, tmpName, set.Cidrs); err != nil {
+		return err
 	}
 
 	// rename the temp ipset with the target name of ipset if the taget ipset not exists,
 	// otherwise swap  them with each other.
-	if err := s.renameIPSet(ctx, nsPath, tmpName, name); err != nil {
-		return nil, err
-	}
+	err := renameIPSet(ctx, nsPath, tmpName, name)
 
-	return &empty.Empty{}, nil
+	return err
 }
 
-func (s *daemonServer) createIPSet(ctx context.Context, nsPath string, name string) error {
+func createIPSet(ctx context.Context, nsPath string, name string) error {
 	// ipset name cannot be longer than 31 bytes
 	if len(name) > 31 {
 		name = name[:31]
 	}
 
-	cmd := withNetNS(ctx, nsPath, "ipset", "create", name, "hash:net")
+	cmd := defaultProcessBuilder("ipset", "create", name, "hash:net").SetNetNS(nsPath).Build(ctx)
 
 	log.Info("create ipset", "command", cmd.String())
 
@@ -86,7 +92,7 @@ func (s *daemonServer) createIPSet(ctx context.Context, nsPath string, name stri
 			return err
 		}
 
-		cmd := withNetNS(ctx, nsPath, "ipset", "flush", name)
+		cmd := defaultProcessBuilder("ipset", "flush", name).SetNetNS(nsPath).Build(ctx)
 
 		log.Info("flush ipset", "command", cmd.String())
 
@@ -100,9 +106,9 @@ func (s *daemonServer) createIPSet(ctx context.Context, nsPath string, name stri
 	return nil
 }
 
-func (s *daemonServer) addCIDRsToIPSet(ctx context.Context, nsPath string, name string, cidrs []string) error {
+func addCIDRsToIPSet(ctx context.Context, nsPath string, name string, cidrs []string) error {
 	for _, cidr := range cidrs {
-		cmd := withNetNS(ctx, nsPath, "ipset", "add", name, cidr)
+		cmd := defaultProcessBuilder("ipset", "add", name, cidr).SetNetNS(nsPath).Build(ctx)
 
 		log.Info("add CIDR to ipset", "command", cmd.String())
 
@@ -119,8 +125,8 @@ func (s *daemonServer) addCIDRsToIPSet(ctx context.Context, nsPath string, name 
 	return nil
 }
 
-func (s *daemonServer) renameIPSet(ctx context.Context, nsPath string, oldName string, newName string) error {
-	cmd := withNetNS(ctx, nsPath, "ipset", "rename", oldName, newName)
+func renameIPSet(ctx context.Context, nsPath string, oldName string, newName string) error {
+	cmd := defaultProcessBuilder("ipset", "rename", oldName, newName).SetNetNS(nsPath).Build(ctx)
 
 	log.Info("rename ipset", "command", cmd.String())
 
@@ -133,7 +139,7 @@ func (s *daemonServer) renameIPSet(ctx context.Context, nsPath string, oldName s
 		}
 
 		// swap the old ipset and the new ipset if the new ipset already exist.
-		cmd := withNetNS(ctx, nsPath, "ipset", "swap", oldName, newName)
+		cmd := defaultProcessBuilder("ipset", "swap", oldName, newName).SetNetNS(nsPath).Build(ctx)
 
 		log.Info("swap ipset", "command", cmd.String())
 

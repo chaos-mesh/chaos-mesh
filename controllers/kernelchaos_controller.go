@@ -27,6 +27,7 @@ import (
 // KernelChaosReconciler reconciles a KernelChaos object
 type KernelChaosReconciler struct {
 	client.Client
+	client.Reader
 	Log logr.Logger
 	record.EventRecorder
 }
@@ -40,6 +41,7 @@ func (r *KernelChaosReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error)
 
 	reconciler := kernelchaos.Reconciler{
 		Client:        r.Client,
+		Reader:        r.Reader,
 		Log:           logger,
 		EventRecorder: r.EventRecorder,
 	}

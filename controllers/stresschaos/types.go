@@ -17,6 +17,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
+	"sync"
 	"time"
 
 	"github.com/go-logr/logr"
@@ -43,6 +45,7 @@ const stressChaosMsg = "stress out pod"
 // Reconciler is stresschaos reconciler
 type Reconciler struct {
 	client.Client
+	client.Reader
 	record.EventRecorder
 	Log logr.Logger
 }
@@ -68,12 +71,12 @@ func (r *Reconciler) Reconcile(req ctrl.Request, chaos *v1alpha1.StressChaos) (c
 }
 
 func (r *Reconciler) commonStressChaos(stresschaos *v1alpha1.StressChaos, req ctrl.Request) (ctrl.Result, error) {
-	cr := common.NewReconciler(r, r.Client, r.Log)
+	cr := common.NewReconciler(r, r.Client, r.Reader, r.Log)
 	return cr.Reconcile(req)
 }
 
 func (r *Reconciler) scheduleStressChaos(stresschaos *v1alpha1.StressChaos, req ctrl.Request) (ctrl.Result, error) {
-	sr := twophase.NewReconciler(r, r.Client, r.Log)
+	sr := twophase.NewReconciler(r, r.Client, r.Reader, r.Log)
 	return sr.Reconcile(req)
 }
 
@@ -86,7 +89,7 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1
 		return err
 	}
 
-	pods, err := utils.SelectAndFilterPods(ctx, r.Client, &stresschaos.Spec)
+	pods, err := utils.SelectAndFilterPods(ctx, r.Client, r.Reader, &stresschaos.Spec)
 	if err != nil {
 		r.Log.Error(err, "failed to select and generate pods")
 		return err
@@ -142,7 +145,7 @@ func (r *Reconciler) cleanFinalizersAndRecover(ctx context.Context, chaos *v1alp
 		}
 
 		var pod v1.Pod
-		err = r.Get(ctx, types.NamespacedName{
+		err = r.Client.Get(ctx, types.NamespacedName{
 			Namespace: ns,
 			Name:      name,
 		}, &pod)
@@ -209,6 +212,8 @@ func (r *Reconciler) Object() v1alpha1.InnerObject {
 
 func (r *Reconciler) applyAllPods(ctx context.Context, pods []v1.Pod, chaos *v1alpha1.StressChaos) error {
 	g := errgroup.Group{}
+
+	instancesLock := &sync.RWMutex{}
 	for index := range pods {
 		pod := &pods[index]
 
@@ -219,13 +224,13 @@ func (r *Reconciler) applyAllPods(ctx context.Context, pods []v1.Pod, chaos *v1a
 		chaos.Finalizers = utils.InsertFinalizer(chaos.Finalizers, key)
 
 		g.Go(func() error {
-			return r.applyPod(ctx, pod, chaos)
+			return r.applyPod(ctx, pod, chaos, instancesLock)
 		})
 	}
 	return g.Wait()
 }
 
-func (r *Reconciler) applyPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.StressChaos) error {
+func (r *Reconciler) applyPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.StressChaos, instancesLock *sync.RWMutex) error {
 	r.Log.Info("Try to apply stress chaos", "namespace",
 		pod.Namespace, "name", pod.Name)
 	daemonClient, err := utils.NewChaosDaemonClient(ctx, r.Client,
@@ -234,10 +239,33 @@ func (r *Reconciler) applyPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.
 		return err
 	}
 	defer daemonClient.Close()
+
+	key := fmt.Sprintf("%s/%s", pod.Namespace, pod.Name)
+	instancesLock.RLock()
+	_, ok := chaos.Status.Instances[key]
+	instancesLock.RUnlock()
+	if ok {
+		r.Log.Info("an stress-ng instance is running for this pod")
+		return nil
+	}
+
 	if len(pod.Status.ContainerStatuses) == 0 {
 		return fmt.Errorf("%s %s can't get the state of container", pod.Namespace, pod.Name)
 	}
 	target := pod.Status.ContainerStatuses[0].ContainerID
+	if chaos.Spec.ContainerName != nil &&
+		len(strings.TrimSpace(*chaos.Spec.ContainerName)) != 0 {
+		target = ""
+		for _, container := range pod.Status.ContainerStatuses {
+			if container.Name == *chaos.Spec.ContainerName {
+				target = container.ContainerID
+			}
+		}
+		if len(target) == 0 {
+			return fmt.Errorf("cannot find container with name %s", *chaos.Spec.ContainerName)
+		}
+	}
+
 	stressors := chaos.Spec.StressngStressors
 	if len(stressors) == 0 {
 		stressors, err = chaos.Spec.Stressors.Normalize()
@@ -246,18 +274,21 @@ func (r *Reconciler) applyPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.
 		}
 	}
 	res, err := daemonClient.ExecStressors(ctx, &pb.ExecStressRequest{
-		Scope:     pb.ExecStressRequest_POD,
+		Scope:     pb.ExecStressRequest_CONTAINER,
 		Target:    target,
 		Stressors: stressors,
 	})
 	if err != nil {
 		return err
 	}
-	chaos.Status.Instances[fmt.Sprintf("%s/%s", pod.Namespace, pod.Name)] = v1alpha1.StressInstance{
+
+	instancesLock.Lock()
+	chaos.Status.Instances[key] = v1alpha1.StressInstance{
 		UID: res.Instance,
 		StartTime: &metav1.Time{
 			Time: time.Unix(res.StartTime/1000, (res.StartTime%1000)*int64(time.Millisecond)),
 		},
 	}
+	instancesLock.Unlock()
 	return nil
 }

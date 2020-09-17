@@ -1,4 +1,4 @@
-<img src="static/logo.svg" alt="chaos_logo" width="450"/>
+<img src="static/logo.svg" alt="chaos-mesh-logo" width="450"/>
 
 [![Build Status](https://internal.pingcap.net/idc-jenkins/job/build_chaos_mesh_master/badge/icon)](https://internal.pingcap.net/idc-jenkins/view/chaos-mesh/job/build_chaos_mesh_master/)
 [![codecov](https://codecov.io/gh/pingcap/chaos-mesh/branch/master/graph/badge.svg)](https://codecov.io/gh/pingcap/chaos-mesh)
@@ -48,8 +48,8 @@ The current implementation supports six types of CRD objects for fault injection
 
 ## Quick start
 
-* [Get Started on kind](https://chaos-mesh.org/docs/installation/get_started_on_kind)
-* [Get Started on minikube](https://chaos-mesh.org/docs/installation/get_started_on_minikube)
+- [Get Started on kind](https://chaos-mesh.org/docs/installation/get_started_on_kind)
+- [Get Started on minikube](https://chaos-mesh.org/docs/installation/get_started_on_minikube)
 
 ## Deploy and use
 
@@ -87,7 +87,7 @@ See the [contributing guide](/CONTRIBUTING.md) and [development guide](https://c
 Please reach out for bugs, feature requests, and other issues via:
 
 - Following us on Twitter at [@chaos_mesh](https://twitter.com/chaos_mesh).
-- Joining the #sig-chaos-mesh channel in the [TiDB Community](https://slack.tidb.io/invite?team=tidb-community&channel=sig-chaos-mesh&ref=pingcap-chaos-mesh) Slack workspace.
+- Joining the #project-chaos-mesh channel in the [CNCF Slack](https://join.slack.com/t/cloud-native/shared_invite/zt-fyy3b8up-qHeDNVqbz1j8HDY6g1cY4w) workspace.
 - Filing an issue or opening a PR against this repository.
 
 ### Community meeting
@@ -98,6 +98,12 @@ On the fourth Thursday of every month (unless otherwise specified), the Chaos Me
 
 - [Meeting notes](https://docs.google.com/document/d/1H8IfmhIJiJ1ltg-XLjqR_P_RaMHUGrl1CzvHnKM_9Sc/edit?usp=sharing)
 - [Zoom meeting link](https://pingcap.zoom.com.cn/j/98064001176)
+
+### Community blog
+
+- [Integrate your Reliability Toolkit with Your World, Part 2](https://medium.com/chaosiq/integrate-your-reliability-toolkit-with-your-world-part-2-e012f2c2a7f6)
+- [Streake: Chaos Mesh によるカオスエンジニアリング](https://medium.com/sreake-jp/chaos-mesh-%E3%81%AB%E3%82%88%E3%82%8B%E3%82%AB%E3%82%AA%E3%82%B9%E3%82%A8%E3%83%B3%E3%82%B8%E3%83%8B%E3%82%A2%E3%83%AA%E3%83%B3%E3%82%B0-46fa2897c742)
+- [Chaos Mesh : un générateur de chaos pour Kubernetes](https://www.cowboysysop.com/post/chaos-mesh-un-generateur-de-chaos-pour-kubernetes/)
 
 ## Roadmap
 

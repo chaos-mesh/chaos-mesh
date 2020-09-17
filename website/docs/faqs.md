@@ -10,28 +10,27 @@ sidebar_label: FAQs
 
 No, you can not use Chaos Mesh in this case. But still you can run chaos experiments using command line. Refer to [Command Line Usages of Chaos](https://github.com/pingcap/tipocket/blob/master/doc/command_line_chaos.md) for details.
 
-### Q: When I deploy Chaos-mesh successfully, Then I create PodChaos experiments successfully, but create NetworkChaos/TimeChaos Experiment failed. The log is shown below, what's the matter？
-
-I get chaos-controller-manager's log, as shown below.
+### Q: I have deployed Chaos Mesh and created PodChaos experiments successfully, but I still failed in creating NetworkChaos/TimeChaos Experiment. The log is shown below:
 
 ```
 2020-06-18T01:05:26.207Z	ERROR	controllers.TimeChaos	failed to apply chaos on all pods	{"reconciler": "timechaos", "error": "rpc error: code = Unavailable desc = connection error: desc = \"transport: Error while dialing dial tcp xx.xx.xx.xx:xxxxx: connect: connection refused\""}
 ```
 
-You can try use the parameters: `hostNetwork`. Usage is as follows:
+You can try using the parameter: `hostNetwork`,  as shown below:
 
 ```
 # vim helm/chaos-mesh/values.yaml, change hostNetwork from false to true
 hostNetwork: true
 ```
 
-### Q: If you see an error message like this `ERROR: failed to get cluster internal kubeconfig: command "docker exec --privileged kind-control-plane cat /etc/kubernetes/admin.conf" failed with error: exit status 1` when installing Chaos Mesh with kind. How to fix it?
+### Q: I just saw `ERROR: failed to get cluster internal kubeconfig: command "docker exec --privileged kind-control-plane cat /etc/kubernetes/admin.conf" failed with error: exit status 1` when installing Chaos Mesh with kind. How to fix it?
+
 You can try the following command to fix it:
 ```
 kind delete cluster
 ```
-then deploy again
 
+then deploy again.
 
 ## Debug
 
@@ -74,4 +73,26 @@ github.com/go-logr/zapr.(*zapLogger).Error
 
 ```bash
 kubectl patch pv <your-pv-name> -p '{"spec":{"persistentVolumeReclaimPolicy":"Delete"}}'
+```
+
+## Install
+
+### Q: While trying to install chaos-mesh in OpenShift, tripped over problems regarding authorization.
+Message most looked like this:
+```bash
+Error creating: pods "chaos-daemon-" is forbidden: unable
+ to validate against any security context constraint: [spec.securityContext.hostNetwork:
+ Invalid value: true: Host network is not allowed to be used spec.securityContext.hostPID:
+ Invalid value: true: Host PID is not allowed to be used spec.securityContext.hostIPC:
+ Invalid value: true: Host IPC is not allowed to be used securityContext.runAsUser:
+ Invalid value: "hostPath": hostPath volumes are not allowed to be used spec.containers[0].securityContext.volumes[1]:
+ Invalid value: true: Host network is not allowed to be used spec.containers[0].securityContext.containers[0].hostPort:
+ Invalid value: 31767: Host ports are not allowed to be used spec.containers[0].securityContext.hostPID:
+ Invalid value: true: Host PID is not allowed to be used spec.containers[0].securityContext.hostIPC:
+......]
+```
+
+You need to add privileged scc to default.
+```bash
+oc adm policy add-scc-to-user privileged -n chaos-testing -z default
 ```

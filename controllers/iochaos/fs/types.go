@@ -40,14 +40,16 @@ import (
 
 type Reconciler struct {
 	client.Client
+	client.Reader
 	record.EventRecorder
 	Log logr.Logger
 }
 
-func newReconciler(c client.Client, log logr.Logger, req ctrl.Request, recorder record.EventRecorder) twophase.Reconciler {
+func newReconciler(c client.Client, r client.Reader, log logr.Logger, req ctrl.Request, recorder record.EventRecorder) twophase.Reconciler {
 	return twophase.Reconciler{
 		InnerReconciler: &Reconciler{
 			Client:        c,
+			Reader:        r,
 			EventRecorder: recorder,
 			Log:           log,
 		},
@@ -57,15 +59,15 @@ func newReconciler(c client.Client, log logr.Logger, req ctrl.Request, recorder 
 }
 
 // NewTwoPhaseReconciler would create Reconciler for twophase package
-func NewTwoPhaseReconciler(c client.Client, log logr.Logger, req ctrl.Request, recorder record.EventRecorder) *twophase.Reconciler {
-	r := newReconciler(c, log, req, recorder)
-	return twophase.NewReconciler(r, r.Client, r.Log)
+func NewTwoPhaseReconciler(c client.Client, reader client.Reader, log logr.Logger, req ctrl.Request, recorder record.EventRecorder) *twophase.Reconciler {
+	r := newReconciler(c, reader, log, req, recorder)
+	return twophase.NewReconciler(r, r.Client, r.Reader, r.Log)
 }
 
 // NewCommonReconciler would create Reconciler for common package
-func NewCommonReconciler(c client.Client, log logr.Logger, req ctrl.Request, recorder record.EventRecorder) *common.Reconciler {
-	r := newReconciler(c, log, req, recorder)
-	return common.NewReconciler(r, r.Client, r.Log)
+func NewCommonReconciler(c client.Client, reader client.Reader, log logr.Logger, req ctrl.Request, recorder record.EventRecorder) *common.Reconciler {
+	r := newReconciler(c, reader, log, req, recorder)
+	return common.NewReconciler(r, r.Client, r.Reader, r.Log)
 }
 
 // Object implements the reconciler.InnerReconciler.Object
@@ -82,7 +84,7 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1
 		return err
 	}
 
-	pods, err := utils.SelectAndFilterPods(ctx, r.Client, &iochaos.Spec)
+	pods, err := utils.SelectAndFilterPods(ctx, r.Client, r.Reader, &iochaos.Spec)
 	if err != nil {
 		r.Log.Error(err, "failed to select and filter pods")
 		return err
@@ -141,7 +143,7 @@ func (r *Reconciler) cleanFinalizersAndRecover(ctx context.Context, iochaos *v1a
 		}
 
 		var pod v1.Pod
-		err = r.Get(ctx, types.NamespacedName{
+		err = r.Client.Get(ctx, types.NamespacedName{
 			Namespace: ns,
 			Name:      name,
 		}, &pod)

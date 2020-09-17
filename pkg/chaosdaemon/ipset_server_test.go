@@ -34,15 +34,17 @@ var _ = Describe("ipset server", func() {
 
 	Context("createIPSet", func() {
 		It("should work", func() {
-			defer mock.With("MockWithNetNs", func(ctx context.Context, ns string, cmd string, args ...string) *exec.Cmd {
-				Expect(ns).To(Equal("nsPath"))
-				Expect(cmd).To(Equal("ipset"))
-				Expect(args[0]).To(Equal("create"))
-				Expect(args[1]).To(Equal("name"))
-				Expect(args[2]).To(Equal("hash:net"))
+			defer mock.With("MockProcessBuild", func(ctx context.Context, cmd string, args ...string) *exec.Cmd {
+				Expect(cmd).To(Equal("nsenter"))
+				Expect(args[0]).To(Equal("-nnsPath"))
+				Expect(args[1]).To(Equal("--"))
+				Expect(args[2]).To(Equal("ipset"))
+				Expect(args[3]).To(Equal("create"))
+				Expect(args[4]).To(Equal("name"))
+				Expect(args[5]).To(Equal("hash:net"))
 				return exec.Command("echo", "mock command")
 			})()
-			err := s.createIPSet(context.TODO(), "nsPath", "name")
+			err := createIPSet(context.TODO(), "nsPath", "name")
 			Expect(err).To(BeNil())
 		})
 
@@ -58,10 +60,10 @@ exit 1
 			`), 0755)
 			Expect(err).To(BeNil())
 			defer os.Remove("/tmp/mockfail.sh")
-			defer mock.With("MockWithNetNs", func(context.Context, string, string, ...string) *exec.Cmd {
+			defer mock.With("MockProcessBuild", func(ctx context.Context, cmd string, args ...string) *exec.Cmd {
 				return exec.Command("/tmp/mockfail.sh", ipsetExistErr)
 			})()
-			err = s.createIPSet(context.TODO(), "nsPath", "name")
+			err = createIPSet(context.TODO(), "nsPath", "name")
 			Expect(err).To(BeNil())
 		})
 
@@ -73,10 +75,10 @@ exit 1
 			`), 0755)
 			Expect(err).To(BeNil())
 			defer os.Remove("/tmp/mockfail.sh")
-			defer mock.With("MockWithNetNs", func(context.Context, string, string, ...string) *exec.Cmd {
+			defer mock.With("MockProcessBuild", func(context.Context, string, ...string) *exec.Cmd {
 				return exec.Command("/tmp/mockfail.sh", "fail msg")
 			})()
-			err = s.createIPSet(context.TODO(), "nsPath", "name")
+			err = createIPSet(context.TODO(), "nsPath", "name")
 			Expect(err).ToNot(BeNil())
 		})
 
@@ -88,20 +90,20 @@ exit 1
 			`), 0755)
 			Expect(err).To(BeNil())
 			defer os.Remove("/tmp/mockfail.sh")
-			defer mock.With("MockWithNetNs", func(context.Context, string, string, ...string) *exec.Cmd {
+			defer mock.With("MockProcessBuild", func(context.Context, string, ...string) *exec.Cmd {
 				return exec.Command("/tmp/mockfail.sh", ipsetExistErr)
 			})()
-			err = s.createIPSet(context.TODO(), "nsPath", "name")
+			err = createIPSet(context.TODO(), "nsPath", "name")
 			Expect(err).ToNot(BeNil())
 		})
 	})
 
 	Context("addIpsToIPSet", func() {
 		It("should work", func() {
-			defer mock.With("MockWithNetNs", func(context.Context, string, string, ...string) *exec.Cmd {
+			defer mock.With("MockProcessBuild", func(context.Context, string, ...string) *exec.Cmd {
 				return exec.Command("echo", "mock command")
 			})()
-			err := s.addCIDRsToIPSet(context.TODO(), "nsPath", "name", []string{"1.1.1.1"})
+			err := addCIDRsToIPSet(context.TODO(), "nsPath", "name", []string{"1.1.1.1"})
 			Expect(err).To(BeNil())
 		})
 
@@ -113,10 +115,10 @@ exit 1
 			`), 0755)
 			Expect(err).To(BeNil())
 			defer os.Remove("/tmp/mockfail.sh")
-			defer mock.With("MockWithNetNs", func(context.Context, string, string, ...string) *exec.Cmd {
+			defer mock.With("MockProcessBuild", func(context.Context, string, ...string) *exec.Cmd {
 				return exec.Command("/tmp/mockfail.sh", ipExistErr)
 			})()
-			err = s.addCIDRsToIPSet(context.TODO(), "nsPath", "name", []string{"1.1.1.1"})
+			err = addCIDRsToIPSet(context.TODO(), "nsPath", "name", []string{"1.1.1.1"})
 			Expect(err).To(BeNil())
 		})
 
@@ -128,20 +130,20 @@ exit 1
 			`), 0755)
 			Expect(err).To(BeNil())
 			defer os.Remove("/tmp/mockfail.sh")
-			defer mock.With("MockWithNetNs", func(context.Context, string, string, ...string) *exec.Cmd {
+			defer mock.With("MockProcessBuild", func(context.Context, string, ...string) *exec.Cmd {
 				return exec.Command("/tmp/mockfail.sh", "fail msg")
 			})()
-			err = s.addCIDRsToIPSet(context.TODO(), "nsPath", "name", []string{"1.1.1.1"})
+			err = addCIDRsToIPSet(context.TODO(), "nsPath", "name", []string{"1.1.1.1"})
 			Expect(err).ToNot(BeNil())
 		})
 	})
 
 	Context("renameIPSet", func() {
 		It("should work", func() {
-			defer mock.With("MockWithNetNs", func(context.Context, string, string, ...string) *exec.Cmd {
+			defer mock.With("MockProcessBuild", func(context.Context, string, ...string) *exec.Cmd {
 				return exec.Command("echo", "mock command")
 			})()
-			err := s.renameIPSet(context.TODO(), "nsPath", "name", "newname")
+			err := renameIPSet(context.TODO(), "nsPath", "name", "newname")
 			Expect(err).To(BeNil())
 		})
 
@@ -157,10 +159,10 @@ exit 1
 			`), 0755)
 			Expect(err).To(BeNil())
 			defer os.Remove("/tmp/mockfail.sh")
-			defer mock.With("MockWithNetNs", func(context.Context, string, string, ...string) *exec.Cmd {
+			defer mock.With("MockProcessBuild", func(context.Context, string, ...string) *exec.Cmd {
 				return exec.Command("/tmp/mockfail.sh", ipsetNewNameExistErr)
 			})()
-			err = s.renameIPSet(context.TODO(), "nsPath", "name", "newname")
+			err = renameIPSet(context.TODO(), "nsPath", "name", "newname")
 			Expect(err).To(BeNil())
 		})
 
@@ -172,10 +174,10 @@ exit 1
 			`), 0755)
 			Expect(err).To(BeNil())
 			defer os.Remove("/tmp/mockfail.sh")
-			defer mock.With("MockWithNetNs", func(context.Context, string, string, ...string) *exec.Cmd {
+			defer mock.With("MockProcessBuild", func(context.Context, string, ...string) *exec.Cmd {
 				return exec.Command("/tmp/mockfail.sh", "fail msg")
 			})()
-			err = s.renameIPSet(context.TODO(), "nsPath", "name", "newname")
+			err = renameIPSet(context.TODO(), "nsPath", "name", "newname")
 			Expect(err).ToNot(BeNil())
 		})
 
@@ -187,24 +189,24 @@ exit 1
 			`), 0755)
 			Expect(err).To(BeNil())
 			defer os.Remove("/tmp/mockfail.sh")
-			defer mock.With("MockWithNetNs", func(context.Context, string, string, ...string) *exec.Cmd {
+			defer mock.With("MockProcessBuild", func(context.Context, string, ...string) *exec.Cmd {
 				return exec.Command("/tmp/mockfail.sh", ipsetExistErr)
 			})()
-			err = s.renameIPSet(context.TODO(), "nsPath", "name", "newname")
+			err = renameIPSet(context.TODO(), "nsPath", "name", "newname")
 			Expect(err).ToNot(BeNil())
 		})
 	})
 
-	Context("FlushIPSet", func() {
+	Context("FlushIPSets", func() {
 		It("should work", func() {
-			defer mock.With("MockWithNetNs", func(context.Context, string, string, ...string) *exec.Cmd {
+			defer mock.With("MockProcessBuild", func(context.Context, string, ...string) *exec.Cmd {
 				return exec.Command("echo", "mock command")
 			})()
-			_, err := s.FlushIpSet(context.TODO(), &pb.IpSetRequest{
-				Ipset: &pb.IpSet{
+			_, err := s.FlushIPSets(context.TODO(), &pb.IPSetsRequest{
+				Ipsets: []*pb.IPSet{{
 					Name:  "ipset-name",
 					Cidrs: []string{"1.1.1.1/32"},
-				},
+				}},
 				ContainerId: "containerd://container-id",
 			})
 			Expect(err).To(BeNil())
@@ -213,11 +215,11 @@ exit 1
 		It("should fail on get pid", func() {
 			const errorStr = "mock get pid error"
 			defer mock.With("TaskError", errors.New(errorStr))()
-			_, err := s.FlushIpSet(context.TODO(), &pb.IpSetRequest{
-				Ipset: &pb.IpSet{
+			_, err := s.FlushIPSets(context.TODO(), &pb.IPSetsRequest{
+				Ipsets: []*pb.IPSet{{
 					Name:  "ipset-name",
 					Cidrs: []string{"1.1.1.1/32"},
-				},
+				}},
 				ContainerId: "containerd://container-id",
 			})
 			Expect(err).ToNot(BeNil())

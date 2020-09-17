@@ -58,44 +58,12 @@ func mockError(name string) error {
 	return nil
 }
 
-func (c *MockChaosDaemonClient) SetNetem(ctx context.Context, in *chaosdaemon.NetemRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
-	return nil, mockError("SetNetem")
+func (c *MockChaosDaemonClient) FlushIPSets(ctx context.Context, in *chaosdaemon.IPSetsRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
+	return nil, mockError("FlushIPSets")
 }
 
-func (c *MockChaosDaemonClient) DeleteNetem(ctx context.Context, in *chaosdaemon.NetemRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
-	return nil, mockError("DeleteNetem")
-}
-
-func (c *MockChaosDaemonClient) SetTbf(ctx context.Context, in *chaosdaemon.TbfRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
-	return nil, mockError("SetTbf")
-}
-
-func (c *MockChaosDaemonClient) DeleteTbf(ctx context.Context, in *chaosdaemon.TbfRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
-	return nil, mockError("DeleteTbf")
-}
-
-func (c *MockChaosDaemonClient) AddQdisc(ctx context.Context, in *chaosdaemon.QdiscRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
-	return nil, mockError("AddQdisc")
-}
-
-func (c *MockChaosDaemonClient) DelQdisc(ctx context.Context, in *chaosdaemon.QdiscRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
-	return nil, mockError("DelQdisc")
-}
-
-func (c *MockChaosDaemonClient) AddEmatchFilter(ctx context.Context, in *chaosdaemon.EmatchFilterRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
-	return nil, mockError("AddEmatchFilter")
-}
-
-func (c *MockChaosDaemonClient) DelTcFilter(ctx context.Context, in *chaosdaemon.TcFilterRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
-	return nil, mockError("DelTcFilter")
-}
-
-func (c *MockChaosDaemonClient) FlushIpSet(ctx context.Context, in *chaosdaemon.IpSetRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
-	return nil, mockError("FlushIpSet")
-}
-
-func (c *MockChaosDaemonClient) FlushIptables(ctx context.Context, in *chaosdaemon.IpTablesRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
-	return nil, mockError("FlushIptables")
+func (c *MockChaosDaemonClient) SetIptablesChains(ctx context.Context, in *chaosdaemon.IptablesChainsRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
+	return nil, mockError("SetIptablesChains")
 }
 
 func (c *MockChaosDaemonClient) SetTimeOffset(ctx context.Context, in *chaosdaemon.TimeRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
@@ -108,6 +76,10 @@ func (c *MockChaosDaemonClient) RecoverTimeOffset(ctx context.Context, in *chaos
 
 func (c *MockChaosDaemonClient) ContainerKill(ctx context.Context, in *chaosdaemon.ContainerRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
 	return nil, mockError("ContainerKill")
+}
+
+func (c *MockChaosDaemonClient) SetTcs(ctx context.Context, in *chaosdaemon.TcsRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
+	return nil, mockError("SetTcs")
 }
 
 func (c *MockChaosDaemonClient) Close() error {

@@ -1,9 +1,9 @@
 # Set DEBUGGER=1 to build debug symbols
-LDFLAGS = $(if $(DEBUGGER),,-s -w) $(shell ./hack/version.sh)
+LDFLAGS = $(if $(IMG_LDFLAGS),$(IMG_LDFLAGS),$(if $(DEBUGGER),,-s -w) $(shell ./hack/version.sh))
 
 # SET DOCKER_REGISTRY to change the docker registry
 DOCKER_REGISTRY_PREFIX := $(if $(DOCKER_REGISTRY),$(DOCKER_REGISTRY)/,)
-DOCKER_BUILD_ARGS := --build-arg HTTP_PROXY=${HTTP_PROXY} --build-arg HTTPS_PROXY=${HTTPS_PROXY} --build-arg UI=${UI} --build-arg SWAGGER=${SWAGGER}
+DOCKER_BUILD_ARGS := --build-arg HTTP_PROXY=${HTTP_PROXY} --build-arg HTTPS_PROXY=${HTTPS_PROXY} --build-arg UI=${UI} --build-arg SWAGGER=${SWAGGER} --build-arg LDFLAGS="${LDFLAGS}"
 
 GOVER_MAJOR := $(shell go version | sed -E -e "s/.*go([0-9]+)[.]([0-9]+).*/\1/")
 GOVER_MINOR := $(shell go version | sed -E -e "s/.*go([0-9]+)[.]([0-9]+).*/\2/")
@@ -91,17 +91,23 @@ else
 endif
 
 # Build chaos-daemon binary
-chaosdaemon: generate
+chaosdaemon:
 	$(CGOENV) go build -ldflags '$(LDFLAGS)' -o bin/chaos-daemon ./cmd/chaos-daemon/main.go
 
+bin/pause: ./hack/pause.c
+	cc ./hack/pause.c -o bin/pause
+
+bin/suicide: ./hack/suicide.c
+	cc ./hack/suicide.c -o bin/suicide
+
 # Build manager binary
-manager: generate
+manager:
 	$(GO) build -ldflags '$(LDFLAGS)' -o bin/chaos-controller-manager ./cmd/controller-manager/*.go
 
-chaosfs: generate
+chaosfs:
 	$(GO) build -ldflags '$(LDFLAGS)' -o bin/chaosfs ./cmd/chaosfs/*.go
 
-chaos-dashboard: generate
+chaos-dashboard:
 ifeq ($(SWAGGER),1)
 	make swagger_spec
 endif
@@ -109,7 +115,7 @@ ifeq ($(UI),1)
 	make ui
 	hack/embed_ui_assets.sh
 endif
-	$(CGO) build -ldflags '$(LDFLAGS)' -tags "${BUILD_TAGS}" -o bin/chaos-dashboard cmd/chaos-dashboard/*.go
+	$(CGO) build -ldflags "$(LDFLAGS)" -tags "${BUILD_TAGS}" -o bin/chaos-dashboard cmd/chaos-dashboard/*.go
 
 swagger_spec:
 	hack/generate_swagger_spec.sh
@@ -120,9 +126,9 @@ yarn_dependencies:
 
 ui: yarn_dependencies
 	cd ui &&\
-	REACT_APP_DASHBOARD_API_URL="" yarn build
+	yarn build
 
-binary: chaosdaemon manager chaosfs chaos-dashboard
+binary: chaosdaemon manager chaosfs chaos-dashboard bin/pause bin/suicide
 
 watchmaker:
 	$(CGOENV) go build -ldflags '$(LDFLAGS)' -o bin/watchmaker ./cmd/watchmaker/...
@@ -167,6 +173,12 @@ tidy: clean
 	GO111MODULE=on go mod tidy
 	git diff -U --exit-code go.mod go.sum
 
+update-install-scipt:
+	./hack/update_install_script.sh
+
+check-install-script: update-install-scipt
+	git diff -U --exit-code install.sh
+
 clean:
 	rm -rf docs/docs.go
 
@@ -195,7 +207,7 @@ image-binary: taily-build
 	echo -e "FROM scratch\n COPY . /src/bin\n COPY ./scripts /src/scripts" | docker build -t pingcap/binary -f - ./bin
 else
 image-binary:
-	docker build -t pingcap/binary ${DOCKER_BUILD_ARGS} .
+	DOCKER_BUILDKIT=1 docker build -t pingcap/binary ${DOCKER_BUILD_ARGS} .
 endif
 
 image-chaos-daemon: image-binary
@@ -214,7 +226,7 @@ image-chaos-dashboard: image-binary
 	docker build -t ${DOCKER_REGISTRY_PREFIX}pingcap/chaos-dashboard:${IMAGE_TAG} ${DOCKER_BUILD_ARGS} images/chaos-dashboard
 
 image-chaos-kernel:
-	docker build -t ${DOCKER_REGISTRY_PREFIX}pingcap/chaos-kernel ${DOCKER_BUILD_ARGS} --build-arg MAKE_JOBS=${MAKE_JOBS} --build-arg MIRROR=${UBUNTU_MIRROR} images/chaos-kernel
+	docker build -t ${DOCKER_REGISTRY_PREFIX}pingcap/chaos-kernel:${IMAGE_TAG} ${DOCKER_BUILD_ARGS} --build-arg MAKE_JOBS=${MAKE_JOBS} --build-arg MIRROR=${UBUNTU_MIRROR} images/chaos-kernel
 
 docker-push:
 	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-mesh:${IMAGE_TAG}"
@@ -259,7 +271,7 @@ proto: image-chaos-mesh-protoc
 	docker run --rm --workdir /mnt/ --volume $(shell pwd):/mnt \
 		--user $(shell id -u):$(shell id -g) --env IN_DOCKER=1 pingcap/chaos-mesh-protoc \
 		/usr/bin/make proto
-	
+
 	make fmt
 endif
 

@@ -23,14 +23,14 @@ import (
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/common"
-	"github.com/chaos-mesh/chaos-mesh/controllers/networkchaos/netem"
 	"github.com/chaos-mesh/chaos-mesh/controllers/networkchaos/partition"
-	"github.com/chaos-mesh/chaos-mesh/controllers/networkchaos/tbf"
+	"github.com/chaos-mesh/chaos-mesh/controllers/networkchaos/trafficcontrol"
 	"github.com/chaos-mesh/chaos-mesh/controllers/twophase"
 )
 
 type Reconciler struct {
 	client.Client
+	client.Reader
 	record.EventRecorder
 	Log logr.Logger
 }
@@ -60,14 +60,12 @@ func (r *Reconciler) Reconcile(req ctrl.Request, chaos *v1alpha1.NetworkChaos) (
 func (r *Reconciler) commonNetworkChaos(networkchaos *v1alpha1.NetworkChaos, req ctrl.Request) (ctrl.Result, error) {
 	var cr *common.Reconciler
 	switch networkchaos.Spec.Action {
-	case v1alpha1.NetemAction, v1alpha1.DelayAction, v1alpha1.DuplicateAction, v1alpha1.CorruptAction, v1alpha1.LossAction:
-		cr = netem.NewCommonReconciler(r.Client, r.Log.WithValues("action", "netem"),
+	case v1alpha1.BandwidthAction, v1alpha1.NetemAction, v1alpha1.DelayAction, v1alpha1.DuplicateAction, v1alpha1.CorruptAction, v1alpha1.LossAction:
+		cr = trafficcontrol.NewCommonReconciler(r.Client, r.Reader, r.Log.WithValues("action", "netem"),
 			req, r.EventRecorder)
 	case v1alpha1.PartitionAction:
-		cr = partition.NewCommonReconciler(r.Client, r.Log.WithValues("action", "partition"),
+		cr = partition.NewCommonReconciler(r.Client, r.Reader, r.Log.WithValues("action", "partition"),
 			req, r.EventRecorder)
-	case v1alpha1.BandwidthAction:
-		cr = tbf.NewCommonReconciler(r.Client, r.Log.WithValues("action", "bandwidth"), req, r.EventRecorder)
 	default:
 		return r.invalidActionResponse(networkchaos)
 	}
@@ -77,14 +75,12 @@ func (r *Reconciler) commonNetworkChaos(networkchaos *v1alpha1.NetworkChaos, req
 func (r *Reconciler) scheduleNetworkChaos(networkchaos *v1alpha1.NetworkChaos, req ctrl.Request) (ctrl.Result, error) {
 	var sr *twophase.Reconciler
 	switch networkchaos.Spec.Action {
-	case v1alpha1.NetemAction, v1alpha1.DelayAction, v1alpha1.DuplicateAction, v1alpha1.CorruptAction, v1alpha1.LossAction:
-		sr = netem.NewTwoPhaseReconciler(r.Client, r.Log.WithValues("action", "netem"),
+	case v1alpha1.BandwidthAction, v1alpha1.NetemAction, v1alpha1.DelayAction, v1alpha1.DuplicateAction, v1alpha1.CorruptAction, v1alpha1.LossAction:
+		sr = trafficcontrol.NewTwoPhaseReconciler(r.Client, r.Reader, r.Log.WithValues("action", "netem"),
 			req, r.EventRecorder)
 	case v1alpha1.PartitionAction:
-		sr = partition.NewTwoPhaseReconciler(r.Client, r.Log.WithValues("action", "partition"),
+		sr = partition.NewTwoPhaseReconciler(r.Client, r.Reader, r.Log.WithValues("action", "partition"),
 			req, r.EventRecorder)
-	case v1alpha1.BandwidthAction:
-		sr = tbf.NewTwoPhaseReconciler(r.Client, r.Log.WithValues("action", "bandwidth"), req, r.EventRecorder)
 	default:
 		return r.invalidActionResponse(networkchaos)
 	}

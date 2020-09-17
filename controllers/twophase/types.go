@@ -34,14 +34,16 @@ import (
 type Reconciler struct {
 	reconciler.InnerReconciler
 	client.Client
+	client.Reader
 	Log logr.Logger
 }
 
 // NewReconciler would create reconciler for twophase controller
-func NewReconciler(r reconciler.InnerReconciler, client client.Client, log logr.Logger) *Reconciler {
+func NewReconciler(r reconciler.InnerReconciler, client client.Client, reader client.Reader, log logr.Logger) *Reconciler {
 	return &Reconciler{
 		InnerReconciler: r,
 		Client:          client,
+		Reader:          reader,
 		Log:             log,
 	}
 }
@@ -55,7 +57,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	defer cancel()
 
 	_chaos := r.Object()
-	if err = r.Get(ctx, req.NamespacedName, _chaos); err != nil {
+	if err = r.Client.Get(ctx, req.NamespacedName, _chaos); err != nil {
 		r.Log.Error(err, "unable to get chaos")
 		return ctrl.Result{}, err
 	}

@@ -103,7 +103,7 @@ const TopContainer = () => {
               {chaosMeshRoutes.map((route) => (
                 <Route key={route.path! as string} {...route} />
               ))}
-              <Redirect exact path="*" to="/overview" />
+              <Redirect to="/overview" />
             </Switch>
           </ContentContainer>
         </Box>
@@ -117,8 +117,8 @@ const TopContainer = () => {
 
         <Snackbar
           anchorOrigin={{
-            vertical: 'bottom',
-            horizontal: 'right',
+            vertical: 'top',
+            horizontal: 'center',
           }}
           autoHideDuration={10000}
           open={alertOpen}

@@ -12,7 +12,7 @@ import genChaosChart from 'lib/d3/chaosBarChart'
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     chaosChart: {
-      height: 300,
+      height: 250,
       margin: theme.spacing(3),
     },
   })

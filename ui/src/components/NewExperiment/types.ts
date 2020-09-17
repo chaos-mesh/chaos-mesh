@@ -14,6 +14,7 @@ export interface ExperimentScope {
   phase_selectors: string[]
   mode: string
   value: string
+  pods: { [key: string]: string[] }
 }
 
 export interface ExperimentTargetPod {
@@ -51,12 +52,14 @@ export interface ExperimentTargetNetworkLoss {
 }
 
 export interface ExperimentTargetNetwork {
-  action: 'loss' | 'delay' | 'duplicate' | 'corrupt' | 'bandwidth' | ''
+  action: 'partition' | 'loss' | 'delay' | 'duplicate' | 'corrupt' | 'bandwidth' | ''
   bandwidth: ExperimentTargetNetworkBandwidth
   corrupt: ExperimentTargetNetworkCorrupt
   delay: ExperimentTargetNetworkDelay
   duplicate: ExperimentTargetNetworkDuplicate
   loss: ExperimentTargetNetworkLoss
+  direction: 'from' | 'to' | 'both' | ''
+  target?: ExperimentScope
 }
 
 export interface ExperimentTargetIO {
@@ -84,13 +87,13 @@ export interface FailKernelReq {
 }
 
 export interface ExperimentTargetKernel {
-  fail_kernel_req: FailKernelReq
+  fail_kern_request: FailKernelReq
 }
 
 export interface ExperimentTargetTime {
   clock_ids: string[]
   container_names: string[]
-  offset: string
+  time_offset: string
 }
 
 export interface ExperimentTargetStress {
@@ -103,14 +106,16 @@ export interface ExperimentTargetStress {
     } | null
     memory: {
       workers: number
-      size: string
       options: string[]
     } | null
   }
+  container_name: string
 }
 
+export type ExperimentKind = 'PodChaos' | 'NetworkChaos' | 'IoChaos' | 'KernelChaos' | 'TimeChaos' | 'StressChaos'
+
 export interface ExperimentTarget {
-  kind: string
+  kind: ExperimentKind | ''
   pod_chaos: ExperimentTargetPod
   network_chaos: ExperimentTargetNetwork
   io_chaos: ExperimentTargetIO
@@ -155,6 +160,6 @@ export interface StepperContextProps {
 
 export type FormikCtx = FormikContextType<Experiment>
 
-export type StepperFormTargetProps = FormikCtx & {
+export type StepperFormTargetProps = {
   handleActionChange?: (e: React.ChangeEvent<any>) => void
 }

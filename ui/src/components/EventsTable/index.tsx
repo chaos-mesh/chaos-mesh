@@ -3,6 +3,7 @@ import {
   Button,
   IconButton,
   InputAdornment,
+  Paper,
   Table,
   TableBody,
   TableCell,
@@ -13,19 +14,24 @@ import {
   TableRow,
   TableSortLabel,
   TextField,
+  Typography,
 } from '@material-ui/core'
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useImperativeHandle, useState } from 'react'
 import { createStyles, makeStyles } from '@material-ui/core/styles'
-import day, { dayComparator } from 'lib/dayjs'
+import { dayComparator, format } from 'lib/dayjs'
 
+import CloseIcon from '@material-ui/icons/Close'
 import { Event } from 'api/events.type'
+import EventDetail from 'components/EventDetail'
 import FirstPageIcon from '@material-ui/icons/FirstPage'
+import HelpOutlineIcon from '@material-ui/icons/HelpOutline'
 import KeyboardArrowLeftIcon from '@material-ui/icons/KeyboardArrowLeft'
 import KeyboardArrowRightIcon from '@material-ui/icons/KeyboardArrowRight'
 import LastPageIcon from '@material-ui/icons/LastPage'
-import { Link } from 'react-router-dom'
+import Loading from 'components/Loading'
 import PaperTop from 'components/PaperTop'
 import SearchIcon from '@material-ui/icons/Search'
+import Tooltip from 'components/Tooltip'
 import _debounce from 'lodash.debounce'
 import { searchEvents } from 'lib/search'
 import { usePrevious } from 'lib/hooks'
@@ -35,6 +41,14 @@ const useStyles = makeStyles(() =>
   createStyles({
     tableContainer: {
       maxHeight: 768,
+    },
+    eventDetailPaper: {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      width: '100%',
+      height: '100%',
+      overflowY: 'scroll',
     },
   })
 )
@@ -82,15 +96,16 @@ function stableSort<T>(data: T[], comparator: (a: T, b: T) => number) {
   return indexed.map((el) => el[0])
 }
 
-type SortedEvent = Omit<Event, 'deleted_at' | 'pods'>
-type SortedEventWithPods = Omit<Event, 'deleted_at'>
+type SortedEvent = Omit<Event, 'pods'>
+type SortedEventWithPods = Event
 
 const headCells: { id: keyof SortedEvent; label: string }[] = [
   { id: 'experiment', label: 'Experiment' },
+  { id: 'experiment_id', label: 'UUID' },
   { id: 'namespace', label: 'Namespace' },
   { id: 'kind', label: 'Kind' },
-  { id: 'start_time', label: 'Start Time' },
-  { id: 'finish_time', label: 'Finish Time' },
+  { id: 'start_time', label: 'Started' },
+  { id: 'finish_time', label: 'Ended' },
 ]
 
 interface EventsTableHeadProps {
@@ -105,7 +120,7 @@ const EventsTableHead: React.FC<EventsTableHeadProps> = ({ order, orderBy, onSor
 
   let cells = headCells
   if (detailed) {
-    cells = cells.concat([{ id: 'Detail' as keyof SortedEvent, label: 'Event Detail' }])
+    cells = cells.concat([{ id: 'Detail' as keyof SortedEvent, label: 'Detail' }])
   }
 
   return (
@@ -167,20 +182,20 @@ const TablePaginationActions: React.FC<TablePaginationActionsProps> = ({ count, 
   )
 }
 
-const format = (date: string) => day(date).format('YYYY-MM-DD HH:mm:ss')
-
 interface EventsTableRowProps {
   event: SortedEventWithPods
   detailed: boolean
+  onSelectEvent: (e: Event) => () => void
 }
 
-const EventsTableRow: React.FC<EventsTableRowProps> = ({ event: e, detailed }) => {
+const EventsTableRow: React.FC<EventsTableRowProps> = ({ event: e, detailed, onSelectEvent }) => {
   const runningLabel = useRunningLabelStyles()
 
   return (
     <>
       <TableRow hover>
         <TableCell>{e.experiment}</TableCell>
+        <TableCell>{e.experiment_id}</TableCell>
         <TableCell>{e.namespace}</TableCell>
         <TableCell>{e.kind}</TableCell>
         <TableCell>{format(e.start_time)}</TableCell>
@@ -189,13 +204,7 @@ const EventsTableRow: React.FC<EventsTableRowProps> = ({ event: e, detailed }) =
         </TableCell>
         {detailed && (
           <TableCell>
-            <Button
-              component={Link}
-              to={`/experiments/${e.experiment_id}?name=${e.experiment}&event=${e.id}`}
-              variant="outlined"
-              size="small"
-              color="primary"
-            >
+            <Button variant="outlined" size="small" color="primary" onClick={onSelectEvent(e)}>
               Detail
             </Button>
           </TableCell>
@@ -205,13 +214,21 @@ const EventsTableRow: React.FC<EventsTableRowProps> = ({ event: e, detailed }) =
   )
 }
 
-export interface EventsTableProps {
+export interface EventsTableHandles {
+  onSelectEvent: (e: Event) => () => void
+}
+
+interface EventsTableProps {
   title?: string
   events: Event[]
   detailed?: boolean
+  hasSearch?: boolean
 }
 
-const EventsTable: React.FC<EventsTableProps> = ({ title = 'Events', events: allEvents, detailed = false }) => {
+const EventsTable: React.ForwardRefRenderFunction<EventsTableHandles, EventsTableProps> = (
+  { title = 'Events', events: allEvents, detailed = false, hasSearch = true },
+  ref
+) => {
   const classes = useStyles()
 
   const [events, setEvents] = useState(allEvents)
@@ -221,6 +238,22 @@ const EventsTable: React.FC<EventsTableProps> = ({ title = 'Events', events: all
   const [rowsPerPage, setRowsPerPage] = useState(5)
   const [search, setSearch] = useState('')
   const previousSearch = usePrevious(search)
+
+  const [selectedEvent, setSelectedEvent] = useState<Event>()
+  const [detailLoading, setDetailLoading] = useState(false)
+  const [eventDetailOpen, setEventDetailOpen] = useState(false)
+
+  const onSelectEvent = (e: Event) => () => {
+    setDetailLoading(true)
+    setSelectedEvent(e)
+    setEventDetailOpen(true)
+    setTimeout(() => setDetailLoading(false), 500)
+  }
+  // Methods exposed to the parent
+  useImperativeHandle(ref, () => ({
+    onSelectEvent,
+  }))
+  const closeEventDetail = () => setEventDetailOpen(false)
 
   const handleSortEvents = (_: React.MouseEvent<unknown>, k: keyof SortedEvent) => {
     const isAsc = orderBy === k && order === 'asc'
@@ -251,59 +284,114 @@ const EventsTable: React.FC<EventsTableProps> = ({ title = 'Events', events: all
   }, [search])
 
   return (
-    <>
-      <PaperTop title={title}>
-        <TextField
-          style={{ width: '200px', minWidth: '30%', margin: 0 }}
-          margin="dense"
-          placeholder="Search events ..."
-          disabled={!allEvents}
+    <Box position="relative">
+      <Paper variant="outlined">
+        <PaperTop title={title}>
+          {hasSearch && (
+            <TextField
+              style={{ width: '200px', minWidth: '30%', margin: 0 }}
+              margin="dense"
+              placeholder="Search events..."
+              disabled={!allEvents}
+              variant="outlined"
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon color="primary" />
+                  </InputAdornment>
+                ),
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <Tooltip
+                      title={
+                        <Typography variant="body2">
+                          The following search syntax can help to locate the events quickly:
+                          <ul style={{ paddingLeft: '1rem' }}>
+                            <li>namespace:default xxx will search for events with namespace default.</li>
+                            <li>
+                              kind:NetworkChaos xxx will search for events with kind NetworkChaos, you can also type
+                              kind:net because the search is fuzzy.
+                            </li>
+                            <li>pod:echoserver-774cdcc8b6-nrm65 will search for events by affected pod.</li>
+                            <li>ip:172.17.0.6 is similar to pod:xxx, filter by pod IP.</li>
+                            <li>
+                              uuid:2f79a4d6-1952-45b5-b2d5-ce715823c7a7 will search for events by experimental uuid.
+                            </li>
+                          </ul>
+                        </Typography>
+                      }
+                      style={{ verticalAlign: 'sub' }}
+                      arrow
+                      interactive
+                    >
+                      <HelpOutlineIcon fontSize="small" />
+                    </Tooltip>
+                  </InputAdornment>
+                ),
+              }}
+              inputProps={{
+                style: { paddingTop: 8, paddingBottom: 8 },
+              }}
+              onChange={handleSearchChange}
+            />
+          )}
+        </PaperTop>
+        <TableContainer className={classes.tableContainer}>
+          <Table stickyHeader>
+            <EventsTableHead order={order} orderBy={orderBy} onSort={handleSortEvents} detailed={detailed} />
+
+            <TableBody>
+              {events &&
+                stableSort<SortedEvent>(events, getComparator(order, orderBy))
+                  .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                  .map((e) => (
+                    <EventsTableRow
+                      key={e.id}
+                      event={e as SortedEventWithPods}
+                      detailed={detailed}
+                      onSelectEvent={onSelectEvent}
+                    />
+                  ))}
+            </TableBody>
+
+            <TableFooter>
+              <TableRow>
+                {events && (
+                  <TablePagination
+                    count={events.length}
+                    page={page}
+                    rowsPerPageOptions={[5, 10, 25]}
+                    rowsPerPage={rowsPerPage}
+                    onChangePage={handleChangePage}
+                    onChangeRowsPerPage={handleChangeRowsPerPage}
+                    ActionsComponent={TablePaginationActions as any}
+                    labelDisplayedRows={({ from, to, count }) => `${from} - ${to} of ${count}`}
+                    labelRowsPerPage="Events per page"
+                  />
+                )}
+              </TableRow>
+            </TableFooter>
+          </Table>
+        </TableContainer>
+      </Paper>
+      {eventDetailOpen && (
+        <Paper
           variant="outlined"
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <SearchIcon color="primary" />
-              </InputAdornment>
-            ),
+          className={classes.eventDetailPaper}
+          style={{
+            zIndex: 3, // .MuiTableCell-stickyHeader z-index: 2
           }}
-          inputProps={{
-            style: { paddingTop: 8, paddingBottom: 8 },
-          }}
-          onChange={handleSearchChange}
-        />
-      </PaperTop>
-      <TableContainer className={classes.tableContainer}>
-        <Table stickyHeader>
-          <EventsTableHead order={order} orderBy={orderBy} onSort={handleSortEvents} detailed={detailed} />
-
-          <TableBody>
-            {events &&
-              stableSort<SortedEvent>(events, getComparator(order, orderBy))
-                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                .map((e) => <EventsTableRow key={e.id} event={e as SortedEventWithPods} detailed={detailed} />)}
-          </TableBody>
-
-          <TableFooter>
-            <TableRow>
-              {events && (
-                <TablePagination
-                  count={events.length}
-                  page={page}
-                  rowsPerPageOptions={[5, 10, 25]}
-                  rowsPerPage={rowsPerPage}
-                  onChangePage={handleChangePage}
-                  onChangeRowsPerPage={handleChangeRowsPerPage}
-                  ActionsComponent={TablePaginationActions as any}
-                  labelDisplayedRows={({ from, to, count }) => `${from} - ${to} of ${count}`}
-                  labelRowsPerPage="Events per page"
-                />
-              )}
-            </TableRow>
-          </TableFooter>
-        </Table>
-      </TableContainer>
-    </>
+        >
+          <PaperTop title="Event Detail">
+            <IconButton color="primary" onClick={closeEventDetail}>
+              <CloseIcon />
+            </IconButton>
+          </PaperTop>
+          {selectedEvent && !detailLoading ? <EventDetail event={selectedEvent} /> : <Loading />}
+        </Paper>
+      )}
+    </Box>
   )
 }
 
-export default EventsTable
+export default React.forwardRef(EventsTable)

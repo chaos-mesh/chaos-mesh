@@ -146,7 +146,7 @@ func (c *K8sConfigMapWatcher) Watch(notifyMe chan<- interface{}, stopCh <-chan s
 			// channel may closed caused by HTTP timeout, should restart watcher
 			// detail at https://github.com/kubernetes/client-go/issues/334
 			if !ok {
-				log.Error(nil, "channel has closed, should restart watcher")
+				log.V(5).Info("channel has closed, will restart watcher")
 				return ErrWatchChannelClosed
 			}
 			if e.Type == watch.Error {
@@ -170,7 +170,7 @@ func (c *K8sConfigMapWatcher) Watch(notifyMe chan<- interface{}, stopCh <-chan s
 			// channel may closed caused by HTTP timeout, should restart watcher
 			// detail at https://github.com/kubernetes/client-go/issues/334
 			if !ok {
-				log.Error(nil, "channel has closed, should restart watcher")
+				log.V(5).Info("channel has closed, will restart watcher")
 				return ErrWatchChannelClosed
 			}
 			if e.Type == watch.Error {
@@ -204,7 +204,7 @@ func mapStringStringToLabelSelector(m map[string]string) string {
 	return labels.Set(m).String()
 }
 
-// Get fetches all matching ConfigMaps
+// GetInjectionConfigs fetches all matching ConfigMaps
 func (c *K8sConfigMapWatcher) GetInjectionConfigs() (map[string][]*config.InjectionConfig, error) {
 	templates, err := c.GetTemplates()
 	if err != nil {

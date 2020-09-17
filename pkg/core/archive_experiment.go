@@ -90,7 +90,7 @@ type ExperimentInfo struct {
 // ScopeInfo defines the scope of the Experiment.
 type ScopeInfo struct {
 	SelectorInfo
-	Mode  string `json:"mode" binding:"oneof='' 'one' 'all' 'fixed' 'fixed' 'fixed-percent' 'random-max-percent'"`
+	Mode  string `json:"mode" binding:"oneof='' 'one' 'all' 'fixed' 'fixed-percent' 'random-max-percent'"`
 	Value string `json:"value" binding:"ValueValid"`
 }
 
@@ -146,12 +146,12 @@ func (s *SelectorInfo) ParseSelector() v1alpha1.SelectorSpec {
 // TargetInfo defines the information of target objects.
 type TargetInfo struct {
 	Kind         string            `json:"kind" binding:"required,oneof=PodChaos NetworkChaos IoChaos KernelChaos TimeChaos StressChaos"`
-	PodChaos     *PodChaosInfo     `json:"pod_chaos,omitempty"`
-	NetworkChaos *NetworkChaosInfo `json:"network_chaos,omitempty"`
-	IOChaos      *IOChaosInfo      `json:"io_chaos,omitempty"`
-	KernelChaos  *KernelChaosInfo  `json:"kernel_chaos,omitempty"`
-	TimeChaos    *TimeChaosInfo    `json:"time_chaos,omitempty"`
-	StressChaos  *StressChaosInfo  `json:"stress_chaos,omitempty"`
+	PodChaos     *PodChaosInfo     `json:"pod_chaos,omitempty" binding:"RequiredFieldEqual=Kind:PodChaos"`
+	NetworkChaos *NetworkChaosInfo `json:"network_chaos,omitempty" binding:"RequiredFieldEqual=Kind:NetworkChaos"`
+	IOChaos      *IOChaosInfo      `json:"io_chaos,omitempty" binding:"RequiredFieldEqual=Kind:IoChaos"`
+	KernelChaos  *KernelChaosInfo  `json:"kernel_chaos,omitempty" binding:"RequiredFieldEqual=Kind:KernelChaos"`
+	TimeChaos    *TimeChaosInfo    `json:"time_chaos,omitempty" binding:"RequiredFieldEqual=Kind:TimeChaos"`
+	StressChaos  *StressChaosInfo  `json:"stress_chaos,omitempty" binding:"RequiredFieldEqual=Kind:StressChaos"`
 }
 
 // SchedulerInfo defines the scheduler information.
@@ -166,14 +166,14 @@ type PodChaosInfo struct {
 	ContainerName string `json:"container_name"`
 }
 
-// PodChaosInfo defines the basic information of network chaos for creating a new NetworkChaos.
+// NetworkChaosInfo defines the basic information of network chaos for creating a new NetworkChaos.
 type NetworkChaosInfo struct {
 	Action      string                  `json:"action" binding:"oneof='' 'netem' 'delay' 'loss' 'duplicate' 'corrupt' 'partition' 'bandwidth'"`
-	Delay       *v1alpha1.DelaySpec     `json:"delay"`
-	Loss        *v1alpha1.LossSpec      `json:"loss"`
-	Duplicate   *v1alpha1.DuplicateSpec `json:"duplicate"`
-	Corrupt     *v1alpha1.CorruptSpec   `json:"corrupt"`
-	Bandwidth   *v1alpha1.BandwidthSpec `json:"bandwidth"`
+	Delay       *v1alpha1.DelaySpec     `json:"delay" binding:"RequiredFieldEqual=Action:delay"`
+	Loss        *v1alpha1.LossSpec      `json:"loss" binding:"RequiredFieldEqual=Action:loss"`
+	Duplicate   *v1alpha1.DuplicateSpec `json:"duplicate" binding:"RequiredFieldEqual=Action:duplicate"`
+	Corrupt     *v1alpha1.CorruptSpec   `json:"corrupt" binding:"RequiredFieldEqual=Action:corrupt"`
+	Bandwidth   *v1alpha1.BandwidthSpec `json:"bandwidth" binding:"RequiredFieldEqual=Action:bandwidth"`
 	Direction   string                  `json:"direction" binding:"oneof='' 'to' 'from' 'both'"`
 	TargetScope *ScopeInfo              `json:"target_scope"`
 }
@@ -191,12 +191,12 @@ type IOChaosInfo struct {
 
 // KernelChaosInfo defines the basic information of kernel chaos for creating a new KernelChaos.
 type KernelChaosInfo struct {
-	FailKernRequest v1alpha1.FailKernRequest `json:"fail_kernel_req"`
+	FailKernRequest v1alpha1.FailKernRequest `json:"fail_kern_request"`
 }
 
 // TimeChaosInfo defines the basic information of time chaos for creating a new TimeChaos.
 type TimeChaosInfo struct {
-	TimeOffset     string   `json:"offset"`
+	TimeOffset     string   `json:"time_offset"`
 	ClockIDs       []string `json:"clock_ids"`
 	ContainerNames []string `json:"container_names"`
 }
@@ -205,6 +205,7 @@ type TimeChaosInfo struct {
 type StressChaosInfo struct {
 	Stressors         *v1alpha1.Stressors `json:"stressors"`
 	StressngStressors string              `json:"stressng_stressors,omitempty"`
+	ContainerName     *string             `json:"container_name,omitempty"`
 }
 
 func (e *ArchiveExperiment) ParsePodChaos() (ExperimentInfo, error) {
@@ -225,6 +226,7 @@ func (e *ArchiveExperiment) ParsePodChaos() (ExperimentInfo, error) {
 				AnnotationSelectors: chaos.Spec.Selector.AnnotationSelectors,
 				FieldSelectors:      chaos.Spec.Selector.FieldSelectors,
 				PhaseSelector:       chaos.Spec.Selector.PodPhaseSelectors,
+				Pods:                chaos.Spec.Selector.Pods,
 			},
 			Mode:  string(chaos.Spec.Mode),
 			Value: chaos.Spec.Value,
@@ -267,6 +269,7 @@ func (e *ArchiveExperiment) ParseNetworkChaos() (ExperimentInfo, error) {
 				AnnotationSelectors: chaos.Spec.Selector.AnnotationSelectors,
 				FieldSelectors:      chaos.Spec.Selector.FieldSelectors,
 				PhaseSelector:       chaos.Spec.Selector.PodPhaseSelectors,
+				Pods:                chaos.Spec.Selector.Pods,
 			},
 			Mode:  string(chaos.Spec.Mode),
 			Value: chaos.Spec.Value,
@@ -327,6 +330,7 @@ func (e *ArchiveExperiment) ParseIOChaos() (ExperimentInfo, error) {
 				AnnotationSelectors: chaos.Spec.Selector.AnnotationSelectors,
 				FieldSelectors:      chaos.Spec.Selector.FieldSelectors,
 				PhaseSelector:       chaos.Spec.Selector.PodPhaseSelectors,
+				Pods:                chaos.Spec.Selector.Pods,
 			},
 			Mode:  string(chaos.Spec.Mode),
 			Value: chaos.Spec.Value,
@@ -373,6 +377,7 @@ func (e *ArchiveExperiment) ParseTimeChaos() (ExperimentInfo, error) {
 				AnnotationSelectors: chaos.Spec.Selector.AnnotationSelectors,
 				FieldSelectors:      chaos.Spec.Selector.FieldSelectors,
 				PhaseSelector:       chaos.Spec.Selector.PodPhaseSelectors,
+				Pods:                chaos.Spec.Selector.Pods,
 			},
 			Mode:  string(chaos.Spec.Mode),
 			Value: chaos.Spec.Value,
@@ -415,6 +420,7 @@ func (e *ArchiveExperiment) ParseKernelChaos() (ExperimentInfo, error) {
 				AnnotationSelectors: chaos.Spec.Selector.AnnotationSelectors,
 				FieldSelectors:      chaos.Spec.Selector.FieldSelectors,
 				PhaseSelector:       chaos.Spec.Selector.PodPhaseSelectors,
+				Pods:                chaos.Spec.Selector.Pods,
 			},
 			Mode:  string(chaos.Spec.Mode),
 			Value: chaos.Spec.Value,
@@ -455,6 +461,7 @@ func (e *ArchiveExperiment) ParseStressChaos() (ExperimentInfo, error) {
 				AnnotationSelectors: chaos.Spec.Selector.AnnotationSelectors,
 				FieldSelectors:      chaos.Spec.Selector.FieldSelectors,
 				PhaseSelector:       chaos.Spec.Selector.PodPhaseSelectors,
+				Pods:                chaos.Spec.Selector.Pods,
 			},
 			Mode:  string(chaos.Spec.Mode),
 			Value: chaos.Spec.Value,
@@ -474,6 +481,10 @@ func (e *ArchiveExperiment) ParseStressChaos() (ExperimentInfo, error) {
 
 	if chaos.Spec.Duration != nil {
 		info.Scheduler.Duration = *chaos.Spec.Duration
+	}
+
+	if chaos.Spec.ContainerName != nil {
+		info.Target.StressChaos.ContainerName = chaos.Spec.ContainerName
 	}
 
 	return info, nil

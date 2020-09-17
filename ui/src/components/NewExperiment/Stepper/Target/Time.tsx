@@ -2,22 +2,27 @@ import { LabelField, TextField } from 'components/FormField'
 import React, { useEffect } from 'react'
 
 import AdvancedOptions from 'components/AdvancedOptions'
-import { StepperFormTargetProps } from 'components/NewExperiment/types'
+import { FormikCtx } from 'components/NewExperiment/types'
 import { resetOtherChaos } from 'lib/formikhelpers'
+import { useFormikContext } from 'formik'
 
-export default function Time(props: StepperFormTargetProps) {
+export default function Time() {
+  const formikCtx: FormikCtx = useFormikContext()
+  const { errors, touched } = formikCtx
+
   useEffect(() => {
-    resetOtherChaos(props, 'TimeChaos', false)
+    resetOtherChaos(formikCtx, 'TimeChaos', false)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   return (
     <>
       <TextField
-        id="target.time_chaos.offset"
-        name="target.time_chaos.offset"
+        id="target.time_chaos.time_offset"
+        name="target.time_chaos.time_offset"
         label="Offset"
         helperText="The time offset"
+        error={errors.target?.time_chaos?.time_offset && touched.target?.time_chaos?.time_offset ? true : false}
       />
 
       <AdvancedOptions>

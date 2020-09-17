@@ -38,14 +38,15 @@ FLAGS:
         --volume-provisioner Deploy volume provisioner in local Kubernetes cluster
         --local-registry     Deploy local docker registry in local Kubernetes cluster
         --template           Locally render templates
+        --k3s                Install chaos-mesh in k3s environment
 OPTIONS:
     -v, --version            Version of chaos-mesh, default value: latest
     -l, --local [kind]       Choose a way to run a local kubernetes cluster, supported value: kind,
                              If this value is not set and the Kubernetes is not installed, this script will exit with 1.
     -n, --name               Name of Kubernetes cluster, default value: kind
-    -c  --crd                The URL of the crd files, default value: https://raw.githubusercontent.com/chaos-mesh/chaos-mesh/master/manifests/crd.yaml
+    -c  --crd                The URL of the crd files, default value: https://mirrors.chaos-mesh.org/latest/crd.yaml
     -r  --runtime            Runtime specifies which container runtime to use. Currently we only supports docker and containerd. default value: docker
-    -f  --chaosfs-sidecar    The URL of the chaosfs sidecar configmap files, default value: https://raw.githubusercontent.com/chaos-mesh/chaos-mesh/master/manifests/chaosfs-sidecar.yaml
+    -f  --chaosfs-sidecar    The URL of the chaosfs sidecar configmap files, default value: https://mirrors.chaos-mesh.org/latest/chaosfs-sidecar.yaml
         --kind-version       Version of the Kind tool, default value: v0.7.0
         --node-num           The count of the cluster nodes,default value: 3
         --k8s-version        Version of the Kubernetes cluster,default value: v1.17.2
@@ -72,12 +73,12 @@ main() {
     local docker_mirror=false
     local volume_provisioner=false
     local local_registry=false
-    local crd="https://raw.githubusercontent.com/chaos-mesh/chaos-mesh/master/manifests/crd.yaml"
-    local chaosfs="https://raw.githubusercontent.com/chaos-mesh/chaos-mesh/master/manifests/chaosfs-sidecar.yaml"
+    local crd="https://mirrors.chaos-mesh.org/latest/crd.yaml"
+    local chaosfs="https://mirrors.chaos-mesh.org/latest/chaosfs-sidecar.yaml"
     local runtime="docker"
     local template=false
-    local sidecar_template=true
     local install_dependency_only=false
+    local k3s=false
 
     while [[ $# -gt 0 ]]
     do
@@ -191,8 +192,8 @@ main() {
                 shift
                 shift
                 ;;
-            --sidecar_template)
-                sidecar_template=true
+            --k3s)
+                k3s=true
                 shift
                 shift
                 ;;
@@ -218,12 +219,14 @@ main() {
         runtime="containerd"
     fi
 
+    if [ "${k3s}" == "true" ]; then
+        runtime="containerd"
+    fi
+
     if $template; then
         ensure gen_crd_manifests "${crd}"
-        ensure gen_chaos_mesh_manifests "${runtime}"
-        if $sidecar_template; then
-            ensure gen_default_sidecar_template "${chaosfs}"
-        fi
+        ensure gen_chaos_mesh_manifests "${runtime}" "${k3s}"
+        ensure gen_sidecar_template "${chaosfs}"
         exit 0
     fi
 
@@ -245,8 +248,10 @@ main() {
 
     check_kubernetes
 
-    install_chaos_mesh "${release_name}" "${namespace}" "${local_kube}" ${force_chaos_mesh} ${docker_mirror} "${crd}" "${runtime}" "${chaosfs}"
+    install_chaos_mesh "${release_name}" "${namespace}" "${local_kube}" ${force_chaos_mesh} ${docker_mirror} "${crd}" "${runtime}" "${chaosfs}" "${k3s}"
     ensure_pods_ready "${namespace}" "app.kubernetes.io/component=controller-manager" 100
+    ensure_pods_ready "${namespace}" "app.kubernetes.io/component=chaos-daemon" 100
+    ensure_pods_ready "${namespace}" "app.kubernetes.io/component=chaos-dashboard" 100
     printf "Chaos Mesh %s is installed successfully\n" "${release_name}"
 }
 
@@ -596,8 +601,8 @@ install_chaos_mesh() {
     local docker_mirror=$5
     local crd=$6
     local runtime=$7
-    local sidecar_template=$8
-    local chaosfs=$9
+    local chaosfs=$8
+    local k3s=$9
 
     printf "Install Chaos Mesh %s\n" "${release_name}"
 
@@ -614,10 +619,8 @@ install_chaos_mesh() {
     fi
 
     gen_crd_manifests "${crd}" | kubectl apply -f - || exit 1
-    gen_chaos_mesh_manifests "${runtime}" | kubectl apply -f - || exit 1
-    if [ "$sidecar_template" == "true" ]; then
-        gen_default_sidecar_template "${chaosfs}"| kubectl apply -f - || exit 1
-    fi
+    gen_chaos_mesh_manifests "${runtime}" "${k3s}" | kubectl apply -f - || exit 1
+    gen_sidecar_template "${chaosfs}"| kubectl apply -f - || exit 1
 }
 
 version_lt() {
@@ -710,9 +713,11 @@ ensure_pods_ready() {
     fi
 
     count=0
-    while [[ "$(kubectl get pods -n "${namespace}" ${labels} -o 'jsonpath={..status.conditions[?(@.type=="Ready")].status}')" != "True" ]];
+    while [ -n "$(kubectl get pods -n "${namespace}" ${labels} --no-headers | grep -v Running)" ];
     do
-        echo "Waiting for pod running" && sleep 20;
+        echo "Waiting for pod running" && sleep 10;
+
+        kubectl get pods -n "${namespace}" ${labels} --no-headers | >&2 grep -v Running || true
 
         ((count=count+1))
         if [ $count -gt $limit ]; then
@@ -792,7 +797,7 @@ gen_crd_manifests() {
     ensure cat "$crd"
 }
 
-gen_default_sidecar_template() {
+gen_sidecar_template() {
     local chaosfs=$1
 
     if check_url "$chaosfs"; then
@@ -821,10 +826,17 @@ check_url() {
 
 gen_chaos_mesh_manifests() {
     local runtime=$1
+    local k3s=$2
+
     local socketPath="/var/run/docker.sock"
     local mountPath="/var/run/docker.sock"
     if [ "${runtime}" == "containerd" ]; then
         socketPath="/run/containerd/containerd.sock"
+        mountPath="/run/containerd/containerd.sock"
+    fi
+
+    if [ "${k3s}" == "true" ]; then
+        socketPath="/run/k3s/containerd/containerd.sock"
         mountPath="/run/containerd/containerd.sock"
     fi
 
@@ -965,6 +977,8 @@ rules:
     - timechaos
     - kernelchaos
     - stresschaos
+    - podnetworkchaos
+    - httpchaos
   verbs: ["*"]
 ---
 # Source: chaos-mesh/templates/controller-manager-rbac.yaml
@@ -1020,6 +1034,10 @@ metadata:
 spec:
   type: ClusterIP
   ports:
+    - port: 10081
+      targetPort: pprof
+      protocol: TCP
+      name: pprof
     - port: 10080
       targetPort: http
       protocol: TCP
@@ -1060,7 +1078,7 @@ spec:
       containers:
         - name: chaos-daemon
           image: pingcap/chaos-daemon:latest
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
           command:
             - /usr/local/bin/chaos-daemon
             - --runtime
@@ -1069,6 +1087,10 @@ spec:
             - !!str 31766
             - --grpc-port
             - !!str 31767
+            - --pprof
+          env:
+            - name: TZ
+              value: UTC
           securityContext:
             privileged: true
             capabilities:
@@ -1121,7 +1143,7 @@ spec:
       containers:
         - name: chaos-dashboard
           image: pingcap/chaos-dashboard:latest
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
           resources:
             limits: {}
             requests:
@@ -1138,6 +1160,8 @@ spec:
               value: "0.0.0.0"
             - name: LISTEN_PORT
               value: "2333"
+            - name: TZ
+              value: UTC
           volumeMounts:
             - name: storage-volume
               mountPath: /data
@@ -1172,12 +1196,14 @@ spec:
         app.kubernetes.io/name: chaos-mesh
         app.kubernetes.io/instance: chaos-mesh
         app.kubernetes.io/component: controller-manager
+      annotations:
+        rollme: "install.sh"
     spec:
       serviceAccount: chaos-controller-manager
       containers:
       - name: chaos-mesh
         image: pingcap/chaos-mesh:latest
-        imagePullPolicy: Always
+        imagePullPolicy: IfNotPresent
         resources:
             limits: {}
             requests:
@@ -1200,6 +1226,8 @@ spec:
             value: "app.kubernetes.io/component:template"
           - name: CONFIGMAP_LABELS
             value: "app.kubernetes.io/component:webhook"
+          - name: PPROF_ADDR
+            value: ":10081"
         volumeMounts:
           - name: webhook-certs
             mountPath: /etc/webhook/certs
@@ -1209,6 +1237,8 @@ spec:
             containerPort: 9443 # Customize containerPort
           - name: http
             containerPort: 10080
+          - name: pprof
+            containerPort: 10081
       volumes:
         - name: webhook-certs
           secret:
@@ -1218,7 +1248,7 @@ spec:
 apiVersion: admissionregistration.k8s.io/v1beta1
 kind: MutatingWebhookConfiguration
 metadata:
-  name: chaos-mesh-sidecar-injector
+  name: chaos-mesh-mutation
   labels:
     app.kubernetes.io/name: chaos-mesh
     app.kubernetes.io/instance: chaos-mesh
@@ -1348,6 +1378,24 @@ webhooks:
           - UPDATE
         resources:
           - stresschaos
+  - clientConfig:
+      caBundle: "${CA_BUNDLE}"
+      service:
+        name: chaos-mesh-controller-manager
+        namespace: chaos-testing
+        path: /mutate-chaos-mesh-org-v1alpha1-podnetworkchaos
+    failurePolicy: Fail
+    name: mpodnetworkchaos.kb.io
+    rules:
+      - apiGroups:
+          - chaos-mesh.org
+        apiVersions:
+          - v1alpha1
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - podnetworkchaos
 ---
 # Source: chaos-mesh/templates/webhook-configuration.yaml
 apiVersion: admissionregistration.k8s.io/v1beta1
@@ -1467,6 +1515,24 @@ webhooks:
           - UPDATE
         resources:
           - stresschaos
+  - clientConfig:
+      caBundle: "${CA_BUNDLE}"
+      service:
+        name: chaos-mesh-controller-manager
+        namespace: chaos-testing
+        path: /validate-chaos-mesh-org-v1alpha1-podnetworkchaos
+    failurePolicy: Fail
+    name: vpodnetworkchaos.kb.io
+    rules:
+      - apiGroups:
+          - chaos-mesh.org
+        apiVersions:
+          - v1alpha1
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - podnetworkchaos
 EOF
     # chaos-mesh.yaml end
 }

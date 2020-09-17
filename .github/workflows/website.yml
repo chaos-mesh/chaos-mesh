@@ -3,28 +3,32 @@ name: Website Deployment
 on:
   push:
     branches:
-    - master
+      - master
     paths:
-    - "website/**"
+      - .github/workflows/website.yml
+      - website/**
 
 jobs:
   deploy-website:
     name: Deplpy website
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
       - uses: actions/setup-node@v1
         with:
           node-version: '12.x'
+
       - name: Cache/restore dependencies
-        uses: actions/cache@v1
+        uses: actions/cache@v2
         id: cache
         with:
           path: ./website/node_modules
           key: website-${{ hashFiles('website/yarn.lock') }}
+
       - name: Install dependencies
         if: steps.cache.outputs.cache-hit != 'true'
-        run: yarn install --frozen-lockfile --cwd ./website
+        run: yarn --frozen-lockfile --cwd ./website
+
       - name: Add key to allow access to repository
         env:
           SSH_AUTH_SOCK: /tmp/ssh_agent.sock
@@ -38,6 +42,7 @@ jobs:
           HostName github.com
           IdentityFile ~/.ssh/id_rsa
           EOT
+
       - name: Release to GitHub Pages
         working-directory: ./website
         env:
