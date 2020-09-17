@@ -93,6 +93,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 			updateFailedMessage(ctx, r, chaos, err.Error())
 			return ctrl.Result{Requeue: true}, err
 		}
+
 		status.Experiment.Phase = v1alpha1.ExperimentPhaseFinished
 		status.FailedMessage = emptyString
 	} else if chaos.IsPaused() {
@@ -149,6 +150,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 			updateFailedMessage(ctx, r, chaos, err.Error())
 			return ctrl.Result{Requeue: true}, err
 		}
+
 		status.FailedMessage = emptyString
 	} else if chaos.GetNextStart().Before(now) {
 		tempStart, err := utils.NextTime(*chaos.GetScheduler(), now)
