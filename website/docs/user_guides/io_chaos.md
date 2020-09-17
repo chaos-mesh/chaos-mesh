@@ -47,7 +47,7 @@ For more sample files, see [examples](https://github.com/chaos-mesh/chaos-mesh/t
 | **path** | Defines the path of files for injecting IOChaos actions. It should be a glob for the files which you want to inject fault or delay. | "/var/run/etcd/*\*/\*" |
 | **methods** | Defines the IO methods for injecting IOChaos actions. It is represented as an array of string. | `open` / `read` See the [available methods](#available-methods) for more details. |
 | **duration** | Represents the duration of a chaos action. The duration might be a string with the signed sequence of decimal numbers, each with an optional fraction and a unit suffix. | `"300ms"` / `"2h45m"`|
-| **scheduler** | defines the scheduler rules for the running time of the chaos experiment. | see [robfig/cron](https://godoc.org/github.com/robfig/cron) |
+| **scheduler** | Defines the scheduler rules for the running time of the chaos experiment. | see [robfig/cron](https://godoc.org/github.com/robfig/cron) |
 
 ## Usage
 
