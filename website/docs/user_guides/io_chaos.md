@@ -6,7 +6,7 @@ sidebar_label: IOChaos Experiment
 
 This document helps you run IOChaos experiments.
 
-IOChaos allows you to simulate file system faults such as IO delay and read/write errors. It can inject delay and fault when your program is running IO system calls such as `open`, `read` and `write`.
+IOChaos allows you to simulate file system faults such as IO delay and read/write errors. It can inject delay and fault when your program is running IO system calls such as `open`, `read`, and `write`.
 
 ## Configuration file
 
