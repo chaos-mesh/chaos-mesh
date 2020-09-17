@@ -1198,6 +1198,8 @@ spec:
             value: !!str 50051
           - name: TEMPLATE_LABELS
             value: "app.kubernetes.io/component:template"
+          - name: CONFIGMAP_LABELS
+            value: "app.kubernetes.io/component:webhook"
           - name: PPROF_ADDR
             value: ":10081"
         volumeMounts:
