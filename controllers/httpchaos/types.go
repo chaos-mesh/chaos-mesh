@@ -33,6 +33,7 @@ import (
 
 type Reconciler struct {
 	client.Client
+	client.Reader
 	record.EventRecorder
 	Log logr.Logger
 }
@@ -45,7 +46,7 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1
 		return err
 	}
 
-	pods, err := utils.SelectAndFilterPods(ctx, r.Client, &httpFaultChaos.Spec)
+	pods, err := utils.SelectAndFilterPods(ctx, r.Client, r.Reader, &httpFaultChaos.Spec)
 	if err != nil {
 		r.Log.Error(err, "failed to select and filter pods")
 		return err
@@ -91,7 +92,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request, chaos *v1alpha1.HTTPChaos) (ctr
 }
 
 func (r *Reconciler) commonHttpFaultChaos(httpFaultChaos *v1alpha1.HTTPChaos, req ctrl.Request) (ctrl.Result, error) {
-	cr := common.NewReconciler(r, r.Client, r.Log)
+	cr := common.NewReconciler(r, r.Client, r.Reader, r.Log)
 	return cr.Reconcile(req)
 }
 
