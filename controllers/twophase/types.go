@@ -145,7 +145,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		r.Log.Info("Resuming")
 
 		dur := chaos.GetNextRecover().Sub(now)
-		if err := applyAction(ctx, r, req, dur, chaos); err != nil {
+		if err = applyAction(ctx, r, req, dur, chaos); err != nil {
 			updateFailedMessage(ctx, r, chaos, err.Error())
 			return ctrl.Result{Requeue: true}, err
 		}
