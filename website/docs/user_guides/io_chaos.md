@@ -91,7 +91,7 @@ Selected methods will return error number 32, which means `Broken pipe`.
 
 ### attrOverride
 
-If you are using the `attrOverride` mode, you can edit spec as below:
+If you are using the `attrOverride` mode, you can edit the specification as below:
 
 ```yaml
 spec:
