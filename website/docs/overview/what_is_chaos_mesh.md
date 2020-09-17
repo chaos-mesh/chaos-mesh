@@ -1,6 +1,6 @@
 ---
 slug: /
-id: what_id_chaos_mesh
+id: what_is_chaos_mesh
 title: What is Chaos Mesh
 sidebar_label: What is Chaos Mesh
 ---
