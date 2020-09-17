@@ -153,7 +153,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	} else if chaos.GetNextStart().Before(now) {
 		tempStart, err := utils.NextTime(*chaos.GetScheduler(), now)
 		if err != nil {
-			r.Log.Error(err, "failed to get next start time")
+			r.Log.Error(err, "failed to calculate the start time")
 			updateFailedMessage(ctx, r, chaos, err.Error())
 			return ctrl.Result{}, err
 		}
