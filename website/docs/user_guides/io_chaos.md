@@ -37,7 +37,7 @@ For more sample files, see [examples](https://github.com/chaos-mesh/chaos-mesh/t
 | Field | Description | Sample Value |
 |:------|:------------------|:--------------|
 | **mode** | Defines the mode of the selector. | `one` / `all` / `fixed` / `fixed-percent` / `random-max-percent` |
-| **selector** | Selects pods which will be injected with io chaos.|
+| **selector** | Specifies the pods to be injected with IO chaos. |
 | **action** | Represents the IOChaos actions. Refer to [IOChaos available actions](#iochaos-available-actions) for more details. | `delay` / `fault` / `attrOverride` |
 | **volumePath** | The mount path of the target volume | `"/var/run/etcd"` |
 | **delay** | Specify the latency of injection. The duration might be a string with signed sequence of decimal numbers, each with an optional fraction and a unit suffix. Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", and "h". | `"300ms"` / `"2h45m"` |
