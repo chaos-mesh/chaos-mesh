@@ -38,9 +38,9 @@ Combined with GitHub actions, Chaos Mesh can be more easily integrated into the 
 
 Before you design a workflow, you must consider the following issues:
 
-*   What functions are we going to test in this workflow?
-*   What types of faults will we inject? 
-*   How do we verify the correctness of the system?
+* What functions are we going to test in this workflow?
+* What types of faults will we inject? 
+* How do we verify the correctness of the system?
 
 As an example, let’s design a simple test workflow that includes the following steps: 
 
