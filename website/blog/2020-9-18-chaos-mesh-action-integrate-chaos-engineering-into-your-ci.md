@@ -18,7 +18,7 @@ In this article, I will share how we use chaos-mesh-action, a GitHub action to i
 
 chaos-mesh-action is available on [GitHub market](https://github.com/marketplace/actions/chaos-mesh), and the source code is on [GitHub](https://github.com/chaos-mesh/chaos-mesh-action).
 
-# Design of chaos-mesh-action
+## Design of chaos-mesh-action
 
 [GitHub Action](https://docs.github.com/en/actions) is a CI/CD feature natively supported by GitHub, through which we can easily build automated and customized software development workflows in the GitHub repository. 
 
@@ -26,7 +26,7 @@ Combined with GitHub actions, Chaos Mesh can be more easily integrated into the 
 
 ![chaos-mesh-action integrate in the CI workflow](/img/chaos-mesh-action-integrate-in-the-ci-workflow.png)
 
-# Using chaos-mesh-action in GitHub workflow
+## Using chaos-mesh-action in GitHub workflow
 
 [chaos-mesh-action](https://github.com/marketplace/actions/chaos-mesh) works in Github workflows. A GitHub workflow is a configurable automated process that you can set up in your repository to build, test, package, release, or deploy any GitHub project. To integrate Chaos Mesh in your CI, do the following:
 
@@ -34,7 +34,7 @@ Combined with GitHub actions, Chaos Mesh can be more easily integrated into the 
 2. Create a workflow.
 3. Run the workflow.
 
-## Design a workflow
+### Design a workflow
 
 Before you design a workflow, you must consider the following issues:
 
@@ -48,7 +48,7 @@ As an example, let’s design a simple test workflow that includes the following
 2. Ping one pod from the other. 
 3. Use Chaos Mesh to inject network delay chaos and test whether the ping command is affected.
 
-## Create the workflow
+### Create the workflow
 
 After you design the workflow, the next step is to create it. 
 
@@ -103,7 +103,7 @@ A workflow is essentially the configuration of jobs that take place sequentially
 
 *   Deploy the application.
 
-	In our example, this job deploys an application that creates two Kubernetes Pods.
+    In our example, this job deploys an application that creates two Kubernetes Pods.
 
 
     ```
@@ -168,7 +168,7 @@ A workflow is essentially the configuration of jobs that take place sequentially
            kubectl exec busybox-0 -it -n busybox -- ping -c 30 busybox-1.busybox.busybox.svc
     ```
 
-## Run the workflow
+### Run the workflow
 
 Now that the workflow is configured, we can trigger it by submitting a pull request to the master branch. When the workflow completes, the verification job outputs of the results that look similar to the following:
 
@@ -191,7 +191,7 @@ PING busybox-1.busybox.busybox.svc (10.244.0.6): 56 data bytes
 
 The output indicates a regular series of 10-millisecond delays that last about 5 seconds each. This is consistent with the chaos configuration we injected into chaos-mesh-action.  
 
-# Current status and next steps
+## Current status and next steps
 
 At present, we have applied chaos-mesh-action to the [TiDB Operator](https://github.com/pingcap/tidb-operator) project. The workflow is injected with the Pod chaos to verify the restart function of the specified instances of the operator. The purpose is to ensure that tidb-operator can work normally when the pods of the operator are randomly deleted by the injected faults. You can view the [TiDB Operator page](https://github.com/pingcap/tidb-operator/actions?query=workflow%3Achaos) for more details.
 
