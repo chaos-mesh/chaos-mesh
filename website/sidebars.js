@@ -2,7 +2,7 @@ module.exports = {
   docs: [
     {
       type: 'doc',
-      id: 'what_is_chaos_mesh',
+      id: 'overview/what_is_chaos_mesh',
     },
     {
       type: 'category',
