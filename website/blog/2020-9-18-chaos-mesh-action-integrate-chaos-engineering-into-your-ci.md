@@ -150,7 +150,7 @@ A workflow is essentially the configuration of jobs that take place sequentially
 
     You can obtain the Base64 value of the above chaos configuration file using the following command:
 
-    ```
+    ```shell
     $ base64 chaos.yaml
     ```
 
@@ -169,7 +169,7 @@ A workflow is essentially the configuration of jobs that take place sequentially
 
 Now that the workflow is configured, we can trigger it by submitting a pull request to the master branch. When the workflow completes, the verification job outputs of the results that look similar to the following:
 
-```
+```shell
 do some verification
 Unable to use a TTY - input is not a terminal or the right kind of file
 PING busybox-1.busybox.busybox.svc (10.244.0.6): 56 data bytes
