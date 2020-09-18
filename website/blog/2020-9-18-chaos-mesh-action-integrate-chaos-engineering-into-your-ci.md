@@ -14,6 +14,7 @@ tags: [Chaos Mesh, Chaos Engineering, GitHub Action, CI]
 [Chaos Mesh](https://chaos-mesh.org) is a cloud-native chaos testing platform that orchestrates chaos in Kubernetes environments. While it’s well received in the community with its rich fault injection types and easy-to-use dashboard, it was difficult  to use Chaos Mesh with end-to-end testing or the continuous integration (CI) process. As a result, problems introduced during system development could not be discovered before the release.
 
 In this article, I will share how we use chaos-mesh-action, a GitHub action to integrate Chaos Mesh into the CI process.
+<!--truncate-->
 
 chaos-mesh-action is available on [GitHub market](https://github.com/marketplace/actions/chaos-mesh), and the source code is on [GitHub](https://github.com/chaos-mesh/chaos-mesh-action).
 
@@ -197,4 +198,3 @@ At present, we have applied chaos-mesh-action to the [TiDB Operator](https://git
 In the future, we plan to apply chaos-mesh-action to more tests to ensure the stability of TiDB and related components. You are welcome to create your own workflow using chaos-mesh-action.
 
 If you find a bug or think something is missing, feel free to file an issue, open a pull request (PR), or join us on the [#project-chaos-mesh](https://join.slack.com/t/cloud-native/shared_invite/zt-fyy3b8up-qHeDNVqbz1j8HDY6g1cY4w) channel in the [CNCF](https://www.cncf.io/) slack workspace. 
-
