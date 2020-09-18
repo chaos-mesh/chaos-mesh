@@ -11,7 +11,7 @@
 >
 > This readme and related documentation are Work in Progress.
 
-Chaos Mesh® is a cloud-native Chaos Engineering platform that orchestrates chaos on Kubernetes environments. At the current stage, it has the following components:
+Chaos Mesh® is a [Cloud Native Computing Foundation (CNCF)](https://www.cncf.io/) hosted project. It is a cloud-native Chaos Engineering platform that orchestrates chaos on Kubernetes environments. At the current stage, it has the following components:
 
 - **Chaos Operator**: the core component for chaos orchestration. Fully open sourced.
 - **Chaos Dashboard**: a Web UI for managing, designing, monitoring Chaos Experiments; under development.
@@ -104,6 +104,8 @@ On the fourth Thursday of every month (unless otherwise specified), the Chaos Me
 - [Integrate your Reliability Toolkit with Your World, Part 2](https://medium.com/chaosiq/integrate-your-reliability-toolkit-with-your-world-part-2-e012f2c2a7f6)
 - [Streake: Chaos Mesh によるカオスエンジニアリング](https://medium.com/sreake-jp/chaos-mesh-%E3%81%AB%E3%82%88%E3%82%8B%E3%82%AB%E3%82%AA%E3%82%B9%E3%82%A8%E3%83%B3%E3%82%B8%E3%83%8B%E3%82%A2%E3%83%AA%E3%83%B3%E3%82%B0-46fa2897c742)
 - [Chaos Mesh : un générateur de chaos pour Kubernetes](https://www.cowboysysop.com/post/chaos-mesh-un-generateur-de-chaos-pour-kubernetes/)
+- [K8s Chaos Dive: Chaos-Mesh Part 1](https://dev.to/craigmorten/k8s-chaos-dive-2-chaos-mesh-part-1-2i96)
+- [K8s Chaos Dive: Chaos-Mesh Part 2](https://dev.to/craigmorten/k8s-chaos-dive-chaos-mesh-part-2-536m)
 
 ## Roadmap
 
@@ -115,4 +117,4 @@ Chaos Mesh is licensed under the Apache License, Version 2.0. See [LICENSE](/LIC
 
 ## Trademark
 
-Chaos Mesh® is a trademark of Beijing PingCap Xingchen Technology and Development Co., Ltd. © 2020 Beijing PingCap Xingchen Technology and Development Co., Ltd. All rights reserved.
+Chaos Mesh® is a trademark of The Linux Foundation. All rights reserved.
