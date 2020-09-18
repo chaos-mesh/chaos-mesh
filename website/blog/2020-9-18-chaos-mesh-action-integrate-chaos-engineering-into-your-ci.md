@@ -64,7 +64,7 @@ A workflow is essentially the configuration of jobs that take place sequentially
     This job names the workflow "Chaos.” When the code is pushed to the master branch or a pull request is submitted to the master branch, this workflow is triggered.
 
 
-    ```
+    ```yaml
     name: Chaos
 
     on:
