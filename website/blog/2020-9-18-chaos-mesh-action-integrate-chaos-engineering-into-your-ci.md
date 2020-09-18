@@ -108,7 +108,6 @@ A workflow is essentially the configuration of jobs that take place sequentially
     - name: Deploy an application
          run: |
            kubectl apply -f https://raw.githubusercontent.com/chaos-mesh/apps/master/ping/busybox-statefulset.yaml
-
     ```
 
 *   Inject chaos with chaos-mesh-action.
