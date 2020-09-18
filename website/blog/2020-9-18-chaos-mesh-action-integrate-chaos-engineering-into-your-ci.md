@@ -173,7 +173,7 @@ A workflow is essentially the configuration of jobs that take place sequentially
 Now that the workflow is configured, we can trigger it by submitting a pull request to the master branch. When the workflow completes, the verification job outputs of the results that look similar to the following:
 
 ```
-do some verify
+do some verification
 Unable to use a TTY - input is not a terminal or the right kind of file
 PING busybox-1.busybox.busybox.svc (10.244.0.6): 56 data bytes
 64 bytes from 10.244.0.6: seq=0 ttl=63 time=0.069 ms
