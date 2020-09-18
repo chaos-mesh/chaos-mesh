@@ -79,7 +79,7 @@ A workflow is essentially the configuration of jobs that take place sequentially
 
     This configuration specifies the operating system (Ubuntu), and that it uses [helm/kind-action](https://github.com/marketplace/actions/kind-cluster) to create a Kind cluster. Then, it outputs related information about the cluster. Finally, it checks out the GitHub repository for the workflow to access. 
 
-    ```
+    ```yaml
     jobs:
      build:
        runs-on: ubuntu-latest
@@ -104,8 +104,7 @@ A workflow is essentially the configuration of jobs that take place sequentially
 
     In our example, this job deploys an application that creates two Kubernetes Pods.
 
-
-    ```
+    ```yaml
     - name: Deploy an application
          run: |
            kubectl apply -f https://raw.githubusercontent.com/chaos-mesh/apps/master/ping/busybox-statefulset.yaml
@@ -114,7 +113,7 @@ A workflow is essentially the configuration of jobs that take place sequentially
 
 *   Inject chaos with chaos-mesh-action.
 
-    ```
+    ```yaml
     - name: Run chaos mesh action`
         uses: chaos-mesh/chaos-mesh-action@xiang/refine_script`
         env:`
@@ -123,7 +122,7 @@ A workflow is essentially the configuration of jobs that take place sequentially
 
     With chaos-mesh-action, the installation of Chaos Mesh and the injection of chaos complete automatically. You simply need to prepare the chaos configuration that you intend to use to get its Base64 representation. Here, we want to inject network delay chaos into the Pods, so we use the original chaos configuration as follows:
 
-    ```
+    ```yaml
     apiVersion: chaos-mesh.org/v1alpha1
     kind: NetworkChaos
     metadata:
@@ -160,7 +159,7 @@ A workflow is essentially the configuration of jobs that take place sequentially
 
     In this job,  the workflow pings one Pod from the other and observes the changes in network delay.
 
-    ```
+    ```yaml
     - name: Verify
          run: |
            echo "do some verification"
