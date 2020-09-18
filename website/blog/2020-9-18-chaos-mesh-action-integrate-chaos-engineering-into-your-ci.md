@@ -164,7 +164,7 @@ A workflow is essentially the configuration of jobs that take place sequentially
     ```
     - name: Verify
          run: |
-           echo "do some verify"
+           echo "do some verification"
            kubectl exec busybox-0 -it -n busybox -- ping -c 30 busybox-1.busybox.busybox.svc
     ```
 
