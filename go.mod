@@ -1,6 +1,7 @@
 module github.com/chaos-mesh/chaos-mesh
 
 require (
+	github.com/bruth/assert v0.0.0-20130823105606-de420fa3b72e
 	github.com/containerd/cgroups v0.0.0-20200404012852-53ba5634dc0f
 	github.com/containerd/containerd v1.2.3
 	github.com/containerd/continuity v0.0.0-20200107194136-26c1120b8d41 // indirect
@@ -47,6 +48,7 @@ require (
 	github.com/shurcooL/httpfs v0.0.0-20190707220628-8d4bc4ba7749 // indirect
 	github.com/shurcooL/vfsgen v0.0.0-20181202132449-6a9ea43bcacd
 	github.com/spf13/cobra v0.0.6 // indirect
+	github.com/stretchr/testify v1.4.0
 	github.com/swaggo/files v0.0.0-20190704085106-630677cd5c14
 	github.com/swaggo/gin-swagger v1.2.0
 	github.com/swaggo/swag v1.6.7

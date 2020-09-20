@@ -66,6 +66,15 @@ func init() {
 }
 
 func validate(config *config.ChaosControllerConfig) error {
+
+	if config.WatcherConfig == nil {
+		return fmt.Errorf("required WatcherConfig is missing")
+	}
+
+	if config.ClusterScoped != config.WatcherConfig.ClusterScoped {
+		return fmt.Errorf("K8sConfigMapWatcher config ClusterScoped is not same with controller-manager ClusterScoped. k8s configmap watcher: %t, controller manager: %t", config.WatcherConfig.ClusterScoped, config.ClusterScoped)
+	}
+
 	if !config.ClusterScoped {
 		if strings.TrimSpace(config.TargetNamespace) == "" {
 			return fmt.Errorf("no target namespace specified with namespace scoped mode")
