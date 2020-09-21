@@ -32,11 +32,11 @@ type PodNetworkChaosHandler interface {
 	Apply(context.Context, *PodNetworkChaos) error
 }
 
-var handler PodNetworkChaosHandler
+var podNetworkChaosHandler PodNetworkChaosHandler
 
 // RegisterRawPodNetworkHandler registers handler into webhook
 func RegisterRawPodNetworkHandler(newHandler PodNetworkChaosHandler) {
-	handler = newHandler
+	podNetworkChaosHandler = newHandler
 }
 
 // SetupWebhookWithManager setup PodNetworkChaos's webhook with manager
@@ -65,8 +65,8 @@ func (in *PodNetworkChaos) ValidateCreate() error {
 
 	podnetworkchaoslog.Info("validate create", "name", in.Name)
 
-	if handler != nil {
-		err := handler.Apply(context.TODO(), in)
+	if podNetworkChaosHandler != nil {
+		err := podNetworkChaosHandler.Apply(context.TODO(), in)
 		if err != nil {
 			return err
 		}
@@ -81,8 +81,8 @@ func (in *PodNetworkChaos) ValidateUpdate(old runtime.Object) error {
 
 	podnetworkchaoslog.Info("validate update", "name", in.Name)
 
-	if handler != nil {
-		err := handler.Apply(context.TODO(), in)
+	if podNetworkChaosHandler != nil {
+		err := podNetworkChaosHandler.Apply(context.TODO(), in)
 		if err != nil {
 			return err
 		}

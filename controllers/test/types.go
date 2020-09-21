@@ -78,6 +78,10 @@ func (c *MockChaosDaemonClient) ContainerKill(ctx context.Context, in *chaosdaem
 	return nil, mockError("ContainerKill")
 }
 
+func (c *MockChaosDaemonClient) ApplyIoChaos(ctx context.Context, in *chaosdaemon.ApplyIoChaosRequest, opts ...grpc.CallOption) (*chaosdaemon.ApplyIoChaosResponse, error) {
+	return nil, mockError("ApplyIoChaos")
+}
+
 func (c *MockChaosDaemonClient) SetTcs(ctx context.Context, in *chaosdaemon.TcsRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
 	return nil, mockError("SetTcs")
 }

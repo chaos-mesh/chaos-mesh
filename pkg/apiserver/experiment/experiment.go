@@ -239,17 +239,17 @@ func (s *Service) createIOChaos(exp *core.ExperimentInfo) error {
 		},
 		Spec: v1alpha1.IoChaosSpec{
 			Selector: exp.Scope.ParseSelector(),
-			Action:   v1alpha1.IOChaosAction(exp.Target.IOChaos.Action),
 			Mode:     v1alpha1.PodMode(exp.Scope.Mode),
 			Value:    exp.Scope.Value,
+			Action:   v1alpha1.IoChaosType(exp.Target.IOChaos.Action),
 			// TODO: don't hardcode after we support other layers
-			Layer:   v1alpha1.FileSystemLayer,
-			Addr:    exp.Target.IOChaos.Addr,
-			Delay:   exp.Target.IOChaos.Delay,
-			Errno:   exp.Target.IOChaos.Errno,
-			Path:    exp.Target.IOChaos.Path,
-			Percent: exp.Target.IOChaos.Percent,
-			Methods: exp.Target.IOChaos.Methods,
+			Delay:      exp.Target.IOChaos.Delay,
+			Errno:      exp.Target.IOChaos.Errno,
+			Attr:       exp.Target.IOChaos.Attr,
+			Path:       exp.Target.IOChaos.Path,
+			Methods:    exp.Target.IOChaos.Methods,
+			Percent:    exp.Target.IOChaos.Percent,
+			VolumePath: exp.Target.IOChaos.VolumePath,
 		},
 	}
 
@@ -422,6 +422,7 @@ func (s *Service) getIoChaosDetail(namespace string, name string) (ExperimentDet
 		}
 		return ExperimentDetail{}, err
 	}
+
 	info := core.ExperimentInfo{
 		Name:        chaos.Name,
 		Namespace:   chaos.Namespace,
@@ -442,13 +443,14 @@ func (s *Service) getIoChaosDetail(namespace string, name string) (ExperimentDet
 		Target: core.TargetInfo{
 			Kind: v1alpha1.KindIOChaos,
 			IOChaos: &core.IOChaosInfo{
-				Action:  string(chaos.Spec.Action),
-				Addr:    chaos.Spec.Addr,
-				Delay:   chaos.Spec.Delay,
-				Errno:   chaos.Spec.Errno,
-				Path:    chaos.Spec.Path,
-				Percent: chaos.Spec.Percent,
-				Methods: chaos.Spec.Methods,
+				Action:     string(chaos.Spec.Action),
+				Delay:      chaos.Spec.Delay,
+				Errno:      chaos.Spec.Errno,
+				Attr:       chaos.Spec.Attr,
+				Path:       chaos.Spec.Path,
+				Percent:    chaos.Spec.Percent,
+				Methods:    chaos.Spec.Methods,
+				VolumePath: chaos.Spec.VolumePath,
 			},
 		},
 	}
@@ -1236,19 +1238,18 @@ func (s *Service) updateIOChaos(exp *core.ExperimentInfo) error {
 
 	chaos.SetLabels(exp.Labels)
 	chaos.SetAnnotations(exp.Annotations)
+
 	chaos.Spec = v1alpha1.IoChaosSpec{
-		Selector: exp.Scope.ParseSelector(),
-		Action:   v1alpha1.IOChaosAction(exp.Target.IOChaos.Action),
-		Mode:     v1alpha1.PodMode(exp.Scope.Mode),
-		Value:    exp.Scope.Value,
-		// TODO: don't hardcode after we support other layers
-		Layer:   v1alpha1.FileSystemLayer,
-		Addr:    exp.Target.IOChaos.Addr,
-		Delay:   exp.Target.IOChaos.Delay,
-		Errno:   exp.Target.IOChaos.Errno,
-		Path:    exp.Target.IOChaos.Path,
-		Percent: exp.Target.IOChaos.Percent,
-		Methods: exp.Target.IOChaos.Methods,
+		Selector:   exp.Scope.ParseSelector(),
+		Action:     v1alpha1.IoChaosType(exp.Target.IOChaos.Action),
+		Mode:       v1alpha1.PodMode(exp.Scope.Mode),
+		Value:      exp.Scope.Value,
+		Delay:      exp.Target.IOChaos.Delay,
+		Errno:      exp.Target.IOChaos.Errno,
+		Path:       exp.Target.IOChaos.Path,
+		Percent:    exp.Target.IOChaos.Percent,
+		Methods:    exp.Target.IOChaos.Methods,
+		VolumePath: exp.Target.IOChaos.VolumePath,
 	}
 
 	if exp.Scheduler.Cron != "" {
