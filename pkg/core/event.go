@@ -54,7 +54,7 @@ type EventStore interface {
 	Update(context.Context, *Event) error
 
 	// DeleteIncompleteEvent deletes all incomplete events.
-	// If the chaos-dashboard was restarted, some incomplete events would be stored in dbtastore,
+	// If the chaos-dashboard was restarted, some incomplete events would be stored in datastore,
 	// which means the event would never save the finish_time.
 	// DeleteIncompleteEvent can be used to delete all incomplete events to avoid this case.
 	DeleteIncompleteEvents(context.Context) error
@@ -63,7 +63,7 @@ type EventStore interface {
 	DeleteByFinishTime(context.Context, time.Duration) error
 
 	// UpdateIncompleteEvents updates the incomplete event by the namespace and name
-	// If chaos is deleted before an event is over, then the incomplete event would be stored in dbtastore,
+	// If chaos is deleted before an event is over, then the incomplete event would be stored in datastore,
 	// which means the event would never save the finish_time.
 	// UpdateIncompleteEvents can update the finish_time when the chaos is deleted.
 	UpdateIncompleteEvents(context.Context, string, string) error
