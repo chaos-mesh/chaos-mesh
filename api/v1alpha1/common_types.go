@@ -112,8 +112,9 @@ const (
 
 type ChaosStatus struct {
 	// Phase is the chaos status.
-	Phase  ChaosPhase `json:"phase"`
-	Reason string     `json:"reason,omitempty"`
+	Phase         ChaosPhase `json:"phase"`
+	Reason        string     `json:"reason,omitempty"`
+	FailedMessage string     `json:"failedMessage,omitempty"`
 
 	Scheduler ScheduleStatus `json:"scheduler,omitempty"`
 
