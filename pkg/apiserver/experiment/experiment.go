@@ -92,9 +92,10 @@ func Register(r *gin.RouterGroup, s *Service) {
 // Experiment defines the basic information of an experiment
 type Experiment struct {
 	ExperimentBase
-	Created string `json:"created"`
-	Status  string `json:"status"`
-	UID     string `json:"uid"`
+	Created       string `json:"created"`
+	Status        string `json:"status"`
+	UID           string `json:"uid"`
+	FailedMessage string `json:"failed_message,omitempty"`
 }
 
 // ExperimentBase is used to identify the unique experiment from API request.
@@ -402,9 +403,10 @@ func (s *Service) getPodChaosDetail(namespace string, name string) (ExperimentDe
 				Namespace: chaos.Namespace,
 				Name:      chaos.Name,
 			},
-			Created: chaos.GetChaos().StartTime.Format(time.RFC3339),
-			Status:  chaos.GetChaos().Status,
-			UID:     chaos.GetChaos().UID,
+			Created:       chaos.GetChaos().StartTime.Format(time.RFC3339),
+			Status:        chaos.GetChaos().Status,
+			UID:           chaos.GetChaos().UID,
+			FailedMessage: chaos.GetStatus().FailedMessage,
 		},
 		ExperimentInfo: info,
 	}, nil
@@ -466,9 +468,10 @@ func (s *Service) getIoChaosDetail(namespace string, name string) (ExperimentDet
 				Namespace: chaos.Namespace,
 				Name:      chaos.Name,
 			},
-			Created: chaos.GetChaos().StartTime.Format(time.RFC3339),
-			Status:  chaos.GetChaos().Status,
-			UID:     chaos.GetChaos().UID,
+			Created:       chaos.GetChaos().StartTime.Format(time.RFC3339),
+			Status:        chaos.GetChaos().Status,
+			UID:           chaos.GetChaos().UID,
+			FailedMessage: chaos.GetStatus().FailedMessage,
 		},
 		ExperimentInfo: info,
 	}, nil
@@ -542,9 +545,10 @@ func (s *Service) getNetworkChaosDetail(namespace string, name string) (Experime
 				Namespace: chaos.Namespace,
 				Name:      chaos.Name,
 			},
-			Created: chaos.GetChaos().StartTime.Format(time.RFC3339),
-			Status:  chaos.GetChaos().Status,
-			UID:     chaos.GetChaos().UID,
+			Created:       chaos.GetChaos().StartTime.Format(time.RFC3339),
+			Status:        chaos.GetChaos().Status,
+			UID:           chaos.GetChaos().UID,
+			FailedMessage: chaos.GetStatus().FailedMessage,
 		},
 		ExperimentInfo: info,
 	}, nil
@@ -602,9 +606,10 @@ func (s *Service) getTimeChaosDetail(namespace string, name string) (ExperimentD
 				Namespace: chaos.Namespace,
 				Name:      chaos.Name,
 			},
-			Created: chaos.GetChaos().StartTime.Format(time.RFC3339),
-			Status:  chaos.GetChaos().Status,
-			UID:     chaos.GetChaos().UID,
+			Created:       chaos.GetChaos().StartTime.Format(time.RFC3339),
+			Status:        chaos.GetChaos().Status,
+			UID:           chaos.GetChaos().UID,
+			FailedMessage: chaos.GetStatus().FailedMessage,
 		},
 		ExperimentInfo: info,
 	}, nil
@@ -660,9 +665,10 @@ func (s *Service) getKernelChaosDetail(namespace string, name string) (Experimen
 				Namespace: chaos.Namespace,
 				Name:      chaos.Name,
 			},
-			Created: chaos.GetChaos().StartTime.Format(time.RFC3339),
-			Status:  chaos.GetChaos().Status,
-			UID:     chaos.GetChaos().UID,
+			Created:       chaos.GetChaos().StartTime.Format(time.RFC3339),
+			Status:        chaos.GetChaos().Status,
+			UID:           chaos.GetChaos().UID,
+			FailedMessage: chaos.GetStatus().FailedMessage,
 		},
 		ExperimentInfo: info,
 	}, nil
@@ -723,9 +729,10 @@ func (s *Service) getStressChaosDetail(namespace string, name string) (Experimen
 				Namespace: chaos.Namespace,
 				Name:      chaos.Name,
 			},
-			Created: chaos.GetChaos().StartTime.Format(time.RFC3339),
-			Status:  chaos.GetChaos().Status,
-			UID:     chaos.GetChaos().UID,
+			Created:       chaos.GetChaos().StartTime.Format(time.RFC3339),
+			Status:        chaos.GetChaos().Status,
+			UID:           chaos.GetChaos().UID,
+			FailedMessage: chaos.GetStatus().FailedMessage,
 		},
 		ExperimentInfo: info,
 	}, nil
