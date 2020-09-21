@@ -34,7 +34,7 @@ func NewStore(db *dbstore.DB) core.ExperimentStore {
 
 	es := &experimentStore{db}
 
-	if err := es.DeleteIncompleteExperiments(context.Background()); err != nil && gorm.IsRecordNotFoundError(err) {
+	if err := es.DeleteIncompleteExperiments(context.Background()); err != nil && !gorm.IsRecordNotFoundError(err) {
 		log.Error(err, "failed to delete all incomplete experiments")
 	}
 
