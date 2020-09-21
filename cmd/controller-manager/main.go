@@ -26,6 +26,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/controllers"
 	"github.com/chaos-mesh/chaos-mesh/controllers/common"
 	"github.com/chaos-mesh/chaos-mesh/controllers/metrics"
+	"github.com/chaos-mesh/chaos-mesh/controllers/podiochaos"
 	"github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos"
 	"github.com/chaos-mesh/chaos-mesh/pkg/utils"
 	"github.com/chaos-mesh/chaos-mesh/pkg/version"
@@ -38,6 +39,7 @@ import (
 
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
+
 	controllermetrics "sigs.k8s.io/controller-runtime/pkg/metrics"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
 	// +kubebuilder:scaffold:imports
@@ -174,6 +176,17 @@ func main() {
 		os.Exit(1)
 	}
 
+	// We only setup webhook for podiochaos, and the logic of applying chaos are in the mutation
+	// webhook, because we need to get the running result synchronously in io chaos reconciler
+	v1alpha1.RegisterPodIoHandler(&podiochaos.Handler{
+		Client: mgr.GetClient(),
+		Log:    ctrl.Log.WithName("handler").WithName("PodIoChaos"),
+	})
+	if err = (&chaosmeshv1alpha1.PodIoChaos{}).SetupWebhookWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create webhook", "webhook", "PodIoChaos")
+		os.Exit(1)
+	}
+
 	// We only setup webhook for podnetworkchaos, and the logic of applying chaos are in the validation
 	// webhook, because we need to get the running result synchronously in network chaos reconciler
 	v1alpha1.RegisterRawPodNetworkHandler(&podnetworkchaos.Handler{
@@ -190,10 +203,10 @@ func main() {
 	metricsCollector := metrics.NewChaosCollector(mgr.GetCache(), controllermetrics.Registry)
 
 	setupLog.Info("Setting up webhook server")
-
 	hookServer := mgr.GetWebhookServer()
 	hookServer.CertDir = common.ControllerCfg.CertsDir
 	conf := config.NewConfigWatcherConf()
+
 	stopCh := ctrl.SetupSignalHandler()
 
 	if common.ControllerCfg.PprofAddr != "0" {

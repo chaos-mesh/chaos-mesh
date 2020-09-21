@@ -27,10 +27,10 @@ import (
 )
 
 var _ = Describe("IoChaos Controller", func() {
-	supportingModes := []v1alpha1.IOChaosAction{
-		v1alpha1.IODelayAction,
-		v1alpha1.IOErrnoAction,
-		v1alpha1.IOMixedAction,
+	supportingModes := []v1alpha1.IoChaosType{
+		v1alpha1.IoLatency,
+		v1alpha1.IoAttrOverride,
+		v1alpha1.IoFaults,
 	}
 
 	BeforeEach(func() {
@@ -69,7 +69,6 @@ var _ = Describe("IoChaos Controller", func() {
 						Action:   actionTp,
 						Mode:     v1alpha1.OnePodMode,
 						Duration: &duration,
-						Layer:    v1alpha1.FileSystemLayer,
 						Delay:    "10ms",
 					},
 				}

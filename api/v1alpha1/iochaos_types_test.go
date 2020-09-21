@@ -54,9 +54,8 @@ var _ = Describe("IoChaos", func() {
 					Namespace: "default",
 				},
 				Spec: IoChaosSpec{
-					Action: IODelayAction,
+					Action: IoLatency,
 					Mode:   OnePodMode,
-					Layer:  FileSystemLayer,
 				},
 			}
 

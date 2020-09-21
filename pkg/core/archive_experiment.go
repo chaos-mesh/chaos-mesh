@@ -180,13 +180,14 @@ type NetworkChaosInfo struct {
 
 // IOChaosInfo defines the basic information of io chaos for creating a new IOChaos.
 type IOChaosInfo struct {
-	Action  string   `json:"action" binding:"oneof='' 'delay' 'errno' 'mixed'"`
-	Addr    string   `json:"addr"`
-	Delay   string   `json:"delay"`
-	Errno   string   `json:"errno"`
-	Path    string   `json:"path"`
-	Percent string   `json:"percent"`
-	Methods []string `json:"methods"`
+	Action     string                     `json:"action" binding:"oneof='' 'latency' 'fault' 'attrOverride'"`
+	Delay      string                     `json:"delay"`
+	Errno      uint32                     `json:"errno"`
+	Attr       *v1alpha1.AttrOverrideSpec `json:"attr"`
+	Path       string                     `json:"path"`
+	Percent    int                        `json:"percent"`
+	Methods    []v1alpha1.IoMethod        `json:"methods"`
+	VolumePath string                     `json:"volume_path"`
 }
 
 // KernelChaosInfo defines the basic information of kernel chaos for creating a new KernelChaos.
@@ -316,6 +317,10 @@ func (e *ArchiveExperiment) ParseIOChaos() (ExperimentInfo, error) {
 		return ExperimentInfo{}, err
 	}
 
+	var methods []string
+	for _, method := range chaos.Spec.Methods {
+		methods = append(methods, string(method))
+	}
 	info := ExperimentInfo{
 		Name:        chaos.Name,
 		Namespace:   chaos.Namespace,
@@ -336,13 +341,14 @@ func (e *ArchiveExperiment) ParseIOChaos() (ExperimentInfo, error) {
 		Target: TargetInfo{
 			Kind: v1alpha1.KindIOChaos,
 			IOChaos: &IOChaosInfo{
-				Action:  string(chaos.Spec.Action),
-				Addr:    chaos.Spec.Addr,
-				Delay:   chaos.Spec.Delay,
-				Errno:   chaos.Spec.Errno,
-				Path:    chaos.Spec.Path,
-				Percent: chaos.Spec.Percent,
-				Methods: chaos.Spec.Methods,
+				Action:     string(chaos.Spec.Action),
+				Delay:      chaos.Spec.Delay,
+				Errno:      chaos.Spec.Errno,
+				Attr:       chaos.Spec.Attr,
+				Path:       chaos.Spec.Path,
+				Percent:    chaos.Spec.Percent,
+				Methods:    chaos.Spec.Methods,
+				VolumePath: chaos.Spec.VolumePath,
 			},
 		},
 	}

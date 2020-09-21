@@ -32,42 +32,13 @@ func init() {
 	})
 }
 
-// IOChaosAction represents the chaos action about I/O action.
-type IOChaosAction string
-
-const (
-	IODelayAction IOChaosAction = "delay"
-	IOErrnoAction               = "errno"
-	IOMixedAction               = "mixed"
-)
-
 // IOLayer represents the layer of I/O system.
 type IOLayer string
-
-const (
-	FileSystemLayer = "fs"
-	BlockLayer      = "block"
-	DeviceLayer     = "device"
-)
-
-const (
-	DefaultChaosfsAddr = ":65534"
-)
 
 // IoChaosSpec defines the desired state of IoChaos
 type IoChaosSpec struct {
 	// Selector is used to select pods that are used to inject chaos action.
 	Selector SelectorSpec `json:"selector"`
-
-	// Scheduler defines some schedule rules to
-	// control the running time of the chaos experiment about pods.
-	Scheduler *SchedulerSpec `json:"scheduler,omitempty"`
-
-	// Action defines the specific pod chaos action.
-	// Supported action: delay / errno / mixed
-	// Default action: delay
-	// +kubebuilder:validation:Enum=delay;errno;mixed
-	Action IOChaosAction `json:"action"`
 
 	// Mode defines the mode to run chaos action.
 	// Supported mode: one / all / fixed / fixed-percent / random-max-percent
@@ -81,42 +52,27 @@ type IoChaosSpec struct {
 	// +optional
 	Value string `json:"value"`
 
-	// Duration represents the duration of the chaos action.
-	// It is required when the action is `PodFailureAction`.
-	// A duration string is a possibly signed sequence of
-	// decimal numbers, each with optional fraction and a unit suffix,
-	// such as "300ms", "-1.5h" or "2h45m".
-	// Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
-	// +optional
-	Duration *string `json:"duration,omitempty"`
-
-	// Layer represents the layer of the I/O action.
-	// Supported value: fs.
-	// Default layer: fs
-	// +kubebuilder:validation:Enum=fs
-	Layer IOLayer `json:"layer"`
+	// Action defines the specific pod chaos action.
+	// Supported action: latency / fault / attrOverride
+	// +kubebuilder:validation:Enum=latency;fault;attrOverride
+	Action IoChaosType `json:"action"`
 
 	// Delay defines the value of I/O chaos action delay.
 	// A delay string is a possibly signed sequence of
 	// decimal numbers, each with optional fraction and a unit suffix,
 	// such as "300ms".
 	// Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
-	//
-	// If `Delay` is empty, the operator will generate a value for it randomly.
 	// +optional
 	Delay string `json:"delay,omitempty"`
 
 	// Errno defines the error code that returned by I/O action.
 	// refer to: https://www-numi.fnal.gov/offline_software/srt_public_context/WebDocs/Errors/unix_system_errors.html
-	//
-	// If `Errno` is empty, the operator will generate an error code for it randomly.
 	// +optional
-	Errno string `json:"errno,omitempty"`
+	Errno uint32 `json:"errno,omitempty"`
 
-	// Percent defines the percentage of injection errors and provides a number from 0-100.
-	// default: 100.
+	// Attr defines the overrided attribution
 	// +optional
-	Percent string `json:"percent,omitempty"`
+	Attr *AttrOverrideSpec `json:"attr,omitempty"`
 
 	// Path defines the path of files for injecting I/O chaos action.
 	// +optional
@@ -125,11 +81,28 @@ type IoChaosSpec struct {
 	// Methods defines the I/O methods for injecting I/O chaos action.
 	// default: all I/O methods.
 	// +optional
-	Methods []string `json:"methods,omitempty"`
+	Methods []IoMethod `json:"methods,omitempty"`
 
-	// Addr defines the address for sidecar container.
+	// Percent defines the percentage of injection errors and provides a number from 0-100.
+	// default: 100.
 	// +optional
-	Addr string `json:"addr,omitempty"`
+	Percent int `json:"percent,omitempty"`
+
+	// VolumePath represents the mount path of injected volume
+	VolumePath string `json:"volumePath"`
+
+	// Scheduler defines some schedule rules to
+	// control the running time of the chaos experiment about pods.
+	Scheduler *SchedulerSpec `json:"scheduler,omitempty"`
+
+	// Duration represents the duration of the chaos action.
+	// It is required when the action is `PodFailureAction`.
+	// A duration string is a possibly signed sequence of
+	// decimal numbers, each with optional fraction and a unit suffix,
+	// such as "300ms", "-1.5h" or "2h45m".
+	// Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
+	// +optional
+	Duration *string `json:"duration,omitempty"`
 }
 
 func (in *IoChaosSpec) GetSelector() SelectorSpec {
