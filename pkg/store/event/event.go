@@ -38,7 +38,7 @@ func NewStore(db *dbstore.DB) core.EventStore {
 
 	es := &eventStore{db}
 
-	if err := es.DeleteIncompleteEvents(context.Background()); err != nil && gorm.IsRecordNotFoundError(err) {
+	if err := es.DeleteIncompleteEvents(context.Background()); err != nil && !gorm.IsRecordNotFoundError(err) {
 		log.Error(err, "failed to delete all incomplete events")
 	}
 

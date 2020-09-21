@@ -1,4 +1,4 @@
-import { AutocompleteMultipleField, SelectField, TextField } from 'components/FormField'
+import { AutocompleteMultipleField, LabelField, SelectField, TextField } from 'components/FormField'
 import { FormikCtx, StepperFormTargetProps } from 'components/NewExperiment/types'
 import { InputAdornment, MenuItem } from '@material-ui/core'
 
@@ -7,43 +7,44 @@ import React from 'react'
 import { toTitleCase } from 'lib/utils'
 import { useFormikContext } from 'formik'
 
-const actions = ['delay', 'errno', 'mixed']
+const actions = ['latency', 'fault', 'attrOverride']
 const methods = [
+  'lookup',
+  'forget',
+  'getattr',
+  'setattr',
+  'readlink',
+  'mknod',
+  'mkdir',
+  'unlink',
+  'rmdir',
+  'symlink',
+  'rename',
+  'link',
   'open',
   'read',
   'write',
-  'mkdir',
-  'rmdir',
-  'opendir',
-  'fsync',
   'flush',
   'release',
-  'truncate',
-  'getattr',
-  'chown',
-  'chmod',
-  'utimens',
-  'allocate',
-  'getlk',
-  'setlk',
-  'setlkw',
+  'fsync',
+  'opendir',
+  'readdir',
+  'releasedir',
+  'fsyncdir',
   'statfs',
-  'readlink',
-  'symlink',
-  'create',
-  'access',
-  'link',
-  'mknod',
-  'rename',
-  'unlink',
+  'setxattr',
   'getxattr',
   'listxattr',
   'removexattr',
-  'setxattr',
+  'access',
+  'create',
+  'getlk',
+  'setlk',
+  'bmap',
 ]
 
 export default function IO(props: StepperFormTargetProps) {
-  const { values }: FormikCtx = useFormikContext()
+  const { values, errors, touched }: FormikCtx = useFormikContext()
   const { handleActionChange } = props
 
   return (
@@ -63,55 +64,73 @@ export default function IO(props: StepperFormTargetProps) {
         ))}
       </SelectField>
 
-      {(values.target.io_chaos.action === 'delay' || values.target.io_chaos.action === 'mixed') && (
-        <TextField
-          id="target.io_chaos.delay"
-          name="target.io_chaos.delay"
-          label="Delay"
-          helperText="Optional. The value of delay of I/O operations. If it's empty, the operator will generate a value for it randomly."
-        />
-      )}
-
-      {(values.target.io_chaos.action === 'errno' || values.target.io_chaos.action === 'mixed') && (
-        <TextField
-          id="target.io_chaos.errno"
-          name="target.io_chaos.errno"
-          label="Errno"
-          helperText="Optional. The error code returned by I/O operators. By default, it returns a random error code"
-        />
-      )}
-
       {values.target.io_chaos.action !== '' && (
-        <AdvancedOptions>
+        <>
+          {values.target.io_chaos.action === 'latency' && (
+            <TextField
+              id="target.io_chaos.delay"
+              name="target.io_chaos.delay"
+              label="Delay"
+              helperText="The value of delay of I/O operations. If it's empty, the operator will generate a value for it randomly."
+              error={errors.target?.io_chaos?.delay && touched.target?.io_chaos?.delay ? true : false}
+            />
+          )}
+
+          {values.target.io_chaos.action === 'fault' && (
+            <TextField
+              type="number"
+              inputProps={{ min: 0 }}
+              id="target.io_chaos.errno"
+              name="target.io_chaos.errno"
+              label="Errno"
+              helperText="The error code returned by I/O operators. By default, it returns a random error code"
+              error={errors.target?.io_chaos?.errno && touched.target?.io_chaos?.errno ? true : false}
+            />
+          )}
+
+          {values.target.io_chaos.action === 'attrOverride' && (
+            <LabelField
+              id="target.io_chaos.attr"
+              name="target.io_chaos.attr"
+              label="Attr"
+              isKV
+              error={errors.target?.io_chaos?.attr && touched.target?.io_chaos?.attr ? true : false}
+            />
+          )}
+
           <TextField
-            id="target.io_chaos.percent"
-            name="target.io_chaos.percent"
-            label="Percent"
-            helperText="The percentage of injection errors"
-            InputProps={{
-              endAdornment: <InputAdornment position="end">%</InputAdornment>,
-            }}
+            id="target.io_chaos.volume_path"
+            name="target.io_chaos.volume_path"
+            label="Volume Path"
+            helperText="The mount path of injected volume"
           />
-          <TextField
-            id="target.io_chaos.path"
-            name="target.io_chaos.path"
-            label="Path"
-            helperText="The path of files for injecting. If it's empty, the IOChaos action will inject into all files."
-          />
-          <AutocompleteMultipleField
-            id="target.io_chaos.methods"
-            name="target.io_chaos.methods"
-            label="Methods"
-            helperText="Optional. The IO methods for injecting IOChaos actions"
-            options={methods}
-          />
-          <TextField
-            id="target.io_chaos.addr"
-            name="target.io_chaos.addr"
-            label="Addr"
-            helperText="Optional. The sidecar HTTP server address. By default, it will be set to :65534"
-          />
-        </AdvancedOptions>
+
+          <AdvancedOptions>
+            <TextField
+              type="number"
+              id="target.io_chaos.percent"
+              name="target.io_chaos.percent"
+              label="Percent"
+              helperText="The percentage of injection errors"
+              InputProps={{
+                endAdornment: <InputAdornment position="end">%</InputAdornment>,
+              }}
+            />
+            <TextField
+              id="target.io_chaos.path"
+              name="target.io_chaos.path"
+              label="Path"
+              helperText="Optional. The path of files for injecting. If it's empty, the action will inject into all files."
+            />
+            <AutocompleteMultipleField
+              id="target.io_chaos.methods"
+              name="target.io_chaos.methods"
+              label="Methods"
+              helperText="Optional. The IO methods for injecting IOChaos actions"
+              options={methods}
+            />
+          </AdvancedOptions>
+        </>
       )}
     </>
   )
