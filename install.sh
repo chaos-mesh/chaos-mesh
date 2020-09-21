@@ -953,6 +953,7 @@ rules:
     - podiochaos
     - podnetworkchaos
     - httpchaos
+    - dnschaos
   verbs: ["*"]
 ---
 # Source: chaos-mesh/templates/controller-manager-rbac.yaml
