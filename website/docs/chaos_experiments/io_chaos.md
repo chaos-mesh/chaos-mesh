@@ -16,7 +16,7 @@ IOChaos allows you to simulate file system faults such as IO delay and read/writ
 
 ### Commands and arguments for the application container
 
-Chaos Mesh uses [`wait-fush.sh`](https://chaos-mesh.org/docs/user_guides/sidecar_template/#tips) to ensure that the fuse-daemon server is running normally before the application starts.
+Chaos Mesh uses [`wait-fush.sh`](sidecar_template#tips) to ensure that the fuse-daemon server is running normally before the application starts.
 
 Therefore, `wait-fush.sh` needs to be injected into the startup command of the container. If the application process is not started by the [commands and arguments of the container](https://kubernetes.io/docs/tasks/inject-data-application/define-command-argument-container/), IOChaos cannot work properly.
 
@@ -37,8 +37,8 @@ IOChaos needs to inject a sidecar container to user pods and the sidecar contain
 
 Chaos Mesh uses a template mechanism to simplify the configuration of sidecar injection.
 
-Because of the `Go Template` conflict with `helm`, the common template is not included in the [helm chart](../installation/installation.md#install-by-helm).
-However, it will be deployed automatically if you install Chaos Mesh via the [install script](../installation/installation.md#install-chaos-mesh).
+Because of the `Go Template` conflict with `helm`, the common template is not included in the [helm chart](../get_started/installation.md#install-by-helm).
+However, it will be deployed automatically if you install Chaos Mesh via the [install script](../get_started/installation.md#install-chaos-mesh).
 
 By default, the common template ConfigMaps should be deployed in the same namespace as Chaos Mesh.
 

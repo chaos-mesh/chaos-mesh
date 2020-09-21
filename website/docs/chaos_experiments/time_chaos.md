@@ -38,7 +38,7 @@ For more sample files, see [examples](https://github.com/chaos-mesh/chaos-mesh/t
 Description:
 
 * **mode** defines the mode to select pods.
-* **selector** specifies the target pods for chaos injection. For more details, see [Define the Scope of Chaos Experiment](experiment_scope.md).
+* **selector** specifies the target pods for chaos injection. For more details, see [Define the Scope of Chaos Experiment](../user_guides/experiment_scope.md).
 * **timeOffset** specifies the time offset. It is a duration string with specified unit, such as `300ms`, `-1.5h`. Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
 * **clockIds** defines all affected `clk_id`. `clk_id` refers to the first argument of `clock_gettime` call. For most application, `CLOCK_REALTIME` is enough.
 * **containerNames** selects affected containers' names. If not set, all containers will be injected.
