@@ -54,12 +54,13 @@ export const defaultExperimentSchema: Experiment = {
     },
     io_chaos: {
       action: '',
-      addr: '',
       delay: '',
-      errno: '',
+      errno: 0,
+      attr: [],
       methods: [],
       path: '',
-      percent: '100',
+      percent: 100,
+      volume_path: '',
     },
     kernel_chaos: {
       fail_kern_request: {
@@ -205,11 +206,43 @@ export const validationSchema = (intl: IntlShape) => {
                     time_offset: Yup.string().required(
                       intl.formatMessage({ id: 'validation.target.time_chaos.time_offset' })
                     ),
-                  })
-                : schema
-            ),
-          })
-        : schema
-    ),
-  })
-}
+                  loss: Yup.object()
+                    .nullable()
+                    .when('action', (action: string, schema: Yup.ObjectSchema) =>
+                      action === 'loss'
+                        ? Yup.object({
+                            loss: Yup.string().required('The loss is required.'),
+                            correlation: Yup.string().required('The correlation of loss is required.'),
+                          })
+                        : schema
+                    ),
+                })
+              : schema
+          ),
+          io_chaos: Yup.object().when('kind', (kind: string, schema: Yup.ObjectSchema) =>
+            kind === 'IoChaos'
+              ? Yup.object({
+                  action: Yup.string().required('The IOChaos action is required.'),
+                  delay: Yup.string().when('action', (action: string, schema: Yup.StringSchema) =>
+                    action === 'latency' ? Yup.string().required('The delay is required.') : schema
+                  ),
+                  errno: Yup.number().when('action', (action: string, schema: Yup.NumberSchema) =>
+                    action === 'fault' ? Yup.number().min(0).required('The errno is required.') : schema
+                  ),
+                  attr: Yup.array().when('action', (action: string, schema: Yup.ArraySchema<string>) =>
+                    action === 'attrOverride' ? Yup.array().of(Yup.string()).required('The attr is required.') : schema
+                  ),
+                })
+              : schema
+          ),
+          time_chaos: Yup.object().when('kind', (kind: string, schema: Yup.ObjectSchema) =>
+            kind === 'TimeChaos'
+              ? Yup.object({
+                  time_offset: Yup.string().required('The time offset is required.'),
+                })
+              : schema
+          ),
+        })
+      : schema
+  ),
+})

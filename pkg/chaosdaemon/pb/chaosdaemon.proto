@@ -19,6 +19,8 @@ service ChaosDaemon {
 
   rpc ExecStressors (ExecStressRequest) returns (ExecStressResponse) {}
   rpc CancelStressors (CancelStressRequest) returns (google.protobuf.Empty) {}
+
+  rpc ApplyIoChaos(ApplyIoChaosRequest) returns (ApplyIoChaosResponse) {}
 }
 
 message TcHandle {
@@ -162,6 +164,20 @@ message ExecStressResponse {
 
 message CancelStressRequest {
   string instance = 1;
+  int64 startTime = 2;
+}
+
+message ApplyIoChaosRequest {
+  string actions = 1;
+  string volume = 2;
+  string container_id = 3;
+
+  int64 instance = 4;
+  int64 startTime = 5;
+}
+
+message ApplyIoChaosResponse {
+  int64 instance = 1;
   int64 startTime = 2;
 }
 

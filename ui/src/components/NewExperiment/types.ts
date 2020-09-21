@@ -63,13 +63,14 @@ export interface ExperimentTargetNetwork {
 }
 
 export interface ExperimentTargetIO {
-  action: 'delay' | 'errno' | 'mixed' | ''
-  addr: string
-  delay: string
-  errno: string
+  action: 'latency' | 'fault' | 'attrOverride' | ''
+  delay: string | undefined
+  errno: number | undefined
+  attr: object | string[]
   methods: string[]
   path: string
-  percent: string
+  percent: number
+  volume_path: string
 }
 
 export interface CallchainFrame {

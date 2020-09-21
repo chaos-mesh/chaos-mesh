@@ -27,7 +27,7 @@ import (
 
 func main() {
 	port := flag.Int("port", 8080, "listen port")
-	dataDir := flag.String("data-dir", "/var/run/data/test", "data dir is the dir to write temp file, only used in io test")
+	dataDir := flag.String("data-dir", "/var/run/data", "data dir is the dir to write temp file, only used in io test")
 
 	flag.Parse()
 
