@@ -52,6 +52,12 @@ type ExperimentStore interface {
 
 	// FindMetaByUID returns an archive experiment by UID.
 	FindMetaByUID(context.Context, string) (*ArchiveExperimentMeta, error)
+
+	// DeleteIncompleteExperiments deletes all incomplete experiments.
+	// If the chaos-dashboard was restarted and the experiment is completed during the restart,
+	// which means the experiment would never save the finish_time.
+	// DeleteIncompleteExperiments can be used to delete all incomplete experiments to avoid this case.
+	DeleteIncompleteExperiments(context.Context) error
 }
 
 // ArchiveExperiment represents an experiment instance.
