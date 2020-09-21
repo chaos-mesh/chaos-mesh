@@ -183,6 +183,18 @@ func main() {
 		os.Exit(1)
 	}
 
+	if err = (&controllers.DNSChaosReconciler{
+		Client:        mgr.GetClient(),
+		EventRecorder: mgr.GetEventRecorderFor("dnschaos-controller"),
+		Log:           ctrl.Log.WithName("controllers").WithName("DNSChaos"),
+	}).SetupWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create controller", "controller", "DNSChaos")
+		os.Exit(1)
+	}
+	if err = (&chaosmeshv1alpha1.DNSChaos{}).SetupWebhookWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create webhook", "webhook", "DNSChaos")
+	}
+
 	// We only setup webhook for podnetworkchaos, and the logic of applying chaos are in the validation
 	// webhook, because we need to get the running result synchronously in network chaos reconciler
 	v1alpha1.RegisterRawPodNetworkHandler(&podnetworkchaos.Handler{
