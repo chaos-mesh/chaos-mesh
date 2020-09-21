@@ -295,7 +295,7 @@ Then make the Docker image, refer to [Make the Docker image](dev_hello_world.md#
     Apply the chaos by executing the command below:
 
         ```bash
-        kubectl apply -f /path/to/chaos.yaml
+        kubectl apply -f /path/to/helloworld.yaml
         ```
 
     Check the log of `chaos-controller-manager`:
