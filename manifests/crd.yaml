@@ -217,6 +217,8 @@ spec:
                   format: date-time
                   type: string
               type: object
+            failedMessage:
+              type: string
             phase:
               description: Phase is the chaos status.
               type: string
@@ -539,6 +541,8 @@ spec:
                   format: date-time
                   type: string
               type: object
+            failedMessage:
+              type: string
             phase:
               description: Phase is the chaos status.
               type: string
@@ -819,6 +823,8 @@ spec:
                   format: date-time
                   type: string
               type: object
+            failedMessage:
+              type: string
             phase:
               description: Phase is the chaos status.
               type: string
@@ -1245,6 +1251,8 @@ spec:
                   format: date-time
                   type: string
               type: object
+            failedMessage:
+              type: string
             phase:
               description: Phase is the chaos status.
               type: string
@@ -1484,6 +1492,8 @@ spec:
                   format: date-time
                   type: string
               type: object
+            failedMessage:
+              type: string
             phase:
               description: Phase is the chaos status.
               type: string
@@ -1950,6 +1960,8 @@ spec:
                   format: date-time
                   type: string
               type: object
+            failedMessage:
+              type: string
             phase:
               description: Phase is the chaos status.
               type: string
@@ -2210,6 +2222,8 @@ spec:
                   format: date-time
                   type: string
               type: object
+            failedMessage:
+              type: string
             instances:
               additionalProperties:
                 description: StressInstance is an instance generates stresses
@@ -2458,6 +2472,8 @@ spec:
                   format: date-time
                   type: string
               type: object
+            failedMessage:
+              type: string
             phase:
               description: Phase is the chaos status.
               type: string
