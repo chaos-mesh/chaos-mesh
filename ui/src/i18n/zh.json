@@ -43,9 +43,7 @@
       "action": "行为",
       "pod": {
         "title": "Pod 生命周期",
-        "actionHelper": "选择 PodChaos 行为",
-        "containerName": "容器名称",
-        "containerNameHelper": "填写容器名称"
+        "actionHelper": "选择 PodChaos 行为"
       },
       "network": {
         "title": "网络",
@@ -54,22 +52,6 @@
           "title": "目标",
           "podsPreview": "预览目标 Pods",
           "podsPreviewHelper": "通过勾选 Pods 来进一步限制目标的范围"
-        },
-        "partition": {
-          "direction": "方向",
-          "directionHelper": "定义隔离的方向"
-        },
-        "bandwidth": {
-          "rate": "Rate",
-          "rateHelper": "The rate allows bps, kbps, mbps, gbps, tbps unit. For example, bps means bytes per second",
-          "buffer": "Buffer",
-          "bufferHelper": "The maximum amount of bytes that tokens can be available instantaneously",
-          "limit": "Limit",
-          "limitHelper": "The number of bytes that can be queued waiting for tokens to become available",
-          "peakrate": "Peak rate",
-          "peakrateHelper": "The maximum depletion rate of the bucket",
-          "minburst": "Min Burst",
-          "minburstHelper": "The size of the peakrate bucket"
         }
       },
       "io": {
@@ -79,9 +61,7 @@
         "title": "Linux 内核"
       },
       "time": {
-        "title": "时钟",
-        "offset": "偏移量",
-        "offsetHelper": "填写时间偏移量"
+        "title": "时钟"
       },
       "stress": {
         "title": "CPU/Memory 压力测试",

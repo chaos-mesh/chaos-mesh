@@ -43,9 +43,7 @@
       "action": "Action",
       "pod": {
         "title": "Pod Lifecycle",
-        "actionHelper": "Select a PodChaos action",
-        "containerName": "Container Name",
-        "containerNameHelper": "Fill the container name"
+        "actionHelper": "Select a PodChaos action"
       },
       "network": {
         "title": "Network",
@@ -54,22 +52,6 @@
           "title": "Target",
           "podsPreview": "Target Pods Preview",
           "podsPreviewHelper": "Checking or unchecking Pods to further limit the scope of the target"
-        },
-        "partition": {
-          "direction": "Direction",
-          "directionHelper": "Specifies the partition direction"
-        },
-        "bandwidth": {
-          "rate": "Rate",
-          "rateHelper": "The rate allows bps, kbps, mbps, gbps, tbps unit. For example, bps means bytes per second",
-          "buffer": "Buffer",
-          "bufferHelper": "The maximum amount of bytes that tokens can be available instantaneously",
-          "limit": "Limit",
-          "limitHelper": "The number of bytes that can be queued waiting for tokens to become available",
-          "peakrate": "Peak rate",
-          "peakrateHelper": "The maximum depletion rate of the bucket",
-          "minburst": "Min Burst",
-          "minburstHelper": "The size of the peakrate bucket"
         }
       },
       "io": {
@@ -79,9 +61,7 @@
         "title": "Linux Kernel"
       },
       "time": {
-        "title": "Clock",
-        "offset": "Offset",
-        "offsetHelper": "Fill the time offset"
+        "title": "Clock"
       },
       "stress": {
         "title": "Stress CPU/Memory",

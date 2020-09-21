@@ -244,7 +244,7 @@ export default function NewExperiment() {
       <Formik
         enableReinitialize
         initialValues={initialValues}
-        validationSchema={validationSchema(intl!)}
+        validationSchema={validationSchema}
         validateOnChange={false}
         onSubmit={handleOnSubmit}
       >

@@ -69,8 +69,8 @@ export default function Network(props: StepperFormTargetProps) {
         <SelectField
           id="target.network_chaos.direction"
           name="target.network_chaos.direction"
-          label={T('newE.target.network.partition.direction')}
-          helperText={T('newE.target.network.partition.directionHelper')}
+          label="Direction"
+          helperText="Specifies the partition direction"
           error={errors.target?.network_chaos?.direction && touched.target?.network_chaos?.direction ? true : false}
         >
           {direction.map((option) => (
@@ -86,8 +86,8 @@ export default function Network(props: StepperFormTargetProps) {
           <TextField
             id="target.network_chaos.bandwidth.rate"
             name="target.network_chaos.bandwidth.rate"
-            label={T('newE.target.network.bandwidth.rate')}
-            helperText={T('newE.target.network.bandwidth.rateHelper')}
+            label="Rate"
+            helperText="The rate allows bps, kbps, mbps, gbps, tbps unit. For example, bps means bytes per second"
             error={
               errors.target?.network_chaos?.bandwidth?.rate && touched.target?.network_chaos?.bandwidth?.rate
                 ? true
@@ -98,29 +98,29 @@ export default function Network(props: StepperFormTargetProps) {
             type="number"
             id="target.network_chaos.bandwidth.buffer"
             name="target.network_chaos.bandwidth.buffer"
-            label={T('newE.target.network.bandwidth.buffer')}
-            helperText={T('newE.target.network.bandwidth.bufferHelper')}
+            label="Buffer"
+            helperText="The maximum amount of bytes that tokens can be available instantaneously"
           />
           <TextField
             type="number"
             id="target.network_chaos.bandwidth.limit"
             name="target.network_chaos.bandwidth.limit"
-            label={T('newE.target.network.bandwidth.limit')}
-            helperText={T('newE.target.network.bandwidth.limitHelper')}
+            label="Limit"
+            helperText="The number of bytes that can be queued waiting for tokens to become available"
           />
           <TextField
             type="number"
             id="target.network_chaos.bandwidth.peakrate"
             name="target.network_chaos.bandwidth.peakrate"
-            label={T('newE.target.network.bandwidth.peakrate')}
-            helperText={T('newE.target.network.bandwidth.peakrateHelper')}
+            label="Peak rate"
+            helperText="The maximum depletion rate of the bucket"
           />
           <TextField
             type="number"
             id="target.network_chaos.bandwidth.minburst"
             name="target.network_chaos.bandwidth.minburst"
-            label={T('newE.target.network.bandwidth.minburst')}
-            helperText={T('newE.target.network.bandwidth.minburstHelper')}
+            label="Min burst"
+            helperText="The size of the peakrate bucket"
           />
         </>
       )}

@@ -35,8 +35,8 @@ export default function Pod(props: StepperFormTargetProps) {
         <TextField
           id="target.pod_chaos.container_name"
           name="target.pod_chaos.container_name"
-          label={T('newE.target.pod.containerName')}
-          helperText={T('newE.target.pod.containerNameHelper')}
+          label="Container Name"
+          helperText="Fill the container name"
           error={errors.target?.pod_chaos?.container_name && touched.target?.pod_chaos?.container_name ? true : false}
         />
       )}

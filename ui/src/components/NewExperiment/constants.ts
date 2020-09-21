@@ -1,7 +1,6 @@
 import * as Yup from 'yup'
 
 import { Experiment } from './types'
-import { IntlShape } from 'react-intl'
 
 export const defaultExperimentSchema: Experiment = {
   name: '',
@@ -98,113 +97,66 @@ export const defaultExperimentSchema: Experiment = {
   },
 }
 
-export const validationSchema = (intl: IntlShape) => {
-  return Yup.object({
-    name: Yup.string().required(intl.formatMessage({ id: 'validation.name' })),
-    target: Yup.object().when('name', (name: string, schema: Yup.ObjectSchema) =>
-      name
-        ? Yup.object({
-            kind: Yup.string(),
-            pod_chaos: Yup.object().when('kind', (kind: string, schema: Yup.ObjectSchema) =>
-              kind === 'PodChaos'
-                ? Yup.object({
-                    action: Yup.string(),
-                    container_name: Yup.string().when('action', (action: string, schema: Yup.StringSchema) =>
-                      action === 'container-kill'
-                        ? schema.required(intl.formatMessage({ id: 'validation.target.pod_chaos.container_name' }))
+export const validationSchema = Yup.object({
+  name: Yup.string().required('The experiment name is required.'),
+  target: Yup.object().when('name', (name: string, schema: Yup.ObjectSchema) =>
+    name
+      ? Yup.object({
+          kind: Yup.string(),
+          pod_chaos: Yup.object().when('kind', (kind: string, schema: Yup.ObjectSchema) =>
+            kind === 'PodChaos'
+              ? Yup.object({
+                  action: Yup.string(),
+                  container_name: Yup.string().when('action', (action: string, schema: Yup.StringSchema) =>
+                    action === 'container-kill' ? schema.required('The Container name is required.') : schema
+                  ),
+                })
+              : schema
+          ),
+          network_chaos: Yup.object().when('kind', (kind: string, schema: Yup.ObjectSchema) =>
+            kind === 'NetworkChaos'
+              ? Yup.object({
+                  action: Yup.string().required('The NetworkChaos action is required.'),
+                  direction: Yup.string().when('action', (action: string, schema: Yup.StringSchema) =>
+                    action === 'partition' ? schema.required('The direction is required.') : schema
+                  ),
+                  bandwidth: Yup.object()
+                    .nullable()
+                    .when('action', (action: string, schema: Yup.ObjectSchema) =>
+                      action === 'bandwidth'
+                        ? Yup.object({
+                            rate: Yup.string().required('The rate of bandwidth is required.'),
+                          })
                         : schema
                     ),
-                  })
-                : schema
-            ),
-            network_chaos: Yup.object().when('kind', (kind: string, schema: Yup.ObjectSchema) =>
-              kind === 'NetworkChaos'
-                ? Yup.object({
-                    action: Yup.string().required(intl.formatMessage({ id: 'validation.target.network_chaos.action' })),
-                    direction: Yup.string().when('action', (action: string, schema: Yup.StringSchema) =>
-                      action === 'partition'
-                        ? schema.required(intl.formatMessage({ id: 'validation.target.network_chaos.direction' }))
+                  corrupt: Yup.object()
+                    .nullable()
+                    .when('action', (action: string, schema: Yup.ObjectSchema) =>
+                      action === 'corrupt'
+                        ? Yup.object({
+                            corrupt: Yup.string().required('The corrupt is required.'),
+                            correlation: Yup.string().required('The correlation of corrupt is required.'),
+                          })
                         : schema
                     ),
-                    bandwidth: Yup.object()
-                      .nullable()
-                      .when('action', (action: string, schema: Yup.ObjectSchema) =>
-                        action === 'bandwidth'
-                          ? Yup.object({
-                              rate: Yup.string().required(
-                                intl.formatMessage({ id: 'validation.target.network_chaos.bandwidth.rate' })
-                              ),
-                            })
-                          : schema
-                      ),
-                    corrupt: Yup.object()
-                      .nullable()
-                      .when('action', (action: string, schema: Yup.ObjectSchema) =>
-                        action === 'corrupt'
-                          ? Yup.object({
-                              corrupt: Yup.string().required(
-                                intl.formatMessage({ id: 'validation.target.network_chaos.corrupt.corrupt' })
-                              ),
-                              correlation: Yup.string().required(
-                                intl.formatMessage({ id: 'validation.target.network_chaos.corrupt.correlation' })
-                              ),
-                            })
-                          : schema
-                      ),
-                    delay: Yup.object()
-                      .nullable()
-                      .when('action', (action: string, schema: Yup.ObjectSchema) =>
-                        action === 'delay'
-                          ? Yup.object({
-                              latency: Yup.string().required(
-                                intl.formatMessage({ id: 'validation.target.network_chaos.delay.lantency' })
-                              ),
-                            })
-                          : schema
-                      ),
-                    duplicate: Yup.object()
-                      .nullable()
-                      .when('action', (action: string, schema: Yup.ObjectSchema) =>
-                        action === 'duplicate'
-                          ? Yup.object({
-                              duplicate: Yup.string().required(
-                                intl.formatMessage({ id: 'validation.target.network_chaos.duplicate.duplicate' })
-                              ),
-                              correlation: Yup.string().required(
-                                intl.formatMessage({ id: 'validation.target.network_chaos.duplicate.correlation' })
-                              ),
-                            })
-                          : schema
-                      ),
-                    loss: Yup.object()
-                      .nullable()
-                      .when('action', (action: string, schema: Yup.ObjectSchema) =>
-                        action === 'loss'
-                          ? Yup.object({
-                              loss: Yup.string().required(
-                                intl.formatMessage({ id: 'validation.target.network_chaos.loss.loss' })
-                              ),
-                              correlation: Yup.string().required(
-                                intl.formatMessage({ id: 'validation.target.network_chaos.loss.correlation' })
-                              ),
-                            })
-                          : schema
-                      ),
-                  })
-                : schema
-            ),
-            io_chaos: Yup.object().when('kind', (kind: string, schema: Yup.ObjectSchema) =>
-              kind === 'IoChaos'
-                ? Yup.object({
-                    action: Yup.string().required(intl.formatMessage({ id: 'validation.target.io_chaos.action' })),
-                  })
-                : schema
-            ),
-            time_chaos: Yup.object().when('kind', (kind: string, schema: Yup.ObjectSchema) =>
-              kind === 'TimeChaos'
-                ? Yup.object({
-                    time_offset: Yup.string().required(
-                      intl.formatMessage({ id: 'validation.target.time_chaos.time_offset' })
+                  delay: Yup.object()
+                    .nullable()
+                    .when('action', (action: string, schema: Yup.ObjectSchema) =>
+                      action === 'delay'
+                        ? Yup.object({
+                            latency: Yup.string().required('The latency of delay is required.'),
+                          })
+                        : schema
+                    ),
+                  duplicate: Yup.object()
+                    .nullable()
+                    .when('action', (action: string, schema: Yup.ObjectSchema) =>
+                      action === 'duplicate'
+                        ? Yup.object({
+                            duplicate: Yup.string().required('The duplicate is required.'),
+                            correlation: Yup.string().required('The correlation of duplicate is required.'),
+                          })
+                        : schema
                     ),
                   loss: Yup.object()
                     .nullable()
