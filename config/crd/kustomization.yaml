@@ -8,6 +8,7 @@ resources:
 - bases/chaos-mesh.org_timechaos.yaml
 - bases/chaos-mesh.org_kernelchaos.yaml
 - bases/chaos-mesh.org_stresschaos.yaml
+- bases/chaos-mesh.org_podiochaos.yaml
 - bases/chaos-mesh.org_podnetworkchaos.yaml
 # +kubebuilder:scaffold:crdkustomizeresource
 
