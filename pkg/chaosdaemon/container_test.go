@@ -22,12 +22,15 @@ import (
 
 	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
 	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
+
+	"github.com/chaos-mesh/chaos-mesh/pkg/bpm"
 )
 
 var _ = Describe("container kill", func() {
 	defer mock.With("MockContainerdClient", &MockClient{})()
 	c, _ := CreateContainerRuntimeInfoClient(containerRuntimeContainerd)
-	s := &daemonServer{c}
+	m := bpm.NewBackgroundProcessManager()
+	s := &daemonServer{c, m}
 
 	Context("ContainerKill", func() {
 		It("should work", func() {

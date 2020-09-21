@@ -101,6 +101,24 @@ webhooks:
     service:
       name: webhook-service
       namespace: system
+      path: /mutate-chaos-mesh-org-v1alpha1-podiochaos
+  failurePolicy: Fail
+  name: mpodiochaos.kb.io
+  rules:
+  - apiGroups:
+    - chaos-mesh.org
+    apiVersions:
+    - v1alpha1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - podiochaos
+- clientConfig:
+    caBundle: Cg==
+    service:
+      name: webhook-service
+      namespace: system
       path: /mutate-chaos-mesh-org-v1alpha1-podnetworkchaos
   failurePolicy: Fail
   name: mpodnetworkchaos.kb.io

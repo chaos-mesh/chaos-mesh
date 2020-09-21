@@ -80,6 +80,7 @@ rules:
     - timechaos
     - kernelchaos
     - stresschaos
+    - podiochaos
     - podnetworkchaos
     - httpchaos
     - dnschaos
@@ -149,6 +150,7 @@ rules:
   - timechaos
   - kernelchaos
   - stresschaos
+  - podiochaos
   - podnetworkchaos
   - httpchaos
   - dnschaos
