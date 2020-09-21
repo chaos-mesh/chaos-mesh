@@ -19,9 +19,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
-	"os/exec"
 	"strconv"
-	"strings"
 	"sync"
 	"syscall"
 
@@ -29,6 +27,7 @@ import (
 	"github.com/docker/docker/api/types"
 	dockerclient "github.com/docker/docker/client"
 
+	"github.com/chaos-mesh/chaos-mesh/pkg/bpm"
 	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
 	"github.com/chaos-mesh/chaos-mesh/pkg/utils"
 )
@@ -44,9 +43,6 @@ const (
 	defaultContainerdSocket  = "/run/containerd/containerd.sock"
 	containerdProtocolPrefix = "containerd://"
 	containerdDefaultNS      = "k8s.io"
-
-	pausePath   = "/usr/local/bin/pause"
-	suicidePath = "/usr/local/bin/suicide"
 
 	defaultProcPrefix = "/proc"
 )
@@ -188,136 +184,9 @@ func CreateContainerRuntimeInfoClient(containerRuntime string) (ContainerRuntime
 	return cli, nil
 }
 
-type nsType string
-
-const (
-	mountNS nsType = "mnt"
-	utsNS   nsType = "uts"
-	ipcNS   nsType = "ipc"
-	netNS   nsType = "net"
-	pidNS   nsType = "pid"
-	userNS  nsType = "user"
-)
-
-var nsArgMap = map[nsType]string{
-	mountNS: "m",
-	utsNS:   "u",
-	ipcNS:   "i",
-	netNS:   "n",
-	pidNS:   "p",
-	userNS:  "U",
-}
-
 // GetNsPath returns corresponding namespace path
-func GetNsPath(pid uint32, typ nsType) string {
+func GetNsPath(pid uint32, typ bpm.NsType) string {
 	return fmt.Sprintf("%s/%d/ns/%s", defaultProcPrefix, pid, string(typ))
-}
-
-// processBuilder builds a exec.Cmd for daemon
-type processBuilder struct {
-	cmd  string
-	args []string
-
-	nsOptions []nsOption
-
-	pause   bool
-	suicide bool
-}
-
-func defaultProcessBuilder(cmd string, args ...string) *processBuilder {
-	return &processBuilder{
-		cmd:       cmd,
-		args:      args,
-		nsOptions: []nsOption{},
-		pause:     false,
-		suicide:   false,
-	}
-}
-
-func (b *processBuilder) SetNetNS(nsPath string) *processBuilder {
-	return b.SetNS([]nsOption{{
-		Typ:  netNS,
-		Path: nsPath,
-	}})
-}
-
-func (b *processBuilder) SetPidNS(nsPath string) *processBuilder {
-	return b.SetNS([]nsOption{{
-		Typ:  pidNS,
-		Path: nsPath,
-	}})
-}
-
-func (b *processBuilder) SetNS(options []nsOption) *processBuilder {
-	b.nsOptions = append(b.nsOptions, options...)
-
-	return b
-}
-
-func (b *processBuilder) EnablePause() *processBuilder {
-	b.pause = true
-
-	return b
-}
-
-func (b *processBuilder) EnableSuicide() *processBuilder {
-	b.suicide = true
-
-	return b
-}
-
-func (b *processBuilder) Build(ctx context.Context) *exec.Cmd {
-	// The call routine is pause -> suicide -> nsenter --(fork)-> suicide -> process
-	// so that when chaos-daemon killed the suicide process, the sub suicide process will
-	// receive a signal and exit.
-	// For example:
-	// If you call `nsenter -p/proc/.../ns/pid bash -c "while true; do sleep 1; date; done"`
-	// then even you kill the nsenter process, the subprocess of it will continue running
-	// until it gets killed. The suicide program is used to make sure that the subprocess will
-	// be terminated when its parent died.
-	// But the `./bin/suicide nsenter -p/proc/.../ns/pid ./bin/suicide bash -c "while true; do sleep 1; date; done"`
-	// can fix this problem. The first suicide is used to ensure when chaos-daemon is dead, the process is killed
-
-	// I'm not sure this method is 100% reliable, but half a loaf is better than none.
-
-	args := b.args
-	cmd := b.cmd
-
-	if b.suicide {
-		args = append([]string{cmd}, args...)
-		cmd = suicidePath
-	}
-
-	if len(b.nsOptions) > 0 {
-		args = append([]string{"--", cmd}, args...)
-		for _, option := range b.nsOptions {
-			args = append([]string{"-" + nsArgMap[option.Typ] + option.Path}, args...)
-		}
-		cmd = "nsenter"
-	}
-
-	if b.suicide {
-		args = append([]string{cmd}, args...)
-		cmd = suicidePath
-	}
-
-	if b.pause {
-		args = append([]string{cmd}, args...)
-		cmd = pausePath
-	}
-
-	if c := mock.On("MockProcessBuild"); c != nil {
-		f := c.(func(context.Context, string, ...string) *exec.Cmd)
-		return f(ctx, cmd, args...)
-	}
-
-	log.Info("build command", "command", cmd+" "+strings.Join(args, " "))
-	return exec.CommandContext(ctx, cmd, args...)
-}
-
-type nsOption struct {
-	Typ  nsType
-	Path string
 }
 
 // ContainerKillByContainerID kills container according to container id

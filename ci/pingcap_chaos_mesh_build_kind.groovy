@@ -186,7 +186,7 @@ def call(BUILD_BRANCH, CREDENTIALS_ID) {
 							$class: 'GitSCM',
 							branches: [[name: "${BUILD_BRANCH}"]],
 							doGenerateSubmoduleConfigurations: false,
-							extensions: [],
+							extensions: [[$class: 'SubmoduleOption', parentCredentials: true]],
 							submoduleCfg: [],
 							userRemoteConfigs: [[
 								credentialsId: "${CREDENTIALS_ID}",
