@@ -17,6 +17,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strconv"
+	"strings"
 
 	"github.com/go-logr/logr"
 	"golang.org/x/sync/errgroup"
@@ -28,6 +30,8 @@ import (
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/common"
+	"github.com/chaos-mesh/chaos-mesh/controllers/httpchaos/iptables"
+	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
 	"github.com/chaos-mesh/chaos-mesh/pkg/utils"
 )
 
@@ -116,7 +120,61 @@ func (r *Reconciler) applyAllPods(ctx context.Context, pods []v1.Pod, chaos *v1a
 }
 
 func (r *Reconciler) applyPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.HTTPChaos) error {
-	//TODO: The way to connect with sidecar need be discussed & It will work after the sidecar add to the repo.
 	r.Log.Info("Try to inject Http chaos on pod", "namespace", pod.Namespace, "name", pod.Name)
+	err := r.SetIptables(ctx, pod, chaos)
+	if err != nil {
+		return err
+	}
 	return nil
+}
+
+func (r *Reconciler) SetIptables(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.HTTPChaos) error {
+	var chains []*pb.Chain
+	inputFilterName := "HTTP-CHAOS-INPUT"
+	chains = append(chains, &pb.Chain{
+		Command:   pb.Chain_NEW,
+		ChainName: inputFilterName,
+	})
+	outputFilterName := "HTTP-CHAOS-OUTPUT"
+	chains = append(chains, &pb.Chain{
+		Command:   pb.Chain_NEW,
+		ChainName: outputFilterName,
+	})
+	var ports []string
+	for _, container := range pod.Spec.Containers {
+		for _, port := range container.Ports {
+			ports = append(ports, strconv.Itoa(int(port.ContainerPort)))
+		}
+	}
+	chains = append(chains, &pb.Chain{
+		Command:   pb.Chain_ADD,
+		ChainName: "INPUT",
+		Dport:     strings.Join(ports, ","),
+		Action:    inputFilterName,
+	})
+	chains = append(chains, &pb.Chain{
+		Command:   pb.Chain_ADD,
+		ChainName: "OUPUT",
+		Sport:     strings.Join(ports, ","),
+		Action:    outputFilterName,
+	})
+	// todo : need tc support to write delay action
+	// Warning: Traffic control is not support on wsl2
+	// because of the linux kernel problem
+	if chaos.Spec.Action == v1alpha1.HTTPAbortAction ||
+		chaos.Spec.Action == v1alpha1.HTTPMixedAction {
+		chains = append(chains, &pb.Chain{
+			Command:     pb.Chain_ADD,
+			ChainName:   inputFilterName,
+			Action:      "DROP",
+			Probability: chaos.Spec.Percent,
+		})
+		chains = append(chains, &pb.Chain{
+			Command:     pb.Chain_ADD,
+			ChainName:   outputFilterName,
+			Action:      "DROP",
+			Probability: chaos.Spec.Percent,
+		})
+	}
+	return iptables.SetIptablesChains(ctx, r.Client, pod, chains)
 }

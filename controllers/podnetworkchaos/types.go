@@ -77,11 +77,11 @@ func (h *Handler) Apply(ctx context.Context, chaos *v1alpha1.PodNetworkChaos) er
 
 // SetIPSets sets ipset on pod
 func (h *Handler) SetIPSets(ctx context.Context, pod *corev1.Pod, chaos *v1alpha1.PodNetworkChaos) error {
-	ipsets := []*pb.IPSet{}
-	for _, ipset := range chaos.Spec.IPSets {
+	var ipsets []*pb.IPSet
+	for _, ipSet := range chaos.Spec.IPSets {
 		ipsets = append(ipsets, &pb.IPSet{
-			Name:  ipset.Name,
-			Cidrs: ipset.Cidrs,
+			Name:  ipSet.Name,
+			Cidrs: ipSet.Cidrs,
 		})
 	}
 	return ipset.FlushIPSets(ctx, h.Client, pod, ipsets)
@@ -89,11 +89,26 @@ func (h *Handler) SetIPSets(ctx context.Context, pod *corev1.Pod, chaos *v1alpha
 
 // SetIptables sets iptables on pod
 func (h *Handler) SetIptables(ctx context.Context, pod *corev1.Pod, chaos *v1alpha1.PodNetworkChaos) error {
-	chains := []*pb.Chain{}
+	var chains []*pb.Chain
+	for _, direction := range []string{"INPUT", "OUTPUT"} {
+		chainName := "CHAOS-" + direction
+		// iptables -N chainName
+		chains = append(chains, &pb.Chain{
+			Command:   pb.Chain_NEW,
+			ChainName: chainName,
+		})
+		// iptables -A direction -j chainName
+		chains = append(chains, &pb.Chain{
+			Command:   pb.Chain_ADD,
+			ChainName: direction,
+			Action:    chainName,
+		})
+	}
 	for _, chain := range chaos.Spec.Iptables {
 		var direction pb.Chain_Direction
 		if chain.Direction == v1alpha1.Input {
 			direction = pb.Chain_INPUT
+
 		} else if chain.Direction == v1alpha1.Output {
 			direction = pb.Chain_OUTPUT
 		} else {
@@ -101,18 +116,43 @@ func (h *Handler) SetIptables(ctx context.Context, pod *corev1.Pod, chaos *v1alp
 			h.Log.Error(err, "unknown direction")
 			return err
 		}
+		// iptables -N chain.Name
 		chains = append(chains, &pb.Chain{
-			Name:      chain.Name,
-			Ipsets:    chain.IPSets,
-			Direction: direction,
+			Command:   pb.Chain_NEW,
+			ChainName: chain.Name,
 		})
+		// iptables -A chain.Name -m set --match-set ipSets matchPart -j Drop -w 5
+		chains = append(chains, &pb.Chain{
+			Command:    pb.Chain_ADD,
+			ChainName:  chain.Name,
+			Direction:  direction,
+			Ipsets:     chain.IPSets,
+			IpsetsName: chain.Name,
+			Action:     "DROP",
+		})
+		if direction == pb.Chain_INPUT {
+			// iptables -A CHAOS-INPUT -j chain.Name
+			chains = append(chains, &pb.Chain{
+				Command:   pb.Chain_ADD,
+				ChainName: "CHAOS-INPUT",
+				Action:    chain.Name,
+			})
+		} else if direction == pb.Chain_OUTPUT {
+			// iptables -A CHAOS-OUTPUT -j chain.Name
+			chains = append(chains, &pb.Chain{
+				Command:   pb.Chain_ADD,
+				ChainName: "CHAOS-OUTPUT",
+				Action:    chain.Name,
+			})
+		}
+
 	}
 	return iptable.SetIptablesChains(ctx, h.Client, pod, chains)
 }
 
 // SetTcs sets traffic control related chaos on pod
 func (h *Handler) SetTcs(ctx context.Context, pod *corev1.Pod, chaos *v1alpha1.PodNetworkChaos) error {
-	tcs := []*pb.Tc{}
+	var tcs []*pb.Tc
 	for _, tc := range chaos.Spec.TrafficControls {
 		if tc.Type == v1alpha1.Bandwidth {
 			tbf, err := tc.Bandwidth.ToTbf()

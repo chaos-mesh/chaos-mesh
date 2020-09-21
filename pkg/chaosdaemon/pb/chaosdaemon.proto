@@ -8,7 +8,7 @@ service ChaosDaemon {
   rpc SetTcs(TcsRequest) returns (google.protobuf.Empty) {}
 
   rpc FlushIPSets(IPSetsRequest) returns (google.protobuf.Empty) {}
-  
+
   rpc SetIptablesChains(IptablesChainsRequest) returns (google.protobuf.Empty) {}
 
   rpc SetTimeOffset(TimeRequest) returns (google.protobuf.Empty) {}
@@ -123,13 +123,29 @@ message IptablesChainsRequest {
 }
 
 message Chain {
-  string name = 1;
+  string table = 1;
+  enum commandType
+  {
+    NEW = 0;
+    ADD = 1;
+    DELETE = 2;
+  }
+  commandType command =2;
+  string ChainName = 3;
+  string sourceAddress = 4;
+  string sport = 5;
+  string destinationAddress = 6;
+  string dport = 7;
+  string to_ports = 8;
+  string Action = 9;
   enum Direction {
     INPUT = 0;
     OUTPUT = 1;
   }
-  Direction direction = 2;
-  repeated string ipsets = 3;
+  Direction direction = 10;
+  string ipsetsName = 11;
+  repeated string ipsets = 12;
+  string probability = 13;
 }
 
 message TimeRequest {

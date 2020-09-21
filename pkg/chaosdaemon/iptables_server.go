@@ -42,19 +42,130 @@ func (s *daemonServer) SetIptablesChains(ctx context.Context, req *pb.IptablesCh
 	nsPath := GetNsPath(pid, bpm.NetNS)
 
 	iptables := buildIptablesClient(ctx, nsPath)
-	err = iptables.initializeEnv()
-	if err != nil {
-		log.Error(err, "error while initializing iptables")
-		return nil, err
-	}
 
-	err = iptables.setIptablesChains(req.Chains)
-	if err != nil {
-		log.Error(err, "error while setting iptables chains")
-		return nil, err
+	for _, chain := range req.Chains {
+		err = iptables.setIptablesChain(chain)
+		if err != nil {
+			log.Error(err, "error while set iptables chains")
+			return nil, err
+		}
 	}
-
 	return &empty.Empty{}, nil
+}
+
+func (iptables *iptablesClient) setIptablesChain(chain *pb.Chain) error {
+	switch chain.Command {
+	case pb.Chain_NEW:
+		var rule string
+		if chain.Table != "" {
+			rule = fmt.Sprintf("-t %s ", chain.Table)
+		}
+		log.Info("Create New Chain ", chain.ChainName, rule)
+		err := iptables.createNewChain(&iptablesChain{
+			Name: chain.ChainName,
+			Rule: rule,
+		})
+		if err != nil {
+			log.Error(err, "error while create iptables chains")
+			return err
+		}
+	case pb.Chain_ADD:
+		rule, err := parseAddChain(chain)
+		log.Info("Add New rule in ", chain.ChainName, rule)
+		if err != nil {
+			log.Error(err, "error while add iptables chains")
+			return err
+		}
+		if len(chain.Ipsets) > 1 {
+			for _, ipset := range chain.Ipsets {
+				rule = fmt.Sprintf(rule, ipset)
+				err := iptables.ensureRule(&iptablesChain{
+					Name: chain.ChainName,
+				}, rule)
+				if err != nil {
+					log.Error(err, "error while add iptables chains")
+					return err
+				}
+			}
+		} else {
+			err := iptables.ensureRule(&iptablesChain{
+				Name: chain.ChainName,
+			}, rule)
+			if err != nil {
+				log.Error(err, "error while add iptables chains")
+				return err
+			}
+		}
+	case pb.Chain_DELETE:
+		log.Info("Delete Chain ", chain.ChainName)
+		err := iptables.flushIptablesChain(&iptablesChain{
+			Name: chain.ChainName,
+			Rule: "",
+		})
+		if err != nil {
+			log.Error(err, "error while add iptables chains")
+			return err
+		}
+		err = iptables.ensureRule(&iptablesChain{
+			Name: chain.ChainName,
+		}, fmt.Sprintf("-X %s ", chain.ChainName))
+	default:
+		return fmt.Errorf("error no command in iptables chains")
+	}
+	return nil
+}
+
+func parseAddChain(chain *pb.Chain) (string, error) {
+	var rule string
+	if chain.Table != "" {
+		rule += fmt.Sprintf("-t %s ", chain.Table)
+	}
+	if chain.ChainName != "" {
+		rule += fmt.Sprintf("-A %s -p tcp ", chain.ChainName)
+	} else {
+		return "", fmt.Errorf("add chain but no chain name")
+	}
+	if chain.SourceAddress != "" {
+		rule += fmt.Sprintf("-s %s ", chain.SourceAddress)
+	}
+	if chain.Sport != "" {
+		rule += fmt.Sprintf("--sport %s ", chain.Sport)
+	}
+	if chain.DestinationAddress != "" {
+		rule += fmt.Sprintf("-d %s ", chain.DestinationAddress)
+	}
+	if chain.Dport != "" {
+		rule += fmt.Sprintf("--dport %s ", chain.Dport)
+	}
+	if chain.ToPorts != "" {
+		rule += fmt.Sprintf("--to-ports %s ", chain.ToPorts)
+	}
+	if chain.Probability != "" {
+		rule += fmt.Sprintf("--probability %s ", chain.Dport)
+	}
+	if chain.IpsetsName != "" {
+		var matchPart string
+		if chain.Direction == pb.Chain_INPUT {
+			matchPart = "src"
+		} else if chain.Direction == pb.Chain_OUTPUT {
+			matchPart = "dst"
+		} else {
+			return "", fmt.Errorf("unknown chain direction %d", chain.Direction)
+		}
+		if len(chain.Ipsets) > 1 {
+			rule += fmt.Sprintf("-m set --match-set %s %%s -w 5 ", matchPart)
+		} else if len(chain.Ipsets) == 1 {
+			rule += fmt.Sprintf("-m set --match-set %s %s -w 5 ", matchPart, chain.Ipsets[0])
+		} else {
+			rule += fmt.Sprintf("-m set --match-set %s -w 5 ", matchPart)
+		}
+	}
+	if chain.Action != "" {
+		rule += fmt.Sprintf("-j %s ", chain.Action)
+	} else {
+		return "", fmt.Errorf("add chain must have chain Action like ACCEPT or a Chain name as Action")
+	}
+	return rule, nil
 }
 
 type iptablesClient struct {
@@ -63,8 +174,8 @@ type iptablesClient struct {
 }
 
 type iptablesChain struct {
-	Name  string
-	Rules []string
+	Name string
+	Rule string
 }
 
 func buildIptablesClient(ctx context.Context, nsPath string) iptablesClient {
@@ -74,112 +185,21 @@ func buildIptablesClient(ctx context.Context, nsPath string) iptablesClient {
 	}
 }
 
-func (iptables *iptablesClient) setIptablesChains(chains []*pb.Chain) error {
-	for _, chain := range chains {
-		err := iptables.setIptablesChain(chain)
-		if err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
-func (iptables *iptablesClient) setIptablesChain(chain *pb.Chain) error {
-	var matchPart string
-	if chain.Direction == pb.Chain_INPUT {
-		matchPart = "src"
-	} else if chain.Direction == pb.Chain_OUTPUT {
-		matchPart = "dst"
-	} else {
-		return fmt.Errorf("unknown chain direction %d", chain.Direction)
-	}
-
-	rules := []string{}
-	for _, ipset := range chain.Ipsets {
-		rules = append(rules, fmt.Sprintf("-A %s -m set --match-set %s %s -j DROP -w 5", chain.Name, ipset, matchPart))
-	}
-	err := iptables.createNewChain(&iptablesChain{
-		Name:  chain.Name,
-		Rules: rules,
-	})
-	if err != nil {
-		return err
-	}
-
-	if chain.Direction == pb.Chain_INPUT {
-		err := iptables.ensureRule(&iptablesChain{
-			Name: "CHAOS-INPUT",
-		}, "-A CHAOS-INPUT -j "+chain.Name)
-		if err != nil {
-			return err
-		}
-	} else if chain.Direction == pb.Chain_OUTPUT {
-		iptables.ensureRule(&iptablesChain{
-			Name: "CHAOS-OUTPUT",
-		}, "-A CHAOS-OUTPUT -j "+chain.Name)
-		if err != nil {
-			return err
-		}
-	} else {
-		return fmt.Errorf("unknown direction %d", chain.Direction)
-	}
-	return nil
-}
-
-func (iptables *iptablesClient) initializeEnv() error {
-	for _, direction := range []string{"INPUT", "OUTPUT"} {
-		chainName := "CHAOS-" + direction
-
-		err := iptables.createNewChain(&iptablesChain{
-			Name:  chainName,
-			Rules: []string{},
-		})
-		if err != nil {
-			return err
-		}
-
-		iptables.ensureRule(&iptablesChain{
-			Name:  direction,
-			Rules: []string{},
-		}, "-A "+direction+" -j "+chainName)
-	}
-
-	return nil
-}
-
 // createNewChain will cover existing chain
 func (iptables *iptablesClient) createNewChain(chain *iptablesChain) error {
-	cmd := bpm.DefaultProcessBuilder(iptablesCmd, "-w", "-N", chain.Name).SetNetNS(iptables.nsPath).SetContext(iptables.ctx).Build()
+	cmd := bpm.DefaultProcessBuilder(iptablesCmd, strings.Split(chain.Rule+" -w -N "+chain.Name, " ")...).SetNetNS(iptables.nsPath).SetContext(iptables.ctx).Build()
 	out, err := cmd.CombinedOutput()
 
 	if (err == nil && len(out) == 0) ||
 		(err != nil && strings.Contains(string(out), iptablesChainAlreadyExistErr)) {
 		// Successfully create a new chain
-		return iptables.deleteAndWriteRules(chain)
-	}
-
-	return encodeOutputToError(out, err)
-}
-
-// deleteAndWriteRules will remove all existing function in the chain
-// and replace with the new settings
-func (iptables *iptablesClient) deleteAndWriteRules(chain *iptablesChain) error {
-
-	// This chain should already exist
-	err := iptables.flushIptablesChain(chain)
-	if err != nil {
-		return err
-	}
-
-	for _, rule := range chain.Rules {
-		err := iptables.ensureRule(chain, rule)
+		err := iptables.flushIptablesChain(chain)
 		if err != nil {
 			return err
 		}
+		return nil
 	}
-
-	return nil
+	return encodeOutputToError(out, err)
 }
 
 func (iptables *iptablesClient) ensureRule(chain *iptablesChain, rule string) error {

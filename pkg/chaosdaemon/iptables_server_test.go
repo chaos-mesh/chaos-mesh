@@ -46,9 +46,8 @@ var _ = Describe("iptables server", func() {
 			})()
 			_, err := s.SetIptablesChains(context.TODO(), &pb.IptablesChainsRequest{
 				Chains: []*pb.Chain{{
-					Name:      "TEST",
-					Direction: pb.Chain_INPUT,
-					Ipsets:    []string{},
+					Command:   pb.Chain_NEW,
+					ChainName: "TEST",
 				}},
 				ContainerId: "containerd://container-id",
 			})
@@ -60,9 +59,8 @@ var _ = Describe("iptables server", func() {
 			defer mock.With("TaskError", errors.New(errorStr))()
 			_, err := s.SetIptablesChains(context.TODO(), &pb.IptablesChainsRequest{
 				Chains: []*pb.Chain{{
-					Name:      "TEST",
-					Direction: pb.Chain_INPUT,
-					Ipsets:    []string{},
+					Command:   pb.Chain_NEW,
+					ChainName: "TEST",
 				}},
 				ContainerId: "containerd://container-id",
 			})
@@ -82,9 +80,11 @@ var _ = Describe("iptables server", func() {
 
 			_, err := s.SetIptablesChains(context.TODO(), &pb.IptablesChainsRequest{
 				Chains: []*pb.Chain{{
-					Name:      "TEST",
-					Direction: pb.Chain_Direction(233),
-					Ipsets:    []string{},
+					Command:    pb.Chain_ADD,
+					ChainName:  "TEST",
+					Direction:  pb.Chain_Direction(233),
+					IpsetsName: "TEST",
+					Ipsets:     []string{},
 				}},
 				ContainerId: "containerd://container-id",
 			})
@@ -104,9 +104,9 @@ exit 1
 			})()
 			_, err = s.SetIptablesChains(context.TODO(), &pb.IptablesChainsRequest{
 				Chains: []*pb.Chain{{
-					Name:      "TEST",
-					Direction: pb.Chain_INPUT,
-					Ipsets:    []string{},
+					IpsetsName: "TEST",
+					Direction:  pb.Chain_INPUT,
+					Ipsets:     []string{},
 				}},
 				ContainerId: "containerd://container-id",
 			})
