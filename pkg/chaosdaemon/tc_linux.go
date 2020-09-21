@@ -16,6 +16,7 @@ package chaosdaemon
 import (
 	"context"
 
+	"github.com/chaos-mesh/chaos-mesh/pkg/bpm"
 	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
 )
 
@@ -30,9 +31,9 @@ func applyTc(ctx context.Context, pid uint32, args ...string) error {
 		}
 	}
 
-	nsPath := GetNsPath(pid, netNS)
+	nsPath := GetNsPath(pid, bpm.NetNS)
 
-	cmd := defaultProcessBuilder("tc", args...).SetNetNS(nsPath).Build(ctx)
+	cmd := bpm.DefaultProcessBuilder("tc", args...).SetNetNS(nsPath).SetContext(ctx).Build()
 	log.Info("tc command", "command", cmd.String(), "args", args)
 
 	out, err := cmd.CombinedOutput()

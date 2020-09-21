@@ -3,7 +3,6 @@ kind: Deployment
 apiVersion: apps/v1
 metadata:
   name: etcd
-  namespace: chaos-testing
   labels:
     app: etcd
 spec:
@@ -15,8 +14,6 @@ spec:
     metadata:
       labels:
         app: etcd
-      annotations:
-        "admission-webhook.chaos-mesh.org/request": "chaosfs-etcd"
     spec:
       containers:
         - name: etcd

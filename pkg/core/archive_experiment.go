@@ -52,6 +52,12 @@ type ExperimentStore interface {
 
 	// FindMetaByUID returns an archive experiment by UID.
 	FindMetaByUID(context.Context, string) (*ArchiveExperimentMeta, error)
+
+	// DeleteIncompleteExperiments deletes all incomplete experiments.
+	// If the chaos-dashboard was restarted and the experiment is completed during the restart,
+	// which means the experiment would never save the finish_time.
+	// DeleteIncompleteExperiments can be used to delete all incomplete experiments to avoid this case.
+	DeleteIncompleteExperiments(context.Context) error
 }
 
 // ArchiveExperiment represents an experiment instance.
@@ -180,13 +186,14 @@ type NetworkChaosInfo struct {
 
 // IOChaosInfo defines the basic information of io chaos for creating a new IOChaos.
 type IOChaosInfo struct {
-	Action  string   `json:"action" binding:"oneof='' 'delay' 'errno' 'mixed'"`
-	Addr    string   `json:"addr"`
-	Delay   string   `json:"delay"`
-	Errno   string   `json:"errno"`
-	Path    string   `json:"path"`
-	Percent string   `json:"percent"`
-	Methods []string `json:"methods"`
+	Action     string                     `json:"action" binding:"oneof='' 'latency' 'fault' 'attrOverride'"`
+	Delay      string                     `json:"delay"`
+	Errno      uint32                     `json:"errno"`
+	Attr       *v1alpha1.AttrOverrideSpec `json:"attr"`
+	Path       string                     `json:"path"`
+	Percent    int                        `json:"percent"`
+	Methods    []v1alpha1.IoMethod        `json:"methods"`
+	VolumePath string                     `json:"volume_path"`
 }
 
 // KernelChaosInfo defines the basic information of kernel chaos for creating a new KernelChaos.
@@ -284,15 +291,6 @@ func (e *ArchiveExperiment) ParseNetworkChaos() (ExperimentInfo, error) {
 				Corrupt:   chaos.Spec.Corrupt,
 				Bandwidth: chaos.Spec.Bandwidth,
 				Direction: string(chaos.Spec.Direction),
-				TargetScope: &ScopeInfo{
-					SelectorInfo: SelectorInfo{
-						NamespaceSelectors:  chaos.Spec.Selector.Namespaces,
-						LabelSelectors:      chaos.Spec.Selector.LabelSelectors,
-						AnnotationSelectors: chaos.Spec.Selector.AnnotationSelectors,
-						FieldSelectors:      chaos.Spec.Selector.FieldSelectors,
-						PhaseSelector:       chaos.Spec.Selector.PodPhaseSelectors,
-					},
-				},
 			},
 		},
 	}
@@ -306,6 +304,13 @@ func (e *ArchiveExperiment) ParseNetworkChaos() (ExperimentInfo, error) {
 	}
 
 	if chaos.Spec.Target != nil {
+		info.Target.NetworkChaos.TargetScope.SelectorInfo = SelectorInfo{
+			NamespaceSelectors:  chaos.Spec.Target.TargetSelector.Namespaces,
+			LabelSelectors:      chaos.Spec.Target.TargetSelector.LabelSelectors,
+			AnnotationSelectors: chaos.Spec.Target.TargetSelector.AnnotationSelectors,
+			FieldSelectors:      chaos.Spec.Target.TargetSelector.FieldSelectors,
+			PhaseSelector:       chaos.Spec.Target.TargetSelector.PodPhaseSelectors,
+		}
 		info.Target.NetworkChaos.TargetScope.Mode = string(chaos.Spec.Target.TargetMode)
 		info.Target.NetworkChaos.TargetScope.Value = chaos.Spec.Target.TargetValue
 	}
@@ -318,6 +323,10 @@ func (e *ArchiveExperiment) ParseIOChaos() (ExperimentInfo, error) {
 		return ExperimentInfo{}, err
 	}
 
+	var methods []string
+	for _, method := range chaos.Spec.Methods {
+		methods = append(methods, string(method))
+	}
 	info := ExperimentInfo{
 		Name:        chaos.Name,
 		Namespace:   chaos.Namespace,
@@ -338,13 +347,14 @@ func (e *ArchiveExperiment) ParseIOChaos() (ExperimentInfo, error) {
 		Target: TargetInfo{
 			Kind: v1alpha1.KindIOChaos,
 			IOChaos: &IOChaosInfo{
-				Action:  string(chaos.Spec.Action),
-				Addr:    chaos.Spec.Addr,
-				Delay:   chaos.Spec.Delay,
-				Errno:   chaos.Spec.Errno,
-				Path:    chaos.Spec.Path,
-				Percent: chaos.Spec.Percent,
-				Methods: chaos.Spec.Methods,
+				Action:     string(chaos.Spec.Action),
+				Delay:      chaos.Spec.Delay,
+				Errno:      chaos.Spec.Errno,
+				Attr:       chaos.Spec.Attr,
+				Path:       chaos.Spec.Path,
+				Percent:    chaos.Spec.Percent,
+				Methods:    chaos.Spec.Methods,
+				VolumePath: chaos.Spec.VolumePath,
 			},
 		},
 	}
