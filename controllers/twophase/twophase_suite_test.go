@@ -392,6 +392,52 @@ var _ = Describe("TwoPhase", func() {
 			Expect(_chaos.(v1alpha1.InnerSchedulerObject).GetStatus().Experiment.Phase).To(Equal(v1alpha1.ExperimentPhaseRunning))
 		})
 
+		It("TwoPhase ToApplyAgain", func() {
+			chaos := fakeTwoPhaseChaos{
+				TypeMeta:   typeMeta,
+				ObjectMeta: objectMeta,
+				Scheduler:  &v1alpha1.SchedulerSpec{Cron: "@hourly"},
+			}
+
+			chaos.SetNextRecover(futureTime)
+			chaos.SetNextStart(pastTime)
+
+			c := fake.NewFakeClientWithScheme(scheme.Scheme, &chaos)
+
+			r := twophase.Reconciler{
+				InnerReconciler: fakeReconciler{},
+				Client:          c,
+				Log:             ctrl.Log.WithName("controllers").WithName("TwoPhase"),
+			}
+
+			_, err = r.Reconcile(req)
+
+			Expect(err).ToNot(HaveOccurred())
+			_chaos := r.Object()
+			err = r.Client.Get(context.TODO(), req.NamespacedName, _chaos)
+			Expect(err).ToNot(HaveOccurred())
+			Expect(_chaos.(v1alpha1.InnerSchedulerObject).GetStatus().Experiment.Phase).To(Equal(v1alpha1.ExperimentPhaseRunning))
+
+			chaos.Status.Experiment.StartTime = &metav1.Time{Time: pastTime}
+			chaos.Scheduler = &v1alpha1.SchedulerSpec{Cron: "@every 20h"}
+			chaos.SetNextStart(futureTime)
+			_ = c.Update(context.TODO(), &chaos)
+
+			_, err = r.Reconcile(req)
+			Expect(err).ToNot(HaveOccurred())
+			err = r.Client.Get(context.TODO(), req.NamespacedName, _chaos)
+			Expect(err).ToNot(HaveOccurred())
+			Expect(_chaos.(v1alpha1.InnerSchedulerObject).GetStatus().Experiment.Phase).To(Equal(v1alpha1.ExperimentPhaseRunning))
+			d, _ := time.ParseDuration("10h")
+			exp := time.Now().Add(d)
+			Expect(chaos.NextStart.Time.Year()).To(Equal(exp.Year()))
+			Expect(chaos.NextStart.Time.Month()).To(Equal(exp.Month()))
+			Expect(chaos.NextStart.Time.Day()).To(Equal(exp.Day()))
+			Expect(chaos.NextStart.Time.Hour()).To(Equal(exp.Hour()))
+			Expect(chaos.NextStart.Time.Minute()).To(Equal(exp.Minute()))
+			Expect(chaos.NextStart.Time.Second()).To(Equal(exp.Second()))
+		})
+
 		It("TwoPhase ToApply Error", func() {
 			chaos := fakeTwoPhaseChaos{
 				TypeMeta:   typeMeta,

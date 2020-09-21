@@ -33,7 +33,8 @@ module.exports = {
           activeBasePath: 'docs',
           label: 'Documentation',
         },
-        { to: 'blog', activeBasePath: 'blog', label: 'Blog' },
+        { to: 'interactiveTutorial', label: 'Interactive Tutorial' },
+        { to: 'blog', activeBasePath: 'blog', label: 'Blog', position: 'right' },
         {
           href: 'https://github.com/chaos-mesh/chaos-mesh',
           label: 'GitHub',
