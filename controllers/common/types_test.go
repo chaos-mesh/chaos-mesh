@@ -14,10 +14,12 @@
 package common
 
 import (
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+
 	"github.com/chaos-mesh/chaos-mesh/pkg/config"
 	"github.com/chaos-mesh/chaos-mesh/pkg/webhook/config/watcher"
-	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 func TestTargetNamespaceShouldSetWhileClusterScopedIsFalse(t *testing.T) {
