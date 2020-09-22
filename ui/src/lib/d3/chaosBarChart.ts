@@ -2,6 +2,7 @@ import * as d3 from 'd3'
 
 import { ChaosKindKeyMap } from 'lib/formikhelpers'
 import { Experiment } from 'api/experiments.type'
+import { Theme } from 'slices/settings'
 import _debounce from 'lodash.debounce'
 
 const margin = {
@@ -14,16 +15,23 @@ const margin = {
 export default function gen({
   root,
   chaos,
+  theme,
 }: {
   root: HTMLElement
   chaos: { kind: Experiment['kind']; sum: number }[]
+  theme: Theme
 }) {
   const sumArr = chaos.map((c) => c.sum)
 
   let width = root.offsetWidth
   const height = root.offsetHeight
 
-  const svg = d3.select(root).append('svg').attr('class', 'chaos-chart').attr('width', width).attr('height', height)
+  const svg = d3
+    .select(root)
+    .append('svg')
+    .attr('class', theme === 'light' ? 'chaos-chart' : 'chaos-chart-dark')
+    .attr('width', width)
+    .attr('height', height)
 
   const x = d3
     .scaleBand()
@@ -51,9 +59,9 @@ export default function gen({
     .call((g) =>
       g
         .append('g')
-        .attr('stroke-opacity', 0.1)
+        .attr('stroke-opacity', 0.5)
         .selectAll('line')
-        .data(y.ticks())
+        .data(y.ticks(5))
         .join('line')
         .attr('y1', (d) => 0.5 + y(d))
         .attr('y2', (d) => 0.5 + y(d))
@@ -70,7 +78,7 @@ export default function gen({
     .attr('y', (d) => y(d.sum) + margin.top)
     .attr('width', x.bandwidth())
     .attr('height', (d) => yHeight - y(d.sum))
-    .attr('fill', '#172d72')
+    .attr('fill', theme === 'light' ? '#172d72' : '#9db0eb')
 
   function reGen() {
     const newWidth = root.offsetWidth
