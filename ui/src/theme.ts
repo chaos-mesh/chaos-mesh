@@ -17,4 +17,16 @@ const theme = responsiveFontSizes(
   })
 )
 
+export const darkTheme = responsiveFontSizes(
+  createMuiTheme({
+    palette: {
+      type: 'dark',
+      primary: {
+        main: '#9db0eb',
+      },
+    },
+    spacing: (factor) => `${0.25 * factor}rem`,
+  })
+)
+
 export default theme

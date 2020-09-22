@@ -9,9 +9,7 @@ import {
 import { defaultExperimentSchema } from 'components/NewExperiment/constants'
 import snakeCaseKeys from 'snakecase-keys'
 
-export const ChaosKindKeyMap: {
-  [kind: string]: { [key: string]: Exclude<keyof ExperimentTarget, 'kind'> }
-} = {
+export const ChaosKindKeyMap: Record<string, Record<string, Exclude<keyof ExperimentTarget, 'kind'>>> = {
   PodChaos: { key: 'pod_chaos' },
   NetworkChaos: { key: 'network_chaos' },
   IoChaos: { key: 'io_chaos' },

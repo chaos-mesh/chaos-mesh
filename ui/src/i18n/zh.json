@@ -1,0 +1,211 @@
+{
+  "overview": {
+    "title": "概览",
+    "totalExperiments": "当前实验"
+  },
+  "newE": {
+    "title": "新的实验",
+    "create": "创建新的实验",
+    "steps": {
+      "basic": "基本信息",
+      "scope": "范围",
+      "target": "目标",
+      "schedule": "计划"
+    },
+    "loadFromExistingExperiments": "从已有实验加载",
+    "loadFromArchives": "从归档加载",
+    "loadFromYamlFile": "从 YAML 文件加载",
+    "basic": {
+      "name": "名称",
+      "nameHelper": "实验的名称",
+      "namespace": "命名空间",
+      "namespaceHelper": "选择实验的命名空间"
+    },
+    "scope": {
+      "namespaceSelectors": "命名空间选择器",
+      "mode": "模式",
+      "modeHelper": "选择实验模式",
+      "modeValue": "模式值",
+      "modeValuehelper": "请填写实验值",
+      "affectedPods": "受到实验作用的 Pods",
+      "affectedPodsPreview": "预览将要受到实验作用的 Pods",
+      "affectedPodsPreviewHelper": "通过勾选 Pods 来进一步限制实验的范围",
+      "noPodsFound": "未发现 Pods",
+      "podsTable": {
+        "name": "名称",
+        "namespace": "命名空间",
+        "ip": "IP 地址",
+        "state": "状态"
+      }
+    },
+    "target": {
+      "kind": "类别",
+      "action": "行为",
+      "pod": {
+        "title": "Pod 生命周期",
+        "actionHelper": "选择 PodChaos 行为"
+      },
+      "network": {
+        "title": "网络",
+        "actionHelper": "选择 NetworkChaos 行为",
+        "target": {
+          "title": "目标",
+          "podsPreview": "预览目标 Pods",
+          "podsPreviewHelper": "通过勾选 Pods 来进一步限制目标的范围"
+        }
+      },
+      "io": {
+        "title": "文件系统 I/O"
+      },
+      "kernel": {
+        "title": "Linux 内核"
+      },
+      "time": {
+        "title": "时钟"
+      },
+      "stress": {
+        "title": "CPU/Memory 压力测试",
+        "actionHelper": "选择 StressChaos 行为"
+      }
+    },
+    "schedule": {
+      "tooltip": "Chaos Mesh 使用 {cronv3} 来定义计划。参考其文档以获取更详细的信息。",
+      "immediate": "立即执行",
+      "mustBeScheduled": "选择的实验操作必须按计划执行",
+      "cronHelper": "使用 {crontabguru} 来帮助生成 cron job 并确认它将在何时运行",
+      "duration": "持续时间",
+      "durationHelper": "实验的持续时间"
+    },
+    "complete": "所有步骤已完成"
+  },
+  "experiments": {
+    "title": "实验",
+    "single": "实验",
+    "status": {
+      "running": "运行中",
+      "paused": "暂停",
+      "failed": "失败",
+      "waiting": "等待中",
+      "finished": "完成"
+    },
+    "noExperimentsFound": "未发现实验",
+    "createdAt": "创建于",
+    "deleteDesc": "你仍然可以在归档中找到此实验",
+    "pauseDesc": "你可以在同一位置重启这个实验",
+    "startDesc": "此操作将立即生效"
+  },
+  "events": {
+    "title": "事件",
+    "noEventsFound": "未发现事件",
+    "table": "事件列表",
+    "eventsPerPage": "每页事件数",
+    "event": {
+      "experiment": "实验",
+      "uuid": "UUID",
+      "namespace": "命名空间",
+      "kind": "类别",
+      "started": "开始时间",
+      "ended": "结束时间",
+      "pod": {
+        "ip": "IP",
+        "name": "名称",
+        "namespace": "命名空间",
+        "action": "行为",
+        "message": "信息"
+      }
+    }
+  },
+  "archives": {
+    "title": "归档",
+    "single": "归档",
+    "no_archives_found": "未发现归档",
+    "numberOfRuns": "运行次数",
+    "numberOfAffectedPods": "受到实验作用的 Pods 数目"
+  },
+  "settings": {
+    "title": "设置",
+    "theme": "主题",
+    "chooseTheme": "选择主题",
+    "themeLight": "浅色",
+    "themeDark": "暗色",
+    "language": "语言",
+    "chooseInterfaceLanguage": "选择界面语言",
+    "en": "英语",
+    "zh": "简体中文"
+  },
+  "common": {
+    "doc": "文档",
+    "back": "上一步",
+    "next": "下一步",
+    "finish": "完成",
+    "reset": "重置",
+    "submit": "提交",
+    "upload": "上传",
+    "advancedOptions": "高级选项",
+    "isKVHelperText": "键入 key:value 并以空格结尾来创建一个键值对",
+    "multiOptions": "支持多选",
+    "noOptions": "无选项",
+    "detail": "详细信息",
+    "report": "报告",
+    "start": "启动",
+    "pause": "暂停",
+    "update": "更新",
+    "status": "状态",
+    "configuration": "配置",
+    "configured": "已配置",
+    "confirm": "确认",
+    "cancel": "取消",
+    "createSuccessfully": "创建成功",
+    "importSuccessfully": "导入成功",
+    "deleteSuccessfully": "归档成功",
+    "startSuccessfully": "启动成功",
+    "pauseSuccessfully": "暂停成功",
+    "timeline": "时间线",
+    "search": "搜索",
+    "meta": "元信息",
+    "uuid": "UUID"
+  },
+  "k8s": {
+    "labels": "标签",
+    "annotations": "注解",
+    "labelSelectors": "标签选择器",
+    "annotationsSelectors": "注解选择器",
+    "phaseSelectors": "阶段选择器"
+  },
+  "validation": {
+    "name": "请填写实验名称",
+    "target": {
+      "pod_chaos": {
+        "container_name": "请填写容器名称"
+      },
+      "network_chaos": {
+        "action": "请填写 NetworkChaos 操作",
+        "direction": "请选择隔离方向",
+        "bandwidth": {
+          "rate": "请填写带宽速率"
+        },
+        "corrupt": {
+          "corrupt": "请填写坏包比例",
+          "correlation": "请填写坏包关联度"
+        },
+        "delay": {
+          "latency": "请填写网络延迟"
+        },
+        "duplicate": {
+          "duplicate": "请填写重复包比例",
+          "correlation": "请填写重复包关联度"
+        },
+        "loss": {
+          "loss": "请填写丢包比例",
+          "correlation": "请填写丢包关联度"
+        }
+      },
+      "io_chaos": {
+        "action": "请填写 IOChaos 操作"
+      },
+      "time_chaos": {
+        "time_offset": "请填写时间偏移量"
+      }
+    }
+  }
+}

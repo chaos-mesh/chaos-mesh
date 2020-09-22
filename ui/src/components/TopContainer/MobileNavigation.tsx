@@ -1,12 +1,13 @@
-import { AppBar, IconButton, Toolbar, Fab } from '@material-ui/core'
+import { AppBar, Fab, IconButton, Toolbar } from '@material-ui/core'
 import { Theme, createStyles, makeStyles } from '@material-ui/core/styles'
 
 import AddIcon from '@material-ui/icons/Add'
-import { Link } from 'react-router-dom'
 import ArchiveOutlinedIcon from '@material-ui/icons/ArchiveOutlined'
 import BlurLinearIcon from '@material-ui/icons/BlurLinear'
+import { Link } from 'react-router-dom'
 import { NavLink } from 'react-router-dom'
 import React from 'react'
+import SettingsIcon from '@material-ui/icons/Settings'
 import TuneIcon from '@material-ui/icons/Tune'
 import WebIcon from '@material-ui/icons/Web'
 
@@ -38,6 +39,10 @@ const items = [
   {
     icon: <ArchiveOutlinedIcon />,
     href: 'archives',
+  },
+  {
+    icon: <SettingsIcon />,
+    href: 'settings',
   },
 ]
 

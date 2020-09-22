@@ -4,6 +4,7 @@ import React, { useEffect, useRef, useState } from 'react'
 
 import AdvancedOptions from 'components/AdvancedOptions'
 import { FormikCtx } from 'components/NewExperiment/types'
+import T from 'components/T'
 import { defaultExperimentSchema } from 'components/NewExperiment/constants'
 import { getIn } from 'formik'
 import { resetOtherChaos } from 'lib/formikhelpers'
@@ -58,8 +59,8 @@ export default function Stress() {
           select
           margin="dense"
           fullWidth
-          label="Action"
-          helperText="Please select an action"
+          label={T('newE.target.action')}
+          helperText={T('newE.target.stress.actionHelper')}
           value={action}
           onChange={handleActionChange}
         >
