@@ -17,7 +17,7 @@ const useStyles = makeStyles((theme: Theme) =>
 )
 
 interface PaperTopProps {
-  title: string
+  title: string | JSX.Element
 }
 
 const PaperTop: React.FC<PaperTopProps> = ({ title, children }) => {

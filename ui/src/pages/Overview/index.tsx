@@ -5,9 +5,12 @@ import { Theme, createStyles, makeStyles } from '@material-ui/core/styles'
 import { Experiment } from 'api/experiments.type'
 import Loading from 'components/Loading'
 import PaperTop from 'components/PaperTop'
+import { RootState } from 'store'
 import StatusPanel from 'components/StatusPanel'
+import T from 'components/T'
 import api from 'api'
 import genChaosChart from 'lib/d3/chaosBarChart'
+import { useSelector } from 'react-redux'
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -20,6 +23,8 @@ const useStyles = makeStyles((theme: Theme) =>
 
 export default function Overview() {
   const classes = useStyles()
+
+  const { theme } = useSelector((state: RootState) => state.settings)
 
   const chaosChartRef = useRef<HTMLDivElement>(null)
   const [loading, setLoading] = useState(false)
@@ -52,11 +57,12 @@ export default function Overview() {
             }
 
             return acc
-          }, {} as { [key: string]: number })
+          }, {} as Record<string, number>)
         ).map(([k, v]) => ({ kind: k, sum: v })),
+        theme,
       })
     }
-  }, [experiments])
+  }, [experiments, theme])
 
   return (
     <>
@@ -64,7 +70,7 @@ export default function Overview() {
         <Grid container spacing={3}>
           <Grid item xs={12} md={6}>
             <Paper variant="outlined">
-              <PaperTop title="Total Experiments" />
+              <PaperTop title={T('overview.totalExperiments')} />
               <div ref={chaosChartRef} className={classes.chaosChart} />
             </Paper>
           </Grid>

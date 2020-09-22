@@ -6,6 +6,7 @@ import { Link } from 'react-router-dom'
 import MenuIcon from '@material-ui/icons/Menu'
 import { NavigationBreadCrumbProps } from 'slices/navigation.type'
 import React from 'react'
+import T from 'components/T'
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -53,6 +54,10 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 )
 
+function hasLocalBreadcrumb(b: string) {
+  return ['overview', 'experiments', 'newExperiment', 'events', 'archives', 'settings'].includes(b)
+}
+
 interface HeaderProps {
   openDrawer: boolean
   handleDrawerToggle: () => void
@@ -86,12 +91,12 @@ const Header: React.FC<HeaderProps> = ({ openDrawer, handleDrawerToggle, breadcr
                 return b.path ? (
                   <Link key={b.name} to={b.path} style={{ textDecoration: 'none' }}>
                     <Typography className={classes.hoverLink} variant="h6" component="h2" color="textSecondary">
-                      {b.name}
+                      {hasLocalBreadcrumb(b.name) ? T(`${b.name}.title`) : b.name}
                     </Typography>
                   </Link>
                 ) : (
                   <Typography key={b.name} variant="h6" component="h2" color="primary">
-                    {b.name}
+                    {hasLocalBreadcrumb(b.name) ? T(`${b.name === 'newExperiment' ? 'newE' : b.name}.title`) : b.name}
                   </Typography>
                 )
               })}

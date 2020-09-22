@@ -1,3 +1,5 @@
+import 'dayjs/locale/zh'
+
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 
@@ -18,6 +20,9 @@ export function dayComparator(a: string, b: string) {
   return 0
 }
 
-export const format = (date: string) => dayjs(date).format('YYYY-MM-DD HH:mm:ss A')
+export const format = (date: string, locale?: string) =>
+  dayjs(date)
+    .locale(locale ?? 'en')
+    .format('YYYY-MM-DD HH:mm:ss A')
 
 export default dayjs

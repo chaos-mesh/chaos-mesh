@@ -7,6 +7,7 @@ import CheckCircleOutlineIcon from '@material-ui/icons/CheckCircleOutline'
 import ErrorOutlineIcon from '@material-ui/icons/ErrorOutline'
 import PauseCircleOutlineIcon from '@material-ui/icons/PauseCircleOutline'
 import SnoozeIcon from '@material-ui/icons/Snooze'
+import T from 'components/T'
 import TimelineIcon from '@material-ui/icons/Timeline'
 import { getStateofExperiments } from 'slices/experiments'
 import { useSelector } from 'react-redux'
@@ -56,27 +57,27 @@ const StatusPanel = () => {
   const fontSize = isTabletScreen ? undefined : 'large'
   const data: { [k: string]: d } = {
     running: {
-      label: 'Running',
+      label: 'running',
       value: state.Running,
       Icon: <TimelineIcon color="primary" fontSize={fontSize} />,
     },
     paused: {
-      label: 'Paused',
+      label: 'paused',
       value: state.Paused,
       Icon: <PauseCircleOutlineIcon color="primary" fontSize={fontSize} />,
     },
     failed: {
-      label: 'Failed',
+      label: 'failed',
       value: state.Failed,
       Icon: <ErrorOutlineIcon color="error" fontSize={fontSize} />,
     },
     waiting: {
-      label: 'Waiting',
+      label: 'waiting',
       value: state.Waiting,
       Icon: <SnoozeIcon color="primary" fontSize={fontSize} />,
     },
     finished: {
-      label: 'Finished',
+      label: 'finished',
       value: state.Finished,
       Icon: <CheckCircleOutlineIcon fontSize={fontSize} className={classes.finished} />,
     },
@@ -93,7 +94,7 @@ const StatusPanel = () => {
           </Grid>
           <Grid item xs>
             <Box>
-              <Typography variant="overline">{data.label}</Typography>
+              <Typography variant="overline">{T(`experiments.status.${data.label}`)}</Typography>
               <Typography variant="h5">{data.value}</Typography>
             </Box>
           </Grid>
