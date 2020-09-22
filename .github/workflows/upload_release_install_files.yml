@@ -25,5 +25,3 @@ jobs:
           aws s3 cp install.sh ${{ secrets.AWS_BUCKET_NAME }}/${GIT_TAG}/install.sh
           aws s3 cp manifests/crd.yaml ${{ secrets.AWS_BUCKET_NAME }}/${GIT_TAG}/crd.yaml
           aws s3 cp examples/web-show/deploy.sh ${{ secrets.AWS_BUCKET_NAME }}/${GIT_TAG}/web-show/deploy.sh
-          # TODO: delete it
-          aws s3 cp manifests/chaosfs-sidecar.yaml ${{ secrets.AWS_BUCKET_NAME }}/${GIT_TAG}/chaosfs-sidecar.yaml
