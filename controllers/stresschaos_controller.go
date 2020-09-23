@@ -16,6 +16,7 @@ package controllers
 import (
 	"context"
 
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/client-go/tools/record"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
@@ -52,7 +53,12 @@ func (r *StressChaosReconciler) Reconcile(req ctrl.Request) (result ctrl.Result,
 
 	chaos := &v1alpha1.StressChaos{}
 	if err := r.Client.Get(context.Background(), req.NamespacedName, chaos); err != nil {
-		r.Log.Error(err, "unable to get stress chaos")
+		if apierrors.IsNotFound(err) {
+			r.Log.Info("stress chaos not found")
+		} else {
+			r.Log.Error(err, "unable to get stress chaos")
+		}
+
 		return ctrl.Result{}, nil
 	}
 
