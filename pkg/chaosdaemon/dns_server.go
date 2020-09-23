@@ -44,7 +44,7 @@ func (s *daemonServer) SetDNSServer(ctx context.Context,
 		}
 
 		// backup the /etc/resolv.conf
-		cmd := defaultProcessBuilder("cp", DNSServerConfFile, DNSServerConfFile+".chaos.bak").
+		cmd := defaultProcessBuilder("sh", "-c", fmt.Sprintf("ls %s.chaos.bak || cp %s %s.chaos.bak", DNSServerConfFile, DNSServerConfFile, DNSServerConfFile)).
 			SetMountNS(GetNsPath(pid, mountNS)).
 			Build(context.Background())
 		out, err := cmd.Output()
