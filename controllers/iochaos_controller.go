@@ -23,6 +23,8 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
+	"github.com/chaos-mesh/chaos-mesh/controllers/common"
+
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/iochaos"
 	"github.com/chaos-mesh/chaos-mesh/pkg/utils"
@@ -41,6 +43,14 @@ type IoChaosReconciler struct {
 
 // Reconcile reconciles an IOChaos resource
 func (r *IoChaosReconciler) Reconcile(req ctrl.Request) (result ctrl.Result, err error) {
+	logger := r.Log.WithValues("reconciler", "iochaos")
+
+	if !common.ControllerCfg.ClusterScoped && req.Namespace != common.ControllerCfg.TargetNamespace {
+		// NOOP
+		logger.Info("ignore chaos which belongs to an unexpected namespace within namespace scoped mode",
+			"chaosName", req.Name, "expectedNamespace", common.ControllerCfg.TargetNamespace, "actualNamespace", req.Namespace)
+		return
+	}
 
 	chaos := &v1alpha1.IoChaos{}
 	if err := r.Client.Get(context.Background(), req.NamespacedName, chaos); err != nil {

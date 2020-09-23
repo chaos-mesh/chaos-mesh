@@ -16,6 +16,8 @@ package controllers
 import (
 	"context"
 
+	"github.com/chaos-mesh/chaos-mesh/controllers/common"
+
 	"k8s.io/client-go/tools/record"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
@@ -42,6 +44,13 @@ type StressChaosReconciler struct {
 // Reconcile reconciles a StressChaos resource
 func (r *StressChaosReconciler) Reconcile(req ctrl.Request) (result ctrl.Result, err error) {
 	logger := r.Log.WithValues("reconciler", "stresschaos")
+
+	if !common.ControllerCfg.ClusterScoped && req.Namespace != common.ControllerCfg.TargetNamespace {
+		// NOOP
+		logger.Info("ignore chaos which belongs to an unexpected namespace within namespace scoped mode",
+			"chaosName", req.Name, "expectedNamespace", common.ControllerCfg.TargetNamespace, "actualNamespace", req.Namespace)
+		return
+	}
 
 	reconciler := stresschaos.Reconciler{
 		Client:        r.Client,

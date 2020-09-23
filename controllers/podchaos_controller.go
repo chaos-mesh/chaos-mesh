@@ -16,6 +16,8 @@ package controllers
 import (
 	"context"
 
+	"github.com/chaos-mesh/chaos-mesh/controllers/common"
+
 	"github.com/go-logr/logr"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/client-go/tools/record"
@@ -41,6 +43,13 @@ type PodChaosReconciler struct {
 // Reconcile reconciles a PodChaos resource
 func (r *PodChaosReconciler) Reconcile(req ctrl.Request) (result ctrl.Result, err error) {
 	logger := r.Log.WithValues("reconciler", "podchaos")
+
+	if !common.ControllerCfg.ClusterScoped && req.Namespace != common.ControllerCfg.TargetNamespace {
+		// NOOP
+		logger.Info("ignore chaos which belongs to an unexpected namespace within namespace scoped mode",
+			"chaosName", req.Name, "expectedNamespace", common.ControllerCfg.TargetNamespace, "actualNamespace", req.Namespace)
+		return
+	}
 
 	reconciler := podchaos.Reconciler{
 		Client:        r.Client,
