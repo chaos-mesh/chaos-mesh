@@ -39,6 +39,7 @@ FLAGS:
         --local-registry     Deploy local docker registry in local Kubernetes cluster
         --template           Locally render templates
         --k3s                Install chaos-mesh in k3s environment
+        --host-network       Install chaos-mesh using hostNetwork
 OPTIONS:
     -v, --version            Version of chaos-mesh, default value: latest
     -l, --local [kind]       Choose a way to run a local kubernetes cluster, supported value: kind,
@@ -77,6 +78,7 @@ main() {
     local template=false
     local install_dependency_only=false
     local k3s=false
+    local host_network=false
 
     while [[ $# -gt 0 ]]
     do
@@ -190,6 +192,11 @@ main() {
                 shift
                 shift
                 ;;
+            --host-network)
+                host_network=true
+                shift
+                shift
+                ;;
             *)
                 echo "unknown flag or option $key"
                 usage
@@ -218,7 +225,7 @@ main() {
 
     if $template; then
         ensure gen_crd_manifests "${crd}"
-        ensure gen_chaos_mesh_manifests "${runtime}" "${k3s}"
+        ensure gen_chaos_mesh_manifests "${runtime}" "${k3s}" "${host_network}"
         exit 0
     fi
 
@@ -610,7 +617,7 @@ install_chaos_mesh() {
     fi
 
     gen_crd_manifests "${crd}" | kubectl apply -f - || exit 1
-    gen_chaos_mesh_manifests "${runtime}" "${k3s}" | kubectl apply -f - || exit 1
+    gen_chaos_mesh_manifests "${runtime}" "${k3s}" "${host_network}"| kubectl apply -f - || exit 1
 }
 
 version_lt() {
@@ -800,6 +807,7 @@ check_url() {
 gen_chaos_mesh_manifests() {
     local runtime=$1
     local k3s=$2
+    local host_network=$3
 
     local socketPath="/var/run/docker.sock"
     local mountPath="/var/run/docker.sock"
@@ -1047,6 +1055,7 @@ spec:
         app.kubernetes.io/instance: chaos-mesh
         app.kubernetes.io/component: chaos-daemon
     spec:
+      hostNetwork: ${host_network}
       hostIPC: true
       hostPID: true
       containers:
@@ -1173,6 +1182,7 @@ spec:
       annotations:
         rollme: "install.sh"
     spec:
+      hostNetwork: ${host_network}
       serviceAccount: chaos-controller-manager
       containers:
       - name: chaos-mesh
