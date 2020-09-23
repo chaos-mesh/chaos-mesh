@@ -30,6 +30,7 @@ import (
 // DNSChaosReconciler reconciles an DNSChaos object
 type DNSChaosReconciler struct {
 	client.Client
+	client.Reader
 	record.EventRecorder
 	Log logr.Logger
 }
@@ -43,11 +44,12 @@ func (r *DNSChaosReconciler) Reconcile(req ctrl.Request) (result ctrl.Result, er
 
 	reconciler := dnschaos.Reconciler{
 		Client:        r.Client,
+		Reader:        r.Reader,
 		EventRecorder: r.EventRecorder,
 		Log:           logger,
 	}
 	chaos := &v1alpha1.DNSChaos{}
-	if err := r.Get(context.Background(), req.NamespacedName, chaos); err != nil {
+	if err := r.Client.Get(context.Background(), req.NamespacedName, chaos); err != nil {
 		r.Log.Error(err, "unable to get dnschaos")
 		return ctrl.Result{}, nil
 	}

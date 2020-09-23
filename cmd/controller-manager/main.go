@@ -187,6 +187,7 @@ func main() {
 
 	if err = (&controllers.DNSChaosReconciler{
 		Client:        mgr.GetClient(),
+		Reader:        mgr.GetAPIReader(),
 		EventRecorder: mgr.GetEventRecorderFor("dnschaos-controller"),
 		Log:           ctrl.Log.WithName("controllers").WithName("DNSChaos"),
 	}).SetupWithManager(mgr); err != nil {
