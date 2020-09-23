@@ -1,4 +1,4 @@
-// Copyright 2019 Chaos Mesh Authors.
+// Copyright 2020 Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -24,42 +24,39 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	"github.com/chaos-mesh/chaos-mesh/controllers/networkchaos"
+	"github.com/chaos-mesh/chaos-mesh/controllers/httpchaos"
 	"github.com/chaos-mesh/chaos-mesh/pkg/utils"
 )
 
-// NetworkChaosReconciler reconciles a NetworkChaos object
-type NetworkChaosReconciler struct {
+// HTTPChaosReconciler reconciles a HTTPChaos object
+type HTTPChaosReconciler struct {
 	client.Client
 	client.Reader
 	record.EventRecorder
 	Log logr.Logger
 }
 
-// +kubebuilder:rbac:groups=chaos-mesh.org,resources=networkchaos,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups=chaos-mesh.org,resources=networkchaos/status,verbs=get;update;patch
+// +kubebuilder:rbac:groups=chaos-mesh.org,resources=httpchaos,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=chaos-mesh.org,resources=httpchaos/status,verbs=get;update;patch
 
-// Reconcile reconciles a NetworkChaos resource
-func (r *NetworkChaosReconciler) Reconcile(req ctrl.Request) (result ctrl.Result, err error) {
-	logger := r.Log.WithValues("reconciler", "networkchaos")
+func (r *HTTPChaosReconciler) Reconcile(req ctrl.Request) (result ctrl.Result, err error) {
+	logger := r.Log.WithValues("reconciler", "httpfaultchaos")
 
-	reconciler := networkchaos.Reconciler{
+	reconciler := httpchaos.Reconciler{
 		Client:        r.Client,
 		Reader:        r.Reader,
 		EventRecorder: r.EventRecorder,
 		Log:           logger,
 	}
-
-	chaos := &v1alpha1.NetworkChaos{}
+	chaos := &v1alpha1.HTTPChaos{}
 	if err := r.Client.Get(context.Background(), req.NamespacedName, chaos); err != nil {
 		if apierrors.IsNotFound(err) {
-			r.Log.Info("network chaos not found")
+			r.Log.Info("http faultchaos not found")
 		} else {
-			r.Log.Error(err, "unable to get network chaos")
+			r.Log.Error(err, "unable to get http faultchaos")
 		}
 		return ctrl.Result{}, nil
 	}
-
 	result, err = reconciler.Reconcile(req, chaos)
 	if err != nil {
 		if chaos.IsDeleted() || chaos.IsPaused() {
@@ -68,13 +65,12 @@ func (r *NetworkChaosReconciler) Reconcile(req ctrl.Request) (result ctrl.Result
 			r.Event(chaos, v1.EventTypeWarning, utils.EventChaosInjectFailed, err.Error())
 		}
 	}
-
 	return result, nil
-
 }
 
-func (r *NetworkChaosReconciler) SetupWithManager(mgr ctrl.Manager) error {
+func (r *HTTPChaosReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
-		For(&v1alpha1.NetworkChaos{}).
+		//exports `HttpFaultChaos` object, which represents the yaml schema content the user applies.
+		For(&v1alpha1.HTTPChaos{}).
 		Complete(r)
 }
