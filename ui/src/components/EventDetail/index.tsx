@@ -3,8 +3,11 @@ import { TableCell as MUITableCell, Paper, Table, TableBody, TableRow, Typograph
 import AffectedPods from 'components/AffectedPods'
 import { Event } from 'api/events.type'
 import React from 'react'
+import { RootState } from 'store'
+import T from 'components/T'
 import { format } from 'lib/dayjs'
 import useRunningLabelStyles from 'lib/styles/runningLabel'
+import { useSelector } from 'react-redux'
 
 const TableCell = withStyles({
   root: {
@@ -17,13 +20,15 @@ interface EventDetailProps {
 }
 
 const EventDetail: React.FC<EventDetailProps> = ({ event: e }) => {
+  const { lang } = useSelector((state: RootState) => state.settings)
+
   const runningLabel = useRunningLabelStyles()
 
   return (
     <Table>
       <TableBody>
         <TableRow>
-          <TableCell>Experiment ID</TableCell>
+          <TableCell>{T('events.event.experiment')} ID</TableCell>
           <TableCell>
             <Typography variant="body2" color="textSecondary">
               {e.experiment_id}
@@ -32,7 +37,7 @@ const EventDetail: React.FC<EventDetailProps> = ({ event: e }) => {
         </TableRow>
 
         <TableRow>
-          <TableCell>Experiment Name</TableCell>
+          <TableCell>{T('events.event.experiment')}</TableCell>
           <TableCell>
             <Typography variant="body2" color="textSecondary">
               {e.experiment}
@@ -41,7 +46,7 @@ const EventDetail: React.FC<EventDetailProps> = ({ event: e }) => {
         </TableRow>
 
         <TableRow>
-          <TableCell>Namespace</TableCell>
+          <TableCell>{T('events.event.namespace')}</TableCell>
           <TableCell>
             <Typography variant="body2" color="textSecondary">
               {e.namespace}
@@ -50,7 +55,7 @@ const EventDetail: React.FC<EventDetailProps> = ({ event: e }) => {
         </TableRow>
 
         <TableRow>
-          <TableCell>Kind</TableCell>
+          <TableCell>{T('events.event.kind')}</TableCell>
           <TableCell>
             <Typography variant="body2" color="textSecondary">
               {e.kind}
@@ -59,25 +64,29 @@ const EventDetail: React.FC<EventDetailProps> = ({ event: e }) => {
         </TableRow>
 
         <TableRow>
-          <TableCell>Started</TableCell>
+          <TableCell>{T('events.event.started')}</TableCell>
           <TableCell>
             <Typography variant="body2" color="textSecondary">
-              {format(e.start_time)}
+              {format(e.start_time, lang)}
             </Typography>
           </TableCell>
         </TableRow>
 
         <TableRow>
-          <TableCell>Ended</TableCell>
+          <TableCell>{T('events.event.ended')}</TableCell>
           <TableCell>
             <Typography variant="body2" color="textSecondary">
-              {e.finish_time ? format(e.finish_time) : <span className={runningLabel.root}>Running</span>}
+              {e.finish_time ? (
+                format(e.finish_time, lang)
+              ) : (
+                <span className={runningLabel.root}>{T('experiments.status.running')}</span>
+              )}
             </Typography>
           </TableCell>
         </TableRow>
 
         <TableRow>
-          <TableCell>Affected Pods</TableCell>
+          <TableCell>{T('newE.scope.affectedPods')}</TableCell>
           <TableCell>
             <Paper variant="outlined">
               <AffectedPods pods={e.pods!} />

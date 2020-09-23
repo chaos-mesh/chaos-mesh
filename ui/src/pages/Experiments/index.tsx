@@ -6,16 +6,19 @@ import { setAlert, setAlertOpen } from 'slices/globalStatus'
 
 import ConfirmDialog from 'components/ConfirmDialog'
 import { Experiment } from 'api/experiments.type'
-import ExperimentPaper from 'components/ExperimentPaper'
+import ExperimentListItem from 'components/ExperimentListItem'
 import Loading from 'components/Loading'
+import T from 'components/T'
 import TuneIcon from '@material-ui/icons/Tune'
 import _groupBy from 'lodash.groupby'
 import api from 'api'
 import { dayComparator } from 'lib/dayjs'
-import { toTitleCase } from 'lib/utils'
+import { useIntl } from 'react-intl'
 import { useSelector } from 'react-redux'
 
 export default function Experiments() {
+  const intl = useIntl()
+
   const needToRefreshExperiments = useSelector((state: RootState) => state.experiments.needToRefreshExperiments)
   const dispatch = useStoreDispatch()
 
@@ -117,7 +120,7 @@ export default function Experiments() {
         dispatch(
           setAlert({
             type: 'success',
-            message: `${toTitleCase(action)}${action === 'start' ? 'ed' : 'd'} successfully!`,
+            message: intl.formatMessage({ id: `common.${action}Successfully` }),
           })
         )
         dispatch(setAlertOpen(true))
@@ -142,7 +145,12 @@ export default function Experiments() {
                 {experimentsByKind.length > 0 &&
                   experimentsByKind.map((e) => (
                     <Grid key={e.uid} item xs={12}>
-                      <ExperimentPaper experiment={e} handleSelect={setSelected} handleDialogOpen={setDialogOpen} />
+                      <ExperimentListItem
+                        experiment={e}
+                        handleSelect={setSelected}
+                        handleDialogOpen={setDialogOpen}
+                        intl={intl}
+                      />
                     </Grid>
                   ))}
               </Grid>
@@ -155,7 +163,7 @@ export default function Experiments() {
             <TuneIcon fontSize="large" />
           </Box>
           <Typography variant="h6" align="center">
-            No experiments found. Try to create one.
+            {T('experiments.noExperimentsFound')}
           </Typography>
         </Box>
       )}

@@ -4,6 +4,7 @@ import { getIn, useFormikContext } from 'formik'
 
 import Autocomplete from '@material-ui/lab/Autocomplete'
 import { Experiment } from 'components/NewExperiment/types'
+import T from 'components/T'
 
 interface LabelFieldProps {
   isKV?: boolean // whether to use the key: value format
@@ -104,13 +105,7 @@ const LabelField: React.FC<LabelFieldProps & TextFieldProps> = ({ isKV = false, 
             variant="outlined"
             margin="dense"
             fullWidth
-            helperText={
-              error !== ''
-                ? error
-                : isKV
-                ? 'Type key:value and end with a space to generate a key/value pair'
-                : props.helperText
-            }
+            helperText={error !== '' ? error : isKV ? T('common.isKVHelperText') : props.helperText}
             onChange={onInputChange}
             onKeyDown={onKeyDown}
             error={error !== ''}

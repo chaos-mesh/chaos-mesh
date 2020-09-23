@@ -21,7 +21,7 @@ export default function Time() {
         id="target.time_chaos.time_offset"
         name="target.time_chaos.time_offset"
         label="Offset"
-        helperText="The time offset"
+        helperText="Fill the time offset"
         error={errors.target?.time_chaos?.time_offset && touched.target?.time_chaos?.time_offset ? true : false}
       />
 

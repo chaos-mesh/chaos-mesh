@@ -11,6 +11,7 @@ import {
   Typography,
 } from '@material-ui/core'
 import { Form, Formik } from 'formik'
+import { IntlShape, useIntl } from 'react-intl'
 import React, { useEffect, useState } from 'react'
 import { defaultExperimentSchema, validationSchema } from './constants'
 import { parseLoaded, parseSubmit, yamlToExperiment } from 'lib/formikhelpers'
@@ -25,6 +26,7 @@ import PaperTop from 'components/PaperTop'
 import SkeletonN from 'components/SkeletonN'
 import Stepper from './Stepper'
 import { StepperProvider } from './Context'
+import T from 'components/T'
 import api from 'api'
 import flat from 'flat'
 import { setNeedToRefreshExperiments } from 'slices/experiments'
@@ -34,7 +36,7 @@ import yaml from 'js-yaml'
 
 const Skeleton3 = () => <SkeletonN n={3} />
 
-const LoadWrapper: React.FC<{ title: string }> = ({ title, children }) => (
+const LoadWrapper: React.FC<{ title: string | JSX.Element }> = ({ title, children }) => (
   <Box mb={6}>
     <Box mb={6}>
       <Typography>{title}</Typography>
@@ -60,9 +62,10 @@ const CustomRadioLabel = (e: ExperimentResponse | Archive) => (
 
 interface ActionsProps {
   setInitialValues: (initialValues: Experiment) => void
+  intl: IntlShape
 }
 
-const Actions = ({ setInitialValues }: ActionsProps) => {
+const Actions = ({ setInitialValues, intl }: ActionsProps) => {
   const dispatch = useStoreDispatch()
 
   const [experiments, setExperiments] = useState<ExperimentResponse[] | null>(null)
@@ -125,7 +128,7 @@ const Actions = ({ setInitialValues }: ActionsProps) => {
         dispatch(
           setAlert({
             type: 'success',
-            message: `Imported successfully!`,
+            message: intl.formatMessage({ id: 'common.importSuccessfully' }),
           })
         )
       } catch (e) {
@@ -133,7 +136,7 @@ const Actions = ({ setInitialValues }: ActionsProps) => {
         dispatch(
           setAlert({
             type: 'error',
-            message: `An error occurred: ${e}`,
+            message: e,
           })
         )
       } finally {
@@ -145,7 +148,7 @@ const Actions = ({ setInitialValues }: ActionsProps) => {
 
   return (
     <Box p={6} pt={12}>
-      <LoadWrapper title="Load From Existing Experiments">
+      <LoadWrapper title={T('newE.loadFromExistingExperiments')}>
         <RadioGroup value={experimentRadio} onChange={onExperimentRadioChange}>
           {experiments && experiments.length > 0 ? (
             experiments.map((e) => (
@@ -157,7 +160,7 @@ const Actions = ({ setInitialValues }: ActionsProps) => {
               />
             ))
           ) : experiments?.length === 0 ? (
-            <Typography variant="body2">No experiments found.</Typography>
+            <Typography variant="body2">{T('experiments.noExperimentsFound')}</Typography>
           ) : (
             <Skeleton3 />
           )}
@@ -168,7 +171,7 @@ const Actions = ({ setInitialValues }: ActionsProps) => {
         <Divider />
       </Box>
 
-      <LoadWrapper title="Load From Archives">
+      <LoadWrapper title={T('newE.loadFromArchives')}>
         <RadioGroup value={archiveRadio} onChange={onArchiveRadioChange}>
           {archives && archives.length > 0 ? (
             archives.map((a) => (
@@ -180,7 +183,7 @@ const Actions = ({ setInitialValues }: ActionsProps) => {
               />
             ))
           ) : archives?.length === 0 ? (
-            <Typography variant="body2">No archives found.</Typography>
+            <Typography variant="body2">{T('archives.no_archives_found')}</Typography>
           ) : (
             <Skeleton3 />
           )}
@@ -191,9 +194,9 @@ const Actions = ({ setInitialValues }: ActionsProps) => {
         <Divider />
       </Box>
 
-      <LoadWrapper title="Load From YAML File">
+      <LoadWrapper title={T('newE.loadFromYamlFile')}>
         <Button component="label" variant="outlined" size="small" startIcon={<CloudUploadOutlinedIcon />}>
-          Upload
+          {T('common.upload')}
           <input type="file" style={{ display: 'none' }} onChange={handleUploadYAML} />
         </Button>
       </LoadWrapper>
@@ -203,6 +206,8 @@ const Actions = ({ setInitialValues }: ActionsProps) => {
 
 export default function NewExperiment() {
   const history = useHistory()
+
+  const intl = useIntl()
   const dispatch = useStoreDispatch()
 
   const [initialValues, setInitialValues] = useState<Experiment>(defaultExperimentSchema)
@@ -220,7 +225,7 @@ export default function NewExperiment() {
         dispatch(
           setAlert({
             type: 'success',
-            message: 'Created successfully!',
+            message: intl.formatMessage({ id: 'common.createSuccessfully' }),
           })
         )
         dispatch(setAlertOpen(true))
@@ -245,7 +250,7 @@ export default function NewExperiment() {
       >
         {({ errors }) => (
           <Paper variant="outlined" style={{ height: '100%' }}>
-            <PaperTop title="Create a New Experiment" />
+            <PaperTop title={T('newE.create')} />
             <Grid container>
               <Grid item xs={12} sm={8}>
                 <Form>
@@ -253,7 +258,7 @@ export default function NewExperiment() {
                 </Form>
               </Grid>
               <Grid item xs={12} sm={4}>
-                <Actions setInitialValues={setInitialValues} />
+                <Actions setInitialValues={setInitialValues} intl={intl} />
               </Grid>
             </Grid>
 
@@ -264,7 +269,7 @@ export default function NewExperiment() {
               }}
               open={Object.keys(flat(errors)).length > 0}
             >
-              <Alert severity="error">{Object.values<string>(flat(errors))[0]}</Alert>
+              <Alert severity="error">{Object.values<string>(flat(errors)).join('/')}</Alert>
             </Snackbar>
           </Paper>
         )}
