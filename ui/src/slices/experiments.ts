@@ -35,8 +35,8 @@ export const getPodsByNamespaces = createAsyncThunk(
 
 const initialState: {
   namespaces: string[]
-  labels: { [key: string]: string[] }
-  annotations: { [key: string]: string[] }
+  labels: Record<string, string[]>
+  annotations: Record<string, string[]>
   pods: any[]
   stateOfExperiments: StateOfExperiments
   needToRefreshExperiments: boolean
@@ -67,10 +67,10 @@ const experimentsSlice = createSlice({
       state.namespaces = (action.payload as string[]).filter((d) => !namespaceFilters.includes(d))
     })
     builder.addCase(getLabels.fulfilled, (state, action: ExperimentsAction) => {
-      state.labels = action.payload as { [key: string]: string[] }
+      state.labels = action.payload as Record<string, string[]>
     })
     builder.addCase(getAnnotations.fulfilled, (state, action: ExperimentsAction) => {
-      state.annotations = action.payload as { [key: string]: string[] }
+      state.annotations = action.payload as Record<string, string[]>
     })
     builder.addCase(getPodsByNamespaces.fulfilled, (state, action) => {
       state.pods = action.payload as any[]

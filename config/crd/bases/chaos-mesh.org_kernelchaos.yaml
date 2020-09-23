@@ -246,6 +246,8 @@ spec:
                   format: date-time
                   type: string
               type: object
+            failedMessage:
+              type: string
             phase:
               description: Phase is the chaos status.
               type: string

@@ -15,7 +15,6 @@ package v1alpha1
 
 import (
 	"fmt"
-	"strconv"
 	"time"
 
 	"k8s.io/apimachinery/pkg/runtime"
@@ -97,7 +96,7 @@ func (in *IoChaos) ValidatePodMode(spec *field.Path) field.ErrorList {
 
 func (in *IoChaosSpec) validateDelay(delay *field.Path) field.ErrorList {
 	allErrs := field.ErrorList{}
-	if in.Action == IODelayAction || in.Action == IOMixedAction {
+	if in.Action == IoLatency {
 		_, err := time.ParseDuration(in.Delay)
 		if err != nil {
 			allErrs = append(allErrs, field.Invalid(delay, in.Delay,
@@ -109,13 +108,10 @@ func (in *IoChaosSpec) validateDelay(delay *field.Path) field.ErrorList {
 
 func (in *IoChaosSpec) validateErrno(errno *field.Path) field.ErrorList {
 	allErrs := field.ErrorList{}
-	if in.Action == IOErrnoAction || in.Action == IOMixedAction {
-		if in.Errno != "" {
-			_, err := strconv.Atoi(in.Errno)
-			if err != nil {
-				allErrs = append(allErrs, field.Invalid(errno, in.Errno,
-					fmt.Sprintf("parse errno field error:%s for action:%s", err, in.Action)))
-			}
+	if in.Action == IoFaults {
+		if in.Errno == 0 {
+			allErrs = append(allErrs, field.Invalid(errno, in.Errno,
+				fmt.Sprintf("action %s: errno 0 is not supported", in.Action)))
 		}
 	}
 	return allErrs
@@ -123,17 +119,10 @@ func (in *IoChaosSpec) validateErrno(errno *field.Path) field.ErrorList {
 
 func (in *IoChaosSpec) validatePercent(percentField *field.Path) field.ErrorList {
 	allErrs := field.ErrorList{}
-	if in.Percent != "" {
-		percent, err := strconv.Atoi(in.Percent)
-		if err != nil {
-			allErrs = append(allErrs, field.Invalid(percentField, in.Percent,
-				fmt.Sprintf("parse percent field error:%s", err)))
-		}
-
-		if percent <= 0 || percent > 100 {
-			allErrs = append(allErrs, field.Invalid(percentField, in.Percent,
-				fmt.Sprintf("percent value of %d is invalid, Must be (0,100]", percent)))
-		}
+	if in.Percent > 100 || in.Percent < 0 {
+		allErrs = append(allErrs, field.Invalid(percentField, in.Percent,
+			"percent field should be in 0-100"))
 	}
+
 	return allErrs
 }

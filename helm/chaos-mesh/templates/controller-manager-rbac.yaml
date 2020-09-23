@@ -80,6 +80,7 @@ rules:
     - timechaos
     - kernelchaos
     - stresschaos
+    - podiochaos
     - podnetworkchaos
     - httpchaos
   verbs: ["*"]
@@ -148,6 +149,7 @@ rules:
   - timechaos
   - kernelchaos
   - stresschaos
+  - podiochaos
   - podnetworkchaos
   - httpchaos
   verbs: ["*"]

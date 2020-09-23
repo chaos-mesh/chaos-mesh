@@ -7,7 +7,7 @@ function pathnameToBreadCrumbs(pathname: string) {
 
   return nameArray.map((name, i) => {
     const b: NavigationBreadCrumbProps = {
-      name: i === 0 ? name.charAt(0).toUpperCase() + name.slice(1) : name,
+      name,
     }
 
     if (i < nameArray.length - 1) {
