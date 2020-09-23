@@ -20,6 +20,7 @@ import (
 
 	"github.com/go-logr/logr"
 	v1 "k8s.io/api/core/v1"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -60,7 +61,11 @@ func (r *NetworkChaosReconciler) Reconcile(req ctrl.Request) (result ctrl.Result
 
 	chaos := &v1alpha1.NetworkChaos{}
 	if err := r.Client.Get(context.Background(), req.NamespacedName, chaos); err != nil {
-		r.Log.Error(err, "unable to get network chaos")
+		if apierrors.IsNotFound(err) {
+			r.Log.Info("network chaos not found")
+		} else {
+			r.Log.Error(err, "unable to get network chaos")
+		}
 		return ctrl.Result{}, nil
 	}
 

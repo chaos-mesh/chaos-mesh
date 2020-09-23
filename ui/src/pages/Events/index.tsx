@@ -1,14 +1,18 @@
 import { Box, Grow, Paper, Typography } from '@material-ui/core'
+import EventsTable, { EventsTableHandles } from 'components/EventsTable'
 import React, { useEffect, useRef, useState } from 'react'
 import { Theme, createStyles, makeStyles } from '@material-ui/core/styles'
 
 import BlurLinearIcon from '@material-ui/icons/BlurLinear'
 import { Event } from 'api/events.type'
-import EventsTable, { EventsTableHandles } from 'components/EventsTable'
 import Loading from 'components/Loading'
 import PaperTop from 'components/PaperTop'
+import { RootState } from 'store'
+import T from 'components/T'
 import api from 'api'
 import genEventsChart from 'lib/d3/eventsChart'
+import { useIntl } from 'react-intl'
+import { useSelector } from 'react-redux'
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -24,6 +28,10 @@ const useStyles = makeStyles((theme: Theme) =>
 
 export default function Events() {
   const classes = useStyles()
+
+  const intl = useIntl()
+
+  const { theme } = useSelector((state: RootState) => state.settings)
 
   const chartRef = useRef<HTMLDivElement>(null)
   const eventsTableRef = useRef<EventsTableHandles>(null)
@@ -53,8 +61,11 @@ export default function Events() {
         root: chart,
         events,
         onSelectEvent: eventsTableRef.current!.onSelectEvent,
+        intl,
+        theme,
       })
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [events])
 
   return (
@@ -63,7 +74,7 @@ export default function Events() {
         <Grow in={!loading} style={{ transformOrigin: '0 0 0' }}>
           <Box display="flex" flexDirection="column">
             <Paper className={classes.timelinePaper} variant="outlined">
-              <PaperTop title="Timeline" />
+              <PaperTop title={T('common.timeline')} />
               <div ref={chartRef} className={classes.eventsChart} />
             </Paper>
             <EventsTable ref={eventsTableRef} events={events} detailed />
@@ -77,7 +88,7 @@ export default function Events() {
             <BlurLinearIcon fontSize="large" />
           </Box>
           <Typography variant="h6" align="center">
-            No events found. Try to create a new experiment.
+            {T('events.noEventsFound')}
           </Typography>
         </Box>
       )}

@@ -3,12 +3,13 @@ import React, { useState } from 'react'
 
 import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown'
 import ArrowDropUpIcon from '@material-ui/icons/ArrowDropUp'
+import T from 'components/T'
 
 interface AdvancedOptionsProps {
   isOpen?: boolean
   beforeOpen?: () => void
   afterClose?: () => void
-  title?: string
+  title?: string | JSX.Element
 }
 
 const AdvancedOptions: React.FC<AdvancedOptionsProps> = ({
@@ -34,7 +35,7 @@ const AdvancedOptions: React.FC<AdvancedOptionsProps> = ({
     <Box display="flex" flexDirection="column">
       <Box my={3} textAlign="right">
         <Button color="primary" startIcon={open ? <ArrowDropUpIcon /> : <ArrowDropDownIcon />} onClick={setOpen}>
-          {title ? title : 'Advanced Options'}
+          {title ? title : T('common.advancedOptions')}
         </Button>
       </Box>
       <Box display={open ? 'unset' : 'none'}>{children}</Box>
