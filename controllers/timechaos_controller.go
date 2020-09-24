@@ -49,7 +49,7 @@ func (r *TimeChaosReconciler) Reconcile(req ctrl.Request) (result ctrl.Result, e
 		// NOOP
 		logger.Info("ignore chaos which belongs to an unexpected namespace within namespace scoped mode",
 			"chaosName", req.Name, "expectedNamespace", common.ControllerCfg.TargetNamespace, "actualNamespace", req.Namespace)
-		return
+		return ctrl.Result{}, nil
 	}
 
 	reconciler := timechaos.Reconciler{

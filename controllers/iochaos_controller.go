@@ -50,7 +50,7 @@ func (r *IoChaosReconciler) Reconcile(req ctrl.Request) (result ctrl.Result, err
 		// NOOP
 		logger.Info("ignore chaos which belongs to an unexpected namespace within namespace scoped mode",
 			"chaosName", req.Name, "expectedNamespace", common.ControllerCfg.TargetNamespace, "actualNamespace", req.Namespace)
-		return
+		return ctrl.Result{}, nil
 	}
 
 	chaos := &v1alpha1.IoChaos{}
