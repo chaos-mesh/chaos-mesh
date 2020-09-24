@@ -35,6 +35,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/controllers/podchaos/podkill"
 	. "github.com/chaos-mesh/chaos-mesh/controllers/test"
 	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
+	"github.com/chaos-mesh/chaos-mesh/pkg/utils"
 )
 
 func TestPodKill(t *testing.T) {
@@ -93,13 +94,16 @@ var _ = Describe("PodChaos", func() {
 				return pods
 			})()
 
-			var err error
+			ctx := context.TODO()
 
-			err = r.Apply(context.TODO(), ctrl.Request{}, &podChaos)
+			tgt, err := utils.ResolveTargets(ctx, r.Client, r.Reader, podChaos.GetSourceTargetSpec(), true, "", "", metav1.NamespaceDefault)
+			Expect(err).ToNot(HaveOccurred())
+
+			err = r.Apply(context.TODO(), ctrl.Request{}, &podChaos, tgt)
 			Expect(err).ToNot(HaveOccurred())
 
 			// pod "p0" already deleted
-			err = r.Apply(context.TODO(), ctrl.Request{}, &podChaos)
+			err = r.Apply(context.TODO(), ctrl.Request{}, &podChaos, tgt)
 			Expect(err).To(HaveOccurred())
 			Expect(err.Error()).To(ContainSubstring("pods \"p0\" not found"))
 

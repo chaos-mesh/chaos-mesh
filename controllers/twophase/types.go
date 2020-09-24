@@ -22,6 +22,7 @@ import (
 	"k8s.io/client-go/util/retry"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/controllers/common"
 	"github.com/chaos-mesh/chaos-mesh/controllers/reconciler"
 	"github.com/chaos-mesh/chaos-mesh/pkg/utils"
 
@@ -84,6 +85,12 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	}
 
 	status := chaos.GetStatus()
+	chaosSourceTargetSpec := chaos.GetSourceTargetSpec()
+	tgt, err := utils.ResolveTargets(ctx, r.Client, r.Reader, chaosSourceTargetSpec, common.ControllerCfg.ClusterScoped, common.ControllerCfg.AllowedNamespaces, common.ControllerCfg.IgnoredNamespaces, common.ControllerCfg.TargetNamespace)
+	if err != nil {
+		r.Log.Error(err, "failed to select and filter pods by chaos select spec")
+		return ctrl.Result{}, err
+	}
 
 	if chaos.IsDeleted() {
 		// This chaos was deleted
@@ -148,7 +155,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		r.Log.Info("Resuming/Retrying")
 
 		dur := chaos.GetNextRecover().Sub(now)
-		if err = applyAction(ctx, r, req, dur, chaos); err != nil {
+		if err = applyAction(ctx, r, req, dur, chaos, tgt); err != nil {
 			updateFailedMessage(ctx, r, chaos, err.Error())
 			return ctrl.Result{Requeue: true}, err
 		}
@@ -172,7 +179,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 			return ctrl.Result{}, err
 		}
 
-		if err = applyAction(ctx, r, req, *duration, chaos); err != nil {
+		if err = applyAction(ctx, r, req, *duration, chaos, tgt); err != nil {
 			updateFailedMessage(ctx, r, chaos, err.Error())
 			return ctrl.Result{Requeue: true}, err
 		}
@@ -189,6 +196,30 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		status.FailedMessage = emptyString
 	} else {
 		r.Log.Info("Waiting")
+
+		if chaos.IsRenewed(tgt) {
+			r.Log.Info("Refreshing chaos target")
+
+			if err = r.Recover(ctx, req, chaos); err != nil {
+				r.Log.Error(err, "failed to recover chaos")
+				updateFailedMessage(ctx, r, chaos, err.Error())
+				return ctrl.Result{Requeue: true}, err
+			}
+
+			// if it's running, retry re-apply on new targets.
+			if status.Experiment.Phase == v1alpha1.ExperimentPhaseRunning {
+				nextRecover := status.Experiment.StartTime.Time.Add(*duration)
+				leftRunningDuration := nextRecover.Sub(now)
+				if leftRunningDuration > 0 {
+					if err = applyAction(ctx, r, req, leftRunningDuration, chaos, tgt); err != nil {
+						updateFailedMessage(ctx, r, chaos, err.Error())
+						return ctrl.Result{Requeue: true}, err
+					}
+				}
+			}
+
+			r.Log.Info("The twophase chaos target has been renewed", "name", req.Name, "namespace", req.Namespace)
+		}
 
 		nextStart, err := utils.NextTime(*chaos.GetScheduler(), status.Experiment.StartTime.Time)
 		if err != nil {
@@ -229,6 +260,7 @@ func applyAction(
 	req ctrl.Request,
 	duration time.Duration,
 	chaos v1alpha1.InnerSchedulerObject,
+	resolvedTargets *v1alpha1.ChaosResolvedTargets,
 ) error {
 	status := chaos.GetStatus()
 	r.Log.Info("Chaos action:", "chaos", chaos)
@@ -236,7 +268,7 @@ func applyAction(
 	// Start to apply action
 	r.Log.Info("Performing Action")
 
-	if err := r.Apply(ctx, req, chaos); err != nil {
+	if err := r.Apply(ctx, req, chaos, resolvedTargets); err != nil {
 		r.Log.Error(err, "failed to apply chaos action")
 
 		status.Experiment.Phase = v1alpha1.ExperimentPhaseFailed

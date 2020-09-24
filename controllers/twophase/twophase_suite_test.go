@@ -22,6 +22,7 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
+	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -34,7 +35,9 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/controllers/common"
 	"github.com/chaos-mesh/chaos-mesh/controllers/reconciler"
+	"github.com/chaos-mesh/chaos-mesh/controllers/test"
 	"github.com/chaos-mesh/chaos-mesh/controllers/twophase"
 	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
 )
@@ -62,7 +65,7 @@ var _ reconciler.InnerReconciler = (*fakeReconciler)(nil)
 
 type fakeReconciler struct{}
 
-func (r fakeReconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.InnerObject) error {
+func (r fakeReconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.InnerObject, tgt *v1alpha1.ChaosResolvedTargets) error {
 	if err := mock.On("MockApplyError"); err != nil {
 		return err.(error)
 	}
@@ -85,6 +88,12 @@ type fakeTwoPhaseChaos struct {
 
 	// Selector is used to select pods that are used to inject chaos action.
 	Selector v1alpha1.SelectorSpec `json:"selector"`
+
+	// Mode defines the mode to run chaos action.、
+	Mode v1alpha1.PodMode `json:"mode"`
+
+	// Value is required when the mode is set to `FixedPodMode` / `FixedPercentPodMod` / `RandomMaxPercentPodMod`.
+	Value string `json:"value"`
 
 	Deleted bool `json:"deleted"`
 
@@ -115,6 +124,35 @@ func (in *fakeTwoPhaseChaos) IsDeleted() bool {
 // IsPaused returns whether this resource has been paused
 func (in *fakeTwoPhaseChaos) IsPaused() bool {
 	return false
+}
+
+// IsRenewed returns whether this resource resolved targets has changed
+func (in *fakeTwoPhaseChaos) IsRenewed(tgt *v1alpha1.ChaosResolvedTargets) bool {
+	return v1alpha1.IsChaosTargetChanged(tgt, in.Status.Experiment.PodRecords)
+}
+
+// GetMode get mode
+func (in *fakeTwoPhaseChaos) GetMode() v1alpha1.PodMode {
+	return in.Mode
+}
+
+// GetValue is a getter for Value (for implementing ChaosSelectSpec)
+func (in *fakeTwoPhaseChaos) GetValue() string {
+	return in.Value
+}
+
+// GetSelector is a getter for Selector (for implementing ChaosSelectSpec)
+func (in *fakeTwoPhaseChaos) GetSelector() v1alpha1.SelectorSpec {
+	return in.Selector
+}
+
+// GetSourceTargetSpec get networkchaos selector spec
+func (in *fakeTwoPhaseChaos) GetSourceTargetSpec() *v1alpha1.ChaosSourceTargetSpec {
+	return &v1alpha1.ChaosSourceTargetSpec{
+		Source:          in,
+		Target:          nil,        // no target
+		ExternalTargets: []string{}, // no external targets
+	}
 }
 
 func (r fakeReconciler) Object() v1alpha1.InnerObject {
@@ -263,13 +301,46 @@ var _ = Describe("TwoPhase", func() {
 			Name:      "fakechaos-name",
 		}
 
+		setRule := func(clusterScoped bool, allow string, ignore string, target string) {
+			common.ControllerCfg.ClusterScoped = clusterScoped
+			common.ControllerCfg.AllowedNamespaces = allow
+			common.ControllerCfg.IgnoredNamespaces = ignore
+			common.ControllerCfg.TargetNamespace = target
+		}
+
+		clean := func() {
+			common.ControllerCfg.ClusterScoped = false
+			common.ControllerCfg.AllowedNamespaces = ""
+			common.ControllerCfg.IgnoredNamespaces = ""
+			common.ControllerCfg.TargetNamespace = ""
+		}
+
+		podObjects, pods := test.GenerateNPods(
+			"p",
+			1,
+			v1.PodRunning,
+			metav1.NamespaceDefault,
+			nil,
+			map[string]string{"l1": "l1"},
+			v1.ContainerStatus{ContainerID: "fake-container-id"},
+		)
+
 		It("TwoPhase Action", func() {
-			chaos := fakeTwoPhaseChaos{
+			chaos := &fakeTwoPhaseChaos{
 				TypeMeta:   typeMeta,
 				ObjectMeta: objectMeta,
+				Selector:   v1alpha1.SelectorSpec{Namespaces: []string{metav1.NamespaceDefault}},
 			}
 
-			c := fake.NewFakeClientWithScheme(scheme.Scheme, &chaos)
+			var objs []runtime.Object
+			objs = append(objs, podObjects...)
+			objs = append(objs, chaos)
+
+			c := fake.NewFakeClientWithScheme(scheme.Scheme, objs...)
+
+			defer mock.With("MockSelectAndFilterPods", func() []v1.Pod {
+				return pods
+			})()
 
 			r := twophase.Reconciler{
 				InnerReconciler: fakeReconciler{},
@@ -277,21 +348,32 @@ var _ = Describe("TwoPhase", func() {
 				Log:             ctrl.Log.WithName("controllers").WithName("TwoPhase"),
 			}
 
+			setRule(true, "", "", metav1.NamespaceDefault)
 			_, err = r.Reconcile(req)
+			clean()
 
 			Expect(err).To(HaveOccurred())
 			Expect(err.Error()).To(ContainSubstring("misdefined scheduler"))
 		})
 
 		It("TwoPhase Delete", func() {
-			chaos := fakeTwoPhaseChaos{
+			chaos := &fakeTwoPhaseChaos{
 				TypeMeta:   typeMeta,
 				ObjectMeta: objectMeta,
+				Selector:   v1alpha1.SelectorSpec{Namespaces: []string{metav1.NamespaceDefault}},
 				Scheduler:  &v1alpha1.SchedulerSpec{Cron: "@hourly"},
 				Deleted:    true,
 			}
 
-			c := fake.NewFakeClientWithScheme(scheme.Scheme, &chaos)
+			var objs []runtime.Object
+			objs = append(objs, podObjects...)
+			objs = append(objs, chaos)
+
+			c := fake.NewFakeClientWithScheme(scheme.Scheme, objs...)
+
+			defer mock.With("MockSelectAndFilterPods", func() []v1.Pod {
+				return pods
+			})()
 
 			r := twophase.Reconciler{
 				InnerReconciler: fakeReconciler{},
@@ -299,7 +381,9 @@ var _ = Describe("TwoPhase", func() {
 				Log:             ctrl.Log.WithName("controllers").WithName("TwoPhase"),
 			}
 
+			setRule(true, "", "", metav1.NamespaceDefault)
 			_, err = r.Reconcile(req)
+			clean()
 
 			Expect(err).ToNot(HaveOccurred())
 			_chaos := r.Object()
@@ -309,22 +393,33 @@ var _ = Describe("TwoPhase", func() {
 
 			defer mock.With("MockRecoverError", errors.New("RecoverError"))()
 
+			setRule(true, "", "", metav1.NamespaceDefault)
 			_, err = r.Reconcile(req)
+			clean()
 
 			Expect(err).To(HaveOccurred())
 			Expect(err.Error()).To(ContainSubstring("RecoverError"))
 		})
 
 		It("TwoPhase ToRecover", func() {
-			chaos := fakeTwoPhaseChaos{
+			chaos := &fakeTwoPhaseChaos{
 				TypeMeta:   typeMeta,
 				ObjectMeta: objectMeta,
+				Selector:   v1alpha1.SelectorSpec{Namespaces: []string{metav1.NamespaceDefault}},
 				Scheduler:  &v1alpha1.SchedulerSpec{Cron: "@hourly"},
 			}
 
 			chaos.SetNextRecover(pastTime)
 
-			c := fake.NewFakeClientWithScheme(scheme.Scheme, &chaos)
+			var objs []runtime.Object
+			objs = append(objs, podObjects...)
+			objs = append(objs, chaos)
+
+			c := fake.NewFakeClientWithScheme(scheme.Scheme, objs...)
+
+			defer mock.With("MockSelectAndFilterPods", func() []v1.Pod {
+				return pods
+			})()
 
 			r := twophase.Reconciler{
 				InnerReconciler: fakeReconciler{},
@@ -332,7 +427,9 @@ var _ = Describe("TwoPhase", func() {
 				Log:             ctrl.Log.WithName("controllers").WithName("TwoPhase"),
 			}
 
+			setRule(true, "", "", metav1.NamespaceDefault)
 			_, err = r.Reconcile(req)
+			clean()
 
 			Expect(err).ToNot(HaveOccurred())
 			_chaos := r.Object()
@@ -342,16 +439,25 @@ var _ = Describe("TwoPhase", func() {
 		})
 
 		It("TwoPhase ToRecover Error", func() {
-			chaos := fakeTwoPhaseChaos{
+			chaos := &fakeTwoPhaseChaos{
 				TypeMeta:   typeMeta,
 				ObjectMeta: objectMeta,
+				Selector:   v1alpha1.SelectorSpec{Namespaces: []string{metav1.NamespaceDefault}},
 				Scheduler:  &v1alpha1.SchedulerSpec{Cron: "@hourly"},
 			}
 
 			defer mock.With("MockRecoverError", errors.New("RecoverError"))()
 			chaos.SetNextRecover(pastTime)
 
-			c := fake.NewFakeClientWithScheme(scheme.Scheme, &chaos)
+			var objs []runtime.Object
+			objs = append(objs, podObjects...)
+			objs = append(objs, chaos)
+
+			c := fake.NewFakeClientWithScheme(scheme.Scheme, objs...)
+
+			defer mock.With("MockSelectAndFilterPods", func() []v1.Pod {
+				return pods
+			})()
 
 			r := twophase.Reconciler{
 				InnerReconciler: fakeReconciler{},
@@ -359,23 +465,34 @@ var _ = Describe("TwoPhase", func() {
 				Log:             ctrl.Log.WithName("controllers").WithName("TwoPhase"),
 			}
 
+			setRule(true, "", "", metav1.NamespaceDefault)
 			_, err = r.Reconcile(req)
+			clean()
 
 			Expect(err).To(HaveOccurred())
 			Expect(err.Error()).To(ContainSubstring("RecoverError"))
 		})
 
 		It("TwoPhase ToApply", func() {
-			chaos := fakeTwoPhaseChaos{
+			chaos := &fakeTwoPhaseChaos{
 				TypeMeta:   typeMeta,
 				ObjectMeta: objectMeta,
+				Selector:   v1alpha1.SelectorSpec{Namespaces: []string{metav1.NamespaceDefault}},
 				Scheduler:  &v1alpha1.SchedulerSpec{Cron: "@hourly"},
 			}
 
 			chaos.SetNextRecover(futureTime)
 			chaos.SetNextStart(pastTime)
 
-			c := fake.NewFakeClientWithScheme(scheme.Scheme, &chaos)
+			var objs []runtime.Object
+			objs = append(objs, podObjects...)
+			objs = append(objs, chaos)
+
+			c := fake.NewFakeClientWithScheme(scheme.Scheme, objs...)
+
+			defer mock.With("MockSelectAndFilterPods", func() []v1.Pod {
+				return pods
+			})()
 
 			r := twophase.Reconciler{
 				InnerReconciler: fakeReconciler{},
@@ -383,7 +500,9 @@ var _ = Describe("TwoPhase", func() {
 				Log:             ctrl.Log.WithName("controllers").WithName("TwoPhase"),
 			}
 
+			setRule(true, "", "", metav1.NamespaceDefault)
 			_, err = r.Reconcile(req)
+			clean()
 
 			Expect(err).ToNot(HaveOccurred())
 			_chaos := r.Object()
@@ -393,16 +512,25 @@ var _ = Describe("TwoPhase", func() {
 		})
 
 		It("TwoPhase ToApplyAgain", func() {
-			chaos := fakeTwoPhaseChaos{
+			chaos := &fakeTwoPhaseChaos{
 				TypeMeta:   typeMeta,
 				ObjectMeta: objectMeta,
+				Selector:   v1alpha1.SelectorSpec{Namespaces: []string{metav1.NamespaceDefault}},
 				Scheduler:  &v1alpha1.SchedulerSpec{Cron: "@hourly"},
 			}
 
 			chaos.SetNextRecover(futureTime)
 			chaos.SetNextStart(pastTime)
 
-			c := fake.NewFakeClientWithScheme(scheme.Scheme, &chaos)
+			var objs []runtime.Object
+			objs = append(objs, podObjects...)
+			objs = append(objs, chaos)
+
+			c := fake.NewFakeClientWithScheme(scheme.Scheme, objs...)
+
+			defer mock.With("MockSelectAndFilterPods", func() []v1.Pod {
+				return pods
+			})()
 
 			r := twophase.Reconciler{
 				InnerReconciler: fakeReconciler{},
@@ -410,7 +538,9 @@ var _ = Describe("TwoPhase", func() {
 				Log:             ctrl.Log.WithName("controllers").WithName("TwoPhase"),
 			}
 
+			setRule(true, "", "", metav1.NamespaceDefault)
 			_, err = r.Reconcile(req)
+			clean()
 
 			Expect(err).ToNot(HaveOccurred())
 			_chaos := r.Object()
@@ -421,9 +551,12 @@ var _ = Describe("TwoPhase", func() {
 			chaos.Status.Experiment.StartTime = &metav1.Time{Time: pastTime}
 			chaos.Scheduler = &v1alpha1.SchedulerSpec{Cron: "@every 20h"}
 			chaos.SetNextStart(futureTime)
-			_ = c.Update(context.TODO(), &chaos)
+			_ = c.Update(context.TODO(), chaos)
 
+			setRule(true, "", "", metav1.NamespaceDefault)
 			_, err = r.Reconcile(req)
+			clean()
+
 			Expect(err).ToNot(HaveOccurred())
 			err = r.Client.Get(context.TODO(), req.NamespacedName, _chaos)
 			Expect(err).ToNot(HaveOccurred())
@@ -439,16 +572,25 @@ var _ = Describe("TwoPhase", func() {
 		})
 
 		It("TwoPhase ToApply Error", func() {
-			chaos := fakeTwoPhaseChaos{
+			chaos := &fakeTwoPhaseChaos{
 				TypeMeta:   typeMeta,
 				ObjectMeta: objectMeta,
+				Selector:   v1alpha1.SelectorSpec{Namespaces: []string{metav1.NamespaceDefault}},
 				Scheduler:  &v1alpha1.SchedulerSpec{Cron: "@hourly"},
 			}
 
 			chaos.SetNextRecover(futureTime)
 			chaos.SetNextStart(pastTime)
 
-			c := fake.NewFakeClientWithScheme(scheme.Scheme, &chaos)
+			var objs []runtime.Object
+			objs = append(objs, podObjects...)
+			objs = append(objs, chaos)
+
+			c := fake.NewFakeClientWithScheme(scheme.Scheme, objs...)
+
+			defer mock.With("MockSelectAndFilterPods", func() []v1.Pod {
+				return pods
+			})()
 
 			r := twophase.Reconciler{
 				InnerReconciler: fakeReconciler{},
@@ -458,7 +600,9 @@ var _ = Describe("TwoPhase", func() {
 
 			defer mock.With("MockApplyError", errors.New("ApplyError"))()
 
+			setRule(true, "", "", metav1.NamespaceDefault)
 			_, err = r.Reconcile(req)
+			clean()
 
 			Expect(err).To(HaveOccurred())
 			Expect(err.Error()).To(ContainSubstring("ApplyError"))

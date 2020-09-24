@@ -56,22 +56,17 @@ func NewTwoPhaseReconciler(c client.Client, reader client.Reader, log logr.Logge
 }
 
 // Apply implements the reconciler.InnerReconciler.Apply
-func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.InnerObject) error {
+func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.InnerObject, tgt *v1alpha1.ChaosResolvedTargets) error {
 	podchaos, ok := chaos.(*v1alpha1.PodChaos)
 	if !ok {
 		err := errors.New("chaos is not PodChaos")
 		r.Log.Error(err, "chaos is not PodChaos", "chaos", chaos)
 		return err
 	}
-	pods, err := utils.SelectAndFilterPods(ctx, r.Client, r.Reader, &podchaos.Spec)
-	if err != nil {
-		r.Log.Error(err, "fail to select and generate pods")
-		return err
-	}
 
 	g := errgroup.Group{}
-	for index := range pods {
-		pod := &pods[index]
+	for index := range tgt.Sources {
+		pod := &tgt.Sources[index]
 		g.Go(func() error {
 			r.Log.Info("Deleting", "namespace", pod.Namespace, "name", pod.Name)
 
@@ -88,8 +83,8 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1
 	if err := g.Wait(); err != nil {
 		return err
 	}
-	podchaos.Status.Experiment.PodRecords = make([]v1alpha1.PodStatus, 0, len(pods))
-	for _, pod := range pods {
+	podchaos.Status.Experiment.PodRecords = make([]v1alpha1.PodStatus, 0, len(tgt.Sources))
+	for _, pod := range tgt.Sources {
 		ps := v1alpha1.PodStatus{
 			Namespace: pod.Namespace,
 			Name:      pod.Name,

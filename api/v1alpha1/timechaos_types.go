@@ -96,17 +96,17 @@ func (in *TimeChaosSpec) DefaultClockIds() {
 	}
 }
 
-// GetSelector is a getter for Selector (for implementing SelectSpec)
+// GetSelector is a getter for Selector (for implementing ChaosSelectSpec)
 func (in *TimeChaosSpec) GetSelector() SelectorSpec {
 	return in.Selector
 }
 
-// GetMode is a getter for Mode (for implementing SelectSpec)
+// GetMode is a getter for Mode (for implementing ChaosSelectSpec)
 func (in *TimeChaosSpec) GetMode() PodMode {
 	return in.Mode
 }
 
-// GetValue is a getter for Value (for implementing SelectSpec)
+// GetValue is a getter for Value (for implementing ChaosSelectSpec)
 func (in *TimeChaosSpec) GetValue() string {
 	return in.Value
 }
@@ -175,6 +175,15 @@ func (in *TimeChaos) GetScheduler() *SchedulerSpec {
 	return in.Spec.Scheduler
 }
 
+// GetSourceTargetSpec get timechaos selector spec
+func (in *TimeChaos) GetSourceTargetSpec() *ChaosSourceTargetSpec {
+	return &ChaosSourceTargetSpec{
+		Source:          &in.Spec,
+		Target:          nil,        // no target
+		ExternalTargets: []string{}, // no external targets
+	}
+}
+
 // GetStatus returns the status of TimeChaos
 func (in *TimeChaos) GetStatus() *ChaosStatus {
 	return &in.Status.ChaosStatus
@@ -191,6 +200,11 @@ func (in *TimeChaos) IsPaused() bool {
 		return false
 	}
 	return true
+}
+
+// IsRenewed returns whether this resource resolved targets has changed
+func (in *TimeChaos) IsRenewed(tgt *ChaosResolvedTargets) bool {
+	return IsChaosTargetChanged(tgt, in.Status.Experiment.PodRecords)
 }
 
 // GetChaos returns a chaos instance
@@ -227,6 +241,15 @@ func (in *TimeChaosList) ListChaos() []*ChaosInstance {
 	res := make([]*ChaosInstance, 0, len(in.Items))
 	for _, item := range in.Items {
 		res = append(res, item.GetChaos())
+	}
+	return res
+}
+
+// ListItems returns a list of chaos object
+func (in *TimeChaosList) ListItems() []InnerObject {
+	res := make([]InnerObject, 0, len(in.Items))
+	for idx := range in.Items {
+		res = append(res, &in.Items[idx])
 	}
 	return res
 }

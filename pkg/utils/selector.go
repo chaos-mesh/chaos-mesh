@@ -24,7 +24,7 @@ import (
 	"strings"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	"github.com/chaos-mesh/chaos-mesh/controllers/common"
+	"github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos/netutils"
 	"github.com/chaos-mesh/chaos-mesh/pkg/label"
 	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
 
@@ -38,14 +38,40 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 )
 
-type SelectSpec interface {
-	GetSelector() v1alpha1.SelectorSpec
-	GetMode() v1alpha1.PodMode
-	GetValue() string
+// ResolveTargets resolv source/target pods and external cidrs
+func ResolveTargets(ctx context.Context, c client.Client, r client.Reader, selectSpec *v1alpha1.ChaosSourceTargetSpec, clusterScoped bool, allowedNamespaces, ignoredNamespaces, targetNamespace string) (*v1alpha1.ChaosResolvedTargets, error) {
+	tgt := &v1alpha1.ChaosResolvedTargets{}
+
+	sources, err := SelectAndFilterPods(ctx, c, r, selectSpec.Source, clusterScoped, allowedNamespaces, ignoredNamespaces, targetNamespace)
+	if err != nil {
+		return nil, err
+	}
+	tgt.Sources = sources
+
+	var (
+		targets []v1.Pod
+	)
+
+	// We should only apply filter when we specify targets
+	if selectSpec.Target != nil {
+		targets, err = SelectAndFilterPods(ctx, c, r, selectSpec.Target, clusterScoped, allowedNamespaces, ignoredNamespaces, targetNamespace)
+		if err != nil {
+			return nil, err
+		}
+		tgt.Targets = targets
+	}
+
+	externalCidrs, err := netutils.ResolveCidrs(selectSpec.ExternalTargets)
+	if err != nil {
+		return nil, err
+	}
+	tgt.ExternalCidrs = externalCidrs
+
+	return tgt, err
 }
 
 // SelectAndFilterPods returns the list of pods that filtered by selector and PodMode
-func SelectAndFilterPods(ctx context.Context, c client.Client, r client.Reader, spec SelectSpec) ([]v1.Pod, error) {
+func SelectAndFilterPods(ctx context.Context, c client.Client, r client.Reader, spec v1alpha1.InnerSelectSpec, clusterScoped bool, allowedNamespaces, ignoredNamespaces, targetNamespace string) ([]v1.Pod, error) {
 	if pods := mock.On("MockSelectAndFilterPods"); pods != nil {
 		return pods.(func() []v1.Pod)(), nil
 	}
@@ -57,7 +83,7 @@ func SelectAndFilterPods(ctx context.Context, c client.Client, r client.Reader, 
 	mode := spec.GetMode()
 	value := spec.GetValue()
 
-	pods, err := SelectPods(ctx, c, r, selector)
+	pods, err := SelectPods(ctx, c, r, selector, clusterScoped, allowedNamespaces, ignoredNamespaces, targetNamespace)
 	if err != nil {
 		return nil, err
 	}
@@ -75,23 +101,34 @@ func SelectAndFilterPods(ctx context.Context, c client.Client, r client.Reader, 
 	return filteredPod, nil
 }
 
+// SelectAndFilterChaosByPod returns the list of chaos that filtered by the pod selectors
+func SelectAndFilterChaosByPod(ctx context.Context, c client.Client, r client.Reader, spec v1alpha1.InnerSelectSpec, list v1alpha1.ChaosList) ([]v1alpha1.InnerObject, error) {
+	// FIXME: from now, we returned all chaos.
+	chaoes, err := SelectChaoes(ctx, c, r, v1alpha1.SelectorSpec{}, list)
+	if err != nil {
+		return nil, err
+	}
+	return chaoes, nil
+}
+
 // SelectPods returns the list of pods that are available for pod chaos action.
 // It returns all pods that match the configured label, annotation and namespace selectors.
 // If pods are specifically specified by `selector.Pods`, it just returns the selector.Pods.
-func SelectPods(ctx context.Context, c client.Client, r client.Reader, selector v1alpha1.SelectorSpec) ([]v1.Pod, error) {
+func SelectPods(ctx context.Context, c client.Client, r client.Reader, selector v1alpha1.SelectorSpec, clusterScoped bool, allowedNamespaces, ignoredNamespaces, targetNamespace string) ([]v1.Pod, error) {
 	// TODO: refactor: make different selectors to replace if-else logics
 	var pods []v1.Pod
 
 	// pods are specifically specified
 	if len(selector.Pods) > 0 {
 		for ns, names := range selector.Pods {
-			if !common.ControllerCfg.ClusterScoped {
-				if common.ControllerCfg.TargetNamespace != ns {
+			if !clusterScoped {
+				if targetNamespace != ns {
 					log.Info("skip namespace because ns is out of scope within namespace scoped mode", "namespace", ns)
 					continue
 				}
 			}
-			if !IsAllowedNamespaces(ns) {
+
+			if !IsAllowedNamespaces(ns, allowedNamespaces, ignoredNamespaces) {
 				log.Info("filter pod by namespaces", "namespace", ns)
 				continue
 			}
@@ -118,11 +155,11 @@ func SelectPods(ctx context.Context, c client.Client, r client.Reader, selector 
 		return pods, nil
 	}
 
-	if !common.ControllerCfg.ClusterScoped {
+	if !clusterScoped {
 		if len(selector.Namespaces) > 1 {
 			return nil, fmt.Errorf("could NOT use more than 1 namespace selector within namespace scoped mode")
 		} else if len(selector.Namespaces) == 1 {
-			if selector.Namespaces[0] != common.ControllerCfg.TargetNamespace {
+			if selector.Namespaces[0] != targetNamespace {
 				return nil, fmt.Errorf("could NOT list pods from out of scoped namespace: %s", selector.Namespaces[0])
 			}
 		}
@@ -131,8 +168,8 @@ func SelectPods(ctx context.Context, c client.Client, r client.Reader, selector 
 	var podList v1.PodList
 
 	var listOptions = client.ListOptions{}
-	if !common.ControllerCfg.ClusterScoped {
-		listOptions.Namespace = common.ControllerCfg.TargetNamespace
+	if !clusterScoped {
+		listOptions.Namespace = targetNamespace
 	}
 	if len(selector.LabelSelectors) > 0 {
 		listOptions.LabelSelector = labels.SelectorFromSet(selector.LabelSelectors)
@@ -178,7 +215,7 @@ func SelectPods(ctx context.Context, c client.Client, r client.Reader, selector 
 		}
 		pods = filterPodByNode(pods, nodes)
 	}
-	pods = filterByNamespaces(pods)
+	pods = filterByNamespaces(pods, allowedNamespaces, ignoredNamespaces)
 
 	namespaceSelector, err := parseSelector(strings.Join(selector.Namespaces, ","))
 	if err != nil {
@@ -205,6 +242,24 @@ func SelectPods(ctx context.Context, c client.Client, r client.Reader, selector 
 	}
 
 	return pods, nil
+}
+
+// SelectChaoes returns the list of chaoes that are available for specified pod(src or target).
+// It returns all chaoes that match the configured label, annotation and namespace selectors or selectors.Pods.
+func SelectChaoes(ctx context.Context, c client.Client, r client.Reader, selector v1alpha1.SelectorSpec, list v1alpha1.ChaosList) ([]v1alpha1.InnerObject, error) {
+	chaoes := []v1alpha1.InnerObject{}
+	listOptions := client.ListOptions{}
+
+	// FIXME: from now, we returned all chaos.
+	if err := r.List(ctx, list, &listOptions); err != nil {
+		return nil, err
+	}
+
+	for _, chaos := range list.ListItems() {
+		chaoes = append(chaoes, chaos)
+	}
+
+	return chaoes, nil
 }
 
 // CheckPodMeetSelector checks if this pod meets the selection criteria.
@@ -440,11 +495,11 @@ func filterByPhaseSelector(pods []v1.Pod, phases labels.Selector) ([]v1.Pod, err
 	return filteredList, nil
 }
 
-func filterByNamespaces(pods []v1.Pod) []v1.Pod {
+func filterByNamespaces(pods []v1.Pod, allowedNamespaces, ignoredNamespaces string) []v1.Pod {
 	var filteredList []v1.Pod
 
 	for _, pod := range pods {
-		if IsAllowedNamespaces(pod.Namespace) {
+		if IsAllowedNamespaces(pod.Namespace, allowedNamespaces, ignoredNamespaces) {
 			filteredList = append(filteredList, pod)
 		} else {
 			log.Info("filter pod by namespaces",
@@ -455,17 +510,17 @@ func filterByNamespaces(pods []v1.Pod) []v1.Pod {
 }
 
 // IsAllowedNamespaces returns whether namespace allows the execution of a chaos task
-func IsAllowedNamespaces(namespace string) bool {
-	if common.ControllerCfg.AllowedNamespaces != "" {
-		matched, err := regexp.MatchString(common.ControllerCfg.AllowedNamespaces, namespace)
+func IsAllowedNamespaces(namespace, allowedNamespaces, ignoredNamespaces string) bool {
+	if allowedNamespaces != "" {
+		matched, err := regexp.MatchString(allowedNamespaces, namespace)
 		if err != nil {
 			return false
 		}
 		return matched
 	}
 
-	if common.ControllerCfg.IgnoredNamespaces != "" {
-		matched, err := regexp.MatchString(common.ControllerCfg.IgnoredNamespaces, namespace)
+	if ignoredNamespaces != "" {
+		matched, err := regexp.MatchString(ignoredNamespaces, namespace)
 		if err != nil {
 			return false
 		}

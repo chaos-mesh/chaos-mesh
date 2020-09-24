@@ -57,6 +57,16 @@ type PodChaos struct {
 	Status PodChaosStatus `json:"status"`
 }
 
+// GetSourceTargetSpec get podchaos selector spec
+func (in *PodChaos) GetSourceTargetSpec() *ChaosSourceTargetSpec {
+	return &ChaosSourceTargetSpec{
+		Source:          &in.Spec,
+		Target:          nil,        // no target
+		ExternalTargets: []string{}, // no external targets
+	}
+}
+
+// GetStatus get podchaos status
 func (in *PodChaos) GetStatus() *ChaosStatus {
 	return &in.Status.ChaosStatus
 }
@@ -72,6 +82,11 @@ func (in *PodChaos) IsPaused() bool {
 		return false
 	}
 	return true
+}
+
+// IsRenewed returns whether this resource resolved targets has changed
+func (in *PodChaos) IsRenewed(tgt *ChaosResolvedTargets) bool {
+	return IsChaosTargetChanged(tgt, in.Status.Experiment.PodRecords)
 }
 
 // GetDuration would return the duration for chaos
@@ -243,6 +258,15 @@ func (in *PodChaosList) ListChaos() []*ChaosInstance {
 	res := make([]*ChaosInstance, 0, len(in.Items))
 	for _, item := range in.Items {
 		res = append(res, item.GetChaos())
+	}
+	return res
+}
+
+// ListItems returns a list of chaos object
+func (in *PodChaosList) ListItems() []InnerObject {
+	res := make([]InnerObject, 0, len(in.Items))
+	for idx := range in.Items {
+		res = append(res, &in.Items[idx])
 	}
 	return res
 }

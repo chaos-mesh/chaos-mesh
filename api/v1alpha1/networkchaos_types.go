@@ -97,17 +97,17 @@ type Target struct {
 	TargetValue string `json:"value"`
 }
 
-// GetSelector is a getter for Selector (for implementing SelectSpec)
+// GetSelector is a getter for Selector (for implementing ChaosSelectSpec)
 func (in *Target) GetSelector() SelectorSpec {
 	return in.TargetSelector
 }
 
-// GetMode is a getter for Mode (for implementing SelectSpec)
+// GetMode is a getter for Mode (for implementing ChaosSelectSpec)
 func (in *Target) GetMode() PodMode {
 	return in.TargetMode
 }
 
-// GetValue is a getter for Value (for implementing SelectSpec)
+// GetValue is a getter for Value (for implementing ChaosSelectSpec)
 func (in *Target) GetValue() string {
 	return in.TargetValue
 }
@@ -158,17 +158,17 @@ type NetworkChaosSpec struct {
 	ExternalTargets []string `json:"externalTargets,omitempty"`
 }
 
-// GetSelector is a getter for Selector (for implementing SelectSpec)
+// GetSelector is a getter for Selector (for implementing ChaosSelectSpec)
 func (in *NetworkChaosSpec) GetSelector() SelectorSpec {
 	return in.Selector
 }
 
-// GetMode is a getter for Mode (for implementing SelectSpec)
+// GetMode is a getter for Mode (for implementing ChaosSelectSpec)
 func (in *NetworkChaosSpec) GetMode() PodMode {
 	return in.Mode
 }
 
-// GetValue is a getter for Value (for implementing SelectSpec)
+// GetValue is a getter for Value (for implementing ChaosSelectSpec)
 func (in *NetworkChaosSpec) GetValue() string {
 	return in.Value
 }
@@ -193,6 +193,22 @@ type NetworkChaos struct {
 	Status NetworkChaosStatus `json:"status"`
 }
 
+// GetSourceTargetSpec get networkchaos selector spec
+func (in *NetworkChaos) GetSourceTargetSpec() *ChaosSourceTargetSpec {
+	var (
+		tgt InnerSelectSpec
+	)
+	if in.Spec.Target != nil {
+		tgt = in.Spec.Target
+	}
+	return &ChaosSourceTargetSpec{
+		Source:          &in.Spec,
+		Target:          tgt,
+		ExternalTargets: in.Spec.ExternalTargets,
+	}
+}
+
+// GetStatus get networkchaos status
 func (in *NetworkChaos) GetStatus() *ChaosStatus {
 	return &in.Status.ChaosStatus
 }
@@ -210,6 +226,11 @@ func (in *NetworkChaos) IsPaused() bool {
 	return true
 }
 
+// IsRenewed returns whether this resource resolved targets has changed
+func (in *NetworkChaos) IsRenewed(tgt *ChaosResolvedTargets) bool {
+	return IsChaosTargetChanged(tgt, in.Status.Experiment.PodRecords)
+}
+
 // GetDuration would return the duration for chaos
 func (in *NetworkChaos) GetDuration() (*time.Duration, error) {
 	if in.Spec.Duration == nil {
@@ -222,6 +243,7 @@ func (in *NetworkChaos) GetDuration() (*time.Duration, error) {
 	return &duration, nil
 }
 
+// GetNextStart get next start time from scheduler
 func (in *NetworkChaos) GetNextStart() time.Time {
 	if in.Status.Scheduler.NextStart == nil {
 		return time.Time{}
@@ -229,6 +251,7 @@ func (in *NetworkChaos) GetNextStart() time.Time {
 	return in.Status.Scheduler.NextStart.Time
 }
 
+// SetNextStart set next start time in status
 func (in *NetworkChaos) SetNextStart(t time.Time) {
 	if t.IsZero() {
 		in.Status.Scheduler.NextStart = nil
@@ -241,6 +264,7 @@ func (in *NetworkChaos) SetNextStart(t time.Time) {
 	in.Status.Scheduler.NextStart.Time = t
 }
 
+// GetNextRecover get next recover time from scheduler
 func (in *NetworkChaos) GetNextRecover() time.Time {
 	if in.Status.Scheduler.NextRecover == nil {
 		return time.Time{}
@@ -248,6 +272,7 @@ func (in *NetworkChaos) GetNextRecover() time.Time {
 	return in.Status.Scheduler.NextRecover.Time
 }
 
+// SetNextRecover set next recover time in status
 func (in *NetworkChaos) SetNextRecover(t time.Time) {
 	if t.IsZero() {
 		in.Status.Scheduler.NextRecover = nil
@@ -509,6 +534,15 @@ func (in *NetworkChaosList) ListChaos() []*ChaosInstance {
 	res := make([]*ChaosInstance, 0, len(in.Items))
 	for _, item := range in.Items {
 		res = append(res, item.GetChaos())
+	}
+	return res
+}
+
+// ListItems returns a list of chaos object
+func (in *NetworkChaosList) ListItems() []InnerObject {
+	res := make([]InnerObject, 0, len(in.Items))
+	for idx := range in.Items {
+		res = append(res, &in.Items[idx])
 	}
 	return res
 }

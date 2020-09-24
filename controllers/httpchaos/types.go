@@ -38,7 +38,7 @@ type Reconciler struct {
 	Log logr.Logger
 }
 
-func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.InnerObject) error {
+func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.InnerObject, tgt *v1alpha1.ChaosResolvedTargets) error {
 	httpFaultChaos, ok := chaos.(*v1alpha1.HTTPChaos)
 	if !ok {
 		err := errors.New("chaos is not HttpFaultChaos")
@@ -46,12 +46,8 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1
 		return err
 	}
 
-	pods, err := utils.SelectAndFilterPods(ctx, r.Client, r.Reader, &httpFaultChaos.Spec)
-	if err != nil {
-		r.Log.Error(err, "failed to select and filter pods")
-		return err
-	}
-	if err = r.applyAllPods(ctx, pods, httpFaultChaos); err != nil {
+	pods := tgt.Sources
+	if err := r.applyAllPods(ctx, pods, httpFaultChaos); err != nil {
 		r.Log.Error(err, "failed to apply chaos on all pods")
 		return err
 	}

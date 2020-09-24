@@ -71,17 +71,17 @@ type KernelChaosSpec struct {
 	Scheduler *SchedulerSpec `json:"scheduler,omitempty"`
 }
 
-// GetSelector is a getter for Selector (for implementing SelectSpec)
+// GetSelector is a getter for Selector (for implementing ChaosSelectSpec)
 func (in *KernelChaosSpec) GetSelector() SelectorSpec {
 	return in.Selector
 }
 
-// GetMode is a getter for Mode (for implementing SelectSpec)
+// GetMode is a getter for Mode (for implementing ChaosSelectSpec)
 func (in *KernelChaosSpec) GetMode() PodMode {
 	return in.Mode
 }
 
-// GetValue is a getter for Value (for implementing SelectSpec)
+// GetValue is a getter for Value (for implementing ChaosSelectSpec)
 func (in *KernelChaosSpec) GetValue() string {
 	return in.Value
 }
@@ -214,6 +214,15 @@ func (in *KernelChaos) GetStatus() *ChaosStatus {
 	return &in.Status.ChaosStatus
 }
 
+// GetSourceTargetSpec get kernelchaos selector spec
+func (in *KernelChaos) GetSourceTargetSpec() *ChaosSourceTargetSpec {
+	return &ChaosSourceTargetSpec{
+		Source:          &in.Spec,
+		Target:          nil,        // no target
+		ExternalTargets: []string{}, // no external targets
+	}
+}
+
 // IsDeleted returns whether this resource has been deleted
 func (in *KernelChaos) IsDeleted() bool {
 	return !in.DeletionTimestamp.IsZero()
@@ -225,6 +234,11 @@ func (in *KernelChaos) IsPaused() bool {
 		return false
 	}
 	return true
+}
+
+// IsRenewed returns whether this resource resolved targets has changed
+func (in *KernelChaos) IsRenewed(tgt *ChaosResolvedTargets) bool {
+	return IsChaosTargetChanged(tgt, in.Status.Experiment.PodRecords)
 }
 
 // GetChaos returns a chaos instance
@@ -261,6 +275,15 @@ func (in *KernelChaosList) ListChaos() []*ChaosInstance {
 	res := make([]*ChaosInstance, 0, len(in.Items))
 	for _, item := range in.Items {
 		res = append(res, item.GetChaos())
+	}
+	return res
+}
+
+// ListItems returns a list of chaos object
+func (in *KernelChaosList) ListItems() []InnerObject {
+	res := make([]InnerObject, 0, len(in.Items))
+	for idx := range in.Items {
+		res = append(res, &in.Items[idx])
 	}
 	return res
 }

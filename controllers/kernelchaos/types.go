@@ -88,7 +88,7 @@ func (r *Reconciler) scheduleKernelChaos(kernelChaos *v1alpha1.KernelChaos, req 
 }
 
 // Apply applies KernelChaos
-func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.InnerObject) error {
+func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.InnerObject, tgt *v1alpha1.ChaosResolvedTargets) error {
 	kernelChaos, ok := chaos.(*v1alpha1.KernelChaos)
 	if !ok {
 		err := errors.New("chaos is not kernelChaos")
@@ -96,13 +96,8 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1
 		return err
 	}
 
-	pods, err := utils.SelectAndFilterPods(ctx, r.Client, r.Reader, &kernelChaos.Spec)
-	if err != nil {
-		r.Log.Error(err, "failed to select and filter pods")
-		return err
-	}
-
-	if err = r.applyAllPods(ctx, pods, kernelChaos); err != nil {
+	pods := tgt.Sources
+	if err := r.applyAllPods(ctx, pods, kernelChaos); err != nil {
 		r.Log.Error(err, "failed to apply chaos on all pods")
 		return err
 	}

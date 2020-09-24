@@ -125,6 +125,16 @@ type HTTPChaos struct {
 	Status HTTPChaosStatus `json:"status,omitempty"`
 }
 
+// GetSourceTargetSpec get httpchaos selector spec
+func (in *HTTPChaos) GetSourceTargetSpec() *ChaosSourceTargetSpec {
+	return &ChaosSourceTargetSpec{
+		Source:          &in.Spec,
+		Target:          nil,        // no target
+		ExternalTargets: []string{}, // no external targets
+	}
+}
+
+// GetStatus get httpchaos status
 func (in *HTTPChaos) GetStatus() *ChaosStatus {
 	return &in.Status.ChaosStatus
 }
@@ -132,6 +142,11 @@ func (in *HTTPChaos) GetStatus() *ChaosStatus {
 // IsDeleted returns whether this resource has been deleted
 func (in *HTTPChaos) IsDeleted() bool {
 	return !in.DeletionTimestamp.IsZero()
+}
+
+// IsRenewed returns whether this resource resolved targets has changed
+func (in *HTTPChaos) IsRenewed(tgt *ChaosResolvedTargets) bool {
+	return IsChaosTargetChanged(tgt, in.Status.Experiment.PodRecords)
 }
 
 // IsPaused returns whether this resource has been paused
@@ -229,6 +244,15 @@ func (in *HTTPChaosList) ListChaos() []*ChaosInstance {
 	res := make([]*ChaosInstance, 0, len(in.Items))
 	for _, item := range in.Items {
 		res = append(res, item.GetChaos())
+	}
+	return res
+}
+
+// ListItems returns a list of chaos object
+func (in *HTTPChaosList) ListItems() []InnerObject {
+	res := make([]InnerObject, 0, len(in.Items))
+	for idx := range in.Items {
+		res = append(res, &in.Items[idx])
 	}
 	return res
 }

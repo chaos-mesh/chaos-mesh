@@ -36,6 +36,7 @@ import (
 	. "github.com/chaos-mesh/chaos-mesh/controllers/test"
 	. "github.com/chaos-mesh/chaos-mesh/controllers/timechaos"
 	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
+	"github.com/chaos-mesh/chaos-mesh/pkg/utils"
 )
 
 func TestTimechaos(t *testing.T) {
@@ -98,8 +99,12 @@ var _ = Describe("TimeChaos", func() {
 			})()
 			defer mock.With("MockChaosDaemonClient", &MockChaosDaemonClient{})()
 
-			err := r.Apply(context.TODO(), ctrl.Request{}, &timechaos)
+			ctx := context.TODO()
 
+			tgt, err := utils.ResolveTargets(ctx, r.Client, r.Reader, timechaos.GetSourceTargetSpec(), false, "", "", "")
+			Expect(err).ToNot(HaveOccurred())
+
+			err = r.Apply(ctx, ctrl.Request{}, &timechaos, tgt)
 			Expect(err).ToNot(HaveOccurred())
 		})
 
@@ -110,8 +115,12 @@ var _ = Describe("TimeChaos", func() {
 			defer mock.With("MockChaosDaemonClient", &MockChaosDaemonClient{})()
 			defer mock.With("MockSetTimeOffsetError", errors.New("SetTimeOffsetError"))()
 
-			err := r.Apply(context.TODO(), ctrl.Request{}, &timechaos)
+			ctx := context.TODO()
 
+			tgt, err := utils.ResolveTargets(ctx, r.Client, r.Reader, timechaos.GetSourceTargetSpec(), false, "", "", "")
+			Expect(err).ToNot(HaveOccurred())
+
+			err = r.Apply(ctx, ctrl.Request{}, &timechaos, tgt)
 			Expect(err).To(HaveOccurred())
 			Expect(err.Error()).To(ContainSubstring("SetTimeOffsetError"))
 
@@ -134,7 +143,12 @@ var _ = Describe("TimeChaos", func() {
 			defer mock.With("MockChaosDaemonClient", &MockChaosDaemonClient{})()
 			defer mock.With("MockRecoverTimeOffsetError", errors.New("RecoverTimeOffsetError"))()
 
-			err := r.Apply(context.TODO(), ctrl.Request{}, &timechaos)
+			ctx := context.TODO()
+
+			tgt, err := utils.ResolveTargets(ctx, r.Client, r.Reader, timechaos.GetSourceTargetSpec(), false, "", "", "")
+			Expect(err).ToNot(HaveOccurred())
+
+			err = r.Apply(context.TODO(), ctrl.Request{}, &timechaos, tgt)
 			Expect(err).ToNot(HaveOccurred())
 
 			err = r.Recover(context.TODO(), ctrl.Request{}, &timechaos)

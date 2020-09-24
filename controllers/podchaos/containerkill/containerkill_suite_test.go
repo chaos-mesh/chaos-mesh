@@ -35,6 +35,7 @@ import (
 	controllerkill "github.com/chaos-mesh/chaos-mesh/controllers/podchaos/containerkill"
 	. "github.com/chaos-mesh/chaos-mesh/controllers/test"
 	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
+	"github.com/chaos-mesh/chaos-mesh/pkg/utils"
 )
 
 func TestContainerKill(t *testing.T) {
@@ -90,10 +91,15 @@ var _ = Describe("PodChaos", func() {
 		It("ContainerKill Apply", func() {
 			defer mock.With("MockChaosDaemonClient", &MockChaosDaemonClient{})()
 
-			err := r.Apply(context.TODO(), ctrl.Request{}, &podChaos)
+			ctx := context.TODO()
+
+			tgt, err := utils.ResolveTargets(ctx, r.Client, r.Reader, podChaos.GetSourceTargetSpec(), false, "", "", "")
 			Expect(err).ToNot(HaveOccurred())
 
-			err = r.Recover(context.TODO(), ctrl.Request{}, &podChaos)
+			err = r.Apply(ctx, ctrl.Request{}, &podChaos, tgt)
+			Expect(err).ToNot(HaveOccurred())
+
+			err = r.Recover(ctx, ctrl.Request{}, &podChaos)
 			Expect(err).ToNot(HaveOccurred())
 		})
 
@@ -101,7 +107,12 @@ var _ = Describe("PodChaos", func() {
 			defer mock.With("MockChaosDaemonClient", &MockChaosDaemonClient{})()
 			defer mock.With("MockContainerKillError", errors.New("ContainerKillError"))()
 
-			err := r.Apply(context.TODO(), ctrl.Request{}, &podChaos)
+			ctx := context.TODO()
+
+			tgt, err := utils.ResolveTargets(ctx, r.Client, r.Reader, podChaos.GetSourceTargetSpec(), false, "", "", "")
+			Expect(err).ToNot(HaveOccurred())
+
+			err = r.Apply(ctx, ctrl.Request{}, &podChaos, tgt)
 
 			Expect(err).To(HaveOccurred())
 			Expect(err.Error()).To(ContainSubstring("ContainerKillError"))

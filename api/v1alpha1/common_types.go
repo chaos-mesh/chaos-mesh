@@ -16,6 +16,7 @@ package v1alpha1
 import (
 	"time"
 
+	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -110,6 +111,7 @@ const (
 	ChaosPhaseAbnormal ChaosPhase = "Abnormal"
 )
 
+// ChaosStatus is common chaos status
 type ChaosStatus struct {
 	// Phase is the chaos status.
 	Phase         ChaosPhase `json:"phase"`
@@ -133,7 +135,7 @@ type ScheduleStatus struct {
 	NextRecover *metav1.Time `json:"nextRecover,omitempty"`
 }
 
-// ExperimentPhase is the current status of chaos experiment.
+// ExperimentPhase is the current phase of chaos experiment.
 type ExperimentPhase string
 
 const (
@@ -144,6 +146,7 @@ const (
 	ExperimentPhaseFinished ExperimentPhase = "Finished"
 )
 
+// ExperimentStatus is chaos experiment status
 type ExperimentStatus struct {
 	// +optional
 	Phase ExperimentPhase `json:"phase,omitempty"`
@@ -157,6 +160,76 @@ type ExperimentStatus struct {
 	Duration string `json:"duration,omitempty"`
 	// +optional
 	PodRecords []PodStatus `json:"podRecords,omitempty"`
+}
+
+// IsSameTwoPodStatus check if two pod status is same or not
+func IsSameTwoPodStatus(a, b PodStatus) bool {
+	if a.Namespace == b.Namespace && a.Name == b.Name &&
+		a.HostIP == b.HostIP && a.PodIP == b.PodIP {
+		return true
+	}
+	return false
+}
+
+// IsSameTwoPodStatusList check if two pod status list is same or not
+func IsSameTwoPodStatusList(a, b []PodStatus) bool {
+	aMap := make(map[string]PodStatus)
+	aCheckedMap := make(map[string]bool)
+
+	if len(a) != len(b) {
+		return false
+	}
+
+	for _, item := range a {
+		aMap[item.Name] = item
+		aCheckedMap[item.Name] = false
+	}
+
+	for _, item := range b {
+		if found, exists := aMap[item.Name]; exists {
+			if !IsSameTwoPodStatus(found, item) {
+				return false
+			}
+
+			aCheckedMap[item.Name] = true
+		} else {
+			return false
+		}
+	}
+
+	for _, checked := range aCheckedMap {
+		if !checked {
+			return false
+		}
+	}
+
+	return true
+}
+
+// IsChaosTargetChanged check whether the chaos target has been changed
+func IsChaosTargetChanged(tgt *ChaosResolvedTargets, currentPodRecords []PodStatus) bool {
+	if tgt == nil {
+		return false
+	}
+
+	var (
+		stagingPodRecords []PodStatus
+	)
+
+	pods := append(tgt.Sources, tgt.Targets...)
+	for _, pod := range pods {
+		ps := PodStatus{
+			Namespace: pod.Namespace,
+			Name:      pod.Name,
+			HostIP:    pod.Status.HostIP,
+			PodIP:     pod.Status.PodIP,
+			Action:    "", // for this scenario, we don't care about this.
+		}
+		stagingPodRecords = append(stagingPodRecords, ps)
+	}
+
+	changed := IsSameTwoPodStatusList(stagingPodRecords, currentPodRecords)
+	return changed
 }
 
 const (
@@ -187,8 +260,36 @@ type InnerSchedulerObject interface {
 type InnerObject interface {
 	IsDeleted() bool
 	IsPaused() bool
+	IsRenewed(tgt *ChaosResolvedTargets) bool
 	GetChaos() *ChaosInstance
 	StatefulObject
+}
+
+// +kubebuilder:object:generate=false
+
+// InnerSelectSpec defines the select spec impl for source/target pods
+type InnerSelectSpec interface {
+	GetSelector() SelectorSpec
+	GetMode() PodMode
+	GetValue() string
+}
+
+// +kubebuilder:object:generate=false
+
+// ChaosSourceTargetSpec is chaos source target selector spec
+type ChaosSourceTargetSpec struct {
+	Source          InnerSelectSpec
+	Target          InnerSelectSpec
+	ExternalTargets []string
+}
+
+// +kubebuilder:object:generate=false
+
+// ChaosResolvedTargets is the resolved chaos targets, e.g. srcPods, targetPods, externalTargets etc.
+type ChaosResolvedTargets struct {
+	Sources       []v1.Pod
+	Targets       []v1.Pod
+	ExternalCidrs []string
 }
 
 // +kubebuilder:object:generate=false
@@ -197,6 +298,7 @@ type InnerObject interface {
 type StatefulObject interface {
 	runtime.Object
 	GetStatus() *ChaosStatus
+	GetSourceTargetSpec() *ChaosSourceTargetSpec
 }
 
 // +kubebuilder:object:generate=false
@@ -219,5 +321,6 @@ type ChaosInstance struct {
 // ChaosList defines a common interface for chaos lists
 type ChaosList interface {
 	runtime.Object
+	ListItems() []InnerObject
 	ListChaos() []*ChaosInstance
 }

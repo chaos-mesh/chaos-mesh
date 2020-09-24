@@ -81,7 +81,7 @@ func (r *Reconciler) scheduleStressChaos(stresschaos *v1alpha1.StressChaos, req 
 }
 
 // Apply applies stress-chaos
-func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.InnerObject) error {
+func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.InnerObject, tgt *v1alpha1.ChaosResolvedTargets) error {
 	stresschaos, ok := chaos.(*v1alpha1.StressChaos)
 	if !ok {
 		err := errors.New("chaos is not stresschaos")
@@ -89,20 +89,14 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1
 		return err
 	}
 
-	pods, err := utils.SelectAndFilterPods(ctx, r.Client, r.Reader, &stresschaos.Spec)
-	if err != nil {
-		r.Log.Error(err, "failed to select and generate pods")
-		return err
-	}
-
-	stresschaos.Status.Instances = make(map[string]v1alpha1.StressInstance, len(pods))
-	if err = r.applyAllPods(ctx, pods, stresschaos); err != nil {
+	stresschaos.Status.Instances = make(map[string]v1alpha1.StressInstance, len(tgt.Sources))
+	if err := r.applyAllPods(ctx, tgt.Sources, stresschaos); err != nil {
 		r.Log.Error(err, "failed to apply chaos on all pods")
 		return err
 	}
 
-	stresschaos.Status.Experiment.PodRecords = make([]v1alpha1.PodStatus, 0, len(pods))
-	for _, pod := range pods {
+	stresschaos.Status.Experiment.PodRecords = make([]v1alpha1.PodStatus, 0, len(tgt.Sources))
+	for _, pod := range tgt.Sources {
 		ps := v1alpha1.PodStatus{
 			Namespace: pod.Namespace,
 			Name:      pod.Name,

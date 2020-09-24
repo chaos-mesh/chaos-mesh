@@ -32,7 +32,7 @@ var _ = Describe("webhook inject", func() {
 		It("should return unexpected end of JSON input", func() {
 			var testClient client.Client
 			var cfg *config.Config
-			res := Inject(&admissionv1beta1.AdmissionRequest{}, testClient, cfg, nil)
+			res := Inject(&admissionv1beta1.AdmissionRequest{}, testClient, cfg, nil, "", "")
 			Expect(res.Result.Message).To(ContainSubstring("unexpected end of JSON input"))
 		})
 	})
@@ -86,7 +86,7 @@ var _ = Describe("webhook inject", func() {
 			metadata.Namespace = "kube-system"
 			var cli client.Client
 			var cfg config.Config
-			str, flag := injectRequired(&metadata, cli, &cfg)
+			str, flag := injectRequired(&metadata, cli, &cfg, "", "")
 			Expect(str).To(Equal(""))
 			Expect(flag).To(Equal(false))
 		})
@@ -98,7 +98,7 @@ var _ = Describe("webhook inject", func() {
 			var cfg config.Config
 			cfg.AnnotationNamespace = "testNamespace"
 			var cli client.Client
-			str, flag := injectRequired(&metadata, cli, &cfg)
+			str, flag := injectRequired(&metadata, cli, &cfg, "", "")
 			Expect(str).To(Equal(""))
 			Expect(flag).To(Equal(false))
 		})
@@ -110,7 +110,7 @@ var _ = Describe("webhook inject", func() {
 			var cfg config.Config
 			cfg.AnnotationNamespace = "testNamespace"
 			var cli client.Client
-			str, flag := injectRequired(&metadata, cli, &cfg)
+			str, flag := injectRequired(&metadata, cli, &cfg, "", "")
 			Expect(str).To(Equal(""))
 			Expect(flag).To(Equal(false))
 		})
@@ -122,7 +122,7 @@ var _ = Describe("webhook inject", func() {
 			metadata.Namespace = "testNamespace"
 			var cfg config.Config
 			cfg.AnnotationNamespace = "testNamespace"
-			str, flag := injectRequired(&metadata, k8sClient, &cfg)
+			str, flag := injectRequired(&metadata, k8sClient, &cfg, "", "")
 			Expect(str).To(Equal("test"))
 			Expect(flag).To(Equal(true))
 		})
@@ -131,7 +131,7 @@ var _ = Describe("webhook inject", func() {
 			var metadata metav1.ObjectMeta
 			metadata.Annotations = make(map[string]string)
 			var cfg config.Config
-			_, flag := injectRequired(&metadata, k8sClient, &cfg)
+			_, flag := injectRequired(&metadata, k8sClient, &cfg, "", "")
 			Expect(flag).To(Equal(false))
 		})
 	})

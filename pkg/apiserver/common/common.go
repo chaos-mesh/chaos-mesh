@@ -23,6 +23,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/controllers/common"
 	"github.com/chaos-mesh/chaos-mesh/pkg/apiserver/utils"
 	"github.com/chaos-mesh/chaos-mesh/pkg/config"
 	"github.com/chaos-mesh/chaos-mesh/pkg/core"
@@ -87,7 +88,7 @@ func (s *Service) listPods(c *gin.Context) {
 		return
 	}
 	ctx := context.TODO()
-	filteredPods, err := pkgutils.SelectPods(ctx, s.kubeCli, s.reader, exp.ParseSelector())
+	filteredPods, err := pkgutils.SelectPods(ctx, s.kubeCli, s.reader, exp.ParseSelector(), common.ControllerCfg.ClusterScoped, common.ControllerCfg.AllowedNamespaces, common.ControllerCfg.IgnoredNamespaces, common.ControllerCfg.TargetNamespace)
 	if err != nil {
 		c.Status(http.StatusInternalServerError)
 		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
@@ -175,7 +176,7 @@ func (s *Service) getLabels(c *gin.Context) {
 	exp.NamespaceSelectors = nsList
 
 	ctx := context.TODO()
-	filteredPods, err := pkgutils.SelectPods(ctx, s.kubeCli, s.reader, exp.ParseSelector())
+	filteredPods, err := pkgutils.SelectPods(ctx, s.kubeCli, s.reader, exp.ParseSelector(), common.ControllerCfg.ClusterScoped, common.ControllerCfg.AllowedNamespaces, common.ControllerCfg.IgnoredNamespaces, common.ControllerCfg.TargetNamespace)
 	if err != nil {
 		c.Status(http.StatusInternalServerError)
 		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
@@ -220,7 +221,7 @@ func (s *Service) getAnnotations(c *gin.Context) {
 	exp.NamespaceSelectors = nsList
 
 	ctx := context.TODO()
-	filteredPods, err := pkgutils.SelectPods(ctx, s.kubeCli, s.reader, exp.ParseSelector())
+	filteredPods, err := pkgutils.SelectPods(ctx, s.kubeCli, s.reader, exp.ParseSelector(), common.ControllerCfg.ClusterScoped, common.ControllerCfg.AllowedNamespaces, common.ControllerCfg.IgnoredNamespaces, common.ControllerCfg.TargetNamespace)
 	if err != nil {
 		c.Status(http.StatusInternalServerError)
 		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))

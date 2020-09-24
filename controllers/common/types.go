@@ -26,6 +26,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/reconciler"
 	"github.com/chaos-mesh/chaos-mesh/pkg/config"
+	"github.com/chaos-mesh/chaos-mesh/pkg/utils"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/util/retry"
@@ -146,6 +147,12 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	}
 
 	status := chaos.GetStatus()
+	chaosSourceTargetSpec := chaos.GetSourceTargetSpec()
+	tgt, err := utils.ResolveTargets(ctx, r.Client, r.Reader, chaosSourceTargetSpec, ControllerCfg.ClusterScoped, ControllerCfg.AllowedNamespaces, ControllerCfg.IgnoredNamespaces, ControllerCfg.TargetNamespace)
+	if err != nil {
+		r.Log.Error(err, "failed to select and filter pods by chaos select spec")
+		return ctrl.Result{}, err
+	}
 
 	if chaos.IsDeleted() {
 		// This chaos was deleted
@@ -177,13 +184,43 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		status.Experiment.Phase = v1alpha1.ExperimentPhasePaused
 		status.FailedMessage = emptyString
 	} else if status.Experiment.Phase == v1alpha1.ExperimentPhaseRunning {
-		r.Log.Info("The common chaos is already running", "name", req.Name, "namespace", req.Namespace)
+		if !chaos.IsRenewed(tgt) {
+			r.Log.Info("The common chaos is already running", "name", req.Name, "namespace", req.Namespace)
+			return ctrl.Result{}, nil
+		}
+
+		r.Log.Info("Refreshing chaos target")
+
+		if err = r.Recover(ctx, req, chaos); err != nil {
+			r.Log.Error(err, "failed to recover chaos")
+			updateFailedMessage(ctx, r, chaos, err.Error())
+			return ctrl.Result{Requeue: true}, err
+		}
+
+		if err = r.Apply(ctx, req, chaos, tgt); err != nil {
+			r.Log.Error(err, "failed to apply chaos action")
+			updateFailedMessage(ctx, r, chaos, err.Error())
+
+			status.Experiment.Phase = v1alpha1.ExperimentPhaseFailed
+
+			updateError := retry.RetryOnConflict(retry.DefaultRetry, func() error {
+				return r.Update(ctx, chaos)
+			})
+			if updateError != nil {
+				r.Log.Error(updateError, "unable to update chaos finalizers")
+				updateFailedMessage(ctx, r, chaos, updateError.Error())
+			}
+
+			return ctrl.Result{Requeue: true}, err
+		}
+
+		r.Log.Info("The common chaos target has been renewed", "name", req.Name, "namespace", req.Namespace)
 		return ctrl.Result{}, nil
 	} else {
 		// Start chaos action
 		r.Log.Info("Performing Action")
 
-		if err = r.Apply(ctx, req, chaos); err != nil {
+		if err = r.Apply(ctx, req, chaos, tgt); err != nil {
 			r.Log.Error(err, "failed to apply chaos action")
 			updateFailedMessage(ctx, r, chaos, err.Error())
 

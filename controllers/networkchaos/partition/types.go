@@ -87,7 +87,7 @@ func (r *Reconciler) Object() v1alpha1.InnerObject {
 }
 
 // Apply implements the reconciler.InnerReconciler.Apply
-func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.InnerObject) error {
+func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.InnerObject, tgt *v1alpha1.ChaosResolvedTargets) error {
 	r.Log.Info("Applying network partition")
 
 	networkchaos, ok := chaos.(*v1alpha1.NetworkChaos)
@@ -101,32 +101,15 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1
 	source := networkchaos.Namespace + "/" + networkchaos.Name
 	m := podnetworkmanager.New(source, r.Log, r.Client, r.Reader)
 
-	sources, err := utils.SelectAndFilterPods(ctx, r.Client, r.Reader, &networkchaos.Spec)
-
-	if err != nil {
-		r.Log.Error(err, "failed to select and filter pods")
-		return err
-	}
-
-	var targets []v1.Pod
-
-	if networkchaos.Spec.Target != nil {
-		targets, err = utils.SelectAndFilterPods(ctx, r.Client, r.Reader, networkchaos.Spec.Target)
-		if err != nil {
-			r.Log.Error(err, "failed to select and filter pods")
-			return err
-		}
-	}
-
-	sourceSet := ipset.BuildIPSet(sources, []string{}, networkchaos, sourceIPSetPostFix, source)
+	sourceSet := ipset.BuildIPSet(tgt.Sources, []string{}, networkchaos, sourceIPSetPostFix, source)
 	externalCidrs, err := netutils.ResolveCidrs(networkchaos.Spec.ExternalTargets)
 	if err != nil {
 		r.Log.Error(err, "failed to resolve external targets")
 		return err
 	}
-	targetSet := ipset.BuildIPSet(targets, externalCidrs, networkchaos, targetIPSetPostFix, source)
+	targetSet := ipset.BuildIPSet(tgt.Targets, externalCidrs, networkchaos, targetIPSetPostFix, source)
 
-	allPods := append(sources, targets...)
+	allPods := append(tgt.Sources, tgt.Targets...)
 
 	// Set up ipset in every related pods
 	for index := range allPods {
@@ -185,12 +168,12 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1
 	}
 	r.Log.Info("chains prepared", "sourcesChains", sourcesChains, "targetsChains", targetsChains)
 
-	err = r.SetChains(ctx, sources, sourcesChains, m, networkchaos)
+	err = r.SetChains(ctx, tgt.Sources, sourcesChains, m, networkchaos)
 	if err != nil {
 		return err
 	}
 
-	err = r.SetChains(ctx, targets, targetsChains, m, networkchaos)
+	err = r.SetChains(ctx, tgt.Targets, targetsChains, m, networkchaos)
 	if err != nil {
 		return err
 	}

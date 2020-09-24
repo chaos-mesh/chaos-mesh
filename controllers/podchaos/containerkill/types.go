@@ -59,7 +59,7 @@ func NewTwoPhaseReconciler(c client.Client, reader client.Reader, log logr.Logge
 }
 
 // Apply implements the reconciler.InnerReconciler.Apply
-func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, obj v1alpha1.InnerObject) error {
+func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, obj v1alpha1.InnerObject, tgt *v1alpha1.ChaosResolvedTargets) error {
 	var err error
 
 	podchaos, ok := obj.(*v1alpha1.PodChaos)
@@ -74,15 +74,9 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, obj v1alpha1.I
 		return fmt.Errorf("podchaos[%s/%s] the name of container is empty", podchaos.Namespace, podchaos.Name)
 	}
 
-	pods, err := utils.SelectAndFilterPods(ctx, r.Client, r.Reader, &podchaos.Spec)
-	if err != nil {
-		r.Log.Error(err, "fail to select and filter pods")
-		return err
-	}
-
 	g := errgroup.Group{}
-	for podIndex := range pods {
-		pod := &pods[podIndex]
+	for podIndex := range tgt.Sources {
+		pod := &tgt.Sources[podIndex]
 		haveContainer := false
 
 		for containerIndex := range pod.Status.ContainerStatuses {
@@ -112,8 +106,8 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, obj v1alpha1.I
 		return err
 	}
 
-	podchaos.Status.Experiment.PodRecords = make([]v1alpha1.PodStatus, 0, len(pods))
-	for _, pod := range pods {
+	podchaos.Status.Experiment.PodRecords = make([]v1alpha1.PodStatus, 0, len(tgt.Sources))
+	for _, pod := range tgt.Sources {
 		ps := v1alpha1.PodStatus{
 			Namespace: pod.Namespace,
 			Name:      pod.Name,

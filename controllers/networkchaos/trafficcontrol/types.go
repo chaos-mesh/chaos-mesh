@@ -31,7 +31,6 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/controllers/common"
 	"github.com/chaos-mesh/chaos-mesh/controllers/networkchaos/podnetworkmanager"
 	"github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos/ipset"
-	"github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos/netutils"
 	"github.com/chaos-mesh/chaos-mesh/controllers/twophase"
 	"github.com/chaos-mesh/chaos-mesh/pkg/utils"
 )
@@ -81,7 +80,7 @@ func (r *Reconciler) Object() v1alpha1.InnerObject {
 }
 
 // Apply implements the reconciler.InnerReconciler.Apply
-func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.InnerObject) error {
+func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.InnerObject, tgt *v1alpha1.ChaosResolvedTargets) error {
 	r.Log.Info("traffic control Apply", "req", req, "chaos", chaos)
 
 	networkchaos, ok := chaos.(*v1alpha1.NetworkChaos)
@@ -91,49 +90,26 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1
 		return err
 	}
 
+	var err error
 	source := networkchaos.Namespace + "/" + networkchaos.Name
 	m := podnetworkmanager.New(source, r.Log, r.Client, r.Reader)
-
-	sources, err := utils.SelectAndFilterPods(ctx, r.Client, r.Reader, &networkchaos.Spec)
-	if err != nil {
-		r.Log.Error(err, "failed to select and filter pods")
-		return err
-	}
-
-	var targets []v1.Pod
-
-	// We should only apply filter when we specify targets
-	if networkchaos.Spec.Target != nil {
-		targets, err = utils.SelectAndFilterPods(ctx, r.Client, r.Reader, networkchaos.Spec.Target)
-		if err != nil {
-			r.Log.Error(err, "failed to select and filter pods")
-			return err
-		}
-	}
-
-	pods := append(sources, targets...)
-
-	externalCidrs, err := netutils.ResolveCidrs(networkchaos.Spec.ExternalTargets)
-	if err != nil {
-		r.Log.Error(err, "failed to resolve external targets")
-		return err
-	}
+	pods := append(tgt.Sources, tgt.Targets...)
 
 	switch networkchaos.Spec.Direction {
 	case v1alpha1.To:
-		err = r.applyTc(ctx, sources, targets, externalCidrs, m, networkchaos)
+		err = r.applyTc(ctx, tgt.Sources, tgt.Targets, tgt.ExternalCidrs, m, networkchaos)
 		if err != nil {
-			r.Log.Error(err, "failed to apply traffic control", "sources", sources, "targets", targets)
+			r.Log.Error(err, "failed to apply traffic control", "sources", tgt.Sources, "targets", tgt.Targets)
 			return err
 		}
 	case v1alpha1.From:
-		err = r.applyTc(ctx, targets, sources, []string{}, m, networkchaos)
+		err = r.applyTc(ctx, tgt.Targets, tgt.Sources, []string{}, m, networkchaos)
 		if err != nil {
-			r.Log.Error(err, "failed to apply traffic control", "sources", targets, "targets", sources)
+			r.Log.Error(err, "failed to apply traffic control", "sources", tgt.Targets, "targets", tgt.Sources)
 			return err
 		}
 	case v1alpha1.Both:
-		err = r.applyTc(ctx, pods, pods, externalCidrs, m, networkchaos)
+		err = r.applyTc(ctx, pods, pods, tgt.ExternalCidrs, m, networkchaos)
 		if err != nil {
 			r.Log.Error(err, "failed to apply traffic control", "sources", pods, "targets", pods)
 			return err

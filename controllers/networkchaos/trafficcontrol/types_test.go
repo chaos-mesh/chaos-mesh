@@ -28,6 +28,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/test"
 	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
+	"github.com/chaos-mesh/chaos-mesh/pkg/utils"
 )
 
 func TestReconciler_applyNetem(t *testing.T) {
@@ -79,8 +80,12 @@ func TestReconciler_applyNetem(t *testing.T) {
 		})()
 		defer mock.With("MockChaosDaemonClient", &test.MockChaosDaemonClient{})()
 
-		err := r.Apply(context.TODO(), ctrl.Request{}, &networkChaos)
+		ctx := context.TODO()
 
+		tgt, err := utils.ResolveTargets(ctx, r.Client, r.Reader, networkChaos.GetSourceTargetSpec(), false, "", "", "")
+		g.Expect(err).ToNot(HaveOccurred())
+
+		err = r.Apply(ctx, ctrl.Request{}, &networkChaos, tgt)
 		g.Expect(err).ToNot(HaveOccurred())
 	})
 
@@ -116,8 +121,12 @@ func TestReconciler_applyNetem(t *testing.T) {
 		})()
 		defer mock.With("MockChaosDaemonClient", &test.MockChaosDaemonClient{})()
 
-		err := r.Apply(context.TODO(), ctrl.Request{}, &networkChaos)
+		ctx := context.TODO()
 
+		tgt, err := utils.ResolveTargets(ctx, r.Client, r.Reader, networkChaos.GetSourceTargetSpec(), false, "", "", "")
+		g.Expect(err).ToNot(HaveOccurred())
+
+		err = r.Apply(context.TODO(), ctrl.Request{}, &networkChaos, tgt)
 		g.Expect(err).ToNot(HaveOccurred())
 	})
 }

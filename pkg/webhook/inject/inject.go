@@ -34,7 +34,7 @@ import (
 
 var log = ctrl.Log.WithName("inject-webhook")
 
-var ignoredNamespaces = []string{
+var ignoredInjectNamespaces = []string{
 	metav1.NamespaceSystem,
 	metav1.NamespacePublic,
 }
@@ -44,7 +44,7 @@ const (
 	StatusInjected = "injected"
 )
 
-func Inject(res *v1beta1.AdmissionRequest, cli client.Client, cfg *config.Config, metrics *metrics.ChaosCollector) *v1beta1.AdmissionResponse {
+func Inject(res *v1beta1.AdmissionRequest, cli client.Client, cfg *config.Config, metrics *metrics.ChaosCollector, allowedNamespaces, ignoredNamespaces string) *v1beta1.AdmissionResponse {
 	var pod corev1.Pod
 	if err := json.Unmarshal(res.Object.Raw, &pod); err != nil {
 		log.Error(err, "Could not unmarshal raw object")
@@ -67,7 +67,7 @@ func Inject(res *v1beta1.AdmissionRequest, cli client.Client, cfg *config.Config
 	log.V(4).Info("OldObject", "OldObject", string(res.OldObject.Raw))
 	log.V(4).Info("Pod", "Pod", pod)
 
-	requiredKey, ok := injectRequired(&pod.ObjectMeta, cli, cfg)
+	requiredKey, ok := injectRequired(&pod.ObjectMeta, cli, cfg, allowedNamespaces, ignoredNamespaces)
 	if !ok {
 		log.Info("Skipping injection due to policy check", "namespace", pod.ObjectMeta.Namespace, "name", podName)
 		return &v1beta1.AdmissionResponse{
@@ -132,15 +132,15 @@ func Inject(res *v1beta1.AdmissionRequest, cli client.Client, cfg *config.Config
 }
 
 // Check whether the target resource need to be injected and return the required config name
-func injectRequired(metadata *metav1.ObjectMeta, cli client.Client, cfg *config.Config) (string, bool) {
+func injectRequired(metadata *metav1.ObjectMeta, cli client.Client, cfg *config.Config, allowedNamespaces, ignoredNamespaces string) (string, bool) {
 	// skip special kubernetes system namespaces
-	for _, namespace := range ignoredNamespaces {
+	for _, namespace := range ignoredInjectNamespaces {
 		if metadata.Namespace == namespace {
 			log.Info("Skip mutation for it' in special namespace", "name", metadata.Name, "namespace", metadata.Namespace)
 			return "", false
 		}
 	}
-	if !utils.IsAllowedNamespaces(metadata.Namespace) {
+	if !utils.IsAllowedNamespaces(metadata.Namespace, allowedNamespaces, ignoredNamespaces) {
 		log.Info("Skip mutation for it' in special namespace", "name", metadata.Name, "namespace", metadata.Namespace)
 		return "", false
 	}

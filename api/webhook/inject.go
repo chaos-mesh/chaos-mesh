@@ -17,6 +17,7 @@ import (
 	"context"
 	"net/http"
 
+	"github.com/chaos-mesh/chaos-mesh/controllers/common"
 	"github.com/chaos-mesh/chaos-mesh/controllers/metrics"
 	"github.com/chaos-mesh/chaos-mesh/pkg/webhook/config"
 	"github.com/chaos-mesh/chaos-mesh/pkg/webhook/inject"
@@ -50,7 +51,7 @@ func (v *PodInjector) Handle(ctx context.Context, req admission.Request) admissi
 	log.Info("Get request from pod:", "pod", pod)
 
 	return admission.Response{
-		AdmissionResponse: *inject.Inject(&req.AdmissionRequest, v.client, v.Config, v.Metrics),
+		AdmissionResponse: *inject.Inject(&req.AdmissionRequest, v.client, v.Config, v.Metrics, common.ControllerCfg.AllowedNamespaces, common.ControllerCfg.IgnoredNamespaces),
 	}
 }
 

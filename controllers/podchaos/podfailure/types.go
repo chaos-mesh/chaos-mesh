@@ -77,7 +77,7 @@ func (r *Reconciler) Object() v1alpha1.InnerObject {
 }
 
 // Apply implements the reconciler.InnerReconciler.Apply
-func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.InnerObject) error {
+func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.InnerObject, tgt *v1alpha1.ChaosResolvedTargets) error {
 
 	podchaos, ok := chaos.(*v1alpha1.PodChaos)
 	if !ok {
@@ -86,18 +86,13 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1
 		return err
 	}
 
-	pods, err := utils.SelectAndFilterPods(ctx, r.Client, r.Reader, &podchaos.Spec)
-	if err != nil {
-		r.Log.Error(err, "failed to select and filter pods")
-		return err
-	}
-	err = r.failAllPods(ctx, pods, podchaos)
+	err := r.failAllPods(ctx, tgt.Sources, podchaos)
 	if err != nil {
 		return err
 	}
 
-	podchaos.Status.Experiment.PodRecords = make([]v1alpha1.PodStatus, 0, len(pods))
-	for _, pod := range pods {
+	podchaos.Status.Experiment.PodRecords = make([]v1alpha1.PodStatus, 0, len(tgt.Sources))
+	for _, pod := range tgt.Sources {
 		ps := v1alpha1.PodStatus{
 			Namespace: pod.Namespace,
 			Name:      pod.Name,

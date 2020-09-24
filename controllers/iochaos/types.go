@@ -46,7 +46,7 @@ func (r *Reconciler) Object() v1alpha1.InnerObject {
 }
 
 // Apply implements the reconciler.InnerReconciler.Apply
-func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.InnerObject) error {
+func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.InnerObject, tgt *v1alpha1.ChaosResolvedTargets) error {
 	iochaos, ok := chaos.(*v1alpha1.IoChaos)
 	if !ok {
 		err := errors.New("chaos is not IoChaos")
@@ -56,12 +56,7 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1
 
 	source := iochaos.Namespace + "/" + iochaos.Name
 	m := podiochaosmanager.New(source, r.Log, r.Client)
-
-	pods, err := utils.SelectAndFilterPods(ctx, r.Client, r.Reader, &iochaos.Spec)
-	if err != nil {
-		r.Log.Error(err, "failed to select and filter pods")
-		return err
-	}
+	pods := tgt.Sources
 
 	r.Log.Info("applying iochaos", "iochaos", iochaos)
 
@@ -98,7 +93,7 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1
 		iochaos.Finalizers = utils.InsertFinalizer(iochaos.Finalizers, key)
 	}
 	r.Log.Info("commiting updates of podiochaos")
-	err = m.Commit(ctx)
+	err := m.Commit(ctx)
 	if err != nil {
 		r.Log.Error(err, "fail to commit")
 		return err

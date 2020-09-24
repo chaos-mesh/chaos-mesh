@@ -78,7 +78,7 @@ func (r *Reconciler) scheduleTimeChaos(timechaos *v1alpha1.TimeChaos, req ctrl.R
 }
 
 // Apply applies time-chaos
-func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.InnerObject) error {
+func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.InnerObject, tgt *v1alpha1.ChaosResolvedTargets) error {
 	timechaos, ok := chaos.(*v1alpha1.TimeChaos)
 	if !ok {
 		err := errors.New("chaos is not timechaos")
@@ -87,15 +87,9 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1
 	}
 
 	timechaos.SetDefaultValue()
+	pods := tgt.Sources
 
-	pods, err := utils.SelectAndFilterPods(ctx, r.Client, r.Reader, &timechaos.Spec)
-
-	if err != nil {
-		r.Log.Error(err, "failed to select and filter pods")
-		return err
-	}
-
-	if err = r.applyAllPods(ctx, pods, timechaos); err != nil {
+	if err := r.applyAllPods(ctx, pods, timechaos); err != nil {
 		r.Log.Error(err, "failed to apply chaos on all pods")
 		return err
 	}
