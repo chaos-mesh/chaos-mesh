@@ -153,6 +153,8 @@ func parseAddChain(chain *pb.Chain) (string, error) {
 			return "", fmt.Errorf("unknown chain direction %d", chain.Direction)
 		}
 		if len(chain.Ipsets) > 1 {
+			// The placeholder "%%s" is just a real percent symbol , and it works
+			// outside the function to generate rules of several ipsets
 			rule += fmt.Sprintf("-m set --match-set %s %%s -w 5 ", matchPart)
 		} else if len(chain.Ipsets) == 1 {
 			rule += fmt.Sprintf("-m set --match-set %s %s -w 5 ", matchPart, chain.Ipsets[0])
