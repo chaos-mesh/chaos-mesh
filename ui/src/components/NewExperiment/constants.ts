@@ -53,12 +53,13 @@ export const defaultExperimentSchema: Experiment = {
     },
     io_chaos: {
       action: '',
-      addr: '',
       delay: '',
-      errno: '',
+      errno: 0,
+      attr: [],
       methods: [],
       path: '',
-      percent: '100',
+      percent: 100,
+      volume_path: '',
     },
     kernel_chaos: {
       fail_kern_request: {
@@ -174,6 +175,15 @@ export const validationSchema = Yup.object({
             kind === 'IoChaos'
               ? Yup.object({
                   action: Yup.string().required('The IOChaos action is required.'),
+                  delay: Yup.string().when('action', (action: string, schema: Yup.StringSchema) =>
+                    action === 'latency' ? Yup.string().required('The delay is required.') : schema
+                  ),
+                  errno: Yup.number().when('action', (action: string, schema: Yup.NumberSchema) =>
+                    action === 'fault' ? Yup.number().min(0).required('The errno is required.') : schema
+                  ),
+                  attr: Yup.array().when('action', (action: string, schema: Yup.ArraySchema<string>) =>
+                    action === 'attrOverride' ? Yup.array().of(Yup.string()).required('The attr is required.') : schema
+                  ),
                 })
               : schema
           ),

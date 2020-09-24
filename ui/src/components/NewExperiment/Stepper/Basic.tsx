@@ -1,9 +1,10 @@
-import { SelectField, TextField, LabelField } from 'components/FormField'
+import { LabelField, SelectField, TextField } from 'components/FormField'
 
 import AdvancedOptions from 'components/AdvancedOptions'
 import { Experiment } from 'components/NewExperiment/types'
 import { MenuItem } from '@material-ui/core'
 import React from 'react'
+import T from 'components/T'
 import { useFormikContext } from 'formik'
 
 interface BasicStepProps {
@@ -24,8 +25,8 @@ const BasicStep: React.FC<BasicStepProps> = ({ namespaces }) => {
       <TextField
         id="name"
         name="name"
-        label="Name"
-        helperText="The experiment name"
+        label={T('newE.basic.name')}
+        helperText={T('newE.basic.nameHelper')}
         autoFocus
         error={errors.name && touched.name ? true : false}
       />
@@ -33,8 +34,8 @@ const BasicStep: React.FC<BasicStepProps> = ({ namespaces }) => {
       <SelectField
         id="namespace"
         name="namespace"
-        label="Namespace"
-        helperText="Select the experiment's namespace"
+        label={T('newE.basic.namespace')}
+        helperText={T('newE.basic.namespaceHelper')}
         onChange={handleBasicNamespaceChange}
       >
         {namespaces.map((n) => (
@@ -45,8 +46,8 @@ const BasicStep: React.FC<BasicStepProps> = ({ namespaces }) => {
       </SelectField>
 
       <AdvancedOptions isOpen>
-        <LabelField id="labels" name="labels" label="Labels" isKV />
-        <LabelField id="annotations" name="annotations" label="Annotations" isKV />
+        <LabelField id="labels" name="labels" label={T('k8s.labels')} isKV />
+        <LabelField id="annotations" name="annotations" label={T('k8s.annotations')} isKV />
       </AdvancedOptions>
     </>
   )

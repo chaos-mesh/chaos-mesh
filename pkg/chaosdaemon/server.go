@@ -26,6 +26,7 @@ import (
 	"google.golang.org/grpc/reflection"
 	ctrl "sigs.k8s.io/controller-runtime"
 
+	"github.com/chaos-mesh/chaos-mesh/pkg/bpm"
 	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
 	"github.com/chaos-mesh/chaos-mesh/pkg/utils"
 )
@@ -55,7 +56,8 @@ func (c *Config) GrpcAddr() string {
 
 // Server represents a grpc server for tc daemon
 type daemonServer struct {
-	crClient ContainerRuntimeInfoClient
+	crClient                 ContainerRuntimeInfoClient
+	backgroundProcessManager bpm.BackgroundProcessManager
 }
 
 func newDaemonServer(containerRuntime string) (*daemonServer, error) {
@@ -65,7 +67,8 @@ func newDaemonServer(containerRuntime string) (*daemonServer, error) {
 	}
 
 	return &daemonServer{
-		crClient: crClient,
+		crClient:                 crClient,
+		backgroundProcessManager: bpm.NewBackgroundProcessManager(),
 	}, nil
 }
 

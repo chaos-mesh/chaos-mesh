@@ -15,6 +15,7 @@ package podnetworkmanager
 
 import (
 	"context"
+	"errors"
 
 	"github.com/go-logr/logr"
 	"golang.org/x/sync/errgroup"
@@ -26,6 +27,15 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+)
+
+var (
+	// ErrPodNotFound means operate pod may be deleted(almostly)
+	ErrPodNotFound = errors.New("pod not found")
+
+	// ErrPodNotRunning means operate pod may be not working
+	// and it's non-sense to make changes on it.
+	ErrPodNotRunning = errors.New("pod not running")
 )
 
 // PodNetworkManager will save all the related podnetworkchaos
@@ -83,7 +93,15 @@ func (m *PodNetworkManager) Commit(ctx context.Context) error {
 					pod := v1.Pod{}
 					err = m.Client.Get(ctx, key, &pod)
 					if err != nil {
-						m.Log.Error(err, "error while finding pod", "key", key)
+						m.Log.Info("pod not found", "key", key, "error", err.Error())
+						err = ErrPodNotFound
+						return err
+					}
+
+					if pod.Status.Phase != v1.PodRunning {
+						m.Log.Info("pod is not running", "key", key)
+						err = ErrPodNotRunning
+						return err
 					}
 
 					chaos.Name = key.Name
@@ -113,7 +131,11 @@ func (m *PodNetworkManager) Commit(ctx context.Context) error {
 				return m.Client.Update(ctx, chaos)
 			})
 			if updateError != nil {
-				m.Log.Error(updateError, "error while updating")
+				if updateError != ErrPodNotFound && updateError != ErrPodNotRunning {
+					m.Log.Error(updateError, "error while updating")
+				} else {
+					m.Log.Info("apply podnetworkchaos while pod is not found or not running, wait next time reconcile")
+				}
 				return updateError
 			}
 

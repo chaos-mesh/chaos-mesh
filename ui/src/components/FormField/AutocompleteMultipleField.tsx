@@ -4,6 +4,7 @@ import { getIn, useFormikContext } from 'formik'
 
 import Autocomplete from '@material-ui/lab/Autocomplete'
 import { Experiment } from 'components/NewExperiment/types'
+import T from 'components/T'
 
 interface AutocompleteMultipleFieldProps {
   options: string[]
@@ -62,6 +63,7 @@ const AutocompleteMultipleField: React.FC<AutocompleteMultipleFieldProps & TextF
       <Autocomplete
         multiple
         options={options}
+        noOptionsText={T('common.noOptions')}
         value={labels}
         onChange={onChange}
         renderTags={(value: string[], getTagProps) =>

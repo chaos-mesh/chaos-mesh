@@ -22,17 +22,33 @@ import (
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/core"
 	"github.com/chaos-mesh/chaos-mesh/pkg/store/dbstore"
+
+	ctrl "sigs.k8s.io/controller-runtime"
 )
+
+var log = ctrl.Log.WithName("experimentStore")
 
 // NewStore returns a new ExperimentStore.
 func NewStore(db *dbstore.DB) core.ExperimentStore {
 	db.AutoMigrate(&core.ArchiveExperiment{})
 
-	return &experimentStore{db}
+	es := &experimentStore{db}
+
+	if err := es.DeleteIncompleteExperiments(context.Background()); err != nil && !gorm.IsRecordNotFoundError(err) {
+		log.Error(err, "failed to delete all incomplete experiments")
+	}
+
+	return es
 }
 
 type experimentStore struct {
 	db *dbstore.DB
+}
+
+// DeleteIncompleteExperiments implement core.ExperimentStore interface.
+func (e *experimentStore) DeleteIncompleteExperiments(_ context.Context) error {
+	return e.db.Where("finish_time IS NULL").Unscoped().
+		Delete(core.Event{}).Error
 }
 
 func (e *experimentStore) List(_ context.Context, kind, ns, name string) ([]*core.ArchiveExperiment, error) {

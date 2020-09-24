@@ -2,7 +2,9 @@ import { Box, Divider, FormControlLabel, Link, Switch, Typography } from '@mater
 import React, { useState } from 'react'
 
 import { Experiment } from '../types'
+import { FormattedMessage } from 'react-intl'
 import HelpOutlineIcon from '@material-ui/icons/HelpOutline'
+import T from 'components/T'
 import { TextField } from 'components/FormField'
 import Tooltip from 'components/Tooltip'
 import { mustSchedule } from 'lib/formikhelpers'
@@ -27,11 +29,11 @@ const ScheduleStep: React.FC = () => {
     <>
       <FormControlLabel
         control={<Switch name="immediate" color="primary" checked={isImmediate} onChange={handleChecked} />}
-        label="Immediate"
+        label={T('newE.schedule.immediate')}
       />
       {mustBeScheduled && (
         <Typography variant="subtitle2" color="textSecondary">
-          The action you chose must be scheduled.
+          {T('newE.schedule.mustBeScheduled')}
         </Typography>
       )}
 
@@ -39,20 +41,25 @@ const ScheduleStep: React.FC = () => {
         <Divider />
         <Box my={3}>
           <Typography>
-            Schedule{' '}
+            {T('newE.steps.schedule')}{' '}
             <Tooltip
               title={
                 <Typography variant="body2">
-                  Chaos Mesh use{' '}
-                  <Link
-                    href="https://github.com/robfig/cron/v3"
-                    target="_blank"
-                    style={{ color: 'white' }}
-                    underline="always"
-                  >
-                    github.com/robfig/cron/v3
-                  </Link>{' '}
-                  to define the schedule. View its doc for more details.
+                  <FormattedMessage
+                    id="newE.schedule.tooltip"
+                    values={{
+                      cronv3: (
+                        <Link
+                          href="https://pkg.go.dev/github.com/robfig/cron/v3"
+                          target="_blank"
+                          style={{ color: 'white' }}
+                          underline="always"
+                        >
+                          https://pkg.go.dev/github.com/robfig/cron/v3
+                        </Link>
+                      ),
+                    }}
+                  />
                 </Typography>
               }
               style={{ verticalAlign: 'sub' }}
@@ -68,15 +75,26 @@ const ScheduleStep: React.FC = () => {
           id="scheduler.cron"
           name="scheduler.cron"
           label="Cron"
-          helperText="You can use https://crontab.guru/ to help generate your cron syntax and confirm what time it will run"
+          helperText={
+            <FormattedMessage
+              id="newE.schedule.cronHelper"
+              values={{
+                crontabguru: (
+                  <Link href="https://crontab.guru/" target="_blank" underline="always">
+                    https://crontab.guru/
+                  </Link>
+                ),
+              }}
+            />
+          }
         />
 
         {values.target.pod_chaos.action !== 'pod-kill' && values.target.pod_chaos.action !== 'container-kill' && (
           <TextField
             id="scheduler.duration"
             name="scheduler.duration"
-            label="Duration"
-            helperText="The experiment duration"
+            label={T('newE.schedule.duration')}
+            helperText={T('newE.schedule.durationHelper')}
           />
         )}
       </Box>
