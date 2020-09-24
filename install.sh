@@ -976,7 +976,6 @@ subjects:
     namespace: chaos-testing
 ---
 # Source: chaos-mesh/templates/controller-manager-rbac.yaml
-# binding for target namespace,working with cluster scoped mode.
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
