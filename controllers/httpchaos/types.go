@@ -128,8 +128,16 @@ func (r *Reconciler) applyPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.
 	return nil
 }
 
+// SetIptables sets iptables on pod
+// The iptables rules are:
+//1: -N HTTP-CHAOS-INPUT, -N HTTP-CHAOS-OUTPUT
+//2: -A INPUT -dport container_ports -j HTTP-CHAOS-INPUT
+//3: -A OUTPUT -sport container_ports -j HTTP-CHAOS-OUTPUT
+//4: if abort: -A HTTP-CHAOS-INPUT --probability percent -j DROP
+//5: if abort: -A HTTP-CHAOS-OUTPUT --probability percent -j DROP
 func (r *Reconciler) SetIptables(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.HTTPChaos) error {
 	var chains []*pb.Chain
+	//1: -N HTTP-CHAOS-INPUT, -N HTTP-CHAOS-OUTPUT
 	inputFilterName := "HTTP-CHAOS-INPUT"
 	chains = append(chains, &pb.Chain{
 		Command:   pb.Chain_NEW,
@@ -146,12 +154,14 @@ func (r *Reconciler) SetIptables(ctx context.Context, pod *v1.Pod, chaos *v1alph
 			ports = append(ports, strconv.Itoa(int(port.ContainerPort)))
 		}
 	}
+	//2: -A INPUT -dport container_ports -j HTTP-CHAOS-INPUT
 	chains = append(chains, &pb.Chain{
 		Command:   pb.Chain_ADD,
 		ChainName: "INPUT",
 		Dport:     strings.Join(ports, ","),
 		Action:    inputFilterName,
 	})
+	//3: -A OUTPUT -sport container_ports -j HTTP-CHAOS-OUTPUT
 	chains = append(chains, &pb.Chain{
 		Command:   pb.Chain_ADD,
 		ChainName: "OUPUT",
@@ -163,12 +173,14 @@ func (r *Reconciler) SetIptables(ctx context.Context, pod *v1.Pod, chaos *v1alph
 	// because of the linux kernel problem
 	if chaos.Spec.Action == v1alpha1.HTTPAbortAction ||
 		chaos.Spec.Action == v1alpha1.HTTPMixedAction {
+		//4: -A HTTP-CHAOS-INPUT --probability percent -j DROP
 		chains = append(chains, &pb.Chain{
 			Command:     pb.Chain_ADD,
 			ChainName:   inputFilterName,
 			Action:      "DROP",
 			Probability: chaos.Spec.Percent,
 		})
+		//5: -A HTTP-CHAOS-OUTPUT --probability percent -j DROP
 		chains = append(chains, &pb.Chain{
 			Command:     pb.Chain_ADD,
 			ChainName:   outputFilterName,

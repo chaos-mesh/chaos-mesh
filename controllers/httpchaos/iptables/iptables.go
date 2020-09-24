@@ -25,6 +25,9 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/utils"
 )
 
+// The detail of how Iptables chains work is in ./pkg/chaosdaemon/iptables_server.go
+// And in ./pkg/chaosdaemon/pb/chaosdaemon.proto you counld found grpc setting of struct pb.chains
+// You counld edit & generate your proto setting by edit chaosdaemon.proto & make proto
 func SetIptablesChains(ctx context.Context, c client.Client, pod *v1.Pod, chains []*pb.Chain) error {
 	pbClient, err := utils.NewChaosDaemonClient(ctx, c, pod, common.ControllerCfg.ChaosDaemonPort)
 	if err != nil {
