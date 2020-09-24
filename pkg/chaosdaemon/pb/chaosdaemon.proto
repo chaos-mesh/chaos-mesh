@@ -131,13 +131,13 @@ message Chain {
     DELETE = 2;
   }
   commandType command =2;
-  string ChainName = 3;
+  string chainName = 3;
   string sourceAddress = 4;
   string sport = 5;
   string destinationAddress = 6;
   string dport = 7;
   string to_ports = 8;
-  string Action = 9;
+  string action = 9;
   enum Direction {
     INPUT = 0;
     OUTPUT = 1;
