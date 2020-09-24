@@ -52,6 +52,7 @@ OPTIONS:
         --volume-num         The volumes number of each kubernetes node,default value: 5
         --release-name       Release name of chaos-mesh, default value: chaos-mesh
         --namespace          Namespace of chaos-mesh, default value: chaos-testing
+        --timezone           Specifies timezone to be used by chaos-dashboard, chaos-daemon and controlller.
 EOF
 }
 
@@ -65,6 +66,7 @@ main() {
     local volume_num=5
     local release_name="chaos-mesh"
     local namespace="chaos-testing"
+    local timezone="UTC"
     local force_chaos_mesh=false
     local force_local_kube=false
     local force_kubectl=false
@@ -190,6 +192,11 @@ main() {
                 shift
                 shift
                 ;;
+            --timezone)
+                timezone="$2"
+                shift
+                shift
+                ;;
             *)
                 echo "unknown flag or option $key"
                 usage
@@ -222,7 +229,7 @@ main() {
 
     if $template; then
         ensure gen_crd_manifests "${crd}"
-        ensure gen_chaos_mesh_manifests "${runtime}" "${k3s}" "${cm_version}"
+        ensure gen_chaos_mesh_manifests "${runtime}" "${k3s}" "${cm_version}" "${timezone}"
         exit 0
     fi
 
@@ -244,7 +251,7 @@ main() {
 
     check_kubernetes
 
-    install_chaos_mesh "${release_name}" "${namespace}" "${local_kube}" ${force_chaos_mesh} ${docker_mirror} "${crd}" "${runtime}" "${k3s}" "${cm_version}"
+    install_chaos_mesh "${release_name}" "${namespace}" "${local_kube}" ${force_chaos_mesh} ${docker_mirror} "${crd}" "${runtime}" "${k3s}" "${cm_version}" "${timezone}"
     ensure_pods_ready "${namespace}" "app.kubernetes.io/component=controller-manager" 100
     ensure_pods_ready "${namespace}" "app.kubernetes.io/component=chaos-daemon" 100
     ensure_pods_ready "${namespace}" "app.kubernetes.io/component=chaos-dashboard" 100
@@ -587,7 +594,6 @@ install_kind() {
     ensure curl -Lo /tmp/kind https://github.com/kubernetes-sigs/kind/releases/download/"$1"/kind-"${target_os}"-amd64
     ensure chmod +x /tmp/kind
     ensure mv /tmp/kind "$KIND_BIN"
-}
 
 install_chaos_mesh() {
     local release_name=$1
@@ -599,6 +605,7 @@ install_chaos_mesh() {
     local runtime=$7
     local k3s=$8
     local version=$9
+    local timezone=$10
 
     printf "Install Chaos Mesh %s\n" "${release_name}"
 
@@ -618,7 +625,7 @@ install_chaos_mesh() {
     fi
 
     gen_crd_manifests "${crd}" | kubectl apply -f - || exit 1
-    gen_chaos_mesh_manifests "${runtime}" "${k3s}" "${version}" | kubectl apply -f - || exit 1
+    gen_chaos_mesh_manifests "${runtime}" "${k3s}" "${version}" "${timezone}" | kubectl apply -f - || exit 1
 }
 
 version_lt() {
@@ -805,6 +812,7 @@ gen_chaos_mesh_manifests() {
     local runtime=$1
     local k3s=$2
     local version=$3
+    local timezone=$4
 
     local socketPath="/var/run/docker.sock"
     local mountPath="/var/run/docker.sock"
@@ -1099,7 +1107,7 @@ spec:
             - --pprof
           env:
             - name: TZ
-              value: UTC
+              value: ${timezone}
           securityContext:
             privileged: true
             capabilities:
@@ -1170,7 +1178,7 @@ spec:
             - name: LISTEN_PORT
               value: "2333"
             - name: TZ
-              value: UTC
+              value: ${timezone}
           volumeMounts:
             - name: storage-volume
               mountPath: /data
@@ -1234,7 +1242,7 @@ spec:
           - name: CLUSTER_SCOPED
             value: "true"
           - name: TZ
-            value: UTC
+            value: ${timezone}
           - name: CHAOS_DAEMON_PORT
             value: !!str 31767
           - name: BPFKI_PORT
