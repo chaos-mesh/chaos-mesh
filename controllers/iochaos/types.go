@@ -103,6 +103,19 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1
 		r.Log.Error(err, "fail to commit")
 		return err
 	}
+
+	iochaos.Status.Experiment.PodRecords = make([]v1alpha1.PodStatus, 0, len(pods))
+	for _, pod := range pods {
+		ps := v1alpha1.PodStatus{
+			Namespace: pod.Namespace,
+			Name:      pod.Name,
+			HostIP:    pod.Status.HostIP,
+			PodIP:     pod.Status.PodIP,
+			Action:    string(iochaos.Spec.Action),
+		}
+
+		iochaos.Status.Experiment.PodRecords = append(iochaos.Status.Experiment.PodRecords, ps)
+	}
 	r.Event(iochaos, v1.EventTypeNormal, utils.EventChaosInjected, "")
 
 	return nil
