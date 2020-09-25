@@ -15,7 +15,10 @@ package common
 
 import (
 	"context"
+	"fmt"
 	"os"
+	"regexp"
+	"strings"
 	"time"
 
 	"github.com/go-logr/logr"
@@ -54,7 +57,61 @@ func init() {
 		os.Exit(1)
 	}
 
+	err = validate(&conf)
+	if err != nil {
+		ctrl.SetLogger(zap.Logger(true))
+		log.Error(err, "Chaos Controller: invalid configuration")
+		os.Exit(1)
+	}
+
 	ControllerCfg = &conf
+}
+
+func validate(config *config.ChaosControllerConfig) error {
+
+	if config.WatcherConfig == nil {
+		return fmt.Errorf("required WatcherConfig is missing")
+	}
+
+	if config.ClusterScoped != config.WatcherConfig.ClusterScoped {
+		return fmt.Errorf("K8sConfigMapWatcher config ClusterScoped is not same with controller-manager ClusterScoped. k8s configmap watcher: %t, controller manager: %t", config.WatcherConfig.ClusterScoped, config.ClusterScoped)
+	}
+
+	if !config.ClusterScoped {
+		if strings.TrimSpace(config.TargetNamespace) == "" {
+			return fmt.Errorf("no target namespace specified with namespace scoped mode")
+		}
+		if !isAllowedNamespaces(config.TargetNamespace, config.AllowedNamespaces, config.IgnoredNamespaces) {
+			return fmt.Errorf("target namespace %s is not allowed with filter, please check config AllowedNamespaces and IgnoredNamespaces", config.TargetNamespace)
+		}
+
+		if config.TargetNamespace != config.WatcherConfig.TargetNamespace {
+			return fmt.Errorf("K8sConfigMapWatcher config TargertNamespace is not same with controller-manager TargetNamespace. k8s configmap watcher: %s, controller manager: %s", config.WatcherConfig.TargetNamespace, config.TargetNamespace)
+		}
+	}
+
+	return nil
+}
+
+// FIXME: duplicated with utils.IsAllowedNamespaces, it should considered with some dependency problems.
+func isAllowedNamespaces(namespace, allowedNamespace, ignoredNamespace string) bool {
+	if allowedNamespace != "" {
+		matched, err := regexp.MatchString(allowedNamespace, namespace)
+		if err != nil {
+			return false
+		}
+		return matched
+	}
+
+	if ignoredNamespace != "" {
+		matched, err := regexp.MatchString(ignoredNamespace, namespace)
+		if err != nil {
+			return false
+		}
+		return !matched
+	}
+
+	return true
 }
 
 // Reconciler for common chaos

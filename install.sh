@@ -891,93 +891,122 @@ data:
   tls.key: "${TLS_KEY}"
 ---
 # Source: chaos-mesh/templates/controller-manager-rbac.yaml
+# roles
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
-  name: chaos-mesh:chaos-controller-manager
+  name: chaos-mesh:chaos-controller-manager-target-namespace
   labels:
     app.kubernetes.io/name: chaos-mesh
     app.kubernetes.io/instance: chaos-mesh
     app.kubernetes.io/component: controller-manager
 rules:
-- apiGroups: [""]
-  resources:
-  - services
-  - events
-  - namespaces
-  verbs: ["*"]
-- apiGroups: [""]
-  resources: ["endpoints"]
-  verbs: ["create", "get", "list", "watch", "update"]
-- apiGroups: ["batch"]
-  resources: ["jobs"]
-  verbs: ["get", "list", "watch", "create", "update", "delete"]
-- apiGroups: [""]
-  resources: ["secrets"]
-  verbs: ["get", "list", "watch"]
-- apiGroups: [""]
-  resources: ["persistentvolumeclaims"]
-  verbs: ["get", "list", "watch", "create", "update", "delete"]
-- apiGroups: [""]
-  resources: ["pods"]
-  verbs: ["get", "list", "watch","update", "delete"]
-- apiGroups: ["apps"]
-  resources: ["statefulsets"]
-  verbs: ["*"]
-- apiGroups: [""]
-  resources: ["configmaps"]
-  verbs: ["get", "list", "watch"]
-- apiGroups: [""]
-  resources: ["nodes"]
-  verbs: ["get", "list", "watch"]
-- apiGroups: [""]
-  resources: ["persistentvolumes"]
-  verbs: ["get", "list", "watch", "patch","update"]
-- apiGroups: ["certificates.k8s.io"]
-  resources: ["certificatesigningrequests", "certificatesigningrequests/approval"]
-  verbs: ["get", "delete", "create", "update"]
-- apiGroups: ["certificates.k8s.io"]
-  resources:
-    - "signers"
-  resourceNames:
-    - "kubernetes.io/legacy-unknown"
-  verbs: ["approve"]
-- apiGroups: [""]
-  resources: ["secrets"]
-  verbs: ["get", "create", "list", "watch", "update", "delete"]
-- apiGroups: ["admissionregistration.k8s.io"]
-  resources: ["mutatingwebhookconfigurations","validatingwebhookconfigurations"]
-  verbs: ["get", "create", "delete", "update", "patch"]
-- apiGroups: ["chaos-mesh.org"]
-  resources:
-    - podchaos
-    - networkchaos
-    - iochaos
-    - timechaos
-    - kernelchaos
-    - stresschaos
-    - podiochaos
-    - podnetworkchaos
-    - httpchaos
-  verbs: ["*"]
+  - apiGroups: [ "" ]
+    resources: [ "pods" ]
+    verbs: [ "get", "list", "watch", "delete", "update" ]
+  - apiGroups:
+      - ""
+    resources:
+      - events
+    verbs:
+      - patch
+      - create
+  - apiGroups: [ "" ]
+    resources: [ "configmaps" ]
+    verbs: [ "*" ]
+  - apiGroups: [ "chaos-mesh.org" ]
+    resources:
+      - "*"
+    verbs: [ "*" ]
+---
+# Source: chaos-mesh/templates/controller-manager-rbac.yaml
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: chaos-mesh:chaos-controller-manager-cluster-level
+  labels:
+    app.kubernetes.io/name: chaos-mesh
+    app.kubernetes.io/instance: chaos-mesh
+    app.kubernetes.io/component: controller-manager
+rules:
+  - apiGroups: [ "" ]
+    resources:
+      - namespaces
+      - nodes
+    verbs: [ "get", "list", "watch" ]
+---
+# Source: chaos-mesh/templates/controller-manager-rbac.yaml
+# bindings cluster level
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: chaos-mesh:chaos-controller-manager-cluster-level
+  labels:
+    app.kubernetes.io/name: chaos-mesh
+    app.kubernetes.io/instance: chaos-mesh
+    app.kubernetes.io/component: controller-manager
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: chaos-mesh:chaos-controller-manager-cluster-level
+subjects:
+  - kind: ServiceAccount
+    name: chaos-controller-manager
+    namespace: chaos-testing
 ---
 # Source: chaos-mesh/templates/controller-manager-rbac.yaml
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
-  name: chaos-mesh:chaos-controller-manager
+  name: chaos-mesh:chaos-controller-manager-target-namespace
+  namespace: chaos-testing
   labels:
     app.kubernetes.io/name: chaos-mesh
     app.kubernetes.io/instance: chaos-mesh
     app.kubernetes.io/component: controller-manager
-subjects:
-- kind: ServiceAccount
-  name: chaos-controller-manager
-  namespace: chaos-testing
 roleRef:
-  kind: ClusterRole
-  name: chaos-mesh:chaos-controller-manager
   apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: chaos-mesh:chaos-controller-manager-target-namespace
+subjects:
+  - kind: ServiceAccount
+    name: chaos-controller-manager
+    namespace: chaos-testing
+---
+# Source: chaos-mesh/templates/controller-manager-rbac.yaml
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: chaos-mesh:chaos-controller-manager-control-plane
+  namespace: chaos-testing
+  labels:
+    app.kubernetes.io/name: chaos-mesh
+    app.kubernetes.io/instance: chaos-mesh
+    app.kubernetes.io/component: controller-manager
+rules:
+  - apiGroups: [ "" ]
+    resources: [ "configmaps" ]
+    verbs: [ "get", "list", "watch" ]
+---
+# Source: chaos-mesh/templates/controller-manager-rbac.yaml
+# binding for control plane namespace
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: chaos-mesh:chaos-controller-manager-control-plane
+  namespace: chaos-testing
+  labels:
+    app.kubernetes.io/name: chaos-mesh
+    app.kubernetes.io/instance: chaos-mesh
+    app.kubernetes.io/component: controller-manager
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: chaos-mesh:chaos-controller-manager-control-plane
+subjects:
+  - kind: ServiceAccount
+    name: chaos-controller-manager
+    namespace: chaos-testing
 ---
 # Source: chaos-mesh/templates/chaos-dashboard-deployment.yaml
 apiVersion: v1
@@ -1196,6 +1225,14 @@ spec:
             valueFrom:
               fieldRef:
                 fieldPath: metadata.namespace
+          - name: TEMPLATE_NAMESPACE
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
+          - name: TARGET_NAMESPACE
+            value: chaos-testing
+          - name: CLUSTER_SCOPED
+            value: "true"
           - name: TZ
             value: UTC
           - name: CHAOS_DAEMON_PORT
