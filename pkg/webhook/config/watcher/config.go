@@ -19,7 +19,14 @@ import (
 
 // Config is a configuration struct for the Watcher type
 type Config struct {
-	Namespace string `envconfig:"TEMPLATE_NAMESPACE" default:""`
+	// ClusterScoped means control Chaos Object in cluster level(all namespace);
+	ClusterScoped bool `envconfig:"CLUSTER_SCOPED" default:"true"`
+	// TemplateNamespace is the namespace which holds the template configmap.
+	// If controller-manager is running with in-cluster mode. If is set to empty string, it will be overwrite to namespace which the pod belongs.
+	TemplateNamespace string `envconfig:"TEMPLATE_NAMESPACE" default:""`
+	// TargetNamespace means configmaps in this namespace will be controlled by this controller.
+	// It SHOULD be the same with TargetNamespace in config.ChaosControllerConfig while clusterScoped is false.
+	TargetNamespace string `envconfig:"TARGET_NAMESPACE" default:""`
 	// TemplateLabels is label pairs used to discover common templates in Kubernetes. These should be key1:value[,key2:val2,...]
 	TemplateLabels map[string]string `envconfig:"TEMPLATE_LABELS"`
 	// ConfigLabels is label pairs used to discover ConfigMaps in Kubernetes. These should be key1:value[,key2:val2,...]
@@ -29,9 +36,11 @@ type Config struct {
 // NewConfig returns a new initialized Config
 func NewConfig() *Config {
 	return &Config{
-		Namespace:      "",
-		TemplateLabels: map[string]string{},
-		ConfigLabels:   map[string]string{},
+		ClusterScoped:     true,
+		TemplateNamespace: "",
+		TargetNamespace:   "",
+		TemplateLabels:    map[string]string{},
+		ConfigLabels:      map[string]string{},
 	}
 }
 
@@ -42,6 +51,9 @@ func (c *Config) Verify() error {
 	}
 	if len(c.ConfigLabels) == 0 {
 		return errors.New("envconfig:\"CONFIGMAP_LABELS\" conf labels must be set")
+	}
+	if !c.ClusterScoped && len(c.TargetNamespace) == 0 {
+		return errors.New("envconfig:\"TARGET_NAMESPACE\" conf labels must be set while CLUSTER_SCOPED is false")
 	}
 	return nil
 }

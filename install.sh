@@ -46,6 +46,7 @@ OPTIONS:
     -n, --name               Name of Kubernetes cluster, default value: kind
     -c  --crd                The URL of the crd files, default value: https://mirrors.chaos-mesh.org/latest/crd.yaml
     -r  --runtime            Runtime specifies which container runtime to use. Currently we only supports docker and containerd. default value: docker
+    -f  --chaosfs-sidecar    The URL of the chaosfs sidecar configmap files, default value: https://mirrors.chaos-mesh.org/latest/chaosfs-sidecar.yaml
         --kind-version       Version of the Kind tool, default value: v0.7.0
         --node-num           The count of the cluster nodes,default value: 3
         --k8s-version        Version of the Kubernetes cluster,default value: v1.17.2
@@ -73,6 +74,7 @@ main() {
     local volume_provisioner=false
     local local_registry=false
     local crd="https://mirrors.chaos-mesh.org/latest/crd.yaml"
+    local chaosfs="https://mirrors.chaos-mesh.org/latest/chaosfs-sidecar.yaml"
     local runtime="docker"
     local template=false
     local install_dependency_only=false
@@ -103,6 +105,11 @@ main() {
                 ;;
             -c|--crd)
                 crd="$2"
+                shift
+                shift
+                ;;
+            -f|--chaosfs-sidecar)
+                chaosfs="$2"
                 shift
                 shift
                 ;;
@@ -219,6 +226,7 @@ main() {
     if $template; then
         ensure gen_crd_manifests "${crd}"
         ensure gen_chaos_mesh_manifests "${runtime}" "${k3s}"
+        ensure gen_sidecar_template "${chaosfs}"
         exit 0
     fi
 
@@ -240,7 +248,7 @@ main() {
 
     check_kubernetes
 
-    install_chaos_mesh "${release_name}" "${namespace}" "${local_kube}" ${force_chaos_mesh} ${docker_mirror} "${crd}" "${runtime}" "${k3s}"
+    install_chaos_mesh "${release_name}" "${namespace}" "${local_kube}" ${force_chaos_mesh} ${docker_mirror} "${crd}" "${runtime}" "${chaosfs}" "${k3s}"
     ensure_pods_ready "${namespace}" "app.kubernetes.io/component=controller-manager" 100
     ensure_pods_ready "${namespace}" "app.kubernetes.io/component=chaos-daemon" 100
     ensure_pods_ready "${namespace}" "app.kubernetes.io/component=chaos-dashboard" 100
@@ -593,7 +601,8 @@ install_chaos_mesh() {
     local docker_mirror=$5
     local crd=$6
     local runtime=$7
-    local k3s=$8
+    local chaosfs=$8
+    local k3s=$9
 
     printf "Install Chaos Mesh %s\n" "${release_name}"
 
@@ -611,6 +620,7 @@ install_chaos_mesh() {
 
     gen_crd_manifests "${crd}" | kubectl apply -f - || exit 1
     gen_chaos_mesh_manifests "${runtime}" "${k3s}" | kubectl apply -f - || exit 1
+    gen_sidecar_template "${chaosfs}"| kubectl apply -f - || exit 1
 }
 
 version_lt() {
@@ -787,6 +797,23 @@ gen_crd_manifests() {
     ensure cat "$crd"
 }
 
+gen_sidecar_template() {
+    local chaosfs=$1
+
+    if check_url "$chaosfs"; then
+        need_cmd curl
+        ensure curl -sSL "$chaosfs"
+        return
+    fi
+
+
+    if [ "$chaosfs" == "" ]; then
+        chaosfs="manifests/chaosfs-sidecar.yaml"
+    fi
+
+    ensure cat "$chaosfs"
+}
+
 check_url() {
     local url=$1
     local regex='^(https?|ftp|file)://[-A-Za-z0-9\+&@#/%?=~_|!:,.;]*[-A-Za-z0-9\+&@#/%=~_|]\.[-A-Za-z0-9\+&@#/%?=~_|!:,.;]*[-A-Za-z0-9\+&@#/%=~_|]$'
@@ -885,93 +912,122 @@ data:
   tls.key: "${TLS_KEY}"
 ---
 # Source: chaos-mesh/templates/controller-manager-rbac.yaml
+# roles
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
-  name: chaos-mesh:chaos-controller-manager
+  name: chaos-mesh:chaos-controller-manager-target-namespace
   labels:
     app.kubernetes.io/name: chaos-mesh
     app.kubernetes.io/instance: chaos-mesh
     app.kubernetes.io/component: controller-manager
 rules:
-- apiGroups: [""]
-  resources:
-  - services
-  - events
-  - namespaces
-  verbs: ["*"]
-- apiGroups: [""]
-  resources: ["endpoints"]
-  verbs: ["create", "get", "list", "watch", "update"]
-- apiGroups: ["batch"]
-  resources: ["jobs"]
-  verbs: ["get", "list", "watch", "create", "update", "delete"]
-- apiGroups: [""]
-  resources: ["secrets"]
-  verbs: ["get", "list", "watch"]
-- apiGroups: [""]
-  resources: ["persistentvolumeclaims"]
-  verbs: ["get", "list", "watch", "create", "update", "delete"]
-- apiGroups: [""]
-  resources: ["pods"]
-  verbs: ["get", "list", "watch","update", "delete"]
-- apiGroups: ["apps"]
-  resources: ["statefulsets"]
-  verbs: ["*"]
-- apiGroups: [""]
-  resources: ["configmaps"]
-  verbs: ["get", "list", "watch"]
-- apiGroups: [""]
-  resources: ["nodes"]
-  verbs: ["get", "list", "watch"]
-- apiGroups: [""]
-  resources: ["persistentvolumes"]
-  verbs: ["get", "list", "watch", "patch","update"]
-- apiGroups: ["certificates.k8s.io"]
-  resources: ["certificatesigningrequests", "certificatesigningrequests/approval"]
-  verbs: ["get", "delete", "create", "update"]
-- apiGroups: ["certificates.k8s.io"]
-  resources:
-    - "signers"
-  resourceNames:
-    - "kubernetes.io/legacy-unknown"
-  verbs: ["approve"]
-- apiGroups: [""]
-  resources: ["secrets"]
-  verbs: ["get", "create", "list", "watch", "update", "delete"]
-- apiGroups: ["admissionregistration.k8s.io"]
-  resources: ["mutatingwebhookconfigurations","validatingwebhookconfigurations"]
-  verbs: ["get", "create", "delete", "update", "patch"]
-- apiGroups: ["chaos-mesh.org"]
-  resources:
-    - podchaos
-    - networkchaos
-    - iochaos
-    - timechaos
-    - kernelchaos
-    - stresschaos
-    - podiochaos
-    - podnetworkchaos
-    - httpchaos
-  verbs: ["*"]
+  - apiGroups: [ "" ]
+    resources: [ "pods" ]
+    verbs: [ "get", "list", "watch", "delete", "update" ]
+  - apiGroups:
+      - ""
+    resources:
+      - events
+    verbs:
+      - patch
+      - create
+  - apiGroups: [ "" ]
+    resources: [ "configmaps" ]
+    verbs: [ "*" ]
+  - apiGroups: [ "chaos-mesh.org" ]
+    resources:
+      - "*"
+    verbs: [ "*" ]
+---
+# Source: chaos-mesh/templates/controller-manager-rbac.yaml
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: chaos-mesh:chaos-controller-manager-cluster-level
+  labels:
+    app.kubernetes.io/name: chaos-mesh
+    app.kubernetes.io/instance: chaos-mesh
+    app.kubernetes.io/component: controller-manager
+rules:
+  - apiGroups: [ "" ]
+    resources:
+      - namespaces
+      - nodes
+    verbs: [ "get", "list", "watch" ]
+---
+# Source: chaos-mesh/templates/controller-manager-rbac.yaml
+# bindings cluster level
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: chaos-mesh:chaos-controller-manager-cluster-level
+  labels:
+    app.kubernetes.io/name: chaos-mesh
+    app.kubernetes.io/instance: chaos-mesh
+    app.kubernetes.io/component: controller-manager
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: chaos-mesh:chaos-controller-manager-cluster-level
+subjects:
+  - kind: ServiceAccount
+    name: chaos-controller-manager
+    namespace: chaos-testing
 ---
 # Source: chaos-mesh/templates/controller-manager-rbac.yaml
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
-  name: chaos-mesh:chaos-controller-manager
+  name: chaos-mesh:chaos-controller-manager-target-namespace
+  namespace: chaos-testing
   labels:
     app.kubernetes.io/name: chaos-mesh
     app.kubernetes.io/instance: chaos-mesh
     app.kubernetes.io/component: controller-manager
-subjects:
-- kind: ServiceAccount
-  name: chaos-controller-manager
-  namespace: chaos-testing
 roleRef:
-  kind: ClusterRole
-  name: chaos-mesh:chaos-controller-manager
   apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: chaos-mesh:chaos-controller-manager-target-namespace
+subjects:
+  - kind: ServiceAccount
+    name: chaos-controller-manager
+    namespace: chaos-testing
+---
+# Source: chaos-mesh/templates/controller-manager-rbac.yaml
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: chaos-mesh:chaos-controller-manager-control-plane
+  namespace: chaos-testing
+  labels:
+    app.kubernetes.io/name: chaos-mesh
+    app.kubernetes.io/instance: chaos-mesh
+    app.kubernetes.io/component: controller-manager
+rules:
+  - apiGroups: [ "" ]
+    resources: [ "configmaps" ]
+    verbs: [ "get", "list", "watch" ]
+---
+# Source: chaos-mesh/templates/controller-manager-rbac.yaml
+# binding for control plane namespace
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: chaos-mesh:chaos-controller-manager-control-plane
+  namespace: chaos-testing
+  labels:
+    app.kubernetes.io/name: chaos-mesh
+    app.kubernetes.io/instance: chaos-mesh
+    app.kubernetes.io/component: controller-manager
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: chaos-mesh:chaos-controller-manager-control-plane
+subjects:
+  - kind: ServiceAccount
+    name: chaos-controller-manager
+    namespace: chaos-testing
 ---
 # Source: chaos-mesh/templates/chaos-dashboard-deployment.yaml
 apiVersion: v1
@@ -1190,6 +1246,14 @@ spec:
             valueFrom:
               fieldRef:
                 fieldPath: metadata.namespace
+          - name: TEMPLATE_NAMESPACE
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
+          - name: TARGET_NAMESPACE
+            value: chaos-testing
+          - name: CLUSTER_SCOPED
+            value: "true"
           - name: TZ
             value: UTC
           - name: CHAOS_DAEMON_PORT
