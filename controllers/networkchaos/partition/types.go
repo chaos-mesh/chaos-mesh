@@ -197,11 +197,10 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1
 
 	err = m.Commit(ctx)
 	if err != nil {
-		// if pod is not found or not ready, wait next time.
-		if err == podnetworkmanager.ErrPodNotFound || err == podnetworkmanager.ErrPodNotRunning {
-			return err
+		// if pod is not found or not running, don't print error log and wait next time.
+		if err != podnetworkmanager.ErrPodNotFound && err != podnetworkmanager.ErrPodNotRunning {
+			r.Log.Error(err, "fail to commit")
 		}
-		r.Log.Error(err, "fail to commit")
 		return err
 	}
 

@@ -22,7 +22,6 @@ import _JSONEditor from 'jsoneditor'
 import api from 'api'
 import genEventsChart from 'lib/d3/eventsChart'
 import { getStateofExperiments } from 'slices/experiments'
-import { toTitleCase } from 'lib/utils'
 import { useIntl } from 'react-intl'
 import { usePrevious } from 'lib/hooks'
 import { useSelector } from 'react-redux'
@@ -113,7 +112,9 @@ export default function ExperimentDetail() {
   }, [])
 
   useEffect(() => {
-    fetchEvents()
+    if (detail) {
+      fetchEvents()
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [detail])
 
@@ -200,7 +201,7 @@ export default function ExperimentDetail() {
         dispatch(
           setAlert({
             type: 'success',
-            message: `${toTitleCase(action)}${action === 'start' ? 'ed' : 'd'} successfully!`,
+            message: intl.formatMessage({ id: `common.${action}Successfully` }),
           })
         )
         dispatch(setAlertOpen(true))
@@ -227,7 +228,7 @@ export default function ExperimentDetail() {
         dispatch(
           setAlert({
             type: 'success',
-            message: `Update ${detail!.name} successfully!`,
+            message: intl.formatMessage({ id: 'common.updateSuccessfully' }),
           })
         )
         dispatch(setAlertOpen(true))
