@@ -129,6 +129,12 @@ func (r *ChaosCollector) createEvent(req ctrl.Request, kind string, status *v1al
 		ExperimentID: UID,
 	}
 
+	if _, err := r.event.FindByExperimentAndStartTime(
+		context.Background(), event.Experiment, event.Namespace, event.StartTime); err == nil {
+		r.Log.Info("event has been created")
+		return nil
+	}
+
 	for _, pod := range status.Experiment.PodRecords {
 		podRecord := &core.PodRecord{
 			EventID:   event.ID,
