@@ -1,0 +1,212 @@
+{
+  "overview": {
+    "title": "Overview",
+    "totalExperiments": "Total Experiments"
+  },
+  "newE": {
+    "title": "New Experiment",
+    "create": "Create a New Experiment",
+    "steps": {
+      "basic": "Basic",
+      "scope": "Scope",
+      "target": "Target",
+      "schedule": "Schedule"
+    },
+    "loadFromExistingExperiments": "Load From Existing Experiments",
+    "loadFromArchives": "Load From Archives",
+    "loadFromYamlFile": "Load From YAML File",
+    "basic": {
+      "name": "Name",
+      "nameHelper": "The experiment name",
+      "namespace": "Namespace",
+      "namespaceHelper": "Select the experiment's namespace"
+    },
+    "scope": {
+      "namespaceSelectors": "Namespace Selectors",
+      "mode": "Mode",
+      "modeHelper": "Select the experiment mode",
+      "modeValue": "Mode Value",
+      "modeValuehelper": "Please fill the mode value",
+      "affectedPods": "Affected Pods",
+      "affectedPodsPreview": "Affected Pods Preview",
+      "affectedPodsPreviewHelper": "Checking or unchecking Pods to further limit the scope of the experiment",
+      "noPodsFound": "No pods found",
+      "podsTable": {
+        "name": "Name",
+        "namespace": "Namespace",
+        "ip": "IP",
+        "state": "State"
+      }
+    },
+    "target": {
+      "kind": "Kind",
+      "action": "Action",
+      "pod": {
+        "title": "Pod Lifecycle",
+        "actionHelper": "Select a PodChaos action"
+      },
+      "network": {
+        "title": "Network",
+        "actionHelper": "Select a NetworkChaos action",
+        "target": {
+          "title": "Target",
+          "podsPreview": "Target Pods Preview",
+          "podsPreviewHelper": "Checking or unchecking Pods to further limit the scope of the target"
+        }
+      },
+      "io": {
+        "title": "File System I/O"
+      },
+      "kernel": {
+        "title": "Linux Kernel"
+      },
+      "time": {
+        "title": "Clock"
+      },
+      "stress": {
+        "title": "Stress CPU/Memory",
+        "actionHelper": "Select a StressChaos action"
+      }
+    },
+    "schedule": {
+      "tooltip": "Chaos Mesh use {cronv3} to define the schedule. View its doc for more details.",
+      "immediate": "Immediate",
+      "mustBeScheduled": "The chosen action must be scheduled",
+      "cronHelper": "Use {crontabguru} to help generate the cron job and confirm what time it will run",
+      "duration": "Duration",
+      "durationHelper": "The experiment duration"
+    },
+    "complete": "All steps are completed"
+  },
+  "experiments": {
+    "title": "Experiments",
+    "single": "Experiment",
+    "status": {
+      "running": "Running",
+      "paused": "Paused",
+      "failed": "Failed",
+      "waiting": "Waiting",
+      "finished": "Finished"
+    },
+    "noExperimentsFound": "No experiments found",
+    "createdAt": "Created",
+    "deleteDesc": "You can still find this experiment in the archives",
+    "pauseDesc": "You can restart the experiment in the same position",
+    "startDesc": "The operation will take effect immediately"
+  },
+  "events": {
+    "title": "Events",
+    "noEventsFound": "No events found",
+    "table": "Events",
+    "eventsPerPage": "Events per page",
+    "event": {
+      "experiment": "Experiment",
+      "uuid": "UUID",
+      "namespace": "Namespace",
+      "kind": "Kind",
+      "started": "Started",
+      "ended": "Ended",
+      "pod": {
+        "ip": "IP",
+        "name": "Name",
+        "namespace": "Namespace",
+        "action": "Action",
+        "message": "Message"
+      }
+    }
+  },
+  "archives": {
+    "title": "Archives",
+    "single": "Archive",
+    "no_archives_found": "No archives found",
+    "numberOfRuns": "Number of Runs",
+    "numberOfAffectedPods": "Number of Affected Pods"
+  },
+  "settings": {
+    "title": "Settings",
+    "theme": "Theme",
+    "chooseTheme": "Choose theme",
+    "themeLight": "Light",
+    "themeDark": "Dark",
+    "language": "Language",
+    "chooseInterfaceLanguage": "Choose interface language",
+    "en": "English",
+    "zh": "Chinese"
+  },
+  "common": {
+    "doc": "Documentation",
+    "back": "Back",
+    "next": "Next",
+    "finish": "Finish",
+    "reset": "Reset",
+    "submit": "Submit",
+    "upload": "Upload",
+    "advancedOptions": "Advanced Options",
+    "isKVHelperText": "Type key:value and end with a space to generate a key/value pair",
+    "multiOptions": "Support mutiple options",
+    "noOptions": "No options",
+    "detail": "Detail",
+    "report": "Report",
+    "start": "Start",
+    "pause": "Pause",
+    "update": "Update",
+    "status": "Status",
+    "configuration": "Configuration",
+    "configured": "Configured",
+    "confirm": "Confirm",
+    "cancel": "Cancel",
+    "createSuccessfully": "Created successfully",
+    "importSuccessfully": "Imported successfully",
+    "deleteSuccessfully": "Archived successfully",
+    "startSuccessfully": "Started successfully",
+    "pauseSuccessfully": "Paused successfully",
+    "updateSuccessfully": "Updated successfully",
+    "timeline": "Timeline",
+    "search": "Search",
+    "meta": "Meta",
+    "uuid": "UUID"
+  },
+  "k8s": {
+    "labels": "Labels",
+    "annotations": "Annotations",
+    "labelSelectors": "Label Selectors",
+    "annotationsSelectors": "Annotation Selectors",
+    "phaseSelectors": "Phase Selectors"
+  },
+  "validation": {
+    "name": "The experiment name is required",
+    "target": {
+      "pod_chaos": {
+        "container_name": "The Container name is required"
+      },
+      "network_chaos": {
+        "action": "The NetworkChaos action is required",
+        "direction": "The direction is required",
+        "bandwidth": {
+          "rate": "The rate of bandwidth is required"
+        },
+        "corrupt": {
+          "corrupt": "The corrupt is required",
+          "correlation": "The correlation of corrupt is required"
+        },
+        "delay": {
+          "latency": "The latency of delay is required"
+        },
+        "duplicate": {
+          "duplicate": "The duplicate is required",
+          "correlation": "The correlation of duplicate is required"
+        },
+        "loss": {
+          "loss": "The loss is required",
+          "correlation": "The correlation of loss is required"
+        }
+      },
+      "io_chaos": {
+        "action": "The IOChaos action is required"
+      },
+      "time_chaos": {
+        "time_offset": "The time offset is required"
+      }
+    }
+  }
+}

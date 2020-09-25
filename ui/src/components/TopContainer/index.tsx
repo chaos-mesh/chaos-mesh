@@ -1,23 +1,27 @@
 import { Box, CssBaseline, Snackbar, useMediaQuery, useTheme } from '@material-ui/core'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { Redirect, Route, Switch } from 'react-router-dom'
 import { RootState, useStoreDispatch } from 'store'
-import { Theme, createStyles, makeStyles } from '@material-ui/core/styles'
+import { ThemeProvider, createStyles, makeStyles } from '@material-ui/core/styles'
+import customTheme, { darkTheme as customDarkTheme } from 'theme'
 import { drawerCloseWidth, drawerWidth } from './Sidebar'
 
 import Alert from '@material-ui/lab/Alert'
 import ContentContainer from 'components/ContentContainer'
 import Header from './Header'
+import { IntlProvider } from 'react-intl'
 import MobileNavigation from './MobileNavigation'
 import Sidebar from './Sidebar'
 import chaosMeshRoutes from 'routes'
+import flat from 'flat'
 import insertCommonStyle from 'lib/d3/insertCommonStyle'
+import messages from 'i18n/messages'
 import { setAlertOpen } from 'slices/globalStatus'
 import { setNavigationBreadcrumbs } from 'slices/navigation'
 import { useLocation } from 'react-router-dom'
 import { useSelector } from 'react-redux'
 
-const useStyles = makeStyles((theme: Theme) =>
+const useStyles = makeStyles((theme) =>
   createStyles({
     root: {
       display: 'flex',
@@ -62,9 +66,14 @@ const TopContainer = () => {
 
   const { pathname } = useLocation()
 
-  const { globalStatus, navigation } = useSelector((state: RootState) => state)
+  const { settings, globalStatus, navigation } = useSelector((state: RootState) => state)
+  const { theme: settingTheme, lang } = settings
   const { alert, alertOpen } = globalStatus
   const { breadcrumbs } = navigation
+
+  const globalTheme = useMemo(() => (settingTheme === 'light' ? customTheme : customDarkTheme), [settingTheme])
+  const intlMessages = useMemo<Record<string, string>>(() => flat(messages[lang]), [lang])
+
   const dispatch = useStoreDispatch()
   const handleSnackClose = () => dispatch(setAlertOpen(false))
 
@@ -88,48 +97,52 @@ const TopContainer = () => {
   }, [isTabletScreen])
 
   return (
-    <Box className={openDrawer ? classes.rootShift : classes.root}>
-      {/* CssBaseline: kickstart an elegant, consistent, and simple baseline to build upon. */}
-      <CssBaseline />
-      <Header openDrawer={openDrawer} handleDrawerToggle={handleDrawerToggle} breadcrumbs={breadcrumbs} />
-      {!isMobileScreen && <Sidebar open={openDrawer} />}
-      <main className={classes.main}>
-        <div className={classes.toolbar} />
-
-        <Box className={classes.switchContent}>
-          <ContentContainer>
-            <Switch>
-              <Redirect exact path="/" to="/overview" />
-              {chaosMeshRoutes.map((route) => (
-                <Route key={route.path! as string} {...route} />
-              ))}
-              <Redirect to="/overview" />
-            </Switch>
-          </ContentContainer>
-        </Box>
-
-        {isMobileScreen && (
-          <>
+    <ThemeProvider theme={globalTheme}>
+      <IntlProvider messages={intlMessages} locale={lang} defaultLocale="en">
+        <Box className={openDrawer ? classes.rootShift : classes.root}>
+          {/* CssBaseline: kickstart an elegant, consistent, and simple baseline to build upon. */}
+          <CssBaseline />
+          <Header openDrawer={openDrawer} handleDrawerToggle={handleDrawerToggle} breadcrumbs={breadcrumbs} />
+          {!isMobileScreen && <Sidebar open={openDrawer} />}
+          <main className={classes.main}>
             <div className={classes.toolbar} />
-            <MobileNavigation />
-          </>
-        )}
 
-        <Snackbar
-          anchorOrigin={{
-            vertical: 'top',
-            horizontal: 'center',
-          }}
-          autoHideDuration={10000}
-          open={alertOpen}
-          onClose={handleSnackClose}
-        >
-          <Alert severity={alert.type} onClose={handleSnackClose}>
-            {alert.message}
-          </Alert>
-        </Snackbar>
-      </main>
-    </Box>
+            <Box className={classes.switchContent}>
+              <ContentContainer>
+                <Switch>
+                  <Redirect exact path="/" to="/overview" />
+                  {chaosMeshRoutes.map((route) => (
+                    <Route key={route.path! as string} {...route} />
+                  ))}
+                  <Redirect to="/overview" />
+                </Switch>
+              </ContentContainer>
+            </Box>
+
+            {isMobileScreen && (
+              <>
+                <div className={classes.toolbar} />
+                <MobileNavigation />
+              </>
+            )}
+
+            <Snackbar
+              anchorOrigin={{
+                vertical: 'top',
+                horizontal: 'center',
+              }}
+              autoHideDuration={10000}
+              open={alertOpen}
+              onClose={handleSnackClose}
+            >
+              <Alert severity={alert.type} onClose={handleSnackClose}>
+                {alert.message}
+              </Alert>
+            </Snackbar>
+          </main>
+        </Box>
+      </IntlProvider>
+    </ThemeProvider>
   )
 }
 

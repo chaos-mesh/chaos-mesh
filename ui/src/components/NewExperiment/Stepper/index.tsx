@@ -13,6 +13,7 @@ import PublishIcon from '@material-ui/icons/Publish'
 import ScheduleStep from './Schedule'
 import ScopeStep from './Scope'
 import SkeletonN from 'components/SkeletonN'
+import T from 'components/T'
 import TargetStep from './Target'
 import { getNamespaces } from 'slices/experiments'
 import { useFormikContext } from 'formik'
@@ -54,7 +55,7 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 )
 
-const steps = ['Basic', 'Scope', 'Target', 'Schedule']
+const steps = ['basic', 'scope', 'target', 'schedule']
 
 const CreateStepper: React.FC = () => {
   const theme = useTheme()
@@ -97,7 +98,7 @@ const CreateStepper: React.FC = () => {
         return (
           <Box textAlign="center" my={6}>
             <DoneAllIcon fontSize="large" />
-            <Typography variant="h6">All steps are completed.</Typography>
+            <Typography variant="h6">{T('newE.complete')}</Typography>
           </Box>
         )
       default:
@@ -111,7 +112,7 @@ const CreateStepper: React.FC = () => {
         {steps.map((label, index) => (
           <Step key={label}>
             <StepLabel className={classes.stepLabel} onClick={handleJump(index)}>
-              {label}
+              {T(`newE.steps.${label}`)}
             </StepLabel>
           </Step>
         ))}
@@ -125,7 +126,7 @@ const CreateStepper: React.FC = () => {
               {activeStep === steps.length ? (
                 <Box>
                   <Button className={classes.marginRight6} size={size} onClick={handleReset}>
-                    Reset
+                    {T('common.reset')}
                   </Button>
                   <Button
                     type="submit"
@@ -135,7 +136,7 @@ const CreateStepper: React.FC = () => {
                     startIcon={<PublishIcon />}
                     disabled={activeStep < 4 || isSubmitting}
                   >
-                    Submit
+                    {T('common.submit')}
                   </Button>
                 </Box>
               ) : (
@@ -147,7 +148,7 @@ const CreateStepper: React.FC = () => {
                       startIcon={<ChevronLeftIcon />}
                       onClick={handleBack}
                     >
-                      Back
+                      {T('common.back')}
                     </Button>
                   )}
                   <Button
@@ -157,7 +158,7 @@ const CreateStepper: React.FC = () => {
                     endIcon={activeStep === steps.length - 1 ? <DoneIcon /> : <ChevronRightIcon />}
                     onClick={handleNext}
                   >
-                    {activeStep === steps.length - 1 ? 'Finish' : 'Next'}
+                    {activeStep === steps.length - 1 ? T('common.finish') : T('common.next')}
                   </Button>
                 </>
               )}

@@ -13,7 +13,10 @@ import { ArchiveDetail } from 'api/archives.type'
 import { ChaosKindKeyMap } from 'lib/formikhelpers'
 import { ExperimentDetail } from 'api/experiments.type'
 import React from 'react'
+import { RootState } from 'store'
+import T from 'components/T'
 import { format } from 'lib/dayjs'
+import { useSelector } from 'react-redux'
 
 const TableCell = withStyles({
   root: {
@@ -25,128 +28,132 @@ interface ExperimentConfigurationProps {
   experimentDetail: ExperimentDetail | ArchiveDetail
 }
 
-const ExperimentConfiguration: React.FC<ExperimentConfigurationProps> = ({ experimentDetail: e }) => (
-  <Grid container>
-    <Grid item md={4}>
-      <Box mt={3} ml="16px">
-        <Typography variant="subtitle2" gutterBottom>
-          Basic
-        </Typography>
-      </Box>
+const ExperimentConfiguration: React.FC<ExperimentConfigurationProps> = ({ experimentDetail: e }) => {
+  const { lang } = useSelector((state: RootState) => state.settings)
 
-      <Table size="small">
-        <TableBody>
-          <TableRow>
-            <TableCell>Name</TableCell>
-            <TableCell>
-              <Typography variant="body2" color="textSecondary">
-                {e.name}
-              </Typography>
-            </TableCell>
-          </TableRow>
+  return (
+    <Grid container>
+      <Grid item md={4}>
+        <Box mt={3} ml="16px">
+          <Typography variant="subtitle2" gutterBottom>
+            {T('newE.steps.basic')}
+          </Typography>
+        </Box>
 
-          <TableRow>
-            <TableCell>Kind</TableCell>
-            <TableCell>
-              <Typography variant="body2" color="textSecondary">
-                {e.kind}
-              </Typography>
-            </TableCell>
-          </TableRow>
-
-          {['PodChaos', 'NetworkChaos', 'IoChaos'].includes(e.kind) && (
+        <Table size="small">
+          <TableBody>
             <TableRow>
-              <TableCell>Action</TableCell>
+              <TableCell>{T('newE.basic.name')}</TableCell>
               <TableCell>
                 <Typography variant="body2" color="textSecondary">
-                  {(e.experiment_info.target[ChaosKindKeyMap[e.kind].key] as any).action}
+                  {e.name}
                 </Typography>
               </TableCell>
             </TableRow>
-          )}
-        </TableBody>
-      </Table>
-    </Grid>
 
-    <Grid item md={4}>
-      <Box mt={3} ml="16px">
-        <Typography variant="subtitle2" gutterBottom>
-          Meta
-        </Typography>
-      </Box>
-
-      <Table size="small">
-        <TableBody>
-          <TableRow>
-            <TableCell>Namespace</TableCell>
-            <TableCell>
-              <Typography variant="body2" color="textSecondary">
-                {e.namespace}
-              </Typography>
-            </TableCell>
-          </TableRow>
-
-          <TableRow>
-            <TableCell>UUID</TableCell>
-            <TableCell>
-              <Typography variant="body2" color="textSecondary">
-                {e.uid}
-              </Typography>
-            </TableCell>
-          </TableRow>
-
-          {(e as ExperimentDetail).created && (
             <TableRow>
-              <TableCell>Created</TableCell>
+              <TableCell>{T('newE.target.kind')}</TableCell>
               <TableCell>
                 <Typography variant="body2" color="textSecondary">
-                  {format((e as ExperimentDetail).created)}
+                  {e.kind}
                 </Typography>
               </TableCell>
             </TableRow>
-          )}
-        </TableBody>
-      </Table>
-    </Grid>
 
-    <Grid item md={4}>
-      <Box mt={3} ml="16px">
-        <Typography variant="subtitle2" gutterBottom>
-          Scheduler
-        </Typography>
-      </Box>
-
-      <Table size="small">
-        <TableBody>
-          {e.experiment_info.scheduler.cron ? (
-            <>
+            {['PodChaos', 'NetworkChaos', 'IoChaos'].includes(e.kind) && (
               <TableRow>
-                <TableCell>Cron</TableCell>
+                <TableCell>{T('newE.target.action')}</TableCell>
                 <TableCell>
                   <Typography variant="body2" color="textSecondary">
-                    {e.experiment_info.scheduler.cron}
+                    {(e.experiment_info.target[ChaosKindKeyMap[e.kind].key] as any).action}
                   </Typography>
                 </TableCell>
               </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </Grid>
 
-              <TableRow>
-                <TableCell>Duration</TableCell>
-                <TableCell>
-                  <Typography variant="body2" color="textSecondary">
-                    {e.experiment_info.scheduler.duration ? e.experiment_info.scheduler.duration : 'immediate'}
-                  </Typography>
-                </TableCell>
-              </TableRow>
-            </>
-          ) : (
+      <Grid item md={4}>
+        <Box mt={3} ml="16px">
+          <Typography variant="subtitle2" gutterBottom>
+            {T('common.meta')}
+          </Typography>
+        </Box>
+
+        <Table size="small">
+          <TableBody>
             <TableRow>
-              <TableCell>Immediate Job</TableCell>
+              <TableCell>{T('newE.basic.namespace')}</TableCell>
+              <TableCell>
+                <Typography variant="body2" color="textSecondary">
+                  {e.namespace}
+                </Typography>
+              </TableCell>
             </TableRow>
-          )}
-        </TableBody>
-      </Table>
+
+            <TableRow>
+              <TableCell>{T('common.uuid')}</TableCell>
+              <TableCell>
+                <Typography variant="body2" color="textSecondary">
+                  {e.uid}
+                </Typography>
+              </TableCell>
+            </TableRow>
+
+            {(e as ExperimentDetail).created && (
+              <TableRow>
+                <TableCell>{T('experiments.createdAt')}</TableCell>
+                <TableCell>
+                  <Typography variant="body2" color="textSecondary">
+                    {format((e as ExperimentDetail).created, lang)}
+                  </Typography>
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </Grid>
+
+      <Grid item md={4}>
+        <Box mt={3} ml="16px">
+          <Typography variant="subtitle2" gutterBottom>
+            {T('newE.steps.schedule')}
+          </Typography>
+        </Box>
+
+        <Table size="small">
+          <TableBody>
+            {e.experiment_info.scheduler.cron ? (
+              <>
+                <TableRow>
+                  <TableCell>Cron</TableCell>
+                  <TableCell>
+                    <Typography variant="body2" color="textSecondary">
+                      {e.experiment_info.scheduler.cron}
+                    </Typography>
+                  </TableCell>
+                </TableRow>
+
+                <TableRow>
+                  <TableCell>{T('newE.schedule.duration')}</TableCell>
+                  <TableCell>
+                    <Typography variant="body2" color="textSecondary">
+                      {e.experiment_info.scheduler.duration ? e.experiment_info.scheduler.duration : 'immediate'}
+                    </Typography>
+                  </TableCell>
+                </TableRow>
+              </>
+            ) : (
+              <TableRow>
+                <TableCell>{T('newE.schedule.immediate')}</TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </Grid>
     </Grid>
-  </Grid>
-)
+  )
+}
 
 export default ExperimentConfiguration

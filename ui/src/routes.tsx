@@ -6,6 +6,7 @@ import Experiments from './pages/Experiments'
 import NewExperiment from 'components/NewExperiment'
 import Overview from './pages/Overview'
 import { RouteProps } from 'react-router'
+import Settings from './pages/Settings'
 
 const routes: RouteProps[] = [
   {
@@ -39,6 +40,10 @@ const routes: RouteProps[] = [
   {
     component: ArchiveReport,
     path: '/archives/:uuid',
+  },
+  {
+    component: Settings,
+    path: '/settings',
     exact: true,
   },
 ]
