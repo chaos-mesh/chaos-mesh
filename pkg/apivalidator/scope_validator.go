@@ -52,9 +52,8 @@ func MapSelectorsValid(fl validator.FieldLevel) bool {
 		return false
 	}
 
-	for k, v := range ms {
-		if len(validation.IsQualifiedName(k)) != 0 ||
-			len(validation.IsValidLabelValue(v)) != 0 {
+	for k := range ms {
+		if len(validation.IsQualifiedName(k)) != 0 {
 			return false
 		}
 	}
