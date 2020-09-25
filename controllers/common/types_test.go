@@ -16,63 +16,75 @@ package common
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
+	"sigs.k8s.io/controller-runtime/pkg/envtest"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/config"
 	"github.com/chaos-mesh/chaos-mesh/pkg/webhook/config/watcher"
 )
 
-func TestTargetNamespaceShouldSetWhileClusterScopedIsFalse(t *testing.T) {
-	c := config.ChaosControllerConfig{
-		WatcherConfig: &watcher.Config{
-			ClusterScoped:     false,
-			TemplateNamespace: "",
-			TargetNamespace:   "",
-			TemplateLabels:    nil,
-			ConfigLabels:      nil,
-		},
-		ClusterScoped:   false,
-		TargetNamespace: "",
-	}
-	err := validate(&c)
-	assert.NotNil(t, err)
+func TestAPIs(t *testing.T) {
+	RegisterFailHandler(Fail)
+
+	RunSpecsWithDefaultAndCustomReporters(t,
+		"Namespace scoped",
+		[]Reporter{envtest.NewlineReporter{}})
 }
 
-func TestWatcherConfigIsAlwaysRequired(t *testing.T) {
-	c := config.ChaosControllerConfig{
-		WatcherConfig:   nil,
-		ClusterScoped:   true,
-		TargetNamespace: "",
-	}
-	err := validate(&c)
-	assert.NotNil(t, err)
-}
+var _ = Describe("Namespace-scoped Chaos", func() {
+	Context("Namespace-scoped Chaos Configuration Validation", func() {
+		It("target namespace should not be empty with namespaced scope", func() {
+			c := config.ChaosControllerConfig{
+				WatcherConfig: &watcher.Config{
+					ClusterScoped:     false,
+					TemplateNamespace: "",
+					TargetNamespace:   "",
+					TemplateLabels:    nil,
+					ConfigLabels:      nil,
+				},
+				ClusterScoped:   false,
+				TargetNamespace: "",
+			}
+			By("validating")
+			Expect(validate(&c)).ShouldNot(Succeed())
+		})
 
-func TestClusterScopedInConfigAndClusterScopedInWatcherConfigShouldKeepConstant(t *testing.T) {
-	c := config.ChaosControllerConfig{
-		WatcherConfig: &watcher.Config{
-			ClusterScoped:     false,
-			TemplateNamespace: "",
-			TargetNamespace:   "",
-			TemplateLabels:    nil,
-			ConfigLabels:      nil,
-		},
-		ClusterScoped:   true,
-		TargetNamespace: "",
-	}
-	err := validate(&c)
-	assert.NotNil(t, err)
-}
-
-func TestNsInConfigAndNsInWatcherConfigShouldKeepConstant(t *testing.T) {
-	c := config.ChaosControllerConfig{
-		WatcherConfig: &watcher.Config{
-			ClusterScoped:   false,
-			TargetNamespace: "ns1",
-		},
-		ClusterScoped:   false,
-		TargetNamespace: "ns2",
-	}
-	err := validate(&c)
-	assert.NotNil(t, err)
-}
+		It("Watcher Config is always required", func() {
+			c := config.ChaosControllerConfig{
+				WatcherConfig:   nil,
+				ClusterScoped:   true,
+				TargetNamespace: "",
+			}
+			By("validating")
+			Expect(validate(&c)).ShouldNot(Succeed())
+		})
+		It("clusterScope should keep constant", func() {
+			c := config.ChaosControllerConfig{
+				WatcherConfig: &watcher.Config{
+					ClusterScoped:     false,
+					TemplateNamespace: "",
+					TargetNamespace:   "",
+					TemplateLabels:    nil,
+					ConfigLabels:      nil,
+				},
+				ClusterScoped:   true,
+				TargetNamespace: "",
+			}
+			By("validating")
+			Expect(validate(&c)).ShouldNot(Succeed())
+		})
+		It("ns should keep constant", func() {
+			c := config.ChaosControllerConfig{
+				WatcherConfig: &watcher.Config{
+					ClusterScoped:   false,
+					TargetNamespace: "ns1",
+				},
+				ClusterScoped:   false,
+				TargetNamespace: "ns2",
+			}
+			By("validating")
+			Expect(validate(&c)).ShouldNot(Succeed())
+		})
+	})
+})
