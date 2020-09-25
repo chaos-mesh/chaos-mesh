@@ -79,11 +79,18 @@ func SelectAndFilterPods(ctx context.Context, c client.Client, r client.Reader, 
 // It returns all pods that match the configured label, annotation and namespace selectors.
 // If pods are specifically specified by `selector.Pods`, it just returns the selector.Pods.
 func SelectPods(ctx context.Context, c client.Client, r client.Reader, selector v1alpha1.SelectorSpec) ([]v1.Pod, error) {
+	// TODO: refactor: make different selectors to replace if-else logics
 	var pods []v1.Pod
 
 	// pods are specifically specified
 	if len(selector.Pods) > 0 {
 		for ns, names := range selector.Pods {
+			if !common.ControllerCfg.ClusterScoped {
+				if common.ControllerCfg.TargetNamespace != ns {
+					log.Info("skip namespace because ns is out of scope within namespace scoped mode", "namespace", ns)
+					continue
+				}
+			}
 			if !IsAllowedNamespaces(ns) {
 				log.Info("filter pod by namespaces", "namespace", ns)
 				continue
@@ -111,9 +118,22 @@ func SelectPods(ctx context.Context, c client.Client, r client.Reader, selector 
 		return pods, nil
 	}
 
+	if !common.ControllerCfg.ClusterScoped {
+		if len(selector.Namespaces) > 1 {
+			return nil, fmt.Errorf("could NOT use more than 1 namespace selector within namespace scoped mode")
+		} else if len(selector.Namespaces) == 1 {
+			if selector.Namespaces[0] != common.ControllerCfg.TargetNamespace {
+				return nil, fmt.Errorf("could NOT list pods from out of scoped namespace: %s", selector.Namespaces[0])
+			}
+		}
+	}
+
 	var podList v1.PodList
 
 	var listOptions = client.ListOptions{}
+	if !common.ControllerCfg.ClusterScoped {
+		listOptions.Namespace = common.ControllerCfg.TargetNamespace
+	}
 	if len(selector.LabelSelectors) > 0 {
 		listOptions.LabelSelector = labels.SelectorFromSet(selector.LabelSelectors)
 	}
