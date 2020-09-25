@@ -11,14 +11,14 @@ import ConfirmDialog from 'components/ConfirmDialog'
 import { Event } from 'api/events.type'
 import ExperimentConfiguration from 'components/ExperimentConfiguration'
 import { ExperimentDetail as ExperimentDetailType } from 'api/experiments.type'
-import JSONEditor from 'components/JSONEditor'
 import Loading from 'components/Loading'
 import NoteOutlinedIcon from '@material-ui/icons/NoteOutlined'
 import PaperTop from 'components/PaperTop'
 import PauseCircleOutlineIcon from '@material-ui/icons/PauseCircleOutline'
 import PlayCircleOutlineIcon from '@material-ui/icons/PlayCircleOutline'
 import T from 'components/T'
-import _JSONEditor from 'jsoneditor'
+import YAMLEditor from 'components/YAMLEditor'
+import ace from 'ace-builds'
 import api from 'api'
 import genEventsChart from 'lib/d3/eventsChart'
 import { getStateofExperiments } from 'slices/experiments'
@@ -51,15 +51,6 @@ const useStyles = makeStyles((theme: Theme) =>
         width: '90vw',
       },
     },
-    updateExperimentButton: {
-      position: 'absolute',
-      top: theme.spacing(1.5),
-      right: theme.spacing(1.5),
-      padding: '1px 9px',
-      color: '#fff',
-      borderColor: '#fff',
-      fontSize: '0.75rem',
-    },
   })
 )
 
@@ -81,7 +72,7 @@ export default function ExperimentDetail() {
   const [detail, setDetail] = useState<ExperimentDetailType>()
   const [events, setEvents] = useState<Event[]>()
   const prevEvents = usePrevious(events)
-  const [infoEditor, setInfoEditor] = useState<_JSONEditor>()
+  const [infoEditor, setInfoEditor] = useState<ace.Ace.Editor>()
   const [configOpen, setConfigOpen] = useState(false)
   const [dialogOpen, setDialogOpen] = useState(false)
   const [dialogInfo, setDialogInfo] = useState({
@@ -219,7 +210,7 @@ export default function ExperimentDetail() {
   }
 
   const handleUpdateExperiment = () => {
-    const data = infoEditor!.get()
+    const data = infoEditor!.getValue() as any
 
     api.experiments
       .update(data)
@@ -309,15 +300,14 @@ export default function ExperimentDetail() {
 
       <Modal open={configOpen} onClose={onModalClose}>
         <Paper className={classes.configPaper}>
-          <JSONEditor name={detail?.name} json={detail?.experiment_info as object} mountEditor={setInfoEditor} />
-          <Button
-            className={classes.updateExperimentButton}
-            variant="outlined"
-            size="small"
-            onClick={handleUpdateExperiment}
-          >
-            {T('common.confirm')}
-          </Button>
+          {detail && (
+            <PaperTop title={detail.name}>
+              <Button variant="outlined" size="small" onClick={handleUpdateExperiment}>
+                {T('common.confirm')}
+              </Button>
+            </PaperTop>
+          )}
+          <YAMLEditor theme={theme} data={detail?.experiment_info as object} mountEditor={setInfoEditor} />
         </Paper>
       </Modal>
 
