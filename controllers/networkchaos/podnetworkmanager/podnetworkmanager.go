@@ -93,6 +93,11 @@ func (m *PodNetworkManager) Commit(ctx context.Context) error {
 					pod := v1.Pod{}
 					err = m.Client.Get(ctx, key, &pod)
 					if err != nil {
+						if !k8sError.IsNotFound(err) {
+							m.Log.Error(err, "error while finding pod")
+							return err
+						}
+
 						m.Log.Info("pod not found", "key", key, "error", err.Error())
 						err = ErrPodNotFound
 						return err
