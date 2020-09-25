@@ -47,7 +47,7 @@ The Chaos Dashboard component is a one-stop web interface for Chaos Mesh users t
 
 To further improve the observability of chaos experiments, Chaos Mesh 1.0 includes a Grafana plug-in to allow you to directly display real-time chaos experiment information on your application monitoring panel. Currently, the chaos experiment information is displayed as annotations. This way, you can simultaneously observe the running status of the application and the current chaos experiment information.
 
-![Chaos status and application status on Grafana](/img/chaos-status-and-application-status-on-grafana.png)
+![Chaos status and application status on Grafana](/img/chaos-status.png)
 
 ## Safe and controllable chaos 
 
