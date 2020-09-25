@@ -44,9 +44,8 @@ OPTIONS:
     -l, --local [kind]       Choose a way to run a local kubernetes cluster, supported value: kind,
                              If this value is not set and the Kubernetes is not installed, this script will exit with 1.
     -n, --name               Name of Kubernetes cluster, default value: kind
-    -c  --crd                The URL of the crd files, default value: https://mirrors.chaos-mesh.org/latest/crd.yaml
+    -c  --crd                The path of the crd files. Get the crd file from "https://mirrors.chaos-mesh.org" if the crd path is empty.
     -r  --runtime            Runtime specifies which container runtime to use. Currently we only supports docker and containerd. default value: docker
-    -f  --chaosfs-sidecar    The URL of the chaosfs sidecar configmap files, default value: https://mirrors.chaos-mesh.org/latest/chaosfs-sidecar.yaml
         --kind-version       Version of the Kind tool, default value: v0.7.0
         --node-num           The count of the cluster nodes,default value: 3
         --k8s-version        Version of the Kubernetes cluster,default value: v1.17.2
@@ -73,8 +72,7 @@ main() {
     local docker_mirror=false
     local volume_provisioner=false
     local local_registry=false
-    local crd="https://mirrors.chaos-mesh.org/latest/crd.yaml"
-    local chaosfs="https://mirrors.chaos-mesh.org/latest/chaosfs-sidecar.yaml"
+    local crd=""
     local runtime="docker"
     local template=false
     local install_dependency_only=false
@@ -105,11 +103,6 @@ main() {
                 ;;
             -c|--crd)
                 crd="$2"
-                shift
-                shift
-                ;;
-            -f|--chaosfs-sidecar)
-                chaosfs="$2"
                 shift
                 shift
                 ;;
@@ -223,10 +216,13 @@ main() {
         runtime="containerd"
     fi
 
+    if [ "${crd}" == "" ]; then
+        crd="https://mirrors.chaos-mesh.org/${cm_version}/crd.yaml"
+    fi
+
     if $template; then
         ensure gen_crd_manifests "${crd}"
-        ensure gen_chaos_mesh_manifests "${runtime}" "${k3s}"
-        ensure gen_sidecar_template "${chaosfs}"
+        ensure gen_chaos_mesh_manifests "${runtime}" "${k3s}" "${cm_version}"
         exit 0
     fi
 
@@ -248,7 +244,7 @@ main() {
 
     check_kubernetes
 
-    install_chaos_mesh "${release_name}" "${namespace}" "${local_kube}" ${force_chaos_mesh} ${docker_mirror} "${crd}" "${runtime}" "${chaosfs}" "${k3s}"
+    install_chaos_mesh "${release_name}" "${namespace}" "${local_kube}" ${force_chaos_mesh} ${docker_mirror} "${crd}" "${runtime}" "${k3s}" "${cm_version}"
     ensure_pods_ready "${namespace}" "app.kubernetes.io/component=controller-manager" 100
     ensure_pods_ready "${namespace}" "app.kubernetes.io/component=chaos-daemon" 100
     ensure_pods_ready "${namespace}" "app.kubernetes.io/component=chaos-dashboard" 100
@@ -601,26 +597,28 @@ install_chaos_mesh() {
     local docker_mirror=$5
     local crd=$6
     local runtime=$7
-    local chaosfs=$8
-    local k3s=$9
+    local k3s=$8
+    local version=$9
 
     printf "Install Chaos Mesh %s\n" "${release_name}"
 
-    local chaos_mesh_image="pingcap/chaos-mesh:latest"
-    local chaos_daemon_image="pingcap/chaos-daemon:latest"
+    local chaos_mesh_image="pingcap/chaos-mesh:${version}"
+    local chaos_daemon_image="pingcap/chaos-daemon:${version}"
+    local chaos_dashboard_image="pingcap/chaos-dashboard:${version}"
 
     if [ "$docker_mirror" == "true" ]; then
         azk8spull "${chaos_mesh_image}" || true
         azk8spull "${chaos_daemon_image}" || true
+        azk8spull "${chaos_dashboard_image}" || true
         if [ "${local_kube}" == "kind" ]; then
             kind load docker-image "${chaos_mesh_image}" > /dev/null 2>&1 || true
             kind load docker-image "${chaos_daemon_image}" > /dev/null 2>&1 || true
+            kind load docker-image "${chaos_dashboard_image}" > /dev/null 2>&1 || true
         fi
     fi
 
     gen_crd_manifests "${crd}" | kubectl apply -f - || exit 1
-    gen_chaos_mesh_manifests "${runtime}" "${k3s}" | kubectl apply -f - || exit 1
-    gen_sidecar_template "${chaosfs}"| kubectl apply -f - || exit 1
+    gen_chaos_mesh_manifests "${runtime}" "${k3s}" "${version}" | kubectl apply -f - || exit 1
 }
 
 version_lt() {
@@ -790,28 +788,7 @@ gen_crd_manifests() {
         return
     fi
 
-    if [ "$crd" == "" ]; then
-        crd="manifests/crd.yaml"
-    fi
-
     ensure cat "$crd"
-}
-
-gen_sidecar_template() {
-    local chaosfs=$1
-
-    if check_url "$chaosfs"; then
-        need_cmd curl
-        ensure curl -sSL "$chaosfs"
-        return
-    fi
-
-
-    if [ "$chaosfs" == "" ]; then
-        chaosfs="manifests/chaosfs-sidecar.yaml"
-    fi
-
-    ensure cat "$chaosfs"
 }
 
 check_url() {
@@ -827,6 +804,7 @@ check_url() {
 gen_chaos_mesh_manifests() {
     local runtime=$1
     local k3s=$2
+    local version=$3
 
     local socketPath="/var/run/docker.sock"
     local mountPath="/var/run/docker.sock"
@@ -846,6 +824,7 @@ gen_chaos_mesh_manifests() {
 
     K8S_SERVICE="chaos-mesh-controller-manager"
     K8S_NAMESPACE="chaos-testing"
+    VERSION_TAG="${version}"
     tmpdir=$(mktemp -d)
 
     ensure openssl genrsa -out ${tmpdir}/ca.key 2048 > /dev/null 2>&1
@@ -1107,7 +1086,7 @@ spec:
       hostPID: true
       containers:
         - name: chaos-daemon
-          image: pingcap/chaos-daemon:latest
+          image: pingcap/chaos-daemon:${VERSION_TAG}
           imagePullPolicy: IfNotPresent
           command:
             - /usr/local/bin/chaos-daemon
@@ -1172,7 +1151,7 @@ spec:
       serviceAccount: chaos-controller-manager
       containers:
         - name: chaos-dashboard
-          image: pingcap/chaos-dashboard:latest
+          image: pingcap/chaos-dashboard:${VERSION_TAG}
           imagePullPolicy: IfNotPresent
           resources:
             limits: {}
@@ -1232,7 +1211,7 @@ spec:
       serviceAccount: chaos-controller-manager
       containers:
       - name: chaos-mesh
-        image: pingcap/chaos-mesh:latest
+        image: pingcap/chaos-mesh:${VERSION_TAG}
         imagePullPolicy: IfNotPresent
         resources:
             limits: {}
