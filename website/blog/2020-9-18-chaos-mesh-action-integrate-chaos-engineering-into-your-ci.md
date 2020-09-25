@@ -5,7 +5,7 @@ author: Xiang Wang
 author_title: Contributor of Chaos Mesh
 author_url: https://github.com/WangXiangUSTC
 author_image_url: https://avatars3.githubusercontent.com/u/5793595?v=4
-image: /img/automated_testing_framework.png
+image: /img/chaos-mesh-action.png
 tags: [Chaos Mesh, Chaos Engineering, GitHub Action, CI]
 ---
 
