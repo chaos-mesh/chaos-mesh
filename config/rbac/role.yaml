@@ -9,6 +9,26 @@ rules:
 - apiGroups:
   - chaos-mesh.org
   resources:
+  - helloworldchaos
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - chaos-mesh.org
+  resources:
+  - helloworldchaos/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - chaos-mesh.org
+  resources:
   - httpchaos
   verbs:
   - create

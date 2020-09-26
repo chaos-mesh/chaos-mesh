@@ -144,6 +144,14 @@ func main() {
 		os.Exit(1)
 	}
 
+	if err = (&controllers.HelloWorldChaosReconciler{
+		Client: mgr.GetClient(),
+		Log:    ctrl.Log.WithName("controllers").WithName("HelloWorldChaos"),
+	}).SetupWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create controller", "controller", "HelloWorldChaos")
+		os.Exit(1)
+	}
+
 	if err = (&controllers.TimeChaosReconciler{
 		Client:        mgr.GetClient(),
 		Reader:        mgr.GetAPIReader(),

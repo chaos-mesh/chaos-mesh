@@ -5,6 +5,7 @@ resources:
 - bases/chaos-mesh.org_podchaos.yaml
 - bases/chaos-mesh.org_networkchaos.yaml
 - bases/chaos-mesh.org_iochaos.yaml
+- bases/chaos-mesh.org_helloworldchaos.yaml
 - bases/chaos-mesh.org_timechaos.yaml
 - bases/chaos-mesh.org_kernelchaos.yaml
 - bases/chaos-mesh.org_stresschaos.yaml
