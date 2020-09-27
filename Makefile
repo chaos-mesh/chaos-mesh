@@ -258,8 +258,9 @@ lint: $(GOBIN)/revive
 	@echo "linting"
 	$< -formatter friendly -config revive.toml $$($(PACKAGE_LIST))
 
-link: liche -r $(ROOT)
+link: $(GOBIN)/linkcheck
 	@echo "checking link"
+	$< -r $(ROOT)
 
 # Generate code
 generate: $(GOBIN)/controller-gen
