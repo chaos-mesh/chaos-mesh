@@ -143,6 +143,9 @@ func parseAddChain(chain *pb.Chain) (string, error) {
 	if chain.Probability != "" {
 		rule += fmt.Sprintf("--probability %s ", chain.Dport)
 	}
+	if chain.MarkIndex != "" {
+		rule += fmt.Sprintf("--set-mark %s ", chain.MarkIndex)
+	}
 	if chain.IpsetsName != "" {
 		var matchPart string
 		if chain.Direction == pb.Chain_INPUT {

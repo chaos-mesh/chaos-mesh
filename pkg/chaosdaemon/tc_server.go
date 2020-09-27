@@ -82,6 +82,41 @@ func (s *daemonServer) SetTcs(ctx context.Context, in *pb.TcsRequest) (*empty.Em
 		return &empty.Empty{}, err
 	}
 
+	// the tc rule use fw mark will rely on iptables to set mark
+	// one example with just 500ms delay:
+	// tc qdisc add dev eth0 root handle parentId:0 prio bands bandNum
+	// tc qdisc add dev eth0 parent parentId:subClassIndex handle subHandleId: netem delay 500000
+	// tc filter add dev eth0 parent parentId: handle MarkIndex fw classid parentId:subClassIndex
+	// (iptables -A OUTPUT -t mangle -p tcp --sport 8000 -j MARK --set-mark MarkIndex)(set by yourself)
+	// tip:tc will only filter the output data
+	// Todo: better implements of tc_server for new chaos
+	if in.UseFwMark {
+		parentId := 0
+		bandNum := len(in.Tcs)
+		err = client.addPrio(parentId, bandNum)
+		parentId++
+		defaultClassNum := 3
+		for i, tc := range in.Tcs {
+			subClassIndex := i + (defaultClassNum + 1)
+			subHandleId := (parentId + 1) + i
+			parentArg := fmt.Sprintf("parent %d:%d", parentId, subClassIndex)
+			handleArg := fmt.Sprintf("handle %d:", subHandleId)
+			err := client.addTc(parentArg, handleArg, tc)
+			if err != nil {
+				log.Error(err, "error while adding tc")
+				return &empty.Empty{}, err
+			}
+			parentArg = fmt.Sprintf("parent %d:", parentId)
+			classid := fmt.Sprintf("%d:%d", parentId, subClassIndex)
+			err = client.addFilter(parentArg, classid, "", tc.MarkIndex)
+			if err != nil {
+				log.Error(err, "error while adding filter")
+				return &empty.Empty{}, err
+			}
+		}
+		return &empty.Empty{}, nil
+	}
+
 	// tc rules are split into two different kinds according to whether it has filter.
 	// all tc rules without filter are called `globalTc` and the tc rules with filter will be called `filterTc`.
 	// the `globalTc` rules will be piped one by one from root, and the last `globalTc` will be connected with a PRIO
@@ -164,7 +199,7 @@ func (s *daemonServer) SetTcs(ctx context.Context, in *pb.TcsRequest) (*empty.Em
 
 		parentArg := fmt.Sprintf("parent %d:", parent)
 		classid := fmt.Sprintf("classid %d:%d", parent, index+4)
-		err = client.addFilter(parentArg, classid, ipset)
+		err = client.addFilter(parentArg, classid, ipset, "")
 		if err != nil {
 			log.Error(err, "error while adding filter")
 			return &empty.Empty{}, err
@@ -280,7 +315,19 @@ func (c *tcClient) addTbf(parent string, handle string, tbf *pb.Tbf) error {
 	return nil
 }
 
-func (c *tcClient) addFilter(parent string, classid string, ipset string) error {
+func (c *tcClient) addFilter(parent string, classid string, ipset string, mark string) error {
+	if mark != "" {
+		log.Info("adding filter", "parent", parent, "classid", classid, "mark", mark)
+		args := strings.Split(
+			fmt.Sprintf("filter add dev eth0 %s handle %s fw classid %s", parent, mark, classid),
+			" ")
+		cmd := bpm.DefaultProcessBuilder("tc", args...).SetNetNS(c.nsPath).SetContext(c.ctx).Build()
+		output, err := cmd.CombinedOutput()
+		if err != nil {
+			return encodeOutputToError(output, err)
+		}
+		return nil
+	}
 	log.Info("adding filter", "parent", parent, "classid", classid, "ipset", ipset)
 
 	args := strings.Split(fmt.Sprintf("filter add dev eth0 %s basic match", parent), " ")

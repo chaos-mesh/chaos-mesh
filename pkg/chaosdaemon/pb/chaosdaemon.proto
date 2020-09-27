@@ -146,6 +146,7 @@ message Chain {
   string ipsetsName = 11;
   repeated string ipsets = 12;
   string probability = 13;
+  string markIndex = 14;
 }
 
 message TimeRequest {
@@ -200,6 +201,7 @@ message ApplyIoChaosResponse {
 message TcsRequest {
   repeated Tc tcs = 1;
   string container_id = 2;
+  bool use_fw_mark = 3;
 }
 
 message Tc {
@@ -211,4 +213,5 @@ message Tc {
   Netem netem = 2;
   Tbf tbf = 3;
   string ipset = 4;
+  string mark_index = 5;
 }
