@@ -260,7 +260,7 @@ lint: $(GOBIN)/revive
 
 link: $(GOBIN)/liche
 	@echo "checking link"
-	$< -r $(ROOT) -c 100
+	$< -r $(ROOT) -c 10
 
 # Generate code
 generate: $(GOBIN)/controller-gen
