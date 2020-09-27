@@ -251,14 +251,14 @@ $(GOBIN)/goimports:
 	$(GO) get golang.org/x/tools/cmd/goimports@v0.0.0-20200309202150-20ab64c0d93f
 $(GOBIN)/gosec:
 	$(GO) get github.com/securego/gosec/cmd/gosec@v0.0.0-20200401082031-e946c8c39989
-$(GOBIN)/linkcheck:
+$(GOBIN)/liche:
 	$(GO) get github.com/raviqqe/liche@v0.0.0-20200923075917-3ac05a3bb2c4
 
 lint: $(GOBIN)/revive
 	@echo "linting"
 	$< -formatter friendly -config revive.toml $$($(PACKAGE_LIST))
 
-link: $(GOBIN)/linkcheck
+link: $(GOBIN)/liche
 	@echo "checking link"
 	$< -r $(ROOT)
 
