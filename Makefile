@@ -63,7 +63,7 @@ all: yaml image
 
 build: binary
 
-check: fmt vet boilerplate lint generate yaml tidy
+check: fmt vet boilerplate lint generate yaml tidy link
 
 # Run tests
 test: failpoint-enable generate manifests test-utils
@@ -251,10 +251,14 @@ $(GOBIN)/goimports:
 	$(GO) get golang.org/x/tools/cmd/goimports@v0.0.0-20200309202150-20ab64c0d93f
 $(GOBIN)/gosec:
 	$(GO) get github.com/securego/gosec/cmd/gosec@v0.0.0-20200401082031-e946c8c39989
+$(GOBIN)/linkcheck:
+	$(GO) get github.com/raviqqe/liche@v0.0.0-20200923075917-3ac05a3bb2c4
 
 lint: $(GOBIN)/revive
 	@echo "linting"
 	$< -formatter friendly -config revive.toml $$($(PACKAGE_LIST))
+
+link: liche -r $(ROOT)
 
 # Generate code
 generate: $(GOBIN)/controller-gen
