@@ -28,6 +28,9 @@ sed -i.bak 's/caBundle:.*/caBundle: \"\$\{CA_BUNDLE\}\"/g' $tmp_file
 sed -i.bak 's/mountPath: \/var\/run\/docker.sock/mountPath: \$\{mountPath\}/g' $tmp_file
 sed -i.bak 's/path: \/var\/run\/docker.sock/path: \$\{socketPath\}/g' $tmp_file
 sed -i.bak 's/- docker/- $\{runtime\}/g' $tmp_file
+sed -i.bak 's/pingcap\/chaos-mesh:.*/pingcap\/chaos-mesh:\$\{VERSION_TAG\}/g' $tmp_file
+sed -i.bak 's/pingcap\/chaos-daemon:.*/pingcap\/chaos-daemon:\$\{VERSION_TAG\}/g' $tmp_file
+sed -i.bak 's/pingcap\/chaos-dashboard:.*/pingcap\/chaos-dashboard:\$\{VERSION_TAG\}/g' $tmp_file
 mv $tmp_file $tmp_file.bak
 
 cat <<EOF > $tmp_file

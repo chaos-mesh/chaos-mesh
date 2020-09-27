@@ -1,18 +1,19 @@
 apiVersion: chaos-mesh.org/v1alpha1
 kind: IoChaos
 metadata:
-  name: io-mixed-example
+  name: io-delay-example
   namespace: chaos-testing
 spec:
-  action: mixed
+  action: latency
   mode: one
-  duration: "400s"
-  path: ""
   selector:
     labelSelectors:
-      "app.kubernetes.io/component": "tikv"
-  layer: "fs"
-  percent: "50"
-  delay: "1ms"
+      app: etcd
+  volumePath: /var/run/etcd
+  path: /var/run/etcd/**/*
+  attr:
+    perm: 72
+  percent: 10
+  duration: "400s"
   scheduler:
     cron: "@every 10m"

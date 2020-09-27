@@ -7,12 +7,16 @@ import ArchiveOutlinedIcon from '@material-ui/icons/ArchiveOutlined'
 import ErrorOutlineIcon from '@material-ui/icons/ErrorOutline'
 import { Experiment } from 'api/experiments.type'
 import ExperimentEventsPreview from 'components/ExperimentEventsPreview'
+import { IntlShape } from 'react-intl'
 import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown'
 import KeyboardArrowUpIcon from '@material-ui/icons/KeyboardArrowUp'
 import PauseCircleOutlineIcon from '@material-ui/icons/PauseCircleOutline'
 import PlayCircleOutlineIcon from '@material-ui/icons/PlayCircleOutline'
+import { RootState } from 'store'
+import T from 'components/T'
 import day from 'lib/dayjs'
 import { useHistory } from 'react-router-dom'
+import { useSelector } from 'react-redux'
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -33,24 +37,28 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 )
 
-interface ExperimentPaperProps {
+interface ExperimentListItemProps {
   experiment: Experiment | Archive
   isArchive?: boolean
   handleSelect: (info: { uuid: uuid; title: string; description: string; action: string }) => void
   handleDialogOpen: (open: boolean) => void
+  intl: IntlShape
 }
 
-const ExperimentPaper: React.FC<ExperimentPaperProps> = ({
+const ExperimentListItem: React.FC<ExperimentListItemProps> = ({
   experiment: e,
   isArchive = false,
   handleSelect,
   handleDialogOpen,
+  intl,
 }) => {
   const theme = useTheme()
   const isTabletScreen = useMediaQuery(theme.breakpoints.down('sm'))
   const classes = useStyles()
 
   const history = useHistory()
+
+  const { lang } = useSelector((state: RootState) => state.settings)
 
   const [open, setOpen] = useState(false)
 
@@ -67,8 +75,8 @@ const ExperimentPaper: React.FC<ExperimentPaperProps> = ({
       case 'delete':
         handleSelect({
           uuid: (e as Experiment).uid,
-          title: `Archive ${e.name}?`,
-          description: 'You can still find this experiment in the archives.',
+          title: `${intl.formatMessage({ id: 'archives.single' })} ${e.name}?`,
+          description: intl.formatMessage({ id: 'experiments.deleteDesc' }),
           action: 'delete',
         })
 
@@ -76,8 +84,8 @@ const ExperimentPaper: React.FC<ExperimentPaperProps> = ({
       case 'pause':
         handleSelect({
           uuid: (e as Experiment).uid,
-          title: `Pause ${e.name}?`,
-          description: 'You can restart the experiment in the same position.',
+          title: `${intl.formatMessage({ id: 'common.pause' })} ${e.name}?`,
+          description: intl.formatMessage({ id: 'experiments.pauseDesc' }),
           action: 'pause',
         })
 
@@ -85,8 +93,8 @@ const ExperimentPaper: React.FC<ExperimentPaperProps> = ({
       case 'start':
         handleSelect({
           uuid: (e as Experiment).uid,
-          title: `Start ${e.name}?`,
-          description: 'The operation will take effect immediately.',
+          title: `${intl.formatMessage({ id: 'common.start' })} ${e.name}?`,
+          description: intl.formatMessage({ id: 'experiments.startDesc' }),
           action: 'start',
         })
 
@@ -101,15 +109,18 @@ const ExperimentPaper: React.FC<ExperimentPaperProps> = ({
   const Actions = () => (
     <Box display="flex" justifyContent="flex-end" alignItems="center" className={classes.marginRight}>
       <Typography variant="body2">
-        Created {day(isArchive ? (e as Archive).start_time : (e as Experiment).created).fromNow()}
+        {T('experiments.createdAt')}{' '}
+        {day(isArchive ? (e as Archive).start_time : (e as Experiment).created)
+          .locale(lang)
+          .fromNow()}
       </Typography>
       {!isArchive && (
         <>
           {(e as Experiment).status === 'Paused' ? (
             <IconButton
               color="primary"
-              title="Start experiment"
-              aria-label="Start experiment"
+              title={intl.formatMessage({ id: 'common.start' })}
+              aria-label={intl.formatMessage({ id: 'common.start' })}
               component="span"
               size="small"
               onClick={handleAction('start')}
@@ -119,8 +130,8 @@ const ExperimentPaper: React.FC<ExperimentPaperProps> = ({
           ) : (
             <IconButton
               color="primary"
-              title="Pause experiment"
-              aria-label="Pause experiment"
+              title={intl.formatMessage({ id: 'common.pause' })}
+              aria-label={intl.formatMessage({ id: 'common.pause' })}
               component="span"
               size="small"
               onClick={handleAction('pause')}
@@ -130,8 +141,8 @@ const ExperimentPaper: React.FC<ExperimentPaperProps> = ({
           )}
           <IconButton
             color="primary"
-            title="Archive experiment"
-            aria-label="Archive experiment"
+            title={intl.formatMessage({ id: 'archives.single' })}
+            aria-label={intl.formatMessage({ id: 'archives.single' })}
             component="span"
             size="small"
             onClick={handleAction('delete')}
@@ -141,7 +152,7 @@ const ExperimentPaper: React.FC<ExperimentPaperProps> = ({
         </>
       )}
       <Button variant="outlined" color="primary" size="small">
-        {isArchive ? 'Report' : 'Detail'}
+        {isArchive ? T('common.report') : T('common.detail')}
       </Button>
     </Box>
   )
@@ -151,7 +162,7 @@ const ExperimentPaper: React.FC<ExperimentPaperProps> = ({
       <Box display="flex" justifyContent="space-between" alignItems="center" p={3}>
         <Box display="flex" alignItems="center" className={classes.marginRight}>
           {!isArchive &&
-            (!(e as Experiment).status || (e as Experiment).status === 'Failed' ? (
+            ((e as Experiment).status === 'Failed' ? (
               <ErrorOutlineIcon color="error" />
             ) : (
               <ExperimentEventsPreview events={(e as Experiment).events} />
@@ -189,4 +200,4 @@ const ExperimentPaper: React.FC<ExperimentPaperProps> = ({
   )
 }
 
-export default ExperimentPaper
+export default ExperimentListItem

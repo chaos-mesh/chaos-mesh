@@ -15,12 +15,16 @@ package controllers
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/go-logr/logr"
 	v1 "k8s.io/api/core/v1"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+
+	"github.com/chaos-mesh/chaos-mesh/controllers/common"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/iochaos"
@@ -40,21 +44,37 @@ type IoChaosReconciler struct {
 
 // Reconcile reconciles an IOChaos resource
 func (r *IoChaosReconciler) Reconcile(req ctrl.Request) (result ctrl.Result, err error) {
-	logger := r.Log.WithValues("iochaos", req.NamespacedName)
+	logger := r.Log.WithValues("reconciler", "iochaos")
 
-	reconciler := iochaos.Reconciler{
-		Client:        r.Client,
-		Reader:        r.Reader,
-		EventRecorder: r.EventRecorder,
-		Log:           logger,
-	}
-	chaos := &v1alpha1.IoChaos{}
-	if err := r.Client.Get(context.Background(), req.NamespacedName, chaos); err != nil {
-		r.Log.Error(err, "unable to get iochaos")
+	if !common.ControllerCfg.ClusterScoped && req.Namespace != common.ControllerCfg.TargetNamespace {
+		// NOOP
+		logger.Info("ignore chaos which belongs to an unexpected namespace within namespace scoped mode",
+			"chaosName", req.Name, "expectedNamespace", common.ControllerCfg.TargetNamespace, "actualNamespace", req.Namespace)
 		return ctrl.Result{}, nil
 	}
 
-	result, err = reconciler.Reconcile(req, chaos)
+	chaos := &v1alpha1.IoChaos{}
+	if err := r.Client.Get(context.Background(), req.NamespacedName, chaos); err != nil {
+		if apierrors.IsNotFound(err) {
+			r.Log.Info("io chaos not found")
+		} else {
+			r.Log.Error(err, "unable to get io chaos")
+		}
+		return ctrl.Result{}, nil
+	}
+
+	scheduler := chaos.GetScheduler()
+	duration, err := chaos.GetDuration()
+	if err != nil {
+		r.Log.Error(err, fmt.Sprintf("unable to get iochaos[%s/%s]'s duration", chaos.Namespace, chaos.Name))
+		return ctrl.Result{}, err
+	}
+	if scheduler == nil && duration == nil {
+		return r.commonIoChaos(chaos, req)
+	} else if scheduler != nil && duration != nil {
+		return r.scheduleIoChaos(chaos, req)
+	}
+
 	if err != nil {
 		if chaos.IsDeleted() || chaos.IsPaused() {
 			r.Event(chaos, v1.EventTypeWarning, utils.EventChaosRecoverFailed, err.Error())
@@ -63,6 +83,16 @@ func (r *IoChaosReconciler) Reconcile(req ctrl.Request) (result ctrl.Result, err
 		}
 	}
 	return result, nil
+}
+
+func (r *IoChaosReconciler) commonIoChaos(chaos *v1alpha1.IoChaos, req ctrl.Request) (ctrl.Result, error) {
+	cr := iochaos.NewCommonReconciler(r.Client, r.Reader, r.Log.WithValues("iochaos", req.NamespacedName), req, r.EventRecorder)
+	return cr.Reconcile(req)
+}
+
+func (r *IoChaosReconciler) scheduleIoChaos(chaos *v1alpha1.IoChaos, req ctrl.Request) (ctrl.Result, error) {
+	sr := iochaos.NewTwoPhaseReconciler(r.Client, r.Reader, r.Log.WithValues("iochaos", req.NamespacedName), req, r.EventRecorder)
+	return sr.Reconcile(req)
 }
 
 func (r *IoChaosReconciler) SetupWithManager(mgr ctrl.Manager) error {

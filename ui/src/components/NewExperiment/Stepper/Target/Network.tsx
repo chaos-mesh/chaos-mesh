@@ -6,6 +6,7 @@ import { SelectField, TextField } from 'components/FormField'
 import AdvancedOptions from 'components/AdvancedOptions'
 import { RootState } from 'store'
 import ScopeStep from '../Scope'
+import T from 'components/T'
 import { defaultExperimentSchema } from 'components/NewExperiment/constants'
 import { getIn } from 'formik'
 import { toTitleCase } from 'lib/utils'
@@ -52,8 +53,8 @@ export default function Network(props: StepperFormTargetProps) {
       <SelectField
         id="target.network_chaos.action"
         name="target.network_chaos.action"
-        label="Action"
-        helperText="Please select a NetworkChaos action"
+        label={T('newE.target.action')}
+        helperText={T('newE.target.network.actionHelper')}
         onChange={handleActionChange}
         onBlur={() => {}} // Delay the form validation with an empty func. If don’t do this, errors will appear early
       >
@@ -111,14 +112,14 @@ export default function Network(props: StepperFormTargetProps) {
             type="number"
             id="target.network_chaos.bandwidth.peakrate"
             name="target.network_chaos.bandwidth.peakrate"
-            label="Peakrate"
+            label="Peak rate"
             helperText="The maximum depletion rate of the bucket"
           />
           <TextField
             type="number"
             id="target.network_chaos.bandwidth.minburst"
             name="target.network_chaos.bandwidth.minburst"
-            label="Minburst"
+            label="Min burst"
             helperText="The size of the peakrate bucket"
           />
         </>
@@ -256,13 +257,18 @@ export default function Network(props: StepperFormTargetProps) {
 
       {values.target.network_chaos.action !== '' && (
         <AdvancedOptions
-          title="Target"
+          title={T('newE.target.network.target.title')}
           isOpen={values.target.network_chaos.action === 'partition' ? true : false}
           beforeOpen={beforeTargetOpen}
           afterClose={afterTargetClose}
         >
           {values.target.network_chaos.target && values.target.network_chaos.target.mode && (
-            <ScopeStep namespaces={namespaces} scope="target.network_chaos.target" />
+            <ScopeStep
+              namespaces={namespaces}
+              scope="target.network_chaos.target"
+              podsPreviewTitle={T('newE.target.network.target.podsPreview')}
+              podsPreviewDesc={T('newE.target.network.target.podsPreviewHelper')}
+            />
           )}
         </AdvancedOptions>
       )}

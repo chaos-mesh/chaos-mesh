@@ -9,9 +9,7 @@ import {
 import { defaultExperimentSchema } from 'components/NewExperiment/constants'
 import snakeCaseKeys from 'snakecase-keys'
 
-export const ChaosKindKeyMap: {
-  [kind: string]: { [key: string]: Exclude<keyof ExperimentTarget, 'kind'> }
-} = {
+export const ChaosKindKeyMap: Record<string, Record<string, Exclude<keyof ExperimentTarget, 'kind'>>> = {
   PodChaos: { key: 'pod_chaos' },
   NetworkChaos: { key: 'network_chaos' },
   IoChaos: { key: 'io_chaos' },
@@ -30,11 +28,11 @@ export function parseSubmit(e: Experiment) {
   }
 
   // Parse labels, label_selectors, annotations and annotation_selectors to object
-  function helper1(selectors: string[]) {
-    return selectors.reduce((acc: { [key: string]: string }, d) => {
+  function helper1(selectors: string[], updateVal?: (s: string) => any) {
+    return selectors.reduce((acc: Record<string, any>, d) => {
       const splited = d.replace(/\s/g, '').split(':')
 
-      acc[splited[0]] = splited[1]
+      acc[splited[0]] = typeof updateVal === 'function' ? updateVal(splited[1]) : splited[1]
 
       return acc
     }, {})
@@ -88,6 +86,10 @@ export function parseSubmit(e: Experiment) {
         }
       }
     }
+  }
+
+  if (kind === 'IoChaos') {
+    values.target.io_chaos.attr = helper1(values.target.io_chaos.attr as string[], (s: string) => parseInt(s, 10))
   }
 
   return values
@@ -155,6 +157,10 @@ export function parseLoaded(e: Experiment): Experiment {
       : []
   }
 
+  if (result.target.kind === 'IoChaos' && result.target.io_chaos.attr) {
+    result.target.io_chaos.attr = selectorsToArr(result.target.io_chaos.attr, ':')
+  }
+
   return result
 }
 
@@ -184,6 +190,10 @@ export function yamlToExperiment(yamlObj: any): Experiment {
   delete spec.mode
   delete spec.scheduler
   delete spec.duration
+
+  if (kind === 'IoChaos' && spec.attr) {
+    spec.attr = selectorsToArr(spec.attr, ':')
+  }
 
   if (kind === 'KernelChaos' && spec.fail_kern_request) {
     spec.fail_kern_request.callchain = spec.fail_kern_request.callchain.map((frame: CallchainFrame) => {
