@@ -17,13 +17,14 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/pkg/errors"
+
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos/ipset"
 	"github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos/iptable"
 	"github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos/tc"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
 	"github.com/chaos-mesh/chaos-mesh/pkg/utils"
-	"github.com/pkg/errors"
 
 	"github.com/go-logr/logr"
 	corev1 "k8s.io/api/core/v1"
