@@ -197,11 +197,11 @@ Now take the following steps to run chaos:
 
     ```yaml
     apiVersion: chaos-mesh.org/v1alpha1
-	kind: HelloWorldChaos
-	metadata:
-		name: hello-world
-		namespace: chaos-testing
-	spec: {}
+    kind: HelloWorldChaos
+    metadata:
+      name: hello-world
+      namespace: chaos-testing
+    spec: {}
     ```
 
 4. Apply the chaos:
