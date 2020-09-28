@@ -256,8 +256,14 @@ lint: $(GOBIN)/revive
 	@echo "linting"
 	$< -formatter friendly -config revive.toml $$($(PACKAGE_LIST))
 
+bin/chaos-builder:
+	$(CGOENV) go build -ldflags '$(LDFLAGS)' -o bin/chaos-builder ./cmd/chaos-builder/...
+
+chaos-build: bin/chaos-builder
+	bin/chaos-builder
+
 # Generate code
-generate: $(GOBIN)/controller-gen
+generate: $(GOBIN)/controller-gen chaos-build
 	$< object:headerFile=./hack/boilerplate/boilerplate.generatego.txt paths="./..."
 
 yaml: manifests ensure-kustomize
@@ -328,4 +334,4 @@ install-local-coverage-tools:
 	binary docker-push lint generate yaml \
 	manager chaosfs chaosdaemon chaos-dashboard ensure-all \
 	dashboard dashboard-server-frontend gosec-scan \
-	proto
+	proto bin/chaos-builder
