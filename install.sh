@@ -901,7 +901,7 @@ data:
 # Source: chaos-mesh/templates/controller-manager-rbac.yaml
 # roles
 kind: ClusterRole
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: chaos-mesh:chaos-controller-manager-target-namespace
   labels:
@@ -929,7 +929,7 @@ rules:
 ---
 # Source: chaos-mesh/templates/controller-manager-rbac.yaml
 kind: ClusterRole
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: chaos-mesh:chaos-controller-manager-cluster-level
   labels:
@@ -946,7 +946,7 @@ rules:
 # Source: chaos-mesh/templates/controller-manager-rbac.yaml
 # bindings cluster level
 kind: ClusterRoleBinding
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: chaos-mesh:chaos-controller-manager-cluster-level
   labels:
@@ -964,7 +964,7 @@ subjects:
 ---
 # Source: chaos-mesh/templates/controller-manager-rbac.yaml
 kind: ClusterRoleBinding
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: chaos-mesh:chaos-controller-manager-target-namespace
   namespace: chaos-testing
@@ -983,7 +983,7 @@ subjects:
 ---
 # Source: chaos-mesh/templates/controller-manager-rbac.yaml
 kind: Role
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: chaos-mesh:chaos-controller-manager-control-plane
   namespace: chaos-testing
@@ -999,7 +999,7 @@ rules:
 # Source: chaos-mesh/templates/controller-manager-rbac.yaml
 # binding for control plane namespace
 kind: RoleBinding
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: chaos-mesh:chaos-controller-manager-control-plane
   namespace: chaos-testing
