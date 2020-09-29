@@ -94,6 +94,16 @@ KUBECTL_BIN=${OUTPUT_BIN}/kubectl
 HELM_BIN=${OUTPUT_BIN}/helm
 KIND_BIN=${OUTPUT_BIN}/kind
 
+# create registry container unless it already exists
+reg_name='registry'
+reg_port='5000'
+running="$(docker inspect -f '{{.State.Running}}' "${reg_name}" 2>/dev/null || true)"
+if [ "${running}" != 'true' ]; then
+  docker run \
+    -d --restart=always -p "${reg_port}:5000" --name "${reg_name}" \
+    registry:2
+fi
+
 echo "############# start create cluster:[${clusterName}] #############"
 workDir=${HOME}/kind/${clusterName}
 kubeconfigPath=${workDir}/config
@@ -110,22 +120,21 @@ configFile=${workDir}/kind-config.yaml
 
 cat <<EOF > ${configFile}
 kind: Cluster
-apiVersion: kind.sigs.k8s.io/v1alpha3
+apiVersion: kind.x-k8s.io/v1alpha4
 kubeadmConfigPatches:
 - |
-  apiVersion: kubeadm.k8s.io/v1alpha3
+  apiVersion: kubeadm.k8s.io/v1beta2
   kind: ClusterConfiguration
   metadata:
     name: config
   apiServerExtraArgs:
     enable-admission-plugins: NodeRestriction,MutatingAdmissionWebhook,ValidatingAdmissionWebhook
+containerdConfigPatches:
+- |-
+  [plugins."io.containerd.grpc.v1.cri".registry.mirrors."localhost:${reg_port}"]
+    endpoint = ["http://${reg_name}:${reg_port}"]
 nodes:
 - role: control-plane
-  extraPortMappings:
-  - containerPort: 5000
-    hostPort: 5000
-    listenAddress: 127.0.0.1
-    protocol: TCP
 EOF
 
 for ((i=0;i<${nodeNum};i++))
@@ -149,6 +158,9 @@ echo "start to create k8s cluster"
 ${KIND_BIN} create cluster --config ${configFile} --image kindest/node:${k8sVersion} --name=${clusterName}
 ${KIND_BIN} get kubeconfig --name=${clusterName} > ${kubeconfigPath}
 export KUBECONFIG=${kubeconfigPath}
+
+echo "connect the local docker registry to the cluster network"
+docker network connect "kind" "${reg_name}"
 
 ${KUBECTL_BIN} apply -f ${ROOT}/manifests/local-volume-provisioner.yaml
 ${KUBECTL_BIN} apply -f ${ROOT}/manifests/tiller-rbac.yaml
