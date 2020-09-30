@@ -46,8 +46,8 @@ The current implementation supports six types of CRD objects for fault injection
 
 ## Quick start
 
-- [Get Started on kind](https://chaos-mesh.org/docs/installation/get_started_on_kind)
-- [Get Started on minikube](https://chaos-mesh.org/docs/installation/get_started_on_minikube)
+- [Get Started on kind](https://chaos-mesh.org/docs/get_started/get_started_on_kind)
+- [Get Started on minikube](https://chaos-mesh.org/docs/get_started/get_started_on_minikube)
 
 ## Deploy and use
 

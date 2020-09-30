@@ -21,7 +21,7 @@ Suppose our application will be deployed in three data centers in a production e
 and these data centers are still under construction. Now we want to test the impact of
 such a deployment topology on the business in advance.
 
-Here we use TiDB cluster as an example. Suppose we already install the [TiBD cluster](https://docs.pingcap.com/tidb-in-kubernetes/stable/) and [Chaos Mesh](installation/installation.md)
+Here we use TiDB cluster as an example. Suppose we already install the [TiBD cluster](https://docs.pingcap.com/tidb-in-kubernetes/stable/) and [Chaos Mesh](get_started/installation.md)
 in our Kubernetes environment. In this TiDB cluster, we have three TiDB pods, three PD pods and seven TiKV pods:
 
 ```bash
@@ -70,7 +70,7 @@ basic-tikv-6                       1/1     Running   0          29m
 
 ### Design injection rules
 
-Chaos Mesh provides [`NetworkChaos`](user_guides/network_chaos.md) to inject network latency,
+Chaos Mesh provides [`NetworkChaos`](chaos_experiments/network_chaos.md) to inject network latency,
 so we can use it to simulate the latency between three data centers.
 
 At present, `NetworkChaos` has a limitation that each target pod only has one configuration of `netem` in effect.
