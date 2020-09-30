@@ -162,7 +162,7 @@ const ExperimentListItem: React.FC<ExperimentListItemProps> = ({
       <Box display="flex" justifyContent="space-between" alignItems="center" p={3}>
         <Box display="flex" alignItems="center" className={classes.marginRight}>
           {!isArchive &&
-            (!(e as Experiment).status || (e as Experiment).status === 'Failed' ? (
+            ((e as Experiment).status === 'Failed' ? (
               <ErrorOutlineIcon color="error" />
             ) : (
               <ExperimentEventsPreview events={(e as Experiment).events} />
