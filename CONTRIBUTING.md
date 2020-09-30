@@ -173,7 +173,7 @@ Congratulations! Now you have finished all tests and are ready to commit your co
 
 ### Step 5: Create a pull request
 
-1. Visit your fork at <https://github.com/$user/chaos-mesh> (replace \$user with your name).
+1. Visit your fork at <https://github.com/chaos-mesh/chaos-mesh> (replace the first chaos-mesh with your username).
 2. Click the Compare & pull request button next to your `myfeature` branch.
 3. Edit the description of the pull request to match your changes.
 
