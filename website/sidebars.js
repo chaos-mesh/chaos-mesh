@@ -37,8 +37,6 @@ module.exports = {
         'chaos_experiments/timechaos_experiment',
         'chaos_experiments/iochaos_experiment',
         'chaos_experiments/kernelchaos_experiment',
-        'chaos_experiments/sidecar_configmap',
-        'chaos_experiments/sidecar_template',
       ],
     },
     {
