@@ -25,18 +25,6 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/test/e2e/config"
 )
 
-const ioTestConfigMap = `name: chaosfs-io
-selector:
-  labelSelectors:
-    app: io
-template: chaosfs-sidecar
-arguments:
-  ContainerName: "io"
-  DataPath: "/var/run/data/test"
-  MountPath: "/var/run/data"
-  VolumeName: "datadir"
-`
-
 // NewCommonNginxPod describe that we use common nginx pod to be tested in our chaos-operator test
 func NewCommonNginxPod(name, namespace string) *corev1.Pod {
 	return &corev1.Pod{
@@ -223,21 +211,6 @@ func NewIOTestDeployment(name, namespace string) *appsv1.Deployment {
 					},
 				},
 			},
-		},
-	}
-}
-
-func NewIOTestConfigMap(name, namespace string) *corev1.ConfigMap {
-	return &corev1.ConfigMap{
-		ObjectMeta: metav1.ObjectMeta{
-			Namespace: namespace,
-			Name:      name,
-			Labels: map[string]string{
-				"app.kubernetes.io/component": "webhook",
-			},
-		},
-		Data: map[string]string{
-			"config": ioTestConfigMap,
 		},
 	}
 }

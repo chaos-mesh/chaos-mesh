@@ -30,6 +30,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
+const emptyString = ""
+
 // Reconciler for the twophase reconciler
 type Reconciler struct {
 	reconciler.InnerReconciler
@@ -48,6 +50,7 @@ func NewReconciler(r reconciler.InnerReconciler, client client.Client, reader cl
 	}
 }
 
+// Reconcile is twophase reconcile implement
 func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	var err error
 	now := time.Now()
@@ -88,10 +91,12 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		err = r.Recover(ctx, req, chaos)
 		if err != nil {
 			r.Log.Error(err, "failed to recover chaos")
+			updateFailedMessage(ctx, r, chaos, err.Error())
 			return ctrl.Result{Requeue: true}, err
 		}
 
 		status.Experiment.Phase = v1alpha1.ExperimentPhaseFinished
+		status.FailedMessage = emptyString
 	} else if chaos.IsPaused() {
 		if status.Experiment.Phase == v1alpha1.ExperimentPhaseRunning {
 			r.Log.Info("Pausing")
@@ -99,6 +104,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 			err = r.Recover(ctx, req, chaos)
 			if err != nil {
 				r.Log.Error(err, "failed to pause chaos")
+				updateFailedMessage(ctx, r, chaos, err.Error())
 				return ctrl.Result{Requeue: true}, err
 			}
 
@@ -111,6 +117,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 			}
 		}
 		status.Experiment.Phase = v1alpha1.ExperimentPhasePaused
+		status.FailedMessage = emptyString
 	} else if !chaos.GetNextRecover().IsZero() && chaos.GetNextRecover().Before(now) {
 		// Start recover
 		r.Log.Info("Recovering")
@@ -119,6 +126,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		if status.Experiment.Phase != v1alpha1.ExperimentPhasePaused {
 			if err = r.Recover(ctx, req, chaos); err != nil {
 				r.Log.Error(err, "failed to recover chaos")
+				updateFailedMessage(ctx, r, chaos, err.Error())
 				return ctrl.Result{Requeue: true}, err
 			}
 		}
@@ -129,23 +137,30 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 			Time: time.Now(),
 		}
 		status.Experiment.Phase = v1alpha1.ExperimentPhaseWaiting
-	} else if status.Experiment.Phase == v1alpha1.ExperimentPhasePaused &&
+		status.FailedMessage = emptyString
+	} else if (status.Experiment.Phase == v1alpha1.ExperimentPhaseFailed ||
+		status.Experiment.Phase == v1alpha1.ExperimentPhasePaused) &&
 		!chaos.GetNextRecover().IsZero() && chaos.GetNextRecover().After(now) {
-		// Only resume chaos in the case when current round is not finished,
+		// Only resume/retry chaos in the case when current round is not finished,
 		// which means the current time is before recover time. Otherwise we
 		// don't resume the chaos and just wait for the start of next round.
 
-		r.Log.Info("Resuming")
+		r.Log.Info("Resuming/Retrying")
 
 		dur := chaos.GetNextRecover().Sub(now)
 		if err = applyAction(ctx, r, req, dur, chaos); err != nil {
+			updateFailedMessage(ctx, r, chaos, err.Error())
 			return ctrl.Result{Requeue: true}, err
 		}
 
+		status.FailedMessage = emptyString
 	} else if chaos.GetNextStart().Before(now) {
+		r.Log.Info("Starting")
+
 		tempStart, err := utils.NextTime(*chaos.GetScheduler(), now)
 		if err != nil {
 			r.Log.Error(err, "failed to calculate the start time")
+			updateFailedMessage(ctx, r, chaos, err.Error())
 			return ctrl.Result{}, err
 		}
 
@@ -153,10 +168,12 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		if tempStart.Before(tempRecover) {
 			err := fmt.Errorf("nextRecover shouldn't be later than nextStart")
 			r.Log.Error(err, "Then recover can never be reached.", "scheduler", *chaos.GetScheduler(), "duration", *duration)
+			updateFailedMessage(ctx, r, chaos, err.Error())
 			return ctrl.Result{}, err
 		}
 
 		if err = applyAction(ctx, r, req, *duration, chaos); err != nil {
+			updateFailedMessage(ctx, r, chaos, err.Error())
 			return ctrl.Result{Requeue: true}, err
 		}
 
@@ -169,7 +186,10 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 
 		chaos.SetNextStart(*nextStart)
 		chaos.SetNextRecover(nextRecover)
+		status.FailedMessage = emptyString
 	} else {
+		r.Log.Info("Waiting")
+
 		nextStart, err := utils.NextTime(*chaos.GetScheduler(), status.Experiment.StartTime.Time)
 		if err != nil {
 			r.Log.Error(err, "failed to get next start time")
@@ -190,6 +210,9 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		}
 
 		chaos.SetNextStart(time.Now())
+		duration := nextTime.Sub(now)
+		r.Log.Info("Requeue request", "after", duration)
+		return ctrl.Result{RequeueAfter: duration}, nil
 	}
 
 	if err := r.Update(ctx, chaos); err != nil {
@@ -232,4 +255,17 @@ func applyAction(
 	status.Experiment.Phase = v1alpha1.ExperimentPhaseRunning
 	status.Experiment.Duration = duration.String()
 	return nil
+}
+
+func updateFailedMessage(
+	ctx context.Context,
+	r *Reconciler,
+	chaos v1alpha1.InnerSchedulerObject,
+	err string,
+) {
+	status := chaos.GetStatus()
+	status.FailedMessage = err
+	if err := r.Update(ctx, chaos); err != nil {
+		r.Log.Error(err, "unable to update chaos status")
+	}
 }

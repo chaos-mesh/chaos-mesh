@@ -16,6 +16,8 @@ package controllers
 import (
 	"github.com/go-logr/logr"
 
+	"github.com/chaos-mesh/chaos-mesh/controllers/common"
+
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/kernelchaos"
 
@@ -38,6 +40,13 @@ type KernelChaosReconciler struct {
 // Reconcile reconciles a request from controller
 func (r *KernelChaosReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	logger := r.Log.WithValues("reconciler", "kernelchaos")
+
+	if !common.ControllerCfg.ClusterScoped && req.Namespace != common.ControllerCfg.TargetNamespace {
+		// NOOP
+		logger.Info("ignore chaos which belongs to an unexpected namespace within namespace scoped mode",
+			"chaosName", req.Name, "expectedNamespace", common.ControllerCfg.TargetNamespace, "actualNamespace", req.Namespace)
+		return ctrl.Result{}, nil
+	}
 
 	reconciler := kernelchaos.Reconciler{
 		Client:        r.Client,

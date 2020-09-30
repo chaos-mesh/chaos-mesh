@@ -10,11 +10,12 @@ import EventsTable from 'components/EventsTable'
 import ExperimentConfiguration from 'components/ExperimentConfiguration'
 import Loading from 'components/Loading'
 import PaperTop from 'components/PaperTop'
+import T from 'components/T'
 import api from 'api'
 import { useParams } from 'react-router-dom'
 
 const ArchiveReport: React.FC = () => {
-  const { uuid } = useParams()
+  const { uuid } = useParams<{ uuid: string }>()
 
   const [loading, setLoading] = useState(true)
   const [detail, setDetail] = useState<ArchiveDetail>()
@@ -57,10 +58,10 @@ const ArchiveReport: React.FC = () => {
           {detail && (
             <>
               <Grid item xs={6} sm={6} md={3}>
-                <ArchiveNumberOf title="Number of Runs" num={events.length} />
+                <ArchiveNumberOf title={T('archives.numberOfRuns')} num={events.length} />
               </Grid>
               <Grid item xs={6} sm={6} md={3}>
-                <ArchiveNumberOf title="Number Of Affected Pods" num={affectedPods.length} />
+                <ArchiveNumberOf title={T('archives.numberOfAffectedPods')} num={affectedPods.length} />
               </Grid>
 
               <Grid item xs={12} md={6}>

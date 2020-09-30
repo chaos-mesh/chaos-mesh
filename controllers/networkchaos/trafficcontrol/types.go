@@ -146,7 +146,10 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1
 
 	err = m.Commit(ctx)
 	if err != nil {
-		r.Log.Error(err, "fail to commit")
+		// if pod is not found or not running, don't print error log and wait next time.
+		if err != podnetworkmanager.ErrPodNotFound && err != podnetworkmanager.ErrPodNotRunning {
+			r.Log.Error(err, "fail to commit")
+		}
 		return err
 	}
 
@@ -205,7 +208,8 @@ func (r *Reconciler) cleanFinalizersAndRecover(ctx context.Context, networkchaos
 		})
 
 		err = m.Commit(ctx)
-		if err != nil {
+		// if pod not found or not running, directly return and giveup recover.
+		if err != nil && err != podnetworkmanager.ErrPodNotFound && err != podnetworkmanager.ErrPodNotRunning {
 			r.Log.Error(err, "fail to commit")
 		}
 

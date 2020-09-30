@@ -4,12 +4,16 @@ import React, { useEffect, useState } from 'react'
 import { Archive } from 'api/archives.type'
 import ArchiveOutlinedIcon from '@material-ui/icons/ArchiveOutlined'
 import ConfirmDialog from 'components/ConfirmDialog'
-import ExperimentPaper from 'components/ExperimentPaper'
+import ExperimentListItem from 'components/ExperimentListItem'
 import Loading from 'components/Loading'
+import T from 'components/T'
 import _groupBy from 'lodash.groupby'
 import api from 'api'
+import { useIntl } from 'react-intl'
 
 export default function Archives() {
+  const intl = useIntl()
+
   const [loading, setLoading] = useState(false)
   const [archives, setArchives] = useState<Archive[] | null>(null)
   const [selected, setSelected] = useState({
@@ -59,11 +63,12 @@ export default function Archives() {
                 {archivesByKind.length > 0 &&
                   archivesByKind.map((e) => (
                     <Grid key={e.uid} item xs={12}>
-                      <ExperimentPaper
+                      <ExperimentListItem
                         experiment={e}
                         isArchive
                         handleSelect={setSelected}
                         handleDialogOpen={setDialogOpen}
+                        intl={intl}
                       />
                     </Grid>
                   ))}
@@ -77,7 +82,7 @@ export default function Archives() {
             <ArchiveOutlinedIcon fontSize="large" />
           </Box>
           <Typography variant="h6" align="center">
-            No archives found.
+            {T('archives.no_archives_found')}
           </Typography>
         </Box>
       )}
