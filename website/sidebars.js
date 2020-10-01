@@ -2,31 +2,41 @@ module.exports = {
   docs: [
     {
       type: 'doc',
-      id: 'overview',
+      id: 'overview/what_is_chaos_mesh',
+    },
+    {
+      type: 'category',
+      label: 'Overview',
+      items: ['overview/what_is_chaos_mesh', 'overview/features', 'overview/architecture'],
+    },
+    {
+      type: 'category',
+      label: 'Concepts',
+      items: ['concepts/chaos_engineering'],
     },
     {
       type: 'category',
       label: 'Getting Started',
-      items: ['installation/installation', 'installation/get_started_on_kind', 'installation/get_started_on_minikube'],
+      items: ['get_started/installation', 'get_started/get_started_on_kind', 'get_started/get_started_on_minikube'],
     },
     {
       type: 'category',
       label: 'User Guide',
       items: [
         'user_guides/run_chaos_experiment',
-        {
-          type: 'category',
-          label: 'Configure Chaos',
-          items: [
-            'user_guides/podchaos_experiment',
-            'user_guides/networkchaos_experiment',
-            'user_guides/stresschaos_experiment',
-            'user_guides/timechaos_experiment',
-            'user_guides/iochaos_experiment',
-            'user_guides/kernelchaos_experiment',
-          ],
-        },
         'user_guides/experiment_scope',
+      ],
+    },
+    {
+      type: 'category',
+      label: 'Chaos Experiments',
+      items: [
+        'chaos_experiments/podchaos_experiment',
+        'chaos_experiments/networkchaos_experiment',
+        'chaos_experiments/stresschaos_experiment',
+        'chaos_experiments/timechaos_experiment',
+        'chaos_experiments/iochaos_experiment',
+        'chaos_experiments/kernelchaos_experiment',
       ],
     },
     {

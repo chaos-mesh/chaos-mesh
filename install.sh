@@ -594,6 +594,7 @@ install_kind() {
     ensure curl -Lo /tmp/kind https://github.com/kubernetes-sigs/kind/releases/download/"$1"/kind-"${target_os}"-amd64
     ensure chmod +x /tmp/kind
     ensure mv /tmp/kind "$KIND_BIN"
+}
 
 install_chaos_mesh() {
     local release_name=$1
