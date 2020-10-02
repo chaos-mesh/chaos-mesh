@@ -7,6 +7,21 @@
     {
       "collapsed": true,
       "type": "category",
+      "label": "Concepts",
+      "items": [
+        {
+          "type": "doc",
+          "id": "version-0.9.1/concepts/chaos_engineering"
+        },
+        {
+          "type": "doc",
+          "id": "version-0.9.1/concepts/blast_radius"
+        }
+      ]
+    },
+    {
+      "collapsed": true,
+      "type": "category",
       "label": "Getting Started",
       "items": [
         {
