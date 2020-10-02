@@ -33,8 +33,7 @@ type metadata struct {
 	PackageName string
 }
 
-const implTemplate = `
-// Copyright 2020 Chaos Mesh Authors.
+const implTemplate = `// Copyright 2020 Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
