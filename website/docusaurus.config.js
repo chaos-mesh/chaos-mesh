@@ -49,7 +49,7 @@ module.exports = {
           items: [
             {
               label: 'Getting Started',
-              to: 'docs/installation/installation',
+              to: 'docs/get_started/installation',
             },
             {
               label: 'User Guides',
@@ -86,6 +86,7 @@ module.exports = {
       theme: require('prism-react-renderer/themes/dracula'),
     },
   },
+  onBrokenLinks: 'warn',
   presets: [
     [
       '@docusaurus/preset-classic',
