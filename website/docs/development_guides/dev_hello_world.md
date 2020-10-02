@@ -70,20 +70,6 @@ In Chaos Mesh, all chaos types are managed by the controller manager. To add a n
     }
     ```
 
-> **Note:**
->
-> The comment `// +kubebuilder:rbac:groups=chaos-mesh.org...` is an authority control mechanism that decides which account can access this reconciler. To make it accessible by the dashboard and chaos-controller-manager, you need to modify [controller-manager-rbac.yaml](https://github.com/chaos-mesh/chaos-mesh/blob/master/helm/chaos-mesh/templates/controller-manager-rbac.yaml) accordingly:
-
-```yaml
-  - apiGroups: ["chaos-mesh.org"]
-    resources:
-      - podchaos
-      - networkchaos
-      - iochaos
-      - helloworldchaos    # Add this line in all chaos-mesh.org group
-    verbs: ["*"]
-```
-
 ## Register the CRD
 
 The HelloWorldChaos object is a custom resource object in Kubernetes. This means you need to register the corresponding CRD in the Kubernetes API. To do this, modify [kustomization.yaml](https://github.com/chaos-mesh/chaos-mesh/blob/master/config/crd/kustomization.yaml) by adding the corresponding line as shown below:
@@ -144,6 +130,7 @@ metadata:
 Having the object successfully added, you can make a Docker image and push it to your registry:
 
 ```bash
+make generate
 make
 make docker-push
 ```
@@ -151,6 +138,7 @@ make docker-push
 > **Note:**
 >
 > The default `DOCKER_REGISTRY` is `localhost:5000`, which is preset in `hack/kind-cluster-build.sh`. You can overwrite it to any registry to which you have access permission.
+> To run a local registry with KinD, you could follow the [official doc](https://kind.sigs.k8s.io/docs/user/local-registry/).
 
 ## Run chaos
 
@@ -192,7 +180,7 @@ Now take the following steps to run chaos:
 2. Install Chaos Mesh:
 
     ```bash
-    helm install helm/chaos-mesh --name=chaos-mesh --namespace=chaos-testing --set chaosDaemon.runtime=containerd --set chaosDaemon.socketPath=/run/containerd/containerd.sock
+    helm install chaos-mesh helm/chaos-mesh --namespace=chaos-testing --set chaosDaemon.runtime=containerd --set chaosDaemon.socketPath=/run/containerd/containerd.sock
     kubectl get pods --namespace chaos-testing -l app.kubernetes.io/instance=chaos-mesh
     ```
 
