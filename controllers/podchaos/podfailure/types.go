@@ -19,11 +19,8 @@ import (
 	"fmt"
 
 	"github.com/go-logr/logr"
-	"github.com/hashicorp/go-multierror"
 	"golang.org/x/sync/errgroup"
 	v1 "k8s.io/api/core/v1"
-	k8serror "k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/tools/cache"
 	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -112,69 +109,6 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1
 	}
 	r.Event(podchaos, v1.EventTypeNormal, utils.EventChaosInjected, "")
 	return nil
-}
-
-// Recover implements the reconciler.InnerReconciler.Recover
-func (r *Reconciler) Recover(ctx context.Context, req ctrl.Request, obj v1alpha1.InnerObject) error {
-
-	podchaos, ok := obj.(*v1alpha1.PodChaos)
-	if !ok {
-		err := errors.New("chaos is not PodChaos")
-		r.Log.Error(err, "chaos is not PodChaos", "chaos", obj)
-		return err
-	}
-
-	if err := r.cleanFinalizersAndRecover(ctx, podchaos); err != nil {
-		return err
-	}
-
-	r.Event(podchaos, v1.EventTypeNormal, utils.EventChaosRecovered, "")
-	return nil
-}
-
-func (r *Reconciler) cleanFinalizersAndRecover(ctx context.Context, podchaos *v1alpha1.PodChaos) error {
-	var result error
-
-	for _, key := range podchaos.Finalizers {
-		ns, name, err := cache.SplitMetaNamespaceKey(key)
-		if err != nil {
-			result = multierror.Append(result, err)
-			continue
-		}
-
-		var pod v1.Pod
-		err = r.Client.Get(ctx, types.NamespacedName{
-			Namespace: ns,
-			Name:      name,
-		}, &pod)
-
-		if err != nil {
-			if !k8serror.IsNotFound(err) {
-				result = multierror.Append(result, err)
-				continue
-			}
-
-			r.Log.Info("Pod not found", "namespace", ns, "name", name)
-			podchaos.Finalizers = utils.RemoveFromFinalizer(podchaos.Finalizers, key)
-			continue
-		}
-
-		err = r.recoverPod(ctx, &pod, podchaos)
-		if err != nil {
-			result = multierror.Append(result, err)
-			continue
-		}
-
-		podchaos.Finalizers = utils.RemoveFromFinalizer(podchaos.Finalizers, key)
-	}
-
-	if podchaos.Annotations[common.AnnotationCleanFinalizer] == common.AnnotationCleanFinalizerForced {
-		r.Log.Info("Force cleanup all finalizers", "chaos", podchaos)
-		podchaos.Finalizers = podchaos.Finalizers[:0]
-		return nil
-	}
-
-	return result
 }
 
 func (r *Reconciler) failAllPods(ctx context.Context, pods []v1.Pod, podchaos *v1alpha1.PodChaos) error {

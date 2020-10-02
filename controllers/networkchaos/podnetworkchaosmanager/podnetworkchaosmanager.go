@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package podnetworkmanager
+package podnetworkchaosmanager
 
 import (
 	"context"
@@ -43,18 +43,16 @@ type PodNetworkManager struct {
 	Source string
 	Log    logr.Logger
 	client.Client
-	client.Reader
 
 	Modifications map[types.NamespacedName]*PodNetworkTransaction
 }
 
 // New creates a new PodNetworkMap
-func New(source string, logger logr.Logger, client client.Client, reader client.Reader) *PodNetworkManager {
+func New(source string, logger logr.Logger, client client.Client) *PodNetworkManager {
 	return &PodNetworkManager{
 		Source:        source,
 		Log:           logger,
 		Client:        client,
-		Reader:        reader,
 		Modifications: make(map[types.NamespacedName]*PodNetworkTransaction),
 	}
 }

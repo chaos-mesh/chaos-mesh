@@ -19,7 +19,6 @@ import (
 	"fmt"
 
 	"github.com/go-logr/logr"
-	"github.com/hashicorp/go-multierror"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/tools/cache"
@@ -119,59 +118,6 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1
 	r.Event(iochaos, v1.EventTypeNormal, utils.EventChaosInjected, "")
 
 	return nil
-}
-
-// Recover implements the reconciler.InnerReconciler.Recover
-func (r *Reconciler) Recover(ctx context.Context, req ctrl.Request, chaos v1alpha1.InnerObject) error {
-	iochaos, ok := chaos.(*v1alpha1.IoChaos)
-	if !ok {
-		err := errors.New("chaos is not IoChaos")
-		r.Log.Error(err, "chaos is not IoChaos", "chaos", chaos)
-		return err
-	}
-
-	if err := r.cleanFinalizersAndRecover(ctx, iochaos); err != nil {
-		return err
-	}
-	r.Event(iochaos, v1.EventTypeNormal, utils.EventChaosRecovered, "")
-	return nil
-}
-
-func (r *Reconciler) cleanFinalizersAndRecover(ctx context.Context, chaos *v1alpha1.IoChaos) error {
-	var result error
-
-	source := chaos.Namespace + "/" + chaos.Name
-
-	for _, key := range chaos.Finalizers {
-		m := podiochaosmanager.New(source, r.Log, r.Client)
-
-		ns, name, err := cache.SplitMetaNamespaceKey(key)
-		if err != nil {
-			result = multierror.Append(result, err)
-			continue
-		}
-
-		_ = m.WithInit(types.NamespacedName{
-			Namespace: ns,
-			Name:      name,
-		})
-
-		err = m.Commit(ctx)
-		if err != nil {
-			r.Log.Error(err, "fail to commit")
-		}
-
-		chaos.Finalizers = utils.RemoveFromFinalizer(chaos.Finalizers, key)
-	}
-	r.Log.Info("After recovering", "finalizers", chaos.Finalizers)
-
-	if chaos.Annotations[common.AnnotationCleanFinalizer] == common.AnnotationCleanFinalizerForced {
-		r.Log.Info("Force cleanup all finalizers", "chaos", chaos)
-		chaos.Finalizers = make([]string, 0)
-		return nil
-	}
-
-	return result
 }
 
 func (r *Reconciler) invalidActionResponse(iochaos *v1alpha1.IoChaos) (ctrl.Result, error) {

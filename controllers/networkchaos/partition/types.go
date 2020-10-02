@@ -19,7 +19,6 @@ import (
 	"fmt"
 
 	"github.com/go-logr/logr"
-	"github.com/hashicorp/go-multierror"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/tools/cache"
@@ -29,7 +28,7 @@ import (
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/common"
-	"github.com/chaos-mesh/chaos-mesh/controllers/networkchaos/podnetworkmanager"
+	"github.com/chaos-mesh/chaos-mesh/controllers/networkchaos/podnetworkchaosmanager"
 	"github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos/ipset"
 	"github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos/iptable"
 	"github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos/netutils"
@@ -99,7 +98,7 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1
 	}
 
 	source := networkchaos.Namespace + "/" + networkchaos.Name
-	m := podnetworkmanager.New(source, r.Log, r.Client, r.Reader)
+	m := podnetworkchaosmanager.New(source, r.Log, r.Client, r.Reader)
 
 	sources, err := utils.SelectAndFilterPods(ctx, r.Client, r.Reader, &networkchaos.Spec)
 
@@ -198,7 +197,7 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1
 	err = m.Commit(ctx)
 	if err != nil {
 		// if pod is not found or not running, don't print error log and wait next time.
-		if err != podnetworkmanager.ErrPodNotFound && err != podnetworkmanager.ErrPodNotRunning {
+		if err != podnetworkchaosmanager.ErrPodNotFound && err != podnetworkchaosmanager.ErrPodNotRunning {
 			r.Log.Error(err, "fail to commit")
 		}
 		return err
@@ -226,7 +225,7 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1
 }
 
 // SetChains sets iptables chains for pods
-func (r *Reconciler) SetChains(ctx context.Context, pods []v1.Pod, chains []v1alpha1.RawIptables, m *podnetworkmanager.PodNetworkManager, networkchaos *v1alpha1.NetworkChaos) error {
+func (r *Reconciler) SetChains(ctx context.Context, pods []v1.Pod, chains []v1alpha1.RawIptables, m *podnetworkchaosmanager.PodNetworkManager, networkchaos *v1alpha1.NetworkChaos) error {
 	for index := range pods {
 		pod := &pods[index]
 
@@ -247,65 +246,4 @@ func (r *Reconciler) SetChains(ctx context.Context, pods []v1.Pod, chains []v1al
 
 	}
 	return nil
-}
-
-// Recover implements the reconciler.InnerReconciler.Recover
-func (r *Reconciler) Recover(ctx context.Context, req ctrl.Request, chaos v1alpha1.InnerObject) error {
-	networkchaos, ok := chaos.(*v1alpha1.NetworkChaos)
-	if !ok {
-		err := errors.New("chaos is not NetworkChaos")
-		r.Log.Error(err, "chaos is not NetworkChaos", "chaos", chaos)
-
-		return err
-	}
-
-	if err := r.cleanFinalizersAndRecover(ctx, networkchaos); err != nil {
-		r.Log.Error(err, "cleanFinalizersAndRecover failed")
-		return err
-	}
-	r.Event(networkchaos, v1.EventTypeNormal, utils.EventChaosRecovered, "")
-
-	return nil
-}
-
-func (r *Reconciler) cleanFinalizersAndRecover(ctx context.Context, networkchaos *v1alpha1.NetworkChaos) error {
-	var result error
-
-	source := networkchaos.Namespace + "/" + networkchaos.Name
-	m := podnetworkmanager.New(source, r.Log, r.Client, r.Reader)
-
-	for _, key := range networkchaos.Finalizers {
-		ns, name, err := cache.SplitMetaNamespaceKey(key)
-		if err != nil {
-			result = multierror.Append(result, err)
-			continue
-		}
-
-		_ = m.WithInit(types.NamespacedName{
-			Namespace: ns,
-			Name:      name,
-		})
-
-		if err != nil {
-			result = multierror.Append(result, err)
-			continue
-		}
-
-		err = m.Commit(ctx)
-		// if pod not found or not running, directly return and giveup recover.
-		if err != nil && err != podnetworkmanager.ErrPodNotFound && err != podnetworkmanager.ErrPodNotRunning {
-			r.Log.Error(err, "fail to commit")
-		}
-
-		networkchaos.Finalizers = utils.RemoveFromFinalizer(networkchaos.Finalizers, key)
-	}
-	r.Log.Info("After recovering", "finalizers", networkchaos.Finalizers)
-
-	if networkchaos.Annotations[common.AnnotationCleanFinalizer] == common.AnnotationCleanFinalizerForced {
-		r.Log.Info("Force cleanup all finalizers", "chaos", networkchaos)
-		networkchaos.Finalizers = networkchaos.Finalizers[:0]
-		return nil
-	}
-
-	return result
 }
