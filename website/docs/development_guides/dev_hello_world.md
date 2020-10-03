@@ -138,7 +138,6 @@ make docker-push
 > **Note:**
 >
 > The default `DOCKER_REGISTRY` is `localhost:5000`, which is preset in `hack/kind-cluster-build.sh`. You can overwrite it to any registry to which you have access permission.
-> To run a local registry with KinD, you could follow the [official doc](https://kind.sigs.k8s.io/docs/user/local-registry/).
 
 ## Run chaos
 
@@ -180,6 +179,9 @@ Now take the following steps to run chaos:
 2. Install Chaos Mesh:
 
     ```bash
+    # for helm v2
+    helm install helm/chaos-mesh --name=chaos-mesh --namespace=chaos-testing --set chaosDaemon.runtime=containerd --set chaosDaemon.socketPath=/run/containerd/containerd.sock
+    # for helm v3
     helm install chaos-mesh helm/chaos-mesh --namespace=chaos-testing --set chaosDaemon.runtime=containerd --set chaosDaemon.socketPath=/run/containerd/containerd.sock
     kubectl get pods --namespace chaos-testing -l app.kubernetes.io/instance=chaos-mesh
     ```
