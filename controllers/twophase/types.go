@@ -122,12 +122,14 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 					cronGap := getCronGap(ctx, r, chaos)
 					waitTime := chaos.GetNextStart().Sub(chaos.GetNextRecover())
 					modTime := nextStart.Sub(chaos.GetNextRecover()) % cronGap
+					var nextRecover time.Time
 					if modTime > waitTime {
 						chaos.SetNextStart(*nextStart)
+						nextRecover = nextStart.Add(*duration - (modTime - waitTime))
 					} else {
 						chaos.SetNextStart(nextStart.Add(waitTime - modTime))
+						nextRecover = nextStart.Add(*duration)
 					}
-					nextRecover := nextStart.Add(*duration)
 					chaos.SetNextRecover(nextRecover)
 				}
 			}
