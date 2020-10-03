@@ -241,7 +241,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 
 		// if nextStart is not equal to nextTime, the scheduler may have been modified.
 		// So set nextStart to time.Now.
-		if nextStart.Equal(nextTime) {
+		if nextStart.Equal(nextTime) || (chaos.GetPause() != "" && chaos.GetPause() != "true") {
 			if !chaos.GetNextRecover().IsZero() && chaos.GetNextRecover().Before(nextTime) {
 				nextTime = chaos.GetNextRecover()
 			}
