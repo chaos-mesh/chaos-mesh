@@ -227,6 +227,11 @@ func (in *KernelChaos) GetPause() string {
 	return in.Annotations[PauseAnnotationKey]
 }
 
+// SetPause set the pausetime of annotation. Use for empty pausetime for now.
+func (in *KernelChaos) SetPause(s string) {
+	in.Annotations[PauseAnnotationKey] = s
+}
+
 // GetChaos returns a chaos instance
 func (in *KernelChaos) GetChaos() *ChaosInstance {
 	instance := &ChaosInstance{

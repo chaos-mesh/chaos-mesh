@@ -150,6 +150,11 @@ func (in *IoChaos) GetPause() string {
 	return in.Annotations[PauseAnnotationKey]
 }
 
+// SetPause set the pausetime of annotation. Use for empty pausetime for now.
+func (in *IoChaos) SetPause(s string) {
+	in.Annotations[PauseAnnotationKey] = s
+}
+
 // GetDuration would return the duration for chaos
 func (in *IoChaos) GetDuration() (*time.Duration, error) {
 	if in.Spec.Duration == nil {

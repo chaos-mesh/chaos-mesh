@@ -101,7 +101,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		if status.Experiment.Phase == v1alpha1.ExperimentPhaseRunning {
 			r.Log.Info("Pausing")
 
-			if chaos.GetPause() != "true" {
+			if chaos.GetPause() == "true" {
 				err = r.Recover(ctx, req, chaos)
 				if err != nil {
 					r.Log.Error(err, "failed to pause chaos")
@@ -182,6 +182,9 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		// don't resume the chaos and just wait for the start of next round.
 
 		r.Log.Info("Resuming/Retrying")
+		if chaos.GetPause() != "" {
+			chaos.SetPause("")
+		}
 
 		dur := chaos.GetNextRecover().Sub(now)
 		if err = applyAction(ctx, r, req, dur, chaos); err != nil {
@@ -192,6 +195,9 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		status.FailedMessage = emptyString
 	} else if chaos.GetNextStart().Before(now) {
 		r.Log.Info("Starting")
+		if chaos.GetPause() != "" {
+			chaos.SetPause("")
+		}
 
 		tempStart, err := utils.NextTime(*chaos.GetScheduler(), now)
 		if err != nil {

@@ -210,6 +210,11 @@ func (in *NetworkChaos) GetPause() string {
 	return in.Annotations[PauseAnnotationKey]
 }
 
+// SetPause set the pausetime of annotation. Use for empty pausetime for now.
+func (in *NetworkChaos) SetPause(s string) {
+	in.Annotations[PauseAnnotationKey] = s
+}
+
 // GetDuration would return the duration for chaos
 func (in *NetworkChaos) GetDuration() (*time.Duration, error) {
 	if in.Spec.Duration == nil {
