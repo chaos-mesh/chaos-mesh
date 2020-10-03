@@ -195,7 +195,7 @@ func (in *StressChaos) IsDeleted() bool {
 
 // GetPause returns the annotation when the chaos needs to be paused
 func (in *StressChaos) GetPause() string {
-	if in.Annotations == nil || in.Annotations[PauseAnnotationKey] == "" {
+	if in.Annotations == nil {
 		return ""
 	}
 	return in.Annotations[PauseAnnotationKey]
