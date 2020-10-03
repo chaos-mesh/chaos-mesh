@@ -186,7 +186,7 @@ type InnerSchedulerObject interface {
 // InnerObject is basic Object for the Reconciler
 type InnerObject interface {
 	IsDeleted() bool
-	IsPaused() bool
+	GetPause() string
 	GetChaos() *ChaosInstance
 	StatefulObject
 }

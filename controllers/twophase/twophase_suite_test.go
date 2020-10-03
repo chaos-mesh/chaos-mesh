@@ -112,9 +112,9 @@ func (in *fakeTwoPhaseChaos) IsDeleted() bool {
 	return in.Deleted
 }
 
-// IsPaused returns whether this resource has been paused
-func (in *fakeTwoPhaseChaos) IsPaused() bool {
-	return false
+// Pause returns whether this resource has been paused
+func (in *fakeTwoPhaseChaos) GetPause() string {
+	return ""
 }
 
 func (r fakeReconciler) Object() v1alpha1.InnerObject {

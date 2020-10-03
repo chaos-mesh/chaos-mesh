@@ -76,7 +76,7 @@ func (r *IoChaosReconciler) Reconcile(req ctrl.Request) (result ctrl.Result, err
 	}
 
 	if err != nil {
-		if chaos.IsDeleted() || chaos.IsPaused() {
+		if chaos.IsDeleted() || chaos.GetPause() != "" {
 			r.Event(chaos, v1.EventTypeWarning, utils.EventChaosRecoverFailed, err.Error())
 		} else {
 			r.Event(chaos, v1.EventTypeWarning, utils.EventChaosInjectFailed, err.Error())

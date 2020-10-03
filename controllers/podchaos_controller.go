@@ -72,7 +72,7 @@ func (r *PodChaosReconciler) Reconcile(req ctrl.Request) (result ctrl.Result, er
 
 	result, err = reconciler.Reconcile(req, chaos)
 	if err != nil {
-		if chaos.IsDeleted() || chaos.IsPaused() {
+		if chaos.IsDeleted() || chaos.GetPause() != "" {
 			r.Event(chaos, v1.EventTypeWarning, utils.EventChaosRecoverFailed, err.Error())
 		} else {
 			r.Event(chaos, v1.EventTypeWarning, utils.EventChaosInjectFailed, err.Error())

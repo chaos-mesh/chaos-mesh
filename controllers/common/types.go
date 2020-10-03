@@ -157,7 +157,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		}
 		status.Experiment.Phase = v1alpha1.ExperimentPhaseFinished
 		status.FailedMessage = emptyString
-	} else if chaos.IsPaused() {
+	} else if chaos.GetPause() != "" {
 		if status.Experiment.Phase == v1alpha1.ExperimentPhaseRunning {
 			r.Log.Info("Pausing")
 

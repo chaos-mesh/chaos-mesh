@@ -97,7 +97,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 
 		status.Experiment.Phase = v1alpha1.ExperimentPhaseFinished
 		status.FailedMessage = emptyString
-	} else if chaos.IsPaused() {
+	} else if chaos.GetPause() != "" {
 		if status.Experiment.Phase == v1alpha1.ExperimentPhaseRunning {
 			r.Log.Info("Pausing")
 
@@ -106,6 +106,30 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 				r.Log.Error(err, "failed to pause chaos")
 				updateFailedMessage(ctx, r, chaos, err.Error())
 				return ctrl.Result{Requeue: true}, err
+			}
+
+			if chaos.GetPause() != "true" {
+				var pauseSpec v1alpha1.SchedulerSpec
+				pauseSpec.Cron = "every " + chaos.GetPause()
+				nextStart, err := utils.NextTime(pauseSpec, time.Now())
+				if err != nil {
+					r.Log.Error(err, "failed to get the next start time after pause")
+					return ctrl.Result{}, err
+				}
+				if nextStart.Before(chaos.GetNextRecover()) {
+					chaos.SetNextStart(*nextStart)
+				} else {
+					cronGap := getCronGap(ctx, r, chaos)
+					waitTime := chaos.GetNextStart().Sub(chaos.GetNextRecover())
+					modTime := nextStart.Sub(chaos.GetNextRecover()) % cronGap
+					if modTime > waitTime {
+						chaos.SetNextStart(*nextStart)
+					} else {
+						chaos.SetNextStart(nextStart.Add(waitTime - modTime))
+					}
+					nextRecover := nextStart.Add(*duration)
+					chaos.SetNextRecover(nextRecover)
+				}
 			}
 
 			now := time.Now()
@@ -140,7 +164,8 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		status.FailedMessage = emptyString
 	} else if (status.Experiment.Phase == v1alpha1.ExperimentPhaseFailed ||
 		status.Experiment.Phase == v1alpha1.ExperimentPhasePaused) &&
-		!chaos.GetNextRecover().IsZero() && chaos.GetNextRecover().After(now) {
+		!chaos.GetNextRecover().IsZero() && chaos.GetNextRecover().After(now) &&
+		chaos.GetNextStart().Before(now) {
 		// Only resume/retry chaos in the case when current round is not finished,
 		// which means the current time is before recover time. Otherwise we
 		// don't resume the chaos and just wait for the start of next round.
@@ -268,4 +293,24 @@ func updateFailedMessage(
 	if err := r.Update(ctx, chaos); err != nil {
 		r.Log.Error(err, "unable to update chaos status")
 	}
+}
+
+func getCronGap(
+	ctx context.Context,
+	r *Reconciler,
+	chaos v1alpha1.InnerSchedulerObject,
+) time.Duration {
+	firstTime, err := utils.NextTime(*chaos.GetScheduler(), time.Now())
+	if err != nil {
+		r.Log.Error(err, "failed to calculate the first time")
+		updateFailedMessage(ctx, r, chaos, err.Error())
+		return 0
+	}
+	secondTime, err := utils.NextTime(*chaos.GetScheduler(), *firstTime)
+	if err != nil {
+		r.Log.Error(err, "failed to calculate the second time")
+		updateFailedMessage(ctx, r, chaos, err.Error())
+		return 0
+	}
+	return secondTime.Sub(*firstTime)
 }

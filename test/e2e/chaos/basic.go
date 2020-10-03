@@ -1998,7 +1998,7 @@ func unPauseChaos(ctx context.Context, cli client.Client, chaos runtime.Object) 
 	var mergePatch []byte
 	mergePatch, _ = json.Marshal(map[string]interface{}{
 		"metadata": map[string]interface{}{
-			"annotations": map[string]string{v1alpha1.PauseAnnotationKey: "false"},
+			"annotations": map[string]string{v1alpha1.PauseAnnotationKey: ""},
 		},
 	})
 	return cli.Patch(ctx, chaos, client.ConstantPatch(types.MergePatchType, mergePatch))

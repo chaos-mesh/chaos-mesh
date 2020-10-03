@@ -193,12 +193,12 @@ func (in *StressChaos) IsDeleted() bool {
 	return !in.DeletionTimestamp.IsZero()
 }
 
-// IsPaused returns whether this resource has been paused
-func (in *StressChaos) IsPaused() bool {
-	if in.Annotations == nil || in.Annotations[PauseAnnotationKey] != "true" {
-		return false
+// GetPause returns whether this resource has been paused
+func (in *StressChaos) GetPause() string {
+	if in.Annotations == nil || in.Annotations[PauseAnnotationKey] == "" {
+		return ""
 	}
-	return true
+	return in.Annotations[PauseAnnotationKey]
 }
 
 // GetChaos returns a chaos instance
