@@ -117,6 +117,10 @@ func (in *fakeTwoPhaseChaos) GetPause() string {
 	return ""
 }
 
+// SetPause set the pausetime of annotation. Use for empty pausetime for now.
+func (in *fakeTwoPhaseChaos) SetPause(s string) {
+}
+
 func (r fakeReconciler) Object() v1alpha1.InnerObject {
 	return &fakeTwoPhaseChaos{}
 }
