@@ -142,7 +142,7 @@ func (in *IoChaos) IsDeleted() bool {
 	return !in.DeletionTimestamp.IsZero()
 }
 
-// GetPause returns whether this resource has been paused
+// GetPause returns the annotation when the chaos needs to be paused
 func (in *IoChaos) GetPause() string {
 	if in.Annotations == nil || in.Annotations[PauseAnnotationKey] == "" {
 		return ""

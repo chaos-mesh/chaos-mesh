@@ -202,7 +202,7 @@ func (in *NetworkChaos) IsDeleted() bool {
 	return !in.DeletionTimestamp.IsZero()
 }
 
-// GetPause returns whether this resource has been paused
+// GetPause returns the annotation when the chaos needs to be paused
 func (in *NetworkChaos) GetPause() string {
 	if in.Annotations == nil || in.Annotations[PauseAnnotationKey] == "" {
 		return ""

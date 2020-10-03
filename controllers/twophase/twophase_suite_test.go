@@ -112,7 +112,7 @@ func (in *fakeTwoPhaseChaos) IsDeleted() bool {
 	return in.Deleted
 }
 
-// Pause returns whether this resource has been paused
+// GetPause returns the annotation when the chaos needs to be paused
 func (in *fakeTwoPhaseChaos) GetPause() string {
 	return ""
 }

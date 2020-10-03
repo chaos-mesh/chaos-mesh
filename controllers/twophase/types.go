@@ -101,21 +101,30 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		if status.Experiment.Phase == v1alpha1.ExperimentPhaseRunning {
 			r.Log.Info("Pausing")
 
-			err = r.Recover(ctx, req, chaos)
-			if err != nil {
-				r.Log.Error(err, "failed to pause chaos")
-				updateFailedMessage(ctx, r, chaos, err.Error())
-				return ctrl.Result{Requeue: true}, err
-			}
-
 			if chaos.GetPause() != "true" {
+				err = r.Recover(ctx, req, chaos)
+				if err != nil {
+					r.Log.Error(err, "failed to pause chaos")
+					updateFailedMessage(ctx, r, chaos, err.Error())
+					return ctrl.Result{Requeue: true}, err
+				}
+			} else {
+				// Pause time is set
 				var pauseSpec v1alpha1.SchedulerSpec
 				pauseSpec.Cron = "every " + chaos.GetPause()
 				nextStart, err := utils.NextTime(pauseSpec, time.Now())
 				if err != nil {
-					r.Log.Error(err, "failed to get the next start time after pause")
+					r.Log.Error(err, "failed to get the next start time after pause, check the format of pause input")
 					return ctrl.Result{}, err
 				}
+
+				err = r.Recover(ctx, req, chaos)
+				if err != nil {
+					r.Log.Error(err, "failed to pause chaos")
+					updateFailedMessage(ctx, r, chaos, err.Error())
+					return ctrl.Result{Requeue: true}, err
+				}
+
 				if nextStart.Before(chaos.GetNextRecover()) {
 					chaos.SetNextStart(*nextStart)
 				} else {
