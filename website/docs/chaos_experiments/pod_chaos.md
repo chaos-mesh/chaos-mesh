@@ -45,7 +45,7 @@ Description:
 * **action** defines the specific chaos action for the Pod. In this case, it is a Pod failure.
 * **mode** defines the mode to run chaos action. Supported mode: `one` / `all` / `fixed` / `fixed-percent` / `random-max-percent`.
 * **value** depends on the value of `mode`. If `mode` is `one` or `all`, leave `value` empty. If `fixed`, provide an integer of pods to do chaos action. If `fixed-percent`, provide a number from 0 to 100 to specify the percent of pods the server can do chaos action. If `random-max-percent`, provide a number from 0 to 100 to specify the max percent of pods to do chaos action.
-* **selector** specifies the target pods for chaos injections. For more details, see [Define the Scope of Chaos Experiment](experiment_scope.md).
+* **selector** specifies the target pods for chaos injections. For more details, see [Define the Scope of Chaos Experiment](../user_guides/experiment_scope.md).
 * **duration** defines the duration for each chaos experiment. The default value is `30s`, which indicates that pod failure will last for 30 seconds.
 * **scheduler** defines the scheduler rules for the running time of the chaos experiment. For more rule information, see [robfig/cron](https://godoc.org/github.com/robfig/cron).
 
