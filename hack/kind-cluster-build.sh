@@ -26,10 +26,12 @@ Before run this script,please ensure that:
 * have installed helm
 Options:
        -h,--help               prints the usage message
-       -n,--name               name of the Kubernetes cluster,default value: kind
-       -c,--nodeNum            the count of the cluster nodes,default value: 3
-       -k,--k8sVersion         version of the Kubernetes cluster,default value: v1.15.6
-       -v,--volumeNum          the volumes number of each kubernetes node,default value: 5
+       -n,--name               name of the Kubernetes cluster, default value: kind
+       -c,--nodeNum            the count of the cluster nodes, default value: 3
+       -k,--k8sVersion         version of the Kubernetes cluster, default value: v1.15.6
+       -v,--volumeNum          the volumes number of each kubernetes node, default value: 5
+       -r,--registryName       the name of local docker registry, default value: registry
+       -p,--registryPort       the published port of local docker registry, default value: 5000
 Usage:
     $0 --name testCluster --nodeNum 4 --k8sVersion v1.15.6
 EOF
@@ -60,6 +62,16 @@ case $key in
     shift
     shift
     ;;
+    -r|--registryName)
+    registryName="$2"
+    shift
+    shift
+    ;;
+    -p|--registryPort)
+    registryPort="$2"
+    shift
+    shift
+    ;;
     -h|--help)
     usage
     exit 0
@@ -76,11 +88,15 @@ clusterName=${clusterName:-kind}
 nodeNum=${nodeNum:-3}
 k8sVersion=${k8sVersion:-v1.15.6}
 volumeNum=${volumeNum:-5}
+registryName=${registryName:-registry}
+registryPort=${registryPort:-5000}
 
 echo "clusterName: ${clusterName}"
 echo "nodeNum: ${nodeNum}"
 echo "k8sVersion: ${k8sVersion}"
 echo "volumeNum: ${volumeNum}"
+echo "registryName: ${registryName}"
+echo "registryPort: ${registryPort}"
 
 source "${ROOT}/hack/lib.sh"
 
@@ -95,12 +111,10 @@ HELM_BIN=${OUTPUT_BIN}/helm
 KIND_BIN=${OUTPUT_BIN}/kind
 
 # create registry container unless it already exists
-reg_name='registry'
-reg_port='5000'
-running="$(docker inspect -f '{{.State.Running}}' "${reg_name}" 2>/dev/null || true)"
+running="$(docker inspect -f '{{.State.Running}}' "${registryName}" 2>/dev/null || true)"
 if [ "${running}" != 'true' ]; then
   docker run \
-    -d --restart=always -p "${reg_port}:5000" --name "${reg_name}" \
+    -d --restart=always -p "${registryPort}:5000" --name "${registryName}" \
     registry:2
 fi
 
@@ -131,8 +145,8 @@ kubeadmConfigPatches:
     enable-admission-plugins: NodeRestriction,MutatingAdmissionWebhook,ValidatingAdmissionWebhook
 containerdConfigPatches:
 - |-
-  [plugins."io.containerd.grpc.v1.cri".registry.mirrors."localhost:${reg_port}"]
-    endpoint = ["http://${reg_name}:${reg_port}"]
+  [plugins."io.containerd.grpc.v1.cri".registry.mirrors."localhost:${registryPort}"]
+    endpoint = ["http://${registryName}:${registryPort}"]
 nodes:
 - role: control-plane
 EOF
@@ -160,7 +174,7 @@ ${KIND_BIN} get kubeconfig --name=${clusterName} > ${kubeconfigPath}
 export KUBECONFIG=${kubeconfigPath}
 
 echo "connect the local docker registry to the cluster network"
-docker network connect "kind" "${reg_name}"
+docker network connect "kind" "${registryName}"
 
 ${KUBECTL_BIN} apply -f ${ROOT}/manifests/local-volume-provisioner.yaml
 ${KUBECTL_BIN} apply -f ${ROOT}/manifests/tiller-rbac.yaml
