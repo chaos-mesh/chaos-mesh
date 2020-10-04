@@ -174,7 +174,18 @@ ${KIND_BIN} get kubeconfig --name=${clusterName} > ${kubeconfigPath}
 export KUBECONFIG=${kubeconfigPath}
 
 echo "connect the local docker registry to the cluster network"
-docker network connect "kind" "${registryName}" 2>/dev/null || true
+
+set +e
+
+connected=$(docker network connect "kind" "${registryName}" 2>&1)
+exitCode=$?
+
+if [[ exitCode -ne 0 ]] && [[ $connected != *"already exists"* ]]; then
+  echo "error when connecting docker registry: ${connected}"
+  exit 1
+fi
+
+set -e
 
 ${KUBECTL_BIN} apply -f ${ROOT}/manifests/local-volume-provisioner.yaml
 ${KUBECTL_BIN} apply -f ${ROOT}/manifests/tiller-rbac.yaml
