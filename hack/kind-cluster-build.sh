@@ -174,7 +174,7 @@ ${KIND_BIN} get kubeconfig --name=${clusterName} > ${kubeconfigPath}
 export KUBECONFIG=${kubeconfigPath}
 
 echo "connect the local docker registry to the cluster network"
-docker network connect "kind" "${registryName}"
+docker network connect "kind" "${registryName}" 2>/dev/null || true
 
 ${KUBECTL_BIN} apply -f ${ROOT}/manifests/local-volume-provisioner.yaml
 ${KUBECTL_BIN} apply -f ${ROOT}/manifests/tiller-rbac.yaml
