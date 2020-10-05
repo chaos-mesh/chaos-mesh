@@ -12,7 +12,7 @@ module.exports = {
     {
       type: 'category',
       label: 'Concepts',
-      items: ['concepts/chaos_engineering'],
+      items: ['concepts/chaos_engineering','concepts/blast_radius'],
     },
     {
       type: 'category',
