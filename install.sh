@@ -79,6 +79,7 @@ main() {
     local template=false
     local install_dependency_only=false
     local k3s=false
+    local docker_registry=""
 
     while [[ $# -gt 0 ]]
     do
@@ -197,6 +198,11 @@ main() {
                 shift
                 shift
                 ;;
+            --docker-registry)
+                docker_registry="$2"
+                shift
+                shift
+                ;;
             *)
                 echo "unknown flag or option $key"
                 usage
@@ -226,10 +232,9 @@ main() {
     if [ "${crd}" == "" ]; then
         crd="https://mirrors.chaos-mesh.org/${cm_version}/crd.yaml"
     fi
-
     if $template; then
         ensure gen_crd_manifests "${crd}"
-        ensure gen_chaos_mesh_manifests "${runtime}" "${k3s}" "${cm_version}" "${timezone}"
+        ensure gen_chaos_mesh_manifests "${runtime}" "${k3s}" "${cm_version}" "${timezone}" "${docker_registry}"
         exit 0
     fi
 
@@ -250,8 +255,7 @@ main() {
     fi
 
     check_kubernetes
-
-    install_chaos_mesh "${release_name}" "${namespace}" "${local_kube}" ${force_chaos_mesh} ${docker_mirror} "${crd}" "${runtime}" "${k3s}" "${cm_version}" "${timezone}"
+    install_chaos_mesh "${release_name}" "${namespace}" "${local_kube}" ${force_chaos_mesh} ${docker_mirror} "${crd}" "${runtime}" "${k3s}" "${cm_version}" "${timezone}" "${docker_registry}"
     ensure_pods_ready "${namespace}" "app.kubernetes.io/component=controller-manager" 100
     ensure_pods_ready "${namespace}" "app.kubernetes.io/component=chaos-daemon" 100
     ensure_pods_ready "${namespace}" "app.kubernetes.io/component=chaos-dashboard" 100
@@ -606,13 +610,14 @@ install_chaos_mesh() {
     local runtime=$7
     local k3s=$8
     local version=$9
-    local timezone=$10
-
+    local timezone=${10}
+    local docker_registry=${11}
+    echo "-------${docker_registry}"
     printf "Install Chaos Mesh %s\n" "${release_name}"
 
-    local chaos_mesh_image="pingcap/chaos-mesh:${version}"
-    local chaos_daemon_image="pingcap/chaos-daemon:${version}"
-    local chaos_dashboard_image="pingcap/chaos-dashboard:${version}"
+    local chaos_mesh_image="${docker_registry}/pingcap/chaos-mesh:${version}"
+    local chaos_daemon_image="${docker_registry}/pingcap/chaos-daemon:${version}"
+    local chaos_dashboard_image="${docker_registry}/pingcap/chaos-dashboard:${version}"
 
     if [ "$docker_mirror" == "true" ]; then
         azk8spull "${chaos_mesh_image}" || true
@@ -626,7 +631,7 @@ install_chaos_mesh() {
     fi
 
     gen_crd_manifests "${crd}" | kubectl apply -f - || exit 1
-    gen_chaos_mesh_manifests "${runtime}" "${k3s}" "${version}" "${timezone}" | kubectl apply -f - || exit 1
+    gen_chaos_mesh_manifests "${runtime}" "${k3s}" "${version}" "${timezone}" "${docker_registry}" | kubectl apply -f - || exit 1
 }
 
 version_lt() {
@@ -814,7 +819,7 @@ gen_chaos_mesh_manifests() {
     local k3s=$2
     local version=$3
     local timezone=$4
-
+    local docker_registry=$5
     local socketPath="/var/run/docker.sock"
     local mountPath="/var/run/docker.sock"
     if [ "${runtime}" == "containerd" ]; then
@@ -834,6 +839,7 @@ gen_chaos_mesh_manifests() {
     K8S_SERVICE="chaos-mesh-controller-manager"
     K8S_NAMESPACE="chaos-testing"
     VERSION_TAG="${version}"
+    DOCKER_REGISTRY_PREFIX="${docker_registry}"
     tmpdir=$(mktemp -d)
 
     ensure openssl genrsa -out ${tmpdir}/ca.key 2048 > /dev/null 2>&1
@@ -1095,7 +1101,7 @@ spec:
       hostPID: true
       containers:
         - name: chaos-daemon
-          image: pingcap/chaos-daemon:${VERSION_TAG}
+          image: ${DOCKER_REGISTRY_PREFIX}/pingcap/chaos-daemon:${VERSION_TAG}
           imagePullPolicy: IfNotPresent
           command:
             - /usr/local/bin/chaos-daemon
@@ -1160,7 +1166,7 @@ spec:
       serviceAccount: chaos-controller-manager
       containers:
         - name: chaos-dashboard
-          image: pingcap/chaos-dashboard:${VERSION_TAG}
+          image: ${DOCKER_REGISTRY_PREFIX}/pingcap/chaos-dashboard:${VERSION_TAG}
           imagePullPolicy: IfNotPresent
           resources:
             limits: {}
@@ -1220,7 +1226,7 @@ spec:
       serviceAccount: chaos-controller-manager
       containers:
       - name: chaos-mesh
-        image: pingcap/chaos-mesh:${VERSION_TAG}
+        image: ${DOCKER_REGISTRY_PREFIX}/pingcap/chaos-mesh:${VERSION_TAG}
         imagePullPolicy: IfNotPresent
         resources:
             limits: {}
