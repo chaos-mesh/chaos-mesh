@@ -1,7 +1,7 @@
 <img src="static/logo.svg" alt="chaos-mesh-logo" width="450"/>
 
 [![Build Status](https://internal.pingcap.net/idc-jenkins/job/build_chaos_mesh_master/badge/icon)](https://internal.pingcap.net/idc-jenkins/view/chaos-mesh/job/build_chaos_mesh_master/)
-[![codecov](https://codecov.io/gh/pingcap/chaos-mesh/branch/master/graph/badge.svg)](https://codecov.io/gh/pingcap/chaos-mesh)
+[![codecov](https://codecov.io/gh/chaos-mesh/chaos-mesh/branch/master/graph/badge.svg)](https://codecov.io/gh/chaos-mesh/chaos-mesh)
 [![LICENSE](https://img.shields.io/github/license/pingcap/chaos-mesh.svg)](https://github.com/chaos-mesh/chaos-mesh/blob/master/LICENSE)
 [![Language](https://img.shields.io/badge/Language-Go-blue.svg)](https://golang.org/)
 [![Go Report Card](https://goreportcard.com/badge/github.com/chaos-mesh/chaos-mesh)](https://goreportcard.com/report/github.com/chaos-mesh/chaos-mesh)
@@ -60,7 +60,7 @@ This is a list of known adopters of Chaos Mesh. Some have already gone into prod
 - [Celo](https://celo.org/)
 - [Dailymotion](https://www.dailymotion.com/)
 - [DataStax Fallout](https://github.com/datastax/fallout)
-- [NetEase Fuxi Lab](https://www.crunchbase.com/organization/netease-fuxi-lab)
+- [NetEase Fuxi Lab](https://fuxi.163.com/en/about.html)
 - [JuiceFS](https://juicefs.com/?hl=en)
 - [Meituan-Dianping](https://about.meituan.com/en)
 - [PingCAP](https://www.pingcap.com)
@@ -78,7 +78,7 @@ See [FAQs](https://chaos-mesh.org/docs/faqs).
 
 ## Contribute
 
-See the [contributing guide](/CONTRIBUTING.md) and [development guide](https://chaos-mesh.org/docs/development_guides/development_overview).
+See the [contributing guide](./CONTRIBUTING.md) and [development guide](https://chaos-mesh.org/docs/development_guides/development_overview).
 
 ## Community
 
@@ -107,11 +107,11 @@ On the fourth Thursday of every month (unless otherwise specified), the Chaos Me
 
 ## Roadmap
 
-See [ROADMAP](/ROADMAP.md).
+See [ROADMAP](./ROADMAP.md).
 
 ## License
 
-Chaos Mesh is licensed under the Apache License, Version 2.0. See [LICENSE](/LICENSE) for the full license text.
+Chaos Mesh is licensed under the Apache License, Version 2.0. See [LICENSE](./LICENSE) for the full license text.
 
 ## Trademark
 

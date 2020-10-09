@@ -22,7 +22,7 @@ Within only 7 months since it was open-sourced on December 31st, 2019, Chaos Mes
 
 * [PingCAP](http://www.pingcap.com)
 * [Xpeng Motor](https://en.xiaopeng.com/)
-* [NetEase Fuxi Lab](https://www.crunchbase.com/organization/netease-fuxi-lab)
+* [NetEase Fuxi Lab](https://fuxi.163.com/en/about.html)
 * [JuiceFS](http://juicefs.com/?hl=en)
 * [Dailymotion](https://www.dailymotion.com/)
 * [Meituan-Dianping](https://about.meituan.com/en)

@@ -9,9 +9,9 @@ image: /img/chaos-mesh-action.png
 tags: [Chaos Mesh, Chaos Engineering, GitHub Action, CI]
 ---
 
-![chaos-mesh-action - Integrate-Chaos-Engineering-into-Your-CI](/img/chaos-mesh-action.png)
+![chaos-mesh-action - Integrate Chaos Engineering into Your CI](/img/chaos-mesh-action.png)
 
-[Chaos Mesh](https://chaos-mesh.org) is a cloud-native chaos testing platform that orchestrates chaos in Kubernetes environments. While it’s well received in the community with its rich fault injection types and easy-to-use dashboard, it was difficult  to use Chaos Mesh with end-to-end testing or the continuous integration (CI) process. As a result, problems introduced during system development could not be discovered before the release.
+[Chaos Mesh](https://chaos-mesh.org) is a cloud-native chaos testing platform that orchestrates chaos in Kubernetes environments. While it’s well received in the community with its rich fault injection types and easy-to-use dashboard, it was difficult to use Chaos Mesh with end-to-end testing or the continuous integration (CI) process. As a result, problems introduced during system development could not be discovered before the release.
 
 In this article, I will share how we use chaos-mesh-action, a GitHub action to integrate Chaos Mesh into the CI process.
 <!--truncate-->
@@ -24,7 +24,7 @@ chaos-mesh-action is available on [GitHub market](https://github.com/marketplace
 
 Combined with GitHub actions, Chaos Mesh can be more easily integrated into the daily development and testing of the system, thus guaranteeing that each code submission on GitHub is bug-free and won’t damage existing code. The following figure shows chaos-mesh-action integrated into the CI workflow:
 
-![chaos-mesh-action integrate in the CI workflow](/img/chaos-mesh-action-integrate-in-the-ci-workflow.png)
+![chaos-mesh-action integration in the CI workflow](/img/chaos-mesh-action-integrate-in-the-ci-workflow.png)
 
 ## Using chaos-mesh-action in GitHub workflow
 
@@ -53,7 +53,7 @@ As an example, let’s design a simple test workflow that includes the following
 After you design the workflow, the next step is to create it. 
 
 1. Navigate to the GitHub repository that contains the software you want to test.
-2. To start creating a workflow, click **Actions**, and then click the **"New workflow**" button:
+2. To start creating a workflow, click **Actions**, and then click the **New workflow** button:
 
 ![Creating a workflow](/img/creating-a-workflow.png)
 
