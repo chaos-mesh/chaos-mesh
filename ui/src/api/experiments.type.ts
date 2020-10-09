@@ -1,5 +1,4 @@
 import { Event } from './events.type'
-import { Experiment as ExperimentInfo } from 'components/NewExperiment/types'
 
 export interface StateOfExperiments {
   Total: number
@@ -23,12 +22,12 @@ export interface Experiment {
   kind: string
   namespace: string
   name: string
+  uid: uuid
   created: string
   status: keyof StateOfExperiments
-  uid: uuid
   events?: Event[]
 }
 
 export interface ExperimentDetail extends Experiment {
-  experiment_info: ExperimentInfo
+  yaml: any
 }

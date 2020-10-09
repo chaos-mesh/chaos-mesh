@@ -21,7 +21,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 )
 
-// ExperimentStore defines operations for working with archive experiments
+// ExperimentStore defines operations for working with archives and experiments
 type ExperimentStore interface {
 	// List returns an archive experiment list from the datastore.
 	List(ctx context.Context, kind, namespace, name string) ([]*ArchiveExperiment, error)
@@ -100,7 +100,6 @@ type ScopeInfo struct {
 	Value string `json:"value" binding:"ValueValid"`
 }
 
-// TODO: consider moving this to a common package
 // SelectorInfo defines the selector options of the Experiment.
 type SelectorInfo struct {
 	NamespaceSelectors  []string          `json:"namespace_selectors" binding:"NamespaceSelectorsValid"`
@@ -317,6 +316,7 @@ func (e *ArchiveExperiment) ParseNetworkChaos() (ExperimentInfo, error) {
 
 	return info, nil
 }
+
 func (e *ArchiveExperiment) ParseIOChaos() (ExperimentInfo, error) {
 	chaos := &v1alpha1.IoChaos{}
 	if err := json.Unmarshal([]byte(e.Experiment), &chaos); err != nil {
@@ -369,6 +369,7 @@ func (e *ArchiveExperiment) ParseIOChaos() (ExperimentInfo, error) {
 
 	return info, nil
 }
+
 func (e *ArchiveExperiment) ParseTimeChaos() (ExperimentInfo, error) {
 	chaos := &v1alpha1.TimeChaos{}
 	if err := json.Unmarshal([]byte(e.Experiment), &chaos); err != nil {
@@ -412,6 +413,7 @@ func (e *ArchiveExperiment) ParseTimeChaos() (ExperimentInfo, error) {
 
 	return info, nil
 }
+
 func (e *ArchiveExperiment) ParseKernelChaos() (ExperimentInfo, error) {
 	chaos := &v1alpha1.KernelChaos{}
 	if err := json.Unmarshal([]byte(e.Experiment), &chaos); err != nil {
@@ -453,6 +455,7 @@ func (e *ArchiveExperiment) ParseKernelChaos() (ExperimentInfo, error) {
 
 	return info, nil
 }
+
 func (e *ArchiveExperiment) ParseStressChaos() (ExperimentInfo, error) {
 	chaos := &v1alpha1.StressChaos{}
 	if err := json.Unmarshal([]byte(e.Experiment), &chaos); err != nil {
