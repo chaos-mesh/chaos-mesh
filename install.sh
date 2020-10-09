@@ -839,6 +839,7 @@ gen_chaos_mesh_manifests() {
     K8S_SERVICE="chaos-mesh-controller-manager"
     K8S_NAMESPACE="chaos-testing"
     VERSION_TAG="${version}"
+
     DOCKER_REGISTRY_PREFIX="${docker_registry}"
     tmpdir=$(mktemp -d)
 
