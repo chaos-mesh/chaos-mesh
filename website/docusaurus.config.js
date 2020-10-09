@@ -86,6 +86,7 @@ module.exports = {
       theme: require('prism-react-renderer/themes/dracula'),
     },
   },
+  onBrokenLinks: 'warn',
   presets: [
     [
       '@docusaurus/preset-classic',

@@ -15,8 +15,9 @@ package podnetworkchaos
 
 import (
 	"context"
-	"errors"
 	"fmt"
+
+	"github.com/pkg/errors"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos/ipset"
@@ -54,6 +55,11 @@ func (h *Handler) Apply(ctx context.Context, chaos *v1alpha1.PodNetworkChaos) er
 	}, pod)
 	if err != nil {
 		h.Log.Error(err, "fail to find pod")
+		return err
+	}
+
+	if pod.Spec.HostNetwork {
+		err := errors.Errorf("it's dangerous to inject network chaos on a pod(%s/%s) with `hostNetwork`", pod.Namespace, pod.Name)
 		return err
 	}
 
