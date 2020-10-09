@@ -19,14 +19,15 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	ctx "github.com/chaos-mesh/chaos-mesh/pkg/router/context"
-	end "github.com/chaos-mesh/chaos-mesh/pkg/router/endpoint"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/envtest"
+
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	ctx "github.com/chaos-mesh/chaos-mesh/pkg/router/context"
+	end "github.com/chaos-mesh/chaos-mesh/pkg/router/endpoint"
 )
 
 func TestRouter(t *testing.T) {
