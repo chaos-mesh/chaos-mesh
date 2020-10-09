@@ -40,6 +40,8 @@ const (
 	PodFailureAction PodChaosAction = "pod-failure"
 	// ContainerKillAction represents the chaos action of killing the container
 	ContainerKillAction PodChaosAction = "container-kill"
+	// PodNotReadyAction represents the chaos action of setting pod not ready
+	PodNotReadyAction PodChaosAction = "pod-not-ready"
 )
 
 // +kubebuilder:object:root=true
@@ -159,9 +161,9 @@ type PodChaosSpec struct {
 	Scheduler *SchedulerSpec `json:"scheduler,omitempty"`
 
 	// Action defines the specific pod chaos action.
-	// Supported action: pod-kill / pod-failure / container-kill
+	// Supported action: pod-kill / pod-failure / container-kill / pod-not-ready
 	// Default action: pod-kill
-	// +kubebuilder:validation:Enum=pod-kill;pod-failure;container-kill
+	// +kubebuilder:validation:Enum=pod-kill;pod-failure;container-kill;pod-not-ready
 	Action PodChaosAction `json:"action"`
 
 	// Mode defines the mode to run chaos action.

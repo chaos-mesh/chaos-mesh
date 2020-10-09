@@ -27,6 +27,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/controllers/podchaos/containerkill"
 	"github.com/chaos-mesh/chaos-mesh/controllers/podchaos/podfailure"
 	"github.com/chaos-mesh/chaos-mesh/controllers/podchaos/podkill"
+	"github.com/chaos-mesh/chaos-mesh/controllers/podchaos/podnotready"
 	"github.com/chaos-mesh/chaos-mesh/controllers/twophase"
 )
 
@@ -67,6 +68,9 @@ func (r *Reconciler) commonPodChaos(podchaos *v1alpha1.PodChaos, req ctrl.Reques
 	case v1alpha1.PodFailureAction:
 		pr = podfailure.NewCommonReconciler(r.Client, r.Reader, r.Log.WithValues("action",
 			"pod-failure"), r.EventRecorder)
+	case v1alpha1.PodNotReadyAction:
+		pr = podnotready.NewCommonReconciler(r.Client, r.Reader, r.Log.WithValues("action",
+			"pod-not-ready"), r.EventRecorder)
 	default:
 		return r.invalidActionResponse(podchaos)
 	}
@@ -85,6 +89,9 @@ func (r *Reconciler) schedulePodChaos(podchaos *v1alpha1.PodChaos, req ctrl.Requ
 	case v1alpha1.ContainerKillAction:
 		tr = containerkill.NewTwoPhaseReconciler(r.Client, r.Reader, r.Log.WithValues("action",
 			"container-kill"), r.EventRecorder)
+	case v1alpha1.PodNotReadyAction:
+		tr = podnotready.NewTwoPhaseReconciler(r.Client, r.Reader, r.Log.WithValues("action",
+			"pod-not-ready"), r.EventRecorder)
 	default:
 		return r.invalidActionResponse(podchaos)
 	}
