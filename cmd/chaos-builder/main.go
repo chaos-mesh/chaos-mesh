@@ -75,6 +75,7 @@ import (
 		file, err := parser.ParseFile(fset, path, nil, parser.ParseComments)
 		if err != nil {
 			log.Error(err, "fail to parse file")
+			return err
 		}
 
 		cmap := ast.NewCommentMap(fset, file, file.Comments)

@@ -71,7 +71,7 @@ func Register(name string, obj runtime.Object, routeFunc func(runtime.Object) bo
 // SetupWithManager setups reconciler with manager
 func SetupWithManager(mgr ctrl.Manager) error {
 	for typ, end := range routeTable {
-		log.Info("setup reconciler with manager", "type", typ, "endpoint", end)
+		log.Info("setup reconciler with manager", "type", typ, "endpoint", end.Name)
 		reconciler := NewReconciler(end.Name, end.Object, mgr, end.Endpoints)
 		err := reconciler.SetupWithManager(mgr)
 		if err != nil {
