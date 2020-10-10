@@ -118,7 +118,6 @@ main() {
             -d|--dependency-only)
                 install_dependency_only=true
                 shift
-                shift
                 ;;
             --force)
                 force_chaos_mesh=true
