@@ -616,7 +616,6 @@ install_chaos_mesh() {
     local version=$9
     local timezone=${10}
     local docker_registry=${11}
-    echo "-------${docker_registry}"
     printf "Install Chaos Mesh %s\n" "${release_name}"
 
     local chaos_mesh_image="${docker_registry}/pingcap/chaos-mesh:${version}"
