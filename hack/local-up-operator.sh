@@ -95,7 +95,7 @@ if [ "$PROVIDER" == "kind" ]; then
         exit 1
     fi
 else
-    echo "erorr: only kind PROVIDER is supported"
+    echo "error: only kind PROVIDER is supported"
     exit 1
 fi
 

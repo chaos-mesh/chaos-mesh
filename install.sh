@@ -119,7 +119,6 @@ main() {
             -d|--dependency-only)
                 install_dependency_only=true
                 shift
-                shift
                 ;;
             --force)
                 force_chaos_mesh=true
@@ -193,10 +192,10 @@ main() {
             --k3s)
                 k3s=true
                 shift
-                shift
                 ;;
             --host-network)
                 host_network=true
+                shift
                 ;;
             --timezone)
                 timezone="$2"
