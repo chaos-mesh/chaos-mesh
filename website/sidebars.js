@@ -21,7 +21,7 @@ module.exports = {
     },
     {
       type: 'category',
-      label: 'User Guide',
+      label: 'User Guides',
       items: [
         'user_guides/run_chaos_experiment',
         'user_guides/experiment_scope',
