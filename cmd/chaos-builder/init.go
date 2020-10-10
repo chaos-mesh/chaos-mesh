@@ -30,7 +30,7 @@ func generateInit(name string) string {
 	tmpl, err := template.New("ini").Parse(initTemplate)
 	if err != nil {
 		log.Error(err, "fail to build template")
-		return ""
+		panic(err)
 	}
 
 	buf := new(bytes.Buffer)

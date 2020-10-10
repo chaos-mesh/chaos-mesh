@@ -34,8 +34,7 @@ type metadata struct {
 	Type string
 }
 
-func main() {
-	generatedCode := `// Copyright 2020 Chaos Mesh Authors.
+const codeHeader = `// Copyright 2020 Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -57,7 +56,10 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-	`
+`
+
+func main() {
+	generatedCode := codeHeader
 
 	initImpl := ""
 	filepath.Walk("./api/v1alpha1", func(path string, info os.FileInfo, err error) error {
@@ -86,30 +88,30 @@ import (
 				var err error
 				for _, comment := range commentGroup.List {
 					if strings.Contains(comment.Text, "+chaos-mesh:base") {
-						log.Info("build")
+						log.Info("build", "pos", fset.Position(comment.Pos()))
 						baseDecl, ok := node.(*ast.GenDecl)
 						if !ok {
 							err = errors.Errorf("node is not a *ast.GenDecl")
 							log.Error(err, "fail to get type")
-							continue
+							return err
 						}
 
 						if baseDecl.Tok != token.TYPE {
 							err = errors.Errorf("node.Tok is not token.TYPE")
 							log.Error(err, "fail to get type")
-							continue
+							return err
 						}
 
 						baseType, ok := baseDecl.Specs[0].(*ast.TypeSpec)
 						if !ok {
 							err = errors.Errorf("node is not a *ast.TypeSpec")
 							log.Error(err, "fail to get type")
-							continue
+							return err
 						}
 
 						generatedCode += generateImpl(baseType.Name.Name)
 						initImpl += generateInit(baseType.Name.Name)
-						break out
+						continue out
 					}
 				}
 			}

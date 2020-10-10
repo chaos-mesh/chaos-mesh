@@ -20,7 +20,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-	
+
 const KindHTTPChaos = "HTTPChaos"
 
 // IsDeleted returns whether this resource has been deleted
