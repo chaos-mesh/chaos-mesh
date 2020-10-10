@@ -47,7 +47,7 @@ Description:
 
 * **action** defines the specific chaos action for the pod. In this case, it is network partition.
 * **mode** defines the mode to run chaos action.
-* **selector** specifies the target pods for chaos injection. For more details, see [Define the Scope of Chaos Experiment](experiment_scope.md).
+* **selector** specifies the target pods for chaos injection. For more details, see [Define the Scope of Chaos Experiment](../user_guides/experiment_scope.md).
 * **direction** specifies the partition direction. Supported directions are `from`, `to` and `both`.
 * **target** specifies the target for network partition.
 * **duration** defines the duration for each chaos experiment. In the sample file above, the network partition lasts for `10` seconds.
