@@ -1022,6 +1022,7 @@ func (s *Service) updatePodChaos(exp *YAMLDescription) error {
 
 	chaos.SetLabels(meta.Labels)
 	chaos.SetAnnotations(meta.Annotations)
+
 	var spec v1alpha1.PodChaosSpec
 	mapstructure.Decode(exp.Spec, &spec)
 	chaos.Spec = spec
@@ -1040,9 +1041,14 @@ func (s *Service) updateNetworkChaos(exp *YAMLDescription) error {
 
 	chaos.SetLabels(meta.Labels)
 	chaos.SetAnnotations(meta.Annotations)
+
 	var spec v1alpha1.NetworkChaosSpec
 	mapstructure.Decode(exp.Spec, &spec)
 	chaos.Spec = spec
+	var tcParameter v1alpha1.TcParameter
+	mapstructure.Decode(exp.Spec, &tcParameter)
+	chaos.Spec.TcParameter = tcParameter
+
 	return s.kubeCli.Update(context.Background(), chaos)
 }
 
@@ -1057,6 +1063,7 @@ func (s *Service) updateIOChaos(exp *YAMLDescription) error {
 
 	chaos.SetLabels(meta.Labels)
 	chaos.SetAnnotations(meta.Annotations)
+
 	var spec v1alpha1.IoChaosSpec
 	mapstructure.Decode(exp.Spec, &spec)
 	chaos.Spec = spec
@@ -1075,6 +1082,7 @@ func (s *Service) updateKernelChaos(exp *YAMLDescription) error {
 
 	chaos.SetLabels(meta.Labels)
 	chaos.SetAnnotations(meta.Annotations)
+
 	var spec v1alpha1.KernelChaosSpec
 	mapstructure.Decode(exp.Spec, &spec)
 	chaos.Spec = spec
@@ -1093,6 +1101,7 @@ func (s *Service) updateTimeChaos(exp *YAMLDescription) error {
 
 	chaos.SetLabels(meta.Labels)
 	chaos.SetAnnotations(meta.Annotations)
+
 	var spec v1alpha1.TimeChaosSpec
 	mapstructure.Decode(exp.Spec, &spec)
 	chaos.Spec = spec
@@ -1111,6 +1120,7 @@ func (s *Service) updateStressChaos(exp *YAMLDescription) error {
 
 	chaos.SetLabels(meta.Labels)
 	chaos.SetAnnotations(meta.Annotations)
+
 	var spec v1alpha1.StressChaosSpec
 	mapstructure.Decode(exp.Spec, &spec)
 	chaos.Spec = spec
