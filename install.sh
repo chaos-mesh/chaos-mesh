@@ -39,6 +39,7 @@ FLAGS:
         --local-registry     Deploy local docker registry in local Kubernetes cluster
         --template           Locally render templates
         --k3s                Install chaos-mesh in k3s environment
+        --host-network       Install chaos-mesh using hostNetwork
 OPTIONS:
     -v, --version            Version of chaos-mesh, default value: latest
     -l, --local [kind]       Choose a way to run a local kubernetes cluster, supported value: kind,
@@ -79,6 +80,7 @@ main() {
     local template=false
     local install_dependency_only=false
     local k3s=false
+    local host_network=false
     local docker_registry=""
 
     while [[ $# -gt 0 ]]
@@ -193,6 +195,8 @@ main() {
                 shift
                 shift
                 ;;
+            --host-network)
+                host_network=true
             --timezone)
                 timezone="$2"
                 shift
@@ -234,7 +238,7 @@ main() {
     fi
     if $template; then
         ensure gen_crd_manifests "${crd}"
-        ensure gen_chaos_mesh_manifests "${runtime}" "${k3s}" "${cm_version}" "${timezone}" "${docker_registry}"
+        ensure gen_chaos_mesh_manifests "${runtime}" "${k3s}" "${cm_version}" "${timezone}" "${host_network}" "${docker_registry}"
         exit 0
     fi
 
@@ -631,8 +635,8 @@ install_chaos_mesh() {
     fi
 
     gen_crd_manifests "${crd}" | kubectl apply -f - || exit 1
-    gen_chaos_mesh_manifests "${runtime}" "${k3s}" "${version}" "${timezone}" "${docker_registry}" | kubectl apply -f - || exit 1
-}
+    gen_chaos_mesh_manifests "${runtime}" "${k3s}" "${version}" "${timezone}" "${host_network}" "${docker_registry}" | kubectl apply -f - || exit 1
+  }
 
 version_lt() {
     vercomp $1 $2
@@ -819,7 +823,8 @@ gen_chaos_mesh_manifests() {
     local k3s=$2
     local version=$3
     local timezone=$4
-    local docker_registry=$5
+    local host_network=$5
+    local docker_registry=$6
     local socketPath="/var/run/docker.sock"
     local mountPath="/var/run/docker.sock"
     if [ "${runtime}" == "containerd" ]; then
@@ -1098,6 +1103,7 @@ spec:
         app.kubernetes.io/instance: chaos-mesh
         app.kubernetes.io/component: chaos-daemon
     spec:
+      hostNetwork: ${host_network}
       hostIPC: true
       hostPID: true
       containers:
@@ -1224,6 +1230,7 @@ spec:
       annotations:
         rollme: "install.sh"
     spec:
+      hostNetwork: ${host_network}
       serviceAccount: chaos-controller-manager
       containers:
       - name: chaos-mesh
