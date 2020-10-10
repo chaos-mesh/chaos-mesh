@@ -192,10 +192,10 @@ main() {
             --k3s)
                 k3s=true
                 shift
-                shift
                 ;;
             --host-network)
                 host_network=true
+                shift
                 ;;
             --timezone)
                 timezone="$2"
