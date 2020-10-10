@@ -196,6 +196,7 @@ main() {
                 ;;
             --host-network)
                 host_network=true
+                ;;
             --timezone)
                 timezone="$2"
                 shift
