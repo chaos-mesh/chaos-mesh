@@ -64,7 +64,7 @@ all: yaml image
 
 build: binary
 
-check: fmt vet boilerplate lint generate yaml tidy
+check: fmt vet boilerplate lint generate yaml
 
 # Run tests
 test: failpoint-enable generate manifests test-utils
@@ -172,7 +172,7 @@ vet:
 tidy: clean
 	@echo "go mod tidy"
 	GO111MODULE=on go mod tidy
-	# git diff -U --exit-code go.mod go.sum
+	git diff -U --exit-code go.mod go.sum
 
 update-install-scipt:
 	./hack/update_install_script.sh
