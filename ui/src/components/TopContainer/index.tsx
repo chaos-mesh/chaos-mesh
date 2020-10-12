@@ -114,7 +114,7 @@ const TopContainer = () => {
                   {chaosMeshRoutes.map((route) => (
                     <Route key={route.path! as string} {...route} />
                   ))}
-                  <Redirect to="/overview" />
+                  {/* <Redirect to="/overview" /> */}
                 </Switch>
               </ContentContainer>
             </Box>

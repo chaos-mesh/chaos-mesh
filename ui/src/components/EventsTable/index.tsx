@@ -17,6 +17,7 @@ import {
   Typography,
 } from '@material-ui/core'
 import React, { useCallback, useEffect, useImperativeHandle, useState } from 'react'
+import { Route, useHistory, useLocation, useRouteMatch } from 'react-router-dom'
 import { createStyles, makeStyles } from '@material-ui/core/styles'
 import { dayComparator, format } from 'lib/dayjs'
 
@@ -28,7 +29,6 @@ import HelpOutlineIcon from '@material-ui/icons/HelpOutline'
 import KeyboardArrowLeftIcon from '@material-ui/icons/KeyboardArrowLeft'
 import KeyboardArrowRightIcon from '@material-ui/icons/KeyboardArrowRight'
 import LastPageIcon from '@material-ui/icons/LastPage'
-import Loading from 'components/Loading'
 import PaperTop from 'components/PaperTop'
 import SearchIcon from '@material-ui/icons/Search'
 import T from 'components/T'
@@ -238,6 +238,12 @@ const EventsTable: React.ForwardRefRenderFunction<EventsTableHandles, EventsTabl
 
   const intl = useIntl()
 
+  const eventMatch = useRouteMatch({
+    path: '/events',
+    exact: true,
+  })
+  const history = useHistory()
+
   const [events, setEvents] = useState(allEvents)
   const [order, setOrder] = useState<Order>('desc')
   const [orderBy, setOrderBy] = useState<keyof SortedEvent>('start_time')
@@ -246,21 +252,14 @@ const EventsTable: React.ForwardRefRenderFunction<EventsTableHandles, EventsTabl
   const [search, setSearch] = useState('')
   const previousSearch = usePrevious(search)
 
-  const [selectedEvent, setSelectedEvent] = useState<Event>()
-  const [detailLoading, setDetailLoading] = useState(false)
-  const [eventDetailOpen, setEventDetailOpen] = useState(false)
-
   const onSelectEvent = (e: Event) => () => {
-    setDetailLoading(true)
-    setSelectedEvent(e)
-    setEventDetailOpen(true)
-    setTimeout(() => setDetailLoading(false), 500)
+    history.push(`/events/${e.id}`)
   }
   // Methods exposed to the parent
   useImperativeHandle(ref, () => ({
     onSelectEvent,
   }))
-  const closeEventDetail = () => setEventDetailOpen(false)
+  const closeEventDetail = () => {}
 
   const handleSortEvents = (_: React.MouseEvent<unknown>, k: keyof SortedEvent) => {
     const isAsc = orderBy === k && order === 'asc'
@@ -381,7 +380,7 @@ const EventsTable: React.ForwardRefRenderFunction<EventsTableHandles, EventsTabl
           </Table>
         </TableContainer>
       </Paper>
-      {eventDetailOpen && (
+      {!eventMatch && (
         <Paper
           variant="outlined"
           className={classes.eventDetailPaper}
@@ -394,7 +393,7 @@ const EventsTable: React.ForwardRefRenderFunction<EventsTableHandles, EventsTabl
               <CloseIcon />
             </IconButton>
           </PaperTop>
-          {selectedEvent && !detailLoading ? <EventDetail event={selectedEvent} /> : <Loading />}
+          <Route path={`/events/:id`} render={() => <EventDetail />}></Route>
         </Paper>
       )}
     </Box>

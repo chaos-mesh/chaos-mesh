@@ -30,7 +30,6 @@ const routes: RouteProps[] = [
   {
     component: Events,
     path: '/events',
-    exact: true,
   },
   {
     component: Archives,
