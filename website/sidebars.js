@@ -7,13 +7,12 @@ module.exports = {
     {
       type: 'category',
       label: 'Getting Started',
-      items: ['installation/installation', 'installation/get_started_on_kind', 'installation/get_started_on_minikube'],
+      items: ['installation/installation', 'installation/get_started_on_kind', 'installation/get_started_on_minikube','installation/run_chaos_experiment',],
     },
     {
       type: 'category',
       label: 'User Guide',
       items: [
-        'user_guides/run_chaos_experiment',
         {
           type: 'category',
           label: 'Configure Chaos',
