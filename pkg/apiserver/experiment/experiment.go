@@ -134,7 +134,7 @@ func (s *Service) createExperiment(c *gin.Context) {
 	createFuncs := map[string]createExperimentFunc{
 		v1alpha1.KindPodChaos:     s.createPodChaos,
 		v1alpha1.KindNetworkChaos: s.createNetworkChaos,
-		v1alpha1.KindIOChaos:      s.createIOChaos,
+		v1alpha1.KindIoChaos:      s.createIOChaos,
 		v1alpha1.KindStressChaos:  s.createStressChaos,
 		v1alpha1.KindTimeChaos:    s.createTimeChaos,
 		v1alpha1.KindKernelChaos:  s.createKernelChaos,
@@ -664,7 +664,7 @@ func (s *Service) getExperimentDetail(c *gin.Context) {
 	switch kind {
 	case v1alpha1.KindPodChaos:
 		expDetail, err = s.getPodChaosDetail(ns, name)
-	case v1alpha1.KindIOChaos:
+	case v1alpha1.KindIoChaos:
 		expDetail, err = s.getIoChaosDetail(ns, name)
 	case v1alpha1.KindNetworkChaos:
 		expDetail, err = s.getNetworkChaosDetail(ns, name)
@@ -968,7 +968,7 @@ func (s *Service) updateExperiment(c *gin.Context) {
 	updateFuncs := map[string]updateExperimentFunc{
 		v1alpha1.KindPodChaos:     s.updatePodChaos,
 		v1alpha1.KindNetworkChaos: s.updateNetworkChaos,
-		v1alpha1.KindIOChaos:      s.updateIOChaos,
+		v1alpha1.KindIoChaos:      s.updateIOChaos,
 		v1alpha1.KindStressChaos:  s.updateStressChaos,
 		v1alpha1.KindTimeChaos:    s.updateTimeChaos,
 		v1alpha1.KindKernelChaos:  s.updateKernelChaos,

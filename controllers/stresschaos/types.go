@@ -21,67 +21,34 @@ import (
 	"sync"
 	"time"
 
-	"github.com/go-logr/logr"
 	"github.com/hashicorp/go-multierror"
 	"golang.org/x/sync/errgroup"
 	v1 "k8s.io/api/core/v1"
 	k8serror "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/tools/cache"
-	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/common"
-	"github.com/chaos-mesh/chaos-mesh/controllers/twophase"
 	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
+	"github.com/chaos-mesh/chaos-mesh/pkg/router"
+	ctx "github.com/chaos-mesh/chaos-mesh/pkg/router/context"
+	end "github.com/chaos-mesh/chaos-mesh/pkg/router/endpoint"
 	"github.com/chaos-mesh/chaos-mesh/pkg/utils"
 )
 
 const stressChaosMsg = "stress out pod"
 
-// Reconciler is stresschaos reconciler
-type Reconciler struct {
-	client.Client
-	client.Reader
-	record.EventRecorder
-	Log logr.Logger
-}
-
-// Reconcile reconciles a StressChaos resource
-func (r *Reconciler) Reconcile(req ctrl.Request, chaos *v1alpha1.StressChaos) (ctrl.Result, error) {
-	r.Log.Info("Reconciling stresschaos")
-	scheduler := chaos.GetScheduler()
-	duration, err := chaos.GetDuration()
-	if err != nil {
-		r.Log.Error(err, fmt.Sprintf("unable to get stresschaos[%s/%s]'s duration", chaos.Namespace, chaos.Name))
-		return ctrl.Result{}, err
-	}
-	if scheduler == nil && duration == nil {
-		return r.commonStressChaos(chaos, req)
-	} else if scheduler != nil && duration != nil {
-		return r.scheduleStressChaos(chaos, req)
-	}
-
-	// This should be ensured by admission webhook in the future
-	r.Log.Error(fmt.Errorf("stresschaos[%s/%s] spec invalid", chaos.Namespace, chaos.Name), "scheduler and duration should be omitted or defined at the same time")
-	return ctrl.Result{}, fmt.Errorf("invalid scheduler and duration")
-}
-
-func (r *Reconciler) commonStressChaos(stresschaos *v1alpha1.StressChaos, req ctrl.Request) (ctrl.Result, error) {
-	cr := common.NewReconciler(r, r.Client, r.Reader, r.Log)
-	return cr.Reconcile(req)
-}
-
-func (r *Reconciler) scheduleStressChaos(stresschaos *v1alpha1.StressChaos, req ctrl.Request) (ctrl.Result, error) {
-	sr := twophase.NewReconciler(r, r.Client, r.Reader, r.Log)
-	return sr.Reconcile(req)
+// endpoint is stresschaos reconciler
+type endpoint struct {
+	ctx.Context
 }
 
 // Apply applies stress-chaos
-func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.InnerObject) error {
+func (r *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.InnerObject) error {
 	stresschaos, ok := chaos.(*v1alpha1.StressChaos)
 	if !ok {
 		err := errors.New("chaos is not stresschaos")
@@ -118,7 +85,7 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1
 }
 
 // Recover means the reconciler recovers the chaos action
-func (r *Reconciler) Recover(ctx context.Context, req ctrl.Request, chaos v1alpha1.InnerObject) error {
+func (r *endpoint) Recover(ctx context.Context, req ctrl.Request, chaos v1alpha1.InnerObject) error {
 	stresschaos, ok := chaos.(*v1alpha1.StressChaos)
 	if !ok {
 		err := errors.New("chaos is not StressChaos")
@@ -134,7 +101,7 @@ func (r *Reconciler) Recover(ctx context.Context, req ctrl.Request, chaos v1alph
 	return nil
 }
 
-func (r *Reconciler) cleanFinalizersAndRecover(ctx context.Context, chaos *v1alpha1.StressChaos) error {
+func (r *endpoint) cleanFinalizersAndRecover(ctx context.Context, chaos *v1alpha1.StressChaos) error {
 	var result error
 
 	for _, key := range chaos.Finalizers {
@@ -179,7 +146,7 @@ func (r *Reconciler) cleanFinalizersAndRecover(ctx context.Context, chaos *v1alp
 	return result
 }
 
-func (r *Reconciler) recoverPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.StressChaos) error {
+func (r *endpoint) recoverPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.StressChaos) error {
 	r.Log.Info("Try to recover pod", "namespace", pod.Namespace, "name", pod.Name)
 	daemonClient, err := utils.NewChaosDaemonClient(ctx, r.Client,
 		pod, common.ControllerCfg.ChaosDaemonPort)
@@ -206,11 +173,11 @@ func (r *Reconciler) recoverPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha
 }
 
 // Object would return the instance of chaos
-func (r *Reconciler) Object() v1alpha1.InnerObject {
+func (r *endpoint) Object() v1alpha1.InnerObject {
 	return &v1alpha1.StressChaos{}
 }
 
-func (r *Reconciler) applyAllPods(ctx context.Context, pods []v1.Pod, chaos *v1alpha1.StressChaos) error {
+func (r *endpoint) applyAllPods(ctx context.Context, pods []v1.Pod, chaos *v1alpha1.StressChaos) error {
 	g := errgroup.Group{}
 
 	instancesLock := &sync.RWMutex{}
@@ -230,7 +197,7 @@ func (r *Reconciler) applyAllPods(ctx context.Context, pods []v1.Pod, chaos *v1a
 	return g.Wait()
 }
 
-func (r *Reconciler) applyPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.StressChaos, instancesLock *sync.RWMutex) error {
+func (r *endpoint) applyPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.StressChaos, instancesLock *sync.RWMutex) error {
 	r.Log.Info("Try to apply stress chaos", "namespace",
 		pod.Namespace, "name", pod.Name)
 	daemonClient, err := utils.NewChaosDaemonClient(ctx, r.Client,
@@ -291,4 +258,14 @@ func (r *Reconciler) applyPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.
 	}
 	instancesLock.Unlock()
 	return nil
+}
+
+func init() {
+	router.Register("stresschaos", &v1alpha1.StressChaos{}, func(obj runtime.Object) bool {
+		return true
+	}, func(ctx ctx.Context) end.Endpoint {
+		return &endpoint{
+			Context: ctx,
+		}
+	})
 }
