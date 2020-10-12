@@ -112,7 +112,7 @@ func (s *Service) list(c *gin.Context) {
 		})
 	}
 
-	c.JSON(http.StatusOK, data)
+	c.JSON(http.StatusOK, archives)
 }
 
 // @Summary Get the detail of archived chaos experiment.
@@ -197,8 +197,8 @@ func (s *Service) detail(c *gin.Context) {
 // @Failure 500 {object} utils.APIError
 func (s *Service) report(c *gin.Context) {
 	var (
-		err       error
-		report    Report
+		err    error
+		report Report
 	)
 	uid := c.Query("uid")
 
