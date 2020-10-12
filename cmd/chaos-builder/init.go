@@ -39,7 +39,7 @@ func generateInit(name string) string {
 	})
 	if err != nil {
 		log.Error(err, "fail to execute template")
-		return ""
+		panic(err)
 	}
 
 	return buf.String()
