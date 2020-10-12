@@ -111,6 +111,7 @@ func (h *Handler) SetIptables(ctx context.Context, pod *corev1.Pod, chaos *v1alp
 			Name:      chain.Name,
 			Ipsets:    chain.IPSets,
 			Direction: direction,
+			Target:    "DROP",
 		})
 	}
 	return iptable.SetIptablesChains(ctx, h.Client, pod, chains)
