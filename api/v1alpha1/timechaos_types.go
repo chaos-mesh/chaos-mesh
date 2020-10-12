@@ -14,22 +14,11 @@
 package v1alpha1
 
 import (
-	"time"
-
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// KindTimeChaos is the kind for time chaos
-const KindTimeChaos = "TimeChaos"
-
-func init() {
-	all.register(KindTimeChaos, &ChaosKind{
-		Chaos:     &TimeChaos{},
-		ChaosList: &TimeChaosList{},
-	})
-}
-
 // +kubebuilder:object:root=true
+// +chaos-mesh:base
 
 // TimeChaos is the Schema for the timechaos API
 type TimeChaos struct {
@@ -114,123 +103,4 @@ func (in *TimeChaosSpec) GetValue() string {
 // TimeChaosStatus defines the observed state of TimeChaos
 type TimeChaosStatus struct {
 	ChaosStatus `json:",inline"`
-}
-
-// GetDuration gets the duration of TimeChaos
-func (in *TimeChaos) GetDuration() (*time.Duration, error) {
-	if in.Spec.Duration == nil {
-		return nil, nil
-	}
-	duration, err := time.ParseDuration(*in.Spec.Duration)
-	if err != nil {
-		return nil, err
-	}
-	return &duration, nil
-}
-
-// GetNextStart gets NextStart field of TimeChaos
-func (in *TimeChaos) GetNextStart() time.Time {
-	if in.Status.Scheduler.NextStart == nil {
-		return time.Time{}
-	}
-	return in.Status.Scheduler.NextStart.Time
-}
-
-// SetNextStart sets NextStart field of TimeChaos
-func (in *TimeChaos) SetNextStart(t time.Time) {
-	if t.IsZero() {
-		in.Status.Scheduler.NextStart = nil
-		return
-	}
-
-	if in.Status.Scheduler.NextStart == nil {
-		in.Status.Scheduler.NextStart = &metav1.Time{}
-	}
-	in.Status.Scheduler.NextStart.Time = t
-}
-
-// GetNextRecover get NextRecover field of TimeChaos
-func (in *TimeChaos) GetNextRecover() time.Time {
-	if in.Status.Scheduler.NextRecover == nil {
-		return time.Time{}
-	}
-	return in.Status.Scheduler.NextRecover.Time
-}
-
-// SetNextRecover sets NextRecover field of TimeChaos
-func (in *TimeChaos) SetNextRecover(t time.Time) {
-	if t.IsZero() {
-		in.Status.Scheduler.NextRecover = nil
-		return
-	}
-
-	if in.Status.Scheduler.NextRecover == nil {
-		in.Status.Scheduler.NextRecover = &metav1.Time{}
-	}
-	in.Status.Scheduler.NextRecover.Time = t
-}
-
-// GetScheduler returns the scheduler of TimeChaos
-func (in *TimeChaos) GetScheduler() *SchedulerSpec {
-	return in.Spec.Scheduler
-}
-
-// GetStatus returns the status of TimeChaos
-func (in *TimeChaos) GetStatus() *ChaosStatus {
-	return &in.Status.ChaosStatus
-}
-
-// IsDeleted returns whether this resource has been deleted
-func (in *TimeChaos) IsDeleted() bool {
-	return !in.DeletionTimestamp.IsZero()
-}
-
-// IsPaused returns whether this resource has been paused
-func (in *TimeChaos) IsPaused() bool {
-	if in.Annotations == nil || in.Annotations[PauseAnnotationKey] != "true" {
-		return false
-	}
-	return true
-}
-
-// GetChaos returns a chaos instance
-func (in *TimeChaos) GetChaos() *ChaosInstance {
-	instance := &ChaosInstance{
-		Name:      in.Name,
-		Namespace: in.Namespace,
-		Kind:      KindTimeChaos,
-		StartTime: in.CreationTimestamp.Time,
-		Action:    "",
-		Status:    string(in.GetStatus().Experiment.Phase),
-		UID:       string(in.UID),
-	}
-	if in.Spec.Duration != nil {
-		instance.Duration = *in.Spec.Duration
-	}
-	if in.DeletionTimestamp != nil {
-		instance.EndTime = in.DeletionTimestamp.Time
-	}
-	return instance
-}
-
-// +kubebuilder:object:root=true
-
-// TimeChaosList contains a list of TimeChaos
-type TimeChaosList struct {
-	metav1.TypeMeta `json:",inline"`
-	metav1.ListMeta `json:"metadata,omitempty"`
-	Items           []TimeChaos `json:"items"`
-}
-
-// ListChaos returns a list of time chaos
-func (in *TimeChaosList) ListChaos() []*ChaosInstance {
-	res := make([]*ChaosInstance, 0, len(in.Items))
-	for _, item := range in.Items {
-		res = append(res, item.GetChaos())
-	}
-	return res
-}
-
-func init() {
-	SchemeBuilder.Register(&TimeChaos{}, &TimeChaosList{})
 }
