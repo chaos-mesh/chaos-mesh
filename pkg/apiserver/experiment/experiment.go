@@ -89,6 +89,13 @@ func Register(r *gin.RouterGroup, s *Service) {
 	endpoint.GET("/state", s.state)
 }
 
+// Base represents the base info of an experiment.
+type Base struct {
+	Kind      string `json:"kind"`
+	Namespace string `json:"namespace"`
+	Name      string `json:"name"`
+}
+
 // Experiment defines the basic information of an experiment
 type Experiment struct {
 	Base
@@ -98,37 +105,14 @@ type Experiment struct {
 	FailedMessage string `json:"failed_message,omitempty"`
 }
 
-// Base represents the base info of an experiment.
-type Base struct {
-	Kind      string `json:"kind"`
-	Namespace string `json:"namespace"`
-	Name      string `json:"name"`
-}
-
 // Detail represents an experiment instance.
 type Detail struct {
 	Experiment
-	YAML YAMLDescription `json:"yaml"`
-}
-
-// YAMLDescription defines the YAML structure of an experiment.
-type YAMLDescription struct {
-	APIVersion string       `json:"apiVersion"`
-	Kind       string       `json:"kind"`
-	Metadata   YAMLMetadata `json:"metadata"`
-	Spec       interface{}  `json:"spec"`
-}
-
-// YAMLMetadata defines the metadata of YAMLDescription.
-type YAMLMetadata struct {
-	Name        string            `json:"name"`
-	Namespace   string            `json:"namespace"`
-	Labels      map[string]string `json:"labels"`
-	Annotations map[string]string `json:"annotations"`
+	YAML core.ExperimentYAMLDescription `json:"yaml"`
 }
 
 type createExperimentFunc func(*core.ExperimentInfo) error
-type updateExperimentFunc func(*YAMLDescription) error
+type updateExperimentFunc func(*core.ExperimentYAMLDescription) error
 
 // @Summary Create a new chaos experiment.
 // @Description Create a new chaos experiment.
@@ -392,16 +376,16 @@ func (s *Service) getPodChaosDetail(namespace string, name string) (Detail, erro
 			Status:        chaos.GetChaos().Status,
 			FailedMessage: chaos.GetStatus().FailedMessage,
 		},
-		YAML: YAMLDescription{
-			chaos.APIVersion,
-			chaos.Kind,
-			YAMLMetadata{
-				chaos.Name,
-				chaos.Namespace,
-				chaos.Labels,
-				chaos.Annotations,
+		YAML: core.ExperimentYAMLDescription{
+			APIVersion: chaos.APIVersion,
+			Kind:       chaos.Kind,
+			Metadata: core.ExperimentYAMLMetadata{
+				Name:        chaos.Name,
+				Namespace:   chaos.Namespace,
+				Labels:      chaos.Labels,
+				Annotations: chaos.Annotations,
 			},
-			chaos.Spec,
+			Spec: chaos.Spec,
 		},
 	}, nil
 }
@@ -430,16 +414,16 @@ func (s *Service) getIoChaosDetail(namespace string, name string) (Detail, error
 			Status:        chaos.GetChaos().Status,
 			FailedMessage: chaos.GetStatus().FailedMessage,
 		},
-		YAML: YAMLDescription{
-			chaos.APIVersion,
-			chaos.Kind,
-			YAMLMetadata{
-				chaos.Name,
-				chaos.Namespace,
-				chaos.Labels,
-				chaos.Annotations,
+		YAML: core.ExperimentYAMLDescription{
+			APIVersion: chaos.APIVersion,
+			Kind:       chaos.Kind,
+			Metadata: core.ExperimentYAMLMetadata{
+				Name:        chaos.Name,
+				Namespace:   chaos.Namespace,
+				Labels:      chaos.Labels,
+				Annotations: chaos.Annotations,
 			},
-			chaos.Spec,
+			Spec: chaos.Spec,
 		},
 	}, nil
 }
@@ -468,16 +452,16 @@ func (s *Service) getNetworkChaosDetail(namespace string, name string) (Detail, 
 			Status:        chaos.GetChaos().Status,
 			FailedMessage: chaos.GetStatus().FailedMessage,
 		},
-		YAML: YAMLDescription{
-			chaos.APIVersion,
-			chaos.Kind,
-			YAMLMetadata{
-				chaos.Name,
-				chaos.Namespace,
-				chaos.Labels,
-				chaos.Annotations,
+		YAML: core.ExperimentYAMLDescription{
+			APIVersion: chaos.APIVersion,
+			Kind:       chaos.Kind,
+			Metadata: core.ExperimentYAMLMetadata{
+				Name:        chaos.Name,
+				Namespace:   chaos.Namespace,
+				Labels:      chaos.Labels,
+				Annotations: chaos.Annotations,
 			},
-			chaos.Spec,
+			Spec: chaos.Spec,
 		},
 	}, nil
 }
@@ -506,16 +490,16 @@ func (s *Service) getTimeChaosDetail(namespace string, name string) (Detail, err
 			UID:           chaos.GetChaos().UID,
 			FailedMessage: chaos.GetStatus().FailedMessage,
 		},
-		YAML: YAMLDescription{
-			chaos.APIVersion,
-			chaos.Kind,
-			YAMLMetadata{
-				chaos.Name,
-				chaos.Namespace,
-				chaos.Labels,
-				chaos.Annotations,
+		YAML: core.ExperimentYAMLDescription{
+			APIVersion: chaos.APIVersion,
+			Kind:       chaos.Kind,
+			Metadata: core.ExperimentYAMLMetadata{
+				Name:        chaos.Name,
+				Namespace:   chaos.Namespace,
+				Labels:      chaos.Labels,
+				Annotations: chaos.Annotations,
 			},
-			chaos.Spec,
+			Spec: chaos.Spec,
 		},
 	}, nil
 }
@@ -544,16 +528,16 @@ func (s *Service) getKernelChaosDetail(namespace string, name string) (Detail, e
 			UID:           chaos.GetChaos().UID,
 			FailedMessage: chaos.GetStatus().FailedMessage,
 		},
-		YAML: YAMLDescription{
-			chaos.APIVersion,
-			chaos.Kind,
-			YAMLMetadata{
-				chaos.Name,
-				chaos.Namespace,
-				chaos.Labels,
-				chaos.Annotations,
+		YAML: core.ExperimentYAMLDescription{
+			APIVersion: chaos.APIVersion,
+			Kind:       chaos.Kind,
+			Metadata: core.ExperimentYAMLMetadata{
+				Name:        chaos.Name,
+				Namespace:   chaos.Namespace,
+				Labels:      chaos.Labels,
+				Annotations: chaos.Annotations,
 			},
-			chaos.Spec,
+			Spec: chaos.Spec,
 		},
 	}, nil
 }
@@ -582,16 +566,16 @@ func (s *Service) getStressChaosDetail(namespace string, name string) (Detail, e
 			UID:           chaos.GetChaos().UID,
 			FailedMessage: chaos.GetStatus().FailedMessage,
 		},
-		YAML: YAMLDescription{
-			chaos.APIVersion,
-			chaos.Kind,
-			YAMLMetadata{
-				chaos.Name,
-				chaos.Namespace,
-				chaos.Labels,
-				chaos.Annotations,
+		YAML: core.ExperimentYAMLDescription{
+			APIVersion: chaos.APIVersion,
+			Kind:       chaos.Kind,
+			Metadata: core.ExperimentYAMLMetadata{
+				Name:        chaos.Name,
+				Namespace:   chaos.Namespace,
+				Labels:      chaos.Labels,
+				Annotations: chaos.Annotations,
 			},
-			chaos.Spec,
+			Spec: chaos.Spec,
 		},
 	}, nil
 }
@@ -658,7 +642,7 @@ func (s *Service) listExperiments(c *gin.Context) {
 func (s *Service) getExperimentDetail(c *gin.Context) {
 	var (
 		err       error
-		exp       *core.ArchiveExperiment
+		exp       *core.Experiment
 		expDetail Detail
 	)
 
@@ -717,7 +701,7 @@ func (s *Service) deleteExperiment(c *gin.Context) {
 		chaosMeta metav1.Object
 		ok        bool
 		err       error
-		exp       *core.ArchiveExperiment
+		exp       *core.Experiment
 	)
 
 	uid := c.Param("uid")
@@ -837,8 +821,8 @@ func (s *Service) state(c *gin.Context) {
 	c.JSON(http.StatusOK, data)
 }
 
-// @Summary Pause chaos experiment by API
-// @Description Pause chaos experiment by API
+// @Summary Pause a chaos experiment.
+// @Description Pause a chaos experiment.
 // @Tags experiments
 // @Produce json
 // @Param uid path string true "uid"
@@ -850,7 +834,7 @@ func (s *Service) state(c *gin.Context) {
 func (s *Service) pauseExperiment(c *gin.Context) {
 	var (
 		err        error
-		experiment *core.ArchiveExperiment
+		experiment *core.Experiment
 	)
 
 	uid := c.Param("uid")
@@ -887,8 +871,8 @@ func (s *Service) pauseExperiment(c *gin.Context) {
 	c.JSON(http.StatusOK, nil)
 }
 
-// @Summary Start the paused chaos experiment by API
-// @Description Start the paused chaos experiment by API
+// @Summary Start a chaos experiment.
+// @Description Start a chaos experiment.
 // @Tags experiments
 // @Produce json
 // @Param uid path string true "uid"
@@ -900,7 +884,7 @@ func (s *Service) pauseExperiment(c *gin.Context) {
 func (s *Service) startExperiment(c *gin.Context) {
 	var (
 		err        error
-		experiment *core.ArchiveExperiment
+		experiment *core.Experiment
 	)
 
 	uid := c.Param("uid")
@@ -964,17 +948,17 @@ func (s *Service) patchExperiment(exp *Base, annotations map[string]string) erro
 		client.ConstantPatch(types.MergePatchType, mergePatch))
 }
 
-// @Summary Update the chaos experiment by API
-// @Description Update the chaos experiment by API
+// @Summary Update a chaos experiment.
+// @Description Update a chaos experiment.
 // @Tags experiments
 // @Produce json
-// @Param request body YAMLDescription true "Request body"
+// @Param request body core.ExperimentYAMLDescription true "Request body"
 // @Success 200 "update ok"
 // @Failure 400 {object} utils.APIError
 // @Failure 500 {object} utils.APIError
 // @Router /experiments/update [put]
 func (s *Service) updateExperiment(c *gin.Context) {
-	exp := &YAMLDescription{}
+	exp := &core.ExperimentYAMLDescription{}
 	if err := c.ShouldBindJSON(exp); err != nil {
 		c.Status(http.StatusBadRequest)
 		_ = c.Error(utils.ErrInvalidRequest.WrapWithNoMessage(err))
@@ -1011,7 +995,7 @@ func (s *Service) updateExperiment(c *gin.Context) {
 	c.JSON(http.StatusOK, nil)
 }
 
-func (s *Service) updatePodChaos(exp *YAMLDescription) error {
+func (s *Service) updatePodChaos(exp *core.ExperimentYAMLDescription) error {
 	chaos := &v1alpha1.PodChaos{}
 	meta := &exp.Metadata
 	key := types.NamespacedName{Namespace: meta.Namespace, Name: meta.Name}
@@ -1030,7 +1014,7 @@ func (s *Service) updatePodChaos(exp *YAMLDescription) error {
 	return s.kubeCli.Update(context.Background(), chaos)
 }
 
-func (s *Service) updateNetworkChaos(exp *YAMLDescription) error {
+func (s *Service) updateNetworkChaos(exp *core.ExperimentYAMLDescription) error {
 	chaos := &v1alpha1.NetworkChaos{}
 	meta := &exp.Metadata
 	key := types.NamespacedName{Namespace: meta.Namespace, Name: meta.Name}
@@ -1052,7 +1036,7 @@ func (s *Service) updateNetworkChaos(exp *YAMLDescription) error {
 	return s.kubeCli.Update(context.Background(), chaos)
 }
 
-func (s *Service) updateIOChaos(exp *YAMLDescription) error {
+func (s *Service) updateIOChaos(exp *core.ExperimentYAMLDescription) error {
 	chaos := &v1alpha1.IoChaos{}
 	meta := &exp.Metadata
 	key := types.NamespacedName{Namespace: meta.Namespace, Name: meta.Name}
@@ -1071,7 +1055,7 @@ func (s *Service) updateIOChaos(exp *YAMLDescription) error {
 	return s.kubeCli.Update(context.Background(), chaos)
 }
 
-func (s *Service) updateKernelChaos(exp *YAMLDescription) error {
+func (s *Service) updateKernelChaos(exp *core.ExperimentYAMLDescription) error {
 	chaos := &v1alpha1.KernelChaos{}
 	meta := &exp.Metadata
 	key := types.NamespacedName{Namespace: meta.Namespace, Name: meta.Name}
@@ -1090,7 +1074,7 @@ func (s *Service) updateKernelChaos(exp *YAMLDescription) error {
 	return s.kubeCli.Update(context.Background(), chaos)
 }
 
-func (s *Service) updateTimeChaos(exp *YAMLDescription) error {
+func (s *Service) updateTimeChaos(exp *core.ExperimentYAMLDescription) error {
 	chaos := &v1alpha1.TimeChaos{}
 	meta := &exp.Metadata
 	key := types.NamespacedName{Namespace: meta.Namespace, Name: meta.Name}
@@ -1109,7 +1093,7 @@ func (s *Service) updateTimeChaos(exp *YAMLDescription) error {
 	return s.kubeCli.Update(context.Background(), chaos)
 }
 
-func (s *Service) updateStressChaos(exp *YAMLDescription) error {
+func (s *Service) updateStressChaos(exp *core.ExperimentYAMLDescription) error {
 	chaos := &v1alpha1.StressChaos{}
 	meta := &exp.Metadata
 	key := types.NamespacedName{Namespace: meta.Namespace, Name: meta.Name}

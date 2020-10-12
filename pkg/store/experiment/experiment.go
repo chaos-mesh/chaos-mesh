@@ -26,11 +26,11 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 )
 
-var log = ctrl.Log.WithName("experimentStore")
+var log = ctrl.Log.WithName("Store => Experiment")
 
 // NewStore returns a new ExperimentStore.
 func NewStore(db *dbstore.DB) core.ExperimentStore {
-	db.AutoMigrate(&core.ArchiveExperiment{})
+	db.AutoMigrate(&core.Experiment{})
 
 	es := &experimentStore{db}
 
@@ -51,11 +51,11 @@ func (e *experimentStore) DeleteIncompleteExperiments(_ context.Context) error {
 		Delete(core.Event{}).Error
 }
 
-func (e *experimentStore) List(_ context.Context, kind, ns, name string) ([]*core.ArchiveExperiment, error) {
-	archives := make([]*core.ArchiveExperiment, 0)
-	query, args := constructQueryArgs(kind, ns, name, "")
+func (e *experimentStore) List(_ context.Context, kind, namespace, name string) ([]*core.Experiment, error) {
+	archives := make([]*core.Experiment, 0)
+	query, args := constructQueryArgs(kind, namespace, name, "")
 
-	db := e.db.Model(core.ArchiveExperiment{})
+	db := e.db.Model(core.Experiment{})
 	if len(args) > 0 {
 		db = db.Where(query, args)
 	}
@@ -68,11 +68,11 @@ func (e *experimentStore) List(_ context.Context, kind, ns, name string) ([]*cor
 	return archives, nil
 }
 
-func (e *experimentStore) ListMeta(_ context.Context, kind, ns, name string) ([]*core.ArchiveExperimentMeta, error) {
-	archives := make([]*core.ArchiveExperimentMeta, 0)
-	query, args := constructQueryArgs(kind, ns, name, "")
+func (e *experimentStore) ListMeta(_ context.Context, kind, namespace, name string) ([]*core.ExperimentMeta, error) {
+	archives := make([]*core.ExperimentMeta, 0)
+	query, args := constructQueryArgs(kind, namespace, name, "")
 
-	db := e.db.Table("archive_experiments")
+	db := e.db.Table("experiments")
 	if len(args) > 0 {
 		db = db.Where(query, args)
 	}
@@ -86,7 +86,7 @@ func (e *experimentStore) ListMeta(_ context.Context, kind, ns, name string) ([]
 }
 
 func (e *experimentStore) Archive(_ context.Context, ns, name string) error {
-	if err := e.db.Model(core.ArchiveExperiment{}).
+	if err := e.db.Model(core.Experiment{}).
 		Where("namespace = ? AND name = ? AND archived = ?", ns, name, false).
 		Updates(map[string]interface{}{"archived": true, "finish_time": time.Now()}).Error; err != nil &&
 		!gorm.IsRecordNotFoundError(err) {
@@ -95,14 +95,14 @@ func (e *experimentStore) Archive(_ context.Context, ns, name string) error {
 	return nil
 }
 
-func (e *experimentStore) Set(_ context.Context, archive *core.ArchiveExperiment) error {
-	return e.db.Model(core.ArchiveExperiment{}).Save(archive).Error
+func (e *experimentStore) Set(_ context.Context, archive *core.Experiment) error {
+	return e.db.Model(core.Experiment{}).Save(archive).Error
 }
 
 func (e *experimentStore) getUID(_ context.Context, kind, ns, name string) (string, error) {
-	archives := make([]*core.ArchiveExperimentMeta, 0)
+	archives := make([]*core.ExperimentMeta, 0)
 
-	if err := e.db.Table("archive_experiments").Where(
+	if err := e.db.Table("experiments").Where(
 		"namespace = ? and name = ? and kind = ?", ns, name, kind).
 		Find(&archives).Error; err != nil {
 		return "", err
@@ -125,7 +125,7 @@ func (e *experimentStore) getUID(_ context.Context, kind, ns, name string) (stri
 }
 
 // DetailList returns a list of archive experiments from the datastore.
-func (e *experimentStore) DetailList(ctx context.Context, kind, namespace, name, uid string) ([]*core.ArchiveExperiment, error) {
+func (e *experimentStore) DetailList(ctx context.Context, kind, namespace, name, uid string) ([]*core.Experiment, error) {
 	if kind != "" && namespace != "" && name != "" && uid == "" {
 		var err error
 		uid, err = e.getUID(context.TODO(), kind, namespace, name)
@@ -134,15 +134,15 @@ func (e *experimentStore) DetailList(ctx context.Context, kind, namespace, name,
 		}
 	}
 
-	archives := make([]*core.ArchiveExperiment, 0)
+	archives := make([]*core.Experiment, 0)
 	query, args := constructQueryArgs(kind, namespace, name, uid)
 
 	if len(args) == 0 {
-		if err := e.db.Table("archive_experiments").Find(&archives).Error; err != nil && !gorm.IsRecordNotFoundError(err) {
+		if err := e.db.Table("experiments").Find(&archives).Error; err != nil && !gorm.IsRecordNotFoundError(err) {
 			return nil, err
 		}
 	} else {
-		if err := e.db.Table("archive_experiments").Where(query, args).
+		if err := e.db.Table("experiments").Where(query, args).
 			Find(&archives).Error; err != nil && !gorm.IsRecordNotFoundError(err) {
 			return nil, err
 		}
@@ -152,11 +152,11 @@ func (e *experimentStore) DetailList(ctx context.Context, kind, namespace, name,
 }
 
 // TODO: implement the left core.EventStore interfaces
-func (e *experimentStore) Find(context.Context, int64) (*core.ArchiveExperiment, error) {
+func (e *experimentStore) Find(context.Context, int64) (*core.Experiment, error) {
 	return nil, nil
 }
 
-func (e *experimentStore) Delete(context.Context, *core.ArchiveExperiment) error { return nil }
+func (e *experimentStore) Delete(context.Context, *core.Experiment) error { return nil }
 
 // DeleteByFinishTime deletes experiments whose time difference is greater than the given time from FinishTime.
 func (e *experimentStore) DeleteByFinishTime(_ context.Context, ttl time.Duration) error {
@@ -170,7 +170,7 @@ func (e *experimentStore) DeleteByFinishTime(_ context.Context, ttl time.Duratio
 			continue
 		}
 		if exp.FinishTime.Add(ttl).Before(nowTime) {
-			if err := e.db.Table("archive_experiments").Unscoped().Delete(*exp).Error; err != nil {
+			if err := e.db.Table("experiments").Unscoped().Delete(*exp).Error; err != nil {
 				return err
 			}
 		}
@@ -178,8 +178,8 @@ func (e *experimentStore) DeleteByFinishTime(_ context.Context, ttl time.Duratio
 	return nil
 }
 
-func (e *experimentStore) FindByUID(_ context.Context, uid string) (*core.ArchiveExperiment, error) {
-	archive := new(core.ArchiveExperiment)
+func (e *experimentStore) FindByUID(_ context.Context, uid string) (*core.Experiment, error) {
+	archive := new(core.Experiment)
 
 	if err := e.db.Where(
 		"uid = ?", uid).
@@ -191,10 +191,10 @@ func (e *experimentStore) FindByUID(_ context.Context, uid string) (*core.Archiv
 }
 
 // FindMetaByUID returns an archive experiment by UID.
-func (e *experimentStore) FindMetaByUID(_ context.Context, uid string) (*core.ArchiveExperimentMeta, error) {
-	archive := new(core.ArchiveExperimentMeta)
+func (e *experimentStore) FindMetaByUID(_ context.Context, uid string) (*core.ExperimentMeta, error) {
+	archive := new(core.ExperimentMeta)
 
-	if err := e.db.Table("archive_experiments").Where(
+	if err := e.db.Table("experiments").Where(
 		"uid = ?", uid).
 		First(archive).Error; err != nil {
 		return nil, err

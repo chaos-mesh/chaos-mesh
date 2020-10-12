@@ -30,14 +30,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-// Report defines the report of archive experiments.
-type Report struct {
-	Meta           *core.ArchiveExperimentMeta `json:"meta"`
-	Events         []*core.Event               `json:"events"`
-	TotalTime      string                      `json:"total_time"`
-	TotalFaultTime string                      `json:"total_fault_time"`
-}
-
 // Service defines a handler service for archive experiments.
 type Service struct {
 	conf    *config.ChaosDashboardConfig
@@ -65,17 +57,23 @@ func NewService(
 func Register(r *gin.RouterGroup, s *Service) {
 	endpoint := r.Group("/archives")
 
-	// TODO: add more api handlers
-	endpoint.GET("", s.listExperiments)
-	endpoint.GET("/detail/search", s.experimentDetailSearch)
-	endpoint.GET("/detail", s.experimentDetail)
-	endpoint.GET("/report", s.experimentReport)
+	endpoint.GET("", s.list)
+	endpoint.GET("/detail", s.detail)
+	endpoint.GET("/report", s.report)
 }
 
-// ArchiveExperimentDetail represents an experiment instance.
-type ArchiveExperimentDetail struct {
-	core.ArchiveExperimentMeta
-	ExperimentInfo core.ExperimentInfo `json:"experiment_info"`
+// Detail represents an archive instance.
+type Detail struct {
+	core.Archive
+	YAML core.ExperimentYAMLDescription `json:"yaml"`
+}
+
+// Report defines the report of archive experiments.
+type Report struct {
+	Meta           *core.Archive `json:"meta"`
+	Events         []*core.Event `json:"events"`
+	TotalTime      string        `json:"total_time"`
+	TotalFaultTime string        `json:"total_fault_time"`
 }
 
 // @Summary Get archived chaos experiments.
@@ -85,115 +83,51 @@ type ArchiveExperimentDetail struct {
 // @Param namespace query string false "namespace"
 // @Param name query string false "name"
 // @Param kind query string false "kind" Enums(PodChaos, IoChaos, NetworkChaos, TimeChaos, KernelChaos, StressChaos)
-// @Success 200 {array} core.ArchiveExperimentMeta
+// @Success 200 {array} core.Archive
 // @Router /archives [get]
 // @Failure 500 {object} utils.APIError
-func (s *Service) listExperiments(c *gin.Context) {
+func (s *Service) list(c *gin.Context) {
 	kind := c.Query("kind")
 	name := c.Query("name")
 	ns := c.Query("namespace")
 
-	data, err := s.archive.ListMeta(context.TODO(), kind, ns, name)
+	data, err := s.archive.ListMeta(context.Background(), kind, ns, name)
 	if err != nil {
 		c.Status(http.StatusInternalServerError)
 		_ = c.Error(utils.ErrInternalServer.NewWithNoMessage())
 		return
 	}
 
-	c.JSON(http.StatusOK, data)
-}
+	var archives []core.Archive
 
-// @Summary Get the details of chaos experiment.
-// @Description Get the details of chaos experiment.
-// @Tags archives
-// @Produce json
-// @Param namespace query string false "namespace"
-// @Param name query string false "name"
-// @Param kind query string false "kind" Enums(PodChaos, IoChaos, NetworkChaos, TimeChaos, KernelChaos, StressChaos)
-// @Param uid query string false "uid"
-// @Success 200 {array} ArchiveExperimentDetail
-// @Router /archives/detail/search [get]
-// @Failure 500 {object} utils.APIError
-func (s *Service) experimentDetailSearch(c *gin.Context) {
-	var (
-		err           error
-		info          core.ExperimentInfo
-		expDetailList []ArchiveExperimentDetail
-	)
-	kind := c.Query("kind")
-	name := c.Query("name")
-	ns := c.Query("namespace")
-	uid := c.Query("uid")
-
-	datalist, err := s.archive.DetailList(context.TODO(), kind, ns, name, uid)
-	if err != nil {
-		if !gorm.IsRecordNotFoundError(err) {
-			c.Status(http.StatusInternalServerError)
-			_ = c.Error(utils.ErrInternalServer.NewWithNoMessage())
-		} else {
-			c.Status(http.StatusInternalServerError)
-			_ = c.Error(utils.ErrInvalidRequest.New("the archive is not found"))
-		}
-		return
-	}
-
-	for _, data := range datalist {
-		switch data.Kind {
-		case v1alpha1.KindPodChaos:
-			info, err = data.ParsePodChaos()
-		case v1alpha1.KindIOChaos:
-			info, err = data.ParseIOChaos()
-		case v1alpha1.KindNetworkChaos:
-			info, err = data.ParseNetworkChaos()
-		case v1alpha1.KindTimeChaos:
-			info, err = data.ParseTimeChaos()
-		case v1alpha1.KindKernelChaos:
-			info, err = data.ParseKernelChaos()
-		case v1alpha1.KindStressChaos:
-			info, err = data.ParseStressChaos()
-		default:
-			err = fmt.Errorf("kind %s is not support", data.Kind)
-		}
-		if err != nil {
-			c.Status(http.StatusInternalServerError)
-			_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
-			return
-		}
-		expDetailList = append(expDetailList, ArchiveExperimentDetail{
-			ArchiveExperimentMeta: core.ArchiveExperimentMeta{
-				ID:         data.ID,
-				CreatedAt:  data.CreatedAt,
-				UpdatedAt:  data.UpdatedAt,
-				DeletedAt:  data.DeletedAt,
-				Name:       data.Name,
-				Namespace:  data.Namespace,
-				Kind:       data.Kind,
-				Action:     data.Action,
-				UID:        data.UID,
-				StartTime:  data.StartTime,
-				FinishTime: data.FinishTime,
-				Archived:   data.Archived,
-			},
-			ExperimentInfo: info,
+	for _, d := range data {
+		archives = append(archives, core.Archive{
+			UID:        d.UID,
+			Kind:       d.Kind,
+			Namespace:  d.Namespace,
+			Name:       d.Name,
+			Action:     d.Action,
+			StartTime:  d.StartTime,
+			FinishTime: d.FinishTime,
 		})
 	}
 
-	c.JSON(http.StatusOK, expDetailList)
+	c.JSON(http.StatusOK, data)
 }
 
-// @Summary Get the details of chaos experiment.
-// @Description Get the details of chaos experiment.
+// @Summary Get the detail of archived chaos experiment.
+// @Description Get the detail of archived chaos experiment.
 // @Tags archives
 // @Produce json
 // @Param uid query string true "uid"
-// @Success 200 {object} ArchiveExperimentDetail
+// @Success 200 {object} Detail
 // @Router /archives/detail [get]
 // @Failure 500 {object} utils.APIError
-func (s *Service) experimentDetail(c *gin.Context) {
+func (s *Service) detail(c *gin.Context) {
 	var (
-		err       error
-		info      core.ExperimentInfo
-		expDetail ArchiveExperimentDetail
+		err    error
+		yaml   core.ExperimentYAMLDescription
+		detail Detail
 	)
 	uid := c.Query("uid")
 
@@ -217,17 +151,17 @@ func (s *Service) experimentDetail(c *gin.Context) {
 
 	switch data.Kind {
 	case v1alpha1.KindPodChaos:
-		info, err = data.ParsePodChaos()
+		yaml, err = data.ParsePodChaos()
 	case v1alpha1.KindIOChaos:
-		info, err = data.ParseIOChaos()
+		yaml, err = data.ParseIOChaos()
 	case v1alpha1.KindNetworkChaos:
-		info, err = data.ParseNetworkChaos()
+		yaml, err = data.ParseNetworkChaos()
 	case v1alpha1.KindTimeChaos:
-		info, err = data.ParseTimeChaos()
+		yaml, err = data.ParseTimeChaos()
 	case v1alpha1.KindKernelChaos:
-		info, err = data.ParseKernelChaos()
+		yaml, err = data.ParseKernelChaos()
 	case v1alpha1.KindStressChaos:
-		info, err = data.ParseStressChaos()
+		yaml, err = data.ParseStressChaos()
 	default:
 		err = fmt.Errorf("kind %s is not support", data.Kind)
 	}
@@ -236,41 +170,35 @@ func (s *Service) experimentDetail(c *gin.Context) {
 		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
 		return
 	}
-	expDetail = ArchiveExperimentDetail{
-		ArchiveExperimentMeta: core.ArchiveExperimentMeta{
-			ID:         data.ID,
-			CreatedAt:  data.CreatedAt,
-			UpdatedAt:  data.UpdatedAt,
-			DeletedAt:  data.DeletedAt,
+
+	detail = Detail{
+		Archive: core.Archive{
+			UID:        data.UID,
+			Kind:       data.Kind,
 			Name:       data.Name,
 			Namespace:  data.Namespace,
-			Kind:       data.Kind,
 			Action:     data.Action,
-			UID:        data.UID,
 			StartTime:  data.StartTime,
 			FinishTime: data.FinishTime,
-			Archived:   data.Archived,
 		},
-		ExperimentInfo: info,
+		YAML: yaml,
 	}
 
-	c.JSON(http.StatusOK, expDetail)
+	c.JSON(http.StatusOK, detail)
 }
 
-// @Summary Get the report of chaos experiment.
-// @Description Get the report of chaos experiment.
+// @Summary Get the report of a chaos experiment.
+// @Description Get the report of a chaos experiment.
 // @Tags archives
 // @Produce json
 // @Param uid query string true "uid"
 // @Success 200 {array} Report
 // @Router /archives/report [get]
 // @Failure 500 {object} utils.APIError
-func (s *Service) experimentReport(c *gin.Context) {
+func (s *Service) report(c *gin.Context) {
 	var (
-		report    Report
 		err       error
-		timeNow   time.Time
-		timeAfter time.Time
+		report    Report
 	)
 	uid := c.Query("uid")
 
@@ -280,7 +208,7 @@ func (s *Service) experimentReport(c *gin.Context) {
 		return
 	}
 
-	report.Meta, err = s.archive.FindMetaByUID(context.TODO(), uid)
+	meta, err := s.archive.FindMetaByUID(context.Background(), uid)
 	if err != nil {
 		if !gorm.IsRecordNotFoundError(err) {
 			c.Status(http.StatusInternalServerError)
@@ -291,15 +219,27 @@ func (s *Service) experimentReport(c *gin.Context) {
 		}
 		return
 	}
+	report.Meta = &core.Archive{
+		UID:        meta.UID,
+		Kind:       meta.Kind,
+		Namespace:  meta.Namespace,
+		Name:       meta.Name,
+		Action:     meta.Action,
+		StartTime:  meta.StartTime,
+		FinishTime: meta.FinishTime,
+	}
+
 	report.TotalTime = report.Meta.FinishTime.Sub(report.Meta.StartTime).String()
+
 	report.Events, err = s.event.ListByUID(context.TODO(), uid)
 	if err != nil {
 		c.Status(http.StatusInternalServerError)
 		_ = c.Error(utils.ErrInternalServer.NewWithNoMessage())
 		return
 	}
-	timeNow = time.Now()
-	timeAfter = timeNow
+
+	timeNow := time.Now()
+	timeAfter := timeNow
 	for _, et := range report.Events {
 		timeAfter = timeAfter.Add(et.FinishTime.Sub(*et.StartTime))
 	}

@@ -19,10 +19,10 @@ export enum StateOfExperimentsEnum {
 }
 
 export interface Experiment {
+  uid: uuid
   kind: string
   namespace: string
   name: string
-  uid: uuid
   created: string
   status: keyof StateOfExperiments
   events?: Event[]

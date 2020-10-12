@@ -24,19 +24,19 @@ import (
 // ExperimentStore defines operations for working with archives and experiments
 type ExperimentStore interface {
 	// List returns an archive experiment list from the datastore.
-	List(ctx context.Context, kind, namespace, name string) ([]*ArchiveExperiment, error)
+	List(ctx context.Context, kind, namespace, name string) ([]*Experiment, error)
 
 	// ListMeta returns an archive experiment metadata list from the datastore.
-	ListMeta(ctx context.Context, kind, namespace, name string) ([]*ArchiveExperimentMeta, error)
+	ListMeta(ctx context.Context, kind, namespace, name string) ([]*ExperimentMeta, error)
 
 	// Find returns an archive experiment by ID.
-	Find(context.Context, int64) (*ArchiveExperiment, error)
+	Find(context.Context, int64) (*Experiment, error)
 
 	// Delete deletes the experiment from the datastore.
-	Delete(context.Context, *ArchiveExperiment) error
+	Delete(context.Context, *Experiment) error
 
 	// DetailList returns a list of archive experiments from the datastore.
-	DetailList(ctx context.Context, kind, namespace, name, uid string) ([]*ArchiveExperiment, error)
+	DetailList(ctx context.Context, kind, namespace, name, uid string) ([]*Experiment, error)
 
 	// DeleteByFinishTime deletes experiments whose time difference is greater than the given time from FinishTime.
 	DeleteByFinishTime(context.Context, time.Duration) error
@@ -45,13 +45,13 @@ type ExperimentStore interface {
 	Archive(ctx context.Context, namespace, name string) error
 
 	// Set sets the experiment.
-	Set(context.Context, *ArchiveExperiment) error
+	Set(context.Context, *Experiment) error
 
 	// FindByUID returns an experiment record by the UID of the experiment.
-	FindByUID(ctx context.Context, UID string) (*ArchiveExperiment, error)
+	FindByUID(ctx context.Context, UID string) (*Experiment, error)
 
 	// FindMetaByUID returns an archive experiment by UID.
-	FindMetaByUID(context.Context, string) (*ArchiveExperimentMeta, error)
+	FindMetaByUID(context.Context, string) (*ExperimentMeta, error)
 
 	// DeleteIncompleteExperiments deletes all incomplete experiments.
 	// If the chaos-dashboard was restarted and the experiment is completed during the restart,
@@ -60,26 +60,53 @@ type ExperimentStore interface {
 	DeleteIncompleteExperiments(context.Context) error
 }
 
-// ArchiveExperiment represents an experiment instance.
-type ArchiveExperiment struct {
-	ArchiveExperimentMeta
-	Experiment string `gorm:"size:2048"`
+// Experiment represents an experiment instance.
+type Experiment struct {
+	ExperimentMeta
+	Experiment string `gorm:"size:2048"` // JSON string
 }
 
-// ArchiveExperimentMeta defines the meta data for ArchiveExperiment.
-type ArchiveExperimentMeta struct {
+// ExperimentMeta defines the meta data for Experiment. Use in db.
+type ExperimentMeta struct {
 	ID         uint       `gorm:"primary_key" json:"id"`
 	CreatedAt  time.Time  `json:"created_at"`
 	UpdatedAt  time.Time  `json:"updated_at"`
 	DeletedAt  *time.Time `sql:"index" json:"deleted_at"`
+	UID        string     `gorm:"index:uid" json:"uid"`
+	Kind       string     `json:"kind"`
 	Name       string     `json:"name"`
 	Namespace  string     `json:"namespace"`
-	Kind       string     `json:"kind"`
 	Action     string     `json:"action"`
-	UID        string     `gorm:"index:uid" json:"uid"`
 	StartTime  time.Time  `json:"start_time"`
 	FinishTime time.Time  `json:"finish_time"`
 	Archived   bool       `json:"archived"`
+}
+
+// Archive defines the basic information of an archive.
+type Archive struct {
+	UID        string    `json:"uid"`
+	Kind       string    `json:"kind"`
+	Namespace  string    `json:"namespace"`
+	Name       string    `json:"name"`
+	Action     string    `json:"action"`
+	StartTime  time.Time `json:"start_time"`
+	FinishTime time.Time `json:"finish_time"`
+}
+
+// ExperimentYAMLDescription defines the YAML structure of an experiment.
+type ExperimentYAMLDescription struct {
+	APIVersion string                 `json:"apiVersion"`
+	Kind       string                 `json:"kind"`
+	Metadata   ExperimentYAMLMetadata `json:"metadata"`
+	Spec       interface{}            `json:"spec"`
+}
+
+// ExperimentYAMLMetadata defines the metadata of YAMLDescription.
+type ExperimentYAMLMetadata struct {
+	Name        string            `json:"name"`
+	Namespace   string            `json:"namespace"`
+	Labels      map[string]string `json:"labels"`
+	Annotations map[string]string `json:"annotations"`
 }
 
 // ExperimentInfo defines a form data of Experiment from API.
@@ -214,291 +241,122 @@ type StressChaosInfo struct {
 	ContainerName     *string             `json:"container_name,omitempty"`
 }
 
-func (e *ArchiveExperiment) ParsePodChaos() (ExperimentInfo, error) {
+// ParsePodChaos Parse PodChaos JSON string into ExperimentYAMLDescription.
+func (e *Experiment) ParsePodChaos() (ExperimentYAMLDescription, error) {
 	chaos := &v1alpha1.PodChaos{}
 	if err := json.Unmarshal([]byte(e.Experiment), &chaos); err != nil {
-		return ExperimentInfo{}, err
+		return ExperimentYAMLDescription{}, err
 	}
 
-	info := ExperimentInfo{
-		Name:        chaos.Name,
-		Namespace:   chaos.Namespace,
-		Labels:      chaos.Labels,
-		Annotations: chaos.Annotations,
-		Scope: ScopeInfo{
-			SelectorInfo: SelectorInfo{
-				NamespaceSelectors:  chaos.Spec.Selector.Namespaces,
-				LabelSelectors:      chaos.Spec.Selector.LabelSelectors,
-				AnnotationSelectors: chaos.Spec.Selector.AnnotationSelectors,
-				FieldSelectors:      chaos.Spec.Selector.FieldSelectors,
-				PhaseSelector:       chaos.Spec.Selector.PodPhaseSelectors,
-				Pods:                chaos.Spec.Selector.Pods,
-			},
-			Mode:  string(chaos.Spec.Mode),
-			Value: chaos.Spec.Value,
+	return ExperimentYAMLDescription{
+		APIVersion: chaos.APIVersion,
+		Kind:       chaos.Kind,
+		Metadata: ExperimentYAMLMetadata{
+			Name:        chaos.Name,
+			Namespace:   chaos.Namespace,
+			Labels:      chaos.Labels,
+			Annotations: chaos.Annotations,
 		},
-		Target: TargetInfo{
-			Kind: v1alpha1.KindPodChaos,
-			PodChaos: &PodChaosInfo{
-				Action:        string(chaos.Spec.Action),
-				ContainerName: chaos.Spec.ContainerName,
-			},
-		},
-	}
-
-	if chaos.Spec.Scheduler != nil {
-		info.Scheduler.Cron = chaos.Spec.Scheduler.Cron
-	}
-
-	if chaos.Spec.Duration != nil {
-		info.Scheduler.Duration = *chaos.Spec.Duration
-	}
-
-	return info, nil
+		Spec: chaos.Spec,
+	}, nil
 }
 
-func (e *ArchiveExperiment) ParseNetworkChaos() (ExperimentInfo, error) {
+// ParseNetworkChaos Parse NetworkChaos JSON string into ExperimentYAMLDescription.
+func (e *Experiment) ParseNetworkChaos() (ExperimentYAMLDescription, error) {
 	chaos := &v1alpha1.NetworkChaos{}
 	if err := json.Unmarshal([]byte(e.Experiment), &chaos); err != nil {
-		return ExperimentInfo{}, err
+		return ExperimentYAMLDescription{}, err
 	}
 
-	info := ExperimentInfo{
-		Name:        chaos.Name,
-		Namespace:   chaos.Namespace,
-		Labels:      chaos.Labels,
-		Annotations: chaos.Annotations,
-		Scope: ScopeInfo{
-			SelectorInfo: SelectorInfo{
-				NamespaceSelectors:  chaos.Spec.Selector.Namespaces,
-				LabelSelectors:      chaos.Spec.Selector.LabelSelectors,
-				AnnotationSelectors: chaos.Spec.Selector.AnnotationSelectors,
-				FieldSelectors:      chaos.Spec.Selector.FieldSelectors,
-				PhaseSelector:       chaos.Spec.Selector.PodPhaseSelectors,
-				Pods:                chaos.Spec.Selector.Pods,
-			},
-			Mode:  string(chaos.Spec.Mode),
-			Value: chaos.Spec.Value,
+	return ExperimentYAMLDescription{
+		APIVersion: chaos.APIVersion,
+		Kind:       chaos.Kind,
+		Metadata: ExperimentYAMLMetadata{
+			Name:        chaos.Name,
+			Namespace:   chaos.Namespace,
+			Labels:      chaos.Labels,
+			Annotations: chaos.Annotations,
 		},
-		Target: TargetInfo{
-			Kind: v1alpha1.KindNetworkChaos,
-			NetworkChaos: &NetworkChaosInfo{
-				Action:    string(chaos.Spec.Action),
-				Delay:     chaos.Spec.Delay,
-				Loss:      chaos.Spec.Loss,
-				Duplicate: chaos.Spec.Duplicate,
-				Corrupt:   chaos.Spec.Corrupt,
-				Bandwidth: chaos.Spec.Bandwidth,
-				Direction: string(chaos.Spec.Direction),
-			},
-		},
-	}
-
-	if chaos.Spec.Scheduler != nil {
-		info.Scheduler.Cron = chaos.Spec.Scheduler.Cron
-	}
-
-	if chaos.Spec.Duration != nil {
-		info.Scheduler.Duration = *chaos.Spec.Duration
-	}
-
-	if chaos.Spec.Target != nil {
-		info.Target.NetworkChaos.TargetScope.SelectorInfo = SelectorInfo{
-			NamespaceSelectors:  chaos.Spec.Target.TargetSelector.Namespaces,
-			LabelSelectors:      chaos.Spec.Target.TargetSelector.LabelSelectors,
-			AnnotationSelectors: chaos.Spec.Target.TargetSelector.AnnotationSelectors,
-			FieldSelectors:      chaos.Spec.Target.TargetSelector.FieldSelectors,
-			PhaseSelector:       chaos.Spec.Target.TargetSelector.PodPhaseSelectors,
-		}
-		info.Target.NetworkChaos.TargetScope.Mode = string(chaos.Spec.Target.TargetMode)
-		info.Target.NetworkChaos.TargetScope.Value = chaos.Spec.Target.TargetValue
-	}
-
-	return info, nil
+		Spec: chaos.Spec,
+	}, nil
 }
 
-func (e *ArchiveExperiment) ParseIOChaos() (ExperimentInfo, error) {
+// ParseIOChaos Parse IOChaos JSON string into ExperimentYAMLDescription.
+func (e *Experiment) ParseIOChaos() (ExperimentYAMLDescription, error) {
 	chaos := &v1alpha1.IoChaos{}
 	if err := json.Unmarshal([]byte(e.Experiment), &chaos); err != nil {
-		return ExperimentInfo{}, err
+		return ExperimentYAMLDescription{}, err
 	}
 
-	var methods []string
-	for _, method := range chaos.Spec.Methods {
-		methods = append(methods, string(method))
-	}
-	info := ExperimentInfo{
-		Name:        chaos.Name,
-		Namespace:   chaos.Namespace,
-		Labels:      chaos.Labels,
-		Annotations: chaos.Annotations,
-		Scope: ScopeInfo{
-			SelectorInfo: SelectorInfo{
-				NamespaceSelectors:  chaos.Spec.Selector.Namespaces,
-				LabelSelectors:      chaos.Spec.Selector.LabelSelectors,
-				AnnotationSelectors: chaos.Spec.Selector.AnnotationSelectors,
-				FieldSelectors:      chaos.Spec.Selector.FieldSelectors,
-				PhaseSelector:       chaos.Spec.Selector.PodPhaseSelectors,
-				Pods:                chaos.Spec.Selector.Pods,
-			},
-			Mode:  string(chaos.Spec.Mode),
-			Value: chaos.Spec.Value,
+	return ExperimentYAMLDescription{
+		APIVersion: chaos.APIVersion,
+		Kind:       chaos.Kind,
+		Metadata: ExperimentYAMLMetadata{
+			Name:        chaos.Name,
+			Namespace:   chaos.Namespace,
+			Labels:      chaos.Labels,
+			Annotations: chaos.Annotations,
 		},
-		Target: TargetInfo{
-			Kind: v1alpha1.KindIOChaos,
-			IOChaos: &IOChaosInfo{
-				Action:     string(chaos.Spec.Action),
-				Delay:      chaos.Spec.Delay,
-				Errno:      chaos.Spec.Errno,
-				Attr:       chaos.Spec.Attr,
-				Path:       chaos.Spec.Path,
-				Percent:    chaos.Spec.Percent,
-				Methods:    chaos.Spec.Methods,
-				VolumePath: chaos.Spec.VolumePath,
-			},
-		},
-	}
-
-	if chaos.Spec.Scheduler != nil {
-		info.Scheduler.Cron = chaos.Spec.Scheduler.Cron
-	}
-
-	if chaos.Spec.Duration != nil {
-		info.Scheduler.Duration = *chaos.Spec.Duration
-	}
-
-	return info, nil
+		Spec: chaos.Spec,
+	}, nil
 }
 
-func (e *ArchiveExperiment) ParseTimeChaos() (ExperimentInfo, error) {
+// ParseTimeChaos Parse TimeChaos JSON string into ExperimentYAMLDescription.
+func (e *Experiment) ParseTimeChaos() (ExperimentYAMLDescription, error) {
 	chaos := &v1alpha1.TimeChaos{}
 	if err := json.Unmarshal([]byte(e.Experiment), &chaos); err != nil {
-		return ExperimentInfo{}, err
+		return ExperimentYAMLDescription{}, err
 	}
 
-	info := ExperimentInfo{
-		Name:        chaos.Name,
-		Namespace:   chaos.Namespace,
-		Labels:      chaos.Labels,
-		Annotations: chaos.Annotations,
-		Scope: ScopeInfo{
-			SelectorInfo: SelectorInfo{
-				NamespaceSelectors:  chaos.Spec.Selector.Namespaces,
-				LabelSelectors:      chaos.Spec.Selector.LabelSelectors,
-				AnnotationSelectors: chaos.Spec.Selector.AnnotationSelectors,
-				FieldSelectors:      chaos.Spec.Selector.FieldSelectors,
-				PhaseSelector:       chaos.Spec.Selector.PodPhaseSelectors,
-				Pods:                chaos.Spec.Selector.Pods,
-			},
-			Mode:  string(chaos.Spec.Mode),
-			Value: chaos.Spec.Value,
+	return ExperimentYAMLDescription{
+		APIVersion: chaos.APIVersion,
+		Kind:       chaos.Kind,
+		Metadata: ExperimentYAMLMetadata{
+			Name:        chaos.Name,
+			Namespace:   chaos.Namespace,
+			Labels:      chaos.Labels,
+			Annotations: chaos.Annotations,
 		},
-		Target: TargetInfo{
-			Kind: v1alpha1.KindTimeChaos,
-			TimeChaos: &TimeChaosInfo{
-				TimeOffset:     chaos.Spec.TimeOffset,
-				ClockIDs:       chaos.Spec.ClockIds,
-				ContainerNames: chaos.Spec.ContainerNames,
-			},
-		},
-	}
-
-	if chaos.Spec.Scheduler != nil {
-		info.Scheduler.Cron = chaos.Spec.Scheduler.Cron
-	}
-
-	if chaos.Spec.Duration != nil {
-		info.Scheduler.Duration = *chaos.Spec.Duration
-	}
-
-	return info, nil
+		Spec: chaos.Spec,
+	}, nil
 }
 
-func (e *ArchiveExperiment) ParseKernelChaos() (ExperimentInfo, error) {
+// ParseKernelChaos Parse KernelChaos JSON string into ExperimentYAMLDescription.
+func (e *Experiment) ParseKernelChaos() (ExperimentYAMLDescription, error) {
 	chaos := &v1alpha1.KernelChaos{}
 	if err := json.Unmarshal([]byte(e.Experiment), &chaos); err != nil {
-		return ExperimentInfo{}, err
+		return ExperimentYAMLDescription{}, err
 	}
 
-	info := ExperimentInfo{
-		Name:        chaos.Name,
-		Namespace:   chaos.Namespace,
-		Labels:      chaos.Labels,
-		Annotations: chaos.Annotations,
-		Scope: ScopeInfo{
-			SelectorInfo: SelectorInfo{
-				NamespaceSelectors:  chaos.Spec.Selector.Namespaces,
-				LabelSelectors:      chaos.Spec.Selector.LabelSelectors,
-				AnnotationSelectors: chaos.Spec.Selector.AnnotationSelectors,
-				FieldSelectors:      chaos.Spec.Selector.FieldSelectors,
-				PhaseSelector:       chaos.Spec.Selector.PodPhaseSelectors,
-				Pods:                chaos.Spec.Selector.Pods,
-			},
-			Mode:  string(chaos.Spec.Mode),
-			Value: chaos.Spec.Value,
+	return ExperimentYAMLDescription{
+		APIVersion: chaos.APIVersion,
+		Kind:       chaos.Kind,
+		Metadata: ExperimentYAMLMetadata{
+			Name:        chaos.Name,
+			Namespace:   chaos.Namespace,
+			Labels:      chaos.Labels,
+			Annotations: chaos.Annotations,
 		},
-		Target: TargetInfo{
-			Kind: v1alpha1.KindKernelChaos,
-			KernelChaos: &KernelChaosInfo{
-				FailKernRequest: chaos.Spec.FailKernRequest,
-			},
-		},
-	}
-
-	if chaos.Spec.Scheduler != nil {
-		info.Scheduler.Cron = chaos.Spec.Scheduler.Cron
-	}
-
-	if chaos.Spec.Duration != nil {
-		info.Scheduler.Duration = *chaos.Spec.Duration
-	}
-
-	return info, nil
+		Spec: chaos.Spec,
+	}, nil
 }
 
-func (e *ArchiveExperiment) ParseStressChaos() (ExperimentInfo, error) {
+// ParseStressChaos Parse StressChaos JSON string into ExperimentYAMLDescription.
+func (e *Experiment) ParseStressChaos() (ExperimentYAMLDescription, error) {
 	chaos := &v1alpha1.StressChaos{}
 	if err := json.Unmarshal([]byte(e.Experiment), &chaos); err != nil {
-		return ExperimentInfo{}, err
+		return ExperimentYAMLDescription{}, err
 	}
 
-	info := ExperimentInfo{
-		Name:        chaos.Name,
-		Namespace:   chaos.Namespace,
-		Labels:      chaos.Labels,
-		Annotations: chaos.Annotations,
-		Scope: ScopeInfo{
-			SelectorInfo: SelectorInfo{
-				NamespaceSelectors:  chaos.Spec.Selector.Namespaces,
-				LabelSelectors:      chaos.Spec.Selector.LabelSelectors,
-				AnnotationSelectors: chaos.Spec.Selector.AnnotationSelectors,
-				FieldSelectors:      chaos.Spec.Selector.FieldSelectors,
-				PhaseSelector:       chaos.Spec.Selector.PodPhaseSelectors,
-				Pods:                chaos.Spec.Selector.Pods,
-			},
-			Mode:  string(chaos.Spec.Mode),
-			Value: chaos.Spec.Value,
+	return ExperimentYAMLDescription{
+		APIVersion: chaos.APIVersion,
+		Kind:       chaos.Kind,
+		Metadata: ExperimentYAMLMetadata{
+			Name:        chaos.Name,
+			Namespace:   chaos.Namespace,
+			Labels:      chaos.Labels,
+			Annotations: chaos.Annotations,
 		},
-		Target: TargetInfo{
-			Kind: v1alpha1.KindStressChaos,
-			StressChaos: &StressChaosInfo{
-				Stressors:         chaos.Spec.Stressors,
-				StressngStressors: chaos.Spec.StressngStressors,
-			},
-		},
-	}
-
-	if chaos.Spec.Scheduler != nil {
-		info.Scheduler.Cron = chaos.Spec.Scheduler.Cron
-	}
-
-	if chaos.Spec.Duration != nil {
-		info.Scheduler.Duration = *chaos.Spec.Duration
-	}
-
-	if chaos.Spec.ContainerName != nil {
-		info.Target.StressChaos.ContainerName = chaos.Spec.ContainerName
-	}
-
-	return info, nil
+		Spec: chaos.Spec,
+	}, nil
 }
