@@ -1,0 +1,22 @@
+name: Integration Test
+on:
+  push:
+    branches:
+      - master
+      - release-1.0
+jobs:
+  run:
+    name: Upload
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+        with:
+          # Must use at least depth 2!
+          fetch-depth: 2
+
+      - name: Creating kind cluster 
+        uses: helm/kind-action@v1.0.0-rc.1
+
+      - name: Install Chaos Mesh
+        run: |
+          sh install.sh --local kind
