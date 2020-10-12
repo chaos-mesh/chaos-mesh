@@ -11,7 +11,7 @@ on:
 
 jobs:
   run:
-    name: Upload
+    name: Test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@master
@@ -24,4 +24,4 @@ jobs:
 
       - name: Install Chaos Mesh
         run: |
-          sh install.sh --local kind
+          bash install.sh --local kind
