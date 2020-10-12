@@ -34,13 +34,6 @@ var (
 	stressChaosLog = ctrl.Log.WithName("stresschaos-resource")
 )
 
-// SetupWebhookWithManager setups StressChaos's webhook with manager
-func (in *StressChaos) SetupWebhookWithManager(mgr ctrl.Manager) error {
-	return ctrl.NewWebhookManagedBy(mgr).
-		For(in).
-		Complete()
-}
-
 // +kubebuilder:webhook:path=/mutate-chaos-mesh-org-v1alpha1-stresschaos,mutating=true,failurePolicy=fail,groups=chaos-mesh.org,resources=stresschaos,verbs=create;update,versions=v1alpha1,name=mstresschaos.kb.io
 
 var _ webhook.Defaulter = &StressChaos{}
