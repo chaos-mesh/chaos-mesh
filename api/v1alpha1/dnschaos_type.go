@@ -14,16 +14,11 @@
 package v1alpha1
 
 import (
-	"time"
-
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
-
-// KindDNSChaos is the kind for network chaos
-const KindDNSChaos = "DNSChaos"
 
 // DNSChaosAction represents the chaos action about DNS.
 type DNSChaosAction string
@@ -52,11 +47,23 @@ const (
 	// TODO: maybe we can support set the RegExp for the host
 )
 
-func init() {
-	all.register(KindDNSChaos, &ChaosKind{
-		Chaos:     &DNSChaos{},
-		ChaosList: &DNSChaosList{},
-	})
+// EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
+// NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
+
+// +kubebuilder:object:root=true
+// +chaos-mesh:base
+
+// DNSChaos is the Schema for the networkchaos API
+type DNSChaos struct {
+	metav1.TypeMeta   `json:",inline"`
+	metav1.ObjectMeta `json:"metadata,omitempty"`
+
+	// Spec defines the behavior of a pod chaos experiment
+	Spec DNSChaosSpec `json:"spec"`
+
+	// +optional
+	// Most recently observed status of the chaos experiment about pods
+	Status DNSChaosStatus `json:"status"`
 }
 
 // DNSChaosSpec defines the desired state of DNSChaos
@@ -113,136 +120,4 @@ func (in *DNSChaosSpec) GetValue() string {
 // DNSChaosStatus defines the observed state of DNSChaos
 type DNSChaosStatus struct {
 	ChaosStatus `json:",inline"`
-}
-
-// +kubebuilder:object:root=true
-
-// DNSChaos is the Schema for the networkchaos API
-type DNSChaos struct {
-	metav1.TypeMeta   `json:",inline"`
-	metav1.ObjectMeta `json:"metadata,omitempty"`
-
-	// Spec defines the behavior of a pod chaos experiment
-	Spec DNSChaosSpec `json:"spec"`
-
-	// +optional
-	// Most recently observed status of the chaos experiment about pods
-	Status DNSChaosStatus `json:"status"`
-}
-
-func (in *DNSChaos) GetStatus() *ChaosStatus {
-	return &in.Status.ChaosStatus
-}
-
-// IsDeleted returns whether this resource has been deleted
-func (in *DNSChaos) IsDeleted() bool {
-	return !in.DeletionTimestamp.IsZero()
-}
-
-// IsPaused returns whether this resource has been paused
-func (in *DNSChaos) IsPaused() bool {
-	if in.Annotations == nil || in.Annotations[PauseAnnotationKey] != "true" {
-		return false
-	}
-	return true
-}
-
-// GetDuration would return the duration for chaos
-func (in *DNSChaos) GetDuration() (*time.Duration, error) {
-	if in.Spec.Duration == nil {
-		return nil, nil
-	}
-	duration, err := time.ParseDuration(*in.Spec.Duration)
-	if err != nil {
-		return nil, err
-	}
-	return &duration, nil
-}
-
-func (in *DNSChaos) GetNextStart() time.Time {
-	if in.Status.Scheduler.NextStart == nil {
-		return time.Time{}
-	}
-	return in.Status.Scheduler.NextStart.Time
-}
-
-func (in *DNSChaos) SetNextStart(t time.Time) {
-	if t.IsZero() {
-		in.Status.Scheduler.NextStart = nil
-		return
-	}
-
-	if in.Status.Scheduler.NextStart == nil {
-		in.Status.Scheduler.NextStart = &metav1.Time{}
-	}
-	in.Status.Scheduler.NextStart.Time = t
-}
-
-func (in *DNSChaos) GetNextRecover() time.Time {
-	if in.Status.Scheduler.NextRecover == nil {
-		return time.Time{}
-	}
-	return in.Status.Scheduler.NextRecover.Time
-}
-
-func (in *DNSChaos) SetNextRecover(t time.Time) {
-	if t.IsZero() {
-		in.Status.Scheduler.NextRecover = nil
-		return
-	}
-
-	if in.Status.Scheduler.NextRecover == nil {
-		in.Status.Scheduler.NextRecover = &metav1.Time{}
-	}
-	in.Status.Scheduler.NextRecover.Time = t
-}
-
-// GetScheduler would return the scheduler for chaos
-func (in *DNSChaos) GetScheduler() *SchedulerSpec {
-	return in.Spec.Scheduler
-}
-
-// GetChaos returns a chaos instance
-func (in *DNSChaos) GetChaos() *ChaosInstance {
-	instance := &ChaosInstance{
-		Name:      in.Name,
-		Namespace: in.Namespace,
-		Kind:      KindDNSChaos,
-		StartTime: in.CreationTimestamp.Time,
-		Action:    string(in.Spec.Action),
-		Status:    string(in.GetStatus().Experiment.Phase),
-		UID:       string(in.UID),
-	}
-	if in.Spec.Duration != nil {
-		instance.Duration = *in.Spec.Duration
-	}
-	if in.DeletionTimestamp != nil {
-		instance.EndTime = in.DeletionTimestamp.Time
-	}
-	return instance
-}
-
-// +kubebuilder:object:root=true
-
-// DNSChaosList contains a list of DNSChaos
-type DNSChaosList struct {
-	metav1.TypeMeta `json:",inline"`
-	metav1.ListMeta `json:"metadata,omitempty"`
-	Items           []DNSChaos `json:"items"`
-}
-
-// ListChaos returns a list of network chaos
-func (in *DNSChaosList) ListChaos() []*ChaosInstance {
-	if len(in.Items) == 0 {
-		return nil
-	}
-	res := make([]*ChaosInstance, 0, len(in.Items))
-	for _, item := range in.Items {
-		res = append(res, item.GetChaos())
-	}
-	return res
-}
-
-func init() {
-	SchemeBuilder.Register(&DNSChaos{}, &DNSChaosList{})
 }

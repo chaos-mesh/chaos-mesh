@@ -33,6 +33,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/webhook/config"
 	"github.com/chaos-mesh/chaos-mesh/pkg/webhook/config/watcher"
 
+	_ "github.com/chaos-mesh/chaos-mesh/controllers/dnschaos"
 	_ "github.com/chaos-mesh/chaos-mesh/controllers/httpchaos"
 	_ "github.com/chaos-mesh/chaos-mesh/controllers/iochaos"
 	_ "github.com/chaos-mesh/chaos-mesh/controllers/kernelchaos"
@@ -117,19 +118,6 @@ func main() {
 	if err != nil {
 		setupLog.Error(err, "fail to setup with manager")
 		os.Exit(1)
-	}
-
-	if err = (&controllers.DNSChaosReconciler{
-		Client:        mgr.GetClient(),
-		Reader:        mgr.GetAPIReader(),
-		EventRecorder: mgr.GetEventRecorderFor("dnschaos-controller"),
-		Log:           ctrl.Log.WithName("controllers").WithName("DNSChaos"),
-	}).SetupWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create controller", "controller", "DNSChaos")
-		os.Exit(1)
-	}
-	if err = (&chaosmeshv1alpha1.DNSChaos{}).SetupWebhookWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create webhook", "webhook", "DNSChaos")
 	}
 
 	// We only setup webhook for podiochaos, and the logic of applying chaos are in the mutation
