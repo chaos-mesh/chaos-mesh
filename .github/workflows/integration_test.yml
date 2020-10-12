@@ -25,3 +25,7 @@ jobs:
       - name: Install Chaos Mesh
         run: |
           bash install.sh --local kind
+
+      - name: Run integration test
+        run: |
+          bash test/integration_test/run.sh
