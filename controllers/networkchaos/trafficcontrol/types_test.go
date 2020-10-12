@@ -28,6 +28,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/test"
 	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
+	ctx "github.com/chaos-mesh/chaos-mesh/pkg/router/context"
 )
 
 func TestReconciler_applyNetem(t *testing.T) {
@@ -45,10 +46,12 @@ func TestReconciler_applyNetem(t *testing.T) {
 
 	v1alpha1.SchemeBuilder.AddToScheme(scheme.Scheme)
 
-	r := Reconciler{
-		Client:        fake.NewFakeClientWithScheme(scheme.Scheme, podObjects...),
-		EventRecorder: &record.FakeRecorder{},
-		Log:           ctrl.Log.WithName("controllers").WithName("NetworkChaos"),
+	r := endpoint{
+		Context: ctx.Context{
+			Client:        fake.NewFakeClientWithScheme(scheme.Scheme, podObjects...),
+			EventRecorder: &record.FakeRecorder{},
+			Log:           ctrl.Log.WithName("controllers").WithName("NetworkChaos"),
+		},
 	}
 
 	t.Run("netem without filter", func(t *testing.T) {
