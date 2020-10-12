@@ -152,7 +152,7 @@ func (s *Service) detail(c *gin.Context) {
 	switch data.Kind {
 	case v1alpha1.KindPodChaos:
 		yaml, err = data.ParsePodChaos()
-	case v1alpha1.KindIOChaos:
+	case v1alpha1.KindIoChaos:
 		yaml, err = data.ParseIOChaos()
 	case v1alpha1.KindNetworkChaos:
 		yaml, err = data.ParseNetworkChaos()
