@@ -64,7 +64,7 @@ all: yaml image
 
 build: binary
 
-check: fmt vet boilerplate lint generate yaml
+check: fmt vet boilerplate lint generate yaml tidy
 
 # Run tests
 test: failpoint-enable generate manifests test-utils
