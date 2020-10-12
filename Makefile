@@ -172,7 +172,7 @@ vet:
 tidy: clean
 	@echo "go mod tidy"
 	GO111MODULE=on go mod tidy
-	git --no-pager diff -U --exit-code go.mod go.sum
+	# git diff -U --exit-code go.mod go.sum
 
 update-install-scipt:
 	./hack/update_install_script.sh
