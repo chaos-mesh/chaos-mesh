@@ -6,99 +6,15 @@ sidebar_label: Develop a New Chaos
 
 After [preparing the development environment](setup_env.md), let's develop a new type of chaos, HelloWorldChaos, which only prints a "Hello World!" message to the log. Generally, to add a new chaos type for Chaos Mesh, you need to take the following steps:
 
-1. [Add the chaos object in controller](#add-the-chaos-object-in-controller)
+1. [Define the schema type](#define-the-schema-type)
 2. [Register the CRD](#register-the-crd)
-3. [Implement the schema type](#implement-the-schema-type)
+3. [Register the handler for this chaos object](#register-the-handler-for-this-chaos-object)
 4. [Make the Docker image](#make-the-docker-image)
 5. [Run chaos](#run-chaos)
 
-## Add the chaos object in controller
+## Define the schema type
 
-In Chaos Mesh, all chaos types are managed by the controller manager. To add a new chaos type, you need to start from adding the corresponding reconciler type in the controller, as instructed in the following steps:
-
-1. Add the HelloWorldChaos object in the controller manager [main.go](https://github.com/chaos-mesh/chaos-mesh/blob/master/cmd/controller-manager/main.go#L104).
-
-    You will notice existing chaos types such as PodChaos, NetworkChaos and IOChaos. Add the new type below them:
-
-    ```go
-    	if err = (&controllers.HelloWorldChaosReconciler{
-    		Client: mgr.GetClient(),
-    		Log:    ctrl.Log.WithName("controllers").WithName("HelloWorldChaos"),
-    	}).SetupWithManager(mgr); err != nil {
-    		setupLog.Error(err, "unable to create controller", "controller", "HelloWorldChaos")
-    		os.Exit(1)
-    	}
-    ```
-
-2. Under [controllers](https://github.com/chaos-mesh/chaos-mesh/tree/master/controllers), create a `helloworldchaos_controller.go` file and edit it as below:
-
-    ```go
-    package controllers
-
-    import (
-      "github.com/go-logr/logr"
-
-      chaosmeshv1alpha1 "github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-
-      ctrl "sigs.k8s.io/controller-runtime"
-      "sigs.k8s.io/controller-runtime/pkg/client"
-    )
-
-    // HelloWorldChaosReconciler reconciles a HelloWorldChaos object
-    type HelloWorldChaosReconciler struct {
-      client.Client
-      Log logr.Logger
-    }
-
-    // +kubebuilder:rbac:groups=chaos-mesh.org,resources=helloworldchaos,verbs=get;list;watch;create;update;patch;delete
-    // +kubebuilder:rbac:groups=chaos-mesh.org,resources=helloworldchaos/status,verbs=get;update;patch
-
-    func (r *HelloWorldChaosReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
-      logger := r.Log.WithValues("reconciler", "helloworldchaos")
-
-      // the main logic of `HelloWorldChaos`, it prints a log `Hello World!` and returns nothing.
-      logger.Info("Hello World!")
-
-      return ctrl.Result{}, nil
-    }
-
-    func (r *HelloWorldChaosReconciler) SetupWithManager(mgr ctrl.Manager) error {
-    // exports `HelloWorldChaos` object, which represents the yaml schema content the user applies.
-    return ctrl.NewControllerManagedBy(mgr).
-      For(&chaosmeshv1alpha1.HelloWorldChaos{}).
-      Complete(r)
-    }
-    ```
-
-> **Note:**
->
-> The comment `// +kubebuilder:rbac:groups=chaos-mesh.org...` is an authority control mechanism that decides which account can access this reconciler. To make it accessible by the dashboard and chaos-controller-manager, you need to modify [controller-manager-rbac.yaml](https://github.com/chaos-mesh/chaos-mesh/blob/master/helm/chaos-mesh/templates/controller-manager-rbac.yaml) accordingly:
-
-```yaml
-  - apiGroups: ["chaos-mesh.org"]
-    resources:
-      - podchaos
-      - networkchaos
-      - iochaos
-      - helloworldchaos    # Add this line in all chaos-mesh.org group
-    verbs: ["*"]
-```
-
-## Register the CRD
-
-The HelloWorldChaos object is a custom resource object in Kubernetes. This means you need to register the corresponding CRD in the Kubernetes API. To do this, modify [kustomization.yaml](https://github.com/chaos-mesh/chaos-mesh/blob/master/config/crd/kustomization.yaml) by adding the corresponding line as shown below:
-
-```yaml
-resources:
-- bases/chaos-mesh.org_podchaos.yaml
-- bases/chaos-mesh.org_networkchaos.yaml
-- bases/chaos-mesh.org_iochaos.yaml
-- bases/chaos-mesh.org_helloworldchaos.yaml  # this is the new line
-```
-
-## Implement the schema type
-
-To implement the schema type for the new chaos object, add `helloworldchaos_types.go` in the [api directory](https://github.com/chaos-mesh/chaos-mesh/tree/master/api/v1alpha1) and modify it as below:
+To define the schema type for the new chaos object, add `helloworldchaos_types.go` in the api directory [`/api/v1alpha1`](https://github.com/chaos-mesh/chaos-mesh/tree/master/api/v1alpha1) and fill it with the following content:
 
 ```go
 package v1alpha1
@@ -108,28 +24,35 @@ import (
 )
 
 // +kubebuilder:object:root=true
+// +chaos-mesh:base
 
 // HelloWorldChaos is the Schema for the helloworldchaos API
 type HelloWorldChaos struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
+
+	Spec   HelloWorldChaosSpec   `json:"spec"`
+	Status HelloWorldChaosStatus `json:"status,omitempty"`
 }
 
-// +kubebuilder:object:root=true
+// HelloWorldChaosSpec is the content of the specification for a HelloWorldChaos
+type HelloWorldChaosSpec struct {
+	// Duration represents the duration of the chaos action
+	// +optional
+	Duration *string `json:"duration,omitempty"`
 
-// HelloWorldChaosList contains a list of HelloWorldChaos
-type HelloWorldChaosList struct {
-	metav1.TypeMeta `json:",inline"`
-	metav1.ListMeta `json:"metadata,omitempty"`
-	Items           []HelloWorldChaos `json:"items"`
+	// Scheduler defines some schedule rules to control the running time of the chaos experiment about time.
+	// +optional
+	Scheduler *SchedulerSpec `json:"scheduler,omitempty"`
 }
 
-func init() {
-	SchemeBuilder.Register(&HelloWorldChaos{}, &HelloWorldChaosList{})
+// HelloWorldChaosStatus represents the status of a HelloWorldChaos
+type HelloWorldChaosStatus struct {
+	ChaosStatus `json:",inline"`
 }
 ```
 
-With this file added, the HelloWorldChaos schema type is defined and can be called by the following YAML lines:
+With this file added, the HelloWorldChaos schema type is defined. The structure of it can be described as the YAML file below:
 
 ```yaml
 apiVersion: chaos-mesh.org/v1alpha1
@@ -137,7 +60,79 @@ kind: HelloWorldChaos
 metadata:
   name: <name-of-this-resource>
   namespace: <ns-of-this-resource>
+spec:
+  duration: <duration-of-every-action>
+  scheduler:
+    cron: <the-cron-job-definition-of-this-chaos>
+status:
+  phase: <phase-of-this-resource>
+  ...
 ```
+
+`make generate` will generate boilerplate functions for it, which is needed to integrate the resource in the Chaos Mesh.
+
+## Register the CRD
+
+The HelloWorldChaos object is a custom resource object in Kubernetes. This means you need to register the corresponding CRD in the Kubernetes API. Run `make yaml`, then the CRD will be generated in `/config/crd/bases/chaos-mesh.org_helloworldchaos.yaml`. In order to combine all these YAML file into `/manifests/crd.yaml`, modify [kustomization.yaml](https://github.com/chaos-mesh/chaos-mesh/blob/master/config/crd/kustomization.yaml) by adding the corresponding line as shown below:
+
+```yaml
+resources:
+- bases/chaos-mesh.org_podchaos.yaml
+- bases/chaos-mesh.org_networkchaos.yaml
+- bases/chaos-mesh.org_iochaos.yaml
+- bases/chaos-mesh.org_helloworldchaos.yaml  # this is the new line
+```
+
+Then the definition of HelloWorldChaos will show in `/manifests/crd.yaml`. You can check it through `git diff`
+
+## Register the handler for this chaos object
+
+Create file `/controllers/helloworldchaos/endpoint.go` and fill it with following codes:
+
+```go
+package helloworldchaos
+
+import (
+	"context"
+
+	"k8s.io/apimachinery/pkg/runtime"
+	ctrl "sigs.k8s.io/controller-runtime"
+
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/pkg/router"
+	ctx "github.com/chaos-mesh/chaos-mesh/pkg/router/context"
+	end "github.com/chaos-mesh/chaos-mesh/pkg/router/endpoint"
+)
+
+type endpoint struct {
+	ctx.Context
+}
+
+func (e *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.InnerObject) error {
+	e.Log.Info("Hello World!")
+	return nil
+}
+
+func (e *endpoint) Recover(ctx context.Context, req ctrl.Request, chaos v1alpha1.InnerObject) error {
+	return nil
+}
+
+func (e *endpoint) Object() v1alpha1.InnerObject {
+	return &v1alpha1.HelloWorldChaos{}
+}
+
+func init() {
+	router.Register("helloworldchaos", &v1alpha1.HelloWorldChaos{}, func(obj runtime.Object) bool {
+		return true
+	}, func(ctx ctx.Context) end.Endpoint {
+		return &endpoint{
+			Context: ctx,
+		}
+	})
+}
+```
+
+We should also import `github.com/chaos-mesh/chaos-mesh/controllers/helloworldchaos` in the `/cmd/controller-manager/main.go`, then it will register on the route table when the controller starts up.
 
 ## Make the Docker image
 
@@ -206,6 +201,7 @@ Now take the following steps to run chaos:
     metadata:
       name: hello-world
       namespace: chaos-testing
+    spec: {}
     ```
 
 4. Apply the chaos:
