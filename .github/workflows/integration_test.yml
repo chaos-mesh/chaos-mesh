@@ -4,6 +4,11 @@ on:
     branches:
       - master
       - release-1.0
+  pull_request:
+    branches:
+      - master
+      - release-1.0
+
 jobs:
   run:
     name: Upload
