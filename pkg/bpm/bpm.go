@@ -246,6 +246,14 @@ func (b *ProcessBuilder) SetPidNS(nsPath string) *ProcessBuilder {
 	}})
 }
 
+// SetMountNS sets the namespace of the mount
+func (b *ProcessBuilder) SetMountNS(nsPath string) *ProcessBuilder {
+	return b.SetNS([]nsOption{{
+		Typ:  MountNS,
+		Path: nsPath,
+	}})
+}
+
 // SetNS sets the namespace of the process
 func (b *ProcessBuilder) SetNS(options []nsOption) *ProcessBuilder {
 	b.nsOptions = append(b.nsOptions, options...)

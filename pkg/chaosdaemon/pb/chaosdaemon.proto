@@ -21,6 +21,8 @@ service ChaosDaemon {
   rpc CancelStressors (CancelStressRequest) returns (google.protobuf.Empty) {}
 
   rpc ApplyIoChaos(ApplyIoChaosRequest) returns (ApplyIoChaosResponse) {}
+
+  rpc SetDNSServer (SetDNSServerRequest) returns (google.protobuf.Empty) {}
 }
 
 message TcHandle {
@@ -196,4 +198,10 @@ message Tc {
   Netem netem = 2;
   Tbf tbf = 3;
   string ipset = 4;
+}
+
+message SetDNSServerRequest {
+  string container_id = 1;
+  string dns_server = 2;
+  bool enable = 3;
 }

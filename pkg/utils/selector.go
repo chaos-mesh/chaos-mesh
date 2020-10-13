@@ -207,6 +207,25 @@ func SelectPods(ctx context.Context, c client.Client, r client.Reader, selector 
 	return pods, nil
 }
 
+// SelectAndFilterService returns the list of service that filtered by selector
+func SelectAndFilterService(ctx context.Context, c client.Client, selectLabels map[string]string) (v1.ServiceList, error) {
+	var services v1.ServiceList
+	var listOptions = client.ListOptions{}
+	if len(selectLabels) > 0 {
+		listOptions.LabelSelector = labels.SelectorFromSet(labels.Set(selectLabels))
+	}
+
+	if err := c.List(ctx, &services, &listOptions); err != nil {
+		return services, err
+	}
+
+	if len(services.Items) == 0 {
+		return services, fmt.Errorf("service not found, labels %v", selectLabels)
+	}
+
+	return services, nil
+}
+
 // CheckPodMeetSelector checks if this pod meets the selection criteria.
 // TODO: support to check fieldsSelector
 func CheckPodMeetSelector(pod v1.Pod, selector v1alpha1.SelectorSpec) (bool, error) {
