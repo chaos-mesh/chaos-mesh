@@ -135,6 +135,8 @@ function selectorsToArr(selectors: Object, separator: string) {
 export function yamlToExperiment(yamlObj: any): Experiment {
   const { kind, metadata, spec } = snakeCaseKeys(yamlObj)
 
+  console.log(kind, spec)
+
   let result = {
     ...defaultExperimentSchema,
     ...metadata,
@@ -250,6 +252,7 @@ export function yamlToExperiment(yamlObj: any): Experiment {
     ...result,
     target: {
       ...defaultExperimentSchema.target,
+      kind,
       pod_chaos: {
         action: spec.action,
         [action]: spec[action],
