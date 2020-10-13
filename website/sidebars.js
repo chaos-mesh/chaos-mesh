@@ -23,19 +23,7 @@ module.exports = {
       type: 'category',
       label: 'User Guides',
       items: [
-        {
-          type: 'category',
-          label: 'Configure Chaos',
-          items: [
-            'user_guides/podchaos_experiment',
-            'user_guides/networkchaos_experiment',
-            'user_guides/stresschaos_experiment',
-            'user_guides/timechaos_experiment',
-            'user_guides/iochaos_experiment',
-            'user_guides/kernelchaos_experiment',
-          ],
-        },
-        'user_guides/experiment_scope',
+            'user_guides/experiment_scope',
       ],
     },
     {
