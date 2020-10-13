@@ -32,3 +32,7 @@ export function difference<T>(setA: Set<T>, setB: Set<T>) {
   }
   return _difference
 }
+
+export function assumeType<T>(x: unknown): asserts x is T {
+  return
+}

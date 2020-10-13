@@ -1,7 +1,8 @@
+import { assumeType, difference } from './utils'
+
 import { Archive } from 'api/archives.type'
 import { Event } from 'api/events.type'
 import { Experiment } from 'api/experiments.type'
-import { difference } from './utils'
 
 type Merge<T extends object, U extends object> = T & U
 
@@ -170,7 +171,8 @@ export function searchGlobal({ events, experiments, archives }: GlobalSearchData
         })
         break
       default:
-        result = keyword in target[0] ? target.filter((d) => (d as any)[keyword]?.match(new RegExp(value, 'i'))) : []
+        assumeType<keyof Event & Keyword>(keyword)
+        result = keyword in target[0] ? target.filter((d) => d[keyword]?.match(new RegExp(value, 'i'))) : []
         searchPath.events.push({
           [keyword]: result[0] ? result[0][keyword] : '',
           value,
@@ -196,9 +198,10 @@ export function searchGlobal({ events, experiments, archives }: GlobalSearchData
         })
         break
       default:
-        result = keyword in target[0] ? target.filter((d) => (d as any)[keyword]?.match(new RegExp(value, 'i'))) : []
+        assumeType<keyof Experiment & Keyword>(keyword)
+        result = keyword in target[0] ? target.filter((d) => d[keyword]?.match(new RegExp(value, 'i'))) : []
         searchPath.experiments.push({
-          [keyword]: result[0] ? (result[0] as any)[keyword] : '',
+          [keyword]: result[0] ? result[0][keyword] : '',
           value,
         })
         break
@@ -222,9 +225,10 @@ export function searchGlobal({ events, experiments, archives }: GlobalSearchData
         })
         break
       default:
-        result = keyword in target[0] ? target.filter((d) => (d as any)[keyword]?.match(new RegExp(value, 'i'))) : []
+        assumeType<keyof Archive & Keyword>(keyword)
+        result = keyword in target[0] ? target.filter((d) => d[keyword]?.match(new RegExp(value, 'i'))) : []
         searchPath.archives.push({
-          [keyword]: result[0] ? (result[0] as any)[keyword] : '',
+          [keyword]: result[0] ? result[0][keyword] : '',
           value,
         })
         break

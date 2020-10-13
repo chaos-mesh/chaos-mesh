@@ -17,6 +17,7 @@ import SearchIcon from '@material-ui/icons/Search'
 import Tooltip from 'components/Tooltip'
 import _debounce from 'lodash.debounce'
 import api from 'api'
+import { assumeType } from 'lib/utils'
 import { setSearchModalOpen } from 'slices/globalStatus'
 import store from 'store'
 import { useIntl } from 'react-intl'
@@ -269,20 +270,16 @@ const Search: React.FC = () => {
             <Loading></Loading>
           ) : (
             <List component="nav" aria-label="search-result">
-              {Object.keys(searchResult || {}).map((key, index) => {
+              {Object.keys(searchResult || {}).map((key) => {
+                assumeType<GlobalSearchData>(searchResult)
+                assumeType<keyof GlobalSearchData>(key)
                 return (
                   <React.Fragment key={key}>
                     <ListSubheader disableSticky={true} style={{ fontSize: '22px', padding: 0 }}>
                       {key}
                     </ListSubheader>
-                    {((searchResult as GlobalSearchData)[key as keyof GlobalSearchData] as Array<
-                      GlobalSearchData[keyof GlobalSearchData][number]
-                    >).length !== 0 ? (
-                      <SearchResultForOneCate
-                        category={key as keyof GlobalSearchData}
-                        result={(searchResult as GlobalSearchData)[key as keyof GlobalSearchData]}
-                        searchPath={searchPath![key as keyof GlobalSearchData]}
-                      />
+                    {searchResult[key].length !== 0 ? (
+                      <SearchResultForOneCate category={key} result={searchResult[key]} searchPath={searchPath![key]} />
                     ) : (
                       <Paper variant="outlined">
                         <ListItemLink to="/">
