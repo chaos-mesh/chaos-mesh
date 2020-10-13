@@ -81,7 +81,7 @@ main() {
     local install_dependency_only=false
     local k3s=false
     local host_network=false
-    local docker_registry=""
+    local docker_registry="docker.io"
 
     while [[ $# -gt 0 ]]
     do
