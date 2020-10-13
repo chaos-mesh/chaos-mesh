@@ -17,7 +17,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-
 	"github.com/go-logr/logr"
 	"github.com/hashicorp/go-multierror"
 	v1 "k8s.io/api/core/v1"
@@ -116,51 +115,27 @@ func (r *Reconciler) setAllPodsNotReady(ctx context.Context, pods []v1.Pod, podc
 	r.Log.Info(" all update condition")
 	for index := range pods {
 		pod := &pods[index]
-		if containsReadinessGate(pod) {
-			r.Log.Info(" into  update condition")
-			key, err := cache.MetaNamespaceKeyFunc(pod)
-			if err != nil {
-				return err
-			}
-			podchaos.Finalizers = utils.InsertFinalizer(podchaos.Finalizers, key)
+		if !containsReadinessGate(pod) {
+			continue
+		}
+		r.Log.Info(" into  update condition")
+		key, err := cache.MetaNamespaceKeyFunc(pod)
+		if err != nil {
+			return err
+		}
+		podchaos.Finalizers = utils.InsertFinalizer(podchaos.Finalizers, key)
 
-			var newCondition = v1.PodCondition{
-				Type:               ChaosMeshInjectNotReady,
-				LastTransitionTime: metav1.Time{},
-				Status:             v1.ConditionFalse,
-				Reason:             "StartChaosMeshInjectNotReady",
-			}
-			setPodCondition(pod, newCondition)
-			r.Log.Info(" update condition")
-			if err := r.Update(ctx, pod); err != nil {
-				r.Log.Error(err, "unable to update condition")
-				return err
-			}
-
-		} else {
-			clonePod := &v1.Pod{
-				ObjectMeta: metav1.ObjectMeta{
-					Labels:          pod.Labels,
-					Annotations:     pod.Annotations,
-					GenerateName:    pod.GenerateName,
-					Finalizers:      pod.Finalizers,
-					OwnerReferences: pod.OwnerReferences,
-				},
-			}
-			if len(pod.Namespace) > 0 {
-				clonePod.ObjectMeta.Namespace = pod.Namespace
-			}
-			clonePod.Spec = *pod.Spec.DeepCopy()
-			InjectReadinessGate(clonePod)
-			if err := r.Delete(ctx, pod); err != nil {
-				r.Log.Error(err, "unable to delete pod")
-				return err
-			}
-			if err := r.Create(ctx, clonePod); err != nil {
-				r.Log.Error(err, "unable to delete pod")
-				return err
-			}
-
+		var newCondition = v1.PodCondition{
+			Type:               ChaosMeshInjectNotReady,
+			LastTransitionTime: metav1.Time{},
+			Status:             v1.ConditionTrue,
+			Reason:             "StartChaosMeshInjectNotReady",
+		}
+		setPodCondition(pod, newCondition)
+		r.Log.Info(" update condition")
+		if err := r.Status().Update(ctx, pod); err != nil {
+			r.Log.Error(err, "unable to update condition")
+			return err
 		}
 		ps := v1alpha1.PodStatus{
 			Namespace: pod.Namespace,
@@ -179,25 +154,6 @@ func (r *Reconciler) setAllPodsNotReady(ctx context.Context, pods []v1.Pod, podc
 	return nil
 }
 
-// InjectReadinessGate injects ChaosMeshInjectNotReady into pod.spec.readinessGates
-func InjectReadinessGate(pod *v1.Pod) {
-	for _, r := range pod.Spec.ReadinessGates {
-		if r.ConditionType == ChaosMeshInjectNotReady {
-			return
-		}
-	}
-	pod.Spec.ReadinessGates = append(pod.Spec.ReadinessGates, v1.PodReadinessGate{ConditionType: ChaosMeshInjectNotReady})
-}
-
-func removeReadinessGate(pod *v1.Pod) {
-	for i, r := range pod.Spec.ReadinessGates {
-		if r.ConditionType == ChaosMeshInjectNotReady {
-			pod.Spec.ReadinessGates = append(pod.Spec.ReadinessGates[:], pod.Spec.ReadinessGates[i+1:]...)
-		}
-	}
-	return
-}
-
 func setPodCondition(pod *v1.Pod, condition v1.PodCondition) {
 	for i, c := range pod.Status.Conditions {
 		if c.Type == condition.Type {
@@ -210,6 +166,15 @@ func setPodCondition(pod *v1.Pod, condition v1.PodCondition) {
 	pod.Status.Conditions = append(pod.Status.Conditions, condition)
 }
 
+func resetPodCondition(pod *v1.Pod) {
+	for i, c := range pod.Status.Conditions {
+		if c.Type == ChaosMeshInjectNotReady {
+			pod.Status.Conditions = append(pod.Status.Conditions[:i], pod.Status.Conditions[i+1:]...)
+			return
+		}
+	}
+}
+
 // Recover implements the reconciler.InnerReconciler.Recover
 func (r *Reconciler) Recover(ctx context.Context, req ctrl.Request, obj v1alpha1.InnerObject) error {
 
@@ -220,7 +185,7 @@ func (r *Reconciler) Recover(ctx context.Context, req ctrl.Request, obj v1alpha1
 		return err
 	}
 
-	if err := r.cleanReadinessGateAndRecover(ctx, podchaos); err != nil {
+	if err := r.setPodReadyAndRecover(ctx, podchaos); err != nil {
 		return err
 	}
 
@@ -228,7 +193,7 @@ func (r *Reconciler) Recover(ctx context.Context, req ctrl.Request, obj v1alpha1
 	return nil
 }
 
-func (r *Reconciler) cleanReadinessGateAndRecover(ctx context.Context, podchaos *v1alpha1.PodChaos) error {
+func (r *Reconciler) setPodReadyAndRecover(ctx context.Context, podchaos *v1alpha1.PodChaos) error {
 	var result error
 
 	for _, key := range podchaos.Finalizers {
@@ -275,29 +240,11 @@ func (r *Reconciler) cleanReadinessGateAndRecover(ctx context.Context, podchaos 
 
 func (r *Reconciler) recoverPod(ctx context.Context, pod *v1.Pod, podchaos *v1alpha1.PodChaos) error {
 	r.Log.Info("Recovering", "namespace", pod.Namespace, "name", pod.Name)
-	clonePod := &v1.Pod{
-		ObjectMeta: metav1.ObjectMeta{
-			Labels:          pod.Labels,
-			Annotations:     pod.Annotations,
-			GenerateName:    pod.GenerateName,
-			Finalizers:      pod.Finalizers,
-			OwnerReferences: pod.OwnerReferences,
-		},
-	}
-	if len(pod.Namespace) > 0 {
-		clonePod.ObjectMeta.Namespace = pod.Namespace
-	}
-	clonePod.Spec = *pod.Spec.DeepCopy()
-	removeReadinessGate(clonePod)
-	if err := r.Delete(ctx, pod); err != nil {
-		r.Log.Error(err, "unable to delete pod")
+	resetPodCondition(pod)
+	if err := r.Update(ctx, pod); err != nil {
+		r.Log.Error(err, "unable to update pod")
 		return err
 	}
-	if err := r.Create(ctx, clonePod); err != nil {
-		r.Log.Error(err, "unable to delete pod")
-		return err
-	}
-
 	return nil
 }
 

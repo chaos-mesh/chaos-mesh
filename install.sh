@@ -920,6 +920,7 @@ rules:
     verbs:
       - patch
       - create
+      - update
   - apiGroups: [ "" ]
     resources: [ "configmaps" ]
     verbs: [ "*" ]
