@@ -728,7 +728,7 @@ ensure_pods_ready() {
         echo "Waiting for pod running" && sleep 10;
 
         kubectl get pods -n "${namespace}" ${labels} --no-headers | >&2 grep -v Running || true
-
+        kubectl describe pod chaos-dashboard -n chaos-testing
         ((count=count+1))
         if [ $count -gt $limit ]; then
             printf "Waiting for pod status running timeout\n"
