@@ -62,15 +62,26 @@ func Register(r *gin.RouterGroup, s *Service) {
 	endpoint.GET("/report", s.report)
 }
 
+// Archive defines the basic information of an archive.
+type Archive struct {
+	UID        string    `json:"uid"`
+	Kind       string    `json:"kind"`
+	Namespace  string    `json:"namespace"`
+	Name       string    `json:"name"`
+	Action     string    `json:"action"`
+	StartTime  time.Time `json:"start_time"`
+	FinishTime time.Time `json:"finish_time"`
+}
+
 // Detail represents an archive instance.
 type Detail struct {
-	core.Archive
+	Archive
 	YAML core.ExperimentYAMLDescription `json:"yaml"`
 }
 
 // Report defines the report of archive experiments.
 type Report struct {
-	Meta           *core.Archive `json:"meta"`
+	Meta           *Archive      `json:"meta"`
 	Events         []*core.Event `json:"events"`
 	TotalTime      string        `json:"total_time"`
 	TotalFaultTime string        `json:"total_fault_time"`
@@ -83,7 +94,7 @@ type Report struct {
 // @Param namespace query string false "namespace"
 // @Param name query string false "name"
 // @Param kind query string false "kind" Enums(PodChaos, IoChaos, NetworkChaos, TimeChaos, KernelChaos, StressChaos)
-// @Success 200 {array} core.Archive
+// @Success 200 {array} Archive
 // @Router /archives [get]
 // @Failure 500 {object} utils.APIError
 func (s *Service) list(c *gin.Context) {
@@ -91,17 +102,17 @@ func (s *Service) list(c *gin.Context) {
 	name := c.Query("name")
 	ns := c.Query("namespace")
 
-	data, err := s.archive.ListMeta(context.Background(), kind, ns, name)
+	data, err := s.archive.ListMeta(context.Background(), kind, ns, name, true)
 	if err != nil {
 		c.Status(http.StatusInternalServerError)
 		_ = c.Error(utils.ErrInternalServer.NewWithNoMessage())
 		return
 	}
 
-	var archives []core.Archive
+	archives := make([]Archive, 0)
 
 	for _, d := range data {
-		archives = append(archives, core.Archive{
+		archives = append(archives, Archive{
 			UID:        d.UID,
 			Kind:       d.Kind,
 			Namespace:  d.Namespace,
@@ -172,7 +183,7 @@ func (s *Service) detail(c *gin.Context) {
 	}
 
 	detail = Detail{
-		Archive: core.Archive{
+		Archive: Archive{
 			UID:        data.UID,
 			Kind:       data.Kind,
 			Name:       data.Name,
@@ -219,7 +230,7 @@ func (s *Service) report(c *gin.Context) {
 		}
 		return
 	}
-	report.Meta = &core.Archive{
+	report.Meta = &Archive{
 		UID:        meta.UID,
 		Kind:       meta.Kind,
 		Namespace:  meta.Namespace,

@@ -33,7 +33,7 @@ import (
 )
 
 var (
-	// Module includes the providers and registers provided by apiserver and handlers.
+	// Module includes the providers (gin engine and api router) and the registers.
 	Module = fx.Options(
 		fx.Provide(
 			newEngine,

@@ -21,37 +21,28 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 )
 
-// ExperimentStore defines operations for working with archives and experiments
+// ExperimentStore defines operations for working with experiments.
 type ExperimentStore interface {
-	// List returns an archive experiment list from the datastore.
-	List(ctx context.Context, kind, namespace, name string) ([]*Experiment, error)
+	// ListMeta returns experiment metadata list from the datastore.
+	ListMeta(ctx context.Context, kind, namespace, name string, archived bool) ([]*ExperimentMeta, error)
 
-	// ListMeta returns an archive experiment metadata list from the datastore.
-	ListMeta(ctx context.Context, kind, namespace, name string) ([]*ExperimentMeta, error)
-
-	// Find returns an archive experiment by ID.
-	Find(context.Context, int64) (*Experiment, error)
-
-	// Delete deletes the experiment from the datastore.
-	Delete(context.Context, *Experiment) error
-
-	// DetailList returns a list of archive experiments from the datastore.
-	DetailList(ctx context.Context, kind, namespace, name, uid string) ([]*Experiment, error)
-
-	// DeleteByFinishTime deletes experiments whose time difference is greater than the given time from FinishTime.
-	DeleteByFinishTime(context.Context, time.Duration) error
-
-	// Archive archives experiments whose "archived" field is false,
-	Archive(ctx context.Context, namespace, name string) error
-
-	// Set sets the experiment.
-	Set(context.Context, *Experiment) error
-
-	// FindByUID returns an experiment record by the UID of the experiment.
+	// FindByUID returns an experiment by UID.
 	FindByUID(ctx context.Context, UID string) (*Experiment, error)
 
-	// FindMetaByUID returns an archive experiment by UID.
+	// FindMetaByUID returns an experiment metadata by UID.
 	FindMetaByUID(context.Context, string) (*ExperimentMeta, error)
+
+	// Set sets the experiment to archive.
+	Set(context.Context, *Experiment) error
+
+	// Archive archives experiments which "archived" field is false.
+	Archive(ctx context.Context, namespace, name string) error
+
+	// Delete deletes the archive from the datastore.
+	Delete(context.Context, *Experiment) error
+
+	// DeleteByFinishTime deletes archives which time difference is greater than the given time from FinishTime.
+	DeleteByFinishTime(context.Context, time.Duration) error
 
 	// DeleteIncompleteExperiments deletes all incomplete experiments.
 	// If the chaos-dashboard was restarted and the experiment is completed during the restart,
@@ -60,13 +51,13 @@ type ExperimentStore interface {
 	DeleteIncompleteExperiments(context.Context) error
 }
 
-// Experiment represents an experiment instance.
+// Experiment represents an experiment instance. Use in db.
 type Experiment struct {
 	ExperimentMeta
 	Experiment string `gorm:"size:2048"` // JSON string
 }
 
-// ExperimentMeta defines the meta data for Experiment. Use in db.
+// ExperimentMeta defines the metadata of an experiment. Use in db.
 type ExperimentMeta struct {
 	ID         uint       `gorm:"primary_key" json:"id"`
 	CreatedAt  time.Time  `json:"created_at"`
@@ -80,17 +71,6 @@ type ExperimentMeta struct {
 	StartTime  time.Time  `json:"start_time"`
 	FinishTime time.Time  `json:"finish_time"`
 	Archived   bool       `json:"archived"`
-}
-
-// Archive defines the basic information of an archive.
-type Archive struct {
-	UID        string    `json:"uid"`
-	Kind       string    `json:"kind"`
-	Namespace  string    `json:"namespace"`
-	Name       string    `json:"name"`
-	Action     string    `json:"action"`
-	StartTime  time.Time `json:"start_time"`
-	FinishTime time.Time `json:"finish_time"`
 }
 
 // ExperimentYAMLDescription defines the YAML structure of an experiment.
