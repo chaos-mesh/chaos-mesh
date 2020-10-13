@@ -125,7 +125,7 @@ const ScopePodsTable: React.FC<ScopePodsTableProps> = ({ scope = 'scope', pods }
         </TableHead>
         <TableBody>
           {pods.map((pod) => (
-            <TableRow key={pod.name} onClick={handleSelect(pod.name)}>
+            <TableRow key={pod.name + pod.namespace} onClick={handleSelect(pod.name)}>
               <TableCell padding="checkbox">
                 <Checkbox checked={isSelected(pod.name)} />
               </TableCell>

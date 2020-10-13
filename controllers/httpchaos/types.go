@@ -16,29 +16,25 @@ package httpchaos
 import (
 	"context"
 	"errors"
-	"fmt"
 
-	"github.com/go-logr/logr"
 	"golang.org/x/sync/errgroup"
 	v1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/tools/cache"
-	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	"github.com/chaos-mesh/chaos-mesh/controllers/common"
+	"github.com/chaos-mesh/chaos-mesh/pkg/router"
+	ctx "github.com/chaos-mesh/chaos-mesh/pkg/router/context"
+	end "github.com/chaos-mesh/chaos-mesh/pkg/router/endpoint"
 	"github.com/chaos-mesh/chaos-mesh/pkg/utils"
 )
 
-type Reconciler struct {
-	client.Client
-	client.Reader
-	record.EventRecorder
-	Log logr.Logger
+type endpoint struct {
+	ctx.Context
 }
 
-func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.InnerObject) error {
+func (r *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.InnerObject) error {
 	httpFaultChaos, ok := chaos.(*v1alpha1.HTTPChaos)
 	if !ok {
 		err := errors.New("chaos is not HttpFaultChaos")
@@ -58,7 +54,7 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1
 	return nil
 }
 
-func (r *Reconciler) Recover(ctx context.Context, req ctrl.Request, chaos v1alpha1.InnerObject) error {
+func (r *endpoint) Recover(ctx context.Context, req ctrl.Request, chaos v1alpha1.InnerObject) error {
 	httpFaultChaos, ok := chaos.(*v1alpha1.HTTPChaos)
 	if !ok {
 		err := errors.New("chaos is not HttpChaos")
@@ -69,34 +65,11 @@ func (r *Reconciler) Recover(ctx context.Context, req ctrl.Request, chaos v1alph
 	return nil
 }
 
-func (r *Reconciler) Object() v1alpha1.InnerObject {
+func (r *endpoint) Object() v1alpha1.InnerObject {
 	return &v1alpha1.HTTPChaos{}
 }
 
-func (r *Reconciler) Reconcile(req ctrl.Request, chaos *v1alpha1.HTTPChaos) (ctrl.Result, error) {
-	r.Log.Info("Reconciling HttpFaultChaos")
-	duration, err := chaos.GetDuration()
-	if err != nil {
-		msg := fmt.Sprintf("unable to get iochaos[%s/%s]'s duration",
-			req.Namespace, req.Name)
-		r.Log.Error(err, msg)
-		return ctrl.Result{}, err
-	}
-
-	if duration != nil {
-		return r.commonHttpFaultChaos(chaos, req)
-	}
-	err = fmt.Errorf("HttpFaultChaos[%s/%s] spec invalid", req.Namespace, req.Name)
-	r.Log.Error(err, "scheduler and duration should be omitted or defined at the same time")
-	return ctrl.Result{}, err
-}
-
-func (r *Reconciler) commonHttpFaultChaos(httpFaultChaos *v1alpha1.HTTPChaos, req ctrl.Request) (ctrl.Result, error) {
-	cr := common.NewReconciler(r, r.Client, r.Reader, r.Log)
-	return cr.Reconcile(req)
-}
-
-func (r *Reconciler) applyAllPods(ctx context.Context, pods []v1.Pod, chaos *v1alpha1.HTTPChaos) error {
+func (r *endpoint) applyAllPods(ctx context.Context, pods []v1.Pod, chaos *v1alpha1.HTTPChaos) error {
 	g := errgroup.Group{}
 	for index := range pods {
 		pod := &pods[index]
@@ -115,8 +88,18 @@ func (r *Reconciler) applyAllPods(ctx context.Context, pods []v1.Pod, chaos *v1a
 	return g.Wait()
 }
 
-func (r *Reconciler) applyPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.HTTPChaos) error {
+func (r *endpoint) applyPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.HTTPChaos) error {
 	//TODO: The way to connect with sidecar need be discussed & It will work after the sidecar add to the repo.
 	r.Log.Info("Try to inject Http chaos on pod", "namespace", pod.Namespace, "name", pod.Name)
 	return nil
+}
+
+func init() {
+	router.Register("httpchaos", &v1alpha1.HTTPChaos{}, func(obj runtime.Object) bool {
+		return true
+	}, func(ctx ctx.Context) end.Endpoint {
+		return &endpoint{
+			Context: ctx,
+		}
+	})
 }

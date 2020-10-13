@@ -19,20 +19,20 @@ import (
 	"fmt"
 
 	k8serror "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
-	"k8s.io/client-go/tools/record"
 
-	"github.com/go-logr/logr"
 	"github.com/hashicorp/go-multierror"
 	"golang.org/x/sync/errgroup"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/client-go/tools/cache"
 	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/common"
-	"github.com/chaos-mesh/chaos-mesh/controllers/twophase"
+	"github.com/chaos-mesh/chaos-mesh/pkg/router"
+	ctx "github.com/chaos-mesh/chaos-mesh/pkg/router/context"
+	end "github.com/chaos-mesh/chaos-mesh/pkg/router/endpoint"
 	"github.com/chaos-mesh/chaos-mesh/pkg/utils"
 
 	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
@@ -41,54 +41,13 @@ import (
 
 const kernelChaosMsg = "kernel is injected with %v"
 
-// Reconciler is KernelChaos reconciler
-type Reconciler struct {
-	client.Client
-	client.Reader
-	Log logr.Logger
-	record.EventRecorder
-}
-
-// Reconcile reconciles a request from controller
-func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
-	r.Log.Info("reconciling kernelChaos")
-	ctx := context.Background()
-
-	var kernelChaos v1alpha1.KernelChaos
-	if err := r.Client.Get(ctx, req.NamespacedName, &kernelChaos); err != nil {
-		r.Log.Error(err, "unable to get kernelChaos")
-		return ctrl.Result{}, nil
-	}
-
-	scheduler := kernelChaos.GetScheduler()
-	duration, err := kernelChaos.GetDuration()
-	if err != nil {
-		r.Log.Error(err, fmt.Sprintf("unable to get kernelChaos[%s/%s]'s duration", kernelChaos.Namespace, kernelChaos.Name))
-		return ctrl.Result{}, nil
-	}
-	if scheduler == nil && duration == nil {
-		return r.commonKernelChaos(&kernelChaos, req)
-	} else if scheduler != nil && duration != nil {
-		return r.scheduleKernelChaos(&kernelChaos, req)
-	}
-
-	// This should be ensured by admission webhook in the future
-	r.Log.Error(fmt.Errorf("kernelChaos[%s/%s] spec invalid", kernelChaos.Namespace, kernelChaos.Name), "scheduler and duration should be omitted or defined at the same time")
-	return ctrl.Result{}, nil
-}
-
-func (r *Reconciler) commonKernelChaos(kernelChaos *v1alpha1.KernelChaos, req ctrl.Request) (ctrl.Result, error) {
-	cr := common.NewReconciler(r, r.Client, r.Reader, r.Log)
-	return cr.Reconcile(req)
-}
-
-func (r *Reconciler) scheduleKernelChaos(kernelChaos *v1alpha1.KernelChaos, req ctrl.Request) (ctrl.Result, error) {
-	sr := twophase.NewReconciler(r, r.Client, r.Reader, r.Log)
-	return sr.Reconcile(req)
+// endpoint is KernelChaos reconciler
+type endpoint struct {
+	ctx.Context
 }
 
 // Apply applies KernelChaos
-func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.InnerObject) error {
+func (r *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.InnerObject) error {
 	kernelChaos, ok := chaos.(*v1alpha1.KernelChaos)
 	if !ok {
 		err := errors.New("chaos is not kernelChaos")
@@ -125,7 +84,7 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1
 }
 
 // Recover means the reconciler recovers the chaos action
-func (r *Reconciler) Recover(ctx context.Context, req ctrl.Request, chaos v1alpha1.InnerObject) error {
+func (r *endpoint) Recover(ctx context.Context, req ctrl.Request, chaos v1alpha1.InnerObject) error {
 	kernelChaos, ok := chaos.(*v1alpha1.KernelChaos)
 	if !ok {
 		err := errors.New("chaos is not KernelChaos")
@@ -141,7 +100,7 @@ func (r *Reconciler) Recover(ctx context.Context, req ctrl.Request, chaos v1alph
 	return nil
 }
 
-func (r *Reconciler) cleanFinalizersAndRecover(ctx context.Context, chaos *v1alpha1.KernelChaos) error {
+func (r *endpoint) cleanFinalizersAndRecover(ctx context.Context, chaos *v1alpha1.KernelChaos) error {
 	var result error
 
 	for _, key := range chaos.Finalizers {
@@ -186,7 +145,7 @@ func (r *Reconciler) cleanFinalizersAndRecover(ctx context.Context, chaos *v1alp
 	return result
 }
 
-func (r *Reconciler) recoverPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.KernelChaos) error {
+func (r *endpoint) recoverPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.KernelChaos) error {
 	r.Log.Info("try to recover pod", "namespace", pod.Namespace, "name", pod.Name)
 
 	pbClient, err := utils.NewChaosDaemonClient(ctx, r.Client, pod, common.ControllerCfg.ChaosDaemonPort)
@@ -237,11 +196,11 @@ func (r *Reconciler) recoverPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha
 }
 
 // Object would return the instance of chaos
-func (r *Reconciler) Object() v1alpha1.InnerObject {
+func (r *endpoint) Object() v1alpha1.InnerObject {
 	return &v1alpha1.KernelChaos{}
 }
 
-func (r *Reconciler) applyAllPods(ctx context.Context, pods []v1.Pod, chaos *v1alpha1.KernelChaos) error {
+func (r *endpoint) applyAllPods(ctx context.Context, pods []v1.Pod, chaos *v1alpha1.KernelChaos) error {
 	g := errgroup.Group{}
 	for index := range pods {
 		pod := &pods[index]
@@ -260,7 +219,7 @@ func (r *Reconciler) applyAllPods(ctx context.Context, pods []v1.Pod, chaos *v1a
 	return g.Wait()
 }
 
-func (r *Reconciler) applyPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.KernelChaos) error {
+func (r *endpoint) applyPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.KernelChaos) error {
 	r.Log.Info("Try to inject kernel on pod", "namespace", pod.Namespace, "name", pod.Name)
 
 	pbClient, err := utils.NewChaosDaemonClient(ctx, r.Client, pod, common.ControllerCfg.ChaosDaemonPort)
@@ -311,4 +270,14 @@ func (r *Reconciler) applyPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.
 	})
 
 	return err
+}
+
+func init() {
+	router.Register("kernelchaos", &v1alpha1.KernelChaos{}, func(obj runtime.Object) bool {
+		return true
+	}, func(ctx ctx.Context) end.Endpoint {
+		return &endpoint{
+			Context: ctx,
+		}
+	})
 }

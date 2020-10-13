@@ -97,7 +97,7 @@ func (iptables *iptablesClient) setIptablesChain(chain *pb.Chain) error {
 
 	rules := []string{}
 	for _, ipset := range chain.Ipsets {
-		rules = append(rules, fmt.Sprintf("-A %s -m set --match-set %s %s -j DROP -w 5", chain.Name, ipset, matchPart))
+		rules = append(rules, fmt.Sprintf("-A %s -m set --match-set %s %s -j %s -w 5", chain.Name, ipset, matchPart, chain.Target))
 	}
 	err := iptables.createNewChain(&iptablesChain{
 		Name:  chain.Name,
