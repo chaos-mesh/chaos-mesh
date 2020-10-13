@@ -102,9 +102,9 @@ func (s *daemonServer) SetTcs(ctx context.Context, in *pb.TcsRequest) (*empty.Em
 	//  tc qdisc add dev eth0 parent 3:2 handle 5: sfq
 	//  tc qdisc add dev eth0 parent 3:3 handle 6: sfq
 	//  tc qdisc add dev eth0 parent 3:4 handle 7: netem delay 50000
-	//  tc filter add dev eth0 parent 3: basic match ipset(A dst) classid 3:4
+	//  iptables -A TC-TABLES-0 -m set --match-set A dst -j CLASSIFY --set-class 3:4 -w 5
 	//  tc qdisc add dev eth0 parent 3:5 handle 8: netem delay 100000
-	//  tc filter add dev eth0 parent 3: basic match ipset(B dst) classid 3:5
+	//  iptables -A TC-TABLES-1 -m set --match-set B dst -j CLASSIFY --set-class 3:5 -w 5
 
 	globalTc := []*pb.Tc{}
 	filterTc := map[string][]*pb.Tc{}
@@ -145,6 +145,13 @@ func (s *daemonServer) SetTcs(ctx context.Context, in *pb.TcsRequest) (*empty.Em
 
 	index := 0
 	currentHandler := parent + 3 // 3 handlers for sfq on prio qdisc
+
+	iptables := buildIptablesClient(ctx, nsPath)
+
+	// iptables chain has been initialized by previous grpc request to set iptables
+	// and iptables rules are recovered by previous call too, so there is no need
+	// to remove these rules here
+	chains := []*pb.Chain{}
 	for ipset, tcs := range filterTc {
 		for i, tc := range tcs {
 			parentArg := fmt.Sprintf("parent %d:%d", parent, index+4)
@@ -162,17 +169,20 @@ func (s *daemonServer) SetTcs(ctx context.Context, in *pb.TcsRequest) (*empty.Em
 			}
 		}
 
-		parentArg := fmt.Sprintf("parent %d:", parent)
-		classid := fmt.Sprintf("classid %d:%d", parent, index+4)
-		err = client.addFilter(parentArg, classid, ipset)
-		if err != nil {
-			log.Error(err, "error while adding filter")
-			return &empty.Empty{}, err
-		}
+		chains = append(chains, &pb.Chain{
+			Name:      fmt.Sprintf("TC-TABLES-%d", index),
+			Direction: pb.Chain_OUTPUT,
+			Ipsets:    []string{ipset},
+			Target:    fmt.Sprintf("CLASSIFY --set-class %d:%d", parent, index+4),
+		})
 
 		index++
 	}
-	// TODO: following qdisc
+	err = iptables.setIptablesChains(chains)
+	if err != nil {
+		log.Error(err, "error while setting iptables")
+		return &empty.Empty{}, err
+	}
 
 	return &empty.Empty{}, nil
 }
