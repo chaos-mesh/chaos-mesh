@@ -17,14 +17,13 @@ module.exports = {
     {
       type: 'category',
       label: 'Getting Started',
-      items: ['get_started/installation', 'get_started/get_started_on_kind', 'get_started/get_started_on_minikube'],
+      items: ['get_started/installation', 'get_started/get_started_on_kind', 'get_started/get_started_on_minikube','get_started/run_chaos_experiment']
     },
     {
       type: 'category',
       label: 'User Guides',
       items: [
-        'user_guides/run_chaos_experiment',
-        'user_guides/experiment_scope',
+            'user_guides/experiment_scope',
       ],
     },
     {
