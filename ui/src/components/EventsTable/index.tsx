@@ -2,7 +2,6 @@ import {
   Box,
   Button,
   IconButton,
-  InputAdornment,
   Paper,
   Table,
   TableBody,
@@ -13,30 +12,24 @@ import {
   TablePagination,
   TableRow,
   TableSortLabel,
-  TextField,
-  Typography,
 } from '@material-ui/core'
-import React, { useCallback, useEffect, useImperativeHandle, useState } from 'react'
-import { Redirect, Route, Switch, useHistory, useLocation, useRouteMatch } from 'react-router-dom'
+import React, { useImperativeHandle, useState } from 'react'
 import { createStyles, makeStyles } from '@material-ui/core/styles'
 import { dayComparator, format } from 'lib/dayjs'
-import { usePrevious, useQuery } from 'lib/hooks'
+import { useHistory, useLocation } from 'react-router-dom'
 
 import CloseIcon from '@material-ui/icons/Close'
 import { Event } from 'api/events.type'
 import EventDetail from 'components/EventDetail'
 import FirstPageIcon from '@material-ui/icons/FirstPage'
-import HelpOutlineIcon from '@material-ui/icons/HelpOutline'
 import KeyboardArrowLeftIcon from '@material-ui/icons/KeyboardArrowLeft'
 import KeyboardArrowRightIcon from '@material-ui/icons/KeyboardArrowRight'
 import LastPageIcon from '@material-ui/icons/LastPage'
 import PaperTop from 'components/PaperTop'
-import SearchIcon from '@material-ui/icons/Search'
 import T from 'components/T'
-import Tooltip from 'components/Tooltip'
 import _debounce from 'lodash.debounce'
-import { searchEvents } from 'lib/search'
 import { useIntl } from 'react-intl'
+import { useQuery } from 'lib/hooks'
 import useRunningLabelStyles from 'lib/styles/runningLabel'
 
 const useStyles = makeStyles(() =>
@@ -249,8 +242,6 @@ const EventsTable: React.ForwardRefRenderFunction<EventsTableHandles, EventsTabl
   const [orderBy, setOrderBy] = useState<keyof SortedEvent>('start_time')
   const [page, setPage] = useState(0)
   const [rowsPerPage, setRowsPerPage] = useState(5)
-  const [search, setSearch] = useState('')
-  const previousSearch = usePrevious(search)
 
   const onSelectEvent = (e: Event) => () => {
     history.push(`${location.pathname}?event_id=${e.id}`)
@@ -277,73 +268,10 @@ const EventsTable: React.ForwardRefRenderFunction<EventsTableHandles, EventsTabl
     setPage(0)
   }
 
-  const debounceSetSearch = useCallback(_debounce(setSearch, 500), [])
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => debounceSetSearch(e.target.value)
-
-  useEffect(() => {
-    if (search && allEvents) {
-      setEvents(searchEvents(allEvents, search))
-    }
-
-    if (previousSearch !== '' && search === '') {
-      setEvents(allEvents)
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [search])
-
   return (
     <Box position="relative">
       <Paper variant="outlined">
-        <PaperTop title={T('events.table')}>
-          {hasSearch && (
-            <TextField
-              style={{ width: 200, minWidth: '30%', margin: 0 }}
-              margin="dense"
-              placeholder={intl.formatMessage({ id: 'common.search' })}
-              disabled={!allEvents}
-              variant="outlined"
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <SearchIcon color="primary" />
-                  </InputAdornment>
-                ),
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <Tooltip
-                      title={
-                        <Typography variant="body2">
-                          The following search syntax can help to locate the events quickly:
-                          <ul style={{ marginBottom: 0, paddingLeft: '1rem' }}>
-                            <li>namespace:default xxx will search for events with namespace default</li>
-                            <li>
-                              kind:NetworkChaos xxx will search for events with kind NetworkChaos, you can also type
-                              kind:net because the search is fuzzy
-                            </li>
-                            <li>pod:echoserver-774cdcc8b6-nrm65 will search for events by affected pod</li>
-                            <li>ip:172.17.0.6 is similar to pod:xxx, filter by pod IP</li>
-                            <li>
-                              uuid:2f79a4d6-1952-45b5-b2d5-ce715823c7a7 will search for events by experimental uuid
-                            </li>
-                          </ul>
-                        </Typography>
-                      }
-                      style={{ verticalAlign: 'sub' }}
-                      arrow
-                      interactive
-                    >
-                      <HelpOutlineIcon fontSize="small" />
-                    </Tooltip>
-                  </InputAdornment>
-                ),
-              }}
-              inputProps={{
-                style: { paddingTop: 8, paddingBottom: 8 },
-              }}
-              onChange={handleSearchChange}
-            />
-          )}
-        </PaperTop>
+        <PaperTop title={T('events.table')}></PaperTop>
         <TableContainer className={classes.tableContainer}>
           <Table stickyHeader>
             <EventsTableHead order={order} orderBy={orderBy} onSort={handleSortEvents} detailed={detailed} />
