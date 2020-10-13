@@ -8,7 +8,6 @@ import { RootState } from 'store'
 import T from 'components/T'
 import api from 'api'
 import { format } from 'lib/dayjs'
-import { useParams } from 'react-router-dom'
 import useRunningLabelStyles from 'lib/styles/runningLabel'
 import { useSelector } from 'react-redux'
 
@@ -18,12 +17,14 @@ const TableCell = withStyles({
   },
 })(MUITableCell)
 
-const EventDetail: React.FC = () => {
+interface EventDetailProps {
+  eventID: string
+}
+
+const EventDetail: React.FC<EventDetailProps> = ({ eventID }) => {
   const { lang } = useSelector((state: RootState) => state.settings)
 
   const runningLabel = useRunningLabelStyles()
-
-  const { id } = useParams<{ id: string }>()
 
   const [loading, setLoading] = useState(false)
   const [e, setEvent] = useState<Event | undefined>(undefined)
@@ -34,7 +35,7 @@ const EventDetail: React.FC = () => {
     api.events
       .events()
       .then(({ data }) => {
-        setEvent(data.find((e) => e.id === Number(id)))
+        setEvent(data.find((e) => e.id === Number(eventID)))
       })
       .catch(console.log)
       .finally(() => {

@@ -17,9 +17,10 @@ import {
   Typography,
 } from '@material-ui/core'
 import React, { useCallback, useEffect, useImperativeHandle, useState } from 'react'
-import { Route, useHistory, useLocation, useRouteMatch } from 'react-router-dom'
+import { Redirect, Route, Switch, useHistory, useLocation, useRouteMatch } from 'react-router-dom'
 import { createStyles, makeStyles } from '@material-ui/core/styles'
 import { dayComparator, format } from 'lib/dayjs'
+import { usePrevious, useQuery } from 'lib/hooks'
 
 import CloseIcon from '@material-ui/icons/Close'
 import { Event } from 'api/events.type'
@@ -36,7 +37,6 @@ import Tooltip from 'components/Tooltip'
 import _debounce from 'lodash.debounce'
 import { searchEvents } from 'lib/search'
 import { useIntl } from 'react-intl'
-import { usePrevious } from 'lib/hooks'
 import useRunningLabelStyles from 'lib/styles/runningLabel'
 
 const useStyles = makeStyles(() =>
@@ -238,10 +238,10 @@ const EventsTable: React.ForwardRefRenderFunction<EventsTableHandles, EventsTabl
 
   const intl = useIntl()
 
-  const eventMatch = useRouteMatch({
-    path: '/events',
-    exact: true,
-  })
+  const query = useQuery()
+  const eventID = query.get('event_id')
+
+  const location = useLocation()
   const history = useHistory()
 
   const [events, setEvents] = useState(allEvents)
@@ -253,13 +253,15 @@ const EventsTable: React.ForwardRefRenderFunction<EventsTableHandles, EventsTabl
   const previousSearch = usePrevious(search)
 
   const onSelectEvent = (e: Event) => () => {
-    history.push(`/events/${e.id}`)
+    history.push(`${location.pathname}?event_id=${e.id}`)
   }
   // Methods exposed to the parent
   useImperativeHandle(ref, () => ({
     onSelectEvent,
   }))
-  const closeEventDetail = () => {}
+  const closeEventDetail = () => {
+    history.push(`${location.pathname}`)
+  }
 
   const handleSortEvents = (_: React.MouseEvent<unknown>, k: keyof SortedEvent) => {
     const isAsc = orderBy === k && order === 'asc'
@@ -380,7 +382,7 @@ const EventsTable: React.ForwardRefRenderFunction<EventsTableHandles, EventsTabl
           </Table>
         </TableContainer>
       </Paper>
-      {!eventMatch && (
+      {eventID && (
         <Paper
           variant="outlined"
           className={classes.eventDetailPaper}
@@ -393,7 +395,7 @@ const EventsTable: React.ForwardRefRenderFunction<EventsTableHandles, EventsTabl
               <CloseIcon />
             </IconButton>
           </PaperTop>
-          <Route path={`/events/:id`} render={() => <EventDetail />}></Route>
+          <EventDetail eventID={eventID} />
         </Paper>
       )}
     </Box>

@@ -108,7 +108,7 @@ const SearchResultForOneCate = function <T extends 'events' | 'experiments' | 'a
                     }}
                     to={
                       category === 'events'
-                        ? `/events/${((res as unknown) as Event).id}`
+                        ? `/events?event_id=${((res as unknown) as Event).id}`
                         : category === 'experiments'
                         ? `/experiments/${((res as unknown) as Experiment).uid}`
                         : `/archives/${((res as unknown) as Archive).uid}`
