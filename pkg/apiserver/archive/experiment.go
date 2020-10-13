@@ -141,7 +141,7 @@ func (s *Service) experimentDetailSearch(c *gin.Context) {
 		switch data.Kind {
 		case v1alpha1.KindPodChaos:
 			info, err = data.ParsePodChaos()
-		case v1alpha1.KindIOChaos:
+		case v1alpha1.KindIoChaos:
 			info, err = data.ParseIOChaos()
 		case v1alpha1.KindNetworkChaos:
 			info, err = data.ParseNetworkChaos()
@@ -218,7 +218,7 @@ func (s *Service) experimentDetail(c *gin.Context) {
 	switch data.Kind {
 	case v1alpha1.KindPodChaos:
 		info, err = data.ParsePodChaos()
-	case v1alpha1.KindIOChaos:
+	case v1alpha1.KindIoChaos:
 		info, err = data.ParseIOChaos()
 	case v1alpha1.KindNetworkChaos:
 		info, err = data.ParseNetworkChaos()

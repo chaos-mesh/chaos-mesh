@@ -1416,7 +1416,7 @@ selector:
 		ginkgo.JustBeforeEach(func() {
 			ports = []uint16{}
 			networkPeers = []*v1.Pod{}
-			for index := 0; index <= 3; index++ {
+			for index := 0; index < 4; index++ {
 				name := fmt.Sprintf("network-peer-%d", index)
 
 				svc := fixture.NewE2EService(name, ns)
@@ -1437,6 +1437,60 @@ selector:
 				pfCancels = append(pfCancels, pfCancel)
 				framework.ExpectNoError(err, "create helper io port port-forward failed")
 			}
+		})
+
+		ginkgo.Context("[ForbidHostNetwork]", func() {
+			ginkgo.It("[Schedule]", func() {
+				ctx, cancel := context.WithCancel(context.Background())
+
+				name := "network-peer-4"
+				nd := fixture.NewNetworkTestDeployment(name, ns, map[string]string{"partition": "0"})
+				nd.Spec.Template.Spec.HostNetwork = true
+				_, err = kubeCli.AppsV1().Deployments(ns).Create(nd)
+				framework.ExpectNoError(err, "create network-peer deployment error")
+				err = waitDeploymentReady(name, ns, kubeCli)
+				framework.ExpectNoError(err, "wait network-peer deployment ready error")
+
+				networkPartition := &v1alpha1.NetworkChaos{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      "network-chaos-1",
+						Namespace: ns,
+					},
+					Spec: v1alpha1.NetworkChaosSpec{
+						Action: v1alpha1.PartitionAction,
+						Selector: v1alpha1.SelectorSpec{
+							Namespaces:     []string{ns},
+							LabelSelectors: map[string]string{"app": "network-peer-4"},
+						},
+						Mode:      v1alpha1.OnePodMode,
+						Direction: v1alpha1.To,
+						Target: &v1alpha1.Target{
+							TargetSelector: v1alpha1.SelectorSpec{
+								Namespaces:     []string{ns},
+								LabelSelectors: map[string]string{"app": "network-peer-1"},
+							},
+							TargetMode: v1alpha1.OnePodMode,
+						},
+						Duration: pointer.StringPtr("9m"),
+						Scheduler: &v1alpha1.SchedulerSpec{
+							Cron: "@every 10m",
+						},
+					},
+				}
+
+				err = cli.Create(ctx, networkPartition.DeepCopy())
+				framework.ExpectNoError(err, "create network chaos error")
+				time.Sleep(5 * time.Second)
+
+				cli.Get(ctx, types.NamespacedName{
+					Namespace: ns,
+					Name:      "network-chaos-1",
+				}, networkPartition)
+				framework.ExpectEqual(networkPartition.Status.ChaosStatus.Experiment.Phase, v1alpha1.ExperimentPhaseFailed)
+				framework.ExpectEqual(strings.Contains(networkPartition.Status.ChaosStatus.FailedMessage, "it's dangerous to inject network chaos on a pod"), true)
+
+				cancel()
+			})
 		})
 
 		ginkgo.Context("[NetworkPartition]", func() {

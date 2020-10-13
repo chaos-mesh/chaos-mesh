@@ -17,7 +17,9 @@ tmp_file="chaos-mesh.yaml"
 tmp_install_scipt="install.sh.bak"
 install_scirpt="install.sh"
 
-helm template chaos-mesh helm/chaos-mesh --namespace=chaos-testing --set dashboard.create=true > ${tmp_file}
+helm template chaos-mesh helm/chaos-mesh --namespace=chaos-testing \
+      --set dashboard.create=true,controllerManager.hostNetwork=true,chaosDaemon.hostNetwork=true \
+      > ${tmp_file}
 
 sed -i.bak '/helm/d' $tmp_file
 sed -i.bak '/Helm/d' $tmp_file
@@ -28,9 +30,11 @@ sed -i.bak 's/caBundle:.*/caBundle: \"\$\{CA_BUNDLE\}\"/g' $tmp_file
 sed -i.bak 's/mountPath: \/var\/run\/docker.sock/mountPath: \$\{mountPath\}/g' $tmp_file
 sed -i.bak 's/path: \/var\/run\/docker.sock/path: \$\{socketPath\}/g' $tmp_file
 sed -i.bak 's/- docker/- $\{runtime\}/g' $tmp_file
+sed -i.bak 's/hostNetwork: true/hostNetwork: \$\{host_network\}/g' $tmp_file
 sed -i.bak 's/pingcap\/chaos-mesh:.*/pingcap\/chaos-mesh:\$\{VERSION_TAG\}/g' $tmp_file
 sed -i.bak 's/pingcap\/chaos-daemon:.*/pingcap\/chaos-daemon:\$\{VERSION_TAG\}/g' $tmp_file
 sed -i.bak 's/pingcap\/chaos-dashboard:.*/pingcap\/chaos-dashboard:\$\{VERSION_TAG\}/g' $tmp_file
+sed -i.bak 's/value: UTC/value: \$\{timezone\}/g' $tmp_file
 mv $tmp_file $tmp_file.bak
 
 cat <<EOF > $tmp_file

@@ -2,16 +2,26 @@ module.exports = {
   docs: [
     {
       type: 'doc',
-      id: 'overview',
+      id: 'overview/what_is_chaos_mesh',
+    },
+    {
+      type: 'category',
+      label: 'Overview',
+      items: ['overview/what_is_chaos_mesh', 'overview/features', 'overview/architecture'],
+    },
+    {
+      type: 'category',
+      label: 'Concepts',
+      items: ['concepts/chaos_engineering','concepts/blast_radius'],
     },
     {
       type: 'category',
       label: 'Getting Started',
-      items: ['installation/installation', 'installation/get_started_on_kind', 'installation/get_started_on_minikube','installation/run_chaos_experiment',],
+      items: ['get_started/installation', 'get_started/get_started_on_kind', 'get_started/get_started_on_minikube','get_started/run_chaos_experiment']
     },
     {
       type: 'category',
-      label: 'User Guide',
+      label: 'User Guides',
       items: [
         {
           type: 'category',
@@ -26,6 +36,18 @@ module.exports = {
           ],
         },
         'user_guides/experiment_scope',
+      ],
+    },
+    {
+      type: 'category',
+      label: 'Chaos Experiments',
+      items: [
+        'chaos_experiments/podchaos_experiment',
+        'chaos_experiments/networkchaos_experiment',
+        'chaos_experiments/stresschaos_experiment',
+        'chaos_experiments/timechaos_experiment',
+        'chaos_experiments/iochaos_experiment',
+        'chaos_experiments/kernelchaos_experiment',
       ],
     },
     {
