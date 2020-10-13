@@ -39,6 +39,7 @@ const ScopeStep: React.FC<ScopeStepProps> = ({ namespaces, scope = 'scope', pods
   const labelKVs = useMemo(() => joinObjKVs(labels, ': ', labelFilters), [labels])
   const annotationKVs = useMemo(() => joinObjKVs(annotations, ': '), [annotations])
 
+  const [firstRender, setFirstRender] = useState(true)
   const [currentLabels, setCurrentLabels] = useState<string[]>([])
   const [currentAnnotations, setCurrentAnnotations] = useState<string[]>([])
 
@@ -69,6 +70,12 @@ const ScopeStep: React.FC<ScopeStepProps> = ({ namespaces, scope = 'scope', pods
   }
 
   useEffect(() => {
+    if (firstRender) {
+      setFirstRender(false)
+
+      return
+    }
+
     storeDispatch(
       getPodsByNamespaces({
         namespace_selectors: namespaces,
