@@ -16,41 +16,37 @@ package iochaos
 import (
 	"context"
 	"errors"
-	"fmt"
 
-	"github.com/go-logr/logr"
 	"github.com/hashicorp/go-multierror"
 	v1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/tools/cache"
-	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/common"
 	"github.com/chaos-mesh/chaos-mesh/controllers/iochaos/podiochaosmanager"
-	"github.com/chaos-mesh/chaos-mesh/controllers/twophase"
+	"github.com/chaos-mesh/chaos-mesh/pkg/router"
+	ctx "github.com/chaos-mesh/chaos-mesh/pkg/router/context"
+	end "github.com/chaos-mesh/chaos-mesh/pkg/router/endpoint"
 	"github.com/chaos-mesh/chaos-mesh/pkg/utils"
 )
 
-type Reconciler struct {
-	client.Client
-	client.Reader
-	record.EventRecorder
-	Log logr.Logger
+type endpoint struct {
+	ctx.Context
 }
 
-func (r *Reconciler) Object() v1alpha1.InnerObject {
+func (r *endpoint) Object() v1alpha1.InnerObject {
 	return &v1alpha1.IoChaos{}
 }
 
 // Apply implements the reconciler.InnerReconciler.Apply
-func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.InnerObject) error {
+func (r *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.InnerObject) error {
 	iochaos, ok := chaos.(*v1alpha1.IoChaos)
 	if !ok {
-		err := errors.New("chaos is not IoChaos")
-		r.Log.Error(err, "chaos is not IoChaos", "chaos", chaos)
+		err := errors.New("chaos is not IOChaos")
+		r.Log.Error(err, "chaos is not IOChaos", "chaos", chaos)
 		return err
 	}
 
@@ -122,11 +118,11 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1
 }
 
 // Recover implements the reconciler.InnerReconciler.Recover
-func (r *Reconciler) Recover(ctx context.Context, req ctrl.Request, chaos v1alpha1.InnerObject) error {
+func (r *endpoint) Recover(ctx context.Context, req ctrl.Request, chaos v1alpha1.InnerObject) error {
 	iochaos, ok := chaos.(*v1alpha1.IoChaos)
 	if !ok {
-		err := errors.New("chaos is not IoChaos")
-		r.Log.Error(err, "chaos is not IoChaos", "chaos", chaos)
+		err := errors.New("chaos is not IOChaos")
+		r.Log.Error(err, "chaos is not IOChaos", "chaos", chaos)
 		return err
 	}
 
@@ -137,7 +133,7 @@ func (r *Reconciler) Recover(ctx context.Context, req ctrl.Request, chaos v1alph
 	return nil
 }
 
-func (r *Reconciler) cleanFinalizersAndRecover(ctx context.Context, chaos *v1alpha1.IoChaos) error {
+func (r *endpoint) cleanFinalizersAndRecover(ctx context.Context, chaos *v1alpha1.IoChaos) error {
 	var result error
 
 	source := chaos.Namespace + "/" + chaos.Name
@@ -174,35 +170,12 @@ func (r *Reconciler) cleanFinalizersAndRecover(ctx context.Context, chaos *v1alp
 	return result
 }
 
-func (r *Reconciler) invalidActionResponse(iochaos *v1alpha1.IoChaos) (ctrl.Result, error) {
-	r.Log.Error(nil, "unknown file system I/O layer", "action", iochaos.Spec.Action)
-	return ctrl.Result{}, fmt.Errorf("unknown file system I/O layer")
-}
-
-// NewTwoPhaseReconciler would create Reconciler for twophase package
-func NewTwoPhaseReconciler(c client.Client, r client.Reader, log logr.Logger, req ctrl.Request,
-	recorder record.EventRecorder) *twophase.Reconciler {
-	reconciler := newReconciler(c, r, log, req, recorder)
-	return twophase.NewReconciler(reconciler, reconciler.Client, reconciler.Reader, reconciler.Log)
-}
-
-// NewCommonReconciler would create Reconciler for common package
-func NewCommonReconciler(c client.Client, r client.Reader, log logr.Logger, req ctrl.Request,
-	recorder record.EventRecorder) *common.Reconciler {
-	reconciler := newReconciler(c, r, log, req, recorder)
-	return common.NewReconciler(reconciler, reconciler.Client, reconciler.Reader, reconciler.Log)
-}
-
-func newReconciler(c client.Client, r client.Reader, log logr.Logger, req ctrl.Request,
-	recorder record.EventRecorder) twophase.Reconciler {
-	return twophase.Reconciler{
-		InnerReconciler: &Reconciler{
-			Client:        c,
-			Reader:        r,
-			EventRecorder: recorder,
-			Log:           log,
-		},
-		Client: c,
-		Log:    log,
-	}
+func init() {
+	router.Register("iochaos", &v1alpha1.IoChaos{}, func(obj runtime.Object) bool {
+		return true
+	}, func(ctx ctx.Context) end.Endpoint {
+		return &endpoint{
+			Context: ctx,
+		}
+	})
 }

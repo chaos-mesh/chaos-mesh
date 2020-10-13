@@ -261,6 +261,6 @@ Moving forward, we will continuously improve the Chaos Mesh Dashboard, so that u
 
 If any of these sound interesting to you, join us in building a world class Chaos Engineering platform. May our applications dance in chaos on Kubernetes!
 
-If you find a bug or think something is missing, feel free to file an [issue](https://github.com/chaos-mesh/chaos-mesh/issues), open a PR, or join us on the #sig-chaos-mesh channel in the [TiDB Community](https://chaos-mesh.org/tidbslack) slack workspace.
+If you find a bug or think something is missing, feel free to file an [issue](https://github.com/chaos-mesh/chaos-mesh/issues), open a PR, or message us in the #project-chaos-mesh channel in the [CNCF Slack](https://join.slack.com/t/cloud-native/shared_invite/zt-fyy3b8up-qHeDNVqbz1j8HDY6g1cY4w) workspace.
 
 GitHub: [https://github.com/chaos-mesh/chaos-mesh](https://github.com/chaos-mesh/chaos-mesh)
