@@ -11,6 +11,7 @@ resources:
 - bases/chaos-mesh.org_podiochaos.yaml
 - bases/chaos-mesh.org_podnetworkchaos.yaml
 - bases/chaos-mesh.org_httpchaos.yaml
+- bases/chaos-mesh.org_dnschaos.yaml
 # +kubebuilder:scaffold:crdkustomizeresource
 
 patchesStrategicMerge:
