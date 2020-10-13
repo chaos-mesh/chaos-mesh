@@ -32,7 +32,7 @@ type ExperimentStore interface {
 	// FindMetaByUID returns an experiment metadata by UID.
 	FindMetaByUID(context.Context, string) (*ExperimentMeta, error)
 
-	// Set sets the experiment to archive.
+	// Set saves the experiment to datastore.
 	Set(context.Context, *Experiment) error
 
 	// Archive archives experiments which "archived" field is false.

@@ -24,30 +24,21 @@ import (
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/pkg/apiserver/utils"
-	"github.com/chaos-mesh/chaos-mesh/pkg/config"
 	"github.com/chaos-mesh/chaos-mesh/pkg/core"
-
-	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 // Service defines a handler service for archive experiments.
 type Service struct {
-	conf    *config.ChaosDashboardConfig
-	kubeCli client.Client
 	archive core.ExperimentStore
 	event   core.EventStore
 }
 
 // NewService returns an archive experiment service instance.
 func NewService(
-	conf *config.ChaosDashboardConfig,
-	cli client.Client,
 	archive core.ExperimentStore,
 	event core.EventStore,
 ) *Service {
 	return &Service{
-		conf:    conf,
-		kubeCli: cli,
 		archive: archive,
 		event:   event,
 	}
@@ -126,8 +117,8 @@ func (s *Service) list(c *gin.Context) {
 	c.JSON(http.StatusOK, archives)
 }
 
-// @Summary Get the detail of archived chaos experiment.
-// @Description Get the detail of archived chaos experiment.
+// @Summary Get the detail of an archived chaos experiment.
+// @Description Get the detail of an archived chaos experiment.
 // @Tags archives
 // @Produce json
 // @Param uid query string true "uid"
@@ -148,7 +139,7 @@ func (s *Service) detail(c *gin.Context) {
 		return
 	}
 
-	data, err := s.archive.FindByUID(context.TODO(), uid)
+	data, err := s.archive.FindByUID(context.Background(), uid)
 	if err != nil {
 		if !gorm.IsRecordNotFoundError(err) {
 			c.Status(http.StatusInternalServerError)
@@ -198,8 +189,8 @@ func (s *Service) detail(c *gin.Context) {
 	c.JSON(http.StatusOK, detail)
 }
 
-// @Summary Get the report of a chaos experiment.
-// @Description Get the report of a chaos experiment.
+// @Summary Get the report of an archived chaos experiment.
+// @Description Get the report of an archived chaos experiment.
 // @Tags archives
 // @Produce json
 // @Param uid query string true "uid"
@@ -240,14 +231,14 @@ func (s *Service) report(c *gin.Context) {
 		FinishTime: meta.FinishTime,
 	}
 
-	report.TotalTime = report.Meta.FinishTime.Sub(report.Meta.StartTime).String()
-
 	report.Events, err = s.event.ListByUID(context.TODO(), uid)
 	if err != nil {
 		c.Status(http.StatusInternalServerError)
 		_ = c.Error(utils.ErrInternalServer.NewWithNoMessage())
 		return
 	}
+
+	report.TotalTime = report.Meta.FinishTime.Sub(report.Meta.StartTime).String()
 
 	timeNow := time.Now()
 	timeAfter := timeNow
