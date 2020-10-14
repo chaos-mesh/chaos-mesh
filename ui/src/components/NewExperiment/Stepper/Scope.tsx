@@ -40,6 +40,7 @@ const ScopeStep: React.FC<ScopeStepProps> = ({ namespaces, scope = 'scope', pods
   const annotationKVs = useMemo(() => joinObjKVs(annotations, ': '), [annotations])
 
   const [firstRender, setFirstRender] = useState(true)
+  const [currentNamespaces, setCurrentNamespaces] = useState<string[]>([])
   const [currentLabels, setCurrentLabels] = useState<string[]>([])
   const [currentAnnotations, setCurrentAnnotations] = useState<string[]>([])
 
@@ -48,7 +49,8 @@ const ScopeStep: React.FC<ScopeStepProps> = ({ namespaces, scope = 'scope', pods
 
     storeDispatch(getLabels(_labels))
     storeDispatch(getAnnotations(_labels))
-    storeDispatch(getPodsByNamespaces({ namespace_selectors: _labels }))
+
+    setCurrentNamespaces(_labels)
   }
 
   const handleLabelSelectorsChangeCallback = (labels: string[]) => setCurrentLabels(labels)
@@ -78,13 +80,13 @@ const ScopeStep: React.FC<ScopeStepProps> = ({ namespaces, scope = 'scope', pods
 
     storeDispatch(
       getPodsByNamespaces({
-        namespace_selectors: namespaces,
+        namespace_selectors: currentNamespaces,
         label_selectors: arrToObjBySep(currentLabels, ': '),
         annotation_selectors: arrToObjBySep(currentAnnotations, ': '),
       })
     )
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentLabels, currentAnnotations])
+  }, [currentNamespaces, currentLabels, currentAnnotations])
 
   return (
     <>
