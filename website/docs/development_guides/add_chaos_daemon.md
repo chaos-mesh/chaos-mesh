@@ -15,7 +15,7 @@ And then we can [run this chaos](#run-chaos) to verify whether this chaos works 
 
 ## Add selector for HelloWorldChaos
 
-Since we need to select some pods to do `HelloWorld` chaos by namespace, labels, annotation, etc, refer to [Define the Scope of Chaos Experiment](../user_guides/experiment_scope.md), so just add a field `Spec` in `HelloWorldChaos` to implement it:
+In Chaos Mesh, we have defined the `spec.selector` field to specify the scope of the chaos by namespace, labels, annotation, etc. You can refer to [Define the Scope of Chaos Experiment](../user_guides/experiment_scope.md) for more information. To specify the Pods for `HelloWorld` chaos, we just add the `Spec` field in `HelloWorldChaos`:
 
     ```golang
     // HelloWorldChaos is the Schema for the helloworldchaos API
