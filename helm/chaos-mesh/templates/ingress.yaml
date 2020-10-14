@@ -1,5 +1,4 @@
 {{- if .Values.dashboard.ingress.enabled -}}
-{{- $name := include "chaos-mesh.name" . -}}
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
@@ -31,7 +30,7 @@ spec:
         {{- range $paths }}
           - path: {{ . }}
             backend:
-              serviceName: {{ $name }}-chaos-dashboard
+              serviceName: {{ template "chaos-dashboard.svc" . }}
               servicePort: http
         {{- end }}
   {{- end }}

@@ -345,7 +345,7 @@ func (e *ArchiveExperiment) ParseIOChaos() (ExperimentInfo, error) {
 			Value: chaos.Spec.Value,
 		},
 		Target: TargetInfo{
-			Kind: v1alpha1.KindIOChaos,
+			Kind: v1alpha1.KindIoChaos,
 			IOChaos: &IOChaosInfo{
 				Action:     string(chaos.Spec.Action),
 				Delay:      chaos.Spec.Delay,
