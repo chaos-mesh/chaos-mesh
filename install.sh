@@ -947,6 +947,7 @@ rules:
     resources:
       - namespaces
       - nodes
+      - services
     verbs: [ "get", "list", "watch" ]
 ---
 # Source: chaos-mesh/templates/controller-manager-rbac.yaml

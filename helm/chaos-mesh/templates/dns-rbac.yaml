@@ -26,14 +26,7 @@ metadata:
 rules:
   - apiGroups: [ "" ]
     resources: [ "pods" ]
-    verbs: [ "get", "list", "watch", "delete", "update" ]
-  - apiGroups:
-      - ""
-    resources:
-      - events
-    verbs:
-      - patch
-      - create
+    verbs: [ "get", "list", "watch" ]
   - apiGroups: [ "" ]
     resources: [ "configmaps" ]
     verbs: [ "*" ]
@@ -57,7 +50,6 @@ rules:
   - apiGroups: [ "" ]
     resources:
       - namespaces
-      - nodes
       - services
       - endpoints
       - pods
@@ -78,7 +70,7 @@ metadata:
 rules:
   - apiGroups: [ "" ]
     resources: [ "configmaps" ]
-    verbs: [ "get", "list", "watch" ]
+    verbs: [ "get", "list" ]
 
 ---
 # bindings cluster level
