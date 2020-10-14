@@ -28,7 +28,7 @@ So we are all set up for you in Hacktoberfest - labeled [suitable issues](https:
 
 ## How can you participate
 
-How can you participate? It could not  be easier with the following steps: 
+How can you participate? It could not be easier with the following steps: 
 
 1. Sign up for [Hacktoberfest](https://hacktoberfest.digitalocean.com/login) using your GitHub account between Oct 1 and Oct 31.
 2. Pick up an issue. Note that the issues are still being updated, but you don’t have to be limited to issues with the Hacktoberfest label, which only serve as a starting point. 
