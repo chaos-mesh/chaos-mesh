@@ -11,6 +11,24 @@ webhooks:
     service:
       name: webhook-service
       namespace: system
+      path: /mutate-chaos-mesh-org-v1alpha1-dnschaos
+  failurePolicy: Fail
+  name: mdnschaos.kb.io
+  rules:
+  - apiGroups:
+    - chaos-mesh.org
+    apiVersions:
+    - v1alpha1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - dnschaos
+- clientConfig:
+    caBundle: Cg==
+    service:
+      name: webhook-service
+      namespace: system
       path: /mutate-chaos-mesh-org-v1alpha1-iochaos
   failurePolicy: Fail
   name: miochaos.kb.io
@@ -83,6 +101,24 @@ webhooks:
     service:
       name: webhook-service
       namespace: system
+      path: /mutate-chaos-mesh-org-v1alpha1-podiochaos
+  failurePolicy: Fail
+  name: mpodiochaos.kb.io
+  rules:
+  - apiGroups:
+    - chaos-mesh.org
+    apiVersions:
+    - v1alpha1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - podiochaos
+- clientConfig:
+    caBundle: Cg==
+    service:
+      name: webhook-service
+      namespace: system
       path: /mutate-chaos-mesh-org-v1alpha1-podnetworkchaos
   failurePolicy: Fail
   name: mpodnetworkchaos.kb.io
@@ -140,6 +176,24 @@ metadata:
   creationTimestamp: null
   name: validating-webhook-configuration
 webhooks:
+- clientConfig:
+    caBundle: Cg==
+    service:
+      name: webhook-service
+      namespace: system
+      path: /validate-chaos-mesh-org-v1alpha1-dnschaos
+  failurePolicy: Fail
+  name: vdnschaos.kb.io
+  rules:
+  - apiGroups:
+    - chaos-mesh.org
+    apiVersions:
+    - v1alpha1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - dnschaos
 - clientConfig:
     caBundle: Cg==
     service:

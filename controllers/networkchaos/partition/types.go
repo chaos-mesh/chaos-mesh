@@ -18,14 +18,12 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/go-logr/logr"
 	"github.com/hashicorp/go-multierror"
 	v1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/tools/cache"
-	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/common"
@@ -33,8 +31,10 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos/ipset"
 	"github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos/iptable"
 	"github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos/netutils"
-	"github.com/chaos-mesh/chaos-mesh/controllers/twophase"
 	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
+	"github.com/chaos-mesh/chaos-mesh/pkg/router"
+	ctx "github.com/chaos-mesh/chaos-mesh/pkg/router/context"
+	end "github.com/chaos-mesh/chaos-mesh/pkg/router/endpoint"
 	"github.com/chaos-mesh/chaos-mesh/pkg/utils"
 )
 
@@ -45,74 +45,43 @@ const (
 	targetIPSetPostFix = "tgt"
 )
 
-func newReconciler(c client.Client, r client.Reader, log logr.Logger, req ctrl.Request,
-	recorder record.EventRecorder) twophase.Reconciler {
-	return twophase.Reconciler{
-		InnerReconciler: &Reconciler{
-			Client:        c,
-			Reader:        r,
-			EventRecorder: recorder,
-			Log:           log,
-		},
-		Client: c,
-		Log:    log,
-	}
-}
-
-// NewTwoPhaseReconciler would create Reconciler for twophase package
-func NewTwoPhaseReconciler(c client.Client, reader client.Reader, log logr.Logger, req ctrl.Request,
-	recorder record.EventRecorder) *twophase.Reconciler {
-	r := newReconciler(c, reader, log, req, recorder)
-	return twophase.NewReconciler(r, r.Client, r.Reader, r.Log)
-}
-
-// NewCommonReconciler would create Reconciler for common package
-func NewCommonReconciler(c client.Client, reader client.Reader, log logr.Logger, req ctrl.Request,
-	recorder record.EventRecorder) *common.Reconciler {
-	r := newReconciler(c, reader, log, req, recorder)
-	return common.NewReconciler(r, r.Client, r.Reader, r.Log)
-}
-
-type Reconciler struct {
-	client.Client
-	client.Reader
-	record.EventRecorder
-	Log logr.Logger
+type endpoint struct {
+	ctx.Context
 }
 
 // Object implements the reconciler.InnerReconciler.Object
-func (r *Reconciler) Object() v1alpha1.InnerObject {
+func (e *endpoint) Object() v1alpha1.InnerObject {
 	return &v1alpha1.NetworkChaos{}
 }
 
-// Apply implements the reconciler.InnerReconciler.Apply
-func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.InnerObject) error {
-	r.Log.Info("Applying network partition")
+// Apply applies the chaos operation
+func (e *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.InnerObject) error {
+	e.Log.Info("Applying network partition")
 
 	networkchaos, ok := chaos.(*v1alpha1.NetworkChaos)
 	if !ok {
 		err := errors.New("chaos is not NetworkChaos")
-		r.Log.Error(err, "chaos is not NetworkChaos", "chaos", chaos)
+		e.Log.Error(err, "chaos is not NetworkChaos", "chaos", chaos)
 
 		return err
 	}
 
 	source := networkchaos.Namespace + "/" + networkchaos.Name
-	m := podnetworkmanager.New(source, r.Log, r.Client, r.Reader)
+	m := podnetworkmanager.New(source, e.Log, e.Client, e.Reader)
 
-	sources, err := utils.SelectAndFilterPods(ctx, r.Client, r.Reader, &networkchaos.Spec)
+	sources, err := utils.SelectAndFilterPods(ctx, e.Client, e.Reader, &networkchaos.Spec)
 
 	if err != nil {
-		r.Log.Error(err, "failed to select and filter pods")
+		e.Log.Error(err, "failed to select and filter pods")
 		return err
 	}
 
 	var targets []v1.Pod
 
 	if networkchaos.Spec.Target != nil {
-		targets, err = utils.SelectAndFilterPods(ctx, r.Client, r.Reader, networkchaos.Spec.Target)
+		targets, err = utils.SelectAndFilterPods(ctx, e.Client, e.Reader, networkchaos.Spec.Target)
 		if err != nil {
-			r.Log.Error(err, "failed to select and filter pods")
+			e.Log.Error(err, "failed to select and filter pods")
 			return err
 		}
 	}
@@ -120,7 +89,7 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1
 	sourceSet := ipset.BuildIPSet(sources, []string{}, networkchaos, sourceIPSetPostFix, source)
 	externalCidrs, err := netutils.ResolveCidrs(networkchaos.Spec.ExternalTargets)
 	if err != nil {
-		r.Log.Error(err, "failed to resolve external targets")
+		e.Log.Error(err, "failed to resolve external targets")
 		return err
 	}
 	targetSet := ipset.BuildIPSet(targets, externalCidrs, networkchaos, targetIPSetPostFix, source)
@@ -130,7 +99,7 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1
 	// Set up ipset in every related pods
 	for index := range allPods {
 		pod := allPods[index]
-		r.Log.Info("PODS", "name", pod.Name, "namespace", pod.Namespace)
+		e.Log.Info("PODS", "name", pod.Name, "namespace", pod.Namespace)
 
 		t := m.WithInit(types.NamespacedName{
 			Name:      pod.Name,
@@ -182,21 +151,24 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1
 			},
 		})
 	}
-	r.Log.Info("chains prepared", "sourcesChains", sourcesChains, "targetsChains", targetsChains)
+	e.Log.Info("chains prepared", "sourcesChains", sourcesChains, "targetsChains", targetsChains)
 
-	err = r.SetChains(ctx, sources, sourcesChains, m, networkchaos)
+	err = e.SetChains(ctx, sources, sourcesChains, m, networkchaos)
 	if err != nil {
 		return err
 	}
 
-	err = r.SetChains(ctx, targets, targetsChains, m, networkchaos)
+	err = e.SetChains(ctx, targets, targetsChains, m, networkchaos)
 	if err != nil {
 		return err
 	}
 
 	err = m.Commit(ctx)
 	if err != nil {
-		r.Log.Error(err, "fail to commit")
+		// if pod is not found or not running, don't print error log and wait next time.
+		if err != podnetworkmanager.ErrPodNotFound && err != podnetworkmanager.ErrPodNotRunning {
+			e.Log.Error(err, "fail to commit")
+		}
 		return err
 	}
 
@@ -217,12 +189,12 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1
 		networkchaos.Status.Experiment.PodRecords = append(networkchaos.Status.Experiment.PodRecords, ps)
 	}
 
-	r.Event(networkchaos, v1.EventTypeNormal, utils.EventChaosInjected, "")
+	e.Event(networkchaos, v1.EventTypeNormal, utils.EventChaosInjected, "")
 	return nil
 }
 
 // SetChains sets iptables chains for pods
-func (r *Reconciler) SetChains(ctx context.Context, pods []v1.Pod, chains []v1alpha1.RawIptables, m *podnetworkmanager.PodNetworkManager, networkchaos *v1alpha1.NetworkChaos) error {
+func (e *endpoint) SetChains(ctx context.Context, pods []v1.Pod, chains []v1alpha1.RawIptables, m *podnetworkmanager.PodNetworkManager, networkchaos *v1alpha1.NetworkChaos) error {
 	for index := range pods {
 		pod := &pods[index]
 
@@ -245,30 +217,30 @@ func (r *Reconciler) SetChains(ctx context.Context, pods []v1.Pod, chains []v1al
 	return nil
 }
 
-// Recover implements the reconciler.InnerReconciler.Recover
-func (r *Reconciler) Recover(ctx context.Context, req ctrl.Request, chaos v1alpha1.InnerObject) error {
+// Recover recovers the chaos
+func (e *endpoint) Recover(ctx context.Context, req ctrl.Request, chaos v1alpha1.InnerObject) error {
 	networkchaos, ok := chaos.(*v1alpha1.NetworkChaos)
 	if !ok {
 		err := errors.New("chaos is not NetworkChaos")
-		r.Log.Error(err, "chaos is not NetworkChaos", "chaos", chaos)
+		e.Log.Error(err, "chaos is not NetworkChaos", "chaos", chaos)
 
 		return err
 	}
 
-	if err := r.cleanFinalizersAndRecover(ctx, networkchaos); err != nil {
-		r.Log.Error(err, "cleanFinalizersAndRecover failed")
+	if err := e.cleanFinalizersAndRecover(ctx, networkchaos); err != nil {
+		e.Log.Error(err, "cleanFinalizersAndRecover failed")
 		return err
 	}
-	r.Event(networkchaos, v1.EventTypeNormal, utils.EventChaosRecovered, "")
+	e.Event(networkchaos, v1.EventTypeNormal, utils.EventChaosRecovered, "")
 
 	return nil
 }
 
-func (r *Reconciler) cleanFinalizersAndRecover(ctx context.Context, networkchaos *v1alpha1.NetworkChaos) error {
+func (e *endpoint) cleanFinalizersAndRecover(ctx context.Context, networkchaos *v1alpha1.NetworkChaos) error {
 	var result error
 
 	source := networkchaos.Namespace + "/" + networkchaos.Name
-	m := podnetworkmanager.New(source, r.Log, r.Client, r.Reader)
+	m := podnetworkmanager.New(source, e.Log, e.Client, e.Reader)
 
 	for _, key := range networkchaos.Finalizers {
 		ns, name, err := cache.SplitMetaNamespaceKey(key)
@@ -288,19 +260,36 @@ func (r *Reconciler) cleanFinalizersAndRecover(ctx context.Context, networkchaos
 		}
 
 		err = m.Commit(ctx)
-		if err != nil {
-			r.Log.Error(err, "fail to commit")
+
+		// if pod not found or not running, directly return and giveup recover.
+		if err != nil && err != podnetworkmanager.ErrPodNotFound && err != podnetworkmanager.ErrPodNotRunning {
+			e.Log.Error(err, "fail to commit")
 		}
 
 		networkchaos.Finalizers = utils.RemoveFromFinalizer(networkchaos.Finalizers, key)
 	}
-	r.Log.Info("After recovering", "finalizers", networkchaos.Finalizers)
+	e.Log.Info("After recovering", "finalizers", networkchaos.Finalizers)
 
 	if networkchaos.Annotations[common.AnnotationCleanFinalizer] == common.AnnotationCleanFinalizerForced {
-		r.Log.Info("Force cleanup all finalizers", "chaos", networkchaos)
+		e.Log.Info("Force cleanup all finalizers", "chaos", networkchaos)
 		networkchaos.Finalizers = networkchaos.Finalizers[:0]
 		return nil
 	}
 
 	return result
+}
+
+func init() {
+	router.Register("networkchaos", &v1alpha1.NetworkChaos{}, func(obj runtime.Object) bool {
+		chaos, ok := obj.(*v1alpha1.NetworkChaos)
+		if !ok {
+			return false
+		}
+
+		return chaos.Spec.Action == v1alpha1.PartitionAction
+	}, func(ctx ctx.Context) end.Endpoint {
+		return &endpoint{
+			Context: ctx,
+		}
+	})
 }

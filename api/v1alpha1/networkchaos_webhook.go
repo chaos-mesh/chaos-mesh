@@ -20,8 +20,7 @@ import (
 
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/validation/field"
-	ctrl "sigs.k8s.io/controller-runtime"
-	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
+	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
 )
 
@@ -35,13 +34,6 @@ const (
 
 // log is for logging in this package.
 var networkchaoslog = logf.Log.WithName("networkchaos-resource")
-
-// SetupWebhookWithManager setup NetworkChaos's webhook with manager
-func (in *NetworkChaos) SetupWebhookWithManager(mgr ctrl.Manager) error {
-	return ctrl.NewWebhookManagedBy(mgr).
-		For(in).
-		Complete()
-}
 
 // +kubebuilder:webhook:path=/mutate-chaos-mesh-org-v1alpha1-networkchaos,mutating=true,failurePolicy=fail,groups=chaos-mesh.org,resources=networkchaos,verbs=create;update,versions=v1alpha1,name=mnetworkchaos.kb.io
 
@@ -281,5 +273,14 @@ func (in *BandwidthSpec) validateBandwidth(bandwidth *field.Path) field.ErrorLis
 
 // validateTarget validates the target
 func (in *Target) validateTarget(target *field.Path) field.ErrorList {
-	return ValidatePodMode(in.TargetValue, in.TargetMode, target.Child("value"))
+	modes := []PodMode{OnePodMode, AllPodMode, FixedPodMode, FixedPercentPodMode, RandomMaxPercentPodMode}
+
+	for _, mode := range modes {
+		if in.TargetMode == mode {
+			return ValidatePodMode(in.TargetValue, in.TargetMode, target.Child("value"))
+		}
+	}
+
+	return field.ErrorList{field.Invalid(target.Child("mode"), in.TargetMode,
+		fmt.Sprintf("mode %s not supported", in.TargetMode))}
 }

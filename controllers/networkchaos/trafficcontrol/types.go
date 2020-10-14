@@ -18,21 +18,21 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/go-logr/logr"
 	"github.com/hashicorp/go-multierror"
 	v1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/tools/cache"
-	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/common"
 	"github.com/chaos-mesh/chaos-mesh/controllers/networkchaos/podnetworkmanager"
 	"github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos/ipset"
 	"github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos/netutils"
-	"github.com/chaos-mesh/chaos-mesh/controllers/twophase"
+	"github.com/chaos-mesh/chaos-mesh/pkg/router"
+	ctx "github.com/chaos-mesh/chaos-mesh/pkg/router/context"
+	end "github.com/chaos-mesh/chaos-mesh/pkg/router/endpoint"
 	"github.com/chaos-mesh/chaos-mesh/pkg/utils"
 )
 
@@ -40,48 +40,17 @@ const (
 	networkTcActionMsg = "network traffic control action duration %s"
 )
 
-func newReconciler(c client.Client, r client.Reader, log logr.Logger, req ctrl.Request,
-	recorder record.EventRecorder) twophase.Reconciler {
-	return twophase.Reconciler{
-		InnerReconciler: &Reconciler{
-			Client:        c,
-			Reader:        r,
-			EventRecorder: recorder,
-			Log:           log,
-		},
-		Client: c,
-		Log:    log,
-	}
-}
-
-// NewTwoPhaseReconciler would create Reconciler for twophase package
-func NewTwoPhaseReconciler(c client.Client, reader client.Reader, log logr.Logger, req ctrl.Request,
-	recorder record.EventRecorder) *twophase.Reconciler {
-	r := newReconciler(c, reader, log, req, recorder)
-	return twophase.NewReconciler(r, r.Client, r.Reader, r.Log)
-}
-
-// NewCommonReconciler would create Reconciler for common package
-func NewCommonReconciler(c client.Client, reader client.Reader, log logr.Logger, req ctrl.Request,
-	recorder record.EventRecorder) *common.Reconciler {
-	r := newReconciler(c, reader, log, req, recorder)
-	return common.NewReconciler(r, r.Client, r.Reader, r.Log)
-}
-
-type Reconciler struct {
-	client.Client
-	client.Reader
-	record.EventRecorder
-	Log logr.Logger
+type endpoint struct {
+	ctx.Context
 }
 
 // Object implements the reconciler.InnerReconciler.Object
-func (r *Reconciler) Object() v1alpha1.InnerObject {
+func (r *endpoint) Object() v1alpha1.InnerObject {
 	return &v1alpha1.NetworkChaos{}
 }
 
 // Apply implements the reconciler.InnerReconciler.Apply
-func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.InnerObject) error {
+func (r *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.InnerObject) error {
 	r.Log.Info("traffic control Apply", "req", req, "chaos", chaos)
 
 	networkchaos, ok := chaos.(*v1alpha1.NetworkChaos)
@@ -146,7 +115,10 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1
 
 	err = m.Commit(ctx)
 	if err != nil {
-		r.Log.Error(err, "fail to commit")
+		// if pod is not found or not running, don't print error log and wait next time.
+		if err != podnetworkmanager.ErrPodNotFound && err != podnetworkmanager.ErrPodNotRunning {
+			r.Log.Error(err, "fail to commit")
+		}
 		return err
 	}
 
@@ -171,7 +143,7 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1
 }
 
 // Recover implements the reconciler.InnerReconciler.Recover
-func (r *Reconciler) Recover(ctx context.Context, req ctrl.Request, chaos v1alpha1.InnerObject) error {
+func (r *endpoint) Recover(ctx context.Context, req ctrl.Request, chaos v1alpha1.InnerObject) error {
 	networkchaos, ok := chaos.(*v1alpha1.NetworkChaos)
 	if !ok {
 		err := errors.New("chaos is not NetworkChaos")
@@ -186,7 +158,7 @@ func (r *Reconciler) Recover(ctx context.Context, req ctrl.Request, chaos v1alph
 	return nil
 }
 
-func (r *Reconciler) cleanFinalizersAndRecover(ctx context.Context, networkchaos *v1alpha1.NetworkChaos) error {
+func (r *endpoint) cleanFinalizersAndRecover(ctx context.Context, networkchaos *v1alpha1.NetworkChaos) error {
 	var result error
 
 	source := networkchaos.Namespace + "/" + networkchaos.Name
@@ -205,7 +177,8 @@ func (r *Reconciler) cleanFinalizersAndRecover(ctx context.Context, networkchaos
 		})
 
 		err = m.Commit(ctx)
-		if err != nil {
+		// if pod not found or not running, directly return and giveup recover.
+		if err != nil && err != podnetworkmanager.ErrPodNotFound && err != podnetworkmanager.ErrPodNotRunning {
 			r.Log.Error(err, "fail to commit")
 		}
 
@@ -222,7 +195,7 @@ func (r *Reconciler) cleanFinalizersAndRecover(ctx context.Context, networkchaos
 	return result
 }
 
-func (r *Reconciler) applyTc(ctx context.Context, sources, targets []v1.Pod, externalTargets []string, m *podnetworkmanager.PodNetworkManager, networkchaos *v1alpha1.NetworkChaos) error {
+func (r *endpoint) applyTc(ctx context.Context, sources, targets []v1.Pod, externalTargets []string, m *podnetworkmanager.PodNetworkManager, networkchaos *v1alpha1.NetworkChaos) error {
 	for index := range sources {
 		pod := &sources[index]
 
@@ -284,4 +257,25 @@ func (r *Reconciler) applyTc(ctx context.Context, sources, targets []v1.Pod, ext
 	}
 
 	return nil
+}
+
+func init() {
+	router.Register("networkchaos", &v1alpha1.NetworkChaos{}, func(obj runtime.Object) bool {
+		chaos, ok := obj.(*v1alpha1.NetworkChaos)
+		if !ok {
+			return false
+		}
+
+		return chaos.Spec.Action == v1alpha1.BandwidthAction ||
+			chaos.Spec.Action == v1alpha1.NetemAction ||
+			chaos.Spec.Action == v1alpha1.DelayAction ||
+			chaos.Spec.Action == v1alpha1.LossAction ||
+			chaos.Spec.Action == v1alpha1.DuplicateAction ||
+			chaos.Spec.Action == v1alpha1.CorruptAction
+
+	}, func(ctx ctx.Context) end.Endpoint {
+		return &endpoint{
+			Context: ctx,
+		}
+	})
 }

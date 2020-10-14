@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package timechaos_test
+package timechaos
 
 import (
 	"context"
@@ -34,8 +34,8 @@ import (
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	. "github.com/chaos-mesh/chaos-mesh/controllers/test"
-	. "github.com/chaos-mesh/chaos-mesh/controllers/timechaos"
 	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
+	ctx "github.com/chaos-mesh/chaos-mesh/pkg/router/context"
 )
 
 func TestTimechaos(t *testing.T) {
@@ -86,10 +86,12 @@ var _ = Describe("TimeChaos", func() {
 			},
 		}
 
-		r := Reconciler{
-			Client:        fake.NewFakeClientWithScheme(scheme.Scheme, podObjects...),
-			EventRecorder: &record.FakeRecorder{},
-			Log:           ctrl.Log.WithName("controllers").WithName("TimeChaos"),
+		r := endpoint{
+			Context: ctx.Context{
+				Client:        fake.NewFakeClientWithScheme(scheme.Scheme, podObjects...),
+				EventRecorder: &record.FakeRecorder{},
+				Log:           ctrl.Log.WithName("controllers").WithName("TimeChaos"),
+			},
 		}
 
 		It("TimeChaos Apply", func() {

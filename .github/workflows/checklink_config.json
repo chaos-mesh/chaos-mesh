@@ -1,0 +1,13 @@
+{
+  "ignorePatterns": [
+    {
+      "pattern": ["^/img/"]
+    },
+    {
+      "pattern": ["^http://localhost"]
+    },
+    {
+      "pattern": ["^https://github.com"]
+    }
+  ]
+}

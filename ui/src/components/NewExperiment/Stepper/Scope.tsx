@@ -9,26 +9,28 @@ import { getIn, useFormikContext } from 'formik'
 import AdvancedOptions from 'components/AdvancedOptions'
 import { Experiment } from '../types'
 import ScopePodsTable from './ScopePodsTable'
+import T from 'components/T'
 import { useSelector } from 'react-redux'
 
 interface ScopeStepProps {
   namespaces: string[]
   scope?: string
+  podsPreviewTitle?: string | JSX.Element
+  podsPreviewDesc?: string | JSX.Element
 }
 
 const phases = ['all', 'pending', 'running', 'succeeded', 'failed', 'unknown']
 const modes = [
-  'all',
   { name: 'Random One', value: 'one' },
   { name: 'Fixed Number', value: 'fixed' },
-  'fixed percent',
-  'random max percent',
+  { name: 'Fixed Percent', value: 'fixed-percent' },
+  { name: 'Random Max Percent', value: 'random-max-percent' },
 ]
 const modesWithAdornment = ['fixed-percent', 'random-max-percent']
 
 const labelFilters = ['pod-template-hash']
 
-const ScopeStep: React.FC<ScopeStepProps> = ({ namespaces, scope = 'scope' }) => {
+const ScopeStep: React.FC<ScopeStepProps> = ({ namespaces, scope = 'scope', podsPreviewTitle, podsPreviewDesc }) => {
   const { values, handleChange } = useFormikContext<Experiment>()
 
   const { labels, annotations, pods } = useSelector((state: RootState) => state.experiments)
@@ -37,6 +39,8 @@ const ScopeStep: React.FC<ScopeStepProps> = ({ namespaces, scope = 'scope' }) =>
   const labelKVs = useMemo(() => joinObjKVs(labels, ': ', labelFilters), [labels])
   const annotationKVs = useMemo(() => joinObjKVs(annotations, ': '), [annotations])
 
+  const [firstRender, setFirstRender] = useState(true)
+  const [currentNamespaces, setCurrentNamespaces] = useState<string[]>([])
   const [currentLabels, setCurrentLabels] = useState<string[]>([])
   const [currentAnnotations, setCurrentAnnotations] = useState<string[]>([])
 
@@ -45,7 +49,8 @@ const ScopeStep: React.FC<ScopeStepProps> = ({ namespaces, scope = 'scope' }) =>
 
     storeDispatch(getLabels(_labels))
     storeDispatch(getAnnotations(_labels))
-    storeDispatch(getPodsByNamespaces({ namespace_selectors: _labels }))
+
+    setCurrentNamespaces(_labels)
   }
 
   const handleLabelSelectorsChangeCallback = (labels: string[]) => setCurrentLabels(labels)
@@ -67,23 +72,29 @@ const ScopeStep: React.FC<ScopeStepProps> = ({ namespaces, scope = 'scope' }) =>
   }
 
   useEffect(() => {
+    if (firstRender) {
+      setFirstRender(false)
+
+      return
+    }
+
     storeDispatch(
       getPodsByNamespaces({
-        namespace_selectors: namespaces,
+        namespace_selectors: currentNamespaces,
         label_selectors: arrToObjBySep(currentLabels, ': '),
         annotation_selectors: arrToObjBySep(currentAnnotations, ': '),
       })
     )
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentLabels, currentAnnotations])
+  }, [currentNamespaces, currentLabels, currentAnnotations])
 
   return (
     <>
       <AutocompleteMultipleField
         id={`${scope}.namespace_selectors`}
         name={`${scope}.namespace_selectors`}
-        label="Namespace Selectors"
-        helperText="Multiple options"
+        label={T('newE.scope.namespaceSelectors')}
+        helperText={T('common.multiOptions')}
         options={namespaces}
         onChangeCallback={handleNamespaceSelectorsChangeCallback}
       />
@@ -91,32 +102,32 @@ const ScopeStep: React.FC<ScopeStepProps> = ({ namespaces, scope = 'scope' }) =>
       <AutocompleteMultipleField
         id={`${scope}.label_selectors`}
         name={`${scope}.label_selectors`}
-        label="Label Selectors"
-        helperText="Multiple options"
+        label={T('k8s.labelSelectors')}
+        helperText={T('common.multiOptions')}
         options={labelKVs}
         onChangeCallback={handleLabelSelectorsChangeCallback}
       />
 
-      <SelectField id={`${scope}.mode`} name={`${scope}.mode`} label="Mode" helperText="Select the experiment mode">
-        {modes.map((option) =>
-          typeof option === 'string' ? (
-            <MenuItem key={option} value={option.split(' ').join('-')}>
-              {toTitleCase(option)}
-            </MenuItem>
-          ) : (
-            <MenuItem key={option.value} value={option.value}>
-              {option.name}
-            </MenuItem>
-          )
-        )}
+      <SelectField
+        id={`${scope}.mode`}
+        name={`${scope}.mode`}
+        label={T('newE.scope.mode')}
+        helperText={T('newE.scope.modeHelper')}
+      >
+        <MenuItem value="all">All</MenuItem>
+        {modes.map((option) => (
+          <MenuItem key={option.value} value={option.value}>
+            {option.name}
+          </MenuItem>
+        ))}
       </SelectField>
 
       {getIn(values, scope).mode !== 'all' && getIn(values, scope).mode !== 'one' && (
         <TextField
           id={`${scope}.value`}
           name={`${scope}.value`}
-          label="Mode Value"
-          helperText="Please fill the mode value"
+          label={T('newE.scope.modeValue')}
+          helperText={T('newE.scope.modeValueHelper')}
           InputProps={{
             endAdornment: modesWithAdornment.includes(getIn(values, scope).mode) && (
               <InputAdornment position="end">%</InputAdornment>
@@ -129,8 +140,8 @@ const ScopeStep: React.FC<ScopeStepProps> = ({ namespaces, scope = 'scope' }) =>
         <AutocompleteMultipleField
           id={`${scope}.annotation_selectors`}
           name={`${scope}.annotation_selectors`}
-          label="Annotation Selectors"
-          helperText="Multiple options"
+          label={T('k8s.annotationsSelectors')}
+          helperText={T('common.multiOptions')}
           options={annotationKVs}
           onChangeCallback={handleAnnotationSelectorsChangeCallback}
         />
@@ -138,8 +149,8 @@ const ScopeStep: React.FC<ScopeStepProps> = ({ namespaces, scope = 'scope' }) =>
         <SelectField
           id={`${scope}.phase_selectors`}
           name={`${scope}.phase_selectors`}
-          label="Phase Selectors"
-          helperText="Multiple options"
+          label={T('k8s.phaseSelectors')}
+          helperText={T('common.multiOptions')}
           multiple
           onChange={handleChangeIncludeAll(`${scope}.phase_selectors`)}
         >
@@ -151,19 +162,21 @@ const ScopeStep: React.FC<ScopeStepProps> = ({ namespaces, scope = 'scope' }) =>
         </SelectField>
       </AdvancedOptions>
 
-      {pods.length > 0 && (
-        <>
-          <Box my={6}>
-            <Divider />
-          </Box>
-          <Box mb={6}>
-            <Typography>Affected Pods Preview</Typography>
-            <Typography variant="subtitle2" color="textSecondary">
-              You can further limit the scope of the experiment by checking pods
-            </Typography>
-          </Box>
-          <ScopePodsTable scope={scope} pods={pods} />
-        </>
+      <Box my={6}>
+        <Divider />
+      </Box>
+
+      <Box mb={6}>
+        <Typography>{podsPreviewTitle || T('newE.scope.affectedPodsPreview')}</Typography>
+        <Typography variant="subtitle2" color="textSecondary">
+          {podsPreviewDesc || T('newE.scope.affectedPodsPreviewHelper')}
+        </Typography>
+      </Box>
+
+      {pods.length > 0 ? (
+        <ScopePodsTable scope={scope} pods={pods} />
+      ) : (
+        <Typography variant="subtitle2">{T('newE.scope.noPodsFound')}</Typography>
       )}
     </>
   )

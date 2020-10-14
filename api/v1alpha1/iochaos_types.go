@@ -14,60 +14,28 @@
 package v1alpha1
 
 import (
-	"time"
-
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
-// KindIOChaos is the kind for io chaos
-const KindIOChaos = "IoChaos"
+// +kubebuilder:object:root=true
+// +chaos-mesh:base
 
-func init() {
-	all.register(KindIOChaos, &ChaosKind{
-		Chaos:     &IoChaos{},
-		ChaosList: &IoChaosList{},
-	})
+// IoChaos is the Schema for the iochaos API
+type IoChaos struct {
+	metav1.TypeMeta   `json:",inline"`
+	metav1.ObjectMeta `json:"metadata,omitempty"`
+
+	Spec   IoChaosSpec   `json:"spec,omitempty"`
+	Status IoChaosStatus `json:"status,omitempty"`
 }
-
-// IOChaosAction represents the chaos action about I/O action.
-type IOChaosAction string
-
-const (
-	IODelayAction IOChaosAction = "delay"
-	IOErrnoAction               = "errno"
-	IOMixedAction               = "mixed"
-)
-
-// IOLayer represents the layer of I/O system.
-type IOLayer string
-
-const (
-	FileSystemLayer = "fs"
-	BlockLayer      = "block"
-	DeviceLayer     = "device"
-)
-
-const (
-	DefaultChaosfsAddr = ":65534"
-)
 
 // IoChaosSpec defines the desired state of IoChaos
 type IoChaosSpec struct {
 	// Selector is used to select pods that are used to inject chaos action.
 	Selector SelectorSpec `json:"selector"`
-
-	// Scheduler defines some schedule rules to
-	// control the running time of the chaos experiment about pods.
-	Scheduler *SchedulerSpec `json:"scheduler,omitempty"`
-
-	// Action defines the specific pod chaos action.
-	// Supported action: delay / errno / mixed
-	// Default action: delay
-	// +kubebuilder:validation:Enum=delay;errno;mixed
-	Action IOChaosAction `json:"action"`
 
 	// Mode defines the mode to run chaos action.
 	// Supported mode: one / all / fixed / fixed-percent / random-max-percent
@@ -81,42 +49,27 @@ type IoChaosSpec struct {
 	// +optional
 	Value string `json:"value"`
 
-	// Duration represents the duration of the chaos action.
-	// It is required when the action is `PodFailureAction`.
-	// A duration string is a possibly signed sequence of
-	// decimal numbers, each with optional fraction and a unit suffix,
-	// such as "300ms", "-1.5h" or "2h45m".
-	// Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
-	// +optional
-	Duration *string `json:"duration,omitempty"`
-
-	// Layer represents the layer of the I/O action.
-	// Supported value: fs.
-	// Default layer: fs
-	// +kubebuilder:validation:Enum=fs
-	Layer IOLayer `json:"layer"`
+	// Action defines the specific pod chaos action.
+	// Supported action: latency / fault / attrOverride
+	// +kubebuilder:validation:Enum=latency;fault;attrOverride
+	Action IoChaosType `json:"action"`
 
 	// Delay defines the value of I/O chaos action delay.
 	// A delay string is a possibly signed sequence of
 	// decimal numbers, each with optional fraction and a unit suffix,
 	// such as "300ms".
 	// Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
-	//
-	// If `Delay` is empty, the operator will generate a value for it randomly.
 	// +optional
 	Delay string `json:"delay,omitempty"`
 
 	// Errno defines the error code that returned by I/O action.
 	// refer to: https://www-numi.fnal.gov/offline_software/srt_public_context/WebDocs/Errors/unix_system_errors.html
-	//
-	// If `Errno` is empty, the operator will generate an error code for it randomly.
 	// +optional
-	Errno string `json:"errno,omitempty"`
+	Errno uint32 `json:"errno,omitempty"`
 
-	// Percent defines the percentage of injection errors and provides a number from 0-100.
-	// default: 100.
+	// Attr defines the overrided attribution
 	// +optional
-	Percent string `json:"percent,omitempty"`
+	Attr *AttrOverrideSpec `json:"attr,omitempty"`
 
 	// Path defines the path of files for injecting I/O chaos action.
 	// +optional
@@ -125,11 +78,28 @@ type IoChaosSpec struct {
 	// Methods defines the I/O methods for injecting I/O chaos action.
 	// default: all I/O methods.
 	// +optional
-	Methods []string `json:"methods,omitempty"`
+	Methods []IoMethod `json:"methods,omitempty"`
 
-	// Addr defines the address for sidecar container.
+	// Percent defines the percentage of injection errors and provides a number from 0-100.
+	// default: 100.
 	// +optional
-	Addr string `json:"addr,omitempty"`
+	Percent int `json:"percent,omitempty"`
+
+	// VolumePath represents the mount path of injected volume
+	VolumePath string `json:"volumePath"`
+
+	// Scheduler defines some schedule rules to
+	// control the running time of the chaos experiment about pods.
+	Scheduler *SchedulerSpec `json:"scheduler,omitempty"`
+
+	// Duration represents the duration of the chaos action.
+	// It is required when the action is `PodFailureAction`.
+	// A duration string is a possibly signed sequence of
+	// decimal numbers, each with optional fraction and a unit suffix,
+	// such as "300ms", "-1.5h" or "2h45m".
+	// Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
+	// +optional
+	Duration *string `json:"duration,omitempty"`
 }
 
 func (in *IoChaosSpec) GetSelector() SelectorSpec {
@@ -147,129 +117,4 @@ func (in *IoChaosSpec) GetValue() string {
 // IoChaosStatus defines the observed state of IoChaos
 type IoChaosStatus struct {
 	ChaosStatus `json:",inline"`
-}
-
-// +kubebuilder:object:root=true
-
-// IoChaos is the Schema for the iochaos API
-type IoChaos struct {
-	metav1.TypeMeta   `json:",inline"`
-	metav1.ObjectMeta `json:"metadata,omitempty"`
-
-	Spec   IoChaosSpec   `json:"spec,omitempty"`
-	Status IoChaosStatus `json:"status,omitempty"`
-}
-
-func (in *IoChaos) GetStatus() *ChaosStatus {
-	return &in.Status.ChaosStatus
-}
-
-// IsDeleted returns whether this resource has been deleted
-func (in *IoChaos) IsDeleted() bool {
-	return !in.DeletionTimestamp.IsZero()
-}
-
-// IsPaused returns whether this resource has been paused
-func (in *IoChaos) IsPaused() bool {
-	if in.Annotations == nil || in.Annotations[PauseAnnotationKey] != "true" {
-		return false
-	}
-	return true
-}
-
-// GetDuration would return the duration for chaos
-func (in *IoChaos) GetDuration() (*time.Duration, error) {
-	if in.Spec.Duration == nil {
-		return nil, nil
-	}
-	duration, err := time.ParseDuration(*in.Spec.Duration)
-	if err != nil {
-		return nil, err
-	}
-	return &duration, nil
-}
-
-func (in *IoChaos) GetNextStart() time.Time {
-	if in.Status.Scheduler.NextStart == nil {
-		return time.Time{}
-	}
-	return in.Status.Scheduler.NextStart.Time
-}
-
-func (in *IoChaos) SetNextStart(t time.Time) {
-	if t.IsZero() {
-		in.Status.Scheduler.NextStart = nil
-		return
-	}
-
-	if in.Status.Scheduler.NextStart == nil {
-		in.Status.Scheduler.NextStart = &metav1.Time{}
-	}
-	in.Status.Scheduler.NextStart.Time = t
-}
-
-func (in *IoChaos) GetNextRecover() time.Time {
-	if in.Status.Scheduler.NextRecover == nil {
-		return time.Time{}
-	}
-	return in.Status.Scheduler.NextRecover.Time
-}
-
-func (in *IoChaos) SetNextRecover(t time.Time) {
-	if t.IsZero() {
-		in.Status.Scheduler.NextRecover = nil
-		return
-	}
-
-	if in.Status.Scheduler.NextRecover == nil {
-		in.Status.Scheduler.NextRecover = &metav1.Time{}
-	}
-	in.Status.Scheduler.NextRecover.Time = t
-}
-
-// GetScheduler would return the scheduler for chaos
-func (in *IoChaos) GetScheduler() *SchedulerSpec {
-	return in.Spec.Scheduler
-}
-
-// GetChaos returns a chaos instance
-func (in *IoChaos) GetChaos() *ChaosInstance {
-	instance := &ChaosInstance{
-		Name:      in.Name,
-		Namespace: in.Namespace,
-		Kind:      KindIOChaos,
-		StartTime: in.CreationTimestamp.Time,
-		Action:    string(in.Spec.Action),
-		Status:    string(in.GetStatus().Experiment.Phase),
-		UID:       string(in.UID),
-	}
-	if in.Spec.Duration != nil {
-		instance.Duration = *in.Spec.Duration
-	}
-	if in.DeletionTimestamp != nil {
-		instance.EndTime = in.DeletionTimestamp.Time
-	}
-	return instance
-}
-
-// +kubebuilder:object:root=true
-
-// IoChaosList contains a list of IoChaos
-type IoChaosList struct {
-	metav1.TypeMeta `json:",inline"`
-	metav1.ListMeta `json:"metadata,omitempty"`
-	Items           []IoChaos `json:"items"`
-}
-
-// ListChaos returns a list of io chaos
-func (in *IoChaosList) ListChaos() []*ChaosInstance {
-	res := make([]*ChaosInstance, 0, len(in.Items))
-	for _, item := range in.Items {
-		res = append(res, item.GetChaos())
-	}
-	return res
-}
-
-func init() {
-	SchemeBuilder.Register(&IoChaos{}, &IoChaosList{})
 }

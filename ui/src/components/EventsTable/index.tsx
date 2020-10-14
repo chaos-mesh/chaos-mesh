@@ -31,15 +31,18 @@ import LastPageIcon from '@material-ui/icons/LastPage'
 import Loading from 'components/Loading'
 import PaperTop from 'components/PaperTop'
 import SearchIcon from '@material-ui/icons/Search'
+import T from 'components/T'
 import Tooltip from 'components/Tooltip'
 import _debounce from 'lodash.debounce'
 import { searchEvents } from 'lib/search'
+import { useIntl } from 'react-intl'
 import { usePrevious } from 'lib/hooks'
 import useRunningLabelStyles from 'lib/styles/runningLabel'
 
 const useStyles = makeStyles(() =>
   createStyles({
     tableContainer: {
+      minHeight: 450,
       maxHeight: 768,
     },
     eventDetailPaper: {
@@ -100,12 +103,12 @@ type SortedEvent = Omit<Event, 'pods'>
 type SortedEventWithPods = Event
 
 const headCells: { id: keyof SortedEvent; label: string }[] = [
-  { id: 'experiment', label: 'Experiment' },
-  { id: 'experiment_id', label: 'UUID' },
-  { id: 'namespace', label: 'Namespace' },
-  { id: 'kind', label: 'Kind' },
-  { id: 'start_time', label: 'Started' },
-  { id: 'finish_time', label: 'Ended' },
+  { id: 'experiment', label: 'experiment' },
+  { id: 'experiment_id', label: 'uuid' },
+  { id: 'namespace', label: 'namespace' },
+  { id: 'kind', label: 'kind' },
+  { id: 'start_time', label: 'started' },
+  { id: 'finish_time', label: 'ended' },
 ]
 
 interface EventsTableHeadProps {
@@ -120,7 +123,7 @@ const EventsTableHead: React.FC<EventsTableHeadProps> = ({ order, orderBy, onSor
 
   let cells = headCells
   if (detailed) {
-    cells = cells.concat([{ id: 'Detail' as keyof SortedEvent, label: 'Detail' }])
+    cells = cells.concat([{ id: 'Detail' as keyof SortedEvent, label: '' }])
   }
 
   return (
@@ -133,7 +136,7 @@ const EventsTableHead: React.FC<EventsTableHeadProps> = ({ order, orderBy, onSor
             onClick={handleSortEvents(cell.id)}
           >
             <TableSortLabel active={orderBy === cell.id} direction={orderBy === cell.id ? order : 'desc'}>
-              {cell.label}
+              {cell.label && T(`events.event.${cell.label}`)}
             </TableSortLabel>
           </TableCell>
         ))}
@@ -200,12 +203,16 @@ const EventsTableRow: React.FC<EventsTableRowProps> = ({ event: e, detailed, onS
         <TableCell>{e.kind}</TableCell>
         <TableCell>{format(e.start_time)}</TableCell>
         <TableCell>
-          {e.finish_time ? format(e.finish_time) : <span className={runningLabel.root}>Running</span>}
+          {e.finish_time ? (
+            format(e.finish_time)
+          ) : (
+            <span className={runningLabel.root}>{T('experiments.status.running')}</span>
+          )}
         </TableCell>
         {detailed && (
           <TableCell>
             <Button variant="outlined" size="small" color="primary" onClick={onSelectEvent(e)}>
-              Detail
+              {T('common.detail')}
             </Button>
           </TableCell>
         )}
@@ -219,17 +226,18 @@ export interface EventsTableHandles {
 }
 
 interface EventsTableProps {
-  title?: string
   events: Event[]
   detailed?: boolean
   hasSearch?: boolean
 }
 
 const EventsTable: React.ForwardRefRenderFunction<EventsTableHandles, EventsTableProps> = (
-  { title = 'Events', events: allEvents, detailed = false, hasSearch = true },
+  { events: allEvents, detailed = false, hasSearch = true },
   ref
 ) => {
   const classes = useStyles()
+
+  const intl = useIntl()
 
   const [events, setEvents] = useState(allEvents)
   const [order, setOrder] = useState<Order>('desc')
@@ -286,12 +294,12 @@ const EventsTable: React.ForwardRefRenderFunction<EventsTableHandles, EventsTabl
   return (
     <Box position="relative">
       <Paper variant="outlined">
-        <PaperTop title={title}>
+        <PaperTop title={T('events.table')}>
           {hasSearch && (
             <TextField
-              style={{ width: '200px', minWidth: '30%', margin: 0 }}
+              style={{ width: 200, minWidth: '30%', margin: 0 }}
               margin="dense"
-              placeholder="Search events..."
+              placeholder={intl.formatMessage({ id: 'common.search' })}
               disabled={!allEvents}
               variant="outlined"
               InputProps={{
@@ -306,16 +314,16 @@ const EventsTable: React.ForwardRefRenderFunction<EventsTableHandles, EventsTabl
                       title={
                         <Typography variant="body2">
                           The following search syntax can help to locate the events quickly:
-                          <ul style={{ paddingLeft: '1rem' }}>
-                            <li>namespace:default xxx will search for events with namespace default.</li>
+                          <ul style={{ marginBottom: 0, paddingLeft: '1rem' }}>
+                            <li>namespace:default xxx will search for events with namespace default</li>
                             <li>
                               kind:NetworkChaos xxx will search for events with kind NetworkChaos, you can also type
-                              kind:net because the search is fuzzy.
+                              kind:net because the search is fuzzy
                             </li>
-                            <li>pod:echoserver-774cdcc8b6-nrm65 will search for events by affected pod.</li>
-                            <li>ip:172.17.0.6 is similar to pod:xxx, filter by pod IP.</li>
+                            <li>pod:echoserver-774cdcc8b6-nrm65 will search for events by affected pod</li>
+                            <li>ip:172.17.0.6 is similar to pod:xxx, filter by pod IP</li>
                             <li>
-                              uuid:2f79a4d6-1952-45b5-b2d5-ce715823c7a7 will search for events by experimental uuid.
+                              uuid:2f79a4d6-1952-45b5-b2d5-ce715823c7a7 will search for events by experimental uuid
                             </li>
                           </ul>
                         </Typography>
@@ -366,7 +374,7 @@ const EventsTable: React.ForwardRefRenderFunction<EventsTableHandles, EventsTabl
                     onChangeRowsPerPage={handleChangeRowsPerPage}
                     ActionsComponent={TablePaginationActions as any}
                     labelDisplayedRows={({ from, to, count }) => `${from} - ${to} of ${count}`}
-                    labelRowsPerPage="Events per page"
+                    labelRowsPerPage={intl.formatMessage({ id: 'events.eventsPerPage' })}
                   />
                 )}
               </TableRow>
@@ -382,7 +390,7 @@ const EventsTable: React.ForwardRefRenderFunction<EventsTableHandles, EventsTabl
             zIndex: 3, // .MuiTableCell-stickyHeader z-index: 2
           }}
         >
-          <PaperTop title="Event Detail">
+          <PaperTop title={T('common.detail')}>
             <IconButton color="primary" onClick={closeEventDetail}>
               <CloseIcon />
             </IconButton>

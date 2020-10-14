@@ -92,9 +92,10 @@ func Register(r *gin.RouterGroup, s *Service) {
 // Experiment defines the basic information of an experiment
 type Experiment struct {
 	ExperimentBase
-	Created string `json:"created"`
-	Status  string `json:"status"`
-	UID     string `json:"uid"`
+	Created       string `json:"created"`
+	Status        string `json:"status"`
+	UID           string `json:"uid"`
+	FailedMessage string `json:"failed_message,omitempty"`
 }
 
 // ExperimentBase is used to identify the unique experiment from API request.
@@ -132,7 +133,7 @@ func (s *Service) createExperiment(c *gin.Context) {
 	createFuncs := map[string]actionFunc{
 		v1alpha1.KindPodChaos:     s.createPodChaos,
 		v1alpha1.KindNetworkChaos: s.createNetworkChaos,
-		v1alpha1.KindIOChaos:      s.createIOChaos,
+		v1alpha1.KindIoChaos:      s.createIOChaos,
 		v1alpha1.KindStressChaos:  s.createStressChaos,
 		v1alpha1.KindTimeChaos:    s.createTimeChaos,
 		v1alpha1.KindKernelChaos:  s.createKernelChaos,
@@ -238,17 +239,17 @@ func (s *Service) createIOChaos(exp *core.ExperimentInfo) error {
 		},
 		Spec: v1alpha1.IoChaosSpec{
 			Selector: exp.Scope.ParseSelector(),
-			Action:   v1alpha1.IOChaosAction(exp.Target.IOChaos.Action),
 			Mode:     v1alpha1.PodMode(exp.Scope.Mode),
 			Value:    exp.Scope.Value,
+			Action:   v1alpha1.IoChaosType(exp.Target.IOChaos.Action),
 			// TODO: don't hardcode after we support other layers
-			Layer:   v1alpha1.FileSystemLayer,
-			Addr:    exp.Target.IOChaos.Addr,
-			Delay:   exp.Target.IOChaos.Delay,
-			Errno:   exp.Target.IOChaos.Errno,
-			Path:    exp.Target.IOChaos.Path,
-			Percent: exp.Target.IOChaos.Percent,
-			Methods: exp.Target.IOChaos.Methods,
+			Delay:      exp.Target.IOChaos.Delay,
+			Errno:      exp.Target.IOChaos.Errno,
+			Attr:       exp.Target.IOChaos.Attr,
+			Path:       exp.Target.IOChaos.Path,
+			Methods:    exp.Target.IOChaos.Methods,
+			Percent:    exp.Target.IOChaos.Percent,
+			VolumePath: exp.Target.IOChaos.VolumePath,
 		},
 	}
 
@@ -402,9 +403,10 @@ func (s *Service) getPodChaosDetail(namespace string, name string) (ExperimentDe
 				Namespace: chaos.Namespace,
 				Name:      chaos.Name,
 			},
-			Created: chaos.GetChaos().StartTime.Format(time.RFC3339),
-			Status:  chaos.GetChaos().Status,
-			UID:     chaos.GetChaos().UID,
+			Created:       chaos.GetChaos().StartTime.Format(time.RFC3339),
+			Status:        chaos.GetChaos().Status,
+			UID:           chaos.GetChaos().UID,
+			FailedMessage: chaos.GetStatus().FailedMessage,
 		},
 		ExperimentInfo: info,
 	}, nil
@@ -420,6 +422,7 @@ func (s *Service) getIoChaosDetail(namespace string, name string) (ExperimentDet
 		}
 		return ExperimentDetail{}, err
 	}
+
 	info := core.ExperimentInfo{
 		Name:        chaos.Name,
 		Namespace:   chaos.Namespace,
@@ -438,15 +441,16 @@ func (s *Service) getIoChaosDetail(namespace string, name string) (ExperimentDet
 			Value: chaos.Spec.Value,
 		},
 		Target: core.TargetInfo{
-			Kind: v1alpha1.KindIOChaos,
+			Kind: v1alpha1.KindIoChaos,
 			IOChaos: &core.IOChaosInfo{
-				Action:  string(chaos.Spec.Action),
-				Addr:    chaos.Spec.Addr,
-				Delay:   chaos.Spec.Delay,
-				Errno:   chaos.Spec.Errno,
-				Path:    chaos.Spec.Path,
-				Percent: chaos.Spec.Percent,
-				Methods: chaos.Spec.Methods,
+				Action:     string(chaos.Spec.Action),
+				Delay:      chaos.Spec.Delay,
+				Errno:      chaos.Spec.Errno,
+				Attr:       chaos.Spec.Attr,
+				Path:       chaos.Spec.Path,
+				Percent:    chaos.Spec.Percent,
+				Methods:    chaos.Spec.Methods,
+				VolumePath: chaos.Spec.VolumePath,
 			},
 		},
 	}
@@ -466,9 +470,10 @@ func (s *Service) getIoChaosDetail(namespace string, name string) (ExperimentDet
 				Namespace: chaos.Namespace,
 				Name:      chaos.Name,
 			},
-			Created: chaos.GetChaos().StartTime.Format(time.RFC3339),
-			Status:  chaos.GetChaos().Status,
-			UID:     chaos.GetChaos().UID,
+			Created:       chaos.GetChaos().StartTime.Format(time.RFC3339),
+			Status:        chaos.GetChaos().Status,
+			UID:           chaos.GetChaos().UID,
+			FailedMessage: chaos.GetStatus().FailedMessage,
 		},
 		ExperimentInfo: info,
 	}, nil
@@ -511,15 +516,6 @@ func (s *Service) getNetworkChaosDetail(namespace string, name string) (Experime
 				Corrupt:   chaos.Spec.Corrupt,
 				Bandwidth: chaos.Spec.Bandwidth,
 				Direction: string(chaos.Spec.Direction),
-				TargetScope: &core.ScopeInfo{
-					SelectorInfo: core.SelectorInfo{
-						NamespaceSelectors:  chaos.Spec.Selector.Namespaces,
-						LabelSelectors:      chaos.Spec.Selector.LabelSelectors,
-						AnnotationSelectors: chaos.Spec.Selector.AnnotationSelectors,
-						FieldSelectors:      chaos.Spec.Selector.FieldSelectors,
-						PhaseSelector:       chaos.Spec.Selector.PodPhaseSelectors,
-					},
-				},
 			},
 		},
 	}
@@ -533,6 +529,13 @@ func (s *Service) getNetworkChaosDetail(namespace string, name string) (Experime
 	}
 
 	if chaos.Spec.Target != nil {
+		info.Target.NetworkChaos.TargetScope.SelectorInfo = core.SelectorInfo{
+			NamespaceSelectors:  chaos.Spec.Target.TargetSelector.Namespaces,
+			LabelSelectors:      chaos.Spec.Target.TargetSelector.LabelSelectors,
+			AnnotationSelectors: chaos.Spec.Target.TargetSelector.AnnotationSelectors,
+			FieldSelectors:      chaos.Spec.Target.TargetSelector.FieldSelectors,
+			PhaseSelector:       chaos.Spec.Target.TargetSelector.PodPhaseSelectors,
+		}
 		info.Target.NetworkChaos.TargetScope.Mode = string(chaos.Spec.Target.TargetMode)
 		info.Target.NetworkChaos.TargetScope.Value = chaos.Spec.Target.TargetValue
 	}
@@ -544,9 +547,10 @@ func (s *Service) getNetworkChaosDetail(namespace string, name string) (Experime
 				Namespace: chaos.Namespace,
 				Name:      chaos.Name,
 			},
-			Created: chaos.GetChaos().StartTime.Format(time.RFC3339),
-			Status:  chaos.GetChaos().Status,
-			UID:     chaos.GetChaos().UID,
+			Created:       chaos.GetChaos().StartTime.Format(time.RFC3339),
+			Status:        chaos.GetChaos().Status,
+			UID:           chaos.GetChaos().UID,
+			FailedMessage: chaos.GetStatus().FailedMessage,
 		},
 		ExperimentInfo: info,
 	}, nil
@@ -604,9 +608,10 @@ func (s *Service) getTimeChaosDetail(namespace string, name string) (ExperimentD
 				Namespace: chaos.Namespace,
 				Name:      chaos.Name,
 			},
-			Created: chaos.GetChaos().StartTime.Format(time.RFC3339),
-			Status:  chaos.GetChaos().Status,
-			UID:     chaos.GetChaos().UID,
+			Created:       chaos.GetChaos().StartTime.Format(time.RFC3339),
+			Status:        chaos.GetChaos().Status,
+			UID:           chaos.GetChaos().UID,
+			FailedMessage: chaos.GetStatus().FailedMessage,
 		},
 		ExperimentInfo: info,
 	}, nil
@@ -662,9 +667,10 @@ func (s *Service) getKernelChaosDetail(namespace string, name string) (Experimen
 				Namespace: chaos.Namespace,
 				Name:      chaos.Name,
 			},
-			Created: chaos.GetChaos().StartTime.Format(time.RFC3339),
-			Status:  chaos.GetChaos().Status,
-			UID:     chaos.GetChaos().UID,
+			Created:       chaos.GetChaos().StartTime.Format(time.RFC3339),
+			Status:        chaos.GetChaos().Status,
+			UID:           chaos.GetChaos().UID,
+			FailedMessage: chaos.GetStatus().FailedMessage,
 		},
 		ExperimentInfo: info,
 	}, nil
@@ -725,9 +731,10 @@ func (s *Service) getStressChaosDetail(namespace string, name string) (Experimen
 				Namespace: chaos.Namespace,
 				Name:      chaos.Name,
 			},
-			Created: chaos.GetChaos().StartTime.Format(time.RFC3339),
-			Status:  chaos.GetChaos().Status,
-			UID:     chaos.GetChaos().UID,
+			Created:       chaos.GetChaos().StartTime.Format(time.RFC3339),
+			Status:        chaos.GetChaos().Status,
+			UID:           chaos.GetChaos().UID,
+			FailedMessage: chaos.GetStatus().FailedMessage,
 		},
 		ExperimentInfo: info,
 	}, nil
@@ -817,7 +824,7 @@ func (s *Service) getExperimentDetail(c *gin.Context) {
 	switch kind {
 	case v1alpha1.KindPodChaos:
 		expDetail, err = s.getPodChaosDetail(ns, name)
-	case v1alpha1.KindIOChaos:
+	case v1alpha1.KindIoChaos:
 		expDetail, err = s.getIoChaosDetail(ns, name)
 	case v1alpha1.KindNetworkChaos:
 		expDetail, err = s.getNetworkChaosDetail(ns, name)
@@ -1121,7 +1128,7 @@ func (s *Service) updateExperiment(c *gin.Context) {
 	updateFuncs := map[string]actionFunc{
 		v1alpha1.KindPodChaos:     s.updatePodChaos,
 		v1alpha1.KindNetworkChaos: s.updateNetworkChaos,
-		v1alpha1.KindIOChaos:      s.updateIOChaos,
+		v1alpha1.KindIoChaos:      s.updateIOChaos,
 		v1alpha1.KindStressChaos:  s.updateStressChaos,
 		v1alpha1.KindTimeChaos:    s.updateTimeChaos,
 		v1alpha1.KindKernelChaos:  s.updateKernelChaos,
@@ -1231,19 +1238,18 @@ func (s *Service) updateIOChaos(exp *core.ExperimentInfo) error {
 
 	chaos.SetLabels(exp.Labels)
 	chaos.SetAnnotations(exp.Annotations)
+
 	chaos.Spec = v1alpha1.IoChaosSpec{
-		Selector: exp.Scope.ParseSelector(),
-		Action:   v1alpha1.IOChaosAction(exp.Target.IOChaos.Action),
-		Mode:     v1alpha1.PodMode(exp.Scope.Mode),
-		Value:    exp.Scope.Value,
-		// TODO: don't hardcode after we support other layers
-		Layer:   v1alpha1.FileSystemLayer,
-		Addr:    exp.Target.IOChaos.Addr,
-		Delay:   exp.Target.IOChaos.Delay,
-		Errno:   exp.Target.IOChaos.Errno,
-		Path:    exp.Target.IOChaos.Path,
-		Percent: exp.Target.IOChaos.Percent,
-		Methods: exp.Target.IOChaos.Methods,
+		Selector:   exp.Scope.ParseSelector(),
+		Action:     v1alpha1.IoChaosType(exp.Target.IOChaos.Action),
+		Mode:       v1alpha1.PodMode(exp.Scope.Mode),
+		Value:      exp.Scope.Value,
+		Delay:      exp.Target.IOChaos.Delay,
+		Errno:      exp.Target.IOChaos.Errno,
+		Path:       exp.Target.IOChaos.Path,
+		Percent:    exp.Target.IOChaos.Percent,
+		Methods:    exp.Target.IOChaos.Methods,
+		VolumePath: exp.Target.IOChaos.VolumePath,
 	}
 
 	if exp.Scheduler.Cron != "" {

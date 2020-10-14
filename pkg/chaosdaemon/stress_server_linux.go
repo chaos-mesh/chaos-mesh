@@ -19,7 +19,6 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -31,6 +30,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/shirou/gopsutil/process"
 
+	"github.com/chaos-mesh/chaos-mesh/pkg/bpm"
 	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
 )
 
@@ -65,13 +65,14 @@ func (s *daemonServer) ExecStressors(ctx context.Context,
 		return nil, err
 	}
 
-	cmd := defaultProcessBuilder("stress-ng", strings.Fields(req.Stressors)...).
+	cmd := bpm.DefaultProcessBuilder("stress-ng", strings.Fields(req.Stressors)...).
 		EnablePause().
 		EnableSuicide().
-		SetPidNS(GetNsPath(pid, pidNS)).
-		Build(context.Background())
+		SetPidNS(GetNsPath(pid, bpm.PidNS)).
+		Build()
 
-	if err := cmd.Start(); err != nil {
+	err = s.backgroundProcessManager.StartProcess(cmd)
+	if err != nil {
 		return nil, err
 	}
 	log.Info("Start process successfully")
@@ -108,16 +109,6 @@ func (s *daemonServer) ExecStressors(ctx context.Context,
 		}
 		log.Info("the process hasn't resumed, step into the following loop", "comm", comm)
 	}
-	go func() {
-		if err, ok := cmd.Wait().(*exec.ExitError); ok {
-			status := err.Sys().(syscall.WaitStatus)
-			if status.Signaled() && status.Signal() == syscall.SIGTERM {
-				log.Info("Stressors cancelled", "request", req)
-			} else {
-				log.Error(err, "stressors exited accidentally", "request", req)
-			}
-		}
-	}()
 
 	return &pb.ExecStressResponse{
 		Instance:  strconv.Itoa(cmd.Process.Pid),
@@ -135,48 +126,11 @@ func (s *daemonServer) CancelStressors(ctx context.Context,
 	}
 	log.Info("Canceling stressors", "request", req)
 
-	p, err := os.FindProcess(pid)
+	err = s.backgroundProcessManager.KillBackgroundProcess(ctx, pid, req.StartTime)
 	if err != nil {
-		log.Error(err, "unreachable path. `os.FindProcess` will never return an error on unix", "pid", pid)
 		return nil, err
 	}
-
-	procState, err := process.NewProcess(int32(pid))
-	if err != nil {
-		// return successfully as the process has exited
-		return &empty.Empty{}, nil
-	}
-	ct, err := procState.CreateTime()
-	if err != nil {
-		log.Error(err, "fail to read create time", "pid", pid)
-		// return successfully as the process has exited
-		return &empty.Empty{}, nil
-	}
-	if req.StartTime != ct {
-		log.Info("process has already been killed", "pid", pid, "startTime", ct, "expectedStartTime", req.StartTime)
-		// return successfully as the process has exited
-		return &empty.Empty{}, nil
-	}
-
-	ppid, err := procState.Ppid()
-	if err != nil {
-		log.Error(err, "fail to read parent id", "pid", pid)
-		// return successfully as the process has exited
-		return &empty.Empty{}, nil
-	}
-	if ppid != int32(os.Getpid()) {
-		log.Info("process has already been killed", "pid", pid, "ppid", ppid)
-		// return successfully as the process has exited
-		return &empty.Empty{}, nil
-	}
-
-	err = p.Signal(syscall.SIGTERM)
-	if err != nil && err.Error() != "os: process already finished" {
-		log.Error(err, "error while killing process", "pid", pid)
-		return nil, err
-	}
-
-	log.Info("Successfully canceled stressors")
+	log.Info("killing stressor successfully")
 	return &empty.Empty{}, nil
 }
 

@@ -15,20 +15,21 @@ package common
 
 import (
 	"context"
+	"fmt"
 	"os"
+	"regexp"
+	"strings"
 	"time"
 
-	"github.com/go-logr/logr"
-
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	"github.com/chaos-mesh/chaos-mesh/controllers/reconciler"
 	"github.com/chaos-mesh/chaos-mesh/pkg/config"
+	ctx "github.com/chaos-mesh/chaos-mesh/pkg/router/context"
+	endpoint "github.com/chaos-mesh/chaos-mesh/pkg/router/endpoint"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/util/retry"
 
 	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 )
 
@@ -38,6 +39,8 @@ const (
 	// AnnotationCleanFinalizerForced value
 	AnnotationCleanFinalizerForced = `forced`
 )
+
+const emptyString = ""
 
 var log = ctrl.Log.WithName("controller")
 
@@ -52,24 +55,74 @@ func init() {
 		os.Exit(1)
 	}
 
+	err = validate(&conf)
+	if err != nil {
+		ctrl.SetLogger(zap.Logger(true))
+		log.Error(err, "Chaos Controller: invalid configuration")
+		os.Exit(1)
+	}
+
 	ControllerCfg = &conf
+}
+
+func validate(config *config.ChaosControllerConfig) error {
+
+	if config.WatcherConfig == nil {
+		return fmt.Errorf("required WatcherConfig is missing")
+	}
+
+	if config.ClusterScoped != config.WatcherConfig.ClusterScoped {
+		return fmt.Errorf("K8sConfigMapWatcher config ClusterScoped is not same with controller-manager ClusterScoped. k8s configmap watcher: %t, controller manager: %t", config.WatcherConfig.ClusterScoped, config.ClusterScoped)
+	}
+
+	if !config.ClusterScoped {
+		if strings.TrimSpace(config.TargetNamespace) == "" {
+			return fmt.Errorf("no target namespace specified with namespace scoped mode")
+		}
+		if !isAllowedNamespaces(config.TargetNamespace, config.AllowedNamespaces, config.IgnoredNamespaces) {
+			return fmt.Errorf("target namespace %s is not allowed with filter, please check config AllowedNamespaces and IgnoredNamespaces", config.TargetNamespace)
+		}
+
+		if config.TargetNamespace != config.WatcherConfig.TargetNamespace {
+			return fmt.Errorf("K8sConfigMapWatcher config TargertNamespace is not same with controller-manager TargetNamespace. k8s configmap watcher: %s, controller manager: %s", config.WatcherConfig.TargetNamespace, config.TargetNamespace)
+		}
+	}
+
+	return nil
+}
+
+// FIXME: duplicated with utils.IsAllowedNamespaces, it should considered with some dependency problems.
+func isAllowedNamespaces(namespace, allowedNamespace, ignoredNamespace string) bool {
+	if allowedNamespace != "" {
+		matched, err := regexp.MatchString(allowedNamespace, namespace)
+		if err != nil {
+			return false
+		}
+		return matched
+	}
+
+	if ignoredNamespace != "" {
+		matched, err := regexp.MatchString(ignoredNamespace, namespace)
+		if err != nil {
+			return false
+		}
+		return !matched
+	}
+
+	return true
 }
 
 // Reconciler for common chaos
 type Reconciler struct {
-	reconciler.InnerReconciler
-	client.Client
-	client.Reader
-	Log logr.Logger
+	endpoint.Endpoint
+	ctx.Context
 }
 
 // NewReconciler would create Reconciler for common chaos
-func NewReconciler(reconcile reconciler.InnerReconciler, c client.Client, r client.Reader, log logr.Logger) *Reconciler {
+func NewReconciler(e endpoint.Endpoint, ctx ctx.Context) *Reconciler {
 	return &Reconciler{
-		InnerReconciler: reconcile,
-		Client:          c,
-		Reader:          r,
-		Log:             log,
+		Endpoint: e,
+		Context:  ctx,
 	}
 }
 
@@ -93,15 +146,18 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		r.Log.Info("Removing self")
 		if err = r.Recover(ctx, req, chaos); err != nil {
 			r.Log.Error(err, "failed to recover chaos")
+			updateFailedMessage(ctx, r, chaos, err.Error())
 			return ctrl.Result{Requeue: true}, err
 		}
 		status.Experiment.Phase = v1alpha1.ExperimentPhaseFinished
+		status.FailedMessage = emptyString
 	} else if chaos.IsPaused() {
 		if status.Experiment.Phase == v1alpha1.ExperimentPhaseRunning {
 			r.Log.Info("Pausing")
 
 			if err = r.Recover(ctx, req, chaos); err != nil {
 				r.Log.Error(err, "failed to pause chaos")
+				updateFailedMessage(ctx, r, chaos, err.Error())
 				return ctrl.Result{Requeue: true}, err
 			}
 			now := time.Now()
@@ -113,6 +169,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 			}
 		}
 		status.Experiment.Phase = v1alpha1.ExperimentPhasePaused
+		status.FailedMessage = emptyString
 	} else if status.Experiment.Phase == v1alpha1.ExperimentPhaseRunning {
 		r.Log.Info("The common chaos is already running", "name", req.Name, "namespace", req.Namespace)
 		return ctrl.Result{}, nil
@@ -122,6 +179,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 
 		if err = r.Apply(ctx, req, chaos); err != nil {
 			r.Log.Error(err, "failed to apply chaos action")
+			updateFailedMessage(ctx, r, chaos, err.Error())
 
 			status.Experiment.Phase = v1alpha1.ExperimentPhaseFailed
 
@@ -130,6 +188,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 			})
 			if updateError != nil {
 				r.Log.Error(updateError, "unable to update chaos finalizers")
+				updateFailedMessage(ctx, r, chaos, updateError.Error())
 			}
 
 			return ctrl.Result{Requeue: true}, err
@@ -138,6 +197,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 			Time: time.Now(),
 		}
 		status.Experiment.Phase = v1alpha1.ExperimentPhaseRunning
+		status.FailedMessage = emptyString
 	}
 
 	if err := r.Update(ctx, chaos); err != nil {
@@ -146,4 +206,17 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	}
 
 	return ctrl.Result{}, nil
+}
+
+func updateFailedMessage(
+	ctx context.Context,
+	r *Reconciler,
+	chaos v1alpha1.InnerObject,
+	err string,
+) {
+	status := chaos.GetStatus()
+	status.FailedMessage = err
+	if err := r.Update(ctx, chaos); err != nil {
+		r.Log.Error(err, "unable to update chaos status")
+	}
 }

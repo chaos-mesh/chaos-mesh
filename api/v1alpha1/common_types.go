@@ -112,13 +112,52 @@ const (
 
 type ChaosStatus struct {
 	// Phase is the chaos status.
-	Phase  ChaosPhase `json:"phase"`
-	Reason string     `json:"reason,omitempty"`
+	Phase         ChaosPhase `json:"phase"`
+	Reason        string     `json:"reason,omitempty"`
+	FailedMessage string     `json:"failedMessage,omitempty"`
 
 	Scheduler ScheduleStatus `json:"scheduler,omitempty"`
 
 	// Experiment records the last experiment state.
 	Experiment ExperimentStatus `json:"experiment"`
+}
+
+func (in *ChaosStatus) GetNextStart() time.Time {
+	if in.Scheduler.NextStart == nil {
+		return time.Time{}
+	}
+	return in.Scheduler.NextStart.Time
+}
+
+func (in *ChaosStatus) SetNextStart(t time.Time) {
+	if t.IsZero() {
+		in.Scheduler.NextStart = nil
+		return
+	}
+
+	if in.Scheduler.NextStart == nil {
+		in.Scheduler.NextStart = &metav1.Time{}
+	}
+	in.Scheduler.NextStart.Time = t
+}
+
+func (in *ChaosStatus) GetNextRecover() time.Time {
+	if in.Scheduler.NextRecover == nil {
+		return time.Time{}
+	}
+	return in.Scheduler.NextRecover.Time
+}
+
+func (in *ChaosStatus) SetNextRecover(t time.Time) {
+	if t.IsZero() {
+		in.Scheduler.NextRecover = nil
+		return
+	}
+
+	if in.Scheduler.NextRecover == nil {
+		in.Scheduler.NextRecover = &metav1.Time{}
+	}
+	in.Scheduler.NextRecover.Time = t
 }
 
 // ScheduleStatus is the current status of chaos scheduler.
@@ -157,10 +196,6 @@ type ExperimentStatus struct {
 	// +optional
 	PodRecords []PodStatus `json:"podRecords,omitempty"`
 }
-
-const (
-	invalidConfigurationMsg = "invalid configuration"
-)
 
 var log = ctrl.Log.WithName("validate-webhook")
 

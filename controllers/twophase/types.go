@@ -18,36 +18,34 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/go-logr/logr"
 	"k8s.io/client-go/util/retry"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	"github.com/chaos-mesh/chaos-mesh/controllers/reconciler"
+	ctx "github.com/chaos-mesh/chaos-mesh/pkg/router/context"
+	"github.com/chaos-mesh/chaos-mesh/pkg/router/endpoint"
 	"github.com/chaos-mesh/chaos-mesh/pkg/utils"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 )
+
+const emptyString = ""
 
 // Reconciler for the twophase reconciler
 type Reconciler struct {
-	reconciler.InnerReconciler
-	client.Client
-	client.Reader
-	Log logr.Logger
+	endpoint.Endpoint
+	ctx.Context
 }
 
 // NewReconciler would create reconciler for twophase controller
-func NewReconciler(r reconciler.InnerReconciler, client client.Client, reader client.Reader, log logr.Logger) *Reconciler {
+func NewReconciler(e endpoint.Endpoint, ctx ctx.Context) *Reconciler {
 	return &Reconciler{
-		InnerReconciler: r,
-		Client:          client,
-		Reader:          reader,
-		Log:             log,
+		Endpoint: e,
+		Context:  ctx,
 	}
 }
 
+// Reconcile is twophase reconcile implement
 func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	var err error
 	now := time.Now()
@@ -88,10 +86,12 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		err = r.Recover(ctx, req, chaos)
 		if err != nil {
 			r.Log.Error(err, "failed to recover chaos")
+			updateFailedMessage(ctx, r, chaos, err.Error())
 			return ctrl.Result{Requeue: true}, err
 		}
 
 		status.Experiment.Phase = v1alpha1.ExperimentPhaseFinished
+		status.FailedMessage = emptyString
 	} else if chaos.IsPaused() {
 		if status.Experiment.Phase == v1alpha1.ExperimentPhaseRunning {
 			r.Log.Info("Pausing")
@@ -99,6 +99,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 			err = r.Recover(ctx, req, chaos)
 			if err != nil {
 				r.Log.Error(err, "failed to pause chaos")
+				updateFailedMessage(ctx, r, chaos, err.Error())
 				return ctrl.Result{Requeue: true}, err
 			}
 
@@ -111,6 +112,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 			}
 		}
 		status.Experiment.Phase = v1alpha1.ExperimentPhasePaused
+		status.FailedMessage = emptyString
 	} else if !chaos.GetNextRecover().IsZero() && chaos.GetNextRecover().Before(now) {
 		// Start recover
 		r.Log.Info("Recovering")
@@ -119,6 +121,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		if status.Experiment.Phase != v1alpha1.ExperimentPhasePaused {
 			if err = r.Recover(ctx, req, chaos); err != nil {
 				r.Log.Error(err, "failed to recover chaos")
+				updateFailedMessage(ctx, r, chaos, err.Error())
 				return ctrl.Result{Requeue: true}, err
 			}
 		}
@@ -129,49 +132,81 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 			Time: time.Now(),
 		}
 		status.Experiment.Phase = v1alpha1.ExperimentPhaseWaiting
-	} else if status.Experiment.Phase == v1alpha1.ExperimentPhasePaused &&
+		status.FailedMessage = emptyString
+	} else if (status.Experiment.Phase == v1alpha1.ExperimentPhaseFailed ||
+		status.Experiment.Phase == v1alpha1.ExperimentPhasePaused) &&
 		!chaos.GetNextRecover().IsZero() && chaos.GetNextRecover().After(now) {
-		// Only resume chaos in the case when current round is not finished,
+		// Only resume/retry chaos in the case when current round is not finished,
 		// which means the current time is before recover time. Otherwise we
 		// don't resume the chaos and just wait for the start of next round.
 
-		r.Log.Info("Resuming")
+		r.Log.Info("Resuming/Retrying")
 
 		dur := chaos.GetNextRecover().Sub(now)
-		if err := applyAction(ctx, r, req, dur, chaos); err != nil {
+		if err = applyAction(ctx, r, req, dur, chaos); err != nil {
+			updateFailedMessage(ctx, r, chaos, err.Error())
 			return ctrl.Result{Requeue: true}, err
 		}
 
+		status.FailedMessage = emptyString
 	} else if chaos.GetNextStart().Before(now) {
-		nextStart, err := utils.NextTime(*chaos.GetScheduler(), now)
+		r.Log.Info("Starting")
+
+		tempStart, err := utils.NextTime(*chaos.GetScheduler(), now)
+		if err != nil {
+			r.Log.Error(err, "failed to calculate the start time")
+			updateFailedMessage(ctx, r, chaos, err.Error())
+			return ctrl.Result{}, err
+		}
+
+		tempRecover := now.Add(*duration)
+		if tempStart.Before(tempRecover) {
+			err := fmt.Errorf("nextRecover shouldn't be later than nextStart")
+			r.Log.Error(err, "Then recover can never be reached.", "scheduler", *chaos.GetScheduler(), "duration", *duration)
+			updateFailedMessage(ctx, r, chaos, err.Error())
+			return ctrl.Result{}, err
+		}
+
+		if err = applyAction(ctx, r, req, *duration, chaos); err != nil {
+			updateFailedMessage(ctx, r, chaos, err.Error())
+			return ctrl.Result{Requeue: true}, err
+		}
+
+		nextStart, err := utils.NextTime(*chaos.GetScheduler(), status.Experiment.StartTime.Time)
+		if err != nil {
+			r.Log.Error(err, "failed to get the next start time")
+			return ctrl.Result{}, err
+		}
+		nextRecover := status.Experiment.StartTime.Time.Add(*duration)
+
+		chaos.SetNextStart(*nextStart)
+		chaos.SetNextRecover(nextRecover)
+		status.FailedMessage = emptyString
+	} else {
+		r.Log.Info("Waiting")
+
+		nextStart, err := utils.NextTime(*chaos.GetScheduler(), status.Experiment.StartTime.Time)
 		if err != nil {
 			r.Log.Error(err, "failed to get next start time")
 			return ctrl.Result{}, err
 		}
-
-		nextRecover := now.Add(*duration)
-		if nextStart.Before(nextRecover) {
-			err := fmt.Errorf("nextRecover shouldn't be later than nextStart")
-			r.Log.Error(err, "nextRecover is later than nextStart. Then recover can never be reached",
-				"nextRecover", nextRecover, "nextStart", nextStart)
-			return ctrl.Result{}, err
-		}
-
-		if err := applyAction(ctx, r, req, *duration, chaos); err != nil {
-			return ctrl.Result{Requeue: true}, err
-		}
-
-		chaos.SetNextStart(*nextStart)
-		chaos.SetNextRecover(nextRecover)
-	} else {
 		nextTime := chaos.GetNextStart()
 
-		if !chaos.GetNextRecover().IsZero() && chaos.GetNextRecover().Before(nextTime) {
-			nextTime = chaos.GetNextRecover()
+		// if nextStart is not equal to nextTime, the scheduler may have been modified.
+		// So set nextStart to time.Now.
+		if nextStart.Equal(nextTime) {
+			if !chaos.GetNextRecover().IsZero() && chaos.GetNextRecover().Before(nextTime) {
+				nextTime = chaos.GetNextRecover()
+			}
+			duration := nextTime.Sub(now)
+			r.Log.Info("Requeue request", "after", duration)
+
+			return ctrl.Result{RequeueAfter: duration}, nil
 		}
+
+		chaos.SetNextStart(time.Now())
 		duration := nextTime.Sub(now)
 		r.Log.Info("Requeue request", "after", duration)
-
 		return ctrl.Result{RequeueAfter: duration}, nil
 	}
 
@@ -215,4 +250,17 @@ func applyAction(
 	status.Experiment.Phase = v1alpha1.ExperimentPhaseRunning
 	status.Experiment.Duration = duration.String()
 	return nil
+}
+
+func updateFailedMessage(
+	ctx context.Context,
+	r *Reconciler,
+	chaos v1alpha1.InnerSchedulerObject,
+	err string,
+) {
+	status := chaos.GetStatus()
+	status.FailedMessage = err
+	if err := r.Update(ctx, chaos); err != nil {
+		r.Log.Error(err, "unable to update chaos status")
+	}
 }

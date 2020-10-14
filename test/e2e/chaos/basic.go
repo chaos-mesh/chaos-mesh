@@ -24,7 +24,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/onsi/ginkgo"
 	"github.com/pingcap/errors"
 	corev1 "k8s.io/api/core/v1"
@@ -45,8 +44,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	fscli "github.com/chaos-mesh/chaos-mesh/pkg/chaosfs/client"
-	chaosfs "github.com/chaos-mesh/chaos-mesh/pkg/chaosfs/pb"
 	e2econfig "github.com/chaos-mesh/chaos-mesh/test/e2e/config"
 	"github.com/chaos-mesh/chaos-mesh/test/e2e/util/portforward"
 	"github.com/chaos-mesh/chaos-mesh/test/pkg/fixture"
@@ -854,17 +851,12 @@ var _ = ginkgo.Describe("[Basic]", func() {
 	ginkgo.Context("[IOChaos]", func() {
 
 		var (
-			err                       error
-			port, sidecarPort         uint16
-			pfCancel, pfSidecarCancel context.CancelFunc
-			sidecarClient             chaosfs.InjureClient
+			err      error
+			port     uint16
+			pfCancel context.CancelFunc
 		)
 
 		ginkgo.JustBeforeEach(func() {
-			err = createIOChaosConfigMap(kubeCli, ns)
-			framework.ExpectNoError(err, "create io chaos configmap error")
-			err = enableWebhook(ns)
-			framework.ExpectNoError(err, "enable webhook on ns error")
 			svc := fixture.NewE2EService("io", ns)
 			_, err = kubeCli.CoreV1().Services(ns).Create(svc)
 			framework.ExpectNoError(err, "create service error")
@@ -875,18 +867,11 @@ var _ = ginkgo.Describe("[Basic]", func() {
 			framework.ExpectNoError(err, "wait io-test deployment ready error")
 			_, port, pfCancel, err = portforward.ForwardOnePort(fw, ns, "svc/io", 8080)
 			framework.ExpectNoError(err, "create helper io port port-forward failed")
-			_, sidecarPort, pfSidecarCancel, err = portforward.ForwardOnePort(fw, ns, "svc/io", 65534)
-			framework.ExpectNoError(err, "create helper sidecar port port-forward failed")
-			sidecarClient, err = fscli.NewClient(fmt.Sprintf("localhost:%d", sidecarPort))
-			framework.ExpectNoError(err, "failed to create chaosfs client")
 		})
 
 		ginkgo.JustAfterEach(func() {
 			if pfCancel != nil {
 				pfCancel()
-			}
-			if pfSidecarCancel != nil {
-				pfSidecarCancel()
 			}
 		})
 
@@ -898,15 +883,6 @@ var _ = ginkgo.Describe("[Basic]", func() {
 				err = waitE2EHelperReady(c, port)
 				framework.ExpectNoError(err, "wait e2e helper ready error")
 
-				listOption := metav1.ListOptions{
-					LabelSelector: labels.SelectorFromSet(map[string]string{
-						"app": "io",
-					}).String(),
-				}
-				pods, err := kubeCli.CoreV1().Pods(ns).List(listOption)
-				framework.ExpectNoError(err, "failed to get io-test pod")
-				framework.ExpectEqual(len(pods.Items[0].Spec.Containers), 2, "sidecar should be injected")
-
 				ioChaos := &v1alpha1.IoChaos{
 					ObjectMeta: metav1.ObjectMeta{
 						Name:      "io-chaos",
@@ -917,13 +893,13 @@ var _ = ginkgo.Describe("[Basic]", func() {
 							Namespaces:     []string{ns},
 							LabelSelectors: map[string]string{"app": "io"},
 						},
-						Action:   v1alpha1.IODelayAction,
-						Mode:     v1alpha1.OnePodMode,
-						Path:     "",
-						Delay:    "1s",
-						Percent:  "100",
-						Layer:    v1alpha1.FileSystemLayer,
-						Duration: pointer.StringPtr("9m"),
+						Action:     v1alpha1.IoLatency,
+						Mode:       v1alpha1.OnePodMode,
+						VolumePath: "/var/run/data",
+						Path:       "/var/run/data/*",
+						Delay:      "1s",
+						Percent:    100,
+						Duration:   pointer.StringPtr("9m"),
 						Scheduler: &v1alpha1.SchedulerSpec{
 							Cron: "@every 10m",
 						},
@@ -932,37 +908,35 @@ var _ = ginkgo.Describe("[Basic]", func() {
 				err = cli.Create(ctx, ioChaos)
 				framework.ExpectNoError(err, "create io chaos error")
 
-				err = wait.PollImmediate(5*time.Second, 1*time.Minute, func() (done bool, err error) {
-					dur, err := getPodIODelay(c, port)
-					framework.ExpectNoError(err, "failed to get pod io delay")
-					// IO Delay > 1s
-					if dur.Seconds() > 1 {
+				err = wait.PollImmediate(5*time.Second, 1*time.Minute, func() (bool, error) {
+					dur, _ := getPodIODelay(c, port)
+
+					second := dur.Seconds()
+					klog.Infof("get io delay %fs", second)
+					// IO Delay >= 1s
+					if second >= 1 {
 						return true, nil
 					}
 					return false, nil
 				})
 				framework.ExpectNoError(err, "io chaos doesn't work as expected")
+				klog.Infof("apply io chaos successfully")
 
 				err = cli.Delete(ctx, ioChaos)
 				framework.ExpectNoError(err, "failed to delete io chaos")
 
-				err = waitSidecarFaultRecovery(ctx, sidecarClient)
-				framework.ExpectNoError(err, "wait chaosfs recover fault error")
+				err = wait.PollImmediate(5*time.Second, 1*time.Minute, func() (bool, error) {
+					dur, _ := getPodIODelay(c, port)
 
-				klog.Infof("success to perform io chaos")
-				err = wait.PollImmediate(5*time.Second, 1*time.Minute, func() (done bool, err error) {
-					dur, err := getPodIODelay(c, port)
-					framework.ExpectNoError(err, "failed to get pod io delay")
-					// io delay shouldn't > 1s, which is expected
-					if dur.Seconds() > 1 {
-						return true, nil
+					second := dur.Seconds()
+					klog.Infof("get io delay %fs", second)
+					// IO Delay shouldn't longer than 1s
+					if second >= 1 {
+						return false, nil
 					}
-					return false, nil
+					return true, nil
 				})
-				framework.ExpectError(err, "wait no io chaos error")
-				framework.ExpectEqual(err.Error(), wait.ErrWaitTimeout.Error())
-
-				cli.Delete(ctx, ioChaos)
+				framework.ExpectNoError(err, "fail to recover io chaos")
 				cancel()
 			})
 
@@ -971,15 +945,6 @@ var _ = ginkgo.Describe("[Basic]", func() {
 				err = waitE2EHelperReady(c, port)
 				framework.ExpectNoError(err, "wait e2e helper ready error")
 
-				listOption := metav1.ListOptions{
-					LabelSelector: labels.SelectorFromSet(map[string]string{
-						"app": "io",
-					}).String(),
-				}
-				pods, err := kubeCli.CoreV1().Pods(ns).List(listOption)
-				framework.ExpectNoError(err, "failed to get io-test pod")
-				framework.ExpectEqual(len(pods.Items[0].Spec.Containers), 2, "sidecar should be injected")
-
 				ioChaos := &v1alpha1.IoChaos{
 					ObjectMeta: metav1.ObjectMeta{
 						Name:      "io-chaos",
@@ -990,26 +955,28 @@ var _ = ginkgo.Describe("[Basic]", func() {
 							Namespaces:     []string{ns},
 							LabelSelectors: map[string]string{"app": "io"},
 						},
-						Action:   v1alpha1.IODelayAction,
-						Mode:     v1alpha1.OnePodMode,
-						Path:     "",
-						Delay:    "1s",
-						Percent:  "100",
-						Layer:    v1alpha1.FileSystemLayer,
-						Duration: pointer.StringPtr("9m"),
+						Action:     v1alpha1.IoLatency,
+						Mode:       v1alpha1.OnePodMode,
+						VolumePath: "/var/run/data",
+						Path:       "/var/run/data/*",
+						Delay:      "1s",
+						Percent:    100,
+						Duration:   pointer.StringPtr("9m"),
 						Scheduler: &v1alpha1.SchedulerSpec{
 							Cron: "@every 10m",
 						},
 					},
 				}
 				err = cli.Create(ctx, ioChaos)
-				framework.ExpectNoError(err, "create io chaos error")
+				framework.ExpectNoError(err, "error occurs while applying io chaos")
 
-				err = wait.PollImmediate(5*time.Second, 1*time.Minute, func() (done bool, err error) {
-					dur, err := getPodIODelay(c, port)
-					framework.ExpectNoError(err, "failed to get pod io delay")
-					// IO Delay > 1s
-					if dur.Seconds() > 1 {
+				err = wait.PollImmediate(5*time.Second, 1*time.Minute, func() (bool, error) {
+					dur, _ := getPodIODelay(c, port)
+
+					second := dur.Seconds()
+					klog.Infof("get io delay %fs", second)
+					// IO Delay >= 1s
+					if second >= 1 {
 						return true, nil
 					}
 					return false, nil
@@ -1036,21 +1003,19 @@ var _ = ginkgo.Describe("[Basic]", func() {
 				})
 				framework.ExpectNoError(err, "check paused chaos failed")
 
-				err = waitSidecarFaultRecovery(ctx, sidecarClient)
-				framework.ExpectNoError(err, "wait chaosfs recover fault error")
-
 				// wait 1 min to check whether io delay still exists
-				err = wait.PollImmediate(5*time.Second, 1*time.Minute, func() (done bool, err error) {
-					dur, err := getPodIODelay(c, port)
-					framework.ExpectNoError(err, "failed to get pod io delay")
-					// io delay shouldn't > 1s, which is expected
-					if dur.Seconds() > 1 {
-						return true, nil
+				err = wait.PollImmediate(5*time.Second, 1*time.Minute, func() (bool, error) {
+					dur, _ := getPodIODelay(c, port)
+
+					second := dur.Seconds()
+					klog.Infof("get io delay %fs", second)
+					// IO Delay shouldn't longer than 1s
+					if second >= 1 {
+						return false, nil
 					}
-					return false, nil
+					return true, nil
 				})
-				framework.ExpectError(err, "wait no io chaos error")
-				framework.ExpectEqual(err.Error(), wait.ErrWaitTimeout.Error())
+				framework.ExpectNoError(err, "fail to recover io chaos")
 
 				// resume experiment
 				err = unPauseChaos(ctx, cli, ioChaos)
@@ -1067,11 +1032,13 @@ var _ = ginkgo.Describe("[Basic]", func() {
 				})
 				framework.ExpectNoError(err, "check resumed chaos failed")
 
-				err = wait.PollImmediate(5*time.Second, 1*time.Minute, func() (done bool, err error) {
-					dur, err := getPodIODelay(c, port)
-					framework.ExpectNoError(err, "failed to get pod io delay")
-					// IO Delay > 1s
-					if dur.Seconds() > 1 {
+				err = wait.PollImmediate(5*time.Second, 1*time.Minute, func() (bool, error) {
+					dur, _ := getPodIODelay(c, port)
+
+					second := dur.Seconds()
+					klog.Infof("get io delay %fs", second)
+					// IO Delay >= 1s
+					if second >= 1 {
 						return true, nil
 					}
 					return false, nil
@@ -1092,15 +1059,6 @@ var _ = ginkgo.Describe("[Basic]", func() {
 				err = waitE2EHelperReady(c, port)
 				framework.ExpectNoError(err, "wait e2e helper ready error")
 
-				listOption := metav1.ListOptions{
-					LabelSelector: labels.SelectorFromSet(map[string]string{
-						"app": "io",
-					}).String(),
-				}
-				pods, err := kubeCli.CoreV1().Pods(ns).List(listOption)
-				framework.ExpectNoError(err, "failed to get io-test pod")
-				framework.ExpectEqual(len(pods.Items[0].Spec.Containers), 2, "sidecar should be injected")
-
 				ioChaos := &v1alpha1.IoChaos{
 					ObjectMeta: metav1.ObjectMeta{
 						Name:      "io-chaos",
@@ -1111,15 +1069,15 @@ var _ = ginkgo.Describe("[Basic]", func() {
 							Namespaces:     []string{ns},
 							LabelSelectors: map[string]string{"app": "io"},
 						},
-						Action:  v1alpha1.IOErrnoAction,
-						Mode:    v1alpha1.OnePodMode,
-						Path:    "",
-						Percent: "100",
+						Action:     v1alpha1.IoFaults,
+						Mode:       v1alpha1.OnePodMode,
+						VolumePath: "/var/run/data",
+						Path:       "/var/run/data/*",
+						Percent:    100,
 						// errno 5 is EIO -> I/O error
-						Errno: "5",
+						Errno: 5,
 						// only inject write method
-						Methods:  []string{"write"},
-						Layer:    v1alpha1.FileSystemLayer,
+						Methods:  []v1alpha1.IoMethod{v1alpha1.Write},
 						Duration: pointer.StringPtr("9m"),
 						Scheduler: &v1alpha1.SchedulerSpec{
 							Cron: "@every 10m",
@@ -1127,9 +1085,9 @@ var _ = ginkgo.Describe("[Basic]", func() {
 					},
 				}
 				err = cli.Create(ctx, ioChaos)
-				framework.ExpectNoError(err, "create io chaos error")
+				framework.ExpectNoError(err, "create io chaos")
 
-				err = wait.PollImmediate(5*time.Second, 1*time.Minute, func() (done bool, err error) {
+				err = wait.PollImmediate(5*time.Second, 1*time.Minute, func() (bool, error) {
 					_, err = getPodIODelay(c, port)
 					// input/output error is errno 5
 					if err != nil && strings.Contains(err.Error(), "input/output error") {
@@ -1142,17 +1100,16 @@ var _ = ginkgo.Describe("[Basic]", func() {
 				err = cli.Delete(ctx, ioChaos)
 				framework.ExpectNoError(err, "failed to delete io chaos")
 
-				err = waitSidecarFaultRecovery(ctx, sidecarClient)
-				framework.ExpectNoError(err, "wait chaosfs recover fault error")
-
 				klog.Infof("success to perform io chaos")
-				err = wait.PollImmediate(5*time.Second, 1*time.Minute, func() (done bool, err error) {
+				err = wait.PollImmediate(5*time.Second, 1*time.Minute, func() (bool, error) {
 					_, err = getPodIODelay(c, port)
-					framework.ExpectNoError(err, "failed to get pod io delay")
+
+					if err == nil {
+						return true, nil
+					}
 					return false, nil
 				})
-				framework.ExpectError(err, "wait no io chaos error")
-				framework.ExpectEqual(err.Error(), wait.ErrWaitTimeout.Error())
+				framework.ExpectNoError(err, "fail to recover io chaos")
 
 				cancel()
 			})
@@ -1161,15 +1118,6 @@ var _ = ginkgo.Describe("[Basic]", func() {
 				ctx, cancel := context.WithCancel(context.Background())
 				err = waitE2EHelperReady(c, port)
 				framework.ExpectNoError(err, "wait e2e helper ready error")
-
-				listOption := metav1.ListOptions{
-					LabelSelector: labels.SelectorFromSet(map[string]string{
-						"app": "io",
-					}).String(),
-				}
-				pods, err := kubeCli.CoreV1().Pods(ns).List(listOption)
-				framework.ExpectNoError(err, "failed to get io-test pod")
-				framework.ExpectEqual(len(pods.Items[0].Spec.Containers), 2, "sidecar should be injected")
 
 				ioChaos := &v1alpha1.IoChaos{
 					ObjectMeta: metav1.ObjectMeta{
@@ -1181,15 +1129,15 @@ var _ = ginkgo.Describe("[Basic]", func() {
 							Namespaces:     []string{ns},
 							LabelSelectors: map[string]string{"app": "io"},
 						},
-						Action:  v1alpha1.IOErrnoAction,
-						Mode:    v1alpha1.OnePodMode,
-						Path:    "",
-						Percent: "100",
+						Action:     v1alpha1.IoFaults,
+						Mode:       v1alpha1.OnePodMode,
+						VolumePath: "/var/run/data",
+						Path:       "/var/run/data/*",
+						Percent:    100,
 						// errno 5 is EIO -> I/O error
-						Errno: "5",
+						Errno: 5,
 						// only inject write method
-						Methods:  []string{"write"},
-						Layer:    v1alpha1.FileSystemLayer,
+						Methods:  []v1alpha1.IoMethod{v1alpha1.Write},
 						Duration: pointer.StringPtr("9m"),
 						Scheduler: &v1alpha1.SchedulerSpec{
 							Cron: "@every 10m",
@@ -1199,8 +1147,11 @@ var _ = ginkgo.Describe("[Basic]", func() {
 				err = cli.Create(ctx, ioChaos)
 				framework.ExpectNoError(err, "create io chaos error")
 
-				err = wait.PollImmediate(5*time.Second, 1*time.Minute, func() (done bool, err error) {
+				klog.Info("create iochaos successfully")
+
+				err = wait.PollImmediate(5*time.Second, 1*time.Minute, func() (bool, error) {
 					_, err = getPodIODelay(c, port)
+					// input/output error is errno 5
 					if err != nil && strings.Contains(err.Error(), "input/output error") {
 						return true, nil
 					}
@@ -1217,6 +1168,8 @@ var _ = ginkgo.Describe("[Basic]", func() {
 				err = pauseChaos(ctx, cli, ioChaos)
 				framework.ExpectNoError(err, "pause chaos error")
 
+				klog.Info("pause iochaos")
+
 				err = wait.Poll(5*time.Second, 5*time.Minute, func() (done bool, err error) {
 					chaos := &v1alpha1.IoChaos{}
 					err = cli.Get(ctx, chaosKey, chaos)
@@ -1228,17 +1181,16 @@ var _ = ginkgo.Describe("[Basic]", func() {
 				})
 				framework.ExpectNoError(err, "check paused chaos failed")
 
-				err = waitSidecarFaultRecovery(ctx, sidecarClient)
-				framework.ExpectNoError(err, "wait chaosfs recover fault error")
-
 				// wait 1 min to check whether io delay still exists
-				err = wait.PollImmediate(5*time.Second, 1*time.Minute, func() (done bool, err error) {
+				err = wait.PollImmediate(5*time.Second, 1*time.Minute, func() (bool, error) {
 					_, err = getPodIODelay(c, port)
-					framework.ExpectNoError(err, "failed to get pod io delay")
+
+					if err == nil {
+						return true, nil
+					}
 					return false, nil
 				})
-				framework.ExpectError(err, "wait no io chaos error")
-				framework.ExpectEqual(err.Error(), wait.ErrWaitTimeout.Error())
+				framework.ExpectNoError(err, "fail to recover io chaos")
 
 				// resume experiment
 				err = unPauseChaos(ctx, cli, ioChaos)
@@ -1255,8 +1207,9 @@ var _ = ginkgo.Describe("[Basic]", func() {
 				})
 				framework.ExpectNoError(err, "check resumed chaos failed")
 
-				err = wait.PollImmediate(5*time.Second, 1*time.Minute, func() (done bool, err error) {
+				err = wait.PollImmediate(5*time.Second, 1*time.Minute, func() (bool, error) {
 					_, err = getPodIODelay(c, port)
+					// input/output error is errno 5
 					if err != nil && strings.Contains(err.Error(), "input/output error") {
 						return true, nil
 					}
@@ -1266,6 +1219,188 @@ var _ = ginkgo.Describe("[Basic]", func() {
 
 				// cleanup
 				cli.Delete(ctx, ioChaos)
+				cancel()
+			})
+		})
+	})
+
+	ginkgo.Context("[Sidecar Config]", func() {
+		var (
+			cmName      string
+			cmNamespace string
+		)
+
+		// delete the created config map in each test case
+		ginkgo.JustAfterEach(func() {
+			kubeCli.CoreV1().ConfigMaps(cmNamespace).Delete(cmName, &metav1.DeleteOptions{})
+		})
+
+		ginkgo.Context("[Template Config]", func() {
+
+			ginkgo.It("[InValid ConfigMap key]", func() {
+				ctx, cancel := context.WithCancel(context.Background())
+				cmName = "incorrect-key-name"
+				cmNamespace = chaosMeshNamespace
+				err := createTemplateConfig(ctx, cli, cmName,
+					map[string]string{
+						"chaos-pd.yaml": `name: chaosfs-pd
+selector:
+  labelSelectors:
+    "app.kubernetes.io/component": "pd"`})
+				framework.ExpectNoError(err, "failed to create template config")
+
+				listOptions := metav1.ListOptions{
+					LabelSelector: labels.SelectorFromSet(map[string]string{
+						"app.kubernetes.io/component": "controller-manager",
+					}).String(),
+				}
+				pods, err := kubeCli.CoreV1().Pods(chaosMeshNamespace).List(listOptions)
+				framework.ExpectNoError(err, "get chaos mesh controller pods error")
+
+				err = wait.Poll(time.Second, 10*time.Second, func() (done bool, err error) {
+					newPods, err := kubeCli.CoreV1().Pods(chaosMeshNamespace).List(listOptions)
+					framework.ExpectNoError(err, "get chaos mesh controller pods error")
+					if !fixture.HaveSameUIDs(pods.Items, newPods.Items) {
+						return true, nil
+					}
+					if newPods.Items[0].Status.ContainerStatuses[0].RestartCount > 0 {
+						return true, nil
+					}
+					return false, nil
+				})
+				framework.ExpectError(err, "wait chaos mesh not dies")
+				framework.ExpectEqual(err.Error(), wait.ErrWaitTimeout.Error())
+
+				cancel()
+			})
+
+			ginkgo.It("[InValid Configuration]", func() {
+				ctx, cancel := context.WithCancel(context.Background())
+				cmName = "incorrect-configuration"
+				cmNamespace = chaosMeshNamespace
+				err := createTemplateConfig(ctx, cli, cmName,
+					map[string]string{
+						"data": `name: chaosfs-pd
+selector:
+  labelSelectors:
+    "app.kubernetes.io/component": "pd"`})
+				framework.ExpectNoError(err, "failed to create template config")
+
+				listOptions := metav1.ListOptions{
+					LabelSelector: labels.SelectorFromSet(map[string]string{
+						"app.kubernetes.io/component": "controller-manager",
+					}).String(),
+				}
+				pods, err := kubeCli.CoreV1().Pods(chaosMeshNamespace).List(listOptions)
+				framework.ExpectNoError(err, "get chaos mesh controller pods error")
+
+				err = wait.Poll(time.Second, 10*time.Second, func() (done bool, err error) {
+					newPods, err := kubeCli.CoreV1().Pods(chaosMeshNamespace).List(listOptions)
+					framework.ExpectNoError(err, "get chaos mesh controller pods error")
+					if !fixture.HaveSameUIDs(pods.Items, newPods.Items) {
+						return true, nil
+					}
+					if newPods.Items[0].Status.ContainerStatuses[0].RestartCount > 0 {
+						return true, nil
+					}
+					return false, nil
+				})
+				framework.ExpectError(err, "wait chaos mesh not dies")
+				framework.ExpectEqual(err.Error(), wait.ErrWaitTimeout.Error())
+
+				cancel()
+			})
+		})
+
+		ginkgo.Context("[Injection Config]", func() {
+			ginkgo.It("[No Template]", func() {
+				ctx, cancel := context.WithCancel(context.Background())
+				cmName = "no-template-name"
+				cmNamespace = ns
+				err := createInjectionConfig(ctx, cli, ns, cmName,
+					map[string]string{
+						"chaosfs-io": `name: chaosfs-io
+selector:
+  labelSelectors:
+    app: io`})
+				framework.ExpectNoError(err, "failed to create injection config")
+
+				listOptions := metav1.ListOptions{
+					LabelSelector: labels.SelectorFromSet(map[string]string{
+						"app.kubernetes.io/component": "controller-manager",
+					}).String(),
+				}
+				pods, err := kubeCli.CoreV1().Pods(chaosMeshNamespace).List(listOptions)
+				framework.ExpectNoError(err, "get chaos mesh controller pods error")
+
+				err = wait.Poll(time.Second, 10*time.Second, func() (done bool, err error) {
+					newPods, err := kubeCli.CoreV1().Pods(chaosMeshNamespace).List(listOptions)
+					framework.ExpectNoError(err, "get chaos mesh controller pods error")
+					if !fixture.HaveSameUIDs(pods.Items, newPods.Items) {
+						return true, nil
+					}
+					if newPods.Items[0].Status.ContainerStatuses[0].RestartCount > 0 {
+						return true, nil
+					}
+					return false, nil
+				})
+				framework.ExpectError(err, "wait chaos mesh not dies")
+				framework.ExpectEqual(err.Error(), wait.ErrWaitTimeout.Error())
+
+				err = enableWebhook(ns)
+				framework.ExpectNoError(err, "enable webhook on ns error")
+				nd := fixture.NewIOTestDeployment("io-test", ns)
+				_, err = kubeCli.AppsV1().Deployments(ns).Create(nd)
+				framework.ExpectNoError(err, "create io-test deployment error")
+				err = waitDeploymentReady("io-test", ns, kubeCli)
+				framework.ExpectNoError(err, "wait io-test deployment ready error")
+
+				cancel()
+			})
+
+			ginkgo.It("[No Template Args]", func() {
+				ctx, cancel := context.WithCancel(context.Background())
+				cmName = "no-template-args"
+				cmNamespace = ns
+				err := createInjectionConfig(ctx, cli, ns, cmName,
+					map[string]string{
+						"chaosfs-io": `name: chaosfs-io
+template: chaosfs-sidecar
+selector:
+  labelSelectors:
+    app: io`})
+				framework.ExpectNoError(err, "failed to create injection config")
+
+				listOptions := metav1.ListOptions{
+					LabelSelector: labels.SelectorFromSet(map[string]string{
+						"app.kubernetes.io/component": "controller-manager",
+					}).String(),
+				}
+				pods, err := kubeCli.CoreV1().Pods(chaosMeshNamespace).List(listOptions)
+				framework.ExpectNoError(err, "get chaos mesh controller pods error")
+
+				err = wait.Poll(time.Second, 10*time.Second, func() (done bool, err error) {
+					newPods, err := kubeCli.CoreV1().Pods(chaosMeshNamespace).List(listOptions)
+					framework.ExpectNoError(err, "get chaos mesh controller pods error")
+					if !fixture.HaveSameUIDs(pods.Items, newPods.Items) {
+						return true, nil
+					}
+					if newPods.Items[0].Status.ContainerStatuses[0].RestartCount > 0 {
+						return true, nil
+					}
+					return false, nil
+				})
+				framework.ExpectError(err, "wait chaos mesh not dies")
+				framework.ExpectEqual(err.Error(), wait.ErrWaitTimeout.Error())
+
+				err = enableWebhook(ns)
+				framework.ExpectNoError(err, "enable webhook on ns error")
+				nd := fixture.NewIOTestDeployment("io-test", ns)
+				_, err = kubeCli.AppsV1().Deployments(ns).Create(nd)
+				framework.ExpectNoError(err, "create io-test deployment error")
+				err = waitDeploymentReady("io-test", ns, kubeCli)
+				framework.ExpectNoError(err, "wait io-test deployment ready error")
+
 				cancel()
 			})
 		})
@@ -1281,7 +1416,7 @@ var _ = ginkgo.Describe("[Basic]", func() {
 		ginkgo.JustBeforeEach(func() {
 			ports = []uint16{}
 			networkPeers = []*v1.Pod{}
-			for index := 0; index <= 3; index++ {
+			for index := 0; index < 4; index++ {
 				name := fmt.Sprintf("network-peer-%d", index)
 
 				svc := fixture.NewE2EService(name, ns)
@@ -1302,6 +1437,60 @@ var _ = ginkgo.Describe("[Basic]", func() {
 				pfCancels = append(pfCancels, pfCancel)
 				framework.ExpectNoError(err, "create helper io port port-forward failed")
 			}
+		})
+
+		ginkgo.Context("[ForbidHostNetwork]", func() {
+			ginkgo.It("[Schedule]", func() {
+				ctx, cancel := context.WithCancel(context.Background())
+
+				name := "network-peer-4"
+				nd := fixture.NewNetworkTestDeployment(name, ns, map[string]string{"partition": "0"})
+				nd.Spec.Template.Spec.HostNetwork = true
+				_, err = kubeCli.AppsV1().Deployments(ns).Create(nd)
+				framework.ExpectNoError(err, "create network-peer deployment error")
+				err = waitDeploymentReady(name, ns, kubeCli)
+				framework.ExpectNoError(err, "wait network-peer deployment ready error")
+
+				networkPartition := &v1alpha1.NetworkChaos{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      "network-chaos-1",
+						Namespace: ns,
+					},
+					Spec: v1alpha1.NetworkChaosSpec{
+						Action: v1alpha1.PartitionAction,
+						Selector: v1alpha1.SelectorSpec{
+							Namespaces:     []string{ns},
+							LabelSelectors: map[string]string{"app": "network-peer-4"},
+						},
+						Mode:      v1alpha1.OnePodMode,
+						Direction: v1alpha1.To,
+						Target: &v1alpha1.Target{
+							TargetSelector: v1alpha1.SelectorSpec{
+								Namespaces:     []string{ns},
+								LabelSelectors: map[string]string{"app": "network-peer-1"},
+							},
+							TargetMode: v1alpha1.OnePodMode,
+						},
+						Duration: pointer.StringPtr("9m"),
+						Scheduler: &v1alpha1.SchedulerSpec{
+							Cron: "@every 10m",
+						},
+					},
+				}
+
+				err = cli.Create(ctx, networkPartition.DeepCopy())
+				framework.ExpectNoError(err, "create network chaos error")
+				time.Sleep(5 * time.Second)
+
+				cli.Get(ctx, types.NamespacedName{
+					Namespace: ns,
+					Name:      "network-chaos-1",
+				}, networkPartition)
+				framework.ExpectEqual(networkPartition.Status.ChaosStatus.Experiment.Phase, v1alpha1.ExperimentPhaseFailed)
+				framework.ExpectEqual(strings.Contains(networkPartition.Status.ChaosStatus.FailedMessage, "it's dangerous to inject network chaos on a pod"), true)
+
+				cancel()
+			})
 		})
 
 		ginkgo.Context("[NetworkPartition]", func() {
@@ -1608,188 +1797,6 @@ var _ = ginkgo.Describe("[Basic]", func() {
 		})
 	})
 
-	ginkgo.Context("[Sidecar Config]", func() {
-		var (
-			cmName      string
-			cmNamespace string
-		)
-
-		// delete the created config map in each test case
-		ginkgo.JustAfterEach(func() {
-			kubeCli.CoreV1().ConfigMaps(cmNamespace).Delete(cmName, &metav1.DeleteOptions{})
-		})
-
-		ginkgo.Context("[Template Config]", func() {
-
-			ginkgo.It("[InValid ConfigMap key]", func() {
-				ctx, cancel := context.WithCancel(context.Background())
-				cmName = "incorrect-key-name"
-				cmNamespace = chaosMeshNamespace
-				err := createTemplateConfig(ctx, cli, cmName,
-					map[string]string{
-						"chaos-pd.yaml": `name: chaosfs-pd
-selector:
-  labelSelectors:
-    "app.kubernetes.io/component": "pd"`})
-				framework.ExpectNoError(err, "failed to create template config")
-
-				listOptions := metav1.ListOptions{
-					LabelSelector: labels.SelectorFromSet(map[string]string{
-						"app.kubernetes.io/component": "controller-manager",
-					}).String(),
-				}
-				pods, err := kubeCli.CoreV1().Pods(chaosMeshNamespace).List(listOptions)
-				framework.ExpectNoError(err, "get chaos mesh controller pods error")
-
-				err = wait.Poll(time.Second, 10*time.Second, func() (done bool, err error) {
-					newPods, err := kubeCli.CoreV1().Pods(chaosMeshNamespace).List(listOptions)
-					framework.ExpectNoError(err, "get chaos mesh controller pods error")
-					if !fixture.HaveSameUIDs(pods.Items, newPods.Items) {
-						return true, nil
-					}
-					if newPods.Items[0].Status.ContainerStatuses[0].RestartCount > 0 {
-						return true, nil
-					}
-					return false, nil
-				})
-				framework.ExpectError(err, "wait chaos mesh not dies")
-				framework.ExpectEqual(err.Error(), wait.ErrWaitTimeout.Error())
-
-				cancel()
-			})
-
-			ginkgo.It("[InValid Configuration]", func() {
-				ctx, cancel := context.WithCancel(context.Background())
-				cmName = "incorrect-configuration"
-				cmNamespace = chaosMeshNamespace
-				err := createTemplateConfig(ctx, cli, cmName,
-					map[string]string{
-						"data": `name: chaosfs-pd
-selector:
-  labelSelectors:
-    "app.kubernetes.io/component": "pd"`})
-				framework.ExpectNoError(err, "failed to create template config")
-
-				listOptions := metav1.ListOptions{
-					LabelSelector: labels.SelectorFromSet(map[string]string{
-						"app.kubernetes.io/component": "controller-manager",
-					}).String(),
-				}
-				pods, err := kubeCli.CoreV1().Pods(chaosMeshNamespace).List(listOptions)
-				framework.ExpectNoError(err, "get chaos mesh controller pods error")
-
-				err = wait.Poll(time.Second, 10*time.Second, func() (done bool, err error) {
-					newPods, err := kubeCli.CoreV1().Pods(chaosMeshNamespace).List(listOptions)
-					framework.ExpectNoError(err, "get chaos mesh controller pods error")
-					if !fixture.HaveSameUIDs(pods.Items, newPods.Items) {
-						return true, nil
-					}
-					if newPods.Items[0].Status.ContainerStatuses[0].RestartCount > 0 {
-						return true, nil
-					}
-					return false, nil
-				})
-				framework.ExpectError(err, "wait chaos mesh not dies")
-				framework.ExpectEqual(err.Error(), wait.ErrWaitTimeout.Error())
-
-				cancel()
-			})
-		})
-
-		ginkgo.Context("[Injection Config]", func() {
-			ginkgo.It("[No Template]", func() {
-				ctx, cancel := context.WithCancel(context.Background())
-				cmName = "no-template-name"
-				cmNamespace = ns
-				err := createInjectionConfig(ctx, cli, ns, cmName,
-					map[string]string{
-						"chaosfs-io": `name: chaosfs-io
-selector:
-  labelSelectors:
-    app: io`})
-				framework.ExpectNoError(err, "failed to create injection config")
-
-				listOptions := metav1.ListOptions{
-					LabelSelector: labels.SelectorFromSet(map[string]string{
-						"app.kubernetes.io/component": "controller-manager",
-					}).String(),
-				}
-				pods, err := kubeCli.CoreV1().Pods(chaosMeshNamespace).List(listOptions)
-				framework.ExpectNoError(err, "get chaos mesh controller pods error")
-
-				err = wait.Poll(time.Second, 10*time.Second, func() (done bool, err error) {
-					newPods, err := kubeCli.CoreV1().Pods(chaosMeshNamespace).List(listOptions)
-					framework.ExpectNoError(err, "get chaos mesh controller pods error")
-					if !fixture.HaveSameUIDs(pods.Items, newPods.Items) {
-						return true, nil
-					}
-					if newPods.Items[0].Status.ContainerStatuses[0].RestartCount > 0 {
-						return true, nil
-					}
-					return false, nil
-				})
-				framework.ExpectError(err, "wait chaos mesh not dies")
-				framework.ExpectEqual(err.Error(), wait.ErrWaitTimeout.Error())
-
-				err = enableWebhook(ns)
-				framework.ExpectNoError(err, "enable webhook on ns error")
-				nd := fixture.NewIOTestDeployment("io-test", ns)
-				_, err = kubeCli.AppsV1().Deployments(ns).Create(nd)
-				framework.ExpectNoError(err, "create io-test deployment error")
-				err = waitDeploymentReady("io-test", ns, kubeCli)
-				framework.ExpectNoError(err, "wait io-test deployment ready error")
-
-				cancel()
-			})
-
-			ginkgo.It("[No Template Args]", func() {
-				ctx, cancel := context.WithCancel(context.Background())
-				cmName = "no-template-args"
-				cmNamespace = ns
-				err := createInjectionConfig(ctx, cli, ns, cmName,
-					map[string]string{
-						"chaosfs-io": `name: chaosfs-io
-template: chaosfs-sidecar
-selector:
-  labelSelectors:
-    app: io`})
-				framework.ExpectNoError(err, "failed to create injection config")
-
-				listOptions := metav1.ListOptions{
-					LabelSelector: labels.SelectorFromSet(map[string]string{
-						"app.kubernetes.io/component": "controller-manager",
-					}).String(),
-				}
-				pods, err := kubeCli.CoreV1().Pods(chaosMeshNamespace).List(listOptions)
-				framework.ExpectNoError(err, "get chaos mesh controller pods error")
-
-				err = wait.Poll(time.Second, 10*time.Second, func() (done bool, err error) {
-					newPods, err := kubeCli.CoreV1().Pods(chaosMeshNamespace).List(listOptions)
-					framework.ExpectNoError(err, "get chaos mesh controller pods error")
-					if !fixture.HaveSameUIDs(pods.Items, newPods.Items) {
-						return true, nil
-					}
-					if newPods.Items[0].Status.ContainerStatuses[0].RestartCount > 0 {
-						return true, nil
-					}
-					return false, nil
-				})
-				framework.ExpectError(err, "wait chaos mesh not dies")
-				framework.ExpectEqual(err.Error(), wait.ErrWaitTimeout.Error())
-
-				err = enableWebhook(ns)
-				framework.ExpectNoError(err, "enable webhook on ns error")
-				nd := fixture.NewIOTestDeployment("io-test", ns)
-				_, err = kubeCli.AppsV1().Deployments(ns).Create(nd)
-				framework.ExpectNoError(err, "create io-test deployment error")
-				err = waitDeploymentReady("io-test", ns, kubeCli)
-				framework.ExpectNoError(err, "wait io-test deployment ready error")
-
-				cancel()
-			})
-		})
-	})
-
 })
 
 func waitPodRunning(name, namespace string, cli kubernetes.Interface) error {
@@ -1824,17 +1831,6 @@ func waitDeploymentReady(name, namespace string, cli kubernetes.Interface) error
 func waitE2EHelperReady(c http.Client, port uint16) error {
 	return wait.Poll(10*time.Second, 5*time.Minute, func() (done bool, err error) {
 		if _, err = c.Get(fmt.Sprintf("http://localhost:%d/ping", port)); err != nil {
-			return false, nil
-		}
-		return true, nil
-	})
-}
-
-func waitSidecarFaultRecovery(ctx context.Context, cli chaosfs.InjureClient) error {
-	return wait.PollImmediate(time.Second, 30*time.Second, func() (done bool, err error) {
-		resp, err := cli.Injected(ctx, &empty.Empty{})
-		framework.ExpectNoError(err, "failed to get injected response")
-		if resp.Injected == true {
 			return false, nil
 		}
 		return true, nil
@@ -1985,19 +1981,6 @@ func enableWebhook(ns string) error {
 	if err != nil {
 		klog.Fatalf("Failed to run 'kubectl %s'\nCombined output: %q\nError: %v", strings.Join(args, " "), string(out), err)
 	}
-	return nil
-}
-
-// create the config map for io chaos sidecar injection
-func createIOChaosConfigMap(kubeCli kubernetes.Interface, namespace string) error {
-	cm := fixture.NewIOTestConfigMap("io-test", namespace)
-	if _, err := kubeCli.CoreV1().ConfigMaps(namespace).Create(cm); err != nil {
-		if !apierrors.IsAlreadyExists(err) {
-			return err
-		}
-	}
-	// Wait 15 seconds to let chaos mesh load the config map
-	time.Sleep(15 * time.Second)
 	return nil
 }
 

@@ -3,10 +3,15 @@ import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { setAlert, setAlertOpen } from 'slices/globalStatus'
 
 import { Experiment } from 'components/NewExperiment/types'
+import T from 'components/T'
 import { useFormikContext } from 'formik'
 import { useStoreDispatch } from 'store'
 
-const PaperOutlined: React.FC = ({ children }) => <Paper variant="outlined">{children}</Paper>
+const PaperOutlined: React.FC = ({ children }) => (
+  <Paper style={{ maxHeight: 768, overflow: 'scroll' }} variant="outlined">
+    {children}
+  </Paper>
+)
 
 interface ScopePodsTableProps {
   scope?: string
@@ -116,15 +121,15 @@ const ScopePodsTable: React.FC<ScopePodsTableProps> = ({ scope = 'scope', pods }
                 onChange={handleSelectAll}
               />
             </TableCell>
-            <TableCell>Name</TableCell>
-            <TableCell>Namespace</TableCell>
-            <TableCell>IP</TableCell>
-            <TableCell>State</TableCell>
+            <TableCell>{T('newE.scope.podsTable.name')}</TableCell>
+            <TableCell>{T('newE.scope.podsTable.namespace')}</TableCell>
+            <TableCell>{T('newE.scope.podsTable.ip')}</TableCell>
+            <TableCell>{T('newE.scope.podsTable.state')}</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
           {pods.map((pod) => (
-            <TableRow key={pod.name} onClick={handleSelect(pod.name)}>
+            <TableRow key={pod.name + pod.namespace} onClick={handleSelect(pod.name)}>
               <TableCell padding="checkbox">
                 <Checkbox checked={isSelected(pod.name)} />
               </TableCell>

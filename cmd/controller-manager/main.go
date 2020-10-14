@@ -23,14 +23,27 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	chaosmeshv1alpha1 "github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	apiWebhook "github.com/chaos-mesh/chaos-mesh/api/webhook"
-	"github.com/chaos-mesh/chaos-mesh/controllers"
 	"github.com/chaos-mesh/chaos-mesh/controllers/common"
 	"github.com/chaos-mesh/chaos-mesh/controllers/metrics"
+	"github.com/chaos-mesh/chaos-mesh/controllers/podiochaos"
 	"github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos"
+	"github.com/chaos-mesh/chaos-mesh/pkg/router"
 	"github.com/chaos-mesh/chaos-mesh/pkg/utils"
 	"github.com/chaos-mesh/chaos-mesh/pkg/version"
 	"github.com/chaos-mesh/chaos-mesh/pkg/webhook/config"
 	"github.com/chaos-mesh/chaos-mesh/pkg/webhook/config/watcher"
+
+	_ "github.com/chaos-mesh/chaos-mesh/controllers/dnschaos"
+	_ "github.com/chaos-mesh/chaos-mesh/controllers/httpchaos"
+	_ "github.com/chaos-mesh/chaos-mesh/controllers/iochaos"
+	_ "github.com/chaos-mesh/chaos-mesh/controllers/kernelchaos"
+	_ "github.com/chaos-mesh/chaos-mesh/controllers/networkchaos/partition"
+	_ "github.com/chaos-mesh/chaos-mesh/controllers/networkchaos/trafficcontrol"
+	_ "github.com/chaos-mesh/chaos-mesh/controllers/podchaos/containerkill"
+	_ "github.com/chaos-mesh/chaos-mesh/controllers/podchaos/podfailure"
+	_ "github.com/chaos-mesh/chaos-mesh/controllers/podchaos/podkill"
+	_ "github.com/chaos-mesh/chaos-mesh/controllers/stresschaos"
+	_ "github.com/chaos-mesh/chaos-mesh/controllers/timechaos"
 
 	"k8s.io/apimachinery/pkg/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
@@ -38,6 +51,7 @@ import (
 
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
+
 	controllermetrics "sigs.k8s.io/controller-runtime/pkg/metrics"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
 	// +kubebuilder:scaffold:imports
@@ -79,107 +93,41 @@ func main() {
 
 	ctrl.SetLogger(zap.Logger(true))
 
-	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
+	options := ctrl.Options{
 		Scheme:             scheme,
 		MetricsBindAddress: common.ControllerCfg.MetricsAddr,
 		LeaderElection:     common.ControllerCfg.EnableLeaderElection,
 		Port:               9443,
-	})
+	}
+
+	if common.ControllerCfg.ClusterScoped {
+		setupLog.Info("Chaos controller manager is running in cluster scoped mode.")
+		// will not specific a certain namespace
+	} else {
+		setupLog.Info("Chaos controller manager is running in namespace scoped mode.", "targetNamespace", common.ControllerCfg.TargetNamespace)
+		options.Namespace = common.ControllerCfg.TargetNamespace
+	}
+
+	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), options)
 	if err != nil {
 		setupLog.Error(err, "unable to start manager")
 		os.Exit(1)
 	}
 
-	if err = (&controllers.PodChaosReconciler{
-		Client:        mgr.GetClient(),
-		Reader:        mgr.GetAPIReader(),
-		EventRecorder: mgr.GetEventRecorderFor("podchaos-controller"),
-		Log:           ctrl.Log.WithName("controllers").WithName("PodChaos"),
-	}).SetupWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create controller", "controller", "PodChaos")
-		os.Exit(1)
-	}
-	if err = (&chaosmeshv1alpha1.PodChaos{}).SetupWebhookWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create webhook", "webhook", "PodChaos")
+	err = router.SetupWithManager(mgr)
+	if err != nil {
+		setupLog.Error(err, "fail to setup with manager")
 		os.Exit(1)
 	}
 
-	if err = (&controllers.NetworkChaosReconciler{
-		Client:        mgr.GetClient(),
-		Reader:        mgr.GetAPIReader(),
-		EventRecorder: mgr.GetEventRecorderFor("networkchaos-controller"),
-		Log:           ctrl.Log.WithName("controllers").WithName("NetworkChaos"),
-	}).SetupWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create controller", "controller", "NetworkChaos")
-		os.Exit(1)
-	}
-	if err = (&chaosmeshv1alpha1.NetworkChaos{}).SetupWebhookWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create webhook", "webhook", "NetworkChaos")
-		os.Exit(1)
-	}
-
-	if err = (&controllers.IoChaosReconciler{
-		Client:        mgr.GetClient(),
-		Reader:        mgr.GetAPIReader(),
-		EventRecorder: mgr.GetEventRecorderFor("iochaos-controller"),
-		Log:           ctrl.Log.WithName("controllers").WithName("IoChaos"),
-	}).SetupWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create controller", "controller", "IoChaos")
-		os.Exit(1)
-	}
-	if err = (&chaosmeshv1alpha1.IoChaos{}).SetupWebhookWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create webhook", "webhook", "IoChaos")
-		os.Exit(1)
-	}
-
-	if err = (&controllers.TimeChaosReconciler{
-		Client:        mgr.GetClient(),
-		Reader:        mgr.GetAPIReader(),
-		EventRecorder: mgr.GetEventRecorderFor("timechaos-controller"),
-		Log:           ctrl.Log.WithName("controllers").WithName("TimeChaos"),
-	}).SetupWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create controller", "controller", "TimeChaos")
-		os.Exit(1)
-	}
-	if err = (&chaosmeshv1alpha1.TimeChaos{}).SetupWebhookWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create webhook", "webhook", "TimeChaos")
-		os.Exit(1)
-	}
-
-	if err = (&controllers.KernelChaosReconciler{
-		Client:        mgr.GetClient(),
-		Reader:        mgr.GetAPIReader(),
-		EventRecorder: mgr.GetEventRecorderFor("kernelchaos-controller"),
-		Log:           ctrl.Log.WithName("controllers").WithName("KernelChaos"),
-	}).SetupWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create controller", "controller", "KernelChaos")
-		os.Exit(1)
-	}
-	if err = (&chaosmeshv1alpha1.KernelChaos{}).SetupWebhookWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create webhook", "webhook", "KernelChaos")
-		os.Exit(1)
-	}
-
-	if err = (&controllers.StressChaosReconciler{
-		Client:        mgr.GetClient(),
-		Reader:        mgr.GetAPIReader(),
-		EventRecorder: mgr.GetEventRecorderFor("stresschaos-controller"),
-		Log:           ctrl.Log.WithName("controllers").WithName("StressChaos"),
-	}).SetupWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create controller", "controller", "StressChaos")
-		os.Exit(1)
-	}
-	if err = (&chaosmeshv1alpha1.StressChaos{}).SetupWebhookWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create webhook", "webhook", "StressChaos")
-		os.Exit(1)
-	}
-
-	if err = (&controllers.HTTPChaosReconciler{
+	// We only setup webhook for podiochaos, and the logic of applying chaos are in the mutation
+	// webhook, because we need to get the running result synchronously in io chaos reconciler
+	v1alpha1.RegisterPodIoHandler(&podiochaos.Handler{
 		Client: mgr.GetClient(),
-		Reader: mgr.GetAPIReader(),
-		Log:    ctrl.Log.WithName("controllers").WithName("HTTPChaos"),
-	}).SetupWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create controller", "controller", "HTTPChaos")
+		Log:    ctrl.Log.WithName("handler").WithName("PodIOChaos"),
+	})
+	if err = (&chaosmeshv1alpha1.PodIoChaos{}).SetupWebhookWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create webhook", "webhook", "PodIOChaos")
 		os.Exit(1)
 	}
 
@@ -199,10 +147,10 @@ func main() {
 	metricsCollector := metrics.NewChaosCollector(mgr.GetCache(), controllermetrics.Registry)
 
 	setupLog.Info("Setting up webhook server")
-
 	hookServer := mgr.GetWebhookServer()
 	hookServer.CertDir = common.ControllerCfg.CertsDir
 	conf := config.NewConfigWatcherConf()
+
 	stopCh := ctrl.SetupSignalHandler()
 
 	if common.ControllerCfg.PprofAddr != "0" {
@@ -258,7 +206,8 @@ func watchConfig(configWatcher *watcher.K8sConfigMapWatcher, cfg *config.Config,
 				if err := configWatcher.Watch(sigChan, stopCh); err != nil {
 					switch err {
 					case watcher.ErrWatchChannelClosed:
-						setupLog.Error(err, "watcher got error, try to restart watcher")
+						// known issue: https://github.com/kubernetes/client-go/issues/334
+						setupLog.Info("watcher channel has closed, restart watcher")
 					default:
 						setupLog.Error(err, "unable to watch new ConfigMaps")
 						os.Exit(1)
