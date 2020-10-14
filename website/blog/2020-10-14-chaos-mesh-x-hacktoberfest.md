@@ -26,6 +26,8 @@ We hereby invite you to be part of us, starting from our handpicked issues with 
 
 ## How can you participate
 
+So we are all set up for you in Hacktoberfest - labeled [suitable issues](https://github.com/chaos-mesh/chaos-mesh/issues?q=is%3Aissue+is%3Aopen+label%3AHacktoberfest) with “Hacktoberfest”, and updated the [Contributing Guide](https://github.com/chaos-mesh/chaos-mesh/blob/master/CONTRIBUTING.md).
+
 How can you participate? It could not be easier with the following steps: 
 
 1. Sign up for [Hacktoberfest](https://hacktoberfest.digitalocean.com/login) using your GitHub account between Oct 1 and Oct 31.
