@@ -29,5 +29,6 @@ export interface Experiment {
 }
 
 export interface ExperimentDetail extends Experiment {
+  failed_message: string
   yaml: any
 }
