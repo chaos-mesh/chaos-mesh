@@ -4,7 +4,7 @@ title: Add Facilities to Chaos Daemon
 sidebar_label: Add Facilities to Chaos Daemon
 ---
 
-After [Develop a new chaos](dev_hello_world.md), we add a new chaos type `HelloWorldChaos`, it will print `hello world` in `chaos-controller-manager`. Let's do more things for this chaos type: `chaos-controller-manager` selects Pods according to the chaos configuration, then sends the chaos request to these Pods corresponding `chaos-daemon`, and these `chaos-daemon`s do chaos at last.
+In [Develop a new chaos](dev_hello_world.md), we have added a new chaos type named `HelloWorldChaos`, which will print `hello world` in `chaos-controller-manager`. To actually run the chaos, we need to configure some facilities for Chaos Daemon - so that `controller-manager` can select the specified Pods according to the chaos configuration and sends the chaos request to the `chaos-daemon` corresponding to these Pods. Once these are done, the `chaos-daemon` could run the chaos at last.
 
 The implementation of this function can be divided into the following parts: 
 
