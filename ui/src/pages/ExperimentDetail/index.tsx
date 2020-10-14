@@ -6,6 +6,7 @@ import { Theme, createStyles, makeStyles } from '@material-ui/core/styles'
 import { setAlert, setAlertOpen } from 'slices/globalStatus'
 import { useHistory, useParams } from 'react-router-dom'
 
+import Alert from '@material-ui/lab/Alert'
 import ArchiveOutlinedIcon from '@material-ui/icons/ArchiveOutlined'
 import ConfirmDialog from 'components/ConfirmDialog'
 import { Event } from 'api/events.type'
@@ -276,6 +277,14 @@ export default function ExperimentDetail() {
               </Box>
             </Box>
           </Grid>
+
+          {detail?.failed_message && (
+            <Grid item xs={12}>
+              <Alert severity="error">
+                An error occurred: <b>{detail.failed_message}</b>
+              </Alert>
+            </Grid>
+          )}
 
           <Grid item xs={12}>
             <Paper variant="outlined">
