@@ -134,16 +134,6 @@ func init() {
 
 We should also import `github.com/chaos-mesh/chaos-mesh/controllers/helloworldchaos` in the `/cmd/controller-manager/main.go`, then it will register on the route table when the controller starts up.
 
-## Generate deepcopy code
-
-Need to generate deepcopy code for type `HelloWorldChaos` and `HelloWorldChaosList`.
-
-```bash
-make generate
-```
-
-Then you can see there are some codes generated in [zz_generated.deepcopy.go](https://github.com/chaos-mesh/chaos-mesh/blob/master/api/v1alpha1/zz_generated.deepcopy.go).
-
 ## Make the Docker image
 
 Having the object successfully added, you can make a Docker image:
