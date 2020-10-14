@@ -120,4 +120,3 @@ Chaos Mesh is licensed under the Apache License, Version 2.0. See [LICENSE](./LI
 ## Trademark
 
 Chaos Mesh® is a trademark of The Linux Foundation. All rights reserved.
-
