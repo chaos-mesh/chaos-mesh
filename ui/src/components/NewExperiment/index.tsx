@@ -136,7 +136,7 @@ const Actions = ({ setInitialValues, intl }: ActionsProps) => {
         dispatch(
           setAlert({
             type: 'error',
-            message: e,
+            message: e.message,
           })
         )
       } finally {

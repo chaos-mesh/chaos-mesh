@@ -135,7 +135,9 @@ function selectorsToArr(selectors: Object, separator: string) {
 export function yamlToExperiment(yamlObj: any): Experiment {
   const { kind, metadata, spec } = snakeCaseKeys(yamlObj)
 
-  console.log(kind, spec)
+  if (!kind || !metadata || !spec) {
+    throw new Error('Fail to parse the YAML file. Please check the kind, metadata, and spec fields.')
+  }
 
   let result = {
     ...defaultExperimentSchema,
