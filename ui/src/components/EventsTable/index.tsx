@@ -42,6 +42,7 @@ import useRunningLabelStyles from 'lib/styles/runningLabel'
 const useStyles = makeStyles(() =>
   createStyles({
     tableContainer: {
+      minHeight: 450,
       maxHeight: 768,
     },
     eventDetailPaper: {
