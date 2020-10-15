@@ -69,14 +69,13 @@ This is a list of known adopters of Chaos Mesh. Some have already gone into prod
 
 ## Blogs
 
+Blogs on Chaos Mesh design & implementation, features, chaos engineering, community updates, etc.  See [Chaos Mesh Blogs](https://chaos-mesh.org/blog). Here are some recommended ones for you to start with:
+
 - [Chaos Mesh - Your Chaos Engineering Solution for System Resiliency on Kubernetes](https://pingcap.com/blog/chaos-mesh-your-chaos-engineering-solution-for-system-resiliency-on-kubernetes/)
 - [Run Your First Chaos Experiment in 10 Minutes](https://pingcap.com/blog/run-first-chaos-experiment-in-ten-minutes/)
 - [Simulating Clock Skew in K8s Without Affecting Other Containers on the Node](https://pingcap.com/blog/simulating-clock-skew-in-k8s-without-affecting-other-containers-on-node/)
-- [Chaos Mesh® Joins CNCF as a Sandbox Project](https://chaos-mesh.org/blog/chaos-mesh-join-cncf-sandbox-project)
 - [Building an Automated Testing Framework Based on Chaos Mesh® and Argo](https://chaos-mesh.org/blog/building_automated_testing_framework)
-- [chaos-mesh-action: Integrate Chaos Engineering into Your CI](https://chaos-mesh.org/blog/chaos-mesh-action-integrate-chaos-engineering-into-your-ci)
 - [Chaos Mesh 1.0: Chaos Engineering on Kubernetes Made Easier](https://chaos-mesh.org/blog/chaos-mesh-1.0-chaos-engineering-on-kubernetes-made-easier)
-- [Chaos Mesh X Hacktoberfest 2020 - An Invitation to Open Source](https://chaos-mesh.org/blog/chaos-mesh-x-hacktoberfest-2020)
 
 ## Contribute
 
