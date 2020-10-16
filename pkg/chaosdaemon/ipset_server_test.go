@@ -38,7 +38,7 @@ var _ = Describe("ipset server", func() {
 		It("should work", func() {
 			defer mock.With("MockProcessBuild", func(ctx context.Context, cmd string, args ...string) *exec.Cmd {
 				Expect(cmd).To(Equal("nsenter"))
-				Expect(args[0]).To(Equal("-n/proc/1/ns/name"))
+				Expect(args[0]).To(Equal("-n/proc/1/ns/net"))
 				Expect(args[1]).To(Equal("--"))
 				Expect(args[2]).To(Equal("ipset"))
 				Expect(args[3]).To(Equal("create"))
