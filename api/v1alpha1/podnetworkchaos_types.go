@@ -168,7 +168,7 @@ func (in *PodNetworkChaos) GetChaos() *ChaosInstance {
 	instance := &ChaosInstance{
 		Name:      in.Name,
 		Namespace: in.Namespace,
-		Kind:      KindNetworkChaos,
+		Kind:      "NetworkChaos",
 		StartTime: in.CreationTimestamp.Time,
 		Status:    string(in.GetStatus().Experiment.Phase),
 	}

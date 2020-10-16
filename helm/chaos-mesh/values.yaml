@@ -266,6 +266,7 @@ webhook:
     - stresschaos
     - podiochaos
     - podnetworkchaos
+    - dnschaos
 
 bpfki:
   create: false

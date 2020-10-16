@@ -4,7 +4,7 @@ title: Sidecar Template
 sidebar_label: Sidecar Template
 ---
 
-The following content is the common template ConfigMap defined for injecting IOChaos sidecar, you can also find this example [here](https://github.com/chaos-mesh/chaos-mesh/blob/master/manifests/chaosfs-sidecar.yaml):
+The following content is the common template ConfigMap defined for injecting IOChaos sidecar, you can also find this example [here](https://github.com/chaos-mesh/chaos-mesh/blob/release-0.9/manifests/chaosfs-sidecar.yaml):
 
 ## Template ConfigMap
 

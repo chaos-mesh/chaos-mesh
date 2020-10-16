@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package podfailure_test
+package podfailure
 
 import (
 	"context"
@@ -32,9 +32,9 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	"github.com/chaos-mesh/chaos-mesh/controllers/podchaos/podfailure"
 	. "github.com/chaos-mesh/chaos-mesh/controllers/test"
 	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
+	ctx "github.com/chaos-mesh/chaos-mesh/pkg/router/context"
 )
 
 func TestPodFailure(t *testing.T) {
@@ -81,10 +81,12 @@ var _ = Describe("PodChaos", func() {
 			},
 		}
 
-		r := podfailure.Reconciler{
-			Client:        fake.NewFakeClientWithScheme(scheme.Scheme, objs...),
-			EventRecorder: &record.FakeRecorder{},
-			Log:           ctrl.Log.WithName("controllers").WithName("PodChaos"),
+		r := endpoint{
+			Context: ctx.Context{
+				Client:        fake.NewFakeClientWithScheme(scheme.Scheme, objs...),
+				EventRecorder: &record.FakeRecorder{},
+				Log:           ctrl.Log.WithName("controllers").WithName("PodChaos"),
+			},
 		}
 
 		It("PodFailure Action", func() {

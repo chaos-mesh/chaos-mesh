@@ -168,7 +168,7 @@ const SearchResultForOneCate = function <T extends 'events' | 'experiments' | 'a
                           {searchPath.map((path) => {
                             return (
                               <>
-                                <span>{nameMap[path.name]}:</span>
+                                <span>{nameMap[path.name]}: </span>
                                 <HighLightText text={path.value}>{path.matchedValue}</HighLightText>
                               </>
                             )
