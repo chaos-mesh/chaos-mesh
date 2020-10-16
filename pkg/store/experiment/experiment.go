@@ -25,7 +25,7 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 )
 
-var log = ctrl.Log.WithName("store -> experiment")
+var log = ctrl.Log.WithName("store/experiment")
 
 // NewStore returns a new ExperimentStore.
 func NewStore(db *dbstore.DB) core.ExperimentStore {

@@ -26,7 +26,7 @@ import (
 )
 
 var (
-	log = ctrl.Log.WithName("store -> dbstore")
+	log = ctrl.Log.WithName("store/dbstore")
 )
 
 // DB defines a db storage.
