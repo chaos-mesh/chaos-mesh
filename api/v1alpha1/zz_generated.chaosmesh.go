@@ -20,7 +20,6 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-
 const KindDNSChaos = "DNSChaos"
 
 // IsDeleted returns whether this resource has been deleted
