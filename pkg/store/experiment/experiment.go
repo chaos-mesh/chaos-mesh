@@ -47,7 +47,7 @@ type experimentStore struct {
 	db *dbstore.DB
 }
 
-// ListMeta implement the core.ExperimentStore.ListMeta method.
+// ListMeta implements the core.ExperimentStore.ListMeta method.
 func (e *experimentStore) ListMeta(_ context.Context, kind, namespace, name string, archived bool) ([]*core.ExperimentMeta, error) {
 	db := e.db.Table("experiments")
 	experiments := make([]*core.ExperimentMeta, 0)
@@ -60,7 +60,7 @@ func (e *experimentStore) ListMeta(_ context.Context, kind, namespace, name stri
 	return experiments, nil
 }
 
-// FindByUID implement the core.ExperimentStore.FindByUID method.
+// FindByUID implements the core.ExperimentStore.FindByUID method.
 func (e *experimentStore) FindByUID(_ context.Context, uid string) (*core.Experiment, error) {
 	experiment := new(core.Experiment)
 
@@ -71,7 +71,7 @@ func (e *experimentStore) FindByUID(_ context.Context, uid string) (*core.Experi
 	return experiment, nil
 }
 
-// FindMetaByUID implement the core.ExperimentStore.FindMetaByUID method.
+// FindMetaByUID implements the core.ExperimentStore.FindMetaByUID method.
 func (e *experimentStore) FindMetaByUID(_ context.Context, uid string) (*core.ExperimentMeta, error) {
 	db := e.db.Table("experiments")
 	experiment := new(core.ExperimentMeta)
@@ -83,12 +83,12 @@ func (e *experimentStore) FindMetaByUID(_ context.Context, uid string) (*core.Ex
 	return experiment, nil
 }
 
-// Set implement the core.ExperimentStore.Set method.
+// Set implements the core.ExperimentStore.Set method.
 func (e *experimentStore) Set(_ context.Context, experiment *core.Experiment) error {
 	return e.db.Model(core.Experiment{}).Save(experiment).Error
 }
 
-// Archive implement the core.ExperimentStore.Archive method.
+// Archive implements the core.ExperimentStore.Archive method.
 func (e *experimentStore) Archive(_ context.Context, ns, name string) error {
 	if err := e.db.Model(core.Experiment{}).
 		Where("namespace = ? AND name = ? AND archived = ?", ns, name, false).
@@ -120,7 +120,7 @@ func (e *experimentStore) DeleteByFinishTime(_ context.Context, ttl time.Duratio
 	return nil
 }
 
-// DeleteIncompleteExperiments implement the core.ExperimentStore.DeleteIncompleteExperiments method.
+// DeleteIncompleteExperiments implements the core.ExperimentStore.DeleteIncompleteExperiments method.
 func (e *experimentStore) DeleteIncompleteExperiments(_ context.Context) error {
 	return e.db.Where("finish_time IS NULL").Unscoped().Delete(core.Event{}).Error
 }
