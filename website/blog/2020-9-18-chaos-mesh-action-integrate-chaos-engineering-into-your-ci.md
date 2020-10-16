@@ -1,5 +1,5 @@
 ---
-slug: /chaos-mesh-action-integrate-chaos-engineering-into -your-ci
+slug: /chaos-mesh-action-integrate-chaos-engineering-into-your-ci
 title: 'chaos-mesh-action: Integrate Chaos Engineering into Your CI'
 author: Xiang Wang
 author_title: Contributor of Chaos Mesh

@@ -67,15 +67,15 @@ This is a list of known adopters of Chaos Mesh. Some have already gone into prod
 - [PingCAP](https://www.pingcap.com)
 - [Xpeng Motors](https://en.xiaopeng.com/)
 
-## FAQs
-
-See [FAQs](https://chaos-mesh.org/docs/faqs).
-
 ## Blogs
+
+Blogs on Chaos Mesh design & implementation, features, chaos engineering, community updates, etc.  See [Chaos Mesh Blogs](https://chaos-mesh.org/blog). Here are some recommended ones for you to start with:
 
 - [Chaos Mesh - Your Chaos Engineering Solution for System Resiliency on Kubernetes](https://pingcap.com/blog/chaos-mesh-your-chaos-engineering-solution-for-system-resiliency-on-kubernetes/)
 - [Run Your First Chaos Experiment in 10 Minutes](https://pingcap.com/blog/run-first-chaos-experiment-in-ten-minutes/)
 - [Simulating Clock Skew in K8s Without Affecting Other Containers on the Node](https://pingcap.com/blog/simulating-clock-skew-in-k8s-without-affecting-other-containers-on-node/)
+- [Building an Automated Testing Framework Based on Chaos Mesh® and Argo](https://chaos-mesh.org/blog/building_automated_testing_framework)
+- [Chaos Mesh 1.0: Chaos Engineering on Kubernetes Made Easier](https://chaos-mesh.org/blog/chaos-mesh-1.0-chaos-engineering-on-kubernetes-made-easier)
 
 ## Contribute
 
@@ -105,6 +105,15 @@ On the fourth Thursday of every month (unless otherwise specified), the Chaos Me
 - [Chaos Mesh : un générateur de chaos pour Kubernetes](https://www.cowboysysop.com/post/chaos-mesh-un-generateur-de-chaos-pour-kubernetes/)
 - [K8s Chaos Dive: Chaos-Mesh Part 1](https://dev.to/craigmorten/k8s-chaos-dive-2-chaos-mesh-part-1-2i96)
 - [K8s Chaos Dive: Chaos-Mesh Part 2](https://dev.to/craigmorten/k8s-chaos-dive-chaos-mesh-part-2-536m)
+
+## Media coverage
+- CodeZine: [オープンソースのカオステストツール「Chaos Mesh 1.0」、一般提供を開始](https://codezine.jp/article/detail/12996)
+- @IT atmarkit: [Kubernetes向けカオスエンジニアリングプラットフォーム「Chaos Mesh 1.0」が公開](https://www.atmarkit.co.jp/ait/articles/2010/09/news108.html)
+- Publickey: [KubernetesのPodやネットワークをわざと落としまくってカオスエンジニアリングのテストができる「Chaos Mesh」がバージョン1.0に到達](https://www.publickey1.jp/blog/20/kubernetespodchaos_mesh10.html)
+
+## FAQs
+
+See [FAQs](https://chaos-mesh.org/docs/faqs).
 
 ## Roadmap
 
