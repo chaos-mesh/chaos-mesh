@@ -1,9 +1,10 @@
-import { GlobalSearchData, SearchPath, searchGlobal } from 'lib/search'
+import { GlobalSearchData, PropForKeyword, SearchPath, searchGlobal } from 'lib/search'
 import { Grid, InputAdornment, Paper, TextField, Typography } from '@material-ui/core'
 import { Link, LinkProps } from 'react-router-dom'
 import ListItem, { ListItemProps } from '@material-ui/core/ListItem'
-import React, { ReactNode, useCallback, useEffect, useState } from 'react'
+import React, { ReactNode, useCallback, useEffect, useRef, useState } from 'react'
 import { createStyles, makeStyles } from '@material-ui/core/styles'
+import { dayComparator, format } from 'lib/dayjs'
 
 import { Archive } from 'api/archives.type'
 import { Event } from 'api/events.type'
@@ -14,6 +15,8 @@ import ListItemText from '@material-ui/core/ListItemText'
 import ListSubheader from '@material-ui/core/ListSubheader'
 import Loading from 'components/Loading'
 import SearchIcon from '@material-ui/icons/Search'
+import Separate from 'components/Separate'
+import T from 'components/T'
 import Tooltip from 'components/Tooltip'
 import _debounce from 'lodash.debounce'
 import api from 'api'
@@ -31,8 +34,7 @@ const useStyles = makeStyles(() =>
     },
     searchResultContainer: {
       marginTop: 10,
-      background: '#f5f6f7',
-      maxHeight: '30rem',
+      maxHeight: '480px',
       overflow: 'scroll',
     },
   })
@@ -83,12 +85,54 @@ const SearchResultForOneCate = function <T extends 'events' | 'experiments' | 'a
   props: SearchResultForOneCateProps<T> & { children?: ReactNode }
 ) {
   const { category, searchPath, result } = props
-  const hasExperiment = searchPath.some((path) => {
-    return Object.keys(path)[0] === 'Experiment'
+
+  if (category === 'events') {
+    ;((result as unknown) as Event[]).sort((a, b) => {
+      return dayComparator(a.start_time, b.start_time)
+    })
+  }
+
+  const nameMap: {
+    [k in PropForKeyword]: string
+  } = {
+    experiment: 'Experiment',
+    uid: 'UUID',
+    experiment_id: 'UUID',
+    ip: 'IP',
+    kind: 'Kind',
+    pod: 'Pod',
+    namespace: 'Namespace',
+  }
+
+  type RequiredHLItem = { name: string; isHighLighted: true; value: string }
+  type RequiredNoHLItem = { name: string; isHighLighted: false }
+  type RequiredItems = (RequiredHLItem | RequiredNoHLItem)[]
+
+  const requiredItems: RequiredItems =
+    category === 'events'
+      ? [
+          { name: 'experiment', isHighLighted: false },
+          { name: 'start_time', isHighLighted: false },
+        ]
+      : category === 'experiments' || category === 'archives'
+      ? [
+          { name: 'name', isHighLighted: false },
+          { name: 'uid', isHighLighted: false },
+        ]
+      : []
+
+  requiredItems.forEach((item) => {
+    const posInSearchPath = searchPath.findIndex((path) => {
+      return path.name === item.name
+    })
+    if (posInSearchPath !== -1) {
+      item.isHighLighted = true
+      if (item.isHighLighted === true) {
+        item.value = searchPath[posInSearchPath].value
+      }
+    }
   })
-  const hasUUID = searchPath.some((path) => {
-    return Object.keys(path)[0] === 'UUID'
-  })
+
   return (
     <Grid container direction="column" justify="space-between" spacing={3}>
       {((result as unknown) as (T extends 'events' ? Event : T extends 'experiments' ? Experiment : Archive)[])
@@ -115,43 +159,43 @@ const SearchResultForOneCate = function <T extends 'events' | 'experiments' | 'a
                         : `/archives/${((res as unknown) as Archive).uid}`
                     }
                   >
-                    {hasExperiment || (
-                      <ListItemText
-                        primary={'Experiment'}
-                        secondary={
-                          category === 'events'
-                            ? ((res as any) as Event).experiment
-                            : ((res as any) as Experiment & Archive).name
-                        }
-                      />
-                    )}
-
-                    {hasUUID || category === 'events' || (
-                      <ListItemText primary={'UUID'} secondary={((res as any) as Experiment & Archive).uid} />
-                    )}
-                    {category !== 'events' || (
-                      <ListItemText primary={'Start Time'} secondary={((res as any) as Event).start_time} />
-                    )}
-                    {searchPath.map((path) => {
-                      return (
-                        <ListItemText
-                          primary={Object.keys(path).filter((key) => key !== 'value')[0]}
-                          secondary={
-                            <HighLightText text={path.value}>
-                              {path[Object.keys(path).filter((key) => key !== 'value')[0]]}
-                            </HighLightText>
-                          }
-                          key={Object.keys(path).filter((key) => key !== 'value')[0]}
-                        />
-                      )
-                    })}
+                    <ListItemText
+                      style={{
+                        wordBreak: 'break-all',
+                      }}
+                      primary={
+                        <Separate separator={<span>&nbsp;|&nbsp;</span>}>
+                          {searchPath.map((path) => {
+                            return (
+                              <>
+                                <span>{nameMap[path.name]}:</span>
+                                <HighLightText text={path.value}>{path.matchedValue}</HighLightText>
+                              </>
+                            )
+                          })}
+                        </Separate>
+                      }
+                      secondary={
+                        <Separate separator={<span>&nbsp;</span>}>
+                          {requiredItems.map((item) => {
+                            return item.isHighLighted ? (
+                              <HighLightText text={item.value}>{(res as any)[item.name]}</HighLightText>
+                            ) : (
+                              <span>
+                                {item.name === 'start_time' ? format((res as any)[item.name]) : (res as any)[item.name]}
+                              </span>
+                            )
+                          })}
+                        </Separate>
+                      }
+                    />
                   </ListItemLink>
                 </Paper>
               }
             </Grid>
           )
         })
-        .slice(0, 5)}
+        .slice(0, 3)}
     </Grid>
   )
 }
@@ -164,7 +208,6 @@ const Search: React.FC = () => {
   const [searchResult, setSearchResult] = useState<GlobalSearchData | {}>()
   const [searchPath, setSearchPath] = useState<SearchPath>()
   const [loading, setLoading] = useState(false)
-  const [focus, setFocus] = useState(false)
   const [isEmptySearch, setIsEmptySearch] = useState(true)
 
   const debounceSetSearch = useCallback(_debounce(setSearch, 500), [])
@@ -215,14 +258,13 @@ const Search: React.FC = () => {
 
   useEffect(() => {
     globalSearchData ? setLoading(false) : setLoading(true)
-    if (!focus) setShowSearchResult(false)
-  }, [focus, globalSearchData])
+  }, [globalSearchData])
 
   return (
     <div className={classes.searchContainer}>
       <TextField
         margin="dense"
-        placeholder={intl.formatMessage({ id: 'common.search' })}
+        placeholder={intl.formatMessage({ id: 'search.placeholder' })}
         disabled={!globalSearchData}
         variant="outlined"
         InputProps={{
@@ -236,16 +278,13 @@ const Search: React.FC = () => {
               <Tooltip
                 title={
                   <Typography variant="body2">
-                    The following search syntax can help to locate the events quickly:
+                    {T('search.tip.title')}
                     <ul style={{ marginBottom: 0, paddingLeft: '1rem' }}>
-                      <li>namespace:default xxx will search for events with namespace default</li>
-                      <li>
-                        kind:NetworkChaos xxx will search for events with kind NetworkChaos, you can also type kind:net
-                        because the search is fuzzy
-                      </li>
-                      <li>pod:echoserver-774cdcc8b6-nrm65 will search for events by affected pod</li>
-                      <li>ip:172.17.0.6 is similar to pod:xxx, filter by pod IP</li>
-                      <li>uuid:2f79a4d6-1952-45b5-b2d5-ce715823c7a7 will search for events by experimental uuid</li>
+                      <li>{T('search.tip.namespace')}</li>
+                      <li>{T('search.tip.kind')}</li>
+                      <li>{T('search.tip.pod')}</li>
+                      <li>{T('search.tip.ip')}</li>
+                      <li>{T('search.tip.uuid')}</li>
                     </ul>
                   </Typography>
                 }
@@ -261,8 +300,8 @@ const Search: React.FC = () => {
         inputProps={{
           style: { paddingTop: 8, paddingBottom: 8 },
         }}
+        inputRef={(input) => input && input.focus()}
         onChange={handleSearchChange}
-        onFocus={() => setFocus(true)}
       />
       {showSearchResult && (
         <Paper elevation={0} className={classes.searchResultContainer}>

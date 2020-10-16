@@ -6,11 +6,12 @@ import { Experiment } from 'api/experiments.type'
 
 type Merge<T extends object, U extends object> = T & U
 
-type SelfRecursiveForFuncProp<T> = {
-  [P in keyof T]: T[P] extends (...args: infer X) => any ? (...args: X) => SelfRecursiveForFuncProp<T> : T[P]
+type MappedEveryFuncToReturnThis<T> = {
+  [P in keyof T]: T[P] extends (...args: infer X) => any ? (...args: X) => MappedEveryFuncToReturnThis<T> : T[P]
 }
 
 type Keyword = 'namespace' | 'kind' | 'pod' | 'ip' | 'uuid'
+export type PropForKeyword = 'experiment' | 'uid' | 'kind' | 'ip' | 'pod' | 'namespace' | 'experiment_id'
 
 export type GlobalSearchData = {
   events: Event[]
@@ -19,7 +20,7 @@ export type GlobalSearchData = {
 }
 
 export type SearchPath = {
-  [k in keyof GlobalSearchData]: { value: string; [index: string]: string }[]
+  [k in keyof GlobalSearchData]: { name: PropForKeyword; value: string; matchedValue: string }[]
 }
 
 interface BaseToken {
@@ -86,7 +87,7 @@ class ParseSearchAutomata {
     for (let method of this.parseMethods) {
       if (prototype[method].call(this, s) !== false) return this.tokens
     }
-    // Since parseContent always return undefined rather than false, so the code below is totally unreachable.
+    // Since parseContent never return false, so the code below is totally unreachable.
     // It exists just for type check.
     return this.tokens
   }
@@ -145,7 +146,8 @@ export function searchGlobal({ events, experiments, archives }: GlobalSearchData
           })
         )
         searchPath.events.push({
-          Pod: podName,
+          name: 'pod',
+          matchedValue: podName,
           value,
         })
         break
@@ -159,14 +161,16 @@ export function searchGlobal({ events, experiments, archives }: GlobalSearchData
           })
         )
         searchPath.events.push({
-          IP: ip,
+          name: 'ip',
+          matchedValue: ip,
           value,
         })
         break
       case 'uuid':
         result = target.filter((d) => d.experiment_id.match(new RegExp('^' + value, 'i')))
         searchPath.events.push({
-          UUID: result[0]?.experiment_id,
+          name: 'experiment_id',
+          matchedValue: result[0]?.experiment_id,
           value,
         })
         break
@@ -174,7 +178,8 @@ export function searchGlobal({ events, experiments, archives }: GlobalSearchData
         assumeType<keyof Event & Keyword>(keyword)
         result = keyword in target[0] ? target.filter((d) => d[keyword]?.match(new RegExp(value, 'i'))) : []
         searchPath.events.push({
-          [keyword]: result[0] ? result[0][keyword] : '',
+          name: keyword,
+          matchedValue: result[0] ? result[0][keyword] : '',
           value,
         })
         break
@@ -193,7 +198,8 @@ export function searchGlobal({ events, experiments, archives }: GlobalSearchData
       case 'uuid':
         result = target.filter((d) => d.uid.match(new RegExp('^' + value, 'i')))
         searchPath.experiments.push({
-          UUID: result[0]?.uid,
+          name: 'uid',
+          matchedValue: result[0]?.uid,
           value,
         })
         break
@@ -201,7 +207,8 @@ export function searchGlobal({ events, experiments, archives }: GlobalSearchData
         assumeType<keyof Experiment & Keyword>(keyword)
         result = keyword in target[0] ? target.filter((d) => d[keyword]?.match(new RegExp(value, 'i'))) : []
         searchPath.experiments.push({
-          [keyword]: result[0] ? result[0][keyword] : '',
+          name: keyword,
+          matchedValue: result[0] ? result[0][keyword] : '',
           value,
         })
         break
@@ -220,7 +227,8 @@ export function searchGlobal({ events, experiments, archives }: GlobalSearchData
       case 'uuid':
         result = target.filter((d) => d.uid.match(new RegExp('^' + value, 'i')))
         searchPath.archives.push({
-          UUID: result[0]?.uid,
+          name: 'uid',
+          matchedValue: result[0]?.uid,
           value,
         })
         break
@@ -228,7 +236,8 @@ export function searchGlobal({ events, experiments, archives }: GlobalSearchData
         assumeType<keyof Archive & Keyword>(keyword)
         result = keyword in target[0] ? target.filter((d) => d[keyword]?.match(new RegExp(value, 'i'))) : []
         searchPath.archives.push({
-          [keyword]: result[0] ? result[0][keyword] : '',
+          name: keyword,
+          matchedValue: result[0] ? result[0][keyword] : '',
           value,
         })
         break
@@ -243,15 +252,18 @@ export function searchGlobal({ events, experiments, archives }: GlobalSearchData
     const experimentRes = experiments.filter((d) => d.name.match(new RegExp(value, 'i')))
     const archiveRes = archives.filter((d) => d.name.match(new RegExp(value, 'i')))
     searchPath.events.push({
-      Experiment: eventRes[0]?.experiment,
+      name: 'experiment',
+      matchedValue: eventRes[0]?.experiment,
       value,
     })
     searchPath.experiments.push({
-      Experiment: experimentRes[0]?.name,
+      name: 'experiment',
+      matchedValue: experimentRes[0]?.name,
       value,
     })
     searchPath.archives.push({
-      Experiment: archiveRes[0]?.name,
+      name: 'experiment',
+      matchedValue: archiveRes[0]?.name,
       value,
     })
     return {
@@ -276,7 +288,7 @@ export function searchGlobal({ events, experiments, archives }: GlobalSearchData
     experiments,
     archives,
   }
-  type Result = SelfRecursiveForFuncProp<Merge<typeof source, typeof protoWithSearchMethods>>
+  type Result = MappedEveryFuncToReturnThis<Merge<typeof source, typeof protoWithSearchMethods>>
   let result: Result = Object.setPrototypeOf(source, protoWithSearchMethods)
 
   tokens.forEach((token) => {

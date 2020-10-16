@@ -162,9 +162,19 @@
     "pauseSuccessfully": "暂停成功",
     "updateSuccessfully": "更新成功",
     "timeline": "时间线",
-    "search": "搜索",
     "meta": "元信息",
     "uuid": "UUID"
+  },
+  "search": {
+    "placeholder": "搜索",
+    "tip": {
+      "title": "下面的搜索语法将会帮助您快速地定位到事件，实验以及归档：",
+      "namespace": "namespace:default xxx 将搜索带有 default 命名空间的事件，实验以及归档",
+      "kind": "kind:NetworkChaos xxx 将搜索带有 NetworkChaos 类型的事件，实验以及归档，您也可以输入 kind:net，因为搜索是模糊匹配",
+      "pod": "pod:echoserver-774cdcc8b6-nrm65 将搜索发生在指定 pod 上的事件",
+      "ip": "ip:172.17.0.6 类似于 pod:xxx，只不过通过 pod IP 进行过滤",
+      "uuid": "uuid:2f79a4d6-1952-45b5-b2d5-ce715823c7a7 将搜索带有指定实验 UUID 的事件，实验以及归档"
+    }
   },
   "k8s": {
     "labels": "标签",

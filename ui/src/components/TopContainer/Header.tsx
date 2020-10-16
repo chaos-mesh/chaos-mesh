@@ -1,19 +1,13 @@
-import { AppBar, Box, Breadcrumbs, Button, IconButton, Paper, Toolbar, Typography } from '@material-ui/core'
-import React, { useEffect, useState } from 'react'
+import { AppBar, Box, Breadcrumbs, IconButton, Toolbar, Typography } from '@material-ui/core'
 import { Theme, createStyles, makeStyles } from '@material-ui/core/styles'
 import { drawerCloseWidth, drawerWidth } from './Sidebar'
 
 import { Link } from 'react-router-dom'
 import MenuIcon from '@material-ui/icons/Menu'
-import Modal from '@material-ui/core/Modal'
 import { NavigationBreadCrumbProps } from 'slices/navigation.type'
-import { RootState } from 'store'
-import Search from 'components/Search'
-import SearchIcon from '@material-ui/icons/Search'
+import React from 'react'
+import SearchTrigger from 'components/SearchTrigger'
 import T from 'components/T'
-import { setSearchModalOpen } from 'slices/globalStatus'
-import store from 'store'
-import { useSelector } from 'react-redux'
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -58,67 +52,11 @@ const useStyles = makeStyles((theme: Theme) =>
         cursor: 'pointer',
       },
     },
-    searchTrigger: {
-      borderRadius: '4px',
-      color: '#969faf',
-      cursor: 'pointer',
-      '&:hover': {
-        color: '#1c1e21',
-      },
-    },
-    searchModal: {
-      position: 'relative',
-      maxWidth: '35rem',
-      minHeight: '12.8125rem',
-      margin: '3.75rem auto auto',
-      padding: 12,
-      background: '#f5f6f7',
-      outline: 0,
-    },
   })
 )
 
 function hasLocalBreadcrumb(b: string) {
   return ['overview', 'experiments', 'newExperiment', 'events', 'archives', 'settings'].includes(b)
-}
-
-const SearchTrigger: React.FC = () => {
-  const classes = useStyles()
-  const [open, setOpen] = useState(false)
-
-  const handleOpen = () => {
-    setOpen(true)
-    store.dispatch(setSearchModalOpen(true))
-  }
-
-  const handleClose = () => {
-    setOpen(false)
-    store.dispatch(setSearchModalOpen(false))
-  }
-
-  const searchModalOpen = useSelector((state: RootState) => state.globalStatus.searchModalOpen)
-
-  useEffect(() => {
-    if (!searchModalOpen) handleClose()
-  }, [searchModalOpen])
-
-  return (
-    <>
-      <Button
-        variant="outlined"
-        className={classes.searchTrigger}
-        startIcon={<SearchIcon color="primary" />}
-        onClick={handleOpen}
-      >
-        Search
-      </Button>
-      <Modal open={open} onClose={handleClose}>
-        <Paper elevation={3} className={classes.searchModal}>
-          <Search></Search>
-        </Paper>
-      </Modal>
-    </>
-  )
 }
 
 interface HeaderProps {
