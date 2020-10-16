@@ -113,7 +113,6 @@ After `chaos-daemon` receive `ExecHelloWorldChaos` request, `chaos-daemon` will 
 
 ### Send GRPC request in reconcile
 
-
 When the object of CRD is updated(for example: create or delete), we need to compare the state specified in the object against the actual state, and then perform operations to make the actual cluster state reflect the state specified, which is called `reconcile`. For `HelloworldChaos`, `chaos-controller-manager` need to send chaos request to `chaos-daemon` in `reconcile`.
 
 Create a dir named `helloworldchaos` under [controllers](https://github.com/chaos-mesh/chaos-mesh/tree/master/controllers), and create a golang file `type.go` under `helloworldchaos` dir, fill this file with the content below:
