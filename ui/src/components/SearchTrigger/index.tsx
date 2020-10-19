@@ -11,25 +11,26 @@ import { setSearchModalOpen } from 'slices/globalStatus'
 import store from 'store'
 import { useSelector } from 'react-redux'
 
-const useStyles = makeStyles((theme: Theme) =>
-  createStyles({
+const useStyles = makeStyles((theme: Theme) => {
+  return createStyles({
     searchTrigger: {
       borderRadius: '4px',
       cursor: 'pointer',
       whiteSpace: 'nowrap',
     },
     searchModal: {
+      [theme.breakpoints.down('md')]: {
+        maxWidth: '80%',
+      },
       position: 'relative',
       maxWidth: '40%',
-      minHeight: '30%',
-      maxHeight: '80%',
       margin: `${theme.spacing(15)} auto auto`,
       padding: theme.spacing(3),
+      overflowY: 'hidden',
       outline: 0,
-      overflowY: 'scroll',
     },
   })
-)
+})
 
 const SearchTrigger: React.FC = () => {
   const classes = useStyles()

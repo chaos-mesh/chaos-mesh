@@ -20,7 +20,7 @@ export type GlobalSearchData = {
 }
 
 export type SearchPath = {
-  [k in keyof GlobalSearchData]: { name: PropForKeyword; value: string; matchedValue: string }[]
+  [k in keyof GlobalSearchData]: { name: PropForKeyword; path: string; value: string }[]
 }
 
 interface BaseToken {
@@ -137,32 +137,18 @@ export function searchGlobal({ events, experiments, archives }: GlobalSearchData
     let result: Event[]
     switch (keyword) {
       case 'pod':
-        let podName = ''
-        result = target.filter((d) =>
-          d.pods?.some((pod) => {
-            const res = pod.pod_name.match(new RegExp(value, 'i'))
-            if (res) podName = pod.pod_name
-            return res
-          })
-        )
+        result = target.filter((d) => d.pods?.some((pod) => pod.pod_name.match(new RegExp(value, 'i'))))
         searchPath.events.push({
           name: 'pod',
-          matchedValue: podName,
+          path: 'pod.pod_name',
           value,
         })
         break
       case 'ip':
-        let ip = ''
-        result = target.filter((d) =>
-          d.pods?.some((pod) => {
-            const res = pod.pod_ip.match(new RegExp(value, 'i'))
-            if (res) ip = pod.pod_ip
-            return res
-          })
-        )
+        result = target.filter((d) => d.pods?.some((pod) => pod.pod_ip.match(new RegExp(value, 'i'))))
         searchPath.events.push({
           name: 'ip',
-          matchedValue: ip,
+          path: 'pod.pod_ip',
           value,
         })
         break
@@ -170,7 +156,7 @@ export function searchGlobal({ events, experiments, archives }: GlobalSearchData
         result = target.filter((d) => d.experiment_id.match(new RegExp('^' + value, 'i')))
         searchPath.events.push({
           name: 'experiment_id',
-          matchedValue: result[0]?.experiment_id,
+          path: 'experiment_id',
           value,
         })
         break
@@ -179,7 +165,7 @@ export function searchGlobal({ events, experiments, archives }: GlobalSearchData
         result = keyword in target[0] ? target.filter((d) => d[keyword]?.match(new RegExp(value, 'i'))) : []
         searchPath.events.push({
           name: keyword,
-          matchedValue: result[0] ? result[0][keyword] : '',
+          path: keyword,
           value,
         })
         break
@@ -199,7 +185,7 @@ export function searchGlobal({ events, experiments, archives }: GlobalSearchData
         result = target.filter((d) => d.uid.match(new RegExp('^' + value, 'i')))
         searchPath.experiments.push({
           name: 'uid',
-          matchedValue: result[0]?.uid,
+          path: 'uid',
           value,
         })
         break
@@ -208,7 +194,7 @@ export function searchGlobal({ events, experiments, archives }: GlobalSearchData
         result = keyword in target[0] ? target.filter((d) => d[keyword]?.match(new RegExp(value, 'i'))) : []
         searchPath.experiments.push({
           name: keyword,
-          matchedValue: result[0] ? result[0][keyword] : '',
+          path: keyword,
           value,
         })
         break
@@ -228,7 +214,7 @@ export function searchGlobal({ events, experiments, archives }: GlobalSearchData
         result = target.filter((d) => d.uid.match(new RegExp('^' + value, 'i')))
         searchPath.archives.push({
           name: 'uid',
-          matchedValue: result[0]?.uid,
+          path: 'uid',
           value,
         })
         break
@@ -237,7 +223,7 @@ export function searchGlobal({ events, experiments, archives }: GlobalSearchData
         result = keyword in target[0] ? target.filter((d) => d[keyword]?.match(new RegExp(value, 'i'))) : []
         searchPath.archives.push({
           name: keyword,
-          matchedValue: result[0] ? result[0][keyword] : '',
+          path: keyword,
           value,
         })
         break
@@ -253,17 +239,17 @@ export function searchGlobal({ events, experiments, archives }: GlobalSearchData
     const archiveRes = archives.filter((d) => d.name.match(new RegExp(value, 'i')))
     searchPath.events.push({
       name: 'experiment',
-      matchedValue: eventRes[0]?.experiment,
+      path: 'experiment',
       value,
     })
     searchPath.experiments.push({
       name: 'experiment',
-      matchedValue: experimentRes[0]?.name,
+      path: 'name',
       value,
     })
     searchPath.archives.push({
       name: 'experiment',
-      matchedValue: archiveRes[0]?.name,
+      path: 'name',
       value,
     })
     return {

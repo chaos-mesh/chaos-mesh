@@ -3,7 +3,7 @@ import { Grid, InputAdornment, Paper, TextField, Typography } from '@material-ui
 import { Link, LinkProps } from 'react-router-dom'
 import ListItem, { ListItemProps } from '@material-ui/core/ListItem'
 import React, { ReactNode, useCallback, useEffect, useState } from 'react'
-import { Theme, createStyles, makeStyles } from '@material-ui/core/styles'
+import { Theme, createStyles, makeStyles, useTheme } from '@material-ui/core/styles'
 import { dayComparator, format } from 'lib/dayjs'
 
 import { Archive } from 'api/archives.type'
@@ -13,6 +13,7 @@ import HelpOutlineIcon from '@material-ui/icons/HelpOutline'
 import List from '@material-ui/core/List'
 import ListItemText from '@material-ui/core/ListItemText'
 import ListSubheader from '@material-ui/core/ListSubheader'
+import { RootState } from 'store'
 import SearchIcon from '@material-ui/icons/Search'
 import Separate from 'components/Separate'
 import T from 'components/T'
@@ -20,10 +21,11 @@ import Tooltip from 'components/Tooltip'
 import _debounce from 'lodash.debounce'
 import api from 'api'
 import { assumeType } from 'lib/utils'
+import get from 'lodash.get'
 import { setSearchModalOpen } from 'slices/globalStatus'
 import store from 'store'
-import theme from 'theme'
 import { useIntl } from 'react-intl'
+import { useSelector } from 'react-redux'
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -33,7 +35,11 @@ const useStyles = makeStyles((theme: Theme) =>
       justifyContent: 'space-between',
     },
     searchResultContainer: {
+      minHeight: '30vh',
+      maxHeight: '70vh',
       marginTop: theme.spacing(2.5),
+      overflowY: 'scroll',
+      overflowX: 'hidden',
     },
   })
 )
@@ -59,6 +65,8 @@ interface HighLightTextProps {
 }
 
 const HighLightText: React.FC<HighLightTextProps> = ({ children, text }) => {
+  const theme = useTheme()
+  const isDarkMode = useSelector((state: RootState) => state.settings.theme) === 'dark' ? true : false
   const matchRes = children.match(new RegExp(text, 'i'))
   const startIndex = matchRes!.index!
   const frontPart = children.slice(0, startIndex)
@@ -67,7 +75,12 @@ const HighLightText: React.FC<HighLightTextProps> = ({ children, text }) => {
   return (
     <Typography component="span">
       <span>{frontPart}</span>
-      <span style={{ background: theme.palette.primary.light, color: theme.palette.primary.contrastText }}>
+      <span
+        style={{
+          background: isDarkMode ? theme.palette.primary.dark : theme.palette.primary.light,
+          color: theme.palette.primary.contrastText,
+        }}
+      >
         {highLightPart}
       </span>
       <span>{endPart}</span>
@@ -171,10 +184,11 @@ const SearchResultForOneCate = function <T extends 'events' | 'experiments' | 'a
                       primary={
                         <Separate separator={<span>&nbsp;|&nbsp;</span>}>
                           {searchPath.map((path) => {
+                            if (!get(res, path.path)) console.log(path.path, res)
                             return (
                               <Typography key={path.name + path.value}>
                                 <span>{T(`search.result.keywords.${nameMap[path.name]}`)}: </span>
-                                <HighLightText text={path.value}>{path.matchedValue}</HighLightText>
+                                <HighLightText text={path.value}>{get(res, path.path)}</HighLightText>
                               </Typography>
                             )
                           })}
@@ -212,6 +226,7 @@ const SearchResultForOneCate = function <T extends 'events' | 'experiments' | 'a
 }
 
 const Search: React.FC = () => {
+  const theme = useTheme()
   const classes = useStyles()
   const intl = useIntl()
   const [search, setSearch] = useState('')
