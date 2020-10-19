@@ -2,7 +2,7 @@ import { GlobalSearchData, PropForKeyword, SearchPath, searchGlobal } from 'lib/
 import { Grid, InputAdornment, Paper, TextField, Typography } from '@material-ui/core'
 import { Link, LinkProps } from 'react-router-dom'
 import ListItem, { ListItemProps } from '@material-ui/core/ListItem'
-import React, { ReactNode, useCallback, useEffect, useRef, useState } from 'react'
+import React, { ReactNode, useCallback, useEffect, useState } from 'react'
 import { createStyles, makeStyles } from '@material-ui/core/styles'
 import { dayComparator, format } from 'lib/dayjs'
 
@@ -92,8 +92,10 @@ const SearchResultForOneCate = function <T extends 'events' | 'experiments' | 'a
     })
   }
 
+  type searchResultNames = PropForKeyword | 'start_time' | 'name'
+
   const nameMap: {
-    [k in PropForKeyword]: string
+    [k in searchResultNames]: string
   } = {
     experiment: 'Experiment',
     uid: 'UUID',
@@ -102,10 +104,12 @@ const SearchResultForOneCate = function <T extends 'events' | 'experiments' | 'a
     kind: 'Kind',
     pod: 'Pod',
     namespace: 'Namespace',
+    start_time: 'Start Time',
+    name: 'Experiment',
   }
 
-  type RequiredHLItem = { name: string; isHighLighted: true; value: string }
-  type RequiredNoHLItem = { name: string; isHighLighted: false }
+  type RequiredHLItem = { name: searchResultNames; alternativeName?: string; isHighLighted: true; value: string }
+  type RequiredNoHLItem = { name: searchResultNames; alternativeName?: string; isHighLighted: false }
   type RequiredItems = (RequiredHLItem | RequiredNoHLItem)[]
 
   const requiredItems: RequiredItems =
@@ -116,14 +120,14 @@ const SearchResultForOneCate = function <T extends 'events' | 'experiments' | 'a
         ]
       : category === 'experiments' || category === 'archives'
       ? [
-          { name: 'name', isHighLighted: false },
+          { name: 'name', alternativeName: 'experiment', isHighLighted: false },
           { name: 'uid', isHighLighted: false },
         ]
       : []
 
   requiredItems.forEach((item) => {
     const posInSearchPath = searchPath.findIndex((path) => {
-      return path.name === item.name
+      return path.name === item.name || (item.alternativeName && item.alternativeName === path.name)
     })
     if (posInSearchPath !== -1) {
       item.isHighLighted = true
@@ -167,23 +171,30 @@ const SearchResultForOneCate = function <T extends 'events' | 'experiments' | 'a
                         <Separate separator={<span>&nbsp;|&nbsp;</span>}>
                           {searchPath.map((path) => {
                             return (
-                              <>
-                                <span>{nameMap[path.name]}: </span>
+                              <React.Fragment key={path.name + path.value}>
+                                <span>{T(`search.result.keywords.${nameMap[path.name]}`)}: </span>
                                 <HighLightText text={path.value}>{path.matchedValue}</HighLightText>
-                              </>
+                              </React.Fragment>
                             )
                           })}
                         </Separate>
                       }
                       secondary={
-                        <Separate separator={<span>&nbsp;</span>}>
+                        <Separate separator={<span>&nbsp;|&nbsp;</span>}>
                           {requiredItems.map((item) => {
-                            return item.isHighLighted ? (
-                              <HighLightText text={item.value}>{(res as any)[item.name]}</HighLightText>
-                            ) : (
-                              <span>
-                                {item.name === 'start_time' ? format((res as any)[item.name]) : (res as any)[item.name]}
-                              </span>
+                            return (
+                              <React.Fragment key={item.name}>
+                                <span>{T(`search.result.keywords.${nameMap[item.name]}`)}: </span>
+                                {item.isHighLighted ? (
+                                  <HighLightText text={item.value}>{(res as any)[item.name]}</HighLightText>
+                                ) : (
+                                  <span>
+                                    {item.name === 'start_time'
+                                      ? format((res as any)[item.name])
+                                      : (res as any)[item.name]}
+                                  </span>
+                                )}
+                              </React.Fragment>
                             )
                           })}
                         </Separate>
@@ -315,14 +326,14 @@ const Search: React.FC = () => {
                 return (
                   <React.Fragment key={key}>
                     <ListSubheader disableSticky={true} style={{ fontSize: '22px', padding: 0 }}>
-                      {key}
+                      {T(`search.result.category.${key}`)}
                     </ListSubheader>
                     {searchResult[key].length !== 0 ? (
                       <SearchResultForOneCate category={key} result={searchResult[key]} searchPath={searchPath![key]} />
                     ) : (
                       <Paper variant="outlined">
                         <ListItemLink to="/">
-                          <ListItemText primary="No Result" />
+                          <ListItemText primary={T('search.result.noResult')} />
                         </ListItemLink>
                       </Paper>
                     )}

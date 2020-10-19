@@ -174,6 +174,23 @@
       "pod": "pod:echoserver-774cdcc8b6-nrm65 will search for events by affected pod",
       "ip": "ip:172.17.0.6 is similar to pod:xxx, filter by pod IP",
       "uuid": "uuid:2f79a4d6-1952-45b5-b2d5-ce715823c7a7 will search for events, experiments and archives by experimental uuid"
+    },
+    "result": {
+      "category": {
+        "events": "events",
+        "experiments": "experiments",
+        "archives": "archives"
+      },
+      "keywords": {
+        "Experiment": "Experiment",
+        "UUID": "UUID",
+        "IP": "IP",
+        "Kind": "Kind",
+        "Pod": "Pod",
+        "Namespace": "Namespace",
+        "Start Time": "Start Time" 
+      },
+      "noResult": "No Result"
     }
   },
   "k8s": {

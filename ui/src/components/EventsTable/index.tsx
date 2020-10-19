@@ -27,7 +27,6 @@ import KeyboardArrowRightIcon from '@material-ui/icons/KeyboardArrowRight'
 import LastPageIcon from '@material-ui/icons/LastPage'
 import PaperTop from 'components/PaperTop'
 import T from 'components/T'
-import _debounce from 'lodash.debounce'
 import { useIntl } from 'react-intl'
 import { useQuery } from 'lib/hooks'
 import useRunningLabelStyles from 'lib/styles/runningLabel'
@@ -237,7 +236,7 @@ const EventsTable: React.ForwardRefRenderFunction<EventsTableHandles, EventsTabl
   const location = useLocation()
   const history = useHistory()
 
-  const [events, setEvents] = useState(allEvents)
+  const [events] = useState(allEvents)
   const [order, setOrder] = useState<Order>('desc')
   const [orderBy, setOrderBy] = useState<keyof SortedEvent>('start_time')
   const [page, setPage] = useState(0)

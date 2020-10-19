@@ -52,9 +52,8 @@ const SearchTrigger: React.FC = () => {
   useEffect(() => {
     const keyMap: { [index: string]: boolean } = {}
     const keyDownHandler = (e: KeyboardEvent) => {
-      console.log(e.code)
       keyMap[e.code] = true
-      if (keyMap['MetaLeft'] && keyMap['ControlLeft'] && keyMap['KeyP']) {
+      if (keyMap['ControlLeft'] && keyMap['KeyP']) {
         handleOpen()
       }
     }
