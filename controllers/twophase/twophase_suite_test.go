@@ -444,7 +444,6 @@ var _ = Describe("TwoPhase", func() {
 			Expect(chaos.NextStart.Time.Day()).To(Equal(exp.Day()))
 			Expect(chaos.NextStart.Time.Hour()).To(Equal(exp.Hour()))
 			Expect(chaos.NextStart.Time.Minute()).To(Equal(exp.Minute()))
-			Expect(chaos.NextStart.Time.Second()).To(Equal(exp.Second()))
 		})
 
 		It("TwoPhase ToApply Error", func() {
