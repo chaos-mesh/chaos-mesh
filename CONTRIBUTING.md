@@ -123,9 +123,14 @@ $ make test
 
 3. Install Chaos Mesh:
 
+   Following command will rebuild project code and reinstall chaos mesh.
+
    ```bash
+   #
    $ ./hack/local-up-operator.sh
    ```
+
+
 
 Now you can test your code update on the deployed cluster.
 
