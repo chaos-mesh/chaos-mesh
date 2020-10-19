@@ -7,7 +7,7 @@ import PickVersion from '@site/src/components/PickVersion'
 
 This document describes how to install Chaos Mesh to perform chaos experiments against your application in Kubernetes.
 
-If you want to try Chaos Mesh on your your laptop (Linux or macOS), you can refer the following two documents:
+If you want to try Chaos Mesh on your laptop (Linux or macOS), you can refer the following two documents:
 
 - [Get started on kind](get_started_on_kind.md)
 - [Get started on minikube](get_started_on_minikube.md)
@@ -144,13 +144,13 @@ Depending on your environment, there are two methods of installing Chaos Mesh:
      - for helm 2.X
 
      ```bash
-     helm install helm/chaos-mesh --name=chaos-mesh --namespace=chaos-testing --set chaosDaemon.runtime=containerd --set chaosDaemon.socketPath=/run/containerd/containerd.sock
+     helm install chaos-mesh/chaos-mesh --name=chaos-mesh --namespace=chaos-testing --set chaosDaemon.runtime=containerd --set chaosDaemon.socketPath=/run/containerd/containerd.sock
      ```
 
      - for helm 3.X
 
      ```bash
-     helm install chaos-mesh helm/chaos-mesh --namespace=chaos-testing --set chaosDaemon.runtime=containerd --set chaosDaemon.socketPath=/run/containerd/containerd.sock
+     helm install chaos-mesh chaos-mesh/chaos-mesh --namespace=chaos-testing --set chaosDaemon.runtime=containerd --set chaosDaemon.socketPath=/run/containerd/containerd.sock
      ```
 
   3. Check whether Chaos Mesh pods are installed:

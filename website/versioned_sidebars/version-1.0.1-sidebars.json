@@ -1,0 +1,160 @@
+{
+  "version-1.0.1/docs": [
+    {
+      "type": "doc",
+      "id": "version-1.0.1/overview/what_is_chaos_mesh"
+    },
+    {
+      "collapsed": true,
+      "type": "category",
+      "label": "Overview",
+      "items": [
+        {
+          "type": "doc",
+          "id": "version-1.0.1/overview/what_is_chaos_mesh"
+        },
+        {
+          "type": "doc",
+          "id": "version-1.0.1/overview/features"
+        },
+        {
+          "type": "doc",
+          "id": "version-1.0.1/overview/architecture"
+        }
+      ]
+    },
+    {
+      "collapsed": true,
+      "type": "category",
+      "label": "Concepts",
+      "items": [
+        {
+          "type": "doc",
+          "id": "version-1.0.1/concepts/chaos_engineering"
+        },
+        {
+          "type": "doc",
+          "id": "version-1.0.1/concepts/blast_radius"
+        }
+      ]
+    },
+    {
+      "collapsed": true,
+      "type": "category",
+      "label": "Getting Started",
+      "items": [
+        {
+          "type": "doc",
+          "id": "version-1.0.1/get_started/installation"
+        },
+        {
+          "type": "doc",
+          "id": "version-1.0.1/get_started/get_started_on_kind"
+        },
+        {
+          "type": "doc",
+          "id": "version-1.0.1/get_started/get_started_on_minikube"
+        },
+        {
+          "type": "doc",
+          "id": "version-1.0.1/get_started/run_chaos_experiment"
+        }
+      ]
+    },
+    {
+      "collapsed": true,
+      "type": "category",
+      "label": "User Guides",
+      "items": [
+        {
+          "type": "doc",
+          "id": "version-1.0.1/user_guides/experiment_scope"
+        }
+      ]
+    },
+    {
+      "collapsed": true,
+      "type": "category",
+      "label": "Chaos Experiments",
+      "items": [
+        {
+          "type": "doc",
+          "id": "version-1.0.1/chaos_experiments/podchaos_experiment"
+        },
+        {
+          "type": "doc",
+          "id": "version-1.0.1/chaos_experiments/networkchaos_experiment"
+        },
+        {
+          "type": "doc",
+          "id": "version-1.0.1/chaos_experiments/stresschaos_experiment"
+        },
+        {
+          "type": "doc",
+          "id": "version-1.0.1/chaos_experiments/timechaos_experiment"
+        },
+        {
+          "type": "doc",
+          "id": "version-1.0.1/chaos_experiments/iochaos_experiment"
+        },
+        {
+          "type": "doc",
+          "id": "version-1.0.1/chaos_experiments/kernelchaos_experiment"
+        }
+      ]
+    },
+    {
+      "collapsed": true,
+      "type": "category",
+      "label": "Use Cases",
+      "items": [
+        {
+          "type": "doc",
+          "id": "version-1.0.1/use_cases/multi_data_centers"
+        }
+      ]
+    },
+    {
+      "collapsed": true,
+      "type": "category",
+      "label": "Development Guide",
+      "items": [
+        {
+          "type": "doc",
+          "id": "version-1.0.1/development_guides/development_overview"
+        },
+        {
+          "type": "doc",
+          "id": "version-1.0.1/development_guides/set_up_the_development_environment"
+        },
+        {
+          "type": "doc",
+          "id": "version-1.0.1/development_guides/develop_a_new_chaos"
+        }
+      ]
+    },
+    {
+      "type": "doc",
+      "id": "version-1.0.1/faqs"
+    },
+    {
+      "collapsed": true,
+      "type": "category",
+      "label": "Releases",
+      "items": [
+        {
+          "type": "doc",
+          "id": "version-1.0.1/releases/v1.0.0"
+        },
+        {
+          "type": "doc",
+          "id": "version-1.0.1/releases/v0.9.0"
+        },
+        {
+          "type": "doc",
+          "id": "version-1.0.1/releases/v0.8.0"
+        }
+      ]
+    }
+  ]
+}
