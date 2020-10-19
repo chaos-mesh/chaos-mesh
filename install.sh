@@ -912,7 +912,7 @@ metadata:
 rules:
   - apiGroups: [ "" ]
     resources: [ "pods" ]
-    verbs: [ "get", "list", "watch", "delete", "update" ]
+    verbs: [ "get", "list", "watch", "create", "update", "patch", "delete"]
   - apiGroups:
       - ""
     resources:
