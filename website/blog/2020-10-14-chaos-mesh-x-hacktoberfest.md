@@ -20,7 +20,7 @@ Hosted by DigitalOcean, Intel and DEV, Hacktoberfest is an open source celebrati
 
 ## Open source is the spirit 
 
-Chaos Mesh has always been a dedicated and firm advocate of open source from day 1. Within only 10 months since it was open-sourced on December 31st, 2019, Chaos Mesh has already received 25k GitHub stars, with 59 contributors from multiple organizations. And it was accepted as a [CNCF sandbox project](https://www.cncf.io/sandbox-projects/) in July 2020. The amazing growth of the project as well as the community could not have been possible without our shared commitment to the open-source community and spirit. 
+Chaos Mesh has always been a dedicated and firm advocate of open source from day 1. Within only 10 months since it was open-sourced on December 31st, 2019, Chaos Mesh has received around 2.5k GitHub stars, with 59 contributors from multiple organizations. And it was accepted as a [CNCF sandbox project](https://www.cncf.io/sandbox-projects/) in July 2020. The amazing growth of the project as well as the community could not have been possible without our shared commitment to the open-source community and spirit. 
 
 We hereby invite you to be part of us, starting from our handpicked issues with proper mentoring and assistance along your journey, which we hope you will find rewarding, inspiring, and most of all, fun. 
 
