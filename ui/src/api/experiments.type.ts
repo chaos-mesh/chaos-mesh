@@ -30,5 +30,6 @@ export interface Experiment {
 }
 
 export interface ExperimentDetail extends Experiment {
+  failed_message: string
   experiment_info: ExperimentInfo
 }

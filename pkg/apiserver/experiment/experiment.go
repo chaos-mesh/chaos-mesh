@@ -205,9 +205,12 @@ func (s *Service) createNetworkChaos(exp *core.ExperimentInfo) error {
 		},
 	}
 
+	if exp.Target.NetworkChaos.Action == string(v1alpha1.BandwidthAction) || exp.Target.NetworkChaos.Action == string(v1alpha1.PartitionAction) {
+		chaos.Spec.Direction = v1alpha1.Direction(exp.Target.NetworkChaos.Direction)
+	}
+
 	if exp.Target.NetworkChaos.Action == string(v1alpha1.BandwidthAction) {
 		chaos.Spec.Bandwidth = exp.Target.NetworkChaos.Bandwidth
-		chaos.Spec.Direction = v1alpha1.Direction(exp.Target.NetworkChaos.Direction)
 	}
 
 	if exp.Scheduler.Cron != "" {
