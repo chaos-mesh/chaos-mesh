@@ -46,7 +46,7 @@ EOF
 }
 
 
-installOnly=false
+dependency_only=false
 while getopts "h?i" opt; do
     case "$opt" in
     h|\?)
@@ -54,7 +54,7 @@ while getopts "h?i" opt; do
         exit 0
         ;;
     i)
-      installOnly=true
+      dependency_only=true
         ;;
     esac
 done
@@ -72,7 +72,7 @@ hack::ensure_kubectl
 hack::ensure_kind
 hack::ensure_helm
 
-if [[ "$installOnly" == "true" ]]; then
+if [[ "$dependency_only" == "true" ]]; then
     exit 0
 fi
 

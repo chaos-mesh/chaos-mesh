@@ -635,7 +635,7 @@ install_chaos_mesh() {
 
     gen_crd_manifests "${crd}" | kubectl apply -f - || exit 1
     gen_chaos_mesh_manifests "${runtime}" "${k3s}" "${version}" "${timezone}" "${host_network}" "${docker_registry}" | kubectl apply -f - || exit 1
-  }
+}
 
 version_lt() {
     vercomp $1 $2
