@@ -130,8 +130,6 @@ $ make test
    $ ./hack/local-up-operator.sh
    ```
 
-
-
 Now you can test your code update on the deployed cluster.
 
 ### Step 4: Commit and push your changes
