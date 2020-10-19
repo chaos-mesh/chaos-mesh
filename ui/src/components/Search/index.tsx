@@ -3,7 +3,7 @@ import { Grid, InputAdornment, Paper, TextField, Typography } from '@material-ui
 import { Link, LinkProps } from 'react-router-dom'
 import ListItem, { ListItemProps } from '@material-ui/core/ListItem'
 import React, { ReactNode, useCallback, useEffect, useState } from 'react'
-import { createStyles, makeStyles } from '@material-ui/core/styles'
+import { Theme, createStyles, makeStyles } from '@material-ui/core/styles'
 import { dayComparator, format } from 'lib/dayjs'
 
 import { Archive } from 'api/archives.type'
@@ -13,7 +13,6 @@ import HelpOutlineIcon from '@material-ui/icons/HelpOutline'
 import List from '@material-ui/core/List'
 import ListItemText from '@material-ui/core/ListItemText'
 import ListSubheader from '@material-ui/core/ListSubheader'
-import Loading from 'components/Loading'
 import SearchIcon from '@material-ui/icons/Search'
 import Separate from 'components/Separate'
 import T from 'components/T'
@@ -23,18 +22,18 @@ import api from 'api'
 import { assumeType } from 'lib/utils'
 import { setSearchModalOpen } from 'slices/globalStatus'
 import store from 'store'
+import theme from 'theme'
 import { useIntl } from 'react-intl'
 
-const useStyles = makeStyles(() =>
+const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     searchContainer: {
       display: 'flex',
       flexDirection: 'column',
-      justifyContent: 'spaceBetween',
+      justifyContent: 'space-between',
     },
     searchResultContainer: {
-      marginTop: 10,
-      maxHeight: '480px',
+      marginTop: theme.spacing(2.5),
     },
   })
 )
@@ -66,11 +65,13 @@ const HighLightText: React.FC<HighLightTextProps> = ({ children, text }) => {
   const highLightPart = children.slice(startIndex, startIndex + text.length)
   const endPart = children.slice(startIndex + text.length)
   return (
-    <>
+    <Typography component="span">
       <span>{frontPart}</span>
-      <span style={{ background: '#E7F0FB', color: '#143A78' }}>{highLightPart}</span>
+      <span style={{ background: theme.palette.primary.light, color: theme.palette.primary.contrastText }}>
+        {highLightPart}
+      </span>
       <span>{endPart}</span>
-    </>
+    </Typography>
   )
 }
 
@@ -139,6 +140,7 @@ const SearchResultForOneCate = function <T extends 'events' | 'experiments' | 'a
   return (
     <Grid container direction="column" justify="space-between" spacing={3}>
       {((result as unknown) as (T extends 'events' ? Event : T extends 'experiments' ? Experiment : Archive)[])
+        .slice(0, 5)
         .map((res) => {
           return (
             <Grid
@@ -170,10 +172,10 @@ const SearchResultForOneCate = function <T extends 'events' | 'experiments' | 'a
                         <Separate separator={<span>&nbsp;|&nbsp;</span>}>
                           {searchPath.map((path) => {
                             return (
-                              <React.Fragment key={path.name + path.value}>
+                              <Typography key={path.name + path.value}>
                                 <span>{T(`search.result.keywords.${nameMap[path.name]}`)}: </span>
                                 <HighLightText text={path.value}>{path.matchedValue}</HighLightText>
-                              </React.Fragment>
+                              </Typography>
                             )
                           })}
                         </Separate>
@@ -182,7 +184,7 @@ const SearchResultForOneCate = function <T extends 'events' | 'experiments' | 'a
                         <Separate separator={<span>&nbsp;|&nbsp;</span>}>
                           {requiredItems.map((item) => {
                             return (
-                              <React.Fragment key={item.name}>
+                              <Typography component="span" key={item.name}>
                                 <span>{T(`search.result.keywords.${nameMap[item.name]}`)}: </span>
                                 {item.isHighLighted ? (
                                   <HighLightText text={item.value}>{(res as any)[item.name]}</HighLightText>
@@ -193,7 +195,7 @@ const SearchResultForOneCate = function <T extends 'events' | 'experiments' | 'a
                                       : (res as any)[item.name]}
                                   </span>
                                 )}
-                              </React.Fragment>
+                              </Typography>
                             )
                           })}
                         </Separate>
@@ -204,8 +206,7 @@ const SearchResultForOneCate = function <T extends 'events' | 'experiments' | 'a
               }
             </Grid>
           )
-        })
-        .slice(0, 3)}
+        })}
     </Grid>
   )
 }
@@ -217,7 +218,6 @@ const Search: React.FC = () => {
   const [showSearchResult, setShowSearchResult] = useState(false)
   const [searchResult, setSearchResult] = useState<GlobalSearchData | {}>()
   const [searchPath, setSearchPath] = useState<SearchPath>()
-  const [loading, setLoading] = useState(false)
   const [isEmptySearch, setIsEmptySearch] = useState(true)
 
   const debounceSetSearch = useCallback(_debounce(setSearch, 500), [])
@@ -262,13 +262,8 @@ const Search: React.FC = () => {
       setSearchPath(searchPath)
       isEmptySearch ? setShowSearchResult(false) : setShowSearchResult(true)
     }
-    setLoading(false)
     // eslint-disable-next-line
-  }, [search])
-
-  useEffect(() => {
-    globalSearchData ? setLoading(false) : setLoading(true)
-  }, [globalSearchData])
+  }, [search, globalSearchData])
 
   return (
     <div className={classes.searchContainer}>
@@ -289,7 +284,7 @@ const Search: React.FC = () => {
                 title={
                   <Typography variant="body2">
                     {T('search.tip.title')}
-                    <ul style={{ marginBottom: 0, paddingLeft: '1rem' }}>
+                    <ul style={{ marginBottom: 0, paddingLeft: theme.spacing(4) }}>
                       <li>{T('search.tip.namespace')}</li>
                       <li>{T('search.tip.kind')}</li>
                       <li>{T('search.tip.pod')}</li>
@@ -308,41 +303,38 @@ const Search: React.FC = () => {
           ),
         }}
         inputProps={{
-          style: { paddingTop: 8, paddingBottom: 8 },
+          style: { paddingTop: theme.spacing(2), paddingBottom: theme.spacing(2) },
         }}
         inputRef={(input) => input && input.focus()}
         onChange={handleSearchChange}
       />
-      {showSearchResult && (
-        <Paper elevation={0} className={classes.searchResultContainer}>
-          {loading ? (
-            <Loading></Loading>
-          ) : (
-            <List component="nav" aria-label="search-result">
-              {Object.keys(searchResult || {}).map((key) => {
-                assumeType<GlobalSearchData>(searchResult)
-                assumeType<keyof GlobalSearchData>(key)
-                return (
-                  <React.Fragment key={key}>
-                    <ListSubheader disableSticky={true} style={{ fontSize: '22px', padding: 0 }}>
-                      {T(`search.result.category.${key}`)}
-                    </ListSubheader>
-                    {searchResult[key].length !== 0 ? (
-                      <SearchResultForOneCate category={key} result={searchResult[key]} searchPath={searchPath![key]} />
-                    ) : (
-                      <Paper variant="outlined">
-                        <ListItemLink to="/">
-                          <ListItemText primary={T('search.result.noResult')} />
-                        </ListItemLink>
-                      </Paper>
-                    )}
-                  </React.Fragment>
-                )
-              })}
-            </List>
-          )}
-        </Paper>
-      )}
+
+      <Paper elevation={0} className={classes.searchResultContainer}>
+        {showSearchResult && (
+          <List component="nav" aria-label="search-result">
+            {Object.keys(searchResult || {}).map((key) => {
+              assumeType<GlobalSearchData>(searchResult)
+              assumeType<keyof GlobalSearchData>(key)
+              return (
+                <React.Fragment key={key}>
+                  <ListSubheader disableSticky={true} style={{ fontSize: '1.375rem', padding: 0 }}>
+                    {T(`search.result.category.${key}`)}
+                  </ListSubheader>
+                  {searchResult[key].length !== 0 ? (
+                    <SearchResultForOneCate category={key} result={searchResult[key]} searchPath={searchPath![key]} />
+                  ) : (
+                    <Paper variant="outlined">
+                      <ListItemLink to="/">
+                        <ListItemText primary={T('search.result.noResult')} />
+                      </ListItemLink>
+                    </Paper>
+                  )}
+                </React.Fragment>
+              )
+            })}
+          </List>
+        )}
+      </Paper>
     </div>
   )
 }

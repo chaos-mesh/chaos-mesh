@@ -1,5 +1,5 @@
 import { Button, Paper } from '@material-ui/core'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect } from 'react'
 import { Theme, createStyles, makeStyles } from '@material-ui/core/styles'
 
 import Modal from '@material-ui/core/Modal'
@@ -21,26 +21,24 @@ const useStyles = makeStyles((theme: Theme) =>
     searchModal: {
       position: 'relative',
       maxWidth: '40%',
-      minHeight: '206px',
-      margin: '3.75rem auto auto',
-      padding: 12,
+      minHeight: '30%',
+      maxHeight: '80%',
+      margin: `${theme.spacing(15)} auto auto`,
+      padding: theme.spacing(3),
       outline: 0,
-      overflowX: 'hidden',
+      overflowY: 'scroll',
     },
   })
 )
 
 const SearchTrigger: React.FC = () => {
   const classes = useStyles()
-  const [open, setOpen] = useState(false)
 
   const handleOpen = () => {
-    setOpen(true)
     store.dispatch(setSearchModalOpen(true))
   }
 
   const handleClose = () => {
-    setOpen(false)
     store.dispatch(setSearchModalOpen(false))
   }
 
@@ -79,7 +77,7 @@ const SearchTrigger: React.FC = () => {
       >
         {T('search.placeholder')}
       </Button>
-      <Modal open={open} onClose={handleClose}>
+      <Modal open={searchModalOpen} onClose={handleClose}>
         <Paper elevation={3} className={classes.searchModal}>
           <Search></Search>
         </Paper>
