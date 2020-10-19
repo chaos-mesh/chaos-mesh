@@ -25,6 +25,7 @@ const useStyles = makeStyles((theme: Theme) =>
       margin: '3.75rem auto auto',
       padding: 12,
       outline: 0,
+      overflowX: 'hidden',
     },
   })
 )

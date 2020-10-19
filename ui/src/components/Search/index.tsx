@@ -35,7 +35,6 @@ const useStyles = makeStyles(() =>
     searchResultContainer: {
       marginTop: 10,
       maxHeight: '480px',
-      overflow: 'scroll',
     },
   })
 )
