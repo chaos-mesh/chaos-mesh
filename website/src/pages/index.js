@@ -2,61 +2,18 @@ import Layout from '@theme/Layout'
 import PickVersion from '../components/PickVersion'
 import React from 'react'
 import clsx from 'clsx'
-import styles from './styles.module.css'
+import features from '../data/features'
+import styles from './index.module.css'
 import useBaseUrl from '@docusaurus/useBaseUrl'
 import useDocusaurusContext from '@docusaurus/useDocusaurusContext'
+import whoIsUsing from '../data/whoIsUsing'
 
-const features = [
-  {
-    title: <>Easy to Use</>,
-    imageUrl: 'img/undraw_server_down_s4lk.svg',
-    description: (
-      <>
-        <p>
-          No special dependencies, Chaos Mesh can be easily deployed directly on Kubernetes clusters, including{' '}
-          <a href="https://github.com/kubernetes/minikube">Minikube</a> and{' '}
-          <a href="https://kind.sigs.k8s.io/docs/user/quick-start/">Kind</a>.
-        </p>
-        <ul>
-          <li>Require no modification to the deployment logic of the system under test (SUT)</li>
-          <li>Easily orchestrate fault injection behaviors in chaos experiments</li>
-          <li>Hide underlying implementation details so that users can focus on orchestrating the chaos experiments</li>
-        </ul>
-      </>
-    ),
-  },
-  {
-    title: <>Design for Kubernetes</>,
-    imageUrl: 'img/logos/kubernetes.svg',
-    description: (
-      <>
-        <p>
-          Chaos Mesh uses{' '}
-          <a
-            href="https://kubernetes.io/docs/concepts/extend-kubernetes/api-extension/custom-resources/"
-            target="_blank"
-          >
-            CustomResourceDefinitions
-          </a>{' '}
-          (CRD) to define chaos objects.
-        </p>
-        <p>
-          In the Kubernetes realm, CRD is a mature solution for implementing custom resources, with abundant
-          implementation cases and toolsets available. Using CRD makes Chaos Mesh naturally integrate with the
-          Kubernetes ecosystem.
-        </p>
-      </>
-    ),
-    reverse: true,
-  },
-]
-
-function Feature({ imageUrl, title, description, reverse }) {
+function Feature({ imgUrl, title, description, reverse }) {
   return (
     <div className={clsx('row', styles.feature, reverse ? styles.featureReverse : '')}>
       <div className="col col--6">
         <div className="text--center">
-          {imageUrl && <img className={styles.featureImage} src={useBaseUrl(imageUrl)} alt={title} />}
+          {imgUrl && <img className={styles.featureImage} src={useBaseUrl(imgUrl)} alt={title} />}
         </div>
       </div>
       <div className={clsx('col col--6', styles.featureDesc)}>
@@ -85,15 +42,17 @@ function Home() {
         </div>
       </header>
 
-      <div className={clsx('text--center', styles.install)}>
-        <h2>Start By One Line</h2>
-        <div className={styles.installTextWrapper}>
-          <PickVersion>curl -sSL https://mirrors.chaos-mesh.org/latest/install.sh | bash</PickVersion>
+      <div className={clsx('hero', styles.hero)}>
+        <div className="container text--center">
+          <h2 className="hero__subtitle">Start By One Line</h2>
+          <div className={styles.installTextWrapper}>
+            <PickVersion>curl -sSL https://mirrors.chaos-mesh.org/latest/install.sh | bash</PickVersion>
+          </div>
         </div>
       </div>
 
-      <main className={styles.main}>
-        {features && features.length > 0 && (
+      <main className={clsx('hero', styles.hero)}>
+        <div className="container">
           <section className={styles.features}>
             <div className="container">
               {features.map((f, idx) => (
@@ -101,17 +60,34 @@ function Home() {
               ))}
             </div>
           </section>
-        )}
-
-        <div className="hero">
-          <div className="container text--center">
-            <h2 className="hero__subtitle">
-              Chaos Mesh® is a <a href="https://cncf.io/">Cloud Native Computing Foundation</a> sandbox project
-            </h2>
-            <div className={clsx('cncf-logo', styles.cncfLogo)} />
-          </div>
         </div>
       </main>
+
+      <div className={clsx('hero', styles.hero)}>
+        <div className="container text--center">
+          <h2 className="hero__subtitle">Who Are Using Chaos Mesh?</h2>
+          <div className={styles.whiteboard}>
+            <div className="row">
+              {whoIsUsing.map((w) => (
+                <div key={w.name} className="col col--3">
+                  <div className={styles.logoWrapper}>
+                    <img src={useBaseUrl(w.img)} alt={w.name} />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className={clsx('hero', styles.hero)}>
+        <div className="container text--center">
+          <h2 className="hero__subtitle">
+            Chaos Mesh® is a <a href="https://cncf.io/">Cloud Native Computing Foundation</a> sandbox project
+          </h2>
+          <div className={clsx('cncf-logo', styles.cncfLogo)} />
+        </div>
+      </div>
     </Layout>
   )
 }
