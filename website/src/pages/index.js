@@ -2,11 +2,11 @@ import Layout from '@theme/Layout'
 import PickVersion from '../components/PickVersion'
 import React from 'react'
 import clsx from 'clsx'
-import features from './features'
-import styles from './styles.module.css'
+import features from '../data/features'
+import styles from './index.module.css'
 import useBaseUrl from '@docusaurus/useBaseUrl'
 import useDocusaurusContext from '@docusaurus/useDocusaurusContext'
-import whoIsUsing from './whoIsUsing'
+import whoIsUsing from '../data/whoIsUsing'
 
 function Feature({ imgUrl, title, description, reverse }) {
   return (
