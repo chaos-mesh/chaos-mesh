@@ -46,15 +46,20 @@ const SearchTrigger: React.FC = () => {
   const searchModalOpen = useSelector((state: RootState) => state.globalStatus.searchModalOpen)
 
   useEffect(() => {
-    if (!searchModalOpen) handleClose()
-  }, [searchModalOpen])
-
-  useEffect(() => {
     const keyMap: { [index: string]: boolean } = {}
     const keyDownHandler = (e: KeyboardEvent) => {
       keyMap[e.code] = true
-      if (keyMap['ControlLeft'] && keyMap['KeyP']) {
+      if (keyMap['MetaLeft'] && keyMap['KeyP']) {
+        e.preventDefault()
         handleOpen()
+        // In some cases, such as pressing multiple keys at the same time almostly, the browser won't fire the keyup event repeatedly.
+        keyMap['MetaLeft'] = false
+        keyMap['KeyP'] = false
+      } else if (keyMap['ControlLeft'] && keyMap['KeyP']) {
+        e.preventDefault()
+        handleOpen()
+        keyMap['ControlLeft'] = false
+        keyMap['KeyP'] = false
       }
     }
     const keyUpHandler = (e: KeyboardEvent) => {

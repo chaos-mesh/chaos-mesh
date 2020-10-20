@@ -332,7 +332,7 @@ const Search: React.FC = () => {
               return (
                 <React.Fragment key={key}>
                   <ListSubheader disableSticky={true} style={{ padding: 0 }}>
-                    <Typography variant="h5" component="span">
+                    <Typography variant="h6" component="span">
                       {T(`search.result.category.${key}`)}
                     </Typography>
                   </ListSubheader>

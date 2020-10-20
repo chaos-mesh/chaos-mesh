@@ -3,7 +3,6 @@ import { assumeType, difference } from './utils'
 import { Archive } from 'api/archives.type'
 import { Event } from 'api/events.type'
 import { Experiment } from 'api/experiments.type'
-import { isMainThread } from 'worker_threads'
 
 type Merge<T extends object, U extends object> = T & U
 
@@ -169,7 +168,7 @@ export function searchGlobal({ events, experiments, archives }: GlobalSearchData
         })
         break
       case 'uuid':
-        result = target.filter((d) => d.experiment_id.toLowerCase().includes(value.toLowerCase()))
+        result = target.filter((d) => d.experiment_id.toLowerCase().startsWith(value.toLowerCase()))
         searchPath.events.push({
           name: 'experiment_id',
           path: 'experiment_id',
