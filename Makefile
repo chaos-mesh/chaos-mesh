@@ -245,7 +245,7 @@ docker-push-chaos-kernel:
 $(GOBIN)/controller-gen:
 	$(GO) get sigs.k8s.io/controller-tools/cmd/controller-gen@v0.2.5
 $(GOBIN)/revive:
-	$(GO) get github.com/mgechev/revive@v1.0.2-0.20200225make image072153-6219ca02fffb
+	$(GO) get github.com/mgechev/revive@v1.0.2-0.20200225072153-6219ca02fffb
 $(GOBIN)/failpoint-ctl:
 	$(GO) get github.com/pingcap/failpoint/failpoint-ctl@v0.0.0-20200210140405-f8f9fb234798
 $(GOBIN)/goimports:
