@@ -65,7 +65,7 @@ function Home() {
 
       <div className={clsx('hero', styles.hero)}>
         <div className="container text--center">
-          <h2 className="hero__subtitle">Who Is Using Chaos Mesh</h2>
+          <h2 className="hero__subtitle">Who Are Using Chaos Mesh?</h2>
           <div className={styles.whiteboard}>
             <div className="row">
               {whoIsUsing.map((w) => (
