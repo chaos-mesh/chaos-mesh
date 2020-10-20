@@ -124,4 +124,5 @@ done
 
 $KUBECTL_BIN -n "$NAMESPACE" delete deploy -l app.kubernetes.io/name=chaos-mesh
 $KUBECTL_BIN -n "$NAMESPACE" delete pods -l app.kubernetes.io/name=chaos-mesh
+
 ${ROOT}/install.sh --runtime containerd --crd ${ROOT}/manifests/crd.yaml --version ${IMAGE_TAG} --docker-registry ${DOCKER_REGISTRY_PREFIX}
