@@ -11,11 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package podnotready_test
+package podnotready
 
 import (
 	"context"
-	"github.com/chaos-mesh/chaos-mesh/controllers/podchaos/podnotready"
 	"testing"
 
 	"k8s.io/client-go/kubernetes/scheme"
@@ -35,13 +34,14 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	. "github.com/chaos-mesh/chaos-mesh/controllers/test"
 	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
+	ctx "github.com/chaos-mesh/chaos-mesh/pkg/router/context"
 )
 
 func TestPodKill(t *testing.T) {
 	RegisterFailHandler(Fail)
 
 	RunSpecsWithDefaultAndCustomReporters(t,
-		"PodNotReady Suite",
+		"PodKill Suite",
 		[]Reporter{envtest.NewlineReporter{}})
 }
 
@@ -81,10 +81,12 @@ var _ = Describe("PodChaos", func() {
 			},
 		}
 
-		r := podnotready.Reconciler{
-			Client:        fake.NewFakeClientWithScheme(scheme.Scheme, objs...),
-			EventRecorder: &record.FakeRecorder{},
-			Log:           ctrl.Log.WithName("controllers").WithName("PodChaos"),
+		r := endpoint{
+			Context: ctx.Context{
+				Client:        fake.NewFakeClientWithScheme(scheme.Scheme, objs...),
+				EventRecorder: &record.FakeRecorder{},
+				Log:           ctrl.Log.WithName("controllers").WithName("PodChaos"),
+			},
 		}
 
 		It("PodKill Action", func() {
