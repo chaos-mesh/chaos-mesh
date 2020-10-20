@@ -34,12 +34,12 @@ module.exports = {
           label: 'Documentation',
         },
         { to: 'interactiveTutorial', label: 'Interactive Tutorial' },
-        { to: 'blog', activeBasePath: 'blog', label: 'Blog', position: 'right' },
         {
           href: 'https://github.com/chaos-mesh/chaos-mesh',
           label: 'GitHub',
           position: 'right',
         },
+        { to: 'blog', activeBasePath: 'blog', label: 'Blog', position: 'right' },
       ],
     },
     footer: {
@@ -49,7 +49,7 @@ module.exports = {
           items: [
             {
               label: 'Getting Started',
-              to: 'docs/get_started/installation',
+              to: 'docs/installation/installation',
             },
             {
               label: 'User Guides',
@@ -64,23 +64,42 @@ module.exports = {
               label: 'Twitter',
               href: 'https://twitter.com/chaos_mesh',
             },
+            {
+              label: 'Slack (#project-chaos-mesh)',
+              href: 'https://join.slack.com/t/cloud-native/shared_invite/zt-fyy3b8up-qHeDNVqbz1j8HDY6g1cY4w',
+            },
           ],
         },
         {
           title: 'More',
           items: [
             {
+              label: 'GitHub',
+              href: 'https://github.com/chaos-mesh/chaos-mesh',
+            },
+            {
               label: 'Blog',
               to: 'blog',
             },
+          ],
+        },
+        {
+          title: 'Others',
+          items: [
             {
-              label: 'GitHub',
-              href: 'https://github.com/chaos-mesh/chaos-mesh',
+              html:
+                '<a href="https://www.netlify.com"><img src="https://www.netlify.com/img/global/badges/netlify-color-accent.svg" alt="Deploys by Netlify" /></a>',
             },
           ],
         },
       ],
-      copyright: `<br /><strong>© Chaos Mesh® Authors ${new Date().getFullYear()} | Documentation Distributed under CC-BY-4.0 </strong><br /><br />© ${new Date().getFullYear()} The Linux Foundation. All rights reserved. The Linux Foundation has registered trademarks and uses trademarks. For a list of trademarks of The Linux Foundation, please see our <a href="https://www.linuxfoundation.org/trademark-usage/"> Trademark Usage</a> page.`,
+      copyright: `
+        <br />
+        <strong>© Chaos Mesh® Authors ${new Date().getFullYear()} | Documentation Distributed under CC-BY-4.0 </strong>
+        <br />
+        <br />
+        © ${new Date().getFullYear()} The Linux Foundation. All rights reserved. The Linux Foundation has registered trademarks and uses trademarks. For a list of trademarks of The Linux Foundation, please see our <a href="https://www.linuxfoundation.org/trademark-usage/"> Trademark Usage</a> page.
+      `,
     },
     prism: {
       theme: require('prism-react-renderer/themes/dracula'),

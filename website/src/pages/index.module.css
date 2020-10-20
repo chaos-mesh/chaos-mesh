@@ -1,0 +1,107 @@
+/* stylelint-disable docusaurus/copyright-header */
+
+/**
+ * CSS files with the .module.css suffix will be treated as CSS modules
+ * and scoped locally.
+ */
+
+.hero {
+  border-bottom: 1px solid var(--hero-border-color);
+}
+
+.heroLogoWrapper {
+  position: relative;
+  left: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 256px;
+  height: 256px;
+  margin-bottom: 1.5rem;
+  background: #fff;
+  border-radius: 48px;
+  transform: translateX(-50%);
+}
+
+.heroLogo {
+  width: 80%;
+  height: 80%;
+}
+
+.heroTitle {
+  padding-left: 1.5rem;
+}
+
+.installTextWrapper {
+  width: 100%;
+}
+
+.feature {
+  margin-bottom: 4.5rem;
+}
+
+.feature:last-child {
+  margin-bottom: 0;
+}
+
+@media screen and (max-width: 768px) {
+  .feature {
+    margin-bottom: 1.5rem;
+  }
+}
+
+.featureReverse {
+  flex-direction: row-reverse;
+}
+
+.featureImage {
+  height: 256px;
+}
+
+@media screen and (max-width: 768px) {
+  .featureImage {
+    margin-bottom: 1.5rem;
+  }
+}
+
+.featureDesc {
+  display: flex !important;
+  align-items: center;
+}
+
+.whiteboard {
+  margin-top: 3rem;
+  background: #fff;
+  border-radius: 8px;
+}
+
+.logoWrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 150px;
+}
+
+.logoWrapper img {
+  width: 80%;
+}
+
+@media screen and (max-width: 768px) {
+  .logoWrapper {
+    height: 100px;
+  }
+
+  .logoWrapper img {
+    width: 50%;
+  }
+}
+
+.cncfLogo {
+  height: 128px;
+}
+
+@media screen and (max-width: 768px) {
+  .cncfLogo {
+    height: 64px;
+  }
+}

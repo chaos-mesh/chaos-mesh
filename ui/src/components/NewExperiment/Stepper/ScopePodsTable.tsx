@@ -7,7 +7,11 @@ import T from 'components/T'
 import { useFormikContext } from 'formik'
 import { useStoreDispatch } from 'store'
 
-const PaperOutlined: React.FC = ({ children }) => <Paper variant="outlined">{children}</Paper>
+const PaperOutlined: React.FC = ({ children }) => (
+  <Paper style={{ maxHeight: 768, overflow: 'scroll' }} variant="outlined">
+    {children}
+  </Paper>
+)
 
 interface ScopePodsTableProps {
   scope?: string
@@ -125,7 +129,7 @@ const ScopePodsTable: React.FC<ScopePodsTableProps> = ({ scope = 'scope', pods }
         </TableHead>
         <TableBody>
           {pods.map((pod) => (
-            <TableRow key={pod.name} onClick={handleSelect(pod.name)}>
+            <TableRow key={pod.name + pod.namespace} onClick={handleSelect(pod.name)}>
               <TableCell padding="checkbox">
                 <Checkbox checked={isSelected(pod.name)} />
               </TableCell>
