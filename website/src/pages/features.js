@@ -3,7 +3,7 @@ import React from 'react'
 const features = [
   {
     title: <>Easy to Use</>,
-    img: 'img/undraw_server_down_s4lk.svg',
+    imgUrl: 'img/undraw_server_down_s4lk.svg',
     description: (
       <>
         <p>
@@ -21,7 +21,7 @@ const features = [
   },
   {
     title: <>Design for Kubernetes</>,
-    img: 'img/logos/kubernetes.svg',
+    imgUrl: 'img/logos/kubernetes.svg',
     description: (
       <>
         <p>

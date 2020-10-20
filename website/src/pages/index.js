@@ -8,12 +8,12 @@ import useBaseUrl from '@docusaurus/useBaseUrl'
 import useDocusaurusContext from '@docusaurus/useDocusaurusContext'
 import whoIsUsing from './whoIsUsing'
 
-function Feature({ img, title, description, reverse }) {
+function Feature({ imgUrl, title, description, reverse }) {
   return (
     <div className={clsx('row', styles.feature, reverse ? styles.featureReverse : '')}>
       <div className="col col--6">
         <div className="text--center">
-          {img && <img className={styles.featureImage} src={useBaseUrl(img)} alt={title} />}
+          {imgUrl && <img className={styles.featureImage} src={useBaseUrl(imgUrl)} alt={title} />}
         </div>
       </div>
       <div className={clsx('col col--6', styles.featureDesc)}>

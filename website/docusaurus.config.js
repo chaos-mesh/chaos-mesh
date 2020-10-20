@@ -58,21 +58,25 @@ module.exports = {
           ],
         },
         {
-          title: 'Channels',
+          title: 'Community',
           items: [
             {
               label: 'Twitter',
               href: 'https://twitter.com/chaos_mesh',
             },
             {
-              label: 'GitHub',
-              href: 'https://github.com/chaos-mesh/chaos-mesh',
+              label: 'Slack (#project-chaos-mesh)',
+              href: 'https://join.slack.com/t/cloud-native/shared_invite/zt-fyy3b8up-qHeDNVqbz1j8HDY6g1cY4w',
             },
           ],
         },
         {
           title: 'More',
           items: [
+            {
+              label: 'GitHub',
+              href: 'https://github.com/chaos-mesh/chaos-mesh',
+            },
             {
               label: 'Blog',
               to: 'blog',
