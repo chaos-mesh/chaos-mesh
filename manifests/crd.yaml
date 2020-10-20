@@ -1558,11 +1558,13 @@ spec:
           properties:
             action:
               description: 'Action defines the specific pod chaos action. Supported
-                action: pod-kill / pod-failure / container-kill Default action: pod-kill'
+                action: pod-kill / pod-failure / container-kill / pod-not-ready Default
+                action: pod-kill'
               enum:
               - pod-kill
               - pod-failure
               - container-kill
+              - pod-not-ready
               type: string
             containerName:
               description: ContainerName indicates the name of the container. Needed
