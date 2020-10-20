@@ -3,6 +3,7 @@ import { assumeType, difference } from './utils'
 import { Archive } from 'api/archives.type'
 import { Event } from 'api/events.type'
 import { Experiment } from 'api/experiments.type'
+import { isMainThread } from 'worker_threads'
 
 type Merge<T extends object, U extends object> = T & U
 
@@ -14,9 +15,9 @@ type Keyword = 'namespace' | 'kind' | 'pod' | 'ip' | 'uuid'
 export type PropForKeyword = 'experiment' | 'uid' | 'kind' | 'ip' | 'pod' | 'namespace' | 'experiment_id'
 
 export type GlobalSearchData = {
-  events: Event[]
-  experiments: Experiment[]
-  archives: Archive[]
+  events: Event[] | []
+  experiments: Experiment[] | []
+  archives: Archive[] | []
 }
 
 export type SearchPath = {
@@ -135,25 +136,40 @@ export function searchGlobal({ events, experiments, archives }: GlobalSearchData
     if (target.length === 0) return this
 
     let result: Event[]
+    let matchedIndex = -1
     switch (keyword) {
       case 'pod':
-        result = target.filter((d) => d.pods?.some((pod) => pod.pod_name.match(new RegExp(value, 'i'))))
+        matchedIndex = -1
+        result = target.filter((d) => {
+          return d.pods?.some((pod, index) => {
+            const isMatched = pod.pod_name.toLowerCase().includes(value.toLowerCase())
+            if (isMatched) matchedIndex = index
+            return isMatched
+          })
+        })
         searchPath.events.push({
           name: 'pod',
-          path: 'pod.pod_name',
+          path: `pods[${matchedIndex}].pod_name`,
           value,
         })
         break
       case 'ip':
-        result = target.filter((d) => d.pods?.some((pod) => pod.pod_ip.match(new RegExp(value, 'i'))))
+        matchedIndex = -1
+        result = target.filter((d) => {
+          return d.pods?.some((pod, index) => {
+            const isMatched = pod.pod_ip.toLowerCase().includes(value.toLowerCase())
+            if (isMatched) matchedIndex = index
+            return isMatched
+          })
+        })
         searchPath.events.push({
           name: 'ip',
-          path: 'pod.pod_ip',
+          path: `pods[${matchedIndex}].pod_ip`,
           value,
         })
         break
       case 'uuid':
-        result = target.filter((d) => d.experiment_id.match(new RegExp('^' + value, 'i')))
+        result = target.filter((d) => d.experiment_id.toLowerCase().includes(value.toLowerCase()))
         searchPath.events.push({
           name: 'experiment_id',
           path: 'experiment_id',
@@ -162,7 +178,10 @@ export function searchGlobal({ events, experiments, archives }: GlobalSearchData
         break
       default:
         assumeType<keyof Event & Keyword>(keyword)
-        result = keyword in target[0] ? target.filter((d) => d[keyword]?.match(new RegExp(value, 'i'))) : []
+        result =
+          keyword in target[0]
+            ? target.filter((d) => d[keyword]?.toLowerCase().includes(value.toLocaleLowerCase()))
+            : []
         searchPath.events.push({
           name: keyword,
           path: keyword,
@@ -182,7 +201,7 @@ export function searchGlobal({ events, experiments, archives }: GlobalSearchData
     let result: Experiment[]
     switch (keyword) {
       case 'uuid':
-        result = target.filter((d) => d.uid.match(new RegExp('^' + value, 'i')))
+        result = target.filter((d) => d.uid.toLowerCase().startsWith(value.toLowerCase()))
         searchPath.experiments.push({
           name: 'uid',
           path: 'uid',
@@ -191,7 +210,8 @@ export function searchGlobal({ events, experiments, archives }: GlobalSearchData
         break
       default:
         assumeType<keyof Experiment & Keyword>(keyword)
-        result = keyword in target[0] ? target.filter((d) => d[keyword]?.match(new RegExp(value, 'i'))) : []
+        result =
+          keyword in target[0] ? target.filter((d) => d[keyword]?.toLowerCase().includes(value.toLowerCase())) : []
         searchPath.experiments.push({
           name: keyword,
           path: keyword,
@@ -211,7 +231,7 @@ export function searchGlobal({ events, experiments, archives }: GlobalSearchData
     let result: Archive[]
     switch (keyword) {
       case 'uuid':
-        result = target.filter((d) => d.uid.match(new RegExp('^' + value, 'i')))
+        result = target.filter((d) => d.uid.toLowerCase().startsWith(value.toLowerCase()))
         searchPath.archives.push({
           name: 'uid',
           path: 'uid',
@@ -220,7 +240,8 @@ export function searchGlobal({ events, experiments, archives }: GlobalSearchData
         break
       default:
         assumeType<keyof Archive & Keyword>(keyword)
-        result = keyword in target[0] ? target.filter((d) => d[keyword]?.match(new RegExp(value, 'i'))) : []
+        result =
+          keyword in target[0] ? target.filter((d) => d[keyword]?.toLowerCase().includes(value.toLowerCase())) : []
         searchPath.archives.push({
           name: keyword,
           path: keyword,
@@ -234,9 +255,9 @@ export function searchGlobal({ events, experiments, archives }: GlobalSearchData
 
   const searchForContent = function (this: GlobalSearchData, value: string): GlobalSearchData {
     const { events, experiments, archives } = this
-    const eventRes = events.filter((d) => d.experiment.match(new RegExp(value, 'i')))
-    const experimentRes = experiments.filter((d) => d.name.match(new RegExp(value, 'i')))
-    const archiveRes = archives.filter((d) => d.name.match(new RegExp(value, 'i')))
+    const eventRes = events.filter((d) => d.experiment.toLowerCase().includes(value.toLowerCase()))
+    const experimentRes = experiments.filter((d) => d.name.toLowerCase().includes(value.toLowerCase()))
+    const archiveRes = archives.filter((d) => d.name.toLowerCase().includes(value.toLowerCase()))
     searchPath.events.push({
       name: 'experiment',
       path: 'experiment',
@@ -277,16 +298,24 @@ export function searchGlobal({ events, experiments, archives }: GlobalSearchData
   type Result = MappedEveryFuncToReturnThis<Merge<typeof source, typeof protoWithSearchMethods>>
   let result: Result = Object.setPrototypeOf(source, protoWithSearchMethods)
 
-  tokens.forEach((token) => {
-    if (token.type === 'keyword') {
-      result = result
-        .searchEvents(token.keyword, token.value)
-        .searchExperiments(token.keyword, token.value)
-        .searchArchives(token.keyword, token.value)
-    } else if (token.type === 'content') {
-      result = result.searchForContent(token.value)
+  try {
+    tokens.forEach((token) => {
+      if (token.type === 'keyword') {
+        result = result
+          .searchEvents(token.keyword, token.value)
+          .searchExperiments(token.keyword, token.value)
+          .searchArchives(token.keyword, token.value)
+      } else if (token.type === 'content') {
+        result = result.searchForContent(token.value)
+      }
+    })
+  } catch (e) {
+    ;(result as typeof source) = {
+      events: [],
+      experiments: [],
+      archives: [],
     }
-  })
+  }
   return {
     searchPath,
     result: result as typeof source,

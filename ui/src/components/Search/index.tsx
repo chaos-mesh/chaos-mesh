@@ -184,9 +184,8 @@ const SearchResultForOneCate = function <T extends 'events' | 'experiments' | 'a
                       primary={
                         <Separate separator={<span>&nbsp;|&nbsp;</span>}>
                           {searchPath.map((path) => {
-                            if (!get(res, path.path)) console.log(path.path, res)
                             return (
-                              <Typography key={path.name + path.value}>
+                              <Typography component="span" key={path.name + path.value}>
                                 <span>{T(`search.result.keywords.${nameMap[path.name]}`)}: </span>
                                 <HighLightText text={path.value}>{get(res, path.path)}</HighLightText>
                               </Typography>
@@ -278,7 +277,7 @@ const Search: React.FC = () => {
       isEmptySearch ? setShowSearchResult(false) : setShowSearchResult(true)
     }
     // eslint-disable-next-line
-  }, [search, globalSearchData])
+  }, [globalSearchData])
 
   return (
     <div className={classes.searchContainer}>
@@ -332,8 +331,10 @@ const Search: React.FC = () => {
               assumeType<keyof GlobalSearchData>(key)
               return (
                 <React.Fragment key={key}>
-                  <ListSubheader disableSticky={true} style={{ fontSize: '1.375rem', padding: 0 }}>
-                    {T(`search.result.category.${key}`)}
+                  <ListSubheader disableSticky={true} style={{ padding: 0 }}>
+                    <Typography variant="h5" component="span">
+                      {T(`search.result.category.${key}`)}
+                    </Typography>
                   </ListSubheader>
                   {searchResult[key].length !== 0 ? (
                     <SearchResultForOneCate category={key} result={searchResult[key]} searchPath={searchPath![key]} />
