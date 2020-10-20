@@ -114,13 +114,11 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1
 }
 
 func (r *Reconciler) setAllPodsNotReady(ctx context.Context, pods []v1.Pod, podchaos *v1alpha1.PodChaos) error {
-	r.Log.Info(" all update condition")
 	for index := range pods {
 		pod := &pods[index]
 		if containsReadinessGate(pod) {
 			continue
 		}
-		r.Log.Info(" into  update condition")
 		key, err := cache.MetaNamespaceKeyFunc(pod)
 		if err != nil {
 			return err
@@ -141,9 +139,12 @@ func (r *Reconciler) setAllPodsNotReady(ctx context.Context, pods []v1.Pod, podc
 			clonePod.ObjectMeta.Namespace = pod.Namespace
 		}
 		clonePod.Spec = *pod.Spec.DeepCopy()
+
+		r.Log.Info("Add readinessGate spec into pod", "namespace", pod.Namespace, "name", pod.Name)
 		injectReadinessGate(clonePod)
+
 		if err := r.Delete(ctx, pod); err != nil {
-			r.Log.Error(err, "unable to delete pod")
+			r.Log.Error(err, "unable to delete pod", "namespace", pod.Namespace, "name", pod.Name)
 			return err
 		}
 		err = wait.Poll(5*time.Second, 5*time.Minute, func() (done bool, err error) {
@@ -161,7 +162,7 @@ func (r *Reconciler) setAllPodsNotReady(ctx context.Context, pods []v1.Pod, podc
 			}
 
 			if err := r.Create(ctx, clonePod); err != nil {
-				r.Log.Error(err, "unable to create clonePod")
+				r.Log.Error(err, "unable to create pod", "namespace", clonePod.Namespace, "name", clonePod.Name)
 				return false, nil
 			}
 
@@ -169,7 +170,7 @@ func (r *Reconciler) setAllPodsNotReady(ctx context.Context, pods []v1.Pod, podc
 		})
 
 		if err != nil {
-			r.Log.Error(err, "inject pod failed")
+			r.Log.Error(err, "inject pod failed", "namespace", pod.Namespace, "name", pod.Name)
 			return err
 		}
 
@@ -188,7 +189,7 @@ func (r *Reconciler) setAllPodsNotReady(ctx context.Context, pods []v1.Pod, podc
 		})
 
 		if err != nil {
-			r.Log.Error(err, "ensure pods status failed")
+			r.Log.Error(err, "ensure pods status failed", "namespace", pod.Namespace, "name", pod.Name)
 			return err
 		}
 
@@ -227,15 +228,6 @@ func removeReadinessGate(pod *v1.Pod) {
 		}
 	}
 	return
-}
-
-func ensureSystemCondition(conditions []v1.PodCondition) bool {
-	for _, c := range conditions {
-		if c.Type == ChaosMeshInjectNotReady {
-			return true
-		}
-	}
-	return false
 }
 
 // Recover implements the reconciler.InnerReconciler.Recover
@@ -317,14 +309,38 @@ func (r *Reconciler) recoverPod(ctx context.Context, pod *v1.Pod, podchaos *v1al
 		clonePod.ObjectMeta.Namespace = pod.Namespace
 	}
 	clonePod.Spec = *pod.Spec.DeepCopy()
-	removeReadinessGate(clonePod)
 
+	r.Log.Info("Remove readinessGate spec into pod", "namespace", pod.Namespace, "name", pod.Name)
+	removeReadinessGate(clonePod)
 	if err := r.Delete(ctx, pod); err != nil {
-		r.Log.Error(err, "unable to delete pod")
+		r.Log.Error(err, "unable to delete pod", "namespace", pod.Namespace, "name", pod.Name)
 		return err
 	}
-	if err := r.Create(ctx, clonePod); err != nil {
-		r.Log.Error(err, "unable to create pod")
+
+	err := wait.Poll(5*time.Second, 5*time.Minute, func() (done bool, err error) {
+		var pod v1.Pod
+		if err = r.Client.Get(ctx, types.NamespacedName{
+			Namespace: clonePod.Namespace,
+			Name:      clonePod.Name,
+		}, &pod); err != nil {
+			if !k8serror.IsNotFound(err) {
+				r.Log.Error(err, "get pod error")
+				return false, nil
+			}
+		} else {
+			return false, nil
+		}
+
+		if err := r.Create(ctx, clonePod); err != nil {
+			r.Log.Error(err, "unable to create pod", "namespace", clonePod.Namespace, "name", clonePod.Name)
+			return false, nil
+		}
+
+		return true, nil
+	})
+
+	if err != nil {
+		r.Log.Error(err, "unable to create recover pod", "namespace", pod.Namespace, "name", pod.Name)
 		return err
 	}
 	return nil
