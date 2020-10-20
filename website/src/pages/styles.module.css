@@ -6,7 +6,7 @@
  */
 
 .hero {
-  box-shadow: var(--ifm-navbar-shadow);
+  border-bottom: 1px solid var(--hero-border-color);
 }
 
 .heroLogoWrapper {
@@ -32,30 +32,16 @@
   padding-left: 1.5rem;
 }
 
-.install {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 3rem 0;
-  box-shadow: var(--ifm-navbar-shadow);
-}
-
 .installTextWrapper {
-  width: 60%;
-}
-
-@media screen and (max-width: 768px) {
-  .installTextWrapper {
-    width: 90%;
-  }
-}
-
-.main {
-  margin-top: 4.5rem;
+  width: 100%;
 }
 
 .feature {
   margin-bottom: 4.5rem;
+}
+
+.feature:last-child {
+  margin-bottom: 0;
 }
 
 @media screen and (max-width: 768px) {
@@ -81,6 +67,33 @@
 .featureDesc {
   display: flex !important;
   align-items: center;
+}
+
+.whiteboard {
+  margin-top: 3rem;
+  background: #fff;
+  border-radius: 8px;
+}
+
+.logoWrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 150px;
+}
+
+.logoWrapper img {
+  width: 80%;
+}
+
+@media screen and (max-width: 768px) {
+  .logoWrapper {
+    height: 100px;
+  }
+
+  .logoWrapper img {
+    width: 50%;
+  }
 }
 
 .cncfLogo {

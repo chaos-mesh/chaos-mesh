@@ -34,12 +34,12 @@ module.exports = {
           label: 'Documentation',
         },
         { to: 'interactiveTutorial', label: 'Interactive Tutorial' },
-        { to: 'blog', activeBasePath: 'blog', label: 'Blog', position: 'right' },
         {
           href: 'https://github.com/chaos-mesh/chaos-mesh',
           label: 'GitHub',
           position: 'right',
         },
+        { to: 'blog', activeBasePath: 'blog', label: 'Blog', position: 'right' },
       ],
     },
     footer: {
@@ -58,11 +58,15 @@ module.exports = {
           ],
         },
         {
-          title: 'Community',
+          title: 'Channels',
           items: [
             {
               label: 'Twitter',
               href: 'https://twitter.com/chaos_mesh',
+            },
+            {
+              label: 'GitHub',
+              href: 'https://github.com/chaos-mesh/chaos-mesh',
             },
           ],
         },
@@ -73,10 +77,11 @@ module.exports = {
               label: 'Blog',
               to: 'blog',
             },
-            {
-              label: 'GitHub',
-              href: 'https://github.com/chaos-mesh/chaos-mesh',
-            },
+          ],
+        },
+        {
+          title: 'Others',
+          items: [
             {
               html:
                 '<a href="https://www.netlify.com"><img src="https://www.netlify.com/img/global/badges/netlify-color-accent.svg" alt="Deploys by Netlify" /></a>',
@@ -84,7 +89,13 @@ module.exports = {
           ],
         },
       ],
-      copyright: `<br /><strong>© Chaos Mesh® Authors ${new Date().getFullYear()} | Documentation Distributed under CC-BY-4.0 </strong><br /><br />© ${new Date().getFullYear()} The Linux Foundation. All rights reserved. The Linux Foundation has registered trademarks and uses trademarks. For a list of trademarks of The Linux Foundation, please see our <a href="https://www.linuxfoundation.org/trademark-usage/"> Trademark Usage</a> page.`,
+      copyright: `
+        <br />
+        <strong>© Chaos Mesh® Authors ${new Date().getFullYear()} | Documentation Distributed under CC-BY-4.0 </strong>
+        <br />
+        <br />
+        © ${new Date().getFullYear()} The Linux Foundation. All rights reserved. The Linux Foundation has registered trademarks and uses trademarks. For a list of trademarks of The Linux Foundation, please see our <a href="https://www.linuxfoundation.org/trademark-usage/"> Trademark Usage</a> page.
+      `,
     },
     prism: {
       theme: require('prism-react-renderer/themes/dracula'),
