@@ -26,7 +26,7 @@
       "mode": "模式",
       "modeHelper": "选择实验模式",
       "modeValue": "模式值",
-      "modeValuehelper": "请填写实验值",
+      "modeValueHelper": "请填写模式值",
       "affectedPods": "受到实验作用的 Pods",
       "affectedPodsPreview": "预览将要受到实验作用的 Pods",
       "affectedPodsPreviewHelper": "通过勾选 Pods 来进一步限制实验的范围",
