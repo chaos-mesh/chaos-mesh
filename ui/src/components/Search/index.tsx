@@ -32,12 +32,11 @@ const useStyles = makeStyles((theme: Theme) =>
     searchContainer: {
       display: 'flex',
       flexDirection: 'column',
-      justifyContent: 'space-between',
     },
     searchResultContainer: {
       minHeight: '30vh',
       maxHeight: '70vh',
-      marginTop: theme.spacing(2.5),
+      marginTop: theme.spacing(3),
       overflowY: 'scroll',
       overflowX: 'hidden',
     },
@@ -267,7 +266,12 @@ const Search: React.FC = () => {
       .catch(console.log)
   }
 
-  useEffect(fetchAll, [search])
+  useEffect(() => {
+    if (search !== '') {
+      fetchAll()
+    }
+    // eslint-disable-next-line
+  }, [search])
 
   useEffect(() => {
     if (globalSearchData) {
@@ -284,7 +288,6 @@ const Search: React.FC = () => {
       <TextField
         margin="dense"
         placeholder={intl.formatMessage({ id: 'search.placeholder' })}
-        disabled={!globalSearchData}
         variant="outlined"
         InputProps={{
           startAdornment: (
@@ -296,9 +299,9 @@ const Search: React.FC = () => {
             <InputAdornment position="end">
               <Tooltip
                 title={
-                  <Typography variant="body2">
+                  <Typography variant="body2" component="div">
                     {T('search.tip.title')}
-                    <ul style={{ marginBottom: 0, paddingLeft: theme.spacing(4) }}>
+                    <ul style={{ marginBottom: 0, paddingLeft: theme.spacing(3) }}>
                       <li>{T('search.tip.namespace')}</li>
                       <li>{T('search.tip.kind')}</li>
                       <li>{T('search.tip.pod')}</li>
@@ -315,9 +318,6 @@ const Search: React.FC = () => {
               </Tooltip>
             </InputAdornment>
           ),
-        }}
-        inputProps={{
-          style: { paddingTop: theme.spacing(2), paddingBottom: theme.spacing(2) },
         }}
         inputRef={(input) => input && input.focus()}
         onChange={handleSearchChange}

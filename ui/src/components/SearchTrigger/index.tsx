@@ -14,8 +14,6 @@ import { useSelector } from 'react-redux'
 const useStyles = makeStyles((theme: Theme) => {
   return createStyles({
     searchTrigger: {
-      borderRadius: '4px',
-      cursor: 'pointer',
       whiteSpace: 'nowrap',
     },
     searchModal: {
@@ -46,25 +44,19 @@ const SearchTrigger: React.FC = () => {
   const searchModalOpen = useSelector((state: RootState) => state.globalStatus.searchModalOpen)
 
   useEffect(() => {
-    const keyMap: { [index: string]: boolean } = {}
+    const keyMap: Record<string, boolean> = {}
     const keyDownHandler = (e: KeyboardEvent) => {
-      keyMap[e.code] = true
-      if (keyMap['MetaLeft'] && keyMap['KeyP']) {
+      keyMap[e.key] = true
+      // In some cases, such as pressing multiple keys almost at the same time, the browser won't fire the keyup event repeatedly.
+      if ((keyMap['Meta'] && keyMap['p']) || (keyMap['Control'] && keyMap['p'])) {
         e.preventDefault()
         handleOpen()
-        // In some cases, such as pressing multiple keys at the same time almostly, the browser won't fire the keyup event repeatedly.
-        keyMap['MetaLeft'] = false
-        keyMap['KeyP'] = false
-      } else if (keyMap['ControlLeft'] && keyMap['KeyP']) {
-        e.preventDefault()
-        handleOpen()
-        keyMap['ControlLeft'] = false
-        keyMap['KeyP'] = false
       }
     }
     const keyUpHandler = (e: KeyboardEvent) => {
-      keyMap[e.code] = false
+      keyMap[e.key] = false
     }
+
     document.addEventListener('keydown', keyDownHandler)
     document.addEventListener('keyup', keyUpHandler)
     return () => {
@@ -77,15 +69,16 @@ const SearchTrigger: React.FC = () => {
     <>
       <Button
         variant="outlined"
+        color="primary"
         className={classes.searchTrigger}
-        startIcon={<SearchIcon color="primary" />}
+        startIcon={<SearchIcon />}
         onClick={handleOpen}
       >
         {T('search.placeholder')}
       </Button>
       <Modal open={searchModalOpen} onClose={handleClose}>
         <Paper elevation={3} className={classes.searchModal}>
-          <Search></Search>
+          <Search />
         </Paper>
       </Modal>
     </>

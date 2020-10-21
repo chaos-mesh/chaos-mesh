@@ -40,7 +40,7 @@ const useStyles = makeStyles((theme: Theme) =>
       },
     },
     nav: {
-      marginLeft: theme.spacing(4),
+      marginLeft: theme.spacing(3),
       '& .MuiBreadcrumbs-separator': {
         color: theme.palette.primary.main,
       },
