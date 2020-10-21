@@ -127,7 +127,7 @@ $ make test
 
    ```bash
    #
-   $ ./hack/local-up-operator.sh
+   $ ./hack/local-up-chaos-mesh
    ```
 
 Now you can test your code update on the deployed cluster.
