@@ -330,10 +330,6 @@ func (b *ProcessBuilder) Build() *ManagedProcess {
 	command := exec.CommandContext(b.ctx, cmd, args...)
 	command.SysProcAttr = &syscall.SysProcAttr{}
 
-	if b.suicide {
-		command.SysProcAttr.Pdeathsig = syscall.SIGTERM
-	}
-
 	return &ManagedProcess{
 		Cmd:        command,
 		Identifier: b.identifier,

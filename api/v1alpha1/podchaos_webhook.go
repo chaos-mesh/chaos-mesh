@@ -112,7 +112,6 @@ func (in *PodChaos) ValidateScheduler(spec *field.Path) field.ErrorList {
 	default:
 		err := fmt.Errorf("podchaos[%s/%s] have unknown action type", in.Namespace, in.Name)
 		log.Error(err, "Wrong PodChaos Action type")
-		log.Info("Wrong PodChaos Action type %s", err)
 
 		actionField := spec.Child("action")
 		allErrs = append(allErrs, field.Invalid(actionField, in.Spec.Action, err.Error()))
