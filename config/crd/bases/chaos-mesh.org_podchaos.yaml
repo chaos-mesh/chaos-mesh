@@ -42,6 +42,7 @@ spec:
               - pod-kill
               - pod-failure
               - container-kill
+              - pod-not-ready
               type: string
             containerName:
               description: ContainerName indicates the name of the container. Needed
