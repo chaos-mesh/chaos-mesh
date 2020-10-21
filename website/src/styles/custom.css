@@ -15,6 +15,12 @@
   --ifm-color-primary-lighter: #37b5fb;
   --ifm-color-primary-lightest: #5ec3fc;
   --ifm-code-font-size: 95%;
+
+  --hero-border-color: rgba(0, 0, 0, 0.1);
+}
+
+:root[data-theme='dark'] {
+  --hero-border-color: rgba(255, 255, 255, 0.1);
 }
 
 .docusaurus-highlight-code-line {
@@ -22,6 +28,13 @@
   display: block;
   margin: 0 calc(-1 * var(--ifm-pre-padding));
   padding: 0 var(--ifm-pre-padding);
+}
+
+@media screen and (max-width: 768px) {
+  .hero {
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+  }
 }
 
 .cncf-logo {

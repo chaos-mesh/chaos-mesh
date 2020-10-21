@@ -19,6 +19,7 @@ import (
 
 	"go.uber.org/fx"
 
+	"github.com/gin-contrib/pprof"
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-playground/validator/v10"
@@ -54,6 +55,9 @@ func serverRegister(r *gin.Engine, conf *config.ChaosDashboardConfig) {
 
 func newEngine() *gin.Engine {
 	r := gin.Default()
+
+	// default is "/debug/pprof/"
+	pprof.Register(r)
 
 	r.Use(apiutils.MWHandleErrors())
 
