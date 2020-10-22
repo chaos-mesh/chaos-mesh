@@ -30,6 +30,13 @@ var (
 	ColorGreen = "\033[32m"
 )
 
+type PodName struct {
+	PodName                 string
+	PodNamespace            string
+	ChaosDaemonPodName      string
+	ChaosDaemonPodNamespace string
+}
+
 func ExtractFromYaml(yamlStr string, str []string) (string, error) {
 	resultMap := make(map[string]interface{})
 	// remove parts that could not been parsed to yaml
@@ -78,9 +85,10 @@ func ExtractFromGet(str string, column string) (string, error) {
 
 func Debug(chaosType string, chaos string, ns string) ([]string, error) {
 	chaosType = strings.ToLower(chaosType)
-	out, err := exec.Command("kubectl", "get", chaosType, "-n", ns).CombinedOutput()
+	cmd := fmt.Sprintf("kubectl get %s -n %s", chaosType, ns)
+	out, err := exec.Command("bash", "-c", cmd).CombinedOutput()
 	if err != nil {
-		return nil, fmt.Errorf("run command 'kubectl get %s' failed with: %s", chaosType, err.Error())
+		return nil, fmt.Errorf("run command '%s' failed with: %s", cmd, err.Error())
 	}
 
 	lines := strings.Split(string(out), "\n")
@@ -93,7 +101,7 @@ func Debug(chaosType string, chaos string, ns string) ([]string, error) {
 		for i := 1; i < len(lines)-1; i++ {
 			chaosName, err := ExtractFromGet(title+"\n"+lines[i], "NAME")
 			if err != nil {
-				return nil, fmt.Errorf("ExtractFromGet failed with: %s", err.Error())
+				return nil, fmt.Errorf("extractFromGet failed with: %s", err.Error())
 			}
 			if chaos == "" || chaos == chaosName {
 				chaosList = append(chaosList, chaosName)
@@ -105,4 +113,57 @@ func Debug(chaosType string, chaos string, ns string) ([]string, error) {
 		}
 	}
 	return chaosList, nil
+}
+
+func GetPod(chaosType string, chaos string, ns string) (*PodName, error) {
+	// get podName
+	cmd := fmt.Sprintf("kubectl describe %s %s -n %s", chaosType, chaos, ns)
+	out, err := exec.Command("bash", "-c", cmd).CombinedOutput()
+	if err != nil {
+		return nil, fmt.Errorf("run command '%s' failed with: %s", cmd, err.Error())
+	}
+	podHier := []string{"Status", "Experiment", "Pod Records", "Name"}
+	podName, err := ExtractFromYaml(string(out), podHier)
+	if err != nil {
+		return nil, fmt.Errorf("get podName from 'kubectl describe' failed with: %s", err.Error())
+	}
+	podHier = []string{"Status", "Experiment", "Pod Records", "Namespace"}
+	podNamespace, err := ExtractFromYaml(string(out), podHier)
+	if err != nil {
+		return nil, fmt.Errorf("get podNamespace from 'kubectl describe' with: %s", err.Error())
+	}
+
+	// get nodeName
+	cmd = fmt.Sprintf("kubectl get pods -o wide %s -n %s", podName, podNamespace)
+	out, err = exec.Command("bash", "-c", cmd).CombinedOutput()
+	if err != nil {
+		return nil, fmt.Errorf("run command '%s' failed with: %s", cmd, err.Error())
+	}
+	nodeName, err := ExtractFromGet(string(out), "NODE")
+	if err != nil {
+		return nil, fmt.Errorf("get nodeName from 'kubectl get' failed with: %s", err.Error())
+	}
+
+	// get chaos daemon
+	cmd = "kubectl get pods -A -o wide"
+	out, err = exec.Command("bash", "-c", cmd).CombinedOutput()
+	if err != nil {
+		return nil, fmt.Errorf("run command '%s' failed with: %s", cmd, err.Error())
+	}
+	title := strings.Split(string(out), "\n")[0]
+	cmd = fmt.Sprintf("kubectl get pods -A -o wide | grep chaos-daemon | grep %s", nodeName)
+	out, err = exec.Command("bash", "-c", cmd).CombinedOutput()
+	if err != nil {
+		return nil, fmt.Errorf("run command '%s' failed with: %s", cmd, err.Error())
+	}
+	chaosDaemonPodName, err := ExtractFromGet(title+"\n"+string(out), "NAME")
+	if err != nil {
+		return nil, fmt.Errorf("get chaos daemon name failed with: %s", err.Error())
+	}
+	chaosDaemonPodNamespace, err := ExtractFromGet(title+"\n"+string(out), "NAMESPACE")
+	if err != nil {
+		return nil, fmt.Errorf("get chaos daemon namespace failed with: %s", err.Error())
+	}
+
+	return &PodName{podName, podNamespace, chaosDaemonPodName, chaosDaemonPodNamespace}, nil
 }

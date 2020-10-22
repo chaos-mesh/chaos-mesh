@@ -28,7 +28,7 @@ func Debug(chaos string, ns string) error {
 		return fmt.Errorf(err.Error())
 	}
 	for _, chaosName := range chaosList {
-		fmt.Println(string(common.ColorRed), "[CHAOSNAME]\n", chaosName, "\n", string(common.ColorReset))
+		fmt.Println(string(common.ColorRed), "[CHAOSNAME]:", string(common.ColorReset), chaosName)
 		if err := debugEachChaos(chaosName, ns); err != nil {
 			return fmt.Errorf("debug chaos failed with: %s", err.Error())
 		}
@@ -37,53 +37,18 @@ func Debug(chaos string, ns string) error {
 }
 
 func debugEachChaos(chaos string, ns string) error {
-	// get podName
-	out, err := exec.Command("kubectl", "describe", "networkchaos", chaos, "-n", ns).CombinedOutput()
+	p, err := common.GetPod("networkchaos", chaos, ns)
 	if err != nil {
-		return fmt.Errorf("run command 'kubectl describe networkchaos' failed with: %s", err.Error())
+		return err
 	}
-	podHier := []string{"Status", "Experiment", "Pod Records", "Name"}
-	podName, err := common.ExtractFromYaml(string(out), podHier)
-	if err != nil {
-		return fmt.Errorf("get podName failed with: %s", err.Error())
-	}
-	podHier = []string{"Status", "Experiment", "Pod Records", "Namespace"}
-	podNamespace, err := common.ExtractFromYaml(string(out), podHier)
-	if err != nil {
-		return fmt.Errorf("get podNamespace failed with: %s", err.Error())
-	}
-
-	// get nodeName
-	out, err = exec.Command("kubectl", "get", "pods", "-o", "wide", podName, "-n", podNamespace).CombinedOutput()
-	if err != nil {
-		return fmt.Errorf("cmd.Run() failed with: %s", err.Error())
-	}
-	nodeName, err := common.ExtractFromGet(string(out), "NODE")
-	if err != nil {
-		return fmt.Errorf("get nodeName failed with: %s", err.Error())
-	}
-
-	// get chaos daemon
-	fullCmd := "kubectl get pods -A -o wide"
-	out, err = exec.Command("bash", "-c", fullCmd).CombinedOutput()
-	if err != nil {
-		return fmt.Errorf("cmd.Run() failed with: %s", err.Error())
-	}
-	title := strings.Split(string(out), "\n")[0]
-	fullCmd = "kubectl get pods -A -o wide | grep chaos-daemon | grep " + nodeName
-	out, err = exec.Command("bash", "-c", fullCmd).CombinedOutput()
-	if err != nil {
-		return fmt.Errorf("cmd.Run() failed with: %s", err.Error())
-	}
-	chaosDaemonPodName, err := common.ExtractFromGet(title+"\n"+string(out), "NAME")
-	chaosDaemonPodNamespace, err := common.ExtractFromGet(title+"\n"+string(out), "NAMESPACE")
 
 	// get nsenter path from log
-	for _, tailNum := range []string{"--tail=20", "--tail=100", "--tail=500", ""} {
-		fullCmd := "kubectl logs " + chaosDaemonPodName + " -n " + chaosDaemonPodNamespace + " " + tailNum + " | grep 'nsenter -n/proc/'"
-		out, err = exec.Command("bash", "-c", fullCmd).CombinedOutput()
+	var out []byte
+	for _, tailNum := range []string{"--tail=100", "--tail=1000", "--tail=10000", ""} {
+		cmd := fmt.Sprintf("kubectl logs %s -n %s %s | grep 'nsenter -n/proc/'", p.ChaosDaemonPodName, p.ChaosDaemonPodNamespace, tailNum)
+		out, err = exec.Command("bash", "-c", cmd).CombinedOutput()
 		if err != nil {
-			return fmt.Errorf("cmd.Run() failed with: %s", err.Error())
+			return fmt.Errorf("run command '%s' failed with: %s", cmd, err.Error())
 		}
 		if len(out) != 0 {
 			break
@@ -92,31 +57,28 @@ func debugEachChaos(chaos string, ns string) error {
 			return fmt.Errorf("could not found networkchaos related logs")
 		}
 	}
-
 	line := strings.Split(string(out), "\n")[0]
-	r, _ := regexp.Compile("(?:-n/proc/)(.*)(?:/ns/net)")
-	nsenterPath := r.FindStringSubmatch(line)[0]
+	nsenterPath := regexp.MustCompile("(?:-n/proc/)(.*)(?:/ns/net)").FindStringSubmatch(line)[0]
 
-	// print out result
-
-	fullCmd = "kubectl exec " + chaosDaemonPodName + " -n" + chaosDaemonPodNamespace + " -- /usr/bin/nsenter " + nsenterPath + " -- ipset list"
-	out, err = exec.Command("bash", "-c", fullCmd).CombinedOutput()
+	// print out debug info
+	cmd := fmt.Sprintf("kubectl exec %s -n %s -- /usr/bin/nsenter %s -- ipset list", p.ChaosDaemonPodName, p.ChaosDaemonPodNamespace, nsenterPath)
+	out, err = exec.Command("bash", "-c", cmd).CombinedOutput()
 	if err != nil {
-		return fmt.Errorf("cmd.Run() failed with: %s", err.Error())
+		return fmt.Errorf("run command '%s' failed with: %s", cmd, err.Error())
 	}
 	fmt.Println(string(common.ColorGreen), "[ipset list]", string(common.ColorReset))
 	fmt.Println(string(out))
 
-	fullCmd = "kubectl exec " + chaosDaemonPodName + " -n" + chaosDaemonPodNamespace + " -- /usr/bin/nsenter " + nsenterPath + " -- tc qdisc list"
-	out, err = exec.Command("bash", "-c", fullCmd).CombinedOutput()
+	cmd = fmt.Sprintf("kubectl exec %s -n %s -- /usr/bin/nsenter %s -- tc qdisc list", p.ChaosDaemonPodName, p.ChaosDaemonPodNamespace, nsenterPath)
+	out, err = exec.Command("bash", "-c", cmd).CombinedOutput()
 	if err != nil {
-		return fmt.Errorf("cmd.Run() failed with: %s", err.Error())
+		return fmt.Errorf("run command '%s' failed with: %s", cmd, err.Error())
 	}
 	fmt.Println(string(common.ColorGreen), "[tc qdisc list]", string(common.ColorReset))
 	fmt.Println(string(out))
 
-	fullCmd = "kubectl exec " + chaosDaemonPodName + " -n" + chaosDaemonPodNamespace + " -- /usr/bin/nsenter " + nsenterPath + " -- iptables --list"
-	out, err = exec.Command("bash", "-c", fullCmd).CombinedOutput()
+	cmd = fmt.Sprintf("kubectl exec %s -n %s -- /usr/bin/nsenter %s -- iptables --list", p.ChaosDaemonPodName, p.ChaosDaemonPodNamespace, nsenterPath)
+	out, err = exec.Command("bash", "-c", cmd).CombinedOutput()
 	if err != nil {
 		return fmt.Errorf("cmd.Run() failed with: %s", err.Error())
 	}

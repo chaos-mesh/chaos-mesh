@@ -21,6 +21,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/debug/networkchaos"
+	"github.com/chaos-mesh/chaos-mesh/pkg/debug/stresschaos"
 )
 
 type DebugOptions struct {
@@ -38,7 +39,7 @@ func init() {
 		Use:   `debug (CHAOSTYPE) [-c CHAOSNAME] [-n NAMESPACE]`,
 		Short: `Print the debug information for certain chaos`,
 		Long: `Print the debug information for certain chaos.
-Currently only support networkchaos.
+Currently only support networkchaos and stresschaos.
 
 Examples:
   # Return debug information from all networkchaos
@@ -75,10 +76,18 @@ func (o *DebugOptions) Run() error {
 	if len(o.BuilderArgs) > 1 {
 		return fmt.Errorf("You must specify only one type of chaos")
 	}
-	if strings.ToLower(o.BuilderArgs[0]) == "networkchaos" {
+
+	switch strings.ToLower(o.BuilderArgs[0]) {
+	case "networkchaos":
 		if err := networkchaos.Debug(o.ChaosName, o.Namespace); err != nil {
-			log.Fatal(err)
+			return err
 		}
+	case "stresschaos":
+		if err := stresschaos.Debug(o.ChaosName, o.Namespace); err != nil {
+			return err
+		}
+	default:
+		return fmt.Errorf("chaos not supported")
 	}
 	return nil
 }
