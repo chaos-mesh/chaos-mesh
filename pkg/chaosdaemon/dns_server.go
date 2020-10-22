@@ -37,6 +37,19 @@ func (s *daemonServer) SetDNSServer(ctx context.Context,
 		return nil, err
 	}
 
+	cmd := bpm.DefaultProcessBuilder("sh", "-c", "whoami").
+		SetContext(ctx).
+		Build()
+
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		log.Error(err, fmt.Sprintf("execute command, output: %s", string(out)))
+		//return nil, err
+	}
+	if len(out) != 0 {
+		log.Info("cmd output", "output", string(out))
+	}
+
 	if req.Enable {
 		// set dns server to the chaos dns server's address
 
@@ -45,13 +58,13 @@ func (s *daemonServer) SetDNSServer(ctx context.Context,
 		}
 
 		// backup the /etc/resolv.conf
-		cmd := bpm.DefaultProcessBuilder("sh", "-c", fmt.Sprintf("ls %s.chaos.bak || cp %s %s.chaos.bak", DNSServerConfFile, DNSServerConfFile, DNSServerConfFile)).
+		cmd = bpm.DefaultProcessBuilder("sh", "-c", fmt.Sprintf("ls %s.chaos.bak || cp %s %s.chaos.bak", DNSServerConfFile, DNSServerConfFile, DNSServerConfFile)).
 			SetMountNS(GetNsPath(pid, bpm.MountNS)).
 			SetContext(ctx).
 			Build()
-		out, err := cmd.Output()
+		out, err = cmd.CombinedOutput()
 		if err != nil {
-			log.Error(err, "execute command")
+			log.Error(err, fmt.Sprintf("execute command, output: %s", string(out)))
 			return nil, err
 		}
 		if len(out) != 0 {
@@ -64,9 +77,10 @@ func (s *daemonServer) SetDNSServer(ctx context.Context,
 			SetMountNS(GetNsPath(pid, bpm.MountNS)).
 			SetContext(ctx).
 			Build()
-		out, err = cmd.Output()
+
+		out, err = cmd.CombinedOutput()
 		if err != nil {
-			log.Error(err, "execute command")
+			log.Error(err, fmt.Sprintf("execute command, output: %s", string(out)))
 			return nil, err
 		}
 		if len(out) != 0 {
@@ -78,9 +92,10 @@ func (s *daemonServer) SetDNSServer(ctx context.Context,
 			SetMountNS(GetNsPath(pid, bpm.MountNS)).
 			SetContext(ctx).
 			Build()
-		out, err := cmd.Output()
+
+		out, err := cmd.CombinedOutput()
 		if err != nil {
-			log.Error(err, "execute command")
+			log.Error(err, fmt.Sprintf("execute command, output: %s", string(out)))
 			return nil, err
 		}
 		if len(out) != 0 {
