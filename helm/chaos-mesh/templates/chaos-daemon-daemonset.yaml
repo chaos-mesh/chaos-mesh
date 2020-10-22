@@ -61,19 +61,15 @@ spec:
             {{- end }}
           securityContext:
             privileged: true
-            #runAsNonRoot: true
-            runAsUser: 1000
-            runAsGroup: 1000
+            {{- if ne .Values.chaosDaemon.runUserID 0 }}
+            runAsUser: {{ .Values.chaosDaemon.runUserID }}
+            {{- end }}
+            {{- if ne .Values.chaosDaemon.runGroupID 0 }}
+            runAsGroup: {{ .Values.chaosDaemon.runGroupID }}
+            {{- end }}
             capabilities:
               add:
                 - SYS_PTRACE
-                #- SETGID
-                #- SETUID
-                #- SYS_ADMIN
-                #- FOWNER
-                #- CHOWN
-                #- DAC_OVERRIDE
-                #- FSETID
           volumeMounts:
             - name: socket-path
               {{- if eq .Values.chaosDaemon.runtime "docker" }}
@@ -83,8 +79,10 @@ spec:
               {{- end }}
             - name: sys-path
               mountPath: /sys
+            {{- if ne .Values.chaosDaemon.runUserID 0 }}
             - name: etc-path
               mountPath: /etc
+            {{- end }}
           ports:
             - name: grpc
               containerPort: {{ .Values.chaosDaemon.grpcPort }}
@@ -109,9 +107,12 @@ spec:
             - !!str {{ .Values.bpfki.grpcPort }}
           securityContext:
             privileged: true
-            #runAsNonRoot: true
-            runAsUser: 1000
-            runAsGroup: 1000
+            {{- if ne .Values.chaosDaemon.runUserID 0 }}
+            runAsUser: {{ .Values.chaosDaemon.runUserID }}
+            {{- end }}
+            {{- if ne .Values.chaosDaemon.runGroupID 0 }}
+            runAsGroup: {{ .Values.chaosDaemon.runGroupID }}
+            {{- end }}
             
           volumeMounts:
             - name: localtime-path
@@ -135,9 +136,12 @@ spec:
         - name: sys-path
           hostPath:
             path: /sys
+        {{- if ne .Values.chaosDaemon.runUserID 0 }}
         - name: etc-path
           hostPath:
             path: /etc
+        {{- end }}
+          
 {{- if .Values.bpfki.create }}
         - name: localtime-path
           hostPath:

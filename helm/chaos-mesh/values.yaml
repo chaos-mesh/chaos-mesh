@@ -73,6 +73,9 @@ chaosDaemon:
   env: {}
   hostNetwork: false
 
+  runUserID: 0
+  runGroupID: 0
+
   podAnnotations: {}
 
   # runtime specifies which container runtime to use. Currently
