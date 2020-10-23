@@ -31,9 +31,9 @@ sed -i.bak 's/mountPath: \/var\/run\/docker.sock/mountPath: \$\{mountPath\}/g' $
 sed -i.bak 's/path: \/var\/run\/docker.sock/path: \$\{socketPath\}/g' $tmp_file
 sed -i.bak 's/- docker/- $\{runtime\}/g' $tmp_file
 sed -i.bak 's/hostNetwork: true/hostNetwork: \$\{host_network\}/g' $tmp_file
-sed -i.bak 's/pingcap\/chaos-mesh:.*/pingcap\/chaos-mesh:\$\{VERSION_TAG\}/g' $tmp_file
-sed -i.bak 's/pingcap\/chaos-daemon:.*/pingcap\/chaos-daemon:\$\{VERSION_TAG\}/g' $tmp_file
-sed -i.bak 's/pingcap\/chaos-dashboard:.*/pingcap\/chaos-dashboard:\$\{VERSION_TAG\}/g' $tmp_file
+sed -i.bak 's/pingcap\/chaos-mesh:.*/\${DOCKER_REGISTRY_PREFIX}\/pingcap\/chaos-mesh:\$\{VERSION_TAG\}/g' $tmp_file
+sed -i.bak 's/pingcap\/chaos-daemon:.*/\${DOCKER_REGISTRY_PREFIX}\/pingcap\/chaos-daemon:\$\{VERSION_TAG\}/g' $tmp_file
+sed -i.bak 's/pingcap\/chaos-dashboard:.*/\${DOCKER_REGISTRY_PREFIX}\/pingcap\/chaos-dashboard:\$\{VERSION_TAG\}/g' $tmp_file
 sed -i.bak 's/value: UTC/value: \$\{timezone\}/g' $tmp_file
 mv $tmp_file $tmp_file.bak
 
@@ -59,4 +59,3 @@ chmod +x $install_scirpt
 
 rm -rf $tmp_file
 rm -rf $tmp_file.bak
-rm -rf $tmp_install_scipt
