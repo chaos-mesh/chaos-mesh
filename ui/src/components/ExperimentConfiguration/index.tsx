@@ -123,7 +123,7 @@ const ExperimentConfiguration: React.FC<ExperimentConfigurationProps> = ({ exper
 
         <Table size="small">
           <TableBody>
-            {e.yaml.spec.scheduler.cron ? (
+            {e.yaml.spec.scheduler?.cron ? (
               <>
                 <TableRow>
                   <TableCell>Cron</TableCell>
