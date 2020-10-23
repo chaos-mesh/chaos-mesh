@@ -1,3 +1,3 @@
-# Documents
+# Docs
 
-This directory was moved to [here](../website/docs).
+This directory was moved to [chaos-mesh/website](https://github.com/chaos-mesh/website).
