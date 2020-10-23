@@ -15,6 +15,7 @@ package bpm
 
 import (
 	"context"
+	"fmt"
 	"math/rand"
 	"testing"
 	"time"
@@ -144,6 +145,7 @@ var _ = Describe("background process manager", func() {
 				time.Sleep(time.Second)
 
 				err = m.KillBackgroundProcess(context.Background(), pid, ct)
+				fmt.Println("KillBackgroundProcess error", err)
 				Expect(err).To(BeNil())
 			}()
 
