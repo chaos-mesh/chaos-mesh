@@ -225,6 +225,8 @@ type ProcessBuilder struct {
 	pause   bool
 	suicide bool
 
+	useSudo bool
+
 	identifier *string
 
 	ctx context.Context
@@ -281,6 +283,12 @@ func (b *ProcessBuilder) SetContext(ctx context.Context) *ProcessBuilder {
 	return b
 }
 
+// SetSudo sets the useSudo = true
+func (b *ProcessBuilder) SetSudo() *ProcessBuilder {
+	b.useSudo = true
+	return b
+}
+
 // Build builds the process
 func (b *ProcessBuilder) Build() *ManagedProcess {
 	// The call routine is pause -> suicide -> nsenter --(fork)-> suicide -> process
@@ -317,6 +325,11 @@ func (b *ProcessBuilder) Build() *ManagedProcess {
 		cmd = pausePath
 	}
 
+	if b.useSudo {
+		args = append([]string{cmd}, args...)
+		cmd = "sudo"
+	}
+
 	if c := mock.On("MockProcessBuild"); c != nil {
 		f := c.(func(context.Context, string, ...string) *exec.Cmd)
 		return &ManagedProcess{
@@ -325,14 +338,9 @@ func (b *ProcessBuilder) Build() *ManagedProcess {
 		}
 	}
 
-	newArgs := []string{cmd}
-	for _, arg := range args {
-		newArgs = append(newArgs, arg)
-	}
+	log.Info("build command", "command", cmd+" "+strings.Join(args, " "))
 
-	log.Info("build command", "command", "sudo "+strings.Join(newArgs, " "))
-
-	command := exec.CommandContext(b.ctx, "sudo", newArgs...)
+	command := exec.CommandContext(b.ctx, cmd, args...)
 	command.SysProcAttr = &syscall.SysProcAttr{}
 
 	if b.suicide {
