@@ -69,6 +69,7 @@ func (s *daemonServer) ExecStressors(ctx context.Context,
 		EnablePause().
 		EnableSuicide().
 		SetNS(pid, bpm.PidNS).
+		WithSudo().
 		Build()
 
 	err = s.backgroundProcessManager.StartProcess(cmd)

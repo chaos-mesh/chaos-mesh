@@ -82,6 +82,7 @@ func createIPSet(ctx context.Context, pid uint32, name string) error {
 	cmd := bpm.DefaultProcessBuilder("ipset", "create", name, "hash:net").
 		SetNS(pid, bpm.NetNS).
 		SetContext(ctx).
+		WithSudo().
 		Build()
 
 	log.Info("create ipset", "command", cmd.String())
@@ -97,6 +98,7 @@ func createIPSet(ctx context.Context, pid uint32, name string) error {
 		cmd := bpm.DefaultProcessBuilder("ipset", "flush", name).
 			SetNS(pid, bpm.NetNS).
 			SetContext(ctx).
+			WithSudo().
 			Build()
 
 		log.Info("flush ipset", "command", cmd.String())
@@ -113,7 +115,11 @@ func createIPSet(ctx context.Context, pid uint32, name string) error {
 
 func addCIDRsToIPSet(ctx context.Context, pid uint32, name string, cidrs []string) error {
 	for _, cidr := range cidrs {
-		cmd := bpm.DefaultProcessBuilder("ipset", "add", name, cidr).SetNS(pid, bpm.NetNS).SetContext(ctx).Build()
+		cmd := bpm.DefaultProcessBuilder("ipset", "add", name, cidr).
+			SetNS(pid, bpm.NetNS).
+			SetContext(ctx).
+			WithSudo().
+			Build()
 
 		log.Info("add CIDR to ipset", "command", cmd.String())
 
@@ -131,7 +137,11 @@ func addCIDRsToIPSet(ctx context.Context, pid uint32, name string, cidrs []strin
 }
 
 func renameIPSet(ctx context.Context, pid uint32, oldName string, newName string) error {
-	cmd := bpm.DefaultProcessBuilder("ipset", "rename", oldName, newName).SetNS(pid, bpm.NetNS).SetContext(ctx).Build()
+	cmd := bpm.DefaultProcessBuilder("ipset", "rename", oldName, newName).
+		SetNS(pid, bpm.NetNS).
+		SetContext(ctx).
+		WithSudo().
+		Build()
 
 	log.Info("rename ipset", "command", cmd.String())
 
@@ -144,7 +154,11 @@ func renameIPSet(ctx context.Context, pid uint32, oldName string, newName string
 		}
 
 		// swap the old ipset and the new ipset if the new ipset already exist.
-		cmd := bpm.DefaultProcessBuilder("ipset", "swap", oldName, newName).SetNS(pid, bpm.NetNS).SetContext(ctx).Build()
+		cmd := bpm.DefaultProcessBuilder("ipset", "swap", oldName, newName).
+			SetNS(pid, bpm.NetNS).
+			SetContext(ctx).
+			WithSudo().
+			Build()
 
 		log.Info("swap ipset", "command", cmd.String())
 

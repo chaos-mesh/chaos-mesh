@@ -68,6 +68,7 @@ func (s *daemonServer) ApplyIoChaos(ctx context.Context, in *pb.ApplyIoChaosRequ
 	cmd := bpm.DefaultProcessBuilder(todaBin, strings.Split(args, " ")...).
 		EnableSuicide().
 		SetIdentifier(in.ContainerId).
+		WithSudo().
 		Build()
 	cmd.Stdin = strings.NewReader(in.Actions)
 	cmd.Stdout = os.Stdout

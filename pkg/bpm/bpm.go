@@ -283,8 +283,8 @@ func (b *ProcessBuilder) SetContext(ctx context.Context) *ProcessBuilder {
 	return b
 }
 
-// SetSudo sets the useSudo = true
-func (b *ProcessBuilder) SetSudo() *ProcessBuilder {
+// WithSudo sets the useSudo = true
+func (b *ProcessBuilder) WithSudo() *ProcessBuilder {
 	b.useSudo = true
 	return b
 }

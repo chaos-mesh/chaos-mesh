@@ -148,7 +148,11 @@ func (iptables *iptablesClient) initializeEnv() error {
 
 // createNewChain will cover existing chain
 func (iptables *iptablesClient) createNewChain(chain *iptablesChain) error {
-	cmd := bpm.DefaultProcessBuilder(iptablesCmd, "-w", "-N", chain.Name).SetNS(iptables.pid, bpm.NetNS).SetContext(iptables.ctx).Build()
+	cmd := bpm.DefaultProcessBuilder(iptablesCmd, "-w", "-N", chain.Name).
+		SetNS(iptables.pid, bpm.NetNS).
+		SetContext(iptables.ctx).
+		WithSudo().
+		Build()
 	out, err := cmd.CombinedOutput()
 
 	if (err == nil && len(out) == 0) ||
@@ -181,7 +185,11 @@ func (iptables *iptablesClient) deleteAndWriteRules(chain *iptablesChain) error 
 }
 
 func (iptables *iptablesClient) ensureRule(chain *iptablesChain, rule string) error {
-	cmd := bpm.DefaultProcessBuilder(iptablesCmd, "-w", "-S", chain.Name).SetNS(iptables.pid, bpm.NetNS).SetContext(iptables.ctx).Build()
+	cmd := bpm.DefaultProcessBuilder(iptablesCmd, "-w", "-S", chain.Name).
+		SetNS(iptables.pid, bpm.NetNS).
+		SetContext(iptables.ctx).
+		WithSudo().
+		Build()
 	out, err := cmd.CombinedOutput()
 	if err != nil {
 		return encodeOutputToError(out, err)
@@ -193,7 +201,11 @@ func (iptables *iptablesClient) ensureRule(chain *iptablesChain, rule string) er
 	}
 
 	// TODO: lock on every container but not on chaos-daemon's `/run/xtables.lock`
-	cmd = bpm.DefaultProcessBuilder(iptablesCmd, strings.Split("-w "+rule, " ")...).SetNS(iptables.pid, bpm.NetNS).SetContext(iptables.ctx).Build()
+	cmd = bpm.DefaultProcessBuilder(iptablesCmd, strings.Split("-w "+rule, " ")...).
+		SetNS(iptables.pid, bpm.NetNS).
+		SetContext(iptables.ctx).
+		WithSudo().
+		Build()
 	out, err = cmd.CombinedOutput()
 	if err != nil {
 		return encodeOutputToError(out, err)
@@ -203,7 +215,11 @@ func (iptables *iptablesClient) ensureRule(chain *iptablesChain, rule string) er
 }
 
 func (iptables *iptablesClient) flushIptablesChain(chain *iptablesChain) error {
-	cmd := bpm.DefaultProcessBuilder(iptablesCmd, "-w", "-F", chain.Name).SetNS(iptables.pid, bpm.NetNS).SetContext(iptables.ctx).Build()
+	cmd := bpm.DefaultProcessBuilder(iptablesCmd, "-w", "-F", chain.Name).
+		SetNS(iptables.pid, bpm.NetNS).
+		SetContext(iptables.ctx).
+		WithSudo().
+		Build()
 	out, err := cmd.CombinedOutput()
 	if err != nil {
 		return encodeOutputToError(out, err)

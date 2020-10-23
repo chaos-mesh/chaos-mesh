@@ -200,7 +200,11 @@ func buildTcClient(ctx context.Context, pid uint32) tcClient {
 }
 
 func (c *tcClient) flush() error {
-	cmd := bpm.DefaultProcessBuilder("tc", "qdisc", "del", "dev", "eth0", "root").SetNS(c.pid, bpm.NetNS).SetContext(c.ctx).Build()
+	cmd := bpm.DefaultProcessBuilder("tc", "qdisc", "del", "dev", "eth0", "root").
+		SetNS(c.pid, bpm.NetNS).
+		SetContext(c.ctx).
+		WithSudo().
+		Build()
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		if (!strings.Contains(string(output), ruleNotExistLowerVersion)) && (!strings.Contains(string(output), ruleNotExist)) {
@@ -248,7 +252,11 @@ func (c *tcClient) addPrio(parent int, band int) error {
 		parentArg = fmt.Sprintf("parent %d:", parent)
 	}
 	args := fmt.Sprintf("qdisc add dev eth0 %s handle %d: prio bands %d priomap 1 2 2 2 1 2 0 0 1 1 1 1 1 1 1 1", parentArg, parent+1, band)
-	cmd := bpm.DefaultProcessBuilder("tc", strings.Split(args, " ")...).SetNS(c.pid, bpm.NetNS).SetContext(c.ctx).Build()
+	cmd := bpm.DefaultProcessBuilder("tc", strings.Split(args, " ")...).
+		SetNS(c.pid, bpm.NetNS).
+		SetContext(c.ctx).
+		WithSudo().
+		Build()
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		return encodeOutputToError(output, err)
@@ -256,7 +264,11 @@ func (c *tcClient) addPrio(parent int, band int) error {
 
 	for index := 1; index <= 3; index++ {
 		args := fmt.Sprintf("qdisc add dev eth0 parent %d:%d handle %d: sfq", parent+1, index, parent+1+index)
-		cmd := bpm.DefaultProcessBuilder("tc", strings.Split(args, " ")...).SetNS(c.pid, bpm.NetNS).SetContext(c.ctx).Build()
+		cmd := bpm.DefaultProcessBuilder("tc", strings.Split(args, " ")...).
+			SetNS(c.pid, bpm.NetNS).
+			SetContext(c.ctx).
+			WithSudo().
+			Build()
 		output, err := cmd.CombinedOutput()
 		if err != nil {
 			return encodeOutputToError(output, err)
@@ -270,7 +282,11 @@ func (c *tcClient) addNetem(parent string, handle string, netem *pb.Netem) error
 	log.Info("adding netem", "parent", parent, "handle", handle)
 
 	args := fmt.Sprintf("qdisc add dev eth0 %s %s netem %s", parent, handle, convertNetemToArgs(netem))
-	cmd := bpm.DefaultProcessBuilder("tc", strings.Split(args, " ")...).SetNS(c.pid, bpm.NetNS).SetContext(c.ctx).Build()
+	cmd := bpm.DefaultProcessBuilder("tc", strings.Split(args, " ")...).
+		SetNS(c.pid, bpm.NetNS).
+		SetContext(c.ctx).
+		WithSudo().
+		Build()
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		return encodeOutputToError(output, err)
@@ -282,7 +298,11 @@ func (c *tcClient) addTbf(parent string, handle string, tbf *pb.Tbf) error {
 	log.Info("adding tbf", "parent", parent, "handle", handle)
 
 	args := fmt.Sprintf("qdisc add dev eth0 %s %s tbf %s", parent, handle, convertTbfToArgs(tbf))
-	cmd := bpm.DefaultProcessBuilder("tc", strings.Split(args, " ")...).SetNS(c.pid, bpm.NetNS).SetContext(c.ctx).Build()
+	cmd := bpm.DefaultProcessBuilder("tc", strings.Split(args, " ")...).
+		SetNS(c.pid, bpm.NetNS).
+		SetContext(c.ctx).
+		WithSudo().
+		Build()
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		return encodeOutputToError(output, err)
@@ -296,7 +316,11 @@ func (c *tcClient) addFilter(parent string, classid string, ipset string) error 
 	args := strings.Split(fmt.Sprintf("filter add dev eth0 %s basic match", parent), " ")
 	args = append(args, fmt.Sprintf("ipset(%s dst)", ipset))
 	args = append(args, strings.Split(classid, " ")...)
-	cmd := bpm.DefaultProcessBuilder("tc", args...).SetNS(c.pid, bpm.NetNS).SetContext(c.ctx).Build()
+	cmd := bpm.DefaultProcessBuilder("tc", args...).
+		SetNS(c.pid, bpm.NetNS).
+		SetContext(c.ctx).
+		WithSudo().
+		Build()
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		return encodeOutputToError(output, err)
