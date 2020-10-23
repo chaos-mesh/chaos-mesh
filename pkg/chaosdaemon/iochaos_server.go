@@ -42,7 +42,12 @@ func (s *daemonServer) ApplyIoChaos(ctx context.Context, in *pb.ApplyIoChaosRequ
 	}
 
 	actions := []v1alpha1.IoChaosAction{}
-	json.Unmarshal([]byte(in.Actions), &actions)
+	err := json.Unmarshal([]byte(in.Actions), &actions)
+	if err != nil {
+		log.Error(err, "error while unmarshal json bytes")
+		return nil, err
+	}
+
 	log.Info("the length of actions", "length", len(actions))
 	if len(actions) == 0 {
 		return &pb.ApplyIoChaosResponse{

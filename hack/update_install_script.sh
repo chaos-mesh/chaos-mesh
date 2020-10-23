@@ -59,4 +59,3 @@ chmod +x $install_scirpt
 
 rm -rf $tmp_file
 rm -rf $tmp_file.bak
-rm -rf $tmp_install_scipt
