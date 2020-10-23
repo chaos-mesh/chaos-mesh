@@ -61,10 +61,10 @@ spec:
             {{- end }}
           securityContext:
             privileged: true
-            {{- if ne .Values.chaosDaemon.runUserID 0 }}
+            {{- if ne (.Values.chaosDaemon.runUserID | toString) "0" }}
             runAsUser: {{ .Values.chaosDaemon.runUserID }}
             {{- end }}
-            {{- if ne .Values.chaosDaemon.runGroupID 0 }}
+            {{- if ne (.Values.chaosDaemon.runGroupID | toString) "0" }}
             runAsGroup: {{ .Values.chaosDaemon.runGroupID }}
             {{- end }}
             capabilities:
@@ -79,7 +79,7 @@ spec:
               {{- end }}
             - name: sys-path
               mountPath: /sys
-            {{- if ne .Values.chaosDaemon.runUserID 0 }}
+            {{- if ne (.Values.chaosDaemon.runUserID | toString) "0" }}
             - name: etc-path
               mountPath: /etc
             {{- end }}
@@ -107,10 +107,10 @@ spec:
             - !!str {{ .Values.bpfki.grpcPort }}
           securityContext:
             privileged: true
-            {{- if ne .Values.chaosDaemon.runUserID 0 }}
+            {{- if ne (.Values.chaosDaemon.runUserID | toString ) "0" }}
             runAsUser: {{ .Values.chaosDaemon.runUserID }}
             {{- end }}
-            {{- if ne .Values.chaosDaemon.runGroupID 0 }}
+            {{- if ne (.Values.chaosDaemon.runGroupID  | toString ) "0" }}
             runAsGroup: {{ .Values.chaosDaemon.runGroupID }}
             {{- end }}
             
@@ -136,7 +136,7 @@ spec:
         - name: sys-path
           hostPath:
             path: /sys
-        {{- if ne .Values.chaosDaemon.runUserID 0 }}
+        {{- if ne (.Values.chaosDaemon.runUserID | toString) "0" }}
         - name: etc-path
           hostPath:
             path: /etc
