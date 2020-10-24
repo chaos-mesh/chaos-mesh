@@ -103,7 +103,7 @@ func (in *DNSChaos) GetChaos() *ChaosInstance {
 	}
 
 	action := reflect.ValueOf(in).Elem().FieldByName("Spec").FieldByName("Action")
-	if !action.IsZero() {
+	if action.IsValid() {
 		instance.Action = action.String()
 	}
 	if in.Spec.Duration != nil {
@@ -220,7 +220,7 @@ func (in *HTTPChaos) GetChaos() *ChaosInstance {
 	}
 
 	action := reflect.ValueOf(in).Elem().FieldByName("Spec").FieldByName("Action")
-	if !action.IsZero() {
+	if action.IsValid() {
 		instance.Action = action.String()
 	}
 	if in.Spec.Duration != nil {
@@ -337,7 +337,7 @@ func (in *IoChaos) GetChaos() *ChaosInstance {
 	}
 
 	action := reflect.ValueOf(in).Elem().FieldByName("Spec").FieldByName("Action")
-	if !action.IsZero() {
+	if action.IsValid() {
 		instance.Action = action.String()
 	}
 	if in.Spec.Duration != nil {
@@ -454,7 +454,7 @@ func (in *KernelChaos) GetChaos() *ChaosInstance {
 	}
 
 	action := reflect.ValueOf(in).Elem().FieldByName("Spec").FieldByName("Action")
-	if !action.IsZero() {
+	if action.IsValid() {
 		instance.Action = action.String()
 	}
 	if in.Spec.Duration != nil {
@@ -571,7 +571,7 @@ func (in *NetworkChaos) GetChaos() *ChaosInstance {
 	}
 
 	action := reflect.ValueOf(in).Elem().FieldByName("Spec").FieldByName("Action")
-	if !action.IsZero() {
+	if action.IsValid() {
 		instance.Action = action.String()
 	}
 	if in.Spec.Duration != nil {
@@ -688,7 +688,7 @@ func (in *PodChaos) GetChaos() *ChaosInstance {
 	}
 
 	action := reflect.ValueOf(in).Elem().FieldByName("Spec").FieldByName("Action")
-	if !action.IsZero() {
+	if action.IsValid() {
 		instance.Action = action.String()
 	}
 	if in.Spec.Duration != nil {
@@ -805,7 +805,7 @@ func (in *StressChaos) GetChaos() *ChaosInstance {
 	}
 
 	action := reflect.ValueOf(in).Elem().FieldByName("Spec").FieldByName("Action")
-	if !action.IsZero() {
+	if action.IsValid() {
 		instance.Action = action.String()
 	}
 	if in.Spec.Duration != nil {
@@ -922,7 +922,7 @@ func (in *TimeChaos) GetChaos() *ChaosInstance {
 	}
 
 	action := reflect.ValueOf(in).Elem().FieldByName("Spec").FieldByName("Action")
-	if !action.IsZero() {
+	if action.IsValid() {
 		instance.Action = action.String()
 	}
 	if in.Spec.Duration != nil {
