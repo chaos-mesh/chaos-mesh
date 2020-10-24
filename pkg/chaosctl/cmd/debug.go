@@ -19,21 +19,24 @@ import (
 	"strings"
 
 	"github.com/spf13/cobra"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/client-go/kubernetes"
+	"sigs.k8s.io/controller-runtime/pkg/client/config"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/debug/networkchaos"
 	"github.com/chaos-mesh/chaos-mesh/pkg/debug/stresschaos"
 )
 
 type DebugOptions struct {
-	ChaosName   string
-	Namespace   string
-	BuilderArgs []string
+	ChaosName string
+	Namespace string
 }
 
 // debugCmd represents the debug command
 
 func init() {
 	o := &DebugOptions{}
+	validArgs := []string{"networkchaos", "stresschaos"}
 
 	var debugCmd = &cobra.Command{
 		Use:   `debug (CHAOSTYPE) [-c CHAOSNAME] [-n NAMESPACE]`,
@@ -48,36 +51,32 @@ Examples:
   # Return debug information from certain networkchaos
   chaosctl debug networkchaos -c web-show-network-delay -n chaos-testing`,
 		Run: func(cmd *cobra.Command, args []string) {
-			o.BuilderArgs = args
-			if err := o.Run(); err != nil {
+			if err := o.Run(args); err != nil {
 				log.Fatal(err)
 			}
 		},
+		ValidArgs: validArgs,
+	}
+
+	debugCmd.Flags().StringVarP(&o.ChaosName, "chaosname", "c", "", "certain chaos name")
+	debugCmd.Flags().StringVarP(&o.Namespace, "namespace", "n", "default", "namespace to find chaos")
+
+	if err := flagCompletion(debugCmd); err != nil {
+		log.Fatal(err)
 	}
 
 	rootCmd.AddCommand(debugCmd)
-
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// debugCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	debugCmd.Flags().StringVarP(&o.ChaosName, "chaosname", "c", "", "certain chaos name")
-	debugCmd.Flags().StringVarP(&o.Namespace, "namespace", "n", "default", "namespace to find chaos")
 }
 
-func (o *DebugOptions) Run() error {
-	if len(o.BuilderArgs) == 0 {
-		return fmt.Errorf("You must specify the type of chaos")
+func (o *DebugOptions) Run(args []string) error {
+	if len(args) == 0 {
+		return fmt.Errorf("The type of chaos need to be specified")
 	}
-	if len(o.BuilderArgs) > 1 {
-		return fmt.Errorf("You must specify only one type of chaos")
+	if len(args) > 1 {
+		return fmt.Errorf("Only one type of chaos need to be specified")
 	}
 
-	switch strings.ToLower(o.BuilderArgs[0]) {
+	switch strings.ToLower(args[0]) {
 	case "networkchaos":
 		if err := networkchaos.Debug(o.ChaosName, o.Namespace); err != nil {
 			return err
@@ -90,4 +89,37 @@ func (o *DebugOptions) Run() error {
 		return fmt.Errorf("chaos not supported")
 	}
 	return nil
+}
+
+func flagCompletion(cmd *cobra.Command) error {
+	k8sConfig, err := config.GetConfig()
+	if err != nil {
+		return err
+	}
+	clientset, err := kubernetes.NewForConfig(k8sConfig)
+	if err != nil {
+		return err
+	}
+	err = cmd.RegisterFlagCompletionFunc("namespace", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+		return listNameSpace(clientset, toComplete)
+	})
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func listNameSpace(clientset *kubernetes.Clientset, toComplete string) ([]string, cobra.ShellCompDirective) {
+	namespaces, err := clientset.CoreV1().Namespaces().List(v1.ListOptions{})
+	if err != nil {
+		return nil, cobra.ShellCompDirectiveDefault
+	}
+	var ret []string
+	for _, ns := range namespaces.Items {
+		if strings.HasPrefix(ns.Name, toComplete) {
+			ret = append(ret, ns.Name)
+		}
+	}
+	return ret, cobra.ShellCompDirectiveNoFileComp
 }
