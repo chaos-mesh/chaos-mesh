@@ -18,35 +18,30 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/go-logr/logr"
 	"k8s.io/client-go/util/retry"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	"github.com/chaos-mesh/chaos-mesh/controllers/reconciler"
+	ctx "github.com/chaos-mesh/chaos-mesh/pkg/router/context"
+	"github.com/chaos-mesh/chaos-mesh/pkg/router/endpoint"
 	"github.com/chaos-mesh/chaos-mesh/pkg/utils"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 const emptyString = ""
 
 // Reconciler for the twophase reconciler
 type Reconciler struct {
-	reconciler.InnerReconciler
-	client.Client
-	client.Reader
-	Log logr.Logger
+	endpoint.Endpoint
+	ctx.Context
 }
 
 // NewReconciler would create reconciler for twophase controller
-func NewReconciler(r reconciler.InnerReconciler, client client.Client, reader client.Reader, log logr.Logger) *Reconciler {
+func NewReconciler(e endpoint.Endpoint, ctx ctx.Context) *Reconciler {
 	return &Reconciler{
-		InnerReconciler: r,
-		Client:          client,
-		Reader:          reader,
-		Log:             log,
+		Endpoint: e,
+		Context:  ctx,
 	}
 }
 

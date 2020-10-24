@@ -14,26 +14,23 @@
 package v1alpha1
 
 import (
-	"time"
-
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
-// KindIOChaos is the kind for io chaos
-const KindIOChaos = "IoChaos"
+// +kubebuilder:object:root=true
+// +chaos-mesh:base
 
-func init() {
-	all.register(KindIOChaos, &ChaosKind{
-		Chaos:     &IoChaos{},
-		ChaosList: &IoChaosList{},
-	})
+// IoChaos is the Schema for the iochaos API
+type IoChaos struct {
+	metav1.TypeMeta   `json:",inline"`
+	metav1.ObjectMeta `json:"metadata,omitempty"`
+
+	Spec   IoChaosSpec   `json:"spec,omitempty"`
+	Status IoChaosStatus `json:"status,omitempty"`
 }
-
-// IOLayer represents the layer of I/O system.
-type IOLayer string
 
 // IoChaosSpec defines the desired state of IoChaos
 type IoChaosSpec struct {
@@ -120,134 +117,4 @@ func (in *IoChaosSpec) GetValue() string {
 // IoChaosStatus defines the observed state of IoChaos
 type IoChaosStatus struct {
 	ChaosStatus `json:",inline"`
-}
-
-// +kubebuilder:object:root=true
-
-// IoChaos is the Schema for the iochaos API
-type IoChaos struct {
-	metav1.TypeMeta   `json:",inline"`
-	metav1.ObjectMeta `json:"metadata,omitempty"`
-
-	Spec   IoChaosSpec   `json:"spec,omitempty"`
-	Status IoChaosStatus `json:"status,omitempty"`
-}
-
-func (in *IoChaos) GetStatus() *ChaosStatus {
-	return &in.Status.ChaosStatus
-}
-
-// IsDeleted returns whether this resource has been deleted
-func (in *IoChaos) IsDeleted() bool {
-	return !in.DeletionTimestamp.IsZero()
-}
-
-// GetPause returns the annotation when the chaos needs to be paused
-func (in *IoChaos) GetPause() string {
-	if in.Annotations == nil {
-		return ""
-	}
-	return in.Annotations[PauseAnnotationKey]
-}
-
-// SetPause set the pausetime of annotation. Use for empty pausetime for now.
-func (in *IoChaos) SetPause(s string) {
-	in.Annotations[PauseAnnotationKey] = s
-}
-
-// GetDuration would return the duration for chaos
-func (in *IoChaos) GetDuration() (*time.Duration, error) {
-	if in.Spec.Duration == nil {
-		return nil, nil
-	}
-	duration, err := time.ParseDuration(*in.Spec.Duration)
-	if err != nil {
-		return nil, err
-	}
-	return &duration, nil
-}
-
-func (in *IoChaos) GetNextStart() time.Time {
-	if in.Status.Scheduler.NextStart == nil {
-		return time.Time{}
-	}
-	return in.Status.Scheduler.NextStart.Time
-}
-
-func (in *IoChaos) SetNextStart(t time.Time) {
-	if t.IsZero() {
-		in.Status.Scheduler.NextStart = nil
-		return
-	}
-
-	if in.Status.Scheduler.NextStart == nil {
-		in.Status.Scheduler.NextStart = &metav1.Time{}
-	}
-	in.Status.Scheduler.NextStart.Time = t
-}
-
-func (in *IoChaos) GetNextRecover() time.Time {
-	if in.Status.Scheduler.NextRecover == nil {
-		return time.Time{}
-	}
-	return in.Status.Scheduler.NextRecover.Time
-}
-
-func (in *IoChaos) SetNextRecover(t time.Time) {
-	if t.IsZero() {
-		in.Status.Scheduler.NextRecover = nil
-		return
-	}
-
-	if in.Status.Scheduler.NextRecover == nil {
-		in.Status.Scheduler.NextRecover = &metav1.Time{}
-	}
-	in.Status.Scheduler.NextRecover.Time = t
-}
-
-// GetScheduler would return the scheduler for chaos
-func (in *IoChaos) GetScheduler() *SchedulerSpec {
-	return in.Spec.Scheduler
-}
-
-// GetChaos returns a chaos instance
-func (in *IoChaos) GetChaos() *ChaosInstance {
-	instance := &ChaosInstance{
-		Name:      in.Name,
-		Namespace: in.Namespace,
-		Kind:      KindIOChaos,
-		StartTime: in.CreationTimestamp.Time,
-		Action:    string(in.Spec.Action),
-		Status:    string(in.GetStatus().Experiment.Phase),
-		UID:       string(in.UID),
-	}
-	if in.Spec.Duration != nil {
-		instance.Duration = *in.Spec.Duration
-	}
-	if in.DeletionTimestamp != nil {
-		instance.EndTime = in.DeletionTimestamp.Time
-	}
-	return instance
-}
-
-// +kubebuilder:object:root=true
-
-// IoChaosList contains a list of IoChaos
-type IoChaosList struct {
-	metav1.TypeMeta `json:",inline"`
-	metav1.ListMeta `json:"metadata,omitempty"`
-	Items           []IoChaos `json:"items"`
-}
-
-// ListChaos returns a list of io chaos
-func (in *IoChaosList) ListChaos() []*ChaosInstance {
-	res := make([]*ChaosInstance, 0, len(in.Items))
-	for _, item := range in.Items {
-		res = append(res, item.GetChaos())
-	}
-	return res
-}
-
-func init() {
-	SchemeBuilder.Register(&IoChaos{}, &IoChaosList{})
 }

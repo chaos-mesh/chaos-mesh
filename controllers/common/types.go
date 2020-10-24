@@ -21,17 +21,15 @@ import (
 	"strings"
 	"time"
 
-	"github.com/go-logr/logr"
-
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	"github.com/chaos-mesh/chaos-mesh/controllers/reconciler"
 	"github.com/chaos-mesh/chaos-mesh/pkg/config"
+	ctx "github.com/chaos-mesh/chaos-mesh/pkg/router/context"
+	endpoint "github.com/chaos-mesh/chaos-mesh/pkg/router/endpoint"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/util/retry"
 
 	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 )
 
@@ -116,19 +114,15 @@ func isAllowedNamespaces(namespace, allowedNamespace, ignoredNamespace string) b
 
 // Reconciler for common chaos
 type Reconciler struct {
-	reconciler.InnerReconciler
-	client.Client
-	client.Reader
-	Log logr.Logger
+	endpoint.Endpoint
+	ctx.Context
 }
 
 // NewReconciler would create Reconciler for common chaos
-func NewReconciler(reconcile reconciler.InnerReconciler, c client.Client, r client.Reader, log logr.Logger) *Reconciler {
+func NewReconciler(e endpoint.Endpoint, ctx ctx.Context) *Reconciler {
 	return &Reconciler{
-		InnerReconciler: reconcile,
-		Client:          c,
-		Reader:          r,
-		Log:             log,
+		Endpoint: e,
+		Context:  ctx,
 	}
 }
 

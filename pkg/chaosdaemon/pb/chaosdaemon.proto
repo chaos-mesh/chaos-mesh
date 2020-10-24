@@ -130,6 +130,7 @@ message Chain {
   }
   Direction direction = 2;
   repeated string ipsets = 3;
+  string target = 4;
 }
 
 message TimeRequest {

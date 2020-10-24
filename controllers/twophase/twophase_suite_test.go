@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package twophase_test
+package twophase
 
 import (
 	"context"
@@ -34,9 +34,9 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	"github.com/chaos-mesh/chaos-mesh/controllers/reconciler"
-	"github.com/chaos-mesh/chaos-mesh/controllers/twophase"
 	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
+	ctx "github.com/chaos-mesh/chaos-mesh/pkg/router/context"
+	end "github.com/chaos-mesh/chaos-mesh/pkg/router/endpoint"
 )
 
 func TestTwoPhase(t *testing.T) {
@@ -58,18 +58,18 @@ var _ = BeforeSuite(func(done Done) {
 var _ = AfterSuite(func() {
 })
 
-var _ reconciler.InnerReconciler = (*fakeReconciler)(nil)
+var _ end.Endpoint = (*fakeEndpoint)(nil)
 
-type fakeReconciler struct{}
+type fakeEndpoint struct{}
 
-func (r fakeReconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.InnerObject) error {
+func (r fakeEndpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.InnerObject) error {
 	if err := mock.On("MockApplyError"); err != nil {
 		return err.(error)
 	}
 	return nil
 }
 
-func (r fakeReconciler) Recover(ctx context.Context, req ctrl.Request, chaos v1alpha1.InnerObject) error {
+func (r fakeEndpoint) Recover(ctx context.Context, req ctrl.Request, chaos v1alpha1.InnerObject) error {
 	if err := mock.On("MockRecoverError"); err != nil {
 		return err.(error)
 	}
@@ -121,7 +121,7 @@ func (in *fakeTwoPhaseChaos) GetPause() string {
 func (in *fakeTwoPhaseChaos) SetPause(s string) {
 }
 
-func (r fakeReconciler) Object() v1alpha1.InnerObject {
+func (r fakeEndpoint) Object() v1alpha1.InnerObject {
 	return &fakeTwoPhaseChaos{}
 }
 
@@ -224,10 +224,7 @@ func (in *fakeTwoPhaseChaos) DeepCopy() *fakeTwoPhaseChaos {
 }
 
 func (in *fakeTwoPhaseChaos) DeepCopyObject() runtime.Object {
-	if c := in.DeepCopy(); c != nil {
-		return c
-	}
-	return nil
+	return in.DeepCopy()
 }
 
 var (
@@ -275,10 +272,12 @@ var _ = Describe("TwoPhase", func() {
 
 			c := fake.NewFakeClientWithScheme(scheme.Scheme, &chaos)
 
-			r := twophase.Reconciler{
-				InnerReconciler: fakeReconciler{},
-				Client:          c,
-				Log:             ctrl.Log.WithName("controllers").WithName("TwoPhase"),
+			r := Reconciler{
+				Endpoint: fakeEndpoint{},
+				Context: ctx.Context{
+					Client: c,
+					Log:    ctrl.Log.WithName("controllers").WithName("TwoPhase"),
+				},
 			}
 
 			_, err = r.Reconcile(req)
@@ -297,10 +296,12 @@ var _ = Describe("TwoPhase", func() {
 
 			c := fake.NewFakeClientWithScheme(scheme.Scheme, &chaos)
 
-			r := twophase.Reconciler{
-				InnerReconciler: fakeReconciler{},
-				Client:          c,
-				Log:             ctrl.Log.WithName("controllers").WithName("TwoPhase"),
+			r := Reconciler{
+				Endpoint: fakeEndpoint{},
+				Context: ctx.Context{
+					Client: c,
+					Log:    ctrl.Log.WithName("controllers").WithName("TwoPhase"),
+				},
 			}
 
 			_, err = r.Reconcile(req)
@@ -330,10 +331,12 @@ var _ = Describe("TwoPhase", func() {
 
 			c := fake.NewFakeClientWithScheme(scheme.Scheme, &chaos)
 
-			r := twophase.Reconciler{
-				InnerReconciler: fakeReconciler{},
-				Client:          c,
-				Log:             ctrl.Log.WithName("controllers").WithName("TwoPhase"),
+			r := Reconciler{
+				Endpoint: fakeEndpoint{},
+				Context: ctx.Context{
+					Client: c,
+					Log:    ctrl.Log.WithName("controllers").WithName("TwoPhase"),
+				},
 			}
 
 			_, err = r.Reconcile(req)
@@ -357,10 +360,12 @@ var _ = Describe("TwoPhase", func() {
 
 			c := fake.NewFakeClientWithScheme(scheme.Scheme, &chaos)
 
-			r := twophase.Reconciler{
-				InnerReconciler: fakeReconciler{},
-				Client:          c,
-				Log:             ctrl.Log.WithName("controllers").WithName("TwoPhase"),
+			r := Reconciler{
+				Endpoint: fakeEndpoint{},
+				Context: ctx.Context{
+					Client: c,
+					Log:    ctrl.Log.WithName("controllers").WithName("TwoPhase"),
+				},
 			}
 
 			_, err = r.Reconcile(req)
@@ -381,10 +386,12 @@ var _ = Describe("TwoPhase", func() {
 
 			c := fake.NewFakeClientWithScheme(scheme.Scheme, &chaos)
 
-			r := twophase.Reconciler{
-				InnerReconciler: fakeReconciler{},
-				Client:          c,
-				Log:             ctrl.Log.WithName("controllers").WithName("TwoPhase"),
+			r := Reconciler{
+				Endpoint: fakeEndpoint{},
+				Context: ctx.Context{
+					Client: c,
+					Log:    ctrl.Log.WithName("controllers").WithName("TwoPhase"),
+				},
 			}
 
 			_, err = r.Reconcile(req)
@@ -408,10 +415,12 @@ var _ = Describe("TwoPhase", func() {
 
 			c := fake.NewFakeClientWithScheme(scheme.Scheme, &chaos)
 
-			r := twophase.Reconciler{
-				InnerReconciler: fakeReconciler{},
-				Client:          c,
-				Log:             ctrl.Log.WithName("controllers").WithName("TwoPhase"),
+			r := Reconciler{
+				Endpoint: fakeEndpoint{},
+				Context: ctx.Context{
+					Client: c,
+					Log:    ctrl.Log.WithName("controllers").WithName("TwoPhase"),
+				},
 			}
 
 			_, err = r.Reconcile(req)
@@ -439,7 +448,7 @@ var _ = Describe("TwoPhase", func() {
 			Expect(chaos.NextStart.Time.Day()).To(Equal(exp.Day()))
 			Expect(chaos.NextStart.Time.Hour()).To(Equal(exp.Hour()))
 			Expect(chaos.NextStart.Time.Minute()).To(Equal(exp.Minute()))
-			Expect(chaos.NextStart.Time.Second()).To(Equal(exp.Second()))
+			Expect(exp.Second()-chaos.NextStart.Time.Second() < 2).To(Equal(true))
 		})
 
 		It("TwoPhase ToApply Error", func() {
@@ -454,10 +463,12 @@ var _ = Describe("TwoPhase", func() {
 
 			c := fake.NewFakeClientWithScheme(scheme.Scheme, &chaos)
 
-			r := twophase.Reconciler{
-				InnerReconciler: fakeReconciler{},
-				Client:          c,
-				Log:             ctrl.Log.WithName("controllers").WithName("TwoPhase"),
+			r := Reconciler{
+				Endpoint: fakeEndpoint{},
+				Context: ctx.Context{
+					Client: c,
+					Log:    ctrl.Log.WithName("controllers").WithName("TwoPhase"),
+				},
 			}
 
 			defer mock.With("MockApplyError", errors.New("ApplyError"))()

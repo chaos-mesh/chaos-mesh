@@ -27,17 +27,23 @@ import (
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
-// KindNetworkChaos is the kind for network chaos
-const KindNetworkChaos = "NetworkChaos"
+// +kubebuilder:object:root=true
+// +chaos-mesh:base
 
-func init() {
-	all.register(KindNetworkChaos, &ChaosKind{
-		Chaos:     &NetworkChaos{},
-		ChaosList: &NetworkChaosList{},
-	})
+// NetworkChaos is the Schema for the networkchaos API
+type NetworkChaos struct {
+	metav1.TypeMeta   `json:",inline"`
+	metav1.ObjectMeta `json:"metadata,omitempty"`
+
+	// Spec defines the behavior of a pod chaos experiment
+	Spec NetworkChaosSpec `json:"spec"`
+
+	// +optional
+	// Most recently observed status of the chaos experiment about pods
+	Status NetworkChaosStatus `json:"status"`
 }
 
-// ChaosAction represents the chaos action about pods.
+// NetworkChaosAction represents the chaos action about pods.
 type NetworkChaosAction string
 
 const (
@@ -176,118 +182,6 @@ func (in *NetworkChaosSpec) GetValue() string {
 // NetworkChaosStatus defines the observed state of NetworkChaos
 type NetworkChaosStatus struct {
 	ChaosStatus `json:",inline"`
-}
-
-// +kubebuilder:object:root=true
-
-// NetworkChaos is the Schema for the networkchaos API
-type NetworkChaos struct {
-	metav1.TypeMeta   `json:",inline"`
-	metav1.ObjectMeta `json:"metadata,omitempty"`
-
-	// Spec defines the behavior of a pod chaos experiment
-	Spec NetworkChaosSpec `json:"spec"`
-
-	// +optional
-	// Most recently observed status of the chaos experiment about pods
-	Status NetworkChaosStatus `json:"status"`
-}
-
-func (in *NetworkChaos) GetStatus() *ChaosStatus {
-	return &in.Status.ChaosStatus
-}
-
-// IsDeleted returns whether this resource has been deleted
-func (in *NetworkChaos) IsDeleted() bool {
-	return !in.DeletionTimestamp.IsZero()
-}
-
-// GetPause returns the annotation when the chaos needs to be paused
-func (in *NetworkChaos) GetPause() string {
-	if in.Annotations == nil {
-		return ""
-	}
-	return in.Annotations[PauseAnnotationKey]
-}
-
-// SetPause set the pausetime of annotation. Use for empty pausetime for now.
-func (in *NetworkChaos) SetPause(s string) {
-	in.Annotations[PauseAnnotationKey] = s
-}
-
-// GetDuration would return the duration for chaos
-func (in *NetworkChaos) GetDuration() (*time.Duration, error) {
-	if in.Spec.Duration == nil {
-		return nil, nil
-	}
-	duration, err := time.ParseDuration(*in.Spec.Duration)
-	if err != nil {
-		return nil, err
-	}
-	return &duration, nil
-}
-
-func (in *NetworkChaos) GetNextStart() time.Time {
-	if in.Status.Scheduler.NextStart == nil {
-		return time.Time{}
-	}
-	return in.Status.Scheduler.NextStart.Time
-}
-
-func (in *NetworkChaos) SetNextStart(t time.Time) {
-	if t.IsZero() {
-		in.Status.Scheduler.NextStart = nil
-		return
-	}
-
-	if in.Status.Scheduler.NextStart == nil {
-		in.Status.Scheduler.NextStart = &metav1.Time{}
-	}
-	in.Status.Scheduler.NextStart.Time = t
-}
-
-func (in *NetworkChaos) GetNextRecover() time.Time {
-	if in.Status.Scheduler.NextRecover == nil {
-		return time.Time{}
-	}
-	return in.Status.Scheduler.NextRecover.Time
-}
-
-func (in *NetworkChaos) SetNextRecover(t time.Time) {
-	if t.IsZero() {
-		in.Status.Scheduler.NextRecover = nil
-		return
-	}
-
-	if in.Status.Scheduler.NextRecover == nil {
-		in.Status.Scheduler.NextRecover = &metav1.Time{}
-	}
-	in.Status.Scheduler.NextRecover.Time = t
-}
-
-// GetScheduler would return the scheduler for chaos
-func (in *NetworkChaos) GetScheduler() *SchedulerSpec {
-	return in.Spec.Scheduler
-}
-
-// GetChaos returns a chaos instance
-func (in *NetworkChaos) GetChaos() *ChaosInstance {
-	instance := &ChaosInstance{
-		Name:      in.Name,
-		Namespace: in.Namespace,
-		Kind:      KindNetworkChaos,
-		StartTime: in.CreationTimestamp.Time,
-		Action:    string(in.Spec.Action),
-		Status:    string(in.GetStatus().Experiment.Phase),
-		UID:       string(in.UID),
-	}
-	if in.Spec.Duration != nil {
-		instance.Duration = *in.Spec.Duration
-	}
-	if in.DeletionTimestamp != nil {
-		instance.EndTime = in.DeletionTimestamp.Time
-	}
-	return instance
 }
 
 // DelaySpec defines detail of a delay action
@@ -495,29 +389,4 @@ type ReorderSpec struct {
 	Reorder     string `json:"reorder"`
 	Correlation string `json:"correlation"`
 	Gap         int    `json:"gap"`
-}
-
-// +kubebuilder:object:root=true
-
-// NetworkChaosList contains a list of NetworkChaos
-type NetworkChaosList struct {
-	metav1.TypeMeta `json:",inline"`
-	metav1.ListMeta `json:"metadata,omitempty"`
-	Items           []NetworkChaos `json:"items"`
-}
-
-// ListChaos returns a list of network chaos
-func (in *NetworkChaosList) ListChaos() []*ChaosInstance {
-	if len(in.Items) == 0 {
-		return nil
-	}
-	res := make([]*ChaosInstance, 0, len(in.Items))
-	for _, item := range in.Items {
-		res = append(res, item.GetChaos())
-	}
-	return res
-}
-
-func init() {
-	SchemeBuilder.Register(&NetworkChaos{}, &NetworkChaosList{})
 }

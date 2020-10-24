@@ -13,20 +13,18 @@
 
 package v1alpha1
 
-import (
-	"time"
+import metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-)
+// +kubebuilder:object:root=true
+// +chaos-mesh:base
 
-// KindHTTPChaos is the kind for http chaos
-const KindHTTPChaos = "HTTPChaos"
+// HTTPChaos is the Schema for the HTTPchaos API
+type HTTPChaos struct {
+	metav1.TypeMeta   `json:",inline"`
+	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-func init() {
-	all.register(KindHTTPChaos, &ChaosKind{
-		Chaos:     &HTTPChaos{},
-		ChaosList: &HTTPChaosList{},
-	})
+	Spec   HTTPChaosSpec   `json:"spec,omitempty"`
+	Status HTTPChaosStatus `json:"status,omitempty"`
 }
 
 // HTTPChaosAction represents the chaos action about HTTP.
@@ -112,132 +110,4 @@ func (in *HTTPChaosSpec) GetSelector() SelectorSpec {
 
 type HTTPChaosStatus struct {
 	ChaosStatus `json:",inline"`
-}
-
-// +kubebuilder:object:root=true
-
-// HTTPChaos is the Schema for the HTTPchaos API
-type HTTPChaos struct {
-	metav1.TypeMeta   `json:",inline"`
-	metav1.ObjectMeta `json:"metadata,omitempty"`
-
-	Spec   HTTPChaosSpec   `json:"spec,omitempty"`
-	Status HTTPChaosStatus `json:"status,omitempty"`
-}
-
-func (in *HTTPChaos) GetStatus() *ChaosStatus {
-	return &in.Status.ChaosStatus
-}
-
-// IsDeleted returns whether this resource has been deleted
-func (in *HTTPChaos) IsDeleted() bool {
-	return !in.DeletionTimestamp.IsZero()
-}
-
-// GetPause returns the annotation when the chaos needs to be paused
-func (in *HTTPChaos) GetPause() string {
-	if in.Annotations == nil {
-		return ""
-	}
-	return in.Annotations[PauseAnnotationKey]
-}
-
-// SetPause set the pausetime of annotation. Use for empty pausetime for now.
-func (in *HTTPChaos) SetPause(s string) {
-	in.Annotations[PauseAnnotationKey] = s
-}
-
-// GetDuration would return the duration for chaos
-func (in *HTTPChaos) GetDuration() (*time.Duration, error) {
-	if in.Spec.Duration == nil {
-		return nil, nil
-	}
-	duration, err := time.ParseDuration(*in.Spec.Duration)
-	if err != nil {
-		return nil, err
-	}
-	return &duration, nil
-}
-
-func (in *HTTPChaos) GetNextStart() time.Time {
-	if in.Status.Scheduler.NextStart == nil {
-		return time.Time{}
-	}
-	return in.Status.Scheduler.NextStart.Time
-}
-
-func (in *HTTPChaos) SetNextStart(t time.Time) {
-	if t.IsZero() {
-		in.Status.Scheduler.NextStart = nil
-		return
-	}
-
-	if in.Status.Scheduler.NextStart == nil {
-		in.Status.Scheduler.NextStart = &metav1.Time{}
-	}
-	in.Status.Scheduler.NextStart.Time = t
-}
-
-func (in *HTTPChaos) GetNextRecover() time.Time {
-	if in.Status.Scheduler.NextRecover == nil {
-		return time.Time{}
-	}
-	return in.Status.Scheduler.NextRecover.Time
-}
-
-func (in *HTTPChaos) SetNextRecover(t time.Time) {
-	if t.IsZero() {
-		in.Status.Scheduler.NextRecover = nil
-		return
-	}
-
-	if in.Status.Scheduler.NextRecover == nil {
-		in.Status.Scheduler.NextRecover = &metav1.Time{}
-	}
-	in.Status.Scheduler.NextRecover.Time = t
-}
-
-// GetScheduler would return the scheduler for chaos
-func (in *HTTPChaos) GetScheduler() *SchedulerSpec {
-	return in.Spec.Scheduler
-}
-
-func (in *HTTPChaos) GetChaos() *ChaosInstance {
-	instance := &ChaosInstance{
-		Name:      in.Name,
-		Namespace: in.Namespace,
-		Kind:      KindHTTPChaos,
-		StartTime: in.CreationTimestamp.Time,
-		Action:    string(in.Spec.Action),
-		UID:       string(in.UID),
-	}
-	if in.Spec.Duration != nil {
-		instance.Duration = *in.Spec.Duration
-	}
-	if in.DeletionTimestamp != nil {
-		instance.EndTime = in.DeletionTimestamp.Time
-	}
-	return instance
-}
-
-// +kubebuilder:object:root=true
-
-// HTTPChaosList contains a list of HTTPChaos
-type HTTPChaosList struct {
-	metav1.TypeMeta `json:",inline"`
-	metav1.ListMeta `json:"metadata,omitempty"`
-	Items           []HTTPChaos `json:"items"`
-}
-
-// ListChaos returns a list of io chaos
-func (in *HTTPChaosList) ListChaos() []*ChaosInstance {
-	res := make([]*ChaosInstance, 0, len(in.Items))
-	for _, item := range in.Items {
-		res = append(res, item.GetChaos())
-	}
-	return res
-}
-
-func init() {
-	SchemeBuilder.Register(&HTTPChaos{}, &HTTPChaosList{})
 }

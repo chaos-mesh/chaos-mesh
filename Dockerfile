@@ -30,7 +30,7 @@ RUN apk add --no-cache curl tar
 
 WORKDIR /bin
 
-RUN curl -L https://github.com/chaos-mesh/toda/releases/download/v0.1.1/toda-linux-amd64.tar.gz | tar -xz
+RUN curl -L https://github.com/chaos-mesh/toda/releases/download/v0.1.4/toda-linux-amd64.tar.gz | tar -xz
 
 COPY ./scripts /scripts
 COPY --from=go_build /src/bin /bin

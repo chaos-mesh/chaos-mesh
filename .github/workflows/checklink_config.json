@@ -9,7 +9,5 @@
     {
       "pattern": ["^https://github.com"]
     }
-  ],
-  "retryOn429": true,
-  "aliveStatusCodes":[200, 206, 400, 0]
+  ]
 }

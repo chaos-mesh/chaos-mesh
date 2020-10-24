@@ -14,22 +14,11 @@
 package v1alpha1
 
 import (
-	"time"
-
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// KindKernelChaos is the kind for kernel chaos
-const KindKernelChaos = "KernelChaos"
-
-func init() {
-	all.register(KindKernelChaos, &ChaosKind{
-		Chaos:     &KernelChaos{},
-		ChaosList: &KernelChaosList{},
-	})
-}
-
 // +kubebuilder:object:root=true
+// +chaos-mesh:base
 
 // KernelChaos is the Schema for the kernelchaos API
 type KernelChaos struct {
@@ -148,128 +137,4 @@ type Frame struct {
 // KernelChaosStatus defines the observed state of KernelChaos
 type KernelChaosStatus struct {
 	ChaosStatus `json:",inline"`
-}
-
-// GetDuration gets the duration of KernelChaos
-func (in *KernelChaos) GetDuration() (*time.Duration, error) {
-	if in.Spec.Duration == nil {
-		return nil, nil
-	}
-	duration, err := time.ParseDuration(*in.Spec.Duration)
-	if err != nil {
-		return nil, err
-	}
-	return &duration, nil
-}
-
-// GetNextStart gets NextStart field of KernelChaos
-func (in *KernelChaos) GetNextStart() time.Time {
-	if in.Status.Scheduler.NextStart == nil {
-		return time.Time{}
-	}
-	return in.Status.Scheduler.NextStart.Time
-}
-
-// SetNextStart sets NextStart field of KernelChaos
-func (in *KernelChaos) SetNextStart(t time.Time) {
-	if t.IsZero() {
-		in.Status.Scheduler.NextStart = nil
-		return
-	}
-
-	if in.Status.Scheduler.NextStart == nil {
-		in.Status.Scheduler.NextStart = &metav1.Time{}
-	}
-	in.Status.Scheduler.NextStart.Time = t
-}
-
-// GetNextRecover gets NextRecover field of KernelChaos
-func (in *KernelChaos) GetNextRecover() time.Time {
-	if in.Status.Scheduler.NextRecover == nil {
-		return time.Time{}
-	}
-	return in.Status.Scheduler.NextRecover.Time
-}
-
-// SetNextRecover sets NextRecover field of KernelChaos
-func (in *KernelChaos) SetNextRecover(t time.Time) {
-	if t.IsZero() {
-		in.Status.Scheduler.NextRecover = nil
-		return
-	}
-
-	if in.Status.Scheduler.NextRecover == nil {
-		in.Status.Scheduler.NextRecover = &metav1.Time{}
-	}
-	in.Status.Scheduler.NextRecover.Time = t
-}
-
-// GetScheduler returns the scheduler of KernelChaos
-func (in *KernelChaos) GetScheduler() *SchedulerSpec {
-	return in.Spec.Scheduler
-}
-
-// GetStatus returns the status of KernelChaos
-func (in *KernelChaos) GetStatus() *ChaosStatus {
-	return &in.Status.ChaosStatus
-}
-
-// IsDeleted returns whether this resource has been deleted
-func (in *KernelChaos) IsDeleted() bool {
-	return !in.DeletionTimestamp.IsZero()
-}
-
-// GetPause returns whether this resource has been paused
-func (in *KernelChaos) GetPause() string {
-	if in.Annotations == nil || in.Annotations[PauseAnnotationKey] == "" {
-		return ""
-	}
-	return in.Annotations[PauseAnnotationKey]
-}
-
-// SetPause set the pausetime of annotation. Use for empty pausetime for now.
-func (in *KernelChaos) SetPause(s string) {
-	in.Annotations[PauseAnnotationKey] = s
-}
-
-// GetChaos returns a chaos instance
-func (in *KernelChaos) GetChaos() *ChaosInstance {
-	instance := &ChaosInstance{
-		Name:      in.Name,
-		Namespace: in.Namespace,
-		Kind:      KindKernelChaos,
-		StartTime: in.CreationTimestamp.Time,
-		Action:    "",
-		Status:    string(in.GetStatus().Experiment.Phase),
-		UID:       string(in.UID),
-	}
-	if in.Spec.Duration != nil {
-		instance.Duration = *in.Spec.Duration
-	}
-	if in.DeletionTimestamp != nil {
-		instance.EndTime = in.DeletionTimestamp.Time
-	}
-	return instance
-}
-
-// +kubebuilder:object:root=true
-
-// KernelChaosList contains a list of KernelChaos
-type KernelChaosList struct {
-	metav1.TypeMeta `json:",inline"`
-	metav1.ListMeta `json:"metadata,omitempty"`
-	Items           []KernelChaos `json:"items"`
-}
-
-// ListChaos returns a list of kernel chaos
-func (in *KernelChaosList) ListChaos() []*ChaosInstance {
-	res := make([]*ChaosInstance, 0, len(in.Items))
-	for _, item := range in.Items {
-		res = append(res, item.GetChaos())
-	}
-	return res
-}
-
-func init() {
-	SchemeBuilder.Register(&KernelChaos{}, &KernelChaosList{})
 }
