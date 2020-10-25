@@ -122,15 +122,20 @@ func GetPod(chaosType string, chaos string, ns string) (*PodName, error) {
 	if err != nil {
 		return nil, fmt.Errorf("run command '%s' failed with: %s", cmd, err.Error())
 	}
+
+	failedMessage := regexp.MustCompile("(?:Failed Message:\\s*)(.*)").FindStringSubmatch(string(out))
+	if len(failedMessage) != 0 {
+		return nil, fmt.Errorf("chaos failed with: %s", failedMessage)
+	}
 	podHier := []string{"Status", "Experiment", "Pod Records", "Name"}
 	podName, err := ExtractFromYaml(string(out), podHier)
 	if err != nil {
-		return nil, fmt.Errorf("get podName from 'kubectl describe' failed with: %s", err.Error())
+		return nil, fmt.Errorf("get podName from '%s' failed with: %s", cmd, err.Error())
 	}
 	podHier = []string{"Status", "Experiment", "Pod Records", "Namespace"}
 	podNamespace, err := ExtractFromYaml(string(out), podHier)
 	if err != nil {
-		return nil, fmt.Errorf("get podNamespace from 'kubectl describe' with: %s", err.Error())
+		return nil, fmt.Errorf("get podNamespace from '%s' with: %s", cmd, err.Error())
 	}
 
 	// get nodeName
@@ -141,7 +146,7 @@ func GetPod(chaosType string, chaos string, ns string) (*PodName, error) {
 	}
 	nodeName, err := ExtractFromGet(string(out), "NODE")
 	if err != nil {
-		return nil, fmt.Errorf("get nodeName from 'kubectl get' failed with: %s", err.Error())
+		return nil, fmt.Errorf("get nodeName from '%s' failed with: %s", cmd, err.Error())
 	}
 
 	// get chaos daemon
@@ -158,11 +163,11 @@ func GetPod(chaosType string, chaos string, ns string) (*PodName, error) {
 	}
 	chaosDaemonPodName, err := ExtractFromGet(title+"\n"+string(out), "NAME")
 	if err != nil {
-		return nil, fmt.Errorf("get chaos daemon name failed with: %s", err.Error())
+		return nil, fmt.Errorf("get chaos daemon name from '%s' failed with: %s", cmd, err.Error())
 	}
 	chaosDaemonPodNamespace, err := ExtractFromGet(title+"\n"+string(out), "NAMESPACE")
 	if err != nil {
-		return nil, fmt.Errorf("get chaos daemon namespace failed with: %s", err.Error())
+		return nil, fmt.Errorf("get chaos daemon namespace failed from '%s' with: %s", cmd, err.Error())
 	}
 
 	return &PodName{podName, podNamespace, chaosDaemonPodName, chaosDaemonPodNamespace}, nil

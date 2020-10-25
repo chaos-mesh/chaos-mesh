@@ -23,6 +23,7 @@ import (
 	"k8s.io/client-go/kubernetes"
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
 
+	"github.com/chaos-mesh/chaos-mesh/pkg/debug/iochaos"
 	"github.com/chaos-mesh/chaos-mesh/pkg/debug/networkchaos"
 	"github.com/chaos-mesh/chaos-mesh/pkg/debug/stresschaos"
 )
@@ -36,7 +37,7 @@ type DebugOptions struct {
 
 func init() {
 	o := &DebugOptions{}
-	validArgs := []string{"networkchaos", "stresschaos"}
+	validArgs := []string{"networkchaos", "stresschaos", "iochaos"}
 
 	var debugCmd = &cobra.Command{
 		Use:   `debug (CHAOSTYPE) [-c CHAOSNAME] [-n NAMESPACE]`,
@@ -83,6 +84,10 @@ func (o *DebugOptions) Run(args []string) error {
 		}
 	case "stresschaos":
 		if err := stresschaos.Debug(o.ChaosName, o.Namespace); err != nil {
+			return err
+		}
+	case "iochaos":
+		if err := iochaos.Debug(o.ChaosName, o.Namespace); err != nil {
 			return err
 		}
 	default:
