@@ -2,7 +2,7 @@
 
 Thanks for your interest in improving the project! This document provides a step-by-step guide for general contributions to Chaos Mesh.
 
-If you want to get yourself some rewards while contributing to the Chaos Mesh project, you can't miss [Hacktoberfest 2020](https://hacktoberfest.digitalocean.com/). It's a month-long (Oct 1 - Oct 31) celebration of open source software organized by DigitalOcean, Intel, and DEV. 
+If you want to get yourself some rewards while contributing to the Chaos Mesh project, you can't miss [Hacktoberfest 2020](https://hacktoberfest.digitalocean.com/). It's a month-long (Oct 1 - Oct 31) celebration of open source software organized by DigitalOcean, Intel, and DEV.
 
 Chaos Mesh project is now participating in this program. We have made an [issue list](https://github.com/chaos-mesh/chaos-mesh/issues?q=is%3Aissue+is%3Aopen+label%3AHacktoberfest) for contributors, covering code enhancement, documentation improvement, and test cases. Come pick the issues and earn your Hacktoberfest tee or tree reward.
 
@@ -121,28 +121,13 @@ $ make test
    ...
    ```
 
-3. Build the image:
+3. Install Chaos Mesh:
+
+   Following command will rebuild project code and reinstall chaos mesh.
 
    ```bash
-   $ make image-chaos-mesh
-   $ make image-chaos-dahsboard
-   $ make image-chaos-daemon
-   # or build all images
-   $ make image
-   ```
-
-4. Load image into Kubernetes nodes:
-
-   ```bash
-   $ kind load docker-image pingcap/chaos-mesh:latest
-   $ kind load docker-image pingcap/chaos-dashboard:latest
-   $ kind load docker-image pingcap/chaos-daemon:latest
-   ```
-
-5. Deploy Chaos Mesh:
-
-   ```bash
-   $ ./install.sh --runtime containerd
+   #
+   $ ./hack/local-up-chaos-mesh.sh
    ```
 
 Now you can test your code update on the deployed cluster.
