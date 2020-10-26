@@ -8,7 +8,7 @@ This chart bootstraps a [Chaos Mesh](https://github.com/chaos-mesh/chaos-mesh) d
 
 ## Deploy
 
-Before deploying Chaos Mesh, make sure you have installed the [Prerequisites](../../website/docs/get_started/installation.md#prerequisites). And then follow the [install-by-helm](../../website/docs/get_started/installation.md#install-by-helm) doc step by step.
+Before deploying Chaos Mesh, make sure you have installed the [Prerequisites](https://chaos-mesh.org/docs/get_started/installation#prerequisites). And then follow the [install-by-helm](https://chaos-mesh.org/docs/get_started/installation#install-by-helm) doc step by step.
 
 ## Configuration
 
@@ -96,6 +96,7 @@ The following tables list the configurable parameters of the Chaos Mesh chart an
 | `webhook.CRDS` | Define a list of chaos types that implement admission webhook | `[podchaos,iochaos,timechaos,networkchaos,kernelchaos]` |
 
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm install`. For example,
+
 ```console
 # helm 2.X
 helm install helm/chaos-mesh --name=chaos-mesh --namespace=chaos-testing --set dashboard.create=true
@@ -145,6 +146,7 @@ The webhook's cert and the [MutatingAdmissionWebhook](https://kubernetes.io/docs
 In case your Cert-manager's option `enable-certificate-owner-ref` is true, it means that deleting a certificate resource will also delete its secret.
 
 The Cert-manager's option `enable-certificate-owner-ref` refer to the following:
+
 > https://github.com/jetstack/cert-manager/issues/296
 >
 > https://github.com/jetstack/cert-manager/pull/819

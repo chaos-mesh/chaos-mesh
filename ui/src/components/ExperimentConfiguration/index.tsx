@@ -10,7 +10,6 @@ import {
 } from '@material-ui/core'
 
 import { ArchiveDetail } from 'api/archives.type'
-import { ChaosKindKeyMap } from 'lib/formikhelpers'
 import { ExperimentDetail } from 'api/experiments.type'
 import React from 'react'
 import { RootState } from 'store'
@@ -65,7 +64,7 @@ const ExperimentConfiguration: React.FC<ExperimentConfigurationProps> = ({ exper
                 <TableCell>{T('newE.target.action')}</TableCell>
                 <TableCell>
                   <Typography variant="body2" color="textSecondary">
-                    {(e.experiment_info.target[ChaosKindKeyMap[e.kind].key] as any).action}
+                    {e.yaml.spec.action}
                   </Typography>
                 </TableCell>
               </TableRow>
@@ -124,13 +123,13 @@ const ExperimentConfiguration: React.FC<ExperimentConfigurationProps> = ({ exper
 
         <Table size="small">
           <TableBody>
-            {e.experiment_info.scheduler.cron ? (
+            {e.yaml.spec.scheduler?.cron ? (
               <>
                 <TableRow>
                   <TableCell>Cron</TableCell>
                   <TableCell>
                     <Typography variant="body2" color="textSecondary">
-                      {e.experiment_info.scheduler.cron}
+                      {e.yaml.spec.scheduler.cron}
                     </Typography>
                   </TableCell>
                 </TableRow>
@@ -139,7 +138,7 @@ const ExperimentConfiguration: React.FC<ExperimentConfigurationProps> = ({ exper
                   <TableCell>{T('newE.schedule.duration')}</TableCell>
                   <TableCell>
                     <Typography variant="body2" color="textSecondary">
-                      {e.experiment_info.scheduler.duration ? e.experiment_info.scheduler.duration : 'immediate'}
+                      {e.yaml.spec.duration || 'immediate'}
                     </Typography>
                   </TableCell>
                 </TableRow>

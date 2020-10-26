@@ -43,8 +43,6 @@ const (
 	defaultContainerdSocket  = "/run/containerd/containerd.sock"
 	containerdProtocolPrefix = "containerd://"
 	containerdDefaultNS      = "k8s.io"
-
-	defaultProcPrefix = "/proc"
 )
 
 // ContainerRuntimeInfoClient represents a struct which can give you information about container runtime
@@ -184,11 +182,6 @@ func CreateContainerRuntimeInfoClient(containerRuntime string) (ContainerRuntime
 	return cli, nil
 }
 
-// GetNsPath returns corresponding namespace path
-func GetNsPath(pid uint32, typ bpm.NsType) string {
-	return fmt.Sprintf("%s/%d/ns/%s", defaultProcPrefix, pid, string(typ))
-}
-
 // ContainerKillByContainerID kills container according to container id
 func (c DockerClient) ContainerKillByContainerID(ctx context.Context, containerID string) error {
 	if len(containerID) < len(dockerProtocolPrefix) {
@@ -227,7 +220,7 @@ func (c ContainerdClient) ContainerKillByContainerID(ctx context.Context, contai
 
 // ReadCommName returns the command name of process
 func ReadCommName(pid int) (string, error) {
-	f, err := os.Open(fmt.Sprintf("%s/%d/comm", defaultProcPrefix, pid))
+	f, err := os.Open(fmt.Sprintf("%s/%d/comm", bpm.DefaultProcPrefix, pid))
 	if err != nil {
 		return "", err
 	}
@@ -243,7 +236,7 @@ func ReadCommName(pid int) (string, error) {
 // GetChildProcesses will return all child processes's pid. Include all generations.
 // only return error when /proc/pid/tasks cannot be read
 func GetChildProcesses(ppid uint32) ([]uint32, error) {
-	procs, err := ioutil.ReadDir(defaultProcPrefix)
+	procs, err := ioutil.ReadDir(bpm.DefaultProcPrefix)
 	if err != nil {
 		return nil, err
 	}
@@ -265,7 +258,7 @@ func GetChildProcesses(ppid uint32) ([]uint32, error) {
 				continue
 			}
 
-			statusPath := defaultProcPrefix + "/" + proc.Name() + "/stat"
+			statusPath := bpm.DefaultProcPrefix + "/" + proc.Name() + "/stat"
 
 			wg.Add(1)
 			go func() {
