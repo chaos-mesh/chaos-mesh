@@ -20,6 +20,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/ghodss/yaml"
 )
@@ -28,6 +29,7 @@ var (
 	ColorReset = "\033[0m"
 	ColorRed   = "\033[31m"
 	ColorGreen = "\033[32m"
+	ColorCyan  = "\033[36m"
 )
 
 type PodName struct {
@@ -37,7 +39,7 @@ type PodName struct {
 	ChaosDaemonPodNamespace string
 }
 
-func ExtractFromYaml(yamlStr string, str []string) (string, error) {
+func ExtractFromYaml(yamlStr string, str []string) (interface{}, error) {
 	resultMap := make(map[string]interface{})
 	// remove parts that could not been parsed to yaml
 	for {
@@ -62,7 +64,7 @@ func ExtractFromYaml(yamlStr string, str []string) (string, error) {
 			return "", fmt.Errorf("wrong hierarchy: %s", str[i])
 		}
 	}
-	ret, ok := resultMap[str[len(str)-1]].(string)
+	ret, ok := resultMap[str[len(str)-1]]
 	if !ok {
 		return "", fmt.Errorf("wrong hierarchy: %s", str[len(str)-1])
 	}
@@ -127,6 +129,19 @@ func GetPod(chaosType string, chaos string, ns string) (*PodName, error) {
 	if len(failedMessage) != 0 {
 		return nil, fmt.Errorf("chaos failed with: %s", failedMessage)
 	}
+
+	isRunning := regexp.MustCompile("(?:Next Recover:\\s)(.*)").MatchString(string(out))
+	nextStart := regexp.MustCompile("(?:Next Start:\\s*)(.*)").FindStringSubmatch(string(out))[1]
+	if isRunning == false {
+		nextStartTime, err := time.Parse(time.RFC3339, nextStart)
+		if err != nil {
+			return nil, fmt.Errorf("time parsing next start failed: %s", err.Error())
+		}
+		waitTime := nextStartTime.Sub(time.Now())
+		fmt.Printf("Waiting for chaos to start, for %v\n", waitTime)
+		time.Sleep(waitTime)
+	}
+
 	podHier := []string{"Status", "Experiment", "Pod Records", "Name"}
 	podName, err := ExtractFromYaml(string(out), podHier)
 	if err != nil {
@@ -170,5 +185,9 @@ func GetPod(chaosType string, chaos string, ns string) (*PodName, error) {
 		return nil, fmt.Errorf("get chaos daemon namespace failed from '%s' with: %s", cmd, err.Error())
 	}
 
-	return &PodName{podName, podNamespace, chaosDaemonPodName, chaosDaemonPodNamespace}, nil
+	return &PodName{podName.(string), podNamespace.(string), chaosDaemonPodName, chaosDaemonPodNamespace}, nil
+}
+
+func PrintWithTab(s string) {
+	fmt.Printf("\t%s\n", regexp.MustCompile("\n").ReplaceAllString(s, "\n\t"))
 }

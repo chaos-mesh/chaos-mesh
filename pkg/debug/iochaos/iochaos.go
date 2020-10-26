@@ -26,7 +26,7 @@ func Debug(chaos string, ns string) error {
 		return fmt.Errorf(err.Error())
 	}
 	for _, chaosName := range chaosList {
-		fmt.Println(string(common.ColorRed), "[CHAOSNAME]:", string(common.ColorReset), chaosName)
+		fmt.Println(string(common.ColorCyan), "[CHAOSNAME]:", chaosName, string(common.ColorReset))
 		if err := debugEachChaos(chaosName, ns); err != nil {
 			return fmt.Errorf("debug chaos failed with: %s", err.Error())
 		}
@@ -46,16 +46,16 @@ func debugEachChaos(chaos string, ns string) error {
 	if err != nil {
 		return fmt.Errorf("run command '%s' failed with: %s", cmd, err.Error())
 	}
-	fmt.Println(string(common.ColorGreen), "[file discriptors]", string(common.ColorReset))
-	fmt.Println(string(out))
+	fmt.Println(string(common.ColorCyan), "1. [file discriptors]", string(common.ColorReset))
+	common.PrintWithTab(string(out))
 
 	cmd = fmt.Sprintf("kubectl exec %s -n %s -- mount", p.ChaosDaemonPodName, p.ChaosDaemonPodNamespace)
 	out, err = exec.Command("bash", "-c", cmd).CombinedOutput()
 	if err != nil {
 		return fmt.Errorf("run command '%s' failed with: %s", cmd, err.Error())
 	}
-	fmt.Println(string(common.ColorGreen), "[mount information]", string(common.ColorReset))
-	fmt.Println(string(out))
+	fmt.Println(string(common.ColorCyan), "2. [mount information]", string(common.ColorReset))
+	common.PrintWithTab(string(out))
 
 	return nil
 }

@@ -31,7 +31,7 @@ func Debug(chaos string, ns string) error {
 		return fmt.Errorf(err.Error())
 	}
 	for _, chaosName := range chaosList {
-		fmt.Println(string(common.ColorRed), "[CHAOSNAME]:", string(common.ColorReset), chaosName)
+		fmt.Println(string(common.ColorCyan), "[CHAOSNAME]:", chaosName, string(common.ColorReset))
 		if err := debugEachChaos(chaosName, ns); err != nil {
 			return fmt.Errorf("debug chaos failed with: %s", err.Error())
 		}
@@ -66,11 +66,24 @@ func debugEachChaos(chaos string, ns string) error {
 		cpuMountType = "cpu"
 	}
 
+	cmd = fmt.Sprintf("kubectl exec %s -n %s -- ps", p.PodName, p.PodNamespace)
+	out, err = exec.Command("bash", "-c", cmd).CombinedOutput()
+	if err != nil {
+		return fmt.Errorf("run command '%s' failed with: %s", cmd, err.Error())
+	}
+	stressngLine := regexp.MustCompile("(.*)(stress-ng)").FindStringSubmatch(string(out))
+	if len(stressngLine) == 0 {
+		return fmt.Errorf("Could not find stress-ng, StressChaos failed")
+	}
+	stressngPid := strings.Split(stressngLine[0], " ")[0]
+
 	cmd = fmt.Sprintf("kubectl exec %s -n %s -- cat /proc/1/cgroup", p.PodName, p.PodNamespace)
 	out, err = exec.Command("bash", "-c", cmd).CombinedOutput()
 	if err != nil {
 		return fmt.Errorf("run command '%s' failed with: %s", cmd, err.Error())
 	}
+	fmt.Println(string(common.ColorCyan), "1. [cat /proc/1/cgroup]:", string(common.ColorReset))
+	common.PrintWithTab(string(out))
 	var expr string
 	if isCPU {
 		expr = "(?::" + cpuMountType + ":)(.*)"
@@ -79,6 +92,22 @@ func debugEachChaos(chaos string, ns string) error {
 	}
 	processPath := regexp.MustCompile(expr).FindStringSubmatch(string(out))[1]
 
+	cmd = fmt.Sprintf("kubectl exec %s -n %s -- cat /proc/%s/cgroup", p.PodName, p.PodNamespace, stressngPid)
+	outStress, err := exec.Command("bash", "-c", cmd).CombinedOutput()
+	if err != nil {
+		return fmt.Errorf("run command '%s' failed with: %s", cmd, err.Error())
+	}
+	fmt.Println(string(common.ColorCyan), "2. [cat /proc/(stress-ng pid)/cgroup]:", string(common.ColorReset))
+	common.PrintWithTab(string(outStress))
+
+	if string(out) != string(outStress) {
+		errInfo := fmt.Sprintf("%sStressChaos failed to execute as expected%s\n", string(common.ColorRed), string(common.ColorReset))
+		common.PrintWithTab(errInfo)
+		return nil
+	}
+	sucInfo := fmt.Sprintf("%scgroup is the same%s\n", string(common.ColorGreen), string(common.ColorReset))
+	common.PrintWithTab(sucInfo)
+
 	// print out debug info
 	if isCPU {
 		cmd = fmt.Sprintf("kubectl exec %s -n %s -- cat /sys/fs/cgroup/%s/%s/cpu.cfs_quota_us", p.ChaosDaemonPodName, p.ChaosDaemonPodNamespace, cpuMountType, processPath)
@@ -86,7 +115,8 @@ func debugEachChaos(chaos string, ns string) error {
 		if err != nil {
 			return fmt.Errorf("run command '%s' failed with: %s", cmd, err.Error())
 		}
-		fmt.Println(string(common.ColorGreen), "[cpu.cfs_quota_us]:", string(common.ColorReset), string(out))
+		fmt.Println(string(common.ColorCyan), "3. [cpu.cfs_quota_us]:", string(common.ColorReset))
+		common.PrintWithTab(string(out))
 		quota, err := strconv.Atoi(strings.TrimSuffix(string(out), "\n"))
 		if err != nil {
 			return fmt.Errorf("could not get cpu.cfs_quota_us with: %s", err.Error())
@@ -97,14 +127,15 @@ func debugEachChaos(chaos string, ns string) error {
 		if err != nil {
 			return fmt.Errorf("run command '%s' failed with: %s", cmd, err.Error())
 		}
-		fmt.Println(string(common.ColorGreen), "[cpu.cfs_period_us]:", string(common.ColorReset), string(out))
+		fmt.Println(string(common.ColorCyan), "4. [cpu.cfs_period_us]:", string(common.ColorReset))
+		common.PrintWithTab(string(out))
 		period, err := strconv.Atoi(strings.TrimSuffix(string(out), "\n"))
 		if err != nil {
 			return fmt.Errorf("could not get cpu.cfs_period_us with: %s", err.Error())
 		}
 
 		if quota == -1 {
-			fmt.Println(string(common.ColorGreen), "no cpu limit is set for now", string(common.ColorReset))
+			fmt.Println(string(common.ColorRed), "no cpu limit is set for now", string(common.ColorReset))
 		} else {
 			fmt.Println(string(common.ColorGreen), "cpu limit is equals to", float64(quota)/float64(period), string(common.ColorReset))
 		}
@@ -118,7 +149,8 @@ func debugEachChaos(chaos string, ns string) error {
 		if err != nil {
 			return fmt.Errorf("could not get memory.limit_in_bytes with: %s", err.Error())
 		}
-		fmt.Println(string(common.ColorGreen), "[memory.limit_in_bytes]: ", string(common.ColorReset), bytefmt.ByteSize(limit))
+		fmt.Println(string(common.ColorCyan), "3. [memory.limit_in_bytes]: ", string(common.ColorReset))
+		common.PrintWithTab(bytefmt.ByteSize(limit) + "B")
 	}
 	return nil
 }
