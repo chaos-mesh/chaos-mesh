@@ -172,41 +172,5 @@
     "labelSelectors": "Label Selectors",
     "annotationsSelectors": "Annotation Selectors",
     "phaseSelectors": "Phase Selectors"
-  },
-  "validation": {
-    "name": "The experiment name is required",
-    "target": {
-      "pod_chaos": {
-        "container_name": "The Container name is required"
-      },
-      "network_chaos": {
-        "action": "The NetworkChaos action is required",
-        "direction": "The direction is required",
-        "bandwidth": {
-          "rate": "The rate of bandwidth is required"
-        },
-        "corrupt": {
-          "corrupt": "The corrupt is required",
-          "correlation": "The correlation of corrupt is required"
-        },
-        "delay": {
-          "latency": "The latency of delay is required"
-        },
-        "duplicate": {
-          "duplicate": "The duplicate is required",
-          "correlation": "The correlation of duplicate is required"
-        },
-        "loss": {
-          "loss": "The loss is required",
-          "correlation": "The correlation of loss is required"
-        }
-      },
-      "io_chaos": {
-        "action": "The IOChaos action is required"
-      },
-      "time_chaos": {
-        "time_offset": "The time offset is required"
-      }
-    }
   }
 }
