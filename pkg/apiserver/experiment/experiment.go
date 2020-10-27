@@ -654,6 +654,7 @@ func (s *Service) getExperimentDetail(c *gin.Context) {
 			c.Status(http.StatusInternalServerError)
 			_ = c.Error(utils.ErrInvalidRequest.New("the experiment is not found"))
 		}
+		return
 	}
 
 	kind := exp.Kind
@@ -712,6 +713,7 @@ func (s *Service) deleteExperiment(c *gin.Context) {
 			c.Status(http.StatusInternalServerError)
 			_ = c.Error(utils.ErrInvalidRequest.New("the experiment is not found"))
 		}
+		return
 	}
 
 	kind := exp.Kind
@@ -845,6 +847,7 @@ func (s *Service) pauseExperiment(c *gin.Context) {
 			c.Status(http.StatusInternalServerError)
 			_ = c.Error(utils.ErrInvalidRequest.New("the experiment is not found"))
 		}
+		return
 	}
 
 	exp := &Base{
@@ -895,6 +898,7 @@ func (s *Service) startExperiment(c *gin.Context) {
 			c.Status(http.StatusInternalServerError)
 			_ = c.Error(utils.ErrInvalidRequest.New("the experiment is not found"))
 		}
+		return
 	}
 
 	exp := &Base{
