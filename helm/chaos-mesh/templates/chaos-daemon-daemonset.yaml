@@ -61,19 +61,9 @@ spec:
             {{- end }}
           securityContext:
             privileged: true
-            #runAsNonRoot: true
-            runAsUser: 1000
-            runAsGroup: 1000
             capabilities:
               add:
                 - SYS_PTRACE
-                #- SETGID
-                #- SETUID
-                #- SYS_ADMIN
-                #- FOWNER
-                #- CHOWN
-                #- DAC_OVERRIDE
-                #- FSETID
           volumeMounts:
             - name: socket-path
               {{- if eq .Values.chaosDaemon.runtime "docker" }}
@@ -83,8 +73,6 @@ spec:
               {{- end }}
             - name: sys-path
               mountPath: /sys
-            - name: etc-path
-              mountPath: /etc
           ports:
             - name: grpc
               containerPort: {{ .Values.chaosDaemon.grpcPort }}
@@ -109,10 +97,6 @@ spec:
             - !!str {{ .Values.bpfki.grpcPort }}
           securityContext:
             privileged: true
-            #runAsNonRoot: true
-            runAsUser: 1000
-            runAsGroup: 1000
-            
           volumeMounts:
             - name: localtime-path
               mountPath: /etc/localtime
@@ -135,9 +119,6 @@ spec:
         - name: sys-path
           hostPath:
             path: /sys
-        - name: etc-path
-          hostPath:
-            path: /etc
 {{- if .Values.bpfki.create }}
         - name: localtime-path
           hostPath:

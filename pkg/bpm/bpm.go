@@ -325,14 +325,9 @@ func (b *ProcessBuilder) Build() *ManagedProcess {
 		}
 	}
 
-	newArgs := []string{cmd}
-	for _, arg := range args {
-		newArgs = append(newArgs, arg)
-	}
+	log.Info("build command", "command", cmd+" "+strings.Join(args, " "))
 
-	log.Info("build command", "command", "sudo "+strings.Join(newArgs, " "))
-
-	command := exec.CommandContext(b.ctx, "sudo", newArgs...)
+	command := exec.CommandContext(b.ctx, cmd, args...)
 	command.SysProcAttr = &syscall.SysProcAttr{}
 
 	if b.suicide {
