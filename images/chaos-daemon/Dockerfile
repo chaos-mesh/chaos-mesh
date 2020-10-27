@@ -16,3 +16,4 @@ COPY --from=pingcap/chaos-binary /bin/chaos-daemon /usr/local/bin/chaos-daemon
 COPY --from=pingcap/chaos-binary /bin/toda /usr/local/bin/toda
 COPY --from=pingcap/chaos-binary /bin/pause /usr/local/bin/pause
 COPY --from=pingcap/chaos-binary /bin/suicide /usr/local/bin/suicide
+COPY --from=pingcap/chaos-binary /toda-glibc-2.28 /usr/local/lib/toda-glibc
