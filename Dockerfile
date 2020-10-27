@@ -32,10 +32,9 @@ WORKDIR /bin
 
 RUN curl -L https://github.com/chaos-mesh/toda/releases/download/v0.1.5/toda-linux-amd64.tar.gz | tar -xz
 
-RUN mkdir /toda-glibc
-
 WORKDIR /
 RUN curl -L https://github.com/chaos-mesh/toda-glibc/releases/download/v2.28-alpha.1/toda-glibc-2.28.tar.xz | tar -xz
+RUN mv /toda-glibc-2.28 /toda-glibc
 
 COPY ./scripts /scripts
 COPY --from=go_build /src/bin /bin
