@@ -4,12 +4,14 @@ import { createSlice } from '@reduxjs/toolkit'
 const initialState: {
   alert: Alert
   alertOpen: boolean
+  searchModalOpen: boolean
 } = {
   alert: {
     type: 'success',
     message: '',
   },
   alertOpen: false,
+  searchModalOpen: false,
 }
 
 const globalStatusSlice = createSlice({
@@ -22,9 +24,12 @@ const globalStatusSlice = createSlice({
     setAlertOpen(state, action) {
       state.alertOpen = action.payload
     },
+    setSearchModalOpen(state, action) {
+      state.searchModalOpen = action.payload
+    },
   },
 })
 
-export const { setAlert, setAlertOpen } = globalStatusSlice.actions
+export const { setAlert, setAlertOpen, setSearchModalOpen } = globalStatusSlice.actions
 
 export default globalStatusSlice.reducer
