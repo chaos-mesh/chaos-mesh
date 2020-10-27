@@ -277,8 +277,8 @@ func (r *endpoint) applyPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.DN
 }
 
 func (r *endpoint) setDNSServerRules(dnsServerIP string, port int64, name string, pods []v1.Pod, action v1alpha1.DNSChaosAction, scope v1alpha1.DNSChaosScope) error {
-	r.Log.Info("setDNSServerRules")
-	defer r.Log.Info("setDNSServerRules finished")
+	r.Log.Info("setDNSServerRules", "name", name)
+
 	pbPods := make([]*dnspb.Pod, len(pods))
 	for i, pod := range pods {
 		pbPods[i] = &dnspb.Pod{
