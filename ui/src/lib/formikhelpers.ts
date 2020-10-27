@@ -132,42 +132,14 @@ function selectorsToArr(selectors: Object, separator: string) {
   return Object.entries(selectors).map(([key, val]) => `${key}${separator}${val}`)
 }
 
-export function parseLoaded(e: Experiment): Experiment {
-  const result = e
-
-  result.labels = result.labels ? selectorsToArr(result.labels, ':') : []
-  result.annotations = result.annotations ? selectorsToArr(result.annotations, ':') : []
-  result.scope.label_selectors = result.scope.label_selectors ? selectorsToArr(result.scope.label_selectors, ': ') : []
-  result.scope.annotation_selectors = result.scope.annotation_selectors
-    ? selectorsToArr(result.scope.annotation_selectors, ': ')
-    : []
-  result.scope.phase_selectors = result.scope.phase_selectors ? result.scope.phase_selectors : ['all']
-
-  result.target = {
-    ...defaultExperimentSchema.target,
-    ...result.target,
-  }
-
-  if (result.target.kind === 'NetworkChaos' && result.target.network_chaos.target) {
-    result.target.network_chaos.target.label_selectors = result.target.network_chaos.target.label_selectors
-      ? selectorsToArr(result.target.network_chaos.target.label_selectors, ': ')
-      : []
-    result.target.network_chaos.target.annotation_selectors = result.target.network_chaos.target.annotation_selectors
-      ? selectorsToArr(result.target.network_chaos.target.annotation_selectors, ': ')
-      : []
-  }
-
-  if (result.target.kind === 'IoChaos' && result.target.io_chaos.attr) {
-    result.target.io_chaos.attr = selectorsToArr(result.target.io_chaos.attr, ':')
-  }
-
-  return result
-}
-
 export function yamlToExperiment(yamlObj: any): Experiment {
   const { kind, metadata, spec } = snakeCaseKeys(yamlObj)
 
-  let halfResult = {
+  if (!kind || !metadata || !spec) {
+    throw new Error('Fail to parse the YAML file. Please check the kind, metadata, and spec fields.')
+  }
+
+  let result = {
     ...defaultExperimentSchema,
     ...metadata,
     labels: metadata.labels ? selectorsToArr(metadata.labels, ':') : [],
@@ -228,7 +200,7 @@ export function yamlToExperiment(yamlObj: any): Experiment {
 
   if (['IoChaos', 'KernelChaos', 'TimeChaos', 'StressChaos'].includes(kind)) {
     return {
-      ...halfResult,
+      ...result,
       target: {
         ...defaultExperimentSchema.target,
         kind,
@@ -253,7 +225,7 @@ export function yamlToExperiment(yamlObj: any): Experiment {
     spec.target?.selector && delete spec.target.selector
 
     return {
-      ...halfResult,
+      ...result,
       target: {
         ...defaultExperimentSchema.target,
         kind,
@@ -279,9 +251,10 @@ export function yamlToExperiment(yamlObj: any): Experiment {
 
   // PodChaos
   return {
-    ...halfResult,
+    ...result,
     target: {
       ...defaultExperimentSchema.target,
+      kind,
       pod_chaos: {
         action: spec.action,
         [action]: spec[action],

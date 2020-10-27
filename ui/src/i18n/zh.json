@@ -199,41 +199,5 @@
     "labelSelectors": "标签选择器",
     "annotationsSelectors": "注解选择器",
     "phaseSelectors": "阶段选择器"
-  },
-  "validation": {
-    "name": "请填写实验名称",
-    "target": {
-      "pod_chaos": {
-        "container_name": "请填写容器名称"
-      },
-      "network_chaos": {
-        "action": "请填写 NetworkChaos 操作",
-        "direction": "请选择隔离方向",
-        "bandwidth": {
-          "rate": "请填写带宽速率"
-        },
-        "corrupt": {
-          "corrupt": "请填写坏包比例",
-          "correlation": "请填写坏包关联度"
-        },
-        "delay": {
-          "latency": "请填写网络延迟"
-        },
-        "duplicate": {
-          "duplicate": "请填写重复包比例",
-          "correlation": "请填写重复包关联度"
-        },
-        "loss": {
-          "loss": "请填写丢包比例",
-          "correlation": "请填写丢包关联度"
-        }
-      },
-      "io_chaos": {
-        "action": "请填写 IOChaos 操作"
-      },
-      "time_chaos": {
-        "time_offset": "请填写时间偏移量"
-      }
-    }
   }
 }
