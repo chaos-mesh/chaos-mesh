@@ -1,100 +1,84 @@
-// Copyright 2020 Chaos Mesh Authors.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
 package main
 
 import (
-	"flag"
-	"os"
+	"context"
+	"fmt"
+	"time"
 
-	"go.uber.org/fx"
-
-	_ "github.com/jinzhu/gorm/dialects/mssql"
-	_ "github.com/jinzhu/gorm/dialects/mysql"
-	_ "github.com/jinzhu/gorm/dialects/postgres"
-	_ "github.com/jinzhu/gorm/dialects/sqlite"
-
-	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
+	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/runtime"
+	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/log/zap"
-
-	"github.com/chaos-mesh/chaos-mesh/pkg/apiserver"
-	"github.com/chaos-mesh/chaos-mesh/pkg/collector"
-	"github.com/chaos-mesh/chaos-mesh/pkg/config"
-	"github.com/chaos-mesh/chaos-mesh/pkg/store"
-	"github.com/chaos-mesh/chaos-mesh/pkg/store/dbstore"
-	"github.com/chaos-mesh/chaos-mesh/pkg/ttlcontroller"
-	"github.com/chaos-mesh/chaos-mesh/pkg/version"
+	pkgclient "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 var (
-	log = ctrl.Log.WithName("setup")
+	scheme = runtime.NewScheme()
+	//log    = ctrl.Log.WithName("test")
 )
 
-var (
-	printVersion bool
-)
-
-// @title Chaos Mesh Dashboard API
-// @version 0.9
-// @description Swagger docs for Chaos Mesh Dashboard. If you encounter any problems with API, please click on the issues link below to report bugs or questions.
-
-// @contact.name Issues
-// @contact.url https://github.com/chaos-mesh/chaos-mesh/issues
-
-// @license.name Apache 2.0
-// @license.url http://www.apache.org/licenses/LICENSE-2.0.html
-
-// @BasePath /api
 func main() {
-	flag.BoolVar(&printVersion, "version", false, "print version information and exit")
-	flag.Parse()
+	_ = clientgoscheme.AddToScheme(scheme)
+	_ = corev1.AddToScheme(scheme)
+	//_ = chaosmeshv1alpha1.AddToScheme(scheme)
 
-	version.PrintVersionInfo("Chaos Dashboard")
-	if printVersion {
-		os.Exit(0)
-	}
+	/*
+		options := ctrl.Options{
+			Scheme: scheme,
+			//MetricsBindAddress: common.ControllerCfg.MetricsAddr,
+			//LeaderElection:     common.ControllerCfg.EnableLeaderElection,
+			//Port:               9443,
+			Namespace: "busybox",
+		}
+	*/
 
-	ctrl.SetLogger(zap.New(zap.UseDevMode(true)))
-
-	dashboardConfig, err := config.EnvironChaosDashboard()
+	config := ctrl.GetConfigOrDie()
+	config.BearerToken = "eyJhbGciOiJSUzI1NiIsImtpZCI6ImRxMHZnTmphR2lKbVFfOUhMTWNNWW5aSWV4ZmwxVHpRMWJlclV2b2tGUjQifQ.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJidXN5Ym94Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZWNyZXQubmFtZSI6InMtdGVzdDEtdG9rZW4tbmhieDciLCJrdWJlcm5ldGVzLmlvL3NlcnZpY2VhY2NvdW50L3NlcnZpY2UtYWNjb3VudC5uYW1lIjoicy10ZXN0MSIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VydmljZS1hY2NvdW50LnVpZCI6IjhiYTg3NzZlLTU1YWEtNGFhNS05MTkzLTM0ZmJkOTQ1MzVjZiIsInN1YiI6InN5c3RlbTpzZXJ2aWNlYWNjb3VudDpidXN5Ym94OnMtdGVzdDEifQ.iEUSvOWnE4_k5OJQGWR0FJFZK1Vc1X2dH_SltTtAYPBGgWHmLl77oqX_o7nFpU96Y_YErAntsCun3LMN-Hvfl_0bkUY9Dhc3qDj5AhrmI7b7Tp0diz6oXQmUQ0ZqlFfKvheZTySNgrkbV0m0ssdp9lIFh39eoLmrTPyHjhQDGFD9xnLHi6HyI-da0BQuo7hEwBlpW4LDWgXyndszyXB5BuXw3YMWrzZzAwdYfmPp1Ew-6vVYx68LyQz0Brz5gRYUHz1Md5TgPr7_5Tb53Syo23JSZb9ktjIQiASkHykTfAU7SN62_6EdslFsmn3HVIQkG2h9EqEmCnWtdtY2RC-MNw"
+	config.BearerTokenFile = ""
+	//log.Info("config", "cfg", config)
+	fmt.Println("config", config)
+	/*
+		mgr, err := ctrl.NewManager(config, options)
+		if err != nil {
+			fmt.Println(err, "unable to start manager")
+			os.Exit(1)
+		}
+	*/
+	client, err := pkgclient.New(config, pkgclient.Options{})
 	if err != nil {
-		log.Error(err, "main: invalid ChaosDashboardConfig")
-		os.Exit(1)
+		fmt.Println("new client", err)
 	}
 
-	persistTTLConfigParsed, err := config.ParsePersistTTLConfig(dashboardConfig.PersistTTL)
-	if err != nil {
-		log.Error(err, "main: invalid PersistTTLConfig")
-		os.Exit(1)
-	}
+	go func() {
+		time.Sleep(5 * time.Second)
+		//client := mgr.GetClient()
+		// Using a typed object.
 
-	controllerRuntimeStopCh := ctrl.SetupSignalHandler()
-	app := fx.New(
-		fx.Provide(
-			func() (<-chan struct{}, *config.ChaosDashboardConfig, *ttlcontroller.TTLconfig) {
-				return controllerRuntimeStopCh, dashboardConfig, persistTTLConfigParsed
-			},
-			dbstore.NewDBStore,
-			collector.NewServer,
-			ttlcontroller.NewController,
-		),
-		store.Module,
-		apiserver.Module,
-		fx.Invoke(collector.Register),
-		fx.Invoke(ttlcontroller.Register),
-	)
+		pod := &corev1.PodList{}
+		var listOptions = pkgclient.ListOptions{}
 
-	app.Run()
-	<-controllerRuntimeStopCh
+		fmt.Println("begin list pod in busybox")
+		listOptions.Namespace = "busybox"
+		ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+		defer cancel()
+		err = client.List(ctx, pod, &listOptions)
+		fmt.Println("list pod in busybox", pod, "err", err)
+
+		listOptions.Namespace = "chaos-testing"
+		ctx2, _ := context.WithTimeout(context.Background(), 3*time.Second)
+		err = client.List(ctx2, pod, pkgclient.InNamespace("chaos-testing"))
+
+		fmt.Println("list pod in chaos-testing", pod, "err", err)
+
+	}()
+
+	/*
+		stopCh := ctrl.SetupSignalHandler()
+		if err := mgr.Start(stopCh); err != nil {
+			fmt.Println(err, "unable to start manager")
+			os.Exit(1)
+		}
+	*/
+
+	time.Sleep(3600 * time.Second)
 }

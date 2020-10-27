@@ -64,6 +64,8 @@ spec:
             capabilities:
               add:
                 - SYS_PTRACE
+                - NET_ADMIN
+                - SYS_ADMIN
           volumeMounts:
             - name: socket-path
               {{- if eq .Values.chaosDaemon.runtime "docker" }}
