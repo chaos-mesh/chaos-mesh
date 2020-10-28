@@ -15,7 +15,6 @@ package iochaos
 
 import (
 	"fmt"
-	"os/exec"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/debug/common"
 )
@@ -34,23 +33,23 @@ func Debug(chaos string, ns string) error {
 	return nil
 }
 
-func debugEachChaos(chaos string, ns string) error {
-	p, err := common.GetPod("iochaos", chaos, ns)
+func debugEachChaos(chaosName string, ns string) error {
+	p, err := common.GetPod("iochaos", chaosName, ns)
 	if err != nil {
 		return err
 	}
 
 	// print out debug info
-	cmd := fmt.Sprintf("kubectl exec %s -n %s -- ls /proc/1/fd -al", p.ChaosDaemonPodName, p.ChaosDaemonPodNamespace)
-	out, err := exec.Command("bash", "-c", cmd).CombinedOutput()
+	cmd := fmt.Sprintf("ls /proc/1/fd -al")
+	out, err := common.ExecCommand(p.ChaosDaemonName, p.ChaosDaemonNamespace, cmd)
 	if err != nil {
 		return fmt.Errorf("run command '%s' failed with: %s", cmd, err.Error())
 	}
 	fmt.Println(string(common.ColorCyan), "1. [file discriptors]", string(common.ColorReset))
 	common.PrintWithTab(string(out))
 
-	cmd = fmt.Sprintf("kubectl exec %s -n %s -- mount", p.ChaosDaemonPodName, p.ChaosDaemonPodNamespace)
-	out, err = exec.Command("bash", "-c", cmd).CombinedOutput()
+	cmd = fmt.Sprintf("mount")
+	out, err = common.ExecCommand(p.ChaosDaemonName, p.ChaosDaemonNamespace, cmd)
 	if err != nil {
 		return fmt.Errorf("run command '%s' failed with: %s", cmd, err.Error())
 	}

@@ -15,7 +15,6 @@ package networkchaos
 
 import (
 	"fmt"
-	"os/exec"
 	"regexp"
 	"strconv"
 	"strings"
@@ -37,63 +36,61 @@ func Debug(chaos string, ns string) error {
 	return nil
 }
 
-func debugEachChaos(chaos string, ns string) error {
-	p, err := common.GetPod("networkchaos", chaos, ns)
+func debugEachChaos(chaosName string, ns string) error {
+	p, err := common.GetPod("networkchaos", chaosName, ns)
 	if err != nil {
 		return err
 	}
 
 	// get nsenter path from log
-	var out []byte
-	for _, tailNum := range []string{"--tail=100", "--tail=1000", "--tail=10000", ""} {
-		cmd := fmt.Sprintf("kubectl logs %s -n %s %s | grep 'nsenter -n/proc/'", p.ChaosDaemonPodName, p.ChaosDaemonPodNamespace, tailNum)
-		out, err = exec.Command("bash", "-c", cmd).CombinedOutput()
+	var nsenterPathList []string
+	for _, tailNum := range []int64{100, 1000, 10000, -1} {
+		log, err := common.GetLog(p.ChaosDaemonName, p.ChaosDaemonNamespace, tailNum)
 		if err != nil {
-			return fmt.Errorf("run command '%s' failed with: %s", cmd, err.Error())
+			return fmt.Errorf("get log failed with: %s", err.Error())
 		}
-		if len(out) != 0 {
+		nsenterPathList = regexp.MustCompile("(?:-n/proc/)(.*)(?:/ns/net)").FindStringSubmatch(log)
+		if len(nsenterPathList) != 0 {
 			break
 		}
-		if tailNum == "" {
+		if tailNum == -1 {
 			return fmt.Errorf("could not found networkchaos related logs")
 		}
 	}
-	line := strings.Split(string(out), "\n")[0]
-	nsenterPath := regexp.MustCompile("(?:-n/proc/)(.*)(?:/ns/net)").FindStringSubmatch(line)[0]
+	nsenterPath := nsenterPathList[0]
 
-	cmd := fmt.Sprintf("kubectl describe networkchaos %s -n %s", chaos, ns)
-	out, err = exec.Command("bash", "-c", cmd).CombinedOutput()
+	chaos, err := common.GetChaos("networkchaos", chaosName, ns)
 	if err != nil {
-		return fmt.Errorf("run command '%s' failed with: %s", cmd, err.Error())
+		return fmt.Errorf("failed to get chaos %s: %s", chaosName, err.Error())
 	}
-	specHier := []string{"Spec", "Action"}
-	action, err := common.ExtractFromYaml(string(out), specHier)
+
+	actionHier := []string{"spec", "action"}
+	action, err := common.ExtractFromJson(chaos, actionHier)
 	if err != nil {
-		fmt.Printf("get podName from '%s' failed with: %s", cmd, err.Error())
+		return fmt.Errorf("get action failed with: %s", err.Error())
 	}
 	var netemExpect string
 	switch action.(string) {
 	case "delay":
-		latency, _ := common.ExtractFromYaml(string(out), []string{"Spec", "Delay", "Latency"})
-		jitter, _ := common.ExtractFromYaml(string(out), []string{"Spec", "Delay", "Jitter"})
-		correlation, _ := common.ExtractFromYaml(string(out), []string{"Spec", "Delay", "Correlation"})
+		latency, _ := common.ExtractFromJson(chaos, []string{"spec", "delay", "latency"})
+		jitter, _ := common.ExtractFromJson(chaos, []string{"spec", "delay", "jitter"})
+		correlation, _ := common.ExtractFromJson(chaos, []string{"spec", "delay", "correlation"})
 		netemExpect = fmt.Sprintf("%v %v %v %v%%", action, latency, jitter, correlation)
 	default:
 		return fmt.Errorf("chaos not supported")
 	}
 
 	// print out debug info
-
-	cmd = fmt.Sprintf("kubectl exec %s -n %s -- /usr/bin/nsenter %s -- ipset list", p.ChaosDaemonPodName, p.ChaosDaemonPodNamespace, nsenterPath)
-	out, err = exec.Command("bash", "-c", cmd).CombinedOutput()
+	cmd := fmt.Sprintf("/usr/bin/nsenter %s -- ipset list", nsenterPath)
+	out, err := common.ExecCommand(p.ChaosDaemonName, p.ChaosDaemonNamespace, cmd)
 	if err != nil {
 		return fmt.Errorf("run command '%s' failed with: %s", cmd, err.Error())
 	}
 	fmt.Println(string(common.ColorCyan), "1. [ipset list]", string(common.ColorReset))
 	common.PrintWithTab(string(out))
 
-	cmd = fmt.Sprintf("kubectl exec %s -n %s -- /usr/bin/nsenter %s -- tc qdisc list", p.ChaosDaemonPodName, p.ChaosDaemonPodNamespace, nsenterPath)
-	out, err = exec.Command("bash", "-c", cmd).CombinedOutput()
+	cmd = fmt.Sprintf("/usr/bin/nsenter %s -- tc qdisc list", nsenterPath)
+	out, err = common.ExecCommand(p.ChaosDaemonName, p.ChaosDaemonNamespace, cmd)
 	if err != nil {
 		return fmt.Errorf("run command '%s' failed with: %s", cmd, err.Error())
 	}
@@ -104,18 +101,18 @@ func debugEachChaos(chaos string, ns string) error {
 	if len(netemCurrent) == 0 {
 		return fmt.Errorf("No NetworkChaos is applied")
 	}
-	for i := range strings.Fields(netemCurrent[1]) {
-		itemCurrent := strings.Fields(netemCurrent[1])[i]
+	for i, netem := range strings.Fields(netemCurrent[1]) {
+		itemCurrent := netem
 		itemExpect := strings.Fields(netemExpect)[i]
 		if itemCurrent != itemExpect {
 			r := regexp.MustCompile("([0-9]*[.])?[0-9]+")
 			numCurrent, err := strconv.ParseFloat(r.FindString(itemCurrent), 64)
 			if err != nil {
-				return fmt.Errorf("parse float failed: %s", err.Error())
+				return fmt.Errorf("parse itemCurrent failed: %s", err.Error())
 			}
 			numExpect, err := strconv.ParseFloat(r.FindString(itemExpect), 64)
 			if err != nil {
-				return fmt.Errorf("parse float failed: %s", err.Error())
+				return fmt.Errorf("parse itemExpect failed: %s", err.Error())
 			}
 			if numCurrent == numExpect {
 				continue
@@ -133,8 +130,8 @@ func debugEachChaos(chaos string, ns string) error {
 	sucInfo := fmt.Sprintf("%sNetworkChaos execute as expected%s\n", string(common.ColorGreen), string(common.ColorReset))
 	common.PrintWithTab(sucInfo)
 
-	cmd = fmt.Sprintf("kubectl exec %s -n %s -- /usr/bin/nsenter %s -- iptables --list", p.ChaosDaemonPodName, p.ChaosDaemonPodNamespace, nsenterPath)
-	out, err = exec.Command("bash", "-c", cmd).CombinedOutput()
+	cmd = fmt.Sprintf("/usr/bin/nsenter %s -- iptables --list", nsenterPath)
+	out, err = common.ExecCommand(p.ChaosDaemonName, p.ChaosDaemonNamespace, cmd)
 	if err != nil {
 		return fmt.Errorf("cmd.Run() failed with: %s", err.Error())
 	}

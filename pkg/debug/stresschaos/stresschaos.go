@@ -15,7 +15,6 @@ package stresschaos
 
 import (
 	"fmt"
-	"os/exec"
 	"regexp"
 	"strconv"
 	"strings"
@@ -39,23 +38,28 @@ func Debug(chaos string, ns string) error {
 	return nil
 }
 
-func debugEachChaos(chaos string, ns string) error {
-	p, err := common.GetPod("stresschaos", chaos, ns)
+func debugEachChaos(chaosName string, ns string) error {
+	p, err := common.GetPod("stresschaos", chaosName, ns)
 	if err != nil {
 		return err
 	}
 
 	// cpu or memory chaos
-	cmd := fmt.Sprintf("kubectl describe stresschaos %s -n %s", chaos, ns)
-	out, err := exec.Command("bash", "-c", cmd).CombinedOutput()
+	chaos, err := common.GetChaos("stresschaos", chaosName, ns)
 	if err != nil {
-		return fmt.Errorf("run command '%s' failed with: %s", cmd, err.Error())
+		return fmt.Errorf("failed to get chaos %s: %s", chaosName, err.Error())
 	}
-	isCPU := regexp.MustCompile("(f:cpu)").MatchString(string(out))
+
+	isCPU := true
+	cpuHier := []string{"spec", "stressors", "cpu"}
+	_, err = common.ExtractFromJson(chaos, cpuHier)
+	if err != nil {
+		isCPU = false
+	}
 
 	// get process path
-	cmd = fmt.Sprintf("kubectl exec %s -n %s -- cat /proc/cgroups", p.PodName, p.PodNamespace)
-	out, err = exec.Command("bash", "-c", cmd).CombinedOutput()
+	cmd := fmt.Sprintf("cat /proc/cgroups")
+	out, err := common.ExecCommand(p.PodName, p.PodNamespace, cmd)
 	if err != nil {
 		return fmt.Errorf("run command '%s' failed with: %s", cmd, err.Error())
 	}
@@ -66,8 +70,8 @@ func debugEachChaos(chaos string, ns string) error {
 		cpuMountType = "cpu"
 	}
 
-	cmd = fmt.Sprintf("kubectl exec %s -n %s -- ps", p.PodName, p.PodNamespace)
-	out, err = exec.Command("bash", "-c", cmd).CombinedOutput()
+	cmd = fmt.Sprintf("ps")
+	out, err = common.ExecCommand(p.PodName, p.PodNamespace, cmd)
 	if err != nil {
 		return fmt.Errorf("run command '%s' failed with: %s", cmd, err.Error())
 	}
@@ -77,13 +81,14 @@ func debugEachChaos(chaos string, ns string) error {
 	}
 	stressngPid := strings.Split(stressngLine[0], " ")[0]
 
-	cmd = fmt.Sprintf("kubectl exec %s -n %s -- cat /proc/1/cgroup", p.PodName, p.PodNamespace)
-	out, err = exec.Command("bash", "-c", cmd).CombinedOutput()
+	cmd = fmt.Sprintf("cat /proc/1/cgroup")
+	out, err = common.ExecCommand(p.PodName, p.PodNamespace, cmd)
 	if err != nil {
 		return fmt.Errorf("run command '%s' failed with: %s", cmd, err.Error())
 	}
 	fmt.Println(string(common.ColorCyan), "1. [cat /proc/1/cgroup]:", string(common.ColorReset))
 	common.PrintWithTab(string(out))
+
 	var expr string
 	if isCPU {
 		expr = "(?::" + cpuMountType + ":)(.*)"
@@ -92,8 +97,8 @@ func debugEachChaos(chaos string, ns string) error {
 	}
 	processPath := regexp.MustCompile(expr).FindStringSubmatch(string(out))[1]
 
-	cmd = fmt.Sprintf("kubectl exec %s -n %s -- cat /proc/%s/cgroup", p.PodName, p.PodNamespace, stressngPid)
-	outStress, err := exec.Command("bash", "-c", cmd).CombinedOutput()
+	cmd = fmt.Sprintf("cat /proc/%s/cgroup", stressngPid)
+	outStress, err := common.ExecCommand(p.PodName, p.PodNamespace, cmd)
 	if err != nil {
 		return fmt.Errorf("run command '%s' failed with: %s", cmd, err.Error())
 	}
@@ -110,8 +115,8 @@ func debugEachChaos(chaos string, ns string) error {
 
 	// print out debug info
 	if isCPU {
-		cmd = fmt.Sprintf("kubectl exec %s -n %s -- cat /sys/fs/cgroup/%s/%s/cpu.cfs_quota_us", p.ChaosDaemonPodName, p.ChaosDaemonPodNamespace, cpuMountType, processPath)
-		out, err = exec.Command("bash", "-c", cmd).CombinedOutput()
+		cmd = fmt.Sprintf("cat /sys/fs/cgroup/%s/%s/cpu.cfs_quota_us", cpuMountType, processPath)
+		out, err = common.ExecCommand(p.ChaosDaemonName, p.ChaosDaemonNamespace, cmd)
 		if err != nil {
 			return fmt.Errorf("run command '%s' failed with: %s", cmd, err.Error())
 		}
@@ -122,8 +127,8 @@ func debugEachChaos(chaos string, ns string) error {
 			return fmt.Errorf("could not get cpu.cfs_quota_us with: %s", err.Error())
 		}
 
-		cmd = fmt.Sprintf("kubectl exec %s -n %s -- cat /sys/fs/cgroup/%s/%s/cpu.cfs_period_us", p.ChaosDaemonPodName, p.ChaosDaemonPodNamespace, cpuMountType, processPath)
-		out, err = exec.Command("bash", "-c", cmd).CombinedOutput()
+		cmd = fmt.Sprintf("cat /sys/fs/cgroup/%s/%s/cpu.cfs_period_us", cpuMountType, processPath)
+		out, err = common.ExecCommand(p.ChaosDaemonName, p.ChaosDaemonNamespace, cmd)
 		if err != nil {
 			return fmt.Errorf("run command '%s' failed with: %s", cmd, err.Error())
 		}
@@ -140,8 +145,8 @@ func debugEachChaos(chaos string, ns string) error {
 			fmt.Println(string(common.ColorGreen), "cpu limit is equals to", float64(quota)/float64(period), string(common.ColorReset))
 		}
 	} else {
-		cmd = fmt.Sprintf("kubectl exec %s -n %s -- cat /sys/fs/cgroup/memory/%s/memory.limit_in_bytes", p.ChaosDaemonPodName, p.ChaosDaemonPodNamespace, processPath)
-		out, err = exec.Command("bash", "-c", cmd).CombinedOutput()
+		cmd = fmt.Sprintf("cat /sys/fs/cgroup/memory/%s/memory.limit_in_bytes", processPath)
+		out, err = common.ExecCommand(p.ChaosDaemonName, p.ChaosDaemonNamespace, cmd)
 		if err != nil {
 			return fmt.Errorf("run command '%s' failed with: %s", cmd, err.Error())
 		}
