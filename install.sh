@@ -1122,10 +1122,15 @@ spec:
             - name: TZ
               value: ${timezone}
           securityContext:
-            privileged: true
+            privileged: false
             capabilities:
               add:
                 - SYS_PTRACE
+                - NET_ADMIN
+                - MKNOD
+                - SYS_CHROOT
+                - SYS_ADMIN
+                - KILL
           volumeMounts:
             - name: socket-path
               mountPath: ${mountPath}
