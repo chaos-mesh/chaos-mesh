@@ -33,6 +33,7 @@ import (
 // EnsureFuseDev ensures /dev/fuse exists. If not, it will create one
 func EnsureFuseDev() {
 	if _, err := os.Open("/dev/fuse"); os.IsNotExist(err) {
+		// 10, 229 according to https://www.kernel.org/doc/Documentation/admin-guide/devices.txt
 		fuse := C.Makedev(10, 229)
 		syscall.Mknod("/dev/fuse", 0o666|syscall.S_IFCHR, int(fuse))
 	}
@@ -77,6 +78,7 @@ func GrantAccess() error {
 	if err != nil {
 		return err
 	}
+	// 10, 229 according to https://www.kernel.org/doc/Documentation/admin-guide/devices.txt
 	content := "c 10:229 rwm"
 	_, err = f.WriteString(content)
 	if err != nil {
