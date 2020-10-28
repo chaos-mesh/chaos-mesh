@@ -60,7 +60,7 @@ spec:
               value: {{ .Values.timezone | default "UTC" }}
             {{- end }}
           securityContext:
-            privileged: true
+            privileged: false
             capabilities:
               add:
                 - SYS_PTRACE
