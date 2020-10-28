@@ -1,10 +1,10 @@
-import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
+import { PayloadAction, createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 
 import { ExperimentScope } from 'components/NewExperiment/types'
 import { StateOfExperiments } from 'api/experiments.type'
 import api from 'api'
 
-const defaultExperiments = {
+const defaultStateOfExperiments = {
   Total: 0,
   Running: 0,
   Waiting: 0,
@@ -48,7 +48,7 @@ const initialState: {
   labels: {},
   annotations: {},
   pods: [],
-  stateOfExperiments: defaultExperiments,
+  stateOfExperiments: defaultStateOfExperiments,
   needToRefreshExperiments: false,
   // New Experiment needed
   step1: false,
@@ -63,13 +63,13 @@ const experimentsSlice = createSlice({
   name: 'experiments',
   initialState,
   reducers: {
-    setNeedToRefreshExperiments(state, action) {
+    setNeedToRefreshExperiments(state, action: PayloadAction<boolean>) {
       state.needToRefreshExperiments = action.payload
     },
-    setStep1(state, action) {
+    setStep1(state, action: PayloadAction<boolean>) {
       state.step1 = action.payload
     },
-    setStep2(state, action) {
+    setStep2(state, action: PayloadAction<boolean>) {
       state.step2 = action.payload
     },
     setTarget(state, action) {

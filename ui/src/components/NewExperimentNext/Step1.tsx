@@ -58,7 +58,7 @@ const Step1 = () => {
   const step1 = useSelector((state: RootState) => state.experiments.step1)
   const dispatch = useStoreDispatch()
 
-  const [target, setTarget] = useState<targetDataKeyType | ''>('')
+  const [target, setTarget] = useState<targetDataKeyType>()
   const [action, setAction] = useState<Category>()
 
   const handleSelectTarget = (key: targetDataKeyType) => () => {

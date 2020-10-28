@@ -4,7 +4,7 @@ import { drawerCloseWidth, drawerWidth } from './Sidebar'
 
 import { Link } from 'react-router-dom'
 import MenuIcon from '@material-ui/icons/Menu'
-import { NavigationBreadCrumbProps } from 'slices/navigation.type'
+import { NavigationBreadCrumbProps } from 'slices/navigation'
 import React from 'react'
 import SearchTrigger from 'components/SearchTrigger'
 import T from 'components/T'
