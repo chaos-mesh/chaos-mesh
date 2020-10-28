@@ -98,7 +98,7 @@ const ioCommon: Spec = {
     helperText: 'The percentage of injection errors',
   },
   methods: {
-    field: 'select',
+    field: 'autocomplete',
     items: ioMethods,
     label: 'Methods',
     value: [],

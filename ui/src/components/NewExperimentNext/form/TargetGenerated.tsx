@@ -1,18 +1,24 @@
+import { AutocompleteMultipleField, LabelField, SelectField, TextField } from 'components/FormField'
 import { Box, Button, MenuItem } from '@material-ui/core'
 import { Form, Formik } from 'formik'
-import { LabelField, SelectField, TextField } from 'components/FormField'
+import { Kind, Spec } from '../data/target'
 
+import AdvancedOptions from 'components/AdvancedOptions'
 import PublishIcon from '@material-ui/icons/Publish'
 import React from 'react'
-import { Spec } from '../data/target'
+import { RootState } from 'store'
+import Scope from './Scope'
 import T from 'components/T'
+import basicData from '../data/basic'
+import { useSelector } from 'react-redux'
 
 interface TargetGeneratedProps {
+  kind?: Kind | ''
   data: Spec
   onSubmit: (values: Record<string, any>) => void
 }
 
-const TargetGenerated: React.FC<TargetGeneratedProps> = ({ data, onSubmit }) => {
+const TargetGenerated: React.FC<TargetGeneratedProps> = ({ kind, data, onSubmit }) => {
   const initialValues = Object.entries(data).reduce((acc, [k, v]) => {
     if (v instanceof Object && v.field) {
       acc[k] = v.value
@@ -55,7 +61,16 @@ const TargetGenerated: React.FC<TargetGeneratedProps> = ({ data, onSubmit }) => 
           case 'label':
             return <LabelField key={k} id={k} name={k} label={v.label} helperText={v.helperText} isKV={v.isKV} />
           case 'autocomplete':
-            return null
+            return (
+              <AutocompleteMultipleField
+                key={k}
+                id={k}
+                name={k}
+                label={v.label}
+                helperText={v.helperText}
+                options={v.items!}
+              />
+            )
           default:
             return null
         }
@@ -65,16 +80,41 @@ const TargetGenerated: React.FC<TargetGeneratedProps> = ({ data, onSubmit }) => 
     return <>{rendered.map((d) => d)}</>
   }
 
+  const { namespaces } = useSelector((state: RootState) => state.experiments)
+
   return (
     <Formik initialValues={initialValues} onSubmit={onSubmit}>
-      <Form>
-        {parseDataToFormFields()}
-        <Box mt={6} textAlign="right">
-          <Button type="submit" variant="contained" color="primary" startIcon={<PublishIcon />}>
-            {T('common.submit')}
-          </Button>
-        </Box>
-      </Form>
+      {({ values, setFieldValue }) => {
+        const beforeTargetOpen = () => setFieldValue('target', basicData.scope)
+        const afterTargetClose = () => setFieldValue('target', undefined)
+
+        return (
+          <Form>
+            {parseDataToFormFields()}
+            {kind === 'NetworkChaos' && (
+              <AdvancedOptions
+                title={T('newE.target.network.target.title')}
+                beforeOpen={beforeTargetOpen}
+                afterClose={afterTargetClose}
+              >
+                {values.target && (
+                  <Scope
+                    namespaces={namespaces}
+                    scope="target"
+                    podsPreviewTitle={T('newE.target.network.target.podsPreview')}
+                    podsPreviewDesc={T('newE.target.network.target.podsPreviewHelper')}
+                  />
+                )}
+              </AdvancedOptions>
+            )}
+            <Box mt={6} textAlign="right">
+              <Button type="submit" variant="contained" color="primary" startIcon={<PublishIcon />}>
+                {T('common.submit')}
+              </Button>
+            </Box>
+          </Form>
+        )
+      }}
     </Formik>
   )
 }

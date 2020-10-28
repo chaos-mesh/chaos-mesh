@@ -7,12 +7,10 @@ import T from 'components/T'
 
 interface AutocompleteMultipleFieldProps {
   options: string[]
-  onChangeCallback?: (labels: string[]) => void
 }
 
 const AutocompleteMultipleField: React.FC<AutocompleteMultipleFieldProps & TextFieldProps> = ({
   options,
-  onChangeCallback,
   ...props
 }) => {
   const { values, setFieldValue } = useFormikContext()
@@ -22,7 +20,6 @@ const AutocompleteMultipleField: React.FC<AutocompleteMultipleFieldProps & TextF
   const setLabels = (labels: string[]) => setFieldValue(name, labels)
 
   const onChange = (_: any, newVal: string[], reason: string) => {
-    console.log(newVal)
     if (reason === 'clear') {
       setLabels([])
 
@@ -30,15 +27,9 @@ const AutocompleteMultipleField: React.FC<AutocompleteMultipleFieldProps & TextF
     }
 
     setLabels(newVal)
-    typeof onChangeCallback === 'function' && onChangeCallback(newVal)
   }
 
-  const onDelete = (val: string) => () => {
-    const updated = labels.filter((d) => d !== val)
-
-    setLabels(updated)
-    typeof onChangeCallback === 'function' && onChangeCallback(updated)
-  }
+  const onDelete = (val: string) => () => setLabels(labels.filter((d) => d !== val))
 
   return (
     <Box mb={3}>

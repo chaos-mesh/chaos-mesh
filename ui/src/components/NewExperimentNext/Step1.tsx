@@ -6,6 +6,7 @@ import { setStep1, setTarget as setTargetToStore } from 'slices/experiments'
 import targetData, { Category, Kind } from './data/target'
 
 import CheckCircleOutlineIcon from '@material-ui/icons/CheckCircleOutline'
+import Kernel from './form/Kernel'
 import Paper from 'components-mui/Paper'
 import PaperTop from 'components/PaperTop'
 import RadioButtonCheckedOutlinedIcon from '@material-ui/icons/RadioButtonCheckedOutlined'
@@ -114,7 +115,7 @@ const Step1 = () => {
       </PaperTop>
       <Box hidden={step1}>
         <Box p={6} overflow="hidden">
-          <GridList className={classes.gridList} cols={isDesktopScreen ? 1.5 : 4.5} spacing={9} cellHeight="auto">
+          <GridList className={classes.gridList} cols={isDesktopScreen ? 1.5 : 3.5} spacing={9} cellHeight="auto">
             {Object.entries(targetData).map(([key, t]) => (
               <GridListTile key={key}>
                 <Card
@@ -147,7 +148,7 @@ const Step1 = () => {
             <Divider />
             <Box p={6} overflow="hidden">
               {targetData[kind].categories ? (
-                <GridList className={classes.gridList} cols={isDesktopScreen ? 2.5 : 5.5} spacing={9} cellHeight="auto">
+                <GridList className={classes.gridList} cols={isDesktopScreen ? 2.5 : 4.5} spacing={9} cellHeight="auto">
                   {targetData[kind].categories!.map((d: any) => (
                     <GridListTile key={d.key}>
                       <Card
@@ -178,6 +179,8 @@ const Step1 = () => {
                     </GridListTile>
                   ))}
                 </GridList>
+              ) : kind === 'KernelChaos' ? (
+                <Kernel onSubmit={handleSubmitStep1} />
               ) : kind === 'TimeChaos' ? (
                 <TargetGenerated data={targetData[kind].spec!} onSubmit={handleSubmitStep1} />
               ) : kind === 'StressChaos' ? (
@@ -191,7 +194,12 @@ const Step1 = () => {
             <Divider />
             <Box p={6}>
               {/* Force re-render when spec changed */}
-              <TargetGenerated key={JSON.stringify(action.spec)} data={action.spec} onSubmit={handleSubmitStep1} />
+              <TargetGenerated
+                key={JSON.stringify(action.spec)}
+                data={action.spec}
+                kind={kind}
+                onSubmit={handleSubmitStep1}
+              />
             </Box>
           </>
         )}
