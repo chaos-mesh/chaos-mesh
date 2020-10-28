@@ -1116,7 +1116,6 @@ spec:
             - name: TZ
               value: ${timezone}
           securityContext:
-            privileged: false
             capabilities:
               add:
                 - SYS_PTRACE
