@@ -5,6 +5,8 @@
   },
   "newE": {
     "title": "新的实验",
+    "titleStep1": "选择目标",
+    "titleStep2": "填写实验信息",
     "create": "创建新的实验",
     "steps": {
       "basic": "基本信息",
@@ -12,9 +14,9 @@
       "target": "目标",
       "schedule": "计划"
     },
-    "loadFromExistingExperiments": "从已有实验加载",
+    "loadFromExperiments": "从已有实验加载",
     "loadFromArchives": "从归档加载",
-    "loadFromYamlFile": "从 YAML 文件加载",
+    "loadFromYaml": "从 YAML 文件加载",
     "basic": {
       "name": "名称",
       "nameHelper": "实验的名称",
@@ -70,8 +72,8 @@
     },
     "schedule": {
       "tooltip": "Chaos Mesh 使用 {cronv3} 来定义计划。参考其文档以获取更详细的信息。",
-      "immediate": "立即执行",
-      "mustBeScheduled": "选择的实验操作必须按计划执行",
+      "immediate": "立即运行",
+      "mustBeScheduled": "所选实验必须按计划执行",
       "cronHelper": "使用 {crontabguru} 来帮助生成 cron job 并确认它将在何时运行",
       "duration": "持续时间",
       "durationHelper": "实验的持续时间"

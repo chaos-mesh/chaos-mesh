@@ -1,35 +1,22 @@
 import { Box, Chip, TextField, TextFieldProps } from '@material-ui/core'
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useState } from 'react'
 import { getIn, useFormikContext } from 'formik'
 
 import Autocomplete from '@material-ui/lab/Autocomplete'
-import { Experiment } from 'components/NewExperiment/types'
 import T from 'components/T'
 
 interface LabelFieldProps {
-  isKV?: boolean // whether to use the key: value format
+  isKV?: boolean // whether to use the key:value format
 }
 
 const LabelField: React.FC<LabelFieldProps & TextFieldProps> = ({ isKV = false, ...props }) => {
-  const { values, setFieldValue } = useFormikContext<Experiment>()
+  const { values, setFieldValue } = useFormikContext()
 
   const [text, setText] = useState('')
   const [error, setError] = useState('')
-  const labelsInForm = getIn(values, props.name!)
-  const labelsRef = useRef(labelsInForm)
-  const [labels, _setLabels] = useState<string[]>(labelsRef.current)
-  const setLabels = (newVal: string[]) => {
-    labelsRef.current = newVal
-    _setLabels(labelsRef.current)
-  }
-
-  useEffect(
-    () => () => setFieldValue(props.name!, labelsRef.current),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
-  )
-
-  useEffect(() => setLabels(labelsInForm), [labelsInForm])
+  const name = props.name!
+  const labels: string[] = getIn(values, name)
+  const setLabels = (labels: string[]) => setFieldValue(name, labels)
 
   const onChange = (_: any, __: any, reason: string) => {
     if (reason === 'clear') {
@@ -77,16 +64,15 @@ const LabelField: React.FC<LabelFieldProps & TextFieldProps> = ({ isKV = false, 
     }
   }
 
-  const onDelete = (val: string) => () => setLabels(labels.filter((d) => d !== val))
+  const onDelete = (val: string) => () => setLabels(labels.filter((d: string) => d !== val))
 
   return (
-    <Box mb={2}>
+    <Box mb={3}>
       <Autocomplete
         multiple
         options={labels}
         value={labels}
-        // make popup always closed
-        open={false}
+        open={false} // make popup always closed
         forcePopupIcon={false}
         onChange={onChange}
         inputValue={text}

@@ -1,7 +1,6 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 
 import { ExperimentScope } from 'components/NewExperiment/types'
-import { ExperimentsAction } from './experiments.type'
 import { StateOfExperiments } from 'api/experiments.type'
 import api from 'api'
 
@@ -40,6 +39,10 @@ const initialState: {
   pods: any[]
   stateOfExperiments: StateOfExperiments
   needToRefreshExperiments: boolean
+  step1: boolean
+  step2: boolean
+  target: any
+  basic: any
 } = {
   namespaces: [],
   labels: {},
@@ -47,6 +50,11 @@ const initialState: {
   pods: [],
   stateOfExperiments: defaultExperiments,
   needToRefreshExperiments: false,
+  // New Experiment needed
+  step1: false,
+  step2: false,
+  target: {},
+  basic: {},
 }
 
 const namespaceFilters = ['kube-system', 'chaos-testing']
@@ -58,19 +66,31 @@ const experimentsSlice = createSlice({
     setNeedToRefreshExperiments(state, action) {
       state.needToRefreshExperiments = action.payload
     },
+    setStep1(state, action) {
+      state.step1 = action.payload
+    },
+    setStep2(state, action) {
+      state.step2 = action.payload
+    },
+    setTarget(state, action) {
+      state.target = action.payload
+    },
+    setBasic(state, action) {
+      state.basic = action.payload
+    },
   },
   extraReducers: (builder) => {
-    builder.addCase(getStateofExperiments.fulfilled, (state, action: ExperimentsAction) => {
-      state.stateOfExperiments = action.payload as StateOfExperiments
+    builder.addCase(getStateofExperiments.fulfilled, (state, action) => {
+      state.stateOfExperiments = action.payload
     })
-    builder.addCase(getNamespaces.fulfilled, (state, action: ExperimentsAction) => {
-      state.namespaces = (action.payload as string[]).filter((d) => !namespaceFilters.includes(d))
+    builder.addCase(getNamespaces.fulfilled, (state, action) => {
+      state.namespaces = action.payload.filter((d) => !namespaceFilters.includes(d))
     })
-    builder.addCase(getLabels.fulfilled, (state, action: ExperimentsAction) => {
-      state.labels = action.payload as Record<string, string[]>
+    builder.addCase(getLabels.fulfilled, (state, action) => {
+      state.labels = action.payload
     })
-    builder.addCase(getAnnotations.fulfilled, (state, action: ExperimentsAction) => {
-      state.annotations = action.payload as Record<string, string[]>
+    builder.addCase(getAnnotations.fulfilled, (state, action) => {
+      state.annotations = action.payload
     })
     builder.addCase(getPodsByNamespaces.fulfilled, (state, action) => {
       state.pods = action.payload as any[]
@@ -78,6 +98,6 @@ const experimentsSlice = createSlice({
   },
 })
 
-export const { setNeedToRefreshExperiments } = experimentsSlice.actions
+export const { setNeedToRefreshExperiments, setStep1, setStep2, setTarget, setBasic } = experimentsSlice.actions
 
 export default experimentsSlice.reducer

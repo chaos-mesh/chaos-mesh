@@ -6,8 +6,11 @@ import {
   FormikCtx,
 } from 'components/NewExperiment/types'
 
+import _snakecase from 'lodash.snakecase'
+import basic from 'components/NewExperimentNext/data/basic'
 import { defaultExperimentSchema } from 'components/NewExperiment/constants'
 import snakeCaseKeys from 'snakecase-keys'
+import target from 'components/NewExperimentNext/data/target'
 
 export const ChaosKindKeyMap: Record<string, Record<string, Exclude<keyof ExperimentTarget, 'kind'>>> = {
   PodChaos: { key: 'pod_chaos' },
@@ -132,7 +135,7 @@ function selectorsToArr(selectors: Object, separator: string) {
   return Object.entries(selectors).map(([key, val]) => `${key}${separator}${val}`)
 }
 
-export function yamlToExperiment(yamlObj: any): Experiment {
+export function yamlToExperiment(yamlObj: any): any {
   const { kind, metadata, spec } = snakeCaseKeys(yamlObj)
 
   if (!kind || !metadata || !spec) {
@@ -140,26 +143,29 @@ export function yamlToExperiment(yamlObj: any): Experiment {
   }
 
   let result = {
-    ...defaultExperimentSchema,
-    ...metadata,
-    labels: metadata.labels ? selectorsToArr(metadata.labels, ':') : [],
-    annotations: metadata.annotations ? selectorsToArr(metadata.annotations, ':') : [],
-    scope: {
-      ...defaultExperimentSchema.scope,
-      label_selectors: spec.selector?.label_selectors ? selectorsToArr(spec.selector.label_selectors, ': ') : [],
-      annotation_selectors: spec.selector?.annotation_selectors
-        ? selectorsToArr(spec.selector.annotation_selectors, ': ')
-        : [],
-      mode: spec.mode,
-    },
-    scheduler: {
-      cron: spec.scheduler?.cron ?? '',
-      duration: spec.duration ?? '',
+    basic: {
+      ...basic,
+      ...metadata,
+      labels: metadata.labels ? selectorsToArr(metadata.labels, ':') : [],
+      annotations: metadata.annotations ? selectorsToArr(metadata.annotations, ':') : [],
+      scope: {
+        label_selectors: spec.selector?.label_selectors ? selectorsToArr(spec.selector.label_selectors, ': ') : [],
+        annotation_selectors: spec.selector?.annotation_selectors
+          ? selectorsToArr(spec.selector.annotation_selectors, ': ')
+          : [],
+        mode: spec.mode ?? 'one',
+        value: spec.value ?? '',
+      },
+      scheduler: {
+        cron: spec.scheduler?.cron ?? '',
+        duration: spec.duration ?? '',
+      },
     },
   }
 
   delete spec.selector
   delete spec.mode
+  delete spec.value
   delete spec.scheduler
   delete spec.duration
 
@@ -179,86 +185,56 @@ export function yamlToExperiment(yamlObj: any): Experiment {
 
       return frame
     })
-
-    spec.fail_kern_request = {
-      ...defaultExperimentSchema.target.kernel_chaos.fail_kern_request,
-      ...spec.fail_kern_request,
-    }
   }
 
   if (kind === 'StressChaos') {
     spec.stressors.cpu = {
-      ...defaultExperimentSchema.target.stress_chaos.stressors.cpu,
+      ...(target.StressChaos.spec!.stressors as any).cpu,
       ...spec.stressors.cpu,
     }
 
     spec.stressors.memory = {
-      ...defaultExperimentSchema.target.stress_chaos.stressors.memory,
+      ...(target.StressChaos.spec!.stressors as any).memory,
       ...spec.stressors.memory,
     }
   }
 
-  if (['IoChaos', 'KernelChaos', 'TimeChaos', 'StressChaos'].includes(kind)) {
+  if (['KernelChaos', 'TimeChaos', 'StressChaos'].includes(kind)) {
     return {
       ...result,
       target: {
-        ...defaultExperimentSchema.target,
         kind,
-        [ChaosKindKeyMap[kind].key]: {
-          ...defaultExperimentSchema.target[ChaosKindKeyMap[kind].key],
-          ...spec,
-        },
+        [_snakecase(kind)]: spec,
       },
     }
   }
 
-  const action = Object.keys(spec).filter((k) => k === spec.action)[0]
+  // TODO: Refactor
+  // if (kind === 'NetworkChaos') {
+  //   const label_selectors = spec.target?.selector?.label_selectors
+  //     ? selectorsToArr(spec.target.selector.label_selectors, ': ')
+  //     : []
+  //   const annotation_selectors = spec.target?.selector?.annotation_selectors
+  //     ? selectorsToArr(spec.target.selector.annotation_selectors, ': ')
+  //     : []
 
-  if (kind === 'NetworkChaos') {
-    const label_selectors = spec.target?.selector?.label_selectors
-      ? selectorsToArr(spec.target.selector.label_selectors, ': ')
-      : []
-    const annotation_selectors = spec.target?.selector?.annotation_selectors
-      ? selectorsToArr(spec.target.selector.annotation_selectors, ': ')
-      : []
+  //   spec.target?.selector && delete spec.target.selector
 
-    spec.target?.selector && delete spec.target.selector
-
-    return {
-      ...result,
-      target: {
-        ...defaultExperimentSchema.target,
-        kind,
-        network_chaos: {
-          action: spec.action,
-          ...(spec.action === 'partition'
-            ? { direction: spec.direction }
-            : {
-                [action]: spec[action],
-              }),
-          target: spec.target
-            ? {
-                ...defaultExperimentSchema.scope,
-                ...spec.target,
-                label_selectors,
-                annotation_selectors,
-              }
-            : undefined,
-        },
-      },
-    }
-  }
+  //   return {
+  //     ...result,
+  //     target: {
+  //       kind,
+  //       network_chaos: spec,
+  //     },
+  //   }
+  // }
 
   // PodChaos
   return {
     ...result,
     target: {
-      ...defaultExperimentSchema.target,
       kind,
-      pod_chaos: {
-        action: spec.action,
-        [action]: spec[action],
-      },
+      pod_chaos: spec,
     },
   }
 }
