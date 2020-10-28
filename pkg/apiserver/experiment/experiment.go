@@ -17,6 +17,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/chaos-mesh/chaos-mesh/pkg/config"
 	"net/http"
 	"sync"
 	"time"
@@ -56,6 +57,7 @@ type Service struct {
 	kubeCli client.Client
 	archive core.ExperimentStore
 	event   core.EventStore
+	conf    *config.ChaosDashboardConfig
 }
 
 // NewService returns an experiment service instance.
@@ -63,11 +65,13 @@ func NewService(
 	cli client.Client,
 	archive core.ExperimentStore,
 	event core.EventStore,
+	conf *config.ChaosDashboardConfig,
 ) *Service {
 	return &Service{
 		kubeCli: cli,
 		archive: archive,
 		event:   event,
+		conf:    conf,
 	}
 }
 
@@ -596,6 +600,11 @@ func (s *Service) listExperiments(c *gin.Context) {
 	ns := c.Query("namespace")
 	status := c.Query("status")
 
+	if !s.conf.ClusterScoped {
+		log.Info("Overwrite namespace within namespace scoped mode", "origin", ns, "new", s.conf.TargetNamespace)
+		ns = s.conf.TargetNamespace
+	}
+
 	data := make([]*Experiment, 0)
 	for key, list := range v1alpha1.AllKinds() {
 		if kind != "" && key != kind {
@@ -787,10 +796,16 @@ func (s *Service) state(c *gin.Context) {
 	g, ctx := errgroup.WithContext(context.Background())
 	m := &sync.Mutex{}
 	kinds := v1alpha1.AllKinds()
+
+	var listOptions []client.ListOption
+	if !s.conf.ClusterScoped {
+		listOptions = append(listOptions, &client.ListOptions{Namespace: s.conf.TargetNamespace})
+	}
+
 	for index := range kinds {
 		list := kinds[index]
 		g.Go(func() error {
-			if err := s.kubeCli.List(ctx, list.ChaosList); err != nil {
+			if err := s.kubeCli.List(ctx, list.ChaosList, listOptions...); err != nil {
 				return err
 			}
 			m.Lock()
