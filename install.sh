@@ -1192,6 +1192,10 @@ spec:
               value: "2333"
             - name: TZ
               value: ${timezone}
+            - name: TARGET_NAMESPACE
+              value: chaos-testing
+            - name: CLUSTER_SCOPED
+              value: "true"
           volumeMounts:
             - name: storage-volume
               mountPath: /data
