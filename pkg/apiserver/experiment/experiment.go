@@ -17,10 +17,11 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/chaos-mesh/chaos-mesh/pkg/config"
 	"net/http"
 	"sync"
 	"time"
+
+	"github.com/chaos-mesh/chaos-mesh/pkg/config"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
