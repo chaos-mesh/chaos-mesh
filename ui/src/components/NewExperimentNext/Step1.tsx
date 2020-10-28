@@ -1,9 +1,9 @@
 import { Box, Card, Divider, GridList, GridListTile, Typography, useMediaQuery, useTheme } from '@material-ui/core'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { RootState, useStoreDispatch } from 'store'
 import { createStyles, makeStyles } from '@material-ui/core/styles'
 import { setStep1, setTarget as setTargetToStore } from 'slices/experiments'
-import targetData, { Category, dataType as targetDataType } from './data/target'
+import targetData, { Category, Kind } from './data/target'
 
 import CheckCircleOutlineIcon from '@material-ui/icons/CheckCircleOutline'
 import Paper from 'components-mui/Paper'
@@ -19,7 +19,7 @@ import clsx from 'clsx'
 import { useSelector } from 'react-redux'
 
 const useStyles = makeStyles((theme) => {
-  const targetCardActive = {
+  const cardActive = {
     color: theme.palette.primary.main,
     borderColor: theme.palette.primary.main,
   }
@@ -29,11 +29,11 @@ const useStyles = makeStyles((theme) => {
       flexWrap: 'nowrap',
       transform: 'translateZ(0)',
     },
-    targetCard: {
+    card: {
       cursor: 'pointer',
-      '&:hover': targetCardActive,
+      '&:hover': cardActive,
     },
-    targetCardActive,
+    cardActive,
     submit: {
       borderColor: theme.palette.success.main,
     },
@@ -46,8 +46,6 @@ const useStyles = makeStyles((theme) => {
   })
 })
 
-type targetDataKeyType = keyof targetDataType
-
 const submitDirectly = ['pod-failure', 'pod-kill']
 
 const Step1 = () => {
@@ -55,17 +53,22 @@ const Step1 = () => {
   const isDesktopScreen = useMediaQuery(theme.breakpoints.down('md'))
   const classes = useStyles()
 
-  const step1 = useSelector((state: RootState) => state.experiments.step1)
+  const { kind: _kind, action: _action, step1 } = useSelector((state: RootState) => state.experiments)
   const dispatch = useStoreDispatch()
 
-  const [target, setTarget] = useState<targetDataKeyType>()
-  const [action, setAction] = useState<Category>()
+  const [kind, setKind] = useState<Kind | ''>(_kind)
+  const [action, setAction] = useState<Omit<Category, 'name'> | undefined>(_action)
 
-  const handleSelectTarget = (key: targetDataKeyType) => () => {
-    setTarget(key)
+  useEffect(() => {
+    setKind(_kind)
+    setAction(_action)
+  }, [_kind, _action])
+
+  const handleSelectTarget = (key: Kind) => () => {
+    setKind(key)
     setAction(undefined)
   }
-  const handleSelectAction = (d: Category) => () => {
+  const handleSelectAction = (d: Omit<Category, 'name'>) => () => {
     if (submitDirectly.includes(d.key)) {
       handleSubmitStep1(d.spec)
     }
@@ -75,8 +78,8 @@ const Step1 = () => {
 
   const handleSubmitStep1 = (values: Record<string, any>) => {
     const result = {
-      kind: target,
-      [_snakecase(target)]: values,
+      kind,
+      [_snakecase(kind)]: values,
     }
 
     if (process.env.NODE_ENV === 'development') {
@@ -115,9 +118,9 @@ const Step1 = () => {
             {Object.entries(targetData).map(([key, t]) => (
               <GridListTile key={key}>
                 <Card
-                  className={clsx(classes.targetCard, target === key ? classes.targetCardActive : '')}
+                  className={clsx(classes.card, kind === key ? classes.cardActive : '')}
                   variant="outlined"
-                  onClick={handleSelectTarget(key as targetDataKeyType)}
+                  onClick={handleSelectTarget(key as Kind)}
                 >
                   <Box display="flex" justifyContent="center" alignItems="center" height="100px">
                     <Box display="flex" justifyContent="center" alignItems="center" flex={1}>
@@ -139,16 +142,16 @@ const Step1 = () => {
             ))}
           </GridList>
         </Box>
-        {target && (
+        {kind && (
           <>
             <Divider />
             <Box p={6} overflow="hidden">
-              {targetData[target].categories ? (
+              {targetData[kind].categories ? (
                 <GridList className={classes.gridList} cols={isDesktopScreen ? 2.5 : 5.5} spacing={9} cellHeight="auto">
-                  {targetData[target].categories!.map((d: any) => (
+                  {targetData[kind].categories!.map((d: any) => (
                     <GridListTile key={d.key}>
                       <Card
-                        className={clsx(classes.targetCard, action?.key === d.key ? classes.targetCardActive : '')}
+                        className={clsx(classes.card, action?.key === d.key ? classes.cardActive : '')}
                         variant="outlined"
                         onClick={handleSelectAction(d)}
                       >
@@ -175,9 +178,9 @@ const Step1 = () => {
                     </GridListTile>
                   ))}
                 </GridList>
-              ) : target === 'TimeChaos' ? (
-                <TargetGenerated data={targetData[target].spec!} onSubmit={handleSubmitStep1} />
-              ) : target === 'StressChaos' ? (
+              ) : kind === 'TimeChaos' ? (
+                <TargetGenerated data={targetData[kind].spec!} onSubmit={handleSubmitStep1} />
+              ) : kind === 'StressChaos' ? (
                 <Stress onSubmit={handleSubmitStep1} />
               ) : null}
             </Box>

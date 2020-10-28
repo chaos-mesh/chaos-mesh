@@ -8,7 +8,7 @@ import { ReactComponent as StressIcon } from '../images/stress.svg'
 import { SvgIcon } from '@material-ui/core'
 import T from 'components/T'
 
-type Kind = 'PodChaos' | 'NetworkChaos' | 'IoChaos' | 'KernelChaos' | 'TimeChaos' | 'StressChaos'
+export type Kind = 'PodChaos' | 'NetworkChaos' | 'IoChaos' | 'KernelChaos' | 'TimeChaos' | 'StressChaos'
 type FieldType = 'text' | 'number' | 'select' | 'label' | 'autocomplete'
 interface SpecField {
   field: FieldType

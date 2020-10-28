@@ -1,3 +1,4 @@
+import { Category, Kind } from 'components/NewExperimentNext/data/target'
 import { PayloadAction, createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 
 import { ExperimentScope } from 'components/NewExperiment/types'
@@ -41,6 +42,8 @@ const initialState: {
   needToRefreshExperiments: boolean
   step1: boolean
   step2: boolean
+  kind: Kind | ''
+  action: Omit<Category, 'name'> | undefined
   target: any
   basic: any
 } = {
@@ -53,6 +56,8 @@ const initialState: {
   // New Experiment needed
   step1: false,
   step2: false,
+  kind: '',
+  action: undefined,
   target: {},
   basic: {},
 }
@@ -71,6 +76,12 @@ const experimentsSlice = createSlice({
     },
     setStep2(state, action: PayloadAction<boolean>) {
       state.step2 = action.payload
+    },
+    setKind(state, action) {
+      state.kind = action.payload
+    },
+    setAction(state, action) {
+      state.action = action.payload
     },
     setTarget(state, action) {
       state.target = action.payload
@@ -98,6 +109,14 @@ const experimentsSlice = createSlice({
   },
 })
 
-export const { setNeedToRefreshExperiments, setStep1, setStep2, setTarget, setBasic } = experimentsSlice.actions
+export const {
+  setNeedToRefreshExperiments,
+  setStep1,
+  setStep2,
+  setKind,
+  setAction,
+  setTarget,
+  setBasic,
+} = experimentsSlice.actions
 
 export default experimentsSlice.reducer
