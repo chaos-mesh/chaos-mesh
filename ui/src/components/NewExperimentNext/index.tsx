@@ -1,6 +1,8 @@
 import { Box, Grid } from '@material-ui/core'
 
-import LoadFrom from './LoadFrom'
+import LoadFromArchives from './LoadFrom/Archives'
+import LoadFromExperiments from './LoadFrom/Experiments'
+import LoadFromYAML from './LoadFrom/YAML'
 import React from 'react'
 import Step1 from './Step1'
 import Step2 from './Step2'
@@ -15,12 +17,12 @@ const NewExperiment = () => {
         </Box>
       </Grid>
       <Grid item xs={12} md={4}>
-        <LoadFrom from="experiments" />
+        <LoadFromExperiments />
         <Box mt={6}>
-          <LoadFrom from="archives" />
+          <LoadFromArchives />
         </Box>
         <Box mt={6}>
-          <LoadFrom from="yaml" />
+          <LoadFromYAML />
         </Box>
       </Grid>
     </Grid>

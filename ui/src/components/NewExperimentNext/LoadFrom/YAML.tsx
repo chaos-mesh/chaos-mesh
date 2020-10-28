@@ -1,22 +1,16 @@
-import { Box, Button } from '@material-ui/core'
 import { setAlert, setAlertOpen } from 'slices/globalStatus'
 
+import { Button } from '@material-ui/core'
 import CloudUploadOutlinedIcon from '@material-ui/icons/CloudUploadOutlined'
-import Paper from 'components-mui/Paper'
-import PaperTop from 'components/PaperTop'
 import React from 'react'
 import T from 'components/T'
-import { toTitleCase } from 'lib/utils'
+import Wrapper from './Wrapper'
 import { useIntl } from 'react-intl'
 import { useStoreDispatch } from 'store'
 import yaml from 'js-yaml'
 import { yamlToExperiment } from 'lib/formikhelpers'
 
-interface LoadFromProps {
-  from: 'experiments' | 'archives' | 'yaml'
-}
-
-const LoadFrom: React.FC<LoadFromProps> = ({ from }) => {
+const YAML = () => {
   const intl = useIntl()
 
   const dispatch = useStoreDispatch()
@@ -54,18 +48,13 @@ const LoadFrom: React.FC<LoadFromProps> = ({ from }) => {
   }
 
   return (
-    <Paper>
-      <PaperTop title={T(`newE.loadFrom${toTitleCase(from)}`)} />
-      <Box p={6} maxHeight={450} style={{ overflowY: 'scroll' }}>
-        {from === 'yaml' && (
-          <Button component="label" variant="outlined" size="small" startIcon={<CloudUploadOutlinedIcon />}>
-            {T('common.upload')}
-            <input type="file" style={{ display: 'none' }} onChange={handleUploadYAML} />
-          </Button>
-        )}
-      </Box>
-    </Paper>
+    <Wrapper from="yaml">
+      <Button component="label" variant="outlined" size="small" startIcon={<CloudUploadOutlinedIcon />}>
+        {T('common.upload')}
+        <input type="file" style={{ display: 'none' }} onChange={handleUploadYAML} />
+      </Button>
+    </Wrapper>
   )
 }
 
-export default LoadFrom
+export default YAML
