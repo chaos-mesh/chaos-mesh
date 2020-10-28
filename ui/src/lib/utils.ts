@@ -21,3 +21,18 @@ export function arrToObjBySep(arr: string[], sep: string) {
 
   return result as object
 }
+
+export function difference<T>(setA: Set<T>, setB: Set<T>) {
+  if (setA.size < setB.size) {
+    ;[setA, setB] = [setB, setA]
+  }
+  const _difference = setA
+  for (let el of setB) {
+    _difference.delete(el)
+  }
+  return _difference
+}
+
+export function assumeType<T>(x: unknown): asserts x is T {
+  return
+}

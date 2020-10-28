@@ -6,6 +6,7 @@ import { Link } from 'react-router-dom'
 import MenuIcon from '@material-ui/icons/Menu'
 import { NavigationBreadCrumbProps } from 'slices/navigation.type'
 import React from 'react'
+import SearchTrigger from 'components/SearchTrigger'
 import T from 'components/T'
 
 const useStyles = makeStyles((theme: Theme) =>
@@ -39,7 +40,7 @@ const useStyles = makeStyles((theme: Theme) =>
       },
     },
     nav: {
-      marginLeft: theme.spacing(4),
+      marginLeft: theme.spacing(3),
       '& .MuiBreadcrumbs-separator': {
         color: theme.palette.primary.main,
       },
@@ -102,6 +103,7 @@ const Header: React.FC<HeaderProps> = ({ openDrawer, handleDrawerToggle, breadcr
               })}
           </Breadcrumbs>
         </Box>
+        <SearchTrigger />
       </Toolbar>
     </AppBar>
   )
