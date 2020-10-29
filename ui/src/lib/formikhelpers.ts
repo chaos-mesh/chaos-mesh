@@ -36,7 +36,7 @@ export function parseSubmit(e: Experiment) {
   function helper2(scope: ExperimentScope) {
     scope.label_selectors = helper1(scope.label_selectors as string[])
     scope.annotation_selectors = helper1(scope.annotation_selectors as string[])
-    scope.pods = (scope.pods as string[]).reduce((acc, d) => {
+    scope.pods = ((scope.pods as unknown) as string[]).reduce((acc, d) => {
       const [namespace, name] = d.split(':')
       if (acc.hasOwnProperty(namespace)) {
         acc[namespace].push(name)
@@ -92,6 +92,7 @@ export function yamlToExperiment(yamlObj: any): any {
       annotations: metadata.annotations ? selectorsToArr(metadata.annotations, ':') : [],
       scope: {
         ...basic.scope,
+        namespace_selectors: spec.selector.namespaces,
         label_selectors: spec.selector?.label_selectors ? selectorsToArr(spec.selector.label_selectors, ': ') : [],
         annotation_selectors: spec.selector?.annotation_selectors
           ? selectorsToArr(spec.selector.annotation_selectors, ': ')
