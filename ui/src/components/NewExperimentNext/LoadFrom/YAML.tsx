@@ -35,7 +35,7 @@ const YAML = () => {
         dispatch(
           setAlert({
             type: 'success',
-            message: intl.formatMessage({ id: 'common.importSuccessfully' }),
+            message: intl.formatMessage({ id: 'common.loadSuccessfully' }),
           })
         )
       } catch (e) {

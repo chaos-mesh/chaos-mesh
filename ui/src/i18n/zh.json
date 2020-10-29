@@ -13,8 +13,7 @@
       "scope": "范围",
       "schedule": "计划"
     },
-    "loadFromExperiments": "从实验加载",
-    "loadFromArchives": "从归档加载",
+    "loadFrom": "加载自",
     "loadFromYaml": "从 YAML 文件加载",
     "basic": {
       "name": "名称",
@@ -154,7 +153,7 @@
     "confirm": "确认",
     "cancel": "取消",
     "createSuccessfully": "创建成功",
-    "importSuccessfully": "导入成功",
+    "loadSuccessfully": "加载成功",
     "deleteSuccessfully": "归档成功",
     "startSuccessfully": "启动成功",
     "pauseSuccessfully": "暂停成功",

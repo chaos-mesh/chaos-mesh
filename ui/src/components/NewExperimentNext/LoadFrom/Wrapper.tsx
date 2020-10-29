@@ -6,10 +6,10 @@ import T from 'components/T'
 import { toTitleCase } from 'lib/utils'
 
 interface WrapperProps {
-  from: 'experiments' | 'archives' | 'yaml'
+  from?: 'yaml'
 }
 
-const Wrapper: React.FC<WrapperProps> = ({ from, children }) => (
+const Wrapper: React.FC<WrapperProps> = ({ from = '', children }) => (
   <Paper>
     <PaperTop title={T(`newE.loadFrom${toTitleCase(from)}`)} />
     <Box p={6} maxHeight={450} style={{ overflowY: 'scroll' }}>

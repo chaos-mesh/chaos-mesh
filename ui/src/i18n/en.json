@@ -13,9 +13,8 @@
       "scope": "Scope",
       "schedule": "Schedule"
     },
-    "loadFromExperiments": "Load From Existing Experiments",
-    "loadFromArchives": "Load From Archives",
-    "loadFromYaml": "Load From YAML File",
+    "loadFrom": "Load from",
+    "loadFromYaml": "Load from YAML file",
     "basic": {
       "name": "Name",
       "nameHelper": "The experiment name",
@@ -154,7 +153,7 @@
     "confirm": "Confirm",
     "cancel": "Cancel",
     "createSuccessfully": "Created successfully",
-    "importSuccessfully": "Imported successfully",
+    "loadSuccessfully": "Loaded successfully",
     "deleteSuccessfully": "Archived successfully",
     "startSuccessfully": "Started successfully",
     "pauseSuccessfully": "Paused successfully",

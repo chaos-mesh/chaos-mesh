@@ -1,9 +1,10 @@
-import { FormControlLabel, Radio, RadioGroup, Typography } from '@material-ui/core'
+import { Box, Divider, FormControlLabel, Radio, RadioGroup, Typography } from '@material-ui/core'
 import React, { useEffect, useState } from 'react'
 import { setAlert, setAlertOpen } from 'slices/globalStatus'
 import { setBasic, setKindAction, setTarget } from 'slices/experiments'
 
 import { Archive } from 'api/archives.type'
+import { Experiment } from 'api/experiments.type'
 import RadioLabel from './RadioLabel'
 import SkeletonN from 'components-mui/SkeletonN'
 import T from 'components/T'
@@ -14,13 +15,20 @@ import { useIntl } from 'react-intl'
 import { useStoreDispatch } from 'store'
 import { yamlToExperiment } from 'lib/formikhelpers'
 
-const Archives = () => {
+const LoadFrom = () => {
   const intl = useIntl()
 
   const dispatch = useStoreDispatch()
 
+  const [experiments, setExperiments] = useState<Experiment[]>()
   const [archives, setArchives] = useState<Archive[]>()
   const [radio, setRadio] = useState('')
+
+  const fetchExperiments = () =>
+    api.experiments
+      .experiments()
+      .then(({ data }) => setExperiments(data))
+      .catch(console.log)
 
   const fetchArchives = () =>
     api.archives
@@ -29,15 +37,17 @@ const Archives = () => {
       .catch(console.log)
 
   useEffect(() => {
+    fetchExperiments()
     fetchArchives()
   }, [])
 
   const onRadioChange = (e: any) => {
-    const uuid = e.target.value
+    const [type, uuid] = e.target.value.split('+')
+    const apiRequest = type === 'e' ? api.experiments : api.archives
 
-    setRadio(uuid)
+    setRadio(e.target.value)
 
-    api.archives
+    apiRequest
       .detail(uuid)
       .then(({ data }) => {
         const y = yamlToExperiment(data.yaml)
@@ -49,7 +59,7 @@ const Archives = () => {
         dispatch(
           setAlert({
             type: 'success',
-            message: intl.formatMessage({ id: 'common.importSuccessfully' }),
+            message: intl.formatMessage({ id: 'common.loadSuccessfully' }),
           })
         )
         dispatch(setAlertOpen(true))
@@ -58,11 +68,39 @@ const Archives = () => {
   }
 
   return (
-    <Wrapper from="archives">
+    <Wrapper>
       <RadioGroup value={radio} onChange={onRadioChange}>
+        <Box mb={3}>
+          <Typography>{T('experiments.title')}</Typography>
+        </Box>
+        {experiments && experiments.length > 0 ? (
+          experiments.map((e) => (
+            <FormControlLabel
+              key={e.uid}
+              value={`e+${e.uid}`}
+              control={<Radio color="primary" />}
+              label={RadioLabel(e)}
+            />
+          ))
+        ) : experiments?.length === 0 ? (
+          <Typography variant="body2">{T('experiments.noExperimentsFound')}</Typography>
+        ) : (
+          <SkeletonN n={3} />
+        )}
+        <Box my={6}>
+          <Divider />
+        </Box>
+        <Box mb={3}>
+          <Typography>{T('archives.title')}</Typography>
+        </Box>
         {archives && archives.length > 0 ? (
           archives.map((a) => (
-            <FormControlLabel key={a.uid} value={a.uid} control={<Radio color="primary" />} label={RadioLabel(a)} />
+            <FormControlLabel
+              key={a.uid}
+              value={`a+${a.uid}`}
+              control={<Radio color="primary" />}
+              label={RadioLabel(a)}
+            />
           ))
         ) : archives?.length === 0 ? (
           <Typography variant="body2">{T('archives.no_archives_found')}</Typography>
@@ -74,4 +112,4 @@ const Archives = () => {
   )
 }
 
-export default Archives
+export default LoadFrom
