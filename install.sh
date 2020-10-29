@@ -951,7 +951,6 @@ metadata:
 rules:
   - apiGroups: [ "" ]
     resources:
-      - namespaces
       - nodes
     verbs: [ "get", "list", "watch" ]
 ---
