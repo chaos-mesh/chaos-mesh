@@ -1,6 +1,6 @@
 import { Box } from '@material-ui/core'
 import Paper from 'components-mui/Paper'
-import PaperTop from 'components/PaperTop'
+import PaperTop from 'components-mui/PaperTop'
 import React from 'react'
 import T from 'components/T'
 import { toTitleCase } from 'lib/utils'

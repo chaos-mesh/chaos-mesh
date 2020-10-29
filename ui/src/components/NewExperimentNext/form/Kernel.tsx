@@ -5,7 +5,7 @@ import React, { useEffect, useState } from 'react'
 
 import AddIcon from '@material-ui/icons/Add'
 import Paper from 'components-mui/Paper'
-import PaperTop from 'components/PaperTop'
+import PaperTop from 'components-mui/PaperTop'
 import RemoveIcon from '@material-ui/icons/Remove'
 import { RootState } from 'store'
 import targetData from '../data/target'

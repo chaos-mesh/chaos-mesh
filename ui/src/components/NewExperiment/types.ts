@@ -1,5 +1,3 @@
-import { FormikContextType } from 'formik'
-
 export interface ExperimentBasic {
   name: string
   namespace: string

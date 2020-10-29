@@ -5,7 +5,7 @@ import { setAlert, setAlertOpen } from 'slices/globalStatus'
 
 import { Archive } from 'api/archives.type'
 import RadioLabel from './RadioLabel'
-import SkeletonN from 'components/SkeletonN'
+import SkeletonN from 'components-mui/SkeletonN'
 import T from 'components/T'
 import Wrapper from './Wrapper'
 import _snakecase from 'lodash.snakecase'

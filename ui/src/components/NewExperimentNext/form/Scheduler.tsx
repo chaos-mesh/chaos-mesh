@@ -6,7 +6,7 @@ import HelpOutlineIcon from '@material-ui/icons/HelpOutline'
 import { RootState } from 'store'
 import T from 'components/T'
 import { TextField } from 'components/FormField'
-import Tooltip from 'components/Tooltip'
+import Tooltip from 'components-mui/Tooltip'
 import { useSelector } from 'react-redux'
 
 const mustBeScheduled = ['pod-kill', 'container-kill']
