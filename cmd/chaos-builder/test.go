@@ -147,7 +147,6 @@ func Test{{.Type}}ListChaos(t *testing.T) {
 
 	chaos.ListChaos()
 }
-
 `
 
 func generateTest(name string) string {

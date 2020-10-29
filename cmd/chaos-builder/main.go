@@ -48,7 +48,6 @@ const codeHeader = `// Copyright 2020 Chaos Mesh Authors.
 // limitations under the License.
 
 package v1alpha1
-
 `
 
 func main() {

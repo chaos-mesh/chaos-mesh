@@ -13,7 +13,6 @@
 
 package v1alpha1
 
-
 import (
 	"reflect"
 	"testing"
@@ -144,7 +143,6 @@ func TestDNSChaosListChaos(t *testing.T) {
 	chaos.ListChaos()
 }
 
-
 func TestHTTPChaosIsDeleted(t *testing.T) {
 	g := NewGomegaWithT(t)
 
@@ -265,7 +263,6 @@ func TestHTTPChaosListChaos(t *testing.T) {
 
 	chaos.ListChaos()
 }
-
 
 func TestIoChaosIsDeleted(t *testing.T) {
 	g := NewGomegaWithT(t)
@@ -388,7 +385,6 @@ func TestIoChaosListChaos(t *testing.T) {
 	chaos.ListChaos()
 }
 
-
 func TestKernelChaosIsDeleted(t *testing.T) {
 	g := NewGomegaWithT(t)
 
@@ -509,7 +505,6 @@ func TestKernelChaosListChaos(t *testing.T) {
 
 	chaos.ListChaos()
 }
-
 
 func TestNetworkChaosIsDeleted(t *testing.T) {
 	g := NewGomegaWithT(t)
@@ -632,7 +627,6 @@ func TestNetworkChaosListChaos(t *testing.T) {
 	chaos.ListChaos()
 }
 
-
 func TestPodChaosIsDeleted(t *testing.T) {
 	g := NewGomegaWithT(t)
 
@@ -753,7 +747,6 @@ func TestPodChaosListChaos(t *testing.T) {
 
 	chaos.ListChaos()
 }
-
 
 func TestStressChaosIsDeleted(t *testing.T) {
 	g := NewGomegaWithT(t)
@@ -876,7 +869,6 @@ func TestStressChaosListChaos(t *testing.T) {
 	chaos.ListChaos()
 }
 
-
 func TestTimeChaosIsDeleted(t *testing.T) {
 	g := NewGomegaWithT(t)
 
@@ -997,7 +989,6 @@ func TestTimeChaosListChaos(t *testing.T) {
 
 	chaos.ListChaos()
 }
-
 
 func init() {
 	faker.AddProvider("ioMethods", func(v reflect.Value) (interface{}, error) {
