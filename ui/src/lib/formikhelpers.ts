@@ -17,12 +17,6 @@ export const ChaosKindKeyMap: Record<Kind, { key: string }> = {
 export function parseSubmit(e: Experiment) {
   const values: Experiment = JSON.parse(JSON.stringify(e))
 
-  // Parse phase_selectors
-  const phaseSelectors = values.scope.phase_selectors
-  if (phaseSelectors.length === 1 && phaseSelectors[0] === 'all') {
-    values.scope.phase_selectors = []
-  }
-
   // Parse labels, label_selectors, annotations and annotation_selectors to object
   function helper1(selectors: string[], updateVal?: (s: string) => any) {
     return selectors.reduce((acc: Record<string, any>, d) => {
@@ -46,6 +40,12 @@ export function parseSubmit(e: Experiment) {
 
       return acc
     }, {} as Record<string, string[]>)
+
+    // Parse phase_selectors
+    const phaseSelectors = scope.phase_selectors
+    if (phaseSelectors.length === 1 && phaseSelectors[0] === 'all') {
+      scope.phase_selectors = []
+    }
   }
   values.labels = helper1(values.labels as string[])
   values.annotations = helper1(values.annotations as string[])
@@ -55,13 +55,13 @@ export function parseSubmit(e: Experiment) {
 
   // Handle NetworkChaos target
   if (kind === 'NetworkChaos') {
-    const networkTarget = values.target.network_chaos.target
+    const networkTarget = values.target.network_chaos.target_scope
 
     if (networkTarget) {
       if (networkTarget.mode) {
-        helper2(values.target.network_chaos.target!)
+        helper2(values.target.network_chaos.target_scope!)
       } else {
-        values.target.network_chaos.target = undefined
+        values.target.network_chaos.target_scope = undefined
       }
     }
   }
@@ -92,13 +92,13 @@ export function yamlToExperiment(yamlObj: any): any {
       annotations: metadata.annotations ? selectorsToArr(metadata.annotations, ':') : [],
       scope: {
         ...basic.scope,
-        namespace_selectors: spec.selector.namespaces,
+        namespace_selectors: spec.selector.namespaces ?? [],
         label_selectors: spec.selector?.label_selectors ? selectorsToArr(spec.selector.label_selectors, ': ') : [],
         annotation_selectors: spec.selector?.annotation_selectors
           ? selectorsToArr(spec.selector.annotation_selectors, ': ')
           : [],
         mode: spec.mode ?? 'one',
-        value: spec.value ?? '',
+        value: spec.value?.toString() ?? '',
       },
       scheduler: {
         cron: spec.scheduler?.cron ?? '',
@@ -115,6 +115,7 @@ export function yamlToExperiment(yamlObj: any): any {
 
   if (kind === 'NetworkChaos') {
     if (spec.target) {
+      const namespace_selectors = spec.target.selector?.namespaces ?? []
       const label_selectors = spec.target.selector?.label_selectors
         ? selectorsToArr(spec.target.selector.label_selectors, ': ')
         : []
@@ -124,12 +125,15 @@ export function yamlToExperiment(yamlObj: any): any {
 
       spec.target.selector && delete spec.target.selector
 
-      spec.target = {
+      spec.target_scope = {
         ...basic.scope,
         ...spec.target,
+        namespace_selectors,
         label_selectors,
         annotation_selectors,
       }
+
+      delete spec.target
     }
   }
 

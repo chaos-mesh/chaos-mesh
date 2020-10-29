@@ -41,6 +41,7 @@ const networkCommon: Spec = {
     value: '',
     helperText: 'Specifies the network direction',
   },
+  target_scope: undefined as any,
 }
 
 const ioMethods = [

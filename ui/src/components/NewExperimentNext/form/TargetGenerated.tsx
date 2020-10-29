@@ -1,6 +1,6 @@
 import { AutocompleteMultipleField, LabelField, SelectField, TextField } from 'components/FormField'
 import { Box, Button, MenuItem } from '@material-ui/core'
-import { Form, Formik } from 'formik'
+import { Form, Formik, getIn } from 'formik'
 import { Kind, Spec } from '../data/target'
 import React, { useEffect, useState } from 'react'
 
@@ -59,7 +59,7 @@ const TargetGenerated: React.FC<TargetGeneratedProps> = ({ kind, data, onSubmit 
 
   const parseDataToFormFields = () => {
     const rendered = Object.entries(data)
-      .filter(([_, v]) => v instanceof Object && v.field)
+      .filter(([_, v]) => v && v instanceof Object && v.field)
       .map(([k, v]) => {
         if (kind === 'NetworkChaos' && k !== 'direction') {
           k = `${data.action}.${k}`
@@ -115,22 +115,21 @@ const TargetGenerated: React.FC<TargetGeneratedProps> = ({ kind, data, onSubmit 
   return (
     <Formik enableReinitialize initialValues={init} onSubmit={onSubmit}>
       {({ values, setFieldValue }) => {
-        const beforeTargetOpen = () => setFieldValue('target', basicData.scope)
-        const afterTargetClose = () => setFieldValue('target', undefined)
+        const beforeTargetOpen = () => {
+          if (!getIn(values, 'target_scope')) {
+            setFieldValue('target_scope', basicData.scope)
+          }
+        }
 
         return (
           <Form>
             {parseDataToFormFields()}
             {kind === 'NetworkChaos' && (
-              <AdvancedOptions
-                title={T('newE.target.network.target.title')}
-                beforeOpen={beforeTargetOpen}
-                afterClose={afterTargetClose}
-              >
-                {values.target && (
+              <AdvancedOptions title={T('newE.target.network.target.title')} beforeOpen={beforeTargetOpen}>
+                {values.target_scope && (
                   <Scope
                     namespaces={namespaces}
-                    scope="target"
+                    scope="target_scope"
                     podsPreviewTitle={T('newE.target.network.target.podsPreview')}
                     podsPreviewDesc={T('newE.target.network.target.podsPreviewHelper')}
                   />

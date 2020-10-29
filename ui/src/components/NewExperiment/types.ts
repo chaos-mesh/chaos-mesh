@@ -57,7 +57,7 @@ export interface ExperimentTargetNetwork {
   duplicate: ExperimentTargetNetworkDuplicate
   loss: ExperimentTargetNetworkLoss
   direction: 'from' | 'to' | 'both' | ''
-  target?: ExperimentScope
+  target_scope?: ExperimentScope
 }
 
 export interface ExperimentTargetIO {
