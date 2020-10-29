@@ -20,7 +20,7 @@ interface SpecField {
   inputProps?: Record<string, any>
 }
 export type Spec = Record<string, SpecField>
-export interface Category {
+interface Category {
   name: string
   key: string
   spec: Spec

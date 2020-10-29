@@ -14,7 +14,7 @@
       "target": "目标",
       "schedule": "计划"
     },
-    "loadFromExperiments": "从已有实验加载",
+    "loadFromExperiments": "从实验加载",
     "loadFromArchives": "从归档加载",
     "loadFromYaml": "从 YAML 文件加载",
     "basic": {
@@ -177,7 +177,7 @@
       "ip": "ip:172.17.0.6 类似于 pod:xxx，通过 Pod IP 进行过滤",
       "uuid": "uuid:2f79a4d6-1952-45b5-b2d5-ce715823c7a7 将通过实验 UUID 搜索事件，实验以及归档"
     },
-     "result": {
+    "result": {
       "category": {
         "events": "事件",
         "experiments": "实验",
@@ -190,7 +190,7 @@
         "Kind": "实验类型",
         "Pod": "Pod",
         "Namespace": "命名空间",
-        "Start Time": "开始时间" 
+        "Start Time": "开始时间"
       },
       "noResult": "无结果"
     }

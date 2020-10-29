@@ -1,7 +1,7 @@
-import { Box, Button, Grid, MenuItem } from '@material-ui/core'
+import { Box, Button, Divider, Grid, MenuItem } from '@material-ui/core'
 import { Form, Formik } from 'formik'
 import { LabelField, SelectField, TextField } from 'components/FormField'
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { RootState, useStoreDispatch } from 'store'
 import { createStyles, makeStyles } from '@material-ui/core/styles'
 import { setBasic, setStep2 } from 'slices/experiments'
@@ -37,12 +37,21 @@ const useStyles = makeStyles((theme) =>
 const Step2 = () => {
   const classes = useStyles()
 
-  const { namespaces, step2 } = useSelector((state: RootState) => state.experiments)
+  const { namespaces, step2, basic } = useSelector((state: RootState) => state.experiments)
   const dispatch = useStoreDispatch()
+
+  const [init, setInit] = useState(basicData)
 
   useEffect(() => {
     dispatch(getNamespaces())
   }, [dispatch])
+
+  useEffect(() => {
+    setInit({
+      ...basicData,
+      ...basic,
+    })
+  }, [basic])
 
   const handleOnSubmitStep2 = (values: Record<string, any>) => {
     if (process.env.NODE_ENV === 'development') {
@@ -78,7 +87,7 @@ const Step2 = () => {
         )}
       </PaperTop>
       <Box position="relative" p={6} hidden={step2}>
-        <Formik initialValues={basicData} onSubmit={handleOnSubmitStep2}>
+        <Formik enableReinitialize initialValues={init} onSubmit={handleOnSubmitStep2}>
           <Form>
             <Grid container spacing={9}>
               <Grid item xs={12} md={6}>
@@ -108,6 +117,9 @@ const Step2 = () => {
                   <LabelField id="labels" name="labels" label={T('k8s.labels')} isKV />
                   <LabelField id="annotations" name="annotations" label={T('k8s.annotations')} isKV />
                 </AdvancedOptions>
+                <Box mb={3}>
+                  <Divider />
+                </Box>
                 <Scheduler />
                 <Box mt={6} textAlign="right">
                   <Button type="submit" variant="contained" color="primary" startIcon={<PublishIcon />}>

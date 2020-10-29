@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react'
 import { RootState, useStoreDispatch } from 'store'
 import { createStyles, makeStyles } from '@material-ui/core/styles'
 import { setStep1, setTarget as setTargetToStore } from 'slices/experiments'
-import targetData, { Category, Kind } from './data/target'
+import targetData, { Kind } from './data/target'
 
 import CheckCircleOutlineIcon from '@material-ui/icons/CheckCircleOutline'
 import Kernel from './form/Kernel'
@@ -58,7 +58,7 @@ const Step1 = () => {
   const dispatch = useStoreDispatch()
 
   const [kind, setKind] = useState<Kind | ''>(_kind)
-  const [action, setAction] = useState<Omit<Category, 'name'> | undefined>(_action)
+  const [action, setAction] = useState<string>(_action)
 
   useEffect(() => {
     setKind(_kind)
@@ -67,14 +67,14 @@ const Step1 = () => {
 
   const handleSelectTarget = (key: Kind) => () => {
     setKind(key)
-    setAction(undefined)
+    setAction('')
   }
-  const handleSelectAction = (d: Omit<Category, 'name'>) => () => {
-    if (submitDirectly.includes(d.key)) {
-      handleSubmitStep1(d.spec)
+  const handleSelectAction = (k: string) => () => {
+    if (submitDirectly.includes(k)) {
+      handleSubmitStep1(targetData[kind as Kind].categories!.filter(({ key }) => key === k)[0].spec)
     }
 
-    setAction(d)
+    setAction(k)
   }
 
   const handleSubmitStep1 = (values: Record<string, any>) => {
@@ -152,13 +152,13 @@ const Step1 = () => {
                   {targetData[kind].categories!.map((d: any) => (
                     <GridListTile key={d.key}>
                       <Card
-                        className={clsx(classes.card, action?.key === d.key ? classes.cardActive : '')}
+                        className={clsx(classes.card, action === d.key ? classes.cardActive : '')}
                         variant="outlined"
-                        onClick={handleSelectAction(d)}
+                        onClick={handleSelectAction(d.key)}
                       >
                         <Box display="flex" justifyContent="center" alignItems="center" height="50px">
                           <Box display="flex" justifyContent="center" alignItems="center" flex={1}>
-                            {action?.key === d.key ? (
+                            {action === d.key ? (
                               <RadioButtonCheckedOutlinedIcon />
                             ) : (
                               <RadioButtonUncheckedOutlinedIcon />
@@ -189,14 +189,14 @@ const Step1 = () => {
             </Box>
           </>
         )}
-        {action && !submitDirectly.includes(action.key) && (
+        {action && !submitDirectly.includes(action) && (
           <>
             <Divider />
             <Box p={6}>
               {/* Force re-render when spec changed */}
               <TargetGenerated
-                key={JSON.stringify(action.spec)}
-                data={action.spec}
+                key={action}
+                data={targetData[kind as Kind].categories!.filter(({ key }) => key === action)[0].spec}
                 kind={kind}
                 onSubmit={handleSubmitStep1}
               />

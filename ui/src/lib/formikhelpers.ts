@@ -149,6 +149,7 @@ export function yamlToExperiment(yamlObj: any): any {
       labels: metadata.labels ? selectorsToArr(metadata.labels, ':') : [],
       annotations: metadata.annotations ? selectorsToArr(metadata.annotations, ':') : [],
       scope: {
+        ...basic.scope,
         label_selectors: spec.selector?.label_selectors ? selectorsToArr(spec.selector.label_selectors, ': ') : [],
         annotation_selectors: spec.selector?.annotation_selectors
           ? selectorsToArr(spec.selector.annotation_selectors, ': ')
@@ -168,6 +169,26 @@ export function yamlToExperiment(yamlObj: any): any {
   delete spec.value
   delete spec.scheduler
   delete spec.duration
+
+  if (kind === 'NetworkChaos') {
+    if (spec.target) {
+      const label_selectors = spec.target.selector?.label_selectors
+        ? selectorsToArr(spec.target.selector.label_selectors, ': ')
+        : []
+      const annotation_selectors = spec.target.selector?.annotation_selectors
+        ? selectorsToArr(spec.target.selector.annotation_selectors, ': ')
+        : []
+
+      spec.target.selector && delete spec.target.selector
+
+      spec.target = {
+        ...basic.scope,
+        ...spec.target,
+        label_selectors,
+        annotation_selectors,
+      }
+    }
+  }
 
   if (kind === 'IoChaos' && spec.attr) {
     spec.attr = selectorsToArr(spec.attr, ':')
@@ -199,42 +220,11 @@ export function yamlToExperiment(yamlObj: any): any {
     }
   }
 
-  if (['KernelChaos', 'TimeChaos', 'StressChaos'].includes(kind)) {
-    return {
-      ...result,
-      target: {
-        kind,
-        [_snakecase(kind)]: spec,
-      },
-    }
-  }
-
-  // TODO: Refactor
-  // if (kind === 'NetworkChaos') {
-  //   const label_selectors = spec.target?.selector?.label_selectors
-  //     ? selectorsToArr(spec.target.selector.label_selectors, ': ')
-  //     : []
-  //   const annotation_selectors = spec.target?.selector?.annotation_selectors
-  //     ? selectorsToArr(spec.target.selector.annotation_selectors, ': ')
-  //     : []
-
-  //   spec.target?.selector && delete spec.target.selector
-
-  //   return {
-  //     ...result,
-  //     target: {
-  //       kind,
-  //       network_chaos: spec,
-  //     },
-  //   }
-  // }
-
-  // PodChaos
   return {
     ...result,
     target: {
       kind,
-      pod_chaos: spec,
+      [_snakecase(kind)]: spec,
     },
   }
 }

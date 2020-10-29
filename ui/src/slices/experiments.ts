@@ -1,7 +1,7 @@
-import { Category, Kind } from 'components/NewExperimentNext/data/target'
 import { PayloadAction, createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 
 import { ExperimentScope } from 'components/NewExperiment/types'
+import { Kind } from 'components/NewExperimentNext/data/target'
 import { StateOfExperiments } from 'api/experiments.type'
 import api from 'api'
 
@@ -43,7 +43,7 @@ const initialState: {
   step1: boolean
   step2: boolean
   kind: Kind | ''
-  action: Omit<Category, 'name'> | undefined
+  action: string
   target: any
   basic: any
 } = {
@@ -57,12 +57,12 @@ const initialState: {
   step1: false,
   step2: false,
   kind: '',
-  action: undefined,
+  action: '',
   target: {},
   basic: {},
 }
 
-const namespaceFilters = ['kube-system', 'chaos-testing']
+const namespaceFilters = ['kube-system']
 
 const experimentsSlice = createSlice({
   name: 'experiments',

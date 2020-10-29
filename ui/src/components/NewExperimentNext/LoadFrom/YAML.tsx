@@ -1,3 +1,4 @@
+import { setAction, setBasic, setKind, setTarget } from 'slices/experiments'
 import { setAlert, setAlertOpen } from 'slices/globalStatus'
 
 import { Button } from '@material-ui/core'
@@ -5,6 +6,7 @@ import CloudUploadOutlinedIcon from '@material-ui/icons/CloudUploadOutlined'
 import React from 'react'
 import T from 'components/T'
 import Wrapper from './Wrapper'
+import _snakecase from 'lodash.snakecase'
 import { useIntl } from 'react-intl'
 import { useStoreDispatch } from 'store'
 import yaml from 'js-yaml'
@@ -25,7 +27,12 @@ const YAML = () => {
         if (process.env.NODE_ENV === 'development') {
           console.debug('Debug yamlToExperiment:', y)
         }
-        // setInitialValues(y)
+
+        const kind = y.target.kind
+        dispatch(setKind(kind))
+        dispatch(setAction(y.target[_snakecase(kind)].action ?? ''))
+        dispatch(setTarget(y.target))
+        dispatch(setBasic(y.basic))
         dispatch(
           setAlert({
             type: 'success',

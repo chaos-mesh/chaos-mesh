@@ -1,18 +1,34 @@
 import { Form, Formik } from 'formik'
 import { LabelField, TextField } from 'components/FormField'
+import React, { useEffect, useState } from 'react'
 
 import AdvancedOptions from 'components/AdvancedOptions'
-import React from 'react'
+import { RootState } from 'store'
 import { Typography } from '@material-ui/core'
 import targetData from '../data/target'
+import { useSelector } from 'react-redux'
 
 interface StressProps {
   onSubmit: (values: Record<string, any>) => void
 }
 
 const Stress: React.FC<StressProps> = ({ onSubmit }) => {
+  const { target } = useSelector((state: RootState) => state.experiments)
+
+  const initialValues = targetData.StressChaos.spec!
+
+  const [init, setInit] = useState(initialValues)
+
+  useEffect(() => {
+    setInit({
+      ...initialValues,
+      ...target['stress_chaos'],
+    })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [target])
+
   return (
-    <Formik initialValues={targetData.StressChaos.spec!} onSubmit={onSubmit}>
+    <Formik enableReinitialize initialValues={init} onSubmit={onSubmit}>
       <Form>
         <Typography gutterBottom>CPU</Typography>
         <TextField

@@ -2,13 +2,14 @@ import { AutocompleteMultipleField, LabelField, SelectField, TextField } from 'c
 import { Box, Button, MenuItem } from '@material-ui/core'
 import { Form, Formik } from 'formik'
 import { Kind, Spec } from '../data/target'
+import React, { useEffect, useState } from 'react'
 
 import AdvancedOptions from 'components/AdvancedOptions'
 import PublishIcon from '@material-ui/icons/Publish'
-import React from 'react'
 import { RootState } from 'store'
 import Scope from './Scope'
 import T from 'components/T'
+import _snakecase from 'lodash.snakecase'
 import basicData from '../data/basic'
 import { useSelector } from 'react-redux'
 
@@ -19,7 +20,9 @@ interface TargetGeneratedProps {
 }
 
 const TargetGenerated: React.FC<TargetGeneratedProps> = ({ kind, data, onSubmit }) => {
-  const initialValues = Object.entries(data).reduce((acc, [k, v]) => {
+  const { namespaces, target } = useSelector((state: RootState) => state.experiments)
+
+  let initialValues = Object.entries(data).reduce((acc, [k, v]) => {
     if (v instanceof Object && v.field) {
       acc[k] = v.value
     } else {
@@ -29,10 +32,39 @@ const TargetGenerated: React.FC<TargetGeneratedProps> = ({ kind, data, onSubmit 
     return acc
   }, {} as Record<string, any>)
 
+  if (kind === 'NetworkChaos') {
+    const action = initialValues.action
+    delete initialValues.action
+    const direction = initialValues.direction
+    delete initialValues.direction
+
+    initialValues = {
+      action,
+      [action]: initialValues,
+      direction,
+    }
+  }
+
+  const [init, setInit] = useState(initialValues)
+
+  useEffect(() => {
+    if (target['kind']) {
+      setInit({
+        ...initialValues,
+        ...target[_snakecase(kind)],
+      })
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [target])
+
   const parseDataToFormFields = () => {
     const rendered = Object.entries(data)
       .filter(([_, v]) => v instanceof Object && v.field)
       .map(([k, v]) => {
+        if (kind === 'NetworkChaos' && k !== 'direction') {
+          k = `${data.action}.${k}`
+        }
+
         switch (v.field) {
           case 'text':
             return <TextField key={k} id={k} name={k} label={v.label} helperText={v.helperText} {...v.inputProps} />
@@ -80,10 +112,8 @@ const TargetGenerated: React.FC<TargetGeneratedProps> = ({ kind, data, onSubmit 
     return <>{rendered.map((d) => d)}</>
   }
 
-  const { namespaces } = useSelector((state: RootState) => state.experiments)
-
   return (
-    <Formik initialValues={initialValues} onSubmit={onSubmit}>
+    <Formik enableReinitialize initialValues={init} onSubmit={onSubmit}>
       {({ values, setFieldValue }) => {
         const beforeTargetOpen = () => setFieldValue('target', basicData.scope)
         const afterTargetClose = () => setFieldValue('target', undefined)

@@ -1,15 +1,24 @@
 import { FormControlLabel, Radio, RadioGroup, Typography } from '@material-ui/core'
 import React, { useEffect, useState } from 'react'
+import { setAction, setBasic, setKind, setTarget } from 'slices/experiments'
+import { setAlert, setAlertOpen } from 'slices/globalStatus'
 
 import { Archive } from 'api/archives.type'
 import RadioLabel from './RadioLabel'
 import SkeletonN from 'components/SkeletonN'
 import T from 'components/T'
 import Wrapper from './Wrapper'
+import _snakecase from 'lodash.snakecase'
 import api from 'api'
+import { useIntl } from 'react-intl'
+import { useStoreDispatch } from 'store'
 import { yamlToExperiment } from 'lib/formikhelpers'
 
 const Archives = () => {
+  const intl = useIntl()
+
+  const dispatch = useStoreDispatch()
+
   const [archives, setArchives] = useState<Archive[]>()
   const [radio, setRadio] = useState('')
 
@@ -28,14 +37,29 @@ const Archives = () => {
 
     setRadio(uuid)
 
-    // api.experiments
-    //   .detail(uuid)
-    //   .then(({ data }) => setInitialValues(yamlToExperiment(data.yaml)))
-    //   .catch(console.log)
+    api.experiments
+      .detail(uuid)
+      .then(({ data }) => {
+        const y = yamlToExperiment(data.yaml)
+
+        const kind = y.target.kind
+        dispatch(setKind(kind))
+        dispatch(setAction(y.target[_snakecase(kind)].action ?? ''))
+        dispatch(setTarget(y.target))
+        dispatch(setBasic(y.basic))
+        dispatch(
+          setAlert({
+            type: 'success',
+            message: intl.formatMessage({ id: 'common.importSuccessfully' }),
+          })
+        )
+        dispatch(setAlertOpen(true))
+      })
+      .catch(console.log)
   }
 
   return (
-    <Wrapper from="experiments">
+    <Wrapper from="archives">
       <RadioGroup value={radio} onChange={onRadioChange}>
         {archives && archives.length > 0 ? (
           archives.map((a) => (
