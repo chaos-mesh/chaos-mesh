@@ -11,7 +11,6 @@
     "steps": {
       "basic": "基本信息",
       "scope": "范围",
-      "target": "目标",
       "schedule": "计划"
     },
     "loadFromExperiments": "从实验加载",
@@ -44,12 +43,10 @@
       "kind": "类别",
       "action": "行为",
       "pod": {
-        "title": "Pod 生命周期",
-        "actionHelper": "选择 PodChaos 行为"
+        "title": "Pod 生命周期"
       },
       "network": {
         "title": "网络",
-        "actionHelper": "选择 NetworkChaos 行为",
         "target": {
           "title": "目标",
           "podsPreview": "预览目标 Pods",
@@ -66,8 +63,7 @@
         "title": "时钟"
       },
       "stress": {
-        "title": "CPU/Memory 压力测试",
-        "actionHelper": "选择 StressChaos 行为"
+        "title": "CPU/Memory 压力测试"
       }
     },
     "schedule": {

@@ -11,7 +11,6 @@
     "steps": {
       "basic": "Basic",
       "scope": "Scope",
-      "target": "Target",
       "schedule": "Schedule"
     },
     "loadFromExperiments": "Load From Existing Experiments",
@@ -44,12 +43,10 @@
       "kind": "Kind",
       "action": "Action",
       "pod": {
-        "title": "Pod Lifecycle",
-        "actionHelper": "Select a PodChaos action"
+        "title": "Pod Lifecycle"
       },
       "network": {
         "title": "Network",
-        "actionHelper": "Select a NetworkChaos action",
         "target": {
           "title": "Target",
           "podsPreview": "Target Pods Preview",
@@ -66,8 +63,7 @@
         "title": "Clock"
       },
       "stress": {
-        "title": "Stress CPU/Memory",
-        "actionHelper": "Select a StressChaos action"
+        "title": "Stress CPU/Memory"
       }
     },
     "schedule": {

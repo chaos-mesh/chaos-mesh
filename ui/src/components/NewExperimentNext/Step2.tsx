@@ -1,4 +1,4 @@
-import { Box, Button, Divider, Grid, MenuItem } from '@material-ui/core'
+import { Box, Button, Divider, Grid, MenuItem, Typography } from '@material-ui/core'
 import { Form, Formik } from 'formik'
 import { LabelField, SelectField, TextField } from 'components/FormField'
 import React, { useEffect, useState } from 'react'
@@ -91,9 +91,15 @@ const Step2 = () => {
           <Form>
             <Grid container spacing={9}>
               <Grid item xs={12} md={6}>
+                <Box mb={3}>
+                  <Typography>{T('newE.steps.scope')}</Typography>
+                </Box>
                 {namespaces.length ? <Scope namespaces={namespaces} /> : <SkeletonN n={6} />}
               </Grid>
               <Grid item xs={12} md={6}>
+                <Box mb={3}>
+                  <Typography>{T('newE.steps.basic')}</Typography>
+                </Box>
                 <TextField id="name" name="name" label={T('newE.basic.name')} helperText={T('newE.basic.nameHelper')} />
 
                 {namespaces.length ? (
