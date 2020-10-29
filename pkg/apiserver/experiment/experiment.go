@@ -110,8 +110,8 @@ type Detail struct {
 type createExperimentFunc func(*core.ExperimentInfo) error
 type updateExperimentFunc func(*core.ExperimentYAMLDescription) error
 
-// StringStruct defines a common status struct.
-type StringStruct struct {
+// StatusResponse defines a common status struct.
+type StatusResponse struct {
 	Status string `json:"status"`
 }
 
@@ -832,7 +832,7 @@ func (s *Service) state(c *gin.Context) {
 // @Tags experiments
 // @Produce json
 // @Param uid path string true "uid"
-// @Success 200 {object} StringStruct
+// @Success 200 {object} StatusResponse
 // @Failure 400 {object} utils.APIError
 // @Failure 404 {object} utils.APIError
 // @Failure 500 {object} utils.APIError
@@ -875,7 +875,7 @@ func (s *Service) pauseExperiment(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, StringStruct{Status: "success"})
+	c.JSON(http.StatusOK, StatusResponse{Status: "success"})
 }
 
 // @Summary Start a chaos experiment.
@@ -883,7 +883,7 @@ func (s *Service) pauseExperiment(c *gin.Context) {
 // @Tags experiments
 // @Produce json
 // @Param uid path string true "uid"
-// @Success 200 {object} StringStruct
+// @Success 200 {object} StatusResponse
 // @Failure 400 {object} utils.APIError
 // @Failure 404 {object} utils.APIError
 // @Failure 500 {object} utils.APIError
@@ -926,7 +926,7 @@ func (s *Service) startExperiment(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, StringStruct{Status: "success"})
+	c.JSON(http.StatusOK, StatusResponse{Status: "success"})
 }
 
 func (s *Service) patchExperiment(exp *Base, annotations map[string]string) error {
