@@ -1130,6 +1130,8 @@ spec:
                 - SYS_CHROOT
                 - SYS_ADMIN
                 - KILL
+                # CAP_IPC_LOCK is used to lock memory
+                - CAP_IPC_LOCK
           volumeMounts:
             - name: socket-path
               mountPath: ${mountPath}
