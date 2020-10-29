@@ -1,5 +1,5 @@
 import { Box, FormControlLabel, Link, Switch, Typography } from '@material-ui/core'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 
 import { FormattedMessage } from 'react-intl'
 import HelpOutlineIcon from '@material-ui/icons/HelpOutline'
@@ -22,6 +22,12 @@ const Scheduler: React.FC<SchedulerProps> = () => {
     : false
   const [immediate, setImmediate] = useState(scheduled)
 
+  useEffect(() => {
+    if (scheduled) {
+      setImmediate(false)
+    }
+  }, [scheduled])
+
   const handleChecked = (_: React.ChangeEvent<HTMLInputElement>, checked: boolean) => {
     if (scheduled) {
       setImmediate(false)
@@ -33,8 +39,8 @@ const Scheduler: React.FC<SchedulerProps> = () => {
   return (
     <>
       <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
-        <Typography>
-          {T('newE.steps.schedule')}{' '}
+        <Typography style={{ display: 'flex', alignItems: 'center' }}>
+          {T('newE.steps.schedule')}
           <Tooltip
             title={
               <Typography variant="body2">
@@ -55,7 +61,6 @@ const Scheduler: React.FC<SchedulerProps> = () => {
                 />
               </Typography>
             }
-            style={{ verticalAlign: 'sub' }}
             arrow
             interactive
           >
@@ -64,8 +69,10 @@ const Scheduler: React.FC<SchedulerProps> = () => {
         </Typography>
         <Box>
           <FormControlLabel
-            style={{ marginRight: 0 }}
-            control={<Switch name="immediate" color="primary" checked={immediate} onChange={handleChecked} />}
+            style={{ marginLeft: -4, marginRight: 0 }}
+            control={
+              <Switch name="immediate" color="primary" size="small" checked={immediate} onChange={handleChecked} />
+            }
             label={T('newE.schedule.immediate')}
           />
           {scheduled && (

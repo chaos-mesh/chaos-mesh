@@ -6,9 +6,7 @@ import React from 'react'
 
 const RadioLabel = (e: Experiment | Archive) => (
   <Box display="flex" justifyContent="space-between" alignItems="center">
-    <Typography variant="body1" component="div">
-      {e.name}
-    </Typography>
+    <Typography>{e.name}</Typography>
     <Box ml={3}>
       <Typography variant="body2" color="textSecondary">
         {e.uid}

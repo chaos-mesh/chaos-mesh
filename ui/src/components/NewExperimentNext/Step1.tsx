@@ -54,27 +54,28 @@ const Step1 = () => {
   const isDesktopScreen = useMediaQuery(theme.breakpoints.down('md'))
   const classes = useStyles()
 
-  const { kind: _kind, action: _action, step1 } = useSelector((state: RootState) => state.experiments)
+  const {
+    kindAction: [_kind, _action],
+    step1,
+  } = useSelector((state: RootState) => state.experiments)
   const dispatch = useStoreDispatch()
 
-  const [kind, setKind] = useState<Kind | ''>(_kind)
-  const [action, setAction] = useState<string>(_action)
+  const [kindAction, setKindAction] = useState<[Kind | '', string]>([_kind, _action])
+  const kind = kindAction[0]
+  const action = kindAction[1]
 
   useEffect(() => {
-    setKind(_kind)
-    setAction(_action)
+    setKindAction([_kind, _action])
   }, [_kind, _action])
 
-  const handleSelectTarget = (key: Kind) => () => {
-    setKind(key)
-    setAction('')
-  }
-  const handleSelectAction = (k: string) => () => {
-    if (submitDirectly.includes(k)) {
-      handleSubmitStep1(targetData[kind as Kind].categories!.filter(({ key }) => key === k)[0].spec)
+  const handleSelectTarget = (key: Kind) => () => setKindAction([key, ''])
+
+  const handleSelectAction = (action: string) => () => {
+    if (submitDirectly.includes(action)) {
+      handleSubmitStep1(targetData[kind as Kind].categories!.filter(({ key }) => key === action)[0].spec)
     }
 
-    setAction(k)
+    setKindAction([kind, action])
   }
 
   const handleSubmitStep1 = (values: Record<string, any>) => {
@@ -193,9 +194,7 @@ const Step1 = () => {
           <>
             <Divider />
             <Box p={6}>
-              {/* Force re-render when spec changed */}
               <TargetGenerated
-                key={action}
                 data={targetData[kind as Kind].categories!.filter(({ key }) => key === action)[0].spec}
                 kind={kind}
                 onSubmit={handleSubmitStep1}

@@ -42,8 +42,7 @@ const initialState: {
   needToRefreshExperiments: boolean
   step1: boolean
   step2: boolean
-  kind: Kind | ''
-  action: string
+  kindAction: [Kind | '', string]
   target: any
   basic: any
 } = {
@@ -56,8 +55,7 @@ const initialState: {
   // New Experiment needed
   step1: false,
   step2: false,
-  kind: '',
-  action: '',
+  kindAction: ['', ''],
   target: {},
   basic: {},
 }
@@ -77,11 +75,8 @@ const experimentsSlice = createSlice({
     setStep2(state, action: PayloadAction<boolean>) {
       state.step2 = action.payload
     },
-    setKind(state, action) {
-      state.kind = action.payload
-    },
-    setAction(state, action) {
-      state.action = action.payload
+    setKindAction(state, action) {
+      state.kindAction = action.payload
     },
     setTarget(state, action) {
       state.target = action.payload
@@ -113,8 +108,7 @@ export const {
   setNeedToRefreshExperiments,
   setStep1,
   setStep2,
-  setKind,
-  setAction,
+  setKindAction,
   setTarget,
   setBasic,
 } = experimentsSlice.actions

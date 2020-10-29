@@ -1,5 +1,5 @@
-import { setAction, setBasic, setKind, setTarget } from 'slices/experiments'
 import { setAlert, setAlertOpen } from 'slices/globalStatus'
+import { setBasic, setKindAction, setTarget } from 'slices/experiments'
 
 import { Button } from '@material-ui/core'
 import CloudUploadOutlinedIcon from '@material-ui/icons/CloudUploadOutlined'
@@ -29,8 +29,7 @@ const YAML = () => {
         }
 
         const kind = y.target.kind
-        dispatch(setKind(kind))
-        dispatch(setAction(y.target[_snakecase(kind)].action ?? ''))
+        dispatch(setKindAction([kind, y.target[_snakecase(kind)].action ?? '']))
         dispatch(setTarget(y.target))
         dispatch(setBasic(y.basic))
         dispatch(

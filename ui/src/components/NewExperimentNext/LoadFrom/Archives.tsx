@@ -1,7 +1,7 @@
 import { FormControlLabel, Radio, RadioGroup, Typography } from '@material-ui/core'
 import React, { useEffect, useState } from 'react'
-import { setAction, setBasic, setKind, setTarget } from 'slices/experiments'
 import { setAlert, setAlertOpen } from 'slices/globalStatus'
+import { setBasic, setKindAction, setTarget } from 'slices/experiments'
 
 import { Archive } from 'api/archives.type'
 import RadioLabel from './RadioLabel'
@@ -37,14 +37,13 @@ const Archives = () => {
 
     setRadio(uuid)
 
-    api.experiments
+    api.archives
       .detail(uuid)
       .then(({ data }) => {
         const y = yamlToExperiment(data.yaml)
 
         const kind = y.target.kind
-        dispatch(setKind(kind))
-        dispatch(setAction(y.target[_snakecase(kind)].action ?? ''))
+        dispatch(setKindAction([kind, y.target[_snakecase(kind)].action ?? '']))
         dispatch(setTarget(y.target))
         dispatch(setBasic(y.basic))
         dispatch(
