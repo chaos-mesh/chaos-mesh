@@ -17,7 +17,10 @@ interface ScopePodsTableProps {
 }
 
 const ScopePodsTable: React.FC<ScopePodsTableProps> = ({ scope = 'scope', pods }) => {
-  const originalPods = useMemo(() => pods.map((d) => d.name).reduce((acc, d) => acc.concat(d), []), [pods])
+  const originalPods = useMemo(
+    () => pods.map((d) => `${d.namespace}:${d.name}`).reduce<string[]>((acc, d) => acc.concat(d), []),
+    [pods]
+  )
   const podsCount = originalPods.length
 
   const { values, setFieldValue } = useFormikContext()
@@ -71,17 +74,21 @@ const ScopePodsTable: React.FC<ScopePodsTableProps> = ({ scope = 'scope', pods }
           </TableRow>
         </TableHead>
         <TableBody>
-          {pods.map((pod) => (
-            <TableRow key={pod.name + pod.namespace} onClick={handleSelect(pod.name)}>
-              <TableCell padding="checkbox">
-                <Checkbox checked={isSelected(pod.name)} />
-              </TableCell>
-              <TableCell>{pod.name}</TableCell>
-              <TableCell>{pod.namespace}</TableCell>
-              <TableCell>{pod.ip}</TableCell>
-              <TableCell>{pod.state}</TableCell>
-            </TableRow>
-          ))}
+          {pods.map((pod) => {
+            const key = `${pod.namespace}:${pod.name}`
+
+            return (
+              <TableRow key={key} onClick={handleSelect(key)}>
+                <TableCell padding="checkbox">
+                  <Checkbox checked={isSelected(key)} />
+                </TableCell>
+                <TableCell>{pod.name}</TableCell>
+                <TableCell>{pod.namespace}</TableCell>
+                <TableCell>{pod.ip}</TableCell>
+                <TableCell>{pod.state}</TableCell>
+              </TableRow>
+            )
+          })}
         </TableBody>
       </Table>
     </TableContainer>

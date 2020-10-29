@@ -84,6 +84,13 @@ const experimentsSlice = createSlice({
     setBasic(state, action) {
       state.basic = action.payload
     },
+    resetNewExperiment(state) {
+      state.step1 = false
+      state.step2 = false
+      state.kindAction = ['', '']
+      state.target = {}
+      state.basic = {}
+    },
   },
   extraReducers: (builder) => {
     builder.addCase(getStateofExperiments.fulfilled, (state, action) => {
@@ -111,6 +118,7 @@ export const {
   setKindAction,
   setTarget,
   setBasic,
+  resetNewExperiment,
 } = experimentsSlice.actions
 
 export default experimentsSlice.reducer

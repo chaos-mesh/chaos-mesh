@@ -36,21 +36,35 @@ export function parseSubmit(e: Experiment) {
   function helper2(scope: ExperimentScope) {
     scope.label_selectors = helper1(scope.label_selectors as string[])
     scope.annotation_selectors = helper1(scope.annotation_selectors as string[])
+    scope.pods = (scope.pods as string[]).reduce((acc, d) => {
+      const [namespace, name] = d.split(':')
+      if (acc.hasOwnProperty(namespace)) {
+        acc[namespace].push(name)
+      } else {
+        acc[namespace] = [name]
+      }
+
+      return acc
+    }, {} as Record<string, string[]>)
   }
   values.labels = helper1(values.labels as string[])
   values.annotations = helper1(values.annotations as string[])
   helper2(values.scope)
-  // Handle NetworkChaos target
-  const networkTarget = values.target.network_chaos.target
-  if (networkTarget) {
-    if (networkTarget.mode) {
-      helper2(values.target.network_chaos.target!)
-    } else {
-      values.target.network_chaos.target = undefined
-    }
-  }
 
   const kind = values.target.kind
+
+  // Handle NetworkChaos target
+  if (kind === 'NetworkChaos') {
+    const networkTarget = values.target.network_chaos.target
+
+    if (networkTarget) {
+      if (networkTarget.mode) {
+        helper2(values.target.network_chaos.target!)
+      } else {
+        values.target.network_chaos.target = undefined
+      }
+    }
+  }
 
   if (kind === 'IoChaos') {
     values.target.io_chaos.attr = helper1(values.target.io_chaos.attr as string[], (s: string) => parseInt(s, 10))
