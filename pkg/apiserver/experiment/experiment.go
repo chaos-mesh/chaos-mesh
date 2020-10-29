@@ -21,8 +21,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/chaos-mesh/chaos-mesh/pkg/config"
-
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
 	"golang.org/x/sync/errgroup"
