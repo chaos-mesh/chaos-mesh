@@ -23,17 +23,17 @@ import (
 
 var (
 	ErrNS             = errorx.NewNamespace("error.api")
-	ErrOther          = ErrNS.NewType("other")
+	ErrUnknown        = ErrNS.NewType("unknown")
 	ErrInvalidRequest = ErrNS.NewType("invalid_request")
 	ErrInternalServer = ErrNS.NewType("internal_server_error")
 	ErrNotFound       = ErrNS.NewType("resource_not_found")
 )
 
 type APIError struct {
-	Error    bool   `json:"error"`
 	Message  string `json:"message"`
 	Code     string `json:"code"`
 	FullText string `json:"full_text"`
+	Status   string `json:"status"`
 }
 
 // MWHandleErrors creates a middleware that turns (last) error in the context into an APIError json response.
@@ -57,11 +57,11 @@ func MWHandleErrors() gin.HandlerFunc {
 
 		innerErr := errorx.Cast(err.Err)
 		if innerErr == nil {
-			innerErr = ErrOther.WrapWithNoMessage(err.Err)
+			innerErr = ErrUnknown.WrapWithNoMessage(err.Err)
 		}
 
 		c.AbortWithStatusJSON(statusCode, APIError{
-			Error:    true,
+			Status:   "error",
 			Message:  innerErr.Error(),
 			Code:     errorx.GetTypeName(innerErr),
 			FullText: fmt.Sprintf("%+v", innerErr),
