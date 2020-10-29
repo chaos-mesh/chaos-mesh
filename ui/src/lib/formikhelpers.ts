@@ -1,18 +1,11 @@
-import {
-  CallchainFrame,
-  Experiment,
-  ExperimentScope,
-  ExperimentTarget,
-  FormikCtx,
-} from 'components/NewExperiment/types'
+import { CallchainFrame, Experiment, ExperimentScope } from 'components/NewExperiment/types'
+import target, { Kind } from 'components/NewExperimentNext/data/target'
 
 import _snakecase from 'lodash.snakecase'
 import basic from 'components/NewExperimentNext/data/basic'
-import { defaultExperimentSchema } from 'components/NewExperiment/constants'
 import snakeCaseKeys from 'snakecase-keys'
-import target from 'components/NewExperimentNext/data/target'
 
-export const ChaosKindKeyMap: Record<string, Record<string, Exclude<keyof ExperimentTarget, 'kind'>>> = {
+export const ChaosKindKeyMap: Record<Kind, { key: string }> = {
   PodChaos: { key: 'pod_chaos' },
   NetworkChaos: { key: 'network_chaos' },
   IoChaos: { key: 'io_chaos' },
@@ -57,78 +50,13 @@ export function parseSubmit(e: Experiment) {
     }
   }
 
-  // Remove unrelated chaos
   const kind = values.target.kind
-  Object.entries(ChaosKindKeyMap)
-    .filter((k) => k[0] !== kind)
-    .map((k) => k[1].key)
-    .forEach((k) => delete values.target[k])
-
-  // Remove unrelated actions
-  if (['PodChaos', 'NetworkChaos'].includes(kind)) {
-    for (const key in values.target) {
-      if (key !== 'kind') {
-        const chaos = (values.target as any)[key]
-
-        for (const action in chaos) {
-          if (
-            action === 'action' ||
-            // Handle PodChaos container-kill action
-            (chaos.action === 'container-kill' && action === 'container_name') ||
-            // Pass NetworkChaos target
-            action === 'target' ||
-            // Handle NetworkChaos partition action
-            (chaos.action === 'partition' && action === 'direction')
-          ) {
-            continue
-          }
-
-          if (action !== chaos.action) {
-            delete chaos[action]
-          }
-        }
-      }
-    }
-  }
 
   if (kind === 'IoChaos') {
     values.target.io_chaos.attr = helper1(values.target.io_chaos.attr as string[], (s: string) => parseInt(s, 10))
   }
 
   return values
-}
-
-export function mustSchedule(formikValues: Experiment) {
-  if (
-    formikValues.target.pod_chaos.action === 'pod-kill' ||
-    formikValues.target.pod_chaos.action === 'container-kill'
-  ) {
-    return true
-  }
-
-  return false
-}
-
-export function resetOtherChaos(ctx: FormikCtx, selectedChaosKind: string, action: string | boolean) {
-  const { values, setFieldValue } = ctx
-
-  const kind = selectedChaosKind
-  const selectedChaosKey = ChaosKindKeyMap[kind].key
-
-  const updatedTarget = {
-    ...defaultExperimentSchema.target,
-    kind,
-    [selectedChaosKey]: {
-      ...values.target[selectedChaosKey],
-      ...(action
-        ? {
-            action,
-          }
-        : {}),
-    },
-  }
-
-  setFieldValue('target', updatedTarget)
 }
 
 function selectorsToArr(selectors: Object, separator: string) {

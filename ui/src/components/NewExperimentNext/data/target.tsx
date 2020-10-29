@@ -1,4 +1,5 @@
 import { ReactComponent as ClockIcon } from '../images/time.svg'
+import { ExperimentKind } from 'components/NewExperiment/types'
 import { ReactComponent as FileSystemIOIcon } from '../images/io.svg'
 import { ReactComponent as LinuxKernelIcon } from '../images/kernel.svg'
 import { ReactComponent as NetworkIcon } from '../images/network.svg'
@@ -8,7 +9,7 @@ import { ReactComponent as StressIcon } from '../images/stress.svg'
 import { SvgIcon } from '@material-ui/core'
 import T from 'components/T'
 
-export type Kind = 'PodChaos' | 'NetworkChaos' | 'IoChaos' | 'KernelChaos' | 'TimeChaos' | 'StressChaos'
+export type Kind = ExperimentKind
 type FieldType = 'text' | 'number' | 'select' | 'label' | 'autocomplete'
 interface SpecField {
   field: FieldType

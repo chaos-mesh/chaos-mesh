@@ -135,32 +135,3 @@ export interface Experiment extends ExperimentBasic {
   target: ExperimentTarget
   scheduler: ExperimentSchedule
 }
-
-export interface StepperState {
-  activeStep: number
-}
-
-export enum StepperType {
-  NEXT = 'NEXT',
-  BACK = 'BACK',
-  JUMP = 'JUMP',
-  RESET = 'RESET',
-}
-
-export type StepperAction = {
-  type: StepperType
-  payload?: number
-}
-
-type StepperDispatch = (action: StepperAction) => void
-
-export interface StepperContextProps {
-  state: StepperState
-  dispatch: StepperDispatch
-}
-
-export type FormikCtx = FormikContextType<Experiment>
-
-export type StepperFormTargetProps = {
-  handleActionChange?: (e: React.ChangeEvent<any>) => void
-}
