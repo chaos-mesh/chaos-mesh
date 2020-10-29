@@ -95,9 +95,6 @@ endif
 chaosdaemon:
 	$(CGOENV) go build -ldflags '$(LDFLAGS)' -o bin/chaos-daemon ./cmd/chaos-daemon/main.go
 
-token:
-	$(CGOENV) go build -ldflags '$(LDFLAGS)' -o bin/token ./cmd/token/main.go
-
 bin/pause: ./hack/pause.c
 	cc ./hack/pause.c -o bin/pause
 
@@ -219,9 +216,6 @@ image-build-base:
 
 image-chaos-daemon: image-binary
 	docker build -t ${DOCKER_REGISTRY_PREFIX}pingcap/chaos-daemon:${IMAGE_TAG} ${DOCKER_BUILD_ARGS} images/chaos-daemon
-
-image-token: image-binary
-	docker build -t ${DOCKER_REGISTRY_PREFIX}pingcap/token:${IMAGE_TAG} ${DOCKER_BUILD_ARGS} images/token
 
 image-chaos-mesh: image-binary
 	docker build -t ${DOCKER_REGISTRY_PREFIX}pingcap/chaos-mesh:${IMAGE_TAG} ${DOCKER_BUILD_ARGS} images/chaos-mesh
