@@ -19,6 +19,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
 	lru "github.com/hashicorp/golang-lru"
 	"k8s.io/client-go/rest"
 	pkgclient "sigs.k8s.io/controller-runtime/pkg/client"
@@ -66,7 +67,13 @@ func (c *Clients) Client(token string) (pkgclient.Client, error) {
 	config.BearerToken = token
 	config.BearerTokenFile = ""
 
-	client, err := pkgclient.New(config, pkgclient.Options{})
+	newFunc := pkgclient.New
+
+	if mockNew := mock.On("MockCreateK8sClient"); mockNew != nil {
+		newFunc = mockNew.(func(config *rest.Config, options pkgclient.Options) (pkgclient.Client, error))
+	}
+
+	client, err := newFunc(config, pkgclient.Options{})
 	if err != nil {
 		return nil, err
 	}
