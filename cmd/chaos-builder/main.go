@@ -49,19 +49,29 @@ const codeHeader = `// Copyright 2020 Chaos Mesh Authors.
 
 package v1alpha1
 
+`
+
+func main() {
+	generatedCode := codeHeader + `
 import (
 	"reflect"
 	"time"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
-
 `
+	generatedTest := codeHeader + `
+import (
+	"reflect"
+	"testing"
+	"time"
 
-func main() {
-	generatedCode := codeHeader
-
+	"github.com/bxcodec/faker"
+	. "github.com/onsi/gomega"
+)
+`
 	initImpl := ""
+
 	filepath.Walk("./api/v1alpha1", func(path string, info os.FileInfo, err error) error {
 		log := log.WithValues("file", path)
 
@@ -110,6 +120,7 @@ func main() {
 						}
 
 						generatedCode += generateImpl(baseType.Name.Name)
+						generatedTest += generateTest(baseType.Name.Name)
 						initImpl += generateInit(baseType.Name.Name)
 						continue out
 					}
@@ -130,6 +141,13 @@ func init() {
 		log.Error(err, "fail to create file")
 	}
 	fmt.Fprint(file, generatedCode)
+
+	generatedTest += testInit
+	file, err = os.Create("./api/v1alpha1/zz_generated.chaosmesh_test.go")
+	if err != nil {
+		log.Error(err, "fail to create file")
+	}
+	fmt.Fprint(file, generatedTest)
 
 	return
 }

@@ -78,7 +78,7 @@ type IoChaosSpec struct {
 	// Methods defines the I/O methods for injecting I/O chaos action.
 	// default: all I/O methods.
 	// +optional
-	Methods []IoMethod `json:"methods,omitempty"`
+	Methods []IoMethod `json:"methods,omitempty" faker:"ioMethods"`
 
 	// Percent defines the percentage of injection errors and provides a number from 0-100.
 	// default: 100.
