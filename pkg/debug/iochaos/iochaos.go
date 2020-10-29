@@ -14,47 +14,34 @@
 package iochaos
 
 import (
+	"context"
 	"fmt"
 
-	"github.com/chaos-mesh/chaos-mesh/pkg/debug/common"
+	cm "github.com/chaos-mesh/chaos-mesh/pkg/debug/common"
 )
 
-func Debug(chaos string, ns string) error {
-	chaosList, err := common.Debug("iochaos", chaos, ns)
-	if err != nil {
-		return fmt.Errorf(err.Error())
-	}
-	for _, chaosName := range chaosList {
-		fmt.Println(string(common.ColorCyan), "[CHAOSNAME]:", chaosName, string(common.ColorReset))
-		if err := debugEachChaos(chaosName, ns); err != nil {
-			return fmt.Errorf("debug chaos failed with: %s", err.Error())
-		}
-	}
-	return nil
-}
-
-func debugEachChaos(chaosName string, ns string) error {
-	p, err := common.GetPod("iochaos", chaosName, ns)
+func Debug(ctx context.Context, chaosName string, ns string, c *cm.ClientSet) error {
+	p, err := cm.GetPod(ctx, "iochaos", chaosName, ns, c.CtrlClient)
 	if err != nil {
 		return err
 	}
 
 	// print out debug info
 	cmd := fmt.Sprintf("ls /proc/1/fd -al")
-	out, err := common.ExecCommand(p.ChaosDaemonName, p.ChaosDaemonNamespace, cmd)
+	out, err := cm.Exec(p.ChaosDaemonName, p.ChaosDaemonNamespace, cmd, c.K8sClient)
 	if err != nil {
 		return fmt.Errorf("run command '%s' failed with: %s", cmd, err.Error())
 	}
-	fmt.Println(string(common.ColorCyan), "1. [file discriptors]", string(common.ColorReset))
-	common.PrintWithTab(string(out))
+	fmt.Println(string(cm.ColorCyan), "1. [file discriptors]", string(cm.ColorReset))
+	cm.PrintWithTab(string(out))
 
 	cmd = fmt.Sprintf("mount")
-	out, err = common.ExecCommand(p.ChaosDaemonName, p.ChaosDaemonNamespace, cmd)
+	out, err = cm.Exec(p.ChaosDaemonName, p.ChaosDaemonNamespace, cmd, c.K8sClient)
 	if err != nil {
 		return fmt.Errorf("run command '%s' failed with: %s", cmd, err.Error())
 	}
-	fmt.Println(string(common.ColorCyan), "2. [mount information]", string(common.ColorReset))
-	common.PrintWithTab(string(out))
+	fmt.Println(string(cm.ColorCyan), "2. [mount information]", string(cm.ColorReset))
+	cm.PrintWithTab(string(out))
 
 	return nil
 }

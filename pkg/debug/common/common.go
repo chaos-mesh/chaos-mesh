@@ -52,14 +52,43 @@ type PodName struct {
 	ChaosDaemonNamespace string
 }
 
+type ClientSet struct {
+	CtrlClient client.Client
+	K8sClient  *kubernetes.Clientset
+}
+
 func init() {
 	_ = v1alpha1.AddToScheme(scheme)
 	_ = clientgoscheme.AddToScheme(scheme)
 }
 
-func UpperCaseChaos(str string) string {
+func upperCaseChaos(str string) string {
 	parts := regexp.MustCompile("(.*)(chaos)").FindStringSubmatch(str)
 	return strings.Title(parts[1]) + strings.Title(parts[2])
+}
+
+func PrintWithTab(s string) {
+	fmt.Printf("\t%s\n", regexp.MustCompile("\n").ReplaceAllString(s, "\n\t"))
+}
+
+func MarshalChaos(s interface{}) (string, error) {
+	b, err := json.MarshalIndent(s, "", "  ")
+	if err != nil {
+		return "", fmt.Errorf("failed to marshal indent: %s", err.Error())
+	}
+	return string(b), nil
+}
+
+func InitClientSet() (*ClientSet, error) {
+	ctrlClient, err := client.New(config.GetConfigOrDie(), client.Options{Scheme: scheme})
+	if err != nil {
+		return nil, fmt.Errorf("failed to create client")
+	}
+	k8sClient, err := kubernetes.NewForConfig(config.GetConfigOrDie())
+	if err != nil {
+		return nil, fmt.Errorf("error in getting access to K8S: %v", err.Error())
+	}
+	return &ClientSet{ctrlClient, k8sClient}, nil
 }
 
 // ExtractFromJson extract certain item from given string slice
@@ -77,6 +106,7 @@ func ExtractFromJson(chaos runtime.Object, str []string) (interface{}, error) {
 	}
 	for i := 0; i < len(str)-1; i++ {
 		var ok bool
+		// to see if next is a number
 		num, err := strconv.Atoi(str[i+1])
 		if err == nil {
 			resultMap, ok = resultMap[str[i]].([]interface{})[num].(map[string]interface{})
@@ -95,56 +125,9 @@ func ExtractFromJson(chaos runtime.Object, str []string) (interface{}, error) {
 	return ret, nil
 }
 
-func Debug(chaosType string, chaosName string, ns string) ([]string, error) {
-	options := client.Options{
-		Scheme: scheme,
-	}
-	c, err := client.New(config.GetConfigOrDie(), options)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create client")
-	}
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-
-	chaosType = UpperCaseChaos(strings.ToLower(chaosType))
-	allKinds := v1alpha1.AllKinds()
-	chaosListIntf := allKinds[chaosType].ChaosList
-
-	if err := c.List(ctx, chaosListIntf, client.InNamespace(ns)); err != nil {
-		return nil, fmt.Errorf("failed to get chaosList: %s", err.Error())
-	}
-	chaosList := chaosListIntf.ListChaos()
-	if len(chaosList) == 0 {
-		return nil, fmt.Errorf("no chaos is found, please check your input")
-	}
-
-	var retList []string
-	chaosNum := 0
-	for _, ch := range chaosList {
-		if chaosName == "" || chaosName == ch.Name {
-			retList = append(retList, ch.Name)
-			chaosNum++
-		}
-	}
-	if chaosNum == 0 {
-		return nil, fmt.Errorf("no chaos is found, please check your input")
-	}
-	return retList, nil
-}
-
-func GetChaos(chaosType string, chaosName string, ns string) (runtime.Object, error) {
-	options := client.Options{
-		Scheme: scheme,
-	}
-	c, err := client.New(config.GetConfigOrDie(), options)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create client")
-	}
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-
+func GetChaos(ctx context.Context, chaosType string, chaosName string, ns string, c client.Client) (runtime.Object, error) {
 	// get podName
-	chaosType = UpperCaseChaos(strings.ToLower(chaosType))
+	chaosType = upperCaseChaos(strings.ToLower(chaosType))
 	allKinds := v1alpha1.AllKinds()
 	chaos := allKinds[chaosType].Chaos
 	objectKey := client.ObjectKey{
@@ -157,8 +140,10 @@ func GetChaos(chaosType string, chaosName string, ns string) (runtime.Object, er
 	return chaos, nil
 }
 
-func GetLog(pod string, ns string, tail int64) (string, error) {
+// runtime-controller only support CRUD， use client-go client
+func Log(pod string, ns string, tail int64, c *kubernetes.Clientset) (string, error) {
 	var podLogOpts corev1.PodLogOptions
+	//use negative tail to indicate no tail limit is needed
 	if tail < 0 {
 		podLogOpts = corev1.PodLogOptions{}
 	} else {
@@ -166,13 +151,7 @@ func GetLog(pod string, ns string, tail int64) (string, error) {
 			TailLines: func(i int64) *int64 { return &i }(tail),
 		}
 	}
-	// runtime-controller not support getlog for now
-	// use client-go client
-	clientset, err := kubernetes.NewForConfig(config.GetConfigOrDie())
-	if err != nil {
-		return "", fmt.Errorf("failed to access to K8S: %v", err.Error())
-	}
-	req := clientset.CoreV1().Pods(ns).GetLogs(pod, &podLogOpts)
+	req := c.CoreV1().Pods(ns).GetLogs(pod, &podLogOpts)
 	podLogs, err := req.Stream()
 	if err != nil {
 		return "", fmt.Errorf("failed to open stream: %v", err.Error())
@@ -187,15 +166,8 @@ func GetLog(pod string, ns string, tail int64) (string, error) {
 	return buf.String(), nil
 }
 
-func ExecCommand(pod string, ns string, cmd string) (string, error) {
-	// creates the clientset
-	configK8S := config.GetConfigOrDie()
-	clientset, err := kubernetes.NewForConfig(configK8S)
-	if err != nil {
-		return "", fmt.Errorf("error in getting access to K8S: %v", err.Error())
-	}
-
-	req := clientset.CoreV1().RESTClient().Post().
+func Exec(pod string, ns string, cmd string, c *kubernetes.Clientset) (string, error) {
+	req := c.CoreV1().RESTClient().Post().
 		Resource("pods").
 		Name(pod).
 		Namespace(ns).
@@ -210,7 +182,7 @@ func ExecCommand(pod string, ns string, cmd string) (string, error) {
 	}, kubectlscheme.ParameterCodec)
 
 	var stdout, stderr bytes.Buffer
-	exec, err := remotecommand.NewSPDYExecutor(configK8S, "POST", req.URL())
+	exec, err := remotecommand.NewSPDYExecutor(config.GetConfigOrDie(), "POST", req.URL())
 	if err != nil {
 		return "", fmt.Errorf("error in creating NewSPDYExecutor: %v", err.Error())
 	}
@@ -228,19 +200,9 @@ func ExecCommand(pod string, ns string, cmd string) (string, error) {
 	return stdout.String(), nil
 }
 
-func GetPod(chaosType string, chaosName string, ns string) (*PodName, error) {
-	options := client.Options{
-		Scheme: scheme,
-	}
-	c, err := client.New(config.GetConfigOrDie(), options)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create client")
-	}
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-
+func GetPod(ctx context.Context, chaosType string, chaosName string, ns string, c client.Client) (*PodName, error) {
 	// get podName
-	chaos, err := GetChaos(chaosType, chaosName, ns)
+	chaos, err := GetChaos(ctx, chaosType, chaosName, ns, c)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get chaos %s: %s", chaosName, err.Error())
 	}
@@ -312,6 +274,29 @@ func GetPod(chaosType string, chaosName string, ns string) (*PodName, error) {
 	return &PodName{podName.(string), podNamespace.(string), ChaosDaemonName, ChaosDaemonNamespace}, nil
 }
 
-func PrintWithTab(s string) {
-	fmt.Printf("\t%s\n", regexp.MustCompile("\n").ReplaceAllString(s, "\n\t"))
+func GetChaosList(ctx context.Context, chaosType string, chaosName string, ns string, c client.Client) ([]string, error) {
+	chaosType = upperCaseChaos(strings.ToLower(chaosType))
+	allKinds := v1alpha1.AllKinds()
+	chaosListIntf := allKinds[chaosType].ChaosList
+
+	if err := c.List(ctx, chaosListIntf, client.InNamespace(ns)); err != nil {
+		return nil, fmt.Errorf("failed to get chaosList: %s", err.Error())
+	}
+	chaosList := chaosListIntf.ListChaos()
+	if len(chaosList) == 0 {
+		return nil, fmt.Errorf("no chaos is found, please check your input")
+	}
+
+	var retList []string
+	chaosNum := 0
+	for _, ch := range chaosList {
+		if chaosName == "" || chaosName == ch.Name {
+			retList = append(retList, ch.Name)
+			chaosNum++
+		}
+	}
+	if chaosNum == 0 {
+		return nil, fmt.Errorf("no chaos is found, please check your input")
+	}
+	return retList, nil
 }

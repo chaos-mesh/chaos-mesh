@@ -14,30 +14,19 @@
 package networkchaos
 
 import (
+	"context"
 	"fmt"
 	"regexp"
 	"strconv"
 	"strings"
 
-	"github.com/chaos-mesh/chaos-mesh/pkg/debug/common"
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	cm "github.com/chaos-mesh/chaos-mesh/pkg/debug/common"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-func Debug(chaos string, ns string) error {
-	chaosList, err := common.Debug("networkchaos", chaos, ns)
-	if err != nil {
-		return fmt.Errorf(err.Error())
-	}
-	for _, chaosName := range chaosList {
-		fmt.Println(string(common.ColorCyan), "[CHAOSNAME]:", chaosName, string(common.ColorReset))
-		if err := debugEachChaos(chaosName, ns); err != nil {
-			return fmt.Errorf("debug chaos failed with: %s", err.Error())
-		}
-	}
-	return nil
-}
-
-func debugEachChaos(chaosName string, ns string) error {
-	p, err := common.GetPod("networkchaos", chaosName, ns)
+func Debug(ctx context.Context, chaosName string, ns string, c *cm.ClientSet) error {
+	p, err := cm.GetPod(ctx, "networkchaos", chaosName, ns, c.CtrlClient)
 	if err != nil {
 		return err
 	}
@@ -45,7 +34,7 @@ func debugEachChaos(chaosName string, ns string) error {
 	// get nsenter path from log
 	var nsenterPathList []string
 	for _, tailNum := range []int64{100, 1000, 10000, -1} {
-		log, err := common.GetLog(p.ChaosDaemonName, p.ChaosDaemonNamespace, tailNum)
+		log, err := cm.Log(p.ChaosDaemonName, p.ChaosDaemonNamespace, tailNum, c.K8sClient)
 		if err != nil {
 			return fmt.Errorf("get log failed with: %s", err.Error())
 		}
@@ -59,22 +48,22 @@ func debugEachChaos(chaosName string, ns string) error {
 	}
 	nsenterPath := nsenterPathList[0]
 
-	chaos, err := common.GetChaos("networkchaos", chaosName, ns)
+	chaos, err := cm.GetChaos(ctx, "networkchaos", chaosName, ns, c.CtrlClient)
 	if err != nil {
 		return fmt.Errorf("failed to get chaos %s: %s", chaosName, err.Error())
 	}
 
 	actionHier := []string{"spec", "action"}
-	action, err := common.ExtractFromJson(chaos, actionHier)
+	action, err := cm.ExtractFromJson(chaos, actionHier)
 	if err != nil {
 		return fmt.Errorf("get action failed with: %s", err.Error())
 	}
 	var netemExpect string
 	switch action.(string) {
 	case "delay":
-		latency, _ := common.ExtractFromJson(chaos, []string{"spec", "delay", "latency"})
-		jitter, _ := common.ExtractFromJson(chaos, []string{"spec", "delay", "jitter"})
-		correlation, _ := common.ExtractFromJson(chaos, []string{"spec", "delay", "correlation"})
+		latency, _ := cm.ExtractFromJson(chaos, []string{"spec", "delay", "latency"})
+		jitter, _ := cm.ExtractFromJson(chaos, []string{"spec", "delay", "jitter"})
+		correlation, _ := cm.ExtractFromJson(chaos, []string{"spec", "delay", "correlation"})
 		netemExpect = fmt.Sprintf("%v %v %v %v%%", action, latency, jitter, correlation)
 	default:
 		return fmt.Errorf("chaos not supported")
@@ -82,20 +71,20 @@ func debugEachChaos(chaosName string, ns string) error {
 
 	// print out debug info
 	cmd := fmt.Sprintf("/usr/bin/nsenter %s -- ipset list", nsenterPath)
-	out, err := common.ExecCommand(p.ChaosDaemonName, p.ChaosDaemonNamespace, cmd)
+	out, err := cm.Exec(p.ChaosDaemonName, p.ChaosDaemonNamespace, cmd, c.K8sClient)
 	if err != nil {
 		return fmt.Errorf("run command '%s' failed with: %s", cmd, err.Error())
 	}
-	fmt.Println(string(common.ColorCyan), "1. [ipset list]", string(common.ColorReset))
-	common.PrintWithTab(string(out))
+	fmt.Println(string(cm.ColorCyan), "1. [ipset list]", string(cm.ColorReset))
+	cm.PrintWithTab(string(out))
 
 	cmd = fmt.Sprintf("/usr/bin/nsenter %s -- tc qdisc list", nsenterPath)
-	out, err = common.ExecCommand(p.ChaosDaemonName, p.ChaosDaemonNamespace, cmd)
+	out, err = cm.Exec(p.ChaosDaemonName, p.ChaosDaemonNamespace, cmd, c.K8sClient)
 	if err != nil {
 		return fmt.Errorf("run command '%s' failed with: %s", cmd, err.Error())
 	}
-	fmt.Println(string(common.ColorCyan), "2. [tc qdisc list]", string(common.ColorReset))
-	common.PrintWithTab(string(out))
+	fmt.Println(string(cm.ColorCyan), "2. [tc qdisc list]", string(cm.ColorReset))
+	cm.PrintWithTab(string(out))
 
 	netemCurrent := regexp.MustCompile("(?:limit 1000)(.*)").FindStringSubmatch(string(out))
 	if len(netemCurrent) == 0 {
@@ -122,21 +111,43 @@ func debugEachChaos(chaosName string, ns string) error {
 			if alpCurrent == alpExpect {
 				continue
 			}
-			errInfo := fmt.Sprintf("%sNetworkChaos didn't execute as expected, expect: %s, got: %s%s", string(common.ColorRed), netemExpect, netemCurrent, string(common.ColorReset))
-			common.PrintWithTab(errInfo)
+			errInfo := fmt.Sprintf("%sNetworkChaos didn't execute as expected, expect: %s, got: %s%s", string(cm.ColorRed), netemExpect, netemCurrent, string(cm.ColorReset))
+			cm.PrintWithTab(errInfo)
 			return nil
 		}
 	}
-	sucInfo := fmt.Sprintf("%sNetworkChaos execute as expected%s\n", string(common.ColorGreen), string(common.ColorReset))
-	common.PrintWithTab(sucInfo)
+	sucInfo := fmt.Sprintf("%sNetworkChaos execute as expected%s\n", string(cm.ColorGreen), string(cm.ColorReset))
+	cm.PrintWithTab(sucInfo)
 
 	cmd = fmt.Sprintf("/usr/bin/nsenter %s -- iptables --list", nsenterPath)
-	out, err = common.ExecCommand(p.ChaosDaemonName, p.ChaosDaemonNamespace, cmd)
+	out, err = cm.Exec(p.ChaosDaemonName, p.ChaosDaemonNamespace, cmd, c.K8sClient)
 	if err != nil {
 		return fmt.Errorf("cmd.Run() failed with: %s", err.Error())
 	}
-	fmt.Println(string(common.ColorCyan), "3. [iptables list]", string(common.ColorReset))
-	common.PrintWithTab(string(out))
+	fmt.Println(string(cm.ColorCyan), "3. [iptables list]", string(cm.ColorReset))
+	cm.PrintWithTab(string(out))
+
+	cmd = fmt.Sprintf("/usr/bin/nsenter %s -- iptables --list", nsenterPath)
+	out, err = cm.Exec(p.ChaosDaemonName, p.ChaosDaemonNamespace, cmd, c.K8sClient)
+	if err != nil {
+		return fmt.Errorf("cmd.Run() failed with: %s", err.Error())
+	}
+
+	podNetworkChaos := &v1alpha1.PodNetworkChaos{}
+	objectKey := client.ObjectKey{
+		Namespace: p.PodNamespace,
+		Name:      p.PodName,
+	}
+
+	if err = c.CtrlClient.Get(ctx, objectKey, podNetworkChaos); err != nil {
+		return fmt.Errorf("failed to get chaos: %s", err.Error())
+	}
+	fmt.Println(string(cm.ColorCyan), "4. [podnetworkchaos]", string(cm.ColorReset))
+	mar, err := cm.MarshalChaos(podNetworkChaos.Spec)
+	if err != nil {
+		return err
+	}
+	cm.PrintWithTab(mar)
 
 	return nil
 }
