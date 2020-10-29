@@ -110,12 +110,17 @@ type Detail struct {
 type createExperimentFunc func(*core.ExperimentInfo) error
 type updateExperimentFunc func(*core.ExperimentYAMLDescription) error
 
+// StatusResponse defines a common status struct.
+type StatusResponse struct {
+	Status string `json:"status"`
+}
+
 // @Summary Create a new chaos experiment.
 // @Description Create a new chaos experiment.
 // @Tags experiments
 // @Produce json
 // @Param request body core.ExperimentInfo true "Request body"
-// @Success 200 "create ok"
+// @Success 200 {object} core.ExperimentInfo
 // @Failure 400 {object} utils.APIError
 // @Failure 500 {object} utils.APIError
 // @Router /experiments/new [post]
@@ -149,7 +154,7 @@ func (s *Service) createExperiment(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, nil)
+	c.JSON(http.StatusOK, exp)
 }
 
 func (s *Service) createPodChaos(exp *core.ExperimentInfo) error {
@@ -827,7 +832,7 @@ func (s *Service) state(c *gin.Context) {
 // @Tags experiments
 // @Produce json
 // @Param uid path string true "uid"
-// @Success 200 "pause ok"
+// @Success 200 {object} StatusResponse
 // @Failure 400 {object} utils.APIError
 // @Failure 404 {object} utils.APIError
 // @Failure 500 {object} utils.APIError
@@ -870,7 +875,7 @@ func (s *Service) pauseExperiment(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, nil)
+	c.JSON(http.StatusOK, StatusResponse{Status: "success"})
 }
 
 // @Summary Start a chaos experiment.
@@ -878,7 +883,7 @@ func (s *Service) pauseExperiment(c *gin.Context) {
 // @Tags experiments
 // @Produce json
 // @Param uid path string true "uid"
-// @Success 200 "start ok"
+// @Success 200 {object} StatusResponse
 // @Failure 400 {object} utils.APIError
 // @Failure 404 {object} utils.APIError
 // @Failure 500 {object} utils.APIError
@@ -921,7 +926,7 @@ func (s *Service) startExperiment(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, nil)
+	c.JSON(http.StatusOK, StatusResponse{Status: "success"})
 }
 
 func (s *Service) patchExperiment(exp *Base, annotations map[string]string) error {
@@ -956,7 +961,7 @@ func (s *Service) patchExperiment(exp *Base, annotations map[string]string) erro
 // @Tags experiments
 // @Produce json
 // @Param request body core.ExperimentYAMLDescription true "Request body"
-// @Success 200 "update ok"
+// @Success 200 {object} core.ExperimentYAMLDescription
 // @Failure 400 {object} utils.APIError
 // @Failure 500 {object} utils.APIError
 // @Router /experiments/update [put]
@@ -995,7 +1000,7 @@ func (s *Service) updateExperiment(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, nil)
+	c.JSON(http.StatusOK, exp)
 }
 
 func (s *Service) updatePodChaos(exp *core.ExperimentYAMLDescription) error {
