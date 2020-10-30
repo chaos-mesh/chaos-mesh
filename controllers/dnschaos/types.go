@@ -41,14 +41,8 @@ import (
 )
 
 var (
-	// DNSServerName is the chaos DNS server's name
-	DNSServerName = "chaos-mesh-dns-service"
-
-	// DNSServerSelectorLabels is the labels used to select the DNS server
-	DNSServerSelectorLabels = map[string]string{
-		"app.kubernetes.io/component": "dns-server",
-		"app.kubernetes.io/instance":  "chaos-mesh",
-	}
+	// DNSServiceName is the chaos DNS server's name
+	DNSServiceName = "chaos-mesh-dns-server"
 )
 
 // endpoint is dns-chaos reconciler
@@ -72,17 +66,12 @@ func (r *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.I
 	}
 
 	// get dns server's ip used for chaos
-	services, err := utils.SelectAndFilterService(ctx, r.Client, DNSServerSelectorLabels)
+	service, err := utils.GetService(ctx, r.Client, "", DNSServiceName)
 	if err != nil {
-		r.Log.Error(err, "fail to select service", "labels", DNSServerSelectorLabels)
+		r.Log.Error(err, "fail to get service")
 		return err
 	}
-	if len(services.Items) != 1 {
-		err = fmt.Errorf("get %d services from the labels %v", len(services.Items), DNSServerSelectorLabels)
-		r.Log.Error(err, "fail to select service")
-		return err
-	}
-	service := services.Items[0]
+	r.Log.Info("Set DNS chaos to DNS service", "ip", service.Spec.ClusterIP)
 
 	// TODO: get port from dns service to instead 9288
 	err = r.setDNSServerRules(service.Spec.ClusterIP, 9288, dnschaos.Name, pods, dnschaos.Spec.Action, dnschaos.Spec.Scope)
@@ -121,18 +110,12 @@ func (r *endpoint) Recover(ctx context.Context, req ctrl.Request, chaos v1alpha1
 	}
 
 	// get dns server's ip used for chaos
-	services, err := utils.SelectAndFilterService(ctx, r.Client, DNSServerSelectorLabels)
+	service, err := utils.GetService(ctx, r.Client, "", DNSServiceName)
 	if err != nil {
-		r.Log.Error(err, "fail to select service", "labels", DNSServerSelectorLabels)
+		r.Log.Error(err, "fail to get service")
 		return err
 	}
-	if len(services.Items) != 1 {
-		err = fmt.Errorf("get %d services from the labels %v", len(services.Items), DNSServerSelectorLabels)
-		r.Log.Error(err, "fail to select service")
-		return err
-	}
-	service := services.Items[0]
-	r.Log.Info("Recover get dns service", "service", service.String(), "ip", service.Spec.ClusterIP)
+	r.Log.Info("Cancel DNS chaos to DNS service", "ip", service.Spec.ClusterIP)
 
 	// TODO: get port from dns service to instead 9288
 	r.cancelDNSServerRules(service.Spec.ClusterIP, 9288, dnschaos.Name)

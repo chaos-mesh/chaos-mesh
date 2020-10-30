@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"math"
 	"math/rand"
+	"os"
 	"regexp"
 	"strconv"
 	"strings"
@@ -207,23 +208,22 @@ func SelectPods(ctx context.Context, c client.Client, r client.Reader, selector 
 	return pods, nil
 }
 
-// SelectAndFilterService returns the list of service that filtered by selector
-func SelectAndFilterService(ctx context.Context, c client.Client, selectLabels map[string]string) (v1.ServiceList, error) {
-	var services v1.ServiceList
-	var listOptions = client.ListOptions{}
-	if len(selectLabels) > 0 {
-		listOptions.LabelSelector = labels.SelectorFromSet(labels.Set(selectLabels))
+func GetService(ctx context.Context, c client.Client, namespace string, serviceName string) (*v1.Service, error) {
+	// use the environment value if namespace is empty
+	if len(namespace) == 0 {
+		namespace = os.Getenv("NAMESPACE")
 	}
 
-	if err := c.List(ctx, &services, &listOptions); err != nil {
-		return services, err
+	service := &v1.Service{}
+	err := c.Get(ctx, client.ObjectKey{
+		Namespace: namespace,
+		Name:      serviceName,
+	}, service)
+	if err != nil {
+		return nil, err
 	}
 
-	if len(services.Items) == 0 {
-		return services, fmt.Errorf("service not found, labels %v", selectLabels)
-	}
-
-	return services, nil
+	return service, nil
 }
 
 // CheckPodMeetSelector checks if this pod meets the selection criteria.
