@@ -1,5 +1,4 @@
 import Mock from 'mockjs'
-import { Pool } from '@material-ui/icons'
 
 const Random = Mock.Random
 
@@ -302,5 +301,3 @@ export const eventsParamsMock = Mock.mock({
 })
 
 export const eventsRequiredParams = []
-
-export const dryEventsResMock = []
