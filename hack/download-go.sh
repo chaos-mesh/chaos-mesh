@@ -1,6 +1,9 @@
 #!/bin/bash
 
 ARCH="$(uname -m)"
+
+echo "Build for $ARCH"
+
 case $ARCH in
 "x86_64")
     ARCH=amd64
@@ -13,9 +16,6 @@ case $ARCH in
     ;;
 "armv8")
     ARCH=arm64
-    ;;
-.*386.*)
-    ARCH=386
     ;;
 esac
 
