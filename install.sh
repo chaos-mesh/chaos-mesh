@@ -1268,6 +1268,8 @@ spec:
             value: "app.kubernetes.io/component:webhook"
           - name: PPROF_ADDR
             value: ":10081"
+          - name: CHAOS_DNS_SERVICE_NAME
+            value: chaos-mesh-dns-server
         volumeMounts:
           - name: webhook-certs
             mountPath: /etc/webhook/certs
