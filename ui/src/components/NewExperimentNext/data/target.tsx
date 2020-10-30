@@ -300,10 +300,10 @@ const data: Record<Kind, Target> = {
     ),
     categories: [
       {
-        name: 'Delay',
-        key: 'delay',
+        name: 'Latency',
+        key: 'latency',
         spec: {
-          action: 'delay' as any,
+          action: 'latency' as any,
           delay: {
             field: 'text',
             label: 'Delay',

@@ -1,10 +1,11 @@
 import { AutocompleteMultipleField, LabelField, SelectField, TextField } from 'components/FormField'
 import { Box, Button, MenuItem } from '@material-ui/core'
-import { Form, Formik, getIn } from 'formik'
+import { Form, Formik, FormikErrors, FormikTouched, getIn } from 'formik'
 import { Kind, Spec } from '../data/target'
 import React, { useEffect, useState } from 'react'
 
 import AdvancedOptions from 'components/AdvancedOptions'
+import { ObjectSchema } from 'yup'
 import PublishIcon from '@material-ui/icons/Publish'
 import { RootState } from 'store'
 import Scope from './Scope'
@@ -16,10 +17,11 @@ import { useSelector } from 'react-redux'
 interface TargetGeneratedProps {
   kind?: Kind | ''
   data: Spec
+  validationSchema: ObjectSchema
   onSubmit: (values: Record<string, any>) => void
 }
 
-const TargetGenerated: React.FC<TargetGeneratedProps> = ({ kind, data, onSubmit }) => {
+const TargetGenerated: React.FC<TargetGeneratedProps> = ({ kind, data, validationSchema, onSubmit }) => {
   const { namespaces, target } = useSelector((state: RootState) => state.experiments)
 
   let initialValues = Object.entries(data).reduce((acc, [k, v]) => {
@@ -57,7 +59,10 @@ const TargetGenerated: React.FC<TargetGeneratedProps> = ({ kind, data, onSubmit 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [target])
 
-  const parseDataToFormFields = () => {
+  const parseDataToFormFields = (
+    errors: FormikErrors<Record<string, any>>,
+    touched: FormikTouched<Record<string, any>>
+  ) => {
     const rendered = Object.entries(data)
       .filter(([_, v]) => v && v instanceof Object && v.field)
       .map(([k, v]) => {
@@ -67,7 +72,17 @@ const TargetGenerated: React.FC<TargetGeneratedProps> = ({ kind, data, onSubmit 
 
         switch (v.field) {
           case 'text':
-            return <TextField key={k} id={k} name={k} label={v.label} helperText={v.helperText} {...v.inputProps} />
+            return (
+              <TextField
+                key={k}
+                id={k}
+                name={k}
+                label={v.label}
+                helperText={errors[k] && getIn(touched, k) ? errors[k] : v.helperText}
+                error={errors[k] && getIn(touched, k) ? true : false}
+                {...v.inputProps}
+              />
+            )
           case 'number':
             return (
               <TextField
@@ -76,13 +91,21 @@ const TargetGenerated: React.FC<TargetGeneratedProps> = ({ kind, data, onSubmit 
                 id={k}
                 name={k}
                 label={v.label}
-                helperText={v.helperText}
+                helperText={errors[k] && getIn(touched, k) ? errors[k] : v.helperText}
+                error={errors[k] && getIn(touched, k) ? true : false}
                 {...v.inputProps}
               />
             )
           case 'select':
             return (
-              <SelectField key={k} id={k} name={k} label={v.label} helperText={v.helperText}>
+              <SelectField
+                key={k}
+                id={k}
+                name={k}
+                label={v.label}
+                helperText={errors[k] && getIn(touched, k) ? errors[k] : v.helperText}
+                error={errors[k] && getIn(touched, k) ? true : false}
+              >
                 {v.items!.map((option: string) => (
                   <MenuItem key={option} value={option}>
                     {option}
@@ -91,7 +114,17 @@ const TargetGenerated: React.FC<TargetGeneratedProps> = ({ kind, data, onSubmit 
               </SelectField>
             )
           case 'label':
-            return <LabelField key={k} id={k} name={k} label={v.label} helperText={v.helperText} isKV={v.isKV} />
+            return (
+              <LabelField
+                key={k}
+                id={k}
+                name={k}
+                label={v.label}
+                helperText={v.helperText}
+                isKV={v.isKV}
+                errorText={errors[k] && getIn(touched, k) ? (errors[k] as string) : ''}
+              />
+            )
           case 'autocomplete':
             return (
               <AutocompleteMultipleField
@@ -113,8 +146,8 @@ const TargetGenerated: React.FC<TargetGeneratedProps> = ({ kind, data, onSubmit 
   }
 
   return (
-    <Formik enableReinitialize initialValues={init} onSubmit={onSubmit}>
-      {({ values, setFieldValue }) => {
+    <Formik enableReinitialize initialValues={init} validationSchema={validationSchema} onSubmit={onSubmit}>
+      {({ values, setFieldValue, errors, touched }) => {
         const beforeTargetOpen = () => {
           if (!getIn(values, 'target_scope')) {
             setFieldValue('target_scope', basicData.scope)
@@ -123,7 +156,7 @@ const TargetGenerated: React.FC<TargetGeneratedProps> = ({ kind, data, onSubmit 
 
         return (
           <Form>
-            {parseDataToFormFields()}
+            {parseDataToFormFields(errors, touched)}
             {kind === 'NetworkChaos' && (
               <AdvancedOptions title={T('newE.target.network.target.title')} beforeOpen={beforeTargetOpen}>
                 {values.target_scope && (

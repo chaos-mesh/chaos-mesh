@@ -1,15 +1,16 @@
 import { Box, Chip, TextField, TextFieldProps } from '@material-ui/core'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { getIn, useFormikContext } from 'formik'
 
 import Autocomplete from '@material-ui/lab/Autocomplete'
 import T from 'components/T'
 
 interface LabelFieldProps {
-  isKV?: boolean // whether to use the key:value format
+  isKV?: boolean // whether to use the key:value format,
+  errorText?: string
 }
 
-const LabelField: React.FC<LabelFieldProps & TextFieldProps> = ({ isKV = false, ...props }) => {
+const LabelField: React.FC<LabelFieldProps & TextFieldProps> = ({ isKV = false, errorText, ...props }) => {
   const { values, setFieldValue } = useFormikContext()
 
   const [text, setText] = useState('')
@@ -17,6 +18,12 @@ const LabelField: React.FC<LabelFieldProps & TextFieldProps> = ({ isKV = false, 
   const name = props.name!
   const labels: string[] = getIn(values, name)
   const setLabels = (labels: string[]) => setFieldValue(name, labels)
+
+  useEffect(() => {
+    if (errorText) {
+      setError(errorText)
+    }
+  }, [errorText])
 
   const onChange = (_: any, __: any, reason: string) => {
     if (reason === 'clear') {

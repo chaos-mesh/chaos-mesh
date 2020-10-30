@@ -66,7 +66,7 @@ export function parseSubmit(e: Experiment) {
     }
   }
 
-  if (kind === 'IoChaos') {
+  if (kind === 'IoChaos' && values.target.io_chaos.action === 'attrOverride') {
     values.target.io_chaos.attr = helper1(values.target.io_chaos.attr as string[], (s: string) => parseInt(s, 10))
   }
 

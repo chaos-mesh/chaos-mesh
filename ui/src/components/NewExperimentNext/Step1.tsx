@@ -18,6 +18,7 @@ import UndoIcon from '@material-ui/icons/Undo'
 import _snakecase from 'lodash.snakecase'
 import clsx from 'clsx'
 import { useSelector } from 'react-redux'
+import validationData from './data/validation'
 
 const useStyles = makeStyles((theme) => {
   const cardActive = {
@@ -183,7 +184,11 @@ const Step1 = () => {
               ) : kind === 'KernelChaos' ? (
                 <Kernel onSubmit={handleSubmitStep1} />
               ) : kind === 'TimeChaos' ? (
-                <TargetGenerated data={targetData[kind].spec!} onSubmit={handleSubmitStep1} />
+                <TargetGenerated
+                  data={targetData[kind].spec!}
+                  validationSchema={validationData.TimeChaos!.default}
+                  onSubmit={handleSubmitStep1}
+                />
               ) : kind === 'StressChaos' ? (
                 <Stress onSubmit={handleSubmitStep1} />
               ) : null}
@@ -195,8 +200,11 @@ const Step1 = () => {
             <Divider />
             <Box p={6}>
               <TargetGenerated
-                data={targetData[kind as Kind].categories!.filter(({ key }) => key === action)[0].spec}
+                // force re-rendered after action changed
+                key={kind + action}
                 kind={kind}
+                data={targetData[kind as Kind].categories!.filter(({ key }) => key === action)[0].spec}
+                validationSchema={validationData[kind as Kind]![action]}
                 onSubmit={handleSubmitStep1}
               />
             </Box>
