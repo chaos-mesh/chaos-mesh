@@ -19,7 +19,6 @@ import (
 	"fmt"
 	"math"
 	"math/rand"
-	"os"
 	"regexp"
 	"strconv"
 	"strings"
@@ -211,7 +210,7 @@ func SelectPods(ctx context.Context, c client.Client, r client.Reader, selector 
 func GetService(ctx context.Context, c client.Client, namespace string, serviceName string) (*v1.Service, error) {
 	// use the environment value if namespace is empty
 	if len(namespace) == 0 {
-		namespace = os.Getenv("NAMESPACE")
+		namespace = common.ControllerCfg.Namespace
 	}
 
 	service := &v1.Service{}

@@ -40,11 +40,6 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/utils"
 )
 
-var (
-	// DNSServiceName is the chaos DNS server's name
-	DNSServiceName = "chaos-mesh-dns-server"
-)
-
 // endpoint is dns-chaos reconciler
 type endpoint struct {
 	ctx.Context
@@ -66,7 +61,7 @@ func (r *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.I
 	}
 
 	// get dns server's ip used for chaos
-	service, err := utils.GetService(ctx, r.Client, "", DNSServiceName)
+	service, err := utils.GetService(ctx, r.Client, "", common.ControllerCfg.DNSServiceName)
 	if err != nil {
 		r.Log.Error(err, "fail to get service")
 		return err
@@ -110,7 +105,7 @@ func (r *endpoint) Recover(ctx context.Context, req ctrl.Request, chaos v1alpha1
 	}
 
 	// get dns server's ip used for chaos
-	service, err := utils.GetService(ctx, r.Client, "", DNSServiceName)
+	service, err := utils.GetService(ctx, r.Client, "", common.ControllerCfg.DNSServiceName)
 	if err != nil {
 		r.Log.Error(err, "fail to get service")
 		return err

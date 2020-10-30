@@ -221,7 +221,7 @@ dnsServer:
 
   runtime: docker
 
-  name: dns-server
+  name: chaos-mesh-dns-server
 
   resources:
     # We usually recommend not to specify default resources and to leave this as a conscious
