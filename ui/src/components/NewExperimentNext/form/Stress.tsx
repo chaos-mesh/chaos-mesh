@@ -1,9 +1,12 @@
+import { Box, Button } from '@material-ui/core'
 import { Form, Formik } from 'formik'
 import { LabelField, TextField } from 'components/FormField'
 import React, { useEffect, useState } from 'react'
 
 import AdvancedOptions from 'components/AdvancedOptions'
+import PublishIcon from '@material-ui/icons/Publish'
 import { RootState } from 'store'
+import T from 'components/T'
 import { Typography } from '@material-ui/core'
 import targetData from '../data/target'
 import { useSelector } from 'react-redux'
@@ -75,6 +78,12 @@ const Stress: React.FC<StressProps> = ({ onSubmit }) => {
             helperText="Optional. Fill the container name you want to inject stress in"
           />
         </AdvancedOptions>
+
+        <Box mt={6} textAlign="right">
+          <Button type="submit" variant="contained" color="primary" startIcon={<PublishIcon />}>
+            {T('common.submit')}
+          </Button>
+        </Box>
       </Form>
     </Formik>
   )

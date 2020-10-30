@@ -6,8 +6,10 @@ import React, { useEffect, useState } from 'react'
 import AddIcon from '@material-ui/icons/Add'
 import Paper from 'components-mui/Paper'
 import PaperTop from 'components-mui/PaperTop'
+import PublishIcon from '@material-ui/icons/Publish'
 import RemoveIcon from '@material-ui/icons/Remove'
 import { RootState } from 'store'
+import T from 'components/T'
 import targetData from '../data/target'
 import { useSelector } from 'react-redux'
 
@@ -136,6 +138,12 @@ const Kernel: React.FC<KernelProps> = ({ onSubmit }) => {
               name="fail_kern_request.times"
               helperText="The max times of failures"
             />
+
+            <Box mt={6} textAlign="right">
+              <Button type="submit" variant="contained" color="primary" startIcon={<PublishIcon />}>
+                {T('common.submit')}
+              </Button>
+            </Box>
           </Form>
         )
       }}
