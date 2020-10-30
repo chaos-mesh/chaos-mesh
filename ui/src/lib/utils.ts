@@ -36,3 +36,21 @@ export function difference<T>(setA: Set<T>, setB: Set<T>) {
 export function assumeType<T>(x: unknown): asserts x is T {
   return
 }
+
+export function isObject(x: unknown): x is object {
+  return Object.prototype.toString.call(x) === '[object Object]'
+}
+
+export function getAllSubsets(arr: any[]) {
+  return arr.reduce(
+    (subsets: any[][], value, index) =>
+      subsets.concat(
+        subsets.map((set) => {
+          const newSet = [...set]
+          newSet[index] = value
+          return newSet
+        })
+      ),
+    [arr.map(() => undefined)]
+  )
+}

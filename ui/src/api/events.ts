@@ -1,9 +1,9 @@
-import { Event, EventsParams } from './events.type'
+import { Event, EventsParams, GetEvents } from './events.type'
 
 import { AxiosResponse } from 'axios'
 import http from './http'
 
-export const events: (params?: EventsParams) => Promise<AxiosResponse<Event[]>> = (params) =>
+export const events: GetEvents = (params) =>
   http.get('/events', {
     params,
   })

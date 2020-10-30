@@ -1,9 +1,11 @@
+import { AxiosResponse } from 'axios'
+
 export interface EventsParams {
-  limit?: number
+  limit?: string
 }
 
 export interface EventPod {
-  id: string
+  id: number
   pod_ip: string
   pod_name: string
   namespace: string
@@ -22,3 +24,9 @@ export interface Event {
   finish_time: string
   pods: EventPod[] | null
 }
+
+export interface GetEvents {
+  (params?: EventsParams): Promise<AxiosResponse<Event[]>>
+}
+
+export type GetEventsParams = Parameters<GetEvents>
