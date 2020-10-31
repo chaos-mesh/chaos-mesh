@@ -12,6 +12,7 @@ import {
 } from '__mock__/api'
 import { assumeType, getAllSubsets, isObject } from 'lib/utils'
 
+import { AxiosResponse } from 'axios'
 import Mock from 'mockjs'
 import MockAdapter from 'axios-mock-adapter'
 import api from 'api'
@@ -64,9 +65,6 @@ function getMockBySchema(
     }
   } else if (schema.$ref) {
     const def = getDefinitionByRef(schema.$ref)
-    if (!schema.definitions) {
-      console.log(schema)
-    }
     return getMockBySchema(definitions![def] as TJS.Definition, definitions)
   }
 }
@@ -79,7 +77,6 @@ function buildSchema(includedFiles: string[], paramsInterfaceName: string, resIn
   }
   const resSchema = generator.getSchemaForSymbol(resInterfaceName)
   const paramsSchema = generator.getSchemaForSymbol(paramsInterfaceName)
-  console.log(paramsSchema)
   return { resSchema, paramsSchema }
 }
 
@@ -112,7 +109,6 @@ describe('api test', () => {
     if (schema.type === 'object' && schema.properties) {
       if (schema.definitions) {
         Object.assign(definitions, schema.definitions)
-        console.log(definitions)
       }
       Object.entries(schema.properties).forEach(([prop, val]) => {
         expect(
@@ -137,8 +133,6 @@ describe('api test', () => {
       testAPIReturnData(apiName, schema.items as TJS.Definition, data[0], dataName + "'s item", definitions)
     } else if (schema.$ref) {
       const def = getDefinitionByRef(schema.$ref)
-      console.log('def', def)
-      console.log(definitions)
       testAPIReturnData(apiName, definitions[def], data, dataName, definitions)
     } else {
       expect(
@@ -195,13 +189,33 @@ describe('api test', () => {
       requiredParamsMock.push(getMockBySchema(requiredParams[i], schema.definitions))
     }
 
-    console.log(requiredParamsMock)
-
     getAllSubsets(optionalParams.map((param) => getMockBySchema(param, schema.definitions))).forEach((subset) => {
       sendParamsMocks.push([...requiredParams, ...subset])
     })
-    console.log(sendParamsMocks)
+
     return sendParamsMocks
+  }
+
+  function startTest(
+    apiName: string,
+    api: (...args: any) => Promise<AxiosResponse<any>>,
+    paramsSchema: TJS.Definition,
+    resSchema: TJS.Definition
+  ) {
+    return () => {
+      return Promise.all(
+        getSendParamsMocks(paramsSchema).map((mock) =>
+          api(...mock).then((data) => {
+            const properties = resSchema.properties
+            if (!properties) {
+              console.log('this schema has no property')
+              return
+            }
+            testAPIReturnData(apiName, resSchema, data.data[0])
+          })
+        )
+      )
+    }
   }
 
   describe('archive test', () => {
@@ -220,20 +234,7 @@ describe('api test', () => {
       })
       .reply(200, archivesResMock)
 
-    test('archives test', () => {
-      return Promise.all(
-        getSendParamsMocks(paramsSchema).map((mock) =>
-          archives(...mock).then((data) => {
-            const properties = resSchema.properties
-            if (!properties) {
-              console.log('this schema has no property')
-              return
-            }
-            testAPIReturnData('archives', resSchema, data.data[0])
-          })
-        )
-      )
-    })
+    test('archives test', startTest('archives', archives, paramsSchema, resSchema))
 
     describe('events test', () => {
       const { paramsSchema, resSchema } = buildSchema(
@@ -252,20 +253,7 @@ describe('api test', () => {
         })
         .reply(200, eventsResMock)
 
-      test('events test', () => {
-        return Promise.all(
-          getSendParamsMocks(paramsSchema).map((mock) =>
-            events(...mock).then((data) => {
-              const properties = resSchema.properties
-              if (!properties) {
-                console.log('this schema has no property')
-                return
-              }
-              testAPIReturnData('events', resSchema, data.data[0])
-            })
-          )
-        )
-      })
+      test('events test', startTest('events', events, paramsSchema, resSchema))
     })
   })
 })
