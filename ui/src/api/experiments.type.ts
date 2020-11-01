@@ -1,3 +1,4 @@
+import { AxiosResponse } from 'axios'
 import { Event } from './events.type'
 
 export interface StateOfExperiments {
@@ -17,7 +18,9 @@ export enum StateOfExperimentsEnum {
   Failed = 'Failed',
   Finished = 'Finished',
 }
-
+/**
+ * @description experiments:result
+ */
 export interface Experiment {
   uid: uuid
   kind: string
@@ -27,6 +30,14 @@ export interface Experiment {
   status: keyof StateOfExperiments
   events?: Event[]
 }
+
+export interface GetExperiment {
+  (namespace?: string, name?: string, kind?: string, status?: string): Promise<AxiosResponse<Experiment[]>>
+}
+/**
+ * @description experiments:params
+ */
+export type GetExperimentParams = Parameters<GetExperiment>
 
 export interface ExperimentDetail extends Experiment {
   failed_message: string

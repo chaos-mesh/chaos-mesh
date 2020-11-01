@@ -1,4 +1,9 @@
-import { ExperimentDetail, Experiment as ExperimentReponse, StateOfExperiments } from './experiments.type'
+import {
+  ExperimentDetail,
+  Experiment as ExperimentReponse,
+  GetExperiment,
+  StateOfExperiments,
+} from './experiments.type'
 
 import { AxiosResponse } from 'axios'
 import { Experiment } from 'components/NewExperiment/types'
@@ -8,13 +13,15 @@ export const state: () => Promise<AxiosResponse<StateOfExperiments>> = () => htt
 
 export const newExperiment = (data: Experiment) => http.post('/experiments/new', data)
 
-export const experiments: (
-  namespace?: string,
-  name?: string,
-  kind?: string,
-  status?: string
-) => Promise<AxiosResponse<ExperimentReponse[]>> = (namespace = '', name = '', kind = '', status = '') =>
-  http.get(`/experiments?namespace=${namespace}&name=${name}&kind=${kind}&status=${status}`)
+export const experiments: GetExperiment = (namespace = '', name = '', kind = '', status = '') =>
+  http.get(`/experiments`, {
+    params: {
+      namespace,
+      name,
+      kind,
+      status,
+    },
+  })
 
 export const deleteExperiment = (uuid: uuid) => http.delete(`/experiments/${uuid}`)
 

@@ -1,22 +1,18 @@
 import 'jest-expect-message'
 
 import * as TJS from 'typescript-json-schema'
+import * as esprima from 'esprima'
+import * as mockData from '__mock__/api'
 
-import {
-  archivesParamsMock,
-  archivesRequiredParams,
-  archivesResMock,
-  eventsParamsMock,
-  eventsRequiredParams,
-  eventsResMock,
-} from '__mock__/api'
 import { assumeType, getAllSubsets, isObject } from 'lib/utils'
 
 import { AxiosResponse } from 'axios'
 import Mock from 'mockjs'
 import MockAdapter from 'axios-mock-adapter'
 import api from 'api'
+import { createDebuggerStatement } from 'typescript'
 import http from 'api/http'
+import { readFileSync } from 'fs'
 import { resolve } from 'path'
 
 const Random = Mock.Random
@@ -69,35 +65,99 @@ function getMockBySchema(
   }
 }
 
-function buildSchema(includedFiles: string[], paramsInterfaceName: string, resInterfaceName: string) {
+function getGenerator(includedFiles: string[]) {
   const program = TJS.getProgramFromFiles(includedFiles.map((file) => resolve(file)))
   const generator = TJS.buildGenerator(program)
   if (!generator) {
     throw new Error('generator build error')
   }
-  const resSchema = generator.getSchemaForSymbol(resInterfaceName)
-  const paramsSchema = generator.getSchemaForSymbol(paramsInterfaceName)
+  return generator
+}
+
+function getSchemaByAPIName(includedFiles: string[], apiName: string) {
+  const generator = getGenerator(includedFiles)
+  const allSymbolNames = generator.getUserSymbols()
+  let resSchema: TJS.Definition | undefined
+  let paramsSchema: TJS.Definition | undefined
+  for (let symbolName of allSymbolNames) {
+    const currentSchema = generator.getSchemaForSymbol(symbolName)
+    const pattern = /^(\w+):\s*(result|params)\s*/
+    const description = currentSchema.description
+    const match = description?.match(pattern)
+    if (!description || !match) continue
+    const [_, currentAPIName, currentMockType] = match
+    if (currentAPIName !== apiName) continue
+    if (currentMockType === 'result') {
+      resSchema = currentSchema
+      if (paramsSchema) break
+    } else if (currentMockType === 'params') {
+      paramsSchema = currentSchema
+      if (resSchema) break
+    } else {
+      throw new Error(`unknown mock type ${currentMockType} for api ${apiName}`)
+    }
+  }
   return { resSchema, paramsSchema }
 }
 
+function getMockByAPIName(apiName: string) {
+  const resMock = (mockData as any)[apiName + 'ResMock']
+  const paramsMock = (mockData as any)[apiName + 'ParamsMock']
+  const requiredParams = (mockData as any)[apiName + 'RequiredParams']
+
+  return {
+    resMock,
+    paramsMock,
+    requiredParams,
+  }
+}
+
+describe('mock test', () => {
+  test('mock data identifier test', () => {
+    const mockSuffixes = ['ResMock', 'ParamsMock', 'RequiredParams']
+
+    const filePath = resolve('src/__mock__/api.ts')
+    const fileData = readFileSync(filePath, 'utf8')
+    const parsedRes = esprima.parseModule(fileData)
+    parsedRes.body.forEach((item) => {
+      if (item.type === 'ExportNamedDeclaration') {
+        if (item.declaration?.type === 'VariableDeclaration') {
+          item.declaration.declarations.forEach((declaration) => {
+            if (declaration.id.type === 'Identifier') {
+              const identifier = declaration.id.name
+              const pass = mockSuffixes.some((suffix) => {
+                const re = new RegExp(`^\\w*?${suffix}$`)
+                return identifier.match(re)
+              })
+              expect(pass, `The suffix of ${identifier} should be one of ${mockSuffixes}`).toBeTruthy()
+            }
+          })
+        }
+      }
+    })
+  })
+})
+
 describe('api test', () => {
   const mock = new MockAdapter(http)
-  const archives = api.archives.archives
-  const archiveDetail = api.archives.detail
-  const report = api.archives.report
-  const namespaces = api.common.namespaces
-  const labels = api.common.labels
-  const annotations = api.common.annotations
-  const pods = api.common.pods
-  const events = api.events.events
-  const dryEvents = api.events.dryEvents
-  const experiments = api.experiments.experiments
-  const newExperiment = api.experiments.newExperiment
-  const startExperiment = api.experiments.startExperiment
-  const deleteExperiment = api.experiments.detail
-  const pauseExperiment = api.experiments.pauseExperiment
-  const updateExperiment = api.experiments.update
-  const experimentDetail = api.experiments.detail
+
+  const allTestedAPI: IndexedTypeByString = {}
+  allTestedAPI.archives = api.archives.archives
+  allTestedAPI.archiveDetail = api.archives.detail
+  allTestedAPI.archiveReport = api.archives.report
+  allTestedAPI.namespaces = api.common.namespaces
+  allTestedAPI.labels = api.common.labels
+  allTestedAPI.annotations = api.common.annotations
+  allTestedAPI.pods = api.common.pods
+  allTestedAPI.events = api.events.events
+  allTestedAPI.dryEvents = api.events.dryEvents
+  allTestedAPI.experiments = api.experiments.experiments
+  allTestedAPI.newExperiment = api.experiments.newExperiment
+  allTestedAPI.startExperiment = api.experiments.startExperiment
+  allTestedAPI.deleteExperiment = api.experiments.detail
+  allTestedAPI.pauseExperiment = api.experiments.pauseExperiment
+  allTestedAPI.updateExperiment = api.experiments.update
+  allTestedAPI.experimentDetail = api.experiments.detail
 
   function testAPIReturnData(
     apiName: string,
@@ -131,6 +191,43 @@ describe('api test', () => {
           : `The data ${dataName} from the API ${apiName} should be an array`
       ).toBeTruthy()
       testAPIReturnData(apiName, schema.items as TJS.Definition, data[0], dataName + "'s item", definitions)
+    } else if (Object.keys(schema).length === 0) {
+      // schema is a empty object, which means the type of the schema is any
+      return
+    } else if (Array.isArray(schema.type)) {
+      // The corresponded type of the schema is a simple union
+      const maxFailedNumber = schema.type.length
+      let failedNumber = 0
+      schema.type.forEach((t) => {
+        try {
+          testAPIReturnData(apiName, { type: t } as TJS.Definition, data, dataName, definitions)
+        } catch (e) {
+          failedNumber += 1
+        }
+        expect(
+          failedNumber,
+          dataName === apiName
+            ? `The return data of the API ${apiName} dose not match any given schema`
+            : `The data ${dataName} from the API ${apiName} dose not match any given schema`
+        ).toBeLessThan(maxFailedNumber)
+      })
+    } else if (schema.anyOf) {
+      // schema has the anyOf property, which means the corresponded type of the schema is a non-simple union
+      const maxFailedNumber = schema.anyOf.length
+      let failedNumber = 0
+      schema.anyOf.forEach((s) => {
+        try {
+          testAPIReturnData(apiName, s as TJS.Definition, data, dataName, definitions)
+        } catch (e) {
+          failedNumber += 1
+        }
+      })
+      expect(
+        failedNumber,
+        dataName === apiName
+          ? `The return data of the API ${apiName} dose not match any given schema`
+          : `The data ${dataName} from the API ${apiName} dose not match any given schema`
+      ).toBeLessThan(maxFailedNumber)
     } else if (schema.$ref) {
       const def = getDefinitionByRef(schema.$ref)
       testAPIReturnData(apiName, definitions[def], data, dataName, definitions)
@@ -188,72 +285,82 @@ describe('api test', () => {
     for (let i = 0; i < schema.minItems!; i++) {
       requiredParamsMock.push(getMockBySchema(requiredParams[i], schema.definitions))
     }
-
     getAllSubsets(optionalParams.map((param) => getMockBySchema(param, schema.definitions))).forEach((subset) => {
-      sendParamsMocks.push([...requiredParams, ...subset])
+      sendParamsMocks.push([...requiredParamsMock, ...subset])
     })
-
     return sendParamsMocks
   }
 
   function startTest(
     apiName: string,
-    api: (...args: any) => Promise<AxiosResponse<any>>,
-    paramsSchema: TJS.Definition,
-    resSchema: TJS.Definition
+    apiMethod: 'get' | 'post' | 'put' | 'delete',
+    apiURL: string,
+    includedFiles: string[]
   ) {
     return () => {
-      return Promise.all(
-        getSendParamsMocks(paramsSchema).map((mock) =>
-          api(...mock).then((data) => {
-            const properties = resSchema.properties
-            if (!properties) {
-              console.log('this schema has no property')
-              return
-            }
-            testAPIReturnData(apiName, resSchema, data.data[0])
-          })
+      const api: (...args: any) => Promise<AxiosResponse<any>> = allTestedAPI[apiName]
+
+      const mappedMethod = {
+        get: 'onGet' as 'onGet',
+        post: 'onPost' as 'onPost',
+        put: 'onPut' as 'onPut',
+        delete: 'onDelete' as 'onDelete',
+      }
+
+      const { resSchema, paramsSchema } = getSchemaByAPIName(includedFiles, apiName)
+      const { resMock, paramsMock, requiredParams } = getMockByAPIName(apiName)
+
+      mock[mappedMethod[apiMethod]](apiURL, {
+        params: {
+          asymmetricMatch: (actual: object) => {
+            return testAPIParams(apiName, actual, paramsMock, requiredParams)
+          },
+        },
+      }).reply(200, resMock)
+
+      const testAPIReturnDataOrNot = (data: AxiosResponse) => {
+        if (resSchema) {
+          const properties = resSchema.properties
+          if (!properties) {
+            console.log('this schema has no property')
+            return
+          }
+          testAPIReturnData(apiName, resSchema, Array.isArray(data.data) ? data.data[0] : data.data)
+        }
+      }
+      if (!paramsSchema) {
+        return api().then((data) => {
+          testAPIReturnDataOrNot(data)
+        })
+      } else {
+        return Promise.all(
+          getSendParamsMocks(paramsSchema).map((mock) =>
+            api(...mock).then((data) => {
+              testAPIReturnDataOrNot(data)
+            })
+          )
         )
-      )
+      }
     }
   }
 
   describe('archive test', () => {
-    const { paramsSchema, resSchema } = buildSchema(
-      ['src/api/archives.type.ts', 'src/@types/global.d.ts'],
-      'GetArchivesParams',
-      'Archive'
-    )
-    mock
-      .onGet('archives', {
-        params: {
-          asymmetricMatch: (actual: object) => {
-            return testAPIParams('archives', actual, archivesParamsMock, archivesRequiredParams)
-          },
-        },
-      })
-      .reply(200, archivesResMock)
+    const includedFiles = ['src/api/archives.type.ts', 'src/@types/global.d.ts']
 
-    test('archives test', startTest('archives', archives, paramsSchema, resSchema))
+    test('archives test', startTest('archives', 'get', 'archives', includedFiles))
+    test('archive detail test', startTest('archiveDetail', 'get', 'archives/detail', includedFiles))
+    test('archive report test', startTest('archiveReport', 'get', 'archives/report', includedFiles))
+  })
 
-    describe('events test', () => {
-      const { paramsSchema, resSchema } = buildSchema(
-        ['src/api/events.type.ts', 'src/@types/global.d.ts'],
-        'GetEventsParams',
-        'Event'
-      )
+  describe('events test', () => {
+    const includedFiles = ['src/api/events.type.ts', 'src/@types/global.d.ts']
 
-      mock
-        .onGet('events', {
-          params: {
-            asymmetricMatch: (actual: object) => {
-              return testAPIParams('events', actual, eventsParamsMock, eventsRequiredParams)
-            },
-          },
-        })
-        .reply(200, eventsResMock)
+    test('events test', startTest('events', 'get', 'events', includedFiles))
+  })
 
-      test('events test', startTest('events', events, paramsSchema, resSchema))
-    })
+  describe('experiments test', () => {
+    const includedFiles = ['src/api/experiments.type.ts', 'src/@types/global.d.ts']
+
+    test('experiments test', startTest('experiments', 'get', 'experiments', includedFiles))
   })
 })
