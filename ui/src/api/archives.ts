@@ -1,4 +1,5 @@
-import { GetArchives } from './archives.type'
+import { GetArchiveDetail, GetArchiveReport, GetArchives } from './archives.type'
+
 import http from './http'
 
 export const archives: GetArchives = (namespace = '', name = '', kind = '') => {
@@ -11,6 +12,16 @@ export const archives: GetArchives = (namespace = '', name = '', kind = '') => {
   })
 }
 
-export const detail = (uuid: uuid) => http.get(`/archives/detail?uid=${uuid}`)
+export const detail: GetArchiveDetail = (uuid: uuid) =>
+  http.get(`/archives/detail`, {
+    params: {
+      uid: uuid,
+    },
+  })
 
-export const report = (uuid: uuid) => http.get(`/archives/report?uid=${uuid}`)
+export const report: GetArchiveReport = (uuid: uuid) =>
+  http.get(`/archives/report`, {
+    params: {
+      uid: uuid,
+    },
+  })

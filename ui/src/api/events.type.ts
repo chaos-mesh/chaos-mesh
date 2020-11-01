@@ -12,7 +12,9 @@ export interface EventPod {
   action: string
   message: string
 }
-
+/**
+ * @description events:result
+ */
 export interface Event {
   id: number
   experiment_id: uuid
@@ -28,5 +30,7 @@ export interface Event {
 export interface GetEvents {
   (params?: EventsParams): Promise<AxiosResponse<Event[]>>
 }
-
+/**
+ * @description events:params
+ */
 export type GetEventsParams = Parameters<GetEvents>

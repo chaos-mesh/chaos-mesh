@@ -1,3 +1,6 @@
+/**
+ * All variable name of mock data must be <api-name><suffix>, and <suffix> can be ResMock, ParamsMock or RequiredParams
+ */
 import Mock from 'mockjs'
 
 const Random = Mock.Random
@@ -27,182 +30,42 @@ export const archivesParamsMock = Mock.mock({
 
 export const archivesRequiredParams = []
 
-export const archivesDetailResMock = Mock.mock({
+export const archiveDetailResMock = Mock.mock({
   action: '@string',
-  archived: '@boolean',
-  created_at: '@string',
-  deleted_at: '@string',
-  experiment_info: {
-    annotations: {
-      additionalProp1: '@string',
-      additionalProp2: '@string',
-      additionalProp3: '@string',
-    },
-    labels: {
-      additionalProp1: '@string',
-      additionalProp2: '@string',
-      additionalProp3: '@string',
-    },
-    name: '@string',
-    namespace: '@string',
-    scheduler: {
-      cron: '@string',
-      duration: '@string',
-    },
-    scope: {
-      annotation_selectors: {
-        additionalProp1: '@string',
-        additionalProp2: '@string',
-        additionalProp3: '@string',
-      },
-      field_selectors: {
-        additionalProp1: '@string',
-        additionalProp2: '@string',
-        additionalProp3: '@string',
-      },
-      label_selectors: {
-        additionalProp1: '@string',
-        additionalProp2: '@string',
-        additionalProp3: '@string',
-      },
-      mode: '@string',
-      namespace_selectors: ['@string'],
-      phase_selectors: ['@string'],
-      pods: {
-        additionalProp1: ['@string'],
-        additionalProp2: ['@string'],
-        additionalProp3: ['@string'],
-      },
-      value: '@string',
-    },
-    target: {
-      io_chaos: {
-        action: '@string',
-        addr: '@string',
-        delay: '@string',
-        errno: '@string',
-        methods: ['@string'],
-        path: '@string',
-        percent: '@string',
-      },
-      kernel_chaos: {
-        fail_kern_request: {
-          callchain: [
-            {
-              funcname: '@string',
-              parameters: '@string',
-              predicate: '@string',
-            },
-          ],
-          failtype: '@natural',
-          headers: ['@string'],
-          probability: '@natural',
-          times: '@natural',
-        },
-      },
-      kind: '@string',
-      network_chaos: {
-        action: '@string',
-        bandwidth: {
-          buffer: '@natural',
-          limit: '@natural',
-          minburst: '@natural',
-          peakrate: '@natural',
-          rate: '@string',
-        },
-        corrupt: {
-          correlation: '@string',
-          corrupt: '@string',
-        },
-        delay: {
-          correlation: '@string',
-          jitter: '@string',
-          latency: '@string',
-          reorder: {
-            correlation: '@string',
-            gap: '@natural',
-            reorder: '@string',
-          },
-        },
-        direction: '@string',
-        duplicate: {
-          correlation: '@string',
-          duplicate: '@string',
-        },
-        loss: {
-          correlation: '@string',
-          loss: '@string',
-        },
-        target_scope: {
-          annotation_selectors: {
-            additionalProp1: '@string',
-            additionalProp2: '@string',
-            additionalProp3: '@string',
-          },
-          field_selectors: {
-            additionalProp1: '@string',
-            additionalProp2: '@string',
-            additionalProp3: '@string',
-          },
-          label_selectors: {
-            additionalProp1: '@string',
-            additionalProp2: '@string',
-            additionalProp3: '@string',
-          },
-          mode: '@string',
-          namespace_selectors: ['@string'],
-          phase_selectors: ['@string'],
-          pods: {
-            additionalProp1: ['@string'],
-            additionalProp2: ['@string'],
-            additionalProp3: ['@string'],
-          },
-          value: '@string',
-        },
-      },
-      pod_chaos: {
-        action: '@string',
-        container_name: '@string',
-      },
-      stress_chaos: {
-        container_name: '@string',
-        stressng_stressors: '@string',
-        stressors: {
-          cpu: {
-            load: '@natural',
-            options: ['@string'],
-            workers: '@natural',
-          },
-          memory: {
-            options: ['@string'],
-            workers: '@natural',
-          },
-        },
-      },
-      time_chaos: {
-        clock_ids: ['@string'],
-        container_names: ['@string'],
-        time_offset: '@string',
-      },
-    },
-  },
   finish_time: '@string',
-  id: '@natural',
   kind: '@string',
   name: '@string',
   namespace: '@string',
   start_time: '@string',
   uid: '@string',
-  updated_at: '@string',
+  yaml: {
+    apiVersion: '@string',
+    kind: '@string',
+    metadata: {
+      annotations: {
+        additionalProp1: '@string',
+        additionalProp2: '@string',
+        additionalProp3: '@string',
+      },
+      labels: {
+        additionalProp1: '@string',
+        additionalProp2: '@string',
+        additionalProp3: '@string',
+      },
+      name: '@string',
+      namespace: '@string',
+    },
+    spec: {},
+  },
 })
 
-export const archivesDetailParamsMock = Mock.mock({
+export const archiveDetailParamsMock = Mock.mock({
   uid: '@guid',
 })
 
-export const archivesDetailRequiredParams = ['uid']
+export const archiveDetailRequiredParams = ['uid']
 
-export const archivesReportResMock = Mock.mock({
+export const archiveReportResMock = Mock.mock({
   events: [
     {
       created_at: '@string',
@@ -251,11 +114,11 @@ export const archivesReportResMock = Mock.mock({
   total_time: '@string',
 })
 
-export const archivesReportParamsMock = Mock.mock({
+export const archiveReportParamsMock = Mock.mock({
   uid: '@guid',
 })
 
-export const archivesReportRequiredParams = ['uid']
+export const archiveReportRequiredParams = ['uid']
 
 export const eventsResMock = [
   Mock.mock({
@@ -301,3 +164,24 @@ export const eventsParamsMock = Mock.mock({
 })
 
 export const eventsRequiredParams = []
+
+export const experimentsResMock = [
+  Mock.mock({
+    created: '@string',
+    failed_message: '@string',
+    kind: '@string',
+    name: '@string',
+    namespace: '@string',
+    status: '@string',
+    uid: '@string',
+  }),
+]
+
+export const experimentsParamsMock = Mock.mock({
+  namespace: '@string',
+  name: '@string',
+  kind: '@string',
+  status: '@string',
+})
+
+export const experimentsRequiredParams = []
