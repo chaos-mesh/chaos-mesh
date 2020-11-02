@@ -57,6 +57,9 @@ rules:
   - apiGroups: [ "" ]
     resources:
       - nodes
+{{- if .Values.clusterScoped }}
+      - namespaces
+{{- end }}
     verbs: [ "get", "list", "watch" ]
 
 ---

@@ -946,6 +946,7 @@ rules:
   - apiGroups: [ "" ]
     resources:
       - nodes
+      - namespaces
     verbs: [ "get", "list", "watch" ]
 ---
 # Source: chaos-mesh/templates/controller-manager-rbac.yaml
