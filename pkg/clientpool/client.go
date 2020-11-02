@@ -19,10 +19,11 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
 	lru "github.com/hashicorp/golang-lru"
 	"k8s.io/client-go/rest"
 	pkgclient "sigs.k8s.io/controller-runtime/pkg/client"
+
+	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
 )
 
 // K8sClients is an object of Clients
