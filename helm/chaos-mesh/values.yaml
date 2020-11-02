@@ -267,6 +267,7 @@ webhook:
     - podiochaos
     - podnetworkchaos
     - dnschaos
+    - jvmchaos
 
 bpfki:
   create: false
