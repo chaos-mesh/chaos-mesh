@@ -20,9 +20,9 @@ const data = {
   },
 }
 
-export const schema: Record<string, Yup.Schema<any>> = {
+export const schema: Yup.ObjectSchema = Yup.object({
   name: Yup.string().required('The experiment name is required'),
-}
+})
 
 export type dataType = typeof data
 
