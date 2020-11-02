@@ -78,8 +78,8 @@ const TargetGenerated: React.FC<TargetGeneratedProps> = ({ kind, data, validatio
                 id={k}
                 name={k}
                 label={v.label}
-                helperText={errors[k] && getIn(touched, k) ? errors[k] : v.helperText}
-                error={errors[k] && getIn(touched, k) ? true : false}
+                helperText={getIn(touched, k) && getIn(errors, k) ? getIn(errors, k) : v.helperText}
+                error={getIn(touched, k) && getIn(errors, k) ? true : false}
                 {...v.inputProps}
               />
             )
@@ -91,8 +91,8 @@ const TargetGenerated: React.FC<TargetGeneratedProps> = ({ kind, data, validatio
                 id={k}
                 name={k}
                 label={v.label}
-                helperText={errors[k] && getIn(touched, k) ? errors[k] : v.helperText}
-                error={errors[k] && getIn(touched, k) ? true : false}
+                helperText={getIn(touched, k) && getIn(errors, k) ? getIn(errors, k) : v.helperText}
+                error={getIn(errors, k) && getIn(touched, k) ? true : false}
                 {...v.inputProps}
               />
             )
@@ -103,8 +103,8 @@ const TargetGenerated: React.FC<TargetGeneratedProps> = ({ kind, data, validatio
                 id={k}
                 name={k}
                 label={v.label}
-                helperText={errors[k] && getIn(touched, k) ? errors[k] : v.helperText}
-                error={errors[k] && getIn(touched, k) ? true : false}
+                helperText={getIn(touched, k) && getIn(errors, k) ? getIn(errors, k) : v.helperText}
+                error={getIn(errors, k) && getIn(touched, k) ? true : false}
               >
                 {v.items!.map((option: string) => (
                   <MenuItem key={option} value={option}>
@@ -122,7 +122,7 @@ const TargetGenerated: React.FC<TargetGeneratedProps> = ({ kind, data, validatio
                 label={v.label}
                 helperText={v.helperText}
                 isKV={v.isKV}
-                errorText={errors[k] && getIn(touched, k) ? (errors[k] as string) : ''}
+                errorText={getIn(errors, k) && getIn(touched, k) ? getIn(errors, k) : ''}
               />
             )
           case 'autocomplete':
