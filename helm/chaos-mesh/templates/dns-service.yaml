@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: chaos-mesh-dns-server
+  name: {{ .Values.dnsServer.name }}
   namespace: {{ .Release.Namespace }}
   annotations:
     prometheus.io/port: "9153"
@@ -29,6 +29,6 @@ spec:
     port: 9153
     protocol: TCP
   - name: grpc
-    port: 9288
+    port: {{ .Values.dnsServer.grpcPort }}
     protocol: TCP
 {{- end }} 

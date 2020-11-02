@@ -51,6 +51,7 @@ type ChaosControllerConfig struct {
 
 	// DNSServiceName is the name of DNS service, which is used for DNS chaos
 	DNSServiceName string `envconfig:"CHAOS_DNS_SERVICE_NAME" default:""`
+	DNSServicePort int `envconfig:"CHAOS_DNS_SERVICE_PORT" default:""`
 
 	// Namespace is the namespace which the controller manager run in
 	Namespace string `envconfig:"NAMESPACE" default:""`

@@ -68,8 +68,7 @@ func (r *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.I
 	}
 	r.Log.Info("Set DNS chaos to DNS service", "ip", service.Spec.ClusterIP)
 
-	// TODO: get port from dns service to instead 9288
-	err = r.setDNSServerRules(service.Spec.ClusterIP, 9288, dnschaos.Name, pods, dnschaos.Spec.Action, dnschaos.Spec.Scope)
+	err = r.setDNSServerRules(service.Spec.ClusterIP, common.ControllerCfg.DNSServicePort, dnschaos.Name, pods, dnschaos.Spec.Action, dnschaos.Spec.Scope)
 	if err != nil {
 		r.Log.Error(err, "fail to set DNS server rules")
 		return err
@@ -112,8 +111,7 @@ func (r *endpoint) Recover(ctx context.Context, req ctrl.Request, chaos v1alpha1
 	}
 	r.Log.Info("Cancel DNS chaos to DNS service", "ip", service.Spec.ClusterIP)
 
-	// TODO: get port from dns service to instead 9288
-	r.cancelDNSServerRules(service.Spec.ClusterIP, 9288, dnschaos.Name)
+	r.cancelDNSServerRules(service.Spec.ClusterIP, common.ControllerCfg.DNSServicePort, dnschaos.Name)
 
 	if err := r.cleanFinalizersAndRecover(ctx, dnschaos); err != nil {
 		return err
@@ -254,7 +252,7 @@ func (r *endpoint) applyPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.DN
 	return nil
 }
 
-func (r *endpoint) setDNSServerRules(dnsServerIP string, port int64, name string, pods []v1.Pod, action v1alpha1.DNSChaosAction, scope v1alpha1.DNSChaosScope) error {
+func (r *endpoint) setDNSServerRules(dnsServerIP string, port int, name string, pods []v1.Pod, action v1alpha1.DNSChaosAction, scope v1alpha1.DNSChaosScope) error {
 	r.Log.Info("setDNSServerRules", "name", name)
 
 	pbPods := make([]*dnspb.Pod, len(pods))
@@ -293,7 +291,7 @@ func (r *endpoint) setDNSServerRules(dnsServerIP string, port int64, name string
 	return nil
 }
 
-func (r *endpoint) cancelDNSServerRules(dnsServerIP string, port int64, name string) error {
+func (r *endpoint) cancelDNSServerRules(dnsServerIP string, port int, name string) error {
 	conn, err := grpc.Dial(fmt.Sprintf("%s:%d", dnsServerIP, port), grpc.WithInsecure())
 	if err != nil {
 		return err

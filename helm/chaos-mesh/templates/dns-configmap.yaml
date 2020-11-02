@@ -22,6 +22,7 @@ data:
             pods insecure
             fallthrough in-addr.arpa ip6.arpa
             ttl 30
+            grpcport {{ .Values.dnsServer.grpcPort }}
         }
         forward . /etc/resolv.conf {
             max_concurrent 1000

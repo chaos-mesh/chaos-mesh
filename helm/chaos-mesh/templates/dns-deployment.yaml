@@ -72,7 +72,7 @@ spec:
         - containerPort: 9153
           name: metrics
           protocol: TCP
-        - containerPort: 9288
+        - containerPort: {{ .Values.dnsServer.grpcPort }}
           name: grpc
           protocol: TCP
         livenessProbe:
