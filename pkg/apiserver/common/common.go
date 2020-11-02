@@ -65,7 +65,7 @@ func Register(r *gin.RouterGroup, s *Service) {
 	endpoint := r.Group("/common")
 
 	endpoint.POST("/pods", s.listPods)
-	endpoint.GET("/namespaces", s.getChaosAvailableNamespaces)
+	endpoint.GET("/chaos-available-namespaces", s.getChaosAvailableNamespaces)
 	endpoint.GET("/kinds", s.getKinds)
 	endpoint.GET("/labels", s.getLabels)
 	endpoint.GET("/annotations", s.getAnnotations)
