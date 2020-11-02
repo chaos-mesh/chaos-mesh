@@ -60,10 +60,16 @@ spec:
               value: {{ .Values.timezone | default "UTC" }}
             {{- end }}
           securityContext:
-            privileged: true
             capabilities:
               add:
                 - SYS_PTRACE
+                - NET_ADMIN
+                - MKNOD
+                - SYS_CHROOT
+                - SYS_ADMIN
+                - KILL
+                # CAP_IPC_LOCK is used to lock memory
+                - IPC_LOCK
           volumeMounts:
             - name: socket-path
               {{- if eq .Values.chaosDaemon.runtime "docker" }}
