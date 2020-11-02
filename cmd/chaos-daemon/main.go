@@ -20,6 +20,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon"
+	"github.com/chaos-mesh/chaos-mesh/pkg/fusedev"
 	"github.com/chaos-mesh/chaos-mesh/pkg/version"
 
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -58,7 +59,14 @@ func main() {
 		prometheus.NewProcessCollector(prometheus.ProcessCollectorOpts{}),
 	)
 
-	if err := chaosdaemon.StartServer(conf, reg); err != nil {
+	log.Info("ensure /dev/fuse exists")
+	fusedev.EnsureFuseDev()
+	err := fusedev.GrantAccess()
+	if err != nil {
+		log.Error(err, "fail to grant access to /dev/fuse")
+	}
+
+	if err = chaosdaemon.StartServer(conf, reg); err != nil {
 		log.Error(err, "failed to start chaos-daemon server")
 		os.Exit(1)
 	}
