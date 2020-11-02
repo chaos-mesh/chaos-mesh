@@ -74,8 +74,7 @@ function getGenerator(includedFiles: string[]) {
   return generator
 }
 
-function getSchemaByAPIName(includedFiles: string[], apiName: string) {
-  const generator = getGenerator(includedFiles)
+function getSchemaByAPIName(includedFiles: string[], apiName: string, generator: TJS.JsonSchemaGenerator) {
   const allSymbolNames = generator.getUserSymbols()
   let resSchema: TJS.Definition | undefined
   let paramsSchema: TJS.Definition | undefined
@@ -295,7 +294,8 @@ describe('api test', () => {
     apiName: string,
     apiMethod: 'get' | 'post' | 'put' | 'delete',
     apiURL: string,
-    includedFiles: string[]
+    includedFiles: string[],
+    generator: TJS.JsonSchemaGenerator
   ) {
     return () => {
       const api: (...args: any) => Promise<AxiosResponse<any>> = allTestedAPI[apiName]
@@ -307,7 +307,7 @@ describe('api test', () => {
         delete: 'onDelete' as 'onDelete',
       }
 
-      const { resSchema, paramsSchema } = getSchemaByAPIName(includedFiles, apiName)
+      const { resSchema, paramsSchema } = getSchemaByAPIName(includedFiles, apiName, generator)
       const { resMock, paramsMock, requiredParams } = getMockByAPIName(apiName)
 
       mock[mappedMethod[apiMethod]](apiURL, {
@@ -346,21 +346,24 @@ describe('api test', () => {
 
   describe('archive test', () => {
     const includedFiles = ['src/api/archives.type.ts', 'src/@types/global.d.ts']
+    const generator = getGenerator(includedFiles)
 
-    test('archives test', startTest('archives', 'get', 'archives', includedFiles))
-    test('archive detail test', startTest('archiveDetail', 'get', 'archives/detail', includedFiles))
-    test('archive report test', startTest('archiveReport', 'get', 'archives/report', includedFiles))
+    test('archives test', startTest('archives', 'get', 'archives', includedFiles, generator))
+    test('archive detail test', startTest('archiveDetail', 'get', 'archives/detail', includedFiles, generator))
+    test('archive report test', startTest('archiveReport', 'get', 'archives/report', includedFiles, generator))
   })
 
   describe('events test', () => {
     const includedFiles = ['src/api/events.type.ts', 'src/@types/global.d.ts']
+    const generator = getGenerator(includedFiles)
 
-    test('events test', startTest('events', 'get', 'events', includedFiles))
+    test('events test', startTest('events', 'get', 'events', includedFiles, generator))
   })
 
   describe('experiments test', () => {
     const includedFiles = ['src/api/experiments.type.ts', 'src/@types/global.d.ts']
+    const generator = getGenerator(includedFiles)
 
-    test('experiments test', startTest('experiments', 'get', 'experiments', includedFiles))
+    test('experiments test', startTest('experiments', 'get', 'experiments', includedFiles, generator))
   })
 })
