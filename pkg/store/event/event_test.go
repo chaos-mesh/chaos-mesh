@@ -47,7 +47,7 @@ var _ = Describe("event", func() {
 		gdb, err := gorm.Open("sqlite3", db)
 		Expect(err).ShouldNot(HaveOccurred())
 
-		es = &eventStore{db: &dbstore.DB{gdb}}
+		es = &eventStore{db: &dbstore.DB{DB: gdb}}
 	})
 
 	AfterEach(func() {
