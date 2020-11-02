@@ -44,6 +44,10 @@ const LabelField: React.FC<LabelFieldProps & TextFieldProps> = ({ isKV = false, 
   }
 
   const onKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (error) {
+      setError('')
+    }
+
     if (e.key === ' ') {
       const t = text.trim()
 

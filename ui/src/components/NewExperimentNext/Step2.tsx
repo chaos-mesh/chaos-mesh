@@ -3,6 +3,7 @@ import { Form, Formik } from 'formik'
 import { LabelField, SelectField, TextField } from 'components/FormField'
 import React, { useEffect, useState } from 'react'
 import { RootState, useStoreDispatch } from 'store'
+import basicData, { schema } from './data/basic'
 import { createStyles, makeStyles } from '@material-ui/core/styles'
 import { setBasic, setStep2 } from 'slices/experiments'
 
@@ -16,7 +17,6 @@ import Scope from './form/Scope'
 import SkeletonN from 'components-mui/SkeletonN'
 import T from 'components/T'
 import UndoIcon from '@material-ui/icons/Undo'
-import basicData from './data/basic'
 import { getNamespaces } from 'slices/experiments'
 import { useSelector } from 'react-redux'
 
@@ -87,54 +87,62 @@ const Step2 = () => {
         )}
       </PaperTop>
       <Box position="relative" p={6} hidden={step2}>
-        <Formik enableReinitialize initialValues={init} onSubmit={handleOnSubmitStep2}>
-          <Form>
-            <Grid container spacing={9}>
-              <Grid item xs={12} md={6}>
-                <Box mb={3}>
-                  <Typography>{T('newE.steps.scope')}</Typography>
-                </Box>
-                {namespaces.length ? <Scope namespaces={namespaces} /> : <SkeletonN n={6} />}
-              </Grid>
-              <Grid item xs={12} md={6}>
-                <Box mb={3}>
-                  <Typography>{T('newE.steps.basic')}</Typography>
-                </Box>
-                <TextField id="name" name="name" label={T('newE.basic.name')} helperText={T('newE.basic.nameHelper')} />
+        <Formik enableReinitialize initialValues={init} validationSchema={schema} onSubmit={handleOnSubmitStep2}>
+          {({ errors, touched }) => (
+            <Form>
+              <Grid container spacing={9}>
+                <Grid item xs={12} md={6}>
+                  <Box mb={3}>
+                    <Typography>{T('newE.steps.scope')}</Typography>
+                  </Box>
+                  {namespaces.length ? <Scope namespaces={namespaces} /> : <SkeletonN n={6} />}
+                </Grid>
+                <Grid item xs={12} md={6}>
+                  <Box mb={3}>
+                    <Typography>{T('newE.steps.basic')}</Typography>
+                  </Box>
+                  <TextField
+                    id="name"
+                    name="name"
+                    label={T('newE.basic.name')}
+                    helperText={errors.name && touched.name ? errors.name : T('newE.basic.nameHelper')}
+                    error={errors.name && touched.name ? true : false}
+                  />
 
-                {namespaces.length ? (
-                  <SelectField
-                    id="namespace"
-                    name="namespace"
-                    label={T('newE.basic.namespace')}
-                    helperText={T('newE.basic.namespaceHelper')}
-                  >
-                    {namespaces.map((n) => (
-                      <MenuItem key={n} value={n}>
-                        {n}
-                      </MenuItem>
-                    ))}
-                  </SelectField>
-                ) : (
-                  <SkeletonN n={3} />
-                )}
+                  {namespaces.length ? (
+                    <SelectField
+                      id="namespace"
+                      name="namespace"
+                      label={T('newE.basic.namespace')}
+                      helperText={T('newE.basic.namespaceHelper')}
+                    >
+                      {namespaces.map((n) => (
+                        <MenuItem key={n} value={n}>
+                          {n}
+                        </MenuItem>
+                      ))}
+                    </SelectField>
+                  ) : (
+                    <SkeletonN n={3} />
+                  )}
 
-                <AdvancedOptions>
-                  <LabelField id="labels" name="labels" label={T('k8s.labels')} isKV />
-                  <LabelField id="annotations" name="annotations" label={T('k8s.annotations')} isKV />
-                </AdvancedOptions>
-                <Box mb={3}>
-                  <Divider />
-                </Box>
-                <Scheduler />
-                <Box mt={6} textAlign="right">
-                  <Button type="submit" variant="contained" color="primary" startIcon={<PublishIcon />}>
-                    {T('common.submit')}
-                  </Button>
-                </Box>
+                  <AdvancedOptions>
+                    <LabelField id="labels" name="labels" label={T('k8s.labels')} isKV />
+                    <LabelField id="annotations" name="annotations" label={T('k8s.annotations')} isKV />
+                  </AdvancedOptions>
+                  <Box mb={3}>
+                    <Divider />
+                  </Box>
+                  <Scheduler />
+                  <Box mt={6} textAlign="right">
+                    <Button type="submit" variant="contained" color="primary" startIcon={<PublishIcon />}>
+                      {T('common.submit')}
+                    </Button>
+                  </Box>
+                </Grid>
               </Grid>
-            </Grid>
-          </Form>
+            </Form>
+          )}
         </Formik>
       </Box>
     </Paper>

@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react'
 import { RootState, useStoreDispatch } from 'store'
 import { createStyles, makeStyles } from '@material-ui/core/styles'
 import { setStep1, setTarget as setTargetToStore } from 'slices/experiments'
-import targetData, { Kind } from './data/target'
+import targetData, { Kind, schema } from './data/target'
 
 import CheckCircleOutlineIcon from '@material-ui/icons/CheckCircleOutline'
 import Kernel from './form/Kernel'
@@ -18,7 +18,6 @@ import UndoIcon from '@material-ui/icons/Undo'
 import _snakecase from 'lodash.snakecase'
 import clsx from 'clsx'
 import { useSelector } from 'react-redux'
-import validationData from './data/validation'
 
 const useStyles = makeStyles((theme) => {
   const cardActive = {
@@ -186,7 +185,7 @@ const Step1 = () => {
               ) : kind === 'TimeChaos' ? (
                 <TargetGenerated
                   data={targetData[kind].spec!}
-                  validationSchema={validationData.TimeChaos!.default}
+                  validationSchema={schema.TimeChaos!.default}
                   onSubmit={handleSubmitStep1}
                 />
               ) : kind === 'StressChaos' ? (
@@ -204,7 +203,7 @@ const Step1 = () => {
                 key={kind + action}
                 kind={kind}
                 data={targetData[kind as Kind].categories!.filter(({ key }) => key === action)[0].spec}
-                validationSchema={validationData[kind as Kind]![action]}
+                validationSchema={schema[kind as Kind]![action]}
                 onSubmit={handleSubmitStep1}
               />
             </Box>

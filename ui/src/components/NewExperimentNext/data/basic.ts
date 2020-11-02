@@ -1,3 +1,5 @@
+import * as Yup from 'yup'
+
 const data = {
   name: '',
   namespace: 'default',
@@ -16,6 +18,10 @@ const data = {
     cron: '',
     duration: '',
   },
+}
+
+export const schema: Record<string, Yup.Schema<any>> = {
+  name: Yup.string().required('The experiment name is required'),
 }
 
 export type dataType = typeof data

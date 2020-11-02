@@ -34,6 +34,7 @@
   },
   "scripts": {
     "start": "react-scripts start",
+    "start:default": "cross-env REACT_APP_API_URL=http://localhost:2333 BROWSER=none react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
@@ -71,6 +72,7 @@
     "@types/react-redux": "^7.1.9",
     "@types/react-router-dom": "^5.1.4",
     "@types/yup": "^0.29.1",
+    "cross-env": "^7.0.2",
     "http-proxy-middleware": "^1.0.4",
     "husky": "^4.2.5",
     "import-sort-style-eslint": "^6.0.0",
