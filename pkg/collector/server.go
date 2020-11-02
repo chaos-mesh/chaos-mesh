@@ -50,13 +50,22 @@ func NewServer(
 ) (*Server, client.Client, client.Reader) {
 	s := &Server{}
 
-	var err error
-	s.Manager, err = ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
+	// namespace scoped
+	options := ctrl.Options{
 		Scheme:             scheme,
 		MetricsBindAddress: conf.MetricAddress,
 		LeaderElection:     conf.EnableLeaderElection,
 		Port:               9443,
-	})
+	}
+	if conf.ClusterScoped {
+		log.Info("Chaos controller manager is running in cluster scoped mode.")
+	} else {
+		log.Info("Chaos controller manager is running in namespace scoped mode.", "targetNamespace", conf.TargetNamespace)
+		options.Namespace = conf.TargetNamespace
+	}
+
+	var err error
+	s.Manager, err = ctrl.NewManager(ctrl.GetConfigOrDie(), options)
 	if err != nil {
 		log.Error(err, "unable to start collector")
 		os.Exit(1)
