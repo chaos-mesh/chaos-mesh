@@ -40,6 +40,12 @@ export function parseSubmit(e: Experiment) {
   function helper2(scope: ExperimentScope) {
     scope.label_selectors = helper1(scope.label_selectors as string[])
     scope.annotation_selectors = helper1(scope.annotation_selectors as string[])
+
+    // Parse phase_selectors
+    const phaseSelectors = scope.phase_selectors
+    if (phaseSelectors.length === 1 && phaseSelectors[0] === 'all') {
+      scope.phase_selectors = []
+    }
   }
   values.labels = helper1(values.labels as string[])
   values.annotations = helper1(values.annotations as string[])
@@ -88,7 +94,7 @@ export function parseSubmit(e: Experiment) {
     }
   }
 
-  if (kind === 'IoChaos') {
+  if (kind === 'IoChaos' && values.target.io_chaos.action === 'attrOverride') {
     values.target.io_chaos.attr = helper1(values.target.io_chaos.attr as string[], (s: string) => parseInt(s, 10))
   }
 
@@ -174,6 +180,7 @@ export function yamlToExperiment(yamlObj: any): Experiment {
     annotations: metadata.annotations ? selectorsToArr(metadata.annotations, ':') : [],
     scope: {
       ...defaultExperimentSchema.scope,
+      namespace_selectors: spec.selector?.namespaces ?? [],
       label_selectors: spec.selector?.label_selectors ? selectorsToArr(spec.selector.label_selectors, ': ') : [],
       annotation_selectors: spec.selector?.annotation_selectors
         ? selectorsToArr(spec.selector.annotation_selectors, ': ')
@@ -243,6 +250,7 @@ export function yamlToExperiment(yamlObj: any): Experiment {
   const action = Object.keys(spec).filter((k) => k === spec.action)[0]
 
   if (kind === 'NetworkChaos') {
+    const namespace_selectors = spec.target.selector?.namespaces ?? []
     const label_selectors = spec.target?.selector?.label_selectors
       ? selectorsToArr(spec.target.selector.label_selectors, ': ')
       : []
@@ -268,6 +276,7 @@ export function yamlToExperiment(yamlObj: any): Experiment {
             ? {
                 ...defaultExperimentSchema.scope,
                 ...spec.target,
+                namespace_selectors,
                 label_selectors,
                 annotation_selectors,
               }

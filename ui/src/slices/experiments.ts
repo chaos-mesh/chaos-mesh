@@ -49,7 +49,7 @@ const initialState: {
   needToRefreshExperiments: false,
 }
 
-const namespaceFilters = ['kube-system', 'chaos-testing']
+const namespaceFilters = ['kube-system']
 
 const experimentsSlice = createSlice({
   name: 'experiments',

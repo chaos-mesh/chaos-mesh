@@ -181,7 +181,7 @@ type NetworkChaosInfo struct {
 	Corrupt     *v1alpha1.CorruptSpec   `json:"corrupt" binding:"RequiredFieldEqual=Action:corrupt"`
 	Bandwidth   *v1alpha1.BandwidthSpec `json:"bandwidth" binding:"RequiredFieldEqual=Action:bandwidth"`
 	Direction   string                  `json:"direction" binding:"oneof='' 'to' 'from' 'both'"`
-	TargetScope *ScopeInfo              `json:"target_scope"`
+	TargetScope *ScopeInfo              `json:"target"`
 }
 
 // IOChaosInfo defines the basic information of io chaos for creating a new IOChaos.
