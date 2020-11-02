@@ -1270,6 +1270,8 @@ spec:
             value: ":10081"
           - name: CHAOS_DNS_SERVICE_NAME
             value: chaos-mesh-dns-server
+          - name: CHAOS_DNS_SERVICE_PORT
+            value: !!str 9288
         volumeMounts:
           - name: webhook-certs
             mountPath: /etc/webhook/certs
