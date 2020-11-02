@@ -20,11 +20,11 @@ import (
 	"fmt"
 	"io"
 	"regexp"
-	"strconv"
 	"strings"
 	"time"
 
 	corev1 "k8s.io/api/core/v1"
+	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/kubernetes"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
@@ -33,6 +33,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/pkg/utils"
 
 	kubectlscheme "k8s.io/kubectl/pkg/scheme"
 )
@@ -42,16 +43,11 @@ var (
 	ColorRed   = "\033[31m"
 	ColorGreen = "\033[32m"
 	ColorCyan  = "\033[36m"
+	ColorBlue  = "\033[34m"
 	scheme     = runtime.NewScheme()
 )
 
-type PodName struct {
-	PodName              string
-	PodNamespace         string
-	ChaosDaemonName      string
-	ChaosDaemonNamespace string
-}
-
+// ClientSet contains two different clients
 type ClientSet struct {
 	CtrlClient client.Client
 	K8sClient  *kubernetes.Clientset
@@ -67,10 +63,17 @@ func upperCaseChaos(str string) string {
 	return strings.Title(parts[1]) + strings.Title(parts[2])
 }
 
-func PrintWithTab(s string) {
-	fmt.Printf("\t%s\n", regexp.MustCompile("\n").ReplaceAllString(s, "\n\t"))
+// Print prints result to users in prettier format, with number of tabs and color specified
+func Print(s string, num int, color string) {
+	var tabStr string
+	for i := 0; i < num; i++ {
+		tabStr += "\t"
+	}
+	s = string(color) + s + string(ColorReset)
+	fmt.Printf("%s%s\n\n", tabStr, regexp.MustCompile("\n").ReplaceAllString(s, "\n"+tabStr))
 }
 
+// MarshalChaos returns json in readable format
 func MarshalChaos(s interface{}) (string, error) {
 	b, err := json.MarshalIndent(s, "", "  ")
 	if err != nil {
@@ -79,6 +82,7 @@ func MarshalChaos(s interface{}) (string, error) {
 	return string(b), nil
 }
 
+// InitClientSet inits two different clients that would be used
 func InitClientSet() (*ClientSet, error) {
 	ctrlClient, err := client.New(config.GetConfigOrDie(), client.Options{Scheme: scheme})
 	if err != nil {
@@ -86,60 +90,12 @@ func InitClientSet() (*ClientSet, error) {
 	}
 	k8sClient, err := kubernetes.NewForConfig(config.GetConfigOrDie())
 	if err != nil {
-		return nil, fmt.Errorf("error in getting access to K8S: %v", err.Error())
+		return nil, fmt.Errorf("error in getting access to K8S: %s", err.Error())
 	}
 	return &ClientSet{ctrlClient, k8sClient}, nil
 }
 
-// ExtractFromJson extract certain item from given string slice
-// String means the key of yaml
-// Number means the order in a slice
-func ExtractFromJson(chaos runtime.Object, str []string) (interface{}, error) {
-	resultMap := make(map[string]interface{})
-	b, err := json.Marshal(chaos)
-	if err != nil {
-		return nil, fmt.Errorf("marshal failed: %s", err.Error())
-	}
-	err = json.Unmarshal(b, &resultMap)
-	if err != nil {
-		return nil, fmt.Errorf("unmarshal failed: %s", err.Error())
-	}
-	for i := 0; i < len(str)-1; i++ {
-		var ok bool
-		// to see if next is a number
-		num, err := strconv.Atoi(str[i+1])
-		if err == nil {
-			resultMap, ok = resultMap[str[i]].([]interface{})[num].(map[string]interface{})
-			i++
-		} else {
-			resultMap, ok = resultMap[str[i]].(map[string]interface{})
-		}
-		if !ok {
-			return "", fmt.Errorf("wrong hierarchy: %s", str[i])
-		}
-	}
-	ret, ok := resultMap[str[len(str)-1]]
-	if !ok {
-		return "", fmt.Errorf("wrong hierarchy: %s", str[len(str)-1])
-	}
-	return ret, nil
-}
-
-func GetChaos(ctx context.Context, chaosType string, chaosName string, ns string, c client.Client) (runtime.Object, error) {
-	// get podName
-	chaosType = upperCaseChaos(strings.ToLower(chaosType))
-	allKinds := v1alpha1.AllKinds()
-	chaos := allKinds[chaosType].Chaos
-	objectKey := client.ObjectKey{
-		Namespace: ns,
-		Name:      chaosName,
-	}
-	if err := c.Get(ctx, objectKey, chaos); err != nil {
-		return nil, fmt.Errorf("failed to get chaos %s: %s", chaosName, err.Error())
-	}
-	return chaos, nil
-}
-
+// Log gets information from log and returns the result
 // runtime-controller only support CRUD， use client-go client
 func Log(pod string, ns string, tail int64, c *kubernetes.Clientset) (string, error) {
 	var podLogOpts corev1.PodLogOptions
@@ -154,18 +110,19 @@ func Log(pod string, ns string, tail int64, c *kubernetes.Clientset) (string, er
 	req := c.CoreV1().Pods(ns).GetLogs(pod, &podLogOpts)
 	podLogs, err := req.Stream()
 	if err != nil {
-		return "", fmt.Errorf("failed to open stream: %v", err.Error())
+		return "", fmt.Errorf("failed to open stream: %s", err.Error())
 	}
 	defer podLogs.Close()
 
 	buf := new(bytes.Buffer)
 	_, err = io.Copy(buf, podLogs)
 	if err != nil {
-		return "", fmt.Errorf("failed to copy information from podLogs to buf: %v", err.Error())
+		return "", fmt.Errorf("failed to copy information from podLogs to buf: %s", err.Error())
 	}
 	return buf.String(), nil
 }
 
+// Exec executes certain command and returns the result
 func Exec(pod string, ns string, cmd string, c *kubernetes.Clientset) (string, error) {
 	req := c.CoreV1().RESTClient().Post().
 		Resource("pods").
@@ -184,7 +141,7 @@ func Exec(pod string, ns string, cmd string, c *kubernetes.Clientset) (string, e
 	var stdout, stderr bytes.Buffer
 	exec, err := remotecommand.NewSPDYExecutor(config.GetConfigOrDie(), "POST", req.URL())
 	if err != nil {
-		return "", fmt.Errorf("error in creating NewSPDYExecutor: %v", err.Error())
+		return "", fmt.Errorf("error in creating NewSPDYExecutor: %s", err.Error())
 	}
 	err = exec.Stream(remotecommand.StreamOptions{
 		Stdin:  nil,
@@ -192,7 +149,7 @@ func Exec(pod string, ns string, cmd string, c *kubernetes.Clientset) (string, e
 		Stderr: &stderr,
 	})
 	if err != nil {
-		return "", fmt.Errorf("error in creating StreamOptions: %v", err.Error())
+		return "", fmt.Errorf("error in creating StreamOptions: %s", err.Error())
 	}
 	if stderr.String() != "" {
 		return stdout.String(), fmt.Errorf(stderr.String())
@@ -200,80 +157,66 @@ func Exec(pod string, ns string, cmd string, c *kubernetes.Clientset) (string, e
 	return stdout.String(), nil
 }
 
-func GetPod(ctx context.Context, chaosType string, chaosName string, ns string, c client.Client) (*PodName, error) {
+// GetChaos returns the chaos that will do type-assertion
+func GetChaos(ctx context.Context, chaosType string, chaosName string, ns string, c client.Client) (runtime.Object, error) {
 	// get podName
-	chaos, err := GetChaos(ctx, chaosType, chaosName, ns, c)
-	if err != nil {
+	chaosType = upperCaseChaos(strings.ToLower(chaosType))
+	allKinds := v1alpha1.AllKinds()
+	chaos := allKinds[chaosType].Chaos
+	objectKey := client.ObjectKey{
+		Namespace: ns,
+		Name:      chaosName,
+	}
+	if err := c.Get(ctx, objectKey, chaos); err != nil {
 		return nil, fmt.Errorf("failed to get chaos %s: %s", chaosName, err.Error())
 	}
+	return chaos, nil
+}
 
-	failedMessageHier := []string{"status", "failedMessage"}
-	failedMessage, err := ExtractFromJson(chaos, failedMessageHier)
-	if err == nil {
-		return nil, fmt.Errorf("chaos failed with: %s", failedMessage)
+// GetPods returns pod list and corresponding chaos daemon
+func GetPods(ctx context.Context, status v1alpha1.ChaosStatus, selector v1alpha1.SelectorSpec, c client.Client) ([]v1.Pod, []v1.Pod, error) {
+	// get podName
+	failedMessage := status.FailedMessage
+	if failedMessage != "" {
+		return nil, nil, fmt.Errorf("chaos failed with: %s", failedMessage)
 	}
 
-	phaseHier := []string{"status", "experiment", "phase"}
-	phase, err := ExtractFromJson(chaos, phaseHier)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get chaos phase with: %s", err.Error())
-	}
+	phase := status.Experiment.Phase
+	nextStart := status.Scheduler.NextStart
 
-	nextStartHier := []string{"status", "scheduler", "nextStart"}
-	nextStart, err := ExtractFromJson(chaos, nextStartHier)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get chaos phase with: %s", err.Error())
-	}
-
-	if phase.(string) == "Waiting" {
-		nextStartTime, err := time.Parse(time.RFC3339, nextStart.(string))
-		if err != nil {
-			return nil, fmt.Errorf("time parsing next start failed: %s", err.Error())
-		}
-		waitTime := nextStartTime.Sub(time.Now())
-		fmt.Printf("Waiting for chaos to start, in %v\n", waitTime)
+	if phase == "Waiting" {
+		waitTime := nextStart.Sub(time.Now())
+		fmt.Printf("Waiting for chaos to start, in %s\n", waitTime)
 		time.Sleep(waitTime)
 	}
 
-	podNameHier := []string{"status", "experiment", "podRecords", "0", "name"}
-	podName, err := ExtractFromJson(chaos, podNameHier)
+	// TODO: failed and maybe not appropirate to create manager here, to get client.Reader
+	// So could not parse fieldSelector for now
+	pods, err := utils.SelectPods(ctx, c, nil, selector)
 	if err != nil {
-		return nil, fmt.Errorf("get podName failed with: %s", err.Error())
-	}
-	podNamespaceHier := []string{"status", "experiment", "podRecords", "0", "namespace"}
-	podNamespace, err := ExtractFromJson(chaos, podNamespaceHier)
-	if err != nil {
-		return nil, fmt.Errorf("get podNamespace with: %s", err.Error())
+		return nil, nil, fmt.Errorf("failed to SelectPods with: %s", err.Error())
 	}
 
-	// get nodeName
-	pod := &corev1.Pod{}
-	objectKey := client.ObjectKey{
-		Namespace: podNamespace.(string),
-		Name:      podName.(string),
-	}
-	if err = c.Get(ctx, objectKey, pod); err != nil {
-		return nil, fmt.Errorf("failed to get pod %s: %s", podName, err.Error())
-	}
-	nodeName := pod.Spec.NodeName
-
+	var chaosDaemons []corev1.Pod
 	// get chaos daemon
-	podList := &corev1.PodList{}
-
-	listOptions := (&client.ListOptions{}).ApplyOptions([]client.ListOption{
-		client.MatchingFields{"spec.nodeName": nodeName},
-		client.MatchingLabels{"app.kubernetes.io/component": "chaos-daemon"},
-	})
-
-	if err = c.List(ctx, podList, listOptions); err != nil || len(podList.Items) == 0 {
-		return nil, fmt.Errorf("failed to get podList: %s", err.Error())
+	for _, pod := range pods {
+		nodeName := pod.Spec.NodeName
+		daemonSelector := v1alpha1.SelectorSpec{
+			Nodes:          []string{nodeName},
+			LabelSelectors: map[string]string{"app.kubernetes.io/component": "chaos-daemon"},
+		}
+		daemons, err := utils.SelectPods(ctx, c, nil, daemonSelector)
+		if err != nil || len(daemons) == 0 {
+			return nil, nil, fmt.Errorf("fail to get daemon with: %s", err.Error())
+		}
+		// TODO: not sure about this, if only get one daemon is enough
+		chaosDaemons = append(chaosDaemons, daemons[0])
 	}
-	ChaosDaemonName := podList.Items[0].GetObjectMeta().GetName()
-	ChaosDaemonNamespace := podList.Items[0].GetObjectMeta().GetNamespace()
 
-	return &PodName{podName.(string), podNamespace.(string), ChaosDaemonName, ChaosDaemonNamespace}, nil
+	return pods, chaosDaemons, nil
 }
 
+// GetChaosList returns chaos list limited by input
 func GetChaosList(ctx context.Context, chaosType string, chaosName string, ns string, c client.Client) ([]string, error) {
 	chaosType = upperCaseChaos(strings.ToLower(chaosType))
 	allKinds := v1alpha1.AllKinds()

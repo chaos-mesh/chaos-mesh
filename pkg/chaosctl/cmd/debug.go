@@ -91,19 +91,23 @@ func (o *DebugOptions) Run(args []string, c *cm.ClientSet) error {
 	}
 
 	for _, chaosName := range chaosList {
-		fmt.Println(string(cm.ColorCyan), "[CHAOSNAME]:", chaosName, string(cm.ColorReset))
+		cm.Print("[CHAOSNAME]: "+chaosName, 0, cm.ColorBlue)
+		chaos, err := cm.GetChaos(ctx, chaosType, chaosName, o.Namespace, c.CtrlClient)
+		if err != nil {
+			return fmt.Errorf("failed to get chaos %s: %s", chaosName, err.Error())
+		}
 
 		switch chaosType {
 		case "networkchaos":
-			if err := networkchaos.Debug(ctx, chaosName, o.Namespace, c); err != nil {
+			if err := networkchaos.Debug(ctx, chaos, c); err != nil {
 				return err
 			}
 		case "stresschaos":
-			if err := stresschaos.Debug(ctx, chaosName, o.Namespace, c); err != nil {
+			if err := stresschaos.Debug(ctx, chaos, c); err != nil {
 				return err
 			}
 		case "iochaos":
-			if err := iochaos.Debug(ctx, chaosName, o.Namespace, c); err != nil {
+			if err := iochaos.Debug(ctx, chaos, c); err != nil {
 				return err
 			}
 		default:
