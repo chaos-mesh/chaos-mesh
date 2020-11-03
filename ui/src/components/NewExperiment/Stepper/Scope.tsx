@@ -57,7 +57,7 @@ const ScopeStep: React.FC<ScopeStepProps> = ({ namespaces, scope = 'scope', pods
   const handleAnnotationSelectorsChangeCallback = (labels: string[]) => setCurrentAnnotations(labels)
 
   const handleChangeIncludeAll = (id: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
-    const lastValues = id.split('.').reduce((acc, cur) => acc[cur], values as any)
+    const lastValues = getIn(values, id)
     const currentValues = (e.target.value as unknown) as string[]
 
     if (!lastValues.includes('all') && currentValues.includes('all')) {
