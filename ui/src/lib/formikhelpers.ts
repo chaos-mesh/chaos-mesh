@@ -21,12 +21,6 @@ export const ChaosKindKeyMap: Record<string, Record<string, Exclude<keyof Experi
 export function parseSubmit(e: Experiment) {
   const values: Experiment = JSON.parse(JSON.stringify(e))
 
-  // Parse phase_selectors
-  const phaseSelectors = values.scope.phase_selectors
-  if (phaseSelectors.length === 1 && phaseSelectors[0] === 'all') {
-    values.scope.phase_selectors = []
-  }
-
   // Parse labels, label_selectors, annotations and annotation_selectors to object
   function helper1(selectors: string[], updateVal?: (s: string) => any) {
     return selectors.reduce((acc: Record<string, any>, d) => {
