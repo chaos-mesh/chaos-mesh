@@ -41,9 +41,11 @@ export function parseSubmit(e: Experiment) {
       scope.phase_selectors = []
     }
   }
+
   values.labels = helper1(values.labels as string[])
   values.annotations = helper1(values.annotations as string[])
   helper2(values.scope)
+
   // Handle NetworkChaos target
   const networkTarget = values.target.network_chaos.target
   if (networkTarget) {
