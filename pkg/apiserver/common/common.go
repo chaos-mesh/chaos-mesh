@@ -65,7 +65,8 @@ func Register(r *gin.RouterGroup, s *Service) {
 	endpoint := r.Group("/common")
 
 	endpoint.POST("/pods", s.listPods)
-	endpoint.GET("/namespaces", s.getNamespaces)
+	endpoint.GET("/namespaces", s.listNamespaces)
+	endpoint.GET("/chaos-available-namespaces", s.getChaosAvailableNamespaces)
 	endpoint.GET("/kinds", s.getKinds)
 	endpoint.GET("/labels", s.getLabels)
 	endpoint.GET("/annotations", s.getAnnotations)
@@ -108,23 +109,56 @@ func (s *Service) listPods(c *gin.Context) {
 }
 
 // @Summary Get all namespaces from Kubernetes cluster.
-// @Description Get all namespaces from Kubernetes cluster.
+// @Description Get all from Kubernetes cluster.
+// @Deprecated This API only works within cluster scoped mode. Please use /common/chaos-available-namespaces instead.
 // @Tags common
 // @Produce json
 // @Success 200 {array} string
 // @Router /common/namespaces [get]
 // @Failure 500 {object} utils.APIError
-func (s *Service) getNamespaces(c *gin.Context) {
+func (s *Service) listNamespaces(c *gin.Context) {
+
+	var namespaces sort.StringSlice
+
 	var nsList v1.NamespaceList
 	if err := s.kubeCli.List(context.Background(), &nsList); err != nil {
 		c.Status(http.StatusInternalServerError)
 		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
 		return
 	}
-
-	namespaces := make(sort.StringSlice, 0, len(nsList.Items))
+	namespaces = make(sort.StringSlice, 0, len(nsList.Items))
 	for _, ns := range nsList.Items {
 		namespaces = append(namespaces, ns.Name)
+	}
+
+	sort.Sort(namespaces)
+	c.JSON(http.StatusOK, namespaces)
+}
+
+// @Summary Get all namespaces which could inject chaos(explosion scope) from Kubernetes cluster.
+// @Description Get all namespaces which could inject chaos(explosion scope) from Kubernetes cluster.
+// @Tags common
+// @Produce json
+// @Success 200 {array} string
+// @Router /common/chaos-available-namespaces [get]
+// @Failure 500 {object} utils.APIError
+func (s *Service) getChaosAvailableNamespaces(c *gin.Context) {
+
+	var namespaces sort.StringSlice
+
+	if s.conf.ClusterScoped {
+		var nsList v1.NamespaceList
+		if err := s.kubeCli.List(context.Background(), &nsList); err != nil {
+			c.Status(http.StatusInternalServerError)
+			_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
+			return
+		}
+		namespaces = make(sort.StringSlice, 0, len(nsList.Items))
+		for _, ns := range nsList.Items {
+			namespaces = append(namespaces, ns.Name)
+		}
+	} else {
+		namespaces = append(namespaces, s.conf.TargetNamespace)
 	}
 
 	sort.Sort(namespaces)

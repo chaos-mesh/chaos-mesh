@@ -945,8 +945,8 @@ metadata:
 rules:
   - apiGroups: [ "" ]
     resources:
-      - namespaces
       - nodes
+      - namespaces
     verbs: [ "get", "list", "watch" ]
 ---
 # Source: chaos-mesh/templates/controller-manager-rbac.yaml
@@ -1192,6 +1192,10 @@ spec:
               value: "2333"
             - name: TZ
               value: ${timezone}
+            - name: TARGET_NAMESPACE
+              value: chaos-testing
+            - name: CLUSTER_SCOPED
+              value: "true"
           volumeMounts:
             - name: storage-volume
               mountPath: /data
