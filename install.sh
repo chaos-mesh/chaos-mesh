@@ -952,8 +952,8 @@ rules:
   - apiGroups: [ "" ]
     resources:
       - nodes
-      - services
       - namespaces
+      - services
     verbs: [ "get", "list", "watch" ]
 ---
 # Source: chaos-mesh/templates/controller-manager-rbac.yaml
@@ -1006,7 +1006,7 @@ metadata:
     app.kubernetes.io/component: controller-manager
 rules:
   - apiGroups: [ "" ]
-    resources: [ "configmaps" ]
+    resources: [ "configmaps", "services" ]
     verbs: [ "get", "list", "watch" ]
 ---
 # Source: chaos-mesh/templates/controller-manager-rbac.yaml
