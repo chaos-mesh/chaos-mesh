@@ -141,7 +141,7 @@ func (r *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.I
 		}
 
 		if networkchaos.Spec.Duration != nil {
-			ps.Message = fmt.Sprintf(networkTcActionMsg, *networkchaos.Spec.Duration)
+			ps.Message += fmt.Sprintf(networkTcActionMsg, *networkchaos.Spec.Duration)
 		}
 
 		networkchaos.Status.Experiment.PodRecords = append(networkchaos.Status.Experiment.PodRecords, ps)
