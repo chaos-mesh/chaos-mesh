@@ -1,7 +1,7 @@
 import { ExperimentScope } from 'components/NewExperiment/types'
 import http from './http'
 
-export const namespaces = () => http.get<string[]>('/common/namespaces')
+export const chaosAvailableNamespaces = () => http.get<string[]>('/common/chaos-available-namespaces')
 
 export const labels = (podNamespaceList: string[]) =>
   http.get<Record<string, string[]>>(`/common/labels?podNamespaceList=${podNamespaceList.join(',')}`)
