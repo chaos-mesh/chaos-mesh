@@ -29,6 +29,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/common"
 	"github.com/chaos-mesh/chaos-mesh/pkg/apiserver/utils"
+	"github.com/chaos-mesh/chaos-mesh/pkg/config"
 	"github.com/chaos-mesh/chaos-mesh/pkg/core"
 
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -56,6 +57,7 @@ type Service struct {
 	kubeCli client.Client
 	archive core.ExperimentStore
 	event   core.EventStore
+	conf    *config.ChaosDashboardConfig
 }
 
 // NewService returns an experiment service instance.
@@ -63,11 +65,13 @@ func NewService(
 	cli client.Client,
 	archive core.ExperimentStore,
 	event core.EventStore,
+	conf *config.ChaosDashboardConfig,
 ) *Service {
 	return &Service{
 		kubeCli: cli,
 		archive: archive,
 		event:   event,
+		conf:    conf,
 	}
 }
 
@@ -110,12 +114,17 @@ type Detail struct {
 type createExperimentFunc func(*core.ExperimentInfo) error
 type updateExperimentFunc func(*core.ExperimentYAMLDescription) error
 
+// StatusResponse defines a common status struct.
+type StatusResponse struct {
+	Status string `json:"status"`
+}
+
 // @Summary Create a new chaos experiment.
 // @Description Create a new chaos experiment.
 // @Tags experiments
 // @Produce json
 // @Param request body core.ExperimentInfo true "Request body"
-// @Success 200 "create ok"
+// @Success 200 {object} core.ExperimentInfo
 // @Failure 400 {object} utils.APIError
 // @Failure 500 {object} utils.APIError
 // @Router /experiments/new [post]
@@ -149,7 +158,7 @@ func (s *Service) createExperiment(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, nil)
+	c.JSON(http.StatusOK, exp)
 }
 
 func (s *Service) createPodChaos(exp *core.ExperimentInfo) error {
@@ -596,6 +605,11 @@ func (s *Service) listExperiments(c *gin.Context) {
 	ns := c.Query("namespace")
 	status := c.Query("status")
 
+	if !s.conf.ClusterScoped {
+		log.Info("Overwrite namespace within namespace scoped mode", "origin", ns, "new", s.conf.TargetNamespace)
+		ns = s.conf.TargetNamespace
+	}
+
 	data := make([]*Experiment, 0)
 	for key, list := range v1alpha1.AllKinds() {
 		if kind != "" && key != kind {
@@ -654,6 +668,7 @@ func (s *Service) getExperimentDetail(c *gin.Context) {
 			c.Status(http.StatusInternalServerError)
 			_ = c.Error(utils.ErrInvalidRequest.New("the experiment is not found"))
 		}
+		return
 	}
 
 	kind := exp.Kind
@@ -712,6 +727,7 @@ func (s *Service) deleteExperiment(c *gin.Context) {
 			c.Status(http.StatusInternalServerError)
 			_ = c.Error(utils.ErrInvalidRequest.New("the experiment is not found"))
 		}
+		return
 	}
 
 	kind := exp.Kind
@@ -785,10 +801,16 @@ func (s *Service) state(c *gin.Context) {
 	g, ctx := errgroup.WithContext(context.Background())
 	m := &sync.Mutex{}
 	kinds := v1alpha1.AllKinds()
+
+	var listOptions []client.ListOption
+	if !s.conf.ClusterScoped {
+		listOptions = append(listOptions, &client.ListOptions{Namespace: s.conf.TargetNamespace})
+	}
+
 	for index := range kinds {
 		list := kinds[index]
 		g.Go(func() error {
-			if err := s.kubeCli.List(ctx, list.ChaosList); err != nil {
+			if err := s.kubeCli.List(ctx, list.ChaosList, listOptions...); err != nil {
 				return err
 			}
 			m.Lock()
@@ -825,7 +847,7 @@ func (s *Service) state(c *gin.Context) {
 // @Tags experiments
 // @Produce json
 // @Param uid path string true "uid"
-// @Success 200 "pause ok"
+// @Success 200 {object} StatusResponse
 // @Failure 400 {object} utils.APIError
 // @Failure 404 {object} utils.APIError
 // @Failure 500 {object} utils.APIError
@@ -845,6 +867,7 @@ func (s *Service) pauseExperiment(c *gin.Context) {
 			c.Status(http.StatusInternalServerError)
 			_ = c.Error(utils.ErrInvalidRequest.New("the experiment is not found"))
 		}
+		return
 	}
 
 	exp := &Base{
@@ -867,7 +890,7 @@ func (s *Service) pauseExperiment(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, nil)
+	c.JSON(http.StatusOK, StatusResponse{Status: "success"})
 }
 
 // @Summary Start a chaos experiment.
@@ -875,7 +898,7 @@ func (s *Service) pauseExperiment(c *gin.Context) {
 // @Tags experiments
 // @Produce json
 // @Param uid path string true "uid"
-// @Success 200 "start ok"
+// @Success 200 {object} StatusResponse
 // @Failure 400 {object} utils.APIError
 // @Failure 404 {object} utils.APIError
 // @Failure 500 {object} utils.APIError
@@ -895,6 +918,7 @@ func (s *Service) startExperiment(c *gin.Context) {
 			c.Status(http.StatusInternalServerError)
 			_ = c.Error(utils.ErrInvalidRequest.New("the experiment is not found"))
 		}
+		return
 	}
 
 	exp := &Base{
@@ -917,7 +941,7 @@ func (s *Service) startExperiment(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, nil)
+	c.JSON(http.StatusOK, StatusResponse{Status: "success"})
 }
 
 func (s *Service) patchExperiment(exp *Base, annotations map[string]string) error {
@@ -952,7 +976,7 @@ func (s *Service) patchExperiment(exp *Base, annotations map[string]string) erro
 // @Tags experiments
 // @Produce json
 // @Param request body core.ExperimentYAMLDescription true "Request body"
-// @Success 200 "update ok"
+// @Success 200 {object} core.ExperimentYAMLDescription
 // @Failure 400 {object} utils.APIError
 // @Failure 500 {object} utils.APIError
 // @Router /experiments/update [put]
@@ -991,7 +1015,7 @@ func (s *Service) updateExperiment(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, nil)
+	c.JSON(http.StatusOK, exp)
 }
 
 func (s *Service) updatePodChaos(exp *core.ExperimentYAMLDescription) error {

@@ -19,7 +19,7 @@ export const getStateofExperiments = createAsyncThunk(
   async () => (await api.experiments.state()).data
 )
 
-export const getNamespaces = createAsyncThunk('common/namespaces', async () => (await api.common.namespaces()).data)
+export const getNamespaces = createAsyncThunk('common/chaos-available-namespaces', async () => (await api.common.chaosAvailableNamespaces()).data)
 export const getLabels = createAsyncThunk(
   'common/labels',
   async (podNamespaceList: string[]) => (await api.common.labels(podNamespaceList)).data

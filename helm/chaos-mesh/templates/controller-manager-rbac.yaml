@@ -56,9 +56,11 @@ metadata:
 rules:
   - apiGroups: [ "" ]
     resources:
-      - namespaces
       - nodes
       - services
+{{- if .Values.clusterScoped }}
+      - namespaces
+{{- end }}
     verbs: [ "get", "list", "watch" ]
 
 ---

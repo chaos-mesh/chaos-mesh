@@ -29,6 +29,11 @@ type ChaosDashboardConfig struct {
 	EnableLeaderElection bool   `envconfig:"ENABLE_LEADER_ELECTION"`
 	Database             *DatabaseConfig
 	PersistTTL           *PersistTTLConfig
+	// ClusterScoped means control Chaos Object in cluster level(all namespace),
+	ClusterScoped bool `envconfig:"CLUSTER_SCOPED" default:"true"`
+	// TargetNamespace is the target namespace to injecting chaos.
+	// It only works with ClusterScoped is false;
+	TargetNamespace string `envconfig:"TARGET_NAMESPACE" default:""`
 }
 
 // PersistTTLConfig defines the configuration of ttl

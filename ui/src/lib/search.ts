@@ -1,56 +1,322 @@
+import { assumeType, difference } from './utils'
+
+import { Archive } from 'api/archives.type'
 import { Event } from 'api/events.type'
+import { Experiment } from 'api/experiments.type'
 
-const searchRegex = /(namespace:\S+)?\s?(kind:\S+)?\s?(pod:\S+)?\s?(ip:\S+)?\s?(uuid:\S+)?\s?(.*)/
+type Merge<T extends object, U extends object> = T & U
 
-function parseSearch(search: string) {
-  const matches = search.match(searchRegex)!
+type MappedEveryFuncToReturnThis<T> = {
+  [P in keyof T]: T[P] extends (...args: infer X) => any ? (...args: X) => MappedEveryFuncToReturnThis<T> : T[P]
+}
 
-  const namespace = matches[1] ? matches[1].split(':')[1].toLowerCase() : undefined
-  const kind = matches[2] ? matches[2].split(':')[1].toLowerCase() : undefined
-  const pod = matches[3] ? matches[3].split(':')[1].toLowerCase() : undefined
-  const ip = matches[4] ? matches[4].split(':')[1].toLowerCase() : undefined
-  const uuid = matches[5] ? matches[5].split(':')[1].toLowerCase() : undefined
-  const content = matches[6].toLowerCase()
+type Keyword = 'namespace' | 'kind' | 'pod' | 'ip' | 'uuid'
+export type PropForKeyword = 'experiment' | 'uid' | 'kind' | 'ip' | 'pod' | 'namespace' | 'experiment_id'
 
-  return {
-    namespace,
-    kind,
-    pod,
-    ip,
-    uuid,
-    content,
+export type GlobalSearchData = {
+  events: Event[] | []
+  experiments: Experiment[] | []
+  archives: Archive[] | []
+}
+
+export type SearchPath = {
+  [k in keyof GlobalSearchData]: { name: PropForKeyword; path: string; value: string }[]
+}
+
+interface BaseToken {
+  type: 'keyword' | 'content'
+  value: string
+}
+
+interface KeywordToken extends BaseToken {
+  type: 'keyword'
+  keyword: Keyword
+}
+
+interface ContentToken extends BaseToken {
+  type: 'content'
+}
+
+type Token = KeywordToken | ContentToken
+
+class ParseSearchAutomata {
+  private keywords: Set<Keyword>
+  private resolvedKeywords: Set<Keyword>
+  private tokens: Token[]
+
+  constructor(keywords: Keyword[]) {
+    this.keywords = new Set(keywords)
+    this.resolvedKeywords = new Set()
+    this.tokens = []
+  }
+
+  private get unresolvedKeywords() {
+    return difference(this.keywords, this.resolvedKeywords)
+  }
+
+  private get parseMethods(): string[] {
+    const prototype = Object.getPrototypeOf(this)
+    const parseMethods = Object.getOwnPropertyNames(prototype).filter(
+      (prop) => prop.startsWith('parse') && prop !== 'parseStart' && prop !== 'parseEnd' && prop !== 'parseMethods'
+    )
+    // keep parseContent always the last one in parseMethods
+    parseMethods.forEach((method, index, array) => {
+      if (method === 'parseContent') {
+        const tmp = array[index]
+        array[index] = array[array.length - 1]
+        array[array.length - 1] = tmp
+      }
+    })
+    Object.defineProperty(this, 'parseMethods', {
+      value: parseMethods,
+      writable: false,
+      configurable: true,
+    })
+    return this.parseMethods
+  }
+
+  private emit(token: Token) {
+    this.tokens.push(token)
+  }
+
+  parseStart(s: string) {
+    const prototype = Object.getPrototypeOf(this)
+    if (s.length === 0) {
+      return this.parseEnd()
+    }
+    for (let method of this.parseMethods) {
+      if (prototype[method].call(this, s) !== false) return this.tokens
+    }
+    // Since parseContent never return false, so the code below is totally unreachable.
+    // It exists just for type check.
+    return this.tokens
+  }
+
+  private parseEnd() {
+    return this.tokens
+  }
+
+  private parseKeyword(s: string) {
+    for (let keyword of this.unresolvedKeywords) {
+      const re = new RegExp(`^(${keyword}):\\s*(\\S+)`)
+      const parsedResult = s.match(re)
+      if (parsedResult) {
+        this.emit({
+          type: 'keyword',
+          keyword: parsedResult[1],
+          value: parsedResult[2],
+        } as KeywordToken)
+        this.resolvedKeywords.add(parsedResult[1] as Keyword)
+        return this.parseStart(s.slice(parsedResult[0].length).trim())
+      }
+    }
+    return false
+  }
+
+  private parseContent(s: string) {
+    this.emit({
+      type: 'content',
+      value: s,
+    } as ContentToken)
+    return this.parseStart('')
   }
 }
 
-export function searchEvents(events: Event[], search: string) {
-  const parsed = parseSearch(search)
-  const { namespace, kind, pod, ip, uuid, content } = parsed
+export function searchGlobal({ events, experiments, archives }: GlobalSearchData, search: string) {
+  if (search.length === 0) return {}
+  const searchPath: SearchPath = {
+    events: [],
+    experiments: [],
+    archives: [],
+  }
+  const searchEvents = function (this: GlobalSearchData, keyword: Keyword, value: string) {
+    const target = this.events
 
-  let result = events
+    if (target.length === 0) return this
 
-  if (namespace) {
-    result = result.filter((d) => d.namespace.toLowerCase().includes(namespace))
+    let result: Event[]
+    let matchedIndex = -1
+    switch (keyword) {
+      case 'pod':
+        matchedIndex = -1
+        result = target.filter((d) => {
+          return d.pods?.some((pod, index) => {
+            const isMatched = pod.pod_name.toLowerCase().includes(value.toLowerCase())
+            if (isMatched) matchedIndex = index
+            return isMatched
+          })
+        })
+        searchPath.events.push({
+          name: 'pod',
+          path: `pods[${matchedIndex}].pod_name`,
+          value,
+        })
+        break
+      case 'ip':
+        matchedIndex = -1
+        result = target.filter((d) => {
+          return d.pods?.some((pod, index) => {
+            const isMatched = pod.pod_ip.toLowerCase().includes(value.toLowerCase())
+            if (isMatched) matchedIndex = index
+            return isMatched
+          })
+        })
+        searchPath.events.push({
+          name: 'ip',
+          path: `pods[${matchedIndex}].pod_ip`,
+          value,
+        })
+        break
+      case 'uuid':
+        result = target.filter((d) => d.experiment_id.toLowerCase().startsWith(value.toLowerCase()))
+        searchPath.events.push({
+          name: 'experiment_id',
+          path: 'experiment_id',
+          value,
+        })
+        break
+      default:
+        assumeType<keyof Event & Keyword>(keyword)
+        result =
+          keyword in target[0]
+            ? target.filter((d) => d[keyword]?.toLowerCase().includes(value.toLocaleLowerCase()))
+            : []
+        searchPath.events.push({
+          name: keyword,
+          path: keyword,
+          value,
+        })
+        break
+    }
+    this.events = result
+    return this
   }
 
-  if (kind) {
-    result = result.filter((d) => d.kind.toLowerCase().includes(kind))
+  const searchExperiments = function (this: GlobalSearchData, keyword: Keyword, value: string) {
+    const target = this.experiments
+
+    if (target.length === 0) return this
+
+    let result: Experiment[]
+    switch (keyword) {
+      case 'uuid':
+        result = target.filter((d) => d.uid.toLowerCase().startsWith(value.toLowerCase()))
+        searchPath.experiments.push({
+          name: 'uid',
+          path: 'uid',
+          value,
+        })
+        break
+      default:
+        assumeType<keyof Experiment & Keyword>(keyword)
+        result =
+          keyword in target[0] ? target.filter((d) => d[keyword]?.toLowerCase().includes(value.toLowerCase())) : []
+        searchPath.experiments.push({
+          name: keyword,
+          path: keyword,
+          value,
+        })
+        break
+    }
+    this.experiments = result
+    return this
   }
 
-  if (pod) {
-    result = result.filter((d) => d.pods?.some((d) => d.pod_name.toLowerCase().includes(pod)))
+  const searchArchives = function (this: GlobalSearchData, keyword: Keyword, value: string) {
+    const target = this.archives
+
+    if (target.length === 0) return this
+
+    let result: Archive[]
+    switch (keyword) {
+      case 'uuid':
+        result = target.filter((d) => d.uid.toLowerCase().startsWith(value.toLowerCase()))
+        searchPath.archives.push({
+          name: 'uid',
+          path: 'uid',
+          value,
+        })
+        break
+      default:
+        assumeType<keyof Archive & Keyword>(keyword)
+        result =
+          keyword in target[0] ? target.filter((d) => d[keyword]?.toLowerCase().includes(value.toLowerCase())) : []
+        searchPath.archives.push({
+          name: keyword,
+          path: keyword,
+          value,
+        })
+        break
+    }
+    this.archives = result
+    return this
   }
 
-  if (ip) {
-    result = result.filter((d) => d.pods?.some((d) => d.pod_ip.toLowerCase().includes(ip)))
+  const searchForContent = function (this: GlobalSearchData, value: string): GlobalSearchData {
+    const { events, experiments, archives } = this
+    const eventRes = events.filter((d) => d.experiment.toLowerCase().includes(value.toLowerCase()))
+    const experimentRes = experiments.filter((d) => d.name.toLowerCase().includes(value.toLowerCase()))
+    const archiveRes = archives.filter((d) => d.name.toLowerCase().includes(value.toLowerCase()))
+    searchPath.events.push({
+      name: 'experiment',
+      path: 'experiment',
+      value,
+    })
+    searchPath.experiments.push({
+      name: 'experiment',
+      path: 'name',
+      value,
+    })
+    searchPath.archives.push({
+      name: 'experiment',
+      path: 'name',
+      value,
+    })
+    return {
+      events: eventRes,
+      experiments: experimentRes,
+      archives: archiveRes,
+    }
   }
 
-  if (uuid) {
-    result = result.filter((d) => d.experiment_id.toLowerCase().startsWith(uuid))
+  const protoWithSearchMethods = {
+    searchEvents,
+    searchExperiments,
+    searchArchives,
+    searchForContent,
   }
 
-  if (content) {
-    result = result.filter((d) => d.experiment.toLowerCase().includes(content))
+  const keywords: Keyword[] = ['namespace', 'kind', 'pod', 'ip', 'uuid']
+  const automata = new ParseSearchAutomata(keywords)
+  const tokens = automata.parseStart(search)
+  const source = {
+    events,
+    experiments,
+    archives,
   }
+  type Result = MappedEveryFuncToReturnThis<Merge<typeof source, typeof protoWithSearchMethods>>
+  let result: Result = Object.setPrototypeOf(source, protoWithSearchMethods)
 
-  return result
+  try {
+    tokens.forEach((token) => {
+      if (token.type === 'keyword') {
+        result = result
+          .searchEvents(token.keyword, token.value)
+          .searchExperiments(token.keyword, token.value)
+          .searchArchives(token.keyword, token.value)
+      } else if (token.type === 'content') {
+        result = result.searchForContent(token.value)
+      }
+    })
+  } catch (e) {
+    ;(result as typeof source) = {
+      events: [],
+      experiments: [],
+      archives: [],
+    }
+  }
+  return {
+    searchPath,
+    result: result as typeof source,
+  }
 }
