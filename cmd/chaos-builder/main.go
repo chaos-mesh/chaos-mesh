@@ -51,24 +51,9 @@ package v1alpha1
 `
 
 func main() {
-	generatedCode := codeHeader + `
-import (
-	"reflect"
-	"time"
+	implCode := codeHeader + implImport
 
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-)
-`
-	generatedTest := codeHeader + `
-import (
-	"reflect"
-	"testing"
-	"time"
-
-	"github.com/bxcodec/faker"
-	. "github.com/onsi/gomega"
-)
-`
+	testCode := codeHeader + testImport
 	initImpl := ""
 
 	filepath.Walk("./api/v1alpha1", func(path string, info os.FileInfo, err error) error {
@@ -118,8 +103,8 @@ import (
 							return err
 						}
 
-						generatedCode += generateImpl(baseType.Name.Name)
-						generatedTest += generateTest(baseType.Name.Name)
+						implCode += generateImpl(baseType.Name.Name)
+						testCode += generateTest(baseType.Name.Name)
 						initImpl += generateInit(baseType.Name.Name)
 						continue out
 					}
@@ -130,7 +115,7 @@ import (
 		return nil
 	})
 
-	generatedCode += fmt.Sprintf(`
+	implCode += fmt.Sprintf(`
 func init() {
 %s
 }
@@ -138,15 +123,17 @@ func init() {
 	file, err := os.Create("./api/v1alpha1/zz_generated.chaosmesh.go")
 	if err != nil {
 		log.Error(err, "fail to create file")
+		os.Exit(1)
 	}
-	fmt.Fprint(file, generatedCode)
+	fmt.Fprint(file, implCode)
 
-	generatedTest += testInit
+	testCode += testInit
 	file, err = os.Create("./api/v1alpha1/zz_generated.chaosmesh_test.go")
 	if err != nil {
 		log.Error(err, "fail to create file")
+		os.Exit(1)
 	}
-	fmt.Fprint(file, generatedTest)
+	fmt.Fprint(file, testCode)
 
 	return
 }

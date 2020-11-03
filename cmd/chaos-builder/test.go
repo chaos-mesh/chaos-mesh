@@ -18,6 +18,17 @@ import (
 	"text/template"
 )
 
+const testImport = `
+import (
+	"reflect"
+	"testing"
+	"time"
+
+	"github.com/bxcodec/faker"
+	. "github.com/onsi/gomega"
+)
+`
+
 const testInit = `
 func init() {
 	faker.AddProvider("ioMethods", func(v reflect.Value) (interface{}, error) {
