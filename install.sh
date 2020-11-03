@@ -951,8 +951,8 @@ metadata:
 rules:
   - apiGroups: [ "" ]
     resources:
-      - namespaces
       - nodes
+      - namespaces
     verbs: [ "get", "list", "watch" ]
 ---
 # Source: chaos-mesh/templates/controller-manager-rbac.yaml
@@ -1122,10 +1122,16 @@ spec:
             - name: TZ
               value: ${timezone}
           securityContext:
-            privileged: true
             capabilities:
               add:
                 - SYS_PTRACE
+                - NET_ADMIN
+                - MKNOD
+                - SYS_CHROOT
+                - SYS_ADMIN
+                - KILL
+                # CAP_IPC_LOCK is used to lock memory
+                - IPC_LOCK
           volumeMounts:
             - name: socket-path
               mountPath: ${mountPath}
@@ -1192,6 +1198,10 @@ spec:
               value: "2333"
             - name: TZ
               value: ${timezone}
+            - name: TARGET_NAMESPACE
+              value: chaos-testing
+            - name: CLUSTER_SCOPED
+              value: "true"
           volumeMounts:
             - name: storage-volume
               mountPath: /data
