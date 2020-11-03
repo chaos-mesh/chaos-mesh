@@ -1,18 +1,9 @@
 import { CallchainFrame, Experiment, ExperimentScope } from 'components/NewExperiment/types'
-import target, { Kind } from 'components/NewExperimentNext/data/target'
 
 import _snakecase from 'lodash.snakecase'
 import basic from 'components/NewExperimentNext/data/basic'
 import snakeCaseKeys from 'snakecase-keys'
-
-export const ChaosKindKeyMap: Record<Kind, { key: string }> = {
-  PodChaos: { key: 'pod_chaos' },
-  NetworkChaos: { key: 'network_chaos' },
-  IoChaos: { key: 'io_chaos' },
-  KernelChaos: { key: 'kernel_chaos' },
-  TimeChaos: { key: 'time_chaos' },
-  StressChaos: { key: 'stress_chaos' },
-}
+import target from 'components/NewExperimentNext/data/target'
 
 export function parseSubmit(e: Experiment) {
   const values: Experiment = JSON.parse(JSON.stringify(e))
