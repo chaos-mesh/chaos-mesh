@@ -29,6 +29,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/apiserver"
+	"github.com/chaos-mesh/chaos-mesh/pkg/clientpool"
 	"github.com/chaos-mesh/chaos-mesh/pkg/collector"
 	"github.com/chaos-mesh/chaos-mesh/pkg/config"
 	"github.com/chaos-mesh/chaos-mesh/pkg/store"
@@ -76,6 +77,13 @@ func main() {
 	persistTTLConfigParsed, err := config.ParsePersistTTLConfig(dashboardConfig.PersistTTL)
 	if err != nil {
 		log.Error(err, "main: invalid PersistTTLConfig")
+		os.Exit(1)
+	}
+
+	cfg := ctrl.GetConfigOrDie()
+	clientpool.K8sClients, err = clientpool.New(cfg, 100)
+	if err != nil {
+		log.Error(err, "main: fail to create client pool")
 		os.Exit(1)
 	}
 
