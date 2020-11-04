@@ -61,7 +61,7 @@ spec:
                     must be an implementation class with a full package name, such
                     as com.xxx.xxx.XController. required
                   type: string
-                cpucout:
+                cpucount:
                   description: CpuCount represents the number of CPU cores to bind
                     to, that is, specify how many cores are full
                   type: integer
@@ -72,7 +72,7 @@ spec:
                   type: string
               required:
               - classname
-              - cpucout
+              - cpucount
               - methodname
               type: object
             count:

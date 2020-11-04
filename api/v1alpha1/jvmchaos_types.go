@@ -172,7 +172,7 @@ type JVMCpufullloadSpec struct {
 	JVMCommonParmeter `json:",inline"`
 
 	// CpuCount represents the number of CPU cores to bind to, that is, specify how many cores are full
-	CpuCount int `json:"cpucout"`
+	CpuCount int `json:"cpucount"`
 }
 
 // JVMScriptSpec represents the detail about JVM chaos action of Java or Groovy scripts
