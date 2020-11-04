@@ -11,13 +11,16 @@ import ContentContainer from 'components/ContentContainer'
 import Header from './Header'
 import { IntlProvider } from 'react-intl'
 import MobileNavigation from './MobileNavigation'
+import PrivateRoute from 'components/PrivateRoute'
 import Sidebar from './Sidebar'
 import chaosMeshRoutes from 'routes'
 import flat from 'flat'
+import http from 'api/http'
 import insertCommonStyle from 'lib/d3/insertCommonStyle'
 import messages from 'i18n/messages'
 import { setAlertOpen } from 'slices/globalStatus'
 import { setNavigationBreadcrumbs } from 'slices/navigation'
+import { setTokenIntercepterNumber } from 'slices/globalStatus'
 import { useLocation } from 'react-router-dom'
 import { useSelector } from 'react-redux'
 
@@ -96,51 +99,67 @@ const TopContainer = () => {
     }
   }, [isTabletScreen])
 
+  useEffect(() => {
+    const token = window.localStorage.getItem('chaos-mesh-token')
+    let newTokenIntercepterNumber
+    if (token) {
+      newTokenIntercepterNumber = http.interceptors.request.use((config) => {
+        config.headers = {
+          Authorization: `Bearer ${token}`,
+        }
+        return config
+      })
+    }
+    dispatch(setTokenIntercepterNumber(newTokenIntercepterNumber))
+  }, [dispatch])
+
   return (
     <ThemeProvider theme={globalTheme}>
       <IntlProvider messages={intlMessages} locale={lang} defaultLocale="en">
-        <Box className={openDrawer ? classes.rootShift : classes.root}>
-          {/* CssBaseline: kickstart an elegant, consistent, and simple baseline to build upon. */}
-          <CssBaseline />
-          <Header openDrawer={openDrawer} handleDrawerToggle={handleDrawerToggle} breadcrumbs={breadcrumbs} />
-          {!isMobileScreen && <Sidebar open={openDrawer} />}
-          <main className={classes.main}>
-            <div className={classes.toolbar} />
+        {/* CssBaseline: kickstart an elegant, consistent, and simple baseline to build upon. */}
+        <CssBaseline />
+        <PrivateRoute>
+          <Box className={openDrawer ? classes.rootShift : classes.root}>
+            <Header openDrawer={openDrawer} handleDrawerToggle={handleDrawerToggle} breadcrumbs={breadcrumbs} />
+            {!isMobileScreen && <Sidebar open={openDrawer} />}
+            <main className={classes.main}>
+              <div className={classes.toolbar} />
 
-            <Box className={classes.switchContent}>
-              <ContentContainer>
-                <Switch>
-                  <Redirect exact path="/" to="/overview" />
-                  {chaosMeshRoutes.map((route) => (
-                    <Route key={route.path! as string} {...route} />
-                  ))}
-                  <Redirect to="/overview" />
-                </Switch>
-              </ContentContainer>
-            </Box>
+              <Box className={classes.switchContent}>
+                <ContentContainer>
+                  <Switch>
+                    <Redirect exact path="/" to="/overview" />
+                    {chaosMeshRoutes.map((route) => (
+                      <Route key={route.path! as string} {...route} />
+                    ))}
+                    <Redirect to="/overview" />
+                  </Switch>
+                </ContentContainer>
+              </Box>
 
-            {isMobileScreen && (
-              <>
-                <div className={classes.toolbar} />
-                <MobileNavigation />
-              </>
-            )}
+              {isMobileScreen && (
+                <>
+                  <div className={classes.toolbar} />
+                  <MobileNavigation />
+                </>
+              )}
 
-            <Snackbar
-              anchorOrigin={{
-                vertical: 'top',
-                horizontal: 'center',
-              }}
-              autoHideDuration={10000}
-              open={alertOpen}
-              onClose={handleSnackClose}
-            >
-              <Alert severity={alert.type} onClose={handleSnackClose}>
-                {alert.message}
-              </Alert>
-            </Snackbar>
-          </main>
-        </Box>
+              <Snackbar
+                anchorOrigin={{
+                  vertical: 'top',
+                  horizontal: 'center',
+                }}
+                autoHideDuration={10000}
+                open={alertOpen}
+                onClose={handleSnackClose}
+              >
+                <Alert severity={alert.type} onClose={handleSnackClose}>
+                  {alert.message}
+                </Alert>
+              </Snackbar>
+            </main>
+          </Box>
+        </PrivateRoute>
       </IntlProvider>
     </ThemeProvider>
   )
