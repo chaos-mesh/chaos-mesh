@@ -51,7 +51,6 @@ type Service struct {
 func NewService(
 	conf *config.ChaosDashboardConfig,
 	cli client.Client,
-	reader client.Reader,
 ) *Service {
 	return &Service{
 		conf:    conf,
