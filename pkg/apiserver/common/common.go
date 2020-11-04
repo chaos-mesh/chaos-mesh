@@ -29,6 +29,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/core"
 	pkgutils "github.com/chaos-mesh/chaos-mesh/pkg/utils"
 
+	"sigs.k8s.io/controller-runtime/pkg/client"
 	v1 "k8s.io/api/core/v1"
 )
 
@@ -42,15 +43,18 @@ type Pod struct {
 
 // Service defines a handler service for cluster common objects.
 type Service struct {
+	kubeCli client.Client
 	conf *config.ChaosDashboardConfig
 }
 
 // NewService returns an experiment service instance.
 func NewService(
 	conf *config.ChaosDashboardConfig,
+	kubeCli client.Client,
 ) *Service {
 	return &Service{
 		conf: conf,
+		kubeCli: kubeCli,
 	}
 }
 
@@ -118,16 +122,10 @@ func (s *Service) listPods(c *gin.Context) {
 // @Failure 500 {object} utils.APIError
 func (s *Service) listNamespaces(c *gin.Context) {
 
-	kubeCli, err := clientpool.ExtractTokenAndGetClient(c.Request.Header)
-	if err != nil {
-		_ = c.Error(utils.ErrInvalidRequest.WrapWithNoMessage(err))
-		return
-	}
-
 	var namespaces sort.StringSlice
 
 	var nsList v1.NamespaceList
-	if err := kubeCli.List(context.Background(), &nsList); err != nil {
+	if err := s.kubeCli.List(context.Background(), &nsList); err != nil {
 		c.Status(http.StatusInternalServerError)
 		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
 		return
@@ -150,17 +148,11 @@ func (s *Service) listNamespaces(c *gin.Context) {
 // @Failure 500 {object} utils.APIError
 func (s *Service) getChaosAvailableNamespaces(c *gin.Context) {
 
-	kubeCli, err := clientpool.ExtractTokenAndGetClient(c.Request.Header)
-	if err != nil {
-		_ = c.Error(utils.ErrInvalidRequest.WrapWithNoMessage(err))
-		return
-	}
-
 	var namespaces sort.StringSlice
 
 	if s.conf.ClusterScoped {
 		var nsList v1.NamespaceList
-		if err := kubeCli.List(context.Background(), &nsList); err != nil {
+		if err := s.kubeCli.List(context.Background(), &nsList); err != nil {
 			c.Status(http.StatusInternalServerError)
 			_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
 			return
