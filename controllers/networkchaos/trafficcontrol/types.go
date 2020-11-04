@@ -37,7 +37,9 @@ import (
 )
 
 const (
-	networkTcActionMsg = "network traffic control action duration %s"
+	networkTcActionMsg    = "network traffic control action duration %s"
+	networkChaosSourceMsg = "This is a source pod."
+	networkChaosTargetMsg = "This is a target pod."
 )
 
 func newReconciler(c client.Client, r client.Reader, log logr.Logger, req ctrl.Request,
@@ -154,7 +156,7 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1
 	}
 
 	networkchaos.Status.Experiment.PodRecords = make([]v1alpha1.PodStatus, 0, len(pods))
-	for _, pod := range pods {
+	for index, pod := range pods {
 		ps := v1alpha1.PodStatus{
 			Namespace: pod.Namespace,
 			Name:      pod.Name,
@@ -163,8 +165,14 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1
 			Action:    string(networkchaos.Spec.Action),
 		}
 
+		if index < len(sources) {
+			ps.Message = networkChaosSourceMsg
+		} else {
+			ps.Message = networkChaosTargetMsg
+		}
+
 		if networkchaos.Spec.Duration != nil {
-			ps.Message = fmt.Sprintf(networkTcActionMsg, *networkchaos.Spec.Duration)
+			ps.Message += fmt.Sprintf(networkTcActionMsg, *networkchaos.Spec.Duration)
 		}
 
 		networkchaos.Status.Experiment.PodRecords = append(networkchaos.Status.Experiment.PodRecords, ps)
