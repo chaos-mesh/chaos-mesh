@@ -17,7 +17,7 @@ import (
 	"context"
 	"fmt"
 
-	corev1 "k8s.io/api/core/v1"
+	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
@@ -48,7 +48,7 @@ func Debug(ctx context.Context, chaos runtime.Object, c *cm.ClientSet) error {
 	return nil
 }
 
-func debugEachPod(ctx context.Context, pod corev1.Pod, daemon corev1.Pod, chaos *v1alpha1.IoChaos, c *cm.ClientSet) error {
+func debugEachPod(ctx context.Context, pod v1.Pod, daemon v1.Pod, chaos *v1alpha1.IoChaos, c *cm.ClientSet) error {
 	daemonName := daemon.GetObjectMeta().GetName()
 	daemonNamespace := daemon.GetObjectMeta().GetNamespace()
 

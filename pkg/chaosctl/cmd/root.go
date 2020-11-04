@@ -28,8 +28,8 @@ var rootCmd = &cobra.Command{
 Interacting with chaos mesh
 
 Currently only support printing debug information. For example:
-  $ chaosctl debug networkChaos
-will show infomation about networkChaos if there is only one`,
+  $ chaosctl debug networkchaos
+will show infomation about networkchaos`,
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -42,4 +42,8 @@ func Execute() {
 }
 
 func init() {
+}
+
+func noCompletions(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+	return nil, cobra.ShellCompDirectiveNoFileComp
 }

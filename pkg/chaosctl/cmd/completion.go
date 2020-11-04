@@ -36,6 +36,7 @@ MacOS:
   $ chaosctl completion bash > /usr/local/etc/bash_completion.d/chaosctl
 
 Zsh:
+$ compdef _chaosctl chaosctl
 
 # If shell completion is not already enabled in your environment you will need
 # to enable it.  You can execute the following once:

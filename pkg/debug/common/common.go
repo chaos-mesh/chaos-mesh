@@ -23,7 +23,6 @@ import (
 	"strings"
 	"time"
 
-	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/kubernetes"
@@ -98,12 +97,12 @@ func InitClientSet() (*ClientSet, error) {
 // Log gets information from log and returns the result
 // runtime-controller only support CRUD， use client-go client
 func Log(pod string, ns string, tail int64, c *kubernetes.Clientset) (string, error) {
-	var podLogOpts corev1.PodLogOptions
+	var podLogOpts v1.PodLogOptions
 	//use negative tail to indicate no tail limit is needed
 	if tail < 0 {
-		podLogOpts = corev1.PodLogOptions{}
+		podLogOpts = v1.PodLogOptions{}
 	} else {
-		podLogOpts = corev1.PodLogOptions{
+		podLogOpts = v1.PodLogOptions{
 			TailLines: func(i int64) *int64 { return &i }(tail),
 		}
 	}
@@ -130,7 +129,7 @@ func Exec(pod string, ns string, cmd string, c *kubernetes.Clientset) (string, e
 		Namespace(ns).
 		SubResource("exec")
 
-	req.VersionedParams(&corev1.PodExecOptions{
+	req.VersionedParams(&v1.PodExecOptions{
 		Command: []string{"/bin/sh", "-c", cmd},
 		Stdin:   false,
 		Stdout:  true,
@@ -157,22 +156,6 @@ func Exec(pod string, ns string, cmd string, c *kubernetes.Clientset) (string, e
 	return stdout.String(), nil
 }
 
-// GetChaos returns the chaos that will do type-assertion
-func GetChaos(ctx context.Context, chaosType string, chaosName string, ns string, c client.Client) (runtime.Object, error) {
-	// get podName
-	chaosType = upperCaseChaos(strings.ToLower(chaosType))
-	allKinds := v1alpha1.AllKinds()
-	chaos := allKinds[chaosType].Chaos
-	objectKey := client.ObjectKey{
-		Namespace: ns,
-		Name:      chaosName,
-	}
-	if err := c.Get(ctx, objectKey, chaos); err != nil {
-		return nil, fmt.Errorf("failed to get chaos %s: %s", chaosName, err.Error())
-	}
-	return chaos, nil
-}
-
 // GetPods returns pod list and corresponding chaos daemon
 func GetPods(ctx context.Context, status v1alpha1.ChaosStatus, selector v1alpha1.SelectorSpec, c client.Client) ([]v1.Pod, []v1.Pod, error) {
 	// get podName
@@ -197,7 +180,7 @@ func GetPods(ctx context.Context, status v1alpha1.ChaosStatus, selector v1alpha1
 		return nil, nil, fmt.Errorf("failed to SelectPods with: %s", err.Error())
 	}
 
-	var chaosDaemons []corev1.Pod
+	var chaosDaemons []v1.Pod
 	// get chaos daemon
 	for _, pod := range pods {
 		nodeName := pod.Spec.NodeName
@@ -214,6 +197,22 @@ func GetPods(ctx context.Context, status v1alpha1.ChaosStatus, selector v1alpha1
 	}
 
 	return pods, chaosDaemons, nil
+}
+
+// GetChaos returns the chaos that will do type-assertion
+func GetChaos(ctx context.Context, chaosType string, chaosName string, ns string, c client.Client) (runtime.Object, error) {
+	// get podName
+	chaosType = upperCaseChaos(strings.ToLower(chaosType))
+	allKinds := v1alpha1.AllKinds()
+	chaos := allKinds[chaosType].Chaos
+	objectKey := client.ObjectKey{
+		Namespace: ns,
+		Name:      chaosName,
+	}
+	if err := c.Get(ctx, objectKey, chaos); err != nil {
+		return nil, fmt.Errorf("failed to get chaos %s: %s", chaosName, err.Error())
+	}
+	return chaos, nil
 }
 
 // GetChaosList returns chaos list limited by input

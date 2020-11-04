@@ -22,6 +22,7 @@ import (
 	"github.com/spf13/cobra"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	cm "github.com/chaos-mesh/chaos-mesh/pkg/debug/common"
 	"github.com/chaos-mesh/chaos-mesh/pkg/debug/iochaos"
@@ -36,7 +37,6 @@ type DebugOptions struct {
 
 func init() {
 	o := &DebugOptions{}
-	validArgs := []string{"networkchaos", "stresschaos", "iochaos"}
 
 	c, err := cm.InitClientSet()
 	if err != nil {
@@ -51,41 +51,93 @@ func init() {
 Currently only support networkchaos and stresschaos.
 
 Examples:
-  # Return debug information from all networkchaos
+  # Return debug information from all networkchaos in default namespace
   chaosctl debug networkchaos
 
   # Return debug information from certain networkchaos
   chaosctl debug networkchaos -c web-show-network-delay -n chaos-testing`,
+		ValidArgsFunction: noCompletions,
+	}
+
+	networkCmd := &cobra.Command{
+		Use:   `networkchaos (CHAOSNAME) [-n NAMESPACE]`,
+		Short: `Print the debug information for certain network chaos`,
+		Long:  `Print the debug information for certain network chaos`,
 		Run: func(cmd *cobra.Command, args []string) {
-			if err := o.Run(args, c); err != nil {
+			if err := o.Run("networkchaos", args, c); err != nil {
 				log.Fatal(err)
 			}
 		},
-		ValidArgs: validArgs,
+		ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+			if len(args) != 0 {
+				return nil, cobra.ShellCompDirectiveNoFileComp
+			}
+			return listChaos("networkchaos", o.Namespace, toComplete, c.CtrlClient)
+		},
 	}
 
-	debugCmd.Flags().StringVarP(&o.ChaosName, "chaosname", "c", "", "certain chaos name")
-	debugCmd.Flags().StringVarP(&o.Namespace, "namespace", "n", "default", "namespace to find chaos")
+	stressCmd := &cobra.Command{
+		Use:   `stresschaos (CHAOSNAME) [-n NAMESPACE]`,
+		Short: `Print the debug information for certain stress chaos`,
+		Long:  `Print the debug information for certain stress chaos`,
+		Run: func(cmd *cobra.Command, args []string) {
+			if err := o.Run("stresschaos", args, c); err != nil {
+				log.Fatal(err)
+			}
+		},
+		ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+			if len(args) != 0 {
+				return nil, cobra.ShellCompDirectiveNoFileComp
+			}
+			return listChaos("stresschaos", o.Namespace, toComplete, c.CtrlClient)
+		},
+	}
 
-	if err := flagCompletion(debugCmd, c.K8sClient); err != nil {
+	ioCmd := &cobra.Command{
+		Use:   `iochaos (CHAOSNAME) [-n NAMESPACE]`,
+		Short: `Print the debug information for certain io chaos`,
+		Long:  `Print the debug information for certain io chaos`,
+		Run: func(cmd *cobra.Command, args []string) {
+			if err := o.Run("iochaos", args, c); err != nil {
+				log.Fatal(err)
+			}
+		},
+		ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+			if len(args) != 0 {
+				return nil, cobra.ShellCompDirectiveNoFileComp
+			}
+			return listChaos("iochaos", o.Namespace, toComplete, c.CtrlClient)
+		},
+	}
+
+	debugCmd.AddCommand(networkCmd)
+	debugCmd.AddCommand(stressCmd)
+	debugCmd.AddCommand(ioCmd)
+
+	debugCmd.PersistentFlags().StringVarP(&o.Namespace, "namespace", "n", "default", "namespace to find chaos")
+	err = debugCmd.RegisterFlagCompletionFunc("namespace", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+		return listNamespace(toComplete, c.K8sClient)
+	})
+	if err != nil {
 		log.Fatal(err)
 	}
 
 	rootCmd.AddCommand(debugCmd)
 }
 
-func (o *DebugOptions) Run(args []string, c *cm.ClientSet) error {
-	if len(args) == 0 {
-		return fmt.Errorf("The type of chaos need to be specified")
-	}
+func (o *DebugOptions) Run(chaosType string, args []string, c *cm.ClientSet) error {
 	if len(args) > 1 {
-		return fmt.Errorf("Only one type of chaos need to be specified")
+		return fmt.Errorf("Only one chaos could be specified")
 	}
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	chaosType := strings.ToLower(args[0])
-	chaosList, err := cm.GetChaosList(ctx, chaosType, o.ChaosName, o.Namespace, c.CtrlClient)
+	chaosNameArg := ""
+	if len(args) == 1 {
+		chaosNameArg = args[0]
+	}
+
+	chaosList, err := cm.GetChaosList(ctx, chaosType, chaosNameArg, o.Namespace, c.CtrlClient)
 	if err != nil {
 		return fmt.Errorf(err.Error())
 	}
@@ -118,17 +170,7 @@ func (o *DebugOptions) Run(args []string, c *cm.ClientSet) error {
 	return nil
 }
 
-func flagCompletion(cmd *cobra.Command, c *kubernetes.Clientset) error {
-	err := cmd.RegisterFlagCompletionFunc("namespace", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-		return listNameSpace(toComplete, c)
-	})
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func listNameSpace(toComplete string, c *kubernetes.Clientset) ([]string, cobra.ShellCompDirective) {
+func listNamespace(toComplete string, c *kubernetes.Clientset) ([]string, cobra.ShellCompDirective) {
 	namespaces, err := c.CoreV1().Namespaces().List(v1.ListOptions{})
 	if err != nil {
 		return nil, cobra.ShellCompDirectiveDefault
@@ -137,6 +179,22 @@ func listNameSpace(toComplete string, c *kubernetes.Clientset) ([]string, cobra.
 	for _, ns := range namespaces.Items {
 		if strings.HasPrefix(ns.Name, toComplete) {
 			ret = append(ret, ns.Name)
+		}
+	}
+	return ret, cobra.ShellCompDirectiveNoFileComp
+}
+
+func listChaos(chaosType string, namespace string, toComplete string, c client.Client) ([]string, cobra.ShellCompDirective) {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	chaosList, err := cm.GetChaosList(ctx, chaosType, "", namespace, c)
+	if err != nil {
+		return nil, cobra.ShellCompDirectiveDefault
+	}
+	var ret []string
+	for _, chaos := range chaosList {
+		if strings.HasPrefix(chaos, toComplete) {
+			ret = append(ret, chaos)
 		}
 	}
 	return ret, cobra.ShellCompDirectiveNoFileComp
