@@ -207,6 +207,24 @@ func SelectPods(ctx context.Context, c client.Client, r client.Reader, selector 
 	return pods, nil
 }
 
+func GetService(ctx context.Context, c client.Client, namespace string, serviceName string) (*v1.Service, error) {
+	// use the environment value if namespace is empty
+	if len(namespace) == 0 {
+		namespace = common.ControllerCfg.Namespace
+	}
+
+	service := &v1.Service{}
+	err := c.Get(ctx, client.ObjectKey{
+		Namespace: namespace,
+		Name:      serviceName,
+	}, service)
+	if err != nil {
+		return nil, err
+	}
+
+	return service, nil
+}
+
 // CheckPodMeetSelector checks if this pod meets the selection criteria.
 // TODO: support to check fieldsSelector
 func CheckPodMeetSelector(pod v1.Pod, selector v1alpha1.SelectorSpec) (bool, error) {

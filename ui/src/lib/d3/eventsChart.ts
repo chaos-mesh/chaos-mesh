@@ -133,7 +133,7 @@ export default function gen({
       let width = d.finish_time ? x(day(d.finish_time)) - x(day(d.start_time)) : x(day()) - x(day(d.start_time))
 
       if (width === 0) {
-        width = 1
+        width = 3 // For better visual effects
       }
 
       return width

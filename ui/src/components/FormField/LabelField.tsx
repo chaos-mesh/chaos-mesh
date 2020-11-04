@@ -15,7 +15,8 @@ const LabelField: React.FC<LabelFieldProps & TextFieldProps> = ({ isKV = false, 
 
   const [text, setText] = useState('')
   const [error, setError] = useState('')
-  const labelsRef = useRef(getIn(values, props.name!))
+  const labelsInForm = getIn(values, props.name!)
+  const labelsRef = useRef(labelsInForm)
   const [labels, _setLabels] = useState<string[]>(labelsRef.current)
   const setLabels = (newVal: string[]) => {
     labelsRef.current = newVal
@@ -27,6 +28,8 @@ const LabelField: React.FC<LabelFieldProps & TextFieldProps> = ({ isKV = false, 
     // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   )
+
+  useEffect(() => setLabels(labelsInForm), [labelsInForm])
 
   const onChange = (_: any, __: any, reason: string) => {
     if (reason === 'clear') {

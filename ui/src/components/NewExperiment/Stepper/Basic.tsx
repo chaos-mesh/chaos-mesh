@@ -27,7 +27,6 @@ const BasicStep: React.FC<BasicStepProps> = ({ namespaces }) => {
         name="name"
         label={T('newE.basic.name')}
         helperText={T('newE.basic.nameHelper')}
-        autoFocus
         error={errors.name && touched.name ? true : false}
       />
 

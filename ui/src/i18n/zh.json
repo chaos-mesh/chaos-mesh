@@ -26,7 +26,7 @@
       "mode": "模式",
       "modeHelper": "选择实验模式",
       "modeValue": "模式值",
-      "modeValuehelper": "请填写实验值",
+      "modeValueHelper": "请填写模式值",
       "affectedPods": "受到实验作用的 Pods",
       "affectedPodsPreview": "预览将要受到实验作用的 Pods",
       "affectedPodsPreviewHelper": "通过勾选 Pods 来进一步限制实验的范围",
@@ -162,9 +162,36 @@
     "pauseSuccessfully": "暂停成功",
     "updateSuccessfully": "更新成功",
     "timeline": "时间线",
-    "search": "搜索",
     "meta": "元信息",
     "uuid": "UUID"
+  },
+  "search": {
+    "placeholder": "搜索",
+    "tip": {
+      "title": "以下搜索语法可以帮助快速地定位事件，实验以及归档：",
+      "namespace": "namespace:default xxx 将搜索命名空间为 default 的事件，实验以及归档",
+      "kind": "kind:NetworkChaos xxx 将搜索类型为 NetworkChaos 的事件，实验以及归档，您也可以输入 kind:net，因为搜索是模糊匹配的",
+      "pod": "pod:echoserver-774cdcc8b6-nrm65 将通过受影响的 Pod 搜索事件",
+      "ip": "ip:172.17.0.6 类似于 pod:xxx，通过 Pod IP 进行过滤",
+      "uuid": "uuid:2f79a4d6-1952-45b5-b2d5-ce715823c7a7 将通过实验 UUID 搜索事件，实验以及归档"
+    },
+     "result": {
+      "category": {
+        "events": "事件",
+        "experiments": "实验",
+        "archives": "归档"
+      },
+      "keywords": {
+        "Experiment": "实验",
+        "UUID": "UUID",
+        "IP": "IP地址",
+        "Kind": "实验类型",
+        "Pod": "Pod",
+        "Namespace": "命名空间",
+        "Start Time": "开始时间" 
+      },
+      "noResult": "无结果"
+    }
   },
   "k8s": {
     "labels": "标签",
@@ -172,41 +199,5 @@
     "labelSelectors": "标签选择器",
     "annotationsSelectors": "注解选择器",
     "phaseSelectors": "阶段选择器"
-  },
-  "validation": {
-    "name": "请填写实验名称",
-    "target": {
-      "pod_chaos": {
-        "container_name": "请填写容器名称"
-      },
-      "network_chaos": {
-        "action": "请填写 NetworkChaos 操作",
-        "direction": "请选择隔离方向",
-        "bandwidth": {
-          "rate": "请填写带宽速率"
-        },
-        "corrupt": {
-          "corrupt": "请填写坏包比例",
-          "correlation": "请填写坏包关联度"
-        },
-        "delay": {
-          "latency": "请填写网络延迟"
-        },
-        "duplicate": {
-          "duplicate": "请填写重复包比例",
-          "correlation": "请填写重复包关联度"
-        },
-        "loss": {
-          "loss": "请填写丢包比例",
-          "correlation": "请填写丢包关联度"
-        }
-      },
-      "io_chaos": {
-        "action": "请填写 IOChaos 操作"
-      },
-      "time_chaos": {
-        "time_offset": "请填写时间偏移量"
-      }
-    }
   }
 }
