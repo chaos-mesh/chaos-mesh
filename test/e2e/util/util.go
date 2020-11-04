@@ -14,6 +14,13 @@
 package util
 
 import (
+	"context"
+	"encoding/json"
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/client-go/kubernetes"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 	"time"
 
 	apiextensionsv1beta1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1"
@@ -91,3 +98,41 @@ func WaitForCRDsEstablished(client apiextensionsclientset.Interface, selector la
 		return true, nil
 	})
 }
+
+// WaitDeploymentReady waits for all pods which controlled by deployment to be ready.
+func WaitDeploymentReady(name, namespace string, cli kubernetes.Interface) error {
+	return wait.Poll(5*time.Second, 5*time.Minute, func() (done bool, err error) {
+		d, err := cli.AppsV1().Deployments(namespace).Get(name, metav1.GetOptions{})
+		if err != nil {
+			return false, nil
+		}
+		if d.Status.AvailableReplicas != *d.Spec.Replicas {
+			return false, nil
+		}
+		if d.Status.UpdatedReplicas != *d.Spec.Replicas {
+			return false, nil
+		}
+		return true, nil
+	})
+}
+
+func PauseChaos(ctx context.Context, cli client.Client, chaos runtime.Object) error {
+	var mergePatch []byte
+	mergePatch, _ = json.Marshal(map[string]interface{}{
+		"metadata": map[string]interface{}{
+			"annotations": map[string]string{v1alpha1.PauseAnnotationKey: "true"},
+		},
+	})
+	return cli.Patch(ctx, chaos, client.ConstantPatch(types.MergePatchType, mergePatch))
+}
+
+func UnPauseChaos(ctx context.Context, cli client.Client, chaos runtime.Object) error {
+	var mergePatch []byte
+	mergePatch, _ = json.Marshal(map[string]interface{}{
+		"metadata": map[string]interface{}{
+			"annotations": map[string]string{v1alpha1.PauseAnnotationKey: "false"},
+		},
+	})
+	return cli.Patch(ctx, chaos, client.ConstantPatch(types.MergePatchType, mergePatch))
+}
+
