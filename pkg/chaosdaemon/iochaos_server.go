@@ -64,6 +64,7 @@ func (s *daemonServer) ApplyIoChaos(ctx context.Context, in *pb.ApplyIoChaosRequ
 		EnableSuicide().
 		SetIdentifier(in.ContainerId).
 		Build()
+	cmd.Env = append(cmd.Env, "LD_LIBRARY_PATH=/usr/local/lib/toda-glibc")
 	cmd.Stdin = strings.NewReader(in.Actions)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
