@@ -77,6 +77,10 @@ spec:
           - name: PPROF_ADDR
             value: ":10081"
           {{- end }}
+          - name: CHAOS_DNS_SERVICE_NAME
+            value: {{ .Values.dnsServer.name }}
+          - name: CHAOS_DNS_SERVICE_PORT
+            value: !!str {{ .Values.dnsServer.grpcPort }}
         volumeMounts:
           - name: webhook-certs
             mountPath: /etc/webhook/certs

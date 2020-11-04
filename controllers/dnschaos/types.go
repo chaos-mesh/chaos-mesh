@@ -16,9 +16,13 @@ package dnschaos
 import (
 	"context"
 	"errors"
+	"fmt"
+	"time"
 
+	dnspb "github.com/chaos-mesh/k8s_dns_chaos/pb"
 	multierror "github.com/hashicorp/go-multierror"
 	"golang.org/x/sync/errgroup"
+	"google.golang.org/grpc"
 	v1 "k8s.io/api/core/v1"
 	k8serror "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -29,21 +33,11 @@ import (
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/common"
+	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
 	"github.com/chaos-mesh/chaos-mesh/pkg/router"
 	ctx "github.com/chaos-mesh/chaos-mesh/pkg/router/context"
 	end "github.com/chaos-mesh/chaos-mesh/pkg/router/endpoint"
 	"github.com/chaos-mesh/chaos-mesh/pkg/utils"
-)
-
-var (
-	// DNSServerName is the chaos DNS server's name
-	DNSServerName = "chaos-mesh-dns-service"
-
-	// DNSServerSelectorLabels is the labels used to select the DNS server
-	DNSServerSelectorLabels = map[string]string{
-		"app.kubernetes.io/component": "dns-server",
-		"app.kubernetes.io/instance":  "chaos-mesh",
-	}
 )
 
 // endpoint is dns-chaos reconciler
@@ -66,9 +60,21 @@ func (r *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.I
 		return err
 	}
 
-	// TODO: get chaos dns server's address, and send request to this server to set chaos rules.
+	// get dns server's ip used for chaos
+	service, err := utils.GetService(ctx, r.Client, "", common.ControllerCfg.DNSServiceName)
+	if err != nil {
+		r.Log.Error(err, "fail to get service")
+		return err
+	}
+	r.Log.Info("Set DNS chaos to DNS service", "ip", service.Spec.ClusterIP)
 
-	if err = r.applyAllPods(ctx, pods, dnschaos, ""); err != nil {
+	err = r.setDNSServerRules(service.Spec.ClusterIP, common.ControllerCfg.DNSServicePort, dnschaos.Name, pods, dnschaos.Spec.Action, dnschaos.Spec.Scope)
+	if err != nil {
+		r.Log.Error(err, "fail to set DNS server rules")
+		return err
+	}
+
+	if err = r.applyAllPods(ctx, pods, dnschaos, service.Spec.ClusterIP); err != nil {
 		r.Log.Error(err, "failed to apply chaos on all pods")
 		return err
 	}
@@ -96,6 +102,16 @@ func (r *endpoint) Recover(ctx context.Context, req ctrl.Request, chaos v1alpha1
 		r.Log.Error(err, "chaos is not DNSChaos", "chaos", chaos)
 		return err
 	}
+
+	// get dns server's ip used for chaos
+	service, err := utils.GetService(ctx, r.Client, "", common.ControllerCfg.DNSServiceName)
+	if err != nil {
+		r.Log.Error(err, "fail to get service")
+		return err
+	}
+	r.Log.Info("Cancel DNS chaos to DNS service", "ip", service.Spec.ClusterIP)
+
+	r.cancelDNSServerRules(service.Spec.ClusterIP, common.ControllerCfg.DNSServicePort, dnschaos.Name)
 
 	if err := r.cleanFinalizersAndRecover(ctx, dnschaos); err != nil {
 		return err
@@ -153,7 +169,27 @@ func (r *endpoint) cleanFinalizersAndRecover(ctx context.Context, chaos *v1alpha
 func (r *endpoint) recoverPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.DNSChaos) error {
 	r.Log.Info("Try to recover pod", "namespace", pod.Namespace, "name", pod.Name)
 
-	// TODO: send request to daemon to do recover
+	daemonClient, err := utils.NewChaosDaemonClient(ctx, r.Client,
+		pod, common.ControllerCfg.ChaosDaemonPort)
+	if err != nil {
+		r.Log.Error(err, "get chaos daemon client")
+		return err
+	}
+	defer daemonClient.Close()
+	if len(pod.Status.ContainerStatuses) == 0 {
+		return fmt.Errorf("%s %s can't get the state of container", pod.Namespace, pod.Name)
+	}
+
+	target := pod.Status.ContainerStatuses[0].ContainerID
+
+	_, err = daemonClient.SetDNSServer(ctx, &pb.SetDNSServerRequest{
+		ContainerId: target,
+		Enable:      false,
+	})
+	if err != nil {
+		r.Log.Error(err, "recover pod for DNS chaos")
+		return err
+	}
 
 	return nil
 }
@@ -190,8 +226,93 @@ func (r *endpoint) applyAllPods(ctx context.Context, pods []v1.Pod, chaos *v1alp
 func (r *endpoint) applyPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.DNSChaos, dnsServerIP string) error {
 	r.Log.Info("Try to apply dns chaos", "namespace",
 		pod.Namespace, "name", pod.Name)
+	daemonClient, err := utils.NewChaosDaemonClient(ctx, r.Client,
+		pod, common.ControllerCfg.ChaosDaemonPort)
+	if err != nil {
+		r.Log.Error(err, "get chaos daemon client")
+		return err
+	}
+	defer daemonClient.Close()
+	if len(pod.Status.ContainerStatuses) == 0 {
+		return fmt.Errorf("%s %s can't get the state of container", pod.Namespace, pod.Name)
+	}
 
-	// TODO: send request to daemon to apply dns chaos
+	target := pod.Status.ContainerStatuses[0].ContainerID
+
+	_, err = daemonClient.SetDNSServer(ctx, &pb.SetDNSServerRequest{
+		ContainerId: target,
+		DnsServer:   dnsServerIP,
+		Enable:      true,
+	})
+	if err != nil {
+		r.Log.Error(err, "set dns server")
+		return err
+	}
+
+	return nil
+}
+
+func (r *endpoint) setDNSServerRules(dnsServerIP string, port int, name string, pods []v1.Pod, action v1alpha1.DNSChaosAction, scope v1alpha1.DNSChaosScope) error {
+	r.Log.Info("setDNSServerRules", "name", name)
+
+	pbPods := make([]*dnspb.Pod, len(pods))
+	for i, pod := range pods {
+		pbPods[i] = &dnspb.Pod{
+			Name:      pod.Name,
+			Namespace: pod.Namespace,
+		}
+	}
+
+	conn, err := grpc.Dial(fmt.Sprintf("%s:%d", dnsServerIP, port), grpc.WithInsecure())
+	if err != nil {
+		return err
+	}
+	defer conn.Close()
+
+	c := dnspb.NewDNSClient(conn)
+	request := &dnspb.SetDNSChaosRequest{
+		Name:   name,
+		Action: string(action),
+		Pods:   pbPods,
+		Scope:  string(scope),
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	response, err := c.SetDNSChaos(ctx, request)
+	if err != nil {
+		return err
+	}
+
+	if !response.Result {
+		return fmt.Errorf("set dns chaos to dns server error %s", response.Msg)
+	}
+
+	return nil
+}
+
+func (r *endpoint) cancelDNSServerRules(dnsServerIP string, port int, name string) error {
+	conn, err := grpc.Dial(fmt.Sprintf("%s:%d", dnsServerIP, port), grpc.WithInsecure())
+	if err != nil {
+		return err
+	}
+	defer conn.Close()
+
+	c := dnspb.NewDNSClient(conn)
+	request := &dnspb.CancelDNSChaosRequest{
+		Name: name,
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	response, err := c.CancelDNSChaos(ctx, request)
+	if err != nil {
+		return err
+	}
+
+	if !response.Result {
+		return fmt.Errorf("set dns chaos to dns server error %s", response.Msg)
+	}
 
 	return nil
 }
