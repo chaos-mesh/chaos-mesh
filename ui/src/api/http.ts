@@ -1,6 +1,6 @@
 import axios, { AxiosError } from 'axios'
-
 import { setAlert, setAlertOpen } from 'slices/globalStatus'
+
 import store from 'store'
 
 const http = axios.create({

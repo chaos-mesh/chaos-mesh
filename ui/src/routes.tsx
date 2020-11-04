@@ -1,3 +1,4 @@
+import Account from './pages/Account'
 import ArchiveReport from './pages/ArchiveReport'
 import Archives from './pages/Archives'
 import Events from './pages/Events'
@@ -44,6 +45,11 @@ const routes: RouteProps[] = [
   {
     component: Settings,
     path: '/settings',
+    exact: true,
+  },
+  {
+    component: Account,
+    path: '/account',
     exact: true,
   },
 ]

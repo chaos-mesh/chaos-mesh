@@ -133,6 +133,14 @@
     "en": "英语",
     "zh": "简体中文"
   },
+  "account": {
+    "title": "账户",
+    "token": "令牌",
+    "tokenInputHelper": "请输入您的令牌",
+    "tokenTips": "您必须输入令牌以进行其它操作",
+    "tokenChangeHelper": "您可以在这里修改您的令牌",
+    "tokenValidation": "令牌不能为空"
+  },
   "common": {
     "doc": "文档",
     "back": "上一步",
@@ -161,6 +169,7 @@
     "startSuccessfully": "启动成功",
     "pauseSuccessfully": "暂停成功",
     "updateSuccessfully": "更新成功",
+    "submitSuccessfully": "提交成功",
     "timeline": "时间线",
     "meta": "元信息",
     "uuid": "UUID"
@@ -199,5 +208,8 @@
     "labelSelectors": "标签选择器",
     "annotationsSelectors": "注解选择器",
     "phaseSelectors": "阶段选择器"
+  },
+  "login": {
+    "welcome": "欢迎使用 Chaos Mesh"
   }
 }

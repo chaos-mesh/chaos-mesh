@@ -5,6 +5,7 @@ const initialState: {
   alert: Alert
   alertOpen: boolean
   searchModalOpen: boolean
+  tokenIntercepterNumber: number
 } = {
   alert: {
     type: 'success',
@@ -12,6 +13,7 @@ const initialState: {
   },
   alertOpen: false,
   searchModalOpen: false,
+  tokenIntercepterNumber: -1,
 }
 
 const globalStatusSlice = createSlice({
@@ -27,9 +29,12 @@ const globalStatusSlice = createSlice({
     setSearchModalOpen(state, action) {
       state.searchModalOpen = action.payload
     },
+    setTokenIntercepterNumber(state, action) {
+      state.tokenIntercepterNumber = action.payload
+    },
   },
 })
 
-export const { setAlert, setAlertOpen, setSearchModalOpen } = globalStatusSlice.actions
+export const { setAlert, setAlertOpen, setSearchModalOpen, setTokenIntercepterNumber } = globalStatusSlice.actions
 
 export default globalStatusSlice.reducer
