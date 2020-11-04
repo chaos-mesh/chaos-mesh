@@ -51,6 +51,7 @@ import (
 
 	// testcases
 	podchaostestcases "github.com/chaos-mesh/chaos-mesh/test/e2e/chaos/podchaos"
+	timechaostestcases "github.com/chaos-mesh/chaos-mesh/test/e2e/chaos/timechaos"
 )
 
 var _ = ginkgo.Describe("[Basic]", func() {
@@ -146,166 +147,11 @@ var _ = ginkgo.Describe("[Basic]", func() {
 		ginkgo.Context("[TimeSkew]", func() {
 
 			ginkgo.It("[Schedule]", func() {
-				ctx, cancel := context.WithCancel(context.Background())
-				err = waitE2EHelperReady(c, port)
-				framework.ExpectNoError(err, "wait e2e helper ready error")
-
-				initTime, err := getPodTimeNS(c, port)
-				framework.ExpectNoError(err, "failed to get pod time")
-
-				timeChaos := &v1alpha1.TimeChaos{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "timer-time-chaos",
-						Namespace: ns,
-					},
-					Spec: v1alpha1.TimeChaosSpec{
-						Selector: v1alpha1.SelectorSpec{
-							Namespaces:     []string{ns},
-							LabelSelectors: map[string]string{"app": "timer"},
-						},
-						Mode:       v1alpha1.OnePodMode,
-						Duration:   pointer.StringPtr("9m"),
-						TimeOffset: "-1h",
-						Scheduler: &v1alpha1.SchedulerSpec{
-							Cron: "@every 10m",
-						},
-					},
-				}
-				err = cli.Create(ctx, timeChaos)
-				framework.ExpectNoError(err, "create time chaos error")
-
-				err = wait.PollImmediate(5*time.Second, 5*time.Minute, func() (done bool, err error) {
-					podTime, err := getPodTimeNS(c, port)
-					framework.ExpectNoError(err, "failed to get pod time")
-					if podTime.Before(*initTime) {
-						return true, nil
-					}
-					return false, nil
-				})
-				framework.ExpectNoError(err, "time chaos doesn't work as expected")
-
-				err = cli.Delete(ctx, timeChaos)
-				framework.ExpectNoError(err, "failed to delete time chaos")
-				time.Sleep(10 * time.Second)
-
-				klog.Infof("success to perform time chaos")
-				err = wait.PollImmediate(5*time.Second, 1*time.Minute, func() (done bool, err error) {
-					podTime, err := getPodTimeNS(c, port)
-					framework.ExpectNoError(err, "failed to get pod time")
-					// since there is no timechaos now, current pod time should not be earlier
-					// than the init time
-					if podTime.Before(*initTime) {
-						return true, nil
-					}
-					return false, nil
-				})
-				framework.ExpectError(err, "wait no timechaos error")
-				framework.ExpectEqual(err.Error(), wait.ErrWaitTimeout.Error())
-
-				cancel()
+				timechaostestcases.TestcaseTimeSkewOnceThenRecover(ns, cli, c, port)
 			})
 
 			ginkgo.It("[Pause]", func() {
-				ctx, cancel := context.WithCancel(context.Background())
-				err = waitE2EHelperReady(c, port)
-				framework.ExpectNoError(err, "wait e2e helper ready error")
-
-				initTime, err := getPodTimeNS(c, port)
-				framework.ExpectNoError(err, "failed to get pod time")
-
-				timeChaos := &v1alpha1.TimeChaos{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      "timer-time-chaos",
-						Namespace: ns,
-					},
-					Spec: v1alpha1.TimeChaosSpec{
-						Selector: v1alpha1.SelectorSpec{
-							Namespaces:     []string{ns},
-							LabelSelectors: map[string]string{"app": "timer"},
-						},
-						Mode:       v1alpha1.OnePodMode,
-						Duration:   pointer.StringPtr("9m"),
-						TimeOffset: "-1h",
-						Scheduler: &v1alpha1.SchedulerSpec{
-							Cron: "@every 10m",
-						},
-					},
-				}
-				err = cli.Create(ctx, timeChaos)
-				framework.ExpectNoError(err, "create time chaos error")
-
-				err = wait.PollImmediate(5*time.Second, 5*time.Minute, func() (done bool, err error) {
-					podTime, err := getPodTimeNS(c, port)
-					framework.ExpectNoError(err, "failed to get pod time")
-					if podTime.Before(*initTime) {
-						return true, nil
-					}
-					return false, nil
-				})
-				framework.ExpectNoError(err, "time chaos doesn't work as expected")
-
-				chaosKey := types.NamespacedName{
-					Namespace: ns,
-					Name:      "timer-time-chaos",
-				}
-
-				// pause experiment
-				err = util.PauseChaos(ctx, cli, timeChaos)
-				framework.ExpectNoError(err, "pause chaos error")
-
-				err = wait.Poll(5*time.Second, 5*time.Minute, func() (done bool, err error) {
-					chaos := &v1alpha1.TimeChaos{}
-					err = cli.Get(ctx, chaosKey, chaos)
-					framework.ExpectNoError(err, "get time chaos error")
-					if chaos.Status.Experiment.Phase == v1alpha1.ExperimentPhasePaused {
-						return true, nil
-					}
-					return false, err
-				})
-				framework.ExpectNoError(err, "check paused chaos failed")
-
-				// wait for 1 minutes and check timer
-				framework.ExpectNoError(err, "get timer pod error")
-				err = wait.Poll(5*time.Second, 1*time.Minute, func() (done bool, err error) {
-					podTime, err := getPodTimeNS(c, port)
-					framework.ExpectNoError(err, "failed to get pod time")
-					if podTime.Before(*initTime) {
-						return true, nil
-					}
-					return false, nil
-				})
-				framework.ExpectError(err, "wait time chaos paused error")
-				framework.ExpectEqual(err.Error(), wait.ErrWaitTimeout.Error())
-
-				// resume experiment
-				err = util.UnPauseChaos(ctx, cli, timeChaos)
-				framework.ExpectNoError(err, "resume chaos error")
-
-				err = wait.Poll(5*time.Second, 5*time.Minute, func() (done bool, err error) {
-					chaos := &v1alpha1.TimeChaos{}
-					err = cli.Get(ctx, chaosKey, chaos)
-					framework.ExpectNoError(err, "get time chaos error")
-					if chaos.Status.Experiment.Phase == v1alpha1.ExperimentPhaseRunning {
-						return true, nil
-					}
-					return false, err
-				})
-				framework.ExpectNoError(err, "check resumed chaos failed")
-
-				// timechaos is running again, we want to check pod
-				// whether time is earlier than init time,
-				err = wait.PollImmediate(5*time.Second, 1*time.Minute, func() (done bool, err error) {
-					podTime, err := getPodTimeNS(c, port)
-					framework.ExpectNoError(err, "failed to get pod time")
-					if podTime.Before(*initTime) {
-						return true, nil
-					}
-					return false, nil
-				})
-				framework.ExpectNoError(err, "time chaos failed")
-
-				cli.Delete(ctx, timeChaos)
-				cancel()
+				timechaostestcases.TestcaseTimeSkewPauseThenUnpause(ns, cli, c, port)
 			})
 		})
 	})
@@ -343,7 +189,7 @@ var _ = ginkgo.Describe("[Basic]", func() {
 
 			ginkgo.It("[Schedule]", func() {
 				ctx, cancel := context.WithCancel(context.Background())
-				err = waitE2EHelperReady(c, port)
+				err = util.WaitE2EHelperReady(c, port)
 				framework.ExpectNoError(err, "wait e2e helper ready error")
 
 				ioChaos := &v1alpha1.IoChaos{
@@ -405,7 +251,7 @@ var _ = ginkgo.Describe("[Basic]", func() {
 
 			ginkgo.It("[Pause]", func() {
 				ctx, cancel := context.WithCancel(context.Background())
-				err = waitE2EHelperReady(c, port)
+				err = util.WaitE2EHelperReady(c, port)
 				framework.ExpectNoError(err, "wait e2e helper ready error")
 
 				ioChaos := &v1alpha1.IoChaos{
@@ -519,7 +365,7 @@ var _ = ginkgo.Describe("[Basic]", func() {
 
 			ginkgo.It("[Schedule]", func() {
 				ctx, cancel := context.WithCancel(context.Background())
-				err = waitE2EHelperReady(c, port)
+				err = util.WaitE2EHelperReady(c, port)
 				framework.ExpectNoError(err, "wait e2e helper ready error")
 
 				ioChaos := &v1alpha1.IoChaos{
@@ -579,7 +425,7 @@ var _ = ginkgo.Describe("[Basic]", func() {
 
 			ginkgo.It("[Pause]", func() {
 				ctx, cancel := context.WithCancel(context.Background())
-				err = waitE2EHelperReady(c, port)
+				err = util.WaitE2EHelperReady(c, port)
 				framework.ExpectNoError(err, "wait e2e helper ready error")
 
 				ioChaos := &v1alpha1.IoChaos{
@@ -961,7 +807,7 @@ selector:
 				ctx, cancel := context.WithCancel(context.Background())
 
 				for index := range networkPeers {
-					err = waitE2EHelperReady(c, ports[index])
+					err = util.WaitE2EHelperReady(c, ports[index])
 
 					framework.ExpectNoError(err, "wait e2e helper ready error")
 				}
@@ -1098,7 +944,7 @@ selector:
 				ctx, cancel := context.WithCancel(context.Background())
 
 				for index := range networkPeers {
-					err = waitE2EHelperReady(c, ports[index])
+					err = util.WaitE2EHelperReady(c, ports[index])
 
 					framework.ExpectNoError(err, "wait e2e helper ready error")
 				}
@@ -1261,35 +1107,6 @@ selector:
 	})
 
 })
-
-func waitE2EHelperReady(c http.Client, port uint16) error {
-	return wait.Poll(10*time.Second, 5*time.Minute, func() (done bool, err error) {
-		if _, err = c.Get(fmt.Sprintf("http://localhost:%d/ping", port)); err != nil {
-			return false, nil
-		}
-		return true, nil
-	})
-}
-
-// get pod current time in nanosecond
-func getPodTimeNS(c http.Client, port uint16) (*time.Time, error) {
-	resp, err := c.Get(fmt.Sprintf("http://localhost:%d/time", port))
-	if err != nil {
-		return nil, err
-	}
-
-	out, err := ioutil.ReadAll(resp.Body)
-	defer resp.Body.Close()
-	if err != nil {
-		return nil, err
-	}
-
-	t, err := time.Parse(time.RFC3339Nano, string(out))
-	if err != nil {
-		return nil, err
-	}
-	return &t, nil
-}
 
 // get pod io delay
 func getPodIODelay(c http.Client, port uint16) (time.Duration, error) {

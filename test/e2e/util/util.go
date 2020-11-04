@@ -16,10 +16,12 @@ package util
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/kubernetes"
+	"net/http"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"time"
 
@@ -134,5 +136,14 @@ func UnPauseChaos(ctx context.Context, cli client.Client, chaos runtime.Object) 
 		},
 	})
 	return cli.Patch(ctx, chaos, client.ConstantPatch(types.MergePatchType, mergePatch))
+}
+
+func WaitE2EHelperReady(c http.Client, port uint16) error {
+	return wait.Poll(10*time.Second, 5*time.Minute, func() (done bool, err error) {
+		if _, err = c.Get(fmt.Sprintf("http://localhost:%d/ping", port)); err != nil {
+			return false, nil
+		}
+		return true, nil
+	})
 }
 
