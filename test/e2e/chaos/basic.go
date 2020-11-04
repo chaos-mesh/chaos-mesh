@@ -1796,7 +1796,68 @@ selector:
 			}
 		})
 	})
+	// DNS chaos case in [DNSChaos] context
+	ginkgo.Context("[DNSChaos]", func() {
+		var err error
+		var port uint16
 
+		ginkgo.JustBeforeEach(func() {
+			name := fmt.Sprintf("network-peer")
+
+			svc := fixture.NewE2EService(name, ns)
+			_, err = kubeCli.CoreV1().Services(ns).Create(svc)
+			framework.ExpectNoError(err, "create service error")
+			nd := fixture.NewNetworkTestDeployment(name, ns, map[string]string{"partition": "0"})
+			_, err = kubeCli.AppsV1().Deployments(ns).Create(nd)
+			framework.ExpectNoError(err, "create network-peer deployment error")
+			err = waitDeploymentReady(name, ns, kubeCli)
+			framework.ExpectNoError(err, "wait network-peer deployment ready error")
+
+			_, err := getPod(kubeCli, ns, name)
+			framework.ExpectNoError(err, "select network-peer pod error")
+
+			_, port, _, err = portforward.ForwardOnePort(fw, ns, "svc/"+svc.Name, 8080)
+			framework.ExpectNoError(err, "create helper io port port-forward failed")
+		})
+		ginkgo.It("[RANDOM]", func() {
+			ctx, cancel := context.WithCancel(context.Background())
+
+			err = waitE2EHelperReady(c, port)
+
+			framework.ExpectNoError(err, "wait e2e helper ready error")
+
+			// get IP of a non exists host, and will get error
+			_, err := testDNSServer(c, port)
+			framework.ExpectError(err, "test DNS server failed")
+
+			dnsChaos := &v1alpha1.DNSChaos{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "dns-chaos",
+					Namespace: ns,
+				},
+				Spec: v1alpha1.DNSChaosSpec{
+					Action: v1alpha1.RandomAction,
+					Mode:   v1alpha1.AllPodMode,
+					Scope:  v1alpha1.AllScope,
+					Selector: v1alpha1.SelectorSpec{
+						Namespaces:     []string{ns},
+						LabelSelectors: map[string]string{"app": "network-peer"},
+					},
+				},
+			}
+
+			err = cli.Create(ctx, dnsChaos.DeepCopy())
+			framework.ExpectNoError(err, "create dns chaos error")
+			time.Sleep(5 * time.Second)
+
+			// get IP of a non exists host, because chaos DNS server will return a random IP,
+			// so err should be nil
+			_, err = testDNSServer(c, port)
+			framework.ExpectNoError(err, "test DNS server failed")
+
+			cancel()
+		})
+	})
 })
 
 func waitPodRunning(name, namespace string, cli kubernetes.Interface) error {
@@ -1924,6 +1985,29 @@ func recvUDPPacket(c http.Client, port uint16) (string, error) {
 	}
 
 	result := string(out)
+	return result, nil
+}
+
+func testDNSServer(c http.Client, port uint16) (string, error) {
+	klog.Infof("sending request to http://localhost:%d/dns", port)
+
+	resp, err := c.Get(fmt.Sprintf("http://localhost:%d/dns", port))
+	if err != nil {
+		return "", err
+	}
+
+	out, err := ioutil.ReadAll(resp.Body)
+	defer resp.Body.Close()
+	if err != nil {
+		return "", err
+	}
+
+	result := string(out)
+	klog.Infof("testDNSServer result: %s", result)
+	if strings.Contains(result, "failed") {
+		return "", fmt.Errorf("test DNS server failed")
+	}
+
 	return result, nil
 }
 
