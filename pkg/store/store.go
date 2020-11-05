@@ -23,7 +23,8 @@ import (
 // Module includes the providers provided by store.
 var Module = fx.Options(
 	fx.Provide(
-		event.NewStore,
 		experiment.NewStore,
+		event.NewStore,
 	),
+	fx.Invoke(experiment.DeleteIncompleteExperiments),
 )

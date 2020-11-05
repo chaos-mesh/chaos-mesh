@@ -195,8 +195,8 @@ func (r *ChaosCollector) setUnarchivedExperiment(req ctrl.Request, obj v1alpha1.
 	}
 	UID := string(chaosMeta.GetUID())
 
-	archive := &core.ArchiveExperiment{
-		ArchiveExperimentMeta: core.ArchiveExperimentMeta{
+	archive := &core.Experiment{
+		ExperimentMeta: core.ExperimentMeta{
 			Namespace: req.Namespace,
 			Name:      req.Name,
 			Kind:      obj.GetObjectKind().GroupVersionKind().Kind,

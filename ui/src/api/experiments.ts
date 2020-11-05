@@ -25,4 +25,4 @@ export const startExperiment = (uuid: uuid) => http.put(`/experiments/start/${uu
 export const detail: (uuid: uuid) => Promise<AxiosResponse<ExperimentDetail>> = (uuid) =>
   http.get(`/experiments/detail/${uuid}`)
 
-export const update = (data: Experiment) => http.put('/experiments/update', data)
+export const update = (data: ExperimentDetail['yaml']) => http.put('/experiments/update', data)
