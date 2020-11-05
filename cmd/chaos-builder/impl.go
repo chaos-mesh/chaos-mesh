@@ -97,7 +97,7 @@ func (in *{{.Type}}) GetChaos() *ChaosInstance {
 		Kind:      Kind{{.Type}},
 		StartTime: in.CreationTimestamp.Time,
 		Action:    "",
-		Status:    string(in.Status.ChaosStatus.Experiment.Phase),
+		Status:    string(in.Status.Experiment.Phase),
 		UID:       string(in.UID),
 	}
 
