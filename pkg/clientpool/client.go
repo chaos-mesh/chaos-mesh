@@ -20,6 +20,7 @@ import (
 	"sync"
 
 	lru "github.com/hashicorp/golang-lru"
+	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/rest"
 	pkgclient "sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -33,12 +34,13 @@ var K8sClients *Clients
 type Clients struct {
 	sync.RWMutex
 
+	scheme      *runtime.Scheme
 	localConfig *rest.Config
 	clients     *lru.Cache
 }
 
 // New creates a new Clients
-func New(localConfig *rest.Config, maxClientNum int) (*Clients, error) {
+func New(localConfig *rest.Config, scheme *runtime.Scheme, maxClientNum int) (*Clients, error) {
 	clients, err := lru.New(maxClientNum)
 	if err != nil {
 		return nil, err
@@ -46,6 +48,7 @@ func New(localConfig *rest.Config, maxClientNum int) (*Clients, error) {
 
 	return &Clients{
 		localConfig: localConfig,
+		scheme:      scheme,
 		clients:     clients,
 	}, nil
 }
@@ -74,7 +77,9 @@ func (c *Clients) Client(token string) (pkgclient.Client, error) {
 		newFunc = mockNew.(func(config *rest.Config, options pkgclient.Options) (pkgclient.Client, error))
 	}
 
-	client, err := newFunc(config, pkgclient.Options{})
+	client, err := newFunc(config, pkgclient.Options{
+		Scheme: c.scheme,
+	})
 	if err != nil {
 		return nil, err
 	}

@@ -18,6 +18,7 @@ import (
 	"testing"
 
 	. "github.com/onsi/gomega"
+	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/rest"
 	pkgclient "sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -32,7 +33,7 @@ func TestClientPool(t *testing.T) {
 			return nil, nil
 		})()
 
-		k8sClients, err := New(&rest.Config{}, 5)
+		k8sClients, err := New(&rest.Config{}, &runtime.Scheme{}, 5)
 		g.Expect(err).ToNot(HaveOccurred())
 
 		for i := 0; i < 6; i++ {
