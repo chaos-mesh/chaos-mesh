@@ -16,8 +16,6 @@ package chaos
 import (
 	"context"
 	"fmt"
-	"github.com/chaos-mesh/chaos-mesh/test/e2e/chaos/sidecar"
-
 	"net/http"
 	"strconv"
 	"time"
@@ -44,6 +42,7 @@ import (
 	iochaostestcases "github.com/chaos-mesh/chaos-mesh/test/e2e/chaos/iochaos"
 	networkchaostestcases "github.com/chaos-mesh/chaos-mesh/test/e2e/chaos/networkchaos"
 	podchaostestcases "github.com/chaos-mesh/chaos-mesh/test/e2e/chaos/podchaos"
+	sidecartestcases "github.com/chaos-mesh/chaos-mesh/test/e2e/chaos/sidecar"
 	timechaostestcases "github.com/chaos-mesh/chaos-mesh/test/e2e/chaos/timechaos"
 )
 
@@ -217,13 +216,13 @@ var _ = ginkgo.Describe("[Basic]", func() {
 			ginkgo.It("[InValid ConfigMap key]", func() {
 				cmName = "incorrect-key-name"
 				cmNamespace = e2econst.ChaosMeshNamespace
-				sidecar.TestcaseInvalidConfigMapKey(ns, cmNamespace, cmName, kubeCli, cli)
+				sidecartestcases.TestcaseInvalidConfigMapKey(ns, cmNamespace, cmName, kubeCli, cli)
 			})
 
 			ginkgo.It("[InValid Configuration]", func() {
 				cmName = "incorrect-configuration"
 				cmNamespace = e2econst.ChaosMeshNamespace
-				sidecar.TestcaseInvalidConfiguration(ns, cmNamespace, cmName, kubeCli, cli)
+				sidecartestcases.TestcaseInvalidConfiguration(ns, cmNamespace, cmName, kubeCli, cli)
 			})
 		})
 
@@ -231,14 +230,13 @@ var _ = ginkgo.Describe("[Basic]", func() {
 			ginkgo.It("[No Template]", func() {
 				cmName = "no-template-name"
 				cmNamespace = e2econst.ChaosMeshNamespace
-				sidecar.TestcaseNoTemplate(ns, cmNamespace, cmName, kubeCli, cli)
-
+				sidecartestcases.TestcaseNoTemplate(ns, cmNamespace, cmName, kubeCli, cli)
 			})
 
 			ginkgo.It("[No Template Args]", func() {
 				cmName = "no-template-args"
 				cmNamespace = e2econst.ChaosMeshNamespace
-				sidecar.TestcaseNoTemplateArgs(ns, cmNamespace, cmName, kubeCli, cli)
+				sidecartestcases.TestcaseNoTemplateArgs(ns, cmNamespace, cmName, kubeCli, cli)
 			})
 		})
 	})
