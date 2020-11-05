@@ -59,8 +59,7 @@ func main() {
 		prometheus.NewProcessCollector(prometheus.ProcessCollectorOpts{}),
 	)
 
-	log.Info("ensure /dev/fuse exists")
-	fusedev.EnsureFuseDev()
+	log.Info("grant access to /dev/fuse")
 	err := fusedev.GrantAccess()
 	if err != nil {
 		log.Error(err, "fail to grant access to /dev/fuse")

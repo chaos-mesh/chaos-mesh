@@ -43,7 +43,7 @@ type NetworkChaos struct {
 	Status NetworkChaosStatus `json:"status"`
 }
 
-// NetworkChaosAction represents the chaos action about pods.
+// NetworkChaosAction represents the chaos action about network.
 type NetworkChaosAction string
 
 const (
