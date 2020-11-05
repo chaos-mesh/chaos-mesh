@@ -7,15 +7,18 @@ import * as mockData from '__mock__/api'
 import { assumeType, getAllSubsets, isObject } from 'lib/utils'
 
 import { AxiosResponse } from 'axios'
-import Mock from 'mockjs'
+import Chance from 'chance'
 import MockAdapter from 'axios-mock-adapter'
 import api from 'api'
-import { createDebuggerStatement } from 'typescript'
 import http from 'api/http'
 import { readFileSync } from 'fs'
 import { resolve } from 'path'
 
-const Random = Mock.Random
+type IndexedTypeByString = {
+  [index: string]: any
+}
+
+const chance = new Chance()
 
 function getSchemaPropType(x: unknown) {
   if (isObject(x)) {
@@ -40,17 +43,17 @@ function getMockBySchema(
   if (schema.type) {
     switch (schema.type) {
       case 'string':
-        return Random.string()
+        return chance.string()
       case 'number':
-        return Random.natural()
+        return chance.natural()
       case 'boolean':
-        return Random.boolean()
+        return chance.bool()
       case 'object':
         const mockSource = Object.keys(schema.properties!).reduce((mockObj, prop) => {
           mockObj[prop] = getMockBySchema(schema.properties![prop] as TJS.Definition, definitions)
           return mockObj
         }, {} as IndexedTypeByString)
-        return Mock.mock(mockSource)
+        return mockSource
       case 'array':
         /* Since the array type has a property named minItem, which means how many items are required in the array.
            So there are multiple cases to mock an array, and the logic is over complex and unnecessary for this function.
@@ -298,6 +301,10 @@ describe('api test', () => {
     generator: TJS.JsonSchemaGenerator
   ) {
     return () => {
+      if ((global as any).mockTestFailed) {
+        console.error(`Ignore the API ${apiName} test because the mock test failed`)
+        return
+      }
       const api: (...args: any) => Promise<AxiosResponse<any>> = allTestedAPI[apiName]
 
       const mappedMethod = {

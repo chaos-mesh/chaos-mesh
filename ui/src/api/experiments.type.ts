@@ -21,13 +21,16 @@ export enum StateOfExperimentsEnum {
 /**
  * @description experiments:result
  */
-export interface Experiment {
+export interface ExperimentFromAPIData {
   uid: uuid
   kind: string
   namespace: string
   name: string
   created: string
   status: keyof StateOfExperiments
+}
+
+export interface Experiment extends ExperimentFromAPIData {
   events?: Event[]
 }
 

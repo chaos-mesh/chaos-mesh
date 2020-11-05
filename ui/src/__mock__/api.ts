@@ -1,187 +1,187 @@
 /**
  * All variable name of mock data must be <api-name><suffix>, and <suffix> can be ResMock, ParamsMock or RequiredParams
  */
-import Mock from 'mockjs'
+import Chance from 'chance'
 
-const Random = Mock.Random
+const chance = new Chance()
 
 export const archivesResMock = [
-  Mock.mock({
-    action: '@string',
-    archived: '@boolean',
-    created_at: '@string',
-    deleted_at: '@string',
-    finish_time: '@string',
-    id: '@natural',
-    kind: '@string',
-    name: '@string',
-    namespace: '@string',
-    start_time: '@string',
-    uid: '@guid',
-    updated_at: '@string',
-  }),
+  {
+    action: chance.string(),
+    archived: chance.bool(),
+    created_at: chance.string(),
+    deleted_at: chance.string(),
+    finish_time: chance.string(),
+    id: chance.natural(),
+    kind: chance.string(),
+    name: chance.string(),
+    namespace: chance.string(),
+    start_time: chance.string(),
+    uid: chance.guid(),
+    updated_at: chance.string(),
+  },
 ]
 
-export const archivesParamsMock = Mock.mock({
-  namespace: '@string',
-  name: '@string',
-  kind: '@string',
-})
+export const archivesParamsMock = {
+  namespace: chance.string(),
+  name: chance.string(),
+  kind: chance.string(),
+}
 
 export const archivesRequiredParams = []
 
-export const archiveDetailResMock = Mock.mock({
-  action: '@string',
-  finish_time: '@string',
-  kind: '@string',
-  name: '@string',
-  namespace: '@string',
-  start_time: '@string',
-  uid: '@string',
+export const archiveDetailResMock = {
+  action: chance.string(),
+  finish_time: chance.string(),
+  kind: chance.string(),
+  name: chance.string(),
+  namespace: chance.string(),
+  start_time: chance.string(),
+  uid: chance.string(),
   yaml: {
-    apiVersion: '@string',
-    kind: '@string',
+    apiVersion: chance.string(),
+    kind: chance.string(),
     metadata: {
       annotations: {
-        additionalProp1: '@string',
-        additionalProp2: '@string',
-        additionalProp3: '@string',
+        additionalProp1: chance.string(),
+        additionalProp2: chance.string(),
+        additionalProp3: chance.string(),
       },
       labels: {
-        additionalProp1: '@string',
-        additionalProp2: '@string',
-        additionalProp3: '@string',
+        additionalProp1: chance.string(),
+        additionalProp2: chance.string(),
+        additionalProp3: chance.string(),
       },
-      name: '@string',
-      namespace: '@string',
+      name: chance.string(),
+      namespace: chance.string(),
     },
     spec: {},
   },
-})
+}
 
-export const archiveDetailParamsMock = Mock.mock({
-  uid: '@guid',
-})
+export const archiveDetailParamsMock = {
+  uid: chance.guid(),
+}
 
 export const archiveDetailRequiredParams = ['uid']
 
-export const archiveReportResMock = Mock.mock({
+export const archiveReportResMock = {
   events: [
     {
-      created_at: '@string',
-      deleted_at: '@string',
-      duration: '@string',
-      experiment: '@string',
-      experiment_id: '@string',
-      finish_time: '@string',
-      id: '@natural',
-      kind: '@string',
-      message: '@string',
-      namespace: '@string',
+      created_at: chance.string(),
+      deleted_at: chance.string(),
+      duration: chance.string(),
+      experiment: chance.string(),
+      experiment_id: chance.string(),
+      finish_time: chance.string(),
+      id: chance.natural(),
+      kind: chance.string(),
+      message: chance.string(),
+      namespace: chance.string(),
       pods: [
         {
-          action: '@string',
-          created_at: '@string',
-          deleted_at: '@string',
-          event_id: '@natural',
-          id: '@natural',
-          message: '@string',
-          namespace: '@string',
-          pod_ip: '@string',
-          pod_name: '@string',
-          updated_at: '@string',
+          action: chance.string(),
+          created_at: chance.string(),
+          deleted_at: chance.string(),
+          event_id: chance.natural(),
+          id: chance.natural(),
+          message: chance.string(),
+          namespace: chance.string(),
+          pod_ip: chance.string(),
+          pod_name: chance.string(),
+          updated_at: chance.string(),
         },
       ],
-      start_time: '@string',
-      updated_at: '@string',
+      start_time: chance.string(),
+      updated_at: chance.string(),
     },
   ],
   meta: {
-    action: '@string',
-    archived: '@boolean',
-    created_at: '@string',
-    deleted_at: '@string',
-    finish_time: '@string',
-    id: '@natural',
-    kind: '@string',
-    name: '@string',
-    namespace: '@string',
-    start_time: '@string',
-    uid: '@string',
-    updated_at: '@string',
+    action: chance.string(),
+    archived: chance.bool(),
+    created_at: chance.string(),
+    deleted_at: chance.string(),
+    finish_time: chance.string(),
+    id: chance.natural(),
+    kind: chance.string(),
+    name: chance.string(),
+    namespace: chance.string(),
+    start_time: chance.string(),
+    uid: chance.string(),
+    updated_at: chance.string(),
   },
-  total_fault_time: '@string',
-  total_time: '@string',
-})
+  total_fault_time: chance.string(),
+  total_time: chance.string(),
+}
 
-export const archiveReportParamsMock = Mock.mock({
-  uid: '@guid',
-})
+export const archiveReportParamsMock = {
+  uid: chance.guid(),
+}
 
 export const archiveReportRequiredParams = ['uid']
 
 export const eventsResMock = [
-  Mock.mock({
-    created_at: '@string',
-    deleted_at: '@string',
-    duration: '@string',
-    experiment: '@string',
-    experiment_id: '@string',
-    finish_time: '@string',
-    id: '@natural',
-    kind: '@string',
-    message: '@string',
-    namespace: '@string',
+  {
+    created_at: chance.string(),
+    deleted_at: chance.string(),
+    duration: chance.string(),
+    experiment: chance.string(),
+    experiment_id: chance.string(),
+    finish_time: chance.string(),
+    id: chance.natural(),
+    kind: chance.string(),
+    message: chance.string(),
+    namespace: chance.string(),
     pods: [
       {
-        action: '@string',
-        created_at: '@string',
-        deleted_at: '@string',
-        event_id: '@natural',
-        id: '@natural',
-        message: '@string',
-        namespace: '@string',
-        pod_ip: '@string',
-        pod_name: '@string',
-        updated_at: '@string',
+        action: chance.string(),
+        created_at: chance.string(),
+        deleted_at: chance.string(),
+        event_id: chance.natural(),
+        id: chance.natural(),
+        message: chance.string(),
+        namespace: chance.string(),
+        pod_ip: chance.string(),
+        pod_name: chance.string(),
+        updated_at: chance.string(),
       },
     ],
-    start_time: '@string',
-    updated_at: '@string',
-  }),
+    start_time: chance.string(),
+    updated_at: chance.string(),
+  },
 ]
 
-export const eventsParamsMock = Mock.mock({
-  podName: '@string',
-  podNamespace: '@string',
-  startTime: '@string',
-  endTime: '@string',
-  experimentName: '@string',
-  experimentNamespace: '@string',
-  uid: '@string',
-  kind: '@string',
-  limit: Random.natural().toString(),
-})
+export const eventsParamsMock = {
+  podName: chance.string(),
+  podNamespace: chance.string(),
+  startTime: chance.string(),
+  endTime: chance.string(),
+  experimentName: chance.string(),
+  experimentNamespace: chance.string(),
+  uid: chance.string(),
+  kind: chance.string(),
+  limit: chance.natural().toString(),
+}
 
 export const eventsRequiredParams = []
 
 export const experimentsResMock = [
-  Mock.mock({
-    created: '@string',
-    failed_message: '@string',
-    kind: '@string',
-    name: '@string',
-    namespace: '@string',
-    status: '@string',
-    uid: '@string',
-  }),
+  {
+    created: chance.string(),
+    failed_message: chance.string(),
+    kind: chance.string(),
+    name: chance.string(),
+    namespace: chance.string(),
+    status: chance.string(),
+    uid: chance.string(),
+  },
 ]
 
-export const experimentsParamsMock = Mock.mock({
-  namespace: '@string',
-  name: '@string',
-  kind: '@string',
-  status: '@string',
-})
+export const experimentsParamsMock = {
+  namespace: chance.string(),
+  name: chance.string(),
+  kind: chance.string(),
+  status: chance.string(),
+}
 
 export const experimentsRequiredParams = []
