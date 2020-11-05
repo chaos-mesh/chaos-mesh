@@ -77,7 +77,6 @@
     "@types/yup": "^0.29.1",
     "axios-mock-adapter": "^1.19.0",
     "chance": "^1.1.7",
-    "es-arguments": "^1.0.2",
     "esprima": "^4.0.1",
     "http-proxy-middleware": "^1.0.4",
     "husky": "^4.2.5",
