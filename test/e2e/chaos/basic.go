@@ -16,25 +16,21 @@ package chaos
 import (
 	"context"
 	"fmt"
+	"github.com/chaos-mesh/chaos-mesh/test/e2e/chaos/sidecar"
 
 	"net/http"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/onsi/ginkgo"
-	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/kubernetes"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	restClient "k8s.io/client-go/rest"
-	"k8s.io/klog"
 	"k8s.io/kubernetes/test/e2e/framework"
-	"k8s.io/utils/exec"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
@@ -219,170 +215,30 @@ var _ = ginkgo.Describe("[Basic]", func() {
 		ginkgo.Context("[Template Config]", func() {
 
 			ginkgo.It("[InValid ConfigMap key]", func() {
-				ctx, cancel := context.WithCancel(context.Background())
 				cmName = "incorrect-key-name"
 				cmNamespace = e2econst.ChaosMeshNamespace
-				err := createTemplateConfig(ctx, cli, cmName,
-					map[string]string{
-						"chaos-pd.yaml": `name: chaosfs-pd
-selector:
-  labelSelectors:
-    "app.kubernetes.io/component": "pd"`})
-				framework.ExpectNoError(err, "failed to create template config")
-
-				listOptions := metav1.ListOptions{
-					LabelSelector: labels.SelectorFromSet(map[string]string{
-						"app.kubernetes.io/component": "controller-manager",
-					}).String(),
-				}
-				pods, err := kubeCli.CoreV1().Pods(e2econst.ChaosMeshNamespace).List(listOptions)
-				framework.ExpectNoError(err, "get chaos mesh controller pods error")
-
-				err = wait.Poll(time.Second, 10*time.Second, func() (done bool, err error) {
-					newPods, err := kubeCli.CoreV1().Pods(e2econst.ChaosMeshNamespace).List(listOptions)
-					framework.ExpectNoError(err, "get chaos mesh controller pods error")
-					if !fixture.HaveSameUIDs(pods.Items, newPods.Items) {
-						return true, nil
-					}
-					if newPods.Items[0].Status.ContainerStatuses[0].RestartCount > 0 {
-						return true, nil
-					}
-					return false, nil
-				})
-				framework.ExpectError(err, "wait chaos mesh not dies")
-				framework.ExpectEqual(err.Error(), wait.ErrWaitTimeout.Error())
-
-				cancel()
+				sidecar.TestcaseInvalidConfigMapKey(ns, cmNamespace, cmName, kubeCli, cli)
 			})
 
 			ginkgo.It("[InValid Configuration]", func() {
-				ctx, cancel := context.WithCancel(context.Background())
 				cmName = "incorrect-configuration"
 				cmNamespace = e2econst.ChaosMeshNamespace
-				err := createTemplateConfig(ctx, cli, cmName,
-					map[string]string{
-						"data": `name: chaosfs-pd
-selector:
-  labelSelectors:
-    "app.kubernetes.io/component": "pd"`})
-				framework.ExpectNoError(err, "failed to create template config")
-
-				listOptions := metav1.ListOptions{
-					LabelSelector: labels.SelectorFromSet(map[string]string{
-						"app.kubernetes.io/component": "controller-manager",
-					}).String(),
-				}
-				pods, err := kubeCli.CoreV1().Pods(e2econst.ChaosMeshNamespace).List(listOptions)
-				framework.ExpectNoError(err, "get chaos mesh controller pods error")
-
-				err = wait.Poll(time.Second, 10*time.Second, func() (done bool, err error) {
-					newPods, err := kubeCli.CoreV1().Pods(e2econst.ChaosMeshNamespace).List(listOptions)
-					framework.ExpectNoError(err, "get chaos mesh controller pods error")
-					if !fixture.HaveSameUIDs(pods.Items, newPods.Items) {
-						return true, nil
-					}
-					if newPods.Items[0].Status.ContainerStatuses[0].RestartCount > 0 {
-						return true, nil
-					}
-					return false, nil
-				})
-				framework.ExpectError(err, "wait chaos mesh not dies")
-				framework.ExpectEqual(err.Error(), wait.ErrWaitTimeout.Error())
-
-				cancel()
+				sidecar.TestcaseInvalidConfiguration(ns, cmNamespace, cmName, kubeCli, cli)
 			})
 		})
 
 		ginkgo.Context("[Injection Config]", func() {
 			ginkgo.It("[No Template]", func() {
-				ctx, cancel := context.WithCancel(context.Background())
 				cmName = "no-template-name"
-				cmNamespace = ns
-				err := createInjectionConfig(ctx, cli, ns, cmName,
-					map[string]string{
-						"chaosfs-io": `name: chaosfs-io
-selector:
-  labelSelectors:
-    app: io`})
-				framework.ExpectNoError(err, "failed to create injection config")
+				cmNamespace = e2econst.ChaosMeshNamespace
+				sidecar.TestcaseNoTemplate(ns, cmNamespace, cmName, kubeCli, cli)
 
-				listOptions := metav1.ListOptions{
-					LabelSelector: labels.SelectorFromSet(map[string]string{
-						"app.kubernetes.io/component": "controller-manager",
-					}).String(),
-				}
-				pods, err := kubeCli.CoreV1().Pods(e2econst.ChaosMeshNamespace).List(listOptions)
-				framework.ExpectNoError(err, "get chaos mesh controller pods error")
-
-				err = wait.Poll(time.Second, 10*time.Second, func() (done bool, err error) {
-					newPods, err := kubeCli.CoreV1().Pods(e2econst.ChaosMeshNamespace).List(listOptions)
-					framework.ExpectNoError(err, "get chaos mesh controller pods error")
-					if !fixture.HaveSameUIDs(pods.Items, newPods.Items) {
-						return true, nil
-					}
-					if newPods.Items[0].Status.ContainerStatuses[0].RestartCount > 0 {
-						return true, nil
-					}
-					return false, nil
-				})
-				framework.ExpectError(err, "wait chaos mesh not dies")
-				framework.ExpectEqual(err.Error(), wait.ErrWaitTimeout.Error())
-
-				err = enableWebhook(ns)
-				framework.ExpectNoError(err, "enable webhook on ns error")
-				nd := fixture.NewIOTestDeployment("io-test", ns)
-				_, err = kubeCli.AppsV1().Deployments(ns).Create(nd)
-				framework.ExpectNoError(err, "create io-test deployment error")
-				err = util.WaitDeploymentReady("io-test", ns, kubeCli)
-				framework.ExpectNoError(err, "wait io-test deployment ready error")
-
-				cancel()
 			})
 
 			ginkgo.It("[No Template Args]", func() {
-				ctx, cancel := context.WithCancel(context.Background())
 				cmName = "no-template-args"
-				cmNamespace = ns
-				err := createInjectionConfig(ctx, cli, ns, cmName,
-					map[string]string{
-						"chaosfs-io": `name: chaosfs-io
-template: chaosfs-sidecar
-selector:
-  labelSelectors:
-    app: io`})
-				framework.ExpectNoError(err, "failed to create injection config")
-
-				listOptions := metav1.ListOptions{
-					LabelSelector: labels.SelectorFromSet(map[string]string{
-						"app.kubernetes.io/component": "controller-manager",
-					}).String(),
-				}
-				pods, err := kubeCli.CoreV1().Pods(e2econst.ChaosMeshNamespace).List(listOptions)
-				framework.ExpectNoError(err, "get chaos mesh controller pods error")
-
-				err = wait.Poll(time.Second, 10*time.Second, func() (done bool, err error) {
-					newPods, err := kubeCli.CoreV1().Pods(e2econst.ChaosMeshNamespace).List(listOptions)
-					framework.ExpectNoError(err, "get chaos mesh controller pods error")
-					if !fixture.HaveSameUIDs(pods.Items, newPods.Items) {
-						return true, nil
-					}
-					if newPods.Items[0].Status.ContainerStatuses[0].RestartCount > 0 {
-						return true, nil
-					}
-					return false, nil
-				})
-				framework.ExpectError(err, "wait chaos mesh not dies")
-				framework.ExpectEqual(err.Error(), wait.ErrWaitTimeout.Error())
-
-				err = enableWebhook(ns)
-				framework.ExpectNoError(err, "enable webhook on ns error")
-				nd := fixture.NewIOTestDeployment("io-test", ns)
-				_, err = kubeCli.AppsV1().Deployments(ns).Create(nd)
-				framework.ExpectNoError(err, "create io-test deployment error")
-				err = util.WaitDeploymentReady("io-test", ns, kubeCli)
-				framework.ExpectNoError(err, "wait io-test deployment ready error")
-
-				cancel()
+				cmNamespace = e2econst.ChaosMeshNamespace
+				sidecar.TestcaseNoTemplateArgs(ns, cmNamespace, cmName, kubeCli, cli)
 			})
 		})
 	})
@@ -468,52 +324,4 @@ func getPod(kubeCli kubernetes.Interface, ns string, appLabel string) (*v1.Pod, 
 	}
 
 	return &pods.Items[0], nil
-}
-
-// enableWebhook enables webhook on the specific namespace
-func enableWebhook(ns string) error {
-	args := []string{"label", "ns", ns, "admission-webhook=enabled"}
-	out, err := exec.New().Command("kubectl", args...).CombinedOutput()
-	if err != nil {
-		klog.Fatalf("Failed to run 'kubectl %s'\nCombined output: %q\nError: %v", strings.Join(args, " "), string(out), err)
-	}
-	return nil
-}
-
-func createTemplateConfig(
-	ctx context.Context,
-	cli client.Client,
-	name string,
-	data map[string]string,
-) error {
-	cm := &corev1.ConfigMap{
-		ObjectMeta: metav1.ObjectMeta{
-			Namespace: e2econst.ChaosMeshNamespace,
-			Name:      name,
-			Labels: map[string]string{
-				"app.kubernetes.io/component": "template",
-			},
-		},
-		Data: data,
-	}
-	return cli.Create(ctx, cm)
-}
-
-func createInjectionConfig(
-	ctx context.Context,
-	cli client.Client,
-	ns, name string,
-	data map[string]string,
-) error {
-	cm := &corev1.ConfigMap{
-		ObjectMeta: metav1.ObjectMeta{
-			Namespace: ns,
-			Name:      name,
-			Labels: map[string]string{
-				"app.kubernetes.io/component": "webhook",
-			},
-		},
-		Data: data,
-	}
-	return cli.Create(ctx, cm)
 }
