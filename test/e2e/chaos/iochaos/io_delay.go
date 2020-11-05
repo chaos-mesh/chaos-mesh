@@ -125,7 +125,7 @@ func TestcaseIODelayDurationForATimePauseAndUnPause(
 			Mode:       v1alpha1.OnePodMode,
 			VolumePath: "/var/run/data",
 			Path:       "/var/run/data/*",
-			Delay:      "1s",
+			Delay:      "10ms",
 			Percent:    100,
 			Duration:   pointer.StringPtr("9m"),
 			Scheduler: &v1alpha1.SchedulerSpec{
@@ -140,10 +140,10 @@ func TestcaseIODelayDurationForATimePauseAndUnPause(
 	err = wait.PollImmediate(5*time.Second, 1*time.Minute, func() (bool, error) {
 		dur, _ := getPodIODelay(c, port)
 
-		second := dur.Seconds()
-		klog.Infof("get io delay %fs", second)
-		// IO Delay >= 1s
-		if second >= 1 {
+		ms := dur.Milliseconds()
+		klog.Infof("get io delay %dms", ms)
+		// IO Delay >= 500ms
+		if ms >= 10 {
 			return true, nil
 		}
 		return false, nil
@@ -176,10 +176,10 @@ func TestcaseIODelayDurationForATimePauseAndUnPause(
 	err = wait.PollImmediate(5*time.Second, 1*time.Minute, func() (bool, error) {
 		dur, _ := getPodIODelay(c, port)
 
-		second := dur.Seconds()
-		klog.Infof("get io delay %fs", second)
-		// IO Delay shouldn't longer than 1s
-		if second >= 1 {
+		ms := dur.Milliseconds()
+		klog.Infof("get io delay %ds", ms)
+		// IO Delay shouldn't longer than 10ms
+		if ms > 10 {
 			return false, nil
 		}
 		return true, nil
@@ -206,10 +206,10 @@ func TestcaseIODelayDurationForATimePauseAndUnPause(
 	err = wait.PollImmediate(5*time.Second, 1*time.Minute, func() (bool, error) {
 		dur, _ := getPodIODelay(c, port)
 
-		second := dur.Seconds()
-		klog.Infof("get io delay %fs", second)
-		// IO Delay >= 1s
-		if second >= 1 {
+		ms := dur.Milliseconds()
+		klog.Infof("get io delay %dms", ms)
+		// IO Delay >= 10ms
+		if ms >= 10 {
 			return true, nil
 		}
 		return false, nil
