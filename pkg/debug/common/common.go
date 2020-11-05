@@ -18,7 +18,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io"
+	"log"
 	"regexp"
 	"strings"
 	"time"
@@ -32,7 +32,11 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/controllers/common"
+	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
 	"github.com/chaos-mesh/chaos-mesh/pkg/utils"
+	e2econfig "github.com/chaos-mesh/chaos-mesh/test/e2e/config"
+	"github.com/chaos-mesh/chaos-mesh/test/e2e/util/portforward"
 
 	kubectlscheme "k8s.io/kubectl/pkg/scheme"
 )
@@ -94,34 +98,8 @@ func InitClientSet() (*ClientSet, error) {
 	return &ClientSet{ctrlClient, k8sClient}, nil
 }
 
-// Log gets information from log and returns the result
-// runtime-controller only support CRUD， use client-go client
-func Log(pod string, ns string, tail int64, c *kubernetes.Clientset) (string, error) {
-	var podLogOpts v1.PodLogOptions
-	//use negative tail to indicate no tail limit is needed
-	if tail < 0 {
-		podLogOpts = v1.PodLogOptions{}
-	} else {
-		podLogOpts = v1.PodLogOptions{
-			TailLines: func(i int64) *int64 { return &i }(tail),
-		}
-	}
-	req := c.CoreV1().Pods(ns).GetLogs(pod, &podLogOpts)
-	podLogs, err := req.Stream()
-	if err != nil {
-		return "", fmt.Errorf("failed to open stream: %s", err.Error())
-	}
-	defer podLogs.Close()
-
-	buf := new(bytes.Buffer)
-	_, err = io.Copy(buf, podLogs)
-	if err != nil {
-		return "", fmt.Errorf("failed to copy information from podLogs to buf: %s", err.Error())
-	}
-	return buf.String(), nil
-}
-
 // Exec executes certain command and returns the result
+// runtime-controller only support CRUD， use client-go client
 func Exec(pod string, ns string, cmd string, c *kubernetes.Clientset) (string, error) {
 	req := c.CoreV1().RESTClient().Post().
 		Resource("pods").
@@ -192,7 +170,6 @@ func GetPods(ctx context.Context, status v1alpha1.ChaosStatus, selector v1alpha1
 		if err != nil || len(daemons) == 0 {
 			return nil, nil, fmt.Errorf("fail to get daemon with: %s", err.Error())
 		}
-		// TODO: not sure about this, if only get one daemon is enough
 		chaosDaemons = append(chaosDaemons, daemons[0])
 	}
 
@@ -241,4 +218,49 @@ func GetChaosList(ctx context.Context, chaosType string, chaosName string, ns st
 		return nil, fmt.Errorf("no chaos is found, please check your input")
 	}
 	return retList, nil
+}
+
+// GetPidFromPod returns pid given containerd ID in pod
+func GetPidFromPod(ctx context.Context, pod v1.Pod, daemon v1.Pod) (int, error) {
+	pfCancel, localPort, err := forwardPorts(ctx, daemon, uint16(common.ControllerCfg.ChaosDaemonPort))
+	if err != nil {
+		return 0, fmt.Errorf("forward ports failed: %s", err.Error())
+	}
+
+	daemonClient, err := utils.NewChaosDaemonClientLocally(int(localPort))
+	if err != nil {
+		return 0, fmt.Errorf("new chaos daemon client failed: %s", err.Error())
+	}
+	defer daemonClient.Close()
+
+	if len(pod.Status.ContainerStatuses) == 0 {
+		return 0, fmt.Errorf("%s %s can't get the state of container", pod.Namespace, pod.Name)
+	}
+
+	res, err := daemonClient.ContainerGetPid(ctx, &pb.ContainerRequest{
+		Action: &pb.ContainerAction{
+			Action: pb.ContainerAction_GETPID,
+		},
+		ContainerId: pod.Status.ContainerStatuses[0].ContainerID,
+	})
+	if err != nil {
+		return 0, fmt.Errorf("container get pid failed: %s", err.Error())
+	}
+	if pfCancel != nil {
+		pfCancel()
+	}
+	return int(res.Pid), nil
+}
+
+func forwardPorts(ctx context.Context, pod v1.Pod, port uint16) (context.CancelFunc, uint16, error) {
+	clientRawConfig, err := e2econfig.LoadClientRawConfig()
+	if err != nil {
+		log.Fatal("failed to load raw config", err.Error())
+	}
+	fw, err := portforward.NewPortForwarder(ctx, e2econfig.NewSimpleRESTClientGetter(clientRawConfig))
+	if err != nil {
+		log.Fatal("failed to create port forwarder", err.Error())
+	}
+	_, localPort, pfCancel, err := portforward.ForwardOnePort(fw, pod.Namespace, pod.Name, port, false)
+	return pfCancel, localPort, err
 }

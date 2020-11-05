@@ -16,10 +16,12 @@ package networkchaos
 import (
 	"context"
 	"fmt"
+	"io/ioutil"
 	"regexp"
 	"strconv"
 	"strings"
 
+	"google.golang.org/grpc/grpclog"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	v1 "k8s.io/api/core/v1"
@@ -59,35 +61,14 @@ func debugEachPod(ctx context.Context, pod v1.Pod, daemon v1.Pod, chaos *v1alpha
 	daemonName := daemon.GetObjectMeta().GetName()
 	daemonNamespace := daemon.GetObjectMeta().GetNamespace()
 
-	// get nsenter path from log
-	var nsenterPathList []string
-	for _, tailNum := range []int64{100, 1000, 10000, -1} {
-		log, err := cm.Log(daemonName, daemonNamespace, tailNum, c.K8sClient)
-		if err != nil {
-			return fmt.Errorf("get log failed with: %s", err.Error())
-		}
-		nsenterPathList = regexp.MustCompile("(?:-n/proc/)(.*)(?:/ns/net)").FindStringSubmatch(log)
-		if len(nsenterPathList) != 0 {
-			break
-		}
-		if tailNum == -1 {
-			return fmt.Errorf("could not found networkchaos related logs")
-		}
+	// To disable printing irrelevant log from grpc/clientconn.go
+	// see grpc/grpc-go#3918 for detail. could be resolved in the future
+	grpclog.SetLoggerV2(grpclog.NewLoggerV2(ioutil.Discard, ioutil.Discard, ioutil.Discard))
+	pid, err := cm.GetPidFromPod(ctx, pod, daemon)
+	if err != nil {
+		return err
 	}
-	nsenterPath := nsenterPathList[0]
-
-	action := chaos.Spec.Action
-
-	var netemExpect string
-	switch action {
-	case "delay":
-		latency := chaos.Spec.Delay.Latency
-		jitter := chaos.Spec.Delay.Jitter
-		correlation := chaos.Spec.Delay.Correlation
-		netemExpect = fmt.Sprintf("%v %v %v %v%%", action, latency, jitter, correlation)
-	default:
-		return fmt.Errorf("chaos not supported")
-	}
+	nsenterPath := "-n/proc/" + strconv.Itoa(pid) + "/ns/net"
 
 	// print out debug info
 	cmd := fmt.Sprintf("/usr/bin/nsenter %s -- ipset list", nsenterPath)
@@ -105,6 +86,18 @@ func debugEachPod(ctx context.Context, pod v1.Pod, daemon v1.Pod, chaos *v1alpha
 	}
 	cm.Print("2. [tc qdisc list]", 1, cm.ColorCyan)
 	cm.Print(string(out), 1, "")
+
+	action := chaos.Spec.Action
+	var netemExpect string
+	switch action {
+	case "delay":
+		latency := chaos.Spec.Delay.Latency
+		jitter := chaos.Spec.Delay.Jitter
+		correlation := chaos.Spec.Delay.Correlation
+		netemExpect = fmt.Sprintf("%v %v %v %v%%", action, latency, jitter, correlation)
+	default:
+		return fmt.Errorf("chaos not supported")
+	}
 
 	netemCurrent := regexp.MustCompile("(?:limit 1000)(.*)").FindStringSubmatch(string(out))
 	if len(netemCurrent) == 0 {

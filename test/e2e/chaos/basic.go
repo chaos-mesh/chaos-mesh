@@ -669,7 +669,7 @@ var _ = ginkgo.Describe("[Basic]", func() {
 			framework.ExpectNoError(err, "create timer deployment error")
 			err = waitDeploymentReady("timer", ns, kubeCli)
 			framework.ExpectNoError(err, "wait timer deployment ready error")
-			_, port, pfCancel, err = portforward.ForwardOnePort(fw, ns, "svc/timer", 8080)
+			_, port, pfCancel, err = portforward.ForwardOnePort(fw, ns, "svc/timer", 8080, true)
 			framework.ExpectNoError(err, "create helper port-forward failed")
 		})
 
@@ -865,7 +865,7 @@ var _ = ginkgo.Describe("[Basic]", func() {
 			framework.ExpectNoError(err, "create io-test deployment error")
 			err = waitDeploymentReady("io-test", ns, kubeCli)
 			framework.ExpectNoError(err, "wait io-test deployment ready error")
-			_, port, pfCancel, err = portforward.ForwardOnePort(fw, ns, "svc/io", 8080)
+			_, port, pfCancel, err = portforward.ForwardOnePort(fw, ns, "svc/io", 8080, true)
 			framework.ExpectNoError(err, "create helper io port port-forward failed")
 		})
 
@@ -1432,7 +1432,7 @@ selector:
 				framework.ExpectNoError(err, "select network-peer pod error")
 				networkPeers = append(networkPeers, pod)
 
-				_, port, pfCancel, err := portforward.ForwardOnePort(fw, ns, "svc/"+svc.Name, 8080)
+				_, port, pfCancel, err := portforward.ForwardOnePort(fw, ns, "svc/"+svc.Name, 8080, true)
 				ports = append(ports, port)
 				pfCancels = append(pfCancels, pfCancel)
 				framework.ExpectNoError(err, "create helper io port port-forward failed")

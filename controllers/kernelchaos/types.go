@@ -171,7 +171,7 @@ func (r *endpoint) recoverPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.
 	}
 
 	r.Log.Info("Get container pid", "namespace", pod.Namespace, "name", pod.Name)
-	conn, err := utils.CreateGrpcConnection(ctx, r.Client, pod, common.ControllerCfg.BPFKIPort)
+	conn, err := utils.CreateGrpcConnection(ctx, r.Client, pod, common.ControllerCfg.BPFKIPort, "")
 	if err != nil {
 		return err
 	}
@@ -244,7 +244,7 @@ func (r *endpoint) applyPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.Ke
 	}
 
 	r.Log.Info("Get container pid", "namespace", pod.Namespace, "name", pod.Name)
-	conn, err := utils.CreateGrpcConnection(ctx, r.Client, pod, common.ControllerCfg.BPFKIPort)
+	conn, err := utils.CreateGrpcConnection(ctx, r.Client, pod, common.ControllerCfg.BPFKIPort, "")
 	if err != nil {
 		return err
 	}
