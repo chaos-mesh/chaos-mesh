@@ -206,7 +206,7 @@ func TestcaseContainerKillPauseThenUnPause(ns string, kubeCli kubernetes.Interfa
 	framework.ExpectEqual(err.Error(), wait.ErrWaitTimeout.Error())
 
 	// resume experiment
-	err = util.PauseChaos(ctx, cli, containerKillChaos)
+	err = util.UnPauseChaos(ctx, cli, containerKillChaos)
 	framework.ExpectNoError(err, "resume chaos error")
 
 	err = wait.Poll(5*time.Second, 5*time.Minute, func() (done bool, err error) {
