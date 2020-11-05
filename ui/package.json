@@ -36,7 +36,7 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "test:api": "react-scripts test --testRunner=jest-circus/runner --env=./apiTestEnv",
+    "test:api": "react-scripts test --testRunner=jest-circus/runner --env=./apiTestEnv --testPathPattern=api.ts",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {
