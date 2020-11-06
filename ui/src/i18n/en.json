@@ -26,7 +26,7 @@
       "mode": "Mode",
       "modeHelper": "Select the experiment mode",
       "modeValue": "Mode Value",
-      "modeValuehelper": "Please fill the mode value",
+      "modeValueHelper": "Please fill the mode value",
       "affectedPods": "Affected Pods",
       "affectedPodsPreview": "Affected Pods Preview",
       "affectedPodsPreviewHelper": "Checking or unchecking Pods to further limit the scope of the experiment",

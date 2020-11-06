@@ -26,11 +26,11 @@
       "mode": "模式",
       "modeHelper": "选择实验模式",
       "modeValue": "模式值",
-      "modeValuehelper": "请填写实验值",
-      "affectedPods": "受到实验作用的 Pods",
-      "affectedPodsPreview": "预览将要受到实验作用的 Pods",
-      "affectedPodsPreviewHelper": "通过勾选 Pods 来进一步限制实验的范围",
-      "noPodsFound": "未发现 Pods",
+      "modeValueHelper": "请填写模式值",
+      "affectedPods": "受到实验作用的 Pod",
+      "affectedPodsPreview": "预览将要受到实验作用的 Pod",
+      "affectedPodsPreviewHelper": "通过勾选 Pod 来进一步限制实验的范围",
+      "noPodsFound": "未发现 Pod",
       "podsTable": {
         "name": "名称",
         "namespace": "命名空间",
@@ -50,8 +50,8 @@
         "actionHelper": "选择 NetworkChaos 行为",
         "target": {
           "title": "目标",
-          "podsPreview": "预览目标 Pods",
-          "podsPreviewHelper": "通过勾选 Pods 来进一步限制目标的范围"
+          "podsPreview": "预览目标 Pod",
+          "podsPreviewHelper": "通过勾选 Pod 来进一步限制目标的范围"
         }
       },
       "io": {
@@ -120,7 +120,7 @@
     "single": "归档",
     "no_archives_found": "未发现归档",
     "numberOfRuns": "运行次数",
-    "numberOfAffectedPods": "受到实验作用的 Pods 数目"
+    "numberOfAffectedPods": "受到实验作用的 Pod 数目"
   },
   "settings": {
     "title": "设置",
