@@ -70,7 +70,7 @@ const ArchiveReport: React.FC = () => {
 
               <Grid item xs={12}>
                 <Paper variant="outlined">
-                  <PaperTop title="Configuration" />
+                  <PaperTop title={T('common.configuration')} />
                   <Box p={3}>
                     <ExperimentConfiguration experimentDetail={detail} />
                   </Box>
@@ -79,7 +79,7 @@ const ArchiveReport: React.FC = () => {
 
               <Grid item xs={12}>
                 <Paper variant="outlined">
-                  <PaperTop title="Affected Pods" />
+                  <PaperTop title={T('newE.scope.affectedPods')} />
                   <AffectedPods pods={affectedPods} />
                 </Paper>
               </Grid>
