@@ -30,9 +30,9 @@ var (
 
 // Controller defines the database ttl controller
 type Controller struct {
-	archive   core.ExperimentStore
-	event     core.EventStore
-	ttlconfig *TTLconfig
+	experiment core.ExperimentStore
+	event      core.EventStore
+	ttlconfig  *TTLconfig
 }
 
 // TTLconfig defines the ttl
@@ -47,14 +47,14 @@ type TTLconfig struct {
 
 // NewController returns a new database ttl controller
 func NewController(
-	archive core.ExperimentStore,
+	experiment core.ExperimentStore,
 	event core.EventStore,
 	ttlc *TTLconfig,
 ) *Controller {
 	return &Controller{
-		archive:   archive,
-		event:     event,
-		ttlconfig: ttlc,
+		experiment: experiment,
+		event:      event,
+		ttlconfig:  ttlc,
 	}
 }
 
@@ -70,5 +70,5 @@ func Register(c *Controller, controllerRuntimeStopCh <-chan struct{}) {
 func (c *Controller) runWorker() {
 	log.Info("deleting expired data from the database")
 	c.event.DeleteByFinishTime(context.Background(), c.ttlconfig.EventTTL)
-	c.archive.DeleteByFinishTime(context.Background(), c.ttlconfig.ArchiveExperimentTTL)
+	c.experiment.DeleteByFinishTime(context.Background(), c.ttlconfig.ArchiveExperimentTTL)
 }

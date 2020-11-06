@@ -48,6 +48,18 @@ spec:
             - name: TZ
               value: {{ .Values.timezone | default "UTC" }}
             {{- end }}
+            - name: TARGET_NAMESPACE
+              value: {{ .Values.controllerManager.targetNamespace }}
+            - name: CLUSTER_SCOPED
+              value: "{{ .Values.clusterScoped }}"
+            {{- if .Values.controllerManager.allowedNamespaces }}
+            - name: ALLOWED_NAMESPACES
+              value: {{ .Values.controllerManager.allowedNamespaces }}
+            {{- end }}
+            {{- if .Values.controllerManager.ignoredNamespaces }}
+            - name: IGNORED_NAMESPACES
+              value: {{ .Values.controllerManager.ignoredNamespaces }}
+            {{- end }}
           volumeMounts:
             - name: storage-volume
               mountPath: {{ .Values.dashboard.persistentVolume.mountPath }}

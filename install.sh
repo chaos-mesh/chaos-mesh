@@ -951,8 +951,9 @@ metadata:
 rules:
   - apiGroups: [ "" ]
     resources:
-      - namespaces
       - nodes
+      - namespaces
+      - services
     verbs: [ "get", "list", "watch" ]
 ---
 # Source: chaos-mesh/templates/controller-manager-rbac.yaml
@@ -1005,7 +1006,7 @@ metadata:
     app.kubernetes.io/component: controller-manager
 rules:
   - apiGroups: [ "" ]
-    resources: [ "configmaps" ]
+    resources: [ "configmaps", "services" ]
     verbs: [ "get", "list", "watch" ]
 ---
 # Source: chaos-mesh/templates/controller-manager-rbac.yaml
@@ -1122,10 +1123,16 @@ spec:
             - name: TZ
               value: ${timezone}
           securityContext:
-            privileged: true
             capabilities:
               add:
                 - SYS_PTRACE
+                - NET_ADMIN
+                - MKNOD
+                - SYS_CHROOT
+                - SYS_ADMIN
+                - KILL
+                # CAP_IPC_LOCK is used to lock memory
+                - IPC_LOCK
           volumeMounts:
             - name: socket-path
               mountPath: ${mountPath}
@@ -1192,6 +1199,10 @@ spec:
               value: "2333"
             - name: TZ
               value: ${timezone}
+            - name: TARGET_NAMESPACE
+              value: chaos-testing
+            - name: CLUSTER_SCOPED
+              value: "true"
           volumeMounts:
             - name: storage-volume
               mountPath: /data
@@ -1267,6 +1278,10 @@ spec:
             value: "app.kubernetes.io/component:webhook"
           - name: PPROF_ADDR
             value: ":10081"
+          - name: CHAOS_DNS_SERVICE_NAME
+            value: chaos-mesh-dns-server
+          - name: CHAOS_DNS_SERVICE_PORT
+            value: !!str 9288
         volumeMounts:
           - name: webhook-certs
             mountPath: /etc/webhook/certs

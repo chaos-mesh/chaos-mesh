@@ -6,26 +6,27 @@ import { Theme, createStyles, makeStyles } from '@material-ui/core/styles'
 import { setAlert, setAlertOpen } from 'slices/globalStatus'
 import { useHistory, useParams } from 'react-router-dom'
 
+import { Ace } from 'ace-builds'
 import Alert from '@material-ui/lab/Alert'
 import ArchiveOutlinedIcon from '@material-ui/icons/ArchiveOutlined'
 import ConfirmDialog from 'components/ConfirmDialog'
 import { Event } from 'api/events.type'
 import ExperimentConfiguration from 'components/ExperimentConfiguration'
 import { ExperimentDetail as ExperimentDetailType } from 'api/experiments.type'
-import JSONEditor from 'components/JSONEditor'
 import Loading from 'components/Loading'
 import NoteOutlinedIcon from '@material-ui/icons/NoteOutlined'
 import PaperTop from 'components/PaperTop'
 import PauseCircleOutlineIcon from '@material-ui/icons/PauseCircleOutline'
 import PlayCircleOutlineIcon from '@material-ui/icons/PlayCircleOutline'
 import T from 'components/T'
-import _JSONEditor from 'jsoneditor'
+import YAMLEditor from 'components/YAMLEditor'
 import api from 'api'
 import genEventsChart from 'lib/d3/eventsChart'
 import { getStateofExperiments } from 'slices/experiments'
 import { useIntl } from 'react-intl'
 import { usePrevious } from 'lib/hooks'
 import { useSelector } from 'react-redux'
+import yaml from 'js-yaml'
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -52,15 +53,6 @@ const useStyles = makeStyles((theme: Theme) =>
         width: '90vw',
       },
     },
-    updateExperimentButton: {
-      position: 'absolute',
-      top: theme.spacing(1.5),
-      right: theme.spacing(1.5),
-      padding: '1px 9px',
-      color: '#fff',
-      borderColor: '#fff',
-      fontSize: '0.75rem',
-    },
   })
 )
 
@@ -82,7 +74,7 @@ export default function ExperimentDetail() {
   const [detail, setDetail] = useState<ExperimentDetailType>()
   const [events, setEvents] = useState<Event[]>()
   const prevEvents = usePrevious(events)
-  const [infoEditor, setInfoEditor] = useState<_JSONEditor>()
+  const [yamlEditor, setYAMLEditor] = useState<Ace.Editor>()
   const [configOpen, setConfigOpen] = useState(false)
   const [dialogOpen, setDialogOpen] = useState(false)
   const [dialogInfo, setDialogInfo] = useState({
@@ -220,7 +212,7 @@ export default function ExperimentDetail() {
   }
 
   const handleUpdateExperiment = () => {
-    const data = infoEditor!.get()
+    const data = yaml.safeLoad(yamlEditor!.getValue())
 
     api.experiments
       .update(data)
@@ -318,15 +310,16 @@ export default function ExperimentDetail() {
 
       <Modal open={configOpen} onClose={onModalClose}>
         <Paper className={classes.configPaper}>
-          <JSONEditor name={detail?.name} json={detail?.experiment_info as object} mountEditor={setInfoEditor} />
-          <Button
-            className={classes.updateExperimentButton}
-            variant="outlined"
-            size="small"
-            onClick={handleUpdateExperiment}
-          >
-            {T('common.confirm')}
-          </Button>
+          {detail && (
+            <>
+              <PaperTop title={detail.name}>
+                <Button variant="outlined" color="primary" size="small" onClick={handleUpdateExperiment}>
+                  {T('common.confirm')}
+                </Button>
+              </PaperTop>
+              <YAMLEditor theme={theme} data={yaml.safeDump(detail.yaml)} mountEditor={setYAMLEditor} />
+            </>
+          )}
         </Paper>
       </Modal>
 

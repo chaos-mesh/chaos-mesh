@@ -56,8 +56,11 @@ metadata:
 rules:
   - apiGroups: [ "" ]
     resources:
-      - namespaces
       - nodes
+{{- if .Values.clusterScoped }}
+      - namespaces
+      - services
+{{- end }}
     verbs: [ "get", "list", "watch" ]
 
 ---
@@ -74,7 +77,7 @@ metadata:
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+"  "_" }}
 rules:
   - apiGroups: [ "" ]
-    resources: [ "configmaps" ]
+    resources: [ "configmaps", "services" ]
     verbs: [ "get", "list", "watch" ]
 
 ---

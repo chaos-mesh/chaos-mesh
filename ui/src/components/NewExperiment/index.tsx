@@ -14,7 +14,7 @@ import { Form, Formik } from 'formik'
 import { IntlShape, useIntl } from 'react-intl'
 import React, { useEffect, useState } from 'react'
 import { defaultExperimentSchema, validationSchema } from './constants'
-import { parseLoaded, parseSubmit, yamlToExperiment } from 'lib/formikhelpers'
+import { parseSubmit, yamlToExperiment } from 'lib/formikhelpers'
 import { setAlert, setAlertOpen } from 'slices/globalStatus'
 
 import Alert from '@material-ui/lab/Alert'
@@ -81,7 +81,7 @@ const Actions = ({ setInitialValues, intl }: ActionsProps) => {
 
     api.experiments
       .detail(uuid)
-      .then(({ data }) => setInitialValues(parseLoaded(data.experiment_info)))
+      .then(({ data }) => setInitialValues(yamlToExperiment(data.yaml)))
       .catch(console.log)
   }
 
@@ -93,7 +93,7 @@ const Actions = ({ setInitialValues, intl }: ActionsProps) => {
 
     api.archives
       .detail(uuid)
-      .then(({ data }) => setInitialValues(parseLoaded(data.experiment_info)))
+      .then(({ data }) => setInitialValues(yamlToExperiment(data.yaml)))
       .catch(console.log)
   }
 
@@ -136,7 +136,7 @@ const Actions = ({ setInitialValues, intl }: ActionsProps) => {
         dispatch(
           setAlert({
             type: 'error',
-            message: e,
+            message: e.message,
           })
         )
       } finally {
@@ -248,31 +248,37 @@ export default function NewExperiment() {
         validateOnChange={false}
         onSubmit={handleOnSubmit}
       >
-        {({ errors }) => (
-          <Paper variant="outlined" style={{ height: '100%' }}>
-            <PaperTop title={T('newE.create')} />
-            <Grid container>
-              <Grid item xs={12} sm={8}>
-                <Form>
-                  <Stepper />
-                </Form>
-              </Grid>
-              <Grid item xs={12} sm={4}>
-                <Actions setInitialValues={setInitialValues} intl={intl} />
-              </Grid>
-            </Grid>
+        {({ errors }) => {
+          const flatErrors: Record<string, string> = flat(errors)
 
-            <Snackbar
-              anchorOrigin={{
-                vertical: 'top',
-                horizontal: 'center',
-              }}
-              open={Object.keys(flat(errors)).length > 0}
-            >
-              <Alert severity="error">{Object.values<string>(flat(errors)).join('/')}</Alert>
-            </Snackbar>
-          </Paper>
-        )}
+          return (
+            <Paper variant="outlined" style={{ height: '100%' }}>
+              <PaperTop title={T('newE.create')} />
+              <Grid container>
+                <Grid item xs={12} sm={8}>
+                  <Form>
+                    <Stepper />
+                  </Form>
+                </Grid>
+                <Grid item xs={12} sm={4}>
+                  <Actions setInitialValues={setInitialValues} intl={intl} />
+                </Grid>
+              </Grid>
+
+              {Object.keys(flatErrors).length > 0 && (
+                <Snackbar
+                  anchorOrigin={{
+                    vertical: 'top',
+                    horizontal: 'center',
+                  }}
+                  open={true}
+                >
+                  <Alert severity="error">{Object.values(flatErrors).join('/')}</Alert>
+                </Snackbar>
+              )}
+            </Paper>
+          )
+        }}
       </Formik>
     </StepperProvider>
   )
