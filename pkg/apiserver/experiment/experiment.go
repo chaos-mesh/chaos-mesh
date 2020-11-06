@@ -29,8 +29,8 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/common"
 	"github.com/chaos-mesh/chaos-mesh/pkg/apiserver/utils"
-	"github.com/chaos-mesh/chaos-mesh/pkg/config"
 	"github.com/chaos-mesh/chaos-mesh/pkg/clientpool"
+	"github.com/chaos-mesh/chaos-mesh/pkg/config"
 	"github.com/chaos-mesh/chaos-mesh/pkg/core"
 
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -627,7 +627,7 @@ func (s *Service) listExperiments(c *gin.Context) {
 		}
 		if err := kubeCli.List(context.Background(), list.ChaosList, &client.ListOptions{Namespace: ns}); err != nil {
 			c.Status(http.StatusInternalServerError)
-			_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
+			utils.SetErrorForGinCtx(c, err)
 			return
 		}
 		for _, chaos := range list.ListChaos() {
@@ -861,7 +861,7 @@ func (s *Service) state(c *gin.Context) {
 	}
 	if err := g.Wait(); err != nil {
 		c.Status(http.StatusInternalServerError)
-		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
+		utils.SetErrorForGinCtx(c, err)
 		return
 	}
 
