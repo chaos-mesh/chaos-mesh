@@ -48,6 +48,13 @@ type ChaosControllerConfig struct {
 	// TargetNamespace is the target namespace to injecting chaos.
 	// It only works with ClusterScoped is false;
 	TargetNamespace string `envconfig:"TARGET_NAMESPACE" default:""`
+
+	// DNSServiceName is the name of DNS service, which is used for DNS chaos
+	DNSServiceName string `envconfig:"CHAOS_DNS_SERVICE_NAME" default:""`
+	DNSServicePort int    `envconfig:"CHAOS_DNS_SERVICE_PORT" default:""`
+
+	// Namespace is the namespace which the controller manager run in
+	Namespace string `envconfig:"NAMESPACE" default:""`
 }
 
 // EnvironChaosController returns the settings from the environment.
