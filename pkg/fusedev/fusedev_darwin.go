@@ -13,11 +13,6 @@
 
 package fusedev
 
-// EnsureFuseDev ensures /dev/fuse exists. If not, it will create one
-func EnsureFuseDev() {
-	panic("unimplemented")
-}
-
 // GrantAccess appends 'c 10:229 rwm' to devices.allow
 func GrantAccess() error {
 	panic("unimplemented")
