@@ -1136,7 +1136,7 @@ func (s *Service) patchExperiment(exp *ExperimentBase, annotations map[string]st
 // @Tags experiments
 // @Produce json
 // @Param request body core.ExperimentInfo true "Request body"
-// @Success 200 {object} core.ExperimentYAMLDescription
+// @Success 200 {object} core.ExperimentInfo
 // @Failure 400 {object} utils.APIError
 // @Failure 500 {object} utils.APIError
 // @Router /experiments/update [put]
