@@ -1211,35 +1211,29 @@ var _ = ginkgo.Describe("[Basic]", func() {
 					},
 				}
 				err = cli.Create(ctx, ioChaos)
-				framework.ExpectNoError(err, "create io chaos error")
+				framework.ExpectNoError(err, "create io chaos")
 
 				err = wait.PollImmediate(5*time.Second, 1*time.Minute, func() (bool, error) {
-					dur, _ := getPodIODelay(c, port)
-
-					ms := dur.Milliseconds()
-					klog.Infof("get io delay %dms", ms)
-					// IO Delay >= 10ms
-					if ms >= 10 {
+					_, err = getPodIODelay(c, port)
+					// input/output error is errno 5
+					if err != nil && strings.Contains(err.Error(), "input/output error") {
 						return true, nil
 					}
 					return false, nil
 				})
 				framework.ExpectNoError(err, "io chaos doesn't work as expected")
-				klog.Infof("apply io chaos successfully")
 
 				err = cli.Delete(ctx, ioChaos)
 				framework.ExpectNoError(err, "failed to delete io chaos")
 
+				klog.Infof("success to perform io chaos")
 				err = wait.PollImmediate(5*time.Second, 1*time.Minute, func() (bool, error) {
-					dur, _ := getPodIODelay(c, port)
+					_, err = getPodIODelay(c, port)
 
-					ms := dur.Milliseconds()
-					klog.Infof("get io delay %dms", ms)
-					// IO Delay shouldn't longer than 10ms
-					if ms >= 10 {
-						return false, nil
+					if err == nil {
+						return true, nil
 					}
-					return true, nil
+					return false, nil
 				})
 				framework.ExpectNoError(err, "fail to recover io chaos")
 				cancel()

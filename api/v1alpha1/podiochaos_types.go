@@ -25,7 +25,7 @@ type PodIoChaosSpec struct {
 
 	// TODO: support multiple different container to inject in one pod
 	// +optional
-	Container *string `json:"container"`
+	Container *string `json:"container,omitempty"`
 
 	// Pid represents a running toda process id
 	// +optional
