@@ -1,4 +1,5 @@
 {{- if .Values.chaosDaemon.serviceAccount }}
+---
 kind: ServiceAccount
 apiVersion: v1
 metadata:
