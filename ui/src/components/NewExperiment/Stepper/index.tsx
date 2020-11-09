@@ -15,6 +15,7 @@ import ScopeStep from './Scope'
 import SkeletonN from 'components/SkeletonN'
 import T from 'components/T'
 import TargetStep from './Target'
+import { defaultExperimentSchema } from '../constants'
 import { getNamespaces } from 'slices/experiments'
 import { useFormikContext } from 'formik'
 import { useSelector } from 'react-redux'
@@ -81,7 +82,9 @@ const CreateStepper: React.FC = () => {
   const handleJump = (step: number) => () => dispatch(jump(step))
   const handleReset = () => {
     dispatch(reset())
-    resetForm()
+    resetForm({
+      values: defaultExperimentSchema,
+    })
   }
 
   const getStepContent = () => {
