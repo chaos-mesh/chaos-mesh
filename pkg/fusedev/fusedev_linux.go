@@ -36,9 +36,6 @@ func GrantAccess() error {
 	cgroupScanner := bufio.NewScanner(cgroupFile)
 	var deviceCgroupPath string
 	for cgroupScanner.Scan() {
-		if err := cgroupScanner.Err(); err != nil {
-			return err
-		}
 		var (
 			text  = cgroupScanner.Text()
 			parts = strings.SplitN(text, ":", 3)
@@ -50,6 +47,10 @@ func GrantAccess() error {
 		if parts[1] == "devices" {
 			deviceCgroupPath = parts[2]
 		}
+	}
+
+	if err := cgroupScanner.Err(); err != nil {
+		return err
 	}
 
 	if len(deviceCgroupPath) == 0 {

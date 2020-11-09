@@ -27,10 +27,10 @@
       "modeHelper": "选择实验模式",
       "modeValue": "模式值",
       "modeValueHelper": "请填写模式值",
-      "affectedPods": "受到实验作用的 Pods",
-      "affectedPodsPreview": "预览将要受到实验作用的 Pods",
-      "affectedPodsPreviewHelper": "通过勾选 Pods 来进一步限制实验的范围",
-      "noPodsFound": "未发现 Pods",
+      "affectedPods": "受到实验作用的 Pod",
+      "affectedPodsPreview": "预览将要受到实验作用的 Pod",
+      "affectedPodsPreviewHelper": "通过勾选 Pod 来进一步限制实验的范围",
+      "noPodsFound": "未发现 Pod",
       "podsTable": {
         "name": "名称",
         "namespace": "命名空间",
@@ -50,8 +50,8 @@
         "actionHelper": "选择 NetworkChaos 行为",
         "target": {
           "title": "目标",
-          "podsPreview": "预览目标 Pods",
-          "podsPreviewHelper": "通过勾选 Pods 来进一步限制目标的范围"
+          "podsPreview": "预览目标 Pod",
+          "podsPreviewHelper": "通过勾选 Pod 来进一步限制目标的范围"
         }
       },
       "io": {
@@ -120,7 +120,7 @@
     "single": "归档",
     "no_archives_found": "未发现归档",
     "numberOfRuns": "运行次数",
-    "numberOfAffectedPods": "受到实验作用的 Pods 数目"
+    "numberOfAffectedPods": "受到实验作用的 Pod 数目"
   },
   "settings": {
     "title": "设置",
@@ -175,7 +175,7 @@
       "ip": "ip:172.17.0.6 类似于 pod:xxx，通过 Pod IP 进行过滤",
       "uuid": "uuid:2f79a4d6-1952-45b5-b2d5-ce715823c7a7 将通过实验 UUID 搜索事件，实验以及归档"
     },
-     "result": {
+    "result": {
       "category": {
         "events": "事件",
         "experiments": "实验",
@@ -188,7 +188,7 @@
         "Kind": "实验类型",
         "Pod": "Pod",
         "Namespace": "命名空间",
-        "Start Time": "开始时间" 
+        "Start Time": "开始时间"
       },
       "noResult": "无结果"
     }
