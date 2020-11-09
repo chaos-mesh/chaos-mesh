@@ -72,7 +72,7 @@ Examples:
 			if len(args) != 0 {
 				return nil, cobra.ShellCompDirectiveNoFileComp
 			}
-			return listChaos("networkchaos", o.Namespace, toComplete, c.CtrlClient)
+			return listChaos("networkchaos", o.Namespace, toComplete, c.CtrlCli)
 		},
 	}
 
@@ -89,7 +89,7 @@ Examples:
 			if len(args) != 0 {
 				return nil, cobra.ShellCompDirectiveNoFileComp
 			}
-			return listChaos("stresschaos", o.Namespace, toComplete, c.CtrlClient)
+			return listChaos("stresschaos", o.Namespace, toComplete, c.CtrlCli)
 		},
 	}
 
@@ -106,7 +106,7 @@ Examples:
 			if len(args) != 0 {
 				return nil, cobra.ShellCompDirectiveNoFileComp
 			}
-			return listChaos("iochaos", o.Namespace, toComplete, c.CtrlClient)
+			return listChaos("iochaos", o.Namespace, toComplete, c.CtrlCli)
 		},
 	}
 
@@ -116,7 +116,7 @@ Examples:
 
 	debugCmd.PersistentFlags().StringVarP(&o.Namespace, "namespace", "n", "default", "namespace to find chaos")
 	err = debugCmd.RegisterFlagCompletionFunc("namespace", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-		return listNamespace(toComplete, c.K8sClient)
+		return listNamespace(toComplete, c.KubeCli)
 	})
 	if err != nil {
 		log.Fatal(err)
@@ -137,18 +137,13 @@ func (o *DebugOptions) Run(chaosType string, args []string, c *cm.ClientSet) err
 		chaosNameArg = args[0]
 	}
 
-	chaosList, err := cm.GetChaosList(ctx, chaosType, chaosNameArg, o.Namespace, c.CtrlClient)
+	chaosList, nameList, err := cm.GetChaosList(ctx, chaosType, chaosNameArg, o.Namespace, c.CtrlCli)
 	if err != nil {
 		return fmt.Errorf(err.Error())
 	}
 
-	for _, chaosName := range chaosList {
-		cm.Print("[CHAOSNAME]: "+chaosName, 0, cm.ColorBlue)
-		chaos, err := cm.GetChaos(ctx, chaosType, chaosName, o.Namespace, c.CtrlClient)
-		if err != nil {
-			return fmt.Errorf("failed to get chaos %s: %s", chaosName, err.Error())
-		}
-
+	for i, chaos := range chaosList {
+		cm.Print("[CHAOSNAME]: "+nameList[i], 0, cm.ColorBlue)
 		switch chaosType {
 		case "networkchaos":
 			if err := networkchaos.Debug(ctx, chaos, c); err != nil {
@@ -187,7 +182,7 @@ func listNamespace(toComplete string, c *kubernetes.Clientset) ([]string, cobra.
 func listChaos(chaosType string, namespace string, toComplete string, c client.Client) ([]string, cobra.ShellCompDirective) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	chaosList, err := cm.GetChaosList(ctx, chaosType, "", namespace, c)
+	_, chaosList, err := cm.GetChaosList(ctx, chaosType, "", namespace, c)
 	if err != nil {
 		return nil, cobra.ShellCompDirectiveDefault
 	}

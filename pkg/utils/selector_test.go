@@ -15,7 +15,6 @@ package utils
 
 import (
 	"context"
-	"fmt"
 	"testing"
 
 	. "github.com/onsi/gomega"
@@ -27,7 +26,6 @@ import (
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
-	"k8s.io/apimachinery/pkg/runtime"
 
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
@@ -36,11 +34,11 @@ import (
 func TestSelectPods(t *testing.T) {
 	g := NewGomegaWithT(t)
 
-	objects, pods := generateNPods("p", 5, v1.PodRunning, metav1.NamespaceDefault, nil, map[string]string{"l1": "l1"}, "az1-node1")
-	objects2, pods2 := generateNPods("s", 2, v1.PodRunning, "test-s", nil, map[string]string{"l2": "l2"}, "az2-node1")
+	objects, pods := GenerateNPods("p", 5, v1.PodRunning, metav1.NamespaceDefault, nil, map[string]string{"l1": "l1"}, "az1-node1")
+	objects2, pods2 := GenerateNPods("s", 2, v1.PodRunning, "test-s", nil, map[string]string{"l2": "l2"}, "az2-node1")
 
-	objects3, _ := generateNNodes("az1-node", 3, map[string]string{"disktype": "ssd", "zone": "az1"})
-	objects4, _ := generateNNodes("az2-node", 2, map[string]string{"disktype": "hdd", "zone": "az2"})
+	objects3, _ := GenerateNNodes("az1-node", 3, map[string]string{"disktype": "ssd", "zone": "az1"})
+	objects4, _ := GenerateNNodes("az2-node", 2, map[string]string{"disktype": "hdd", "zone": "az2"})
 
 	objects = append(objects, objects2...)
 	objects = append(objects, objects3...)
@@ -615,84 +613,4 @@ func TestFilterPodByNode(t *testing.T) {
 		g.Expect(filterPodByNode(tc.pods, tc.nodes)).To(Equal(tc.filteredPods), tc.name)
 	}
 
-}
-
-func newPod(
-	name string,
-	status v1.PodPhase,
-	namespace string,
-	ans map[string]string,
-	ls map[string]string,
-	nodename string,
-) v1.Pod {
-	return v1.Pod{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       "Pod",
-			APIVersion: "v1",
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Name:        name,
-			Namespace:   namespace,
-			Labels:      ls,
-			Annotations: ans,
-		},
-		Spec: v1.PodSpec{
-			NodeName: nodename,
-		},
-		Status: v1.PodStatus{
-			Phase: status,
-		},
-	}
-}
-
-func generateNPods(
-	namePrefix string,
-	n int,
-	status v1.PodPhase,
-	ns string,
-	ans map[string]string,
-	ls map[string]string,
-	nodename string,
-) ([]runtime.Object, []v1.Pod) {
-	var podObjects []runtime.Object
-	var pods []v1.Pod
-	for i := 0; i < n; i++ {
-		pod := newPod(fmt.Sprintf("%s%d", namePrefix, i), status, ns, ans, ls, nodename)
-		podObjects = append(podObjects, &pod)
-		pods = append(pods, pod)
-	}
-
-	return podObjects, pods
-}
-
-func newNode(
-	name string,
-	label map[string]string,
-) v1.Node {
-	return v1.Node{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       "Node",
-			APIVersion: "v1",
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Name:   name,
-			Labels: label,
-		},
-	}
-}
-
-func generateNNodes(
-	namePrefix string,
-	n int,
-	label map[string]string,
-) ([]runtime.Object, []v1.Node) {
-	var nodeObjects []runtime.Object
-	var nodes []v1.Node
-
-	for i := 0; i < n; i++ {
-		node := newNode(fmt.Sprintf("%s%d", namePrefix, i), label)
-		nodeObjects = append(nodeObjects, &node)
-		nodes = append(nodes, node)
-	}
-	return nodeObjects, nodes
 }

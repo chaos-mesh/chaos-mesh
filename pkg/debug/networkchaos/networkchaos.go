@@ -22,10 +22,9 @@ import (
 	"strings"
 
 	"google.golang.org/grpc/grpclog"
-	"sigs.k8s.io/controller-runtime/pkg/client"
-
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	cm "github.com/chaos-mesh/chaos-mesh/pkg/debug/common"
@@ -39,7 +38,7 @@ func Debug(ctx context.Context, chaos runtime.Object, c *cm.ClientSet) error {
 	chaosStatus := networkChaos.Status.ChaosStatus
 	chaosSelector := networkChaos.Spec.GetSelector()
 
-	pods, daemons, err := cm.GetPods(ctx, chaosStatus, chaosSelector, c.CtrlClient)
+	pods, daemons, err := cm.GetPods(ctx, chaosStatus, chaosSelector, c.CtrlCli)
 	if err != nil {
 		return err
 	}
@@ -72,7 +71,7 @@ func debugEachPod(ctx context.Context, pod v1.Pod, daemon v1.Pod, chaos *v1alpha
 
 	// print out debug info
 	cmd := fmt.Sprintf("/usr/bin/nsenter %s -- ipset list", nsenterPath)
-	out, err := cm.Exec(daemonName, daemonNamespace, cmd, c.K8sClient)
+	out, err := cm.Exec(daemonName, daemonNamespace, cmd, c.KubeCli)
 	if err != nil {
 		return fmt.Errorf("run command '%s' failed with: %s", cmd, err.Error())
 	}
@@ -80,7 +79,7 @@ func debugEachPod(ctx context.Context, pod v1.Pod, daemon v1.Pod, chaos *v1alpha
 	cm.Print(string(out), 1, "")
 
 	cmd = fmt.Sprintf("/usr/bin/nsenter %s -- tc qdisc list", nsenterPath)
-	out, err = cm.Exec(daemonName, daemonNamespace, cmd, c.K8sClient)
+	out, err = cm.Exec(daemonName, daemonNamespace, cmd, c.KubeCli)
 	if err != nil {
 		return fmt.Errorf("run command '%s' failed with: %s", cmd, err.Error())
 	}
@@ -132,7 +131,7 @@ func debugEachPod(ctx context.Context, pod v1.Pod, daemon v1.Pod, chaos *v1alpha
 	cm.Print("NetworkChaos execute as expected", 1, cm.ColorGreen)
 
 	cmd = fmt.Sprintf("/usr/bin/nsenter %s -- iptables --list", nsenterPath)
-	out, err = cm.Exec(daemonName, daemonNamespace, cmd, c.K8sClient)
+	out, err = cm.Exec(daemonName, daemonNamespace, cmd, c.KubeCli)
 	if err != nil {
 		return fmt.Errorf("cmd.Run() failed with: %s", err.Error())
 	}
@@ -140,7 +139,7 @@ func debugEachPod(ctx context.Context, pod v1.Pod, daemon v1.Pod, chaos *v1alpha
 	cm.Print(string(out), 1, "")
 
 	cmd = fmt.Sprintf("/usr/bin/nsenter %s -- iptables --list", nsenterPath)
-	out, err = cm.Exec(daemonName, daemonNamespace, cmd, c.K8sClient)
+	out, err = cm.Exec(daemonName, daemonNamespace, cmd, c.KubeCli)
 	if err != nil {
 		return fmt.Errorf("cmd.Run() failed with: %s", err.Error())
 	}
@@ -151,7 +150,7 @@ func debugEachPod(ctx context.Context, pod v1.Pod, daemon v1.Pod, chaos *v1alpha
 		Name:      podName,
 	}
 
-	if err = c.CtrlClient.Get(ctx, objectKey, podNetworkChaos); err != nil {
+	if err = c.CtrlCli.Get(ctx, objectKey, podNetworkChaos); err != nil {
 		return fmt.Errorf("failed to get chaos: %s", err.Error())
 	}
 	cm.Print("4. [podnetworkchaos]", 1, cm.ColorCyan)

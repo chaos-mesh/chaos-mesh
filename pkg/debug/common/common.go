@@ -28,6 +28,7 @@ import (
 	"k8s.io/client-go/kubernetes"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/tools/remotecommand"
+	kubectlscheme "k8s.io/kubectl/pkg/scheme"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
 
@@ -37,8 +38,6 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/utils"
 	e2econfig "github.com/chaos-mesh/chaos-mesh/test/e2e/config"
 	"github.com/chaos-mesh/chaos-mesh/test/e2e/util/portforward"
-
-	kubectlscheme "k8s.io/kubectl/pkg/scheme"
 )
 
 var (
@@ -52,8 +51,8 @@ var (
 
 // ClientSet contains two different clients
 type ClientSet struct {
-	CtrlClient client.Client
-	K8sClient  *kubernetes.Clientset
+	CtrlCli client.Client
+	KubeCli *kubernetes.Clientset
 }
 
 func init() {
@@ -91,11 +90,11 @@ func InitClientSet() (*ClientSet, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to create client")
 	}
-	k8sClient, err := kubernetes.NewForConfig(config.GetConfigOrDie())
+	kubeClient, err := kubernetes.NewForConfig(config.GetConfigOrDie())
 	if err != nil {
 		return nil, fmt.Errorf("error in getting access to K8S: %s", err.Error())
 	}
-	return &ClientSet{ctrlClient, k8sClient}, nil
+	return &ClientSet{ctrlClient, kubeClient}, nil
 }
 
 // Exec executes certain command and returns the result
@@ -157,6 +156,9 @@ func GetPods(ctx context.Context, status v1alpha1.ChaosStatus, selector v1alpha1
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to SelectPods with: %s", err.Error())
 	}
+	if len(pods) == 0 {
+		return nil, nil, fmt.Errorf("no pods found for selector: %s", selector)
+	}
 
 	var chaosDaemons []v1.Pod
 	// get chaos daemon
@@ -167,8 +169,11 @@ func GetPods(ctx context.Context, status v1alpha1.ChaosStatus, selector v1alpha1
 			LabelSelectors: map[string]string{"app.kubernetes.io/component": "chaos-daemon"},
 		}
 		daemons, err := utils.SelectPods(ctx, c, nil, daemonSelector)
-		if err != nil || len(daemons) == 0 {
-			return nil, nil, fmt.Errorf("fail to get daemon with: %s", err.Error())
+		if err != nil {
+			return nil, nil, fmt.Errorf("failed to SelectPods with: %s", err.Error())
+		}
+		if len(daemons) == 0 {
+			return nil, nil, fmt.Errorf("no daemons found for selector: %s", daemonSelector)
 		}
 		chaosDaemons = append(chaosDaemons, daemons[0])
 	}
@@ -176,10 +181,40 @@ func GetPods(ctx context.Context, status v1alpha1.ChaosStatus, selector v1alpha1
 	return pods, chaosDaemons, nil
 }
 
-// GetChaos returns the chaos that will do type-assertion
-func GetChaos(ctx context.Context, chaosType string, chaosName string, ns string, c client.Client) (runtime.Object, error) {
-	// get podName
+// GetChaosList returns chaos list limited by input
+func GetChaosList(ctx context.Context, chaosType string, chaosName string, ns string, c client.Client) ([]runtime.Object, []string, error) {
 	chaosType = upperCaseChaos(strings.ToLower(chaosType))
+	allKinds := v1alpha1.AllKinds()
+	chaosListIntf := allKinds[chaosType].ChaosList
+
+	if err := c.List(ctx, chaosListIntf, client.InNamespace(ns)); err != nil {
+		return nil, nil, fmt.Errorf("failed to get chaosList: %s", err.Error())
+	}
+	chaosList := chaosListIntf.ListChaos()
+	if len(chaosList) == 0 {
+		return nil, nil, fmt.Errorf("no chaos is found, please check your input")
+	}
+
+	var retList []runtime.Object
+	var nameList []string
+	for _, ch := range chaosList {
+		if chaosName == "" || chaosName == ch.Name {
+			chaos, err := getChaos(ctx, chaosType, ch.Name, ns, c)
+			if err != nil {
+				return nil, nil, err
+			}
+			retList = append(retList, chaos)
+			nameList = append(nameList, ch.Name)
+		}
+	}
+	if len(retList) == 0 {
+		return nil, nil, fmt.Errorf("no chaos is found, please check your input")
+	}
+
+	return retList, nameList, nil
+}
+
+func getChaos(ctx context.Context, chaosType string, chaosName string, ns string, c client.Client) (runtime.Object, error) {
 	allKinds := v1alpha1.AllKinds()
 	chaos := allKinds[chaosType].Chaos
 	objectKey := client.ObjectKey{
@@ -190,34 +225,6 @@ func GetChaos(ctx context.Context, chaosType string, chaosName string, ns string
 		return nil, fmt.Errorf("failed to get chaos %s: %s", chaosName, err.Error())
 	}
 	return chaos, nil
-}
-
-// GetChaosList returns chaos list limited by input
-func GetChaosList(ctx context.Context, chaosType string, chaosName string, ns string, c client.Client) ([]string, error) {
-	chaosType = upperCaseChaos(strings.ToLower(chaosType))
-	allKinds := v1alpha1.AllKinds()
-	chaosListIntf := allKinds[chaosType].ChaosList
-
-	if err := c.List(ctx, chaosListIntf, client.InNamespace(ns)); err != nil {
-		return nil, fmt.Errorf("failed to get chaosList: %s", err.Error())
-	}
-	chaosList := chaosListIntf.ListChaos()
-	if len(chaosList) == 0 {
-		return nil, fmt.Errorf("no chaos is found, please check your input")
-	}
-
-	var retList []string
-	chaosNum := 0
-	for _, ch := range chaosList {
-		if chaosName == "" || chaosName == ch.Name {
-			retList = append(retList, ch.Name)
-			chaosNum++
-		}
-	}
-	if chaosNum == 0 {
-		return nil, fmt.Errorf("no chaos is found, please check your input")
-	}
-	return retList, nil
 }
 
 // GetPidFromPod returns pid given containerd ID in pod
