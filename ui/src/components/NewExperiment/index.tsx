@@ -10,7 +10,7 @@ import {
   Snackbar,
   Typography,
 } from '@material-ui/core'
-import { Form, Formik } from 'formik'
+import { Form, Formik, FormikHelpers } from 'formik'
 import { IntlShape, useIntl } from 'react-intl'
 import React, { useEffect, useState } from 'react'
 import { defaultExperimentSchema, validationSchema } from './constants'
@@ -212,7 +212,7 @@ export default function NewExperiment() {
 
   const [initialValues, setInitialValues] = useState<Experiment>(defaultExperimentSchema)
 
-  const handleOnSubmit = (values: Experiment) => {
+  const handleOnSubmit = (values: Experiment, { resetForm }: FormikHelpers<Experiment>) => {
     const parsedValues = parseSubmit(values)
 
     if (process.env.NODE_ENV === 'development') {
@@ -236,7 +236,13 @@ export default function NewExperiment() {
           history.push('/experiments')
         }
       })
-      .catch(console.log)
+      .catch((error) => {
+        console.error(error)
+
+        resetForm({
+          values,
+        })
+      })
   }
 
   return (
