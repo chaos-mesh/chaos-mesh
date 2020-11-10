@@ -61,7 +61,7 @@ func newChaosDaemonClient(ctx context.Context, c client.Client, pod *v1.Pod, por
 
 	var cc *grpc.ClientConn
 	var err error
-	if address != "" {
+	if address == "" {
 		cc, err = CreateGrpcConnection(ctx, c, pod, port)
 	} else {
 		cc, err = CreateGrpcConnectionWithAddress(ctx, port, address)

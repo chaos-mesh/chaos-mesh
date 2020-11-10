@@ -143,7 +143,7 @@ func (o *DebugOptions) Run(chaosType string, args []string, c *cm.ClientSet) err
 	}
 
 	for i, chaos := range chaosList {
-		cm.Print("[CHAOSNAME]: "+nameList[i], 0, cm.ColorBlue)
+		cm.Print("[CHAOSNAME]: "+nameList[i], 0, "Blue")
 		switch chaosType {
 		case "networkchaos":
 			if err := networkchaos.Debug(ctx, chaos, c); err != nil {

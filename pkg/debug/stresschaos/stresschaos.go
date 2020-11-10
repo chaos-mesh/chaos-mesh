@@ -43,7 +43,7 @@ func Debug(ctx context.Context, chaos runtime.Object, c *cm.ClientSet) error {
 
 	for i := range pods {
 		podName := pods[i].GetObjectMeta().GetName()
-		cm.Print("[Pod]: "+podName, 0, cm.ColorBlue)
+		cm.Print("[Pod]: "+podName, 0, "Blue")
 		err := debugEachPod(ctx, pods[i], daemons[i], stressChaos, c)
 		if err != nil {
 			return fmt.Errorf("for %s: %s", podName, err.Error())
@@ -53,11 +53,6 @@ func Debug(ctx context.Context, chaos runtime.Object, c *cm.ClientSet) error {
 }
 
 func debugEachPod(ctx context.Context, pod v1.Pod, daemon v1.Pod, chaos *v1alpha1.StressChaos, c *cm.ClientSet) error {
-	podName := pod.GetObjectMeta().GetName()
-	podNamespace := pod.GetObjectMeta().GetNamespace()
-	daemonName := daemon.GetObjectMeta().GetName()
-	daemonNamespace := daemon.GetObjectMeta().GetNamespace()
-
 	// cpu or memory chaos
 	isCPU := true
 	if cpuSpec := chaos.Spec.Stressors.CPUStressor; cpuSpec == nil {
@@ -66,7 +61,7 @@ func debugEachPod(ctx context.Context, pod v1.Pod, daemon v1.Pod, chaos *v1alpha
 
 	// get process path
 	cmd := fmt.Sprintf("cat /proc/cgroups")
-	out, err := cm.Exec(podName, podNamespace, cmd, c.KubeCli)
+	out, err := cm.Exec(pod, cmd, c.KubeCli)
 	if err != nil {
 		return fmt.Errorf("run command '%s' failed with: %s", cmd, err.Error())
 	}
@@ -78,7 +73,7 @@ func debugEachPod(ctx context.Context, pod v1.Pod, daemon v1.Pod, chaos *v1alpha
 	}
 
 	cmd = fmt.Sprintf("ps")
-	out, err = cm.Exec(podName, podNamespace, cmd, c.KubeCli)
+	out, err = cm.Exec(pod, cmd, c.KubeCli)
 	if err != nil {
 		return fmt.Errorf("run command '%s' failed with: %s", cmd, err.Error())
 	}
@@ -89,11 +84,11 @@ func debugEachPod(ctx context.Context, pod v1.Pod, daemon v1.Pod, chaos *v1alpha
 	stressngPid := strings.Fields(stressngLine[0])[0]
 
 	cmd = fmt.Sprintf("cat /proc/1/cgroup")
-	out, err = cm.Exec(podName, podNamespace, cmd, c.KubeCli)
+	out, err = cm.Exec(pod, cmd, c.KubeCli)
 	if err != nil {
 		return fmt.Errorf("run command '%s' failed with: %s", cmd, err.Error())
 	}
-	cm.Print("1. [cat /proc/1/cgroup]", 1, cm.ColorCyan)
+	cm.Print("1. [cat /proc/1/cgroup]", 1, "Cyan")
 	cm.Print(string(out), 1, "")
 
 	var expr string
@@ -105,27 +100,27 @@ func debugEachPod(ctx context.Context, pod v1.Pod, daemon v1.Pod, chaos *v1alpha
 	processPath := regexp.MustCompile(expr).FindStringSubmatch(string(out))[1]
 
 	cmd = fmt.Sprintf("cat /proc/%s/cgroup", stressngPid)
-	outStress, err := cm.Exec(podName, podNamespace, cmd, c.KubeCli)
+	outStress, err := cm.Exec(pod, cmd, c.KubeCli)
 	if err != nil {
 		return fmt.Errorf("run command '%s' failed with: %s", cmd, err.Error())
 	}
-	cm.Print("2. [cat /proc/(stress-ng pid)/cgroup]", 1, cm.ColorCyan)
+	cm.Print("2. [cat /proc/(stress-ng pid)/cgroup]", 1, "Cyan")
 	cm.Print(string(outStress), 1, "")
 
 	if string(out) != string(outStress) {
-		cm.Print("StressChaos failed to execute as expected", 1, cm.ColorRed)
+		cm.Print("StressChaos failed to execute as expected", 1, "Red")
 		return nil
 	}
-	cm.Print("cgroup is the same", 1, cm.ColorGreen)
+	cm.Print("cgroup is the same", 1, "Green")
 
 	// print out debug info
 	if isCPU {
 		cmd = fmt.Sprintf("cat /sys/fs/cgroup/%s/%s/cpu.cfs_quota_us", cpuMountType, processPath)
-		out, err = cm.Exec(daemonName, daemonNamespace, cmd, c.KubeCli)
+		out, err = cm.Exec(daemon, cmd, c.KubeCli)
 		if err != nil {
 			return fmt.Errorf("run command '%s' failed with: %s", cmd, err.Error())
 		}
-		cm.Print("3. [cpu.cfs_quota_us]", 1, cm.ColorCyan)
+		cm.Print("3. [cpu.cfs_quota_us]", 1, "Cyan")
 		cm.Print(string(out), 1, "")
 		quota, err := strconv.Atoi(strings.TrimSuffix(string(out), "\n"))
 		if err != nil {
@@ -133,11 +128,11 @@ func debugEachPod(ctx context.Context, pod v1.Pod, daemon v1.Pod, chaos *v1alpha
 		}
 
 		cmd = fmt.Sprintf("cat /sys/fs/cgroup/%s/%s/cpu.cfs_period_us", cpuMountType, processPath)
-		out, err = cm.Exec(daemonName, daemonNamespace, cmd, c.KubeCli)
+		out, err = cm.Exec(daemon, cmd, c.KubeCli)
 		if err != nil {
 			return fmt.Errorf("run command '%s' failed with: %s", cmd, err.Error())
 		}
-		cm.Print("4. [cpu.cfs_period_us]", 1, cm.ColorCyan)
+		cm.Print("4. [cpu.cfs_period_us]", 1, "Cyan")
 		cm.Print(string(out), 1, "")
 		period, err := strconv.Atoi(strings.TrimSuffix(string(out), "\n"))
 		if err != nil {
@@ -145,14 +140,14 @@ func debugEachPod(ctx context.Context, pod v1.Pod, daemon v1.Pod, chaos *v1alpha
 		}
 
 		if quota == -1 {
-			cm.Print("no cpu limit is set for now", 1, cm.ColorRed)
+			cm.Print("no cpu limit is set for now", 1, "Red")
 		} else {
 			cpuLimitStr := fmt.Sprintf("cpu limit is equals to %.2f", float64(quota)/float64(period))
-			cm.Print(cpuLimitStr, 1, cm.ColorGreen)
+			cm.Print(cpuLimitStr, 1, "Green")
 		}
 	} else {
 		cmd = fmt.Sprintf("cat /sys/fs/cgroup/memory/%s/memory.limit_in_bytes", processPath)
-		out, err = cm.Exec(daemonName, daemonNamespace, cmd, c.KubeCli)
+		out, err = cm.Exec(daemon, cmd, c.KubeCli)
 		if err != nil {
 			return fmt.Errorf("run command '%s' failed with: %s", cmd, err.Error())
 		}
@@ -160,7 +155,7 @@ func debugEachPod(ctx context.Context, pod v1.Pod, daemon v1.Pod, chaos *v1alpha
 		if err != nil {
 			return fmt.Errorf("could not get memory.limit_in_bytes with: %s", err.Error())
 		}
-		cm.Print("3. [memory.limit_in_bytes]", 1, cm.ColorCyan)
+		cm.Print("3. [memory.limit_in_bytes]", 1, "Cyan")
 		cm.Print(bytefmt.ByteSize(limit)+"B", 1, "")
 	}
 	return nil

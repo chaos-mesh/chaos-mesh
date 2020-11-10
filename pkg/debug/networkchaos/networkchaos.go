@@ -45,7 +45,7 @@ func Debug(ctx context.Context, chaos runtime.Object, c *cm.ClientSet) error {
 
 	for i := range pods {
 		podName := pods[i].GetObjectMeta().GetName()
-		cm.Print("[Pod]: "+podName, 0, cm.ColorBlue)
+		cm.Print("[Pod]: "+podName, 0, "Blue")
 		err := debugEachPod(ctx, pods[i], daemons[i], networkChaos, c)
 		if err != nil {
 			return fmt.Errorf("for %s: %s", podName, err.Error())
@@ -57,8 +57,6 @@ func Debug(ctx context.Context, chaos runtime.Object, c *cm.ClientSet) error {
 func debugEachPod(ctx context.Context, pod v1.Pod, daemon v1.Pod, chaos *v1alpha1.NetworkChaos, c *cm.ClientSet) error {
 	podName := pod.GetObjectMeta().GetName()
 	podNamespace := pod.GetObjectMeta().GetNamespace()
-	daemonName := daemon.GetObjectMeta().GetName()
-	daemonNamespace := daemon.GetObjectMeta().GetNamespace()
 
 	// To disable printing irrelevant log from grpc/clientconn.go
 	// see grpc/grpc-go#3918 for detail. could be resolved in the future
@@ -71,19 +69,19 @@ func debugEachPod(ctx context.Context, pod v1.Pod, daemon v1.Pod, chaos *v1alpha
 
 	// print out debug info
 	cmd := fmt.Sprintf("/usr/bin/nsenter %s -- ipset list", nsenterPath)
-	out, err := cm.Exec(daemonName, daemonNamespace, cmd, c.KubeCli)
+	out, err := cm.Exec(daemon, cmd, c.KubeCli)
 	if err != nil {
 		return fmt.Errorf("run command '%s' failed with: %s", cmd, err.Error())
 	}
-	cm.Print("1. [ipset list]", 1, cm.ColorCyan)
+	cm.Print("1. [ipset list]", 1, "Cyan")
 	cm.Print(string(out), 1, "")
 
 	cmd = fmt.Sprintf("/usr/bin/nsenter %s -- tc qdisc list", nsenterPath)
-	out, err = cm.Exec(daemonName, daemonNamespace, cmd, c.KubeCli)
+	out, err = cm.Exec(daemon, cmd, c.KubeCli)
 	if err != nil {
 		return fmt.Errorf("run command '%s' failed with: %s", cmd, err.Error())
 	}
-	cm.Print("2. [tc qdisc list]", 1, cm.ColorCyan)
+	cm.Print("2. [tc qdisc list]", 1, "Cyan")
 	cm.Print(string(out), 1, "")
 
 	action := chaos.Spec.Action
@@ -124,18 +122,18 @@ func debugEachPod(ctx context.Context, pod v1.Pod, daemon v1.Pod, chaos *v1alpha
 				continue
 			}
 			errInfo := fmt.Sprintf("NetworkChaos didn't execute as expected, expect: %s, got: %s", netemExpect, netemCurrent)
-			cm.Print(errInfo, 1, cm.ColorRed)
+			cm.Print(errInfo, 1, "Red")
 			return nil
 		}
 	}
-	cm.Print("NetworkChaos execute as expected", 1, cm.ColorGreen)
+	cm.Print("NetworkChaos execute as expected", 1, "Green")
 
 	cmd = fmt.Sprintf("/usr/bin/nsenter %s -- iptables --list", nsenterPath)
-	out, err = cm.Exec(daemonName, daemonNamespace, cmd, c.KubeCli)
+	out, err = cm.Exec(daemon, cmd, c.KubeCli)
 	if err != nil {
 		return fmt.Errorf("cmd.Run() failed with: %s", err.Error())
 	}
-	cm.Print("3. [iptables list]", 1, cm.ColorCyan)
+	cm.Print("3. [iptables list]", 1, "Cyan")
 	cm.Print(string(out), 1, "")
 
 	podNetworkChaos := &v1alpha1.PodNetworkChaos{}
@@ -147,7 +145,7 @@ func debugEachPod(ctx context.Context, pod v1.Pod, daemon v1.Pod, chaos *v1alpha
 	if err = c.CtrlCli.Get(ctx, objectKey, podNetworkChaos); err != nil {
 		return fmt.Errorf("failed to get chaos: %s", err.Error())
 	}
-	cm.Print("4. [podnetworkchaos]", 1, cm.ColorCyan)
+	cm.Print("4. [podnetworkchaos]", 1, "Cyan")
 	mar, err := cm.MarshalChaos(podNetworkChaos.Spec)
 	if err != nil {
 		return err

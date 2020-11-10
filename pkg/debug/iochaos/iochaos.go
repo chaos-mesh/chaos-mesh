@@ -39,7 +39,7 @@ func Debug(ctx context.Context, chaos runtime.Object, c *cm.ClientSet) error {
 
 	for i := range pods {
 		podName := pods[i].GetObjectMeta().GetName()
-		cm.Print("[Pod]: "+podName, 0, cm.ColorBlue)
+		cm.Print("[Pod]: "+podName, 0, "Blue")
 		err := debugEachPod(ctx, pods[i], daemons[i], ioChaos, c)
 		if err != nil {
 			return fmt.Errorf("for %s: %s", podName, err.Error())
@@ -49,24 +49,21 @@ func Debug(ctx context.Context, chaos runtime.Object, c *cm.ClientSet) error {
 }
 
 func debugEachPod(ctx context.Context, pod v1.Pod, daemon v1.Pod, chaos *v1alpha1.IoChaos, c *cm.ClientSet) error {
-	daemonName := daemon.GetObjectMeta().GetName()
-	daemonNamespace := daemon.GetObjectMeta().GetNamespace()
-
 	// print out debug info
 	cmd := fmt.Sprintf("ls /proc/1/fd -al")
-	out, err := cm.Exec(daemonName, daemonNamespace, cmd, c.KubeCli)
+	out, err := cm.Exec(daemon, cmd, c.KubeCli)
 	if err != nil {
 		return fmt.Errorf("run command '%s' failed with: %s", cmd, err.Error())
 	}
-	cm.Print("1. [file discriptors]", 1, cm.ColorCyan)
+	cm.Print("1. [file discriptors]", 1, "Cyan")
 	cm.Print(string(out), 1, "")
 
 	cmd = fmt.Sprintf("mount")
-	out, err = cm.Exec(daemonName, daemonNamespace, cmd, c.KubeCli)
+	out, err = cm.Exec(daemon, cmd, c.KubeCli)
 	if err != nil {
 		return fmt.Errorf("run command '%s' failed with: %s", cmd, err.Error())
 	}
-	cm.Print("2. [mount information]", 1, cm.ColorCyan)
+	cm.Print("2. [mount information]", 1, "Cyan")
 	cm.Print(string(out), 1, "")
 
 	return nil

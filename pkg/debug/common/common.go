@@ -23,6 +23,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/fatih/color"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/kubernetes"
@@ -41,12 +42,13 @@ import (
 )
 
 var (
-	ColorReset = "\033[0m"
-	ColorRed   = "\033[31m"
-	ColorGreen = "\033[32m"
-	ColorCyan  = "\033[36m"
-	ColorBlue  = "\033[34m"
-	scheme     = runtime.NewScheme()
+	colorFunc = map[string]func(string, ...interface{}){
+		"Blue":  color.Blue,
+		"Red":   color.Red,
+		"Green": color.Green,
+		"Cyan":  color.Cyan,
+	}
+	scheme = runtime.NewScheme()
 )
 
 // ClientSet contains two different clients
@@ -65,14 +67,18 @@ func upperCaseChaos(str string) string {
 	return strings.Title(parts[1]) + strings.Title(parts[2])
 }
 
-// Print prints result to users in prettier format, with number of tabs and color specified
+// Print prints result to users in prettier format, with number of tabs
 func Print(s string, num int, color string) {
 	var tabStr string
 	for i := 0; i < num; i++ {
 		tabStr += "\t"
 	}
-	s = string(color) + s + string(ColorReset)
-	fmt.Printf("%s%s\n\n", tabStr, regexp.MustCompile("\n").ReplaceAllString(s, "\n"+tabStr))
+	str := fmt.Sprintf("%s%s\n\n", tabStr, regexp.MustCompile("\n").ReplaceAllString(s, "\n"+tabStr))
+	if color != "" {
+		colorFunc[color](str)
+	} else {
+		fmt.Printf(str)
+	}
 }
 
 // MarshalChaos returns json in readable format
@@ -99,19 +105,27 @@ func InitClientSet() (*ClientSet, error) {
 
 // Exec executes certain command and returns the result
 // runtime-controller only support CRUD， use client-go client
-func Exec(pod string, ns string, cmd string, c *kubernetes.Clientset) (string, error) {
+func Exec(pod v1.Pod, cmd string, c *kubernetes.Clientset) (string, error) {
+	name := pod.GetObjectMeta().GetName()
+	namespace := pod.GetObjectMeta().GetNamespace()
+	// TODO: if `containerNames` is set and specific container is injected chaos,
+	// need to use THE name rather than the first one.
+	// till 20/11/10 only podchaos and kernelchaos support `containerNames`, so not set it for now
+	containerName := pod.Spec.Containers[0].Name
+
 	req := c.CoreV1().RESTClient().Post().
 		Resource("pods").
-		Name(pod).
-		Namespace(ns).
+		Name(name).
+		Namespace(namespace).
 		SubResource("exec")
 
 	req.VersionedParams(&v1.PodExecOptions{
-		Command: []string{"/bin/sh", "-c", cmd},
-		Stdin:   false,
-		Stdout:  true,
-		Stderr:  true,
-		TTY:     false,
+		Container: containerName,
+		Command:   []string{"/bin/sh", "-c", cmd},
+		Stdin:     false,
+		Stdout:    true,
+		Stderr:    true,
+		TTY:       false,
 	}, kubectlscheme.ParameterCodec)
 
 	var stdout, stderr bytes.Buffer
@@ -150,8 +164,6 @@ func GetPods(ctx context.Context, status v1alpha1.ChaosStatus, selector v1alpha1
 		time.Sleep(waitTime)
 	}
 
-	// TODO: failed and maybe not appropirate to create manager here, to get client.Reader
-	// So could not parse fieldSelector for now
 	pods, err := utils.SelectPods(ctx, c, nil, selector)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to SelectPods with: %s", err.Error())
@@ -185,12 +197,12 @@ func GetPods(ctx context.Context, status v1alpha1.ChaosStatus, selector v1alpha1
 func GetChaosList(ctx context.Context, chaosType string, chaosName string, ns string, c client.Client) ([]runtime.Object, []string, error) {
 	chaosType = upperCaseChaos(strings.ToLower(chaosType))
 	allKinds := v1alpha1.AllKinds()
-	chaosListIntf := allKinds[chaosType].ChaosList
+	chaosListInterface := allKinds[chaosType].ChaosList
 
-	if err := c.List(ctx, chaosListIntf, client.InNamespace(ns)); err != nil {
+	if err := c.List(ctx, chaosListInterface, client.InNamespace(ns)); err != nil {
 		return nil, nil, fmt.Errorf("failed to get chaosList: %s", err.Error())
 	}
-	chaosList := chaosListIntf.ListChaos()
+	chaosList := chaosListInterface.ListChaos()
 	if len(chaosList) == 0 {
 		return nil, nil, fmt.Errorf("no chaos is found, please check your input")
 	}
