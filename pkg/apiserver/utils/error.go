@@ -73,7 +73,7 @@ func MWHandleErrors() gin.HandlerFunc {
 }
 
 func SetErrorForGinCtx(c *gin.Context, err error) {
-	if apierrors.IsNotFound(err) && strings.Contains(err.Error(), "at the cluster scope") {
+	if apierrors.IsForbidden(err) && strings.Contains(err.Error(), "at the cluster scope") {
 		_ = c.Error(ErrNoClusterPrivilege.WrapWithNoMessage(err))
 		return
 	} else if apierrors.IsNotFound(err) {
