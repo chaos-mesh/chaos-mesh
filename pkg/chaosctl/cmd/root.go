@@ -41,9 +41,6 @@ func Execute() {
 	}
 }
 
-func init() {
-}
-
 func noCompletions(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 	return nil, cobra.ShellCompDirectiveNoFileComp
 }

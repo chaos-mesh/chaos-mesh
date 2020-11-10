@@ -138,12 +138,6 @@ func debugEachPod(ctx context.Context, pod v1.Pod, daemon v1.Pod, chaos *v1alpha
 	cm.Print("3. [iptables list]", 1, cm.ColorCyan)
 	cm.Print(string(out), 1, "")
 
-	cmd = fmt.Sprintf("/usr/bin/nsenter %s -- iptables --list", nsenterPath)
-	out, err = cm.Exec(daemonName, daemonNamespace, cmd, c.KubeCli)
-	if err != nil {
-		return fmt.Errorf("cmd.Run() failed with: %s", err.Error())
-	}
-
 	podNetworkChaos := &v1alpha1.PodNetworkChaos{}
 	objectKey := client.ObjectKey{
 		Namespace: podNamespace,

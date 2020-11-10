@@ -32,7 +32,16 @@ const DefaultRPCTimeout = 60 * time.Second
 var RPCTimeout = DefaultRPCTimeout
 
 // CreateGrpcConnection create a grpc connection with given port
-func CreateGrpcConnection(ctx context.Context, c client.Client, pod *v1.Pod, port int, address string) (*grpc.ClientConn, error) {
+func CreateGrpcConnection(ctx context.Context, c client.Client, pod *v1.Pod, port int) (*grpc.ClientConn, error) {
+	return createGrpcConnection(ctx, c, pod, port, "")
+}
+
+// CreateGrpcConnectionWithAddress create a grpc connection with given port and address
+func CreateGrpcConnectionWithAddress(ctx context.Context, port int, address string) (*grpc.ClientConn, error) {
+	return createGrpcConnection(ctx, nil, nil, port, address)
+}
+
+func createGrpcConnection(ctx context.Context, c client.Client, pod *v1.Pod, port int, address string) (*grpc.ClientConn, error) {
 	// for remote client, use the node address got from pod
 	if address == "" {
 		nodeName := pod.Spec.NodeName

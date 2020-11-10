@@ -136,7 +136,7 @@ watchmaker:
 
 # Build chaosctl
 chaosctl:
-	go install ./pkg/chaosctl
+	go install ./cmd/chaosctl
 
 # Run against the configured Kubernetes cluster in ~/.kube/config
 run: generate fmt vet manifests
