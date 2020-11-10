@@ -43,7 +43,7 @@ const EventDetail: React.FC<EventDetailProps> = ({ eventID }) => {
       })
   }
 
-  useEffect(fetchEvent, [])
+  useEffect(fetchEvent, [eventID])
 
   return (
     <>

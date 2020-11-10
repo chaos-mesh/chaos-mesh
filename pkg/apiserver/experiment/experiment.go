@@ -44,7 +44,6 @@ var log = ctrl.Log.WithName("experiment api")
 
 // ChaosState defines the number of chaos experiments of each phase
 type ChaosState struct {
-	Total    int `json:"Total"`
 	Running  int `json:"Running"`
 	Waiting  int `json:"Waiting"`
 	Paused   int `json:"Paused"`
@@ -827,7 +826,6 @@ func (s *Service) state(c *gin.Context) {
 				case string(v1alpha1.ExperimentPhaseFinished):
 					data.Finished++
 				}
-				data.Total++
 			}
 			m.Unlock()
 			return nil

@@ -13,31 +13,14 @@
 
 package fusedev
 
-// #include <sys/sysmacros.h>
-// #include <sys/types.h>
-// // makedev is a macro, so a wrapper is needed
-// dev_t Makedev(unsigned int maj, unsigned int min) {
-//   return makedev(maj, min);
-// }
-import "C"
 import (
 	"bufio"
 	"fmt"
 	"os"
 	"strings"
-	"syscall"
 
 	"github.com/pingcap/errors"
 )
-
-// EnsureFuseDev ensures /dev/fuse exists. If not, it will create one
-func EnsureFuseDev() {
-	if _, err := os.Open("/dev/fuse"); os.IsNotExist(err) {
-		// 10, 229 according to https://www.kernel.org/doc/Documentation/admin-guide/devices.txt
-		fuse := C.Makedev(10, 229)
-		syscall.Mknod("/dev/fuse", 0o666|syscall.S_IFCHR, int(fuse))
-	}
-}
 
 // GrantAccess appends 'c 10:229 rwm' to devices.allow
 func GrantAccess() error {
@@ -53,9 +36,6 @@ func GrantAccess() error {
 	cgroupScanner := bufio.NewScanner(cgroupFile)
 	var deviceCgroupPath string
 	for cgroupScanner.Scan() {
-		if err := cgroupScanner.Err(); err != nil {
-			return err
-		}
 		var (
 			text  = cgroupScanner.Text()
 			parts = strings.SplitN(text, ":", 3)
@@ -67,6 +47,10 @@ func GrantAccess() error {
 		if parts[1] == "devices" {
 			deviceCgroupPath = parts[2]
 		}
+	}
+
+	if err := cgroupScanner.Err(); err != nil {
+		return err
 	}
 
 	if len(deviceCgroupPath) == 0 {
