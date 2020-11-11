@@ -1,9 +1,9 @@
 import * as d3 from 'd3'
 
-import { ChaosKindKeyMap } from 'lib/formikhelpers'
 import { Experiment } from 'api/experiments.type'
 import { Theme } from 'slices/settings'
 import _debounce from 'lodash.debounce'
+import { kind } from 'components/NewExperiment/types'
 
 const margin = {
   top: 15,
@@ -35,7 +35,7 @@ export default function gen({
 
   const x = d3
     .scaleBand()
-    .domain(Object.keys(ChaosKindKeyMap).map((d) => d.replace('Chaos', '')))
+    .domain(kind.map((d) => d.replace('Chaos', '')))
     .range([margin.left, width - margin.right])
     .padding(0.5)
   const xAxis = d3.axisBottom(x)
