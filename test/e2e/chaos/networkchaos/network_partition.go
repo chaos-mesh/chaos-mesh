@@ -20,7 +20,6 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/test/pkg/fixture"
 	. "github.com/onsi/ginkgo"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/kubernetes"
@@ -52,32 +51,18 @@ func TestcaseForbidHostNetwork(
 	framework.ExpectNoError(err, "wait network-peer deployment ready error")
 
 	By("create network partition chaos CRD objects")
-	networkPartition := &v1alpha1.NetworkChaos{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "network-chaos-1",
-			Namespace: ns,
+	networkPartition := makeNetworkPartitionChaos(
+		ns, "network-chaos-1",
+		map[string]string{"app": "network-peer-4"},
+		map[string]string{"app": "network-peer-1"},
+		v1alpha1.OnePodMode,
+		v1alpha1.OnePodMode,
+		v1alpha1.To,
+		pointer.StringPtr("9m"),
+		&v1alpha1.SchedulerSpec{
+			Cron: "@every 10m",
 		},
-		Spec: v1alpha1.NetworkChaosSpec{
-			Action: v1alpha1.PartitionAction,
-			Selector: v1alpha1.SelectorSpec{
-				Namespaces:     []string{ns},
-				LabelSelectors: map[string]string{"app": "network-peer-4"},
-			},
-			Mode:      v1alpha1.OnePodMode,
-			Direction: v1alpha1.To,
-			Target: &v1alpha1.Target{
-				TargetSelector: v1alpha1.SelectorSpec{
-					Namespaces:     []string{ns},
-					LabelSelectors: map[string]string{"app": "network-peer-1"},
-				},
-				TargetMode: v1alpha1.OnePodMode,
-			},
-			Duration: pointer.StringPtr("9m"),
-			Scheduler: &v1alpha1.SchedulerSpec{
-				Cron: "@every 10m",
-			},
-		},
-	}
+	)
 
 	err = cli.Create(ctx, networkPartition.DeepCopy())
 	framework.ExpectNoError(err, "create network chaos error")
@@ -119,138 +104,154 @@ func TestcaseNetworkPartition(
 
 		framework.ExpectNoError(err, "wait e2e helper ready error")
 	}
-	connect := func(source, target int) bool {
-		err := sendUDPPacket(c, ports[source], networkPeers[target].Status.PodIP)
-		if err != nil {
-			klog.Infof("Error: %v", err)
-			return false
+
+	result := probeNetworkCondition(c, networkPeers, ports)
+	framework.ExpectEqual(len(result[networkConditionBlocked]), 0)
+	framework.ExpectEqual(len(result[networkConditionSlow]), 0)
+
+	var (
+		testDelayDuration      = pointer.StringPtr("9m")
+		testDelaySchedulerSpec = &v1alpha1.SchedulerSpec{
+			Cron: "@every 10m",
 		}
+	)
 
-		data, err := recvUDPPacket(c, ports[target])
-		if err != nil || data != "ping\n" {
-			klog.Infof("Error: %v, Data: %s", err, data)
-			return false
-		}
-
-		return true
-	}
-	allBlockedConnection := func() [][]int {
-		var result [][]int
-		for source := range networkPeers {
-			for target := range networkPeers {
-				if source == target {
-					continue
-				}
-
-				if !connect(source, target) {
-					result = append(result, []int{source, target})
-				}
-			}
-		}
-
-		return result
-	}
-	framework.ExpectEqual(len(allBlockedConnection()), 0)
-
-	baseNetworkPartition := &v1alpha1.NetworkChaos{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "network-chaos-1",
-			Namespace: ns,
-		},
-		Spec: v1alpha1.NetworkChaosSpec{
-			Action: v1alpha1.PartitionAction,
-			Selector: v1alpha1.SelectorSpec{
-				Namespaces:     []string{ns},
-				LabelSelectors: map[string]string{"app": "network-peer-0"},
-			},
-			Mode:      v1alpha1.OnePodMode,
-			Direction: v1alpha1.To,
-			Target: &v1alpha1.Target{
-				TargetSelector: v1alpha1.SelectorSpec{
-					Namespaces:     []string{ns},
-					LabelSelectors: map[string]string{"app": "network-peer-1"},
-				},
-				TargetMode: v1alpha1.OnePodMode,
-			},
-			Duration: pointer.StringPtr("9m"),
-			Scheduler: &v1alpha1.SchedulerSpec{
-				Cron: "@every 10m",
-			},
-		},
-	}
+	baseNetworkPartition := makeNetworkPartitionChaos(
+		ns, "network-chaos-1",
+		map[string]string{"app": "network-peer-0"},
+		map[string]string{"app": "network-peer-1"},
+		v1alpha1.OnePodMode,
+		v1alpha1.OnePodMode,
+		v1alpha1.To,
+		testDelayDuration,
+		testDelaySchedulerSpec,
+	)
 
 	By("block from peer-0 to peer-1")
 	err := cli.Create(ctx, baseNetworkPartition.DeepCopy())
 	framework.ExpectNoError(err, "create network chaos error")
 	time.Sleep(5 * time.Second)
-	framework.ExpectEqual(allBlockedConnection(), [][]int{{0, 1}})
+
+	result = probeNetworkCondition(c, networkPeers, ports)
+	framework.ExpectEqual(result[networkConditionBlocked], [][]int{{0, 1}})
+	framework.ExpectEqual(len(result[networkConditionSlow]), 0)
 
 	By("recover")
 	err = cli.Delete(ctx, baseNetworkPartition.DeepCopy())
 	framework.ExpectNoError(err, "delete network chaos error")
 	time.Sleep(5 * time.Second)
-	framework.ExpectEqual(len(allBlockedConnection()), 0)
+	result = probeNetworkCondition(c, networkPeers, ports)
+	framework.ExpectEqual(len(result[networkConditionBlocked]), 0)
+	framework.ExpectEqual(len(result[networkConditionSlow]), 0)
 
 	By("block both from peer-0 to peer-1 and from peer-1 to peer-0")
-	baseNetworkPartition.Spec.Direction = v1alpha1.Both
-	err = cli.Create(ctx, baseNetworkPartition.DeepCopy())
+	bothDirectionNetworkPartition := makeNetworkPartitionChaos(
+		ns, "network-chaos-1",
+		map[string]string{"app": "network-peer-0"},
+		map[string]string{"app": "network-peer-1"},
+		v1alpha1.OnePodMode,
+		v1alpha1.OnePodMode,
+		v1alpha1.Both,
+		testDelayDuration,
+		testDelaySchedulerSpec,
+	)
+	err = cli.Create(ctx, bothDirectionNetworkPartition.DeepCopy())
 	framework.ExpectNoError(err, "create network chaos error")
 	time.Sleep(5 * time.Second)
-	framework.ExpectEqual(allBlockedConnection(), [][]int{{0, 1}, {1, 0}})
+	result = probeNetworkCondition(c, networkPeers, ports)
+	framework.ExpectEqual(result[networkConditionBlocked], [][]int{{0, 1}, {1, 0}})
+	framework.ExpectEqual(len(result[networkConditionSlow]), 0)
 
 	By("recover")
-	err = cli.Delete(ctx, baseNetworkPartition.DeepCopy())
+	err = cli.Delete(ctx, bothDirectionNetworkPartition.DeepCopy())
 	framework.ExpectNoError(err, "delete network chaos error")
 	time.Sleep(5 * time.Second)
-	framework.ExpectEqual(len(allBlockedConnection()), 0)
+	result = probeNetworkCondition(c, networkPeers, ports)
+	framework.ExpectEqual(len(result[networkConditionBlocked]), 0)
+	framework.ExpectEqual(len(result[networkConditionSlow]), 0)
 
 	By("block from peer-1 to peer-0")
-	baseNetworkPartition.Spec.Direction = v1alpha1.From
-	err = cli.Create(ctx, baseNetworkPartition.DeepCopy())
+	fromDirectionNetworkPartition := makeNetworkPartitionChaos(
+		ns, "network-chaos-1",
+		map[string]string{"app": "network-peer-0"},
+		map[string]string{"app": "network-peer-1"},
+		v1alpha1.OnePodMode,
+		v1alpha1.OnePodMode,
+		v1alpha1.From,
+		testDelayDuration,
+		testDelaySchedulerSpec,
+	)
+
+	err = cli.Create(ctx, fromDirectionNetworkPartition.DeepCopy())
 	framework.ExpectNoError(err, "create network chaos error")
 	time.Sleep(5 * time.Second)
-	framework.ExpectEqual(allBlockedConnection(), [][]int{{1, 0}})
+	result = probeNetworkCondition(c, networkPeers, ports)
+	framework.ExpectEqual(result[networkConditionBlocked], [][]int{{1, 0}})
+	framework.ExpectEqual(len(result[networkConditionSlow]), 0)
 
 	By("recover")
-	err = cli.Delete(ctx, baseNetworkPartition.DeepCopy())
+	err = cli.Delete(ctx, fromDirectionNetworkPartition.DeepCopy())
 	framework.ExpectNoError(err, "delete network chaos error")
 	time.Sleep(5 * time.Second)
-	framework.ExpectEqual(len(allBlockedConnection()), 0)
+	result = probeNetworkCondition(c, networkPeers, ports)
+	framework.ExpectEqual(len(result[networkConditionBlocked]), 0)
+	framework.ExpectEqual(len(result[networkConditionSlow]), 0)
 
 	By("network partition 1")
-	baseNetworkPartition.Spec.Direction = v1alpha1.Both
-	baseNetworkPartition.Spec.Target.TargetSelector.LabelSelectors = map[string]string{"partition": "1"}
-	baseNetworkPartition.Spec.Target.TargetMode = v1alpha1.AllPodMode
-	err = cli.Create(ctx, baseNetworkPartition.DeepCopy())
+
+	bothDirectionWithPartitionNetworkPartition := makeNetworkPartitionChaos(
+		ns, "network-chaos-1",
+		map[string]string{"app": "network-peer-0"},
+		map[string]string{"partition": "1"},
+		v1alpha1.OnePodMode,
+		v1alpha1.AllPodMode,
+		v1alpha1.Both,
+		testDelayDuration,
+		testDelaySchedulerSpec,
+	)
+	err = cli.Create(ctx, bothDirectionWithPartitionNetworkPartition.DeepCopy())
 	framework.ExpectNoError(err, "create network chaos error")
 	time.Sleep(5 * time.Second)
-	framework.ExpectEqual(allBlockedConnection(), [][]int{{0, 1}, {0, 3}, {1, 0}, {3, 0}})
+	result = probeNetworkCondition(c, networkPeers, ports)
+	framework.ExpectEqual(result[networkConditionBlocked], [][]int{{0, 1}, {1, 0}, {0, 3}, {3, 0}})
+	framework.ExpectEqual(len(result[networkConditionSlow]), 0)
 
 	By("recover")
-	err = cli.Delete(ctx, baseNetworkPartition.DeepCopy())
+	err = cli.Delete(ctx, bothDirectionWithPartitionNetworkPartition.DeepCopy())
 	framework.ExpectNoError(err, "delete network chaos error")
 	time.Sleep(5 * time.Second)
-	framework.ExpectEqual(len(allBlockedConnection()), 0)
+	result = probeNetworkCondition(c, networkPeers, ports)
+	framework.ExpectEqual(len(result[networkConditionBlocked]), 0)
+	framework.ExpectEqual(len(result[networkConditionSlow]), 0)
 
 	By("multiple network partition chaos on peer-0")
-	anotherNetworkPartition := baseNetworkPartition.DeepCopy()
-	anotherNetworkPartition.Name = "network-chaos-2"
-	anotherNetworkPartition.Spec.Direction = v1alpha1.To
-	anotherNetworkPartition.Spec.Target.TargetSelector.LabelSelectors = map[string]string{"partition": "0"}
-	anotherNetworkPartition.Spec.Target.TargetMode = v1alpha1.AllPodMode
-	err = cli.Create(ctx, baseNetworkPartition.DeepCopy())
+	anotherNetworkPartition := makeNetworkPartitionChaos(
+		ns, "network-chaos-2",
+		map[string]string{"app": "network-peer-0"},
+		map[string]string{"partition": "0"},
+		v1alpha1.OnePodMode,
+		v1alpha1.AllPodMode,
+		v1alpha1.To,
+		testDelayDuration,
+		testDelaySchedulerSpec,
+	)
+	err = cli.Create(ctx, bothDirectionWithPartitionNetworkPartition.DeepCopy())
 	framework.ExpectNoError(err, "create network chaos error")
 	err = cli.Create(ctx, anotherNetworkPartition.DeepCopy())
 	framework.ExpectNoError(err, "create network chaos error")
 	time.Sleep(5 * time.Second)
-	framework.ExpectEqual(allBlockedConnection(), [][]int{{0, 1}, {0, 2}, {0, 3}, {1, 0}, {3, 0}})
+
+	result = probeNetworkCondition(c, networkPeers, ports)
+	framework.ExpectEqual(result[networkConditionBlocked], [][]int{{0, 1}, {1, 0}, {0, 2}, {0, 3}, {3, 0}})
+	framework.ExpectEqual(len(result[networkConditionSlow]), 0)
 
 	By("recover")
-	err = cli.Delete(ctx, baseNetworkPartition.DeepCopy())
+	err = cli.Delete(ctx, bothDirectionWithPartitionNetworkPartition.DeepCopy())
 	framework.ExpectNoError(err, "delete network chaos error")
 	err = cli.Delete(ctx, anotherNetworkPartition.DeepCopy())
 	framework.ExpectNoError(err, "delete network chaos error")
 	time.Sleep(5 * time.Second)
-	framework.ExpectEqual(len(allBlockedConnection()), 0)
-
+	result = probeNetworkCondition(c, networkPeers, ports)
+	framework.ExpectEqual(len(result[networkConditionBlocked]), 0)
+	framework.ExpectEqual(len(result[networkConditionSlow]), 0)
 }
