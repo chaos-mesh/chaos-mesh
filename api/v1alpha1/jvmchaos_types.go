@@ -46,9 +46,9 @@ type JVMChaosSpec struct {
 	// +kubebuilder:validation:Enum=delay;return;script;cfl;oom;ccf;tce;delay4svr;tce4svr
 	Action JVMChaosAction `json:"action"`
 
-	// JVMParmeter represents the detail about jvm chaos action definition
+	// JVMParameter represents the detail about jvm chaos action definition
 	// +optional
-	JVMParmeter `json:",inline"`
+	JVMParameter `json:",inline"`
 }
 
 // JVMChaosAction represents the chaos action about jvm
@@ -85,7 +85,8 @@ const (
 	ServletExceptionAction JVMChaosAction = "tce4svr"
 )
 
-type JVMParmeter struct {
+// JVMParameter represents the detail about jvm chaos action definition
+type JVMParameter struct {
 	// Count represents the number of affect
 	// +optional
 	Count int `json:"count"`
@@ -129,8 +130,8 @@ type JVMParmeter struct {
 
 // JVMExceptionSpec represents the detail about JVM chaos action of throwing custom exceptions
 type JVMExceptionSpec struct {
-	// JVMCommonParmeter represents the common jvm chaos parmeter
-	JVMCommonParmeter `json:",inline"`
+	// JVMCommonParameter represents the common jvm chaos parameter
+	JVMCommonParameter `json:",inline"`
 
 	// Exception represents the Exception class, with the full package name, must inherit from java.lang.Exception or Java.lang.Exception itself
 	Exception string `json:"exception"`
@@ -142,8 +143,8 @@ type JVMExceptionSpec struct {
 
 // JVMOOMSpec represents the detail about JVM chaos action of OOM exception
 type JVMOOMSpec struct {
-	// JVMCommonParmeter represents the common jvm chaos parmeter
-	JVMCommonParmeter `json:",inline"`
+	// JVMCommonParameter represents the common jvm chaos parameter
+	JVMCommonParameter `json:",inline"`
 
 	// Area represents JVM memory area, currently supported [HEAP, NOHEAP, OFFHEAP], required.
 	// Eden+Old is denoted by HEAP
@@ -168,8 +169,8 @@ type JVMOOMSpec struct {
 
 // JVMCpufullloadSpec represents the detail about JVM chaos action of CPU is full
 type JVMCpufullloadSpec struct {
-	// JVMCommonParmeter represents the common jvm chaos parmeter
-	JVMCommonParmeter `json:",inline"`
+	// JVMCommonParameter represents the common jvm chaos parameter
+	JVMCommonParameter `json:",inline"`
 
 	// CpuCount represents the number of CPU cores to bind to, that is, specify how many cores are full
 	CpuCount int `json:"cpucount"`
@@ -177,8 +178,8 @@ type JVMCpufullloadSpec struct {
 
 // JVMScriptSpec represents the detail about JVM chaos action of Java or Groovy scripts
 type JVMScriptSpec struct {
-	// JVMCommonParmeter represents the common jvm chaos parmeter
-	JVMCommonParmeter `json:",inline"`
+	// JVMCommonParameter represents the common jvm chaos parameter
+	JVMCommonParameter `json:",inline"`
 
 	// Content represents the script content is Base64 encoded content.
 	// Note that it cannot be used with file
@@ -200,18 +201,19 @@ type JVMScriptSpec struct {
 	Type string `json:"type"`
 }
 
-// JVMReturnSpec
+// JVMReturnSpec represents the detail about JVM chaos action of return value
 type JVMReturnSpec struct {
-	// JVMCommonParmeter represents the common jvm chaos parmeter
-	JVMCommonParmeter `json:",inline"`
+	// JVMCommonParameter represents the common jvm chaos parameter
+	JVMCommonParameter `json:",inline"`
 
 	// Value represents specifies the return value of a class method, supporting only primitive, null, and String return values. required
 	Value string `json:"value"`
 }
 
+// JVMDelaySpec represents the detail about JVM chaos action of invoke delay
 type JVMDelaySpec struct {
-	// JVMCommonParmeter represents the common jvm chaos parmeter
-	JVMCommonParmeter `json:",inline"`
+	// JVMCommonParameter represents the common jvm chaos parameter
+	JVMCommonParameter `json:",inline"`
 
 	// Time represents delay time, in milliseconds, required
 	Time int `json:"time"`
@@ -221,8 +223,8 @@ type JVMDelaySpec struct {
 	Offset int `json:"offset"`
 }
 
-// JVMCommonParmeter represents the common jvm chaos parmeter
-type JVMCommonParmeter struct {
+// JVMCommonParameter represents the common jvm chaos parameter
+type JVMCommonParameter struct {
 	// Classname represents specify the class name, which must be an implementation class with a full package name, such as com.xxx.xxx.XController. required
 	Classname string `json:"classname"`
 
@@ -234,9 +236,10 @@ type JVMCommonParmeter struct {
 	After bool `json:"after"`
 }
 
+// ServletExceptionSpec represents the detail about JVM chaos action of Servlet throwing custom exceptions
 type ServletExceptionSpec struct {
-	// ServletCommonParmeter represents the common servlet chaos parmeter
-	ServletCommonParmeter `json:",inline"`
+	// ServletCommonParameter represents the common servlet chaos parameter
+	ServletCommonParameter `json:",inline"`
 
 	// Exception represents the Exception class, with the full package name, must inherit from java.lang.Exception or Java.lang.Exception itself
 	Exception string `json:"exception"`
@@ -246,9 +249,10 @@ type ServletExceptionSpec struct {
 	Message string `json:"message"`
 }
 
+// ServletDelaySpec represents the detail about JVM chaos action of Servlet response delay
 type ServletDelaySpec struct {
-	// ServletCommonParmeter represents the common servlet chaos parmeter
-	ServletCommonParmeter `json:",inline"`
+	// ServletCommonParameter represents the common servlet chaos parameter
+	ServletCommonParameter `json:",inline"`
 
 	// Time represents delay time, in milliseconds, required
 	Time int `json:"time"`
@@ -258,7 +262,8 @@ type ServletDelaySpec struct {
 	Offset int `json:"offset"`
 }
 
-type ServletCommonParmeter struct {
+// ServletCommonParameter represents the common servlet chaos parameter
+type ServletCommonParameter struct {
 	// Method represents HTTP request method, such as GET, POST, or PUT. Default is GET
 	// +kubebuilder:validation:Enum=GET;POST;PUT
 	// +optional
