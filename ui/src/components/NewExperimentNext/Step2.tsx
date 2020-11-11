@@ -62,9 +62,7 @@ const Step2 = () => {
     dispatch(setStep2(true))
   }
 
-  const handleUndo = () => {
-    dispatch(setStep2(false))
-  }
+  const handleUndo = () => dispatch(setStep2(false))
 
   return (
     <Paper className={step2 ? classes.submit : ''}>
@@ -114,7 +112,10 @@ const Step2 = () => {
                       id="namespace"
                       name="namespace"
                       label={T('newE.basic.namespace')}
-                      helperText={T('newE.basic.namespaceHelper')}
+                      helperText={
+                        errors.namespace && touched.namespace ? errors.namespace : T('newE.basic.namespaceHelper')
+                      }
+                      error={errors.namespace && touched.namespace ? true : false}
                     >
                       {namespaces.map((n) => (
                         <MenuItem key={n} value={n}>
@@ -133,7 +134,7 @@ const Step2 = () => {
                   <Box mb={3}>
                     <Divider />
                   </Box>
-                  <Scheduler />
+                  <Scheduler errors={errors} touched={touched} />
                   <Box mt={6} textAlign="right">
                     <Button type="submit" variant="contained" color="primary" startIcon={<PublishIcon />}>
                       {T('common.submit')}
