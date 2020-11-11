@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react'
 
 import AffectedPods from 'components/AffectedPods'
 import { Event } from 'api/events.type'
-import Loading from 'components/Loading'
+import Loading from 'components-mui/Loading'
 import { RootState } from 'store'
 import T from 'components/T'
 import api from 'api'
