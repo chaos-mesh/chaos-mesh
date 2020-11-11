@@ -208,6 +208,41 @@ dashboard:
         ## If TLS is set to true, you must declare what secret will store the key/certificate for TLS
         tlsSecret: dashboard.local-tls
 
+dnsServer:
+  create: false
+
+  serviceAccount: chaos-dns-server
+
+  image: pingcap/coredns:latest
+
+  imagePullPolicy: IfNotPresent
+
+  nodeSelector: {}
+
+  runtime: docker
+
+  name: chaos-mesh-dns-server
+
+  grpcPort: 9288
+
+  resources:
+    # We usually recommend not to specify default resources and to leave this as a conscious
+    # choice for the user. This also increases chances charts run on environments with little
+    # resources, such as Minikube. If you do want to specify resources, uncomment the following
+    # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+    limits: {}
+    #  cpu: 500m
+    #  memory: 1024Mi
+    requests:
+      cpu: 100m
+      memory: 70Mi
+
+  tolerations: []
+
+  env:
+    LISTEN_HOST: "0.0.0.0"
+    LISTEN_PORT: 53
+
 prometheus:
   create: false
 

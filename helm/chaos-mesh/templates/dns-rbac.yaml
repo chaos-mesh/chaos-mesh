@@ -1,14 +1,14 @@
-{{- if .Values.rbac.create }}
+{{- if .Values.dnsServer.create }}
 kind: ServiceAccount
 apiVersion: v1
 metadata:
   namespace: {{ .Release.Namespace }}
-  name: {{ .Values.controllerManager.serviceAccount }}
+  name: {{ .Values.dnsServer.serviceAccount }}
   labels:
     app.kubernetes.io/name: {{ template "chaos-mesh.name" . }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     app.kubernetes.io/instance: {{ .Release.Name }}
-    app.kubernetes.io/component: controller-manager
+    app.kubernetes.io/component: dns-server
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+"  "_" }}
 
 ---
@@ -16,24 +16,17 @@ metadata:
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: {{ .Release.Name }}:chaos-controller-manager-target-namespace
+  name: {{ .Release.Name }}:chaos-dns-server
   labels:
     app.kubernetes.io/name: {{ template "chaos-mesh.name" . }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     app.kubernetes.io/instance: {{ .Release.Name }}
-    app.kubernetes.io/component: controller-manager
+    app.kubernetes.io/component: dns-server
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+"  "_" }}
 rules:
   - apiGroups: [ "" ]
     resources: [ "pods" ]
-    verbs: [ "get", "list", "watch", "delete", "update" ]
-  - apiGroups:
-      - ""
-    resources:
-      - events
-    verbs:
-      - patch
-      - create
+    verbs: [ "get", "list", "watch" ]
   - apiGroups: [ "" ]
     resources: [ "configmaps" ]
     verbs: [ "*" ]
@@ -46,59 +39,58 @@ rules:
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: {{ .Release.Name }}:chaos-controller-manager-cluster-level
+  name: {{ .Release.Name }}:chaos-dns-server-cluster-level
   labels:
     app.kubernetes.io/name: {{ template "chaos-mesh.name" . }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     app.kubernetes.io/instance: {{ .Release.Name }}
-    app.kubernetes.io/component: controller-manager
+    app.kubernetes.io/component: dns-server
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+"  "_" }}
 rules:
   - apiGroups: [ "" ]
     resources:
-      - nodes
-{{- if .Values.clusterScoped }}
       - namespaces
       - services
-{{- end }}
+      - endpoints
+      - pods
     verbs: [ "get", "list", "watch" ]
 
 ---
 kind: Role
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: {{ .Release.Name }}:chaos-controller-manager-control-plane
+  name: {{ .Release.Name }}:chaos-dns-server-control-plane
   namespace: {{ .Release.Namespace }}
   labels:
     app.kubernetes.io/name: {{ template "chaos-mesh.name" . }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     app.kubernetes.io/instance: {{ .Release.Name }}
-    app.kubernetes.io/component: controller-manager
+    app.kubernetes.io/component: dns-server
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+"  "_" }}
 rules:
   - apiGroups: [ "" ]
-    resources: [ "configmaps", "services" ]
-    verbs: [ "get", "list", "watch" ]
+    resources: [ "configmaps" ]
+    verbs: [ "get", "list" ]
 
 ---
 # bindings cluster level
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: {{ .Release.Name }}:chaos-controller-manager-cluster-level
+  name: {{ .Release.Name }}:chaos-dns-server-cluster-level
   labels:
     app.kubernetes.io/name: {{ template "chaos-mesh.name" . }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     app.kubernetes.io/instance: {{ .Release.Name }}
-    app.kubernetes.io/component: controller-manager
+    app.kubernetes.io/component: dns-server
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+"  "_" }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: {{ .Release.Name }}:chaos-controller-manager-cluster-level
+  name: {{ .Release.Name }}:chaos-dns-server-cluster-level
 subjects:
   - kind: ServiceAccount
-    name: {{ .Values.controllerManager.serviceAccount }}
+    name: {{ .Values.dnsServer.serviceAccount }}
     namespace: {{ .Release.Namespace }}
 
 ---
@@ -106,21 +98,21 @@ subjects:
 kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: {{ .Release.Name }}:chaos-controller-manager-control-plane
+  name: {{ .Release.Name }}:chaos-dns-server-control-plane
   namespace: {{ .Release.Namespace }}
   labels:
     app.kubernetes.io/name: {{ template "chaos-mesh.name" . }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     app.kubernetes.io/instance: {{ .Release.Name }}
-    app.kubernetes.io/component: controller-manager
+    app.kubernetes.io/component: dns-server
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+"  "_" }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
-  name: {{ .Release.Name }}:chaos-controller-manager-control-plane
+  name: {{ .Release.Name }}:chaos-dns-server-control-plane
 subjects:
   - kind: ServiceAccount
-    name: {{ .Values.controllerManager.serviceAccount }}
+    name: {{ .Values.dnsServer.serviceAccount }}
     namespace: {{ .Release.Namespace }}
 
 ---
@@ -131,20 +123,20 @@ kind: RoleBinding
 {{- end }}
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: {{ .Release.Name }}:chaos-controller-manager-target-namespace
-  namespace: {{ .Values.controllerManager.targetNamespace }}
+  name: {{ .Release.Name }}:chaos-dns-server-target-namespace
+  namespace: {{ .Values.dnsServer.targetNamespace }}
   labels:
     app.kubernetes.io/name: {{ template "chaos-mesh.name" . }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     app.kubernetes.io/instance: {{ .Release.Name }}
-    app.kubernetes.io/component: controller-manager
+    app.kubernetes.io/component: dns-server
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+"  "_" }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: {{ .Release.Name }}:chaos-controller-manager-target-namespace
+  name: {{ .Release.Name }}:chaos-dns-server-target-namespace
 subjects:
   - kind: ServiceAccount
-    name: {{ .Values.controllerManager.serviceAccount }}
+    name: {{ .Values.dnsServer.serviceAccount }}
     namespace: {{ .Release.Namespace }}
 {{- end }}
