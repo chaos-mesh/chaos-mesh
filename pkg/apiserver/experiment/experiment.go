@@ -812,6 +812,7 @@ func (s *Service) deleteExperiment(c *gin.Context) {
 // @Description Get chaos experiments state from Kubernetes cluster.
 // @Tags experiments
 // @Produce json
+// @Param namespace query string false "namespace"
 // @Success 200 {object} ChaosState
 // @Router /experiments/state [get]
 // @Failure 500 {object} utils.APIError
@@ -822,6 +823,8 @@ func (s *Service) state(c *gin.Context) {
 		return
 	}
 
+	namespace := c.Query("namespace")
+
 	data := new(ChaosState)
 
 	g, ctx := errgroup.WithContext(context.Background())
@@ -831,6 +834,8 @@ func (s *Service) state(c *gin.Context) {
 	var listOptions []client.ListOption
 	if !s.conf.ClusterScoped {
 		listOptions = append(listOptions, &client.ListOptions{Namespace: s.conf.TargetNamespace})
+	} else if len(namespace) != 0 {
+		listOptions = append(listOptions, &client.ListOptions{Namespace: namespace})
 	}
 
 	for index := range kinds {
