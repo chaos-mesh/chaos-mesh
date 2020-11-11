@@ -29,8 +29,8 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/core"
 	pkgutils "github.com/chaos-mesh/chaos-mesh/pkg/utils"
 
-	"sigs.k8s.io/controller-runtime/pkg/client"
 	v1 "k8s.io/api/core/v1"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 // Pod defines the basic information of a pod
@@ -44,7 +44,7 @@ type Pod struct {
 // Service defines a handler service for cluster common objects.
 type Service struct {
 	kubeCli client.Client
-	conf *config.ChaosDashboardConfig
+	conf    *config.ChaosDashboardConfig
 }
 
 // NewService returns an experiment service instance.
@@ -53,7 +53,7 @@ func NewService(
 	kubeCli client.Client,
 ) *Service {
 	return &Service{
-		conf: conf,
+		conf:    conf,
 		kubeCli: kubeCli,
 	}
 }

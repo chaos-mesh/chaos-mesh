@@ -70,7 +70,7 @@ func (c *Clients) Client(token string) (pkgclient.Client, error) {
 	config := rest.CopyConfig(c.localConfig)
 	config.BearerToken = token
 	config.BearerTokenFile = ""
-	config.TLSClientConfig = rest.TLSClientConfig {
+	config.TLSClientConfig = rest.TLSClientConfig{
 		Insecure: true,
 	}
 
