@@ -16,6 +16,7 @@ package iochaos
 import (
 	"context"
 	"errors"
+	"strings"
 
 	"github.com/hashicorp/go-multierror"
 	v1 "k8s.io/api/core/v1"
@@ -69,6 +70,12 @@ func (r *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.I
 
 		// TODO: support chaos on multiple volume
 		t.SetVolumePath(iochaos.Spec.VolumePath)
+
+		if iochaos.Spec.ContainerName != nil &&
+			len(strings.TrimSpace(*iochaos.Spec.ContainerName)) != 0 {
+			t.SetContainer(*iochaos.Spec.ContainerName)
+		}
+
 		t.Append(v1alpha1.IoChaosAction{
 			Type: iochaos.Spec.Action,
 			Filter: v1alpha1.Filter{
