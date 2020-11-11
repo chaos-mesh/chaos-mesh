@@ -14,7 +14,14 @@ export const experiments: (
   kind?: string,
   status?: string
 ) => Promise<AxiosResponse<ExperimentReponse[]>> = (namespace = '', name = '', kind = '', status = '') =>
-  http.get(`/experiments?namespace=${namespace}&name=${name}&kind=${kind}&status=${status}`)
+  http.get(`/experiments`, {
+    params: {
+      namespace,
+      name,
+      kind,
+      status,
+    },
+  })
 
 export const deleteExperiment = (uuid: uuid) => http.delete(`/experiments/${uuid}`)
 

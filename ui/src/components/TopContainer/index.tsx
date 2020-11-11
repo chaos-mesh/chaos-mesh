@@ -5,6 +5,7 @@ import { RootState, useStoreDispatch } from 'store'
 import { ThemeProvider, createStyles, makeStyles } from '@material-ui/core/styles'
 import customTheme, { darkTheme as customDarkTheme } from 'theme'
 import { drawerCloseWidth, drawerWidth } from './Sidebar'
+import { setNameSpaceInterceptorNumber, setTokenInterceptorNumber } from 'slices/globalStatus'
 
 import Alert from '@material-ui/lab/Alert'
 import ContentContainer from 'components/ContentContainer'
@@ -20,7 +21,6 @@ import insertCommonStyle from 'lib/d3/insertCommonStyle'
 import messages from 'i18n/messages'
 import { setAlertOpen } from 'slices/globalStatus'
 import { setNavigationBreadcrumbs } from 'slices/navigation'
-import { setTokenIntercepterNumber } from 'slices/globalStatus'
 import { useLocation } from 'react-router-dom'
 import { useSelector } from 'react-redux'
 
@@ -67,6 +67,8 @@ const TopContainer = () => {
   const isMobileScreen = useMediaQuery(theme.breakpoints.down('xs'))
   const classes = useStyles()
 
+  const [hasRendered, setHasRendered] = useState(false)
+
   const { pathname } = useLocation()
 
   const { settings, globalStatus, navigation } = useSelector((state: RootState) => state)
@@ -87,6 +89,32 @@ const TopContainer = () => {
     window.localStorage.setItem('chaos-mesh-mini-sidebar', openDrawer ? 'y' : 'n')
   }
 
+  if (!hasRendered) {
+    const token = window.localStorage.getItem('chaos-mesh-token')
+    const namespace = window.localStorage.getItem('chaos-mesh-namespace')
+    let newTokenInterceptorNumber
+    let newNSInterceptorNumber
+    if (token) {
+      newTokenInterceptorNumber = http.interceptors.request.use((config) => {
+        config.headers = {
+          Authorization: `Bearer ${token}`,
+        }
+        return config
+      })
+    }
+    if (namespace) {
+      newNSInterceptorNumber = http.interceptors.request.use((config) => {
+        config.params = {
+          namespace,
+        }
+        return config
+      })
+    }
+    dispatch(setTokenInterceptorNumber(newTokenInterceptorNumber))
+    dispatch(setNameSpaceInterceptorNumber(newNSInterceptorNumber))
+    setHasRendered(true)
+  }
+
   useEffect(insertCommonStyle, [])
 
   useEffect(() => {
@@ -98,20 +126,6 @@ const TopContainer = () => {
       setOpenDrawer(false)
     }
   }, [isTabletScreen])
-
-  useEffect(() => {
-    const token = window.localStorage.getItem('chaos-mesh-token')
-    let newTokenIntercepterNumber
-    if (token) {
-      newTokenIntercepterNumber = http.interceptors.request.use((config) => {
-        config.headers = {
-          Authorization: `Bearer ${token}`,
-        }
-        return config
-      })
-    }
-    dispatch(setTokenIntercepterNumber(newTokenIntercepterNumber))
-  }, [dispatch])
 
   return (
     <ThemeProvider theme={globalTheme}>

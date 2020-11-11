@@ -10,10 +10,10 @@ import T from 'components/T'
 import TextField from 'components/FormField/TextField'
 import { useIntl } from 'react-intl'
 import { useStoreDispatch } from 'store'
-import { useTokenHandler } from 'lib/token'
+import { useTokenRegistry } from 'lib/auth'
 
 const Account = () => {
-  const tokenSubmitHandler = useTokenHandler()
+  const tokenSubmitHandler = useTokenRegistry()
   const dispatch = useStoreDispatch()
   const intl = useIntl()
 

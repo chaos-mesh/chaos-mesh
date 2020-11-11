@@ -5,7 +5,11 @@ const initialState: {
   alert: Alert
   alertOpen: boolean
   searchModalOpen: boolean
-  tokenIntercepterNumber: number
+  tokenInterceptorNumber: number
+  namespaceInterceptorNumber: number
+  hasPrivilege: boolean
+  isValidToken: boolean
+  isPrivilegedToken: boolean
 } = {
   alert: {
     type: 'success',
@@ -13,7 +17,11 @@ const initialState: {
   },
   alertOpen: false,
   searchModalOpen: false,
-  tokenIntercepterNumber: -1,
+  tokenInterceptorNumber: -1,
+  namespaceInterceptorNumber: -1,
+  hasPrivilege: true,
+  isValidToken: true,
+  isPrivilegedToken: true,
 }
 
 const globalStatusSlice = createSlice({
@@ -29,12 +37,33 @@ const globalStatusSlice = createSlice({
     setSearchModalOpen(state, action) {
       state.searchModalOpen = action.payload
     },
-    setTokenIntercepterNumber(state, action) {
-      state.tokenIntercepterNumber = action.payload
+    setTokenInterceptorNumber(state, action) {
+      state.tokenInterceptorNumber = action.payload
+    },
+    setNameSpaceInterceptorNumber(state, action) {
+      state.namespaceInterceptorNumber = action.payload
+    },
+    setHasPrivilege(state, action) {
+      state.hasPrivilege = action.payload
+    },
+    setIsValidToken(state, action) {
+      state.isValidToken = action.payload
+    },
+    setIsPrivilegedToken(state, action) {
+      state.isPrivilegedToken = action.payload
     },
   },
 })
 
-export const { setAlert, setAlertOpen, setSearchModalOpen, setTokenIntercepterNumber } = globalStatusSlice.actions
+export const {
+  setAlert,
+  setAlertOpen,
+  setSearchModalOpen,
+  setTokenInterceptorNumber,
+  setNameSpaceInterceptorNumber,
+  setHasPrivilege,
+  setIsValidToken,
+  setIsPrivilegedToken,
+} = globalStatusSlice.actions
 
 export default globalStatusSlice.reducer

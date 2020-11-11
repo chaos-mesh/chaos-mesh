@@ -139,7 +139,10 @@
     "tokenInputHelper": "请输入您的令牌",
     "tokenTips": "您必须输入令牌以进行其它操作",
     "tokenChangeHelper": "您可以在这里修改您的令牌",
-    "tokenValidation": "令牌不能为空"
+    "tokenValidation": "令牌不能为空",
+    "namespaceInputHelper": "请输入与令牌权限相匹配的命名空间",
+    "namespaceTips": "您必须输入命名空间以进行其它操作",
+    "namespaceValidation": "命名空间不能为空"
   },
   "common": {
     "doc": "文档",
@@ -207,9 +210,7 @@
     "annotations": "注解",
     "labelSelectors": "标签选择器",
     "annotationsSelectors": "注解选择器",
-    "phaseSelectors": "阶段选择器"
-  },
-  "login": {
-    "welcome": "欢迎使用 Chaos Mesh"
+    "phaseSelectors": "阶段选择器",
+    "namespaces": "命名空间"
   }
 }

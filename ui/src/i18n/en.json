@@ -139,7 +139,10 @@
     "tokenInputHelper": "Please input your token",
     "tokenTips": "To use chaos mesh, you must input your token here.",
     "tokenChangeHelper": "You can change your token here",
-    "tokenValidation": "The token can not be empty"
+    "tokenValidation": "The token can not be empty",
+    "namespaceInputHelper": "Please input the namespace matched with the token privilege",
+    "namespaceTips": "To use chaos mesh, you must input your namespace here.",
+    "namespaceValidation": "The namespace can not be empty"
   },
   "common": {
     "doc": "Documentation",
@@ -207,9 +210,7 @@
     "annotations": "Annotations",
     "labelSelectors": "Label Selectors",
     "annotationsSelectors": "Annotation Selectors",
-    "phaseSelectors": "Phase Selectors"
-  },
-  "login": {
-    "welcome": "Welcome to Chaos Mesh"
+    "phaseSelectors": "Phase Selectors",
+    "namespaces": "Namespaces"
   }
 }
