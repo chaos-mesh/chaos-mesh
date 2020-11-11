@@ -192,14 +192,15 @@ type NetworkChaosInfo struct {
 
 // IOChaosInfo defines the basic information of io chaos for creating a new IOChaos.
 type IOChaosInfo struct {
-	Action     string                     `json:"action" binding:"oneof='' 'latency' 'fault' 'attrOverride'"`
-	Delay      string                     `json:"delay"`
-	Errno      uint32                     `json:"errno"`
-	Attr       *v1alpha1.AttrOverrideSpec `json:"attr"`
-	Path       string                     `json:"path"`
-	Percent    int                        `json:"percent"`
-	Methods    []v1alpha1.IoMethod        `json:"methods"`
-	VolumePath string                     `json:"volume_path"`
+	Action        string                     `json:"action" binding:"oneof='' 'latency' 'fault' 'attrOverride'"`
+	Delay         string                     `json:"delay"`
+	Errno         uint32                     `json:"errno"`
+	Attr          *v1alpha1.AttrOverrideSpec `json:"attr"`
+	Path          string                     `json:"path"`
+	Percent       int                        `json:"percent"`
+	Methods       []v1alpha1.IoMethod        `json:"methods"`
+	VolumePath    string                     `json:"volume_path"`
+	ContainerName string                     `json:"container_name"`
 }
 
 // KernelChaosInfo defines the basic information of kernel chaos for creating a new KernelChaos.
