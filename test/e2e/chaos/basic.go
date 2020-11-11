@@ -186,6 +186,9 @@ var _ = ginkgo.Describe("[Basic]", func() {
 			ginkgo.It("[Pause]", func() {
 				iochaostestcases.TestcaseIODelayDurationForATimePauseAndUnPause(ns, cli, c, port)
 			})
+			ginkgo.It("[SpecifyContainer]", func() {
+				iochaostestcases.TestcaseIODelayWithSpecifiedContainer(ns, cli, c, port)
+			})
 		})
 
 		// io chaos case in [IOError] context
@@ -196,6 +199,9 @@ var _ = ginkgo.Describe("[Basic]", func() {
 			})
 			ginkgo.It("[Pause]", func() {
 				iochaostestcases.TestcaseIOErrorDurationForATimePauseAndUnPause(ns, cli, c, port)
+			})
+			ginkgo.It("[SpecifyContainer]", func() {
+				iochaostestcases.TestcaseIOErrorWithSpecifiedContainer(ns, cli, c, port)
 			})
 		})
 	})

@@ -206,3 +206,68 @@ func TestcaseIOErrorDurationForATimePauseAndUnPause(
 	cli.Delete(ctx, ioChaos)
 	cancel()
 }
+
+func TestcaseIOErrorWithSpecifiedContainer(
+	ns string,
+	cli client.Client,
+	c http.Client,
+	port uint16, ) {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	err := util.WaitE2EHelperReady(c, port)
+	framework.ExpectNoError(err, "wait e2e helper ready error")
+
+	containerName := "io"
+	ioChaos := &v1alpha1.IoChaos{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "io-chaos",
+			Namespace: ns,
+		},
+		Spec: v1alpha1.IoChaosSpec{
+			Selector: v1alpha1.SelectorSpec{
+				Namespaces:     []string{ns},
+				LabelSelectors: map[string]string{"app": "io"},
+			},
+			Action:     v1alpha1.IoFaults,
+			Mode:       v1alpha1.OnePodMode,
+			VolumePath: "/var/run/data",
+			Path:       "/var/run/data/*",
+			Percent:    100,
+			// errno 5 is EIO -> I/O error
+			Errno: 5,
+			// only inject write method
+			ContainerName: &containerName,
+			Methods:       []v1alpha1.IoMethod{v1alpha1.Write},
+			Duration:      pointer.StringPtr("9m"),
+			Scheduler: &v1alpha1.SchedulerSpec{
+				Cron: "@every 10m",
+			},
+		},
+	}
+	err = cli.Create(ctx, ioChaos)
+	framework.ExpectNoError(err, "create io chaos")
+
+	err = wait.PollImmediate(5*time.Second, 1*time.Minute, func() (bool, error) {
+		_, err = getPodIODelay(c, port)
+		// input/output error is errno 5
+		if err != nil && strings.Contains(err.Error(), "input/output error") {
+			return true, nil
+		}
+		return false, nil
+	})
+	framework.ExpectNoError(err, "io chaos doesn't work as expected")
+
+	err = cli.Delete(ctx, ioChaos)
+	framework.ExpectNoError(err, "failed to delete io chaos")
+
+	klog.Infof("success to perform io chaos")
+	err = wait.PollImmediate(5*time.Second, 1*time.Minute, func() (bool, error) {
+		_, err = getPodIODelay(c, port)
+
+		if err == nil {
+			return true, nil
+		}
+		return false, nil
+	})
+	framework.ExpectNoError(err, "fail to recover io chaos")
+}
