@@ -225,7 +225,7 @@ func TestcaseIODelayWithSpecifiedContainer(
 	ns string,
 	cli client.Client,
 	c http.Client,
-	port uint16,){
+	port uint16) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 	err := util.WaitE2EHelperReady(c, port)
