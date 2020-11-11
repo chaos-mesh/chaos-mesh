@@ -69,6 +69,7 @@ func (h *Handler) Apply(ctx context.Context, chaos *v1alpha1.PodIoChaos) error {
 		for _, container := range pod.Status.ContainerStatuses {
 			if container.Name == *chaos.Spec.Container {
 				containerID = container.ContainerID
+				break
 			}
 		}
 		if len(containerID) == 0 {
