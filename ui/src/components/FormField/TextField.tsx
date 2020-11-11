@@ -4,7 +4,7 @@ import { Field } from 'formik'
 import React from 'react'
 
 const TextField: React.FC<TextFieldProps> = (props) => (
-  <Box mb={2}>
+  <Box mb={3}>
     <Field {...props} as={MUITextField} variant="outlined" margin="dense" fullWidth />
   </Box>
 )
