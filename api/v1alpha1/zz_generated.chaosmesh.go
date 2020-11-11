@@ -453,6 +453,7 @@ func (in *JVMChaos) GetChaos() *ChaosInstance {
 		Kind:      KindJVMChaos,
 		StartTime: in.CreationTimestamp.Time,
 		Action:    "",
+		Status:    string(in.Status.Experiment.Phase),
 		UID:       string(in.UID),
 	}
 
