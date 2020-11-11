@@ -11,7 +11,7 @@ http.interceptors.response.use(undefined, (error: AxiosError) => {
   const data = error.response?.data
 
   if (data) {
-    if (data.code === 'error.api.no_cluster_privilege') {
+    if (data.code === 'error.api.no_cluster_privilege' || data.code === 'error.api.no_namespace_privilege') {
       store.dispatch(setHasPrivilege(false))
     } else if (data.code === 'error.api.internal_server_error' && data.message.includes('forbidden')) {
       store.dispatch(setIsPrivilegedToken(false))

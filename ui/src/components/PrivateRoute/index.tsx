@@ -10,7 +10,7 @@ import {
   MenuItem,
 } from '@material-ui/core'
 import { Form, Formik } from 'formik'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect } from 'react'
 import { setAlert, setAlertOpen, setHasPrivilege, setIsPrivilegedToken, setIsValidToken } from 'slices/globalStatus'
 import { useNameSpaceRegistry, useTokenRegistry } from 'lib/auth'
 
@@ -49,6 +49,7 @@ const PrivateRoute: React.FC = ({ children, ...props }) => {
     )
     dispatch(setAlertOpen(true))
     dispatch(setIsValidToken(true))
+    dispatch(setIsPrivilegedToken(true))
     dispatch(setHasPrivilege(true))
     window.location.reload()
   }
