@@ -70,7 +70,7 @@ metadata:
     app.kubernetes.io/component: chaos-daemon
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+"  "_" }}
 spec:
-  privileged: true
+  privileged: false
   allowPrivilegeEscalation: true
   allowedCapabilities:
     - '*'
