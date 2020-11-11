@@ -1,4 +1,4 @@
-name: Integration Test
+name: Script Test
 on:
   push:
     branches:
