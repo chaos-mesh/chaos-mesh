@@ -10,7 +10,7 @@ import {
   MenuItem,
 } from '@material-ui/core'
 import { Form, Formik } from 'formik'
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { setAlert, setAlertOpen, setHasPrivilege, setIsPrivilegedToken, setIsValidToken } from 'slices/globalStatus'
 import { useNameSpaceRegistry, useTokenRegistry } from 'lib/auth'
 
@@ -34,6 +34,8 @@ const PrivateRoute: React.FC = ({ children, ...props }) => {
   const hasLoggedIn = tokenIntercepterNumber > -1 || window.localStorage.getItem('chaos-mesh-token')
 
   const { namespaces } = useSelector((state: RootState) => state.experiments)
+
+  const [namespaceDialog, setNamespaceDialog] = useState(true)
 
   const tokenSubmitHandler = useTokenRegistry()
   const nsSubmitHandler = useNameSpaceRegistry()
@@ -84,9 +86,8 @@ const PrivateRoute: React.FC = ({ children, ...props }) => {
             <>
               {children}
               <Dialog
-                open={true}
-                disableBackdropClick
-                disableEscapeKeyDown
+                open={namespaceDialog}
+                onClose={() => setNamespaceDialog(false)}
                 PaperProps={{ variant: 'outlined' }}
                 maxWidth="md"
                 fullWidth
