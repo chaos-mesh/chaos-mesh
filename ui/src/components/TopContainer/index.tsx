@@ -104,8 +104,10 @@ const TopContainer = () => {
     }
     if (namespace) {
       newNSInterceptorNumber = http.interceptors.request.use((config) => {
-        config.params = {
-          namespace,
+        if (config.url?.match(/^\/experiments(\/state)?$/)) {
+          config.params = {
+            namespace,
+          }
         }
         return config
       })

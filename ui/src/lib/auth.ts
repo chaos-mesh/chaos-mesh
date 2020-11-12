@@ -49,9 +49,10 @@ export const useNameSpaceRegistry = () => {
   return useInterceptorRegistry(
     'namespaceInterceptorNumber',
     (namespace) => (config) => {
-      console.log(namespace)
-      config.params = {
-        namespace,
+      if (config.url?.match(/^\/experiments(\/state)?$/)) {
+        config.params = {
+          namespace,
+        }
       }
       return config
     },
