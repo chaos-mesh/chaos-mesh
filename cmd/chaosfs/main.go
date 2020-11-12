@@ -20,17 +20,21 @@ import (
 	"math/rand"
 	"os"
 	"os/exec"
+	"os/signal"
+	"sync"
+	"syscall"
 	"time"
-
-	"github.com/ethercflow/hookfs/hookfs"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosfs"
 	"github.com/chaos-mesh/chaos-mesh/pkg/pidfile"
 	"github.com/chaos-mesh/chaos-mesh/pkg/version"
 
+	"github.com/ethercflow/hookfs/hookfs"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 )
+
+var log = ctrl.Log.WithName("chaos-daemon")
 
 var (
 	addr         string
@@ -39,29 +43,22 @@ var (
 	mountpoint   string
 	printVersion bool
 
-	pf *pidfile.PIDFile
+	once sync.Once
+	pf   *pidfile.PIDFile
 )
 
-var log = ctrl.Log.WithName("chaos-daemon")
+func init() {
+	rand.Seed(time.Now().UnixNano())
 
-func initFlag() {
 	flag.StringVar(&addr, "addr", ":65534", "The address to bind to")
 	flag.StringVar(&pidFile, "pidfile", "", "PidFile")
 	flag.StringVar(&original, "original", "", "ORIGINAL")
 	flag.StringVar(&mountpoint, "mountpoint", "", "MOUNTPOINT")
 	flag.BoolVar(&printVersion, "version", false, "print version information and exit")
-
-	rand.Seed(time.Now().UnixNano())
-	flag.Parse()
 }
 
 func main() {
-	initFlag()
-
-	if err := checkFlag(); err != nil {
-		log.Error(err, "invalid flag")
-		os.Exit(1)
-	}
+	flag.Parse()
 
 	ctrl.SetLogger(zap.Logger(true))
 
@@ -70,63 +67,92 @@ func main() {
 		os.Exit(0)
 	}
 
-	stopCh := ctrl.SetupSignalHandler()
+	if err := checkFlags(); err != nil {
+		log.Error(err, "Failed to check flags")
+		os.Exit(1)
+	}
+
+	stopCh := make(chan os.Signal, 1)
+	signal.Notify(stopCh, os.Interrupt, syscall.SIGTERM)
 
 	go func() {
 		sig := <-stopCh
 		log.Info("Got signal to exit", "signal", sig)
 
-		if pf != nil {
-			if err := pf.Remove(); err != nil {
-				log.Error(err, "failed to remove pid file")
-			}
-		}
+		removePidFileOnce()
 
-		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-		defer cancel()
-		err := exec.CommandContext(ctx, "fusermount", "-u", mountpoint).Run()
+		umountTimeout := time.Second * 5
+		err := RunUmountCmd(umountTimeout, mountpoint)
 		if err != nil {
-			if err1 := exec.CommandContext(ctx, "umount", "-l", mountpoint).Run(); err1 != nil {
-				log.Error(err, "failed to fusermount", "umount failed", err1)
-			}
-			log.Error(err, "failed to fusermount")
+			log.Error(err, "Failed to umount file", "mountpoint", mountpoint)
 		}
 		os.Exit(0)
 	}()
 
-	log.Info("Init hookfs")
+	log.Info("Init hookfs", "original", original, "mountpoint", mountpoint, "address", addr)
 	fs, err := hookfs.NewHookFs(original, mountpoint, &chaosfs.InjuredHook{Addr: addr})
 	if err != nil {
-		log.Error(err, "failed to init hookfs")
-	}
-
-	pf, err := pidfile.New(pidFile)
-	if err != nil {
-		log.Error(err, "failed to create pid file")
+		log.Error(err, "Failed to init hookfs")
 		os.Exit(1)
 	}
 
-	defer func() {
-		if err := pf.Remove(); err != nil {
-			log.Error(err, "failed to remove pid file")
-		}
-	}()
+	log.Info("Create pidFile", "pidFile", pidFile)
+	pf, err = pidfile.New(pidFile)
+	if err != nil {
+		log.Error(err, "Failed to create pid file")
+		os.Exit(1)
+	}
+	defer removePidFileOnce()
 
 	log.Info("Starting chaosfs server...")
 	if err = fs.Serve(); err != nil {
-		log.Error(err, "failed to start fuse server")
+		log.Error(err, "Failed to start fuse server")
 		os.Exit(1)
 	}
 }
 
-func checkFlag() error {
-	if original == "" || mountpoint == "" {
-		return errors.New("invalid original or mountpoint")
+func checkFlags() error {
+	if original == "" {
+		return errors.New("original is empty")
 	}
-
+	if mountpoint == "" {
+		return errors.New("mountpoint is empty")
+	}
 	if pidFile == "" {
-		return errors.New("invalid pid file")
+		return errors.New("pidFile is empty")
 	}
-
 	return nil
+}
+
+func removePidFileOnce() {
+	once.Do(func() {
+		if pf != nil {
+			if err := pf.Remove(); err != nil {
+				log.Error(err, "Failed to remove pid file", "pidFile", pidFile)
+			}
+		}
+	})
+}
+
+func RunUmountCmd(timeout time.Duration, mountpoint string) error {
+	err := runFuserMountCmd(timeout, mountpoint)
+	if err != nil {
+		err = runUmountCmd(timeout, mountpoint)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func runFuserMountCmd(timeout time.Duration, mountpoint string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+	defer cancel()
+	return exec.CommandContext(ctx, "fusermount", "-u", mountpoint).Run()
+}
+
+func runUmountCmd(timeout time.Duration, mountpoint string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+	defer cancel()
+	return exec.CommandContext(ctx, "umount", "-l", mountpoint).Run()
 }
