@@ -39,11 +39,14 @@ const TargetGenerated: React.FC<TargetGeneratedProps> = ({ kind, data, validatio
     delete initialValues.action
     const direction = initialValues.direction
     delete initialValues.direction
+    const externalTargets = initialValues.external_targets
+    delete initialValues.external_targets
 
     initialValues = {
       action,
       [action]: initialValues,
       direction,
+      external_targets: externalTargets,
     }
   }
 
@@ -66,7 +69,7 @@ const TargetGenerated: React.FC<TargetGeneratedProps> = ({ kind, data, validatio
     const rendered = Object.entries(data)
       .filter(([_, v]) => v && v instanceof Object && v.field)
       .map(([k, v]) => {
-        if (kind === 'NetworkChaos' && k !== 'direction') {
+        if (kind === 'NetworkChaos' && k !== 'direction' && k !== 'external_targets') {
           k = `${data.action}.${k}`
         }
 
