@@ -56,7 +56,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (result ctrl.Result, err error)
 	chaos := r.Object.DeepCopyObject().(v1alpha1.InnerSchedulerObject)
 	if err := r.Client.Get(context.Background(), req.NamespacedName, chaos); err != nil {
 		if apierrors.IsNotFound(err) {
-			r.Log.Info("network chaos not found")
+			r.Log.Info("chaos not found")
 		} else {
 			r.Log.Error(err, "unable to get network chaos")
 		}

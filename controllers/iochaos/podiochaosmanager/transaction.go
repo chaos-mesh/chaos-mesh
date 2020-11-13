@@ -65,6 +65,18 @@ func (a *Append) Apply(chaos *v1alpha1.PodIoChaos) error {
 	return nil
 }
 
+// SetContainer sets the container field of podiochaos
+type SetContainer struct {
+	Container string
+}
+
+// Apply runs this action
+func (s *SetContainer) Apply(chaos *v1alpha1.PodIoChaos) error {
+	chaos.Spec.Container = &s.Container
+
+	return nil
+}
+
 // SetVolumePath sets the volumePath field of podiochaos
 type SetVolumePath struct {
 	Path string
@@ -101,6 +113,14 @@ func (t *PodIoTransaction) Append(item interface{}) error {
 func (t *PodIoTransaction) SetVolumePath(path string) error {
 	t.Steps = append(t.Steps, &SetVolumePath{
 		Path: path,
+	})
+
+	return nil
+}
+
+func (t *PodIoTransaction) SetContainer(container string) error {
+	t.Steps = append(t.Steps, &SetContainer{
+		Container: container,
 	})
 
 	return nil
