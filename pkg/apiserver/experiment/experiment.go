@@ -233,7 +233,7 @@ func (s *Service) createNetworkChaos(exp *core.ExperimentInfo, kubeCli client.Cl
 		chaos.Spec.Duration = &exp.Scheduler.Duration
 	}
 
-	return s.kubeCli.Create(context.Background(), chaos)
+	return kubeCli.Create(context.Background(), chaos)
 }
 
 func (s *Service) createIOChaos(exp *core.ExperimentInfo, kubeCli client.Client) error {
