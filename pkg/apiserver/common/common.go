@@ -88,7 +88,7 @@ func (s *Service) listPods(c *gin.Context) {
 		return
 	}
 	ctx := context.TODO()
-	filteredPods, err := pkgutils.SelectPods(ctx, s.kubeCli, s.reader, exp.ParseSelector())
+	filteredPods, err := pkgutils.SelectPods(ctx, s.kubeCli, s.reader, exp.ParseSelector(), s.conf.ClusterScoped, s.conf.TargetNamespace, s.conf.AllowedNamespaces, s.conf.IgnoredNamespaces)
 	if err != nil {
 		c.Status(http.StatusInternalServerError)
 		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
@@ -209,7 +209,7 @@ func (s *Service) getLabels(c *gin.Context) {
 	exp.NamespaceSelectors = nsList
 
 	ctx := context.TODO()
-	filteredPods, err := pkgutils.SelectPods(ctx, s.kubeCli, s.reader, exp.ParseSelector())
+	filteredPods, err := pkgutils.SelectPods(ctx, s.kubeCli, s.reader, exp.ParseSelector(), s.conf.ClusterScoped, s.conf.TargetNamespace, s.conf.AllowedNamespaces, s.conf.IgnoredNamespaces)
 	if err != nil {
 		c.Status(http.StatusInternalServerError)
 		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
@@ -254,7 +254,7 @@ func (s *Service) getAnnotations(c *gin.Context) {
 	exp.NamespaceSelectors = nsList
 
 	ctx := context.TODO()
-	filteredPods, err := pkgutils.SelectPods(ctx, s.kubeCli, s.reader, exp.ParseSelector())
+	filteredPods, err := pkgutils.SelectPods(ctx, s.kubeCli, s.reader, exp.ParseSelector(), s.conf.ClusterScoped, s.conf.TargetNamespace, s.conf.AllowedNamespaces, s.conf.IgnoredNamespaces)
 	if err != nil {
 		c.Status(http.StatusInternalServerError)
 		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))

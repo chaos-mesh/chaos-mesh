@@ -19,6 +19,7 @@ import (
 
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
+	controllerCfg "github.com/chaos-mesh/chaos-mesh/pkg/config"
 	"github.com/chaos-mesh/chaos-mesh/pkg/webhook/config"
 
 	admissionv1beta1 "k8s.io/api/admission/v1beta1"
@@ -32,7 +33,8 @@ var _ = Describe("webhook inject", func() {
 		It("should return unexpected end of JSON input", func() {
 			var testClient client.Client
 			var cfg *config.Config
-			res := Inject(&admissionv1beta1.AdmissionRequest{}, testClient, cfg, nil)
+			var controllerCfg *controllerCfg.ChaosControllerConfig
+			res := Inject(&admissionv1beta1.AdmissionRequest{}, testClient, cfg, controllerCfg, nil)
 			Expect(res.Result.Message).To(ContainSubstring("unexpected end of JSON input"))
 		})
 	})
@@ -86,7 +88,8 @@ var _ = Describe("webhook inject", func() {
 			metadata.Namespace = "kube-system"
 			var cli client.Client
 			var cfg config.Config
-			str, flag := injectRequired(&metadata, cli, &cfg)
+			var controllerCfg controllerCfg.ChaosControllerConfig
+			str, flag := injectRequired(&metadata, cli, &cfg, &controllerCfg)
 			Expect(str).To(Equal(""))
 			Expect(flag).To(Equal(false))
 		})
@@ -96,9 +99,10 @@ var _ = Describe("webhook inject", func() {
 			metadata.Annotations = make(map[string]string)
 			metadata.Annotations["testNamespace/status"] = StatusInjected
 			var cfg config.Config
+			var controllerCfg controllerCfg.ChaosControllerConfig
 			cfg.AnnotationNamespace = "testNamespace"
 			var cli client.Client
-			str, flag := injectRequired(&metadata, cli, &cfg)
+			str, flag := injectRequired(&metadata, cli, &cfg, &controllerCfg)
 			Expect(str).To(Equal(""))
 			Expect(flag).To(Equal(false))
 		})
@@ -108,9 +112,10 @@ var _ = Describe("webhook inject", func() {
 			metadata.Annotations = make(map[string]string)
 			metadata.Annotations["testNamespace/status"] = StatusInjected
 			var cfg config.Config
+			var controllerCfg controllerCfg.ChaosControllerConfig
 			cfg.AnnotationNamespace = "testNamespace"
 			var cli client.Client
-			str, flag := injectRequired(&metadata, cli, &cfg)
+			str, flag := injectRequired(&metadata, cli, &cfg, &controllerCfg)
 			Expect(str).To(Equal(""))
 			Expect(flag).To(Equal(false))
 		})
@@ -121,8 +126,9 @@ var _ = Describe("webhook inject", func() {
 			metadata.Annotations["testNamespace/request"] = "test"
 			metadata.Namespace = "testNamespace"
 			var cfg config.Config
+			var controllerCfg controllerCfg.ChaosControllerConfig
 			cfg.AnnotationNamespace = "testNamespace"
-			str, flag := injectRequired(&metadata, k8sClient, &cfg)
+			str, flag := injectRequired(&metadata, k8sClient, &cfg, &controllerCfg)
 			Expect(str).To(Equal("test"))
 			Expect(flag).To(Equal(true))
 		})
@@ -131,7 +137,8 @@ var _ = Describe("webhook inject", func() {
 			var metadata metav1.ObjectMeta
 			metadata.Annotations = make(map[string]string)
 			var cfg config.Config
-			_, flag := injectRequired(&metadata, k8sClient, &cfg)
+			var controllerCfg controllerCfg.ChaosControllerConfig
+			_, flag := injectRequired(&metadata, k8sClient, &cfg, &controllerCfg)
 			Expect(flag).To(Equal(false))
 		})
 	})

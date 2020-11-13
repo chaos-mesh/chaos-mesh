@@ -174,8 +174,9 @@ func main() {
 	watchConfig(configWatcher, conf, stopCh)
 	hookServer.Register("/inject-v1-pod", &webhook.Admission{
 		Handler: &apiWebhook.PodInjector{
-			Config:  conf,
-			Metrics: metricsCollector,
+			Config:        conf,
+			ControllerCfg: common.ControllerCfg,
+			Metrics:       metricsCollector,
 		}},
 	)
 
