@@ -8,7 +8,7 @@ import { drawerCloseWidth, drawerWidth } from './Sidebar'
 import { setNameSpaceInterceptorNumber, setTokenInterceptorNumber } from 'slices/globalStatus'
 
 import Alert from '@material-ui/lab/Alert'
-import ContentContainer from 'components/ContentContainer'
+import ContentContainer from 'components-mui/ContentContainer'
 import Header from './Header'
 import { IntlProvider } from 'react-intl'
 import MobileNavigation from './MobileNavigation'
