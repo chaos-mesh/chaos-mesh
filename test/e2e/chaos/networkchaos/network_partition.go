@@ -15,9 +15,10 @@ package networkchaos
 
 import (
 	"context"
-	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	"github.com/chaos-mesh/chaos-mesh/test/e2e/util"
-	"github.com/chaos-mesh/chaos-mesh/test/pkg/fixture"
+	"net/http"
+	"strings"
+	"time"
+
 	. "github.com/onsi/ginkgo"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -26,10 +27,11 @@ import (
 	"k8s.io/klog"
 	"k8s.io/kubernetes/test/e2e/framework"
 	"k8s.io/utils/pointer"
-	"net/http"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"strings"
-	"time"
+
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/test/e2e/util"
+	"github.com/chaos-mesh/chaos-mesh/test/pkg/fixture"
 )
 
 // TestcaseForbidHostNetwork We do NOT allow that inject chaos on a pod which uses hostNetwork

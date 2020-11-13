@@ -16,16 +16,18 @@ package networkchaos
 import (
 	"bytes"
 	"fmt"
-	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"io/ioutil"
-	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/klog"
-	"k8s.io/kubernetes/test/e2e/framework"
 	"net/http"
 	"strconv"
 	"strings"
 	"time"
+
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/klog"
+	"k8s.io/kubernetes/test/e2e/framework"
+
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 )
 
 const (

@@ -15,9 +15,8 @@ package podchaos
 
 import (
 	"context"
-	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	"github.com/chaos-mesh/chaos-mesh/test/e2e/util"
-	"github.com/chaos-mesh/chaos-mesh/test/pkg/fixture"
+	"time"
+
 	. "github.com/onsi/ginkgo"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -28,7 +27,10 @@ import (
 	"k8s.io/kubernetes/test/e2e/framework"
 	"k8s.io/utils/pointer"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"time"
+
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/test/e2e/util"
+	"github.com/chaos-mesh/chaos-mesh/test/pkg/fixture"
 )
 
 func TestcaseContainerKillOnceThenDelete(ns string, kubeCli kubernetes.Interface, cli client.Client) {
