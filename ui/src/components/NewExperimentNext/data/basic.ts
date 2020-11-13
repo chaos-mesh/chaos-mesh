@@ -2,11 +2,11 @@ import * as Yup from 'yup'
 
 const data = {
   name: '',
-  namespace: 'default',
+  namespace: '',
   labels: [],
   annotations: [],
   scope: {
-    namespace_selectors: ['default'],
+    namespace_selectors: [],
     label_selectors: [],
     annotation_selectors: [],
     phase_selectors: ['all'],
@@ -22,6 +22,10 @@ const data = {
 
 export const schema: Yup.ObjectSchema = Yup.object({
   name: Yup.string().required('The experiment name is required'),
+  namespace: Yup.string().required('The experiment namespace is required'),
+  scheduler: Yup.object({
+    cron: Yup.string().required('The cron is required'),
+  }),
 })
 
 export type dataType = typeof data
