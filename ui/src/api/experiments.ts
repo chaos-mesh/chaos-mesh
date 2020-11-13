@@ -7,13 +7,8 @@ export const state = () => http.get<StateOfExperiments>('/experiments/state')
 
 export const newExperiment = (data: Experiment) => http.post('/experiments/new', data)
 
-export const experiments: (
-  namespace?: string,
-  name?: string,
-  kind?: string,
-  status?: string
-) => Promise<AxiosResponse<ExperimentReponse[]>> = (namespace = '', name = '', kind = '', status = '') =>
-  http.get(`/experiments`, {
+export const experiments = (namespace = '', name = '', kind = '', status = '') =>
+  http.get<ExperimentReponse[]>(`/experiments`, {
     params: {
       namespace,
       name,
