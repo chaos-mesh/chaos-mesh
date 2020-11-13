@@ -4,7 +4,7 @@ import { Box, Button, Container, Paper } from '@material-ui/core'
 import { Form, Formik } from 'formik'
 import { setAlert, setAlertOpen } from 'slices/globalStatus'
 
-import PaperTop from 'components/PaperTop'
+import PaperTop from 'components-mui/PaperTop'
 import React from 'react'
 import T from 'components/T'
 import TextField from 'components/FormField/TextField'
