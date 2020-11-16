@@ -43,6 +43,12 @@ const networkCommon: Spec = {
     value: '',
     helperText: 'Specifies the network direction',
   },
+  external_targets: {
+    field: 'label',
+    label: 'External Targets',
+    value: [],
+    helperText: 'Type string and end with a space to generate the network targets outside k8s',
+  },
   target_scope: undefined as any,
 }
 

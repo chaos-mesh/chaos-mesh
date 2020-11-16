@@ -1,4 +1,4 @@
-name: Integration Test
+name: Script Test
 on:
   push:
     branches:
@@ -24,8 +24,7 @@ jobs:
 
       - name: Install Chaos Mesh
         run: |
-          export CLUSTER="chart-testing"
-          hack/local-up-chaos-mesh.sh
+          bash install.sh --local kind --crd ./manifests/crd.yaml
 
       - name: Run integration test
         run: |
