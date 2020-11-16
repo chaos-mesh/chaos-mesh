@@ -38,8 +38,8 @@ func TestEvent(t *testing.T) {
 
 var _ = Describe("event", func() {
 	var (
-		es *eventStore
-		mock sqlmock.Sqlmock
+		es         *eventStore
+		mock       sqlmock.Sqlmock
 		podRecord0 *core.PodRecord
 		podRecord1 *core.PodRecord
 		event0     *core.Event
@@ -88,7 +88,7 @@ var _ = Describe("event", func() {
 			CreatedAt:    timeNow,
 			UpdatedAt:    timeNow,
 			DeletedAt:    &timeNow,
-			Experiment:   "testExperiment",
+			Experiment:   "testExperiment0",
 			Namespace:    "testNamespace",
 			Kind:         "testKind",
 			Message:      "testMessage",
@@ -103,7 +103,7 @@ var _ = Describe("event", func() {
 			CreatedAt:    timeNow,
 			UpdatedAt:    timeNow,
 			DeletedAt:    &timeNow,
-			Experiment:   "testExperiment",
+			Experiment:   "testExperiment1",
 			Namespace:    "testNamespace",
 			Kind:         "testKind",
 			Message:      "testMessage",
@@ -207,7 +207,7 @@ var _ = Describe("event", func() {
 					"message", "start_time", "finish_time", "duration", "experiment_id"}).
 					AddRow(event1.ID, event1.CreatedAt, event1.UpdatedAt, event1.DeletedAt, event1.Experiment, event1.Namespace,
 						event1.Kind, event1.Message, event1.StartTime, event1.FinishTime, event1.Duration, event1.ExperimentID),
-				}
+			}
 
 			sqlSelect := `SELECT * FROM "events" WHERE "events"."deleted_at" IS NULL AND ((experiment_id = ?))`
 			mock.ExpectQuery(regexp.QuoteMeta(sqlSelect)).WithArgs(event0.ExperimentID).WillReturnRows(mockedRow[0])
@@ -458,13 +458,77 @@ var _ = Describe("event", func() {
 			Expect(err).Should(HaveOccurred())
 			Expect(strings.Contains(err.Error(), "the format of the finishTime is wrong")).To(Equal(true))
 		})
-
-		// TODO: listByFilter other cases
 	})
 
-	// TODO: DryListByFilter
+	Context("dryListByFilter", func() {
+		It("limitStr wrong", func() {
+			filter := core.Filter{
+				LimitStr: "testWrong",
+			}
+			_, err := es.DryListByFilter(context.TODO(), filter)
+			Expect(err).Should(HaveOccurred())
+			Expect(strings.Contains(err.Error(), "the format of the limitStr is wrong")).To(Equal(true))
+		})
 
+		It("startTimeStr wrong", func() {
+			filter := core.Filter{
+				StartTimeStr: "testWrong",
+			}
+			_, err := es.DryListByFilter(context.TODO(), filter)
+			Expect(err).Should(HaveOccurred())
+			Expect(strings.Contains(err.Error(), "the format of the startTime is wrong")).To(Equal(true))
+		})
 
+		It("finishTimeStr wrong", func() {
+			filter := core.Filter{
+				FinishTimeStr: "testWrong",
+			}
+			_, err := es.DryListByFilter(context.TODO(), filter)
+			Expect(err).Should(HaveOccurred())
+			Expect(strings.Contains(err.Error(), "the format of the finishTime is wrong")).To(Equal(true))
+		})
+
+		It("empty args", func() {
+			rows := sqlmock.
+				NewRows([]string{"id", "created_at", "updated_at", "deleted_at", "experiment", "namespace", "kind",
+					"message", "start_time", "finish_time", "duration", "experiment_id"}).
+				AddRow(event0.ID, event0.CreatedAt, event0.UpdatedAt, event0.DeletedAt, event0.Experiment, event0.Namespace,
+					event0.Kind, event0.Message, event0.StartTime, event0.FinishTime, event0.Duration, event0.ExperimentID)
+			sqlSelect := `SELECT * FROM "events"`
+			mock.ExpectQuery(regexp.QuoteMeta(sqlSelect)).WillReturnRows(rows)
+
+			filter := core.Filter{}
+			events, err := es.DryListByFilter(context.TODO(), filter)
+			Expect(err).ShouldNot(HaveOccurred())
+			Expect(events[0].ID).Should(Equal(event0.ID))
+		})
+
+		It("test args", func() {
+			filter := core.Filter{
+				ExperimentName: "testExperiment0",
+				UID:            "testID0",
+			}
+			rows := sqlmock.
+				NewRows([]string{"id", "created_at", "updated_at", "deleted_at", "experiment", "namespace", "kind",
+					"message", "start_time", "finish_time", "duration", "experiment_id"}).
+				AddRow(event0.ID, event0.CreatedAt, event0.UpdatedAt, event0.DeletedAt, event0.Experiment, event0.Namespace,
+					event0.Kind, event0.Message, event0.StartTime, event0.FinishTime, event0.Duration, event0.ExperimentID)
+			sqlSelect := `SELECT * FROM "events" WHERE "events"."deleted_at" IS NULL AND ((experiment = ? AND experiment_id = ?))`
+			mock.ExpectQuery(regexp.QuoteMeta(sqlSelect)).WithArgs(filter.ExperimentName, filter.UID).WillReturnRows(rows)
+
+			events, err := es.DryListByFilter(context.TODO(), filter)
+			Expect(err).ShouldNot(HaveOccurred())
+			Expect(events[0].ID).Should(Equal(event0.ID))
+		})
+
+		It("not found", func() {
+			filter := core.Filter{}
+			mock.ExpectQuery(`.+`).WillReturnRows(sqlmock.NewRows(nil))
+			events, err := es.DryListByFilter(context.TODO(), filter)
+			Expect(err).ShouldNot(HaveOccurred())
+			Expect(len(events)).Should(Equal(0))
+		})
+	})
 })
 
 func TestConstructQueryArgs(t *testing.T) {
@@ -479,124 +543,124 @@ func TestConstructQueryArgs(t *testing.T) {
 		expectedArgs  []string
 	}{
 		{
-			name:           "",
-			ns:             "",
-			uid:            "",
-			kind:           "",
-			startTime:      "",
-			finishTime:     "",
-			expectedQuery:  "",
-			expectedArgs:   []string{},
+			name:          "",
+			ns:            "",
+			uid:           "",
+			kind:          "",
+			startTime:     "",
+			finishTime:    "",
+			expectedQuery: "",
+			expectedArgs:  []string{},
 		},
 		{
-			name:           "testName",
-			ns:             "",
-			uid:            "",
-			kind:           "",
-			startTime:      "",
-			finishTime:     "",
-			expectedQuery:  "experiment = ?",
-			expectedArgs:   []string{"testName"},
+			name:          "testName",
+			ns:            "",
+			uid:           "",
+			kind:          "",
+			startTime:     "",
+			finishTime:    "",
+			expectedQuery: "experiment = ?",
+			expectedArgs:  []string{"testName"},
 		},
 		{
-			name:           "",
-			ns:             "testNamespace",
-			uid:            "",
-			kind:           "",
-			startTime:      "",
-			finishTime:     "",
-			expectedQuery:  "namespace = ?",
-			expectedArgs:   []string{"testNamespace"},
+			name:          "",
+			ns:            "testNamespace",
+			uid:           "",
+			kind:          "",
+			startTime:     "",
+			finishTime:    "",
+			expectedQuery: "namespace = ?",
+			expectedArgs:  []string{"testNamespace"},
 		},
 		{
-			name:           "",
-			ns:             "",
-			uid:            "testUID",
-			kind:           "",
-			startTime:      "",
-			finishTime:     "",
-			expectedQuery:  "experiment_id = ?",
-			expectedArgs:   []string{"testUID"},
+			name:          "",
+			ns:            "",
+			uid:           "testUID",
+			kind:          "",
+			startTime:     "",
+			finishTime:    "",
+			expectedQuery: "experiment_id = ?",
+			expectedArgs:  []string{"testUID"},
 		},
 		{
-			name:           "",
-			ns:             "",
-			uid:            "",
-			kind:           "testKind",
-			startTime:      "",
-			finishTime:     "",
-			expectedQuery:  "kind = ?",
-			expectedArgs:   []string{"testKind"},
+			name:          "",
+			ns:            "",
+			uid:           "",
+			kind:          "testKind",
+			startTime:     "",
+			finishTime:    "",
+			expectedQuery: "kind = ?",
+			expectedArgs:  []string{"testKind"},
 		},
 		{
-			name:           "",
-			ns:             "",
-			uid:            "",
-			kind:           "",
-			startTime:      "20200101",
-			finishTime:     "",
-			expectedQuery:  "start_time >= ?",
-			expectedArgs:   []string{"20200101"},
+			name:          "",
+			ns:            "",
+			uid:           "",
+			kind:          "",
+			startTime:     "20200101",
+			finishTime:    "",
+			expectedQuery: "start_time >= ?",
+			expectedArgs:  []string{"20200101"},
 		},
 		{
-			name:           "",
-			ns:             "",
-			uid:            "",
-			kind:           "",
-			startTime:      "",
-			finishTime:     "20200102",
-			expectedQuery:  "finish_time <= ?",
-			expectedArgs:   []string{"20200102"},
+			name:          "",
+			ns:            "",
+			uid:           "",
+			kind:          "",
+			startTime:     "",
+			finishTime:    "20200102",
+			expectedQuery: "finish_time <= ?",
+			expectedArgs:  []string{"20200102"},
 		},
 		{
-			name:           "testName",
-			ns:             "testNamespace",
-			uid:            "",
-			kind:           "",
-			startTime:      "",
-			finishTime:     "",
-			expectedQuery:  "experiment = ? AND namespace = ?",
-			expectedArgs:   []string{"testName", "testNamespace"},
+			name:          "testName",
+			ns:            "testNamespace",
+			uid:           "",
+			kind:          "",
+			startTime:     "",
+			finishTime:    "",
+			expectedQuery: "experiment = ? AND namespace = ?",
+			expectedArgs:  []string{"testName", "testNamespace"},
 		},
 		{
-			name:           "testName",
-			ns:             "testNamespace",
-			uid:            "testUID",
-			kind:           "",
-			startTime:      "",
-			finishTime:     "",
-			expectedQuery:  "experiment = ? AND namespace = ? AND experiment_id = ?",
-			expectedArgs:   []string{"testName", "testNamespace", "testUID"},
+			name:          "testName",
+			ns:            "testNamespace",
+			uid:           "testUID",
+			kind:          "",
+			startTime:     "",
+			finishTime:    "",
+			expectedQuery: "experiment = ? AND namespace = ? AND experiment_id = ?",
+			expectedArgs:  []string{"testName", "testNamespace", "testUID"},
 		},
 		{
-			name:           "testName",
-			ns:             "testNamespace",
-			uid:            "testUID",
-			kind:           "testKind",
-			startTime:      "",
-			finishTime:     "",
-			expectedQuery:  "experiment = ? AND namespace = ? AND experiment_id = ? AND kind = ?",
-			expectedArgs:   []string{"testName", "testNamespace", "testUID", "testKind"},
+			name:          "testName",
+			ns:            "testNamespace",
+			uid:           "testUID",
+			kind:          "testKind",
+			startTime:     "",
+			finishTime:    "",
+			expectedQuery: "experiment = ? AND namespace = ? AND experiment_id = ? AND kind = ?",
+			expectedArgs:  []string{"testName", "testNamespace", "testUID", "testKind"},
 		},
 		{
-			name:           "testName",
-			ns:             "testNamespace",
-			uid:            "testUID",
-			kind:           "testKind",
-			startTime:      "20200101",
-			finishTime:     "",
-			expectedQuery:  "experiment = ? AND namespace = ? AND experiment_id = ? AND kind = ? AND start_time >= ?",
-			expectedArgs:   []string{"testName", "testNamespace", "testUID", "testKind", "20200101"},
+			name:          "testName",
+			ns:            "testNamespace",
+			uid:           "testUID",
+			kind:          "testKind",
+			startTime:     "20200101",
+			finishTime:    "",
+			expectedQuery: "experiment = ? AND namespace = ? AND experiment_id = ? AND kind = ? AND start_time >= ?",
+			expectedArgs:  []string{"testName", "testNamespace", "testUID", "testKind", "20200101"},
 		},
 		{
-			name:           "testName",
-			ns:             "testNamespace",
-			uid:            "testUID",
-			kind:           "testKind",
-			startTime:      "20200101",
-			finishTime:     "20200102",
-			expectedQuery:  "experiment = ? AND namespace = ? AND experiment_id = ? AND kind = ? AND start_time >= ? AND finish_time <= ?",
-			expectedArgs:   []string{"testName", "testNamespace", "testUID", "testKind", "20200101", "20200102"},
+			name:          "testName",
+			ns:            "testNamespace",
+			uid:           "testUID",
+			kind:          "testKind",
+			startTime:     "20200101",
+			finishTime:    "20200102",
+			expectedQuery: "experiment = ? AND namespace = ? AND experiment_id = ? AND kind = ? AND start_time >= ? AND finish_time <= ?",
+			expectedArgs:  []string{"testName", "testNamespace", "testUID", "testKind", "20200101", "20200102"},
 		},
 	}
 
