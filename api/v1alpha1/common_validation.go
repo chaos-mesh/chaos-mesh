@@ -104,6 +104,7 @@ func ValidatePodMode(value string, mode PodMode, valueField *field.Path) field.E
 		if err != nil {
 			allErrs = append(allErrs, field.Invalid(valueField, value,
 				fmt.Sprintf(ValidateValueParseError, err)))
+			break
 		}
 
 		if num <= 0 {
@@ -116,6 +117,7 @@ func ValidatePodMode(value string, mode PodMode, valueField *field.Path) field.E
 		if err != nil {
 			allErrs = append(allErrs, field.Invalid(valueField, value,
 				fmt.Sprintf(ValidateValueParseError, err)))
+			break
 		}
 
 		if percentage <= 0 || percentage > 100 {
@@ -124,5 +126,6 @@ func ValidatePodMode(value string, mode PodMode, valueField *field.Path) field.E
 					percentage, mode)))
 		}
 	}
+
 	return allErrs
 }
