@@ -39,7 +39,9 @@ import (
 )
 
 const (
-	networkPartitionActionMsg = "partition network duration %s"
+	networkPartitionActionMsg = " partition network duration %s"
+	networkChaosSourceMsg     = "This is a source pod."
+	networkChaosTargetMsg     = "This is a target pod."
 
 	sourceIPSetPostFix = "src"
 	targetIPSetPostFix = "tgt"
@@ -173,7 +175,7 @@ func (e *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.I
 	}
 
 	networkchaos.Status.Experiment.PodRecords = make([]v1alpha1.PodStatus, 0, len(allPods))
-	for _, pod := range allPods {
+	for index, pod := range allPods {
 		ps := v1alpha1.PodStatus{
 			Namespace: pod.Namespace,
 			Name:      pod.Name,
@@ -182,8 +184,14 @@ func (e *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.I
 			Action:    string(networkchaos.Spec.Action),
 		}
 
+		if index < len(sources) {
+			ps.Message = networkChaosSourceMsg
+		} else {
+			ps.Message = networkChaosTargetMsg
+		}
+
 		if networkchaos.Spec.Duration != nil {
-			ps.Message = fmt.Sprintf(networkPartitionActionMsg, *networkchaos.Spec.Duration)
+			ps.Message += fmt.Sprintf(networkPartitionActionMsg, *networkchaos.Spec.Duration)
 		}
 
 		networkchaos.Status.Experiment.PodRecords = append(networkchaos.Status.Experiment.PodRecords, ps)
