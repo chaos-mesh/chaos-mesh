@@ -329,7 +329,11 @@ var _ = ginkgo.Describe("[Basic]", func() {
 			framework.ExpectNoError(err, "create helper io port port-forward failed")
 		})
 		ginkgo.It("[RANDOM]", func() {
-			dnschaostestcases.TestcaseDNS(ns, cli, port, c)
+			dnschaostestcases.TestcaseDNSRandom(ns, cli, port, c)
+		})
+
+		ginkgo.It("[ERROR]", func() {
+			dnschaostestcases.TestcaseDNSError(ns, cli, port, c)
 		})
 	})
 })

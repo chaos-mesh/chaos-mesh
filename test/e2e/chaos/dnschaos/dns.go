@@ -30,7 +30,51 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/test/e2e/util"
 )
 
-func TestcaseDNS(
+func TestcaseDNSRandom(
+	ns string,
+	cli client.Client,
+	port uint16,
+	c http.Client,
+) {
+	ctx, cancel := context.WithCancel(context.Background())
+
+	err := util.WaitE2EHelperReady(c, port)
+
+	framework.ExpectNoError(err, "wait e2e helper ready error")
+
+	// get IP of a non exists host, and will get error
+	_, err = testDNSServer(c, port)
+	framework.ExpectError(err, "test DNS server failed")
+
+	dnsChaos := &v1alpha1.DNSChaos{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "dns-chaos",
+			Namespace: ns,
+		},
+		Spec: v1alpha1.DNSChaosSpec{
+			Action: v1alpha1.RandomAction,
+			Mode:   v1alpha1.AllPodMode,
+			Scope:  v1alpha1.AllScope,
+			Selector: v1alpha1.SelectorSpec{
+				Namespaces:     []string{ns},
+				LabelSelectors: map[string]string{"app": "network-peer"},
+			},
+		},
+	}
+
+	err = cli.Create(ctx, dnsChaos.DeepCopy())
+	framework.ExpectNoError(err, "create dns chaos error")
+	time.Sleep(5 * time.Second)
+
+	// get IP of a non exists host, because chaos DNS server will return a random IP,
+	// so err should be nil
+	_, err = testDNSServer(c, port)
+	framework.ExpectNoError(err, "test DNS server failed")
+
+	cancel()
+}
+
+func TestcaseDNSError(
 	ns string,
 	cli client.Client,
 	port uint16,
