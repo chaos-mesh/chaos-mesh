@@ -31,6 +31,7 @@ func GrantAccess() error {
 	if err != nil {
 		return err
 	}
+	defer cgroupFile.Close()
 
 	// TODO: encapsulate these logic with chaos-daemon StressChaos part
 	cgroupScanner := bufio.NewScanner(cgroupFile)
@@ -62,6 +63,8 @@ func GrantAccess() error {
 	if err != nil {
 		return err
 	}
+	defer f.Close()
+
 	// 10, 229 according to https://www.kernel.org/doc/Documentation/admin-guide/devices.txt
 	content := "c 10:229 rwm"
 	_, err = f.WriteString(content)
