@@ -114,7 +114,15 @@ func (s *server) ioTest(w http.ResponseWriter, _ *http.Request) {
 
 // a handler to test dns chaos
 func (s *server) dnsTest(w http.ResponseWriter, r *http.Request) {
-	ips, err := net.LookupIP("not-exist-host.abc")
+
+	url, ok := r.URL.Query()["url"]
+
+	if !ok || len(url[0]) < 1 {
+		http.Error(w, "url is empty", http.StatusBadRequest)
+		return
+	}
+
+	ips, err := net.LookupIP(url[0])
 	if err != nil {
 		http.Error(w, "failed", http.StatusBadRequest)
 		return

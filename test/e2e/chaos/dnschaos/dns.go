@@ -43,7 +43,7 @@ func TestcaseDNSRandom(
 	framework.ExpectNoError(err, "wait e2e helper ready error")
 
 	// get IP of a non exists host, and will get error
-	_, err = testDNSServer(c, port)
+	_, err = testDNSServer(c, port, "not-exist-host.abc")
 	framework.ExpectError(err, "test DNS server failed")
 
 	dnsChaos := &v1alpha1.DNSChaos{
@@ -68,7 +68,7 @@ func TestcaseDNSRandom(
 
 	// get IP of a non exists host, because chaos DNS server will return a random IP,
 	// so err should be nil
-	_, err = testDNSServer(c, port)
+	_, err = testDNSServer(c, port, "not-exist-host.abc")
 	framework.ExpectNoError(err, "test DNS server failed")
 
 	cancel()
@@ -86,9 +86,9 @@ func TestcaseDNSError(
 
 	framework.ExpectNoError(err, "wait e2e helper ready error")
 
-	// get IP of a non exists host, and will get error
-	_, err = testDNSServer(c, port)
-	framework.ExpectError(err, "test DNS server failed")
+	// get IP of chaos-mesh.org, and will get no error
+	_, err = testDNSServer(c, port, "chaos-mesh.org")
+	framework.ExpectNoError(err, "test DNS server failed")
 
 	dnsChaos := &v1alpha1.DNSChaos{
 		ObjectMeta: metav1.ObjectMeta{
@@ -110,18 +110,18 @@ func TestcaseDNSError(
 	framework.ExpectNoError(err, "create dns chaos error")
 	time.Sleep(5 * time.Second)
 
-	// get IP of a non exists host, because chaos DNS server will return a random IP,
-	// so err should be nil
-	_, err = testDNSServer(c, port)
-	framework.ExpectNoError(err, "test DNS server failed")
+	// get IP of a chaos-mesh.org, because chaos DNS server will return error,
+	// so err should not be nil
+	_, err = testDNSServer(c, port, "chaos-mesh.org")
+	framework.ExpectError(err, "test DNS server failed")
 
 	cancel()
 }
 
-func testDNSServer(c http.Client, port uint16) (string, error) {
-	klog.Infof("sending request to http://localhost:%d/dns", port)
+func testDNSServer(c http.Client, port uint16, url string) (string, error) {
+	klog.Infof("sending request to http://localhost:%d/dns?url=%s", port, url)
 
-	resp, err := c.Get(fmt.Sprintf("http://localhost:%d/dns", port))
+	resp, err := c.Get(fmt.Sprintf("http://localhost:%d/dns?url=%s", port, url))
 	if err != nil {
 		return "", err
 	}
