@@ -203,8 +203,8 @@ message Tc {
   Tbf tbf = 3;
   string ipset = 4;
   string protocol = 5;
-  string sourcePort = 6;
-  string egressPort = 7;
+  string source_port = 6;
+  string egress_port = 7;
 }
 
 message SetDNSServerRequest {
