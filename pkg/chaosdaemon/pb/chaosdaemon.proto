@@ -62,6 +62,7 @@ message Netem {
   float corrupt_corr = 13;
   TcHandle parent = 14;
   TcHandle handle = 15;
+  string device = 16;
 }
 
 message TbfRequest {
@@ -133,6 +134,9 @@ message Chain {
   Direction direction = 2;
   repeated string ipsets = 3;
   string target = 4;
+  string protocol = 5;
+  string source_ports = 6;
+  string destination_ports = 7;
 }
 
 message TimeRequest {
@@ -198,6 +202,9 @@ message Tc {
   Netem netem = 2;
   Tbf tbf = 3;
   string ipset = 4;
+  string protocol = 5;
+  string source_port = 6;
+  string egress_port = 7;
 }
 
 message SetDNSServerRequest {

@@ -101,6 +101,12 @@ const ioCommon: Spec = {
     value: '',
     helperText: "Optional. The path of files for injecting. If it's empty, the action will inject into all files.",
   },
+  container_name: {
+    field: 'text',
+    label: 'Container Name',
+    value: '',
+    helperText: 'Optional. The target container to inject in',
+  },
   percent: {
     field: 'number',
     label: 'Percent',
