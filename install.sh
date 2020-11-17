@@ -269,7 +269,7 @@ main() {
     fi
 
     check_kubernetes
-    install_chaos_mesh "${release_name}" "${namespace}" "${local_kube}" ${force_chaos_mesh} ${docker_mirror} "${crd}" "${runtime}" "${k3s}" "${cm_version}" "${timezone}" "${docker_registry}"
+    install_chaos_mesh "${release_name}" "${namespace}" "${local_kube}" ${force_chaos_mesh} ${docker_mirror} "${crd}" "${runtime}" "${k3s}" "${cm_version}" "${timezone}" "${docker_registry}" "${microk8s}"
     ensure_pods_ready "${namespace}" "app.kubernetes.io/component=controller-manager" 100
     ensure_pods_ready "${namespace}" "app.kubernetes.io/component=chaos-daemon" 100
     ensure_pods_ready "${namespace}" "app.kubernetes.io/component=chaos-dashboard" 100
@@ -626,6 +626,7 @@ install_chaos_mesh() {
     local version=$9
     local timezone=${10}
     local docker_registry=${11}
+    local microk8s=${12}
     printf "Install Chaos Mesh %s\n" "${release_name}"
 
     local chaos_mesh_image="${docker_registry}/pingcap/chaos-mesh:${version}"
