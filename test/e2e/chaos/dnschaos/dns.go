@@ -72,6 +72,9 @@ func TestcaseDNSRandom(
 	framework.ExpectNoError(err, "test DNS server failed")
 
 	cancel()
+
+	err = cli.Delete(ctx, dnsChaos)
+	framework.ExpectNoError(err, "failed to delete dns chaos")
 }
 
 func TestcaseDNSError(
@@ -116,6 +119,9 @@ func TestcaseDNSError(
 	framework.ExpectError(err, "test DNS server failed")
 
 	cancel()
+
+	err = cli.Delete(ctx, dnsChaos)
+	framework.ExpectNoError(err, "failed to delete dns chaos")
 }
 
 func testDNSServer(c http.Client, port uint16, url string) (string, error) {

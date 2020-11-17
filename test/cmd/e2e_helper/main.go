@@ -118,7 +118,7 @@ func (s *server) dnsTest(w http.ResponseWriter, r *http.Request) {
 	url, ok := r.URL.Query()["url"]
 
 	if !ok || len(url[0]) < 1 {
-		http.Error(w, "url is empty", http.StatusBadRequest)
+		http.Error(w, "failed", http.StatusBadRequest)
 		return
 	}
 
