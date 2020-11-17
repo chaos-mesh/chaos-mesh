@@ -48,7 +48,7 @@ func TestcaseDNSRandom(
 
 	dnsChaos := &v1alpha1.DNSChaos{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      "dns-chaos",
+			Name:      "dns-chaos-random",
 			Namespace: ns,
 		},
 		Spec: v1alpha1.DNSChaosSpec{
@@ -92,11 +92,11 @@ func TestcaseDNSError(
 
 	dnsChaos := &v1alpha1.DNSChaos{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      "dns-chaos",
+			Name:      "dns-chaos-error",
 			Namespace: ns,
 		},
 		Spec: v1alpha1.DNSChaosSpec{
-			Action: v1alpha1.RandomAction,
+			Action: v1alpha1.ErrorAction,
 			Mode:   v1alpha1.AllPodMode,
 			Scope:  v1alpha1.AllScope,
 			Selector: v1alpha1.SelectorSpec{
