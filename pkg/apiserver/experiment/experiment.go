@@ -206,24 +206,11 @@ func (s *Service) createNetworkChaos(exp *core.ExperimentInfo) error {
 				Loss:      exp.Target.NetworkChaos.Loss,
 				Duplicate: exp.Target.NetworkChaos.Duplicate,
 				Corrupt:   exp.Target.NetworkChaos.Corrupt,
+				Bandwidth: exp.Target.NetworkChaos.Bandwidth,
 			},
+			Direction:       v1alpha1.Direction(exp.Target.NetworkChaos.Direction),
+			ExternalTargets: exp.Target.NetworkChaos.ExternalTargets,
 		},
-	}
-
-	if exp.Target.NetworkChaos.Action == string(v1alpha1.BandwidthAction) || exp.Target.NetworkChaos.Action == string(v1alpha1.PartitionAction) {
-		chaos.Spec.Direction = v1alpha1.Direction(exp.Target.NetworkChaos.Direction)
-	}
-
-	if exp.Target.NetworkChaos.Action == string(v1alpha1.BandwidthAction) {
-		chaos.Spec.Bandwidth = exp.Target.NetworkChaos.Bandwidth
-	}
-
-	if exp.Scheduler.Cron != "" {
-		chaos.Spec.Scheduler = &v1alpha1.SchedulerSpec{Cron: exp.Scheduler.Cron}
-	}
-
-	if exp.Scheduler.Duration != "" {
-		chaos.Spec.Duration = &exp.Scheduler.Duration
 	}
 
 	if exp.Target.NetworkChaos.TargetScope != nil {
@@ -232,6 +219,14 @@ func (s *Service) createNetworkChaos(exp *core.ExperimentInfo) error {
 			TargetMode:     v1alpha1.PodMode(exp.Target.NetworkChaos.TargetScope.Mode),
 			TargetValue:    exp.Target.NetworkChaos.TargetScope.Value,
 		}
+	}
+
+	if exp.Scheduler.Cron != "" {
+		chaos.Spec.Scheduler = &v1alpha1.SchedulerSpec{Cron: exp.Scheduler.Cron}
+	}
+
+	if exp.Scheduler.Duration != "" {
+		chaos.Spec.Duration = &exp.Scheduler.Duration
 	}
 
 	return s.kubeCli.Create(context.Background(), chaos)
@@ -246,17 +241,18 @@ func (s *Service) createIOChaos(exp *core.ExperimentInfo) error {
 			Annotations: exp.Annotations,
 		},
 		Spec: v1alpha1.IoChaosSpec{
-			Selector:   exp.Scope.ParseSelector(),
-			Mode:       v1alpha1.PodMode(exp.Scope.Mode),
-			Value:      exp.Scope.Value,
-			Action:     v1alpha1.IoChaosType(exp.Target.IOChaos.Action),
-			Delay:      exp.Target.IOChaos.Delay,
-			Errno:      exp.Target.IOChaos.Errno,
-			Attr:       exp.Target.IOChaos.Attr,
-			Path:       exp.Target.IOChaos.Path,
-			Methods:    exp.Target.IOChaos.Methods,
-			Percent:    exp.Target.IOChaos.Percent,
-			VolumePath: exp.Target.IOChaos.VolumePath,
+			Selector:      exp.Scope.ParseSelector(),
+			Mode:          v1alpha1.PodMode(exp.Scope.Mode),
+			Value:         exp.Scope.Value,
+			Action:        v1alpha1.IoChaosType(exp.Target.IOChaos.Action),
+			Delay:         exp.Target.IOChaos.Delay,
+			Errno:         exp.Target.IOChaos.Errno,
+			Attr:          exp.Target.IOChaos.Attr,
+			Path:          exp.Target.IOChaos.Path,
+			Methods:       exp.Target.IOChaos.Methods,
+			Percent:       exp.Target.IOChaos.Percent,
+			VolumePath:    exp.Target.IOChaos.VolumePath,
+			ContainerName: &exp.Target.IOChaos.ContainerName,
 		},
 	}
 
