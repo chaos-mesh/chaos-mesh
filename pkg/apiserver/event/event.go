@@ -57,7 +57,7 @@ func Register(r *gin.RouterGroup, s *Service) {
 	endpoint := r.Group("/events")
 
 	// TODO: add more api handlers
-	endpoint.GET("", s.listEvents)
+	endpoint.GET("", s.ListEvents)
 	endpoint.GET("/dry", s.listDryEvents)
 	endpoint.GET("/get", s.getEvent)
 }
@@ -78,7 +78,7 @@ func Register(r *gin.RouterGroup, s *Service) {
 // @Success 200 {array} core.Event
 // @Router /events [get]
 // @Failure 500 {object} utils.APIError
-func (s *Service) listEvents(c *gin.Context) {
+func (s *Service) ListEvents(c *gin.Context) {
 	filter := core.Filter{
 		PodName:             c.Query("podName"),
 		PodNamespace:        c.Query("podNamespace"),
