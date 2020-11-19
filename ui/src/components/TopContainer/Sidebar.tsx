@@ -1,7 +1,6 @@
 import { Box, Button, Divider, Drawer, List, ListItem, ListItemIcon, ListItemText } from '@material-ui/core'
 import { Theme, createStyles, makeStyles } from '@material-ui/core/styles'
 
-import AccountIcon from '@material-ui/icons/AccountCircleOutlined'
 import AddIcon from '@material-ui/icons/Add'
 import ArchiveOutlinedIcon from '@material-ui/icons/ArchiveOutlined'
 import BlurLinearIcon from '@material-ui/icons/BlurLinear'
@@ -102,10 +101,6 @@ const listItems = [
   {
     icon: <SettingsIcon />,
     text: 'settings',
-  },
-  {
-    icon: <AccountIcon />,
-    text: 'account',
   },
 ]
 

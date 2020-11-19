@@ -62,7 +62,7 @@ const Kernel: React.FC<KernelProps> = ({ onSubmit }) => {
           <Form>
             <Paper>
               <PaperTop title="Callchain">
-                <Button variant="outlined" color="primary" startIcon={<AddIcon />} onClick={addFrame}>
+                <Button variant="contained" color="primary" startIcon={<AddIcon />} onClick={addFrame}>
                   Add
                 </Button>
               </PaperTop>
@@ -74,9 +74,9 @@ const Kernel: React.FC<KernelProps> = ({ onSubmit }) => {
                         Frame {i + 1}
                       </Typography>
                       <Button
-                        variant="outlined"
-                        size="small"
+                        variant="contained"
                         color="secondary"
+                        size="small"
                         startIcon={<RemoveIcon />}
                         onClick={removeFrame(i)}
                       >

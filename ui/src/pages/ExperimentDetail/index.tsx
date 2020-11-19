@@ -328,7 +328,7 @@ export default function ExperimentDetail() {
         setOpen={setDialogOpen}
         title={dialogInfo.title}
         description={dialogInfo.description}
-        handleConfirm={handleExperiment(dialogInfo.action)}
+        onConfirm={handleExperiment(dialogInfo.action)}
       />
 
       {loading && <Loading />}

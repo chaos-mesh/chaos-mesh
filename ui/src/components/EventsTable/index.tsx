@@ -26,10 +26,10 @@ import KeyboardArrowLeftIcon from '@material-ui/icons/KeyboardArrowLeft'
 import KeyboardArrowRightIcon from '@material-ui/icons/KeyboardArrowRight'
 import LastPageIcon from '@material-ui/icons/LastPage'
 import PaperTop from 'components-mui/PaperTop'
+import RunningLabel from 'components-mui/RunningLabel'
 import T from 'components/T'
 import { useIntl } from 'react-intl'
 import { useQuery } from 'lib/hooks'
-import useRunningLabelStyles from 'lib/styles/runningLabel'
 
 const useStyles = makeStyles(() =>
   createStyles({
@@ -183,35 +183,25 @@ interface EventsTableRowProps {
   onSelectEvent: (e: Event) => () => void
 }
 
-const EventsTableRow: React.FC<EventsTableRowProps> = ({ event: e, detailed, onSelectEvent }) => {
-  const runningLabel = useRunningLabelStyles()
-
-  return (
-    <>
-      <TableRow hover>
-        <TableCell>{e.experiment}</TableCell>
-        <TableCell>{e.experiment_id}</TableCell>
-        <TableCell>{e.namespace}</TableCell>
-        <TableCell>{e.kind}</TableCell>
-        <TableCell>{format(e.start_time)}</TableCell>
-        <TableCell>
-          {e.finish_time ? (
-            format(e.finish_time)
-          ) : (
-            <span className={runningLabel.root}>{T('experiments.status.running')}</span>
-          )}
-        </TableCell>
-        {detailed && (
-          <TableCell>
-            <Button variant="outlined" size="small" color="primary" onClick={onSelectEvent(e)}>
-              {T('common.detail')}
-            </Button>
-          </TableCell>
-        )}
-      </TableRow>
-    </>
-  )
-}
+const EventsTableRow: React.FC<EventsTableRowProps> = ({ event: e, detailed, onSelectEvent }) => (
+  <TableRow hover>
+    <TableCell>{e.experiment}</TableCell>
+    <TableCell>{e.experiment_id}</TableCell>
+    <TableCell>{e.namespace}</TableCell>
+    <TableCell>{e.kind}</TableCell>
+    <TableCell>{format(e.start_time)}</TableCell>
+    <TableCell>
+      {e.finish_time ? format(e.finish_time) : <RunningLabel>{T('experiments.status.running')}</RunningLabel>}
+    </TableCell>
+    {detailed && (
+      <TableCell>
+        <Button variant="outlined" size="small" color="primary" onClick={onSelectEvent(e)}>
+          {T('common.detail')}
+        </Button>
+      </TableCell>
+    )}
+  </TableRow>
+)
 
 export interface EventsTableHandles {
   onSelectEvent: (e: Event) => () => void

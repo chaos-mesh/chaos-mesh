@@ -77,8 +77,7 @@ export default function Experiments() {
       fetchExperiments()
       dispatch(setNeedToRefreshExperiments(false))
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [needToRefreshExperiments])
+  }, [dispatch, needToRefreshExperiments])
 
   // Refresh every experiments' events after experiments state updated
   useEffect(() => {
@@ -175,7 +174,7 @@ export default function Experiments() {
         setOpen={setDialogOpen}
         title={selected.title}
         description={selected.description}
-        handleConfirm={handleExperiment(selected.action)}
+        onConfirm={handleExperiment(selected.action)}
       />
     </>
   )
