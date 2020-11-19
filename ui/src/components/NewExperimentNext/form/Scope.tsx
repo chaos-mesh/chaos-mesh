@@ -73,6 +73,12 @@ const ScopeStep: React.FC<ScopeStepProps> = ({ namespaces, scope = 'scope', pods
 
   useEffect(() => {
     if (currentNamespaces.length) {
+      dispatch(
+        getPodsByNamespaces({
+          namespace_selectors: currentNamespaces,
+        })
+      )
+
       dispatch(getLabels(currentNamespaces))
       dispatch(getAnnotations(currentNamespaces))
     }
