@@ -205,7 +205,6 @@ var _ = Describe("event", func() {
 	})
 	Context("ListEvents", func() {
 		It("success", func() {
-			fmt.Println("这里这里这里")
 			mockes := new(MockEventService)
 			//mockService.On("Get", mock.AnythingOfType("*gin.Context"), uid).Return(mockUserResp, nil)
 			mockes.On("ListByFilter", mock.Anything,mock.Anything).Return(nil, nil)
