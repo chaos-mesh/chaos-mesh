@@ -41,6 +41,6 @@ func NewDefaultConfig() *Config {
 		E2EImage:          "localhost:5000/pingcap/e2e-helper:latest",
 		ChaosFSImage:      "localhost:5000/pingcap/chaos-fs:latest",
 		ChaosScriptsImage: "localhost:5000/pingcap/chaos-scripts:latest",
-		ChaosDNSImage:     "pingcap/chaosdns:latest",
+		ChaosDNSImage:     "localhost:5000/pingcap/chaos-dns:latest",
 	}
 }
