@@ -43,6 +43,12 @@ const networkCommon: Spec = {
     value: '',
     helperText: 'Specifies the network direction',
   },
+  external_targets: {
+    field: 'label',
+    label: 'External Targets',
+    value: [],
+    helperText: 'Type string and end with a space to generate the network targets outside k8s',
+  },
   target_scope: undefined as any,
 }
 
@@ -94,6 +100,12 @@ const ioCommon: Spec = {
     label: 'Path',
     value: '',
     helperText: "Optional. The path of files for injecting. If it's empty, the action will inject into all files.",
+  },
+  container_name: {
+    field: 'text',
+    label: 'Container Name',
+    value: '',
+    helperText: 'Optional. The target container to inject in',
   },
   percent: {
     field: 'number',

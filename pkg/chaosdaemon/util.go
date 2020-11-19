@@ -224,6 +224,7 @@ func ReadCommName(pid int) (string, error) {
 	if err != nil {
 		return "", err
 	}
+	defer f.Close()
 
 	b, err := ioutil.ReadAll(f)
 	if err != nil {
@@ -269,6 +270,7 @@ func GetChildProcesses(ppid uint32) ([]uint32, error) {
 					log.Error(err, "read status file error", "path", statusPath)
 					return
 				}
+				defer reader.Close()
 
 				var (
 					pid    uint32
