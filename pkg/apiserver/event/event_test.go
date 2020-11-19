@@ -15,17 +15,17 @@ package event
 
 import (
 	"context"
-	"testing"
 	"net/http"
 	"net/http/httptest"
+	"testing"
 	"time"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/core"
 
 	"github.com/gin-gonic/gin"
-	"github.com/stretchr/testify/mock"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	"github.com/stretchr/testify/mock"
 )
 
 // MockEventService is a mock type for event.Service
@@ -97,8 +97,8 @@ func performRequest(r http.Handler, method, path string) *httptest.ResponseRecor
 	return w
 }
 
-func (m *MockEventService) ListByFilter (ctx context.Context, filter core.Filter) ([]*core.Event, error) {
-	return nil,nil
+func (m *MockEventService) ListByFilter(ctx context.Context, filter core.Filter) ([]*core.Event, error) {
+	return nil, nil
 	//ret := m.Called(ctx, filter)
 	//return ret.Get(0).([]*core.Event), ret.Get(1).(error)
 }
@@ -115,7 +115,7 @@ var _ = Describe("event", func() {
 	Context("ListEvents", func() {
 		It("empty podNamespace", func() {
 			mockes := new(MockEventService)
-			mockes.On("ListByFilter", mock.Anything,mock.Anything).Return(nil, nil)
+			mockes.On("ListByFilter", mock.Anything, mock.Anything).Return(nil, nil)
 
 			s := Service{
 				conf:    nil,
@@ -139,7 +139,7 @@ var _ = Describe("event", func() {
 
 		It("success", func() {
 			mockes := new(MockEventService)
-			mockes.On("ListByFilter", mock.Anything,mock.Anything).Return(nil, nil)
+			mockes.On("ListByFilter", mock.Anything, mock.Anything).Return(nil, nil)
 
 			s := Service{
 				conf:    nil,
@@ -162,4 +162,3 @@ var _ = Describe("event", func() {
 		})
 	})
 })
-
