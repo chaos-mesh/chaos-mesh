@@ -15,6 +15,8 @@ package event
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -23,6 +25,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/core"
 
 	"github.com/gin-gonic/gin"
+	"github.com/jinzhu/gorm"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/stretchr/testify/mock"
@@ -53,12 +56,85 @@ func (m *MockEventService) ListByUID(context.Context, string) ([]*core.Event, er
 	panic("implement me")
 }
 
-func (m *MockEventService) DryListByFilter(context.Context, core.Filter) ([]*core.Event, error) {
-	panic("implement me")
+func (m *MockEventService) ListByFilter(ctx context.Context, filter core.Filter) ([]*core.Event, error) {
+	var res []*core.Event
+	var err error
+	if filter.UID == "testUID" {
+		event := &core.Event{
+			ID:           0,
+			CreatedAt:    time.Time{},
+			UpdatedAt:    time.Time{},
+			DeletedAt:    nil,
+			Experiment:   "testExperiment",
+			Namespace:    "testNamespace",
+			Kind:         "testKind",
+			Message:      "test",
+			StartTime:    nil,
+			FinishTime:   nil,
+			Duration:     "1m",
+			Pods:         nil,
+			ExperimentID: "testUID",
+		}
+		res = append(res, event)
+	} else {
+		err = fmt.Errorf("test err")
+	}
+	return res, err
 }
 
-func (m *MockEventService) Find(context.Context, uint) (*core.Event, error) {
-	panic("implement me")
+func (m *MockEventService) DryListByFilter(_ context.Context, filter core.Filter) ([]*core.Event, error) {
+	var res []*core.Event
+	var err error
+	if filter.Kind == "testKind" {
+		event := &core.Event{
+			ID:           0,
+			CreatedAt:    time.Time{},
+			UpdatedAt:    time.Time{},
+			DeletedAt:    nil,
+			Experiment:   "testExperiment",
+			Namespace:    "testNamespace",
+			Kind:         "testKind",
+			Message:      "test",
+			StartTime:    nil,
+			FinishTime:   nil,
+			Duration:     "1m",
+			Pods:         nil,
+			ExperimentID: "testUID",
+		}
+		res = append(res, event)
+	} else {
+		err = fmt.Errorf("test err")
+	}
+	return res, err
+}
+
+func (m *MockEventService) Find(_ context.Context, id uint) (*core.Event, error) {
+	var res *core.Event
+	var err error
+	if id == 0 {
+		res = &core.Event{
+			ID:           0,
+			CreatedAt:    time.Time{},
+			UpdatedAt:    time.Time{},
+			DeletedAt:    nil,
+			Experiment:   "testExperiment",
+			Namespace:    "testNamespace",
+			Kind:         "testKind",
+			Message:      "test",
+			StartTime:    nil,
+			FinishTime:   nil,
+			Duration:     "1m",
+			Pods:         nil,
+			ExperimentID: "testUID",
+		}
+	} else {
+		if id == 1 {
+			err = gorm.ErrRecordNotFound
+		} else {
+			err = fmt.Errorf("test err")
+		}
+	}
+	return res, err
 }
 
 func (m *MockEventService) FindByExperimentAndStartTime(context.Context, string, string, *time.Time) (*core.Event, error) {
@@ -97,15 +173,23 @@ func performRequest(r http.Handler, method, path string) *httptest.ResponseRecor
 	return w
 }
 
-func (m *MockEventService) ListByFilter(ctx context.Context, filter core.Filter) ([]*core.Event, error) {
-	return nil, nil
-	//ret := m.Called(ctx, filter)
-	//return ret.Get(0).([]*core.Event), ret.Get(1).(error)
-}
-
 var _ = Describe("event", func() {
+	var router *gin.Engine
 	BeforeEach(func() {
-		// Add any setup steps that needs to be executed before each test
+		mockes := new(MockEventService)
+
+		s := Service{
+			conf:    nil,
+			kubeCli: nil,
+			archive: nil,
+			event:   mockes,
+		}
+		router = gin.Default()
+		r := router.Group("/api")
+		endpoint := r.Group("/events")
+		endpoint.GET("", s.ListEvents)
+		endpoint.GET("/dry", s.ListDryEvents)
+		endpoint.GET("/get", s.GetEvent)
 	})
 
 	AfterEach(func() {
@@ -114,51 +198,159 @@ var _ = Describe("event", func() {
 
 	Context("ListEvents", func() {
 		It("empty podNamespace", func() {
-			mockes := new(MockEventService)
-			mockes.On("ListByFilter", mock.Anything, mock.Anything).Return(nil, nil)
-
-			s := Service{
-				conf:    nil,
-				kubeCli: nil,
-				archive: nil,
-				event:   mockes,
-			}
-			router := gin.Default()
-			r := router.Group("/api")
-			endpoint := r.Group("/events")
-			endpoint.GET("", s.ListEvents)
 			rr := httptest.NewRecorder()
 			request, err := http.NewRequest(http.MethodGet, "/api/events?podName=testpodNamespace", nil)
-
 			Expect(err).ShouldNot(HaveOccurred())
 			router.ServeHTTP(rr, request)
-
 			Expect(err).ShouldNot(HaveOccurred())
 			Expect(rr.Code).Should(Equal(http.StatusInternalServerError))
 		})
 
 		It("success", func() {
-			mockes := new(MockEventService)
-			mockes.On("ListByFilter", mock.Anything, mock.Anything).Return(nil, nil)
-
-			s := Service{
-				conf:    nil,
-				kubeCli: nil,
-				archive: nil,
-				event:   mockes,
+			response := []*core.Event{
+				&core.Event{
+					ID:           0,
+					CreatedAt:    time.Time{},
+					UpdatedAt:    time.Time{},
+					DeletedAt:    nil,
+					Experiment:   "testExperiment",
+					Namespace:    "testNamespace",
+					Kind:         "testKind",
+					Message:      "test",
+					StartTime:    nil,
+					FinishTime:   nil,
+					Duration:     "1m",
+					Pods:         nil,
+					ExperimentID: "testUID",
+				},
 			}
-			router := gin.Default()
-			r := router.Group("/api")
-			endpoint := r.Group("/events")
-			endpoint.GET("", s.ListEvents)
 			rr := httptest.NewRecorder()
-			request, err := http.NewRequest(http.MethodGet, "/api/events", nil)
-
+			request, err := http.NewRequest(http.MethodGet, "/api/events?uid=testUID", nil)
 			Expect(err).ShouldNot(HaveOccurred())
-
 			router.ServeHTTP(rr, request)
 			Expect(err).ShouldNot(HaveOccurred())
 			Expect(rr.Code).Should(Equal(http.StatusOK))
+			responseBody, err := json.Marshal(response)
+			Expect(err).ShouldNot(HaveOccurred())
+			Expect(rr.Body.Bytes()).Should(Equal(responseBody))
+		})
+
+		It("test err", func() {
+			rr := httptest.NewRecorder()
+			request, err := http.NewRequest(http.MethodGet, "/api/events?uid=err", nil)
+			Expect(err).ShouldNot(HaveOccurred())
+			router.ServeHTTP(rr, request)
+			Expect(err).ShouldNot(HaveOccurred())
+			Expect(rr.Code).Should(Equal(http.StatusInternalServerError))
+		})
+	})
+
+	Context("ListDryEvents", func() {
+		It("success", func() {
+			response := []*core.Event{
+				&core.Event{
+					ID:           0,
+					CreatedAt:    time.Time{},
+					UpdatedAt:    time.Time{},
+					DeletedAt:    nil,
+					Experiment:   "testExperiment",
+					Namespace:    "testNamespace",
+					Kind:         "testKind",
+					Message:      "test",
+					StartTime:    nil,
+					FinishTime:   nil,
+					Duration:     "1m",
+					Pods:         nil,
+					ExperimentID: "testUID",
+				},
+			}
+			rr := httptest.NewRecorder()
+			request, err := http.NewRequest(http.MethodGet, "/api/events/dry?kind=testKind", nil)
+			Expect(err).ShouldNot(HaveOccurred())
+			router.ServeHTTP(rr, request)
+			Expect(err).ShouldNot(HaveOccurred())
+			Expect(rr.Code).Should(Equal(http.StatusOK))
+			responseBody, err := json.Marshal(response)
+			Expect(err).ShouldNot(HaveOccurred())
+			Expect(rr.Body.Bytes()).Should(Equal(responseBody))
+		})
+
+		It("test err", func() {
+			rr := httptest.NewRecorder()
+			request, err := http.NewRequest(http.MethodGet, "/api/events/dry?kind=err", nil)
+			Expect(err).ShouldNot(HaveOccurred())
+			router.ServeHTTP(rr, request)
+			Expect(err).ShouldNot(HaveOccurred())
+			Expect(rr.Code).Should(Equal(http.StatusInternalServerError))
+		})
+	})
+
+	Context("GetEvent", func() {
+		It("success", func() {
+			response := &core.Event{
+				ID:           0,
+				CreatedAt:    time.Time{},
+				UpdatedAt:    time.Time{},
+				DeletedAt:    nil,
+				Experiment:   "testExperiment",
+				Namespace:    "testNamespace",
+				Kind:         "testKind",
+				Message:      "test",
+				StartTime:    nil,
+				FinishTime:   nil,
+				Duration:     "1m",
+				Pods:         nil,
+				ExperimentID: "testUID",
+			}
+			rr := httptest.NewRecorder()
+			request, err := http.NewRequest(http.MethodGet, "/api/events/get?id=0", nil)
+			Expect(err).ShouldNot(HaveOccurred())
+			router.ServeHTTP(rr, request)
+			Expect(err).ShouldNot(HaveOccurred())
+			Expect(rr.Code).Should(Equal(http.StatusOK))
+			responseBody, err := json.Marshal(response)
+			Expect(err).ShouldNot(HaveOccurred())
+			Expect(rr.Body.Bytes()).Should(Equal(responseBody))
+		})
+
+		It("empty id", func() {
+			rr := httptest.NewRecorder()
+			request, err := http.NewRequest(http.MethodGet, "/api/events/get", nil)
+			Expect(err).ShouldNot(HaveOccurred())
+			router.ServeHTTP(rr, request)
+			Expect(err).ShouldNot(HaveOccurred())
+			Expect(rr.Code).Should(Equal(http.StatusBadRequest))
+			Expect(err).ShouldNot(HaveOccurred())
+		})
+
+		It("bad id", func() {
+			rr := httptest.NewRecorder()
+			request, err := http.NewRequest(http.MethodGet, "/api/events/get?id=badID", nil)
+			Expect(err).ShouldNot(HaveOccurred())
+			router.ServeHTTP(rr, request)
+			Expect(err).ShouldNot(HaveOccurred())
+			Expect(rr.Code).Should(Equal(http.StatusBadRequest))
+			Expect(err).ShouldNot(HaveOccurred())
+		})
+
+		It("not found", func() {
+			rr := httptest.NewRecorder()
+			request, err := http.NewRequest(http.MethodGet, "/api/events/get?id=1", nil)
+			Expect(err).ShouldNot(HaveOccurred())
+			router.ServeHTTP(rr, request)
+			Expect(err).ShouldNot(HaveOccurred())
+			Expect(rr.Code).Should(Equal(http.StatusInternalServerError))
+			Expect(err).ShouldNot(HaveOccurred())
+		})
+
+		It("other err", func() {
+			rr := httptest.NewRecorder()
+			request, err := http.NewRequest(http.MethodGet, "/api/events/get?id=2", nil)
+			Expect(err).ShouldNot(HaveOccurred())
+			router.ServeHTTP(rr, request)
+			Expect(err).ShouldNot(HaveOccurred())
+			Expect(rr.Code).Should(Equal(http.StatusInternalServerError))
+			Expect(err).ShouldNot(HaveOccurred())
 		})
 	})
 })

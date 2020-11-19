@@ -58,8 +58,8 @@ func Register(r *gin.RouterGroup, s *Service) {
 
 	// TODO: add more api handlers
 	endpoint.GET("", s.ListEvents)
-	endpoint.GET("/dry", s.listDryEvents)
-	endpoint.GET("/get", s.getEvent)
+	endpoint.GET("/dry", s.ListDryEvents)
+	endpoint.GET("/get", s.GetEvent)
 }
 
 // @Summary Get the list of events from db.
@@ -120,7 +120,7 @@ func (s *Service) ListEvents(c *gin.Context) {
 // @Success 200 {array} core.Event
 // @Router /events/dry [get]
 // @Failure 500 {object} utils.APIError
-func (s *Service) listDryEvents(c *gin.Context) {
+func (s *Service) ListDryEvents(c *gin.Context) {
 	filter := core.Filter{
 		StartTimeStr:        c.Query("startTime"),
 		FinishTimeStr:       c.Query("finishTime"),
@@ -148,7 +148,7 @@ func (s *Service) listDryEvents(c *gin.Context) {
 // @Success 200 {object} core.Event
 // @Router /events/get [get]
 // @Failure 500 {object} utils.APIError
-func (s *Service) getEvent(c *gin.Context) {
+func (s *Service) GetEvent(c *gin.Context) {
 	idStr := c.Query("id")
 
 	if idStr == "" {
