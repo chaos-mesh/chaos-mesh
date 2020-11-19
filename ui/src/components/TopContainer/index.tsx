@@ -5,7 +5,8 @@ import { RootState, useStoreDispatch } from 'store'
 import { ThemeProvider, makeStyles } from '@material-ui/core/styles'
 import customTheme, { darkTheme as customDarkTheme } from 'theme'
 import { drawerCloseWidth, drawerWidth } from './Sidebar'
-import { setAlertOpen, setTokenName, setTokens } from 'slices/globalStatus'
+import { setAlertOpen, setNameSpace, setTokenName, setTokens } from 'slices/globalStatus'
+import { setGlobalNamespace, useToken } from 'lib/auth'
 
 import Alert from '@material-ui/lab/Alert'
 import Auth from './Auth'
@@ -23,7 +24,6 @@ import routes from 'routes'
 import { setNavigationBreadcrumbs } from 'slices/navigation'
 import { useLocation } from 'react-router-dom'
 import { useSelector } from 'react-redux'
-import { useToken } from 'lib/auth'
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -94,8 +94,7 @@ const TopContainer = () => {
   function setAuth() {
     const token = LS.get('token')
     const tokenName = LS.get('token-name')
-
-    let namespace
+    const globalNamespace = LS.get('global-namespace')
 
     if (token && tokenName) {
       const tokens = JSON.parse(token)
@@ -107,7 +106,9 @@ const TopContainer = () => {
       setAuthOpen(true)
     }
 
-    if (namespace) {
+    if (globalNamespace) {
+      setGlobalNamespace(globalNamespace)
+      dispatch(setNameSpace(globalNamespace))
     }
 
     setAuthed(true)

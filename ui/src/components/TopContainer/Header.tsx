@@ -1,6 +1,8 @@
 import { AppBar, Box, Breadcrumbs, IconButton, MenuItem, TextField, Toolbar, Typography } from '@material-ui/core'
 import React, { useEffect, useState } from 'react'
+import { RootState, useStoreDispatch } from 'store'
 import { drawerCloseWidth, drawerWidth } from './Sidebar'
+import { useHistory, useLocation } from 'react-router-dom'
 
 import { Link } from 'react-router-dom'
 import MenuIcon from '@material-ui/icons/Menu'
@@ -8,6 +10,9 @@ import { NavigationBreadCrumbProps } from 'slices/navigation'
 import T from 'components/T'
 import api from 'api'
 import { makeStyles } from '@material-ui/core/styles'
+import { setGlobalNamespace } from 'lib/auth'
+import { setNameSpace } from 'slices/globalStatus'
+import { useSelector } from 'react-redux'
 
 const useStyles = makeStyles((theme) => ({
   appBarCommon: {
@@ -76,6 +81,11 @@ interface HeaderProps {
 
 const Header: React.FC<HeaderProps> = ({ openDrawer, handleDrawerToggle, breadcrumbs }) => {
   const classes = useStyles()
+  const history = useHistory()
+  const { pathname } = useLocation()
+
+  const { namespace } = useSelector((state: RootState) => state.globalStatus)
+  const dispatch = useStoreDispatch()
 
   const [namespaces, setNamespaces] = useState(['All'])
 
@@ -84,6 +94,16 @@ const Header: React.FC<HeaderProps> = ({ openDrawer, handleDrawerToggle, breadcr
       .chaosAvailableNamespaces()
       .then(({ data }) => setNamespaces(['All', ...data]))
       .catch(console.log)
+  }
+
+  const handleSelectGlobalNamespace = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const ns = e.target.value
+
+    setGlobalNamespace(ns)
+    dispatch(setNameSpace(ns))
+
+    history.replace('/namespaceSetted')
+    setTimeout(() => history.replace(pathname))
   }
 
   useEffect(fetchNamespaces, [])
@@ -128,7 +148,8 @@ const Header: React.FC<HeaderProps> = ({ openDrawer, handleDrawerToggle, breadcr
             color="primary"
             margin="dense"
             select
-            defaultValue="All"
+            value={namespace}
+            onChange={handleSelectGlobalNamespace}
           >
             {namespaces.map((option) => (
               <MenuItem key={option} value={option}>

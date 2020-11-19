@@ -1,5 +1,6 @@
 import { PayloadAction, createSlice } from '@reduxjs/toolkit'
 
+import LS from 'lib/localStorage'
 import { TokenFormValues } from 'components/Token'
 
 export interface Alert {
@@ -25,7 +26,7 @@ const initialState: {
   tokens: [],
   tokenInterceptor: -1,
   tokenName: '',
-  namespace: 'default',
+  namespace: 'All',
 }
 
 const globalStatusSlice = createSlice({
@@ -51,7 +52,11 @@ const globalStatusSlice = createSlice({
       state.tokenName = action.payload
     },
     setNameSpace(state, action: PayloadAction<string>) {
-      state.namespace = action.payload
+      const ns = action.payload
+
+      state.namespace = ns
+
+      LS.set('global-namespace', ns)
     },
   },
 })

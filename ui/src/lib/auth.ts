@@ -27,3 +27,22 @@ export const useToken = () => {
 
   return register
 }
+
+let nsInterceptorId: number
+
+export const setGlobalNamespace = (ns: string) => {
+  if (nsInterceptorId) {
+    http.interceptors.request.eject(nsInterceptorId)
+  }
+
+  nsInterceptorId = http.interceptors.request.use((config) => {
+    if (/archives|experiments$/g.test(config.url!)) {
+      config.params = {
+        ...config.params,
+        namespace: ns === 'All' ? null : ns,
+      }
+    }
+
+    return config
+  })
+}
