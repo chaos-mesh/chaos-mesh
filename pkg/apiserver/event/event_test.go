@@ -16,21 +16,13 @@ package event
 import (
 	"context"
 	"testing"
-
-	//"database/sql"
-	"fmt"
-	//"github.com/DATA-DOG/go-sqlmock"
-	//"github.com/chaos-mesh/chaos-mesh/pkg/store/event"
-	"github.com/gin-gonic/gin"
-	//"github.com/jinzhu/gorm"
-	//"github.com/stretchr/testify/assert"
 	"net/http"
 	"net/http/httptest"
-	//"testing"
 	"time"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/core"
 
+	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/mock"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -106,110 +98,24 @@ func performRequest(r http.Handler, method, path string) *httptest.ResponseRecor
 }
 
 func (m *MockEventService) ListByFilter (ctx context.Context, filter core.Filter) ([]*core.Event, error) {
-	fmt.Println("?weishenme ")
 	return nil,nil
 	//ret := m.Called(ctx, filter)
 	//return ret.Get(0).([]*core.Event), ret.Get(1).(error)
 }
 
-//func TestListEvents(t *testing.T) {
-//	gin.SetMode(gin.TestMode)
-//
-//	t.Run("Success", func(t *testing.T) {
-//
-//
-//		mockes := new(MockEventService)
-//		//mockService.On("Get", mock.AnythingOfType("*gin.Context"), uid).Return(mockUserResp, nil)
-//		mockes.On("ListByFilter", mock.Anything,mock.Anything).Return(nil, nil)
-//
-//		rr := httptest.NewRecorder()
-//
-//		s := Service{
-//			conf:    nil,
-//			kubeCli: nil,
-//			archive: nil,
-//			event:   mockes,
-//		}
-//
-//
-//		router := gin.Default()
-//		r := router.Group("/api")
-//		endpoint := r.Group("/events")
-//		endpoint.GET("", s.ListEvents)
-//
-//		//_ = router.Run("127.0.0.1:2333")
-//		//router.Use(func(c *gin.Context) {
-//		//	c.Set("user", &model.User{
-//		//		UID: uid,
-//		//	},
-//		//	)
-//		//})
-//
-//		//NewHandler(&Config{
-//		//	R:           router,
-//		//	UserService: mockUserService,
-//		//})
-//
-//
-//		request, err := http.NewRequest(http.MethodGet, "/api/events", nil)
-//		assert.NoError(t, err)
-//
-//		router.ServeHTTP(rr, request)
-//		fmt.Println("!!!!!!?????")
-//		fmt.Println(rr.Body)
-//		fmt.Println("!!!!!!")
-//		//respBody, err := json.Marshal(gin.H{
-//		//	"user": mockUserResp,
-//		//})
-//
-//		assert.NoError(t, err)
-//		assert.Equal(t, 200, rr.Code)
-//		//assert.Equal(t, respBody, rr.Body.Bytes())
-//		//mockes.AssertExpectations(t)
-//	})
-//}
-
-
 var _ = Describe("event", func() {
-	//var (
-	//	s          *Service
-	//	mock       sqlmock.Sqlmock
-	//
-	//)
-	//
 	BeforeEach(func() {
 		// Add any setup steps that needs to be executed before each test
-		//var db *sql.DB
-		//var err error
-		//db, mock, err = sqlmock.New()
-		//Expect(err).ShouldNot(HaveOccurred())
-		//
-		//gdb, err := gorm.Open("sqlite3", db)
-		//Expect(err).ShouldNot(HaveOccurred())
-		//
-		//xs := event.eventStore
-		//
-		//s = &Service{
-		//	conf:    nil,
-		//	kubeCli: nil,
-		//	archive: nil,
-		//	event: nil,
-		//	//event:   &event.eventStore{db: &dbstore.DB{DB: gdb},
-		//}
-		////s = &Service{db: &dbstore.DB{DB: gdb}}
-
 	})
 
 	AfterEach(func() {
 		// Add any setup steps that needs to be executed before each test
 	})
-	Context("ListEvents", func() {
-		It("success", func() {
-			mockes := new(MockEventService)
-			//mockService.On("Get", mock.AnythingOfType("*gin.Context"), uid).Return(mockUserResp, nil)
-			mockes.On("ListByFilter", mock.Anything,mock.Anything).Return(nil, nil)
 
-			rr := httptest.NewRecorder()
+	Context("ListEvents", func() {
+		It("empty podNamespace", func() {
+			mockes := new(MockEventService)
+			mockes.On("ListByFilter", mock.Anything,mock.Anything).Return(nil, nil)
 
 			s := Service{
 				conf:    nil,
@@ -217,41 +123,42 @@ var _ = Describe("event", func() {
 				archive: nil,
 				event:   mockes,
 			}
-
-
 			router := gin.Default()
 			r := router.Group("/api")
 			endpoint := r.Group("/events")
 			endpoint.GET("", s.ListEvents)
+			rr := httptest.NewRecorder()
+			request, err := http.NewRequest(http.MethodGet, "/api/events?podName=testpodNamespace", nil)
 
-			//_ = router.Run("127.0.0.1:2333")
-			//router.Use(func(c *gin.Context) {
-			//	c.Set("user", &model.User{
-			//		UID: uid,
-			//	},
-			//	)
-			//})
+			Expect(err).ShouldNot(HaveOccurred())
+			router.ServeHTTP(rr, request)
 
-			//NewHandler(&Config{
-			//	R:           router,
-			//	UserService: mockUserService,
-			//})
+			Expect(err).ShouldNot(HaveOccurred())
+			Expect(rr.Code).Should(Equal(http.StatusInternalServerError))
+		})
 
+		It("success", func() {
+			mockes := new(MockEventService)
+			mockes.On("ListByFilter", mock.Anything,mock.Anything).Return(nil, nil)
 
+			s := Service{
+				conf:    nil,
+				kubeCli: nil,
+				archive: nil,
+				event:   mockes,
+			}
+			router := gin.Default()
+			r := router.Group("/api")
+			endpoint := r.Group("/events")
+			endpoint.GET("", s.ListEvents)
+			rr := httptest.NewRecorder()
 			request, err := http.NewRequest(http.MethodGet, "/api/events", nil)
 
 			Expect(err).ShouldNot(HaveOccurred())
 
 			router.ServeHTTP(rr, request)
-			fmt.Println("!!!!!!?????")
-			fmt.Println(rr.Body)
-			fmt.Println("!!!!!!")
-			//respBody, err := json.Marshal(gin.H{
-			//	"user": mockUserResp,
-			//})
-
 			Expect(err).ShouldNot(HaveOccurred())
-			Expect(rr.Code).Should(Equal(200))
+			Expect(rr.Code).Should(Equal(http.StatusOK))
 		})
 	})
 })
