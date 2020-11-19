@@ -5,6 +5,8 @@ import ConfirmDialog from 'components-mui/ConfirmDialog'
 import LS from 'lib/localStorage'
 import React from 'react'
 import T from 'components/T'
+import { setTokenName } from 'slices/globalStatus'
+import { useStoreDispatch } from 'store'
 
 interface AuthProps {
   open: boolean
@@ -15,9 +17,12 @@ const Auth: React.FC<AuthProps> = ({ open, setOpen }) => {
   const history = useHistory()
   const { pathname } = useLocation()
 
+  const dispatch = useStoreDispatch()
+
   const handleSubmitCallback = (values: TokenFormValues) => {
     setOpen(false)
 
+    dispatch(setTokenName(values.name))
     LS.set('token-name', values.name)
 
     history.replace('/authed')
