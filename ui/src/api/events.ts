@@ -1,15 +1,14 @@
 import { Event, EventsParams } from './events.type'
 
-import { AxiosResponse } from 'axios'
 import http from './http'
 
-export const events: (params?: EventsParams) => Promise<AxiosResponse<Event[]>> = (params) =>
-  http.get('/events', {
+export const events = (params?: EventsParams) =>
+  http.get<Event[]>('/events', {
     params,
   })
 
 // Without pods field
-export const dryEvents: (params?: EventsParams) => Promise<AxiosResponse<Event[]>> = (params) =>
-  http.get('/events/dry', {
+export const dryEvents = (params?: EventsParams) =>
+  http.get<Event[]>('/events/dry', {
     params,
   })

@@ -1,0 +1,31 @@
+name: Script Test
+on:
+  push:
+    branches:
+      - master
+      - release-1.0
+  pull_request:
+    branches:
+      - master
+      - release-1.0
+
+jobs:
+  run:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+        with:
+          # Must use at least depth 2!
+          fetch-depth: 2
+
+      - name: Creating kind cluster 
+        uses: helm/kind-action@v1.0.0-rc.1
+
+      - name: Install Chaos Mesh
+        run: |
+          bash install.sh --local kind --crd ./manifests/crd.yaml
+
+      - name: Run integration test
+        run: |
+          bash test/integration_test/run.sh

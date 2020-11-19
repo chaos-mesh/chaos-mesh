@@ -29,6 +29,9 @@ spec:
   {{- if .Values.chaosDaemon.hostNetwork }}
       hostNetwork: true
   {{- end }}
+  {{- if .Values.chaosDaemon.serviceAccount }}
+      serviceAccount: {{ .Values.chaosDaemon.serviceAccount }}
+  {{- end }}
       hostIPC: true
       hostPID: true
       containers:

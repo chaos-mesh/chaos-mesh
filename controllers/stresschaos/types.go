@@ -226,6 +226,7 @@ func (r *endpoint) applyPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.St
 		for _, container := range pod.Status.ContainerStatuses {
 			if container.Name == *chaos.Spec.ContainerName {
 				target = container.ContainerID
+				break
 			}
 		}
 		if len(target) == 0 {
