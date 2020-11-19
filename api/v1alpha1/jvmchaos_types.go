@@ -87,13 +87,13 @@ const (
 
 // JVMParameter represents the detail about jvm chaos action definition
 type JVMParameter struct {
-	// Count represents the number of affect
+	// EffectCount represents the number of affect
 	// +optional
-	Count int `json:"count"`
+	EffectCount int `json:"effectcount"`
 
-	// Percent represents the percent of affect
+	// EffectPercent represents the percent of affect
 	// +optional
-	Percent int `json:"percent"`
+	EffectPercent int `json:"effectpercent"`
 
 	// Delay represents the detail about JVM chaos action of invoke delay
 	// +optional
@@ -119,13 +119,13 @@ type JVMParameter struct {
 	// +optional
 	Exception *JVMExceptionSpec `json:"tce,omitempty"`
 
-	// Delay4Svr represents the detail about JVM chaos action of Servlet response delay
+	// Delay4Servlet represents the detail about JVM chaos action of Servlet response delay
 	// +optional
-	Delay4Svr *ServletDelaySpec `json:"delay4svr,omitempty"`
+	Delay4Servlet *ServletDelaySpec `json:"delay4servlet,omitempty"`
 
-	// Exception4Svr represents the detail about JVM chaos action of Servlet throwing custom exceptions
+	// Exception4Servlet represents the detail about JVM chaos action of Servlet throwing custom exceptions
 	// +optional
-	Exception4Svr *ServletExceptionSpec `json:"tce4svr,omitempty"`
+	Exception4Servlet *ServletExceptionSpec `json:"tce4servlet,omitempty"`
 }
 
 // JVMExceptionSpec represents the detail about JVM chaos action of throwing custom exceptions

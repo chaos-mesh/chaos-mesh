@@ -877,13 +877,13 @@ func (in *JVMParameter) DeepCopyInto(out *JVMParameter) {
 		*out = new(JVMExceptionSpec)
 		**out = **in
 	}
-	if in.Delay4Svr != nil {
-		in, out := &in.Delay4Svr, &out.Delay4Svr
+	if in.Delay4Servlet != nil {
+		in, out := &in.Delay4Servlet, &out.Delay4Servlet
 		*out = new(ServletDelaySpec)
 		**out = **in
 	}
-	if in.Exception4Svr != nil {
-		in, out := &in.Exception4Svr, &out.Exception4Svr
+	if in.Exception4Servlet != nil {
+		in, out := &in.Exception4Servlet, &out.Exception4Servlet
 		*out = new(ServletExceptionSpec)
 		**out = **in
 	}

@@ -75,9 +75,6 @@ spec:
               - cpucount
               - methodname
               type: object
-            count:
-              description: Count represents the number of affect
-              type: integer
             delay:
               description: Delay represents the detail about JVM chaos action of invoke
                 delay
@@ -107,8 +104,8 @@ spec:
               - methodname
               - time
               type: object
-            delay4svr:
-              description: Delay4Svr represents the detail about JVM chaos action
+            delay4servlet:
+              description: Delay4Servlet represents the detail about JVM chaos action
                 of Servlet response delay
               properties:
                 method:
@@ -139,6 +136,12 @@ spec:
             duration:
               description: Duration represents the duration of the chaos action
               type: string
+            effectcount:
+              description: EffectCount represents the number of affect
+              type: integer
+            effectpercent:
+              description: EffectPercent represents the percent of affect
+              type: integer
             mode:
               description: 'Mode defines the mode to run chaos action. Supported mode:
                 one / all / fixed / fixed-percent / random-max-percent'
@@ -190,9 +193,6 @@ spec:
               - classname
               - methodname
               type: object
-            percent:
-              description: Percent represents the percent of affect
-              type: integer
             return:
               description: Return represents the detail about JVM chaos action of
                 return value
@@ -362,9 +362,9 @@ spec:
               - exception
               - methodname
               type: object
-            tce4svr:
-              description: Exception4Svr represents the detail about JVM chaos action
-                of Servlet throwing custom exceptions
+            tce4servlet:
+              description: Exception4Servlet represents the detail about JVM chaos
+                action of Servlet throwing custom exceptions
               properties:
                 exception:
                   description: Exception represents the Exception class, with the
