@@ -57,9 +57,9 @@ func Register(r *gin.RouterGroup, s *Service) {
 	endpoint := r.Group("/events")
 
 	// TODO: add more api handlers
-	endpoint.GET("", s.ListEvents)
-	endpoint.GET("/dry", s.ListDryEvents)
-	endpoint.GET("/get", s.GetEvent)
+	endpoint.GET("", s.listEvents)
+	endpoint.GET("/dry", s.listDryEvents)
+	endpoint.GET("/get", s.getEvent)
 }
 
 // @Summary Get the list of events from db.
@@ -78,7 +78,7 @@ func Register(r *gin.RouterGroup, s *Service) {
 // @Success 200 {array} core.Event
 // @Router /events [get]
 // @Failure 500 {object} utils.APIError
-func (s *Service) ListEvents(c *gin.Context) {
+func (s *Service) listEvents(c *gin.Context) {
 	filter := core.Filter{
 		PodName:             c.Query("podName"),
 		PodNamespace:        c.Query("podNamespace"),
@@ -120,7 +120,7 @@ func (s *Service) ListEvents(c *gin.Context) {
 // @Success 200 {array} core.Event
 // @Router /events/dry [get]
 // @Failure 500 {object} utils.APIError
-func (s *Service) ListDryEvents(c *gin.Context) {
+func (s *Service) listDryEvents(c *gin.Context) {
 	filter := core.Filter{
 		StartTimeStr:        c.Query("startTime"),
 		FinishTimeStr:       c.Query("finishTime"),
@@ -148,7 +148,7 @@ func (s *Service) ListDryEvents(c *gin.Context) {
 // @Success 200 {object} core.Event
 // @Router /events/get [get]
 // @Failure 500 {object} utils.APIError
-func (s *Service) GetEvent(c *gin.Context) {
+func (s *Service) getEvent(c *gin.Context) {
 	idStr := c.Query("id")
 
 	if idStr == "" {

@@ -166,13 +166,6 @@ func TestEvent(t *testing.T) {
 	RunSpecs(t, "Event Suite")
 }
 
-func performRequest(r http.Handler, method, path string) *httptest.ResponseRecorder {
-	req, _ := http.NewRequest(method, path, nil)
-	w := httptest.NewRecorder()
-	r.ServeHTTP(w, req)
-	return w
-}
-
 var _ = Describe("event", func() {
 	var router *gin.Engine
 	BeforeEach(func() {
@@ -187,9 +180,9 @@ var _ = Describe("event", func() {
 		router = gin.Default()
 		r := router.Group("/api")
 		endpoint := r.Group("/events")
-		endpoint.GET("", s.ListEvents)
-		endpoint.GET("/dry", s.ListDryEvents)
-		endpoint.GET("/get", s.GetEvent)
+		endpoint.GET("", s.listEvents)
+		endpoint.GET("/dry", s.listDryEvents)
+		endpoint.GET("/get", s.getEvent)
 	})
 
 	AfterEach(func() {
