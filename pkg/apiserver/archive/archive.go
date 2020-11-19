@@ -93,7 +93,7 @@ func (s *Service) list(c *gin.Context) {
 	name := c.Query("name")
 	ns := c.Query("namespace")
 
-	data, err := s.archive.ListMeta(context.Background(), kind, ns, name, true)
+	metas, err := s.archive.ListMeta(context.Background(), kind, ns, name, true)
 	if err != nil {
 		c.Status(http.StatusInternalServerError)
 		_ = c.Error(utils.ErrInternalServer.NewWithNoMessage())
@@ -102,15 +102,15 @@ func (s *Service) list(c *gin.Context) {
 
 	archives := make([]Archive, 0)
 
-	for _, d := range data {
+	for _, meta := range metas {
 		archives = append(archives, Archive{
-			UID:        d.UID,
-			Kind:       d.Kind,
-			Namespace:  d.Namespace,
-			Name:       d.Name,
-			Action:     d.Action,
-			StartTime:  d.StartTime,
-			FinishTime: d.FinishTime,
+			UID:        meta.UID,
+			Kind:       meta.Kind,
+			Namespace:  meta.Namespace,
+			Name:       meta.Name,
+			Action:     meta.Action,
+			StartTime:  meta.StartTime,
+			FinishTime: meta.FinishTime,
 		})
 	}
 
@@ -139,7 +139,7 @@ func (s *Service) detail(c *gin.Context) {
 		return
 	}
 
-	data, err := s.archive.FindByUID(context.Background(), uid)
+	exp, err := s.archive.FindByUID(context.Background(), uid)
 	if err != nil {
 		if !gorm.IsRecordNotFoundError(err) {
 			c.Status(http.StatusInternalServerError)
@@ -151,21 +151,21 @@ func (s *Service) detail(c *gin.Context) {
 		return
 	}
 
-	switch data.Kind {
+	switch exp.Kind {
 	case v1alpha1.KindPodChaos:
-		yaml, err = data.ParsePodChaos()
+		yaml, err = exp.ParsePodChaos()
 	case v1alpha1.KindIoChaos:
-		yaml, err = data.ParseIOChaos()
+		yaml, err = exp.ParseIOChaos()
 	case v1alpha1.KindNetworkChaos:
-		yaml, err = data.ParseNetworkChaos()
+		yaml, err = exp.ParseNetworkChaos()
 	case v1alpha1.KindTimeChaos:
-		yaml, err = data.ParseTimeChaos()
+		yaml, err = exp.ParseTimeChaos()
 	case v1alpha1.KindKernelChaos:
-		yaml, err = data.ParseKernelChaos()
+		yaml, err = exp.ParseKernelChaos()
 	case v1alpha1.KindStressChaos:
-		yaml, err = data.ParseStressChaos()
+		yaml, err = exp.ParseStressChaos()
 	default:
-		err = fmt.Errorf("kind %s is not support", data.Kind)
+		err = fmt.Errorf("kind %s is not support", exp.Kind)
 	}
 	if err != nil {
 		c.Status(http.StatusInternalServerError)
@@ -175,13 +175,13 @@ func (s *Service) detail(c *gin.Context) {
 
 	detail = Detail{
 		Archive: Archive{
-			UID:        data.UID,
-			Kind:       data.Kind,
-			Name:       data.Name,
-			Namespace:  data.Namespace,
-			Action:     data.Action,
-			StartTime:  data.StartTime,
-			FinishTime: data.FinishTime,
+			UID:        exp.UID,
+			Kind:       exp.Kind,
+			Name:       exp.Name,
+			Namespace:  exp.Namespace,
+			Action:     exp.Action,
+			StartTime:  exp.StartTime,
+			FinishTime: exp.FinishTime,
 		},
 		YAML: yaml,
 	}
