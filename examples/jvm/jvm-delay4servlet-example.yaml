@@ -1,7 +1,7 @@
 apiVersion: chaos-mesh.org/v1alpha1
 kind: JVMChaos
 metadata:
-  name: jvm-delay4svr-example
+  name: jvm-delay4servlet-example
   namespace: chaos-testing
 spec:
   action: delay4servlet
