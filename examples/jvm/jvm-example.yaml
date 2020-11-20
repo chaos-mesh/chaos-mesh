@@ -4,8 +4,8 @@ metadata:
   name: jvm-delay4svr-example
   namespace: chaos-testing
 spec:
-  action: delay4svr
-  delay4svr:
+  action: delay4servlet
+  delay4servlet:
     requestpath: /
     time: 10000
   mode: one

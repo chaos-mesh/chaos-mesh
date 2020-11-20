@@ -45,8 +45,8 @@ spec:
               - oom
               - ccf
               - tce
-              - delay4svr
-              - tce4svr
+              - delay4servlet
+              - tce4servlet
               type: string
             cfl:
               description: CpuFullload represents the detail about JVM chaos action

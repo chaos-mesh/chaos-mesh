@@ -43,7 +43,7 @@ type JVMChaosSpec struct {
 
 	// Action defines the specific jvm chaos action.
 	// Supported action: delay, return, script, cfl, oom, ccf, tce, delay4svr, tce4svr
-	// +kubebuilder:validation:Enum=delay;return;script;cfl;oom;ccf;tce;delay4svr;tce4svr
+	// +kubebuilder:validation:Enum=delay;return;script;cfl;oom;ccf;tce;delay4servlet;tce4servlet
 	Action JVMChaosAction `json:"action"`
 
 	// JVMParameter represents the detail about jvm chaos action definition
@@ -79,10 +79,10 @@ const (
 	JVMExceptionAction JVMChaosAction = "tce"
 
 	// ServletDelayAction represents the JVM chaos action of Servlet response delay
-	ServletDelayAction JVMChaosAction = "delay4svr"
+	ServletDelayAction JVMChaosAction = "delay4servlet"
 
 	// ServletExceptionAction represents the JVM chaos action of Servlet throwing custom exceptions
-	ServletExceptionAction JVMChaosAction = "tce4svr"
+	ServletExceptionAction JVMChaosAction = "tce4servlet"
 )
 
 // JVMParameter represents the detail about jvm chaos action definition
