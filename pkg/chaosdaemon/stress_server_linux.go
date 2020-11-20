@@ -213,9 +213,6 @@ func parseCgroupFromReader(r io.Reader) (map[string]string, error) {
 		s       = bufio.NewScanner(r)
 	)
 	for s.Scan() {
-		if err := s.Err(); err != nil {
-			return nil, err
-		}
 		var (
 			text  = s.Text()
 			parts = strings.SplitN(text, ":", 3)
@@ -229,6 +226,11 @@ func parseCgroupFromReader(r io.Reader) (map[string]string, error) {
 			}
 		}
 	}
+
+	if err := s.Err(); err != nil {
+		return nil, err
+	}
+
 	return cgroups, nil
 }
 
@@ -242,15 +244,15 @@ func getCgroupDestination(pid int, subsystem string) (string, error) {
 	defer f.Close()
 	s := bufio.NewScanner(f)
 	for s.Scan() {
-		if err := s.Err(); err != nil {
-			return "", err
-		}
 		fields := strings.Fields(s.Text())
 		for _, opt := range strings.Split(fields[len(fields)-1], ",") {
 			if opt == subsystem {
 				return fields[3], nil
 			}
 		}
+	}
+	if err := s.Err(); err != nil {
+		return "", err
 	}
 	return "", fmt.Errorf("never found desct for %s", subsystem)
 }

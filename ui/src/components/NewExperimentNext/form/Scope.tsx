@@ -30,7 +30,7 @@ const modesWithAdornment = ['fixed-percent', 'random-max-percent']
 const labelFilters = ['pod-template-hash']
 
 const ScopeStep: React.FC<ScopeStepProps> = ({ namespaces, scope = 'scope', podsPreviewTitle, podsPreviewDesc }) => {
-  const { values, handleChange } = useFormikContext()
+  const { values, handleChange, setFieldValue } = useFormikContext()
   const {
     namespace_selectors: currentNamespaces,
     label_selectors: currentLabels,
@@ -60,8 +60,28 @@ const ScopeStep: React.FC<ScopeStepProps> = ({ namespaces, scope = 'scope', pods
   }
 
   useEffect(() => {
-    dispatch(getLabels(currentNamespaces))
-    dispatch(getAnnotations(currentNamespaces))
+    if (namespaces.length === 1) {
+      setFieldValue(`${scope}.namespace_selectors`, namespaces)
+
+      if (scope === 'scope') {
+        setFieldValue('namespace', namespaces[0])
+      }
+    } else {
+      setFieldValue(`${scope}.namespace_selectors`, ['default'])
+    }
+  }, [namespaces, scope, setFieldValue])
+
+  useEffect(() => {
+    if (currentNamespaces.length) {
+      dispatch(
+        getPodsByNamespaces({
+          namespace_selectors: currentNamespaces,
+        })
+      )
+
+      dispatch(getLabels(currentNamespaces))
+      dispatch(getAnnotations(currentNamespaces))
+    }
   }, [currentNamespaces, dispatch])
 
   useEffect(() => {
