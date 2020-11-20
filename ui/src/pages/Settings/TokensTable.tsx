@@ -29,7 +29,6 @@ const TokensTable = () => {
   const handleUseToken = (_token: TokenFormValues) => () => {
     dispatch(setTokenName(_token.name))
     api.auth.token(_token.token)
-    LS.set('token-name', _token.name)
   }
 
   const handleRemoveToken = (token: TokenFormValues) => (_: any, __: any) => {
@@ -46,12 +45,10 @@ const TokensTable = () => {
 
     if (current.length) {
       dispatch(setTokens(current))
-      LS.set('token', JSON.stringify(current))
 
       if (selected.tokenName === tokenName) {
         api.auth.token(current[0].token)
         dispatch(setTokenName(current[0].name))
-        LS.set('token-name', current[0].name)
       }
     } else {
       LS.remove('token')

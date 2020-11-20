@@ -2,7 +2,6 @@ import Token, { TokenFormValues } from 'components/Token'
 import { useHistory, useLocation } from 'react-router-dom'
 
 import ConfirmDialog from 'components-mui/ConfirmDialog'
-import LS from 'lib/localStorage'
 import React from 'react'
 import T from 'components/T'
 import { setTokenName } from 'slices/globalStatus'
@@ -23,7 +22,6 @@ const Auth: React.FC<AuthProps> = ({ open, setOpen }) => {
     setOpen(false)
 
     dispatch(setTokenName(values.name))
-    LS.set('token-name', values.name)
 
     history.replace('/authed')
     setTimeout(() => history.replace(pathname))

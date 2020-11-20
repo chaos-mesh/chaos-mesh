@@ -12,7 +12,6 @@ const initialState: {
   alert: Alert
   alertOpen: boolean
   searchModalOpen: boolean
-  tokenInterceptor: number
   tokens: TokenFormValues[]
   tokenName: string
   namespace: string
@@ -24,7 +23,6 @@ const initialState: {
   alertOpen: false,
   searchModalOpen: false,
   tokens: [],
-  tokenInterceptor: -1,
   tokenName: '',
   namespace: 'All',
 }
@@ -43,13 +41,18 @@ const globalStatusSlice = createSlice({
       state.searchModalOpen = action.payload
     },
     setTokens(state, action: PayloadAction<TokenFormValues[]>) {
-      state.tokens = action.payload
-    },
-    setTokenInterceptor(state, action: PayloadAction<number>) {
-      state.tokenInterceptor = action.payload
+      const tokens = action.payload
+
+      state.tokens = tokens
+
+      LS.set('token', JSON.stringify(tokens))
     },
     setTokenName(state, action: PayloadAction<string>) {
-      state.tokenName = action.payload
+      const name = action.payload
+
+      state.tokenName = name
+
+      LS.set('token-name', name)
     },
     setNameSpace(state, action: PayloadAction<string>) {
       const ns = action.payload
@@ -66,7 +69,6 @@ export const {
   setAlertOpen,
   setSearchModalOpen,
   setTokens,
-  setTokenInterceptor,
   setTokenName,
   setNameSpace,
 } = globalStatusSlice.actions

@@ -52,7 +52,6 @@ const Token: React.FC<TokenProps> = ({ onSubmitCallback }) => {
     tokens.push(values)
 
     dispatch(setTokens(tokens))
-    LS.set('token', JSON.stringify(tokens))
   }
 
   const submitToken = (values: TokenFormValues, { resetForm }: FormikHelpers<TokenFormValues>) => {
