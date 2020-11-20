@@ -70,6 +70,8 @@ func (c *Clients) Client(token string) (pkgclient.Client, error) {
 	config := rest.CopyConfig(c.localConfig)
 	config.BearerToken = token
 	config.BearerTokenFile = ""
+
+	// TODO: set insecure = true only used for test, will delete it before pr merged
 	config.TLSClientConfig = rest.TLSClientConfig{
 		Insecure: true,
 	}

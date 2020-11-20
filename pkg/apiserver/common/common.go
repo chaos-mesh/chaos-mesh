@@ -43,6 +43,7 @@ type Pod struct {
 
 // Service defines a handler service for cluster common objects.
 type Service struct {
+	// this kubeCli use the local token, used for list namespace of the K8s cluster
 	kubeCli client.Client
 	conf    *config.ChaosDashboardConfig
 }
