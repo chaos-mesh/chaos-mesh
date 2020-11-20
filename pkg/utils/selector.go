@@ -148,14 +148,21 @@ func SelectPods(ctx context.Context, c client.Client, r client.Reader, selector 
 		}
 	}
 
-	for _, namespace := range selector.Namespaces {
-		var podList v1.PodList
-		listOptions.Namespace = namespace
+	var podList v1.PodList
+	if len(selector.Namespaces) > 0 {
+		for _, namespace := range selector.Namespaces {
+			listOptions.Namespace = namespace
+
+			if err := listFunc(ctx, &podList, &listOptions); err != nil {
+				return nil, err
+			}
+		}
+	} else {
 		if err := listFunc(ctx, &podList, &listOptions); err != nil {
 			return nil, err
 		}
-		pods = append(pods, podList.Items...)
 	}
+	pods = append(pods, podList.Items...)
 
 	var (
 		nodes           []v1.Node
