@@ -128,11 +128,9 @@ func SelectPods(ctx context.Context, c client.Client, r client.Reader, selector 
 		}
 	}
 
-	var podList v1.PodList
-
 	var listOptions = client.ListOptions{}
 	if !common.ControllerCfg.ClusterScoped {
-		listOptions.Namespace = common.ControllerCfg.TargetNamespace
+		selector.Namespaces = []string{common.ControllerCfg.TargetNamespace}
 	}
 	if len(selector.LabelSelectors) > 0 {
 		listOptions.LabelSelector = labels.SelectorFromSet(selector.LabelSelectors)
@@ -150,11 +148,15 @@ func SelectPods(ctx context.Context, c client.Client, r client.Reader, selector 
 		}
 	}
 
-	if err := listFunc(ctx, &podList, &listOptions); err != nil {
-		return nil, err
+	for _, namespace := range selector.Namespaces {
+		var podList v1.PodList
+		listOptions.Namespace = namespace
+		if err := listFunc(ctx, &podList, &listOptions); err != nil {
+			return nil, err
+		}
+		pods = append(pods, podList.Items...)
 	}
 
-	pods = append(pods, podList.Items...)
 	var (
 		nodes           []v1.Node
 		nodeList        v1.NodeList
