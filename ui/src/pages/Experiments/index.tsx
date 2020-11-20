@@ -38,7 +38,7 @@ export default function Experiments() {
     api.experiments
       .experiments()
       .then(({ data }) => setExperiments(data))
-      .catch(console.log)
+      .catch(console.error)
       .finally(() => setLoading(false))
   }
 
@@ -65,7 +65,7 @@ export default function Experiments() {
           )
         }
       })
-      .catch(console.log)
+      .catch(console.error)
   }
 
   // Get all experiments after mount
@@ -126,7 +126,7 @@ export default function Experiments() {
         dispatch(getStateofExperiments())
         fetchExperiments()
       })
-      .catch(console.log)
+      .catch(console.error)
   }
 
   return (

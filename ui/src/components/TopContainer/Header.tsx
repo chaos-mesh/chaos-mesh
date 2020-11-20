@@ -10,7 +10,6 @@ import { NavigationBreadCrumbProps } from 'slices/navigation'
 import T from 'components/T'
 import api from 'api'
 import { makeStyles } from '@material-ui/core/styles'
-import { setGlobalNamespace } from 'lib/auth'
 import { setNameSpace } from 'slices/globalStatus'
 import { useSelector } from 'react-redux'
 
@@ -93,13 +92,13 @@ const Header: React.FC<HeaderProps> = ({ openDrawer, handleDrawerToggle, breadcr
     api.common
       .chaosAvailableNamespaces()
       .then(({ data }) => setNamespaces(['All', ...data]))
-      .catch(console.log)
+      .catch(console.error)
   }
 
   const handleSelectGlobalNamespace = (e: React.ChangeEvent<HTMLInputElement>) => {
     const ns = e.target.value
 
-    setGlobalNamespace(ns)
+    api.auth.namespace(ns)
     dispatch(setNameSpace(ns))
 
     history.replace('/namespaceSetted')

@@ -22,7 +22,7 @@ export default function Archives() {
     api.archives
       .archives()
       .then(({ data }) => setArchives(data))
-      .catch(console.log)
+      .catch(console.error)
       .finally(() => {
         setLoading(false)
       })

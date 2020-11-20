@@ -3,7 +3,7 @@ import { Box, InputAdornment, MenuItem, Typography } from '@material-ui/core'
 import React, { useEffect, useMemo } from 'react'
 import { RootState, useStoreDispatch } from 'store'
 import { arrToObjBySep, joinObjKVs, toTitleCase } from 'lib/utils'
-import { getAnnotations, getLabels, getPodsByNamespaces } from 'slices/experiments'
+import { getAnnotations, getLabels, getPodsByNamespaces as getPods } from 'slices/experiments'
 import { getIn, useFormikContext } from 'formik'
 
 import AdvancedOptions from 'components/AdvancedOptions'
@@ -74,7 +74,7 @@ const ScopeStep: React.FC<ScopeStepProps> = ({ namespaces, scope = 'scope', pods
   useEffect(() => {
     if (currentNamespaces.length) {
       dispatch(
-        getPodsByNamespaces({
+        getPods({
           namespace_selectors: currentNamespaces,
         })
       )
@@ -86,7 +86,7 @@ const ScopeStep: React.FC<ScopeStepProps> = ({ namespaces, scope = 'scope', pods
 
   useEffect(() => {
     dispatch(
-      getPodsByNamespaces({
+      getPods({
         namespace_selectors: currentNamespaces,
         label_selectors: arrToObjBySep(currentLabels, kvSeparator),
         annotation_selectors: arrToObjBySep(currentAnnotations, kvSeparator),

@@ -3,7 +3,12 @@ import { ExperimentDetail, Experiment as ExperimentReponse, StateOfExperiments }
 import { Experiment } from 'components/NewExperiment/types'
 import http from './http'
 
-export const state = () => http.get<StateOfExperiments>('/experiments/state')
+export const state = (namespace = '') =>
+  http.get<StateOfExperiments>('/experiments/state', {
+    params: {
+      namespace,
+    },
+  })
 
 export const newExperiment = (data: Experiment) => http.post('/experiments/new', data)
 

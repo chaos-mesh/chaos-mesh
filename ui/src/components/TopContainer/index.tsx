@@ -6,7 +6,6 @@ import { ThemeProvider, makeStyles } from '@material-ui/core/styles'
 import customTheme, { darkTheme as customDarkTheme } from 'theme'
 import { drawerCloseWidth, drawerWidth } from './Sidebar'
 import { setAlertOpen, setNameSpace, setTokenName, setTokens } from 'slices/globalStatus'
-import { setGlobalNamespace, useToken } from 'lib/auth'
 
 import Alert from '@material-ui/lab/Alert'
 import Auth from './Auth'
@@ -17,6 +16,7 @@ import LS from 'lib/localStorage'
 import MobileNavigation from './MobileNavigation'
 import SearchTrigger from 'components/SearchTrigger'
 import Sidebar from './Sidebar'
+import api from 'api'
 import flat from 'flat'
 import insertCommonStyle from 'lib/d3/insertCommonStyle'
 import messages from 'i18n/messages'
@@ -89,8 +89,6 @@ const TopContainer = () => {
   const [authOpen, setAuthOpen] = useState(false)
   const [authed, setAuthed] = useState(false)
 
-  const _useToken = useToken()
-
   function setAuth() {
     const token = LS.get('token')
     const tokenName = LS.get('token-name')
@@ -99,7 +97,7 @@ const TopContainer = () => {
     if (token && tokenName) {
       const tokens = JSON.parse(token)
 
-      _useToken(tokens.filter(({ name }: { name: string }) => name === tokenName)[0].token)
+      api.auth.token(tokens.filter(({ name }: { name: string }) => name === tokenName)[0].token)
       dispatch(setTokens(tokens))
       dispatch(setTokenName(tokenName))
     } else {
@@ -107,7 +105,7 @@ const TopContainer = () => {
     }
 
     if (globalNamespace) {
-      setGlobalNamespace(globalNamespace)
+      api.auth.namespace(globalNamespace)
       dispatch(setNameSpace(globalNamespace))
     }
 

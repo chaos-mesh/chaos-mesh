@@ -35,7 +35,7 @@ const EventDetail: React.FC<EventDetailProps> = ({ eventID }) => {
       .then(({ data }) => {
         setEvent(data.find((e) => e.id === Number(eventID)))
       })
-      .catch(console.log)
+      .catch(console.error)
       .finally(() => {
         setLoading(false)
       })

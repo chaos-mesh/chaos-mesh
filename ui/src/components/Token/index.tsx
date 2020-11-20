@@ -5,9 +5,9 @@ import LS from 'lib/localStorage'
 import React from 'react'
 import T from 'components/T'
 import { TextField } from 'components/FormField'
+import api from 'api'
 import { setTokens } from 'slices/globalStatus'
 import { useStoreDispatch } from 'store'
-import { useToken } from 'lib/auth'
 
 function validateName(value: string) {
   let error
@@ -40,7 +40,6 @@ interface TokenProps {
 
 const Token: React.FC<TokenProps> = ({ onSubmitCallback }) => {
   const dispatch = useStoreDispatch()
-  const token = useToken()
 
   const saveToken = (values: TokenFormValues) => {
     let tokens = []
@@ -57,7 +56,7 @@ const Token: React.FC<TokenProps> = ({ onSubmitCallback }) => {
   }
 
   const submitToken = (values: TokenFormValues, { resetForm }: FormikHelpers<TokenFormValues>) => {
-    token(values.token)
+    api.auth.token(values.token)
 
     saveToken(values)
 

@@ -263,7 +263,7 @@ const Search: React.FC = () => {
           archives: data[2].data,
         })
       })
-      .catch(console.log)
+      .catch(console.error)
   }
 
   useEffect(() => {

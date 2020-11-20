@@ -8,10 +8,10 @@ import PaperContainer from 'components-mui/PaperContainer'
 import { RootState } from 'store'
 import T from 'components/T'
 import { TokenFormValues } from 'components/Token'
+import api from 'api'
 import { useIntl } from 'react-intl'
 import { useSelector } from 'react-redux'
 import { useStoreDispatch } from 'store'
-import { useToken } from 'lib/auth'
 
 const TokensTable = () => {
   const intl = useIntl()
@@ -26,11 +26,9 @@ const TokensTable = () => {
     description: '',
   })
 
-  const token = useToken()
-
   const handleUseToken = (_token: TokenFormValues) => () => {
     dispatch(setTokenName(_token.name))
-    token(_token.token)
+    api.auth.token(_token.token)
     LS.set('token-name', _token.name)
   }
 
@@ -51,7 +49,7 @@ const TokensTable = () => {
       LS.set('token', JSON.stringify(current))
 
       if (selected.tokenName === tokenName) {
-        token(current[0].token)
+        api.auth.token(current[0].token)
         dispatch(setTokenName(current[0].name))
         LS.set('token-name', current[0].name)
       }
@@ -84,7 +82,9 @@ const TokensTable = () => {
                     <Checkbox indeterminate checked={true} onChange={handleRemoveToken(token)} />
                   </TableCell>
                   <TableCell>{token.name}</TableCell>
-                  <TableCell title={token.token}>{token.token.slice(0, 30) + '...'}</TableCell>
+                  <TableCell title={token.token}>
+                    {token.token.slice(0, 30) + '...' + token.token.slice(token.token.length - 10)}
+                  </TableCell>
                   <TableCell>
                     <Button
                       onClick={handleUseToken(token)}

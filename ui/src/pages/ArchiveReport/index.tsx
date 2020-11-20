@@ -47,7 +47,7 @@ const ArchiveReport: React.FC = () => {
   useEffect(() => {
     Promise.all([fetchDetail(), fetchReport()])
       .then((_) => setLoading(false))
-      .catch(console.log)
+      .catch(console.error)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 

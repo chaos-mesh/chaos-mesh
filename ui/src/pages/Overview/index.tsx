@@ -36,7 +36,11 @@ export default function Overview() {
     api.experiments
       .experiments()
       .then(({ data }) => setExperiments(data))
-      .catch(console.log)
+      .catch((error) => {
+        console.error(error)
+
+        setExperiments([])
+      })
       .finally(() => setLoading(false))
   }
 
