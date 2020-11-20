@@ -195,7 +195,6 @@ var _ = Describe("event", func() {
 			request, err := http.NewRequest(http.MethodGet, "/api/events?podName=testpodNamespace", nil)
 			Expect(err).ShouldNot(HaveOccurred())
 			router.ServeHTTP(rr, request)
-			Expect(err).ShouldNot(HaveOccurred())
 			Expect(rr.Code).Should(Equal(http.StatusInternalServerError))
 		})
 
@@ -224,7 +223,6 @@ var _ = Describe("event", func() {
 			Expect(err).ShouldNot(HaveOccurred())
 			Expect(rr.Code).Should(Equal(http.StatusOK))
 			responseBody, err := json.Marshal(response)
-			Expect(err).ShouldNot(HaveOccurred())
 			Expect(rr.Body.Bytes()).Should(Equal(responseBody))
 		})
 
@@ -233,7 +231,6 @@ var _ = Describe("event", func() {
 			request, err := http.NewRequest(http.MethodGet, "/api/events?uid=err", nil)
 			Expect(err).ShouldNot(HaveOccurred())
 			router.ServeHTTP(rr, request)
-			Expect(err).ShouldNot(HaveOccurred())
 			Expect(rr.Code).Should(Equal(http.StatusInternalServerError))
 		})
 	})
@@ -261,7 +258,6 @@ var _ = Describe("event", func() {
 			request, err := http.NewRequest(http.MethodGet, "/api/events/dry?kind=testKind", nil)
 			Expect(err).ShouldNot(HaveOccurred())
 			router.ServeHTTP(rr, request)
-			Expect(err).ShouldNot(HaveOccurred())
 			Expect(rr.Code).Should(Equal(http.StatusOK))
 			responseBody, err := json.Marshal(response)
 			Expect(err).ShouldNot(HaveOccurred())
@@ -273,7 +269,6 @@ var _ = Describe("event", func() {
 			request, err := http.NewRequest(http.MethodGet, "/api/events/dry?kind=err", nil)
 			Expect(err).ShouldNot(HaveOccurred())
 			router.ServeHTTP(rr, request)
-			Expect(err).ShouldNot(HaveOccurred())
 			Expect(rr.Code).Should(Equal(http.StatusInternalServerError))
 		})
 	})
@@ -299,7 +294,6 @@ var _ = Describe("event", func() {
 			request, err := http.NewRequest(http.MethodGet, "/api/events/get?id=0", nil)
 			Expect(err).ShouldNot(HaveOccurred())
 			router.ServeHTTP(rr, request)
-			Expect(err).ShouldNot(HaveOccurred())
 			Expect(rr.Code).Should(Equal(http.StatusOK))
 			responseBody, err := json.Marshal(response)
 			Expect(err).ShouldNot(HaveOccurred())
@@ -311,9 +305,7 @@ var _ = Describe("event", func() {
 			request, err := http.NewRequest(http.MethodGet, "/api/events/get", nil)
 			Expect(err).ShouldNot(HaveOccurred())
 			router.ServeHTTP(rr, request)
-			Expect(err).ShouldNot(HaveOccurred())
 			Expect(rr.Code).Should(Equal(http.StatusBadRequest))
-			Expect(err).ShouldNot(HaveOccurred())
 		})
 
 		It("bad id", func() {
@@ -321,9 +313,7 @@ var _ = Describe("event", func() {
 			request, err := http.NewRequest(http.MethodGet, "/api/events/get?id=badID", nil)
 			Expect(err).ShouldNot(HaveOccurred())
 			router.ServeHTTP(rr, request)
-			Expect(err).ShouldNot(HaveOccurred())
 			Expect(rr.Code).Should(Equal(http.StatusBadRequest))
-			Expect(err).ShouldNot(HaveOccurred())
 		})
 
 		It("not found", func() {
@@ -331,9 +321,7 @@ var _ = Describe("event", func() {
 			request, err := http.NewRequest(http.MethodGet, "/api/events/get?id=1", nil)
 			Expect(err).ShouldNot(HaveOccurred())
 			router.ServeHTTP(rr, request)
-			Expect(err).ShouldNot(HaveOccurred())
 			Expect(rr.Code).Should(Equal(http.StatusInternalServerError))
-			Expect(err).ShouldNot(HaveOccurred())
 		})
 
 		It("other err", func() {
@@ -341,9 +329,7 @@ var _ = Describe("event", func() {
 			request, err := http.NewRequest(http.MethodGet, "/api/events/get?id=2", nil)
 			Expect(err).ShouldNot(HaveOccurred())
 			router.ServeHTTP(rr, request)
-			Expect(err).ShouldNot(HaveOccurred())
 			Expect(rr.Code).Should(Equal(http.StatusInternalServerError))
-			Expect(err).ShouldNot(HaveOccurred())
 		})
 	})
 })
