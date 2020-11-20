@@ -47,8 +47,8 @@ const TokensTable = () => {
       dispatch(setTokens(current))
 
       if (selected.tokenName === tokenName) {
-        api.auth.token(current[0].token)
-        dispatch(setTokenName(current[0].name))
+        api.auth.resetToken()
+        dispatch(setTokenName(''))
       }
     } else {
       LS.remove('token')

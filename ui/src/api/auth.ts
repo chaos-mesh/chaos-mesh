@@ -17,6 +17,8 @@ export const token = (token: string) => {
   })
 }
 
+export const resetToken = () => http.interceptors.request.eject(tokenInterceptorId)
+
 let nsInterceptorId: number
 
 export const namespace = (ns: string) => {

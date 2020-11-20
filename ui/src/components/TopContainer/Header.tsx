@@ -61,10 +61,12 @@ const useStyles = makeStyles((theme) => ({
     },
   },
   namespaces: {
-    paddingRight: theme.spacing(3),
-    [theme.breakpoints.down('xs')]: {
-      paddingRight: theme.spacing(4),
-    },
+    minWidth: 120,
+    margin: 0,
+  },
+  namespacesSelectRoot: {
+    paddingTop: theme.spacing(1.5),
+    paddingBottom: theme.spacing(1.5),
   },
 }))
 
@@ -124,7 +126,7 @@ const Header: React.FC<HeaderProps> = ({ openDrawer, handleDrawerToggle, breadcr
         >
           <MenuIcon />
         </IconButton>
-        <Box display="flex" justifyContent="space-between" alignItems="center" width="100%">
+        <Box display="flex" alignItems="center" width="100%">
           <Breadcrumbs className={classes.nav}>
             {breadcrumbs.length > 0 &&
               breadcrumbs.map((b) => {
@@ -141,21 +143,25 @@ const Header: React.FC<HeaderProps> = ({ openDrawer, handleDrawerToggle, breadcr
                 )
               })}
           </Breadcrumbs>
-          <TextField
-            className={classes.namespaces}
-            variant="outlined"
-            color="primary"
-            margin="dense"
-            select
-            value={namespace}
-            onChange={handleSelectGlobalNamespace}
-          >
-            {namespaces.map((option) => (
-              <MenuItem key={option} value={option}>
-                {option}
-              </MenuItem>
-            ))}
-          </TextField>
+          <Box ml={6}>
+            <TextField
+              className={classes.namespaces}
+              variant="outlined"
+              color="primary"
+              select
+              SelectProps={{
+                classes: { root: classes.namespacesSelectRoot },
+              }}
+              value={namespace}
+              onChange={handleSelectGlobalNamespace}
+            >
+              {namespaces.map((option) => (
+                <MenuItem key={option} value={option}>
+                  {option}
+                </MenuItem>
+              ))}
+            </TextField>
+          </Box>
         </Box>
       </Toolbar>
     </AppBar>
