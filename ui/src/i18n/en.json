@@ -175,7 +175,8 @@
     "startSuccessfully": "Started successfully",
     "pauseSuccessfully": "Paused successfully",
     "updateSuccessfully": "Updated successfully",
-    "submitSuccessfully": "Submitted successfully"
+    "submitSuccessfully": "Submitted successfully",
+    "chooseNamespace": "Choose namespace"
   },
   "search": {
     "placeholder": "Search",

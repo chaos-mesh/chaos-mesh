@@ -175,7 +175,8 @@
     "startSuccessfully": "启动成功",
     "pauseSuccessfully": "暂停成功",
     "updateSuccessfully": "更新成功",
-    "submitSuccessfully": "提交成功"
+    "submitSuccessfully": "提交成功",
+    "chooseNamespace": "选择命名空间"
   },
   "search": {
     "placeholder": "搜索",

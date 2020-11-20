@@ -79,9 +79,7 @@ const TokensTable = () => {
                     <Checkbox indeterminate checked={true} onChange={handleRemoveToken(token)} />
                   </TableCell>
                   <TableCell>{token.name}</TableCell>
-                  <TableCell title={token.token}>
-                    {token.token.slice(0, 30) + '...' + token.token.slice(token.token.length - 10)}
-                  </TableCell>
+                  <TableCell>{'*'.repeat(12)}</TableCell>
                   <TableCell>
                     <Button
                       onClick={handleUseToken(token)}

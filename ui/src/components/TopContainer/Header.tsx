@@ -15,6 +15,7 @@ import { useSelector } from 'react-redux'
 
 const useStyles = makeStyles((theme) => ({
   appBarCommon: {
+    maxHeight: 64,
     borderBottom: `1px solid ${theme.palette.divider}`,
   },
   appBar: {
@@ -38,6 +39,7 @@ const useStyles = makeStyles((theme) => ({
   },
   menuButton: {
     marginLeft: theme.spacing(0),
+    marginRight: theme.spacing(3),
     [theme.breakpoints.down('sm')]: {
       display: 'none',
     },
@@ -61,12 +63,8 @@ const useStyles = makeStyles((theme) => ({
     },
   },
   namespaces: {
-    minWidth: 120,
+    minWidth: 180,
     margin: 0,
-  },
-  namespacesSelectRoot: {
-    paddingTop: theme.spacing(1.5),
-    paddingBottom: theme.spacing(1.5),
   },
 }))
 
@@ -148,10 +146,9 @@ const Header: React.FC<HeaderProps> = ({ openDrawer, handleDrawerToggle, breadcr
               className={classes.namespaces}
               variant="outlined"
               color="primary"
+              margin="dense"
               select
-              SelectProps={{
-                classes: { root: classes.namespacesSelectRoot },
-              }}
+              label={T('common.chooseNamespace')}
               value={namespace}
               onChange={handleSelectGlobalNamespace}
             >
