@@ -111,11 +111,12 @@ spec:
               properties:
                 method:
                   description: Method represents HTTP request method, such as GET,
-                    POST, or PUT. Default is GET
+                    POST, DELETE or PUT. Default is GET
                   enum:
                   - GET
                   - POST
                   - PUT
+                  - DELETE
                   type: string
                 offset:
                   description: Offset represents delay fluctuation time
@@ -377,11 +378,12 @@ spec:
                   type: string
                 method:
                   description: Method represents HTTP request method, such as GET,
-                    POST, or PUT. Default is GET
+                    POST, DELETE or PUT. Default is GET
                   enum:
                   - GET
                   - POST
                   - PUT
+                  - DELETE
                   type: string
                 querystring:
                   description: QueryString represents HTTP request query string

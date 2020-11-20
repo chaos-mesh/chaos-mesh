@@ -264,8 +264,8 @@ type ServletDelaySpec struct {
 
 // ServletCommonParameter represents the common servlet chaos parameter
 type ServletCommonParameter struct {
-	// Method represents HTTP request method, such as GET, POST, or PUT. Default is GET
-	// +kubebuilder:validation:Enum=GET;POST;PUT
+	// Method represents HTTP request method, such as GET, POST, DELETE or PUT. Default is GET
+	// +kubebuilder:validation:Enum=GET;POST;PUT;DELETE
 	// +optional
 	Method string `json:"method"`
 
