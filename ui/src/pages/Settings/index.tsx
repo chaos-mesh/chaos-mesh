@@ -2,7 +2,7 @@ import { Box, Container, MenuItem, Paper, TextField } from '@material-ui/core'
 import { RootState, useStoreDispatch } from 'store'
 import { setLang, setTheme } from 'slices/settings'
 
-import PaperTop from 'components/PaperTop'
+import PaperTop from 'components-mui/PaperTop'
 import React from 'react'
 import T from 'components/T'
 import messages from 'i18n/messages'
