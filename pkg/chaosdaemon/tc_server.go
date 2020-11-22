@@ -169,12 +169,32 @@ func (s *daemonServer) SetTcs(ctx context.Context, in *pb.TcsRequest) (*empty.Em
 			}
 		}
 
-		chains = append(chains, &pb.Chain{
+		ch := &pb.Chain{
 			Name:      fmt.Sprintf("TC-TABLES-%d", index),
 			Direction: pb.Chain_OUTPUT,
 			Ipsets:    []string{ipset},
 			Target:    fmt.Sprintf("CLASSIFY --set-class %d:%d", parent, index+4),
-		})
+		}
+
+		// TODO: refactor this logic
+		tc := tcs[0]
+		if len(tc.Protocol) > 0 {
+			ch.Protocol = fmt.Sprintf("--protocol %s", tc.Protocol)
+		}
+
+		if len(tc.SourcePort) > 0 || len(tc.EgressPort) > 0 {
+			ch.SourcePorts = fmt.Sprintf("--source-port %s", tc.SourcePort)
+			if strings.Contains(tc.SourcePort, ",") {
+				ch.SourcePorts = fmt.Sprintf("-m multiport --source-ports %s", tc.SourcePort)
+			}
+
+			ch.DestinationPorts = fmt.Sprintf("--destination-port %s", tc.EgressPort)
+			if strings.Contains(tc.EgressPort, ",") {
+				ch.DestinationPorts = fmt.Sprintf("-m multiport --destination-ports %s", tc.EgressPort)
+			}
+		}
+
+		chains = append(chains, ch)
 
 		index++
 	}

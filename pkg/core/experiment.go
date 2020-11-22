@@ -180,26 +180,28 @@ type PodChaosInfo struct {
 
 // NetworkChaosInfo defines the basic information of network chaos for creating a new NetworkChaos.
 type NetworkChaosInfo struct {
-	Action      string                  `json:"action" binding:"oneof='' 'netem' 'delay' 'loss' 'duplicate' 'corrupt' 'partition' 'bandwidth'"`
-	Delay       *v1alpha1.DelaySpec     `json:"delay" binding:"RequiredFieldEqual=Action:delay"`
-	Loss        *v1alpha1.LossSpec      `json:"loss" binding:"RequiredFieldEqual=Action:loss"`
-	Duplicate   *v1alpha1.DuplicateSpec `json:"duplicate" binding:"RequiredFieldEqual=Action:duplicate"`
-	Corrupt     *v1alpha1.CorruptSpec   `json:"corrupt" binding:"RequiredFieldEqual=Action:corrupt"`
-	Bandwidth   *v1alpha1.BandwidthSpec `json:"bandwidth" binding:"RequiredFieldEqual=Action:bandwidth"`
-	Direction   string                  `json:"direction" binding:"oneof='' 'to' 'from' 'both'"`
-	TargetScope *ScopeInfo              `json:"target_scope"`
+	Action          string                  `json:"action" binding:"oneof='' 'netem' 'delay' 'loss' 'duplicate' 'corrupt' 'partition' 'bandwidth'"`
+	Delay           *v1alpha1.DelaySpec     `json:"delay" binding:"RequiredFieldEqual=Action:delay"`
+	Loss            *v1alpha1.LossSpec      `json:"loss" binding:"RequiredFieldEqual=Action:loss"`
+	Duplicate       *v1alpha1.DuplicateSpec `json:"duplicate" binding:"RequiredFieldEqual=Action:duplicate"`
+	Corrupt         *v1alpha1.CorruptSpec   `json:"corrupt" binding:"RequiredFieldEqual=Action:corrupt"`
+	Bandwidth       *v1alpha1.BandwidthSpec `json:"bandwidth" binding:"RequiredFieldEqual=Action:bandwidth"`
+	Direction       string                  `json:"direction" binding:"oneof='' 'to' 'from' 'both'"`
+	TargetScope     *ScopeInfo              `json:"target_scope"`
+	ExternalTargets []string                `json:"external_targets"`
 }
 
 // IOChaosInfo defines the basic information of io chaos for creating a new IOChaos.
 type IOChaosInfo struct {
-	Action     string                     `json:"action" binding:"oneof='' 'latency' 'fault' 'attrOverride'"`
-	Delay      string                     `json:"delay"`
-	Errno      uint32                     `json:"errno"`
-	Attr       *v1alpha1.AttrOverrideSpec `json:"attr"`
-	Path       string                     `json:"path"`
-	Percent    int                        `json:"percent"`
-	Methods    []v1alpha1.IoMethod        `json:"methods"`
-	VolumePath string                     `json:"volume_path"`
+	Action        string                     `json:"action" binding:"oneof='' 'latency' 'fault' 'attrOverride'"`
+	Delay         string                     `json:"delay"`
+	Errno         uint32                     `json:"errno"`
+	Attr          *v1alpha1.AttrOverrideSpec `json:"attr"`
+	Path          string                     `json:"path"`
+	Percent       int                        `json:"percent"`
+	Methods       []v1alpha1.IoMethod        `json:"methods"`
+	VolumePath    string                     `json:"volume_path"`
+	ContainerName string                     `json:"container_name"`
 }
 
 // KernelChaosInfo defines the basic information of kernel chaos for creating a new KernelChaos.

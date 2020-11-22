@@ -76,6 +76,11 @@ func StartTimer() (*Timer, error) {
 				Time: &t,
 			}
 		}
+		if err := stdoutScanner.Err(); err != nil {
+			output <- TimeResult{
+				Error: err,
+			}
+		}
 	}()
 
 	stdin, err := process.StdinPipe()
