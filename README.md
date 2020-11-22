@@ -32,7 +32,7 @@ Chaos Operator injects chaos into the applications and Kubernetes infrastructure
 ![Chaos Operator](./static/chaos-mesh.svg)
 
 Chaos Operator uses [Custom Resource Definition (CRD)](https://kubernetes.io/docs/tasks/access-kubernetes-api/custom-resources/custom-resource-definitions/) to define chaos objects.
-The current implementation supports six types of CRD objects for fault injection, namely PodChaos, NetworkChaos, IOChaos, TimeChaos, StressChaos, and KernelChaos, which correspond to the following major actions (experiments):
+The current implementation supports a few types of CRD objects for fault injection, namely DNSChaos, PodChaos, PodIoChaos, PodNetworkChaos, NetworkChaos, IoChaos, TimeChaos, StressChaos, and KernelChaos, which correspond to the following major actions (experiments):
 
 - pod-kill: The selected pod is killed (ReplicaSet or something similar may be needed to ensure the pod will be restarted).
 - pod-failure: The selected pod will be unavailable in a specified period of time.
@@ -44,6 +44,7 @@ The current implementation supports six types of CRD objects for fault injection
 - cpu-burn: Simulate the CPU of the selected pod stress.
 - memory-burn: Simulate the memory of the selected pod stress.
 - kernel chaos: The selected pod will be injected with (slab, bio, etc) errors.
+- dns chaos: The selected pod will be injected with dns errors, such as error, random.
 
 ## Quick start
 
