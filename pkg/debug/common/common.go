@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"log"
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
 
@@ -105,7 +106,25 @@ func InitClientSet() (*ClientSet, error) {
 
 // Exec executes certain command and returns the result
 // runtime-controller only support CRUD， use client-go client
-func Exec(pod v1.Pod, cmd string, c *kubernetes.Clientset) (string, error) {
+func Exec(ctx context.Context, pod v1.Pod, daemon v1.Pod, cmd string, c *kubernetes.Clientset) (string, error) {
+	out, err := exec(ctx, pod, daemon, cmd, c)
+
+	if err != nil {
+		// use daemon to enter namespace and execute command if command not found
+		if strings.Contains(err.Error(), "not found") {
+			outNs, errNs := nsEnterExec(ctx, err.Error(), pod, daemon, cmd, c)
+			if errNs != nil {
+				return outNs, nil
+			}
+			err = fmt.Errorf("%s\nnsenter also failed with: %s", err.Error(), errNs.Error())
+		}
+		return "", err
+	}
+
+	return out, nil
+}
+
+func exec(ctx context.Context, pod v1.Pod, daemon v1.Pod, cmd string, c *kubernetes.Clientset) (string, error) {
 	name := pod.GetObjectMeta().GetName()
 	namespace := pod.GetObjectMeta().GetNamespace()
 	// TODO: if `containerNames` is set and specific container is injected chaos,
@@ -142,9 +161,38 @@ func Exec(pod v1.Pod, cmd string, c *kubernetes.Clientset) (string, error) {
 		return "", fmt.Errorf("error in creating StreamOptions: %s", err.Error())
 	}
 	if stderr.String() != "" {
-		return stdout.String(), fmt.Errorf(stderr.String())
+		return "", fmt.Errorf(stderr.String())
 	}
 	return stdout.String(), nil
+}
+
+func nsEnterExec(ctx context.Context, stderr string, pod v1.Pod, daemon v1.Pod, cmd string, c *kubernetes.Clientset) (string, error) {
+	cmdSubSlice := strings.Fields(cmd)
+	if len(cmdSubSlice) == 0 {
+		return "", fmt.Errorf("cmd is empty")
+	}
+	pid, err := GetPidFromPod(ctx, pod, daemon)
+	if err != nil {
+		return "", err
+	}
+	switch cmdSubSlice[0] {
+	case "ps":
+		nsenterPath := "-p/proc/" + strconv.Itoa(pid) + "/ns/pid"
+		newCmd := fmt.Sprintf("/usr/bin/nsenter %s -- ps", nsenterPath)
+		return exec(ctx, daemon, daemon, newCmd, c)
+	case "cat":
+		// we need to enter mount namespace to get file related infomation
+		// but enter mnt ns would prevent us to access `cat` in daemon
+		// so use `nscat` to achieve using nsenter and cat together
+		nsenterPath := "/proc/" + strconv.Itoa(pid) + "/ns/mnt"
+		if len(cmdSubSlice) < 2 {
+			return "", fmt.Errorf("cat should have one argument")
+		}
+		newCmd := fmt.Sprintf("/usr/local/bin/nscat %s %s", nsenterPath, cmdSubSlice[1])
+		return exec(ctx, daemon, daemon, newCmd, c)
+	default:
+		return "", fmt.Errorf("cmd not supported for nsenter")
+	}
 }
 
 // GetPods returns pod list and corresponding chaos daemon
@@ -164,7 +212,7 @@ func GetPods(ctx context.Context, status v1alpha1.ChaosStatus, selector v1alpha1
 		time.Sleep(waitTime)
 	}
 
-	pods, err := utils.SelectPods(ctx, c, nil, selector)
+	pods, err := utils.SelectPods(ctx, c, c, selector)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to SelectPods with: %s", err.Error())
 	}

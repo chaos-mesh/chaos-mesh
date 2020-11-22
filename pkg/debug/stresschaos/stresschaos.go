@@ -61,7 +61,7 @@ func debugEachPod(ctx context.Context, pod v1.Pod, daemon v1.Pod, chaos *v1alpha
 
 	// get process path
 	cmd := fmt.Sprintf("cat /proc/cgroups")
-	out, err := cm.Exec(pod, cmd, c.KubeCli)
+	out, err := cm.Exec(ctx, pod, daemon, cmd, c.KubeCli)
 	if err != nil {
 		return fmt.Errorf("run command '%s' failed with: %s", cmd, err.Error())
 	}
@@ -73,7 +73,7 @@ func debugEachPod(ctx context.Context, pod v1.Pod, daemon v1.Pod, chaos *v1alpha
 	}
 
 	cmd = fmt.Sprintf("ps")
-	out, err = cm.Exec(pod, cmd, c.KubeCli)
+	out, err = cm.Exec(ctx, pod, daemon, cmd, c.KubeCli)
 	if err != nil {
 		return fmt.Errorf("run command '%s' failed with: %s", cmd, err.Error())
 	}
@@ -84,7 +84,7 @@ func debugEachPod(ctx context.Context, pod v1.Pod, daemon v1.Pod, chaos *v1alpha
 	stressngPid := strings.Fields(stressngLine[0])[0]
 
 	cmd = fmt.Sprintf("cat /proc/1/cgroup")
-	out, err = cm.Exec(pod, cmd, c.KubeCli)
+	out, err = cm.Exec(ctx, pod, daemon, cmd, c.KubeCli)
 	if err != nil {
 		return fmt.Errorf("run command '%s' failed with: %s", cmd, err.Error())
 	}
@@ -100,7 +100,7 @@ func debugEachPod(ctx context.Context, pod v1.Pod, daemon v1.Pod, chaos *v1alpha
 	processPath := regexp.MustCompile(expr).FindStringSubmatch(string(out))[1]
 
 	cmd = fmt.Sprintf("cat /proc/%s/cgroup", stressngPid)
-	outStress, err := cm.Exec(pod, cmd, c.KubeCli)
+	outStress, err := cm.Exec(ctx, pod, daemon, cmd, c.KubeCli)
 	if err != nil {
 		return fmt.Errorf("run command '%s' failed with: %s", cmd, err.Error())
 	}
@@ -116,7 +116,7 @@ func debugEachPod(ctx context.Context, pod v1.Pod, daemon v1.Pod, chaos *v1alpha
 	// print out debug info
 	if isCPU {
 		cmd = fmt.Sprintf("cat /sys/fs/cgroup/%s/%s/cpu.cfs_quota_us", cpuMountType, processPath)
-		out, err = cm.Exec(daemon, cmd, c.KubeCli)
+		out, err = cm.Exec(ctx, daemon, daemon, cmd, c.KubeCli)
 		if err != nil {
 			return fmt.Errorf("run command '%s' failed with: %s", cmd, err.Error())
 		}
@@ -128,7 +128,7 @@ func debugEachPod(ctx context.Context, pod v1.Pod, daemon v1.Pod, chaos *v1alpha
 		}
 
 		cmd = fmt.Sprintf("cat /sys/fs/cgroup/%s/%s/cpu.cfs_period_us", cpuMountType, processPath)
-		out, err = cm.Exec(daemon, cmd, c.KubeCli)
+		out, err = cm.Exec(ctx, daemon, daemon, cmd, c.KubeCli)
 		if err != nil {
 			return fmt.Errorf("run command '%s' failed with: %s", cmd, err.Error())
 		}
@@ -147,7 +147,7 @@ func debugEachPod(ctx context.Context, pod v1.Pod, daemon v1.Pod, chaos *v1alpha
 		}
 	} else {
 		cmd = fmt.Sprintf("cat /sys/fs/cgroup/memory/%s/memory.limit_in_bytes", processPath)
-		out, err = cm.Exec(daemon, cmd, c.KubeCli)
+		out, err = cm.Exec(ctx, daemon, daemon, cmd, c.KubeCli)
 		if err != nil {
 			return fmt.Errorf("run command '%s' failed with: %s", cmd, err.Error())
 		}

@@ -161,7 +161,6 @@ func (o *DebugOptions) Run(chaosType string, args []string, c *cm.ClientSet) err
 			return fmt.Errorf("chaos not supported")
 		}
 	}
-
 	return nil
 }
 
