@@ -52,7 +52,7 @@ func Debug(ctx context.Context, chaos runtime.Object, c *cm.ClientSet, result *c
 
 func debugEachPod(ctx context.Context, pod v1.Pod, daemon v1.Pod, chaos *v1alpha1.IoChaos, c *cm.ClientSet, result *cm.PodResult) error {
 	// print out debug info
-	cmd := fmt.Sprintf("ls /proc/1/fd -al")
+	cmd := fmt.Sprintf("ls /proc/1/fd -l")
 	out, err := cm.Exec(ctx, pod, daemon, cmd, c.KubeCli)
 	if err != nil {
 		return fmt.Errorf("run command '%s' failed with: %s", cmd, err.Error())

@@ -220,6 +220,7 @@ func nsEnterExec(ctx context.Context, stderr string, pod v1.Pod, daemon v1.Pod, 
 	if len(cmdSubSlice) == 0 {
 		return "", fmt.Errorf("cmd is empty")
 	}
+	cmdArguments := strings.Join(cmdSubSlice[1:], " ")
 	pid, err := GetPidFromPod(ctx, pod, daemon)
 	if err != nil {
 		return "", err
@@ -227,7 +228,8 @@ func nsEnterExec(ctx context.Context, stderr string, pod v1.Pod, daemon v1.Pod, 
 	switch cmdSubSlice[0] {
 	case "ps":
 		nsenterPath := "-p/proc/" + strconv.Itoa(pid) + "/ns/pid"
-		newCmd := fmt.Sprintf("/usr/bin/nsenter %s -- ps", nsenterPath)
+		nsCmd := fmt.Sprintf("mount -t proc proc /proc && ps %s && umount proc", cmdArguments)
+		newCmd := fmt.Sprintf("/usr/bin/nsenter %s -- /bin/bash -c '%s'", nsenterPath, nsCmd)
 		return exec(ctx, daemon, daemon, newCmd, c)
 	case "cat":
 		// we need to enter mount namespace to get file related infomation
@@ -237,7 +239,7 @@ func nsEnterExec(ctx context.Context, stderr string, pod v1.Pod, daemon v1.Pod, 
 		if len(cmdSubSlice) < 2 {
 			return "", fmt.Errorf("cat should have one argument")
 		}
-		newCmd := fmt.Sprintf("/usr/local/bin/nscat %s %s", nsenterPath, cmdSubSlice[1])
+		newCmd := fmt.Sprintf("/usr/local/bin/nscat %s %s", nsenterPath, cmdArguments)
 		return exec(ctx, daemon, daemon, newCmd, c)
 	default:
 		return "", fmt.Errorf("cmd not supported for nsenter")
