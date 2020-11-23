@@ -111,6 +111,10 @@ spec:
                   format: int32
                   type: integer
               type: object
+            containerName:
+              description: ContainerName indicates the target container to inject
+                iochaos in
+              type: string
             delay:
               description: Delay defines the value of I/O chaos action delay. A delay
                 string is a possibly signed sequence of decimal numbers, each with

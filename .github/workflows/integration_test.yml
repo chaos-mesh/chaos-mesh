@@ -24,7 +24,8 @@ jobs:
 
       - name: Install Chaos Mesh
         run: |
-          bash install.sh --local kind --crd ./manifests/crd.yaml
+          export CLUSTER="chart-testing"
+          hack/local-up-chaos-mesh.sh
 
       - name: Run integration test
         run: |
