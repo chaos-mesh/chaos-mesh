@@ -1046,6 +1046,7 @@ func (s *Service) updateNetworkChaos(exp *core.ExperimentYAMLDescription) error 
 	var spec v1alpha1.NetworkChaosSpec
 	mapstructure.Decode(exp.Spec, &spec)
 	chaos.Spec = spec
+
 	var tcParameter v1alpha1.TcParameter
 	mapstructure.Decode(exp.Spec, &tcParameter)
 	chaos.Spec.TcParameter = tcParameter
