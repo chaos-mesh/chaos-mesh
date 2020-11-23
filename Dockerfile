@@ -31,12 +31,11 @@ RUN apk add --no-cache curl tar
 WORKDIR /bin
 
 RUN curl -L https://github.com/chaos-mesh/toda/releases/download/v0.1.8/toda-linux-amd64.tar.gz | tar -xz
+RUN curl -L https://github.com/Yiyiyimu/nscat/releases/download/v0.1.0/nscat-linx-amd64.tar.gz | tar -xz
 
 WORKDIR /
 RUN curl -L https://github.com/chaos-mesh/toda-glibc/releases/download/v2.28-alpha.2/toda-glibc-2.28.tar.xz | tar -xz
 RUN mv /toda-glibc-2.28 /toda-glibc
-
-RUN curl -L https://github.com/Yiyiyimu/nscat/releases/download/v0.1.0/nscat-linx-amd64.tar.gz | tar -xz
 
 COPY ./scripts /scripts
 COPY --from=go_build /src/bin /bin
