@@ -115,6 +115,7 @@ On the fourth Thursday of every month (unless otherwise specified), the Chaos Me
 - @IT atmarkit: [Kubernetes向けカオスエンジニアリングプラットフォーム「Chaos Mesh 1.0」が公開](https://www.atmarkit.co.jp/ait/articles/2010/09/news108.html)
 - Publickey: [KubernetesのPodやネットワークをわざと落としまくってカオスエンジニアリングのテストができる「Chaos Mesh」がバージョン1.0に到達](https://www.publickey1.jp/blog/20/kubernetespodchaos_mesh10.html)
 - InfoQ: [Chaos Engineering on Kubernetes : Chaos Mesh Generally Available with v1.0](https://www.infoq.com/news/2020/10/kubernetes-chaos-mesh-ga/)
+- TechGenix: [Chaos Mesh Promises to Bring Order to Chaos Engineering](http://techgenix.com/chaos-mesh-chaos-engineering/)
 
 ## FAQs
 
