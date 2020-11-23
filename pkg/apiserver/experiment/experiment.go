@@ -537,6 +537,7 @@ func (s *Service) getNetworkChaosDetail(namespace string, name string) (Experime
 	}
 
 	if chaos.Spec.Target != nil {
+		info.Target.NetworkChaos.TargetScope = &core.ScopeInfo{}
 		info.Target.NetworkChaos.TargetScope.SelectorInfo = core.SelectorInfo{
 			NamespaceSelectors:  chaos.Spec.Target.TargetSelector.Namespaces,
 			LabelSelectors:      chaos.Spec.Target.TargetSelector.LabelSelectors,
