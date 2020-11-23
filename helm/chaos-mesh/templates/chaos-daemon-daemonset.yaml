@@ -118,6 +118,7 @@ spec:
           ports:
             - name: grpc
               containerPort: {{ .Values.bpfki.grpcPort }}
+              hostPort: {{ .Values.bpfki.grpcPort }}
 {{- end }}
       volumes:
         - name: socket-path
