@@ -141,26 +141,31 @@ func (o *DebugOptions) Run(chaosType string, args []string, c *cm.ClientSet) err
 	if err != nil {
 		return fmt.Errorf(err.Error())
 	}
+	var ctlResult []cm.ChaosResult
 
 	for i, chaos := range chaosList {
-		cm.Print("[CHAOSNAME]: "+nameList[i], 0, "Blue")
+		var chaosResult cm.ChaosResult
+		chaosResult.Name = nameList[i]
+		//cm.Print("[CHAOSNAME]: "+nameList[i], 0, "Blue")
+
+		var err error
 		switch chaosType {
 		case "networkchaos":
-			if err := networkchaos.Debug(ctx, chaos, c); err != nil {
-				return err
-			}
+			err = networkchaos.Debug(ctx, chaos, c, &chaosResult)
 		case "stresschaos":
-			if err := stresschaos.Debug(ctx, chaos, c); err != nil {
-				return err
-			}
+			err = stresschaos.Debug(ctx, chaos, c, &chaosResult)
 		case "iochaos":
-			if err := iochaos.Debug(ctx, chaos, c); err != nil {
-				return err
-			}
+			err = iochaos.Debug(ctx, chaos, c, &chaosResult)
 		default:
 			return fmt.Errorf("chaos not supported")
 		}
+		ctlResult = append(ctlResult, chaosResult)
+		if err != nil {
+			cm.PrintResult(ctlResult)
+			return err
+		}
 	}
+	cm.PrintResult(ctlResult)
 	return nil
 }
 

@@ -24,7 +24,8 @@ import (
 	cm "github.com/chaos-mesh/chaos-mesh/pkg/debug/common"
 )
 
-func Debug(ctx context.Context, chaos runtime.Object, c *cm.ClientSet) error {
+// Debug get chaos debug information
+func Debug(ctx context.Context, chaos runtime.Object, c *cm.ClientSet, result *cm.ChaosResult) error {
 	ioChaos, ok := chaos.(*v1alpha1.IoChaos)
 	if !ok {
 		return fmt.Errorf("chaos is not iochaos")
@@ -39,8 +40,9 @@ func Debug(ctx context.Context, chaos runtime.Object, c *cm.ClientSet) error {
 
 	for i := range pods {
 		podName := pods[i].GetObjectMeta().GetName()
-		cm.Print("[Pod]: "+podName, 0, "Blue")
-		err := debugEachPod(ctx, pods[i], daemons[i], ioChaos, c)
+		podResult := cm.PodResult{Name: podName}
+		err := debugEachPod(ctx, pods[i], daemons[i], ioChaos, c, &podResult)
+		result.Pods = append(result.Pods, podResult)
 		if err != nil {
 			return fmt.Errorf("for %s: %s", podName, err.Error())
 		}
@@ -48,23 +50,21 @@ func Debug(ctx context.Context, chaos runtime.Object, c *cm.ClientSet) error {
 	return nil
 }
 
-func debugEachPod(ctx context.Context, pod v1.Pod, daemon v1.Pod, chaos *v1alpha1.IoChaos, c *cm.ClientSet) error {
+func debugEachPod(ctx context.Context, pod v1.Pod, daemon v1.Pod, chaos *v1alpha1.IoChaos, c *cm.ClientSet, result *cm.PodResult) error {
 	// print out debug info
 	cmd := fmt.Sprintf("ls /proc/1/fd -al")
-	out, err := cm.Exec(ctx, daemon, daemon, cmd, c.KubeCli)
+	out, err := cm.Exec(ctx, pod, daemon, cmd, c.KubeCli)
 	if err != nil {
 		return fmt.Errorf("run command '%s' failed with: %s", cmd, err.Error())
 	}
-	cm.Print("1. [file discriptors]", 1, "Cyan")
-	cm.Print(string(out), 1, "")
+	result.Items = append(result.Items, cm.ItemResult{Name: "file discriptors", Value: string(out)})
 
 	cmd = fmt.Sprintf("mount")
-	out, err = cm.Exec(ctx, daemon, daemon, cmd, c.KubeCli)
+	out, err = cm.Exec(ctx, pod, daemon, cmd, c.KubeCli)
 	if err != nil {
 		return fmt.Errorf("run command '%s' failed with: %s", cmd, err.Error())
 	}
-	cm.Print("2. [mount information]", 1, "Cyan")
-	cm.Print(string(out), 1, "")
+	result.Items = append(result.Items, cm.ItemResult{Name: "mount information", Value: string(out)})
 
 	return nil
 }

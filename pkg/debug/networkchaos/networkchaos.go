@@ -30,7 +30,8 @@ import (
 	cm "github.com/chaos-mesh/chaos-mesh/pkg/debug/common"
 )
 
-func Debug(ctx context.Context, chaos runtime.Object, c *cm.ClientSet) error {
+// Debug get chaos debug information
+func Debug(ctx context.Context, chaos runtime.Object, c *cm.ClientSet, result *cm.ChaosResult) error {
 	networkChaos, ok := chaos.(*v1alpha1.NetworkChaos)
 	if !ok {
 		return fmt.Errorf("chaos is not network")
@@ -45,8 +46,9 @@ func Debug(ctx context.Context, chaos runtime.Object, c *cm.ClientSet) error {
 
 	for i := range pods {
 		podName := pods[i].GetObjectMeta().GetName()
-		cm.Print("[Pod]: "+podName, 0, "Blue")
-		err := debugEachPod(ctx, pods[i], daemons[i], networkChaos, c)
+		podResult := cm.PodResult{Name: podName}
+		err := debugEachPod(ctx, pods[i], daemons[i], networkChaos, c, &podResult)
+		result.Pods = append(result.Pods, podResult)
 		if err != nil {
 			return fmt.Errorf("for %s: %s", podName, err.Error())
 		}
@@ -54,7 +56,7 @@ func Debug(ctx context.Context, chaos runtime.Object, c *cm.ClientSet) error {
 	return nil
 }
 
-func debugEachPod(ctx context.Context, pod v1.Pod, daemon v1.Pod, chaos *v1alpha1.NetworkChaos, c *cm.ClientSet) error {
+func debugEachPod(ctx context.Context, pod v1.Pod, daemon v1.Pod, chaos *v1alpha1.NetworkChaos, c *cm.ClientSet, result *cm.PodResult) error {
 	podName := pod.GetObjectMeta().GetName()
 	podNamespace := pod.GetObjectMeta().GetNamespace()
 
@@ -73,16 +75,14 @@ func debugEachPod(ctx context.Context, pod v1.Pod, daemon v1.Pod, chaos *v1alpha
 	if err != nil {
 		return fmt.Errorf("run command '%s' failed with: %s", cmd, err.Error())
 	}
-	cm.Print("1. [ipset list]", 1, "Cyan")
-	cm.Print(string(out), 1, "")
+	result.Items = append(result.Items, cm.ItemResult{Name: "ipset list", Value: string(out)})
 
 	cmd = fmt.Sprintf("/usr/bin/nsenter %s -- tc qdisc list", nsenterPath)
 	out, err = cm.Exec(ctx, daemon, daemon, cmd, c.KubeCli)
 	if err != nil {
 		return fmt.Errorf("run command '%s' failed with: %s", cmd, err.Error())
 	}
-	cm.Print("2. [tc qdisc list]", 1, "Cyan")
-	cm.Print(string(out), 1, "")
+	itemResult := cm.ItemResult{Name: "tc qdisc list", Value: string(out)}
 
 	action := chaos.Spec.Action
 	var netemExpect string
@@ -121,20 +121,21 @@ func debugEachPod(ctx context.Context, pod v1.Pod, daemon v1.Pod, chaos *v1alpha
 			if alpCurrent == alpExpect {
 				continue
 			}
-			errInfo := fmt.Sprintf("NetworkChaos didn't execute as expected, expect: %s, got: %s", netemExpect, netemCurrent)
-			cm.Print(errInfo, 1, "Red")
+			itemResult.Status = cm.ItemFailure
+			itemResult.ErrInfo = fmt.Sprintf("expect: %s, got: %v", netemExpect, netemCurrent)
+			result.Items = append(result.Items, itemResult)
 			return nil
 		}
 	}
-	cm.Print("NetworkChaos execute as expected", 1, "Green")
+	itemResult.Status = cm.ItemSuccess
+	result.Items = append(result.Items, itemResult)
 
 	cmd = fmt.Sprintf("/usr/bin/nsenter %s -- iptables --list", nsenterPath)
 	out, err = cm.Exec(ctx, daemon, daemon, cmd, c.KubeCli)
 	if err != nil {
 		return fmt.Errorf("cmd.Run() failed with: %s", err.Error())
 	}
-	cm.Print("3. [iptables list]", 1, "Cyan")
-	cm.Print(string(out), 1, "")
+	result.Items = append(result.Items, cm.ItemResult{Name: "iptables list", Value: string(out)})
 
 	podNetworkChaos := &v1alpha1.PodNetworkChaos{}
 	objectKey := client.ObjectKey{
@@ -145,12 +146,11 @@ func debugEachPod(ctx context.Context, pod v1.Pod, daemon v1.Pod, chaos *v1alpha
 	if err = c.CtrlCli.Get(ctx, objectKey, podNetworkChaos); err != nil {
 		return fmt.Errorf("failed to get chaos: %s", err.Error())
 	}
-	cm.Print("4. [podnetworkchaos]", 1, "Cyan")
 	mar, err := cm.MarshalChaos(podNetworkChaos.Spec)
 	if err != nil {
 		return err
 	}
-	cm.Print(mar, 1, "")
+	result.Items = append(result.Items, cm.ItemResult{Name: "podnetworkchaos", Value: mar})
 
 	return nil
 }

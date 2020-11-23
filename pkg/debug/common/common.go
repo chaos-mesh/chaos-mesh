@@ -58,6 +58,29 @@ type ClientSet struct {
 	KubeCli *kubernetes.Clientset
 }
 
+type ChaosResult struct {
+	Name string
+	Pods []PodResult
+}
+
+type PodResult struct {
+	Name  string
+	Items []ItemResult
+}
+
+const (
+	ItemSuccess = iota + 1
+	ItemFailure
+)
+
+type ItemResult struct {
+	Name    string
+	Value   string
+	Status  int    `json:",omitempty"`
+	SucInfo string `json:",omitempty"`
+	ErrInfo string `json:",omitempty"`
+}
+
 func init() {
 	_ = v1alpha1.AddToScheme(scheme)
 	_ = clientgoscheme.AddToScheme(scheme)
@@ -68,17 +91,43 @@ func upperCaseChaos(str string) string {
 	return strings.Title(parts[1]) + strings.Title(parts[2])
 }
 
-// Print prints result to users in prettier format, with number of tabs
-func Print(s string, num int, color string) {
+func print(s string, num int, color string) {
 	var tabStr string
 	for i := 0; i < num; i++ {
 		tabStr += "\t"
 	}
 	str := fmt.Sprintf("%s%s\n\n", tabStr, regexp.MustCompile("\n").ReplaceAllString(s, "\n"+tabStr))
 	if color != "" {
-		colorFunc[color](str)
+		if cfunc, ok := colorFunc[color]; !ok {
+			fmt.Printf("COLOR NOT SUPPORTED")
+		} else {
+			cfunc(str)
+		}
 	} else {
 		fmt.Printf(str)
+	}
+}
+
+// PrintResult prints result to users in prettier format
+func PrintResult(result []ChaosResult) {
+	for _, chaos := range result {
+		print("[Chaos]: "+chaos.Name, 0, "Blue")
+		for _, pod := range chaos.Pods {
+			print("[Pod]: "+pod.Name, 0, "Blue")
+			for i, item := range pod.Items {
+				print(fmt.Sprintf("%d. [%s]", i+1, item.Name), 1, "Cyan")
+				print(item.Value, 1, "")
+				if item.Status == ItemSuccess {
+					if item.SucInfo != "" {
+						print(item.SucInfo, 1, "Green")
+					} else {
+						print("Execute as expected", 1, "Green")
+					}
+				} else if item.Status == ItemFailure {
+					print(fmt.Sprintf("Failed: %s ", item.ErrInfo), 1, "Red")
+				}
+			}
+		}
 	}
 }
 

@@ -28,7 +28,8 @@ import (
 	cm "github.com/chaos-mesh/chaos-mesh/pkg/debug/common"
 )
 
-func Debug(ctx context.Context, chaos runtime.Object, c *cm.ClientSet) error {
+// Debug get chaos debug information
+func Debug(ctx context.Context, chaos runtime.Object, c *cm.ClientSet, result *cm.ChaosResult) error {
 	stressChaos, ok := chaos.(*v1alpha1.StressChaos)
 	if !ok {
 		return fmt.Errorf("chaos is not stresschaos")
@@ -43,8 +44,9 @@ func Debug(ctx context.Context, chaos runtime.Object, c *cm.ClientSet) error {
 
 	for i := range pods {
 		podName := pods[i].GetObjectMeta().GetName()
-		cm.Print("[Pod]: "+podName, 0, "Blue")
-		err := debugEachPod(ctx, pods[i], daemons[i], stressChaos, c)
+		podResult := cm.PodResult{Name: podName}
+		err := debugEachPod(ctx, pods[i], daemons[i], stressChaos, c, &podResult)
+		result.Pods = append(result.Pods, podResult)
 		if err != nil {
 			return fmt.Errorf("for %s: %s", podName, err.Error())
 		}
@@ -52,7 +54,7 @@ func Debug(ctx context.Context, chaos runtime.Object, c *cm.ClientSet) error {
 	return nil
 }
 
-func debugEachPod(ctx context.Context, pod v1.Pod, daemon v1.Pod, chaos *v1alpha1.StressChaos, c *cm.ClientSet) error {
+func debugEachPod(ctx context.Context, pod v1.Pod, daemon v1.Pod, chaos *v1alpha1.StressChaos, c *cm.ClientSet, result *cm.PodResult) error {
 	// cpu or memory chaos
 	isCPU := true
 	if cpuSpec := chaos.Spec.Stressors.CPUStressor; cpuSpec == nil {
@@ -88,8 +90,7 @@ func debugEachPod(ctx context.Context, pod v1.Pod, daemon v1.Pod, chaos *v1alpha
 	if err != nil {
 		return fmt.Errorf("run command '%s' failed with: %s", cmd, err.Error())
 	}
-	cm.Print("1. [cat /proc/1/cgroup]", 1, "Cyan")
-	cm.Print(string(out), 1, "")
+	result.Items = append(result.Items, cm.ItemResult{Name: "/proc/1/cgroup", Value: string(out)})
 
 	var expr string
 	if isCPU {
@@ -104,14 +105,16 @@ func debugEachPod(ctx context.Context, pod v1.Pod, daemon v1.Pod, chaos *v1alpha
 	if err != nil {
 		return fmt.Errorf("run command '%s' failed with: %s", cmd, err.Error())
 	}
-	cm.Print("2. [cat /proc/(stress-ng pid)/cgroup]", 1, "Cyan")
-	cm.Print(string(outStress), 1, "")
+	itemResult := cm.ItemResult{Name: "/proc/(stress-ng pid)/cgroup", Value: string(outStress)}
 
 	if string(out) != string(outStress) {
-		cm.Print("StressChaos failed to execute as expected", 1, "Red")
+		itemResult.Status = cm.ItemFailure
+		itemResult.ErrInfo = "Cgroup of stress-ng and init process not the same"
+		result.Items = append(result.Items, itemResult)
 		return nil
 	}
-	cm.Print("cgroup is the same", 1, "Green")
+	itemResult.Status = cm.ItemSuccess
+	result.Items = append(result.Items, itemResult)
 
 	// print out debug info
 	if isCPU {
@@ -120,8 +123,7 @@ func debugEachPod(ctx context.Context, pod v1.Pod, daemon v1.Pod, chaos *v1alpha
 		if err != nil {
 			return fmt.Errorf("run command '%s' failed with: %s", cmd, err.Error())
 		}
-		cm.Print("3. [cpu.cfs_quota_us]", 1, "Cyan")
-		cm.Print(string(out), 1, "")
+		result.Items = append(result.Items, cm.ItemResult{Name: "cpu.cfs_quota_us", Value: string(out)})
 		quota, err := strconv.Atoi(strings.TrimSuffix(string(out), "\n"))
 		if err != nil {
 			return fmt.Errorf("could not get cpu.cfs_quota_us with: %s", err.Error())
@@ -132,19 +134,20 @@ func debugEachPod(ctx context.Context, pod v1.Pod, daemon v1.Pod, chaos *v1alpha
 		if err != nil {
 			return fmt.Errorf("run command '%s' failed with: %s", cmd, err.Error())
 		}
-		cm.Print("4. [cpu.cfs_period_us]", 1, "Cyan")
-		cm.Print(string(out), 1, "")
 		period, err := strconv.Atoi(strings.TrimSuffix(string(out), "\n"))
 		if err != nil {
 			return fmt.Errorf("could not get cpu.cfs_period_us with: %s", err.Error())
 		}
+		itemResult = cm.ItemResult{Name: "cpu.cfs_period_us", Value: string(out)}
 
 		if quota == -1 {
-			cm.Print("no cpu limit is set for now", 1, "Red")
+			itemResult.Status = cm.ItemFailure
+			itemResult.ErrInfo = "no cpu limit is set for now"
 		} else {
-			cpuLimitStr := fmt.Sprintf("cpu limit is equals to %.2f", float64(quota)/float64(period))
-			cm.Print(cpuLimitStr, 1, "Green")
+			itemResult.Status = cm.ItemSuccess
+			itemResult.SucInfo = fmt.Sprintf("cpu limit is equals to %.2f", float64(quota)/float64(period))
 		}
+		result.Items = append(result.Items, itemResult)
 	} else {
 		cmd = fmt.Sprintf("cat /sys/fs/cgroup/memory/%s/memory.limit_in_bytes", processPath)
 		out, err = cm.Exec(ctx, daemon, daemon, cmd, c.KubeCli)
@@ -155,8 +158,7 @@ func debugEachPod(ctx context.Context, pod v1.Pod, daemon v1.Pod, chaos *v1alpha
 		if err != nil {
 			return fmt.Errorf("could not get memory.limit_in_bytes with: %s", err.Error())
 		}
-		cm.Print("3. [memory.limit_in_bytes]", 1, "Cyan")
-		cm.Print(bytefmt.ByteSize(limit)+"B", 1, "")
+		result.Items = append(result.Items, cm.ItemResult{Name: "memory.limit_in_bytes", Value: bytefmt.ByteSize(limit) + "B"})
 	}
 	return nil
 }
