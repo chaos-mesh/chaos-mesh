@@ -19,6 +19,7 @@ import (
 	"time"
 
 	"github.com/chaos-mesh/chaos-mesh/controllers/common"
+	"github.com/pkg/errors"
 	"google.golang.org/grpc"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -47,15 +48,22 @@ func CreateGrpcConnection(ctx context.Context, c client.Client, pod *v1.Pod, por
 		return nil, err
 	}
 
-	var node v1.Node
-	err = c.Get(ctx, types.NamespacedName{
-		Name: nodeName,
-	}, &node)
-	if err != nil {
-		return nil, err
+	var daemonIP string
+outer:
+	for _, subset := range endpoints.Subsets {
+		for _, addr := range subset.Addresses {
+			if addr.NodeName != nil && *addr.NodeName == nodeName {
+				daemonIP = addr.IP
+				break outer
+			}
+		}
 	}
 
-	conn, err := grpc.Dial(fmt.Sprintf("%s:%d", node.Status.Addresses[0].Address, port),
+	if len(daemonIP) == 0 {
+		return nil, errors.Errorf("cannot find daemonIP on node %s in related Endpoints %v", nodeName, endpoints)
+	}
+
+	conn, err := grpc.Dial(fmt.Sprintf("%s:%d", daemonIP, port),
 		grpc.WithInsecure(),
 		grpc.WithUnaryInterceptor(TimeoutClientInterceptor))
 	if err != nil {
