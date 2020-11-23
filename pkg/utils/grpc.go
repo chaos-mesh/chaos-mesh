@@ -18,6 +18,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/chaos-mesh/chaos-mesh/controllers/common"
 	"google.golang.org/grpc"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -36,8 +37,18 @@ func CreateGrpcConnection(ctx context.Context, c client.Client, pod *v1.Pod, por
 	nodeName := pod.Spec.NodeName
 	log.Info("Creating client to chaos-daemon", "node", nodeName)
 
-	var node v1.Node
+	ns := common.ControllerCfg.Namespace
+	var endpoints v1.Endpoints
 	err := c.Get(ctx, types.NamespacedName{
+		Namespace: ns,
+		Name:      "chaos-daemon",
+	}, &endpoints)
+	if err != nil {
+		return nil, err
+	}
+
+	var node v1.Node
+	err = c.Get(ctx, types.NamespacedName{
 		Name: nodeName,
 	}, &node)
 	if err != nil {
