@@ -23,7 +23,6 @@ import (
 	"time"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	"github.com/chaos-mesh/chaos-mesh/pkg/apiserver/event"
 	"github.com/chaos-mesh/chaos-mesh/pkg/core"
 
 	"github.com/gin-gonic/gin"
