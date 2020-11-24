@@ -1,8 +1,8 @@
 module github.com/chaos-mesh/chaos-mesh
 
 require (
-	github.com/bxcodec/faker v2.0.1+incompatible
 	github.com/DATA-DOG/go-sqlmock v1.5.0
+	github.com/bxcodec/faker v2.0.1+incompatible
 	github.com/chaos-mesh/k8s_dns_chaos v0.0.0-20200922120555-7ced93637075
 	github.com/containerd/cgroups v0.0.0-20200404012852-53ba5634dc0f
 	github.com/containerd/containerd v1.2.3
