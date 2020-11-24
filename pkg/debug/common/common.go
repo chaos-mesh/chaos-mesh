@@ -18,6 +18,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"regexp"
 	"strconv"
@@ -25,6 +26,7 @@ import (
 	"time"
 
 	"github.com/fatih/color"
+	"google.golang.org/grpc/grpclog"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/kubernetes"
@@ -159,10 +161,10 @@ func Exec(ctx context.Context, pod v1.Pod, daemon v1.Pod, cmd string, c *kuberne
 	out, err := exec(ctx, pod, daemon, cmd, c)
 
 	if err != nil {
-		// use daemon to enter namespace and execute command if command not found
-		if strings.Contains(err.Error(), "not found") {
+		// use daemon to enter namespace and execute command if command not found (which stream would failed)
+		if strings.Contains(err.Error(), "streaming remotecommand") {
 			outNs, errNs := nsEnterExec(ctx, err.Error(), pod, daemon, cmd, c)
-			if errNs != nil {
+			if errNs == nil {
 				return outNs, nil
 			}
 			err = fmt.Errorf("%s\nnsenter also failed with: %s", err.Error(), errNs.Error())
@@ -207,7 +209,7 @@ func exec(ctx context.Context, pod v1.Pod, daemon v1.Pod, cmd string, c *kuberne
 		Stderr: &stderr,
 	})
 	if err != nil {
-		return "", fmt.Errorf("error in creating StreamOptions: %s", err.Error())
+		return "", fmt.Errorf("error in streaming remotecommand: %s", err.Error())
 	}
 	if stderr.String() != "" {
 		return "", fmt.Errorf(stderr.String())
@@ -220,6 +222,7 @@ func nsEnterExec(ctx context.Context, stderr string, pod v1.Pod, daemon v1.Pod, 
 	if len(cmdSubSlice) == 0 {
 		return "", fmt.Errorf("command should not be empty")
 	}
+	grpclog.SetLoggerV2(grpclog.NewLoggerV2(ioutil.Discard, ioutil.Discard, ioutil.Discard))
 	pid, err := GetPidFromPod(ctx, pod, daemon)
 	if err != nil {
 		return "", err
