@@ -136,19 +136,19 @@ var _ = ginkgo.SynchronizedBeforeSuite(func() []byte {
 	framework.ExpectNoError(err, "failed to create clientset")
 	apiExtCli, err := apiextensionsclientset.NewForConfig(config)
 	framework.ExpectNoError(err, "failed to create clientset")
-	oa := test.NewOperatorAction(kubeCli, aggrCli, apiExtCli, e2econfig.TestConfig)
-	ocfg := test.NewDefaultOperatorConfig()
-	ocfg.Manager.Image = e2econfig.TestConfig.ManagerImage
-	ocfg.Manager.Tag = e2econfig.TestConfig.ManagerTag
-	ocfg.Daemon.Image = e2econfig.TestConfig.DaemonImage
-	ocfg.Daemon.Tag = e2econfig.TestConfig.DaemonTag
-	ocfg.DNSImage = e2econfig.TestConfig.ChaosDNSImage
+	_ = test.NewOperatorAction(kubeCli, aggrCli, apiExtCli, e2econfig.TestConfig)
+	// ocfg := test.NewDefaultOperatorConfig()
+	// ocfg.Manager.Image = e2econfig.TestConfig.ManagerImage
+	// ocfg.Manager.Tag = e2econfig.TestConfig.ManagerTag
+	// ocfg.Daemon.Image = e2econfig.TestConfig.DaemonImage
+	// ocfg.Daemon.Tag = e2econfig.TestConfig.DaemonTag
+	// ocfg.DNSImage = e2econfig.TestConfig.ChaosDNSImage
 
-	oa.CleanCRDOrDie()
-	err = oa.InstallCRD(ocfg)
-	framework.ExpectNoError(err, "failed to install crd")
-	err = oa.DeployOperator(ocfg)
-	framework.ExpectNoError(err, "failed to install chaos-mesh")
+	// oa.CleanCRDOrDie()
+	// err = oa.InstallCRD(ocfg)
+	// framework.ExpectNoError(err, "failed to install crd")
+	// err = oa.DeployOperator(ocfg)
+	// framework.ExpectNoError(err, "failed to install chaos-mesh")
 	return nil
 }, func(data []byte) {
 	// Run on all Ginkgo nodes
