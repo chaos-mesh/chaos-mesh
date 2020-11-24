@@ -18,11 +18,12 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/chaos-mesh/chaos-mesh/controllers/common"
 	"github.com/pkg/errors"
 	"google.golang.org/grpc"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
+
+	"github.com/chaos-mesh/chaos-mesh/controllers/common"
 
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
