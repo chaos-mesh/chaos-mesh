@@ -47,6 +47,24 @@ webhooks:
     service:
       name: webhook-service
       namespace: system
+      path: /mutate-chaos-mesh-org-v1alpha1-jvmchaos
+  failurePolicy: Fail
+  name: mjvmchaos.kb.io
+  rules:
+  - apiGroups:
+    - chaos-mesh.org
+    apiVersions:
+    - v1alpha1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - jvmchaos
+- clientConfig:
+    caBundle: Cg==
+    service:
+      name: webhook-service
+      namespace: system
       path: /mutate-chaos-mesh-org-v1alpha1-kernelchaos
   failurePolicy: Fail
   name: mkernelchaos.kb.io
@@ -212,6 +230,24 @@ webhooks:
     - UPDATE
     resources:
     - iochaos
+- clientConfig:
+    caBundle: Cg==
+    service:
+      name: webhook-service
+      namespace: system
+      path: /validate-chaos-mesh-org-v1alpha1-jvmchaos
+  failurePolicy: Fail
+  name: vjvmchaos.kb.io
+  rules:
+  - apiGroups:
+    - chaos-mesh.org
+    apiVersions:
+    - v1alpha1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - jvmchaos
 - clientConfig:
     caBundle: Cg==
     service:
