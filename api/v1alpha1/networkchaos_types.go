@@ -89,18 +89,18 @@ const (
 // Target represents network partition and netem action target.
 type Target struct {
 	// TargetSelector defines the target selector
-	TargetSelector SelectorSpec `json:"selector"`
+	TargetSelector SelectorSpec `json:"selector" mapstructure:"selector"`
 
 	// TargetMode defines the target selector mode
 	// +kubebuilder:validation:Enum=one;all;fixed;fixed-percent;random-max-percent;""
-	TargetMode PodMode `json:"mode"`
+	TargetMode PodMode `json:"mode" mapstructure:"mode"`
 
 	// TargetValue is required when the mode is set to `FixedPodMode` / `FixedPercentPodMod` / `RandomMaxPercentPodMod`.
 	// If `FixedPodMode`, provide an integer of pods to do chaos action.
 	// If `FixedPercentPodMod`, provide a number from 0-100 to specify the percent of pods the server can do chaos action.
 	// If `RandomMaxPercentPodMod`,  provide a number from 0-100 to specify the max percent of pods to do chaos action
 	// +optional
-	TargetValue string `json:"value"`
+	TargetValue string `json:"value" mapstructure:"value"`
 }
 
 // GetSelector is a getter for Selector (for implementing SelectSpec)
