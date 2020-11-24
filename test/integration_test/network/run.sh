@@ -37,7 +37,7 @@ echo "****** test delay chaos ******"
 kubectl apply -f ./delay_chaos.yaml
 
 echo "verifaction"
-kubectl exec busybox-0 -i -n busybox -- ping -c 10 busybox-1.busybox.busybox.svc > ping.log
+kubectl exec busybox-0 -i -n busybox -- ping -c 20 busybox-1.busybox.busybox.svc > ping.log
 cat ping.log
 
 # the log looks like `64 bytes from 10.244.0.9: seq=0 ttl=63 time=0.240 ms`
@@ -53,7 +53,8 @@ do
 done
 
 # about half of the latency should be greater than 10ms
-if [[ "$high_latency_num" -lt "4" ]] || [[ "$high_latency_num" -gt "6" ]]; then
+# Note: this chaos may not take effect immediately, the max wait time is 10 second for scheduler @every 10s
+if [[ "$high_latency_num" -lt "5" ]] || [[ "$high_latency_num" -gt "10" ]]; then
     echo "the chaos dosen't work as expect"
     exit 1
 fi
