@@ -42,8 +42,8 @@ const (
 
 // PortForward represents an interface which can forward local ports to a pod.
 type PortForward interface {
-	Forward(namespace, resourceName string, addresses []string, ports []string, useLog bool) ([]portforward.ForwardedPort, context.CancelFunc, error)
-	ForwardPod(pod *corev1.Pod, addresses []string, ports []string, useLog bool) ([]portforward.ForwardedPort, context.CancelFunc, error)
+	Forward(namespace, resourceName string, addresses []string, ports []string) ([]portforward.ForwardedPort, context.CancelFunc, error)
+	ForwardPod(pod *corev1.Pod, addresses []string, ports []string) ([]portforward.ForwardedPort, context.CancelFunc, error)
 }
 
 // portForwarder implements PortForward interface
@@ -56,7 +56,7 @@ type portForwarder struct {
 
 var _ PortForward = &portForwarder{}
 
-func (f *portForwarder) forwardPorts(podKey, method string, url *url.URL, addresses []string, ports []string, useLog bool) (forwardedPorts []portforward.ForwardedPort, cancel context.CancelFunc, err error) {
+func (f *portForwarder) forwardPorts(podKey, method string, url *url.URL, addresses []string, ports []string) (forwardedPorts []portforward.ForwardedPort, cancel context.CancelFunc, err error) {
 	transport, upgrader, err := spdy.RoundTripperFor(f.config)
 	if err != nil {
 		return nil, nil, err
@@ -80,9 +80,7 @@ func (f *portForwarder) forwardPorts(podKey, method string, url *url.URL, addres
 	go func() {
 		lineScanner := bufio.NewScanner(r)
 		for lineScanner.Scan() {
-			if useLog {
-				klog.Infof("log from port forwarding %q: %s", podKey, lineScanner.Text())
-			}
+			klog.Infof("log from port forwarding %q: %s", podKey, lineScanner.Text())
 		}
 	}()
 
@@ -111,7 +109,7 @@ func (f *portForwarder) forwardPorts(podKey, method string, url *url.URL, addres
 }
 
 // Forward would port-forward to target resources
-func (f *portForwarder) Forward(namespace, resourceName string, addresses []string, ports []string, useLog bool) (forwardedPorts []portforward.ForwardedPort, cancel context.CancelFunc, err error) {
+func (f *portForwarder) Forward(namespace, resourceName string, addresses []string, ports []string) (forwardedPorts []portforward.ForwardedPort, cancel context.CancelFunc, err error) {
 	builder := resource.NewBuilder(f).
 		WithScheme(scheme.Scheme, scheme.Scheme.PrioritizedVersionsAllGroups()...).
 		ContinueOnError().
@@ -133,11 +131,11 @@ func (f *portForwarder) Forward(namespace, resourceName string, addresses []stri
 	if err != nil {
 		return nil, nil, err
 	}
-	return f.ForwardPod(pod, addresses, ports, useLog)
+	return f.ForwardPod(pod, addresses, ports)
 }
 
 // ForwardPod would port-forward target Pod
-func (f *portForwarder) ForwardPod(pod *corev1.Pod, addresses []string, ports []string, useLog bool) (forwardedPorts []portforward.ForwardedPort, cancel context.CancelFunc, err error) {
+func (f *portForwarder) ForwardPod(pod *corev1.Pod, addresses []string, ports []string) (forwardedPorts []portforward.ForwardedPort, cancel context.CancelFunc, err error) {
 	if pod.Status.Phase != corev1.PodRunning {
 		return nil, nil, fmt.Errorf("unable to forward port because pod is not running. Current status=%v", pod.Status.Phase)
 	}
@@ -148,7 +146,7 @@ func (f *portForwarder) ForwardPod(pod *corev1.Pod, addresses []string, ports []
 		Name(pod.Name).
 		SubResource("portforward")
 
-	return f.forwardPorts(fmt.Sprintf("%s/%s", pod.Namespace, pod.Name), "POST", req.URL(), addresses, ports, useLog)
+	return f.forwardPorts(fmt.Sprintf("%s/%s", pod.Namespace, pod.Name), "POST", req.URL(), addresses, ports)
 }
 
 // NewPortForwarder would create a new port-forward
@@ -171,9 +169,9 @@ func NewPortForwarder(ctx context.Context, restClientGetter genericclioptions.RE
 }
 
 // ForwardOnePort help to utility to forward one port of Kubernetes resource.
-func ForwardOnePort(fw PortForward, ns, resource string, port uint16, useLog bool) (string, uint16, context.CancelFunc, error) {
+func ForwardOnePort(fw PortForward, ns, resource string, port uint16) (string, uint16, context.CancelFunc, error) {
 	ports := []string{fmt.Sprintf("0:%d", port)}
-	forwardedPorts, cancel, err := fw.Forward(ns, resource, []string{"127.0.0.1"}, ports, useLog)
+	forwardedPorts, cancel, err := fw.Forward(ns, resource, []string{"127.0.0.1"}, ports)
 	if err != nil {
 		return "", 0, nil, err
 	}

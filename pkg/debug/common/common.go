@@ -381,6 +381,6 @@ func forwardPorts(ctx context.Context, pod v1.Pod, port uint16) (context.CancelF
 	if err != nil {
 		log.Fatal("failed to create port forwarder", err.Error())
 	}
-	_, localPort, pfCancel, err := portforward.ForwardOnePort(fw, pod.Namespace, pod.Name, port, false)
+	_, localPort, pfCancel, err := portforward.ForwardOnePort(fw, pod.Namespace, pod.Name, port)
 	return pfCancel, localPort, err
 }
