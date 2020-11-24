@@ -39,6 +39,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/test/pkg/fixture"
 
 	// testcases
+	dnschaostestcases "github.com/chaos-mesh/chaos-mesh/test/e2e/chaos/dnschaos"
 	iochaostestcases "github.com/chaos-mesh/chaos-mesh/test/e2e/chaos/iochaos"
 	networkchaostestcases "github.com/chaos-mesh/chaos-mesh/test/e2e/chaos/networkchaos"
 	podchaostestcases "github.com/chaos-mesh/chaos-mesh/test/e2e/chaos/podchaos"
@@ -304,7 +305,37 @@ var _ = ginkgo.Describe("[Basic]", func() {
 			}
 		})
 	})
+	// DNS chaos case in [DNSChaos] context
+	ginkgo.Context("[DNSChaos]", func() {
+		var err error
+		var port uint16
 
+		ginkgo.JustBeforeEach(func() {
+			name := fmt.Sprintf("network-peer")
+
+			svc := fixture.NewE2EService(name, ns)
+			_, err = kubeCli.CoreV1().Services(ns).Create(svc)
+			framework.ExpectNoError(err, "create service error")
+			nd := fixture.NewNetworkTestDeployment(name, ns, map[string]string{"partition": "0"})
+			_, err = kubeCli.AppsV1().Deployments(ns).Create(nd)
+			framework.ExpectNoError(err, "create network-peer deployment error")
+			err = util.WaitDeploymentReady(name, ns, kubeCli)
+			framework.ExpectNoError(err, "wait network-peer deployment ready error")
+
+			_, err := getPod(kubeCli, ns, name)
+			framework.ExpectNoError(err, "select network-peer pod error")
+
+			_, port, _, err = portforward.ForwardOnePort(fw, ns, "svc/"+svc.Name, 8080)
+			framework.ExpectNoError(err, "create helper io port port-forward failed")
+		})
+		ginkgo.It("[RANDOM]", func() {
+			dnschaostestcases.TestcaseDNSRandom(ns, cli, port, c)
+		})
+
+		ginkgo.It("[ERROR]", func() {
+			dnschaostestcases.TestcaseDNSError(ns, cli, port, c)
+		})
+	})
 })
 
 func getPod(kubeCli kubernetes.Interface, ns string, appLabel string) (*v1.Pod, error) {
