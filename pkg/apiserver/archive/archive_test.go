@@ -23,6 +23,7 @@ import (
 	"time"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/pkg/apiserver/event"
 	"github.com/chaos-mesh/chaos-mesh/pkg/core"
 
 	"github.com/gin-gonic/gin"
@@ -267,10 +268,10 @@ func (m *MockExperimentStore) DeleteIncompleteExperiments(context.Context) error
 var _ = Describe("event", func() {
 	var router *gin.Engine
 	BeforeEach(func() {
-		mockes := new(MockExperimentStore)
+		mockExpStore := new(MockExperimentStore)
 
 		s := Service{
-			archive: mockes,
+			archive: mockExpStore,
 			event:   nil,
 		}
 		router = gin.Default()
