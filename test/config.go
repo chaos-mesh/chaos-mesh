@@ -25,6 +25,7 @@ type Config struct {
 	E2EImage          string
 	ChaosFSImage      string
 	ChaosScriptsImage string
+	ChaosDNSImage     string
 }
 
 // NewDefaultConfig describe the default configuration for operator test
@@ -40,5 +41,6 @@ func NewDefaultConfig() *Config {
 		E2EImage:          "localhost:5000/pingcap/e2e-helper:latest",
 		ChaosFSImage:      "localhost:5000/pingcap/chaos-fs:latest",
 		ChaosScriptsImage: "localhost:5000/pingcap/chaos-scripts:latest",
+		ChaosDNSImage:     "localhost:5000/pingcap/chaos-dns:latest",
 	}
 }
