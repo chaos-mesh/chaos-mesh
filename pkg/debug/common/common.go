@@ -218,9 +218,8 @@ func exec(ctx context.Context, pod v1.Pod, daemon v1.Pod, cmd string, c *kuberne
 func nsEnterExec(ctx context.Context, stderr string, pod v1.Pod, daemon v1.Pod, cmd string, c *kubernetes.Clientset) (string, error) {
 	cmdSubSlice := strings.Fields(cmd)
 	if len(cmdSubSlice) == 0 {
-		return "", fmt.Errorf("cmd is empty")
+		return "", fmt.Errorf("command should not be empty")
 	}
-	cmdArguments := strings.Join(cmdSubSlice[1:], " ")
 	pid, err := GetPidFromPod(ctx, pod, daemon)
 	if err != nil {
 		return "", err
@@ -228,21 +227,21 @@ func nsEnterExec(ctx context.Context, stderr string, pod v1.Pod, daemon v1.Pod, 
 	switch cmdSubSlice[0] {
 	case "ps":
 		nsenterPath := "-p/proc/" + strconv.Itoa(pid) + "/ns/pid"
+		cmdArguments := strings.Join(cmdSubSlice[1:], " ")
 		nsCmd := fmt.Sprintf("mount -t proc proc /proc && ps %s && umount proc", cmdArguments)
 		newCmd := fmt.Sprintf("/usr/bin/nsenter %s -- /bin/bash -c '%s'", nsenterPath, nsCmd)
 		return exec(ctx, daemon, daemon, newCmd, c)
-	case "cat":
+	case "cat", "ls":
 		// we need to enter mount namespace to get file related infomation
-		// but enter mnt ns would prevent us to access `cat` in daemon
-		// so use `nscat` to achieve using nsenter and cat together
-		nsenterPath := "/proc/" + strconv.Itoa(pid) + "/ns/mnt"
+		// but enter mnt ns would prevent us to access `cat`/`ls` in daemon
+		// so use `nsexec` to achieve using nsenter and cat together
 		if len(cmdSubSlice) < 2 {
-			return "", fmt.Errorf("cat should have one argument")
+			return "", fmt.Errorf("%s should have one argument at least", cmdSubSlice[0])
 		}
-		newCmd := fmt.Sprintf("/usr/local/bin/nscat %s %s", nsenterPath, cmdArguments)
+		newCmd := fmt.Sprintf("/usr/local/bin/nsexec %s %s", strconv.Itoa(pid), cmd)
 		return exec(ctx, daemon, daemon, newCmd, c)
 	default:
-		return "", fmt.Errorf("cmd not supported for nsenter")
+		return "", fmt.Errorf("command not supported for nsenter")
 	}
 }
 
