@@ -72,8 +72,7 @@ func (m *PodNetworkManager) WithInit(key types.NamespacedName) *PodNetworkTransa
 	return t
 }
 
-// KeyErrorTuple is a tuple of (Key, Err)
-// It's a shame that I'm writing a programming language without tuple and tagged enum :(
+// KeyErrorTuple is a tuple (Key, Err)
 type KeyErrorTuple struct {
 	Key types.NamespacedName
 	Err error

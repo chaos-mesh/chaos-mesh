@@ -15,6 +15,7 @@ package podiochaosmanager
 
 import (
 	"context"
+	"errors"
 
 	"github.com/go-logr/logr"
 	"golang.org/x/sync/errgroup"
@@ -28,7 +29,16 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 )
 
-// PodIoManager will save all the related podnetworkchaos
+var (
+	// ErrPodNotFound means operate pod may be deleted(almostly)
+	ErrPodNotFound = errors.New("pod not found")
+
+	// ErrPodNotRunning means operate pod may be not working
+	// and it's non-sense to make changes on it.
+	ErrPodNotRunning = errors.New("pod not running")
+)
+
+// PodIoManager will save all the related podiochaos
 type PodIoManager struct {
 	Source string
 	Log    logr.Logger
@@ -60,8 +70,16 @@ func (m *PodIoManager) WithInit(key types.NamespacedName) *PodIoTransaction {
 	return t
 }
 
+// KeyErrorTuple is a tuple (Key, Err)
+type KeyErrorTuple struct {
+	Key types.NamespacedName
+	Err error
+}
+
 // Commit will update all modifications to the cluster
-func (m *PodIoManager) Commit(ctx context.Context) error {
+func (m *PodIoManager) Commit(ctx context.Context) chan KeyErrorTuple {
+	keyChan := make(chan KeyErrorTuple)
+
 	g := errgroup.Group{}
 	for key, t := range m.Modifications {
 		key := key
@@ -74,14 +92,27 @@ func (m *PodIoManager) Commit(ctx context.Context) error {
 				err := m.Client.Get(ctx, key, chaos)
 				if err != nil {
 					if !k8sError.IsNotFound(err) {
-						m.Log.Error(err, "error while getting podnetworkchaos")
+						m.Log.Error(err, "error while getting podiochaos")
 						return err
 					}
 
 					pod := v1.Pod{}
 					err = m.Client.Get(ctx, key, &pod)
 					if err != nil {
-						m.Log.Error(err, "error while finding pod", "key", key)
+						if !k8sError.IsNotFound(err) {
+							m.Log.Error(err, "error while finding pod")
+							return err
+						}
+
+						m.Log.Info("pod not found", "key", key, "error", err.Error())
+						err = ErrPodNotFound
+						return err
+					}
+
+					if pod.Status.Phase != v1.PodRunning {
+						m.Log.Info("pod is not running", "key", key)
+						err = ErrPodNotRunning
+						return err
 					}
 
 					chaos.Name = key.Name
@@ -97,7 +128,7 @@ func (m *PodIoManager) Commit(ctx context.Context) error {
 					err = m.Client.Create(ctx, chaos)
 
 					if err != nil {
-						m.Log.Error(err, "error while creating podnetworkchaos")
+						m.Log.Error(err, "error while creating podiochaos")
 						return err
 					}
 				}
@@ -110,8 +141,17 @@ func (m *PodIoManager) Commit(ctx context.Context) error {
 
 				return m.Client.Update(ctx, chaos)
 			})
+
+			keyChan <- KeyErrorTuple{
+				Key: key,
+				Err: updateError,
+			}
 			if updateError != nil {
-				m.Log.Error(updateError, "error while updating")
+				if updateError != ErrPodNotFound && updateError != ErrPodNotRunning {
+					m.Log.Error(updateError, "error while updating")
+				} else {
+					m.Log.Info("apply podiochaos while pod is not found or not running, wait next time reconcile")
+				}
 				return updateError
 			}
 
@@ -119,5 +159,10 @@ func (m *PodIoManager) Commit(ctx context.Context) error {
 		})
 	}
 
-	return g.Wait()
+	go func() {
+		g.Wait()
+		close(keyChan)
+	}()
+
+	return keyChan
 }

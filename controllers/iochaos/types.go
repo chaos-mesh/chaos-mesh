@@ -60,6 +60,14 @@ func (r *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.I
 		return err
 	}
 
+	keyPodMap := make(map[types.NamespacedName]v1.Pod)
+	for _, pod := range pods {
+		keyPodMap[types.NamespacedName{
+			Name:      pod.Name,
+			Namespace: pod.Namespace,
+		}] = pod
+	}
+
 	r.Log.Info("applying iochaos", "iochaos", iochaos)
 
 	for _, pod := range pods {
@@ -101,14 +109,20 @@ func (r *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.I
 		iochaos.Finalizers = utils.InsertFinalizer(iochaos.Finalizers, key)
 	}
 	r.Log.Info("commiting updates of podiochaos")
-	err = m.Commit(ctx)
-	if err != nil {
-		r.Log.Error(err, "fail to commit")
-		return err
-	}
-
+	ch := m.Commit(ctx)
 	iochaos.Status.Experiment.PodRecords = make([]v1alpha1.PodStatus, 0, len(pods))
-	for _, pod := range pods {
+	for keyErrorTuple := range ch {
+		err := keyErrorTuple.Err
+		if err != nil {
+			// if pod is not found or not running, don't print error log and wait next time.
+			if err != podiochaosmanager.ErrPodNotFound && err != podiochaosmanager.ErrPodNotRunning {
+				r.Log.Error(err, "fail to commit")
+			}
+			return err
+		}
+
+		pod := keyPodMap[keyErrorTuple.Key]
+
 		ps := v1alpha1.PodStatus{
 			Namespace: pod.Namespace,
 			Name:      pod.Name,
@@ -145,8 +159,8 @@ func (r *endpoint) cleanFinalizersAndRecover(ctx context.Context, chaos *v1alpha
 
 	source := chaos.Namespace + "/" + chaos.Name
 
+	m := podiochaosmanager.New(source, r.Log, r.Client)
 	for _, key := range chaos.Finalizers {
-		m := podiochaosmanager.New(source, r.Log, r.Client)
 
 		ns, name, err := cache.SplitMetaNamespaceKey(key)
 		if err != nil {
@@ -158,13 +172,14 @@ func (r *endpoint) cleanFinalizersAndRecover(ctx context.Context, chaos *v1alpha
 			Namespace: ns,
 			Name:      name,
 		})
-
-		err = m.Commit(ctx)
-		if err != nil {
-			r.Log.Error(err, "fail to commit")
+	}
+	keyErrorChan := m.Commit(ctx)
+	for keyError := range keyErrorChan {
+		if keyError.Err == nil || keyError.Err == podiochaosmanager.ErrPodNotFound {
+			chaos.Finalizers = utils.RemoveFromFinalizer(chaos.Finalizers, keyError.Key.String())
+		} else {
+			r.Log.Error(keyError.Err, "fail to commit", "pod", keyError.Key)
 		}
-
-		chaos.Finalizers = utils.RemoveFromFinalizer(chaos.Finalizers, key)
 	}
 	r.Log.Info("After recovering", "finalizers", chaos.Finalizers)
 
