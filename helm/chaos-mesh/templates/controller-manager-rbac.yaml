@@ -25,7 +25,10 @@ metadata:
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+"  "_" }}
 rules:
   - apiGroups: [ "" ]
-    resources: [ "pods", "endpoints" ]
+    resources: [ "endpoints" ]
+    verbs: [ "get", "list", "watch" ]
+  - apiGroups: [ "" ]
+    resources: [ "pods" ]
     verbs: [ "get", "list", "watch", "delete", "update" ]
   - apiGroups:
       - ""
