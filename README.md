@@ -32,7 +32,7 @@ Chaos Operator injects chaos into the applications and Kubernetes infrastructure
 ![Chaos Operator](./static/chaos-mesh.svg)
 
 Chaos Operator uses [Custom Resource Definition (CRD)](https://kubernetes.io/docs/tasks/access-kubernetes-api/custom-resources/custom-resource-definitions/) to define chaos objects.
-The current implementation supports six types of CRD objects for fault injection, namely PodChaos, NetworkChaos, IOChaos, TimeChaos, StressChaos, and KernelChaos, which correspond to the following major actions (experiments):
+The current implementation supports a few types of CRD objects for fault injection, namely DNSChaos, PodChaos, PodIoChaos, PodNetworkChaos, NetworkChaos, IoChaos, TimeChaos, StressChaos, and KernelChaos, which correspond to the following major actions (experiments):
 
 - pod-kill: The selected pod is killed (ReplicaSet or something similar may be needed to ensure the pod will be restarted).
 - pod-failure: The selected pod will be unavailable in a specified period of time.
@@ -44,6 +44,7 @@ The current implementation supports six types of CRD objects for fault injection
 - cpu-burn: Simulate the CPU of the selected pod stress.
 - memory-burn: Simulate the memory of the selected pod stress.
 - kernel chaos: The selected pod will be injected with (slab, bio, etc) errors.
+- dns chaos: The selected pod will be injected with dns errors, such as error, random.
 
 ## Quick start
 
@@ -65,6 +66,7 @@ This is a list of known adopters of Chaos Mesh. Some have already gone into prod
 - [JuiceFS](https://juicefs.com/?hl=en)
 - [Meituan-Dianping](https://about.meituan.com/en)
 - [PingCAP](https://www.pingcap.com)
+- [Qihoo 360](https://www.360.cn/)
 - [Xpeng Motors](https://en.xiaopeng.com/)
 
 ## Blogs
@@ -100,19 +102,22 @@ On the fourth Thursday of every month (unless otherwise specified), the Chaos Me
 
 ### Community blog
 
-- [Integrate your Reliability Toolkit with Your World, Part 2](https://medium.com/chaosiq/integrate-your-reliability-toolkit-with-your-world-part-2-e012f2c2a7f6)
-- [Streake: Chaos Mesh によるカオスエンジニアリング](https://medium.com/sreake-jp/chaos-mesh-%E3%81%AB%E3%82%88%E3%82%8B%E3%82%AB%E3%82%AA%E3%82%B9%E3%82%A8%E3%83%B3%E3%82%B8%E3%83%8B%E3%82%A2%E3%83%AA%E3%83%B3%E3%82%B0-46fa2897c742)
-- [Chaos Mesh : un générateur de chaos pour Kubernetes](https://www.cowboysysop.com/post/chaos-mesh-un-generateur-de-chaos-pour-kubernetes/)
-- [K8s Chaos Dive: Chaos-Mesh Part 1](https://dev.to/craigmorten/k8s-chaos-dive-2-chaos-mesh-part-1-2i96)
-- [K8s Chaos Dive: Chaos-Mesh Part 2](https://dev.to/craigmorten/k8s-chaos-dive-chaos-mesh-part-2-536m)
-- [Getting Started with Chaos Mesh and Kubernetes](https://itnext.io/getting-started-with-chaos-mesh-and-kubernetes-bfd98d25d481)
-- [​Kubernetes ネイティブなカオスエンジニアリングツール Chaos Mesh を使ってみる](https://blog.kondoumh.com/entry/2020/10/23/123431)
+- Grant Tarrant-Fisher: [Integrate your Reliability Toolkit with Your World, Part 2](https://medium.com/chaosiq/integrate-your-reliability-toolkit-with-your-world-part-2-e012f2c2a7f6)
+- Yoshinori Teraoka: [Streake: Chaos Mesh によるカオスエンジニアリング](https://medium.com/sreake-jp/chaos-mesh-%E3%81%AB%E3%82%88%E3%82%8B%E3%82%AB%E3%82%AA%E3%82%B9%E3%82%A8%E3%83%B3%E3%82%B8%E3%83%8B%E3%82%A2%E3%83%AA%E3%83%B3%E3%82%B0-46fa2897c742)
+- Sébastien Prud'homme: [Chaos Mesh : un générateur de chaos pour Kubernetes](https://www.cowboysysop.com/post/chaos-mesh-un-generateur-de-chaos-pour-kubernetes/)
+- Craig Morten
+   - [K8s Chaos Dive: Chaos-Mesh Part 1](https://dev.to/craigmorten/k8s-chaos-dive-2-chaos-mesh-part-1-2i96)
+   - [K8s Chaos Dive: Chaos-Mesh Part 2](https://dev.to/craigmorten/k8s-chaos-dive-chaos-mesh-part-2-536m)
+- Ronak Banka: [Getting Started with Chaos Mesh and Kubernetes](https://itnext.io/getting-started-with-chaos-mesh-and-kubernetes-bfd98d25d481)
+- kondoumh: [​Kubernetes ネイティブなカオスエンジニアリングツール Chaos Mesh を使ってみる](https://blog.kondoumh.com/entry/2020/10/23/123431)
+- Vadim Tkachenko: [ChaosMesh to Create Chaos in Kubernetes](https://www.percona.com/blog/2020/11/05/chaosmesh-to-create-chaos-in-kubernetes/)
 
 ## Media coverage
 - CodeZine: [オープンソースのカオステストツール「Chaos Mesh 1.0」、一般提供を開始](https://codezine.jp/article/detail/12996)
 - @IT atmarkit: [Kubernetes向けカオスエンジニアリングプラットフォーム「Chaos Mesh 1.0」が公開](https://www.atmarkit.co.jp/ait/articles/2010/09/news108.html)
 - Publickey: [KubernetesのPodやネットワークをわざと落としまくってカオスエンジニアリングのテストができる「Chaos Mesh」がバージョン1.0に到達](https://www.publickey1.jp/blog/20/kubernetespodchaos_mesh10.html)
 - InfoQ: [Chaos Engineering on Kubernetes : Chaos Mesh Generally Available with v1.0](https://www.infoq.com/news/2020/10/kubernetes-chaos-mesh-ga/)
+- TechGenix: [Chaos Mesh Promises to Bring Order to Chaos Engineering](http://techgenix.com/chaos-mesh-chaos-engineering/)
 
 ## FAQs
 

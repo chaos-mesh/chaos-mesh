@@ -44,7 +44,6 @@ var log = ctrl.Log.WithName("experiment api")
 
 // ChaosState defines the number of chaos experiments of each phase
 type ChaosState struct {
-	Total    int `json:"Total"`
 	Running  int `json:"Running"`
 	Waiting  int `json:"Waiting"`
 	Paused   int `json:"Paused"`
@@ -207,24 +206,11 @@ func (s *Service) createNetworkChaos(exp *core.ExperimentInfo) error {
 				Loss:      exp.Target.NetworkChaos.Loss,
 				Duplicate: exp.Target.NetworkChaos.Duplicate,
 				Corrupt:   exp.Target.NetworkChaos.Corrupt,
+				Bandwidth: exp.Target.NetworkChaos.Bandwidth,
 			},
+			Direction:       v1alpha1.Direction(exp.Target.NetworkChaos.Direction),
+			ExternalTargets: exp.Target.NetworkChaos.ExternalTargets,
 		},
-	}
-
-	if exp.Target.NetworkChaos.Action == string(v1alpha1.BandwidthAction) || exp.Target.NetworkChaos.Action == string(v1alpha1.PartitionAction) {
-		chaos.Spec.Direction = v1alpha1.Direction(exp.Target.NetworkChaos.Direction)
-	}
-
-	if exp.Target.NetworkChaos.Action == string(v1alpha1.BandwidthAction) {
-		chaos.Spec.Bandwidth = exp.Target.NetworkChaos.Bandwidth
-	}
-
-	if exp.Scheduler.Cron != "" {
-		chaos.Spec.Scheduler = &v1alpha1.SchedulerSpec{Cron: exp.Scheduler.Cron}
-	}
-
-	if exp.Scheduler.Duration != "" {
-		chaos.Spec.Duration = &exp.Scheduler.Duration
 	}
 
 	if exp.Target.NetworkChaos.TargetScope != nil {
@@ -233,6 +219,14 @@ func (s *Service) createNetworkChaos(exp *core.ExperimentInfo) error {
 			TargetMode:     v1alpha1.PodMode(exp.Target.NetworkChaos.TargetScope.Mode),
 			TargetValue:    exp.Target.NetworkChaos.TargetScope.Value,
 		}
+	}
+
+	if exp.Scheduler.Cron != "" {
+		chaos.Spec.Scheduler = &v1alpha1.SchedulerSpec{Cron: exp.Scheduler.Cron}
+	}
+
+	if exp.Scheduler.Duration != "" {
+		chaos.Spec.Duration = &exp.Scheduler.Duration
 	}
 
 	return s.kubeCli.Create(context.Background(), chaos)
@@ -247,17 +241,18 @@ func (s *Service) createIOChaos(exp *core.ExperimentInfo) error {
 			Annotations: exp.Annotations,
 		},
 		Spec: v1alpha1.IoChaosSpec{
-			Selector:   exp.Scope.ParseSelector(),
-			Mode:       v1alpha1.PodMode(exp.Scope.Mode),
-			Value:      exp.Scope.Value,
-			Action:     v1alpha1.IoChaosType(exp.Target.IOChaos.Action),
-			Delay:      exp.Target.IOChaos.Delay,
-			Errno:      exp.Target.IOChaos.Errno,
-			Attr:       exp.Target.IOChaos.Attr,
-			Path:       exp.Target.IOChaos.Path,
-			Methods:    exp.Target.IOChaos.Methods,
-			Percent:    exp.Target.IOChaos.Percent,
-			VolumePath: exp.Target.IOChaos.VolumePath,
+			Selector:      exp.Scope.ParseSelector(),
+			Mode:          v1alpha1.PodMode(exp.Scope.Mode),
+			Value:         exp.Scope.Value,
+			Action:        v1alpha1.IoChaosType(exp.Target.IOChaos.Action),
+			Delay:         exp.Target.IOChaos.Delay,
+			Errno:         exp.Target.IOChaos.Errno,
+			Attr:          exp.Target.IOChaos.Attr,
+			Path:          exp.Target.IOChaos.Path,
+			Methods:       exp.Target.IOChaos.Methods,
+			Percent:       exp.Target.IOChaos.Percent,
+			VolumePath:    exp.Target.IOChaos.VolumePath,
+			ContainerName: &exp.Target.IOChaos.ContainerName,
 		},
 	}
 
@@ -610,7 +605,7 @@ func (s *Service) listExperiments(c *gin.Context) {
 		ns = s.conf.TargetNamespace
 	}
 
-	data := make([]*Experiment, 0)
+	exps := make([]*Experiment, 0)
 	for key, list := range v1alpha1.AllKinds() {
 		if kind != "" && key != kind {
 			continue
@@ -627,7 +622,7 @@ func (s *Service) listExperiments(c *gin.Context) {
 			if status != "" && chaos.Status != status {
 				continue
 			}
-			data = append(data, &Experiment{
+			exps = append(exps, &Experiment{
 				Base: Base{
 					Name:      chaos.Name,
 					Namespace: chaos.Namespace,
@@ -640,7 +635,7 @@ func (s *Service) listExperiments(c *gin.Context) {
 		}
 	}
 
-	c.JSON(http.StatusOK, data)
+	c.JSON(http.StatusOK, exps)
 }
 
 // @Summary Get detailed information about the specified chaos experiment.
@@ -796,7 +791,7 @@ func (s *Service) deleteExperiment(c *gin.Context) {
 // @Router /experiments/state [get]
 // @Failure 500 {object} utils.APIError
 func (s *Service) state(c *gin.Context) {
-	data := new(ChaosState)
+	states := new(ChaosState)
 
 	g, ctx := errgroup.WithContext(context.Background())
 	m := &sync.Mutex{}
@@ -817,17 +812,16 @@ func (s *Service) state(c *gin.Context) {
 			for _, chaos := range list.ListChaos() {
 				switch chaos.Status {
 				case string(v1alpha1.ExperimentPhaseRunning):
-					data.Running++
+					states.Running++
 				case string(v1alpha1.ExperimentPhaseWaiting):
-					data.Waiting++
+					states.Waiting++
 				case string(v1alpha1.ExperimentPhasePaused):
-					data.Paused++
+					states.Paused++
 				case string(v1alpha1.ExperimentPhaseFailed):
-					data.Failed++
+					states.Failed++
 				case string(v1alpha1.ExperimentPhaseFinished):
-					data.Finished++
+					states.Finished++
 				}
-				data.Total++
 			}
 			m.Unlock()
 			return nil
@@ -839,7 +833,7 @@ func (s *Service) state(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, data)
+	c.JSON(http.StatusOK, states)
 }
 
 // @Summary Pause a chaos experiment.

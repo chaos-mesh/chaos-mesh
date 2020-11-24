@@ -5,16 +5,16 @@
   },
   "newE": {
     "title": "New Experiment",
+    "titleStep1": "Choose a Target",
+    "titleStep2": "Fill the experiment info",
     "create": "Create a New Experiment",
     "steps": {
       "basic": "Basic",
       "scope": "Scope",
-      "target": "Target",
       "schedule": "Schedule"
     },
-    "loadFromExistingExperiments": "Load From Existing Experiments",
-    "loadFromArchives": "Load From Archives",
-    "loadFromYamlFile": "Load From YAML File",
+    "loadFrom": "Load from",
+    "loadFromYaml": "Load from YAML file",
     "basic": {
       "name": "Name",
       "nameHelper": "The experiment name",
@@ -42,12 +42,10 @@
       "kind": "Kind",
       "action": "Action",
       "pod": {
-        "title": "Pod Lifecycle",
-        "actionHelper": "Select a PodChaos action"
+        "title": "Pod Lifecycle"
       },
       "network": {
         "title": "Network",
-        "actionHelper": "Select a NetworkChaos action",
         "target": {
           "title": "Target",
           "podsPreview": "Target Pods Preview",
@@ -64,13 +62,12 @@
         "title": "Clock"
       },
       "stress": {
-        "title": "Stress CPU/Memory",
-        "actionHelper": "Select a StressChaos action"
+        "title": "Stress CPU/Memory"
       }
     },
     "schedule": {
       "tooltip": "Chaos Mesh use {cronv3} to define the schedule. View its doc for more details.",
-      "immediate": "Immediate",
+      "immediate": "Run immediately",
       "mustBeScheduled": "The chosen action must be scheduled",
       "cronHelper": "Use {crontabguru} to help generate the cron job and confirm what time it will run",
       "duration": "Duration",
@@ -156,7 +153,7 @@
     "confirm": "Confirm",
     "cancel": "Cancel",
     "createSuccessfully": "Created successfully",
-    "importSuccessfully": "Imported successfully",
+    "loadSuccessfully": "Loaded successfully",
     "deleteSuccessfully": "Archived successfully",
     "startSuccessfully": "Started successfully",
     "pauseSuccessfully": "Paused successfully",
@@ -188,7 +185,7 @@
         "Kind": "Kind",
         "Pod": "Pod",
         "Namespace": "Namespace",
-        "Start Time": "Start Time" 
+        "Start Time": "Start Time"
       },
       "noResult": "No Result"
     }

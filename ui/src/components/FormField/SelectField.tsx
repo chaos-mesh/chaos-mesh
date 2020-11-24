@@ -1,21 +1,19 @@
 import { Box, Chip, TextField, TextFieldProps } from '@material-ui/core'
 import { Field, getIn, useFormikContext } from 'formik'
-import { createStyles, makeStyles } from '@material-ui/core/styles'
 
 import { Experiment } from 'components/NewExperiment/types'
 import React from 'react'
 import clsx from 'clsx'
+import { makeStyles } from '@material-ui/core/styles'
 
-const useStyles = makeStyles(() =>
-  createStyles({
-    muiSelectRoot: {
-      '& .MuiSelect-root': {
-        padding: 6,
-        paddingTop: 8,
-      },
+const useStyles = makeStyles({
+  muiSelectRoot: {
+    '& .MuiSelect-root': {
+      padding: 6,
+      paddingTop: 8,
     },
-  })
-)
+  },
+})
 
 const SelectField: React.FC<TextFieldProps & { multiple?: boolean }> = ({ multiple = false, ...props }) => {
   const classes = useStyles()
@@ -50,7 +48,7 @@ const SelectField: React.FC<TextFieldProps & { multiple?: boolean }> = ({ multip
   }
 
   return (
-    <Box mb={2}>
+    <Box mb={3}>
       <Field
         {...props}
         as={TextField}

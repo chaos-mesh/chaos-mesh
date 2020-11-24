@@ -1,5 +1,5 @@
-import en from 'i18n/en.json'
-import zh from 'i18n/zh.json'
+import en from './en.json'
+import zh from './zh.json'
 
 const messages: Record<string, object> = {
   en,

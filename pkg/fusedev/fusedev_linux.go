@@ -31,14 +31,12 @@ func GrantAccess() error {
 	if err != nil {
 		return err
 	}
+	defer cgroupFile.Close()
 
 	// TODO: encapsulate these logic with chaos-daemon StressChaos part
 	cgroupScanner := bufio.NewScanner(cgroupFile)
 	var deviceCgroupPath string
 	for cgroupScanner.Scan() {
-		if err := cgroupScanner.Err(); err != nil {
-			return err
-		}
 		var (
 			text  = cgroupScanner.Text()
 			parts = strings.SplitN(text, ":", 3)
@@ -52,6 +50,10 @@ func GrantAccess() error {
 		}
 	}
 
+	if err := cgroupScanner.Err(); err != nil {
+		return err
+	}
+
 	if len(deviceCgroupPath) == 0 {
 		return errors.Errorf("fail to find device cgroup")
 	}
@@ -61,6 +63,8 @@ func GrantAccess() error {
 	if err != nil {
 		return err
 	}
+	defer f.Close()
+
 	// 10, 229 according to https://www.kernel.org/doc/Documentation/admin-guide/devices.txt
 	content := "c 10:229 rwm"
 	_, err = f.WriteString(content)

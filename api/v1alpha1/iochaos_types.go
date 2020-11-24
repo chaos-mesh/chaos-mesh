@@ -88,6 +88,10 @@ type IoChaosSpec struct {
 	// VolumePath represents the mount path of injected volume
 	VolumePath string `json:"volumePath"`
 
+	// ContainerName indicates the target container to inject iochaos in
+	// +optional
+	ContainerName *string `json:"containerName,omitempty"`
+
 	// Scheduler defines some schedule rules to
 	// control the running time of the chaos experiment about pods.
 	Scheduler *SchedulerSpec `json:"scheduler,omitempty"`

@@ -17,6 +17,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	"github.com/go-logr/logr"
 	v1 "k8s.io/api/core/v1"
@@ -62,6 +63,19 @@ func (h *Handler) Apply(ctx context.Context, chaos *v1alpha1.PodIoChaos) error {
 	}
 
 	containerID := pod.Status.ContainerStatuses[0].ContainerID
+	if chaos.Spec.Container != nil &&
+		len(strings.TrimSpace(*chaos.Spec.Container)) != 0 {
+		containerID = ""
+		for _, container := range pod.Status.ContainerStatuses {
+			if container.Name == *chaos.Spec.Container {
+				containerID = container.ContainerID
+				break
+			}
+		}
+		if len(containerID) == 0 {
+			return fmt.Errorf("cannot find container with name %s", *chaos.Spec.Container)
+		}
+	}
 
 	actions, err := json.Marshal(chaos.Spec.Actions)
 	if err != nil {
