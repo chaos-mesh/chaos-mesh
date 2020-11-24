@@ -29,7 +29,7 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 )
 
-var log = ctrl.Log.WithName("eventStore")
+var log = ctrl.Log.WithName("store/event")
 
 // NewStore return a new EventStore.
 func NewStore(db *dbstore.DB) core.EventStore {
@@ -393,7 +393,7 @@ func (e *eventStore) DryListByFilter(_ context.Context, filter core.Filter) ([]*
 	if filter.LimitStr != "" {
 		db = &dbstore.DB{DB: db.Order("created_at desc").Limit(limit)}
 	}
-	if err := db.Where(query, args...).Find(&resList).Error; err != nil &&
+	if err := db.Find(&resList).Error; err != nil &&
 		!gorm.IsRecordNotFoundError(err) {
 		return resList, err
 	}

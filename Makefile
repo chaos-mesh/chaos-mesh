@@ -155,7 +155,7 @@ gosec-scan: $(GOBIN)/gosec
 	$(GOENV) $< ./api/... ./controllers/... ./pkg/... || echo "*** sec-scan failed: known-issues ***"
 
 groupimports: $(GOBIN)/goimports
-	$< -w -l -local github.com/chaos-mesh/chaos-mesh $$($(PACKAGE_DIRECTORIES))
+	$< -w -l -local github.com/chaos-mesh/chaos-mesh .
 
 failpoint-enable: $(GOBIN)/failpoint-ctl
 # Converting gofail failpoints...
