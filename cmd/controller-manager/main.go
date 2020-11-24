@@ -35,6 +35,7 @@ import (
 	_ "github.com/chaos-mesh/chaos-mesh/controllers/dnschaos"
 	_ "github.com/chaos-mesh/chaos-mesh/controllers/httpchaos"
 	_ "github.com/chaos-mesh/chaos-mesh/controllers/iochaos"
+	_ "github.com/chaos-mesh/chaos-mesh/controllers/jvmchaos"
 	_ "github.com/chaos-mesh/chaos-mesh/controllers/kernelchaos"
 	_ "github.com/chaos-mesh/chaos-mesh/controllers/networkchaos/partition"
 	_ "github.com/chaos-mesh/chaos-mesh/controllers/networkchaos/trafficcontrol"
