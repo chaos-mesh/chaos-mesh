@@ -901,6 +901,17 @@ kind: Namespace
 metadata:
   name: chaos-testing
 ---
+# Source: chaos-mesh/templates/chaos-daemon-rbac.yaml
+kind: ServiceAccount
+apiVersion: v1
+metadata:
+  namespace: chaos-testing
+  name: chaos-daemon
+  labels:
+    app.kubernetes.io/name: chaos-mesh
+    app.kubernetes.io/instance: chaos-mesh
+    app.kubernetes.io/component: chaos-daemon
+---
 # Source: chaos-mesh/templates/controller-manager-rbac.yaml
 kind: ServiceAccount
 apiVersion: v1
@@ -1121,6 +1132,7 @@ spec:
         app.kubernetes.io/component: chaos-daemon
     spec:
       hostNetwork: ${host_network}
+      serviceAccount: chaos-daemon
       hostIPC: true
       hostPID: true
       containers:
