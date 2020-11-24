@@ -537,15 +537,17 @@ func (s *Service) getNetworkChaosDetail(namespace string, name string) (Experime
 	}
 
 	if chaos.Spec.Target != nil {
-		info.Target.NetworkChaos.TargetScope.SelectorInfo = core.SelectorInfo{
-			NamespaceSelectors:  chaos.Spec.Target.TargetSelector.Namespaces,
-			LabelSelectors:      chaos.Spec.Target.TargetSelector.LabelSelectors,
-			AnnotationSelectors: chaos.Spec.Target.TargetSelector.AnnotationSelectors,
-			FieldSelectors:      chaos.Spec.Target.TargetSelector.FieldSelectors,
-			PhaseSelector:       chaos.Spec.Target.TargetSelector.PodPhaseSelectors,
+		info.Target.NetworkChaos.TargetScope = &core.ScopeInfo{
+			SelectorInfo: core.SelectorInfo{
+				NamespaceSelectors:  chaos.Spec.Target.TargetSelector.Namespaces,
+				LabelSelectors:      chaos.Spec.Target.TargetSelector.LabelSelectors,
+				AnnotationSelectors: chaos.Spec.Target.TargetSelector.AnnotationSelectors,
+				FieldSelectors:      chaos.Spec.Target.TargetSelector.FieldSelectors,
+				PhaseSelector:       chaos.Spec.Target.TargetSelector.PodPhaseSelectors,
+			},
+			Mode:  string(chaos.Spec.Target.TargetMode),
+			Value: chaos.Spec.Target.TargetValue,
 		}
-		info.Target.NetworkChaos.TargetScope.Mode = string(chaos.Spec.Target.TargetMode)
-		info.Target.NetworkChaos.TargetScope.Value = chaos.Spec.Target.TargetValue
 	}
 
 	return ExperimentDetail{
