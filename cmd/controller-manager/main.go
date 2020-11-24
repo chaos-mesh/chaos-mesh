@@ -66,7 +66,8 @@ var (
 )
 
 var (
-	printVersion bool
+	printVersion            bool
+	allowHostNetworkTesting bool
 )
 
 func init() {
@@ -78,6 +79,7 @@ func init() {
 
 func parseFlags() {
 	flag.BoolVar(&printVersion, "version", false, "print version information and exit")
+	flag.BoolVar(&allowHostNetworkTesting, "allowhostnetworktesting", false, "allows hostNetwork pods to be affected [DANGEROUS]")
 	flag.Parse()
 }
 
@@ -134,9 +136,10 @@ func main() {
 	// We only setup webhook for podnetworkchaos, and the logic of applying chaos are in the validation
 	// webhook, because we need to get the running result synchronously in network chaos reconciler
 	chaosmeshv1alpha1.RegisterRawPodNetworkHandler(&podnetworkchaos.Handler{
-		Client: mgr.GetClient(),
-		Reader: mgr.GetAPIReader(),
-		Log:    ctrl.Log.WithName("handler").WithName("PodNetworkChaos"),
+		Client:                  mgr.GetClient(),
+		Reader:                  mgr.GetAPIReader(),
+		Log:                     ctrl.Log.WithName("handler").WithName("PodNetworkChaos"),
+		AllowHostNetworkTesting: allowHostNetworkTesting,
 	})
 	if err = (&chaosmeshv1alpha1.PodNetworkChaos{}).SetupWebhookWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create webhook", "webhook", "PodNetworkChaos")

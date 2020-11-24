@@ -38,8 +38,9 @@ require (
 	github.com/mgechev/revive v1.0.2-0.20200225072153-6219ca02fffb
 	github.com/mitchellh/mapstructure v1.3.3
 	github.com/morikuni/aec v1.0.0 // indirect
-	github.com/onsi/ginkgo v1.12.0
-	github.com/onsi/gomega v1.9.0
+	github.com/nxadm/tail v1.4.5 // indirect
+	github.com/onsi/ginkgo v1.14.2
+	github.com/onsi/gomega v1.10.1
 	github.com/pingcap/check v0.0.0-20191216031241-8a5a85928f12 // indirect
 	github.com/pingcap/errors v0.11.5-0.20190809092503-95897b64e011
 	github.com/pingcap/failpoint v0.0.0-20200210140405-f8f9fb234798
@@ -59,9 +60,9 @@ require (
 	go.uber.org/fx v1.12.0
 	go.uber.org/zap v1.15.0
 	golang.org/x/lint v0.0.0-20200302205851-738671d3881b // indirect
-	golang.org/x/net v0.0.0-20200320220750-118fecf932d8
+	golang.org/x/net v0.0.0-20200520004742-59133d7f0dd7
 	golang.org/x/sync v0.0.0-20190911185100-cd5d95a43a6e
-	golang.org/x/sys v0.0.0-20200409092240-59c9f1ba88fa // indirect
+	golang.org/x/sys v0.0.0-20201119102817-f84b799fce68 // indirect
 	golang.org/x/time v0.0.0-20191024005414-555d28b269f0 // indirect
 	golang.org/x/tools v0.0.0-20200309202150-20ab64c0d93f
 	google.golang.org/grpc v1.27.0
