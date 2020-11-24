@@ -37,6 +37,7 @@ type OperatorConfig struct {
 	Manager     ManagerConfig
 	Daemon      DaemonConfig
 	Tag         string
+	DNSImage    string
 }
 
 // ManagerConfig describe the chaos-operator configuration during installing chaos-mesh
@@ -73,6 +74,7 @@ func NewDefaultOperatorConfig() OperatorConfig {
 			Runtime:         "containerd",
 			SocketPath:      "/run/containerd/containerd.sock",
 		},
+		DNSImage: "pingcap/coredns:latest",
 	}
 }
 
@@ -92,6 +94,8 @@ func (oi *OperatorConfig) operatorHelmSetString() string {
 		"chaosDaemon.runtime":               oi.Daemon.Runtime,
 		"chaosDaemon.socketPath":            oi.Daemon.SocketPath,
 		"chaosDaemon.imagePullPolicy":       oi.Daemon.ImagePullPolicy,
+		"dnsServer.create":                  "true",
+		"dnsServer.image":                   oi.DNSImage,
 	}
 	arr := make([]string, 0, len(set))
 	for k, v := range set {

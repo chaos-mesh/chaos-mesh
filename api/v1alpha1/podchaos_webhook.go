@@ -81,7 +81,6 @@ func (in *PodChaos) ValidateScheduler(spec *field.Path) field.ErrorList {
 	switch in.Spec.Action {
 	case PodFailureAction:
 		allErrs = append(allErrs, ValidateScheduler(in, spec)...)
-		break
 	case PodKillAction:
 		// We choose to ignore the Duration property even user define it
 		if in.Spec.Scheduler == nil {
@@ -90,7 +89,6 @@ func (in *PodChaos) ValidateScheduler(spec *field.Path) field.ErrorList {
 			_, err := ParseCron(in.Spec.Scheduler.Cron, schedulerField.Child("cron"))
 			allErrs = append(allErrs, err...)
 		}
-		break
 	case ContainerKillAction:
 		// We choose to ignore the Duration property even user define it
 		if in.Spec.Scheduler == nil {
@@ -99,14 +97,12 @@ func (in *PodChaos) ValidateScheduler(spec *field.Path) field.ErrorList {
 			_, err := ParseCron(in.Spec.Scheduler.Cron, schedulerField.Child("cron"))
 			allErrs = append(allErrs, err...)
 		}
-		break
 	default:
 		err := fmt.Errorf("podchaos[%s/%s] have unknown action type", in.Namespace, in.Name)
 		log.Error(err, "Wrong PodChaos Action type")
 
 		actionField := spec.Child("action")
 		allErrs = append(allErrs, field.Invalid(actionField, in.Spec.Action, err.Error()))
-		break
 	}
 	return allErrs
 }

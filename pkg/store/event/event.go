@@ -29,7 +29,7 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 )
 
-var log = ctrl.Log.WithName("eventStore")
+var log = ctrl.Log.WithName("store/event")
 
 // NewStore return a new EventStore.
 func NewStore(db *dbstore.DB) core.EventStore {
