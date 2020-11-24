@@ -72,8 +72,17 @@ func (m *PodNetworkManager) WithInit(key types.NamespacedName) *PodNetworkTransa
 	return t
 }
 
+// KeyErrorTuple is a tuple of (Key, Err)
+// It's a shame that I'm writing a programming language without tuple and tagged enum :(
+type KeyErrorTuple struct {
+	Key types.NamespacedName
+	Err error
+}
+
 // Commit will update all modifications to the cluster
-func (m *PodNetworkManager) Commit(ctx context.Context) error {
+func (m *PodNetworkManager) Commit(ctx context.Context) chan KeyErrorTuple {
+	keyChan := make(chan KeyErrorTuple)
+
 	g := errgroup.Group{}
 	for key, t := range m.Modifications {
 		key := key
@@ -135,6 +144,11 @@ func (m *PodNetworkManager) Commit(ctx context.Context) error {
 
 				return m.Client.Update(ctx, chaos)
 			})
+
+			keyChan <- KeyErrorTuple{
+				Key: key,
+				Err: updateError,
+			}
 			if updateError != nil {
 				if updateError != ErrPodNotFound && updateError != ErrPodNotRunning {
 					m.Log.Error(updateError, "error while updating")
@@ -148,5 +162,10 @@ func (m *PodNetworkManager) Commit(ctx context.Context) error {
 		})
 	}
 
-	return g.Wait()
+	go func() {
+		g.Wait()
+		close(keyChan)
+	}()
+
+	return keyChan
 }

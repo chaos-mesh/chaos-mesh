@@ -98,6 +98,27 @@ func (e *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.I
 
 	allPods := append(sources, targets...)
 
+	type podPositionTuple struct {
+		Pod      v1.Pod
+		Position string
+	}
+	keyPodMap := make(map[types.NamespacedName]podPositionTuple)
+	for index, pod := range allPods {
+		position := ""
+		if index < len(sources) {
+			position = "source"
+		} else {
+			position = "target"
+		}
+		keyPodMap[types.NamespacedName{
+			Name:      pod.Name,
+			Namespace: pod.Namespace,
+		}] = podPositionTuple{
+			Pod:      pod,
+			Position: position,
+		}
+	}
+
 	// Set up ipset in every related pods
 	for index := range allPods {
 		pod := allPods[index]
@@ -165,35 +186,37 @@ func (e *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.I
 		return err
 	}
 
-	err = m.Commit(ctx)
-	if err != nil {
-		// if pod is not found or not running, don't print error log and wait next time.
-		if err != podnetworkmanager.ErrPodNotFound && err != podnetworkmanager.ErrPodNotRunning {
-			e.Log.Error(err, "fail to commit")
-		}
-		return err
-	}
+	ch := m.Commit(ctx)
 
 	networkchaos.Status.Experiment.PodRecords = make([]v1alpha1.PodStatus, 0, len(allPods))
-	for index, pod := range allPods {
-		ps := v1alpha1.PodStatus{
-			Namespace: pod.Namespace,
-			Name:      pod.Name,
-			HostIP:    pod.Status.HostIP,
-			PodIP:     pod.Status.PodIP,
-			Action:    string(networkchaos.Spec.Action),
+	for keyErrorTuple := range ch {
+		err := keyErrorTuple.Err
+		if err != nil {
+			// if pod is not found or not running, don't print error log and wait next time.
+			if err != podnetworkmanager.ErrPodNotFound && err != podnetworkmanager.ErrPodNotRunning {
+				e.Log.Error(err, "fail to commit")
+			}
+			return err
 		}
 
-		if index < len(sources) {
+		pod := keyPodMap[keyErrorTuple.Key]
+		ps := v1alpha1.PodStatus{
+			Namespace: pod.Pod.Namespace,
+			Name:      pod.Pod.Name,
+			HostIP:    pod.Pod.Status.HostIP,
+			PodIP:     pod.Pod.Status.PodIP,
+			Action:    string(networkchaos.Spec.Action),
+		}
+		if pod.Position == "source" {
 			ps.Message = networkChaosSourceMsg
 		} else {
 			ps.Message = networkChaosTargetMsg
 		}
 
+		// TODO: add source, target and tc action message
 		if networkchaos.Spec.Duration != nil {
 			ps.Message += fmt.Sprintf(networkPartitionActionMsg, *networkchaos.Spec.Duration)
 		}
-
 		networkchaos.Status.Experiment.PodRecords = append(networkchaos.Status.Experiment.PodRecords, ps)
 	}
 
@@ -262,19 +285,18 @@ func (e *endpoint) cleanFinalizersAndRecover(ctx context.Context, networkchaos *
 			Name:      name,
 		})
 
-		if err != nil {
-			result = multierror.Append(result, err)
-			continue
-		}
-
-		err = m.Commit(ctx)
-
 		// if pod not found or not running, directly return and giveup recover.
 		if err != nil && err != podnetworkmanager.ErrPodNotFound && err != podnetworkmanager.ErrPodNotRunning {
 			e.Log.Error(err, "fail to commit")
 		}
-
-		networkchaos.Finalizers = utils.RemoveFromFinalizer(networkchaos.Finalizers, key)
+	}
+	keyErrorChan := m.Commit(ctx)
+	for keyError := range keyErrorChan {
+		if keyError.Err == nil || keyError.Err == podnetworkmanager.ErrPodNotFound {
+			networkchaos.Finalizers = utils.RemoveFromFinalizer(networkchaos.Finalizers, keyError.Key.String())
+		} else {
+			e.Log.Error(keyError.Err, "fail to commit", "pod", keyError.Key)
+		}
 	}
 	e.Log.Info("After recovering", "finalizers", networkchaos.Finalizers)
 
