@@ -93,7 +93,7 @@ func upperCaseChaos(str string) string {
 	return strings.Title(parts[1]) + strings.Title(parts[2])
 }
 
-func print(s string, num int, color string) {
+func prettyPrint(s string, num int, color string) {
 	var tabStr string
 	for i := 0; i < num; i++ {
 		tabStr += "\t"
@@ -113,20 +113,20 @@ func print(s string, num int, color string) {
 // PrintResult prints result to users in prettier format
 func PrintResult(result []ChaosResult) {
 	for _, chaos := range result {
-		print("[Chaos]: "+chaos.Name, 0, "Blue")
+		prettyPrint("[Chaos]: "+chaos.Name, 0, "Blue")
 		for _, pod := range chaos.Pods {
-			print("[Pod]: "+pod.Name, 0, "Blue")
+			prettyPrint("[Pod]: "+pod.Name, 0, "Blue")
 			for i, item := range pod.Items {
-				print(fmt.Sprintf("%d. [%s]", i+1, item.Name), 1, "Cyan")
-				print(item.Value, 1, "")
+				prettyPrint(fmt.Sprintf("%d. [%s]", i+1, item.Name), 1, "Cyan")
+				prettyPrint(item.Value, 1, "")
 				if item.Status == ItemSuccess {
 					if item.SucInfo != "" {
-						print(item.SucInfo, 1, "Green")
+						prettyPrint(item.SucInfo, 1, "Green")
 					} else {
-						print("Execute as expected", 1, "Green")
+						prettyPrint("Execute as expected", 1, "Green")
 					}
 				} else if item.Status == ItemFailure {
-					print(fmt.Sprintf("Failed: %s ", item.ErrInfo), 1, "Red")
+					prettyPrint(fmt.Sprintf("Failed: %s ", item.ErrInfo), 1, "Red")
 				}
 			}
 		}
@@ -253,7 +253,7 @@ func GetPods(ctx context.Context, status v1alpha1.ChaosStatus, selector v1alpha1
 	// get podName
 	failedMessage := status.FailedMessage
 	if failedMessage != "" {
-		return nil, nil, fmt.Errorf("chaos failed with: %s", failedMessage)
+		prettyPrint(fmt.Sprintf("chaos failed with: %s", failedMessage), 0, "Red")
 	}
 
 	phase := status.Experiment.Phase
