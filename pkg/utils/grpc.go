@@ -49,16 +49,7 @@ func CreateGrpcConnection(ctx context.Context, c client.Client, pod *v1.Pod, por
 		return nil, err
 	}
 
-	var daemonIP string
-outer:
-	for _, subset := range endpoints.Subsets {
-		for _, addr := range subset.Addresses {
-			if addr.NodeName != nil && *addr.NodeName == nodeName {
-				daemonIP = addr.IP
-				break outer
-			}
-		}
-	}
+	daemonIP := findIPOnEndpoints(&endpoints, nodeName)
 
 	if len(daemonIP) == 0 {
 		return nil, errors.Errorf("cannot find daemonIP on node %s in related Endpoints %v", nodeName, endpoints)
@@ -71,6 +62,16 @@ outer:
 		return nil, err
 	}
 	return conn, nil
+}
+
+func findIPOnEndpoints(e *v1.Endpoints, nodeName string) string {
+	for _, subset := range e.Subsets {
+		for _, addr := range subset.Addresses {
+			if addr.NodeName != nil && *addr.NodeName == nodeName {
+				return addr.IP
+			}
+		}
+	}
 }
 
 // TimeoutClientInterceptor wraps the RPC with a timeout.
