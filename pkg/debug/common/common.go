@@ -294,6 +294,42 @@ func GetPods(ctx context.Context, status v1alpha1.ChaosStatus, selector v1alpha1
 	return pods, chaosDaemons, nil
 }
 
+// CheckFailedMessage provide debug info and suggestions from failed message
+func CheckFailedMessage(ctx context.Context, failedMessage string, daemons []v1.Pod, c *ClientSet) error {
+	if strings.Contains(failedMessage, "rpc error: code = Unavailable desc = connection error") || strings.Contains(failedMessage, "connect: connection refused") {
+		if err := checkConnForCtrlAndDaemon(ctx, daemons, c); err != nil {
+			return fmt.Errorf("Error occurs when check failed message: %s", err)
+		}
+	}
+	return nil
+}
+
+func checkConnForCtrlAndDaemon(ctx context.Context, daemons []v1.Pod, c *ClientSet) error {
+	ctrlSelector := v1alpha1.SelectorSpec{
+		LabelSelectors: map[string]string{"app.kubernetes.io/component": "controller-manager"},
+	}
+	ctrlMgrs, err := utils.SelectPods(ctx, c.CtrlCli, nil, ctrlSelector)
+	if err != nil {
+		return fmt.Errorf("failed to SelectPods with: %s", err.Error())
+	}
+	for _, daemon := range daemons {
+		daemonIP := daemon.Status.PodIP
+		cmd := fmt.Sprintf("ping -c 1 %s > /dev/null; echo $?", daemonIP)
+		out, err := Exec(ctx, ctrlMgrs[0], daemon, cmd, c.KubeCli)
+		if err != nil {
+			return fmt.Errorf("run command '%s' failed with: %s", cmd, err.Error())
+		}
+		if string(out) == "0" {
+			prettyPrint(fmt.Sprintf("Connection between Controller-Manager and Daemon %s (ip address: %s) works well", daemon.Name, daemonIP), 0, "Green")
+		} else {
+			prettyPrint(fmt.Sprintf(`Connection between Controller-Manager and Daemon %s (ip address: %s) is blocked.
+Please check networkpolicy / firewall, or see FAQ on website`, daemon.Name, daemonIP), 0, "Red")
+		}
+
+	}
+	return nil
+}
+
 // GetChaosList returns chaos list limited by input
 func GetChaosList(ctx context.Context, chaosType string, chaosName string, ns string, c client.Client) ([]runtime.Object, []string, error) {
 	chaosType = upperCaseChaos(strings.ToLower(chaosType))
