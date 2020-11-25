@@ -188,12 +188,6 @@ func TestGetPods(t *testing.T) {
 			chaosStatus:   v1alpha1.ChaosStatus{},
 			expectedErr:   true,
 		},
-		{
-			name:          "chaos failed",
-			chaosSelector: v1alpha1.SelectorSpec{LabelSelectors: map[string]string{"app": "pod"}},
-			chaosStatus:   v1alpha1.ChaosStatus{FailedMessage: "oops"},
-			expectedErr:   true,
-		},
 	}
 
 	for _, test := range tests {
