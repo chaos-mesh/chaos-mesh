@@ -186,7 +186,7 @@ var _ = Describe("event", func() {
 	})
 
 	AfterEach(func() {
-		// Add any setup steps that needs to be executed before each test
+		// Add any teardown steps that needs to be executed after each test
 	})
 
 	Context("ListEvents", func() {
