@@ -63,7 +63,7 @@ func debugEachPod(ctx context.Context, pod v1.Pod, daemon v1.Pod, chaos *v1alpha
 	}
 	result.Items = append(result.Items, cm.ItemResult{Name: "file discriptors", Value: string(out)})
 
-	cmd = fmt.Sprintf("mount")
+	cmd = fmt.Sprintf("cat /proc/mount")
 	out, err = cm.Exec(ctx, pod, daemon, cmd, c.KubeCli)
 	if err != nil {
 		return fmt.Errorf("run command '%s' failed with: %s", cmd, err.Error())
