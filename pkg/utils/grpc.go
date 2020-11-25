@@ -72,6 +72,8 @@ func findIPOnEndpoints(e *v1.Endpoints, nodeName string) string {
 			}
 		}
 	}
+
+	return ""
 }
 
 // TimeoutClientInterceptor wraps the RPC with a timeout.
