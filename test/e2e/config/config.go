@@ -36,6 +36,7 @@ func RegisterOperatorFlags(flags *flag.FlagSet) {
 	flags.StringVar(&TestConfig.ChaosFSImage, "chaos-fs-image", "pingcap/chaos-fs:latest", "chaos-fs image")
 	flags.StringVar(&TestConfig.ChaosScriptsImage, "chaos-scripts-image", "pingcap/chaos-scripts:latest", "chaos-scripts image")
 	flags.StringVar(&TestConfig.ChaosDNSImage, "chaos-dns-image", "pingcap/coredns:latest", "chaos-dns image")
+	flags.BoolVar(&TestConfig.InstallChaosMesh, "install-chaos-mesh", false, "automatically install chaos-mesh")
 }
 
 // LoadClientRawConfig would provide client raw config
