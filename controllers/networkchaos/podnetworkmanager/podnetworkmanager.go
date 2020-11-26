@@ -79,7 +79,7 @@ type KeyErrorTuple struct {
 }
 
 // Commit will update all modifications to the cluster
-func (m *PodNetworkManager) Commit(ctx context.Context) chan KeyErrorTuple {
+func (m *PodNetworkManager) Commit(ctx context.Context) <-chan KeyErrorTuple {
 	keyChan := make(chan KeyErrorTuple)
 
 	g := errgroup.Group{}

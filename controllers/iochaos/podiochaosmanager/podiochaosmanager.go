@@ -70,15 +70,15 @@ func (m *PodIoManager) WithInit(key types.NamespacedName) *PodIoTransaction {
 	return t
 }
 
-// KeyErrorTuple is a tuple (Key, Err)
-type KeyErrorTuple struct {
+// CommitResponse is a tuple (Key, Err)
+type CommitResponse struct {
 	Key types.NamespacedName
 	Err error
 }
 
 // Commit will update all modifications to the cluster
-func (m *PodIoManager) Commit(ctx context.Context) chan KeyErrorTuple {
-	keyChan := make(chan KeyErrorTuple)
+func (m *PodIoManager) Commit(ctx context.Context) <-chan CommitResponse {
+	keyChan := make(chan CommitResponse)
 
 	g := errgroup.Group{}
 	for key, t := range m.Modifications {
@@ -142,7 +142,7 @@ func (m *PodIoManager) Commit(ctx context.Context) chan KeyErrorTuple {
 				return m.Client.Update(ctx, chaos)
 			})
 
-			keyChan <- KeyErrorTuple{
+			keyChan <- CommitResponse{
 				Key: key,
 				Err: updateError,
 			}
