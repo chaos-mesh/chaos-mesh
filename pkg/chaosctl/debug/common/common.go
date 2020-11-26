@@ -14,25 +14,19 @@
 package common
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"regexp"
-	"strconv"
 	"strings"
 	"time"
 
 	"github.com/fatih/color"
-	"google.golang.org/grpc/grpclog"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/kubernetes"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
-	"k8s.io/client-go/tools/remotecommand"
-	kubectlscheme "k8s.io/kubectl/pkg/scheme"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
 
@@ -155,99 +149,6 @@ func InitClientSet() (*ClientSet, error) {
 	return &ClientSet{ctrlClient, kubeClient}, nil
 }
 
-// Exec executes certain command and returns the result
-// runtime-controller only support CRUD， use client-go client
-func Exec(ctx context.Context, pod v1.Pod, daemon v1.Pod, cmd string, c *kubernetes.Clientset) (string, error) {
-	out, err := exec(ctx, pod, daemon, cmd, c)
-
-	if err != nil {
-		// use daemon to enter namespace and execute command if command not found (which stream would failed)
-		if strings.Contains(err.Error(), "streaming remotecommand") {
-			outNs, errNs := nsEnterExec(ctx, err.Error(), pod, daemon, cmd, c)
-			if errNs == nil {
-				return outNs, nil
-			}
-			err = fmt.Errorf("%s\nnsenter also failed with: %s", err.Error(), errNs.Error())
-		}
-		return "", err
-	}
-
-	return out, nil
-}
-
-func exec(ctx context.Context, pod v1.Pod, daemon v1.Pod, cmd string, c *kubernetes.Clientset) (string, error) {
-	name := pod.GetObjectMeta().GetName()
-	namespace := pod.GetObjectMeta().GetNamespace()
-	// TODO: if `containerNames` is set and specific container is injected chaos,
-	// need to use THE name rather than the first one.
-	// till 20/11/10 only podchaos and kernelchaos support `containerNames`, so not set it for now
-	containerName := pod.Spec.Containers[0].Name
-
-	req := c.CoreV1().RESTClient().Post().
-		Resource("pods").
-		Name(name).
-		Namespace(namespace).
-		SubResource("exec")
-
-	req.VersionedParams(&v1.PodExecOptions{
-		Container: containerName,
-		Command:   []string{"/bin/sh", "-c", cmd},
-		Stdin:     false,
-		Stdout:    true,
-		Stderr:    true,
-		TTY:       false,
-	}, kubectlscheme.ParameterCodec)
-
-	var stdout, stderr bytes.Buffer
-	exec, err := remotecommand.NewSPDYExecutor(config.GetConfigOrDie(), "POST", req.URL())
-	if err != nil {
-		return "", fmt.Errorf("error in creating NewSPDYExecutor: %s", err.Error())
-	}
-	err = exec.Stream(remotecommand.StreamOptions{
-		Stdin:  nil,
-		Stdout: &stdout,
-		Stderr: &stderr,
-	})
-	if err != nil {
-		return "", fmt.Errorf("error in streaming remotecommand: %s", err.Error())
-	}
-	if stderr.String() != "" {
-		return "", fmt.Errorf(stderr.String())
-	}
-	return stdout.String(), nil
-}
-
-func nsEnterExec(ctx context.Context, stderr string, pod v1.Pod, daemon v1.Pod, cmd string, c *kubernetes.Clientset) (string, error) {
-	cmdSubSlice := strings.Fields(cmd)
-	if len(cmdSubSlice) == 0 {
-		return "", fmt.Errorf("command should not be empty")
-	}
-	grpclog.SetLoggerV2(grpclog.NewLoggerV2(ioutil.Discard, ioutil.Discard, ioutil.Discard))
-	pid, err := GetPidFromPod(ctx, pod, daemon)
-	if err != nil {
-		return "", err
-	}
-	switch cmdSubSlice[0] {
-	case "ps":
-		nsenterPath := "-p/proc/" + strconv.Itoa(pid) + "/ns/pid"
-		cmdArguments := strings.Join(cmdSubSlice[1:], " ")
-		nsCmd := fmt.Sprintf("mount -t proc proc /proc && ps %s && umount proc", cmdArguments)
-		newCmd := fmt.Sprintf("/usr/bin/nsenter %s -- /bin/bash -c '%s'", nsenterPath, nsCmd)
-		return exec(ctx, daemon, daemon, newCmd, c)
-	case "cat", "ls":
-		// we need to enter mount namespace to get file related infomation
-		// but enter mnt ns would prevent us to access `cat`/`ls` in daemon
-		// so use `nsexec` to achieve using nsenter and cat together
-		if len(cmdSubSlice) < 2 {
-			return "", fmt.Errorf("%s should have one argument at least", cmdSubSlice[0])
-		}
-		newCmd := fmt.Sprintf("/usr/local/bin/nsexec %s %s", strconv.Itoa(pid), cmd)
-		return exec(ctx, daemon, daemon, newCmd, c)
-	default:
-		return "", fmt.Errorf("command not supported for nsenter")
-	}
-}
-
 // GetPods returns pod list and corresponding chaos daemon
 func GetPods(ctx context.Context, status v1alpha1.ChaosStatus, selector v1alpha1.SelectorSpec, c client.Client) ([]v1.Pod, []v1.Pod, error) {
 	// get podName
@@ -294,42 +195,6 @@ func GetPods(ctx context.Context, status v1alpha1.ChaosStatus, selector v1alpha1
 	return pods, chaosDaemons, nil
 }
 
-// CheckFailedMessage provide debug info and suggestions from failed message
-func CheckFailedMessage(ctx context.Context, failedMessage string, daemons []v1.Pod, c *ClientSet) error {
-	if strings.Contains(failedMessage, "rpc error: code = Unavailable desc = connection error") || strings.Contains(failedMessage, "connect: connection refused") {
-		if err := checkConnForCtrlAndDaemon(ctx, daemons, c); err != nil {
-			return fmt.Errorf("Error occurs when check failed message: %s", err)
-		}
-	}
-	return nil
-}
-
-func checkConnForCtrlAndDaemon(ctx context.Context, daemons []v1.Pod, c *ClientSet) error {
-	ctrlSelector := v1alpha1.SelectorSpec{
-		LabelSelectors: map[string]string{"app.kubernetes.io/component": "controller-manager"},
-	}
-	ctrlMgrs, err := utils.SelectPods(ctx, c.CtrlCli, nil, ctrlSelector)
-	if err != nil {
-		return fmt.Errorf("failed to SelectPods with: %s", err.Error())
-	}
-	for _, daemon := range daemons {
-		daemonIP := daemon.Status.PodIP
-		cmd := fmt.Sprintf("ping -c 1 %s > /dev/null; echo $?", daemonIP)
-		out, err := Exec(ctx, ctrlMgrs[0], daemon, cmd, c.KubeCli)
-		if err != nil {
-			return fmt.Errorf("run command '%s' failed with: %s", cmd, err.Error())
-		}
-		if string(out) == "0" {
-			prettyPrint(fmt.Sprintf("Connection between Controller-Manager and Daemon %s (ip address: %s) works well", daemon.Name, daemonIP), 0, "Green")
-		} else {
-			prettyPrint(fmt.Sprintf(`Connection between Controller-Manager and Daemon %s (ip address: %s) is blocked.
-Please check networkpolicy / firewall, or see FAQ on website`, daemon.Name, daemonIP), 0, "Red")
-		}
-
-	}
-	return nil
-}
-
 // GetChaosList returns chaos list limited by input
 func GetChaosList(ctx context.Context, chaosType string, chaosName string, ns string, c client.Client) ([]runtime.Object, []string, error) {
 	chaosType = upperCaseChaos(strings.ToLower(chaosType))
@@ -345,7 +210,7 @@ func GetChaosList(ctx context.Context, chaosType string, chaosName string, ns st
 	}
 
 	var retList []runtime.Object
-	var nameList []string
+	var retNameList []string
 	for _, ch := range chaosList {
 		if chaosName == "" || chaosName == ch.Name {
 			chaos, err := getChaos(ctx, chaosType, ch.Name, ns, c)
@@ -353,14 +218,14 @@ func GetChaosList(ctx context.Context, chaosType string, chaosName string, ns st
 				return nil, nil, err
 			}
 			retList = append(retList, chaos)
-			nameList = append(nameList, ch.Name)
+			retNameList = append(retNameList, ch.Name)
 		}
 	}
 	if len(retList) == 0 {
 		return nil, nil, fmt.Errorf("no chaos is found, please check your input")
 	}
 
-	return retList, nameList, nil
+	return retList, retNameList, nil
 }
 
 func getChaos(ctx context.Context, chaosType string, chaosName string, ns string, c client.Client) (runtime.Object, error) {
@@ -419,4 +284,40 @@ func forwardPorts(ctx context.Context, pod v1.Pod, port uint16) (context.CancelF
 	}
 	_, localPort, pfCancel, err := portforward.ForwardOnePort(fw, pod.Namespace, pod.Name, port)
 	return pfCancel, localPort, err
+}
+
+// CheckFailedMessage provide debug info and suggestions from failed message
+func CheckFailedMessage(ctx context.Context, failedMessage string, daemons []v1.Pod, c *ClientSet) error {
+	if strings.Contains(failedMessage, "rpc error: code = Unavailable desc = connection error") || strings.Contains(failedMessage, "connect: connection refused") {
+		if err := checkConnForCtrlAndDaemon(ctx, daemons, c); err != nil {
+			return fmt.Errorf("Error occurs when check failed message: %s", err)
+		}
+	}
+	return nil
+}
+
+func checkConnForCtrlAndDaemon(ctx context.Context, daemons []v1.Pod, c *ClientSet) error {
+	ctrlSelector := v1alpha1.SelectorSpec{
+		LabelSelectors: map[string]string{"app.kubernetes.io/component": "controller-manager"},
+	}
+	ctrlMgrs, err := utils.SelectPods(ctx, c.CtrlCli, c.CtrlCli, ctrlSelector)
+	if err != nil {
+		return fmt.Errorf("failed to SelectPods with: %s", err.Error())
+	}
+	for _, daemon := range daemons {
+		daemonIP := daemon.Status.PodIP
+		cmd := fmt.Sprintf("ping -c 1 %s > /dev/null; echo $?", daemonIP)
+		out, err := Exec(ctx, ctrlMgrs[0], daemon, cmd, c.KubeCli)
+		if err != nil {
+			return fmt.Errorf("run command '%s' failed with: %s", cmd, err.Error())
+		}
+		if string(out) == "0" {
+			prettyPrint(fmt.Sprintf("Connection between Controller-Manager and Daemon %s (ip address: %s) works well", daemon.Name, daemonIP), 0, "Green")
+		} else {
+			prettyPrint(fmt.Sprintf(`Connection between Controller-Manager and Daemon %s (ip address: %s) is blocked.
+Please check network policy / firewall, or see FAQ on website`, daemon.Name, daemonIP), 0, "Red")
+		}
+
+	}
+	return nil
 }

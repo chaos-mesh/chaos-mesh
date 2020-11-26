@@ -27,7 +27,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	cm "github.com/chaos-mesh/chaos-mesh/pkg/debug/common"
+	cm "github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/debug/common"
 )
 
 // Debug get chaos debug information
@@ -61,9 +61,6 @@ func Debug(ctx context.Context, chaos runtime.Object, c *cm.ClientSet, result *c
 }
 
 func debugEachPod(ctx context.Context, pod v1.Pod, daemon v1.Pod, chaos *v1alpha1.NetworkChaos, c *cm.ClientSet, result *cm.PodResult) error {
-	podName := pod.GetObjectMeta().GetName()
-	podNamespace := pod.GetObjectMeta().GetNamespace()
-
 	// To disable printing irrelevant log from grpc/clientconn.go
 	// see grpc/grpc-go#3918 for detail. could be resolved in the future
 	grpclog.SetLoggerV2(grpclog.NewLoggerV2(ioutil.Discard, ioutil.Discard, ioutil.Discard))
@@ -88,6 +85,7 @@ func debugEachPod(ctx context.Context, pod v1.Pod, daemon v1.Pod, chaos *v1alpha
 	}
 	itemResult := cm.ItemResult{Name: "tc qdisc list", Value: string(out)}
 
+	// A demo for comparison with expected. A bit messy actually, don't know if we still need this
 	action := chaos.Spec.Action
 	var netemExpect string
 	switch action {
@@ -96,65 +94,65 @@ func debugEachPod(ctx context.Context, pod v1.Pod, daemon v1.Pod, chaos *v1alpha
 		jitter := chaos.Spec.Delay.Jitter
 		correlation := chaos.Spec.Delay.Correlation
 		netemExpect = fmt.Sprintf("%v %v %v %v%%", action, latency, jitter, correlation)
-	default:
-		return fmt.Errorf("chaos not supported")
-	}
 
-	netemCurrent := regexp.MustCompile("(?:limit 1000)(.*)").FindStringSubmatch(string(out))
-	if len(netemCurrent) == 0 {
-		return fmt.Errorf("No NetworkChaos is applied")
-	}
-	for i, netem := range strings.Fields(netemCurrent[1]) {
-		itemCurrent := netem
-		itemExpect := strings.Fields(netemExpect)[i]
-		if itemCurrent != itemExpect {
-			r := regexp.MustCompile("([0-9]*[.])?[0-9]+")
-			numCurrent, err := strconv.ParseFloat(r.FindString(itemCurrent), 64)
-			if err != nil {
-				return fmt.Errorf("parse itemCurrent failed: %s", err.Error())
+		netemCurrent := regexp.MustCompile("(?:limit 1000)(.*)").FindStringSubmatch(string(out))
+		if len(netemCurrent) == 0 {
+			return fmt.Errorf("No NetworkChaos is applied")
+		}
+		for i, netem := range strings.Fields(netemCurrent[1]) {
+			itemCurrent := netem
+			itemExpect := strings.Fields(netemExpect)[i]
+			if itemCurrent != itemExpect {
+				r := regexp.MustCompile("([0-9]*[.])?[0-9]+")
+				// digit could be different, so parse string to float
+				numCurrent, err := strconv.ParseFloat(r.FindString(itemCurrent), 64)
+				if err != nil {
+					return fmt.Errorf("parse itemCurrent failed: %s", err.Error())
+				}
+				numExpect, err := strconv.ParseFloat(r.FindString(itemExpect), 64)
+				if err != nil {
+					return fmt.Errorf("parse itemExpect failed: %s", err.Error())
+				}
+				if numCurrent == numExpect {
+					continue
+				}
+				// alphabetic charactors
+				alpCurrent := regexp.MustCompile("[[:alpha:]]+").FindString(itemCurrent)
+				alpExpect := regexp.MustCompile("[[:alpha:]]+").FindString(itemExpect)
+				if alpCurrent == alpExpect {
+					continue
+				}
+				itemResult.Status = cm.ItemFailure
+				itemResult.ErrInfo = fmt.Sprintf("expect: %s, got: %v", netemExpect, netemCurrent)
 			}
-			numExpect, err := strconv.ParseFloat(r.FindString(itemExpect), 64)
-			if err != nil {
-				return fmt.Errorf("parse itemExpect failed: %s", err.Error())
-			}
-			if numCurrent == numExpect {
-				continue
-			}
-			alpCurrent := regexp.MustCompile("[[:alpha:]]+").FindString(itemCurrent)
-			alpExpect := regexp.MustCompile("[[:alpha:]]+").FindString(itemExpect)
-			if alpCurrent == alpExpect {
-				continue
-			}
-			itemResult.Status = cm.ItemFailure
-			itemResult.ErrInfo = fmt.Sprintf("expect: %s, got: %v", netemExpect, netemCurrent)
-			result.Items = append(result.Items, itemResult)
-			return nil
+		}
+		if itemResult.Status != cm.ItemFailure {
+			itemResult.Status = cm.ItemSuccess
 		}
 	}
-	itemResult.Status = cm.ItemSuccess
 	result.Items = append(result.Items, itemResult)
 
 	cmd = fmt.Sprintf("/usr/bin/nsenter %s -- iptables --list", nsenterPath)
 	out, err = cm.Exec(ctx, daemon, daemon, cmd, c.KubeCli)
 	if err != nil {
-		return fmt.Errorf("cmd.Run() failed with: %s", err.Error())
+		return fmt.Errorf("run command '%s' failed with: %s", cmd, err.Error())
 	}
 	result.Items = append(result.Items, cm.ItemResult{Name: "iptables list", Value: string(out)})
 
 	podNetworkChaos := &v1alpha1.PodNetworkChaos{}
 	objectKey := client.ObjectKey{
-		Namespace: podNamespace,
-		Name:      podName,
+		Namespace: pod.Namespace,
+		Name:      pod.Name,
 	}
 
 	if err = c.CtrlCli.Get(ctx, objectKey, podNetworkChaos); err != nil {
 		return fmt.Errorf("failed to get chaos: %s", err.Error())
 	}
-	mar, err := cm.MarshalChaos(podNetworkChaos.Spec)
+	output, err := cm.MarshalChaos(podNetworkChaos.Spec)
 	if err != nil {
 		return err
 	}
-	result.Items = append(result.Items, cm.ItemResult{Name: "podnetworkchaos", Value: mar})
+	result.Items = append(result.Items, cm.ItemResult{Name: "podnetworkchaos", Value: output})
 
 	return nil
 }

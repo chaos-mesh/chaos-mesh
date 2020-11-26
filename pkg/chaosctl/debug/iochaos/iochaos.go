@@ -21,7 +21,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	cm "github.com/chaos-mesh/chaos-mesh/pkg/debug/common"
+	cm "github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/debug/common"
 )
 
 // Debug get chaos debug information
@@ -43,7 +43,7 @@ func Debug(ctx context.Context, chaos runtime.Object, c *cm.ClientSet, result *c
 	}
 
 	for i := range pods {
-		podName := pods[i].GetObjectMeta().GetName()
+		podName := pods[i].Name
 		podResult := cm.PodResult{Name: podName}
 		err := debugEachPod(ctx, pods[i], daemons[i], ioChaos, c, &podResult)
 		result.Pods = append(result.Pods, podResult)

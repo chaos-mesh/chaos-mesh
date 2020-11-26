@@ -24,10 +24,10 @@ import (
 	"k8s.io/client-go/kubernetes"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	cm "github.com/chaos-mesh/chaos-mesh/pkg/debug/common"
-	"github.com/chaos-mesh/chaos-mesh/pkg/debug/iochaos"
-	"github.com/chaos-mesh/chaos-mesh/pkg/debug/networkchaos"
-	"github.com/chaos-mesh/chaos-mesh/pkg/debug/stresschaos"
+	cm "github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/debug/common"
+	"github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/debug/iochaos"
+	"github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/debug/networkchaos"
+	"github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/debug/stresschaos"
 )
 
 type DebugOptions struct {
@@ -126,6 +126,7 @@ Examples:
 	rootCmd.AddCommand(debugCmd)
 }
 
+// Run debug
 func (o *DebugOptions) Run(chaosType string, args []string, c *cm.ClientSet) error {
 	if len(args) > 1 {
 		return fmt.Errorf("Only one chaos could be specified")
@@ -133,9 +134,12 @@ func (o *DebugOptions) Run(chaosType string, args []string, c *cm.ClientSet) err
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	chaosNameArg := args[0]
+	ns := ""
+	if len(args) == 1 {
+		ns = args[0]
+	}
 
-	chaosList, chaosNameList, err := cm.GetChaosList(ctx, chaosType, chaosNameArg, o.Namespace, c.CtrlCli)
+	chaosList, chaosNameList, err := cm.GetChaosList(ctx, chaosType, ns, o.Namespace, c.CtrlCli)
 	if err != nil {
 		return fmt.Errorf(err.Error())
 	}

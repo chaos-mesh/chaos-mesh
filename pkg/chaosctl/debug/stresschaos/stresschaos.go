@@ -25,7 +25,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	cm "github.com/chaos-mesh/chaos-mesh/pkg/debug/common"
+	cm "github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/debug/common"
 )
 
 // Debug get chaos debug information
@@ -47,7 +47,7 @@ func Debug(ctx context.Context, chaos runtime.Object, c *cm.ClientSet, result *c
 	}
 
 	for i := range pods {
-		podName := pods[i].GetObjectMeta().GetName()
+		podName := pods[i].Name
 		podResult := cm.PodResult{Name: podName}
 		err := debugEachPod(ctx, pods[i], daemons[i], stressChaos, c, &podResult)
 		result.Pods = append(result.Pods, podResult)
@@ -114,10 +114,9 @@ func debugEachPod(ctx context.Context, pod v1.Pod, daemon v1.Pod, chaos *v1alpha
 	if string(out) != string(outStress) {
 		itemResult.Status = cm.ItemFailure
 		itemResult.ErrInfo = "Cgroup of stress-ng and init process not the same"
-		result.Items = append(result.Items, itemResult)
-		return nil
+	} else {
+		itemResult.Status = cm.ItemSuccess
 	}
-	itemResult.Status = cm.ItemSuccess
 	result.Items = append(result.Items, itemResult)
 
 	// print out debug info
