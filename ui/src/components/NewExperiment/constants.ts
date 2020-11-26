@@ -54,7 +54,7 @@ export const defaultExperimentSchema: Experiment = {
     io_chaos: {
       action: '',
       delay: '',
-      errno: 0,
+      errno: 1,
       attr: [],
       methods: [],
       path: '',
