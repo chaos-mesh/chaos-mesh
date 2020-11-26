@@ -31,13 +31,13 @@ $ source <(chaosctl completion bash)
 
 # To load completions for each session, execute once:
 Linux:
-  $ chaosctl completion bash > /etc/bash_completion.d/chaosctl
+  $ ./bin/chaosctl completion bash > /etc/bash_completion.d/chaosctl
 MacOS:
-  $ chaosctl completion bash > /usr/local/etc/bash_completion.d/chaosctl
+  $ ./bin/chaosctl completion bash > /usr/local/etc/bash_completion.d/chaosctl
 
 Zsh:
 
-$ compdef _chaosctl chaosctl
+$ compdef _chaosctl ./bin/chaosctl
 
 # If shell completion is not already enabled in your environment you will need
 # to enable it.  You can execute the following once:
@@ -45,23 +45,23 @@ $ compdef _chaosctl chaosctl
 $ echo "autoload -U compinit; compinit" >> ~/.zshrc
 
 # To load completions for each session, execute once:
-$ chaosctl completion zsh > "${fpath[1]}/_chaosctl"
+$ ./bin/chaosctl completion zsh > "${fpath[1]}/_chaosctl"
 
 # You will need to start a new shell for this setup to take effect.
 
 Fish:
 
-$ chaosctl completion fish | source
+$ ./bin/chaosctl completion fish | source
 
 # To load completions for each session, execute once:
-$ chaosctl completion fish > ~/.config/fish/completions/chaosctl.fish
+$ ./bin/chaosctl completion fish > ~/.config/fish/completions/chaosctl.fish
 
 Powershell:
 
-PS> chaosctl completion powershell | Out-String | Invoke-Expression
+PS> ./bin/chaosctl completion powershell | Out-String | Invoke-Expression
 
 # To load completions for every new session, run:
-PS> chaosctl completion powershell > chaosctl.ps1
+PS> ./bin/chaosctl completion powershell > chaosctl.ps1
 # and source this file from your powershell profile.
 `,
 	DisableFlagsInUseLine: true,

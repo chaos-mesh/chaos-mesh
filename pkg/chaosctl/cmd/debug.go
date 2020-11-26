@@ -24,19 +24,18 @@ import (
 	"k8s.io/client-go/kubernetes"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	cm "github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/debug/common"
+	cm "github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/common"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/debug/iochaos"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/debug/networkchaos"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/debug/stresschaos"
 )
 
-type DebugOptions struct {
-	ChaosName string
-	Namespace string
+type debugOptions struct {
+	namespace string
 }
 
 func init() {
-	o := &DebugOptions{}
+	o := &debugOptions{}
 
 	c, err := cm.InitClientSet()
 	if err != nil {
@@ -73,7 +72,7 @@ Examples:
 			if len(args) != 0 {
 				return nil, cobra.ShellCompDirectiveNoFileComp
 			}
-			return listChaos("networkchaos", o.Namespace, toComplete, c.CtrlCli)
+			return listChaos("networkchaos", o.namespace, toComplete, c.CtrlCli)
 		},
 	}
 
@@ -90,7 +89,7 @@ Examples:
 			if len(args) != 0 {
 				return nil, cobra.ShellCompDirectiveNoFileComp
 			}
-			return listChaos("stresschaos", o.Namespace, toComplete, c.CtrlCli)
+			return listChaos("stresschaos", o.namespace, toComplete, c.CtrlCli)
 		},
 	}
 
@@ -107,7 +106,7 @@ Examples:
 			if len(args) != 0 {
 				return nil, cobra.ShellCompDirectiveNoFileComp
 			}
-			return listChaos("iochaos", o.Namespace, toComplete, c.CtrlCli)
+			return listChaos("iochaos", o.namespace, toComplete, c.CtrlCli)
 		},
 	}
 
@@ -115,7 +114,7 @@ Examples:
 	debugCmd.AddCommand(stressCmd)
 	debugCmd.AddCommand(ioCmd)
 
-	debugCmd.PersistentFlags().StringVarP(&o.Namespace, "namespace", "n", "default", "namespace to find chaos")
+	debugCmd.PersistentFlags().StringVarP(&o.namespace, "namespace", "n", "default", "namespace to find chaos")
 	err = debugCmd.RegisterFlagCompletionFunc("namespace", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		return listNamespace(toComplete, c.KubeCli)
 	})
@@ -127,19 +126,19 @@ Examples:
 }
 
 // Run debug
-func (o *DebugOptions) Run(chaosType string, args []string, c *cm.ClientSet) error {
+func (o *debugOptions) Run(chaosType string, args []string, c *cm.ClientSet) error {
 	if len(args) > 1 {
 		return fmt.Errorf("Only one chaos could be specified")
 	}
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	ns := ""
+	chaosName := ""
 	if len(args) == 1 {
-		ns = args[0]
+		chaosName = args[0]
 	}
 
-	chaosList, chaosNameList, err := cm.GetChaosList(ctx, chaosType, ns, o.Namespace, c.CtrlCli)
+	chaosList, chaosNameList, err := cm.GetChaosList(ctx, chaosType, chaosName, o.namespace, c.CtrlCli)
 	if err != nil {
 		return fmt.Errorf(err.Error())
 	}

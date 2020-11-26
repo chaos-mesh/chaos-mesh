@@ -25,7 +25,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	cm "github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/debug/common"
+	cm "github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/common"
 )
 
 // Debug get chaos debug information

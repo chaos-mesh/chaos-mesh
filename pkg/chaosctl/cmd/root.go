@@ -27,9 +27,11 @@ var rootCmd = &cobra.Command{
 	Long: `
 Interacting with chaos mesh
 
-Currently only support printing debug information. For example:
-  $ chaosctl debug networkchaos
-will show infomation about networkchaos`,
+  # show debug info
+  chaosctl debug networkchaos
+  
+  # show logs of all chaos-mesh componentes
+  chaosctl logs`,
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.

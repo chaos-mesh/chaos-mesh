@@ -14,9 +14,11 @@
 package common
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"log"
 	"regexp"
 	"strings"
@@ -87,7 +89,8 @@ func upperCaseChaos(str string) string {
 	return strings.Title(parts[1]) + strings.Title(parts[2])
 }
 
-func prettyPrint(s string, num int, color string) {
+// PrettyPrint print with tab number and color
+func PrettyPrint(s string, num int, color string) {
 	var tabStr string
 	for i := 0; i < num; i++ {
 		tabStr += "\t"
@@ -107,20 +110,20 @@ func prettyPrint(s string, num int, color string) {
 // PrintResult prints result to users in prettier format
 func PrintResult(result []ChaosResult) {
 	for _, chaos := range result {
-		prettyPrint("[Chaos]: "+chaos.Name, 0, "Blue")
+		PrettyPrint("[Chaos]: "+chaos.Name, 0, "Blue")
 		for _, pod := range chaos.Pods {
-			prettyPrint("[Pod]: "+pod.Name, 0, "Blue")
+			PrettyPrint("[Pod]: "+pod.Name, 0, "Blue")
 			for i, item := range pod.Items {
-				prettyPrint(fmt.Sprintf("%d. [%s]", i+1, item.Name), 1, "Cyan")
-				prettyPrint(item.Value, 1, "")
+				PrettyPrint(fmt.Sprintf("%d. [%s]", i+1, item.Name), 1, "Cyan")
+				PrettyPrint(item.Value, 1, "")
 				if item.Status == ItemSuccess {
 					if item.SucInfo != "" {
-						prettyPrint(item.SucInfo, 1, "Green")
+						PrettyPrint(item.SucInfo, 1, "Green")
 					} else {
-						prettyPrint("Execute as expected", 1, "Green")
+						PrettyPrint("Execute as expected", 1, "Green")
 					}
 				} else if item.Status == ItemFailure {
-					prettyPrint(fmt.Sprintf("Failed: %s ", item.ErrInfo), 1, "Red")
+					PrettyPrint(fmt.Sprintf("Failed: %s ", item.ErrInfo), 1, "Red")
 				}
 			}
 		}
@@ -154,7 +157,7 @@ func GetPods(ctx context.Context, status v1alpha1.ChaosStatus, selector v1alpha1
 	// get podName
 	failedMessage := status.FailedMessage
 	if failedMessage != "" {
-		prettyPrint(fmt.Sprintf("chaos failed with: %s", failedMessage), 0, "Red")
+		PrettyPrint(fmt.Sprintf("chaos failed with: %s", failedMessage), 0, "Red")
 	}
 
 	phase := status.Experiment.Phase
@@ -286,6 +289,32 @@ func forwardPorts(ctx context.Context, pod v1.Pod, port uint16) (context.CancelF
 	return pfCancel, localPort, err
 }
 
+// Log print log of pod
+func Log(pod v1.Pod, tail int64, c *kubernetes.Clientset) (string, error) {
+	var podLogOpts v1.PodLogOptions
+	//use negative tail to indicate no tail limit is needed
+	if tail < 0 {
+		podLogOpts = v1.PodLogOptions{}
+	} else {
+		podLogOpts = v1.PodLogOptions{
+			TailLines: func(i int64) *int64 { return &i }(tail),
+		}
+	}
+	req := c.CoreV1().Pods(pod.Namespace).GetLogs(pod.Name, &podLogOpts)
+	podLogs, err := req.Stream()
+	if err != nil {
+		return "", fmt.Errorf("failed to open stream: %v", err.Error())
+	}
+	defer podLogs.Close()
+
+	buf := new(bytes.Buffer)
+	_, err = io.Copy(buf, podLogs)
+	if err != nil {
+		return "", fmt.Errorf("failed to copy information from podLogs to buf: %v", err.Error())
+	}
+	return buf.String(), nil
+}
+
 // CheckFailedMessage provide debug info and suggestions from failed message
 func CheckFailedMessage(ctx context.Context, failedMessage string, daemons []v1.Pod, c *ClientSet) error {
 	if strings.Contains(failedMessage, "rpc error: code = Unavailable desc = connection error") || strings.Contains(failedMessage, "connect: connection refused") {
@@ -312,9 +341,9 @@ func checkConnForCtrlAndDaemon(ctx context.Context, daemons []v1.Pod, c *ClientS
 			return fmt.Errorf("run command '%s' failed with: %s", cmd, err.Error())
 		}
 		if string(out) == "0" {
-			prettyPrint(fmt.Sprintf("Connection between Controller-Manager and Daemon %s (ip address: %s) works well", daemon.Name, daemonIP), 0, "Green")
+			PrettyPrint(fmt.Sprintf("Connection between Controller-Manager and Daemon %s (ip address: %s) works well", daemon.Name, daemonIP), 0, "Green")
 		} else {
-			prettyPrint(fmt.Sprintf(`Connection between Controller-Manager and Daemon %s (ip address: %s) is blocked.
+			PrettyPrint(fmt.Sprintf(`Connection between Controller-Manager and Daemon %s (ip address: %s) is blocked.
 Please check network policy / firewall, or see FAQ on website`, daemon.Name, daemonIP), 0, "Red")
 		}
 
