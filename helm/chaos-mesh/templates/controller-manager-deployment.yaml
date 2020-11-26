@@ -42,6 +42,9 @@ spec:
 {{ toYaml .Values.controllerManager.resources | indent 12 }}
         command:
           - /usr/local/bin/chaos-controller-manager
+        {{- if .Values.controllerManager.allowHostNetworkTesting }}
+          - -allowhostnetworktesting
+        {{- end }}
         env:
           - name: NAMESPACE
             valueFrom:
