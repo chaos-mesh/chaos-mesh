@@ -48,17 +48,18 @@ func init() {
 		Use:   `debug (CHAOSTYPE) [-c CHAOSNAME] [-n NAMESPACE]`,
 		Short: `Print the debug information for certain chaos`,
 		Long: `Print the debug information for certain chaos.
-Currently only support networkchaos and stresschaos.
+Currently support networkchaos, stresschaos and iochaos.
 
 Examples:
   # Return debug information from all networkchaos in default namespace
   chaosctl debug networkchaos
 
   # Return debug information from certain networkchaos
-  chaosctl debug networkchaos -c web-show-network-delay -n chaos-testing`,
+  chaosctl debug networkchaos CHAOSNAME -n NAMESPACE`,
 		ValidArgsFunction: noCompletions,
 	}
 
+	// Need to separately support chaos-level completion, so split each chaos apart
 	networkCmd := &cobra.Command{
 		Use:   `networkchaos (CHAOSNAME) [-n NAMESPACE]`,
 		Short: `Print the debug information for certain network chaos`,
@@ -132,21 +133,17 @@ func (o *DebugOptions) Run(chaosType string, args []string, c *cm.ClientSet) err
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	chaosNameArg := ""
-	if len(args) == 1 {
-		chaosNameArg = args[0]
-	}
+	chaosNameArg := args[0]
 
-	chaosList, nameList, err := cm.GetChaosList(ctx, chaosType, chaosNameArg, o.Namespace, c.CtrlCli)
+	chaosList, chaosNameList, err := cm.GetChaosList(ctx, chaosType, chaosNameArg, o.Namespace, c.CtrlCli)
 	if err != nil {
 		return fmt.Errorf(err.Error())
 	}
-	var ctlResult []cm.ChaosResult
+	var result []cm.ChaosResult
 
 	for i, chaos := range chaosList {
 		var chaosResult cm.ChaosResult
-		chaosResult.Name = nameList[i]
-		//cm.Print("[CHAOSNAME]: "+nameList[i], 0, "Blue")
+		chaosResult.Name = chaosNameList[i]
 
 		var err error
 		switch chaosType {
@@ -157,15 +154,15 @@ func (o *DebugOptions) Run(chaosType string, args []string, c *cm.ClientSet) err
 		case "iochaos":
 			err = iochaos.Debug(ctx, chaos, c, &chaosResult)
 		default:
-			return fmt.Errorf("chaos not supported")
+			return fmt.Errorf("chaos type not supported")
 		}
-		ctlResult = append(ctlResult, chaosResult)
+		result = append(result, chaosResult)
 		if err != nil {
-			cm.PrintResult(ctlResult)
+			cm.PrintResult(result)
 			return err
 		}
 	}
-	cm.PrintResult(ctlResult)
+	cm.PrintResult(result)
 	return nil
 }
 

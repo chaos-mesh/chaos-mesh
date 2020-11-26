@@ -55,6 +55,14 @@ $ chaosctl completion fish | source
 
 # To load completions for each session, execute once:
 $ chaosctl completion fish > ~/.config/fish/completions/chaosctl.fish
+
+Powershell:
+
+PS> chaosctl completion powershell | Out-String | Invoke-Expression
+
+# To load completions for every new session, run:
+PS> chaosctl completion powershell > chaosctl.ps1
+# and source this file from your powershell profile.
 `,
 	DisableFlagsInUseLine: true,
 	ValidArgs:             []string{"bash", "zsh", "fish", "powershell"},
@@ -67,6 +75,8 @@ $ chaosctl completion fish > ~/.config/fish/completions/chaosctl.fish
 			cmd.Root().GenZshCompletion(os.Stdout)
 		case "fish":
 			cmd.Root().GenFishCompletion(os.Stdout, true)
+		// TODO: powershell completion is still not fully supported, see https://github.com/spf13/cobra/pull/1208
+		// Need to update cobra version when this PR is merged
 		case "powershell":
 			cmd.Root().GenPowerShellCompletion(os.Stdout)
 		}
