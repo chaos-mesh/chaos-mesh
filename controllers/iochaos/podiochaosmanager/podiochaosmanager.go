@@ -142,9 +142,13 @@ func (m *PodIoManager) Commit(ctx context.Context) <-chan CommitResponse {
 				return m.Client.Update(ctx, chaos)
 			})
 
-			keyChan <- CommitResponse{
+			select {
+			case keyChan <- CommitResponse{
 				Key: key,
 				Err: updateError,
+			}:
+			case <-ctx.Done():
+				return ctx.Err()
 			}
 			if updateError != nil {
 				if updateError != ErrPodNotFound && updateError != ErrPodNotRunning {

@@ -72,15 +72,15 @@ func (m *PodNetworkManager) WithInit(key types.NamespacedName) *PodNetworkTransa
 	return t
 }
 
-// KeyErrorTuple is a tuple (Key, Err)
-type KeyErrorTuple struct {
+// CommitResponse is a tuple (Key, Err)
+type CommitResponse struct {
 	Key types.NamespacedName
 	Err error
 }
 
 // Commit will update all modifications to the cluster
-func (m *PodNetworkManager) Commit(ctx context.Context) <-chan KeyErrorTuple {
-	keyChan := make(chan KeyErrorTuple)
+func (m *PodNetworkManager) Commit(ctx context.Context) <-chan CommitResponse {
+	keyChan := make(chan CommitResponse)
 
 	g := errgroup.Group{}
 	for key, t := range m.Modifications {
@@ -144,9 +144,13 @@ func (m *PodNetworkManager) Commit(ctx context.Context) <-chan KeyErrorTuple {
 				return m.Client.Update(ctx, chaos)
 			})
 
-			keyChan <- KeyErrorTuple{
+			select {
+			case keyChan <- CommitResponse{
 				Key: key,
 				Err: updateError,
+			}:
+			case <-ctx.Done():
+				return ctx.Err()
 			}
 			if updateError != nil {
 				if updateError != ErrPodNotFound && updateError != ErrPodNotRunning {
