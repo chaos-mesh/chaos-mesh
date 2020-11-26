@@ -206,20 +206,23 @@ func (r *endpoint) cleanFinalizersAndRecover(ctx context.Context, networkchaos *
 			Namespace: ns,
 			Name:      name,
 		})
-
-		// if pod not found or not running, directly return and giveup recover.
-		if err != nil && err != podnetworkmanager.ErrPodNotFound && err != podnetworkmanager.ErrPodNotRunning {
-			r.Log.Error(err, "fail to commit")
-		}
-
 	}
-	keyErrorChan := m.Commit(ctx)
-	for keyError := range keyErrorChan {
-		if keyError.Err == nil || keyError.Err == podnetworkmanager.ErrPodNotFound {
-			networkchaos.Finalizers = utils.RemoveFromFinalizer(networkchaos.Finalizers, keyError.Key.String())
-		} else {
-			r.Log.Error(keyError.Err, "fail to commit", "pod", keyError.Key)
+	responseChan := m.Commit(ctx)
+	for response := range responseChan {
+		key := response.Key
+		err := response.Err
+		// if pod not found or not running, directly return and giveup recover.
+		if err != nil {
+			if err != podnetworkmanager.ErrPodNotFound && err != podnetworkmanager.ErrPodNotRunning {
+				r.Log.Error(err, "fail to commit", "key", key)
+				continue
+
+			} else {
+				r.Log.Info("pod is not found or not running", "key", key)
+			}
 		}
+
+		networkchaos.Finalizers = utils.RemoveFromFinalizer(networkchaos.Finalizers, response.Key.String())
 	}
 	r.Log.Info("After recovering", "finalizers", networkchaos.Finalizers)
 
