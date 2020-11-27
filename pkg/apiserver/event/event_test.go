@@ -192,8 +192,7 @@ var _ = Describe("event", func() {
 	Context("ListEvents", func() {
 		It("empty podNamespace", func() {
 			rr := httptest.NewRecorder()
-			request, err := http.NewRequest(http.MethodGet, "/api/events?podName=testpodNamespace", nil)
-			Expect(err).ShouldNot(HaveOccurred())
+			request, _ := http.NewRequest(http.MethodGet, "/api/events?podName=testpodNamespace", nil)
 			router.ServeHTTP(rr, request)
 			Expect(rr.Code).Should(Equal(http.StatusInternalServerError))
 		})
@@ -217,19 +216,17 @@ var _ = Describe("event", func() {
 				},
 			}
 			rr := httptest.NewRecorder()
-			request, err := http.NewRequest(http.MethodGet, "/api/events?uid=testUID", nil)
-			Expect(err).ShouldNot(HaveOccurred())
+			request, _ := http.NewRequest(http.MethodGet, "/api/events?uid=testUID", nil)
 			router.ServeHTTP(rr, request)
-			Expect(err).ShouldNot(HaveOccurred())
 			Expect(rr.Code).Should(Equal(http.StatusOK))
 			responseBody, err := json.Marshal(response)
+			Expect(err).ShouldNot(HaveOccurred())
 			Expect(rr.Body.Bytes()).Should(Equal(responseBody))
 		})
 
 		It("test err", func() {
 			rr := httptest.NewRecorder()
-			request, err := http.NewRequest(http.MethodGet, "/api/events?uid=err", nil)
-			Expect(err).ShouldNot(HaveOccurred())
+			request, _ := http.NewRequest(http.MethodGet, "/api/events?uid=err", nil)
 			router.ServeHTTP(rr, request)
 			Expect(rr.Code).Should(Equal(http.StatusInternalServerError))
 		})
@@ -255,8 +252,7 @@ var _ = Describe("event", func() {
 				},
 			}
 			rr := httptest.NewRecorder()
-			request, err := http.NewRequest(http.MethodGet, "/api/events/dry?kind=testKind", nil)
-			Expect(err).ShouldNot(HaveOccurred())
+			request, _ := http.NewRequest(http.MethodGet, "/api/events/dry?kind=testKind", nil)
 			router.ServeHTTP(rr, request)
 			Expect(rr.Code).Should(Equal(http.StatusOK))
 			responseBody, err := json.Marshal(response)
@@ -266,8 +262,7 @@ var _ = Describe("event", func() {
 
 		It("test err", func() {
 			rr := httptest.NewRecorder()
-			request, err := http.NewRequest(http.MethodGet, "/api/events/dry?kind=err", nil)
-			Expect(err).ShouldNot(HaveOccurred())
+			request, _ := http.NewRequest(http.MethodGet, "/api/events/dry?kind=err", nil)
 			router.ServeHTTP(rr, request)
 			Expect(rr.Code).Should(Equal(http.StatusInternalServerError))
 		})
@@ -291,8 +286,7 @@ var _ = Describe("event", func() {
 				ExperimentID: "testUID",
 			}
 			rr := httptest.NewRecorder()
-			request, err := http.NewRequest(http.MethodGet, "/api/events/get?id=0", nil)
-			Expect(err).ShouldNot(HaveOccurred())
+			request, _ := http.NewRequest(http.MethodGet, "/api/events/get?id=0", nil)
 			router.ServeHTTP(rr, request)
 			Expect(rr.Code).Should(Equal(http.StatusOK))
 			responseBody, err := json.Marshal(response)
@@ -302,32 +296,28 @@ var _ = Describe("event", func() {
 
 		It("empty id", func() {
 			rr := httptest.NewRecorder()
-			request, err := http.NewRequest(http.MethodGet, "/api/events/get", nil)
-			Expect(err).ShouldNot(HaveOccurred())
+			request, _ := http.NewRequest(http.MethodGet, "/api/events/get", nil)
 			router.ServeHTTP(rr, request)
 			Expect(rr.Code).Should(Equal(http.StatusBadRequest))
 		})
 
 		It("bad id", func() {
 			rr := httptest.NewRecorder()
-			request, err := http.NewRequest(http.MethodGet, "/api/events/get?id=badID", nil)
-			Expect(err).ShouldNot(HaveOccurred())
+			request, _ := http.NewRequest(http.MethodGet, "/api/events/get?id=badID", nil)
 			router.ServeHTTP(rr, request)
 			Expect(rr.Code).Should(Equal(http.StatusBadRequest))
 		})
 
 		It("not found", func() {
 			rr := httptest.NewRecorder()
-			request, err := http.NewRequest(http.MethodGet, "/api/events/get?id=1", nil)
-			Expect(err).ShouldNot(HaveOccurred())
+			request, _ := http.NewRequest(http.MethodGet, "/api/events/get?id=1", nil)
 			router.ServeHTTP(rr, request)
 			Expect(rr.Code).Should(Equal(http.StatusInternalServerError))
 		})
 
 		It("other err", func() {
 			rr := httptest.NewRecorder()
-			request, err := http.NewRequest(http.MethodGet, "/api/events/get?id=2", nil)
-			Expect(err).ShouldNot(HaveOccurred())
+			request, _ := http.NewRequest(http.MethodGet, "/api/events/get?id=2", nil)
 			router.ServeHTTP(rr, request)
 			Expect(rr.Code).Should(Equal(http.StatusInternalServerError))
 		})
