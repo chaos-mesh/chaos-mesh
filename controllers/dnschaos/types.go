@@ -49,7 +49,7 @@ type endpoint struct {
 func (r *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.InnerObject) error {
 	dnschaos, ok := chaos.(*v1alpha1.DNSChaos)
 	if !ok {
-		err := errors.New("chaos is not dnschaos")
+		err := errors.New("chaos is not DNSChaos")
 		r.Log.Error(err, "chaos is not DNSChaos", "chaos", chaos)
 		return err
 	}
@@ -148,7 +148,7 @@ func (r *endpoint) cleanFinalizersAndRecover(ctx context.Context, chaos *v1alpha
 			continue
 		}
 
-		err = r.recoverPod(ctx, &pod, chaos)
+		err = r.recoverPod(ctx, &pod)
 		if err != nil {
 			result = multierror.Append(result, err)
 			continue
@@ -166,7 +166,7 @@ func (r *endpoint) cleanFinalizersAndRecover(ctx context.Context, chaos *v1alpha
 	return result
 }
 
-func (r *endpoint) recoverPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.DNSChaos) error {
+func (r *endpoint) recoverPod(ctx context.Context, pod *v1.Pod) error {
 	r.Log.Info("Try to recover pod", "namespace", pod.Namespace, "name", pod.Name)
 
 	daemonClient, err := utils.NewChaosDaemonClient(ctx, r.Client,
@@ -212,7 +212,7 @@ func (r *endpoint) applyAllPods(ctx context.Context, pods []v1.Pod, chaos *v1alp
 		chaos.Finalizers = utils.InsertFinalizer(chaos.Finalizers, key)
 
 		g.Go(func() error {
-			return r.applyPod(ctx, pod, chaos, dnsServerIP)
+			return r.applyPod(ctx, pod, dnsServerIP)
 		})
 	}
 	err := g.Wait()
@@ -223,7 +223,7 @@ func (r *endpoint) applyAllPods(ctx context.Context, pods []v1.Pod, chaos *v1alp
 	return nil
 }
 
-func (r *endpoint) applyPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.DNSChaos, dnsServerIP string) error {
+func (r *endpoint) applyPod(ctx context.Context, pod *v1.Pod, dnsServerIP string) error {
 	r.Log.Info("Try to apply dns chaos", "namespace",
 		pod.Namespace, "name", pod.Name)
 	daemonClient, err := utils.NewChaosDaemonClient(ctx, r.Client,
