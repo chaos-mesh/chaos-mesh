@@ -11,7 +11,8 @@ make chaosctl
 Chaoctl support shell autocompletion, which could save you some typing. Do `./bin/chaosctl completion -h` for detail.
 
 ## How to use
-Currently, chaosctl support networkchaos, stresschaos and iochaos.
+**Debug**
+`chaoctl debug` is used to print debug info of certain chaos. Currently, chaosctl support networkchaos, stresschaos and iochaos.
 ```shell
 #to print info of each networkchaos
 ./bin/chaosctl debug networkchaos
@@ -19,4 +20,14 @@ Currently, chaosctl support networkchaos, stresschaos and iochaos.
 ./bin/chaosctl debug networkchaos CHAOSNAME
 #to print info of each networkchaos in certain namespace
 ./bin/chaosctl debug networkchaos -n NAMESPACE
+```
+
+**Logs**
+`chaoctl log` is used to easily print log from all chaos-mesh components, including controller-manager, chaos-daemon and chaos-dashboard.
+```shell
+# default print 60 recent lines of log of all chaosmesh components
+chaosctl logs
+
+# to print 100 log lines for chaosmesh components in node NODENAME
+chaosctl logs -t 100 -n NODENAME
 ```
