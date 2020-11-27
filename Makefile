@@ -196,7 +196,10 @@ taily-build:
 taily-build-clean:
 	docker kill taily-build && docker rm taily-build || exit 0
 
-image: image-chaos-daemon image-chaos-mesh image-chaos-dashboard image-chaos-fs image-chaos-scripts
+image: image-chaos-daemon image-chaos-mesh image-chaos-dashboard image-chaos-fs image-chaos-scripts image-chaos-jvm
+
+image-chaos-jvm:
+	docker build -t ${DOCKER_REGISTRY_PREFIX}pingcap/chaos-jvm:${IMAGE_TAG} ${DOCKER_BUILD_ARGS} images/chaos-jvm
 
 image-chaos-mesh-protoc:
 	docker build -t pingcap/chaos-mesh-protoc ${DOCKER_BUILD_ARGS} ./hack/protoc
