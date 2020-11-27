@@ -28,7 +28,7 @@ func (s *daemonServer) ContainerKill(ctx context.Context, req *pb.ContainerReque
 
 	action := req.Action.Action
 	if action != pb.ContainerAction_KILL {
-		err := fmt.Errorf("container action is %s , not kill", pb.ContainerAction_Action_name[int32(action)])
+		err := fmt.Errorf("container action is %s , not kill", action)
 		log.Error(err, "container action is not expected")
 		return nil, err
 	}
@@ -47,7 +47,7 @@ func (s *daemonServer) ContainerGetPid(ctx context.Context, req *pb.ContainerReq
 
 	action := req.Action.Action
 	if action != pb.ContainerAction_GETPID {
-		err := fmt.Errorf("container action is %s , not getpid", pb.ContainerAction_Action_name[int32(action)])
+		err := fmt.Errorf("container action is %s , not getpid", action)
 		log.Error(err, "container action is not expected")
 		return nil, err
 	}

@@ -65,6 +65,7 @@ func newServer(dataDir string) *server {
 	s.mux.HandleFunc("/network/send", s.networkSendTest)
 	s.mux.HandleFunc("/network/recv", s.networkRecvTest)
 	s.mux.HandleFunc("/network/ping", s.networkPingTest)
+	s.mux.HandleFunc("/dns", s.dnsTest)
 	return s
 }
 
@@ -109,6 +110,30 @@ func (s *server) ioTest(w http.ResponseWriter, _ *http.Request) {
 	}
 	t2 := time.Now()
 	w.Write([]byte(t2.Sub(t1).String()))
+}
+
+// a handler to test dns chaos
+func (s *server) dnsTest(w http.ResponseWriter, r *http.Request) {
+
+	url, ok := r.URL.Query()["url"]
+
+	if !ok || len(url[0]) < 1 {
+		http.Error(w, "failed", http.StatusBadRequest)
+		return
+	}
+
+	ips, err := net.LookupIP(url[0])
+	if err != nil {
+		http.Error(w, "failed", http.StatusBadRequest)
+		return
+	}
+
+	if len(ips) == 0 {
+		http.Error(w, "failed", http.StatusBadRequest)
+		return
+	}
+
+	w.Write([]byte(ips[0].String()))
 }
 
 type networkSendTestBody struct {
