@@ -300,18 +300,17 @@ var _ = Describe("event", func() {
 				},
 			}
 			rr := httptest.NewRecorder()
-			request, err := http.NewRequest(http.MethodGet, "/api/archives?kind=testKind", nil)
-			Expect(err).ShouldNot(HaveOccurred())
+			request, _ := http.NewRequest(http.MethodGet, "/api/archives?kind=testKind", nil)
 			router.ServeHTTP(rr, request)
 			Expect(rr.Code).Should(Equal(http.StatusOK))
 			responseBody, err := json.Marshal(response)
+			Expect(err).ShouldNot(HaveOccurred())
 			Expect(rr.Body.Bytes()).Should(Equal(responseBody))
 		})
 
 		It("test err", func() {
 			rr := httptest.NewRecorder()
-			request, err := http.NewRequest(http.MethodGet, "/api/archives", nil)
-			Expect(err).ShouldNot(HaveOccurred())
+			request, _ := http.NewRequest(http.MethodGet, "/api/archives", nil)
 			router.ServeHTTP(rr, request)
 			Expect(rr.Code).Should(Equal(http.StatusInternalServerError))
 		})
@@ -320,8 +319,7 @@ var _ = Describe("event", func() {
 	Context("Detail", func() {
 		It("empty uid", func() {
 			rr := httptest.NewRecorder()
-			request, err := http.NewRequest(http.MethodGet, "/api/archives/detail", nil)
-			Expect(err).ShouldNot(HaveOccurred())
+			request, _ := http.NewRequest(http.MethodGet, "/api/archives/detail", nil)
 			router.ServeHTTP(rr, request)
 			Expect(rr.Code).Should(Equal(http.StatusBadRequest))
 		})
@@ -351,11 +349,11 @@ var _ = Describe("event", func() {
 				},
 			}
 			rr := httptest.NewRecorder()
-			request, err := http.NewRequest(http.MethodGet, "/api/archives/detail?uid=testPodChaos", nil)
-			Expect(err).ShouldNot(HaveOccurred())
+			request, _ := http.NewRequest(http.MethodGet, "/api/archives/detail?uid=testPodChaos", nil)
 			router.ServeHTTP(rr, request)
 			Expect(rr.Code).Should(Equal(http.StatusOK))
 			responseBody, err := json.Marshal(response)
+			Expect(err).ShouldNot(HaveOccurred())
 			Expect(rr.Body.Bytes()).Should(Equal(responseBody))
 		})
 
@@ -384,11 +382,11 @@ var _ = Describe("event", func() {
 				},
 			}
 			rr := httptest.NewRecorder()
-			request, err := http.NewRequest(http.MethodGet, "/api/archives/detail?uid=testIoChaos", nil)
-			Expect(err).ShouldNot(HaveOccurred())
+			request, _ := http.NewRequest(http.MethodGet, "/api/archives/detail?uid=testIoChaos", nil)
 			router.ServeHTTP(rr, request)
 			Expect(rr.Code).Should(Equal(http.StatusOK))
 			responseBody, err := json.Marshal(response)
+			Expect(err).ShouldNot(HaveOccurred())
 			Expect(rr.Body.Bytes()).Should(Equal(responseBody))
 		})
 
@@ -417,11 +415,11 @@ var _ = Describe("event", func() {
 				},
 			}
 			rr := httptest.NewRecorder()
-			request, err := http.NewRequest(http.MethodGet, "/api/archives/detail?uid=testNetworkChaos", nil)
-			Expect(err).ShouldNot(HaveOccurred())
+			request, _ := http.NewRequest(http.MethodGet, "/api/archives/detail?uid=testNetworkChaos", nil)
 			router.ServeHTTP(rr, request)
 			Expect(rr.Code).Should(Equal(http.StatusOK))
 			responseBody, err := json.Marshal(response)
+			Expect(err).ShouldNot(HaveOccurred())
 			Expect(rr.Body.Bytes()).Should(Equal(responseBody))
 		})
 
@@ -450,11 +448,11 @@ var _ = Describe("event", func() {
 				},
 			}
 			rr := httptest.NewRecorder()
-			request, err := http.NewRequest(http.MethodGet, "/api/archives/detail?uid=testTimeChaos", nil)
-			Expect(err).ShouldNot(HaveOccurred())
+			request, _ := http.NewRequest(http.MethodGet, "/api/archives/detail?uid=testTimeChaos", nil)
 			router.ServeHTTP(rr, request)
 			Expect(rr.Code).Should(Equal(http.StatusOK))
 			responseBody, err := json.Marshal(response)
+			Expect(err).ShouldNot(HaveOccurred())
 			Expect(rr.Body.Bytes()).Should(Equal(responseBody))
 		})
 
@@ -483,11 +481,11 @@ var _ = Describe("event", func() {
 				},
 			}
 			rr := httptest.NewRecorder()
-			request, err := http.NewRequest(http.MethodGet, "/api/archives/detail?uid=testKernelChaos", nil)
-			Expect(err).ShouldNot(HaveOccurred())
+			request, _ := http.NewRequest(http.MethodGet, "/api/archives/detail?uid=testKernelChaos", nil)
 			router.ServeHTTP(rr, request)
 			Expect(rr.Code).Should(Equal(http.StatusOK))
 			responseBody, err := json.Marshal(response)
+			Expect(err).ShouldNot(HaveOccurred())
 			Expect(rr.Body.Bytes()).Should(Equal(responseBody))
 		})
 
@@ -516,34 +514,31 @@ var _ = Describe("event", func() {
 				},
 			}
 			rr := httptest.NewRecorder()
-			request, err := http.NewRequest(http.MethodGet, "/api/archives/detail?uid=testStressChaos", nil)
-			Expect(err).ShouldNot(HaveOccurred())
+			request, _ := http.NewRequest(http.MethodGet, "/api/archives/detail?uid=testStressChaos", nil)
 			router.ServeHTTP(rr, request)
 			Expect(rr.Code).Should(Equal(http.StatusOK))
 			responseBody, err := json.Marshal(response)
+			Expect(err).ShouldNot(HaveOccurred())
 			Expect(rr.Body.Bytes()).Should(Equal(responseBody))
 		})
 
 		It("testOtherChaos", func() {
 			rr := httptest.NewRecorder()
-			request, err := http.NewRequest(http.MethodGet, "/api/archives/detail?uid=testOtherChaos", nil)
-			Expect(err).ShouldNot(HaveOccurred())
+			request, _ := http.NewRequest(http.MethodGet, "/api/archives/detail?uid=testOtherChaos", nil)
 			router.ServeHTTP(rr, request)
 			Expect(rr.Code).Should(Equal(http.StatusInternalServerError))
 		})
 
 		It("testErrRecordNotFound", func() {
 			rr := httptest.NewRecorder()
-			request, err := http.NewRequest(http.MethodGet, "/api/archives/detail?uid=testErrRecordNotFound", nil)
-			Expect(err).ShouldNot(HaveOccurred())
+			request, _ := http.NewRequest(http.MethodGet, "/api/archives/detail?uid=testErrRecordNotFound", nil)
 			router.ServeHTTP(rr, request)
 			Expect(rr.Code).Should(Equal(http.StatusInternalServerError))
 		})
 
 		It("test err", func() {
 			rr := httptest.NewRecorder()
-			request, err := http.NewRequest(http.MethodGet, "/api/archives/detail?uid=testErr", nil)
-			Expect(err).ShouldNot(HaveOccurred())
+			request, _ := http.NewRequest(http.MethodGet, "/api/archives/detail?uid=testErr", nil)
 			router.ServeHTTP(rr, request)
 			Expect(rr.Code).Should(Equal(http.StatusInternalServerError))
 		})
@@ -552,32 +547,28 @@ var _ = Describe("event", func() {
 	Context("Report", func() {
 		It("empty uid", func() {
 			rr := httptest.NewRecorder()
-			request, err := http.NewRequest(http.MethodGet, "/api/archives/report", nil)
-			Expect(err).ShouldNot(HaveOccurred())
+			request, _ := http.NewRequest(http.MethodGet, "/api/archives/report", nil)
 			router.ServeHTTP(rr, request)
 			Expect(rr.Code).Should(Equal(http.StatusBadRequest))
 		})
 
 		It("testErrRecordNotFound", func() {
 			rr := httptest.NewRecorder()
-			request, err := http.NewRequest(http.MethodGet, "/api/archives/report?uid=testErrRecordNotFound", nil)
-			Expect(err).ShouldNot(HaveOccurred())
+			request, _ := http.NewRequest(http.MethodGet, "/api/archives/report?uid=testErrRecordNotFound", nil)
 			router.ServeHTTP(rr, request)
 			Expect(rr.Code).Should(Equal(http.StatusInternalServerError))
 		})
 
 		It("test err", func() {
 			rr := httptest.NewRecorder()
-			request, err := http.NewRequest(http.MethodGet, "/api/archives/report?uid=testErr", nil)
-			Expect(err).ShouldNot(HaveOccurred())
+			request, _ := http.NewRequest(http.MethodGet, "/api/archives/report?uid=testErr", nil)
 			router.ServeHTTP(rr, request)
 			Expect(rr.Code).Should(Equal(http.StatusInternalServerError))
 		})
 
 		It("testUID", func() {
 			rr := httptest.NewRecorder()
-			request, err := http.NewRequest(http.MethodGet, "/api/archives/report?uid=testUID", nil)
-			Expect(err).ShouldNot(HaveOccurred())
+			request, _ := http.NewRequest(http.MethodGet, "/api/archives/report?uid=testUID", nil)
 			router.ServeHTTP(rr, request)
 			Expect(rr.Code).Should(Equal(http.StatusInternalServerError))
 		})
