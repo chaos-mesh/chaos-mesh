@@ -21,7 +21,7 @@ import clsx from 'clsx'
 import { format } from 'lib/dayjs'
 import { useSelector } from 'react-redux'
 
-const QontoConnector = withStyles({
+const QontoConnector = withStyles((theme) => ({
   alternativeLabel: {
     top: 10,
     left: 'calc(-50% + 16px)',
@@ -29,19 +29,18 @@ const QontoConnector = withStyles({
   },
   active: {
     '& $line': {
-      borderColor: '#172d72',
+      borderColor: theme.palette.primary.main,
     },
   },
   completed: {
     '& $line': {
-      borderColor: '#172d72',
+      borderColor: theme.palette.primary.main,
     },
   },
   line: {
-    borderColor: '#eaeaf0',
     borderTopWidth: 3,
   },
-})(StepConnector)
+}))(StepConnector)
 
 const useQontoStepIconStyles = makeStyles((theme: Theme) =>
   createStyles({
