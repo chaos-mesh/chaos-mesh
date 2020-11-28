@@ -103,16 +103,6 @@ func (r *endpoint) Recover(ctx context.Context, req ctrl.Request, chaos v1alpha1
 		return err
 	}
 
-	// get dns server's ip used for chaos
-	service, err := utils.GetService(ctx, r.Client, "", common.ControllerCfg.DNSServiceName)
-	if err != nil {
-		r.Log.Error(err, "fail to get service")
-		return err
-	}
-	r.Log.Info("Cancel DNS chaos to DNS service", "ip", service.Spec.ClusterIP)
-
-	r.cancelDNSServerRules(service.Spec.ClusterIP, common.ControllerCfg.DNSServicePort, dnschaos.Name)
-
 	if err := r.cleanFinalizersAndRecover(ctx, dnschaos); err != nil {
 		return err
 	}
@@ -148,7 +138,7 @@ func (r *endpoint) cleanFinalizersAndRecover(ctx context.Context, chaos *v1alpha
 			continue
 		}
 
-		err = r.recoverPod(ctx, &pod)
+		err = r.recoverPod(ctx, &pod, chaos)
 		if err != nil {
 			result = multierror.Append(result, err)
 			continue
@@ -166,8 +156,18 @@ func (r *endpoint) cleanFinalizersAndRecover(ctx context.Context, chaos *v1alpha
 	return result
 }
 
-func (r *endpoint) recoverPod(ctx context.Context, pod *v1.Pod) error {
+func (r *endpoint) recoverPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.DNSChaos) error {
 	r.Log.Info("Try to recover pod", "namespace", pod.Namespace, "name", pod.Name)
+
+	// get dns server's ip used for chaos
+	service, err := utils.GetService(ctx, r.Client, "", common.ControllerCfg.DNSServiceName)
+	if err != nil {
+		r.Log.Error(err, "fail to get service")
+		return err
+	}
+	r.Log.Info("Cancel DNS chaos to DNS service", "ip", service.Spec.ClusterIP)
+
+	r.cancelDNSServerRules(service.Spec.ClusterIP, common.ControllerCfg.DNSServicePort, dnschaos.Name)
 
 	daemonClient, err := utils.NewChaosDaemonClient(ctx, r.Client,
 		pod, common.ControllerCfg.ChaosDaemonPort)
