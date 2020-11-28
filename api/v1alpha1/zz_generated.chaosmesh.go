@@ -396,12 +396,17 @@ func (in *JVMChaos) IsDeleted() bool {
 	return !in.DeletionTimestamp.IsZero()
 }
 
-// IsPaused returns whether this resource has been paused
-func (in *JVMChaos) IsPaused() bool {
-	if in.Annotations == nil || in.Annotations[PauseAnnotationKey] != "true" {
-		return false
+// GetPause returns the annotation when the chaos needs to be paused
+func (in *JVMChaos) GetPause() string {
+	if in.Annotations == nil {
+		return ""
 	}
-	return true
+	return in.Annotations[PauseAnnotationKey]
+}
+
+// SetPause set the pausetime of annotation. Use for empty pausetime for now
+func (in *JVMChaos) SetPause(s string) {
+	in.Annotations[PauseAnnotationKey] = s
 }
 
 // GetDuration would return the duration for chaos

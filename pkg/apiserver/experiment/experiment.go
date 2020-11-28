@@ -922,7 +922,7 @@ func (s *Service) startExperiment(c *gin.Context) {
 	}
 
 	annotations := map[string]string{
-		v1alpha1.PauseAnnotationKey: "false",
+		v1alpha1.PauseAnnotationKey: "",
 	}
 	if err := s.patchExperiment(exp, annotations); err != nil {
 		if apierrors.IsNotFound(err) {
