@@ -19,15 +19,14 @@ import (
 
 	"github.com/hashicorp/go-multierror"
 	v1 "k8s.io/api/core/v1"
-	k8serror "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/tools/cache"
 	ctrl "sigs.k8s.io/controller-runtime"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/common"
-	"github.com/chaos-mesh/chaos-mesh/pkg/utils"
 	"github.com/chaos-mesh/chaos-mesh/controllers/iochaos/podiochaosmanager"
+	"github.com/chaos-mesh/chaos-mesh/pkg/utils"
 )
 
 // Recover means the reconciler recovers the chaos action

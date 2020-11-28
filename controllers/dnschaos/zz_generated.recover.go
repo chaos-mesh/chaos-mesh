@@ -27,7 +27,6 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/common"
 	"github.com/chaos-mesh/chaos-mesh/pkg/utils"
-	
 )
 
 // Recover means the reconciler recovers the chaos action
