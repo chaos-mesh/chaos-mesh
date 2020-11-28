@@ -19,11 +19,9 @@ import (
 	"os"
 	"strings"
 	"text/template"
-
-	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 )
 
-type metadata struct {
+type recoverMetadata struct {
 	Type          string
 	Package       string
 	Manager       string
@@ -31,13 +29,13 @@ type metadata struct {
 }
 
 var (
-	log         = zap.Logger(true)
 	withManager = map[string]string{
 		"iochaos":                     "IoChaos",
 		"networkchaos/partition":      "NetworkChaos",
 		"networkchaos/trafficcontrol": "NetworkChaos",
 	}
 	withoutManager = map[string]string{
+		"dnschaos":            "DNSChaos",
 		"kernelchaos":         "KernelChaos",
 		"stresschaos":         "StressChaos",
 		"timechaos":           "TimeChaos",
@@ -100,7 +98,7 @@ func (r *endpoint) cleanFinalizersAndRecover(ctx context.Context, chaos *v1alpha
 
 const cleanWithManagerTemplate = `
 	source := chaos.Namespace + "/" + chaos.Name
-	m := {{.Manager}}.New(source, r.Log, r.Client, r.Reader)
+	m := {{.Manager}}.New(source, r.Log, r.Client)
 
 	for _, key := range chaos.Finalizers {
 		ns, name, err := cache.SplitMetaNamespaceKey(key)
@@ -120,8 +118,7 @@ const cleanWithManagerTemplate = `
 		}
 
 		err = m.Commit(ctx)
-		// if pod not found or not running, directly return and giveup recover.
-		if err != nil && err != {{.Manager}}.ErrPodNotFound && err != {{.Manager}}.ErrPodNotRunning {
+		if err != nil {
 			r.Log.Error(err, "fail to commit")
 		}
 
@@ -183,7 +180,7 @@ const cleanWithoutManagerTemplate = `
 }
 `
 
-func generateImpl(meta metadata, temp string) string {
+func generateRecoverImpl(meta recoverMetadata, temp string) string {
 	tmpl, err := template.New("impl").Parse(temp)
 	if err != nil {
 		log.Error(err, "fail to build template")
@@ -200,7 +197,9 @@ func generateImpl(meta metadata, temp string) string {
 	return buf.String()
 }
 
-func main() {
+// GenerateRecover generate `Recover` and `cleanFinalizersAndRecover` for eachchaos, since most of them are same
+// Customization part would be in `recoverPod` for each chaos
+func GenerateRecover() {
 	// generate `Recover` for controllers with manager
 	for path, chaos := range withManager {
 		file, err := os.Create("./controllers/" + path + "/zz_generated.recover.go")
@@ -211,12 +210,12 @@ func main() {
 		chaosLower := strings.ToLower(chaos)
 		chaosManager := "pod" + chaosLower + "manager"
 
-		generatedCode := generateImpl(metadata{
+		generatedCode := generateRecoverImpl(recoverMetadata{
 			Type:          chaos,
 			Package:       path[strings.LastIndex(path, "/")+1:],
 			ImportManager: `"github.com/chaos-mesh/chaos-mesh/controllers/` + chaosLower + `/` + chaosManager + `"`,
 		}, recoverTemplate)
-		generatedCode += generateImpl(metadata{
+		generatedCode += generateRecoverImpl(recoverMetadata{
 			Manager: chaosManager,
 		}, cleanWithManagerTemplate)
 		fmt.Fprint(file, generatedCode)
@@ -229,11 +228,11 @@ func main() {
 			log.Error(err, "fail to generate recover file")
 		}
 
-		generatedCode := generateImpl(metadata{
+		generatedCode := generateRecoverImpl(recoverMetadata{
 			Type:    chaos,
 			Package: path[strings.LastIndex(path, "/")+1:],
 		}, recoverTemplate)
-		generatedCode += generateImpl(metadata{}, cleanWithoutManagerTemplate)
+		generatedCode += generateRecoverImpl(recoverMetadata{}, cleanWithoutManagerTemplate)
 		fmt.Fprint(file, generatedCode)
 	}
 	return

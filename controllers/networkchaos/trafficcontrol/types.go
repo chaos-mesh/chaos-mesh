@@ -61,7 +61,7 @@ func (r *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.I
 	}
 
 	source := networkchaos.Namespace + "/" + networkchaos.Name
-	m := podnetworkchaosmanager.New(source, r.Log, r.Client, r.Reader)
+	m := podnetworkchaosmanager.New(source, r.Log, r.Client)
 
 	sources, err := utils.SelectAndFilterPods(ctx, r.Client, r.Reader, &networkchaos.Spec)
 	if err != nil {
@@ -148,7 +148,7 @@ func (r *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.I
 	return nil
 }
 
-func (r *endpoint) applyTc(ctx context.Context, sources, targets []v1.Pod, externalTargets []string, m *podnetworkmanager.PodNetworkManager, networkchaos *v1alpha1.NetworkChaos) error {
+func (r *endpoint) applyTc(ctx context.Context, sources, targets []v1.Pod, externalTargets []string, m *podnetworkchaosmanager.PodNetworkManager, networkchaos *v1alpha1.NetworkChaos) error {
 	for index := range sources {
 		pod := &sources[index]
 

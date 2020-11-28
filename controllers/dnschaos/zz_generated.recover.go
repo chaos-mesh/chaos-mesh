@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package timechaos
+package dnschaos
 
 import (
 	"context"
@@ -32,10 +32,10 @@ import (
 
 // Recover means the reconciler recovers the chaos action
 func (r *endpoint) Recover(ctx context.Context, req ctrl.Request, chaos v1alpha1.InnerObject) error {
-	somechaos, ok := chaos.(*v1alpha1.TimeChaos)
+	somechaos, ok := chaos.(*v1alpha1.DNSChaos)
 	if !ok {
-		err := errors.New("chaos is not TimeChaos")
-		r.Log.Error(err, "chaos is not TimeChaos", "chaos", chaos)
+		err := errors.New("chaos is not DNSChaos")
+		r.Log.Error(err, "chaos is not DNSChaos", "chaos", chaos)
 		return err
 	}
 
@@ -47,7 +47,7 @@ func (r *endpoint) Recover(ctx context.Context, req ctrl.Request, chaos v1alpha1
 	return nil
 }
 
-func (r *endpoint) cleanFinalizersAndRecover(ctx context.Context, chaos *v1alpha1.TimeChaos) error {
+func (r *endpoint) cleanFinalizersAndRecover(ctx context.Context, chaos *v1alpha1.DNSChaos) error {
 	var result error
 
 	for _, key := range chaos.Finalizers {

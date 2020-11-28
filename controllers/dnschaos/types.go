@@ -20,13 +20,10 @@ import (
 	"time"
 
 	dnspb "github.com/chaos-mesh/k8s_dns_chaos/pb"
-	multierror "github.com/hashicorp/go-multierror"
 	"golang.org/x/sync/errgroup"
 	"google.golang.org/grpc"
 	v1 "k8s.io/api/core/v1"
-	k8serror "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/tools/cache"
 
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -94,68 +91,6 @@ func (r *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.I
 	return nil
 }
 
-// Recover means the reconciler recovers the chaos action
-func (r *endpoint) Recover(ctx context.Context, req ctrl.Request, chaos v1alpha1.InnerObject) error {
-	dnschaos, ok := chaos.(*v1alpha1.DNSChaos)
-	if !ok {
-		err := errors.New("chaos is not DNSChaos")
-		r.Log.Error(err, "chaos is not DNSChaos", "chaos", chaos)
-		return err
-	}
-
-	if err := r.cleanFinalizersAndRecover(ctx, dnschaos); err != nil {
-		return err
-	}
-	r.Event(dnschaos, v1.EventTypeNormal, utils.EventChaosRecovered, "")
-
-	return nil
-}
-
-func (r *endpoint) cleanFinalizersAndRecover(ctx context.Context, chaos *v1alpha1.DNSChaos) error {
-	var result error
-
-	for _, key := range chaos.Finalizers {
-		ns, name, err := cache.SplitMetaNamespaceKey(key)
-		if err != nil {
-			result = multierror.Append(result, err)
-			continue
-		}
-
-		var pod v1.Pod
-		err = r.Client.Get(ctx, types.NamespacedName{
-			Namespace: ns,
-			Name:      name,
-		}, &pod)
-
-		if err != nil {
-			if !k8serror.IsNotFound(err) {
-				result = multierror.Append(result, err)
-				continue
-			}
-
-			r.Log.Info("Pod not found", "namespace", ns, "name", name)
-			chaos.Finalizers = utils.RemoveFromFinalizer(chaos.Finalizers, key)
-			continue
-		}
-
-		err = r.recoverPod(ctx, &pod, chaos)
-		if err != nil {
-			result = multierror.Append(result, err)
-			continue
-		}
-
-		chaos.Finalizers = utils.RemoveFromFinalizer(chaos.Finalizers, key)
-	}
-
-	if chaos.Annotations[common.AnnotationCleanFinalizer] == common.AnnotationCleanFinalizerForced {
-		r.Log.Info("Force cleanup all finalizers", "chaos", chaos)
-		chaos.Finalizers = chaos.Finalizers[:0]
-		return nil
-	}
-
-	return result
-}
-
 func (r *endpoint) recoverPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.DNSChaos) error {
 	r.Log.Info("Try to recover pod", "namespace", pod.Namespace, "name", pod.Name)
 
@@ -167,7 +102,7 @@ func (r *endpoint) recoverPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.
 	}
 	r.Log.Info("Cancel DNS chaos to DNS service", "ip", service.Spec.ClusterIP)
 
-	r.cancelDNSServerRules(service.Spec.ClusterIP, common.ControllerCfg.DNSServicePort, dnschaos.Name)
+	r.cancelDNSServerRules(service.Spec.ClusterIP, common.ControllerCfg.DNSServicePort, chaos.Name)
 
 	daemonClient, err := utils.NewChaosDaemonClient(ctx, r.Client,
 		pod, common.ControllerCfg.ChaosDaemonPort)

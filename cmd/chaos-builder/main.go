@@ -135,5 +135,7 @@ func init() {
 	}
 	fmt.Fprint(file, testCode)
 
+	GenerateRecover()
+
 	return
 }
