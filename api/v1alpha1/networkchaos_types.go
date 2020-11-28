@@ -27,17 +27,23 @@ import (
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
-// KindNetworkChaos is the kind for network chaos
-const KindNetworkChaos = "NetworkChaos"
+// +kubebuilder:object:root=true
+// +chaos-mesh:base
 
-func init() {
-	all.register(KindNetworkChaos, &ChaosKind{
-		Chaos:     &NetworkChaos{},
-		ChaosList: &NetworkChaosList{},
-	})
+// NetworkChaos is the Schema for the networkchaos API
+type NetworkChaos struct {
+	metav1.TypeMeta   `json:",inline"`
+	metav1.ObjectMeta `json:"metadata,omitempty"`
+
+	// Spec defines the behavior of a pod chaos experiment
+	Spec NetworkChaosSpec `json:"spec"`
+
+	// +optional
+	// Most recently observed status of the chaos experiment about pods
+	Status NetworkChaosStatus `json:"status"`
 }
 
-// ChaosAction represents the chaos action about pods.
+// NetworkChaosAction represents the chaos action about network.
 type NetworkChaosAction string
 
 const (
@@ -83,18 +89,18 @@ const (
 // Target represents network partition and netem action target.
 type Target struct {
 	// TargetSelector defines the target selector
-	TargetSelector SelectorSpec `json:"selector"`
+	TargetSelector SelectorSpec `json:"selector" mapstructure:"selector"`
 
 	// TargetMode defines the target selector mode
 	// +kubebuilder:validation:Enum=one;all;fixed;fixed-percent;random-max-percent;""
-	TargetMode PodMode `json:"mode"`
+	TargetMode PodMode `json:"mode" mapstructure:"mode"`
 
 	// TargetValue is required when the mode is set to `FixedPodMode` / `FixedPercentPodMod` / `RandomMaxPercentPodMod`.
 	// If `FixedPodMode`, provide an integer of pods to do chaos action.
 	// If `FixedPercentPodMod`, provide a number from 0-100 to specify the percent of pods the server can do chaos action.
 	// If `RandomMaxPercentPodMod`,  provide a number from 0-100 to specify the max percent of pods to do chaos action
 	// +optional
-	TargetValue string `json:"value"`
+	TargetValue string `json:"value" mapstructure:"value"`
 }
 
 // GetSelector is a getter for Selector (for implementing SelectSpec)
@@ -176,113 +182,6 @@ func (in *NetworkChaosSpec) GetValue() string {
 // NetworkChaosStatus defines the observed state of NetworkChaos
 type NetworkChaosStatus struct {
 	ChaosStatus `json:",inline"`
-}
-
-// +kubebuilder:object:root=true
-
-// NetworkChaos is the Schema for the networkchaos API
-type NetworkChaos struct {
-	metav1.TypeMeta   `json:",inline"`
-	metav1.ObjectMeta `json:"metadata,omitempty"`
-
-	// Spec defines the behavior of a pod chaos experiment
-	Spec NetworkChaosSpec `json:"spec"`
-
-	// +optional
-	// Most recently observed status of the chaos experiment about pods
-	Status NetworkChaosStatus `json:"status"`
-}
-
-func (in *NetworkChaos) GetStatus() *ChaosStatus {
-	return &in.Status.ChaosStatus
-}
-
-// IsDeleted returns whether this resource has been deleted
-func (in *NetworkChaos) IsDeleted() bool {
-	return !in.DeletionTimestamp.IsZero()
-}
-
-// IsPaused returns whether this resource has been paused
-func (in *NetworkChaos) IsPaused() bool {
-	if in.Annotations == nil || in.Annotations[PauseAnnotationKey] != "true" {
-		return false
-	}
-	return true
-}
-
-// GetDuration would return the duration for chaos
-func (in *NetworkChaos) GetDuration() (*time.Duration, error) {
-	if in.Spec.Duration == nil {
-		return nil, nil
-	}
-	duration, err := time.ParseDuration(*in.Spec.Duration)
-	if err != nil {
-		return nil, err
-	}
-	return &duration, nil
-}
-
-func (in *NetworkChaos) GetNextStart() time.Time {
-	if in.Status.Scheduler.NextStart == nil {
-		return time.Time{}
-	}
-	return in.Status.Scheduler.NextStart.Time
-}
-
-func (in *NetworkChaos) SetNextStart(t time.Time) {
-	if t.IsZero() {
-		in.Status.Scheduler.NextStart = nil
-		return
-	}
-
-	if in.Status.Scheduler.NextStart == nil {
-		in.Status.Scheduler.NextStart = &metav1.Time{}
-	}
-	in.Status.Scheduler.NextStart.Time = t
-}
-
-func (in *NetworkChaos) GetNextRecover() time.Time {
-	if in.Status.Scheduler.NextRecover == nil {
-		return time.Time{}
-	}
-	return in.Status.Scheduler.NextRecover.Time
-}
-
-func (in *NetworkChaos) SetNextRecover(t time.Time) {
-	if t.IsZero() {
-		in.Status.Scheduler.NextRecover = nil
-		return
-	}
-
-	if in.Status.Scheduler.NextRecover == nil {
-		in.Status.Scheduler.NextRecover = &metav1.Time{}
-	}
-	in.Status.Scheduler.NextRecover.Time = t
-}
-
-// GetScheduler would return the scheduler for chaos
-func (in *NetworkChaos) GetScheduler() *SchedulerSpec {
-	return in.Spec.Scheduler
-}
-
-// GetChaos returns a chaos instance
-func (in *NetworkChaos) GetChaos() *ChaosInstance {
-	instance := &ChaosInstance{
-		Name:      in.Name,
-		Namespace: in.Namespace,
-		Kind:      KindNetworkChaos,
-		StartTime: in.CreationTimestamp.Time,
-		Action:    string(in.Spec.Action),
-		Status:    string(in.GetStatus().Experiment.Phase),
-		UID:       string(in.UID),
-	}
-	if in.Spec.Duration != nil {
-		instance.Duration = *in.Spec.Duration
-	}
-	if in.DeletionTimestamp != nil {
-		instance.EndTime = in.DeletionTimestamp.Time
-	}
-	return instance
 }
 
 // DelaySpec defines detail of a delay action
@@ -490,29 +389,4 @@ type ReorderSpec struct {
 	Reorder     string `json:"reorder"`
 	Correlation string `json:"correlation"`
 	Gap         int    `json:"gap"`
-}
-
-// +kubebuilder:object:root=true
-
-// NetworkChaosList contains a list of NetworkChaos
-type NetworkChaosList struct {
-	metav1.TypeMeta `json:",inline"`
-	metav1.ListMeta `json:"metadata,omitempty"`
-	Items           []NetworkChaos `json:"items"`
-}
-
-// ListChaos returns a list of network chaos
-func (in *NetworkChaosList) ListChaos() []*ChaosInstance {
-	if len(in.Items) == 0 {
-		return nil
-	}
-	res := make([]*ChaosInstance, 0, len(in.Items))
-	for _, item := range in.Items {
-		res = append(res, item.GetChaos())
-	}
-	return res
-}
-
-func init() {
-	SchemeBuilder.Register(&NetworkChaos{}, &NetworkChaosList{})
 }

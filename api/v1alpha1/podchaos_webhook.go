@@ -18,20 +18,12 @@ import (
 
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/validation/field"
-	ctrl "sigs.k8s.io/controller-runtime"
-	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
+	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
 )
 
 // log is for logging in this package.
 var podchaoslog = logf.Log.WithName("podchaos-resource")
-
-// SetupWebhookWithManager setup PodChaos's webhook with manager
-func (in *PodChaos) SetupWebhookWithManager(mgr ctrl.Manager) error {
-	return ctrl.NewWebhookManagedBy(mgr).
-		For(in).
-		Complete()
-}
 
 // +kubebuilder:webhook:path=/mutate-chaos-mesh-org-v1alpha1-podchaos,mutating=true,failurePolicy=fail,groups=chaos-mesh.org,resources=podchaos,verbs=create;update,versions=v1alpha1,name=mpodchaos.kb.io
 
@@ -89,7 +81,6 @@ func (in *PodChaos) ValidateScheduler(spec *field.Path) field.ErrorList {
 	switch in.Spec.Action {
 	case PodFailureAction:
 		allErrs = append(allErrs, ValidateScheduler(in, spec)...)
-		break
 	case PodKillAction:
 		// We choose to ignore the Duration property even user define it
 		if in.Spec.Scheduler == nil {
@@ -98,7 +89,6 @@ func (in *PodChaos) ValidateScheduler(spec *field.Path) field.ErrorList {
 			_, err := ParseCron(in.Spec.Scheduler.Cron, schedulerField.Child("cron"))
 			allErrs = append(allErrs, err...)
 		}
-		break
 	case ContainerKillAction:
 		// We choose to ignore the Duration property even user define it
 		if in.Spec.Scheduler == nil {
@@ -107,14 +97,12 @@ func (in *PodChaos) ValidateScheduler(spec *field.Path) field.ErrorList {
 			_, err := ParseCron(in.Spec.Scheduler.Cron, schedulerField.Child("cron"))
 			allErrs = append(allErrs, err...)
 		}
-		break
 	default:
 		err := fmt.Errorf("podchaos[%s/%s] have unknown action type", in.Namespace, in.Name)
 		log.Error(err, "Wrong PodChaos Action type")
 
 		actionField := spec.Child("action")
 		allErrs = append(allErrs, field.Invalid(actionField, in.Spec.Action, err.Error()))
-		break
 	}
 	return allErrs
 }

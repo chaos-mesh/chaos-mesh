@@ -11,6 +11,24 @@ webhooks:
     service:
       name: webhook-service
       namespace: system
+      path: /mutate-chaos-mesh-org-v1alpha1-dnschaos
+  failurePolicy: Fail
+  name: mdnschaos.kb.io
+  rules:
+  - apiGroups:
+    - chaos-mesh.org
+    apiVersions:
+    - v1alpha1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - dnschaos
+- clientConfig:
+    caBundle: Cg==
+    service:
+      name: webhook-service
+      namespace: system
       path: /mutate-chaos-mesh-org-v1alpha1-iochaos
   failurePolicy: Fail
   name: miochaos.kb.io
@@ -24,6 +42,24 @@ webhooks:
     - UPDATE
     resources:
     - iochaos
+- clientConfig:
+    caBundle: Cg==
+    service:
+      name: webhook-service
+      namespace: system
+      path: /mutate-chaos-mesh-org-v1alpha1-jvmchaos
+  failurePolicy: Fail
+  name: mjvmchaos.kb.io
+  rules:
+  - apiGroups:
+    - chaos-mesh.org
+    apiVersions:
+    - v1alpha1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - jvmchaos
 - clientConfig:
     caBundle: Cg==
     service:
@@ -163,6 +199,24 @@ webhooks:
     service:
       name: webhook-service
       namespace: system
+      path: /validate-chaos-mesh-org-v1alpha1-dnschaos
+  failurePolicy: Fail
+  name: vdnschaos.kb.io
+  rules:
+  - apiGroups:
+    - chaos-mesh.org
+    apiVersions:
+    - v1alpha1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - dnschaos
+- clientConfig:
+    caBundle: Cg==
+    service:
+      name: webhook-service
+      namespace: system
       path: /validate-chaos-mesh-org-v1alpha1-iochaos
   failurePolicy: Fail
   name: viochaos.kb.io
@@ -176,6 +230,24 @@ webhooks:
     - UPDATE
     resources:
     - iochaos
+- clientConfig:
+    caBundle: Cg==
+    service:
+      name: webhook-service
+      namespace: system
+      path: /validate-chaos-mesh-org-v1alpha1-jvmchaos
+  failurePolicy: Fail
+  name: vjvmchaos.kb.io
+  rules:
+  - apiGroups:
+    - chaos-mesh.org
+    apiVersions:
+    - v1alpha1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - jvmchaos
 - clientConfig:
     caBundle: Cg==
     service:

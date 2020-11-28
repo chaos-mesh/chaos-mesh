@@ -18,101 +18,69 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/go-logr/logr"
 	v1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/tools/cache"
-	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	"github.com/chaos-mesh/chaos-mesh/controllers/common"
-	"github.com/chaos-mesh/chaos-mesh/controllers/networkchaos/podnetworkchaosmanager"
 	"github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos/ipset"
 	"github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos/iptable"
 	"github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos/netutils"
-	"github.com/chaos-mesh/chaos-mesh/controllers/twophase"
 	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
+	"github.com/chaos-mesh/chaos-mesh/pkg/router"
+	ctx "github.com/chaos-mesh/chaos-mesh/pkg/router/context"
+	end "github.com/chaos-mesh/chaos-mesh/pkg/router/endpoint"
 	"github.com/chaos-mesh/chaos-mesh/pkg/utils"
 )
 
 const (
-	networkPartitionActionMsg = "partition network duration %s"
+	networkPartitionActionMsg = " partition network duration %s"
+	networkChaosSourceMsg     = "This is a source pod."
+	networkChaosTargetMsg     = "This is a target pod."
 
 	sourceIPSetPostFix = "src"
 	targetIPSetPostFix = "tgt"
 )
 
-func newReconciler(c client.Client, r client.Reader, log logr.Logger, req ctrl.Request,
-	recorder record.EventRecorder) twophase.Reconciler {
-	return twophase.Reconciler{
-		InnerReconciler: &Reconciler{
-			Client:        c,
-			Reader:        r,
-			EventRecorder: recorder,
-			Log:           log,
-		},
-		Client: c,
-		Log:    log,
-	}
-}
-
-// NewTwoPhaseReconciler would create Reconciler for twophase package
-func NewTwoPhaseReconciler(c client.Client, reader client.Reader, log logr.Logger, req ctrl.Request,
-	recorder record.EventRecorder) *twophase.Reconciler {
-	r := newReconciler(c, reader, log, req, recorder)
-	return twophase.NewReconciler(r, r.Client, r.Reader, r.Log)
-}
-
-// NewCommonReconciler would create Reconciler for common package
-func NewCommonReconciler(c client.Client, reader client.Reader, log logr.Logger, req ctrl.Request,
-	recorder record.EventRecorder) *common.Reconciler {
-	r := newReconciler(c, reader, log, req, recorder)
-	return common.NewReconciler(r, r.Client, r.Reader, r.Log)
-}
-
-// Reconciler is networkchaos reconciler
-type Reconciler struct {
-	client.Client
-	client.Reader
-	record.EventRecorder
-	Log logr.Logger
+type endpoint struct {
+	ctx.Context
 }
 
 // Object implements the reconciler.InnerReconciler.Object
-func (r *Reconciler) Object() v1alpha1.InnerObject {
+func (e *endpoint) Object() v1alpha1.InnerObject {
 	return &v1alpha1.NetworkChaos{}
 }
 
-// Apply implements the reconciler.InnerReconciler.Apply
-func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.InnerObject) error {
-	r.Log.Info("Applying network partition")
+// Apply applies the chaos operation
+func (e *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.InnerObject) error {
+	e.Log.Info("Applying network partition")
 
 	networkchaos, ok := chaos.(*v1alpha1.NetworkChaos)
 	if !ok {
 		err := errors.New("chaos is not NetworkChaos")
-		r.Log.Error(err, "chaos is not NetworkChaos", "chaos", chaos)
+		e.Log.Error(err, "chaos is not NetworkChaos", "chaos", chaos)
 
 		return err
 	}
 
 	source := networkchaos.Namespace + "/" + networkchaos.Name
-	m := podnetworkchaosmanager.New(source, r.Log, r.Client, r.Reader)
+	m := podnetworkmanager.New(source, e.Log, e.Client, e.Reader)
 
-	sources, err := utils.SelectAndFilterPods(ctx, r.Client, r.Reader, &networkchaos.Spec)
+	sources, err := utils.SelectAndFilterPods(ctx, e.Client, e.Reader, &networkchaos.Spec)
 
 	if err != nil {
-		r.Log.Error(err, "failed to select and filter pods")
+		e.Log.Error(err, "failed to select and filter pods")
 		return err
 	}
 
 	var targets []v1.Pod
 
 	if networkchaos.Spec.Target != nil {
-		targets, err = utils.SelectAndFilterPods(ctx, r.Client, r.Reader, networkchaos.Spec.Target)
+		targets, err = utils.SelectAndFilterPods(ctx, e.Client, e.Reader, networkchaos.Spec.Target)
 		if err != nil {
-			r.Log.Error(err, "failed to select and filter pods")
+			e.Log.Error(err, "failed to select and filter pods")
 			return err
 		}
 	}
@@ -120,7 +88,7 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1
 	sourceSet := ipset.BuildIPSet(sources, []string{}, networkchaos, sourceIPSetPostFix, source)
 	externalCidrs, err := netutils.ResolveCidrs(networkchaos.Spec.ExternalTargets)
 	if err != nil {
-		r.Log.Error(err, "failed to resolve external targets")
+		e.Log.Error(err, "failed to resolve external targets")
 		return err
 	}
 	targetSet := ipset.BuildIPSet(targets, externalCidrs, networkchaos, targetIPSetPostFix, source)
@@ -130,7 +98,7 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1
 	// Set up ipset in every related pods
 	for index := range allPods {
 		pod := allPods[index]
-		r.Log.Info("PODS", "name", pod.Name, "namespace", pod.Namespace)
+		e.Log.Info("PODS", "name", pod.Name, "namespace", pod.Namespace)
 
 		t := m.WithInit(types.NamespacedName{
 			Name:      pod.Name,
@@ -182,14 +150,14 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1
 			},
 		})
 	}
-	r.Log.Info("chains prepared", "sourcesChains", sourcesChains, "targetsChains", targetsChains)
+	e.Log.Info("chains prepared", "sourcesChains", sourcesChains, "targetsChains", targetsChains)
 
-	err = r.SetChains(ctx, sources, sourcesChains, m, networkchaos)
+	err = e.SetChains(ctx, sources, sourcesChains, m, networkchaos)
 	if err != nil {
 		return err
 	}
 
-	err = r.SetChains(ctx, targets, targetsChains, m, networkchaos)
+	err = e.SetChains(ctx, targets, targetsChains, m, networkchaos)
 	if err != nil {
 		return err
 	}
@@ -197,14 +165,14 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1
 	err = m.Commit(ctx)
 	if err != nil {
 		// if pod is not found or not running, don't print error log and wait next time.
-		if err != podnetworkchaosmanager.ErrPodNotFound && err != podnetworkchaosmanager.ErrPodNotRunning {
-			r.Log.Error(err, "fail to commit")
+		if err != podnetworkmanager.ErrPodNotFound && err != podnetworkmanager.ErrPodNotRunning {
+			e.Log.Error(err, "fail to commit")
 		}
 		return err
 	}
 
 	networkchaos.Status.Experiment.PodRecords = make([]v1alpha1.PodStatus, 0, len(allPods))
-	for _, pod := range allPods {
+	for index, pod := range allPods {
 		ps := v1alpha1.PodStatus{
 			Namespace: pod.Namespace,
 			Name:      pod.Name,
@@ -213,19 +181,25 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1
 			Action:    string(networkchaos.Spec.Action),
 		}
 
+		if index < len(sources) {
+			ps.Message = networkChaosSourceMsg
+		} else {
+			ps.Message = networkChaosTargetMsg
+		}
+
 		if networkchaos.Spec.Duration != nil {
-			ps.Message = fmt.Sprintf(networkPartitionActionMsg, *networkchaos.Spec.Duration)
+			ps.Message += fmt.Sprintf(networkPartitionActionMsg, *networkchaos.Spec.Duration)
 		}
 
 		networkchaos.Status.Experiment.PodRecords = append(networkchaos.Status.Experiment.PodRecords, ps)
 	}
 
-	r.Event(networkchaos, v1.EventTypeNormal, utils.EventChaosInjected, "")
+	e.Event(networkchaos, v1.EventTypeNormal, utils.EventChaosInjected, "")
 	return nil
 }
 
 // SetChains sets iptables chains for pods
-func (r *Reconciler) SetChains(ctx context.Context, pods []v1.Pod, chains []v1alpha1.RawIptables, m *podnetworkchaosmanager.PodNetworkManager, networkchaos *v1alpha1.NetworkChaos) error {
+func (e *endpoint) SetChains(ctx context.Context, pods []v1.Pod, chains []v1alpha1.RawIptables, m *podnetworkmanager.PodNetworkManager, networkchaos *v1alpha1.NetworkChaos) error {
 	for index := range pods {
 		pod := &pods[index]
 
@@ -246,4 +220,19 @@ func (r *Reconciler) SetChains(ctx context.Context, pods []v1.Pod, chains []v1al
 
 	}
 	return nil
+}
+
+func init() {
+	router.Register("networkchaos", &v1alpha1.NetworkChaos{}, func(obj runtime.Object) bool {
+		chaos, ok := obj.(*v1alpha1.NetworkChaos)
+		if !ok {
+			return false
+		}
+
+		return chaos.Spec.Action == v1alpha1.PartitionAction
+	}, func(ctx ctx.Context) end.Endpoint {
+		return &endpoint{
+			Context: ctx,
+		}
+	})
 }

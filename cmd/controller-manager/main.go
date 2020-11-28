@@ -20,18 +20,30 @@ import (
 	"os"
 	"time"
 
-	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	chaosmeshv1alpha1 "github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	apiWebhook "github.com/chaos-mesh/chaos-mesh/api/webhook"
-	"github.com/chaos-mesh/chaos-mesh/controllers"
 	"github.com/chaos-mesh/chaos-mesh/controllers/common"
 	"github.com/chaos-mesh/chaos-mesh/controllers/metrics"
 	"github.com/chaos-mesh/chaos-mesh/controllers/podiochaos"
 	"github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos"
+	"github.com/chaos-mesh/chaos-mesh/pkg/router"
 	"github.com/chaos-mesh/chaos-mesh/pkg/utils"
 	"github.com/chaos-mesh/chaos-mesh/pkg/version"
 	"github.com/chaos-mesh/chaos-mesh/pkg/webhook/config"
 	"github.com/chaos-mesh/chaos-mesh/pkg/webhook/config/watcher"
+
+	_ "github.com/chaos-mesh/chaos-mesh/controllers/dnschaos"
+	_ "github.com/chaos-mesh/chaos-mesh/controllers/httpchaos"
+	_ "github.com/chaos-mesh/chaos-mesh/controllers/iochaos"
+	_ "github.com/chaos-mesh/chaos-mesh/controllers/jvmchaos"
+	_ "github.com/chaos-mesh/chaos-mesh/controllers/kernelchaos"
+	_ "github.com/chaos-mesh/chaos-mesh/controllers/networkchaos/partition"
+	_ "github.com/chaos-mesh/chaos-mesh/controllers/networkchaos/trafficcontrol"
+	_ "github.com/chaos-mesh/chaos-mesh/controllers/podchaos/containerkill"
+	_ "github.com/chaos-mesh/chaos-mesh/controllers/podchaos/podfailure"
+	_ "github.com/chaos-mesh/chaos-mesh/controllers/podchaos/podkill"
+	_ "github.com/chaos-mesh/chaos-mesh/controllers/stresschaos"
+	_ "github.com/chaos-mesh/chaos-mesh/controllers/timechaos"
 
 	"k8s.io/apimachinery/pkg/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
@@ -102,113 +114,26 @@ func main() {
 		os.Exit(1)
 	}
 
-	if err = (&controllers.PodChaosReconciler{
-		Client:        mgr.GetClient(),
-		Reader:        mgr.GetAPIReader(),
-		EventRecorder: mgr.GetEventRecorderFor("podchaos-controller"),
-		Log:           ctrl.Log.WithName("controllers").WithName("PodChaos"),
-	}).SetupWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create controller", "controller", "PodChaos")
-		os.Exit(1)
-	}
-	if err = (&chaosmeshv1alpha1.PodChaos{}).SetupWebhookWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create webhook", "webhook", "PodChaos")
-		os.Exit(1)
-	}
-
-	if err = (&controllers.NetworkChaosReconciler{
-		Client:        mgr.GetClient(),
-		Reader:        mgr.GetAPIReader(),
-		EventRecorder: mgr.GetEventRecorderFor("networkchaos-controller"),
-		Log:           ctrl.Log.WithName("controllers").WithName("NetworkChaos"),
-	}).SetupWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create controller", "controller", "NetworkChaos")
-		os.Exit(1)
-	}
-	if err = (&chaosmeshv1alpha1.NetworkChaos{}).SetupWebhookWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create webhook", "webhook", "NetworkChaos")
-		os.Exit(1)
-	}
-
-	if err = (&controllers.IoChaosReconciler{
-		Client:        mgr.GetClient(),
-		Reader:        mgr.GetAPIReader(),
-		EventRecorder: mgr.GetEventRecorderFor("iochaos-controller"),
-		Log:           ctrl.Log.WithName("controllers").WithName("IoChaos"),
-	}).SetupWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create controller", "controller", "IoChaos")
-		os.Exit(1)
-	}
-	if err = (&chaosmeshv1alpha1.IoChaos{}).SetupWebhookWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create webhook", "webhook", "IoChaos")
-		os.Exit(1)
-	}
-
-	if err = (&controllers.TimeChaosReconciler{
-		Client:        mgr.GetClient(),
-		Reader:        mgr.GetAPIReader(),
-		EventRecorder: mgr.GetEventRecorderFor("timechaos-controller"),
-		Log:           ctrl.Log.WithName("controllers").WithName("TimeChaos"),
-	}).SetupWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create controller", "controller", "TimeChaos")
-		os.Exit(1)
-	}
-	if err = (&chaosmeshv1alpha1.TimeChaos{}).SetupWebhookWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create webhook", "webhook", "TimeChaos")
-		os.Exit(1)
-	}
-
-	if err = (&controllers.KernelChaosReconciler{
-		Client:        mgr.GetClient(),
-		Reader:        mgr.GetAPIReader(),
-		EventRecorder: mgr.GetEventRecorderFor("kernelchaos-controller"),
-		Log:           ctrl.Log.WithName("controllers").WithName("KernelChaos"),
-	}).SetupWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create controller", "controller", "KernelChaos")
-		os.Exit(1)
-	}
-	if err = (&chaosmeshv1alpha1.KernelChaos{}).SetupWebhookWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create webhook", "webhook", "KernelChaos")
-		os.Exit(1)
-	}
-
-	if err = (&controllers.StressChaosReconciler{
-		Client:        mgr.GetClient(),
-		Reader:        mgr.GetAPIReader(),
-		EventRecorder: mgr.GetEventRecorderFor("stresschaos-controller"),
-		Log:           ctrl.Log.WithName("controllers").WithName("StressChaos"),
-	}).SetupWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create controller", "controller", "StressChaos")
-		os.Exit(1)
-	}
-	if err = (&chaosmeshv1alpha1.StressChaos{}).SetupWebhookWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create webhook", "webhook", "StressChaos")
-		os.Exit(1)
-	}
-
-	if err = (&controllers.HTTPChaosReconciler{
-		Client: mgr.GetClient(),
-		Reader: mgr.GetAPIReader(),
-		Log:    ctrl.Log.WithName("controllers").WithName("HTTPChaos"),
-	}).SetupWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create controller", "controller", "HTTPChaos")
+	err = router.SetupWithManager(mgr)
+	if err != nil {
+		setupLog.Error(err, "fail to setup with manager")
 		os.Exit(1)
 	}
 
 	// We only setup webhook for podiochaos, and the logic of applying chaos are in the mutation
 	// webhook, because we need to get the running result synchronously in io chaos reconciler
-	v1alpha1.RegisterPodIoHandler(&podiochaos.Handler{
+	chaosmeshv1alpha1.RegisterPodIoHandler(&podiochaos.Handler{
 		Client: mgr.GetClient(),
-		Log:    ctrl.Log.WithName("handler").WithName("PodIoChaos"),
+		Log:    ctrl.Log.WithName("handler").WithName("PodIOChaos"),
 	})
 	if err = (&chaosmeshv1alpha1.PodIoChaos{}).SetupWebhookWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create webhook", "webhook", "PodIoChaos")
+		setupLog.Error(err, "unable to create webhook", "webhook", "PodIOChaos")
 		os.Exit(1)
 	}
 
 	// We only setup webhook for podnetworkchaos, and the logic of applying chaos are in the validation
 	// webhook, because we need to get the running result synchronously in network chaos reconciler
-	v1alpha1.RegisterRawPodNetworkHandler(&podnetworkchaos.Handler{
+	chaosmeshv1alpha1.RegisterRawPodNetworkHandler(&podnetworkchaos.Handler{
 		Client: mgr.GetClient(),
 		Reader: mgr.GetAPIReader(),
 		Log:    ctrl.Log.WithName("handler").WithName("PodNetworkChaos"),

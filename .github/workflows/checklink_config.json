@@ -1,4 +1,13 @@
 {
-  "retryOn429": true,
-  "aliveStatusCodes":[200, 206, 400, 0]
+  "ignorePatterns": [
+    {
+      "pattern": ["^/img/"]
+    },
+    {
+      "pattern": ["^http://localhost"]
+    },
+    {
+      "pattern": ["^https://github.com"]
+    }
+  ]
 }

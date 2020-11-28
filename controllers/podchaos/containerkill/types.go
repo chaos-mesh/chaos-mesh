@@ -18,17 +18,17 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/go-logr/logr"
 	"golang.org/x/sync/errgroup"
 	v1 "k8s.io/api/core/v1"
-	"k8s.io/client-go/tools/record"
+	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/common"
-	"github.com/chaos-mesh/chaos-mesh/controllers/twophase"
 	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
+	"github.com/chaos-mesh/chaos-mesh/pkg/router"
+	ctx "github.com/chaos-mesh/chaos-mesh/pkg/router/context"
+	end "github.com/chaos-mesh/chaos-mesh/pkg/router/endpoint"
 	"github.com/chaos-mesh/chaos-mesh/pkg/utils"
 )
 
@@ -36,30 +36,12 @@ const (
 	containerKillActionMsg = "delete container %s"
 )
 
-func newReconciler(c client.Client, r client.Reader, log logr.Logger, recorder record.EventRecorder) *Reconciler {
-	return &Reconciler{
-		Client:        c,
-		Reader:        r,
-		EventRecorder: recorder,
-		Log:           log,
-	}
-}
-
-type Reconciler struct {
-	client.Client
-	client.Reader
-	record.EventRecorder
-	Log logr.Logger
-}
-
-// NewTwoPhaseReconciler would create Reconciler for twophase package
-func NewTwoPhaseReconciler(c client.Client, reader client.Reader, log logr.Logger, recorder record.EventRecorder) *twophase.Reconciler {
-	r := newReconciler(c, reader, log, recorder)
-	return twophase.NewReconciler(r, r.Client, r.Reader, r.Log)
+type endpoint struct {
+	ctx.Context
 }
 
 // Apply implements the reconciler.InnerReconciler.Apply
-func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, obj v1alpha1.InnerObject) error {
+func (r *endpoint) Apply(ctx context.Context, req ctrl.Request, obj v1alpha1.InnerObject) error {
 	var err error
 
 	podchaos, ok := obj.(*v1alpha1.PodChaos)
@@ -130,18 +112,18 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, obj v1alpha1.I
 }
 
 // Recover implements the reconciler.InnerReconciler.Recover
-func (r *Reconciler) Recover(ctx context.Context, req ctrl.Request, obj v1alpha1.InnerObject) error {
+func (r *endpoint) Recover(ctx context.Context, req ctrl.Request, obj v1alpha1.InnerObject) error {
 	return nil
 }
 
 // Object implements the reconciler.InnerReconciler.Object
-func (r *Reconciler) Object() v1alpha1.InnerObject {
+func (r *endpoint) Object() v1alpha1.InnerObject {
 	return &v1alpha1.PodChaos{}
 }
 
 // KillContainer kills container according to containerID
 // Use client in chaos-daemon
-func (r *Reconciler) KillContainer(ctx context.Context, pod *v1.Pod, containerID string) error {
+func (r *endpoint) KillContainer(ctx context.Context, pod *v1.Pod, containerID string) error {
 	r.Log.Info("Try to kill container", "namespace", pod.Namespace, "podName", pod.Name, "containerID", containerID)
 
 	pbClient, err := utils.NewChaosDaemonClient(ctx, r.Client, pod, common.ControllerCfg.ChaosDaemonPort)
@@ -165,4 +147,19 @@ func (r *Reconciler) KillContainer(ctx context.Context, pod *v1.Pod, containerID
 	}
 
 	return nil
+}
+
+func init() {
+	router.Register("podchaos", &v1alpha1.PodChaos{}, func(obj runtime.Object) bool {
+		chaos, ok := obj.(*v1alpha1.PodChaos)
+		if !ok {
+			return false
+		}
+
+		return chaos.Spec.Action == v1alpha1.ContainerKillAction
+	}, func(ctx ctx.Context) end.Endpoint {
+		return &endpoint{
+			Context: ctx,
+		}
+	})
 }

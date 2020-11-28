@@ -6,7 +6,7 @@ import { useDispatch } from 'react-redux'
 const middlewares = [...getDefaultMiddleware()]
 const ignoreActions = [
   'experiments/state/pending',
-  'common/namespaces/pending',
+  'common/chaos-available-namespaces/pending',
   'common/labels/pending',
   'common/annotations/pending',
   'common/pods/pending',

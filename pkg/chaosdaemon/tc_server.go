@@ -74,8 +74,8 @@ func (s *daemonServer) SetTcs(ctx context.Context, in *pb.TcsRequest) (*empty.Em
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "get pid from containerID error: %v", err)
 	}
-	nsPath := GetNsPath(pid, bpm.NetNS)
-	client := buildTcClient(ctx, nsPath)
+
+	client := buildTcClient(ctx, pid)
 	err = client.flush()
 	if err != nil {
 		log.Error(err, "error while flushing client")
@@ -102,9 +102,9 @@ func (s *daemonServer) SetTcs(ctx context.Context, in *pb.TcsRequest) (*empty.Em
 	//  tc qdisc add dev eth0 parent 3:2 handle 5: sfq
 	//  tc qdisc add dev eth0 parent 3:3 handle 6: sfq
 	//  tc qdisc add dev eth0 parent 3:4 handle 7: netem delay 50000
-	//  tc filter add dev eth0 parent 3: basic match ipset(A dst) classid 3:4
+	//  iptables -A TC-TABLES-0 -m set --match-set A dst -j CLASSIFY --set-class 3:4 -w 5
 	//  tc qdisc add dev eth0 parent 3:5 handle 8: netem delay 100000
-	//  tc filter add dev eth0 parent 3: basic match ipset(B dst) classid 3:5
+	//  iptables -A TC-TABLES-1 -m set --match-set B dst -j CLASSIFY --set-class 3:5 -w 5
 
 	globalTc := []*pb.Tc{}
 	filterTc := map[string][]*pb.Tc{}
@@ -145,6 +145,13 @@ func (s *daemonServer) SetTcs(ctx context.Context, in *pb.TcsRequest) (*empty.Em
 
 	index := 0
 	currentHandler := parent + 3 // 3 handlers for sfq on prio qdisc
+
+	iptables := buildIptablesClient(ctx, pid)
+
+	// iptables chain has been initialized by previous grpc request to set iptables
+	// and iptables rules are recovered by previous call too, so there is no need
+	// to remove these rules here
+	chains := []*pb.Chain{}
 	for ipset, tcs := range filterTc {
 		for i, tc := range tcs {
 			parentArg := fmt.Sprintf("parent %d:%d", parent, index+4)
@@ -162,35 +169,58 @@ func (s *daemonServer) SetTcs(ctx context.Context, in *pb.TcsRequest) (*empty.Em
 			}
 		}
 
-		parentArg := fmt.Sprintf("parent %d:", parent)
-		classid := fmt.Sprintf("classid %d:%d", parent, index+4)
-		err = client.addFilter(parentArg, classid, ipset)
-		if err != nil {
-			log.Error(err, "error while adding filter")
-			return &empty.Empty{}, err
+		ch := &pb.Chain{
+			Name:      fmt.Sprintf("TC-TABLES-%d", index),
+			Direction: pb.Chain_OUTPUT,
+			Ipsets:    []string{ipset},
+			Target:    fmt.Sprintf("CLASSIFY --set-class %d:%d", parent, index+4),
 		}
+
+		// TODO: refactor this logic
+		tc := tcs[0]
+		if len(tc.Protocol) > 0 {
+			ch.Protocol = fmt.Sprintf("--protocol %s", tc.Protocol)
+		}
+
+		if len(tc.SourcePort) > 0 || len(tc.EgressPort) > 0 {
+			ch.SourcePorts = fmt.Sprintf("--source-port %s", tc.SourcePort)
+			if strings.Contains(tc.SourcePort, ",") {
+				ch.SourcePorts = fmt.Sprintf("-m multiport --source-ports %s", tc.SourcePort)
+			}
+
+			ch.DestinationPorts = fmt.Sprintf("--destination-port %s", tc.EgressPort)
+			if strings.Contains(tc.EgressPort, ",") {
+				ch.DestinationPorts = fmt.Sprintf("-m multiport --destination-ports %s", tc.EgressPort)
+			}
+		}
+
+		chains = append(chains, ch)
 
 		index++
 	}
-	// TODO: following qdisc
+	err = iptables.setIptablesChains(chains)
+	if err != nil {
+		log.Error(err, "error while setting iptables")
+		return &empty.Empty{}, err
+	}
 
 	return &empty.Empty{}, nil
 }
 
 type tcClient struct {
-	ctx    context.Context
-	nsPath string
+	ctx context.Context
+	pid uint32
 }
 
-func buildTcClient(ctx context.Context, nsPath string) tcClient {
+func buildTcClient(ctx context.Context, pid uint32) tcClient {
 	return tcClient{
 		ctx,
-		nsPath,
+		pid,
 	}
 }
 
 func (c *tcClient) flush() error {
-	cmd := bpm.DefaultProcessBuilder("tc", "qdisc", "del", "dev", "eth0", "root").SetNetNS(c.nsPath).SetContext(c.ctx).Build()
+	cmd := bpm.DefaultProcessBuilder("tc", "qdisc", "del", "dev", "eth0", "root").SetNS(c.pid, bpm.NetNS).SetContext(c.ctx).Build()
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		if (!strings.Contains(string(output), ruleNotExistLowerVersion)) && (!strings.Contains(string(output), ruleNotExist)) {
@@ -238,7 +268,7 @@ func (c *tcClient) addPrio(parent int, band int) error {
 		parentArg = fmt.Sprintf("parent %d:", parent)
 	}
 	args := fmt.Sprintf("qdisc add dev eth0 %s handle %d: prio bands %d priomap 1 2 2 2 1 2 0 0 1 1 1 1 1 1 1 1", parentArg, parent+1, band)
-	cmd := bpm.DefaultProcessBuilder("tc", strings.Split(args, " ")...).SetNetNS(c.nsPath).SetContext(c.ctx).Build()
+	cmd := bpm.DefaultProcessBuilder("tc", strings.Split(args, " ")...).SetNS(c.pid, bpm.NetNS).SetContext(c.ctx).Build()
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		return encodeOutputToError(output, err)
@@ -246,7 +276,7 @@ func (c *tcClient) addPrio(parent int, band int) error {
 
 	for index := 1; index <= 3; index++ {
 		args := fmt.Sprintf("qdisc add dev eth0 parent %d:%d handle %d: sfq", parent+1, index, parent+1+index)
-		cmd := bpm.DefaultProcessBuilder("tc", strings.Split(args, " ")...).SetNetNS(c.nsPath).SetContext(c.ctx).Build()
+		cmd := bpm.DefaultProcessBuilder("tc", strings.Split(args, " ")...).SetNS(c.pid, bpm.NetNS).SetContext(c.ctx).Build()
 		output, err := cmd.CombinedOutput()
 		if err != nil {
 			return encodeOutputToError(output, err)
@@ -260,7 +290,7 @@ func (c *tcClient) addNetem(parent string, handle string, netem *pb.Netem) error
 	log.Info("adding netem", "parent", parent, "handle", handle)
 
 	args := fmt.Sprintf("qdisc add dev eth0 %s %s netem %s", parent, handle, convertNetemToArgs(netem))
-	cmd := bpm.DefaultProcessBuilder("tc", strings.Split(args, " ")...).SetNetNS(c.nsPath).SetContext(c.ctx).Build()
+	cmd := bpm.DefaultProcessBuilder("tc", strings.Split(args, " ")...).SetNS(c.pid, bpm.NetNS).SetContext(c.ctx).Build()
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		return encodeOutputToError(output, err)
@@ -272,7 +302,7 @@ func (c *tcClient) addTbf(parent string, handle string, tbf *pb.Tbf) error {
 	log.Info("adding tbf", "parent", parent, "handle", handle)
 
 	args := fmt.Sprintf("qdisc add dev eth0 %s %s tbf %s", parent, handle, convertTbfToArgs(tbf))
-	cmd := bpm.DefaultProcessBuilder("tc", strings.Split(args, " ")...).SetNetNS(c.nsPath).SetContext(c.ctx).Build()
+	cmd := bpm.DefaultProcessBuilder("tc", strings.Split(args, " ")...).SetNS(c.pid, bpm.NetNS).SetContext(c.ctx).Build()
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		return encodeOutputToError(output, err)
@@ -286,7 +316,7 @@ func (c *tcClient) addFilter(parent string, classid string, ipset string) error 
 	args := strings.Split(fmt.Sprintf("filter add dev eth0 %s basic match", parent), " ")
 	args = append(args, fmt.Sprintf("ipset(%s dst)", ipset))
 	args = append(args, strings.Split(classid, " ")...)
-	cmd := bpm.DefaultProcessBuilder("tc", args...).SetNetNS(c.nsPath).SetContext(c.ctx).Build()
+	cmd := bpm.DefaultProcessBuilder("tc", args...).SetNS(c.pid, bpm.NetNS).SetContext(c.ctx).Build()
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		return encodeOutputToError(output, err)

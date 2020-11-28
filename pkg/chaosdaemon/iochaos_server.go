@@ -42,7 +42,12 @@ func (s *daemonServer) ApplyIoChaos(ctx context.Context, in *pb.ApplyIoChaosRequ
 	}
 
 	actions := []v1alpha1.IoChaosAction{}
-	json.Unmarshal([]byte(in.Actions), &actions)
+	err := json.Unmarshal([]byte(in.Actions), &actions)
+	if err != nil {
+		log.Error(err, "error while unmarshal json bytes")
+		return nil, err
+	}
+
 	log.Info("the length of actions", "length", len(actions))
 	if len(actions) == 0 {
 		return &pb.ApplyIoChaosResponse{
@@ -64,6 +69,7 @@ func (s *daemonServer) ApplyIoChaos(ctx context.Context, in *pb.ApplyIoChaosRequ
 		EnableSuicide().
 		SetIdentifier(in.ContainerId).
 		Build()
+	cmd.Env = append(cmd.Env, "LD_LIBRARY_PATH=/usr/local/lib/toda-glibc")
 	cmd.Stdin = strings.NewReader(in.Actions)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr

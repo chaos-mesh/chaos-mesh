@@ -19,63 +19,30 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/go-logr/logr"
 	"golang.org/x/sync/errgroup"
 	v1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/tools/cache"
-	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/common"
-	"github.com/chaos-mesh/chaos-mesh/controllers/twophase"
 	chaosdaemon "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
+	"github.com/chaos-mesh/chaos-mesh/pkg/router"
+	ctx "github.com/chaos-mesh/chaos-mesh/pkg/router/context"
+	end "github.com/chaos-mesh/chaos-mesh/pkg/router/endpoint"
 	"github.com/chaos-mesh/chaos-mesh/pkg/utils"
 )
 
 const timeChaosMsg = "time is shifted with %v"
 
-// Reconciler is time-chaos reconciler
-type Reconciler struct {
-	client.Client
-	client.Reader
-	record.EventRecorder
-	Log logr.Logger
-}
-
-// Reconcile reconciles a TimeChaos resource
-func (r *Reconciler) Reconcile(req ctrl.Request, chaos *v1alpha1.TimeChaos) (ctrl.Result, error) {
-	r.Log.Info("Reconciling timechaos")
-	scheduler := chaos.GetScheduler()
-	duration, err := chaos.GetDuration()
-	if err != nil {
-		r.Log.Error(err, fmt.Sprintf("unable to get timechaos[%s/%s]'s duration", chaos.Namespace, chaos.Name))
-		return ctrl.Result{}, err
-	}
-	if scheduler == nil && duration == nil {
-		return r.commonTimeChaos(chaos, req)
-	} else if scheduler != nil && duration != nil {
-		return r.scheduleTimeChaos(chaos, req)
-	}
-
-	// This should be ensured by admission webhook in the future
-	r.Log.Error(fmt.Errorf("timechaos[%s/%s] spec invalid", chaos.Namespace, chaos.Name), "scheduler and duration should be omitted or defined at the same time")
-	return ctrl.Result{}, fmt.Errorf("invalid scheduler and duration")
-}
-
-func (r *Reconciler) commonTimeChaos(timechaos *v1alpha1.TimeChaos, req ctrl.Request) (ctrl.Result, error) {
-	cr := common.NewReconciler(r, r.Client, r.Reader, r.Log)
-	return cr.Reconcile(req)
-}
-
-func (r *Reconciler) scheduleTimeChaos(timechaos *v1alpha1.TimeChaos, req ctrl.Request) (ctrl.Result, error) {
-	sr := twophase.NewReconciler(r, r.Client, r.Reader, r.Log)
-	return sr.Reconcile(req)
+// endpoint is time-chaos reconciler
+type endpoint struct {
+	ctx.Context
 }
 
 // Apply applies time-chaos
-func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.InnerObject) error {
+func (r *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.InnerObject) error {
 	timechaos, ok := chaos.(*v1alpha1.TimeChaos)
 	if !ok {
 		err := errors.New("chaos is not timechaos")
@@ -113,7 +80,7 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1
 	return nil
 }
 
-func (r *Reconciler) recoverPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.TimeChaos) error {
+func (r *endpoint) recoverPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.TimeChaos) error {
 	r.Log.Info("Try to recover pod", "namespace", pod.Namespace, "name", pod.Name)
 
 	pbClient, err := utils.NewChaosDaemonClient(ctx, r.Client, pod, common.ControllerCfg.ChaosDaemonPort)
@@ -152,7 +119,7 @@ func (r *Reconciler) recoverPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha
 	return g.Wait()
 }
 
-func (r *Reconciler) recoverContainer(ctx context.Context, client chaosdaemon.ChaosDaemonClient, containerID string) error {
+func (r *endpoint) recoverContainer(ctx context.Context, client chaosdaemon.ChaosDaemonClient, containerID string) error {
 	r.Log.Info("Try to recover time on container", "id", containerID)
 
 	_, err := client.RecoverTimeOffset(ctx, &chaosdaemon.TimeRequest{
@@ -163,11 +130,11 @@ func (r *Reconciler) recoverContainer(ctx context.Context, client chaosdaemon.Ch
 }
 
 // Object would return the instance of chaos
-func (r *Reconciler) Object() v1alpha1.InnerObject {
+func (r *endpoint) Object() v1alpha1.InnerObject {
 	return &v1alpha1.TimeChaos{}
 }
 
-func (r *Reconciler) applyAllPods(ctx context.Context, pods []v1.Pod, chaos *v1alpha1.TimeChaos) error {
+func (r *endpoint) applyAllPods(ctx context.Context, pods []v1.Pod, chaos *v1alpha1.TimeChaos) error {
 	g := errgroup.Group{}
 	for index := range pods {
 		pod := &pods[index]
@@ -186,7 +153,7 @@ func (r *Reconciler) applyAllPods(ctx context.Context, pods []v1.Pod, chaos *v1a
 	return g.Wait()
 }
 
-func (r *Reconciler) applyPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.TimeChaos) error {
+func (r *endpoint) applyPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.TimeChaos) error {
 	r.Log.Info("Try to shift time on pod", "namespace", pod.Namespace, "name", pod.Name)
 
 	pbClient, err := utils.NewChaosDaemonClient(ctx, r.Client, pod, common.ControllerCfg.ChaosDaemonPort)
@@ -217,7 +184,7 @@ func (r *Reconciler) applyPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.
 	return g.Wait()
 }
 
-func (r *Reconciler) applyContainer(ctx context.Context, client chaosdaemon.ChaosDaemonClient, containerID string, chaos *v1alpha1.TimeChaos) error {
+func (r *endpoint) applyContainer(ctx context.Context, client chaosdaemon.ChaosDaemonClient, containerID string, chaos *v1alpha1.TimeChaos) error {
 	r.Log.Info("Try to shift time on container", "id", containerID)
 
 	mask, err := utils.EncodeClkIds(chaos.Spec.ClockIds)
@@ -248,4 +215,14 @@ func secAndNSecFromDuration(duration time.Duration) (sec int64, nsec int64) {
 	nsec = duration.Nanoseconds() - (sec * 1e9)
 
 	return
+}
+
+func init() {
+	router.Register("timechaos", &v1alpha1.TimeChaos{}, func(obj runtime.Object) bool {
+		return true
+	}, func(ctx ctx.Context) end.Endpoint {
+		return &endpoint{
+			Context: ctx,
+		}
+	})
 }

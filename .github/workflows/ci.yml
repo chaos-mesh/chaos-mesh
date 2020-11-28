@@ -48,7 +48,7 @@ jobs:
           if [[ "$job" == "verify" ]]; then
             make check
             echo "Please make check before creating a PR"
-            git diff --quiet -- .
+            git diff --quiet -- . || (git diff | cat && false)
             make check-install-script
           elif [[ "$job" == "build" ]]; then
             make image

@@ -30,7 +30,7 @@ import (
 )
 
 // Recover means the reconciler recovers the chaos action
-func (r *Reconciler) Recover(ctx context.Context, req ctrl.Request, chaos v1alpha1.InnerObject) error {
+func (r *endpoint) Recover(ctx context.Context, req ctrl.Request, chaos v1alpha1.InnerObject) error {
 	somechaos, ok := chaos.(*v1alpha1.StressChaos)
 	if !ok {
 		err := errors.New("chaos is not StressChaos")
@@ -46,7 +46,7 @@ func (r *Reconciler) Recover(ctx context.Context, req ctrl.Request, chaos v1alph
 	return nil
 }
 
-func (r *Reconciler) cleanFinalizersAndRecover(ctx context.Context, chaos *v1alpha1.StressChaos) error {
+func (r *endpoint) cleanFinalizersAndRecover(ctx context.Context, chaos *v1alpha1.StressChaos) error {
 	var result error
 
 	for _, key := range chaos.Finalizers {
