@@ -221,9 +221,9 @@ func (r *endpoint) cleanFinalizersAndRecover(ctx context.Context, networkchaos *
 
 				result = multierror.Append(result, err)
 				continue
-			} else {
-				r.Log.Info("pod is not found or not running", "key", key)
 			}
+
+			r.Log.Info("pod is not found or not running", "key", key)
 		}
 
 		networkchaos.Finalizers = utils.RemoveFromFinalizer(networkchaos.Finalizers, response.Key.String())

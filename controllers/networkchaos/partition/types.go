@@ -296,9 +296,9 @@ func (e *endpoint) cleanFinalizersAndRecover(ctx context.Context, networkchaos *
 			if err != podnetworkmanager.ErrPodNotFound && err != podnetworkmanager.ErrPodNotRunning {
 				e.Log.Error(err, "fail to commit", "key", key)
 				continue
-			} else {
-				e.Log.Info("pod is not found or not running", "key", key)
 			}
+
+			e.Log.Info("pod is not found or not running", "key", key)
 		}
 
 		networkchaos.Finalizers = utils.RemoveFromFinalizer(networkchaos.Finalizers, response.Key.String())

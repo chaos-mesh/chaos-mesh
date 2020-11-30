@@ -186,9 +186,9 @@ func (r *endpoint) cleanFinalizersAndRecover(ctx context.Context, chaos *v1alpha
 
 				result = multierror.Append(result, err)
 				continue
-			} else {
-				r.Log.Info("pod is not found or not running", "key", key)
 			}
+
+			r.Log.Info("pod is not found or not running", "key", key)
 		}
 
 		chaos.Finalizers = utils.RemoveFromFinalizer(chaos.Finalizers, response.Key.String())
