@@ -66,8 +66,7 @@ var (
 )
 
 var (
-	printVersion            bool
-	allowHostNetworkTesting bool
+	printVersion bool
 )
 
 func init() {
@@ -79,7 +78,6 @@ func init() {
 
 func parseFlags() {
 	flag.BoolVar(&printVersion, "version", false, "print version information and exit")
-	flag.BoolVar(&allowHostNetworkTesting, "allowhostnetworktesting", false, "allows hostNetwork pods to be affected [DANGEROUS]")
 	flag.Parse()
 }
 
@@ -139,7 +137,7 @@ func main() {
 		Client:                  mgr.GetClient(),
 		Reader:                  mgr.GetAPIReader(),
 		Log:                     ctrl.Log.WithName("handler").WithName("PodNetworkChaos"),
-		AllowHostNetworkTesting: allowHostNetworkTesting,
+		AllowHostNetworkTesting: common.ControllerCfg.AllowHostNetworkTesting,
 	})
 	if err = (&chaosmeshv1alpha1.PodNetworkChaos{}).SetupWebhookWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create webhook", "webhook", "PodNetworkChaos")
