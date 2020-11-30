@@ -80,9 +80,12 @@ func SetupWithManager(mgr ctrl.Manager) error {
 			return err
 		}
 
-		ctrl.NewWebhookManagedBy(mgr).
+		if err := ctrl.NewWebhookManagedBy(mgr).
 			For(end.Object).
-			Complete()
+			Complete(); err != nil {
+			log.Error(err, "fail to setup webhook")
+			return err
+		}
 	}
 
 	return nil

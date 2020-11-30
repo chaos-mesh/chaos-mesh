@@ -16,19 +16,12 @@ package v1alpha1
 import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/validation/field"
-	ctrl "sigs.k8s.io/controller-runtime"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
 )
 
 // log is for logging in this package.
 var jvmchaoslog = logf.Log.WithName("jvmchaos-resource")
-
-func (in *JVMChaos) SetupWebhookWithManager(mgr ctrl.Manager) error {
-	return ctrl.NewWebhookManagedBy(mgr).
-		For(in).
-		Complete()
-}
 
 // +kubebuilder:webhook:path=/mutate-chaos-mesh-org-v1alpha1-jvmchaos,mutating=true,failurePolicy=fail,groups=chaos-mesh.org,resources=jvmchaos,verbs=create;update,versions=v1alpha1,name=mjvmchaos.kb.io
 
