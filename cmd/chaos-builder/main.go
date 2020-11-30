@@ -48,20 +48,14 @@ const codeHeader = `// Copyright 2020 Chaos Mesh Authors.
 // limitations under the License.
 
 package v1alpha1
-
-import (
-	"reflect"
-	"time"
-
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-)
-
 `
 
 func main() {
-	generatedCode := codeHeader
+	implCode := codeHeader + implImport
 
+	testCode := codeHeader + testImport
 	initImpl := ""
+
 	filepath.Walk("./api/v1alpha1", func(path string, info os.FileInfo, err error) error {
 		log := log.WithValues("file", path)
 
@@ -109,7 +103,8 @@ func main() {
 							return err
 						}
 
-						generatedCode += generateImpl(baseType.Name.Name)
+						implCode += generateImpl(baseType.Name.Name)
+						testCode += generateTest(baseType.Name.Name)
 						initImpl += generateInit(baseType.Name.Name)
 						continue out
 					}
@@ -120,7 +115,7 @@ func main() {
 		return nil
 	})
 
-	generatedCode += fmt.Sprintf(`
+	implCode += fmt.Sprintf(`
 func init() {
 %s
 }
@@ -128,8 +123,17 @@ func init() {
 	file, err := os.Create("./api/v1alpha1/zz_generated.chaosmesh.go")
 	if err != nil {
 		log.Error(err, "fail to create file")
+		os.Exit(1)
 	}
-	fmt.Fprint(file, generatedCode)
+	fmt.Fprint(file, implCode)
+
+	testCode += testInit
+	file, err = os.Create("./api/v1alpha1/zz_generated.chaosmesh_test.go")
+	if err != nil {
+		log.Error(err, "fail to create file")
+		os.Exit(1)
+	}
+	fmt.Fprint(file, testCode)
 
 	return
 }
