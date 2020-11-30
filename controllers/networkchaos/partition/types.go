@@ -193,7 +193,6 @@ func (e *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.I
 		key := keyErrorTuple.Key
 		err := keyErrorTuple.Err
 		if err != nil {
-			// if pod is not found or not running, don't print error log and wait next time.
 			if err != podnetworkmanager.ErrPodNotFound && err != podnetworkmanager.ErrPodNotRunning {
 				e.Log.Error(err, "fail to commit")
 			} else {
