@@ -1291,6 +1291,8 @@ spec:
             valueFrom:
               fieldRef:
                 fieldPath: metadata.namespace
+          - name: ALLOW_HOST_NETWORK_TESTING
+            value: "false"
           - name: TARGET_NAMESPACE
             value: chaos-testing
           - name: CLUSTER_SCOPED
