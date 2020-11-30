@@ -84,8 +84,7 @@ func (m *PodNetworkManager) Commit(ctx context.Context) []CommitResponse {
 	results := make([]CommitResponse, len(m.Modifications))
 	index := 0
 	for key, t := range m.Modifications {
-		index++
-		index := index
+		i := index
 
 		key := key
 		t := t
@@ -147,21 +146,15 @@ func (m *PodNetworkManager) Commit(ctx context.Context) []CommitResponse {
 				return m.Client.Update(ctx, chaos)
 			})
 
-			results[index] = CommitResponse{
+			results[i] = CommitResponse{
 				Key: key,
 				Err: updateError,
-			}
-			if updateError != nil {
-				if updateError != ErrPodNotFound && updateError != ErrPodNotRunning {
-					m.Log.Error(updateError, "error while updating")
-				} else {
-					m.Log.Info("apply podnetworkchaos while pod is not found or not running, wait next time reconcile")
-				}
-				return nil
 			}
 
 			return nil
 		})
+
+		index++
 	}
 
 	g.Wait()

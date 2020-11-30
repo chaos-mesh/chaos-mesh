@@ -82,8 +82,7 @@ func (m *PodIoManager) Commit(ctx context.Context) []CommitResponse {
 	results := make([]CommitResponse, len(m.Modifications))
 	index := 0
 	for key, t := range m.Modifications {
-		index++
-		index := index
+		i := index
 
 		key := key
 		t := t
@@ -145,13 +144,15 @@ func (m *PodIoManager) Commit(ctx context.Context) []CommitResponse {
 				return m.Client.Update(ctx, chaos)
 			})
 
-			results[index] = CommitResponse{
+			results[i] = CommitResponse{
 				Key: key,
 				Err: updateError,
 			}
 
 			return nil
 		})
+
+		index++
 	}
 
 	g.Wait()
