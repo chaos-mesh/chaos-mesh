@@ -186,15 +186,18 @@ func (e *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.I
 		return err
 	}
 
-	ch := m.Commit(ctx)
+	responses := m.Commit(ctx)
 
 	networkchaos.Status.Experiment.PodRecords = make([]v1alpha1.PodStatus, 0, len(allPods))
-	for keyErrorTuple := range ch {
+	for _, keyErrorTuple := range responses {
+		key := keyErrorTuple.Key
 		err := keyErrorTuple.Err
 		if err != nil {
 			// if pod is not found or not running, don't print error log and wait next time.
 			if err != podnetworkmanager.ErrPodNotFound && err != podnetworkmanager.ErrPodNotRunning {
 				e.Log.Error(err, "fail to commit")
+			} else {
+				e.Log.Info("pod is not found or not running", "key", key)
 			}
 			return err
 		}
@@ -285,8 +288,8 @@ func (e *endpoint) cleanFinalizersAndRecover(ctx context.Context, networkchaos *
 			Name:      name,
 		})
 	}
-	responseChan := m.Commit(ctx)
-	for response := range responseChan {
+	responses := m.Commit(ctx)
+	for _, response := range responses {
 		key := response.Key
 		err := response.Err
 		// if pod not found or not running, directly return and giveup recover.
@@ -294,7 +297,6 @@ func (e *endpoint) cleanFinalizersAndRecover(ctx context.Context, networkchaos *
 			if err != podnetworkmanager.ErrPodNotFound && err != podnetworkmanager.ErrPodNotRunning {
 				e.Log.Error(err, "fail to commit", "key", key)
 				continue
-
 			} else {
 				e.Log.Info("pod is not found or not running", "key", key)
 			}

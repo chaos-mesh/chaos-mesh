@@ -79,11 +79,14 @@ type CommitResponse struct {
 }
 
 // Commit will update all modifications to the cluster
-func (m *PodNetworkManager) Commit(ctx context.Context) <-chan CommitResponse {
-	keyChan := make(chan CommitResponse)
-
+func (m *PodNetworkManager) Commit(ctx context.Context) []CommitResponse {
 	g := errgroup.Group{}
+	results := make([]CommitResponse, len(m.Modifications))
+	index := 0
 	for key, t := range m.Modifications {
+		index++
+		index := index
+
 		key := key
 		t := t
 		g.Go(func() error {
@@ -144,13 +147,9 @@ func (m *PodNetworkManager) Commit(ctx context.Context) <-chan CommitResponse {
 				return m.Client.Update(ctx, chaos)
 			})
 
-			select {
-			case keyChan <- CommitResponse{
+			results[index] = CommitResponse{
 				Key: key,
 				Err: updateError,
-			}:
-			case <-ctx.Done():
-				return ctx.Err()
 			}
 			if updateError != nil {
 				if updateError != ErrPodNotFound && updateError != ErrPodNotRunning {
@@ -158,17 +157,13 @@ func (m *PodNetworkManager) Commit(ctx context.Context) <-chan CommitResponse {
 				} else {
 					m.Log.Info("apply podnetworkchaos while pod is not found or not running, wait next time reconcile")
 				}
-				return updateError
+				return nil
 			}
 
 			return nil
 		})
 	}
 
-	go func() {
-		g.Wait()
-		close(keyChan)
-	}()
-
-	return keyChan
+	g.Wait()
+	return results
 }
