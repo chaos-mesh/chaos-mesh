@@ -35,7 +35,8 @@ func (in *{{.Type}}) IsDeleted() bool {
 	return !in.DeletionTimestamp.IsZero()
 }
 
-// GetPause returns the annotation when the chaos needs to be paused
+// GetPause returns the annotation when if chaos is paused
+// return empty when annotations is not set, or pause key is set to empty
 func (in *{{.Type}}) GetPause() string {
 	if in.Annotations == nil {
 		return ""
@@ -43,7 +44,7 @@ func (in *{{.Type}}) GetPause() string {
 	return in.Annotations[PauseAnnotationKey]
 }
 
-// SetPause set the pausetime of annotation. Use for empty pausetime for now
+// SetPause set the pausetime of annotation. Empty meams not paused
 func (in *{{.Type}}) SetPause(s string) {
 	in.Annotations[PauseAnnotationKey] = s
 }

@@ -27,7 +27,8 @@ func (in *DNSChaos) IsDeleted() bool {
 	return !in.DeletionTimestamp.IsZero()
 }
 
-// GetPause returns the annotation when the chaos needs to be paused
+// GetPause returns the annotation when if chaos is paused
+// return empty when annotations is not set, or pause key is set to empty
 func (in *DNSChaos) GetPause() string {
 	if in.Annotations == nil {
 		return ""
@@ -35,7 +36,7 @@ func (in *DNSChaos) GetPause() string {
 	return in.Annotations[PauseAnnotationKey]
 }
 
-// SetPause set the pausetime of annotation. Use for empty pausetime for now
+// SetPause set the pausetime of annotation. Empty meams not paused
 func (in *DNSChaos) SetPause(s string) {
 	in.Annotations[PauseAnnotationKey] = s
 }
@@ -150,7 +151,8 @@ func (in *HTTPChaos) IsDeleted() bool {
 	return !in.DeletionTimestamp.IsZero()
 }
 
-// GetPause returns the annotation when the chaos needs to be paused
+// GetPause returns the annotation when if chaos is paused
+// return empty when annotations is not set, or pause key is set to empty
 func (in *HTTPChaos) GetPause() string {
 	if in.Annotations == nil {
 		return ""
@@ -158,7 +160,7 @@ func (in *HTTPChaos) GetPause() string {
 	return in.Annotations[PauseAnnotationKey]
 }
 
-// SetPause set the pausetime of annotation. Use for empty pausetime for now
+// SetPause set the pausetime of annotation. Empty meams not paused
 func (in *HTTPChaos) SetPause(s string) {
 	in.Annotations[PauseAnnotationKey] = s
 }
@@ -273,7 +275,8 @@ func (in *IoChaos) IsDeleted() bool {
 	return !in.DeletionTimestamp.IsZero()
 }
 
-// GetPause returns the annotation when the chaos needs to be paused
+// GetPause returns the annotation when if chaos is paused
+// return empty when annotations is not set, or pause key is set to empty
 func (in *IoChaos) GetPause() string {
 	if in.Annotations == nil {
 		return ""
@@ -281,7 +284,7 @@ func (in *IoChaos) GetPause() string {
 	return in.Annotations[PauseAnnotationKey]
 }
 
-// SetPause set the pausetime of annotation. Use for empty pausetime for now
+// SetPause set the pausetime of annotation. Empty meams not paused
 func (in *IoChaos) SetPause(s string) {
 	in.Annotations[PauseAnnotationKey] = s
 }
@@ -396,7 +399,8 @@ func (in *JVMChaos) IsDeleted() bool {
 	return !in.DeletionTimestamp.IsZero()
 }
 
-// GetPause returns the annotation when the chaos needs to be paused
+// GetPause returns the annotation when if chaos is paused
+// return empty when annotations is not set, or pause key is set to empty
 func (in *JVMChaos) GetPause() string {
 	if in.Annotations == nil {
 		return ""
@@ -404,7 +408,7 @@ func (in *JVMChaos) GetPause() string {
 	return in.Annotations[PauseAnnotationKey]
 }
 
-// SetPause set the pausetime of annotation. Use for empty pausetime for now
+// SetPause set the pausetime of annotation. Empty meams not paused
 func (in *JVMChaos) SetPause(s string) {
 	in.Annotations[PauseAnnotationKey] = s
 }
@@ -519,7 +523,8 @@ func (in *KernelChaos) IsDeleted() bool {
 	return !in.DeletionTimestamp.IsZero()
 }
 
-// GetPause returns the annotation when the chaos needs to be paused
+// GetPause returns the annotation when if chaos is paused
+// return empty when annotations is not set, or pause key is set to empty
 func (in *KernelChaos) GetPause() string {
 	if in.Annotations == nil {
 		return ""
@@ -527,7 +532,7 @@ func (in *KernelChaos) GetPause() string {
 	return in.Annotations[PauseAnnotationKey]
 }
 
-// SetPause set the pausetime of annotation. Use for empty pausetime for now
+// SetPause set the pausetime of annotation. Empty meams not paused
 func (in *KernelChaos) SetPause(s string) {
 	in.Annotations[PauseAnnotationKey] = s
 }
@@ -642,7 +647,8 @@ func (in *NetworkChaos) IsDeleted() bool {
 	return !in.DeletionTimestamp.IsZero()
 }
 
-// GetPause returns the annotation when the chaos needs to be paused
+// GetPause returns the annotation when if chaos is paused
+// return empty when annotations is not set, or pause key is set to empty
 func (in *NetworkChaos) GetPause() string {
 	if in.Annotations == nil {
 		return ""
@@ -650,7 +656,7 @@ func (in *NetworkChaos) GetPause() string {
 	return in.Annotations[PauseAnnotationKey]
 }
 
-// SetPause set the pausetime of annotation. Use for empty pausetime for now
+// SetPause set the pausetime of annotation. Empty meams not paused
 func (in *NetworkChaos) SetPause(s string) {
 	in.Annotations[PauseAnnotationKey] = s
 }
@@ -765,7 +771,8 @@ func (in *PodChaos) IsDeleted() bool {
 	return !in.DeletionTimestamp.IsZero()
 }
 
-// GetPause returns the annotation when the chaos needs to be paused
+// GetPause returns the annotation when if chaos is paused
+// return empty when annotations is not set, or pause key is set to empty
 func (in *PodChaos) GetPause() string {
 	if in.Annotations == nil {
 		return ""
@@ -773,7 +780,7 @@ func (in *PodChaos) GetPause() string {
 	return in.Annotations[PauseAnnotationKey]
 }
 
-// SetPause set the pausetime of annotation. Use for empty pausetime for now
+// SetPause set the pausetime of annotation. Empty meams not paused
 func (in *PodChaos) SetPause(s string) {
 	in.Annotations[PauseAnnotationKey] = s
 }
@@ -888,7 +895,8 @@ func (in *StressChaos) IsDeleted() bool {
 	return !in.DeletionTimestamp.IsZero()
 }
 
-// GetPause returns the annotation when the chaos needs to be paused
+// GetPause returns the annotation when if chaos is paused
+// return empty when annotations is not set, or pause key is set to empty
 func (in *StressChaos) GetPause() string {
 	if in.Annotations == nil {
 		return ""
@@ -896,7 +904,7 @@ func (in *StressChaos) GetPause() string {
 	return in.Annotations[PauseAnnotationKey]
 }
 
-// SetPause set the pausetime of annotation. Use for empty pausetime for now
+// SetPause set the pausetime of annotation. Empty meams not paused
 func (in *StressChaos) SetPause(s string) {
 	in.Annotations[PauseAnnotationKey] = s
 }
@@ -1011,7 +1019,8 @@ func (in *TimeChaos) IsDeleted() bool {
 	return !in.DeletionTimestamp.IsZero()
 }
 
-// GetPause returns the annotation when the chaos needs to be paused
+// GetPause returns the annotation when if chaos is paused
+// return empty when annotations is not set, or pause key is set to empty
 func (in *TimeChaos) GetPause() string {
 	if in.Annotations == nil {
 		return ""
@@ -1019,7 +1028,7 @@ func (in *TimeChaos) GetPause() string {
 	return in.Annotations[PauseAnnotationKey]
 }
 
-// SetPause set the pausetime of annotation. Use for empty pausetime for now
+// SetPause set the pausetime of annotation. Empty meams not paused
 func (in *TimeChaos) SetPause(s string) {
 	in.Annotations[PauseAnnotationKey] = s
 }
