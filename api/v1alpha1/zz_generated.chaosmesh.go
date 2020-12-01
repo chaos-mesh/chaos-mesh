@@ -20,7 +20,6 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-
 const KindDNSChaos = "DNSChaos"
 
 // IsDeleted returns whether this resource has been deleted
@@ -368,6 +367,124 @@ type IoChaosList struct {
 
 // ListChaos returns a list of chaos
 func (in *IoChaosList) ListChaos() []*ChaosInstance {
+	res := make([]*ChaosInstance, 0, len(in.Items))
+	for _, item := range in.Items {
+		res = append(res, item.GetChaos())
+	}
+	return res
+}
+
+const KindJVMChaos = "JVMChaos"
+
+// IsDeleted returns whether this resource has been deleted
+func (in *JVMChaos) IsDeleted() bool {
+	return !in.DeletionTimestamp.IsZero()
+}
+
+// IsPaused returns whether this resource has been paused
+func (in *JVMChaos) IsPaused() bool {
+	if in.Annotations == nil || in.Annotations[PauseAnnotationKey] != "true" {
+		return false
+	}
+	return true
+}
+
+// GetDuration would return the duration for chaos
+func (in *JVMChaos) GetDuration() (*time.Duration, error) {
+	if in.Spec.Duration == nil {
+		return nil, nil
+	}
+	duration, err := time.ParseDuration(*in.Spec.Duration)
+	if err != nil {
+		return nil, err
+	}
+	return &duration, nil
+}
+
+func (in *JVMChaos) GetNextStart() time.Time {
+	if in.Status.Scheduler.NextStart == nil {
+		return time.Time{}
+	}
+	return in.Status.Scheduler.NextStart.Time
+}
+
+func (in *JVMChaos) SetNextStart(t time.Time) {
+	if t.IsZero() {
+		in.Status.Scheduler.NextStart = nil
+		return
+	}
+
+	if in.Status.Scheduler.NextStart == nil {
+		in.Status.Scheduler.NextStart = &metav1.Time{}
+	}
+	in.Status.Scheduler.NextStart.Time = t
+}
+
+func (in *JVMChaos) GetNextRecover() time.Time {
+	if in.Status.Scheduler.NextRecover == nil {
+		return time.Time{}
+	}
+	return in.Status.Scheduler.NextRecover.Time
+}
+
+func (in *JVMChaos) SetNextRecover(t time.Time) {
+	if t.IsZero() {
+		in.Status.Scheduler.NextRecover = nil
+		return
+	}
+
+	if in.Status.Scheduler.NextRecover == nil {
+		in.Status.Scheduler.NextRecover = &metav1.Time{}
+	}
+	in.Status.Scheduler.NextRecover.Time = t
+}
+
+// GetScheduler would return the scheduler for chaos
+func (in *JVMChaos) GetScheduler() *SchedulerSpec {
+	return in.Spec.Scheduler
+}
+
+// GetChaos would return the a record for chaos
+func (in *JVMChaos) GetChaos() *ChaosInstance {
+	instance := &ChaosInstance{
+		Name:      in.Name,
+		Namespace: in.Namespace,
+		Kind:      KindJVMChaos,
+		StartTime: in.CreationTimestamp.Time,
+		Action:    "",
+		Status:    string(in.Status.Experiment.Phase),
+		UID:       string(in.UID),
+	}
+
+	action := reflect.ValueOf(in).Elem().FieldByName("Spec").FieldByName("Action")
+	if action.IsValid() {
+		instance.Action = action.String()
+	}
+	if in.Spec.Duration != nil {
+		instance.Duration = *in.Spec.Duration
+	}
+	if in.DeletionTimestamp != nil {
+		instance.EndTime = in.DeletionTimestamp.Time
+	}
+	return instance
+}
+
+// GetStatus returns the status
+func (in *JVMChaos) GetStatus() *ChaosStatus {
+	return &in.Status.ChaosStatus
+}
+
+// +kubebuilder:object:root=true
+
+// JVMChaosList contains a list of JVMChaos
+type JVMChaosList struct {
+	metav1.TypeMeta `json:",inline"`
+	metav1.ListMeta `json:"metadata,omitempty"`
+	Items           []JVMChaos `json:"items"`
+}
+
+// ListChaos returns a list of chaos
+func (in *JVMChaosList) ListChaos() []*ChaosInstance {
 	res := make([]*ChaosInstance, 0, len(in.Items))
 	for _, item := range in.Items {
 		res = append(res, item.GetChaos())
@@ -983,6 +1100,12 @@ func init() {
 	all.register(KindIoChaos, &ChaosKind{
 		Chaos:     &IoChaos{},
 		ChaosList: &IoChaosList{},
+	})
+
+	SchemeBuilder.Register(&JVMChaos{}, &JVMChaosList{})
+	all.register(KindJVMChaos, &ChaosKind{
+		Chaos:     &JVMChaos{},
+		ChaosList: &JVMChaosList{},
 	})
 
 	SchemeBuilder.Register(&KernelChaos{}, &KernelChaosList{})
