@@ -114,7 +114,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	err = router.SetupWithManager(mgr)
+	err = router.SetupWithManagerAndConfigs(mgr, common.ControllerCfg)
 	if err != nil {
 		setupLog.Error(err, "fail to setup with manager")
 		os.Exit(1)
@@ -176,8 +176,9 @@ func main() {
 	watchConfig(configWatcher, conf, stopCh)
 	hookServer.Register("/inject-v1-pod", &webhook.Admission{
 		Handler: &apiWebhook.PodInjector{
-			Config:  conf,
-			Metrics: metricsCollector,
+			Config:        conf,
+			ControllerCfg: common.ControllerCfg,
+			Metrics:       metricsCollector,
 		}},
 	)
 

@@ -54,7 +54,7 @@ func (r *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.I
 	source := iochaos.Namespace + "/" + iochaos.Name
 	m := podiochaosmanager.New(source, r.Log, r.Client)
 
-	pods, err := utils.SelectAndFilterPods(ctx, r.Client, r.Reader, &iochaos.Spec)
+	pods, err := utils.SelectAndFilterPods(ctx, r.Client, r.Reader, &iochaos.Spec, common.ControllerCfg.ClusterScoped, common.ControllerCfg.TargetNamespace, common.ControllerCfg.AllowedNamespaces, common.ControllerCfg.IgnoredNamespaces)
 	if err != nil {
 		r.Log.Error(err, "failed to select and filter pods")
 		return err
