@@ -40,7 +40,8 @@ const (
 type Handler struct {
 	client.Client
 	client.Reader
-	Log logr.Logger
+	Log                     logr.Logger
+	AllowHostNetworkTesting bool
 }
 
 // Apply flushes network configuration on pod
@@ -58,9 +59,11 @@ func (h *Handler) Apply(ctx context.Context, chaos *v1alpha1.PodNetworkChaos) er
 		return err
 	}
 
-	if pod.Spec.HostNetwork {
-		err := errors.Errorf("it's dangerous to inject network chaos on a pod(%s/%s) with `hostNetwork`", pod.Namespace, pod.Name)
-		return err
+	if !h.AllowHostNetworkTesting {
+		if pod.Spec.HostNetwork {
+			err := errors.Errorf("it's dangerous to inject network chaos on a pod(%s/%s) with `hostNetwork`", pod.Namespace, pod.Name)
+			return err
+		}
 	}
 
 	err = h.SetIPSets(ctx, pod, chaos)

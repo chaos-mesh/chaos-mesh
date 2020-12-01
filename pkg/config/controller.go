@@ -55,6 +55,9 @@ type ChaosControllerConfig struct {
 
 	// Namespace is the namespace which the controller manager run in
 	Namespace string `envconfig:"NAMESPACE" default:""`
+
+	// AllowHostNetworkTesting removes the restriction on chaos testing pods with `hostNetwork` set to true
+	AllowHostNetworkTesting bool `envconfig:"ALLOW_HOST_NETWORK_TESTING" default:"false"`
 }
 
 // EnvironChaosController returns the settings from the environment.
