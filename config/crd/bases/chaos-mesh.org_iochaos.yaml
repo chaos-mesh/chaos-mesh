@@ -14,6 +14,7 @@ spec:
     listKind: IoChaosList
     plural: iochaos
     singular: iochaos
+  preserveUnknownFields: false
   scope: Namespaced
   validation:
     openAPIV3Schema:
