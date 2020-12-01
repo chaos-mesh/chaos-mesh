@@ -74,7 +74,7 @@ func newDaemonServer(containerRuntime string) (*daemonServer, error) {
 
 // NewDaemonServerWithCRClient returns daemonServer with container runtime client
 func NewDaemonServerWithCRClient(crClient ContainerRuntimeInfoClient) *daemonServer {
-	return daemonServer{
+	return &daemonServer{
 		crClient:                 crClient,
 		backgroundProcessManager: bpm.NewBackgroundProcessManager(),
 	}
