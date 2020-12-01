@@ -65,6 +65,9 @@ controllerManager:
 
   podAnnotations: {}
 
+  # This is Dangerous. Run only on temporary clusters.
+  allowHostNetworkTesting: false
+
 chaosDaemon:
   image: pingcap/chaos-daemon:latest
   imagePullPolicy: IfNotPresent
@@ -75,6 +78,11 @@ chaosDaemon:
 
   podAnnotations: {}
 
+  serviceAccount: chaos-daemon
+
+  # enable a podSecurityPolicy(psp)
+  podSecurityPolicy: false
+  
   # runtime specifies which container runtime to use. Currently
   # we only supports docker and containerd.
   runtime: docker
@@ -302,6 +310,7 @@ webhook:
     - podiochaos
     - podnetworkchaos
     - dnschaos
+    - jvmchaos
 
 bpfki:
   create: false

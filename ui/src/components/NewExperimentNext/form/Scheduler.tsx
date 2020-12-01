@@ -12,6 +12,16 @@ import { useSelector } from 'react-redux'
 
 const mustBeScheduled = ['pod-kill', 'container-kill']
 
+function validateCron(value: string) {
+  let error
+
+  if (value === '') {
+    error = 'The cron is required'
+  }
+
+  return error
+}
+
 function validateDuration(value: string) {
   let error
 
@@ -97,45 +107,48 @@ const Scheduler: React.FC<SchedulerProps> = ({ errors, touched }) => {
         </Box>
       </Box>
 
-      <Box hidden={immediate}>
-        <TextField
-          id="scheduler.cron"
-          name="scheduler.cron"
-          label="Cron"
-          helperText={
-            getIn(errors, 'scheduler.cron') && getIn(touched, 'scheduler.cron') ? (
-              getIn(errors, 'scheduler.cron')
-            ) : (
-              <FormattedMessage
-                id="newE.schedule.cronHelper"
-                values={{
-                  crontabguru: (
-                    <Link href="https://crontab.guru/" target="_blank" underline="always">
-                      https://crontab.guru/
-                    </Link>
-                  ),
-                }}
-              />
-            )
-          }
-          error={getIn(errors, 'scheduler.cron') && getIn(touched, 'scheduler.cron') ? true : false}
-        />
-
-        {!scheduled && (
+      {!immediate && (
+        <Box>
           <TextField
-            id="scheduler.duration"
-            name="scheduler.duration"
-            label={T('newE.schedule.duration')}
-            validate={validateDuration}
+            id="scheduler.cron"
+            name="scheduler.cron"
+            label="Cron"
+            validate={validateCron}
             helperText={
-              getIn(errors, 'scheduler.duration') && getIn(touched, 'scheduler.duration')
-                ? getIn(errors, 'scheduler.duration')
-                : T('newE.schedule.durationHelper')
+              getIn(errors, 'scheduler.cron') && getIn(touched, 'scheduler.cron') ? (
+                getIn(errors, 'scheduler.cron')
+              ) : (
+                <FormattedMessage
+                  id="newE.schedule.cronHelper"
+                  values={{
+                    crontabguru: (
+                      <Link href="https://crontab.guru/" target="_blank" underline="always">
+                        https://crontab.guru/
+                      </Link>
+                    ),
+                  }}
+                />
+              )
             }
-            error={getIn(errors, 'scheduler.duration') && getIn(touched, 'scheduler.duration') ? true : false}
+            error={getIn(errors, 'scheduler.cron') && getIn(touched, 'scheduler.cron') ? true : false}
           />
-        )}
-      </Box>
+
+          {!scheduled && (
+            <TextField
+              id="scheduler.duration"
+              name="scheduler.duration"
+              label={T('newE.schedule.duration')}
+              validate={validateDuration}
+              helperText={
+                getIn(errors, 'scheduler.duration') && getIn(touched, 'scheduler.duration')
+                  ? getIn(errors, 'scheduler.duration')
+                  : T('newE.schedule.durationHelper')
+              }
+              error={getIn(errors, 'scheduler.duration') && getIn(touched, 'scheduler.duration') ? true : false}
+            />
+          )}
+        </Box>
+      )}
     </>
   )
 }
