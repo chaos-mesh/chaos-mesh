@@ -70,6 +70,7 @@ func NewServer(
 	cfg := ctrl.GetConfigOrDie()
 	clientpool.K8sClients, err = clientpool.New(cfg, scheme, 100)
 	if err != nil {
+		// this should never happen
 		log.Error(err, "fail to create client pool")
 		os.Exit(1)
 	}

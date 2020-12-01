@@ -32,7 +32,7 @@ var K8sClients *Clients
 
 // Clients is the client pool of k8s client
 type Clients struct {
-	sync.RWMutex
+	sync.Mutex
 
 	scheme      *runtime.Scheme
 	localConfig *rest.Config
