@@ -99,6 +99,25 @@ func (in *{{.Type}}) SetNextRecover(t time.Time) {
 	in.Status.Scheduler.NextRecover.Time = t
 }
 
+func (in *{{.Type}}) GetAutoResume() time.Time {
+	if in.Status.Scheduler.AutoResume == nil {
+		return time.Time{}
+	}
+	return in.Status.Scheduler.AutoResume.Time
+}
+
+func (in *{{.Type}}) SetAutoResume(t time.Time) {
+	if t.IsZero() {
+		in.Status.Scheduler.AutoResume = nil
+		return
+	}
+
+	if in.Status.Scheduler.AutoResume == nil {
+		in.Status.Scheduler.AutoResume = &metav1.Time{}
+	}
+	in.Status.Scheduler.AutoResume.Time = t
+}
+
 // GetScheduler would return the scheduler for chaos
 func (in *{{.Type}}) GetScheduler() *SchedulerSpec {
 	return in.Spec.Scheduler

@@ -91,6 +91,25 @@ func (in *DNSChaos) SetNextRecover(t time.Time) {
 	in.Status.Scheduler.NextRecover.Time = t
 }
 
+func (in *DNSChaos) GetAutoResume() time.Time {
+	if in.Status.Scheduler.AutoResume == nil {
+		return time.Time{}
+	}
+	return in.Status.Scheduler.AutoResume.Time
+}
+
+func (in *DNSChaos) SetAutoResume(t time.Time) {
+	if t.IsZero() {
+		in.Status.Scheduler.AutoResume = nil
+		return
+	}
+
+	if in.Status.Scheduler.AutoResume == nil {
+		in.Status.Scheduler.AutoResume = &metav1.Time{}
+	}
+	in.Status.Scheduler.AutoResume.Time = t
+}
+
 // GetScheduler would return the scheduler for chaos
 func (in *DNSChaos) GetScheduler() *SchedulerSpec {
 	return in.Spec.Scheduler
@@ -213,6 +232,25 @@ func (in *HTTPChaos) SetNextRecover(t time.Time) {
 		in.Status.Scheduler.NextRecover = &metav1.Time{}
 	}
 	in.Status.Scheduler.NextRecover.Time = t
+}
+
+func (in *HTTPChaos) GetAutoResume() time.Time {
+	if in.Status.Scheduler.AutoResume == nil {
+		return time.Time{}
+	}
+	return in.Status.Scheduler.AutoResume.Time
+}
+
+func (in *HTTPChaos) SetAutoResume(t time.Time) {
+	if t.IsZero() {
+		in.Status.Scheduler.AutoResume = nil
+		return
+	}
+
+	if in.Status.Scheduler.AutoResume == nil {
+		in.Status.Scheduler.AutoResume = &metav1.Time{}
+	}
+	in.Status.Scheduler.AutoResume.Time = t
 }
 
 // GetScheduler would return the scheduler for chaos
@@ -339,6 +377,25 @@ func (in *IoChaos) SetNextRecover(t time.Time) {
 	in.Status.Scheduler.NextRecover.Time = t
 }
 
+func (in *IoChaos) GetAutoResume() time.Time {
+	if in.Status.Scheduler.AutoResume == nil {
+		return time.Time{}
+	}
+	return in.Status.Scheduler.AutoResume.Time
+}
+
+func (in *IoChaos) SetAutoResume(t time.Time) {
+	if t.IsZero() {
+		in.Status.Scheduler.AutoResume = nil
+		return
+	}
+
+	if in.Status.Scheduler.AutoResume == nil {
+		in.Status.Scheduler.AutoResume = &metav1.Time{}
+	}
+	in.Status.Scheduler.AutoResume.Time = t
+}
+
 // GetScheduler would return the scheduler for chaos
 func (in *IoChaos) GetScheduler() *SchedulerSpec {
 	return in.Spec.Scheduler
@@ -461,6 +518,25 @@ func (in *JVMChaos) SetNextRecover(t time.Time) {
 		in.Status.Scheduler.NextRecover = &metav1.Time{}
 	}
 	in.Status.Scheduler.NextRecover.Time = t
+}
+
+func (in *JVMChaos) GetAutoResume() time.Time {
+	if in.Status.Scheduler.AutoResume == nil {
+		return time.Time{}
+	}
+	return in.Status.Scheduler.AutoResume.Time
+}
+
+func (in *JVMChaos) SetAutoResume(t time.Time) {
+	if t.IsZero() {
+		in.Status.Scheduler.AutoResume = nil
+		return
+	}
+
+	if in.Status.Scheduler.AutoResume == nil {
+		in.Status.Scheduler.AutoResume = &metav1.Time{}
+	}
+	in.Status.Scheduler.AutoResume.Time = t
 }
 
 // GetScheduler would return the scheduler for chaos
@@ -587,6 +663,25 @@ func (in *KernelChaos) SetNextRecover(t time.Time) {
 	in.Status.Scheduler.NextRecover.Time = t
 }
 
+func (in *KernelChaos) GetAutoResume() time.Time {
+	if in.Status.Scheduler.AutoResume == nil {
+		return time.Time{}
+	}
+	return in.Status.Scheduler.AutoResume.Time
+}
+
+func (in *KernelChaos) SetAutoResume(t time.Time) {
+	if t.IsZero() {
+		in.Status.Scheduler.AutoResume = nil
+		return
+	}
+
+	if in.Status.Scheduler.AutoResume == nil {
+		in.Status.Scheduler.AutoResume = &metav1.Time{}
+	}
+	in.Status.Scheduler.AutoResume.Time = t
+}
+
 // GetScheduler would return the scheduler for chaos
 func (in *KernelChaos) GetScheduler() *SchedulerSpec {
 	return in.Spec.Scheduler
@@ -709,6 +804,25 @@ func (in *NetworkChaos) SetNextRecover(t time.Time) {
 		in.Status.Scheduler.NextRecover = &metav1.Time{}
 	}
 	in.Status.Scheduler.NextRecover.Time = t
+}
+
+func (in *NetworkChaos) GetAutoResume() time.Time {
+	if in.Status.Scheduler.AutoResume == nil {
+		return time.Time{}
+	}
+	return in.Status.Scheduler.AutoResume.Time
+}
+
+func (in *NetworkChaos) SetAutoResume(t time.Time) {
+	if t.IsZero() {
+		in.Status.Scheduler.AutoResume = nil
+		return
+	}
+
+	if in.Status.Scheduler.AutoResume == nil {
+		in.Status.Scheduler.AutoResume = &metav1.Time{}
+	}
+	in.Status.Scheduler.AutoResume.Time = t
 }
 
 // GetScheduler would return the scheduler for chaos
@@ -835,6 +949,25 @@ func (in *PodChaos) SetNextRecover(t time.Time) {
 	in.Status.Scheduler.NextRecover.Time = t
 }
 
+func (in *PodChaos) GetAutoResume() time.Time {
+	if in.Status.Scheduler.AutoResume == nil {
+		return time.Time{}
+	}
+	return in.Status.Scheduler.AutoResume.Time
+}
+
+func (in *PodChaos) SetAutoResume(t time.Time) {
+	if t.IsZero() {
+		in.Status.Scheduler.AutoResume = nil
+		return
+	}
+
+	if in.Status.Scheduler.AutoResume == nil {
+		in.Status.Scheduler.AutoResume = &metav1.Time{}
+	}
+	in.Status.Scheduler.AutoResume.Time = t
+}
+
 // GetScheduler would return the scheduler for chaos
 func (in *PodChaos) GetScheduler() *SchedulerSpec {
 	return in.Spec.Scheduler
@@ -959,6 +1092,25 @@ func (in *StressChaos) SetNextRecover(t time.Time) {
 	in.Status.Scheduler.NextRecover.Time = t
 }
 
+func (in *StressChaos) GetAutoResume() time.Time {
+	if in.Status.Scheduler.AutoResume == nil {
+		return time.Time{}
+	}
+	return in.Status.Scheduler.AutoResume.Time
+}
+
+func (in *StressChaos) SetAutoResume(t time.Time) {
+	if t.IsZero() {
+		in.Status.Scheduler.AutoResume = nil
+		return
+	}
+
+	if in.Status.Scheduler.AutoResume == nil {
+		in.Status.Scheduler.AutoResume = &metav1.Time{}
+	}
+	in.Status.Scheduler.AutoResume.Time = t
+}
+
 // GetScheduler would return the scheduler for chaos
 func (in *StressChaos) GetScheduler() *SchedulerSpec {
 	return in.Spec.Scheduler
@@ -1081,6 +1233,25 @@ func (in *TimeChaos) SetNextRecover(t time.Time) {
 		in.Status.Scheduler.NextRecover = &metav1.Time{}
 	}
 	in.Status.Scheduler.NextRecover.Time = t
+}
+
+func (in *TimeChaos) GetAutoResume() time.Time {
+	if in.Status.Scheduler.AutoResume == nil {
+		return time.Time{}
+	}
+	return in.Status.Scheduler.AutoResume.Time
+}
+
+func (in *TimeChaos) SetAutoResume(t time.Time) {
+	if t.IsZero() {
+		in.Status.Scheduler.AutoResume = nil
+		return
+	}
+
+	if in.Status.Scheduler.AutoResume == nil {
+		in.Status.Scheduler.AutoResume = &metav1.Time{}
+	}
+	in.Status.Scheduler.AutoResume.Time = t
 }
 
 // GetScheduler would return the scheduler for chaos

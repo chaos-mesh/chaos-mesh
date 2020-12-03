@@ -174,7 +174,6 @@ func TestcaseTimeSkewPauseThenUnpause(
 	framework.ExpectNoError(err, "check paused chaos failed")
 
 	// wait for 1 minutes and check timer
-	framework.ExpectNoError(err, "get timer pod error")
 	err = wait.Poll(5*time.Second, 1*time.Minute, func() (done bool, err error) {
 		podTime, err := getPodTimeNS(c, port)
 		framework.ExpectNoError(err, "failed to get pod time")
@@ -218,7 +217,7 @@ func TestcaseTimeSkewPauseThenUnpause(
 	cli.Delete(ctx, timeChaos)
 }
 
-func TestcaseTimeSkewPauseForTimeThenUnpauseInMultiCycle(
+func TestcaseTimeSkewPauseThenAutoResumeAtRunning(
 	ns string,
 	cli client.Client,
 	c http.Client,
@@ -246,10 +245,10 @@ func TestcaseTimeSkewPauseForTimeThenUnpauseInMultiCycle(
 				LabelSelectors: map[string]string{"app": "timer"},
 			},
 			Mode:       v1alpha1.OnePodMode,
-			Duration:   pointer.StringPtr("29s"),
+			Duration:   pointer.StringPtr("9m"),
 			TimeOffset: "-1h",
 			Scheduler: &v1alpha1.SchedulerSpec{
-				Cron: "@every 30s",
+				Cron: "@every 10m",
 			},
 		},
 	}
@@ -291,7 +290,6 @@ func TestcaseTimeSkewPauseForTimeThenUnpauseInMultiCycle(
 	framework.ExpectNoError(err, "check paused chaos failed")
 
 	// wait for 1 minute and check timer
-	framework.ExpectNoError(err, "get timer pod error")
 	err = wait.Poll(5*time.Second, 1*time.Minute, func() (done bool, err error) {
 		podTime, err := getPodTimeNS(c, port)
 		framework.ExpectNoError(err, "failed to get pod time")
@@ -332,7 +330,7 @@ func TestcaseTimeSkewPauseForTimeThenUnpauseInMultiCycle(
 	cli.Delete(ctx, timeChaos)
 }
 
-func TestcaseTimeSkewPauseForTimeThenUnpauseInOneCycle(
+func TestcaseTimeSkewPauseThenAutoResumeAtWaiting(
 	ns string,
 	cli client.Client,
 	c http.Client,
@@ -390,11 +388,11 @@ func TestcaseTimeSkewPauseForTimeThenUnpauseInOneCycle(
 	By("pause time skew chaos experiment for 2min")
 	// sleep till pause at the first minute in cron cycle
 	var sleepTime time.Duration
-	pauseTime := time.Now()
-	if pauseTime.Sub(createTime) < time.Minute {
+	// to make sure resume at waiting state
+	if time.Now().Sub(createTime) < time.Minute {
 		sleepTime = 0
 	} else {
-		sleepTime = 4*time.Minute - pauseTime.Sub(createTime)
+		sleepTime = 4*time.Minute - time.Now().Sub(createTime)
 	}
 	time.Sleep(sleepTime)
 	// pause experiment
@@ -412,9 +410,9 @@ func TestcaseTimeSkewPauseForTimeThenUnpauseInOneCycle(
 		return false, err
 	})
 	framework.ExpectNoError(err, "check paused chaos failed")
+	pauseTime := time.Now()
 
 	// wait for 1 minute and check timer
-	framework.ExpectNoError(err, "get timer pod error")
 	err = wait.Poll(5*time.Second, 1*time.Minute, func() (done bool, err error) {
 		podTime, err := getPodTimeNS(c, port)
 		framework.ExpectNoError(err, "failed to get pod time")
@@ -429,15 +427,15 @@ func TestcaseTimeSkewPauseForTimeThenUnpauseInOneCycle(
 	By("assert pause stop and still in waiting state")
 	time.Sleep(2*time.Minute - time.Now().Sub(pauseTime))
 	err = wait.Poll(5*time.Second, 1*time.Minute, func() (done bool, err error) {
-		podTime, err := getPodTimeNS(c, port)
-		framework.ExpectNoError(err, "failed to get pod time")
-		if podTime.Before(*initTime) {
+		chaos := &v1alpha1.TimeChaos{}
+		err = cli.Get(ctx, chaosKey, chaos)
+		framework.ExpectNoError(err, "get time chaos error")
+		if chaos.Status.Experiment.Phase == v1alpha1.ExperimentPhaseWaiting {
 			return true, nil
 		}
-		return false, nil
+		return false, err
 	})
-	framework.ExpectError(err, "wait time chaos paused error")
-	framework.ExpectEqual(err.Error(), wait.ErrWaitTimeout.Error())
+	framework.ExpectNoError(err, "check paused chaos failed")
 
 	By("assert chaos experiment resumed")
 	time.Sleep(4*time.Minute - time.Now().Sub(createTime))

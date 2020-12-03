@@ -78,13 +78,12 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		duration = &zero
 	}
 
-	// disable pause at time to resume
-	if chaos.GetPause() != "" && chaos.GetPause() != "true" &&
-		(chaos.GetNextRecover().Before(now) || chaos.GetNextStart().Before(now)) {
+	// disable pause and remove auto resume at time to resume
+	autoResume := chaos.GetAutoResume()
+	if !autoResume.IsZero() && autoResume.Before(now) {
 		chaos.SetPause("")
-		r.Log.Info("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
+		chaos.SetAutoResume(time.Time{})
 	}
-	var pauseTime time.Duration
 
 	status := chaos.GetStatus()
 
@@ -112,36 +111,28 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 			}
 			// Pause time is set
 			if chaos.GetPause() != "true" {
-				pauseTime, err = time.ParseDuration(chaos.GetPause())
+				pauseTime, err := time.ParseDuration(chaos.GetPause())
 				if err != nil {
 					r.Log.Error(err, "failed to get pause time, check the format of pause input")
 					return ctrl.Result{}, err
 				}
-				nextStart := time.Now().Add(pauseTime)
+				resumeTime := time.Now().Add(pauseTime)
 
-				if nextStart.Before(chaos.GetNextRecover()) {
-					chaos.SetNextStart(nextStart)
+				cronCycle := getCronCycle(ctx, r, chaos)
+				waitTime := cronCycle - *duration
+				// resume duration after the last recover, negative means in the first running state
+				rsmTime := resumeTime.Sub(chaos.GetNextStart().Add(-waitTime)) % cronCycle
+
+				if rsmTime < 0 || rsmTime > waitTime {
+					// resume at running state
+					chaos.SetNextStart(resumeTime)
+					chaos.SetNextRecover(resumeTime.Add(*duration - rsmTime))
 				} else {
-					cronCycle := getCronCycle(ctx, r, chaos)
-					if !chaos.GetNextRecover().IsZero() {
-						waitTime := chaos.GetNextStart().Sub(chaos.GetNextRecover())
-						// resume time duration after the last recover
-						rsmTime := nextStart.Sub(chaos.GetNextRecover()) % cronCycle
-
-						if rsmTime > waitTime {
-							// resume at running state
-							chaos.SetNextStart(nextStart)
-							chaos.SetNextRecover(nextStart.Add(*duration - (rsmTime - waitTime)))
-						} else {
-							// resume at waiting state
-							chaos.SetNextStart(nextStart.Add(waitTime - rsmTime))
-							chaos.SetNextRecover(nextStart)
-						}
-					} else {
-						chaos.SetNextStart(nextStart)
-						chaos.SetNextRecover(time.Time{})
-					}
+					// resume at waiting state
+					chaos.SetNextStart(resumeTime.Add(waitTime - rsmTime))
+					chaos.SetNextRecover(resumeTime)
 				}
+				chaos.SetAutoResume(resumeTime)
 			}
 
 			now := time.Now()
@@ -256,9 +247,10 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		return ctrl.Result{}, err
 	}
 
-	if pauseTime != 0 {
-		r.Log.Info("Requeue unpause request", "after", pauseTime)
-		return ctrl.Result{RequeueAfter: pauseTime}, nil
+	autoResume = chaos.GetAutoResume()
+	if !autoResume.IsZero() {
+		r.Log.Info("Requeue unpause request", "after", autoResume.Sub(time.Now()))
+		return ctrl.Result{RequeueAfter: autoResume.Sub(time.Now())}, nil
 	}
 
 	return ctrl.Result{}, nil

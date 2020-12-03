@@ -174,6 +174,14 @@ func (in *fakeTwoPhaseChaos) SetNextRecover(t time.Time) {
 	in.NextRecover.Time = t
 }
 
+func (in *fakeTwoPhaseChaos) GetAutoResume() time.Time {
+	return time.Time{}
+}
+
+func (in *fakeTwoPhaseChaos) SetAutoResume(t time.Time) {
+	return
+}
+
 func (in *fakeTwoPhaseChaos) GetScheduler() *v1alpha1.SchedulerSpec {
 	return in.Scheduler
 }

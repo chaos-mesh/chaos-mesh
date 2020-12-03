@@ -169,6 +169,10 @@ type ScheduleStatus struct {
 	// Next time when this action will be recovered
 	// +optional
 	NextRecover *metav1.Time `json:"nextRecover,omitempty"`
+
+	// Time when this action will be auto resumed
+	// +optional
+	AutoResume *metav1.Time `json:"autoResume,omitempty"`
 }
 
 // ExperimentPhase is the current status of chaos experiment.
@@ -211,6 +215,9 @@ type InnerSchedulerObject interface {
 
 	GetNextRecover() time.Time
 	SetNextRecover(time.Time)
+
+	GetAutoResume() time.Time
+	SetAutoResume(time.Time)
 
 	GetScheduler() *SchedulerSpec
 }

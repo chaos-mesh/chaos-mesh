@@ -203,6 +203,10 @@ spec:
             scheduler:
               description: ScheduleStatus is the current status of chaos scheduler.
               properties:
+                autoResume:
+                  description: Time when this action will be auto resumed
+                  format: date-time
+                  type: string
                 nextRecover:
                   description: Next time when this action will be recovered
                   format: date-time
@@ -460,6 +464,10 @@ spec:
             scheduler:
               description: ScheduleStatus is the current status of chaos scheduler.
               properties:
+                autoResume:
+                  description: Time when this action will be auto resumed
+                  format: date-time
+                  type: string
                 nextRecover:
                   description: Next time when this action will be recovered
                   format: date-time
@@ -788,6 +796,10 @@ spec:
             scheduler:
               description: ScheduleStatus is the current status of chaos scheduler.
               properties:
+                autoResume:
+                  description: Time when this action will be auto resumed
+                  format: date-time
+                  type: string
                 nextRecover:
                   description: Next time when this action will be recovered
                   format: date-time
@@ -1281,6 +1293,10 @@ spec:
             scheduler:
               description: ScheduleStatus is the current status of chaos scheduler.
               properties:
+                autoResume:
+                  description: Time when this action will be auto resumed
+                  format: date-time
+                  type: string
                 nextRecover:
                   description: Next time when this action will be recovered
                   format: date-time
@@ -1563,6 +1579,10 @@ spec:
             scheduler:
               description: ScheduleStatus is the current status of chaos scheduler.
               properties:
+                autoResume:
+                  description: Time when this action will be auto resumed
+                  format: date-time
+                  type: string
                 nextRecover:
                   description: Next time when this action will be recovered
                   format: date-time
@@ -1991,6 +2011,10 @@ spec:
             scheduler:
               description: ScheduleStatus is the current status of chaos scheduler.
               properties:
+                autoResume:
+                  description: Time when this action will be auto resumed
+                  format: date-time
+                  type: string
                 nextRecover:
                   description: Next time when this action will be recovered
                   format: date-time
@@ -2232,6 +2256,10 @@ spec:
             scheduler:
               description: ScheduleStatus is the current status of chaos scheduler.
               properties:
+                autoResume:
+                  description: Time when this action will be auto resumed
+                  format: date-time
+                  type: string
                 nextRecover:
                   description: Next time when this action will be recovered
                   format: date-time
@@ -2704,6 +2732,10 @@ spec:
             scheduler:
               description: ScheduleStatus is the current status of chaos scheduler.
               properties:
+                autoResume:
+                  description: Time when this action will be auto resumed
+                  format: date-time
+                  type: string
                 nextRecover:
                   description: Next time when this action will be recovered
                   format: date-time
@@ -2980,6 +3012,10 @@ spec:
             scheduler:
               description: ScheduleStatus is the current status of chaos scheduler.
               properties:
+                autoResume:
+                  description: Time when this action will be auto resumed
+                  format: date-time
+                  type: string
                 nextRecover:
                   description: Next time when this action will be recovered
                   format: date-time
@@ -3216,6 +3252,10 @@ spec:
             scheduler:
               description: ScheduleStatus is the current status of chaos scheduler.
               properties:
+                autoResume:
+                  description: Time when this action will be auto resumed
+                  format: date-time
+                  type: string
                 nextRecover:
                   description: Next time when this action will be recovered
                   format: date-time
