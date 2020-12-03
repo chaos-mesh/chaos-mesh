@@ -1,6 +1,7 @@
 import * as Yup from 'yup'
 
 import { ReactComponent as ClockIcon } from '../images/time.svg'
+import { ReactComponent as DNSIcon } from '../images/dns.svg'
 import { ExperimentKind } from 'components/NewExperiment/types'
 import { ReactComponent as FileSystemIOIcon } from '../images/io.svg'
 import { ReactComponent as LinuxKernelIcon } from '../images/kernel.svg'
@@ -29,7 +30,7 @@ interface Category {
   spec: Spec
 }
 interface Target {
-  name: JSX.Element
+  name: JSX.Element | string
   icon: JSX.Element
   categories?: Category[]
   spec?: Spec
@@ -119,6 +120,16 @@ const ioCommon: Spec = {
     label: 'Methods',
     value: [],
     helperText: 'Optional. The IO methods for injecting IOChaos actions',
+  },
+}
+
+const dnsCommon: Spec = {
+  scope: {
+    field: 'select',
+    items: ['', 'outer', 'inner', 'all'],
+    label: 'Scope',
+    value: '',
+    helperText: 'Specifies the dns scope',
   },
 }
 
@@ -432,6 +443,32 @@ const data: Record<Kind, Target> = {
       container_name: '',
     } as any,
   },
+  DNSChaos: {
+    name: 'DNS',
+    icon: (
+      <SvgIcon fontSize="large">
+        <DNSIcon />
+      </SvgIcon>
+    ),
+    categories: [
+      {
+        name: 'Error',
+        key: 'error',
+        spec: {
+          action: 'error' as any,
+          ...dnsCommon,
+        },
+      },
+      {
+        name: 'Random',
+        key: 'random',
+        spec: {
+          action: 'random' as any,
+          ...dnsCommon,
+        },
+      },
+    ],
+  },
 }
 
 export const schema: Partial<Record<Kind, Record<string, Yup.ObjectSchema>>> = {
@@ -484,6 +521,14 @@ export const schema: Partial<Record<Kind, Record<string, Yup.ObjectSchema>>> = {
   TimeChaos: {
     default: Yup.object({
       time_offset: Yup.string().required('The time offset is required'),
+    }),
+  },
+  DNSChaos: {
+    error: Yup.object({
+      scope: Yup.string().required('The scope is required'),
+    }),
+    random: Yup.object({
+      scope: Yup.string().required('The scope is required'),
     }),
   },
 }
