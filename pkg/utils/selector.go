@@ -74,11 +74,11 @@ func SelectAndFilterPods(ctx context.Context, c client.Client, r client.Reader, 
 	return filteredPod, nil
 }
 
+//revive:disable:flag-parameter
+
 // SelectPods returns the list of pods that are available for pod chaos action.
 // It returns all pods that match the configured label, annotation and namespace selectors.
 // If pods are specifically specified by `selector.Pods`, it just returns the selector.Pods.
-
-//revive:disable:flag-parameter
 func SelectPods(ctx context.Context, c client.Client, r client.Reader, selector v1alpha1.SelectorSpec, clusterScoped bool, targetNamespace string, allowedNamespaces, ignoredNamespaces string) ([]v1.Pod, error) {
 	// TODO: refactor: make different selectors to replace if-else logics
 	var pods []v1.Pod
