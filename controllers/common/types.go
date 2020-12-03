@@ -17,7 +17,6 @@ import (
 	"context"
 	"fmt"
 	"os"
-	"regexp"
 	"strings"
 	"time"
 
@@ -25,6 +24,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/config"
 	ctx "github.com/chaos-mesh/chaos-mesh/pkg/router/context"
 	endpoint "github.com/chaos-mesh/chaos-mesh/pkg/router/endpoint"
+	"github.com/chaos-mesh/chaos-mesh/pkg/utils"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/util/retry"
@@ -44,7 +44,7 @@ const emptyString = ""
 
 var log = ctrl.Log.WithName("controller")
 
-//ControllerCfg is a global variable to keep the configuration for Chaos Controller
+// ControllerCfg is a global variable to keep the configuration for Chaos Controller
 var ControllerCfg *config.ChaosControllerConfig
 
 func init() {
@@ -79,7 +79,7 @@ func validate(config *config.ChaosControllerConfig) error {
 		if strings.TrimSpace(config.TargetNamespace) == "" {
 			return fmt.Errorf("no target namespace specified with namespace scoped mode")
 		}
-		if !isAllowedNamespaces(config.TargetNamespace, config.AllowedNamespaces, config.IgnoredNamespaces) {
+		if !utils.IsAllowedNamespaces(config.TargetNamespace, config.AllowedNamespaces, config.IgnoredNamespaces) {
 			return fmt.Errorf("target namespace %s is not allowed with filter, please check config AllowedNamespaces and IgnoredNamespaces", config.TargetNamespace)
 		}
 
@@ -89,27 +89,6 @@ func validate(config *config.ChaosControllerConfig) error {
 	}
 
 	return nil
-}
-
-// FIXME: duplicated with utils.IsAllowedNamespaces, it should considered with some dependency problems.
-func isAllowedNamespaces(namespace, allowedNamespace, ignoredNamespace string) bool {
-	if allowedNamespace != "" {
-		matched, err := regexp.MatchString(allowedNamespace, namespace)
-		if err != nil {
-			return false
-		}
-		return matched
-	}
-
-	if ignoredNamespace != "" {
-		matched, err := regexp.MatchString(ignoredNamespace, namespace)
-		if err != nil {
-			return false
-		}
-		return !matched
-	}
-
-	return true
 }
 
 // Reconciler for common chaos
