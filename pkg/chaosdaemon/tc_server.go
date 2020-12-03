@@ -30,10 +30,11 @@ import (
 const (
 	ruleNotExist             = "Cannot delete qdisc with handle of zero."
 	ruleNotExistLowerVersion = "RTNETLINK answers: No such file or directory"
+
+	defaultDevice = "eth0"
 )
 
 func generateQdiscArgs(action string, qdisc *pb.Qdisc) ([]string, error) {
-
 	if qdisc == nil {
 		return nil, fmt.Errorf("qdisc is required")
 	}
@@ -67,6 +68,12 @@ func generateQdiscArgs(action string, qdisc *pb.Qdisc) ([]string, error) {
 	return args, nil
 }
 
+func setDefaultTcsRequest(in *pb.TcsRequest) {
+	if len(in.Device) == 0 {
+		in.Device = defaultDevice
+	}
+}
+
 func (s *daemonServer) SetTcs(ctx context.Context, in *pb.TcsRequest) (*empty.Empty, error) {
 	log.Info("handling tc request", "tcs", in)
 
@@ -74,6 +81,8 @@ func (s *daemonServer) SetTcs(ctx context.Context, in *pb.TcsRequest) (*empty.Em
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "get pid from containerID error: %v", err)
 	}
+
+	setDefaultTcsRequest(in)
 
 	client := buildTcClient(ctx, pid)
 	err = client.flush(in.Device)
