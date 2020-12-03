@@ -34,6 +34,10 @@ type ChaosDashboardConfig struct {
 	// TargetNamespace is the target namespace to injecting chaos.
 	// It only works with ClusterScoped is false;
 	TargetNamespace string `envconfig:"TARGET_NAMESPACE" default:""`
+	// AllowedNamespaces is a regular expression, and matching namespace will allow the chaos task to be performed
+	AllowedNamespaces string `envconfig:"ALLOWED_NAMESPACES" default:""`
+	// IgnoredNamespaces is a regular expression, and the chaos task will be ignored by a matching namespace
+	IgnoredNamespaces string `envconfig:"IGNORED_NAMESPACES" default:""`
 }
 
 // PersistTTLConfig defines the configuration of ttl
