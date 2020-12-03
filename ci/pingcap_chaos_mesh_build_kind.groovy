@@ -15,7 +15,7 @@ metadata:
 spec:
   containers:
   - name: main
-    image: gcr.io/k8s-testimages/kubekins-e2e:v20200311-1e25827-master
+    image: hub.pingcap.net/yangkeao/chaos-mesh-e2e
     command:
     - runner.sh
     # Clean containers on TERM signal in root process to avoid cgroup leaking.
