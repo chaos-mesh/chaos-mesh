@@ -113,7 +113,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 			if chaos.GetPause() != "true" {
 				pauseTime, err := time.ParseDuration(chaos.GetPause())
 				if err != nil {
-					r.Log.Error(err, "failed to get pause time, check the format of pause input")
+					r.Log.Error(err, "failed to parse duration, check the format of pause input")
 					return ctrl.Result{}, err
 				}
 				resumeTime := time.Now().Add(pauseTime)
