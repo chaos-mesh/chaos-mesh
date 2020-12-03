@@ -114,7 +114,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	err = router.SetupWithManager(mgr)
+	err = router.SetupWithManagerAndConfigs(mgr, common.ControllerCfg)
 	if err != nil {
 		setupLog.Error(err, "fail to setup with manager")
 		os.Exit(1)
@@ -134,9 +134,10 @@ func main() {
 	// We only setup webhook for podnetworkchaos, and the logic of applying chaos are in the validation
 	// webhook, because we need to get the running result synchronously in network chaos reconciler
 	chaosmeshv1alpha1.RegisterRawPodNetworkHandler(&podnetworkchaos.Handler{
-		Client: mgr.GetClient(),
-		Reader: mgr.GetAPIReader(),
-		Log:    ctrl.Log.WithName("handler").WithName("PodNetworkChaos"),
+		Client:                  mgr.GetClient(),
+		Reader:                  mgr.GetAPIReader(),
+		Log:                     ctrl.Log.WithName("handler").WithName("PodNetworkChaos"),
+		AllowHostNetworkTesting: common.ControllerCfg.AllowHostNetworkTesting,
 	})
 	if err = (&chaosmeshv1alpha1.PodNetworkChaos{}).SetupWebhookWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create webhook", "webhook", "PodNetworkChaos")
@@ -175,8 +176,9 @@ func main() {
 	watchConfig(configWatcher, conf, stopCh)
 	hookServer.Register("/inject-v1-pod", &webhook.Admission{
 		Handler: &apiWebhook.PodInjector{
-			Config:  conf,
-			Metrics: metricsCollector,
+			Config:        conf,
+			ControllerCfg: common.ControllerCfg,
+			Metrics:       metricsCollector,
 		}},
 	)
 

@@ -38,7 +38,7 @@ type ChaosControllerConfig struct {
 	CertsDir string `envconfig:"CERTS_DIR" default:"/etc/webhook/certs"`
 	// AllowedNamespaces is a regular expression, and matching namespace will allow the chaos task to be performed
 	AllowedNamespaces string `envconfig:"ALLOWED_NAMESPACES" default:""`
-	// AllowedNamespaces is a regular expression, and the chaos task will be ignored by a matching namespace
+	// IgnoredNamespaces is a regular expression, and the chaos task will be ignored by a matching namespace
 	IgnoredNamespaces string `envconfig:"IGNORED_NAMESPACES" default:""`
 	// RPCTimeout is timeout of RPC between controllers and chaos-operator
 	RPCTimeout    time.Duration `envconfig:"RPC_TIMEOUT" default:"1m"`
@@ -55,6 +55,9 @@ type ChaosControllerConfig struct {
 
 	// Namespace is the namespace which the controller manager run in
 	Namespace string `envconfig:"NAMESPACE" default:""`
+
+	// AllowHostNetworkTesting removes the restriction on chaos testing pods with `hostNetwork` set to true
+	AllowHostNetworkTesting bool `envconfig:"ALLOW_HOST_NETWORK_TESTING" default:"false"`
 }
 
 // EnvironChaosController returns the settings from the environment.

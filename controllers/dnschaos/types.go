@@ -54,14 +54,14 @@ func (r *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.I
 		return err
 	}
 
-	pods, err := utils.SelectAndFilterPods(ctx, r.Client, r.Reader, &dnschaos.Spec)
+	pods, err := utils.SelectAndFilterPods(ctx, r.Client, r.Reader, &dnschaos.Spec, common.ControllerCfg.ClusterScoped, common.ControllerCfg.TargetNamespace, common.ControllerCfg.AllowedNamespaces, common.ControllerCfg.IgnoredNamespaces)
 	if err != nil {
 		r.Log.Error(err, "failed to select and generate pods")
 		return err
 	}
 
 	// get dns server's ip used for chaos
-	service, err := utils.GetService(ctx, r.Client, "", common.ControllerCfg.DNSServiceName)
+	service, err := utils.GetService(ctx, r.Client, "", common.ControllerCfg.Namespace, common.ControllerCfg.DNSServiceName)
 	if err != nil {
 		r.Log.Error(err, "fail to get service")
 		return err
@@ -104,7 +104,7 @@ func (r *endpoint) Recover(ctx context.Context, req ctrl.Request, chaos v1alpha1
 	}
 
 	// get dns server's ip used for chaos
-	service, err := utils.GetService(ctx, r.Client, "", common.ControllerCfg.DNSServiceName)
+	service, err := utils.GetService(ctx, r.Client, "", common.ControllerCfg.Namespace, common.ControllerCfg.DNSServiceName)
 	if err != nil {
 		r.Log.Error(err, "fail to get service")
 		return err
