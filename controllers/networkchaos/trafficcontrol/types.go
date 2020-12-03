@@ -29,6 +29,7 @@ import (
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/common"
+	"github.com/chaos-mesh/chaos-mesh/controllers/iochaos/podiochaosmanager"
 	"github.com/chaos-mesh/chaos-mesh/controllers/networkchaos/podnetworkmanager"
 	"github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos/ipset"
 	"github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos/netutils"
@@ -114,6 +115,26 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1
 	}
 
 	pods := append(sources, targets...)
+	type podPositionTuple struct {
+		Pod      v1.Pod
+		Position string
+	}
+	keyPodMap := make(map[types.NamespacedName]podPositionTuple)
+	for index, pod := range pods {
+		position := ""
+		if index < len(sources) {
+			position = "source"
+		} else {
+			position = "target"
+		}
+		keyPodMap[types.NamespacedName{
+			Name:      pod.Name,
+			Namespace: pod.Namespace,
+		}] = podPositionTuple{
+			Pod:      pod,
+			Position: position,
+		}
+	}
 
 	externalCidrs, err := netutils.ResolveCidrs(networkchaos.Spec.ExternalTargets)
 	if err != nil {
@@ -146,37 +167,42 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1
 		return err
 	}
 
-	err = m.Commit(ctx)
-	if err != nil {
-		// if pod is not found or not running, don't print error log and wait next time.
-		if err != podnetworkmanager.ErrPodNotFound && err != podnetworkmanager.ErrPodNotRunning {
-			r.Log.Error(err, "fail to commit")
-		}
-		return err
-	}
+	responses := m.Commit(ctx)
 
 	networkchaos.Status.Experiment.PodRecords = make([]v1alpha1.PodStatus, 0, len(pods))
-	for index, pod := range pods {
-		ps := v1alpha1.PodStatus{
-			Namespace: pod.Namespace,
-			Name:      pod.Name,
-			HostIP:    pod.Status.HostIP,
-			PodIP:     pod.Status.PodIP,
-			Action:    string(networkchaos.Spec.Action),
+	for _, keyErrorTuple := range responses {
+		key := keyErrorTuple.Key
+		err := keyErrorTuple.Err
+		if err != nil {
+			if err != podiochaosmanager.ErrPodNotFound && err != podiochaosmanager.ErrPodNotRunning {
+				r.Log.Error(err, "fail to commit")
+			} else {
+				r.Log.Info("pod is not found or not running", "key", key)
+			}
+			return err
 		}
 
-		if index < len(sources) {
+		pod := keyPodMap[keyErrorTuple.Key]
+		ps := v1alpha1.PodStatus{
+			Namespace: pod.Pod.Namespace,
+			Name:      pod.Pod.Name,
+			HostIP:    pod.Pod.Status.HostIP,
+			PodIP:     pod.Pod.Status.PodIP,
+			Action:    string(networkchaos.Spec.Action),
+		}
+		if pod.Position == "source" {
 			ps.Message = networkChaosSourceMsg
 		} else {
 			ps.Message = networkChaosTargetMsg
 		}
 
+		// TODO: add source, target and tc action message
 		if networkchaos.Spec.Duration != nil {
 			ps.Message += fmt.Sprintf(networkTcActionMsg, *networkchaos.Spec.Duration)
 		}
-
 		networkchaos.Status.Experiment.PodRecords = append(networkchaos.Status.Experiment.PodRecords, ps)
 	}
+
 	r.Event(networkchaos, v1.EventTypeNormal, utils.EventChaosInjected, "")
 	return nil
 }
@@ -214,14 +240,24 @@ func (r *Reconciler) cleanFinalizersAndRecover(ctx context.Context, networkchaos
 			Namespace: ns,
 			Name:      name,
 		})
-
-		err = m.Commit(ctx)
+	}
+	responses := m.Commit(ctx)
+	for _, response := range responses {
+		key := response.Key
+		err := response.Err
 		// if pod not found or not running, directly return and giveup recover.
-		if err != nil && err != podnetworkmanager.ErrPodNotFound && err != podnetworkmanager.ErrPodNotRunning {
-			r.Log.Error(err, "fail to commit")
+		if err != nil {
+			if err != podnetworkmanager.ErrPodNotFound && err != podnetworkmanager.ErrPodNotRunning {
+				r.Log.Error(err, "fail to commit", "key", key)
+
+				result = multierror.Append(result, err)
+				continue
+			}
+
+			r.Log.Info("pod is not found or not running", "key", key)
 		}
 
-		networkchaos.Finalizers = utils.RemoveFromFinalizer(networkchaos.Finalizers, key)
+		networkchaos.Finalizers = utils.RemoveFromFinalizer(networkchaos.Finalizers, response.Key.String())
 	}
 	r.Log.Info("After recovering", "finalizers", networkchaos.Finalizers)
 
