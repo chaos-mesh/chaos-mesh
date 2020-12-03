@@ -72,6 +72,14 @@ func newDaemonServer(containerRuntime string) (*daemonServer, error) {
 	}, nil
 }
 
+// NewDaemonServerWithCRClient returns daemonServer with container runtime client
+func NewDaemonServerWithCRClient(crClient ContainerRuntimeInfoClient) *daemonServer {
+	return &daemonServer{
+		crClient:                 crClient,
+		backgroundProcessManager: bpm.NewBackgroundProcessManager(),
+	}
+}
+
 func newGRPCServer(containerRuntime string, reg prometheus.Registerer) (*grpc.Server, error) {
 	ds, err := newDaemonServer(containerRuntime)
 	if err != nil {

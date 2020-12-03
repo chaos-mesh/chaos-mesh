@@ -56,7 +56,7 @@ func (r *endpoint) Apply(ctx context.Context, req ctrl.Request, obj v1alpha1.Inn
 		return fmt.Errorf("podchaos[%s/%s] the name of container is empty", podchaos.Namespace, podchaos.Name)
 	}
 
-	pods, err := utils.SelectAndFilterPods(ctx, r.Client, r.Reader, &podchaos.Spec)
+	pods, err := utils.SelectAndFilterPods(ctx, r.Client, r.Reader, &podchaos.Spec, common.ControllerCfg.ClusterScoped, common.ControllerCfg.TargetNamespace, common.ControllerCfg.AllowedNamespaces, common.ControllerCfg.IgnoredNamespaces)
 	if err != nil {
 		r.Log.Error(err, "fail to select and filter pods")
 		return err
