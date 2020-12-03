@@ -22,7 +22,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos/ipset"
 	"github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos/iptable"
-	"github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos/tc"
+	tcpkg "github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos/tc"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
 	"github.com/chaos-mesh/chaos-mesh/pkg/utils"
 
@@ -150,7 +150,7 @@ func (h *Handler) SetTcs(ctx context.Context, pod *corev1.Pod, chaos *v1alpha1.P
 	}
 
 	h.Log.Info("setting tcs", "tcs", tcs)
-	return tc.SetTcs(ctx, h.Client, pod, tcs)
+	return tcpkg.SetTcs(ctx, h.Client, pod, tcs)
 }
 
 // NetemSpec defines the interface to convert to a Netem protobuf
