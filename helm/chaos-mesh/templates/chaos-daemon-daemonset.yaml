@@ -85,6 +85,7 @@ spec:
           ports:
             - name: grpc
               containerPort: {{ .Values.chaosDaemon.grpcPort }}
+              hostPort: {{ .Values.chaosDaemon.grpcPort }}
             - name: http
               containerPort: {{ .Values.chaosDaemon.httpPort }}
       {{- with .Values.chaosDaemon.tolerations }}
