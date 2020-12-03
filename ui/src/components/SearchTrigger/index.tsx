@@ -47,21 +47,22 @@ const SearchTrigger: React.FC = () => {
     const keyMap: Record<string, boolean> = {}
     const keyDownHandler = (e: KeyboardEvent) => {
       keyMap[e.key] = true
+
       // In some cases, such as pressing multiple keys almost at the same time, the browser won't fire the keyup event repeatedly.
       if ((keyMap['Meta'] && keyMap['p']) || (keyMap['Control'] && keyMap['p'])) {
         e.preventDefault()
+
         handleOpen()
+
+        delete keyMap['Meta']
+        delete keyMap['Control']
+        delete keyMap['p']
       }
-    }
-    const keyUpHandler = (e: KeyboardEvent) => {
-      keyMap[e.key] = false
     }
 
     document.addEventListener('keydown', keyDownHandler)
-    document.addEventListener('keyup', keyUpHandler)
     return () => {
       document.removeEventListener('keydown', keyDownHandler)
-      document.removeEventListener('keyup', keyUpHandler)
     }
   }, [])
 
