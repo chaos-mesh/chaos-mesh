@@ -55,7 +55,7 @@ func (r *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.I
 
 	timechaos.SetDefaultValue()
 
-	pods, err := utils.SelectAndFilterPods(ctx, r.Client, r.Reader, &timechaos.Spec)
+	pods, err := utils.SelectAndFilterPods(ctx, r.Client, r.Reader, &timechaos.Spec, common.ControllerCfg.ClusterScoped, common.ControllerCfg.TargetNamespace, common.ControllerCfg.AllowedNamespaces, common.ControllerCfg.IgnoredNamespaces)
 
 	if err != nil {
 		r.Log.Error(err, "failed to select and filter pods")
