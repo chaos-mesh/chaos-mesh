@@ -226,9 +226,9 @@ func (r *Reconciler) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1
 		err := keyErrorTuple.Err
 		if err != nil {
 			if err != podnetworkmanager.ErrPodNotFound && err != podnetworkmanager.ErrPodNotRunning {
-				e.Log.Error(err, "fail to commit")
+				r.Log.Error(err, "fail to commit")
 			} else {
-				e.Log.Info("pod is not found or not running", "key", key)
+				r.Log.Info("pod is not found or not running", "key", key)
 			}
 			return err
 		}
