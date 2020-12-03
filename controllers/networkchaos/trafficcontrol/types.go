@@ -68,7 +68,7 @@ func (r *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.I
 
 	sources, err := utils.SelectAndFilterPods(ctx, r.Client, r.Reader, &networkchaos.Spec, common.ControllerCfg.ClusterScoped, common.ControllerCfg.TargetNamespace, common.ControllerCfg.AllowedNamespaces, common.ControllerCfg.IgnoredNamespaces)
 	if err != nil {
-		r.Log.Error(err, "failed to select and filter pods")
+		r.Log.Error(err, "failed to select and filter source pods")
 		return err
 	}
 
@@ -78,7 +78,7 @@ func (r *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.I
 	if networkchaos.Spec.Target != nil {
 		targets, err = utils.SelectAndFilterPods(ctx, r.Client, r.Reader, networkchaos.Spec.Target, common.ControllerCfg.ClusterScoped, common.ControllerCfg.TargetNamespace, common.ControllerCfg.AllowedNamespaces, common.ControllerCfg.IgnoredNamespaces)
 		if err != nil {
-			r.Log.Error(err, "failed to select and filter pods")
+			r.Log.Error(err, "failed to select and filter target pods")
 			return err
 		}
 	}
