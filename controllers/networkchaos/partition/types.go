@@ -326,18 +326,11 @@ func (r *Reconciler) cleanFinalizersAndRecover(ctx context.Context, networkchaos
 		// if pod not found or not running, directly return and giveup recover.
 		if err != nil {
 			if err != podnetworkmanager.ErrPodNotFound && err != podnetworkmanager.ErrPodNotRunning {
-				e.Log.Error(err, "fail to commit", "key", key)
+				r.Log.Error(err, "fail to commit", "key", key)
 				continue
 			}
 
-<<<<<<< HEAD
-		err = m.Commit(ctx)
-		// if pod not found or not running, directly return and giveup recover.
-		if err != nil && err != podnetworkmanager.ErrPodNotFound && err != podnetworkmanager.ErrPodNotRunning {
-			r.Log.Error(err, "fail to commit")
-=======
-			e.Log.Info("pod is not found or not running", "key", key)
->>>>>>> 3d3cd87... Fix networkchaos/iochaos recover slow (#1215)
+			r.Log.Info("pod is not found or not running", "key", key)
 		}
 
 		networkchaos.Finalizers = utils.RemoveFromFinalizer(networkchaos.Finalizers, response.Key.String())
