@@ -79,6 +79,7 @@ Blogs on Chaos Mesh design & implementation, features, chaos engineering, commun
 - [Building an Automated Testing Framework Based on Chaos Mesh® and Argo](https://chaos-mesh.org/blog/building_automated_testing_framework)
 - [Chaos Mesh 1.0: Chaos Engineering on Kubernetes Made Easier](https://chaos-mesh.org/blog/chaos-mesh-1.0-chaos-engineering-on-kubernetes-made-easier)
 
+
 ## Contribute
 
 See the [contributing guide](./CONTRIBUTING.md) and [development guide](https://chaos-mesh.org/docs/development_guides/development_overview).
@@ -111,6 +112,7 @@ On the fourth Thursday of every month (unless otherwise specified), the Chaos Me
 - Ronak Banka: [Getting Started with Chaos Mesh and Kubernetes](https://itnext.io/getting-started-with-chaos-mesh-and-kubernetes-bfd98d25d481)
 - kondoumh: [​Kubernetes ネイティブなカオスエンジニアリングツール Chaos Mesh を使ってみる](https://blog.kondoumh.com/entry/2020/10/23/123431)
 - Vadim Tkachenko: [ChaosMesh to Create Chaos in Kubernetes](https://www.percona.com/blog/2020/11/05/chaosmesh-to-create-chaos-in-kubernetes/)
+- Hui Zhang: [How a Top Game Company Uses Chaos Engineering to Improve Testing](https://chaos-mesh.org/blog/how-a-top-game-company-uses-chaos-engineering-to-improve-testing)
 
 ## Media coverage
 - CodeZine: [オープンソースのカオステストツール「Chaos Mesh 1.0」、一般提供を開始](https://codezine.jp/article/detail/12996)
