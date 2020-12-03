@@ -26,6 +26,7 @@ type Config struct {
 	ChaosFSImage      string
 	ChaosScriptsImage string
 	ChaosDNSImage     string
+	InstallChaosMesh  bool
 }
 
 // NewDefaultConfig describe the default configuration for operator test
@@ -42,5 +43,6 @@ func NewDefaultConfig() *Config {
 		ChaosFSImage:      "localhost:5000/pingcap/chaos-fs:latest",
 		ChaosScriptsImage: "localhost:5000/pingcap/chaos-scripts:latest",
 		ChaosDNSImage:     "localhost:5000/pingcap/chaos-dns:latest",
+		InstallChaosMesh:  false,
 	}
 }

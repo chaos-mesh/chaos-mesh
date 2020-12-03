@@ -153,6 +153,7 @@ e2e_args=(
     --e2e-image="${DOCKER_REGISTRY}/pingcap/e2e-helper:${IMAGE_TAG}"
     --chaos-fs-image="${DOCKER_REGISTRY}/pingcap/chaos-fs:${IMAGE_TAG}"
     --chaos-scripts-image="${DOCKER_REGISTRY}/pingcap/chaos-scripts:${IMAGE_TAG}"
+    --install-chaos-mesh
 )
 
 if [ -n "$REPORT_DIR" ]; then

@@ -114,41 +114,43 @@ func setupSuite() {
 }
 
 var _ = ginkgo.SynchronizedBeforeSuite(func() []byte {
-	ginkgo.By("Clear all helm releases")
-	helmClearCmd := "helm ls --all --short | xargs -n 1 -r helm delete --purge"
-	if err := exec.Command("sh", "-c", helmClearCmd).Run(); err != nil {
-		framework.Failf("failed to clear helm releases (cmd: %q, error: %v", helmClearCmd, err)
+	if e2econfig.TestConfig.InstallChaosMesh {
+		ginkgo.By("Clear all helm releases")
+		helmClearCmd := "helm ls --all --short | xargs -n 1 -r helm delete --purge"
+		if err := exec.Command("sh", "-c", helmClearCmd).Run(); err != nil {
+			framework.Failf("failed to clear helm releases (cmd: %q, error: %v", helmClearCmd, err)
+		}
+		ginkgo.By("Clear non-kubernetes apiservices")
+		clearNonK8SAPIServicesCmd := "kubectl delete apiservices -l kube-aggregator.kubernetes.io/automanaged!=onstart"
+		if err := exec.Command("sh", "-c", clearNonK8SAPIServicesCmd).Run(); err != nil {
+			framework.Failf("failed to clear non-kubernetes apiservices (cmd: %q, error: %v", clearNonK8SAPIServicesCmd, err)
+		}
+
+		setupSuite()
+
+		// Get clients
+		config, err := framework.LoadConfig()
+		framework.ExpectNoError(err, "failed to load config")
+		kubeCli, err := kubernetes.NewForConfig(config)
+		framework.ExpectNoError(err, "failed to create clientset")
+		aggrCli, err := aggregatorclientset.NewForConfig(config)
+		framework.ExpectNoError(err, "failed to create clientset")
+		apiExtCli, err := apiextensionsclientset.NewForConfig(config)
+		framework.ExpectNoError(err, "failed to create clientset")
+		oa := test.NewOperatorAction(kubeCli, aggrCli, apiExtCli, e2econfig.TestConfig)
+		ocfg := test.NewDefaultOperatorConfig()
+		ocfg.Manager.Image = e2econfig.TestConfig.ManagerImage
+		ocfg.Manager.Tag = e2econfig.TestConfig.ManagerTag
+		ocfg.Daemon.Image = e2econfig.TestConfig.DaemonImage
+		ocfg.Daemon.Tag = e2econfig.TestConfig.DaemonTag
+		ocfg.DNSImage = e2econfig.TestConfig.ChaosDNSImage
+
+		oa.CleanCRDOrDie()
+		err = oa.InstallCRD(ocfg)
+		framework.ExpectNoError(err, "failed to install crd")
+		err = oa.DeployOperator(ocfg)
+		framework.ExpectNoError(err, "failed to install chaos-mesh")
 	}
-	ginkgo.By("Clear non-kubernetes apiservices")
-	clearNonK8SAPIServicesCmd := "kubectl delete apiservices -l kube-aggregator.kubernetes.io/automanaged!=onstart"
-	if err := exec.Command("sh", "-c", clearNonK8SAPIServicesCmd).Run(); err != nil {
-		framework.Failf("failed to clear non-kubernetes apiservices (cmd: %q, error: %v", clearNonK8SAPIServicesCmd, err)
-	}
-
-	setupSuite()
-
-	// Get clients
-	config, err := framework.LoadConfig()
-	framework.ExpectNoError(err, "failed to load config")
-	kubeCli, err := kubernetes.NewForConfig(config)
-	framework.ExpectNoError(err, "failed to create clientset")
-	aggrCli, err := aggregatorclientset.NewForConfig(config)
-	framework.ExpectNoError(err, "failed to create clientset")
-	apiExtCli, err := apiextensionsclientset.NewForConfig(config)
-	framework.ExpectNoError(err, "failed to create clientset")
-	oa := test.NewOperatorAction(kubeCli, aggrCli, apiExtCli, e2econfig.TestConfig)
-	ocfg := test.NewDefaultOperatorConfig()
-	ocfg.Manager.Image = e2econfig.TestConfig.ManagerImage
-	ocfg.Manager.Tag = e2econfig.TestConfig.ManagerTag
-	ocfg.Daemon.Image = e2econfig.TestConfig.DaemonImage
-	ocfg.Daemon.Tag = e2econfig.TestConfig.DaemonTag
-	ocfg.DNSImage = e2econfig.TestConfig.ChaosDNSImage
-
-	oa.CleanCRDOrDie()
-	err = oa.InstallCRD(ocfg)
-	framework.ExpectNoError(err, "failed to install crd")
-	err = oa.DeployOperator(ocfg)
-	framework.ExpectNoError(err, "failed to install chaos-mesh")
 	return nil
 }, func(data []byte) {
 	// Run on all Ginkgo nodes
