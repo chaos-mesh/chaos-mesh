@@ -76,7 +76,7 @@ func (s *daemonServer) SetTcs(ctx context.Context, in *pb.TcsRequest) (*empty.Em
 	}
 
 	client := buildTcClient(ctx, pid)
-	err = client.flush()
+	err = client.flush(in.Device)
 	if err != nil {
 		log.Error(err, "error while flushing client")
 		return &empty.Empty{}, err
@@ -126,7 +126,7 @@ func (s *daemonServer) SetTcs(ctx context.Context, in *pb.TcsRequest) (*empty.Em
 
 		handleArg := fmt.Sprintf("handle %d:", index+1)
 
-		err := client.addTc(parentArg, handleArg, tc)
+		err := client.addTc(in.Device, parentArg, handleArg, tc)
 		if err != nil {
 			log.Error(err, "error while adding tc")
 			return &empty.Empty{}, err
@@ -135,7 +135,7 @@ func (s *daemonServer) SetTcs(ctx context.Context, in *pb.TcsRequest) (*empty.Em
 
 	parent := len(globalTc)
 	band := 3 + len(filterTc) // 3 handlers for normal sfq on prio qdisc
-	err = client.addPrio(parent, band)
+	err = client.addPrio(in.Device, parent, band)
 	if err != nil {
 		log.Error(err, "error while adding prio")
 		return &empty.Empty{}, err
@@ -162,7 +162,7 @@ func (s *daemonServer) SetTcs(ctx context.Context, in *pb.TcsRequest) (*empty.Em
 			currentHandler++
 			handleArg := fmt.Sprintf("handle %d:", currentHandler)
 
-			err := client.addTc(parentArg, handleArg, tc)
+			err := client.addTc(in.Device, parentArg, handleArg, tc)
 			if err != nil {
 				log.Error(err, "error while adding tc")
 				return &empty.Empty{}, err
@@ -219,8 +219,8 @@ func buildTcClient(ctx context.Context, pid uint32) tcClient {
 	}
 }
 
-func (c *tcClient) flush() error {
-	cmd := bpm.DefaultProcessBuilder("tc", "qdisc", "del", "dev", "eth0", "root").SetNS(c.pid, bpm.NetNS).SetContext(c.ctx).Build()
+func (c *tcClient) flush(device string) error {
+	cmd := bpm.DefaultProcessBuilder("tc", "qdisc", "del", "dev", device, "root").SetNS(c.pid, bpm.NetNS).SetContext(c.ctx).Build()
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		if (!strings.Contains(string(output), ruleNotExistLowerVersion)) && (!strings.Contains(string(output), ruleNotExist)) {
@@ -230,7 +230,7 @@ func (c *tcClient) flush() error {
 	return nil
 }
 
-func (c *tcClient) addTc(parentArg string, handleArg string, tc *pb.Tc) error {
+func (c *tcClient) addTc(device string, parentArg string, handleArg string, tc *pb.Tc) error {
 	log.Info("add tc", "tc", tc)
 
 	if tc.Type == pb.Tc_BANDWIDTH {
@@ -238,7 +238,7 @@ func (c *tcClient) addTc(parentArg string, handleArg string, tc *pb.Tc) error {
 		if tc.Tbf == nil {
 			return fmt.Errorf("tbf is nil while type is BANDWIDTH")
 		}
-		err := c.addTbf(parentArg, handleArg, tc.Tbf)
+		err := c.addTbf(device, parentArg, handleArg, tc.Tbf)
 		if err != nil {
 			return err
 		}
@@ -248,7 +248,7 @@ func (c *tcClient) addTc(parentArg string, handleArg string, tc *pb.Tc) error {
 		if tc.Netem == nil {
 			return fmt.Errorf("netem is nil while type is NETEM")
 		}
-		err := c.addNetem(parentArg, handleArg, tc.Netem)
+		err := c.addNetem(device, parentArg, handleArg, tc.Netem)
 		if err != nil {
 			return err
 		}
@@ -260,14 +260,14 @@ func (c *tcClient) addTc(parentArg string, handleArg string, tc *pb.Tc) error {
 	return nil
 }
 
-func (c *tcClient) addPrio(parent int, band int) error {
+func (c *tcClient) addPrio(device string, parent int, band int) error {
 	log.Info("adding prio", "parent", parent)
 
 	parentArg := "root"
 	if parent > 0 {
 		parentArg = fmt.Sprintf("parent %d:", parent)
 	}
-	args := fmt.Sprintf("qdisc add dev eth0 %s handle %d: prio bands %d priomap 1 2 2 2 1 2 0 0 1 1 1 1 1 1 1 1", parentArg, parent+1, band)
+	args := fmt.Sprintf("qdisc add dev %s %s handle %d: prio bands %d priomap 1 2 2 2 1 2 0 0 1 1 1 1 1 1 1 1", device, parentArg, parent+1, band)
 	cmd := bpm.DefaultProcessBuilder("tc", strings.Split(args, " ")...).SetNS(c.pid, bpm.NetNS).SetContext(c.ctx).Build()
 	output, err := cmd.CombinedOutput()
 	if err != nil {
@@ -275,7 +275,7 @@ func (c *tcClient) addPrio(parent int, band int) error {
 	}
 
 	for index := 1; index <= 3; index++ {
-		args := fmt.Sprintf("qdisc add dev eth0 parent %d:%d handle %d: sfq", parent+1, index, parent+1+index)
+		args := fmt.Sprintf("qdisc add dev %s parent %d:%d handle %d: sfq", device, parent+1, index, parent+1+index)
 		cmd := bpm.DefaultProcessBuilder("tc", strings.Split(args, " ")...).SetNS(c.pid, bpm.NetNS).SetContext(c.ctx).Build()
 		output, err := cmd.CombinedOutput()
 		if err != nil {
@@ -286,10 +286,10 @@ func (c *tcClient) addPrio(parent int, band int) error {
 	return nil
 }
 
-func (c *tcClient) addNetem(parent string, handle string, netem *pb.Netem) error {
-	log.Info("adding netem", "parent", parent, "handle", handle)
+func (c *tcClient) addNetem(device string, parent string, handle string, netem *pb.Netem) error {
+	log.Info("adding netem", "device", device, "parent", parent, "handle", handle)
 
-	args := fmt.Sprintf("qdisc add dev eth0 %s %s netem %s", parent, handle, convertNetemToArgs(netem))
+	args := fmt.Sprintf("qdisc add dev %s %s %s netem %s", device, parent, handle, convertNetemToArgs(netem))
 	cmd := bpm.DefaultProcessBuilder("tc", strings.Split(args, " ")...).SetNS(c.pid, bpm.NetNS).SetContext(c.ctx).Build()
 	output, err := cmd.CombinedOutput()
 	if err != nil {
@@ -298,10 +298,10 @@ func (c *tcClient) addNetem(parent string, handle string, netem *pb.Netem) error
 	return nil
 }
 
-func (c *tcClient) addTbf(parent string, handle string, tbf *pb.Tbf) error {
-	log.Info("adding tbf", "parent", parent, "handle", handle)
+func (c *tcClient) addTbf(device string, parent string, handle string, tbf *pb.Tbf) error {
+	log.Info("adding tbf", "device", device, "parent", parent, "handle", handle)
 
-	args := fmt.Sprintf("qdisc add dev eth0 %s %s tbf %s", parent, handle, convertTbfToArgs(tbf))
+	args := fmt.Sprintf("qdisc add dev %s %s %s tbf %s", device, parent, handle, convertTbfToArgs(tbf))
 	cmd := bpm.DefaultProcessBuilder("tc", strings.Split(args, " ")...).SetNS(c.pid, bpm.NetNS).SetContext(c.ctx).Build()
 	output, err := cmd.CombinedOutput()
 	if err != nil {
@@ -310,10 +310,10 @@ func (c *tcClient) addTbf(parent string, handle string, tbf *pb.Tbf) error {
 	return nil
 }
 
-func (c *tcClient) addFilter(parent string, classid string, ipset string) error {
+func (c *tcClient) addFilter(device string, parent string, classid string, ipset string) error {
 	log.Info("adding filter", "parent", parent, "classid", classid, "ipset", ipset)
 
-	args := strings.Split(fmt.Sprintf("filter add dev eth0 %s basic match", parent), " ")
+	args := strings.Split(fmt.Sprintf("filter add dev %s %s basic match", device, parent), " ")
 	args = append(args, fmt.Sprintf("ipset(%s dst)", ipset))
 	args = append(args, strings.Split(classid, " ")...)
 	cmd := bpm.DefaultProcessBuilder("tc", args...).SetNS(c.pid, bpm.NetNS).SetContext(c.ctx).Build()
