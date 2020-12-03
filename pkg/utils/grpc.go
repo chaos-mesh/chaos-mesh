@@ -23,7 +23,7 @@ import (
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
 
-	"github.com/chaos-mesh/chaos-mesh/controllers/common"
+	"github.com/chaos-mesh/chaos-mesh/controllers/config"
 
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
@@ -39,7 +39,7 @@ func CreateGrpcConnection(ctx context.Context, c client.Client, pod *v1.Pod, por
 	nodeName := pod.Spec.NodeName
 	log.Info("Creating client to chaos-daemon", "node", nodeName)
 
-	ns := common.ControllerCfg.Namespace
+	ns := config.ControllerCfg.Namespace
 	var endpoints v1.Endpoints
 	err := c.Get(ctx, types.NamespacedName{
 		Namespace: ns,
