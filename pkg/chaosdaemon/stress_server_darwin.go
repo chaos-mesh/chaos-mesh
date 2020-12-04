@@ -21,10 +21,10 @@ import (
 	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
 )
 
-func (s *daemonServer) ExecStressors(context.Context, *pb.ExecStressRequest) (*pb.ExecStressResponse, error) {
+func (s *DaemonServer) ExecStressors(context.Context, *pb.ExecStressRequest) (*pb.ExecStressResponse, error) {
 	return nil, nil
 }
 
-func (s *daemonServer) CancelStressors(context.Context, *pb.CancelStressRequest) (*empty.Empty, error) {
+func (s *DaemonServer) CancelStressors(context.Context, *pb.CancelStressRequest) (*empty.Empty, error) {
 	return &empty.Empty{}, nil
 }

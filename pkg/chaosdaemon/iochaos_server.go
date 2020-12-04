@@ -31,7 +31,7 @@ const (
 	todaBin = "/usr/local/bin/toda"
 )
 
-func (s *daemonServer) ApplyIoChaos(ctx context.Context, in *pb.ApplyIoChaosRequest) (*pb.ApplyIoChaosResponse, error) {
+func (s *DaemonServer) ApplyIoChaos(ctx context.Context, in *pb.ApplyIoChaosRequest) (*pb.ApplyIoChaosResponse, error) {
 	log.Info("applying io chaos", "Request", in)
 
 	if in.Instance != 0 {
@@ -97,7 +97,7 @@ func (s *daemonServer) ApplyIoChaos(ctx context.Context, in *pb.ApplyIoChaosRequ
 	}, nil
 }
 
-func (s *daemonServer) killIoChaos(ctx context.Context, pid int64, startTime int64) error {
+func (s *DaemonServer) killIoChaos(ctx context.Context, pid int64, startTime int64) error {
 	log.Info("killing toda", "pid", pid)
 
 	err := s.backgroundProcessManager.KillBackgroundProcess(ctx, int(pid), startTime)

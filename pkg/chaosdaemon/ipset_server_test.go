@@ -32,7 +32,7 @@ var _ = Describe("ipset server", func() {
 	defer mock.With("MockContainerdClient", &MockClient{})()
 	c, _ := CreateContainerRuntimeInfoClient(containerRuntimeContainerd)
 	m := bpm.NewBackgroundProcessManager()
-	s := &daemonServer{c, m}
+	s := &DaemonServer{c, m}
 
 	Context("createIPSet", func() {
 		It("should work", func() {
