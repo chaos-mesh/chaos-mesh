@@ -38,7 +38,7 @@ export default function Experiments() {
     api.experiments
       .experiments()
       .then(({ data }) => setExperiments(data))
-      .catch(console.log)
+      .catch(console.error)
       .finally(() => setLoading(false))
   }
 
@@ -65,7 +65,7 @@ export default function Experiments() {
           )
         }
       })
-      .catch(console.log)
+      .catch(console.error)
   }
 
   // Get all experiments after mount
@@ -77,8 +77,7 @@ export default function Experiments() {
       fetchExperiments()
       dispatch(setNeedToRefreshExperiments(false))
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [needToRefreshExperiments])
+  }, [dispatch, needToRefreshExperiments])
 
   // Refresh every experiments' events after experiments state updated
   useEffect(() => {
@@ -127,7 +126,7 @@ export default function Experiments() {
         dispatch(getStateofExperiments())
         fetchExperiments()
       })
-      .catch(console.log)
+      .catch(console.error)
   }
 
   return (
@@ -175,7 +174,7 @@ export default function Experiments() {
         setOpen={setDialogOpen}
         title={selected.title}
         description={selected.description}
-        handleConfirm={handleExperiment(selected.action)}
+        onConfirm={handleExperiment(selected.action)}
       />
     </>
   )

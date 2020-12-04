@@ -74,7 +74,7 @@ func setDefaultTcsRequest(in *pb.TcsRequest) {
 	}
 }
 
-func (s *daemonServer) SetTcs(ctx context.Context, in *pb.TcsRequest) (*empty.Empty, error) {
+func (s *DaemonServer) SetTcs(ctx context.Context, in *pb.TcsRequest) (*empty.Empty, error) {
 	log.Info("handling tc request", "tcs", in)
 
 	pid, err := s.crClient.GetPidFromContainerID(ctx, in.ContainerId)
