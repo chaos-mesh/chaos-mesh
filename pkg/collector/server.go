@@ -74,7 +74,7 @@ func NewServer(
 		os.Exit(1)
 	}
 
-	if conf.DisableToken {
+	if conf.UnsafeMode {
 		clientpool.K8sClients = clientpool.NewLocalClient(s.Manager.GetClient())
 	} else {
 		clientpool.K8sClients, err = clientpool.NewClientPool(cfg, scheme, 100)

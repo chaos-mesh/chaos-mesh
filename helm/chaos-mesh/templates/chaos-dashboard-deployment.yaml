@@ -52,8 +52,8 @@ spec:
               value: {{ .Values.controllerManager.targetNamespace }}
             - name: CLUSTER_SCOPED
               value: "{{ .Values.clusterScoped }}"
-            - name: DISABLE_TOKEN
-              value: "{{ .Values.dashboard.disableToken }}"
+            - name: UNSAFE_MODE
+              value: "{{ .Values.dashboard.unsafeMode }}"
             {{- if .Values.controllerManager.allowedNamespaces }}
             - name: ALLOWED_NAMESPACES
               value: {{ .Values.controllerManager.allowedNamespaces }}

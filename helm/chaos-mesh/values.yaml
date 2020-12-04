@@ -119,7 +119,7 @@ dashboard:
   image: pingcap/chaos-dashboard:latest
   imagePullPolicy: IfNotPresent
 
-  disableToken: false
+  unsafeMode: false
 
   nodeSelector: {}
 
