@@ -69,6 +69,7 @@ func Register(r *gin.RouterGroup, s *Service) {
 	endpoint.GET("/kinds", s.getKinds)
 	endpoint.GET("/labels", s.getLabels)
 	endpoint.GET("/annotations", s.getAnnotations)
+	endpoint.GET("/disable-token", s.getDisableTokenCfg)
 }
 
 // @Summary Get pods from Kubernetes cluster.
@@ -294,6 +295,17 @@ func (s *Service) getAnnotations(c *gin.Context) {
 		}
 	}
 	c.JSON(http.StatusOK, annotations)
+}
+
+// @Summary Get the config of DisableToken.
+// @Description Get the config of DisableToken.
+// @Tags common
+// @Produce json
+// @Success 200 {object} bool
+// @Router /common//disable-token [get]
+// @Failure 500 {object} utils.APIError
+func (s *Service) getDisableTokenCfg(c *gin.Context) {
+	c.JSON(http.StatusOK, s.conf.DisableToken)
 }
 
 // inSlice checks given string in string slice or not.
