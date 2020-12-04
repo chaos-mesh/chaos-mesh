@@ -28,10 +28,28 @@ import (
 )
 
 // K8sClients is an object of Clients
-var K8sClients *Clients
+var K8sClients Clients
+
+type Clients interface {
+	Client(token string) (pkgclient.Client, error)
+}
+
+type LocalClient struct {
+	client pkgclient.Client
+}
+
+func NewLocalClient(client pkgclient.Client) Clients {
+	return LocalClient{
+		client: client,
+	}
+}
+
+func (c LocalClient) Client(token string) (pkgclient.Client, error) {
+	return c.client, nil
+}
 
 // Clients is the client pool of k8s client
-type Clients struct {
+type ClientsPool struct {
 	sync.Mutex
 
 	scheme      *runtime.Scheme
@@ -40,13 +58,13 @@ type Clients struct {
 }
 
 // New creates a new Clients
-func New(localConfig *rest.Config, scheme *runtime.Scheme, maxClientNum int) (*Clients, error) {
+func NewClientPool(localConfig *rest.Config, scheme *runtime.Scheme, maxClientNum int) (Clients, error) {
 	clients, err := lru.New(maxClientNum)
 	if err != nil {
 		return nil, err
 	}
 
-	return &Clients{
+	return ClientsPool{
 		localConfig: localConfig,
 		scheme:      scheme,
 		clients:     clients,
@@ -54,7 +72,7 @@ func New(localConfig *rest.Config, scheme *runtime.Scheme, maxClientNum int) (*C
 }
 
 // Client returns a k8s client according to the token
-func (c *Clients) Client(token string) (pkgclient.Client, error) {
+func (c ClientsPool) Client(token string) (pkgclient.Client, error) {
 	c.Lock()
 	defer c.Unlock()
 

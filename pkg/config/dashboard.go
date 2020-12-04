@@ -38,6 +38,9 @@ type ChaosDashboardConfig struct {
 	AllowedNamespaces string `envconfig:"ALLOWED_NAMESPACES" default:""`
 	// IgnoredNamespaces is a regular expression, and the chaos task will be ignored by a matching namespace
 	IgnoredNamespaces string `envconfig:"IGNORED_NAMESPACES" default:""`
+
+	// DisableToken will use the token login by the user if set to false
+	DisableToken bool `envconfig:"DISABLE_TOKEN" default:"false"`
 }
 
 // PersistTTLConfig defines the configuration of ttl
