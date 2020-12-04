@@ -71,11 +71,6 @@ func (c *Clients) Client(token string) (pkgclient.Client, error) {
 	config.BearerToken = token
 	config.BearerTokenFile = ""
 
-	// TODO: set insecure = true only used for test, will delete it before pr merged
-	config.TLSClientConfig = rest.TLSClientConfig{
-		Insecure: true,
-	}
-
 	newFunc := pkgclient.New
 
 	if mockNew := mock.On("MockCreateK8sClient"); mockNew != nil {
