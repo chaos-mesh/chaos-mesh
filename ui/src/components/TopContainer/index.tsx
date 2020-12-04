@@ -2,61 +2,63 @@ import { Box, CssBaseline, Snackbar, useMediaQuery, useTheme } from '@material-u
 import React, { useEffect, useMemo, useState } from 'react'
 import { Redirect, Route, Switch } from 'react-router-dom'
 import { RootState, useStoreDispatch } from 'store'
-import { ThemeProvider, createStyles, makeStyles } from '@material-ui/core/styles'
+import { ThemeProvider, makeStyles } from '@material-ui/core/styles'
 import customTheme, { darkTheme as customDarkTheme } from 'theme'
 import { drawerCloseWidth, drawerWidth } from './Sidebar'
+import { setAlertOpen, setNameSpace, setTokenName, setTokens } from 'slices/globalStatus'
 
 import Alert from '@material-ui/lab/Alert'
+import Auth from './Auth'
 import ContentContainer from 'components-mui/ContentContainer'
 import Header from './Header'
 import { IntlProvider } from 'react-intl'
+import LS from 'lib/localStorage'
 import MobileNavigation from './MobileNavigation'
+import SearchTrigger from 'components/SearchTrigger'
 import Sidebar from './Sidebar'
-import chaosMeshRoutes from 'routes'
+import api from 'api'
 import flat from 'flat'
 import insertCommonStyle from 'lib/d3/insertCommonStyle'
 import messages from 'i18n/messages'
-import { setAlertOpen } from 'slices/globalStatus'
+import routes from 'routes'
 import { setNavigationBreadcrumbs } from 'slices/navigation'
 import { useLocation } from 'react-router-dom'
 import { useSelector } from 'react-redux'
 
-const useStyles = makeStyles((theme) =>
-  createStyles({
-    root: {
-      display: 'flex',
-      flexDirection: 'column',
-      marginLeft: drawerCloseWidth,
-      width: `calc(100% - ${drawerCloseWidth})`,
-      transition: theme.transitions.create(['width', 'margin'], {
-        easing: theme.transitions.easing.sharp,
-        duration: theme.transitions.duration.leavingScreen,
-      }),
-      [theme.breakpoints.down('xs')]: {
-        width: '100%',
-        marginLeft: 0,
-      },
+const useStyles = makeStyles((theme) => ({
+  root: {
+    display: 'flex',
+    flexDirection: 'column',
+    marginLeft: drawerCloseWidth,
+    width: `calc(100% - ${drawerCloseWidth})`,
+    transition: theme.transitions.create(['width', 'margin'], {
+      easing: theme.transitions.easing.sharp,
+      duration: theme.transitions.duration.leavingScreen,
+    }),
+    [theme.breakpoints.down('xs')]: {
+      width: '100%',
+      marginLeft: 0,
     },
-    rootShift: {
-      marginLeft: drawerWidth,
-      width: `calc(100% - ${drawerWidth})`,
-      transition: theme.transitions.create(['width', 'margin'], {
-        easing: theme.transitions.easing.sharp,
-        duration: theme.transitions.duration.enteringScreen,
-      }),
-    },
-    main: {
-      display: 'flex',
-      flexDirection: 'column',
-      minHeight: '100vh',
-    },
-    toolbar: theme.mixins.toolbar,
-    switchContent: {
-      display: 'flex',
-      flex: 1,
-    },
-  })
-)
+  },
+  rootShift: {
+    marginLeft: drawerWidth,
+    width: `calc(100% - ${drawerWidth})`,
+    transition: theme.transitions.create(['width', 'margin'], {
+      easing: theme.transitions.easing.sharp,
+      duration: theme.transitions.duration.enteringScreen,
+    }),
+  },
+  main: {
+    display: 'flex',
+    flexDirection: 'column',
+    minHeight: '100vh',
+  },
+  toolbar: theme.mixins.toolbar,
+  switchContent: {
+    display: 'flex',
+    flex: 1,
+  },
+}))
 
 const TopContainer = () => {
   const theme = useTheme()
@@ -77,11 +79,41 @@ const TopContainer = () => {
   const dispatch = useStoreDispatch()
   const handleSnackClose = () => dispatch(setAlertOpen(false))
 
-  const miniSidebar = window.localStorage.getItem('chaos-mesh-mini-sidebar') === 'y'
+  const miniSidebar = LS.get('mini-sidebar') === 'y'
   const [openDrawer, setOpenDrawer] = useState(!miniSidebar)
   const handleDrawerToggle = () => {
     setOpenDrawer(!openDrawer)
-    window.localStorage.setItem('chaos-mesh-mini-sidebar', openDrawer ? 'y' : 'n')
+    LS.set('mini-sidebar', openDrawer ? 'y' : 'n')
+  }
+
+  const [authOpen, setAuthOpen] = useState(false)
+  const [authed, setAuthed] = useState(false)
+
+  function setAuth() {
+    const token = LS.get('token')
+    const tokenName = LS.get('token-name')
+    const globalNamespace = LS.get('global-namespace')
+
+    if (token && tokenName) {
+      const tokens = JSON.parse(token)
+
+      api.auth.token(tokens.filter(({ name }: { name: string }) => name === tokenName)[0].token)
+      dispatch(setTokens(tokens))
+      dispatch(setTokenName(tokenName))
+    } else {
+      setAuthOpen(true)
+    }
+
+    if (globalNamespace) {
+      api.auth.namespace(globalNamespace)
+      dispatch(setNameSpace(globalNamespace))
+    }
+
+    setAuthed(true)
+  }
+
+  if (!authed) {
+    setAuth()
   }
 
   useEffect(insertCommonStyle, [])
@@ -99,9 +131,9 @@ const TopContainer = () => {
   return (
     <ThemeProvider theme={globalTheme}>
       <IntlProvider messages={intlMessages} locale={lang} defaultLocale="en">
+        {/* CssBaseline: kickstart an elegant, consistent, and simple baseline to build upon. */}
+        <CssBaseline />
         <Box className={openDrawer ? classes.rootShift : classes.root}>
-          {/* CssBaseline: kickstart an elegant, consistent, and simple baseline to build upon. */}
-          <CssBaseline />
           <Header openDrawer={openDrawer} handleDrawerToggle={handleDrawerToggle} breadcrumbs={breadcrumbs} />
           {!isMobileScreen && <Sidebar open={openDrawer} />}
           <main className={classes.main}>
@@ -110,10 +142,8 @@ const TopContainer = () => {
             <Box className={classes.switchContent}>
               <ContentContainer>
                 <Switch>
-                  <Redirect exact path="/" to="/overview" />
-                  {chaosMeshRoutes.map((route) => (
-                    <Route key={route.path! as string} {...route} />
-                  ))}
+                  <Redirect path="/" to="/overview" exact />
+                  {!authOpen && routes.map((route) => <Route key={route.path as string} {...route} />)}
                   <Redirect to="/overview" />
                 </Switch>
               </ContentContainer>
@@ -125,6 +155,10 @@ const TopContainer = () => {
                 <MobileNavigation />
               </>
             )}
+
+            <Auth open={authOpen} setOpen={setAuthOpen} />
+
+            <SearchTrigger />
 
             <Snackbar
               anchorOrigin={{
