@@ -146,6 +146,7 @@ func (s *Service) createExperiment(c *gin.Context) {
 		v1alpha1.KindStressChaos:  s.createStressChaos,
 		v1alpha1.KindTimeChaos:    s.createTimeChaos,
 		v1alpha1.KindKernelChaos:  s.createKernelChaos,
+		v1alpha1.KindDNSChaos:     s.createDNSChaos,
 	}
 
 	f, ok := createFuncs[exp.Target.Kind]
@@ -354,6 +355,34 @@ func (s *Service) createStressChaos(exp *core.ExperimentInfo, kubeCli client.Cli
 
 	if exp.Target.StressChaos.ContainerName != nil {
 		chaos.Spec.ContainerName = exp.Target.StressChaos.ContainerName
+	}
+
+	return kubeCli.Create(context.Background(), chaos)
+}
+
+func (s *Service) createDNSChaos(exp *core.ExperimentInfo, kubeCli client.Client) error {
+	chaos := &v1alpha1.DNSChaos{
+		ObjectMeta: v1.ObjectMeta{
+			Name:        exp.Name,
+			Namespace:   exp.Namespace,
+			Labels:      exp.Labels,
+			Annotations: exp.Annotations,
+		},
+		Spec: v1alpha1.DNSChaosSpec{
+			Selector: exp.Scope.ParseSelector(),
+			Mode:     v1alpha1.PodMode(exp.Scope.Mode),
+			Value:    exp.Scope.Value,
+			Action:   v1alpha1.DNSChaosAction(exp.Target.DNSChaos.Action),
+			Scope:    v1alpha1.DNSChaosScope(exp.Target.DNSChaos.Scope),
+		},
+	}
+
+	if exp.Scheduler.Cron != "" {
+		chaos.Spec.Scheduler = &v1alpha1.SchedulerSpec{Cron: exp.Scheduler.Cron}
+	}
+
+	if exp.Scheduler.Duration != "" {
+		chaos.Spec.Duration = &exp.Scheduler.Duration
 	}
 
 	return kubeCli.Create(context.Background(), chaos)
@@ -587,6 +616,44 @@ func (s *Service) getStressChaosDetail(namespace string, name string, kubeCli cl
 	}, nil
 }
 
+func (s *Service) getDNSChaosDetail(namespace string, name string, kubeCli client.Client) (Detail, error) {
+	chaos := &v1alpha1.DNSChaos{}
+
+	chaosKey := types.NamespacedName{Namespace: namespace, Name: name}
+	if err := kubeCli.Get(context.Background(), chaosKey, chaos); err != nil {
+		if apierrors.IsNotFound(err) {
+			return Detail{}, utils.ErrNotFound.NewWithNoMessage()
+		}
+
+		return Detail{}, err
+	}
+
+	return Detail{
+		Experiment: Experiment{
+			Base: Base{
+				Kind:      chaos.Kind,
+				Namespace: chaos.Namespace,
+				Name:      chaos.Name,
+			},
+			Created:       chaos.GetChaos().StartTime.Format(time.RFC3339),
+			Status:        chaos.GetChaos().Status,
+			UID:           chaos.GetChaos().UID,
+			FailedMessage: chaos.GetStatus().FailedMessage,
+		},
+		YAML: core.ExperimentYAMLDescription{
+			APIVersion: chaos.APIVersion,
+			Kind:       chaos.Kind,
+			Metadata: core.ExperimentYAMLMetadata{
+				Name:        chaos.Name,
+				Namespace:   chaos.Namespace,
+				Labels:      chaos.Labels,
+				Annotations: chaos.Annotations,
+			},
+			Spec: chaos.Spec,
+		},
+	}, nil
+}
+
 // @Summary Get chaos experiments from Kubernetes cluster.
 // @Description Get chaos experiments from Kubernetes cluster.
 // @Tags experiments
@@ -698,6 +765,8 @@ func (s *Service) getExperimentDetail(c *gin.Context) {
 		expDetail, err = s.getKernelChaosDetail(ns, name, kubeCli)
 	case v1alpha1.KindStressChaos:
 		expDetail, err = s.getStressChaosDetail(ns, name, kubeCli)
+	case v1alpha1.KindDNSChaos:
+		expDetail, err = s.getDNSChaosDetail(ns, name, kubeCli)
 	}
 	if err != nil {
 		c.Status(http.StatusInternalServerError)
@@ -1033,6 +1102,7 @@ func (s *Service) updateExperiment(c *gin.Context) {
 		v1alpha1.KindStressChaos:  s.updateStressChaos,
 		v1alpha1.KindTimeChaos:    s.updateTimeChaos,
 		v1alpha1.KindKernelChaos:  s.updateKernelChaos,
+		v1alpha1.KindDNSChaos:     s.updateDNSChaos,
 	}
 
 	f, ok := updateFuncs[exp.Kind]
@@ -1168,6 +1238,25 @@ func (s *Service) updateStressChaos(exp *core.ExperimentYAMLDescription, kubeCli
 	chaos.SetAnnotations(meta.Annotations)
 
 	var spec v1alpha1.StressChaosSpec
+	mapstructure.Decode(exp.Spec, &spec)
+	chaos.Spec = spec
+
+	return kubeCli.Update(context.Background(), chaos)
+}
+
+func (s *Service) updateDNSChaos(exp *core.ExperimentYAMLDescription, kubeCli client.Client) error {
+	chaos := &v1alpha1.DNSChaos{}
+	meta := &exp.Metadata
+	key := types.NamespacedName{Namespace: meta.Namespace, Name: meta.Name}
+
+	if err := kubeCli.Get(context.Background(), key, chaos); err != nil {
+		return err
+	}
+
+	chaos.SetLabels(meta.Labels)
+	chaos.SetAnnotations(meta.Annotations)
+
+	var spec v1alpha1.DNSChaosSpec
 	mapstructure.Decode(exp.Spec, &spec)
 	chaos.Spec = spec
 
