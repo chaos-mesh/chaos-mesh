@@ -111,7 +111,15 @@ export interface ExperimentTargetStress {
   container_name: string
 }
 
-export const kind = ['PodChaos', 'NetworkChaos', 'IoChaos', 'KernelChaos', 'TimeChaos', 'StressChaos'] as const
+export const kind = [
+  'PodChaos',
+  'NetworkChaos',
+  'IoChaos',
+  'KernelChaos',
+  'TimeChaos',
+  'StressChaos',
+  'DNSChaos',
+] as const
 export type ExperimentKind = typeof kind[number]
 
 export interface ExperimentTarget {

@@ -24,6 +24,7 @@ import (
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/pkg/apiserver/utils"
+	"github.com/chaos-mesh/chaos-mesh/pkg/clientpool"
 	"github.com/chaos-mesh/chaos-mesh/pkg/config"
 	"github.com/chaos-mesh/chaos-mesh/pkg/core"
 	pkgutils "github.com/chaos-mesh/chaos-mesh/pkg/utils"
@@ -42,21 +43,19 @@ type Pod struct {
 
 // Service defines a handler service for cluster common objects.
 type Service struct {
-	conf    *config.ChaosDashboardConfig
+	// this kubeCli use the local token, used for list namespace of the K8s cluster
 	kubeCli client.Client
-	reader  client.Reader
+	conf    *config.ChaosDashboardConfig
 }
 
 // NewService returns an experiment service instance.
 func NewService(
 	conf *config.ChaosDashboardConfig,
-	cli client.Client,
-	reader client.Reader,
+	kubeCli client.Client,
 ) *Service {
 	return &Service{
 		conf:    conf,
-		kubeCli: cli,
-		reader:  reader,
+		kubeCli: kubeCli,
 	}
 }
 
@@ -81,6 +80,12 @@ func Register(r *gin.RouterGroup, s *Service) {
 // @Router /common/pods [post]
 // @Failure 500 {object} utils.APIError
 func (s *Service) listPods(c *gin.Context) {
+	kubeCli, err := clientpool.ExtractTokenAndGetClient(c.Request.Header)
+	if err != nil {
+		_ = c.Error(utils.ErrInvalidRequest.WrapWithNoMessage(err))
+		return
+	}
+
 	exp := &core.SelectorInfo{}
 	if err := c.ShouldBindJSON(exp); err != nil {
 		c.Status(http.StatusBadRequest)
@@ -88,7 +93,7 @@ func (s *Service) listPods(c *gin.Context) {
 		return
 	}
 	ctx := context.TODO()
-	filteredPods, err := pkgutils.SelectPods(ctx, s.kubeCli, s.reader, exp.ParseSelector())
+	filteredPods, err := pkgutils.SelectPods(ctx, kubeCli, nil, exp.ParseSelector(), s.conf.ClusterScoped, s.conf.TargetNamespace, s.conf.AllowedNamespaces, s.conf.IgnoredNamespaces)
 	if err != nil {
 		c.Status(http.StatusInternalServerError)
 		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
@@ -196,6 +201,13 @@ type MapSlice map[string][]string
 // @Router /common/labels [get]
 // @Failure 500 {object} utils.APIError
 func (s *Service) getLabels(c *gin.Context) {
+
+	kubeCli, err := clientpool.ExtractTokenAndGetClient(c.Request.Header)
+	if err != nil {
+		_ = c.Error(utils.ErrInvalidRequest.WrapWithNoMessage(err))
+		return
+	}
+
 	podNamespaceList := c.Query("podNamespaceList")
 
 	if podNamespaceList == "" {
@@ -209,7 +221,7 @@ func (s *Service) getLabels(c *gin.Context) {
 	exp.NamespaceSelectors = nsList
 
 	ctx := context.TODO()
-	filteredPods, err := pkgutils.SelectPods(ctx, s.kubeCli, s.reader, exp.ParseSelector())
+	filteredPods, err := pkgutils.SelectPods(ctx, kubeCli, nil, exp.ParseSelector(), s.conf.ClusterScoped, s.conf.TargetNamespace, s.conf.AllowedNamespaces, s.conf.IgnoredNamespaces)
 	if err != nil {
 		c.Status(http.StatusInternalServerError)
 		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
@@ -241,6 +253,13 @@ func (s *Service) getLabels(c *gin.Context) {
 // @Router /common/annotations [get]
 // @Failure 500 {object} utils.APIError
 func (s *Service) getAnnotations(c *gin.Context) {
+
+	kubeCli, err := clientpool.ExtractTokenAndGetClient(c.Request.Header)
+	if err != nil {
+		_ = c.Error(utils.ErrInvalidRequest.WrapWithNoMessage(err))
+		return
+	}
+
 	podNamespaceList := c.Query("podNamespaceList")
 
 	if podNamespaceList == "" {
@@ -254,7 +273,7 @@ func (s *Service) getAnnotations(c *gin.Context) {
 	exp.NamespaceSelectors = nsList
 
 	ctx := context.TODO()
-	filteredPods, err := pkgutils.SelectPods(ctx, s.kubeCli, s.reader, exp.ParseSelector())
+	filteredPods, err := pkgutils.SelectPods(ctx, kubeCli, nil, exp.ParseSelector(), s.conf.ClusterScoped, s.conf.TargetNamespace, s.conf.AllowedNamespaces, s.conf.IgnoredNamespaces)
 	if err != nil {
 		c.Status(http.StatusInternalServerError)
 		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))

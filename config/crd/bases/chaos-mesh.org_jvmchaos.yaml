@@ -14,6 +14,7 @@ spec:
     listKind: JVMChaosList
     plural: jvmchaos
     singular: jvmchaos
+  preserveUnknownFields: false
   scope: Namespaced
   validation:
     openAPIV3Schema:

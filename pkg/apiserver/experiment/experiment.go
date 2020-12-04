@@ -29,6 +29,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/common"
 	"github.com/chaos-mesh/chaos-mesh/pkg/apiserver/utils"
+	"github.com/chaos-mesh/chaos-mesh/pkg/clientpool"
 	"github.com/chaos-mesh/chaos-mesh/pkg/config"
 	"github.com/chaos-mesh/chaos-mesh/pkg/core"
 
@@ -53,7 +54,6 @@ type ChaosState struct {
 
 // Service defines a handler service for experiments.
 type Service struct {
-	kubeCli client.Client
 	archive core.ExperimentStore
 	event   core.EventStore
 	conf    *config.ChaosDashboardConfig
@@ -61,13 +61,11 @@ type Service struct {
 
 // NewService returns an experiment service instance.
 func NewService(
-	cli client.Client,
 	archive core.ExperimentStore,
 	event core.EventStore,
 	conf *config.ChaosDashboardConfig,
 ) *Service {
 	return &Service{
-		kubeCli: cli,
 		archive: archive,
 		event:   event,
 		conf:    conf,
@@ -110,8 +108,8 @@ type Detail struct {
 	YAML core.ExperimentYAMLDescription `json:"yaml"`
 }
 
-type createExperimentFunc func(*core.ExperimentInfo) error
-type updateExperimentFunc func(*core.ExperimentYAMLDescription) error
+type createExperimentFunc func(*core.ExperimentInfo, client.Client) error
+type updateExperimentFunc func(*core.ExperimentYAMLDescription, client.Client) error
 
 // StatusResponse defines a common status struct.
 type StatusResponse struct {
@@ -128,6 +126,12 @@ type StatusResponse struct {
 // @Failure 500 {object} utils.APIError
 // @Router /experiments/new [post]
 func (s *Service) createExperiment(c *gin.Context) {
+	kubeCli, err := clientpool.ExtractTokenAndGetClient(c.Request.Header)
+	if err != nil {
+		_ = c.Error(utils.ErrInvalidRequest.WrapWithNoMessage(err))
+		return
+	}
+
 	exp := &core.ExperimentInfo{}
 	if err := c.ShouldBindJSON(exp); err != nil {
 		c.Status(http.StatusBadRequest)
@@ -142,6 +146,7 @@ func (s *Service) createExperiment(c *gin.Context) {
 		v1alpha1.KindStressChaos:  s.createStressChaos,
 		v1alpha1.KindTimeChaos:    s.createTimeChaos,
 		v1alpha1.KindKernelChaos:  s.createKernelChaos,
+		v1alpha1.KindDNSChaos:     s.createDNSChaos,
 	}
 
 	f, ok := createFuncs[exp.Target.Kind]
@@ -151,7 +156,7 @@ func (s *Service) createExperiment(c *gin.Context) {
 		return
 	}
 
-	if err := f(exp); err != nil {
+	if err := f(exp, kubeCli); err != nil {
 		c.Status(http.StatusInternalServerError)
 		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
 		return
@@ -160,7 +165,7 @@ func (s *Service) createExperiment(c *gin.Context) {
 	c.JSON(http.StatusOK, exp)
 }
 
-func (s *Service) createPodChaos(exp *core.ExperimentInfo) error {
+func (s *Service) createPodChaos(exp *core.ExperimentInfo, kubeCli client.Client) error {
 	chaos := &v1alpha1.PodChaos{
 		ObjectMeta: v1.ObjectMeta{
 			Name:        exp.Name,
@@ -185,10 +190,10 @@ func (s *Service) createPodChaos(exp *core.ExperimentInfo) error {
 		chaos.Spec.Duration = &exp.Scheduler.Duration
 	}
 
-	return s.kubeCli.Create(context.Background(), chaos)
+	return kubeCli.Create(context.Background(), chaos)
 }
 
-func (s *Service) createNetworkChaos(exp *core.ExperimentInfo) error {
+func (s *Service) createNetworkChaos(exp *core.ExperimentInfo, kubeCli client.Client) error {
 	chaos := &v1alpha1.NetworkChaos{
 		ObjectMeta: v1.ObjectMeta{
 			Name:        exp.Name,
@@ -229,10 +234,10 @@ func (s *Service) createNetworkChaos(exp *core.ExperimentInfo) error {
 		chaos.Spec.Duration = &exp.Scheduler.Duration
 	}
 
-	return s.kubeCli.Create(context.Background(), chaos)
+	return kubeCli.Create(context.Background(), chaos)
 }
 
-func (s *Service) createIOChaos(exp *core.ExperimentInfo) error {
+func (s *Service) createIOChaos(exp *core.ExperimentInfo, kubeCli client.Client) error {
 	chaos := &v1alpha1.IoChaos{
 		ObjectMeta: v1.ObjectMeta{
 			Name:        exp.Name,
@@ -264,10 +269,10 @@ func (s *Service) createIOChaos(exp *core.ExperimentInfo) error {
 		chaos.Spec.Duration = &exp.Scheduler.Duration
 	}
 
-	return s.kubeCli.Create(context.Background(), chaos)
+	return kubeCli.Create(context.Background(), chaos)
 }
 
-func (s *Service) createTimeChaos(exp *core.ExperimentInfo) error {
+func (s *Service) createTimeChaos(exp *core.ExperimentInfo, kubeCli client.Client) error {
 	chaos := &v1alpha1.TimeChaos{
 		ObjectMeta: v1.ObjectMeta{
 			Name:        exp.Name,
@@ -293,10 +298,10 @@ func (s *Service) createTimeChaos(exp *core.ExperimentInfo) error {
 		chaos.Spec.Duration = &exp.Scheduler.Duration
 	}
 
-	return s.kubeCli.Create(context.Background(), chaos)
+	return kubeCli.Create(context.Background(), chaos)
 }
 
-func (s *Service) createKernelChaos(exp *core.ExperimentInfo) error {
+func (s *Service) createKernelChaos(exp *core.ExperimentInfo, kubeCli client.Client) error {
 	chaos := &v1alpha1.KernelChaos{
 		ObjectMeta: v1.ObjectMeta{
 			Name:        exp.Name,
@@ -320,10 +325,10 @@ func (s *Service) createKernelChaos(exp *core.ExperimentInfo) error {
 		chaos.Spec.Duration = &exp.Scheduler.Duration
 	}
 
-	return s.kubeCli.Create(context.Background(), chaos)
+	return kubeCli.Create(context.Background(), chaos)
 }
 
-func (s *Service) createStressChaos(exp *core.ExperimentInfo) error {
+func (s *Service) createStressChaos(exp *core.ExperimentInfo, kubeCli client.Client) error {
 	chaos := &v1alpha1.StressChaos{
 		ObjectMeta: v1.ObjectMeta{
 			Name:        exp.Name,
@@ -352,14 +357,42 @@ func (s *Service) createStressChaos(exp *core.ExperimentInfo) error {
 		chaos.Spec.ContainerName = exp.Target.StressChaos.ContainerName
 	}
 
-	return s.kubeCli.Create(context.Background(), chaos)
+	return kubeCli.Create(context.Background(), chaos)
 }
 
-func (s *Service) getPodChaosDetail(namespace string, name string) (Detail, error) {
+func (s *Service) createDNSChaos(exp *core.ExperimentInfo, kubeCli client.Client) error {
+	chaos := &v1alpha1.DNSChaos{
+		ObjectMeta: v1.ObjectMeta{
+			Name:        exp.Name,
+			Namespace:   exp.Namespace,
+			Labels:      exp.Labels,
+			Annotations: exp.Annotations,
+		},
+		Spec: v1alpha1.DNSChaosSpec{
+			Selector: exp.Scope.ParseSelector(),
+			Mode:     v1alpha1.PodMode(exp.Scope.Mode),
+			Value:    exp.Scope.Value,
+			Action:   v1alpha1.DNSChaosAction(exp.Target.DNSChaos.Action),
+			Scope:    v1alpha1.DNSChaosScope(exp.Target.DNSChaos.Scope),
+		},
+	}
+
+	if exp.Scheduler.Cron != "" {
+		chaos.Spec.Scheduler = &v1alpha1.SchedulerSpec{Cron: exp.Scheduler.Cron}
+	}
+
+	if exp.Scheduler.Duration != "" {
+		chaos.Spec.Duration = &exp.Scheduler.Duration
+	}
+
+	return kubeCli.Create(context.Background(), chaos)
+}
+
+func (s *Service) getPodChaosDetail(namespace string, name string, kubeCli client.Client) (Detail, error) {
 	chaos := &v1alpha1.PodChaos{}
 
 	chaosKey := types.NamespacedName{Namespace: namespace, Name: name}
-	if err := s.kubeCli.Get(context.Background(), chaosKey, chaos); err != nil {
+	if err := kubeCli.Get(context.Background(), chaosKey, chaos); err != nil {
 		if apierrors.IsNotFound(err) {
 			return Detail{}, utils.ErrNotFound.NewWithNoMessage()
 		}
@@ -393,11 +426,11 @@ func (s *Service) getPodChaosDetail(namespace string, name string) (Detail, erro
 	}, nil
 }
 
-func (s *Service) getIoChaosDetail(namespace string, name string) (Detail, error) {
+func (s *Service) getIoChaosDetail(namespace string, name string, kubeCli client.Client) (Detail, error) {
 	chaos := &v1alpha1.IoChaos{}
 
 	chaosKey := types.NamespacedName{Namespace: namespace, Name: name}
-	if err := s.kubeCli.Get(context.Background(), chaosKey, chaos); err != nil {
+	if err := kubeCli.Get(context.Background(), chaosKey, chaos); err != nil {
 		if apierrors.IsNotFound(err) {
 			return Detail{}, utils.ErrNotFound.NewWithNoMessage()
 		}
@@ -431,11 +464,11 @@ func (s *Service) getIoChaosDetail(namespace string, name string) (Detail, error
 	}, nil
 }
 
-func (s *Service) getNetworkChaosDetail(namespace string, name string) (Detail, error) {
+func (s *Service) getNetworkChaosDetail(namespace string, name string, kubeCli client.Client) (Detail, error) {
 	chaos := &v1alpha1.NetworkChaos{}
 
 	chaosKey := types.NamespacedName{Namespace: namespace, Name: name}
-	if err := s.kubeCli.Get(context.Background(), chaosKey, chaos); err != nil {
+	if err := kubeCli.Get(context.Background(), chaosKey, chaos); err != nil {
 		if apierrors.IsNotFound(err) {
 			return Detail{}, utils.ErrNotFound.NewWithNoMessage()
 		}
@@ -469,11 +502,11 @@ func (s *Service) getNetworkChaosDetail(namespace string, name string) (Detail, 
 	}, nil
 }
 
-func (s *Service) getTimeChaosDetail(namespace string, name string) (Detail, error) {
+func (s *Service) getTimeChaosDetail(namespace string, name string, kubeCli client.Client) (Detail, error) {
 	chaos := &v1alpha1.TimeChaos{}
 
 	chaosKey := types.NamespacedName{Namespace: namespace, Name: name}
-	if err := s.kubeCli.Get(context.Background(), chaosKey, chaos); err != nil {
+	if err := kubeCli.Get(context.Background(), chaosKey, chaos); err != nil {
 		if apierrors.IsNotFound(err) {
 			return Detail{}, utils.ErrNotFound.NewWithNoMessage()
 		}
@@ -507,11 +540,11 @@ func (s *Service) getTimeChaosDetail(namespace string, name string) (Detail, err
 	}, nil
 }
 
-func (s *Service) getKernelChaosDetail(namespace string, name string) (Detail, error) {
+func (s *Service) getKernelChaosDetail(namespace string, name string, kubeCli client.Client) (Detail, error) {
 	chaos := &v1alpha1.KernelChaos{}
 
 	chaosKey := types.NamespacedName{Namespace: namespace, Name: name}
-	if err := s.kubeCli.Get(context.Background(), chaosKey, chaos); err != nil {
+	if err := kubeCli.Get(context.Background(), chaosKey, chaos); err != nil {
 		if apierrors.IsNotFound(err) {
 			return Detail{}, utils.ErrNotFound.NewWithNoMessage()
 		}
@@ -545,11 +578,49 @@ func (s *Service) getKernelChaosDetail(namespace string, name string) (Detail, e
 	}, nil
 }
 
-func (s *Service) getStressChaosDetail(namespace string, name string) (Detail, error) {
+func (s *Service) getStressChaosDetail(namespace string, name string, kubeCli client.Client) (Detail, error) {
 	chaos := &v1alpha1.StressChaos{}
 
 	chaosKey := types.NamespacedName{Namespace: namespace, Name: name}
-	if err := s.kubeCli.Get(context.Background(), chaosKey, chaos); err != nil {
+	if err := kubeCli.Get(context.Background(), chaosKey, chaos); err != nil {
+		if apierrors.IsNotFound(err) {
+			return Detail{}, utils.ErrNotFound.NewWithNoMessage()
+		}
+
+		return Detail{}, err
+	}
+
+	return Detail{
+		Experiment: Experiment{
+			Base: Base{
+				Kind:      chaos.Kind,
+				Namespace: chaos.Namespace,
+				Name:      chaos.Name,
+			},
+			Created:       chaos.GetChaos().StartTime.Format(time.RFC3339),
+			Status:        chaos.GetChaos().Status,
+			UID:           chaos.GetChaos().UID,
+			FailedMessage: chaos.GetStatus().FailedMessage,
+		},
+		YAML: core.ExperimentYAMLDescription{
+			APIVersion: chaos.APIVersion,
+			Kind:       chaos.Kind,
+			Metadata: core.ExperimentYAMLMetadata{
+				Name:        chaos.Name,
+				Namespace:   chaos.Namespace,
+				Labels:      chaos.Labels,
+				Annotations: chaos.Annotations,
+			},
+			Spec: chaos.Spec,
+		},
+	}, nil
+}
+
+func (s *Service) getDNSChaosDetail(namespace string, name string, kubeCli client.Client) (Detail, error) {
+	chaos := &v1alpha1.DNSChaos{}
+
+	chaosKey := types.NamespacedName{Namespace: namespace, Name: name}
+	if err := kubeCli.Get(context.Background(), chaosKey, chaos); err != nil {
 		if apierrors.IsNotFound(err) {
 			return Detail{}, utils.ErrNotFound.NewWithNoMessage()
 		}
@@ -595,6 +666,12 @@ func (s *Service) getStressChaosDetail(namespace string, name string) (Detail, e
 // @Router /experiments [get]
 // @Failure 500 {object} utils.APIError
 func (s *Service) listExperiments(c *gin.Context) {
+	kubeCli, err := clientpool.ExtractTokenAndGetClient(c.Request.Header)
+	if err != nil {
+		_ = c.Error(utils.ErrInvalidRequest.WrapWithNoMessage(err))
+		return
+	}
+
 	kind := c.Query("kind")
 	name := c.Query("name")
 	ns := c.Query("namespace")
@@ -610,9 +687,9 @@ func (s *Service) listExperiments(c *gin.Context) {
 		if kind != "" && key != kind {
 			continue
 		}
-		if err := s.kubeCli.List(context.Background(), list.ChaosList, &client.ListOptions{Namespace: ns}); err != nil {
+		if err := kubeCli.List(context.Background(), list.ChaosList, &client.ListOptions{Namespace: ns}); err != nil {
 			c.Status(http.StatusInternalServerError)
-			_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
+			utils.SetErrorForGinCtx(c, err)
 			return
 		}
 		for _, chaos := range list.ListChaos() {
@@ -649,10 +726,15 @@ func (s *Service) listExperiments(c *gin.Context) {
 // @Failure 500 {object} utils.APIError
 func (s *Service) getExperimentDetail(c *gin.Context) {
 	var (
-		err       error
 		exp       *core.Experiment
 		expDetail Detail
 	)
+
+	kubeCli, err := clientpool.ExtractTokenAndGetClient(c.Request.Header)
+	if err != nil {
+		_ = c.Error(utils.ErrInvalidRequest.WrapWithNoMessage(err))
+		return
+	}
 
 	uid := c.Param("uid")
 	if exp, err = s.archive.FindByUID(context.Background(), uid); err != nil {
@@ -672,17 +754,19 @@ func (s *Service) getExperimentDetail(c *gin.Context) {
 
 	switch kind {
 	case v1alpha1.KindPodChaos:
-		expDetail, err = s.getPodChaosDetail(ns, name)
+		expDetail, err = s.getPodChaosDetail(ns, name, kubeCli)
 	case v1alpha1.KindIoChaos:
-		expDetail, err = s.getIoChaosDetail(ns, name)
+		expDetail, err = s.getIoChaosDetail(ns, name, kubeCli)
 	case v1alpha1.KindNetworkChaos:
-		expDetail, err = s.getNetworkChaosDetail(ns, name)
+		expDetail, err = s.getNetworkChaosDetail(ns, name, kubeCli)
 	case v1alpha1.KindTimeChaos:
-		expDetail, err = s.getTimeChaosDetail(ns, name)
+		expDetail, err = s.getTimeChaosDetail(ns, name, kubeCli)
 	case v1alpha1.KindKernelChaos:
-		expDetail, err = s.getKernelChaosDetail(ns, name)
+		expDetail, err = s.getKernelChaosDetail(ns, name, kubeCli)
 	case v1alpha1.KindStressChaos:
-		expDetail, err = s.getStressChaosDetail(ns, name)
+		expDetail, err = s.getStressChaosDetail(ns, name, kubeCli)
+	case v1alpha1.KindDNSChaos:
+		expDetail, err = s.getDNSChaosDetail(ns, name, kubeCli)
 	}
 	if err != nil {
 		c.Status(http.StatusInternalServerError)
@@ -709,9 +793,14 @@ func (s *Service) deleteExperiment(c *gin.Context) {
 		chaosKind *v1alpha1.ChaosKind
 		chaosMeta metav1.Object
 		ok        bool
-		err       error
 		exp       *core.Experiment
 	)
+
+	kubeCli, err := clientpool.ExtractTokenAndGetClient(c.Request.Header)
+	if err != nil {
+		_ = c.Error(utils.ErrInvalidRequest.WrapWithNoMessage(err))
+		return
+	}
 
 	uid := c.Param("uid")
 	if exp, err = s.archive.FindByUID(context.Background(), uid); err != nil {
@@ -738,7 +827,7 @@ func (s *Service) deleteExperiment(c *gin.Context) {
 		_ = c.Error(utils.ErrInvalidRequest.New(kind + " is not supported"))
 		return
 	}
-	if err := s.kubeCli.Get(ctx, chaosKey, chaosKind.Chaos); err != nil {
+	if err := kubeCli.Get(ctx, chaosKey, chaosKind.Chaos); err != nil {
 		if apierrors.IsNotFound(err) {
 			c.Status(http.StatusNotFound)
 			_ = c.Error(utils.ErrNotFound.NewWithNoMessage())
@@ -762,14 +851,14 @@ func (s *Service) deleteExperiment(c *gin.Context) {
 		}
 		annotations[common.AnnotationCleanFinalizer] = common.AnnotationCleanFinalizerForced
 		chaosMeta.SetAnnotations(annotations)
-		if err := s.kubeCli.Update(context.Background(), chaosKind.Chaos); err != nil {
+		if err := kubeCli.Update(context.Background(), chaosKind.Chaos); err != nil {
 			c.Status(http.StatusInternalServerError)
 			_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(fmt.Errorf("forced deletion of chaos failed, because update chaos annotation error")))
 			return
 		}
 	}
 
-	if err := s.kubeCli.Delete(ctx, chaosKind.Chaos, &client.DeleteOptions{}); err != nil {
+	if err := kubeCli.Delete(ctx, chaosKind.Chaos, &client.DeleteOptions{}); err != nil {
 		if apierrors.IsNotFound(err) {
 			c.Status(http.StatusNotFound)
 			_ = c.Error(utils.ErrNotFound.NewWithNoMessage())
@@ -787,10 +876,19 @@ func (s *Service) deleteExperiment(c *gin.Context) {
 // @Description Get chaos experiments state from Kubernetes cluster.
 // @Tags experiments
 // @Produce json
+// @Param namespace query string false "namespace"
 // @Success 200 {object} ChaosState
 // @Router /experiments/state [get]
 // @Failure 500 {object} utils.APIError
 func (s *Service) state(c *gin.Context) {
+	kubeCli, err := clientpool.ExtractTokenAndGetClient(c.Request.Header)
+	if err != nil {
+		_ = c.Error(utils.ErrInvalidRequest.WrapWithNoMessage(err))
+		return
+	}
+
+	namespace := c.Query("namespace")
+
 	states := new(ChaosState)
 
 	g, ctx := errgroup.WithContext(context.Background())
@@ -800,12 +898,14 @@ func (s *Service) state(c *gin.Context) {
 	var listOptions []client.ListOption
 	if !s.conf.ClusterScoped {
 		listOptions = append(listOptions, &client.ListOptions{Namespace: s.conf.TargetNamespace})
+	} else if len(namespace) != 0 {
+		listOptions = append(listOptions, &client.ListOptions{Namespace: namespace})
 	}
 
 	for index := range kinds {
 		list := kinds[index]
 		g.Go(func() error {
-			if err := s.kubeCli.List(ctx, list.ChaosList, listOptions...); err != nil {
+			if err := kubeCli.List(ctx, list.ChaosList, listOptions...); err != nil {
 				return err
 			}
 			m.Lock()
@@ -829,7 +929,7 @@ func (s *Service) state(c *gin.Context) {
 	}
 	if err := g.Wait(); err != nil {
 		c.Status(http.StatusInternalServerError)
-		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
+		utils.SetErrorForGinCtx(c, err)
 		return
 	}
 
@@ -847,10 +947,13 @@ func (s *Service) state(c *gin.Context) {
 // @Failure 500 {object} utils.APIError
 // @Router /experiments/pause/{uid} [put]
 func (s *Service) pauseExperiment(c *gin.Context) {
-	var (
-		err        error
-		experiment *core.Experiment
-	)
+	var experiment *core.Experiment
+
+	kubeCli, err := clientpool.ExtractTokenAndGetClient(c.Request.Header)
+	if err != nil {
+		_ = c.Error(utils.ErrInvalidRequest.WrapWithNoMessage(err))
+		return
+	}
 
 	uid := c.Param("uid")
 	if experiment, err = s.archive.FindByUID(context.Background(), uid); err != nil {
@@ -873,7 +976,7 @@ func (s *Service) pauseExperiment(c *gin.Context) {
 	annotations := map[string]string{
 		v1alpha1.PauseAnnotationKey: "true",
 	}
-	if err := s.patchExperiment(exp, annotations); err != nil {
+	if err := s.patchExperiment(exp, annotations, kubeCli); err != nil {
 		if apierrors.IsNotFound(err) {
 			c.Status(http.StatusNotFound)
 			_ = c.Error(utils.ErrNotFound.WrapWithNoMessage(err))
@@ -898,10 +1001,13 @@ func (s *Service) pauseExperiment(c *gin.Context) {
 // @Failure 500 {object} utils.APIError
 // @Router /experiments/start/{uid} [put]
 func (s *Service) startExperiment(c *gin.Context) {
-	var (
-		err        error
-		experiment *core.Experiment
-	)
+	var experiment *core.Experiment
+
+	kubeCli, err := clientpool.ExtractTokenAndGetClient(c.Request.Header)
+	if err != nil {
+		_ = c.Error(utils.ErrInvalidRequest.WrapWithNoMessage(err))
+		return
+	}
 
 	uid := c.Param("uid")
 	if experiment, err = s.archive.FindByUID(context.Background(), uid); err != nil {
@@ -924,7 +1030,8 @@ func (s *Service) startExperiment(c *gin.Context) {
 	annotations := map[string]string{
 		v1alpha1.PauseAnnotationKey: "false",
 	}
-	if err := s.patchExperiment(exp, annotations); err != nil {
+
+	if err := s.patchExperiment(exp, annotations, kubeCli); err != nil {
 		if apierrors.IsNotFound(err) {
 			c.Status(http.StatusNotFound)
 			_ = c.Error(utils.ErrNotFound.WrapWithNoMessage(err))
@@ -938,7 +1045,7 @@ func (s *Service) startExperiment(c *gin.Context) {
 	c.JSON(http.StatusOK, StatusResponse{Status: "success"})
 }
 
-func (s *Service) patchExperiment(exp *Base, annotations map[string]string) error {
+func (s *Service) patchExperiment(exp *Base, annotations map[string]string, kubeCli client.Client) error {
 	var (
 		chaosKind *v1alpha1.ChaosKind
 		ok        bool
@@ -949,7 +1056,7 @@ func (s *Service) patchExperiment(exp *Base, annotations map[string]string) erro
 	}
 
 	key := types.NamespacedName{Namespace: exp.Namespace, Name: exp.Name}
-	if err := s.kubeCli.Get(context.Background(), key, chaosKind.Chaos); err != nil {
+	if err := kubeCli.Get(context.Background(), key, chaosKind.Chaos); err != nil {
 		return err
 	}
 
@@ -960,7 +1067,7 @@ func (s *Service) patchExperiment(exp *Base, annotations map[string]string) erro
 		},
 	})
 
-	return s.kubeCli.Patch(context.Background(),
+	return kubeCli.Patch(context.Background(),
 		chaosKind.Chaos,
 		client.ConstantPatch(types.MergePatchType, mergePatch))
 }
@@ -975,6 +1082,12 @@ func (s *Service) patchExperiment(exp *Base, annotations map[string]string) erro
 // @Failure 500 {object} utils.APIError
 // @Router /experiments/update [put]
 func (s *Service) updateExperiment(c *gin.Context) {
+	kubeCli, err := clientpool.ExtractTokenAndGetClient(c.Request.Header)
+	if err != nil {
+		_ = c.Error(utils.ErrInvalidRequest.WrapWithNoMessage(err))
+		return
+	}
+
 	exp := &core.ExperimentYAMLDescription{}
 	if err := c.ShouldBindJSON(exp); err != nil {
 		c.Status(http.StatusBadRequest)
@@ -989,6 +1102,7 @@ func (s *Service) updateExperiment(c *gin.Context) {
 		v1alpha1.KindStressChaos:  s.updateStressChaos,
 		v1alpha1.KindTimeChaos:    s.updateTimeChaos,
 		v1alpha1.KindKernelChaos:  s.updateKernelChaos,
+		v1alpha1.KindDNSChaos:     s.updateDNSChaos,
 	}
 
 	f, ok := updateFuncs[exp.Kind]
@@ -998,7 +1112,7 @@ func (s *Service) updateExperiment(c *gin.Context) {
 		return
 	}
 
-	if err := f(exp); err != nil {
+	if err := f(exp, kubeCli); err != nil {
 		if apierrors.IsNotFound(err) {
 			c.Status(http.StatusNotFound)
 			_ = c.Error(utils.ErrNotFound.WrapWithNoMessage(err))
@@ -1012,12 +1126,12 @@ func (s *Service) updateExperiment(c *gin.Context) {
 	c.JSON(http.StatusOK, exp)
 }
 
-func (s *Service) updatePodChaos(exp *core.ExperimentYAMLDescription) error {
+func (s *Service) updatePodChaos(exp *core.ExperimentYAMLDescription, kubeCli client.Client) error {
 	chaos := &v1alpha1.PodChaos{}
 	meta := &exp.Metadata
 	key := types.NamespacedName{Namespace: meta.Namespace, Name: meta.Name}
 
-	if err := s.kubeCli.Get(context.Background(), key, chaos); err != nil {
+	if err := kubeCli.Get(context.Background(), key, chaos); err != nil {
 		return err
 	}
 
@@ -1028,15 +1142,15 @@ func (s *Service) updatePodChaos(exp *core.ExperimentYAMLDescription) error {
 	mapstructure.Decode(exp.Spec, &spec)
 	chaos.Spec = spec
 
-	return s.kubeCli.Update(context.Background(), chaos)
+	return kubeCli.Update(context.Background(), chaos)
 }
 
-func (s *Service) updateNetworkChaos(exp *core.ExperimentYAMLDescription) error {
+func (s *Service) updateNetworkChaos(exp *core.ExperimentYAMLDescription, kubeCli client.Client) error {
 	chaos := &v1alpha1.NetworkChaos{}
 	meta := &exp.Metadata
 	key := types.NamespacedName{Namespace: meta.Namespace, Name: meta.Name}
 
-	if err := s.kubeCli.Get(context.Background(), key, chaos); err != nil {
+	if err := kubeCli.Get(context.Background(), key, chaos); err != nil {
 		return err
 	}
 
@@ -1051,15 +1165,15 @@ func (s *Service) updateNetworkChaos(exp *core.ExperimentYAMLDescription) error 
 	mapstructure.Decode(exp.Spec, &tcParameter)
 	chaos.Spec.TcParameter = tcParameter
 
-	return s.kubeCli.Update(context.Background(), chaos)
+	return kubeCli.Update(context.Background(), chaos)
 }
 
-func (s *Service) updateIOChaos(exp *core.ExperimentYAMLDescription) error {
+func (s *Service) updateIOChaos(exp *core.ExperimentYAMLDescription, kubeCli client.Client) error {
 	chaos := &v1alpha1.IoChaos{}
 	meta := &exp.Metadata
 	key := types.NamespacedName{Namespace: meta.Namespace, Name: meta.Name}
 
-	if err := s.kubeCli.Get(context.Background(), key, chaos); err != nil {
+	if err := kubeCli.Get(context.Background(), key, chaos); err != nil {
 		return err
 	}
 
@@ -1070,15 +1184,15 @@ func (s *Service) updateIOChaos(exp *core.ExperimentYAMLDescription) error {
 	mapstructure.Decode(exp.Spec, &spec)
 	chaos.Spec = spec
 
-	return s.kubeCli.Update(context.Background(), chaos)
+	return kubeCli.Update(context.Background(), chaos)
 }
 
-func (s *Service) updateKernelChaos(exp *core.ExperimentYAMLDescription) error {
+func (s *Service) updateKernelChaos(exp *core.ExperimentYAMLDescription, kubeCli client.Client) error {
 	chaos := &v1alpha1.KernelChaos{}
 	meta := &exp.Metadata
 	key := types.NamespacedName{Namespace: meta.Namespace, Name: meta.Name}
 
-	if err := s.kubeCli.Get(context.Background(), key, chaos); err != nil {
+	if err := kubeCli.Get(context.Background(), key, chaos); err != nil {
 		return err
 	}
 
@@ -1089,15 +1203,15 @@ func (s *Service) updateKernelChaos(exp *core.ExperimentYAMLDescription) error {
 	mapstructure.Decode(exp.Spec, &spec)
 	chaos.Spec = spec
 
-	return s.kubeCli.Update(context.Background(), chaos)
+	return kubeCli.Update(context.Background(), chaos)
 }
 
-func (s *Service) updateTimeChaos(exp *core.ExperimentYAMLDescription) error {
+func (s *Service) updateTimeChaos(exp *core.ExperimentYAMLDescription, kubeCli client.Client) error {
 	chaos := &v1alpha1.TimeChaos{}
 	meta := &exp.Metadata
 	key := types.NamespacedName{Namespace: meta.Namespace, Name: meta.Name}
 
-	if err := s.kubeCli.Get(context.Background(), key, chaos); err != nil {
+	if err := kubeCli.Get(context.Background(), key, chaos); err != nil {
 		return err
 	}
 
@@ -1108,15 +1222,15 @@ func (s *Service) updateTimeChaos(exp *core.ExperimentYAMLDescription) error {
 	mapstructure.Decode(exp.Spec, &spec)
 	chaos.Spec = spec
 
-	return s.kubeCli.Update(context.Background(), chaos)
+	return kubeCli.Update(context.Background(), chaos)
 }
 
-func (s *Service) updateStressChaos(exp *core.ExperimentYAMLDescription) error {
+func (s *Service) updateStressChaos(exp *core.ExperimentYAMLDescription, kubeCli client.Client) error {
 	chaos := &v1alpha1.StressChaos{}
 	meta := &exp.Metadata
 	key := types.NamespacedName{Namespace: meta.Namespace, Name: meta.Name}
 
-	if err := s.kubeCli.Get(context.Background(), key, chaos); err != nil {
+	if err := kubeCli.Get(context.Background(), key, chaos); err != nil {
 		return err
 	}
 
@@ -1127,5 +1241,24 @@ func (s *Service) updateStressChaos(exp *core.ExperimentYAMLDescription) error {
 	mapstructure.Decode(exp.Spec, &spec)
 	chaos.Spec = spec
 
-	return s.kubeCli.Update(context.Background(), chaos)
+	return kubeCli.Update(context.Background(), chaos)
+}
+
+func (s *Service) updateDNSChaos(exp *core.ExperimentYAMLDescription, kubeCli client.Client) error {
+	chaos := &v1alpha1.DNSChaos{}
+	meta := &exp.Metadata
+	key := types.NamespacedName{Namespace: meta.Namespace, Name: meta.Name}
+
+	if err := kubeCli.Get(context.Background(), key, chaos); err != nil {
+		return err
+	}
+
+	chaos.SetLabels(meta.Labels)
+	chaos.SetAnnotations(meta.Annotations)
+
+	var spec v1alpha1.DNSChaosSpec
+	mapstructure.Decode(exp.Spec, &spec)
+	chaos.Spec = spec
+
+	return kubeCli.Update(context.Background(), chaos)
 }

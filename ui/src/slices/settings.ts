@@ -1,10 +1,11 @@
+import LS from 'lib/localStorage'
 import { createSlice } from '@reduxjs/toolkit'
 
 export type Theme = 'light' | 'dark'
 
 const initialState = {
-  theme: (window.localStorage.getItem('chaos-mesh-theme') || 'light') as Theme,
-  lang: window.localStorage.getItem('chaos-mesh-lang') || 'en',
+  theme: (LS.get('theme') || 'light') as Theme,
+  lang: LS.get('lang') || 'en',
 }
 
 const settingsSlice = createSlice({
@@ -14,12 +15,12 @@ const settingsSlice = createSlice({
     setTheme(state, action) {
       state.theme = action.payload
 
-      window.localStorage.setItem('chaos-mesh-theme', action.payload)
+      LS.set('theme', action.payload)
     },
     setLang(state, action) {
       state.lang = action.payload
 
-      window.localStorage.setItem('chaos-mesh-lang', action.payload)
+      LS.set('lang', action.payload)
     },
   },
 })
