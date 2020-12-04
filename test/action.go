@@ -104,7 +104,7 @@ func (oa *operatorAction) DeployOperator(info OperatorConfig) error {
 
 func (oa *operatorAction) InstallCRD(info OperatorConfig) error {
 	klog.Infof("deploying chaos-mesh crd :%v", info.ReleaseName)
-	oa.runKubectlOrDie("apply", "-f", oa.manifestPath("e2e/crd.yaml"))
+	oa.runKubectlOrDie("apply", "-f", oa.manifestPath("e2e/crd.yaml"), "--validate=false")
 	e2eutil.WaitForCRDsEstablished(oa.apiExtCli, labels.Everything())
 	// workaround for https://github.com/kubernetes/kubernetes/issues/65517
 	klog.Infof("force sync kubectl cache")
