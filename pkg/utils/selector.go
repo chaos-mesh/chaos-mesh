@@ -19,11 +19,11 @@ import (
 	"fmt"
 	"math"
 	"math/rand"
-	"regexp"
 	"strconv"
 	"strings"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/controllers/config"
 	"github.com/chaos-mesh/chaos-mesh/pkg/label"
 	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
 
@@ -74,6 +74,8 @@ func SelectAndFilterPods(ctx context.Context, c client.Client, r client.Reader, 
 	return filteredPod, nil
 }
 
+//revive:disable:flag-parameter
+
 // SelectPods returns the list of pods that are available for pod chaos action.
 // It returns all pods that match the configured label, annotation and namespace selectors.
 // If pods are specifically specified by `selector.Pods`, it just returns the selector.Pods.
@@ -90,7 +92,7 @@ func SelectPods(ctx context.Context, c client.Client, r client.Reader, selector 
 					continue
 				}
 			}
-			if !IsAllowedNamespaces(ns, allowedNamespaces, ignoredNamespaces) {
+			if !config.IsAllowedNamespaces(ns, allowedNamespaces, ignoredNamespaces) {
 				log.Info("filter pod by namespaces", "namespace", ns)
 				continue
 			}
@@ -219,6 +221,8 @@ func SelectPods(ctx context.Context, c client.Client, r client.Reader, selector 
 
 	return pods, nil
 }
+
+//revive:enable:flag-parameter
 
 // GetService get k8s service by service name
 func GetService(ctx context.Context, c client.Client, namespace, controllerNamespace string, serviceName string) (*v1.Service, error) {
@@ -476,7 +480,7 @@ func filterByNamespaces(pods []v1.Pod, allowedNamespaces, ignoredNamespaces stri
 	var filteredList []v1.Pod
 
 	for _, pod := range pods {
-		if IsAllowedNamespaces(pod.Namespace, allowedNamespaces, ignoredNamespaces) {
+		if config.IsAllowedNamespaces(pod.Namespace, allowedNamespaces, ignoredNamespaces) {
 			filteredList = append(filteredList, pod)
 		} else {
 			log.Info("filter pod by namespaces",
@@ -484,27 +488,6 @@ func filterByNamespaces(pods []v1.Pod, allowedNamespaces, ignoredNamespaces stri
 		}
 	}
 	return filteredList
-}
-
-// IsAllowedNamespaces returns whether namespace allows the execution of a chaos task
-func IsAllowedNamespaces(namespace string, allowedNamespaces, ignoredNamespaces string) bool {
-	if allowedNamespaces != "" {
-		matched, err := regexp.MatchString(allowedNamespaces, namespace)
-		if err != nil {
-			return false
-		}
-		return matched
-	}
-
-	if ignoredNamespaces != "" {
-		matched, err := regexp.MatchString(ignoredNamespaces, namespace)
-		if err != nil {
-			return false
-		}
-		return !matched
-	}
-
-	return true
 }
 
 // filterByNamespaceSelector filters a list of pods by a given namespace selector.
