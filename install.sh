@@ -1232,6 +1232,8 @@ spec:
               value: chaos-testing
             - name: CLUSTER_SCOPED
               value: "true"
+            - name: UNSAFE_MODE
+              value: "false"
           volumeMounts:
             - name: storage-volume
               mountPath: /data
