@@ -20,7 +20,6 @@ import (
 	. "github.com/onsi/gomega"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	"github.com/chaos-mesh/chaos-mesh/controllers/common"
 	"github.com/chaos-mesh/chaos-mesh/pkg/label"
 
 	v1 "k8s.io/api/core/v1"
@@ -121,8 +120,15 @@ func TestSelectPods(t *testing.T) {
 		},
 	}
 
+	var (
+		testCfgClusterScoped     = true
+		testCfgTargetNamespace   = ""
+		testCfgAllowedNamespaces = ""
+		testCfgIgnoredNamespaces = ""
+	)
+
 	for _, tc := range tcs {
-		filteredPods, err := SelectPods(context.Background(), c, r, tc.selector)
+		filteredPods, err := SelectPods(context.Background(), c, r, tc.selector, testCfgClusterScoped, testCfgTargetNamespace, testCfgAllowedNamespaces, testCfgIgnoredNamespaces)
 		g.Expect(err).ShouldNot(HaveOccurred(), tc.name)
 		g.Expect(len(filteredPods)).To(Equal(len(tc.expectedPods)), tc.name)
 	}
@@ -483,22 +489,10 @@ func TestIsAllowedNamespaces(t *testing.T) {
 		ignore: "ignore",
 	})
 
-	setRule := func(allow string, ignore string) {
-		common.ControllerCfg.AllowedNamespaces = allow
-		common.ControllerCfg.IgnoredNamespaces = ignore
-	}
-
-	clean := func() {
-		common.ControllerCfg.AllowedNamespaces = ""
-		common.ControllerCfg.IgnoredNamespaces = ""
-	}
-
 	for _, tc := range tcs {
-		setRule(tc.allow, tc.ignore)
 		for index, pod := range tc.pods {
-			g.Expect(IsAllowedNamespaces(pod.Namespace)).Should(Equal(tc.ret[index]))
+			g.Expect(IsAllowedNamespaces(pod.Namespace, tc.allow, tc.ignore)).Should(Equal(tc.ret[index]))
 		}
-		clean()
 	}
 }
 
