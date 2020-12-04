@@ -53,7 +53,7 @@ spec:
             - name: CLUSTER_SCOPED
               value: "{{ .Values.clusterScoped }}"
             - name: DISABLE_TOKEN
-              value: "{{ .Values.disableToken }}"
+              value: "{{ .Values.dashboard.disableToken }}"
             {{- if .Values.controllerManager.allowedNamespaces }}
             - name: ALLOWED_NAMESPACES
               value: {{ .Values.controllerManager.allowedNamespaces }}
