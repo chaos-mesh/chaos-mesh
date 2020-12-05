@@ -43,15 +43,6 @@ func (c *GrpcChaosDaemonClient) Close() error {
 
 // NewChaosDaemonClient would create ChaosDaemonClient
 func NewChaosDaemonClient(ctx context.Context, c client.Client, pod *v1.Pod, port int) (ChaosDaemonClientInterface, error) {
-	return newChaosDaemonClient(ctx, c, pod, port, "")
-}
-
-// NewChaosDaemonClientLocally would create ChaosDaemonClient in localhost
-func NewChaosDaemonClientLocally(port int) (ChaosDaemonClientInterface, error) {
-	return newChaosDaemonClient(nil, nil, nil, port, "localhost")
-}
-
-func newChaosDaemonClient(ctx context.Context, c client.Client, pod *v1.Pod, port int, address string) (ChaosDaemonClientInterface, error) {
 	if cli := mock.On("MockChaosDaemonClient"); cli != nil {
 		return cli.(ChaosDaemonClientInterface), nil
 	}
@@ -59,14 +50,26 @@ func newChaosDaemonClient(ctx context.Context, c client.Client, pod *v1.Pod, por
 		return nil, err.(error)
 	}
 
-	var cc *grpc.ClientConn
-	var err error
-	if address == "" {
-		cc, err = CreateGrpcConnection(ctx, c, pod, port)
-	} else {
-		cc, err = CreateGrpcConnectionWithAddress(ctx, port, address)
+	cc, err := CreateGrpcConnection(ctx, c, pod, port)
+	if err != nil {
+		return nil, err
+	}
+	return &GrpcChaosDaemonClient{
+		ChaosDaemonClient: chaosdaemon.NewChaosDaemonClient(cc),
+		conn:              cc,
+	}, nil
+}
+
+// NewChaosDaemonClientLocally would create ChaosDaemonClient in localhost
+func NewChaosDaemonClientLocally(port int) (ChaosDaemonClientInterface, error) {
+	if cli := mock.On("MockChaosDaemonClient"); cli != nil {
+		return cli.(ChaosDaemonClientInterface), nil
+	}
+	if err := mock.On("NewChaosDaemonClientError"); err != nil {
+		return nil, err.(error)
 	}
 
+	cc, err := CreateGrpcConnectionWithAddress(port, "localhost")
 	if err != nil {
 		return nil, err
 	}

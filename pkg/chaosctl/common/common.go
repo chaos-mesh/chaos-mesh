@@ -169,7 +169,7 @@ func GetPods(ctx context.Context, status v1alpha1.ChaosStatus, selector v1alpha1
 		time.Sleep(waitTime)
 	}
 
-	pods, err := utils.SelectPods(ctx, c, c, selector)
+	pods, err := utils.SelectPods(ctx, c, c, selector, common.ControllerCfg.ClusterScoped, common.ControllerCfg.TargetNamespace, common.ControllerCfg.AllowedNamespaces, common.ControllerCfg.IgnoredNamespaces)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to SelectPods with: %s", err.Error())
 	}
@@ -185,7 +185,7 @@ func GetPods(ctx context.Context, status v1alpha1.ChaosStatus, selector v1alpha1
 			Nodes:          []string{nodeName},
 			LabelSelectors: map[string]string{"app.kubernetes.io/component": "chaos-daemon"},
 		}
-		daemons, err := utils.SelectPods(ctx, c, nil, daemonSelector)
+		daemons, err := utils.SelectPods(ctx, c, nil, daemonSelector, common.ControllerCfg.ClusterScoped, common.ControllerCfg.TargetNamespace, common.ControllerCfg.AllowedNamespaces, common.ControllerCfg.IgnoredNamespaces)
 		if err != nil {
 			return nil, nil, fmt.Errorf("failed to SelectPods with: %s", err.Error())
 		}
@@ -291,15 +291,12 @@ func forwardPorts(ctx context.Context, pod v1.Pod, port uint16) (context.CancelF
 
 // Log print log of pod
 func Log(pod v1.Pod, tail int64, c *kubernetes.Clientset) (string, error) {
-	var podLogOpts v1.PodLogOptions
+	podLogOpts := v1.PodLogOptions{}
 	//use negative tail to indicate no tail limit is needed
-	if tail < 0 {
-		podLogOpts = v1.PodLogOptions{}
-	} else {
-		podLogOpts = v1.PodLogOptions{
-			TailLines: func(i int64) *int64 { return &i }(tail),
-		}
+	if tail >= 0 {
+		podLogOpts.TailLines = func(i int64) *int64 { return &i }(tail)
 	}
+
 	req := c.CoreV1().Pods(pod.Namespace).GetLogs(pod.Name, &podLogOpts)
 	podLogs, err := req.Stream()
 	if err != nil {
@@ -329,14 +326,17 @@ func checkConnForCtrlAndDaemon(ctx context.Context, daemons []v1.Pod, c *ClientS
 	ctrlSelector := v1alpha1.SelectorSpec{
 		LabelSelectors: map[string]string{"app.kubernetes.io/component": "controller-manager"},
 	}
-	ctrlMgrs, err := utils.SelectPods(ctx, c.CtrlCli, c.CtrlCli, ctrlSelector)
+	ctrlMgrs, err := utils.SelectPods(ctx, c.CtrlCli, c.CtrlCli, ctrlSelector, common.ControllerCfg.ClusterScoped, common.ControllerCfg.TargetNamespace, common.ControllerCfg.AllowedNamespaces, common.ControllerCfg.IgnoredNamespaces)
 	if err != nil {
 		return fmt.Errorf("failed to SelectPods with: %s", err.Error())
+	}
+	if len(ctrlMgrs) == 0 {
+		return fmt.Errorf("Could not found controller manager")
 	}
 	for _, daemon := range daemons {
 		daemonIP := daemon.Status.PodIP
 		cmd := fmt.Sprintf("ping -c 1 %s > /dev/null; echo $?", daemonIP)
-		out, err := Exec(ctx, ctrlMgrs[0], daemon, cmd, c.KubeCli)
+		out, err := Exec(ctx, ctrlMgrs[0], cmd, c.KubeCli)
 		if err != nil {
 			return fmt.Errorf("run command '%s' failed with: %s", cmd, err.Error())
 		}

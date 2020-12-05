@@ -57,14 +57,14 @@ func Debug(ctx context.Context, chaos runtime.Object, c *cm.ClientSet, result *c
 func debugEachPod(ctx context.Context, pod v1.Pod, daemon v1.Pod, chaos *v1alpha1.IoChaos, c *cm.ClientSet, result *cm.PodResult) error {
 	// print out debug info
 	cmd := fmt.Sprintf("ls -l /proc/1/fd")
-	out, err := cm.Exec(ctx, pod, daemon, cmd, c.KubeCli)
+	out, err := cm.ExecBypass(ctx, pod, daemon, cmd, c.KubeCli)
 	if err != nil {
 		return fmt.Errorf("run command '%s' failed with: %s", cmd, err.Error())
 	}
 	result.Items = append(result.Items, cm.ItemResult{Name: "file discriptors", Value: string(out)})
 
 	cmd = fmt.Sprintf("cat /proc/mounts")
-	out, err = cm.Exec(ctx, pod, daemon, cmd, c.KubeCli)
+	out, err = cm.ExecBypass(ctx, pod, daemon, cmd, c.KubeCli)
 	if err != nil {
 		return fmt.Errorf("run command '%s' failed with: %s", cmd, err.Error())
 	}

@@ -31,7 +31,7 @@ RUN apk add --no-cache curl tar
 WORKDIR /bin
 
 RUN curl -L https://github.com/chaos-mesh/toda/releases/download/v0.1.8/toda-linux-amd64.tar.gz | tar -xz
-RUN curl -L https://github.com/Yiyiyimu/nscat/releases/download/v0.1.1/nsexec-linx-amd64.tar.gz | tar -xz
+RUN curl -L https://github.com/Yiyiyimu/nsexec/releases/download/v0.1.1/nsexec-linx-amd64.tar.gz | tar -xz
 
 WORKDIR /
 RUN curl -L https://github.com/chaos-mesh/toda-glibc/releases/download/v2.28-alpha.2/toda-glibc-2.28.tar.xz | tar -xz

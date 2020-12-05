@@ -30,26 +30,9 @@ import (
 )
 
 // Exec executes certain command and returns the result
-// runtime-controller only support CRUD， use client-go client
-func Exec(ctx context.Context, pod v1.Pod, daemon v1.Pod, cmd string, c *kubernetes.Clientset) (string, error) {
-	out, err := exec(ctx, pod, daemon, cmd, c)
-
-	if err != nil {
-		// use daemon to enter namespace and execute command if command not found (which stream would failed)
-		if strings.Contains(err.Error(), "streaming remotecommand") {
-			outNs, errNs := nsEnterExec(ctx, err.Error(), pod, daemon, cmd, c)
-			if errNs == nil {
-				return outNs, nil
-			}
-			err = fmt.Errorf("%s\nnsenter also failed with: %s", err.Error(), errNs.Error())
-		}
-		return "", err
-	}
-
-	return out, nil
-}
-
-func exec(ctx context.Context, pod v1.Pod, daemon v1.Pod, cmd string, c *kubernetes.Clientset) (string, error) {
+// Only commands in chaos-mesh components should use this way
+// for target pod, use ExecBypass
+func Exec(ctx context.Context, pod v1.Pod, cmd string, c *kubernetes.Clientset) (string, error) {
 	name := pod.GetObjectMeta().GetName()
 	namespace := pod.GetObjectMeta().GetNamespace()
 	// TODO: if `containerNames` is set and specific container is injected chaos,
@@ -83,15 +66,16 @@ func exec(ctx context.Context, pod v1.Pod, daemon v1.Pod, cmd string, c *kuberne
 		Stderr: &stderr,
 	})
 	if err != nil {
-		return "", fmt.Errorf("error in streaming remotecommand: %s", err.Error())
+		return "", fmt.Errorf("error in streaming remotecommand: %s, pod: %s, command: %s", err.Error(), pod.Name, cmd)
 	}
 	if stderr.String() != "" {
-		return "", fmt.Errorf(stderr.String())
+		return "", fmt.Errorf("error of command %s: %s", cmd, stderr.String())
 	}
 	return stdout.String(), nil
 }
 
-func nsEnterExec(ctx context.Context, stderr string, pod v1.Pod, daemon v1.Pod, cmd string, c *kubernetes.Clientset) (string, error) {
+// ExecBypass use chaos-daemon to enter namespace and execute command in target pod
+func ExecBypass(ctx context.Context, pod v1.Pod, daemon v1.Pod, cmd string, c *kubernetes.Clientset) (string, error) {
 	cmdSubSlice := strings.Fields(cmd)
 	if len(cmdSubSlice) == 0 {
 		return "", fmt.Errorf("command should not be empty")
@@ -105,19 +89,15 @@ func nsEnterExec(ctx context.Context, stderr string, pod v1.Pod, daemon v1.Pod, 
 	}
 	switch cmdSubSlice[0] {
 	case "ps":
-		nsenterPath := "-p/proc/" + strconv.Itoa(pid) + "/ns/pid"
-		nsCmd := fmt.Sprintf("mount -t proc proc /proc && %s && umount proc", cmd)
-		newCmd := fmt.Sprintf("/usr/bin/nsenter %s -- /bin/bash -c '%s'", nsenterPath, nsCmd)
-		return exec(ctx, daemon, daemon, newCmd, c)
+		nsenterPath := "-t " + strconv.Itoa(pid) + " -p -m"
+		newCmd := fmt.Sprintf("/usr/bin/nsenter %s -- /bin/sh -c '%s'", nsenterPath, cmd)
+		return Exec(ctx, daemon, newCmd, c)
 	case "cat", "ls":
 		// we need to enter mount namespace to get file related infomation
 		// but enter mnt ns would prevent us to access `cat`/`ls` in daemon
 		// so use `nsexec` to achieve using nsenter and cat together
-		if len(cmdSubSlice) < 2 {
-			return "", fmt.Errorf("%s should have one argument at least", cmdSubSlice[0])
-		}
 		newCmd := fmt.Sprintf("/usr/local/bin/nsexec %s %s", strconv.Itoa(pid), cmd)
-		return exec(ctx, daemon, daemon, newCmd, c)
+		return Exec(ctx, daemon, newCmd, c)
 	default:
 		return "", fmt.Errorf("command not supported for nsenter")
 	}

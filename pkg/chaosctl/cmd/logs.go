@@ -24,6 +24,7 @@ import (
 	"k8s.io/client-go/kubernetes"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/controllers/common"
 	cm "github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/common"
 	"github.com/chaos-mesh/chaos-mesh/pkg/utils"
 )
@@ -47,7 +48,7 @@ func init() {
 		Long: `Print logs of controller-manager, chaos-daemon and chaos-dashboard, to provide debug information.
 
 Examples:
-  # Default print 60 recent lines of log of all chaosmesh components
+  # Default print all log of all chaosmesh components
   chaosctl logs
 
   # Print 100 log lines for chaosmesh components in node NODENAME
@@ -60,7 +61,7 @@ Examples:
 		ValidArgsFunction: noCompletions,
 	}
 
-	logsCmd.Flags().Int64VarP(&o.tail, "tail", "t", 60, "Number of lines of recent log")
+	logsCmd.Flags().Int64VarP(&o.tail, "tail", "t", -1, "Number of lines of recent log")
 	logsCmd.Flags().StringVarP(&o.node, "node", "n", "", "Number of lines of recent log")
 	err = logsCmd.RegisterFlagCompletionFunc("node", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		return listNodes(toComplete, c.KubeCli)
@@ -86,7 +87,7 @@ func (o *logsOptions) Run(args []string, c *cm.ClientSet) error {
 			selector.Nodes = []string{o.node}
 		}
 
-		components, err := utils.SelectPods(ctx, c.CtrlCli, nil, selector)
+		components, err := utils.SelectPods(ctx, c.CtrlCli, nil, selector, common.ControllerCfg.ClusterScoped, common.ControllerCfg.TargetNamespace, common.ControllerCfg.AllowedNamespaces, common.ControllerCfg.IgnoredNamespaces)
 		if err != nil {
 			return fmt.Errorf("failed to SelectPods with: %s", err.Error())
 		}

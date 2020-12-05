@@ -25,7 +25,7 @@ Chaoctl support shell autocompletion, which could save you some typing. Do `./bi
 **Logs**
 `chaoctl log` is used to easily print log from all chaos-mesh components, including controller-manager, chaos-daemon and chaos-dashboard.
 ```shell
-# default print 60 recent lines of log of all chaosmesh components
+# Default print all log of all chaosmesh components
 chaosctl logs
 
 # to print 100 log lines for chaosmesh components in node NODENAME

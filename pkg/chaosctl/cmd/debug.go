@@ -34,6 +34,14 @@ type debugOptions struct {
 	namespace string
 }
 
+type chaosT int
+
+const (
+	networkChaos = "networkchaos"
+	stressChaos  = "stresschaos"
+	ioChaos      = "iochaos"
+)
+
 func init() {
 	o := &debugOptions{}
 
@@ -42,7 +50,6 @@ func init() {
 		log.Fatal(err)
 	}
 
-	// debugCmd represents the debug command
 	debugCmd := &cobra.Command{
 		Use:   `debug (CHAOSTYPE) [-c CHAOSNAME] [-n NAMESPACE]`,
 		Short: `Print the debug information for certain chaos`,
@@ -150,11 +157,11 @@ func (o *debugOptions) Run(chaosType string, args []string, c *cm.ClientSet) err
 
 		var err error
 		switch chaosType {
-		case "networkchaos":
+		case networkChaos:
 			err = networkchaos.Debug(ctx, chaos, c, &chaosResult)
-		case "stresschaos":
+		case stressChaos:
 			err = stresschaos.Debug(ctx, chaos, c, &chaosResult)
-		case "iochaos":
+		case ioChaos:
 			err = iochaos.Debug(ctx, chaos, c, &chaosResult)
 		default:
 			return fmt.Errorf("chaos type not supported")
