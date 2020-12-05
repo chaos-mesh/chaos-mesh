@@ -45,7 +45,7 @@ export default function Events() {
     api.events
       .events()
       .then(({ data }) => setEvents(data))
-      .catch(console.log)
+      .catch(console.error)
       .finally(() => {
         setLoading(false)
       })

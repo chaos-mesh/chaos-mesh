@@ -3,13 +3,9 @@ import React, { useMemo } from 'react'
 import { getIn, useFormikContext } from 'formik'
 import { setAlert, setAlertOpen } from 'slices/globalStatus'
 
-import Paper from 'components-mui/Paper'
+import PaperContainer from 'components-mui/PaperContainer'
 import T from 'components/T'
 import { useStoreDispatch } from 'store'
-
-const PaperContainer: React.FC = ({ children }) => (
-  <Paper style={{ maxHeight: 768, overflow: 'scroll' }}>{children}</Paper>
-)
 
 interface ScopePodsTableProps {
   scope?: string

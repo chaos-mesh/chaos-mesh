@@ -33,7 +33,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	"github.com/chaos-mesh/chaos-mesh/controllers/common"
+	ctrlconfig "github.com/chaos-mesh/chaos-mesh/controllers/config"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
 	"github.com/chaos-mesh/chaos-mesh/pkg/utils"
 	e2econfig "github.com/chaos-mesh/chaos-mesh/test/e2e/config"
@@ -169,7 +169,7 @@ func GetPods(ctx context.Context, status v1alpha1.ChaosStatus, selector v1alpha1
 		time.Sleep(waitTime)
 	}
 
-	pods, err := utils.SelectPods(ctx, c, c, selector, common.ControllerCfg.ClusterScoped, common.ControllerCfg.TargetNamespace, common.ControllerCfg.AllowedNamespaces, common.ControllerCfg.IgnoredNamespaces)
+	pods, err := utils.SelectPods(ctx, c, c, selector, ctrlconfig.ControllerCfg.ClusterScoped, ctrlconfig.ControllerCfg.TargetNamespace, ctrlconfig.ControllerCfg.AllowedNamespaces, ctrlconfig.ControllerCfg.IgnoredNamespaces)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to SelectPods with: %s", err.Error())
 	}
@@ -185,7 +185,7 @@ func GetPods(ctx context.Context, status v1alpha1.ChaosStatus, selector v1alpha1
 			Nodes:          []string{nodeName},
 			LabelSelectors: map[string]string{"app.kubernetes.io/component": "chaos-daemon"},
 		}
-		daemons, err := utils.SelectPods(ctx, c, nil, daemonSelector, common.ControllerCfg.ClusterScoped, common.ControllerCfg.TargetNamespace, common.ControllerCfg.AllowedNamespaces, common.ControllerCfg.IgnoredNamespaces)
+		daemons, err := utils.SelectPods(ctx, c, nil, daemonSelector, ctrlconfig.ControllerCfg.ClusterScoped, ctrlconfig.ControllerCfg.TargetNamespace, ctrlconfig.ControllerCfg.AllowedNamespaces, ctrlconfig.ControllerCfg.IgnoredNamespaces)
 		if err != nil {
 			return nil, nil, fmt.Errorf("failed to SelectPods with: %s", err.Error())
 		}
@@ -246,7 +246,7 @@ func getChaos(ctx context.Context, chaosType string, chaosName string, ns string
 
 // GetPidFromPod returns pid given containerd ID in pod
 func GetPidFromPod(ctx context.Context, pod v1.Pod, daemon v1.Pod) (int, error) {
-	pfCancel, localPort, err := forwardPorts(ctx, daemon, uint16(common.ControllerCfg.ChaosDaemonPort))
+	pfCancel, localPort, err := forwardPorts(ctx, daemon, uint16(ctrlconfig.ControllerCfg.ChaosDaemonPort))
 	if err != nil {
 		return 0, fmt.Errorf("forward ports failed: %s", err.Error())
 	}
@@ -326,7 +326,7 @@ func checkConnForCtrlAndDaemon(ctx context.Context, daemons []v1.Pod, c *ClientS
 	ctrlSelector := v1alpha1.SelectorSpec{
 		LabelSelectors: map[string]string{"app.kubernetes.io/component": "controller-manager"},
 	}
-	ctrlMgrs, err := utils.SelectPods(ctx, c.CtrlCli, c.CtrlCli, ctrlSelector, common.ControllerCfg.ClusterScoped, common.ControllerCfg.TargetNamespace, common.ControllerCfg.AllowedNamespaces, common.ControllerCfg.IgnoredNamespaces)
+	ctrlMgrs, err := utils.SelectPods(ctx, c.CtrlCli, c.CtrlCli, ctrlSelector, ctrlconfig.ControllerCfg.ClusterScoped, ctrlconfig.ControllerCfg.TargetNamespace, ctrlconfig.ControllerCfg.AllowedNamespaces, ctrlconfig.ControllerCfg.IgnoredNamespaces)
 	if err != nil {
 		return fmt.Errorf("failed to SelectPods with: %s", err.Error())
 	}

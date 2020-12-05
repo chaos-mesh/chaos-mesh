@@ -19,11 +19,11 @@ import (
 	"fmt"
 	"math"
 	"math/rand"
-	"regexp"
 	"strconv"
 	"strings"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/controllers/config"
 	"github.com/chaos-mesh/chaos-mesh/pkg/label"
 	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
 
@@ -74,6 +74,8 @@ func SelectAndFilterPods(ctx context.Context, c client.Client, r client.Reader, 
 	return filteredPod, nil
 }
 
+//revive:disable:flag-parameter
+
 // SelectPods returns the list of pods that are available for pod chaos action.
 // It returns all pods that match the configured label, annotation and namespace selectors.
 // If pods are specifically specified by `selector.Pods`, it just returns the selector.Pods.
@@ -90,7 +92,7 @@ func SelectPods(ctx context.Context, c client.Client, r client.Reader, selector 
 					continue
 				}
 			}
-			if !IsAllowedNamespaces(ns, allowedNamespaces, ignoredNamespaces) {
+			if !config.IsAllowedNamespaces(ns, allowedNamespaces, ignoredNamespaces) {
 				log.Info("filter pod by namespaces", "namespace", ns)
 				continue
 			}
@@ -127,8 +129,6 @@ func SelectPods(ctx context.Context, c client.Client, r client.Reader, selector 
 		}
 	}
 
-	var podList v1.PodList
-
 	var listOptions = client.ListOptions{}
 	if !clusterScoped {
 		listOptions.Namespace = targetNamespace
@@ -136,19 +136,35 @@ func SelectPods(ctx context.Context, c client.Client, r client.Reader, selector 
 	if len(selector.LabelSelectors) > 0 {
 		listOptions.LabelSelector = labels.SelectorFromSet(selector.LabelSelectors)
 	}
+
+	listFunc := c.List
+
 	if len(selector.FieldSelectors) > 0 {
-		// Since FieldSelectors need to implement index creation, Reader.List is used to get the pod list.
 		listOptions.FieldSelector = fields.SelectorFromSet(selector.FieldSelectors)
-		if err := r.List(ctx, &podList, &listOptions); err != nil {
-			return nil, err
+
+		// Since FieldSelectors need to implement index creation, Reader.List is used to get the pod list.
+		// Otherwise, just call Client.List directly, which can be obtained through cache.
+		if r != nil {
+			listFunc = r.List
+		}
+	}
+
+	var podList v1.PodList
+	if len(selector.Namespaces) > 0 {
+		for _, namespace := range selector.Namespaces {
+			listOptions.Namespace = namespace
+
+			if err := listFunc(ctx, &podList, &listOptions); err != nil {
+				return nil, err
+			}
 		}
 	} else {
-		// Otherwise, just call Client.List directly, which can be obtained through cache.
-		if err := c.List(ctx, &podList, &listOptions); err != nil {
+		if err := listFunc(ctx, &podList, &listOptions); err != nil {
 			return nil, err
 		}
 	}
 	pods = append(pods, podList.Items...)
+
 	var (
 		nodes           []v1.Node
 		nodeList        v1.NodeList
@@ -202,6 +218,8 @@ func SelectPods(ctx context.Context, c client.Client, r client.Reader, selector 
 
 	return pods, nil
 }
+
+//revive:enable:flag-parameter
 
 // GetService get k8s service by service name
 func GetService(ctx context.Context, c client.Client, namespace, controllerNamespace string, serviceName string) (*v1.Service, error) {
@@ -459,7 +477,7 @@ func filterByNamespaces(pods []v1.Pod, allowedNamespaces, ignoredNamespaces stri
 	var filteredList []v1.Pod
 
 	for _, pod := range pods {
-		if IsAllowedNamespaces(pod.Namespace, allowedNamespaces, ignoredNamespaces) {
+		if config.IsAllowedNamespaces(pod.Namespace, allowedNamespaces, ignoredNamespaces) {
 			filteredList = append(filteredList, pod)
 		} else {
 			log.Info("filter pod by namespaces",
@@ -467,27 +485,6 @@ func filterByNamespaces(pods []v1.Pod, allowedNamespaces, ignoredNamespaces stri
 		}
 	}
 	return filteredList
-}
-
-// IsAllowedNamespaces returns whether namespace allows the execution of a chaos task
-func IsAllowedNamespaces(namespace string, allowedNamespaces, ignoredNamespaces string) bool {
-	if allowedNamespaces != "" {
-		matched, err := regexp.MatchString(allowedNamespaces, namespace)
-		if err != nil {
-			return false
-		}
-		return matched
-	}
-
-	if ignoredNamespaces != "" {
-		matched, err := regexp.MatchString(ignoredNamespaces, namespace)
-		if err != nil {
-			return false
-		}
-		return !matched
-	}
-
-	return true
 }
 
 // filterByNamespaceSelector filters a list of pods by a given namespace selector.

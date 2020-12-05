@@ -52,7 +52,7 @@ const Step3 = () => {
 
         dispatch(resetNewExperiment())
       })
-      .catch(console.log)
+      .catch(console.error)
   }
 
   return (

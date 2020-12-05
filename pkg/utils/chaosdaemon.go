@@ -69,7 +69,7 @@ func NewChaosDaemonClientLocally(port int) (ChaosDaemonClientInterface, error) {
 		return nil, err.(error)
 	}
 
-	cc, err := CreateGrpcConnectionWithAddress(port, "localhost")
+	cc, err := CreateGrpcConnectionWithAddress("localhost", port)
 	if err != nil {
 		return nil, err
 	}
