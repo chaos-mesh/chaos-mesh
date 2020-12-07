@@ -90,12 +90,24 @@ func debugEachPod(ctx context.Context, pod v1.Pod, daemon v1.Pod, chaos *v1alpha
 	}
 	stressngPid := strings.Fields(stressngLine[0])[0]
 
-	cmd = fmt.Sprintf("cat /proc/1/cgroup")
+	pids, commands, err := cm.GetPidFromPS(ctx, pod, daemon, c.KubeCli)
+
+	for i := range pids {
+		cmd = fmt.Sprintf("cat /proc/%s/cgroup", pids[i])
+		out, err = cm.ExecBypass(ctx, pod, daemon, cmd, c.KubeCli)
+		if err != nil {
+			result.Items = append(result.Items, cm.ItemResult{Name: fmt.Sprintf("/proc/%s/cgroup of %s", pids[i], commands[i]), Value: "No cgroup found"})
+		} else {
+			result.Items = append(result.Items, cm.ItemResult{Name: fmt.Sprintf("/proc/%s/cgroup of %s", pids[i], commands[i]), Value: string(out)})
+		}
+	}
+
+	cmd = fmt.Sprintf("cat /proc/%s/cgroup", stressngPid)
 	out, err = cm.ExecBypass(ctx, pod, daemon, cmd, c.KubeCli)
 	if err != nil {
 		return fmt.Errorf("run command '%s' failed with: %s", cmd, err.Error())
 	}
-	result.Items = append(result.Items, cm.ItemResult{Name: "/proc/1/cgroup", Value: string(out)})
+	itemResult := cm.ItemResult{Name: "/proc/(stress-ng pid)/cgroup", Value: string(out)}
 
 	var expr string
 	if isCPU {
@@ -104,21 +116,6 @@ func debugEachPod(ctx context.Context, pod v1.Pod, daemon v1.Pod, chaos *v1alpha
 		expr = "(?::memory:)(.*)"
 	}
 	processPath := regexp.MustCompile(expr).FindStringSubmatch(string(out))[1]
-
-	cmd = fmt.Sprintf("cat /proc/%s/cgroup", stressngPid)
-	outStress, err := cm.ExecBypass(ctx, pod, daemon, cmd, c.KubeCli)
-	if err != nil {
-		return fmt.Errorf("run command '%s' failed with: %s", cmd, err.Error())
-	}
-	itemResult := cm.ItemResult{Name: "/proc/(stress-ng pid)/cgroup", Value: string(outStress)}
-
-	if string(out) != string(outStress) {
-		itemResult.Status = cm.ItemFailure
-		itemResult.ErrInfo = "Cgroup of stress-ng and init process not the same"
-	} else {
-		itemResult.Status = cm.ItemSuccess
-	}
-	result.Items = append(result.Items, itemResult)
 
 	// print out debug info
 	if isCPU {

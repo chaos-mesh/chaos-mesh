@@ -244,6 +244,43 @@ func getChaos(ctx context.Context, chaosType string, chaosName string, ns string
 	return chaos, nil
 }
 
+// GetPidFromPS returns pid-command pairs
+func GetPidFromPS(ctx context.Context, pod v1.Pod, daemon v1.Pod, c *kubernetes.Clientset) ([]string, []string, error) {
+	cmd := fmt.Sprintf("ps")
+	out, err := ExecBypass(ctx, pod, daemon, cmd, c)
+	if err != nil {
+		return nil, nil, fmt.Errorf("run command '%s' failed with: %s", cmd, err.Error())
+	}
+	outLines := strings.Split(string(out), "\n")
+	if len(outLines) < 2 {
+		return nil, nil, fmt.Errorf("ps returns empty")
+	}
+	titles := strings.Fields(outLines[0])
+	var pidColumn, cmdColumn int
+	for i, t := range titles {
+		if t == "PID" {
+			pidColumn = i
+		}
+		if t == "COMMAND" || t == "CMD" {
+			cmdColumn = i
+		}
+	}
+	if pidColumn == 0 && cmdColumn == 0 {
+		return nil, nil, fmt.Errorf("Parsing ps error: could not get PID and COMMAND column")
+	}
+	var pids, commands []string
+	for _, line := range outLines[1:] {
+		item := strings.Fields(line)
+		// break when got empty line
+		if len(item) == 0 {
+			break
+		}
+		pids = append(pids, item[pidColumn])
+		commands = append(commands, item[cmdColumn])
+	}
+	return pids, commands, nil
+}
+
 // GetPidFromPod returns pid given containerd ID in pod
 func GetPidFromPod(ctx context.Context, pod v1.Pod, daemon v1.Pod) (int, error) {
 	pfCancel, localPort, err := forwardPorts(ctx, daemon, uint16(ctrlconfig.ControllerCfg.ChaosDaemonPort))
