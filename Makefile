@@ -105,9 +105,6 @@ bin/suicide: ./hack/suicide.c
 manager:
 	$(GO) build -ldflags '$(LDFLAGS)' -o bin/chaos-controller-manager ./cmd/controller-manager/*.go
 
-chaosfs:
-	$(GO) build -ldflags '$(LDFLAGS)' -o bin/chaosfs ./cmd/chaosfs/*.go
-
 chaos-dashboard:
 ifeq ($(SWAGGER),1)
 	make swagger_spec
@@ -129,7 +126,7 @@ ui: yarn_dependencies
 	cd ui &&\
 	yarn build
 
-binary: chaosdaemon manager chaosfs chaos-dashboard bin/pause bin/suicide
+binary: chaosdaemon manager chaos-dashboard bin/pause bin/suicide
 
 watchmaker:
 	$(CGOENV) go build -ldflags '$(LDFLAGS)' -o bin/watchmaker ./cmd/watchmaker/...
@@ -196,7 +193,7 @@ taily-build:
 taily-build-clean:
 	docker kill taily-build && docker rm taily-build || exit 0
 
-image: image-chaos-daemon image-chaos-mesh image-chaos-dashboard image-chaos-fs image-chaos-scripts
+image: image-chaos-daemon image-chaos-mesh image-chaos-dashboard image-chaos-scripts
 
 image-chaos-mesh-protoc:
 	docker build -t pingcap/chaos-mesh-protoc ${DOCKER_BUILD_ARGS} ./hack/protoc
@@ -219,9 +216,6 @@ image-chaos-daemon: image-binary
 
 image-chaos-mesh: image-binary
 	docker build -t ${DOCKER_REGISTRY_PREFIX}pingcap/chaos-mesh:${IMAGE_TAG} ${DOCKER_BUILD_ARGS} images/chaos-mesh
-
-image-chaos-fs: image-binary
-	docker build -t ${DOCKER_REGISTRY_PREFIX}pingcap/chaos-fs:${IMAGE_TAG} ${DOCKER_BUILD_ARGS} images/chaosfs
 
 image-chaos-scripts: image-binary
 	docker build -t ${DOCKER_REGISTRY_PREFIX}pingcap/chaos-scripts:${IMAGE_TAG} ${DOCKER_BUILD_ARGS} images/chaos-scripts
@@ -273,7 +267,7 @@ yaml: manifests ensure-kustomize
 # Generate Go files from Chaos Mesh proto files.
 ifeq ($(IN_DOCKER),1)
 proto:
-	for dir in pkg/chaosdaemon pkg/chaosfs; do\
+	for dir in pkg/chaosdaemon; do\
 		protoc -I $$dir/pb $$dir/pb/*.proto --go_out=plugins=grpc:$$dir/pb --go_out=./$$dir/pb ;\
 	done
 else
@@ -333,6 +327,6 @@ install-local-coverage-tools:
 
 .PHONY: all build test install manifests groupimports fmt vet tidy image \
 	binary docker-push lint generate yaml \
-	manager chaosfs chaosdaemon chaos-dashboard ensure-all \
+	manager chaosdaemon chaos-dashboard ensure-all \
 	dashboard dashboard-server-frontend gosec-scan \
 	proto bin/chaos-builder

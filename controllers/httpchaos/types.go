@@ -25,6 +25,7 @@ import (
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/config"
+	"github.com/chaos-mesh/chaos-mesh/pkg/finalizer"
 	"github.com/chaos-mesh/chaos-mesh/pkg/router"
 	ctx "github.com/chaos-mesh/chaos-mesh/pkg/router/context"
 	end "github.com/chaos-mesh/chaos-mesh/pkg/router/endpoint"
@@ -79,7 +80,7 @@ func (r *endpoint) applyAllPods(ctx context.Context, pods []v1.Pod, chaos *v1alp
 		if err != nil {
 			return err
 		}
-		chaos.Finalizers = utils.InsertFinalizer(chaos.Finalizers, key)
+		chaos.Finalizers = finalizer.InsertFinalizer(chaos.Finalizers, key)
 
 		g.Go(func() error {
 			return r.applyPod(ctx, pod, chaos)

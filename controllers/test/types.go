@@ -25,11 +25,12 @@ import (
 
 	chaosdaemon "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
 	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
-	"github.com/chaos-mesh/chaos-mesh/pkg/utils"
+
+	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/client"
 )
 
 // Assert *MockChaosDaemonClient implements chaosdaemon.ChaosDaemonClientInterface.
-var _ utils.ChaosDaemonClientInterface = (*MockChaosDaemonClient)(nil)
+var _ client.ChaosDaemonClientInterface = (*MockChaosDaemonClient)(nil)
 
 // MockChaosDaemonClient implements ChaosDaemonClientInterface for unit testing
 type MockChaosDaemonClient struct{}

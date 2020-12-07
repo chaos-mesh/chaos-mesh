@@ -32,6 +32,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/controllers/networkchaos/podnetworkmanager"
 	"github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos/ipset"
 	"github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos/netutils"
+	"github.com/chaos-mesh/chaos-mesh/pkg/finalizer"
 	"github.com/chaos-mesh/chaos-mesh/pkg/router"
 	ctx "github.com/chaos-mesh/chaos-mesh/pkg/router/context"
 	end "github.com/chaos-mesh/chaos-mesh/pkg/router/endpoint"
@@ -227,7 +228,7 @@ func (r *endpoint) cleanFinalizersAndRecover(ctx context.Context, networkchaos *
 			r.Log.Info("pod is not found or not running", "key", key)
 		}
 
-		networkchaos.Finalizers = utils.RemoveFromFinalizer(networkchaos.Finalizers, response.Key.String())
+		networkchaos.Finalizers = finalizer.RemoveFromFinalizer(networkchaos.Finalizers, response.Key.String())
 	}
 	r.Log.Info("After recovering", "finalizers", networkchaos.Finalizers)
 
@@ -249,7 +250,7 @@ func (r *endpoint) applyTc(ctx context.Context, sources, targets []v1.Pod, exter
 			return err
 		}
 
-		networkchaos.Finalizers = utils.InsertFinalizer(networkchaos.Finalizers, key)
+		networkchaos.Finalizers = finalizer.InsertFinalizer(networkchaos.Finalizers, key)
 	}
 
 	tcType := v1alpha1.Bandwidth

@@ -32,6 +32,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/controllers/common"
 	"github.com/chaos-mesh/chaos-mesh/controllers/config"
 	"github.com/chaos-mesh/chaos-mesh/pkg/annotation"
+	"github.com/chaos-mesh/chaos-mesh/pkg/finalizer"
 	"github.com/chaos-mesh/chaos-mesh/pkg/router"
 	ctx "github.com/chaos-mesh/chaos-mesh/pkg/router/context"
 	end "github.com/chaos-mesh/chaos-mesh/pkg/router/endpoint"
@@ -134,7 +135,7 @@ func (r *endpoint) cleanFinalizersAndRecover(ctx context.Context, podchaos *v1al
 			}
 
 			r.Log.Info("Pod not found", "namespace", ns, "name", name)
-			podchaos.Finalizers = utils.RemoveFromFinalizer(podchaos.Finalizers, key)
+			podchaos.Finalizers = finalizer.RemoveFromFinalizer(podchaos.Finalizers, key)
 			continue
 		}
 
@@ -144,7 +145,7 @@ func (r *endpoint) cleanFinalizersAndRecover(ctx context.Context, podchaos *v1al
 			continue
 		}
 
-		podchaos.Finalizers = utils.RemoveFromFinalizer(podchaos.Finalizers, key)
+		podchaos.Finalizers = finalizer.RemoveFromFinalizer(podchaos.Finalizers, key)
 	}
 
 	if podchaos.Annotations[common.AnnotationCleanFinalizer] == common.AnnotationCleanFinalizerForced {
@@ -165,7 +166,7 @@ func (r *endpoint) failAllPods(ctx context.Context, pods []v1.Pod, podchaos *v1a
 		if err != nil {
 			return err
 		}
-		podchaos.Finalizers = utils.InsertFinalizer(podchaos.Finalizers, key)
+		podchaos.Finalizers = finalizer.InsertFinalizer(podchaos.Finalizers, key)
 
 		g.Go(func() error {
 			return r.failPod(ctx, pod, podchaos)

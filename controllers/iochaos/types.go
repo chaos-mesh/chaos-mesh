@@ -29,6 +29,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/controllers/common"
 	"github.com/chaos-mesh/chaos-mesh/controllers/config"
 	"github.com/chaos-mesh/chaos-mesh/controllers/iochaos/podiochaosmanager"
+	"github.com/chaos-mesh/chaos-mesh/pkg/finalizer"
 	"github.com/chaos-mesh/chaos-mesh/pkg/router"
 	ctx "github.com/chaos-mesh/chaos-mesh/pkg/router/context"
 	end "github.com/chaos-mesh/chaos-mesh/pkg/router/endpoint"
@@ -107,7 +108,7 @@ func (r *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.I
 		if err != nil {
 			return err
 		}
-		iochaos.Finalizers = utils.InsertFinalizer(iochaos.Finalizers, key)
+		iochaos.Finalizers = finalizer.InsertFinalizer(iochaos.Finalizers, key)
 	}
 	r.Log.Info("commiting updates of podiochaos")
 	responses := m.Commit(ctx)
@@ -192,7 +193,7 @@ func (r *endpoint) cleanFinalizersAndRecover(ctx context.Context, chaos *v1alpha
 			r.Log.Info("pod is not found or not running", "key", key)
 		}
 
-		chaos.Finalizers = utils.RemoveFromFinalizer(chaos.Finalizers, response.Key.String())
+		chaos.Finalizers = finalizer.RemoveFromFinalizer(chaos.Finalizers, response.Key.String())
 	}
 	r.Log.Info("After recovering", "finalizers", chaos.Finalizers)
 

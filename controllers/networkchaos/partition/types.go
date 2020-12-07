@@ -33,6 +33,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos/iptable"
 	"github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos/netutils"
 	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
+	"github.com/chaos-mesh/chaos-mesh/pkg/finalizer"
 	"github.com/chaos-mesh/chaos-mesh/pkg/router"
 	ctx "github.com/chaos-mesh/chaos-mesh/pkg/router/context"
 	end "github.com/chaos-mesh/chaos-mesh/pkg/router/endpoint"
@@ -245,7 +246,7 @@ func (e *endpoint) SetChains(ctx context.Context, pods []v1.Pod, chains []v1alph
 			t.Append(chain)
 		}
 
-		networkchaos.Finalizers = utils.InsertFinalizer(networkchaos.Finalizers, key)
+		networkchaos.Finalizers = finalizer.InsertFinalizer(networkchaos.Finalizers, key)
 
 	}
 	return nil
@@ -302,7 +303,7 @@ func (e *endpoint) cleanFinalizersAndRecover(ctx context.Context, networkchaos *
 			e.Log.Info("pod is not found or not running", "key", key)
 		}
 
-		networkchaos.Finalizers = utils.RemoveFromFinalizer(networkchaos.Finalizers, response.Key.String())
+		networkchaos.Finalizers = finalizer.RemoveFromFinalizer(networkchaos.Finalizers, response.Key.String())
 	}
 	e.Log.Info("After recovering", "finalizers", networkchaos.Finalizers)
 

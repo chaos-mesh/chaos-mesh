@@ -26,6 +26,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/controllers/metrics"
 	"github.com/chaos-mesh/chaos-mesh/controllers/podiochaos"
 	"github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos"
+	grpcUtils "github.com/chaos-mesh/chaos-mesh/pkg/grpc"
 	"github.com/chaos-mesh/chaos-mesh/pkg/router"
 	"github.com/chaos-mesh/chaos-mesh/pkg/utils"
 	"github.com/chaos-mesh/chaos-mesh/pkg/version"
@@ -89,7 +90,7 @@ func main() {
 	}
 
 	// set RPCTimeout config
-	utils.RPCTimeout = ccfg.ControllerCfg.RPCTimeout
+	grpcUtils.RPCTimeout = ccfg.ControllerCfg.RPCTimeout
 
 	ctrl.SetLogger(zap.Logger(true))
 
