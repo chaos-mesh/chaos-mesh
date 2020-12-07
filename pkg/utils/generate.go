@@ -21,7 +21,8 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 )
 
-// PodArg by DEFAULT use `Status=corev1.PodRunning` and `Namespace=metav1.NamespaceDefault`, when they are not specified
+// PodArg by default use `Status=corev1.PodRunning` and `Namespace=metav1.NamespaceDefault`.
+// For the others, the default values are empty.
 type PodArg struct {
 	Name            string
 	Status          v1.PodPhase `default: corev1.PodRunning`
