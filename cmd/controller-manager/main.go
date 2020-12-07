@@ -28,7 +28,6 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos"
 	grpcUtils "github.com/chaos-mesh/chaos-mesh/pkg/grpc"
 	"github.com/chaos-mesh/chaos-mesh/pkg/router"
-	"github.com/chaos-mesh/chaos-mesh/pkg/utils"
 	"github.com/chaos-mesh/chaos-mesh/pkg/version"
 	"github.com/chaos-mesh/chaos-mesh/pkg/webhook/config"
 	"github.com/chaos-mesh/chaos-mesh/pkg/webhook/config/watcher"
@@ -201,7 +200,7 @@ func watchConfig(configWatcher *watcher.K8sConfigMapWatcher, cfg *config.Config,
 		//debouncedChan := make(chan interface{}, 10)
 
 		// debounce events from sigChan, so we dont hammer apiserver on reconciliation
-		eventsCh := utils.Coalescer(EventCoalesceWindow, sigChan, stopCh)
+		eventsCh := Coalescer(EventCoalesceWindow, sigChan, stopCh)
 
 		go func() {
 			for {
