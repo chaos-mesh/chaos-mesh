@@ -38,8 +38,8 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/router"
 	ctx "github.com/chaos-mesh/chaos-mesh/pkg/router/context"
 	end "github.com/chaos-mesh/chaos-mesh/pkg/router/endpoint"
+	"github.com/chaos-mesh/chaos-mesh/pkg/selector"
 	timeUtils "github.com/chaos-mesh/chaos-mesh/pkg/time/utils"
-	"github.com/chaos-mesh/chaos-mesh/pkg/utils"
 )
 
 const timeChaosMsg = "time is shifted with %v"
@@ -60,7 +60,7 @@ func (r *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.I
 
 	timechaos.SetDefaultValue()
 
-	pods, err := utils.SelectAndFilterPods(ctx, r.Client, r.Reader, &timechaos.Spec, config.ControllerCfg.ClusterScoped, config.ControllerCfg.TargetNamespace, config.ControllerCfg.AllowedNamespaces, config.ControllerCfg.IgnoredNamespaces)
+	pods, err := selector.SelectAndFilterPods(ctx, r.Client, r.Reader, &timechaos.Spec, config.ControllerCfg.ClusterScoped, config.ControllerCfg.TargetNamespace, config.ControllerCfg.AllowedNamespaces, config.ControllerCfg.IgnoredNamespaces)
 
 	if err != nil {
 		r.Log.Error(err, "failed to select and filter pods")

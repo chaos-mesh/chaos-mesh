@@ -38,7 +38,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/router"
 	ctx "github.com/chaos-mesh/chaos-mesh/pkg/router/context"
 	end "github.com/chaos-mesh/chaos-mesh/pkg/router/endpoint"
-	"github.com/chaos-mesh/chaos-mesh/pkg/utils"
+	"github.com/chaos-mesh/chaos-mesh/pkg/selector"
 )
 
 const (
@@ -74,7 +74,7 @@ func (e *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.I
 	source := networkchaos.Namespace + "/" + networkchaos.Name
 	m := podnetworkmanager.New(source, e.Log, e.Client, e.Reader)
 
-	sources, err := utils.SelectAndFilterPods(ctx, e.Client, e.Reader, &networkchaos.Spec, config.ControllerCfg.ClusterScoped, config.ControllerCfg.TargetNamespace, config.ControllerCfg.AllowedNamespaces, config.ControllerCfg.IgnoredNamespaces)
+	sources, err := selector.SelectAndFilterPods(ctx, e.Client, e.Reader, &networkchaos.Spec, config.ControllerCfg.ClusterScoped, config.ControllerCfg.TargetNamespace, config.ControllerCfg.AllowedNamespaces, config.ControllerCfg.IgnoredNamespaces)
 
 	if err != nil {
 		e.Log.Error(err, "failed to select and filter source pods")
@@ -84,7 +84,7 @@ func (e *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.I
 	var targets []v1.Pod
 
 	if networkchaos.Spec.Target != nil {
-		targets, err = utils.SelectAndFilterPods(ctx, e.Client, e.Reader, networkchaos.Spec.Target, config.ControllerCfg.ClusterScoped, config.ControllerCfg.TargetNamespace, config.ControllerCfg.AllowedNamespaces, config.ControllerCfg.IgnoredNamespaces)
+		targets, err = selector.SelectAndFilterPods(ctx, e.Client, e.Reader, networkchaos.Spec.Target, config.ControllerCfg.ClusterScoped, config.ControllerCfg.TargetNamespace, config.ControllerCfg.AllowedNamespaces, config.ControllerCfg.IgnoredNamespaces)
 		if err != nil {
 			e.Log.Error(err, "failed to select and filter target pods")
 			return err

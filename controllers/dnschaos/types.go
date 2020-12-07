@@ -41,7 +41,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/router"
 	ctx "github.com/chaos-mesh/chaos-mesh/pkg/router/context"
 	end "github.com/chaos-mesh/chaos-mesh/pkg/router/endpoint"
-	"github.com/chaos-mesh/chaos-mesh/pkg/utils"
+	"github.com/chaos-mesh/chaos-mesh/pkg/selector"
 )
 
 // endpoint is dns-chaos reconciler
@@ -58,14 +58,14 @@ func (r *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.I
 		return err
 	}
 
-	pods, err := utils.SelectAndFilterPods(ctx, r.Client, r.Reader, &dnschaos.Spec, config.ControllerCfg.ClusterScoped, config.ControllerCfg.TargetNamespace, config.ControllerCfg.AllowedNamespaces, config.ControllerCfg.IgnoredNamespaces)
+	pods, err := selector.SelectAndFilterPods(ctx, r.Client, r.Reader, &dnschaos.Spec, config.ControllerCfg.ClusterScoped, config.ControllerCfg.TargetNamespace, config.ControllerCfg.AllowedNamespaces, config.ControllerCfg.IgnoredNamespaces)
 	if err != nil {
 		r.Log.Error(err, "failed to select and generate pods")
 		return err
 	}
 
 	// get dns server's ip used for chaos
-	service, err := utils.GetService(ctx, r.Client, "", config.ControllerCfg.Namespace, config.ControllerCfg.DNSServiceName)
+	service, err := selector.GetService(ctx, r.Client, "", config.ControllerCfg.Namespace, config.ControllerCfg.DNSServiceName)
 	if err != nil {
 		r.Log.Error(err, "fail to get service")
 		return err
@@ -108,7 +108,7 @@ func (r *endpoint) Recover(ctx context.Context, req ctrl.Request, chaos v1alpha1
 	}
 
 	// get dns server's ip used for chaos
-	service, err := utils.GetService(ctx, r.Client, "", config.ControllerCfg.Namespace, config.ControllerCfg.DNSServiceName)
+	service, err := selector.GetService(ctx, r.Client, "", config.ControllerCfg.Namespace, config.ControllerCfg.DNSServiceName)
 	if err != nil {
 		r.Log.Error(err, "fail to get service")
 		return err

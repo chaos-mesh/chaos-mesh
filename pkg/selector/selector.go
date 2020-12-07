@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package utils
+package selector
 
 import (
 	"context"
@@ -27,6 +27,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/label"
 	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
 
+	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	v1 "k8s.io/api/core/v1"
@@ -36,6 +37,8 @@ import (
 	"k8s.io/apimachinery/pkg/selection"
 	"k8s.io/apimachinery/pkg/types"
 )
+
+var log = ctrl.Log.WithName("selector")
 
 type SelectSpec interface {
 	GetSelector() v1alpha1.SelectorSpec
