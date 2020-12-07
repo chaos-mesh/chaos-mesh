@@ -24,13 +24,13 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
 )
 
-func commonTcTest(t *testing.T, fpname, errString string, tcFunc func(s *daemonServer) error) {
+func commonTcTest(t *testing.T, fpname, errString string, tcFunc func(s *DaemonServer) error) {
 	g := NewWithT(t)
 
 	defer mock.With("MockContainerdClient", &MockClient{})()
 	c, _ := CreateContainerRuntimeInfoClient(containerRuntimeContainerd)
 	m := bpm.NewBackgroundProcessManager()
-	s := &daemonServer{c, m}
+	s := &DaemonServer{c, m}
 
 	if errString == "" {
 		defer mock.With(fpname, true)()

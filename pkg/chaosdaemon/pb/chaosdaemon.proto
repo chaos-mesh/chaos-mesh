@@ -8,7 +8,7 @@ service ChaosDaemon {
   rpc SetTcs(TcsRequest) returns (google.protobuf.Empty) {}
 
   rpc FlushIPSets(IPSetsRequest) returns (google.protobuf.Empty) {}
-  
+
   rpc SetIptablesChains(IptablesChainsRequest) returns (google.protobuf.Empty) {}
 
   rpc SetTimeOffset(TimeRequest) returns (google.protobuf.Empty) {}
@@ -62,7 +62,6 @@ message Netem {
   float corrupt_corr = 13;
   TcHandle parent = 14;
   TcHandle handle = 15;
-  string device = 16;
 }
 
 message TbfRequest {
@@ -191,6 +190,7 @@ message ApplyIoChaosResponse {
 message TcsRequest {
   repeated Tc tcs = 1;
   string container_id = 2;
+  string device = 3;
 }
 
 message Tc {

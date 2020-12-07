@@ -21,6 +21,7 @@ The following tables list the configurable parameters of the Chaos Mesh chart an
 | `timezone` | The timezone where controller-manager, chaos-daemon and dashboard uses. For example: `UTC`, `Asia/Shanghai` | `UTC` |
 | `enableProfiling` | A flag to enable pprof in controller-manager and chaos-daemon  | `true` |
 | `controllerManager.hostNetwork` | running chaos-controller-manager on host network | `false` |
+| `controllerManager.allowHostNetworkTesting`   | Allow testing on `hostNetwork` pods | `false` |
 | `controllerManager.serviceAccount` | The serviceAccount for chaos-controller-manager | `chaos-controller-manager` |
 | `controllerManager.replicaCount` | Replicas for chaos-controller-manager | `1` |
 | `controllerManager.image` | docker image for chaos-controller-manager  | `pingcap/chaos-mesh:latest` |

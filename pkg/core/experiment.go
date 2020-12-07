@@ -157,13 +157,14 @@ func (s *SelectorInfo) ParseSelector() v1alpha1.SelectorSpec {
 
 // TargetInfo defines the information of target objects.
 type TargetInfo struct {
-	Kind         string            `json:"kind" binding:"required,oneof=PodChaos NetworkChaos IoChaos KernelChaos TimeChaos StressChaos"`
+	Kind         string            `json:"kind" binding:"required,oneof=PodChaos NetworkChaos IoChaos KernelChaos TimeChaos StressChaos DNSChaos"`
 	PodChaos     *PodChaosInfo     `json:"pod_chaos,omitempty" binding:"RequiredFieldEqual=Kind:PodChaos"`
 	NetworkChaos *NetworkChaosInfo `json:"network_chaos,omitempty" binding:"RequiredFieldEqual=Kind:NetworkChaos"`
 	IOChaos      *IOChaosInfo      `json:"io_chaos,omitempty" binding:"RequiredFieldEqual=Kind:IoChaos"`
 	KernelChaos  *KernelChaosInfo  `json:"kernel_chaos,omitempty" binding:"RequiredFieldEqual=Kind:KernelChaos"`
 	TimeChaos    *TimeChaosInfo    `json:"time_chaos,omitempty" binding:"RequiredFieldEqual=Kind:TimeChaos"`
 	StressChaos  *StressChaosInfo  `json:"stress_chaos,omitempty" binding:"RequiredFieldEqual=Kind:StressChaos"`
+	DNSChaos     *DNSChaosInfo     `json:"dns_chaos,omitempty" binding:"RequiredFieldEqual=Kind:DNSChaos"`
 }
 
 // SchedulerInfo defines the scheduler information.
@@ -221,6 +222,12 @@ type StressChaosInfo struct {
 	Stressors         *v1alpha1.Stressors `json:"stressors"`
 	StressngStressors string              `json:"stressng_stressors,omitempty"`
 	ContainerName     *string             `json:"container_name,omitempty"`
+}
+
+// DNSChaosInfo defines the basic information of dns chaos for creating a new DNSChaos.
+type DNSChaosInfo struct {
+	Action string `json:"action" binding:"oneof='error' 'random'"`
+	Scope  string `json:"scope" binding:"oneof='outer' 'inner' 'all'"`
 }
 
 // ParsePodChaos Parse PodChaos JSON string into ExperimentYAMLDescription.

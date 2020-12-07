@@ -173,7 +173,6 @@ var _ = Describe("event", func() {
 
 		s := Service{
 			conf:    nil,
-			kubeCli: nil,
 			archive: nil,
 			event:   mockes,
 		}

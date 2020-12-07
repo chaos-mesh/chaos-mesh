@@ -41,7 +41,7 @@ var (
 		"cpuset", "cpuacct", "pids", "hugetlb"}
 )
 
-func (s *daemonServer) ExecStressors(ctx context.Context,
+func (s *DaemonServer) ExecStressors(ctx context.Context,
 	req *pb.ExecStressRequest) (*pb.ExecStressResponse, error) {
 	log.Info("Executing stressors", "request", req)
 	pid, err := s.crClient.GetPidFromContainerID(ctx, req.Target)
@@ -118,7 +118,7 @@ func (s *daemonServer) ExecStressors(ctx context.Context,
 
 var errFinished = "os: process already finished"
 
-func (s *daemonServer) CancelStressors(ctx context.Context,
+func (s *DaemonServer) CancelStressors(ctx context.Context,
 	req *pb.CancelStressRequest) (*empty.Empty, error) {
 	pid, err := strconv.Atoi(req.Instance)
 	if err != nil {

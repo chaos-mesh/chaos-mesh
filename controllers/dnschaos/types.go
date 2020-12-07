@@ -33,6 +33,7 @@ import (
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/common"
+	"github.com/chaos-mesh/chaos-mesh/controllers/config"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
 	"github.com/chaos-mesh/chaos-mesh/pkg/router"
 	ctx "github.com/chaos-mesh/chaos-mesh/pkg/router/context"
@@ -54,21 +55,21 @@ func (r *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.I
 		return err
 	}
 
-	pods, err := utils.SelectAndFilterPods(ctx, r.Client, r.Reader, &dnschaos.Spec)
+	pods, err := utils.SelectAndFilterPods(ctx, r.Client, r.Reader, &dnschaos.Spec, config.ControllerCfg.ClusterScoped, config.ControllerCfg.TargetNamespace, config.ControllerCfg.AllowedNamespaces, config.ControllerCfg.IgnoredNamespaces)
 	if err != nil {
 		r.Log.Error(err, "failed to select and generate pods")
 		return err
 	}
 
 	// get dns server's ip used for chaos
-	service, err := utils.GetService(ctx, r.Client, "", common.ControllerCfg.DNSServiceName)
+	service, err := utils.GetService(ctx, r.Client, "", config.ControllerCfg.Namespace, config.ControllerCfg.DNSServiceName)
 	if err != nil {
 		r.Log.Error(err, "fail to get service")
 		return err
 	}
 	r.Log.Info("Set DNS chaos to DNS service", "ip", service.Spec.ClusterIP)
 
-	err = r.setDNSServerRules(service.Spec.ClusterIP, common.ControllerCfg.DNSServicePort, dnschaos.Name, pods, dnschaos.Spec.Action, dnschaos.Spec.Scope)
+	err = r.setDNSServerRules(service.Spec.ClusterIP, config.ControllerCfg.DNSServicePort, dnschaos.Name, pods, dnschaos.Spec.Action, dnschaos.Spec.Scope)
 	if err != nil {
 		r.Log.Error(err, "fail to set DNS server rules")
 		return err
@@ -104,14 +105,14 @@ func (r *endpoint) Recover(ctx context.Context, req ctrl.Request, chaos v1alpha1
 	}
 
 	// get dns server's ip used for chaos
-	service, err := utils.GetService(ctx, r.Client, "", common.ControllerCfg.DNSServiceName)
+	service, err := utils.GetService(ctx, r.Client, "", config.ControllerCfg.Namespace, config.ControllerCfg.DNSServiceName)
 	if err != nil {
 		r.Log.Error(err, "fail to get service")
 		return err
 	}
 	r.Log.Info("Cancel DNS chaos to DNS service", "ip", service.Spec.ClusterIP)
 
-	r.cancelDNSServerRules(service.Spec.ClusterIP, common.ControllerCfg.DNSServicePort, dnschaos.Name)
+	r.cancelDNSServerRules(service.Spec.ClusterIP, config.ControllerCfg.DNSServicePort, dnschaos.Name)
 
 	if err := r.cleanFinalizersAndRecover(ctx, dnschaos); err != nil {
 		return err
@@ -170,7 +171,7 @@ func (r *endpoint) recoverPod(ctx context.Context, pod *v1.Pod) error {
 	r.Log.Info("Try to recover pod", "namespace", pod.Namespace, "name", pod.Name)
 
 	daemonClient, err := utils.NewChaosDaemonClient(ctx, r.Client,
-		pod, common.ControllerCfg.ChaosDaemonPort)
+		pod, config.ControllerCfg.ChaosDaemonPort)
 	if err != nil {
 		r.Log.Error(err, "get chaos daemon client")
 		return err
@@ -227,7 +228,7 @@ func (r *endpoint) applyPod(ctx context.Context, pod *v1.Pod, dnsServerIP string
 	r.Log.Info("Try to apply dns chaos", "namespace",
 		pod.Namespace, "name", pod.Name)
 	daemonClient, err := utils.NewChaosDaemonClient(ctx, r.Client,
-		pod, common.ControllerCfg.ChaosDaemonPort)
+		pod, config.ControllerCfg.ChaosDaemonPort)
 	if err != nil {
 		r.Log.Error(err, "get chaos daemon client")
 		return err
