@@ -16,8 +16,10 @@ package utils
 import (
 	"context"
 	"fmt"
+	"os"
 	"time"
 
+	"github.com/pkg/errors"
 	"google.golang.org/grpc"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -36,15 +38,26 @@ func CreateGrpcConnection(ctx context.Context, c client.Client, pod *v1.Pod, por
 	nodeName := pod.Spec.NodeName
 	log.Info("Creating client to chaos-daemon", "node", nodeName)
 
-	var node v1.Node
+	ns := os.Getenv("NAMESPACE")
+	if len(ns) == 0 {
+		return nil, errors.Errorf("fail to find NAMESPACE")
+	}
+	var endpoints v1.Endpoints
 	err := c.Get(ctx, types.NamespacedName{
-		Name: nodeName,
-	}, &node)
+		Namespace: ns,
+		Name:      "chaos-daemon",
+	}, &endpoints)
 	if err != nil {
 		return nil, err
 	}
 
-	conn, err := grpc.Dial(fmt.Sprintf("%s:%d", node.Status.Addresses[0].Address, port),
+	daemonIP := findIPOnEndpoints(&endpoints, nodeName)
+
+	if len(daemonIP) == 0 {
+		return nil, errors.Errorf("cannot find daemonIP on node %s in related Endpoints %v", nodeName, endpoints)
+	}
+
+	conn, err := grpc.Dial(fmt.Sprintf("%s:%d", daemonIP, port),
 		grpc.WithInsecure(),
 		grpc.WithUnaryInterceptor(TimeoutClientInterceptor))
 	if err != nil {
@@ -69,4 +82,16 @@ func TimeoutServerInterceptor(ctx context.Context, req interface{}, info *grpc.U
 		return nil, ctx.Err()
 	}
 	return handler(ctx, req)
+}
+
+func findIPOnEndpoints(e *v1.Endpoints, nodeName string) string {
+	for _, subset := range e.Subsets {
+		for _, addr := range subset.Addresses {
+			if addr.NodeName != nil && *addr.NodeName == nodeName {
+				return addr.IP
+			}
+		}
+	}
+
+	return ""
 }
