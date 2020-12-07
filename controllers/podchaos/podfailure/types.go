@@ -31,6 +31,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/common"
 	"github.com/chaos-mesh/chaos-mesh/controllers/config"
+	"github.com/chaos-mesh/chaos-mesh/pkg/annotation"
 	"github.com/chaos-mesh/chaos-mesh/pkg/router"
 	ctx "github.com/chaos-mesh/chaos-mesh/pkg/router/context"
 	end "github.com/chaos-mesh/chaos-mesh/pkg/router/endpoint"
@@ -182,7 +183,7 @@ func (r *endpoint) failPod(ctx context.Context, pod *v1.Pod, podchaos *v1alpha1.
 		originImage := pod.Spec.InitContainers[index].Image
 		name := pod.Spec.InitContainers[index].Name
 
-		key := utils.GenAnnotationKeyForImage(podchaos, name)
+		key := annotation.GenKeyForImage(podchaos, name)
 		if pod.Annotations == nil {
 			pod.Annotations = make(map[string]string)
 		}
@@ -199,7 +200,7 @@ func (r *endpoint) failPod(ctx context.Context, pod *v1.Pod, podchaos *v1alpha1.
 		originImage := pod.Spec.Containers[index].Image
 		name := pod.Spec.Containers[index].Name
 
-		key := utils.GenAnnotationKeyForImage(podchaos, name)
+		key := annotation.GenKeyForImage(podchaos, name)
 		if pod.Annotations == nil {
 			pod.Annotations = make(map[string]string)
 		}
@@ -238,7 +239,7 @@ func (r *endpoint) recoverPod(ctx context.Context, pod *v1.Pod, podchaos *v1alph
 
 	for index := range pod.Spec.Containers {
 		name := pod.Spec.Containers[index].Name
-		_ = utils.GenAnnotationKeyForImage(podchaos, name)
+		_ = annotation.GenKeyForImage(podchaos, name)
 
 		if pod.Annotations == nil {
 			pod.Annotations = make(map[string]string)

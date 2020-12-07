@@ -1,4 +1,4 @@
-// Copyright 2019 Chaos Mesh Authors.
+// Copyright 2020 Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package utils
+package annotation
 
 import (
 	"fmt"
@@ -24,7 +24,7 @@ const (
 	AnnotationPrefix = "chaos-mesh"
 )
 
-func GenAnnotationKeyForImage(pc *v1alpha1.PodChaos, containerName string) string {
+func GenKeyForImage(pc *v1alpha1.PodChaos, containerName string) string {
 	imageKey := fmt.Sprintf("%s-%s-%s-%s-image", AnnotationPrefix, pc.Name, pc.Spec.Action, containerName)
 
 	// name part of annotation must be no more than 63 characters.
@@ -36,6 +36,6 @@ func GenAnnotationKeyForImage(pc *v1alpha1.PodChaos, containerName string) strin
 	return imageKey
 }
 
-func GenAnnotationKeyForWebhook(prefix string, podName string) string {
+func GenKeyForWebhook(prefix string, podName string) string {
 	return fmt.Sprintf("%s-%s", prefix, podName)
 }

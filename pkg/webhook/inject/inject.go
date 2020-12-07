@@ -20,6 +20,7 @@ import (
 	"strings"
 
 	"github.com/chaos-mesh/chaos-mesh/controllers/metrics"
+	"github.com/chaos-mesh/chaos-mesh/pkg/annotation"
 	controllerCfg "github.com/chaos-mesh/chaos-mesh/pkg/config"
 	"github.com/chaos-mesh/chaos-mesh/pkg/utils"
 	"github.com/chaos-mesh/chaos-mesh/pkg/webhook/config"
@@ -210,7 +211,7 @@ func injectByNamespaceRequired(metadata *metav1.ObjectMeta, cli client.Client, c
 		annotations = make(map[string]string)
 	}
 
-	required, ok := annotations[utils.GenAnnotationKeyForWebhook(cfg.RequestAnnotationKey(), metadata.Name)]
+	required, ok := annotations[annotation.GenKeyForWebhook(cfg.RequestAnnotationKey(), metadata.Name)]
 	if !ok {
 		log.Info("Pod annotation by namespace is missing, skipping injection",
 			"namespace", metadata.Namespace, "pod", metadata.Name, "config", required)
