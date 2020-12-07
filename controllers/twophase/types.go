@@ -20,10 +20,11 @@ import (
 
 	"k8s.io/client-go/util/retry"
 
+	"github.com/robfig/cron/v3"
+
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	ctx "github.com/chaos-mesh/chaos-mesh/pkg/router/context"
 	"github.com/chaos-mesh/chaos-mesh/pkg/router/endpoint"
-	"github.com/chaos-mesh/chaos-mesh/pkg/utils"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -152,7 +153,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	} else if chaos.GetNextStart().Before(now) {
 		r.Log.Info("Starting")
 
-		tempStart, err := utils.NextTime(*chaos.GetScheduler(), now)
+		tempStart, err := nextTime(*chaos.GetScheduler(), now)
 		if err != nil {
 			r.Log.Error(err, "failed to calculate the start time")
 			updateFailedMessage(ctx, r, chaos, err.Error())
@@ -172,7 +173,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 			return ctrl.Result{Requeue: true}, err
 		}
 
-		nextStart, err := utils.NextTime(*chaos.GetScheduler(), status.Experiment.StartTime.Time)
+		nextStart, err := nextTime(*chaos.GetScheduler(), status.Experiment.StartTime.Time)
 		if err != nil {
 			r.Log.Error(err, "failed to get the next start time")
 			return ctrl.Result{}, err
@@ -185,7 +186,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	} else {
 		r.Log.Info("Waiting")
 
-		nextStart, err := utils.NextTime(*chaos.GetScheduler(), status.Experiment.StartTime.Time)
+		nextStart, err := nextTime(*chaos.GetScheduler(), status.Experiment.StartTime.Time)
 		if err != nil {
 			r.Log.Error(err, "failed to get next start time")
 			return ctrl.Result{}, err
@@ -263,4 +264,14 @@ func updateFailedMessage(
 	if err := r.Update(ctx, chaos); err != nil {
 		r.Log.Error(err, "unable to update chaos status")
 	}
+}
+
+func nextTime(spec v1alpha1.SchedulerSpec, now time.Time) (*time.Time, error) {
+	scheduler, err := cron.ParseStandard(spec.Cron)
+	if err != nil {
+		return nil, fmt.Errorf("fail to parse runner rule %s, %v", spec.Cron, err)
+	}
+
+	next := scheduler.Next(now)
+	return &next, nil
 }

@@ -38,6 +38,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/router"
 	ctx "github.com/chaos-mesh/chaos-mesh/pkg/router/context"
 	end "github.com/chaos-mesh/chaos-mesh/pkg/router/endpoint"
+	timeUtils "github.com/chaos-mesh/chaos-mesh/pkg/time/utils"
 	"github.com/chaos-mesh/chaos-mesh/pkg/utils"
 )
 
@@ -256,7 +257,7 @@ func (r *endpoint) applyPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.Ti
 func (r *endpoint) applyContainer(ctx context.Context, client chaosdaemon.ChaosDaemonClient, containerID string, chaos *v1alpha1.TimeChaos) error {
 	r.Log.Info("Try to shift time on container", "id", containerID)
 
-	mask, err := utils.EncodeClkIds(chaos.Spec.ClockIds)
+	mask, err := timeUtils.EncodeClkIds(chaos.Spec.ClockIds)
 	if err != nil {
 		return err
 	}
