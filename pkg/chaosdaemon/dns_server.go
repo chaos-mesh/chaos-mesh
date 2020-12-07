@@ -28,7 +28,7 @@ const (
 	DNSServerConfFile = "/etc/resolv.conf"
 )
 
-func (s *daemonServer) SetDNSServer(ctx context.Context,
+func (s *DaemonServer) SetDNSServer(ctx context.Context,
 	req *pb.SetDNSServerRequest) (*empty.Empty, error) {
 	log.Info("SetDNSServer", "request", req)
 	pid, err := s.crClient.GetPidFromContainerID(ctx, req.ContainerId)
