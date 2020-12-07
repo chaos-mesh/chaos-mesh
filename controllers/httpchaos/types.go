@@ -25,6 +25,7 @@ import (
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/config"
+	"github.com/chaos-mesh/chaos-mesh/pkg/events"
 	"github.com/chaos-mesh/chaos-mesh/pkg/finalizer"
 	"github.com/chaos-mesh/chaos-mesh/pkg/router"
 	ctx "github.com/chaos-mesh/chaos-mesh/pkg/router/context"
@@ -63,7 +64,7 @@ func (r *endpoint) Recover(ctx context.Context, req ctrl.Request, chaos v1alpha1
 		r.Log.Error(err, "chaos is not HttpChaos", "chaos", chaos)
 		return err
 	}
-	r.Event(httpFaultChaos, v1.EventTypeNormal, utils.EventChaosRecovered, "")
+	r.Event(httpFaultChaos, v1.EventTypeNormal, events.ChaosRecovered, "")
 	return nil
 }
 

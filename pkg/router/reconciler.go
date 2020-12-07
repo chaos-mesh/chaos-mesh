@@ -27,9 +27,9 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/common"
 	"github.com/chaos-mesh/chaos-mesh/controllers/twophase"
+	"github.com/chaos-mesh/chaos-mesh/pkg/events"
 	ctx "github.com/chaos-mesh/chaos-mesh/pkg/router/context"
 	end "github.com/chaos-mesh/chaos-mesh/pkg/router/endpoint"
-	"github.com/chaos-mesh/chaos-mesh/pkg/utils"
 )
 
 // Reconciler reconciles a chaos resource
@@ -100,9 +100,9 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (result ctrl.Result, err error)
 	result, err = reconciler.Reconcile(req)
 	if err != nil {
 		if chaos.IsDeleted() || chaos.IsPaused() {
-			r.Event(chaos, v1.EventTypeWarning, utils.EventChaosRecoverFailed, err.Error())
+			r.Event(chaos, v1.EventTypeWarning, events.ChaosRecoverFailed, err.Error())
 		} else {
-			r.Event(chaos, v1.EventTypeWarning, utils.EventChaosInjectFailed, err.Error())
+			r.Event(chaos, v1.EventTypeWarning, events.ChaosInjectFailed, err.Error())
 		}
 	}
 	return result, nil

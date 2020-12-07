@@ -29,6 +29,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/controllers/common"
 	"github.com/chaos-mesh/chaos-mesh/controllers/config"
 	"github.com/chaos-mesh/chaos-mesh/controllers/iochaos/podiochaosmanager"
+	"github.com/chaos-mesh/chaos-mesh/pkg/events"
 	"github.com/chaos-mesh/chaos-mesh/pkg/finalizer"
 	"github.com/chaos-mesh/chaos-mesh/pkg/router"
 	ctx "github.com/chaos-mesh/chaos-mesh/pkg/router/context"
@@ -137,7 +138,7 @@ func (r *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.I
 
 		iochaos.Status.Experiment.PodRecords = append(iochaos.Status.Experiment.PodRecords, ps)
 	}
-	r.Event(iochaos, v1.EventTypeNormal, utils.EventChaosInjected, "")
+	r.Event(iochaos, v1.EventTypeNormal, events.ChaosInjected, "")
 
 	return nil
 }
@@ -154,7 +155,7 @@ func (r *endpoint) Recover(ctx context.Context, req ctrl.Request, chaos v1alpha1
 	if err := r.cleanFinalizersAndRecover(ctx, iochaos); err != nil {
 		return err
 	}
-	r.Event(iochaos, v1.EventTypeNormal, utils.EventChaosRecovered, "")
+	r.Event(iochaos, v1.EventTypeNormal, events.ChaosRecovered, "")
 	return nil
 }
 

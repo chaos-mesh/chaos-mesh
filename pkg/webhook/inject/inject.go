@@ -319,7 +319,7 @@ func setCommands(target []corev1.Container, postStart map[string]config.ExecActi
 
 		path := fmt.Sprintf("/spec/containers/%d/command", containerIndex)
 
-		commands := utils.MergeCommands(execCmd.Command, container.Command, container.Args)
+		commands := MergeCommands(execCmd.Command, container.Command, container.Args)
 
 		log.Info("Inject command", "command", commands)
 

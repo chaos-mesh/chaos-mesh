@@ -31,6 +31,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/common"
 	"github.com/chaos-mesh/chaos-mesh/controllers/config"
+	"github.com/chaos-mesh/chaos-mesh/pkg/events"
 	"github.com/chaos-mesh/chaos-mesh/pkg/finalizer"
 	"github.com/chaos-mesh/chaos-mesh/pkg/grpc"
 	"github.com/chaos-mesh/chaos-mesh/pkg/router"
@@ -82,7 +83,7 @@ func (r *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.I
 
 		kernelChaos.Status.Experiment.PodRecords = append(kernelChaos.Status.Experiment.PodRecords, ps)
 	}
-	r.Event(kernelChaos, v1.EventTypeNormal, utils.EventChaosInjected, "")
+	r.Event(kernelChaos, v1.EventTypeNormal, events.ChaosInjected, "")
 
 	return nil
 }
@@ -99,7 +100,7 @@ func (r *endpoint) Recover(ctx context.Context, req ctrl.Request, chaos v1alpha1
 	if err := r.cleanFinalizersAndRecover(ctx, kernelChaos); err != nil {
 		return err
 	}
-	r.Event(kernelChaos, v1.EventTypeNormal, utils.EventChaosRecovered, "")
+	r.Event(kernelChaos, v1.EventTypeNormal, events.ChaosRecovered, "")
 
 	return nil
 }
