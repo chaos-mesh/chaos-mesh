@@ -1233,7 +1233,7 @@ spec:
             - name: CLUSTER_SCOPED
               value: "true"
             - name: SECURITY_MODE
-              value: "true"
+              value: "false"
           volumeMounts:
             - name: storage-volume
               mountPath: /data
