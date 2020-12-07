@@ -74,15 +74,15 @@ func NewServer(
 		os.Exit(1)
 	}
 
-	if conf.UnsafeMode {
-		clientpool.K8sClients = clientpool.NewLocalClient(s.Manager.GetClient())
-	} else {
+	if conf.SecurityMode {
 		clientpool.K8sClients, err = clientpool.NewClientPool(cfg, scheme, 100)
 		if err != nil {
 			// this should never happen
 			log.Error(err, "fail to create client pool")
 			os.Exit(1)
 		}
+	} else {
+		clientpool.K8sClients = clientpool.NewLocalClient(s.Manager.GetClient())
 	}
 
 	for kind, chaosKind := range v1alpha1.AllKinds() {
