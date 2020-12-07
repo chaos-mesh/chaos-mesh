@@ -24,8 +24,8 @@ import (
 // PodArg by DEFAULT use `Status=corev1.PodRunning` and `Namespace=metav1.NamespaceDefault`, when they are not specified
 type PodArg struct {
 	Name            string
-	Status          v1.PodPhase
-	Namespace       string
+	Status          v1.PodPhase `default: corev1.PodRunning`
+	Namespace       string      `default: metav1.NamespaceDefault`
 	Ans             map[string]string
 	Labels          map[string]string
 	ContainerStatus v1.ContainerStatus
