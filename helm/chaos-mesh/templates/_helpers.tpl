@@ -39,6 +39,13 @@ Define the svc's name
 {{- end -}}
 
 {{/*
+Define the chaos-daemon svc's name
+*/}}
+{{- define "chaos-daemon.svc" -}}
+{{- printf "chaos-daemon" -}}
+{{- end -}}
+
+{{/*
 Define the chaos-dashboard svc's name
 */}}
 {{- define "chaos-dashboard.svc" -}}
