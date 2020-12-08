@@ -25,8 +25,8 @@ import (
 // For the others, the default values are empty.
 type PodArg struct {
 	Name            string
-	Status          v1.PodPhase `default:"corev1.PodRunning"`
-	Namespace       string      `default:"metav1.NamespaceDefault"`
+	Status          v1.PodPhase
+	Namespace       string
 	Ans             map[string]string
 	Labels          map[string]string
 	ContainerStatus v1.ContainerStatus
