@@ -59,7 +59,10 @@ func Debug(ctx context.Context, chaos runtime.Object, c *cm.ClientSet, result *c
 }
 
 func debugEachPod(ctx context.Context, pod v1.Pod, daemon v1.Pod, chaos *v1alpha1.StressChaos, c *cm.ClientSet, result *cm.PodResult) error {
-	// cpu or memory chaos
+	// only support cpu or memory chaos for now
+	if chaos.Spec.StressngStressors != "" {
+		return fmt.Errorf("Currently not support chaos defined in stress-ng stressors")
+	}
 	isCPU := true
 	if cpuSpec := chaos.Spec.Stressors.CPUStressor; cpuSpec == nil {
 		isCPU = false
