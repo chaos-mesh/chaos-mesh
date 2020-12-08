@@ -59,26 +59,11 @@ func Debug(ctx context.Context, chaos runtime.Object, c *cm.ClientSet, result *c
 }
 
 func debugEachPod(ctx context.Context, pod v1.Pod, daemon v1.Pod, chaos *v1alpha1.StressChaos, c *cm.ClientSet, result *cm.PodResult) error {
-	// only support cpu or memory chaos for now
-	if chaos.Spec.StressngStressors != "" {
-		return fmt.Errorf("Currently not support chaos defined in stress-ng stressors")
-	}
-	isCPU := true
-	if cpuSpec := chaos.Spec.Stressors.CPUStressor; cpuSpec == nil {
-		isCPU = false
-	}
-
 	// get process path
 	cmd := fmt.Sprintf("cat /proc/cgroups")
 	out, err := cm.ExecBypass(ctx, pod, daemon, cmd, c.KubeCli)
 	if err != nil {
 		return fmt.Errorf("run command '%s' failed with: %s", cmd, err.Error())
-	}
-	var cpuMountType string
-	if regexp.MustCompile("(cpu,cpuacct)").MatchString(string(out)) {
-		cpuMountType = "cpu,cpuacct"
-	} else {
-		cpuMountType = "cpu"
 	}
 
 	cmd = fmt.Sprintf("ps")
@@ -112,8 +97,23 @@ func debugEachPod(ctx context.Context, pod v1.Pod, daemon v1.Pod, chaos *v1alpha
 	}
 	itemResult := cm.ItemResult{Name: "/proc/(stress-ng pid)/cgroup", Value: string(out)}
 
-	var expr string
+	// no more info for StressngStressors
+	if chaos.Spec.StressngStressors != "" {
+		return nil
+	}
+
+	isCPU := true
+	if cpuSpec := chaos.Spec.Stressors.CPUStressor; cpuSpec == nil {
+		isCPU = false
+	}
+
+	var expr, cpuMountType string
 	if isCPU {
+		if regexp.MustCompile("(cpu,cpuacct)").MatchString(string(out)) {
+			cpuMountType = "cpu,cpuacct"
+		} else {
+			cpuMountType = "cpu"
+		}
 		expr = "(?::" + cpuMountType + ":)(.*)"
 	} else {
 		expr = "(?::memory:)(.*)"
