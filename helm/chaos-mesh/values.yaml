@@ -119,6 +119,8 @@ dashboard:
   image: pingcap/chaos-dashboard:latest
   imagePullPolicy: IfNotPresent
 
+  securityMode: true
+
   nodeSelector: {}
 
   tolerations: []
