@@ -10,6 +10,8 @@
     - [Scheduler](#scheduler)
     - [Actor](#actor)
     - [WorkflowManager: rest glue codes](#workflowmanager-rest-glue-codes)
+    - [States for Node](#states-for-node)
+    - [States for Workflow](#states-for-workflow)
     - [Others](#others)
   - [Implement for Various Template](#implement-for-various-template)
     - [Suspend](#suspend)
@@ -156,9 +158,83 @@ func loop(){
 }
 ```
 
+### States for Node
+
+There are 6 phase of one Node:
+
+- WaitingForSchedule
+- WaitingForChild
+- Running
+- Holding
+- Succeed
+- Failed
+
+**WaitingForSchedule** is the default phase when **Node** just created. means this Node is idle and safe for next scheduling; It is presents:
+
+- For Chaos, Suspend, Task, Parallel:
+  - This Node did not make "Effect" yet.
+- For Serial:
+  - This Node did not create child node yet;
+  - Or previous child node just succeed;
+
+**WaitingForChild** is only available on Serial and Parallel, it means at least 1 child node is in **Running** state.
+
+**Running** is available on type Chaos, Suspend, Task; It means an **Actor** is doing dirty work for this node. For Chaos, both of "create Chaos CRD resource" and "delete Chaos CRD resource" are presented as **Running**.
+
+> Question: Should we split it?
+
+**Holding** is available on Chaos, Suspend, Task, Serial, Parallel; It means current node is waiting for next action. For example: a Chaos node which in **Holding** is waiting for the end of this ChaosExperiments, then delete it.
+
+**Succeed** means this node is completed.
+
+**Failed** means this node failed. One **Failed** node will cause the whole Workflow fall into **Failed**.
+
+Examples:
+
+A **NetworkChaos** Node: **WaitingForSchedule** -> **Running** -> **Holding** -> **Running** -> **WaitingForSchedule** -> **Succeed**
+
+A **Suspend** Node: **WaitingForSchedule** -> **Holding** -> **WaitingForSchedule** -> **Succeed**
+
+A **Serial** Node(which contains 3 children): **WaitingForSchedule** -> **WaitingForChild** -> **WaitingForSchedule** -> **WaitingForChild** -> **WaitingForSchedule** -> **WaitingForChild** -> **WaitingForSchedule** -> **Succeed**
+
+A **Parallel** Node(which contains 3 children): **WaitingForSchedule** -> **WaitingForChild** -> **WaitingForChild** -> **WaitingForChild** -> **WaitingForSchedule** -> **Succeed**
+
+A **Task** Node: **WaitingForSchedule** -> **Running** -> **WaitingForSchedule** -> **Succeed**
+
+### States for Workflow
+
+There are 4 phase of one Workflow:
+
+- WaitingForSchedule
+- Running
+- Succeed
+- Failed
+
+**WaitingForSchedule** is the default phase when **Workflow** just created. It means there are no Node is in **Running** or **Holding** state, and it's safe for scheduling next operation.
+
+**Running** means at least 1 node is in **Running**/**Holding**/**WaitingForChild**/**WaitingForSchedule** state.
+
+**Succeed** means all nodes is in **Succeed** node and no Template could schedule anymore.
+
+**Failed** means at least one Node is in **Failed** state.
+
+> Question: Should we interpret other node when Workflow fall into **Failed**?
+
 ### Others
 
 - Persistent Repo or just "repo", fetches and updates status for Workflow and Node.
+
+Detail about instating template:
+
+After calling `Scheduler.ScheduleNext()`, it will return
+
+- which template should be instated
+- the parent node of template's new node instant
+
+1. update the state of parent node to `WaitingForChild`
+1. instant a new node of this template
+
+Detail about Node
 
 ## Implement for Various Template
 
@@ -249,3 +325,4 @@ We want Chaos Mesh Workflow could drive these things at the same time:
 - Assertion SDK / WebAPI for Task
 - Event-driven & Webhook
 - Split controller-manager and workflow-engine as two binary
+- Should `Node` be a standalone CRD? No. Just write the codes at first.
