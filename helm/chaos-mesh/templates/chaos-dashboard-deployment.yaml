@@ -52,6 +52,8 @@ spec:
               value: {{ .Values.controllerManager.targetNamespace }}
             - name: CLUSTER_SCOPED
               value: "{{ .Values.clusterScoped }}"
+            - name: SECURITY_MODE
+              value: "{{ .Values.dashboard.securityMode }}"
             {{- if .Values.controllerManager.allowedNamespaces }}
             - name: ALLOWED_NAMESPACES
               value: {{ .Values.controllerManager.allowedNamespaces }}

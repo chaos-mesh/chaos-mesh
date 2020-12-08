@@ -33,7 +33,7 @@ func TestClientPool(t *testing.T) {
 			return nil, nil
 		})()
 
-		k8sClients, err := New(&rest.Config{}, &runtime.Scheme{}, 5)
+		k8sClients, err := NewClientPool(&rest.Config{}, &runtime.Scheme{}, 5)
 		g.Expect(err).ToNot(HaveOccurred())
 
 		for i := 0; i < 6; i++ {
@@ -42,13 +42,13 @@ func TestClientPool(t *testing.T) {
 		}
 
 		// remain key 1, 2, 3, 4, 5 in cache, 0 is evicted
-		g.Expect(k8sClients.clients.Len()).To(Equal(5))
+		g.Expect(k8sClients.Num()).To(Equal(5))
 
 		_, err = k8sClients.Client("6")
 		g.Expect(err).ToNot(HaveOccurred())
 
 		// 6 in cache, and 1 is evict because it is the oldest key which is not used recently
-		g.Expect(k8sClients.clients.Contains("6")).To(Equal(true))
-		g.Expect(k8sClients.clients.Contains("1")).To(Equal(false))
+		g.Expect(k8sClients.Contains("6")).To(Equal(true))
+		g.Expect(k8sClients.Contains("1")).To(Equal(false))
 	})
 }
