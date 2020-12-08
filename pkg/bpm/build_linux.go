@@ -48,9 +48,13 @@ func (b *ProcessBuilder) Build() *ManagedProcess {
 	if len(b.nsOptions) > 0 {
 		args = append([]string{"--", cmd}, args...)
 		for _, option := range b.nsOptions {
-			args = append([]string{"-" + nsArgMap[option.Typ] + option.Path}, args...)
+			args = append([]string{"-" + nsArgMap[option.Typ], option.Path}, args...)
 		}
-		cmd = "nsenter"
+
+		if b.localMnt {
+			args = append([]string{"-l"}, args...)
+		}
+		cmd = nsexecPath
 	}
 
 	if b.pause {
