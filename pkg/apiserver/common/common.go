@@ -69,6 +69,7 @@ func Register(r *gin.RouterGroup, s *Service) {
 	endpoint.GET("/kinds", s.getKinds)
 	endpoint.GET("/labels", s.getLabels)
 	endpoint.GET("/annotations", s.getAnnotations)
+	endpoint.GET("/config", s.getConfig)
 }
 
 // @Summary Get pods from Kubernetes cluster.
@@ -294,6 +295,17 @@ func (s *Service) getAnnotations(c *gin.Context) {
 		}
 	}
 	c.JSON(http.StatusOK, annotations)
+}
+
+// @Summary Get the config of Dashboard.
+// @Description Get the config of Dashboard.
+// @Tags common
+// @Produce json
+// @Success 200 {object} json
+// @Router /common/config [get]
+// @Failure 500 {object} utils.APIError
+func (s *Service) getConfig(c *gin.Context) {
+	c.JSON(http.StatusOK, s.conf)
 }
 
 // inSlice checks given string in string slice or not.
