@@ -260,7 +260,11 @@ func updateFailedMessage(
 ) {
 	status := chaos.GetStatus()
 	status.FailedMessage = err
-	if err := r.Update(ctx, chaos); err != nil {
-		r.Log.Error(err, "unable to update chaos status")
+
+	updateError := retry.RetryOnConflict(retry.DefaultBackoff, func() error {
+		return r.Update(ctx, chaos)
+	})
+	if updateError != nil {
+		r.Log.Error(updateError, "unable to update chaos status")
 	}
 }
