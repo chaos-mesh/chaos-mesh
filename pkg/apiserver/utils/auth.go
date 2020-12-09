@@ -14,17 +14,13 @@
 package utils
 
 import (
-	//"fmt"
 	"net/http"
-	//"strings"
 
 	"github.com/gin-gonic/gin"
-	//"github.com/joomcode/errorx"
-	//apierrors "k8s.io/apimachinery/pkg/api/errors"
+
 	"github.com/chaos-mesh/chaos-mesh/pkg/clientpool"
 
 	authorizationv1 "k8s.io/api/authorization/v1"
-	//authorizationv1client "k8s.io/client-go/kubernetes/typed/authorization/v1"
 )
 
 func CanListChaos(c *gin.Context, namespace string) bool {
@@ -48,7 +44,7 @@ func CanListChaos(c *gin.Context, namespace string) bool {
 	response, err := authCli.SelfSubjectAccessReviews().Create(sar)
 	if err != nil {
 		c.Status(http.StatusInternalServerError)
-		_ = c.Error(ErrInternalServer.NewWithNoMessage(err))
+		_ = c.Error(ErrInternalServer.WrapWithNoMessage(err))
 		return false
 	}
 

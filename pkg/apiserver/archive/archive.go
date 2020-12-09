@@ -22,10 +22,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
 
-	//authv1 "k8s.io/api/authorization/v1"
-	//authorizationv1 "k8s.io/api/authorization/v1"
-	//metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/pkg/apiserver/utils"
 	"github.com/chaos-mesh/chaos-mesh/pkg/core"

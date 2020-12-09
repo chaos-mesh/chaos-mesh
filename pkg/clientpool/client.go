@@ -77,6 +77,7 @@ type ClientsPool struct {
 	scheme      *runtime.Scheme
 	localConfig *rest.Config
 	clients     *lru.Cache
+	authClients *lru.Cache
 }
 
 // New creates a new Clients
@@ -86,10 +87,16 @@ func NewClientPool(localConfig *rest.Config, scheme *runtime.Scheme, maxClientNu
 		return nil, err
 	}
 
+	authClients, err := lru.New(maxClientNum)
+	if err != nil {
+		return nil, err
+	}
+
 	return &ClientsPool{
 		localConfig: localConfig,
 		scheme:      scheme,
 		clients:     clients,
+		authClients: authClients,
 	}, nil
 }
 
@@ -130,6 +137,18 @@ func (c *ClientsPool) Client(token string) (pkgclient.Client, error) {
 }
 
 func (c *ClientsPool) AuthClient(token string) (authorizationv1client.AuthorizationV1Interface, error) {
+	c.Lock()
+	defer c.Unlock()
+
+	if len(token) == 0 {
+		return nil, errors.New("token is empty")
+	}
+
+	value, ok := c.authClients.Get(token)
+	if ok {
+		return value.(authorizationv1client.AuthorizationV1Interface), nil
+	}
+
 	config := rest.CopyConfig(c.localConfig)
 	config.BearerToken = token
 	config.BearerTokenFile = ""
@@ -139,8 +158,9 @@ func (c *ClientsPool) AuthClient(token string) (authorizationv1client.Authorizat
 		return nil, err
 	}
 
+	_ = c.authClients.Add(token, authCli)
+
 	return authCli, nil
-	//SelfSubjectRulesReviews().Create(context.TODO(), sar, metav1.CreateOptions{})
 }
 
 // Num returns the num of clients
