@@ -48,7 +48,7 @@ func CanListChaos(c *gin.Context, namespace string) bool {
 	response, err := authCli.SelfSubjectAccessReviews().Create(sar)
 	if err != nil {
 		c.Status(http.StatusInternalServerError)
-		_ = c.Error(ErrInternalServer.NewWithNoMessage())
+		_ = c.Error(ErrInternalServer.NewWithNoMessage(err))
 		return false
 	}
 
@@ -59,6 +59,7 @@ func CanListChaos(c *gin.Context, namespace string) bool {
 		} else {
 			_ = c.Error(ErrNoNamespacePrivilege.New("can't list chaos experiments in namespace %s", namespace))
 		}
+		return false
 	}
 
 	return true
