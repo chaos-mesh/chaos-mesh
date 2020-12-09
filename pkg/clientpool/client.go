@@ -21,8 +21,12 @@ import (
 
 	lru "github.com/hashicorp/golang-lru"
 	"k8s.io/apimachinery/pkg/runtime"
+	authorizationv1client "k8s.io/client-go/kubernetes/typed/authorization/v1"
 	"k8s.io/client-go/rest"
 	pkgclient "sigs.k8s.io/controller-runtime/pkg/client"
+
+	//authorizationv1 "k8s.io/api/authorization/v1"
+	authorizationv1 "k8s.io/client-go/kubernetes/typed/authorization/v1"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
 )
@@ -32,6 +36,7 @@ var K8sClients Clients
 
 type Clients interface {
 	Client(token string) (pkgclient.Client, error)
+	AuthClient(token string) (authorizationv1client.AuthorizationV1Interface, error)
 	Num() int
 	Contains(token string) bool
 }
@@ -49,6 +54,10 @@ func NewLocalClient(client pkgclient.Client) Clients {
 // Client returns the local k8s client
 func (c *LocalClient) Client(token string) (pkgclient.Client, error) {
 	return c.client, nil
+}
+
+func (c *LocalClient) AuthClient(token string) (authorizationv1client.AuthorizationV1Interface, error) {
+	return nil, nil
 }
 
 // Num returns the num of clients
@@ -120,6 +129,20 @@ func (c *ClientsPool) Client(token string) (pkgclient.Client, error) {
 	return client, nil
 }
 
+func (c *ClientsPool) AuthClient(token string) (authorizationv1client.AuthorizationV1Interface, error) {
+	config := rest.CopyConfig(c.localConfig)
+	config.BearerToken = token
+	config.BearerTokenFile = ""
+
+	authCli, err := authorizationv1.NewForConfig(config)
+	if err != nil {
+		return nil, err
+	}
+
+	return authCli, nil
+	//SelfSubjectRulesReviews().Create(context.TODO(), sar, metav1.CreateOptions{})
+}
+
 // Num returns the num of clients
 func (c *ClientsPool) Num() int {
 	return c.clients.Len()
@@ -148,4 +171,10 @@ func ExtractTokenFromHeader(header http.Header) string {
 func ExtractTokenAndGetClient(header http.Header) (pkgclient.Client, error) {
 	token := ExtractTokenFromHeader(header)
 	return K8sClients.Client(token)
+}
+
+// ExtractTokenAndGetAuthClient extracts token from http header, and get the authority client of this token
+func ExtractTokenAndGetAuthClient(header http.Header) (authorizationv1client.AuthorizationV1Interface, error) {
+	token := ExtractTokenFromHeader(header)
+	return K8sClients.AuthClient(token)
 }

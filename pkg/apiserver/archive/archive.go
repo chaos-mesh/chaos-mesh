@@ -22,8 +22,13 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
 
+	//authv1 "k8s.io/api/authorization/v1"
+	authorizationv1 "k8s.io/api/authorization/v1"
+	//metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/pkg/apiserver/utils"
+	"github.com/chaos-mesh/chaos-mesh/pkg/clientpool"
 	"github.com/chaos-mesh/chaos-mesh/pkg/core"
 )
 
@@ -92,6 +97,36 @@ func (s *Service) list(c *gin.Context) {
 	kind := c.Query("kind")
 	name := c.Query("name")
 	ns := c.Query("namespace")
+
+	authCli, err := clientpool.ExtractTokenAndGetAuthClient(c.Request.Header)
+	if err != nil {
+		_ = c.Error(utils.ErrInvalidRequest.WrapWithNoMessage(err))
+		return
+	}
+
+	sar := &authorizationv1.SelfSubjectAccessReview{
+		Spec: authorizationv1.SelfSubjectAccessReviewSpec{
+			ResourceAttributes: &authorizationv1.ResourceAttributes{
+				Namespace: ns,
+				Verb:      "list",
+				Group:     "chaos-mesh.org",
+				Resource:  "*",
+			},
+		},
+	}
+
+	response, err := authCli.SelfSubjectAccessReviews().Create(sar)
+	if err != nil {
+		c.Status(http.StatusInternalServerError)
+		_ = c.Error(utils.ErrInternalServer.NewWithNoMessage())
+		return
+	}
+
+	if !response.Status.Allowed {
+		c.Status(http.StatusInternalServerError)
+		_ = c.Error(utils.ErrInternalServer.NewWithNoMessage())
+		return
+	}
 
 	metas, err := s.archive.ListMeta(context.Background(), kind, ns, name, true)
 	if err != nil {
