@@ -30,7 +30,7 @@ const (
 	iptablesChainAlreadyExistErr = "iptables: Chain already exists."
 )
 
-func (s *daemonServer) SetIptablesChains(ctx context.Context, req *pb.IptablesChainsRequest) (*empty.Empty, error) {
+func (s *DaemonServer) SetIptablesChains(ctx context.Context, req *pb.IptablesChainsRequest) (*empty.Empty, error) {
 	log.Info("Set iptables chains", "request", req)
 
 	pid, err := s.crClient.GetPidFromContainerID(ctx, req.ContainerId)

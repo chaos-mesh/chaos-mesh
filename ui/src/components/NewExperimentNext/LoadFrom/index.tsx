@@ -28,13 +28,13 @@ const LoadFrom = () => {
     api.experiments
       .experiments()
       .then(({ data }) => setExperiments(data))
-      .catch(console.log)
+      .catch(console.error)
 
   const fetchArchives = () =>
     api.archives
       .archives()
       .then(({ data }) => setArchives(data))
-      .catch(console.log)
+      .catch(console.error)
 
   useEffect(() => {
     fetchExperiments()
@@ -64,7 +64,7 @@ const LoadFrom = () => {
         )
         dispatch(setAlertOpen(true))
       })
-      .catch(console.log)
+      .catch(console.error)
   }
 
   return (

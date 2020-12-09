@@ -25,14 +25,11 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/apiserver/utils"
 	"github.com/chaos-mesh/chaos-mesh/pkg/config"
 	"github.com/chaos-mesh/chaos-mesh/pkg/core"
-
-	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 // Service defines a handler service for events.
 type Service struct {
 	conf    *config.ChaosDashboardConfig
-	kubeCli client.Client
 	archive core.ExperimentStore
 	event   core.EventStore
 }
@@ -40,13 +37,11 @@ type Service struct {
 // NewService return an event service instance.
 func NewService(
 	conf *config.ChaosDashboardConfig,
-	cli client.Client,
 	archive core.ExperimentStore,
 	event core.EventStore,
 ) *Service {
 	return &Service{
 		conf:    conf,
-		kubeCli: cli,
 		archive: archive,
 		event:   event,
 	}

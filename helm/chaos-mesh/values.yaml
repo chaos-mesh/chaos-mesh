@@ -65,6 +65,9 @@ controllerManager:
 
   podAnnotations: {}
 
+  # This is Dangerous. Run only on temporary clusters.
+  allowHostNetworkTesting: false
+
 chaosDaemon:
   image: pingcap/chaos-daemon:latest
   imagePullPolicy: IfNotPresent
@@ -116,6 +119,8 @@ dashboard:
   image: pingcap/chaos-dashboard:latest
   imagePullPolicy: IfNotPresent
 
+  securityMode: true
+
   nodeSelector: {}
 
   tolerations: []
@@ -123,6 +128,11 @@ dashboard:
   affinity: {}
 
   podAnnotations: {}
+
+  service:
+    type: NodePort
+    # clusterIP:
+    # nodePort:
 
   resources:
     # We usually recommend not to specify default resources and to leave this as a conscious

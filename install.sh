@@ -644,7 +644,7 @@ install_chaos_mesh() {
         fi
     fi
 
-    gen_crd_manifests "${crd}" | kubectl apply -f - || exit 1
+    gen_crd_manifests "${crd}" | kubectl apply --validate=false -f - || exit 1
     gen_chaos_mesh_manifests "${runtime}" "${k3s}" "${version}" "${timezone}" "${host_network}" "${docker_registry}" "${microk8s}" | kubectl apply -f - || exit 1
 }
 
@@ -950,6 +950,9 @@ metadata:
     app.kubernetes.io/component: controller-manager
 rules:
   - apiGroups: [ "" ]
+    resources: [ "endpoints" ]
+    verbs: [ "get", "list", "watch" ]
+  - apiGroups: [ "" ]
     resources: [ "pods" ]
     verbs: [ "get", "list", "watch", "delete", "update" ]
   - apiGroups:
@@ -1056,6 +1059,31 @@ subjects:
   - kind: ServiceAccount
     name: chaos-controller-manager
     namespace: chaos-testing
+---
+# Source: chaos-mesh/templates/chaos-daemon-service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: chaos-testing
+  name: chaos-daemon
+  labels:
+    app.kubernetes.io/name: chaos-mesh
+    app.kubernetes.io/instance: chaos-mesh
+    app.kubernetes.io/component: chaos-daemon
+spec:
+  clusterIP: None
+  ports:
+    - name: grpc
+      port: 31767
+      targetPort: grpc
+      protocol: TCP
+    - name: http
+      port: 31766
+      targetPort: http
+      protocol: TCP
+  selector:
+    app.kubernetes.io/component: chaos-daemon
+    app.kubernetes.io/instance: chaos-mesh
 ---
 # Source: chaos-mesh/templates/chaos-dashboard-deployment.yaml
 apiVersion: v1
@@ -1232,6 +1260,8 @@ spec:
               value: chaos-testing
             - name: CLUSTER_SCOPED
               value: "true"
+            - name: SECURITY_MODE
+              value: "false"
           volumeMounts:
             - name: storage-volume
               mountPath: /data
@@ -1291,6 +1321,8 @@ spec:
             valueFrom:
               fieldRef:
                 fieldPath: metadata.namespace
+          - name: ALLOW_HOST_NETWORK_TESTING
+            value: "false"
           - name: TARGET_NAMESPACE
             value: chaos-testing
           - name: CLUSTER_SCOPED

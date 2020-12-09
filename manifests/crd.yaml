@@ -12,6 +12,7 @@ spec:
     listKind: DNSChaosList
     plural: dnschaos
     singular: dnschaos
+  preserveUnknownFields: false
   scope: Namespaced
   validation:
     openAPIV3Schema:
@@ -245,6 +246,7 @@ spec:
     listKind: HTTPChaosList
     plural: httpchaos
     singular: httpchaos
+  preserveUnknownFields: false
   scope: Namespaced
   validation:
     openAPIV3Schema:
@@ -500,6 +502,7 @@ spec:
     listKind: IoChaosList
     plural: iochaos
     singular: iochaos
+  preserveUnknownFields: false
   scope: Namespaced
   validation:
     openAPIV3Schema:
@@ -828,6 +831,7 @@ spec:
     listKind: JVMChaosList
     plural: jvmchaos
     singular: jvmchaos
+  preserveUnknownFields: false
   scope: Namespaced
   validation:
     openAPIV3Schema:
@@ -1077,6 +1081,7 @@ spec:
     listKind: KernelChaosList
     plural: kernelchaos
     singular: kernelchaos
+  preserveUnknownFields: false
   scope: Namespaced
   validation:
     openAPIV3Schema:
@@ -1361,6 +1366,7 @@ spec:
     listKind: NetworkChaosList
     plural: networkchaos
     singular: networkchaos
+  preserveUnknownFields: false
   scope: Namespaced
   validation:
     openAPIV3Schema:
@@ -1789,6 +1795,7 @@ spec:
     listKind: PodChaosList
     plural: podchaos
     singular: podchaos
+  preserveUnknownFields: false
   scope: Namespaced
   validation:
     openAPIV3Schema:
@@ -2030,6 +2037,7 @@ spec:
     listKind: PodIoChaosList
     plural: podiochaos
     singular: podiochaos
+  preserveUnknownFields: false
   scope: Namespaced
   validation:
     openAPIV3Schema:
@@ -2213,6 +2221,7 @@ spec:
     listKind: PodNetworkChaosList
     plural: podnetworkchaos
     singular: podnetworkchaos
+  preserveUnknownFields: false
   scope: Namespaced
   validation:
     openAPIV3Schema:
@@ -2502,6 +2511,7 @@ spec:
     listKind: StressChaosList
     plural: stresschaos
     singular: stresschaos
+  preserveUnknownFields: false
   scope: Namespaced
   validation:
     openAPIV3Schema:
@@ -2778,6 +2788,7 @@ spec:
     listKind: TimeChaosList
     plural: timechaos
     singular: timechaos
+  preserveUnknownFields: false
   scope: Namespaced
   validation:
     openAPIV3Schema:

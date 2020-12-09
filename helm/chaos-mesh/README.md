@@ -21,6 +21,7 @@ The following tables list the configurable parameters of the Chaos Mesh chart an
 | `timezone` | The timezone where controller-manager, chaos-daemon and dashboard uses. For example: `UTC`, `Asia/Shanghai` | `UTC` |
 | `enableProfiling` | A flag to enable pprof in controller-manager and chaos-daemon  | `true` |
 | `controllerManager.hostNetwork` | running chaos-controller-manager on host network | `false` |
+| `controllerManager.allowHostNetworkTesting`   | Allow testing on `hostNetwork` pods | `false` |
 | `controllerManager.serviceAccount` | The serviceAccount for chaos-controller-manager | `chaos-controller-manager` |
 | `controllerManager.replicaCount` | Replicas for chaos-controller-manager | `1` |
 | `controllerManager.image` | docker image for chaos-controller-manager  | `pingcap/chaos-mesh:latest` |
@@ -66,6 +67,9 @@ The following tables list the configurable parameters of the Chaos Mesh chart an
 | `dashboard.persistentVolume.storageClassName` | Chaos Dashboard data Persistent Volume Storage Class | `standard` |
 | `dashboard.persistentVolume.mountPath` | Chaos Dashboard data Persistent Volume mount root path | `/data` |
 | `dashboard.persistentVolume.subPath` | Subdirectory of  Chaos Dashboard data Persistent Volume to mount | `` |
+| `dashboard.service.type`              | Service type of the service created for exposing the dashboard                             | `NodePort`     |
+| `dashboard.service.clusterIP`         | Set the `clusterIP` of the dashboard service if the type is `ClusterIP` | `nil`           |
+| `dashboard.service.nodePort`          | Set the `nodePort` of the dashboard service if the type is `NodePort`  | `nil`           |
 | `dashboard.env` | The keys within the `env` map are mounted as environment variables on the Chaos Dashboard pod | `` |
 | `dashboard.env.LISTEN_HOST` | | `0.0.0.0` |
 | `dashboard.env.LISTEN_PORT` | | `2333` |

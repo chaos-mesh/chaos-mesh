@@ -22,6 +22,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/pkg/clientpool"
 	"github.com/chaos-mesh/chaos-mesh/pkg/config"
 	"github.com/chaos-mesh/chaos-mesh/pkg/core"
 )
@@ -65,10 +66,23 @@ func NewServer(
 	}
 
 	var err error
-	s.Manager, err = ctrl.NewManager(ctrl.GetConfigOrDie(), options)
+
+	cfg := ctrl.GetConfigOrDie()
+	s.Manager, err = ctrl.NewManager(cfg, options)
 	if err != nil {
 		log.Error(err, "unable to start collector")
 		os.Exit(1)
+	}
+
+	if conf.SecurityMode {
+		clientpool.K8sClients, err = clientpool.NewClientPool(cfg, scheme, 100)
+		if err != nil {
+			// this should never happen
+			log.Error(err, "fail to create client pool")
+			os.Exit(1)
+		}
+	} else {
+		clientpool.K8sClients = clientpool.NewLocalClient(s.Manager.GetClient())
 	}
 
 	for kind, chaosKind := range v1alpha1.AllKinds() {
