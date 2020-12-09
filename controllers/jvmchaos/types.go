@@ -15,10 +15,8 @@ package jvmchaos
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
-	"math/rand"
-	"time"
+	"fmt"
 
 	"github.com/hashicorp/go-multierror"
 	"golang.org/x/sync/errgroup"
@@ -60,7 +58,6 @@ func (r *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.I
 		return err
 	}
 
-	// TODO: applyAllPods
 	if err = r.applyAllPods(ctx, pods, jvmchaos); err != nil {
 		r.Log.Error(err, "failed to apply chaos on all pods")
 		return err
@@ -94,7 +91,7 @@ func (r *endpoint) applyAllPods(ctx context.Context, pods []v1.Pod, chaos *v1alp
 		chaos.Finalizers = utils.InsertFinalizer(chaos.Finalizers, key)
 
 		g.Go(func() error {
-			return r.applyPod(ctx, pod)
+			return r.applyPod(ctx, pod, chaos)
 		})
 	}
 	err := g.Wait()
@@ -105,11 +102,10 @@ func (r *endpoint) applyAllPods(ctx context.Context, pods []v1.Pod, chaos *v1alp
 	return nil
 }
 
-func (r *endpoint) applyPod(ctx context.Context, pod *v1.Pod) error {
+func (r *endpoint) applyPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.JVMChaos) error {
 	r.Log.Info("Try to apply jvm chaos", "namespace",
 		pod.Namespace, "name", pod.Name)
-	// get pod id,and send http pod.Status.PodIP;
-	// TODO: Custom ports may be required
+
 	err := jvm.ActiveSandbox(pod.Status.PodIP, 10086)
 	if err != nil {
 		return err
@@ -117,31 +113,28 @@ func (r *endpoint) applyPod(ctx context.Context, pod *v1.Pod) error {
 
 	r.Log.Info("active sandbox", "pod", pod.Name)
 
-	rand.Seed(time.Now().Unix())
-	//suid := fmt.Sprintf("%s-%d", pod.Name , rand.Int())
-	suid := "podname-randid"
-	delay := &Delay{
-		Action:      "delay",
-		Target:      "servlet",
-		SUID:        suid,
-		Time:        "10000",
-		RequestPath: "/",
+	suid := genSUID(pod, chaos)
+	jsonBytes, err := jvm.ToSandboxAction(suid, chaos)
+
+	if err != nil {
+		return err
 	}
-	jsonBytes, err := json.Marshal(delay)
+	// TODO: Custom port may be required
 	err = jvm.InjectChaos(pod.Status.PodIP, 10086, jsonBytes)
 	if err != nil {
 		return err
 	}
-	r.Log.Info("delay servlet", "pod", pod.Name)
+	r.Log.Info("Inject JVM Chaos", "pod", pod.Name, "action", chaos.Spec.Action)
 	return nil
 }
 
-type Delay struct {
-	Action      string `json:"action"`
-	Target      string `json:"target"`
-	SUID        string `json:"suid"`
-	Time        string `json:"time"`
-	RequestPath string `json:"requestpath"`
+func genSUID(pod *v1.Pod, chaos *v1alpha1.JVMChaos) string {
+	return fmt.Sprintf("%s:%s:%s:%s:%s",
+		pod.Name,
+		chaos.Spec.Action,
+		chaos.Spec.Target,
+		chaos.Name,
+		chaos.Namespace)
 }
 
 // Recover means the reconciler recovers the chaos action
@@ -188,7 +181,7 @@ func (r *endpoint) cleanFinalizersAndRecover(ctx context.Context, chaos *v1alpha
 			continue
 		}
 
-		err = r.recoverPod(ctx, &pod)
+		err = r.recoverPod(ctx, &pod, chaos)
 		if err != nil {
 			result = multierror.Append(result, err)
 			continue
@@ -206,18 +199,13 @@ func (r *endpoint) cleanFinalizersAndRecover(ctx context.Context, chaos *v1alpha
 	return result
 }
 
-func (r *endpoint) recoverPod(ctx context.Context, pod *v1.Pod) error {
+func (r *endpoint) recoverPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.JVMChaos) error {
 	r.Log.Info("Try to recover pod", "namespace", pod.Namespace, "name", pod.Name)
-	// TODO: Custom ports may be required
-	suid := "podname-randid"
-	delay := &Delay{
-		Action:      "delay",
-		Target:      "servlet",
-		SUID:        suid,
-		Time:        "10000",
-		RequestPath: "/",
-	}
-	jsonBytes, err := json.Marshal(delay)
+
+	suid := genSUID(pod, chaos)
+	jsonBytes, err := jvm.ToSandboxAction(suid, chaos)
+
+	// TODO: Custom port may be required
 	err = jvm.RecoverChaos(pod.Status.PodIP, 10086, jsonBytes)
 	if err != nil {
 		return err
