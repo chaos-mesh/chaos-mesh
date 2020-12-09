@@ -23,12 +23,11 @@ import (
 	"github.com/jinzhu/gorm"
 
 	//authv1 "k8s.io/api/authorization/v1"
-	authorizationv1 "k8s.io/api/authorization/v1"
+	//authorizationv1 "k8s.io/api/authorization/v1"
 	//metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/pkg/apiserver/utils"
-	"github.com/chaos-mesh/chaos-mesh/pkg/clientpool"
 	"github.com/chaos-mesh/chaos-mesh/pkg/core"
 )
 
@@ -98,33 +97,8 @@ func (s *Service) list(c *gin.Context) {
 	name := c.Query("name")
 	ns := c.Query("namespace")
 
-	authCli, err := clientpool.ExtractTokenAndGetAuthClient(c.Request.Header)
-	if err != nil {
-		_ = c.Error(utils.ErrInvalidRequest.WrapWithNoMessage(err))
-		return
-	}
-
-	sar := &authorizationv1.SelfSubjectAccessReview{
-		Spec: authorizationv1.SelfSubjectAccessReviewSpec{
-			ResourceAttributes: &authorizationv1.ResourceAttributes{
-				Namespace: ns,
-				Verb:      "list",
-				Group:     "chaos-mesh.org",
-				Resource:  "*",
-			},
-		},
-	}
-
-	response, err := authCli.SelfSubjectAccessReviews().Create(sar)
-	if err != nil {
-		c.Status(http.StatusInternalServerError)
-		_ = c.Error(utils.ErrInternalServer.NewWithNoMessage())
-		return
-	}
-
-	if !response.Status.Allowed {
-		c.Status(http.StatusInternalServerError)
-		_ = c.Error(utils.ErrInternalServer.NewWithNoMessage())
+	canList := utils.CanListChaos(c, ns)
+	if !canList {
 		return
 	}
 
@@ -183,6 +157,11 @@ func (s *Service) detail(c *gin.Context) {
 			c.Status(http.StatusInternalServerError)
 			_ = c.Error(utils.ErrInvalidRequest.New("the archive is not found"))
 		}
+		return
+	}
+
+	canList := utils.CanListChaos(c, exp.Namespace)
+	if !canList {
 		return
 	}
 
@@ -256,6 +235,12 @@ func (s *Service) report(c *gin.Context) {
 		}
 		return
 	}
+
+	canList := utils.CanListChaos(c, meta.Namespace)
+	if !canList {
+		return
+	}
+
 	report.Meta = &Archive{
 		UID:        meta.UID,
 		Kind:       meta.Kind,

@@ -86,6 +86,11 @@ func (s *Service) listEvents(c *gin.Context) {
 		LimitStr:            c.Query("limit"),
 	}
 
+	canList := utils.CanListChaos(c, filter.ExperimentNamespace)
+	if !canList {
+		return
+	}
+
 	if filter.PodName != "" && filter.PodNamespace == "" {
 		c.Status(http.StatusInternalServerError)
 		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(fmt.Errorf("when podName is not empty, podNamespace cannot be empty")))
@@ -123,6 +128,11 @@ func (s *Service) listDryEvents(c *gin.Context) {
 		ExperimentNamespace: c.Query("experimentNamespace"),
 		Kind:                c.Query("kind"),
 		LimitStr:            c.Query("limit"),
+	}
+
+	canList := utils.CanListChaos(c, filter.ExperimentNamespace)
+	if !canList {
+		return
 	}
 
 	eventList, err := s.event.DryListByFilter(context.Background(), filter)
@@ -168,6 +178,11 @@ func (s *Service) getEvent(c *gin.Context) {
 			c.Status(http.StatusInternalServerError)
 			_ = c.Error(utils.ErrInvalidRequest.New("the event is not found"))
 		}
+		return
+	}
+
+	canList := utils.CanListChaos(c, event.Namespace)
+	if !canList {
 		return
 	}
 
