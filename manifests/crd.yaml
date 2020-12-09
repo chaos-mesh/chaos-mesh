@@ -854,8 +854,7 @@ spec:
           properties:
             action:
               description: 'Action defines the specific jvm chaos action. Supported
-                action: delay, return, script, cfl, oom, ccf, tce, delay4servlet,
-                tce4servlet'
+                action: delay;return;script;cfl;oom;ccf;tce;cpf;tde;tpf'
               enum:
               - delay
               - return
@@ -864,8 +863,9 @@ spec:
               - oom
               - ccf
               - tce
-              - delay4servlet
-              - tce4servlet
+              - cpf
+              - tde
+              - tpf
               type: string
             duration:
               description: Duration represents the duration of the chaos action

@@ -18,6 +18,8 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/chaos-mesh/chaos-mesh/controllers/config"
+
 	"github.com/hashicorp/go-multierror"
 	"golang.org/x/sync/errgroup"
 	v1 "k8s.io/api/core/v1"
@@ -52,7 +54,7 @@ func (r *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.I
 		return err
 	}
 
-	pods, err := utils.SelectAndFilterPods(ctx, r.Client, r.Reader, &jvmchaos.Spec)
+	pods, err := utils.SelectAndFilterPods(ctx, r.Client, r.Reader, &jvmchaos.Spec, config.ControllerCfg.ClusterScoped, config.ControllerCfg.TargetNamespace, config.ControllerCfg.AllowedNamespaces, config.ControllerCfg.IgnoredNamespaces)
 	if err != nil {
 		r.Log.Error(err, "failed to select and generate pods")
 		return err

@@ -42,8 +42,8 @@ type JVMChaosSpec struct {
 	Scheduler *SchedulerSpec `json:"scheduler,omitempty"`
 
 	// Action defines the specific jvm chaos action.
-	// Supported action: delay, return, script, cfl, oom, ccf, tce, delay4servlet, tce4servlet
-	// +kubebuilder:validation:Enum=delay;return;script;cfl;oom;ccf;tce;delay4servlet;tce4servlet
+	// Supported action: delay;return;script;cfl;oom;ccf;tce;cpf;tde;tpf
+	// +kubebuilder:validation:Enum=delay;return;script;cfl;oom;ccf;tce;cpf;tde;tpf
 	Action JVMChaosAction `json:"action"`
 
 	// JVMParameter represents the detail about jvm chaos action definition
