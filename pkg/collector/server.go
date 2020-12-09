@@ -82,7 +82,11 @@ func NewServer(
 			os.Exit(1)
 		}
 	} else {
-		clientpool.K8sClients = clientpool.NewLocalClient(s.Manager.GetClient())
+		clientpool.K8sClients, err = clientpool.NewLocalClient(cfg, scheme)
+		if err != nil {
+			log.Error(err, "fail to create client pool")
+			os.Exit(1)
+		}
 	}
 
 	for kind, chaosKind := range v1alpha1.AllKinds() {

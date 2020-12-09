@@ -21,12 +21,10 @@ import (
 
 	lru "github.com/hashicorp/golang-lru"
 	"k8s.io/apimachinery/pkg/runtime"
+	authorizationv1 "k8s.io/client-go/kubernetes/typed/authorization/v1"
 	authorizationv1client "k8s.io/client-go/kubernetes/typed/authorization/v1"
 	"k8s.io/client-go/rest"
 	pkgclient "sigs.k8s.io/controller-runtime/pkg/client"
-
-	//authorizationv1 "k8s.io/api/authorization/v1"
-	authorizationv1 "k8s.io/client-go/kubernetes/typed/authorization/v1"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
 )
@@ -42,13 +40,27 @@ type Clients interface {
 }
 
 type LocalClient struct {
-	client pkgclient.Client
+	client     pkgclient.Client
+	authClient authorizationv1client.AuthorizationV1Interface
 }
 
-func NewLocalClient(client pkgclient.Client) Clients {
-	return &LocalClient{
-		client: client,
+func NewLocalClient(localConfig *rest.Config, scheme *runtime.Scheme) (Clients, error) {
+	client, err := pkgclient.New(localConfig, pkgclient.Options{
+		Scheme: scheme,
+	})
+	if err != nil {
+		return nil, err
 	}
+
+	authCli, err := authorizationv1.NewForConfig(localConfig)
+	if err != nil {
+		return nil, err
+	}
+
+	return &LocalClient{
+		client:     client,
+		authClient: authCli,
+	}, nil
 }
 
 // Client returns the local k8s client
@@ -57,7 +69,7 @@ func (c *LocalClient) Client(token string) (pkgclient.Client, error) {
 }
 
 func (c *LocalClient) AuthClient(token string) (authorizationv1client.AuthorizationV1Interface, error) {
-	return nil, nil
+	return c.authClient, nil
 }
 
 // Num returns the num of clients
