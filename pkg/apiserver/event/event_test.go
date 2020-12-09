@@ -168,7 +168,8 @@ func TestEvent(t *testing.T) {
 }
 
 var _ = Describe("event", func() {
-	defer pkgmock.With("MockCanListChaos", true)()
+	pkgmock.With("MockCanListChaos", true)()
+	defer pkgmock.With("MockCanListChaos", false)()
 
 	var router *gin.Engine
 	BeforeEach(func() {
