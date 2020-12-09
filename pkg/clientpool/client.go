@@ -22,7 +22,6 @@ import (
 	lru "github.com/hashicorp/golang-lru"
 	"k8s.io/apimachinery/pkg/runtime"
 	authorizationv1 "k8s.io/client-go/kubernetes/typed/authorization/v1"
-	authorizationv1client "k8s.io/client-go/kubernetes/typed/authorization/v1"
 	"k8s.io/client-go/rest"
 	pkgclient "sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -34,14 +33,14 @@ var K8sClients Clients
 
 type Clients interface {
 	Client(token string) (pkgclient.Client, error)
-	AuthClient(token string) (authorizationv1client.AuthorizationV1Interface, error)
+	AuthClient(token string) (authorizationv1.AuthorizationV1Interface, error)
 	Num() int
 	Contains(token string) bool
 }
 
 type LocalClient struct {
 	client     pkgclient.Client
-	authClient authorizationv1client.AuthorizationV1Interface
+	authClient authorizationv1.AuthorizationV1Interface
 }
 
 func NewLocalClient(localConfig *rest.Config, scheme *runtime.Scheme) (Clients, error) {
@@ -68,7 +67,7 @@ func (c *LocalClient) Client(token string) (pkgclient.Client, error) {
 	return c.client, nil
 }
 
-func (c *LocalClient) AuthClient(token string) (authorizationv1client.AuthorizationV1Interface, error) {
+func (c *LocalClient) AuthClient(token string) (authorizationv1.AuthorizationV1Interface, error) {
 	return c.authClient, nil
 }
 
@@ -148,7 +147,7 @@ func (c *ClientsPool) Client(token string) (pkgclient.Client, error) {
 	return client, nil
 }
 
-func (c *ClientsPool) AuthClient(token string) (authorizationv1client.AuthorizationV1Interface, error) {
+func (c *ClientsPool) AuthClient(token string) (authorizationv1.AuthorizationV1Interface, error) {
 	c.Lock()
 	defer c.Unlock()
 
@@ -158,7 +157,7 @@ func (c *ClientsPool) AuthClient(token string) (authorizationv1client.Authorizat
 
 	value, ok := c.authClients.Get(token)
 	if ok {
-		return value.(authorizationv1client.AuthorizationV1Interface), nil
+		return value.(authorizationv1.AuthorizationV1Interface), nil
 	}
 
 	config := rest.CopyConfig(c.localConfig)
@@ -206,7 +205,7 @@ func ExtractTokenAndGetClient(header http.Header) (pkgclient.Client, error) {
 }
 
 // ExtractTokenAndGetAuthClient extracts token from http header, and get the authority client of this token
-func ExtractTokenAndGetAuthClient(header http.Header) (authorizationv1client.AuthorizationV1Interface, error) {
+func ExtractTokenAndGetAuthClient(header http.Header) (authorizationv1.AuthorizationV1Interface, error) {
 	token := ExtractTokenFromHeader(header)
 	return K8sClients.AuthClient(token)
 }

@@ -23,6 +23,7 @@ import (
 	"time"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/core"
+	pkgmock "github.com/chaos-mesh/chaos-mesh/pkg/mock"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
@@ -167,6 +168,8 @@ func TestEvent(t *testing.T) {
 }
 
 var _ = Describe("event", func() {
+	defer pkgmock.With("MockCanListChaos", true)()
+
 	var router *gin.Engine
 	BeforeEach(func() {
 		mockes := new(MockEventService)

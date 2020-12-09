@@ -17,13 +17,17 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	authorizationv1 "k8s.io/api/authorization/v1"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/clientpool"
-
-	authorizationv1 "k8s.io/api/authorization/v1"
+	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
 )
 
 func CanListChaos(c *gin.Context, namespace string) bool {
+	if mock := mock.On("MockCanListChaos"); mock == true {
+		return true
+	}
+
 	authCli, err := clientpool.ExtractTokenAndGetAuthClient(c.Request.Header)
 	if err != nil {
 		_ = c.Error(ErrInvalidRequest.WrapWithNoMessage(err))
