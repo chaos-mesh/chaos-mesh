@@ -111,13 +111,6 @@ func recover(ctx context.Context, m *chaosStateMachine, targetPhase v1alpha1.Exp
 	if status.Experiment.StartTime != nil {
 		status.Experiment.Duration = now.Sub(status.Experiment.StartTime.Time).String()
 	}
-
-	// Pause from a running phase should set the nextStart to now
-	// so that the Reconciler will start another cycle of running right
-	// after resume
-	if targetPhase == v1alpha1.ExperimentPhasePaused {
-		m.Chaos.SetNextStart(now)
-	}
 	return true, nil
 }
 
