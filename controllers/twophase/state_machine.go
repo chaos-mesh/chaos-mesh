@@ -39,7 +39,7 @@ func unexpected(ctx context.Context, m *chaosStateMachine, targetPhase v1alpha1.
 	return true, errors.Errorf("turn from %s into %s is unexpected", currentPhase, targetPhase)
 }
 
-func none(ctx context.Context, m *chaosStateMachine, targetPhase v1alpha1.ExperimentPhase, now time.Time) (bool, error) {
+func noop(ctx context.Context, m *chaosStateMachine, targetPhase v1alpha1.ExperimentPhase, now time.Time) (bool, error) {
 	updated := false
 	currentPhase := m.Chaos.GetStatus().Experiment.Phase
 
@@ -161,7 +161,7 @@ func resume(ctx context.Context, m *chaosStateMachine, targetPhase v1alpha1.Expe
 		}
 
 		if nextStart.After(now) {
-			return none(ctx, m, v1alpha1.ExperimentPhaseWaiting, now)
+			return noop(ctx, m, v1alpha1.ExperimentPhaseWaiting, now)
 		}
 
 		lastStart = nextStart
@@ -246,16 +246,16 @@ func (m *chaosStateMachine) IterateNextTime(startTime time.Time, duration time.D
 
 var phaseTransitionMap = map[v1alpha1.ExperimentPhase]map[v1alpha1.ExperimentPhase]func(ctx context.Context, m *chaosStateMachine, targetPhase v1alpha1.ExperimentPhase, now time.Time) (bool, error){
 	v1alpha1.ExperimentPhaseUninitialized: {
-		v1alpha1.ExperimentPhaseUninitialized: none,
+		v1alpha1.ExperimentPhaseUninitialized: noop,
 		v1alpha1.ExperimentPhaseRunning:       apply,
-		v1alpha1.ExperimentPhaseWaiting:       none,
-		v1alpha1.ExperimentPhasePaused:        none,
+		v1alpha1.ExperimentPhaseWaiting:       noop,
+		v1alpha1.ExperimentPhasePaused:        noop,
 		v1alpha1.ExperimentPhaseFailed:        unexpected,
-		v1alpha1.ExperimentPhaseFinished:      none,
+		v1alpha1.ExperimentPhaseFinished:      noop,
 	},
 	v1alpha1.ExperimentPhaseRunning: {
 		v1alpha1.ExperimentPhaseUninitialized: unexpected,
-		v1alpha1.ExperimentPhaseRunning:       none,
+		v1alpha1.ExperimentPhaseRunning:       noop,
 		v1alpha1.ExperimentPhaseWaiting:       recover,
 		v1alpha1.ExperimentPhasePaused:        recover,
 		v1alpha1.ExperimentPhaseFailed:        unexpected,
@@ -264,26 +264,26 @@ var phaseTransitionMap = map[v1alpha1.ExperimentPhase]map[v1alpha1.ExperimentPha
 	v1alpha1.ExperimentPhaseWaiting: {
 		v1alpha1.ExperimentPhaseUninitialized: unexpected,
 		v1alpha1.ExperimentPhaseRunning:       apply,
-		v1alpha1.ExperimentPhaseWaiting:       none,
-		v1alpha1.ExperimentPhasePaused:        none,
+		v1alpha1.ExperimentPhaseWaiting:       noop,
+		v1alpha1.ExperimentPhasePaused:        noop,
 		v1alpha1.ExperimentPhaseFailed:        unexpected,
-		v1alpha1.ExperimentPhaseFinished:      none,
+		v1alpha1.ExperimentPhaseFinished:      noop,
 	},
 	v1alpha1.ExperimentPhasePaused: {
 		v1alpha1.ExperimentPhaseUninitialized: unexpected,
 		v1alpha1.ExperimentPhaseRunning:       resume,
 		v1alpha1.ExperimentPhaseWaiting:       resume,
-		v1alpha1.ExperimentPhasePaused:        none,
+		v1alpha1.ExperimentPhasePaused:        noop,
 		v1alpha1.ExperimentPhaseFailed:        unexpected,
-		v1alpha1.ExperimentPhaseFinished:      none,
+		v1alpha1.ExperimentPhaseFinished:      noop,
 	},
 	v1alpha1.ExperimentPhaseFailed: {
 		v1alpha1.ExperimentPhaseUninitialized: unexpected,
 		v1alpha1.ExperimentPhaseRunning:       apply,
-		v1alpha1.ExperimentPhaseWaiting:       none,
-		v1alpha1.ExperimentPhasePaused:        none,
-		v1alpha1.ExperimentPhaseFailed:        none,
-		v1alpha1.ExperimentPhaseFinished:      none,
+		v1alpha1.ExperimentPhaseWaiting:       noop,
+		v1alpha1.ExperimentPhasePaused:        noop,
+		v1alpha1.ExperimentPhaseFailed:        noop,
+		v1alpha1.ExperimentPhaseFinished:      noop,
 	},
 	v1alpha1.ExperimentPhaseFinished: {
 		v1alpha1.ExperimentPhaseUninitialized: unexpected,
@@ -291,6 +291,6 @@ var phaseTransitionMap = map[v1alpha1.ExperimentPhase]map[v1alpha1.ExperimentPha
 		v1alpha1.ExperimentPhaseWaiting:       unexpected,
 		v1alpha1.ExperimentPhasePaused:        unexpected,
 		v1alpha1.ExperimentPhaseFailed:        unexpected,
-		v1alpha1.ExperimentPhaseFinished:      none,
+		v1alpha1.ExperimentPhaseFinished:      noop,
 	},
 }
