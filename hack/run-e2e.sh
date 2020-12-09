@@ -79,11 +79,13 @@ function e2e::image_load() {
         done
 
         # bypassing docker pull rate limit inner the kind container: kindest/node has no credentials
-        # pingcap/coredns:latest is required for dns chaos
+        # pingcap/coredns:latest and nginx:latest is required for test
         # we suppose that you could pull this image on your host docker
-        echo "info: load images pingcap/coredns:latest"
+        echo "info: load images pingcap/coredns:latest and nginx:latest"
         docker pull pingcap/coredns:latest
+        docker pull nginx:latest
         $KIND_BIN load docker-image --name $CLUSTER pingcap/coredns:latest --nodes $(hack::join ',' ${nodes[@]})
+        $KIND_BIN load docker-image --name $CLUSTER nginx:latest --nodes $(hack::join ',' ${nodes[@]})
     fi
 }
 
