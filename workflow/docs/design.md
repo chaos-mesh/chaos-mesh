@@ -162,6 +162,7 @@ func loop(){
 
 There are 6 phase of one Node:
 
+- Init
 - WaitingForSchedule
 - WaitingForChild
 - Running
@@ -169,7 +170,9 @@ There are 6 phase of one Node:
 - Succeed
 - Failed
 
-**WaitingForSchedule** is the default phase when **Node** just created. means this Node is idle and safe for next scheduling; It is presents:
+**Init** means is the default phase when **Node** just created, means this node is just created, did not effect real world yet.
+
+**WaitingForSchedule** means this Node is idle and safe for next scheduling; It is presents:
 
 - For Chaos, Suspend, Task, Parallel:
   - This Node did not make "Effect" yet.
@@ -177,9 +180,11 @@ There are 6 phase of one Node:
   - This Node did not create child node yet;
   - Or previous child node just succeed;
 
-**WaitingForChild** is only available on Serial and Parallel, it means at least 1 child node is in **Running** state.
+**WaitingForChild** is only available on Serial, Parallel and Task, it means at least 1 child node is in **Running** state.
 
 **Running** is available on type Chaos, Suspend, Task; It means an **Actor** is doing dirty work for this node. For Chaos, both of "create Chaos CRD resource" and "delete Chaos CRD resource" are presented as **Running**.
+
+**Evaluating** is only available on Task, it means Task is collecting result of user's pod, then picks templates to execute.
 
 > Question: Should we split it?
 
@@ -191,15 +196,15 @@ There are 6 phase of one Node:
 
 Examples:
 
-A **NetworkChaos** Node: **WaitingForSchedule** -> **Running** -> **Holding** -> **Running** -> **WaitingForSchedule** -> **Succeed**
+A **NetworkChaos** Node: **Init** -> **Running** -> **Holding** -> **Running** -> **Succeed**
 
-A **Suspend** Node: **WaitingForSchedule** -> **Holding** -> **WaitingForSchedule** -> **Succeed**
+A **Suspend** Node: **Init** -> **Holding** -> **Succeed**
 
-A **Serial** Node(which contains 3 children): **WaitingForSchedule** -> **WaitingForChild** -> **WaitingForSchedule** -> **WaitingForChild** -> **WaitingForSchedule** -> **WaitingForChild** -> **WaitingForSchedule** -> **Succeed**
+A **Serial** Node(which contains 3 children): **WaitingForSchedule** -> **WaitingForChild** -> **WaitingForSchedule** -> **WaitingForChild** -> **WaitingForSchedule** -> **WaitingForChild** -> **Succeed**
 
-A **Parallel** Node(which contains 3 children): **WaitingForSchedule** -> **WaitingForChild** -> **WaitingForChild** -> **WaitingForChild** -> **WaitingForSchedule** -> **Succeed**
+A **Parallel** Node(which contains 3 children): **WaitingForSchedule** -> **WaitingForChild** -> **WaitingForChild** -> **WaitingForChild** -> **Succeed**
 
-A **Task** Node: **WaitingForSchedule** -> **Running** -> **WaitingForSchedule** -> **Succeed**
+A **Task** Node: **Init** -> **Running** -> **Evaluating** -> **WaitingForSchedule** -> **WaitingForChild** -> **Succeed**
 
 ### States for Workflow
 
