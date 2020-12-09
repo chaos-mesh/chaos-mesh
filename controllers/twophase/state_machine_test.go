@@ -44,7 +44,7 @@ func TestStateMachine(t *testing.T) {
 var _ = Describe("TwoPhase StateMachine", func() {
 	Context("TwoPhase", func() {
 
-		status := []v1alpha1.ExperimentPhase{
+		statuses := []v1alpha1.ExperimentPhase{
 			v1alpha1.ExperimentPhaseFailed,
 			v1alpha1.ExperimentPhaseFinished,
 			v1alpha1.ExperimentPhasePaused,
@@ -56,7 +56,7 @@ var _ = Describe("TwoPhase StateMachine", func() {
 			defer mock.With("MockApplyError", errors.New("ApplyError"))()
 			defer mock.With("MockRecoverError", errors.New("RecoverError"))()
 
-			for _, status := range status {
+			for _, status := range statuses {
 				now := time.Now()
 				sm := setupStateMachineWithStatus(status)
 
@@ -84,7 +84,7 @@ var _ = Describe("TwoPhase StateMachine", func() {
 			defer mock.With("MockApplyError", errors.New("ApplyError"))()
 			defer mock.With("MockRecoverError", errors.New("RecoverError"))()
 
-			for _, status := range status {
+			for _, status := range statuses {
 				now := time.Now()
 				sm := setupStateMachineWithStatus(status)
 
@@ -117,7 +117,7 @@ var _ = Describe("TwoPhase StateMachine", func() {
 			defer mock.With("MockApplyError", errors.New("ApplyError"))()
 			defer mock.With("MockRecoverError", errors.New("RecoverError"))()
 
-			for _, status := range status {
+			for _, status := range statuses {
 				now := time.Now()
 				sm := setupStateMachineWithStatus(status)
 
