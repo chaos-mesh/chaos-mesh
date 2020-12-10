@@ -68,17 +68,21 @@ func NewServer(
 	var err error
 
 	cfg := ctrl.GetConfigOrDie()
-	clientpool.K8sClients, err = clientpool.New(cfg, scheme, 100)
-	if err != nil {
-		// this should never happen
-		log.Error(err, "fail to create client pool")
-		os.Exit(1)
-	}
-
 	s.Manager, err = ctrl.NewManager(cfg, options)
 	if err != nil {
 		log.Error(err, "unable to start collector")
 		os.Exit(1)
+	}
+
+	if conf.SecurityMode {
+		clientpool.K8sClients, err = clientpool.NewClientPool(cfg, scheme, 100)
+		if err != nil {
+			// this should never happen
+			log.Error(err, "fail to create client pool")
+			os.Exit(1)
+		}
+	} else {
+		clientpool.K8sClients = clientpool.NewLocalClient(s.Manager.GetClient())
 	}
 
 	for kind, chaosKind := range v1alpha1.AllKinds() {
