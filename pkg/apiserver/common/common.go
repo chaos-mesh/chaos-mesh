@@ -301,7 +301,7 @@ func (s *Service) getAnnotations(c *gin.Context) {
 // @Description Get the config of Dashboard.
 // @Tags common
 // @Produce json
-// @Success 200 {object} json
+// @Success 200 {object} config.ChaosDashboardConfig
 // @Router /common/config [get]
 // @Failure 500 {object} utils.APIError
 func (s *Service) getConfig(c *gin.Context) {
