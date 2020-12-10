@@ -51,6 +51,7 @@ spec:
       nodeSelector:
 {{ toYaml . | indent 8 }}
       {{- end }}
+      priorityClassName: {{ .Values.dnsServer.priorityClassName}}
       containers:
       - name: chaos-dns-server
         image: {{ .Values.dnsServer.image }}
