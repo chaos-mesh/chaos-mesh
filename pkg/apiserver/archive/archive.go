@@ -51,6 +51,7 @@ func Register(r *gin.RouterGroup, s *Service) {
 	endpoint.GET("", s.list)
 	endpoint.GET("/detail", s.detail)
 	endpoint.GET("/report", s.report)
+	endpoint.DELETE("/:uid", s.delete)
 }
 
 // Archive defines the basic information of an archive.
@@ -248,4 +249,39 @@ func (s *Service) report(c *gin.Context) {
 	report.TotalFaultTime = timeAfter.Sub(timeNow).String()
 
 	c.JSON(http.StatusOK, report)
+}
+
+// @Summary Delete the specified archived experiment.
+// @Description Delete the specified archived experiment.
+// @Tags archives
+// @Produce json
+// @Param uid path string true "uid"
+// @Success 200 "delete ok"
+// @Failure 500 {object} utils.APIError
+// @Router /experiments/{uid} [delete]
+func (s *Service) delete(c *gin.Context) {
+	var (
+		err error
+		exp *core.Experiment
+	)
+
+	uid := c.Param("uid")
+
+	if exp, err = s.archive.FindByUID(context.Background(), uid); err != nil {
+		if !gorm.IsRecordNotFoundError(err) {
+			c.Status(http.StatusInternalServerError)
+			_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
+		} else {
+			c.Status(http.StatusInternalServerError)
+			_ = c.Error(utils.ErrInvalidRequest.New("the archived experiment is not found"))
+		}
+		return
+	}
+
+	if err = s.archive.Delete(context.Background(), exp); err != nil {
+		c.Status(http.StatusInternalServerError)
+		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
+	} else {
+		c.JSON(http.StatusOK, "delete ok")
+	}
 }
