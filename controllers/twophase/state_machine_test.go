@@ -138,6 +138,8 @@ var _ = Describe("TwoPhase StateMachine", func() {
 
 		It("Pause", func() {
 			// duration 15min, scheduler @every 20m
+			// Then it should be running in 13:10-13:25, 13:30-13:45, 13:50-14:05, 14:10-14:25
+			// Pause will only erase part of it
 			now, err := time.Parse(time.RFC3339, "2020-12-07T13:10:00+00:00")
 			Expect(err).ToNot(HaveOccurred())
 			sm := setupStateMachineWithStatus(v1alpha1.ExperimentPhaseUninitialized)
@@ -166,6 +168,20 @@ var _ = Describe("TwoPhase StateMachine", func() {
 			Expect(err).ToNot(HaveOccurred())
 			Expect(updated).To(Equal(true))
 			Expect(sm.Chaos.GetStatus().Experiment.Phase).To(Equal(v1alpha1.ExperimentPhasePaused))
+
+			now, err = time.Parse(time.RFC3339, "2020-12-07T14:06:00+00:00")
+			Expect(err).ToNot(HaveOccurred())
+			updated, err = sm.run(context.TODO(), v1alpha1.ExperimentPhaseRunning, now)
+			Expect(err).ToNot(HaveOccurred())
+			Expect(updated).To(Equal(true))
+			Expect(sm.Chaos.GetStatus().Experiment.Phase).To(Equal(v1alpha1.ExperimentPhaseWaiting))
+
+			now, err = time.Parse(time.RFC3339, "2020-12-07T14:11:00+00:00")
+			Expect(err).ToNot(HaveOccurred())
+			updated, err = sm.run(context.TODO(), v1alpha1.ExperimentPhaseRunning, now)
+			Expect(err).ToNot(HaveOccurred())
+			Expect(updated).To(Equal(true))
+			Expect(sm.Chaos.GetStatus().Experiment.Phase).To(Equal(v1alpha1.ExperimentPhaseRunning))
 		})
 	})
 
