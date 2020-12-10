@@ -28,11 +28,42 @@ import (
 )
 
 // K8sClients is an object of Clients
-var K8sClients *Clients
+var K8sClients Clients
+
+type Clients interface {
+	Client(token string) (pkgclient.Client, error)
+	Num() int
+	Contains(token string) bool
+}
+
+type LocalClient struct {
+	client pkgclient.Client
+}
+
+func NewLocalClient(client pkgclient.Client) Clients {
+	return &LocalClient{
+		client: client,
+	}
+}
+
+// Client returns the local k8s client
+func (c *LocalClient) Client(token string) (pkgclient.Client, error) {
+	return c.client, nil
+}
+
+// Num returns the num of clients
+func (c *LocalClient) Num() int {
+	return 1
+}
+
+// Contains return false for LocalClient
+func (c *LocalClient) Contains(token string) bool {
+	return false
+}
 
 // Clients is the client pool of k8s client
-type Clients struct {
-	sync.Mutex
+type ClientsPool struct {
+	sync.RWMutex
 
 	scheme      *runtime.Scheme
 	localConfig *rest.Config
@@ -40,13 +71,13 @@ type Clients struct {
 }
 
 // New creates a new Clients
-func New(localConfig *rest.Config, scheme *runtime.Scheme, maxClientNum int) (*Clients, error) {
+func NewClientPool(localConfig *rest.Config, scheme *runtime.Scheme, maxClientNum int) (Clients, error) {
 	clients, err := lru.New(maxClientNum)
 	if err != nil {
 		return nil, err
 	}
 
-	return &Clients{
+	return &ClientsPool{
 		localConfig: localConfig,
 		scheme:      scheme,
 		clients:     clients,
@@ -54,7 +85,7 @@ func New(localConfig *rest.Config, scheme *runtime.Scheme, maxClientNum int) (*C
 }
 
 // Client returns a k8s client according to the token
-func (c *Clients) Client(token string) (pkgclient.Client, error) {
+func (c *ClientsPool) Client(token string) (pkgclient.Client, error) {
 	c.Lock()
 	defer c.Unlock()
 
@@ -87,6 +118,20 @@ func (c *Clients) Client(token string) (pkgclient.Client, error) {
 	_ = c.clients.Add(token, client)
 
 	return client, nil
+}
+
+// Num returns the num of clients
+func (c *ClientsPool) Num() int {
+	return c.clients.Len()
+}
+
+// Contains return true if have client for the token
+func (c *ClientsPool) Contains(token string) bool {
+	c.RLock()
+	defer c.RUnlock()
+
+	_, ok := c.clients.Get(token)
+	return ok
 }
 
 // ExtractTokenFromHeader extracts token from http header
