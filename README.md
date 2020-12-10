@@ -59,6 +59,7 @@ See [Docs](https://chaos-mesh.org/docs/).
 
 This is a list of known adopters of Chaos Mesh. Some have already gone into production, and others are at various stages of testing.
 
+- [Apache APISIX](https://github.com/apache/apisix)
 - [Celo](https://celo.org/)
 - [Dailymotion](https://www.dailymotion.com/)
 - [DataStax Fallout](https://github.com/datastax/fallout)
