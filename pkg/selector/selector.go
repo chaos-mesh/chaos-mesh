@@ -160,13 +160,16 @@ func SelectPods(ctx context.Context, c client.Client, r client.Reader, selector 
 			if err := listFunc(ctx, &podList, &listOptions); err != nil {
 				return nil, err
 			}
+
+			pods = append(pods, podList.Items...)
 		}
 	} else {
 		if err := listFunc(ctx, &podList, &listOptions); err != nil {
 			return nil, err
 		}
+
+		pods = append(pods, podList.Items...)
 	}
-	pods = append(pods, podList.Items...)
 
 	var (
 		nodes           []v1.Node

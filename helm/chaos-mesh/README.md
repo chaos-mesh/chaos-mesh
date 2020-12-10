@@ -67,6 +67,9 @@ The following tables list the configurable parameters of the Chaos Mesh chart an
 | `dashboard.persistentVolume.storageClassName` | Chaos Dashboard data Persistent Volume Storage Class | `standard` |
 | `dashboard.persistentVolume.mountPath` | Chaos Dashboard data Persistent Volume mount root path | `/data` |
 | `dashboard.persistentVolume.subPath` | Subdirectory of  Chaos Dashboard data Persistent Volume to mount | `` |
+| `dashboard.service.type`              | Service type of the service created for exposing the dashboard                             | `NodePort`     |
+| `dashboard.service.clusterIP`         | Set the `clusterIP` of the dashboard service if the type is `ClusterIP` | `nil`           |
+| `dashboard.service.nodePort`          | Set the `nodePort` of the dashboard service if the type is `NodePort`  | `nil`           |
 | `dashboard.env` | The keys within the `env` map are mounted as environment variables on the Chaos Dashboard pod | `` |
 | `dashboard.env.LISTEN_HOST` | | `0.0.0.0` |
 | `dashboard.env.LISTEN_PORT` | | `2333` |
