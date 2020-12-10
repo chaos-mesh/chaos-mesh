@@ -168,11 +168,10 @@ func TestEvent(t *testing.T) {
 }
 
 var _ = Describe("event", func() {
-	pkgmock.With("MockCanListChaos", true)()
-	defer pkgmock.With("MockCanListChaos", false)()
-
 	var router *gin.Engine
 	BeforeEach(func() {
+		pkgmock.With("MockCanListChaos", true)
+
 		mockes := new(MockEventService)
 
 		s := Service{
@@ -190,6 +189,7 @@ var _ = Describe("event", func() {
 
 	AfterEach(func() {
 		// Add any teardown steps that needs to be executed after each test
+		pkgmock.Reset("MockCanListChaos")
 	})
 
 	Context("ListEvents", func() {

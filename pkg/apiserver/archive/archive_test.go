@@ -266,11 +266,10 @@ func (m *MockExperimentStore) DeleteIncompleteExperiments(context.Context) error
 }
 
 var _ = Describe("event", func() {
-	pkgmock.With("MockCanListChaos", true)()
-	defer pkgmock.With("MockCanListChaos", false)()
-
 	var router *gin.Engine
 	BeforeEach(func() {
+		pkgmock.With("MockCanListChaos", true)
+
 		mockExpStore := new(MockExperimentStore)
 
 		s := Service{
@@ -287,7 +286,8 @@ var _ = Describe("event", func() {
 	})
 
 	AfterEach(func() {
-		// Add any setup steps that needs to be executed before each test
+		// Add any setup steps that needs to be executed after each test
+		pkgmock.Reset("MockCanListChaos")
 	})
 
 	Context("List", func() {

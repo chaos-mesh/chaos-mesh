@@ -24,8 +24,8 @@ import (
 )
 
 func CanListChaos(c *gin.Context, namespace string) bool {
-	if mock := mock.On("MockCanListChaos"); mock == true {
-		return true
+	if mockResult := mock.On("MockCanListChaos"); mockResult != nil {
+		return mockResult.(bool)
 	}
 
 	authCli, err := clientpool.ExtractTokenAndGetAuthClient(c.Request.Header)
