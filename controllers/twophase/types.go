@@ -26,7 +26,6 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/utils"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 )
 
@@ -87,7 +86,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		err = r.Recover(ctx, req, chaos)
 		if err != nil {
 			r.Log.Error(err, "failed to recover chaos")
-			updateFailedMessage(ctx, r, chaos, err.Error())
+			updateFailedMessage(ctx, req, r, chaos, err.Error())
 			return ctrl.Result{Requeue: true}, err
 		}
 
@@ -100,7 +99,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 			err = r.Recover(ctx, req, chaos)
 			if err != nil {
 				r.Log.Error(err, "failed to pause chaos")
-				updateFailedMessage(ctx, r, chaos, err.Error())
+				updateFailedMessage(ctx, req, r, chaos, err.Error())
 				return ctrl.Result{Requeue: true}, err
 			}
 
@@ -122,7 +121,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		if status.Experiment.Phase != v1alpha1.ExperimentPhasePaused {
 			if err = r.Recover(ctx, req, chaos); err != nil {
 				r.Log.Error(err, "failed to recover chaos")
-				updateFailedMessage(ctx, r, chaos, err.Error())
+				updateFailedMessage(ctx, req, r, chaos, err.Error())
 				return ctrl.Result{Requeue: true}, err
 			}
 		}
@@ -145,7 +144,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 
 		dur := chaos.GetNextRecover().Sub(now)
 		if err = applyAction(ctx, r, req, dur, chaos); err != nil {
-			updateFailedMessage(ctx, r, chaos, err.Error())
+			updateFailedMessage(ctx, req, r, chaos, err.Error())
 			return ctrl.Result{Requeue: true}, err
 		}
 
@@ -156,7 +155,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		tempStart, err := utils.NextTime(*chaos.GetScheduler(), now)
 		if err != nil {
 			r.Log.Error(err, "failed to calculate the start time")
-			updateFailedMessage(ctx, r, chaos, err.Error())
+			updateFailedMessage(ctx, req, r, chaos, err.Error())
 			return ctrl.Result{}, err
 		}
 
@@ -164,12 +163,12 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		if tempStart.Before(tempRecover) {
 			err := fmt.Errorf("nextRecover shouldn't be later than nextStart")
 			r.Log.Error(err, "Then recover can never be reached.", "scheduler", *chaos.GetScheduler(), "duration", *duration)
-			updateFailedMessage(ctx, r, chaos, err.Error())
+			updateFailedMessage(ctx, req, r, chaos, err.Error())
 			return ctrl.Result{}, err
 		}
 
 		if err = applyAction(ctx, r, req, *duration, chaos); err != nil {
-			updateFailedMessage(ctx, r, chaos, err.Error())
+			updateFailedMessage(ctx, req, r, chaos, err.Error())
 			return ctrl.Result{Requeue: true}, err
 		}
 
@@ -255,6 +254,7 @@ func applyAction(
 
 func updateFailedMessage(
 	ctx context.Context,
+	req ctrl.Request,
 	r *Reconciler,
 	chaos v1alpha1.InnerSchedulerObject,
 	err string,
@@ -262,11 +262,7 @@ func updateFailedMessage(
 	updateError := retry.RetryOnConflict(retry.DefaultBackoff, func() error {
 		// Fetch the resource
 		_chaos := r.Object()
-		namespacedName := types.NamespacedName{
-			Namespace: chaos.GetChaos().Namespace,
-			Name:      chaos.GetChaos().Name,
-		}
-		if err := r.Client.Get(ctx, namespacedName, _chaos); err != nil {
+		if err := r.Client.Get(ctx, req.NamespacedName, _chaos); err != nil {
 			r.Log.Error(err, "unable to get chaos")
 			return err
 		}
