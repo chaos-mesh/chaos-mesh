@@ -26,6 +26,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/utils"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 )
 
@@ -258,10 +259,24 @@ func updateFailedMessage(
 	chaos v1alpha1.InnerSchedulerObject,
 	err string,
 ) {
-	status := chaos.GetStatus()
-	status.FailedMessage = err
-
 	updateError := retry.RetryOnConflict(retry.DefaultBackoff, func() error {
+		// Fetch the resource
+		_chaos := r.Object()
+		namespacedName := types.NamespacedName{
+			Namespace: chaos.GetChaos().Namespace,
+			Name:      chaos.GetChaos().Name,
+		}
+		if err := r.Client.Get(ctx, namespacedName, _chaos); err != nil {
+			r.Log.Error(err, "unable to get chaos")
+			return err
+		}
+		chaos := _chaos.(v1alpha1.InnerSchedulerObject)
+
+		// Make updates to the resource
+		status := chaos.GetStatus()
+		status.FailedMessage = err
+
+		// Try to update
 		return r.Update(ctx, chaos)
 	})
 	if updateError != nil {
