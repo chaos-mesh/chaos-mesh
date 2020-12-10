@@ -114,7 +114,7 @@ func recover(ctx context.Context, m *chaosStateMachine, targetPhase v1alpha1.Exp
 	return true, nil
 }
 
-func resume(ctx context.Context, m *chaosStateMachine, targetPhase v1alpha1.ExperimentPhase, now time.Time) (bool, error) {
+func resume(ctx context.Context, m *chaosStateMachine, _ v1alpha1.ExperimentPhase, now time.Time) (bool, error) {
 	startTime := now
 	duration, err := m.Chaos.GetDuration()
 	if err != nil {
@@ -148,7 +148,6 @@ func resume(ctx context.Context, m *chaosStateMachine, targetPhase v1alpha1.Expe
 	for {
 		if nextRecover.After(now) {
 			startTime = lastStart
-			targetPhase = v1alpha1.ExperimentPhaseRunning
 
 			return apply(ctx, m, v1alpha1.ExperimentPhaseRunning, startTime)
 		}

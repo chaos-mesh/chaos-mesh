@@ -77,6 +77,13 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		targetPhase = v1alpha1.ExperimentPhasePaused
 	}
 
+	// TODO: find a better way to solve the pause and resume problem.
+	// Or pause is a bad design for the scheduler :(
+	if !chaos.IsPaused() && status.Experiment.Phase == v1alpha1.ExperimentPhasePaused {
+		// Running and Waiting has the same logic for resuming
+		targetPhase = v1alpha1.ExperimentPhaseRunning
+	}
+
 	if chaos.IsDeleted() {
 		targetPhase = v1alpha1.ExperimentPhaseFinished
 	}
