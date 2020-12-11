@@ -174,7 +174,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	watchConfig(configWatcher, conf, stopCh)
+	go watchConfig(configWatcher, conf, stopCh)
 	hookServer.Register("/inject-v1-pod", &webhook.Admission{
 		Handler: &apiWebhook.PodInjector{
 			Config:        conf,
@@ -190,73 +190,74 @@ func main() {
 		setupLog.Error(err, "unable to start manager")
 		os.Exit(1)
 	}
+}
 
+func setupWatchQueue(stopCh <-chan struct{}, configWatcher *watcher.K8sConfigMapWatcher) workqueue.Interface {
+	// watch for reconciliation signals, and grab configmaps, then update the running configuration
+	// for the server
+	sigChan := make(chan interface{}, 10)
+
+	queue := workqueue.NewRateLimitingQueue(workqueue.DefaultControllerRateLimiter())
+
+	go func() {
+		for {
+			select {
+			case <-stopCh:
+				queue.ShutDown()
+				return
+			case <-sigChan:
+				queue.AddRateLimited(struct{}{})
+			}
+		}
+	}()
+
+	go func() {
+		for {
+			setupLog.Info("Launching watcher for ConfigMaps")
+			if err := configWatcher.Watch(sigChan, stopCh); err != nil {
+				switch err {
+				case watcher.ErrWatchChannelClosed:
+					// known issue: https://github.com/kubernetes/client-go/issues/334
+					setupLog.Info("watcher channel has closed, restart watcher")
+				default:
+					setupLog.Error(err, "unable to watch new ConfigMaps")
+					os.Exit(1)
+				}
+			}
+
+			select {
+			case <-stopCh:
+				close(sigChan)
+				return
+			default:
+				// sleep 2 seconds to prevent excessive log due to infinite restart
+				time.Sleep(2 * time.Second)
+			}
+		}
+	}()
+
+	return queue
 }
 
 func watchConfig(configWatcher *watcher.K8sConfigMapWatcher, cfg *config.Config, stopCh <-chan struct{}) {
-	go func() {
-		// watch for reconciliation signals, and grab configmaps, then update the running configuration
-		// for the server
-		sigChan := make(chan interface{}, 10)
-		//debouncedChan := make(chan interface{}, 10)
+	queue := setupWatchQueue(stopCh, configWatcher)
 
-		queue := workqueue.NewRateLimitingQueue(workqueue.DefaultControllerRateLimiter())
-
-		go func() {
-			for {
-				select {
-				case <-stopCh:
-					queue.ShutDown()
-					return
-				case <-sigChan:
-					queue.Add(struct{}{})
-				}
-			}
-		}()
-
-		go func() {
-			for {
-				setupLog.Info("Launching watcher for ConfigMaps")
-				if err := configWatcher.Watch(sigChan, stopCh); err != nil {
-					switch err {
-					case watcher.ErrWatchChannelClosed:
-						// known issue: https://github.com/kubernetes/client-go/issues/334
-						setupLog.Info("watcher channel has closed, restart watcher")
-					default:
-						setupLog.Error(err, "unable to watch new ConfigMaps")
-						os.Exit(1)
-					}
-				}
-
-				select {
-				case <-stopCh:
-					close(sigChan)
-					return
-				default:
-					// sleep 2 seconds to prevent excessive log due to infinite restart
-					time.Sleep(2 * time.Second)
-				}
-			}
-		}()
-
-		for {
-			_, shutdown := queue.Get()
-			if shutdown {
-				break
-			}
-
-			setupLog.Info("Triggering ConfigMap reconciliation")
-			updatedInjectionConfigs, err := configWatcher.GetInjectionConfigs()
-			if err != nil {
-				setupLog.Error(err, "unable to get ConfigMaps")
-				continue
-			}
-
-			setupLog.Info("Updating server with newly loaded configurations",
-				"original configs count", len(cfg.Injections), "updated configs count", len(updatedInjectionConfigs))
-			cfg.ReplaceInjectionConfigs(updatedInjectionConfigs)
-			setupLog.Info("Configuration replaced")
+	for {
+		_, shutdown := queue.Get()
+		if shutdown {
+			break
 		}
 
-	}()
+		setupLog.Info("Triggering ConfigMap reconciliation")
+		updatedInjectionConfigs, err := configWatcher.GetInjectionConfigs()
+		if err != nil {
+			setupLog.Error(err, "unable to get ConfigMaps")
+			continue
+		}
+
+		setupLog.Info("Updating server with newly loaded configurations",
+			"original configs count", len(cfg.Injections), "updated configs count", len(updatedInjectionConfigs))
+		cfg.ReplaceInjectionConfigs(updatedInjectionConfigs)
+		setupLog.Info("Configuration replaced")
+	}
 }
