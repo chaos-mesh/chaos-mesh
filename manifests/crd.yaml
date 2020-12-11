@@ -956,7 +956,7 @@ spec:
               type: object
             target:
               description: 'Target defines the specific jvm chaos target. Supported
-                target: servlet;psql;jvm;jedis;http;dubbo;rocketmq;tars;mysql;druid'
+                target: servlet;psql;jvm;jedis;http;dubbo;rocketmq;tars;mysql;druid;redisson;rabbitmq;mongodb'
               enum:
               - servlet
               - psql
@@ -968,6 +968,9 @@ spec:
               - tars
               - mysql
               - druid
+              - redisson
+              - rabbitmq
+              - mongodb
               type: string
             value:
               description: Value is required when the mode is set to `FixedPodMode`

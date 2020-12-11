@@ -51,8 +51,8 @@ type JVMChaosSpec struct {
 	JVMParameter `json:",inline"`
 
 	// Target defines the specific jvm chaos target.
-	// Supported target: servlet;psql;jvm;jedis;http;dubbo;rocketmq;tars;mysql;druid
-	// +kubebuilder:validation:Enum=servlet;psql;jvm;jedis;http;dubbo;rocketmq;tars;mysql;druid
+	// Supported target: servlet;psql;jvm;jedis;http;dubbo;rocketmq;tars;mysql;druid;redisson;rabbitmq;mongodb
+	// +kubebuilder:validation:Enum=servlet;psql;jvm;jedis;http;dubbo;rocketmq;tars;mysql;druid;redisson;rabbitmq;mongodb
 	Target JVMChaosTarget `json:"target"`
 }
 

@@ -20,9 +20,9 @@ import (
 )
 
 const (
-	BaseURL = "http://%s:%d/sandbox/default/module/http/"
-	ActiveURL = BaseURL + "sandbox-module-mgr/active?ids=chaosblade"
-	InjectURL = BaseURL + "chaosblade/create"
+	BaseURL    = "http://%s:%d/sandbox/default/module/http/"
+	ActiveURL  = BaseURL + "sandbox-module-mgr/active?ids=chaosblade"
+	InjectURL  = BaseURL + "chaosblade/create"
 	RecoverURL = BaseURL + "chaosblade/destroy"
 )
 
