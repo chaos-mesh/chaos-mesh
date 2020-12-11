@@ -33,33 +33,29 @@ type basicScheduler struct {
 func (it *basicScheduler) ScheduleNext(ctx context.Context) ([]template.Template, string, error) {
 	op := "basicScheduler.ScheduleNext"
 
-	phase := it.workflowStatus.GetPhase()
-	if phase == workflow.WaitingForSchedule || phase == workflow.Running {
-		nodesMap := it.workflowStatus.FetchNodesMap()
-		if len(nodesMap) == 0 {
-			// first schedule
-			entry := it.workflowSpec.FetchTemplateMap()[it.workflowSpec.GetEntry()]
-			return []template.Template{entry}, "", nil
-		} else {
-			var uncompletedSchedulableCompositeNode node.Node
-			for _, item := range it.workflowStatus.GetNodes() {
-				if item.GetNodePhase() == node.WaitingForSchedule {
-					uncompletedSchedulableCompositeNode = item
-					break
-				}
-			}
-
-			if uncompletedSchedulableCompositeNode == nil {
-				return nil, "", errors.NewNoNeedScheduleError(op, it.workflowSpec.GetName())
-			}
-
-			templates, err := it.fetchChildrenForCompositeNode(uncompletedSchedulableCompositeNode.GetName())
-			return templates, uncompletedSchedulableCompositeNode.GetName(), err
-
-		}
+	nodesMap := it.workflowStatus.FetchNodesMap()
+	if len(nodesMap) == 0 {
+		// first schedule
+		entry := it.workflowSpec.FetchTemplateMap()[it.workflowSpec.GetEntry()]
+		return []template.Template{entry}, "", nil
 	} else {
-		return nil, "", errors.NewNoNeedScheduleError(op, it.workflowSpec.GetName())
+		var uncompletedSchedulableCompositeNode node.Node
+		for _, item := range it.workflowStatus.GetNodes() {
+			if item.GetNodePhase() == node.WaitingForSchedule {
+				uncompletedSchedulableCompositeNode = item
+				break
+			}
+		}
+
+		if uncompletedSchedulableCompositeNode == nil {
+			return nil, "", errors.NewNoNeedScheduleError(op, it.workflowSpec.GetName())
+		}
+
+		templates, err := it.fetchChildrenForCompositeNode(uncompletedSchedulableCompositeNode.GetName())
+		return templates, uncompletedSchedulableCompositeNode.GetName(), err
+
 	}
+
 }
 
 func (it *basicScheduler) fetchChildrenForCompositeNode(parentNodeName string) ([]template.Template, error) {

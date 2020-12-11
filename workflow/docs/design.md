@@ -160,19 +160,20 @@ func loop(){
 
 ### States for Node
 
-There are 6 phase of one Node:
+There are 8 phase of one Node:
 
 - Init
 - WaitingForSchedule
 - WaitingForChild
 - Running
+- Evaluating
 - Holding
 - Succeed
 - Failed
 
 **Init** means is the default phase when **Node** just created, means this node is just created, did not effect real world yet.
 
-**WaitingForSchedule** means this Node is idle and safe for next scheduling; It is presents:
+**WaitingForSchedule** is only available on Serial, Parallel and Task, it means this Node is idle and safe for next scheduling; It is presents:
 
 - For Chaos, Suspend, Task, Parallel:
   - This Node did not make "Effect" yet.
@@ -188,7 +189,7 @@ There are 6 phase of one Node:
 
 > Question: Should we split it?
 
-**Holding** is available on Chaos, Suspend, Task, Serial, Parallel; It means current node is waiting for next action. For example: a Chaos node which in **Holding** is waiting for the end of this ChaosExperiments, then delete it.
+**Holding** is available on Chaos, Suspend; It means current node is waiting for next action. For example: a Chaos node which in **Holding** is waiting for the end of this ChaosExperiments, then delete it.
 
 **Succeed** means this node is completed.
 
@@ -200,22 +201,22 @@ A **NetworkChaos** Node: **Init** -> **Running** -> **Holding** -> **Running** -
 
 A **Suspend** Node: **Init** -> **Holding** -> **Succeed**
 
-A **Serial** Node(which contains 3 children): **WaitingForSchedule** -> **WaitingForChild** -> **WaitingForSchedule** -> **WaitingForChild** -> **WaitingForSchedule** -> **WaitingForChild** -> **Succeed**
+A **Serial** Node(which contains 3 children): **Init** -> **WaitingForSchedule** -> **WaitingForChild** -> **WaitingForSchedule** -> **WaitingForChild** -> **WaitingForSchedule** -> **WaitingForChild** -> **Succeed**
 
-A **Parallel** Node(which contains 3 children): **WaitingForSchedule** -> **WaitingForChild** -> **WaitingForChild** -> **WaitingForChild** -> **Succeed**
+A **Parallel** Node(which contains 3 children): **Init** -> **WaitingForSchedule** -> **WaitingForChild** -> **WaitingForChild** -> **WaitingForChild** -> **Succeed**
 
-A **Task** Node: **Init** -> **Running** -> **Evaluating** -> **WaitingForSchedule** -> **WaitingForChild** -> **Succeed**
+A **Task** Node: **Init** -> **Running** -> **WaitingForChild** -> **Evaluating** -> **WaitingForSchedule** -> **WaitingForChild** -> **Succeed**
 
 ### States for Workflow
 
 There are 4 phase of one Workflow:
 
-- WaitingForSchedule
+- Init
 - Running
 - Succeed
 - Failed
 
-**WaitingForSchedule** is the default phase when **Workflow** just created. It means there are no Node is in **Running** or **Holding** state, and it's safe for scheduling next operation.
+**Init** is the default phase when **Workflow** just created. It means there are no Node is in **Running** or **Holding** state, and it's safe for scheduling next operation.
 
 **Running** means at least 1 node is in **Running**/**Holding**/**WaitingForChild**/**WaitingForSchedule** state.
 
@@ -224,6 +225,7 @@ There are 4 phase of one Workflow:
 **Failed** means at least one Node is in **Failed** state.
 
 > Question: Should we interpret other node when Workflow fall into **Failed**?
+> I think we should do that.
 
 ### Others
 

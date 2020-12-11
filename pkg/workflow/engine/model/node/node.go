@@ -20,16 +20,16 @@ import (
 type NodePhase string
 
 const (
+	Init               NodePhase = "Init"
 	WaitingForSchedule NodePhase = "WaitingForSchedule"
-
-	Running NodePhase = "Running"
+	Running            NodePhase = "Running"
 	// It means current node is not changing something, but waiting for some signal. It's still alive.
 	// It's the most common state for most of Node which referenced Template contains duration or deadline.
-	Holding NodePhase = "Holding"
-	Succeed NodePhase = "Succeed"
-	Failed  NodePhase = "Failed"
-
+	Holding         NodePhase = "Holding"
+	Succeed         NodePhase = "Succeed"
+	Failed          NodePhase = "Failed"
 	WaitingForChild NodePhase = "WaitingForChild"
+	Evaluating      NodePhase = "Evaluating"
 )
 
 type Node interface {

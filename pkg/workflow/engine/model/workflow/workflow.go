@@ -35,10 +35,10 @@ type WorkflowPhase string
 
 const (
 	// It's also the initial phase of a workflow.
-	WaitingForSchedule WorkflowPhase = "WaitingForSchedule"
-	Running            WorkflowPhase = "Running"
-	Succeed            WorkflowPhase = "Succeed"
-	Failed             WorkflowPhase = "Failed"
+	Init    WorkflowPhase = "Init"
+	Running WorkflowPhase = "Running"
+	Succeed WorkflowPhase = "Succeed"
+	Failed  WorkflowPhase = "Failed"
 )
 
 type WorkflowStatus interface {
