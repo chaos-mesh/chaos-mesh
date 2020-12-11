@@ -19,8 +19,15 @@ import (
 	"net/http"
 )
 
+const (
+	BaseURL = "http://%s:%d/sandbox/default/module/http/"
+	ActiveURL = BaseURL + "sandbox-module-mgr/active?ids=chaosblade"
+	InjectURL = BaseURL + "chaosblade/create"
+	RecoverURL = BaseURL + "chaosblade/destroy"
+)
+
 func ActiveSandbox(host string, port int) error {
-	url := fmt.Sprintf("http://%s:%d/sandbox/default/module/http/sandbox-module-mgr/active?ids=chaosblade", host, port)
+	url := fmt.Sprintf(ActiveURL, host, port)
 	_, err := http.Get(url)
 	if err != nil {
 		return err
@@ -31,7 +38,7 @@ func ActiveSandbox(host string, port int) error {
 func InjectChaos(host string, port int, body []byte) error {
 	client := &http.Client{}
 	reqBody := bytes.NewBuffer([]byte(body))
-	url := fmt.Sprintf("http://%s:%d/sandbox/default/module/http/chaosblade/create", host, port)
+	url := fmt.Sprintf(InjectURL, host, port)
 	request, _ := http.NewRequest("POST", url, reqBody)
 	request.Header.Set("Content-type", "application/json")
 	_, err := client.Do(request)
@@ -44,7 +51,7 @@ func InjectChaos(host string, port int, body []byte) error {
 func RecoverChaos(host string, port int, body []byte) error {
 	client := &http.Client{}
 	reqBody := bytes.NewBuffer([]byte(body))
-	url := fmt.Sprintf("http://%s:%d/sandbox/default/module/http/chaosblade/destroy", host, port)
+	url := fmt.Sprintf(RecoverURL, host, port)
 	request, _ := http.NewRequest("POST", url, reqBody)
 	request.Header.Set("Content-type", "application/json")
 	_, err := client.Do(request)

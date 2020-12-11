@@ -305,6 +305,7 @@ var JvmSpec = map[JVMChaosTarget]map[JVMChaosAction]ActionParameterRules{
 				{Name: "httpclient4", ParameterType: BoolType},
 				{Name: "rest", ParameterType: BoolType},
 				{Name: "httpclient3", ParameterType: BoolType},
+				{Name: "okhttp3", ParameterType: BoolType},
 				{Name: "uri", Required: true},
 			},
 		},
@@ -319,11 +320,12 @@ var JvmSpec = map[JVMChaosTarget]map[JVMChaosAction]ActionParameterRules{
 				{Name: "httpclient4", ParameterType: BoolType},
 				{Name: "rest", ParameterType: BoolType},
 				{Name: "httpclient3", ParameterType: BoolType},
+				{Name: "okhttp3", ParameterType: BoolType},
 				{Name: "uri", Required: true},
 			},
 		},
 	},
-	ROCKETMQ: {
+	RABBITMQ: {
 		JVMDelayAction: ActionParameterRules{
 			Flags: []ParameterRules{
 				{Name: "time", ParameterType: IntType, Required: true},
@@ -332,9 +334,11 @@ var JvmSpec = map[JVMChaosTarget]map[JVMChaosAction]ActionParameterRules{
 			Matcher: []ParameterRules{
 				{Name: "effect-count", ParameterType: IntType},
 				{Name: "effect-percent", ParameterType: IntType},
-				{Name: "producerGroup"},
+				{Name: "routingkey"},
+				{Name: "producer", ParameterType:BoolType},
 				{Name: "topic"},
-				{Name: "consumerGroup"},
+				{Name: "exchange"},
+				{Name: "consumer",ParameterType:BoolType},
 			},
 		},
 		JVMExceptionAction: ActionParameterRules{
@@ -345,9 +349,11 @@ var JvmSpec = map[JVMChaosTarget]map[JVMChaosAction]ActionParameterRules{
 			Matcher: []ParameterRules{
 				{Name: "effect-count", ParameterType: IntType},
 				{Name: "effect-percent", ParameterType: IntType},
-				{Name: "producerGroup"},
+				{Name: "routingkey"},
+				{Name: "producer", ParameterType:BoolType},
 				{Name: "topic"},
-				{Name: "consumerGroup"},
+				{Name: "exchange"},
+				{Name: "consumer",ParameterType:BoolType},
 			},
 		},
 	},
@@ -395,6 +401,7 @@ var JvmSpec = map[JVMChaosTarget]map[JVMChaosAction]ActionParameterRules{
 				{Name: "service"},
 				{Name: "version"},
 				{Name: "consumer", ParameterType: BoolType},
+				{Name: "methodname"},
 				{Name: "group"},
 			},
 		},
@@ -411,6 +418,7 @@ var JvmSpec = map[JVMChaosTarget]map[JVMChaosAction]ActionParameterRules{
 				{Name: "service"},
 				{Name: "version"},
 				{Name: "consumer", ParameterType: BoolType},
+				{Name: "methodname"},
 				{Name: "group"},
 			},
 		},
@@ -482,6 +490,8 @@ var JvmSpec = map[JVMChaosTarget]map[JVMChaosAction]ActionParameterRules{
 				{Name: "script-type"},
 				{Name: "script-content"},
 				{Name: "script-name"},
+				{Name: "external-jar"},
+				{Name: "external-jar-path"},
 			},
 			Matcher: []ParameterRules{
 				{Name: "effect-count", ParameterType: IntType},
@@ -505,6 +515,90 @@ var JvmSpec = map[JVMChaosTarget]map[JVMChaosAction]ActionParameterRules{
 			Matcher: []ParameterRules{
 				{Name: "effect-count", ParameterType: IntType},
 				{Name: "effect-percent", ParameterType: IntType},
+			},
+		},
+	},
+	REDISSON: {
+		JVMDelayAction: ActionParameterRules{
+			Flags: []ParameterRules{
+				{Name: "time", ParameterType: IntType, Required: true},
+				{Name: "offset", ParameterType: IntType},
+			},
+			Matcher: []ParameterRules{
+				{Name: "effect-count", ParameterType: IntType},
+				{Name: "effect-percent", ParameterType: IntType},
+				{Name: "cmd"},
+				{Name: "key"},
+			},
+		},
+		JVMExceptionAction: ActionParameterRules{
+			Flags: []ParameterRules{
+				{Name: "exception", Required: true},
+				{Name: "exception-message"},
+			},
+			Matcher: []ParameterRules{
+				{Name: "effect-count", ParameterType: IntType},
+				{Name: "effect-percent", ParameterType: IntType},
+				{Name: "cmd"},
+				{Name: "key"},
+			},
+		},
+	},
+	ROCKETMQ: {
+		JVMDelayAction: ActionParameterRules{
+			Flags: []ParameterRules{
+				{Name: "time", ParameterType: IntType, Required: true},
+				{Name: "offset", ParameterType: IntType},
+			},
+			Matcher: []ParameterRules{
+				{Name: "effect-count", ParameterType: IntType},
+				{Name: "effect-percent", ParameterType: IntType},
+				{Name: "producerGroup"},
+				{Name: "producer"},
+				{Name: "topic", Required:true},
+				{Name: "consumerGroup"},
+			},
+		},
+		JVMExceptionAction: ActionParameterRules{
+			Flags: []ParameterRules{
+				{Name: "exception", Required: true},
+				{Name: "exception-message"},
+			},
+			Matcher: []ParameterRules{
+				{Name: "effect-count", ParameterType: IntType},
+				{Name: "effect-percent", ParameterType: IntType},
+				{Name: "producerGroup"},
+				{Name: "producer"},
+				{Name: "topic", Required:true},
+				{Name: "consumerGroup"},
+			},
+		},
+	},
+	MONGODB: {
+		JVMDelayAction: ActionParameterRules{
+			Flags: []ParameterRules{
+				{Name: "time", ParameterType: IntType, Required: true},
+				{Name: "offset", ParameterType: IntType},
+			},
+			Matcher: []ParameterRules{
+				{Name: "effect-count", ParameterType: IntType},
+				{Name: "effect-percent", ParameterType: IntType},
+				{Name: "sqltype"},
+				{Name: "database"},
+				{Name: "false"},
+			},
+		},
+		JVMExceptionAction: ActionParameterRules{
+			Flags: []ParameterRules{
+				{Name: "exception", Required: true},
+				{Name: "exception-message"},
+			},
+			Matcher: []ParameterRules{
+				{Name: "effect-count", ParameterType: IntType},
+				{Name: "effect-percent", ParameterType: IntType},
+				{Name: "sqltype"},
+				{Name: "database"},
+				{Name: "false"},
 			},
 		},
 	},

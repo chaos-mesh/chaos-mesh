@@ -74,25 +74,44 @@ func (in *JVMChaosSpec) GetValue() string {
 type JVMChaosTarget string
 
 const (
+	// SERVLET represents servlet as a target of chaos
 	SERVLET JVMChaosTarget = "servlet"
 
+	// PSQL represents Postgrelsql JDBC as a target of chaos
 	PSQL JVMChaosTarget = "psql"
 
+	// JVM represents JVM as a target of chaos
 	JVM JVMChaosTarget = "jvm"
 
+	// JEDIS represents jedis (a java redis client) as a target of chaos
 	JEDIS JVMChaosTarget = "jedis"
 
+	// HTTP represents http client as a target of chaos
 	HTTP JVMChaosTarget = "http"
 
+	// DUBBO represents a Dubbo services as a target of chaos
 	DUBBO JVMChaosTarget = "dubbo"
 
+	// ROCKETMQ represents Rocketmq java client as a target of chaos
 	ROCKETMQ JVMChaosTarget = "rocketmq"
 
+	// MYSQL represents Mysql JDBC as a target of chaos
 	MYSQL JVMChaosTarget = "mysql"
 
+	// DRUID represents the Druid database connection pool as a target of chaos
 	DRUID JVMChaosTarget = "druid"
 
+	// TARS represents the Tars service as a target of chaos
 	TARS JVMChaosTarget = "tars"
+
+	// REDISSON represents Redisson (a java redis client) as a target of chaos
+	REDISSON JVMChaosTarget = "redisson"
+
+	// RABBITMQ represents the Rabbitmq java client as a target of chaos
+	RABBITMQ JVMChaosTarget = "rabbitmq"
+
+	// MONGODB represents the Mongodb java client as a target of chaos
+	MONGODB JVMChaosTarget = "mongodb"
 )
 
 // JVMChaosAction represents the chaos action about jvm
