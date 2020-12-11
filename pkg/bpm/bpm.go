@@ -53,10 +53,9 @@ var nsArgMap = map[NsType]string{
 }
 
 const (
-	pausePath   = "/usr/local/bin/pause"
-	suicidePath = "/usr/local/bin/suicide"
-	ignorePath  = "/usr/local/bin/ignore"
-	nsexecPath  = "/usr/local/bin/nsexec"
+	pausePath  = "/usr/local/bin/pause"
+	ignorePath = "/usr/local/bin/ignore"
+	nsexecPath = "/usr/local/bin/nsexec"
 
 	DefaultProcPrefix = "/proc"
 )
@@ -214,7 +213,6 @@ func DefaultProcessBuilder(cmd string, args ...string) *ProcessBuilder {
 		args:       args,
 		nsOptions:  []nsOption{},
 		pause:      false,
-		suicide:    false,
 		identifier: nil,
 		ctx:        context.Background(),
 	}
@@ -228,7 +226,6 @@ type ProcessBuilder struct {
 	nsOptions []nsOption
 
 	pause    bool
-	suicide  bool
 	localMnt bool
 
 	identifier *string
@@ -266,13 +263,6 @@ func (b *ProcessBuilder) SetIdentifier(id string) *ProcessBuilder {
 // EnablePause enables pause for process
 func (b *ProcessBuilder) EnablePause() *ProcessBuilder {
 	b.pause = true
-
-	return b
-}
-
-// EnableSuicide enables suicide for process
-func (b *ProcessBuilder) EnableSuicide() *ProcessBuilder {
-	b.suicide = true
 
 	return b
 }
