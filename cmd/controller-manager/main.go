@@ -48,6 +48,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
+	"k8s.io/client-go/util/workqueue"
 
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
@@ -199,8 +200,19 @@ func watchConfig(configWatcher *watcher.K8sConfigMapWatcher, cfg *config.Config,
 		sigChan := make(chan interface{}, 10)
 		//debouncedChan := make(chan interface{}, 10)
 
-		// debounce events from sigChan, so we dont hammer apiserver on reconciliation
-		eventsCh := Coalescer(EventCoalesceWindow, sigChan, stopCh)
+		queue := workqueue.NewRateLimitingQueue(workqueue.DefaultControllerRateLimiter())
+
+		go func() {
+			for {
+				select {
+				case <-stopCh:
+					queue.ShutDown()
+					return
+				case <-sigChan:
+					queue.Add(struct{}{})
+				}
+			}
+		}()
 
 		go func() {
 			for {
@@ -228,22 +240,22 @@ func watchConfig(configWatcher *watcher.K8sConfigMapWatcher, cfg *config.Config,
 		}()
 
 		for {
-			select {
-			case <-eventsCh:
-				setupLog.Info("Triggering ConfigMap reconciliation")
-				updatedInjectionConfigs, err := configWatcher.GetInjectionConfigs()
-				if err != nil {
-					setupLog.Error(err, "unable to get ConfigMaps")
-					continue
-				}
-
-				setupLog.Info("Updating server with newly loaded configurations",
-					"original configs count", len(cfg.Injections), "updated configs count", len(updatedInjectionConfigs))
-				cfg.ReplaceInjectionConfigs(updatedInjectionConfigs)
-				setupLog.Info("Configuration replaced")
-			case <-stopCh:
+			_, shutdown := queue.Get()
+			if shutdown {
 				break
 			}
+
+			setupLog.Info("Triggering ConfigMap reconciliation")
+			updatedInjectionConfigs, err := configWatcher.GetInjectionConfigs()
+			if err != nil {
+				setupLog.Error(err, "unable to get ConfigMaps")
+				continue
+			}
+
+			setupLog.Info("Updating server with newly loaded configurations",
+				"original configs count", len(cfg.Injections), "updated configs count", len(updatedInjectionConfigs))
+			cfg.ReplaceInjectionConfigs(updatedInjectionConfigs)
+			setupLog.Info("Configuration replaced")
 		}
 
 	}()
