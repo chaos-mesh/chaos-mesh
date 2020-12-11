@@ -8,7 +8,8 @@ spec:
   scope: outer
   mode: all
   selector:
-    app: busybox
+    namespaces:
+      - busybox
   duration: "50s"
   scheduler:
     cron: "@every 100s"
