@@ -30,13 +30,11 @@ type basicScheduler struct {
 	workflowStatus workflow.WorkflowStatus
 }
 
-func (it *basicScheduler) HasNext() bool {
-	panic("implement me")
-}
-
 func (it *basicScheduler) ScheduleNext(ctx context.Context) ([]template.Template, string, error) {
+	op := "basicScheduler.ScheduleNext"
+
 	phase := it.workflowStatus.GetPhase()
-	if phase == workflow.WaitingForSchedule {
+	if phase == workflow.WaitingForSchedule || phase == workflow.Running {
 		nodesMap := it.workflowStatus.FetchNodesMap()
 		if len(nodesMap) == 0 {
 			// first schedule
@@ -51,15 +49,17 @@ func (it *basicScheduler) ScheduleNext(ctx context.Context) ([]template.Template
 				}
 			}
 
+			if uncompletedSchedulableCompositeNode == nil {
+				return nil, "", errors.NewNoNeedScheduleError(op, it.workflowSpec.GetName())
+			}
+
 			templates, err := it.fetchChildrenForCompositeNode(uncompletedSchedulableCompositeNode.GetName())
 			return templates, uncompletedSchedulableCompositeNode.GetName(), err
 
 		}
 	} else {
-		return nil, "", errors.NewNoNeedScheduleError("basicScheduler.ScheduleNext", it.workflowSpec.GetName())
+		return nil, "", errors.NewNoNeedScheduleError(op, it.workflowSpec.GetName())
 	}
-
-	panic("unresolved situation")
 }
 
 func (it *basicScheduler) fetchChildrenForCompositeNode(parentNodeName string) ([]template.Template, error) {
