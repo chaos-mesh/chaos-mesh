@@ -18,6 +18,7 @@
 package v1alpha1
 
 import (
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 )
 
@@ -1726,6 +1727,13 @@ func (in *SelectorSpec) DeepCopyInto(out *SelectorSpec) {
 		*out = make(map[string]string, len(*in))
 		for key, val := range *in {
 			(*out)[key] = val
+		}
+	}
+	if in.ExpressionSelectors != nil {
+		in, out := &in.ExpressionSelectors, &out.ExpressionSelectors
+		*out = make([]v1.LabelSelectorRequirement, len(*in))
+		for i := range *in {
+			(*in)[i].DeepCopyInto(&(*out)[i])
 		}
 	}
 	if in.AnnotationSelectors != nil {

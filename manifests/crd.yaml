@@ -2,7 +2,7 @@ apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.2.5
+    controller-gen.kubebuilder.io/version: v0.3.0
   creationTimestamp: null
   name: dnschaos.chaos-mesh.org
 spec:
@@ -84,6 +84,37 @@ spec:
                   description: Map of string keys and values that can be used to select
                     objects. A selector based on annotations.
                   type: object
+                expressionSelectors:
+                  description: a slice of label selector expressions that can be used
+                    to select objects. A list of selectors based on set-based label
+                    expressions.
+                  items:
+                    description: A label selector requirement is a selector that contains
+                      values, a key, and an operator that relates the key and values.
+                    properties:
+                      key:
+                        description: key is the label key that the selector applies
+                          to.
+                        type: string
+                      operator:
+                        description: operator represents a key's relationship to a
+                          set of values. Valid operators are In, NotIn, Exists and
+                          DoesNotExist.
+                        type: string
+                      values:
+                        description: values is an array of string values. If the operator
+                          is In or NotIn, the values array must be non-empty. If the
+                          operator is Exists or DoesNotExist, the values array must
+                          be empty. This array is replaced during a strategic merge
+                          patch.
+                        items:
+                          type: string
+                        type: array
+                    required:
+                    - key
+                    - operator
+                    type: object
+                  type: array
                 fieldSelectors:
                   additionalProperties:
                     type: string
@@ -230,7 +261,7 @@ apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.2.5
+    controller-gen.kubebuilder.io/version: v0.3.0
   creationTimestamp: null
   name: httpchaos.chaos-mesh.org
 spec:
@@ -339,6 +370,37 @@ spec:
                   description: Map of string keys and values that can be used to select
                     objects. A selector based on annotations.
                   type: object
+                expressionSelectors:
+                  description: a slice of label selector expressions that can be used
+                    to select objects. A list of selectors based on set-based label
+                    expressions.
+                  items:
+                    description: A label selector requirement is a selector that contains
+                      values, a key, and an operator that relates the key and values.
+                    properties:
+                      key:
+                        description: key is the label key that the selector applies
+                          to.
+                        type: string
+                      operator:
+                        description: operator represents a key's relationship to a
+                          set of values. Valid operators are In, NotIn, Exists and
+                          DoesNotExist.
+                        type: string
+                      values:
+                        description: values is an array of string values. If the operator
+                          is In or NotIn, the values array must be non-empty. If the
+                          operator is Exists or DoesNotExist, the values array must
+                          be empty. This array is replaced during a strategic merge
+                          patch.
+                        items:
+                          type: string
+                        type: array
+                    required:
+                    - key
+                    - operator
+                    type: object
+                  type: array
                 fieldSelectors:
                   additionalProperties:
                     type: string
@@ -480,7 +542,7 @@ apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.2.5
+    controller-gen.kubebuilder.io/version: v0.3.0
   creationTimestamp: null
   name: iochaos.chaos-mesh.org
 spec:
@@ -657,6 +719,37 @@ spec:
                   description: Map of string keys and values that can be used to select
                     objects. A selector based on annotations.
                   type: object
+                expressionSelectors:
+                  description: a slice of label selector expressions that can be used
+                    to select objects. A list of selectors based on set-based label
+                    expressions.
+                  items:
+                    description: A label selector requirement is a selector that contains
+                      values, a key, and an operator that relates the key and values.
+                    properties:
+                      key:
+                        description: key is the label key that the selector applies
+                          to.
+                        type: string
+                      operator:
+                        description: operator represents a key's relationship to a
+                          set of values. Valid operators are In, NotIn, Exists and
+                          DoesNotExist.
+                        type: string
+                      values:
+                        description: values is an array of string values. If the operator
+                          is In or NotIn, the values array must be non-empty. If the
+                          operator is Exists or DoesNotExist, the values array must
+                          be empty. This array is replaced during a strategic merge
+                          patch.
+                        items:
+                          type: string
+                        type: array
+                    required:
+                    - key
+                    - operator
+                    type: object
+                  type: array
                 fieldSelectors:
                   additionalProperties:
                     type: string
@@ -803,7 +896,7 @@ apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.2.5
+    controller-gen.kubebuilder.io/version: v0.3.0
   creationTimestamp: null
   name: jvmchaos.chaos-mesh.org
 spec:
@@ -1086,6 +1179,37 @@ spec:
                   description: Map of string keys and values that can be used to select
                     objects. A selector based on annotations.
                   type: object
+                expressionSelectors:
+                  description: a slice of label selector expressions that can be used
+                    to select objects. A list of selectors based on set-based label
+                    expressions.
+                  items:
+                    description: A label selector requirement is a selector that contains
+                      values, a key, and an operator that relates the key and values.
+                    properties:
+                      key:
+                        description: key is the label key that the selector applies
+                          to.
+                        type: string
+                      operator:
+                        description: operator represents a key's relationship to a
+                          set of values. Valid operators are In, NotIn, Exists and
+                          DoesNotExist.
+                        type: string
+                      values:
+                        description: values is an array of string values. If the operator
+                          is In or NotIn, the values array must be non-empty. If the
+                          operator is Exists or DoesNotExist, the values array must
+                          be empty. This array is replaced during a strategic merge
+                          patch.
+                        items:
+                          type: string
+                        type: array
+                    required:
+                    - key
+                    - operator
+                    type: object
+                  type: array
                 fieldSelectors:
                   additionalProperties:
                     type: string
@@ -1291,7 +1415,7 @@ apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.2.5
+    controller-gen.kubebuilder.io/version: v0.3.0
   creationTimestamp: null
   name: kernelchaos.chaos-mesh.org
 spec:
@@ -1426,6 +1550,37 @@ spec:
                   description: Map of string keys and values that can be used to select
                     objects. A selector based on annotations.
                   type: object
+                expressionSelectors:
+                  description: a slice of label selector expressions that can be used
+                    to select objects. A list of selectors based on set-based label
+                    expressions.
+                  items:
+                    description: A label selector requirement is a selector that contains
+                      values, a key, and an operator that relates the key and values.
+                    properties:
+                      key:
+                        description: key is the label key that the selector applies
+                          to.
+                        type: string
+                      operator:
+                        description: operator represents a key's relationship to a
+                          set of values. Valid operators are In, NotIn, Exists and
+                          DoesNotExist.
+                        type: string
+                      values:
+                        description: values is an array of string values. If the operator
+                          is In or NotIn, the values array must be non-empty. If the
+                          operator is Exists or DoesNotExist, the values array must
+                          be empty. This array is replaced during a strategic merge
+                          patch.
+                        items:
+                          type: string
+                        type: array
+                    required:
+                    - key
+                    - operator
+                    type: object
+                  type: array
                 fieldSelectors:
                   additionalProperties:
                     type: string
@@ -1570,7 +1725,7 @@ apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.2.5
+    controller-gen.kubebuilder.io/version: v0.3.0
   creationTimestamp: null
   name: networkchaos.chaos-mesh.org
 spec:
@@ -1764,6 +1919,37 @@ spec:
                   description: Map of string keys and values that can be used to select
                     objects. A selector based on annotations.
                   type: object
+                expressionSelectors:
+                  description: a slice of label selector expressions that can be used
+                    to select objects. A list of selectors based on set-based label
+                    expressions.
+                  items:
+                    description: A label selector requirement is a selector that contains
+                      values, a key, and an operator that relates the key and values.
+                    properties:
+                      key:
+                        description: key is the label key that the selector applies
+                          to.
+                        type: string
+                      operator:
+                        description: operator represents a key's relationship to a
+                          set of values. Valid operators are In, NotIn, Exists and
+                          DoesNotExist.
+                        type: string
+                      values:
+                        description: values is an array of string values. If the operator
+                          is In or NotIn, the values array must be non-empty. If the
+                          operator is Exists or DoesNotExist, the values array must
+                          be empty. This array is replaced during a strategic merge
+                          patch.
+                        items:
+                          type: string
+                        type: array
+                    required:
+                    - key
+                    - operator
+                    type: object
+                  type: array
                 fieldSelectors:
                   additionalProperties:
                     type: string
@@ -1834,6 +2020,38 @@ spec:
                       description: Map of string keys and values that can be used
                         to select objects. A selector based on annotations.
                       type: object
+                    expressionSelectors:
+                      description: a slice of label selector expressions that can
+                        be used to select objects. A list of selectors based on set-based
+                        label expressions.
+                      items:
+                        description: A label selector requirement is a selector that
+                          contains values, a key, and an operator that relates the
+                          key and values.
+                        properties:
+                          key:
+                            description: key is the label key that the selector applies
+                              to.
+                            type: string
+                          operator:
+                            description: operator represents a key's relationship
+                              to a set of values. Valid operators are In, NotIn, Exists
+                              and DoesNotExist.
+                            type: string
+                          values:
+                            description: values is an array of string values. If the
+                              operator is In or NotIn, the values array must be non-empty.
+                              If the operator is Exists or DoesNotExist, the values
+                              array must be empty. This array is replaced during a
+                              strategic merge patch.
+                            items:
+                              type: string
+                            type: array
+                        required:
+                        - key
+                        - operator
+                        type: object
+                      type: array
                     fieldSelectors:
                       additionalProperties:
                         type: string
@@ -1993,7 +2211,7 @@ apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.2.5
+    controller-gen.kubebuilder.io/version: v0.3.0
   creationTimestamp: null
   name: podchaos.chaos-mesh.org
 spec:
@@ -2084,6 +2302,37 @@ spec:
                   description: Map of string keys and values that can be used to select
                     objects. A selector based on annotations.
                   type: object
+                expressionSelectors:
+                  description: a slice of label selector expressions that can be used
+                    to select objects. A list of selectors based on set-based label
+                    expressions.
+                  items:
+                    description: A label selector requirement is a selector that contains
+                      values, a key, and an operator that relates the key and values.
+                    properties:
+                      key:
+                        description: key is the label key that the selector applies
+                          to.
+                        type: string
+                      operator:
+                        description: operator represents a key's relationship to a
+                          set of values. Valid operators are In, NotIn, Exists and
+                          DoesNotExist.
+                        type: string
+                      values:
+                        description: values is an array of string values. If the operator
+                          is In or NotIn, the values array must be non-empty. If the
+                          operator is Exists or DoesNotExist, the values array must
+                          be empty. This array is replaced during a strategic merge
+                          patch.
+                        items:
+                          type: string
+                        type: array
+                    required:
+                    - key
+                    - operator
+                    type: object
+                  type: array
                 fieldSelectors:
                   additionalProperties:
                     type: string
@@ -2229,7 +2478,7 @@ apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.2.5
+    controller-gen.kubebuilder.io/version: v0.3.0
   creationTimestamp: null
   name: podiochaos.chaos-mesh.org
 spec:
@@ -2413,7 +2662,7 @@ apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.2.5
+    controller-gen.kubebuilder.io/version: v0.3.0
   creationTimestamp: null
   name: podnetworkchaos.chaos-mesh.org
 spec:
@@ -2697,7 +2946,7 @@ apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.2.5
+    controller-gen.kubebuilder.io/version: v0.3.0
   creationTimestamp: null
   name: stresschaos.chaos-mesh.org
 spec:
@@ -2762,6 +3011,37 @@ spec:
                   description: Map of string keys and values that can be used to select
                     objects. A selector based on annotations.
                   type: object
+                expressionSelectors:
+                  description: a slice of label selector expressions that can be used
+                    to select objects. A list of selectors based on set-based label
+                    expressions.
+                  items:
+                    description: A label selector requirement is a selector that contains
+                      values, a key, and an operator that relates the key and values.
+                    properties:
+                      key:
+                        description: key is the label key that the selector applies
+                          to.
+                        type: string
+                      operator:
+                        description: operator represents a key's relationship to a
+                          set of values. Valid operators are In, NotIn, Exists and
+                          DoesNotExist.
+                        type: string
+                      values:
+                        description: values is an array of string values. If the operator
+                          is In or NotIn, the values array must be non-empty. If the
+                          operator is Exists or DoesNotExist, the values array must
+                          be empty. This array is replaced during a strategic merge
+                          patch.
+                        items:
+                          type: string
+                        type: array
+                    required:
+                    - key
+                    - operator
+                    type: object
+                  type: array
                 fieldSelectors:
                   additionalProperties:
                     type: string
@@ -2968,7 +3248,7 @@ apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.2.5
+    controller-gen.kubebuilder.io/version: v0.3.0
   creationTimestamp: null
   name: timechaos.chaos-mesh.org
 spec:
@@ -3049,6 +3329,37 @@ spec:
                   description: Map of string keys and values that can be used to select
                     objects. A selector based on annotations.
                   type: object
+                expressionSelectors:
+                  description: a slice of label selector expressions that can be used
+                    to select objects. A list of selectors based on set-based label
+                    expressions.
+                  items:
+                    description: A label selector requirement is a selector that contains
+                      values, a key, and an operator that relates the key and values.
+                    properties:
+                      key:
+                        description: key is the label key that the selector applies
+                          to.
+                        type: string
+                      operator:
+                        description: operator represents a key's relationship to a
+                          set of values. Valid operators are In, NotIn, Exists and
+                          DoesNotExist.
+                        type: string
+                      values:
+                        description: values is an array of string values. If the operator
+                          is In or NotIn, the values array must be non-empty. If the
+                          operator is Exists or DoesNotExist, the values array must
+                          be empty. This array is replaced during a strategic merge
+                          patch.
+                        items:
+                          type: string
+                        type: array
+                    required:
+                    - key
+                    - operator
+                    type: object
+                  type: array
                 fieldSelectors:
                   additionalProperties:
                     type: string
