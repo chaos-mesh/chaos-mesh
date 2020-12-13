@@ -26,6 +26,9 @@ const (
 	PauseAnnotationKey = "experiment.chaos-mesh.org/pause"
 )
 
+// LabelSelectorRequirements is list of LabelSelectorRequirement
+type LabelSelectorRequirements []metav1.LabelSelectorRequirement
+
 // SelectorSpec defines the some selectors to select objects.
 // If the all selectors are empty, all objects will be used in chaos experiment.
 type SelectorSpec struct {
@@ -62,7 +65,7 @@ type SelectorSpec struct {
 	// a slice of label selector expressions that can be used to select objects.
 	// A list of selectors based on set-based label expressions.
 	// +optional
-	ExpressionSelectors []metav1.LabelSelectorRequirement `json:"expressionSelectors,omitempty"`
+	ExpressionSelectors LabelSelectorRequirements `json:"expressionSelectors,omitempty"`
 
 	// Map of string keys and values that can be used to select objects.
 	// A selector based on annotations.
