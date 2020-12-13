@@ -113,7 +113,7 @@ type ScopeInfo struct {
 type SelectorInfo struct {
 	NamespaceSelectors  []string                          `json:"namespace_selectors" binding:"NamespaceSelectorsValid"`
 	LabelSelectors      map[string]string                 `json:"label_selectors" binding:"MapSelectorsValid"`
-	ExpressionSelectors []metav1.LabelSelectorRequirement `json:"expression_selectors"`
+	ExpressionSelectors []metav1.LabelSelectorRequirement `json:"expression_selectors" binding:"RequirementSelectorsValid"`
 	AnnotationSelectors map[string]string                 `json:"annotation_selectors" binding:"MapSelectorsValid"`
 	FieldSelectors      map[string]string                 `json:"field_selectors" binding:"MapSelectorsValid"`
 	PhaseSelector       []string                          `json:"phase_selectors" binding:"PhaseSelectorsValid"`
