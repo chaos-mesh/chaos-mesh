@@ -89,14 +89,13 @@ func ExecBypass(ctx context.Context, pod v1.Pod, daemon v1.Pod, cmd string, c *k
 	}
 	switch cmdSubSlice[0] {
 	case "ps":
-		nsenterPath := "-t " + strconv.Itoa(pid) + " -p -m"
-		newCmd := fmt.Sprintf("/usr/bin/nsenter %s -- /bin/sh -c '%s'", nsenterPath, cmd)
+		newCmd := fmt.Sprintf("/usr/local/bin/nsexec -m /proc/%s/ns/mnt -p /proc/%s/ns/pid -l -- %s", strconv.Itoa(pid), strconv.Itoa(pid), cmd)
 		return Exec(ctx, daemon, newCmd, c)
 	case "cat", "ls":
 		// we need to enter mount namespace to get file related infomation
 		// but enter mnt ns would prevent us to access `cat`/`ls` in daemon
 		// so use `nsexec` to achieve using nsenter and cat together
-		newCmd := fmt.Sprintf("/usr/local/bin/nsexec %s %s", strconv.Itoa(pid), cmd)
+		newCmd := fmt.Sprintf("/usr/local/bin/nsexec -m /proc/%s/ns/mnt -l -- %s", strconv.Itoa(pid), cmd)
 		return Exec(ctx, daemon, newCmd, c)
 	default:
 		return "", fmt.Errorf("command not supported for nsenter")
