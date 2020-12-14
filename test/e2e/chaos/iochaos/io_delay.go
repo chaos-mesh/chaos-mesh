@@ -179,7 +179,7 @@ func TestcaseIODelayDurationForATimePauseAndUnPause(
 		dur, _ := getPodIODelay(c, port)
 
 		ms := dur.Milliseconds()
-		klog.Infof("get io delay %ds", ms)
+		klog.Infof("get io delay %dms", ms)
 		// IO Delay shouldn't longer than 10ms
 		if ms > 10 {
 			return false, nil

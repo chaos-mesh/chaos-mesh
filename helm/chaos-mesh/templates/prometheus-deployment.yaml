@@ -32,6 +32,7 @@ spec:
       {{- if .Values.prometheus.serviceAccount }}
       serviceAccount: {{ .Values.prometheus.serviceAccount }}
       {{- end }}
+      priorityClassName: {{ .Values.prometheus.priorityClassName}}
       initContainers:
         - name: data-permission-fix
           image: busybox
