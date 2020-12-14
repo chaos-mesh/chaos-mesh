@@ -89,7 +89,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (result ctrl.Result, err error)
 		reconciler = common.NewReconciler(controller, ctx)
 	} else if scheduler != nil {
 		// scheduler != nil && duration != nil
-		// but PodKill is an expection
+		// but PodKill is an exception
 		reconciler = twophase.NewReconciler(controller, ctx)
 	} else {
 		err := errors.Errorf("both scheduler and duration should be nil or not nil")
