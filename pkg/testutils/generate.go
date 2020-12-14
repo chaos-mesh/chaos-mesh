@@ -78,7 +78,7 @@ func GenerateNPods(
 	return podObjects, pods
 }
 
-func newNode(
+func NewNode(
 	name string,
 	label map[string]string,
 ) v1.Node {
@@ -103,7 +103,7 @@ func GenerateNNodes(
 	var nodes []v1.Node
 
 	for i := 0; i < n; i++ {
-		node := newNode(fmt.Sprintf("%s%d", namePrefix, i), label)
+		node := NewNode(fmt.Sprintf("%s%d", namePrefix, i), label)
 		nodeObjects = append(nodeObjects, &node)
 		nodes = append(nodes, node)
 	}

@@ -537,8 +537,8 @@ func TestFilterPodByNode(t *testing.T) {
 	}
 
 	nodes := []v1.Node{
-		newNode("node1", map[string]string{"disktype": "ssd", "zone": "az1"}),
-		newNode("node2", map[string]string{"disktype": "hdd", "zone": "az1"}),
+		NewNode("node1", map[string]string{"disktype": "ssd", "zone": "az1"}),
+		NewNode("node2", map[string]string{"disktype": "hdd", "zone": "az1"}),
 	}
 
 	tcs = append(tcs, TestCase{
