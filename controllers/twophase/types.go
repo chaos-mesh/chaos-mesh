@@ -101,7 +101,9 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		return ctrl.Result{}, err
 	}
 
-	if chaos.GetStatus().Experiment.Phase == v1alpha1.ExperimentPhaseFinished {
+	// the reconciliation of Finished and Paused resource shouldn't be triggered by time
+	if chaos.GetStatus().Experiment.Phase == v1alpha1.ExperimentPhaseFinished ||
+		chaos.GetStatus().Experiment.Phase == v1alpha1.ExperimentPhasePaused {
 		return ctrl.Result{}, nil
 	}
 
