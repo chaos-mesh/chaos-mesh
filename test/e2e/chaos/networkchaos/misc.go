@@ -20,11 +20,11 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/klog"
-	"k8s.io/kubernetes/test/e2e/framework"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 )
@@ -181,13 +181,8 @@ func makeNetworkDelayChaos(
 func probeNetworkCondition(c http.Client, peers []*corev1.Pod, ports []uint16) map[string][][]int {
 	result := make(map[string][][]int)
 
-	testDelay := func(from int, to int) int64 {
-		delay, err := testNetworkDelay(c, ports[from], peers[to].Status.PodIP)
-		framework.ExpectNoError(err, fmt.Sprintf(
-			"send request from %s to %s to test delay failed",
-			peers[from].Name, peers[to].Name,
-		))
-		return delay
+	testDelay := func(from int, to int) (int64, error) {
+		return testNetworkDelay(c, ports[from], peers[to].Status.PodIP)
 	}
 
 	for source := 0; source < len(peers); source++ {
@@ -216,8 +211,11 @@ func probeNetworkCondition(c http.Client, peers []*corev1.Pod, ports []uint16) m
 
 			// case 2: slow network
 			klog.Infof("testing delay from %s to %s", peers[source].Name, peers[target].Name)
-			delay := testDelay(source, target)
-			klog.Infof("delay from %d to %d: %d", source, target, delay)
+			delay, err := testDelay(source, target)
+			klog.Infof("delay from %d to %d: %d, err: %v", source, target, delay, err)
+			if err != nil {
+				continue
+			}
 			if delay > 100*1e6 {
 				klog.Infof("detect slow network from %s to %s", peers[source].Name, peers[target].Name)
 				result[networkConditionSlow] = append(result[networkConditionSlow], []int{source, target})
@@ -239,6 +237,8 @@ func couldConnect(c http.Client, sourcePort uint16, targetPodIP string, targetPo
 		klog.Infof("Error: %v", err)
 		return false
 	}
+
+	time.Sleep(time.Second)
 
 	data, err := recvUDPPacket(c, targetPort)
 	if err != nil {
