@@ -142,12 +142,12 @@ func (s *Service) detail(c *gin.Context) {
 
 	exp, err := s.archive.FindByUID(context.Background(), uid)
 	if err != nil {
-		if !gorm.IsRecordNotFoundError(err) {
-			c.Status(http.StatusInternalServerError)
-			_ = c.Error(utils.ErrInternalServer.NewWithNoMessage())
-		} else {
+		if gorm.IsRecordNotFoundError(err) {
 			c.Status(http.StatusInternalServerError)
 			_ = c.Error(utils.ErrInvalidRequest.New("the archive is not found"))
+		} else {
+			c.Status(http.StatusInternalServerError)
+			_ = c.Error(utils.ErrInternalServer.NewWithNoMessage())
 		}
 		return
 	}
@@ -213,12 +213,12 @@ func (s *Service) report(c *gin.Context) {
 
 	meta, err := s.archive.FindMetaByUID(context.Background(), uid)
 	if err != nil {
-		if !gorm.IsRecordNotFoundError(err) {
-			c.Status(http.StatusInternalServerError)
-			_ = c.Error(utils.ErrInternalServer.NewWithNoMessage())
-		} else {
+		if gorm.IsRecordNotFoundError(err) {
 			c.Status(http.StatusInternalServerError)
 			_ = c.Error(utils.ErrInvalidRequest.New("the archive is not found"))
+		} else {
+			c.Status(http.StatusInternalServerError)
+			_ = c.Error(utils.ErrInternalServer.NewWithNoMessage())
 		}
 		return
 	}
@@ -268,12 +268,12 @@ func (s *Service) delete(c *gin.Context) {
 	uid := c.Param("uid")
 
 	if exp, err = s.archive.FindByUID(context.Background(), uid); err != nil {
-		if !gorm.IsRecordNotFoundError(err) {
-			c.Status(http.StatusInternalServerError)
-			_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
-		} else {
+		if gorm.IsRecordNotFoundError(err) {
 			c.Status(http.StatusInternalServerError)
 			_ = c.Error(utils.ErrInvalidRequest.New("the archived experiment is not found"))
+		} else {
+			c.Status(http.StatusInternalServerError)
+			_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
 		}
 		return
 	}
