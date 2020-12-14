@@ -20,7 +20,6 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
-	"time"
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -240,8 +239,6 @@ func couldConnect(c http.Client, sourcePort uint16, targetPodIP string, targetPo
 		klog.Infof("Error: %v", err)
 		return false
 	}
-
-	time.Sleep(2 * time.Second)
 
 	data, err := recvUDPPacket(c, targetPort)
 	if err != nil {
