@@ -33,7 +33,7 @@ type PodArg struct {
 	Nodename        string
 }
 
-func newPod(p PodArg) v1.Pod {
+func NewPod(p PodArg) v1.Pod {
 	if p.Status == "" {
 		p.Status = v1.PodRunning
 	}
@@ -70,7 +70,7 @@ func GenerateNPods(
 	var pods []v1.Pod
 	for i := 0; i < n; i++ {
 		podArg.Name = fmt.Sprintf("%s%d", namePrefix, i)
-		pod := newPod(podArg)
+		pod := NewPod(podArg)
 		podObjects = append(podObjects, &pod)
 		pods = append(pods, pod)
 	}
