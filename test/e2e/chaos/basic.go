@@ -32,10 +32,10 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/pkg/portforward"
 	e2econfig "github.com/chaos-mesh/chaos-mesh/test/e2e/config"
 	"github.com/chaos-mesh/chaos-mesh/test/e2e/e2econst"
 	"github.com/chaos-mesh/chaos-mesh/test/e2e/util"
-	"github.com/chaos-mesh/chaos-mesh/test/e2e/util/portforward"
 	"github.com/chaos-mesh/chaos-mesh/test/pkg/fixture"
 
 	// testcases

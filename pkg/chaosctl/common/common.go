@@ -35,9 +35,9 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	ctrlconfig "github.com/chaos-mesh/chaos-mesh/controllers/config"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
+	"github.com/chaos-mesh/chaos-mesh/pkg/portforward"
 	"github.com/chaos-mesh/chaos-mesh/pkg/utils"
 	e2econfig "github.com/chaos-mesh/chaos-mesh/test/e2e/config"
-	"github.com/chaos-mesh/chaos-mesh/test/e2e/util/portforward"
 )
 
 var (
