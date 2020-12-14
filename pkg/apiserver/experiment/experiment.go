@@ -783,7 +783,7 @@ func (s *Service) getExperimentDetail(c *gin.Context) {
 // @Produce json
 // @Param uid path string true "uid"
 // @Param force query string true "force" Enums(true, false)
-// @Success 200 StatusResponse
+// @Success 200 {object} StatusResponse
 // @Failure 400 {object} utils.APIError
 // @Failure 404 {object} utils.APIError
 // @Failure 500 {object} utils.APIError

@@ -261,7 +261,7 @@ func (s *Service) report(c *gin.Context) {
 // @Tags archives
 // @Produce json
 // @Param uid path string true "uid"
-// @Success 200 StatusResponse
+// @Success 200 {object} StatusResponse
 // @Failure 500 {object} utils.APIError
 // @Router /experiments/{uid} [delete]
 func (s *Service) delete(c *gin.Context) {
