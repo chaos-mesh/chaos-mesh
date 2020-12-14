@@ -1,0 +1,15 @@
+apiVersion: chaos-mesh.org/v1alpha1
+kind: DNSChaos
+metadata:
+  name: dns-chaos-example
+  namespace: chaos-testing
+spec:
+  action: random
+  scope: outer
+  mode: all
+  selector:
+    namespaces:
+      - busybox
+  duration: "50s"
+  scheduler:
+    cron: "@every 100s"
