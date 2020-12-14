@@ -15,15 +15,13 @@ package bpm
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"os/exec"
-	"strings"
 	"sync"
 	"syscall"
 
 	"github.com/shirou/gopsutil/process"
-
-	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
 
 	ctrl "sigs.k8s.io/controller-runtime"
 )
@@ -235,24 +233,29 @@ type ProcessBuilder struct {
 	ctx context.Context
 }
 
+// GetNsPath returns corresponding namespace path
+func GetNsPath(pid uint32, typ NsType) string {
+	return fmt.Sprintf("%s/%d/ns/%s", DefaultProcPrefix, pid, string(typ))
+}
+
 // SetNetNS sets the net namespace of the process
 func (b *ProcessBuilder) SetNetNS(nsPath string) *ProcessBuilder {
-	return b.SetNS([]nsOption{{
+	return b.SetNSOpt([]nsOption{{
 		Typ:  NetNS,
 		Path: nsPath,
 	}})
 }
 
-// SetPidNS sets the pid namespace of the process
-func (b *ProcessBuilder) SetPidNS(nsPath string) *ProcessBuilder {
-	return b.SetNS([]nsOption{{
-		Typ:  PidNS,
-		Path: nsPath,
+// SetNS sets the namespace of the process
+func (b *ProcessBuilder) SetNS(pid uint32, typ NsType) *ProcessBuilder {
+	return b.SetNSOpt([]nsOption{{
+		Typ:  typ,
+		Path: GetNsPath(pid, typ),
 	}})
 }
 
-// SetNS sets the namespace of the process
-func (b *ProcessBuilder) SetNS(options []nsOption) *ProcessBuilder {
+// SetNSOpt sets the namespace of the process
+func (b *ProcessBuilder) SetNSOpt(options []nsOption) *ProcessBuilder {
 	b.nsOptions = append(b.nsOptions, options...)
 
 	return b
