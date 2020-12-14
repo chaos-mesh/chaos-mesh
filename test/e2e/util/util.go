@@ -141,7 +141,7 @@ func UnPauseChaos(ctx context.Context, cli client.Client, chaos runtime.Object) 
 }
 
 func WaitE2EHelperReady(c http.Client, port uint16) error {
-	return wait.Poll(10*time.Second, 5*time.Minute, func() (done bool, err error) {
+	return wait.Poll(2*time.Second, 5*time.Minute, func() (done bool, err error) {
 		if _, err = c.Get(fmt.Sprintf("http://localhost:%d/ping", port)); err != nil {
 			return false, nil
 		}
