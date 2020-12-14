@@ -21,48 +21,56 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 )
 
-func newPod(
-	name string,
-	status v1.PodPhase,
-	namespace string,
-	ans map[string]string,
-	ls map[string]string,
-	nodename string,
-) v1.Pod {
+// PodArg by default use `Status=corev1.PodRunning` and `Namespace=metav1.NamespaceDefault`.
+// For the others, the default values are empty.
+type PodArg struct {
+	Name            string
+	Status          v1.PodPhase
+	Namespace       string
+	Ans             map[string]string
+	Labels          map[string]string
+	ContainerStatus v1.ContainerStatus
+	Nodename        string
+}
+
+func newPod(p PodArg) v1.Pod {
+	if p.Status == "" {
+		p.Status = v1.PodRunning
+	}
+	if p.Namespace == "" {
+		p.Namespace = metav1.NamespaceDefault
+	}
 	return v1.Pod{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "Pod",
 			APIVersion: "v1",
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name:        name,
-			Namespace:   namespace,
-			Labels:      ls,
-			Annotations: ans,
+			Name:        p.Name,
+			Namespace:   p.Namespace,
+			Labels:      p.Labels,
+			Annotations: p.Ans,
 		},
 		Spec: v1.PodSpec{
-			NodeName: nodename,
+			NodeName: p.Nodename,
 		},
 		Status: v1.PodStatus{
-			Phase: status,
+			Phase:             p.Status,
+			ContainerStatuses: []v1.ContainerStatus{p.ContainerStatus},
 		},
 	}
 }
 
-// GenerateNPods generate pods for test
 func GenerateNPods(
 	namePrefix string,
 	n int,
-	status v1.PodPhase,
-	ns string,
-	ans map[string]string,
-	ls map[string]string,
-	nodename string,
+	podArg PodArg,
 ) ([]runtime.Object, []v1.Pod) {
 	var podObjects []runtime.Object
 	var pods []v1.Pod
 	for i := 0; i < n; i++ {
-		pod := newPod(fmt.Sprintf("%s%d", namePrefix, i), status, ns, ans, ls, nodename)
+		podArg.Name = fmt.Sprintf("%s%d", namePrefix, i)
+		pod := newPod(podArg)
 		podObjects = append(podObjects, &pod)
 		pods = append(pods, pod)
 	}
@@ -86,7 +94,6 @@ func newNode(
 	}
 }
 
-// GenerateNNodes generate nodes for test
 func GenerateNNodes(
 	namePrefix string,
 	n int,

@@ -19,7 +19,6 @@ import (
 	"time"
 
 	. "github.com/onsi/gomega"
-	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	kubectlscheme "k8s.io/kubectl/pkg/scheme"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
@@ -128,10 +127,10 @@ func TestGetPods(t *testing.T) {
 	}
 
 	nodeObjects, _ := utils.GenerateNNodes("node", 2, nil)
-	podObjects0, _ := utils.GenerateNPods("pod-node0", 1, v1.PodRunning, metav1.NamespaceDefault, nil, map[string]string{"app": "pod"}, "node0")
-	daemonObjects0, _ := utils.GenerateNPods("daemon-node0", 1, v1.PodRunning, metav1.NamespaceDefault, nil, map[string]string{"app.kubernetes.io/component": "chaos-daemon"}, "node0")
-	podObjects1, _ := utils.GenerateNPods("pod-node1", 1, v1.PodRunning, metav1.NamespaceDefault, nil, map[string]string{"app": "pod"}, "node1")
-	daemonObjects1, _ := utils.GenerateNPods("daemon-node1", 1, v1.PodRunning, metav1.NamespaceDefault, nil, map[string]string{"app.kubernetes.io/component": "chaos-daemon"}, "node1")
+	podObjects0, _ := utils.GenerateNPods("pod-node0", 1, utils.PodArg{Labels: map[string]string{"app": "pod"}, Nodename: "node0"})
+	podObjects1, _ := utils.GenerateNPods("pod-node1", 1, utils.PodArg{Labels: map[string]string{"app": "pod"}, Nodename: "node1"})
+	daemonObjects0, _ := utils.GenerateNPods("daemon-node0", 1, utils.PodArg{Labels: map[string]string{"app.kubernetes.io/component": "chaos-daemon"}, Nodename: "node0"})
+	daemonObjects1, _ := utils.GenerateNPods("daemon-node1", 1, utils.PodArg{Labels: map[string]string{"app.kubernetes.io/component": "chaos-daemon"}, Nodename: "node1"})
 
 	allObjects := append(nodeObjects, daemonObjects0[0], podObjects0[0], daemonObjects1[0], podObjects1[0])
 
