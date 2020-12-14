@@ -39,7 +39,7 @@ var _ = Describe("ipset server", func() {
 			defer mock.With("MockProcessBuild", func(ctx context.Context, cmd string, args ...string) *exec.Cmd {
 				Expect(cmd).To(Equal("/usr/local/bin/nsexec"))
 				Expect(args[0]).To(Equal("-n"))
-				Expect(args[1]).To(Equal("/proc/1/ns/net"))
+				Expect(args[1]).To(Equal("nsPath"))
 				Expect(args[2]).To(Equal("--"))
 				Expect(args[3]).To(Equal("ipset"))
 				Expect(args[4]).To(Equal("create"))
