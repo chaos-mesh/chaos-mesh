@@ -287,6 +287,9 @@ func GetPidFromPod(ctx context.Context, pod v1.Pod, daemon v1.Pod) (int, error) 
 	if err != nil {
 		return 0, fmt.Errorf("forward ports failed: %s", err.Error())
 	}
+	defer func() {
+		pfCancel()
+	}()
 
 	daemonClient, err := utils.NewChaosDaemonClientLocally(int(localPort))
 	if err != nil {
@@ -307,9 +310,6 @@ func GetPidFromPod(ctx context.Context, pod v1.Pod, daemon v1.Pod) (int, error) 
 	if err != nil {
 		return 0, fmt.Errorf("container get pid failed: %s", err.Error())
 	}
-	if pfCancel != nil {
-		pfCancel()
-	}
 	return int(res.Pid), nil
 }
 
@@ -318,7 +318,7 @@ func forwardPorts(ctx context.Context, pod v1.Pod, port uint16) (context.CancelF
 	if err != nil {
 		log.Fatal("failed to load raw config", err.Error())
 	}
-	fw, err := portforward.NewPortForwarder(ctx, e2econfig.NewSimpleRESTClientGetter(clientRawConfig))
+	fw, err := portforward.NewPortForwarder(ctx, e2econfig.NewSimpleRESTClientGetter(clientRawConfig), false)
 	if err != nil {
 		log.Fatal("failed to create port forwarder", err.Error())
 	}

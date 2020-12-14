@@ -66,7 +66,7 @@ func Exec(ctx context.Context, pod v1.Pod, cmd string, c *kubernetes.Clientset) 
 		Stderr: &stderr,
 	})
 	if err != nil {
-		return "", fmt.Errorf("error in streaming remotecommand: %s, pod: %s, command: %s", err.Error(), pod.Name, cmd)
+		return "", fmt.Errorf("error in streaming remotecommand: %s, pod: %s, command: %s, std error: %s", err.Error(), pod.Name, cmd, stderr.String())
 	}
 	if stderr.String() != "" {
 		return "", fmt.Errorf("error of command %s: %s", cmd, stderr.String())

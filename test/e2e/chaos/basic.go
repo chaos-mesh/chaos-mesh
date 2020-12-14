@@ -64,7 +64,7 @@ var _ = ginkgo.Describe("[Basic]", func() {
 		ctx, cancel := context.WithCancel(context.Background())
 		clientRawConfig, err := e2econfig.LoadClientRawConfig()
 		framework.ExpectNoError(err, "failed to load raw config")
-		fw, err = portforward.NewPortForwarder(ctx, e2econfig.NewSimpleRESTClientGetter(clientRawConfig))
+		fw, err = portforward.NewPortForwarder(ctx, e2econfig.NewSimpleRESTClientGetter(clientRawConfig), true)
 		framework.ExpectNoError(err, "failed to create port forwarder")
 		fwCancel = cancel
 		kubeCli = f.ClientSet
