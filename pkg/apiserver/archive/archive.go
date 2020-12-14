@@ -44,6 +44,11 @@ func NewService(
 	}
 }
 
+// StatusResponse defines a common status struct.
+type StatusResponse struct {
+	Status string `json:"status"`
+}
+
 // Register mounts our HTTP handler on the mux.
 func Register(r *gin.RouterGroup, s *Service) {
 	endpoint := r.Group("/archives")
@@ -256,7 +261,7 @@ func (s *Service) report(c *gin.Context) {
 // @Tags archives
 // @Produce json
 // @Param uid path string true "uid"
-// @Success 200 "delete ok"
+// @Success 200 StatusResponse
 // @Failure 500 {object} utils.APIError
 // @Router /experiments/{uid} [delete]
 func (s *Service) delete(c *gin.Context) {
@@ -282,6 +287,6 @@ func (s *Service) delete(c *gin.Context) {
 		c.Status(http.StatusInternalServerError)
 		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
 	} else {
-		c.JSON(http.StatusOK, "delete ok")
+		c.JSON(http.StatusOK, StatusResponse{Status: "success"})
 	}
 }

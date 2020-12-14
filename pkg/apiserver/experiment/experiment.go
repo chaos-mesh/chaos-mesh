@@ -783,7 +783,7 @@ func (s *Service) getExperimentDetail(c *gin.Context) {
 // @Produce json
 // @Param uid path string true "uid"
 // @Param force query string true "force" Enums(true, false)
-// @Success 200 "delete ok"
+// @Success 200 StatusResponse
 // @Failure 400 {object} utils.APIError
 // @Failure 404 {object} utils.APIError
 // @Failure 500 {object} utils.APIError
@@ -869,7 +869,7 @@ func (s *Service) deleteExperiment(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, nil)
+	c.JSON(http.StatusOK, StatusResponse{Status: "success"})
 }
 
 // @Summary Get chaos experiments state from Kubernetes cluster.
