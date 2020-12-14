@@ -67,8 +67,7 @@ func (s *daemonServer) ExecStressors(ctx context.Context,
 
 	cmd := bpm.DefaultProcessBuilder("stress-ng", strings.Fields(req.Stressors)...).
 		EnablePause().
-		EnableSuicide().
-		SetPidNS(GetNsPath(pid, bpm.PidNS)).
+		SetNS(pid, bpm.PidNS).
 		Build()
 
 	err = s.backgroundProcessManager.StartProcess(cmd)

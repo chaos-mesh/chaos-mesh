@@ -916,6 +916,9 @@ metadata:
     app.kubernetes.io/component: controller-manager
 rules:
   - apiGroups: [ "" ]
+    resources: [ "endpoints" ]
+    verbs: [ "get", "list", "watch" ]
+  - apiGroups: [ "" ]
     resources: [ "pods" ]
     verbs: [ "get", "list", "watch", "delete", "update" ]
   - apiGroups:
