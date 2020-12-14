@@ -35,7 +35,7 @@ const (
 type Node interface {
 	GetName() string
 	GetNodePhase() NodePhase
-	GetParent() string
+	GetParentNodeName() string
 
 	GetTemplateName() string
 	GetTemplateType() template.TemplateType

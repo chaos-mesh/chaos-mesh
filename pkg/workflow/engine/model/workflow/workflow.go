@@ -21,14 +21,7 @@ import (
 type WorkflowSpec interface {
 	GetName() string
 	GetEntry() string
-	GetTemplates() Templates
-
-	FetchTemplateMap() map[string]template.Template
-}
-
-type Templates interface {
-	FetchAllTemplates() []template.Template
-	GetByTemplateName(templateName string) template.Template
+	GetTemplates() template.Templates
 }
 
 type WorkflowPhase string

@@ -44,3 +44,9 @@ type Template interface {
 func (it TemplateType) IsCompositeType() bool {
 	return it == Serial || it == Parallel || it == Task
 }
+
+type Templates interface {
+	FetchAllTemplates() []Template
+	FetchTemplateMap() map[string]Template
+	GetByTemplateName(templateName string) Template
+}

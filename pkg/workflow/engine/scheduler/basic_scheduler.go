@@ -15,14 +15,15 @@ package scheduler
 
 import (
 	"context"
+	goerror "errors"
 	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/engine/errors"
 	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/engine/model/node"
 	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/engine/model/template"
 	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/engine/model/workflow"
 )
 
-func NewBasicScheduler() *basicScheduler {
-	return &basicScheduler{}
+func NewBasicScheduler(workflowSpec workflow.WorkflowSpec, workflowStatus workflow.WorkflowStatus) *basicScheduler {
+	return &basicScheduler{workflowSpec: workflowSpec, workflowStatus: workflowStatus}
 }
 
 type basicScheduler struct {
@@ -36,7 +37,11 @@ func (it *basicScheduler) ScheduleNext(ctx context.Context) ([]template.Template
 	nodesMap := it.workflowStatus.FetchNodesMap()
 	if len(nodesMap) == 0 {
 		// first schedule
-		entry := it.workflowSpec.FetchTemplateMap()[it.workflowSpec.GetEntry()]
+		templates := it.workflowSpec.GetTemplates()
+		if templates == nil {
+			return nil, "", errors.NewNoTemplatesError(op, it.workflowSpec.GetName())
+		}
+		entry := templates.GetByTemplateName(it.workflowSpec.GetEntry())
 		return []template.Template{entry}, "", nil
 	} else {
 		var uncompletedSchedulableCompositeNode node.Node
@@ -142,4 +147,8 @@ func fetchAllAvailableTemplatesFromTask(status node.TaskNode, allChildrenTemplat
 	}
 
 	return result, err
+}
+
+func IsNoNeedSchedule(err error) bool {
+	return goerror.Is(err, errors.ErrNoNeedSchedule)
 }

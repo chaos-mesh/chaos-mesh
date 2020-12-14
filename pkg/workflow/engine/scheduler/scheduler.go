@@ -21,5 +21,5 @@ import (
 
 /*  interface Scheduler follows the iterator-pattern, it provides templates which need instantiate. */
 type Scheduler interface {
-	ScheduleNext(ctx context.Context) (templatesNeedInstantiate []template.Template, parentNodeName string, err error)
+	ScheduleNext(ctx context.Context) (nextTemplates []template.Template, parentNodeName string, err error)
 }
