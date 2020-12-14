@@ -16,6 +16,7 @@ package scheduler
 import (
 	"context"
 	goerror "errors"
+
 	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/engine/errors"
 	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/engine/model/node"
 	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/engine/model/template"
@@ -43,23 +44,21 @@ func (it *basicScheduler) ScheduleNext(ctx context.Context) ([]template.Template
 		}
 		entry := templates.GetByTemplateName(it.workflowSpec.GetEntry())
 		return []template.Template{entry}, "", nil
-	} else {
-		var uncompletedSchedulableCompositeNode node.Node
-		for _, item := range it.workflowStatus.GetNodes() {
-			if item.GetNodePhase() == node.WaitingForSchedule {
-				uncompletedSchedulableCompositeNode = item
-				break
-			}
-		}
-
-		if uncompletedSchedulableCompositeNode == nil {
-			return nil, "", errors.NewNoNeedScheduleError(op, it.workflowSpec.GetName())
-		}
-
-		templates, err := it.fetchChildrenForCompositeNode(uncompletedSchedulableCompositeNode.GetName())
-		return templates, uncompletedSchedulableCompositeNode.GetName(), err
-
 	}
+	var uncompletedSchedulableCompositeNode node.Node
+	for _, item := range it.workflowStatus.GetNodes() {
+		if item.GetNodePhase() == node.WaitingForSchedule {
+			uncompletedSchedulableCompositeNode = item
+			break
+		}
+	}
+
+	if uncompletedSchedulableCompositeNode == nil {
+		return nil, "", errors.NewNoNeedScheduleError(op, it.workflowSpec.GetName())
+	}
+
+	templates, err := it.fetchChildrenForCompositeNode(uncompletedSchedulableCompositeNode.GetName())
+	return templates, uncompletedSchedulableCompositeNode.GetName(), err
 
 }
 
@@ -113,19 +112,19 @@ func fetchNextTemplateFromSerial(status node.NodeTreeChildren, childrenTemplates
 	if status.Length() == len(childrenTemplates) {
 		// TODO: unexpected situation, warn log
 		return nil, errors.NewNoMoreTemplateInSerialTemplateError()
-	} else {
-		for _, item := range childrenTemplates {
-			if status.ContainsTemplate(item.GetName()) {
-				continue
-			} else {
-				// TODO: debug logs
-				return item, nil
-			}
-		}
-
-		// TODO: warn logs
-		return nil, errors.NewNoMoreTemplateInSerialTemplateError()
 	}
+
+	for _, item := range childrenTemplates {
+		if status.ContainsTemplate(item.GetName()) {
+			continue
+		}
+		// TODO: debug logs
+		return item, nil
+	}
+
+	// TODO: warn logs
+	return nil, errors.NewNoMoreTemplateInSerialTemplateError()
+
 }
 
 func fetchAllAvailableTemplatesFromTask(status node.TaskNode, allChildrenTemplates []template.Template) ([]template.Template, error) {
