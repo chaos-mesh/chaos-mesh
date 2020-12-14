@@ -2,14 +2,8 @@ export default function insertCommonStyle() {
   document.head.insertAdjacentHTML(
     'beforeend',
     `<style>
-      .chaos-chart text {
-        fill: rgba(0, 0, 0, 0.54);
-        font-weight: bold;
-      }
-
       .chaos-chart-dark text {
         fill: #fff;
-        font-weight: bold;
       }
 
       .chaos-chart .axis path,
@@ -27,9 +21,9 @@ export default function insertCommonStyle() {
         top: 0;
         left: 0;
         display: flex;
-        max-width: 100%;
         max-height: 36px;
         flex-wrap: wrap;
+        overflow-y: scroll;
       }
 
       .chaos-events-legends > div {
@@ -37,6 +31,10 @@ export default function insertCommonStyle() {
         align-items: center;
         margin-left: 1rem;
         cursor: pointer;
+      }
+
+      .chaos-events-legends > div:first-child {
+        margin-left: 0;
       }
     </style>`
   )

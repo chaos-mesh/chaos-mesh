@@ -1,4 +1,4 @@
-import { Box, Button, Collapse, IconButton, Paper, Typography, useMediaQuery, useTheme } from '@material-ui/core'
+import { Box, Collapse, IconButton, Paper, Typography, useMediaQuery, useTheme } from '@material-ui/core'
 import React, { useState } from 'react'
 import { Theme, createStyles, makeStyles } from '@material-ui/core/styles'
 
@@ -151,9 +151,6 @@ const ExperimentListItem: React.FC<ExperimentListItemProps> = ({
           </IconButton>
         </>
       )}
-      <Button variant="outlined" color="primary" size="small">
-        {isArchive ? T('common.report') : T('common.detail')}
-      </Button>
     </Box>
   )
 

@@ -31,7 +31,7 @@ import yaml from 'js-yaml'
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     eventsChart: {
-      height: 200,
+      height: 250,
       margin: theme.spacing(3),
     },
     eventDetailPaper: {

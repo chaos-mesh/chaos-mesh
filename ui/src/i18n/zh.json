@@ -1,7 +1,13 @@
 {
-  "overview": {
-    "title": "概览",
-    "totalExperiments": "当前实验"
+  "dashboard": {
+    "title": "仪表盘",
+    "welcome": "欢迎来到 Chaos Mesh Dashboard",
+    "welcomeDesc": "不知道如何使用？点击下面的按钮开始教程。",
+    "veteran": "已经是熟手了",
+    "verteranDesc": "从一个新的实验开始！成功创建后，你可以返回仪表板以观察其状态。",
+    "totalExperiments": "当前实验",
+    "totalState": "当前状态",
+    "predefined": "预定义"
   },
   "newE": {
     "title": "新的实验",
@@ -78,7 +84,7 @@
   "experiments": {
     "title": "实验",
     "single": "实验",
-    "status": {
+    "state": {
       "running": "运行中",
       "paused": "暂停",
       "failed": "失败",
@@ -94,7 +100,6 @@
   "events": {
     "title": "事件",
     "noEventsFound": "未发现事件",
-    "table": "事件列表",
     "eventsPerPage": "每页事件数",
     "event": {
       "experiment": "实验",
@@ -148,12 +153,12 @@
   "common": {
     "other": "其他",
     "doc": "文档",
+    "tutorial": "教程",
     "confirm": "确认",
     "cancel": "取消",
     "submit": "提交",
     "upload": "上传",
     "detail": "详情",
-    "report": "报告",
     "start": "启动",
     "pause": "暂停",
     "update": "更新",

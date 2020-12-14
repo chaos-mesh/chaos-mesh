@@ -1,7 +1,13 @@
 {
-  "overview": {
-    "title": "Overview",
-    "totalExperiments": "Total Experiments"
+  "dashboard": {
+    "title": "Dashboard",
+    "welcome": "Welcome to Chaos Mesh Dashboard",
+    "welcomeDesc": "Don't know how to start? Click the button below to start a tutorial.",
+    "veteran": "Already a veteran",
+    "veteranDesc": "Start with a new experiment! After it's successfully created, you can return the dashboard to observe its status.",
+    "totalExperiments": "Total Experiments",
+    "totalState": "Total State",
+    "predefined": "Predefined"
   },
   "newE": {
     "title": "New Experiment",
@@ -78,7 +84,7 @@
   "experiments": {
     "title": "Experiments",
     "single": "Experiment",
-    "status": {
+    "state": {
       "running": "Running",
       "paused": "Paused",
       "failed": "Failed",
@@ -94,7 +100,6 @@
   "events": {
     "title": "Events",
     "noEventsFound": "No events found",
-    "table": "Events",
     "eventsPerPage": "Events per page",
     "event": {
       "experiment": "Experiment",
@@ -148,12 +153,12 @@
   "common": {
     "other": "Other",
     "doc": "Documentation",
+    "tutorial": "Tutorial",
     "confirm": "Confirm",
     "cancel": "Cancel",
     "submit": "Submit",
     "upload": "Upload",
     "detail": "Detail",
-    "report": "Report",
     "start": "Start",
     "pause": "Pause",
     "update": "Update",

@@ -164,6 +164,8 @@ func (s *Service) detail(c *gin.Context) {
 		yaml, err = exp.ParseKernelChaos()
 	case v1alpha1.KindStressChaos:
 		yaml, err = exp.ParseStressChaos()
+	case v1alpha1.KindDNSChaos:
+		yaml, err = exp.ParseDNSChaos()
 	default:
 		err = fmt.Errorf("kind %s is not support", exp.Kind)
 	}

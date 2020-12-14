@@ -349,3 +349,23 @@ func (e *Experiment) ParseStressChaos() (ExperimentYAMLDescription, error) {
 		Spec: chaos.Spec,
 	}, nil
 }
+
+// ParseDNSChaos Parse DNSChaos JSON string into ExperimentYAMLDescription.
+func (e *Experiment) ParseDNSChaos() (ExperimentYAMLDescription, error) {
+	chaos := &v1alpha1.DNSChaos{}
+	if err := json.Unmarshal([]byte(e.Experiment), &chaos); err != nil {
+		return ExperimentYAMLDescription{}, err
+	}
+
+	return ExperimentYAMLDescription{
+		APIVersion: chaos.APIVersion,
+		Kind:       chaos.Kind,
+		Metadata: ExperimentYAMLMetadata{
+			Name:        chaos.Name,
+			Namespace:   chaos.Namespace,
+			Labels:      chaos.Labels,
+			Annotations: chaos.Annotations,
+		},
+		Spec: chaos.Spec,
+	}, nil
+}

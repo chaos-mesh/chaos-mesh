@@ -1,7 +1,6 @@
 import { Event } from './events.type'
 
 export interface StateOfExperiments {
-  Total: number
   Running: number
   Waiting: number
   Paused: number
@@ -10,7 +9,6 @@ export interface StateOfExperiments {
 }
 
 export enum StateOfExperimentsEnum {
-  Total = 'Total',
   Running = 'Running',
   Waiting = 'Waiting',
   Paused = 'Paused',

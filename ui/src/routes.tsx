@@ -1,17 +1,17 @@
 import ArchiveReport from './pages/ArchiveReport'
 import Archives from './pages/Archives'
+import Dashboard from './pages/Dashboard'
 import Events from './pages/Events'
 import ExperimentDetail from './pages/ExperimentDetail'
 import Experiments from './pages/Experiments'
 import NewExperiment from 'components/NewExperimentNext'
-import Overview from './pages/Overview'
 import { RouteProps } from 'react-router'
 import Settings from './pages/Settings'
 
 const routes: RouteProps[] = [
   {
-    component: Overview,
-    path: '/overview',
+    component: Dashboard,
+    path: '/dashboard',
     exact: true,
   },
   {

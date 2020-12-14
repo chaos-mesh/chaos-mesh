@@ -1,8 +1,9 @@
-import { Fab, Paper } from '@material-ui/core'
 import React, { useEffect } from 'react'
 import { Theme, createStyles, makeStyles } from '@material-ui/core/styles'
 
+import { IconButton } from '@material-ui/core'
 import Modal from '@material-ui/core/Modal'
+import Paper from 'components-mui/Paper'
 import { RootState } from 'store'
 import Search from 'components/Search'
 import SearchIcon from '@material-ui/icons/Search'
@@ -12,12 +13,6 @@ import { useSelector } from 'react-redux'
 
 const useStyles = makeStyles((theme: Theme) => {
   return createStyles({
-    searchTrigger: {
-      position: 'fixed',
-      bottom: theme.spacing(6),
-      right: theme.spacing(6),
-      zIndex: 1101, // .MuiAppBar-root z-index: 1100
-    },
     searchModal: {
       [theme.breakpoints.down('md')]: {
         maxWidth: '80%',
@@ -70,9 +65,9 @@ const SearchTrigger: React.FC = () => {
 
   return (
     <>
-      <Fab component="div" className={classes.searchTrigger} color="primary" size="medium" onClick={handleOpen}>
+      <IconButton color="inherit" aria-label="Search" onClick={handleOpen}>
         <SearchIcon />
-      </Fab>
+      </IconButton>
       <Modal open={searchModalOpen} onClose={handleClose}>
         <Paper elevation={3} className={classes.searchModal}>
           <Search />
