@@ -23,7 +23,6 @@ import (
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/config"
 	"github.com/chaos-mesh/chaos-mesh/pkg/router/endpoint"
-	end "github.com/chaos-mesh/chaos-mesh/pkg/router/endpoint"
 )
 
 type routeEntry struct {
@@ -50,7 +49,7 @@ var routeTable map[reflect.Type]*routeEntry
 var log logr.Logger
 
 // Register registers an endpoint
-func Register(name string, obj runtime.Object, routeFunc func(runtime.Object) bool, newEndpoint end.NewEndpoint) {
+func Register(name string, obj runtime.Object, routeFunc func(runtime.Object) bool, newEndpoint endpoint.NewEndpoint) {
 	typ := reflect.TypeOf(obj)
 	_, ok := routeTable[typ]
 	if !ok {
