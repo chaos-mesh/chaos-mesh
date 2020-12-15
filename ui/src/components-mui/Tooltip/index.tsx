@@ -3,7 +3,7 @@ import { withStyles } from '@material-ui/core/styles'
 
 const Tooltip = withStyles((theme) => ({
   tooltip: {
-    padding: 14,
+    padding: theme.spacing(3),
     backgroundColor: theme.palette.common.black,
     color: theme.palette.common.white,
   },

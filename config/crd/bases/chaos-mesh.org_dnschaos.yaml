@@ -14,6 +14,7 @@ spec:
     listKind: DNSChaosList
     plural: dnschaos
     singular: dnschaos
+  preserveUnknownFields: false
   scope: Namespaced
   validation:
     openAPIV3Schema:

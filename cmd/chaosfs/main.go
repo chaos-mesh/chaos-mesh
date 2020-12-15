@@ -63,7 +63,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	ctrl.SetLogger(zap.Logger(true))
+	ctrl.SetLogger(zap.New(zap.UseDevMode(true)))
 
 	version.PrintVersionInfo("Chaosfs")
 	if printVersion {

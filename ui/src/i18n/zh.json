@@ -121,46 +121,62 @@
   },
   "settings": {
     "title": "设置",
-    "theme": "主题",
-    "chooseTheme": "选择主题",
-    "themeLight": "浅色",
-    "themeDark": "暗色",
-    "language": "语言",
-    "chooseInterfaceLanguage": "选择界面语言",
-    "en": "英语",
-    "zh": "简体中文"
+    "theme": {
+      "title": "主题",
+      "choose": "选择主题",
+      "light": "浅色",
+      "dark": "暗色"
+    },
+    "lang": {
+      "title": "语言",
+      "choose": "选择界面语言",
+      "en": "英语",
+      "zh": "简体中文"
+    },
+    "addToken": {
+      "prompt": "输入令牌 (RBAC 鉴权) 以继续",
+      "title": "添加令牌",
+      "name": "名称",
+      "nameHelper": "请输入令牌名称",
+      "nameValidation": "令牌名称不能为空",
+      "token": "令牌",
+      "tokenHelper": "请输入令牌",
+      "tokenValidation": "令牌不能为空",
+      "deleteDesc": "此操作不可逆"
+    }
   },
   "common": {
+    "other": "其他",
     "doc": "文档",
-    "back": "上一步",
-    "next": "下一步",
-    "finish": "完成",
-    "reset": "重置",
+    "confirm": "确认",
+    "cancel": "取消",
     "submit": "提交",
     "upload": "上传",
-    "advancedOptions": "高级选项",
-    "isKVHelperText": "键入 key:value 并以空格结尾来创建一个键值对",
-    "multiOptions": "支持多选",
-    "noOptions": "无选项",
-    "detail": "详细信息",
+    "detail": "详情",
     "report": "报告",
     "start": "启动",
     "pause": "暂停",
     "update": "更新",
+    "delete": "删除",
     "status": "状态",
+    "use": "使用",
+    "using": "使用中",
     "configuration": "配置",
-    "configured": "已配置",
-    "confirm": "确认",
-    "cancel": "取消",
+    "noOptions": "无选项",
+    "multiOptions": "支持多选",
+    "advancedOptions": "高级选项",
+    "isKVHelperText": "键入 key:value 并以空格结尾来创建一个键值对",
+    "timeline": "时间线",
+    "meta": "元信息",
+    "uuid": "UUID",
     "createSuccessfully": "创建成功",
     "loadSuccessfully": "加载成功",
     "deleteSuccessfully": "归档成功",
     "startSuccessfully": "启动成功",
     "pauseSuccessfully": "暂停成功",
     "updateSuccessfully": "更新成功",
-    "timeline": "时间线",
-    "meta": "元信息",
-    "uuid": "UUID"
+    "submitSuccessfully": "提交成功",
+    "chooseNamespace": "选择命名空间"
   },
   "search": {
     "placeholder": "搜索",
@@ -195,6 +211,7 @@
     "annotations": "注解",
     "labelSelectors": "标签选择器",
     "annotationsSelectors": "注解选择器",
-    "phaseSelectors": "阶段选择器"
+    "phaseSelectors": "阶段选择器",
+    "namespaces": "命名空间"
   }
 }

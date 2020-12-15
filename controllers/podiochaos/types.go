@@ -26,7 +26,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	"github.com/chaos-mesh/chaos-mesh/controllers/common"
+	"github.com/chaos-mesh/chaos-mesh/controllers/config"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
 	"github.com/chaos-mesh/chaos-mesh/pkg/utils"
 )
@@ -52,7 +52,7 @@ func (h *Handler) Apply(ctx context.Context, chaos *v1alpha1.PodIoChaos) error {
 		return err
 	}
 
-	pbClient, err := utils.NewChaosDaemonClient(ctx, h, pod, common.ControllerCfg.ChaosDaemonPort)
+	pbClient, err := utils.NewChaosDaemonClient(ctx, h, pod, config.ControllerCfg.ChaosDaemonPort)
 	if err != nil {
 		return err
 	}

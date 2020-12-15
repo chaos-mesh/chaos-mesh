@@ -22,7 +22,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos/ipset"
 	"github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos/iptable"
-	"github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos/tc"
+	tcpkg "github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos/tc"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
 	"github.com/chaos-mesh/chaos-mesh/pkg/utils"
 
@@ -40,7 +40,8 @@ const (
 type Handler struct {
 	client.Client
 	client.Reader
-	Log logr.Logger
+	Log                     logr.Logger
+	AllowHostNetworkTesting bool
 }
 
 // Apply flushes network configuration on pod
@@ -58,9 +59,11 @@ func (h *Handler) Apply(ctx context.Context, chaos *v1alpha1.PodNetworkChaos) er
 		return err
 	}
 
-	if pod.Spec.HostNetwork {
-		err := errors.Errorf("it's dangerous to inject network chaos on a pod(%s/%s) with `hostNetwork`", pod.Namespace, pod.Name)
-		return err
+	if !h.AllowHostNetworkTesting {
+		if pod.Spec.HostNetwork {
+			err := errors.Errorf("it's dangerous to inject network chaos on a pod(%s/%s) with `hostNetwork`", pod.Namespace, pod.Name)
+			return err
+		}
 	}
 
 	err = h.SetIPSets(ctx, pod, chaos)
@@ -147,7 +150,7 @@ func (h *Handler) SetTcs(ctx context.Context, pod *corev1.Pod, chaos *v1alpha1.P
 	}
 
 	h.Log.Info("setting tcs", "tcs", tcs)
-	return tc.SetTcs(ctx, h.Client, pod, tcs)
+	return tcpkg.SetTcs(ctx, h.Client, pod, tcs)
 }
 
 // NetemSpec defines the interface to convert to a Netem protobuf

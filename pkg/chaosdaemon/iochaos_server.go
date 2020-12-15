@@ -31,7 +31,7 @@ const (
 	todaBin = "/usr/local/bin/toda"
 )
 
-func (s *daemonServer) ApplyIoChaos(ctx context.Context, in *pb.ApplyIoChaosRequest) (*pb.ApplyIoChaosResponse, error) {
+func (s *DaemonServer) ApplyIoChaos(ctx context.Context, in *pb.ApplyIoChaosRequest) (*pb.ApplyIoChaosResponse, error) {
 	log.Info("applying io chaos", "Request", in)
 
 	if in.Instance != 0 {
@@ -63,13 +63,14 @@ func (s *daemonServer) ApplyIoChaos(ctx context.Context, in *pb.ApplyIoChaosRequ
 	}
 
 	// TODO: make this log level configurable
-	args := fmt.Sprintf("--path %s --pid %d --verbose info", in.Volume, pid)
+	args := fmt.Sprintf("--path %s --verbose info", in.Volume)
 	log.Info("executing", "cmd", todaBin+" "+args)
 	cmd := bpm.DefaultProcessBuilder(todaBin, strings.Split(args, " ")...).
-		EnableSuicide().
+		SetNS(pid, bpm.MountNS).
+		SetNS(pid, bpm.PidNS).
+		EnableLocalMnt().
 		SetIdentifier(in.ContainerId).
 		Build()
-	cmd.Env = append(cmd.Env, "LD_LIBRARY_PATH=/usr/local/lib/toda-glibc")
 	cmd.Stdin = strings.NewReader(in.Actions)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
@@ -97,7 +98,7 @@ func (s *daemonServer) ApplyIoChaos(ctx context.Context, in *pb.ApplyIoChaosRequ
 	}, nil
 }
 
-func (s *daemonServer) killIoChaos(ctx context.Context, pid int64, startTime int64) error {
+func (s *DaemonServer) killIoChaos(ctx context.Context, pid int64, startTime int64) error {
 	log.Info("killing toda", "pid", pid)
 
 	err := s.backgroundProcessManager.KillBackgroundProcess(ctx, int(pid), startTime)

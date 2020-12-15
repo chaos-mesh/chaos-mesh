@@ -23,7 +23,7 @@ import (
 )
 
 // ContainerKill kills container according to container id in the req
-func (s *daemonServer) ContainerKill(ctx context.Context, req *pb.ContainerRequest) (*empty.Empty, error) {
+func (s *DaemonServer) ContainerKill(ctx context.Context, req *pb.ContainerRequest) (*empty.Empty, error) {
 	log.Info("Container Kill", "request", req)
 
 	action := req.Action.Action
@@ -42,7 +42,7 @@ func (s *daemonServer) ContainerKill(ctx context.Context, req *pb.ContainerReque
 	return &empty.Empty{}, nil
 }
 
-func (s *daemonServer) ContainerGetPid(ctx context.Context, req *pb.ContainerRequest) (*pb.ContainerResponse, error) {
+func (s *DaemonServer) ContainerGetPid(ctx context.Context, req *pb.ContainerRequest) (*pb.ContainerResponse, error) {
 	log.Info("container GetPid", "request", req)
 
 	action := req.Action.Action

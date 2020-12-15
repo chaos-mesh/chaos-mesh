@@ -5,10 +5,10 @@ import AffectedPods from 'components/AffectedPods'
 import { Event } from 'api/events.type'
 import Loading from 'components-mui/Loading'
 import { RootState } from 'store'
+import RunningLabel from 'components-mui/RunningLabel'
 import T from 'components/T'
 import api from 'api'
 import { format } from 'lib/dayjs'
-import useRunningLabelStyles from 'lib/styles/runningLabel'
 import { useSelector } from 'react-redux'
 
 const TableCell = withStyles({
@@ -24,8 +24,6 @@ interface EventDetailProps {
 const EventDetail: React.FC<EventDetailProps> = ({ eventID }) => {
   const { lang } = useSelector((state: RootState) => state.settings)
 
-  const runningLabel = useRunningLabelStyles()
-
   const [loading, setLoading] = useState(false)
   const [e, setEvent] = useState<Event | undefined>(undefined)
 
@@ -37,7 +35,7 @@ const EventDetail: React.FC<EventDetailProps> = ({ eventID }) => {
       .then(({ data }) => {
         setEvent(data.find((e) => e.id === Number(eventID)))
       })
-      .catch(console.log)
+      .catch(console.error)
       .finally(() => {
         setLoading(false)
       })
@@ -102,7 +100,7 @@ const EventDetail: React.FC<EventDetailProps> = ({ eventID }) => {
                   {e.finish_time ? (
                     format(e.finish_time, lang)
                   ) : (
-                    <span className={runningLabel.root}>{T('experiments.status.running')}</span>
+                    <RunningLabel>{T('experiments.status.running')}</RunningLabel>
                   )}
                 </Typography>
               </TableCell>
