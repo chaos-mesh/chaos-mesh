@@ -191,37 +191,37 @@ func probeNetworkCondition(c http.Client, peers []*corev1.Pod, ports []uint16) m
 			connectable := true
 
 			var (
-				wg   sync.WaitGroup
-				lock sync.Mutex
+				wg           sync.WaitGroup
+				link1, link2 bool
 			)
 			wg.Add(2)
 			go func() {
 				defer wg.Done()
 				// case 1-1: source to target blocked?
 				klog.Infof("testing connectivity from %s to %s", peers[source].Name, peers[target].Name)
-				if !couldConnect(c, ports[source], peers[target].Status.PodIP, ports[target]) {
-					klog.Infof("%s could not connect to %s", peers[source].Name, peers[target].Name)
-					lock.Lock()
-					result[networkConditionBlocked] = append(result[networkConditionBlocked], []int{source, target})
-					connectable = false
-					lock.Unlock()
-				}
+				link1 = couldConnect(c, ports[source], peers[target].Status.PodIP, ports[target])
+
 			}()
 
 			go func() {
 				defer wg.Done()
 				// case 1-2: target to source blocked?
 				klog.Infof("testing connectivity from %s to %s", peers[target].Name, peers[source].Name)
-				if !couldConnect(c, ports[target], peers[source].Status.PodIP, ports[source]) {
-					klog.Infof("%s could not connect to %s", peers[target].Name, peers[source].Name)
-					lock.Lock()
-					result[networkConditionBlocked] = append(result[networkConditionBlocked], []int{target, source})
-					connectable = false
-					lock.Unlock()
-				}
+				link2 = couldConnect(c, ports[target], peers[source].Status.PodIP, ports[source])
 			}()
-
 			wg.Wait()
+
+			if !link1 {
+				klog.Infof("%s could not connect to %s", peers[source].Name, peers[target].Name)
+				result[networkConditionBlocked] = append(result[networkConditionBlocked], []int{source, target})
+				connectable = false
+			}
+			if !link2 {
+				klog.Infof("%s could not connect to %s", peers[target].Name, peers[source].Name)
+				result[networkConditionBlocked] = append(result[networkConditionBlocked], []int{target, source})
+				connectable = false
+			}
+
 			if !connectable {
 				continue
 			}
