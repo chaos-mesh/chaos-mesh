@@ -2,7 +2,7 @@
   "dashboard": {
     "title": "仪表盘",
     "welcome": "欢迎来到 Chaos Mesh Dashboard",
-    "welcomeDesc": "不知道如何使用？点击下面的按钮开始教程。",
+    "welcomeDesc": "😎 不知道如何使用？点击下面的按钮开始教程。",
     "tutorial": {
       "step1": "仪表盘是对 Chaos Mesh 的概览，在这里你可以观察到所有实验的运行状态。",
       "step2": "实验界面管理着所有的实验，在这里你可以对实验进行多种操作（暂停，归档，更新等）。",
@@ -15,10 +15,11 @@
       "step9": "🎉 恭喜你完成了所有的教程步骤！点击空白处即可退出。"
     },
     "veteran": "已经是熟手了",
-    "veteranDesc": "从一个新的实验开始！成功创建后，你可以返回仪表板以观察其状态。",
+    "veteranDesc": "🧨 从一个新的实验开始！成功创建后，你可以返回仪表板以观察其状态。",
     "totalExperiments": "当前实验",
     "totalState": "当前状态",
-    "predefined": "预定义"
+    "predefined": "预定义",
+    "predefinedDesc": "📦 在这里存储自定义的实验以快速执行。"
   },
   "newE": {
     "title": "新的实验",
@@ -31,7 +32,6 @@
       "schedule": "计划"
     },
     "loadFrom": "加载自",
-    "loadFromYaml": "从 YAML 文件加载",
     "basic": {
       "name": "名称",
       "nameHelper": "实验的名称",
@@ -165,6 +165,7 @@
     "other": "其他",
     "doc": "文档",
     "tutorial": "教程",
+    "add": "添加",
     "confirm": "确认",
     "cancel": "取消",
     "submit": "提交",

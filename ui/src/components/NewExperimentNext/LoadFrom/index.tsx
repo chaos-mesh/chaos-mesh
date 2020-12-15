@@ -5,10 +5,12 @@ import { setBasic, setKindAction, setTarget } from 'slices/experiments'
 
 import { Archive } from 'api/archives.type'
 import { Experiment } from 'api/experiments.type'
+import Paper from 'components-mui/Paper'
+import PaperTop from 'components-mui/PaperTop'
 import RadioLabel from './RadioLabel'
 import SkeletonN from 'components-mui/SkeletonN'
 import T from 'components/T'
-import Wrapper from './Wrapper'
+import YAML from './YAML'
 import _snakecase from 'lodash.snakecase'
 import api from 'api'
 import { useIntl } from 'react-intl'
@@ -68,47 +70,52 @@ const LoadFrom = () => {
   }
 
   return (
-    <Wrapper>
-      <RadioGroup value={radio} onChange={onRadioChange}>
-        <Box mb={3}>
-          <Typography>{T('experiments.title')}</Typography>
-        </Box>
-        {experiments && experiments.length > 0 ? (
-          experiments.map((e) => (
-            <FormControlLabel
-              key={e.uid}
-              value={`e+${e.uid}`}
-              control={<Radio color="primary" />}
-              label={RadioLabel(e)}
-            />
-          ))
-        ) : experiments?.length === 0 ? (
-          <Typography variant="body2">{T('experiments.noExperimentsFound')}</Typography>
-        ) : (
-          <SkeletonN n={3} />
-        )}
-        <Box my={6}>
-          <Divider />
-        </Box>
-        <Box mb={3}>
-          <Typography>{T('archives.title')}</Typography>
-        </Box>
-        {archives && archives.length > 0 ? (
-          archives.map((a) => (
-            <FormControlLabel
-              key={a.uid}
-              value={`a+${a.uid}`}
-              control={<Radio color="primary" />}
-              label={RadioLabel(a)}
-            />
-          ))
-        ) : archives?.length === 0 ? (
-          <Typography variant="body2">{T('archives.no_archives_found')}</Typography>
-        ) : (
-          <SkeletonN n={3} />
-        )}
-      </RadioGroup>
-    </Wrapper>
+    <Paper>
+      <PaperTop title={T('newE.loadFrom')}>
+        <YAML />
+      </PaperTop>
+      <Box p={6} maxHeight={450} style={{ overflowY: 'scroll' }}>
+        <RadioGroup value={radio} onChange={onRadioChange}>
+          <Box mb={3}>
+            <Typography>{T('experiments.title')}</Typography>
+          </Box>
+          {experiments && experiments.length > 0 ? (
+            experiments.map((e) => (
+              <FormControlLabel
+                key={e.uid}
+                value={`e+${e.uid}`}
+                control={<Radio color="primary" />}
+                label={RadioLabel(e)}
+              />
+            ))
+          ) : experiments?.length === 0 ? (
+            <Typography variant="body2">{T('experiments.noExperimentsFound')}</Typography>
+          ) : (
+            <SkeletonN n={3} />
+          )}
+          <Box my={6}>
+            <Divider />
+          </Box>
+          <Box mb={3}>
+            <Typography>{T('archives.title')}</Typography>
+          </Box>
+          {archives && archives.length > 0 ? (
+            archives.map((a) => (
+              <FormControlLabel
+                key={a.uid}
+                value={`a+${a.uid}`}
+                control={<Radio color="primary" />}
+                label={RadioLabel(a)}
+              />
+            ))
+          ) : archives?.length === 0 ? (
+            <Typography variant="body2">{T('archives.no_archives_found')}</Typography>
+          ) : (
+            <SkeletonN n={3} />
+          )}
+        </RadioGroup>
+      </Box>
+    </Paper>
   )
 }
 

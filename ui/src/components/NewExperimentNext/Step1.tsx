@@ -1,9 +1,8 @@
 import { Box, Card, Divider, GridList, GridListTile, Typography, useMediaQuery, useTheme } from '@material-ui/core'
 import React, { useEffect, useState } from 'react'
-import { RootState, useStoreDispatch } from 'store'
-import { createStyles, makeStyles } from '@material-ui/core/styles'
 import { setStep1, setTarget as setTargetToStore } from 'slices/experiments'
 import targetData, { Kind, schema } from './data/target'
+import { useStoreDispatch, useStoreSelector } from 'store'
 
 import CheckCircleOutlineIcon from '@material-ui/icons/CheckCircleOutline'
 import Kernel from './form/Kernel'
@@ -17,7 +16,7 @@ import TargetGenerated from './form/TargetGenerated'
 import UndoIcon from '@material-ui/icons/Undo'
 import _snakecase from 'lodash.snakecase'
 import clsx from 'clsx'
-import { useSelector } from 'react-redux'
+import { makeStyles } from '@material-ui/core/styles'
 
 const useStyles = makeStyles((theme) => {
   const cardActive = {
@@ -25,9 +24,10 @@ const useStyles = makeStyles((theme) => {
     borderColor: theme.palette.primary.main,
   }
 
-  return createStyles({
+  return {
     gridList: {
       flexWrap: 'nowrap',
+      // Promote the list into his own layer on Chrome. This cost memory but helps keeping high FPS.
       transform: 'translateZ(0)',
     },
     card: {
@@ -44,7 +44,7 @@ const useStyles = makeStyles((theme) => {
     asButton: {
       cursor: 'pointer',
     },
-  })
+  }
 })
 
 const submitDirectly = ['pod-failure', 'pod-kill']
@@ -57,7 +57,7 @@ const Step1 = () => {
   const {
     kindAction: [_kind, _action],
     step1,
-  } = useSelector((state: RootState) => state.experiments)
+  } = useStoreSelector((state) => state.experiments)
   const dispatch = useStoreDispatch()
 
   const [kindAction, setKindAction] = useState<[Kind | '', string]>([_kind, _action])

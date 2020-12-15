@@ -5,7 +5,6 @@ import { Button } from '@material-ui/core'
 import CloudUploadOutlinedIcon from '@material-ui/icons/CloudUploadOutlined'
 import React from 'react'
 import T from 'components/T'
-import Wrapper from './Wrapper'
 import _snakecase from 'lodash.snakecase'
 import { useIntl } from 'react-intl'
 import { useStoreDispatch } from 'store'
@@ -54,12 +53,10 @@ const YAML = () => {
   }
 
   return (
-    <Wrapper from="yaml">
-      <Button component="label" variant="outlined" size="small" startIcon={<CloudUploadOutlinedIcon />}>
-        {T('common.upload')}
-        <input type="file" style={{ display: 'none' }} onChange={handleUploadYAML} />
-      </Button>
-    </Wrapper>
+    <Button component="label" variant="outlined" size="small" startIcon={<CloudUploadOutlinedIcon />}>
+      {T('common.upload')}
+      <input type="file" style={{ display: 'none' }} onChange={handleUploadYAML} />
+    </Button>
   )
 }
 

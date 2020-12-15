@@ -76,12 +76,7 @@ const Welcome = () => {
         <Paper>
           <PaperTop title={T('dashboard.welcome')} />
           <Box className={classes.container}>
-            <Typography>
-              <span role="img" aria-label="smiling face with sunglasses">
-                😎
-              </span>{' '}
-              {T('dashboard.welcomeDesc')}
-            </Typography>
+            <Typography>{T('dashboard.welcomeDesc')}</Typography>
 
             <Box position="absolute" bottom={0} width="100%">
               <Button
@@ -112,12 +107,7 @@ const Welcome = () => {
         <Paper>
           <PaperTop title={T('dashboard.veteran')} />
           <Box className={classes.container}>
-            <Typography>
-              <span role="img" aria-label="firecracker">
-                🧨
-              </span>{' '}
-              {T('dashboard.veteranDesc')}
-            </Typography>
+            <Typography>{T('dashboard.veteranDesc')}</Typography>
 
             <Box position="absolute" bottom={0} width="100%">
               <Button

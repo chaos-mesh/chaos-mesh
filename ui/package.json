@@ -15,6 +15,7 @@
     "dayjs": "^1.8.28",
     "flat": "^5.0.2",
     "formik": "^2.2.1",
+    "idb": "^5.0.8",
     "js-yaml": "^3.14.0",
     "lodash.debounce": "^4.0.8",
     "lodash.get": "^4.4.2",

@@ -3,6 +3,7 @@ import React, { useEffect, useRef } from 'react'
 
 import Paper from 'components-mui/Paper'
 import PaperTop from 'components-mui/PaperTop'
+import Predefined from './Predefined'
 import { RootState } from 'store'
 import T from 'components/T'
 import Timeline from 'components/Timeline'
@@ -81,6 +82,7 @@ export default function Dashboard() {
           <Grid item md={12} lg={6}>
             <Paper>
               <PaperTop title={T('dashboard.totalExperiments')} />
+
               <Box className={classes.totalExperiments} height={300} m={3} overflow="scroll">
                 <TotalExperiments />
               </Box>
@@ -90,6 +92,7 @@ export default function Dashboard() {
           <Grid item xs={12} md={12} lg={3}>
             <Paper style={{ position: 'relative' }}>
               <PaperTop title={T('dashboard.totalState')} />
+
               <div ref={chaosStatePieChartRef} className={classes.container} />
               {Object.values(stateOfExperiments).filter((d) => d !== 0).length === 0 && (
                 <Typography className={classes.notFound} align="center">
@@ -102,13 +105,20 @@ export default function Dashboard() {
           <Grid item xs={12} md={12} lg={9}>
             <Paper>
               <PaperTop title={T('dashboard.predefined')} />
-              <Box height={150} m={3}></Box>
+
+              <Box height={150} mx={3}>
+                <Typography>{T('dashboard.predefinedDesc')}</Typography>
+                <Box py={6}>
+                  <Predefined />
+                </Box>
+              </Box>
             </Paper>
           </Grid>
 
           <Grid item xs={12} md={12} lg={9}>
             <Paper>
               <PaperTop title={T('common.timeline')} />
+
               <Timeline className={classes.container} />
             </Paper>
           </Grid>

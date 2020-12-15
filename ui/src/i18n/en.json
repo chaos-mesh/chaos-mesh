@@ -2,7 +2,7 @@
   "dashboard": {
     "title": "Dashboard",
     "welcome": "Welcome to Chaos Mesh Dashboard",
-    "welcomeDesc": "Don't know how to start? Click the button below to start a tutorial.",
+    "welcomeDesc": "😎 Don't know how to start? Click the button below to start a tutorial.",
     "tutorial": {
       "step1": "Dashboard is an overview of Chaos Mesh, where you can observe the running status of all experiments.",
       "step2": "Experiments manages all experiments, where you can perform various operations (pause, archive, update, etc.) on the experiment.",
@@ -15,10 +15,11 @@
       "step9": "🎉 Congratulations on completing all the tutorial steps! Click the blank space to exit."
     },
     "veteran": "Already a veteran",
-    "veteranDesc": "Start with a new experiment! After it's successfully created, you can return the dashboard to observe its status.",
+    "veteranDesc": "🧨 Start with a new experiment! After it's successfully created, you can return the dashboard to observe its status.",
     "totalExperiments": "Total Experiments",
     "totalState": "Total State",
-    "predefined": "Predefined"
+    "predefined": "Predefined",
+    "predefinedDesc": "📦 Store custom experiments here for quick execution."
   },
   "newE": {
     "title": "New Experiment",
@@ -31,7 +32,6 @@
       "schedule": "Schedule"
     },
     "loadFrom": "Load from",
-    "loadFromYaml": "Load from YAML file",
     "basic": {
       "name": "Name",
       "nameHelper": "The experiment name",
@@ -165,6 +165,7 @@
     "other": "Other",
     "doc": "Documentation",
     "tutorial": "Tutorial",
+    "add": "Add",
     "confirm": "Confirm",
     "cancel": "Cancel",
     "submit": "Submit",
