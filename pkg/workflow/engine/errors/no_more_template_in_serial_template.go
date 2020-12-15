@@ -16,8 +16,26 @@ package errors
 type NoMoreTemplateInSerialTemplateError struct {
 	Op  string
 	Err error
+
+	WorkflowName string
+	TemplateName string
+	NodeName     string
 }
 
-func NewNoMoreTemplateInSerialTemplateError() error {
-	panic("unimplemented")
+func (e *NoMoreTemplateInSerialTemplateError) Error() string {
+	return toJsonOrFallbackToError(e)
+}
+
+func (e *NoMoreTemplateInSerialTemplateError) Unwrap() error {
+	return e.Err
+}
+
+func NewNoMoreTemplateInSerialTemplateError(op, workflowName, templateName, nodeName string) *NoMoreTemplateInSerialTemplateError {
+	return &NoMoreTemplateInSerialTemplateError{
+		Op:           op,
+		Err:          ErrNoMoreTemplateInSerialTemplate,
+		WorkflowName: workflowName,
+		TemplateName: templateName,
+		NodeName:     nodeName,
+	}
 }

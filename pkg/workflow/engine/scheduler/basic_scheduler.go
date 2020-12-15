@@ -16,7 +16,6 @@ package scheduler
 import (
 	"context"
 	goerror "errors"
-
 	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/engine/errors"
 	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/engine/model/node"
 	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/engine/model/template"
@@ -38,11 +37,10 @@ func (it *basicScheduler) ScheduleNext(ctx context.Context) ([]template.Template
 	nodesMap := it.workflowStatus.FetchNodesMap()
 	if len(nodesMap) == 0 {
 		// first schedule
-		templates := it.workflowSpec.GetTemplates()
-		if templates == nil {
-			return nil, "", errors.NewNoTemplatesError(op, it.workflowSpec.GetName())
+		entry, err := it.workflowSpec.GetTemplateByName(it.workflowSpec.GetEntry())
+		if err != nil {
+			return nil, "", err
 		}
-		entry := templates.GetByTemplateName(it.workflowSpec.GetEntry())
 		return []template.Template{entry}, "", nil
 	}
 	var uncompletedSchedulableCompositeNode node.Node
@@ -71,10 +69,12 @@ func (it *basicScheduler) fetchChildrenForCompositeNode(parentNodeName string) (
 			return nil, errors.NewTreeNodeIsRequiredError(op, it.workflowSpec.GetName())
 		}
 		if nodeTreeNode := root.FetchNodeByName(parentNodeName); nodeTreeNode != nil {
-			childrenNodes := nodeTreeNode.GetChildren()
-			parentTemplate := it.workflowSpec.GetTemplates().GetByTemplateName(parentNode.GetTemplateName())
+			parentTemplate, err := it.workflowSpec.GetTemplateByName(parentNode.GetTemplateName())
+			if err != nil {
+				return nil, err
+			}
 			if parentTemplate == nil {
-				return nil, errors.NewNoSuchTemplateError()
+				return nil, errors.NewNoSuchTemplateError(op, it.workflowSpec.GetName(), parentNode.GetTemplateName())
 			}
 			// Serial template execute its children template one-by-one, so it need found out previous one
 			// is completed or not, then pick the next one.
@@ -84,7 +84,7 @@ func (it *basicScheduler) fetchChildrenForCompositeNode(parentNodeName string) (
 				if err != nil {
 					return nil, err
 				}
-				result, err := fetchNextTemplateFromSerial(childrenNodes, serialTemplate.GetSerialChildrenList())
+				result, err := it.fetchNextTemplateFromSerial(nodeTreeNode, serialTemplate.GetSerialChildrenList())
 				return []template.Template{result}, err
 
 			} else if parentNode.GetTemplateType() == template.Parallel {
@@ -102,7 +102,7 @@ func (it *basicScheduler) fetchChildrenForCompositeNode(parentNodeName string) (
 				if err != nil {
 					return nil, err
 				}
-				results, err := fetchAllAvailableTemplatesFromTask(taskNode, taskTemplate.GetAllTemplates())
+				results, err := it.fetchAllAvailableTemplatesFromTask(taskNode, taskTemplate.GetAllTemplates())
 				return results, err
 			} else {
 				return nil, errors.NewUnsupportedNodeTypeError(op, parentNode.GetName(), string(parentNode.GetTemplateType()), it.workflowSpec.GetName())
@@ -115,14 +115,16 @@ func (it *basicScheduler) fetchChildrenForCompositeNode(parentNodeName string) (
 	}
 }
 
-func fetchNextTemplateFromSerial(status node.NodeTreeChildren, childrenTemplates []template.Template) (template.Template, error) {
-	if status.Length() == len(childrenTemplates) {
+func (it *basicScheduler) fetchNextTemplateFromSerial(parentTreeNode node.NodeTreeNode, childrenTemplates []template.Template) (template.Template, error) {
+	op := "basicScheduler.fetchNextTemplateFromSerial"
+	// TODO: it might need all the workflow status
+	if parentTreeNode.GetChildren().Length() == len(childrenTemplates) {
 		// TODO: unexpected situation, warn log
-		return nil, errors.NewNoMoreTemplateInSerialTemplateError()
+		return nil, errors.NewNoMoreTemplateInSerialTemplateError(op, it.workflowSpec.GetName(), parentTreeNode.GetTemplateName(), parentTreeNode.GetName())
 	}
 
 	for _, item := range childrenTemplates {
-		if status.ContainsTemplate(item.GetName()) {
+		if parentTreeNode.GetChildren().ContainsTemplate(item.GetName()) {
 			continue
 		}
 		// TODO: debug logs
@@ -130,11 +132,11 @@ func fetchNextTemplateFromSerial(status node.NodeTreeChildren, childrenTemplates
 	}
 
 	// TODO: warn logs
-	return nil, errors.NewNoMoreTemplateInSerialTemplateError()
-
+	return nil, errors.NewNoMoreTemplateInSerialTemplateError(op, it.workflowSpec.GetName(), parentTreeNode.GetTemplateName(), parentTreeNode.GetName())
 }
 
-func fetchAllAvailableTemplatesFromTask(status node.TaskNode, allChildrenTemplates []template.Template) ([]template.Template, error) {
+func (it *basicScheduler) fetchAllAvailableTemplatesFromTask(status node.TaskNode, allChildrenTemplates []template.Template) ([]template.Template, error) {
+	op := "basicScheduler.fetchAllAvailableTemplatesFromTask"
 	nameOfAvailableTemplates, err := status.FetchAvailableChildren()
 	if err != nil {
 		return nil, err
@@ -143,13 +145,17 @@ func fetchAllAvailableTemplatesFromTask(status node.TaskNode, allChildrenTemplat
 	var result []template.Template
 
 	for _, name := range nameOfAvailableTemplates {
+		founded := false
 		for _, item := range allChildrenTemplates {
 			if item.GetName() == name {
 				result = append(result, item)
+				founded = true
 				break
 			}
 		}
-		return nil, errors.NewNoSuchTemplateError()
+		if !founded {
+			return nil, errors.NewNoSuchTemplateError(op, it.workflowSpec.GetName(), name)
+		}
 	}
 
 	return result, err

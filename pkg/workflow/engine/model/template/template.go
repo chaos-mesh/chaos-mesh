@@ -48,5 +48,5 @@ func (it TemplateType) IsCompositeType() bool {
 type Templates interface {
 	FetchAllTemplates() []Template
 	FetchTemplateMap() map[string]Template
-	GetByTemplateName(templateName string) Template
+	GetTemplateByName(templateName string) (Template, error)
 }

@@ -13,6 +13,27 @@
 
 package errors
 
-func NewNoSuchTemplateError() error {
-	panic("unimplemented")
+type NoSuchTemplateError struct {
+	Op  string
+	Err error
+
+	WorkflowName string
+	TemplateName string
+}
+
+func (e *NoSuchTemplateError) Error() string {
+	return toJsonOrFallbackToError(e)
+}
+
+func (e *NoSuchTemplateError) Unwrap() error {
+	return e.Err
+}
+
+func NewNoSuchTemplateError(op, workflowName, templateName string) *NoSuchTemplateError {
+	return &NoSuchTemplateError{
+		Op:           op,
+		Err:          ErrNoSuchTemplate,
+		WorkflowName: workflowName,
+		TemplateName: templateName,
+	}
 }

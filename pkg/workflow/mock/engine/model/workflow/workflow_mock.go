@@ -15,6 +15,7 @@ package workflow
 
 import (
 	"fmt"
+	mocktemplate "github.com/chaos-mesh/chaos-mesh/pkg/workflow/mock/engine/model/template"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/engine/model/node"
 	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/engine/model/template"
@@ -22,13 +23,15 @@ import (
 )
 
 type mockWorkflowSpec struct {
-	name      string
-	entry     string
-	templates template.Templates
+	name  string
+	entry string
+	template.Templates
 }
 
 func NewMockWorkflowSpec() *mockWorkflowSpec {
-	return &mockWorkflowSpec{}
+	return &mockWorkflowSpec{
+		Templates: mocktemplate.NewMockedTemplates(nil),
+	}
 }
 
 func (it *mockWorkflowSpec) SetName(name string) {
@@ -40,7 +43,7 @@ func (it *mockWorkflowSpec) SetEntry(entry string) {
 }
 
 func (it *mockWorkflowSpec) SetTemplates(templates template.Templates) {
-	it.templates = templates
+	it.Templates = templates
 }
 
 func (it *mockWorkflowSpec) GetName() string {
@@ -49,10 +52,6 @@ func (it *mockWorkflowSpec) GetName() string {
 
 func (it *mockWorkflowSpec) GetEntry() string {
 	return it.entry
-}
-
-func (it *mockWorkflowSpec) GetTemplates() template.Templates {
-	return it.templates
 }
 
 type mockWorkflowStatus struct {

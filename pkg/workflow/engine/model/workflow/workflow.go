@@ -19,9 +19,9 @@ import (
 )
 
 type WorkflowSpec interface {
+	template.Templates
 	GetName() string
 	GetEntry() string
-	GetTemplates() template.Templates
 }
 
 type WorkflowPhase string

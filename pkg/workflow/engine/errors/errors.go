@@ -14,12 +14,13 @@
 package errors
 
 var (
-	ErrNoNeedSchedule            = New("no need to schedule")
-	ErrNoSuchNode                = New("no such node")
-	ErrTemplatesIsRequired       = New("missing required templates in workflow spec")
-	ErrTreeNodeIsRequired        = New("missing required tree node in workflow status")
-	ErrUnsupportedNodeType       = New("unsupported node type")
-	ErrParseSerialTemplateFailed = New("failed to parse serial template")
+	ErrNoNeedSchedule                 = New("no need to schedule")
+	ErrNoSuchNode                     = New("no such node")
+	ErrNoSuchTemplate                 = New("no such template")
+	ErrTreeNodeIsRequired             = New("missing required tree node in workflow status")
+	ErrUnsupportedNodeType            = New("unsupported node type")
+	ErrParseSerialTemplateFailed      = New("failed to parse serial template")
+	ErrNoMoreTemplateInSerialTemplate = New("no more template could schedule in serial template")
 )
 
 type WorkflowError struct {

@@ -35,7 +35,7 @@ func TestEmptySpec(t *testing.T) {
 	scheduler := NewBasicScheduler(mockedWorkflowSpec, mockWorkflowStatus)
 	nextTemplates, parentNode, err := scheduler.ScheduleNext(context.Background())
 	assert.Error(t, err, "must be failed")
-	assert.True(t, errors.Is(err, workflowerr.ErrTemplatesIsRequired))
+	assert.True(t, errors.Is(err, workflowerr.ErrNoSuchTemplate))
 	assert.Equal(t, 0, len(nextTemplates))
 	assert.Equal(t, "", parentNode)
 }

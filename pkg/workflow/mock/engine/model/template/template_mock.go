@@ -15,6 +15,7 @@ package template
 
 import (
 	"fmt"
+	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/engine/errors"
 	"time"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/engine/model/template"
@@ -87,6 +88,10 @@ func (it *mockedTemplates) FetchTemplateMap() map[string]template.Template {
 	return result
 }
 
-func (it *mockedTemplates) GetByTemplateName(templateName string) template.Template {
-	return it.FetchTemplateMap()[templateName]
+func (it *mockedTemplates) GetTemplateByName(templateName string) (template.Template, error) {
+	if result, ok := it.FetchTemplateMap()[templateName]; ok {
+		return result, nil
+	} else {
+		return nil, errors.NewNoSuchTemplateError("", "", "")
+	}
 }
