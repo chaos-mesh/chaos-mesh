@@ -84,6 +84,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	}
 
 	status := chaos.GetStatus()
+	result := ctrl.Result{}
 
 	if chaos.IsDeleted() {
 		// This chaos was deleted
@@ -154,65 +155,66 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		}
 
 		status.FailedMessage = emptyString
-	} else if chaos.GetNextStart().Before(now) {
-		r.Log.Info("Starting")
-
-		tempStart, err := utils.NextTime(*chaos.GetScheduler(), now)
-		if err != nil {
-			r.Log.Error(err, "failed to calculate the start time")
-			updateFailedMessage(ctx, r, chaos, err.Error())
-			return ctrl.Result{}, err
-		}
-
-		tempRecover := now.Add(*duration)
-		if tempStart.Before(tempRecover) {
-			err := fmt.Errorf("nextRecover shouldn't be later than nextStart")
-			r.Log.Error(err, "Then recover can never be reached.", "scheduler", *chaos.GetScheduler(), "duration", *duration)
-			updateFailedMessage(ctx, r, chaos, err.Error())
-			return ctrl.Result{}, err
-		}
-
-		if err = applyAction(ctx, r, req, *duration, chaos); err != nil {
-			updateFailedMessage(ctx, r, chaos, err.Error())
-			return ctrl.Result{Requeue: true}, err
-		}
-
-		nextStart, err := utils.NextTime(*chaos.GetScheduler(), status.Experiment.StartTime.Time)
-		if err != nil {
-			r.Log.Error(err, "failed to get the next start time")
-			return ctrl.Result{}, err
-		}
-		nextRecover := status.Experiment.StartTime.Time.Add(*duration)
-
-		chaos.SetNextStart(*nextStart)
-		chaos.SetNextRecover(nextRecover)
-		status.FailedMessage = emptyString
 	} else {
-		r.Log.Info("Waiting")
-
-		nextStart, err := utils.NextTime(*chaos.GetScheduler(), status.Experiment.StartTime.Time)
-		if err != nil {
-			r.Log.Error(err, "failed to get next start time")
-			return ctrl.Result{}, err
-		}
-		nextTime := chaos.GetNextStart()
-
-		// if nextStart is not equal to nextTime, the scheduler may have been modified.
-		// So set nextStart to time.Now.
-		if nextStart.Equal(nextTime) {
-			if !chaos.GetNextRecover().IsZero() && chaos.GetNextRecover().Before(nextTime) {
-				nextTime = chaos.GetNextRecover()
+		if chaos.GetNextStart() == (time.Time{}) {
+			// this is the first time start, calculate the next start time
+			nextStart, err := utils.NextTime(*chaos.GetScheduler(), now, true)
+			if err != nil {
+				r.Log.Error(err, "failed to calculate the start time")
+				updateFailedMessage(ctx, r, chaos, err.Error())
+				return ctrl.Result{}, err
 			}
-			duration := nextTime.Sub(now)
-			r.Log.Info("Requeue request", "after", duration)
-
-			return ctrl.Result{RequeueAfter: duration}, nil
+			chaos.SetNextStart(*nextStart)
+			r.Log.Info("First time start, set the next start time", "next start time", *nextStart)
+			status.Experiment.StartTime = &metav1.Time{Time: now}
 		}
 
-		chaos.SetNextStart(time.Now())
-		duration := nextTime.Sub(now)
-		r.Log.Info("Requeue request", "after", duration)
-		return ctrl.Result{RequeueAfter: duration}, nil
+		if chaos.GetNextStart().Before(now) {
+			r.Log.Info("Starting")
+			if err = applyAction(ctx, r, req, *duration, chaos); err != nil {
+				updateFailedMessage(ctx, r, chaos, err.Error())
+				return ctrl.Result{Requeue: true}, err
+			}
+
+			nextStart, err := utils.NextTime(*chaos.GetScheduler(), status.Experiment.StartTime.Time, false)
+			if err != nil {
+				r.Log.Error(err, "failed to get the next start time")
+				return ctrl.Result{}, err
+			}
+			nextRecover := status.Experiment.StartTime.Time.Add(*duration)
+			if nextStart.Before(nextRecover) {
+				r.Log.Info("nextRecover shouldn't be later than nextStart, update the nextStart time")
+				*nextStart = nextRecover.Add(time.Second)
+			}
+
+			chaos.SetNextStart(*nextStart)
+			chaos.SetNextRecover(nextRecover)
+			status.FailedMessage = emptyString
+		} else {
+			r.Log.Info("Waiting")
+			nextStart, err := utils.NextTime(*chaos.GetScheduler(), status.Experiment.StartTime.Time, false)
+			if err != nil {
+				r.Log.Error(err, "failed to get next start time")
+				return ctrl.Result{}, err
+			}
+
+			nextTime := chaos.GetNextStart()
+			var duration time.Duration
+			// if nextStart is not equal to nextTime, the scheduler may have been modified.
+			// So set nextStart to new next start time.
+			if nextStart.Equal(nextTime) {
+				if !chaos.GetNextRecover().IsZero() && chaos.GetNextRecover().Before(nextTime) {
+					nextTime = chaos.GetNextRecover()
+				}
+				duration = nextTime.Sub(now)
+			} else {
+				chaos.SetNextStart(*nextStart)
+				duration = nextStart.Sub(now)
+			}
+
+			r.Log.Info("Requeue request", "after", duration)
+			result.RequeueAfter = duration
+		}
 	}
 
 	if err := r.Update(ctx, chaos); err != nil {
@@ -220,7 +222,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		return ctrl.Result{}, err
 	}
 
-	return ctrl.Result{}, nil
+	return result, nil
 }
 
 func applyAction(
