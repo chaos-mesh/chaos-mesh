@@ -393,11 +393,6 @@ spec:
               type: object
             failedMessage:
               type: string
-            phase:
-              description: Phase is the chaos status.
-              type: string
-            reason:
-              type: string
             scheduler:
               description: ScheduleStatus is the current status of chaos scheduler.
               properties:
@@ -412,7 +407,6 @@ spec:
               type: object
           required:
           - experiment
-          - phase
           type: object
       required:
       - spec
