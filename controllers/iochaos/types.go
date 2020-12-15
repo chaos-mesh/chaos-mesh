@@ -25,6 +25,7 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/controllers/config"
 	"github.com/chaos-mesh/chaos-mesh/controllers/iochaos/podiochaosmanager"
 	"github.com/chaos-mesh/chaos-mesh/pkg/router"
 	ctx "github.com/chaos-mesh/chaos-mesh/pkg/router/context"
@@ -52,10 +53,18 @@ func (r *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.I
 	source := iochaos.Namespace + "/" + iochaos.Name
 	m := podiochaosmanager.New(source, r.Log, r.Client)
 
-	pods, err := utils.SelectAndFilterPods(ctx, r.Client, r.Reader, &iochaos.Spec)
+	pods, err := utils.SelectAndFilterPods(ctx, r.Client, r.Reader, &iochaos.Spec, config.ControllerCfg.ClusterScoped, config.ControllerCfg.TargetNamespace, config.ControllerCfg.AllowedNamespaces, config.ControllerCfg.IgnoredNamespaces)
 	if err != nil {
 		r.Log.Error(err, "failed to select and filter pods")
 		return err
+	}
+
+	keyPodMap := make(map[types.NamespacedName]v1.Pod)
+	for _, pod := range pods {
+		keyPodMap[types.NamespacedName{
+			Name:      pod.Name,
+			Namespace: pod.Namespace,
+		}] = pod
 	}
 
 	r.Log.Info("applying iochaos", "iochaos", iochaos)
@@ -99,14 +108,22 @@ func (r *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.I
 		iochaos.Finalizers = utils.InsertFinalizer(iochaos.Finalizers, key)
 	}
 	r.Log.Info("commiting updates of podiochaos")
-	err = m.Commit(ctx)
-	if err != nil {
-		r.Log.Error(err, "fail to commit")
-		return err
-	}
-
+	responses := m.Commit(ctx)
 	iochaos.Status.Experiment.PodRecords = make([]v1alpha1.PodStatus, 0, len(pods))
-	for _, pod := range pods {
+	for _, keyErrorTuple := range responses {
+		key := keyErrorTuple.Key
+		err := keyErrorTuple.Err
+		if err != nil {
+			if err != podiochaosmanager.ErrPodNotFound && err != podiochaosmanager.ErrPodNotRunning {
+				r.Log.Error(err, "fail to commit")
+			} else {
+				r.Log.Info("pod is not found or not running", "key", key)
+			}
+			return err
+		}
+
+		pod := keyPodMap[keyErrorTuple.Key]
+
 		ps := v1alpha1.PodStatus{
 			Namespace: pod.Namespace,
 			Name:      pod.Name,

@@ -34,19 +34,21 @@ import (
 
 // Reconciler reconciles a chaos resource
 type Reconciler struct {
-	Name      string
-	Object    runtime.Object
-	Endpoints []routeEndpoint
+	Name            string
+	Object          runtime.Object
+	Endpoints       []routeEndpoint
+	ClusterScoped   bool
+	TargetNamespace string
 
 	ctx.Context
 }
 
 // Reconcile reconciles a chaos resource
 func (r *Reconciler) Reconcile(req ctrl.Request) (result ctrl.Result, err error) {
-	if !common.ControllerCfg.ClusterScoped && req.Namespace != common.ControllerCfg.TargetNamespace {
+	if !r.ClusterScoped && req.Namespace != r.TargetNamespace {
 		// NOOP
 		r.Log.Info("ignore chaos which belongs to an unexpected namespace within namespace scoped mode",
-			"chaosName", req.Name, "expectedNamespace", common.ControllerCfg.TargetNamespace, "actualNamespace", req.Namespace)
+			"chaosName", req.Name, "expectedNamespace", r.TargetNamespace, "actualNamespace", req.Namespace)
 		return ctrl.Result{}, nil
 	}
 
@@ -87,7 +89,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (result ctrl.Result, err error)
 		reconciler = common.NewReconciler(controller, ctx)
 	} else if scheduler != nil {
 		// scheduler != nil && duration != nil
-		// but PodKill is an expection
+		// but PodKill is an exception
 		reconciler = twophase.NewReconciler(controller, ctx)
 	} else {
 		err := errors.Errorf("both scheduler and duration should be nil or not nil")
@@ -107,11 +109,13 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (result ctrl.Result, err error)
 }
 
 // NewReconciler creates a new reconciler
-func NewReconciler(name string, object runtime.Object, mgr ctrl.Manager, endpoints []routeEndpoint) *Reconciler {
+func NewReconciler(name string, object runtime.Object, mgr ctrl.Manager, endpoints []routeEndpoint, clusterScoped bool, targetNamespace string) *Reconciler {
 	return &Reconciler{
-		Name:      name,
-		Object:    object,
-		Endpoints: endpoints,
+		Name:            name,
+		Object:          object,
+		Endpoints:       endpoints,
+		ClusterScoped:   clusterScoped,
+		TargetNamespace: targetNamespace,
 
 		Context: ctx.Context{
 			Client:        mgr.GetClient(),

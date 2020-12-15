@@ -87,14 +87,14 @@ export default function ExperimentDetail() {
     api.experiments
       .detail(uuid)
       .then(({ data }) => setDetail(data))
-      .catch(console.log)
+      .catch(console.error)
   }
 
   const fetchEvents = () =>
     api.events
       .events()
       .then(({ data }) => setEvents(data.filter((d) => d.experiment_id === uuid)))
-      .catch(console.log)
+      .catch(console.error)
       .finally(() => {
         setLoading(false)
       })
@@ -208,7 +208,7 @@ export default function ExperimentDetail() {
           fetchExperimentDetail()
         }
       })
-      .catch(console.log)
+      .catch(console.error)
   }
 
   const handleUpdateExperiment = () => {
@@ -227,7 +227,7 @@ export default function ExperimentDetail() {
         dispatch(setAlertOpen(true))
         fetchExperimentDetail()
       })
-      .catch(console.log)
+      .catch(console.error)
   }
 
   return (
@@ -328,7 +328,7 @@ export default function ExperimentDetail() {
         setOpen={setDialogOpen}
         title={dialogInfo.title}
         description={dialogInfo.description}
-        handleConfirm={handleExperiment(dialogInfo.action)}
+        onConfirm={handleExperiment(dialogInfo.action)}
       />
 
       {loading && <Loading />}

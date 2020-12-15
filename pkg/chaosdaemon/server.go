@@ -54,22 +54,30 @@ func (c *Config) GrpcAddr() string {
 	return fmt.Sprintf("%s:%d", c.Host, c.GRPCPort)
 }
 
-// Server represents a grpc server for tc daemon
-type daemonServer struct {
+// DaemonServer represents a grpc server for tc daemon
+type DaemonServer struct {
 	crClient                 ContainerRuntimeInfoClient
 	backgroundProcessManager bpm.BackgroundProcessManager
 }
 
-func newDaemonServer(containerRuntime string) (*daemonServer, error) {
+func newDaemonServer(containerRuntime string) (*DaemonServer, error) {
 	crClient, err := CreateContainerRuntimeInfoClient(containerRuntime)
 	if err != nil {
 		return nil, err
 	}
 
-	return &daemonServer{
+	return &DaemonServer{
 		crClient:                 crClient,
 		backgroundProcessManager: bpm.NewBackgroundProcessManager(),
 	}, nil
+}
+
+// NewDaemonServerWithCRClient returns DaemonServer with container runtime client
+func NewDaemonServerWithCRClient(crClient ContainerRuntimeInfoClient) *DaemonServer {
+	return &DaemonServer{
+		crClient:                 crClient,
+		backgroundProcessManager: bpm.NewBackgroundProcessManager(),
+	}
 }
 
 func newGRPCServer(containerRuntime string, reg prometheus.Registerer) (*grpc.Server, error) {

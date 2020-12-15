@@ -21,7 +21,9 @@ The following tables list the configurable parameters of the Chaos Mesh chart an
 | `timezone` | The timezone where controller-manager, chaos-daemon and dashboard uses. For example: `UTC`, `Asia/Shanghai` | `UTC` |
 | `enableProfiling` | A flag to enable pprof in controller-manager and chaos-daemon  | `true` |
 | `controllerManager.hostNetwork` | running chaos-controller-manager on host network | `false` |
+| `controllerManager.allowHostNetworkTesting`   | Allow testing on `hostNetwork` pods | `false` |
 | `controllerManager.serviceAccount` | The serviceAccount for chaos-controller-manager | `chaos-controller-manager` |
+| `controllerManager.priorityClassName` | Custom priorityClassName for using pod priorities | `` |
 | `controllerManager.replicaCount` | Replicas for chaos-controller-manager | `1` |
 | `controllerManager.image` | docker image for chaos-controller-manager  | `pingcap/chaos-mesh:latest` |
 | `controllerManager.imagePullPolicy` | Image pull policy | `Always` |
@@ -41,6 +43,7 @@ The following tables list the configurable parameters of the Chaos Mesh chart an
 | `chaosDaemon.httpPort` | The port which http server listens on | `31766` |
 | `chaosDaemon.env` | chaosDaemon envs | `{}` |
 | `chaosDaemon.hostNetwork` | running chaosDaemon on host network | `false` |
+| `chaosDaemon.priorityClassName` | Custom priorityClassName for using pod priorities | `` |
 | `chaosDaemon.podAnnotations` | Pod annotations of chaos-daemon | `{}` |
 | `chaosDaemon.runtime` | Runtime specifies which container runtime to use. Currently we only supports docker and containerd. | `docker` |
 | `chaosDaemon.socketPath` | Specifies the container runtime socket | `/var/run/docker.sock` |
@@ -53,6 +56,7 @@ The following tables list the configurable parameters of the Chaos Mesh chart an
 | `bpfki.resources` | CPU/Memory resource requests/limits for chaos-kernel container | `requests: { cpu: "250m", memory: "512Mi" }, limits:{ cpu: "500m", memory: "1024Mi" }`  |
 | `dashboard.create` | Enable chaos-dashboard | `false` |
 | `dashboard.serviceAccount` | The serviceAccount for chaos-dashboard  | `chaos-dashboard` |
+| `dashboard.priorityClassName` | Custom priorityClassName for using pod priorities | `` |
 | `dashboard.image` | Docker image for chaos-dashboard | `pingcap/chaos-dashboard:latest` |
 | `dashboard.imagePullPolicy` | Image pull policy | `Always` |
 | `dashboard.nodeSelector` | Node labels for chaos-dashboard  pod assignment | `{}` |
@@ -66,6 +70,9 @@ The following tables list the configurable parameters of the Chaos Mesh chart an
 | `dashboard.persistentVolume.storageClassName` | Chaos Dashboard data Persistent Volume Storage Class | `standard` |
 | `dashboard.persistentVolume.mountPath` | Chaos Dashboard data Persistent Volume mount root path | `/data` |
 | `dashboard.persistentVolume.subPath` | Subdirectory of  Chaos Dashboard data Persistent Volume to mount | `` |
+| `dashboard.service.type`              | Service type of the service created for exposing the dashboard                             | `NodePort`     |
+| `dashboard.service.clusterIP`         | Set the `clusterIP` of the dashboard service if the type is `ClusterIP` | `nil`           |
+| `dashboard.service.nodePort`          | Set the `nodePort` of the dashboard service if the type is `NodePort`  | `nil`           |
 | `dashboard.env` | The keys within the `env` map are mounted as environment variables on the Chaos Dashboard pod | `` |
 | `dashboard.env.LISTEN_HOST` | | `0.0.0.0` |
 | `dashboard.env.LISTEN_PORT` | | `2333` |
@@ -81,6 +88,7 @@ The following tables list the configurable parameters of the Chaos Mesh chart an
 | `dashboard.ingress.hosts[0].tlsSecret`        | TLS Secret (certificates)                                                             | `dashboard.local-tls` |
 | `prometheus.create` | Enable prometheus | `false` |
 | `prometheus.serviceAccount` | The serviceAccount for prometheus | `prometheus` |
+| `prometheus.priorityClassName` | Custom priorityClassName for using pod priorities | `` |
 | `prometheus.image` | Docker image for prometheus | `prom/prometheus:v2.15.2` |
 | `prometheus.imagePullPolicy` | Image pull policy | `IfNotPresent` |
 | `prometheus.nodeSelector` | Node labels for prometheus pod assignment | `{}` |

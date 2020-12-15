@@ -31,6 +31,7 @@ spec:
       {{- if .Values.dashboard.serviceAccount }}
       serviceAccount: {{ .Values.dashboard.serviceAccount }}
       {{- end }}
+      priorityClassName: {{ .Values.dashboard.priorityClassName}}
       containers:
         - name: chaos-dashboard
           image: {{ .Values.dashboard.image }}
@@ -52,6 +53,8 @@ spec:
               value: {{ .Values.controllerManager.targetNamespace }}
             - name: CLUSTER_SCOPED
               value: "{{ .Values.clusterScoped }}"
+            - name: SECURITY_MODE
+              value: "{{ .Values.dashboard.securityMode }}"
             {{- if .Values.controllerManager.allowedNamespaces }}
             - name: ALLOWED_NAMESPACES
               value: {{ .Values.controllerManager.allowedNamespaces }}
@@ -104,10 +107,16 @@ spec:
     app.kubernetes.io/name: {{ template "chaos-mesh.name" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/component: chaos-dashboard
-  type: NodePort
+  type: {{ .Values.dashboard.service.type }}
+{{- if and .Values.dashboard.service.clusterIP (eq .Values.dashboard.service.type "ClusterIP") }}
+  clusterIP: {{ .Values.dashboard.service.clusterIP }}
+{{- end }}
   ports:
     - protocol: TCP
       port: {{ .Values.dashboard.env.LISTEN_PORT }}
       targetPort: {{ .Values.dashboard.env.LISTEN_PORT }}
       name: http
+{{- if and .Values.dashboard.service.nodePort (eq .Values.dashboard.service.type "NodePort") }}
+      nodePort: {{ .Values.dashboard.service.nodePort }}
+{{- end }}
 {{- end }}

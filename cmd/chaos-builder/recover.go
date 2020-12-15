@@ -101,6 +101,7 @@ const cleanWithManagerTemplate = `
 	m := {{.Manager}}.New(source, r.Log, r.Client)
 
 	for _, key := range chaos.Finalizers {
+
 		ns, name, err := cache.SplitMetaNamespaceKey(key)
 		if err != nil {
 			result = multierror.Append(result, err)
@@ -111,24 +112,30 @@ const cleanWithManagerTemplate = `
 			Namespace: ns,
 			Name:      name,
 		})
-
+	}
+	responses := m.Commit(ctx)
+	for _, response := range responses {
+		key := response.Key
+		err := response.Err
+		// if pod not found or not running, directly return and giveup recover.
 		if err != nil {
-			result = multierror.Append(result, err)
-			continue
+			if err != {{.Manager}}.ErrPodNotFound && err != {{.Manager}}.ErrPodNotRunning {
+				r.Log.Error(err, "fail to commit", "key", key)
+
+				result = multierror.Append(result, err)
+				continue
+			}
+
+			r.Log.Info("pod is not found or not running", "key", key)
 		}
 
-		err = m.Commit(ctx)
-		if err != nil {
-			r.Log.Error(err, "fail to commit")
-		}
-
-		chaos.Finalizers = utils.RemoveFromFinalizer(chaos.Finalizers, key)
+		chaos.Finalizers = utils.RemoveFromFinalizer(chaos.Finalizers, response.Key.String())
 	}
 	r.Log.Info("After recovering", "finalizers", chaos.Finalizers)
 
 	if chaos.Annotations[common.AnnotationCleanFinalizer] == common.AnnotationCleanFinalizerForced {
 		r.Log.Info("Force cleanup all finalizers", "chaos", chaos)
-		chaos.Finalizers = chaos.Finalizers[:0]
+		chaos.Finalizers = make([]string, 0)
 		return nil
 	}
 
