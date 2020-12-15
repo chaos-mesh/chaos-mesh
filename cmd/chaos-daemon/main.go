@@ -51,7 +51,7 @@ func main() {
 		os.Exit(0)
 	}
 
-	ctrl.SetLogger(zap.Logger(true))
+	ctrl.SetLogger(zap.New(zap.UseDevMode(true)))
 
 	reg := prometheus.NewRegistry()
 	reg.MustRegister(
