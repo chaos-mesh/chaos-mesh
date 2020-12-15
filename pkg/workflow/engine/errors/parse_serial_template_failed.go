@@ -13,25 +13,27 @@
 
 package errors
 
-type NoTemplatesError struct {
+import "reflect"
+
+type ParseSerialTemplateFailedError struct {
 	Op  string
 	Err error
 
-	WorkflowName string
+	RawType string
 }
 
-func (e *NoTemplatesError) Error() string {
+func (e *ParseSerialTemplateFailedError) Error() string {
 	return toJsonOrFallbackToError(e)
 }
 
-func (e *NoTemplatesError) Unwrap() error {
+func (e *ParseSerialTemplateFailedError) Unwrap() error {
 	return e.Err
 }
 
-func NewNoTemplatesError(op, workflowName string) *NoTemplatesError {
-	return &NoTemplatesError{
-		Op:           op,
-		Err:          ErrNoTemplates,
-		WorkflowName: workflowName,
+func NewParseSerialTemplateFailedError(op string, raw interface{}) *ParseSerialTemplateFailedError {
+	return &ParseSerialTemplateFailedError{
+		Op:      op,
+		Err:     ErrParseSerialTemplateFailed,
+		RawType: reflect.TypeOf(raw).Name(),
 	}
 }

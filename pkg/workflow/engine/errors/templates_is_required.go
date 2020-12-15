@@ -11,19 +11,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package template
+package errors
 
-import "github.com/chaos-mesh/chaos-mesh/pkg/workflow/engine/errors"
+type TemplatesIsRequiredError struct {
+	Op  string
+	Err error
 
-type SerialTemplate interface {
-	Template
-	GetSerialChildrenList() []Template
+	WorkflowName string
 }
 
-func ParseSerialTemplate(raw interface{}) (SerialTemplate, error) {
-	op := "template.ParseSerialTemplate"
-	if target, ok := raw.(SerialTemplate); ok {
-		return target, nil
+func (e *TemplatesIsRequiredError) Error() string {
+	return toJsonOrFallbackToError(e)
+}
+
+func (e *TemplatesIsRequiredError) Unwrap() error {
+	return e.Err
+}
+
+func NewNoTemplatesError(op, workflowName string) *TemplatesIsRequiredError {
+	return &TemplatesIsRequiredError{
+		Op:           op,
+		Err:          ErrTemplatesIsRequired,
+		WorkflowName: workflowName,
 	}
-	return nil, errors.NewParseSerialTemplateFailedError(op, raw)
 }

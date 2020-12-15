@@ -43,14 +43,14 @@ type Node interface {
 
 type NodeTreeNode interface {
 	GetName() string
+	GetTemplateName() string
 	GetChildren() NodeTreeChildren
-	GetParent() NodeTreeNode
-	FetchChildNodeByNodeName(nodeName string) NodeTreeNode
+	FetchNodeByName(nodeName string) NodeTreeNode
 }
 
 type NodeTreeChildren interface {
 	Length() int
-	ContainsName(nodeName string) bool
+	ContainsNode(nodeName string) bool
 	ContainsTemplate(templateName string) bool
 	GetAllChildrenNode() []NodeTreeNode
 }

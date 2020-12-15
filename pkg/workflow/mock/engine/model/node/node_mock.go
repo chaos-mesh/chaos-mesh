@@ -26,28 +26,12 @@ type mockNode struct {
 	templateType   template.TemplateType
 }
 
-func NewMockNode() *mockNode {
-	return &mockNode{}
-}
-
-func (it *mockNode) SetNodeName(nodeName string) {
-	it.nodeName = nodeName
+func NewMockNode(nodeName string, phase node.NodePhase, parentNodeName string, templateName string, templateType template.TemplateType) *mockNode {
+	return &mockNode{nodeName: nodeName, phase: phase, parentNodeName: parentNodeName, templateName: templateName, templateType: templateType}
 }
 
 func (it *mockNode) SetPhase(phase node.NodePhase) {
 	it.phase = phase
-}
-
-func (it *mockNode) SetParentNodeName(parentNodeName string) {
-	it.parentNodeName = parentNodeName
-}
-
-func (it *mockNode) SetTemplateName(templateName string) {
-	it.templateName = templateName
-}
-
-func (it *mockNode) SetTemplateType(templateType template.TemplateType) {
-	it.templateType = templateType
 }
 
 func (it *mockNode) GetName() string {
@@ -68,4 +52,80 @@ func (it *mockNode) GetTemplateName() string {
 
 func (it *mockNode) GetTemplateType() template.TemplateType {
 	return it.templateType
+}
+
+type mockTreeNode struct {
+	nodeName     string
+	templateName string
+	children     *mockNodeTreeChildren
+}
+
+func NewMockTreeNode(nodeName string, templateName string, children *mockNodeTreeChildren) *mockTreeNode {
+	return &mockTreeNode{nodeName: nodeName, templateName: templateName, children: children}
+}
+
+func (it *mockTreeNode) SetChildren(children *mockNodeTreeChildren) {
+	it.children = children
+}
+
+func (it *mockTreeNode) GetName() string {
+	return it.nodeName
+}
+
+func (it *mockTreeNode) FetchNodeByName(nodeName string) node.NodeTreeNode {
+	if it.GetName() == nodeName {
+		return it
+	}
+	for _, treeNode := range it.GetChildren().GetAllChildrenNode() {
+		target := treeNode.FetchNodeByName(nodeName)
+		if target != nil {
+			return target
+		}
+	}
+	return nil
+}
+
+func (it *mockTreeNode) GetTemplateName() string {
+	return it.templateName
+}
+
+func (it *mockTreeNode) GetChildren() node.NodeTreeChildren {
+	return it.children
+}
+
+type mockNodeTreeChildren struct {
+	nodesMap map[string]node.NodeTreeNode
+}
+
+func NewMockNodeTreeChildren(nodesMap map[string]node.NodeTreeNode) *mockNodeTreeChildren {
+	if nodesMap == nil {
+		nodesMap = make(map[string]node.NodeTreeNode)
+	}
+	return &mockNodeTreeChildren{nodesMap: nodesMap}
+}
+
+func (it *mockNodeTreeChildren) Length() int {
+	return len(it.nodesMap)
+}
+
+func (it *mockNodeTreeChildren) ContainsNode(nodeName string) bool {
+	_, exists := it.nodesMap[nodeName]
+	return exists
+}
+
+func (it *mockNodeTreeChildren) ContainsTemplate(templateName string) bool {
+	for _, treeNode := range it.nodesMap {
+		if treeNode.GetTemplateName() == templateName {
+			return true
+		}
+	}
+	return false
+}
+
+func (it *mockNodeTreeChildren) GetAllChildrenNode() []node.NodeTreeNode {
+	result := make([]node.NodeTreeNode, 0)
+	for _, treeNode := range it.nodesMap {
+		result = append(result, treeNode)
+	}
+	return result
 }

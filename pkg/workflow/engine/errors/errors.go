@@ -13,12 +13,25 @@
 
 package errors
 
-import (
-	"errors"
+var (
+	ErrNoNeedSchedule            = New("no need to schedule")
+	ErrNoSuchNode                = New("no such node")
+	ErrTemplatesIsRequired       = New("missing required templates in workflow spec")
+	ErrTreeNodeIsRequired        = New("missing required tree node in workflow status")
+	ErrUnsupportedNodeType       = New("unsupported node type")
+	ErrParseSerialTemplateFailed = New("failed to parse serial template")
 )
 
-var (
-	ErrNoNeedSchedule = errors.New("no need to schedule")
-	ErrNoSuchNode     = errors.New("no such node")
-	ErrNoTemplates    = errors.New("no templates in workflow spec")
-)
+type WorkflowError struct {
+	Message string
+}
+
+func (it *WorkflowError) Error() string {
+	return it.Message
+}
+
+func New(message string) *WorkflowError {
+	return &WorkflowError{
+		Message: message,
+	}
+}

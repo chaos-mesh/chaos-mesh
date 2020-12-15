@@ -66,9 +66,16 @@ func (it *basicScheduler) fetchChildrenForCompositeNode(parentNodeName string) (
 	op := "basicScheduler.fetchChildrenForCompositeNode"
 
 	if parentNode, ok := it.workflowStatus.FetchNodesMap()[parentNodeName]; ok {
-		if nodeTreeNode := it.workflowStatus.GetNodesTree().FetchChildNodeByNodeName(parentNodeName); nodeTreeNode != nil {
+		root := it.workflowStatus.GetNodesTree()
+		if root == nil {
+			return nil, errors.NewTreeNodeIsRequiredError(op, it.workflowSpec.GetName())
+		}
+		if nodeTreeNode := root.FetchNodeByName(parentNodeName); nodeTreeNode != nil {
 			childrenNodes := nodeTreeNode.GetChildren()
 			parentTemplate := it.workflowSpec.GetTemplates().GetByTemplateName(parentNode.GetTemplateName())
+			if parentTemplate == nil {
+				return nil, errors.NewNoSuchTemplateError()
+			}
 			// Serial template execute its children template one-by-one, so it need found out previous one
 			// is completed or not, then pick the next one.
 			// Parallel and Task execute all children at once, so it should runs into here only one time.
@@ -98,7 +105,7 @@ func (it *basicScheduler) fetchChildrenForCompositeNode(parentNodeName string) (
 				results, err := fetchAllAvailableTemplatesFromTask(taskNode, taskTemplate.GetAllTemplates())
 				return results, err
 			} else {
-				return nil, errors.NewUnsupportedNodeTypeError(op, parentNode.GetName(), parentNode.GetTemplateType(), it.workflowSpec.GetName())
+				return nil, errors.NewUnsupportedNodeTypeError(op, parentNode.GetName(), string(parentNode.GetTemplateType()), it.workflowSpec.GetName())
 			}
 		} else {
 			return nil, errors.NewNoSuchTreeNodeError(op, parentNodeName, it.workflowSpec.GetName())

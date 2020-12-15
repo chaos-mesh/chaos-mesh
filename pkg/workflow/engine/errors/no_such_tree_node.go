@@ -13,6 +13,27 @@
 
 package errors
 
-func NewNoSuchTreeNodeError(op string, nodeName string, workflowName string) error {
-	panic("unimplemented")
+type NoSuchTreeNodeError struct {
+	Op  string
+	Err error
+
+	WorkflowName   string
+	ParentNodeName string
+}
+
+func (e *NoSuchTreeNodeError) Error() string {
+	return toJsonOrFallbackToError(e)
+}
+
+func (e *NoSuchTreeNodeError) Unwrap() error {
+	return e.Err
+}
+
+func NewNoSuchTreeNodeError(op string, parentNodeName string, workflowName string) *NoSuchTreeNodeError {
+	return &NoSuchTreeNodeError{
+		Op:             op,
+		Err:            ErrNoSuchNode,
+		WorkflowName:   workflowName,
+		ParentNodeName: parentNodeName,
+	}
 }

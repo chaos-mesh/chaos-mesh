@@ -13,8 +13,29 @@
 
 package errors
 
-import "github.com/chaos-mesh/chaos-mesh/pkg/workflow/engine/model/template"
+type UnsupportedNodeTypeError struct {
+	Op  string
+	Err error `json:"err"`
 
-func NewUnsupportedNodeTypeError(op string, nodeName string, templateType template.TemplateType, workflowName string) error {
-	panic("unimplemented")
+	NodeName     string
+	TemplateType string
+	WorkflowName string
+}
+
+func (e *UnsupportedNodeTypeError) Error() string {
+	return toJsonOrFallbackToError(e)
+}
+
+func (e *UnsupportedNodeTypeError) Unwrap() error {
+	return e.Err
+}
+
+func NewUnsupportedNodeTypeError(op string, nodeName string, templateType string, workflowName string) *UnsupportedNodeTypeError {
+	return &UnsupportedNodeTypeError{
+		Op:           op,
+		Err:          ErrUnsupportedNodeType,
+		NodeName:     nodeName,
+		TemplateType: templateType,
+		WorkflowName: workflowName,
+	}
 }

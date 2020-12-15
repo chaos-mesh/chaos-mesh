@@ -13,6 +13,11 @@
 
 package errors
 
+type NoMoreTemplateInSerialTemplateError struct {
+	Op  string
+	Err error
+}
+
 func NewNoMoreTemplateInSerialTemplateError() error {
 	panic("unimplemented")
 }
