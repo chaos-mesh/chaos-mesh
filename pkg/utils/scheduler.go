@@ -1,4 +1,4 @@
-// Copyright 2019 Chaos Mesh Authors.
+// Copyright 2020 Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -51,6 +51,8 @@ func LastTime(spec v1alpha1.SchedulerSpec, now time.Time) (*time.Time, error) {
 	} else if cronSpec, ok := scheduler.(cron.ConstantDelaySchedule); ok {
 		scheduleLast := &cusConstantDelaySchedule{cronSpec}
 		next = scheduleLast.Last(now)
+	} else {
+		return nil, fmt.Errorf("assert cron spec failed")
 	}
 	return &next, nil
 }
