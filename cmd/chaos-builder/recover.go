@@ -101,7 +101,6 @@ const cleanWithManagerTemplate = `
 	m := {{.Manager}}.New(source, r.Log, r.Client)
 
 	for _, key := range chaos.Finalizers {
-
 		ns, name, err := cache.SplitMetaNamespaceKey(key)
 		if err != nil {
 			result = multierror.Append(result, err)
