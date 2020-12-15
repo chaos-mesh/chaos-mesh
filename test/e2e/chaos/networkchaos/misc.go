@@ -20,6 +20,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	corev1 "k8s.io/api/core/v1"
@@ -189,22 +190,38 @@ func probeNetworkCondition(c http.Client, peers []*corev1.Pod, ports []uint16) m
 		for target := source + 1; target < len(peers); target++ {
 			connectable := true
 
-			// case 1-1: source to target blocked?
-			klog.Infof("testing connectivity from %s to %s", peers[source].Name, peers[target].Name)
-			if !couldConnect(c, ports[source], peers[target].Status.PodIP, ports[target]) {
-				klog.Infof("%s could not connect to %s", peers[source].Name, peers[target].Name)
-				result[networkConditionBlocked] = append(result[networkConditionBlocked], []int{source, target})
-				connectable = false
-			}
+			var (
+				wg   sync.WaitGroup
+				lock sync.Mutex
+			)
+			wg.Add(2)
+			go func() {
+				defer wg.Done()
+				// case 1-1: source to target blocked?
+				klog.Infof("testing connectivity from %s to %s", peers[source].Name, peers[target].Name)
+				if !couldConnect(c, ports[source], peers[target].Status.PodIP, ports[target]) {
+					klog.Infof("%s could not connect to %s", peers[source].Name, peers[target].Name)
+					lock.Lock()
+					result[networkConditionBlocked] = append(result[networkConditionBlocked], []int{source, target})
+					connectable = false
+					lock.Unlock()
+				}
+			}()
 
-			// case 1-2: target to source blocked?
-			klog.Infof("testing connectivity from %s to %s", peers[target].Name, peers[source].Name)
-			if !couldConnect(c, ports[target], peers[source].Status.PodIP, ports[source]) {
-				klog.Infof("%s could not connect to %s", peers[target].Name, peers[source].Name)
-				result[networkConditionBlocked] = append(result[networkConditionBlocked], []int{target, source})
-				connectable = false
-			}
+			go func() {
+				defer wg.Done()
+				// case 1-2: target to source blocked?
+				klog.Infof("testing connectivity from %s to %s", peers[target].Name, peers[source].Name)
+				if !couldConnect(c, ports[target], peers[source].Status.PodIP, ports[source]) {
+					klog.Infof("%s could not connect to %s", peers[target].Name, peers[source].Name)
+					lock.Lock()
+					result[networkConditionBlocked] = append(result[networkConditionBlocked], []int{target, source})
+					connectable = false
+					lock.Unlock()
+				}
+			}()
 
+			wg.Wait()
 			if !connectable {
 				continue
 			}
