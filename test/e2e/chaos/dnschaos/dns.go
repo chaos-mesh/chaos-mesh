@@ -22,6 +22,7 @@ import (
 	"time"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/klog"
 	"k8s.io/kubernetes/test/e2e/framework"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -66,9 +67,15 @@ func TestcaseDNSRandom(
 	framework.ExpectNoError(err, "create dns chaos error")
 	time.Sleep(5 * time.Second)
 
-	// get IP of a non exists host, because chaos DNS server will return a random IP,
-	// so err should be nil
-	_, err = testDNSServer(c, port, "not-exist-host.abc")
+	err = wait.Poll(time.Second, 5*time.Second, func() (done bool, err error) {
+		// get IP of a non exists host, because chaos DNS server will return a random IP,
+		// so err should be nil
+		_, err1 := testDNSServer(c, port, "not-exist-host.abc")
+		if err1 != nil {
+			return false, nil
+		}
+		return true, nil
+	})
 	framework.ExpectNoError(err, "test DNS server failed")
 
 	err = cli.Delete(ctx, dnsChaos.DeepCopy())
@@ -111,12 +118,17 @@ func TestcaseDNSError(
 
 	err = cli.Create(ctx, dnsChaos.DeepCopy())
 	framework.ExpectNoError(err, "create dns chaos error")
-	time.Sleep(5 * time.Second)
 
-	// get IP of a chaos-mesh.org, because chaos DNS server will return error,
-	// so err should not be nil
-	_, err = testDNSServer(c, port, "chaos-mesh.org")
-	framework.ExpectError(err, "test DNS server failed")
+	err = wait.Poll(time.Second, 5*time.Second, func() (done bool, err error) {
+		// get IP of a chaos-mesh.org, because chaos DNS server will return error,
+		// so err should not be nil
+		_, err1 := testDNSServer(c, port, "chaos-mesh.org")
+		if err1 == nil {
+			return false, nil
+		}
+		return true, nil
+	})
+	framework.ExpectNoError(err, "test DNS server failed")
 
 	err = cli.Delete(ctx, dnsChaos.DeepCopy())
 	framework.ExpectNoError(err, "failed to delete dns chaos")
