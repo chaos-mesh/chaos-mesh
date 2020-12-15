@@ -115,7 +115,7 @@ export default function Dashboard() {
             </Paper>
           </Grid>
 
-          <Grid item md={12} lg={3}>
+          <Grid item xs={12} md={12} lg={3}>
             <Paper style={{ position: 'relative' }}>
               <PaperTop title={T('dashboard.totalState')} />
               <div ref={chaosStatePieChartRef} className={classes.container} />
@@ -127,14 +127,14 @@ export default function Dashboard() {
             </Paper>
           </Grid>
 
-          <Grid item md={12} lg={9}>
+          <Grid item xs={12} md={12} lg={9}>
             <Paper>
               <PaperTop title={T('dashboard.predefined')} />
               <Box height={150} m={3}></Box>
             </Paper>
           </Grid>
 
-          <Grid item md={12} lg={9}>
+          <Grid item xs={12} md={12} lg={9}>
             <Paper>
               <PaperTop title={T('common.timeline')} />
               <div ref={chartRef} className={classes.container} />

@@ -1,21 +1,32 @@
-import { AppBar, Box, MenuItem, TextField, Toolbar } from '@material-ui/core'
+import { MenuItem, TextField } from '@material-ui/core'
 import React, { useEffect, useState } from 'react'
 import { useHistory, useLocation } from 'react-router-dom'
 import { useStoreDispatch, useStoreSelector } from 'store'
 
+import T from 'components/T'
 import api from 'api'
 import { makeStyles } from '@material-ui/core/styles'
 import { setNameSpace } from 'slices/globalStatus'
 
-const useStyles = makeStyles({
-  toolbar: {
-    minHeight: 48,
-  },
+const useStyles = makeStyles((theme) => ({
   namespaces: {
-    height: 48,
     minWidth: 180,
+    '& .MuiInputBase-root': {
+      height: 32,
+      color: theme.palette.background.default,
+    },
+    '& .MuiFormLabel-root': {
+      margin: 0,
+      color: theme.palette.background.default,
+    },
+    '& .MuiSelect-icon': {
+      color: theme.palette.background.default,
+    },
+    '& .MuiOutlinedInput-notchedOutline': {
+      borderColor: `${theme.palette.background.default} !important`,
+    },
   },
-})
+}))
 
 const ControlBar = () => {
   const classes = useStyles()
@@ -34,8 +45,8 @@ const ControlBar = () => {
       .catch(console.error)
   }
 
-  const handleSelectGlobalNamespace = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const ns = e.target.value
+  const handleSelectGlobalNamespace = (e: React.ChangeEvent<{ value: unknown }>) => {
+    const ns = e.target.value as string
 
     api.auth.namespace(ns)
     dispatch(setNameSpace(ns))
@@ -47,31 +58,20 @@ const ControlBar = () => {
   useEffect(fetchNamespaces, [])
 
   return (
-    <AppBar position="relative" color="inherit" elevation={0}>
-      <Toolbar className={classes.toolbar} disableGutters>
-        <Box>
-          <TextField
-            className={classes.namespaces}
-            variant="outlined"
-            color="primary"
-            select
-            InputProps={{
-              style: {
-                height: '100%',
-              },
-            }}
-            value={namespace}
-            onChange={handleSelectGlobalNamespace}
-          >
-            {namespaces.map((option) => (
-              <MenuItem key={option} value={option}>
-                {option}
-              </MenuItem>
-            ))}
-          </TextField>
-        </Box>
-      </Toolbar>
-    </AppBar>
+    <TextField
+      className={classes.namespaces}
+      select
+      variant="outlined"
+      label={T('common.chooseNamespace')}
+      value={namespace}
+      onChange={handleSelectGlobalNamespace}
+    >
+      {namespaces.map((option) => (
+        <MenuItem key={option} value={option}>
+          {option}
+        </MenuItem>
+      ))}
+    </TextField>
   )
 }
 

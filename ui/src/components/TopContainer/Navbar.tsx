@@ -4,6 +4,7 @@ import { Theme, makeStyles } from '@material-ui/core/styles'
 import AddIcon from '@material-ui/icons/Add'
 import { Link } from 'react-router-dom'
 import MenuIcon from '@material-ui/icons/Menu'
+import Namespace from './Namespace'
 import { NavigationBreadCrumbProps } from 'slices/navigation'
 import React from 'react'
 import SearchTrigger from 'components/SearchTrigger'
@@ -21,9 +22,6 @@ const useStyles = makeStyles((theme: Theme) => ({
     margin: theme.spacing(6),
     borderRadius: theme.shape.borderRadius,
   },
-  toolbar: {
-    minHeight: 56,
-  },
   menuButton: {
     marginLeft: theme.spacing(0),
     [theme.breakpoints.down('sm')]: {
@@ -33,6 +31,9 @@ const useStyles = makeStyles((theme: Theme) => ({
   nav: {
     marginLeft: theme.spacing(3),
     color: 'inherit',
+    [theme.breakpoints.down('xs')]: {
+      display: 'none',
+    },
   },
   hoverLink: {
     textDecoration: 'none',
@@ -66,7 +67,7 @@ const Navbar: React.FC<HeaderProps> = ({ handleDrawerToggle, breadcrumbs }) => {
     <>
       <Toolbar className={classes.fill} />
       <AppBar className={classes.appBar}>
-        <Toolbar className={classes.toolbar}>
+        <Toolbar>
           <IconButton
             className={classes.menuButton}
             color="inherit"
@@ -93,11 +94,16 @@ const Navbar: React.FC<HeaderProps> = ({ handleDrawerToggle, breadcrumbs }) => {
                   )
                 })}
             </Breadcrumbs>
-            <Box>
-              <SearchTrigger />
-              <IconButton color="inherit" aria-label="New Experiment" onClick={() => history.push('/newExperiment')}>
-                <AddIcon />
-              </IconButton>
+            <Box display="flex" justifyContent="space-between" alignItems="center">
+              <Box mr={3}>
+                <Namespace />
+              </Box>
+              <Box>
+                <SearchTrigger />
+                <IconButton color="inherit" aria-label="New Experiment" onClick={() => history.push('/newExperiment')}>
+                  <AddIcon />
+                </IconButton>
+              </Box>
             </Box>
           </Box>
         </Toolbar>
