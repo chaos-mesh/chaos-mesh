@@ -65,7 +65,6 @@ func TestcaseDNSRandom(
 
 	err = cli.Create(ctx, dnsChaos.DeepCopy())
 	framework.ExpectNoError(err, "create dns chaos error")
-	time.Sleep(5 * time.Second)
 
 	err = wait.Poll(time.Second, 5*time.Second, func() (done bool, err error) {
 		// get IP of a non exists host, because chaos DNS server will return a random IP,
