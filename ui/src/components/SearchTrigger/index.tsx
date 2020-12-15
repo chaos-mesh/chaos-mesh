@@ -1,5 +1,4 @@
 import React, { useEffect } from 'react'
-import { Theme, createStyles, makeStyles } from '@material-ui/core/styles'
 
 import { IconButton } from '@material-ui/core'
 import Modal from '@material-ui/core/Modal'
@@ -7,25 +6,24 @@ import Paper from 'components-mui/Paper'
 import { RootState } from 'store'
 import Search from 'components/Search'
 import SearchIcon from '@material-ui/icons/Search'
+import { makeStyles } from '@material-ui/core/styles'
 import { setSearchModalOpen } from 'slices/globalStatus'
 import store from 'store'
 import { useSelector } from 'react-redux'
 
-const useStyles = makeStyles((theme: Theme) => {
-  return createStyles({
-    searchModal: {
-      [theme.breakpoints.down('md')]: {
-        maxWidth: '80%',
-      },
-      position: 'relative',
-      maxWidth: '40%',
-      margin: `${theme.spacing(15)} auto auto`,
-      padding: theme.spacing(3),
-      overflowY: 'hidden',
-      outline: 0,
+const useStyles = makeStyles((theme) => ({
+  searchModal: {
+    position: 'relative',
+    maxWidth: '40%',
+    margin: `${theme.spacing(15)} auto auto`,
+    padding: theme.spacing(3),
+    overflowY: 'hidden',
+    outline: 0,
+    [theme.breakpoints.down('md')]: {
+      maxWidth: '80%',
     },
-  })
-})
+  },
+}))
 
 const SearchTrigger: React.FC = () => {
   const classes = useStyles()

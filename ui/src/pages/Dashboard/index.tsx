@@ -28,6 +28,13 @@ const useStyles = makeStyles((theme) => ({
     left: '50%',
     transform: 'translate3d(-50%, -50%, 0)',
   },
+  totalExperiments: {
+    display: 'flex',
+    alignItems: 'center',
+    [theme.breakpoints.down('sm')]: {
+      alignItems: 'unset',
+    },
+  },
 }))
 
 export default function Dashboard() {
@@ -95,20 +102,20 @@ export default function Dashboard() {
     <>
       <Grow in={true} style={{ transformOrigin: '0 0 0' }}>
         <Grid container spacing={3}>
-          <Grid item xs={12} md={3}>
+          <Grid item md={12} lg={3}>
             <Welcome />
           </Grid>
 
-          <Grid item xs={12} md={6}>
+          <Grid item md={12} lg={6}>
             <Paper>
               <PaperTop title={T('dashboard.totalExperiments')} />
-              <Box height={300} m={3} overflow="scroll">
+              <Box className={classes.totalExperiments} height={300} m={3} overflow="scroll">
                 <TotalExperiments />
               </Box>
             </Paper>
           </Grid>
 
-          <Grid item xs={12} md={3}>
+          <Grid item md={12} lg={3}>
             <Paper style={{ position: 'relative' }}>
               <PaperTop title={T('dashboard.totalState')} />
               <div ref={chaosStatePieChartRef} className={classes.container} />
@@ -120,14 +127,14 @@ export default function Dashboard() {
             </Paper>
           </Grid>
 
-          <Grid item xs={12} md={9}>
+          <Grid item md={12} lg={9}>
             <Paper>
               <PaperTop title={T('dashboard.predefined')} />
               <Box height={150} m={3}></Box>
             </Paper>
           </Grid>
 
-          <Grid item xs={12} md={9}>
+          <Grid item md={12} lg={9}>
             <Paper>
               <PaperTop title={T('common.timeline')} />
               <div ref={chartRef} className={classes.container} />

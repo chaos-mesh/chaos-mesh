@@ -29,12 +29,8 @@ export default function insertCommonStyle() {
       .chaos-events-legends > div {
         display: flex;
         align-items: center;
-        margin-left: 1rem;
+        margin-right: 1rem;
         cursor: pointer;
-      }
-
-      .chaos-events-legends > div:first-child {
-        margin-left: 0;
       }
     </style>`
   )
