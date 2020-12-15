@@ -1,49 +1,42 @@
 import React, { useEffect } from 'react'
+import { useStoreDispatch, useStoreSelector } from 'store'
 
 import { IconButton } from '@material-ui/core'
 import Modal from '@material-ui/core/Modal'
 import Paper from 'components-mui/Paper'
-import { RootState } from 'store'
 import Search from 'components/Search'
 import SearchIcon from '@material-ui/icons/Search'
 import { makeStyles } from '@material-ui/core/styles'
 import { setSearchModalOpen } from 'slices/globalStatus'
-import store from 'store'
-import { useSelector } from 'react-redux'
 
 const useStyles = makeStyles((theme) => ({
-  searchModal: {
-    position: 'relative',
+  modalPaperWrapper: {
     maxWidth: '40%',
-    margin: `${theme.spacing(15)} auto auto`,
-    padding: theme.spacing(3),
-    overflowY: 'hidden',
-    outline: 0,
+    margin: '0 auto',
+    marginTop: theme.spacing(9),
     [theme.breakpoints.down('md')]: {
       maxWidth: '80%',
     },
+  },
+  modalPaper: {
+    padding: theme.spacing(3),
   },
 }))
 
 const SearchTrigger: React.FC = () => {
   const classes = useStyles()
 
-  const handleOpen = () => {
-    store.dispatch(setSearchModalOpen(true))
-  }
+  const { searchModalOpen } = useStoreSelector((state) => state.globalStatus)
+  const dispatch = useStoreDispatch()
 
-  const handleClose = () => {
-    store.dispatch(setSearchModalOpen(false))
-  }
-
-  const searchModalOpen = useSelector((state: RootState) => state.globalStatus.searchModalOpen)
+  const handleOpen = () => dispatch(setSearchModalOpen(true))
+  const handleClose = () => dispatch(setSearchModalOpen(false))
 
   useEffect(() => {
     const keyMap: Record<string, boolean> = {}
     const keyDownHandler = (e: KeyboardEvent) => {
       keyMap[e.key] = true
 
-      // In some cases, such as pressing multiple keys almost at the same time, the browser won't fire the keyup event repeatedly.
       if ((keyMap['Meta'] && keyMap['p']) || (keyMap['Control'] && keyMap['p'])) {
         e.preventDefault()
 
@@ -59,17 +52,21 @@ const SearchTrigger: React.FC = () => {
     return () => {
       document.removeEventListener('keydown', keyDownHandler)
     }
+
+    // eslint-disable-next-line
   }, [])
 
   return (
     <>
-      <IconButton color="inherit" aria-label="Search" onClick={handleOpen}>
+      <IconButton className="nav-search" color="inherit" aria-label="Search" onClick={handleOpen}>
         <SearchIcon />
       </IconButton>
       <Modal open={searchModalOpen} onClose={handleClose}>
-        <Paper elevation={3} className={classes.searchModal}>
-          <Search />
-        </Paper>
+        <div className={classes.modalPaperWrapper}>
+          <Paper className={classes.modalPaper}>
+            <Search />
+          </Paper>
+        </div>
       </Modal>
     </>
   )

@@ -27,8 +27,10 @@
     "react-redux": "^7.2.0",
     "react-router-dom": "^5.1.2",
     "react-scripts": "3.4.1",
+    "reactour": "^1.18.0",
     "redux": "^4.0.5",
     "snakecase-keys": "^3.2.0",
+    "styled-components": "^5.2.1",
     "typescript": "^3.8.3",
     "yup": "^0.29.1"
   },
@@ -71,6 +73,7 @@
     "@types/react-dom": "^16.9.6",
     "@types/react-redux": "^7.1.9",
     "@types/react-router-dom": "^5.1.4",
+    "@types/reactour": "^1.17.1",
     "@types/yup": "^0.29.1",
     "cross-env": "^7.0.2",
     "http-proxy-middleware": "^1.0.4",

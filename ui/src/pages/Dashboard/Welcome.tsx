@@ -1,12 +1,15 @@
 import { Box, Button, Grid, Typography } from '@material-ui/core'
+import React, { useState } from 'react'
+import Tour, { ReactourStep } from 'reactour'
+import { makeStyles, useTheme } from '@material-ui/core/styles'
 
 import AddIcon from '@material-ui/icons/Add'
+import ArrowBackOutlinedIcon from '@material-ui/icons/ArrowBackOutlined'
+import ArrowForwardOutlinedIcon from '@material-ui/icons/ArrowForwardOutlined'
 import { Link } from 'react-router-dom'
 import Paper from 'components-mui/Paper'
 import PaperTop from 'components-mui/PaperTop'
-import React from 'react'
 import T from 'components/T'
-import { makeStyles } from '@material-ui/core/styles'
 
 const useStyles = makeStyles((theme) => ({
   container: {
@@ -19,6 +22,53 @@ const useStyles = makeStyles((theme) => ({
 
 const Welcome = () => {
   const classes = useStyles()
+  const theme = useTheme()
+
+  const steps: ReactourStep[] = [
+    {
+      selector: '.sidebar-dashboard',
+      content: T('dashboard.tutorial.step1'),
+    },
+    {
+      selector: '.sidebar-experiments',
+      content: T('dashboard.tutorial.step2'),
+    },
+    {
+      selector: '.sidebar-events',
+      content: T('dashboard.tutorial.step3'),
+    },
+    {
+      selector: '.sidebar-archives',
+      content: T('dashboard.tutorial.step4'),
+    },
+    {
+      selector: '.dashboard-new-experiment',
+      content: T('dashboard.tutorial.step5'),
+    },
+    {
+      selector: '.nav-new-experiment',
+      content: T('dashboard.tutorial.step6'),
+    },
+    {
+      selector: '.nav-search',
+      content: T('dashboard.tutorial.step7'),
+    },
+    {
+      selector: '.nav-namespace',
+      content: T('dashboard.tutorial.step8'),
+    },
+    {
+      selector: '.dashboard-tutorial',
+      content: T('dashboard.tutorial.step9'),
+    },
+  ].map((d) => ({
+    ...d,
+    style: {
+      background: theme.palette.background.default,
+    },
+  }))
+
+  const [isTourOpen, setIsTourOpen] = useState(false)
 
   return (
     <Grid container spacing={3}>
@@ -34,10 +84,27 @@ const Welcome = () => {
             </Typography>
 
             <Box position="absolute" bottom={0} width="100%">
-              <Button variant="contained" color="primary" fullWidth>
+              <Button
+                className="dashboard-tutorial"
+                variant="contained"
+                color="primary"
+                fullWidth
+                onClick={() => setIsTourOpen(true)}
+              >
                 {T('common.tutorial')}
               </Button>
             </Box>
+
+            <Tour
+              steps={steps}
+              isOpen={isTourOpen}
+              onRequestClose={() => setIsTourOpen(false)}
+              accentColor={theme.palette.primary.main}
+              rounded={theme.shape.borderRadius}
+              prevButton={<ArrowBackOutlinedIcon />}
+              nextButton={<ArrowForwardOutlinedIcon />}
+              showCloseButton={false}
+            />
           </Box>
         </Paper>
       </Grid>
@@ -54,6 +121,7 @@ const Welcome = () => {
 
             <Box position="absolute" bottom={0} width="100%">
               <Button
+                className="dashboard-new-experiment"
                 component={Link}
                 to="/newExperiment"
                 variant="contained"

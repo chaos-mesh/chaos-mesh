@@ -48,6 +48,11 @@ const useStyles = makeStyles((theme: Theme) => ({
       cursor: 'pointer',
     },
   },
+  tail: {
+    [theme.breakpoints.down('xs')]: {
+      width: '100%',
+    },
+  },
 }))
 
 function hasLocalBreadcrumb(b: string) {
@@ -94,13 +99,18 @@ const Navbar: React.FC<HeaderProps> = ({ handleDrawerToggle, breadcrumbs }) => {
                   )
                 })}
             </Breadcrumbs>
-            <Box display="flex" justifyContent="space-between" alignItems="center">
+            <Box className={classes.tail} display="flex" justifyContent="space-between" alignItems="center">
               <Box mr={3}>
                 <Namespace />
               </Box>
               <Box>
                 <SearchTrigger />
-                <IconButton color="inherit" aria-label="New Experiment" onClick={() => history.push('/newExperiment')}>
+                <IconButton
+                  className="nav-new-experiment"
+                  color="inherit"
+                  aria-label="New Experiment"
+                  onClick={() => history.push('/newExperiment')}
+                >
                   <AddIcon />
                 </IconButton>
               </Box>

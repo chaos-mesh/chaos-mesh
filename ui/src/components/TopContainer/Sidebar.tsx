@@ -149,7 +149,13 @@ const Sidebar: React.FC<SidebarProps> = ({ open }) => {
 
           <List className={classes.list}>
             {listItems.map(({ icon, text }) => (
-              <ListItem key={text} className={classes.listItem} component={NavLink} to={`/${text}`} button>
+              <ListItem
+                key={text}
+                className={clsx(classes.listItem, `sidebar-${text}`)}
+                component={NavLink}
+                to={`/${text}`}
+                button
+              >
                 <ListItemIcon className={classes.listItemIcon}>{icon}</ListItemIcon>
                 <ListItemText primary={T(`${text}.title`)} />
               </ListItem>

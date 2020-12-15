@@ -5,11 +5,12 @@ import { useStoreDispatch, useStoreSelector } from 'store'
 
 import T from 'components/T'
 import api from 'api'
+import clsx from 'clsx'
 import { makeStyles } from '@material-ui/core/styles'
 import { setNameSpace } from 'slices/globalStatus'
 
 const useStyles = makeStyles((theme) => ({
-  namespaces: {
+  namespace: {
     minWidth: 180,
     '& .MuiInputBase-root': {
       height: 32,
@@ -59,7 +60,7 @@ const ControlBar = () => {
 
   return (
     <TextField
-      className={classes.namespaces}
+      className={clsx(classes.namespace, 'nav-namespace')}
       select
       variant="outlined"
       label={T('common.chooseNamespace')}
