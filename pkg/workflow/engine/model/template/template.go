@@ -45,6 +45,7 @@ func (it TemplateType) IsCompositeType() bool {
 	return it == Serial || it == Parallel || it == Task
 }
 
+// FIXME: remove this interface, it's should belongs workflow spec
 type Templates interface {
 	FetchAllTemplates() []Template
 	FetchTemplateMap() map[string]Template

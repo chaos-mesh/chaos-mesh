@@ -41,6 +41,7 @@ type Node interface {
 	GetTemplateType() template.TemplateType
 }
 
+// FIXME: remove this interface, it's should belongs workflow status
 type NodeTreeNode interface {
 	GetName() string
 	GetTemplateName() string

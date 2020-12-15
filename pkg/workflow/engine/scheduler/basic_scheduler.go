@@ -16,6 +16,7 @@ package scheduler
 import (
 	"context"
 	goerror "errors"
+
 	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/engine/errors"
 	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/engine/model/node"
 	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/engine/model/template"
@@ -72,9 +73,6 @@ func (it *basicScheduler) fetchChildrenForCompositeNode(parentNodeName string) (
 			parentTemplate, err := it.workflowSpec.GetTemplateByName(parentNode.GetTemplateName())
 			if err != nil {
 				return nil, err
-			}
-			if parentTemplate == nil {
-				return nil, errors.NewNoSuchTemplateError(op, it.workflowSpec.GetName(), parentNode.GetTemplateName())
 			}
 			// Serial template execute its children template one-by-one, so it need found out previous one
 			// is completed or not, then pick the next one.

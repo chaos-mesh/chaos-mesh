@@ -14,12 +14,14 @@
 package workflow
 
 import (
+	"errors"
 	"fmt"
-	mocktemplate "github.com/chaos-mesh/chaos-mesh/pkg/workflow/mock/engine/model/template"
 
+	workflowerrors "github.com/chaos-mesh/chaos-mesh/pkg/workflow/engine/errors"
 	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/engine/model/node"
 	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/engine/model/template"
 	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/engine/model/workflow"
+	mocktemplate "github.com/chaos-mesh/chaos-mesh/pkg/workflow/mock/engine/model/template"
 )
 
 type mockWorkflowSpec struct {
@@ -44,6 +46,18 @@ func (it *mockWorkflowSpec) SetEntry(entry string) {
 
 func (it *mockWorkflowSpec) SetTemplates(templates template.Templates) {
 	it.Templates = templates
+}
+
+func (it *mockWorkflowSpec) GetTemplateByName(templateName string) (template.Template, error) {
+	result, err := it.Templates.GetTemplateByName(templateName)
+	if err != nil {
+		if errors.Is(err, workflowerrors.ErrNoSuchTemplate) {
+			var target *workflowerrors.NoSuchTemplateError
+			errors.As(err, &target)
+			return result, workflowerrors.NewNoSuchTemplateError(target.Op, it.GetName(), target.WorkflowName)
+		}
+	}
+	return result, err
 }
 
 func (it *mockWorkflowSpec) GetName() string {
