@@ -93,5 +93,9 @@ func (it *mockedTemplates) GetTemplateByName(templateName string) (template.Temp
 	if result, ok := it.FetchTemplateMap()[templateName]; ok {
 		return result, nil
 	}
-	return nil, errors.NewNoSuchTemplateError("mockedTemplates.templateName", "", templateName)
+	allAvailableTemplates := make([]string, 0)
+	for k := range it.FetchTemplateMap() {
+		allAvailableTemplates = append(allAvailableTemplates, k)
+	}
+	return nil, errors.NewNoSuchTemplateErrorInTemplates("mockedTemplates.GetTemplateByName", templateName, allAvailableTemplates)
 }

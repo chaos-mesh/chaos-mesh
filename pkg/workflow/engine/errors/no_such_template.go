@@ -17,8 +17,9 @@ type NoSuchTemplateError struct {
 	Op  string
 	Err error
 
-	WorkflowName string
-	TemplateName string
+	WorkflowName          string
+	TemplateName          string
+	AllAvailableTemplates []string
 }
 
 func (e *NoSuchTemplateError) Error() string {
@@ -35,5 +36,14 @@ func NewNoSuchTemplateError(op, workflowName, templateName string) *NoSuchTempla
 		Err:          ErrNoSuchTemplate,
 		WorkflowName: workflowName,
 		TemplateName: templateName,
+	}
+}
+
+func NewNoSuchTemplateErrorInTemplates(op, templateName string, allAvailableTemplates []string) *NoSuchTemplateError {
+	return &NoSuchTemplateError{
+		Op:                    op,
+		Err:                   ErrNoSuchTemplate,
+		TemplateName:          templateName,
+		AllAvailableTemplates: allAvailableTemplates,
 	}
 }

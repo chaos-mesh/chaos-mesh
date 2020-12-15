@@ -38,7 +38,11 @@ func (it *basicScheduler) ScheduleNext(ctx context.Context) ([]template.Template
 	nodesMap := it.workflowStatus.FetchNodesMap()
 	if len(nodesMap) == 0 {
 		// first schedule
-		entry, err := it.workflowSpec.GetTemplateByName(it.workflowSpec.GetEntry())
+		templates, err := it.workflowSpec.GetTemplates()
+		if err != nil {
+			return nil, "", err
+		}
+		entry, err := templates.GetTemplateByName(it.workflowSpec.GetEntry())
 		if err != nil {
 			return nil, "", err
 		}
@@ -70,7 +74,11 @@ func (it *basicScheduler) fetchChildrenForCompositeNode(parentNodeName string) (
 			return nil, errors.NewTreeNodeIsRequiredError(op, it.workflowSpec.GetName())
 		}
 		if nodeTreeNode := root.FetchNodeByName(parentNodeName); nodeTreeNode != nil {
-			parentTemplate, err := it.workflowSpec.GetTemplateByName(parentNode.GetTemplateName())
+			templates, err := it.workflowSpec.GetTemplates()
+			if err != nil {
+				return nil, err
+			}
+			parentTemplate, err := templates.GetTemplateByName(parentNode.GetTemplateName())
 			if err != nil {
 				return nil, err
 			}

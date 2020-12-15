@@ -14,10 +14,9 @@
 package workflow
 
 import (
-	"errors"
 	"fmt"
+	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/engine/errors"
 
-	workflowerrors "github.com/chaos-mesh/chaos-mesh/pkg/workflow/engine/errors"
 	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/engine/model/node"
 	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/engine/model/template"
 	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/engine/model/workflow"
@@ -25,14 +24,14 @@ import (
 )
 
 type mockWorkflowSpec struct {
-	name  string
-	entry string
-	template.Templates
+	name      string
+	entry     string
+	templates template.Templates
 }
 
 func NewMockWorkflowSpec() *mockWorkflowSpec {
 	return &mockWorkflowSpec{
-		Templates: mocktemplate.NewMockedTemplates(nil),
+		templates: mocktemplate.NewMockedTemplates(nil),
 	}
 }
 
@@ -45,19 +44,14 @@ func (it *mockWorkflowSpec) SetEntry(entry string) {
 }
 
 func (it *mockWorkflowSpec) SetTemplates(templates template.Templates) {
-	it.Templates = templates
+	it.templates = templates
 }
 
-func (it *mockWorkflowSpec) GetTemplateByName(templateName string) (template.Template, error) {
-	result, err := it.Templates.GetTemplateByName(templateName)
-	if err != nil {
-		if errors.Is(err, workflowerrors.ErrNoSuchTemplate) {
-			var target *workflowerrors.NoSuchTemplateError
-			errors.As(err, &target)
-			return result, workflowerrors.NewNoSuchTemplateError(target.Op, it.GetName(), target.WorkflowName)
-		}
+func (it *mockWorkflowSpec) GetTemplates() (template.Templates, error) {
+	if it.templates == nil {
+		return nil, errors.NewTemplatesIsRequiredError("mockWorkflowSpec.GetTemplates", it.GetName())
 	}
-	return result, err
+	return it.templates, nil
 }
 
 func (it *mockWorkflowSpec) GetName() string {
