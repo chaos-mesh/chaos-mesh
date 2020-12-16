@@ -29,7 +29,7 @@ controllerManager:
 
   replicaCount: 1
 
-  image: pingcap/chaos-mesh:v1.0.2
+  image: pingcap/chaos-mesh:v1.0.3
   imagePullPolicy: IfNotPresent
 
   nameOverride: ""
@@ -66,7 +66,7 @@ controllerManager:
   podAnnotations: {}
 
 chaosDaemon:
-  image: pingcap/chaos-daemon:v1.0.2
+  image: pingcap/chaos-daemon:v1.0.3
   imagePullPolicy: IfNotPresent
   grpcPort: 31767
   httpPort: 31766
@@ -108,7 +108,7 @@ dashboard:
 
   serviceAccount: chaos-controller-manager
 
-  image: pingcap/chaos-dashboard:v1.0.2
+  image: pingcap/chaos-dashboard:v1.0.3
   imagePullPolicy: IfNotPresent
 
   nodeSelector: {}
@@ -269,7 +269,7 @@ webhook:
 
 bpfki:
   create: false
-  image: pingcap/chaos-kernel:v1.0.2
+  image: pingcap/chaos-kernel:v1.0.3
   imagePullPolicy: IfNotPresent
   grpcPort: 50051
   resources: {}
