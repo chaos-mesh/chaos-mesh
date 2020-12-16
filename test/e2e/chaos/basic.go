@@ -137,7 +137,7 @@ var _ = ginkgo.Describe("[Basic]", func() {
 		})
 
 		// time skew chaos case in [TimeSkew] context
-		ginkgo.Context("[TimeSkew]", func() {
+		ginkgo.FContext("[TimeSkew]", func() {
 
 			ginkgo.It("[Schedule]", func() {
 				timechaostestcases.TestcaseTimeSkewOnceThenRecover(ns, cli, c, port)

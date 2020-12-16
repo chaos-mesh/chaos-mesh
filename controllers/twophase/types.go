@@ -23,7 +23,6 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	ctx "github.com/chaos-mesh/chaos-mesh/pkg/router/context"
 	"github.com/chaos-mesh/chaos-mesh/pkg/router/endpoint"
-	"github.com/chaos-mesh/chaos-mesh/pkg/utils"
 
 	ctrl "sigs.k8s.io/controller-runtime"
 )
@@ -62,6 +61,13 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	}
 	chaos := _chaos.(v1alpha1.InnerSchedulerObject)
 
+	// disable pause and remove auto resume at time to resume
+	autoResume := chaos.GetAutoResume()
+	if !autoResume.IsZero() && autoResume.Before(now) {
+		chaos.SetPause("")
+		chaos.SetAutoResume(time.Time{})
+	}
+
 	status := chaos.GetStatus()
 
 	targetPhase := status.Experiment.Phase
@@ -76,6 +82,15 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 
 	if chaos.GetPause() != "" {
 		targetPhase = v1alpha1.ExperimentPhasePaused
+		if chaos.GetPause() != "true" {
+			pauseTime, err := time.ParseDuration(chaos.GetPause())
+			if err != nil {
+				r.Log.Error(err, "failed to parse pause duration")
+				return ctrl.Result{}, err
+			}
+			resumeTime := now.Add(pauseTime)
+			chaos.SetAutoResume(resumeTime)
+		}
 	}
 
 	// TODO: find a better way to solve the pause and resume problem.
@@ -102,10 +117,17 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		return ctrl.Result{}, err
 	}
 
-	// the reconciliation of Finished and Paused resource shouldn't be triggered by time
-	if chaos.GetStatus().Experiment.Phase == v1alpha1.ExperimentPhaseFinished ||
-		chaos.GetStatus().Experiment.Phase == v1alpha1.ExperimentPhasePaused {
+	// the reconciliation of Finished resource shouldn't be triggered by time
+	if chaos.GetStatus().Experiment.Phase == v1alpha1.ExperimentPhaseFinished {
 		return ctrl.Result{}, nil
+	}
+
+	if chaos.GetStatus().Experiment.Phase == v1alpha1.ExperimentPhasePaused {
+		autoResume = chaos.GetAutoResume()
+		if !autoResume.IsZero() {
+			r.Log.Info("Requeue unpause request", "after", autoResume.Sub(time.Now()))
+			return ctrl.Result{RequeueAfter: autoResume.Sub(time.Now())}, nil
+		}
 	}
 
 	requeueAfter, err := calcRequeueAfterTime(chaos, now)
@@ -140,22 +162,4 @@ func calcRequeueAfterTime(chaos v1alpha1.InnerSchedulerObject, now time.Time) (t
 	}
 
 	return requeueAfter, err
-}
-
-func getCronCycle(
-	ctx context.Context,
-	r *Reconciler,
-	chaos v1alpha1.InnerSchedulerObject,
-) time.Duration {
-	firstTime, err := utils.NextTime(*chaos.GetScheduler(), time.Now())
-	if err != nil {
-		r.Log.Error(err, "failed to calculate the first time")
-		return 0
-	}
-	secondTime, err := utils.NextTime(*chaos.GetScheduler(), *firstTime)
-	if err != nil {
-		r.Log.Error(err, "failed to calculate the second time")
-		return 0
-	}
-	return secondTime.Sub(*firstTime)
 }
