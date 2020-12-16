@@ -907,9 +907,9 @@ data:
 # Source: chaos-mesh/templates/controller-manager-rbac.yaml
 # roles
 kind: ClusterRole
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: chaos-mesh:chaos-controller-manager-target-namespace
+  name: chaos-mesh-chaos-controller-manager-target-namespace
   labels:
     app.kubernetes.io/name: chaos-mesh
     app.kubernetes.io/instance: chaos-mesh
@@ -938,9 +938,9 @@ rules:
 ---
 # Source: chaos-mesh/templates/controller-manager-rbac.yaml
 kind: ClusterRole
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: chaos-mesh:chaos-controller-manager-cluster-level
+  name: chaos-mesh-chaos-controller-manager-cluster-level
   labels:
     app.kubernetes.io/name: chaos-mesh
     app.kubernetes.io/instance: chaos-mesh
@@ -955,9 +955,9 @@ rules:
 # Source: chaos-mesh/templates/controller-manager-rbac.yaml
 # bindings cluster level
 kind: ClusterRoleBinding
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: chaos-mesh:chaos-controller-manager-cluster-level
+  name: chaos-mesh-chaos-controller-manager-cluster-level
   labels:
     app.kubernetes.io/name: chaos-mesh
     app.kubernetes.io/instance: chaos-mesh
@@ -965,7 +965,7 @@ metadata:
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: chaos-mesh:chaos-controller-manager-cluster-level
+  name: chaos-mesh-chaos-controller-manager-cluster-level
 subjects:
   - kind: ServiceAccount
     name: chaos-controller-manager
@@ -973,9 +973,9 @@ subjects:
 ---
 # Source: chaos-mesh/templates/controller-manager-rbac.yaml
 kind: ClusterRoleBinding
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: chaos-mesh:chaos-controller-manager-target-namespace
+  name: chaos-mesh-chaos-controller-manager-target-namespace
   namespace: chaos-testing
   labels:
     app.kubernetes.io/name: chaos-mesh
@@ -984,7 +984,7 @@ metadata:
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: chaos-mesh:chaos-controller-manager-target-namespace
+  name: chaos-mesh-chaos-controller-manager-target-namespace
 subjects:
   - kind: ServiceAccount
     name: chaos-controller-manager
@@ -992,9 +992,9 @@ subjects:
 ---
 # Source: chaos-mesh/templates/controller-manager-rbac.yaml
 kind: Role
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: chaos-mesh:chaos-controller-manager-control-plane
+  name: chaos-mesh-chaos-controller-manager-control-plane
   namespace: chaos-testing
   labels:
     app.kubernetes.io/name: chaos-mesh
@@ -1008,9 +1008,9 @@ rules:
 # Source: chaos-mesh/templates/controller-manager-rbac.yaml
 # binding for control plane namespace
 kind: RoleBinding
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: chaos-mesh:chaos-controller-manager-control-plane
+  name: chaos-mesh-chaos-controller-manager-control-plane
   namespace: chaos-testing
   labels:
     app.kubernetes.io/name: chaos-mesh
@@ -1019,7 +1019,7 @@ metadata:
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
-  name: chaos-mesh:chaos-controller-manager-control-plane
+  name: chaos-mesh-chaos-controller-manager-control-plane
 subjects:
   - kind: ServiceAccount
     name: chaos-controller-manager
