@@ -14,7 +14,7 @@ metadata:
 ---
 # roles
 kind: ClusterRole
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: {{ .Release.Name }}:chaos-controller-manager-target-namespace
   labels:
@@ -47,7 +47,7 @@ rules:
 
 ---
 kind: ClusterRole
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: {{ .Release.Name }}:chaos-controller-manager-cluster-level
   labels:
@@ -67,7 +67,7 @@ rules:
 
 ---
 kind: Role
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: {{ .Release.Name }}:chaos-controller-manager-control-plane
   namespace: {{ .Release.Namespace }}
@@ -85,7 +85,7 @@ rules:
 ---
 # bindings cluster level
 kind: ClusterRoleBinding
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: {{ .Release.Name }}:chaos-controller-manager-cluster-level
   labels:
@@ -106,7 +106,7 @@ subjects:
 ---
 # binding for control plane namespace
 kind: RoleBinding
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: {{ .Release.Name }}:chaos-controller-manager-control-plane
   namespace: {{ .Release.Namespace }}
@@ -131,7 +131,7 @@ kind: ClusterRoleBinding
 {{- else }}
 kind: RoleBinding
 {{- end }}
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: {{ .Release.Name }}:chaos-controller-manager-target-namespace
   namespace: {{ .Values.controllerManager.targetNamespace }}
