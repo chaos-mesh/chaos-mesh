@@ -131,7 +131,6 @@ const TopContainer = () => {
   useEffect(() => {
     fetchServerConfig()
     insertCommonStyle()
-
     // eslint-disable-next-line
   }, [])
 

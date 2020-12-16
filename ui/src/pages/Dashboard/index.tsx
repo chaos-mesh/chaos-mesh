@@ -108,7 +108,7 @@ export default function Dashboard() {
 
               <Box height={150} mx={3}>
                 <Typography>{T('dashboard.predefinedDesc')}</Typography>
-                <Box py={6}>
+                <Box pt={6}>
                   <Predefined />
                 </Box>
               </Box>

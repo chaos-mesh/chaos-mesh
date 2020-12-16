@@ -6,7 +6,7 @@ export async function getStore(name: string, type: 'readonly' | 'readwrite' = 'r
   if (!db) {
     db = await openDB('chaos-mesh', 1, {
       upgrade(db, oldVersion) {
-        if (oldVersion == 0) {
+        if (oldVersion === 0) {
           db.createObjectStore('predefined', { keyPath: 'id' })
         }
       },

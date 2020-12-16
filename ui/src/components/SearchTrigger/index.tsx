@@ -52,7 +52,6 @@ const SearchTrigger: React.FC = () => {
     return () => {
       document.removeEventListener('keydown', keyDownHandler)
     }
-
     // eslint-disable-next-line
   }, [])
 

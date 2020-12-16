@@ -1,12 +1,12 @@
-import { Box, Card, GridList, GridListTile, Typography } from '@material-ui/core'
+import { Box, Card, GridList, GridListTile, Typography, useMediaQuery, useTheme } from '@material-ui/core'
 import React, { useRef } from 'react'
 
-import AddIcon from '@material-ui/icons/Add'
 import T from 'components/T'
-import clsx from 'clsx'
+import YAML from 'components/YAML'
+import { getStore } from 'lib/idb'
 import { makeStyles } from '@material-ui/core/styles'
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles({
   gridList: {
     flexWrap: 'nowrap',
     // Promote the list into his own layer on Chrome. This cost memory but helps keeping high FPS.
@@ -17,30 +17,33 @@ const useStyles = makeStyles((theme) => ({
   },
   addCard: {
     width: 210,
-    borderStyle: 'dashed',
-    '&:hover': {
-      color: theme.palette.primary.main,
-      borderColor: theme.palette.primary.main,
-    },
   },
-}))
+})
 
 const Predefined = () => {
+  const theme = useTheme()
+  const isDesktopScreen = useMediaQuery(theme.breakpoints.down('md'))
   const classes = useStyles()
-  const dbRef = useRef()
+  const idb = useRef(getStore('predefined'))
 
   return (
     <Box overflow="hidden">
-      <GridList className={classes.gridList} spacing={9} cellHeight="auto">
+      <GridList className={classes.gridList} cols={isDesktopScreen ? 1.5 : 3.5} spacing={9} cellHeight="auto">
         <GridListTile>
-          <Card className={clsx(classes.card, classes.addCard)} variant="outlined">
+          <YAML callback={() => {}} />
+        </GridListTile>
+        <GridListTile>
+          <Card className={classes.card} variant="outlined">
             <Box display="flex" justifyContent="center" alignItems="center" height={88}>
-              <Box display="flex" justifyContent="center" alignItems="center" flex={1}>
-                <AddIcon />
-              </Box>
-              <Box display="flex" justifyContent="center" alignItems="center" flex={2} px={1.5} textAlign="center">
-                <Typography variant="button">{T('common.add')}</Typography>
-              </Box>
+              <Box display="flex" justifyContent="center" alignItems="center" flex={1}></Box>
+              <Box
+                display="flex"
+                justifyContent="center"
+                alignItems="center"
+                flex={2}
+                px={1.5}
+                textAlign="center"
+              ></Box>
             </Box>
           </Card>
         </GridListTile>

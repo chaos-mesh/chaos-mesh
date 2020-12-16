@@ -85,13 +85,15 @@ const ScopeStep: React.FC<ScopeStepProps> = ({ namespaces, scope = 'scope', pods
   }, [currentNamespaces, dispatch])
 
   useEffect(() => {
-    dispatch(
-      getPods({
-        namespace_selectors: currentNamespaces,
-        label_selectors: arrToObjBySep(currentLabels, kvSeparator),
-        annotation_selectors: arrToObjBySep(currentAnnotations, kvSeparator),
-      })
-    )
+    if (currentLabels.length || currentAnnotations.length) {
+      dispatch(
+        getPods({
+          namespace_selectors: currentNamespaces,
+          label_selectors: arrToObjBySep(currentLabels, kvSeparator),
+          annotation_selectors: arrToObjBySep(currentAnnotations, kvSeparator),
+        })
+      )
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentLabels, currentAnnotations])
 

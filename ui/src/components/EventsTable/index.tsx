@@ -204,11 +204,10 @@ export interface EventsTableHandles {
 interface EventsTableProps {
   events: Event[]
   detailed?: boolean
-  hasSearch?: boolean
 }
 
 const EventsTable: React.ForwardRefRenderFunction<EventsTableHandles, EventsTableProps> = (
-  { events: allEvents, detailed = false, hasSearch = true },
+  { events: allEvents, detailed = false },
   ref
 ) => {
   const classes = useStyles()

@@ -10,7 +10,7 @@ import PaperTop from 'components-mui/PaperTop'
 import RadioLabel from './RadioLabel'
 import SkeletonN from 'components-mui/SkeletonN'
 import T from 'components/T'
-import YAML from './YAML'
+import YAML from 'components/YAML'
 import _snakecase from 'lodash.snakecase'
 import api from 'api'
 import { useIntl } from 'react-intl'
@@ -39,9 +39,15 @@ const LoadFrom = () => {
       .catch(console.error)
 
   useEffect(() => {
-    fetchExperiments()
-    fetchArchives()
+    Promise.all([fetchExperiments(), fetchArchives()])
   }, [])
+
+  function fillExperiment(y: any) {
+    const kind = y.target.kind
+    dispatch(setKindAction([kind, y.target[_snakecase(kind)].action ?? '']))
+    dispatch(setTarget(y.target))
+    dispatch(setBasic(y.basic))
+  }
 
   const onRadioChange = (e: any) => {
     const [type, uuid] = e.target.value.split('+')
@@ -54,10 +60,8 @@ const LoadFrom = () => {
       .then(({ data }) => {
         const y = yamlToExperiment(data.yaml)
 
-        const kind = y.target.kind
-        dispatch(setKindAction([kind, y.target[_snakecase(kind)].action ?? '']))
-        dispatch(setTarget(y.target))
-        dispatch(setBasic(y.basic))
+        fillExperiment(y)
+
         dispatch(
           setAlert({
             type: 'success',
@@ -72,7 +76,7 @@ const LoadFrom = () => {
   return (
     <Paper>
       <PaperTop title={T('newE.loadFrom')}>
-        <YAML />
+        <YAML callback={fillExperiment} />
       </PaperTop>
       <Box p={6} maxHeight={450} style={{ overflowY: 'scroll' }}>
         <RadioGroup value={radio} onChange={onRadioChange}>

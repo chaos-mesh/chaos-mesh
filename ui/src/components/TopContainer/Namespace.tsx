@@ -1,11 +1,12 @@
 import { MenuItem, TextField } from '@material-ui/core'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect } from 'react'
 import { useHistory, useLocation } from 'react-router-dom'
 import { useStoreDispatch, useStoreSelector } from 'store'
 
 import T from 'components/T'
 import api from 'api'
 import clsx from 'clsx'
+import { getNamespaces } from 'slices/experiments'
 import { makeStyles } from '@material-ui/core/styles'
 import { setNameSpace } from 'slices/globalStatus'
 
@@ -35,16 +36,12 @@ const ControlBar = () => {
   const { pathname } = useLocation()
 
   const { namespace } = useStoreSelector((state) => state.globalStatus)
+  const { namespaces } = useStoreSelector((state) => state.experiments)
   const dispatch = useStoreDispatch()
 
-  const [namespaces, setNamespaces] = useState(['All'])
-
-  const fetchNamespaces = () => {
-    api.common
-      .chaosAvailableNamespaces()
-      .then(({ data }) => setNamespaces(['All', ...data]))
-      .catch(console.error)
-  }
+  useEffect(() => {
+    dispatch(getNamespaces())
+  }, [dispatch])
 
   const handleSelectGlobalNamespace = (e: React.ChangeEvent<{ value: unknown }>) => {
     const ns = e.target.value as string
@@ -56,8 +53,6 @@ const ControlBar = () => {
     setTimeout(() => history.replace(pathname))
   }
 
-  useEffect(fetchNamespaces, [])
-
   return (
     <TextField
       className={clsx(classes.namespace, 'nav-namespace')}
@@ -67,7 +62,7 @@ const ControlBar = () => {
       value={namespace}
       onChange={handleSelectGlobalNamespace}
     >
-      {namespaces.map((option) => (
+      {['All', ...namespaces].map((option) => (
         <MenuItem key={option} value={option}>
           {option}
         </MenuItem>

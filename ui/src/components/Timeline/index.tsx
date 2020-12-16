@@ -21,7 +21,7 @@ const Timeline: React.FC<TimelineProps> = (props) => {
 
   const fetchEvents = () => {
     api.events
-      .events()
+      .dryEvents()
       .then(({ data }) => setEvents(data))
       .catch(console.error)
   }
@@ -39,7 +39,6 @@ const Timeline: React.FC<TimelineProps> = (props) => {
         theme,
       })
     }
-
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [events])
 
