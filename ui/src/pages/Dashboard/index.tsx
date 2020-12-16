@@ -32,6 +32,7 @@ const useStyles = makeStyles((theme) => ({
     alignItems: 'center',
     [theme.breakpoints.down('sm')]: {
       alignItems: 'unset',
+      overflowY: 'scroll',
     },
   },
 }))
@@ -83,7 +84,7 @@ export default function Dashboard() {
             <Paper>
               <PaperTop title={T('dashboard.totalExperiments')} />
 
-              <Box className={classes.totalExperiments} height={300} m={3} overflow="scroll">
+              <Box className={classes.totalExperiments} height={300} m={3}>
                 <TotalExperiments />
               </Box>
             </Paper>
@@ -116,9 +117,12 @@ export default function Dashboard() {
           </Grid>
 
           <Grid item xs={12} md={12} lg={9}>
-            <Paper>
+            <Paper style={{ position: 'relative' }}>
               <PaperTop title={T('common.timeline')} />
 
+              <Typography className={classes.notFound} align="center">
+                {T('experiments.noExperimentsFound')}
+              </Typography>
               <Timeline className={classes.container} />
             </Paper>
           </Grid>

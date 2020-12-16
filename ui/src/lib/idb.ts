@@ -1,17 +1,34 @@
-import { IDBPDatabase, openDB } from 'idb'
+import { DBSchema, IDBPDatabase, openDB } from 'idb'
 
-let db: IDBPDatabase
+import { ExperimentKind } from 'components/NewExperiment/types'
 
-export async function getStore(name: string, type: 'readonly' | 'readwrite' = 'readonly') {
+export interface PreDefinedValue {
+  name: string
+  kind: ExperimentKind
+  yaml: object
+}
+
+interface DB extends DBSchema {
+  predefined: {
+    key: string
+    value: PreDefinedValue
+  }
+}
+
+let db: IDBPDatabase<DB>
+
+export async function getDB() {
   if (!db) {
-    db = await openDB('chaos-mesh', 1, {
+    db = await openDB<DB>('chaos-mesh', 1, {
       upgrade(db, oldVersion) {
         if (oldVersion === 0) {
-          db.createObjectStore('predefined', { keyPath: 'id' })
+          db.createObjectStore('predefined', {
+            keyPath: 'name',
+          })
         }
       },
     })
   }
 
-  return db.transaction(name, type).objectStore(name)
+  return db
 }

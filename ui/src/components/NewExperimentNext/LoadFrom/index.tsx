@@ -42,8 +42,10 @@ const LoadFrom = () => {
     Promise.all([fetchExperiments(), fetchArchives()])
   }, [])
 
-  function fillExperiment(y: any) {
+  function fillExperiment(original: any) {
+    const y = yamlToExperiment(original)
     const kind = y.target.kind
+
     dispatch(setKindAction([kind, y.target[_snakecase(kind)].action ?? '']))
     dispatch(setTarget(y.target))
     dispatch(setBasic(y.basic))
