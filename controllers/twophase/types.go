@@ -169,7 +169,8 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 			status.Experiment.StartTime = &metav1.Time{Time: now}
 		}
 
-		if chaos.GetNextStart().Before(now) {
+		// start the chaos before or equal now
+		if !chaos.GetNextStart().After(now) {
 			r.Log.Info("Starting")
 			if err = applyAction(ctx, r, req, *duration, chaos); err != nil {
 				updateFailedMessage(ctx, r, chaos, err.Error())
