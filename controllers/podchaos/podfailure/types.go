@@ -220,7 +220,7 @@ func (r *endpoint) failPod(ctx context.Context, pod *v1.Pod, podchaos *v1alpha1.
 
 	updateErr := retry.RetryOnConflict(retry.DefaultRetry, func() error {
 		var newPod v1.Pod
-		getErr := r.Get(ctx, types.NamespacedName{
+		getErr := r.Client.Get(ctx, types.NamespacedName{
 			Namespace: pod.Namespace,
 			Name:      pod.Name,
 		}, &newPod)
@@ -230,7 +230,7 @@ func (r *endpoint) failPod(ctx context.Context, pod *v1.Pod, podchaos *v1alpha1.
 		newPod.Annotations = pod.Annotations
 		newPod.Spec.Containers = pod.Spec.Containers
 		newPod.Spec.InitContainers = pod.Spec.InitContainers
-		return r.Update(ctx, &newPod)
+		return r.Client.Update(ctx, &newPod)
 	})
 	if updateErr != nil {
 		r.Log.Error(updateErr, "unable to use fake image on pod")
