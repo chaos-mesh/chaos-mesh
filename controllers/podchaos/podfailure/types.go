@@ -35,6 +35,7 @@ import (
 	ctx "github.com/chaos-mesh/chaos-mesh/pkg/router/context"
 	end "github.com/chaos-mesh/chaos-mesh/pkg/router/endpoint"
 	"github.com/chaos-mesh/chaos-mesh/pkg/utils"
+	"k8s.io/client-go/util/retry"
 )
 
 const (
@@ -43,6 +44,10 @@ const (
 	pauseImage = "gcr.io/google-containers/pause:latest"
 
 	podFailureActionMsg = "pod failure duration %s"
+)
+
+var (
+	notOperatedByPodChaos = errors.New("the pod not operated by podChaos")
 )
 
 type endpoint struct {
@@ -138,7 +143,8 @@ func (r *endpoint) cleanFinalizersAndRecover(ctx context.Context, podchaos *v1al
 		}
 
 		err = r.recoverPod(ctx, &pod, podchaos)
-		if err != nil {
+		// the pod not operated by PodChaos should be removed in pod chaos finalizers
+		if err != nil && !errors.Is(err, notOperatedByPodChaos) {
 			result = multierror.Append(result, err)
 			continue
 		}
@@ -212,9 +218,23 @@ func (r *endpoint) failPod(ctx context.Context, pod *v1.Pod, podchaos *v1alpha1.
 		pod.Spec.Containers[index].Image = pauseImage
 	}
 
-	if err := r.Update(ctx, pod); err != nil {
-		r.Log.Error(err, "unable to use fake image on pod")
-		return err
+	updateErr := retry.RetryOnConflict(retry.DefaultRetry, func() error {
+		var newPod v1.Pod
+		getErr := r.Get(ctx, types.NamespacedName{
+			Namespace: pod.Namespace,
+			Name:      pod.Name,
+		}, &newPod)
+		if getErr != nil {
+			return getErr
+		}
+		newPod.Annotations = pod.Annotations
+		newPod.Spec.Containers = pod.Spec.Containers
+		newPod.Spec.InitContainers = pod.Spec.InitContainers
+		return r.Update(ctx, &newPod)
+	})
+	if updateErr != nil {
+		r.Log.Error(updateErr, "unable to use fake image on pod")
+		return updateErr
 	}
 
 	ps := v1alpha1.PodStatus{
@@ -238,13 +258,16 @@ func (r *endpoint) recoverPod(ctx context.Context, pod *v1.Pod, podchaos *v1alph
 
 	for index := range pod.Spec.Containers {
 		name := pod.Spec.Containers[index].Name
-		_ = utils.GenAnnotationKeyForImage(podchaos, name)
+		key := utils.GenAnnotationKeyForImage(podchaos, name)
 
 		if pod.Annotations == nil {
 			pod.Annotations = make(map[string]string)
 		}
-
-		// FIXME: Check annotations and return error.
+		// Check annotations and return error
+		if _, ok := pod.Annotations[key]; !ok {
+			r.Log.Error(notOperatedByPodChaos, "the pod not operated by podChaos", "namespace", pod.Namespace, "name", pod.Name)
+			return notOperatedByPodChaos
+		}
 	}
 
 	// chaos-mesh don't support
