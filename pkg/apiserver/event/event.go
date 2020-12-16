@@ -161,12 +161,12 @@ func (s *Service) getEvent(c *gin.Context) {
 
 	event, err := s.event.Find(context.Background(), uint(id))
 	if err != nil {
-		if !gorm.IsRecordNotFoundError(err) {
-			c.Status(http.StatusInternalServerError)
-			_ = c.Error(utils.ErrInternalServer.NewWithNoMessage())
-		} else {
+		if gorm.IsRecordNotFoundError(err) {
 			c.Status(http.StatusInternalServerError)
 			_ = c.Error(utils.ErrInvalidRequest.New("the event is not found"))
+		} else {
+			c.Status(http.StatusInternalServerError)
+			_ = c.Error(utils.ErrInternalServer.NewWithNoMessage())
 		}
 		return
 	}

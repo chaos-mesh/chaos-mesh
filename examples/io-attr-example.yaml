@@ -1,10 +1,10 @@
 apiVersion: chaos-mesh.org/v1alpha1
 kind: IoChaos
 metadata:
-  name: io-delay-example
+  name: io-attr-example
   namespace: chaos-testing
 spec:
-  action: latency
+  action: attrOverride
   mode: one
   selector:
     labelSelectors:
