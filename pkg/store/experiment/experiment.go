@@ -99,7 +99,11 @@ func (e *experimentStore) Archive(_ context.Context, ns, name string) error {
 	return nil
 }
 
-func (e *experimentStore) Delete(context.Context, *core.Experiment) error { return nil }
+// Delete deletes the experiment from the datastore.
+func (e *experimentStore) Delete(_ context.Context, exp *core.Experiment) error {
+	err := e.db.Table("experiments").Unscoped().Delete(*exp).Error
+	return err
+}
 
 // DeleteByFinishTime deletes experiments whose time difference is greater than the given time from FinishTime.
 func (e *experimentStore) DeleteByFinishTime(_ context.Context, ttl time.Duration) error {

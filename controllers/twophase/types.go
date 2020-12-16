@@ -15,10 +15,10 @@ package twophase
 
 import (
 	"context"
-	"fmt"
+	"math"
 	"time"
 
-	"k8s.io/client-go/util/retry"
+	"github.com/pkg/errors"
 
 	"github.com/robfig/cron/v3"
 
@@ -26,7 +26,6 @@ import (
 	ctx "github.com/chaos-mesh/chaos-mesh/pkg/router/context"
 	"github.com/chaos-mesh/chaos-mesh/pkg/router/endpoint"
 
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
 )
 
@@ -39,7 +38,9 @@ type Reconciler struct {
 }
 
 // NewReconciler would create reconciler for twophase controller
-func NewReconciler(e endpoint.Endpoint, ctx ctx.Context) *Reconciler {
+func NewReconciler(req ctrl.Request, e endpoint.Endpoint, ctx ctx.Context) *Reconciler {
+	ctx.Log = ctx.Log.WithName(req.NamespacedName.String())
+
 	return &Reconciler{
 		Endpoint: e,
 		Context:  ctx,
@@ -51,7 +52,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	var err error
 	now := time.Now()
 
-	r.Log.Info("Reconciling a two phase chaos", "name", req.Name, "namespace", req.Namespace)
+	r.Log.Info("Reconciling a two phase chaos", "name", req.Name, "namespace", req.Namespace, "time", time.Now())
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
@@ -62,223 +63,84 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	}
 	chaos := _chaos.(v1alpha1.InnerSchedulerObject)
 
-	duration, err := chaos.GetDuration()
-	if err != nil {
-		r.Log.Error(err, "failed to get chaos duration")
-		return ctrl.Result{}, err
-	}
-
-	scheduler := chaos.GetScheduler()
-	if scheduler == nil {
-		r.Log.Info("Scheduler should be defined currently")
-		return ctrl.Result{}, fmt.Errorf("misdefined scheduler")
-	}
-
-	if duration == nil {
-		zero := 0 * time.Second
-		duration = &zero
-	}
-
 	status := chaos.GetStatus()
+
+	targetPhase := status.Experiment.Phase
+
+	if !chaos.GetNextRecover().IsZero() && chaos.GetNextRecover().Before(now) {
+		targetPhase = v1alpha1.ExperimentPhaseWaiting
+	}
+
+	if chaos.GetNextStart().Before(now) {
+		targetPhase = v1alpha1.ExperimentPhaseRunning
+	}
+
+	if chaos.IsPaused() {
+		targetPhase = v1alpha1.ExperimentPhasePaused
+	}
+
+	// TODO: find a better way to solve the pause and resume problem.
+	// Or pause is a bad design for the scheduler :(
+	if !chaos.IsPaused() && status.Experiment.Phase == v1alpha1.ExperimentPhasePaused {
+		// Running and Waiting has the same logic for resuming
+		targetPhase = v1alpha1.ExperimentPhaseRunning
+	}
 
 	if chaos.IsDeleted() {
-		// This chaos was deleted
-		r.Log.Info("Removing self")
-		err = r.Recover(ctx, req, chaos)
-		if err != nil {
-			r.Log.Error(err, "failed to recover chaos")
-			updateFailedMessage(ctx, req, r, chaos, err.Error())
-			return ctrl.Result{Requeue: true}, err
-		}
-
-		status.Experiment.Phase = v1alpha1.ExperimentPhaseFinished
-		status.FailedMessage = emptyString
-	} else if chaos.IsPaused() {
-		if status.Experiment.Phase == v1alpha1.ExperimentPhaseRunning {
-			r.Log.Info("Pausing")
-
-			err = r.Recover(ctx, req, chaos)
-			if err != nil {
-				r.Log.Error(err, "failed to pause chaos")
-				updateFailedMessage(ctx, req, r, chaos, err.Error())
-				return ctrl.Result{Requeue: true}, err
-			}
-
-			now := time.Now()
-			status.Experiment.EndTime = &metav1.Time{
-				Time: now,
-			}
-			if status.Experiment.StartTime != nil {
-				status.Experiment.Duration = now.Sub(status.Experiment.StartTime.Time).String()
-			}
-		}
-		status.Experiment.Phase = v1alpha1.ExperimentPhasePaused
-		status.FailedMessage = emptyString
-	} else if !chaos.GetNextRecover().IsZero() && chaos.GetNextRecover().Before(now) {
-		// Start recover
-		r.Log.Info("Recovering")
-
-		// Don't need to recover again if chaos was paused before
-		if status.Experiment.Phase != v1alpha1.ExperimentPhasePaused {
-			if err = r.Recover(ctx, req, chaos); err != nil {
-				r.Log.Error(err, "failed to recover chaos")
-				updateFailedMessage(ctx, req, r, chaos, err.Error())
-				return ctrl.Result{Requeue: true}, err
-			}
-		}
-
-		chaos.SetNextRecover(time.Time{})
-
-		status.Experiment.EndTime = &metav1.Time{
-			Time: time.Now(),
-		}
-		status.Experiment.Phase = v1alpha1.ExperimentPhaseWaiting
-		status.FailedMessage = emptyString
-	} else if (status.Experiment.Phase == v1alpha1.ExperimentPhaseFailed ||
-		status.Experiment.Phase == v1alpha1.ExperimentPhasePaused) &&
-		!chaos.GetNextRecover().IsZero() && chaos.GetNextRecover().After(now) {
-		// Only resume/retry chaos in the case when current round is not finished,
-		// which means the current time is before recover time. Otherwise we
-		// don't resume the chaos and just wait for the start of next round.
-
-		r.Log.Info("Resuming/Retrying")
-
-		dur := chaos.GetNextRecover().Sub(now)
-		if err = applyAction(ctx, r, req, dur, chaos); err != nil {
-			updateFailedMessage(ctx, req, r, chaos, err.Error())
-			return ctrl.Result{Requeue: true}, err
-		}
-
-		status.FailedMessage = emptyString
-	} else if chaos.GetNextStart().Before(now) {
-		r.Log.Info("Starting")
-
-		tempStart, err := nextTime(*chaos.GetScheduler(), now)
-		if err != nil {
-			r.Log.Error(err, "failed to calculate the start time")
-			updateFailedMessage(ctx, req, r, chaos, err.Error())
-			return ctrl.Result{}, err
-		}
-
-		tempRecover := now.Add(*duration)
-		if tempStart.Before(tempRecover) {
-			err := fmt.Errorf("nextRecover shouldn't be later than nextStart")
-			r.Log.Error(err, "Then recover can never be reached.", "scheduler", *chaos.GetScheduler(), "duration", *duration)
-			updateFailedMessage(ctx, req, r, chaos, err.Error())
-			return ctrl.Result{}, err
-		}
-
-		if err = applyAction(ctx, r, req, *duration, chaos); err != nil {
-			updateFailedMessage(ctx, req, r, chaos, err.Error())
-			return ctrl.Result{Requeue: true}, err
-		}
-
-		nextStart, err := nextTime(*chaos.GetScheduler(), status.Experiment.StartTime.Time)
-		if err != nil {
-			r.Log.Error(err, "failed to get the next start time")
-			return ctrl.Result{}, err
-		}
-		nextRecover := status.Experiment.StartTime.Time.Add(*duration)
-
-		chaos.SetNextStart(*nextStart)
-		chaos.SetNextRecover(nextRecover)
-		status.FailedMessage = emptyString
-	} else {
-		r.Log.Info("Waiting")
-
-		nextStart, err := nextTime(*chaos.GetScheduler(), status.Experiment.StartTime.Time)
-		if err != nil {
-			r.Log.Error(err, "failed to get next start time")
-			return ctrl.Result{}, err
-		}
-		nextTime := chaos.GetNextStart()
-
-		// if nextStart is not equal to nextTime, the scheduler may have been modified.
-		// So set nextStart to time.Now.
-		if nextStart.Equal(nextTime) {
-			if !chaos.GetNextRecover().IsZero() && chaos.GetNextRecover().Before(nextTime) {
-				nextTime = chaos.GetNextRecover()
-			}
-			duration := nextTime.Sub(now)
-			r.Log.Info("Requeue request", "after", duration)
-
-			return ctrl.Result{RequeueAfter: duration}, nil
-		}
-
-		chaos.SetNextStart(time.Now())
-		duration := nextTime.Sub(now)
-		r.Log.Info("Requeue request", "after", duration)
-		return ctrl.Result{RequeueAfter: duration}, nil
+		targetPhase = v1alpha1.ExperimentPhaseFinished
 	}
 
-	if err := r.Update(ctx, chaos); err != nil {
-		r.Log.Error(err, "unable to update chaos status")
+	r.Log.Info("decide target phase", "target phase", targetPhase)
+
+	machine := chaosStateMachine{
+		Chaos:      chaos,
+		Req:        req,
+		Reconciler: r,
+	}
+	err = machine.Into(ctx, targetPhase, now)
+	if err != nil {
+		r.Log.Error(err, "fail to step into the phase", "target phase", targetPhase)
 		return ctrl.Result{}, err
 	}
 
-	return ctrl.Result{}, nil
-}
-
-func applyAction(
-	ctx context.Context,
-	r *Reconciler,
-	req ctrl.Request,
-	duration time.Duration,
-	chaos v1alpha1.InnerSchedulerObject,
-) error {
-	status := chaos.GetStatus()
-	r.Log.Info("Chaos action:", "chaos", chaos)
-
-	// Start to apply action
-	r.Log.Info("Performing Action")
-
-	if err := r.Apply(ctx, req, chaos); err != nil {
-		r.Log.Error(err, "failed to apply chaos action")
-
-		status.Experiment.Phase = v1alpha1.ExperimentPhaseFailed
-
-		updateError := retry.RetryOnConflict(retry.DefaultRetry, func() error {
-			return r.Update(ctx, chaos)
-		})
-		if updateError != nil {
-			r.Log.Error(updateError, "unable to update chaos finalizers")
-		}
-
-		return err
+	// the reconciliation of Finished and Paused resource shouldn't be triggered by time
+	if chaos.GetStatus().Experiment.Phase == v1alpha1.ExperimentPhaseFinished ||
+		chaos.GetStatus().Experiment.Phase == v1alpha1.ExperimentPhasePaused {
+		return ctrl.Result{}, nil
 	}
 
-	status.Experiment.StartTime = &metav1.Time{Time: time.Now()}
-	status.Experiment.Phase = v1alpha1.ExperimentPhaseRunning
-	status.Experiment.Duration = duration.String()
-	return nil
+	requeueAfter, err := calcRequeueAfterTime(chaos, now)
+	if err != nil {
+		r.Log.Error(err, "unexpected time", "now", now, "nextStart", chaos.GetNextStart(), "nextRecover", chaos.GetNextRecover())
+
+		// will not return error and retry
+		// because nothing will be better with retrying
+		return ctrl.Result{}, nil
+	}
+	r.Log.Info("requeue", "requeue after", requeueAfter)
+	return ctrl.Result{
+		RequeueAfter: requeueAfter,
+	}, nil
 }
 
-func updateFailedMessage(
-	ctx context.Context,
-	req ctrl.Request,
-	r *Reconciler,
-	chaos v1alpha1.InnerSchedulerObject,
-	err string,
-) {
-	updateError := retry.RetryOnConflict(retry.DefaultBackoff, func() error {
-		// Fetch the resource
-		_chaos := r.Object()
-		if err := r.Client.Get(ctx, req.NamespacedName, _chaos); err != nil {
-			r.Log.Error(err, "unable to get chaos")
-			return err
-		}
-		chaos := _chaos.(v1alpha1.InnerSchedulerObject)
-
-		// Make updates to the resource
-		status := chaos.GetStatus()
-		status.FailedMessage = err
-
-		// Try to update
-		return r.Update(ctx, chaos)
-	})
-	if updateError != nil {
-		r.Log.Error(updateError, "unable to update chaos status")
+func calcRequeueAfterTime(chaos v1alpha1.InnerSchedulerObject, now time.Time) (time.Duration, error) {
+	requeueAfter := time.Duration(math.MaxInt64)
+	// requeueAfter = min(filter([nextRecoverAfter, nextStartAfter], >0))
+	nextRecoverAfter := chaos.GetNextRecover().Sub(now)
+	nextStartAfter := chaos.GetNextStart().Sub(now)
+	if nextRecoverAfter > 0 && requeueAfter > nextRecoverAfter {
+		requeueAfter = nextRecoverAfter
 	}
+	if nextStartAfter > 0 && requeueAfter > nextStartAfter {
+		requeueAfter = nextStartAfter
+	}
+
+	var err error
+	if requeueAfter == math.MaxInt64 {
+		err = errors.Errorf("unexpected behavior, now is greater than nextRecover and nextStart")
+	}
+
+	return requeueAfter, err
 }
 
 func nextTime(spec v1alpha1.SchedulerSpec, now time.Time) (*time.Time, error) {

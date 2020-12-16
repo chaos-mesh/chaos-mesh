@@ -92,7 +92,7 @@ func main() {
 	// set RPCTimeout config
 	grpcUtils.RPCTimeout = ccfg.ControllerCfg.RPCTimeout
 
-	ctrl.SetLogger(zap.Logger(true))
+	ctrl.SetLogger(zap.New(zap.UseDevMode(true)))
 
 	options := ctrl.Options{
 		Scheme:             scheme,
