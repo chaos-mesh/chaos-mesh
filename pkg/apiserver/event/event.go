@@ -86,8 +86,6 @@ func (s *Service) listEvents(c *gin.Context) {
 		LimitStr:            c.Query("limit"),
 	}
 
-	fmt.Println("listEvents", filter)
-
 	canList := utils.CanListChaos(c, filter.ExperimentNamespace)
 	if !canList {
 		return
