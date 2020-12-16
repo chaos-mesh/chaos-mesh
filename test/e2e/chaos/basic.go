@@ -146,6 +146,10 @@ var _ = ginkgo.Describe("[Basic]", func() {
 			ginkgo.It("[Pause]", func() {
 				timechaostestcases.TestcaseTimeSkewPauseThenUnpause(ns, cli, c, port)
 			})
+
+			ginkgo.It("[StartAtWaiting]", func() {
+				timechaostestcases.TestcaseTimeSkewStartAtWaitingThenIntoRunning(ns, cli, c, port)
+			})
 		})
 	})
 

@@ -61,11 +61,10 @@ type cusConstantDelaySchedule struct {
 	cron.ConstantDelaySchedule
 }
 
-// Last returns the last time this schedule activated.
-// This rounds so that the next activation time will be on the second.
-// Modified from the original `Next` function in robfig/cron at Dec 15, 2020
+// Last returns the last time this schedule activated, less than or equal with the given time.
+// So it would always return now
 func (s cusConstantDelaySchedule) Last(t time.Time) time.Time {
-	return t.Add(-s.Delay + time.Duration(t.Nanosecond())*time.Nanosecond)
+	return t
 }
 
 type cusSchedule struct {
@@ -96,9 +95,6 @@ func (s *cusSchedule) Last(t time.Time) time.Time {
 	if s.Location != time.Local {
 		t = t.In(s.Location)
 	}
-
-	// Start at the lastest possible time (now).
-	t = t.Add(-time.Duration(t.Nanosecond()) * time.Nanosecond)
 
 	// If no time is found within five years, return zero.
 	yearLimit := t.Year() - 5
