@@ -39,21 +39,22 @@ func TestcasePodFailureOnceThenDelete(ns string, kubeCli kubernetes.Interface, c
 	defer cancel()
 
 	By("preparing experiment pods")
-	nd := fixture.NewTimerDeployment("timer", ns)
+	appName := "timer-pod-failure1"
+	nd := fixture.NewTimerDeployment(appName, ns)
 	_, err := kubeCli.AppsV1().Deployments(ns).Create(nd)
 	framework.ExpectNoError(err, "create timer deployment error")
-	err = util.WaitDeploymentReady("timer", ns, kubeCli)
+	err = util.WaitDeploymentReady(appName, ns, kubeCli)
 	framework.ExpectNoError(err, "wait timer deployment ready error")
 
 	By("create pod failure chaos CRD objects")
 	listOption := metav1.ListOptions{
 		LabelSelector: labels.SelectorFromSet(map[string]string{
-			"app": "timer",
+			"app": appName,
 		}).String(),
 	}
 	podFailureChaos := &v1alpha1.PodChaos{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      "timer-failure",
+			Name:      "timer-failure1",
 			Namespace: ns,
 		},
 		Spec: v1alpha1.PodChaosSpec{
@@ -62,7 +63,7 @@ func TestcasePodFailureOnceThenDelete(ns string, kubeCli kubernetes.Interface, c
 					ns,
 				},
 				LabelSelectors: map[string]string{
-					"app": "timer",
+					"app": appName,
 				},
 			},
 			Action: v1alpha1.PodFailureAction,
@@ -121,29 +122,30 @@ func TestcasePodFailurePauseThenUnPause(ns string, kubeCli kubernetes.Interface,
 	defer cancel()
 
 	By("preparing experiment pods")
-	nd := fixture.NewTimerDeployment("timer", ns)
+	appName := "timer-pod-failure2"
+	nd := fixture.NewTimerDeployment(appName, ns)
 	_, err := kubeCli.AppsV1().Deployments(ns).Create(nd)
 	framework.ExpectNoError(err, "create timer deployment error")
-	err = util.WaitDeploymentReady("timer", ns, kubeCli)
+	err = util.WaitDeploymentReady(appName, ns, kubeCli)
 	framework.ExpectNoError(err, "wait timer deployment ready error")
 
 	By("create pod failure chaos CRD objects")
 	var pods *corev1.PodList
 	listOption := metav1.ListOptions{
 		LabelSelector: labels.SelectorFromSet(map[string]string{
-			"app": "timer",
+			"app": appName,
 		}).String(),
 	}
 
 	podFailureChaos := &v1alpha1.PodChaos{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      "timer-failure",
+			Name:      "timer-failure2",
 			Namespace: ns,
 		},
 		Spec: v1alpha1.PodChaosSpec{
 			Selector: v1alpha1.SelectorSpec{
 				Namespaces:     []string{ns},
-				LabelSelectors: map[string]string{"app": "timer"},
+				LabelSelectors: map[string]string{"app": appName},
 			},
 			Action:   v1alpha1.PodFailureAction,
 			Mode:     v1alpha1.OnePodMode,
@@ -157,7 +159,7 @@ func TestcasePodFailurePauseThenUnPause(ns string, kubeCli kubernetes.Interface,
 	framework.ExpectNoError(err, "create pod failure chaos error")
 	chaosKey := types.NamespacedName{
 		Namespace: ns,
-		Name:      "timer-failure",
+		Name:      "timer-failure2",
 	}
 
 	By("waiting for assertion some pod fall into failure")
