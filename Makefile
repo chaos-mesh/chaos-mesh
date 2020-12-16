@@ -98,9 +98,6 @@ chaosdaemon:
 bin/pause: ./hack/pause.c
 	cc ./hack/pause.c -o bin/pause
 
-bin/suicide: ./hack/suicide.c
-	cc ./hack/suicide.c -o bin/suicide
-
 # Build manager binary
 manager:
 	$(GO) build -ldflags '$(LDFLAGS)' -o bin/chaos-controller-manager ./cmd/controller-manager/*.go
@@ -126,7 +123,7 @@ ui: yarn_dependencies
 	cd ui &&\
 	yarn build
 
-binary: chaosdaemon manager chaos-dashboard bin/pause bin/suicide
+binary: chaosdaemon manager chaos-dashboard bin/pause
 
 watchmaker:
 	$(CGOENV) go build -ldflags '$(LDFLAGS)' -o bin/watchmaker ./cmd/watchmaker/...
