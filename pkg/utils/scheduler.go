@@ -15,6 +15,7 @@ package utils
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/robfig/cron/v3"
@@ -22,7 +23,11 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 )
 
-func NextTime(spec v1alpha1.SchedulerSpec, now time.Time) (*time.Time, error) {
+func NextTime(spec v1alpha1.SchedulerSpec, now time.Time, firstTime bool) (*time.Time, error) {
+	if firstTime && strings.Contains(spec.Cron, "every") {
+		return &now, nil
+	}
+
 	scheduler, err := cron.ParseStandard(spec.Cron)
 	if err != nil {
 		return nil, fmt.Errorf("fail to parse runner rule %s, %v", spec.Cron, err)

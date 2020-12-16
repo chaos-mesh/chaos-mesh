@@ -16,6 +16,7 @@ package twophase_test
 import (
 	"context"
 	"errors"
+	"math"
 	"testing"
 	"time"
 
@@ -435,7 +436,8 @@ var _ = Describe("TwoPhase", func() {
 			Expect(chaos.NextStart.Time.Day()).To(Equal(exp.Day()))
 			Expect(chaos.NextStart.Time.Hour()).To(Equal(exp.Hour()))
 			Expect(chaos.NextStart.Time.Minute()).To(Equal(exp.Minute()))
-			Expect(chaos.NextStart.Time.Second()).To(Equal(exp.Second()))
+			// tolerate a small amount of deviation for second
+			Expect(math.Abs(float64(chaos.NextStart.Time.Second()-exp.Second())) <= 1).To(Equal(true))
 		})
 
 		It("TwoPhase ToApply Error", func() {

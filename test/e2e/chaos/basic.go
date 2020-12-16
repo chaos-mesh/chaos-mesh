@@ -1509,6 +1509,8 @@ selector:
 						return false
 					}
 
+					time.Sleep(time.Second)
+
 					data, err := recvUDPPacket(c, ports[target])
 					if err != nil || data != "ping\n" {
 						klog.Infof("Error: %v, Data: %s", err, data)
