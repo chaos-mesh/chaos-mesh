@@ -47,7 +47,7 @@ const (
 )
 
 var (
-	notOperatedByPodChaos = errors.New("the pod not operated by podChaos")
+	errNotOperatedChaos = errors.New("the pod not operated by podChaos")
 )
 
 type endpoint struct {
@@ -144,7 +144,7 @@ func (r *endpoint) cleanFinalizersAndRecover(ctx context.Context, podchaos *v1al
 
 		err = r.recoverPod(ctx, &pod, podchaos)
 		// the pod not operated by PodChaos should be removed in pod chaos finalizers
-		if err != nil && !errors.Is(err, notOperatedByPodChaos) {
+		if err != nil && !errors.Is(err, errNotOperatedChaos) {
 			result = multierror.Append(result, err)
 			continue
 		}
@@ -265,8 +265,8 @@ func (r *endpoint) recoverPod(ctx context.Context, pod *v1.Pod, podchaos *v1alph
 		}
 		// Check annotations and return error
 		if _, ok := pod.Annotations[key]; !ok {
-			r.Log.Error(notOperatedByPodChaos, "the pod not operated by podChaos", "namespace", pod.Namespace, "name", pod.Name)
-			return notOperatedByPodChaos
+			r.Log.Error(errNotOperatedChaos, "the pod not operated by podChaos", "namespace", pod.Namespace, "name", pod.Name)
+			return errNotOperatedChaos
 		}
 	}
 
