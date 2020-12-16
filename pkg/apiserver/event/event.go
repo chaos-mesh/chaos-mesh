@@ -80,11 +80,13 @@ func (s *Service) listEvents(c *gin.Context) {
 		StartTimeStr:        c.Query("startTime"),
 		FinishTimeStr:       c.Query("finishTime"),
 		ExperimentName:      c.Query("experimentName"),
-		ExperimentNamespace: c.Query("experimentNamespace"),
+		ExperimentNamespace: c.Query("namespace"),
 		UID:                 c.Query("uid"),
 		Kind:                c.Query("kind"),
 		LimitStr:            c.Query("limit"),
 	}
+
+	fmt.Println("listEvents", filter)
 
 	canList := utils.CanListChaos(c, filter.ExperimentNamespace)
 	if !canList {
@@ -125,7 +127,7 @@ func (s *Service) listDryEvents(c *gin.Context) {
 		StartTimeStr:        c.Query("startTime"),
 		FinishTimeStr:       c.Query("finishTime"),
 		ExperimentName:      c.Query("experimentName"),
-		ExperimentNamespace: c.Query("experimentNamespace"),
+		ExperimentNamespace: c.Query("namespace"),
 		Kind:                c.Query("kind"),
 		LimitStr:            c.Query("limit"),
 	}
