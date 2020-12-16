@@ -29,8 +29,8 @@ func (in *ActionParameterRules) DeepCopyInto(out *ActionParameterRules) {
 		*out = make([]ParameterRules, len(*in))
 		copy(*out, *in)
 	}
-	if in.Matcher != nil {
-		in, out := &in.Matcher, &out.Matcher
+	if in.Matchers != nil {
+		in, out := &in.Matchers, &out.Matchers
 		*out = make([]ParameterRules, len(*in))
 		copy(*out, *in)
 	}

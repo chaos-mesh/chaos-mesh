@@ -26,8 +26,10 @@ const (
 	RecoverURL = BaseURL + "chaosblade/destroy"
 )
 
+// ActiveSandbox activates sandboxes
 func ActiveSandbox(host string, port int) error {
 	url := fmt.Sprintf(ActiveURL, host, port)
+
 	_, err := http.Get(url)
 	if err != nil {
 		return err
@@ -35,12 +37,15 @@ func ActiveSandbox(host string, port int) error {
 	return nil
 }
 
+// InjectChaos injects jvm chaos to a java process
 func InjectChaos(host string, port int, body []byte) error {
 	client := &http.Client{}
 	reqBody := bytes.NewBuffer([]byte(body))
 	url := fmt.Sprintf(InjectURL, host, port)
+
 	request, _ := http.NewRequest("POST", url, reqBody)
 	request.Header.Set("Content-type", "application/json")
+
 	_, err := client.Do(request)
 	if err != nil {
 		return err
@@ -48,12 +53,15 @@ func InjectChaos(host string, port int, body []byte) error {
 	return nil
 }
 
+// RecoverChaos recovers jvm chaos from a java process
 func RecoverChaos(host string, port int, body []byte) error {
 	client := &http.Client{}
 	reqBody := bytes.NewBuffer([]byte(body))
 	url := fmt.Sprintf(RecoverURL, host, port)
+
 	request, _ := http.NewRequest("POST", url, reqBody)
 	request.Header.Set("Content-type", "application/json")
+
 	_, err := client.Do(request)
 	if err != nil {
 		return err

@@ -27,6 +27,7 @@ const (
 	TARGET string = "target"
 )
 
+// ToSandboxAction convertes chaos to sandbox action
 func ToSandboxAction(suid string, chaos *v1alpha1.JVMChaos) ([]byte, error) {
 	kv := make(map[string]string, 0)
 
@@ -50,7 +51,7 @@ func ToSandboxAction(suid string, chaos *v1alpha1.JVMChaos) ([]byte, error) {
 		}
 	}
 
-	matchers := v1alpha1.JvmSpec[chaos.Spec.Target][chaos.Spec.Action].Matcher
+	matchers := v1alpha1.JvmSpec[chaos.Spec.Target][chaos.Spec.Action].Matchers
 	if matchers != nil {
 		for k, v := range chaos.Spec.Matchers {
 			for _, rule := range matchers {

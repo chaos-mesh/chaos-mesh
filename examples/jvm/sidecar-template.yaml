@@ -9,7 +9,7 @@ data:
   data: |
     initContainers:
       - name: jvmchaos-initcontainer
-        image: 'registry.logan.xiaopeng.local/logancloud/pingcap/chaos-jvm:latest'
+        image: 'gallardot/chaos-jvm:latest'
         command:
           - cp
           - '-r'
