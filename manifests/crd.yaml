@@ -12,6 +12,7 @@ spec:
     listKind: DNSChaosList
     plural: dnschaos
     singular: dnschaos
+  preserveUnknownFields: false
   scope: Namespaced
   validation:
     openAPIV3Schema:
@@ -195,11 +196,6 @@ spec:
               type: object
             failedMessage:
               type: string
-            phase:
-              description: Phase is the chaos status.
-              type: string
-            reason:
-              type: string
             scheduler:
               description: ScheduleStatus is the current status of chaos scheduler.
               properties:
@@ -218,7 +214,6 @@ spec:
               type: object
           required:
           - experiment
-          - phase
           type: object
       required:
       - spec
@@ -249,6 +244,7 @@ spec:
     listKind: HTTPChaosList
     plural: httpchaos
     singular: httpchaos
+  preserveUnknownFields: false
   scope: Namespaced
   validation:
     openAPIV3Schema:
@@ -456,11 +452,6 @@ spec:
               type: object
             failedMessage:
               type: string
-            phase:
-              description: Phase is the chaos status.
-              type: string
-            reason:
-              type: string
             scheduler:
               description: ScheduleStatus is the current status of chaos scheduler.
               properties:
@@ -479,7 +470,6 @@ spec:
               type: object
           required:
           - experiment
-          - phase
           type: object
       type: object
   version: v1alpha1
@@ -508,6 +498,7 @@ spec:
     listKind: IoChaosList
     plural: iochaos
     singular: iochaos
+  preserveUnknownFields: false
   scope: Namespaced
   validation:
     openAPIV3Schema:
@@ -788,11 +779,6 @@ spec:
               type: object
             failedMessage:
               type: string
-            phase:
-              description: Phase is the chaos status.
-              type: string
-            reason:
-              type: string
             scheduler:
               description: ScheduleStatus is the current status of chaos scheduler.
               properties:
@@ -811,7 +797,6 @@ spec:
               type: object
           required:
           - experiment
-          - phase
           type: object
       type: object
   version: v1alpha1
@@ -840,6 +825,7 @@ spec:
     listKind: JVMChaosList
     plural: jvmchaos
     singular: jvmchaos
+  preserveUnknownFields: false
   scope: Namespaced
   validation:
     openAPIV3Schema:
@@ -1285,11 +1271,6 @@ spec:
               type: object
             failedMessage:
               type: string
-            phase:
-              description: Phase is the chaos status.
-              type: string
-            reason:
-              type: string
             scheduler:
               description: ScheduleStatus is the current status of chaos scheduler.
               properties:
@@ -1308,7 +1289,6 @@ spec:
               type: object
           required:
           - experiment
-          - phase
           type: object
       type: object
   version: v1alpha1
@@ -1337,6 +1317,7 @@ spec:
     listKind: KernelChaosList
     plural: kernelchaos
     singular: kernelchaos
+  preserveUnknownFields: false
   scope: Namespaced
   validation:
     openAPIV3Schema:
@@ -1571,11 +1552,6 @@ spec:
               type: object
             failedMessage:
               type: string
-            phase:
-              description: Phase is the chaos status.
-              type: string
-            reason:
-              type: string
             scheduler:
               description: ScheduleStatus is the current status of chaos scheduler.
               properties:
@@ -1594,7 +1570,6 @@ spec:
               type: object
           required:
           - experiment
-          - phase
           type: object
       required:
       - spec
@@ -1625,6 +1600,7 @@ spec:
     listKind: NetworkChaosList
     plural: networkchaos
     singular: networkchaos
+  preserveUnknownFields: false
   scope: Namespaced
   validation:
     openAPIV3Schema:
@@ -2003,11 +1979,6 @@ spec:
               type: object
             failedMessage:
               type: string
-            phase:
-              description: Phase is the chaos status.
-              type: string
-            reason:
-              type: string
             scheduler:
               description: ScheduleStatus is the current status of chaos scheduler.
               properties:
@@ -2026,7 +1997,6 @@ spec:
               type: object
           required:
           - experiment
-          - phase
           type: object
       required:
       - spec
@@ -2057,6 +2027,7 @@ spec:
     listKind: PodChaosList
     plural: podchaos
     singular: podchaos
+  preserveUnknownFields: false
   scope: Namespaced
   validation:
     openAPIV3Schema:
@@ -2248,11 +2219,6 @@ spec:
               type: object
             failedMessage:
               type: string
-            phase:
-              description: Phase is the chaos status.
-              type: string
-            reason:
-              type: string
             scheduler:
               description: ScheduleStatus is the current status of chaos scheduler.
               properties:
@@ -2271,7 +2237,6 @@ spec:
               type: object
           required:
           - experiment
-          - phase
           type: object
       required:
       - spec
@@ -2302,6 +2267,7 @@ spec:
     listKind: PodIoChaosList
     plural: podiochaos
     singular: podiochaos
+  preserveUnknownFields: false
   scope: Namespaced
   validation:
     openAPIV3Schema:
@@ -2485,6 +2451,7 @@ spec:
     listKind: PodNetworkChaosList
     plural: podnetworkchaos
     singular: podnetworkchaos
+  preserveUnknownFields: false
   scope: Namespaced
   validation:
     openAPIV3Schema:
@@ -2724,11 +2691,6 @@ spec:
               type: object
             failedMessage:
               type: string
-            phase:
-              description: Phase is the chaos status.
-              type: string
-            reason:
-              type: string
             scheduler:
               description: ScheduleStatus is the current status of chaos scheduler.
               properties:
@@ -2747,7 +2709,6 @@ spec:
               type: object
           required:
           - experiment
-          - phase
           type: object
       required:
       - spec
@@ -2778,6 +2739,7 @@ spec:
     listKind: StressChaosList
     plural: stresschaos
     singular: stresschaos
+  preserveUnknownFields: false
   scope: Namespaced
   validation:
     openAPIV3Schema:
@@ -3004,11 +2966,6 @@ spec:
                 type: object
               description: Instances always specifies stressing instances
               type: object
-            phase:
-              description: Phase is the chaos status.
-              type: string
-            reason:
-              type: string
             scheduler:
               description: ScheduleStatus is the current status of chaos scheduler.
               properties:
@@ -3027,7 +2984,6 @@ spec:
               type: object
           required:
           - experiment
-          - phase
           type: object
       required:
       - spec
@@ -3058,6 +3014,7 @@ spec:
     listKind: TimeChaosList
     plural: timechaos
     singular: timechaos
+  preserveUnknownFields: false
   scope: Namespaced
   validation:
     openAPIV3Schema:
@@ -3244,11 +3201,6 @@ spec:
               type: object
             failedMessage:
               type: string
-            phase:
-              description: Phase is the chaos status.
-              type: string
-            reason:
-              type: string
             scheduler:
               description: ScheduleStatus is the current status of chaos scheduler.
               properties:
@@ -3267,7 +3219,6 @@ spec:
               type: object
           required:
           - experiment
-          - phase
           type: object
       required:
       - spec

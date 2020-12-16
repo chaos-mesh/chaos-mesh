@@ -29,6 +29,8 @@ controllerManager:
 
   replicaCount: 1
 
+  priorityClassName: ""
+
   image: pingcap/chaos-mesh:latest
   imagePullPolicy: IfNotPresent
 
@@ -76,6 +78,8 @@ chaosDaemon:
   env: {}
   hostNetwork: false
 
+  priorityClassName: ""
+
   podAnnotations: {}
 
   serviceAccount: chaos-daemon
@@ -114,10 +118,14 @@ dashboard:
 
   replicaCount: 1
 
+  priorityClassName: ""
+
   serviceAccount: chaos-controller-manager
 
   image: pingcap/chaos-dashboard:latest
   imagePullPolicy: IfNotPresent
+
+  securityMode: true
 
   nodeSelector: {}
 
@@ -126,6 +134,11 @@ dashboard:
   affinity: {}
 
   podAnnotations: {}
+
+  service:
+    type: NodePort
+    # clusterIP:
+    # nodePort:
 
   resources:
     # We usually recommend not to specify default resources and to leave this as a conscious
@@ -225,6 +238,8 @@ dnsServer:
 
   imagePullPolicy: IfNotPresent
 
+  priorityClassName: ""
+
   nodeSelector: {}
 
   runtime: docker
@@ -258,6 +273,8 @@ prometheus:
 
   image: prom/prometheus:v2.18.1
   imagePullPolicy: IfNotPresent
+
+  priorityClassName: ""
 
   nodeSelector: {}
 

@@ -32,16 +32,17 @@ var _ = Describe("iptables server", func() {
 	defer mock.With("MockContainerdClient", &MockClient{})()
 	c, _ := CreateContainerRuntimeInfoClient(containerRuntimeContainerd)
 	m := bpm.NewBackgroundProcessManager()
-	s := &daemonServer{c, m}
+	s := &DaemonServer{c, m}
 
 	Context("FlushIptables", func() {
 		It("should work", func() {
 			defer mock.With("pid", 9527)()
 			defer mock.With("MockProcessBuild", func(ctx context.Context, cmd string, args ...string) *exec.Cmd {
-				Expect(cmd).To(Equal("nsenter"))
-				Expect(args[0]).To(Equal("-n/proc/9527/ns/net"))
-				Expect(args[1]).To(Equal("--"))
-				Expect(args[2]).To(Equal(iptablesCmd))
+				Expect(cmd).To(Equal("/usr/local/bin/nsexec"))
+				Expect(args[0]).To(Equal("-n"))
+				Expect(args[1]).To(Equal("/proc/9527/ns/net"))
+				Expect(args[2]).To(Equal("--"))
+				Expect(args[3]).To(Equal(iptablesCmd))
 				return exec.Command("echo", "-n")
 			})()
 			_, err := s.SetIptablesChains(context.TODO(), &pb.IptablesChainsRequest{
@@ -73,10 +74,11 @@ var _ = Describe("iptables server", func() {
 		It("should fail on unknown chain direction", func() {
 			defer mock.With("pid", 9527)()
 			defer mock.With("MockProcessBuild", func(ctx context.Context, cmd string, args ...string) *exec.Cmd {
-				Expect(cmd).To(Equal("nsenter"))
-				Expect(args[0]).To(Equal("-n/proc/9527/ns/net"))
-				Expect(args[1]).To(Equal("--"))
-				Expect(args[2]).To(Equal(iptablesCmd))
+				Expect(cmd).To(Equal("/usr/local/bin/nsexec"))
+				Expect(args[0]).To(Equal("-n"))
+				Expect(args[1]).To(Equal("/proc/9527/ns/net"))
+				Expect(args[2]).To(Equal("--"))
+				Expect(args[3]).To(Equal(iptablesCmd))
 				return exec.Command("echo", "-n")
 			})()
 

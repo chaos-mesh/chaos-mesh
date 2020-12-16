@@ -14,6 +14,7 @@ spec:
     listKind: StressChaosList
     plural: stresschaos
     singular: stresschaos
+  preserveUnknownFields: false
   scope: Namespaced
   validation:
     openAPIV3Schema:
@@ -240,11 +241,6 @@ spec:
                 type: object
               description: Instances always specifies stressing instances
               type: object
-            phase:
-              description: Phase is the chaos status.
-              type: string
-            reason:
-              type: string
             scheduler:
               description: ScheduleStatus is the current status of chaos scheduler.
               properties:
@@ -263,7 +259,6 @@ spec:
               type: object
           required:
           - experiment
-          - phase
           type: object
       required:
       - spec

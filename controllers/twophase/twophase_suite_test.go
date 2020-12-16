@@ -322,6 +322,10 @@ var _ = Describe("TwoPhase", func() {
 
 			defer mock.With("MockRecoverError", errors.New("RecoverError"))()
 
+			chaos.Status.Experiment.Phase = v1alpha1.ExperimentPhaseRunning
+			err := c.Update(context.TODO(), &chaos)
+			Expect(err).NotTo(HaveOccurred())
+
 			_, err = r.Reconcile(req)
 
 			Expect(err).To(HaveOccurred())
@@ -336,6 +340,7 @@ var _ = Describe("TwoPhase", func() {
 			}
 
 			chaos.SetNextRecover(pastTime)
+			chaos.SetNextStart(futureTime)
 
 			c := fake.NewFakeClientWithScheme(scheme.Scheme, &chaos)
 
@@ -365,6 +370,8 @@ var _ = Describe("TwoPhase", func() {
 
 			defer mock.With("MockRecoverError", errors.New("RecoverError"))()
 			chaos.SetNextRecover(pastTime)
+			chaos.SetNextStart(futureTime)
+			chaos.Status.Experiment.Phase = v1alpha1.ExperimentPhaseRunning
 
 			c := fake.NewFakeClientWithScheme(scheme.Scheme, &chaos)
 

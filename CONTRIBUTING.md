@@ -2,17 +2,6 @@
 
 Thanks for your interest in improving the project! This document provides a step-by-step guide for general contributions to Chaos Mesh.
 
-If you want to get yourself some rewards while contributing to the Chaos Mesh project, you can't miss [Hacktoberfest 2020](https://hacktoberfest.digitalocean.com/). It's a month-long (Oct 1 - Oct 31) celebration of open source software organized by DigitalOcean, Intel, and DEV.
-
-Chaos Mesh project is now participating in this program. We have made an [issue list](https://github.com/chaos-mesh/chaos-mesh/issues?q=is%3Aissue+is%3Aopen+label%3AHacktoberfest) for contributors, covering code enhancement, documentation improvement, and test cases. Come pick the issues and earn your Hacktoberfest tee or tree reward.
-
-To participate：
-
-1. Sign up for [Hacktoberfest](https://hacktoberfest.digitalocean.com/login) using your GitHub account.
-2. Pick up an issue from the issue list specially tailored for you.
-3. Submit your PRs.
-4. Our maintainers review your submitted PRs. Once you successfully merged 4 or more of them, the PRs will be automatically counted, and you will be eligible to claim your SWAG on the Hacktoberfest website.
-
 ## Communications
 
 Before starting work on something major, please reach out to us via GitHub, Slack, email, etc. We will make sure no one else is already working on it and ask you to open a GitHub issue. Also, we will provide necessary guidance should you need it.
