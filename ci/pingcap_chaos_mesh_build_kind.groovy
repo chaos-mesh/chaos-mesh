@@ -118,6 +118,24 @@ def build(String name, String code) {
 							docker version
 							"""
 						}
+						stage('Checkout') {
+							checkout changelog: false,
+							poll: false,
+							scm: [
+								$class: 'GitSCM',
+								branches: [[name: "${BUILD_BRANCH}"]],
+								doGenerateSubmoduleConfigurations: false,
+								extensions: [[$class: 'SubmoduleOption', parentCredentials: true]],
+								submoduleCfg: [],
+								userRemoteConfigs: [[
+									credentialsId: "${CREDENTIALS_ID}",
+									refspec: '+refs/heads/*:refs/remotes/origin/* +refs/pull/*:refs/remotes/origin/pr/*',
+									url: "${BUILD_URL}",
+								]]
+							]
+
+							GITHASH = sh(returnStdout: true, script: "git rev-parse HEAD").trim()
+						}
 						stage('Run') {
 							ansiColor('xterm') {
 								sh """
