@@ -29,7 +29,7 @@ export default function Experiments() {
     uuid: '',
     title: '',
     description: '',
-    action: 'delete',
+    action: 'archive',
   })
 
   const fetchExperiments = () => {
@@ -90,7 +90,7 @@ export default function Experiments() {
     let actionFunc: any
 
     switch (action) {
-      case 'delete':
+      case 'archive':
         actionFunc = api.experiments.deleteExperiment
 
         break

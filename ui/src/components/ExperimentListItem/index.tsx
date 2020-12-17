@@ -72,12 +72,12 @@ const ExperimentListItem: React.FC<ExperimentListItemProps> = ({
 
     handleDialogOpen(true)
     switch (action) {
-      case 'delete':
+      case 'archive':
         handleSelect({
           uuid: (e as Experiment).uid,
           title: `${intl.formatMessage({ id: 'archives.single' })} ${e.name}?`,
           description: intl.formatMessage({ id: 'experiments.deleteDesc' }),
-          action: 'delete',
+          action: 'archive',
         })
 
         return
@@ -145,7 +145,7 @@ const ExperimentListItem: React.FC<ExperimentListItemProps> = ({
             aria-label={intl.formatMessage({ id: 'archives.single' })}
             component="span"
             size="small"
-            onClick={handleAction('delete')}
+            onClick={handleAction('archive')}
           >
             <ArchiveOutlinedIcon />
           </IconButton>

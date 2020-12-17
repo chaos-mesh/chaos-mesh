@@ -1,4 +1,4 @@
-import { Box, Button, Grid, Grow, Modal, Paper } from '@material-ui/core'
+import { Box, Button, Grid, Grow, Modal } from '@material-ui/core'
 import EventsTable, { EventsTableHandles } from 'components/EventsTable'
 import React, { useEffect, useRef, useState } from 'react'
 import { RootState, useStoreDispatch } from 'store'
@@ -15,6 +15,7 @@ import ExperimentConfiguration from 'components/ExperimentConfiguration'
 import { ExperimentDetail as ExperimentDetailType } from 'api/experiments.type'
 import Loading from 'components-mui/Loading'
 import NoteOutlinedIcon from '@material-ui/icons/NoteOutlined'
+import Paper from 'components-mui/Paper'
 import PaperTop from 'components-mui/PaperTop'
 import PauseCircleOutlineIcon from '@material-ui/icons/PauseCircleOutline'
 import PlayCircleOutlineIcon from '@material-ui/icons/PlayCircleOutline'
@@ -278,7 +279,7 @@ export default function ExperimentDetail() {
           )}
 
           <Grid item xs={12}>
-            <Paper variant="outlined">
+            <Paper>
               <PaperTop title={T('common.configuration')}>
                 <Button
                   variant="outlined"
@@ -295,7 +296,7 @@ export default function ExperimentDetail() {
           </Grid>
 
           <Grid item xs={12}>
-            <Paper variant="outlined">
+            <Paper>
               <PaperTop title={T('common.timeline')} />
               <div ref={chartRef} className={classes.eventsChart} />
             </Paper>

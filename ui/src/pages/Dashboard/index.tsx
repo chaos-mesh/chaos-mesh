@@ -120,10 +120,12 @@ export default function Dashboard() {
             <Paper style={{ position: 'relative' }}>
               <PaperTop title={T('common.timeline')} />
 
-              <Typography className={classes.notFound} align="center">
-                {T('experiments.noExperimentsFound')}
-              </Typography>
               <Timeline className={classes.container} />
+              {Object.values(stateOfExperiments).filter((d) => d !== 0).length === 0 && (
+                <Typography className={classes.notFound} align="center">
+                  {T('experiments.noExperimentsFound')}
+                </Typography>
+              )}
             </Paper>
           </Grid>
         </Grid>

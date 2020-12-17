@@ -1,32 +1,113 @@
-import { Box, Card, GridList, GridListTile, Typography, useMediaQuery, useTheme } from '@material-ui/core'
+import { Box, Button, Card, Modal, SvgIcon, Typography } from '@material-ui/core'
 import { PreDefinedValue, getDB } from 'lib/idb'
 import React, { useEffect, useRef, useState } from 'react'
+import { parseSubmit, yamlToExperiment } from 'lib/formikhelpers'
+import { setAlert, setAlertOpen } from 'slices/globalStatus'
+import { useStoreDispatch, useStoreSelector } from 'store'
 
+import { Ace } from 'ace-builds'
+import { ReactComponent as ClockIcon } from 'images/chaos/time.svg'
+import { ReactComponent as DNSIcon } from 'images/chaos/dns.svg'
+import { ExperimentKind } from 'components/NewExperiment/types'
+import { ReactComponent as FileSystemIOIcon } from 'images/chaos/io.svg'
+import { ReactComponent as LinuxKernelIcon } from 'images/chaos/kernel.svg'
+import { ReactComponent as NetworkIcon } from 'images/chaos/network.svg'
+import Paper from 'components-mui/Paper'
+import PaperTop from 'components-mui/PaperTop'
+import { ReactComponent as PodLifecycleIcon } from 'images/chaos/pod.svg'
+import { ReactComponent as StressIcon } from 'images/chaos/stress.svg'
+import T from 'components/T'
 import YAML from 'components/YAML'
+import YAMLEditor from 'components/YAMLEditor'
+import api from 'api'
+import clsx from 'clsx'
 import { makeStyles } from '@material-ui/core/styles'
+import { useIntl } from 'react-intl'
+import yaml from 'js-yaml'
 
-const useStyles = makeStyles({
-  gridList: {
-    flexWrap: 'nowrap',
-    // Promote the list into his own layer on Chrome. This cost memory but helps keeping high FPS.
-    transform: 'translateZ(0)',
+const useStyles = makeStyles((theme) => ({
+  container: {
+    display: 'flex',
+    height: 88,
+    overflowX: 'scroll',
   },
   card: {
+    flex: '0 0 240px',
+    marginRight: theme.spacing(3),
     cursor: 'pointer',
+    '&:last-child': {
+      marginRight: 0,
+    },
+    '&:hover': {
+      color: theme.palette.primary.main,
+      borderColor: theme.palette.primary.main,
+    },
   },
   addCard: {
     width: 210,
-    height: '100%',
+    '&:hover': {
+      color: 'unset',
+      borderColor: 'unset',
+    },
   },
-})
+  editorPaperWrapper: {
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    width: '50vw',
+    height: '80vh',
+    transform: 'translate(-50%, -50%)',
+    [theme.breakpoints.down('sm')]: {
+      width: '90vw',
+    },
+  },
+}))
+
+function iconByKind(kind: ExperimentKind) {
+  let icon
+
+  switch (kind) {
+    case 'PodChaos':
+      icon = <PodLifecycleIcon />
+      break
+    case 'NetworkChaos':
+      icon = <NetworkIcon />
+      break
+    case 'IoChaos':
+      icon = <FileSystemIOIcon />
+      break
+    case 'KernelChaos':
+      icon = <LinuxKernelIcon />
+      break
+    case 'TimeChaos':
+      icon = <ClockIcon />
+      break
+    case 'StressChaos':
+      icon = <StressIcon />
+      break
+    case 'DNSChaos':
+      icon = <DNSIcon />
+      break
+    default:
+      icon = <PodLifecycleIcon />
+  }
+
+  return <SvgIcon fontSize="large">{icon}</SvgIcon>
+}
 
 const Predefined = () => {
-  const theme = useTheme()
-  const isDesktopScreen = useMediaQuery(theme.breakpoints.down('md'))
   const classes = useStyles()
+
+  const intl = useIntl()
+
+  const { theme } = useStoreSelector((state) => state.settings)
+  const dispatch = useStoreDispatch()
 
   const idb = useRef(getDB())
 
+  const [yamlEditor, setYAMLEditor] = useState<Ace.Editor>()
+  const [editorOpen, seteditorOpen] = useState(false)
+  const [experiment, setExperiment] = useState<PreDefinedValue>()
   const [experiments, setExperiments] = useState<PreDefinedValue[]>([])
 
   async function getExperiments() {
@@ -49,26 +130,95 @@ const Predefined = () => {
     getExperiments()
   }
 
+  const onModalOpen = (exp: PreDefinedValue) => () => {
+    seteditorOpen(true)
+    setExperiment(exp)
+  }
+  const onModalClose = () => seteditorOpen(false)
+
+  const handleApplyExperiment = () => {
+    const { basic, target } = yamlToExperiment(yaml.safeLoad(yamlEditor!.getValue()))
+    const parsedValues = parseSubmit({
+      ...basic,
+      target,
+    })
+
+    if (process.env.NODE_ENV === 'development') {
+      console.debug('Debug parsedValues:', parsedValues)
+    }
+
+    api.experiments
+      .newExperiment(parsedValues)
+      .then(() => {
+        seteditorOpen(false)
+        dispatch(
+          setAlert({
+            type: 'success',
+            message: intl.formatMessage({ id: 'common.createSuccessfully' }),
+          })
+        )
+        dispatch(setAlertOpen(true))
+      })
+      .catch(console.error)
+  }
+
+  const handleDeleteExperiment = async () => {
+    const db = await idb.current
+
+    await db.delete('predefined', experiment!.name)
+
+    getExperiments()
+    seteditorOpen(false)
+    dispatch(
+      setAlert({
+        type: 'success',
+        message: intl.formatMessage({ id: 'common.deleteSuccessfully' }),
+      })
+    )
+    dispatch(setAlertOpen(true))
+  }
+
   return (
-    <Box overflow="hidden">
-      <GridList className={classes.gridList} cols={isDesktopScreen ? 1.5 : 3.5} spacing={9} cellHeight={88}>
-        <GridListTile>
-          <YAML callback={saveExperiment} buttonProps={{ className: classes.addCard }} />
-        </GridListTile>
+    <>
+      <Box className={classes.container}>
+        <YAML callback={saveExperiment} buttonProps={{ className: clsx(classes.card, classes.addCard) }} />
         {experiments.map((d) => (
-          <GridListTile key={d.name}>
-            <Card className={classes.card} variant="outlined">
-              <Box display="flex" justifyContent="center" alignItems="center">
-                <Box display="flex" justifyContent="center" alignItems="center" flex={1}></Box>
-                <Box display="flex" justifyContent="center" alignItems="center" flex={2} px={1.5} textAlign="center">
-                  <Typography>{d.name}</Typography>
-                </Box>
+          <Card key={d.name} className={classes.card} variant="outlined" onClick={onModalOpen(d)}>
+            <Box display="flex" justifyContent="center" alignItems="center" height="100%">
+              <Box display="flex" justifyContent="center" alignItems="center" flex={1}>
+                {iconByKind(d.kind)}
               </Box>
-            </Card>
-          </GridListTile>
+              <Box display="flex" justifyContent="center" alignItems="center" flex={2} px={1.5} textAlign="center">
+                <Typography>{d.name}</Typography>
+              </Box>
+            </Box>
+          </Card>
         ))}
-      </GridList>
-    </Box>
+      </Box>
+      <Modal open={editorOpen} onClose={onModalClose}>
+        <div className={classes.editorPaperWrapper}>
+          <Paper style={{ height: '100%' }}>
+            {experiment && (
+              <>
+                <PaperTop title={experiment.name}>
+                  <Box display="flex">
+                    <Box mr={3}>
+                      <Button variant="outlined" color="secondary" size="small" onClick={handleDeleteExperiment}>
+                        {T('common.delete')}
+                      </Button>
+                    </Box>
+                    <Button variant="outlined" color="primary" size="small" onClick={handleApplyExperiment}>
+                      {T('common.submit')}
+                    </Button>
+                  </Box>
+                </PaperTop>
+                <YAMLEditor theme={theme} data={yaml.safeDump(experiment.yaml)} mountEditor={setYAMLEditor} />
+              </>
+            )}
+          </Paper>
+        </div>
+      </Modal>
+    </>
   )
 }
 
