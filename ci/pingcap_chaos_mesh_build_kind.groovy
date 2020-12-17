@@ -174,7 +174,7 @@ def call(BUILD_BRANCH, CREDENTIALS_ID) {
 
 	catchError {
 		node('build_go1130_memvolume') {
-			container("hub.pingcap.com/yangkeao/chaos-mesh-e2e-prepare") {
+			container("hub.pingcap.net/yangkeao/chaos-mesh-e2e-prepare") {
 				def WORKSPACE = pwd()
 				dir("${PROJECT_DIR}") {
 					deleteDir()
