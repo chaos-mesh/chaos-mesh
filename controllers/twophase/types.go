@@ -64,7 +64,6 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	// disable pause and remove auto resume at time to resume
 	autoResume := chaos.GetAutoResume()
 	if !autoResume.IsZero() && autoResume.Before(now) {
-		r.Log.Info("auto resume from pause")
 		chaos.SetPause("")
 		chaos.SetAutoResume(time.Time{})
 	}
@@ -83,8 +82,8 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 
 	if chaos.GetPause() != "" {
 		targetPhase = v1alpha1.ExperimentPhasePaused
-		// pause for certain duration
-		if chaos.GetPause() != "true" {
+		// pause for certain duration, only set autoResume once
+		if chaos.GetPause() != "true" && status.Experiment.Phase != v1alpha1.ExperimentPhasePaused {
 			pauseTime, err := time.ParseDuration(chaos.GetPause())
 			if err != nil {
 				r.Log.Error(err, "failed to parse pause duration")
@@ -94,8 +93,6 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 			chaos.SetAutoResume(resumeTime)
 		}
 	}
-	//current problem, requeue works, but after enter again, targetPhase would still be pause
-	r.Log.Info("TTTTTTTTTTTTTTTTT", "pause status", chaos.GetPause(), "current phase", status.Experiment.Phase)
 
 	// TODO: find a better way to solve the pause and resume problem.
 	// Or pause is a bad design for the scheduler :(

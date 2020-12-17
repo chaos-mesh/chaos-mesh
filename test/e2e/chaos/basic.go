@@ -147,7 +147,7 @@ var _ = ginkgo.Describe("[Basic]", func() {
 				timechaostestcases.TestcaseTimeSkewPauseThenUnpause(ns, cli, c, port)
 			})
 
-			ginkgo.FIt("[Pause And Auto Resume At Running]", func() {
+			ginkgo.It("[Pause And Auto Resume At Running]", func() {
 				timechaostestcases.TestcaseTimeSkewPauseThenAutoResumeAtRunning(ns, cli, c, port)
 			})
 
