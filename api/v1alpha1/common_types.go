@@ -111,10 +111,7 @@ const (
 )
 
 type ChaosStatus struct {
-	// Phase is the chaos status.
-	Phase         ChaosPhase `json:"phase"`
-	Reason        string     `json:"reason,omitempty"`
-	FailedMessage string     `json:"failedMessage,omitempty"`
+	FailedMessage string `json:"failedMessage,omitempty"`
 
 	Scheduler ScheduleStatus `json:"scheduler,omitempty"`
 
@@ -175,11 +172,12 @@ type ScheduleStatus struct {
 type ExperimentPhase string
 
 const (
-	ExperimentPhaseRunning  ExperimentPhase = "Running"
-	ExperimentPhaseWaiting  ExperimentPhase = "Waiting"
-	ExperimentPhasePaused   ExperimentPhase = "Paused"
-	ExperimentPhaseFailed   ExperimentPhase = "Failed"
-	ExperimentPhaseFinished ExperimentPhase = "Finished"
+	ExperimentPhaseUninitialized ExperimentPhase = ""
+	ExperimentPhaseRunning       ExperimentPhase = "Running"
+	ExperimentPhaseWaiting       ExperimentPhase = "Waiting"
+	ExperimentPhasePaused        ExperimentPhase = "Paused"
+	ExperimentPhaseFailed        ExperimentPhase = "Failed"
+	ExperimentPhaseFinished      ExperimentPhase = "Finished"
 )
 
 type ExperimentStatus struct {
