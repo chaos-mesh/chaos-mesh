@@ -16,7 +16,7 @@ package podnetworkmanager
 import (
 	"fmt"
 
-	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	v1alpha1 "github.com/chaos-mesh/api"
 )
 
 // PodNetworkTransaction represents a modification on podnetwork

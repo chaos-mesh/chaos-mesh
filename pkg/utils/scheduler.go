@@ -19,7 +19,7 @@ import (
 
 	"github.com/robfig/cron/v3"
 
-	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	v1alpha1 "github.com/chaos-mesh/api"
 )
 
 func NextTime(spec v1alpha1.SchedulerSpec, now time.Time) (*time.Time, error) {

@@ -21,7 +21,7 @@ import (
 
 	"github.com/ghodss/yaml"
 
-	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	v1alpha1 "github.com/chaos-mesh/api"
 
 	corev1 "k8s.io/api/core/v1"
 )

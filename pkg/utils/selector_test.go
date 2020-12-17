@@ -19,7 +19,8 @@ import (
 
 	. "github.com/onsi/gomega"
 
-	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	v1alpha1 "github.com/chaos-mesh/api"
+
 	"github.com/chaos-mesh/chaos-mesh/pkg/label"
 
 	v1 "k8s.io/api/core/v1"
