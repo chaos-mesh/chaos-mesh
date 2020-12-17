@@ -14,9 +14,7 @@
 package netem
 
 import (
-	"errors"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
@@ -124,7 +122,7 @@ func FromCorrupt(in *v1alpha1.CorruptSpec) (*chaosdaemonpb.Netem, error) {
 // for traffic control with the tc command.
 // http://man7.org/linux/man-pages/man8/tc-tbf.8.html
 func FromBandwidth(in *v1alpha1.BandwidthSpec) (*chaosdaemonpb.Tbf, error) {
-	rate, err := convertUnitToBytes(in.Rate)
+	rate, err := v1alpha1.ConvertUnitToBytes(in.Rate)
 
 	if err != nil {
 		return nil, err
@@ -142,31 +140,4 @@ func FromBandwidth(in *v1alpha1.BandwidthSpec) (*chaosdaemonpb.Tbf, error) {
 	}
 
 	return tbf, nil
-}
-
-func convertUnitToBytes(nu string) (uint64, error) {
-	// normalize input
-	s := strings.ToLower(strings.TrimSpace(nu))
-
-	for i, u := range []string{"tbps", "gbps", "mbps", "kbps", "bps"} {
-		if strings.HasSuffix(s, u) {
-			ts := strings.TrimSuffix(s, u)
-			s := strings.TrimSpace(ts)
-
-			n, err := strconv.ParseUint(s, 10, 64)
-
-			if err != nil {
-				return 0, err
-			}
-
-			// convert unit to bytes
-			for j := 4 - i; j > 0; j-- {
-				n = n * 1024
-			}
-
-			return n, nil
-		}
-	}
-
-	return 0, errors.New("invalid unit")
 }
