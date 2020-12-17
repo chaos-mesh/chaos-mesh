@@ -231,7 +231,7 @@ func probeNetworkCondition(c http.Client, peers []*corev1.Pod, ports []uint16) m
 			klog.Infof("testing delay from %s to %s", peers[source].Name, peers[target].Name)
 			delay, err := testDelay(source, target)
 			framework.ExpectNoError(err, fmt.Sprintf("send request from %s to %s to test delay failed",
-				peers[from].Name, peers[to].Name))
+				peers[source].Name, peers[target].Name))
 			klog.Infof("delay from %d to %d: %d", source, target, delay)
 			if delay > 100*1e6 {
 				klog.Infof("detect slow network from %s to %s", peers[source].Name, peers[target].Name)
