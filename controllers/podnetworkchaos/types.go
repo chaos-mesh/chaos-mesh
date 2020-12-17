@@ -24,6 +24,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos/iptable"
 	tcpkg "github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos/tc"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
+	"github.com/chaos-mesh/chaos-mesh/pkg/netem"
 	"github.com/chaos-mesh/chaos-mesh/pkg/utils"
 
 	"github.com/go-logr/logr"
@@ -125,7 +126,7 @@ func (h *Handler) SetTcs(ctx context.Context, pod *corev1.Pod, chaos *v1alpha1.P
 	tcs := []*pb.Tc{}
 	for _, tc := range chaos.Spec.TrafficControls {
 		if tc.Type == v1alpha1.Bandwidth {
-			tbf, err := tc.Bandwidth.ToTbf()
+			tbf, err := netem.FromBandwidth(tc.Bandwidth)
 			if err != nil {
 				return err
 			}
@@ -153,11 +154,6 @@ func (h *Handler) SetTcs(ctx context.Context, pod *corev1.Pod, chaos *v1alpha1.P
 	return tcpkg.SetTcs(ctx, h.Client, pod, tcs)
 }
 
-// NetemSpec defines the interface to convert to a Netem protobuf
-type NetemSpec interface {
-	ToNetem() (*pb.Netem, error)
-}
-
 // mergeNetem calls ToNetem on all non nil network emulation specs and merges them into one request.
 func mergeNetem(spec v1alpha1.TcParameter) (*pb.Netem, error) {
 	// NOTE: a cleaner way like
@@ -167,29 +163,41 @@ func mergeNetem(spec v1alpha1.TcParameter) (*pb.Netem, error) {
 	// See https://stackoverflow.com/questions/13476349/check-for-nil-and-nil-interface-in-go
 	// And https://groups.google.com/forum/#!topic/golang-nuts/wnH302gBa4I/discussion
 	// > In short: If you never store (*T)(nil) in an interface, then you can reliably use comparison against nil
-	var emSpecs []NetemSpec
+	var emSpecs []*pb.Netem
 	if spec.Delay != nil {
-		emSpecs = append(emSpecs, spec.Delay)
+		em, err := netem.FromDelay(spec.Delay)
+		if err != nil {
+			return nil, err
+		}
+		emSpecs = append(emSpecs, em)
 	}
 	if spec.Loss != nil {
-		emSpecs = append(emSpecs, spec.Loss)
+		em, err := netem.FromLoss(spec.Loss)
+		if err != nil {
+			return nil, err
+		}
+		emSpecs = append(emSpecs, em)
 	}
 	if spec.Duplicate != nil {
-		emSpecs = append(emSpecs, spec.Duplicate)
+		em, err := netem.FromDuplicate(spec.Duplicate)
+		if err != nil {
+			return nil, err
+		}
+		emSpecs = append(emSpecs, em)
 	}
 	if spec.Corrupt != nil {
-		emSpecs = append(emSpecs, spec.Corrupt)
+		em, err := netem.FromCorrupt(spec.Corrupt)
+		if err != nil {
+			return nil, err
+		}
+		emSpecs = append(emSpecs, em)
 	}
 	if len(emSpecs) == 0 {
 		return nil, errors.New(invalidNetemSpecMsg)
 	}
 
 	merged := &pb.Netem{}
-	for _, spec := range emSpecs {
-		em, err := spec.ToNetem()
-		if err != nil {
-			return nil, err
-		}
+	for _, em := range emSpecs {
 		merged = utils.MergeNetem(merged, em)
 	}
 	return merged, nil
