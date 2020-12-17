@@ -19,7 +19,8 @@
     "totalExperiments": "Total Experiments",
     "totalState": "Total State",
     "predefined": "Predefined",
-    "predefinedDesc": "📦 Store custom experiments here for quick execution."
+    "predefinedDesc": "📦 Store custom experiments here for quick execution.",
+    "recent": "Recent"
   },
   "newE": {
     "title": "New Experiment",

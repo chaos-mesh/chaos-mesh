@@ -1,14 +1,17 @@
 import { Box, Grid, Grow, Typography } from '@material-ui/core'
-import React, { useEffect, useRef } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 
+import { Event } from 'api/events.type'
 import Paper from 'components-mui/Paper'
 import PaperTop from 'components-mui/PaperTop'
 import Predefined from './Predefined'
+import Recent from './Recent'
 import { RootState } from 'store'
 import T from 'components/T'
 import Timeline from 'components/Timeline'
 import TotalExperiments from './TotalExperiments'
 import Welcome from './Welcome'
+import api from 'api'
 import genChaosStatePieChart from 'lib/d3/chaosStatePieChart'
 import { getStateofExperiments } from 'slices/experiments'
 import { makeStyles } from '@material-ui/core/styles'
@@ -47,6 +50,17 @@ export default function Dashboard() {
   const dispatch = useStoreDispatch()
 
   const chaosStatePieChartRef = useRef<any>(null)
+
+  const [events, setEvents] = useState<Event[]>([])
+
+  const fetchEvents = () => {
+    api.events
+      .dryEvents()
+      .then(({ data }) => setEvents(data))
+      .catch(console.error)
+  }
+
+  useEffect(fetchEvents, [])
 
   useEffect(() => {
     dispatch(getStateofExperiments())
@@ -96,36 +110,41 @@ export default function Dashboard() {
 
               <div ref={chaosStatePieChartRef} className={classes.container} />
               {Object.values(stateOfExperiments).filter((d) => d !== 0).length === 0 && (
-                <Typography className={classes.notFound} align="center">
-                  {T('experiments.noExperimentsFound')}
-                </Typography>
+                <Typography className={classes.notFound}>{T('experiments.noExperimentsFound')}</Typography>
               )}
             </Paper>
           </Grid>
 
-          <Grid item xs={12} md={12} lg={9}>
-            <Paper>
-              <PaperTop title={T('dashboard.predefined')} />
+          <Grid container item xs={12} md={12} lg={9}>
+            <Grid item xs={12}>
+              <Paper style={{ position: 'relative' }}>
+                <PaperTop title={T('common.timeline')} />
 
-              <Box height={150} mx={3}>
-                <Typography>{T('dashboard.predefinedDesc')}</Typography>
-                <Box pt={6}>
-                  <Predefined />
-                </Box>
+                <Timeline events={events} className={classes.container} />
+              </Paper>
+            </Grid>
+
+            <Grid item xs={12}>
+              <Box mt={3}>
+                <Paper>
+                  <PaperTop title={T('dashboard.predefined')} />
+
+                  <Box height={150} mx={3}>
+                    <Typography>{T('dashboard.predefinedDesc')}</Typography>
+                    <Box pt={6}>
+                      <Predefined />
+                    </Box>
+                  </Box>
+                </Paper>
               </Box>
-            </Paper>
+            </Grid>
           </Grid>
 
-          <Grid item xs={12} md={12} lg={9}>
-            <Paper style={{ position: 'relative' }}>
-              <PaperTop title={T('common.timeline')} />
+          <Grid item xs={12} md={12} lg={3}>
+            <Paper style={{ height: '100%' }}>
+              <PaperTop title={T('dashboard.recent')} />
 
-              <Timeline className={classes.container} />
-              {Object.values(stateOfExperiments).filter((d) => d !== 0).length === 0 && (
-                <Typography className={classes.notFound} align="center">
-                  {T('experiments.noExperimentsFound')}
-                </Typography>
-              )}
+              <Recent events={events.slice(-6)} />
             </Paper>
           </Grid>
         </Grid>

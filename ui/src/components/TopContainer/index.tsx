@@ -12,6 +12,7 @@ import Auth from './Auth'
 import ContentContainer from 'components-mui/ContentContainer'
 import { IntlProvider } from 'react-intl'
 import LS from 'lib/localStorage'
+import Loading from 'components-mui/Loading'
 import MobileNavigation from './MobileNavigation'
 import Navbar from './Navbar'
 import Sidebar from './Sidebar'
@@ -92,15 +93,19 @@ const TopContainer = () => {
    *
    */
   function fetchServerConfig() {
-    api.common.config().then(({ data }) => {
-      if (data.security_mode) {
-        setAuth()
-      } else {
-        dispatch(setSecurityMode(false))
-      }
-    })
+    api.common
+      .config()
+      .then(({ data }) => {
+        if (data.security_mode) {
+          setAuth()
+        } else {
+          dispatch(setSecurityMode(false))
+        }
+      })
+      .finally(() => setLoading(false))
   }
 
+  const [loading, setLoading] = useState(true)
   const [authOpen, setAuthOpen] = useState(false)
 
   /**
@@ -157,11 +162,15 @@ const TopContainer = () => {
 
             <Box className={classes.switchContent}>
               <ContentContainer>
-                <Switch>
-                  <Redirect path="/" to="/dashboard" exact />
-                  {!authOpen && routes.map((route) => <Route key={route.path as string} {...route} />)}
-                  <Redirect to="/dashboard" />
-                </Switch>
+                {loading ? (
+                  <Loading />
+                ) : (
+                  <Switch>
+                    <Redirect path="/" to="/dashboard" exact />
+                    {!authOpen && routes.map((route) => <Route key={route.path as string} {...route} />)}
+                    <Redirect to="/dashboard" />
+                  </Switch>
+                )}
               </ContentContainer>
             </Box>
 

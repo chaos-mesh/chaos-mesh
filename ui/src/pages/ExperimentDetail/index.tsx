@@ -81,7 +81,7 @@ export default function ExperimentDetail() {
   const [dialogInfo, setDialogInfo] = useState({
     title: '',
     description: '',
-    action: 'delete',
+    action: 'archive',
   })
 
   const fetchExperimentDetail = () => {
@@ -132,11 +132,11 @@ export default function ExperimentDetail() {
 
   const handleAction = (action: string) => () => {
     switch (action) {
-      case 'delete':
+      case 'archive':
         setDialogInfo({
           title: `${intl.formatMessage({ id: 'archives.single' })} ${detail!.name}?`,
           description: intl.formatMessage({ id: 'experiments.deleteDesc' }),
-          action: 'delete',
+          action: 'archive',
         })
 
         break
@@ -167,7 +167,7 @@ export default function ExperimentDetail() {
     let actionFunc: any
 
     switch (action) {
-      case 'delete':
+      case 'archive':
         actionFunc = api.experiments.deleteExperiment
 
         break
@@ -200,7 +200,7 @@ export default function ExperimentDetail() {
         dispatch(setAlertOpen(true))
         dispatch(getStateofExperiments())
 
-        if (action === 'delete') {
+        if (action === 'archive') {
           history.push('/experiments')
         }
 
@@ -241,7 +241,7 @@ export default function ExperimentDetail() {
                   variant="outlined"
                   size="small"
                   startIcon={<ArchiveOutlinedIcon />}
-                  onClick={handleAction('delete')}
+                  onClick={handleAction('archive')}
                 >
                   {T('archives.single')}
                 </Button>

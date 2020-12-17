@@ -1,15 +1,6 @@
 import * as Yup from 'yup'
 
-import { ReactComponent as ClockIcon } from 'images/chaos/time.svg'
-import { ReactComponent as DNSIcon } from 'images/chaos/dns.svg'
 import { ExperimentKind } from 'components/NewExperiment/types'
-import { ReactComponent as FileSystemIOIcon } from 'images/chaos/io.svg'
-import { ReactComponent as LinuxKernelIcon } from 'images/chaos/kernel.svg'
-import { ReactComponent as NetworkIcon } from 'images/chaos/network.svg'
-import { ReactComponent as PodLifecycleIcon } from 'images/chaos/pod.svg'
-import React from 'react'
-import { ReactComponent as StressIcon } from 'images/chaos/stress.svg'
-import { SvgIcon } from '@material-ui/core'
 import T from 'components/T'
 
 export type Kind = ExperimentKind
@@ -31,7 +22,6 @@ interface Category {
 }
 interface Target {
   name: JSX.Element | string
-  icon: JSX.Element
   categories?: Category[]
   spec?: Spec
 }
@@ -137,11 +127,6 @@ const data: Record<Kind, Target> = {
   // Pod LifeCycle
   PodChaos: {
     name: T('newE.target.pod.title'),
-    icon: (
-      <SvgIcon fontSize="large">
-        <PodLifecycleIcon />
-      </SvgIcon>
-    ),
     categories: [
       {
         name: 'Pod Failure',
@@ -175,11 +160,6 @@ const data: Record<Kind, Target> = {
   // Network
   NetworkChaos: {
     name: T('newE.target.network.title'),
-    icon: (
-      <SvgIcon fontSize="large">
-        <NetworkIcon />
-      </SvgIcon>
-    ),
     categories: [
       {
         name: 'Partition',
@@ -318,11 +298,6 @@ const data: Record<Kind, Target> = {
   // File System IO
   IoChaos: {
     name: T('newE.target.io.title'),
-    icon: (
-      <SvgIcon fontSize="large">
-        <FileSystemIOIcon />
-      </SvgIcon>
-    ),
     categories: [
       {
         name: 'Latency',
@@ -373,11 +348,6 @@ const data: Record<Kind, Target> = {
   // Linux Kernel
   KernelChaos: {
     name: T('newE.target.kernel.title'),
-    icon: (
-      <SvgIcon fontSize="large">
-        <LinuxKernelIcon />
-      </SvgIcon>
-    ),
     spec: {
       fail_kern_request: {
         callchain: [],
@@ -391,11 +361,6 @@ const data: Record<Kind, Target> = {
   // Clock
   TimeChaos: {
     name: T('newE.target.time.title'),
-    icon: (
-      <SvgIcon fontSize="large">
-        <ClockIcon />
-      </SvgIcon>
-    ),
     spec: {
       time_offset: {
         field: 'text',
@@ -422,11 +387,6 @@ const data: Record<Kind, Target> = {
   // Stress CPU/Memory
   StressChaos: {
     name: T('newE.target.stress.title'),
-    icon: (
-      <SvgIcon fontSize="large">
-        <StressIcon />
-      </SvgIcon>
-    ),
     spec: {
       stressors: {
         cpu: {
@@ -445,11 +405,6 @@ const data: Record<Kind, Target> = {
   },
   DNSChaos: {
     name: 'DNS',
-    icon: (
-      <SvgIcon fontSize="large">
-        <DNSIcon />
-      </SvgIcon>
-    ),
     categories: [
       {
         name: 'Error',

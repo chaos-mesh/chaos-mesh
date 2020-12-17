@@ -1,4 +1,4 @@
-import { Box, Button, Card, Modal, SvgIcon, Typography } from '@material-ui/core'
+import { Box, Button, Card, Modal, Typography } from '@material-ui/core'
 import { PreDefinedValue, getDB } from 'lib/idb'
 import React, { useEffect, useRef, useState } from 'react'
 import { parseSubmit, yamlToExperiment } from 'lib/formikhelpers'
@@ -6,21 +6,14 @@ import { setAlert, setAlertOpen } from 'slices/globalStatus'
 import { useStoreDispatch, useStoreSelector } from 'store'
 
 import { Ace } from 'ace-builds'
-import { ReactComponent as ClockIcon } from 'images/chaos/time.svg'
-import { ReactComponent as DNSIcon } from 'images/chaos/dns.svg'
-import { ExperimentKind } from 'components/NewExperiment/types'
-import { ReactComponent as FileSystemIOIcon } from 'images/chaos/io.svg'
-import { ReactComponent as LinuxKernelIcon } from 'images/chaos/kernel.svg'
-import { ReactComponent as NetworkIcon } from 'images/chaos/network.svg'
 import Paper from 'components-mui/Paper'
 import PaperTop from 'components-mui/PaperTop'
-import { ReactComponent as PodLifecycleIcon } from 'images/chaos/pod.svg'
-import { ReactComponent as StressIcon } from 'images/chaos/stress.svg'
 import T from 'components/T'
 import YAML from 'components/YAML'
 import YAMLEditor from 'components/YAMLEditor'
 import api from 'api'
 import clsx from 'clsx'
+import iconByKind from 'lib/iconByKind'
 import { makeStyles } from '@material-ui/core/styles'
 import { useIntl } from 'react-intl'
 import yaml from 'js-yaml'
@@ -62,38 +55,6 @@ const useStyles = makeStyles((theme) => ({
     },
   },
 }))
-
-function iconByKind(kind: ExperimentKind) {
-  let icon
-
-  switch (kind) {
-    case 'PodChaos':
-      icon = <PodLifecycleIcon />
-      break
-    case 'NetworkChaos':
-      icon = <NetworkIcon />
-      break
-    case 'IoChaos':
-      icon = <FileSystemIOIcon />
-      break
-    case 'KernelChaos':
-      icon = <LinuxKernelIcon />
-      break
-    case 'TimeChaos':
-      icon = <ClockIcon />
-      break
-    case 'StressChaos':
-      icon = <StressIcon />
-      break
-    case 'DNSChaos':
-      icon = <DNSIcon />
-      break
-    default:
-      icon = <PodLifecycleIcon />
-  }
-
-  return <SvgIcon fontSize="large">{icon}</SvgIcon>
-}
 
 const Predefined = () => {
   const classes = useStyles()
@@ -185,10 +146,10 @@ const Predefined = () => {
         {experiments.map((d) => (
           <Card key={d.name} className={classes.card} variant="outlined" onClick={onModalOpen(d)}>
             <Box display="flex" justifyContent="center" alignItems="center" height="100%">
-              <Box display="flex" justifyContent="center" alignItems="center" flex={1}>
+              <Box display="flex" justifyContent="center" flex={1}>
                 {iconByKind(d.kind)}
               </Box>
-              <Box display="flex" justifyContent="center" alignItems="center" flex={2} px={1.5} textAlign="center">
+              <Box display="flex" justifyContent="center" flex={2} px={1.5}>
                 <Typography>{d.name}</Typography>
               </Box>
             </Box>

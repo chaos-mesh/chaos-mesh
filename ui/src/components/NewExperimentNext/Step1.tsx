@@ -16,6 +16,7 @@ import TargetGenerated from './form/TargetGenerated'
 import UndoIcon from '@material-ui/icons/Undo'
 import _snakecase from 'lodash.snakecase'
 import clsx from 'clsx'
+import iconByKind from 'lib/iconByKind'
 import { makeStyles } from '@material-ui/core/styles'
 
 const useStyles = makeStyles((theme) => {
@@ -125,17 +126,10 @@ const Step1 = () => {
                   onClick={handleSelectTarget(key as Kind)}
                 >
                   <Box display="flex" justifyContent="center" alignItems="center" height="100px">
-                    <Box display="flex" justifyContent="center" alignItems="center" flex={1}>
-                      {t.icon}
+                    <Box display="flex" justifyContent="center" flex={1}>
+                      {iconByKind(key as Kind)}
                     </Box>
-                    <Box
-                      display="flex"
-                      justifyContent="center"
-                      alignItems="center"
-                      flex={2}
-                      px={1.5}
-                      textAlign="center"
-                    >
+                    <Box display="flex" justifyContent="center" flex={2} px={1.5} textAlign="center">
                       <Typography variant="button">{t.name}</Typography>
                     </Box>
                   </Box>
@@ -165,14 +159,7 @@ const Step1 = () => {
                               <RadioButtonUncheckedOutlinedIcon />
                             )}
                           </Box>
-                          <Box
-                            display="flex"
-                            justifyContent="center"
-                            alignItems="center"
-                            flex={2}
-                            px={1.5}
-                            textAlign="center"
-                          >
+                          <Box display="flex" justifyContent="center" alignItems="center" flex={2} px={1.5}>
                             <Typography variant="button">{d.name}</Typography>
                           </Box>
                         </Box>

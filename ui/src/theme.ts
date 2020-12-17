@@ -18,9 +18,6 @@ const common: ThemeOptions = {
     },
   },
   spacing: (factor) => `${0.25 * factor}rem`,
-  shape: {
-    borderRadius: 8,
-  },
 }
 
 const theme = responsiveFontSizes(createMuiTheme(common))
