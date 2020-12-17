@@ -23,11 +23,11 @@ import (
 
 // ChaosDashboardConfig defines the configuration for Chaos Dashboard
 type ChaosDashboardConfig struct {
-	ListenHost           string `envconfig:"LISTEN_HOST" default:"0.0.0.0" json:"listen_host"`
-	ListenPort           int    `envconfig:"LISTEN_PORT" default:"2333" json:"listen_port"`
-	MetricAddress        string `envconfig:"METRIC_ADDRESS" json:"-"`
-	EnableLeaderElection bool   `envconfig:"ENABLE_LEADER_ELECTION" json:"-"`
-	Database             *DatabaseConfig `json:"-"`
+	ListenHost           string            `envconfig:"LISTEN_HOST" default:"0.0.0.0" json:"listen_host"`
+	ListenPort           int               `envconfig:"LISTEN_PORT" default:"2333" json:"listen_port"`
+	MetricAddress        string            `envconfig:"METRIC_ADDRESS" json:"-"`
+	EnableLeaderElection bool              `envconfig:"ENABLE_LEADER_ELECTION" json:"-"`
+	Database             *DatabaseConfig   `json:"-"`
 	PersistTTL           *PersistTTLConfig `json:"-"`
 	// ClusterScoped means control Chaos Object in cluster level(all namespace),
 	ClusterScoped bool `envconfig:"CLUSTER_SCOPED" default:"true" json:"cluster_mode"`
