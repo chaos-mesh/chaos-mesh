@@ -105,7 +105,6 @@ def build(String name, String code) {
 				def ARTIFACTS = "${WORKSPACE}/go/src/github.com/chaos-mesh/chaos-mesh/_artifacts"
 				try {
 					dir("${WORKSPACE}/go/src/github.com/chaos-mesh/chaos-mesh") {
-						unstash 'chaos-mesh'
 						stage("Debug Info") {
 							println "debug host: 172.16.5.15"
 							println "debug command: kubectl -n jenkins-ci exec -ti ${NODE_NAME} bash"
