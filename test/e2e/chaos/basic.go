@@ -137,7 +137,7 @@ var _ = ginkgo.Describe("[Basic]", func() {
 		})
 
 		// time skew chaos case in [TimeSkew] context
-		ginkgo.FContext("[TimeSkew]", func() {
+		ginkgo.Context("[TimeSkew]", func() {
 
 			ginkgo.It("[Schedule]", func() {
 				timechaostestcases.TestcaseTimeSkewOnceThenRecover(ns, cli, c, port)
@@ -147,7 +147,7 @@ var _ = ginkgo.Describe("[Basic]", func() {
 				timechaostestcases.TestcaseTimeSkewPauseThenUnpause(ns, cli, c, port)
 			})
 
-			ginkgo.It("[Pause And Auto Resume At Running]", func() {
+			ginkgo.FIt("[Pause And Auto Resume At Running]", func() {
 				timechaostestcases.TestcaseTimeSkewPauseThenAutoResumeAtRunning(ns, cli, c, port)
 			})
 
