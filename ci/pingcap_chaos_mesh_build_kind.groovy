@@ -105,6 +105,7 @@ def build(String name, String code) {
 				def ARTIFACTS = "${WORKSPACE}/go/src/github.com/chaos-mesh/chaos-mesh/_artifacts"
 				try {
 					dir("${WORKSPACE}/go/src/github.com/chaos-mesh/chaos-mesh") {
+						unstash 'chaos-mesh'
 						stage("Debug Info") {
 							println "debug host: 172.16.5.15"
 							println "debug command: kubectl -n jenkins-ci exec -ti ${NODE_NAME} bash"
@@ -117,24 +118,6 @@ def build(String name, String code) {
 							echo "====== docker version ======"
 							docker version
 							"""
-						}
-						stage('Checkout') {
-							checkout changelog: false,
-							poll: false,
-							scm: [
-								$class: 'GitSCM',
-								branches: [[name: "${BUILD_BRANCH}"]],
-								doGenerateSubmoduleConfigurations: false,
-								extensions: [[$class: 'SubmoduleOption', parentCredentials: true]],
-								submoduleCfg: [],
-								userRemoteConfigs: [[
-									credentialsId: "${CREDENTIALS_ID}",
-									refspec: '+refs/heads/*:refs/remotes/origin/* +refs/pull/*:refs/remotes/origin/pr/*',
-									url: "${BUILD_URL}",
-								]]
-							]
-
-							GITHASH = sh(returnStdout: true, script: "git rev-parse HEAD").trim()
 						}
 						stage('Run') {
 							ansiColor('xterm') {
@@ -190,6 +173,55 @@ def call(BUILD_BRANCH, CREDENTIALS_ID) {
 	def PROJECT_DIR = "go/src/github.com/chaos-mesh/chaos-mesh"
 
 	catchError {
+		node('build_go1130_memvolume') {
+			container("golang") {
+				def WORKSPACE = pwd()
+				dir("${PROJECT_DIR}") {
+					deleteDir()
+
+					stage('Checkout') {
+						checkout changelog: false,
+						poll: false,
+						scm: [
+							$class: 'GitSCM',
+							branches: [[name: "${BUILD_BRANCH}"]],
+							doGenerateSubmoduleConfigurations: false,
+							extensions: [[$class: 'SubmoduleOption', parentCredentials: true]],
+							submoduleCfg: [],
+							userRemoteConfigs: [[
+								credentialsId: "${CREDENTIALS_ID}",
+								refspec: '+refs/heads/*:refs/remotes/origin/* +refs/pull/*:refs/remotes/origin/pr/*',
+								url: "${BUILD_URL}",
+							]]
+						]
+
+						GITHASH = sh(returnStdout: true, script: "git rev-parse HEAD").trim()
+					}
+
+					stage("Build") {
+						ansiColor('xterm') {
+							sh """
+							make ensure-kubebuilder
+							make ensure-kustomize
+							make manifests
+							make e2e-build
+							"""
+						}
+					}
+
+					stage("Prepare for e2e") {
+						ansiColor('xterm') {
+							sh """
+							hack/prepare-e2e.sh
+							"""
+						}
+					}
+
+					stash excludes: "vendor/**,deploy/**", name: "chaos-mesh"
+				}
+			}
+		}
+
 		def GLOBALS = "SKIP_BUILD=y IMAGE_TAG=${GITHASH} GINKGO_NO_COLOR=y"
 		def artifacts = "go/src/github.com/chaos-mesh/chaos-mesh/artifacts"
 		def builds = [:]
