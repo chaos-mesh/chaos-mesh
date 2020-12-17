@@ -130,6 +130,10 @@ binary: chaosdaemon manager chaosfs chaos-dashboard bin/pause
 watchmaker:
 	$(CGOENV) go build -ldflags '$(LDFLAGS)' -o bin/watchmaker ./cmd/watchmaker/...
 
+# Build chaosctl
+chaosctl:
+	$(GO) build -ldflags '$(LDFLAGS)' -o bin/chaosctl ./cmd/chaosctl/*.go
+
 # Run against the configured Kubernetes cluster in ~/.kube/config
 run: generate fmt vet manifests
 	$(GO) run ./cmd/controller-manager/main.go

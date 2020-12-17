@@ -158,13 +158,10 @@ func SelectPods(ctx context.Context, c client.Client, r client.Reader, selector 
 		if len(selector.Nodes) > 0 {
 			for _, nodename := range selector.Nodes {
 				var node v1.Node
-				err := c.Get(ctx, types.NamespacedName{
-					Name: nodename,
-				}, &node)
-				if err == nil {
-					nodes = append(nodes, node)
-					continue
+				if err := c.Get(ctx, types.NamespacedName{Name: nodename}, &node); err != nil {
+					return nil, err
 				}
+				nodes = append(nodes, node)
 			}
 		}
 		if len(selector.NodeSelectors) > 0 {
