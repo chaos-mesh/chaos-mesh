@@ -60,6 +60,25 @@ func NewChaosDaemonClient(ctx context.Context, c client.Client, pod *v1.Pod, por
 	}, nil
 }
 
+// NewChaosDaemonClientLocally would create ChaosDaemonClient in localhost
+func NewChaosDaemonClientLocally(port int) (ChaosDaemonClientInterface, error) {
+	if cli := mock.On("MockChaosDaemonClient"); cli != nil {
+		return cli.(ChaosDaemonClientInterface), nil
+	}
+	if err := mock.On("NewChaosDaemonClientError"); err != nil {
+		return nil, err.(error)
+	}
+
+	cc, err := CreateGrpcConnectionWithAddress("localhost", port)
+	if err != nil {
+		return nil, err
+	}
+	return &GrpcChaosDaemonClient{
+		ChaosDaemonClient: chaosdaemon.NewChaosDaemonClient(cc),
+		conn:              cc,
+	}, nil
+}
+
 // MergeNetem merges two Netem protos into a new one.
 // REMEMBER to assign the return value, i.e. merged = utils.MergeNetm(merged, em)
 // For each field it takes the bigger value of the two.
