@@ -15,7 +15,7 @@ metadata:
 spec:
   containers:
   - name: main
-    image: hub.pingcap.net/yangkeao/chaos-mesh-e2e
+    image: hub.pingcap.net/yangkeao/chaos-mesh-e2e-base
     command:
     - runner.sh
     # Clean containers on TERM signal in root process to avoid cgroup leaking.
@@ -119,6 +119,13 @@ def build(String name, String code) {
 							docker version
 							"""
 						}
+						stage('Build e2e') {
+							ansiColor('xterm') {
+								sh """
+								make e2e-build
+								"""
+							}
+						}
 						stage('Run') {
 							ansiColor('xterm') {
 								sh """
@@ -196,26 +203,6 @@ def call(BUILD_BRANCH, CREDENTIALS_ID) {
 						]
 
 						GITHASH = sh(returnStdout: true, script: "git rev-parse HEAD").trim()
-					}
-
-					stage("Build") {
-						ansiColor('xterm') {
-							sh """
-							make ensure-kubebuilder
-							make ensure-kustomize
-							make binary
-							make manifests
-							make e2e-build
-							"""
-						}
-					}
-
-					stage("Prepare for e2e") {
-						ansiColor('xterm') {
-							sh """
-							hack/prepare-e2e.sh
-							"""
-						}
 					}
 
 					stash excludes: "vendor/**,deploy/**", name: "chaos-mesh"
