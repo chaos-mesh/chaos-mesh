@@ -123,6 +123,8 @@ def build(String name, String code) {
 							ansiColor('xterm') {
 								sh """
 								make e2e-build
+								mkdir -p output/bin
+								cp -r /usr/local/bin/* output/bin/
 								"""
 							}
 						}
@@ -187,6 +189,8 @@ def call(BUILD_BRANCH, CREDENTIALS_ID) {
 					deleteDir()
 
 					stage('Checkout') {
+						scm.extensions << [$class: 'CloneOption', shallow: true]
+
 						checkout changelog: false,
 						poll: false,
 						scm: [
