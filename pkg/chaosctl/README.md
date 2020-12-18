@@ -12,7 +12,7 @@ Chaoctl support shell autocompletion, which could save you some typing. Do `./bi
 
 ## How to use
 **Debug**
-`chaoctl debug` is used to print debug info of certain chaos. Currently, chaosctl support networkchaos, stresschaos and iochaos.
+`chaoctl debug` is used to print debug info of certain chaos. Currently, chaosctl support **networkchaos**, **stresschaos** and **iochaos**.
 ```shell
 #to print info of each networkchaos
 ./bin/chaosctl debug networkchaos
@@ -31,3 +31,30 @@ chaosctl logs
 # to print 100 log lines for chaosmesh components in node NODENAME
 chaosctl logs -t 100 -n NODENAME
 ```
+
+## Detail of `debug`
+A example output structure of `debug` would be like: 
+```
+CHAOSNAME
+PODNAME (which the chaos would take effect on)
+    DEBUG_INFO
+PODNAME
+    DEBUG_INFO
+```
+The `DEBUG_INFO` of each supported chaos would be:
+
+​	NetworkChaos:
+1. `ipset list` of chaos daemon
+2. `tc qdisc list`
+3. `iptables list`
+4. podnetworkchaos spec
+
+​	StressChaos:
+1. `ps` of target pod
+2. `cat /proc/${PID}/cgroup` of each process
+3. `cat /proc/${stress-ng_PID}/cgroup`
+4. `cpu` or `memory` limit, and compare with the set value
+
+​	IoChaos:
+1. `cat /proc/mounts` of target pod
+2. `ls -l /proc/${PID}/fd` of target pod
