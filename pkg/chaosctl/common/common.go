@@ -34,6 +34,7 @@ import (
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	ctrlconfig "github.com/chaos-mesh/chaos-mesh/controllers/config"
+	"github.com/chaos-mesh/chaos-mesh/pkg/bpm"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
 	"github.com/chaos-mesh/chaos-mesh/pkg/portforward"
 	"github.com/chaos-mesh/chaos-mesh/pkg/utils"
@@ -247,7 +248,7 @@ func getChaos(ctx context.Context, chaosType string, chaosName string, ns string
 // GetPidFromPS returns pid-command pairs
 func GetPidFromPS(ctx context.Context, pod v1.Pod, daemon v1.Pod, c *kubernetes.Clientset) ([]string, []string, error) {
 	cmd := fmt.Sprintf("ps")
-	out, err := ExecBypass(ctx, pod, daemon, cmd, c)
+	out, err := ExecBypass(ctx, pod, daemon, cmd, c, bpm.PidNS)
 	if err != nil {
 		return nil, nil, fmt.Errorf("run command '%s' failed with: %s", cmd, err.Error())
 	}
@@ -282,7 +283,7 @@ func GetPidFromPS(ctx context.Context, pod v1.Pod, daemon v1.Pod, c *kubernetes.
 }
 
 // GetPidFromPod returns pid given containerd ID in pod
-func GetPidFromPod(ctx context.Context, pod v1.Pod, daemon v1.Pod) (int, error) {
+func GetPidFromPod(ctx context.Context, pod v1.Pod, daemon v1.Pod) (uint32, error) {
 	pfCancel, localPort, err := forwardPorts(ctx, daemon, uint16(ctrlconfig.ControllerCfg.ChaosDaemonPort))
 	if err != nil {
 		return 0, fmt.Errorf("forward ports failed: %s", err.Error())
@@ -310,7 +311,7 @@ func GetPidFromPod(ctx context.Context, pod v1.Pod, daemon v1.Pod) (int, error) 
 	if err != nil {
 		return 0, fmt.Errorf("container get pid failed: %s", err.Error())
 	}
-	return int(res.Pid), nil
+	return res.Pid, nil
 }
 
 func forwardPorts(ctx context.Context, pod v1.Pod, port uint16) (context.CancelFunc, uint16, error) {

@@ -25,6 +25,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/pkg/bpm"
 	cm "github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/common"
 )
 
@@ -67,7 +68,7 @@ func debugEachPod(ctx context.Context, pod v1.Pod, daemon v1.Pod, chaos *v1alpha
 	}
 
 	cmd = fmt.Sprintf("ps")
-	out, err = cm.ExecBypass(ctx, pod, daemon, cmd, c.KubeCli)
+	out, err = cm.ExecBypass(ctx, pod, daemon, cmd, c.KubeCli, bpm.PidNS)
 	if err != nil {
 		return fmt.Errorf("run command '%s' failed with: %s", cmd, err.Error())
 	}
