@@ -123,8 +123,8 @@ def build(String name, String code) {
 							ansiColor('xterm') {
 								sh """
 								make e2e-build
-								mkdir -p output/bin
-								cp -r /usr/local/bin/* output/bin/
+								mkdir output
+								cp -r /usr/local/bin/chaos-mesh-e2e output/bin
 								"""
 							}
 						}
