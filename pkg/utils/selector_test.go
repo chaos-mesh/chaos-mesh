@@ -204,7 +204,7 @@ func TestCheckPodMeetSelector(t *testing.T) {
 		},
 		{
 			name: "meet labels and meet expressions",
-			pod:  newPod("t1", v1.PodPending, metav1.NamespaceDefault, nil, map[string]string{"app": "tikv", "ss": "t1"}, ""),
+			pod:  newPod(PodArg{Name: "t1", Status: v1.PodPending, Labels: map[string]string{"app": "tikv", "ss": "t1"}}),
 			selector: v1alpha1.SelectorSpec{
 				LabelSelectors: map[string]string{"app": "tikv"},
 				ExpressionSelectors: []metav1.LabelSelectorRequirement{
@@ -218,7 +218,7 @@ func TestCheckPodMeetSelector(t *testing.T) {
 		},
 		{
 			name: "meet labels and not meet expressions",
-			pod:  newPod("t1", v1.PodPending, metav1.NamespaceDefault, nil, map[string]string{"app": "tikv", "ss": "t1"}, ""),
+			pod:  newPod(PodArg{Name: "t1", Status: v1.PodPending, Labels: map[string]string{"app": "tikv", "ss": "t1"}}),
 			selector: v1alpha1.SelectorSpec{
 				LabelSelectors: map[string]string{"app": "tikv"},
 				ExpressionSelectors: []metav1.LabelSelectorRequirement{
