@@ -189,15 +189,13 @@ def call(BUILD_BRANCH, CREDENTIALS_ID) {
 					deleteDir()
 
 					stage('Checkout') {
-						scm.extensions << [$class: 'CloneOption', shallow: true]
-
 						checkout changelog: false,
 						poll: false,
 						scm: [
 							$class: 'GitSCM',
 							branches: [[name: "${BUILD_BRANCH}"]],
 							doGenerateSubmoduleConfigurations: false,
-							extensions: [[$class: 'SubmoduleOption', parentCredentials: true]],
+							extensions: [[$class: 'SubmoduleOption', parentCredentials: true], [$class: 'CloneOption', shallow: true]],
 							submoduleCfg: [],
 							userRemoteConfigs: [[
 								credentialsId: "${CREDENTIALS_ID}",
