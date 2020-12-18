@@ -137,9 +137,7 @@ func (s *SelectorInfo) ParseSelector() v1alpha1.SelectorSpec {
 		selector.LabelSelectors[key] = val
 	}
 
-	for _, expr := range s.ExpressionSelectors {
-		selector.ExpressionSelectors = append(selector.ExpressionSelectors, expr)
-	}
+	selector.ExpressionSelectors = append(selector.ExpressionSelectors, s.ExpressionSelectors...)
 
 	selector.AnnotationSelectors = make(map[string]string)
 	for key, val := range s.AnnotationSelectors {
