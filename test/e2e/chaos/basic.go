@@ -322,7 +322,7 @@ var _ = ginkgo.Describe("[Basic]", func() {
 			err = util.WaitDeploymentReady(name, ns, kubeCli)
 			framework.ExpectNoError(err, "wait network-peer deployment ready error")
 
-			_, err := getPod(kubeCli, ns, name)
+			_, err = getPod(kubeCli, ns, name)
 			framework.ExpectNoError(err, "select network-peer pod error")
 
 			_, port, _, err = portforward.ForwardOnePort(fw, ns, "svc/"+svc.Name, 8080)
