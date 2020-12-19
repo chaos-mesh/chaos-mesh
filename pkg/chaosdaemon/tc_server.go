@@ -188,11 +188,7 @@ func (s *DaemonServer) setFilterTc(
 	// to remove these rules here
 	chains := []*pb.Chain{}
 	for _, tc := range filterTcs {
-		//for i, tc := range allTcs {
 		parentArg := fmt.Sprintf("parent %d:%d", parent, index+4)
-		//if i > 0 {
-		//	parentArg = fmt.Sprintf("parent %d:", currentHandler)
-		//}
 
 		currentHandler++
 		handleArg := fmt.Sprintf("handle %d:", currentHandler)
@@ -201,7 +197,6 @@ func (s *DaemonServer) setFilterTc(
 			log.Error(err, "error while adding tc")
 			return err
 		}
-		// }
 
 		ch := &pb.Chain{
 			Name:      fmt.Sprintf("TC-TABLES-%d", index),
@@ -441,26 +436,4 @@ func filterIsEmpty(tc *pb.Tc) bool {
 	}
 
 	return false
-}
-
-func generateFilterKey(tc *pb.Tc) string {
-	if tc.Ipset != "" {
-		return tc.Ipset
-	}
-
-	key := ""
-
-	if tc.Protocol != "" {
-		key = tc.Protocol
-	}
-
-	if tc.SourcePort != "" {
-		key += "-" + tc.SourcePort
-	}
-
-	if tc.EgressPort != "" {
-		key += "-" + tc.EgressPort
-	}
-
-	return key
 }
