@@ -18,8 +18,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/pkg/errors"
-
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
@@ -117,27 +115,28 @@ func (s *DaemonServer) SetTcs(ctx context.Context, in *pb.TcsRequest) (*empty.Em
 	//  tc qdisc add dev eth0 parent 3:5 handle 8: netem delay 100000
 	//  iptables -A TC-TABLES-1 -m set --match-set B dst -j CLASSIFY --set-class 3:5 -w 5
 
-	globalTcs := []*pb.Tc{}
-	filterTcs := []*pb.Tc{}
+	globalTc := []*pb.Tc{}
+	filterTc := make(map[string][]*pb.Tc)
 
 	for _, tc := range in.Tcs {
-		if !filterIsEmpty(tc) {
-			filterTcs = append(filterTcs, tc)
+		filter := abstractTcFilter(tc)
+		if len(filter) > 0 {
+			filterTc[filter] = append(filterTc[filter], tc)
 			continue
 		}
-		globalTcs = append(globalTcs, tc)
+		globalTc = append(globalTc, tc)
 	}
 
-	if len(globalTcs) > 0 {
-		if err := s.setGlobalTc(tcCli, globalTcs, in.Device); err != nil {
+	if len(globalTc) > 0 {
+		if err := s.setGlobalTcs(tcCli, globalTc, in.Device); err != nil {
 			log.Error(err, "error while setting global tc")
 			return &empty.Empty{}, nil
 		}
 	}
 
-	if len(filterTcs) > 0 {
+	if len(filterTc) > 0 {
 		iptablesCli := buildIptablesClient(ctx, pid)
-		if err := s.setFilterTc(tcCli, iptablesCli, filterTcs, in.Device, len(globalTcs)); err != nil {
+		if err := s.setFilterTcs(tcCli, iptablesCli, filterTc, in.Device, len(globalTc)); err != nil {
 			log.Error(err, "error while setting filter tc")
 			return &empty.Empty{}, nil
 		}
@@ -146,7 +145,7 @@ func (s *DaemonServer) SetTcs(ctx context.Context, in *pb.TcsRequest) (*empty.Em
 	return &empty.Empty{}, nil
 }
 
-func (s *DaemonServer) setGlobalTc(cli tcClient, tcs []*pb.Tc, device string) error {
+func (s *DaemonServer) setGlobalTcs(cli tcClient, tcs []*pb.Tc, device string) error {
 	for index, tc := range tcs {
 		parentArg := "root"
 		if index > 0 {
@@ -158,22 +157,22 @@ func (s *DaemonServer) setGlobalTc(cli tcClient, tcs []*pb.Tc, device string) er
 		err := cli.addTc(device, parentArg, handleArg, tc)
 		if err != nil {
 			log.Error(err, "error while adding tc")
-			return errors.WithStack(err)
+			return err
 		}
 	}
 
 	return nil
 }
 
-func (s *DaemonServer) setFilterTc(
+func (s *DaemonServer) setFilterTcs(
 	tcCli tcClient,
 	iptablesCli iptablesClient,
-	filterTcs []*pb.Tc,
+	filterTc map[string][]*pb.Tc,
 	device string,
 	baseIndex int,
 ) error {
 	parent := baseIndex
-	band := 3 + len(filterTcs) // 3 handlers for normal sfq on prio qdisc
+	band := 3 + len(filterTc) // 3 handlers for normal sfq on prio qdisc
 	if err := tcCli.addPrio(device, parent, band); err != nil {
 		log.Error(err, "error while adding prio")
 		return err
@@ -187,24 +186,30 @@ func (s *DaemonServer) setFilterTc(
 	// and iptables rules are recovered by previous call too, so there is no need
 	// to remove these rules here
 	chains := []*pb.Chain{}
-	for _, tc := range filterTcs {
-		parentArg := fmt.Sprintf("parent %d:%d", parent, index+4)
+	for _, tcs := range filterTc {
+		for i, tc := range tcs {
+			parentArg := fmt.Sprintf("parent %d:%d", parent, index+4)
+			if i > 0 {
+				parentArg = fmt.Sprintf("parent %d:", currentHandler)
+			}
 
-		currentHandler++
-		handleArg := fmt.Sprintf("handle %d:", currentHandler)
+			currentHandler++
+			handleArg := fmt.Sprintf("handle %d:", currentHandler)
 
-		if err := tcCli.addTc(device, parentArg, handleArg, tc); err != nil {
-			log.Error(err, "error while adding tc")
-			return err
+			err := tcCli.addTc(device, parentArg, handleArg, tc)
+			if err != nil {
+				log.Error(err, "error while adding tc")
+				return err
+			}
 		}
 
 		ch := &pb.Chain{
 			Name:      fmt.Sprintf("TC-TABLES-%d", index),
 			Direction: pb.Chain_OUTPUT,
-			//Ipsets:    []string{ipset},
-			Target: fmt.Sprintf("CLASSIFY --set-class %d:%d", parent, index+4),
+			Target:    fmt.Sprintf("CLASSIFY --set-class %d:%d", parent, index+4),
 		}
 
+		tc := tcs[0]
 		if len(tc.Ipset) > 0 {
 			ch.Ipsets = []string{tc.Ipset}
 		}
@@ -427,13 +432,20 @@ func convertTbfToArgs(tbf *pb.Tbf) string {
 	return args
 }
 
-func filterIsEmpty(tc *pb.Tc) bool {
-	if tc.Ipset == "" &&
-		tc.Protocol == "" &&
-		tc.EgressPort == "" &&
-		tc.SourcePort == "" {
-		return true
+func abstractTcFilter(tc *pb.Tc) string {
+	filter := tc.Ipset
+
+	if len(tc.Protocol) > 0 {
+		filter += "-" + tc.Protocol
 	}
 
-	return false
+	if len(tc.EgressPort) > 0 {
+		filter += "-" + tc.EgressPort
+	}
+
+	if len(tc.SourcePort) > 0 {
+		filter += "-" + tc.EgressPort
+	}
+
+	return filter
 }
