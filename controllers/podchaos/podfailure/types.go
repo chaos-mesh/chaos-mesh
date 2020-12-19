@@ -18,14 +18,18 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/hashicorp/go-multierror"
 	"golang.org/x/sync/errgroup"
 	v1 "k8s.io/api/core/v1"
+	k8serror "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/tools/cache"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/controllers/common"
 	"github.com/chaos-mesh/chaos-mesh/controllers/config"
 	"github.com/chaos-mesh/chaos-mesh/pkg/router"
 	ctx "github.com/chaos-mesh/chaos-mesh/pkg/router/context"
@@ -86,6 +90,68 @@ func (r *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.I
 	}
 	r.Event(podchaos, v1.EventTypeNormal, utils.EventChaosInjected, "")
 	return nil
+}
+
+// Recover means the reconciler recovers the chaos action
+func (r *endpoint) Recover(ctx context.Context, req ctrl.Request, chaos v1alpha1.InnerObject) error {
+	somechaos, ok := chaos.(*v1alpha1.PodChaos)
+	if !ok {
+		err := errors.New("chaos is not PodChaos")
+		r.Log.Error(err, "chaos is not PodChaos", "chaos", chaos)
+		return err
+	}
+
+	if err := r.cleanFinalizersAndRecover(ctx, somechaos); err != nil {
+		return err
+	}
+	r.Event(somechaos, v1.EventTypeNormal, utils.EventChaosRecovered, "")
+
+	return nil
+}
+
+func (r *endpoint) cleanFinalizersAndRecover(ctx context.Context, chaos *v1alpha1.PodChaos) error {
+	var result error
+
+	for _, key := range chaos.Finalizers {
+		ns, name, err := cache.SplitMetaNamespaceKey(key)
+		if err != nil {
+			result = multierror.Append(result, err)
+			continue
+		}
+
+		var pod v1.Pod
+		err = r.Client.Get(ctx, types.NamespacedName{
+			Namespace: ns,
+			Name:      name,
+		}, &pod)
+
+		if err != nil {
+			if !k8serror.IsNotFound(err) {
+				result = multierror.Append(result, err)
+				continue
+			}
+
+			r.Log.Info("Pod not found", "namespace", ns, "name", name)
+			chaos.Finalizers = utils.RemoveFromFinalizer(chaos.Finalizers, key)
+			continue
+		}
+
+		err = r.recoverPod(ctx, &pod, chaos)
+		if err != nil {
+			result = multierror.Append(result, err)
+			continue
+		}
+
+		chaos.Finalizers = utils.RemoveFromFinalizer(chaos.Finalizers, key)
+	}
+
+	if chaos.Annotations[common.AnnotationCleanFinalizer] == common.AnnotationCleanFinalizerForced {
+		r.Log.Info("Force cleanup all finalizers", "chaos", chaos)
+		chaos.Finalizers = chaos.Finalizers[:0]
+		return nil
+	}
+
+	return result
 }
 
 func (r *endpoint) failAllPods(ctx context.Context, pods []v1.Pod, podchaos *v1alpha1.PodChaos) error {
