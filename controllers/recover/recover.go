@@ -29,16 +29,17 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/utils"
 )
 
-type RecoverDelegate struct {
+type Delegate struct {
 	client.Client
 	Log logr.Logger
+	RecoverIntf
 }
 
 type RecoverIntf interface {
-	RecoverPod(context.Context, *v1.Pod, v1alpha1.InnerObject, logr.Logger, client.Client) error
+	RecoverPod(context.Context, *v1.Pod, v1alpha1.InnerObject) error
 }
 
-func (r *RecoverDelegate) CleanFinalizersAndRecover(ctx context.Context, chaos v1alpha1.InnerObject, finalizers []string, annotations map[string]string, intf RecoverIntf) ([]string, error) {
+func (r *Delegate) CleanFinalizersAndRecover(ctx context.Context, chaos v1alpha1.InnerObject, finalizers []string, annotations map[string]string) ([]string, error) {
 	var result error
 
 	for _, key := range finalizers {
@@ -65,7 +66,7 @@ func (r *RecoverDelegate) CleanFinalizersAndRecover(ctx context.Context, chaos v
 			continue
 		}
 
-		err = intf.RecoverPod(ctx, &pod, chaos, r.Log, r.Client)
+		err = r.RecoverPod(ctx, &pod, chaos)
 		if err != nil {
 			result = multierror.Append(result, err)
 			continue

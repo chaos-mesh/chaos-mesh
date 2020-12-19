@@ -143,17 +143,17 @@ func (r *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.I
 
 // Recover means the reconciler recovers the chaos action
 func (r *endpoint) Recover(ctx context.Context, req ctrl.Request, chaos v1alpha1.InnerObject) error {
-	somechaos, ok := chaos.(*v1alpha1.IoChaos)
+	iochaos, ok := chaos.(*v1alpha1.IoChaos)
 	if !ok {
 		err := errors.New("chaos is not IoChaos")
 		r.Log.Error(err, "chaos is not IoChaos", "chaos", chaos)
 		return err
 	}
 
-	if err := r.cleanFinalizersAndRecover(ctx, somechaos); err != nil {
+	if err := r.cleanFinalizersAndRecover(ctx, iochaos); err != nil {
 		return err
 	}
-	r.Event(somechaos, v1.EventTypeNormal, utils.EventChaosRecovered, "")
+	r.Event(iochaos, v1.EventTypeNormal, utils.EventChaosRecovered, "")
 
 	return nil
 }

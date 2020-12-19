@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/go-logr/logr"
 	"golang.org/x/sync/errgroup"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -26,11 +27,9 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/go-logr/logr"
-
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/config"
-	rc "github.com/chaos-mesh/chaos-mesh/controllers/recover"
+	"github.com/chaos-mesh/chaos-mesh/controllers/recover"
 	chaosdaemon "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
 	"github.com/chaos-mesh/chaos-mesh/pkg/router"
 	ctx "github.com/chaos-mesh/chaos-mesh/pkg/router/context"
@@ -45,8 +44,9 @@ type endpoint struct {
 	ctx.Context
 }
 
-type recoverDelegate struct {
-	rc.RecoverDelegate
+type recoverer struct {
+	client.Client
+	Log logr.Logger
 }
 
 // Apply applies time-chaos
@@ -97,9 +97,9 @@ func (r *endpoint) Recover(ctx context.Context, req ctrl.Request, chaos v1alpha1
 		return err
 	}
 
-	rd := recoverDelegate{rc.RecoverDelegate{Client: r.Client, Log: r.Log}}
+	rd := recover.Delegate{Client: r.Client, Log: r.Log, RecoverIntf: &recoverer{r.Client, r.Log}}
 
-	finalizers, err := rd.CleanFinalizersAndRecover(ctx, chaos, timechaos.Finalizers, timechaos.Annotations, &recoverDelegate{})
+	finalizers, err := rd.CleanFinalizersAndRecover(ctx, chaos, timechaos.Finalizers, timechaos.Annotations)
 	if err != nil {
 		return err
 	}
@@ -109,12 +109,12 @@ func (r *endpoint) Recover(ctx context.Context, req ctrl.Request, chaos v1alpha1
 	return nil
 }
 
-func (r *recoverDelegate) RecoverPod(ctx context.Context, pod *v1.Pod, somechaos v1alpha1.InnerObject, Log logr.Logger, Client client.Client) error {
-	// judge type in `Recover` already so no need to judge again
+func (r *recoverer) RecoverPod(ctx context.Context, pod *v1.Pod, somechaos v1alpha1.InnerObject) error {
+	// judged type in `Recover` already so no need to judge again
 	chaos, _ := somechaos.(*v1alpha1.TimeChaos)
-	Log.Info("Try to recover pod", "namespace", pod.Namespace, "name", pod.Name)
+	r.Log.Info("Try to recover pod", "namespace", pod.Namespace, "name", pod.Name)
 
-	pbClient, err := utils.NewChaosDaemonClient(ctx, Client, pod, config.ControllerCfg.ChaosDaemonPort)
+	pbClient, err := utils.NewChaosDaemonClient(ctx, r.Client, pod, config.ControllerCfg.ChaosDaemonPort)
 	if err != nil {
 		return err
 	}
@@ -134,12 +134,12 @@ func (r *recoverDelegate) RecoverPod(ctx context.Context, pod *v1.Pod, somechaos
 
 		if len(expectedNames) == 0 || expectedNames[container.Name] {
 			g.Go(func() error {
-				err := r.recoverContainer(ctx, pbClient, container.ContainerID, Log)
+				err := r.recoverContainer(ctx, pbClient, container.ContainerID)
 
 				if err != nil {
-					Log.Error(err, "recover pod error", "namespace", pod.Namespace, "name", pod.Name)
+					r.Log.Error(err, "recover pod error", "namespace", pod.Namespace, "name", pod.Name)
 				} else {
-					Log.Info("Recover pod finished", "namespace", pod.Namespace, "name", pod.Name)
+					r.Log.Info("Recover pod finished", "namespace", pod.Namespace, "name", pod.Name)
 				}
 
 				return err
@@ -150,8 +150,8 @@ func (r *recoverDelegate) RecoverPod(ctx context.Context, pod *v1.Pod, somechaos
 	return g.Wait()
 }
 
-func (r *recoverDelegate) recoverContainer(ctx context.Context, client chaosdaemon.ChaosDaemonClient, containerID string, Log logr.Logger) error {
-	Log.Info("Try to recover time on container", "id", containerID)
+func (r *recoverer) recoverContainer(ctx context.Context, client chaosdaemon.ChaosDaemonClient, containerID string) error {
+	r.Log.Info("Try to recover time on container", "id", containerID)
 
 	_, err := client.RecoverTimeOffset(ctx, &chaosdaemon.TimeRequest{
 		ContainerId: containerID,

@@ -253,17 +253,17 @@ func (e *endpoint) SetChains(ctx context.Context, pods []v1.Pod, chains []v1alph
 
 // Recover means the reconciler recovers the chaos action
 func (e *endpoint) Recover(ctx context.Context, req ctrl.Request, chaos v1alpha1.InnerObject) error {
-	somechaos, ok := chaos.(*v1alpha1.NetworkChaos)
+	networkchaos, ok := chaos.(*v1alpha1.NetworkChaos)
 	if !ok {
 		err := errors.New("chaos is not NetworkChaos")
 		e.Log.Error(err, "chaos is not NetworkChaos", "chaos", chaos)
 		return err
 	}
 
-	if err := e.cleanFinalizersAndRecover(ctx, somechaos); err != nil {
+	if err := e.cleanFinalizersAndRecover(ctx, networkchaos); err != nil {
 		return err
 	}
-	e.Event(somechaos, v1.EventTypeNormal, utils.EventChaosRecovered, "")
+	e.Event(networkchaos, v1.EventTypeNormal, utils.EventChaosRecovered, "")
 
 	return nil
 }
