@@ -18,6 +18,8 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/pkg/errors"
+
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
@@ -84,8 +86,8 @@ func (s *DaemonServer) SetTcs(ctx context.Context, in *pb.TcsRequest) (*empty.Em
 
 	setDefaultTcsRequest(in)
 
-	client := buildTcClient(ctx, pid)
-	err = client.flush(in.Device)
+	tcCli := buildTcClient(ctx, pid)
+	err = tcCli.flush(in.Device)
 	if err != nil {
 		log.Error(err, "error while flushing client")
 		return &empty.Empty{}, err
@@ -115,19 +117,37 @@ func (s *DaemonServer) SetTcs(ctx context.Context, in *pb.TcsRequest) (*empty.Em
 	//  tc qdisc add dev eth0 parent 3:5 handle 8: netem delay 100000
 	//  iptables -A TC-TABLES-1 -m set --match-set B dst -j CLASSIFY --set-class 3:5 -w 5
 
-	globalTc := []*pb.Tc{}
-	filterTc := map[string][]*pb.Tc{}
+	globalTcs := []*pb.Tc{}
+	filterTcs := []*pb.Tc{}
 
 	for _, tc := range in.Tcs {
-		if tc.Ipset == "" {
-			globalTc = append(globalTc, tc)
-		} else {
-			// TODO: support multiple tc with one ipset
-			filterTc[tc.Ipset] = append(filterTc[tc.Ipset], tc)
+		if !filterIsEmpty(tc) {
+			filterTcs = append(filterTcs, tc)
+			continue
+		}
+		globalTcs = append(globalTcs, tc)
+	}
+
+	if len(globalTcs) > 0 {
+		if err := s.setGlobalTc(tcCli, globalTcs, in.Device); err != nil {
+			log.Error(err, "error while setting global tc")
+			return &empty.Empty{}, nil
 		}
 	}
 
-	for index, tc := range globalTc {
+	if len(filterTcs) > 0 {
+		iptablesCli := buildIptablesClient(ctx, pid)
+		if err := s.setFilterTc(tcCli, iptablesCli, filterTcs, in.Device, len(globalTcs)); err != nil {
+			log.Error(err, "error while setting filter tc")
+			return &empty.Empty{}, nil
+		}
+	}
+
+	return &empty.Empty{}, nil
+}
+
+func (s *DaemonServer) setGlobalTc(cli tcClient, tcs []*pb.Tc, device string) error {
+	for index, tc := range tcs {
 		parentArg := "root"
 		if index > 0 {
 			parentArg = fmt.Sprintf("parent %d:", index)
@@ -135,58 +155,65 @@ func (s *DaemonServer) SetTcs(ctx context.Context, in *pb.TcsRequest) (*empty.Em
 
 		handleArg := fmt.Sprintf("handle %d:", index+1)
 
-		err := client.addTc(in.Device, parentArg, handleArg, tc)
+		err := cli.addTc(device, parentArg, handleArg, tc)
 		if err != nil {
 			log.Error(err, "error while adding tc")
-			return &empty.Empty{}, err
+			return errors.WithStack(err)
 		}
 	}
 
-	parent := len(globalTc)
-	band := 3 + len(filterTc) // 3 handlers for normal sfq on prio qdisc
-	err = client.addPrio(in.Device, parent, band)
-	if err != nil {
+	return nil
+}
+
+func (s *DaemonServer) setFilterTc(
+	tcCli tcClient,
+	iptablesCli iptablesClient,
+	filterTcs []*pb.Tc,
+	device string,
+	baseIndex int,
+) error {
+	parent := baseIndex
+	band := 3 + len(filterTcs) // 3 handlers for normal sfq on prio qdisc
+	if err := tcCli.addPrio(device, parent, band); err != nil {
 		log.Error(err, "error while adding prio")
-		return &empty.Empty{}, err
+		return err
 	}
 
 	parent++
-
 	index := 0
 	currentHandler := parent + 3 // 3 handlers for sfq on prio qdisc
-
-	iptables := buildIptablesClient(ctx, pid)
 
 	// iptables chain has been initialized by previous grpc request to set iptables
 	// and iptables rules are recovered by previous call too, so there is no need
 	// to remove these rules here
 	chains := []*pb.Chain{}
-	for ipset, tcs := range filterTc {
-		for i, tc := range tcs {
-			parentArg := fmt.Sprintf("parent %d:%d", parent, index+4)
-			if i > 0 {
-				parentArg = fmt.Sprintf("parent %d:", currentHandler)
-			}
+	for _, tc := range filterTcs {
+		//for i, tc := range allTcs {
+		parentArg := fmt.Sprintf("parent %d:%d", parent, index+4)
+		//if i > 0 {
+		//	parentArg = fmt.Sprintf("parent %d:", currentHandler)
+		//}
 
-			currentHandler++
-			handleArg := fmt.Sprintf("handle %d:", currentHandler)
+		currentHandler++
+		handleArg := fmt.Sprintf("handle %d:", currentHandler)
 
-			err := client.addTc(in.Device, parentArg, handleArg, tc)
-			if err != nil {
-				log.Error(err, "error while adding tc")
-				return &empty.Empty{}, err
-			}
+		if err := tcCli.addTc(device, parentArg, handleArg, tc); err != nil {
+			log.Error(err, "error while adding tc")
+			return err
 		}
+		// }
 
 		ch := &pb.Chain{
 			Name:      fmt.Sprintf("TC-TABLES-%d", index),
 			Direction: pb.Chain_OUTPUT,
-			Ipsets:    []string{ipset},
-			Target:    fmt.Sprintf("CLASSIFY --set-class %d:%d", parent, index+4),
+			//Ipsets:    []string{ipset},
+			Target: fmt.Sprintf("CLASSIFY --set-class %d:%d", parent, index+4),
 		}
 
-		// TODO: refactor this logic
-		tc := tcs[0]
+		if len(tc.Ipset) > 0 {
+			ch.Ipsets = []string{tc.Ipset}
+		}
+
 		if len(tc.Protocol) > 0 {
 			ch.Protocol = fmt.Sprintf("--protocol %s", tc.Protocol)
 		}
@@ -207,13 +234,12 @@ func (s *DaemonServer) SetTcs(ctx context.Context, in *pb.TcsRequest) (*empty.Em
 
 		index++
 	}
-	err = iptables.setIptablesChains(chains)
-	if err != nil {
+	if err := iptablesCli.setIptablesChains(chains); err != nil {
 		log.Error(err, "error while setting iptables")
-		return &empty.Empty{}, err
+		return err
 	}
 
-	return &empty.Empty{}, nil
+	return nil
 }
 
 type tcClient struct {
@@ -404,4 +430,37 @@ func convertTbfToArgs(tbf *pb.Tbf) string {
 	}
 
 	return args
+}
+
+func filterIsEmpty(tc *pb.Tc) bool {
+	if tc.Ipset == "" &&
+		tc.Protocol == "" &&
+		tc.EgressPort == "" &&
+		tc.SourcePort == "" {
+		return true
+	}
+
+	return false
+}
+
+func generateFilterKey(tc *pb.Tc) string {
+	if tc.Ipset != "" {
+		return tc.Ipset
+	}
+
+	key := ""
+
+	if tc.Protocol != "" {
+		key = tc.Protocol
+	}
+
+	if tc.SourcePort != "" {
+		key += "-" + tc.SourcePort
+	}
+
+	if tc.EgressPort != "" {
+		key += "-" + tc.EgressPort
+	}
+
+	return key
 }
