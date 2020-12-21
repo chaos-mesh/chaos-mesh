@@ -75,7 +75,7 @@ func Exec(ctx context.Context, pod v1.Pod, cmd string, c *kubernetes.Clientset) 
 }
 
 // ExecBypass use chaos-daemon to enter namespace and execute command in target pod
-func ExecBypass(ctx context.Context, pod v1.Pod, daemon v1.Pod, cmd string, c *kubernetes.Clientset, nsTypes ...bpm.NsType) (string, error) {
+func ExecBypass(ctx context.Context, pod v1.Pod, daemon v1.Pod, cmd string, c *kubernetes.Clientset) (string, error) {
 	// To disable printing irrelevant log from grpc/clientconn.go
 	// See grpc/grpc-go#3918 for detail. Could be resolved in the future
 	grpclog.SetLoggerV2(grpclog.NewLoggerV2(ioutil.Discard, ioutil.Discard, ioutil.Discard))
@@ -84,21 +84,6 @@ func ExecBypass(ctx context.Context, pod v1.Pod, daemon v1.Pod, cmd string, c *k
 		return "", err
 	}
 	// enter mount ns by default
-	cmdBuilder := bpm.DefaultProcessBuilder(cmd).SetNS(pid, bpm.MountNS).SetContext(ctx)
-	for _, nsType := range nsTypes {
-		cmdBuilder.SetNS(pid, nsType)
-	}
+	cmdBuilder := bpm.DefaultProcessBuilder(cmd).SetNS(pid, bpm.MountNS).SetNS(pid, bpm.PidNS).SetContext(ctx)
 	return Exec(ctx, daemon, cmdBuilder.Build().Cmd.String(), c)
-	/*
-		switch cmdSubSlice[0] {
-		case "ps":
-			newCmd := fmt.Sprintf("/usr/local/bin/nsexec -m /proc/%s/ns/mnt -p /proc/%s/ns/pid -l -- %s", strconv.Itoa(pid), strconv.Itoa(pid), cmd)
-			return Exec(ctx, daemon, newCmd, c)
-		case "cat", "ls":
-			newCmd := fmt.Sprintf("/usr/local/bin/nsexec -m /proc/%s/ns/mnt -l -- %s", strconv.Itoa(pid), cmd)
-			return Exec(ctx, daemon, newCmd, c)
-		default:
-			return "", fmt.Errorf("command not supported for nsenter")
-		}
-	*/
 }

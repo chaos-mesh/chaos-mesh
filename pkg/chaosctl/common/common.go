@@ -34,7 +34,6 @@ import (
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	ctrlconfig "github.com/chaos-mesh/chaos-mesh/controllers/config"
-	"github.com/chaos-mesh/chaos-mesh/pkg/bpm"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
 	"github.com/chaos-mesh/chaos-mesh/pkg/portforward"
 	"github.com/chaos-mesh/chaos-mesh/pkg/utils"
@@ -248,7 +247,7 @@ func getChaos(ctx context.Context, chaosType string, chaosName string, ns string
 // GetPidFromPS returns pid-command pairs
 func GetPidFromPS(ctx context.Context, pod v1.Pod, daemon v1.Pod, c *kubernetes.Clientset) ([]string, []string, error) {
 	cmd := fmt.Sprintf("ps")
-	out, err := ExecBypass(ctx, pod, daemon, cmd, c, bpm.PidNS)
+	out, err := ExecBypass(ctx, pod, daemon, cmd, c)
 	if err != nil {
 		return nil, nil, fmt.Errorf("run command '%s' failed with: %s", cmd, err.Error())
 	}

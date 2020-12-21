@@ -16,14 +16,16 @@ package iochaos
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	"github.com/chaos-mesh/chaos-mesh/pkg/bpm"
 	cm "github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/common"
 )
+
+var fdNotExistError = "No such file or directory"
 
 // Debug get chaos debug information
 func Debug(ctx context.Context, chaos runtime.Object, c *cm.ClientSet, result *cm.ChaosResult) error {
@@ -58,7 +60,7 @@ func Debug(ctx context.Context, chaos runtime.Object, c *cm.ClientSet, result *c
 func debugEachPod(ctx context.Context, pod v1.Pod, daemon v1.Pod, chaos *v1alpha1.IoChaos, c *cm.ClientSet, result *cm.PodResult) error {
 	// print out debug info
 	cmd := fmt.Sprintf("cat /proc/mounts")
-	out, err := cm.ExecBypass(ctx, pod, daemon, cmd, c.KubeCli, bpm.PidNS)
+	out, err := cm.ExecBypass(ctx, pod, daemon, cmd, c.KubeCli)
 	if err != nil {
 		return fmt.Errorf("run command '%s' failed with: %s", cmd, err.Error())
 	}
@@ -72,7 +74,11 @@ func debugEachPod(ctx context.Context, pod v1.Pod, daemon v1.Pod, chaos *v1alpha
 	for i := range pids {
 		cmd = fmt.Sprintf("ls -l /proc/%s/fd", pids[i])
 		out, err = cm.ExecBypass(ctx, pod, daemon, cmd, c.KubeCli)
-		if err == nil {
+		if err != nil {
+			if !strings.Contains(err.Error(), fdNotExistError) {
+				return err
+			}
+		} else {
 			result.Items = append(result.Items, cm.ItemResult{Name: fmt.Sprintf("file discriptors of PID: %s, COMMAND: %s", pids[i], commands[i]), Value: string(out)})
 		}
 	}
