@@ -67,7 +67,6 @@ function e2e::image_load() {
     local images=(
         pingcap/chaos-mesh
         pingcap/chaos-daemon
-        pingcap/chaos-fs
         pingcap/chaos-scripts
         pingcap/e2e-helper
     )
