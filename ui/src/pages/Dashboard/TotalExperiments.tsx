@@ -1,10 +1,10 @@
 import { Box, Grid, Typography } from '@material-ui/core'
 import React, { useEffect, useState } from 'react'
+import { iconByKind, transByKind } from 'lib/byKind'
 
 import { Experiment } from 'api/experiments.type'
 import { ExperimentKind } from 'components/NewExperiment/types'
 import api from 'api'
-import iconByKind from 'lib/iconByKind'
 
 interface ChaosProps {
   kind: ExperimentKind
@@ -19,7 +19,7 @@ const Chaos: React.FC<ChaosProps> = ({ kind, data }) => (
       </Box>
       <Box flex={1.5}>
         <Typography variant="button" color="textSecondary" gutterBottom>
-          {kind}
+          {transByKind(kind)}
         </Typography>
         <Typography variant="h5">{data.sum}</Typography>
       </Box>

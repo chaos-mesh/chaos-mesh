@@ -60,10 +60,10 @@
       "kind": "类别",
       "action": "行为",
       "pod": {
-        "title": "Pod 生命周期"
+        "title": "Pod 故障"
       },
       "network": {
-        "title": "网络",
+        "title": "网络攻击",
         "target": {
           "title": "目标",
           "podsPreview": "预览目标 Pod",
@@ -71,16 +71,19 @@
         }
       },
       "io": {
-        "title": "文件系统 I/O"
+        "title": "文件系统注入"
       },
       "kernel": {
-        "title": "Linux 内核"
+        "title": "内核故障"
       },
       "time": {
-        "title": "时钟"
+        "title": "时钟偏移"
       },
       "stress": {
-        "title": "CPU/Memory 压力测试"
+        "title": "压力测试"
+      },
+      "dns": {
+        "title": "DNS 故障"
       }
     },
     "schedule": {

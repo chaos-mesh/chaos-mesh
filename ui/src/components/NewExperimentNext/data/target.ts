@@ -1,7 +1,6 @@
 import * as Yup from 'yup'
 
 import { ExperimentKind } from 'components/NewExperiment/types'
-import T from 'components/T'
 
 export type Kind = ExperimentKind
 type FieldType = 'text' | 'number' | 'select' | 'label' | 'autocomplete'
@@ -20,8 +19,7 @@ interface Category {
   key: string
   spec: Spec
 }
-interface Target {
-  name: JSX.Element | string
+export interface Target {
   categories?: Category[]
   spec?: Spec
 }
@@ -124,9 +122,8 @@ const dnsCommon: Spec = {
 }
 
 const data: Record<Kind, Target> = {
-  // Pod LifeCycle
+  // Pod Fault
   PodChaos: {
-    name: T('newE.target.pod.title'),
     categories: [
       {
         name: 'Pod Failure',
@@ -157,9 +154,8 @@ const data: Record<Kind, Target> = {
       },
     ],
   },
-  // Network
+  // Network Attack
   NetworkChaos: {
-    name: T('newE.target.network.title'),
     categories: [
       {
         name: 'Partition',
@@ -295,9 +291,8 @@ const data: Record<Kind, Target> = {
       },
     ],
   },
-  // File System IO
+  // IO Injection
   IoChaos: {
-    name: T('newE.target.io.title'),
     categories: [
       {
         name: 'Latency',
@@ -345,9 +340,8 @@ const data: Record<Kind, Target> = {
       },
     ],
   },
-  // Linux Kernel
+  // Kernel Fault
   KernelChaos: {
-    name: T('newE.target.kernel.title'),
     spec: {
       fail_kern_request: {
         callchain: [],
@@ -358,9 +352,8 @@ const data: Record<Kind, Target> = {
       },
     } as any,
   },
-  // Clock
+  // Clock Skew
   TimeChaos: {
-    name: T('newE.target.time.title'),
     spec: {
       time_offset: {
         field: 'text',
@@ -384,9 +377,8 @@ const data: Record<Kind, Target> = {
       },
     },
   },
-  // Stress CPU/Memory
+  // Stress Test
   StressChaos: {
-    name: T('newE.target.stress.title'),
     spec: {
       stressors: {
         cpu: {
@@ -403,8 +395,8 @@ const data: Record<Kind, Target> = {
       container_name: '',
     } as any,
   },
+  // DNS Fault
   DNSChaos: {
-    name: 'DNS',
     categories: [
       {
         name: 'Error',

@@ -1,8 +1,7 @@
 import { Box, Grid, Typography } from '@material-ui/core'
 import React, { useEffect, useState } from 'react'
-import { RootState, useStoreDispatch } from 'store'
-import { getStateofExperiments, setNeedToRefreshExperiments } from 'slices/experiments'
 import { setAlert, setAlertOpen } from 'slices/globalStatus'
+import { useStoreDispatch, useStoreSelector } from 'store'
 
 import ConfirmDialog from 'components-mui/ConfirmDialog'
 import { Experiment } from 'api/experiments.type'
@@ -13,13 +12,14 @@ import TuneIcon from '@material-ui/icons/Tune'
 import _groupBy from 'lodash.groupby'
 import api from 'api'
 import { dayComparator } from 'lib/dayjs'
+import { setNeedToRefreshExperiments } from 'slices/experiments'
+import { transByKind } from 'lib/byKind'
 import { useIntl } from 'react-intl'
-import { useSelector } from 'react-redux'
 
 export default function Experiments() {
   const intl = useIntl()
 
-  const needToRefreshExperiments = useSelector((state: RootState) => state.experiments.needToRefreshExperiments)
+  const needToRefreshExperiments = useStoreSelector((state) => state.experiments.needToRefreshExperiments)
   const dispatch = useStoreDispatch()
 
   const [loading, setLoading] = useState(false)
@@ -123,7 +123,6 @@ export default function Experiments() {
           })
         )
         dispatch(setAlertOpen(true))
-        dispatch(getStateofExperiments())
         fetchExperiments()
       })
       .catch(console.error)
@@ -138,7 +137,7 @@ export default function Experiments() {
           .map(([kind, experimentsByKind]) => (
             <Box key={kind} mb={6}>
               <Box mb={6}>
-                <Typography variant="button">{kind}</Typography>
+                <Typography variant="button">{transByKind(kind as any)}</Typography>
               </Box>
               <Grid container spacing={3}>
                 {experimentsByKind.length > 0 &&

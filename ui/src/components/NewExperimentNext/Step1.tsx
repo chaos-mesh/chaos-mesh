@@ -1,7 +1,8 @@
 import { Box, Card, Divider, GridList, GridListTile, Typography, useMediaQuery, useTheme } from '@material-ui/core'
 import React, { useEffect, useState } from 'react'
+import { iconByKind, transByKind } from 'lib/byKind'
 import { setStep1, setTarget as setTargetToStore } from 'slices/experiments'
-import targetData, { Kind, schema } from './data/target'
+import targetData, { Kind, Target, schema } from './data/target'
 import { useStoreDispatch, useStoreSelector } from 'store'
 
 import CheckCircleOutlineIcon from '@material-ui/icons/CheckCircleOutline'
@@ -16,7 +17,6 @@ import TargetGenerated from './form/TargetGenerated'
 import UndoIcon from '@material-ui/icons/Undo'
 import _snakecase from 'lodash.snakecase'
 import clsx from 'clsx'
-import iconByKind from 'lib/iconByKind'
 import { makeStyles } from '@material-ui/core/styles'
 
 const useStyles = makeStyles((theme) => {
@@ -118,19 +118,19 @@ const Step1 = () => {
       <Box hidden={step1}>
         <Box p={6} overflow="hidden">
           <GridList className={classes.gridList} cols={isDesktopScreen ? 1.5 : 3.5} spacing={9} cellHeight="auto">
-            {Object.entries(targetData).map(([key, t]) => (
+            {(Object.entries(targetData) as [Kind, Target][]).map(([key, t]) => (
               <GridListTile key={key}>
                 <Card
                   className={clsx(classes.card, kind === key ? classes.cardActive : '')}
                   variant="outlined"
-                  onClick={handleSelectTarget(key as Kind)}
+                  onClick={handleSelectTarget(key)}
                 >
                   <Box display="flex" justifyContent="center" alignItems="center" height="100px">
                     <Box display="flex" justifyContent="center" flex={1}>
-                      {iconByKind(key as Kind)}
+                      {iconByKind(key)}
                     </Box>
                     <Box display="flex" justifyContent="center" flex={2} px={1.5} textAlign="center">
-                      <Typography variant="button">{t.name}</Typography>
+                      <Typography variant="button">{transByKind(key)}</Typography>
                     </Box>
                   </Box>
                 </Card>

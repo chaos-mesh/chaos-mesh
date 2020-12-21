@@ -60,10 +60,10 @@
       "kind": "Kind",
       "action": "Action",
       "pod": {
-        "title": "Pod Lifecycle"
+        "title": "Pod Fault"
       },
       "network": {
-        "title": "Network",
+        "title": "Network Attack",
         "target": {
           "title": "Target",
           "podsPreview": "Target Pods Preview",
@@ -71,16 +71,19 @@
         }
       },
       "io": {
-        "title": "File System I/O"
+        "title": "IO Injection"
       },
       "kernel": {
-        "title": "Linux Kernel"
+        "title": "Kernel Fault"
       },
       "time": {
-        "title": "Clock"
+        "title": "Clock Skew"
       },
       "stress": {
-        "title": "Stress CPU/Memory"
+        "title": "Stress Test"
+      },
+      "dns": {
+        "title": "DNS Fault"
       }
     },
     "schedule": {

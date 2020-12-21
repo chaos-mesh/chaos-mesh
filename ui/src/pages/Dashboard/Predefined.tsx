@@ -13,7 +13,7 @@ import YAML from 'components/YAML'
 import YAMLEditor from 'components/YAMLEditor'
 import api from 'api'
 import clsx from 'clsx'
-import iconByKind from 'lib/iconByKind'
+import { iconByKind } from 'lib/byKind'
 import { makeStyles } from '@material-ui/core/styles'
 import { useIntl } from 'react-intl'
 import yaml from 'js-yaml'
@@ -164,11 +164,11 @@ const Predefined = () => {
                 <PaperTop title={experiment.name}>
                   <Box display="flex">
                     <Box mr={3}>
-                      <Button variant="outlined" color="secondary" size="small" onClick={handleDeleteExperiment}>
+                      <Button variant="contained" color="secondary" size="small" onClick={handleDeleteExperiment}>
                         {T('common.delete')}
                       </Button>
                     </Box>
-                    <Button variant="outlined" color="primary" size="small" onClick={handleApplyExperiment}>
+                    <Button variant="contained" color="primary" size="small" onClick={handleApplyExperiment}>
                       {T('common.submit')}
                     </Button>
                   </Box>

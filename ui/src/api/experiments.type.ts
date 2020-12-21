@@ -1,4 +1,5 @@
 import { Event } from './events.type'
+import { ExperimentKind } from 'components/NewExperiment/types'
 
 export interface StateOfExperiments {
   Running: number
@@ -18,7 +19,7 @@ export enum StateOfExperimentsEnum {
 
 export interface Experiment {
   uid: uuid
-  kind: string
+  kind: ExperimentKind
   namespace: string
   name: string
   created: string

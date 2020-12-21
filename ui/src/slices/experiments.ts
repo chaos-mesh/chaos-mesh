@@ -2,22 +2,7 @@ import { PayloadAction, createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 
 import { ExperimentScope } from 'components/NewExperiment/types'
 import { Kind } from 'components/NewExperimentNext/data/target'
-import { StateOfExperiments } from 'api/experiments.type'
 import api from 'api'
-
-const defaultStateOfExperiments = {
-  Total: 0,
-  Running: 0,
-  Waiting: 0,
-  Paused: 0,
-  Failed: 0,
-  Finished: 0,
-}
-
-export const getStateofExperiments = createAsyncThunk(
-  'experiments/state',
-  async () => (await api.experiments.state()).data
-)
 
 export const getNamespaces = createAsyncThunk(
   'common/chaos-available-namespaces',
@@ -41,7 +26,6 @@ const initialState: {
   labels: Record<string, string[]>
   annotations: Record<string, string[]>
   pods: any[]
-  stateOfExperiments: StateOfExperiments
   needToRefreshExperiments: boolean
   step1: boolean
   step2: boolean
@@ -53,7 +37,6 @@ const initialState: {
   labels: {},
   annotations: {},
   pods: [],
-  stateOfExperiments: defaultStateOfExperiments,
   needToRefreshExperiments: false,
   // New Experiment needed
   step1: false,
@@ -96,9 +79,6 @@ const experimentsSlice = createSlice({
     },
   },
   extraReducers: (builder) => {
-    builder.addCase(getStateofExperiments.fulfilled, (state, action) => {
-      state.stateOfExperiments = action.payload
-    })
     builder.addCase(getNamespaces.fulfilled, (state, action) => {
       state.namespaces = action.payload.filter((d) => !namespaceFilters.includes(d))
     })

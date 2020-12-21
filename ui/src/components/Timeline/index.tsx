@@ -1,21 +1,11 @@
 import React, { useEffect, useRef } from 'react'
 
 import { Event } from 'api/events.type'
+import NotFound from 'components-mui/NotFound'
 import T from 'components/T'
-import { Typography } from '@material-ui/core'
 import genEventsChart from 'lib/d3/eventsChart'
-import { makeStyles } from '@material-ui/core/styles'
 import { useIntl } from 'react-intl'
 import { useStoreSelector } from 'store'
-
-const useStyles = makeStyles({
-  notFound: {
-    position: 'absolute',
-    top: '50%',
-    left: '50%',
-    transform: 'translate3d(-50%, -50%, 0)',
-  },
-})
 
 interface TimelineProps {
   events: Event[]
@@ -23,8 +13,6 @@ interface TimelineProps {
 }
 
 const Timeline: React.FC<TimelineProps> = ({ events, ...rest }) => {
-  const classes = useStyles()
-
   const intl = useIntl()
 
   const { theme } = useStoreSelector((state) => state.settings)
@@ -47,7 +35,7 @@ const Timeline: React.FC<TimelineProps> = ({ events, ...rest }) => {
 
   return (
     <div ref={chartRef} {...rest}>
-      {events?.length === 0 && <Typography className={classes.notFound}>{T('events.noEventsFound')}</Typography>}
+      {events?.length === 0 && <NotFound>{T('events.noEventsFound')}</NotFound>}
     </div>
   )
 }

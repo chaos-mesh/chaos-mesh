@@ -23,7 +23,6 @@ import T from 'components/T'
 import YAMLEditor from 'components/YAMLEditor'
 import api from 'api'
 import genEventsChart from 'lib/d3/eventsChart'
-import { getStateofExperiments } from 'slices/experiments'
 import { useIntl } from 'react-intl'
 import { usePrevious } from 'lib/hooks'
 import { useSelector } from 'react-redux'
@@ -198,7 +197,6 @@ export default function ExperimentDetail() {
           })
         )
         dispatch(setAlertOpen(true))
-        dispatch(getStateofExperiments())
 
         if (action === 'archive') {
           history.push('/experiments')
@@ -313,7 +311,7 @@ export default function ExperimentDetail() {
           {detail && (
             <>
               <PaperTop title={detail.name}>
-                <Button variant="outlined" color="primary" size="small" onClick={handleUpdateExperiment}>
+                <Button variant="contained" color="primary" size="small" onClick={handleUpdateExperiment}>
                   {T('common.confirm')}
                 </Button>
               </PaperTop>
