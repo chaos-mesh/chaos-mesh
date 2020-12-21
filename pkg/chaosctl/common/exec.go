@@ -18,6 +18,7 @@ import (
 	"context"
 	"fmt"
 	"io/ioutil"
+	"strings"
 
 	"google.golang.org/grpc/grpclog"
 	v1 "k8s.io/api/core/v1"
@@ -66,7 +67,10 @@ func Exec(ctx context.Context, pod v1.Pod, cmd string, c *kubernetes.Clientset) 
 		Stderr: &stderr,
 	})
 	if err != nil {
-		return "", fmt.Errorf("error in streaming remotecommand: %s, pod: %s, command: %s, std error: %s", err.Error(), pod.Name, cmd, stderr.String())
+		if stderr.String() != "" {
+			return "", fmt.Errorf("error: %s\npod: %s\ncommand: %s", strings.TrimSuffix(stderr.String(), "\n"), pod.Name, cmd)
+		}
+		return "", fmt.Errorf("error in streaming remotecommand: %s\npod: %s\ncommand: %s", err.Error(), pod.Name, cmd)
 	}
 	if stderr.String() != "" {
 		return "", fmt.Errorf("error of command %s: %s", cmd, stderr.String())

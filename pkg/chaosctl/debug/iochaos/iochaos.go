@@ -74,11 +74,11 @@ func debugEachPod(ctx context.Context, pod v1.Pod, daemon v1.Pod, chaos *v1alpha
 
 		var itemValue string
 		if err != nil {
-			itemValue = fmt.Sprintf("Error: %s", err.Error())
+			itemValue = err.Error()
 		} else {
 			itemValue = string(out)
 		}
-		result.Items = append(result.Items, cm.ItemResult{Name: fmt.Sprintf("file discriptors of PID: %s, COMMAND: %s", pids[i], commands[i]), Value: itemValue})
+		result.Items = append(result.Items, cm.ItemResult{Name: fmt.Sprintf("file descriptors of PID: %s, COMMAND: %s", pids[i], commands[i]), Value: itemValue})
 	}
 
 	return nil
