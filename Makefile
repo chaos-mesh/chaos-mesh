@@ -205,14 +205,24 @@ $(eval $(call COPY_TEMPLATE,chaos-dashboard,chaos-dashboard))
 $(eval $(call COPY_TEMPLATE,chaos-mesh,chaos-controller-manager))
 
 define IMAGE_TEMPLATE =
+
 image-$(1):$(image-$(1)-dependencies)
 ifeq ($(DOCKER_CACHE),1)
+
+ifneq ($(DISABLE_CACHE_FROM),1)
 	DOCKER_BUILDKIT=1 DOCKER_CLI_EXPERIMENTAL=enabled docker buildx build --load --cache-to type=local,dest=$(CACHE_DIR)/$(1) --cache-from type=local,src=$(CACHE_DIR)/$(1) -t ${DOCKER_REGISTRY_PREFIX}pingcap/$(1):${IMAGE_TAG} ${DOCKER_BUILD_ARGS} $(2)
+else
+	DOCKER_BUILDKIT=1 DOCKER_CLI_EXPERIMENTAL=enabled docker buildx build --load --cache-to type=local,dest=$(CACHE_DIR)/$(1) -t ${DOCKER_REGISTRY_PREFIX}pingcap/$(1):${IMAGE_TAG} ${DOCKER_BUILD_ARGS} $(2)
+endif
+
 else
 	DOCKER_BUILDKIT=1 docker build -t ${DOCKER_REGISTRY_PREFIX}pingcap/$(1):${IMAGE_TAG} ${DOCKER_BUILD_ARGS} $(2)
 endif
+
+IMAGE_PHONY += image-$(1)
 endef
 
+IMAGE_PHONY := ""
 $(eval $(call IMAGE_TEMPLATE,chaos-daemon,images/chaos-daemon))
 $(eval $(call IMAGE_TEMPLATE,chaos-mesh,images/chaos-mesh))
 $(eval $(call IMAGE_TEMPLATE,chaos-dashboard,images/chaos-dashboard))
@@ -309,7 +319,7 @@ install-local-coverage-tools:
 
 .PHONY: all build test install manifests groupimports fmt vet tidy image \
 	binary docker-push lint generate yaml \
-	$(all-tool-dependencies) install.sh \
+	$(all-tool-dependencies) install.sh $(IMAGE_PHONY) \
 	manager chaosfs chaosdaemon chaos-dashboard \
 	dashboard dashboard-server-frontend gosec-scan \
 	proto bin/chaos-builder
