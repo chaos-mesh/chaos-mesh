@@ -16,7 +16,6 @@ package iochaos
 import (
 	"context"
 	"fmt"
-	"strings"
 
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -24,8 +23,6 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	cm "github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/common"
 )
-
-var fdNotExistError = "No such file or directory"
 
 // Debug get chaos debug information
 func Debug(ctx context.Context, chaos runtime.Object, c *cm.ClientSet, result *cm.ChaosResult) error {
@@ -74,13 +71,14 @@ func debugEachPod(ctx context.Context, pod v1.Pod, daemon v1.Pod, chaos *v1alpha
 	for i := range pids {
 		cmd = fmt.Sprintf("ls -l /proc/%s/fd", pids[i])
 		out, err = cm.ExecBypass(ctx, pod, daemon, cmd, c.KubeCli)
+
+		var itemValue string
 		if err != nil {
-			if !strings.Contains(err.Error(), fdNotExistError) {
-				return err
-			}
+			itemValue = fmt.Sprintf("Error: %s", err.Error())
 		} else {
-			result.Items = append(result.Items, cm.ItemResult{Name: fmt.Sprintf("file discriptors of PID: %s, COMMAND: %s", pids[i], commands[i]), Value: string(out)})
+			itemValue = string(out)
 		}
+		result.Items = append(result.Items, cm.ItemResult{Name: fmt.Sprintf("file discriptors of PID: %s, COMMAND: %s", pids[i], commands[i]), Value: itemValue})
 	}
 
 	return nil
