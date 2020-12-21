@@ -26,7 +26,6 @@
     "title": "New Experiment",
     "titleStep1": "Choose a Target",
     "titleStep2": "Fill the experiment info",
-    "create": "Create a New Experiment",
     "steps": {
       "basic": "Basic",
       "scope": "Scope",
@@ -98,7 +97,6 @@
   },
   "experiments": {
     "title": "Experiments",
-    "single": "Experiment",
     "state": {
       "running": "Running",
       "paused": "Paused",
@@ -118,7 +116,6 @@
     "eventsPerPage": "Events per page",
     "event": {
       "experiment": "Experiment",
-      "uuid": "UUID",
       "namespace": "Namespace",
       "kind": "Kind",
       "started": "Started",
@@ -135,7 +132,7 @@
   "archives": {
     "title": "Archives",
     "single": "Archive",
-    "no_archives_found": "No archives found",
+    "noArchivesFound": "No archives found",
     "numberOfRuns": "Number of Runs",
     "numberOfAffectedPods": "Number of Affected Pods"
   },
@@ -233,7 +230,6 @@
     "annotations": "Annotations",
     "labelSelectors": "Label Selectors",
     "annotationsSelectors": "Annotation Selectors",
-    "phaseSelectors": "Phase Selectors",
-    "namespaces": "Namespaces"
+    "phaseSelectors": "Phase Selectors"
   }
 }

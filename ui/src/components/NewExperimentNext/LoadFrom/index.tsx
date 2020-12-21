@@ -115,7 +115,7 @@ const LoadFrom = () => {
               />
             ))
           ) : archives?.length === 0 ? (
-            <Typography variant="body2">{T('archives.no_archives_found')}</Typography>
+            <Typography variant="body2">{T('archives.noArchivesFound')}</Typography>
           ) : (
             <SkeletonN n={3} />
           )}

@@ -64,7 +64,7 @@ export default function Archives() {
             <ArchiveOutlinedIcon fontSize="large" />
           </Box>
           <Typography variant="h6" align="center">
-            {T('archives.no_archives_found')}
+            {T('archives.noArchivesFound')}
           </Typography>
         </Box>
       )}

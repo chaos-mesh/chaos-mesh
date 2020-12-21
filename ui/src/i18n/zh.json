@@ -26,7 +26,6 @@
     "title": "新的实验",
     "titleStep1": "选择目标",
     "titleStep2": "填写实验信息",
-    "create": "创建新的实验",
     "steps": {
       "basic": "基本信息",
       "scope": "范围",
@@ -98,7 +97,6 @@
   },
   "experiments": {
     "title": "实验",
-    "single": "实验",
     "state": {
       "running": "运行中",
       "paused": "暂停",
@@ -118,7 +116,6 @@
     "eventsPerPage": "每页事件数",
     "event": {
       "experiment": "实验",
-      "uuid": "UUID",
       "namespace": "命名空间",
       "kind": "类别",
       "started": "开始时间",
@@ -135,7 +132,7 @@
   "archives": {
     "title": "归档",
     "single": "归档",
-    "no_archives_found": "未发现归档",
+    "noArchivesFound": "未发现归档",
     "numberOfRuns": "运行次数",
     "numberOfAffectedPods": "受到实验作用的 Pod 数目"
   },
@@ -233,7 +230,6 @@
     "annotations": "注解",
     "labelSelectors": "标签选择器",
     "annotationsSelectors": "注解选择器",
-    "phaseSelectors": "阶段选择器",
-    "namespaces": "命名空间"
+    "phaseSelectors": "阶段选择器"
   }
 }
