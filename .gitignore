@@ -33,3 +33,5 @@ test/image/e2e/manifests/
 
 /docs/swagger.*
 /docs/docs.go
+
+/images/*/bin/*

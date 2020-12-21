@@ -175,10 +175,10 @@ tidy: clean
 	GO111MODULE=on go mod tidy
 	git diff -U --exit-code go.mod go.sum
 
-update-install-scipt:
+install.sh:
 	./hack/update_install_script.sh
 
-check-install-script: update-install-scipt
+check-install-script: install.sh
 	git diff -U --exit-code install.sh
 
 clean:
@@ -187,48 +187,38 @@ clean:
 boilerplate:
 	./hack/verify-boilerplate.sh
 
-taily-build:
-	if [ "$(shell docker ps --filter=name=$@ -q)" = "" ]; then \
-		docker build -t pingcap/chaos-binary ${DOCKER_BUILD_ARGS} .; \
-		docker run --rm --mount type=bind,source=$(shell pwd),target=/src \
-			--name $@ -d pingcap/chaos-binary tail -f /dev/null; \
-	fi;
+image: image-chaos-daemon image-chaos-mesh image-chaos-dashboard
 
-taily-build-clean:
-	docker kill taily-build && docker rm taily-build || exit 0
+define COPY_TEMPLATE =
+images/$(1)/bin/$(2): image-chaos-binary
+	docker run --rm --volume $(shell pwd)/images/$(1)/bin:/mnt ${DOCKER_REGISTRY_PREFIX}pingcap/chaos-binary cp /bin/$(2) /mnt/$(2)
 
-image: image-chaos-daemon image-chaos-mesh image-chaos-dashboard image-chaos-fs image-chaos-scripts
+image-$(1)-dependencies := $(image-$(1)-dependencies) images/$(1)/bin/$(2)
+endef
 
-image-chaos-mesh-protoc:
-	docker build -t pingcap/chaos-mesh-protoc ${DOCKER_BUILD_ARGS} ./hack/protoc
+$(eval $(call COPY_TEMPLATE,chaos-daemon,chaos-daemon))
+$(eval $(call COPY_TEMPLATE,chaos-daemon,toda))
+$(eval $(call COPY_TEMPLATE,chaos-daemon,nsexec))
+$(eval $(call COPY_TEMPLATE,chaos-daemon,libnsenter.so))
+$(eval $(call COPY_TEMPLATE,chaos-daemon,pause))
+$(eval $(call COPY_TEMPLATE,chaos-dashboard,chaos-dashboard))
+$(eval $(call COPY_TEMPLATE,chaos-mesh,chaos-controller-manager))
 
-ifneq ($(TAILY_BUILD),)
-image-binary: taily-build image-build-base
-	docker exec -it taily-build make binary
-	cp -r scripts ./bin
-	echo -e "FROM scratch\n COPY . /src/bin\n COPY ./scripts /src/scripts" | docker build -t pingcap/chaos-binary -f - ./bin
+define IMAGE_TEMPLATE =
+image-$(1):$(image-$(1)-dependencies)
+ifeq ($(DOCKER_CACHE),1)
+	DOCKER_BUILDKIT=1 DOCKER_CLI_EXPERIMENTAL=enabled docker buildx build --load --cache-to type=local,dest=$(CACHE_DIR)/$(1) --cache-from type=local,src=$(CACHE_DIR)/$(1) -t ${DOCKER_REGISTRY_PREFIX}pingcap/$(1):${IMAGE_TAG} ${DOCKER_BUILD_ARGS} $(2)
 else
-image-binary: image-build-base
-	DOCKER_BUILDKIT=1 docker build -t pingcap/chaos-binary ${DOCKER_BUILD_ARGS} .
+	DOCKER_BUILDKIT=1 docker build -t ${DOCKER_REGISTRY_PREFIX}pingcap/$(1):${IMAGE_TAG} ${DOCKER_BUILD_ARGS} $(2)
 endif
+endef
 
-image-build-base:
-	DOCKER_BUILDKIT=0 docker build --ulimit nofile=65536:65536 -t pingcap/chaos-build-base ${DOCKER_BUILD_ARGS} images/build-base
-
-image-chaos-daemon: image-binary
-	docker build -t ${DOCKER_REGISTRY_PREFIX}pingcap/chaos-daemon:${IMAGE_TAG} ${DOCKER_BUILD_ARGS} images/chaos-daemon
-
-image-chaos-mesh: image-binary
-	docker build -t ${DOCKER_REGISTRY_PREFIX}pingcap/chaos-mesh:${IMAGE_TAG} ${DOCKER_BUILD_ARGS} images/chaos-mesh
-
-image-chaos-fs: image-binary
-	docker build -t ${DOCKER_REGISTRY_PREFIX}pingcap/chaos-fs:${IMAGE_TAG} ${DOCKER_BUILD_ARGS} images/chaosfs
-
-image-chaos-scripts: image-binary
-	docker build -t ${DOCKER_REGISTRY_PREFIX}pingcap/chaos-scripts:${IMAGE_TAG} ${DOCKER_BUILD_ARGS} images/chaos-scripts
-
-image-chaos-dashboard: image-binary
-	docker build -t ${DOCKER_REGISTRY_PREFIX}pingcap/chaos-dashboard:${IMAGE_TAG} ${DOCKER_BUILD_ARGS} images/chaos-dashboard
+$(eval $(call IMAGE_TEMPLATE,chaos-daemon,images/chaos-daemon))
+$(eval $(call IMAGE_TEMPLATE,chaos-mesh,images/chaos-mesh))
+$(eval $(call IMAGE_TEMPLATE,chaos-dashboard,images/chaos-dashboard))
+$(eval $(call IMAGE_TEMPLATE,chaos-binary,.))
+$(eval $(call IMAGE_TEMPLATE,e2e-helper,test/cmd/e2e_helper))
+$(eval $(call IMAGE_TEMPLATE,chaos-mesh-protoc,./hack/protoc))
 
 image-chaos-kernel:
 	docker build -t ${DOCKER_REGISTRY_PREFIX}pingcap/chaos-kernel:${IMAGE_TAG} ${DOCKER_BUILD_ARGS} --build-arg MAKE_JOBS=${MAKE_JOBS} --build-arg MIRROR=${UBUNTU_MIRROR} images/chaos-kernel
@@ -236,9 +226,7 @@ image-chaos-kernel:
 docker-push:
 	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-mesh:${IMAGE_TAG}"
 	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-dashboard:${IMAGE_TAG}"
-	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-fs:${IMAGE_TAG}"
 	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-daemon:${IMAGE_TAG}"
-	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-scripts:${IMAGE_TAG}"
 
 docker-push-chaos-kernel:
 	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-kernel:${IMAGE_TAG}"
@@ -280,14 +268,11 @@ proto:
 else
 proto: image-chaos-mesh-protoc
 	docker run --rm --workdir /mnt/ --volume $(shell pwd):/mnt \
-		--user $(shell id -u):$(shell id -g) --env IN_DOCKER=1 pingcap/chaos-mesh-protoc \
+		--user $(shell id -u):$(shell id -g) --env IN_DOCKER=1 ${DOCKER_REGISTRY_PREFIX}pingcap/chaos-mesh-protoc \
 		/usr/bin/make proto
 
 	make fmt
 endif
-
-update-install-script:
-	hack/update_install_script.sh
 
 e2e-build:
 	$(GO) build -trimpath  -o test/image/e2e/bin/ginkgo github.com/onsi/ginkgo/ginkgo
@@ -304,28 +289,18 @@ endif
 	cp -r manifests test/image/e2e
 	docker build -t "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-mesh-e2e:${IMAGE_TAG}" test/image/e2e
 
-image-e2e-helper:
-	docker build -t "${DOCKER_REGISTRY_PREFIX}pingcap/e2e-helper:${IMAGE_TAG}" test/cmd/e2e_helper
+tools := kubectl helm kind kubebuilder kustomize kubetest2
+define DOWNLOAD_TOOL =
+ensure-$(1):
+	@echo "ensuring $(1)"
+	ROOT=$(ROOT) && source ./hack/lib.sh && hack::ensure_$(1)
 
-ensure-kind:
-	@echo "ensuring kind"
-	$(shell ./hack/tools.sh kind)
+all-tool-dependencies := $(all-tool-dependencies) ensure-$(1)
+endef
 
-ensure-kubebuilder:
-	@echo "ensuring kubebuilder"
-	$(shell ./hack/tools.sh kubebuilder)
+$(foreach tool, $(tools), $(eval $(call DOWNLOAD_TOOL,$(tool))))
 
-ensure-kustomize:
-	@echo "ensuring kustomize"
-	$(shell ./hack/tools.sh kustomize)
-
-ensure-kubectl:
-	@echo "ensuring kubectl"
-	$(shell ./hack/tools.sh kubectl)
-
-ensure-all:
-	@echo "ensuring all"
-	$(shell ./hack/tools.sh all)
+ensure-all: $(all-tool-dependencies)
 
 install-local-coverage-tools:
 	go get github.com/axw/gocov/gocov \
@@ -334,6 +309,7 @@ install-local-coverage-tools:
 
 .PHONY: all build test install manifests groupimports fmt vet tidy image \
 	binary docker-push lint generate yaml \
-	manager chaosfs chaosdaemon chaos-dashboard ensure-all \
+	$(all-tool-dependencies) install.sh \
+	manager chaosfs chaosdaemon chaos-dashboard \
 	dashboard dashboard-server-frontend gosec-scan \
 	proto bin/chaos-builder
