@@ -96,8 +96,8 @@ const Welcome = () => {
               onRequestClose={() => setIsTourOpen(false)}
               accentColor={theme.palette.primary.main}
               rounded={theme.shape.borderRadius}
-              prevButton={<ArrowBackOutlinedIcon />}
-              nextButton={<ArrowForwardOutlinedIcon />}
+              prevButton={<ArrowBackOutlinedIcon color="action" />}
+              nextButton={<ArrowForwardOutlinedIcon color="action" />}
               showCloseButton={false}
             />
           </Box>
