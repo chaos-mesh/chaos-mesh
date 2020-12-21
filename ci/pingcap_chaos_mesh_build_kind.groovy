@@ -140,6 +140,7 @@ def build(String name, String code) {
 								sh """
 								DOCKER_CLI_EXPERIMENTAL=enabled docker buildx create --use --name chaos-mesh-builder
 								make DOCKER_CACHE=1 CACHE_DIR=\$(pwd)/docker-cache image
+								make DOCKER_CACHE=1 CACHE_DIR=\$(pwd)/docker-cache image-e2e-helper
 								"""
 							}
 						}
