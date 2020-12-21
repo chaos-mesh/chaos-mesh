@@ -123,7 +123,6 @@ def build(String name, String code) {
 							ansiColor('xterm') {
 								sh """
 								tar xvf /docker-cache.tar.gz
-								cp -r docker-cache/* /docker-graph/
 								"""
 							}
 						}
@@ -133,6 +132,13 @@ def build(String name, String code) {
 								make e2e-build
 								mkdir output
 								cp -r /usr/local/bin/chaos-mesh-e2e output/bin
+								"""
+							}
+						}
+						stage('Build image') {
+							ansiColor('xterm') {
+								sh """
+								make DOCKER_CACHE=1 CACHE_DIR=/docker-cache image
 								"""
 							}
 						}
@@ -220,7 +226,7 @@ def call(BUILD_BRANCH, CREDENTIALS_ID) {
 			}
 		}
 
-		def GLOBALS = "SKIP_BUILD=y IMAGE_TAG=${GITHASH} GINKGO_NO_COLOR=y"
+		def GLOBALS = "SKIP_BUILD=y SKIP_IMAGE_BUILD=y IMAGE_TAG=${GITHASH} GINKGO_NO_COLOR=y"
 		def artifacts = "go/src/github.com/chaos-mesh/chaos-mesh/artifacts"
 		def builds = [:]
 		builds["E2E v1.12.10"] = {
