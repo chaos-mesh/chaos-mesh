@@ -26,9 +26,6 @@ WORKDIR /bin
 RUN curl -L https://github.com/chaos-mesh/toda/releases/download/v0.1.9/toda-linux-amd64.tar.gz | tar -xz
 RUN curl -L https://github.com/chaos-mesh/nsexec/releases/download/v0.1.5/nsexec-linux-amd64.tar.gz | tar -xz
 
-ARG HTTPS_PROXY
-ARG HTTP_PROXY
-
 RUN if [[ -n "$HTTP_PROXY" ]]; then yarn config set proxy $HTTP_PROXY; fi
 
 WORKDIR /src
