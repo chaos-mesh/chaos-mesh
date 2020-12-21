@@ -15,3 +15,7 @@ about: Something isn't working as expected
 **What did you expect to see?**
 
 **What did you see instead?**
+
+**Output of chaosctl**
+<!-- If it is related to networkchaos, stresschaos or iochaos, chaosctl would help maintainers better find the bug. -->
+<!-- See pkg/chaosctl/README.md for detail -->

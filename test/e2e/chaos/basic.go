@@ -32,10 +32,10 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/pkg/portforward"
 	e2econfig "github.com/chaos-mesh/chaos-mesh/test/e2e/config"
 	"github.com/chaos-mesh/chaos-mesh/test/e2e/e2econst"
 	"github.com/chaos-mesh/chaos-mesh/test/e2e/util"
-	"github.com/chaos-mesh/chaos-mesh/test/e2e/util/portforward"
 	"github.com/chaos-mesh/chaos-mesh/test/pkg/fixture"
 
 	// testcases
@@ -64,7 +64,7 @@ var _ = ginkgo.Describe("[Basic]", func() {
 		ctx, cancel := context.WithCancel(context.Background())
 		clientRawConfig, err := e2econfig.LoadClientRawConfig()
 		framework.ExpectNoError(err, "failed to load raw config")
-		fw, err = portforward.NewPortForwarder(ctx, e2econfig.NewSimpleRESTClientGetter(clientRawConfig))
+		fw, err = portforward.NewPortForwarder(ctx, e2econfig.NewSimpleRESTClientGetter(clientRawConfig), true)
 		framework.ExpectNoError(err, "failed to create port forwarder")
 		fwCancel = cancel
 		kubeCli = f.ClientSet
@@ -330,7 +330,7 @@ var _ = ginkgo.Describe("[Basic]", func() {
 			err = util.WaitDeploymentReady(name, ns, kubeCli)
 			framework.ExpectNoError(err, "wait network-peer deployment ready error")
 
-			_, err := getPod(kubeCli, ns, name)
+			_, err = getPod(kubeCli, ns, name)
 			framework.ExpectNoError(err, "select network-peer pod error")
 
 			_, port, _, err = portforward.ForwardOnePort(fw, ns, "svc/"+svc.Name, 8080)

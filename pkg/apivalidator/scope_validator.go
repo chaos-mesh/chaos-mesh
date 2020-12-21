@@ -18,6 +18,7 @@ import (
 
 	"github.com/go-playground/validator/v10"
 	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/validation"
 )
 
@@ -54,6 +55,40 @@ func MapSelectorsValid(fl validator.FieldLevel) bool {
 
 	for k := range ms {
 		if len(validation.IsQualifiedName(k)) != 0 {
+			return false
+		}
+	}
+
+	return true
+}
+
+// RequirementSelectorsValid can be used to check whether label requirement selectors is valid.
+func RequirementSelectorsValid(fl validator.FieldLevel) bool {
+	if fl.Field().IsNil() {
+		return true
+	}
+
+	rs, ok := fl.Field().Interface().([]metav1.LabelSelectorRequirement)
+	if !ok {
+		return false
+	}
+
+	for _, r := range rs {
+		if len(validation.IsQualifiedName(r.Key)) != 0 {
+			return false
+		}
+
+		switch r.Operator {
+		case metav1.LabelSelectorOpIn, metav1.LabelSelectorOpNotIn:
+			if len(r.Values) == 0 {
+				return false
+			}
+		case metav1.LabelSelectorOpExists, metav1.LabelSelectorOpDoesNotExist:
+			if len(r.Values) > 0 {
+				return false
+			}
+		default:
+			// unsupport operator
 			return false
 		}
 	}
