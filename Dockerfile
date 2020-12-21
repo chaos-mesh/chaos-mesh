@@ -39,13 +39,9 @@ RUN --mount=type=cache,target=/root/go/pkg \
     --mount=type=cache,target=/src/ui/node_modules \
     IMG_LDFLAGS=$LDFLAGS make binary
 
-FROM alpine:3.12
-
-RUN apk add --no-cache curl tar
-
 WORKDIR /bin
 
 RUN curl -L https://github.com/chaos-mesh/toda/releases/download/v0.1.9/toda-linux-amd64.tar.gz | tar -xz
 RUN curl -L https://github.com/chaos-mesh/nsexec/releases/download/v0.1.5/nsexec-linux-amd64.tar.gz | tar -xz
 
-COPY --from=go_build /src/bin /bin
+COPY /src/bin/* /bin
