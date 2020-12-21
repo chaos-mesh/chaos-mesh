@@ -191,7 +191,6 @@ def getChangeLogText() {
 def call(BUILD_BRANCH, CREDENTIALS_ID) {
 	timeout (time: 2, unit: 'HOURS') {
 
-	def GITHASH
 	def UCLOUD_OSS_URL = "http://pingcap-dev.hk.ufileos.com"
 	def BUILD_URL = "git@github.com:pingcap/chaos-mesh.git"
 	def PROJECT_DIR = "go/src/github.com/chaos-mesh/chaos-mesh"
@@ -218,8 +217,6 @@ def call(BUILD_BRANCH, CREDENTIALS_ID) {
 								url: "${BUILD_URL}",
 							]]
 						]
-
-						GITHASH = sh(returnStdout: true, script: "git rev-parse HEAD").trim()
 					}
 
 					stash excludes: "vendor/**,deploy/**", name: "chaos-mesh"
@@ -227,7 +224,7 @@ def call(BUILD_BRANCH, CREDENTIALS_ID) {
 			}
 		}
 
-		def GLOBALS = "SKIP_BUILD=y SKIP_IMAGE_BUILD=y IMAGE_TAG=${GITHASH} GINKGO_NO_COLOR=y"
+		def GLOBALS = "SKIP_BUILD=y SKIP_IMAGE_BUILD=y GINKGO_NO_COLOR=y"
 		def artifacts = "go/src/github.com/chaos-mesh/chaos-mesh/artifacts"
 		def builds = [:]
 		builds["E2E v1.12.10"] = {
