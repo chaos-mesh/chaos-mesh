@@ -138,6 +138,7 @@ def build(String name, String code) {
 						stage('Build image') {
 							ansiColor('xterm') {
 								sh """
+								DOCKER_CLI_EXPERIMENTAL=enabled docker buildx create --use --name chaos-mesh-builder
 								make DOCKER_CACHE=1 CACHE_DIR=/docker-cache image
 								"""
 							}

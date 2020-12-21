@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:experimental
 
-FROM debian:buster-slim AS go_build
+FROM debian:buster-slim
 
 ENV DEBIAN_FRONTEND noninteractive
 
