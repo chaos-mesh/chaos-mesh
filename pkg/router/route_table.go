@@ -21,8 +21,8 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 
+	"github.com/chaos-mesh/chaos-mesh/pkg/config"
 	"github.com/chaos-mesh/chaos-mesh/pkg/router/endpoint"
-	end "github.com/chaos-mesh/chaos-mesh/pkg/router/endpoint"
 )
 
 type routeEntry struct {
@@ -49,7 +49,7 @@ var routeTable map[reflect.Type]*routeEntry
 var log logr.Logger
 
 // Register registers an endpoint
-func Register(name string, obj runtime.Object, routeFunc func(runtime.Object) bool, newEndpoint end.NewEndpoint) {
+func Register(name string, obj runtime.Object, routeFunc func(runtime.Object) bool, newEndpoint endpoint.NewEndpoint) {
 	typ := reflect.TypeOf(obj)
 	_, ok := routeTable[typ]
 	if !ok {
@@ -68,11 +68,11 @@ func Register(name string, obj runtime.Object, routeFunc func(runtime.Object) bo
 	})
 }
 
-// SetupWithManager setups reconciler with manager
-func SetupWithManager(mgr ctrl.Manager) error {
+// SetupWithManagerAndConfigs setups reconciler with manager and controller configs
+func SetupWithManagerAndConfigs(mgr ctrl.Manager, cfg *config.ChaosControllerConfig) error {
 	for typ, end := range routeTable {
 		log.Info("setup reconciler with manager", "type", typ, "endpoint", end.Name)
-		reconciler := NewReconciler(end.Name, end.Object, mgr, end.Endpoints)
+		reconciler := NewReconciler(end.Name, end.Object, mgr, end.Endpoints, cfg.ClusterScoped, cfg.TargetNamespace)
 		err := reconciler.SetupWithManager(mgr)
 		if err != nil {
 			log.Error(err, "fail to setup reconciler with manager")
@@ -80,9 +80,12 @@ func SetupWithManager(mgr ctrl.Manager) error {
 			return err
 		}
 
-		ctrl.NewWebhookManagedBy(mgr).
+		if err := ctrl.NewWebhookManagedBy(mgr).
 			For(end.Object).
-			Complete()
+			Complete(); err != nil {
+			log.Error(err, "fail to setup webhook")
+			return err
+		}
 	}
 
 	return nil

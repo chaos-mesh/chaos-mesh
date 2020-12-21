@@ -18,6 +18,15 @@ import (
 	"text/template"
 )
 
+const implImport = `
+import (
+	"reflect"
+	"time"
+
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+)
+`
+
 const implTemplate = `
 const Kind{{.Type}} = "{{.Type}}"
 
@@ -97,6 +106,7 @@ func (in *{{.Type}}) GetChaos() *ChaosInstance {
 		Kind:      Kind{{.Type}},
 		StartTime: in.CreationTimestamp.Time,
 		Action:    "",
+		Status:    string(in.Status.Experiment.Phase),
 		UID:       string(in.UID),
 	}
 

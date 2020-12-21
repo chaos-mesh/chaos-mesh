@@ -38,7 +38,7 @@ PACKAGE_LIST := go list ./... | grep -vE "chaos-mesh/test|pkg/ptrace|zz_generate
 PACKAGE_DIRECTORIES := $(PACKAGE_LIST) | sed 's|github.com/chaos-mesh/chaos-mesh/||'
 
 # Produce CRDs that work back to Kubernetes 1.11 (no version conversion)
-CRD_OPTIONS ?= "crd:trivialVersions=true"
+CRD_OPTIONS ?= "crd:trivialVersions=true,preserveUnknownFields=false"
 
 # Get the currently used golang install path (in GOPATH/bin, unless GOBIN is set)
 ifeq (,$(shell go env GOBIN))
@@ -98,9 +98,6 @@ chaosdaemon:
 bin/pause: ./hack/pause.c
 	cc ./hack/pause.c -o bin/pause
 
-bin/suicide: ./hack/suicide.c
-	cc ./hack/suicide.c -o bin/suicide
-
 # Build manager binary
 manager:
 	$(GO) build -ldflags '$(LDFLAGS)' -o bin/chaos-controller-manager ./cmd/controller-manager/*.go
@@ -129,10 +126,14 @@ ui: yarn_dependencies
 	cd ui &&\
 	yarn build
 
-binary: chaosdaemon manager chaosfs chaos-dashboard bin/pause bin/suicide
+binary: chaosdaemon manager chaosfs chaos-dashboard bin/pause
 
 watchmaker:
 	$(CGOENV) go build -ldflags '$(LDFLAGS)' -o bin/watchmaker ./cmd/watchmaker/...
+
+# Build chaosctl
+chaosctl:
+	$(GO) build -ldflags '$(LDFLAGS)' -o bin/chaosctl ./cmd/chaosctl/*.go
 
 # Run against the configured Kubernetes cluster in ~/.kube/config
 run: generate fmt vet manifests
@@ -155,7 +156,7 @@ gosec-scan: $(GOBIN)/gosec
 	$(GOENV) $< ./api/... ./controllers/... ./pkg/... || echo "*** sec-scan failed: known-issues ***"
 
 groupimports: $(GOBIN)/goimports
-	$< -w -l -local github.com/chaos-mesh/chaos-mesh $$($(PACKAGE_DIRECTORIES))
+	$< -w -l -local github.com/chaos-mesh/chaos-mesh .
 
 failpoint-enable: $(GOBIN)/failpoint-ctl
 # Converting gofail failpoints...

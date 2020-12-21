@@ -4,10 +4,10 @@ import { RootState, useStoreDispatch } from 'store'
 import { getStateofExperiments, setNeedToRefreshExperiments } from 'slices/experiments'
 import { setAlert, setAlertOpen } from 'slices/globalStatus'
 
-import ConfirmDialog from 'components/ConfirmDialog'
+import ConfirmDialog from 'components-mui/ConfirmDialog'
 import { Experiment } from 'api/experiments.type'
 import ExperimentListItem from 'components/ExperimentListItem'
-import Loading from 'components/Loading'
+import Loading from 'components-mui/Loading'
 import T from 'components/T'
 import TuneIcon from '@material-ui/icons/Tune'
 import _groupBy from 'lodash.groupby'
@@ -38,7 +38,7 @@ export default function Experiments() {
     api.experiments
       .experiments()
       .then(({ data }) => setExperiments(data))
-      .catch(console.log)
+      .catch(console.error)
       .finally(() => setLoading(false))
   }
 
@@ -65,7 +65,7 @@ export default function Experiments() {
           )
         }
       })
-      .catch(console.log)
+      .catch(console.error)
   }
 
   // Get all experiments after mount
@@ -77,8 +77,7 @@ export default function Experiments() {
       fetchExperiments()
       dispatch(setNeedToRefreshExperiments(false))
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [needToRefreshExperiments])
+  }, [dispatch, needToRefreshExperiments])
 
   // Refresh every experiments' events after experiments state updated
   useEffect(() => {
@@ -127,7 +126,7 @@ export default function Experiments() {
         dispatch(getStateofExperiments())
         fetchExperiments()
       })
-      .catch(console.log)
+      .catch(console.error)
   }
 
   return (
@@ -175,7 +174,7 @@ export default function Experiments() {
         setOpen={setDialogOpen}
         title={selected.title}
         description={selected.description}
-        handleConfirm={handleExperiment(selected.action)}
+        onConfirm={handleExperiment(selected.action)}
       />
     </>
   )

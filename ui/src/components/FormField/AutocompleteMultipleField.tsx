@@ -1,65 +1,38 @@
 import { Box, Chip, TextField, TextFieldProps } from '@material-ui/core'
-import React, { useEffect, useRef, useState } from 'react'
 import { getIn, useFormikContext } from 'formik'
 
 import Autocomplete from '@material-ui/lab/Autocomplete'
-import { Experiment } from 'components/NewExperiment/types'
+import React from 'react'
 import T from 'components/T'
 
 interface AutocompleteMultipleFieldProps {
   options: string[]
-  onChangeCallback?: (labels: string[]) => void
 }
 
 const AutocompleteMultipleField: React.FC<AutocompleteMultipleFieldProps & TextFieldProps> = ({
   options,
-  onChangeCallback,
   ...props
 }) => {
-  const { values, setFieldValue } = useFormikContext<Experiment>()
+  const { values, setFieldValue } = useFormikContext()
 
-  const firstRenderRef = useRef(false) // This ref prevents to exec the callback function when labels are empty in the first render
-  const labelsRef = useRef(getIn(values, props.name!))
-  const [labels, _setLabels] = useState<string[]>(labelsRef.current)
-  const setLabels = (newVal: string[]) => {
-    labelsRef.current = newVal
-    _setLabels(labelsRef.current)
-  }
+  const name = props.name!
+  const labels: string[] = getIn(values, name)
+  const setLabels = (labels: string[]) => setFieldValue(name, labels)
 
-  // For performance consider, setFieldValue before compoennt unmount
-  useEffect(
-    () => () => setFieldValue(props.name!, labelsRef.current),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
-  )
-
-  const onChange = (_: any, newVal: string | string[] | null, reason: string) => {
+  const onChange = (_: any, newVal: string[], reason: string) => {
     if (reason === 'clear') {
       setLabels([])
 
       return
     }
 
-    if (newVal) {
-      setLabels(newVal as string[])
-    }
+    setLabels(newVal)
   }
-
-  useEffect(() => {
-    if (typeof onChangeCallback === 'function' && (labels.length > 0 || firstRenderRef.current)) {
-      onChangeCallback(labels)
-
-      if (!firstRenderRef.current) {
-        firstRenderRef.current = true
-      }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [labels])
 
   const onDelete = (val: string) => () => setLabels(labels.filter((d) => d !== val))
 
   return (
-    <Box mb={2}>
+    <Box mb={3}>
       <Autocomplete
         multiple
         options={options}

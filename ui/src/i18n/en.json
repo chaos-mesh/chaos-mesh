@@ -5,16 +5,16 @@
   },
   "newE": {
     "title": "New Experiment",
+    "titleStep1": "Choose a Target",
+    "titleStep2": "Fill the experiment info",
     "create": "Create a New Experiment",
     "steps": {
       "basic": "Basic",
       "scope": "Scope",
-      "target": "Target",
       "schedule": "Schedule"
     },
-    "loadFromExistingExperiments": "Load From Existing Experiments",
-    "loadFromArchives": "Load From Archives",
-    "loadFromYamlFile": "Load From YAML File",
+    "loadFrom": "Load from",
+    "loadFromYaml": "Load from YAML file",
     "basic": {
       "name": "Name",
       "nameHelper": "The experiment name",
@@ -42,12 +42,10 @@
       "kind": "Kind",
       "action": "Action",
       "pod": {
-        "title": "Pod Lifecycle",
-        "actionHelper": "Select a PodChaos action"
+        "title": "Pod Lifecycle"
       },
       "network": {
         "title": "Network",
-        "actionHelper": "Select a NetworkChaos action",
         "target": {
           "title": "Target",
           "podsPreview": "Target Pods Preview",
@@ -64,13 +62,12 @@
         "title": "Clock"
       },
       "stress": {
-        "title": "Stress CPU/Memory",
-        "actionHelper": "Select a StressChaos action"
+        "title": "Stress CPU/Memory"
       }
     },
     "schedule": {
       "tooltip": "Chaos Mesh use {cronv3} to define the schedule. View its doc for more details.",
-      "immediate": "Immediate",
+      "immediate": "Run immediately",
       "mustBeScheduled": "The chosen action must be scheduled",
       "cronHelper": "Use {crontabguru} to help generate the cron job and confirm what time it will run",
       "duration": "Duration",
@@ -124,46 +121,62 @@
   },
   "settings": {
     "title": "Settings",
-    "theme": "Theme",
-    "chooseTheme": "Choose theme",
-    "themeLight": "Light",
-    "themeDark": "Dark",
-    "language": "Language",
-    "chooseInterfaceLanguage": "Choose interface language",
-    "en": "English",
-    "zh": "Chinese"
+    "theme": {
+      "title": "Theme",
+      "choose": "Choose theme",
+      "light": "Light",
+      "dark": "Dark"
+    },
+    "lang": {
+      "title": "Language",
+      "choose": "Choose interface language",
+      "en": "English",
+      "zh": "Chinese"
+    },
+    "addToken": {
+      "prompt": "Enter the token (RBAC Authorization) to continue",
+      "title": "Add Token",
+      "name": "Name",
+      "nameHelper": "Please fill the token name",
+      "nameValidation": "The token name is required",
+      "token": "Token",
+      "tokenHelper": "Please fill the secret token",
+      "tokenValidation": "The token is required",
+      "deleteDesc": "The operation is irreversible"
+    }
   },
   "common": {
+    "other": "Other",
     "doc": "Documentation",
-    "back": "Back",
-    "next": "Next",
-    "finish": "Finish",
-    "reset": "Reset",
+    "confirm": "Confirm",
+    "cancel": "Cancel",
     "submit": "Submit",
     "upload": "Upload",
-    "advancedOptions": "Advanced Options",
-    "isKVHelperText": "Type key:value and end with a space to generate a key/value pair",
-    "multiOptions": "Support mutiple options",
-    "noOptions": "No options",
     "detail": "Detail",
     "report": "Report",
     "start": "Start",
     "pause": "Pause",
     "update": "Update",
+    "delete": "Delete",
     "status": "Status",
+    "use": "Use",
+    "using": "Using",
     "configuration": "Configuration",
-    "configured": "Configured",
-    "confirm": "Confirm",
-    "cancel": "Cancel",
+    "noOptions": "No options",
+    "multiOptions": "Support mutiple options",
+    "advancedOptions": "Advanced Options",
+    "isKVHelperText": "Type key:value and end with a space to generate a key/value pair",
+    "timeline": "Timeline",
+    "meta": "Meta",
+    "uuid": "UUID",
     "createSuccessfully": "Created successfully",
-    "importSuccessfully": "Imported successfully",
+    "loadSuccessfully": "Loaded successfully",
     "deleteSuccessfully": "Archived successfully",
     "startSuccessfully": "Started successfully",
     "pauseSuccessfully": "Paused successfully",
     "updateSuccessfully": "Updated successfully",
-    "timeline": "Timeline",
-    "meta": "Meta",
-    "uuid": "UUID"
+    "submitSuccessfully": "Submitted successfully",
+    "chooseNamespace": "Choose namespace"
   },
   "search": {
     "placeholder": "Search",
@@ -188,7 +201,7 @@
         "Kind": "Kind",
         "Pod": "Pod",
         "Namespace": "Namespace",
-        "Start Time": "Start Time" 
+        "Start Time": "Start Time"
       },
       "noResult": "No Result"
     }
@@ -198,6 +211,7 @@
     "annotations": "Annotations",
     "labelSelectors": "Label Selectors",
     "annotationsSelectors": "Annotation Selectors",
-    "phaseSelectors": "Phase Selectors"
+    "phaseSelectors": "Phase Selectors",
+    "namespaces": "Namespaces"
   }
 }

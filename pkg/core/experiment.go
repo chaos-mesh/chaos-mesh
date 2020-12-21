@@ -19,6 +19,8 @@ import (
 	"time"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // ExperimentStore defines operations for working with experiments.
@@ -109,11 +111,12 @@ type ScopeInfo struct {
 
 // SelectorInfo defines the selector options of the Experiment.
 type SelectorInfo struct {
-	NamespaceSelectors  []string          `json:"namespace_selectors" binding:"NamespaceSelectorsValid"`
-	LabelSelectors      map[string]string `json:"label_selectors" binding:"MapSelectorsValid"`
-	AnnotationSelectors map[string]string `json:"annotation_selectors" binding:"MapSelectorsValid"`
-	FieldSelectors      map[string]string `json:"field_selectors" binding:"MapSelectorsValid"`
-	PhaseSelector       []string          `json:"phase_selectors" binding:"PhaseSelectorsValid"`
+	NamespaceSelectors  []string                          `json:"namespace_selectors" binding:"NamespaceSelectorsValid"`
+	LabelSelectors      map[string]string                 `json:"label_selectors" binding:"MapSelectorsValid"`
+	ExpressionSelectors []metav1.LabelSelectorRequirement `json:"expression_selectors" binding:"RequirementSelectorsValid"`
+	AnnotationSelectors map[string]string                 `json:"annotation_selectors" binding:"MapSelectorsValid"`
+	FieldSelectors      map[string]string                 `json:"field_selectors" binding:"MapSelectorsValid"`
+	PhaseSelector       []string                          `json:"phase_selectors" binding:"PhaseSelectorsValid"`
 
 	// Pods is a map of string keys and a set values that used to select pods.
 	// The key defines the namespace which pods belong,
@@ -133,6 +136,8 @@ func (s *SelectorInfo) ParseSelector() v1alpha1.SelectorSpec {
 	for key, val := range s.LabelSelectors {
 		selector.LabelSelectors[key] = val
 	}
+
+	selector.ExpressionSelectors = append(selector.ExpressionSelectors, s.ExpressionSelectors...)
 
 	selector.AnnotationSelectors = make(map[string]string)
 	for key, val := range s.AnnotationSelectors {
@@ -157,13 +162,14 @@ func (s *SelectorInfo) ParseSelector() v1alpha1.SelectorSpec {
 
 // TargetInfo defines the information of target objects.
 type TargetInfo struct {
-	Kind         string            `json:"kind" binding:"required,oneof=PodChaos NetworkChaos IoChaos KernelChaos TimeChaos StressChaos"`
+	Kind         string            `json:"kind" binding:"required,oneof=PodChaos NetworkChaos IoChaos KernelChaos TimeChaos StressChaos DNSChaos"`
 	PodChaos     *PodChaosInfo     `json:"pod_chaos,omitempty" binding:"RequiredFieldEqual=Kind:PodChaos"`
 	NetworkChaos *NetworkChaosInfo `json:"network_chaos,omitempty" binding:"RequiredFieldEqual=Kind:NetworkChaos"`
 	IOChaos      *IOChaosInfo      `json:"io_chaos,omitempty" binding:"RequiredFieldEqual=Kind:IoChaos"`
 	KernelChaos  *KernelChaosInfo  `json:"kernel_chaos,omitempty" binding:"RequiredFieldEqual=Kind:KernelChaos"`
 	TimeChaos    *TimeChaosInfo    `json:"time_chaos,omitempty" binding:"RequiredFieldEqual=Kind:TimeChaos"`
 	StressChaos  *StressChaosInfo  `json:"stress_chaos,omitempty" binding:"RequiredFieldEqual=Kind:StressChaos"`
+	DNSChaos     *DNSChaosInfo     `json:"dns_chaos,omitempty" binding:"RequiredFieldEqual=Kind:DNSChaos"`
 }
 
 // SchedulerInfo defines the scheduler information.
@@ -180,26 +186,28 @@ type PodChaosInfo struct {
 
 // NetworkChaosInfo defines the basic information of network chaos for creating a new NetworkChaos.
 type NetworkChaosInfo struct {
-	Action      string                  `json:"action" binding:"oneof='' 'netem' 'delay' 'loss' 'duplicate' 'corrupt' 'partition' 'bandwidth'"`
-	Delay       *v1alpha1.DelaySpec     `json:"delay" binding:"RequiredFieldEqual=Action:delay"`
-	Loss        *v1alpha1.LossSpec      `json:"loss" binding:"RequiredFieldEqual=Action:loss"`
-	Duplicate   *v1alpha1.DuplicateSpec `json:"duplicate" binding:"RequiredFieldEqual=Action:duplicate"`
-	Corrupt     *v1alpha1.CorruptSpec   `json:"corrupt" binding:"RequiredFieldEqual=Action:corrupt"`
-	Bandwidth   *v1alpha1.BandwidthSpec `json:"bandwidth" binding:"RequiredFieldEqual=Action:bandwidth"`
-	Direction   string                  `json:"direction" binding:"oneof='' 'to' 'from' 'both'"`
-	TargetScope *ScopeInfo              `json:"target_scope"`
+	Action          string                  `json:"action" binding:"oneof='' 'netem' 'delay' 'loss' 'duplicate' 'corrupt' 'partition' 'bandwidth'"`
+	Delay           *v1alpha1.DelaySpec     `json:"delay" binding:"RequiredFieldEqual=Action:delay"`
+	Loss            *v1alpha1.LossSpec      `json:"loss" binding:"RequiredFieldEqual=Action:loss"`
+	Duplicate       *v1alpha1.DuplicateSpec `json:"duplicate" binding:"RequiredFieldEqual=Action:duplicate"`
+	Corrupt         *v1alpha1.CorruptSpec   `json:"corrupt" binding:"RequiredFieldEqual=Action:corrupt"`
+	Bandwidth       *v1alpha1.BandwidthSpec `json:"bandwidth" binding:"RequiredFieldEqual=Action:bandwidth"`
+	Direction       string                  `json:"direction" binding:"oneof='' 'to' 'from' 'both'"`
+	TargetScope     *ScopeInfo              `json:"target_scope"`
+	ExternalTargets []string                `json:"external_targets"`
 }
 
 // IOChaosInfo defines the basic information of io chaos for creating a new IOChaos.
 type IOChaosInfo struct {
-	Action     string                     `json:"action" binding:"oneof='' 'latency' 'fault' 'attrOverride'"`
-	Delay      string                     `json:"delay"`
-	Errno      uint32                     `json:"errno"`
-	Attr       *v1alpha1.AttrOverrideSpec `json:"attr"`
-	Path       string                     `json:"path"`
-	Percent    int                        `json:"percent"`
-	Methods    []v1alpha1.IoMethod        `json:"methods"`
-	VolumePath string                     `json:"volume_path"`
+	Action        string                     `json:"action" binding:"oneof='' 'latency' 'fault' 'attrOverride'"`
+	Delay         string                     `json:"delay"`
+	Errno         uint32                     `json:"errno"`
+	Attr          *v1alpha1.AttrOverrideSpec `json:"attr"`
+	Path          string                     `json:"path"`
+	Percent       int                        `json:"percent"`
+	Methods       []v1alpha1.IoMethod        `json:"methods"`
+	VolumePath    string                     `json:"volume_path"`
+	ContainerName string                     `json:"container_name"`
 }
 
 // KernelChaosInfo defines the basic information of kernel chaos for creating a new KernelChaos.
@@ -219,6 +227,12 @@ type StressChaosInfo struct {
 	Stressors         *v1alpha1.Stressors `json:"stressors"`
 	StressngStressors string              `json:"stressng_stressors,omitempty"`
 	ContainerName     *string             `json:"container_name,omitempty"`
+}
+
+// DNSChaosInfo defines the basic information of dns chaos for creating a new DNSChaos.
+type DNSChaosInfo struct {
+	Action string `json:"action" binding:"oneof='error' 'random'"`
+	Scope  string `json:"scope" binding:"oneof='outer' 'inner' 'all'"`
 }
 
 // ParsePodChaos Parse PodChaos JSON string into ExperimentYAMLDescription.

@@ -1,10 +1,13 @@
-import { FormikContextType } from 'formik'
-
 export interface ExperimentBasic {
   name: string
   namespace: string
   labels: object | string[]
   annotations: object | string[]
+}
+
+export interface ExperimentTargetPod {
+  action: 'pod-failure' | 'pod-kill' | 'container-kill'
+  container_name?: string
 }
 
 export interface ExperimentScope {
@@ -14,63 +17,58 @@ export interface ExperimentScope {
   phase_selectors: string[]
   mode: string
   value: string
-  pods: Record<string, string[]>
+  pods: Record<string, string[]> | string[]
 }
 
-export interface ExperimentTargetPod {
-  action: 'pod-failure' | 'pod-kill' | 'container-kill' | ''
-  container_name?: string
-}
-
-export interface ExperimentTargetNetworkBandwidth {
-  buffer: number
-  limit: number
-  minburst: number
-  peakrate: number
-  rate: string
-}
-
-export interface ExperimentTargetNetworkCorrupt {
+export interface ExperimentTargetNetworkLoss {
+  loss: string
   correlation: string
-  corrupt: string
 }
 
 export interface ExperimentTargetNetworkDelay {
   latency: string
-  correlation: string
   jitter: string
+  correlation: string
 }
 
 export interface ExperimentTargetNetworkDuplicate {
-  correlation: string
   duplicate: string
+  correlation: string
 }
 
-export interface ExperimentTargetNetworkLoss {
+export interface ExperimentTargetNetworkCorrupt {
+  corrupt: string
   correlation: string
-  loss: string
+}
+
+export interface ExperimentTargetNetworkBandwidth {
+  rate: string
+  limit: number
+  buffer: number
+  minburst: number
+  peakrate: number
 }
 
 export interface ExperimentTargetNetwork {
-  action: 'partition' | 'loss' | 'delay' | 'duplicate' | 'corrupt' | 'bandwidth' | ''
-  bandwidth: ExperimentTargetNetworkBandwidth
-  corrupt: ExperimentTargetNetworkCorrupt
+  action: 'partition' | 'loss' | 'delay' | 'duplicate' | 'corrupt' | 'bandwidth'
+  loss: ExperimentTargetNetworkLoss
   delay: ExperimentTargetNetworkDelay
   duplicate: ExperimentTargetNetworkDuplicate
-  loss: ExperimentTargetNetworkLoss
+  corrupt: ExperimentTargetNetworkCorrupt
+  bandwidth: ExperimentTargetNetworkBandwidth
   direction: 'from' | 'to' | 'both' | ''
-  target?: ExperimentScope
+  target_scope?: ExperimentScope
 }
 
 export interface ExperimentTargetIO {
-  action: 'latency' | 'fault' | 'attrOverride' | ''
-  delay: string | undefined
-  errno: number | undefined
-  attr: object | string[]
-  methods: string[]
+  action: 'latency' | 'fault' | 'attrOverride'
+  delay?: string
+  errno?: number
+  attr?: object | string[]
+  volume_path: string
   path: string
   percent: number
-  volume_path: string
+  methods: string[]
 }
 
 export interface CallchainFrame {
@@ -92,31 +90,40 @@ export interface ExperimentTargetKernel {
 }
 
 export interface ExperimentTargetTime {
+  time_offset: string
   clock_ids: string[]
   container_names: string[]
-  time_offset: string
 }
 
 export interface ExperimentTargetStress {
-  stressng_stressors: string
   stressors: {
-    cpu: {
+    cpu?: {
       workers: number
       load: number
       options: string[]
-    } | null
-    memory: {
+    }
+    memory?: {
       workers: number
       options: string[]
-    } | null
+    }
   }
+  stressng_stressors: string
   container_name: string
 }
 
-export type ExperimentKind = 'PodChaos' | 'NetworkChaos' | 'IoChaos' | 'KernelChaos' | 'TimeChaos' | 'StressChaos'
+export const kind = [
+  'PodChaos',
+  'NetworkChaos',
+  'IoChaos',
+  'KernelChaos',
+  'TimeChaos',
+  'StressChaos',
+  'DNSChaos',
+] as const
+export type ExperimentKind = typeof kind[number]
 
 export interface ExperimentTarget {
-  kind: ExperimentKind | ''
+  kind: ExperimentKind
   pod_chaos: ExperimentTargetPod
   network_chaos: ExperimentTargetNetwork
   io_chaos: ExperimentTargetIO
@@ -134,33 +141,4 @@ export interface Experiment extends ExperimentBasic {
   scope: ExperimentScope
   target: ExperimentTarget
   scheduler: ExperimentSchedule
-}
-
-export interface StepperState {
-  activeStep: number
-}
-
-export enum StepperType {
-  NEXT = 'NEXT',
-  BACK = 'BACK',
-  JUMP = 'JUMP',
-  RESET = 'RESET',
-}
-
-export type StepperAction = {
-  type: StepperType
-  payload?: number
-}
-
-type StepperDispatch = (action: StepperAction) => void
-
-export interface StepperContextProps {
-  state: StepperState
-  dispatch: StepperDispatch
-}
-
-export type FormikCtx = FormikContextType<Experiment>
-
-export type StepperFormTargetProps = {
-  handleActionChange?: (e: React.ChangeEvent<any>) => void
 }

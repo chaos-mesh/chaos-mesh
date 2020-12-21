@@ -30,7 +30,7 @@ const (
 	iptablesChainAlreadyExistErr = "iptables: Chain already exists."
 )
 
-func (s *daemonServer) SetIptablesChains(ctx context.Context, req *pb.IptablesChainsRequest) (*empty.Empty, error) {
+func (s *DaemonServer) SetIptablesChains(ctx context.Context, req *pb.IptablesChainsRequest) (*empty.Empty, error) {
 	log.Info("Set iptables chains", "request", req)
 
 	pid, err := s.crClient.GetPidFromContainerID(ctx, req.ContainerId)
@@ -93,9 +93,21 @@ func (iptables *iptablesClient) setIptablesChain(chain *pb.Chain) error {
 		return fmt.Errorf("unknown chain direction %d", chain.Direction)
 	}
 
+	protocolAndPort := chain.Protocol
+	if len(protocolAndPort) > 0 {
+		if len(chain.SourcePorts) > 0 {
+			protocolAndPort += " " + chain.SourcePorts
+		}
+
+		if len(chain.DestinationPorts) > 0 {
+			protocolAndPort += " " + chain.DestinationPorts
+		}
+	}
+
 	rules := []string{}
 	for _, ipset := range chain.Ipsets {
-		rules = append(rules, fmt.Sprintf("-A %s -m set --match-set %s %s -j %s -w 5", chain.Name, ipset, matchPart, chain.Target))
+		rules = append(rules, strings.TrimSpace(fmt.Sprintf("-A %s -m set --match-set %s %s -j %s -w 5 %s",
+			chain.Name, ipset, matchPart, chain.Target, protocolAndPort)))
 	}
 	err := iptables.createNewChain(&iptablesChain{
 		Name:  chain.Name,

@@ -38,7 +38,7 @@ type DB struct {
 func NewDBStore(lc fx.Lifecycle, conf *config.ChaosDashboardConfig) (*DB, error) {
 	gormDB, err := gorm.Open(conf.Database.Driver, conf.Database.Datasource)
 	if err != nil {
-		log.Error(err, "failed to open DB")
+		log.Error(err, "failed to open DB", "driver", conf.Database.Driver, "datasource", conf.Database.Datasource)
 		return nil, err
 	}
 

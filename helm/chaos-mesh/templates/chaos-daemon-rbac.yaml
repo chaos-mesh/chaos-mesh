@@ -1,0 +1,94 @@
+{{- if .Values.chaosDaemon.serviceAccount }}
+---
+kind: ServiceAccount
+apiVersion: v1
+metadata:
+  namespace: {{ .Release.Namespace }}
+  name: {{ .Values.chaosDaemon.serviceAccount }}
+  labels:
+    app.kubernetes.io/name: {{ template "chaos-mesh.name" . }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/component: chaos-daemon
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+"  "_" }}
+{{- end}}
+{{- if .Values.chaosDaemon.podSecurityPolicy }}
+---
+# roles
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: {{ .Release.Name }}-chaos-daemon-target-namespace
+  namespace: chaos-testing
+  labels:
+    app.kubernetes.io/name: {{ template "chaos-mesh.name" . }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/component: chaos-daemon
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+"  "_" }}
+subjects:
+  - kind: ServiceAccount
+    name: {{ .Values.chaosDaemon.serviceAccount }}
+    # apiGroup: rbac.authorization.k8s.io
+    namespace: {{ .Release.Namespace }}
+roleRef:
+  kind: ClusterRole
+  name: {{ .Release.Name }}-chaos-daemon-psp
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ .Release.Name }}-chaos-daemon-psp
+  labels:
+    app.kubernetes.io/name: {{ template "chaos-mesh.name" . }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/component: chaos-daemon
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+"  "_" }}
+rules:
+- apiGroups:
+  - policy
+  - extensions
+  resourceNames:
+  - {{ .Release.Name }}-chaos-daemon
+  resources:
+  - podsecuritypolicies
+  verbs:
+  - use
+---
+# Restricted DEFAULT policy
+# ( Default policy for all new services )
+apiVersion: policy/v1beta1
+kind: PodSecurityPolicy
+metadata:
+  name: {{ .Release.Name }}-chaos-daemon
+  labels:
+    app.kubernetes.io/name: {{ template "chaos-mesh.name" . }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/component: chaos-daemon
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+"  "_" }}
+spec:
+  privileged: false
+  allowPrivilegeEscalation: true
+  allowedCapabilities:
+    - '*'
+  hostNetwork: true
+  hostPorts:
+  - max: 65535
+    min: 0
+  hostIPC: true
+  hostPID: true
+  seLinux:
+    rule: RunAsAny
+  supplementalGroups:
+    rule: RunAsAny
+  runAsUser:
+    rule: RunAsAny
+  fsGroup:
+    rule: RunAsAny
+  volumes:
+  - '*'
+{{- end }}
+

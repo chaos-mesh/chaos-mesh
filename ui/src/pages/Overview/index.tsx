@@ -3,8 +3,8 @@ import React, { useEffect, useRef, useState } from 'react'
 import { Theme, createStyles, makeStyles } from '@material-ui/core/styles'
 
 import { Experiment } from 'api/experiments.type'
-import Loading from 'components/Loading'
-import PaperTop from 'components/PaperTop'
+import Loading from 'components-mui/Loading'
+import PaperTop from 'components-mui/PaperTop'
 import { RootState } from 'store'
 import StatusPanel from 'components/StatusPanel'
 import T from 'components/T'
@@ -36,7 +36,11 @@ export default function Overview() {
     api.experiments
       .experiments()
       .then(({ data }) => setExperiments(data))
-      .catch(console.log)
+      .catch((error) => {
+        console.error(error)
+
+        setExperiments([])
+      })
       .finally(() => setLoading(false))
   }
 

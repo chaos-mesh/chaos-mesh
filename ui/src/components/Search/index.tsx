@@ -17,7 +17,7 @@ import { RootState } from 'store'
 import SearchIcon from '@material-ui/icons/Search'
 import Separate from 'components/Separate'
 import T from 'components/T'
-import Tooltip from 'components/Tooltip'
+import Tooltip from 'components-mui/Tooltip'
 import _debounce from 'lodash.debounce'
 import api from 'api'
 import { assumeType } from 'lib/utils'
@@ -263,7 +263,7 @@ const Search: React.FC = () => {
           archives: data[2].data,
         })
       })
-      .catch(console.log)
+      .catch(console.error)
   }
 
   useEffect(() => {

@@ -18,6 +18,7 @@ import (
 	"net/http"
 
 	"github.com/chaos-mesh/chaos-mesh/controllers/metrics"
+	controllerCfg "github.com/chaos-mesh/chaos-mesh/pkg/config"
 	"github.com/chaos-mesh/chaos-mesh/pkg/webhook/config"
 	"github.com/chaos-mesh/chaos-mesh/pkg/webhook/inject"
 
@@ -32,13 +33,16 @@ var log = ctrl.Log.WithName("inject-webhook")
 
 // +kubebuilder:webhook:path=/inject-v1-pod,mutating=false,failurePolicy=fail,groups="",resources=pods,verbs=create;update,versions=v1,name=vpod.kb.io
 
+// PodInjector is pod template config injector
 type PodInjector struct {
-	client  client.Client
-	decoder *admission.Decoder
-	Config  *config.Config
-	Metrics *metrics.ChaosCollector
+	client        client.Client
+	decoder       *admission.Decoder
+	Config        *config.Config
+	ControllerCfg *controllerCfg.ChaosControllerConfig
+	Metrics       *metrics.ChaosCollector
 }
 
+// Handle is pod injector handler
 func (v *PodInjector) Handle(ctx context.Context, req admission.Request) admission.Response {
 	pod := &v1.Pod{}
 
@@ -50,15 +54,17 @@ func (v *PodInjector) Handle(ctx context.Context, req admission.Request) admissi
 	log.Info("Get request from pod:", "pod", pod)
 
 	return admission.Response{
-		AdmissionResponse: *inject.Inject(&req.AdmissionRequest, v.client, v.Config, v.Metrics),
+		AdmissionResponse: *inject.Inject(&req.AdmissionRequest, v.client, v.Config, v.ControllerCfg, v.Metrics),
 	}
 }
 
+// InjectClient is pod injector client
 func (v *PodInjector) InjectClient(c client.Client) error {
 	v.client = c
 	return nil
 }
 
+// InjectDecoder is pod injector decoder
 func (v *PodInjector) InjectDecoder(d *admission.Decoder) error {
 	v.decoder = d
 	return nil

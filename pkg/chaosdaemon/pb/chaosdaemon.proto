@@ -8,7 +8,7 @@ service ChaosDaemon {
   rpc SetTcs(TcsRequest) returns (google.protobuf.Empty) {}
 
   rpc FlushIPSets(IPSetsRequest) returns (google.protobuf.Empty) {}
-  
+
   rpc SetIptablesChains(IptablesChainsRequest) returns (google.protobuf.Empty) {}
 
   rpc SetTimeOffset(TimeRequest) returns (google.protobuf.Empty) {}
@@ -133,6 +133,9 @@ message Chain {
   Direction direction = 2;
   repeated string ipsets = 3;
   string target = 4;
+  string protocol = 5;
+  string source_ports = 6;
+  string destination_ports = 7;
 }
 
 message TimeRequest {
@@ -187,6 +190,7 @@ message ApplyIoChaosResponse {
 message TcsRequest {
   repeated Tc tcs = 1;
   string container_id = 2;
+  string device = 3;
 }
 
 message Tc {
@@ -198,6 +202,9 @@ message Tc {
   Netem netem = 2;
   Tbf tbf = 3;
   string ipset = 4;
+  string protocol = 5;
+  string source_port = 6;
+  string egress_port = 7;
 }
 
 message SetDNSServerRequest {

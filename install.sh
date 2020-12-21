@@ -39,6 +39,7 @@ FLAGS:
         --local-registry     Deploy local docker registry in local Kubernetes cluster
         --template           Locally render templates
         --k3s                Install chaos-mesh in k3s environment
+        --microk8s           Install chaos-mesh in microk8s environment
         --host-network       Install chaos-mesh using hostNetwork
 OPTIONS:
     -v, --version            Version of chaos-mesh, default value: latest
@@ -80,6 +81,7 @@ main() {
     local template=false
     local install_dependency_only=false
     local k3s=false
+    local microk8s=false
     local host_network=false
     local docker_registry="docker.io"
 
@@ -193,6 +195,10 @@ main() {
                 k3s=true
                 shift
                 ;;
+            --microk8s)
+                microk8s=true
+                shift
+                ;;
             --host-network)
                 host_network=true
                 shift
@@ -233,12 +239,16 @@ main() {
         runtime="containerd"
     fi
 
+    if [ "${microk8s}" == "true" ]; then
+        runtime="containerd"
+    fi
+
     if [ "${crd}" == "" ]; then
         crd="https://mirrors.chaos-mesh.org/${cm_version}/crd.yaml"
     fi
     if $template; then
         ensure gen_crd_manifests "${crd}"
-        ensure gen_chaos_mesh_manifests "${runtime}" "${k3s}" "${cm_version}" "${timezone}" "${host_network}" "${docker_registry}"
+        ensure gen_chaos_mesh_manifests "${runtime}" "${k3s}" "${cm_version}" "${timezone}" "${host_network}" "${docker_registry}" "${microk8s}"
         exit 0
     fi
 
@@ -259,7 +269,7 @@ main() {
     fi
 
     check_kubernetes
-    install_chaos_mesh "${release_name}" "${namespace}" "${local_kube}" ${force_chaos_mesh} ${docker_mirror} "${crd}" "${runtime}" "${k3s}" "${cm_version}" "${timezone}" "${docker_registry}"
+    install_chaos_mesh "${release_name}" "${namespace}" "${local_kube}" ${force_chaos_mesh} ${docker_mirror} "${crd}" "${runtime}" "${k3s}" "${cm_version}" "${timezone}" "${docker_registry}" "${microk8s}"
     ensure_pods_ready "${namespace}" "app.kubernetes.io/component=controller-manager" 100
     ensure_pods_ready "${namespace}" "app.kubernetes.io/component=chaos-daemon" 100
     ensure_pods_ready "${namespace}" "app.kubernetes.io/component=chaos-dashboard" 100
@@ -616,6 +626,7 @@ install_chaos_mesh() {
     local version=$9
     local timezone=${10}
     local docker_registry=${11}
+    local microk8s=${12}
     printf "Install Chaos Mesh %s\n" "${release_name}"
 
     local chaos_mesh_image="${docker_registry}/pingcap/chaos-mesh:${version}"
@@ -633,8 +644,8 @@ install_chaos_mesh() {
         fi
     fi
 
-    gen_crd_manifests "${crd}" | kubectl apply -f - || exit 1
-    gen_chaos_mesh_manifests "${runtime}" "${k3s}" "${version}" "${timezone}" "${host_network}" "${docker_registry}" | kubectl apply -f - || exit 1
+    gen_crd_manifests "${crd}" | kubectl apply --validate=false -f - || exit 1
+    gen_chaos_mesh_manifests "${runtime}" "${k3s}" "${version}" "${timezone}" "${host_network}" "${docker_registry}" "${microk8s}" | kubectl apply -f - || exit 1
 }
 
 version_lt() {
@@ -824,6 +835,7 @@ gen_chaos_mesh_manifests() {
     local timezone=$4
     local host_network=$5
     local docker_registry=$6
+    local microk8s=$7
     local socketPath="/var/run/docker.sock"
     local mountPath="/var/run/docker.sock"
     if [ "${runtime}" == "containerd" ]; then
@@ -833,6 +845,11 @@ gen_chaos_mesh_manifests() {
 
     if [ "${k3s}" == "true" ]; then
         socketPath="/run/k3s/containerd/containerd.sock"
+        mountPath="/run/containerd/containerd.sock"
+    fi
+
+    if [ "${microk8s}" == "true" ]; then
+        socketPath="/var/snap/microk8s/common/run/containerd.sock"
         mountPath="/run/containerd/containerd.sock"
     fi
 
@@ -884,6 +901,17 @@ kind: Namespace
 metadata:
   name: chaos-testing
 ---
+# Source: chaos-mesh/templates/chaos-daemon-rbac.yaml
+kind: ServiceAccount
+apiVersion: v1
+metadata:
+  namespace: chaos-testing
+  name: chaos-daemon
+  labels:
+    app.kubernetes.io/name: chaos-mesh
+    app.kubernetes.io/instance: chaos-mesh
+    app.kubernetes.io/component: chaos-daemon
+---
 # Source: chaos-mesh/templates/controller-manager-rbac.yaml
 kind: ServiceAccount
 apiVersion: v1
@@ -915,12 +943,15 @@ data:
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: chaos-mesh:chaos-controller-manager-target-namespace
+  name: chaos-mesh-chaos-controller-manager-target-namespace
   labels:
     app.kubernetes.io/name: chaos-mesh
     app.kubernetes.io/instance: chaos-mesh
     app.kubernetes.io/component: controller-manager
 rules:
+  - apiGroups: [ "" ]
+    resources: [ "endpoints" ]
+    verbs: [ "get", "list", "watch" ]
   - apiGroups: [ "" ]
     resources: [ "pods" ]
     verbs: [ "get", "list", "watch", "delete", "update" ]
@@ -943,7 +974,7 @@ rules:
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: chaos-mesh:chaos-controller-manager-cluster-level
+  name: chaos-mesh-chaos-controller-manager-cluster-level
   labels:
     app.kubernetes.io/name: chaos-mesh
     app.kubernetes.io/instance: chaos-mesh
@@ -961,7 +992,7 @@ rules:
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: chaos-mesh:chaos-controller-manager-cluster-level
+  name: chaos-mesh-chaos-controller-manager-cluster-level
   labels:
     app.kubernetes.io/name: chaos-mesh
     app.kubernetes.io/instance: chaos-mesh
@@ -969,7 +1000,7 @@ metadata:
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: chaos-mesh:chaos-controller-manager-cluster-level
+  name: chaos-mesh-chaos-controller-manager-cluster-level
 subjects:
   - kind: ServiceAccount
     name: chaos-controller-manager
@@ -979,7 +1010,7 @@ subjects:
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: chaos-mesh:chaos-controller-manager-target-namespace
+  name: chaos-mesh-chaos-controller-manager-target-namespace
   namespace: chaos-testing
   labels:
     app.kubernetes.io/name: chaos-mesh
@@ -988,7 +1019,7 @@ metadata:
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: chaos-mesh:chaos-controller-manager-target-namespace
+  name: chaos-mesh-chaos-controller-manager-target-namespace
 subjects:
   - kind: ServiceAccount
     name: chaos-controller-manager
@@ -998,7 +1029,7 @@ subjects:
 kind: Role
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: chaos-mesh:chaos-controller-manager-control-plane
+  name: chaos-mesh-chaos-controller-manager-control-plane
   namespace: chaos-testing
   labels:
     app.kubernetes.io/name: chaos-mesh
@@ -1014,7 +1045,7 @@ rules:
 kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: chaos-mesh:chaos-controller-manager-control-plane
+  name: chaos-mesh-chaos-controller-manager-control-plane
   namespace: chaos-testing
   labels:
     app.kubernetes.io/name: chaos-mesh
@@ -1023,11 +1054,36 @@ metadata:
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
-  name: chaos-mesh:chaos-controller-manager-control-plane
+  name: chaos-mesh-chaos-controller-manager-control-plane
 subjects:
   - kind: ServiceAccount
     name: chaos-controller-manager
     namespace: chaos-testing
+---
+# Source: chaos-mesh/templates/chaos-daemon-service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: chaos-testing
+  name: chaos-daemon
+  labels:
+    app.kubernetes.io/name: chaos-mesh
+    app.kubernetes.io/instance: chaos-mesh
+    app.kubernetes.io/component: chaos-daemon
+spec:
+  clusterIP: None
+  ports:
+    - name: grpc
+      port: 31767
+      targetPort: grpc
+      protocol: TCP
+    - name: http
+      port: 31766
+      targetPort: http
+      protocol: TCP
+  selector:
+    app.kubernetes.io/component: chaos-daemon
+    app.kubernetes.io/instance: chaos-mesh
 ---
 # Source: chaos-mesh/templates/chaos-dashboard-deployment.yaml
 apiVersion: v1
@@ -1104,8 +1160,10 @@ spec:
         app.kubernetes.io/component: chaos-daemon
     spec:
       hostNetwork: ${host_network}
+      serviceAccount: chaos-daemon
       hostIPC: true
       hostPID: true
+      priorityClassName: 
       containers:
         - name: chaos-daemon
           image: localhost:5000/pingcap/chaos-daemon:${VERSION_TAG}
@@ -1177,6 +1235,7 @@ spec:
         app.kubernetes.io/component: chaos-dashboard
     spec:
       serviceAccount: chaos-controller-manager
+      priorityClassName: 
       containers:
         - name: chaos-dashboard
           image: localhost:5000/pingcap/chaos-dashboard:${VERSION_TAG}
@@ -1203,6 +1262,8 @@ spec:
               value: chaos-testing
             - name: CLUSTER_SCOPED
               value: "true"
+            - name: SECURITY_MODE
+              value: "false"
           volumeMounts:
             - name: storage-volume
               mountPath: /data
@@ -1242,6 +1303,7 @@ spec:
     spec:
       hostNetwork: ${host_network}
       serviceAccount: chaos-controller-manager
+      priorityClassName: 
       containers:
       - name: chaos-mesh
         image: localhost:5000/pingcap/chaos-mesh:${VERSION_TAG}
@@ -1262,6 +1324,8 @@ spec:
             valueFrom:
               fieldRef:
                 fieldPath: metadata.namespace
+          - name: ALLOW_HOST_NETWORK_TESTING
+            value: "false"
           - name: TARGET_NAMESPACE
             value: chaos-testing
           - name: CLUSTER_SCOPED
@@ -1486,6 +1550,24 @@ webhooks:
           - UPDATE
         resources:
           - dnschaos
+  - clientConfig:
+      caBundle: "${CA_BUNDLE}"
+      service:
+        name: chaos-mesh-controller-manager
+        namespace: chaos-testing
+        path: /mutate-chaos-mesh-org-v1alpha1-jvmchaos
+    failurePolicy: Fail
+    name: mjvmchaos.kb.io
+    rules:
+      - apiGroups:
+          - chaos-mesh.org
+        apiVersions:
+          - v1alpha1
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - jvmchaos
 ---
 # Source: chaos-mesh/templates/webhook-configuration.yaml
 apiVersion: admissionregistration.k8s.io/v1beta1
@@ -1641,6 +1723,24 @@ webhooks:
           - UPDATE
         resources:
           - dnschaos
+  - clientConfig:
+      caBundle: "${CA_BUNDLE}"
+      service:
+        name: chaos-mesh-controller-manager
+        namespace: chaos-testing
+        path: /validate-chaos-mesh-org-v1alpha1-jvmchaos
+    failurePolicy: Fail
+    name: vjvmchaos.kb.io
+    rules:
+      - apiGroups:
+          - chaos-mesh.org
+        apiVersions:
+          - v1alpha1
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - jvmchaos
 EOF
     # chaos-mesh.yaml end
 }

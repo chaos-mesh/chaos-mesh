@@ -52,8 +52,6 @@ func Read(pid int) ([]Entry, error) {
 
 		if len(sections) > 5 {
 			path = sections[len(sections)-1]
-		} else {
-			path = ""
 		}
 
 		addresses := strings.Split(sections[0], "-")

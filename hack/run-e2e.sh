@@ -78,6 +78,15 @@ function e2e::image_load() {
         for image in ${images[@]}; do
             $KIND_BIN load docker-image --name $CLUSTER ${DOCKER_REGISTRY}/$image:$IMAGE_TAG --nodes $(hack::join ',' ${nodes[@]})
         done
+
+        # bypassing docker pull rate limit inner the kind container: kindest/node has no credentials
+        # pingcap/coredns:latest and nginx:latest is required for test
+        # we suppose that you could pull this image on your host docker
+        echo "info: load images pingcap/coredns:latest and nginx:latest"
+        docker pull pingcap/coredns:latest
+        docker pull nginx:latest
+        $KIND_BIN load docker-image --name $CLUSTER pingcap/coredns:latest --nodes $(hack::join ',' ${nodes[@]})
+        $KIND_BIN load docker-image --name $CLUSTER nginx:latest --nodes $(hack::join ',' ${nodes[@]})
     fi
 }
 
@@ -153,6 +162,7 @@ e2e_args=(
     --e2e-image="${DOCKER_REGISTRY}/pingcap/e2e-helper:${IMAGE_TAG}"
     --chaos-fs-image="${DOCKER_REGISTRY}/pingcap/chaos-fs:${IMAGE_TAG}"
     --chaos-scripts-image="${DOCKER_REGISTRY}/pingcap/chaos-scripts:${IMAGE_TAG}"
+    --install-chaos-mesh
 )
 
 if [ -n "$REPORT_DIR" ]; then

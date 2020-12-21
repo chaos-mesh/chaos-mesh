@@ -8,8 +8,8 @@ import ArchiveDuration from 'components/ArchiveDuration'
 import ArchiveNumberOf from 'components/ArchiveNumberOf'
 import EventsTable from 'components/EventsTable'
 import ExperimentConfiguration from 'components/ExperimentConfiguration'
-import Loading from 'components/Loading'
-import PaperTop from 'components/PaperTop'
+import Loading from 'components-mui/Loading'
+import PaperTop from 'components-mui/PaperTop'
 import T from 'components/T'
 import api from 'api'
 import { useParams } from 'react-router-dom'
@@ -47,7 +47,7 @@ const ArchiveReport: React.FC = () => {
   useEffect(() => {
     Promise.all([fetchDetail(), fetchReport()])
       .then((_) => setLoading(false))
-      .catch(console.log)
+      .catch(console.error)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
@@ -70,7 +70,7 @@ const ArchiveReport: React.FC = () => {
 
               <Grid item xs={12}>
                 <Paper variant="outlined">
-                  <PaperTop title="Configuration" />
+                  <PaperTop title={T('common.configuration')} />
                   <Box p={3}>
                     <ExperimentConfiguration experimentDetail={detail} />
                   </Box>
@@ -79,7 +79,7 @@ const ArchiveReport: React.FC = () => {
 
               <Grid item xs={12}>
                 <Paper variant="outlined">
-                  <PaperTop title="Affected Pods" />
+                  <PaperTop title={T('newE.scope.affectedPods')} />
                   <AffectedPods pods={affectedPods} />
                 </Paper>
               </Grid>

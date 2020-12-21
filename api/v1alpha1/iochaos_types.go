@@ -78,7 +78,7 @@ type IoChaosSpec struct {
 	// Methods defines the I/O methods for injecting I/O chaos action.
 	// default: all I/O methods.
 	// +optional
-	Methods []IoMethod `json:"methods,omitempty"`
+	Methods []IoMethod `json:"methods,omitempty" faker:"ioMethods"`
 
 	// Percent defines the percentage of injection errors and provides a number from 0-100.
 	// default: 100.
@@ -87,6 +87,10 @@ type IoChaosSpec struct {
 
 	// VolumePath represents the mount path of injected volume
 	VolumePath string `json:"volumePath"`
+
+	// ContainerName indicates the target container to inject iochaos in
+	// +optional
+	ContainerName *string `json:"containerName,omitempty"`
 
 	// Scheduler defines some schedule rules to
 	// control the running time of the chaos experiment about pods.

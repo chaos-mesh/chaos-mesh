@@ -5,8 +5,8 @@ import { Theme, createStyles, makeStyles } from '@material-ui/core/styles'
 
 import BlurLinearIcon from '@material-ui/icons/BlurLinear'
 import { Event } from 'api/events.type'
-import Loading from 'components/Loading'
-import PaperTop from 'components/PaperTop'
+import Loading from 'components-mui/Loading'
+import PaperTop from 'components-mui/PaperTop'
 import { RootState } from 'store'
 import T from 'components/T'
 import api from 'api'
@@ -45,7 +45,7 @@ export default function Events() {
     api.events
       .events()
       .then(({ data }) => setEvents(data))
-      .catch(console.log)
+      .catch(console.error)
       .finally(() => {
         setLoading(false)
       })

@@ -34,6 +34,7 @@ spec:
     {{- if .Values.controllerManager.serviceAccount }}
       serviceAccount: {{ .Values.controllerManager.serviceAccount }}
     {{- end }}
+      priorityClassName: {{ .Values.controllerManager.priorityClassName}}
       containers:
       - name: chaos-mesh
         image: {{ .Values.controllerManager.image }}
@@ -51,6 +52,8 @@ spec:
             valueFrom:
               fieldRef:
                 fieldPath: metadata.namespace
+          - name: ALLOW_HOST_NETWORK_TESTING
+            value: "{{ .Values.controllerManager.allowHostNetworkTesting }}"
           - name: TARGET_NAMESPACE
             value: {{ .Values.controllerManager.targetNamespace }}
           - name: CLUSTER_SCOPED

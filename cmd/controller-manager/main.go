@@ -20,10 +20,9 @@ import (
 	"os"
 	"time"
 
-	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	chaosmeshv1alpha1 "github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	apiWebhook "github.com/chaos-mesh/chaos-mesh/api/webhook"
-	"github.com/chaos-mesh/chaos-mesh/controllers/common"
+	ccfg "github.com/chaos-mesh/chaos-mesh/controllers/config"
 	"github.com/chaos-mesh/chaos-mesh/controllers/metrics"
 	"github.com/chaos-mesh/chaos-mesh/controllers/podiochaos"
 	"github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos"
@@ -37,6 +36,7 @@ import (
 	_ "github.com/chaos-mesh/chaos-mesh/controllers/dnschaos"
 	_ "github.com/chaos-mesh/chaos-mesh/controllers/httpchaos"
 	_ "github.com/chaos-mesh/chaos-mesh/controllers/iochaos"
+	_ "github.com/chaos-mesh/chaos-mesh/controllers/jvmchaos"
 	_ "github.com/chaos-mesh/chaos-mesh/controllers/kernelchaos"
 	_ "github.com/chaos-mesh/chaos-mesh/controllers/networkchaos/partition"
 	_ "github.com/chaos-mesh/chaos-mesh/controllers/networkchaos/trafficcontrol"
@@ -90,23 +90,23 @@ func main() {
 	}
 
 	// set RPCTimeout config
-	utils.RPCTimeout = common.ControllerCfg.RPCTimeout
+	utils.RPCTimeout = ccfg.ControllerCfg.RPCTimeout
 
-	ctrl.SetLogger(zap.Logger(true))
+	ctrl.SetLogger(zap.New(zap.UseDevMode(true)))
 
 	options := ctrl.Options{
 		Scheme:             scheme,
-		MetricsBindAddress: common.ControllerCfg.MetricsAddr,
-		LeaderElection:     common.ControllerCfg.EnableLeaderElection,
+		MetricsBindAddress: ccfg.ControllerCfg.MetricsAddr,
+		LeaderElection:     ccfg.ControllerCfg.EnableLeaderElection,
 		Port:               9443,
 	}
 
-	if common.ControllerCfg.ClusterScoped {
+	if ccfg.ControllerCfg.ClusterScoped {
 		setupLog.Info("Chaos controller manager is running in cluster scoped mode.")
 		// will not specific a certain namespace
 	} else {
-		setupLog.Info("Chaos controller manager is running in namespace scoped mode.", "targetNamespace", common.ControllerCfg.TargetNamespace)
-		options.Namespace = common.ControllerCfg.TargetNamespace
+		setupLog.Info("Chaos controller manager is running in namespace scoped mode.", "targetNamespace", ccfg.ControllerCfg.TargetNamespace)
+		options.Namespace = ccfg.ControllerCfg.TargetNamespace
 	}
 
 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), options)
@@ -115,7 +115,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	err = router.SetupWithManager(mgr)
+	err = router.SetupWithManagerAndConfigs(mgr, ccfg.ControllerCfg)
 	if err != nil {
 		setupLog.Error(err, "fail to setup with manager")
 		os.Exit(1)
@@ -123,7 +123,7 @@ func main() {
 
 	// We only setup webhook for podiochaos, and the logic of applying chaos are in the mutation
 	// webhook, because we need to get the running result synchronously in io chaos reconciler
-	v1alpha1.RegisterPodIoHandler(&podiochaos.Handler{
+	chaosmeshv1alpha1.RegisterPodIoHandler(&podiochaos.Handler{
 		Client: mgr.GetClient(),
 		Log:    ctrl.Log.WithName("handler").WithName("PodIOChaos"),
 	})
@@ -134,10 +134,11 @@ func main() {
 
 	// We only setup webhook for podnetworkchaos, and the logic of applying chaos are in the validation
 	// webhook, because we need to get the running result synchronously in network chaos reconciler
-	v1alpha1.RegisterRawPodNetworkHandler(&podnetworkchaos.Handler{
-		Client: mgr.GetClient(),
-		Reader: mgr.GetAPIReader(),
-		Log:    ctrl.Log.WithName("handler").WithName("PodNetworkChaos"),
+	chaosmeshv1alpha1.RegisterRawPodNetworkHandler(&podnetworkchaos.Handler{
+		Client:                  mgr.GetClient(),
+		Reader:                  mgr.GetAPIReader(),
+		Log:                     ctrl.Log.WithName("handler").WithName("PodNetworkChaos"),
+		AllowHostNetworkTesting: ccfg.ControllerCfg.AllowHostNetworkTesting,
 	})
 	if err = (&chaosmeshv1alpha1.PodNetworkChaos{}).SetupWebhookWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create webhook", "webhook", "PodNetworkChaos")
@@ -149,25 +150,25 @@ func main() {
 
 	setupLog.Info("Setting up webhook server")
 	hookServer := mgr.GetWebhookServer()
-	hookServer.CertDir = common.ControllerCfg.CertsDir
+	hookServer.CertDir = ccfg.ControllerCfg.CertsDir
 	conf := config.NewConfigWatcherConf()
 
 	stopCh := ctrl.SetupSignalHandler()
 
-	if common.ControllerCfg.PprofAddr != "0" {
+	if ccfg.ControllerCfg.PprofAddr != "0" {
 		go func() {
-			if err := http.ListenAndServe(common.ControllerCfg.PprofAddr, nil); err != nil {
+			if err := http.ListenAndServe(ccfg.ControllerCfg.PprofAddr, nil); err != nil {
 				setupLog.Error(err, "unable to start pprof server")
 				os.Exit(1)
 			}
 		}()
 	}
 
-	if err = common.ControllerCfg.WatcherConfig.Verify(); err != nil {
+	if err = ccfg.ControllerCfg.WatcherConfig.Verify(); err != nil {
 		setupLog.Error(err, "invalid environment configuration")
 		os.Exit(1)
 	}
-	configWatcher, err := watcher.New(*common.ControllerCfg.WatcherConfig, metricsCollector)
+	configWatcher, err := watcher.New(*ccfg.ControllerCfg.WatcherConfig, metricsCollector)
 	if err != nil {
 		setupLog.Error(err, "unable to create config watcher")
 		os.Exit(1)
@@ -176,8 +177,9 @@ func main() {
 	watchConfig(configWatcher, conf, stopCh)
 	hookServer.Register("/inject-v1-pod", &webhook.Admission{
 		Handler: &apiWebhook.PodInjector{
-			Config:  conf,
-			Metrics: metricsCollector,
+			Config:        conf,
+			ControllerCfg: ccfg.ControllerCfg,
+			Metrics:       metricsCollector,
 		}},
 	)
 

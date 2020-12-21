@@ -3,9 +3,8 @@ import React, { useEffect, useState } from 'react'
 
 import { Archive } from 'api/archives.type'
 import ArchiveOutlinedIcon from '@material-ui/icons/ArchiveOutlined'
-import ConfirmDialog from 'components/ConfirmDialog'
 import ExperimentListItem from 'components/ExperimentListItem'
-import Loading from 'components/Loading'
+import Loading from 'components-mui/Loading'
 import T from 'components/T'
 import _groupBy from 'lodash.groupby'
 import api from 'api'
@@ -16,13 +15,6 @@ export default function Archives() {
 
   const [loading, setLoading] = useState(false)
   const [archives, setArchives] = useState<Archive[] | null>(null)
-  const [selected, setSelected] = useState({
-    uuid: '',
-    title: '',
-    description: '',
-    action: 'recover',
-  })
-  const [dialogOpen, setDialogOpen] = useState(false)
 
   const fetchArchives = () => {
     setLoading(true)
@@ -30,23 +22,13 @@ export default function Archives() {
     api.archives
       .archives()
       .then(({ data }) => setArchives(data))
-      .catch(console.log)
+      .catch(console.error)
       .finally(() => {
         setLoading(false)
       })
   }
 
   useEffect(fetchArchives, [])
-
-  const handleArchive = (action: string) => () => {
-    switch (action) {
-      case 'recover':
-        break
-
-      default:
-        break
-    }
-  }
 
   return (
     <>
@@ -66,8 +48,8 @@ export default function Archives() {
                       <ExperimentListItem
                         experiment={e}
                         isArchive
-                        handleSelect={setSelected}
-                        handleDialogOpen={setDialogOpen}
+                        handleSelect={() => {}}
+                        handleDialogOpen={() => {}}
                         intl={intl}
                       />
                     </Grid>
@@ -88,14 +70,6 @@ export default function Archives() {
       )}
 
       {loading && <Loading />}
-
-      <ConfirmDialog
-        open={dialogOpen}
-        setOpen={setDialogOpen}
-        title={selected.title}
-        description={selected.description}
-        handleConfirm={handleArchive(selected.action)}
-      />
     </>
   )
 }

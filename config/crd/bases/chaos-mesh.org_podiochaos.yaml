@@ -14,6 +14,7 @@ spec:
     listKind: PodIoChaosList
     plural: podiochaos
     singular: podiochaos
+  preserveUnknownFields: false
   scope: Namespaced
   validation:
     openAPIV3Schema:
@@ -149,6 +150,10 @@ spec:
                 - type
                 type: object
               type: array
+            container:
+              description: 'TODO: support multiple different container to inject in
+                one pod'
+              type: string
             pid:
               description: Pid represents a running toda process id
               format: int64

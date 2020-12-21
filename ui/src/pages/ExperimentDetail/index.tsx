@@ -9,13 +9,13 @@ import { useHistory, useParams } from 'react-router-dom'
 import { Ace } from 'ace-builds'
 import Alert from '@material-ui/lab/Alert'
 import ArchiveOutlinedIcon from '@material-ui/icons/ArchiveOutlined'
-import ConfirmDialog from 'components/ConfirmDialog'
+import ConfirmDialog from 'components-mui/ConfirmDialog'
 import { Event } from 'api/events.type'
 import ExperimentConfiguration from 'components/ExperimentConfiguration'
 import { ExperimentDetail as ExperimentDetailType } from 'api/experiments.type'
-import Loading from 'components/Loading'
+import Loading from 'components-mui/Loading'
 import NoteOutlinedIcon from '@material-ui/icons/NoteOutlined'
-import PaperTop from 'components/PaperTop'
+import PaperTop from 'components-mui/PaperTop'
 import PauseCircleOutlineIcon from '@material-ui/icons/PauseCircleOutline'
 import PlayCircleOutlineIcon from '@material-ui/icons/PlayCircleOutline'
 import T from 'components/T'
@@ -87,14 +87,14 @@ export default function ExperimentDetail() {
     api.experiments
       .detail(uuid)
       .then(({ data }) => setDetail(data))
-      .catch(console.log)
+      .catch(console.error)
   }
 
   const fetchEvents = () =>
     api.events
       .events()
       .then(({ data }) => setEvents(data.filter((d) => d.experiment_id === uuid)))
-      .catch(console.log)
+      .catch(console.error)
       .finally(() => {
         setLoading(false)
       })
@@ -208,7 +208,7 @@ export default function ExperimentDetail() {
           fetchExperimentDetail()
         }
       })
-      .catch(console.log)
+      .catch(console.error)
   }
 
   const handleUpdateExperiment = () => {
@@ -227,7 +227,7 @@ export default function ExperimentDetail() {
         dispatch(setAlertOpen(true))
         fetchExperimentDetail()
       })
-      .catch(console.log)
+      .catch(console.error)
   }
 
   return (
@@ -328,7 +328,7 @@ export default function ExperimentDetail() {
         setOpen={setDialogOpen}
         title={dialogInfo.title}
         description={dialogInfo.description}
-        handleConfirm={handleExperiment(dialogInfo.action)}
+        onConfirm={handleExperiment(dialogInfo.action)}
       />
 
       {loading && <Loading />}
