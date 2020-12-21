@@ -64,7 +64,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	// disable pause and remove auto resume at time to resume
 	autoResume := chaos.GetAutoResume()
 	if !autoResume.IsZero() && autoResume.Before(now) {
-		chaos.SetPause("")
+		chaos.RecoverPause()
 		chaos.SetAutoResume(time.Time{})
 	}
 

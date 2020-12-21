@@ -117,8 +117,8 @@ func (in *fakeTwoPhaseChaos) GetPause() string {
 	return ""
 }
 
-// SetPause set the pausetime of annotation. Use for empty pausetime for now.
-func (in *fakeTwoPhaseChaos) SetPause(s string) {
+// RecoverPause set the pausetime to empty, to stop pause
+func (in *fakeTwoPhaseChaos) RecoverPause() {
 }
 
 func (r fakeEndpoint) Object() v1alpha1.InnerObject {

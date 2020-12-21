@@ -44,9 +44,9 @@ func (in *{{.Type}}) GetPause() string {
 	return in.Annotations[PauseAnnotationKey]
 }
 
-// SetPause set the pausetime of annotation. Empty meams not paused
-func (in *{{.Type}}) SetPause(s string) {
-	in.Annotations[PauseAnnotationKey] = s
+// RecoverPause set the pausetime to empty, to stop pause
+func (in *{{.Type}}) RecoverPause() {
+	in.Annotations[PauseAnnotationKey] = ""
 }
 
 // GetDuration would return the duration for chaos

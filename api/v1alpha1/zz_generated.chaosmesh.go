@@ -36,9 +36,9 @@ func (in *DNSChaos) GetPause() string {
 	return in.Annotations[PauseAnnotationKey]
 }
 
-// SetPause set the pausetime of annotation. Empty meams not paused
-func (in *DNSChaos) SetPause(s string) {
-	in.Annotations[PauseAnnotationKey] = s
+// RecoverPause set the pausetime to empty, to stop pause
+func (in *DNSChaos) RecoverPause() {
+	in.Annotations[PauseAnnotationKey] = ""
 }
 
 // GetDuration would return the duration for chaos
@@ -179,9 +179,9 @@ func (in *HTTPChaos) GetPause() string {
 	return in.Annotations[PauseAnnotationKey]
 }
 
-// SetPause set the pausetime of annotation. Empty meams not paused
-func (in *HTTPChaos) SetPause(s string) {
-	in.Annotations[PauseAnnotationKey] = s
+// RecoverPause set the pausetime to empty, to stop pause
+func (in *HTTPChaos) RecoverPause() {
+	in.Annotations[PauseAnnotationKey] = ""
 }
 
 // GetDuration would return the duration for chaos
@@ -322,9 +322,9 @@ func (in *IoChaos) GetPause() string {
 	return in.Annotations[PauseAnnotationKey]
 }
 
-// SetPause set the pausetime of annotation. Empty meams not paused
-func (in *IoChaos) SetPause(s string) {
-	in.Annotations[PauseAnnotationKey] = s
+// RecoverPause set the pausetime to empty, to stop pause
+func (in *IoChaos) RecoverPause() {
+	in.Annotations[PauseAnnotationKey] = ""
 }
 
 // GetDuration would return the duration for chaos
@@ -465,9 +465,9 @@ func (in *JVMChaos) GetPause() string {
 	return in.Annotations[PauseAnnotationKey]
 }
 
-// SetPause set the pausetime of annotation. Empty meams not paused
-func (in *JVMChaos) SetPause(s string) {
-	in.Annotations[PauseAnnotationKey] = s
+// RecoverPause set the pausetime to empty, to stop pause
+func (in *JVMChaos) RecoverPause() {
+	in.Annotations[PauseAnnotationKey] = ""
 }
 
 // GetDuration would return the duration for chaos
@@ -608,9 +608,9 @@ func (in *KernelChaos) GetPause() string {
 	return in.Annotations[PauseAnnotationKey]
 }
 
-// SetPause set the pausetime of annotation. Empty meams not paused
-func (in *KernelChaos) SetPause(s string) {
-	in.Annotations[PauseAnnotationKey] = s
+// RecoverPause set the pausetime to empty, to stop pause
+func (in *KernelChaos) RecoverPause() {
+	in.Annotations[PauseAnnotationKey] = ""
 }
 
 // GetDuration would return the duration for chaos
@@ -751,9 +751,9 @@ func (in *NetworkChaos) GetPause() string {
 	return in.Annotations[PauseAnnotationKey]
 }
 
-// SetPause set the pausetime of annotation. Empty meams not paused
-func (in *NetworkChaos) SetPause(s string) {
-	in.Annotations[PauseAnnotationKey] = s
+// RecoverPause set the pausetime to empty, to stop pause
+func (in *NetworkChaos) RecoverPause() {
+	in.Annotations[PauseAnnotationKey] = ""
 }
 
 // GetDuration would return the duration for chaos
@@ -894,9 +894,9 @@ func (in *PodChaos) GetPause() string {
 	return in.Annotations[PauseAnnotationKey]
 }
 
-// SetPause set the pausetime of annotation. Empty meams not paused
-func (in *PodChaos) SetPause(s string) {
-	in.Annotations[PauseAnnotationKey] = s
+// RecoverPause set the pausetime to empty, to stop pause
+func (in *PodChaos) RecoverPause() {
+	in.Annotations[PauseAnnotationKey] = ""
 }
 
 // GetDuration would return the duration for chaos
@@ -1037,9 +1037,9 @@ func (in *StressChaos) GetPause() string {
 	return in.Annotations[PauseAnnotationKey]
 }
 
-// SetPause set the pausetime of annotation. Empty meams not paused
-func (in *StressChaos) SetPause(s string) {
-	in.Annotations[PauseAnnotationKey] = s
+// RecoverPause set the pausetime to empty, to stop pause
+func (in *StressChaos) RecoverPause() {
+	in.Annotations[PauseAnnotationKey] = ""
 }
 
 // GetDuration would return the duration for chaos
@@ -1180,9 +1180,9 @@ func (in *TimeChaos) GetPause() string {
 	return in.Annotations[PauseAnnotationKey]
 }
 
-// SetPause set the pausetime of annotation. Empty meams not paused
-func (in *TimeChaos) SetPause(s string) {
-	in.Annotations[PauseAnnotationKey] = s
+// RecoverPause set the pausetime to empty, to stop pause
+func (in *TimeChaos) RecoverPause() {
+	in.Annotations[PauseAnnotationKey] = ""
 }
 
 // GetDuration would return the duration for chaos

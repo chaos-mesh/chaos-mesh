@@ -234,7 +234,7 @@ type InnerSchedulerObject interface {
 type InnerObject interface {
 	IsDeleted() bool
 	GetPause() string
-	SetPause(string)
+	RecoverPause()
 	GetChaos() *ChaosInstance
 	StatefulObject
 }
