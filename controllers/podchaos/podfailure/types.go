@@ -17,6 +17,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+
 	"k8s.io/client-go/util/retry"
 
 	"github.com/hashicorp/go-multierror"
@@ -142,12 +143,10 @@ func (r *endpoint) cleanFinalizersAndRecover(ctx context.Context, podchaos *v1al
 			continue
 		}
 		err = r.recoverPod(ctx, &pod, podchaos)
-		if err != nil {
+		// the pod not operated by PodChaos should be removed in pod chaos finalizers
+		if err != nil && !errors.Is(err, errNotOperatedChaos) {
 			result = multierror.Append(result, err)
-			// the pod not operated by PodChaos should be removed in pod chaos finalizers
-			if !errors.Is(err, errNotOperatedChaos) {
-				continue
-			}
+			continue
 		}
 
 		podchaos.Finalizers = utils.RemoveFromFinalizer(podchaos.Finalizers, key)
