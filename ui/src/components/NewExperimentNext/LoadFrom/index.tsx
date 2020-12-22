@@ -60,9 +60,7 @@ const LoadFrom = () => {
     apiRequest
       .detail(uuid)
       .then(({ data }) => {
-        const y = yamlToExperiment(data.yaml)
-
-        fillExperiment(y)
+        fillExperiment(data.yaml)
 
         dispatch(
           setAlert({
