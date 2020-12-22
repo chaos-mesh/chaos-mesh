@@ -62,11 +62,11 @@ endif
 
 CLEAN_TARGETS :=
 
-all: yaml image
+all: manifests/crd.yaml image
 
 build: binary
 
-check: fmt vet boilerplate lint generate yaml tidy
+check: fmt vet boilerplate lint generate manifests/crd.yaml tidy
 
 # Run tests
 test: failpoint-enable generate manifests test-utils
@@ -130,7 +130,7 @@ install: manifests
 	bash -c '[[ `$(HELM_BIN) version --client --short` == "Client: v2"* ]] && $(HELM_BIN) install helm/chaos-mesh --name=chaos-mesh --namespace=chaos-testing || $(HELM_BIN) install chaos-mesh helm/chaos-mesh --namespace=chaos-testing;'
 
 # Generate manifests e.g. CRD, RBAC etc.
-manifests: $(GOBIN)/controller-gen
+config: $(GOBIN)/controller-gen
 	$< $(CRD_OPTIONS) rbac:roleName=manager-role webhook paths="./..." output:crd:artifacts:config=config/crd/bases
 
 # Run go fmt against code
@@ -178,11 +178,11 @@ GO_TARGET_PHONY :=
 
 define COMPILE_GO =
 ifeq ($(IN_DOCKER),1)
-images/$(1)/bin/$(2): $(4)
+$(1): $(4)
 ifeq ($(3),1)
-	$(CGO) build -ldflags "$(LDFLAGS)" -tags "${BUILD_TAGS}" -o images/$(1)/bin/$(2) ./cmd/$(2)/main.go
+	$(CGO) build -ldflags "$(LDFLAGS)" -tags "${BUILD_TAGS}" -o $(1) $(2)
 else
-	$(GO) build -ldflags "$(LDFLAGS)" -tags "${BUILD_TAGS}" -o images/$(1)/bin/$(2) ./cmd/$(2)/main.go
+	$(GO) build -ldflags "$(LDFLAGS)" -tags "${BUILD_TAGS}" -o $(1) $(2)
 endif
 
 GO_TARGET_PHONY += images/$(1)/bin/$(2)
@@ -195,14 +195,14 @@ ifneq ($(GO_BUILD_CACHE),)
 	BUILD_INDOCKER_ARG += --volume $(GO_BUILD_CACHE)/chaos-mesh-gobuild:/tmp/go-build
 endif
 define BUILD_IN_DOCKER =
-CLEAN_TARGETS += images/$(1)/bin/$(2)
+CLEAN_TARGETS += $(2)
 ifneq ($(IN_DOCKER),1)
-images/$(1)/bin/$(2): image-build-env
+$(2): image-build-env
 	docker run --rm --workdir /mnt/ --volume $(shell pwd):/mnt \
 		$(BUILD_INDOCKER_ARG) --env UI=${UI} --env SWAGGER=${SWAGGER} \
 		--user $(shell id -u):$(shell id -g) ${DOCKER_REGISTRY_PREFIX}pingcap/build-env \
-		/usr/bin/make images/$(1)/bin/$(2)
-image-$(1)-dependencies := $(image-$(1)-dependencies) images/$(1)/bin/$(2)
+		/usr/bin/make $(2)
+image-$(1)-dependencies := $(image-$(1)-dependencies) $(2)
 endif
 endef
 
@@ -210,26 +210,31 @@ ifeq ($(IN_DOCKER),1)
 images/chaos-daemon/bin/pause: hack/pause.c
 	cc ./hack/pause.c -o images/chaos-daemon/bin/pause
 endif
-$(eval $(call BUILD_IN_DOCKER,chaos-daemon,pause))
+$(eval $(call BUILD_IN_DOCKER,chaos-daemon,images/chaos-daemon/bin/pause))
 
-$(eval $(call BUILD_IN_DOCKER,chaos-daemon,chaos-daemon))
-$(eval $(call COMPILE_GO,chaos-daemon,chaos-daemon,1))
+$(eval $(call BUILD_IN_DOCKER,chaos-daemon,images/chaos-daemon/bin/chaos-daemon))
+$(eval $(call COMPILE_GO,images/chaos-daemon/bin/chaos-daemon,./cmd/chaos-daemon/main.go,1))
 
-$(eval $(call BUILD_IN_DOCKER,chaos-dashboard,chaos-dashboard))
-$(eval $(call COMPILE_GO,chaos-dashboard,chaos-dashboard,1,ui swagger_spec))
+$(eval $(call BUILD_IN_DOCKER,chaos-dashboard,images/chaos-dashboard/bin/chaos-dashboard))
+$(eval $(call COMPILE_GO,images/chaos-dashboard/bin/chaos-dashboard,./cmd/chaos-dashboard/main.go,1,ui swagger_spec))
 
-$(eval $(call BUILD_IN_DOCKER,chaos-mesh,chaos-controller-manager))
-$(eval $(call COMPILE_GO,chaos-mesh,chaos-controller-manager,0))
+$(eval $(call BUILD_IN_DOCKER,chaos-mesh,images/chaos-mesh/bin/chaos-controller-manager))
+$(eval $(call COMPILE_GO,images/chaos-mesh/bin/chaos-controller-manager,./cmd/chaos-controller-manager/main.go,0))
 
-image-chaos-mesh-e2e-dependencies += test/image/e2e/manifests test/image/e2e/chaos-mesh e2e-build
+$(eval $(call BUILD_IN_DOCKER,chaos-mesh-e2e,test/image/e2e/bin/ginkgo))
+$(eval $(call COMPILE_GO,test/image/e2e/bin/ginkgo,github.com/onsi/ginkgo/ginkgo,0))
 
-e2e-build: test/image/e2e/bin/ginkgo test/image/e2e/bin/e2e.test
-
-test/image/e2e/bin/ginkgo:
-	$(GO) build -trimpath  -o test/image/e2e/bin/ginkgo github.com/onsi/ginkgo/ginkgo
-
+$(eval $(call BUILD_IN_DOCKER,chaos-mesh-e2e,test/image/e2e/bin/e2e.test))
+ifeq ($(IN_DOCKER),1)
 test/image/e2e/bin/e2e.test:
 	$(GO) test -c  -o ./test/image/e2e/bin/e2e.test ./test/e2e
+
+GO_TARGET_PHONY += test/image/e2e/bin/e2e.test
+endif
+
+image-chaos-mesh-e2e-dependencies += test/image/e2e/manifests test/image/e2e/chaos-mesh
+
+e2e-build: test/image/e2e/bin/ginkgo test/image/e2e/bin/e2e.test
 
 test/image/e2e/manifests: manifests
 	cp -r manifests test/image/e2e
@@ -299,7 +304,7 @@ chaos-build: bin/chaos-builder
 generate: $(GOBIN)/controller-gen chaos-build
 	$< object:headerFile=./hack/boilerplate/boilerplate.generatego.txt paths="./..."
 
-yaml: manifests ensure-kustomize
+manifests/crd.yaml: config ensure-kustomize
 	$(KUSTOMIZE_BIN) build config/default > manifests/crd.yaml
 
 # Generate Go files from Chaos Mesh proto files.
@@ -336,7 +341,7 @@ install-local-coverage-tools:
 	&& go get -u github.com/matm/gocov-html
 
 .PHONY: all build test install manifests groupimports fmt vet tidy image \
-	binary docker-push lint generate yaml \
+	binary docker-push lint generate \
 	$(all-tool-dependencies) install.sh $(GO_TARGET_PHONY) \
 	manager chaosfs chaosdaemon chaos-dashboard \
 	dashboard dashboard-server-frontend gosec-scan \
