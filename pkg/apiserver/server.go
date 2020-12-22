@@ -65,6 +65,7 @@ func newEngine() *gin.Engine {
 		v.RegisterValidation("NameValid", apivalidator.NameValid)
 		v.RegisterValidation("NamespaceSelectorsValid", apivalidator.NamespaceSelectorsValid)
 		v.RegisterValidation("MapSelectorsValid", apivalidator.MapSelectorsValid)
+		v.RegisterValidation("RequirementSelectorsValid", apivalidator.RequirementSelectorsValid)
 		v.RegisterValidation("PhaseSelectorsValid", apivalidator.PhaseSelectorsValid)
 		v.RegisterValidation("CronValid", apivalidator.CronValid)
 		v.RegisterValidation("DurationValid", apivalidator.DurationValid)

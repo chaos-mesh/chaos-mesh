@@ -26,6 +26,9 @@ const (
 	PauseAnnotationKey = "experiment.chaos-mesh.org/pause"
 )
 
+// LabelSelectorRequirements is list of LabelSelectorRequirement
+type LabelSelectorRequirements []metav1.LabelSelectorRequirement
+
 // SelectorSpec defines the some selectors to select objects.
 // If the all selectors are empty, all objects will be used in chaos experiment.
 type SelectorSpec struct {
@@ -58,6 +61,11 @@ type SelectorSpec struct {
 	// A selector based on labels.
 	// +optional
 	LabelSelectors map[string]string `json:"labelSelectors,omitempty"`
+
+	// a slice of label selector expressions that can be used to select objects.
+	// A list of selectors based on set-based label expressions.
+	// +optional
+	ExpressionSelectors LabelSelectorRequirements `json:"expressionSelectors,omitempty"`
 
 	// Map of string keys and values that can be used to select objects.
 	// A selector based on annotations.
@@ -111,10 +119,7 @@ const (
 )
 
 type ChaosStatus struct {
-	// Phase is the chaos status.
-	Phase         ChaosPhase `json:"phase"`
-	Reason        string     `json:"reason,omitempty"`
-	FailedMessage string     `json:"failedMessage,omitempty"`
+	FailedMessage string `json:"failedMessage,omitempty"`
 
 	Scheduler ScheduleStatus `json:"scheduler,omitempty"`
 
@@ -175,11 +180,12 @@ type ScheduleStatus struct {
 type ExperimentPhase string
 
 const (
-	ExperimentPhaseRunning  ExperimentPhase = "Running"
-	ExperimentPhaseWaiting  ExperimentPhase = "Waiting"
-	ExperimentPhasePaused   ExperimentPhase = "Paused"
-	ExperimentPhaseFailed   ExperimentPhase = "Failed"
-	ExperimentPhaseFinished ExperimentPhase = "Finished"
+	ExperimentPhaseUninitialized ExperimentPhase = ""
+	ExperimentPhaseRunning       ExperimentPhase = "Running"
+	ExperimentPhaseWaiting       ExperimentPhase = "Waiting"
+	ExperimentPhasePaused        ExperimentPhase = "Paused"
+	ExperimentPhaseFailed        ExperimentPhase = "Failed"
+	ExperimentPhaseFinished      ExperimentPhase = "Finished"
 )
 
 type ExperimentStatus struct {
