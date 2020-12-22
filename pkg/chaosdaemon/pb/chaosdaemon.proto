@@ -163,6 +163,7 @@ message ExecStressRequest {
   Scope scope = 1;
   string target = 2;
   string stressors = 3;
+  bool withoutNS = 4;
 }
 
 message ExecStressResponse {
