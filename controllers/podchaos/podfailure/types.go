@@ -256,6 +256,7 @@ func (r *endpoint) failPod(ctx context.Context, pod *v1.Pod, podchaos *v1alpha1.
 func (r *endpoint) recoverPod(ctx context.Context, pod *v1.Pod, podchaos *v1alpha1.PodChaos) error {
 	r.Log.Info("Recovering", "namespace", pod.Namespace, "name", pod.Name)
 
+	containerChaosCount := 0
 	for index := range pod.Spec.Containers {
 		name := pod.Spec.Containers[index].Name
 		key := utils.GenAnnotationKeyForImage(podchaos, name)
@@ -263,13 +264,15 @@ func (r *endpoint) recoverPod(ctx context.Context, pod *v1.Pod, podchaos *v1alph
 		if pod.Annotations == nil {
 			pod.Annotations = make(map[string]string)
 		}
-		// Check annotations and return error
-		if _, ok := pod.Annotations[key]; !ok {
-			r.Log.Error(errNotOperatedChaos, "the pod not operated by podChaos", "namespace", pod.Namespace, "name", pod.Name)
-			return errNotOperatedChaos
+		// Check annotations
+		if _, ok := pod.Annotations[key]; ok {
+			containerChaosCount++
 		}
 	}
-
+	if containerChaosCount == 0 {
+		r.Log.Error(errNotOperatedChaos, "the pod not operated by podChaos", "namespace", pod.Namespace, "name", pod.Name)
+		return errNotOperatedChaos
+	}
 	// chaos-mesh don't support
 	return r.Delete(ctx, pod, &client.DeleteOptions{
 		GracePeriodSeconds: new(int64), // PeriodSeconds has to be set specifically
