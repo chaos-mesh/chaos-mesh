@@ -17,6 +17,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"k8s.io/client-go/util/retry"
 
 	"github.com/hashicorp/go-multierror"
 	"golang.org/x/sync/errgroup"
@@ -43,6 +44,10 @@ const (
 	pauseImage = "gcr.io/google-containers/pause:latest"
 
 	podFailureActionMsg = "pod failure duration %s"
+)
+
+var (
+	errNotOperatedChaos = errors.New("the pod not operated by podChaos")
 )
 
 type endpoint struct {
@@ -136,11 +141,13 @@ func (r *endpoint) cleanFinalizersAndRecover(ctx context.Context, podchaos *v1al
 			podchaos.Finalizers = utils.RemoveFromFinalizer(podchaos.Finalizers, key)
 			continue
 		}
-
 		err = r.recoverPod(ctx, &pod, podchaos)
 		if err != nil {
 			result = multierror.Append(result, err)
-			continue
+			// the pod not operated by PodChaos should be removed in pod chaos finalizers
+			if !errors.Is(err, errNotOperatedChaos) {
+				continue
+			}
 		}
 
 		podchaos.Finalizers = utils.RemoveFromFinalizer(podchaos.Finalizers, key)
@@ -211,10 +218,23 @@ func (r *endpoint) failPod(ctx context.Context, pod *v1.Pod, podchaos *v1alpha1.
 		pod.Annotations[key] = originImage
 		pod.Spec.Containers[index].Image = pauseImage
 	}
-
-	if err := r.Update(ctx, pod); err != nil {
-		r.Log.Error(err, "unable to use fake image on pod")
-		return err
+	updateErr := retry.RetryOnConflict(retry.DefaultRetry, func() error {
+		var newPod v1.Pod
+		getErr := r.Client.Get(ctx, types.NamespacedName{
+			Namespace: pod.Namespace,
+			Name:      pod.Name,
+		}, &newPod)
+		if getErr != nil {
+			return getErr
+		}
+		newPod.Annotations = pod.Annotations
+		newPod.Spec.Containers = pod.Spec.Containers
+		newPod.Spec.InitContainers = pod.Spec.InitContainers
+		return r.Client.Update(ctx, &newPod)
+	})
+	if updateErr != nil {
+		r.Log.Error(updateErr, "unable to use fake image on pod")
+		return updateErr
 	}
 
 	ps := v1alpha1.PodStatus{
@@ -236,17 +256,23 @@ func (r *endpoint) failPod(ctx context.Context, pod *v1.Pod, podchaos *v1alpha1.
 func (r *endpoint) recoverPod(ctx context.Context, pod *v1.Pod, podchaos *v1alpha1.PodChaos) error {
 	r.Log.Info("Recovering", "namespace", pod.Namespace, "name", pod.Name)
 
+	containerChaosCount := 0
 	for index := range pod.Spec.Containers {
 		name := pod.Spec.Containers[index].Name
-		_ = utils.GenAnnotationKeyForImage(podchaos, name)
+		key := utils.GenAnnotationKeyForImage(podchaos, name)
 
 		if pod.Annotations == nil {
 			pod.Annotations = make(map[string]string)
 		}
-
-		// FIXME: Check annotations and return error.
+		// check annotation
+		if _, ok := pod.Annotations[key]; ok {
+			containerChaosCount++
+		}
 	}
-
+	if containerChaosCount == 0 {
+		r.Log.Error(errNotOperatedChaos, "the pod not operated by podChaos", "namespace", pod.Namespace, "name", pod.Name)
+		return errNotOperatedChaos
+	}
 	// chaos-mesh don't support
 	return r.Delete(ctx, pod, &client.DeleteOptions{
 		GracePeriodSeconds: new(int64), // PeriodSeconds has to be set specifically

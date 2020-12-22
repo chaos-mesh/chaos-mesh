@@ -34,14 +34,14 @@ var log = ctrl.Log.WithName("config")
 func init() {
 	conf, err := config.EnvironChaosController()
 	if err != nil {
-		ctrl.SetLogger(zap.Logger(true))
+		ctrl.SetLogger(zap.New(zap.UseDevMode(true)))
 		log.Error(err, "Chaos Controller: invalid environment configuration")
 		os.Exit(1)
 	}
 
 	err = validate(&conf)
 	if err != nil {
-		ctrl.SetLogger(zap.Logger(true))
+		ctrl.SetLogger(zap.New(zap.UseDevMode(true)))
 		log.Error(err, "Chaos Controller: invalid configuration")
 		os.Exit(1)
 	}
