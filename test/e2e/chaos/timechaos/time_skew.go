@@ -83,10 +83,9 @@ func TestcaseTimeSkewOnceThenRecover(
 	By("delete chaos CRD objects")
 	err = cli.Delete(ctx, timeChaos)
 	framework.ExpectNoError(err, "failed to delete time chaos")
-	time.Sleep(10 * time.Second)
 
 	By("waiting for assertion recovering")
-	err = wait.PollImmediate(5*time.Second, 1*time.Minute, func() (done bool, err error) {
+	err = wait.Poll(5*time.Second, 1*time.Minute, func() (done bool, err error) {
 		podTime, err := getPodTimeNS(c, port)
 		framework.ExpectNoError(err, "failed to get pod time")
 		// since there is no timechaos now, current pod time should not be earlier
@@ -99,7 +98,6 @@ func TestcaseTimeSkewOnceThenRecover(
 	framework.ExpectError(err, "wait no timechaos error")
 	framework.ExpectEqual(err.Error(), wait.ErrWaitTimeout.Error())
 	By("success to perform time chaos")
-
 }
 
 func TestcaseTimeSkewPauseThenUnpause(
