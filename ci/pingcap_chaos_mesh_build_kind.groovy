@@ -137,7 +137,7 @@ def build(String name, String code) {
 						stage('Build image') {
 							ansiColor('xterm') {
 								sh """
-								DOCKER_CLI_EXPERIMENTAL=enabled docker buildx create --use --name chaos-mesh-builder
+								DOCKER_CLI_EXPERIMENTAL=enabled docker buildx create --use --name chaos-mesh-builder --config ./ci/builder.toml
 								make DOCKER_CACHE=1 CACHE_DIR=\$(pwd)/cache GO_BUILD_CACHE=\$(pwd)/cache image
 								make DOCKER_CACHE=1 CACHE_DIR=\$(pwd)/cache GO_BUILD_CACHE=\$(pwd)/cache image-e2e-helper
 								make DOCKER_CACHE=1 CACHE_DIR=\$(pwd)/cache GO_BUILD_CACHE=\$(pwd)/cache image-chaos-mesh-e2e
