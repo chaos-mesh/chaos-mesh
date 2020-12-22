@@ -22,6 +22,7 @@ type WorkflowSpec interface {
 	GetName() string
 	GetEntry() string
 	GetTemplates() (template.Templates, error)
+	FetchTemplateByName(templateName string) (template.Template, error)
 }
 
 type WorkflowPhase string
@@ -48,4 +49,6 @@ type WorkflowStatus interface {
 	// func FetchNodesMap
 	// Key is the name of node
 	FetchNodesMap() map[string]node.Node
+
+	FetchNodeByName(nodeName string) (node.Node, error)
 }
