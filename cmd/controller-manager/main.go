@@ -242,7 +242,8 @@ func watchConfig(configWatcher *watcher.K8sConfigMapWatcher, cfg *config.Config,
 	queue := setupWatchQueue(stopCh, configWatcher)
 
 	for {
-		_, shutdown := queue.Get()
+		item, shutdown := queue.Get()
+		defer queue.Done(item)
 		if shutdown {
 			break
 		}
