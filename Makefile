@@ -52,13 +52,15 @@ FAILPOINT_DISABLE := $$(find $$PWD/ -type d | grep -vE "(\.git|bin)" | xargs $(G
 
 BUILD_TAGS ?=
 
-ifeq ($(SWAGGER),1)
+ifeq (${SWAGGER},1)
 	BUILD_TAGS += swagger_server
 endif
 
-ifeq ($(UI),1)
+ifeq (${UI},1)
 	BUILD_TAGS += ui_server
 endif
+
+CLEAN_TARGETS :=
 
 all: yaml image
 
@@ -91,45 +93,28 @@ else
 	gocov-html < cover.json > cover/index.html
 endif
 
-# Build chaos-daemon binary
-chaosdaemon:
-	$(CGOENV) go build -ldflags '$(LDFLAGS)' -o bin/chaos-daemon ./cmd/chaos-daemon/main.go
-
-bin/pause: ./hack/pause.c
-	cc ./hack/pause.c -o bin/pause
-
-# Build manager binary
-manager:
-	$(GO) build -ldflags '$(LDFLAGS)' -o bin/chaos-controller-manager ./cmd/controller-manager/*.go
-
-chaosfs:
-	$(GO) build -ldflags '$(LDFLAGS)' -o bin/chaosfs ./cmd/chaosfs/*.go
-
-chaos-dashboard:
-ifeq ($(SWAGGER),1)
-	make swagger_spec
-endif
-ifeq ($(UI),1)
-	make ui
-	hack/embed_ui_assets.sh
-endif
-	$(CGO) build -ldflags "$(LDFLAGS)" -tags "${BUILD_TAGS}" -o bin/chaos-dashboard cmd/chaos-dashboard/*.go
-
 swagger_spec:
+ifeq (${SWAGGER},1)
 	hack/generate_swagger_spec.sh
+endif
 
 yarn_dependencies:
+ifeq (${UI},1)
 	cd ui &&\
 	yarn install --frozen-lockfile
+endif
 
 ui: yarn_dependencies
+ifeq (${UI},1)
 	cd ui &&\
 	yarn build
+	hack/embed_ui_assets.sh
+endif
 
 binary: chaosdaemon manager chaosfs chaos-dashboard bin/pause
 
 watchmaker:
-	$(CGOENV) go build -ldflags '$(LDFLAGS)' -o bin/watchmaker ./cmd/watchmaker/...
+	$(CGO) build -ldflags '$(LDFLAGS)' -o bin/watchmaker ./cmd/watchmaker/...
 
 # Build chaosctl
 chaosctl:
@@ -150,7 +135,7 @@ manifests: $(GOBIN)/controller-gen
 
 # Run go fmt against code
 fmt: groupimports
-	$(CGOENV) go fmt ./...
+	$(CGO) fmt ./...
 
 gosec-scan: $(GOBIN)/gosec
 	$(GOENV) $< ./api/... ./controllers/... ./pkg/... || echo "*** sec-scan failed: known-issues ***"
@@ -182,51 +167,96 @@ check-install-script: install.sh
 	git diff -U --exit-code install.sh
 
 clean:
-	rm -rf docs/docs.go
+	rm -rf docs/docs.go $(CLEAN_TARGETS)
 
 boilerplate:
 	./hack/verify-boilerplate.sh
 
 image: image-chaos-daemon image-chaos-mesh image-chaos-dashboard
 
-define COPY_TEMPLATE =
-images/$(1)/bin/$(2): image-chaos-binary
-	docker run --rm --volume $(shell pwd)/images/$(1)/bin:/mnt ${DOCKER_REGISTRY_PREFIX}pingcap/chaos-binary cp /bin/$(2) /mnt/$(2)
+GO_TARGET_PHONY :=
 
-image-$(1)-dependencies := $(image-$(1)-dependencies) images/$(1)/bin/$(2)
+define COMPILE_GO =
+ifeq ($(IN_DOCKER),1)
+images/$(1)/bin/$(2): $(4)
+ifeq ($(3),1)
+	$(CGO) build -ldflags "$(LDFLAGS)" -tags "${BUILD_TAGS}" -o images/$(1)/bin/$(2) ./cmd/$(2)/main.go
+else
+	$(GO) build -ldflags "$(LDFLAGS)" -tags "${BUILD_TAGS}" -o images/$(1)/bin/$(2) ./cmd/$(2)/main.go
+endif
+
+GO_TARGET_PHONY += images/$(1)/bin/$(2)
+endif
 endef
 
-$(eval $(call COPY_TEMPLATE,chaos-daemon,chaos-daemon))
-$(eval $(call COPY_TEMPLATE,chaos-daemon,toda))
-$(eval $(call COPY_TEMPLATE,chaos-daemon,nsexec))
-$(eval $(call COPY_TEMPLATE,chaos-daemon,libnsenter.so))
-$(eval $(call COPY_TEMPLATE,chaos-daemon,pause))
-$(eval $(call COPY_TEMPLATE,chaos-dashboard,chaos-dashboard))
-$(eval $(call COPY_TEMPLATE,chaos-mesh,chaos-controller-manager))
+BUILD_INDOCKER_ARG := --env IN_DOCKER=1
+ifneq ($(GO_BUILD_CACHE),)
+	BUILD_INDOCKER_ARG += --volume $(GO_BUILD_CACHE)/chaos-mesh-gopath:/tmp/go
+	BUILD_INDOCKER_ARG += --volume $(GO_BUILD_CACHE)/chaos-mesh-gobuild:/tmp/go-build
+endif
+define BUILD_IN_DOCKER =
+CLEAN_TARGETS += images/$(1)/bin/$(2)
+ifneq ($(IN_DOCKER),1)
+images/$(1)/bin/$(2): image-build-env
+	docker run --rm --workdir /mnt/ --volume $(shell pwd):/mnt \
+		$(BUILD_INDOCKER_ARG) --env UI=${UI} --env SWAGGER=${SWAGGER} \
+		--user $(shell id -u):$(shell id -g) ${DOCKER_REGISTRY_PREFIX}pingcap/build-env \
+		/usr/bin/make images/$(1)/bin/$(2)
+image-$(1)-dependencies := $(image-$(1)-dependencies) images/$(1)/bin/$(2)
+endif
+endef
+
+$(eval $(call BUILD_IN_DOCKER,chaos-daemon,chaos-daemon))
+$(eval $(call COMPILE_GO,chaos-daemon,chaos-daemon,1))
+
+$(eval $(call BUILD_IN_DOCKER,chaos-dashboard,chaos-dashboard))
+$(eval $(call COMPILE_GO,chaos-dashboard,chaos-dashboard,1,ui swagger_spec))
+
+$(eval $(call BUILD_IN_DOCKER,chaos-mesh,chaos-controller-manager))
+$(eval $(call COMPILE_GO,chaos-mesh,chaos-controller-manager,0))
+
+ifeq ($(IN_DOCKER),1)
+images/chaos-daemon/bin/pause: hack/pause.c
+	cc ./hack/pause.c -o images/chaos-daemon/bin/pause
+endif
+$(eval $(call BUILD_IN_DOCKER,chaos-daemon,pause))
+
+define CURL =
+ifeq ($(IN_DOCKER),1)
+images/$(1)/bin/$(2):
+	curl -L $(3) -o images/$(1)/bin/$(2)
+endif
+endef
+
+$(eval $(call BUILD_IN_DOCKER,chaos-daemon,toda.tar.gz))
+$(eval $(call CURL,chaos-daemon,toda.tar.gz,https://github.com/chaos-mesh/toda/releases/download/v0.1.9/toda-linux-amd64.tar.gz))
+$(eval $(call BUILD_IN_DOCKER,chaos-daemon,nsexec.tar.gz))
+$(eval $(call CURL,chaos-daemon,nsexec.tar.gz,https://github.com/chaos-mesh/nsexec/releases/download/v0.1.5/nsexec-linux-amd64.tar.gz))
 
 define IMAGE_TEMPLATE =
+CLEAN_TARGETS += $(2)/.dockerbuilt
 
-image-$(1):$(image-$(1)-dependencies)
+image-$(1): $(2)/.dockerbuilt
+
+$(2)/.dockerbuilt:$(image-$(1)-dependencies) $(2)/Dockerfile
 ifeq ($(DOCKER_CACHE),1)
 
 ifneq ($(DISABLE_CACHE_FROM),1)
-	DOCKER_BUILDKIT=1 DOCKER_CLI_EXPERIMENTAL=enabled docker buildx build --load --cache-to type=local,dest=$(CACHE_DIR)/$(1) --cache-from type=local,src=$(CACHE_DIR)/$(1) -t ${DOCKER_REGISTRY_PREFIX}pingcap/$(1):${IMAGE_TAG} ${DOCKER_BUILD_ARGS} $(2)
+	DOCKER_BUILDKIT=1 DOCKER_CLI_EXPERIMENTAL=enabled docker buildx build --load --cache-to type=local,dest=$(CACHE_DIR)/image-$(1) --cache-from type=local,src=$(CACHE_DIR)/image-$(1) -t ${DOCKER_REGISTRY_PREFIX}pingcap/$(1):${IMAGE_TAG} ${DOCKER_BUILD_ARGS} $(2)
 else
-	DOCKER_BUILDKIT=1 DOCKER_CLI_EXPERIMENTAL=enabled docker buildx build --load --cache-to type=local,dest=$(CACHE_DIR)/$(1) -t ${DOCKER_REGISTRY_PREFIX}pingcap/$(1):${IMAGE_TAG} ${DOCKER_BUILD_ARGS} $(2)
+	DOCKER_BUILDKIT=1 DOCKER_CLI_EXPERIMENTAL=enabled docker buildx build --load --cache-to type=local,dest=$(CACHE_DIR)/image-$(1) -t ${DOCKER_REGISTRY_PREFIX}pingcap/$(1):${IMAGE_TAG} ${DOCKER_BUILD_ARGS} $(2)
 endif
 
 else
 	DOCKER_BUILDKIT=1 docker build -t ${DOCKER_REGISTRY_PREFIX}pingcap/$(1):${IMAGE_TAG} ${DOCKER_BUILD_ARGS} $(2)
 endif
-
-IMAGE_PHONY += image-$(1)
+	touch $(2)/.dockerbuilt
 endef
 
-IMAGE_PHONY := ""
 $(eval $(call IMAGE_TEMPLATE,chaos-daemon,images/chaos-daemon))
 $(eval $(call IMAGE_TEMPLATE,chaos-mesh,images/chaos-mesh))
 $(eval $(call IMAGE_TEMPLATE,chaos-dashboard,images/chaos-dashboard))
-$(eval $(call IMAGE_TEMPLATE,chaos-binary,.))
+$(eval $(call IMAGE_TEMPLATE,build-env,images/build-env))
 $(eval $(call IMAGE_TEMPLATE,e2e-helper,test/cmd/e2e_helper))
 $(eval $(call IMAGE_TEMPLATE,chaos-mesh-protoc,./hack/protoc))
 
@@ -319,7 +349,7 @@ install-local-coverage-tools:
 
 .PHONY: all build test install manifests groupimports fmt vet tidy image \
 	binary docker-push lint generate yaml \
-	$(all-tool-dependencies) install.sh $(IMAGE_PHONY) \
+	$(all-tool-dependencies) install.sh $(GO_TARGET_PHONY) \
 	manager chaosfs chaosdaemon chaos-dashboard \
 	dashboard dashboard-server-frontend gosec-scan \
 	proto bin/chaos-builder

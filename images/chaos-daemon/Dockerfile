@@ -13,7 +13,12 @@ RUN update-alternatives --set iptables /usr/sbin/iptables-legacy
 ENV RUST_BACKTRACE 1
 
 COPY bin/chaos-daemon /usr/local/bin/chaos-daemon
-COPY bin/toda /usr/local/bin/toda
-COPY bin/nsexec /usr/local/bin/nsexec
-COPY bin/libnsenter.so /usr/local/lib/libnsenter.so
 COPY bin/pause /usr/local/bin/pause
+
+COPY bin/toda.tar.gz /usr/local/bin/toda.tar.gz
+RUN tar xvf /usr/local/bin/toda.tar.gz -C /usr/local/bin
+RUN rm /usr/local/bin/toda.tar.gz
+
+COPY bin/nsexec.tar.gz /usr/local/bin/nsexec.tar.gz
+RUN tar xvf /usr/local/bin/nsexec.tar.gz -C /usr/local/bin
+RUN rm /usr/local/bin/nsexec.tar.gz

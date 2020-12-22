@@ -35,3 +35,5 @@ test/image/e2e/manifests/
 /docs/docs.go
 
 /images/*/bin/*
+
+.dockerbuilt
