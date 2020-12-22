@@ -64,8 +64,6 @@ CLEAN_TARGETS :=
 
 all: manifests/crd.yaml image
 
-build: binary
-
 check: fmt vet boilerplate lint generate manifests/crd.yaml tidy
 
 # Run tests
@@ -110,8 +108,6 @@ ifeq (${UI},1)
 	yarn build
 	hack/embed_ui_assets.sh
 endif
-
-binary: chaosdaemon manager chaosfs chaos-dashboard bin/pause
 
 watchmaker:
 	$(CGO) build -ldflags '$(LDFLAGS)' -o bin/watchmaker ./cmd/watchmaker/...
@@ -224,10 +220,10 @@ $(eval $(call COMPILE_GO,images/chaos-mesh/bin/chaos-controller-manager,./cmd/ch
 $(eval $(call BUILD_IN_DOCKER,chaos-mesh-e2e,test/image/e2e/bin/ginkgo))
 $(eval $(call COMPILE_GO,test/image/e2e/bin/ginkgo,github.com/onsi/ginkgo/ginkgo,0))
 
-$(eval $(call BUILD_IN_DOCKER,chaos-mesh-e2e,test/image/e2e/bin/e2e.test))
 ifeq ($(IN_DOCKER),1)
 test/image/e2e/bin/e2e.test:
 	$(GO) test -c  -o ./test/image/e2e/bin/e2e.test ./test/e2e
+$(eval $(call BUILD_IN_DOCKER,chaos-mesh-e2e,test/image/e2e/bin/e2e.test))
 
 GO_TARGET_PHONY += test/image/e2e/bin/e2e.test
 endif
@@ -340,8 +336,8 @@ install-local-coverage-tools:
 	&& go get github.com/AlekSi/gocov-xml \
 	&& go get -u github.com/matm/gocov-html
 
-.PHONY: all build test install manifests groupimports fmt vet tidy image \
-	binary docker-push lint generate \
+.PHONY: all test install manifests groupimports fmt vet tidy image \
+	docker-push lint generate \
 	$(all-tool-dependencies) install.sh $(GO_TARGET_PHONY) \
 	manager chaosfs chaosdaemon chaos-dashboard \
 	dashboard dashboard-server-frontend gosec-scan \
