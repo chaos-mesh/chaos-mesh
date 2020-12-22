@@ -126,10 +126,9 @@ def build(String name, String code) {
 								"""
 							}
 						}
-						stage('Build e2e') {
+						stage('Copy binary tools') {
 							ansiColor('xterm') {
 								sh """
-								make e2e-build
 								mkdir output
 								cp -r /usr/local/bin/chaos-mesh-e2e output/bin
 								"""
