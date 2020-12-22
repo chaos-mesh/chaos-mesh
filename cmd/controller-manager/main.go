@@ -31,6 +31,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/version"
 	"github.com/chaos-mesh/chaos-mesh/pkg/webhook/config"
 	"github.com/chaos-mesh/chaos-mesh/pkg/webhook/config/watcher"
+	"golang.org/x/time/rate"
 
 	_ "github.com/chaos-mesh/chaos-mesh/controllers/dnschaos"
 	_ "github.com/chaos-mesh/chaos-mesh/controllers/httpchaos"
@@ -61,9 +62,6 @@ import (
 var (
 	scheme   = runtime.NewScheme()
 	setupLog = ctrl.Log.WithName("setup")
-
-	// EventCoalesceWindow is the window for coalescing events from ConfigMapWatcher
-	EventCoalesceWindow = time.Second * 3
 )
 
 var (
@@ -197,7 +195,7 @@ func setupWatchQueue(stopCh <-chan struct{}, configWatcher *watcher.K8sConfigMap
 	// for the server
 	sigChan := make(chan interface{}, 10)
 
-	queue := workqueue.NewRateLimitingQueue(workqueue.DefaultControllerRateLimiter())
+	queue := workqueue.NewRateLimitingQueue(&workqueue.BucketRateLimiter{Limiter: rate.NewLimiter(rate.Limit(0.5), 100)})
 
 	go func() {
 		for {
