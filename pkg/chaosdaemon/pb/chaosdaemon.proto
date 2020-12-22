@@ -112,6 +112,7 @@ message TcFilter {
 message IPSetsRequest {
   repeated IPSet ipsets = 1;
   string container_id = 2;
+  bool withoutNS = 3;
 }
 
 message IPSet {
@@ -122,6 +123,7 @@ message IPSet {
 message IptablesChainsRequest {
   repeated Chain chains = 1;
   string container_id = 2;
+  bool withoutNS = 3;
 }
 
 message Chain {
@@ -180,6 +182,7 @@ message ApplyIoChaosRequest {
 
   int64 instance = 4;
   int64 startTime = 5;
+  bool withoutNS = 6;
 }
 
 message ApplyIoChaosResponse {
@@ -191,6 +194,7 @@ message TcsRequest {
   repeated Tc tcs = 1;
   string container_id = 2;
   string device = 3;
+  bool withoutNS = 4;
 }
 
 message Tc {
@@ -211,4 +215,5 @@ message SetDNSServerRequest {
   string container_id = 1;
   string dns_server = 2;
   bool enable = 3;
+  bool withoutNS = 4;
 }

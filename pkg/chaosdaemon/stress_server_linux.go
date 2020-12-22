@@ -65,10 +65,12 @@ func (s *DaemonServer) ExecStressors(ctx context.Context,
 		return nil, err
 	}
 
-	cmd := bpm.DefaultProcessBuilder("stress-ng", strings.Fields(req.Stressors)...).
-		EnablePause().
-		SetNS(pid, bpm.PidNS).
-		Build()
+	processBuilder := bpm.DefaultProcessBuilder("stress-ng", strings.Fields(req.Stressors)...).
+		EnablePause()
+	if !req.WithoutNS {
+		processBuilder = processBuilder.SetNS(pid, bpm.PidNS)
+	}
+	cmd := processBuilder.Build()
 
 	err = s.backgroundProcessManager.StartProcess(cmd)
 	if err != nil {

@@ -45,10 +45,12 @@ func (s *DaemonServer) SetDNSServer(ctx context.Context,
 		}
 
 		// backup the /etc/resolv.conf
-		cmd := bpm.DefaultProcessBuilder("sh", "-c", fmt.Sprintf("ls %s.chaos.bak || cp %s %s.chaos.bak", DNSServerConfFile, DNSServerConfFile, DNSServerConfFile)).
-			SetNS(pid, bpm.MountNS).
-			SetContext(ctx).
-			Build()
+		processBuilder := bpm.DefaultProcessBuilder("sh", "-c", fmt.Sprintf("ls %s.chaos.bak || cp %s %s.chaos.bak", DNSServerConfFile, DNSServerConfFile, DNSServerConfFile)).SetContext(ctx)
+		if !req.WithoutNS {
+			processBuilder = processBuilder.SetNS(pid, bpm.MountNS)
+		}
+
+		cmd := processBuilder.Build()
 		output, err := cmd.CombinedOutput()
 		if err != nil {
 			log.Error(err, "execute command error", "command", cmd.String(), "output", output)
@@ -60,10 +62,12 @@ func (s *DaemonServer) SetDNSServer(ctx context.Context,
 
 		// add chaos dns server to the first line of /etc/resolv.conf
 		// Note: can not replace the /etc/resolv.conf like `mv temp resolv.conf`, will execute with error `Device or resource busy`
-		cmd = bpm.DefaultProcessBuilder("sh", "-c", fmt.Sprintf("cp %s temp && sed -i 's/.*nameserver.*/nameserver %s/' temp && cat temp > %s", DNSServerConfFile, req.DnsServer, DNSServerConfFile)).
-			SetNS(pid, bpm.MountNS).
-			SetContext(ctx).
-			Build()
+		processBuilder = bpm.DefaultProcessBuilder("sh", "-c", fmt.Sprintf("cp %s temp && sed -i 's/.*nameserver.*/nameserver %s/' temp && cat temp > %s", DNSServerConfFile, req.DnsServer, DNSServerConfFile)).SetContext(ctx)
+		if !req.WithoutNS {
+			processBuilder = processBuilder.SetNS(pid, bpm.MountNS)
+		}
+
+		cmd = processBuilder.Build()
 		output, err = cmd.CombinedOutput()
 		if err != nil {
 			log.Error(err, "execute command error", "command", cmd.String(), "output", output)
@@ -74,10 +78,12 @@ func (s *DaemonServer) SetDNSServer(ctx context.Context,
 		}
 	} else {
 		// recover the dns server's address
-		cmd := bpm.DefaultProcessBuilder("sh", "-c", fmt.Sprintf("ls %s.chaos.bak && cat %s.chaos.bak > %s || true", DNSServerConfFile, DNSServerConfFile, DNSServerConfFile)).
-			SetNS(pid, bpm.MountNS).
-			SetContext(ctx).
-			Build()
+		processBuilder := bpm.DefaultProcessBuilder("sh", "-c", fmt.Sprintf("ls %s.chaos.bak && cat %s.chaos.bak > %s || true", DNSServerConfFile, DNSServerConfFile, DNSServerConfFile)).SetContext(ctx)
+		if !req.WithoutNS {
+			processBuilder = processBuilder.SetNS(pid, bpm.MountNS)
+		}
+
+		cmd := processBuilder.Build()
 		output, err := cmd.CombinedOutput()
 		if err != nil {
 			log.Error(err, "execute command error", "command", cmd.String(), "output", output)

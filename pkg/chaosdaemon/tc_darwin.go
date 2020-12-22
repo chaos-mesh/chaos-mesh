@@ -19,7 +19,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
 )
 
-func applyTc(ctx context.Context, pid uint32, args ...string) error {
+func applyTc(ctx context.Context, pid uint32, withoutNS bool, args ...string) error {
 	// Mock point to return error in unit test
 	if err := mock.On("TcApplyError"); err != nil {
 		if e, ok := err.(error); ok {
