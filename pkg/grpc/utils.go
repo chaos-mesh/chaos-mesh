@@ -53,12 +53,15 @@ func CreateGrpcConnection(ctx context.Context, c client.Client, pod *v1.Pod, por
 	}
 
 	daemonIP := findIPOnEndpoints(&endpoints, nodeName)
-
 	if len(daemonIP) == 0 {
 		return nil, errors.Errorf("cannot find daemonIP on node %s in related Endpoints %v", nodeName, endpoints)
 	}
+	return CreateGrpcConnectionWithAddress(daemonIP, port)
+}
 
-	conn, err := grpc.Dial(fmt.Sprintf("%s:%d", daemonIP, port),
+// CreateGrpcConnectionWithAddress create a grpc connection with given port and address
+func CreateGrpcConnectionWithAddress(address string, port int) (*grpc.ClientConn, error) {
+	conn, err := grpc.Dial(fmt.Sprintf("%s:%d", address, port),
 		grpc.WithInsecure(),
 		grpc.WithUnaryInterceptor(TimeoutClientInterceptor))
 	if err != nil {
