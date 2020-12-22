@@ -116,6 +116,7 @@
     "eventsPerPage": "每页事件数",
     "event": {
       "experiment": "实验",
+      "uuid": "UUID",
       "namespace": "命名空间",
       "kind": "类别",
       "started": "开始时间",

@@ -116,6 +116,7 @@
     "eventsPerPage": "Events per page",
     "event": {
       "experiment": "Experiment",
+      "uuid": "UUID",
       "namespace": "Namespace",
       "kind": "Kind",
       "started": "Started",

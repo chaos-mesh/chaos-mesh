@@ -307,18 +307,20 @@ export default function ExperimentDetail() {
       </Grow>
 
       <Modal open={configOpen} onClose={onModalClose}>
-        <Paper className={classes.configPaper}>
-          {detail && (
-            <>
-              <PaperTop title={detail.name}>
-                <Button variant="contained" color="primary" size="small" onClick={handleUpdateExperiment}>
-                  {T('common.confirm')}
-                </Button>
-              </PaperTop>
-              <YAMLEditor theme={theme} data={yaml.safeDump(detail.yaml)} mountEditor={setYAMLEditor} />
-            </>
-          )}
-        </Paper>
+        <div>
+          <Paper className={classes.configPaper}>
+            {detail && (
+              <>
+                <PaperTop title={detail.name}>
+                  <Button variant="contained" color="primary" size="small" onClick={handleUpdateExperiment}>
+                    {T('common.confirm')}
+                  </Button>
+                </PaperTop>
+                <YAMLEditor theme={theme} data={yaml.safeDump(detail.yaml)} mountEditor={setYAMLEditor} />
+              </>
+            )}
+          </Paper>
+        </div>
       </Modal>
 
       <ConfirmDialog

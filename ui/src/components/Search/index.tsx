@@ -193,7 +193,7 @@ const SearchResultForOneCate = function <T extends 'events' | 'experiments' | 'a
                       }
                       secondary={
                         <Separate separator={<span>&nbsp;|&nbsp;</span>}>
-                          {requiredItems.map((item) => {
+                          {requiredItems.slice(1).map((item) => {
                             return (
                               <Typography component="span" key={item.name}>
                                 <span>{T(`search.result.keywords.${nameMap[item.name]}`)}: </span>
