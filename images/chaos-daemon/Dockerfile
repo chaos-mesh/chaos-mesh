@@ -19,6 +19,7 @@ RUN tar xvf /usr/local/bin/toda.tar.gz -C /usr/local/bin
 RUN rm /usr/local/bin/toda.tar.gz
 RUN tar xvf /usr/local/bin/nsexec.tar.gz -C /usr/local/bin
 RUN rm /usr/local/bin/nsexec.tar.gz
+RUN cp /usr/local/bin/libnsenter.so /usr/local/lib/libnsenter.so
 
 COPY bin/chaos-daemon /usr/local/bin/chaos-daemon
 COPY bin/pause /usr/local/bin/pause
