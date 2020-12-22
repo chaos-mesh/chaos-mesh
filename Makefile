@@ -220,6 +220,7 @@ $(eval $(call COMPILE_GO,images/chaos-mesh/bin/chaos-controller-manager,./cmd/ch
 $(eval $(call BUILD_IN_DOCKER,chaos-mesh-e2e,test/image/e2e/bin/ginkgo))
 $(eval $(call COMPILE_GO,test/image/e2e/bin/ginkgo,github.com/onsi/ginkgo/ginkgo,0))
 
+$(eval $(call BUILD_IN_DOCKER,chaos-mesh-e2e,test/image/e2e/bin/e2e.test))
 ifeq ($(IN_DOCKER),1)
 test/image/e2e/bin/e2e.test:
 	$(GO) test -c  -o ./test/image/e2e/bin/e2e.test ./test/e2e
