@@ -206,6 +206,12 @@ image-$(1)-dependencies := $(image-$(1)-dependencies) images/$(1)/bin/$(2)
 endif
 endef
 
+ifeq ($(IN_DOCKER),1)
+images/chaos-daemon/bin/pause: hack/pause.c
+	cc ./hack/pause.c -o images/chaos-daemon/bin/pause
+endif
+$(eval $(call BUILD_IN_DOCKER,chaos-daemon,pause))
+
 $(eval $(call BUILD_IN_DOCKER,chaos-daemon,chaos-daemon))
 $(eval $(call COMPILE_GO,chaos-daemon,chaos-daemon,1))
 
@@ -215,23 +221,21 @@ $(eval $(call COMPILE_GO,chaos-dashboard,chaos-dashboard,1,ui swagger_spec))
 $(eval $(call BUILD_IN_DOCKER,chaos-mesh,chaos-controller-manager))
 $(eval $(call COMPILE_GO,chaos-mesh,chaos-controller-manager,0))
 
-ifeq ($(IN_DOCKER),1)
-images/chaos-daemon/bin/pause: hack/pause.c
-	cc ./hack/pause.c -o images/chaos-daemon/bin/pause
-endif
-$(eval $(call BUILD_IN_DOCKER,chaos-daemon,pause))
+image-chaos-mesh-e2e-dependencies += test/image/e2e/manifests test/image/e2e/chaos-mesh e2e-build
 
-define CURL =
-ifeq ($(IN_DOCKER),1)
-images/$(1)/bin/$(2):
-	curl -L $(3) -o images/$(1)/bin/$(2)
-endif
-endef
+e2e-build: test/image/e2e/bin/ginkgo test/image/e2e/bin/e2e.test
 
-$(eval $(call BUILD_IN_DOCKER,chaos-daemon,toda.tar.gz))
-$(eval $(call CURL,chaos-daemon,toda.tar.gz,https://github.com/chaos-mesh/toda/releases/download/v0.1.9/toda-linux-amd64.tar.gz))
-$(eval $(call BUILD_IN_DOCKER,chaos-daemon,nsexec.tar.gz))
-$(eval $(call CURL,chaos-daemon,nsexec.tar.gz,https://github.com/chaos-mesh/nsexec/releases/download/v0.1.5/nsexec-linux-amd64.tar.gz))
+test/image/e2e/bin/ginkgo:
+	$(GO) build -trimpath  -o test/image/e2e/bin/ginkgo github.com/onsi/ginkgo/ginkgo
+
+test/image/e2e/bin/e2e.test:
+	$(GO) test -c  -o ./test/image/e2e/bin/e2e.test ./test/e2e
+
+test/image/e2e/manifests: manifests
+	cp -r manifests test/image/e2e
+
+test/image/e2e/chaos-mesh: helm/chaos-mesh
+	cp -r helm/chaos-mesh test/image/e2e
 
 define IMAGE_TEMPLATE =
 CLEAN_TARGETS += $(2)/.dockerbuilt
@@ -258,10 +262,9 @@ $(eval $(call IMAGE_TEMPLATE,chaos-mesh,images/chaos-mesh))
 $(eval $(call IMAGE_TEMPLATE,chaos-dashboard,images/chaos-dashboard))
 $(eval $(call IMAGE_TEMPLATE,build-env,images/build-env))
 $(eval $(call IMAGE_TEMPLATE,e2e-helper,test/cmd/e2e_helper))
-$(eval $(call IMAGE_TEMPLATE,chaos-mesh-protoc,./hack/protoc))
-
-image-chaos-kernel:
-	docker build -t ${DOCKER_REGISTRY_PREFIX}pingcap/chaos-kernel:${IMAGE_TAG} ${DOCKER_BUILD_ARGS} --build-arg MAKE_JOBS=${MAKE_JOBS} --build-arg MIRROR=${UBUNTU_MIRROR} images/chaos-kernel
+$(eval $(call IMAGE_TEMPLATE,chaos-mesh-protoc,hack/protoc))
+$(eval $(call IMAGE_TEMPLATE,chaos-mesh-e2e,test/image/e2e))
+$(eval $(call IMAGE_TEMPLATE,chaos-kernel,images/chaos-kernel))
 
 docker-push:
 	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-mesh:${IMAGE_TAG}"
@@ -313,21 +316,6 @@ proto: image-chaos-mesh-protoc
 
 	make fmt
 endif
-
-e2e-build:
-	$(GO) build -trimpath  -o test/image/e2e/bin/ginkgo github.com/onsi/ginkgo/ginkgo
-	$(GO) test -c  -o ./test/image/e2e/bin/e2e.test ./test/e2e
-
-ifeq ($(NO_BUILD),y)
-e2e-docker:
-	@echo "NO_BUILD=y, skip build for $@"
-else
-e2e-docker: e2e-build
-endif
-	[ -d test/image/e2e/chaos-mesh ] && rm -r test/image/e2e/chaos-mesh || true
-	cp -r helm/chaos-mesh test/image/e2e
-	cp -r manifests test/image/e2e
-	docker build -t "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-mesh-e2e:${IMAGE_TAG}" test/image/e2e
 
 tools := kubectl helm kind kubebuilder kustomize kubetest2
 define DOWNLOAD_TOOL =

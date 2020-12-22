@@ -154,7 +154,7 @@ function e2e::image_build() {
         echo "info: skip building and pushing images"
         return
     fi
-    DOCKER_REGISTRY=${DOCKER_REGISTRY} GOOS=linux GOARCH=amd64 make e2e-docker
+    DOCKER_REGISTRY=${DOCKER_REGISTRY} GOOS=linux GOARCH=amd64 make image-chaos-mesh-e2e
     DOCKER_REGISTRY=${DOCKER_REGISTRY} make image-chaos-mesh
     DOCKER_REGISTRY=${DOCKER_REGISTRY} make image-chaos-daemon
     DOCKER_REGISTRY=${DOCKER_REGISTRY} make image-e2e-helper
