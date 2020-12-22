@@ -52,11 +52,11 @@ FAILPOINT_DISABLE := $$(find $$PWD/ -type d | grep -vE "(\.git|bin)" | xargs $(G
 
 BUILD_TAGS ?=
 
-ifeq (${SWAGGER},1)
+ifeq ($(SWAGGER),1)
 	BUILD_TAGS += swagger_server
 endif
 
-ifeq (${UI},1)
+ifeq ($(UI),1)
 	BUILD_TAGS += ui_server
 endif
 
