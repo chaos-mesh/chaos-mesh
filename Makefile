@@ -62,6 +62,11 @@ endif
 
 CLEAN_TARGETS :=
 
+CHAOS_MESH_BUILD_IN_DOCKER ?= 0
+ifeq (${IN_DOCKER},1)
+	CHAOS_MESH_BUILD_IN_DOCKER = 0
+endif
+
 all: manifests/crd.yaml image
 
 check: fmt vet boilerplate lint generate manifests/crd.yaml tidy
@@ -172,8 +177,9 @@ image: image-chaos-daemon image-chaos-mesh image-chaos-dashboard
 
 GO_TARGET_PHONY :=
 
-define COMPILE_GO =
-ifeq ($(IN_DOCKER),1)
+define COMPILE_GO_TEMPLATE =
+ifeq ($(CHAOS_MESH_BUILD_IN_DOCKER),0)
+
 $(1): $(4)
 ifeq ($(3),1)
 	$(CGO) build -ldflags "$(LDFLAGS)" -tags "${BUILD_TAGS}" -o $(1) $(2)
@@ -181,8 +187,8 @@ else
 	$(GO) build -ldflags "$(LDFLAGS)" -tags "${BUILD_TAGS}" -o $(1) $(2)
 endif
 
-GO_TARGET_PHONY += images/$(1)/bin/$(2)
 endif
+GO_TARGET_PHONY += $(1)
 endef
 
 BUILD_INDOCKER_ARG := --env IN_DOCKER=1
@@ -190,41 +196,41 @@ ifneq ($(GO_BUILD_CACHE),)
 	BUILD_INDOCKER_ARG += --volume $(GO_BUILD_CACHE)/chaos-mesh-gopath:/tmp/go
 	BUILD_INDOCKER_ARG += --volume $(GO_BUILD_CACHE)/chaos-mesh-gobuild:/tmp/go-build
 endif
-define BUILD_IN_DOCKER =
+define BUILD_IN_DOCKER_TEMPLATE =
 CLEAN_TARGETS += $(2)
-ifneq ($(IN_DOCKER),1)
+ifeq ($(CHAOS_MESH_BUILD_IN_DOCKER),1)
 $(2): image-build-env
 	docker run --rm --workdir /mnt/ --volume $(shell pwd):/mnt \
 		$(BUILD_INDOCKER_ARG) --env UI=${UI} --env SWAGGER=${SWAGGER} \
 		--user $(shell id -u):$(shell id -g) ${DOCKER_REGISTRY_PREFIX}pingcap/build-env \
 		/usr/bin/make $(2)
-image-$(1)-dependencies := $(image-$(1)-dependencies) $(2)
 endif
+image-$(1)-dependencies := $(image-$(1)-dependencies) $(2)
 endef
 
-ifeq ($(IN_DOCKER),1)
+ifeq ($(CHAOS_MESH_BUILD_IN_DOCKER),0)
 images/chaos-daemon/bin/pause: hack/pause.c
 	cc ./hack/pause.c -o images/chaos-daemon/bin/pause
 endif
-$(eval $(call BUILD_IN_DOCKER,chaos-daemon,images/chaos-daemon/bin/pause))
+$(eval $(call BUILD_IN_DOCKER_TEMPLATE,chaos-daemon,images/chaos-daemon/bin/pause))
 
-$(eval $(call BUILD_IN_DOCKER,chaos-daemon,images/chaos-daemon/bin/chaos-daemon))
-$(eval $(call COMPILE_GO,images/chaos-daemon/bin/chaos-daemon,./cmd/chaos-daemon/main.go,1))
+$(eval $(call BUILD_IN_DOCKER_TEMPLATE,chaos-daemon,images/chaos-daemon/bin/chaos-daemon))
+$(eval $(call COMPILE_GO_TEMPLATE,images/chaos-daemon/bin/chaos-daemon,./cmd/chaos-daemon/main.go,1))
 
-$(eval $(call BUILD_IN_DOCKER,chaos-dashboard,images/chaos-dashboard/bin/chaos-dashboard))
-$(eval $(call COMPILE_GO,images/chaos-dashboard/bin/chaos-dashboard,./cmd/chaos-dashboard/main.go,1,ui swagger_spec))
+$(eval $(call BUILD_IN_DOCKER_TEMPLATE,chaos-dashboard,images/chaos-dashboard/bin/chaos-dashboard))
+$(eval $(call COMPILE_GO_TEMPLATE,images/chaos-dashboard/bin/chaos-dashboard,./cmd/chaos-dashboard/main.go,1,ui swagger_spec))
 
-$(eval $(call BUILD_IN_DOCKER,chaos-mesh,images/chaos-mesh/bin/chaos-controller-manager))
-$(eval $(call COMPILE_GO,images/chaos-mesh/bin/chaos-controller-manager,./cmd/chaos-controller-manager/main.go,0))
+$(eval $(call BUILD_IN_DOCKER_TEMPLATE,chaos-mesh,images/chaos-mesh/bin/chaos-controller-manager))
+$(eval $(call COMPILE_GO_TEMPLATE,images/chaos-mesh/bin/chaos-controller-manager,./cmd/chaos-controller-manager/main.go,0))
 
-$(eval $(call BUILD_IN_DOCKER,chaos-mesh-e2e,test/image/e2e/bin/ginkgo))
-$(eval $(call COMPILE_GO,test/image/e2e/bin/ginkgo,github.com/onsi/ginkgo/ginkgo,0))
+$(eval $(call BUILD_IN_DOCKER_TEMPLATE,chaos-mesh-e2e,test/image/e2e/bin/ginkgo))
+$(eval $(call COMPILE_GO_TEMPLATE,test/image/e2e/bin/ginkgo,github.com/onsi/ginkgo/ginkgo,0))
 
-$(eval $(call BUILD_IN_DOCKER,chaos-mesh-e2e,test/image/e2e/bin/e2e.test))
-ifeq ($(IN_DOCKER),1)
+$(eval $(call BUILD_IN_DOCKER_TEMPLATE,chaos-mesh-e2e,test/image/e2e/bin/e2e.test))
+ifeq ($(CHAOS_MESH_BUILD_IN_DOCKER),0)
 test/image/e2e/bin/e2e.test:
 	$(GO) test -c  -o ./test/image/e2e/bin/e2e.test ./test/e2e
-$(eval $(call BUILD_IN_DOCKER,chaos-mesh-e2e,test/image/e2e/bin/e2e.test))
+$(eval $(call BUILD_IN_DOCKER_TEMPLATE,chaos-mesh-e2e,test/image/e2e/bin/e2e.test))
 
 GO_TARGET_PHONY += test/image/e2e/bin/e2e.test
 endif
@@ -305,7 +311,7 @@ manifests/crd.yaml: config ensure-kustomize
 	$(KUSTOMIZE_BIN) build config/default > manifests/crd.yaml
 
 # Generate Go files from Chaos Mesh proto files.
-ifeq ($(IN_DOCKER),1)
+ifeq ($(CHAOS_MESH_BUILD_IN_DOCKER),0)
 proto:
 	for dir in pkg/chaosdaemon pkg/chaosfs; do\
 		protoc -I $$dir/pb $$dir/pb/*.proto --go_out=plugins=grpc:$$dir/pb --go_out=./$$dir/pb ;\
