@@ -1,4 +1,6 @@
-bin
+**/bin/*
+!bin/.gitkeep
+
 .idea/
 *.iml
 *.swp
@@ -35,5 +37,6 @@ test/image/e2e/manifests/
 /docs/docs.go
 
 /images/*/bin/*
+!/images/*/bin/.gitkeep
 
 .dockerbuilt
