@@ -20,6 +20,8 @@ import (
 	"os"
 	"time"
 
+	"golang.org/x/time/rate"
+
 	chaosmeshv1alpha1 "github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	apiWebhook "github.com/chaos-mesh/chaos-mesh/api/webhook"
 	ccfg "github.com/chaos-mesh/chaos-mesh/controllers/config"
@@ -31,7 +33,6 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/version"
 	"github.com/chaos-mesh/chaos-mesh/pkg/webhook/config"
 	"github.com/chaos-mesh/chaos-mesh/pkg/webhook/config/watcher"
-	"golang.org/x/time/rate"
 
 	_ "github.com/chaos-mesh/chaos-mesh/controllers/dnschaos"
 	_ "github.com/chaos-mesh/chaos-mesh/controllers/httpchaos"

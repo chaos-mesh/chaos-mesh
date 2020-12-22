@@ -34,9 +34,10 @@ import (
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	ctrlconfig "github.com/chaos-mesh/chaos-mesh/controllers/config"
+	daemonClient "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/client"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
 	"github.com/chaos-mesh/chaos-mesh/pkg/portforward"
-	"github.com/chaos-mesh/chaos-mesh/pkg/utils"
+	sele "github.com/chaos-mesh/chaos-mesh/pkg/selector"
 	e2econfig "github.com/chaos-mesh/chaos-mesh/test/e2e/config"
 )
 
@@ -169,7 +170,7 @@ func GetPods(ctx context.Context, status v1alpha1.ChaosStatus, selector v1alpha1
 		time.Sleep(waitTime)
 	}
 
-	pods, err := utils.SelectPods(ctx, c, c, selector, ctrlconfig.ControllerCfg.ClusterScoped, ctrlconfig.ControllerCfg.TargetNamespace, ctrlconfig.ControllerCfg.AllowedNamespaces, ctrlconfig.ControllerCfg.IgnoredNamespaces)
+	pods, err := sele.SelectPods(ctx, c, c, selector, ctrlconfig.ControllerCfg.ClusterScoped, ctrlconfig.ControllerCfg.TargetNamespace, ctrlconfig.ControllerCfg.AllowedNamespaces, ctrlconfig.ControllerCfg.IgnoredNamespaces)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to SelectPods with: %s", err.Error())
 	}
@@ -185,7 +186,7 @@ func GetPods(ctx context.Context, status v1alpha1.ChaosStatus, selector v1alpha1
 			Nodes:          []string{nodeName},
 			LabelSelectors: map[string]string{"app.kubernetes.io/component": "chaos-daemon"},
 		}
-		daemons, err := utils.SelectPods(ctx, c, nil, daemonSelector, ctrlconfig.ControllerCfg.ClusterScoped, ctrlconfig.ControllerCfg.TargetNamespace, ctrlconfig.ControllerCfg.AllowedNamespaces, ctrlconfig.ControllerCfg.IgnoredNamespaces)
+		daemons, err := sele.SelectPods(ctx, c, nil, daemonSelector, ctrlconfig.ControllerCfg.ClusterScoped, ctrlconfig.ControllerCfg.TargetNamespace, ctrlconfig.ControllerCfg.AllowedNamespaces, ctrlconfig.ControllerCfg.IgnoredNamespaces)
 		if err != nil {
 			return nil, nil, fmt.Errorf("failed to SelectPods with: %s", err.Error())
 		}
@@ -291,7 +292,7 @@ func GetPidFromPod(ctx context.Context, pod v1.Pod, daemon v1.Pod) (int, error) 
 		pfCancel()
 	}()
 
-	daemonClient, err := utils.NewChaosDaemonClientLocally(int(localPort))
+	daemonClient, err := daemonClient.NewChaosDaemonClientLocally(int(localPort))
 	if err != nil {
 		return 0, fmt.Errorf("new chaos daemon client failed: %s", err.Error())
 	}
@@ -363,7 +364,7 @@ func checkConnForCtrlAndDaemon(ctx context.Context, daemons []v1.Pod, c *ClientS
 	ctrlSelector := v1alpha1.SelectorSpec{
 		LabelSelectors: map[string]string{"app.kubernetes.io/component": "controller-manager"},
 	}
-	ctrlMgrs, err := utils.SelectPods(ctx, c.CtrlCli, c.CtrlCli, ctrlSelector, ctrlconfig.ControllerCfg.ClusterScoped, ctrlconfig.ControllerCfg.TargetNamespace, ctrlconfig.ControllerCfg.AllowedNamespaces, ctrlconfig.ControllerCfg.IgnoredNamespaces)
+	ctrlMgrs, err := sele.SelectPods(ctx, c.CtrlCli, c.CtrlCli, ctrlSelector, ctrlconfig.ControllerCfg.ClusterScoped, ctrlconfig.ControllerCfg.TargetNamespace, ctrlconfig.ControllerCfg.AllowedNamespaces, ctrlconfig.ControllerCfg.IgnoredNamespaces)
 	if err != nil {
 		return fmt.Errorf("failed to SelectPods with: %s", err.Error())
 	}

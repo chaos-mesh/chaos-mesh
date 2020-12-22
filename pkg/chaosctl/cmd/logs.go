@@ -26,7 +26,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/config"
 	cm "github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/common"
-	"github.com/chaos-mesh/chaos-mesh/pkg/utils"
+	sele "github.com/chaos-mesh/chaos-mesh/pkg/selector"
 )
 
 type logsOptions struct {
@@ -87,7 +87,7 @@ func (o *logsOptions) Run(args []string, c *cm.ClientSet) error {
 			selector.Nodes = []string{o.node}
 		}
 
-		components, err := utils.SelectPods(ctx, c.CtrlCli, nil, selector, config.ControllerCfg.ClusterScoped, config.ControllerCfg.TargetNamespace, config.ControllerCfg.AllowedNamespaces, config.ControllerCfg.IgnoredNamespaces)
+		components, err := sele.SelectPods(ctx, c.CtrlCli, nil, selector, config.ControllerCfg.ClusterScoped, config.ControllerCfg.TargetNamespace, config.ControllerCfg.AllowedNamespaces, config.ControllerCfg.IgnoredNamespaces)
 		if err != nil {
 			return fmt.Errorf("failed to SelectPods with: %s", err.Error())
 		}
