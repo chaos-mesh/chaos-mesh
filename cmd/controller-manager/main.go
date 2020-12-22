@@ -196,7 +196,7 @@ func setupWatchQueue(stopCh <-chan struct{}, configWatcher *watcher.K8sConfigMap
 	// for the server
 	sigChan := make(chan interface{}, 10)
 
-	queue := workqueue.NewRateLimitingQueue(&workqueue.BucketRateLimiter{Limiter: rate.NewLimiter(rate.Limit(0.5), 100)})
+	queue := workqueue.NewRateLimitingQueue(&workqueue.BucketRateLimiter{Limiter: rate.NewLimiter(rate.Limit(0.5), 1)})
 
 	go func() {
 		for {
