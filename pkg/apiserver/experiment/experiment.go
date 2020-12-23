@@ -738,12 +738,12 @@ func (s *Service) getExperimentDetail(c *gin.Context) {
 
 	uid := c.Param("uid")
 	if exp, err = s.archive.FindByUID(context.Background(), uid); err != nil {
-		if !gorm.IsRecordNotFoundError(err) {
-			c.Status(http.StatusInternalServerError)
-			_ = c.Error(utils.ErrInternalServer.NewWithNoMessage())
-		} else {
+		if gorm.IsRecordNotFoundError(err) {
 			c.Status(http.StatusInternalServerError)
 			_ = c.Error(utils.ErrInvalidRequest.New("the experiment is not found"))
+		} else {
+			c.Status(http.StatusInternalServerError)
+			_ = c.Error(utils.ErrInternalServer.NewWithNoMessage())
 		}
 		return
 	}
@@ -783,7 +783,7 @@ func (s *Service) getExperimentDetail(c *gin.Context) {
 // @Produce json
 // @Param uid path string true "uid"
 // @Param force query string true "force" Enums(true, false)
-// @Success 200 "delete ok"
+// @Success 200 {object} StatusResponse
 // @Failure 400 {object} utils.APIError
 // @Failure 404 {object} utils.APIError
 // @Failure 500 {object} utils.APIError
@@ -804,12 +804,12 @@ func (s *Service) deleteExperiment(c *gin.Context) {
 
 	uid := c.Param("uid")
 	if exp, err = s.archive.FindByUID(context.Background(), uid); err != nil {
-		if !gorm.IsRecordNotFoundError(err) {
-			c.Status(http.StatusInternalServerError)
-			_ = c.Error(utils.ErrInternalServer.NewWithNoMessage())
-		} else {
+		if gorm.IsRecordNotFoundError(err) {
 			c.Status(http.StatusInternalServerError)
 			_ = c.Error(utils.ErrInvalidRequest.New("the experiment is not found"))
+		} else {
+			c.Status(http.StatusInternalServerError)
+			_ = c.Error(utils.ErrInternalServer.NewWithNoMessage())
 		}
 		return
 	}
@@ -869,7 +869,7 @@ func (s *Service) deleteExperiment(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, nil)
+	c.JSON(http.StatusOK, StatusResponse{Status: "success"})
 }
 
 // @Summary Get chaos experiments state from Kubernetes cluster.
@@ -957,12 +957,12 @@ func (s *Service) pauseExperiment(c *gin.Context) {
 
 	uid := c.Param("uid")
 	if experiment, err = s.archive.FindByUID(context.Background(), uid); err != nil {
-		if !gorm.IsRecordNotFoundError(err) {
-			c.Status(http.StatusInternalServerError)
-			_ = c.Error(utils.ErrInternalServer.NewWithNoMessage())
-		} else {
+		if gorm.IsRecordNotFoundError(err) {
 			c.Status(http.StatusInternalServerError)
 			_ = c.Error(utils.ErrInvalidRequest.New("the experiment is not found"))
+		} else {
+			c.Status(http.StatusInternalServerError)
+			_ = c.Error(utils.ErrInternalServer.NewWithNoMessage())
 		}
 		return
 	}
@@ -1011,12 +1011,12 @@ func (s *Service) startExperiment(c *gin.Context) {
 
 	uid := c.Param("uid")
 	if experiment, err = s.archive.FindByUID(context.Background(), uid); err != nil {
-		if !gorm.IsRecordNotFoundError(err) {
-			c.Status(http.StatusInternalServerError)
-			_ = c.Error(utils.ErrInternalServer.NewWithNoMessage())
-		} else {
+		if gorm.IsRecordNotFoundError(err) {
 			c.Status(http.StatusInternalServerError)
 			_ = c.Error(utils.ErrInvalidRequest.New("the experiment is not found"))
+		} else {
+			c.Status(http.StatusInternalServerError)
+			_ = c.Error(utils.ErrInternalServer.NewWithNoMessage())
 		}
 		return
 	}

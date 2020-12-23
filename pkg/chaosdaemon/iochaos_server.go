@@ -63,13 +63,14 @@ func (s *DaemonServer) ApplyIoChaos(ctx context.Context, in *pb.ApplyIoChaosRequ
 	}
 
 	// TODO: make this log level configurable
-	args := fmt.Sprintf("--path %s --pid %d --verbose info", in.Volume, pid)
+	args := fmt.Sprintf("--path %s --verbose info", in.Volume)
 	log.Info("executing", "cmd", todaBin+" "+args)
 	cmd := bpm.DefaultProcessBuilder(todaBin, strings.Split(args, " ")...).
-		EnableSuicide().
+		SetNS(pid, bpm.MountNS).
+		SetNS(pid, bpm.PidNS).
+		EnableLocalMnt().
 		SetIdentifier(in.ContainerId).
 		Build()
-	cmd.Env = append(cmd.Env, "LD_LIBRARY_PATH=/usr/local/lib/toda-glibc")
 	cmd.Stdin = strings.NewReader(in.Actions)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr

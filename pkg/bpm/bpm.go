@@ -32,26 +32,30 @@ type NsType string
 
 const (
 	MountNS NsType = "mnt"
-	UtsNS   NsType = "uts"
-	IpcNS   NsType = "ipc"
-	NetNS   NsType = "net"
-	PidNS   NsType = "pid"
-	UserNS  NsType = "user"
+	// uts namespace is not supported yet
+	// UtsNS   NsType = "uts"
+	IpcNS NsType = "ipc"
+	NetNS NsType = "net"
+	PidNS NsType = "pid"
+	// user namespace is not supported yet
+	// UserNS  NsType = "user"
 )
 
 var nsArgMap = map[NsType]string{
 	MountNS: "m",
-	UtsNS:   "u",
-	IpcNS:   "i",
-	NetNS:   "n",
-	PidNS:   "p",
-	UserNS:  "U",
+	// uts namespace is not supported by nsexec yet
+	// UtsNS:   "u",
+	IpcNS: "i",
+	NetNS: "n",
+	PidNS: "p",
+	// user namespace is not supported by nsexec yet
+	// UserNS:  "U",
 }
 
 const (
-	pausePath   = "/usr/local/bin/pause"
-	suicidePath = "/usr/local/bin/suicide"
-	ignorePath  = "/usr/local/bin/ignore"
+	pausePath  = "/usr/local/bin/pause"
+	ignorePath = "/usr/local/bin/ignore"
+	nsexecPath = "/usr/local/bin/nsexec"
 
 	DefaultProcPrefix = "/proc"
 )
@@ -209,7 +213,6 @@ func DefaultProcessBuilder(cmd string, args ...string) *ProcessBuilder {
 		args:       args,
 		nsOptions:  []nsOption{},
 		pause:      false,
-		suicide:    false,
 		identifier: nil,
 		ctx:        context.Background(),
 	}
@@ -222,8 +225,8 @@ type ProcessBuilder struct {
 
 	nsOptions []nsOption
 
-	pause   bool
-	suicide bool
+	pause    bool
+	localMnt bool
 
 	identifier *string
 
@@ -264,9 +267,8 @@ func (b *ProcessBuilder) EnablePause() *ProcessBuilder {
 	return b
 }
 
-// EnableSuicide enables suicide for process
-func (b *ProcessBuilder) EnableSuicide() *ProcessBuilder {
-	b.suicide = true
+func (b *ProcessBuilder) EnableLocalMnt() *ProcessBuilder {
+	b.localMnt = true
 
 	return b
 }
