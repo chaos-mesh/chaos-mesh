@@ -9,6 +9,7 @@ import { useHistory, useParams } from 'react-router-dom'
 import { Ace } from 'ace-builds'
 import Alert from '@material-ui/lab/Alert'
 import ArchiveOutlinedIcon from '@material-ui/icons/ArchiveOutlined'
+import CloudDownloadOutlinedIcon from '@material-ui/icons/CloudDownloadOutlined'
 import ConfirmDialog from 'components-mui/ConfirmDialog'
 import { Event } from 'api/events.type'
 import ExperimentConfiguration from 'components/ExperimentConfiguration'
@@ -19,9 +20,11 @@ import Paper from 'components-mui/Paper'
 import PaperTop from 'components-mui/PaperTop'
 import PauseCircleOutlineIcon from '@material-ui/icons/PauseCircleOutline'
 import PlayCircleOutlineIcon from '@material-ui/icons/PlayCircleOutline'
+import Space from 'components-mui/Space'
 import T from 'components/T'
 import YAMLEditor from 'components/YAMLEditor'
 import api from 'api'
+import fileDownload from 'js-file-download'
 import genEventsChart from 'lib/d3/eventsChart'
 import { useIntl } from 'react-intl'
 import { usePrevious } from 'lib/hooks'
@@ -209,6 +212,8 @@ export default function ExperimentDetail() {
       .catch(console.error)
   }
 
+  const handleDownloadExperiment = () => fileDownload(yaml.safeDump(detail!.yaml), `${detail!.name}.yaml`)
+
   const handleUpdateExperiment = () => {
     const data = yaml.safeLoad(yamlEditor!.getValue())
 
@@ -279,15 +284,25 @@ export default function ExperimentDetail() {
           <Grid item xs={12}>
             <Paper>
               <PaperTop title={T('common.configuration')}>
-                <Button
-                  variant="outlined"
-                  size="small"
-                  color="primary"
-                  startIcon={<NoteOutlinedIcon />}
-                  onClick={onModalOpen}
-                >
-                  {T('common.update')}
-                </Button>
+                <Space>
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    startIcon={<CloudDownloadOutlinedIcon />}
+                    onClick={handleDownloadExperiment}
+                  >
+                    {T('common.download')}
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    color="primary"
+                    startIcon={<NoteOutlinedIcon />}
+                    onClick={onModalOpen}
+                  >
+                    {T('common.update')}
+                  </Button>
+                </Space>
               </PaperTop>
               <Box p={3}>{detail && <ExperimentConfiguration experimentDetail={detail} />}</Box>
             </Paper>
