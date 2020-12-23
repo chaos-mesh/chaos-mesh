@@ -4,6 +4,7 @@ import { Theme, createStyles, makeStyles } from '@material-ui/core/styles'
 
 import { Archive } from 'api/archives.type'
 import ArchiveOutlinedIcon from '@material-ui/icons/ArchiveOutlined'
+import DeleteOutlinedIcon from '@material-ui/icons/DeleteOutlined'
 import ErrorOutlineIcon from '@material-ui/icons/ErrorOutline'
 import { Experiment } from 'api/experiments.type'
 import ExperimentEventsPreview from 'components/ExperimentEventsPreview'
@@ -68,6 +69,7 @@ const ExperimentListItem: React.FC<ExperimentListItemProps> = ({
   }
 
   const handleAction = (action: string) => (event: React.MouseEvent<HTMLSpanElement>) => {
+    console.log(action)
     event.stopPropagation()
 
     handleDialogOpen(true)
@@ -75,27 +77,36 @@ const ExperimentListItem: React.FC<ExperimentListItemProps> = ({
       case 'archive':
         handleSelect({
           uuid: (e as Experiment).uid,
-          title: `${intl.formatMessage({ id: 'archives.single' })} ${e.name}?`,
+          title: `${intl.formatMessage({ id: 'archives.single' })} ${e.name}`,
           description: intl.formatMessage({ id: 'experiments.deleteDesc' }),
-          action: 'archive',
+          action,
         })
 
         return
       case 'pause':
         handleSelect({
           uuid: (e as Experiment).uid,
-          title: `${intl.formatMessage({ id: 'common.pause' })} ${e.name}?`,
+          title: `${intl.formatMessage({ id: 'common.pause' })} ${e.name}`,
           description: intl.formatMessage({ id: 'experiments.pauseDesc' }),
-          action: 'pause',
+          action,
         })
 
         return
       case 'start':
         handleSelect({
           uuid: (e as Experiment).uid,
-          title: `${intl.formatMessage({ id: 'common.start' })} ${e.name}?`,
+          title: `${intl.formatMessage({ id: 'common.start' })} ${e.name}`,
           description: intl.formatMessage({ id: 'experiments.startDesc' }),
-          action: 'start',
+          action,
+        })
+
+        return
+      case 'delete':
+        handleSelect({
+          uuid: (e as Experiment).uid,
+          title: `${intl.formatMessage({ id: 'common.delete' })} ${e.name}`,
+          description: intl.formatMessage({ id: 'archives.deleteDesc' }),
+          action,
         })
 
         return
@@ -114,7 +125,18 @@ const ExperimentListItem: React.FC<ExperimentListItemProps> = ({
           .locale(lang)
           .fromNow()}
       </Typography>
-      {!isArchive && (
+      {isArchive ? (
+        <IconButton
+          color="primary"
+          title={intl.formatMessage({ id: 'common.delete' })}
+          aria-label={intl.formatMessage({ id: 'common.delete' })}
+          component="span"
+          size="small"
+          onClick={handleAction('delete')}
+        >
+          <DeleteOutlinedIcon />
+        </IconButton>
+      ) : (
         <>
           {(e as Experiment).status === 'Paused' ? (
             <IconButton

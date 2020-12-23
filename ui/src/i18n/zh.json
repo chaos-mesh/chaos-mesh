@@ -134,6 +134,7 @@
     "title": "归档",
     "single": "归档",
     "noArchivesFound": "未发现归档",
+    "deleteDesc": "归档将被永久删除",
     "numberOfRuns": "运行次数",
     "numberOfAffectedPods": "受到实验作用的 Pod 数目"
   },

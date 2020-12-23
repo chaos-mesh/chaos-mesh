@@ -1,7 +1,6 @@
 import { Box, Grid, Typography } from '@material-ui/core'
 import React, { useEffect, useState } from 'react'
 import { setAlert, setAlertOpen } from 'slices/globalStatus'
-import { useStoreDispatch, useStoreSelector } from 'store'
 
 import ConfirmDialog from 'components-mui/ConfirmDialog'
 import { Experiment } from 'api/experiments.type'
@@ -12,14 +11,13 @@ import TuneIcon from '@material-ui/icons/Tune'
 import _groupBy from 'lodash.groupby'
 import api from 'api'
 import { dayComparator } from 'lib/dayjs'
-import { setNeedToRefreshExperiments } from 'slices/experiments'
 import { transByKind } from 'lib/byKind'
 import { useIntl } from 'react-intl'
+import { useStoreDispatch } from 'store'
 
 export default function Experiments() {
   const intl = useIntl()
 
-  const needToRefreshExperiments = useStoreSelector((state) => state.experiments.needToRefreshExperiments)
   const dispatch = useStoreDispatch()
 
   const [loading, setLoading] = useState(false)
@@ -70,14 +68,6 @@ export default function Experiments() {
 
   // Get all experiments after mount
   useEffect(fetchExperiments, [])
-
-  // Refresh experiments after some actions are completed
-  useEffect(() => {
-    if (needToRefreshExperiments) {
-      fetchExperiments()
-      dispatch(setNeedToRefreshExperiments(false))
-    }
-  }, [dispatch, needToRefreshExperiments])
 
   // Refresh every experiments' events after experiments state updated
   useEffect(() => {

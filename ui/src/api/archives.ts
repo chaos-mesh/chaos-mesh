@@ -13,3 +13,5 @@ export const archives = (namespace = null, name = null, kind = null) =>
 export const detail = (uuid: uuid) => http.get(`/archives/detail?uid=${uuid}`)
 
 export const report = (uuid: uuid) => http.get(`/archives/report?uid=${uuid}`)
+
+export const del = (uuid: uuid) => http.delete(`/archives/${uuid}`)

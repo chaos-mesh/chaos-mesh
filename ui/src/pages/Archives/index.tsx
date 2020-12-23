@@ -1,20 +1,32 @@
 import { Box, Grid, Typography } from '@material-ui/core'
 import React, { useEffect, useState } from 'react'
+import { setAlert, setAlertOpen } from 'slices/globalStatus'
 
 import { Archive } from 'api/archives.type'
 import ArchiveOutlinedIcon from '@material-ui/icons/ArchiveOutlined'
+import ConfirmDialog from 'components-mui/ConfirmDialog'
 import ExperimentListItem from 'components/ExperimentListItem'
 import Loading from 'components-mui/Loading'
 import T from 'components/T'
 import _groupBy from 'lodash.groupby'
 import api from 'api'
 import { useIntl } from 'react-intl'
+import { useStoreDispatch } from 'store'
 
 export default function Archives() {
   const intl = useIntl()
 
+  const dispatch = useStoreDispatch()
+
   const [loading, setLoading] = useState(false)
   const [archives, setArchives] = useState<Archive[] | null>(null)
+  const [dialogOpen, setDialogOpen] = useState(false)
+  const [selected, setSelected] = useState({
+    uuid: '',
+    title: '',
+    description: '',
+    action: 'archive',
+  })
 
   const fetchArchives = () => {
     setLoading(true)
@@ -29,6 +41,40 @@ export default function Archives() {
   }
 
   useEffect(fetchArchives, [])
+
+  const handleExperiment = (action: string) => () => {
+    let actionFunc: any
+
+    switch (action) {
+      case 'delete':
+        actionFunc = api.archives.del
+
+        break
+      default:
+        actionFunc = null
+    }
+
+    if (actionFunc === null) {
+      return
+    }
+
+    setDialogOpen(false)
+
+    const { uuid } = selected
+
+    actionFunc(uuid)
+      .then(() => {
+        dispatch(
+          setAlert({
+            type: 'success',
+            message: intl.formatMessage({ id: `common.${action}Successfully` }),
+          })
+        )
+        dispatch(setAlertOpen(true))
+        fetchArchives()
+      })
+      .catch(console.error)
+  }
 
   return (
     <>
@@ -48,8 +94,8 @@ export default function Archives() {
                       <ExperimentListItem
                         experiment={e}
                         isArchive
-                        handleSelect={() => {}}
-                        handleDialogOpen={() => {}}
+                        handleSelect={setSelected}
+                        handleDialogOpen={setDialogOpen}
                         intl={intl}
                       />
                     </Grid>
@@ -70,6 +116,14 @@ export default function Archives() {
       )}
 
       {loading && <Loading />}
+
+      <ConfirmDialog
+        open={dialogOpen}
+        setOpen={setDialogOpen}
+        title={selected.title}
+        description={selected.description}
+        onConfirm={handleExperiment(selected.action)}
+      />
     </>
   )
 }

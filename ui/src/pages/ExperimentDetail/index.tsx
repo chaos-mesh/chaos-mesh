@@ -136,7 +136,7 @@ export default function ExperimentDetail() {
     switch (action) {
       case 'archive':
         setDialogInfo({
-          title: `${intl.formatMessage({ id: 'archives.single' })} ${detail!.name}?`,
+          title: `${intl.formatMessage({ id: 'archives.single' })} ${detail!.name}`,
           description: intl.formatMessage({ id: 'experiments.deleteDesc' }),
           action: 'archive',
         })
@@ -144,7 +144,7 @@ export default function ExperimentDetail() {
         break
       case 'pause':
         setDialogInfo({
-          title: `${intl.formatMessage({ id: 'common.pause' })} ${detail!.name}?`,
+          title: `${intl.formatMessage({ id: 'common.pause' })} ${detail!.name}`,
           description: intl.formatMessage({ id: 'experiments.pauseDesc' }),
           action: 'pause',
         })
@@ -152,7 +152,7 @@ export default function ExperimentDetail() {
         break
       case 'start':
         setDialogInfo({
-          title: `${intl.formatMessage({ id: 'common.start' })} ${detail!.name}?`,
+          title: `${intl.formatMessage({ id: 'common.start' })} ${detail!.name}`,
           description: intl.formatMessage({ id: 'experiments.startDesc' }),
           action: 'start',
         })

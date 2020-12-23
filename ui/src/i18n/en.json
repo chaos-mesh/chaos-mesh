@@ -134,6 +134,7 @@
     "title": "Archives",
     "single": "Archive",
     "noArchivesFound": "No archives found",
+    "deleteDesc": "The Archive will be permanently deleted",
     "numberOfRuns": "Number of Runs",
     "numberOfAffectedPods": "Number of Affected Pods"
   },

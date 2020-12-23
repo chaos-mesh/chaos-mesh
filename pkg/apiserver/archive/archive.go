@@ -265,7 +265,7 @@ func (s *Service) report(c *gin.Context) {
 // @Param uid path string true "uid"
 // @Success 200 {object} StatusResponse
 // @Failure 500 {object} utils.APIError
-// @Router /experiments/{uid} [delete]
+// @Router /archives/{uid} [delete]
 func (s *Service) delete(c *gin.Context) {
 	var (
 		err error

@@ -26,7 +26,6 @@ const initialState: {
   labels: Record<string, string[]>
   annotations: Record<string, string[]>
   pods: any[]
-  needToRefreshExperiments: boolean
   step1: boolean
   step2: boolean
   kindAction: [Kind | '', string]
@@ -37,7 +36,6 @@ const initialState: {
   labels: {},
   annotations: {},
   pods: [],
-  needToRefreshExperiments: false,
   // New Experiment needed
   step1: false,
   step2: false,
@@ -52,9 +50,6 @@ const experimentsSlice = createSlice({
   name: 'experiments',
   initialState,
   reducers: {
-    setNeedToRefreshExperiments(state, action: PayloadAction<boolean>) {
-      state.needToRefreshExperiments = action.payload
-    },
     setStep1(state, action: PayloadAction<boolean>) {
       state.step1 = action.payload
     },
@@ -94,14 +89,6 @@ const experimentsSlice = createSlice({
   },
 })
 
-export const {
-  setNeedToRefreshExperiments,
-  setStep1,
-  setStep2,
-  setKindAction,
-  setTarget,
-  setBasic,
-  resetNewExperiment,
-} = experimentsSlice.actions
+export const { setStep1, setStep2, setKindAction, setTarget, setBasic, resetNewExperiment } = experimentsSlice.actions
 
 export default experimentsSlice.reducer
