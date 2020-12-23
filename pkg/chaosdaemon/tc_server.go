@@ -218,12 +218,14 @@ func (s *DaemonServer) setFilterTcs(
 			ch.Protocol = fmt.Sprintf("--protocol %s", tc.Protocol)
 		}
 
-		if len(tc.SourcePort) > 0 || len(tc.EgressPort) > 0 {
+		if len(tc.SourcePort) > 0 {
 			ch.SourcePorts = fmt.Sprintf("--source-port %s", tc.SourcePort)
 			if strings.Contains(tc.SourcePort, ",") {
 				ch.SourcePorts = fmt.Sprintf("-m multiport --source-ports %s", tc.SourcePort)
 			}
+		}
 
+		if len(tc.EgressPort) > 0 {
 			ch.DestinationPorts = fmt.Sprintf("--destination-port %s", tc.EgressPort)
 			if strings.Contains(tc.EgressPort, ",") {
 				ch.DestinationPorts = fmt.Sprintf("-m multiport --destination-ports %s", tc.EgressPort)
