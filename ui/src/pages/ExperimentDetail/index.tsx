@@ -238,39 +238,35 @@ export default function ExperimentDetail() {
       <Grow in={!loading} style={{ transformOrigin: '0 0 0' }}>
         <Grid container spacing={6}>
           <Grid item xs={12}>
-            <Box display="flex">
-              <Box mr={3}>
+            <Space display="flex">
+              <Button
+                variant="outlined"
+                size="small"
+                startIcon={<ArchiveOutlinedIcon />}
+                onClick={handleAction('archive')}
+              >
+                {T('archives.single')}
+              </Button>
+              {detail?.status === 'Paused' ? (
                 <Button
                   variant="outlined"
                   size="small"
-                  startIcon={<ArchiveOutlinedIcon />}
-                  onClick={handleAction('archive')}
+                  startIcon={<PlayCircleOutlineIcon />}
+                  onClick={handleAction('start')}
                 >
-                  {T('archives.single')}
+                  {T('common.start')}
                 </Button>
-              </Box>
-              <Box>
-                {detail?.status === 'Paused' ? (
-                  <Button
-                    variant="outlined"
-                    size="small"
-                    startIcon={<PlayCircleOutlineIcon />}
-                    onClick={handleAction('start')}
-                  >
-                    {T('common.start')}
-                  </Button>
-                ) : (
-                  <Button
-                    variant="outlined"
-                    size="small"
-                    startIcon={<PauseCircleOutlineIcon />}
-                    onClick={handleAction('pause')}
-                  >
-                    {T('common.pause')}
-                  </Button>
-                )}
-              </Box>
-            </Box>
+              ) : (
+                <Button
+                  variant="outlined"
+                  size="small"
+                  startIcon={<PauseCircleOutlineIcon />}
+                  onClick={handleAction('pause')}
+                >
+                  {T('common.pause')}
+                </Button>
+              )}
+            </Space>
           </Grid>
 
           {detail?.failed_message && (

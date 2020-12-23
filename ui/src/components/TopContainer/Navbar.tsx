@@ -8,6 +8,7 @@ import Namespace from './Namespace'
 import { NavigationBreadCrumbProps } from 'slices/navigation'
 import React from 'react'
 import SearchTrigger from 'components/SearchTrigger'
+import Space from 'components-mui/Space'
 import T from 'components/T'
 import { useHistory } from 'react-router-dom'
 
@@ -99,10 +100,8 @@ const Navbar: React.FC<HeaderProps> = ({ handleDrawerToggle, breadcrumbs }) => {
                   )
                 })}
             </Breadcrumbs>
-            <Box className={classes.tail} display="flex" justifyContent="space-between" alignItems="center">
-              <Box mr={3}>
-                <Namespace />
-              </Box>
+            <Space className={classes.tail} display="flex" justifyContent="space-between" alignItems="center">
+              <Namespace />
               <Box>
                 <SearchTrigger />
                 <IconButton
@@ -114,7 +113,7 @@ const Navbar: React.FC<HeaderProps> = ({ handleDrawerToggle, breadcrumbs }) => {
                   <AddIcon />
                 </IconButton>
               </Box>
-            </Box>
+            </Space>
           </Box>
         </Toolbar>
       </AppBar>

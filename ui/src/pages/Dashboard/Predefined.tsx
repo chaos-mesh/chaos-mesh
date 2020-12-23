@@ -8,6 +8,7 @@ import { useStoreDispatch, useStoreSelector } from 'store'
 import { Ace } from 'ace-builds'
 import Paper from 'components-mui/Paper'
 import PaperTop from 'components-mui/PaperTop'
+import Space from 'components-mui/Space'
 import T from 'components/T'
 import YAML from 'components/YAML'
 import YAMLEditor from 'components/YAMLEditor'
@@ -162,16 +163,14 @@ const Predefined = () => {
             {experiment && (
               <>
                 <PaperTop title={experiment.name}>
-                  <Box display="flex">
-                    <Box mr={3}>
-                      <Button variant="contained" color="secondary" size="small" onClick={handleDeleteExperiment}>
-                        {T('common.delete')}
-                      </Button>
-                    </Box>
+                  <Space display="flex">
+                    <Button variant="contained" color="secondary" size="small" onClick={handleDeleteExperiment}>
+                      {T('common.delete')}
+                    </Button>
                     <Button variant="contained" color="primary" size="small" onClick={handleApplyExperiment}>
                       {T('common.submit')}
                     </Button>
-                  </Box>
+                  </Space>
                 </PaperTop>
                 <YAMLEditor theme={theme} data={yaml.safeDump(experiment.yaml)} mountEditor={setYAMLEditor} />
               </>
