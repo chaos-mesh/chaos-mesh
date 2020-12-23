@@ -163,6 +163,9 @@
       "deleteDesc": "此操作不可逆"
     }
   },
+  "swagger": {
+    "title": "Swagger API"
+  },
   "common": {
     "other": "其他",
     "doc": "文档",

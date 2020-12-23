@@ -3,8 +3,9 @@ import { Theme, makeStyles } from '@material-ui/core/styles'
 
 import ArchiveOutlinedIcon from '@material-ui/icons/ArchiveOutlined'
 import DashboardOutlinedIcon from '@material-ui/icons/DashboardOutlined'
-import DescriptionOutlinedIcon from '@material-ui/icons/DescriptionOutlined'
 import GitHubIcon from '@material-ui/icons/GitHub'
+import HttpOutlinedIcon from '@material-ui/icons/HttpOutlined'
+import MenuBookOutlinedIcon from '@material-ui/icons/MenuBookOutlined'
 import { NavLink } from 'react-router-dom'
 import React from 'react'
 import SettingsOutlinedIcon from '@material-ui/icons/SettingsOutlined'
@@ -164,6 +165,13 @@ const Sidebar: React.FC<SidebarProps> = ({ open }) => {
         </Box>
 
         <List className={classes.list}>
+          <ListItem className={classes.listItem} component={NavLink} to="/swagger" button>
+            <ListItemIcon className={classes.listItemIcon}>
+              <HttpOutlinedIcon />
+            </ListItemIcon>
+            <ListItemText primary="Swagger API" />
+          </ListItem>
+
           <ListItem
             className={classes.listItem}
             component="a"
@@ -172,7 +180,7 @@ const Sidebar: React.FC<SidebarProps> = ({ open }) => {
             button
           >
             <ListItemIcon className={classes.listItemIcon}>
-              <DescriptionOutlinedIcon />
+              <MenuBookOutlinedIcon />
             </ListItemIcon>
             <ListItemText primary={T('common.doc')} />
           </ListItem>

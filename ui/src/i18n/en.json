@@ -163,6 +163,9 @@
       "deleteDesc": "The operation is irreversible"
     }
   },
+  "swagger": {
+    "title": "Swagger API"
+  },
   "common": {
     "other": "Other",
     "doc": "Documentation",
