@@ -211,6 +211,7 @@ exit 1
 					Cidrs: []string{"1.1.1.1/32"},
 				}},
 				ContainerId: "containerd://container-id",
+				EnterNS:     true,
 			})
 			Expect(err).To(BeNil())
 		})
@@ -224,6 +225,7 @@ exit 1
 					Cidrs: []string{"1.1.1.1/32"},
 				}},
 				ContainerId: "containerd://container-id",
+				EnterNS:     true,
 			})
 			Expect(err).ToNot(BeNil())
 			Expect(err.Error()).To(Equal(errorStr))
