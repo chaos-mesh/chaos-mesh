@@ -20,7 +20,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
 )
 
-func applyTc(ctx context.Context, pid uint32, withoutNS bool, args ...string) error {
+func applyTc(ctx context.Context, pid uint32, enterNS bool, args ...string) error {
 	// Mock point to return error in unit test
 	if err := mock.On("TcApplyError"); err != nil {
 		if e, ok := err.(error); ok {
@@ -32,7 +32,7 @@ func applyTc(ctx context.Context, pid uint32, withoutNS bool, args ...string) er
 	}
 
 	processBuilder := bpm.DefaultProcessBuilder("tc", args...).SetContext(ctx)
-	if !withoutNS {
+	if enterNS {
 		processBuilder = processBuilder.SetNS(pid, bpm.NetNS)
 	}
 	cmd := processBuilder.Build()

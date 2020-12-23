@@ -40,13 +40,13 @@ func (s *DaemonServer) SetIptablesChains(ctx context.Context, req *pb.IptablesCh
 	}
 
 	iptables := buildIptablesClient(ctx, pid)
-	err = iptables.initializeEnv(req.WithoutNS)
+	err = iptables.initializeEnv(req.EnterNS)
 	if err != nil {
 		log.Error(err, "error while initializing iptables")
 		return nil, err
 	}
 
-	err = iptables.setIptablesChains(req.Chains, req.WithoutNS)
+	err = iptables.setIptablesChains(req.Chains, req.EnterNS)
 	if err != nil {
 		log.Error(err, "error while setting iptables chains")
 		return nil, err
@@ -72,9 +72,9 @@ func buildIptablesClient(ctx context.Context, pid uint32) iptablesClient {
 	}
 }
 
-func (iptables *iptablesClient) setIptablesChains(chains []*pb.Chain, withoutNS bool) error {
+func (iptables *iptablesClient) setIptablesChains(chains []*pb.Chain, enterNS bool) error {
 	for _, chain := range chains {
-		err := iptables.setIptablesChain(chain, withoutNS)
+		err := iptables.setIptablesChain(chain, enterNS)
 		if err != nil {
 			return err
 		}
@@ -83,7 +83,7 @@ func (iptables *iptablesClient) setIptablesChains(chains []*pb.Chain, withoutNS 
 	return nil
 }
 
-func (iptables *iptablesClient) setIptablesChain(chain *pb.Chain, withoutNS bool) error {
+func (iptables *iptablesClient) setIptablesChain(chain *pb.Chain, enterNS bool) error {
 	var matchPart string
 	if chain.Direction == pb.Chain_INPUT {
 		matchPart = "src"
@@ -112,7 +112,7 @@ func (iptables *iptablesClient) setIptablesChain(chain *pb.Chain, withoutNS bool
 	err := iptables.createNewChain(&iptablesChain{
 		Name:  chain.Name,
 		Rules: rules,
-	}, withoutNS)
+	}, enterNS)
 	if err != nil {
 		return err
 	}
@@ -120,14 +120,14 @@ func (iptables *iptablesClient) setIptablesChain(chain *pb.Chain, withoutNS bool
 	if chain.Direction == pb.Chain_INPUT {
 		err := iptables.ensureRule(&iptablesChain{
 			Name: "CHAOS-INPUT",
-		}, "-A CHAOS-INPUT -j "+chain.Name, withoutNS)
+		}, "-A CHAOS-INPUT -j "+chain.Name, enterNS)
 		if err != nil {
 			return err
 		}
 	} else if chain.Direction == pb.Chain_OUTPUT {
 		iptables.ensureRule(&iptablesChain{
 			Name: "CHAOS-OUTPUT",
-		}, "-A CHAOS-OUTPUT -j "+chain.Name, withoutNS)
+		}, "-A CHAOS-OUTPUT -j "+chain.Name, enterNS)
 		if err != nil {
 			return err
 		}
@@ -137,14 +137,14 @@ func (iptables *iptablesClient) setIptablesChain(chain *pb.Chain, withoutNS bool
 	return nil
 }
 
-func (iptables *iptablesClient) initializeEnv(withoutNS bool) error {
+func (iptables *iptablesClient) initializeEnv(enterNS bool) error {
 	for _, direction := range []string{"INPUT", "OUTPUT"} {
 		chainName := "CHAOS-" + direction
 
 		err := iptables.createNewChain(&iptablesChain{
 			Name:  chainName,
 			Rules: []string{},
-		}, withoutNS)
+		}, enterNS)
 		if err != nil {
 			return err
 		}
@@ -152,16 +152,16 @@ func (iptables *iptablesClient) initializeEnv(withoutNS bool) error {
 		iptables.ensureRule(&iptablesChain{
 			Name:  direction,
 			Rules: []string{},
-		}, "-A "+direction+" -j "+chainName, withoutNS)
+		}, "-A "+direction+" -j "+chainName, enterNS)
 	}
 
 	return nil
 }
 
 // createNewChain will cover existing chain
-func (iptables *iptablesClient) createNewChain(chain *iptablesChain, withoutNS bool) error {
+func (iptables *iptablesClient) createNewChain(chain *iptablesChain, enterNS bool) error {
 	processBuilder := bpm.DefaultProcessBuilder(iptablesCmd, "-w", "-N", chain.Name).SetContext(iptables.ctx)
-	if !withoutNS {
+	if enterNS {
 		processBuilder = processBuilder.SetNS(iptables.pid, bpm.NetNS)
 	}
 	cmd := processBuilder.Build()
@@ -170,7 +170,7 @@ func (iptables *iptablesClient) createNewChain(chain *iptablesChain, withoutNS b
 	if (err == nil && len(out) == 0) ||
 		(err != nil && strings.Contains(string(out), iptablesChainAlreadyExistErr)) {
 		// Successfully create a new chain
-		return iptables.deleteAndWriteRules(chain, withoutNS)
+		return iptables.deleteAndWriteRules(chain, enterNS)
 	}
 
 	return encodeOutputToError(out, err)
@@ -178,16 +178,16 @@ func (iptables *iptablesClient) createNewChain(chain *iptablesChain, withoutNS b
 
 // deleteAndWriteRules will remove all existing function in the chain
 // and replace with the new settings
-func (iptables *iptablesClient) deleteAndWriteRules(chain *iptablesChain, withoutNS bool) error {
+func (iptables *iptablesClient) deleteAndWriteRules(chain *iptablesChain, enterNS bool) error {
 
 	// This chain should already exist
-	err := iptables.flushIptablesChain(chain, withoutNS)
+	err := iptables.flushIptablesChain(chain, enterNS)
 	if err != nil {
 		return err
 	}
 
 	for _, rule := range chain.Rules {
-		err := iptables.ensureRule(chain, rule, withoutNS)
+		err := iptables.ensureRule(chain, rule, enterNS)
 		if err != nil {
 			return err
 		}
@@ -196,9 +196,9 @@ func (iptables *iptablesClient) deleteAndWriteRules(chain *iptablesChain, withou
 	return nil
 }
 
-func (iptables *iptablesClient) ensureRule(chain *iptablesChain, rule string, withoutNS bool) error {
+func (iptables *iptablesClient) ensureRule(chain *iptablesChain, rule string, enterNS bool) error {
 	processBuilder := bpm.DefaultProcessBuilder(iptablesCmd, "-w", "-S", chain.Name).SetContext(iptables.ctx)
-	if !withoutNS {
+	if enterNS {
 		processBuilder = processBuilder.SetNS(iptables.pid, bpm.NetNS)
 	}
 	cmd := processBuilder.Build()
@@ -214,7 +214,7 @@ func (iptables *iptablesClient) ensureRule(chain *iptablesChain, rule string, wi
 
 	// TODO: lock on every container but not on chaos-daemon's `/run/xtables.lock`
 	processBuilder = bpm.DefaultProcessBuilder(iptablesCmd, strings.Split("-w "+rule, " ")...).SetContext(iptables.ctx)
-	if !withoutNS {
+	if enterNS {
 		processBuilder = processBuilder.SetNS(iptables.pid, bpm.NetNS)
 	}
 	cmd = processBuilder.Build()
@@ -226,9 +226,9 @@ func (iptables *iptablesClient) ensureRule(chain *iptablesChain, rule string, wi
 	return nil
 }
 
-func (iptables *iptablesClient) flushIptablesChain(chain *iptablesChain, withoutNS bool) error {
+func (iptables *iptablesClient) flushIptablesChain(chain *iptablesChain, enterNS bool) error {
 	processBuilder := bpm.DefaultProcessBuilder(iptablesCmd, "-w", "-F", chain.Name).SetContext(iptables.ctx)
-	if !withoutNS {
+	if enterNS {
 		processBuilder = processBuilder.SetNS(iptables.pid, bpm.NetNS)
 	}
 	cmd := processBuilder.Build()

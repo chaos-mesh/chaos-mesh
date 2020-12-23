@@ -70,7 +70,7 @@ func (s *DaemonServer) ApplyIoChaos(ctx context.Context, in *pb.ApplyIoChaosRequ
 		EnableLocalMnt().
 		SetIdentifier(in.ContainerId)
 
-	if !in.WithoutNS {
+	if in.EnterNS {
 		processBuilder = processBuilder.SetNS(pid, bpm.MountNS).SetNS(pid, bpm.PidNS)
 	}
 
