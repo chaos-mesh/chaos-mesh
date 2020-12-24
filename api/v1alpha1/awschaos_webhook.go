@@ -66,7 +66,6 @@ func (in *AwsChaos) Validate() error {
 	allErrs = append(allErrs, in.Spec.validateEbsVolume(specField.Child("volumeID"))...)
 	allErrs = append(allErrs, in.Spec.validateDeviceName(specField.Child("deviceName"))...)
 
-
 	if len(allErrs) > 0 {
 		return fmt.Errorf(allErrs.ToAggregate().Error())
 	}

@@ -16,6 +16,7 @@ package detachvolume
 import (
 	"context"
 	"errors"
+
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
@@ -58,7 +59,7 @@ func (e *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.I
 	}
 
 	ec2client := ec2.New(ec2.Options{
-		Region: awschaos.Spec.AwsRegion,
+		Region:      awschaos.Spec.AwsRegion,
 		Credentials: &aws.CredentialsCache{Provider: credentials.NewStaticCredentialsProvider(string(secret.Data["aws_access_key_id"]), string(secret.Data["aws_secret_access_key"]), "")},
 	})
 
@@ -98,7 +99,7 @@ func (e *endpoint) Recover(ctx context.Context, req ctrl.Request, chaos v1alpha1
 	}
 
 	ec2client := ec2.New(ec2.Options{
-		Region: awschaos.Spec.AwsRegion,
+		Region:      awschaos.Spec.AwsRegion,
 		Credentials: &aws.CredentialsCache{Provider: credentials.NewStaticCredentialsProvider(string(secret.Data["aws_access_key_id"]), string(secret.Data["aws_secret_access_key"]), "")},
 	})
 
