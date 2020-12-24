@@ -98,6 +98,7 @@ func (in *AwsChaos) GetChaos() *ChaosInstance {
 		Kind:      KindAwsChaos,
 		StartTime: in.CreationTimestamp.Time,
 		Action:    "",
+		Status:    string(in.Status.Experiment.Phase),
 		UID:       string(in.UID),
 	}
 

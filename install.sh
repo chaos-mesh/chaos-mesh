@@ -953,7 +953,7 @@ rules:
     resources: [ "endpoints" ]
     verbs: [ "get", "list", "watch" ]
   - apiGroups: [ "" ]
-    resources: [ "pods" ]
+    resources: [ "pods", "secrets" ]
     verbs: [ "get", "list", "watch", "delete", "update" ]
   - apiGroups:
       - ""
@@ -1163,7 +1163,7 @@ spec:
       serviceAccount: chaos-daemon
       hostIPC: true
       hostPID: true
-      priorityClassName: 
+      priorityClassName:
       containers:
         - name: chaos-daemon
           image: localhost:5000/pingcap/chaos-daemon:${VERSION_TAG}
@@ -1235,7 +1235,7 @@ spec:
         app.kubernetes.io/component: chaos-dashboard
     spec:
       serviceAccount: chaos-controller-manager
-      priorityClassName: 
+      priorityClassName:
       containers:
         - name: chaos-dashboard
           image: localhost:5000/pingcap/chaos-dashboard:${VERSION_TAG}
@@ -1303,7 +1303,7 @@ spec:
     spec:
       hostNetwork: ${host_network}
       serviceAccount: chaos-controller-manager
-      priorityClassName: 
+      priorityClassName:
       containers:
       - name: chaos-mesh
         image: localhost:5000/pingcap/chaos-mesh:${VERSION_TAG}
@@ -1501,6 +1501,24 @@ webhooks:
       service:
         name: chaos-mesh-controller-manager
         namespace: chaos-testing
+        path: /mutate-chaos-mesh-org-v1alpha1-awschaos
+    failurePolicy: Fail
+    name: mawschaos.kb.io
+    rules:
+      - apiGroups:
+          - chaos-mesh.org
+        apiVersions:
+          - v1alpha1
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - awschaos
+  - clientConfig:
+      caBundle: "${CA_BUNDLE}"
+      service:
+        name: chaos-mesh-controller-manager
+        namespace: chaos-testing
         path: /mutate-chaos-mesh-org-v1alpha1-podiochaos
     failurePolicy: Fail
     name: mpodiochaos.kb.io
@@ -1687,6 +1705,24 @@ webhooks:
           - UPDATE
         resources:
           - stresschaos
+  - clientConfig:
+      caBundle: "${CA_BUNDLE}"
+      service:
+        name: chaos-mesh-controller-manager
+        namespace: chaos-testing
+        path: /validate-chaos-mesh-org-v1alpha1-awschaos
+    failurePolicy: Fail
+    name: vawschaos.kb.io
+    rules:
+      - apiGroups:
+          - chaos-mesh.org
+        apiVersions:
+          - v1alpha1
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - awschaos
   - clientConfig:
       caBundle: "${CA_BUNDLE}"
       service:

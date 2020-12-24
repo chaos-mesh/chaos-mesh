@@ -12,6 +12,7 @@ spec:
     listKind: AwsChaosList
     plural: awschaos
     singular: awschaos
+  preserveUnknownFields: false
   scope: Namespaced
   validation:
     openAPIV3Schema:
@@ -32,8 +33,25 @@ spec:
         spec:
           description: AwsChaosSpec is the content of the specification for a AwsChaos
           properties:
+            action:
+              description: 'Action defines the specific aws chaos action. Supported
+                action: ec2-stop / detach-volume Default action: ec2-stop'
+              enum:
+              - ec2-stop
+              - detach-volume
+              type: string
+            awsRegion:
+              description: AwsRegion defines the region of aws.
+              type: string
+            deviceName:
+              description: DeviceName indicates the name of the device. Needed in
+                detach-volume.
+              type: string
             duration:
-              description: Duration represents the duration of the chaos action
+              description: Duration represents the duration of the chaos action.
+              type: string
+            ec2Instance:
+              description: Ec2Instance indicates the ID of the ec2 instance.
               type: string
             scheduler:
               description: Scheduler defines some schedule rules to control the running
@@ -48,6 +66,18 @@ spec:
               required:
               - cron
               type: object
+            secretName:
+              description: SecretName defines the name of kubernetes secret.
+              type: string
+            volumeID:
+              description: EbsVolume indicates the ID of the EBS volume. Needed in
+                detach-volume.
+              type: string
+          required:
+          - action
+          - awsRegion
+          - ec2Instance
+          - secretName
           type: object
         status:
           description: AwsChaosStatus represents the status of a AwsChaos
@@ -99,11 +129,6 @@ spec:
               type: object
             failedMessage:
               type: string
-            phase:
-              description: Phase is the chaos status.
-              type: string
-            reason:
-              type: string
             scheduler:
               description: ScheduleStatus is the current status of chaos scheduler.
               properties:
@@ -118,7 +143,6 @@ spec:
               type: object
           required:
           - experiment
-          - phase
           type: object
       required:
       - spec

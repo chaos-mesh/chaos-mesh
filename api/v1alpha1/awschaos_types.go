@@ -29,15 +29,50 @@ type AwsChaos struct {
 	Status AwsChaosStatus `json:"status,omitempty"`
 }
 
+// AwsChaosAction represents the chaos action about aws.
+type AwsChaosAction string
+
+const (
+	// Ec2Stop represents the chaos action of stopping ec2.
+	Ec2Stop AwsChaosAction = "ec2-stop"
+	// DetachVolume represents the chaos action of detaching the volume of ec2.
+	DetachVolume AwsChaosAction = "detach-volume"
+)
+
 // AwsChaosSpec is the content of the specification for a AwsChaos
 type AwsChaosSpec struct {
-	// Duration represents the duration of the chaos action
+	// Action defines the specific aws chaos action.
+	// Supported action: ec2-stop / detach-volume
+	// Default action: ec2-stop
+	// +kubebuilder:validation:Enum=ec2-stop;detach-volume
+	Action AwsChaosAction `json:"action"`
+
+	// Duration represents the duration of the chaos action.
 	// +optional
 	Duration *string `json:"duration,omitempty"`
 
 	// Scheduler defines some schedule rules to control the running time of the chaos experiment about time.
 	// +optional
 	Scheduler *SchedulerSpec `json:"scheduler,omitempty"`
+
+	// SecretName defines the name of kubernetes secret.
+	SecretName string `json:"secretName"`
+
+	// AwsRegion defines the region of aws.
+	AwsRegion string `json:"awsRegion"`
+
+	// Ec2Instance indicates the ID of the ec2 instance.
+	Ec2Instance string `json:"ec2Instance"`
+
+	// EbsVolume indicates the ID of the EBS volume.
+	// Needed in detach-volume.
+	// +optional
+	EbsVolume string `json:"volumeID"`
+
+	// DeviceName indicates the name of the device.
+	// Needed in detach-volume.
+	// +optional
+	DeviceName string `json:"deviceName"`
 }
 
 // AwsChaosStatus represents the status of a AwsChaos
