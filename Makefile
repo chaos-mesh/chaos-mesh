@@ -50,6 +50,12 @@ endif
 FAILPOINT_ENABLE  := $$(find $$PWD/ -type d | grep -vE "(\.git|bin)" | xargs $(GOBIN)/failpoint-ctl enable)
 FAILPOINT_DISABLE := $$(find $$PWD/ -type d | grep -vE "(\.git|bin)" | xargs $(GOBIN)/failpoint-ctl disable)
 
+GO_BUILD_CACHE ?= $(HOME)/.cache/chaos-mesh
+
+go_build_cache_directory:
+	mkdir -p $(GO_BUILD_CACHE)/chaos-mesh-gobuild
+	mkdir -p $(GO_BUILD_CACHE)/chaos-mesh-gopath
+
 BUILD_TAGS ?=
 
 ifeq ($(SWAGGER),1)
@@ -62,7 +68,7 @@ endif
 
 CLEAN_TARGETS :=
 
-CHAOS_MESH_BUILD_IN_DOCKER ?= 0
+CHAOS_MESH_BUILD_IN_DOCKER ?= 1
 ifeq (${IN_DOCKER},1)
 	CHAOS_MESH_BUILD_IN_DOCKER = 0
 endif
@@ -199,7 +205,7 @@ endif
 define BUILD_IN_DOCKER_TEMPLATE =
 CLEAN_TARGETS += $(2)
 ifeq ($(CHAOS_MESH_BUILD_IN_DOCKER),1)
-$(2): image-build-env
+$(2): image-build-env go_build_cache_directory
 	docker run --rm --workdir /mnt/ --volume $(shell pwd):/mnt \
 		$(BUILD_INDOCKER_ARG) --env UI=${UI} --env SWAGGER=${SWAGGER} \
 		--user $(shell id -u):$(shell id -g) ${DOCKER_REGISTRY_PREFIX}pingcap/build-env \
@@ -254,9 +260,9 @@ $(2)/.dockerbuilt:$(image-$(1)-dependencies) $(2)/Dockerfile
 ifeq ($(DOCKER_CACHE),1)
 
 ifneq ($(DISABLE_CACHE_FROM),1)
-	DOCKER_BUILDKIT=1 DOCKER_CLI_EXPERIMENTAL=enabled docker buildx build --load --cache-to type=local,dest=$(CACHE_DIR)/image-$(1) --cache-from type=local,src=$(CACHE_DIR)/image-$(1) -t ${DOCKER_REGISTRY_PREFIX}pingcap/$(1):${IMAGE_TAG} ${DOCKER_BUILD_ARGS} $(2)
+	DOCKER_BUILDKIT=1 DOCKER_CLI_EXPERIMENTAL=enabled docker buildx build --load --cache-to type=local,dest=$(DOCKER_CACHE_DIR)/image-$(1) --cache-from type=local,src=$(DOCKER_CACHE_DIR)/image-$(1) -t ${DOCKER_REGISTRY_PREFIX}pingcap/$(1):${IMAGE_TAG} ${DOCKER_BUILD_ARGS} $(2)
 else
-	DOCKER_BUILDKIT=1 DOCKER_CLI_EXPERIMENTAL=enabled docker buildx build --load --cache-to type=local,dest=$(CACHE_DIR)/image-$(1) -t ${DOCKER_REGISTRY_PREFIX}pingcap/$(1):${IMAGE_TAG} ${DOCKER_BUILD_ARGS} $(2)
+	DOCKER_BUILDKIT=1 DOCKER_CLI_EXPERIMENTAL=enabled docker buildx build --load --cache-to type=local,dest=$(DOCKER_CACHE_DIR)/image-$(1) -t ${DOCKER_REGISTRY_PREFIX}pingcap/$(1):${IMAGE_TAG} ${DOCKER_BUILD_ARGS} $(2)
 endif
 
 else
@@ -348,4 +354,4 @@ install-local-coverage-tools:
 	$(all-tool-dependencies) install.sh $(GO_TARGET_PHONY) \
 	manager chaosfs chaosdaemon chaos-dashboard \
 	dashboard dashboard-server-frontend gosec-scan \
-	proto bin/chaos-builder
+	proto bin/chaos-builder go_build_cache_directory
