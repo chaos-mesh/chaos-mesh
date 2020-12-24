@@ -16,22 +16,30 @@ package scheduler
 import (
 	"context"
 	"errors"
-	"testing"
-	"time"
-
-	"github.com/stretchr/testify/assert"
-
 	workflowerr "github.com/chaos-mesh/chaos-mesh/pkg/workflow/engine/errors"
 	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/engine/model/node"
 	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/engine/model/template"
-	mocknode "github.com/chaos-mesh/chaos-mesh/pkg/workflow/mock/engine/model/node"
-	mocktemplate "github.com/chaos-mesh/chaos-mesh/pkg/workflow/mock/engine/model/template"
-	mockworkflow "github.com/chaos-mesh/chaos-mesh/pkg/workflow/mock/engine/model/workflow"
+	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/mock/engine/model/mock_node"
+	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/mock/engine/model/mock_template"
+	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/mock/engine/model/mock_workflow"
+	"github.com/golang/mock/gomock"
+	"github.com/stretchr/testify/assert"
+	"testing"
 )
 
 func TestEmptySpec(t *testing.T) {
-	mockedWorkflowSpec := mockworkflow.NewMockWorkflowSpec()
-	mockWorkflowStatus := mockworkflow.NewMockWorkflowStatus()
+	mockctl := gomock.NewController(t)
+	defer mockctl.Finish()
+
+	mockedTemplates := mock_template.NewMockTemplates(mockctl)
+	mockedTemplates.EXPECT().GetTemplateByName(gomock.Any()).Return(nil, workflowerr.ErrNoSuchTemplate)
+
+	mockedWorkflowSpec := mock_workflow.NewMockWorkflowSpec(mockctl)
+	mockedWorkflowSpec.EXPECT().GetTemplates().Return(mockedTemplates, nil)
+	mockedWorkflowSpec.EXPECT().GetEntry().Return("")
+
+	mockWorkflowStatus := mock_workflow.NewMockWorkflowStatus(mockctl)
+	mockWorkflowStatus.EXPECT().FetchNodesMap().Return(nil)
 	scheduler := NewBasicScheduler(mockedWorkflowSpec, mockWorkflowStatus)
 	nextTemplates, parentNode, err := scheduler.ScheduleNext(context.Background())
 	assert.Error(t, err, "must be failed")
@@ -41,23 +49,30 @@ func TestEmptySpec(t *testing.T) {
 }
 
 func TestScheduleTheFirstEntry(t *testing.T) {
+	mockctl := gomock.NewController(t)
+	defer mockctl.Finish()
+
 	workflowName := "mocked-workflow-0"
 	entryTemplateName := "just-a-fake-entry"
 	entryNodeName := entryTemplateName + "-0000"
 
-	entryTemplate := mocktemplate.NewMockTemplate()
-	entryTemplate.SetName(entryTemplateName)
-	entryTemplate.SetTemplateType(template.IoChaos)
-	entryTemplate.SetDuration(3 * time.Minute)
+	entryTemplate := mock_template.NewMockTemplate(mockctl)
+	entryTemplate.EXPECT().GetName().AnyTimes().Return(entryTemplateName)
+	entryTemplate.EXPECT().GetTemplateType().Return(template.IoChaos)
 
-	mockedWorkflowSpec := mockworkflow.NewMockWorkflowSpec()
-	mockedWorkflowSpec.SetName(workflowName)
-	mockedWorkflowSpec.SetEntry(entryTemplateName)
-	mockedWorkflowSpec.SetTemplates(mocktemplate.NewMockedTemplates([]template.Template{entryTemplate}))
+	mockTemplates := mock_template.NewMockTemplates(mockctl)
+	mockTemplates.EXPECT().GetTemplateByName(gomock.Eq(entryTemplateName)).AnyTimes().Return(entryTemplate, nil)
 
-	mockWorkflowStatus := mockworkflow.NewMockWorkflowStatus()
+	mockedWorkflowSpec := mock_workflow.NewMockWorkflowSpec(mockctl)
+	mockedWorkflowSpec.EXPECT().GetName().Return(workflowName)
+	mockedWorkflowSpec.EXPECT().GetEntry().AnyTimes().Return(entryTemplate.GetName())
+	mockedWorkflowSpec.EXPECT().GetTemplates().AnyTimes().Return(mockTemplates, nil)
+
+	mockWorkflowStatus := mock_workflow.NewMockWorkflowStatus(mockctl)
 
 	basicScheduler := NewBasicScheduler(mockedWorkflowSpec, mockWorkflowStatus)
+	mockWorkflowStatus.EXPECT().FetchNodesMap().AnyTimes().Return(map[string]node.Node{
+	})
 
 	// schedule entry
 	nextTemplates, parentNode, err := basicScheduler.ScheduleNext(context.Background())
@@ -67,13 +82,16 @@ func TestScheduleTheFirstEntry(t *testing.T) {
 	assert.Equal(t, "", parentNode)
 
 	// update workflow status
-	entryNode := mocknode.NewMockNode(
-		entryNodeName,
-		node.Succeed,
-		"",
-		entryTemplate.GetName(),
-		entryTemplate.GetTemplateType())
-	mockWorkflowStatus.SetNodes([]node.Node{entryNode})
+	entryNode := mock_node.NewMockNode(mockctl)
+	entryNode.EXPECT().GetName().AnyTimes().Return(entryNodeName)
+	entryNode.EXPECT().GetTemplateType().AnyTimes().Return(entryTemplate.GetTemplateType())
+	entryNode.EXPECT().GetNodePhase().Return(node.Succeed)
+
+	mockWorkflowStatus = mock_workflow.NewMockWorkflowStatus(mockctl)
+	mockWorkflowStatus.EXPECT().GetNodes().Return([]node.Node{entryNode})
+	mockWorkflowStatus.EXPECT().FetchNodesMap().AnyTimes().Return(map[string]node.Node{
+		entryNode.GetName(): entryNode,
+	})
 
 	// the second schedule
 	basicScheduler = NewBasicScheduler(mockedWorkflowSpec, mockWorkflowStatus)
@@ -85,6 +103,8 @@ func TestScheduleTheFirstEntry(t *testing.T) {
 }
 
 func TestNextedTwoLayerSerial(t *testing.T) {
+	mockctl := gomock.NewController(t)
+	defer mockctl.Finish()
 
 	workflowName := "mocked-workflow-1"
 
@@ -99,33 +119,30 @@ func TestNextedTwoLayerSerial(t *testing.T) {
 	secondNodeName := secondTemplateName + "-0000"
 	thirdNodeName := thirdTemplateName + "-0000"
 
-	firstTemplate := mocktemplate.NewMockTemplate()
-	firstTemplate.SetName(firstTemplateName)
-	firstTemplate.SetTemplateType(template.IoChaos)
-	firstTemplate.SetDuration(5 * time.Minute)
+	firstTemplate := mock_template.NewMockTemplate(mockctl)
+	firstTemplate.EXPECT().GetName().AnyTimes().Return(firstTemplateName)
 
-	secondTemplate := mocktemplate.NewMockTemplate()
-	secondTemplate.SetName(secondTemplateName)
-	secondTemplate.SetTemplateType(template.Task)
-	secondTemplate.SetDuration(1 * time.Minute)
+	secondTemplate := mock_template.NewMockTemplate(mockctl)
+	secondTemplate.EXPECT().GetName().AnyTimes().Return(secondTemplateName)
 
-	thirdTemplate := mocktemplate.NewMockTemplate()
-	thirdTemplate.SetName(thirdTemplateName)
-	thirdTemplate.SetTemplateType(template.Suspend)
-	thirdTemplate.SetDuration(1 * time.Minute)
+	thirdTemplate := mock_template.NewMockTemplate(mockctl)
+	thirdTemplate.EXPECT().GetName().AnyTimes().Return(thirdTemplateName)
 
-	entryTemplate := mocktemplate.NewMockSerialTemplate()
-	entryTemplate.SetName(entryTemplateName)
-	entryTemplate.SetTemplateType(template.Serial)
-	entryTemplate.SetDeadline(20 * time.Minute)
-	entryTemplate.SetSerialChildrenList([]template.Template{firstTemplate, secondTemplate, thirdTemplate})
+	entryTemplate := mock_template.NewMockSerialTemplate(mockctl)
+	entryTemplate.EXPECT().GetName().AnyTimes().Return(entryTemplateName)
+	entryTemplate.EXPECT().GetTemplateType().Return(template.Serial)
+	entryTemplate.EXPECT().GetSerialChildrenList().AnyTimes().Return([]template.Template{firstTemplate, secondTemplate, thirdTemplate})
 
-	mockedWorkflowSpec := mockworkflow.NewMockWorkflowSpec()
-	mockedWorkflowSpec.SetName(workflowName)
-	mockedWorkflowSpec.SetEntry(entryTemplateName)
-	mockedWorkflowSpec.SetTemplates(mocktemplate.NewMockedTemplates([]template.Template{entryTemplate}))
+	mockedTemplates := mock_template.NewMockTemplates(mockctl)
+	mockedTemplates.EXPECT().GetTemplateByName(gomock.Eq(entryTemplate.GetName())).AnyTimes().Return(entryTemplate, nil)
 
-	mockWorkflowStatus := mockworkflow.NewMockWorkflowStatus()
+	mockedWorkflowSpec := mock_workflow.NewMockWorkflowSpec(mockctl)
+	mockedWorkflowSpec.EXPECT().GetName().Return(workflowName)
+	mockedWorkflowSpec.EXPECT().GetEntry().AnyTimes().Return(entryTemplate.GetName())
+	mockedWorkflowSpec.EXPECT().GetTemplates().AnyTimes().Return(mockedTemplates, nil)
+
+	mockWorkflowStatus := mock_workflow.NewMockWorkflowStatus(mockctl)
+	mockWorkflowStatus.EXPECT().FetchNodesMap().Return(nil)
 
 	basicScheduler := NewBasicScheduler(mockedWorkflowSpec, mockWorkflowStatus)
 
@@ -136,20 +153,29 @@ func TestNextedTwoLayerSerial(t *testing.T) {
 	assert.Equal(t, entryTemplateName, nextTemplates[0].GetName())
 	assert.Equal(t, "", parentNode)
 
-	// update workflow status
-	entryNode := mocknode.NewMockNode(
-		entryNodeName,
-		node.WaitingForSchedule,
-		"",
-		entryTemplate.GetName(),
-		entryTemplate.GetTemplateType())
+	entryNode := mock_node.NewMockNode(mockctl)
+	entryNode.EXPECT().GetName().AnyTimes().Return(entryNodeName)
+	entryNode.EXPECT().GetNodePhase().AnyTimes().Return(node.WaitingForSchedule)
+	entryNode.EXPECT().GetTemplateName().AnyTimes().Return(entryTemplate.GetName())
+	entryNode.EXPECT().GetTemplateType().AnyTimes().Return(entryTemplate.GetTemplateType())
 
-	mockWorkflowStatus.SetNodes([]node.Node{entryNode})
-	entryNodeTreeNode := mocknode.NewMockTreeNode(
-		entryNode.GetName(),
-		entryNode.GetTemplateName(),
-		mocknode.NewMockNodeTreeChildren(nil))
-	mockWorkflowStatus.SetRootNode(entryNodeTreeNode)
+	mockedEntryNodeTreeNode := mock_node.NewMockNodeTreeNode(mockctl)
+
+	// emptyTreeChildren is dummy var
+	emptyTreeChildren := mock_node.NewMockNodeTreeChildren(mockctl)
+	emptyTreeChildren.EXPECT().Length().AnyTimes().Return(0)
+	emptyTreeChildren.EXPECT().ContainsTemplate(gomock.Any()).AnyTimes().Return(false)
+
+	entryNodeChildren := emptyTreeChildren
+	mockedEntryNodeTreeNode.EXPECT().GetChildren().AnyTimes().Return(entryNodeChildren)
+	mockedEntryNodeTreeNode.EXPECT().FetchNodeByName(gomock.Eq(entryNode.GetName())).AnyTimes().Return(mockedEntryNodeTreeNode)
+
+	mockWorkflowStatus = mock_workflow.NewMockWorkflowStatus(mockctl)
+	mockWorkflowStatus.EXPECT().GetNodes().Return([]node.Node{entryNode})
+	mockWorkflowStatus.EXPECT().GetNodesTree().AnyTimes().Return(mockedEntryNodeTreeNode)
+	mockWorkflowStatus.EXPECT().FetchNodesMap().AnyTimes().Return(map[string]node.Node{
+		entryNode.GetName(): entryNode,
+	})
 
 	// the second schedule, it expected to return the first child in Serial
 	basicScheduler = NewBasicScheduler(mockedWorkflowSpec, mockWorkflowStatus)
@@ -161,26 +187,26 @@ func TestNextedTwoLayerSerial(t *testing.T) {
 	assert.Equal(t, firstTemplateName, nextTemplates[0].GetName())
 
 	// update status
-	firstNode := mocknode.NewMockNode(
-		firstNodeName,
-		node.Succeed,
-		entryNode.GetName(),
-		firstTemplate.GetName(),
-		firstTemplate.GetTemplateType(),
-	)
+	firstNode := mock_node.NewMockNode(mockctl)
+	firstNode.EXPECT().GetName().AnyTimes().Return(firstNodeName)
+	firstNode.EXPECT().GetNodePhase().Return(node.Succeed)
 
-	firstTreeNode := mocknode.NewMockTreeNode(
-		firstNode.GetName(),
-		firstNode.GetTemplateName(),
-		mocknode.NewMockNodeTreeChildren(nil),
-	)
+	entryNodeChildren = mock_node.NewMockNodeTreeChildren(mockctl)
+	entryNodeChildren.EXPECT().Length().Return(1)
+	entryNodeChildren.EXPECT().ContainsTemplate(gomock.Eq(firstTemplate.GetName())).Return(true)
+	entryNodeChildren.EXPECT().ContainsTemplate(gomock.Eq(secondTemplate.GetName())).Return(false)
 
-	entryNodeTreeNode.SetChildren(mocknode.NewMockNodeTreeChildren(
-		map[string]node.NodeTreeNode{
-			firstNodeName: firstTreeNode,
-		}))
+	mockedEntryNodeTreeNode = mock_node.NewMockNodeTreeNode(mockctl)
+	mockedEntryNodeTreeNode.EXPECT().GetChildren().AnyTimes().Return(entryNodeChildren)
+	mockedEntryNodeTreeNode.EXPECT().FetchNodeByName(gomock.Eq(entryNode.GetName())).AnyTimes().Return(mockedEntryNodeTreeNode)
 
-	mockWorkflowStatus.SetNodes([]node.Node{entryNode, firstNode})
+	mockWorkflowStatus = mock_workflow.NewMockWorkflowStatus(mockctl)
+	mockWorkflowStatus.EXPECT().GetNodes().Return([]node.Node{entryNode, firstNode})
+	mockWorkflowStatus.EXPECT().GetNodesTree().Return(mockedEntryNodeTreeNode)
+	mockWorkflowStatus.EXPECT().FetchNodesMap().AnyTimes().Return(map[string]node.Node{
+		entryNode.GetName(): entryNode,
+		firstNode.GetName(): firstNode,
+	})
 
 	// the third schedule, it expected to return the second child in Serial
 	basicScheduler = NewBasicScheduler(mockedWorkflowSpec, mockWorkflowStatus)
@@ -192,27 +218,28 @@ func TestNextedTwoLayerSerial(t *testing.T) {
 	assert.Equal(t, secondTemplateName, nextTemplates[0].GetName())
 
 	// update status
-	secondNode := mocknode.NewMockNode(
-		secondNodeName,
-		node.Succeed,
-		entryNode.GetName(),
-		secondTemplate.GetName(),
-		secondTemplate.GetTemplateType(),
-	)
+	secondNode := mock_node.NewMockNode(mockctl)
+	secondNode.EXPECT().GetName().AnyTimes().Return(secondNodeName)
+	secondNode.EXPECT().GetNodePhase().Return(node.Succeed)
 
-	secondTreeNode := mocknode.NewMockTreeNode(
-		secondNode.GetName(),
-		secondNode.GetTemplateName(),
-		mocknode.NewMockNodeTreeChildren(nil),
-	)
+	entryNodeChildren = mock_node.NewMockNodeTreeChildren(mockctl)
+	entryNodeChildren.EXPECT().Length().Return(2)
+	entryNodeChildren.EXPECT().ContainsTemplate(gomock.Eq(firstTemplate.GetName())).Return(true)
+	entryNodeChildren.EXPECT().ContainsTemplate(gomock.Eq(secondTemplate.GetName())).Return(true)
+	entryNodeChildren.EXPECT().ContainsTemplate(gomock.Eq(thirdTemplate.GetName())).Return(false)
 
-	entryNodeTreeNode.SetChildren(mocknode.NewMockNodeTreeChildren(
-		map[string]node.NodeTreeNode{
-			firstNodeName:  firstTreeNode,
-			secondNodeName: secondTreeNode,
-		}))
+	mockedEntryNodeTreeNode = mock_node.NewMockNodeTreeNode(mockctl)
+	mockedEntryNodeTreeNode.EXPECT().GetChildren().AnyTimes().Return(entryNodeChildren)
+	mockedEntryNodeTreeNode.EXPECT().FetchNodeByName(gomock.Eq(entryNode.GetName())).AnyTimes().Return(mockedEntryNodeTreeNode)
 
-	mockWorkflowStatus.SetNodes([]node.Node{entryNode, firstNode, secondNode})
+	mockWorkflowStatus = mock_workflow.NewMockWorkflowStatus(mockctl)
+	mockWorkflowStatus.EXPECT().GetNodes().Return([]node.Node{entryNode, firstNode, secondNode})
+	mockWorkflowStatus.EXPECT().GetNodesTree().Return(mockedEntryNodeTreeNode)
+	mockWorkflowStatus.EXPECT().FetchNodesMap().AnyTimes().Return(map[string]node.Node{
+		entryNode.GetName():  entryNode,
+		firstNode.GetName():  firstNode,
+		secondNode.GetName(): secondNode,
+	})
 
 	// the forth schedule, it expected to return the third child in Serial
 	basicScheduler = NewBasicScheduler(mockedWorkflowSpec, mockWorkflowStatus)
@@ -224,30 +251,30 @@ func TestNextedTwoLayerSerial(t *testing.T) {
 	assert.Equal(t, thirdTemplateName, nextTemplates[0].GetName())
 
 	// update status
+	thirdNode := mock_node.NewMockNode(mockctl)
+	thirdNode.EXPECT().GetName().AnyTimes().Return(thirdNodeName)
+	thirdNode.EXPECT().GetNodePhase().Return(node.Succeed)
 
-	thirdNode := mocknode.NewMockNode(
-		thirdNodeName,
-		node.Succeed,
-		entryNode.GetName(),
-		thirdTemplate.GetName(),
-		thirdTemplate.GetTemplateType(),
-	)
+	//thirdTreeNode := mock_node.NewMockNodeTreeNode(mockctl)
 
-	thirdTreeNode := mocknode.NewMockTreeNode(
-		thirdNode.GetName(),
-		thirdNode.GetTemplateName(),
-		mocknode.NewMockNodeTreeChildren(nil),
-	)
+	entryNodeChildren = mock_node.NewMockNodeTreeChildren(mockctl)
 
-	entryNodeTreeNode.SetChildren(mocknode.NewMockNodeTreeChildren(
-		map[string]node.NodeTreeNode{
-			firstNodeName:  firstTreeNode,
-			secondNodeName: secondTreeNode,
-			thirdNodeName:  thirdTreeNode,
-		}))
+	mockedEntryNodeTreeNode = mock_node.NewMockNodeTreeNode(mockctl)
+	mockedEntryNodeTreeNode.EXPECT().GetChildren().AnyTimes().Return(entryNodeChildren)
+	mockedEntryNodeTreeNode.EXPECT().FetchNodeByName(gomock.Eq(entryNode.GetName())).AnyTimes().Return(mockedEntryNodeTreeNode)
 
-	mockWorkflowStatus.SetNodes([]node.Node{entryNode, firstNode, secondNode, thirdNode})
-	entryNode.SetPhase(node.Succeed)
+	entryNode = mock_node.NewMockNode(mockctl)
+	entryNode.EXPECT().GetName().AnyTimes().Return(entryNodeName)
+	entryNode.EXPECT().GetNodePhase().Return(node.Succeed)
+
+	mockWorkflowStatus = mock_workflow.NewMockWorkflowStatus(mockctl)
+	mockWorkflowStatus.EXPECT().GetNodes().Return([]node.Node{entryNode, firstNode, secondNode, thirdNode})
+	mockWorkflowStatus.EXPECT().FetchNodesMap().AnyTimes().Return(map[string]node.Node{
+		entryNode.GetName():  entryNode,
+		firstNode.GetName():  firstNode,
+		secondNode.GetName(): secondNode,
+		thirdNode.GetName():  thirdNode,
+	})
 
 	// the fifth schedule, it expected to return no need schedule error
 	basicScheduler = NewBasicScheduler(mockedWorkflowSpec, mockWorkflowStatus)

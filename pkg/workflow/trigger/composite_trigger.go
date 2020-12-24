@@ -15,8 +15,9 @@ package trigger
 
 import (
 	"context"
-	"go.uber.org/atomic"
 	"sync"
+
+	"go.uber.org/atomic"
 )
 
 const defaultBufferSize = 10

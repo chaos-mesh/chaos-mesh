@@ -65,6 +65,11 @@ func (it *basicScheduler) ScheduleNext(ctx context.Context) ([]template.Template
 
 }
 
+func (it *basicScheduler) ScheduleNextWithinParent(ctx context.Context, parentNodeName string) (nextTemplates []template.Template, err error) {
+	templates, err := it.fetchChildrenForCompositeNode(parentNodeName)
+	return templates, err
+}
+
 func (it *basicScheduler) fetchChildrenForCompositeNode(parentNodeName string) ([]template.Template, error) {
 	op := "basicScheduler.fetchChildrenForCompositeNode"
 

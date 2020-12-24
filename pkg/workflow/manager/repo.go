@@ -11,16 +11,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package scheduler
+package manager
 
 import (
-	"context"
-
 	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/engine/model/template"
+	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/engine/model/workflow"
 )
 
-/*  interface Scheduler follows the iterator-pattern, it provides templates which need instantiate. */
-type Scheduler interface {
-	ScheduleNext(ctx context.Context) (nextTemplates []template.Template, parentNodeName string, err error)
-	ScheduleNextWithinParent(ctx context.Context, parentNodeName string) (nextTemplates []template.Template, err error)
+type WorkflowRepo interface {
+	FetchWorkflow(workflowName string) (workflow.WorkflowSpec, workflow.WorkflowStatus, error)
+	CreateNodes(workflowName string, templates []template.Template, parentNode string) ([]string, error)
+	UpdateNodesToRunning(workflowName string, nodeName string) error
+	UpdateNodesToWaitingForChild(workflowName string, nodeName string) error
+	UpdateNodesToWaitingForSchedule(workflowName string, nodeName string) error
 }

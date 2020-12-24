@@ -16,8 +16,9 @@ package trigger
 import (
 	"context"
 	"fmt"
-	"k8s.io/client-go/util/workqueue"
 	"time"
+
+	"k8s.io/client-go/util/workqueue"
 )
 
 type OperableTrigger interface {

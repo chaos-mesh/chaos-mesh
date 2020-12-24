@@ -17,7 +17,7 @@ var (
 	ErrNoNeedSchedule                 = New("no need to schedule")
 	ErrNoSuchNode                     = New("no such node")
 	ErrNoSuchTemplate                 = New("no such template")
-	ErrTemplatesIsRequired             = New("missing required templates in workflow spec")
+	ErrTemplatesIsRequired            = New("missing required templates in workflow spec")
 	ErrTreeNodeIsRequired             = New("missing required tree node in workflow status")
 	ErrUnsupportedNodeType            = New("unsupported node type")
 	ErrParseSerialTemplateFailed      = New("failed to parse serial template")
