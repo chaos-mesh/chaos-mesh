@@ -73,6 +73,33 @@ func TestSelectPods(t *testing.T) {
 			expectedPods: []v1.Pod{pods[5], pods[6]},
 		},
 		{
+			name: "filter pods by label expressions",
+			selector: v1alpha1.SelectorSpec{
+				ExpressionSelectors: []metav1.LabelSelectorRequirement{
+					{
+						Key:      "l2",
+						Operator: metav1.LabelSelectorOpIn,
+						Values:   []string{"l2"},
+					},
+				},
+			},
+			expectedPods: []v1.Pod{pods[5], pods[6]},
+		},
+		{
+			name: "filter pods by label selectors and expression selectors",
+			selector: v1alpha1.SelectorSpec{
+				LabelSelectors: map[string]string{"l1": "l1"},
+				ExpressionSelectors: []metav1.LabelSelectorRequirement{
+					{
+						Key:      "l2",
+						Operator: metav1.LabelSelectorOpIn,
+						Values:   []string{"l2"},
+					},
+				},
+			},
+			expectedPods: nil,
+		},
+		{
 			name: "filter namespace and labels",
 			selector: v1alpha1.SelectorSpec{
 				Namespaces:     []string{"test-s"},
@@ -174,6 +201,35 @@ func TestCheckPodMeetSelector(t *testing.T) {
 			pod:           newPod(PodArg{Name: "t1", Labels: map[string]string{"app": "tidb"}}),
 			selector:      v1alpha1.SelectorSpec{},
 			expectedValue: true,
+		},
+		{
+			name: "meet labels and meet expressions",
+			pod:  newPod(PodArg{Name: "t1", Status: v1.PodPending, Labels: map[string]string{"app": "tikv", "ss": "t1"}}),
+			selector: v1alpha1.SelectorSpec{
+				LabelSelectors: map[string]string{"app": "tikv"},
+				ExpressionSelectors: []metav1.LabelSelectorRequirement{
+					{
+						Key:      "ss",
+						Operator: metav1.LabelSelectorOpExists,
+					},
+				},
+			},
+			expectedValue: true,
+		},
+		{
+			name: "meet labels and not meet expressions",
+			pod:  newPod(PodArg{Name: "t1", Status: v1.PodPending, Labels: map[string]string{"app": "tikv", "ss": "t1"}}),
+			selector: v1alpha1.SelectorSpec{
+				LabelSelectors: map[string]string{"app": "tikv"},
+				ExpressionSelectors: []metav1.LabelSelectorRequirement{
+					{
+						Key:      "ss",
+						Operator: metav1.LabelSelectorOpNotIn,
+						Values:   []string{"t1"},
+					},
+				},
+			},
+			expectedValue: false,
 		},
 		{
 			name: "meet namespace",

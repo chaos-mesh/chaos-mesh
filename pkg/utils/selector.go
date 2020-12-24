@@ -31,6 +31,7 @@ import (
 
 	v1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/fields"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/selection"
@@ -133,8 +134,16 @@ func SelectPods(ctx context.Context, c client.Client, r client.Reader, selector 
 	if !clusterScoped {
 		listOptions.Namespace = targetNamespace
 	}
-	if len(selector.LabelSelectors) > 0 {
-		listOptions.LabelSelector = labels.SelectorFromSet(selector.LabelSelectors)
+	if len(selector.LabelSelectors) > 0 || len(selector.ExpressionSelectors) > 0 {
+		metav1Ls := &metav1.LabelSelector{
+			MatchLabels:      selector.LabelSelectors,
+			MatchExpressions: selector.ExpressionSelectors,
+		}
+		ls, err := metav1.LabelSelectorAsSelector(metav1Ls)
+		if err != nil {
+			return nil, err
+		}
+		listOptions.LabelSelector = ls
 	}
 
 	listFunc := c.List
@@ -178,13 +187,10 @@ func SelectPods(ctx context.Context, c client.Client, r client.Reader, selector 
 		if len(selector.Nodes) > 0 {
 			for _, nodename := range selector.Nodes {
 				var node v1.Node
-				err := c.Get(ctx, types.NamespacedName{
-					Name: nodename,
-				}, &node)
-				if err == nil {
-					nodes = append(nodes, node)
-					continue
+				if err := c.Get(ctx, types.NamespacedName{Name: nodename}, &node); err != nil {
+					return nil, err
 				}
+				nodes = append(nodes, node)
 			}
 		}
 		if len(selector.NodeSelectors) > 0 {
@@ -277,8 +283,15 @@ func CheckPodMeetSelector(pod v1.Pod, selector v1alpha1.SelectorSpec) (bool, err
 		selector.LabelSelectors = make(map[string]string)
 	}
 
-	if len(selector.LabelSelectors) > 0 {
-		ls := labels.SelectorFromSet(selector.LabelSelectors)
+	if len(selector.LabelSelectors) > 0 || len(selector.ExpressionSelectors) > 0 {
+		metav1Ls := &metav1.LabelSelector{
+			MatchLabels:      selector.LabelSelectors,
+			MatchExpressions: selector.ExpressionSelectors,
+		}
+		ls, err := metav1.LabelSelectorAsSelector(metav1Ls)
+		if err != nil {
+			return false, err
+		}
 		podLabels := labels.Set(pod.Labels)
 		if len(pod.Labels) == 0 || !ls.Matches(podLabels) {
 			return false, nil
