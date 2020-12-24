@@ -17,6 +17,8 @@ import (
 	"context"
 	"sync"
 
+	"github.com/go-logr/logr"
+
 	"go.uber.org/atomic"
 )
 
@@ -27,6 +29,7 @@ type CompositeTrigger struct {
 	backends   []Trigger
 	subscribed *atomic.Bool
 	queue      chan EventOrError
+	Logger     logr.Logger
 }
 
 func NewCompositeTrigger(backends ...Trigger) *CompositeTrigger {
@@ -76,7 +79,7 @@ func (it *CompositeTrigger) RunAndPending(ctx context.Context) error {
 
 	wg.Wait()
 	if len(it.queue) > 0 {
-		// TODO: warn log, still unconsumed events in buffering queue
+		it.Logger.Info("there are still unconsumed events in buffering queue", "size", len(it.queue))
 	}
 
 	return nil

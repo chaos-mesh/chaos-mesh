@@ -16,15 +16,17 @@ package scheduler
 import (
 	"context"
 	"errors"
+	"testing"
+
+	"github.com/golang/mock/gomock"
+	"github.com/stretchr/testify/assert"
+
 	workflowerr "github.com/chaos-mesh/chaos-mesh/pkg/workflow/engine/errors"
 	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/engine/model/node"
 	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/engine/model/template"
 	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/mock/engine/model/mock_node"
 	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/mock/engine/model/mock_template"
 	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/mock/engine/model/mock_workflow"
-	"github.com/golang/mock/gomock"
-	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 func TestEmptySpec(t *testing.T) {
@@ -71,8 +73,7 @@ func TestScheduleTheFirstEntry(t *testing.T) {
 	mockWorkflowStatus := mock_workflow.NewMockWorkflowStatus(mockctl)
 
 	basicScheduler := NewBasicScheduler(mockedWorkflowSpec, mockWorkflowStatus)
-	mockWorkflowStatus.EXPECT().FetchNodesMap().AnyTimes().Return(map[string]node.Node{
-	})
+	mockWorkflowStatus.EXPECT().FetchNodesMap().AnyTimes().Return(map[string]node.Node{})
 
 	// schedule entry
 	nextTemplates, parentNode, err := basicScheduler.ScheduleNext(context.Background())

@@ -18,10 +18,12 @@
 package mock_template
 
 import (
-	template "github.com/chaos-mesh/chaos-mesh/pkg/workflow/engine/model/template"
-	gomock "github.com/golang/mock/gomock"
 	reflect "reflect"
 	time "time"
+
+	gomock "github.com/golang/mock/gomock"
+
+	template "github.com/chaos-mesh/chaos-mesh/pkg/workflow/engine/model/template"
 )
 
 // MockTaskTemplate is a mock of TaskTemplate interface

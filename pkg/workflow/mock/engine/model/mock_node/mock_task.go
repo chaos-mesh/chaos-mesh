@@ -18,10 +18,12 @@
 package mock_node
 
 import (
+	reflect "reflect"
+
+	gomock "github.com/golang/mock/gomock"
+
 	node "github.com/chaos-mesh/chaos-mesh/pkg/workflow/engine/model/node"
 	template "github.com/chaos-mesh/chaos-mesh/pkg/workflow/engine/model/template"
-	gomock "github.com/golang/mock/gomock"
-	reflect "reflect"
 )
 
 // MockTaskNode is a mock of TaskNode interface

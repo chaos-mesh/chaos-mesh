@@ -18,11 +18,13 @@
 package mock_workflow
 
 import (
+	reflect "reflect"
+
+	gomock "github.com/golang/mock/gomock"
+
 	node "github.com/chaos-mesh/chaos-mesh/pkg/workflow/engine/model/node"
 	template "github.com/chaos-mesh/chaos-mesh/pkg/workflow/engine/model/template"
 	workflow "github.com/chaos-mesh/chaos-mesh/pkg/workflow/engine/model/workflow"
-	gomock "github.com/golang/mock/gomock"
-	reflect "reflect"
 )
 
 // MockWorkflowSpec is a mock of WorkflowSpec interface

@@ -79,6 +79,7 @@ func (it *basicManager) consume(ctx context.Context, event trigger.Event) error 
 			err := it.operableTrigger.Notify(trigger.NewEvent(workflowName, nodeName, trigger.NodeCreated))
 			if err != nil {
 				// TODO: warn log
+				return err
 			}
 		}
 	case trigger.WorkflowFinished:
@@ -148,6 +149,7 @@ func (it *basicManager) consume(ctx context.Context, event trigger.Event) error 
 				err := it.operableTrigger.Notify(trigger.NewEvent(workflowName, newNodeName, trigger.NodeCreated))
 				if err != nil {
 					// TODO: warn log
+					return err
 				}
 			}
 		default:

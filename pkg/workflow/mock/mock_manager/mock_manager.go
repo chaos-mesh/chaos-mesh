@@ -19,8 +19,9 @@ package mock_manager
 
 import (
 	context "context"
-	gomock "github.com/golang/mock/gomock"
 	reflect "reflect"
+
+	gomock "github.com/golang/mock/gomock"
 )
 
 // MockWorkflowManager is a mock of WorkflowManager interface
