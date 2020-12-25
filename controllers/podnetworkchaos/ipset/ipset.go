@@ -73,6 +73,7 @@ func FlushIPSets(ctx context.Context, c client.Client, pod *v1.Pod, ipsets []*pb
 	_, err = pbClient.FlushIPSets(ctx, &pb.IPSetsRequest{
 		Ipsets:      ipsets,
 		ContainerId: containerID,
+		EnterNS:     true,
 	})
 	return err
 }

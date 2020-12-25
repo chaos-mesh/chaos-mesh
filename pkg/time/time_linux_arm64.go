@@ -11,18 +11,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package chaosdaemon
+package time
 
 import (
-	"context"
+	"errors"
 
-	"github.com/chaos-mesh/chaos-mesh/pkg/bpm"
 	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
 )
 
-func applyTc(ctx context.Context, enterNS bool, pid uint32, args ...string) error {
+// ModifyTime modifies time of target process
+func ModifyTime(pid int, deltaSec int64, deltaNsec int64, clockIdsMask uint64) error {
 	// Mock point to return error in unit test
-	if err := mock.On("TcApplyError"); err != nil {
+	if err := mock.On("ModifyTimeError"); err != nil {
 		if e, ok := err.(error); ok {
 			return e
 		}
@@ -30,20 +30,5 @@ func applyTc(ctx context.Context, enterNS bool, pid uint32, args ...string) erro
 			return nil
 		}
 	}
-
-	processBuilder := bpm.DefaultProcessBuilder("tc", args...).SetContext(ctx)
-	if enterNS {
-		processBuilder = processBuilder.SetNS(pid, bpm.NetNS)
-	}
-	cmd := processBuilder.Build()
-	log.Info("tc command", "command", cmd.String(), "args", args)
-
-	out, err := cmd.CombinedOutput()
-
-	if err != nil {
-		log.Error(err, "tc command error", "command", cmd.String(), "output", string(out))
-		return err
-	}
-
-	return nil
+	return errors.New("arm64 is not supported")
 }

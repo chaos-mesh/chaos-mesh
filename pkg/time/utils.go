@@ -11,24 +11,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package chaosdaemon
+package time
 
 import (
-	"context"
+	"github.com/go-logr/logr"
 
-	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
+	ctrl "sigs.k8s.io/controller-runtime"
 )
 
-func applyTc(ctx context.Context, enterNS bool, pid uint32, args ...string) error {
-	// Mock point to return error in unit test
-	if err := mock.On("TcApplyError"); err != nil {
-		if e, ok := err.(error); ok {
-			return e
-		}
-		if ignore, ok := err.(bool); ok && ignore {
-			return nil
-		}
-	}
+var log = ctrl.Log.WithName("time")
 
-	panic("unimplemented")
+// RegisterLogger registers a logger on time pkg
+func RegisterLogger(logger logr.Logger) {
+	log = logger
 }
