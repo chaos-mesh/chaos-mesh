@@ -71,6 +71,38 @@ Then, you need to provide an API server as a proxy, it will pass into an env var
 
   For the other usage of `make xxx` that please refer the [Makefile](https://github.com/chaos-mesh/chaos-mesh/blob/master/Makefile).
 
+### Structure
+
+```sh
+src
+├── @types
+├── api
+├── components
+├── components-mui
+├── i18n
+├── lib
+├── pages
+├── reducers
+├── routes.tsx
+├── slices
+├── store.ts
+└── theme.ts
+```
+
+The above tree structure explained as follow:
+
+- `@types` place global types, which use for Typescript.
+- `api` place all requests.
+- `components` place all packaged components.
+- `components-mui` nearly the same as `components`, but inherit from Material UI.
+- `i18n` place all translations.
+- `lib` place some independent functions and common utils.
+- `reducers` (Redux reducers)
+- `routes.tsx` (Client routes)
+- `slices` [Redux Tookit slices](https://redux-toolkit.js.org/api/createSlice)
+- `store.ts` (Redux store)
+- `theme` place global theme definitions.
+
 ### The rules we followed
 
 For better collaboration and review, we have developed a few rules to help us develop better.
