@@ -39,7 +39,7 @@ func (s *DaemonServer) SetIptablesChains(ctx context.Context, req *pb.IptablesCh
 		return nil, err
 	}
 
-	iptables := buildIptablesClient(ctx, pid)
+	iptables := buildIptablesClient(ctx, req.EnterNS, pid)
 	err = iptables.initializeEnv()
 	if err != nil {
 		log.Error(err, "error while initializing iptables")
@@ -56,8 +56,9 @@ func (s *DaemonServer) SetIptablesChains(ctx context.Context, req *pb.IptablesCh
 }
 
 type iptablesClient struct {
-	ctx context.Context
-	pid uint32
+	ctx     context.Context
+	enterNS bool
+	pid     uint32
 }
 
 type iptablesChain struct {
@@ -65,9 +66,10 @@ type iptablesChain struct {
 	Rules []string
 }
 
-func buildIptablesClient(ctx context.Context, pid uint32) iptablesClient {
+func buildIptablesClient(ctx context.Context, enterNS bool, pid uint32) iptablesClient {
 	return iptablesClient{
 		ctx,
+		enterNS,
 		pid,
 	}
 }
@@ -165,7 +167,11 @@ func (iptables *iptablesClient) initializeEnv() error {
 
 // createNewChain will cover existing chain
 func (iptables *iptablesClient) createNewChain(chain *iptablesChain) error {
-	cmd := bpm.DefaultProcessBuilder(iptablesCmd, "-w", "-N", chain.Name).SetNS(iptables.pid, bpm.NetNS).SetContext(iptables.ctx).Build()
+	processBuilder := bpm.DefaultProcessBuilder(iptablesCmd, "-w", "-N", chain.Name).SetContext(iptables.ctx)
+	if iptables.enterNS {
+		processBuilder = processBuilder.SetNS(iptables.pid, bpm.NetNS)
+	}
+	cmd := processBuilder.Build()
 	out, err := cmd.CombinedOutput()
 
 	if (err == nil && len(out) == 0) ||
@@ -198,7 +204,11 @@ func (iptables *iptablesClient) deleteAndWriteRules(chain *iptablesChain) error 
 }
 
 func (iptables *iptablesClient) ensureRule(chain *iptablesChain, rule string) error {
-	cmd := bpm.DefaultProcessBuilder(iptablesCmd, "-w", "-S", chain.Name).SetNS(iptables.pid, bpm.NetNS).SetContext(iptables.ctx).Build()
+	processBuilder := bpm.DefaultProcessBuilder(iptablesCmd, "-w", "-S", chain.Name).SetContext(iptables.ctx)
+	if iptables.enterNS {
+		processBuilder = processBuilder.SetNS(iptables.pid, bpm.NetNS)
+	}
+	cmd := processBuilder.Build()
 	out, err := cmd.CombinedOutput()
 	if err != nil {
 		return encodeOutputToError(out, err)
@@ -210,7 +220,11 @@ func (iptables *iptablesClient) ensureRule(chain *iptablesChain, rule string) er
 	}
 
 	// TODO: lock on every container but not on chaos-daemon's `/run/xtables.lock`
-	cmd = bpm.DefaultProcessBuilder(iptablesCmd, strings.Split("-w "+rule, " ")...).SetNS(iptables.pid, bpm.NetNS).SetContext(iptables.ctx).Build()
+	processBuilder = bpm.DefaultProcessBuilder(iptablesCmd, strings.Split("-w "+rule, " ")...).SetContext(iptables.ctx)
+	if iptables.enterNS {
+		processBuilder = processBuilder.SetNS(iptables.pid, bpm.NetNS)
+	}
+	cmd = processBuilder.Build()
 	out, err = cmd.CombinedOutput()
 	if err != nil {
 		return encodeOutputToError(out, err)
@@ -220,7 +234,11 @@ func (iptables *iptablesClient) ensureRule(chain *iptablesChain, rule string) er
 }
 
 func (iptables *iptablesClient) flushIptablesChain(chain *iptablesChain) error {
-	cmd := bpm.DefaultProcessBuilder(iptablesCmd, "-w", "-F", chain.Name).SetNS(iptables.pid, bpm.NetNS).SetContext(iptables.ctx).Build()
+	processBuilder := bpm.DefaultProcessBuilder(iptablesCmd, "-w", "-F", chain.Name).SetContext(iptables.ctx)
+	if iptables.enterNS {
+		processBuilder = processBuilder.SetNS(iptables.pid, bpm.NetNS)
+	}
+	cmd := processBuilder.Build()
 	out, err := cmd.CombinedOutput()
 	if err != nil {
 		return encodeOutputToError(out, err)
