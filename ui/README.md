@@ -84,7 +84,7 @@ Then, you need to provide an API server as a proxy, it will pass into an env var
 
   One is real-time, the other needs to be compiled before use. The compiled bundle the extra Swagger API HTML into the binary file.
 
-  For the other usage of `make xxx` that please refer the [Makefile](https://github.com/chaos-mesh/chaos-mesh/blob/master/Makefile).
+  For the other usage of `make xxx` that please refer to the [Makefile](https://github.com/chaos-mesh/chaos-mesh/blob/master/Makefile).
 
 #### Start
 
