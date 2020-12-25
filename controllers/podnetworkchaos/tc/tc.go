@@ -43,7 +43,8 @@ func SetTcs(ctx context.Context, c client.Client, pod *v1.Pod, tcs []*pb.Tc) err
 		Tcs:         tcs,
 		ContainerId: containerID,
 		// Prevent tcs is empty, used to clean up tc rules
-		Device: "eth0",
+		Device:  "eth0",
+		EnterNS: true,
 	})
 	return err
 }
