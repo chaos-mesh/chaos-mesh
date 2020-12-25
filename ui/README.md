@@ -12,6 +12,7 @@ A Web UI for Chaos Mesh. Powered by ⚛️ [Create React App](https://github.com
   - [Bootstrap](#bootstrap)
     - [Global env](#global-env)
     - [Install deps](#install-deps)
+    - [Start](#start)
   - [Structure](#structure)
   - [The rules we followed](#the-rules-we-followed)
   - [TS or JS](#ts-or-js)
@@ -135,7 +136,7 @@ For better collaboration and review, we have developed a few rules to help us de
 - [Styles](#styles)
 - [Be Compact](#be-compact)
 
-***Before you contribute, you must read the following carefully.***
+**_Before you contribute, you must read the following carefully._**
 
 ### TS or JS
 
