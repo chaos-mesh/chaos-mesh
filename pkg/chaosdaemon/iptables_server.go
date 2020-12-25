@@ -107,6 +107,11 @@ func (iptables *iptablesClient) setIptablesChain(chain *pb.Chain) error {
 	}
 
 	rules := []string{}
+
+	if len(chain.Ipsets) == 0 {
+		rules = append(rules, strings.TrimSpace(fmt.Sprintf("-A %s -j %s -w 5 %s", chain.Name, chain.Target, protocolAndPort)))
+	}
+
 	for _, ipset := range chain.Ipsets {
 		rules = append(rules, strings.TrimSpace(fmt.Sprintf("-A %s -m set --match-set %s %s -j %s -w 5 %s",
 			chain.Name, ipset, matchPart, chain.Target, protocolAndPort)))
