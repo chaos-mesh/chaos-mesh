@@ -7,7 +7,20 @@
 
 A Web UI for Chaos Mesh. Powered by ⚛️ [Create React App](https://github.com/facebook/create-react-app).
 
+- [How to develop](#how-to-develop)
+  - [Main technologies](#main-technologies)
+  - [Bootstrap](#bootstrap)
+    - [Global env](#global-env)
+    - [Install deps](#install-deps)
+  - [Structure](#structure)
+  - [The rules we followed](#the-rules-we-followed)
+  - [TS or JS](#ts-or-js)
+  - [Styles](#styles)
+  - [Be Compact](#be-compact)
+
 ## How to develop
+
+The following content can help you understand how to develop dashboard and its overall structure.
 
 ### Main technologies
 
@@ -46,7 +59,7 @@ This command will install all deps the dashboard needed.
 
 Then, you need to provide an API server as a proxy, it will pass into an env var which named: `REACT_APP_API_URL`. There are three ways to get it:
 
-- From other deployed Chaos Mesh Dashboard
+- **From other deployed Chaos Mesh Dashboard**
 
   If you have Chaos Mesh deployed in the cluster, you can use the dashboard service url as the proxy.
 
@@ -56,11 +69,11 @@ Then, you need to provide an API server as a proxy, it will pass into an env var
   kubectl port-forward -n chaos-testing svc/chaos-dashboard 2333:2333
   ```
 
-- From local deployed Chaos Mesh Dashboard
+- **From local deployed Chaos Mesh Dashboard**
 
   Same as above. Only the cluster is local. (E.g., [kind](https://kind.sigs.k8s.io/) or [minikube](https://minikube.sigs.k8s.io/))
 
-- From local server
+- **From local server**
 
   There have two ways to run chaos-dashboard server in your terminal:
 
@@ -70,6 +83,17 @@ Then, you need to provide an API server as a proxy, it will pass into an env var
   One is real-time, the other needs to be compiled before use. The compiled bundle the extra Swagger API HTML into the binary file.
 
   For the other usage of `make xxx` that please refer the [Makefile](https://github.com/chaos-mesh/chaos-mesh/blob/master/Makefile).
+
+#### Start
+
+We already place a one-step script to start the dashboard:
+
+```sh
+# cross-env REACT_APP_API_URL=http://localhost:2333 BROWSER=none react-scripts start
+yarn start:default
+```
+
+Then open <http://localhost:3000> to see the preview effect.
 
 ### Structure
 
@@ -91,17 +115,17 @@ src
 
 The above tree structure explained as follow:
 
-- `@types` place global types, which use for Typescript.
-- `api` place all requests.
-- `components` place all packaged components.
-- `components-mui` nearly the same as `components`, but inherit from Material UI.
-- `i18n` place all translations.
-- `lib` place some independent functions and common utils.
-- `reducers` (Redux reducers)
-- `routes.tsx` (Client routes)
-- `slices` [Redux Tookit slices](https://redux-toolkit.js.org/api/createSlice)
-- `store.ts` (Redux store)
-- `theme` place global theme definitions.
+- **`@types`** place global types, which use for Typescript.
+- **`api`** place all requests.
+- **`components`** place all packaged components.
+- **`components-mui`** nearly the same as `components`, but inherit from Material UI.
+- **`i18n`** place all translations.
+- **`lib`** place some independent functions and common utils.
+- **`reducers`** (Redux reducers)
+- **`routes.tsx`** (Client routes)
+- **`slices`** [Redux Tookit slices](https://redux-toolkit.js.org/api/createSlice)
+- **`store.ts`** (Redux store)
+- **`theme`** place global theme definitions.
 
 ### The rules we followed
 
@@ -111,13 +135,13 @@ For better collaboration and review, we have developed a few rules to help us de
 - [Styles](#styles)
 - [Be Compact](#be-compact)
 
-**Before you contribute, you must read the following carefully.**
+***Before you contribute, you must read the following carefully.***
 
 ### TS or JS
 
 First, we use [husky](https://github.com/typicode/husky) and [lint-staged](https://github.com/okonet/lint-staged) to make [prettier](https://prettier.io/) format our code automatically before commit.
 
-~~And also, because some of us use vscode to develop the dashboard, we recommend to use [sort-imports](https://marketplace.visualstudio.com/items?itemName=amatiasq.sort-imports) to format all imports.~~ (Sort automatically for now)
+~~And also, because some of us use vscode to develop the dashboard, we recommend to use [sort-imports](https://marketplace.visualstudio.com/items?itemName=amatiasq.sort-imports) to format all imports.~~ **(Sort automatically for now)**
 
 ### Styles
 
