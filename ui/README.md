@@ -15,9 +15,10 @@ A Web UI for Chaos Mesh. Powered by ⚛️ [Create React App](https://github.com
     - [Start](#start)
   - [Structure](#structure)
   - [The rules we followed](#the-rules-we-followed)
-  - [TS or JS](#ts-or-js)
-  - [Styles](#styles)
-  - [Be Compact](#be-compact)
+    - [TS or JS](#ts-or-js)
+    - [Styles](#styles)
+    - [Be Compact](#be-compact)
+- [License](#license)
 
 ## How to develop
 
@@ -138,13 +139,13 @@ For better collaboration and review, we have developed a few rules to help us de
 
 **_Before you contribute, you must read the following carefully._**
 
-### TS or JS
+#### TS or JS
 
 First, we use [husky](https://github.com/typicode/husky) and [lint-staged](https://github.com/okonet/lint-staged) to make [prettier](https://prettier.io/) format our code automatically before commit.
 
 ~~And also, because some of us use vscode to develop the dashboard, we recommend to use [sort-imports](https://marketplace.visualstudio.com/items?itemName=amatiasq.sort-imports) to format all imports.~~ **(Sort automatically for now)**
 
-### Styles
+#### Styles
 
 Currently, we use `@material-ui/styles` to isolate each component styles.
 
@@ -176,7 +177,7 @@ box-shadow: none;
 // Finally, not often used values can be in any order
 ```
 
-### Be Compact
+#### Be Compact
 
 - **Don't include unused deps.**
 - **Don't let your code be too long-winded, there will be a lot of elegant writing.**
