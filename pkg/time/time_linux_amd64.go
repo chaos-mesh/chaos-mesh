@@ -18,21 +18,10 @@ import (
 	"errors"
 	"runtime"
 
-	"github.com/go-logr/logr"
-
 	"github.com/chaos-mesh/chaos-mesh/pkg/mapreader"
 	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
 	"github.com/chaos-mesh/chaos-mesh/pkg/ptrace"
-
-	ctrl "sigs.k8s.io/controller-runtime"
 )
-
-var log = ctrl.Log.WithName("time")
-
-// RegisterLogger registers a logger on time pkg
-func RegisterLogger(logger logr.Logger) {
-	log = logger
-}
 
 // TODO: support more cpu architecture
 // TODO: auto generate these codes
