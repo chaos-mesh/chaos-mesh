@@ -227,7 +227,7 @@ def call(BUILD_BRANCH, CREDENTIALS_ID) {
 		def artifacts = "go/src/github.com/chaos-mesh/chaos-mesh/artifacts"
 		def builds = [:]
 		builds["E2E v1.12.10"] = {
-                build("v1.12", "${GLOBALS} REGISTRY_MIRROR=registry-mirror.pingcap.net GINKGO_NODES=6 KUBE_VERSION=v1.12.10 ./hack/e2e.sh -- --ginkgo.focus='Basic'")
+                build("v1.12", "${GLOBALS} REGISTRY_MIRROR=registry-mirror.pingcap.net/ GINKGO_NODES=6 KUBE_VERSION=v1.12.10 ./hack/e2e.sh -- --ginkgo.focus='Basic'")
         }
 		builds.failFast = false
 		parallel builds
