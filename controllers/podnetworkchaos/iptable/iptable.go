@@ -45,6 +45,7 @@ func SetIptablesChains(ctx context.Context, c client.Client, pod *v1.Pod, chains
 	_, err = pbClient.SetIptablesChains(ctx, &pb.IptablesChainsRequest{
 		Chains:      chains,
 		ContainerId: containerID,
+		EnterNS:     true,
 	})
 	return err
 }

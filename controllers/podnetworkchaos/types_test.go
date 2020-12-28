@@ -95,7 +95,7 @@ func TestHostNetworkOption(t *testing.T) {
 			h := &Handler{
 				Client:                  fake.NewFakeClientWithScheme(scheme.Scheme, objs...),
 				Reader:                  r,
-				Log:                     zap.Logger(true),
+				Log:                     zap.New(zap.UseDevMode(true)),
 				AllowHostNetworkTesting: testCase.enableHostNetworkTesting,
 			}
 

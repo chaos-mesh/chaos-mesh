@@ -189,6 +189,7 @@ func (r *endpoint) recoverPod(ctx context.Context, pod *v1.Pod) error {
 	_, err = daemonClient.SetDNSServer(ctx, &pb.SetDNSServerRequest{
 		ContainerId: target,
 		Enable:      false,
+		EnterNS:     true,
 	})
 	if err != nil {
 		r.Log.Error(err, "recover pod for DNS chaos")
@@ -247,6 +248,7 @@ func (r *endpoint) applyPod(ctx context.Context, pod *v1.Pod, dnsServerIP string
 		ContainerId: target,
 		DnsServer:   dnsServerIP,
 		Enable:      true,
+		EnterNS:     true,
 	})
 	if err != nil {
 		r.Log.Error(err, "set dns server")

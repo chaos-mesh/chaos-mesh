@@ -58,8 +58,13 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (result ctrl.Result, err error)
 
 	ctx := r.Context.LogWithValues("reconciler", r.Name, "resource name", req.NamespacedName)
 
-	// TODO: return error if this convertion failed
-	chaos := r.Object.DeepCopyObject().(v1alpha1.InnerSchedulerObject)
+	chaos, ok := r.Object.DeepCopyObject().(v1alpha1.InnerSchedulerObject)
+	if !ok {
+		err := errors.New("object is not InnerSchedulerObject")
+		r.Log.Error(err, "object is not InnerSchedulerObject", "object", r.Object.DeepCopyObject())
+		return ctrl.Result{}, err
+	}
+
 	if err := r.Client.Get(context.Background(), req.NamespacedName, chaos); err != nil {
 		if apierrors.IsNotFound(err) {
 			r.Log.Info("chaos not found")

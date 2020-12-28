@@ -91,6 +91,7 @@ func (h *Handler) Apply(ctx context.Context, chaos *v1alpha1.PodIoChaos) error {
 
 		Instance:  chaos.Spec.Pid,
 		StartTime: chaos.Spec.StartTime,
+		EnterNS:   true,
 	})
 	if err != nil {
 		return err

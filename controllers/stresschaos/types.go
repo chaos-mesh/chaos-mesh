@@ -249,6 +249,7 @@ func (r *endpoint) applyPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.St
 		Scope:     pb.ExecStressRequest_CONTAINER,
 		Target:    target,
 		Stressors: stressors,
+		EnterNS:   true,
 	})
 	if err != nil {
 		return err
