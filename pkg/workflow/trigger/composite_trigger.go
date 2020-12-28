@@ -45,6 +45,11 @@ func (it *CompositeTrigger) TriggerName() string {
 }
 
 func (it *CompositeTrigger) Acquire(ctx context.Context) (Event, error) {
+	go func() {
+		it.RunAndPending(ctx)
+		// TODO: warn logs
+	}()
+
 	select {
 	case <-ctx.Done():
 		return nil, ctx.Err()

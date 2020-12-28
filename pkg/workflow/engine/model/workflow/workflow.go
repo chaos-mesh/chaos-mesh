@@ -21,7 +21,6 @@ import (
 type WorkflowSpec interface {
 	GetName() string
 	GetEntry() string
-	GetTemplates() (template.Templates, error)
 	FetchTemplateByName(templateName string) (template.Template, error)
 }
 

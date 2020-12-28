@@ -78,21 +78,6 @@ func (mr *MockWorkflowSpecMockRecorder) GetEntry() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetEntry", reflect.TypeOf((*MockWorkflowSpec)(nil).GetEntry))
 }
 
-// GetTemplates mocks base method
-func (m *MockWorkflowSpec) GetTemplates() (template.Templates, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetTemplates")
-	ret0, _ := ret[0].(template.Templates)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetTemplates indicates an expected call of GetTemplates
-func (mr *MockWorkflowSpecMockRecorder) GetTemplates() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTemplates", reflect.TypeOf((*MockWorkflowSpec)(nil).GetTemplates))
-}
-
 // FetchTemplateByName mocks base method
 func (m *MockWorkflowSpec) FetchTemplateByName(templateName string) (template.Template, error) {
 	m.ctrl.T.Helper()

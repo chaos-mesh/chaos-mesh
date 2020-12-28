@@ -33,11 +33,8 @@ func TestEmptySpec(t *testing.T) {
 	mockctl := gomock.NewController(t)
 	defer mockctl.Finish()
 
-	mockedTemplates := mock_template.NewMockTemplates(mockctl)
-	mockedTemplates.EXPECT().GetTemplateByName(gomock.Any()).Return(nil, workflowerr.ErrNoSuchTemplate)
-
 	mockedWorkflowSpec := mock_workflow.NewMockWorkflowSpec(mockctl)
-	mockedWorkflowSpec.EXPECT().GetTemplates().Return(mockedTemplates, nil)
+	mockedWorkflowSpec.EXPECT().FetchTemplateByName(gomock.Any()).Return(nil, workflowerr.ErrNoSuchTemplate)
 	mockedWorkflowSpec.EXPECT().GetEntry().Return("")
 
 	mockWorkflowStatus := mock_workflow.NewMockWorkflowStatus(mockctl)
@@ -62,13 +59,10 @@ func TestScheduleTheFirstEntry(t *testing.T) {
 	entryTemplate.EXPECT().GetName().AnyTimes().Return(entryTemplateName)
 	entryTemplate.EXPECT().GetTemplateType().Return(template.IoChaos)
 
-	mockTemplates := mock_template.NewMockTemplates(mockctl)
-	mockTemplates.EXPECT().GetTemplateByName(gomock.Eq(entryTemplateName)).AnyTimes().Return(entryTemplate, nil)
-
 	mockedWorkflowSpec := mock_workflow.NewMockWorkflowSpec(mockctl)
 	mockedWorkflowSpec.EXPECT().GetName().Return(workflowName)
 	mockedWorkflowSpec.EXPECT().GetEntry().AnyTimes().Return(entryTemplate.GetName())
-	mockedWorkflowSpec.EXPECT().GetTemplates().AnyTimes().Return(mockTemplates, nil)
+	mockedWorkflowSpec.EXPECT().FetchTemplateByName(gomock.Eq(entryTemplateName)).AnyTimes().Return(entryTemplate, nil)
 
 	mockWorkflowStatus := mock_workflow.NewMockWorkflowStatus(mockctl)
 
@@ -131,16 +125,13 @@ func TestNextedTwoLayerSerial(t *testing.T) {
 
 	entryTemplate := mock_template.NewMockSerialTemplate(mockctl)
 	entryTemplate.EXPECT().GetName().AnyTimes().Return(entryTemplateName)
-	entryTemplate.EXPECT().GetTemplateType().Return(template.Serial)
+	entryTemplate.EXPECT().GetTemplateType().AnyTimes().Return(template.Serial)
 	entryTemplate.EXPECT().GetSerialChildrenList().AnyTimes().Return([]template.Template{firstTemplate, secondTemplate, thirdTemplate})
-
-	mockedTemplates := mock_template.NewMockTemplates(mockctl)
-	mockedTemplates.EXPECT().GetTemplateByName(gomock.Eq(entryTemplate.GetName())).AnyTimes().Return(entryTemplate, nil)
 
 	mockedWorkflowSpec := mock_workflow.NewMockWorkflowSpec(mockctl)
 	mockedWorkflowSpec.EXPECT().GetName().Return(workflowName)
 	mockedWorkflowSpec.EXPECT().GetEntry().AnyTimes().Return(entryTemplate.GetName())
-	mockedWorkflowSpec.EXPECT().GetTemplates().AnyTimes().Return(mockedTemplates, nil)
+	mockedWorkflowSpec.EXPECT().FetchTemplateByName(gomock.Eq(entryTemplate.GetName())).AnyTimes().Return(entryTemplate, nil)
 
 	mockWorkflowStatus := mock_workflow.NewMockWorkflowStatus(mockctl)
 	mockWorkflowStatus.EXPECT().FetchNodesMap().Return(nil)

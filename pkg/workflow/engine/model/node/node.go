@@ -13,10 +13,6 @@
 
 package node
 
-import (
-	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/engine/model/template"
-)
-
 type NodePhase string
 
 const (
@@ -36,9 +32,7 @@ type Node interface {
 	GetName() string
 	GetNodePhase() NodePhase
 	GetParentNodeName() string
-
 	GetTemplateName() string
-	GetTemplateType() template.TemplateType
 }
 
 // FIXME: remove this interface, it's should belongs workflow status

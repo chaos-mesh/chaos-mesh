@@ -30,6 +30,28 @@ const (
 	NodeWaitingForSchedule EventType = "NodeWaitingForSchedule"
 )
 
+type basicEvent struct {
+	workflowName string
+	nodeName     string
+	eventType    EventType
+}
+
+func (it *basicEvent) GetWorkflowName() string {
+	return it.workflowName
+}
+
+func (it *basicEvent) GetNodeName() string {
+	return it.nodeName
+}
+
+func (it *basicEvent) GetEventType() EventType {
+	return it.eventType
+}
+
 func NewEvent(workflowName string, nodeName string, eventType EventType) Event {
-	panic("unimplemented")
+	return &basicEvent{
+		workflowName: workflowName,
+		nodeName:     nodeName,
+		eventType:    eventType,
+	}
 }

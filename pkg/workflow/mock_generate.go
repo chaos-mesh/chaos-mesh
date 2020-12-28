@@ -14,6 +14,7 @@
 package workflow
 
 //go:generate mockgen -source ./manager/manager.go -copyright_file ../../hack/boilerplate/boilerplate.gomock.txt -destination ./mock/mock_manager/mock_manager.go
+//go:generate mockgen -source ./manager/repo.go -copyright_file ../../hack/boilerplate/boilerplate.gomock.txt -destination ./mock/mock_manager/mock_repo.go
 //go:generate mockgen -source ./engine/model/workflow/workflow.go -copyright_file ../../hack/boilerplate/boilerplate.gomock.txt -destination ./mock/engine/model/mock_workflow/mock_workflow.go
 
 //go:generate mockgen -source ./engine/model/node/node.go -copyright_file ../../hack/boilerplate/boilerplate.gomock.txt -destination ./mock/engine/model/mock_node/mock_node.go

@@ -21,6 +21,11 @@ import (
 
 /*  interface Scheduler follows the iterator-pattern, it provides templates which need instantiate. */
 type Scheduler interface {
+	// func ScheduleNext.
+	// Basically we do not need this method, because we already know the parent node name before scheduling based on event mechanism.
+	// May be we will remove it in the future.
 	ScheduleNext(ctx context.Context) (nextTemplates []template.Template, parentNodeName string, err error)
+	// func ScheduleNextWithinParent.
+	// We usually use this method when some event triggered by upper manager.
 	ScheduleNextWithinParent(ctx context.Context, parentNodeName string) (nextTemplates []template.Template, err error)
 }

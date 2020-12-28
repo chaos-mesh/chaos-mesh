@@ -33,6 +33,18 @@ type basicManager struct {
 	operableTrigger trigger.OperableTrigger
 }
 
+func NewBasicManager(name string, repo WorkflowRepo, triggers ...trigger.Trigger) *basicManager {
+	operableTrigger := trigger.NewOperableTrigger()
+	allTriggers := append(triggers, operableTrigger)
+	composite := trigger.NewCompositeTrigger(allTriggers...)
+	return &basicManager{
+		name:             name,
+		repo:             repo,
+		multiplexTrigger: composite,
+		operableTrigger:  operableTrigger,
+	}
+}
+
 // TODO: constructor for basicManager
 
 func (it *basicManager) GetName() string {
@@ -74,7 +86,13 @@ func (it *basicManager) consume(ctx context.Context, event trigger.Event) error 
 		}
 		basicScheduler := scheduler.NewBasicScheduler(workflow, status)
 		templatesToRun, parentNode, err := basicScheduler.ScheduleNext(ctx)
+		if err != nil {
+			return err
+		}
 		nodeNames, err := it.repo.CreateNodes(workflowName, templatesToRun, parentNode)
+		if err != nil {
+			return err
+		}
 		for _, nodeName := range nodeNames {
 			err := it.operableTrigger.Notify(trigger.NewEvent(workflowName, nodeName, trigger.NodeCreated))
 			if err != nil {
@@ -83,8 +101,10 @@ func (it *basicManager) consume(ctx context.Context, event trigger.Event) error 
 			}
 		}
 	case trigger.WorkflowFinished:
+		// NOOP
 
 	case trigger.NodeCreated:
+		// initialize Actor updating to Running
 		workflowName := event.GetWorkflowName()
 		nodeName := event.GetNodeName()
 		workflowSpec, workflowStatus, err := it.repo.FetchWorkflow(workflowName)
@@ -110,15 +130,11 @@ func (it *basicManager) consume(ctx context.Context, event trigger.Event) error 
 		default:
 			return fmt.Errorf("unsupproted template type %s", targetTemplate.GetTemplateType())
 		}
-
-		err = it.repo.UpdateNodesToRunning(workflowName, nodeName)
-		if err != nil {
-			return err
-		}
-
 	case trigger.NodeFinished:
+		// updating parent node's status recursively
 
 	case trigger.NodeWaitingForSchedule:
+		// time to scheduling!
 		workflowName := event.GetWorkflowName()
 		nodeName := event.GetNodeName()
 		workflowSpec, workflowStatus, err := it.repo.FetchWorkflow(workflowName)
@@ -137,20 +153,16 @@ func (it *basicManager) consume(ctx context.Context, event trigger.Event) error 
 		case template.Serial:
 			basicScheduler := scheduler.NewBasicScheduler(workflowSpec, workflowStatus)
 			newTemplateNeedSchedule, err := basicScheduler.ScheduleNextWithinParent(ctx, nodeName)
+			if err != nil {
+				return nil
+			}
 			err = it.repo.UpdateNodesToWaitingForChild(workflowName, nodeName)
 			if err != nil {
 				return nil
 			}
-			newNodeNames, err := it.repo.CreateNodes(workflowName, newTemplateNeedSchedule, nodeName)
+			_, err = it.repo.CreateNodes(workflowName, newTemplateNeedSchedule, nodeName)
 			if err != nil {
 				return nil
-			}
-			for _, newNodeName := range newNodeNames {
-				err := it.operableTrigger.Notify(trigger.NewEvent(workflowName, newNodeName, trigger.NodeCreated))
-				if err != nil {
-					// TODO: warn log
-					return err
-				}
 			}
 		default:
 			return fmt.Errorf("unsupproted template type %s", targetTemplate.GetTemplateType())

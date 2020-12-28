@@ -42,6 +42,9 @@ func (it *basicOperableTrigger) TriggerName() string {
 }
 
 func (it *basicOperableTrigger) Acquire(ctx context.Context) (Event, error) {
+
+	// TODO: make ctx work
+
 	item, shutdown := it.queue.Get()
 
 	if shutdown {
