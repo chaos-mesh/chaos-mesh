@@ -337,3 +337,8 @@ install-local-coverage-tools:
 	manager chaosfs chaosdaemon chaos-dashboard ensure-all \
 	dashboard dashboard-server-frontend gosec-scan \
 	proto bin/chaos-builder
+
+# for workflow
+workflow-mocks:
+	cd ./pkg/workflow && go generate
+	make fmt vet

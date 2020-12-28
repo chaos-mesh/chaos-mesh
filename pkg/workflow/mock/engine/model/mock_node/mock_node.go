@@ -23,7 +23,6 @@ import (
 	gomock "github.com/golang/mock/gomock"
 
 	node "github.com/chaos-mesh/chaos-mesh/pkg/workflow/engine/model/node"
-	template "github.com/chaos-mesh/chaos-mesh/pkg/workflow/engine/model/template"
 )
 
 // MockNode is a mock of Node interface
@@ -103,20 +102,6 @@ func (m *MockNode) GetTemplateName() string {
 func (mr *MockNodeMockRecorder) GetTemplateName() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTemplateName", reflect.TypeOf((*MockNode)(nil).GetTemplateName))
-}
-
-// GetTemplateType mocks base method
-func (m *MockNode) GetTemplateType() template.TemplateType {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetTemplateType")
-	ret0, _ := ret[0].(template.TemplateType)
-	return ret0
-}
-
-// GetTemplateType indicates an expected call of GetTemplateType
-func (mr *MockNodeMockRecorder) GetTemplateType() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTemplateType", reflect.TypeOf((*MockNode)(nil).GetTemplateType))
 }
 
 // MockNodeTreeNode is a mock of NodeTreeNode interface

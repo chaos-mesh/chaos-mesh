@@ -23,7 +23,6 @@ import (
 	gomock "github.com/golang/mock/gomock"
 
 	node "github.com/chaos-mesh/chaos-mesh/pkg/workflow/engine/model/node"
-	template "github.com/chaos-mesh/chaos-mesh/pkg/workflow/engine/model/template"
 )
 
 // MockTaskNode is a mock of TaskNode interface
@@ -103,20 +102,6 @@ func (m *MockTaskNode) GetTemplateName() string {
 func (mr *MockTaskNodeMockRecorder) GetTemplateName() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTemplateName", reflect.TypeOf((*MockTaskNode)(nil).GetTemplateName))
-}
-
-// GetTemplateType mocks base method
-func (m *MockTaskNode) GetTemplateType() template.TemplateType {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetTemplateType")
-	ret0, _ := ret[0].(template.TemplateType)
-	return ret0
-}
-
-// GetTemplateType indicates an expected call of GetTemplateType
-func (mr *MockTaskNodeMockRecorder) GetTemplateType() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTemplateType", reflect.TypeOf((*MockTaskNode)(nil).GetTemplateType))
 }
 
 // FetchAvailableChildren mocks base method

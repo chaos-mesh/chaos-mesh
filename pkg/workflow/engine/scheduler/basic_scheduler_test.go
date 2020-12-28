@@ -57,7 +57,6 @@ func TestScheduleTheFirstEntry(t *testing.T) {
 
 	entryTemplate := mock_template.NewMockTemplate(mockctl)
 	entryTemplate.EXPECT().GetName().AnyTimes().Return(entryTemplateName)
-	entryTemplate.EXPECT().GetTemplateType().Return(template.IoChaos)
 
 	mockedWorkflowSpec := mock_workflow.NewMockWorkflowSpec(mockctl)
 	mockedWorkflowSpec.EXPECT().GetName().Return(workflowName)
@@ -79,7 +78,6 @@ func TestScheduleTheFirstEntry(t *testing.T) {
 	// update workflow status
 	entryNode := mock_node.NewMockNode(mockctl)
 	entryNode.EXPECT().GetName().AnyTimes().Return(entryNodeName)
-	entryNode.EXPECT().GetTemplateType().AnyTimes().Return(entryTemplate.GetTemplateType())
 	entryNode.EXPECT().GetNodePhase().Return(node.Succeed)
 
 	mockWorkflowStatus = mock_workflow.NewMockWorkflowStatus(mockctl)
@@ -149,7 +147,6 @@ func TestNextedTwoLayerSerial(t *testing.T) {
 	entryNode.EXPECT().GetName().AnyTimes().Return(entryNodeName)
 	entryNode.EXPECT().GetNodePhase().AnyTimes().Return(node.WaitingForSchedule)
 	entryNode.EXPECT().GetTemplateName().AnyTimes().Return(entryTemplate.GetName())
-	entryNode.EXPECT().GetTemplateType().AnyTimes().Return(entryTemplate.GetTemplateType())
 
 	mockedEntryNodeTreeNode := mock_node.NewMockNodeTreeNode(mockctl)
 
