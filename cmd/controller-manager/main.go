@@ -243,21 +243,23 @@ func watchConfig(configWatcher *watcher.K8sConfigMapWatcher, cfg *config.Config,
 
 	for {
 		item, shutdown := queue.Get()
-		defer queue.Done(item)
 		if shutdown {
 			break
 		}
+		func() {
+			defer queue.Done(item)
 
-		setupLog.Info("Triggering ConfigMap reconciliation")
-		updatedInjectionConfigs, err := configWatcher.GetInjectionConfigs()
-		if err != nil {
-			setupLog.Error(err, "unable to get ConfigMaps")
-			continue
-		}
+			setupLog.Info("Triggering ConfigMap reconciliation")
+			updatedInjectionConfigs, err := configWatcher.GetInjectionConfigs()
+			if err != nil {
+				setupLog.Error(err, "unable to get ConfigMaps")
+				return
+			}
 
-		setupLog.Info("Updating server with newly loaded configurations",
-			"original configs count", len(cfg.Injections), "updated configs count", len(updatedInjectionConfigs))
-		cfg.ReplaceInjectionConfigs(updatedInjectionConfigs)
-		setupLog.Info("Configuration replaced")
+			setupLog.Info("Updating server with newly loaded configurations",
+				"original configs count", len(cfg.Injections), "updated configs count", len(updatedInjectionConfigs))
+			cfg.ReplaceInjectionConfigs(updatedInjectionConfigs)
+			setupLog.Info("Configuration replaced")
+		}()
 	}
 }
