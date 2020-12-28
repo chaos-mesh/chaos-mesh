@@ -18,10 +18,16 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/engine/model/workflow"
 )
 
+// Notice when you update node's status, please make sure already finish the operations.
 type WorkflowRepo interface {
 	FetchWorkflow(workflowName string) (workflow.WorkflowSpec, workflow.WorkflowStatus, error)
+	// func CreateNodes, create the nodes by given templates and parent node.
+	// It return the nodes name with the same order of template.
 	CreateNodes(workflowName string, templates []template.Template, parentNode string) ([]string, error)
+	// func UpdateNodesToRunning, update one specific node status to Running.
 	UpdateNodesToRunning(workflowName string, nodeName string) error
+	// func UpdateNodesToWaitingForChild, update one specific node status to WaitingForChild.
 	UpdateNodesToWaitingForChild(workflowName string, nodeName string) error
+	// func UpdateNodesToWaitingForSchedule, update one specific node status to WaitingForSchedule.
 	UpdateNodesToWaitingForSchedule(workflowName string, nodeName string) error
 }

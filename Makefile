@@ -342,3 +342,7 @@ install-local-coverage-tools:
 workflow-mocks:
 	cd ./pkg/workflow && go generate
 	make fmt vet
+
+workflow-api:
+	controller-gen object paths=./pkg/workflow/apis/workflow/v1alpha1
+	controller-gen crd paths=./pkg/workflow/apis/workflow/v1alpha1 output:crd:artifacts:config=config/crd/bases

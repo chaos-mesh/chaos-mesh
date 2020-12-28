@@ -122,6 +122,8 @@ func (it *basicManager) consume(ctx context.Context, event trigger.Event) error 
 		}
 
 		switch targetTemplate.GetTemplateType() {
+		case template.Suspend:
+
 		case template.Serial:
 			err := it.repo.UpdateNodesToWaitingForSchedule(workflowName, nodeName)
 			if err != nil {
