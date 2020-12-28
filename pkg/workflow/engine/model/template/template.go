@@ -36,8 +36,8 @@ const (
 type Template interface {
 	GetName() string
 	GetTemplateType() TemplateType
-	GetDuration() time.Duration
-	GetDeadline() time.Duration
+	GetDuration() (time.Duration, error)
+	GetDeadline() (time.Duration, error)
 }
 
 // func IsCompositeType. CompositeType means this Template could have children Templates.

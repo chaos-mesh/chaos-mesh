@@ -78,11 +78,12 @@ func (mr *MockTemplateMockRecorder) GetTemplateType() *gomock.Call {
 }
 
 // GetDuration mocks base method
-func (m *MockTemplate) GetDuration() time.Duration {
+func (m *MockTemplate) GetDuration() (time.Duration, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetDuration")
 	ret0, _ := ret[0].(time.Duration)
-	return ret0
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // GetDuration indicates an expected call of GetDuration
@@ -92,11 +93,12 @@ func (mr *MockTemplateMockRecorder) GetDuration() *gomock.Call {
 }
 
 // GetDeadline mocks base method
-func (m *MockTemplate) GetDeadline() time.Duration {
+func (m *MockTemplate) GetDeadline() (time.Duration, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetDeadline")
 	ret0, _ := ret[0].(time.Duration)
-	return ret0
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // GetDeadline indicates an expected call of GetDeadline
