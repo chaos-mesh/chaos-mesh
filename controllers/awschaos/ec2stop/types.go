@@ -22,7 +22,6 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 
-	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
 
@@ -60,7 +59,7 @@ func (e *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.I
 
 	ec2client := ec2.New(ec2.Options{
 		Region:      awschaos.Spec.AwsRegion,
-		Credentials: &aws.CredentialsCache{Provider: credentials.NewStaticCredentialsProvider(string(secret.Data["aws_access_key_id"]), string(secret.Data["aws_secret_access_key"]), "")},
+		Credentials: credentials.NewStaticCredentialsProvider(string(secret.Data["aws_access_key_id"]), string(secret.Data["aws_secret_access_key"]), ""),
 	})
 
 	awschaos.Finalizers = []string{AwsFinalizer}
@@ -97,7 +96,7 @@ func (e *endpoint) Recover(ctx context.Context, req ctrl.Request, chaos v1alpha1
 
 	ec2client := ec2.New(ec2.Options{
 		Region:      awschaos.Spec.AwsRegion,
-		Credentials: &aws.CredentialsCache{Provider: credentials.NewStaticCredentialsProvider(string(secret.Data["aws_access_key_id"]), string(secret.Data["aws_secret_access_key"]), "")},
+		Credentials: credentials.NewStaticCredentialsProvider(string(secret.Data["aws_access_key_id"]), string(secret.Data["aws_secret_access_key"]), ""),
 	})
 
 	_, err = ec2client.StartInstances(context.TODO(), &ec2.StartInstancesInput{
