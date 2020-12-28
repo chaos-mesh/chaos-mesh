@@ -135,6 +135,7 @@ echo "GCR_IO_MIRROR: $GCR_IO_MIRROR"
 echo "QUAY_IO_MIRROR: $QUAY_IO_MIRROR"
 echo "ARTIFACTS: $ARTIFACTS"
 echo "KUBE_WORKERS: $KUBE_WORKERS"
+echo "REGISTRY_MIRROR: $REGISTRY_MIRROR"
 
 # https://github.com/kubernetes-sigs/kind/releases/tag/v0.8.1
 declare -A kind_node_images
@@ -330,6 +331,7 @@ export CLUSTER
 export KUBECONFIG
 export E2E_IMAGE=${DOCKER_REGISTRY}/pingcap/chaos-mesh-e2e:${IMAGE_TAG}
 export DOCKER_REGISTRY=${DOCKER_REGISTRY}
+export REGISTRY_MIRROR=${REGISTRY_MIRROR}
 export IMAGE_TAG=${IMAGE_TAG}
 export PATH=$OUTPUT_BIN:$PATH
 
