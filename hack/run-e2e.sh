@@ -47,6 +47,8 @@ SKIP_GINKGO=${SKIP_GINKGO:-}
 DELETE_NAMESPACE_ON_FAILURE=${DELETE_NAMESPACE_ON_FAILURE:-false}
 DOCKER_REGISTRY=${DOCKER_REGISTRY:-localhost:5000}
 
+REGISTRY_MIRROR=${REGISTRY_MIRROR:-}
+
 if [ -z "$KUBECONFIG" ]; then
     echo "error: KUBECONFIG is required"
     exit 1
@@ -83,8 +85,10 @@ function e2e::image_load() {
         # pingcap/coredns:latest and nginx:latest is required for test
         # we suppose that you could pull this image on your host docker
         echo "info: load images pingcap/coredns:latest and nginx:latest"
-        docker pull pingcap/coredns:latest
-        docker pull nginx:latest
+        docker pull ${REGISTRY_MIRROR}pingcap/coredns:latest
+        docker pull ${REGISTRY_MIRROR}nginx:latest
+        docker image tag ${REGISTRY_MIRROR}pingcap/coredns:latest pingcap/coredns:latest
+        docker image tag ${REGISTRY_MIRROR}nginx:latest nginx:latest
         $KIND_BIN load docker-image --name $CLUSTER pingcap/coredns:latest --nodes $(hack::join ',' ${nodes[@]})
         $KIND_BIN load docker-image --name $CLUSTER nginx:latest --nodes $(hack::join ',' ${nodes[@]})
     fi

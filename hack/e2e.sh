@@ -49,6 +49,7 @@ Environments:
     GINKGO_NODES                ginkgo nodes to run specs, defaults: 1
     GINKGO_PARALLEL             if set to `y`, will run specs in parallel, the number of nodes will be the number of cpus
     GINKGO_NO_COLOR             if set to `y`, suppress color output in default reporter
+    REGISTRY_MIRROR             set the docker registry mirror 
 Examples:
 0) view help
     ./hack/e2e.sh -h
@@ -115,6 +116,7 @@ GCR_IO_MIRROR=${GCR_IO_MIRROR:-}
 QUAY_IO_MIRROR=${QUAY_IO_MIRROR:-}
 RUNNER_SUITE_NAME=${RUNNER_SUITE_NAME:-}
 ARTIFACTS=${ARTIFACTS:-}
+REGISTRY_MIRROR=${REGISTRY_MIRROR:-}
 
 echo "PROVIDER: $PROVIDER"
 echo "DOCKER_REGISTRY: $DOCKER_REGISTRY"
