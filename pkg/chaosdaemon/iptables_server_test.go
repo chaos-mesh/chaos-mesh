@@ -52,6 +52,7 @@ var _ = Describe("iptables server", func() {
 					Ipsets:    []string{},
 				}},
 				ContainerId: "containerd://container-id",
+				EnterNS:     true,
 			})
 			Expect(err).To(BeNil())
 		})
@@ -66,6 +67,7 @@ var _ = Describe("iptables server", func() {
 					Ipsets:    []string{},
 				}},
 				ContainerId: "containerd://container-id",
+				EnterNS:     true,
 			})
 			Expect(err).ToNot(BeNil())
 			Expect(err.Error()).To(Equal(errorStr))
@@ -89,6 +91,7 @@ var _ = Describe("iptables server", func() {
 					Ipsets:    []string{},
 				}},
 				ContainerId: "containerd://container-id",
+				EnterNS:     true,
 			})
 			Expect(err).ToNot(BeNil())
 			Expect(err.Error()).To(Equal("unknown chain direction 233"))
@@ -111,6 +114,7 @@ exit 1
 					Ipsets:    []string{},
 				}},
 				ContainerId: "containerd://container-id",
+				EnterNS:     true,
 			})
 			Expect(err).ToNot(BeNil())
 		})
