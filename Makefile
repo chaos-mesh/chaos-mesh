@@ -183,7 +183,7 @@ image: image-chaos-daemon image-chaos-mesh image-chaos-dashboard
 
 GO_TARGET_PHONY :=
 
-define COMPILE_GO_TEMPLATE =
+define COMPILE_GO_TEMPLATE
 ifeq ($(CHAOS_MESH_BUILD_IN_DOCKER),0)
 
 $(1): $(4)
@@ -202,7 +202,7 @@ ifneq ($(GO_BUILD_CACHE),)
 	BUILD_INDOCKER_ARG += --volume $(GO_BUILD_CACHE)/chaos-mesh-gopath:/tmp/go
 	BUILD_INDOCKER_ARG += --volume $(GO_BUILD_CACHE)/chaos-mesh-gobuild:/tmp/go-build
 endif
-define BUILD_IN_DOCKER_TEMPLATE =
+define BUILD_IN_DOCKER_TEMPLATE
 CLEAN_TARGETS += $(2)
 ifeq ($(CHAOS_MESH_BUILD_IN_DOCKER),1)
 $(2): image-build-env go_build_cache_directory
@@ -251,7 +251,7 @@ test/image/e2e/manifests: manifests
 test/image/e2e/chaos-mesh: helm/chaos-mesh
 	cp -r helm/chaos-mesh test/image/e2e
 
-define IMAGE_TEMPLATE =
+define IMAGE_TEMPLATE
 CLEAN_TARGETS += $(2)/.dockerbuilt
 
 image-$(1): $(2)/.dockerbuilt
@@ -332,7 +332,7 @@ proto: image-chaos-mesh-protoc
 endif
 
 tools := kubectl helm kind kubebuilder kustomize kubetest2
-define DOWNLOAD_TOOL =
+define DOWNLOAD_TOOL
 ensure-$(1):
 	@echo "ensuring $(1)"
 	ROOT=$(ROOT) && source ./hack/lib.sh && hack::ensure_$(1)
