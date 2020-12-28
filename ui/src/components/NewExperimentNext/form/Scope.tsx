@@ -30,7 +30,7 @@ const modesWithAdornment = ['fixed-percent', 'random-max-percent']
 const labelFilters = ['pod-template-hash']
 
 const ScopeStep: React.FC<ScopeStepProps> = ({ namespaces, scope = 'scope', podsPreviewTitle, podsPreviewDesc }) => {
-  const { values, handleChange, setFieldValue } = useFormikContext()
+  const { values, handleChange, setFieldValue, errors, touched } = useFormikContext()
   const {
     namespace_selectors: currentNamespaces,
     label_selectors: currentLabels,
@@ -60,14 +60,13 @@ const ScopeStep: React.FC<ScopeStepProps> = ({ namespaces, scope = 'scope', pods
   }
 
   useEffect(() => {
+    // Set ns selectors directly when CLUSTER_MODE=false.
     if (namespaces.length === 1) {
       setFieldValue(`${scope}.namespace_selectors`, namespaces)
 
       if (scope === 'scope') {
         setFieldValue('namespace', namespaces[0])
       }
-    } else {
-      setFieldValue(`${scope}.namespace_selectors`, ['default'])
     }
   }, [namespaces, scope, setFieldValue])
 
@@ -85,13 +84,16 @@ const ScopeStep: React.FC<ScopeStepProps> = ({ namespaces, scope = 'scope', pods
   }, [currentNamespaces, dispatch])
 
   useEffect(() => {
-    dispatch(
-      getPods({
-        namespace_selectors: currentNamespaces,
-        label_selectors: arrToObjBySep(currentLabels, kvSeparator),
-        annotation_selectors: arrToObjBySep(currentAnnotations, kvSeparator),
-      })
-    )
+    if (currentLabels.length || currentAnnotations.length) {
+      dispatch(
+        getPods({
+          namespace_selectors: currentNamespaces,
+          label_selectors: arrToObjBySep(currentLabels, kvSeparator),
+          annotation_selectors: arrToObjBySep(currentAnnotations, kvSeparator),
+        })
+      )
+    }
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentLabels, currentAnnotations])
 
@@ -101,8 +103,15 @@ const ScopeStep: React.FC<ScopeStepProps> = ({ namespaces, scope = 'scope', pods
         id={`${scope}.namespace_selectors`}
         name={`${scope}.namespace_selectors`}
         label={T('newE.scope.namespaceSelectors')}
-        helperText={T('common.multiOptions')}
+        helperText={
+          getIn(touched, `${scope}.namespace_selectors`) && getIn(errors, `${scope}.namespace_selectors`)
+            ? getIn(errors, `${scope}.namespace_selectors`)
+            : T('common.multiOptions')
+        }
         options={namespaces}
+        error={
+          getIn(errors, `${scope}.namespace_selectors`) && getIn(touched, `${scope}.namespace_selectors`) ? true : false
+        }
       />
 
       <AutocompleteMultipleField
