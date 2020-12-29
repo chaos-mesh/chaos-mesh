@@ -27,7 +27,7 @@ import (
 )
 
 var (
-	log = zap.Logger(true)
+	log = zap.New(zap.UseDevMode(true))
 )
 
 type metadata struct {

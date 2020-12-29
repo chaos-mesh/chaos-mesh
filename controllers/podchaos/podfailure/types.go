@@ -22,7 +22,9 @@ import (
 	"golang.org/x/sync/errgroup"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/tools/cache"
+	"k8s.io/client-go/util/retry"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -41,6 +43,10 @@ const (
 	pauseImage = "gcr.io/google-containers/pause:latest"
 
 	podFailureActionMsg = "pod failure duration %s"
+)
+
+var (
+	errNotOperatedChaos = errors.New("the pod not operated by podChaos")
 )
 
 type endpoint struct {
@@ -121,17 +127,23 @@ func (r *recoverer) RecoverPod(ctx context.Context, pod *v1.Pod, somechaos v1alp
 	chaos, _ := somechaos.(*v1alpha1.PodChaos)
 	r.Log.Info("Recovering", "namespace", pod.Namespace, "name", pod.Name)
 
+	containerChaosCount := 0
 	for index := range pod.Spec.Containers {
 		name := pod.Spec.Containers[index].Name
-		_ = utils.GenAnnotationKeyForImage(chaos, name)
+		key := utils.GenAnnotationKeyForImage(chaos, name)
 
 		if pod.Annotations == nil {
 			pod.Annotations = make(map[string]string)
 		}
-
-		// FIXME: Check annotations and return error.
+		// check annotation
+		if _, ok := pod.Annotations[key]; ok {
+			containerChaosCount++
+		}
 	}
-
+	if containerChaosCount == 0 {
+		r.Log.Error(errNotOperatedChaos, "the pod not operated by podChaos", "namespace", pod.Namespace, "name", pod.Name)
+		return nil
+	}
 	// chaos-mesh don't support
 	return r.Delete(ctx, pod, &client.DeleteOptions{
 		GracePeriodSeconds: new(int64), // PeriodSeconds has to be set specifically
@@ -194,10 +206,23 @@ func (r *endpoint) failPod(ctx context.Context, pod *v1.Pod, podchaos *v1alpha1.
 		pod.Annotations[key] = originImage
 		pod.Spec.Containers[index].Image = pauseImage
 	}
-
-	if err := r.Update(ctx, pod); err != nil {
-		r.Log.Error(err, "unable to use fake image on pod")
-		return err
+	updateErr := retry.RetryOnConflict(retry.DefaultRetry, func() error {
+		var newPod v1.Pod
+		getErr := r.Client.Get(ctx, types.NamespacedName{
+			Namespace: pod.Namespace,
+			Name:      pod.Name,
+		}, &newPod)
+		if getErr != nil {
+			return getErr
+		}
+		newPod.Annotations = pod.Annotations
+		newPod.Spec.Containers = pod.Spec.Containers
+		newPod.Spec.InitContainers = pod.Spec.InitContainers
+		return r.Client.Update(ctx, &newPod)
+	})
+	if updateErr != nil {
+		r.Log.Error(updateErr, "unable to use fake image on pod")
+		return updateErr
 	}
 
 	ps := v1alpha1.PodStatus{

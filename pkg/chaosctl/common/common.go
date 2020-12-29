@@ -282,7 +282,7 @@ func GetPidFromPS(ctx context.Context, pod v1.Pod, daemon v1.Pod, c *kubernetes.
 }
 
 // GetPidFromPod returns pid given containerd ID in pod
-func GetPidFromPod(ctx context.Context, pod v1.Pod, daemon v1.Pod) (int, error) {
+func GetPidFromPod(ctx context.Context, pod v1.Pod, daemon v1.Pod) (uint32, error) {
 	pfCancel, localPort, err := forwardPorts(ctx, daemon, uint16(ctrlconfig.ControllerCfg.ChaosDaemonPort))
 	if err != nil {
 		return 0, fmt.Errorf("forward ports failed: %s", err.Error())
@@ -310,7 +310,7 @@ func GetPidFromPod(ctx context.Context, pod v1.Pod, daemon v1.Pod) (int, error) 
 	if err != nil {
 		return 0, fmt.Errorf("container get pid failed: %s", err.Error())
 	}
-	return int(res.Pid), nil
+	return res.Pid, nil
 }
 
 func forwardPorts(ctx context.Context, pod v1.Pod, port uint16) (context.CancelFunc, uint16, error) {

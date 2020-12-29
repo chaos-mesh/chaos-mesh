@@ -12,9 +12,10 @@ const initialState: {
   alert: Alert
   alertOpen: boolean
   searchModalOpen: boolean
+  namespace: string
+  securityMode: boolean
   tokens: TokenFormValues[]
   tokenName: string
-  namespace: string
 } = {
   alert: {
     type: 'success',
@@ -22,9 +23,10 @@ const initialState: {
   },
   alertOpen: false,
   searchModalOpen: false,
+  namespace: 'All',
+  securityMode: true,
   tokens: [],
   tokenName: '',
-  namespace: 'All',
 }
 
 const globalStatusSlice = createSlice({
@@ -40,6 +42,16 @@ const globalStatusSlice = createSlice({
     setSearchModalOpen(state, action: PayloadAction<boolean>) {
       state.searchModalOpen = action.payload
     },
+    setNameSpace(state, action: PayloadAction<string>) {
+      const ns = action.payload
+
+      state.namespace = ns
+
+      LS.set('global-namespace', ns)
+    },
+    setSecurityMode(state, action: PayloadAction<boolean>) {
+      state.securityMode = action.payload
+    },
     setTokens(state, action: PayloadAction<TokenFormValues[]>) {
       const tokens = action.payload
 
@@ -54,13 +66,6 @@ const globalStatusSlice = createSlice({
 
       LS.set('token-name', name)
     },
-    setNameSpace(state, action: PayloadAction<string>) {
-      const ns = action.payload
-
-      state.namespace = ns
-
-      LS.set('global-namespace', ns)
-    },
   },
 })
 
@@ -68,9 +73,10 @@ export const {
   setAlert,
   setAlertOpen,
   setSearchModalOpen,
+  setNameSpace,
+  setSecurityMode,
   setTokens,
   setTokenName,
-  setNameSpace,
 } = globalStatusSlice.actions
 
 export default globalStatusSlice.reducer
