@@ -112,6 +112,11 @@ func (in *fakeTwoPhaseChaos) IsDeleted() bool {
 	return in.Deleted
 }
 
+// IsPaused returns whether this resource has been paused
+func (in *fakeTwoPhaseChaos) IsPaused() bool {
+	return false
+}
+
 // GetPause returns the annotation when the chaos needs to be paused
 func (in *fakeTwoPhaseChaos) GetPause() string {
 	return ""

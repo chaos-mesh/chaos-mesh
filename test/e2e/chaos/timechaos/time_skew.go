@@ -168,7 +168,7 @@ func TestcaseTimeSkewPauseThenAutoResumeAtRunning(
 	By("pause time skew chaos experiment for 2min")
 	pauseTime := time.Now()
 	// pause experiment
-	err = util.PauseChaosForTime(ctx, cli, timeChaos, "2m")
+	err = util.PauseChaosForDuration(ctx, cli, timeChaos, "2m")
 	framework.ExpectNoError(err, "pause chaos error")
 
 	By("assert pause is effective")
@@ -236,7 +236,7 @@ func TestcaseTimeSkewPauseThenAutoResumeAtWaiting(
 	}
 	time.Sleep(sleepTime)
 	// pause experiment
-	err = util.PauseChaosForTime(ctx, cli, timeChaos, "2m")
+	err = util.PauseChaosForDuration(ctx, cli, timeChaos, "2m")
 	framework.ExpectNoError(err, "pause chaos error")
 
 	By("assert pause is effective")

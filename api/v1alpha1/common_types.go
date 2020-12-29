@@ -24,6 +24,8 @@ import (
 const (
 	// PauseAnnotationKey defines the annotation used to pause a chaos
 	PauseAnnotationKey = "experiment.chaos-mesh.org/pause"
+	// PauseDurationAnnotationKey defines the annotation used to pause a chaos for certain duration
+	PauseDurationAnnotationKey = "experiment.chaos-mesh.org/pauseDuration"
 )
 
 // LabelSelectorRequirements is list of LabelSelectorRequirement
@@ -233,6 +235,7 @@ type InnerSchedulerObject interface {
 // InnerObject is basic Object for the Reconciler
 type InnerObject interface {
 	IsDeleted() bool
+	IsPaused() bool
 	GetPause() string
 	RecoverPause()
 	GetChaos() *ChaosInstance

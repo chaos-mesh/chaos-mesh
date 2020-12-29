@@ -130,11 +130,11 @@ func PauseChaos(ctx context.Context, cli client.Client, chaos runtime.Object) er
 	return cli.Patch(ctx, chaos, client.ConstantPatch(types.MergePatchType, mergePatch))
 }
 
-func PauseChaosForTime(ctx context.Context, cli client.Client, chaos runtime.Object, time string) error {
+func PauseChaosForDuration(ctx context.Context, cli client.Client, chaos runtime.Object, time string) error {
 	var mergePatch []byte
 	mergePatch, _ = json.Marshal(map[string]interface{}{
 		"metadata": map[string]interface{}{
-			"annotations": map[string]string{v1alpha1.PauseAnnotationKey: time},
+			"annotations": map[string]string{v1alpha1.PauseDurationAnnotationKey: time},
 		},
 	})
 	return cli.Patch(ctx, chaos, client.ConstantPatch(types.MergePatchType, mergePatch))

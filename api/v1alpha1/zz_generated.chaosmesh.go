@@ -27,18 +27,26 @@ func (in *DNSChaos) IsDeleted() bool {
 	return !in.DeletionTimestamp.IsZero()
 }
 
+// IsPaused returns whether this resource has been paused
+func (in *DNSChaos) IsPaused() bool {
+	if in.Annotations == nil || in.Annotations[PauseAnnotationKey] != "true" {
+		return false
+	}
+	return true
+}
+
 // GetPause returns the annotation when if chaos is paused
 // return empty when annotations is not set, or pause key is set to empty
 func (in *DNSChaos) GetPause() string {
 	if in.Annotations == nil {
 		return ""
 	}
-	return in.Annotations[PauseAnnotationKey]
+	return in.Annotations[PauseDurationAnnotationKey]
 }
 
 // RecoverPause sets the pausetime to empty, to stop pause
 func (in *DNSChaos) RecoverPause() {
-	in.Annotations[PauseAnnotationKey] = ""
+	in.Annotations[PauseDurationAnnotationKey] = ""
 }
 
 // GetDuration would return the duration for chaos
@@ -170,18 +178,26 @@ func (in *HTTPChaos) IsDeleted() bool {
 	return !in.DeletionTimestamp.IsZero()
 }
 
+// IsPaused returns whether this resource has been paused
+func (in *HTTPChaos) IsPaused() bool {
+	if in.Annotations == nil || in.Annotations[PauseAnnotationKey] != "true" {
+		return false
+	}
+	return true
+}
+
 // GetPause returns the annotation when if chaos is paused
 // return empty when annotations is not set, or pause key is set to empty
 func (in *HTTPChaos) GetPause() string {
 	if in.Annotations == nil {
 		return ""
 	}
-	return in.Annotations[PauseAnnotationKey]
+	return in.Annotations[PauseDurationAnnotationKey]
 }
 
 // RecoverPause sets the pausetime to empty, to stop pause
 func (in *HTTPChaos) RecoverPause() {
-	in.Annotations[PauseAnnotationKey] = ""
+	in.Annotations[PauseDurationAnnotationKey] = ""
 }
 
 // GetDuration would return the duration for chaos
@@ -313,18 +329,26 @@ func (in *IoChaos) IsDeleted() bool {
 	return !in.DeletionTimestamp.IsZero()
 }
 
+// IsPaused returns whether this resource has been paused
+func (in *IoChaos) IsPaused() bool {
+	if in.Annotations == nil || in.Annotations[PauseAnnotationKey] != "true" {
+		return false
+	}
+	return true
+}
+
 // GetPause returns the annotation when if chaos is paused
 // return empty when annotations is not set, or pause key is set to empty
 func (in *IoChaos) GetPause() string {
 	if in.Annotations == nil {
 		return ""
 	}
-	return in.Annotations[PauseAnnotationKey]
+	return in.Annotations[PauseDurationAnnotationKey]
 }
 
 // RecoverPause sets the pausetime to empty, to stop pause
 func (in *IoChaos) RecoverPause() {
-	in.Annotations[PauseAnnotationKey] = ""
+	in.Annotations[PauseDurationAnnotationKey] = ""
 }
 
 // GetDuration would return the duration for chaos
@@ -456,18 +480,26 @@ func (in *JVMChaos) IsDeleted() bool {
 	return !in.DeletionTimestamp.IsZero()
 }
 
+// IsPaused returns whether this resource has been paused
+func (in *JVMChaos) IsPaused() bool {
+	if in.Annotations == nil || in.Annotations[PauseAnnotationKey] != "true" {
+		return false
+	}
+	return true
+}
+
 // GetPause returns the annotation when if chaos is paused
 // return empty when annotations is not set, or pause key is set to empty
 func (in *JVMChaos) GetPause() string {
 	if in.Annotations == nil {
 		return ""
 	}
-	return in.Annotations[PauseAnnotationKey]
+	return in.Annotations[PauseDurationAnnotationKey]
 }
 
 // RecoverPause sets the pausetime to empty, to stop pause
 func (in *JVMChaos) RecoverPause() {
-	in.Annotations[PauseAnnotationKey] = ""
+	in.Annotations[PauseDurationAnnotationKey] = ""
 }
 
 // GetDuration would return the duration for chaos
@@ -599,18 +631,26 @@ func (in *KernelChaos) IsDeleted() bool {
 	return !in.DeletionTimestamp.IsZero()
 }
 
+// IsPaused returns whether this resource has been paused
+func (in *KernelChaos) IsPaused() bool {
+	if in.Annotations == nil || in.Annotations[PauseAnnotationKey] != "true" {
+		return false
+	}
+	return true
+}
+
 // GetPause returns the annotation when if chaos is paused
 // return empty when annotations is not set, or pause key is set to empty
 func (in *KernelChaos) GetPause() string {
 	if in.Annotations == nil {
 		return ""
 	}
-	return in.Annotations[PauseAnnotationKey]
+	return in.Annotations[PauseDurationAnnotationKey]
 }
 
 // RecoverPause sets the pausetime to empty, to stop pause
 func (in *KernelChaos) RecoverPause() {
-	in.Annotations[PauseAnnotationKey] = ""
+	in.Annotations[PauseDurationAnnotationKey] = ""
 }
 
 // GetDuration would return the duration for chaos
@@ -742,18 +782,26 @@ func (in *NetworkChaos) IsDeleted() bool {
 	return !in.DeletionTimestamp.IsZero()
 }
 
+// IsPaused returns whether this resource has been paused
+func (in *NetworkChaos) IsPaused() bool {
+	if in.Annotations == nil || in.Annotations[PauseAnnotationKey] != "true" {
+		return false
+	}
+	return true
+}
+
 // GetPause returns the annotation when if chaos is paused
 // return empty when annotations is not set, or pause key is set to empty
 func (in *NetworkChaos) GetPause() string {
 	if in.Annotations == nil {
 		return ""
 	}
-	return in.Annotations[PauseAnnotationKey]
+	return in.Annotations[PauseDurationAnnotationKey]
 }
 
 // RecoverPause sets the pausetime to empty, to stop pause
 func (in *NetworkChaos) RecoverPause() {
-	in.Annotations[PauseAnnotationKey] = ""
+	in.Annotations[PauseDurationAnnotationKey] = ""
 }
 
 // GetDuration would return the duration for chaos
@@ -885,18 +933,26 @@ func (in *PodChaos) IsDeleted() bool {
 	return !in.DeletionTimestamp.IsZero()
 }
 
+// IsPaused returns whether this resource has been paused
+func (in *PodChaos) IsPaused() bool {
+	if in.Annotations == nil || in.Annotations[PauseAnnotationKey] != "true" {
+		return false
+	}
+	return true
+}
+
 // GetPause returns the annotation when if chaos is paused
 // return empty when annotations is not set, or pause key is set to empty
 func (in *PodChaos) GetPause() string {
 	if in.Annotations == nil {
 		return ""
 	}
-	return in.Annotations[PauseAnnotationKey]
+	return in.Annotations[PauseDurationAnnotationKey]
 }
 
 // RecoverPause sets the pausetime to empty, to stop pause
 func (in *PodChaos) RecoverPause() {
-	in.Annotations[PauseAnnotationKey] = ""
+	in.Annotations[PauseDurationAnnotationKey] = ""
 }
 
 // GetDuration would return the duration for chaos
@@ -1028,18 +1084,26 @@ func (in *StressChaos) IsDeleted() bool {
 	return !in.DeletionTimestamp.IsZero()
 }
 
+// IsPaused returns whether this resource has been paused
+func (in *StressChaos) IsPaused() bool {
+	if in.Annotations == nil || in.Annotations[PauseAnnotationKey] != "true" {
+		return false
+	}
+	return true
+}
+
 // GetPause returns the annotation when if chaos is paused
 // return empty when annotations is not set, or pause key is set to empty
 func (in *StressChaos) GetPause() string {
 	if in.Annotations == nil {
 		return ""
 	}
-	return in.Annotations[PauseAnnotationKey]
+	return in.Annotations[PauseDurationAnnotationKey]
 }
 
 // RecoverPause sets the pausetime to empty, to stop pause
 func (in *StressChaos) RecoverPause() {
-	in.Annotations[PauseAnnotationKey] = ""
+	in.Annotations[PauseDurationAnnotationKey] = ""
 }
 
 // GetDuration would return the duration for chaos
@@ -1171,18 +1235,26 @@ func (in *TimeChaos) IsDeleted() bool {
 	return !in.DeletionTimestamp.IsZero()
 }
 
+// IsPaused returns whether this resource has been paused
+func (in *TimeChaos) IsPaused() bool {
+	if in.Annotations == nil || in.Annotations[PauseAnnotationKey] != "true" {
+		return false
+	}
+	return true
+}
+
 // GetPause returns the annotation when if chaos is paused
 // return empty when annotations is not set, or pause key is set to empty
 func (in *TimeChaos) GetPause() string {
 	if in.Annotations == nil {
 		return ""
 	}
-	return in.Annotations[PauseAnnotationKey]
+	return in.Annotations[PauseDurationAnnotationKey]
 }
 
 // RecoverPause sets the pausetime to empty, to stop pause
 func (in *TimeChaos) RecoverPause() {
-	in.Annotations[PauseAnnotationKey] = ""
+	in.Annotations[PauseDurationAnnotationKey] = ""
 }
 
 // GetDuration would return the duration for chaos

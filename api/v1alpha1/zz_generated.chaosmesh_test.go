@@ -33,6 +33,14 @@ func TestDNSChaosIsDeleted(t *testing.T) {
 	chaos.IsDeleted()
 }
 
+func TestDNSChaosIsIsPaused(t *testing.T) {
+	g := NewGomegaWithT(t)
+	chaos := &DNSChaos{}
+	err := faker.FakeData(chaos)
+	g.Expect(err).To(BeNil())
+	chaos.IsPaused()
+}
+
 func TestDNSChaosGetPause(t *testing.T) {
 	g := NewGomegaWithT(t)
 
@@ -152,6 +160,14 @@ func TestHTTPChaosIsDeleted(t *testing.T) {
 	g.Expect(err).To(BeNil())
 
 	chaos.IsDeleted()
+}
+
+func TestHTTPChaosIsIsPaused(t *testing.T) {
+	g := NewGomegaWithT(t)
+	chaos := &HTTPChaos{}
+	err := faker.FakeData(chaos)
+	g.Expect(err).To(BeNil())
+	chaos.IsPaused()
 }
 
 func TestHTTPChaosGetPause(t *testing.T) {
@@ -275,6 +291,14 @@ func TestIoChaosIsDeleted(t *testing.T) {
 	chaos.IsDeleted()
 }
 
+func TestIoChaosIsIsPaused(t *testing.T) {
+	g := NewGomegaWithT(t)
+	chaos := &IoChaos{}
+	err := faker.FakeData(chaos)
+	g.Expect(err).To(BeNil())
+	chaos.IsPaused()
+}
+
 func TestIoChaosGetPause(t *testing.T) {
 	g := NewGomegaWithT(t)
 
@@ -394,6 +418,14 @@ func TestJVMChaosIsDeleted(t *testing.T) {
 	g.Expect(err).To(BeNil())
 
 	chaos.IsDeleted()
+}
+
+func TestJVMChaosIsIsPaused(t *testing.T) {
+	g := NewGomegaWithT(t)
+	chaos := &JVMChaos{}
+	err := faker.FakeData(chaos)
+	g.Expect(err).To(BeNil())
+	chaos.IsPaused()
 }
 
 func TestJVMChaosGetPause(t *testing.T) {
@@ -517,6 +549,14 @@ func TestKernelChaosIsDeleted(t *testing.T) {
 	chaos.IsDeleted()
 }
 
+func TestKernelChaosIsIsPaused(t *testing.T) {
+	g := NewGomegaWithT(t)
+	chaos := &KernelChaos{}
+	err := faker.FakeData(chaos)
+	g.Expect(err).To(BeNil())
+	chaos.IsPaused()
+}
+
 func TestKernelChaosGetPause(t *testing.T) {
 	g := NewGomegaWithT(t)
 
@@ -636,6 +676,14 @@ func TestNetworkChaosIsDeleted(t *testing.T) {
 	g.Expect(err).To(BeNil())
 
 	chaos.IsDeleted()
+}
+
+func TestNetworkChaosIsIsPaused(t *testing.T) {
+	g := NewGomegaWithT(t)
+	chaos := &NetworkChaos{}
+	err := faker.FakeData(chaos)
+	g.Expect(err).To(BeNil())
+	chaos.IsPaused()
 }
 
 func TestNetworkChaosGetPause(t *testing.T) {
@@ -759,6 +807,14 @@ func TestPodChaosIsDeleted(t *testing.T) {
 	chaos.IsDeleted()
 }
 
+func TestPodChaosIsIsPaused(t *testing.T) {
+	g := NewGomegaWithT(t)
+	chaos := &PodChaos{}
+	err := faker.FakeData(chaos)
+	g.Expect(err).To(BeNil())
+	chaos.IsPaused()
+}
+
 func TestPodChaosGetPause(t *testing.T) {
 	g := NewGomegaWithT(t)
 
@@ -880,6 +936,14 @@ func TestStressChaosIsDeleted(t *testing.T) {
 	chaos.IsDeleted()
 }
 
+func TestStressChaosIsIsPaused(t *testing.T) {
+	g := NewGomegaWithT(t)
+	chaos := &StressChaos{}
+	err := faker.FakeData(chaos)
+	g.Expect(err).To(BeNil())
+	chaos.IsPaused()
+}
+
 func TestStressChaosGetPause(t *testing.T) {
 	g := NewGomegaWithT(t)
 
@@ -999,6 +1063,14 @@ func TestTimeChaosIsDeleted(t *testing.T) {
 	g.Expect(err).To(BeNil())
 
 	chaos.IsDeleted()
+}
+
+func TestTimeChaosIsIsPaused(t *testing.T) {
+	g := NewGomegaWithT(t)
+	chaos := &TimeChaos{}
+	err := faker.FakeData(chaos)
+	g.Expect(err).To(BeNil())
+	chaos.IsPaused()
 }
 
 func TestTimeChaosGetPause(t *testing.T) {

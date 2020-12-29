@@ -80,10 +80,10 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		targetPhase = v1alpha1.ExperimentPhaseRunning
 	}
 
-	if chaos.GetPause() != "" {
+	if chaos.IsPaused() {
 		targetPhase = v1alpha1.ExperimentPhasePaused
 		// pause for certain duration, only set autoResume once
-		if chaos.GetPause() != "true" && status.Experiment.Phase != v1alpha1.ExperimentPhasePaused {
+		if chaos.GetPause() != "" && status.Experiment.Phase != v1alpha1.ExperimentPhasePaused {
 			pauseTime, err := time.ParseDuration(chaos.GetPause())
 			if err != nil {
 				r.Log.Error(err, "failed to parse pause duration")
@@ -96,7 +96,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 
 	// TODO: find a better way to solve the pause and resume problem.
 	// Or pause is a bad design for the scheduler :(
-	if chaos.GetPause() == "" && status.Experiment.Phase == v1alpha1.ExperimentPhasePaused {
+	if !chaos.IsPaused() && status.Experiment.Phase == v1alpha1.ExperimentPhasePaused {
 		// Running and Waiting has the same logic for resuming
 		targetPhase = v1alpha1.ExperimentPhaseRunning
 	}
@@ -125,7 +125,10 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 
 	if chaos.GetStatus().Experiment.Phase == v1alpha1.ExperimentPhasePaused {
 		autoResume = chaos.GetAutoResume()
-		if !autoResume.IsZero() {
+		if autoResume.IsZero() {
+			return ctrl.Result{}, nil
+		} else {
+			// pause for duration
 			r.Log.Info("Requeue unpause request", "after", autoResume.Sub(now))
 			return ctrl.Result{RequeueAfter: autoResume.Sub(now)}, nil
 		}

@@ -103,7 +103,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (result ctrl.Result, err error)
 
 	result, err = reconciler.Reconcile(req)
 	if err != nil {
-		if chaos.IsDeleted() || chaos.GetPause() != "" {
+		if chaos.IsDeleted() || chaos.IsPaused() {
 			r.Event(chaos, v1.EventTypeWarning, utils.EventChaosRecoverFailed, err.Error())
 		} else {
 			r.Event(chaos, v1.EventTypeWarning, utils.EventChaosInjectFailed, err.Error())

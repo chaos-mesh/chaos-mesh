@@ -35,18 +35,26 @@ func (in *{{.Type}}) IsDeleted() bool {
 	return !in.DeletionTimestamp.IsZero()
 }
 
+// IsPaused returns whether this resource has been paused
+func (in *{{.Type}}) IsPaused() bool {
+	if in.Annotations == nil || (in.Annotations[PauseAnnotationKey] != "true" && in.Annotations[PauseDurationAnnotationKey] != "") {
+		return false
+	}
+	return true
+}
+
 // GetPause returns the annotation when if chaos is paused
 // return empty when annotations is not set, or pause key is set to empty
 func (in *{{.Type}}) GetPause() string {
 	if in.Annotations == nil {
 		return ""
 	}
-	return in.Annotations[PauseAnnotationKey]
+	return in.Annotations[PauseDurationAnnotationKey]
 }
 
 // RecoverPause sets the pausetime to empty, to stop pause
 func (in *{{.Type}}) RecoverPause() {
-	in.Annotations[PauseAnnotationKey] = ""
+	in.Annotations[PauseDurationAnnotationKey] = ""
 }
 
 // GetDuration would return the duration for chaos
