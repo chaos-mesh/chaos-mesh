@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package utils
+package selector
 
 import (
 	"context"
@@ -21,6 +21,7 @@ import (
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/pkg/label"
+	. "github.com/chaos-mesh/chaos-mesh/pkg/testutils"
 
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -174,7 +175,7 @@ func TestCheckPodMeetSelector(t *testing.T) {
 	tcs := []TestCase{
 		{
 			name: "meet label",
-			pod:  newPod(PodArg{Name: "t1", Status: v1.PodPending, Labels: map[string]string{"app": "tikv", "ss": "t1"}}),
+			pod:  NewPod(PodArg{Name: "t1", Status: v1.PodPending, Labels: map[string]string{"app": "tikv", "ss": "t1"}}),
 			selector: v1alpha1.SelectorSpec{
 				LabelSelectors: map[string]string{"app": "tikv"},
 			},
@@ -182,7 +183,7 @@ func TestCheckPodMeetSelector(t *testing.T) {
 		},
 		{
 			name: "not meet label",
-			pod:  newPod(PodArg{Name: "t1", Labels: map[string]string{"app": "tidb", "ss": "t1"}}),
+			pod:  NewPod(PodArg{Name: "t1", Labels: map[string]string{"app": "tidb", "ss": "t1"}}),
 			selector: v1alpha1.SelectorSpec{
 				LabelSelectors: map[string]string{"app": "tikv"},
 			},
@@ -190,7 +191,7 @@ func TestCheckPodMeetSelector(t *testing.T) {
 		},
 		{
 			name: "pod labels is empty",
-			pod:  newPod(PodArg{Name: "t1"}),
+			pod:  NewPod(PodArg{Name: "t1"}),
 			selector: v1alpha1.SelectorSpec{
 				LabelSelectors: map[string]string{"app": "tikv"},
 			},
@@ -198,13 +199,13 @@ func TestCheckPodMeetSelector(t *testing.T) {
 		},
 		{
 			name:          "selector is empty",
-			pod:           newPod(PodArg{Name: "t1", Labels: map[string]string{"app": "tidb"}}),
+			pod:           NewPod(PodArg{Name: "t1", Labels: map[string]string{"app": "tidb"}}),
 			selector:      v1alpha1.SelectorSpec{},
 			expectedValue: true,
 		},
 		{
 			name: "meet labels and meet expressions",
-			pod:  newPod(PodArg{Name: "t1", Status: v1.PodPending, Labels: map[string]string{"app": "tikv", "ss": "t1"}}),
+			pod:  NewPod(PodArg{Name: "t1", Status: v1.PodPending, Labels: map[string]string{"app": "tikv", "ss": "t1"}}),
 			selector: v1alpha1.SelectorSpec{
 				LabelSelectors: map[string]string{"app": "tikv"},
 				ExpressionSelectors: []metav1.LabelSelectorRequirement{
@@ -218,7 +219,7 @@ func TestCheckPodMeetSelector(t *testing.T) {
 		},
 		{
 			name: "meet labels and not meet expressions",
-			pod:  newPod(PodArg{Name: "t1", Status: v1.PodPending, Labels: map[string]string{"app": "tikv", "ss": "t1"}}),
+			pod:  NewPod(PodArg{Name: "t1", Status: v1.PodPending, Labels: map[string]string{"app": "tikv", "ss": "t1"}}),
 			selector: v1alpha1.SelectorSpec{
 				LabelSelectors: map[string]string{"app": "tikv"},
 				ExpressionSelectors: []metav1.LabelSelectorRequirement{
@@ -233,7 +234,7 @@ func TestCheckPodMeetSelector(t *testing.T) {
 		},
 		{
 			name: "meet namespace",
-			pod:  newPod(PodArg{Name: "t1"}),
+			pod:  NewPod(PodArg{Name: "t1"}),
 			selector: v1alpha1.SelectorSpec{
 				Namespaces: []string{metav1.NamespaceDefault},
 			},
@@ -241,7 +242,7 @@ func TestCheckPodMeetSelector(t *testing.T) {
 		},
 		{
 			name: "meet namespace and meet labels",
-			pod:  newPod(PodArg{Name: "t1", Labels: map[string]string{"app": "tikv"}}),
+			pod:  NewPod(PodArg{Name: "t1", Labels: map[string]string{"app": "tikv"}}),
 			selector: v1alpha1.SelectorSpec{
 				Namespaces:     []string{metav1.NamespaceDefault},
 				LabelSelectors: map[string]string{"app": "tikv"},
@@ -250,7 +251,7 @@ func TestCheckPodMeetSelector(t *testing.T) {
 		},
 		{
 			name: "meet namespace and not meet labels",
-			pod:  newPod(PodArg{Name: "t1", Labels: map[string]string{"app": "tidb"}}),
+			pod:  NewPod(PodArg{Name: "t1", Labels: map[string]string{"app": "tidb"}}),
 			selector: v1alpha1.SelectorSpec{
 				Namespaces:     []string{metav1.NamespaceDefault},
 				LabelSelectors: map[string]string{"app": "tikv"},
@@ -259,7 +260,7 @@ func TestCheckPodMeetSelector(t *testing.T) {
 		},
 		{
 			name: "meet pods",
-			pod:  newPod(PodArg{Name: "t1", Labels: map[string]string{"app": "tidb"}}),
+			pod:  NewPod(PodArg{Name: "t1", Labels: map[string]string{"app": "tidb"}}),
 			selector: v1alpha1.SelectorSpec{
 				Pods: map[string][]string{
 					metav1.NamespaceDefault: {"t1"},
@@ -269,7 +270,7 @@ func TestCheckPodMeetSelector(t *testing.T) {
 		},
 		{
 			name: "meet annotation",
-			pod:  newPod(PodArg{Name: "t1", Ans: map[string]string{"an": "n1", "an2": "n2"}, Labels: map[string]string{"app": "tidb"}}),
+			pod:  NewPod(PodArg{Name: "t1", Ans: map[string]string{"an": "n1", "an2": "n2"}, Labels: map[string]string{"app": "tidb"}}),
 			selector: v1alpha1.SelectorSpec{
 				Namespaces: []string{metav1.NamespaceDefault},
 				AnnotationSelectors: map[string]string{
@@ -280,7 +281,7 @@ func TestCheckPodMeetSelector(t *testing.T) {
 		},
 		{
 			name: "not meet annotation",
-			pod:  newPod(PodArg{Name: "t1", Ans: map[string]string{"an": "n1"}, Labels: map[string]string{"app": "tidb"}}),
+			pod:  NewPod(PodArg{Name: "t1", Ans: map[string]string{"an": "n1"}, Labels: map[string]string{"app": "tidb"}}),
 			selector: v1alpha1.SelectorSpec{
 				Namespaces: []string{metav1.NamespaceDefault},
 				AnnotationSelectors: map[string]string{
@@ -291,7 +292,7 @@ func TestCheckPodMeetSelector(t *testing.T) {
 		},
 		{
 			name: "meet pod selector",
-			pod:  newPod(PodArg{Name: "t1", Labels: map[string]string{"app": "tidb"}}),
+			pod:  NewPod(PodArg{Name: "t1", Labels: map[string]string{"app": "tidb"}}),
 			selector: v1alpha1.SelectorSpec{
 				Pods: map[string][]string{
 					metav1.NamespaceDefault: {"t1", "t2"},
@@ -301,7 +302,7 @@ func TestCheckPodMeetSelector(t *testing.T) {
 		},
 		{
 			name: "not meet pod selector",
-			pod:  newPod(PodArg{Name: "t1", Labels: map[string]string{"app": "tidb"}}),
+			pod:  NewPod(PodArg{Name: "t1", Labels: map[string]string{"app": "tidb"}}),
 			selector: v1alpha1.SelectorSpec{
 				Pods: map[string][]string{
 					metav1.NamespaceDefault: {"t2"},
@@ -311,7 +312,7 @@ func TestCheckPodMeetSelector(t *testing.T) {
 		},
 		{
 			name: "meet pod selector and not meet labels",
-			pod:  newPod(PodArg{Name: "t1", Labels: map[string]string{"app": "tidb"}}),
+			pod:  NewPod(PodArg{Name: "t1", Labels: map[string]string{"app": "tidb"}}),
 			selector: v1alpha1.SelectorSpec{
 				Pods: map[string][]string{
 					metav1.NamespaceDefault: {"t1", "t2"},
@@ -386,10 +387,10 @@ func TestFilterByPhaseSelector(t *testing.T) {
 	}
 
 	pods := []v1.Pod{
-		newPod(PodArg{Name: "p1", Status: v1.PodRunning}),
-		newPod(PodArg{Name: "p2", Status: v1.PodRunning}),
-		newPod(PodArg{Name: "p3", Status: v1.PodPending}),
-		newPod(PodArg{Name: "p4", Status: v1.PodFailed}),
+		NewPod(PodArg{Name: "p1", Status: v1.PodRunning}),
+		NewPod(PodArg{Name: "p2", Status: v1.PodRunning}),
+		NewPod(PodArg{Name: "p3", Status: v1.PodPending}),
+		NewPod(PodArg{Name: "p4", Status: v1.PodFailed}),
 	}
 
 	var tcs []TestCase
@@ -465,10 +466,10 @@ func TestFilterByAnnotations(t *testing.T) {
 	}
 
 	pods := []v1.Pod{
-		newPod(PodArg{Name: "p1", Ans: map[string]string{"p1": "p1"}}),
-		newPod(PodArg{Name: "p2", Ans: map[string]string{"p2": "p2"}}),
-		newPod(PodArg{Name: "p3", Ans: map[string]string{"t": "t"}}),
-		newPod(PodArg{Name: "p4", Ans: map[string]string{"t": "t"}}),
+		NewPod(PodArg{Name: "p1", Ans: map[string]string{"p1": "p1"}}),
+		NewPod(PodArg{Name: "p2", Ans: map[string]string{"p2": "p2"}}),
+		NewPod(PodArg{Name: "p3", Ans: map[string]string{"t": "t"}}),
+		NewPod(PodArg{Name: "p4", Ans: map[string]string{"t": "t"}}),
 	}
 
 	var tcs []TestCase
@@ -514,10 +515,10 @@ func TestFilterNamespaceSelector(t *testing.T) {
 	}
 
 	pods := []v1.Pod{
-		newPod(PodArg{Name: "p1", Namespace: "n1"}),
-		newPod(PodArg{Name: "p2", Namespace: "n2"}),
-		newPod(PodArg{Name: "p3", Namespace: "n2"}),
-		newPod(PodArg{Name: "p4", Namespace: "n4"}),
+		NewPod(PodArg{Name: "p1", Namespace: "n1"}),
+		NewPod(PodArg{Name: "p2", Namespace: "n2"}),
+		NewPod(PodArg{Name: "p3", Namespace: "n2"}),
+		NewPod(PodArg{Name: "p4", Namespace: "n4"}),
 	}
 
 	var tcs []TestCase
@@ -585,15 +586,15 @@ func TestFilterPodByNode(t *testing.T) {
 	var tcs []TestCase
 
 	pods := []v1.Pod{
-		newPod(PodArg{Name: "p1", Namespace: "n1", Nodename: "node1"}),
-		newPod(PodArg{Name: "p2", Namespace: "n2", Nodename: "node1"}),
-		newPod(PodArg{Name: "p3", Namespace: "n2", Nodename: "node2"}),
-		newPod(PodArg{Name: "p4", Namespace: "n4", Nodename: "node3"}),
+		NewPod(PodArg{Name: "p1", Namespace: "n1", Nodename: "node1"}),
+		NewPod(PodArg{Name: "p2", Namespace: "n2", Nodename: "node1"}),
+		NewPod(PodArg{Name: "p3", Namespace: "n2", Nodename: "node2"}),
+		NewPod(PodArg{Name: "p4", Namespace: "n4", Nodename: "node3"}),
 	}
 
 	nodes := []v1.Node{
-		newNode("node1", map[string]string{"disktype": "ssd", "zone": "az1"}),
-		newNode("node2", map[string]string{"disktype": "hdd", "zone": "az1"}),
+		NewNode("node1", map[string]string{"disktype": "ssd", "zone": "az1"}),
+		NewNode("node2", map[string]string{"disktype": "hdd", "zone": "az1"}),
 	}
 
 	tcs = append(tcs, TestCase{

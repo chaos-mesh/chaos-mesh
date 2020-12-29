@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package utils
+package events
 
 // For each chaos resource, the controller manager will record events
 // once the chaos is started or completed or failed. The starting and
@@ -19,14 +19,14 @@ package utils
 // be of type "Warning". The reasons are defined as following.
 const (
 	// The chaos just started
-	EventChaosInjected string = "ChaosInjected"
+	ChaosInjected string = "ChaosInjected"
 
 	// The chaos just failed when injecting. The message should include detailed error
-	EventChaosInjectFailed string = "ChaosInjectFailed"
+	ChaosInjectFailed string = "ChaosInjectFailed"
 
 	// The chaos just failed when recovering. The message should include detailed error
-	EventChaosRecoverFailed string = "ChaosRecoverFailed"
+	ChaosRecoverFailed string = "ChaosRecoverFailed"
 
 	// The chaos just completed
-	EventChaosRecovered string = "ChaosRecovered"
+	ChaosRecovered string = "ChaosRecovered"
 )
