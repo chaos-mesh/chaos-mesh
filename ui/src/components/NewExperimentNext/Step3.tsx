@@ -11,7 +11,6 @@ import T from 'components/T'
 import api from 'api'
 import { parseSubmit } from 'lib/formikhelpers'
 import { resetNewExperiment } from 'slices/experiments'
-import { setNeedToRefreshExperiments } from 'slices/experiments'
 import { useHistory } from 'react-router-dom'
 import { useIntl } from 'react-intl'
 import { useSelector } from 'react-redux'
@@ -43,14 +42,9 @@ const Step3 = () => {
           })
         )
         dispatch(setAlertOpen(true))
-
-        if (history.location.pathname === '/experiments') {
-          dispatch(setNeedToRefreshExperiments(true))
-        } else {
-          history.push('/experiments')
-        }
-
         dispatch(resetNewExperiment())
+
+        history.push('/experiments')
       })
       .catch(console.error)
   }

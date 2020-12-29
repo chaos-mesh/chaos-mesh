@@ -14,7 +14,6 @@ import List from '@material-ui/core/List'
 import ListItemText from '@material-ui/core/ListItemText'
 import ListSubheader from '@material-ui/core/ListSubheader'
 import { RootState } from 'store'
-import SearchIcon from '@material-ui/icons/Search'
 import Separate from 'components/Separate'
 import T from 'components/T'
 import Tooltip from 'components-mui/Tooltip'
@@ -194,7 +193,7 @@ const SearchResultForOneCate = function <T extends 'events' | 'experiments' | 'a
                       }
                       secondary={
                         <Separate separator={<span>&nbsp;|&nbsp;</span>}>
-                          {requiredItems.map((item) => {
+                          {requiredItems.slice(1).map((item) => {
                             return (
                               <Typography component="span" key={item.name}>
                                 <span>{T(`search.result.keywords.${nameMap[item.name]}`)}: </span>
@@ -290,11 +289,6 @@ const Search: React.FC = () => {
         placeholder={intl.formatMessage({ id: 'search.placeholder' })}
         variant="outlined"
         InputProps={{
-          startAdornment: (
-            <InputAdornment position="start">
-              <SearchIcon color="primary" />
-            </InputAdornment>
-          ),
           endAdornment: (
             <InputAdornment position="end">
               <Tooltip
