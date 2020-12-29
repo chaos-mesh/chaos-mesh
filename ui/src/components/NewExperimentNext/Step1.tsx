@@ -1,9 +1,9 @@
 import { Box, Card, Divider, GridList, GridListTile, Typography, useMediaQuery, useTheme } from '@material-ui/core'
 import React, { useEffect, useState } from 'react'
-import { RootState, useStoreDispatch } from 'store'
-import { createStyles, makeStyles } from '@material-ui/core/styles'
+import { iconByKind, transByKind } from 'lib/byKind'
 import { setStep1, setTarget as setTargetToStore } from 'slices/experiments'
-import targetData, { Kind, schema } from './data/target'
+import targetData, { Kind, Target, schema } from './data/target'
+import { useStoreDispatch, useStoreSelector } from 'store'
 
 import CheckCircleOutlineIcon from '@material-ui/icons/CheckCircleOutline'
 import Kernel from './form/Kernel'
@@ -17,7 +17,7 @@ import TargetGenerated from './form/TargetGenerated'
 import UndoIcon from '@material-ui/icons/Undo'
 import _snakecase from 'lodash.snakecase'
 import clsx from 'clsx'
-import { useSelector } from 'react-redux'
+import { makeStyles } from '@material-ui/core/styles'
 
 const useStyles = makeStyles((theme) => {
   const cardActive = {
@@ -25,9 +25,10 @@ const useStyles = makeStyles((theme) => {
     borderColor: theme.palette.primary.main,
   }
 
-  return createStyles({
+  return {
     gridList: {
       flexWrap: 'nowrap',
+      // Promote the list into his own layer on Chrome. This cost memory but helps keeping high FPS.
       transform: 'translateZ(0)',
     },
     card: {
@@ -44,7 +45,7 @@ const useStyles = makeStyles((theme) => {
     asButton: {
       cursor: 'pointer',
     },
-  })
+  }
 })
 
 const submitDirectly = ['pod-failure', 'pod-kill']
@@ -57,7 +58,7 @@ const Step1 = () => {
   const {
     kindAction: [_kind, _action],
     step1,
-  } = useSelector((state: RootState) => state.experiments)
+  } = useStoreSelector((state) => state.experiments)
   const dispatch = useStoreDispatch()
 
   const [kindAction, setKindAction] = useState<[Kind | '', string]>([_kind, _action])
@@ -117,26 +118,19 @@ const Step1 = () => {
       <Box hidden={step1}>
         <Box p={6} overflow="hidden">
           <GridList className={classes.gridList} cols={isDesktopScreen ? 1.5 : 3.5} spacing={9} cellHeight="auto">
-            {Object.entries(targetData).map(([key, t]) => (
+            {(Object.entries(targetData) as [Kind, Target][]).map(([key, t]) => (
               <GridListTile key={key}>
                 <Card
                   className={clsx(classes.card, kind === key ? classes.cardActive : '')}
                   variant="outlined"
-                  onClick={handleSelectTarget(key as Kind)}
+                  onClick={handleSelectTarget(key)}
                 >
                   <Box display="flex" justifyContent="center" alignItems="center" height="100px">
-                    <Box display="flex" justifyContent="center" alignItems="center" flex={1}>
-                      {t.icon}
+                    <Box display="flex" justifyContent="center" flex={1}>
+                      {iconByKind(key)}
                     </Box>
-                    <Box
-                      display="flex"
-                      justifyContent="center"
-                      alignItems="center"
-                      flex={2}
-                      px={1.5}
-                      textAlign="center"
-                    >
-                      <Typography variant="button">{t.name}</Typography>
+                    <Box display="flex" justifyContent="center" flex={2} px={1.5} textAlign="center">
+                      <Typography variant="button">{transByKind(key)}</Typography>
                     </Box>
                   </Box>
                 </Card>
@@ -165,14 +159,7 @@ const Step1 = () => {
                               <RadioButtonUncheckedOutlinedIcon />
                             )}
                           </Box>
-                          <Box
-                            display="flex"
-                            justifyContent="center"
-                            alignItems="center"
-                            flex={2}
-                            px={1.5}
-                            textAlign="center"
-                          >
+                          <Box display="flex" justifyContent="center" alignItems="center" flex={2} px={1.5}>
                             <Typography variant="button">{d.name}</Typography>
                           </Box>
                         </Box>

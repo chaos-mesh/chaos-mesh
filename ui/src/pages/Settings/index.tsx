@@ -1,37 +1,40 @@
-import { Box, Divider, Grid, Paper, Typography } from '@material-ui/core'
+import { Box, Grid, Paper, Typography } from '@material-ui/core'
 
 import Other from './Other'
 import React from 'react'
 import T from 'components/T'
 import Token from 'components/Token'
 import TokensTable from './TokensTable'
+import { useStoreSelector } from 'store'
 
-const Title: React.FC = ({ children }) => (
-  <>
-    <Typography variant="h6" gutterBottom>
-      {children}
-    </Typography>
-    <Divider />
-    <Box mb={6} />
-  </>
-)
+const Settings = () => {
+  const { securityMode } = useStoreSelector((state) => state.globalStatus)
 
-const Settings = () => (
-  <Grid container justify="center">
-    <Grid item sm={12} md={6} zeroMinWidth>
-      <Paper variant="outlined">
-        <Box p={6}>
-          <Title>{T('settings.addToken.title')}</Title>
-          <Token />
-          <Box my={6} />
-          <TokensTable />
-          <Box mb={6} />
-          <Title>{T('common.other')}</Title>
-          <Other />
-        </Box>
-      </Paper>
+  return (
+    <Grid container>
+      <Grid item sm={12} md={6}>
+        <Paper variant="outlined">
+          <Box p={6}>
+            {securityMode && (
+              <>
+                <Typography variant="h6" gutterBottom>
+                  {T('settings.addToken.title')}
+                </Typography>
+                <Token />
+                <Box my={6} />
+                <TokensTable />
+                <Box mb={6} />
+              </>
+            )}
+            <Typography variant="h6" gutterBottom>
+              {T('common.other')}
+            </Typography>
+            <Other />
+          </Box>
+        </Paper>
+      </Grid>
     </Grid>
-  </Grid>
-)
+  )
+}
 
 export default Settings
