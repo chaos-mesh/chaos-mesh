@@ -64,14 +64,21 @@ func debugEachPod(ctx context.Context, pod v1.Pod, daemon v1.Pod, chaos *v1alpha
 	result.Items = append(result.Items, cm.ItemResult{Name: "mount information", Value: string(out)})
 
 	pids, commands, err := cm.GetPidFromPS(ctx, pod, daemon, c.KubeCli)
+	if err != nil {
+		return fmt.Errorf("get pid from ps failed with: %s", err.Error())
+	}
 
 	for i := range pids {
 		cmd = fmt.Sprintf("ls -l /proc/%s/fd", pids[i])
 		out, err = cm.ExecBypass(ctx, pod, daemon, cmd, c.KubeCli)
+
+		var itemValue string
 		if err != nil {
-			return fmt.Errorf("run command '%s' failed with: %s", cmd, err.Error())
+			itemValue = err.Error()
+		} else {
+			itemValue = string(out)
 		}
-		result.Items = append(result.Items, cm.ItemResult{Name: fmt.Sprintf("file discriptors of PID: %s, COMMAND: %s", pids[i], commands[i]), Value: string(out)})
+		result.Items = append(result.Items, cm.ItemResult{Name: fmt.Sprintf("file descriptors of PID: %s, COMMAND: %s", pids[i], commands[i]), Value: itemValue})
 	}
 
 	return nil

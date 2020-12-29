@@ -18,7 +18,6 @@ import (
 	"context"
 	"fmt"
 	"io/ioutil"
-	"strconv"
 	"strings"
 
 	"google.golang.org/grpc/grpclog"
@@ -27,6 +26,8 @@ import (
 	"k8s.io/client-go/tools/remotecommand"
 	kubectlscheme "k8s.io/kubectl/pkg/scheme"
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
+
+	"github.com/chaos-mesh/chaos-mesh/pkg/bpm"
 )
 
 // Exec executes certain command and returns the result
@@ -66,7 +67,10 @@ func Exec(ctx context.Context, pod v1.Pod, cmd string, c *kubernetes.Clientset) 
 		Stderr: &stderr,
 	})
 	if err != nil {
-		return "", fmt.Errorf("error in streaming remotecommand: %s, pod: %s, command: %s, std error: %s", err.Error(), pod.Name, cmd, stderr.String())
+		if stderr.String() != "" {
+			return "", fmt.Errorf("error: %s\npod: %s\ncommand: %s", strings.TrimSuffix(stderr.String(), "\n"), pod.Name, cmd)
+		}
+		return "", fmt.Errorf("error in streaming remotecommand: %s\npod: %s\ncommand: %s", err.Error(), pod.Name, cmd)
 	}
 	if stderr.String() != "" {
 		return "", fmt.Errorf("error of command %s: %s", cmd, stderr.String())
@@ -76,10 +80,6 @@ func Exec(ctx context.Context, pod v1.Pod, cmd string, c *kubernetes.Clientset) 
 
 // ExecBypass use chaos-daemon to enter namespace and execute command in target pod
 func ExecBypass(ctx context.Context, pod v1.Pod, daemon v1.Pod, cmd string, c *kubernetes.Clientset) (string, error) {
-	cmdSubSlice := strings.Fields(cmd)
-	if len(cmdSubSlice) == 0 {
-		return "", fmt.Errorf("command should not be empty")
-	}
 	// To disable printing irrelevant log from grpc/clientconn.go
 	// See grpc/grpc-go#3918 for detail. Could be resolved in the future
 	grpclog.SetLoggerV2(grpclog.NewLoggerV2(ioutil.Discard, ioutil.Discard, ioutil.Discard))
@@ -87,17 +87,7 @@ func ExecBypass(ctx context.Context, pod v1.Pod, daemon v1.Pod, cmd string, c *k
 	if err != nil {
 		return "", err
 	}
-	switch cmdSubSlice[0] {
-	case "ps":
-		newCmd := fmt.Sprintf("/usr/local/bin/nsexec -m /proc/%s/ns/mnt -p /proc/%s/ns/pid -l -- %s", strconv.Itoa(pid), strconv.Itoa(pid), cmd)
-		return Exec(ctx, daemon, newCmd, c)
-	case "cat", "ls":
-		// we need to enter mount namespace to get file related infomation
-		// but enter mnt ns would prevent us to access `cat`/`ls` in daemon
-		// so use `nsexec` to achieve using nsenter and cat together
-		newCmd := fmt.Sprintf("/usr/local/bin/nsexec -m /proc/%s/ns/mnt -l -- %s", strconv.Itoa(pid), cmd)
-		return Exec(ctx, daemon, newCmd, c)
-	default:
-		return "", fmt.Errorf("command not supported for nsenter")
-	}
+	// enter all possible namespaces needed, since there's no bad effect to do so
+	cmdBuilder := bpm.DefaultProcessBuilder(cmd).SetNS(pid, bpm.MountNS).SetNS(pid, bpm.PidNS).SetContext(ctx)
+	return Exec(ctx, daemon, cmdBuilder.Build().Cmd.String(), c)
 }
