@@ -11,12 +11,16 @@
     - [Actor](#actor)
     - [WorkflowManager: rest glue codes](#workflowmanager-rest-glue-codes)
     - [States for Node](#states-for-node)
+    - [Node StateMachine](#node-statemachine)
+      - [Serial](#serial)
+      - [Suspend](#suspend)
+      - [Chaos](#chaos)
     - [States for Workflow](#states-for-workflow)
     - [Others](#others)
   - [Implement for Various Template](#implement-for-various-template)
-    - [Suspend](#suspend)
+    - [Suspend](#suspend-1)
     - [Parallel/Serial](#parallelserial)
-    - [Chaos](#chaos)
+    - [Chaos](#chaos-1)
     - [Task](#task)
       - [Downward API](#downward-api)
   - [Performance limitation](#performance-limitation)
@@ -45,7 +49,7 @@ As the RFC of Chaos Mesh Workflow is stable, we create this document as the refe
 
 We will not define the certain struct here, but we present pseudo-code for interface and main logic.
 
-An instance of  Chaos Mesh Workflow is basically like a tree:
+An instance of Chaos Mesh Workflow is basically like a tree:
 
 - each action is described by a node;
 - a root node represents for entry-point;
@@ -207,6 +211,39 @@ A **Parallel** Node(which contains 3 children): **Init** -> **WaitingForSchedule
 
 A **Task** Node: **Init** -> **Running** -> **WaitingForChild** -> **Evaluating** -> **WaitingForSchedule** -> **WaitingForChild** -> **Succeed**
 
+### Node StateMachine
+
+#### Serial
+
+Available phase: Init, WaitingForSchedule, WaitingForChild, Succeed, Failed.
+
+| Event \ Current Phase   | Init                                                                                          | WaitingForSchedule                                                                                                                | WaitingForChild                                                                                                                                                                                                       | Succeed | Failed |
+| :---------------------- | :-------------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------ | :----- |
+| NodeCreated             | Change phase to `WaitingForSchedule`, then notify itself with event `NodePickChildToSchedule` | -                                                                                                                                 | -                                                                                                                                                                                                                     | -       | -      |
+| NodePickChildToSchedule | -                                                                                             | Create children nodes, then change phase to `WaitingForChild`, then notify all children nodes one by one with event `NodeCreated` | -                                                                                                                                                                                                                     | -       | -      |
+| ChildNodeSucceed        | -                                                                                             | -                                                                                                                                 | Check children nodes / Change to phase `WaitingForSchedule` then notify itself with event `NodePickChildToSchedule` / or Change to phase `Succeed` then notify parent node (if exists) with event `ChildNodeSucceed` | -       | -      |
+| ChildNodeFailed         | -                                                                                             | -                                                                                                                                 | Change phase to `Failed` then notify parent node (if exists) with event `ChildNodeFailed`                                                                                                                            | -       | -      |
+
+#### Suspend
+
+Available phase: Init, Holding, Succeed.
+
+| Event \ Current Phase | Init                                                                                             | Holding                                                                                      | Succeed |
+| :-------------------- | :----------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------- | :------ |
+| NodeCreated           | Change phase to `Holding`, then delay notify itself with event `NodeHoldingAwake` and `duration` | -                                                                                            | -       |
+| NodeHoldingAwake      | -                                                                                                | Change to phase `Succeed` then notify parent node (if exists) with event `ChildNodeSucceed` | -       |
+
+#### Chaos
+
+Available phase: Init, Running, Holding, Succeed, Failed.
+
+| Event \ Current Phase  | Init                                                    | Running                                                                                          | Holding                                                                                      | Succeed | Failed |
+| :--------------------- | :------------------------------------------------------ | :----------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------- | :------ | :----- |
+| NodeCreated            | Create Chaos CRD object, then change phase to `Running` | -                                                                                                | -                                                                                            | -       | -      |
+| NodeChaosInjectSucceed | -                                                       | Change phase to `Holding`, then delay notify itself with event `NodeHoldingAwake` and `duration` | -                                                                                            | -       | -      |
+| NodeChaosInjectFailed  | -                                                       | Change phase to `Failed` then notify parent node (if exists) with event `ChildNodeFailed`       | -                                                                                            | -       | -      |
+| NodeHoldingAwake       | -                                                       | -                                                                                                | Change to phase `Succeed` then notify parent node (if exists) with event `ChildNodeSucceed` | -       | -      |
+
 ### States for Workflow
 
 There are 4 phase of one Workflow:
@@ -249,7 +286,7 @@ For each Actor, its operation is "instantly", which means one Chaos which contai
 
 ### Suspend
 
-As **Trigger** supporting `Requeue()`,  **Suspend** is quite simple, just write the time to wake up into status then requeue could implement operation based on time.
+As **Trigger** supporting `Requeue()`, **Suspend** is quite simple, just write the time to wake up into status then requeue could implement operation based on time.
 
 It's also the basement for implementing other types of templates.
 
