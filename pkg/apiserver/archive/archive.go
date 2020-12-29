@@ -52,6 +52,7 @@ type StatusResponse struct {
 // Register mounts our HTTP handler on the mux.
 func Register(r *gin.RouterGroup, s *Service) {
 	endpoint := r.Group("/archives")
+	endpoint.Use(utils.AuthRequired)
 
 	endpoint.GET("", s.list)
 	endpoint.GET("/detail", s.detail)
@@ -99,11 +100,6 @@ func (s *Service) list(c *gin.Context) {
 	name := c.Query("name")
 	ns := c.Query("namespace")
 
-	canList := utils.CanListChaos(c, ns)
-	if !canList {
-		return
-	}
-
 	metas, err := s.archive.ListMeta(context.Background(), kind, ns, name, true)
 	if err != nil {
 		c.Status(http.StatusInternalServerError)
@@ -143,6 +139,7 @@ func (s *Service) detail(c *gin.Context) {
 		detail Detail
 	)
 	uid := c.Query("uid")
+	namespace := c.Query("namespace")
 
 	if uid == "" {
 		c.Status(http.StatusBadRequest)
@@ -162,8 +159,9 @@ func (s *Service) detail(c *gin.Context) {
 		return
 	}
 
-	canList := utils.CanListChaos(c, exp.Namespace)
-	if !canList {
+	if len(namespace) != 0 && exp.Namespace != namespace {
+		c.Status(http.StatusBadRequest)
+		_ = c.Error(utils.ErrInvalidRequest.New("exp %s belong to namespace % but not namespace %s", uid, exp.Namespace, namespace))
 		return
 	}
 
@@ -221,6 +219,7 @@ func (s *Service) report(c *gin.Context) {
 		report Report
 	)
 	uid := c.Query("uid")
+	namespace := c.Query("namespace")
 
 	if uid == "" {
 		c.Status(http.StatusBadRequest)
@@ -240,8 +239,9 @@ func (s *Service) report(c *gin.Context) {
 		return
 	}
 
-	canList := utils.CanListChaos(c, meta.Namespace)
-	if !canList {
+	if len(namespace) != 0 && meta.Namespace != namespace {
+		c.Status(http.StatusBadRequest)
+		_ = c.Error(utils.ErrInvalidRequest.New("exp %s belong to namespace % but not namespace %s", uid, meta.Namespace, namespace))
 		return
 	}
 

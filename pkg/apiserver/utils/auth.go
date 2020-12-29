@@ -23,17 +23,19 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
 )
 
-func CanListChaos(c *gin.Context, namespace string) bool {
-	if mockResult := mock.On("MockCanListChaos"); mockResult != nil {
-		return mockResult.(bool)
+func AuthRequired(c *gin.Context) {
+	if mockResult := mock.On("MockAuthRequired"); mockResult != nil {
+		c.Next()
+		return
 	}
 
 	authCli, err := clientpool.ExtractTokenAndGetAuthClient(c.Request.Header)
 	if err != nil {
-		_ = c.Error(ErrInvalidRequest.WrapWithNoMessage(err))
-		return false
+		c.AbortWithError(http.StatusUnauthorized, ErrInvalidRequest.WrapWithNoMessage(err))
+		return
 	}
 
+	namespace := c.Query("namespace")
 	sar := &authorizationv1.SelfSubjectAccessReview{
 		Spec: authorizationv1.SelfSubjectAccessReviewSpec{
 			ResourceAttributes: &authorizationv1.ResourceAttributes{
@@ -47,20 +49,18 @@ func CanListChaos(c *gin.Context, namespace string) bool {
 
 	response, err := authCli.SelfSubjectAccessReviews().Create(sar)
 	if err != nil {
-		c.Status(http.StatusInternalServerError)
-		_ = c.Error(ErrInternalServer.WrapWithNoMessage(err))
-		return false
+		c.AbortWithError(http.StatusUnauthorized, ErrInvalidRequest.WrapWithNoMessage(err))
+		return
 	}
 
 	if !response.Status.Allowed {
-		c.Status(http.StatusInternalServerError)
 		if len(namespace) == 0 {
-			_ = c.Error(ErrNoClusterPrivilege.New("can't list chaos experiments in the cluster"))
+			c.AbortWithError(http.StatusUnauthorized, ErrNoClusterPrivilege.New("can't list chaos experiments in the cluster"))
 		} else {
-			_ = c.Error(ErrNoNamespacePrivilege.New("can't list chaos experiments in namespace %s", namespace))
+			c.AbortWithError(http.StatusUnauthorized, ErrNoNamespacePrivilege.New("can't list chaos experiments in namespace %s", namespace))
 		}
-		return false
+		return
 	}
 
-	return true
+	c.Next()
 }

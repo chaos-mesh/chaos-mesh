@@ -170,7 +170,7 @@ func TestEvent(t *testing.T) {
 var _ = Describe("event", func() {
 	var router *gin.Engine
 	BeforeEach(func() {
-		pkgmock.With("MockCanListChaos", true)
+		pkgmock.With("MockAuthRequired", true)
 
 		mockes := new(MockEventService)
 
@@ -189,7 +189,7 @@ var _ = Describe("event", func() {
 
 	AfterEach(func() {
 		// Add any teardown steps that needs to be executed after each test
-		pkgmock.Reset("MockCanListChaos")
+		pkgmock.Reset("MockAuthRequired")
 	})
 
 	Context("ListEvents", func() {
