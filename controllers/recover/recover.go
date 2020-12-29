@@ -26,7 +26,7 @@ import (
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/common"
-	"github.com/chaos-mesh/chaos-mesh/pkg/utils"
+	"github.com/chaos-mesh/chaos-mesh/pkg/finalizer"
 )
 
 type Delegate struct {
@@ -62,7 +62,7 @@ func (r *Delegate) CleanFinalizersAndRecover(ctx context.Context, chaos v1alpha1
 			}
 
 			r.Log.Info("Pod not found", "namespace", ns, "name", name)
-			finalizers = utils.RemoveFromFinalizer(finalizers, key)
+			finalizers = finalizer.RemoveFromFinalizer(finalizers, key)
 			continue
 		}
 
@@ -72,7 +72,7 @@ func (r *Delegate) CleanFinalizersAndRecover(ctx context.Context, chaos v1alpha1
 			continue
 		}
 
-		finalizers = utils.RemoveFromFinalizer(finalizers, key)
+		finalizers = finalizer.RemoveFromFinalizer(finalizers, key)
 	}
 
 	if annotations[common.AnnotationCleanFinalizer] == common.AnnotationCleanFinalizerForced {
