@@ -2,7 +2,6 @@ import {
   Box,
   Button,
   IconButton,
-  Paper,
   Table,
   TableBody,
   TableCell,
@@ -14,7 +13,6 @@ import {
   TableSortLabel,
 } from '@material-ui/core'
 import React, { useImperativeHandle, useState } from 'react'
-import { createStyles, makeStyles } from '@material-ui/core/styles'
 import { dayComparator, format } from 'lib/dayjs'
 import { useHistory, useLocation } from 'react-router-dom'
 
@@ -25,28 +23,24 @@ import FirstPageIcon from '@material-ui/icons/FirstPage'
 import KeyboardArrowLeftIcon from '@material-ui/icons/KeyboardArrowLeft'
 import KeyboardArrowRightIcon from '@material-ui/icons/KeyboardArrowRight'
 import LastPageIcon from '@material-ui/icons/LastPage'
+import Paper from 'components-mui/Paper'
 import PaperTop from 'components-mui/PaperTop'
 import RunningLabel from 'components-mui/RunningLabel'
 import T from 'components/T'
+import { makeStyles } from '@material-ui/core/styles'
 import { useIntl } from 'react-intl'
 import { useQuery } from 'lib/hooks'
 
-const useStyles = makeStyles(() =>
-  createStyles({
-    tableContainer: {
-      minHeight: 450,
-      maxHeight: 768,
-    },
-    eventDetailPaper: {
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      width: '100%',
-      height: '100%',
-      overflowY: 'scroll',
-    },
-  })
-)
+const useStyles = makeStyles({
+  eventDetailPaper: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    width: '100%',
+    height: '100%',
+    overflowY: 'scroll',
+  },
+})
 
 function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
   if (['CreateAt', 'UpdateAt', 'StartTime', 'EndTime'].includes(orderBy as string)) {
@@ -191,7 +185,7 @@ const EventsTableRow: React.FC<EventsTableRowProps> = ({ event: e, detailed, onS
     <TableCell>{e.kind}</TableCell>
     <TableCell>{format(e.start_time)}</TableCell>
     <TableCell>
-      {e.finish_time ? format(e.finish_time) : <RunningLabel>{T('experiments.status.running')}</RunningLabel>}
+      {e.finish_time ? format(e.finish_time) : <RunningLabel>{T('experiments.state.running')}</RunningLabel>}
     </TableCell>
     {detailed && (
       <TableCell>
@@ -210,11 +204,10 @@ export interface EventsTableHandles {
 interface EventsTableProps {
   events: Event[]
   detailed?: boolean
-  hasSearch?: boolean
 }
 
 const EventsTable: React.ForwardRefRenderFunction<EventsTableHandles, EventsTableProps> = (
-  { events: allEvents, detailed = false, hasSearch = true },
+  { events: allEvents, detailed = false },
   ref
 ) => {
   const classes = useStyles()
@@ -231,7 +224,7 @@ const EventsTable: React.ForwardRefRenderFunction<EventsTableHandles, EventsTabl
   const [order, setOrder] = useState<Order>('desc')
   const [orderBy, setOrderBy] = useState<keyof SortedEvent>('start_time')
   const [page, setPage] = useState(0)
-  const [rowsPerPage, setRowsPerPage] = useState(5)
+  const [rowsPerPage, setRowsPerPage] = useState(7)
 
   const onSelectEvent = (e: Event) => () => {
     history.push(`${location.pathname}?event_id=${e.id}`)
@@ -260,49 +253,46 @@ const EventsTable: React.ForwardRefRenderFunction<EventsTableHandles, EventsTabl
 
   return (
     <Box position="relative">
-      <Paper variant="outlined">
-        <PaperTop title={T('events.table')}></PaperTop>
-        <TableContainer className={classes.tableContainer}>
-          <Table stickyHeader>
-            <EventsTableHead order={order} orderBy={orderBy} onSort={handleSortEvents} detailed={detailed} />
+      <TableContainer component={Paper}>
+        <Table stickyHeader>
+          <EventsTableHead order={order} orderBy={orderBy} onSort={handleSortEvents} detailed={detailed} />
 
-            <TableBody>
-              {events &&
-                stableSort<SortedEvent>(events, getComparator(order, orderBy))
-                  .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                  .map((e) => (
-                    <EventsTableRow
-                      key={e.id}
-                      event={e as SortedEventWithPods}
-                      detailed={detailed}
-                      onSelectEvent={onSelectEvent}
-                    />
-                  ))}
-            </TableBody>
-
-            <TableFooter>
-              <TableRow>
-                {events && (
-                  <TablePagination
-                    count={events.length}
-                    page={page}
-                    rowsPerPageOptions={[5, 10, 25]}
-                    rowsPerPage={rowsPerPage}
-                    onChangePage={handleChangePage}
-                    onChangeRowsPerPage={handleChangeRowsPerPage}
-                    ActionsComponent={TablePaginationActions as any}
-                    labelDisplayedRows={({ from, to, count }) => `${from} - ${to} of ${count}`}
-                    labelRowsPerPage={intl.formatMessage({ id: 'events.eventsPerPage' })}
+          <TableBody>
+            {events &&
+              stableSort<SortedEvent>(events, getComparator(order, orderBy))
+                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                .map((e) => (
+                  <EventsTableRow
+                    key={e.id}
+                    event={e as SortedEventWithPods}
+                    detailed={detailed}
+                    onSelectEvent={onSelectEvent}
                   />
-                )}
-              </TableRow>
-            </TableFooter>
-          </Table>
-        </TableContainer>
-      </Paper>
+                ))}
+          </TableBody>
+
+          <TableFooter>
+            <TableRow>
+              {events && (
+                <TablePagination
+                  style={{ borderBottom: 'none' }}
+                  count={events.length}
+                  page={page}
+                  rowsPerPageOptions={[7, 15, 25]}
+                  rowsPerPage={rowsPerPage}
+                  onChangePage={handleChangePage}
+                  onChangeRowsPerPage={handleChangeRowsPerPage}
+                  ActionsComponent={TablePaginationActions as any}
+                  labelDisplayedRows={({ from, to, count }) => `${from} - ${to} of ${count}`}
+                  labelRowsPerPage={intl.formatMessage({ id: 'events.eventsPerPage' })}
+                />
+              )}
+            </TableRow>
+          </TableFooter>
+        </Table>
+      </TableContainer>
       {eventID && (
         <Paper
-          variant="outlined"
           className={classes.eventDetailPaper}
           style={{
             zIndex: 3, // .MuiTableCell-stickyHeader z-index: 2

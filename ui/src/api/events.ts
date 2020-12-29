@@ -1,17 +1,16 @@
-import { Event } from './events.type'
+import { Event, EventsParams } from './events.type'
+
 import http from './http'
 
-export const events = (namespace = null) =>
+export const events = (params?: EventsParams) =>
   http.get<Event[]>('/events', {
-    params: {
-      namespace,
-    },
+    params,
   })
 
 // Without pods field
-export const dryEvents = (namespace = '') =>
+export const dryEvents = (params?: EventsParams) =>
   http.get<Event[]>('/events/dry', {
-    params: {
-      namespace,
-    },
+    params,
   })
+
+export const get = (id: string) => http.get<Event>(`/events/get?id=${id}`)

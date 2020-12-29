@@ -31,6 +31,7 @@ import (
 	. "github.com/chaos-mesh/chaos-mesh/controllers/test"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
 	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
+	"github.com/chaos-mesh/chaos-mesh/pkg/utils"
 )
 
 func setHostNetwork(objs []runtime.Object) {
@@ -74,10 +75,7 @@ func TestHostNetworkOption(t *testing.T) {
 
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
-			objs, _ := GenerateNPods("podchaos-name", 1, v1.PodRunning, "test-namespace", nil, nil, v1.ContainerStatus{
-				ContainerID: "fake-container-id",
-				Name:        "container-name",
-			})
+			objs, _ := utils.GenerateNPods("p", 1, utils.PodArg{})
 
 			setHostNetwork(objs)
 
@@ -87,8 +85,8 @@ func TestHostNetworkOption(t *testing.T) {
 					APIVersion: "v1",
 				},
 				ObjectMeta: metav1.ObjectMeta{
-					Namespace: "test-namespace",
-					Name:      "podchaos-name0",
+					Namespace: metav1.NamespaceDefault,
+					Name:      "p0",
 				},
 				Spec: v1alpha1.PodNetworkChaosSpec{},
 			}
@@ -97,7 +95,7 @@ func TestHostNetworkOption(t *testing.T) {
 			h := &Handler{
 				Client:                  fake.NewFakeClientWithScheme(scheme.Scheme, objs...),
 				Reader:                  r,
-				Log:                     zap.Logger(true),
+				Log:                     zap.New(zap.UseDevMode(true)),
 				AllowHostNetworkTesting: testCase.enableHostNetworkTesting,
 			}
 

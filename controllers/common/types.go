@@ -45,7 +45,9 @@ type Reconciler struct {
 }
 
 // NewReconciler would create Reconciler for common chaos
-func NewReconciler(e endpoint.Endpoint, ctx ctx.Context) *Reconciler {
+func NewReconciler(req ctrl.Request, e endpoint.Endpoint, ctx ctx.Context) *Reconciler {
+	ctx.Log = ctx.Log.WithName(req.NamespacedName.String())
+
 	return &Reconciler{
 		Endpoint: e,
 		Context:  ctx,

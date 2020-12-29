@@ -1,3 +1,8 @@
+export interface EventsParams {
+  namespace?: string
+  limit?: number
+}
+
 export interface EventPod {
   id: string
   pod_ip: string

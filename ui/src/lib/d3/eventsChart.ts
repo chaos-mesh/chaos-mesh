@@ -57,6 +57,11 @@ export default function gen({
   // Wrap long text, also used in zoom() and reGen()
   svg.selectAll('.tick text').call(wrapText, 30)
 
+  const colorPalette = d3
+    .scaleOrdinal<string, string>()
+    .domain(events.map((d) => d.experiment_id))
+    .range(d3.schemeTableau10)
+
   const allUniqueExperiments = [...new Set(events.map((d) => d.experiment + '/' + d.experiment_id))].map((d) => {
     const [name, uuid] = d.split('/')
 
@@ -65,19 +70,33 @@ export default function gen({
       uuid,
     }
   })
+  const allUniqueUUIDs = allUniqueExperiments.map((d) => d.uuid)
+
   const y = d3
     .scaleBand()
-    .domain(allUniqueExperiments.map((d) => d.uuid))
+    .domain(allUniqueUUIDs)
     .range([0, height - margin.top - margin.bottom])
     .padding(0.5)
   const yAxis = d3.axisLeft(y).tickFormat('' as any)
   // gYAxis
   svg
     .append('g')
-    .attr('class', 'axis')
     .attr('transform', `translate(${margin.left}, ${margin.top})`)
     .call(yAxis)
     .call((g) => g.select('.domain').remove())
+    .call((g) => g.selectAll('.tick').remove())
+    .call((g) =>
+      g
+        .append('g')
+        .attr('stroke-opacity', 0.5)
+        .selectAll('line')
+        .data(allUniqueUUIDs)
+        .join('line')
+        .attr('y1', (d) => y(d)! + y.bandwidth() / 2)
+        .attr('y2', (d) => y(d)! + y.bandwidth() / 2)
+        .attr('x2', width - margin.right - margin.left)
+        .attr('stroke', colorPalette)
+    )
 
   // clipX
   svg
@@ -89,11 +108,6 @@ export default function gen({
     .attr('width', width - margin.left - margin.right)
     .attr('height', height - margin.bottom)
   const gMain = svg.append('g').attr('clip-path', 'url(#clip-x-axis)')
-
-  const colorPalette = d3
-    .scaleOrdinal<string, string>()
-    .domain(events.map((d) => d.experiment_id))
-    .range(d3.schemeTableau10)
 
   // legends
   const legendsRoot = d3.select(document.createElement('div')).attr('class', 'chaos-events-legends')
@@ -117,7 +131,9 @@ export default function gen({
             .translate(-x(day(event.start_time)), 0)
         )
     })
-  legends.append('div').attr('style', (d) => `width: 14px; height: 14px; background: ${colorPalette(d.uuid)};`)
+  legends
+    .append('div')
+    .attr('style', (d) => `width: 14px; height: 14px; background: ${colorPalette(d.uuid)}; border-radius: 50%;`)
   legends
     .insert('div')
     .attr(
@@ -128,27 +144,15 @@ export default function gen({
     )
     .text((d) => d.name)
 
-  function genRectWidth(x: d3.ScaleLinear<number, number>) {
-    return (d: Event) => {
-      let width = d.finish_time ? x(day(d.finish_time)) - x(day(d.start_time)) : x(day()) - x(day(d.start_time))
-
-      if (width === 0) {
-        width = 3 // For better visual effects
-      }
-
-      return width
-    }
-  }
-
-  const rects = gMain
+  // event circles
+  const circles = gMain
     .selectAll()
     .data(events)
     .enter()
-    .append('rect')
-    .attr('x', (d) => x(day(d.start_time)))
-    .attr('y', (d) => y(d.experiment_id)! + margin.top)
-    .attr('width', genRectWidth(x))
-    .attr('height', y.bandwidth())
+    .append('circle')
+    .attr('cx', (d) => x(day(d.start_time)))
+    .attr('cy', (d) => y(d.experiment_id)! + y.bandwidth() / 2 + margin.top)
+    .attr('r', 4)
     .attr('fill', (d) => colorPalette(d.experiment_id))
     .style('cursor', 'pointer')
 
@@ -160,7 +164,7 @@ export default function gen({
 
     gXAxis.call(xAxis.scale(newX))
     svg.selectAll('.tick text').call(wrapText, 30)
-    rects.attr('x', (d) => newX(day(d.start_time))).attr('width', genRectWidth(newX))
+    circles.attr('cx', (d) => newX(day(d.start_time)))
   }
   svg.call(zoom as any)
 
@@ -189,8 +193,8 @@ export default function gen({
             <b>
               ${intl.formatMessage({ id: 'common.status' })}: ${
       d.finish_time
-        ? intl.formatMessage({ id: 'experiments.status.finished' })
-        : intl.formatMessage({ id: 'experiments.status.running' })
+        ? intl.formatMessage({ id: 'experiments.state.finished' })
+        : intl.formatMessage({ id: 'experiments.state.running' })
     }
             </b>
             <br />
@@ -209,7 +213,7 @@ export default function gen({
             `
   }
 
-  rects
+  circles
     .on('click', function (d) {
       if (typeof onSelectEvent === 'function') {
         onSelectEvent(d)()
@@ -257,7 +261,7 @@ export default function gen({
     x.range([margin.left, width - margin.right])
     gXAxis.call(xAxis)
     svg.selectAll('.tick text').call(wrapText, 30)
-    rects.attr('x', (d) => x(day(d.start_time))).attr('width', genRectWidth(x))
+    circles.attr('x', (d) => x(day(d.start_time)))
   }
 
   d3.select(window).on('resize', _debounce(reGen, 250))
