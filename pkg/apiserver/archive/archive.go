@@ -161,7 +161,7 @@ func (s *Service) detail(c *gin.Context) {
 
 	if len(namespace) != 0 && exp.Namespace != namespace {
 		c.Status(http.StatusBadRequest)
-		_ = c.Error(utils.ErrInvalidRequest.New("exp %s belong to namespace % but not namespace %s", uid, exp.Namespace, namespace))
+		_ = c.Error(utils.ErrInvalidRequest.New("exp %s belong to namespace %s but not namespace %s", uid, exp.Namespace, namespace))
 		return
 	}
 
@@ -241,7 +241,7 @@ func (s *Service) report(c *gin.Context) {
 
 	if len(namespace) != 0 && meta.Namespace != namespace {
 		c.Status(http.StatusBadRequest)
-		_ = c.Error(utils.ErrInvalidRequest.New("exp %s belong to namespace % but not namespace %s", uid, meta.Namespace, namespace))
+		_ = c.Error(utils.ErrInvalidRequest.New("exp %s belong to namespace %s but not namespace %s", uid, meta.Namespace, namespace))
 		return
 	}
 
