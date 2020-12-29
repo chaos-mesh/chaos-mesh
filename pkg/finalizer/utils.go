@@ -11,19 +11,30 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package client
+package finalizer
 
-import (
-	chaosfs "github.com/chaos-mesh/chaos-mesh/pkg/chaosfs/pb"
-
-	"google.golang.org/grpc"
-)
-
-func NewClient(addr string) (chaosfs.InjureClient, error) {
-	conn, err := grpc.Dial(addr, grpc.WithInsecure())
-	if err != nil {
-		return nil, err
+func RemoveFromFinalizer(finalizers []string, key string) []string {
+	slice := make([]string, 0, len(finalizers))
+	for _, f := range finalizers {
+		if f != key {
+			slice = append(slice, f)
+		}
 	}
 
-	return chaosfs.NewInjureClient(conn), nil
+	return slice
+}
+
+func InsertFinalizer(finalizers []string, finalizer string) []string {
+	exist := false
+
+	for _, f := range finalizers {
+		if f == finalizer {
+			exist = true
+		}
+	}
+
+	if exist {
+		return finalizers
+	}
+	return append(finalizers, finalizer)
 }

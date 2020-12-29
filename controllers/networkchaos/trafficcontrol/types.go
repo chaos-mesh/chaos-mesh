@@ -32,10 +32,12 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/controllers/networkchaos/podnetworkmanager"
 	"github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos/ipset"
 	"github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos/netutils"
+	"github.com/chaos-mesh/chaos-mesh/pkg/events"
+	"github.com/chaos-mesh/chaos-mesh/pkg/finalizer"
 	"github.com/chaos-mesh/chaos-mesh/pkg/router"
 	ctx "github.com/chaos-mesh/chaos-mesh/pkg/router/context"
 	end "github.com/chaos-mesh/chaos-mesh/pkg/router/endpoint"
-	"github.com/chaos-mesh/chaos-mesh/pkg/utils"
+	"github.com/chaos-mesh/chaos-mesh/pkg/selector"
 )
 
 const (
@@ -67,7 +69,7 @@ func (r *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.I
 	source := networkchaos.Namespace + "/" + networkchaos.Name
 	m := podnetworkmanager.New(source, r.Log, r.Client, r.Reader)
 
-	sources, err := utils.SelectAndFilterPods(ctx, r.Client, r.Reader, &networkchaos.Spec, config.ControllerCfg.ClusterScoped, config.ControllerCfg.TargetNamespace, config.ControllerCfg.AllowedNamespaces, config.ControllerCfg.IgnoredNamespaces)
+	sources, err := selector.SelectAndFilterPods(ctx, r.Client, r.Reader, &networkchaos.Spec, config.ControllerCfg.ClusterScoped, config.ControllerCfg.TargetNamespace, config.ControllerCfg.AllowedNamespaces, config.ControllerCfg.IgnoredNamespaces)
 	if err != nil {
 		r.Log.Error(err, "failed to select and filter source pods")
 		return err
@@ -77,7 +79,7 @@ func (r *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.I
 
 	// We should only apply filter when we specify targets
 	if networkchaos.Spec.Target != nil {
-		targets, err = utils.SelectAndFilterPods(ctx, r.Client, r.Reader, networkchaos.Spec.Target, config.ControllerCfg.ClusterScoped, config.ControllerCfg.TargetNamespace, config.ControllerCfg.AllowedNamespaces, config.ControllerCfg.IgnoredNamespaces)
+		targets, err = selector.SelectAndFilterPods(ctx, r.Client, r.Reader, networkchaos.Spec.Target, config.ControllerCfg.ClusterScoped, config.ControllerCfg.TargetNamespace, config.ControllerCfg.AllowedNamespaces, config.ControllerCfg.IgnoredNamespaces)
 		if err != nil {
 			r.Log.Error(err, "failed to select and filter target pods")
 			return err
@@ -173,7 +175,7 @@ func (r *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.I
 		networkchaos.Status.Experiment.PodRecords = append(networkchaos.Status.Experiment.PodRecords, ps)
 	}
 
-	r.Event(networkchaos, v1.EventTypeNormal, utils.EventChaosInjected, "")
+	r.Event(networkchaos, v1.EventTypeNormal, events.ChaosInjected, "")
 	return nil
 }
 
@@ -189,7 +191,7 @@ func (r *endpoint) Recover(ctx context.Context, req ctrl.Request, chaos v1alpha1
 	if err := r.cleanFinalizersAndRecover(ctx, networkchaos); err != nil {
 		return err
 	}
-	r.Event(networkchaos, v1.EventTypeNormal, utils.EventChaosRecovered, "")
+	r.Event(networkchaos, v1.EventTypeNormal, events.ChaosRecovered, "")
 	return nil
 }
 
@@ -227,7 +229,7 @@ func (r *endpoint) cleanFinalizersAndRecover(ctx context.Context, networkchaos *
 			r.Log.Info("pod is not found or not running", "key", key)
 		}
 
-		networkchaos.Finalizers = utils.RemoveFromFinalizer(networkchaos.Finalizers, response.Key.String())
+		networkchaos.Finalizers = finalizer.RemoveFromFinalizer(networkchaos.Finalizers, response.Key.String())
 	}
 	r.Log.Info("After recovering", "finalizers", networkchaos.Finalizers)
 
@@ -249,7 +251,7 @@ func (r *endpoint) applyTc(ctx context.Context, sources, targets []v1.Pod, exter
 			return err
 		}
 
-		networkchaos.Finalizers = utils.InsertFinalizer(networkchaos.Finalizers, key)
+		networkchaos.Finalizers = finalizer.InsertFinalizer(networkchaos.Finalizers, key)
 	}
 
 	tcType := v1alpha1.Bandwidth

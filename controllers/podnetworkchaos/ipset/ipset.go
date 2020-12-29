@@ -24,7 +24,8 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/controllers/config"
 	"github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos/netutils"
 	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
-	"github.com/chaos-mesh/chaos-mesh/pkg/utils"
+
+	daemonClient "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/client"
 )
 
 const (
@@ -58,7 +59,7 @@ func GenerateIPSetName(networkchaos *v1alpha1.NetworkChaos, namePostFix string) 
 
 // FlushIPSets makes grpc calls to chaosdaemon to save ipset
 func FlushIPSets(ctx context.Context, c client.Client, pod *v1.Pod, ipsets []*pb.IPSet) error {
-	pbClient, err := utils.NewChaosDaemonClient(ctx, c, pod, config.ControllerCfg.ChaosDaemonPort)
+	pbClient, err := daemonClient.NewChaosDaemonClient(ctx, c, pod, config.ControllerCfg.ChaosDaemonPort)
 	if err != nil {
 		return err
 	}

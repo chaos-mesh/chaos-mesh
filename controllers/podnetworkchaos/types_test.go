@@ -31,7 +31,7 @@ import (
 	. "github.com/chaos-mesh/chaos-mesh/controllers/test"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
 	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
-	"github.com/chaos-mesh/chaos-mesh/pkg/utils"
+	. "github.com/chaos-mesh/chaos-mesh/pkg/testutils"
 )
 
 func setHostNetwork(objs []runtime.Object) {
@@ -75,7 +75,7 @@ func TestHostNetworkOption(t *testing.T) {
 
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
-			objs, _ := utils.GenerateNPods("p", 1, utils.PodArg{})
+			objs, _ := GenerateNPods("p", 1, PodArg{})
 
 			setHostNetwork(objs)
 
