@@ -29,7 +29,7 @@ func (in *DNSChaos) IsDeleted() bool {
 
 // IsPaused returns whether this resource has been paused
 func (in *DNSChaos) IsPaused() bool {
-	if in.Annotations == nil || in.Annotations[PauseAnnotationKey] != "true" {
+	if in.Annotations == nil || (in.Annotations[PauseAnnotationKey] != "true" && in.Annotations[PauseDurationAnnotationKey] != "") {
 		return false
 	}
 	return true
@@ -180,7 +180,7 @@ func (in *HTTPChaos) IsDeleted() bool {
 
 // IsPaused returns whether this resource has been paused
 func (in *HTTPChaos) IsPaused() bool {
-	if in.Annotations == nil || in.Annotations[PauseAnnotationKey] != "true" {
+	if in.Annotations == nil || (in.Annotations[PauseAnnotationKey] != "true" && in.Annotations[PauseDurationAnnotationKey] != "") {
 		return false
 	}
 	return true
@@ -331,7 +331,7 @@ func (in *IoChaos) IsDeleted() bool {
 
 // IsPaused returns whether this resource has been paused
 func (in *IoChaos) IsPaused() bool {
-	if in.Annotations == nil || in.Annotations[PauseAnnotationKey] != "true" {
+	if in.Annotations == nil || (in.Annotations[PauseAnnotationKey] != "true" && in.Annotations[PauseDurationAnnotationKey] != "") {
 		return false
 	}
 	return true
@@ -482,7 +482,7 @@ func (in *JVMChaos) IsDeleted() bool {
 
 // IsPaused returns whether this resource has been paused
 func (in *JVMChaos) IsPaused() bool {
-	if in.Annotations == nil || in.Annotations[PauseAnnotationKey] != "true" {
+	if in.Annotations == nil || (in.Annotations[PauseAnnotationKey] != "true" && in.Annotations[PauseDurationAnnotationKey] != "") {
 		return false
 	}
 	return true
@@ -633,7 +633,7 @@ func (in *KernelChaos) IsDeleted() bool {
 
 // IsPaused returns whether this resource has been paused
 func (in *KernelChaos) IsPaused() bool {
-	if in.Annotations == nil || in.Annotations[PauseAnnotationKey] != "true" {
+	if in.Annotations == nil || (in.Annotations[PauseAnnotationKey] != "true" && in.Annotations[PauseDurationAnnotationKey] != "") {
 		return false
 	}
 	return true
@@ -784,7 +784,7 @@ func (in *NetworkChaos) IsDeleted() bool {
 
 // IsPaused returns whether this resource has been paused
 func (in *NetworkChaos) IsPaused() bool {
-	if in.Annotations == nil || in.Annotations[PauseAnnotationKey] != "true" {
+	if in.Annotations == nil || (in.Annotations[PauseAnnotationKey] != "true" && in.Annotations[PauseDurationAnnotationKey] != "") {
 		return false
 	}
 	return true
@@ -935,7 +935,7 @@ func (in *PodChaos) IsDeleted() bool {
 
 // IsPaused returns whether this resource has been paused
 func (in *PodChaos) IsPaused() bool {
-	if in.Annotations == nil || in.Annotations[PauseAnnotationKey] != "true" {
+	if in.Annotations == nil || (in.Annotations[PauseAnnotationKey] != "true" && in.Annotations[PauseDurationAnnotationKey] != "") {
 		return false
 	}
 	return true
@@ -1086,7 +1086,7 @@ func (in *StressChaos) IsDeleted() bool {
 
 // IsPaused returns whether this resource has been paused
 func (in *StressChaos) IsPaused() bool {
-	if in.Annotations == nil || in.Annotations[PauseAnnotationKey] != "true" {
+	if in.Annotations == nil || (in.Annotations[PauseAnnotationKey] != "true" && in.Annotations[PauseDurationAnnotationKey] != "") {
 		return false
 	}
 	return true
@@ -1237,7 +1237,7 @@ func (in *TimeChaos) IsDeleted() bool {
 
 // IsPaused returns whether this resource has been paused
 func (in *TimeChaos) IsPaused() bool {
-	if in.Annotations == nil || in.Annotations[PauseAnnotationKey] != "true" {
+	if in.Annotations == nil || (in.Annotations[PauseAnnotationKey] != "true" && in.Annotations[PauseDurationAnnotationKey] != "") {
 		return false
 	}
 	return true

@@ -127,11 +127,11 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		autoResume = chaos.GetAutoResume()
 		if autoResume.IsZero() {
 			return ctrl.Result{}, nil
-		} else {
-			// pause for duration
-			r.Log.Info("Requeue unpause request", "after", autoResume.Sub(now))
-			return ctrl.Result{RequeueAfter: autoResume.Sub(now)}, nil
 		}
+		// pause for duration
+		r.Log.Info("Requeue unpause request", "after", autoResume.Sub(now))
+		return ctrl.Result{RequeueAfter: autoResume.Sub(now)}, nil
+
 	}
 
 	requeueAfter, err := calcRequeueAfterTime(chaos, now)
