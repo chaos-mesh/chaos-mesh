@@ -175,7 +175,7 @@ func (s *Service) getEvent(c *gin.Context) {
 
 	if len(namespace) != 0 && event.Namespace != namespace {
 		c.Status(http.StatusBadRequest)
-		_ = c.Error(utils.ErrInvalidRequest.New("exp %s belong to namespace % but not namespace %s", uid, event.Namespace, namespace))
+		_ = c.Error(utils.ErrInvalidRequest.New("event %s belong to namespace % but not namespace %s", idStr, event.Namespace, namespace))
 		return
 	}
 
