@@ -63,7 +63,7 @@ This is a list of known adopters of Chaos Mesh. Some have already gone into prod
 - [Celo](https://celo.org/)
 - [Dailymotion](https://www.dailymotion.com/)
 - [DataStax Fallout](https://github.com/datastax/fallout)
-- [NetEase Fuxi Lab](https://fuxi.163.com/en/index.html)
+- [NetEase Fuxi Lab](https://fuxi.163.com/en/about.html)
 - [JuiceFS](https://juicefs.com/?hl=en)
 - [KingNet](https://www.kingnet.com/)
 - [Meituan Dianping](https://about.meituan.com/en)
