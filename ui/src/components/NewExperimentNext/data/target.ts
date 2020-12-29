@@ -1,16 +1,6 @@
 import * as Yup from 'yup'
 
-import { ReactComponent as ClockIcon } from '../images/time.svg'
-import { ReactComponent as DNSIcon } from '../images/dns.svg'
 import { ExperimentKind } from 'components/NewExperiment/types'
-import { ReactComponent as FileSystemIOIcon } from '../images/io.svg'
-import { ReactComponent as LinuxKernelIcon } from '../images/kernel.svg'
-import { ReactComponent as NetworkIcon } from '../images/network.svg'
-import { ReactComponent as PodLifecycleIcon } from '../images/pod.svg'
-import React from 'react'
-import { ReactComponent as StressIcon } from '../images/stress.svg'
-import { SvgIcon } from '@material-ui/core'
-import T from 'components/T'
 
 export type Kind = ExperimentKind
 type FieldType = 'text' | 'number' | 'select' | 'label' | 'autocomplete'
@@ -29,9 +19,7 @@ interface Category {
   key: string
   spec: Spec
 }
-interface Target {
-  name: JSX.Element | string
-  icon: JSX.Element
+export interface Target {
   categories?: Category[]
   spec?: Spec
 }
@@ -134,14 +122,8 @@ const dnsCommon: Spec = {
 }
 
 const data: Record<Kind, Target> = {
-  // Pod LifeCycle
+  // Pod Fault
   PodChaos: {
-    name: T('newE.target.pod.title'),
-    icon: (
-      <SvgIcon fontSize="large">
-        <PodLifecycleIcon />
-      </SvgIcon>
-    ),
     categories: [
       {
         name: 'Pod Failure',
@@ -172,14 +154,8 @@ const data: Record<Kind, Target> = {
       },
     ],
   },
-  // Network
+  // Network Attack
   NetworkChaos: {
-    name: T('newE.target.network.title'),
-    icon: (
-      <SvgIcon fontSize="large">
-        <NetworkIcon />
-      </SvgIcon>
-    ),
     categories: [
       {
         name: 'Partition',
@@ -203,7 +179,7 @@ const data: Record<Kind, Target> = {
           correlation: {
             field: 'text',
             label: 'Correlation',
-            value: '',
+            value: '0',
             helperText: 'The correlation of loss',
           },
           ...networkCommon,
@@ -315,14 +291,8 @@ const data: Record<Kind, Target> = {
       },
     ],
   },
-  // File System IO
+  // IO Injection
   IoChaos: {
-    name: T('newE.target.io.title'),
-    icon: (
-      <SvgIcon fontSize="large">
-        <FileSystemIOIcon />
-      </SvgIcon>
-    ),
     categories: [
       {
         name: 'Latency',
@@ -370,14 +340,8 @@ const data: Record<Kind, Target> = {
       },
     ],
   },
-  // Linux Kernel
+  // Kernel Fault
   KernelChaos: {
-    name: T('newE.target.kernel.title'),
-    icon: (
-      <SvgIcon fontSize="large">
-        <LinuxKernelIcon />
-      </SvgIcon>
-    ),
     spec: {
       fail_kern_request: {
         callchain: [],
@@ -388,14 +352,8 @@ const data: Record<Kind, Target> = {
       },
     } as any,
   },
-  // Clock
+  // Clock Skew
   TimeChaos: {
-    name: T('newE.target.time.title'),
-    icon: (
-      <SvgIcon fontSize="large">
-        <ClockIcon />
-      </SvgIcon>
-    ),
     spec: {
       time_offset: {
         field: 'text',
@@ -419,14 +377,8 @@ const data: Record<Kind, Target> = {
       },
     },
   },
-  // Stress CPU/Memory
+  // Stress Test
   StressChaos: {
-    name: T('newE.target.stress.title'),
-    icon: (
-      <SvgIcon fontSize="large">
-        <StressIcon />
-      </SvgIcon>
-    ),
     spec: {
       stressors: {
         cpu: {
@@ -443,13 +395,8 @@ const data: Record<Kind, Target> = {
       container_name: '',
     } as any,
   },
+  // DNS Fault
   DNSChaos: {
-    name: 'DNS',
-    icon: (
-      <SvgIcon fontSize="large">
-        <DNSIcon />
-      </SvgIcon>
-    ),
     categories: [
       {
         name: 'Error',

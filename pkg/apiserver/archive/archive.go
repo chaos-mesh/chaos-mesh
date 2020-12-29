@@ -170,6 +170,8 @@ func (s *Service) detail(c *gin.Context) {
 		yaml, err = exp.ParseKernelChaos()
 	case v1alpha1.KindStressChaos:
 		yaml, err = exp.ParseStressChaos()
+	case v1alpha1.KindDNSChaos:
+		yaml, err = exp.ParseDNSChaos()
 	default:
 		err = fmt.Errorf("kind %s is not support", exp.Kind)
 	}
@@ -263,7 +265,7 @@ func (s *Service) report(c *gin.Context) {
 // @Param uid path string true "uid"
 // @Success 200 {object} StatusResponse
 // @Failure 500 {object} utils.APIError
-// @Router /experiments/{uid} [delete]
+// @Router /archives/{uid} [delete]
 func (s *Service) delete(c *gin.Context) {
 	var (
 		err error
