@@ -20,8 +20,6 @@ import (
 	"os"
 	"time"
 
-	"k8s.io/client-go/rest"
-
 	"golang.org/x/time/rate"
 
 	chaosmeshv1alpha1 "github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
@@ -52,6 +50,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
+	"k8s.io/client-go/rest"
 	"k8s.io/client-go/util/workqueue"
 
 	ctrl "sigs.k8s.io/controller-runtime"
