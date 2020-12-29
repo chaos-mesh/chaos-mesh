@@ -44,7 +44,7 @@ func (in *{{.Type}}) GetPause() string {
 	return in.Annotations[PauseAnnotationKey]
 }
 
-// RecoverPause set the pausetime to empty, to stop pause
+// RecoverPause sets the pausetime to empty, to stop pause
 func (in *{{.Type}}) RecoverPause() {
 	in.Annotations[PauseAnnotationKey] = ""
 }

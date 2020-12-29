@@ -36,7 +36,7 @@ func (in *DNSChaos) GetPause() string {
 	return in.Annotations[PauseAnnotationKey]
 }
 
-// RecoverPause set the pausetime to empty, to stop pause
+// RecoverPause sets the pausetime to empty, to stop pause
 func (in *DNSChaos) RecoverPause() {
 	in.Annotations[PauseAnnotationKey] = ""
 }
@@ -179,7 +179,7 @@ func (in *HTTPChaos) GetPause() string {
 	return in.Annotations[PauseAnnotationKey]
 }
 
-// RecoverPause set the pausetime to empty, to stop pause
+// RecoverPause sets the pausetime to empty, to stop pause
 func (in *HTTPChaos) RecoverPause() {
 	in.Annotations[PauseAnnotationKey] = ""
 }
@@ -322,7 +322,7 @@ func (in *IoChaos) GetPause() string {
 	return in.Annotations[PauseAnnotationKey]
 }
 
-// RecoverPause set the pausetime to empty, to stop pause
+// RecoverPause sets the pausetime to empty, to stop pause
 func (in *IoChaos) RecoverPause() {
 	in.Annotations[PauseAnnotationKey] = ""
 }
@@ -465,7 +465,7 @@ func (in *JVMChaos) GetPause() string {
 	return in.Annotations[PauseAnnotationKey]
 }
 
-// RecoverPause set the pausetime to empty, to stop pause
+// RecoverPause sets the pausetime to empty, to stop pause
 func (in *JVMChaos) RecoverPause() {
 	in.Annotations[PauseAnnotationKey] = ""
 }
@@ -608,7 +608,7 @@ func (in *KernelChaos) GetPause() string {
 	return in.Annotations[PauseAnnotationKey]
 }
 
-// RecoverPause set the pausetime to empty, to stop pause
+// RecoverPause sets the pausetime to empty, to stop pause
 func (in *KernelChaos) RecoverPause() {
 	in.Annotations[PauseAnnotationKey] = ""
 }
@@ -751,7 +751,7 @@ func (in *NetworkChaos) GetPause() string {
 	return in.Annotations[PauseAnnotationKey]
 }
 
-// RecoverPause set the pausetime to empty, to stop pause
+// RecoverPause sets the pausetime to empty, to stop pause
 func (in *NetworkChaos) RecoverPause() {
 	in.Annotations[PauseAnnotationKey] = ""
 }
@@ -894,7 +894,7 @@ func (in *PodChaos) GetPause() string {
 	return in.Annotations[PauseAnnotationKey]
 }
 
-// RecoverPause set the pausetime to empty, to stop pause
+// RecoverPause sets the pausetime to empty, to stop pause
 func (in *PodChaos) RecoverPause() {
 	in.Annotations[PauseAnnotationKey] = ""
 }
@@ -1037,7 +1037,7 @@ func (in *StressChaos) GetPause() string {
 	return in.Annotations[PauseAnnotationKey]
 }
 
-// RecoverPause set the pausetime to empty, to stop pause
+// RecoverPause sets the pausetime to empty, to stop pause
 func (in *StressChaos) RecoverPause() {
 	in.Annotations[PauseAnnotationKey] = ""
 }
@@ -1180,7 +1180,7 @@ func (in *TimeChaos) GetPause() string {
 	return in.Annotations[PauseAnnotationKey]
 }
 
-// RecoverPause set the pausetime to empty, to stop pause
+// RecoverPause sets the pausetime to empty, to stop pause
 func (in *TimeChaos) RecoverPause() {
 	in.Annotations[PauseAnnotationKey] = ""
 }
