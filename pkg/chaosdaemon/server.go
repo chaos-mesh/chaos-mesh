@@ -28,7 +28,7 @@ import (
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/bpm"
 	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
-	"github.com/chaos-mesh/chaos-mesh/pkg/utils"
+	grpcUtils "github.com/chaos-mesh/chaos-mesh/pkg/grpc"
 )
 
 var log = ctrl.Log.WithName("chaos-daemon-server")
@@ -94,7 +94,7 @@ func newGRPCServer(containerRuntime string, reg prometheus.Registerer) (*grpc.Se
 
 	grpcOpts := []grpc.ServerOption{
 		grpc_middleware.WithUnaryServerChain(
-			utils.TimeoutServerInterceptor,
+			grpcUtils.TimeoutServerInterceptor,
 			grpcMetrics.UnaryServerInterceptor(),
 		),
 	}

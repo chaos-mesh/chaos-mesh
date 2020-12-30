@@ -68,7 +68,7 @@ func debugEachPod(ctx context.Context, pod v1.Pod, daemon v1.Pod, chaos *v1alpha
 	if err != nil {
 		return err
 	}
-	nsenterPath := "-n/proc/" + strconv.Itoa(pid) + "/ns/net"
+	nsenterPath := fmt.Sprintf("-n/proc/%d/ns/net", pid)
 
 	// print out debug info
 	cmd := fmt.Sprintf("/usr/bin/nsenter %s -- ipset list", nsenterPath)
