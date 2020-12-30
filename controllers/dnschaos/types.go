@@ -110,6 +110,16 @@ func (r *endpoint) Recover(ctx context.Context, req ctrl.Request, chaos v1alpha1
 		return err
 	}
 
+	// get dns server's ip used for chaos
+	service, err := selector.GetService(ctx, r.Client, "", config.ControllerCfg.Namespace, config.ControllerCfg.DNSServiceName)
+	if err != nil {
+		r.Log.Error(err, "fail to get service")
+		return err
+	}
+	r.Log.Info("Cancel DNS chaos to DNS service", "ip", service.Spec.ClusterIP)
+
+	r.cancelDNSServerRules(service.Spec.ClusterIP, config.ControllerCfg.DNSServicePort, dnschaos.Name)
+
 	rd := recover.Delegate{Client: r.Client, Log: r.Log, RecoverIntf: &recoverer{r.Client, r.Log}}
 
 	finalizers, err := rd.CleanFinalizersAndRecover(ctx, chaos, dnschaos.Finalizers, dnschaos.Annotations)
@@ -123,19 +133,7 @@ func (r *endpoint) Recover(ctx context.Context, req ctrl.Request, chaos v1alpha1
 }
 
 func (r *recoverer) RecoverPod(ctx context.Context, pod *v1.Pod, somechaos v1alpha1.InnerObject) error {
-	// judged type in `Recover` already so no need to judge again
-	chaos, _ := somechaos.(*v1alpha1.DNSChaos)
 	r.Log.Info("Try to recover pod", "namespace", pod.Namespace, "name", pod.Name)
-
-	// get dns server's ip used for chaos
-	service, err := selector.GetService(ctx, r.Client, "", config.ControllerCfg.Namespace, config.ControllerCfg.DNSServiceName)
-	if err != nil {
-		r.Log.Error(err, "fail to get service")
-		return err
-	}
-	r.Log.Info("Cancel DNS chaos to DNS service", "ip", service.Spec.ClusterIP)
-
-	r.cancelDNSServerRules(service.Spec.ClusterIP, config.ControllerCfg.DNSServicePort, chaos.Name)
 
 	daemonClient, err := client.NewChaosDaemonClient(ctx, r.Client,
 		pod, config.ControllerCfg.ChaosDaemonPort)
@@ -261,7 +259,7 @@ func (r *endpoint) setDNSServerRules(dnsServerIP string, port int, name string, 
 	return nil
 }
 
-func (r *recoverer) cancelDNSServerRules(dnsServerIP string, port int, name string) error {
+func (r *endpoint) cancelDNSServerRules(dnsServerIP string, port int, name string) error {
 	conn, err := grpc.Dial(fmt.Sprintf("%s:%d", dnsServerIP, port), grpc.WithInsecure())
 	if err != nil {
 		return err
