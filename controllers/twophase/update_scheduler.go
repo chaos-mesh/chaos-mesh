@@ -51,6 +51,9 @@ func (r *SchedulerUpdater) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		chaos.SetNextStart(time.Now())
 	}
 
+	//TODO:
+	// use pause duration for 0s to restart
+	// implement same function to common chaos(start without duration and cron)
 	if r.UpdateFlag == true {
 		chaos.SetNextStart(time.Now())
 	}
