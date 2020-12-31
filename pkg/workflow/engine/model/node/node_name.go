@@ -11,15 +11,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package scheduler
+package node
 
-import (
-	"context"
+type NodeNameGenerator interface {
+	GenerateNodeName(templateName string) string
+}
 
-	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/engine/model/template"
-)
+type basicNodeNameGenerator struct {
+}
 
-/*  interface Scheduler follows the iterator-pattern, it provides templates which need instantiate. */
-type Scheduler interface {
-	ScheduleNext(ctx context.Context) (nextTemplates []template.Template, parentNodeName string, err error)
+func NewBasicNodeNameGenerator() *basicNodeNameGenerator {
+	return &basicNodeNameGenerator{}
+}
+
+func (it *basicNodeNameGenerator) GenerateNodeName(templateName string) string {
+	return templateName + "random_suffix"
 }

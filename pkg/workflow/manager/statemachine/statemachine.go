@@ -11,15 +11,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package scheduler
+package statemachine
 
 import (
-	"context"
-
-	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/engine/model/template"
+	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/manager/sideeffect"
+	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/trigger"
 )
 
-/*  interface Scheduler follows the iterator-pattern, it provides templates which need instantiate. */
-type Scheduler interface {
-	ScheduleNext(ctx context.Context) (nextTemplates []template.Template, parentNodeName string, err error)
+type StateMachine interface {
+	GetName() string
+	HandleEvent(event trigger.Event) ([]sideeffect.SideEffect, error)
 }

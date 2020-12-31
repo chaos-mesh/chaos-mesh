@@ -11,10 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package manager
+package workflowrepo
 
 import (
-	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/engine/model/template"
+	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/engine/model/node"
 	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/engine/model/workflow"
 )
 
@@ -23,11 +23,7 @@ type WorkflowRepo interface {
 	FetchWorkflow(workflowName string) (workflow.WorkflowSpec, workflow.WorkflowStatus, error)
 	// func CreateNodes, create the nodes by given templates and parent node.
 	// It return the nodes name with the same order of template.
-	CreateNodes(workflowName string, templates []template.Template, parentNode string) ([]string, error)
-	// func UpdateNodesToRunning, update one specific node status to Running.
-	UpdateNodesToRunning(workflowName string, nodeName string) error
-	// func UpdateNodesToWaitingForChild, update one specific node status to WaitingForChild.
-	UpdateNodesToWaitingForChild(workflowName string, nodeName string) error
-	// func UpdateNodesToWaitingForSchedule, update one specific node status to WaitingForSchedule.
-	UpdateNodesToWaitingForSchedule(workflowName string, nodeName string) error
+	CreateNodes(workflowName, parentNodeName, nodeNames, templateName string) error
+	// func UpdateNodePhase, update certain node to new phase
+	UpdateNodePhase(workflowName, nodeName string, newPhase node.NodePhase) error
 }

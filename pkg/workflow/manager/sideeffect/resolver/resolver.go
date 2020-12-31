@@ -11,15 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package scheduler
+package resolver
 
-import (
-	"context"
+import "github.com/chaos-mesh/chaos-mesh/pkg/workflow/manager/sideeffect"
 
-	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/engine/model/template"
-)
-
-/*  interface Scheduler follows the iterator-pattern, it provides templates which need instantiate. */
-type Scheduler interface {
-	ScheduleNext(ctx context.Context) (nextTemplates []template.Template, parentNodeName string, err error)
+type SideEffectsResolver interface {
+	GetName() string
+	ResolveSideEffect(sideEffect sideeffect.SideEffect) error
+	CouldResolve() []sideeffect.SideEffectType
 }

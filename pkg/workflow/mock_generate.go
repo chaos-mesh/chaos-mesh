@@ -13,11 +13,13 @@
 
 package workflow
 
+//go:generate rm -rf ./mock
 //go:generate mockgen -source ./manager/manager.go -copyright_file ../../hack/boilerplate/boilerplate.gomock.txt -destination ./mock/mock_manager/mock_manager.go
-//go:generate mockgen -source ./manager/repo.go -copyright_file ../../hack/boilerplate/boilerplate.gomock.txt -destination ./mock/mock_manager/mock_repo.go
+//go:generate mockgen -source ./workflowrepo/repo.go -copyright_file ../../hack/boilerplate/boilerplate.gomock.txt -destination ./mock/mock_workflowrepo/mock_repo.go
 //go:generate mockgen -source ./engine/model/workflow/workflow.go -copyright_file ../../hack/boilerplate/boilerplate.gomock.txt -destination ./mock/engine/model/mock_workflow/mock_workflow.go
 
 //go:generate mockgen -source ./engine/model/node/node.go -copyright_file ../../hack/boilerplate/boilerplate.gomock.txt -destination ./mock/engine/model/mock_node/mock_node.go
+//go:generate mockgen -source ./engine/model/node/node_name.go -copyright_file ../../hack/boilerplate/boilerplate.gomock.txt -destination ./mock/engine/model/mock_node/mock_node_name.go
 //go:generate mockgen -source ./engine/model/node/task.go -copyright_file ../../hack/boilerplate/boilerplate.gomock.txt -aux_files github.com/chaos-mesh/chaos-mesh/pkg/workflow/engine/model/node=./engine/model/node/node.go -destination ./mock/engine/model/mock_node/mock_task.go
 
 //go:generate mockgen -source ./engine/model/template/template.go -copyright_file ../../hack/boilerplate/boilerplate.gomock.txt -destination ./mock/engine/model/mock_template/mock_template.go

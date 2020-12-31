@@ -17,31 +17,53 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/manager/sideeffect/resolver"
+	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/workflowrepo"
+
+	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/engine/model/node"
+	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/engine/model/template"
+	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/manager/sideeffect"
+	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/manager/statemachine"
+
+	"github.com/go-logr/logr"
+
 	"go.uber.org/atomic"
 
-	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/engine/model/template"
-	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/engine/scheduler"
 	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/trigger"
 )
 
 type basicManager struct {
-	name string
-	repo WorkflowRepo
-	// A composite trigger.
-	multiplexTrigger trigger.Trigger
+	name   string
+	repo   workflowrepo.WorkflowRepo
+	logger logr.Logger
 
-	operableTrigger trigger.OperableTrigger
+	// A composite trigger.
+	multiplexTrigger  trigger.Trigger
+	operableTrigger   trigger.OperableTrigger
+	nodeNameGenerator node.NodeNameGenerator
+
+	sideEffectsResolver resolver.SideEffectsResolver
 }
 
-func NewBasicManager(name string, repo WorkflowRepo, triggers ...trigger.Trigger) *basicManager {
+func NewBasicManager(
+	name string,
+	repo workflowrepo.WorkflowRepo,
+	logger logr.Logger,
+	nodeNameGenerator node.NodeNameGenerator,
+	sideEffectsResolver resolver.SideEffectsResolver,
+	triggers ...trigger.Trigger,
+) *basicManager {
 	operableTrigger := trigger.NewOperableTrigger()
 	allTriggers := append(triggers, operableTrigger)
 	composite := trigger.NewCompositeTrigger(allTriggers...)
 	return &basicManager{
-		name:             name,
-		repo:             repo,
-		multiplexTrigger: composite,
-		operableTrigger:  operableTrigger,
+		name:                name,
+		repo:                repo,
+		logger:              logger,
+		nodeNameGenerator:   nodeNameGenerator,
+		multiplexTrigger:    composite,
+		operableTrigger:     operableTrigger,
+		sideEffectsResolver: sideEffectsResolver,
 	}
 }
 
@@ -61,12 +83,14 @@ func (it *basicManager) Run(ctx context.Context) {
 	for working.Load() {
 		event, err := it.acquire(ctx)
 		if err != nil {
-			// TODO: warn log
+			it.logger.Error(err, "Failed to acquire new event", "manager-name", it.GetName())
 			continue
 		}
+
+		// TODO: consuming in parallel
 		err = it.consume(ctx, event)
 		if err != nil {
-			// TODO: warn log
+			it.logger.Error(err, "Failed to consume event", "manager-name", it.GetName(), "event", event)
 			continue
 		}
 	}
@@ -79,101 +103,72 @@ func (it *basicManager) acquire(ctx context.Context) (trigger.Event, error) {
 func (it *basicManager) consume(ctx context.Context, event trigger.Event) error {
 	switch event.GetEventType() {
 	case trigger.WorkflowCreated:
+		it.logger.V(1).Info("event: workflow created", "event", event)
 		workflowName := event.GetWorkflowName()
-		workflow, status, err := it.repo.FetchWorkflow(workflowName)
+		workflow, _, err := it.repo.FetchWorkflow(workflowName)
 		if err != nil {
 			return err
 		}
-		basicScheduler := scheduler.NewBasicScheduler(workflow, status)
-		templatesToRun, parentNode, err := basicScheduler.ScheduleNext(ctx)
+		nodeName := it.nodeNameGenerator.GenerateNodeName(workflow.GetEntry())
+		err = it.repo.CreateNodes(workflowName, "", nodeName, workflow.GetEntry())
 		if err != nil {
 			return err
 		}
-		nodeNames, err := it.repo.CreateNodes(workflowName, templatesToRun, parentNode)
+		err = it.operableTrigger.Notify(trigger.NewEvent(workflowName, nodeName, trigger.NodeCreated))
 		if err != nil {
 			return err
 		}
-		for _, nodeName := range nodeNames {
-			err := it.operableTrigger.Notify(trigger.NewEvent(workflowName, nodeName, trigger.NodeCreated))
+		return nil
+
+	case trigger.WorkflowFinished:
+		// NOOP
+		return nil
+
+	case trigger.NodeCreated, trigger.NodeFinished, trigger.NodeHoldingAwake, trigger.NodePickChildToSchedule,
+		trigger.NodeChaosInjectFailed, trigger.NodeChaosInjectSucceed,
+		trigger.NodeUnexpectedFailed,
+		trigger.ChildNodeSucceed, trigger.ChildNodeFailed:
+
+		workflowName := event.GetWorkflowName()
+		nodeName := event.GetNodeName()
+		workflowSpec, workflowStatus, err := it.repo.FetchWorkflow(workflowName)
+		if err != nil {
+			return err
+		}
+		nodeStatus, err := workflowStatus.FetchNodeByName(nodeName)
+		if err != nil {
+			return err
+		}
+		targetTemplate, err := workflowSpec.FetchTemplateByName(nodeStatus.GetTemplateName())
+		if err != nil {
+			return err
+		}
+		treeNode := workflowStatus.GetNodesTree().FetchNodeByName(nodeName)
+
+		// create state machine and make side effects
+		var sideEffects []sideeffect.SideEffect
+
+		switch targetTemplate.GetTemplateType() {
+		case template.Serial:
+			serialStateMachine := statemachine.NewSerialStateMachine(workflowSpec, nodeStatus, treeNode, it.nodeNameGenerator)
+			sideEffects, err = serialStateMachine.HandleEvent(event)
 			if err != nil {
-				// TODO: warn log
+				return err
+			}
+		default:
+			return fmt.Errorf("unsupported template %s", targetTemplate.GetTemplateType())
+		}
+
+		// TODO: apply side effects
+		for _, sideEffectItem := range sideEffects {
+			err := it.sideEffectsResolver.ResolveSideEffect(sideEffectItem)
+			if err != nil {
 				return err
 			}
 		}
-	case trigger.WorkflowFinished:
-		// NOOP
-
-	case trigger.NodeCreated:
-		// initialize Actor updating to Running
-		workflowName := event.GetWorkflowName()
-		nodeName := event.GetNodeName()
-		workflowSpec, workflowStatus, err := it.repo.FetchWorkflow(workflowName)
-		if err != nil {
-			return err
-		}
-
-		node, err := workflowStatus.FetchNodeByName(nodeName)
-		if err != nil {
-			return err
-		}
-		targetTemplate, err := workflowSpec.FetchTemplateByName(node.GetTemplateName())
-		if err != nil {
-			return err
-		}
-
-		switch targetTemplate.GetTemplateType() {
-		case template.Suspend:
-
-		case template.Serial:
-			err := it.repo.UpdateNodesToWaitingForSchedule(workflowName, nodeName)
-			if err != nil {
-				return nil
-			}
-		default:
-			return fmt.Errorf("unsupproted template type %s", targetTemplate.GetTemplateType())
-		}
-	case trigger.NodeFinished:
-		// updating parent node's status recursively
-
-	case trigger.NodeWaitingForSchedule:
-		// time to scheduling!
-		workflowName := event.GetWorkflowName()
-		nodeName := event.GetNodeName()
-		workflowSpec, workflowStatus, err := it.repo.FetchWorkflow(workflowName)
-		if err != nil {
-			return err
-		}
-		node, err := workflowStatus.FetchNodeByName(nodeName)
-		if err != nil {
-			return err
-		}
-		targetTemplate, err := workflowSpec.FetchTemplateByName(node.GetTemplateName())
-		if err != nil {
-			return err
-		}
-		switch targetTemplate.GetTemplateType() {
-		case template.Serial:
-			basicScheduler := scheduler.NewBasicScheduler(workflowSpec, workflowStatus)
-			newTemplateNeedSchedule, err := basicScheduler.ScheduleNextWithinParent(ctx, nodeName)
-			if err != nil {
-				return nil
-			}
-			err = it.repo.UpdateNodesToWaitingForChild(workflowName, nodeName)
-			if err != nil {
-				return nil
-			}
-			_, err = it.repo.CreateNodes(workflowName, newTemplateNeedSchedule, nodeName)
-			if err != nil {
-				return nil
-			}
-		default:
-			return fmt.Errorf("unsupproted template type %s", targetTemplate.GetTemplateType())
-		}
-
+		return nil
 	default:
+		// TODO: replace this error
 		return fmt.Errorf("unsupported event type: %s", event.GetEventType())
 	}
-
-	// default logic
-	return nil
 }

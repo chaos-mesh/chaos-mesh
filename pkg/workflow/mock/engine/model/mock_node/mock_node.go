@@ -220,20 +220,6 @@ func (mr *MockNodeTreeChildrenMockRecorder) Length() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Length", reflect.TypeOf((*MockNodeTreeChildren)(nil).Length))
 }
 
-// ContainsNode mocks base method
-func (m *MockNodeTreeChildren) ContainsNode(nodeName string) bool {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ContainsNode", nodeName)
-	ret0, _ := ret[0].(bool)
-	return ret0
-}
-
-// ContainsNode indicates an expected call of ContainsNode
-func (mr *MockNodeTreeChildrenMockRecorder) ContainsNode(nodeName interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ContainsNode", reflect.TypeOf((*MockNodeTreeChildren)(nil).ContainsNode), nodeName)
-}
-
 // ContainsTemplate mocks base method
 func (m *MockNodeTreeChildren) ContainsTemplate(templateName string) bool {
 	m.ctrl.T.Helper()

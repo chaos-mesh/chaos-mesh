@@ -45,7 +45,6 @@ type NodeTreeNode interface {
 
 type NodeTreeChildren interface {
 	Length() int
-	ContainsNode(nodeName string) bool
 	ContainsTemplate(templateName string) bool
 	GetAllChildrenNode() []NodeTreeNode
 }

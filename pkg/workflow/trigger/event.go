@@ -25,9 +25,22 @@ const (
 	WorkflowCreated  EventType = "WorkflowCreated"
 	WorkflowFinished EventType = "WorkflowFinished"
 
-	NodeCreated            EventType = "NodeCreated"
-	NodeFinished           EventType = "NodeFinished"
-	NodeWaitingForSchedule EventType = "NodeWaitingForSchedule"
+	NodeCreated             EventType = "NodeCreated"
+	NodeFinished            EventType = "NodeFinished"
+	NodeHoldingAwake        EventType = "NodeHoldingAwake"
+	NodePickChildToSchedule EventType = "NodePickChildToSchedule"
+
+	NodeChaosInjectSucceed EventType = "NodeChaosInjectSucceed"
+	NodeChaosInjectFailed  EventType = "NodeChaosInjectFailed"
+
+	// TODO: error handling
+	NodeUnexpectedFailed EventType = "NodeUnexpectedFailed"
+
+	ChildNodeSucceed EventType = "ChildNodeSucceed"
+	ChildNodeFailed  EventType = "ChildNodeFailed"
+
+	// TODO: support abort
+	NodeAbort EventType = "NodeAbort"
 )
 
 type basicEvent struct {
