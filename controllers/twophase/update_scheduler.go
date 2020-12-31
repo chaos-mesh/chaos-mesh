@@ -28,6 +28,7 @@ import (
 type SchedulerUpdater struct {
 	Object runtime.Object
 	ctx.Context
+	UpdateFlag bool
 }
 
 // Reconcile is twophase reconcile implement
@@ -47,6 +48,10 @@ func (r *SchedulerUpdater) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 
 	// update scheduler will start a waiting experiment
 	if chaos.GetStatus().Experiment.Phase == v1alpha1.ExperimentPhaseWaiting {
+		chaos.SetNextStart(time.Now())
+	}
+
+	if r.UpdateFlag == true {
 		chaos.SetNextStart(time.Now())
 	}
 

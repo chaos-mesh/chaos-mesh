@@ -150,6 +150,8 @@ func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
 		return err
 	}
 
+	updateFlag := false
+
 	return ctrl.NewControllerManagedBy(mgr).
 		For(r.Object.DeepCopyObject()).
 		Named(strings.ToLower(kind.Kind) + "-scheduler-updater").
@@ -167,15 +169,17 @@ func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
 				old := e.ObjectOld.(v1alpha1.InnerSchedulerObject).GetScheduler()
 				new := e.ObjectNew.(v1alpha1.InnerSchedulerObject).GetScheduler()
 
-				if (old == nil) || (new == nil) {
+				if (old == nil) || (new == nil) || old.Cron == new.Cron {
 					return false
 				}
+				updateFlag = true
 
-				return old.Cron != new.Cron
+				return true
 			},
 		}).
 		Complete(&twophase.SchedulerUpdater{
-			Context: r.Context,
-			Object:  r.Object,
+			Context:    r.Context,
+			Object:     r.Object,
+			UpdateFlag: updateFlag,
 		})
 }
