@@ -21,6 +21,7 @@ import (
 
 	lru "github.com/hashicorp/golang-lru"
 	"k8s.io/apimachinery/pkg/runtime"
+	authorizationv1 "k8s.io/client-go/kubernetes/typed/authorization/v1"
 	"k8s.io/client-go/rest"
 	pkgclient "sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -32,23 +33,42 @@ var K8sClients Clients
 
 type Clients interface {
 	Client(token string) (pkgclient.Client, error)
+	AuthClient(token string) (authorizationv1.AuthorizationV1Interface, error)
 	Num() int
 	Contains(token string) bool
 }
 
 type LocalClient struct {
-	client pkgclient.Client
+	client     pkgclient.Client
+	authClient authorizationv1.AuthorizationV1Interface
 }
 
-func NewLocalClient(client pkgclient.Client) Clients {
-	return &LocalClient{
-		client: client,
+func NewLocalClient(localConfig *rest.Config, scheme *runtime.Scheme) (Clients, error) {
+	client, err := pkgclient.New(localConfig, pkgclient.Options{
+		Scheme: scheme,
+	})
+	if err != nil {
+		return nil, err
 	}
+
+	authCli, err := authorizationv1.NewForConfig(localConfig)
+	if err != nil {
+		return nil, err
+	}
+
+	return &LocalClient{
+		client:     client,
+		authClient: authCli,
+	}, nil
 }
 
 // Client returns the local k8s client
 func (c *LocalClient) Client(token string) (pkgclient.Client, error) {
 	return c.client, nil
+}
+
+func (c *LocalClient) AuthClient(token string) (authorizationv1.AuthorizationV1Interface, error) {
+	return c.authClient, nil
 }
 
 // Num returns the num of clients
@@ -68,6 +88,7 @@ type ClientsPool struct {
 	scheme      *runtime.Scheme
 	localConfig *rest.Config
 	clients     *lru.Cache
+	authClients *lru.Cache
 }
 
 // New creates a new Clients
@@ -77,10 +98,16 @@ func NewClientPool(localConfig *rest.Config, scheme *runtime.Scheme, maxClientNu
 		return nil, err
 	}
 
+	authClients, err := lru.New(maxClientNum)
+	if err != nil {
+		return nil, err
+	}
+
 	return &ClientsPool{
 		localConfig: localConfig,
 		scheme:      scheme,
 		clients:     clients,
+		authClients: authClients,
 	}, nil
 }
 
@@ -120,6 +147,33 @@ func (c *ClientsPool) Client(token string) (pkgclient.Client, error) {
 	return client, nil
 }
 
+func (c *ClientsPool) AuthClient(token string) (authorizationv1.AuthorizationV1Interface, error) {
+	c.Lock()
+	defer c.Unlock()
+
+	if len(token) == 0 {
+		return nil, errors.New("token is empty")
+	}
+
+	value, ok := c.authClients.Get(token)
+	if ok {
+		return value.(authorizationv1.AuthorizationV1Interface), nil
+	}
+
+	config := rest.CopyConfig(c.localConfig)
+	config.BearerToken = token
+	config.BearerTokenFile = ""
+
+	authCli, err := authorizationv1.NewForConfig(config)
+	if err != nil {
+		return nil, err
+	}
+
+	_ = c.authClients.Add(token, authCli)
+
+	return authCli, nil
+}
+
 // Num returns the num of clients
 func (c *ClientsPool) Num() int {
 	return c.clients.Len()
@@ -148,4 +202,10 @@ func ExtractTokenFromHeader(header http.Header) string {
 func ExtractTokenAndGetClient(header http.Header) (pkgclient.Client, error) {
 	token := ExtractTokenFromHeader(header)
 	return K8sClients.Client(token)
+}
+
+// ExtractTokenAndGetAuthClient extracts token from http header, and get the authority client of this token
+func ExtractTokenAndGetAuthClient(header http.Header) (authorizationv1.AuthorizationV1Interface, error) {
+	token := ExtractTokenFromHeader(header)
+	return K8sClients.AuthClient(token)
 }

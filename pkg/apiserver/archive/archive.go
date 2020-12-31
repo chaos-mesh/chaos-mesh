@@ -52,6 +52,7 @@ type StatusResponse struct {
 // Register mounts our HTTP handler on the mux.
 func Register(r *gin.RouterGroup, s *Service) {
 	endpoint := r.Group("/archives")
+	endpoint.Use(utils.AuthRequired)
 
 	endpoint.GET("", s.list)
 	endpoint.GET("/detail", s.detail)
@@ -138,6 +139,7 @@ func (s *Service) detail(c *gin.Context) {
 		detail Detail
 	)
 	uid := c.Query("uid")
+	namespace := c.Query("namespace")
 
 	if uid == "" {
 		c.Status(http.StatusBadRequest)
@@ -154,6 +156,12 @@ func (s *Service) detail(c *gin.Context) {
 			c.Status(http.StatusInternalServerError)
 			_ = c.Error(utils.ErrInternalServer.NewWithNoMessage())
 		}
+		return
+	}
+
+	if len(namespace) != 0 && exp.Namespace != namespace {
+		c.Status(http.StatusBadRequest)
+		_ = c.Error(utils.ErrInvalidRequest.New("exp %s belong to namespace %s but not namespace %s", uid, exp.Namespace, namespace))
 		return
 	}
 
@@ -211,6 +219,7 @@ func (s *Service) report(c *gin.Context) {
 		report Report
 	)
 	uid := c.Query("uid")
+	namespace := c.Query("namespace")
 
 	if uid == "" {
 		c.Status(http.StatusBadRequest)
@@ -229,6 +238,13 @@ func (s *Service) report(c *gin.Context) {
 		}
 		return
 	}
+
+	if len(namespace) != 0 && meta.Namespace != namespace {
+		c.Status(http.StatusBadRequest)
+		_ = c.Error(utils.ErrInvalidRequest.New("exp %s belong to namespace %s but not namespace %s", uid, meta.Namespace, namespace))
+		return
+	}
+
 	report.Meta = &Archive{
 		UID:        meta.UID,
 		Kind:       meta.Kind,
