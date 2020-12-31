@@ -23,15 +23,10 @@ kubectl apply -f https://raw.githubusercontent.com/chaos-mesh/apps/master/ping/b
 
 echo "create rbac and get token"
 
-#kubectl delete -f ./cluster-manager.yaml
-#kubectl delete -f ./cluster-viewer.yaml
-#kubectl delete -f ./busybox-manager.yaml
-#kubectl delete -f ./busybox-viewer.yaml
-
-#kubectl apply -f ./cluster-manager.yaml
-#kubectl apply -f ./cluster-viewer.yaml
-#kubectl apply -f ./busybox-manager.yaml
-#kubectl apply -f ./busybox-viewer.yaml
+kubectl apply -f ./cluster-manager.yaml
+kubectl apply -f ./cluster-viewer.yaml
+kubectl apply -f ./busybox-manager.yaml
+kubectl apply -f ./busybox-viewer.yaml
 
 CLUSTER_MANAGER_TOKEN=`kubectl -n chaos-testing describe secret $(kubectl -n chaos-testing get secret | grep account-cluster-manager | awk '{print $1}') | grep "token:" | awk '{print $2}'`
 CLUSTER_VIEWER_TOKEN=`kubectl -n chaos-testing describe secret $(kubectl -n chaos-testing get secret | grep account-cluster-viewer | awk '{print $1}') | grep "token:" | awk '{print $2}'`
@@ -182,8 +177,12 @@ REQUEST CLUSTER_VIEW_FORBIDDEN_TOKEN_LIST[@] "GET" "/api/archives/report?uid=${E
 
 
 echo "***** delete archive chaos experiment *****"
-# now all token can delte archive experiments, need to fix it. 
-# here use one token to delete it 
+
+echo "viewer is forbidden to delete archive experiments"
+REQUEST BUSYBOX_MANAGER_FORBIDDEN_TOKEN_LIST[@] "DELETE" "/api/archives/${EXP_UID}?namespace=busybox" "delete_archives.out" "can't"
+
+echo "only manager can delete archive experiments success"
+# here use one manager token to delete it
 REQUEST BUSYBOX_MANAGER_TOKEN_LIST[@] "DELETE" "/api/archives/${EXP_UID}?namespace=busybox" "delete_archives.out" "success"
 
 
