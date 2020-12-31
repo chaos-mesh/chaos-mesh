@@ -39,7 +39,7 @@ func AuthRequired(c *gin.Context) {
 	verb := "list"
 	if c.Request.Method != http.MethodGet {
 		// patch is used to indicate delete, create, patch, delete and other write operations
-		verb := "patch"
+		verb = "patch"
 	}
 
 	sar := &authorizationv1.SelfSubjectAccessReview{
