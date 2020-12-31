@@ -43,6 +43,7 @@ BUSYBOX_MANAGER_FORBIDDEN_TOKEN_LIST=($CLUSTER_VIEWER_TOKEN $BUSYBOX_VIEWER_TOKE
 BUSYBOX_VIEW_TOKEN_LIST=($CLUSTER_MANAGER_TOKEN $CLUSTER_VIEWER_TOKEN $BUSYBOX_MANAGER_TOKEN $BUSYBOX_VIEWER_TOKEN)
 
 EXP_JSON='{"name": "ci-test", "namespace": "busybox", "scope": {"mode":"one", "namespace_selectors": ["busybox"]}, "target": {"kind": "NetworkChaos", "network_chaos": {"action": "delay", "delay": {"latency": "1ms"}}}}'
+UPDATE_EXP_JSON='{"apiVersion": "chaos-mesh.org/v1alpha1", "kind": "NetworkChaos", "metadata": {"name": "ci-test", "namespace": "busybox"}, "spec": {"action": "delay", "latency": "2ms", "mode": "one"}}'
 
 function REQUEST() {
     declare -a TOKEN_LIST=("${!1}")
@@ -54,7 +55,9 @@ function REQUEST() {
     for(( i=0;i<${#TOKEN_LIST[@]};i++)) do
         echo "$i. use token ${TOKEN_LIST[i]} to send $METHOD request to $URL, and save log in $LOG, log should contains $MESSAGE"
         if [ "$METHOD" == "POST" ]; then
-            curl -X $METHOD "localhost:2333$URL" -H "Content-Type: application/json" -H "Authorization: Bearer ${TOKEN_LIST[i]}" -d "${EXP_JSON}"  > $LOG
+            curl -X $METHOD "localhost:2333$URL" -H "Content-Type: application/json" -H "Authorization: Bearer ${TOKEN_LIST[i]}" -d "${EXP_JSON}" > $LOG
+        elif [ "$METHOD" == "PUT" ]; then
+            curl -X $METHOD "localhost:2333$URL" -H "Content-Type: application/json" -H "Authorization: Bearer ${TOKEN_LIST[i]}" -d "${UPDATE_EXP_JSON}" > $LOG
         else
             curl -X $METHOD "localhost:2333$URL" -H "Authorization: Bearer ${TOKEN_LIST[i]}" > $LOG
         fi
@@ -119,12 +122,17 @@ echo "***** restart chaos experiments *****"
 echo "viewer is forbidden to restart experiments"
 REQUEST BUSYBOX_MANAGER_FORBIDDEN_TOKEN_LIST[@] "PUT" "/api/experiments/start/${EXP_UID}?namespace=busybox" "restart_exp.out" "is forbidden"
 
-
 echo "only manager can pause experiments"
 REQUEST BUSYBOX_MANAGE_TOKEN_LIST[@] "PUT" "/api/experiments/start/${EXP_UID}?namespace=busybox" "restart_exp.out" "success"                    
 
-echo "update chaos experiments"
-#  TODO
+
+echo "***** update chaos experiments *****"
+
+echo "viewer is forbidden to update experiments"
+REQUEST BUSYBOX_MANAGER_FORBIDDEN_TOKEN_LIST[@] "PUT" "/api/experiments/update" "update_exp.out" "is forbidden"
+
+echo "only manager can pause experiments"
+REQUEST BUSYBOX_MANAGE_TOKEN_LIST[@] "PUT" "/api/experiments/update" "update_exp.out" '"name":"ci-test"'
 
 
 echo "***** delete chaos experiments *****"
