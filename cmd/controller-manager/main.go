@@ -50,6 +50,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
+	"k8s.io/client-go/rest"
 	"k8s.io/client-go/util/workqueue"
 
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -66,7 +67,8 @@ var (
 )
 
 var (
-	printVersion bool
+	printVersion                   bool
+	restConfigQPS, restConfigBurst int
 )
 
 func init() {
@@ -78,6 +80,8 @@ func init() {
 
 func parseFlags() {
 	flag.BoolVar(&printVersion, "version", false, "print version information and exit")
+	flag.IntVar(&restConfigQPS, "rest-config-qps", 30, "QPS of rest config.")
+	flag.IntVar(&restConfigBurst, "rest-config-burst", 50, "burst of rest config.")
 	flag.Parse()
 }
 
@@ -108,7 +112,9 @@ func main() {
 		options.Namespace = ccfg.ControllerCfg.TargetNamespace
 	}
 
-	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), options)
+	cfg := ctrl.GetConfigOrDie()
+	setRestConfig(cfg)
+	mgr, err := ctrl.NewManager(cfg, options)
 	if err != nil {
 		setupLog.Error(err, "unable to start manager")
 		os.Exit(1)
@@ -188,6 +194,15 @@ func main() {
 	if err := mgr.Start(stopCh); err != nil {
 		setupLog.Error(err, "unable to start manager")
 		os.Exit(1)
+	}
+}
+
+func setRestConfig(c *rest.Config) {
+	if restConfigQPS > 0 {
+		c.QPS = float32(restConfigQPS)
+	}
+	if restConfigBurst > 0 {
+		c.Burst = restConfigBurst
 	}
 }
 
