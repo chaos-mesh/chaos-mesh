@@ -38,34 +38,34 @@ CLUSTER_VIEWER_TOKEN=`kubectl -n chaos-testing describe secret $(kubectl -n chao
 BUSYBOX_MANAGER_TOKEN=`kubectl -n busybox describe secret $(kubectl -n busybox get secret | grep account-busybox-manager | awk '{print $1}') | grep "token:" | awk '{print $2}'`
 BUSYBOX_VIEWER_TOKEN=`kubectl -n busybox describe secret $(kubectl -n busybox get secret | grep account-busybox-viewer | awk '{print $1}') | grep "token:" | awk '{print $2}'`
 
+BUSYBOX_MANAGER_TOKEN_LIST=($BUSYBOX_MANAGER_TOKEN)
+CLUSTER_MANAGER_TOKEN_LIST=($CLUSTER_MANAGER_TOKEN)
+
 CLUSTER_VIEW_TOKEN_LIST=($CLUSTER_MANAGER_TOKEN $CLUSTER_VIEWER_TOKEN)
 CLUSTER_VIEW_FORBIDDEN_TOKEN_LIST=($BUSYBOX_MANAGER_TOKEN $BUSYBOX_VIEWER_TOKEN)
 BUSYBOX_MANAGE_TOKEN_LIST=($CLUSTER_MANAGER_TOKEN $BUSYBOX_MANAGER_TOKEN)
 BUSYBOX_MANAGER_FORBIDDEN_TOKEN_LIST=($CLUSTER_VIEWER_TOKEN $BUSYBOX_VIEWER_TOKEN)
 BUSYBOX_VIEW_TOKEN_LIST=($CLUSTER_MANAGER_TOKEN $CLUSTER_VIEWER_TOKEN $BUSYBOX_MANAGER_TOKEN $BUSYBOX_VIEWER_TOKEN)
 
-CLUSTER_MANAGER_TOKEN_LIST=
-
 EXP_JSON='{"name": "ci-test", "namespace": "busybox", "scope": {"mode":"one", "namespace_selectors": ["busybox"]}, "target": {"kind": "NetworkChaos", "network_chaos": {"action": "delay", "delay": {"latency": "1ms"}}}}'
 
-function request() {
+function REQUEST() {
     declare -a TOKEN_LIST=("${!1}")
-    #TOKEN_LIST=$1
     METHOD=$2
     URL=$3
-    #param2=("${!2}")
-    
-    CHECK_LOG=$4
-    echo $METHOD
-    echo $URL
-    echo $TOKEN_LIST
-    echo $CHECK_LOG
+    LOG=$4
+    MESSAGE=$5
+
+    echo "send $METHOD request to $URL, and save log in $LOG, log should contains $MESSAGE"
 
     for(( i=0;i<${#TOKEN_LIST[@]};i++)) do
-        echo $i
-        echo ${TOKEN_LIST[i]}
-        curl -X POST "localhost:2333$URL" -H "Content-Type: application/json" -H "Authorization: Bearer ${TOKEN_LIST[i]}" -d "${EXP_JSON}"  > test.out
-        check_contains "$CHECK_LOG" "test.out"
+        echo "$i. use token ${TOKEN_LIST[i]} to send $METHOD request to $URL, and save log in $LOG, log should contains $MESSAGE"
+        if [ "$METHOD" == "POST" ]; then
+            curl -X $METHOD "localhost:2333$URL" -H "Content-Type: application/json" -H "Authorization: Bearer ${TOKEN_LIST[i]}" -d "${EXP_JSON}"  > $LOG
+        else
+            curl -X $METHOD "localhost:2333$URL" -H "Authorization: Bearer ${TOKEN_LIST[i]}" > $LOG
+        fi
+        check_contains "$MESSAGE" $LOG
     done
 }
 
@@ -73,85 +73,128 @@ echo "***** create chaos experiments *****"
 
 echo "viewer is forbidden to create experiments"
 
-request BUSYBOX_MANAGER_FORBIDDEN_TOKEN_LIST[@] "POST" "/api/experiments/new" "is forbidden" 
+REQUEST BUSYBOX_MANAGER_FORBIDDEN_TOKEN_LIST[@] "POST" "/api/experiments/new" "create_exp.out" "is forbidden" 
 
-exit 0
-
-for(( i=0;i<${#BUSYBOX_MANAGER_FORBIDDEN_TOKEN_LIST[@]};i++)) do
-    echo $i
-    curl -X POST "localhost:2333/api/experiments/new" -H "Content-Type: application/json" -H "Authorization: Bearer ${BUSYBOX_MANAGER_FORBIDDEN_TOKEN_LIST[i]}" -d "${EXP_JSON}"  > create_exp.out
-    check_contains "is forbidden" "create_exp.out"
-done
+#for(( i=0;i<${#BUSYBOX_MANAGER_FORBIDDEN_TOKEN_LIST[@]};i++)) do
+#    echo $i
+#    curl -X POST "localhost:2333/api/experiments/new" -H "Content-Type: application/json" -H "Authorization: Bearer ${BUSYBOX_MANAGER_FORBIDDEN_TOKEN_LIST[i]}" -d "${EXP_JSON}"  > create_exp.out
+#    check_contains "is forbidden" "create_exp.out"
+#done
 
 echo "only manager can create experiments success"
-curl -X POST "localhost:2333/api/experiments/new" -H "Content-Type: application/json" -H "Authorization: Bearer ${BUSYBOX_MANAGER_TOKEN}" -d "${EXP_JSON}" > create_exp.out
-check_contains '"name":"ci-test"' "create_exp.out"
+# here just use busybox manager because experiment can be created only one time
+REQUEST BUSYBOX_MANAGER_TOKEN_LIST[@] "POST" "/api/experiments/new" "create_exp.out" '"name":"ci-test"'
+
+
+#curl -X POST "localhost:2333/api/experiments/new" -H "Content-Type: application/json" -H "Authorization: Bearer ${BUSYBOX_MANAGER_TOKEN}" -d "${EXP_JSON}" > create_exp.out
+#check_contains '"name":"ci-test"' "create_exp.out"
 
 echo "***** list chaos experiments *****"
 
-echo "all token can list experiments under namespace busybox success"
-for(( i=0;i<${#BUSYBOX_VIEW_TOKEN_LIST[@]};i++)) do
-    curl -X GET "localhost:2333/api/experiments?namespace=busybox" -H "Authorization: Bearer ${BUSYBOX_VIEW_TOKEN_LIST[i]}" > list_exp.out
-    check_contains '"name":"ci-test"' "list_exp.out"
-done
+echo "all token can list experiments under namespace busybox"
+REQUEST BUSYBOX_VIEW_TOKEN_LIST[@] "GET" "/api/experiments?namespace=busybox" "list_exp.out" '"name":"ci-test"'
+
+#for(( i=0;i<${#BUSYBOX_VIEW_TOKEN_LIST[@]};i++)) do
+#    curl -X GET "localhost:2333/api/experiments?namespace=busybox" -H "Authorization: Bearer ${BUSYBOX_VIEW_TOKEN_LIST[i]}" > list_exp.out
+#    check_contains '"name":"ci-test"' "list_exp.out"
+#done
 
 EXP_UID=`cat list_exp.out | sed 's/.*\"uid\":\"\([0-9,a-z,-]*\)\".*/\1/g'`
 
 echo "cluster manager and viewer can list all chaos experiments in the cluster"
-for(( i=0;i<${#CLUSTER_VIEW_TOKEN_LIST[@]};i++)) do
-    curl -X GET "localhost:2333/api/experiments" -H "Authorization: Bearer ${CLUSTER_VIEW_TOKEN_LIST[i]}" > list_exp.out
-    check_contains '"name":"ci-test"' "list_exp.out"
-done
+REQUEST CLUSTER_VIEW_TOKEN_LIST[@] "GET" "/api/experiments" "list_exp.out" '"name":"ci-test"'
+
+#for(( i=0;i<${#CLUSTER_VIEW_TOKEN_LIST[@]};i++)) do
+#    curl -X GET "localhost:2333/api/experiments" -H "Authorization: Bearer ${CLUSTER_VIEW_TOKEN_LIST[i]}" > list_exp.out
+#    check_contains '"name":"ci-test"' "list_exp.out"
+#done
 
 echo "busybox manager and viewer is forbidden to list chaos experiments in the cluster or other namespace"
-for(( i=0;i<${#CLUSTER_VIEW_FORBIDDEN_TOKEN_LIST[@]};i++)) do
-    curl -X GET "localhost:2333/api/experiments" -H "Authorization: Bearer ${CLUSTER_VIEW_FORBIDDEN_TOKEN_LIST[i]}" > list_exp.out
-    check_contains "is forbidden" "list_exp.out"
 
-    curl -X GET "localhost:2333/api/experiments?namespace=default" -H "Authorization: Bearer ${CLUSTER_VIEW_FORBIDDEN_TOKEN_LIST[i]}" > list_exp.out
-    check_contains "is forbidden" "list_exp.out"
-done
+REQUEST CLUSTER_VIEW_FORBIDDEN_TOKEN_LIST[@] "GET" "/api/experiments" "list_exp.out" "is forbidden"
+REQUEST CLUSTER_VIEW_FORBIDDEN_TOKEN_LIST[@] "GET" "/api/experiments?namespace=default" "list_exp.out" "is forbidden"
+
+#for(( i=0;i<${#CLUSTER_VIEW_FORBIDDEN_TOKEN_LIST[@]};i++)) do
+#    curl -X GET "localhost:2333/api/experiments" -H "Authorization: Bearer ${CLUSTER_VIEW_FORBIDDEN_TOKEN_LIST[i]}" > list_exp.out
+#    check_contains "is forbidden" "list_exp.out"
+
+#    curl -X GET "localhost:2333/api/experiments?namespace=default" -H "Authorization: Bearer ${CLUSTER_VIEW_FORBIDDEN_TOKEN_LIST[i]}" > list_exp.out
+#    check_contains "is forbidden" "list_exp.out"
+#done
 
 echo "***** get details of chaos experiments *****"
 
-curl -X GET "localhost:2333/api/experiments/detail/${EXP_UID}" -H "Authorization: Bearer ${BUSYBOX_MANAGER_TOKEN}" > detail_exp.out
-check_contains "Running" "detail_exp.out"
+echo "all token can view the experiments under namespace busybox"
+REQUEST BUSYBOX_VIEW_TOKEN_LIST[@] "GET" "/api/experiments/detail/${EXP_UID}?namespace=busybox" "exp_detail.out" "Running"
+
+#REQUEST  ""
+#curl -X GET "localhost:2333/api/experiments/detail/${EXP_UID}" -H "Authorization: Bearer ${BUSYBOX_MANAGER_TOKEN}" > detail_exp.out
+#check_contains "Running" "detail_exp.out"
 # {"kind":"","namespace":"busybox","name":"ci-test","uid":"fc6bbe96-f251-47f2-a30c-bed1fe04bcf9","created":"2020-12-29T08:41:06Z","status":"Running","yaml":{"apiVersion":"","kind":"","metadata":{"name":"ci-test","namespace":"busybox","labels":null,"annotations":{"experiment.chaos-mesh.org/pause":"false"}},"spec":{"action":"delay","mode":"one","value":"","selector":{"namespaces":["busybox"]},"delay":{"latency":"1ms","correlation":"0","jitter":"0ms"},"direction":"to"}}}
 
-echo "get state"
-curl -X GET "localhost:2333/api/experiments/state?namespace=busybox" -H "Authorization: Bearer ${BUSYBOX_MANAGER_TOKEN}" > state.out
-check_contains '"Running":1' "state.out"
-# {"Running":1,"Waiting":0,"Paused":0,"Failed":0,"Finished":0}
+echo "***** get state of chaos experiments *****"
+
+echo "all token can get the state of experiments under namespace busybox"
+REQUEST BUSYBOX_VIEW_TOKEN_LIST[@] "GET" "/api/experiments/state?namespace=busybox" "exp_state.out" "Running"
+
+echo "cluster manager and viewer can get the state of experiments in the cluster"
+REQUEST CLUSTER_VIEW_TOKEN_LIST[@] "GET" "/api/experiments/state" "exp_state.out" "Running"
+
+echo "busybox manager and viewer is forbidden to get the state of experiments in the cluster or other namespace"
+REQUEST CLUSTER_VIEW_FORBIDDEN_TOKEN_LIST[@] "GET" "/api/experiments/state" "exp_state.out" "is forbidden"
+REQUEST CLUSTER_VIEW_FORBIDDEN_TOKEN_LIST[@] "GET" "/api/experiments/state?namespace=default" "exp_state.out" "is forbidden"
 
 
-echo "pause chaos experiments"
-curl -X PUT "localhost:2333/api/experiments/pause/${EXP_UID}?namespace=busybox" -H "Authorization: Bearer ${BUSYBOX_viewer_TOKEN}" > pause_exp.out
-check_contains "is forbidden" "pause_exp.out"
+echo "***** pause chaos experiments *****"
+
+echo "viewer is forbidden to pause experiments"
+REQUEST BUSYBOX_MANAGER_FORBIDDEN_TOKEN_LIST[@] "PUT" "/api/experiments/pause/${EXP_UID}?namespace=busybox" "pause_exp.out" "is forbidden"
+
+#curl -X PUT "localhost:2333/api/experiments/pause/${EXP_UID}?namespace=busybox" -H "Authorization: Bearer ${BUSYBOX_VIEWER_TOKEN}" > pause_exp.out
+#check_contains "is forbidden" "pause_exp.out"
 # "is forbidden"
 
-curl -X PUT "localhost:2333/api/experiments/pause/${EXP_UID}?namespace=busybox" -H "Authorization: Bearer ${BUSYBOX_MANAGER_TOKEN}" > pause_exp.out
-check_contains "success" "pause_exp.out"
+echo "only manager can pause experiments"
+REQUEST BUSYBOX_MANAGE_TOKEN_LIST[@] "PUT" "/api/experiments/pause/${EXP_UID}?namespace=busybox" "pause_exp.out" "success"
+
+#curl -X PUT "localhost:2333/api/experiments/pause/${EXP_UID}?namespace=busybox" -H "Authorization: Bearer ${BUSYBOX_MANAGER_TOKEN}" > pause_exp.out
+#check_contains "success" "pause_exp.out"
 # {"status":"success"}
 
-echo "restart chaos experiments"
-curl -X PUT "localhost:2333/api/experiments/start/${EXP_UID}?namespace=busybox" -H "Authorization: Bearer ${BUSYBOX_viewer_TOKEN}" > restart_exp.out
-check_contains "is forbidden" "restart_exp.out"
+echo "***** restart chaos experiments *****"
+
+echo "viewer is forbidden to restart experiments"
+REQUEST BUSYBOX_MANAGER_FORBIDDEN_TOKEN_LIST[@] "PUT" "/api/experiments/start/${EXP_UID}?namespace=busybox" "restart_exp.out" "is forbidden"
+
+
+echo "only manager can pause experiments"
+REQUEST BUSYBOX_MANAGE_TOKEN_LIST[@] "PUT" "/api/experiments/start/${EXP_UID}?namespace=busybox" "restart_exp.out" "success"
+
+
+#curl -X PUT "localhost:2333/api/experiments/start/${EXP_UID}?namespace=busybox" -H "Authorization: Bearer ${BUSYBOX_viewer_TOKEN}" > restart_exp.out
+#check_contains "is forbidden" "restart_exp.out"
 # "is forbidden"
 
-curl -X PUT "localhost:2333/api/experiments/start/${EXP_UID}?namespace=busybox" -H "Authorization: Bearer ${BUSYBOX_MANAGER_TOKEN}" > restart_exp.out
-check_contains "success" "restart_exp.out"
+#curl -X PUT "localhost:2333/api/experiments/start/${EXP_UID}?namespace=busybox" -H "Authorization: Bearer ${BUSYBOX_MANAGER_TOKEN}" > restart_exp.out
+#check_contains "success" "restart_exp.out"
 # {"status":"success"}                        
 
 echo "update chaos experiments"
 #  TODO
 
 
-echo "delete chaos experiments"
-curl -X DELETE "localhost:2333/api/experiments/${EXP_UID}" -H "Authorization: Bearer ${BUSYBOX_MANAGER_TOKEN}" > delete_exp.out
+echo "***** delete chaos experiments *****"
+
+echo "viewer is forbidden to delete experiments"
+REQUEST BUSYBOX_MANAGER_FORBIDDEN_TOKEN_LIST[@] "DELETE" "/api/experiments/${EXP_UID}" "delete_exp.out" "is forbidden"
+
+echo "only manager can delete experiments success"
+# here just use cluster manager because experiment can be delete only one time
+REQUEST CLUSTER_MANAGER_TOKEN_LIST[@] "DELETE" "/api/experiments/${EXP_UID}" "delete_exp.out" "success"
+
+
+#curl -X DELETE "localhost:2333/api/experiments/${EXP_UID}" -H "Authorization: Bearer ${BUSYBOX_MANAGER_TOKEN}" > delete_exp.out
 # check_contains 
-
-
-echo "get pods"
 
 echo "list archive chaos experiments"
 
