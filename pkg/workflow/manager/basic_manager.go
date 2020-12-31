@@ -97,7 +97,10 @@ func (it *basicManager) Run(ctx context.Context) {
 }
 
 func (it *basicManager) acquire(ctx context.Context) (trigger.Event, error) {
-	return it.multiplexTrigger.Acquire(ctx)
+	withCancel, cancelFunc := context.WithCancel(ctx)
+	defer cancelFunc()
+	event, _, err := it.multiplexTrigger.Acquire(withCancel)
+	return event, err
 }
 
 func (it *basicManager) consume(ctx context.Context, event trigger.Event) error {

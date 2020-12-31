@@ -19,5 +19,5 @@ import (
 
 type Trigger interface {
 	TriggerName() string
-	Acquire(ctx context.Context) (Event, error)
+	Acquire(ctx context.Context) (event Event, canceled bool, err error)
 }

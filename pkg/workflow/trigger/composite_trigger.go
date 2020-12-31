@@ -44,7 +44,7 @@ func (it *CompositeTrigger) TriggerName() string {
 	return "CompositeTrigger"
 }
 
-func (it *CompositeTrigger) Acquire(ctx context.Context) (Event, error) {
+func (it *CompositeTrigger) Acquire(ctx context.Context) (Event, bool, error) {
 	go func() {
 		it.RunAndPending(ctx)
 		// TODO: warn logs
@@ -52,9 +52,9 @@ func (it *CompositeTrigger) Acquire(ctx context.Context) (Event, error) {
 
 	select {
 	case <-ctx.Done():
-		return nil, ctx.Err()
+		return nil, true, ctx.Err()
 	case item := <-it.queue:
-		return item.Event, item.Err
+		return item.Event, false, item.Err
 	}
 }
 
@@ -72,10 +72,12 @@ func (it *CompositeTrigger) RunAndPending(ctx context.Context) error {
 		eachBackends := item
 		go func() {
 			for working.Load() {
-				event, err := eachBackends.Acquire(ctx)
-				it.queue <- EventOrError{
-					Event: event,
-					Err:   err,
+				event, canceled, err := eachBackends.Acquire(ctx)
+				if !canceled {
+					it.queue <- EventOrError{
+						Event: event,
+						Err:   err,
+					}
 				}
 			}
 			wg.Done()
