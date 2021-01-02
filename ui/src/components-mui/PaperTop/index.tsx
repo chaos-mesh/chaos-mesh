@@ -1,23 +1,20 @@
 import { Box, Typography } from '@material-ui/core'
-import { Theme, createStyles, makeStyles } from '@material-ui/core/styles'
 
 import React from 'react'
+import { makeStyles } from '@material-ui/core/styles'
 
-const useStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    root: {
-      display: 'flex',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      width: '100%',
-      height: '56px',
-      borderBottom: `1px solid ${theme.palette.divider}`,
-    },
-  })
-)
+const useStyles = makeStyles({
+  root: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    width: '100%',
+    height: 56,
+  },
+})
 
 interface PaperTopProps {
-  title: string | JSX.Element
+  title?: string | JSX.Element
 }
 
 const PaperTop: React.FC<PaperTopProps> = ({ title, children }) => {
@@ -25,7 +22,7 @@ const PaperTop: React.FC<PaperTopProps> = ({ title, children }) => {
 
   return (
     <Box className={classes.root} px={3}>
-      <Typography variant="button">{title}</Typography>
+      <Typography variant="h6">{title}</Typography>
       {children}
     </Box>
   )

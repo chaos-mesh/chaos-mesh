@@ -1,23 +1,22 @@
 import { AnyAction, configureStore, getDefaultMiddleware } from '@reduxjs/toolkit'
+import { TypedUseSelectorHook, useDispatch, useSelector } from 'react-redux'
 
 import rootReducer from 'reducers'
-import { useDispatch } from 'react-redux'
 
 const middlewares = [...getDefaultMiddleware()]
-const ignoreActions = [
-  'experiments/state/pending',
-  'common/chaos-available-namespaces/pending',
-  'common/labels/pending',
-  'common/annotations/pending',
-  'common/pods/pending',
-]
 
 const genStore = () => {
   if (process.env.NODE_ENV === 'development') {
     const { createLogger } = require('redux-logger')
 
     const logger = createLogger({
-      predicate: (_: any, action: AnyAction) => !ignoreActions.includes(action.type),
+      predicate: (_: any, action: AnyAction) => {
+        if (action.type.includes('pending')) {
+          return false
+        }
+
+        return true
+      },
     })
 
     middlewares.push(logger)
@@ -33,6 +32,7 @@ const genStore = () => {
 }
 
 export type RootState = ReturnType<typeof rootReducer>
+export const useStoreSelector: TypedUseSelectorHook<RootState> = useSelector
 type StoreDispatch = typeof store.dispatch
 export const useStoreDispatch = () => useDispatch<StoreDispatch>()
 

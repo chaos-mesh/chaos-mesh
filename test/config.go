@@ -40,7 +40,6 @@ func NewDefaultConfig() *Config {
 		DaemonImage:       "localhost:5000/pingcap/chaos-daemon",
 		DaemonTag:         "latest",
 		E2EImage:          "localhost:5000/pingcap/e2e-helper:latest",
-		ChaosFSImage:      "localhost:5000/pingcap/chaos-fs:latest",
 		ChaosScriptsImage: "localhost:5000/pingcap/chaos-scripts:latest",
 		ChaosDNSImage:     "localhost:5000/pingcap/chaos-dns:latest",
 		InstallChaosMesh:  false,

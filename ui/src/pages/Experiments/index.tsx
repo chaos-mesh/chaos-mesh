@@ -1,7 +1,5 @@
 import { Box, Grid, Typography } from '@material-ui/core'
 import React, { useEffect, useState } from 'react'
-import { RootState, useStoreDispatch } from 'store'
-import { getStateofExperiments, setNeedToRefreshExperiments } from 'slices/experiments'
 import { setAlert, setAlertOpen } from 'slices/globalStatus'
 
 import ConfirmDialog from 'components-mui/ConfirmDialog'
@@ -13,13 +11,13 @@ import TuneIcon from '@material-ui/icons/Tune'
 import _groupBy from 'lodash.groupby'
 import api from 'api'
 import { dayComparator } from 'lib/dayjs'
+import { transByKind } from 'lib/byKind'
 import { useIntl } from 'react-intl'
-import { useSelector } from 'react-redux'
+import { useStoreDispatch } from 'store'
 
 export default function Experiments() {
   const intl = useIntl()
 
-  const needToRefreshExperiments = useSelector((state: RootState) => state.experiments.needToRefreshExperiments)
   const dispatch = useStoreDispatch()
 
   const [loading, setLoading] = useState(false)
@@ -29,7 +27,7 @@ export default function Experiments() {
     uuid: '',
     title: '',
     description: '',
-    action: 'delete',
+    action: 'archive',
   })
 
   const fetchExperiments = () => {
@@ -71,14 +69,6 @@ export default function Experiments() {
   // Get all experiments after mount
   useEffect(fetchExperiments, [])
 
-  // Refresh experiments after some actions are completed
-  useEffect(() => {
-    if (needToRefreshExperiments) {
-      fetchExperiments()
-      dispatch(setNeedToRefreshExperiments(false))
-    }
-  }, [dispatch, needToRefreshExperiments])
-
   // Refresh every experiments' events after experiments state updated
   useEffect(() => {
     if (experiments && experiments.length > 0 && !experiments[0].events) {
@@ -90,7 +80,7 @@ export default function Experiments() {
     let actionFunc: any
 
     switch (action) {
-      case 'delete':
+      case 'archive':
         actionFunc = api.experiments.deleteExperiment
 
         break
@@ -123,7 +113,6 @@ export default function Experiments() {
           })
         )
         dispatch(setAlertOpen(true))
-        dispatch(getStateofExperiments())
         fetchExperiments()
       })
       .catch(console.error)
@@ -138,7 +127,7 @@ export default function Experiments() {
           .map(([kind, experimentsByKind]) => (
             <Box key={kind} mb={6}>
               <Box mb={6}>
-                <Typography variant="button">{kind}</Typography>
+                <Typography variant="button">{transByKind(kind as any)}</Typography>
               </Box>
               <Grid container spacing={3}>
                 {experimentsByKind.length > 0 &&

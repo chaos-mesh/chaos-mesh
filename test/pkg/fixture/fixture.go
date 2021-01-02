@@ -91,20 +91,20 @@ func NewTimerDeployment(name, namespace string) *appsv1.Deployment {
 			Name:      name,
 			Namespace: namespace,
 			Labels: map[string]string{
-				"app": "timer",
+				"app": name,
 			},
 		},
 		Spec: appsv1.DeploymentSpec{
 			Replicas: pointer.Int32Ptr(1),
 			Selector: &metav1.LabelSelector{
 				MatchLabels: map[string]string{
-					"app": "timer",
+					"app": name,
 				},
 			},
 			Template: corev1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{
 					Labels: map[string]string{
-						"app": "timer",
+						"app": name,
 					},
 				},
 				Spec: corev1.PodSpec{
@@ -112,7 +112,7 @@ func NewTimerDeployment(name, namespace string) *appsv1.Deployment {
 						{
 							Image:           config.TestConfig.E2EImage,
 							ImagePullPolicy: corev1.PullIfNotPresent,
-							Name:            "timer",
+							Name:            name,
 							Command:         []string{"/bin/test"},
 						},
 					},
