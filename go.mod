@@ -5,7 +5,6 @@ require (
 	github.com/DATA-DOG/go-sqlmock v1.5.0
 	github.com/aws/aws-sdk-go-v2/credentials v0.1.5
 	github.com/aws/aws-sdk-go-v2/service/ec2 v0.31.0
-	github.com/aws/aws-sdk-go-v2/service/eks v0.31.0
 	github.com/bxcodec/faker v2.0.1+incompatible
 	github.com/chaos-mesh/k8s_dns_chaos v0.0.0-20200922120555-7ced93637075
 	github.com/containerd/cgroups v0.0.0-20200404012852-53ba5634dc0f
