@@ -3,11 +3,9 @@ on:
   push:
     branches:
       - master
-      - release-1.0
   pull_request:
     branches:
       - master
-      - release-1.0
 
 jobs:
   run:
@@ -26,7 +24,10 @@ jobs:
         run: |
           export CLUSTER="chart-testing"
           hack/local-up-chaos-mesh.sh
-
+          kubectl set env deployment/chaos-dashboard SECURITY_MODE=true -n chaos-testing
+          sleep 5
+          kubectl port-forward -n chaos-testing svc/chaos-dashboard 2333:2333 &
+      
       - name: Run integration test
         run: |
           bash test/integration_test/run.sh
