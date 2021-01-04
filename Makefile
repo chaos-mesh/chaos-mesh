@@ -183,6 +183,8 @@ image: image-chaos-daemon image-chaos-mesh image-chaos-dashboard
 
 GO_TARGET_PHONY :=
 
+BINARIES :=
+
 define COMPILE_GO_TEMPLATE
 ifeq ($(CHAOS_MESH_BUILD_IN_DOCKER),0)
 
@@ -212,6 +214,7 @@ $(2): image-build-env go_build_cache_directory
 		/usr/bin/make $(2)
 endif
 image-$(1)-dependencies := $(image-$(1)-dependencies) $(2)
+BINARIES := $(BINARIES) $(2)
 endef
 
 ifeq ($(CHAOS_MESH_BUILD_IN_DOCKER),0)
@@ -280,6 +283,8 @@ $(eval $(call IMAGE_TEMPLATE,chaos-mesh-protoc,hack/protoc))
 $(eval $(call IMAGE_TEMPLATE,chaos-mesh-e2e,test/image/e2e))
 $(eval $(call IMAGE_TEMPLATE,chaos-kernel,images/chaos-kernel))
 
+binary: $(BINARIES)
+
 docker-push:
 	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-mesh:${IMAGE_TAG}"
 	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-dashboard:${IMAGE_TAG}"
@@ -319,7 +324,7 @@ manifests/crd.yaml: config ensure-kustomize
 # Generate Go files from Chaos Mesh proto files.
 ifeq ($(CHAOS_MESH_BUILD_IN_DOCKER),0)
 proto:
-	for dir in pkg/chaosdaemon pkg/chaosfs; do\
+	for dir in pkg/chaosdaemon ; do\
 		protoc -I $$dir/pb $$dir/pb/*.proto --go_out=plugins=grpc:$$dir/pb --go_out=./$$dir/pb ;\
 	done
 else

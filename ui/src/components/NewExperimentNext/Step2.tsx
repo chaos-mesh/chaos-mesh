@@ -2,10 +2,10 @@ import { Box, Button, Divider, Grid, MenuItem, Typography } from '@material-ui/c
 import { Form, Formik } from 'formik'
 import { LabelField, SelectField, TextField } from 'components/FormField'
 import React, { useEffect, useState } from 'react'
-import { RootState, useStoreDispatch } from 'store'
 import basicData, { schema } from './data/basic'
 import { createStyles, makeStyles } from '@material-ui/core/styles'
 import { setBasic, setStep2 } from 'slices/experiments'
+import { useStoreDispatch, useStoreSelector } from 'store'
 
 import AdvancedOptions from 'components/AdvancedOptions'
 import CheckCircleOutlineIcon from '@material-ui/icons/CheckCircleOutline'
@@ -17,8 +17,6 @@ import Scope from './form/Scope'
 import SkeletonN from 'components-mui/SkeletonN'
 import T from 'components/T'
 import UndoIcon from '@material-ui/icons/Undo'
-import { getNamespaces } from 'slices/experiments'
-import { useSelector } from 'react-redux'
 
 const useStyles = makeStyles((theme) =>
   createStyles({
@@ -37,14 +35,10 @@ const useStyles = makeStyles((theme) =>
 const Step2 = () => {
   const classes = useStyles()
 
-  const { namespaces, step2, basic } = useSelector((state: RootState) => state.experiments)
+  const { namespaces, step2, basic } = useStoreSelector((state) => state.experiments)
   const dispatch = useStoreDispatch()
 
   const [init, setInit] = useState(basicData)
-
-  useEffect(() => {
-    dispatch(getNamespaces())
-  }, [dispatch])
 
   useEffect(() => {
     setInit({

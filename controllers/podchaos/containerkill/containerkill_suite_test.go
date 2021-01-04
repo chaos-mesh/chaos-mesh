@@ -35,7 +35,7 @@ import (
 	. "github.com/chaos-mesh/chaos-mesh/controllers/test"
 	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
 	ctx "github.com/chaos-mesh/chaos-mesh/pkg/router/context"
-	"github.com/chaos-mesh/chaos-mesh/pkg/utils"
+	. "github.com/chaos-mesh/chaos-mesh/pkg/testutils"
 )
 
 func TestContainerKill(t *testing.T) {
@@ -60,7 +60,7 @@ var _ = AfterSuite(func() {
 
 var _ = Describe("PodChaos", func() {
 	Context("ContainerKill", func() {
-		objs, _ := utils.GenerateNPods("p", 1, utils.PodArg{ContainerStatus: v1.ContainerStatus{
+		objs, _ := GenerateNPods("p", 1, PodArg{ContainerStatus: v1.ContainerStatus{
 			ContainerID: "fake-container-id",
 			Name:        "container-name",
 		}})
