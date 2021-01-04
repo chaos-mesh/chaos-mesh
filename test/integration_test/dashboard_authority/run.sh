@@ -21,6 +21,20 @@ cd $cur
 echo "deploy deployments for test"
 kubectl apply -f https://raw.githubusercontent.com/chaos-mesh/apps/master/ping/busybox-statefulset.yaml
 
+# wait pod status to running
+for ((k=0; k<30; k++)); do
+    kubectl get pods --namespace busybox > pods.status
+    cat pods.status
+
+    run_num=`grep Running pods.status | wc -l`
+    pod_num=$((`cat pods.status | wc -l` - 1))
+    if [ $run_num == $pod_num ]; then
+        break
+    fi
+
+    sleep 1
+done
+
 echo "create rbac and get token"
 
 kubectl apply -f ./cluster-manager.yaml
@@ -53,7 +67,7 @@ function REQUEST() {
     MESSAGE=$5
 
     for(( i=0;i<${#TOKEN_LIST[@]};i++)) do
-        echo "$i. use token ${TOKEN_LIST[i]: 0: 10}...${TOKEN_LIST[i]: 0-10} to send $METHOD request to $URL, and save log in $LOG, log should contains $MESSAGE"
+        echo "$i. use token ${TOKEN_LIST[i]: 0: 10}...${TOKEN_LIST[i]: 0-10} to send $METHOD request to $URL, and save log in $LOG, log should contains '$MESSAGE'"
         if [ "$METHOD" == "POST" ]; then
             curl -X $METHOD "localhost:2333$URL" -H "Content-Type: application/json" -H "Authorization: Bearer ${TOKEN_LIST[i]}" -d "${EXP_JSON}" > $LOG
         elif [ "$METHOD" == "PUT" ]; then
