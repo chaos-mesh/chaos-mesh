@@ -40,3 +40,4 @@ test/image/e2e/manifests/
 !/images/*/bin/.gitkeep
 
 .dockerbuilt
+Dockerfile

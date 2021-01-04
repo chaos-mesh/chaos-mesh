@@ -32,7 +32,7 @@ CGOENV  := GO15VENDOREXPERIMENT="1" CGO_ENABLED=1 GOOS=$(GOOS) GOARCH=$(GOARCH)
 GO     := $(GOENV) go
 CGO    := $(CGOENV) go
 GOTEST := TEST_USE_EXISTING_CLUSTER=false NO_PROXY="${NO_PROXY},testhost" go test
-SHELL    := /usr/bin/env bash
+SHELL    := bash
 
 PACKAGE_LIST := go list ./... | grep -vE "chaos-mesh/test|pkg/ptrace|zz_generated|vendor"
 PACKAGE_DIRECTORIES := $(PACKAGE_LIST) | sed 's|github.com/chaos-mesh/chaos-mesh/||'
@@ -200,19 +200,39 @@ GO_TARGET_PHONY += $(1)
 endef
 
 BUILD_INDOCKER_ARG := --env IN_DOCKER=1
+ifeq ($(DOCKER_HOST),)
+    BUILD_INDOCKER_ARG += --volume $(ROOT):/mnt --user $(shell id -u):$(shell id -g)
+else
+	CLEAN_TARGETS += Dockerfile
+endif
+
 ifneq ($(GO_BUILD_CACHE),)
 	BUILD_INDOCKER_ARG += --volume $(GO_BUILD_CACHE)/chaos-mesh-gopath:/tmp/go
 	BUILD_INDOCKER_ARG += --volume $(GO_BUILD_CACHE)/chaos-mesh-gobuild:/tmp/go-build
 endif
+
 define BUILD_IN_DOCKER_TEMPLATE
 CLEAN_TARGETS += $(2)
 ifeq ($(CHAOS_MESH_BUILD_IN_DOCKER),1)
+
 $(2): image-build-env go_build_cache_directory
-	docker run --rm --workdir /mnt/ --volume $(shell pwd):/mnt \
-		$(BUILD_INDOCKER_ARG) --env UI=${UI} --env SWAGGER=${SWAGGER} \
-		--user $(shell id -u):$(shell id -g) ${DOCKER_REGISTRY_PREFIX}pingcap/build-env \
-		/usr/bin/make $(2)
+	[[ "$(DOCKER_HOST)" == "" ]] || (printf "\
+	FROM ${DOCKER_REGISTRY_PREFIX}pingcap/build-env \n\
+	RUN rm -rf /mnt \n\
+	COPY ./ /mnt \n"\
+	> Dockerfile; docker build . -t ${DOCKER_REGISTRY_PREFIX}pingcap/build-env)
+
+	DOCKER_ID=$$$$(docker run -d \
+		$(BUILD_INDOCKER_ARG) \
+		${DOCKER_REGISTRY_PREFIX}pingcap/build-env \
+		sleep infinity); \
+	docker exec --workdir /mnt/ \
+		--env UI=${UI} --env SWAGGER=${SWAGGER}  \
+		$$$$DOCKER_ID /usr/bin/make $(2); \
+	[[ "$(DOCKER_HOST)" == "" ]] || docker cp $$$$DOCKER_ID:/mnt/$(2) $(2); \
+	docker rm -f $$$$DOCKER_ID
 endif
+
 image-$(1)-dependencies := $(image-$(1)-dependencies) $(2)
 BINARIES := $(BINARIES) $(2)
 endef
@@ -354,7 +374,7 @@ install-local-coverage-tools:
 	&& go get github.com/AlekSi/gocov-xml \
 	&& go get -u github.com/matm/gocov-html
 
-.PHONY: all test install manifests groupimports fmt vet tidy image \
+.PHONY: all clean test install manifests groupimports fmt vet tidy image \
 	docker-push lint generate \
 	$(all-tool-dependencies) install.sh $(GO_TARGET_PHONY) \
 	manager chaosfs chaosdaemon chaos-dashboard \
