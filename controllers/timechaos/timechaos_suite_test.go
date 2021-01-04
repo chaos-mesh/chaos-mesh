@@ -37,7 +37,7 @@ import (
 	. "github.com/chaos-mesh/chaos-mesh/controllers/test"
 	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
 	ctx "github.com/chaos-mesh/chaos-mesh/pkg/router/context"
-	"github.com/chaos-mesh/chaos-mesh/pkg/utils"
+	. "github.com/chaos-mesh/chaos-mesh/pkg/testutils"
 )
 
 func TestTimechaos(t *testing.T) {
@@ -61,7 +61,7 @@ var _ = AfterSuite(func() {
 
 var _ = Describe("TimeChaos", func() {
 	Context("TimeChaos", func() {
-		podObjects, pods := utils.GenerateNPods("p", 1, utils.PodArg{})
+		podObjects, pods := GenerateNPods("p", 1, PodArg{})
 
 		duration := "invalid_duration"
 

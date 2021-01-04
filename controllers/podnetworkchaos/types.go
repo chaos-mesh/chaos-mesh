@@ -24,9 +24,9 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos/ipset"
 	"github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos/iptable"
 	tcpkg "github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos/tc"
+	pbUtils "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/netem"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
 	"github.com/chaos-mesh/chaos-mesh/pkg/netem"
-	"github.com/chaos-mesh/chaos-mesh/pkg/utils"
 
 	"github.com/go-logr/logr"
 	corev1 "k8s.io/api/core/v1"
@@ -155,6 +155,11 @@ func (h *Handler) SetTcs(ctx context.Context, pod *corev1.Pod, chaos *v1alpha1.P
 	return tcpkg.SetTcs(ctx, h.Client, pod, tcs)
 }
 
+// NetemSpec defines the interface to convert to a Netem protobuf
+type NetemSpec interface {
+	ToNetem() (*pb.Netem, error)
+}
+
 // mergeNetem calls ToNetem on all non nil network emulation specs and merges them into one request.
 func mergeNetem(spec v1alpha1.TcParameter) (*pb.Netem, error) {
 	// NOTE: a cleaner way like
@@ -199,7 +204,7 @@ func mergeNetem(spec v1alpha1.TcParameter) (*pb.Netem, error) {
 
 	merged := &pb.Netem{}
 	for _, em := range emSpecs {
-		merged = utils.MergeNetem(merged, em)
+		merged = pbUtils.MergeNetem(merged, em)
 	}
 	return merged, nil
 }

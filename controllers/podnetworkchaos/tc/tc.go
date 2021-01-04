@@ -22,12 +22,13 @@ import (
 
 	"github.com/chaos-mesh/chaos-mesh/controllers/config"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
-	"github.com/chaos-mesh/chaos-mesh/pkg/utils"
+
+	daemonClient "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/client"
 )
 
 // SetTcs makes grpc call to chaosdaemon to flush traffic control rules
 func SetTcs(ctx context.Context, c client.Client, pod *v1.Pod, tcs []*pb.Tc) error {
-	pbClient, err := utils.NewChaosDaemonClient(ctx, c, pod, config.ControllerCfg.ChaosDaemonPort)
+	pbClient, err := daemonClient.NewChaosDaemonClient(ctx, c, pod, config.ControllerCfg.ChaosDaemonPort)
 	if err != nil {
 		return err
 	}
@@ -43,7 +44,8 @@ func SetTcs(ctx context.Context, c client.Client, pod *v1.Pod, tcs []*pb.Tc) err
 		Tcs:         tcs,
 		ContainerId: containerID,
 		// Prevent tcs is empty, used to clean up tc rules
-		Device: "eth0",
+		Device:  "eth0",
+		EnterNS: true,
 	})
 	return err
 }

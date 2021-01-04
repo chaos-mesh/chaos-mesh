@@ -25,6 +25,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/tools/cache"
+	"k8s.io/client-go/util/retry"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -32,10 +33,13 @@ import (
 
 	"github.com/chaos-mesh/chaos-mesh/controllers/common"
 	"github.com/chaos-mesh/chaos-mesh/controllers/config"
+	"github.com/chaos-mesh/chaos-mesh/pkg/annotation"
+	"github.com/chaos-mesh/chaos-mesh/pkg/events"
+	"github.com/chaos-mesh/chaos-mesh/pkg/finalizer"
 	"github.com/chaos-mesh/chaos-mesh/pkg/router"
 	ctx "github.com/chaos-mesh/chaos-mesh/pkg/router/context"
 	end "github.com/chaos-mesh/chaos-mesh/pkg/router/endpoint"
-	"github.com/chaos-mesh/chaos-mesh/pkg/utils"
+	"github.com/chaos-mesh/chaos-mesh/pkg/selector"
 )
 
 const (
@@ -44,6 +48,10 @@ const (
 	pauseImage = "gcr.io/google-containers/pause:latest"
 
 	podFailureActionMsg = "pod failure duration %s"
+)
+
+var (
+	errNotOperatedChaos = errors.New("the pod not operated by podChaos")
 )
 
 type endpoint struct {
@@ -65,7 +73,7 @@ func (r *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.I
 		return err
 	}
 
-	pods, err := utils.SelectAndFilterPods(ctx, r.Client, r.Reader, &podchaos.Spec, config.ControllerCfg.ClusterScoped, config.ControllerCfg.TargetNamespace, config.ControllerCfg.AllowedNamespaces, config.ControllerCfg.IgnoredNamespaces)
+	pods, err := selector.SelectAndFilterPods(ctx, r.Client, r.Reader, &podchaos.Spec, config.ControllerCfg.ClusterScoped, config.ControllerCfg.TargetNamespace, config.ControllerCfg.AllowedNamespaces, config.ControllerCfg.IgnoredNamespaces)
 	if err != nil {
 		r.Log.Error(err, "failed to select and filter pods")
 		return err
@@ -89,7 +97,7 @@ func (r *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.I
 		}
 		podchaos.Status.Experiment.PodRecords = append(podchaos.Status.Experiment.PodRecords, ps)
 	}
-	r.Event(podchaos, v1.EventTypeNormal, utils.EventChaosInjected, "")
+	r.Event(podchaos, v1.EventTypeNormal, events.ChaosInjected, "")
 	return nil
 }
 
@@ -107,7 +115,7 @@ func (r *endpoint) Recover(ctx context.Context, req ctrl.Request, obj v1alpha1.I
 		return err
 	}
 
-	r.Event(podchaos, v1.EventTypeNormal, utils.EventChaosRecovered, "")
+	r.Event(podchaos, v1.EventTypeNormal, events.ChaosRecovered, "")
 	return nil
 }
 
@@ -134,17 +142,17 @@ func (r *endpoint) cleanFinalizersAndRecover(ctx context.Context, podchaos *v1al
 			}
 
 			r.Log.Info("Pod not found", "namespace", ns, "name", name)
-			podchaos.Finalizers = utils.RemoveFromFinalizer(podchaos.Finalizers, key)
+			podchaos.Finalizers = finalizer.RemoveFromFinalizer(podchaos.Finalizers, key)
 			continue
 		}
-
 		err = r.recoverPod(ctx, &pod, podchaos)
+
 		if err != nil {
 			result = multierror.Append(result, err)
 			continue
 		}
 
-		podchaos.Finalizers = utils.RemoveFromFinalizer(podchaos.Finalizers, key)
+		podchaos.Finalizers = finalizer.RemoveFromFinalizer(podchaos.Finalizers, key)
 	}
 
 	if podchaos.Annotations[common.AnnotationCleanFinalizer] == common.AnnotationCleanFinalizerForced {
@@ -165,7 +173,7 @@ func (r *endpoint) failAllPods(ctx context.Context, pods []v1.Pod, podchaos *v1a
 		if err != nil {
 			return err
 		}
-		podchaos.Finalizers = utils.InsertFinalizer(podchaos.Finalizers, key)
+		podchaos.Finalizers = finalizer.InsertFinalizer(podchaos.Finalizers, key)
 
 		g.Go(func() error {
 			return r.failPod(ctx, pod, podchaos)
@@ -183,7 +191,7 @@ func (r *endpoint) failPod(ctx context.Context, pod *v1.Pod, podchaos *v1alpha1.
 		originImage := pod.Spec.InitContainers[index].Image
 		name := pod.Spec.InitContainers[index].Name
 
-		key := utils.GenAnnotationKeyForImage(podchaos, name)
+		key := annotation.GenKeyForImage(podchaos, name)
 		if pod.Annotations == nil {
 			pod.Annotations = make(map[string]string)
 		}
@@ -200,7 +208,7 @@ func (r *endpoint) failPod(ctx context.Context, pod *v1.Pod, podchaos *v1alpha1.
 		originImage := pod.Spec.Containers[index].Image
 		name := pod.Spec.Containers[index].Name
 
-		key := utils.GenAnnotationKeyForImage(podchaos, name)
+		key := annotation.GenKeyForImage(podchaos, name)
 		if pod.Annotations == nil {
 			pod.Annotations = make(map[string]string)
 		}
@@ -212,10 +220,23 @@ func (r *endpoint) failPod(ctx context.Context, pod *v1.Pod, podchaos *v1alpha1.
 		pod.Annotations[key] = originImage
 		pod.Spec.Containers[index].Image = pauseImage
 	}
-
-	if err := r.Update(ctx, pod); err != nil {
-		r.Log.Error(err, "unable to use fake image on pod")
-		return err
+	updateErr := retry.RetryOnConflict(retry.DefaultRetry, func() error {
+		var newPod v1.Pod
+		getErr := r.Client.Get(ctx, types.NamespacedName{
+			Namespace: pod.Namespace,
+			Name:      pod.Name,
+		}, &newPod)
+		if getErr != nil {
+			return getErr
+		}
+		newPod.Annotations = pod.Annotations
+		newPod.Spec.Containers = pod.Spec.Containers
+		newPod.Spec.InitContainers = pod.Spec.InitContainers
+		return r.Client.Update(ctx, &newPod)
+	})
+	if updateErr != nil {
+		r.Log.Error(updateErr, "unable to use fake image on pod")
+		return updateErr
 	}
 
 	ps := v1alpha1.PodStatus{
@@ -237,17 +258,23 @@ func (r *endpoint) failPod(ctx context.Context, pod *v1.Pod, podchaos *v1alpha1.
 func (r *endpoint) recoverPod(ctx context.Context, pod *v1.Pod, podchaos *v1alpha1.PodChaos) error {
 	r.Log.Info("Recovering", "namespace", pod.Namespace, "name", pod.Name)
 
+	containerChaosCount := 0
 	for index := range pod.Spec.Containers {
 		name := pod.Spec.Containers[index].Name
-		_ = utils.GenAnnotationKeyForImage(podchaos, name)
+		key := annotation.GenKeyForImage(podchaos, name)
 
 		if pod.Annotations == nil {
 			pod.Annotations = make(map[string]string)
 		}
-
-		// FIXME: Check annotations and return error.
+		// check annotation
+		if _, ok := pod.Annotations[key]; ok {
+			containerChaosCount++
+		}
 	}
-
+	if containerChaosCount == 0 {
+		r.Log.Error(errNotOperatedChaos, "the pod not operated by podChaos", "namespace", pod.Namespace, "name", pod.Name)
+		return nil
+	}
 	// chaos-mesh don't support
 	return r.Delete(ctx, pod, &client.DeleteOptions{
 		GracePeriodSeconds: new(int64), // PeriodSeconds has to be set specifically

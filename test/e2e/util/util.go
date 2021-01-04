@@ -105,7 +105,7 @@ func WaitForCRDsEstablished(client apiextensionsclientset.Interface, selector la
 
 // WaitDeploymentReady waits for all pods which controlled by deployment to be ready.
 func WaitDeploymentReady(name, namespace string, cli kubernetes.Interface) error {
-	return wait.Poll(5*time.Second, 5*time.Minute, func() (done bool, err error) {
+	return wait.Poll(2*time.Second, 5*time.Minute, func() (done bool, err error) {
 		d, err := cli.AppsV1().Deployments(namespace).Get(name, metav1.GetOptions{})
 		if err != nil {
 			return false, nil
@@ -141,7 +141,7 @@ func UnPauseChaos(ctx context.Context, cli client.Client, chaos runtime.Object) 
 }
 
 func WaitE2EHelperReady(c http.Client, port uint16) error {
-	return wait.Poll(10*time.Second, 5*time.Minute, func() (done bool, err error) {
+	return wait.Poll(2*time.Second, 5*time.Minute, func() (done bool, err error) {
 		if _, err = c.Get(fmt.Sprintf("http://localhost:%d/ping", port)); err != nil {
 			return false, nil
 		}

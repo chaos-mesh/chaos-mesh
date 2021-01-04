@@ -26,10 +26,11 @@ import (
 	v1alpha1 "github.com/chaos-mesh/api"
 
 	"github.com/chaos-mesh/chaos-mesh/controllers/config"
+	"github.com/chaos-mesh/chaos-mesh/pkg/events"
 	"github.com/chaos-mesh/chaos-mesh/pkg/router"
 	ctx "github.com/chaos-mesh/chaos-mesh/pkg/router/context"
 	end "github.com/chaos-mesh/chaos-mesh/pkg/router/endpoint"
-	"github.com/chaos-mesh/chaos-mesh/pkg/utils"
+	"github.com/chaos-mesh/chaos-mesh/pkg/selector"
 )
 
 const (
@@ -48,7 +49,7 @@ func (r *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.I
 		r.Log.Error(err, "chaos is not PodChaos", "chaos", chaos)
 		return err
 	}
-	pods, err := utils.SelectAndFilterPods(ctx, r.Client, r.Reader, &podchaos.Spec, config.ControllerCfg.ClusterScoped, config.ControllerCfg.TargetNamespace, config.ControllerCfg.AllowedNamespaces, config.ControllerCfg.IgnoredNamespaces)
+	pods, err := selector.SelectAndFilterPods(ctx, r.Client, r.Reader, &podchaos.Spec, config.ControllerCfg.ClusterScoped, config.ControllerCfg.TargetNamespace, config.ControllerCfg.AllowedNamespaces, config.ControllerCfg.IgnoredNamespaces)
 	if err != nil {
 		r.Log.Error(err, "fail to select and generate pods")
 		return err
@@ -87,7 +88,7 @@ func (r *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.I
 		podchaos.Status.Experiment.PodRecords = append(podchaos.Status.Experiment.PodRecords, ps)
 	}
 
-	r.Event(podchaos, v1.EventTypeNormal, utils.EventChaosInjected, "")
+	r.Event(podchaos, v1.EventTypeNormal, events.ChaosRecovered, "")
 	return nil
 }
 

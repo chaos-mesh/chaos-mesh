@@ -30,10 +30,12 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/controllers/common"
 	"github.com/chaos-mesh/chaos-mesh/controllers/config"
 	"github.com/chaos-mesh/chaos-mesh/controllers/iochaos/podiochaosmanager"
+	"github.com/chaos-mesh/chaos-mesh/pkg/events"
+	"github.com/chaos-mesh/chaos-mesh/pkg/finalizer"
 	"github.com/chaos-mesh/chaos-mesh/pkg/router"
 	ctx "github.com/chaos-mesh/chaos-mesh/pkg/router/context"
 	end "github.com/chaos-mesh/chaos-mesh/pkg/router/endpoint"
-	"github.com/chaos-mesh/chaos-mesh/pkg/utils"
+	"github.com/chaos-mesh/chaos-mesh/pkg/selector"
 )
 
 type endpoint struct {
@@ -56,7 +58,7 @@ func (r *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.I
 	source := iochaos.Namespace + "/" + iochaos.Name
 	m := podiochaosmanager.New(source, r.Log, r.Client)
 
-	pods, err := utils.SelectAndFilterPods(ctx, r.Client, r.Reader, &iochaos.Spec, config.ControllerCfg.ClusterScoped, config.ControllerCfg.TargetNamespace, config.ControllerCfg.AllowedNamespaces, config.ControllerCfg.IgnoredNamespaces)
+	pods, err := selector.SelectAndFilterPods(ctx, r.Client, r.Reader, &iochaos.Spec, config.ControllerCfg.ClusterScoped, config.ControllerCfg.TargetNamespace, config.ControllerCfg.AllowedNamespaces, config.ControllerCfg.IgnoredNamespaces)
 	if err != nil {
 		r.Log.Error(err, "failed to select and filter pods")
 		return err
@@ -108,7 +110,7 @@ func (r *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.I
 		if err != nil {
 			return err
 		}
-		iochaos.Finalizers = utils.InsertFinalizer(iochaos.Finalizers, key)
+		iochaos.Finalizers = finalizer.InsertFinalizer(iochaos.Finalizers, key)
 	}
 	r.Log.Info("commiting updates of podiochaos")
 	responses := m.Commit(ctx)
@@ -137,7 +139,7 @@ func (r *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.I
 
 		iochaos.Status.Experiment.PodRecords = append(iochaos.Status.Experiment.PodRecords, ps)
 	}
-	r.Event(iochaos, v1.EventTypeNormal, utils.EventChaosInjected, "")
+	r.Event(iochaos, v1.EventTypeNormal, events.ChaosInjected, "")
 
 	return nil
 }
@@ -154,7 +156,7 @@ func (r *endpoint) Recover(ctx context.Context, req ctrl.Request, chaos v1alpha1
 	if err := r.cleanFinalizersAndRecover(ctx, iochaos); err != nil {
 		return err
 	}
-	r.Event(iochaos, v1.EventTypeNormal, utils.EventChaosRecovered, "")
+	r.Event(iochaos, v1.EventTypeNormal, events.ChaosRecovered, "")
 	return nil
 }
 
@@ -193,7 +195,7 @@ func (r *endpoint) cleanFinalizersAndRecover(ctx context.Context, chaos *v1alpha
 			r.Log.Info("pod is not found or not running", "key", key)
 		}
 
-		chaos.Finalizers = utils.RemoveFromFinalizer(chaos.Finalizers, response.Key.String())
+		chaos.Finalizers = finalizer.RemoveFromFinalizer(chaos.Finalizers, response.Key.String())
 	}
 	r.Log.Info("After recovering", "finalizers", chaos.Finalizers)
 

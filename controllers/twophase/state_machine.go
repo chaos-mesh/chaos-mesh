@@ -22,8 +22,6 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 
 	v1alpha1 "github.com/chaos-mesh/api"
-
-	"github.com/chaos-mesh/chaos-mesh/pkg/utils"
 )
 
 const iterMax = 1e4
@@ -209,7 +207,7 @@ func (m *chaosStateMachine) IterateNextTime(startTime time.Time, duration time.D
 		return nil, nil, errors.Errorf("misdefined scheduler")
 	}
 	m.Log.Info("iterate nextStart and nextRecover", "startTime", startTime, "duration", duration, "scheduler", scheduler)
-	nextStart, err := utils.NextTime(*scheduler, startTime)
+	nextStart, err := nextTime(*scheduler, startTime)
 
 	if err != nil {
 		m.Log.Error(err, "failed to get the next start time")
@@ -221,7 +219,7 @@ func (m *chaosStateMachine) IterateNextTime(startTime time.Time, duration time.D
 	// if the duration is too long, `nextRecover` could be after `nextStart`
 	// we can jump over a start to make sure `nextRecover` is before `nextStart`
 	for nextRecover.After(*nextStart) {
-		nextStart, err = utils.NextTime(*scheduler, *nextStart)
+		nextStart, err = nextTime(*scheduler, *nextStart)
 		if err != nil {
 			m.Log.Error(err, "failed to get the next start time")
 			return nil, nil, err

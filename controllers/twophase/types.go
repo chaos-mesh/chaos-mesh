@@ -15,15 +15,16 @@ package twophase
 
 import (
 	"context"
+	"fmt"
 	"math"
 	"time"
 
 	"github.com/pkg/errors"
-
-	v1alpha1 "github.com/chaos-mesh/api"
+	"github.com/robfig/cron/v3"
 
 	ctx "github.com/chaos-mesh/chaos-mesh/pkg/router/context"
 	"github.com/chaos-mesh/chaos-mesh/pkg/router/endpoint"
+	v1alpha1 "github.com/chaos-mesh/api"
 
 	ctrl "sigs.k8s.io/controller-runtime"
 )
@@ -140,4 +141,14 @@ func calcRequeueAfterTime(chaos v1alpha1.InnerSchedulerObject, now time.Time) (t
 	}
 
 	return requeueAfter, err
+}
+
+func nextTime(spec v1alpha1.SchedulerSpec, now time.Time) (*time.Time, error) {
+	scheduler, err := cron.ParseStandard(spec.Cron)
+	if err != nil {
+		return nil, fmt.Errorf("fail to parse runner rule %s, %v", spec.Cron, err)
+	}
+
+	next := scheduler.Next(now)
+	return &next, nil
 }
