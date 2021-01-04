@@ -68,11 +68,6 @@ endif
 
 CLEAN_TARGETS :=
 
-CHAOS_MESH_BUILD_IN_DOCKER ?= 1
-ifeq (${IN_DOCKER},1)
-	CHAOS_MESH_BUILD_IN_DOCKER = 0
-endif
-
 all: manifests/crd.yaml image
 
 check: fmt vet boilerplate lint generate manifests/crd.yaml tidy
@@ -187,7 +182,7 @@ GO_TARGET_PHONY :=
 BINARIES :=
 
 define COMPILE_GO_TEMPLATE
-ifeq ($(CHAOS_MESH_BUILD_IN_DOCKER),0)
+ifeq ($(IN_DOCKER),1)
 
 $(1): $(4)
 ifeq ($(3),1)
@@ -214,7 +209,7 @@ endif
 
 define BUILD_IN_DOCKER_TEMPLATE
 CLEAN_TARGETS += $(2)
-ifeq ($(CHAOS_MESH_BUILD_IN_DOCKER),1)
+ifeq ($(IN_DOCKER),0)
 
 $(2): image-build-env go_build_cache_directory
 	[[ "$(DOCKER_HOST)" == "" ]] || (printf "\
@@ -238,7 +233,7 @@ image-$(1)-dependencies := $(image-$(1)-dependencies) $(2)
 BINARIES := $(BINARIES) $(2)
 endef
 
-ifeq ($(CHAOS_MESH_BUILD_IN_DOCKER),0)
+ifeq ($(IN_DOCKER),1)
 images/chaos-daemon/bin/pause: hack/pause.c
 	cc ./hack/pause.c -o images/chaos-daemon/bin/pause
 endif
@@ -257,7 +252,7 @@ $(eval $(call BUILD_IN_DOCKER_TEMPLATE,chaos-mesh-e2e,test/image/e2e/bin/ginkgo)
 $(eval $(call COMPILE_GO_TEMPLATE,test/image/e2e/bin/ginkgo,github.com/onsi/ginkgo/ginkgo,0))
 
 $(eval $(call BUILD_IN_DOCKER_TEMPLATE,chaos-mesh-e2e,test/image/e2e/bin/e2e.test))
-ifeq ($(CHAOS_MESH_BUILD_IN_DOCKER),0)
+ifeq ($(IN_DOCKER),1)
 test/image/e2e/bin/e2e.test:
 	$(GO) test -c  -o ./test/image/e2e/bin/e2e.test ./test/e2e
 $(eval $(call BUILD_IN_DOCKER_TEMPLATE,chaos-mesh-e2e,test/image/e2e/bin/e2e.test))
@@ -343,7 +338,7 @@ manifests/crd.yaml: config ensure-kustomize
 	$(KUSTOMIZE_BIN) build config/default > manifests/crd.yaml
 
 # Generate Go files from Chaos Mesh proto files.
-ifeq ($(CHAOS_MESH_BUILD_IN_DOCKER),0)
+ifeq ($(IN_DOCKER),1)
 proto:
 	for dir in pkg/chaosdaemon ; do\
 		protoc -I $$dir/pb $$dir/pb/*.proto --go_out=plugins=grpc:$$dir/pb --go_out=./$$dir/pb ;\
