@@ -30,11 +30,16 @@ import (
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/common"
+	"github.com/chaos-mesh/chaos-mesh/controllers/config"
+	"github.com/chaos-mesh/chaos-mesh/pkg/events"
+	"github.com/chaos-mesh/chaos-mesh/pkg/finalizer"
+	"github.com/chaos-mesh/chaos-mesh/pkg/grpc"
 	"github.com/chaos-mesh/chaos-mesh/pkg/router"
 	ctx "github.com/chaos-mesh/chaos-mesh/pkg/router/context"
 	end "github.com/chaos-mesh/chaos-mesh/pkg/router/endpoint"
-	"github.com/chaos-mesh/chaos-mesh/pkg/utils"
+	"github.com/chaos-mesh/chaos-mesh/pkg/selector"
 
+	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/client"
 	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
 	pb_ "github.com/chaos-mesh/chaos-mesh/pkg/chaoskernel/pb"
 )
@@ -55,7 +60,7 @@ func (r *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.I
 		return err
 	}
 
-	pods, err := utils.SelectAndFilterPods(ctx, r.Client, r.Reader, &kernelChaos.Spec)
+	pods, err := selector.SelectAndFilterPods(ctx, r.Client, r.Reader, &kernelChaos.Spec, config.ControllerCfg.ClusterScoped, config.ControllerCfg.TargetNamespace, config.ControllerCfg.AllowedNamespaces, config.ControllerCfg.IgnoredNamespaces)
 	if err != nil {
 		r.Log.Error(err, "failed to select and filter pods")
 		return err
@@ -78,7 +83,7 @@ func (r *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.I
 
 		kernelChaos.Status.Experiment.PodRecords = append(kernelChaos.Status.Experiment.PodRecords, ps)
 	}
-	r.Event(kernelChaos, v1.EventTypeNormal, utils.EventChaosInjected, "")
+	r.Event(kernelChaos, v1.EventTypeNormal, events.ChaosInjected, "")
 
 	return nil
 }
@@ -95,7 +100,7 @@ func (r *endpoint) Recover(ctx context.Context, req ctrl.Request, chaos v1alpha1
 	if err := r.cleanFinalizersAndRecover(ctx, kernelChaos); err != nil {
 		return err
 	}
-	r.Event(kernelChaos, v1.EventTypeNormal, utils.EventChaosRecovered, "")
+	r.Event(kernelChaos, v1.EventTypeNormal, events.ChaosRecovered, "")
 
 	return nil
 }
@@ -123,7 +128,7 @@ func (r *endpoint) cleanFinalizersAndRecover(ctx context.Context, chaos *v1alpha
 			}
 
 			r.Log.Info("Pod not found", "namespace", ns, "name", name)
-			chaos.Finalizers = utils.RemoveFromFinalizer(chaos.Finalizers, key)
+			chaos.Finalizers = finalizer.RemoveFromFinalizer(chaos.Finalizers, key)
 			continue
 		}
 
@@ -133,7 +138,7 @@ func (r *endpoint) cleanFinalizersAndRecover(ctx context.Context, chaos *v1alpha
 			continue
 		}
 
-		chaos.Finalizers = utils.RemoveFromFinalizer(chaos.Finalizers, key)
+		chaos.Finalizers = finalizer.RemoveFromFinalizer(chaos.Finalizers, key)
 	}
 
 	if chaos.Annotations[common.AnnotationCleanFinalizer] == common.AnnotationCleanFinalizerForced {
@@ -148,7 +153,7 @@ func (r *endpoint) cleanFinalizersAndRecover(ctx context.Context, chaos *v1alpha
 func (r *endpoint) recoverPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.KernelChaos) error {
 	r.Log.Info("try to recover pod", "namespace", pod.Namespace, "name", pod.Name)
 
-	pbClient, err := utils.NewChaosDaemonClient(ctx, r.Client, pod, common.ControllerCfg.ChaosDaemonPort)
+	pbClient, err := client.NewChaosDaemonClient(ctx, r.Client, pod, config.ControllerCfg.ChaosDaemonPort)
 	if err != nil {
 		return err
 	}
@@ -171,7 +176,7 @@ func (r *endpoint) recoverPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.
 	}
 
 	r.Log.Info("Get container pid", "namespace", pod.Namespace, "name", pod.Name)
-	conn, err := utils.CreateGrpcConnection(ctx, r.Client, pod, common.ControllerCfg.BPFKIPort)
+	conn, err := grpc.CreateGrpcConnection(ctx, r.Client, pod, config.ControllerCfg.BPFKIPort)
 	if err != nil {
 		return err
 	}
@@ -209,7 +214,7 @@ func (r *endpoint) applyAllPods(ctx context.Context, pods []v1.Pod, chaos *v1alp
 		if err != nil {
 			return err
 		}
-		chaos.Finalizers = utils.InsertFinalizer(chaos.Finalizers, key)
+		chaos.Finalizers = finalizer.InsertFinalizer(chaos.Finalizers, key)
 
 		g.Go(func() error {
 			return r.applyPod(ctx, pod, chaos)
@@ -222,7 +227,7 @@ func (r *endpoint) applyAllPods(ctx context.Context, pods []v1.Pod, chaos *v1alp
 func (r *endpoint) applyPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.KernelChaos) error {
 	r.Log.Info("Try to inject kernel on pod", "namespace", pod.Namespace, "name", pod.Name)
 
-	pbClient, err := utils.NewChaosDaemonClient(ctx, r.Client, pod, common.ControllerCfg.ChaosDaemonPort)
+	pbClient, err := client.NewChaosDaemonClient(ctx, r.Client, pod, config.ControllerCfg.ChaosDaemonPort)
 	if err != nil {
 		return err
 	}
@@ -244,7 +249,7 @@ func (r *endpoint) applyPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.Ke
 	}
 
 	r.Log.Info("Get container pid", "namespace", pod.Namespace, "name", pod.Name)
-	conn, err := utils.CreateGrpcConnection(ctx, r.Client, pod, common.ControllerCfg.BPFKIPort)
+	conn, err := grpc.CreateGrpcConnection(ctx, r.Client, pod, config.ControllerCfg.BPFKIPort)
 	if err != nil {
 		return err
 	}

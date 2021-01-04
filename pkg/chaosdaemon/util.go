@@ -29,7 +29,6 @@ import (
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/bpm"
 	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
-	"github.com/chaos-mesh/chaos-mesh/pkg/utils"
 )
 
 const (
@@ -292,7 +291,7 @@ func GetChildProcesses(ppid uint32) ([]uint32, error) {
 		done <- true
 	}()
 
-	processGraph := utils.NewGraph()
+	processGraph := NewGraph()
 	for {
 		select {
 		case pair := <-pairs:

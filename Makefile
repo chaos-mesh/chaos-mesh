@@ -38,7 +38,7 @@ PACKAGE_LIST := go list ./... | grep -vE "chaos-mesh/test|pkg/ptrace|zz_generate
 PACKAGE_DIRECTORIES := $(PACKAGE_LIST) | sed 's|github.com/chaos-mesh/chaos-mesh/||'
 
 # Produce CRDs that work back to Kubernetes 1.11 (no version conversion)
-CRD_OPTIONS ?= "crd:trivialVersions=true"
+CRD_OPTIONS ?= "crd:trivialVersions=true,preserveUnknownFields=false"
 
 # Get the currently used golang install path (in GOPATH/bin, unless GOBIN is set)
 ifeq (,$(shell go env GOBIN))
@@ -98,15 +98,9 @@ chaosdaemon:
 bin/pause: ./hack/pause.c
 	cc ./hack/pause.c -o bin/pause
 
-bin/suicide: ./hack/suicide.c
-	cc ./hack/suicide.c -o bin/suicide
-
 # Build manager binary
 manager:
 	$(GO) build -ldflags '$(LDFLAGS)' -o bin/chaos-controller-manager ./cmd/controller-manager/*.go
-
-chaosfs:
-	$(GO) build -ldflags '$(LDFLAGS)' -o bin/chaosfs ./cmd/chaosfs/*.go
 
 chaos-dashboard:
 ifeq ($(SWAGGER),1)
@@ -129,10 +123,14 @@ ui: yarn_dependencies
 	cd ui &&\
 	yarn build
 
-binary: chaosdaemon manager chaosfs chaos-dashboard bin/pause bin/suicide
+binary: chaosdaemon manager chaos-dashboard bin/pause
 
 watchmaker:
 	$(CGOENV) go build -ldflags '$(LDFLAGS)' -o bin/watchmaker ./cmd/watchmaker/...
+
+# Build chaosctl
+chaosctl:
+	$(GO) build -ldflags '$(LDFLAGS)' -o bin/chaosctl ./cmd/chaosctl/*.go
 
 # Run against the configured Kubernetes cluster in ~/.kube/config
 run: generate fmt vet manifests
@@ -197,7 +195,7 @@ taily-build:
 taily-build-clean:
 	docker kill taily-build && docker rm taily-build || exit 0
 
-image: image-chaos-daemon image-chaos-mesh image-chaos-dashboard image-chaos-fs image-chaos-scripts
+image: image-chaos-daemon image-chaos-mesh image-chaos-dashboard image-chaos-scripts
 
 image-chaos-mesh-protoc:
 	docker build -t pingcap/chaos-mesh-protoc ${DOCKER_BUILD_ARGS} ./hack/protoc
@@ -221,9 +219,6 @@ image-chaos-daemon: image-binary
 image-chaos-mesh: image-binary
 	docker build -t ${DOCKER_REGISTRY_PREFIX}pingcap/chaos-mesh:${IMAGE_TAG} ${DOCKER_BUILD_ARGS} images/chaos-mesh
 
-image-chaos-fs: image-binary
-	docker build -t ${DOCKER_REGISTRY_PREFIX}pingcap/chaos-fs:${IMAGE_TAG} ${DOCKER_BUILD_ARGS} images/chaosfs
-
 image-chaos-scripts: image-binary
 	docker build -t ${DOCKER_REGISTRY_PREFIX}pingcap/chaos-scripts:${IMAGE_TAG} ${DOCKER_BUILD_ARGS} images/chaos-scripts
 
@@ -236,7 +231,6 @@ image-chaos-kernel:
 docker-push:
 	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-mesh:${IMAGE_TAG}"
 	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-dashboard:${IMAGE_TAG}"
-	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-fs:${IMAGE_TAG}"
 	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-daemon:${IMAGE_TAG}"
 	docker push "${DOCKER_REGISTRY_PREFIX}pingcap/chaos-scripts:${IMAGE_TAG}"
 
@@ -274,7 +268,7 @@ yaml: manifests ensure-kustomize
 # Generate Go files from Chaos Mesh proto files.
 ifeq ($(IN_DOCKER),1)
 proto:
-	for dir in pkg/chaosdaemon pkg/chaosfs; do\
+	for dir in pkg/chaosdaemon; do\
 		protoc -I $$dir/pb $$dir/pb/*.proto --go_out=plugins=grpc:$$dir/pb --go_out=./$$dir/pb ;\
 	done
 else
@@ -334,6 +328,6 @@ install-local-coverage-tools:
 
 .PHONY: all build test install manifests groupimports fmt vet tidy image \
 	binary docker-push lint generate yaml \
-	manager chaosfs chaosdaemon chaos-dashboard ensure-all \
+	manager chaosdaemon chaos-dashboard ensure-all \
 	dashboard dashboard-server-frontend gosec-scan \
 	proto bin/chaos-builder

@@ -23,17 +23,24 @@ import (
 
 // ChaosDashboardConfig defines the configuration for Chaos Dashboard
 type ChaosDashboardConfig struct {
-	ListenHost           string `envconfig:"LISTEN_HOST" default:"0.0.0.0"`
-	ListenPort           int    `envconfig:"LISTEN_PORT" default:"2333"`
-	MetricAddress        string `envconfig:"METRIC_ADDRESS"`
-	EnableLeaderElection bool   `envconfig:"ENABLE_LEADER_ELECTION"`
-	Database             *DatabaseConfig
-	PersistTTL           *PersistTTLConfig
+	ListenHost           string            `envconfig:"LISTEN_HOST" default:"0.0.0.0" json:"listen_host"`
+	ListenPort           int               `envconfig:"LISTEN_PORT" default:"2333" json:"listen_port"`
+	MetricAddress        string            `envconfig:"METRIC_ADDRESS" json:"-"`
+	EnableLeaderElection bool              `envconfig:"ENABLE_LEADER_ELECTION" json:"-"`
+	Database             *DatabaseConfig   `json:"-"`
+	PersistTTL           *PersistTTLConfig `json:"-"`
 	// ClusterScoped means control Chaos Object in cluster level(all namespace),
-	ClusterScoped bool `envconfig:"CLUSTER_SCOPED" default:"true"`
+	ClusterScoped bool `envconfig:"CLUSTER_SCOPED" default:"true" json:"cluster_mode"`
 	// TargetNamespace is the target namespace to injecting chaos.
 	// It only works with ClusterScoped is false;
-	TargetNamespace string `envconfig:"TARGET_NAMESPACE" default:""`
+	TargetNamespace string `envconfig:"TARGET_NAMESPACE" default:"" json:"target_namespace"`
+	// AllowedNamespaces is a regular expression, and matching namespace will allow the chaos task to be performed
+	AllowedNamespaces string `envconfig:"ALLOWED_NAMESPACES" default:"" json:"-"`
+	// IgnoredNamespaces is a regular expression, and the chaos task will be ignored by a matching namespace
+	IgnoredNamespaces string `envconfig:"IGNORED_NAMESPACES" default:"" json:"-"`
+
+	// SecurityMode will use the token login by the user if set to true
+	SecurityMode bool `envconfig:"SECURITY_MODE" default:"true" json:"security_mode"`
 }
 
 // PersistTTLConfig defines the configuration of ttl

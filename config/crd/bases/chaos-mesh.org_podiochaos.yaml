@@ -14,6 +14,7 @@ spec:
     listKind: PodIoChaosList
     plural: podiochaos
     singular: podiochaos
+  preserveUnknownFields: false
   scope: Namespaced
   validation:
     openAPIV3Schema:

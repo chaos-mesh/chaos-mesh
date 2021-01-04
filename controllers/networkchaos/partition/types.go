@@ -27,15 +27,18 @@ import (
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/common"
+	"github.com/chaos-mesh/chaos-mesh/controllers/config"
 	"github.com/chaos-mesh/chaos-mesh/controllers/networkchaos/podnetworkmanager"
 	"github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos/ipset"
 	"github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos/iptable"
 	"github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos/netutils"
 	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
+	"github.com/chaos-mesh/chaos-mesh/pkg/events"
+	"github.com/chaos-mesh/chaos-mesh/pkg/finalizer"
 	"github.com/chaos-mesh/chaos-mesh/pkg/router"
 	ctx "github.com/chaos-mesh/chaos-mesh/pkg/router/context"
 	end "github.com/chaos-mesh/chaos-mesh/pkg/router/endpoint"
-	"github.com/chaos-mesh/chaos-mesh/pkg/utils"
+	"github.com/chaos-mesh/chaos-mesh/pkg/selector"
 )
 
 const (
@@ -71,19 +74,19 @@ func (e *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.I
 	source := networkchaos.Namespace + "/" + networkchaos.Name
 	m := podnetworkmanager.New(source, e.Log, e.Client, e.Reader)
 
-	sources, err := utils.SelectAndFilterPods(ctx, e.Client, e.Reader, &networkchaos.Spec)
+	sources, err := selector.SelectAndFilterPods(ctx, e.Client, e.Reader, &networkchaos.Spec, config.ControllerCfg.ClusterScoped, config.ControllerCfg.TargetNamespace, config.ControllerCfg.AllowedNamespaces, config.ControllerCfg.IgnoredNamespaces)
 
 	if err != nil {
-		e.Log.Error(err, "failed to select and filter pods")
+		e.Log.Error(err, "failed to select and filter source pods")
 		return err
 	}
 
 	var targets []v1.Pod
 
 	if networkchaos.Spec.Target != nil {
-		targets, err = utils.SelectAndFilterPods(ctx, e.Client, e.Reader, networkchaos.Spec.Target)
+		targets, err = selector.SelectAndFilterPods(ctx, e.Client, e.Reader, networkchaos.Spec.Target, config.ControllerCfg.ClusterScoped, config.ControllerCfg.TargetNamespace, config.ControllerCfg.AllowedNamespaces, config.ControllerCfg.IgnoredNamespaces)
 		if err != nil {
-			e.Log.Error(err, "failed to select and filter pods")
+			e.Log.Error(err, "failed to select and filter target pods")
 			return err
 		}
 	}
@@ -97,6 +100,27 @@ func (e *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.I
 	targetSet := ipset.BuildIPSet(targets, externalCidrs, networkchaos, targetIPSetPostFix, source)
 
 	allPods := append(sources, targets...)
+
+	type podPositionTuple struct {
+		Pod      v1.Pod
+		Position string
+	}
+	keyPodMap := make(map[types.NamespacedName]podPositionTuple)
+	for index, pod := range allPods {
+		position := ""
+		if index < len(sources) {
+			position = "source"
+		} else {
+			position = "target"
+		}
+		keyPodMap[types.NamespacedName{
+			Name:      pod.Name,
+			Namespace: pod.Namespace,
+		}] = podPositionTuple{
+			Pod:      pod,
+			Position: position,
+		}
+	}
 
 	// Set up ipset in every related pods
 	for index := range allPods {
@@ -165,39 +189,43 @@ func (e *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.I
 		return err
 	}
 
-	err = m.Commit(ctx)
-	if err != nil {
-		// if pod is not found or not running, don't print error log and wait next time.
-		if err != podnetworkmanager.ErrPodNotFound && err != podnetworkmanager.ErrPodNotRunning {
-			e.Log.Error(err, "fail to commit")
-		}
-		return err
-	}
+	responses := m.Commit(ctx)
 
 	networkchaos.Status.Experiment.PodRecords = make([]v1alpha1.PodStatus, 0, len(allPods))
-	for index, pod := range allPods {
-		ps := v1alpha1.PodStatus{
-			Namespace: pod.Namespace,
-			Name:      pod.Name,
-			HostIP:    pod.Status.HostIP,
-			PodIP:     pod.Status.PodIP,
-			Action:    string(networkchaos.Spec.Action),
+	for _, keyErrorTuple := range responses {
+		key := keyErrorTuple.Key
+		err := keyErrorTuple.Err
+		if err != nil {
+			if err != podnetworkmanager.ErrPodNotFound && err != podnetworkmanager.ErrPodNotRunning {
+				e.Log.Error(err, "fail to commit")
+			} else {
+				e.Log.Info("pod is not found or not running", "key", key)
+			}
+			return err
 		}
 
-		if index < len(sources) {
+		pod := keyPodMap[keyErrorTuple.Key]
+		ps := v1alpha1.PodStatus{
+			Namespace: pod.Pod.Namespace,
+			Name:      pod.Pod.Name,
+			HostIP:    pod.Pod.Status.HostIP,
+			PodIP:     pod.Pod.Status.PodIP,
+			Action:    string(networkchaos.Spec.Action),
+		}
+		if pod.Position == "source" {
 			ps.Message = networkChaosSourceMsg
 		} else {
 			ps.Message = networkChaosTargetMsg
 		}
 
+		// TODO: add source, target and tc action message
 		if networkchaos.Spec.Duration != nil {
 			ps.Message += fmt.Sprintf(networkPartitionActionMsg, *networkchaos.Spec.Duration)
 		}
-
 		networkchaos.Status.Experiment.PodRecords = append(networkchaos.Status.Experiment.PodRecords, ps)
 	}
 
-	e.Event(networkchaos, v1.EventTypeNormal, utils.EventChaosInjected, "")
+	e.Event(networkchaos, v1.EventTypeNormal, events.ChaosInjected, "")
 	return nil
 }
 
@@ -219,7 +247,7 @@ func (e *endpoint) SetChains(ctx context.Context, pods []v1.Pod, chains []v1alph
 			t.Append(chain)
 		}
 
-		networkchaos.Finalizers = utils.InsertFinalizer(networkchaos.Finalizers, key)
+		networkchaos.Finalizers = finalizer.InsertFinalizer(networkchaos.Finalizers, key)
 
 	}
 	return nil
@@ -239,7 +267,7 @@ func (e *endpoint) Recover(ctx context.Context, req ctrl.Request, chaos v1alpha1
 		e.Log.Error(err, "cleanFinalizersAndRecover failed")
 		return err
 	}
-	e.Event(networkchaos, v1.EventTypeNormal, utils.EventChaosRecovered, "")
+	e.Event(networkchaos, v1.EventTypeNormal, events.ChaosRecovered, "")
 
 	return nil
 }
@@ -261,20 +289,22 @@ func (e *endpoint) cleanFinalizersAndRecover(ctx context.Context, networkchaos *
 			Namespace: ns,
 			Name:      name,
 		})
-
-		if err != nil {
-			result = multierror.Append(result, err)
-			continue
-		}
-
-		err = m.Commit(ctx)
-
+	}
+	responses := m.Commit(ctx)
+	for _, response := range responses {
+		key := response.Key
+		err := response.Err
 		// if pod not found or not running, directly return and giveup recover.
-		if err != nil && err != podnetworkmanager.ErrPodNotFound && err != podnetworkmanager.ErrPodNotRunning {
-			e.Log.Error(err, "fail to commit")
+		if err != nil {
+			if err != podnetworkmanager.ErrPodNotFound && err != podnetworkmanager.ErrPodNotRunning {
+				e.Log.Error(err, "fail to commit", "key", key)
+				continue
+			}
+
+			e.Log.Info("pod is not found or not running", "key", key)
 		}
 
-		networkchaos.Finalizers = utils.RemoveFromFinalizer(networkchaos.Finalizers, key)
+		networkchaos.Finalizers = finalizer.RemoveFromFinalizer(networkchaos.Finalizers, response.Key.String())
 	}
 	e.Log.Info("After recovering", "finalizers", networkchaos.Finalizers)
 

@@ -22,9 +22,8 @@ const data = {
 
 export const schema: Yup.ObjectSchema = Yup.object({
   name: Yup.string().required('The experiment name is required'),
-  namespace: Yup.string().required('The experiment namespace is required'),
-  scheduler: Yup.object({
-    cron: Yup.string().required('The cron is required'),
+  scope: Yup.object({
+    namespace_selectors: Yup.array().min(1, 'The namespace selectors is required'),
   }),
 })
 

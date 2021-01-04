@@ -156,7 +156,6 @@ function e2e::image_build() {
     fi
     DOCKER_REGISTRY=${DOCKER_REGISTRY} GOOS=linux GOARCH=amd64 make e2e-docker
     DOCKER_REGISTRY=${DOCKER_REGISTRY} make image-chaos-scripts
-    DOCKER_REGISTRY=${DOCKER_REGISTRY} make image-chaos-fs
     DOCKER_REGISTRY=${DOCKER_REGISTRY} make image-chaos-mesh
     DOCKER_REGISTRY=${DOCKER_REGISTRY} make image-chaos-daemon
     DOCKER_REGISTRY=${DOCKER_REGISTRY} make image-e2e-helper

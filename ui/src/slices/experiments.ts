@@ -2,24 +2,12 @@ import { PayloadAction, createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 
 import { ExperimentScope } from 'components/NewExperiment/types'
 import { Kind } from 'components/NewExperimentNext/data/target'
-import { StateOfExperiments } from 'api/experiments.type'
 import api from 'api'
 
-const defaultStateOfExperiments = {
-  Total: 0,
-  Running: 0,
-  Waiting: 0,
-  Paused: 0,
-  Failed: 0,
-  Finished: 0,
-}
-
-export const getStateofExperiments = createAsyncThunk(
-  'experiments/state',
-  async () => (await api.experiments.state()).data
+export const getNamespaces = createAsyncThunk(
+  'common/chaos-available-namespaces',
+  async () => (await api.common.chaosAvailableNamespaces()).data
 )
-
-export const getNamespaces = createAsyncThunk('common/chaos-available-namespaces', async () => (await api.common.chaosAvailableNamespaces()).data)
 export const getLabels = createAsyncThunk(
   'common/labels',
   async (podNamespaceList: string[]) => (await api.common.labels(podNamespaceList)).data
@@ -38,8 +26,6 @@ const initialState: {
   labels: Record<string, string[]>
   annotations: Record<string, string[]>
   pods: any[]
-  stateOfExperiments: StateOfExperiments
-  needToRefreshExperiments: boolean
   step1: boolean
   step2: boolean
   kindAction: [Kind | '', string]
@@ -50,8 +36,6 @@ const initialState: {
   labels: {},
   annotations: {},
   pods: [],
-  stateOfExperiments: defaultStateOfExperiments,
-  needToRefreshExperiments: false,
   // New Experiment needed
   step1: false,
   step2: false,
@@ -66,9 +50,6 @@ const experimentsSlice = createSlice({
   name: 'experiments',
   initialState,
   reducers: {
-    setNeedToRefreshExperiments(state, action: PayloadAction<boolean>) {
-      state.needToRefreshExperiments = action.payload
-    },
     setStep1(state, action: PayloadAction<boolean>) {
       state.step1 = action.payload
     },
@@ -93,9 +74,6 @@ const experimentsSlice = createSlice({
     },
   },
   extraReducers: (builder) => {
-    builder.addCase(getStateofExperiments.fulfilled, (state, action) => {
-      state.stateOfExperiments = action.payload
-    })
     builder.addCase(getNamespaces.fulfilled, (state, action) => {
       state.namespaces = action.payload.filter((d) => !namespaceFilters.includes(d))
     })
@@ -111,14 +89,6 @@ const experimentsSlice = createSlice({
   },
 })
 
-export const {
-  setNeedToRefreshExperiments,
-  setStep1,
-  setStep2,
-  setKindAction,
-  setTarget,
-  setBasic,
-  resetNewExperiment,
-} = experimentsSlice.actions
+export const { setStep1, setStep2, setKindAction, setTarget, setBasic, resetNewExperiment } = experimentsSlice.actions
 
 export default experimentsSlice.reducer

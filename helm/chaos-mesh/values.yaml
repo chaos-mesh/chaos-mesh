@@ -29,6 +29,8 @@ controllerManager:
 
   replicaCount: 1
 
+  priorityClassName: ""
+
   image: pingcap/chaos-mesh:latest
   imagePullPolicy: IfNotPresent
 
@@ -65,6 +67,9 @@ controllerManager:
 
   podAnnotations: {}
 
+  # This is Dangerous. Run only on temporary clusters.
+  allowHostNetworkTesting: false
+
 chaosDaemon:
   image: pingcap/chaos-daemon:latest
   imagePullPolicy: IfNotPresent
@@ -72,6 +77,8 @@ chaosDaemon:
   httpPort: 31766
   env: {}
   hostNetwork: false
+
+  priorityClassName: ""
 
   podAnnotations: {}
 
@@ -111,10 +118,14 @@ dashboard:
 
   replicaCount: 1
 
+  priorityClassName: ""
+
   serviceAccount: chaos-controller-manager
 
   image: pingcap/chaos-dashboard:latest
   imagePullPolicy: IfNotPresent
+
+  securityMode: true
 
   nodeSelector: {}
 
@@ -123,6 +134,11 @@ dashboard:
   affinity: {}
 
   podAnnotations: {}
+
+  service:
+    type: NodePort
+    # clusterIP:
+    # nodePort:
 
   resources:
     # We usually recommend not to specify default resources and to leave this as a conscious
@@ -222,6 +238,8 @@ dnsServer:
 
   imagePullPolicy: IfNotPresent
 
+  priorityClassName: ""
+
   nodeSelector: {}
 
   runtime: docker
@@ -255,6 +273,8 @@ prometheus:
 
   image: prom/prometheus:v2.18.1
   imagePullPolicy: IfNotPresent
+
+  priorityClassName: ""
 
   nodeSelector: {}
 
@@ -307,6 +327,7 @@ webhook:
     - podiochaos
     - podnetworkchaos
     - dnschaos
+    - jvmchaos
 
 bpfki:
   create: false

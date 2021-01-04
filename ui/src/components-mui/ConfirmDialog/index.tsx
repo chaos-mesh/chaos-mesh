@@ -1,4 +1,12 @@
-import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@material-ui/core'
+import {
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogProps,
+  DialogTitle,
+} from '@material-ui/core'
 
 import React from 'react'
 import T from 'components/T'
@@ -6,16 +14,25 @@ import T from 'components/T'
 interface ConfirmDialogProps {
   open: boolean
   setOpen: (open: boolean) => void
-  title: string
-  description: string
-  handleConfirm: () => void
+  title: string | JSX.Element
+  description?: string
+  onConfirm?: () => void
+  dialogProps?: Omit<DialogProps, 'open'>
 }
 
-const ConfirmDialog: React.FC<ConfirmDialogProps> = ({ open, setOpen, title, description, handleConfirm }) => {
+const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
+  open,
+  setOpen,
+  title,
+  description,
+  onConfirm,
+  children,
+  dialogProps,
+}) => {
   const handleClose = () => setOpen(false)
 
-  const _handleConfirm = () => {
-    handleConfirm()
+  const handleConfirm = () => {
+    typeof onConfirm === 'function' && onConfirm()
     handleClose()
   }
 
@@ -26,17 +43,20 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({ open, setOpen, title, des
       aria-labelledby="dialog-title"
       aria-describedby="dialog-description"
       PaperProps={{ style: { minWidth: 300 } }}
+      {...dialogProps}
     >
       <DialogTitle id="dialog-title">{title}</DialogTitle>
       <DialogContent>
-        <DialogContentText id="dialog-description">{description}</DialogContentText>
+        {children ? children : <DialogContentText id="dialog-description">{description}</DialogContentText>}
       </DialogContent>
-      <DialogActions>
-        <Button onClick={handleClose}>{T('common.cancel')}</Button>
-        <Button color="primary" autoFocus onClick={_handleConfirm}>
-          {T('common.confirm')}
-        </Button>
-      </DialogActions>
+      {onConfirm && (
+        <DialogActions>
+          <Button onClick={handleClose}>{T('common.cancel')}</Button>
+          <Button variant="contained" color="primary" autoFocus onClick={handleConfirm}>
+            {T('common.confirm')}
+          </Button>
+        </DialogActions>
+      )}
     </Dialog>
   )
 }

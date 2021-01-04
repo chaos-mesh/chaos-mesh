@@ -3,12 +3,24 @@ import { ExperimentDetail, Experiment as ExperimentReponse, StateOfExperiments }
 import { Experiment } from 'components/NewExperiment/types'
 import http from './http'
 
-export const state = () => http.get<StateOfExperiments>('/experiments/state')
+export const state = (namespace = null) =>
+  http.get<StateOfExperiments>('/experiments/state', {
+    params: {
+      namespace,
+    },
+  })
 
 export const newExperiment = (data: Experiment) => http.post('/experiments/new', data)
 
-export const experiments = (namespace = '', name = '', kind = '', status = '') =>
-  http.get<ExperimentReponse[]>(`/experiments?namespace=${namespace}&name=${name}&kind=${kind}&status=${status}`)
+export const experiments = (namespace = null, name = null, kind = null, status = null) =>
+  http.get<ExperimentReponse[]>('/experiments', {
+    params: {
+      namespace,
+      name,
+      kind,
+      status,
+    },
+  })
 
 export const deleteExperiment = (uuid: uuid) => http.delete(`/experiments/${uuid}`)
 

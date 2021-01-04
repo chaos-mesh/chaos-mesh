@@ -1,62 +1,65 @@
-import { Box, CssBaseline, Snackbar, useMediaQuery, useTheme } from '@material-ui/core'
+import { Box, CssBaseline, Paper, Snackbar, useMediaQuery, useTheme } from '@material-ui/core'
 import React, { useEffect, useMemo, useState } from 'react'
 import { Redirect, Route, Switch } from 'react-router-dom'
-import { RootState, useStoreDispatch } from 'store'
-import { ThemeProvider, createStyles, makeStyles } from '@material-ui/core/styles'
+import { ThemeProvider, makeStyles } from '@material-ui/core/styles'
 import customTheme, { darkTheme as customDarkTheme } from 'theme'
 import { drawerCloseWidth, drawerWidth } from './Sidebar'
+import { setAlertOpen, setNameSpace, setSecurityMode, setTokenName, setTokens } from 'slices/globalStatus'
+import { useStoreDispatch, useStoreSelector } from 'store'
 
 import Alert from '@material-ui/lab/Alert'
+import Auth from './Auth'
 import ContentContainer from 'components-mui/ContentContainer'
-import Header from './Header'
 import { IntlProvider } from 'react-intl'
+import LS from 'lib/localStorage'
+import Loading from 'components-mui/Loading'
 import MobileNavigation from './MobileNavigation'
+import Navbar from './Navbar'
 import Sidebar from './Sidebar'
-import chaosMeshRoutes from 'routes'
+import api from 'api'
 import flat from 'flat'
 import insertCommonStyle from 'lib/d3/insertCommonStyle'
 import messages from 'i18n/messages'
-import { setAlertOpen } from 'slices/globalStatus'
+import routes from 'routes'
 import { setNavigationBreadcrumbs } from 'slices/navigation'
 import { useLocation } from 'react-router-dom'
-import { useSelector } from 'react-redux'
 
-const useStyles = makeStyles((theme) =>
-  createStyles({
-    root: {
-      display: 'flex',
-      flexDirection: 'column',
-      marginLeft: drawerCloseWidth,
-      width: `calc(100% - ${drawerCloseWidth})`,
-      transition: theme.transitions.create(['width', 'margin'], {
-        easing: theme.transitions.easing.sharp,
-        duration: theme.transitions.duration.leavingScreen,
-      }),
-      [theme.breakpoints.down('xs')]: {
-        width: '100%',
-        marginLeft: 0,
-      },
+const useStyles = makeStyles((theme) => ({
+  root: {
+    display: 'flex',
+    flexDirection: 'column',
+    marginLeft: drawerCloseWidth,
+    width: `calc(100% - ${drawerCloseWidth})`,
+    transition: theme.transitions.create(['width', 'margin'], {
+      easing: theme.transitions.easing.sharp,
+      duration: theme.transitions.duration.leavingScreen,
+    }),
+    [theme.breakpoints.down('xs')]: {
+      width: '100%',
+      marginLeft: 0,
     },
-    rootShift: {
-      marginLeft: drawerWidth,
-      width: `calc(100% - ${drawerWidth})`,
-      transition: theme.transitions.create(['width', 'margin'], {
-        easing: theme.transitions.easing.sharp,
-        duration: theme.transitions.duration.enteringScreen,
-      }),
-    },
-    main: {
-      display: 'flex',
-      flexDirection: 'column',
-      minHeight: '100vh',
-    },
-    toolbar: theme.mixins.toolbar,
-    switchContent: {
-      display: 'flex',
-      flex: 1,
-    },
-  })
-)
+  },
+  rootShift: {
+    marginLeft: drawerWidth,
+    width: `calc(100% - ${drawerWidth})`,
+    transition: theme.transitions.create(['width', 'margin'], {
+      easing: theme.transitions.easing.sharp,
+      duration: theme.transitions.duration.enteringScreen,
+    }),
+  },
+  main: {
+    position: 'relative',
+    display: 'flex',
+    flexDirection: 'column',
+    minHeight: '100vh',
+    zIndex: 1,
+  },
+  toolbar: theme.mixins.toolbar,
+  switchContent: {
+    display: 'flex',
+    flex: 1,
+  },
+}))
 
 const TopContainer = () => {
   const theme = useTheme()
@@ -66,25 +69,75 @@ const TopContainer = () => {
 
   const { pathname } = useLocation()
 
-  const { settings, globalStatus, navigation } = useSelector((state: RootState) => state)
-  const { theme: settingTheme, lang } = settings
+  const { settings, globalStatus, navigation } = useStoreSelector((state) => state)
+  const { theme: settingsTheme, lang } = settings
   const { alert, alertOpen } = globalStatus
   const { breadcrumbs } = navigation
 
-  const globalTheme = useMemo(() => (settingTheme === 'light' ? customTheme : customDarkTheme), [settingTheme])
+  const globalTheme = useMemo(() => (settingsTheme === 'light' ? customTheme : customDarkTheme), [settingsTheme])
   const intlMessages = useMemo<Record<string, string>>(() => flat(messages[lang]), [lang])
 
   const dispatch = useStoreDispatch()
   const handleSnackClose = () => dispatch(setAlertOpen(false))
 
-  const miniSidebar = window.localStorage.getItem('chaos-mesh-mini-sidebar') === 'y'
+  // Sidebar related
+  const miniSidebar = LS.get('mini-sidebar') === 'y'
   const [openDrawer, setOpenDrawer] = useState(!miniSidebar)
   const handleDrawerToggle = () => {
     setOpenDrawer(!openDrawer)
-    window.localStorage.setItem('chaos-mesh-mini-sidebar', openDrawer ? 'y' : 'n')
+    LS.set('mini-sidebar', openDrawer ? 'y' : 'n')
   }
 
-  useEffect(insertCommonStyle, [])
+  /**
+   * Render different components according to server configuration.
+   *
+   */
+  function fetchServerConfig() {
+    api.common
+      .config()
+      .then(({ data }) => {
+        if (data.security_mode) {
+          setAuth()
+        } else {
+          dispatch(setSecurityMode(false))
+        }
+      })
+      .finally(() => setLoading(false))
+  }
+
+  const [loading, setLoading] = useState(true)
+  const [authOpen, setAuthOpen] = useState(false)
+
+  /**
+   * Set authorization (RBAC token) for API use.
+   *
+   */
+  function setAuth() {
+    const token = LS.get('token')
+    const tokenName = LS.get('token-name')
+    const globalNamespace = LS.get('global-namespace')
+
+    if (token && tokenName) {
+      const tokens = JSON.parse(token)
+
+      api.auth.token(tokens.filter(({ name }: { name: string }) => name === tokenName)[0].token)
+      dispatch(setTokens(tokens))
+      dispatch(setTokenName(tokenName))
+    } else {
+      setAuthOpen(true)
+    }
+
+    if (globalNamespace) {
+      api.auth.namespace(globalNamespace)
+      dispatch(setNameSpace(globalNamespace))
+    }
+  }
+
+  useEffect(() => {
+    fetchServerConfig()
+    insertCommonStyle()
+    // eslint-disable-next-line
+  }, [])
 
   useEffect(() => {
     dispatch(setNavigationBreadcrumbs(pathname))
@@ -99,23 +152,25 @@ const TopContainer = () => {
   return (
     <ThemeProvider theme={globalTheme}>
       <IntlProvider messages={intlMessages} locale={lang} defaultLocale="en">
+        <CssBaseline />
+
         <Box className={openDrawer ? classes.rootShift : classes.root}>
-          {/* CssBaseline: kickstart an elegant, consistent, and simple baseline to build upon. */}
-          <CssBaseline />
-          <Header openDrawer={openDrawer} handleDrawerToggle={handleDrawerToggle} breadcrumbs={breadcrumbs} />
           {!isMobileScreen && <Sidebar open={openDrawer} />}
-          <main className={classes.main}>
-            <div className={classes.toolbar} />
+          <Paper className={classes.main} component="main" elevation={0}>
+            {/* <ControlBar /> */}
+            <Navbar handleDrawerToggle={handleDrawerToggle} breadcrumbs={breadcrumbs} />
 
             <Box className={classes.switchContent}>
               <ContentContainer>
-                <Switch>
-                  <Redirect exact path="/" to="/overview" />
-                  {chaosMeshRoutes.map((route) => (
-                    <Route key={route.path! as string} {...route} />
-                  ))}
-                  <Redirect to="/overview" />
-                </Switch>
+                {loading ? (
+                  <Loading />
+                ) : (
+                  <Switch>
+                    <Redirect path="/" to="/dashboard" exact />
+                    {!authOpen && routes.map((route) => <Route key={route.path as string} {...route} />)}
+                    <Redirect to="/dashboard" />
+                  </Switch>
+                )}
               </ContentContainer>
             </Box>
 
@@ -126,12 +181,14 @@ const TopContainer = () => {
               </>
             )}
 
+            <Auth open={authOpen} setOpen={setAuthOpen} />
+
             <Snackbar
               anchorOrigin={{
-                vertical: 'top',
+                vertical: 'bottom',
                 horizontal: 'center',
               }}
-              autoHideDuration={10000}
+              autoHideDuration={9000}
               open={alertOpen}
               onClose={handleSnackClose}
             >
@@ -139,7 +196,7 @@ const TopContainer = () => {
                 {alert.message}
               </Alert>
             </Snackbar>
-          </main>
+          </Paper>
         </Box>
       </IntlProvider>
     </ThemeProvider>

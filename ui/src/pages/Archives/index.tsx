@@ -1,5 +1,6 @@
 import { Box, Grid, Typography } from '@material-ui/core'
 import React, { useEffect, useState } from 'react'
+import { setAlert, setAlertOpen } from 'slices/globalStatus'
 
 import { Archive } from 'api/archives.type'
 import ArchiveOutlinedIcon from '@material-ui/icons/ArchiveOutlined'
@@ -10,19 +11,22 @@ import T from 'components/T'
 import _groupBy from 'lodash.groupby'
 import api from 'api'
 import { useIntl } from 'react-intl'
+import { useStoreDispatch } from 'store'
 
 export default function Archives() {
   const intl = useIntl()
 
+  const dispatch = useStoreDispatch()
+
   const [loading, setLoading] = useState(false)
   const [archives, setArchives] = useState<Archive[] | null>(null)
+  const [dialogOpen, setDialogOpen] = useState(false)
   const [selected, setSelected] = useState({
     uuid: '',
     title: '',
     description: '',
-    action: 'recover',
+    action: 'archive',
   })
-  const [dialogOpen, setDialogOpen] = useState(false)
 
   const fetchArchives = () => {
     setLoading(true)
@@ -30,7 +34,7 @@ export default function Archives() {
     api.archives
       .archives()
       .then(({ data }) => setArchives(data))
-      .catch(console.log)
+      .catch(console.error)
       .finally(() => {
         setLoading(false)
       })
@@ -38,14 +42,38 @@ export default function Archives() {
 
   useEffect(fetchArchives, [])
 
-  const handleArchive = (action: string) => () => {
-    switch (action) {
-      case 'recover':
-        break
+  const handleExperiment = (action: string) => () => {
+    let actionFunc: any
 
-      default:
+    switch (action) {
+      case 'delete':
+        actionFunc = api.archives.del
+
         break
+      default:
+        actionFunc = null
     }
+
+    if (actionFunc === null) {
+      return
+    }
+
+    setDialogOpen(false)
+
+    const { uuid } = selected
+
+    actionFunc(uuid)
+      .then(() => {
+        dispatch(
+          setAlert({
+            type: 'success',
+            message: intl.formatMessage({ id: `common.${action}Successfully` }),
+          })
+        )
+        dispatch(setAlertOpen(true))
+        fetchArchives()
+      })
+      .catch(console.error)
   }
 
   return (
@@ -82,7 +110,7 @@ export default function Archives() {
             <ArchiveOutlinedIcon fontSize="large" />
           </Box>
           <Typography variant="h6" align="center">
-            {T('archives.no_archives_found')}
+            {T('archives.noArchivesFound')}
           </Typography>
         </Box>
       )}
@@ -94,7 +122,7 @@ export default function Archives() {
         setOpen={setDialogOpen}
         title={selected.title}
         description={selected.description}
-        handleConfirm={handleArchive(selected.action)}
+        onConfirm={handleExperiment(selected.action)}
       />
     </>
   )

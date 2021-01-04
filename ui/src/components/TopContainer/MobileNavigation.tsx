@@ -1,48 +1,38 @@
-import { AppBar, Fab, IconButton, Toolbar } from '@material-ui/core'
-import { Theme, createStyles, makeStyles } from '@material-ui/core/styles'
+import { AppBar, IconButton, Toolbar } from '@material-ui/core'
 
-import AddIcon from '@material-ui/icons/Add'
 import ArchiveOutlinedIcon from '@material-ui/icons/ArchiveOutlined'
 import BlurLinearIcon from '@material-ui/icons/BlurLinear'
-import { Link } from 'react-router-dom'
 import { NavLink } from 'react-router-dom'
 import React from 'react'
 import SettingsIcon from '@material-ui/icons/Settings'
 import TuneIcon from '@material-ui/icons/Tune'
 import WebIcon from '@material-ui/icons/Web'
+import { makeStyles } from '@material-ui/core/styles'
 
-const useStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    appBar: {
-      top: 'auto',
-      bottom: 0,
-    },
-    fab: {
-      position: 'fixed',
-      bottom: theme.spacing(7.5),
-      right: theme.spacing(3),
-      zIndex: 1101, // .MuiAppBar-root z-index: 1100
-    },
-  })
-)
+const useStyles = makeStyles({
+  appBar: {
+    top: 'auto',
+    bottom: 0,
+  },
+})
 
 const items = [
-  { icon: <WebIcon />, href: 'overview' },
+  { icon: <WebIcon />, href: '/dashboard' },
   {
     icon: <TuneIcon />,
-    href: 'experiments',
+    href: '/experiments',
   },
   {
     icon: <BlurLinearIcon />,
-    href: 'events',
+    href: '/events',
   },
   {
     icon: <ArchiveOutlinedIcon />,
-    href: 'archives',
+    href: '/archives',
   },
   {
     icon: <SettingsIcon />,
-    href: 'settings',
+    href: '/settings',
   },
 ]
 
@@ -53,20 +43,10 @@ const MobileNavigation = () => {
     <AppBar className={classes.appBar} position="fixed" color="inherit">
       <Toolbar>
         {items.map((i) => (
-          <NavLink key={i.href} to={`/${i.href}`}>
+          <NavLink key={i.href} to={i.href}>
             <IconButton color="primary">{i.icon}</IconButton>
           </NavLink>
         ))}
-        <Fab
-          component={Link}
-          to="/newExperiment"
-          className={classes.fab}
-          color="primary"
-          size="medium"
-          aria-label="New experiment"
-        >
-          <AddIcon />
-        </Fab>
       </Toolbar>
     </AppBar>
   )

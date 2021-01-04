@@ -8,6 +8,11 @@ import target from 'components/NewExperimentNext/data/target'
 export function parseSubmit(e: Experiment) {
   const values: Experiment = JSON.parse(JSON.stringify(e))
 
+  // Set default namespace when it's not present
+  if (!values.namespace) {
+    values.namespace = values.scope.namespace_selectors[0]
+  }
+
   // Parse labels, label_selectors, annotations and annotation_selectors to object
   function helper1(selectors: string[], updateVal?: (s: string) => any) {
     return selectors.reduce((acc: Record<string, any>, d) => {
@@ -18,6 +23,7 @@ export function parseSubmit(e: Experiment) {
       return acc
     }, {})
   }
+  // For parse scope
   function helper2(scope: ExperimentScope) {
     scope.label_selectors = helper1(scope.label_selectors as string[])
     scope.annotation_selectors = helper1(scope.annotation_selectors as string[])
@@ -69,7 +75,9 @@ function selectorsToArr(selectors: Object, separator: string) {
 }
 
 export function yamlToExperiment(yamlObj: any): any {
-  const { kind, metadata, spec } = snakeCaseKeys(yamlObj)
+  const { kind, metadata, spec } = snakeCaseKeys(yamlObj, {
+    exclude: [/\.|\//], // Keys like app.kubernetes.io/component should be ignored
+  })
 
   if (!kind || !metadata || !spec) {
     throw new Error('Fail to parse the YAML file. Please check the kind, metadata, and spec fields.')

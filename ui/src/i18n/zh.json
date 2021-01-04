@@ -1,20 +1,37 @@
 {
-  "overview": {
-    "title": "概览",
-    "totalExperiments": "当前实验"
+  "dashboard": {
+    "title": "仪表盘",
+    "welcome": "欢迎来到 Chaos Mesh Dashboard",
+    "welcomeDesc": "😎 不知道如何使用？点击下面的按钮开始教程。",
+    "tutorial": {
+      "step1": "仪表盘是对 Chaos Mesh 的概览，在这里你可以观察到所有实验的运行状态。",
+      "step2": "实验界面管理着所有的实验，在这里你可以对实验进行多种操作（暂停，归档，更新等）。",
+      "step3": "事件界面展示了所有实验产生的事件。",
+      "step4": "归档页面展示了所有已归档的实验。",
+      "step5": "你可以在这里开始你的第一个实验。～",
+      "step6": "或者点击这里随时创建新的实验。",
+      "step7": "搜索提供了多种语法来帮助你快速地定位实验或事件。你可以在创建实验后尝试它。",
+      "step8": "在这里通过选择不同的命名空间来浏览各自的实验，事件及归档。",
+      "step9": "🎉 恭喜你完成了所有的教程步骤！点击空白处即可退出。"
+    },
+    "veteran": "已经是熟手了",
+    "veteranDesc": "🧨 从一个新的实验开始！成功创建后，你可以返回仪表板以观察其状态。",
+    "totalExperiments": "当前实验",
+    "totalState": "当前状态",
+    "predefined": "预定义",
+    "predefinedDesc": "📦 在这里存储自定义的实验以快速执行。",
+    "recent": "最近"
   },
   "newE": {
     "title": "新的实验",
     "titleStep1": "选择目标",
     "titleStep2": "填写实验信息",
-    "create": "创建新的实验",
     "steps": {
       "basic": "基本信息",
       "scope": "范围",
       "schedule": "计划"
     },
     "loadFrom": "加载自",
-    "loadFromYaml": "从 YAML 文件加载",
     "basic": {
       "name": "名称",
       "nameHelper": "实验的名称",
@@ -42,10 +59,10 @@
       "kind": "类别",
       "action": "行为",
       "pod": {
-        "title": "Pod 生命周期"
+        "title": "Pod 故障"
       },
       "network": {
-        "title": "网络",
+        "title": "网络攻击",
         "target": {
           "title": "目标",
           "podsPreview": "预览目标 Pod",
@@ -53,16 +70,19 @@
         }
       },
       "io": {
-        "title": "文件系统 I/O"
+        "title": "文件系统注入"
       },
       "kernel": {
-        "title": "Linux 内核"
+        "title": "内核故障"
       },
       "time": {
-        "title": "时钟"
+        "title": "时钟偏移"
       },
       "stress": {
-        "title": "CPU/Memory 压力测试"
+        "title": "压力测试"
+      },
+      "dns": {
+        "title": "DNS 故障"
       }
     },
     "schedule": {
@@ -77,8 +97,7 @@
   },
   "experiments": {
     "title": "实验",
-    "single": "实验",
-    "status": {
+    "state": {
       "running": "运行中",
       "paused": "暂停",
       "failed": "失败",
@@ -94,7 +113,6 @@
   "events": {
     "title": "事件",
     "noEventsFound": "未发现事件",
-    "table": "事件列表",
     "eventsPerPage": "每页事件数",
     "event": {
       "experiment": "实验",
@@ -115,52 +133,75 @@
   "archives": {
     "title": "归档",
     "single": "归档",
-    "no_archives_found": "未发现归档",
+    "noArchivesFound": "未发现归档",
+    "deleteDesc": "归档将被永久删除",
     "numberOfRuns": "运行次数",
     "numberOfAffectedPods": "受到实验作用的 Pod 数目"
   },
   "settings": {
     "title": "设置",
-    "theme": "主题",
-    "chooseTheme": "选择主题",
-    "themeLight": "浅色",
-    "themeDark": "暗色",
-    "language": "语言",
-    "chooseInterfaceLanguage": "选择界面语言",
-    "en": "英语",
-    "zh": "简体中文"
+    "theme": {
+      "title": "主题",
+      "choose": "选择主题",
+      "light": "浅色",
+      "dark": "暗色"
+    },
+    "lang": {
+      "title": "语言",
+      "choose": "选择界面语言",
+      "en": "英语",
+      "zh": "简体中文"
+    },
+    "addToken": {
+      "prompt": "输入令牌 (RBAC 鉴权) 以继续",
+      "title": "添加令牌",
+      "name": "名称",
+      "nameHelper": "请输入令牌名称",
+      "nameValidation": "令牌名称不能为空",
+      "token": "令牌",
+      "tokenHelper": "请输入令牌",
+      "tokenValidation": "令牌不能为空",
+      "deleteDesc": "此操作不可逆"
+    }
+  },
+  "swagger": {
+    "title": "Swagger API"
   },
   "common": {
+    "other": "其他",
     "doc": "文档",
-    "back": "上一步",
-    "next": "下一步",
-    "finish": "完成",
-    "reset": "重置",
+    "tutorial": "教程",
+    "add": "添加",
+    "confirm": "确认",
+    "cancel": "取消",
     "submit": "提交",
     "upload": "上传",
-    "advancedOptions": "高级选项",
-    "isKVHelperText": "键入 key:value 并以空格结尾来创建一个键值对",
-    "multiOptions": "支持多选",
-    "noOptions": "无选项",
-    "detail": "详细信息",
-    "report": "报告",
+    "download": "下载",
+    "detail": "详情",
     "start": "启动",
     "pause": "暂停",
     "update": "更新",
+    "delete": "删除",
     "status": "状态",
+    "use": "使用",
+    "using": "使用中",
     "configuration": "配置",
-    "configured": "已配置",
-    "confirm": "确认",
-    "cancel": "取消",
+    "noOptions": "无选项",
+    "multiOptions": "支持多选",
+    "advancedOptions": "高级选项",
+    "isKVHelperText": "键入 key:value 并以空格结尾来创建一个键值对",
+    "timeline": "时间线",
+    "meta": "元信息",
+    "uuid": "UUID",
     "createSuccessfully": "创建成功",
     "loadSuccessfully": "加载成功",
-    "deleteSuccessfully": "归档成功",
+    "deleteSuccessfully": "删除成功",
+    "archiveSuccessfully": "归档成功",
     "startSuccessfully": "启动成功",
     "pauseSuccessfully": "暂停成功",
     "updateSuccessfully": "更新成功",
-    "timeline": "时间线",
-    "meta": "元信息",
-    "uuid": "UUID"
+    "submitSuccessfully": "提交成功",
+    "chooseNamespace": "选择命名空间"
   },
   "search": {
     "placeholder": "搜索",

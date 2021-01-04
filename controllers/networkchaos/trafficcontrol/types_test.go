@@ -29,20 +29,13 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/controllers/test"
 	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
 	ctx "github.com/chaos-mesh/chaos-mesh/pkg/router/context"
+	. "github.com/chaos-mesh/chaos-mesh/pkg/testutils"
 )
 
 func TestReconciler_applyNetem(t *testing.T) {
 	g := NewWithT(t)
 
-	podObjects, pods := test.GenerateNPods(
-		"p",
-		1,
-		v1.PodRunning,
-		metav1.NamespaceDefault,
-		nil,
-		map[string]string{"l1": "l1"},
-		v1.ContainerStatus{ContainerID: "fake-container-id"},
-	)
+	podObjects, pods := GenerateNPods("p", 1, PodArg{})
 
 	v1alpha1.SchemeBuilder.AddToScheme(scheme.Scheme)
 

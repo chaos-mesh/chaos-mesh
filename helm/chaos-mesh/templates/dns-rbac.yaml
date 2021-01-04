@@ -16,7 +16,7 @@ metadata:
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: {{ .Release.Name }}:chaos-dns-server
+  name: {{ .Release.Name }}-chaos-dns-server
   labels:
     app.kubernetes.io/name: {{ template "chaos-mesh.name" . }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
@@ -39,7 +39,7 @@ rules:
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: {{ .Release.Name }}:chaos-dns-server-cluster-level
+  name: {{ .Release.Name }}-chaos-dns-server-cluster-level
   labels:
     app.kubernetes.io/name: {{ template "chaos-mesh.name" . }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
@@ -59,7 +59,7 @@ rules:
 kind: Role
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: {{ .Release.Name }}:chaos-dns-server-control-plane
+  name: {{ .Release.Name }}-chaos-dns-server-control-plane
   namespace: {{ .Release.Namespace }}
   labels:
     app.kubernetes.io/name: {{ template "chaos-mesh.name" . }}
@@ -77,7 +77,7 @@ rules:
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: {{ .Release.Name }}:chaos-dns-server-cluster-level
+  name: {{ .Release.Name }}-chaos-dns-server-cluster-level
   labels:
     app.kubernetes.io/name: {{ template "chaos-mesh.name" . }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
@@ -87,7 +87,7 @@ metadata:
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: {{ .Release.Name }}:chaos-dns-server-cluster-level
+  name: {{ .Release.Name }}-chaos-dns-server-cluster-level
 subjects:
   - kind: ServiceAccount
     name: {{ .Values.dnsServer.serviceAccount }}
@@ -98,7 +98,7 @@ subjects:
 kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: {{ .Release.Name }}:chaos-dns-server-control-plane
+  name: {{ .Release.Name }}-chaos-dns-server-control-plane
   namespace: {{ .Release.Namespace }}
   labels:
     app.kubernetes.io/name: {{ template "chaos-mesh.name" . }}
@@ -109,7 +109,7 @@ metadata:
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
-  name: {{ .Release.Name }}:chaos-dns-server-control-plane
+  name: {{ .Release.Name }}-chaos-dns-server-control-plane
 subjects:
   - kind: ServiceAccount
     name: {{ .Values.dnsServer.serviceAccount }}
@@ -123,7 +123,7 @@ kind: RoleBinding
 {{- end }}
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: {{ .Release.Name }}:chaos-dns-server-target-namespace
+  name: {{ .Release.Name }}-chaos-dns-server-target-namespace
   namespace: {{ .Values.dnsServer.targetNamespace }}
   labels:
     app.kubernetes.io/name: {{ template "chaos-mesh.name" . }}
@@ -134,7 +134,7 @@ metadata:
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: {{ .Release.Name }}:chaos-dns-server-target-namespace
+  name: {{ .Release.Name }}-chaos-dns-server-target-namespace
 subjects:
   - kind: ServiceAccount
     name: {{ .Values.dnsServer.serviceAccount }}

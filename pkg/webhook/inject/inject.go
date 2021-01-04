@@ -20,8 +20,12 @@ import (
 	"strings"
 
 	"github.com/chaos-mesh/chaos-mesh/controllers/metrics"
-	"github.com/chaos-mesh/chaos-mesh/pkg/utils"
+	"github.com/chaos-mesh/chaos-mesh/pkg/annotation"
+	controllerCfg "github.com/chaos-mesh/chaos-mesh/pkg/config"
+	"github.com/chaos-mesh/chaos-mesh/pkg/selector"
 	"github.com/chaos-mesh/chaos-mesh/pkg/webhook/config"
+
+	ccfg "github.com/chaos-mesh/chaos-mesh/controllers/config"
 
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -44,7 +48,8 @@ const (
 	StatusInjected = "injected"
 )
 
-func Inject(res *v1beta1.AdmissionRequest, cli client.Client, cfg *config.Config, metrics *metrics.ChaosCollector) *v1beta1.AdmissionResponse {
+// Inject do pod template config inject
+func Inject(res *v1beta1.AdmissionRequest, cli client.Client, cfg *config.Config, controllerCfg *controllerCfg.ChaosControllerConfig, metrics *metrics.ChaosCollector) *v1beta1.AdmissionResponse {
 	var pod corev1.Pod
 	if err := json.Unmarshal(res.Object.Raw, &pod); err != nil {
 		log.Error(err, "Could not unmarshal raw object")
@@ -67,7 +72,7 @@ func Inject(res *v1beta1.AdmissionRequest, cli client.Client, cfg *config.Config
 	log.V(4).Info("OldObject", "OldObject", string(res.OldObject.Raw))
 	log.V(4).Info("Pod", "Pod", pod)
 
-	requiredKey, ok := injectRequired(&pod.ObjectMeta, cli, cfg)
+	requiredKey, ok := injectRequired(&pod.ObjectMeta, cli, cfg, controllerCfg)
 	if !ok {
 		log.Info("Skipping injection due to policy check", "namespace", pod.ObjectMeta.Namespace, "name", podName)
 		return &v1beta1.AdmissionResponse{
@@ -89,7 +94,7 @@ func Inject(res *v1beta1.AdmissionRequest, cli client.Client, cfg *config.Config
 	}
 
 	if injectionConfig.Selector != nil {
-		meet, err := utils.CheckPodMeetSelector(pod, *injectionConfig.Selector)
+		meet, err := selector.CheckPodMeetSelector(pod, *injectionConfig.Selector)
 		if err != nil {
 			log.Error(err, "Failed to check pod selector", "namespace", pod.Namespace)
 			return &v1beta1.AdmissionResponse{
@@ -132,7 +137,7 @@ func Inject(res *v1beta1.AdmissionRequest, cli client.Client, cfg *config.Config
 }
 
 // Check whether the target resource need to be injected and return the required config name
-func injectRequired(metadata *metav1.ObjectMeta, cli client.Client, cfg *config.Config) (string, bool) {
+func injectRequired(metadata *metav1.ObjectMeta, cli client.Client, cfg *config.Config, controllerCfg *controllerCfg.ChaosControllerConfig) (string, bool) {
 	// skip special kubernetes system namespaces
 	for _, namespace := range ignoredNamespaces {
 		if metadata.Namespace == namespace {
@@ -140,7 +145,7 @@ func injectRequired(metadata *metav1.ObjectMeta, cli client.Client, cfg *config.
 			return "", false
 		}
 	}
-	if !utils.IsAllowedNamespaces(metadata.Namespace) {
+	if !ccfg.IsAllowedNamespaces(metadata.Namespace, controllerCfg.AllowedNamespaces, controllerCfg.IgnoredNamespaces) {
 		log.Info("Skip mutation for it' in special namespace", "name", metadata.Name, "namespace", metadata.Namespace)
 		return "", false
 	}
@@ -206,7 +211,7 @@ func injectByNamespaceRequired(metadata *metav1.ObjectMeta, cli client.Client, c
 		annotations = make(map[string]string)
 	}
 
-	required, ok := annotations[utils.GenAnnotationKeyForWebhook(cfg.RequestAnnotationKey(), metadata.Name)]
+	required, ok := annotations[annotation.GenKeyForWebhook(cfg.RequestAnnotationKey(), metadata.Name)]
 	if !ok {
 		log.Info("Pod annotation by namespace is missing, skipping injection",
 			"namespace", metadata.Namespace, "pod", metadata.Name, "config", required)
@@ -314,7 +319,7 @@ func setCommands(target []corev1.Container, postStart map[string]config.ExecActi
 
 		path := fmt.Sprintf("/spec/containers/%d/command", containerIndex)
 
-		commands := utils.MergeCommands(execCmd.Command, container.Command, container.Args)
+		commands := MergeCommands(execCmd.Command, container.Command, container.Args)
 
 		log.Info("Inject command", "command", commands)
 

@@ -1,63 +1,39 @@
-import { Box, Container, MenuItem, Paper, TextField } from '@material-ui/core'
-import { RootState, useStoreDispatch } from 'store'
-import { setLang, setTheme } from 'slices/settings'
+import { Box, Grid, Paper, Typography } from '@material-ui/core'
 
-import PaperTop from 'components-mui/PaperTop'
+import Other from './Other'
 import React from 'react'
 import T from 'components/T'
-import messages from 'i18n/messages'
-import { useSelector } from 'react-redux'
+import Token from 'components/Token'
+import TokensTable from './TokensTable'
+import { useStoreSelector } from 'store'
 
 const Settings = () => {
-  const { settings } = useSelector((state: RootState) => state)
-  const { theme, lang } = settings
-  const dispatch = useStoreDispatch()
-
-  const handleChangeTheme = (e: React.ChangeEvent<HTMLInputElement>) => dispatch(setTheme(e.target.value))
-  const handleChangeLang = (e: React.ChangeEvent<HTMLInputElement>) => dispatch(setLang(e.target.value))
+  const { securityMode } = useStoreSelector((state) => state.globalStatus)
 
   return (
-    <Paper variant="outlined" style={{ height: '100%' }}>
-      <PaperTop title={T('settings.title')} />
-
-      <Container>
-        <Box p={6} width={400} maxWidth="100%">
-          <Box mb={2}>
-            <TextField
-              variant="outlined"
-              select
-              margin="dense"
-              fullWidth
-              value={theme}
-              label={T('settings.theme')}
-              helperText={T('settings.chooseTheme')}
-              onChange={handleChangeTheme}
-            >
-              <MenuItem value="light">{T(`settings.themeLight`)}</MenuItem>
-              <MenuItem value="dark">{T(`settings.themeDark`)}</MenuItem>
-            </TextField>
+    <Grid container>
+      <Grid item sm={12} md={6}>
+        <Paper variant="outlined">
+          <Box p={6}>
+            {securityMode && (
+              <>
+                <Typography variant="h6" gutterBottom>
+                  {T('settings.addToken.title')}
+                </Typography>
+                <Token />
+                <Box my={6} />
+                <TokensTable />
+                <Box mb={6} />
+              </>
+            )}
+            <Typography variant="h6" gutterBottom>
+              {T('common.other')}
+            </Typography>
+            <Other />
           </Box>
-          <Box mb={2}>
-            <TextField
-              variant="outlined"
-              select
-              margin="dense"
-              fullWidth
-              value={lang}
-              label={T('settings.language')}
-              helperText={T('settings.chooseInterfaceLanguage')}
-              onChange={handleChangeLang}
-            >
-              {Object.keys(messages).map((lang) => (
-                <MenuItem key={lang} value={lang}>
-                  {T(`settings.${lang}`)}
-                </MenuItem>
-              ))}
-            </TextField>
-          </Box>
-        </Box>
-      </Container>
-    </Paper>
+        </Paper>
+      </Grid>
+    </Grid>
   )
 }
 

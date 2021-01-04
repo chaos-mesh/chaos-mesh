@@ -28,7 +28,7 @@ import (
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/bpm"
 	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
-	"github.com/chaos-mesh/chaos-mesh/pkg/utils"
+	grpcUtils "github.com/chaos-mesh/chaos-mesh/pkg/grpc"
 )
 
 var log = ctrl.Log.WithName("chaos-daemon-server")
@@ -54,22 +54,30 @@ func (c *Config) GrpcAddr() string {
 	return fmt.Sprintf("%s:%d", c.Host, c.GRPCPort)
 }
 
-// Server represents a grpc server for tc daemon
-type daemonServer struct {
+// DaemonServer represents a grpc server for tc daemon
+type DaemonServer struct {
 	crClient                 ContainerRuntimeInfoClient
 	backgroundProcessManager bpm.BackgroundProcessManager
 }
 
-func newDaemonServer(containerRuntime string) (*daemonServer, error) {
+func newDaemonServer(containerRuntime string) (*DaemonServer, error) {
 	crClient, err := CreateContainerRuntimeInfoClient(containerRuntime)
 	if err != nil {
 		return nil, err
 	}
 
-	return &daemonServer{
+	return &DaemonServer{
 		crClient:                 crClient,
 		backgroundProcessManager: bpm.NewBackgroundProcessManager(),
 	}, nil
+}
+
+// NewDaemonServerWithCRClient returns DaemonServer with container runtime client
+func NewDaemonServerWithCRClient(crClient ContainerRuntimeInfoClient) *DaemonServer {
+	return &DaemonServer{
+		crClient:                 crClient,
+		backgroundProcessManager: bpm.NewBackgroundProcessManager(),
+	}
 }
 
 func newGRPCServer(containerRuntime string, reg prometheus.Registerer) (*grpc.Server, error) {
@@ -86,7 +94,7 @@ func newGRPCServer(containerRuntime string, reg prometheus.Registerer) (*grpc.Se
 
 	grpcOpts := []grpc.ServerOption{
 		grpc_middleware.WithUnaryServerChain(
-			utils.TimeoutServerInterceptor,
+			grpcUtils.TimeoutServerInterceptor,
 			grpcMetrics.UnaryServerInterceptor(),
 		),
 	}
