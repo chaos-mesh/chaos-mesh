@@ -53,7 +53,7 @@ function REQUEST() {
     MESSAGE=$5
 
     for(( i=0;i<${#TOKEN_LIST[@]};i++)) do
-        echo "$i. use token ${TOKEN_LIST[i]} to send $METHOD request to $URL, and save log in $LOG, log should contains $MESSAGE"
+        echo "$i. use token ${TOKEN_LIST[i]: 0: 10}...${TOKEN_LIST[i]: 0-10} to send $METHOD request to $URL, and save log in $LOG, log should contains $MESSAGE"
         if [ "$METHOD" == "POST" ]; then
             curl -X $METHOD "localhost:2333$URL" -H "Content-Type: application/json" -H "Authorization: Bearer ${TOKEN_LIST[i]}" -d "${EXP_JSON}" > $LOG
         elif [ "$METHOD" == "PUT" ]; then
