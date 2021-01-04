@@ -33,7 +33,6 @@ func RegisterOperatorFlags(flags *flag.FlagSet) {
 	flags.StringVar(&TestConfig.DaemonImage, "daemon-image", "pingcap/chaos-daemon", "chaos-daemon image")
 	flags.StringVar(&TestConfig.DaemonTag, "daemon-image-tag", "latest", "chaos-daemon image tag")
 	flags.StringVar(&TestConfig.E2EImage, "e2e-image", "pingcap/e2e-helper:latest", "e2e helper image")
-	flags.StringVar(&TestConfig.ChaosFSImage, "chaos-fs-image", "pingcap/chaos-fs:latest", "chaos-fs image")
 	flags.StringVar(&TestConfig.ChaosScriptsImage, "chaos-scripts-image", "pingcap/chaos-scripts:latest", "chaos-scripts image")
 	flags.StringVar(&TestConfig.ChaosDNSImage, "chaos-dns-image", "pingcap/coredns:latest", "chaos-dns image")
 	flags.BoolVar(&TestConfig.InstallChaosMesh, "install-chaos-mesh", false, "automatically install chaos-mesh")

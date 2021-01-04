@@ -84,7 +84,7 @@ func (s *DaemonServer) SetTcs(ctx context.Context, in *pb.TcsRequest) (*empty.Em
 
 	setDefaultTcsRequest(in)
 
-	tcCli := buildTcClient(ctx, pid)
+	tcCli := buildTcClient(ctx, in.EnterNS, pid)
 	err = tcCli.flush(in.Device)
 	if err != nil {
 		log.Error(err, "error while flushing client")
@@ -135,7 +135,7 @@ func (s *DaemonServer) SetTcs(ctx context.Context, in *pb.TcsRequest) (*empty.Em
 	}
 
 	if len(filterTc) > 0 {
-		iptablesCli := buildIptablesClient(ctx, pid)
+		iptablesCli := buildIptablesClient(ctx, in.EnterNS, pid)
 		if err := s.setFilterTcs(tcCli, iptablesCli, filterTc, in.Device, len(globalTc)); err != nil {
 			log.Error(err, "error while setting filter tc")
 			return &empty.Empty{}, nil
@@ -218,12 +218,14 @@ func (s *DaemonServer) setFilterTcs(
 			ch.Protocol = fmt.Sprintf("--protocol %s", tc.Protocol)
 		}
 
-		if len(tc.SourcePort) > 0 || len(tc.EgressPort) > 0 {
+		if len(tc.SourcePort) > 0 {
 			ch.SourcePorts = fmt.Sprintf("--source-port %s", tc.SourcePort)
 			if strings.Contains(tc.SourcePort, ",") {
 				ch.SourcePorts = fmt.Sprintf("-m multiport --source-ports %s", tc.SourcePort)
 			}
+		}
 
+		if len(tc.EgressPort) > 0 {
 			ch.DestinationPorts = fmt.Sprintf("--destination-port %s", tc.EgressPort)
 			if strings.Contains(tc.EgressPort, ",") {
 				ch.DestinationPorts = fmt.Sprintf("-m multiport --destination-ports %s", tc.EgressPort)
@@ -243,19 +245,25 @@ func (s *DaemonServer) setFilterTcs(
 }
 
 type tcClient struct {
-	ctx context.Context
-	pid uint32
+	ctx     context.Context
+	enterNS bool
+	pid     uint32
 }
 
-func buildTcClient(ctx context.Context, pid uint32) tcClient {
+func buildTcClient(ctx context.Context, enterNS bool, pid uint32) tcClient {
 	return tcClient{
 		ctx,
+		enterNS,
 		pid,
 	}
 }
 
 func (c *tcClient) flush(device string) error {
-	cmd := bpm.DefaultProcessBuilder("tc", "qdisc", "del", "dev", device, "root").SetNS(c.pid, bpm.NetNS).SetContext(c.ctx).Build()
+	processBuilder := bpm.DefaultProcessBuilder("tc", "qdisc", "del", "dev", device, "root").SetContext(c.ctx)
+	if c.enterNS {
+		processBuilder = processBuilder.SetNS(c.pid, bpm.NetNS)
+	}
+	cmd := processBuilder.Build()
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		if (!strings.Contains(string(output), ruleNotExistLowerVersion)) && (!strings.Contains(string(output), ruleNotExist)) {
@@ -303,7 +311,12 @@ func (c *tcClient) addPrio(device string, parent int, band int) error {
 		parentArg = fmt.Sprintf("parent %d:", parent)
 	}
 	args := fmt.Sprintf("qdisc add dev %s %s handle %d: prio bands %d priomap 1 2 2 2 1 2 0 0 1 1 1 1 1 1 1 1", device, parentArg, parent+1, band)
-	cmd := bpm.DefaultProcessBuilder("tc", strings.Split(args, " ")...).SetNS(c.pid, bpm.NetNS).SetContext(c.ctx).Build()
+
+	processBuilder := bpm.DefaultProcessBuilder("tc", strings.Split(args, " ")...).SetContext(c.ctx)
+	if c.enterNS {
+		processBuilder = processBuilder.SetNS(c.pid, bpm.NetNS)
+	}
+	cmd := processBuilder.Build()
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		return encodeOutputToError(output, err)
@@ -311,7 +324,12 @@ func (c *tcClient) addPrio(device string, parent int, band int) error {
 
 	for index := 1; index <= 3; index++ {
 		args := fmt.Sprintf("qdisc add dev %s parent %d:%d handle %d: sfq", device, parent+1, index, parent+1+index)
-		cmd := bpm.DefaultProcessBuilder("tc", strings.Split(args, " ")...).SetNS(c.pid, bpm.NetNS).SetContext(c.ctx).Build()
+
+		processBuilder := bpm.DefaultProcessBuilder("tc", strings.Split(args, " ")...).SetContext(c.ctx)
+		if c.enterNS {
+			processBuilder = processBuilder.SetNS(c.pid, bpm.NetNS)
+		}
+		cmd := processBuilder.Build()
 		output, err := cmd.CombinedOutput()
 		if err != nil {
 			return encodeOutputToError(output, err)
@@ -325,7 +343,11 @@ func (c *tcClient) addNetem(device string, parent string, handle string, netem *
 	log.Info("adding netem", "device", device, "parent", parent, "handle", handle)
 
 	args := fmt.Sprintf("qdisc add dev %s %s %s netem %s", device, parent, handle, convertNetemToArgs(netem))
-	cmd := bpm.DefaultProcessBuilder("tc", strings.Split(args, " ")...).SetNS(c.pid, bpm.NetNS).SetContext(c.ctx).Build()
+	processBuilder := bpm.DefaultProcessBuilder("tc", strings.Split(args, " ")...).SetContext(c.ctx)
+	if c.enterNS {
+		processBuilder = processBuilder.SetNS(c.pid, bpm.NetNS)
+	}
+	cmd := processBuilder.Build()
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		return encodeOutputToError(output, err)
@@ -337,7 +359,11 @@ func (c *tcClient) addTbf(device string, parent string, handle string, tbf *pb.T
 	log.Info("adding tbf", "device", device, "parent", parent, "handle", handle)
 
 	args := fmt.Sprintf("qdisc add dev %s %s %s tbf %s", device, parent, handle, convertTbfToArgs(tbf))
-	cmd := bpm.DefaultProcessBuilder("tc", strings.Split(args, " ")...).SetNS(c.pid, bpm.NetNS).SetContext(c.ctx).Build()
+	processBuilder := bpm.DefaultProcessBuilder("tc", strings.Split(args, " ")...).SetContext(c.ctx)
+	if c.enterNS {
+		processBuilder = processBuilder.SetNS(c.pid, bpm.NetNS)
+	}
+	cmd := processBuilder.Build()
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		return encodeOutputToError(output, err)
@@ -351,7 +377,11 @@ func (c *tcClient) addFilter(device string, parent string, classid string, ipset
 	args := strings.Split(fmt.Sprintf("filter add dev %s %s basic match", device, parent), " ")
 	args = append(args, fmt.Sprintf("ipset(%s dst)", ipset))
 	args = append(args, strings.Split(classid, " ")...)
-	cmd := bpm.DefaultProcessBuilder("tc", args...).SetNS(c.pid, bpm.NetNS).SetContext(c.ctx).Build()
+	processBuilder := bpm.DefaultProcessBuilder("tc", args...).SetContext(c.ctx)
+	if c.enterNS {
+		processBuilder = processBuilder.SetNS(c.pid, bpm.NetNS)
+	}
+	cmd := processBuilder.Build()
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		return encodeOutputToError(output, err)

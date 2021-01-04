@@ -31,14 +31,10 @@ const EventDetail: React.FC<EventDetailProps> = ({ eventID }) => {
     setLoading(true)
 
     api.events
-      .events()
-      .then(({ data }) => {
-        setEvent(data.find((e) => e.id === Number(eventID)))
-      })
+      .get(eventID)
+      .then(({ data }) => setEvent(data))
       .catch(console.error)
-      .finally(() => {
-        setLoading(false)
-      })
+      .finally(() => setLoading(false))
   }
 
   useEffect(fetchEvent, [eventID])

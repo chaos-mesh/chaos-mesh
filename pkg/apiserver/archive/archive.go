@@ -52,6 +52,7 @@ type StatusResponse struct {
 // Register mounts our HTTP handler on the mux.
 func Register(r *gin.RouterGroup, s *Service) {
 	endpoint := r.Group("/archives")
+	endpoint.Use(utils.AuthRequired)
 
 	endpoint.GET("", s.list)
 	endpoint.GET("/detail", s.detail)
@@ -138,6 +139,7 @@ func (s *Service) detail(c *gin.Context) {
 		detail Detail
 	)
 	uid := c.Query("uid")
+	namespace := c.Query("namespace")
 
 	if uid == "" {
 		c.Status(http.StatusBadRequest)
@@ -157,6 +159,12 @@ func (s *Service) detail(c *gin.Context) {
 		return
 	}
 
+	if len(namespace) != 0 && exp.Namespace != namespace {
+		c.Status(http.StatusBadRequest)
+		_ = c.Error(utils.ErrInvalidRequest.New("exp %s belong to namespace %s but not namespace %s", uid, exp.Namespace, namespace))
+		return
+	}
+
 	switch exp.Kind {
 	case v1alpha1.KindPodChaos:
 		yaml, err = exp.ParsePodChaos()
@@ -170,6 +178,8 @@ func (s *Service) detail(c *gin.Context) {
 		yaml, err = exp.ParseKernelChaos()
 	case v1alpha1.KindStressChaos:
 		yaml, err = exp.ParseStressChaos()
+	case v1alpha1.KindDNSChaos:
+		yaml, err = exp.ParseDNSChaos()
 	default:
 		err = fmt.Errorf("kind %s is not support", exp.Kind)
 	}
@@ -209,6 +219,7 @@ func (s *Service) report(c *gin.Context) {
 		report Report
 	)
 	uid := c.Query("uid")
+	namespace := c.Query("namespace")
 
 	if uid == "" {
 		c.Status(http.StatusBadRequest)
@@ -227,6 +238,13 @@ func (s *Service) report(c *gin.Context) {
 		}
 		return
 	}
+
+	if len(namespace) != 0 && meta.Namespace != namespace {
+		c.Status(http.StatusBadRequest)
+		_ = c.Error(utils.ErrInvalidRequest.New("exp %s belong to namespace %s but not namespace %s", uid, meta.Namespace, namespace))
+		return
+	}
+
 	report.Meta = &Archive{
 		UID:        meta.UID,
 		Kind:       meta.Kind,
@@ -263,7 +281,7 @@ func (s *Service) report(c *gin.Context) {
 // @Param uid path string true "uid"
 // @Success 200 {object} StatusResponse
 // @Failure 500 {object} utils.APIError
-// @Router /experiments/{uid} [delete]
+// @Router /archives/{uid} [delete]
 func (s *Service) delete(c *gin.Context) {
 	var (
 		err error

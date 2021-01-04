@@ -30,8 +30,11 @@ const navigationSlice = createSlice({
     setNavigationBreadcrumbs(state, action: PayloadAction<string>) {
       const breadcrumbs = pathnameToBreadCrumbs(action.payload)
 
-      state.breadcrumbs = breadcrumbs
-      document.title = breadcrumbs.map((b) => b.name).join(' / ') + ' | Chaos Mesh Dashboard'
+      if (breadcrumbs[0].name) {
+        state.breadcrumbs = breadcrumbs
+
+        document.title = breadcrumbs.map((b) => b.name).join(' / ') + ' | Chaos Mesh Dashboard'
+      }
     },
   },
 })
