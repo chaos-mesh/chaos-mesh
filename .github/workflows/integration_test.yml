@@ -27,9 +27,9 @@ jobs:
           export CLUSTER="chart-testing"
           hack/local-up-chaos-mesh.sh
           kubectl set env deployment/chaos-dashboard SECURITY_MODE=true -n chaos-testing
+          sleep 5
           kubectl port-forward -n chaos-testing svc/chaos-dashboard 2333:2333 &
-          bash test/integration_test/run.sh
       
-      # - name: Run integration test
-      #  run: |
-      #    bash test/integration_test/run.sh
+      - name: Run integration test
+        run: |
+          bash test/integration_test/run.sh
