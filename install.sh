@@ -1166,8 +1166,8 @@ spec:
       priorityClassName:
       containers:
         - name: chaos-daemon
-          image: localhost:5000/pingcap/chaos-daemon:${VERSION_TAG}
-          imagePullPolicy: Never
+          image: ${DOCKER_REGISTRY_PREFIX}/pingcap/chaos-daemon:${VERSION_TAG}
+          imagePullPolicy: IfNotPresent
           command:
             - /usr/local/bin/chaos-daemon
             - --runtime
@@ -1235,11 +1235,11 @@ spec:
         app.kubernetes.io/component: chaos-dashboard
     spec:
       serviceAccount: chaos-controller-manager
-      priorityClassName:
+      priorityClassName: 
       containers:
         - name: chaos-dashboard
-          image: localhost:5000/pingcap/chaos-dashboard:${VERSION_TAG}
-          imagePullPolicy: Never
+          image: ${DOCKER_REGISTRY_PREFIX}/pingcap/chaos-dashboard:${VERSION_TAG}
+          imagePullPolicy: IfNotPresent
           resources:
             limits: {}
             requests:
@@ -1303,11 +1303,11 @@ spec:
     spec:
       hostNetwork: ${host_network}
       serviceAccount: chaos-controller-manager
-      priorityClassName:
+      priorityClassName: 
       containers:
       - name: chaos-mesh
-        image: localhost:5000/pingcap/chaos-mesh:${VERSION_TAG}
-        imagePullPolicy: Never
+        image: ${DOCKER_REGISTRY_PREFIX}/pingcap/chaos-mesh:${VERSION_TAG}
+        imagePullPolicy: IfNotPresent
         resources:
             limits: {}
             requests:
