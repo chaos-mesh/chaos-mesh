@@ -1,0 +1,11 @@
+#!/bin/sh
+
+set -eu
+
+if ! grep -Fq "$1" "$2"; then
+    echo "TEST FAILED: $2 DOES NOT CONTAIN '$1'"
+    echo "____________________________________"
+    cat $2
+    echo "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"
+    exit 1
+fi

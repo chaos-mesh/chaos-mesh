@@ -36,11 +36,17 @@ func AuthRequired(c *gin.Context) {
 	}
 
 	namespace := c.Query("namespace")
+	verb := "list"
+	if c.Request.Method != http.MethodGet {
+		// patch is used to indicate delete, create, patch, delete and other write operations
+		verb = "patch"
+	}
+
 	sar := &authorizationv1.SelfSubjectAccessReview{
 		Spec: authorizationv1.SelfSubjectAccessReviewSpec{
 			ResourceAttributes: &authorizationv1.ResourceAttributes{
 				Namespace: namespace,
-				Verb:      "list",
+				Verb:      verb,
 				Group:     "chaos-mesh.org",
 				Resource:  "*",
 			},
@@ -55,9 +61,9 @@ func AuthRequired(c *gin.Context) {
 
 	if !response.Status.Allowed {
 		if len(namespace) == 0 {
-			c.AbortWithError(http.StatusUnauthorized, ErrNoClusterPrivilege.New("can't list chaos experiments in the cluster"))
+			c.AbortWithError(http.StatusUnauthorized, ErrNoClusterPrivilege.New("can't %s resource in the cluster", verb))
 		} else {
-			c.AbortWithError(http.StatusUnauthorized, ErrNoNamespacePrivilege.New("can't list chaos experiments in namespace %s", namespace))
+			c.AbortWithError(http.StatusUnauthorized, ErrNoNamespacePrivilege.New("can't %s resource in namespace %s", verb, namespace))
 		}
 		return
 	}
