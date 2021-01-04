@@ -86,7 +86,7 @@ chaosDaemon:
 
   # enable a podSecurityPolicy(psp)
   podSecurityPolicy: false
-  
+
   # runtime specifies which container runtime to use. Currently
   # we only supports docker and containerd.
   runtime: docker
@@ -324,6 +324,7 @@ webhook:
     - networkchaos
     - kernelchaos
     - stresschaos
+    - awschaos
     - podiochaos
     - podnetworkchaos
     - dnschaos
