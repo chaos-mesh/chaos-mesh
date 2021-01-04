@@ -101,27 +101,21 @@ const Step2 = () => {
                     error={errors.name && touched.name ? true : false}
                   />
 
-                  {namespaces.length ? (
-                    <SelectField
-                      id="namespace"
-                      name="namespace"
-                      label={T('newE.basic.namespace')}
-                      helperText={
-                        errors.namespace && touched.namespace ? errors.namespace : T('newE.basic.namespaceHelper')
-                      }
-                      error={errors.namespace && touched.namespace ? true : false}
-                    >
-                      {namespaces.map((n) => (
-                        <MenuItem key={n} value={n}>
-                          {n}
-                        </MenuItem>
-                      ))}
-                    </SelectField>
-                  ) : (
-                    <SkeletonN n={3} />
-                  )}
-
                   <AdvancedOptions>
+                    {namespaces.length && (
+                      <SelectField
+                        id="namespace"
+                        name="namespace"
+                        label={T('newE.basic.namespace')}
+                        helperText={T('newE.basic.namespaceHelper')}
+                      >
+                        {namespaces.map((n) => (
+                          <MenuItem key={n} value={n}>
+                            {n}
+                          </MenuItem>
+                        ))}
+                      </SelectField>
+                    )}
                     <LabelField id="labels" name="labels" label={T('k8s.labels')} isKV />
                     <LabelField id="annotations" name="annotations" label={T('k8s.annotations')} isKV />
                   </AdvancedOptions>
