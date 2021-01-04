@@ -1,21 +1,23 @@
+
+---
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.2.5
   creationTimestamp: null
-  name: kernelchaos.chaos-mesh.org
+  name: timechaos.chaos-mesh.org
 spec:
   group: chaos-mesh.org
   names:
-    kind: KernelChaos
-    listKind: KernelChaosList
-    plural: kernelchaos
-    singular: kernelchaos
+    kind: TimeChaos
+    listKind: TimeChaosList
+    plural: timechaos
+    singular: timechaos
   scope: Namespaced
   validation:
     openAPIV3Schema:
-      description: KernelChaos is the Schema for the kernelchaos API
+      description: TimeChaos is the Schema for the timechaos API
       properties:
         apiVersion:
           description: 'APIVersion defines the versioned schema of this representation
@@ -30,79 +32,25 @@ spec:
         metadata:
           type: object
         spec:
-          description: Spec defines the behavior of a kernel chaos experiment
+          description: Spec defines the behavior of a time chaos experiment
           properties:
+            clockIds:
+              description: ClockIds defines all affected clock id All available options
+                are ["CLOCK_REALTIME","CLOCK_MONOTONIC","CLOCK_PROCESS_CPUTIME_ID","CLOCK_THREAD_CPUTIME_ID",
+                "CLOCK_MONOTONIC_RAW","CLOCK_REALTIME_COARSE","CLOCK_MONOTONIC_COARSE","CLOCK_BOOTTIME","CLOCK_REALTIME_ALARM",
+                "CLOCK_BOOTTIME_ALARM"] Default value is ["CLOCK_REALTIME"]
+              items:
+                type: string
+              type: array
+            containerNames:
+              description: ContainerName indicates the name of affected container.
+                If not set, all containers will be injected
+              items:
+                type: string
+              type: array
             duration:
               description: Duration represents the duration of the chaos action
               type: string
-            failKernRequest:
-              description: FailKernRequest defines the request of kernel injection
-              properties:
-                callchain:
-                  description: 'Callchain indicate a special call chain, such as:     ext4_mount       ->
-                    mount_subtree          -> ...             -> should_failslab With
-                    an optional set of predicates and an optional set of parameters,
-                    which used with predicates. You can read call chan and predicate
-                    examples from https://github.com/chaos-mesh/bpfki/tree/develop/examples
-                    to learn more. If no special call chain, just keep Callchain empty,
-                    which means it will fail at any call chain with slab alloc (eg:
-                    kmalloc).'
-                  items:
-                    description: Frame defines the function signature and predicate
-                      in function's body
-                    properties:
-                      funcname:
-                        description: Funcname can be find from kernel source or `/proc/kallsyms`,
-                          such as `ext4_mount`
-                        type: string
-                      parameters:
-                        description: Parameters is used with predicate, for example,
-                          if you want to inject slab error in `d_alloc_parallel(struct
-                          dentry *parent, const struct qstr *name)` with a special
-                          name `bananas`, you need to set it to `struct dentry *parent,
-                          const struct qstr *name` otherwise omit it.
-                        type: string
-                      predicate:
-                        description: Predicate will access the arguments of this Frame,
-                          example with Parameters's, you can set it to `STRNCMP(name->name,
-                          "bananas", 8)` to make inject only with it, or omit it to
-                          inject for all d_alloc_parallel call chain.
-                        type: string
-                    type: object
-                  type: array
-                failtype:
-                  description: 'FailType indicates what to fail, can be set to ''0''
-                    / ''1'' / ''2'' If `0`, indicates slab to fail (should_failslab)
-                    If `1`, indicates alloc_page to fail (should_fail_alloc_page)
-                    If `2`, indicates bio to fail (should_fail_bio) You can read:   1.
-                    https://www.kernel.org/doc/html/latest/fault-injection/fault-injection.html   2.
-                    http://github.com/iovisor/bcc/blob/master/tools/inject_example.txt
-                    to learn more'
-                  format: int32
-                  maximum: 2
-                  minimum: 0
-                  type: integer
-                headers:
-                  description: 'Headers indicates the appropriate kernel headers you
-                    need. Eg: "linux/mmzone.h", "linux/blkdev.h" and so on'
-                  items:
-                    type: string
-                  type: array
-                probability:
-                  description: Probability indicates the fails with probability. If
-                    you want 1%, please set this field with 1.
-                  format: int32
-                  maximum: 100
-                  minimum: 0
-                  type: integer
-                times:
-                  description: Times indicates the max times of fails.
-                  format: int32
-                  minimum: 0
-                  type: integer
-              required:
-              - failtype
-              type: object
             mode:
               description: 'Mode defines the mode to run chaos action. Supported mode:
                 one / all / fixed / fixed-percent / random-max-percent'
@@ -183,6 +131,12 @@ spec:
                     belong, and the each values is a set of pod names.
                   type: object
               type: object
+            timeOffset:
+              description: TimeOffset defines the delta time of injected program.
+                It's a possibly signed sequence of decimal numbers, such as "300ms",
+                "-1.5h" or "2h45m". Valid time units are "ns", "us" (or "µs"), "ms",
+                "s", "m", "h".
+              type: string
             value:
               description: Value is required when the mode is set to `FixedPodMode`
                 / `FixedPercentPodMod` / `RandomMaxPercentPodMod`. If `FixedPodMode`,
@@ -192,12 +146,12 @@ spec:
                 from 0-100 to specify the max percent of pods to do chaos action
               type: string
           required:
-          - failKernRequest
           - mode
           - selector
+          - timeOffset
           type: object
         status:
-          description: Most recently observed status of the kernel chaos experiment
+          description: Most recently observed status of the time chaos experiment
           properties:
             experiment:
               description: Experiment records the last experiment state.

@@ -1,21 +1,23 @@
+
+---
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.2.5
   creationTimestamp: null
-  name: timechaos.chaos-mesh.org
+  name: podchaos.chaos-mesh.org
 spec:
   group: chaos-mesh.org
   names:
-    kind: TimeChaos
-    listKind: TimeChaosList
-    plural: timechaos
-    singular: timechaos
+    kind: PodChaos
+    listKind: PodChaosList
+    plural: podchaos
+    singular: podchaos
   scope: Namespaced
   validation:
     openAPIV3Schema:
-      description: TimeChaos is the Schema for the timechaos API
+      description: PodChaos is the control script`s spec.
       properties:
         apiVersion:
           description: 'APIVersion defines the versioned schema of this representation
@@ -30,25 +32,35 @@ spec:
         metadata:
           type: object
         spec:
-          description: Spec defines the behavior of a time chaos experiment
+          description: Spec defines the behavior of a pod chaos experiment
           properties:
-            clockIds:
-              description: ClockIds defines all affected clock id All available options
-                are ["CLOCK_REALTIME","CLOCK_MONOTONIC","CLOCK_PROCESS_CPUTIME_ID","CLOCK_THREAD_CPUTIME_ID",
-                "CLOCK_MONOTONIC_RAW","CLOCK_REALTIME_COARSE","CLOCK_MONOTONIC_COARSE","CLOCK_BOOTTIME","CLOCK_REALTIME_ALARM",
-                "CLOCK_BOOTTIME_ALARM"] Default value is ["CLOCK_REALTIME"]
-              items:
-                type: string
-              type: array
-            containerNames:
-              description: ContainerName indicates the name of affected container.
-                If not set, all containers will be injected
-              items:
-                type: string
-              type: array
-            duration:
-              description: Duration represents the duration of the chaos action
+            action:
+              description: 'Action defines the specific pod chaos action. Supported
+                action: pod-kill / pod-failure / container-kill Default action: pod-kill'
+              enum:
+              - pod-kill
+              - pod-failure
+              - container-kill
               type: string
+            containerName:
+              description: ContainerName indicates the name of the container. Needed
+                in container-kill.
+              type: string
+            duration:
+              description: Duration represents the duration of the chaos action. It
+                is required when the action is `PodFailureAction`. A duration string
+                is a possibly signed sequence of decimal numbers, each with optional
+                fraction and a unit suffix, such as "300ms", "-1.5h" or "2h45m". Valid
+                time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
+              type: string
+            gracePeriod:
+              description: GracePeriod is used in pod-kill action. It represents the
+                duration in seconds before the pod should be deleted. Value must be
+                non-negative integer. The default value is zero that indicates delete
+                immediately.
+              format: int64
+              minimum: 0
+              type: integer
             mode:
               description: 'Mode defines the mode to run chaos action. Supported mode:
                 one / all / fixed / fixed-percent / random-max-percent'
@@ -61,7 +73,7 @@ spec:
               type: string
             scheduler:
               description: Scheduler defines some schedule rules to control the running
-                time of the chaos experiment about time.
+                time of the chaos experiment about pods.
               properties:
                 cron:
                   description: "Cron defines a cron job rule. \n Some rule examples:
@@ -129,27 +141,22 @@ spec:
                     belong, and the each values is a set of pod names.
                   type: object
               type: object
-            timeOffset:
-              description: TimeOffset defines the delta time of injected program.
-                It's a possibly signed sequence of decimal numbers, such as "300ms",
-                "-1.5h" or "2h45m". Valid time units are "ns", "us" (or "µs"), "ms",
-                "s", "m", "h".
-              type: string
             value:
               description: Value is required when the mode is set to `FixedPodMode`
                 / `FixedPercentPodMod` / `RandomMaxPercentPodMod`. If `FixedPodMode`,
                 provide an integer of pods to do chaos action. If `FixedPercentPodMod`,
                 provide a number from 0-100 to specify the percent of pods the server
-                can do chaos action. If `RandomMaxPercentPodMod`,  provide a number
+                can do chaos action. IF `RandomMaxPercentPodMod`,  provide a number
                 from 0-100 to specify the max percent of pods to do chaos action
               type: string
           required:
+          - action
           - mode
           - selector
-          - timeOffset
           type: object
         status:
-          description: Most recently observed status of the time chaos experiment
+          description: Most recently observed status of the chaos experiment about
+            pods
           properties:
             experiment:
               description: Experiment records the last experiment state.

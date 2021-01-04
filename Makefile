@@ -146,6 +146,7 @@ install: manifests
 # Generate manifests e.g. CRD, RBAC etc.
 manifests: $(GOBIN)/controller-gen
 	$< $(CRD_OPTIONS) rbac:roleName=manager-role webhook paths="./..." output:crd:artifacts:config=config/crd/bases
+	$< $(CRD_OPTIONS) rbac:roleName=manager-role webhook paths="./..." output:crd:artifacts:config=helm/chaos-mesh/crds
 
 # Run go fmt against code
 fmt: groupimports

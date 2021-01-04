@@ -1,21 +1,23 @@
+
+---
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.2.5
   creationTimestamp: null
-  name: podchaos.chaos-mesh.org
+  name: httpchaos.chaos-mesh.org
 spec:
   group: chaos-mesh.org
   names:
-    kind: PodChaos
-    listKind: PodChaosList
-    plural: podchaos
-    singular: podchaos
+    kind: HTTPChaos
+    listKind: HTTPChaosList
+    plural: httpchaos
+    singular: httpchaos
   scope: Namespaced
   validation:
     openAPIV3Schema:
-      description: PodChaos is the control script`s spec.
+      description: HTTPChaos is the Schema for the HTTPchaos API
       properties:
         apiVersion:
           description: 'APIVersion defines the versioned schema of this representation
@@ -30,19 +32,14 @@ spec:
         metadata:
           type: object
         spec:
-          description: Spec defines the behavior of a pod chaos experiment
           properties:
             action:
               description: 'Action defines the specific pod chaos action. Supported
-                action: pod-kill / pod-failure / container-kill Default action: pod-kill'
+                action: delay | abort | mixed Default action: delay'
               enum:
-              - pod-kill
-              - pod-failure
-              - container-kill
-              type: string
-            containerName:
-              description: ContainerName indicates the name of the container. Needed
-                in container-kill.
+              - delay
+              - abort
+              - mixed
               type: string
             duration:
               description: Duration represents the duration of the chaos action. It
@@ -51,14 +48,33 @@ spec:
                 fraction and a unit suffix, such as "300ms", "-1.5h" or "2h45m". Valid
                 time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
               type: string
-            gracePeriod:
-              description: GracePeriod is used in pod-kill action. It represents the
-                duration in seconds before the pod should be deleted. Value must be
-                non-negative integer. The default value is zero that indicates delete
-                immediately.
-              format: int64
-              minimum: 0
-              type: integer
+            headers:
+              description: Specifies how the header match will be performed to route
+                the request.
+              items:
+                properties:
+                  exact_match:
+                    type: string
+                  invert_match:
+                    type: string
+                  name:
+                    type: string
+                  prefix_match:
+                    type: string
+                  present_match:
+                    type: string
+                  range_match:
+                    type: string
+                  regex_match:
+                    type: string
+                  safe_regex_match:
+                    type: string
+                  suffix_match:
+                    type: string
+                required:
+                - name
+                type: object
+              type: array
             mode:
               description: 'Mode defines the mode to run chaos action. Supported mode:
                 one / all / fixed / fixed-percent / random-max-percent'
@@ -68,6 +84,10 @@ spec:
               - fixed
               - fixed-percent
               - random-max-percent
+              type: string
+            percent:
+              description: 'Percent defines the percentage of injection errors and
+                provides a number from 0-100. default: 100.'
               type: string
             scheduler:
               description: Scheduler defines some schedule rules to control the running
@@ -153,8 +173,6 @@ spec:
           - selector
           type: object
         status:
-          description: Most recently observed status of the chaos experiment about
-            pods
           properties:
             experiment:
               description: Experiment records the last experiment state.
@@ -224,8 +242,6 @@ spec:
           - experiment
           - phase
           type: object
-      required:
-      - spec
       type: object
   version: v1alpha1
   versions:
