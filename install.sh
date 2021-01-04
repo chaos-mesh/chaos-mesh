@@ -1163,7 +1163,7 @@ spec:
       serviceAccount: chaos-daemon
       hostIPC: true
       hostPID: true
-      priorityClassName:
+      priorityClassName: 
       containers:
         - name: chaos-daemon
           image: ${DOCKER_REGISTRY_PREFIX}/pingcap/chaos-daemon:${VERSION_TAG}
