@@ -110,4 +110,4 @@ replace (
 	vbom.ml/util => github.com/fvbommel/util v0.0.2
 )
 
-go 1.13
+go 1.15
