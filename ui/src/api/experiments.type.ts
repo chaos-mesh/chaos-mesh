@@ -1,7 +1,7 @@
 import { Event } from './events.type'
+import { ExperimentKind } from 'components/NewExperiment/types'
 
 export interface StateOfExperiments {
-  Total: number
   Running: number
   Waiting: number
   Paused: number
@@ -10,7 +10,6 @@ export interface StateOfExperiments {
 }
 
 export enum StateOfExperimentsEnum {
-  Total = 'Total',
   Running = 'Running',
   Waiting = 'Waiting',
   Paused = 'Paused',
@@ -20,7 +19,7 @@ export enum StateOfExperimentsEnum {
 
 export interface Experiment {
   uid: uuid
-  kind: string
+  kind: ExperimentKind
   namespace: string
   name: string
   created: string

@@ -23,8 +23,8 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos/ipset"
 	"github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos/iptable"
 	tcpkg "github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos/tc"
+	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/netem"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
-	"github.com/chaos-mesh/chaos-mesh/pkg/utils"
 
 	"github.com/go-logr/logr"
 	corev1 "k8s.io/api/core/v1"
@@ -190,7 +190,7 @@ func mergeNetem(spec v1alpha1.TcParameter) (*pb.Netem, error) {
 		if err != nil {
 			return nil, err
 		}
-		merged = utils.MergeNetem(merged, em)
+		merged = netem.MergeNetem(merged, em)
 	}
 	return merged, nil
 }

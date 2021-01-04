@@ -2,10 +2,10 @@ import { Box, Button, Divider, Grid, MenuItem, Typography } from '@material-ui/c
 import { Form, Formik } from 'formik'
 import { LabelField, SelectField, TextField } from 'components/FormField'
 import React, { useEffect, useState } from 'react'
-import { RootState, useStoreDispatch } from 'store'
 import basicData, { schema } from './data/basic'
 import { createStyles, makeStyles } from '@material-ui/core/styles'
 import { setBasic, setStep2 } from 'slices/experiments'
+import { useStoreDispatch, useStoreSelector } from 'store'
 
 import AdvancedOptions from 'components/AdvancedOptions'
 import CheckCircleOutlineIcon from '@material-ui/icons/CheckCircleOutline'
@@ -17,8 +17,6 @@ import Scope from './form/Scope'
 import SkeletonN from 'components-mui/SkeletonN'
 import T from 'components/T'
 import UndoIcon from '@material-ui/icons/Undo'
-import { getNamespaces } from 'slices/experiments'
-import { useSelector } from 'react-redux'
 
 const useStyles = makeStyles((theme) =>
   createStyles({
@@ -37,14 +35,10 @@ const useStyles = makeStyles((theme) =>
 const Step2 = () => {
   const classes = useStyles()
 
-  const { namespaces, step2, basic } = useSelector((state: RootState) => state.experiments)
+  const { namespaces, step2, basic } = useStoreSelector((state) => state.experiments)
   const dispatch = useStoreDispatch()
 
   const [init, setInit] = useState(basicData)
-
-  useEffect(() => {
-    dispatch(getNamespaces())
-  }, [dispatch])
 
   useEffect(() => {
     setInit({
@@ -107,27 +101,21 @@ const Step2 = () => {
                     error={errors.name && touched.name ? true : false}
                   />
 
-                  {namespaces.length ? (
-                    <SelectField
-                      id="namespace"
-                      name="namespace"
-                      label={T('newE.basic.namespace')}
-                      helperText={
-                        errors.namespace && touched.namespace ? errors.namespace : T('newE.basic.namespaceHelper')
-                      }
-                      error={errors.namespace && touched.namespace ? true : false}
-                    >
-                      {namespaces.map((n) => (
-                        <MenuItem key={n} value={n}>
-                          {n}
-                        </MenuItem>
-                      ))}
-                    </SelectField>
-                  ) : (
-                    <SkeletonN n={3} />
-                  )}
-
                   <AdvancedOptions>
+                    {namespaces.length && (
+                      <SelectField
+                        id="namespace"
+                        name="namespace"
+                        label={T('newE.basic.namespace')}
+                        helperText={T('newE.basic.namespaceHelper')}
+                      >
+                        {namespaces.map((n) => (
+                          <MenuItem key={n} value={n}>
+                            {n}
+                          </MenuItem>
+                        ))}
+                      </SelectField>
+                    )}
                     <LabelField id="labels" name="labels" label={T('k8s.labels')} isKV />
                     <LabelField id="annotations" name="annotations" label={T('k8s.annotations')} isKV />
                   </AdvancedOptions>

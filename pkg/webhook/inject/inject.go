@@ -20,8 +20,9 @@ import (
 	"strings"
 
 	"github.com/chaos-mesh/chaos-mesh/controllers/metrics"
+	"github.com/chaos-mesh/chaos-mesh/pkg/annotation"
 	controllerCfg "github.com/chaos-mesh/chaos-mesh/pkg/config"
-	"github.com/chaos-mesh/chaos-mesh/pkg/utils"
+	"github.com/chaos-mesh/chaos-mesh/pkg/selector"
 	"github.com/chaos-mesh/chaos-mesh/pkg/webhook/config"
 
 	ccfg "github.com/chaos-mesh/chaos-mesh/controllers/config"
@@ -93,7 +94,7 @@ func Inject(res *v1beta1.AdmissionRequest, cli client.Client, cfg *config.Config
 	}
 
 	if injectionConfig.Selector != nil {
-		meet, err := utils.CheckPodMeetSelector(pod, *injectionConfig.Selector)
+		meet, err := selector.CheckPodMeetSelector(pod, *injectionConfig.Selector)
 		if err != nil {
 			log.Error(err, "Failed to check pod selector", "namespace", pod.Namespace)
 			return &v1beta1.AdmissionResponse{
@@ -210,7 +211,7 @@ func injectByNamespaceRequired(metadata *metav1.ObjectMeta, cli client.Client, c
 		annotations = make(map[string]string)
 	}
 
-	required, ok := annotations[utils.GenAnnotationKeyForWebhook(cfg.RequestAnnotationKey(), metadata.Name)]
+	required, ok := annotations[annotation.GenKeyForWebhook(cfg.RequestAnnotationKey(), metadata.Name)]
 	if !ok {
 		log.Info("Pod annotation by namespace is missing, skipping injection",
 			"namespace", metadata.Namespace, "pod", metadata.Name, "config", required)
@@ -318,7 +319,7 @@ func setCommands(target []corev1.Container, postStart map[string]config.ExecActi
 
 		path := fmt.Sprintf("/spec/containers/%d/command", containerIndex)
 
-		commands := utils.MergeCommands(execCmd.Command, container.Command, container.Args)
+		commands := MergeCommands(execCmd.Command, container.Command, container.Args)
 
 		log.Info("Inject command", "command", commands)
 
