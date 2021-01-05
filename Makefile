@@ -209,7 +209,7 @@ endif
 
 define BUILD_IN_DOCKER_TEMPLATE
 CLEAN_TARGETS += $(2)
-ifeq ($(IN_DOCKER),0)
+ifneq ($(IN_DOCKER),1)
 
 $(2): image-build-env go_build_cache_directory
 	[[ "$(DOCKER_HOST)" == "" ]] || (printf "\
