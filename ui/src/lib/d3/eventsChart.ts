@@ -128,7 +128,7 @@ export default function gen({
           d3.zoomIdentity
             .translate(width / 2, 0)
             .scale(2)
-            .translate(-x(day(event.start_time)), 0)
+            .translate(-x(day(event.start_time))!, 0)
         )
     })
   legends
@@ -150,7 +150,7 @@ export default function gen({
     .data(events)
     .enter()
     .append('circle')
-    .attr('cx', (d) => x(day(d.start_time)))
+    .attr('cx', (d) => x(day(d.start_time))!)
     .attr('cy', (d) => y(d.experiment_id)! + y.bandwidth() / 2 + margin.top)
     .attr('r', 4)
     .attr('fill', (d) => colorPalette(d.experiment_id))
@@ -227,7 +227,7 @@ export default function gen({
           d3.zoomIdentity
             .translate(width / 2, 0)
             .scale(2)
-            .translate(-x(day(d.start_time)), 0)
+            .translate(-x(day(d.start_time))!, 0)
         )
     })
     .on('mouseover', function (d) {
@@ -261,7 +261,7 @@ export default function gen({
     x.range([margin.left, width - margin.right])
     gXAxis.call(xAxis)
     svg.selectAll('.tick text').call(wrapText, 30)
-    circles.attr('x', (d) => x(day(d.start_time)))
+    circles.attr('x', (d) => x(day(d.start_time))!)
   }
 
   d3.select(window).on('resize', _debounce(reGen, 250))

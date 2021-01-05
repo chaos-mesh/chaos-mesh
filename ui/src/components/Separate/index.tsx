@@ -1,10 +1,10 @@
 import React from 'react'
 
-interface Separate {
+interface SeparateProps {
   separator: React.ReactNode
 }
 
-const Separate: React.FC<Separate> = ({ children, separator }) => {
+const Separate: React.FC<SeparateProps> = ({ children, separator }) => {
   return (
     <>
       {React.Children.map(children, (child, index) => {
