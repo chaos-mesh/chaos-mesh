@@ -19,7 +19,6 @@ package mock_template
 
 import (
 	reflect "reflect"
-	time "time"
 
 	gomock "github.com/golang/mock/gomock"
 
@@ -75,36 +74,6 @@ func (m *MockParallelTemplate) GetTemplateType() template.TemplateType {
 func (mr *MockParallelTemplateMockRecorder) GetTemplateType() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTemplateType", reflect.TypeOf((*MockParallelTemplate)(nil).GetTemplateType))
-}
-
-// GetDuration mocks base method
-func (m *MockParallelTemplate) GetDuration() (time.Duration, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetDuration")
-	ret0, _ := ret[0].(time.Duration)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetDuration indicates an expected call of GetDuration
-func (mr *MockParallelTemplateMockRecorder) GetDuration() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetDuration", reflect.TypeOf((*MockParallelTemplate)(nil).GetDuration))
-}
-
-// GetDeadline mocks base method
-func (m *MockParallelTemplate) GetDeadline() (time.Duration, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetDeadline")
-	ret0, _ := ret[0].(time.Duration)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetDeadline indicates an expected call of GetDeadline
-func (mr *MockParallelTemplateMockRecorder) GetDeadline() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetDeadline", reflect.TypeOf((*MockParallelTemplate)(nil).GetDeadline))
 }
 
 // GetParallelChildrenList mocks base method

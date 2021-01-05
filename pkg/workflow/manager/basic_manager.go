@@ -158,6 +158,12 @@ func (it *basicManager) consume(ctx context.Context, event trigger.Event) error 
 			if err != nil {
 				return err
 			}
+		case template.Suspend:
+			suspendStateMachine := statemachine.NewSuspendStateMachine(workflowSpec, nodeStatus, treeNode, it.nodeNameGenerator)
+			sideEffects, err = suspendStateMachine.HandleEvent(event)
+			if err != nil {
+				return err
+			}
 		default:
 			return fmt.Errorf("unsupported template %s", targetTemplate.GetTemplateType())
 		}
