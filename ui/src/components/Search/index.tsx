@@ -2,7 +2,7 @@ import { GlobalSearchData, PropForKeyword, SearchPath, searchGlobal } from 'lib/
 import { Grid, InputAdornment, Paper, TextField, Typography } from '@material-ui/core'
 import { Link, LinkProps } from 'react-router-dom'
 import ListItem, { ListItemProps } from '@material-ui/core/ListItem'
-import React, { ReactNode, useCallback, useEffect, useState } from 'react'
+import React, { ReactNode, useEffect, useMemo, useState } from 'react'
 import { Theme, createStyles, makeStyles, useTheme } from '@material-ui/core/styles'
 import { dayComparator, format } from 'lib/dayjs'
 
@@ -232,7 +232,7 @@ const Search: React.FC = () => {
   const [searchPath, setSearchPath] = useState<SearchPath>()
   const [isEmptySearch, setIsEmptySearch] = useState(true)
 
-  const debounceSetSearch = useCallback(_debounce(setSearch, 500), [])
+  const debounceSetSearch = useMemo(() => _debounce(setSearch, 500), [])
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const search = e.target.value
     search.length === 0 ? setIsEmptySearch(true) : setIsEmptySearch(false)
