@@ -24,24 +24,24 @@ type EventType string
 
 const (
 	WorkflowCreated  EventType = "WorkflowCreated"
-	WorkflowFinished           = "WorkflowFinished"
+	WorkflowFinished EventType = "WorkflowFinished"
 
-	NodeCreated             = "NodeCreated"
-	NodeFinished            = "NodeFinished"
-	NodeHoldingAwake        = "NodeHoldingAwake"
-	NodePickChildToSchedule = "NodePickChildToSchedule"
+	NodeCreated             EventType = "NodeCreated"
+	NodeFinished            EventType = "NodeFinished"
+	NodeHoldingAwake        EventType = "NodeHoldingAwake"
+	NodePickChildToSchedule EventType = "NodePickChildToSchedule"
 
-	NodeChaosInjected = "NodeChaosInjected"
-	NodeChaosCleaned  = "NodeChaosCleaned"
+	NodeChaosInjected EventType = "NodeChaosInjected"
+	NodeChaosCleaned  EventType = "NodeChaosCleaned"
 
 	// TODO: error handling
-	NodeUnexpectedFailed = "NodeUnexpectedFailed"
+	NodeUnexpectedFailed EventType = "NodeUnexpectedFailed"
 
-	ChildNodeSucceed = "ChildNodeSucceed"
-	ChildNodeFailed  = "ChildNodeFailed"
+	ChildNodeSucceed EventType = "ChildNodeSucceed"
+	ChildNodeFailed  EventType = "ChildNodeFailed"
 
 	// TODO: support abort
-	NodeAbort = "NodeAbort"
+	NodeAbort EventType = "NodeAbort"
 )
 
 type basicEvent struct {
