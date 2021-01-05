@@ -77,7 +77,7 @@ function selectorsToArr(selectors: Object, separator: string) {
 export function yamlToExperiment(yamlObj: any): any {
   const { kind, metadata, spec } = snakeCaseKeys(yamlObj, {
     exclude: [/\.|\//], // Keys like app.kubernetes.io/component should be ignored
-  })
+  }) as any
 
   if (!kind || !metadata || !spec) {
     throw new Error('Fail to parse the YAML file. Please check the kind, metadata, and spec fields.')
