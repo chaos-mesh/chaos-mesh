@@ -79,6 +79,20 @@ func (mr *MockWorkflowRepoMockRecorder) CreateNodes(namespace, workflowName, par
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateNodes", reflect.TypeOf((*MockWorkflowRepo)(nil).CreateNodes), namespace, workflowName, parentNodeName, nodeNames, templateName)
 }
 
+// UpdateWorkflowPhase mocks base method
+func (m *MockWorkflowRepo) UpdateWorkflowPhase(namespace, workflowName string, newPhase workflow.WorkflowPhase) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateWorkflowPhase", namespace, workflowName, newPhase)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateWorkflowPhase indicates an expected call of UpdateWorkflowPhase
+func (mr *MockWorkflowRepoMockRecorder) UpdateWorkflowPhase(namespace, workflowName, newPhase interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateWorkflowPhase", reflect.TypeOf((*MockWorkflowRepo)(nil).UpdateWorkflowPhase), namespace, workflowName, newPhase)
+}
+
 // UpdateNodePhase mocks base method
 func (m *MockWorkflowRepo) UpdateNodePhase(namespace, workflowName, nodeName string, newPhase node.NodePhase) error {
 	m.ctrl.T.Helper()

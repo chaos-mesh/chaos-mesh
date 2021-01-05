@@ -15,6 +15,7 @@ package manager
 
 import (
 	"context"
+	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/engine/model/workflow"
 	"testing"
 	"time"
 
@@ -109,6 +110,7 @@ func TestScheduleSingleOne(t *testing.T) {
 	assert.Equal(t, trigger.WorkflowCreated, event.GetEventType())
 	gomock.InOrder(
 		// resolve workflow created
+		mockRepo.EXPECT().UpdateWorkflowPhase(gomock.Eq(namespace), gomock.Eq(workflowName), gomock.Eq(workflow.Running)).Times(1),
 		mockRepo.EXPECT().CreateNodes(gomock.Eq(namespace), gomock.Eq(workflowName), gomock.Eq(""), gomock.Eq(entryNodeName), gomock.Eq(entryName)).Return(nil).Times(1),
 	)
 	err = manager.consume(ctx, event)
@@ -220,6 +222,9 @@ func TestScheduleSingleOne(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, trigger.WorkflowFinished, event.GetEventType())
 	gomock.InOrder()
+	gomock.InOrder(
+		mockRepo.EXPECT().UpdateWorkflowPhase(gomock.Eq(namespace), gomock.Eq(workflowName), gomock.Eq(workflow.Succeed)).Times(1),
+	)
 	err = manager.consume(ctx, event)
 	assert.NoError(t, err)
 }

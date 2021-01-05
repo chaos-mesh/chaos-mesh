@@ -11,14 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package repo
+package kubernetesstuff
 
 import (
+	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/engine/model/node"
+	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/engine/model/workflow"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/engine/model/node"
-
-	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/engine/model/workflow"
 	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/trigger"
 )
 
@@ -27,14 +26,18 @@ type KubernetesWorkflowRepo struct {
 	client          client.Client
 }
 
-func (it *KubernetesWorkflowRepo) FetchWorkflow(workflowName string) (workflow.WorkflowSpec, workflow.WorkflowStatus, error) {
+func (it *KubernetesWorkflowRepo) FetchWorkflow(namespace, workflowName string) (workflow.WorkflowSpec, workflow.WorkflowStatus, error) {
 	panic("implement me")
 }
 
-func (it *KubernetesWorkflowRepo) CreateNodes(workflowName, parentNodeName, nodeNames, templateName string) error {
+func (it *KubernetesWorkflowRepo) CreateNodes(namespace, workflowName, parentNodeName, nodeNames, templateName string) error {
 	panic("implement me")
 }
 
-func (it *KubernetesWorkflowRepo) UpdateNodePhase(workflowName, nodeName string, newPhase node.NodePhase) error {
+func (it *KubernetesWorkflowRepo) UpdateWorkflowPhase(namespace, workflowName string, newPhase workflow.WorkflowPhase) error {
+	panic("implement me")
+}
+
+func (it *KubernetesWorkflowRepo) UpdateNodePhase(namespace, workflowName, nodeName string, newPhase node.NodePhase) error {
 	panic("implement me")
 }

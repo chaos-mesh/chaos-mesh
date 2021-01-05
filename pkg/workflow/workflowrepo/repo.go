@@ -24,6 +24,8 @@ type WorkflowRepo interface {
 	// func CreateNodes, create the nodes by given templates and parent node.
 	// It return the nodes name with the same order of template.
 	CreateNodes(namespace, workflowName, parentNodeName, nodeNames, templateName string) error
+	// func UpdateWorkflowPhase, update certain workflow to new phase
+	UpdateWorkflowPhase(namespace, workflowName string, newPhase workflow.WorkflowPhase) error
 	// func UpdateNodePhase, update certain node to new phase
 	UpdateNodePhase(namespace, workflowName, nodeName string, newPhase node.NodePhase) error
 }

@@ -16,6 +16,7 @@ package manager
 import (
 	"context"
 	"fmt"
+	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/engine/model/workflow"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/manager/sideeffect/resolver"
 	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/workflowrepo"
@@ -111,14 +112,18 @@ func (it *basicManager) consume(ctx context.Context, event trigger.Event) error 
 
 	switch event.GetEventType() {
 	case trigger.WorkflowCreated:
-		it.logger.V(1).Info("event: workflow created", "event", event)
+		it.logger.V(1).Info("event: targetWorkflow created", "event", event)
 		workflowName := event.GetWorkflowName()
-		workflow, _, err := it.repo.FetchWorkflow(event.GetNamespace(), workflowName)
+		targetWorkflow, _, err := it.repo.FetchWorkflow(event.GetNamespace(), workflowName)
 		if err != nil {
 			return err
 		}
-		nodeName := it.nodeNameGenerator.GenerateNodeName(workflow.GetEntry())
-		err = it.repo.CreateNodes(event.GetNamespace(), workflowName, "", nodeName, workflow.GetEntry())
+		nodeName := it.nodeNameGenerator.GenerateNodeName(targetWorkflow.GetEntry())
+		err = it.repo.UpdateWorkflowPhase(event.GetNamespace(), workflowName, workflow.Running)
+		if err != nil {
+			return err
+		}
+		err = it.repo.CreateNodes(event.GetNamespace(), workflowName, "", nodeName, targetWorkflow.GetEntry())
 		if err != nil {
 			return err
 		}
@@ -129,8 +134,7 @@ func (it *basicManager) consume(ctx context.Context, event trigger.Event) error 
 		return nil
 
 	case trigger.WorkflowFinished:
-		// NOOP
-		return nil
+		return it.repo.UpdateWorkflowPhase(event.GetNamespace(), event.GetWorkflowName(), workflow.Succeed)
 
 	case trigger.NodeCreated, trigger.NodeFinished, trigger.NodeHoldingAwake, trigger.NodePickChildToSchedule,
 		trigger.NodeChaosInjected, trigger.NodeChaosCleaned,
