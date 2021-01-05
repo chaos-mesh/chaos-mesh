@@ -50,9 +50,9 @@ func (m *MockWorkflowRepo) EXPECT() *MockWorkflowRepoMockRecorder {
 }
 
 // FetchWorkflow mocks base method
-func (m *MockWorkflowRepo) FetchWorkflow(workflowName string) (workflow.WorkflowSpec, workflow.WorkflowStatus, error) {
+func (m *MockWorkflowRepo) FetchWorkflow(namespace, workflowName string) (workflow.WorkflowSpec, workflow.WorkflowStatus, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "FetchWorkflow", workflowName)
+	ret := m.ctrl.Call(m, "FetchWorkflow", namespace, workflowName)
 	ret0, _ := ret[0].(workflow.WorkflowSpec)
 	ret1, _ := ret[1].(workflow.WorkflowStatus)
 	ret2, _ := ret[2].(error)
@@ -60,35 +60,35 @@ func (m *MockWorkflowRepo) FetchWorkflow(workflowName string) (workflow.Workflow
 }
 
 // FetchWorkflow indicates an expected call of FetchWorkflow
-func (mr *MockWorkflowRepoMockRecorder) FetchWorkflow(workflowName interface{}) *gomock.Call {
+func (mr *MockWorkflowRepoMockRecorder) FetchWorkflow(namespace, workflowName interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FetchWorkflow", reflect.TypeOf((*MockWorkflowRepo)(nil).FetchWorkflow), workflowName)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FetchWorkflow", reflect.TypeOf((*MockWorkflowRepo)(nil).FetchWorkflow), namespace, workflowName)
 }
 
 // CreateNodes mocks base method
-func (m *MockWorkflowRepo) CreateNodes(workflowName, parentNodeName, nodeNames, templateName string) error {
+func (m *MockWorkflowRepo) CreateNodes(namespace, workflowName, parentNodeName, nodeNames, templateName string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CreateNodes", workflowName, parentNodeName, nodeNames, templateName)
+	ret := m.ctrl.Call(m, "CreateNodes", namespace, workflowName, parentNodeName, nodeNames, templateName)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // CreateNodes indicates an expected call of CreateNodes
-func (mr *MockWorkflowRepoMockRecorder) CreateNodes(workflowName, parentNodeName, nodeNames, templateName interface{}) *gomock.Call {
+func (mr *MockWorkflowRepoMockRecorder) CreateNodes(namespace, workflowName, parentNodeName, nodeNames, templateName interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateNodes", reflect.TypeOf((*MockWorkflowRepo)(nil).CreateNodes), workflowName, parentNodeName, nodeNames, templateName)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateNodes", reflect.TypeOf((*MockWorkflowRepo)(nil).CreateNodes), namespace, workflowName, parentNodeName, nodeNames, templateName)
 }
 
 // UpdateNodePhase mocks base method
-func (m *MockWorkflowRepo) UpdateNodePhase(workflowName, nodeName string, newPhase node.NodePhase) error {
+func (m *MockWorkflowRepo) UpdateNodePhase(namespace, workflowName, nodeName string, newPhase node.NodePhase) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "UpdateNodePhase", workflowName, nodeName, newPhase)
+	ret := m.ctrl.Call(m, "UpdateNodePhase", namespace, workflowName, nodeName, newPhase)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // UpdateNodePhase indicates an expected call of UpdateNodePhase
-func (mr *MockWorkflowRepoMockRecorder) UpdateNodePhase(workflowName, nodeName, newPhase interface{}) *gomock.Call {
+func (mr *MockWorkflowRepoMockRecorder) UpdateNodePhase(namespace, workflowName, nodeName, newPhase interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateNodePhase", reflect.TypeOf((*MockWorkflowRepo)(nil).UpdateNodePhase), workflowName, nodeName, newPhase)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateNodePhase", reflect.TypeOf((*MockWorkflowRepo)(nil).UpdateNodePhase), namespace, workflowName, nodeName, newPhase)
 }

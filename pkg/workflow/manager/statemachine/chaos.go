@@ -28,10 +28,13 @@ import (
 )
 
 type ChaosStateMachine struct {
-	workflowSpec      workflow.WorkflowSpec
-	nodeStatus        node.Node
-	treeNode          node.NodeTreeNode
-	nodeNameGenerator node.NodeNameGenerator
+	namespace    string
+	workflowSpec workflow.WorkflowSpec
+	nodeStatus   node.Node
+}
+
+func NewChaosStateMachine(namespace string, workflowSpec workflow.WorkflowSpec, nodeStatus node.Node) *ChaosStateMachine {
+	return &ChaosStateMachine{namespace: namespace, workflowSpec: workflowSpec, nodeStatus: nodeStatus}
 }
 
 func (it *ChaosStateMachine) GetName() string {
@@ -54,9 +57,8 @@ func (it *ChaosStateMachine) HandleEvent(event trigger.Event) ([]sideeffect.Side
 		networkChaosSpec := chaosTemplate.FetchNetworkChaosSpec()
 		targetChaos := chaosmeshv1alph1.NetworkChaos{
 			ObjectMeta: metav1.ObjectMeta{
-				Name: it.nodeStatus.GetName(),
-				// FIXME: namespace is not configured
-				Namespace: "",
+				Name:      it.nodeStatus.GetName(),
+				Namespace: it.namespace,
 			},
 			Spec: networkChaosSpec,
 		}
@@ -65,7 +67,11 @@ func (it *ChaosStateMachine) HandleEvent(event trigger.Event) ([]sideeffect.Side
 		result = append(
 			result,
 			sideeffect.NewUpdatePhaseStatusSideEffect(
-				it.workflowSpec.GetName(), it.nodeStatus.GetName(), it.nodeStatus.GetNodePhase(), node.Running,
+				it.namespace,
+				it.workflowSpec.GetName(),
+				it.nodeStatus.GetName(),
+				it.nodeStatus.GetNodePhase(),
+				node.Running,
 			),
 		)
 		result = append(
@@ -75,10 +81,10 @@ func (it *ChaosStateMachine) HandleEvent(event trigger.Event) ([]sideeffect.Side
 		result = append(
 			result,
 			sideeffect.NewNotifyNewEventSideEffect(
-				trigger.NewEvent(it.workflowSpec.GetName(), it.nodeStatus.GetName(), trigger.NodeChaosInjectSucceed),
+				trigger.NewEvent(it.namespace, it.workflowSpec.GetName(), it.nodeStatus.GetName(), trigger.NodeChaosInjected),
 			))
 		return result, nil
-	case trigger.NodeChaosInjectSucceed:
+	case trigger.NodeChaosInjected:
 		// TODO: assert current state
 		targetTemplate, err := it.workflowSpec.FetchTemplateByName(it.nodeStatus.GetTemplateName())
 		if err != nil {
@@ -94,14 +100,21 @@ func (it *ChaosStateMachine) HandleEvent(event trigger.Event) ([]sideeffect.Side
 		}
 
 		var result []sideeffect.SideEffect
-		result = append(result, sideeffect.NewUpdatePhaseStatusSideEffect(it.workflowSpec.GetName(), it.nodeStatus.GetName(), it.nodeStatus.GetNodePhase(), node.Holding))
-		result = append(result, sideeffect.NewNotifyNewDelayEventSideEffect(trigger.NewEvent(it.workflowSpec.GetName(), it.nodeStatus.GetName(), trigger.NodeHoldingAwake), holdingDuration))
+		result = append(result, sideeffect.NewUpdatePhaseStatusSideEffect(it.namespace, it.workflowSpec.GetName(), it.nodeStatus.GetName(), it.nodeStatus.GetNodePhase(), node.Holding))
+		result = append(result, sideeffect.NewNotifyNewDelayEventSideEffect(trigger.NewEvent(it.namespace, it.workflowSpec.GetName(), it.nodeStatus.GetName(), trigger.NodeHoldingAwake), holdingDuration))
 		return result, nil
 	case trigger.NodeHoldingAwake:
 		// TODO: assert current state
 		var result []sideeffect.SideEffect
-		result = append(result, sideeffect.NewUpdatePhaseStatusSideEffect(it.workflowSpec.GetName(), it.nodeStatus.GetName(), it.nodeStatus.GetNodePhase(), node.Succeed))
-		result = append(result, sideeffect.NewNotifyNewEventSideEffect(trigger.NewEvent(it.workflowSpec.GetName(), it.nodeStatus.GetParentNodeName(), trigger.ChildNodeSucceed)))
+		result = append(result, sideeffect.NewUpdatePhaseStatusSideEffect(it.namespace, it.workflowSpec.GetName(), it.nodeStatus.GetName(), it.nodeStatus.GetNodePhase(), node.Running))
+		result = append(result, sideeffect.NewCreateActorEventSideEffect(actor.NewDeleteNetworkChaosActor(it.namespace, it.nodeStatus.GetName())))
+		result = append(result, sideeffect.NewNotifyNewEventSideEffect(trigger.NewEvent(it.namespace, it.workflowSpec.GetName(), it.nodeStatus.GetParentNodeName(), trigger.NodeChaosCleaned)))
+		return result, nil
+	case trigger.NodeChaosCleaned:
+		// TODO: assert current state
+		var result []sideeffect.SideEffect
+		result = append(result, sideeffect.NewUpdatePhaseStatusSideEffect(it.namespace, it.workflowSpec.GetName(), it.nodeStatus.GetName(), it.nodeStatus.GetNodePhase(), node.Succeed))
+		result = append(result, sideeffect.NewNotifyNewEventSideEffect(trigger.NewEvent(it.namespace, it.workflowSpec.GetName(), it.nodeStatus.GetParentNodeName(), trigger.ChildNodeSucceed)))
 		return result, nil
 	default:
 		// TODO: replace this error

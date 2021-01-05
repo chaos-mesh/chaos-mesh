@@ -14,8 +14,6 @@
 package actor
 
 import (
-	"k8s.io/apimachinery/pkg/types"
-
 	chaosmeshv1alph1 "github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 )
 
@@ -27,7 +25,7 @@ type Actor interface {
 
 type Playground interface {
 	CreateNetworkChaos(networkChaos chaosmeshv1alph1.NetworkChaos) error
-	DeleteNetworkChaos(name types.NamespacedName) error
+	DeleteNetworkChaos(namespace, name string) error
 }
 
 type CreateNetworkChaosActor struct {
@@ -43,13 +41,14 @@ func (it *CreateNetworkChaosActor) PlayOn(pg Playground) error {
 }
 
 type DeleteNetworkChaosActor struct {
-	name types.NamespacedName
+	namespace string
+	name      string
 }
 
-func NewDeleteNetworkChaosActor(name types.NamespacedName) *DeleteNetworkChaosActor {
-	return &DeleteNetworkChaosActor{name: name}
+func NewDeleteNetworkChaosActor(namespace string, name string) *DeleteNetworkChaosActor {
+	return &DeleteNetworkChaosActor{namespace: namespace, name: name}
 }
 
 func (it *DeleteNetworkChaosActor) PlayOn(pg Playground) error {
-	return pg.DeleteNetworkChaos(it.name)
+	return pg.DeleteNetworkChaos(it.namespace, it.name)
 }

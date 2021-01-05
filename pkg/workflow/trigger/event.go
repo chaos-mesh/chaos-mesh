@@ -14,6 +14,7 @@
 package trigger
 
 type Event interface {
+	GetNamespace() string
 	GetWorkflowName() string
 	GetNodeName() string
 	GetEventType() EventType
@@ -23,30 +24,39 @@ type EventType string
 
 const (
 	WorkflowCreated  EventType = "WorkflowCreated"
-	WorkflowFinished EventType = "WorkflowFinished"
+	WorkflowFinished           = "WorkflowFinished"
 
-	NodeCreated             EventType = "NodeCreated"
-	NodeFinished            EventType = "NodeFinished"
-	NodeHoldingAwake        EventType = "NodeHoldingAwake"
-	NodePickChildToSchedule EventType = "NodePickChildToSchedule"
+	NodeCreated             = "NodeCreated"
+	NodeFinished            = "NodeFinished"
+	NodeHoldingAwake        = "NodeHoldingAwake"
+	NodePickChildToSchedule = "NodePickChildToSchedule"
 
-	NodeChaosInjectSucceed EventType = "NodeChaosInjectSucceed"
-	NodeChaosInjectFailed  EventType = "NodeChaosInjectFailed"
+	NodeChaosInjected = "NodeChaosInjected"
+	NodeChaosCleaned  = "NodeChaosCleaned"
 
 	// TODO: error handling
-	NodeUnexpectedFailed EventType = "NodeUnexpectedFailed"
+	NodeUnexpectedFailed = "NodeUnexpectedFailed"
 
-	ChildNodeSucceed EventType = "ChildNodeSucceed"
-	ChildNodeFailed  EventType = "ChildNodeFailed"
+	ChildNodeSucceed = "ChildNodeSucceed"
+	ChildNodeFailed  = "ChildNodeFailed"
 
 	// TODO: support abort
-	NodeAbort EventType = "NodeAbort"
+	NodeAbort = "NodeAbort"
 )
 
 type basicEvent struct {
+	namespace    string
 	workflowName string
 	nodeName     string
 	eventType    EventType
+}
+
+func NewEvent(namespace string, workflowName string, nodeName string, eventType EventType) *basicEvent {
+	return &basicEvent{namespace: namespace, workflowName: workflowName, nodeName: nodeName, eventType: eventType}
+}
+
+func (it *basicEvent) GetNamespace() string {
+	return it.namespace
 }
 
 func (it *basicEvent) GetWorkflowName() string {
@@ -59,12 +69,4 @@ func (it *basicEvent) GetNodeName() string {
 
 func (it *basicEvent) GetEventType() EventType {
 	return it.eventType
-}
-
-func NewEvent(workflowName string, nodeName string, eventType EventType) Event {
-	return &basicEvent{
-		workflowName: workflowName,
-		nodeName:     nodeName,
-		eventType:    eventType,
-	}
 }

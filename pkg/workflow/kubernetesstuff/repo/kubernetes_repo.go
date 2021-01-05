@@ -16,7 +16,8 @@ package repo
 import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/engine/model/template"
+	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/engine/model/node"
+
 	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/engine/model/workflow"
 	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/trigger"
 )
@@ -30,18 +31,10 @@ func (it *KubernetesWorkflowRepo) FetchWorkflow(workflowName string) (workflow.W
 	panic("implement me")
 }
 
-func (it *KubernetesWorkflowRepo) CreateNodes(workflowName string, templates []template.Template, parentNode string) ([]string, error) {
+func (it *KubernetesWorkflowRepo) CreateNodes(workflowName, parentNodeName, nodeNames, templateName string) error {
 	panic("implement me")
 }
 
-func (it *KubernetesWorkflowRepo) UpdateNodesToRunning(workflowName string, nodeName string) error {
-	panic("implement me")
-}
-
-func (it *KubernetesWorkflowRepo) UpdateNodesToWaitingForChild(workflowName string, nodeName string) error {
-	panic("implement me")
-}
-
-func (it *KubernetesWorkflowRepo) UpdateNodesToWaitingForSchedule(workflowName string, nodeName string) error {
+func (it *KubernetesWorkflowRepo) UpdateNodePhase(workflowName, nodeName string, newPhase node.NodePhase) error {
 	panic("implement me")
 }

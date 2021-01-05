@@ -20,10 +20,10 @@ import (
 
 // Notice when you update node's status, please make sure already finish the operations.
 type WorkflowRepo interface {
-	FetchWorkflow(workflowName string) (workflow.WorkflowSpec, workflow.WorkflowStatus, error)
+	FetchWorkflow(namespace, workflowName string) (workflow.WorkflowSpec, workflow.WorkflowStatus, error)
 	// func CreateNodes, create the nodes by given templates and parent node.
 	// It return the nodes name with the same order of template.
-	CreateNodes(workflowName, parentNodeName, nodeNames, templateName string) error
+	CreateNodes(namespace, workflowName, parentNodeName, nodeNames, templateName string) error
 	// func UpdateNodePhase, update certain node to new phase
-	UpdateNodePhase(workflowName, nodeName string, newPhase node.NodePhase) error
+	UpdateNodePhase(namespace, workflowName, nodeName string, newPhase node.NodePhase) error
 }

@@ -40,6 +40,7 @@ func TestScheduleSingleOne(t *testing.T) {
 	mockctl := gomock.NewController(t)
 	mockRepo := mock_workflowrepo.NewMockWorkflowRepo(mockctl)
 
+	const namespace = "mock-ns"
 	const workflowName = "testing-workflow"
 	const entryName = "just-a-entry"
 	const entryNodeName = entryName + "-0000"
@@ -56,7 +57,7 @@ func TestScheduleSingleOne(t *testing.T) {
 	mockLayer1Template0 := mock_template.NewMockTemplate(mockctl)
 
 	// mocked repo needs this trigger
-	mockRepo.EXPECT().FetchWorkflow(gomock.Eq(workflowName)).AnyTimes().Return(mockWorkflowSpec, mockWorkflowStatus, nil)
+	mockRepo.EXPECT().FetchWorkflow(gomock.Eq(namespace), gomock.Eq(workflowName)).AnyTimes().Return(mockWorkflowSpec, mockWorkflowStatus, nil)
 
 	mockNameGenerator.EXPECT().GenerateNodeName(gomock.Eq(entryName)).Return(entryNodeName).AnyTimes()
 	mockNameGenerator.EXPECT().GenerateNodeName(gomock.Eq(layer1Template0Name)).Return(layer1Node0Name).AnyTimes()
@@ -91,13 +92,13 @@ func TestScheduleSingleOne(t *testing.T) {
 	// mocked methods
 	gomock.InOrder(
 		// init workflow
-		mockRepo.EXPECT().CreateNodes(gomock.Eq(workflowName), gomock.Eq(""), gomock.Eq(entryNodeName), gomock.Eq(entryName)).Return(nil).Times(1),
+		mockRepo.EXPECT().CreateNodes(gomock.Eq(namespace), gomock.Eq(workflowName), gomock.Eq(""), gomock.Eq(entryNodeName), gomock.Eq(entryName)).Return(nil).Times(1),
 
 		// resolve workflow created
 		mockWorkflowStatus.EXPECT().FetchNodeByName(entryNodeName).Return(mockEntryNode, nil).Times(1),
 		mockWorkflowStatus.EXPECT().GetNodesTree().Return(mockEntryTreeNode).Times(1),
 		mockEntryTreeNode.EXPECT().FetchNodeByName(entryNodeName).Return(mockEntryTreeNode).Times(1),
-		mockRepo.EXPECT().UpdateNodePhase(gomock.Eq(workflowName), gomock.Eq(entryNodeName), gomock.Eq(node.WaitingForSchedule)).Return(nil).Times(1),
+		mockRepo.EXPECT().UpdateNodePhase(gomock.Eq(namespace), gomock.Eq(workflowName), gomock.Eq(entryNodeName), gomock.Eq(node.WaitingForSchedule)).Return(nil).Times(1),
 
 		// resolve entry node created
 		mockWorkflowStatus.EXPECT().FetchNodeByName(entryNodeName).Return(mockEntryNodeWaitingForSchedule, nil).Times(1),
@@ -107,8 +108,8 @@ func TestScheduleSingleOne(t *testing.T) {
 		mockEntryTreeNodeChildren.EXPECT().Length().Return(0).Times(1),
 		mockEntryTreeNode.EXPECT().GetChildren().Return(mockEntryTreeNodeChildren).Times(1),
 		mockEntryTreeNodeChildren.EXPECT().ContainsTemplate(gomock.Eq(layer1Template0Name)).Return(false).Times(1),
-		mockRepo.EXPECT().UpdateNodePhase(gomock.Eq(workflowName), gomock.Eq(entryNodeName), gomock.Eq(node.WaitingForChild)).Return(nil).Times(1),
-		mockRepo.EXPECT().CreateNodes(gomock.Eq(workflowName), gomock.Eq(entryNodeName), gomock.Eq(layer1Node0Name), gomock.Eq(layer1Template0Name)).Return(nil).Times(1),
+		mockRepo.EXPECT().UpdateNodePhase(gomock.Eq(namespace), gomock.Eq(workflowName), gomock.Eq(entryNodeName), gomock.Eq(node.WaitingForChild)).Return(nil).Times(1),
+		mockRepo.EXPECT().CreateNodes(gomock.Eq(namespace), gomock.Eq(workflowName), gomock.Eq(entryNodeName), gomock.Eq(layer1Node0Name), gomock.Eq(layer1Template0Name)).Return(nil).Times(1),
 
 		// resolve layer1 node 0 created
 		mockWorkflowStatus.EXPECT().FetchNodeByName(layer1Node0Name).Return(layer1Node0Node, nil).Times(1),
@@ -119,7 +120,7 @@ func TestScheduleSingleOne(t *testing.T) {
 		layer1Node0Node.EXPECT().GetName().Return(layer1Node0Name).Times(1),
 		layer1Node0Node.EXPECT().GetNodePhase().Return(node.Init).Times(1),
 		layer1Node0Node.EXPECT().GetName().Return(layer1Node0Name).Times(1),
-		mockRepo.EXPECT().UpdateNodePhase(gomock.Eq(workflowName), gomock.Eq(entryNodeName), gomock.Eq(node.WaitingForChild)).Return(nil).Times(1),
+		mockRepo.EXPECT().UpdateNodePhase(gomock.Eq(namespace), gomock.Eq(workflowName), gomock.Eq(entryNodeName), gomock.Eq(node.WaitingForChild)).Return(nil).Times(1),
 	)
 
 	repoTrigger := trigger.NewOperableTrigger()
@@ -133,7 +134,7 @@ func TestScheduleSingleOne(t *testing.T) {
 	ctx, cancelFunc := context.WithCancel(context.Background())
 	defer cancelFunc()
 
-	err = controllerTrigger.Notify(trigger.NewEvent(workflowName, "", trigger.WorkflowCreated))
+	err = controllerTrigger.Notify(trigger.NewEvent(namespace, workflowName, "", trigger.WorkflowCreated))
 
 	// handle WorkflowCreated
 	event, err := manager.acquire(ctx)

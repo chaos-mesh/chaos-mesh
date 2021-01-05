@@ -24,14 +24,13 @@ import (
 )
 
 type SuspendStateMachine struct {
-	workflowSpec      workflow.WorkflowSpec
-	nodeStatus        node.Node
-	treeNode          node.NodeTreeNode
-	nodeNameGenerator node.NodeNameGenerator
+	namespace    string
+	workflowSpec workflow.WorkflowSpec
+	nodeStatus   node.Node
 }
 
-func NewSuspendStateMachine(workflowSpec workflow.WorkflowSpec, nodeStatus node.Node, treeNode node.NodeTreeNode, nodeNameGenerator node.NodeNameGenerator) *SuspendStateMachine {
-	return &SuspendStateMachine{workflowSpec: workflowSpec, nodeStatus: nodeStatus, treeNode: treeNode, nodeNameGenerator: nodeNameGenerator}
+func NewSuspendStateMachine(namespace string, workflowSpec workflow.WorkflowSpec, nodeStatus node.Node) *SuspendStateMachine {
+	return &SuspendStateMachine{namespace: namespace, workflowSpec: workflowSpec, nodeStatus: nodeStatus}
 }
 
 func (it *SuspendStateMachine) GetName() string {
@@ -56,8 +55,8 @@ func (it *SuspendStateMachine) HandleEvent(event trigger.Event) ([]sideeffect.Si
 			}
 
 			var result []sideeffect.SideEffect
-			result = append(result, sideeffect.NewUpdatePhaseStatusSideEffect(it.workflowSpec.GetName(), it.nodeStatus.GetName(), it.nodeStatus.GetNodePhase(), node.Holding))
-			result = append(result, sideeffect.NewNotifyNewDelayEventSideEffect(trigger.NewEvent(it.workflowSpec.GetName(), it.nodeStatus.GetName(), trigger.NodeHoldingAwake), holdingDuration))
+			result = append(result, sideeffect.NewUpdatePhaseStatusSideEffect(it.namespace, it.workflowSpec.GetName(), it.nodeStatus.GetName(), it.nodeStatus.GetNodePhase(), node.Holding))
+			result = append(result, sideeffect.NewNotifyNewDelayEventSideEffect(trigger.NewEvent(it.namespace, it.workflowSpec.GetName(), it.nodeStatus.GetName(), trigger.NodeHoldingAwake), holdingDuration))
 			return result, nil
 		}
 		// TODO: replace this error
@@ -65,8 +64,8 @@ func (it *SuspendStateMachine) HandleEvent(event trigger.Event) ([]sideeffect.Si
 	case trigger.NodeHoldingAwake:
 		// TODO: assert current state
 		var result []sideeffect.SideEffect
-		result = append(result, sideeffect.NewUpdatePhaseStatusSideEffect(it.workflowSpec.GetName(), it.nodeStatus.GetName(), it.nodeStatus.GetNodePhase(), node.Succeed))
-		result = append(result, sideeffect.NewNotifyNewEventSideEffect(trigger.NewEvent(it.workflowSpec.GetName(), it.nodeStatus.GetParentNodeName(), trigger.ChildNodeSucceed)))
+		result = append(result, sideeffect.NewUpdatePhaseStatusSideEffect(it.namespace, it.workflowSpec.GetName(), it.nodeStatus.GetName(), it.nodeStatus.GetNodePhase(), node.Succeed))
+		result = append(result, sideeffect.NewNotifyNewEventSideEffect(trigger.NewEvent(it.namespace, it.workflowSpec.GetName(), it.nodeStatus.GetParentNodeName(), trigger.ChildNodeSucceed)))
 		return result, nil
 	default:
 		return nil, fmt.Errorf("StateMachine %s could not resolve event %s", it.GetName(), event)

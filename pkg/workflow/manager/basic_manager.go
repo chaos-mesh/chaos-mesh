@@ -108,16 +108,16 @@ func (it *basicManager) consume(ctx context.Context, event trigger.Event) error 
 	case trigger.WorkflowCreated:
 		it.logger.V(1).Info("event: workflow created", "event", event)
 		workflowName := event.GetWorkflowName()
-		workflow, _, err := it.repo.FetchWorkflow(workflowName)
+		workflow, _, err := it.repo.FetchWorkflow(event.GetNamespace(), workflowName)
 		if err != nil {
 			return err
 		}
 		nodeName := it.nodeNameGenerator.GenerateNodeName(workflow.GetEntry())
-		err = it.repo.CreateNodes(workflowName, "", nodeName, workflow.GetEntry())
+		err = it.repo.CreateNodes(event.GetNamespace(), workflowName, "", nodeName, workflow.GetEntry())
 		if err != nil {
 			return err
 		}
-		err = it.operableTrigger.Notify(trigger.NewEvent(workflowName, nodeName, trigger.NodeCreated))
+		err = it.operableTrigger.Notify(trigger.NewEvent(event.GetNamespace(), workflowName, nodeName, trigger.NodeCreated))
 		if err != nil {
 			return err
 		}
@@ -128,13 +128,13 @@ func (it *basicManager) consume(ctx context.Context, event trigger.Event) error 
 		return nil
 
 	case trigger.NodeCreated, trigger.NodeFinished, trigger.NodeHoldingAwake, trigger.NodePickChildToSchedule,
-		trigger.NodeChaosInjectFailed, trigger.NodeChaosInjectSucceed,
+		trigger.NodeChaosInjected, trigger.NodeChaosCleaned,
 		trigger.NodeUnexpectedFailed,
 		trigger.ChildNodeSucceed, trigger.ChildNodeFailed:
 
 		workflowName := event.GetWorkflowName()
 		nodeName := event.GetNodeName()
-		workflowSpec, workflowStatus, err := it.repo.FetchWorkflow(workflowName)
+		workflowSpec, workflowStatus, err := it.repo.FetchWorkflow(event.GetNamespace(), workflowName)
 		if err != nil {
 			return err
 		}
@@ -153,14 +153,20 @@ func (it *basicManager) consume(ctx context.Context, event trigger.Event) error 
 
 		switch targetTemplate.GetTemplateType() {
 		case template.Serial:
-			serialStateMachine := statemachine.NewSerialStateMachine(workflowSpec, nodeStatus, treeNode, it.nodeNameGenerator)
+			serialStateMachine := statemachine.NewSerialStateMachine(event.GetNamespace(), workflowSpec, nodeStatus, treeNode, it.nodeNameGenerator)
 			sideEffects, err = serialStateMachine.HandleEvent(event)
 			if err != nil {
 				return err
 			}
 		case template.Suspend:
-			suspendStateMachine := statemachine.NewSuspendStateMachine(workflowSpec, nodeStatus, treeNode, it.nodeNameGenerator)
+			suspendStateMachine := statemachine.NewSuspendStateMachine(event.GetNamespace(), workflowSpec, nodeStatus)
 			sideEffects, err = suspendStateMachine.HandleEvent(event)
+			if err != nil {
+				return err
+			}
+		case template.NetworkChaos:
+			chaosStateMachine := statemachine.NewChaosStateMachine(event.GetNamespace(), workflowSpec, nodeStatus)
+			sideEffects, err = chaosStateMachine.HandleEvent(event)
 			if err != nil {
 				return err
 			}

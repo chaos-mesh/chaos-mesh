@@ -25,11 +25,12 @@ import (
 )
 
 func TestNotifyThenAcquire(t *testing.T) {
+	const namespace = "mock-ns"
 	const workflowName = "mock-workflow"
 	const nodeName = "mock-node"
 	const eventType = NodeCreated
 	trigger := NewOperableTrigger()
-	expected := NewEvent(workflowName, nodeName, eventType)
+	expected := NewEvent(namespace, workflowName, nodeName, eventType)
 	err := trigger.Notify(expected)
 	assert.NoError(t, err)
 	actual, canceled, err := trigger.Acquire(context.TODO())
@@ -39,11 +40,12 @@ func TestNotifyThenAcquire(t *testing.T) {
 }
 
 func TestAcquireThenNotify(t *testing.T) {
+	const namespace = "mock-ns"
 	const workflowName = "mock-workflow"
 	const nodeName = "mock-node"
 	const eventType = NodeCreated
 	trigger := NewOperableTrigger()
-	expected := NewEvent(workflowName, nodeName, eventType)
+	expected := NewEvent(namespace, workflowName, nodeName, eventType)
 	go func() {
 		time.Sleep(time.Second)
 		err := trigger.Notify(expected)
@@ -56,6 +58,7 @@ func TestAcquireThenNotify(t *testing.T) {
 }
 
 func TestNotifyAndAcquireParallel(t *testing.T) {
+	const namespace = "mock-ns"
 	const workflowName = "mock-workflow"
 	const eventType = NodeCreated
 	trigger := NewOperableTrigger()
@@ -64,7 +67,7 @@ func TestNotifyAndAcquireParallel(t *testing.T) {
 	go func() {
 		defer wg.Done()
 		for i := 0; i < 10000; i++ {
-			expected := NewEvent(workflowName, fmt.Sprintf("%d", i), eventType)
+			expected := NewEvent(namespace, workflowName, fmt.Sprintf("%d", i), eventType)
 			err := trigger.Notify(expected)
 			assert.NoError(t, err)
 		}
@@ -82,11 +85,12 @@ func TestNotifyAndAcquireParallel(t *testing.T) {
 }
 
 func TestFirstAcquireCanceledThenReturnInNextAcquire(t *testing.T) {
+	const namespace = "mock-ns"
 	const workflowName = "mock-workflow"
 	const nodeName = "mock-node"
 	const eventType = NodeCreated
 	trigger := NewOperableTrigger()
-	expected := NewEvent(workflowName, nodeName, eventType)
+	expected := NewEvent(namespace, workflowName, nodeName, eventType)
 
 	ctx, cancelFunc := context.WithCancel(context.TODO())
 	cancelFunc()
@@ -108,6 +112,7 @@ func TestFirstAcquireCanceledThenReturnInNextAcquire(t *testing.T) {
 }
 
 func BenchmarkNotifyAndAcquireParallel(b *testing.B) {
+	const namespace = "mock-ns"
 	const workflowName = "mock-workflow"
 	const eventType = NodeCreated
 	trigger := NewOperableTrigger()
@@ -116,7 +121,7 @@ func BenchmarkNotifyAndAcquireParallel(b *testing.B) {
 	go func() {
 		defer wg.Done()
 		for i := 0; i < b.N; i++ {
-			expected := NewEvent(workflowName, fmt.Sprintf("%d", i), eventType)
+			expected := NewEvent(namespace, workflowName, fmt.Sprintf("%d", i), eventType)
 			err := trigger.Notify(expected)
 			assert.NoError(b, err)
 		}

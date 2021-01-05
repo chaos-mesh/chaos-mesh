@@ -34,7 +34,12 @@ func (it *UpdateNodePhaseResolver) GetName() string {
 
 func (it *UpdateNodePhaseResolver) ResolveSideEffect(sideEffect sideeffect.SideEffect) error {
 	if updateNodePhaseSideEffect, ok := sideEffect.(*sideeffect.UpdateNodePhaseSideEffect); ok {
-		return it.repo.UpdateNodePhase(updateNodePhaseSideEffect.WorkflowName, updateNodePhaseSideEffect.NodeName, updateNodePhaseSideEffect.TargetPhase)
+		return it.repo.UpdateNodePhase(
+			updateNodePhaseSideEffect.Namespace,
+			updateNodePhaseSideEffect.WorkflowName,
+			updateNodePhaseSideEffect.NodeName,
+			updateNodePhaseSideEffect.TargetPhase,
+		)
 	}
 	return fmt.Errorf("can not parse NotifyNewEventSideEffect, side effect %+v", sideEffect)
 

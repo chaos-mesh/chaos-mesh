@@ -36,14 +36,15 @@ const (
 )
 
 type UpdateNodePhaseSideEffect struct {
+	Namespace    string
 	WorkflowName string
 	NodeName     string
 	CurrentPhase node.NodePhase
 	TargetPhase  node.NodePhase
 }
 
-func NewUpdatePhaseStatusSideEffect(workflowName string, nodeName string, currentPhase node.NodePhase, targetPhase node.NodePhase) *UpdateNodePhaseSideEffect {
-	return &UpdateNodePhaseSideEffect{WorkflowName: workflowName, NodeName: nodeName, CurrentPhase: currentPhase, TargetPhase: targetPhase}
+func NewUpdatePhaseStatusSideEffect(namespace string, workflowName string, nodeName string, currentPhase node.NodePhase, targetPhase node.NodePhase) *UpdateNodePhaseSideEffect {
+	return &UpdateNodePhaseSideEffect{Namespace: namespace, WorkflowName: workflowName, NodeName: nodeName, CurrentPhase: currentPhase, TargetPhase: targetPhase}
 }
 
 func (it *UpdateNodePhaseSideEffect) GetSideEffectType() SideEffectType {
@@ -51,6 +52,7 @@ func (it *UpdateNodePhaseSideEffect) GetSideEffectType() SideEffectType {
 }
 
 type CreateNewNodeSideEffect struct {
+	Namespace      string
 	WorkflowName   string
 	ParentNodeName string
 	NodeName       string
@@ -58,8 +60,8 @@ type CreateNewNodeSideEffect struct {
 	NodePhase      node.NodePhase
 }
 
-func NewCreateNewNodeSideEffect(workflowName string, parentNodeName string, nodeName string, templateName string, nodePhase node.NodePhase) *CreateNewNodeSideEffect {
-	return &CreateNewNodeSideEffect{WorkflowName: workflowName, ParentNodeName: parentNodeName, NodeName: nodeName, TemplateName: templateName, NodePhase: nodePhase}
+func NewCreateNewNodeSideEffect(namespace string, workflowName string, parentNodeName string, nodeName string, templateName string, nodePhase node.NodePhase) *CreateNewNodeSideEffect {
+	return &CreateNewNodeSideEffect{Namespace: namespace, WorkflowName: workflowName, ParentNodeName: parentNodeName, NodeName: nodeName, TemplateName: templateName, NodePhase: nodePhase}
 }
 
 func (it *CreateNewNodeSideEffect) GetSideEffectType() SideEffectType {

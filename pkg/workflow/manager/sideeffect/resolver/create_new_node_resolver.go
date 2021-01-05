@@ -34,7 +34,13 @@ func (it *CreateNewNodeResolver) GetName() string {
 
 func (it *CreateNewNodeResolver) ResolveSideEffect(sideEffect sideeffect.SideEffect) error {
 	if createNewNodeSideEffect, ok := sideEffect.(*sideeffect.CreateNewNodeSideEffect); ok {
-		return it.repo.CreateNodes(createNewNodeSideEffect.WorkflowName, createNewNodeSideEffect.ParentNodeName, createNewNodeSideEffect.NodeName, createNewNodeSideEffect.TemplateName)
+		return it.repo.CreateNodes(
+			createNewNodeSideEffect.Namespace,
+			createNewNodeSideEffect.WorkflowName,
+			createNewNodeSideEffect.ParentNodeName,
+			createNewNodeSideEffect.NodeName,
+			createNewNodeSideEffect.TemplateName,
+		)
 	}
 	return fmt.Errorf("can not parse NotifyNewEventSideEffect, side effect %+v", sideEffect)
 

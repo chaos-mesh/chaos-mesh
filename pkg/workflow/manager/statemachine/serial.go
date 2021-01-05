@@ -27,14 +27,15 @@ import (
 )
 
 type SerialStateMachine struct {
+	namespace         string
 	workflowSpec      workflow.WorkflowSpec
 	nodeStatus        node.Node
 	treeNode          node.NodeTreeNode
 	nodeNameGenerator node.NodeNameGenerator
 }
 
-func NewSerialStateMachine(workflowSpec workflow.WorkflowSpec, nodeStatus node.Node, treeNode node.NodeTreeNode, nodeNameGenerator node.NodeNameGenerator) *SerialStateMachine {
-	return &SerialStateMachine{workflowSpec: workflowSpec, nodeStatus: nodeStatus, treeNode: treeNode, nodeNameGenerator: nodeNameGenerator}
+func NewSerialStateMachine(namespace string, workflowSpec workflow.WorkflowSpec, nodeStatus node.Node, treeNode node.NodeTreeNode, nodeNameGenerator node.NodeNameGenerator) *SerialStateMachine {
+	return &SerialStateMachine{namespace: namespace, workflowSpec: workflowSpec, nodeStatus: nodeStatus, treeNode: treeNode, nodeNameGenerator: nodeNameGenerator}
 }
 
 func (it *SerialStateMachine) GetName() string {
@@ -46,8 +47,8 @@ func (it *SerialStateMachine) HandleEvent(event trigger.Event) ([]sideeffect.Sid
 	case trigger.NodeCreated:
 		if it.nodeStatus.GetNodePhase() == node.Init {
 			var result []sideeffect.SideEffect
-			result = append(result, sideeffect.NewUpdatePhaseStatusSideEffect(it.workflowSpec.GetName(), it.nodeStatus.GetName(), it.nodeStatus.GetNodePhase(), node.WaitingForSchedule))
-			result = append(result, sideeffect.NewNotifyNewEventSideEffect(trigger.NewEvent(it.workflowSpec.GetName(), it.nodeStatus.GetName(), trigger.NodePickChildToSchedule)))
+			result = append(result, sideeffect.NewUpdatePhaseStatusSideEffect(it.namespace, it.workflowSpec.GetName(), it.nodeStatus.GetName(), it.nodeStatus.GetNodePhase(), node.WaitingForSchedule))
+			result = append(result, sideeffect.NewNotifyNewEventSideEffect(trigger.NewEvent(it.namespace, it.workflowSpec.GetName(), it.nodeStatus.GetName(), trigger.NodePickChildToSchedule)))
 			return result, nil
 		}
 		// TODO: replace this error
@@ -71,12 +72,12 @@ func (it *SerialStateMachine) HandleEvent(event trigger.Event) ([]sideeffect.Sid
 			}
 
 			var result []sideeffect.SideEffect
-			result = append(result, sideeffect.NewUpdatePhaseStatusSideEffect(it.workflowSpec.GetName(), it.nodeStatus.GetName(), it.nodeStatus.GetNodePhase(), node.WaitingForChild))
+			result = append(result, sideeffect.NewUpdatePhaseStatusSideEffect(it.namespace, it.workflowSpec.GetName(), it.nodeStatus.GetName(), it.nodeStatus.GetNodePhase(), node.WaitingForChild))
 			for _, nodeItem := range newNodes {
-				result = append(result, sideeffect.NewCreateNewNodeSideEffect(it.workflowSpec.GetName(), it.nodeStatus.GetName(), nodeItem.nodeName, nodeItem.templateName, nodeItem.nodePhase))
+				result = append(result, sideeffect.NewCreateNewNodeSideEffect(it.namespace, it.workflowSpec.GetName(), it.nodeStatus.GetName(), nodeItem.nodeName, nodeItem.templateName, nodeItem.nodePhase))
 			}
 			for _, nodeItem := range newNodes {
-				result = append(result, sideeffect.NewNotifyNewEventSideEffect(trigger.NewEvent(it.workflowSpec.GetName(), nodeItem.nodeName, trigger.NodeCreated)))
+				result = append(result, sideeffect.NewNotifyNewEventSideEffect(trigger.NewEvent(it.namespace, it.workflowSpec.GetName(), nodeItem.nodeName, trigger.NodeCreated)))
 			}
 			return result, nil
 		}
@@ -89,8 +90,8 @@ func (it *SerialStateMachine) HandleEvent(event trigger.Event) ([]sideeffect.Sid
 		if err != nil {
 			if errors.Is(err, engineerrors.ErrNoMoreTemplateInSerialTemplate) {
 				var result []sideeffect.SideEffect
-				result = append(result, sideeffect.NewUpdatePhaseStatusSideEffect(it.workflowSpec.GetName(), it.nodeStatus.GetName(), it.nodeStatus.GetNodePhase(), node.Succeed))
-				result = append(result, sideeffect.NewNotifyNewEventSideEffect(trigger.NewEvent(it.workflowSpec.GetName(), it.nodeStatus.GetParentNodeName(), trigger.ChildNodeSucceed)))
+				result = append(result, sideeffect.NewUpdatePhaseStatusSideEffect(it.namespace, it.workflowSpec.GetName(), it.nodeStatus.GetName(), it.nodeStatus.GetNodePhase(), node.Succeed))
+				result = append(result, sideeffect.NewNotifyNewEventSideEffect(trigger.NewEvent(it.namespace, it.workflowSpec.GetName(), it.nodeStatus.GetParentNodeName(), trigger.ChildNodeSucceed)))
 				return result, nil
 			}
 			return nil, err
@@ -98,8 +99,8 @@ func (it *SerialStateMachine) HandleEvent(event trigger.Event) ([]sideeffect.Sid
 
 		// still have schedulable child
 		var result []sideeffect.SideEffect
-		result = append(result, sideeffect.NewUpdatePhaseStatusSideEffect(it.workflowSpec.GetName(), it.nodeStatus.GetName(), it.nodeStatus.GetNodePhase(), node.WaitingForSchedule))
-		result = append(result, sideeffect.NewNotifyNewEventSideEffect(trigger.NewEvent(it.workflowSpec.GetName(), it.nodeStatus.GetName(), trigger.NodePickChildToSchedule)))
+		result = append(result, sideeffect.NewUpdatePhaseStatusSideEffect(it.namespace, it.workflowSpec.GetName(), it.nodeStatus.GetName(), it.nodeStatus.GetNodePhase(), node.WaitingForSchedule))
+		result = append(result, sideeffect.NewNotifyNewEventSideEffect(trigger.NewEvent(it.namespace, it.workflowSpec.GetName(), it.nodeStatus.GetName(), trigger.NodePickChildToSchedule)))
 		return result, nil
 
 	case trigger.ChildNodeFailed:
