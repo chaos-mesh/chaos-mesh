@@ -104,6 +104,11 @@ func (it *basicManager) acquire(ctx context.Context) (trigger.Event, error) {
 }
 
 func (it *basicManager) consume(ctx context.Context, event trigger.Event) error {
+
+	if event.GetEventType() == trigger.ChildNodeSucceed && event.GetNodeName() == "" {
+		return it.operableTrigger.Notify(trigger.NewEvent(event.GetNamespace(), event.GetWorkflowName(), "", trigger.WorkflowFinished))
+	}
+
 	switch event.GetEventType() {
 	case trigger.WorkflowCreated:
 		it.logger.V(1).Info("event: workflow created", "event", event)
@@ -146,13 +151,13 @@ func (it *basicManager) consume(ctx context.Context, event trigger.Event) error 
 		if err != nil {
 			return err
 		}
-		treeNode := workflowStatus.GetNodesTree().FetchNodeByName(nodeName)
 
 		// create state machine and make side effects
 		var sideEffects []sideeffect.SideEffect
 
 		switch targetTemplate.GetTemplateType() {
 		case template.Serial:
+			treeNode := workflowStatus.GetNodesTree().FetchNodeByName(nodeName)
 			serialStateMachine := statemachine.NewSerialStateMachine(event.GetNamespace(), workflowSpec, nodeStatus, treeNode, it.nodeNameGenerator)
 			sideEffects, err = serialStateMachine.HandleEvent(event)
 			if err != nil {

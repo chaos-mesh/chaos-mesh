@@ -26,18 +26,22 @@ const defaultBufferSize = 10
 
 // Multiplexer for trigger. Notice that it will change the context for the Acquire.
 type CompositeTrigger struct {
-	backends   []Trigger
-	subscribed *atomic.Bool
-	queue      chan EventOrError
-	Logger     logr.Logger
+	backends []Trigger
+	queue    chan EventOrError
+	Logger   logr.Logger
 }
 
 func NewCompositeTrigger(backends ...Trigger) *CompositeTrigger {
-	return &CompositeTrigger{
-		backends:   backends,
-		subscribed: atomic.NewBool(false),
-		queue:      make(chan EventOrError, defaultBufferSize),
+	trigger := CompositeTrigger{
+		backends: backends,
+		queue:    make(chan EventOrError, defaultBufferSize),
 	}
+	// FIXME: we need another implementation
+	go func() {
+		err := trigger.RunAndPending(context.TODO())
+		panic(err)
+	}()
+	return &trigger
 }
 
 func (it *CompositeTrigger) TriggerName() string {
@@ -45,11 +49,6 @@ func (it *CompositeTrigger) TriggerName() string {
 }
 
 func (it *CompositeTrigger) Acquire(ctx context.Context) (Event, bool, error) {
-	go func() {
-		it.RunAndPending(ctx)
-		// TODO: warn logs
-	}()
-
 	select {
 	case <-ctx.Done():
 		return nil, true, ctx.Err()

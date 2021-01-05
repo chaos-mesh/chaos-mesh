@@ -16,6 +16,7 @@ package manager
 import (
 	"context"
 	"testing"
+	"time"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/manager/sideeffect/resolver"
 
@@ -54,7 +55,7 @@ func TestScheduleSingleOne(t *testing.T) {
 	mockEntryTreeNode := mock_node.NewMockNodeTreeNode(mockctl)
 	mockEntryTreeNodeChildren := mock_node.NewMockNodeTreeChildren(mockctl)
 
-	mockLayer1Template0 := mock_template.NewMockTemplate(mockctl)
+	mockLayer1Template0 := mock_template.NewMockSuspendTemplate(mockctl)
 
 	// mocked repo needs this trigger
 	mockRepo.EXPECT().FetchWorkflow(gomock.Eq(namespace), gomock.Eq(workflowName)).AnyTimes().Return(mockWorkflowSpec, mockWorkflowStatus, nil)
@@ -87,41 +88,6 @@ func TestScheduleSingleOne(t *testing.T) {
 	)
 
 	layer1Node0Node := mock_node.NewMockNode(mockctl)
-	layer1Node0TreeNode := mock_node.NewMockNodeTreeNode(mockctl)
-
-	// mocked methods
-	gomock.InOrder(
-		// init workflow
-		mockRepo.EXPECT().CreateNodes(gomock.Eq(namespace), gomock.Eq(workflowName), gomock.Eq(""), gomock.Eq(entryNodeName), gomock.Eq(entryName)).Return(nil).Times(1),
-
-		// resolve workflow created
-		mockWorkflowStatus.EXPECT().FetchNodeByName(entryNodeName).Return(mockEntryNode, nil).Times(1),
-		mockWorkflowStatus.EXPECT().GetNodesTree().Return(mockEntryTreeNode).Times(1),
-		mockEntryTreeNode.EXPECT().FetchNodeByName(entryNodeName).Return(mockEntryTreeNode).Times(1),
-		mockRepo.EXPECT().UpdateNodePhase(gomock.Eq(namespace), gomock.Eq(workflowName), gomock.Eq(entryNodeName), gomock.Eq(node.WaitingForSchedule)).Return(nil).Times(1),
-
-		// resolve entry node created
-		mockWorkflowStatus.EXPECT().FetchNodeByName(entryNodeName).Return(mockEntryNodeWaitingForSchedule, nil).Times(1),
-		mockWorkflowStatus.EXPECT().GetNodesTree().Return(mockEntryTreeNode).Times(1),
-		mockEntryTreeNode.EXPECT().FetchNodeByName(entryNodeName).Return(mockEntryTreeNode).Times(1),
-		mockEntryTreeNode.EXPECT().GetChildren().Return(mockEntryTreeNodeChildren).Times(1),
-		mockEntryTreeNodeChildren.EXPECT().Length().Return(0).Times(1),
-		mockEntryTreeNode.EXPECT().GetChildren().Return(mockEntryTreeNodeChildren).Times(1),
-		mockEntryTreeNodeChildren.EXPECT().ContainsTemplate(gomock.Eq(layer1Template0Name)).Return(false).Times(1),
-		mockRepo.EXPECT().UpdateNodePhase(gomock.Eq(namespace), gomock.Eq(workflowName), gomock.Eq(entryNodeName), gomock.Eq(node.WaitingForChild)).Return(nil).Times(1),
-		mockRepo.EXPECT().CreateNodes(gomock.Eq(namespace), gomock.Eq(workflowName), gomock.Eq(entryNodeName), gomock.Eq(layer1Node0Name), gomock.Eq(layer1Template0Name)).Return(nil).Times(1),
-
-		// resolve layer1 node 0 created
-		mockWorkflowStatus.EXPECT().FetchNodeByName(layer1Node0Name).Return(layer1Node0Node, nil).Times(1),
-		layer1Node0Node.EXPECT().GetTemplateName().Return(layer1Template0Name).Times(1),
-		mockWorkflowStatus.EXPECT().GetNodesTree().Return(layer1Node0TreeNode).Times(1),
-		layer1Node0TreeNode.EXPECT().FetchNodeByName(layer1Node0Name).Return(layer1Node0TreeNode).Times(1),
-		layer1Node0Node.EXPECT().GetNodePhase().Return(node.Init).Times(1),
-		layer1Node0Node.EXPECT().GetName().Return(layer1Node0Name).Times(1),
-		layer1Node0Node.EXPECT().GetNodePhase().Return(node.Init).Times(1),
-		layer1Node0Node.EXPECT().GetName().Return(layer1Node0Name).Times(1),
-		mockRepo.EXPECT().UpdateNodePhase(gomock.Eq(namespace), gomock.Eq(workflowName), gomock.Eq(entryNodeName), gomock.Eq(node.WaitingForChild)).Return(nil).Times(1),
-	)
 
 	repoTrigger := trigger.NewOperableTrigger()
 	compositeResolver, err := resolver.NewCompositeResolverWith(resolver.NewNotifyNewEventResolver(repoTrigger), resolver.NewCreateNewNodeResolver(mockRepo), resolver.NewUpdateNodePhaseResolver(mockRepo))
@@ -134,36 +100,126 @@ func TestScheduleSingleOne(t *testing.T) {
 	ctx, cancelFunc := context.WithCancel(context.Background())
 	defer cancelFunc()
 
+	t.Log("triggering workflow created")
 	err = controllerTrigger.Notify(trigger.NewEvent(namespace, workflowName, "", trigger.WorkflowCreated))
 
-	// handle WorkflowCreated
+	t.Log("handle handle WorkflowCreated")
 	event, err := manager.acquire(ctx)
 	assert.NoError(t, err)
 	assert.Equal(t, trigger.WorkflowCreated, event.GetEventType())
+	gomock.InOrder(
+		// resolve workflow created
+		mockRepo.EXPECT().CreateNodes(gomock.Eq(namespace), gomock.Eq(workflowName), gomock.Eq(""), gomock.Eq(entryNodeName), gomock.Eq(entryName)).Return(nil).Times(1),
+	)
 	err = manager.consume(ctx, event)
 	assert.NoError(t, err)
 
-	// handle entry node NodeCreated
+	t.Log("handle entry node NodeCreated")
 	event, err = manager.acquire(ctx)
 	assert.NoError(t, err)
 	assert.Equal(t, trigger.NodeCreated, event.GetEventType())
 	assert.Equal(t, entryNodeName, event.GetNodeName())
+	gomock.InOrder(
+		mockWorkflowStatus.EXPECT().FetchNodeByName(entryNodeName).Return(mockEntryNode, nil).Times(1),
+		mockWorkflowStatus.EXPECT().GetNodesTree().Return(mockEntryTreeNode).Times(1),
+		mockEntryTreeNode.EXPECT().FetchNodeByName(entryNodeName).Return(mockEntryTreeNode).Times(1),
+		mockRepo.EXPECT().UpdateNodePhase(gomock.Eq(namespace), gomock.Eq(workflowName), gomock.Eq(entryNodeName), gomock.Eq(node.WaitingForSchedule)).Return(nil).Times(1),
+	)
 	err = manager.consume(ctx, event)
 	assert.NoError(t, err)
 
-	// handle entry node waiting for schedule
+	t.Log("handle entry node waiting for schedule")
 	event, err = manager.acquire(ctx)
 	assert.NoError(t, err)
 	assert.Equal(t, trigger.NodePickChildToSchedule, event.GetEventType())
 	assert.Equal(t, entryNodeName, event.GetNodeName())
+	gomock.InOrder(
+		// resolve entry node created
+		mockWorkflowStatus.EXPECT().FetchNodeByName(entryNodeName).Return(mockEntryNodeWaitingForSchedule, nil).Times(1),
+		mockWorkflowStatus.EXPECT().GetNodesTree().Return(mockEntryTreeNode).Times(1),
+		mockEntryTreeNode.EXPECT().FetchNodeByName(entryNodeName).Return(mockEntryTreeNode).Times(1),
+		mockEntryTreeNode.EXPECT().GetChildren().Return(mockEntryTreeNodeChildren).Times(1),
+		mockEntryTreeNodeChildren.EXPECT().Length().Return(0).Times(1),
+		mockEntryTreeNode.EXPECT().GetChildren().Return(mockEntryTreeNodeChildren).Times(1),
+		mockEntryTreeNodeChildren.EXPECT().ContainsTemplate(gomock.Eq(layer1Template0Name)).Return(false).Times(1),
+		mockRepo.EXPECT().UpdateNodePhase(gomock.Eq(namespace), gomock.Eq(workflowName), gomock.Eq(entryNodeName), gomock.Eq(node.WaitingForChild)).Return(nil).Times(1),
+		mockRepo.EXPECT().CreateNodes(gomock.Eq(namespace), gomock.Eq(workflowName), gomock.Eq(entryNodeName), gomock.Eq(layer1Node0Name), gomock.Eq(layer1Template0Name)).Return(nil).Times(1),
+	)
 	err = manager.consume(ctx, event)
 	assert.NoError(t, err)
 
-	// handle layer 1 template 0 NodeCreated
+	t.Log("handle layer 1 template 0 NodeCreated")
 	event, err = manager.acquire(ctx)
 	assert.NoError(t, err)
 	assert.Equal(t, trigger.NodeCreated, event.GetEventType())
 	assert.Equal(t, layer1Node0Name, event.GetNodeName())
+	gomock.InOrder(
+		// resolve layer1 node 0 created
+		mockWorkflowStatus.EXPECT().FetchNodeByName(layer1Node0Name).Return(layer1Node0Node, nil).Times(1),
+		layer1Node0Node.EXPECT().GetTemplateName().Return(layer1Template0Name).Times(1),
+		layer1Node0Node.EXPECT().GetNodePhase().Return(node.Init).Times(1),
+		layer1Node0Node.EXPECT().GetTemplateName().Return(layer1Template0Name).Times(1),
+		mockLayer1Template0.EXPECT().GetDuration().Return(170*time.Millisecond, nil).Times(1),
+		layer1Node0Node.EXPECT().GetName().Return(layer1Node0Name).Times(1),
+		layer1Node0Node.EXPECT().GetNodePhase().Return(node.Init).Times(1),
+		layer1Node0Node.EXPECT().GetName().Return(layer1Node0Name).Times(1),
+		mockRepo.EXPECT().UpdateNodePhase(gomock.Eq(namespace), gomock.Eq(workflowName), gomock.Eq(layer1Node0Name), gomock.Eq(node.Holding)).Return(nil).Times(1),
+	)
 	err = manager.consume(ctx, event)
-	assert.Error(t, err)
+	assert.NoError(t, err)
+
+	t.Log("handle layer 1 template 0 NodeHoldingAwake")
+	start := time.Now()
+	event, err = manager.acquire(ctx)
+	delay := time.Now().Sub(start)
+
+	t.Logf("NodeHoldingAwake expected: 170ms actual %dms", delay.Milliseconds())
+	assert.NoError(t, err)
+	assert.Equal(t, trigger.NodeHoldingAwake, event.GetEventType())
+	assert.Equal(t, layer1Node0Name, event.GetNodeName())
+	gomock.InOrder(
+		mockWorkflowStatus.EXPECT().FetchNodeByName(gomock.Eq(layer1Node0Name)).Return(layer1Node0Node, nil).Times(1),
+		layer1Node0Node.EXPECT().GetTemplateName().Return(layer1Template0Name).Times(1),
+		layer1Node0Node.EXPECT().GetName().Return(layer1Node0Name).Times(1),
+		layer1Node0Node.EXPECT().GetNodePhase().Return(node.Init).Times(1),
+		layer1Node0Node.EXPECT().GetParentNodeName().Return(entryNodeName).Times(1),
+		mockRepo.EXPECT().UpdateNodePhase(gomock.Eq(namespace), gomock.Eq(workflowName), gomock.Eq(layer1Node0Name), gomock.Eq(node.Succeed)).Return(nil).Times(1),
+	)
+	err = manager.consume(ctx, event)
+	assert.NoError(t, err)
+
+	t.Log("handle entry node ChildNodeSucceed")
+	event, err = manager.acquire(ctx)
+	assert.NoError(t, err)
+	assert.Equal(t, trigger.ChildNodeSucceed, event.GetEventType())
+	assert.Equal(t, entryNodeName, event.GetNodeName())
+	gomock.InOrder(
+		mockWorkflowStatus.EXPECT().FetchNodeByName(entryNodeName).Return(mockEntryNode, nil).Times(1),
+		mockWorkflowStatus.EXPECT().GetNodesTree().Return(mockEntryTreeNode).Times(1),
+		mockEntryTreeNode.EXPECT().FetchNodeByName(entryNodeName).Return(mockEntryTreeNode).Times(1),
+		mockEntryTreeNode.EXPECT().GetChildren().Return(mockEntryTreeNodeChildren).Times(1),
+		mockEntryTreeNodeChildren.EXPECT().Length().Return(1).Times(1),
+		mockEntryTreeNode.EXPECT().GetTemplateName().Return(entryName).Times(1),
+		mockEntryTreeNode.EXPECT().GetName().Return(entryNodeName).Times(1),
+		mockEntryNode.EXPECT().GetNodePhase().Return(node.WaitingForChild).Times(1),
+		mockEntryNode.EXPECT().GetParentNodeName().Return("").Times(1),
+		mockRepo.EXPECT().UpdateNodePhase(gomock.Eq(namespace), gomock.Eq(workflowName), gomock.Eq(entryNodeName), gomock.Eq(node.Succeed)).Return(nil).Times(1),
+	)
+	err = manager.consume(ctx, event)
+	assert.NoError(t, err)
+
+	event, err = manager.acquire(ctx)
+	assert.NoError(t, err)
+	assert.Equal(t, trigger.ChildNodeSucceed, event.GetEventType())
+	assert.Equal(t, "", event.GetNodeName())
+	gomock.InOrder()
+	err = manager.consume(ctx, event)
+	assert.NoError(t, err)
+
+	event, err = manager.acquire(ctx)
+	assert.NoError(t, err)
+	assert.Equal(t, trigger.WorkflowFinished, event.GetEventType())
+	gomock.InOrder()
+	err = manager.consume(ctx, event)
+	assert.NoError(t, err)
 }
