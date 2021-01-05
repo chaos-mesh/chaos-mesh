@@ -14,13 +14,17 @@
 package template
 
 import (
+	"time"
+
 	chaosmeshv1alph1 "github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/engine/errors"
 )
 
 type NetworkChaosTemplate interface {
 	Template
-	FetchNetworkChaos() chaosmeshv1alph1.NetworkChaosSpec
+	FetchChaosNamePrefix() string
+	FetchNetworkChaosSpec() chaosmeshv1alph1.NetworkChaosSpec
+	GetDuration() (time.Duration, error)
 }
 
 func ParseNetworkChaosTemplate(raw interface{}) (NetworkChaosTemplate, error) {

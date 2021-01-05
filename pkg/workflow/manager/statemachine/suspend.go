@@ -63,6 +63,7 @@ func (it *SuspendStateMachine) HandleEvent(event trigger.Event) ([]sideeffect.Si
 		// TODO: replace this error
 		return nil, fmt.Errorf("StateMachine %s can not handle evnet %s at status %s", it.GetName(), event, it.nodeStatus)
 	case trigger.NodeHoldingAwake:
+		// TODO: assert current state
 		var result []sideeffect.SideEffect
 		result = append(result, sideeffect.NewUpdatePhaseStatusSideEffect(it.workflowSpec.GetName(), it.nodeStatus.GetName(), it.nodeStatus.GetNodePhase(), node.Succeed))
 		result = append(result, sideeffect.NewNotifyNewEventSideEffect(trigger.NewEvent(it.workflowSpec.GetName(), it.nodeStatus.GetParentNodeName(), trigger.ChildNodeSucceed)))

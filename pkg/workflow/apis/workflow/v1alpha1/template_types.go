@@ -43,3 +43,11 @@ func (it *Template) GetDuration() (time.Duration, error) {
 func (it *Template) GetDeadline() (time.Duration, error) {
 	return time.ParseDuration(it.Deadline)
 }
+
+func (it *Template) FetchChaosNamePrefix() string {
+	return it.Name
+}
+
+func (it *Template) FetchNetworkChaosSpec() chaosmeshv1alph1.NetworkChaosSpec {
+	return it.NetworkChaos
+}

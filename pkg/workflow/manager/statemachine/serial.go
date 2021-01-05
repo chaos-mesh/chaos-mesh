@@ -84,6 +84,7 @@ func (it *SerialStateMachine) HandleEvent(event trigger.Event) ([]sideeffect.Sid
 		return nil, fmt.Errorf("StateMachine %s can not handle evnet %s at status %s", it.GetName(), event, it.nodeStatus)
 
 	case trigger.ChildNodeSucceed:
+		// TODO: assert current state
 		_, _, err := scheduler.NewSerialScheduler(it.workflowSpec, it.nodeStatus, it.treeNode).ScheduleNext(context.TODO())
 		if err != nil {
 			if errors.Is(err, engineerrors.ErrNoMoreTemplateInSerialTemplate) {

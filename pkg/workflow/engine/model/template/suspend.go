@@ -14,8 +14,9 @@
 package template
 
 import (
-	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/engine/errors"
 	"time"
+
+	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/engine/errors"
 )
 
 type SuspendTemplate interface {

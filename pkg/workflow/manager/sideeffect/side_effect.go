@@ -16,6 +16,8 @@ package sideeffect
 import (
 	"time"
 
+	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/actor"
+
 	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/engine/model/node"
 	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/trigger"
 )
@@ -78,4 +80,20 @@ func NewNotifyNewDelayEventSideEffect(newEvent trigger.Event, delay time.Duratio
 
 func (it *NotifyNewEventSideEffect) GetSideEffectType() SideEffectType {
 	return NotifyNewEvent
+}
+
+type CreateActorEventSideEffect struct {
+	actor actor.Actor
+}
+
+func (it *CreateActorEventSideEffect) GetActor() actor.Actor {
+	return it.actor
+}
+
+func (it *CreateActorEventSideEffect) GetSideEffectType() SideEffectType {
+	return CreateActor
+}
+
+func NewCreateActorEventSideEffect(actor actor.Actor) *CreateActorEventSideEffect {
+	return &CreateActorEventSideEffect{actor: actor}
 }
