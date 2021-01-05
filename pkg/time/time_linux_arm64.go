@@ -16,13 +16,7 @@ package time
 import (
 	"errors"
 
-<<<<<<< HEAD:pkg/utils/scheduler.go
-	"github.com/robfig/cron/v3"
-
-	v1alpha1 "github.com/chaos-mesh/api"
-=======
 	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
->>>>>>> upstream/master:pkg/time/time_linux_arm64.go
 )
 
 // ModifyTime modifies time of target process

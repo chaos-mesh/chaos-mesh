@@ -32,7 +32,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
 
-	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	v1alpha1 "github.com/chaos-mesh/api"
+
 	ctrlconfig "github.com/chaos-mesh/chaos-mesh/controllers/config"
 	daemonClient "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/client"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
