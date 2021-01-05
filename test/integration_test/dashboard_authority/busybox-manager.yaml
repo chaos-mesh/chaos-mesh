@@ -1,0 +1,44 @@
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  namespace: busybox
+  name: role-busybox-manager
+rules:
+- apiGroups: [""]
+  resources: ["pods", "namespaces"]
+  verbs: ["get", "watch", "list"]
+- apiGroups:
+  - chaos-mesh.org
+  resources: [ "*" ]
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+
+---
+
+kind: ServiceAccount
+apiVersion: v1
+metadata:
+  namespace: busybox
+  name: account-busybox-manager
+
+---
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: bind-busybox-manager
+  namespace: busybox
+subjects:
+- kind: ServiceAccount
+  name: account-busybox-manager
+  namespace: busybox
+roleRef:
+  kind: Role
+  name: role-busybox-manager
+  apiGroup: rbac.authorization.k8s.io

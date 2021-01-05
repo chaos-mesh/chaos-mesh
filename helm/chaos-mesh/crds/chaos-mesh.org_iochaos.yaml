@@ -1,0 +1,355 @@
+
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.2.5
+  creationTimestamp: null
+  name: iochaos.chaos-mesh.org
+spec:
+  group: chaos-mesh.org
+  names:
+    kind: IoChaos
+    listKind: IoChaosList
+    plural: iochaos
+    singular: iochaos
+  preserveUnknownFields: false
+  scope: Namespaced
+  validation:
+    openAPIV3Schema:
+      description: IoChaos is the Schema for the iochaos API
+      properties:
+        apiVersion:
+          description: 'APIVersion defines the versioned schema of this representation
+            of an object. Servers should convert recognized schemas to the latest
+            internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+          type: string
+        kind:
+          description: 'Kind is a string value representing the REST resource this
+            object represents. Servers may infer this from the endpoint the client
+            submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+          type: string
+        metadata:
+          type: object
+        spec:
+          description: IoChaosSpec defines the desired state of IoChaos
+          properties:
+            action:
+              description: 'Action defines the specific pod chaos action. Supported
+                action: latency / fault / attrOverride'
+              enum:
+              - latency
+              - fault
+              - attrOverride
+              type: string
+            attr:
+              description: Attr defines the overrided attribution
+              properties:
+                atime:
+                  description: Timespec represents a time
+                  properties:
+                    nsec:
+                      format: int64
+                      type: integer
+                    sec:
+                      format: int64
+                      type: integer
+                  required:
+                  - nsec
+                  - sec
+                  type: object
+                blocks:
+                  format: int64
+                  type: integer
+                ctime:
+                  description: Timespec represents a time
+                  properties:
+                    nsec:
+                      format: int64
+                      type: integer
+                    sec:
+                      format: int64
+                      type: integer
+                  required:
+                  - nsec
+                  - sec
+                  type: object
+                gid:
+                  format: int32
+                  type: integer
+                ino:
+                  format: int64
+                  type: integer
+                kind:
+                  description: FileType represents type of a file
+                  type: string
+                mtime:
+                  description: Timespec represents a time
+                  properties:
+                    nsec:
+                      format: int64
+                      type: integer
+                    sec:
+                      format: int64
+                      type: integer
+                  required:
+                  - nsec
+                  - sec
+                  type: object
+                nlink:
+                  format: int32
+                  type: integer
+                perm:
+                  type: integer
+                rdev:
+                  format: int32
+                  type: integer
+                size:
+                  format: int64
+                  type: integer
+                uid:
+                  format: int32
+                  type: integer
+              type: object
+            containerName:
+              description: ContainerName indicates the target container to inject
+                iochaos in
+              type: string
+            delay:
+              description: Delay defines the value of I/O chaos action delay. A delay
+                string is a possibly signed sequence of decimal numbers, each with
+                optional fraction and a unit suffix, such as "300ms". Valid time units
+                are "ns", "us" (or "µs"), "ms", "s", "m", "h".
+              type: string
+            duration:
+              description: Duration represents the duration of the chaos action. It
+                is required when the action is `PodFailureAction`. A duration string
+                is a possibly signed sequence of decimal numbers, each with optional
+                fraction and a unit suffix, such as "300ms", "-1.5h" or "2h45m". Valid
+                time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
+              type: string
+            errno:
+              description: 'Errno defines the error code that returned by I/O action.
+                refer to: https://www-numi.fnal.gov/offline_software/srt_public_context/WebDocs/Errors/unix_system_errors.html'
+              format: int32
+              type: integer
+            methods:
+              description: 'Methods defines the I/O methods for injecting I/O chaos
+                action. default: all I/O methods.'
+              items:
+                type: string
+              type: array
+            mode:
+              description: 'Mode defines the mode to run chaos action. Supported mode:
+                one / all / fixed / fixed-percent / random-max-percent'
+              enum:
+              - one
+              - all
+              - fixed
+              - fixed-percent
+              - random-max-percent
+              type: string
+            path:
+              description: Path defines the path of files for injecting I/O chaos
+                action.
+              type: string
+            percent:
+              description: 'Percent defines the percentage of injection errors and
+                provides a number from 0-100. default: 100.'
+              type: integer
+            scheduler:
+              description: Scheduler defines some schedule rules to control the running
+                time of the chaos experiment about pods.
+              properties:
+                cron:
+                  description: "Cron defines a cron job rule. \n Some rule examples:
+                    \"0 30 * * * *\" means to \"Every hour on the half hour\" \"@hourly\"
+                    \     means to \"Every hour\" \"@every 1h30m\" means to \"Every
+                    hour thirty\" \n More rule info: https://godoc.org/github.com/robfig/cron"
+                  type: string
+              required:
+              - cron
+              type: object
+            selector:
+              description: Selector is used to select pods that are used to inject
+                chaos action.
+              properties:
+                annotationSelectors:
+                  additionalProperties:
+                    type: string
+                  description: Map of string keys and values that can be used to select
+                    objects. A selector based on annotations.
+                  type: object
+                expressionSelectors:
+                  description: a slice of label selector expressions that can be used
+                    to select objects. A list of selectors based on set-based label
+                    expressions.
+                  items:
+                    description: A label selector requirement is a selector that contains
+                      values, a key, and an operator that relates the key and values.
+                    properties:
+                      key:
+                        description: key is the label key that the selector applies
+                          to.
+                        type: string
+                      operator:
+                        description: operator represents a key's relationship to a
+                          set of values. Valid operators are In, NotIn, Exists and
+                          DoesNotExist.
+                        type: string
+                      values:
+                        description: values is an array of string values. If the operator
+                          is In or NotIn, the values array must be non-empty. If the
+                          operator is Exists or DoesNotExist, the values array must
+                          be empty. This array is replaced during a strategic merge
+                          patch.
+                        items:
+                          type: string
+                        type: array
+                    required:
+                    - key
+                    - operator
+                    type: object
+                  type: array
+                fieldSelectors:
+                  additionalProperties:
+                    type: string
+                  description: Map of string keys and values that can be used to select
+                    objects. A selector based on fields.
+                  type: object
+                labelSelectors:
+                  additionalProperties:
+                    type: string
+                  description: Map of string keys and values that can be used to select
+                    objects. A selector based on labels.
+                  type: object
+                namespaces:
+                  description: Namespaces is a set of namespace to which objects belong.
+                  items:
+                    type: string
+                  type: array
+                nodeSelectors:
+                  additionalProperties:
+                    type: string
+                  description: Map of string keys and values that can be used to select
+                    nodes. Selector which must match a node's labels, and objects
+                    must belong to these selected nodes.
+                  type: object
+                nodes:
+                  description: Nodes is a set of node name and objects must belong
+                    to these nodes.
+                  items:
+                    type: string
+                  type: array
+                podPhaseSelectors:
+                  description: 'PodPhaseSelectors is a set of condition of a pod at
+                    the current time. supported value: Pending / Running / Succeeded
+                    / Failed / Unknown'
+                  items:
+                    type: string
+                  type: array
+                pods:
+                  additionalProperties:
+                    items:
+                      type: string
+                    type: array
+                  description: Pods is a map of string keys and a set values that
+                    used to select pods. The key defines the namespace which pods
+                    belong, and the each values is a set of pod names.
+                  type: object
+              type: object
+            value:
+              description: Value is required when the mode is set to `FixedPodMode`
+                / `FixedPercentPodMod` / `RandomMaxPercentPodMod`. If `FixedPodMode`,
+                provide an integer of pods to do chaos action. If `FixedPercentPodMod`,
+                provide a number from 0-100 to specify the percent of pods the server
+                can do chaos action. IF `RandomMaxPercentPodMod`,  provide a number
+                from 0-100 to specify the max percent of pods to do chaos action
+              type: string
+            volumePath:
+              description: VolumePath represents the mount path of injected volume
+              type: string
+          required:
+          - action
+          - mode
+          - selector
+          - volumePath
+          type: object
+        status:
+          description: IoChaosStatus defines the observed state of IoChaos
+          properties:
+            experiment:
+              description: Experiment records the last experiment state.
+              properties:
+                duration:
+                  type: string
+                endTime:
+                  format: date-time
+                  type: string
+                phase:
+                  description: ExperimentPhase is the current status of chaos experiment.
+                  type: string
+                podRecords:
+                  items:
+                    description: PodStatus represents information about the status
+                      of a pod in chaos experiment.
+                    properties:
+                      action:
+                        type: string
+                      hostIP:
+                        type: string
+                      message:
+                        description: A brief CamelCase message indicating details
+                          about the chaos action. e.g. "delete this pod" or "pause
+                          this pod duration 5m"
+                        type: string
+                      name:
+                        type: string
+                      namespace:
+                        type: string
+                      podIP:
+                        type: string
+                    required:
+                    - action
+                    - hostIP
+                    - name
+                    - namespace
+                    - podIP
+                    type: object
+                  type: array
+                reason:
+                  type: string
+                startTime:
+                  format: date-time
+                  type: string
+              type: object
+            failedMessage:
+              type: string
+            scheduler:
+              description: ScheduleStatus is the current status of chaos scheduler.
+              properties:
+                nextRecover:
+                  description: Next time when this action will be recovered
+                  format: date-time
+                  type: string
+                nextStart:
+                  description: Next time when this action will be applied again
+                  format: date-time
+                  type: string
+              type: object
+          required:
+          - experiment
+          type: object
+      type: object
+  version: v1alpha1
+  versions:
+  - name: v1alpha1
+    served: true
+    storage: true
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
