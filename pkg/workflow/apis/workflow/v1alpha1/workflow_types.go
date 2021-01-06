@@ -43,3 +43,15 @@ type WorkflowStatus struct {
 	Phase workflow.WorkflowPhase `json:"phase"`
 	Nodes map[string]Node        `json:"nodes"`
 }
+
+// +kubebuilder:object:root=true
+
+type WorkflowList struct {
+	metav1.TypeMeta `json:",inline"`
+	metav1.ListMeta `json:"metadata,omitempty"`
+	Items           []Workflow `json:"items"`
+}
+
+func init() {
+	SchemeBuilder.Register(&Workflow{}, &WorkflowList{})
+}
