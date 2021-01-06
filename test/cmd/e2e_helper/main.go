@@ -151,10 +151,15 @@ func (s *server) networkPingTest(w http.ResponseWriter, r *http.Request) {
 	}
 
 	c := http.Client{
-		Timeout: 10 * time.Second,
+		Timeout: 30 * time.Second,
 	}
 	startTime := time.Now()
 	resp, err := c.Get(fmt.Sprintf("http://%s:8080/ping", body.TargetIP))
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
 	endTime := time.Now()
 	out, err := ioutil.ReadAll(resp.Body)
 	defer resp.Body.Close()
