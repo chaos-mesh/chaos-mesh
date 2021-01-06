@@ -198,7 +198,7 @@ func TestcasePodFailurePauseThenUnPause(ns string, kubeCli kubernetes.Interface,
 	By("wait for 30 seconds and no pod failure")
 	pods, err = kubeCli.CoreV1().Pods(ns).List(listOption)
 	framework.ExpectNoError(err, "get timer pod error")
-	err = wait.Poll(5*time.Second, 30*time.Second, func() (done bool, err error) {
+	err = wait.Poll(5*time.Second, 1*time.Minute, func() (done bool, err error) {
 		pods, err = kubeCli.CoreV1().Pods(ns).List(listOption)
 		framework.ExpectNoError(err, "get timer pod error")
 		pod := pods.Items[0]
