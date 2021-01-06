@@ -9,9 +9,8 @@
 !test
 !ui
 !tools
-!toda
+!images
 
-toda/target
 test/image
 
 !go.mod
