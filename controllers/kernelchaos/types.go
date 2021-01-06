@@ -18,20 +18,18 @@ import (
 	"errors"
 	"fmt"
 
-	k8serror "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/types"
 
-	"github.com/hashicorp/go-multierror"
+	"github.com/go-logr/logr"
 	"golang.org/x/sync/errgroup"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/client-go/tools/cache"
 	ctrl "sigs.k8s.io/controller-runtime"
+	kubeclient "sigs.k8s.io/controller-runtime/pkg/client"
 
-	v1alpha1 "github.com/chaos-mesh/api"
-
-	"github.com/chaos-mesh/chaos-mesh/controllers/common"
+	"github.com/chaos-mesh/api"
 	"github.com/chaos-mesh/chaos-mesh/controllers/config"
+	"github.com/chaos-mesh/chaos-mesh/controllers/recover"
 	"github.com/chaos-mesh/chaos-mesh/pkg/events"
 	"github.com/chaos-mesh/chaos-mesh/pkg/finalizer"
 	"github.com/chaos-mesh/chaos-mesh/pkg/grpc"
@@ -50,6 +48,11 @@ const kernelChaosMsg = "kernel is injected with %v"
 // endpoint is KernelChaos reconciler
 type endpoint struct {
 	ctx.Context
+}
+
+type recoverer struct {
+	kubeclient.Client
+	Log logr.Logger
 }
 
 // Apply applies KernelChaos
@@ -91,67 +94,28 @@ func (r *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.I
 
 // Recover means the reconciler recovers the chaos action
 func (r *endpoint) Recover(ctx context.Context, req ctrl.Request, chaos v1alpha1.InnerObject) error {
-	kernelChaos, ok := chaos.(*v1alpha1.KernelChaos)
+	kernelchaos, ok := chaos.(*v1alpha1.KernelChaos)
 	if !ok {
 		err := errors.New("chaos is not KernelChaos")
 		r.Log.Error(err, "chaos is not KernelChaos", "chaos", chaos)
 		return err
 	}
 
-	if err := r.cleanFinalizersAndRecover(ctx, kernelChaos); err != nil {
+	rd := recover.Delegate{Client: r.Client, Log: r.Log, RecoverIntf: &recoverer{r.Client, r.Log}}
+
+	finalizers, err := rd.CleanFinalizersAndRecover(ctx, chaos, kernelchaos.Finalizers, kernelchaos.Annotations)
+	if err != nil {
 		return err
 	}
-	r.Event(kernelChaos, v1.EventTypeNormal, events.ChaosRecovered, "")
+	kernelchaos.Finalizers = finalizers
+	r.Event(kernelchaos, v1.EventTypeNormal, events.ChaosRecovered, "")
 
 	return nil
 }
 
-func (r *endpoint) cleanFinalizersAndRecover(ctx context.Context, chaos *v1alpha1.KernelChaos) error {
-	var result error
-
-	for _, key := range chaos.Finalizers {
-		ns, name, err := cache.SplitMetaNamespaceKey(key)
-		if err != nil {
-			result = multierror.Append(result, err)
-			continue
-		}
-
-		var pod v1.Pod
-		err = r.Client.Get(ctx, types.NamespacedName{
-			Namespace: ns,
-			Name:      name,
-		}, &pod)
-
-		if err != nil {
-			if !k8serror.IsNotFound(err) {
-				result = multierror.Append(result, err)
-				continue
-			}
-
-			r.Log.Info("Pod not found", "namespace", ns, "name", name)
-			chaos.Finalizers = finalizer.RemoveFromFinalizer(chaos.Finalizers, key)
-			continue
-		}
-
-		err = r.recoverPod(ctx, &pod, chaos)
-		if err != nil {
-			result = multierror.Append(result, err)
-			continue
-		}
-
-		chaos.Finalizers = finalizer.RemoveFromFinalizer(chaos.Finalizers, key)
-	}
-
-	if chaos.Annotations[common.AnnotationCleanFinalizer] == common.AnnotationCleanFinalizerForced {
-		r.Log.Info("Force cleanup all finalizers", "chaos", chaos)
-		chaos.Finalizers = chaos.Finalizers[:0]
-		return nil
-	}
-
-	return result
-}
-
-func (r *endpoint) recoverPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.KernelChaos) error {
+func (r *recoverer) RecoverPod(ctx context.Context, pod *v1.Pod, somechaos v1alpha1.InnerObject) error {
+	// judged type in `Recover` already so no need to judge again
+	chaos, _ := somechaos.(*v1alpha1.KernelChaos)
 	r.Log.Info("try to recover pod", "namespace", pod.Namespace, "name", pod.Name)
 
 	pbClient, err := client.NewChaosDaemonClient(ctx, r.Client, pod, config.ControllerCfg.ChaosDaemonPort)

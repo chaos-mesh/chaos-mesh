@@ -144,12 +144,12 @@ func (r *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.I
 	return nil
 }
 
-// Recover implements the reconciler.InnerReconciler.Recover
+// Recover means the reconciler recovers the chaos action
 func (r *endpoint) Recover(ctx context.Context, req ctrl.Request, chaos v1alpha1.InnerObject) error {
 	iochaos, ok := chaos.(*v1alpha1.IoChaos)
 	if !ok {
-		err := errors.New("chaos is not IOChaos")
-		r.Log.Error(err, "chaos is not IOChaos", "chaos", chaos)
+		err := errors.New("chaos is not IoChaos")
+		r.Log.Error(err, "chaos is not IoChaos", "chaos", chaos)
 		return err
 	}
 
@@ -164,10 +164,9 @@ func (r *endpoint) cleanFinalizersAndRecover(ctx context.Context, chaos *v1alpha
 	var result error
 
 	source := chaos.Namespace + "/" + chaos.Name
-
 	m := podiochaosmanager.New(source, r.Log, r.Client)
-	for _, key := range chaos.Finalizers {
 
+	for _, key := range chaos.Finalizers {
 		ns, name, err := cache.SplitMetaNamespaceKey(key)
 		if err != nil {
 			result = multierror.Append(result, err)
