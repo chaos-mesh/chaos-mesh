@@ -375,12 +375,8 @@ workflow-mocks:
 	cd ./pkg/workflow && go generate
 	make fmt vet
 
-workflow-api:
-	controller-gen object paths=./pkg/workflow/apis/workflow/v1alpha1
-	controller-gen $(CRD_OPTIONS) paths=./pkg/workflow/apis/workflow/v1alpha1 output:crd:artifacts:config=config/crd/bases
-
 .PHONY: all clean test install manifests groupimports fmt vet tidy image \
-	docker-push lint generate \
+	docker-push lint generate config \
 	$(all-tool-dependencies) install.sh $(GO_TARGET_PHONY) \
 	manager chaosfs chaosdaemon chaos-dashboard \
 	dashboard dashboard-server-frontend gosec-scan \

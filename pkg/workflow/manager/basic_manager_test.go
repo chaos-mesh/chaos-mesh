@@ -124,8 +124,8 @@ func TestScheduleSingleOne(t *testing.T) {
 	assert.Equal(t, entryNodeName, event.GetNodeName())
 	gomock.InOrder(
 		mockWorkflowStatus.EXPECT().FetchNodeByName(entryNodeName).Return(mockEntryNode, nil).Times(1),
-		mockWorkflowStatus.EXPECT().GetNodesTree().Return(mockEntryTreeNode).Times(1),
-		mockEntryTreeNode.EXPECT().FetchNodeByName(entryNodeName).Return(mockEntryTreeNode).Times(1),
+		mockWorkflowStatus.EXPECT().GetNodesTree().Return(mockEntryTreeNode, nil).Times(1),
+		mockEntryTreeNode.EXPECT().FetchNodeByName(entryNodeName).Return(mockEntryTreeNode, nil).Times(1),
 		mockRepo.EXPECT().UpdateNodePhase(gomock.Eq(namespace), gomock.Eq(workflowName), gomock.Eq(entryNodeName), gomock.Eq(node.WaitingForSchedule)).Return(nil).Times(1),
 	)
 	err = manager.consume(ctx, event)
@@ -139,8 +139,8 @@ func TestScheduleSingleOne(t *testing.T) {
 	gomock.InOrder(
 		// resolve entry node created
 		mockWorkflowStatus.EXPECT().FetchNodeByName(entryNodeName).Return(mockEntryNodeWaitingForSchedule, nil).Times(1),
-		mockWorkflowStatus.EXPECT().GetNodesTree().Return(mockEntryTreeNode).Times(1),
-		mockEntryTreeNode.EXPECT().FetchNodeByName(entryNodeName).Return(mockEntryTreeNode).Times(1),
+		mockWorkflowStatus.EXPECT().GetNodesTree().Return(mockEntryTreeNode, nil).Times(1),
+		mockEntryTreeNode.EXPECT().FetchNodeByName(entryNodeName).Return(mockEntryTreeNode, nil).Times(1),
 		mockEntryTreeNode.EXPECT().GetChildren().Return(mockEntryTreeNodeChildren).Times(1),
 		mockEntryTreeNodeChildren.EXPECT().Length().Return(0).Times(1),
 		mockEntryTreeNode.EXPECT().GetChildren().Return(mockEntryTreeNodeChildren).Times(1),
@@ -198,8 +198,8 @@ func TestScheduleSingleOne(t *testing.T) {
 	assert.Equal(t, entryNodeName, event.GetNodeName())
 	gomock.InOrder(
 		mockWorkflowStatus.EXPECT().FetchNodeByName(entryNodeName).Return(mockEntryNode, nil).Times(1),
-		mockWorkflowStatus.EXPECT().GetNodesTree().Return(mockEntryTreeNode).Times(1),
-		mockEntryTreeNode.EXPECT().FetchNodeByName(entryNodeName).Return(mockEntryTreeNode).Times(1),
+		mockWorkflowStatus.EXPECT().GetNodesTree().Return(mockEntryTreeNode, nil).Times(1),
+		mockEntryTreeNode.EXPECT().FetchNodeByName(entryNodeName).Return(mockEntryTreeNode, nil).Times(1),
 		mockEntryTreeNode.EXPECT().GetChildren().Return(mockEntryTreeNodeChildren).Times(1),
 		mockEntryTreeNodeChildren.EXPECT().Length().Return(1).Times(1),
 		mockEntryTreeNode.EXPECT().GetTemplateName().Return(entryName).Times(1),
