@@ -170,11 +170,12 @@ func (mr *MockNodeTreeNodeMockRecorder) GetChildren() *gomock.Call {
 }
 
 // FetchNodeByName mocks base method
-func (m *MockNodeTreeNode) FetchNodeByName(nodeName string) node.NodeTreeNode {
+func (m *MockNodeTreeNode) FetchNodeByName(nodeName string) (node.NodeTreeNode, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "FetchNodeByName", nodeName)
 	ret0, _ := ret[0].(node.NodeTreeNode)
-	return ret0
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // FetchNodeByName indicates an expected call of FetchNodeByName

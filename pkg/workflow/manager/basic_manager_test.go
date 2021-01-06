@@ -15,9 +15,10 @@ package manager
 
 import (
 	"context"
-	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/engine/model/workflow"
 	"testing"
 	"time"
+
+	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/engine/model/workflow"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/manager/sideeffect/resolver"
 

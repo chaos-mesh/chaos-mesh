@@ -16,6 +16,7 @@ package manager
 import (
 	"context"
 	"fmt"
+
 	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/engine/model/workflow"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/manager/sideeffect/resolver"
@@ -161,7 +162,14 @@ func (it *basicManager) consume(ctx context.Context, event trigger.Event) error 
 
 		switch targetTemplate.GetTemplateType() {
 		case template.Serial:
-			treeNode := workflowStatus.GetNodesTree().FetchNodeByName(nodeName)
+			nodesTree, err := workflowStatus.GetNodesTree()
+			if err != nil {
+				return err
+			}
+			treeNode, err := nodesTree.FetchNodeByName(nodeName)
+			if err != nil {
+				return err
+			}
 			serialStateMachine := statemachine.NewSerialStateMachine(event.GetNamespace(), workflowSpec, nodeStatus, treeNode, it.nodeNameGenerator)
 			sideEffects, err = serialStateMachine.HandleEvent(event)
 			if err != nil {

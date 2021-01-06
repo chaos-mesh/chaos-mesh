@@ -159,11 +159,12 @@ func (mr *MockWorkflowStatusMockRecorder) GetWorkflowSpecName() *gomock.Call {
 }
 
 // GetNodesTree mocks base method
-func (m *MockWorkflowStatus) GetNodesTree() node.NodeTreeNode {
+func (m *MockWorkflowStatus) GetNodesTree() (node.NodeTreeNode, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetNodesTree")
 	ret0, _ := ret[0].(node.NodeTreeNode)
-	return ret0
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // GetNodesTree indicates an expected call of GetNodesTree

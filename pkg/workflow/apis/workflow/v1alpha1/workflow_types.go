@@ -19,6 +19,8 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/engine/model/workflow"
 )
 
+// +kubebuilder:object:root=true
+
 // Workflow is the schema for the Chaos Mesh Workflow API
 type Workflow struct {
 	metav1.TypeMeta   `json:",inline"`

@@ -40,7 +40,7 @@ type NodeTreeNode interface {
 	GetName() string
 	GetTemplateName() string
 	GetChildren() NodeTreeChildren
-	FetchNodeByName(nodeName string) NodeTreeNode
+	FetchNodeByName(nodeName string) (NodeTreeNode, error)
 }
 
 type NodeTreeChildren interface {

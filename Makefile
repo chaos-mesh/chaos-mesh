@@ -338,4 +338,4 @@ workflow-mocks:
 
 workflow-api:
 	controller-gen object paths=./pkg/workflow/apis/workflow/v1alpha1
-	controller-gen crd paths=./pkg/workflow/apis/workflow/v1alpha1 output:crd:artifacts:config=config/crd/bases
+	controller-gen $(CRD_OPTIONS) paths=./pkg/workflow/apis/workflow/v1alpha1 output:crd:artifacts:config=config/crd/bases

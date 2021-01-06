@@ -43,7 +43,7 @@ type WorkflowStatus interface {
 	GetWorkflowSpecName() string
 	// func GetNodesTree returns the root of the node tree.
 	// This tree could present the hierarchy of how nodes execute.
-	GetNodesTree() node.NodeTreeNode
+	GetNodesTree() (node.NodeTreeNode, error)
 
 	// func FetchNodesMap
 	// Key is the name of node
