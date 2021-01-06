@@ -124,7 +124,7 @@ chaosctl:
 
 # Run against the configured Kubernetes cluster in ~/.kube/config
 run: generate fmt vet manifests
-	$(GO) run ./cmd/controller-manager/main.go
+	$(GO) run ./cmd/chaos-controller-manager/main.go
 
 # Install CRDs into a cluster
 install: manifests

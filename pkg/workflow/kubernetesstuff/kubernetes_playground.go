@@ -15,6 +15,7 @@ package kubernetesstuff
 
 import (
 	"context"
+
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -23,6 +24,10 @@ import (
 
 type KubernetesPlayground struct {
 	client client.Client
+}
+
+func NewKubernetesPlayground(client client.Client) *KubernetesPlayground {
+	return &KubernetesPlayground{client: client}
 }
 
 func (it *KubernetesPlayground) CreateNetworkChaos(networkChaos v1alpha1.NetworkChaos) error {

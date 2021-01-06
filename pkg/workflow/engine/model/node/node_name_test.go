@@ -13,26 +13,17 @@
 
 package node
 
-import "math/rand"
+import (
+	"math/rand"
+	"testing"
+	"time"
+)
 
-type NodeNameGenerator interface {
-	GenerateNodeName(templateName string) string
-}
-
-type basicNodeNameGenerator struct {
-}
-
-const pool = "abcdefghijklmnopqrstuvwxyz0123456789"
-const suffixLength = 5
-
-func NewBasicNodeNameGenerator() *basicNodeNameGenerator {
-	return &basicNodeNameGenerator{}
-}
-
-func (it *basicNodeNameGenerator) GenerateNodeName(templateName string) string {
-	suffix := ""
-	for i := 0; i < suffixLength; i++ {
-		suffix += string(pool[rand.Intn(len(pool))])
+func Benchmark(b *testing.B) {
+	rand.Seed(time.Now().Unix())
+	generator := NewBasicNodeNameGenerator()
+	const templateName = "template-name"
+	for i := 0; i < b.N; i++ {
+		generator.GenerateNodeName(templateName)
 	}
-	return templateName + "-" + suffix
 }

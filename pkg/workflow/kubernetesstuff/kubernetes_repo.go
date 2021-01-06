@@ -24,13 +24,14 @@ import (
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/engine/model/node"
 	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/engine/model/workflow"
-
-	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/trigger"
 )
 
 type KubernetesWorkflowRepo struct {
-	operableTrigger trigger.OperableTrigger
-	client          client.Client
+	client client.Client
+}
+
+func NewKubernetesWorkflowRepo(client client.Client) *KubernetesWorkflowRepo {
+	return &KubernetesWorkflowRepo{client: client}
 }
 
 func (it *KubernetesWorkflowRepo) FetchWorkflow(namespace, workflowName string) (workflow.WorkflowSpec, workflow.WorkflowStatus, error) {

@@ -14,11 +14,16 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"net/http"
 	_ "net/http/pprof"
 	"os"
 	"time"
+
+	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/kubernetesstuff"
+	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/manager"
+	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/trigger"
 
 	"golang.org/x/time/rate"
 
@@ -33,6 +38,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/version"
 	"github.com/chaos-mesh/chaos-mesh/pkg/webhook/config"
 	"github.com/chaos-mesh/chaos-mesh/pkg/webhook/config/watcher"
+	workflowv1alpha1 "github.com/chaos-mesh/chaos-mesh/pkg/workflow/apis/workflow/v1alpha1"
 
 	_ "github.com/chaos-mesh/chaos-mesh/controllers/dnschaos"
 	_ "github.com/chaos-mesh/chaos-mesh/controllers/httpchaos"
@@ -75,6 +81,7 @@ func init() {
 	_ = clientgoscheme.AddToScheme(scheme)
 
 	_ = chaosmeshv1alpha1.AddToScheme(scheme)
+	_ = workflowv1alpha1.AddToScheme(scheme)
 	// +kubebuilder:scaffold:scheme
 }
 
@@ -187,6 +194,29 @@ func main() {
 			Metrics:       metricsCollector,
 		}},
 	)
+
+	// setup workflow stuff
+	workflowTrigger := trigger.NewOperableTrigger()
+	workflowReconciler := kubernetesstuff.NewWorkflowReconciler(ctrl.Log.WithName("workflow"), mgr.GetClient(), workflowTrigger)
+	err = ctrl.NewControllerManagedBy(mgr).For(&workflowv1alpha1.Workflow{}).Complete(workflowReconciler)
+	if err != nil {
+		setupLog.Error(err, "failed to setup workflow reconciler")
+		os.Exit(1)
+	}
+	workflowManager, err := manager.BootstrapManager(mgr.GetClient(), ctrl.Log.WithName("workflow").WithName("manager"), workflowTrigger)
+	if err != nil {
+		setupLog.Error(err, "failed to setup workflow manager")
+		os.Exit(1)
+	}
+
+	go func() {
+		cancelContext, cancelFunc := context.WithCancel(context.TODO())
+		go func() {
+			<-stopCh
+			cancelFunc()
+		}()
+		workflowManager.Run(cancelContext)
+	}()
 
 	// +kubebuilder:scaffold:builder
 
