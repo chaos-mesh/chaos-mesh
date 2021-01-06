@@ -14,16 +14,33 @@
 package kubernetesstuff
 
 import (
+	"context"
+	"k8s.io/apimachinery/pkg/types"
+	"sigs.k8s.io/controller-runtime/pkg/client"
+
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 )
 
 type KubernetesPlayground struct {
+	client client.Client
 }
 
 func (it *KubernetesPlayground) CreateNetworkChaos(networkChaos v1alpha1.NetworkChaos) error {
-	panic("implement me")
+	// TODO: make context work
+	return it.client.Create(context.TODO(), &networkChaos)
 }
 
 func (it *KubernetesPlayground) DeleteNetworkChaos(namespace, name string) error {
-	panic("implement me")
+	key := types.NamespacedName{
+		Namespace: namespace,
+		Name:      name,
+	}
+	target := v1alpha1.NetworkChaos{}
+	// TODO: make context work
+	err := it.client.Get(context.TODO(), key, &target)
+	if err != nil {
+		return err
+	}
+	// TODO: make context work
+	return it.client.Delete(context.TODO(), &target)
 }
