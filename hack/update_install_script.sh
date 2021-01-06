@@ -14,8 +14,8 @@
 # limitations under the License.
 
 tmp_file="chaos-mesh.yaml"
-tmp_install_scipt="install.sh.bak"
-install_scirpt="install.sh"
+tmp_install_script="install.sh.bak"
+install_script="install.sh"
 
 helm template chaos-mesh helm/chaos-mesh --namespace=chaos-testing \
       --set dashboard.create=true,controllerManager.hostNetwork=true,chaosDaemon.hostNetwork=true,dashboard.securityMode=false \
@@ -47,15 +47,15 @@ EOF
 
 cat $tmp_file.bak >> $tmp_file
 
-let start_num=$(cat -n $install_scirpt| grep "# chaos-mesh.yaml start" | awk '{print $1}')+1
-let end_num=$(cat -n $install_scirpt| grep "# chaos-mesh.yaml end" | awk '{print $1}')-1
+let start_num=$(cat -n $install_script| grep "# chaos-mesh.yaml start" | awk '{print $1}')+1
+let end_num=$(cat -n $install_script| grep "# chaos-mesh.yaml end" | awk '{print $1}')-1
 
-head -$start_num $install_scirpt > $tmp_install_scipt
-cat $tmp_file >> $tmp_install_scipt
-tail -n +$end_num $install_scirpt >> $tmp_install_scipt
+head -$start_num $install_script > $tmp_install_script
+cat $tmp_file >> $tmp_install_script
+tail -n +$end_num $install_script >> $tmp_install_script
 
-mv $tmp_install_scipt $install_scirpt
-chmod +x $install_scirpt
+mv $tmp_install_script $install_script
+chmod +x $install_script
 
 rm -rf $tmp_file
 rm -rf $tmp_file.bak
