@@ -1,0 +1,2 @@
+[registry."docker.io"]
+  mirrors = ["registry-mirror.pingcap.net"]
