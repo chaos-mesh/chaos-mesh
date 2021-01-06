@@ -98,7 +98,7 @@ func TestcasePodFailureOnceThenDelete(ns string, kubeCli kubernetes.Interface, c
 	framework.ExpectNoError(err, "failed to delete pod failure chaos")
 
 	By("waiting for assertion recovering")
-	err = wait.PollImmediate(5*time.Second, 2*time.Minute, func() (done bool, err error) {
+	err = wait.Poll(5*time.Second, 2*time.Minute, func() (done bool, err error) {
 		pods, err := kubeCli.CoreV1().Pods(ns).List(listOption)
 		if err != nil {
 			return false, nil
