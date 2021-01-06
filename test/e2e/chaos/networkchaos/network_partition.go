@@ -107,7 +107,14 @@ func TestcaseNetworkPartition(
 		framework.ExpectNoError(err, "wait e2e helper ready error")
 	}
 
-	result := probeNetworkCondition(c, networkPeers, ports)
+	var result map[string][][]int
+	wait.Poll(time.Second, 10*time.Second, func() (done bool, err error) {
+		result = probeNetworkCondition(c, networkPeers, ports)
+		if len(result[networkConditionBlocked]) != 0 || len(result[networkConditionSlow]) != 0 {
+			return false, nil
+		}
+		return true, nil
+	})
 	framework.ExpectEqual(len(result[networkConditionBlocked]), 0)
 	framework.ExpectEqual(len(result[networkConditionSlow]), 0)
 
