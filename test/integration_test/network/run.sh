@@ -36,7 +36,7 @@ done
 echo "****** test delay chaos ******"
 kubectl apply -f ./delay_chaos.yaml
 
-echo "verifaction"
+echo "verification"
 kubectl exec busybox-0 -i -n busybox -- ping -c 10 busybox-1.busybox.busybox.svc > ping.log
 cat ping.log
 
