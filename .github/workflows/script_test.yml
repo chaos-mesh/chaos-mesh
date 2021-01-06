@@ -28,4 +28,4 @@ jobs:
 
       - name: Run integration test
         run: |
-          bash test/integration_test/run.sh
+          bash test/integration_test/run.sh network

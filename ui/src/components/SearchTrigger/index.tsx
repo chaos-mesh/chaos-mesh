@@ -1,9 +1,9 @@
-import React, { useEffect } from 'react'
 import { useStoreDispatch, useStoreSelector } from 'store'
 
 import { IconButton } from '@material-ui/core'
 import Modal from '@material-ui/core/Modal'
 import Paper from 'components-mui/Paper'
+import React from 'react'
 import Search from 'components/Search'
 import SearchIcon from '@material-ui/icons/Search'
 import { makeStyles } from '@material-ui/core/styles'
@@ -31,29 +31,6 @@ const SearchTrigger: React.FC = () => {
 
   const handleOpen = () => dispatch(setSearchModalOpen(true))
   const handleClose = () => dispatch(setSearchModalOpen(false))
-
-  useEffect(() => {
-    const keyMap: Record<string, boolean> = {}
-    const keyDownHandler = (e: KeyboardEvent) => {
-      keyMap[e.key] = true
-
-      if ((keyMap['Meta'] && keyMap['p']) || (keyMap['Control'] && keyMap['p'])) {
-        e.preventDefault()
-
-        handleOpen()
-
-        delete keyMap['Meta']
-        delete keyMap['Control']
-        delete keyMap['p']
-      }
-    }
-
-    document.addEventListener('keydown', keyDownHandler)
-    return () => {
-      document.removeEventListener('keydown', keyDownHandler)
-    }
-    // eslint-disable-next-line
-  }, [])
 
   return (
     <>

@@ -67,7 +67,6 @@ function e2e::image_load() {
     local images=(
         pingcap/chaos-mesh
         pingcap/chaos-daemon
-        pingcap/chaos-scripts
         pingcap/e2e-helper
     )
     if [ "$PROVIDER" == "kind" ]; then
@@ -159,7 +158,6 @@ e2e_args=(
     --daemon-image="${DOCKER_REGISTRY}/pingcap/chaos-daemon"
     --daemon-image-tag="${IMAGE_TAG}"
     --e2e-image="${DOCKER_REGISTRY}/pingcap/e2e-helper:${IMAGE_TAG}"
-    --chaos-scripts-image="${DOCKER_REGISTRY}/pingcap/chaos-scripts:${IMAGE_TAG}"
     --install-chaos-mesh
 )
 
