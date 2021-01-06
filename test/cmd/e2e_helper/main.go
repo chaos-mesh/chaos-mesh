@@ -151,7 +151,7 @@ func (s *server) networkPingTest(w http.ResponseWriter, r *http.Request) {
 	}
 
 	c := http.Client{
-		Timeout: 30 * time.Second,
+		Timeout: 2 * time.Second,
 	}
 	startTime := time.Now()
 	resp, err := c.Get(fmt.Sprintf("http://%s:8080/ping", body.TargetIP))
@@ -159,10 +159,15 @@ func (s *server) networkPingTest(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+	defer resp.Body.Close()
 
 	endTime := time.Now()
 	out, err := ioutil.ReadAll(resp.Body)
-	defer resp.Body.Close()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
 	if string(out) != "pong" {
 		http.Error(w, "response is not pong", http.StatusBadRequest)
 		return
