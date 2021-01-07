@@ -969,6 +969,10 @@ rules:
     resources:
       - "*"
     verbs: [ "*" ]
+  - apiGroups: [ "workflow.chaos-mesh.org" ]
+    resources:
+      - "*"
+    verbs: [ "*" ]
 ---
 # Source: chaos-mesh/templates/controller-manager-rbac.yaml
 kind: ClusterRole
