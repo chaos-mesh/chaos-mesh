@@ -437,10 +437,7 @@ spec:
                   template_type:
                     type: string
                 required:
-                - deadline
-                - duration
                 - name
-                - network_chaos
                 - template_type
                 type: object
               type: array
@@ -472,7 +469,6 @@ spec:
             phase:
               type: string
           required:
-          - nodes
           - phase
           type: object
       required:

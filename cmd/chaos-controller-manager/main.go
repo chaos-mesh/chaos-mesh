@@ -19,6 +19,8 @@ import (
 	"net/http"
 	_ "net/http/pprof"
 	"os"
+	"sigs.k8s.io/controller-runtime/pkg/event"
+	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	"time"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/kubernetesstuff"
@@ -198,12 +200,25 @@ func main() {
 	// setup workflow stuff
 	workflowTrigger := trigger.NewOperableTrigger()
 	workflowReconciler := kubernetesstuff.NewWorkflowReconciler(ctrl.Log.WithName("workflow"), mgr.GetClient(), workflowTrigger)
-	err = ctrl.NewControllerManagedBy(mgr).For(&workflowv1alpha1.Workflow{}).Complete(workflowReconciler)
+	err = ctrl.NewControllerManagedBy(mgr).For(&workflowv1alpha1.Workflow{}).WithEventFilter(predicate.Funcs{
+		CreateFunc: func(event event.CreateEvent) bool {
+			return true
+		},
+		DeleteFunc: func(deleteEvent event.DeleteEvent) bool {
+			return false
+		},
+		UpdateFunc: func(updateEvent event.UpdateEvent) bool {
+			return false
+		},
+		GenericFunc: func(genericEvent event.GenericEvent) bool {
+			return false
+		},
+	}).Complete(workflowReconciler)
 	if err != nil {
 		setupLog.Error(err, "failed to setup workflow reconciler")
 		os.Exit(1)
 	}
-	workflowManager, err := manager.BootstrapManager(mgr.GetClient(), ctrl.Log.WithName("workflow").WithName("manager"), workflowTrigger)
+	workflowManager, err := manager.BootstrapManager(mgr.GetClient(), mgr.GetAPIReader(), ctrl.Log.WithName("workflow").WithName("manager"), workflowTrigger)
 	if err != nil {
 		setupLog.Error(err, "failed to setup workflow manager")
 		os.Exit(1)

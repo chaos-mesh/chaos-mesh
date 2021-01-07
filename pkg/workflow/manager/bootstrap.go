@@ -23,9 +23,9 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/trigger"
 )
 
-func BootstrapManager(kubeclient client.Client, logger logr.Logger, controllerTrigger trigger.Trigger) (WorkflowManager, error) {
+func BootstrapManager(kubeclient client.Client, nonCacheReader client.Reader, logger logr.Logger, controllerTrigger trigger.Trigger) (WorkflowManager, error) {
 	pg := kubernetesstuff.NewKubernetesPlayground(kubeclient)
-	repo := kubernetesstuff.NewKubernetesWorkflowRepo(kubeclient)
+	repo := kubernetesstuff.NewKubernetesWorkflowRepo(kubeclient, nonCacheReader)
 	eventTrigger := trigger.NewOperableTrigger()
 	sideEffectsResolver, err := resolver.NewCompositeResolverWith(
 		resolver.NewActorResolver(pg),

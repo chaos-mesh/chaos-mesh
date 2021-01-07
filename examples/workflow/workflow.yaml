@@ -6,6 +6,8 @@ spec:
   entry: the-entry
   templates:
     - name: the-entry
-      template_type: suspend
+      template_type: Suspend
       duration: 1s
+status:
+  phase: Init
 

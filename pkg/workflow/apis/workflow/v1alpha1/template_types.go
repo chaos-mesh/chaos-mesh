@@ -21,11 +21,14 @@ import (
 )
 
 type Template struct {
-	Name         string                            `json:"name"`
-	TemplateType template.TemplateType             `json:"template_type"`
-	Duration     string                            `json:"duration"`
-	Deadline     string                            `json:"deadline"`
-	NetworkChaos chaosmeshv1alph1.NetworkChaosSpec `json:"network_chaos"`
+	Name         string                `json:"name"`
+	TemplateType template.TemplateType `json:"template_type"`
+	// +optional
+	Duration *string `json:"duration,omitempty"`
+	// +optional
+	Deadline *string `json:"deadline,omitempty"`
+	// +optional
+	NetworkChaos *chaosmeshv1alph1.NetworkChaosSpec `json:"network_chaos,omitempty"`
 }
 
 func (it *Template) GetName() string {
@@ -37,11 +40,11 @@ func (it *Template) GetTemplateType() template.TemplateType {
 }
 
 func (it *Template) GetDuration() (time.Duration, error) {
-	return time.ParseDuration(it.Duration)
+	return time.ParseDuration(*it.Duration)
 }
 
 func (it *Template) GetDeadline() (time.Duration, error) {
-	return time.ParseDuration(it.Deadline)
+	return time.ParseDuration(*it.Deadline)
 }
 
 func (it *Template) FetchChaosNamePrefix() string {
@@ -49,5 +52,5 @@ func (it *Template) FetchChaosNamePrefix() string {
 }
 
 func (it *Template) FetchNetworkChaosSpec() chaosmeshv1alph1.NetworkChaosSpec {
-	return it.NetworkChaos
+	return *it.NetworkChaos
 }

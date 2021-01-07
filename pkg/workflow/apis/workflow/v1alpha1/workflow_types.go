@@ -41,7 +41,8 @@ type WorkflowSpec struct {
 
 type WorkflowStatus struct {
 	Phase workflow.WorkflowPhase `json:"phase"`
-	Nodes map[string]Node        `json:"nodes"`
+	// +optional
+	Nodes map[string]Node `json:"nodes,omitempty"`
 }
 
 // +kubebuilder:object:root=true

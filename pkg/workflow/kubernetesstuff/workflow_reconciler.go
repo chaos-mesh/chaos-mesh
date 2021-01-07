@@ -15,6 +15,7 @@ package kubernetesstuff
 
 import (
 	"context"
+	"k8s.io/apimachinery/pkg/api/errors"
 
 	"github.com/go-logr/logr"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -39,6 +40,9 @@ func (it *WorkflowReconciler) Reconcile(request reconcile.Request) (reconcile.Re
 	target := workflowv1alpha1.Workflow{}
 	err := it.kubeClient.Get(context.Background(), request.NamespacedName, &target)
 	if err != nil {
+		if errors.IsNotFound(err) {
+			return reconcile.Result{}, nil
+		}
 		return reconcile.Result{}, err
 	}
 	if target.Status.Phase == workflow.Init {
