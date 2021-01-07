@@ -406,7 +406,7 @@ func (s *Service) getPodChaosDetail(namespace string, name string, kubeCli clien
 		return Detail{}, err
 	}
 
-	kind, err := apiutil.GVKForObject(chaos.DeepCopyObject(), s.scheme)
+	gvk, err := apiutil.GVKForObject(chaos, s.scheme)
 	if err != nil {
 		return Detail{}, err
 	}
@@ -414,7 +414,7 @@ func (s *Service) getPodChaosDetail(namespace string, name string, kubeCli clien
 	return Detail{
 		Experiment: Experiment{
 			Base: Base{
-				Kind:      kind.Kind,
+				Kind:      gvk.Kind,
 				Namespace: chaos.Namespace,
 				Name:      chaos.Name,
 			},
@@ -424,8 +424,8 @@ func (s *Service) getPodChaosDetail(namespace string, name string, kubeCli clien
 			FailedMessage: chaos.GetStatus().FailedMessage,
 		},
 		YAML: core.ExperimentYAMLDescription{
-			APIVersion: kind.Version,
-			Kind:       kind.Kind,
+			APIVersion: gvk.GroupVersion().String(),
+			Kind:       gvk.Kind,
 			Metadata: core.ExperimentYAMLMetadata{
 				Name:        chaos.Name,
 				Namespace:   chaos.Namespace,
@@ -449,10 +449,15 @@ func (s *Service) getIoChaosDetail(namespace string, name string, kubeCli client
 		return Detail{}, err
 	}
 
+	gvk, err := apiutil.GVKForObject(chaos, s.scheme)
+	if err != nil {
+		return Detail{}, err
+	}
+
 	return Detail{
 		Experiment: Experiment{
 			Base: Base{
-				Kind:      chaos.Kind,
+				Kind:      gvk.Kind,
 				Namespace: chaos.Namespace,
 				Name:      chaos.Name,
 			},
@@ -462,8 +467,8 @@ func (s *Service) getIoChaosDetail(namespace string, name string, kubeCli client
 			FailedMessage: chaos.GetStatus().FailedMessage,
 		},
 		YAML: core.ExperimentYAMLDescription{
-			APIVersion: chaos.APIVersion,
-			Kind:       chaos.Kind,
+			APIVersion: gvk.GroupVersion().String(),
+			Kind:       gvk.Kind,
 			Metadata: core.ExperimentYAMLMetadata{
 				Name:        chaos.Name,
 				Namespace:   chaos.Namespace,
@@ -487,10 +492,15 @@ func (s *Service) getNetworkChaosDetail(namespace string, name string, kubeCli c
 		return Detail{}, err
 	}
 
+	gvk, err := apiutil.GVKForObject(chaos, s.scheme)
+	if err != nil {
+		return Detail{}, err
+	}
+
 	return Detail{
 		Experiment: Experiment{
 			Base: Base{
-				Kind:      chaos.Kind,
+				Kind:      gvk.Kind,
 				Namespace: chaos.Namespace,
 				Name:      chaos.Name,
 			},
@@ -500,8 +510,8 @@ func (s *Service) getNetworkChaosDetail(namespace string, name string, kubeCli c
 			FailedMessage: chaos.GetStatus().FailedMessage,
 		},
 		YAML: core.ExperimentYAMLDescription{
-			APIVersion: chaos.APIVersion,
-			Kind:       chaos.Kind,
+			APIVersion: gvk.GroupVersion().String(),
+			Kind:       gvk.Kind,
 			Metadata: core.ExperimentYAMLMetadata{
 				Name:        chaos.Name,
 				Namespace:   chaos.Namespace,
@@ -525,10 +535,15 @@ func (s *Service) getTimeChaosDetail(namespace string, name string, kubeCli clie
 		return Detail{}, err
 	}
 
+	gvk, err := apiutil.GVKForObject(chaos, s.scheme)
+	if err != nil {
+		return Detail{}, err
+	}
+
 	return Detail{
 		Experiment: Experiment{
 			Base: Base{
-				Kind:      chaos.Kind,
+				Kind:      gvk.Kind,
 				Namespace: chaos.Namespace,
 				Name:      chaos.Name,
 			},
@@ -538,8 +553,8 @@ func (s *Service) getTimeChaosDetail(namespace string, name string, kubeCli clie
 			FailedMessage: chaos.GetStatus().FailedMessage,
 		},
 		YAML: core.ExperimentYAMLDescription{
-			APIVersion: chaos.APIVersion,
-			Kind:       chaos.Kind,
+			APIVersion: gvk.GroupVersion().String(),
+			Kind:       gvk.Kind,
 			Metadata: core.ExperimentYAMLMetadata{
 				Name:        chaos.Name,
 				Namespace:   chaos.Namespace,
@@ -563,10 +578,15 @@ func (s *Service) getKernelChaosDetail(namespace string, name string, kubeCli cl
 		return Detail{}, err
 	}
 
+	gvk, err := apiutil.GVKForObject(chaos, s.scheme)
+	if err != nil {
+		return Detail{}, err
+	}
+
 	return Detail{
 		Experiment: Experiment{
 			Base: Base{
-				Kind:      chaos.Kind,
+				Kind:      gvk.Kind,
 				Namespace: chaos.Namespace,
 				Name:      chaos.Name,
 			},
@@ -576,8 +596,8 @@ func (s *Service) getKernelChaosDetail(namespace string, name string, kubeCli cl
 			FailedMessage: chaos.GetStatus().FailedMessage,
 		},
 		YAML: core.ExperimentYAMLDescription{
-			APIVersion: chaos.APIVersion,
-			Kind:       chaos.Kind,
+			APIVersion: gvk.GroupVersion().String(),
+			Kind:       gvk.Kind,
 			Metadata: core.ExperimentYAMLMetadata{
 				Name:        chaos.Name,
 				Namespace:   chaos.Namespace,
@@ -601,10 +621,15 @@ func (s *Service) getStressChaosDetail(namespace string, name string, kubeCli cl
 		return Detail{}, err
 	}
 
+	gvk, err := apiutil.GVKForObject(chaos, s.scheme)
+	if err != nil {
+		return Detail{}, err
+	}
+
 	return Detail{
 		Experiment: Experiment{
 			Base: Base{
-				Kind:      chaos.Kind,
+				Kind:      gvk.Kind,
 				Namespace: chaos.Namespace,
 				Name:      chaos.Name,
 			},
@@ -614,8 +639,8 @@ func (s *Service) getStressChaosDetail(namespace string, name string, kubeCli cl
 			FailedMessage: chaos.GetStatus().FailedMessage,
 		},
 		YAML: core.ExperimentYAMLDescription{
-			APIVersion: chaos.APIVersion,
-			Kind:       chaos.Kind,
+			APIVersion: gvk.GroupVersion().String(),
+			Kind:       gvk.Kind,
 			Metadata: core.ExperimentYAMLMetadata{
 				Name:        chaos.Name,
 				Namespace:   chaos.Namespace,
@@ -639,10 +664,15 @@ func (s *Service) getDNSChaosDetail(namespace string, name string, kubeCli clien
 		return Detail{}, err
 	}
 
+	gvk, err := apiutil.GVKForObject(chaos, s.scheme)
+	if err != nil {
+		return Detail{}, err
+	}
+
 	return Detail{
 		Experiment: Experiment{
 			Base: Base{
-				Kind:      chaos.Kind,
+				Kind:      gvk.Kind,
 				Namespace: chaos.Namespace,
 				Name:      chaos.Name,
 			},
@@ -652,8 +682,8 @@ func (s *Service) getDNSChaosDetail(namespace string, name string, kubeCli clien
 			FailedMessage: chaos.GetStatus().FailedMessage,
 		},
 		YAML: core.ExperimentYAMLDescription{
-			APIVersion: chaos.APIVersion,
-			Kind:       chaos.Kind,
+			APIVersion: gvk.GroupVersion().String(),
+			Kind:       gvk.Kind,
 			Metadata: core.ExperimentYAMLMetadata{
 				Name:        chaos.Name,
 				Namespace:   chaos.Namespace,
