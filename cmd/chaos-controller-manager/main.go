@@ -19,9 +19,10 @@ import (
 	"net/http"
 	_ "net/http/pprof"
 	"os"
+	"time"
+
 	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
-	"time"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/kubernetesstuff"
 	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/manager"
