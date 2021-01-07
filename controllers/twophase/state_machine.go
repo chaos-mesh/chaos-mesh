@@ -194,8 +194,8 @@ func (m *chaosStateMachine) Into(ctx context.Context, targetPhase v1alpha1.Exper
 	if updated {
 
 		updateError := m.Update(ctx, m.Chaos)
-        if updateError == nil {
-				return nil
+		if updateError == nil {
+			return nil
 		}
 		m.Log.Error(updateError, "fail to update, and will retry on conflict")
 
