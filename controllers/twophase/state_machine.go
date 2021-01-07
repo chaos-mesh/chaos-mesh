@@ -19,6 +19,8 @@ import (
 
 	"github.com/pkg/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/client-go/util/retry"
 	ctrl "sigs.k8s.io/controller-runtime"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
@@ -190,12 +192,29 @@ func (m *chaosStateMachine) Into(ctx context.Context, targetPhase v1alpha1.Exper
 	}
 
 	if updated {
-		updateError := m.Update(ctx, m.Chaos)
-		if updateError != nil {
-			m.Log.Error(err, "fail to update")
-
-			err = updateError
+		namespacedName := types.NamespacedName{
+			Namespace: m.Chaos.GetChaos().Namespace,
+			Name:      m.Chaos.GetChaos().Name,
 		}
+
+		err = retry.RetryOnConflict(retry.DefaultBackoff, func() error {
+			// Fetch the resource
+			_chaos := m.Object()
+			if err := m.Client.Get(ctx, namespacedName, _chaos); err != nil {
+				m.Log.Error(err, "unable to get chaos")
+				return err
+			}
+			chaos := _chaos.(v1alpha1.InnerSchedulerObject)
+
+			// Make updates to the resource
+			status := chaos.GetStatus()
+			status.FailedMessage = m.Chaos.GetStatus().FailedMessage
+			status.Scheduler = m.Chaos.GetStatus().Scheduler
+			status.Experiment = m.Chaos.GetStatus().Experiment
+
+			// Try to update
+			return m.Update(ctx, chaos)
+		})
 	}
 
 	return err
