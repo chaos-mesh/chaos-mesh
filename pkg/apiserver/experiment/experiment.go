@@ -21,6 +21,9 @@ import (
 	"sync"
 	"time"
 
+	"k8s.io/apimachinery/pkg/runtime"
+	"sigs.k8s.io/controller-runtime/pkg/client/apiutil"
+
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
 	"github.com/mitchellh/mapstructure"
@@ -57,6 +60,7 @@ type Service struct {
 	archive core.ExperimentStore
 	event   core.EventStore
 	conf    *config.ChaosDashboardConfig
+	scheme  *runtime.Scheme
 }
 
 // NewService returns an experiment service instance.
@@ -64,11 +68,13 @@ func NewService(
 	archive core.ExperimentStore,
 	event core.EventStore,
 	conf *config.ChaosDashboardConfig,
+	scheme *runtime.Scheme,
 ) *Service {
 	return &Service{
 		archive: archive,
 		event:   event,
 		conf:    conf,
+		scheme:  scheme,
 	}
 }
 
@@ -400,10 +406,15 @@ func (s *Service) getPodChaosDetail(namespace string, name string, kubeCli clien
 		return Detail{}, err
 	}
 
+	kind, err := apiutil.GVKForObject(chaos.DeepCopyObject(), s.scheme)
+	if err != nil {
+		return Detail{}, err
+	}
+
 	return Detail{
 		Experiment: Experiment{
 			Base: Base{
-				Kind:      chaos.Kind,
+				Kind:      kind.Kind,
 				Namespace: chaos.Namespace,
 				Name:      chaos.Name,
 			},
@@ -413,8 +424,8 @@ func (s *Service) getPodChaosDetail(namespace string, name string, kubeCli clien
 			FailedMessage: chaos.GetStatus().FailedMessage,
 		},
 		YAML: core.ExperimentYAMLDescription{
-			APIVersion: chaos.APIVersion,
-			Kind:       chaos.Kind,
+			APIVersion: kind.Version,
+			Kind:       kind.Kind,
 			Metadata: core.ExperimentYAMLMetadata{
 				Name:        chaos.Name,
 				Namespace:   chaos.Namespace,
