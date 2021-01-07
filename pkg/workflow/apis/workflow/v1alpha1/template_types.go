@@ -29,6 +29,8 @@ type Template struct {
 	Deadline *string `json:"deadline,omitempty"`
 	// +optional
 	NetworkChaos *chaosmeshv1alph1.NetworkChaosSpec `json:"network_chaos,omitempty"`
+	// +optional
+	Tasks []string `json:"tasks,omitempty"`
 }
 
 func (it *Template) GetName() string {
@@ -53,4 +55,8 @@ func (it *Template) FetchChaosNamePrefix() string {
 
 func (it *Template) FetchNetworkChaosSpec() chaosmeshv1alph1.NetworkChaosSpec {
 	return *it.NetworkChaos
+}
+
+func (it *Template) GetSerialChildrenList() []string {
+	return it.Tasks
 }

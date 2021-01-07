@@ -51,7 +51,7 @@ func (it *KubernetesWorkflowRepo) FetchWorkflow(namespace, workflowName string) 
 	return &result, &result, nil
 }
 
-func (it *KubernetesWorkflowRepo) CreateNodes(namespace, workflowName, parentNodeName, nodeNames, templateName string) error {
+func (it *KubernetesWorkflowRepo) CreateNodes(namespace, workflowName, parentNodeName, nodeName, templateName string) error {
 	return retry.RetryOnConflict(retry.DefaultBackoff, func() error {
 		key := types.NamespacedName{
 			Namespace: namespace,
@@ -67,11 +67,15 @@ func (it *KubernetesWorkflowRepo) CreateNodes(namespace, workflowName, parentNod
 		if len(copied.Status.Nodes) == 0 {
 			copied.Status.Nodes = make(map[string]workflowv1alpha1.Node)
 		}
-		copied.Status.Nodes[nodeNames] = workflowv1alpha1.Node{
-			Name:         nodeNames,
+		copied.Status.Nodes[nodeName] = workflowv1alpha1.Node{
+			Name:         nodeName,
 			ParentNode:   parentNodeName,
 			NodePhase:    node.Init,
 			TemplateName: templateName,
+		}
+		if parentNodeName == "" {
+			// entry node
+			copied.Status.EntryNode = &nodeName
 		}
 		// TODO: make context work
 		err = it.client.Update(context.TODO(), copied)

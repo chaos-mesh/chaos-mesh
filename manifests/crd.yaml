@@ -3940,6 +3940,10 @@ spec:
                     - mode
                     - selector
                     type: object
+                  tasks:
+                    items:
+                      type: string
+                    type: array
                   template_type:
                     type: string
                 required:
@@ -3954,6 +3958,8 @@ spec:
         status:
           description: Status represents the workflow status
           properties:
+            entry_node:
+              type: string
             nodes:
               additionalProperties:
                 properties:

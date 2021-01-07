@@ -49,7 +49,15 @@ func (it *serialScheduler) ScheduleNext(ctx context.Context) (nextTemplates []te
 		return nil, "", err
 	}
 
-	childrenTemplates := serialTemplate.GetSerialChildrenList()
+	childrenTemplateNames := serialTemplate.GetSerialChildrenList()
+	var childrenTemplates []template.Template
+	for _, name := range childrenTemplateNames {
+		item, err := it.workflowSpec.FetchTemplateByName(name)
+		if err != nil {
+			return nil, "", err
+		}
+		childrenTemplates = append(childrenTemplates, item)
+	}
 	if it.treeNode.GetChildren().Length() == len(childrenTemplates) {
 		// TODO: unexpected situation, warn log
 		return nil, "", errors.NewNoMoreTemplateInSerialTemplateError(op, it.workflowSpec.GetName(), it.treeNode.GetTemplateName(), it.treeNode.GetName())

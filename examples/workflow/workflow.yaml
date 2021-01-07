@@ -6,8 +6,31 @@ spec:
   entry: the-entry
   templates:
     - name: the-entry
-      template_type: Suspend
+      template_type: Serial
       duration: 1s
+      tasks:
+      - prefix-suspending
+      - workflow-network-chaos
+      - suffix-suspending
+    - name: prefix-suspending
+      template_type: Suspend
+      duration: 2s
+    - name: workflow-network-chaos
+      template_type: NetworkChaos
+      duration: 1m
+      network_chaos:
+        action: delay
+        mode: all
+        selector:
+          labelSelectors:
+            "app": "hello-kubernetes"
+        delay:
+          latency: "90ms"
+          correlation: "25"
+          jitter: "90ms"
+    - name: suffix-suspending
+      template_type: Suspend
+      duration: 5s
 status:
   phase: Init
 

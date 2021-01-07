@@ -77,10 +77,10 @@ func (mr *MockSerialTemplateMockRecorder) GetTemplateType() *gomock.Call {
 }
 
 // GetSerialChildrenList mocks base method
-func (m *MockSerialTemplate) GetSerialChildrenList() []template.Template {
+func (m *MockSerialTemplate) GetSerialChildrenList() []string {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetSerialChildrenList")
-	ret0, _ := ret[0].([]template.Template)
+	ret0, _ := ret[0].([]string)
 	return ret0
 }
 

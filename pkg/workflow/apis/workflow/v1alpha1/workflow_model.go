@@ -52,7 +52,7 @@ func (it *Workflow) GetWorkflowSpecName() string {
 }
 
 func (it *Workflow) GetNodesTree() (node.NodeTreeNode, error) {
-	return buildTree(it.GetEntry(), it.Status.Nodes)
+	return buildTree(*it.Status.EntryNode, it.Status.Nodes)
 }
 
 func (it *Workflow) FetchNodesMap() map[string]node.Node {

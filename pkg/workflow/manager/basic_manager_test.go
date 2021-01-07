@@ -71,7 +71,7 @@ func TestScheduleSingleOne(t *testing.T) {
 	mockWorkflowSpec.EXPECT().FetchTemplateByName(gomock.Eq(layer1Template0Name)).Return(mockLayer1Template0, nil).AnyTimes()
 
 	mockEntryTemplate.EXPECT().GetTemplateType().Return(template.Serial).AnyTimes()
-	mockEntryTemplate.EXPECT().GetSerialChildrenList().Return([]template.Template{mockLayer1Template0}).AnyTimes()
+	mockEntryTemplate.EXPECT().GetSerialChildrenList().Return([]string{layer1Template0Name}).AnyTimes()
 
 	mockLayer1Template0.EXPECT().GetName().Return(layer1Template0Name).AnyTimes()
 	mockLayer1Template0.EXPECT().GetTemplateType().Return(template.Suspend).AnyTimes()

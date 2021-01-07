@@ -40,7 +40,9 @@ type WorkflowSpec struct {
 }
 
 type WorkflowStatus struct {
-	Phase workflow.WorkflowPhase `json:"phase"`
+	// +optional
+	EntryNode *string                `json:"entry_node,omitempty"`
+	Phase     workflow.WorkflowPhase `json:"phase"`
 	// +optional
 	Nodes map[string]Node `json:"nodes,omitempty"`
 }
