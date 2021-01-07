@@ -44,6 +44,10 @@ rules:
     resources:
       - "*"
     verbs: [ "*" ]
+  - apiGroups: [ "workflow.chaos-mesh.org" ]
+    resources:
+      - "*"
+    verbs: [ "*" ]
 
 ---
 kind: ClusterRole

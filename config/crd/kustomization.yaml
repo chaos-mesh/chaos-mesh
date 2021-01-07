@@ -13,6 +13,7 @@ resources:
 - bases/chaos-mesh.org_httpchaos.yaml
 - bases/chaos-mesh.org_dnschaos.yaml
 - bases/chaos-mesh.org_jvmchaos.yaml
+- bases/workflow.chaos-mesh.org_workflows.yaml
 # +kubebuilder:scaffold:crdkustomizeresource
 
 patchesStrategicMerge:

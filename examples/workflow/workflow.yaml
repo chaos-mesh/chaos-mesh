@@ -1,0 +1,11 @@
+apiVersion: workflow.chaos-mesh.org/v1alpha1
+kind: Workflow
+metadata:
+  name: try-workflow
+spec:
+  entry: the-entry
+  templates:
+    - name: the-entry
+      template_type: suspend
+      duration: 1s
+

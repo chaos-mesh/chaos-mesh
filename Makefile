@@ -334,7 +334,7 @@ chaos-build: bin/chaos-builder
 generate: $(GOBIN)/controller-gen chaos-build
 	$< object:headerFile=./hack/boilerplate/boilerplate.generatego.txt paths="./..."
 
-manifests/crd.yaml: config ensure-kustomize
+manifests/crd.yaml: config ensure-kustomize ensure-all
 	$(KUSTOMIZE_BIN) build config/default > manifests/crd.yaml
 
 # Generate Go files from Chaos Mesh proto files.
