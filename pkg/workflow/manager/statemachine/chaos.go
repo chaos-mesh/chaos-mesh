@@ -108,7 +108,7 @@ func (it *ChaosStateMachine) HandleEvent(event trigger.Event) ([]sideeffect.Side
 		var result []sideeffect.SideEffect
 		result = append(result, sideeffect.NewUpdatePhaseStatusSideEffect(it.namespace, it.workflowSpec.GetName(), it.nodeStatus.GetName(), it.nodeStatus.GetNodePhase(), node.Running))
 		result = append(result, sideeffect.NewCreateActorEventSideEffect(actor.NewDeleteNetworkChaosActor(it.namespace, it.nodeStatus.GetName())))
-		result = append(result, sideeffect.NewNotifyNewEventSideEffect(trigger.NewEvent(it.namespace, it.workflowSpec.GetName(), it.nodeStatus.GetParentNodeName(), trigger.NodeChaosCleaned)))
+		result = append(result, sideeffect.NewNotifyNewEventSideEffect(trigger.NewEvent(it.namespace, it.workflowSpec.GetName(), it.nodeStatus.GetName(), trigger.NodeChaosCleaned)))
 		return result, nil
 	case trigger.NodeChaosCleaned:
 		// TODO: assert current state
