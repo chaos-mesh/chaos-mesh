@@ -143,7 +143,10 @@ const Predefined = () => {
   return (
     <>
       <Box className={classes.container}>
-        <YAML callback={saveExperiment} buttonProps={{ className: clsx(classes.card, classes.addCard) }} />
+        <YAML
+          callback={saveExperiment}
+          buttonProps={{ className: clsx(classes.card, classes.addCard, 'predefined-upload') }}
+        />
         {experiments.map((d) => (
           <Card key={d.name} className={classes.card} variant="outlined" onClick={onModalOpen(d)}>
             <Box display="flex" justifyContent="center" alignItems="center" height="100%">

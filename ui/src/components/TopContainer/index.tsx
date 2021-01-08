@@ -1,4 +1,4 @@
-import { Box, CssBaseline, Paper, Snackbar, useMediaQuery, useTheme } from '@material-ui/core'
+import { Box, CssBaseline, Paper, Portal, Snackbar, useMediaQuery, useTheme } from '@material-ui/core'
 import React, { useEffect, useMemo, useState } from 'react'
 import { Redirect, Route, Switch } from 'react-router-dom'
 import { ThemeProvider, makeStyles } from '@material-ui/core/styles'
@@ -183,19 +183,21 @@ const TopContainer = () => {
 
             <Auth open={authOpen} setOpen={setAuthOpen} />
 
-            <Snackbar
-              anchorOrigin={{
-                vertical: 'bottom',
-                horizontal: 'center',
-              }}
-              autoHideDuration={9000}
-              open={alertOpen}
-              onClose={handleSnackClose}
-            >
-              <Alert severity={alert.type} onClose={handleSnackClose}>
-                {alert.message}
-              </Alert>
-            </Snackbar>
+            <Portal>
+              <Snackbar
+                anchorOrigin={{
+                  vertical: 'bottom',
+                  horizontal: 'center',
+                }}
+                autoHideDuration={9000}
+                open={alertOpen}
+                onClose={handleSnackClose}
+              >
+                <Alert severity={alert.type} onClose={handleSnackClose}>
+                  {alert.message}
+                </Alert>
+              </Snackbar>
+            </Portal>
           </Paper>
         </Box>
       </IntlProvider>
