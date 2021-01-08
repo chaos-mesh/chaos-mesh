@@ -75,7 +75,7 @@ func TestcasePodFailureOnceThenDelete(ns string, kubeCli kubernetes.Interface, c
 	framework.ExpectNoError(err, "create pod failure chaos error")
 
 	By("waiting for assertion some pod fall into failure")
-	err = wait.PollImmediate(5*time.Second, 5*time.Minute, func() (done bool, err error) {
+	err = wait.Poll(5*time.Second, 5*time.Minute, func() (done bool, err error) {
 		pods, err := kubeCli.CoreV1().Pods(ns).List(listOption)
 		if err != nil {
 			return false, nil
@@ -164,7 +164,7 @@ func TestcasePodFailurePauseThenUnPause(ns string, kubeCli kubernetes.Interface,
 
 	By("waiting for assertion some pod fall into failure")
 	// check whether the pod failure chaos succeeded or not
-	err = wait.PollImmediate(5*time.Second, 5*time.Minute, func() (done bool, err error) {
+	err = wait.Poll(5*time.Second, 5*time.Minute, func() (done bool, err error) {
 		pods, err := kubeCli.CoreV1().Pods(ns).List(listOption)
 		if err != nil {
 			return false, nil
