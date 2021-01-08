@@ -42,7 +42,7 @@ FLAGS:
         --microk8s           Install chaos-mesh in microk8s environment
         --host-network       Install chaos-mesh using hostNetwork
 OPTIONS:
-    -v, --version            Version of chaos-mesh, default value: latest
+    -v, --version            Version of chaos-mesh, default value: v1.1.0
     -l, --local [kind]       Choose a way to run a local kubernetes cluster, supported value: kind,
                              If this value is not set and the Kubernetes is not installed, this script will exit with 1.
     -n, --name               Name of Kubernetes cluster, default value: kind
@@ -60,7 +60,7 @@ EOF
 
 main() {
     local local_kube=""
-    local cm_version="latest"
+    local cm_version="v1.1.0"
     local kind_name="kind"
     local kind_version="v0.7.0"
     local node_num=3
@@ -1163,7 +1163,7 @@ spec:
       serviceAccount: chaos-daemon
       hostIPC: true
       hostPID: true
-      priorityClassName: 
+      priorityClassName:
       containers:
         - name: chaos-daemon
           image: ${DOCKER_REGISTRY_PREFIX}/pingcap/chaos-daemon:${VERSION_TAG}
@@ -1235,7 +1235,7 @@ spec:
         app.kubernetes.io/component: chaos-dashboard
     spec:
       serviceAccount: chaos-controller-manager
-      priorityClassName: 
+      priorityClassName:
       containers:
         - name: chaos-dashboard
           image: ${DOCKER_REGISTRY_PREFIX}/pingcap/chaos-dashboard:${VERSION_TAG}
@@ -1303,7 +1303,7 @@ spec:
     spec:
       hostNetwork: ${host_network}
       serviceAccount: chaos-controller-manager
-      priorityClassName: 
+      priorityClassName:
       containers:
       - name: chaos-mesh
         image: ${DOCKER_REGISTRY_PREFIX}/pingcap/chaos-mesh:${VERSION_TAG}
