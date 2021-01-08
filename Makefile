@@ -213,14 +213,14 @@ ifneq ($(IN_DOCKER),1)
 
 $(2): image-build-env go_build_cache_directory
 	[[ "$(DOCKER_HOST)" == "" ]] || (printf "\
-	FROM ${DOCKER_REGISTRY_PREFIX}pingcap/build-env \n\
+	FROM ${DOCKER_REGISTRY_PREFIX}pingcap/build-env:${IMAGE_TAG} \n\
 	RUN rm -rf /mnt \n\
 	COPY ./ /mnt \n"\
-	> Dockerfile; docker build . -t ${DOCKER_REGISTRY_PREFIX}pingcap/build-env)
+	> Dockerfile; docker build . -t ${DOCKER_REGISTRY_PREFIX}pingcap/build-env:${IMAGE_TAG})
 
 	DOCKER_ID=$$$$(docker run -d \
 		$(BUILD_INDOCKER_ARG) \
-		${DOCKER_REGISTRY_PREFIX}pingcap/build-env \
+		${DOCKER_REGISTRY_PREFIX}pingcap/build-env:${IMAGE_TAG} \
 		sleep infinity); \
 	docker exec --workdir /mnt/ \
 		--env UI=${UI} --env SWAGGER=${SWAGGER}  \
