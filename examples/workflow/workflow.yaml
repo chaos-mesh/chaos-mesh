@@ -12,12 +12,13 @@ spec:
       - prefix-suspending
       - workflow-network-chaos
       - suffix-suspending
+      - workflow-network-chaos
     - name: prefix-suspending
       template_type: Suspend
       duration: 2s
     - name: workflow-network-chaos
       template_type: NetworkChaos
-      duration: 1m
+      duration: 10s
       network_chaos:
         action: delay
         mode: all
