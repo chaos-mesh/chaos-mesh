@@ -44,19 +44,19 @@ const Scheduler: React.FC<SchedulerProps> = ({ errors, touched }) => {
       ? true
       : false
     : false
-  const [immediate, setImmediate] = useState(scheduled)
+  const [continuous, setContinuous] = useState(scheduled)
 
   useEffect(() => {
     if (scheduled) {
-      setImmediate(false)
+      setContinuous(false)
     }
   }, [scheduled])
 
   const handleChecked = (_: React.ChangeEvent<HTMLInputElement>, checked: boolean) => {
     if (scheduled) {
-      setImmediate(false)
+      setContinuous(false)
     } else {
-      setImmediate(checked)
+      setContinuous(checked)
     }
   }
 
@@ -95,9 +95,9 @@ const Scheduler: React.FC<SchedulerProps> = ({ errors, touched }) => {
           <FormControlLabel
             style={{ marginLeft: -4, marginRight: 0 }}
             control={
-              <Switch name="immediate" color="primary" size="small" checked={immediate} onChange={handleChecked} />
+              <Switch name="continuous" color="primary" size="small" checked={continuous} onChange={handleChecked} />
             }
-            label={T('newE.schedule.immediate')}
+            label={T('newE.schedule.continuous')}
           />
           {scheduled && (
             <Typography variant="subtitle2" color="textSecondary">
@@ -107,7 +107,7 @@ const Scheduler: React.FC<SchedulerProps> = ({ errors, touched }) => {
         </Box>
       </Box>
 
-      {!immediate && (
+      {!continuous && (
         <Box>
           <TextField
             id="scheduler.cron"
