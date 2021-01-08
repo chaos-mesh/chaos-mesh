@@ -15,6 +15,7 @@ package twophase
 
 import (
 	"context"
+	"strings"
 	"time"
 
 	"github.com/pkg/errors"
@@ -195,8 +196,13 @@ func (m *chaosStateMachine) Into(ctx context.Context, targetPhase v1alpha1.Exper
 
 		updateError := m.Update(ctx, m.Chaos)
 		if updateError == nil {
-			return nil
+			return err
 		}
+
+		if !strings.Contains(updateError.Error(), "the object has been modified; please apply your changes to the latest version and try again") {
+			return updateError
+		}
+
 		m.Log.Error(updateError, "fail to update, and will retry on conflict")
 
 		// avoid panic
@@ -209,7 +215,7 @@ func (m *chaosStateMachine) Into(ctx context.Context, targetPhase v1alpha1.Exper
 			Name:      m.Chaos.GetChaos().Name,
 		}
 
-		err = retry.RetryOnConflict(retry.DefaultBackoff, func() error {
+		updateError = retry.RetryOnConflict(retry.DefaultBackoff, func() error {
 			// Fetch the resource
 			_chaos := m.Object()
 			if err := m.Client.Get(ctx, namespacedName, _chaos); err != nil {
@@ -227,6 +233,10 @@ func (m *chaosStateMachine) Into(ctx context.Context, targetPhase v1alpha1.Exper
 			// Try to update
 			return m.Update(ctx, chaos)
 		})
+
+		if updateError != nil {
+			return updateError
+		}
 	}
 
 	return err
