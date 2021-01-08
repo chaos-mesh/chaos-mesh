@@ -428,6 +428,27 @@ func (e *eventStore) DeleteByFinishTime(_ context.Context, ttl time.Duration) er
 	return nil
 }
 
+// DeleteByUID deletes events by the uid of the experiment.
+func (e *eventStore) DeleteByUID(_ context.Context, uid string) error {
+	eventList, err := e.ListByUID(context.Background(), uid)
+	if err != nil {
+		return err
+	}
+	for _, et := range eventList {
+		if err := e.db.Model(core.Event{}).Unscoped().Delete(*et).Error; err != nil {
+			return err
+		}
+
+		if err := e.db.Model(core.PodRecord{}).
+			Where(
+				"event_id = ? ",
+				et.ID).Unscoped().Delete(core.PodRecord{}).Error; err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 func (e *eventStore) getUID(_ context.Context, ns, name string) (string, error) {
 	events := make([]*core.Event, 0)
 
