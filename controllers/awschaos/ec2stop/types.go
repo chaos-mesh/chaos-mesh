@@ -42,8 +42,8 @@ type endpoint struct {
 func (e *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.InnerObject) error {
 	awschaos, ok := chaos.(*v1alpha1.AwsChaos)
 	if !ok {
-		err := errors.New("chaos is not stresschaos")
-		e.Log.Error(err, "chaos is not StressChaos", "chaos", chaos)
+		err := errors.New("chaos is not awschaos")
+		e.Log.Error(err, "chaos is not AwsChaos", "chaos", chaos)
 		return err
 	}
 
@@ -78,8 +78,8 @@ func (e *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.I
 func (e *endpoint) Recover(ctx context.Context, req ctrl.Request, chaos v1alpha1.InnerObject) error {
 	awschaos, ok := chaos.(*v1alpha1.AwsChaos)
 	if !ok {
-		err := errors.New("chaos is not stresschaos")
-		e.Log.Error(err, "chaos is not StressChaos", "chaos", chaos)
+		err := errors.New("chaos is not awschaos")
+		e.Log.Error(err, "chaos is not AwsChaos", "chaos", chaos)
 		return err
 	}
 
