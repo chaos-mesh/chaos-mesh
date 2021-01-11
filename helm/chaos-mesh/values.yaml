@@ -86,7 +86,7 @@ chaosDaemon:
 
   # enable a podSecurityPolicy(psp)
   podSecurityPolicy: false
-  
+
   # runtime specifies which container runtime to use. Currently
   # we only supports docker and containerd.
   runtime: docker
@@ -111,7 +111,11 @@ chaosDaemon:
     #   cpu: 250m
     #   memory: 512Mi
 
+  nodeSelector: {}
+
   tolerations: []
+
+  affinity: {}
 
 dashboard:
   create: false
