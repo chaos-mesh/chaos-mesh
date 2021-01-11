@@ -23,7 +23,6 @@ import (
 	"strings"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-
 	"github.com/chaos-mesh/chaos-mesh/controllers/config"
 	"github.com/chaos-mesh/chaos-mesh/pkg/label"
 	"github.com/chaos-mesh/chaos-mesh/pkg/mock"

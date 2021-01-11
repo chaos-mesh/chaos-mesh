@@ -18,7 +18,6 @@ import (
 	"time"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-
 	ctx "github.com/chaos-mesh/chaos-mesh/pkg/router/context"
 	endpoint "github.com/chaos-mesh/chaos-mesh/pkg/router/endpoint"
 

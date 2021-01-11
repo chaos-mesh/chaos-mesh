@@ -19,7 +19,6 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-
 	ctx "github.com/chaos-mesh/chaos-mesh/pkg/router/context"
 )
 
