@@ -136,15 +136,15 @@ spec:
           hostPath:
             path: /usr/src
 {{- end }}
-      {{- with .Values.controllerManager.nodeSelector }}
+      {{- with .Values.chaosDaemon.nodeSelector }}
       nodeSelector:
 {{ toYaml . | indent 8 }}
       {{- end }}
-      {{- with .Values.controllerManager.affinity }}
+      {{- with .Values.chaosDaemon.affinity }}
       affinity:
 {{ toYaml . | indent 8 }}
       {{- end }}
-      {{- with .Values.controllerManager.tolerations }}
+      {{- with .Values.chaosDaemon.tolerations }}
       tolerations:
 {{ toYaml . | indent 8 }}
       {{- end }}
