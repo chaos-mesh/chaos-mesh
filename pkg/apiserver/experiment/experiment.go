@@ -36,9 +36,11 @@ import (
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/client/apiutil"
 )
 
 var log = ctrl.Log.WithName("experiment api")
@@ -57,6 +59,7 @@ type Service struct {
 	archive core.ExperimentStore
 	event   core.EventStore
 	conf    *config.ChaosDashboardConfig
+	scheme  *runtime.Scheme
 }
 
 // NewService returns an experiment service instance.
@@ -64,11 +67,13 @@ func NewService(
 	archive core.ExperimentStore,
 	event core.EventStore,
 	conf *config.ChaosDashboardConfig,
+	scheme *runtime.Scheme,
 ) *Service {
 	return &Service{
 		archive: archive,
 		event:   event,
 		conf:    conf,
+		scheme:  scheme,
 	}
 }
 
@@ -400,10 +405,15 @@ func (s *Service) getPodChaosDetail(namespace string, name string, kubeCli clien
 		return Detail{}, err
 	}
 
+	gvk, err := apiutil.GVKForObject(chaos, s.scheme)
+	if err != nil {
+		return Detail{}, err
+	}
+
 	return Detail{
 		Experiment: Experiment{
 			Base: Base{
-				Kind:      chaos.Kind,
+				Kind:      gvk.Kind,
 				Namespace: chaos.Namespace,
 				Name:      chaos.Name,
 			},
@@ -413,8 +423,8 @@ func (s *Service) getPodChaosDetail(namespace string, name string, kubeCli clien
 			FailedMessage: chaos.GetStatus().FailedMessage,
 		},
 		YAML: core.ExperimentYAMLDescription{
-			APIVersion: chaos.APIVersion,
-			Kind:       chaos.Kind,
+			APIVersion: gvk.GroupVersion().String(),
+			Kind:       gvk.Kind,
 			Metadata: core.ExperimentYAMLMetadata{
 				Name:        chaos.Name,
 				Namespace:   chaos.Namespace,
@@ -438,10 +448,15 @@ func (s *Service) getIoChaosDetail(namespace string, name string, kubeCli client
 		return Detail{}, err
 	}
 
+	gvk, err := apiutil.GVKForObject(chaos, s.scheme)
+	if err != nil {
+		return Detail{}, err
+	}
+
 	return Detail{
 		Experiment: Experiment{
 			Base: Base{
-				Kind:      chaos.Kind,
+				Kind:      gvk.Kind,
 				Namespace: chaos.Namespace,
 				Name:      chaos.Name,
 			},
@@ -451,8 +466,8 @@ func (s *Service) getIoChaosDetail(namespace string, name string, kubeCli client
 			FailedMessage: chaos.GetStatus().FailedMessage,
 		},
 		YAML: core.ExperimentYAMLDescription{
-			APIVersion: chaos.APIVersion,
-			Kind:       chaos.Kind,
+			APIVersion: gvk.GroupVersion().String(),
+			Kind:       gvk.Kind,
 			Metadata: core.ExperimentYAMLMetadata{
 				Name:        chaos.Name,
 				Namespace:   chaos.Namespace,
@@ -476,10 +491,15 @@ func (s *Service) getNetworkChaosDetail(namespace string, name string, kubeCli c
 		return Detail{}, err
 	}
 
+	gvk, err := apiutil.GVKForObject(chaos, s.scheme)
+	if err != nil {
+		return Detail{}, err
+	}
+
 	return Detail{
 		Experiment: Experiment{
 			Base: Base{
-				Kind:      chaos.Kind,
+				Kind:      gvk.Kind,
 				Namespace: chaos.Namespace,
 				Name:      chaos.Name,
 			},
@@ -489,8 +509,8 @@ func (s *Service) getNetworkChaosDetail(namespace string, name string, kubeCli c
 			FailedMessage: chaos.GetStatus().FailedMessage,
 		},
 		YAML: core.ExperimentYAMLDescription{
-			APIVersion: chaos.APIVersion,
-			Kind:       chaos.Kind,
+			APIVersion: gvk.GroupVersion().String(),
+			Kind:       gvk.Kind,
 			Metadata: core.ExperimentYAMLMetadata{
 				Name:        chaos.Name,
 				Namespace:   chaos.Namespace,
@@ -514,10 +534,15 @@ func (s *Service) getTimeChaosDetail(namespace string, name string, kubeCli clie
 		return Detail{}, err
 	}
 
+	gvk, err := apiutil.GVKForObject(chaos, s.scheme)
+	if err != nil {
+		return Detail{}, err
+	}
+
 	return Detail{
 		Experiment: Experiment{
 			Base: Base{
-				Kind:      chaos.Kind,
+				Kind:      gvk.Kind,
 				Namespace: chaos.Namespace,
 				Name:      chaos.Name,
 			},
@@ -527,8 +552,8 @@ func (s *Service) getTimeChaosDetail(namespace string, name string, kubeCli clie
 			FailedMessage: chaos.GetStatus().FailedMessage,
 		},
 		YAML: core.ExperimentYAMLDescription{
-			APIVersion: chaos.APIVersion,
-			Kind:       chaos.Kind,
+			APIVersion: gvk.GroupVersion().String(),
+			Kind:       gvk.Kind,
 			Metadata: core.ExperimentYAMLMetadata{
 				Name:        chaos.Name,
 				Namespace:   chaos.Namespace,
@@ -552,10 +577,15 @@ func (s *Service) getKernelChaosDetail(namespace string, name string, kubeCli cl
 		return Detail{}, err
 	}
 
+	gvk, err := apiutil.GVKForObject(chaos, s.scheme)
+	if err != nil {
+		return Detail{}, err
+	}
+
 	return Detail{
 		Experiment: Experiment{
 			Base: Base{
-				Kind:      chaos.Kind,
+				Kind:      gvk.Kind,
 				Namespace: chaos.Namespace,
 				Name:      chaos.Name,
 			},
@@ -565,8 +595,8 @@ func (s *Service) getKernelChaosDetail(namespace string, name string, kubeCli cl
 			FailedMessage: chaos.GetStatus().FailedMessage,
 		},
 		YAML: core.ExperimentYAMLDescription{
-			APIVersion: chaos.APIVersion,
-			Kind:       chaos.Kind,
+			APIVersion: gvk.GroupVersion().String(),
+			Kind:       gvk.Kind,
 			Metadata: core.ExperimentYAMLMetadata{
 				Name:        chaos.Name,
 				Namespace:   chaos.Namespace,
@@ -590,10 +620,15 @@ func (s *Service) getStressChaosDetail(namespace string, name string, kubeCli cl
 		return Detail{}, err
 	}
 
+	gvk, err := apiutil.GVKForObject(chaos, s.scheme)
+	if err != nil {
+		return Detail{}, err
+	}
+
 	return Detail{
 		Experiment: Experiment{
 			Base: Base{
-				Kind:      chaos.Kind,
+				Kind:      gvk.Kind,
 				Namespace: chaos.Namespace,
 				Name:      chaos.Name,
 			},
@@ -603,8 +638,8 @@ func (s *Service) getStressChaosDetail(namespace string, name string, kubeCli cl
 			FailedMessage: chaos.GetStatus().FailedMessage,
 		},
 		YAML: core.ExperimentYAMLDescription{
-			APIVersion: chaos.APIVersion,
-			Kind:       chaos.Kind,
+			APIVersion: gvk.GroupVersion().String(),
+			Kind:       gvk.Kind,
 			Metadata: core.ExperimentYAMLMetadata{
 				Name:        chaos.Name,
 				Namespace:   chaos.Namespace,
@@ -628,10 +663,15 @@ func (s *Service) getDNSChaosDetail(namespace string, name string, kubeCli clien
 		return Detail{}, err
 	}
 
+	gvk, err := apiutil.GVKForObject(chaos, s.scheme)
+	if err != nil {
+		return Detail{}, err
+	}
+
 	return Detail{
 		Experiment: Experiment{
 			Base: Base{
-				Kind:      chaos.Kind,
+				Kind:      gvk.Kind,
 				Namespace: chaos.Namespace,
 				Name:      chaos.Name,
 			},
@@ -641,8 +681,8 @@ func (s *Service) getDNSChaosDetail(namespace string, name string, kubeCli clien
 			FailedMessage: chaos.GetStatus().FailedMessage,
 		},
 		YAML: core.ExperimentYAMLDescription{
-			APIVersion: chaos.APIVersion,
-			Kind:       chaos.Kind,
+			APIVersion: gvk.GroupVersion().String(),
+			Kind:       gvk.Kind,
 			Metadata: core.ExperimentYAMLMetadata{
 				Name:        chaos.Name,
 				Namespace:   chaos.Namespace,

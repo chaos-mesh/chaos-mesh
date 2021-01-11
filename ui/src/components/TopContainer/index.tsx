@@ -1,20 +1,20 @@
-import { Box, CssBaseline, Snackbar, useMediaQuery, useTheme } from '@material-ui/core'
+import { Box, CssBaseline, Paper, Portal, Snackbar, useMediaQuery, useTheme } from '@material-ui/core'
 import React, { useEffect, useMemo, useState } from 'react'
 import { Redirect, Route, Switch } from 'react-router-dom'
-import { RootState, useStoreDispatch } from 'store'
 import { ThemeProvider, makeStyles } from '@material-ui/core/styles'
 import customTheme, { darkTheme as customDarkTheme } from 'theme'
 import { drawerCloseWidth, drawerWidth } from './Sidebar'
-import { setAlertOpen, setNameSpace, setTokenName, setTokens } from 'slices/globalStatus'
+import { setAlertOpen, setNameSpace, setSecurityMode, setTokenName, setTokens } from 'slices/globalStatus'
+import { useStoreDispatch, useStoreSelector } from 'store'
 
 import Alert from '@material-ui/lab/Alert'
 import Auth from './Auth'
 import ContentContainer from 'components-mui/ContentContainer'
-import Header from './Header'
 import { IntlProvider } from 'react-intl'
 import LS from 'lib/localStorage'
+import Loading from 'components-mui/Loading'
 import MobileNavigation from './MobileNavigation'
-import SearchTrigger from 'components/SearchTrigger'
+import Navbar from './Navbar'
 import Sidebar from './Sidebar'
 import api from 'api'
 import flat from 'flat'
@@ -23,7 +23,6 @@ import messages from 'i18n/messages'
 import routes from 'routes'
 import { setNavigationBreadcrumbs } from 'slices/navigation'
 import { useLocation } from 'react-router-dom'
-import { useSelector } from 'react-redux'
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -49,9 +48,11 @@ const useStyles = makeStyles((theme) => ({
     }),
   },
   main: {
+    position: 'relative',
     display: 'flex',
     flexDirection: 'column',
     minHeight: '100vh',
+    zIndex: 1,
   },
   toolbar: theme.mixins.toolbar,
   switchContent: {
@@ -68,17 +69,18 @@ const TopContainer = () => {
 
   const { pathname } = useLocation()
 
-  const { settings, globalStatus, navigation } = useSelector((state: RootState) => state)
-  const { theme: settingTheme, lang } = settings
+  const { settings, globalStatus, navigation } = useStoreSelector((state) => state)
+  const { theme: settingsTheme, lang } = settings
   const { alert, alertOpen } = globalStatus
   const { breadcrumbs } = navigation
 
-  const globalTheme = useMemo(() => (settingTheme === 'light' ? customTheme : customDarkTheme), [settingTheme])
+  const globalTheme = useMemo(() => (settingsTheme === 'light' ? customTheme : customDarkTheme), [settingsTheme])
   const intlMessages = useMemo<Record<string, string>>(() => flat(messages[lang]), [lang])
 
   const dispatch = useStoreDispatch()
   const handleSnackClose = () => dispatch(setAlertOpen(false))
 
+  // Sidebar related
   const miniSidebar = LS.get('mini-sidebar') === 'y'
   const [openDrawer, setOpenDrawer] = useState(!miniSidebar)
   const handleDrawerToggle = () => {
@@ -86,9 +88,30 @@ const TopContainer = () => {
     LS.set('mini-sidebar', openDrawer ? 'y' : 'n')
   }
 
-  const [authOpen, setAuthOpen] = useState(false)
-  const [authed, setAuthed] = useState(false)
+  /**
+   * Render different components according to server configuration.
+   *
+   */
+  function fetchServerConfig() {
+    api.common
+      .config()
+      .then(({ data }) => {
+        if (data.security_mode) {
+          setAuth()
+        } else {
+          dispatch(setSecurityMode(false))
+        }
+      })
+      .finally(() => setLoading(false))
+  }
 
+  const [loading, setLoading] = useState(true)
+  const [authOpen, setAuthOpen] = useState(false)
+
+  /**
+   * Set authorization (RBAC token) for API use.
+   *
+   */
   function setAuth() {
     const token = LS.get('token')
     const tokenName = LS.get('token-name')
@@ -108,15 +131,13 @@ const TopContainer = () => {
       api.auth.namespace(globalNamespace)
       dispatch(setNameSpace(globalNamespace))
     }
-
-    setAuthed(true)
   }
 
-  if (!authed) {
-    setAuth()
-  }
-
-  useEffect(insertCommonStyle, [])
+  useEffect(() => {
+    fetchServerConfig()
+    insertCommonStyle()
+    // eslint-disable-next-line
+  }, [])
 
   useEffect(() => {
     dispatch(setNavigationBreadcrumbs(pathname))
@@ -131,21 +152,25 @@ const TopContainer = () => {
   return (
     <ThemeProvider theme={globalTheme}>
       <IntlProvider messages={intlMessages} locale={lang} defaultLocale="en">
-        {/* CssBaseline: kickstart an elegant, consistent, and simple baseline to build upon. */}
         <CssBaseline />
+
         <Box className={openDrawer ? classes.rootShift : classes.root}>
-          <Header openDrawer={openDrawer} handleDrawerToggle={handleDrawerToggle} breadcrumbs={breadcrumbs} />
           {!isMobileScreen && <Sidebar open={openDrawer} />}
-          <main className={classes.main}>
-            <div className={classes.toolbar} />
+          <Paper className={classes.main} component="main" elevation={0}>
+            {/* <ControlBar /> */}
+            <Navbar handleDrawerToggle={handleDrawerToggle} breadcrumbs={breadcrumbs} />
 
             <Box className={classes.switchContent}>
               <ContentContainer>
-                <Switch>
-                  <Redirect path="/" to="/overview" exact />
-                  {!authOpen && routes.map((route) => <Route key={route.path as string} {...route} />)}
-                  <Redirect to="/overview" />
-                </Switch>
+                {loading ? (
+                  <Loading />
+                ) : (
+                  <Switch>
+                    <Redirect path="/" to="/dashboard" exact />
+                    {!authOpen && routes.map((route) => <Route key={route.path as string} {...route} />)}
+                    <Redirect to="/dashboard" />
+                  </Switch>
+                )}
               </ContentContainer>
             </Box>
 
@@ -158,22 +183,22 @@ const TopContainer = () => {
 
             <Auth open={authOpen} setOpen={setAuthOpen} />
 
-            <SearchTrigger />
-
-            <Snackbar
-              anchorOrigin={{
-                vertical: 'top',
-                horizontal: 'center',
-              }}
-              autoHideDuration={10000}
-              open={alertOpen}
-              onClose={handleSnackClose}
-            >
-              <Alert severity={alert.type} onClose={handleSnackClose}>
-                {alert.message}
-              </Alert>
-            </Snackbar>
-          </main>
+            <Portal>
+              <Snackbar
+                anchorOrigin={{
+                  vertical: 'bottom',
+                  horizontal: 'center',
+                }}
+                autoHideDuration={9000}
+                open={alertOpen}
+                onClose={handleSnackClose}
+              >
+                <Alert severity={alert.type} onClose={handleSnackClose}>
+                  {alert.message}
+                </Alert>
+              </Snackbar>
+            </Portal>
+          </Paper>
         </Box>
       </IntlProvider>
     </ThemeProvider>

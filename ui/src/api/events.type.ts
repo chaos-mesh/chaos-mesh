@@ -1,4 +1,5 @@
 export interface EventsParams {
+  namespace?: string
   limit?: number
 }
 

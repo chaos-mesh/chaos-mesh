@@ -4,10 +4,12 @@ import * as common from './common'
 import * as events from './events'
 import * as experiments from './experiments'
 
-export default {
+const api = {
   auth,
   common,
   experiments,
   events,
   archives,
 }
+
+export default api

@@ -1,0 +1,487 @@
+
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.2.5
+  creationTimestamp: null
+  name: networkchaos.chaos-mesh.org
+spec:
+  group: chaos-mesh.org
+  names:
+    kind: NetworkChaos
+    listKind: NetworkChaosList
+    plural: networkchaos
+    singular: networkchaos
+  preserveUnknownFields: false
+  scope: Namespaced
+  validation:
+    openAPIV3Schema:
+      description: NetworkChaos is the Schema for the networkchaos API
+      properties:
+        apiVersion:
+          description: 'APIVersion defines the versioned schema of this representation
+            of an object. Servers should convert recognized schemas to the latest
+            internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+          type: string
+        kind:
+          description: 'Kind is a string value representing the REST resource this
+            object represents. Servers may infer this from the endpoint the client
+            submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+          type: string
+        metadata:
+          type: object
+        spec:
+          description: Spec defines the behavior of a pod chaos experiment
+          properties:
+            action:
+              description: 'Action defines the specific network chaos action. Supported
+                action: partition, netem, delay, loss, duplicate, corrupt Default
+                action: delay'
+              enum:
+              - netem
+              - delay
+              - loss
+              - duplicate
+              - corrupt
+              - partition
+              - bandwidth
+              type: string
+            bandwidth:
+              description: Bandwidth represents the detail about bandwidth control
+                action
+              properties:
+                buffer:
+                  description: Buffer is the maximum amount of bytes that tokens can
+                    be available for instantaneously.
+                  format: int32
+                  minimum: 1
+                  type: integer
+                limit:
+                  description: Limit is the number of bytes that can be queued waiting
+                    for tokens to become available.
+                  format: int32
+                  minimum: 1
+                  type: integer
+                minburst:
+                  description: Minburst specifies the size of the peakrate bucket.
+                    For perfect accuracy, should be set to the MTU of the interface.  If
+                    a peakrate is needed, but some burstiness is acceptable, this
+                    size can be raised. A 3000 byte minburst allows around 3mbit/s
+                    of peakrate, given 1000 byte packets.
+                  format: int32
+                  minimum: 0
+                  type: integer
+                peakrate:
+                  description: Peakrate is the maximum depletion rate of the bucket.
+                    The peakrate does not need to be set, it is only necessary if
+                    perfect millisecond timescale shaping is required.
+                  format: int64
+                  minimum: 0
+                  type: integer
+                rate:
+                  description: Rate is the speed knob. Allows bps, kbps, mbps, gbps,
+                    tbps unit. bps means bytes per second.
+                  type: string
+              required:
+              - buffer
+              - limit
+              - rate
+              type: object
+            corrupt:
+              description: Corrupt represents the detail about corrupt action
+              properties:
+                correlation:
+                  type: string
+                corrupt:
+                  type: string
+              required:
+              - correlation
+              - corrupt
+              type: object
+            delay:
+              description: Delay represents the detail about delay action
+              properties:
+                correlation:
+                  type: string
+                jitter:
+                  type: string
+                latency:
+                  type: string
+                reorder:
+                  description: ReorderSpec defines details of packet reorder.
+                  properties:
+                    correlation:
+                      type: string
+                    gap:
+                      type: integer
+                    reorder:
+                      type: string
+                  required:
+                  - correlation
+                  - gap
+                  - reorder
+                  type: object
+              required:
+              - latency
+              type: object
+            direction:
+              description: Direction represents the direction, this applies on netem
+                and network partition action
+              enum:
+              - to
+              - from
+              - both
+              - ""
+              type: string
+            duplicate:
+              description: DuplicateSpec represents the detail about loss action
+              properties:
+                correlation:
+                  type: string
+                duplicate:
+                  type: string
+              required:
+              - correlation
+              - duplicate
+              type: object
+            duration:
+              description: Duration represents the duration of the chaos action
+              type: string
+            externalTargets:
+              description: ExternalTargets represents network targets outside k8s
+              items:
+                type: string
+              type: array
+            loss:
+              description: Loss represents the detail about loss action
+              properties:
+                correlation:
+                  type: string
+                loss:
+                  type: string
+              required:
+              - correlation
+              - loss
+              type: object
+            mode:
+              description: 'Mode defines the mode to run chaos action. Supported mode:
+                one / all / fixed / fixed-percent / random-max-percent'
+              enum:
+              - one
+              - all
+              - fixed
+              - fixed-percent
+              - random-max-percent
+              type: string
+            scheduler:
+              description: Scheduler defines some schedule rules to control the running
+                time of the chaos experiment about network.
+              properties:
+                cron:
+                  description: "Cron defines a cron job rule. \n Some rule examples:
+                    \"0 30 * * * *\" means to \"Every hour on the half hour\" \"@hourly\"
+                    \     means to \"Every hour\" \"@every 1h30m\" means to \"Every
+                    hour thirty\" \n More rule info: https://godoc.org/github.com/robfig/cron"
+                  type: string
+              required:
+              - cron
+              type: object
+            selector:
+              description: Selector is used to select pods that are used to inject
+                chaos action.
+              properties:
+                annotationSelectors:
+                  additionalProperties:
+                    type: string
+                  description: Map of string keys and values that can be used to select
+                    objects. A selector based on annotations.
+                  type: object
+                expressionSelectors:
+                  description: a slice of label selector expressions that can be used
+                    to select objects. A list of selectors based on set-based label
+                    expressions.
+                  items:
+                    description: A label selector requirement is a selector that contains
+                      values, a key, and an operator that relates the key and values.
+                    properties:
+                      key:
+                        description: key is the label key that the selector applies
+                          to.
+                        type: string
+                      operator:
+                        description: operator represents a key's relationship to a
+                          set of values. Valid operators are In, NotIn, Exists and
+                          DoesNotExist.
+                        type: string
+                      values:
+                        description: values is an array of string values. If the operator
+                          is In or NotIn, the values array must be non-empty. If the
+                          operator is Exists or DoesNotExist, the values array must
+                          be empty. This array is replaced during a strategic merge
+                          patch.
+                        items:
+                          type: string
+                        type: array
+                    required:
+                    - key
+                    - operator
+                    type: object
+                  type: array
+                fieldSelectors:
+                  additionalProperties:
+                    type: string
+                  description: Map of string keys and values that can be used to select
+                    objects. A selector based on fields.
+                  type: object
+                labelSelectors:
+                  additionalProperties:
+                    type: string
+                  description: Map of string keys and values that can be used to select
+                    objects. A selector based on labels.
+                  type: object
+                namespaces:
+                  description: Namespaces is a set of namespace to which objects belong.
+                  items:
+                    type: string
+                  type: array
+                nodeSelectors:
+                  additionalProperties:
+                    type: string
+                  description: Map of string keys and values that can be used to select
+                    nodes. Selector which must match a node's labels, and objects
+                    must belong to these selected nodes.
+                  type: object
+                nodes:
+                  description: Nodes is a set of node name and objects must belong
+                    to these nodes.
+                  items:
+                    type: string
+                  type: array
+                podPhaseSelectors:
+                  description: 'PodPhaseSelectors is a set of condition of a pod at
+                    the current time. supported value: Pending / Running / Succeeded
+                    / Failed / Unknown'
+                  items:
+                    type: string
+                  type: array
+                pods:
+                  additionalProperties:
+                    items:
+                      type: string
+                    type: array
+                  description: Pods is a map of string keys and a set values that
+                    used to select pods. The key defines the namespace which pods
+                    belong, and the each values is a set of pod names.
+                  type: object
+              type: object
+            target:
+              description: Target represents network target, this applies on netem
+                and network partition action
+              properties:
+                mode:
+                  description: TargetMode defines the target selector mode
+                  enum:
+                  - one
+                  - all
+                  - fixed
+                  - fixed-percent
+                  - random-max-percent
+                  - ""
+                  type: string
+                selector:
+                  description: TargetSelector defines the target selector
+                  properties:
+                    annotationSelectors:
+                      additionalProperties:
+                        type: string
+                      description: Map of string keys and values that can be used
+                        to select objects. A selector based on annotations.
+                      type: object
+                    expressionSelectors:
+                      description: a slice of label selector expressions that can
+                        be used to select objects. A list of selectors based on set-based
+                        label expressions.
+                      items:
+                        description: A label selector requirement is a selector that
+                          contains values, a key, and an operator that relates the
+                          key and values.
+                        properties:
+                          key:
+                            description: key is the label key that the selector applies
+                              to.
+                            type: string
+                          operator:
+                            description: operator represents a key's relationship
+                              to a set of values. Valid operators are In, NotIn, Exists
+                              and DoesNotExist.
+                            type: string
+                          values:
+                            description: values is an array of string values. If the
+                              operator is In or NotIn, the values array must be non-empty.
+                              If the operator is Exists or DoesNotExist, the values
+                              array must be empty. This array is replaced during a
+                              strategic merge patch.
+                            items:
+                              type: string
+                            type: array
+                        required:
+                        - key
+                        - operator
+                        type: object
+                      type: array
+                    fieldSelectors:
+                      additionalProperties:
+                        type: string
+                      description: Map of string keys and values that can be used
+                        to select objects. A selector based on fields.
+                      type: object
+                    labelSelectors:
+                      additionalProperties:
+                        type: string
+                      description: Map of string keys and values that can be used
+                        to select objects. A selector based on labels.
+                      type: object
+                    namespaces:
+                      description: Namespaces is a set of namespace to which objects
+                        belong.
+                      items:
+                        type: string
+                      type: array
+                    nodeSelectors:
+                      additionalProperties:
+                        type: string
+                      description: Map of string keys and values that can be used
+                        to select nodes. Selector which must match a node's labels,
+                        and objects must belong to these selected nodes.
+                      type: object
+                    nodes:
+                      description: Nodes is a set of node name and objects must belong
+                        to these nodes.
+                      items:
+                        type: string
+                      type: array
+                    podPhaseSelectors:
+                      description: 'PodPhaseSelectors is a set of condition of a pod
+                        at the current time. supported value: Pending / Running /
+                        Succeeded / Failed / Unknown'
+                      items:
+                        type: string
+                      type: array
+                    pods:
+                      additionalProperties:
+                        items:
+                          type: string
+                        type: array
+                      description: Pods is a map of string keys and a set values that
+                        used to select pods. The key defines the namespace which pods
+                        belong, and the each values is a set of pod names.
+                      type: object
+                  type: object
+                value:
+                  description: TargetValue is required when the mode is set to `FixedPodMode`
+                    / `FixedPercentPodMod` / `RandomMaxPercentPodMod`. If `FixedPodMode`,
+                    provide an integer of pods to do chaos action. If `FixedPercentPodMod`,
+                    provide a number from 0-100 to specify the percent of pods the
+                    server can do chaos action. If `RandomMaxPercentPodMod`,  provide
+                    a number from 0-100 to specify the max percent of pods to do chaos
+                    action
+                  type: string
+              required:
+              - mode
+              - selector
+              type: object
+            value:
+              description: Value is required when the mode is set to `FixedPodMode`
+                / `FixedPercentPodMod` / `RandomMaxPercentPodMod`. If `FixedPodMode`,
+                provide an integer of pods to do chaos action. If `FixedPercentPodMod`,
+                provide a number from 0-100 to specify the percent of pods the server
+                can do chaos action. If `RandomMaxPercentPodMod`,  provide a number
+                from 0-100 to specify the max percent of pods to do chaos action
+              type: string
+          required:
+          - action
+          - mode
+          - selector
+          type: object
+        status:
+          description: Most recently observed status of the chaos experiment about
+            pods
+          properties:
+            experiment:
+              description: Experiment records the last experiment state.
+              properties:
+                duration:
+                  type: string
+                endTime:
+                  format: date-time
+                  type: string
+                phase:
+                  description: ExperimentPhase is the current status of chaos experiment.
+                  type: string
+                podRecords:
+                  items:
+                    description: PodStatus represents information about the status
+                      of a pod in chaos experiment.
+                    properties:
+                      action:
+                        type: string
+                      hostIP:
+                        type: string
+                      message:
+                        description: A brief CamelCase message indicating details
+                          about the chaos action. e.g. "delete this pod" or "pause
+                          this pod duration 5m"
+                        type: string
+                      name:
+                        type: string
+                      namespace:
+                        type: string
+                      podIP:
+                        type: string
+                    required:
+                    - action
+                    - hostIP
+                    - name
+                    - namespace
+                    - podIP
+                    type: object
+                  type: array
+                reason:
+                  type: string
+                startTime:
+                  format: date-time
+                  type: string
+              type: object
+            failedMessage:
+              type: string
+            scheduler:
+              description: ScheduleStatus is the current status of chaos scheduler.
+              properties:
+                nextRecover:
+                  description: Next time when this action will be recovered
+                  format: date-time
+                  type: string
+                nextStart:
+                  description: Next time when this action will be applied again
+                  format: date-time
+                  type: string
+              type: object
+          required:
+          - experiment
+          type: object
+      required:
+      - spec
+      type: object
+  version: v1alpha1
+  versions:
+  - name: v1alpha1
+    served: true
+    storage: true
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []

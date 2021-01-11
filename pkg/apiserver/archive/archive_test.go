@@ -24,6 +24,7 @@ import (
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/pkg/core"
+	pkgmock "github.com/chaos-mesh/chaos-mesh/pkg/mock"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
@@ -267,6 +268,8 @@ func (m *MockExperimentStore) DeleteIncompleteExperiments(context.Context) error
 var _ = Describe("event", func() {
 	var router *gin.Engine
 	BeforeEach(func() {
+		pkgmock.With("MockAuthRequired", true)
+
 		mockExpStore := new(MockExperimentStore)
 
 		s := Service{
@@ -283,7 +286,8 @@ var _ = Describe("event", func() {
 	})
 
 	AfterEach(func() {
-		// Add any setup steps that needs to be executed before each test
+		// Add any setup steps that needs to be executed after each test
+		pkgmock.Reset("MockAuthRequired")
 	})
 
 	Context("List", func() {

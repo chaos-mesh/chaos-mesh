@@ -48,7 +48,7 @@ func NewServer(
 	conf *config.ChaosDashboardConfig,
 	archive core.ExperimentStore,
 	event core.EventStore,
-) (*Server, client.Client, client.Reader) {
+) (*Server, client.Client, client.Reader, *runtime.Scheme) {
 	s := &Server{}
 
 	// namespace scoped
@@ -82,7 +82,11 @@ func NewServer(
 			os.Exit(1)
 		}
 	} else {
-		clientpool.K8sClients = clientpool.NewLocalClient(s.Manager.GetClient())
+		clientpool.K8sClients, err = clientpool.NewLocalClient(cfg, scheme)
+		if err != nil {
+			log.Error(err, "fail to create client pool")
+			os.Exit(1)
+		}
 	}
 
 	for kind, chaosKind := range v1alpha1.AllKinds() {
@@ -97,7 +101,7 @@ func NewServer(
 		}
 	}
 
-	return s, s.Manager.GetClient(), s.Manager.GetAPIReader()
+	return s, s.Manager.GetClient(), s.Manager.GetAPIReader(), s.Manager.GetScheme()
 }
 
 // Register starts collectors manager.

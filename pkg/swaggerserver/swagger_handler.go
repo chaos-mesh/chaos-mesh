@@ -27,6 +27,6 @@ import (
 func Handler() gin.HandlerFunc {
 	return ginSwagger.WrapHandler(
 		swaggerFiles.Handler,
-		ginSwagger.URL("./doc.json"),
+		ginSwagger.URL("doc.json"),
 	)
 }

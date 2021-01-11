@@ -50,6 +50,7 @@ func NewService(
 // Register mounts our HTTP handler on the mux.
 func Register(r *gin.RouterGroup, s *Service) {
 	endpoint := r.Group("/events")
+	endpoint.Use(utils.AuthRequired)
 
 	// TODO: add more api handlers
 	endpoint.GET("", s.listEvents)
@@ -80,7 +81,7 @@ func (s *Service) listEvents(c *gin.Context) {
 		StartTimeStr:        c.Query("startTime"),
 		FinishTimeStr:       c.Query("finishTime"),
 		ExperimentName:      c.Query("experimentName"),
-		ExperimentNamespace: c.Query("experimentNamespace"),
+		ExperimentNamespace: c.Query("namespace"),
 		UID:                 c.Query("uid"),
 		Kind:                c.Query("kind"),
 		LimitStr:            c.Query("limit"),
@@ -120,7 +121,7 @@ func (s *Service) listDryEvents(c *gin.Context) {
 		StartTimeStr:        c.Query("startTime"),
 		FinishTimeStr:       c.Query("finishTime"),
 		ExperimentName:      c.Query("experimentName"),
-		ExperimentNamespace: c.Query("experimentNamespace"),
+		ExperimentNamespace: c.Query("namespace"),
 		Kind:                c.Query("kind"),
 		LimitStr:            c.Query("limit"),
 	}
@@ -145,6 +146,7 @@ func (s *Service) listDryEvents(c *gin.Context) {
 // @Failure 500 {object} utils.APIError
 func (s *Service) getEvent(c *gin.Context) {
 	idStr := c.Query("id")
+	namespace := c.Query("namespace")
 
 	if idStr == "" {
 		c.Status(http.StatusBadRequest)
@@ -168,6 +170,12 @@ func (s *Service) getEvent(c *gin.Context) {
 			c.Status(http.StatusInternalServerError)
 			_ = c.Error(utils.ErrInternalServer.NewWithNoMessage())
 		}
+		return
+	}
+
+	if len(namespace) != 0 && event.Namespace != namespace {
+		c.Status(http.StatusBadRequest)
+		_ = c.Error(utils.ErrInvalidRequest.New("event %s belong to namespace %s but not namespace %s", idStr, event.Namespace, namespace))
 		return
 	}
 

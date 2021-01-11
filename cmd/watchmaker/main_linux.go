@@ -19,7 +19,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/chaos-mesh/chaos-mesh/pkg/utils"
+	"github.com/chaos-mesh/chaos-mesh/pkg/time/utils"
 
 	"github.com/go-logr/zapr"
 	"go.uber.org/zap"
