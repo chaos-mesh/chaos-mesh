@@ -3,7 +3,7 @@ module github.com/chaos-mesh/chaos-mesh
 require (
 	code.cloudfoundry.org/bytefmt v0.0.0-20200131002437-cf55d5288a48
 	github.com/DATA-DOG/go-sqlmock v1.5.0
-	github.com/chaos-mesh/api v0.0.0
+	github.com/chaos-mesh/chaos-mesh/api/v1alpha1 v0.0.0
 	github.com/chaos-mesh/k8s_dns_chaos v0.0.0-20200922120555-7ced93637075
 	github.com/containerd/cgroups v0.0.0-20200404012852-53ba5634dc0f
 	github.com/containerd/containerd v1.2.3
@@ -85,7 +85,7 @@ require (
 )
 
 replace (
-	github.com/chaos-mesh/api => ./api/v1alpha1
+	github.com/chaos-mesh/chaos-mesh/api/v1alpha1 => ./api/v1alpha1
 	google.golang.org/grpc => google.golang.org/grpc v1.26.0
 	k8s.io/api => k8s.io/api v0.17.0
 	k8s.io/apiextensions-apiserver => k8s.io/apiextensions-apiserver v0.17.0

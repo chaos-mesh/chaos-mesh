@@ -22,7 +22,7 @@ import (
 	"github.com/go-logr/logr"
 	"github.com/jinzhu/gorm"
 
-	v1alpha1 "github.com/chaos-mesh/api"
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/core"
 

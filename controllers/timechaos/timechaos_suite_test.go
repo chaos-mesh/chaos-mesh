@@ -32,7 +32,7 @@ import (
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
-	v1alpha1 "github.com/chaos-mesh/api"
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 
 	. "github.com/chaos-mesh/chaos-mesh/controllers/test"
 	"github.com/chaos-mesh/chaos-mesh/pkg/mock"

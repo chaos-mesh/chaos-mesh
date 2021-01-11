@@ -26,7 +26,7 @@ import (
 	"github.com/mitchellh/mapstructure"
 	"golang.org/x/sync/errgroup"
 
-	v1alpha1 "github.com/chaos-mesh/api"
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 
 	"github.com/chaos-mesh/chaos-mesh/controllers/common"
 	"github.com/chaos-mesh/chaos-mesh/pkg/apiserver/utils"

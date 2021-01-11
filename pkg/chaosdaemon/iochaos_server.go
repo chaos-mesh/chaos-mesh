@@ -22,7 +22,7 @@ import (
 
 	"github.com/shirou/gopsutil/process"
 
-	v1alpha1 "github.com/chaos-mesh/api"
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/bpm"
 	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"

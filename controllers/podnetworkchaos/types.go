@@ -19,7 +19,7 @@ import (
 
 	"github.com/pkg/errors"
 
-	v1alpha1 "github.com/chaos-mesh/api"
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 
 	"github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos/ipset"
 	"github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos/iptable"

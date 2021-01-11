@@ -16,7 +16,7 @@ package podiochaosmanager
 import (
 	"fmt"
 
-	v1alpha1 "github.com/chaos-mesh/api"
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 )
 
 // PodIoTransaction represents a modification on podnetwork
