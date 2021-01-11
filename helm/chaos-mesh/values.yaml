@@ -111,7 +111,11 @@ chaosDaemon:
     #   cpu: 250m
     #   memory: 512Mi
 
+  nodeSelector: {}
+
   tolerations: []
+
+  affinity: {}
 
 dashboard:
   create: false
