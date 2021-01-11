@@ -24,7 +24,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos/ipset"
 	"github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos/iptable"
 	tcpkg "github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos/tc"
-	pbUtils "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/netem"
+	pbutils "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/netem"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
 	"github.com/chaos-mesh/chaos-mesh/pkg/netem"
 
@@ -204,7 +204,7 @@ func mergeNetem(spec v1alpha1.TcParameter) (*pb.Netem, error) {
 
 	merged := &pb.Netem{}
 	for _, em := range emSpecs {
-		merged = pbUtils.MergeNetem(merged, em)
+		merged = pbutils.MergeNetem(merged, em)
 	}
 	return merged, nil
 }
