@@ -85,18 +85,4 @@ var _ = Describe("NetworkChaos", func() {
 			Expect(nwChaos.GetNextRecover()).To(Equal(nTime))
 		})
 	})
-
-	Context("convertUnitToBytes", func() {
-		It("should convert number with unit successfully", func() {
-			n, err := convertUnitToBytes("  10   mbPs  ")
-			Expect(err).Should(Succeed())
-			Expect(n).To(Equal(uint64(10 * 1024 * 1024)))
-		})
-
-		It("should return error with invalid unit", func() {
-			n, err := convertUnitToBytes(" 10 cpbs")
-			Expect(err).Should(HaveOccurred())
-			Expect(n).To(Equal(uint64(0)))
-		})
-	})
 })
