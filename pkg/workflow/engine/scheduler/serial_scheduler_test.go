@@ -16,14 +16,16 @@ package scheduler
 import (
 	"context"
 	"errors"
+	"testing"
+
+	"github.com/golang/mock/gomock"
+	"github.com/stretchr/testify/assert"
+
 	workflowerrors "github.com/chaos-mesh/chaos-mesh/pkg/workflow/engine/errors"
 	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/engine/model/template"
 	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/mock/engine/model/mock_node"
 	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/mock/engine/model/mock_template"
 	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/mock/engine/model/mock_workflow"
-	"github.com/golang/mock/gomock"
-	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 func TestScheduleWithSerial(t *testing.T) {
@@ -77,25 +79,25 @@ func TestScheduleWithSerial(t *testing.T) {
 			succeedChildren:            0,
 			expectedScheduledTemplates: []string{"child-0"},
 			expectedError:              nil,
-		},{
+		}, {
 			name:                       "schedule-duplicated-template-1",
 			childrenTemplates:          []string{"child-0", "child-1", "child-0", "child-1"},
 			succeedChildren:            1,
 			expectedScheduledTemplates: []string{"child-1"},
 			expectedError:              nil,
-		},{
+		}, {
 			name:                       "schedule-duplicated-template-2",
 			childrenTemplates:          []string{"child-0", "child-1", "child-0", "child-1"},
 			succeedChildren:            2,
 			expectedScheduledTemplates: []string{"child-0"},
 			expectedError:              nil,
-		},{
+		}, {
 			name:                       "schedule-duplicated-template-3",
 			childrenTemplates:          []string{"child-0", "child-1", "child-0", "child-1"},
 			succeedChildren:            3,
 			expectedScheduledTemplates: []string{"child-1"},
 			expectedError:              nil,
-		},{
+		}, {
 			name:                       "schedule-duplicated-template-4",
 			childrenTemplates:          []string{"child-0", "child-1", "child-0", "child-1"},
 			succeedChildren:            4,

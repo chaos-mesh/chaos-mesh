@@ -77,6 +77,11 @@ func (it *KubernetesWorkflowRepo) CreateNodes(namespace, workflowName, parentNod
 			// entry node
 			copied.Status.EntryNode = &nodeName
 		}
+		if parent, ok := copied.Status.Nodes[parentNodeName]; ok {
+			parent.Children = append(parent.Children, nodeName)
+		} else {
+			return fmt.Errorf("parnet node %s not exist", parentNodeName)
+		}
 		// TODO: make context work
 		err = it.client.Update(context.TODO(), copied)
 		return err

@@ -457,6 +457,12 @@ spec:
             nodes:
               additionalProperties:
                 properties:
+                  children:
+                    description: Children is necessary for representing the order
+                      when replicated child template references by parent template.
+                    items:
+                      type: string
+                    type: array
                   name:
                     type: string
                   node_phase:
