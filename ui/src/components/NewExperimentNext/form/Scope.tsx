@@ -3,7 +3,12 @@ import { Box, InputAdornment, MenuItem, Typography } from '@material-ui/core'
 import React, { useEffect, useMemo, useRef } from 'react'
 import { RootState, useStoreDispatch } from 'store'
 import { arrToObjBySep, joinObjKVs, toTitleCase } from 'lib/utils'
-import { getAnnotations, getLabels, getPodsByNamespaces as getPods } from 'slices/experiments'
+import {
+  getAnnotations,
+  getCommonPodsByNamespaces as getCommonPods,
+  getLabels,
+  getNetworkTargetPodsByNamespaces as getNetworkTargetPods,
+} from 'slices/experiments'
 import { getIn, useFormikContext } from 'formik'
 
 import AdvancedOptions from 'components/AdvancedOptions'
@@ -35,7 +40,10 @@ const ScopeStep: React.FC<ScopeStepProps> = ({ namespaces, scope = 'scope', pods
     annotation_selectors: currentAnnotations,
   } = getIn(values, scope)
 
-  const { labels, annotations, pods } = useSelector((state: RootState) => state.experiments)
+  const experiments = useSelector((state: RootState) => state.experiments)
+  const { labels, annotations } = experiments
+  const pods = scope === 'scope' ? experiments.pods : experiments.networkTargetPods
+  const getPods = scope === 'scope' ? getCommonPods : getNetworkTargetPods
   const dispatch = useStoreDispatch()
 
   const kvSeparator = ': '
@@ -81,7 +89,7 @@ const ScopeStep: React.FC<ScopeStepProps> = ({ namespaces, scope = 'scope', pods
       dispatch(getLabels(currentNamespaces))
       dispatch(getAnnotations(currentNamespaces))
     }
-  }, [currentNamespaces, dispatch])
+  }, [currentNamespaces, getPods, dispatch])
 
   useEffect(() => {
     if (firstRender.current) {
