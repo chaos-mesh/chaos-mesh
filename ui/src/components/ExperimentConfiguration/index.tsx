@@ -145,7 +145,7 @@ const ExperimentConfiguration: React.FC<ExperimentConfigurationProps> = ({ exper
               </>
             ) : (
               <TableRow>
-                <TableCell>{T('newE.schedule.immediate')}</TableCell>
+                <TableCell>{T('newE.schedule.continuous')}</TableCell>
               </TableRow>
             )}
           </TableBody>
