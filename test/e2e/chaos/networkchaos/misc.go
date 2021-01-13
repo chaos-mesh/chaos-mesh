@@ -26,7 +26,6 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/klog"
-	"k8s.io/kubernetes/test/e2e/framework"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 )
@@ -230,8 +229,11 @@ func probeNetworkCondition(c http.Client, peers []*corev1.Pod, ports []uint16) m
 			// case 2: slow network
 			klog.Infof("testing delay from %s to %s", peers[source].Name, peers[target].Name)
 			delay, err := testDelay(source, target)
-			framework.ExpectNoError(err, fmt.Sprintf("send request from %s to %s to test delay failed",
-				peers[source].Name, peers[target].Name))
+			if err != nil {
+				klog.Errorf("error from %d to %d: %v", source, target, err)
+				continue
+			}
+
 			klog.Infof("delay from %d to %d: %d", source, target, delay)
 			if delay > 100*1e6 {
 				klog.Infof("detect slow network from %s to %s", peers[source].Name, peers[target].Name)
