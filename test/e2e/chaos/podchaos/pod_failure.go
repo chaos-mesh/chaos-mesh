@@ -75,7 +75,7 @@ func TestcasePodFailureOnceThenDelete(ns string, kubeCli kubernetes.Interface, c
 	framework.ExpectNoError(err, "create pod failure chaos error")
 
 	By("waiting for assertion some pod fall into failure")
-	err = wait.PollImmediate(5*time.Second, 5*time.Minute, func() (done bool, err error) {
+	err = wait.Poll(5*time.Second, 5*time.Minute, func() (done bool, err error) {
 		pods, err := kubeCli.CoreV1().Pods(ns).List(listOption)
 		if err != nil {
 			return false, nil
@@ -98,7 +98,7 @@ func TestcasePodFailureOnceThenDelete(ns string, kubeCli kubernetes.Interface, c
 	framework.ExpectNoError(err, "failed to delete pod failure chaos")
 
 	By("waiting for assertion recovering")
-	err = wait.PollImmediate(5*time.Second, 1*time.Minute, func() (done bool, err error) {
+	err = wait.Poll(5*time.Second, 2*time.Minute, func() (done bool, err error) {
 		pods, err := kubeCli.CoreV1().Pods(ns).List(listOption)
 		if err != nil {
 			return false, nil
@@ -164,7 +164,7 @@ func TestcasePodFailurePauseThenUnPause(ns string, kubeCli kubernetes.Interface,
 
 	By("waiting for assertion some pod fall into failure")
 	// check whether the pod failure chaos succeeded or not
-	err = wait.PollImmediate(5*time.Second, 5*time.Minute, func() (done bool, err error) {
+	err = wait.Poll(5*time.Second, 5*time.Minute, func() (done bool, err error) {
 		pods, err := kubeCli.CoreV1().Pods(ns).List(listOption)
 		if err != nil {
 			return false, nil
@@ -177,6 +177,7 @@ func TestcasePodFailurePauseThenUnPause(ns string, kubeCli kubernetes.Interface,
 		}
 		return false, nil
 	})
+	framework.ExpectNoError(err, "image not update to pause")
 
 	// pause experiment
 	By("pause pod failure chaos")
@@ -204,13 +205,13 @@ func TestcasePodFailurePauseThenUnPause(ns string, kubeCli kubernetes.Interface,
 		pod := pods.Items[0]
 		for _, c := range pod.Spec.Containers {
 			if c.Image == e2econst.PauseImage {
-				return true, nil
+				return false, nil
 			}
 		}
-		return false, nil
+
+		return true, nil
 	})
-	framework.ExpectError(err, "wait no pod failure failed")
-	framework.ExpectEqual(err.Error(), wait.ErrWaitTimeout.Error())
+	framework.ExpectNoError(err, "check paused chaos failed")
 
 	By("resume paused chaos experiment")
 	err = util.UnPauseChaos(ctx, cli, podFailureChaos)

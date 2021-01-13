@@ -69,7 +69,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (result ctrl.Result, err error)
 		if apierrors.IsNotFound(err) {
 			r.Log.Info("chaos not found")
 		} else {
-			r.Log.Error(err, "unable to get network chaos")
+			r.Log.Error(err, "unable to get chaos")
 		}
 		return ctrl.Result{}, nil
 	}
