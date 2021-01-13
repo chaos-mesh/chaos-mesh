@@ -23,6 +23,8 @@ enableProfiling: true
 
 kubectlImage: bitnami/kubectl:latest
 
+registry: ""
+
 controllerManager:
   hostNetwork: false
   serviceAccount: chaos-controller-manager
