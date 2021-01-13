@@ -39,26 +39,19 @@ func ActiveSandbox(host string, port int) error {
 
 // InjectChaos injects jvm chaos to a java process
 func InjectChaos(host string, port int, body []byte) error {
-	client := &http.Client{}
-	reqBody := bytes.NewBuffer([]byte(body))
 	url := fmt.Sprintf(InjectURL, host, port)
-
-	request, _ := http.NewRequest("POST", url, reqBody)
-	request.Header.Set("Content-type", "application/json")
-
-	_, err := client.Do(request)
-	if err != nil {
-		return err
-	}
-	return nil
+	return httpPost(url, body)
 }
 
 // RecoverChaos recovers jvm chaos from a java process
 func RecoverChaos(host string, port int, body []byte) error {
+	url := fmt.Sprintf(RecoverURL, host, port)
+	return httpPost(url, body)
+}
+
+func httpPost(url string, body []byte) error {
 	client := &http.Client{}
 	reqBody := bytes.NewBuffer([]byte(body))
-	url := fmt.Sprintf(RecoverURL, host, port)
-
 	request, _ := http.NewRequest("POST", url, reqBody)
 	request.Header.Set("Content-type", "application/json")
 

@@ -77,7 +77,7 @@ const (
 	// SERVLET represents servlet as a target of chaos
 	SERVLET JVMChaosTarget = "servlet"
 
-	// PSQL represents Postgrelsql JDBC as a target of chaos
+	// PSQL represents Postgresql JDBC as a target of chaos
 	PSQL JVMChaosTarget = "psql"
 
 	// JVM represents JVM as a target of chaos
