@@ -61,6 +61,11 @@ func (in *Template) DeepCopyInto(out *Template) {
 		*out = new(apiv1alpha1.NetworkChaosSpec)
 		(*in).DeepCopyInto(*out)
 	}
+	if in.PodChaos != nil {
+		in, out := &in.PodChaos, &out.PodChaos
+		*out = new(apiv1alpha1.PodChaosSpec)
+		(*in).DeepCopyInto(*out)
+	}
 	if in.Tasks != nil {
 		in, out := &in.Tasks, &out.Tasks
 		*out = make([]string, len(*in))

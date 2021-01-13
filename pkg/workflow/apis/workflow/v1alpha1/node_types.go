@@ -16,7 +16,7 @@ package v1alpha1
 import "github.com/chaos-mesh/chaos-mesh/pkg/workflow/engine/model/node"
 
 type Node struct {
-	Name         string         `json:"name"`
+	Name string `json:"name"`
 	// TODO: construct node tree with only children
 	ParentNode   string         `json:"parent_node"`
 	NodePhase    node.NodePhase `json:"node_phase"`

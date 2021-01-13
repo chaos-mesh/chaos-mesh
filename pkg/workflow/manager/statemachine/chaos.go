@@ -49,18 +49,43 @@ func (it *ChaosStateMachine) HandleEvent(event trigger.Event) ([]sideeffect.Side
 		if err != nil {
 			return nil, err
 		}
-		chaosTemplate, err := template.ParseNetworkChaosTemplate(targetTemplate)
-		if err != nil {
-			return nil, err
-		}
 
-		networkChaosSpec := chaosTemplate.FetchNetworkChaosSpec()
-		targetChaos := chaosmeshv1alph1.NetworkChaos{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      it.nodeStatus.GetName(),
-				Namespace: it.namespace,
-			},
-			Spec: networkChaosSpec,
+		// TODO: multi type of chaos injection
+		var chaosActor actor.Actor
+
+		if targetTemplate.GetTemplateType() == template.NetworkChaos {
+			chaosTemplate, err := template.ParseNetworkChaosTemplate(targetTemplate)
+			if err != nil {
+				return nil, err
+			}
+
+			networkChaosSpec := chaosTemplate.FetchNetworkChaosSpec()
+			targetChaos := chaosmeshv1alph1.NetworkChaos{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      it.nodeStatus.GetName(),
+					Namespace: it.namespace,
+				},
+				Spec: networkChaosSpec,
+			}
+
+			chaosActor = actor.NewCreateNetworkChaosActor(targetChaos)
+		} else if targetTemplate.GetTemplateType() == template.PodChaos {
+			chaosTemplate, err := template.ParsePodChaosTemplate(targetTemplate)
+			if err != nil {
+				return nil, err
+			}
+			podChaosSpec := chaosTemplate.FetchPodChaos()
+			targetChaos := chaosmeshv1alph1.PodChaos{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      it.nodeStatus.GetName(),
+					Namespace: it.namespace,
+				},
+				Spec: podChaosSpec,
+			}
+			chaosActor = actor.NewCreatePodChaosActor(targetChaos)
+		} else {
+			// TODO: replace this error
+			return nil, fmt.Errorf("%s is not supported now", targetTemplate.GetTemplateType())
 		}
 
 		var result []sideeffect.SideEffect
@@ -76,7 +101,7 @@ func (it *ChaosStateMachine) HandleEvent(event trigger.Event) ([]sideeffect.Side
 		)
 		result = append(
 			result,
-			sideeffect.NewCreateActorEventSideEffect(actor.NewCreateNetworkChaosActor(targetChaos)),
+			sideeffect.NewCreateActorEventSideEffect(chaosActor),
 		)
 		result = append(
 			result,
@@ -105,9 +130,25 @@ func (it *ChaosStateMachine) HandleEvent(event trigger.Event) ([]sideeffect.Side
 		return result, nil
 	case trigger.NodeHoldingAwake:
 		// TODO: assert current state
+		targetTemplate, err := it.workflowSpec.FetchTemplateByName(it.nodeStatus.GetTemplateName())
+		if err != nil {
+			return nil, err
+		}
+
+		var chaosActor actor.Actor
+
+		if targetTemplate.GetTemplateType() == template.NetworkChaos {
+			chaosActor = actor.NewDeleteNetworkChaosActor(it.namespace, it.nodeStatus.GetName())
+		} else if targetTemplate.GetTemplateType() == template.PodChaos {
+			chaosActor = actor.NewDeletePodChaosActor(it.namespace, it.nodeStatus.GetName())
+		} else {
+			// TODO: replace this error
+			return nil, fmt.Errorf("%s is not supported now", targetTemplate.GetTemplateType())
+		}
+
 		var result []sideeffect.SideEffect
 		result = append(result, sideeffect.NewUpdatePhaseStatusSideEffect(it.namespace, it.workflowSpec.GetName(), it.nodeStatus.GetName(), it.nodeStatus.GetNodePhase(), node.Running))
-		result = append(result, sideeffect.NewCreateActorEventSideEffect(actor.NewDeleteNetworkChaosActor(it.namespace, it.nodeStatus.GetName())))
+		result = append(result, sideeffect.NewCreateActorEventSideEffect(chaosActor))
 		result = append(result, sideeffect.NewNotifyNewEventSideEffect(trigger.NewEvent(it.namespace, it.workflowSpec.GetName(), it.nodeStatus.GetName(), trigger.NodeChaosCleaned)))
 		return result, nil
 	case trigger.NodeChaosCleaned:

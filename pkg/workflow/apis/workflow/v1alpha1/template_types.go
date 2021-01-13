@@ -30,6 +30,8 @@ type Template struct {
 	// +optional
 	NetworkChaos *chaosmeshv1alph1.NetworkChaosSpec `json:"network_chaos,omitempty"`
 	// +optional
+	PodChaos *chaosmeshv1alph1.PodChaosSpec `json:"pod_chaos,omitempty"`
+	// +optional
 	Tasks []string `json:"tasks,omitempty"`
 }
 
@@ -55,6 +57,10 @@ func (it *Template) FetchChaosNamePrefix() string {
 
 func (it *Template) FetchNetworkChaosSpec() chaosmeshv1alph1.NetworkChaosSpec {
 	return *it.NetworkChaos
+}
+
+func (it *Template) FetchPodChaos() chaosmeshv1alph1.PodChaosSpec {
+	return *it.PodChaos
 }
 
 func (it *Template) GetSerialChildrenList() []string {

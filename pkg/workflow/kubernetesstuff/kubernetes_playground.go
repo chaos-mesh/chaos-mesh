@@ -30,6 +30,25 @@ func NewKubernetesPlayground(client client.Client) *KubernetesPlayground {
 	return &KubernetesPlayground{client: client}
 }
 
+func (it *KubernetesPlayground) CreatePodChaos(podChaos v1alpha1.PodChaos) error {
+	return it.client.Create(context.TODO(), &podChaos)
+}
+
+func (it *KubernetesPlayground) DeletePodChaos(namespace, name string) error {
+	key := types.NamespacedName{
+		Namespace: namespace,
+		Name:      name,
+	}
+	target := v1alpha1.PodChaos{}
+	// TODO: make context work
+	err := it.client.Get(context.TODO(), key, &target)
+	if err != nil {
+		return err
+	}
+	// TODO: make context work
+	return it.client.Delete(context.TODO(), &target)
+}
+
 func (it *KubernetesPlayground) CreateNetworkChaos(networkChaos v1alpha1.NetworkChaos) error {
 	// TODO: make context work
 	return it.client.Create(context.TODO(), &networkChaos)

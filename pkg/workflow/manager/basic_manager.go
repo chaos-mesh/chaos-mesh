@@ -181,7 +181,7 @@ func (it *basicManager) consume(ctx context.Context, event trigger.Event) error 
 			if err != nil {
 				return err
 			}
-		case template.NetworkChaos:
+		case template.NetworkChaos, template.PodChaos:
 			chaosStateMachine := statemachine.NewChaosStateMachine(event.GetNamespace(), workflowSpec, nodeStatus)
 			sideEffects, err = chaosStateMachine.HandleEvent(event)
 			if err != nil {

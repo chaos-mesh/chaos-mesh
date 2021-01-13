@@ -23,9 +23,12 @@ type Actor interface {
 	PlayOn(pg Playground) error
 }
 
+// TODO: multi type of chaos injection
 type Playground interface {
 	CreateNetworkChaos(networkChaos chaosmeshv1alph1.NetworkChaos) error
 	DeleteNetworkChaos(namespace, name string) error
+	CreatePodChaos(podChaos chaosmeshv1alph1.PodChaos) error
+	DeletePodChaos(namespace, name string) error
 }
 
 type CreateNetworkChaosActor struct {
@@ -51,4 +54,29 @@ func NewDeleteNetworkChaosActor(namespace string, name string) *DeleteNetworkCha
 
 func (it *DeleteNetworkChaosActor) PlayOn(pg Playground) error {
 	return pg.DeleteNetworkChaos(it.namespace, it.name)
+}
+
+type CreatePodChaosActor struct {
+	chaosToCreate chaosmeshv1alph1.PodChaos
+}
+
+func NewCreatePodChaosActor(chaosToCreate chaosmeshv1alph1.PodChaos) *CreatePodChaosActor {
+	return &CreatePodChaosActor{chaosToCreate: chaosToCreate}
+}
+
+func (it *CreatePodChaosActor) PlayOn(pg Playground) error {
+	return pg.CreatePodChaos(it.chaosToCreate)
+}
+
+type DeletePodChaosActor struct {
+	namespace string
+	name      string
+}
+
+func NewDeletePodChaosActor(namespace string, name string) *DeletePodChaosActor {
+	return &DeletePodChaosActor{namespace: namespace, name: name}
+}
+
+func (it *DeletePodChaosActor) PlayOn(pg Playground) error {
+	return pg.DeletePodChaos(it.namespace, it.name)
 }
