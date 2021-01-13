@@ -20,7 +20,6 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
-
 	"github.com/robfig/cron/v3"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"

@@ -68,7 +68,7 @@ If you have a specific idea of a fix or update, follow these steps below to subm
 
    ```bash
    $ make generate
-   $ make yaml
+   $ make manifests/crd.yaml
    ```
 
 6. Check the code change by running the following command:
