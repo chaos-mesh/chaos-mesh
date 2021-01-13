@@ -6,21 +6,21 @@ metadata:
   creationTimestamp: null
   name: validating-webhook-configuration
 webhooks:
-  - clientConfig:
-      caBundle: Cg==
-      service:
-        name: webhook-service
-        namespace: system
-        path: /inject-v1-pod
-    failurePolicy: Fail
-    name: vpod.kb.io
-    rules:
-      - apiGroups:
-          - ""
-        apiVersions:
-          - v1
-        operations:
-          - CREATE
-          - UPDATE
-        resources:
-          - pods
+- clientConfig:
+    caBundle: Cg==
+    service:
+      name: webhook-service
+      namespace: system
+      path: /inject-v1-pod
+  failurePolicy: Fail
+  name: vpod.kb.io
+  rules:
+  - apiGroups:
+    - ""
+    apiVersions:
+    - v1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - pods
