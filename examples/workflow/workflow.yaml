@@ -12,7 +12,7 @@ spec:
       - prefix-suspending
       - workflow-network-chaos
       - suffix-suspending
-      - workflow-network-chaos
+      - worklfow-pod-chaos
     - name: prefix-suspending
       template_type: Suspend
       duration: 2s
@@ -29,6 +29,15 @@ spec:
           latency: "90ms"
           correlation: "25"
           jitter: "90ms"
+    - name: worklfow-pod-chaos
+      template_type: PodChaos
+      duration: 10s
+      pod_chaos:
+        action: pod-kill
+        mode: one
+        selector:
+          labelSelectors:
+            "app": "hello-kubernetes"
     - name: suffix-suspending
       template_type: Suspend
       duration: 5s
