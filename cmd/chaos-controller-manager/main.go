@@ -22,7 +22,7 @@ import (
 
 	"golang.org/x/time/rate"
 
-	chaosmeshv1alpha1 "github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	apiWebhook "github.com/chaos-mesh/chaos-mesh/api/webhook"
 	ccfg "github.com/chaos-mesh/chaos-mesh/controllers/config"
 	"github.com/chaos-mesh/chaos-mesh/controllers/metrics"
@@ -76,7 +76,7 @@ var (
 func init() {
 	_ = clientgoscheme.AddToScheme(scheme)
 
-	_ = chaosmeshv1alpha1.AddToScheme(scheme)
+	_ = v1alpha1.AddToScheme(scheme)
 	// +kubebuilder:scaffold:scheme
 }
 
@@ -130,24 +130,24 @@ func main() {
 
 	// We only setup webhook for podiochaos, and the logic of applying chaos are in the mutation
 	// webhook, because we need to get the running result synchronously in io chaos reconciler
-	chaosmeshv1alpha1.RegisterPodIoHandler(&podiochaos.Handler{
+	v1alpha1.RegisterPodIoHandler(&podiochaos.Handler{
 		Client: mgr.GetClient(),
 		Log:    ctrl.Log.WithName("handler").WithName("PodIOChaos"),
 	})
-	if err = (&chaosmeshv1alpha1.PodIoChaos{}).SetupWebhookWithManager(mgr); err != nil {
+	if err = (&v1alpha1.PodIoChaos{}).SetupWebhookWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create webhook", "webhook", "PodIOChaos")
 		os.Exit(1)
 	}
 
 	// We only setup webhook for podnetworkchaos, and the logic of applying chaos are in the validation
 	// webhook, because we need to get the running result synchronously in network chaos reconciler
-	chaosmeshv1alpha1.RegisterRawPodNetworkHandler(&podnetworkchaos.Handler{
+	v1alpha1.RegisterRawPodNetworkHandler(&podnetworkchaos.Handler{
 		Client:                  mgr.GetClient(),
 		Reader:                  mgr.GetAPIReader(),
 		Log:                     ctrl.Log.WithName("handler").WithName("PodNetworkChaos"),
 		AllowHostNetworkTesting: ccfg.ControllerCfg.AllowHostNetworkTesting,
 	})
-	if err = (&chaosmeshv1alpha1.PodNetworkChaos{}).SetupWebhookWithManager(mgr); err != nil {
+	if err = (&v1alpha1.PodNetworkChaos{}).SetupWebhookWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create webhook", "webhook", "PodNetworkChaos")
 		os.Exit(1)
 	}

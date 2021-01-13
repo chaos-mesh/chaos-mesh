@@ -66,6 +66,9 @@ func main() {
 		if info.IsDir() {
 			return nil
 		}
+		if !strings.HasSuffix(info.Name(), ".go") {
+			return nil
+		}
 
 		fset := token.NewFileSet()
 		file, err := parser.ParseFile(fset, path, nil, parser.ParseComments)

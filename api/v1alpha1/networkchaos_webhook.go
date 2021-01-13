@@ -14,8 +14,10 @@
 package v1alpha1
 
 import (
+	"errors"
 	"fmt"
 	"strconv"
+	"strings"
 	"time"
 
 	"k8s.io/apimachinery/pkg/runtime"
@@ -261,7 +263,7 @@ func (in *CorruptSpec) validateCorrupt(corrupt *field.Path) field.ErrorList {
 // validateBandwidth validates the bandwidth
 func (in *BandwidthSpec) validateBandwidth(bandwidth *field.Path) field.ErrorList {
 	allErrs := field.ErrorList{}
-	_, err := convertUnitToBytes(in.Rate)
+	_, err := ConvertUnitToBytes(in.Rate)
 
 	if err != nil {
 		allErrs = append(allErrs,
@@ -283,4 +285,31 @@ func (in *Target) validateTarget(target *field.Path) field.ErrorList {
 
 	return field.ErrorList{field.Invalid(target.Child("mode"), in.TargetMode,
 		fmt.Sprintf("mode %s not supported", in.TargetMode))}
+}
+
+func ConvertUnitToBytes(nu string) (uint64, error) {
+	// normalize input
+	s := strings.ToLower(strings.TrimSpace(nu))
+
+	for i, u := range []string{"tbps", "gbps", "mbps", "kbps", "bps"} {
+		if strings.HasSuffix(s, u) {
+			ts := strings.TrimSuffix(s, u)
+			s := strings.TrimSpace(ts)
+
+			n, err := strconv.ParseUint(s, 10, 64)
+
+			if err != nil {
+				return 0, err
+			}
+
+			// convert unit to bytes
+			for j := 4 - i; j > 0; j-- {
+				n = n * 1024
+			}
+
+			return n, nil
+		}
+	}
+
+	return 0, errors.New("invalid unit")
 }
