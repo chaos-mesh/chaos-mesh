@@ -14,4 +14,4 @@ RUN apt-get update && apt-get install tzdata -y && rm -rf /var/lib/apt/lists/*
 ENV http_proxy=
 ENV https_proxy=
 
-COPY --from=pingcap/chaos-binary /bin/chaos-dashboard /usr/local/bin/chaos-dashboard
+COPY bin/chaos-dashboard /usr/local/bin/chaos-dashboard

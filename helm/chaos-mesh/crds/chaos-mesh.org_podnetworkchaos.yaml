@@ -1,0 +1,285 @@
+
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.2.5
+  creationTimestamp: null
+  name: podnetworkchaos.chaos-mesh.org
+spec:
+  group: chaos-mesh.org
+  names:
+    kind: PodNetworkChaos
+    listKind: PodNetworkChaosList
+    plural: podnetworkchaos
+    singular: podnetworkchaos
+  preserveUnknownFields: false
+  scope: Namespaced
+  validation:
+    openAPIV3Schema:
+      description: PodNetworkChaos is the Schema for the PodNetworkChaos API
+      properties:
+        apiVersion:
+          description: 'APIVersion defines the versioned schema of this representation
+            of an object. Servers should convert recognized schemas to the latest
+            internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+          type: string
+        kind:
+          description: 'Kind is a string value representing the REST resource this
+            object represents. Servers may infer this from the endpoint the client
+            submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+          type: string
+        metadata:
+          type: object
+        spec:
+          description: Spec defines the behavior of a pod chaos experiment
+          properties:
+            ipsets:
+              description: The ipset on the pod
+              items:
+                description: RawIPSet represents an ipset on specific pod
+                properties:
+                  cidrs:
+                    description: The contents of ipset
+                    items:
+                      type: string
+                    type: array
+                  name:
+                    description: The name of ipset
+                    type: string
+                  source:
+                    type: string
+                required:
+                - cidrs
+                - name
+                - source
+                type: object
+              type: array
+            iptables:
+              description: The iptables rules on the pod
+              items:
+                description: RawIptables represents the iptables rules on specific
+                  pod
+                properties:
+                  direction:
+                    description: The block direction of this iptables rule
+                    type: string
+                  ipsets:
+                    description: The name of related ipset
+                    items:
+                      type: string
+                    type: array
+                  name:
+                    description: The name of iptables chain
+                    type: string
+                  source:
+                    type: string
+                required:
+                - direction
+                - ipsets
+                - name
+                - source
+                type: object
+              type: array
+            tcs:
+              description: The tc rules on the pod
+              items:
+                description: RawTrafficControl represents the traffic control chaos
+                  on specific pod
+                properties:
+                  bandwidth:
+                    description: Bandwidth represents the detail about bandwidth control
+                      action
+                    properties:
+                      buffer:
+                        description: Buffer is the maximum amount of bytes that tokens
+                          can be available for instantaneously.
+                        format: int32
+                        minimum: 1
+                        type: integer
+                      limit:
+                        description: Limit is the number of bytes that can be queued
+                          waiting for tokens to become available.
+                        format: int32
+                        minimum: 1
+                        type: integer
+                      minburst:
+                        description: Minburst specifies the size of the peakrate bucket.
+                          For perfect accuracy, should be set to the MTU of the interface.  If
+                          a peakrate is needed, but some burstiness is acceptable,
+                          this size can be raised. A 3000 byte minburst allows around
+                          3mbit/s of peakrate, given 1000 byte packets.
+                        format: int32
+                        minimum: 0
+                        type: integer
+                      peakrate:
+                        description: Peakrate is the maximum depletion rate of the
+                          bucket. The peakrate does not need to be set, it is only
+                          necessary if perfect millisecond timescale shaping is required.
+                        format: int64
+                        minimum: 0
+                        type: integer
+                      rate:
+                        description: Rate is the speed knob. Allows bps, kbps, mbps,
+                          gbps, tbps unit. bps means bytes per second.
+                        type: string
+                    required:
+                    - buffer
+                    - limit
+                    - rate
+                    type: object
+                  corrupt:
+                    description: Corrupt represents the detail about corrupt action
+                    properties:
+                      correlation:
+                        type: string
+                      corrupt:
+                        type: string
+                    required:
+                    - correlation
+                    - corrupt
+                    type: object
+                  delay:
+                    description: Delay represents the detail about delay action
+                    properties:
+                      correlation:
+                        type: string
+                      jitter:
+                        type: string
+                      latency:
+                        type: string
+                      reorder:
+                        description: ReorderSpec defines details of packet reorder.
+                        properties:
+                          correlation:
+                            type: string
+                          gap:
+                            type: integer
+                          reorder:
+                            type: string
+                        required:
+                        - correlation
+                        - gap
+                        - reorder
+                        type: object
+                    required:
+                    - latency
+                    type: object
+                  duplicate:
+                    description: DuplicateSpec represents the detail about loss action
+                    properties:
+                      correlation:
+                        type: string
+                      duplicate:
+                        type: string
+                    required:
+                    - correlation
+                    - duplicate
+                    type: object
+                  ipset:
+                    description: The name of target ipset
+                    type: string
+                  loss:
+                    description: Loss represents the detail about loss action
+                    properties:
+                      correlation:
+                        type: string
+                      loss:
+                        type: string
+                    required:
+                    - correlation
+                    - loss
+                    type: object
+                  source:
+                    description: The name and namespace of the source network chaos
+                    type: string
+                  type:
+                    description: The type of traffic control
+                    type: string
+                required:
+                - source
+                - type
+                type: object
+              type: array
+          type: object
+        status:
+          description: Most recently observed status of the chaos experiment about
+            pods
+          properties:
+            experiment:
+              description: Experiment records the last experiment state.
+              properties:
+                duration:
+                  type: string
+                endTime:
+                  format: date-time
+                  type: string
+                phase:
+                  description: ExperimentPhase is the current status of chaos experiment.
+                  type: string
+                podRecords:
+                  items:
+                    description: PodStatus represents information about the status
+                      of a pod in chaos experiment.
+                    properties:
+                      action:
+                        type: string
+                      hostIP:
+                        type: string
+                      message:
+                        description: A brief CamelCase message indicating details
+                          about the chaos action. e.g. "delete this pod" or "pause
+                          this pod duration 5m"
+                        type: string
+                      name:
+                        type: string
+                      namespace:
+                        type: string
+                      podIP:
+                        type: string
+                    required:
+                    - action
+                    - hostIP
+                    - name
+                    - namespace
+                    - podIP
+                    type: object
+                  type: array
+                reason:
+                  type: string
+                startTime:
+                  format: date-time
+                  type: string
+              type: object
+            failedMessage:
+              type: string
+            scheduler:
+              description: ScheduleStatus is the current status of chaos scheduler.
+              properties:
+                nextRecover:
+                  description: Next time when this action will be recovered
+                  format: date-time
+                  type: string
+                nextStart:
+                  description: Next time when this action will be applied again
+                  format: date-time
+                  type: string
+              type: object
+          required:
+          - experiment
+          type: object
+      required:
+      - spec
+      type: object
+  version: v1alpha1
+  versions:
+  - name: v1alpha1
+    served: true
+    storage: true
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []

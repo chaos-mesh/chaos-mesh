@@ -48,7 +48,7 @@ func NewServer(
 	conf *config.ChaosDashboardConfig,
 	archive core.ExperimentStore,
 	event core.EventStore,
-) (*Server, client.Client, client.Reader) {
+) (*Server, client.Client, client.Reader, *runtime.Scheme) {
 	s := &Server{}
 
 	// namespace scoped
@@ -101,7 +101,7 @@ func NewServer(
 		}
 	}
 
-	return s, s.Manager.GetClient(), s.Manager.GetAPIReader()
+	return s, s.Manager.GetClient(), s.Manager.GetAPIReader(), s.Manager.GetScheme()
 }
 
 // Register starts collectors manager.
