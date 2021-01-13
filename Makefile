@@ -117,10 +117,6 @@ endif
 watchmaker:
 	$(CGO) build -ldflags '$(LDFLAGS)' -o bin/watchmaker ./cmd/watchmaker/...
 
-# Build chaosctl
-chaosctl:
-	$(GO) build -ldflags '$(LDFLAGS)' -o bin/chaosctl ./cmd/chaosctl/*.go
-
 # Run against the configured Kubernetes cluster in ~/.kube/config
 run: generate fmt vet manifests
 	$(GO) run ./cmd/controller-manager/main.go
@@ -180,6 +176,10 @@ GO_TARGET_PHONY :=
 
 BINARIES :=
 
+# $(1): the binary output target
+# $(2): the source code of the binary
+# $(3): whether built with cgo
+# $(4): extra dependencies
 define COMPILE_GO_TEMPLATE
 ifeq ($(IN_DOCKER),1)
 
@@ -247,6 +247,9 @@ $(eval $(call COMPILE_GO_TEMPLATE,images/chaos-dashboard/bin/chaos-dashboard,./c
 
 $(eval $(call BUILD_IN_DOCKER_TEMPLATE,chaos-mesh,images/chaos-mesh/bin/chaos-controller-manager))
 $(eval $(call COMPILE_GO_TEMPLATE,images/chaos-mesh/bin/chaos-controller-manager,./cmd/chaos-controller-manager/main.go,0))
+
+$(eval $(call BUILD_IN_DOCKER_TEMPLATE,chaos-mesh,images/chaos-mesh/bin/chaosctl))
+$(eval $(call COMPILE_GO_TEMPLATE,images/chaos-mesh/bin/chaosctl,./cmd/chaosctl/main.go,0))
 
 $(eval $(call BUILD_IN_DOCKER_TEMPLATE,chaos-mesh-e2e,test/image/e2e/bin/ginkgo))
 $(eval $(call COMPILE_GO_TEMPLATE,test/image/e2e/bin/ginkgo,github.com/onsi/ginkgo/ginkgo,0))
