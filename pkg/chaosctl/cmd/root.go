@@ -29,7 +29,7 @@ Interacting with chaos mesh
   # show debug info
   chaosctl debug networkchaos
 
-  # show logs of all chaos-mesh componentes
+  # show logs of all chaos-mesh components
   chaosctl logs`,
 }
 
