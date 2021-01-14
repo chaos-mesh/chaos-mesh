@@ -38,7 +38,6 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
 	"github.com/chaos-mesh/chaos-mesh/pkg/portforward"
 	"github.com/chaos-mesh/chaos-mesh/pkg/selector"
-	e2econfig "github.com/chaos-mesh/chaos-mesh/test/e2e/config"
 )
 
 var (
@@ -315,11 +314,8 @@ func GetPidFromPod(ctx context.Context, pod v1.Pod, daemon v1.Pod) (uint32, erro
 }
 
 func forwardPorts(ctx context.Context, pod v1.Pod, port uint16) (context.CancelFunc, uint16, error) {
-	clientRawConfig, err := e2econfig.LoadClientRawConfig()
-	if err != nil {
-		log.Fatal("failed to load raw config", err.Error())
-	}
-	fw, err := portforward.NewPortForwarder(ctx, e2econfig.NewSimpleRESTClientGetter(clientRawConfig), false)
+	commonRestClientGetter := NewCommonRestClientGetter()
+	fw, err := portforward.NewPortForwarder(ctx, commonRestClientGetter, false)
 	if err != nil {
 		log.Fatal("failed to create port forwarder", err.Error())
 	}
