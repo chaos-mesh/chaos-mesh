@@ -189,7 +189,7 @@ func (m *chaosStateMachine) run(ctx context.Context, targetPhase v1alpha1.Experi
 func (m *chaosStateMachine) Into(ctx context.Context, targetPhase v1alpha1.ExperimentPhase, now time.Time) error {
 	updated, err := m.run(ctx, targetPhase, now)
 	if err != nil {
-		m.Log.Error(err, "error while excuting state machine")
+		m.Log.Error(err, "error while executing state machine")
 	}
 
 	if updated {
