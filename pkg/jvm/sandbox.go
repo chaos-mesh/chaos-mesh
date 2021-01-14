@@ -16,6 +16,7 @@ package jvm
 import (
 	"bytes"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 )
 
@@ -55,9 +56,17 @@ func httpPost(url string, body []byte) error {
 	request, _ := http.NewRequest("POST", url, reqBody)
 	request.Header.Set("Content-type", "application/json")
 
-	_, err := client.Do(request)
+	response, err := client.Do(request)
 	if err != nil {
 		return err
+	}
+
+	if response.StatusCode != 200 {
+		data, err := ioutil.ReadAll(response.Body)
+		if err != nil {
+			return err
+		}
+		return fmt.Errorf("jvm sandbox error response:%s", data)
 	}
 	return nil
 }
