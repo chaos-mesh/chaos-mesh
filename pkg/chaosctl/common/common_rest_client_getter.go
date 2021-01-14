@@ -45,9 +45,8 @@ func (it *CommonRestClientGetter) ToRESTConfig() (*rest.Config, error) {
 		home, err := os.UserHomeDir()
 		if err != nil {
 			return nil, err
-		} else {
-			kubeconfig = filepath.Join(home, ".kube", "config")
 		}
+		kubeconfig = filepath.Join(home, ".kube", "config")
 	}
 	return clientcmd.BuildConfigFromFlags("", kubeconfig)
 }
