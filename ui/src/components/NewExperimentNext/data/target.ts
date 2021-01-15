@@ -427,30 +427,48 @@ export const schema: Partial<Record<Kind, Record<string, Yup.ObjectSchema>>> = {
   NetworkChaos: {
     partition: Yup.object({
       direction: Yup.string().required('The direction is required'),
+      target_scope: Yup.object({
+        namespace_selectors: Yup.array().min(1, 'The namespace selectors is required'),
+      }),
     }),
     loss: Yup.object({
       loss: Yup.object({
         loss: Yup.string().required('The loss is required'),
+      }),
+      target_scope: Yup.object({
+        namespace_selectors: Yup.array().min(1, 'The namespace selectors is required'),
       }),
     }),
     delay: Yup.object({
       delay: Yup.object({
         latency: Yup.string().required('The latency is required'),
       }),
+      target_scope: Yup.object({
+        namespace_selectors: Yup.array().min(1, 'The namespace selectors is required'),
+      }),
     }),
     duplicate: Yup.object({
       duplicate: Yup.object({
         duplicate: Yup.string().required('The duplicate is required'),
+      }),
+      target_scope: Yup.object({
+        namespace_selectors: Yup.array().min(1, 'The namespace selectors is required'),
       }),
     }),
     corrupt: Yup.object({
       corrupt: Yup.object({
         corrupt: Yup.string().required('The corrupt is required'),
       }),
+      target_scope: Yup.object({
+        namespace_selectors: Yup.array().min(1, 'The namespace selectors is required'),
+      }),
     }),
     bandwidth: Yup.object({
       bandwidth: Yup.object({
         rate: Yup.string().required('The rate of bandwidth is required'),
+      }),
+      target_scope: Yup.object({
+        namespace_selectors: Yup.array().min(1, 'The namespace selectors is required'),
       }),
     }),
   },
