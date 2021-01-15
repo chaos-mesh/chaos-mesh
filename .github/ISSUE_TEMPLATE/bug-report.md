@@ -9,6 +9,9 @@ about: Something isn't working as expected
 **What version of Kubernetes are you using?**
 <!-- You can run `kubectl version` -->
 
+**What version of Chaos Mesh are you using?**
+<!-- You can run `kubectl exec -n chaos-testing {chaos-controller-manager-pod-name} -- /usr/local/bin/chaos-controller-manager -version` -->
+
 **What did you do?**
 <!-- If possible, provide a recipe for reproducing the error. How you installed chaos-mesh. -->
 
