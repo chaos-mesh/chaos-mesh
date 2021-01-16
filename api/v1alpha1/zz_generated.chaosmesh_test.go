@@ -22,6 +22,127 @@ import (
 	. "github.com/onsi/gomega"
 )
 
+func TestAWSChaosIsDeleted(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	chaos := &AWSChaos{}
+	err := faker.FakeData(chaos)
+
+	g.Expect(err).To(BeNil())
+
+	chaos.IsDeleted()
+}
+
+func TestAWSChaosIsIsPaused(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	chaos := &AWSChaos{}
+	err := faker.FakeData(chaos)
+
+	g.Expect(err).To(BeNil())
+
+	chaos.IsPaused()
+}
+
+func TestAWSChaosGetDuration(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	chaos := &AWSChaos{}
+	err := faker.FakeData(chaos)
+
+	g.Expect(err).To(BeNil())
+
+	chaos.GetDuration()
+}
+
+func TestAWSChaosGetNextStart(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	chaos := &AWSChaos{}
+	err := faker.FakeData(chaos)
+
+	g.Expect(err).To(BeNil())
+
+	chaos.GetNextStart()
+}
+
+func TestAWSChaosSetNextStart(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	chaos := &AWSChaos{}
+	err := faker.FakeData(chaos)
+
+	g.Expect(err).To(BeNil())
+
+	chaos.SetNextStart(time.Now())
+}
+
+func TestAWSChaosGetNextRecover(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	chaos := &AWSChaos{}
+	err := faker.FakeData(chaos)
+
+	g.Expect(err).To(BeNil())
+
+	chaos.GetNextRecover()
+}
+
+func TestAWSChaosSetNextRecover(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	chaos := &AWSChaos{}
+	err := faker.FakeData(chaos)
+
+	g.Expect(err).To(BeNil())
+
+	chaos.SetNextRecover(time.Now())
+}
+
+func TestAWSChaosGetScheduler(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	chaos := &AWSChaos{}
+	err := faker.FakeData(chaos)
+
+	g.Expect(err).To(BeNil())
+
+	chaos.GetScheduler()
+}
+
+func TestAWSChaosGetChaos(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	chaos := &AWSChaos{}
+	err := faker.FakeData(chaos)
+
+	g.Expect(err).To(BeNil())
+
+	chaos.GetChaos()
+}
+
+func TestAWSChaosGetStatus(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	chaos := &AWSChaos{}
+	err := faker.FakeData(chaos)
+
+	g.Expect(err).To(BeNil())
+
+	chaos.GetStatus()
+}
+
+func TestAWSChaosListChaos(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	chaos := &AWSChaosList{}
+	err := faker.FakeData(chaos)
+
+	g.Expect(err).To(BeNil())
+
+	chaos.ListChaos()
+}
+
 func TestDNSChaosIsDeleted(t *testing.T) {
 	g := NewGomegaWithT(t)
 

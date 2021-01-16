@@ -3,6 +3,10 @@ module github.com/chaos-mesh/chaos-mesh
 require (
 	code.cloudfoundry.org/bytefmt v0.0.0-20200131002437-cf55d5288a48
 	github.com/DATA-DOG/go-sqlmock v1.5.0
+	github.com/aws/aws-sdk-go-v2 v0.31.0
+	github.com/aws/aws-sdk-go-v2/config v0.4.0
+	github.com/aws/aws-sdk-go-v2/credentials v0.2.0
+	github.com/aws/aws-sdk-go-v2/service/ec2 v0.31.0
 	github.com/chaos-mesh/chaos-mesh/api/v1alpha1 v0.0.0
 	github.com/chaos-mesh/k8s_dns_chaos v0.0.0-20200922120555-7ced93637075
 	github.com/containerd/cgroups v0.0.0-20200404012852-53ba5634dc0f
@@ -12,6 +16,7 @@ require (
 	github.com/containerd/fifo v0.0.0-20191213151349-ff969a566b00 // indirect
 	github.com/containerd/typeurl v0.0.0-20200115183213-fe1d0d650e42 // indirect
 	github.com/coreos/go-systemd v0.0.0-20191104093116-d3cd4ed1dbcf // indirect
+	github.com/coreos/rkt v1.30.0 // indirect
 	github.com/docker/docker v0.7.3-0.20190327010347-be7ac8be2ae0
 	github.com/docker/go-connections v0.4.0 // indirect
 	github.com/docker/go-events v0.0.0-20190806004212-e31b211e4f1c // indirect

@@ -34,6 +34,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/webhook/config"
 	"github.com/chaos-mesh/chaos-mesh/pkg/webhook/config/watcher"
 
+	_ "github.com/chaos-mesh/chaos-mesh/controllers/awschaos"
 	_ "github.com/chaos-mesh/chaos-mesh/controllers/dnschaos"
 	_ "github.com/chaos-mesh/chaos-mesh/controllers/httpchaos"
 	_ "github.com/chaos-mesh/chaos-mesh/controllers/iochaos"
@@ -140,9 +141,9 @@ func main() {
 	// We only setup webhook for podnetworkchaos, and the logic of applying chaos are in the validation
 	// webhook, because we need to get the running result synchronously in network chaos reconciler
 	v1alpha1.RegisterRawPodNetworkHandler(&podnetworkchaos.Handler{
-		Client:                  mgr.GetClient(),
-		Reader:                  mgr.GetAPIReader(),
-		Log:                     ctrl.Log.WithName("handler").WithName("PodNetworkChaos"),
+		Client: mgr.GetClient(),
+		Reader: mgr.GetAPIReader(),
+		Log:    ctrl.Log.WithName("handler").WithName("PodNetworkChaos"),
 		AllowHostNetworkTesting: ccfg.ControllerCfg.AllowHostNetworkTesting,
 	})
 	if err = (&v1alpha1.PodNetworkChaos{}).SetupWebhookWithManager(mgr); err != nil {
