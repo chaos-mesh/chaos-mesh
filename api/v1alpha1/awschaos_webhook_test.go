@@ -30,6 +30,8 @@ var _ = Describe("awschaos_webhook", func() {
 				expect  string
 			}
 			duration := "400s"
+			testDeviceName := "testDeviceName"
+			testEbsVolume := "testEbsVolume"
 			tcs := []TestCase{
 				{
 					name: "simple ValidateCreate for DetachVolume",
@@ -118,7 +120,7 @@ var _ = Describe("awschaos_webhook", func() {
 						},
 						Spec: AwsChaosSpec{
 							Action:     DetachVolume,
-							DeviceName: "testDeviceName",
+							DeviceName: &testDeviceName,
 						},
 					},
 					execute: func(chaos *AwsChaos) error {
@@ -135,7 +137,7 @@ var _ = Describe("awschaos_webhook", func() {
 						},
 						Spec: AwsChaosSpec{
 							Action:    DetachVolume,
-							EbsVolume: "testEbsVolume",
+							EbsVolume: &testEbsVolume,
 						},
 					},
 					execute: func(chaos *AwsChaos) error {
