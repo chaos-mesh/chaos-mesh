@@ -56,7 +56,7 @@ var _ = Describe("AwsChaos", func() {
 					Namespace: "default",
 				},
 				Spec: AwsChaosSpec{
-					Action: Ec2Stop,
+					Action:      Ec2Stop,
 					Ec2Instance: &testInstance,
 					SecretName:  &testSecretName,
 				},
