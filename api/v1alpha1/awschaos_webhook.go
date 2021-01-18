@@ -99,7 +99,7 @@ func (in *AwsChaos) ValidatePodMode(spec *field.Path) field.ErrorList {
 func (in *AwsChaosSpec) validateEbsVolume(containerField *field.Path) field.ErrorList {
 	allErrs := field.ErrorList{}
 	if in.Action == DetachVolume {
-		if in.EbsVolume == "" {
+		if in.EbsVolume == nil {
 			err := fmt.Errorf("the ID of EBS volume should not be empty on %s action", in.Action)
 			allErrs = append(allErrs, field.Invalid(containerField, in.EbsVolume, err.Error()))
 		}
@@ -111,7 +111,7 @@ func (in *AwsChaosSpec) validateEbsVolume(containerField *field.Path) field.Erro
 func (in *AwsChaosSpec) validateDeviceName(containerField *field.Path) field.ErrorList {
 	allErrs := field.ErrorList{}
 	if in.Action == DetachVolume {
-		if in.DeviceName == "" {
+		if in.DeviceName == nil {
 			err := fmt.Errorf("the name of device should not be empty on %s action", in.Action)
 			allErrs = append(allErrs, field.Invalid(containerField, in.DeviceName, err.Error()))
 		}
