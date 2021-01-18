@@ -435,18 +435,15 @@ func (e *eventStore) DeleteByUID(_ context.Context, uid string) error {
 		return err
 	}
 	for _, et := range eventList {
-		if err := e.db.Model(core.Event{}).Unscoped().Delete(*et).Error; err != nil {
-			return err
-		}
-
 		if err := e.db.Model(core.PodRecord{}).
 			Where(
 				"event_id = ? ",
-				et.ID).Unscoped().Delete(core.PodRecord{}).Error; err != nil {
+					et.ID).Unscoped().Delete(core.PodRecord{}).Error; err != nil {
 			return err
 		}
 	}
-	return nil
+	return e.db.Where("experiment_id = ?", uid).Unscoped().
+		Delete(core.Event{}).Error
 }
 
 func (e *eventStore) getUID(_ context.Context, ns, name string) (string, error) {
