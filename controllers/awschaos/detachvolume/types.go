@@ -22,6 +22,7 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 
+	awscfg "github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
 
@@ -47,20 +48,31 @@ func (e *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.I
 		return err
 	}
 
-	secret := &v1.Secret{}
-	err := e.Client.Get(ctx, types.NamespacedName{
-		Name:      awschaos.Spec.SecretName,
-		Namespace: awschaos.Namespace,
-	}, secret)
+	opts := []func(*awscfg.LoadOptions) error{
+		awscfg.WithRegion(awschaos.Spec.AwsRegion),
+	}
+	if awschaos.Spec.SecretName != nil {
+		secret := &v1.Secret{}
+		err := e.Client.Get(ctx, types.NamespacedName{
+			Name:      *awschaos.Spec.SecretName,
+			Namespace: awschaos.Namespace,
+		}, secret)
+		if err != nil {
+			e.Log.Error(err, "fail to get cloud secret")
+			return err
+		}
+		opts = append(opts, awscfg.WithCredentialsProvider(credentials.NewStaticCredentialsProvider(
+			string(secret.Data["aws_access_key_id"]),
+			string(secret.Data["aws_secret_access_key"]),
+			"",
+		)))
+	}
+	cfg, err := awscfg.LoadDefaultConfig(ctx, opts...)
 	if err != nil {
-		e.Log.Error(err, "fail to get cloud secret")
+		e.Log.Error(err, "unable to load aws SDK config")
 		return err
 	}
-
-	ec2client := ec2.New(ec2.Options{
-		Region:      awschaos.Spec.AwsRegion,
-		Credentials: credentials.NewStaticCredentialsProvider(string(secret.Data["aws_access_key_id"]), string(secret.Data["aws_secret_access_key"]), ""),
-	})
+	ec2client := ec2.NewFromConfig(cfg)
 
 	awschaos.Finalizers = []string{AwsFinalizer}
 	_, err = ec2client.DetachVolume(context.TODO(), &ec2.DetachVolumeInput{
@@ -71,6 +83,7 @@ func (e *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.I
 	})
 
 	if err != nil {
+		awschaos.Finalizers = make([]string, 0)
 		e.Log.Error(err, "fail to detach the volume")
 		return err
 	}
@@ -87,20 +100,31 @@ func (e *endpoint) Recover(ctx context.Context, req ctrl.Request, chaos v1alpha1
 	}
 
 	awschaos.Finalizers = make([]string, 0)
-	secret := &v1.Secret{}
-	err := e.Client.Get(ctx, types.NamespacedName{
-		Name:      awschaos.Spec.SecretName,
-		Namespace: awschaos.Namespace,
-	}, secret)
+	opts := []func(*awscfg.LoadOptions) error{
+		awscfg.WithRegion(awschaos.Spec.AwsRegion),
+	}
+	if awschaos.Spec.SecretName != nil {
+		secret := &v1.Secret{}
+		err := e.Client.Get(ctx, types.NamespacedName{
+			Name:      *awschaos.Spec.SecretName,
+			Namespace: awschaos.Namespace,
+		}, secret)
+		if err != nil {
+			e.Log.Error(err, "fail to get cloud secret")
+			return err
+		}
+		opts = append(opts, awscfg.WithCredentialsProvider(credentials.NewStaticCredentialsProvider(
+			string(secret.Data["aws_access_key_id"]),
+			string(secret.Data["aws_secret_access_key"]),
+			"",
+		)))
+	}
+	cfg, err := awscfg.LoadDefaultConfig(ctx, opts...)
 	if err != nil {
-		e.Log.Error(err, "fail to get cloud secret")
+		e.Log.Error(err, "unable to load aws SDK config")
 		return err
 	}
-
-	ec2client := ec2.New(ec2.Options{
-		Region:      awschaos.Spec.AwsRegion,
-		Credentials: credentials.NewStaticCredentialsProvider(string(secret.Data["aws_access_key_id"]), string(secret.Data["aws_secret_access_key"]), ""),
-	})
+	ec2client := ec2.NewFromConfig(cfg)
 
 	_, err = ec2client.AttachVolume(context.TODO(), &ec2.AttachVolumeInput{
 		Device:     awschaos.Spec.DeviceName,

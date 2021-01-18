@@ -56,7 +56,7 @@ type AwsChaosSpec struct {
 	Scheduler *SchedulerSpec `json:"scheduler,omitempty"`
 
 	// SecretName defines the name of kubernetes secret.
-	SecretName string `json:"secretName"`
+	SecretName *string `json:"secretName,omitempty"`
 
 	// AwsRegion defines the region of aws.
 	AwsRegion string `json:"awsRegion"`
