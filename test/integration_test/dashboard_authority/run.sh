@@ -82,7 +82,7 @@ function REQUEST() {
 echo "***** create chaos experiments *****"
 
 echo "viewer is forbidden to create experiments"
-REQUEST BUSYBOX_MANAGER_FORBIDDEN_TOKEN_LIST[@] "POST" "/api/experiments/new" "create_exp.out" "is forbidden" 
+REQUEST BUSYBOX_MANAGER_FORBIDDEN_TOKEN_LIST[@] "POST" "/api/experiments/new" "create_exp.out" "is forbidden"
 
 echo "only manager can create experiments success"
 # here just use busybox manager because experiment can be created only one time
@@ -137,7 +137,7 @@ echo "viewer is forbidden to restart experiments"
 REQUEST BUSYBOX_MANAGER_FORBIDDEN_TOKEN_LIST[@] "PUT" "/api/experiments/start/${EXP_UID}?namespace=busybox" "restart_exp.out" "is forbidden"
 
 echo "only manager can pause experiments"
-REQUEST BUSYBOX_MANAGE_TOKEN_LIST[@] "PUT" "/api/experiments/start/${EXP_UID}?namespace=busybox" "restart_exp.out" "success"                    
+REQUEST BUSYBOX_MANAGE_TOKEN_LIST[@] "PUT" "/api/experiments/start/${EXP_UID}?namespace=busybox" "restart_exp.out" "success"
 
 
 echo "***** update chaos experiments *****"
@@ -157,6 +157,45 @@ REQUEST BUSYBOX_MANAGER_FORBIDDEN_TOKEN_LIST[@] "DELETE" "/api/experiments/${EXP
 echo "only manager can delete experiments success"
 # here just use cluster manager because experiment can be delete only one time
 REQUEST CLUSTER_MANAGER_TOKEN_LIST[@] "DELETE" "/api/experiments/${EXP_UID}" "delete_exp.out" "success"
+
+
+echo "***** list events *****"
+
+echo "all token can list events under namespace busybox"
+REQUEST BUSYBOX_VIEW_TOKEN_LIST[@] "GET" "/api/events?namespace=busybox" "list_event.out" "ci-test"
+
+echo "cluster manager and viewer can list events in the cluster"
+REQUEST CLUSTER_VIEW_TOKEN_LIST[@] "GET" "/api/events" "list_event.out" "ci-test"
+
+echo "busybox manager and viewer is forbidden to list events in the cluster or other namespace"
+REQUEST CLUSTER_VIEW_FORBIDDEN_TOKEN_LIST[@] "GET" "/api/events" "list_event.out" "can't list"
+REQUEST CLUSTER_VIEW_FORBIDDEN_TOKEN_LIST[@] "GET" "/api/events?namespace=default" "list_event.out" "can't list"
+
+
+echo "***** list dry events *****"
+
+echo "all token can list dry events under namespace busybox"
+REQUEST BUSYBOX_VIEW_TOKEN_LIST[@] "GET" "/api/events?namespace=busybox" "list_dry_event.out" "ci-test"
+
+echo "cluster manager and viewer can list dry events in the cluster"
+REQUEST CLUSTER_VIEW_TOKEN_LIST[@] "GET" "/api/events/dry" "list_dry_event.out" "ci-test"
+
+echo "busybox manager and viewer is forbidden to list dry events in the cluster or other namespace"
+REQUEST CLUSTER_VIEW_FORBIDDEN_TOKEN_LIST[@] "GET" "/api/events/dry" "list_dry_event.out" "can't list"
+REQUEST CLUSTER_VIEW_FORBIDDEN_TOKEN_LIST[@] "GET" "/api/events/dry?namespace=default" "list_dry_event.out" "can't list"
+
+
+echo "***** get event by id *****"
+
+echo "all token can get event under namespace busybox"
+REQUEST BUSYBOX_VIEW_TOKEN_LIST[@] "GET" "/api/events/get?id=1&namespace=busybox" "get_event.out" "experiment_id"
+
+echo "cluster manager and viewer can get event in the cluster"
+REQUEST CLUSTER_VIEW_TOKEN_LIST[@] "GET" "/api/events/get?id=1" "get_event.out" "experiment_id"
+
+echo "busybox manager and viewer is forbidden to get event in the cluster or other namespace"
+REQUEST CLUSTER_VIEW_FORBIDDEN_TOKEN_LIST[@] "GET" "/api/events/get?id=1" "get_event.out" "can't list"
+REQUEST CLUSTER_VIEW_FORBIDDEN_TOKEN_LIST[@] "GET" "/api/events/get?id=1&namespace=default" "get_event.out" "can't list"
 
 
 echo "***** list archive chaos experiments *****"
@@ -206,45 +245,6 @@ REQUEST BUSYBOX_MANAGER_FORBIDDEN_TOKEN_LIST[@] "DELETE" "/api/archives/${EXP_UI
 echo "only manager can delete archive experiments success"
 # here use one manager token to delete it
 REQUEST BUSYBOX_MANAGER_TOKEN_LIST[@] "DELETE" "/api/archives/${EXP_UID}?namespace=busybox" "delete_archives.out" "success"
-
-
-echo "***** list events *****"
-
-echo "all token can list events under namespace busybox"
-REQUEST BUSYBOX_VIEW_TOKEN_LIST[@] "GET" "/api/events?namespace=busybox" "list_event.out" "ci-test"
-
-echo "cluster manager and viewer can list events in the cluster"
-REQUEST CLUSTER_VIEW_TOKEN_LIST[@] "GET" "/api/events" "list_event.out" "ci-test"
-
-echo "busybox manager and viewer is forbidden to list events in the cluster or other namespace"
-REQUEST CLUSTER_VIEW_FORBIDDEN_TOKEN_LIST[@] "GET" "/api/events" "list_event.out" "can't list"
-REQUEST CLUSTER_VIEW_FORBIDDEN_TOKEN_LIST[@] "GET" "/api/events?namespace=default" "list_event.out" "can't list"
-
-
-echo "***** list dry events *****"
-
-echo "all token can list dry events under namespace busybox"
-REQUEST BUSYBOX_VIEW_TOKEN_LIST[@] "GET" "/api/events?namespace=busybox" "list_dry_event.out" "ci-test"
-
-echo "cluster manager and viewer can list dry events in the cluster"
-REQUEST CLUSTER_VIEW_TOKEN_LIST[@] "GET" "/api/events/dry" "list_dry_event.out" "ci-test"
-
-echo "busybox manager and viewer is forbidden to list dry events in the cluster or other namespace"
-REQUEST CLUSTER_VIEW_FORBIDDEN_TOKEN_LIST[@] "GET" "/api/events/dry" "list_dry_event.out" "can't list"
-REQUEST CLUSTER_VIEW_FORBIDDEN_TOKEN_LIST[@] "GET" "/api/events/dry?namespace=default" "list_dry_event.out" "can't list"
-
-
-echo "***** get event by id *****"
-
-echo "all token can get event under namespace busybox"
-REQUEST BUSYBOX_VIEW_TOKEN_LIST[@] "GET" "/api/events/get?id=1&namespace=busybox" "get_event.out" "experiment_id"
-
-echo "cluster manager and viewer can get event in the cluster"
-REQUEST CLUSTER_VIEW_TOKEN_LIST[@] "GET" "/api/events/get?id=1" "get_event.out" "experiment_id"
-
-echo "busybox manager and viewer is forbidden to get event in the cluster or other namespace"
-REQUEST CLUSTER_VIEW_FORBIDDEN_TOKEN_LIST[@] "GET" "/api/events/get?id=1" "get_event.out" "can't list"
-REQUEST CLUSTER_VIEW_FORBIDDEN_TOKEN_LIST[@] "GET" "/api/events/get?id=1&namespace=default" "get_event.out" "can't list"
 
 
 echo "pass the dashboard authority test!"

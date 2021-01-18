@@ -305,6 +305,11 @@ func (s *Service) delete(c *gin.Context) {
 		c.Status(http.StatusInternalServerError)
 		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
 	} else {
-		c.JSON(http.StatusOK, StatusResponse{Status: "success"})
+		if err = s.event.DeleteByUID(context.Background(), uid); err != nil {
+			c.Status(http.StatusInternalServerError)
+			_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
+		} else {
+			c.JSON(http.StatusOK, StatusResponse{Status: "success"})
+		}
 	}
 }
