@@ -89,10 +89,6 @@ spec:
               hostPort: {{ .Values.chaosDaemon.grpcPort }}
             - name: http
               containerPort: {{ .Values.chaosDaemon.httpPort }}
-      {{- with .Values.chaosDaemon.tolerations }}
-      tolerations:
-{{ toYaml . | indent 8 }}
-      {{- end }}
 {{- if .Values.bpfki.create }}
         - name: bpfki
           image: {{ .Values.bpfki.image }}
@@ -140,3 +136,15 @@ spec:
           hostPath:
             path: /usr/src
 {{- end }}
+      {{- with .Values.chaosDaemon.nodeSelector }}
+      nodeSelector:
+{{ toYaml . | indent 8 }}
+      {{- end }}
+      {{- with .Values.chaosDaemon.affinity }}
+      affinity:
+{{ toYaml . | indent 8 }}
+      {{- end }}
+      {{- with .Values.chaosDaemon.tolerations }}
+      tolerations:
+{{ toYaml . | indent 8 }}
+      {{- end }}
