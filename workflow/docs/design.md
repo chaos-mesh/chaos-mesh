@@ -8,7 +8,7 @@
   - [Workflow Engine](#workflow-engine)
     - [Trigger](#trigger)
     - [Scheduler](#scheduler)
-    - [Actor](#actor)
+    - [Actor and Playground](#actor-and-playground)
     - [WorkflowManager: rest glue codes](#workflowmanager-rest-glue-codes)
     - [States for Node](#states-for-node)
     - [Node StateMachine](#node-statemachine)
@@ -16,6 +16,7 @@
       - [Suspend](#suspend)
       - [Chaos](#chaos)
     - [States for Workflow](#states-for-workflow)
+    - [Event](#event)
     - [Others](#others)
   - [Implement for Various Template](#implement-for-various-template)
     - [Suspend](#suspend-1)
@@ -65,6 +66,8 @@ It doesn't like:
 
 - BPMN
 
+> Do we really need a tree? How about a pipeline?
+
 ## Core Concepts
 
 **Workflow**: a resource that defines the orchestration of chaos experiments.
@@ -88,37 +91,51 @@ Trigger should:
 - apply rate-limiting on triggered events
 
 ```go
-type Trigger interface{
-  AcquireNext(ctx context.Context) (WorkflowKey, error)
-  ReQueue(key WorkflowKey, duration time.Duration) error
+type Trigger interface {
+	TriggerName() string
+	Acquire(ctx context.Context) (event Event, canceled bool, err error)
 }
 ```
 
-**Trigger** is most like a multiplexer, it could react with various type of events, like:
+For easy implementation, we define a `OperableTrigger`, it works like a queue:
 
-- resources changes
-- delay trigger
-- ...
+```go
+type OperableTrigger interface {
+	Trigger
+	Notify(event Event) error
+	NotifyDelay(event Event, delay time.Duration) error
+}
+```
 
-> For implementation with kubernetes, **Trigger** is controller/reconciler.
+- `Notify` as `Enqueue`
+- `Acquire` as `Dequeue`
+
+`OperableTrigger` is the bridge between workflow engine and other components.
+
+> For implementation with kubernetes, we should make a **Trigger** which is a reconciler in the controller-manager.
 
 ### Scheduler
 
-Scheduler should:
+Scheduler should pick out one or more templates that should be executed next. Scheduler should:
 
-- parse the whole Workflow
-- pick next templates to run
-- evaluate expressions for conditional branch
+- parse the whole Workflow(or other components tell scheduler the hierarchy of workflow, I'm not sure for that)
+- pick next template(s) to run
+- evaluate expressions for conditional branch(only for `Task` Template, which contains conditional branches)
 
-Every workflow instance has its Scheduler, and Scheduler must be rebuild from Workflow status.
+We should implement at least 4 types of Scheduler:
+
+- `EntryScheduler`, it's the first scheduler for each workflow, it only picks the `entry` template.
+- `SerialScheduler`, it should pick the next **one** template from children templates in SerialTemplate.
+- `ParallelScheduler`, it should pick the all templates from children templates in ParallelTemplate.
+- `TaskScheduler`, it is based on `ParallelScheduler`, but contains logic about evaluation expressions for conditional branches.
 
 ```go
 type Scheduler interface{
-  ScheduleNext(ctx context.Context) ([]Template, error)
+  ScheduleNext(ctx context.Context) (nextTemplates []template.Template, parentNodeName string, err error)
 }
 ```
 
-### Actor
+### Actor and Playground
 
 > - Nothing happens until the Actor works.
 > - The status of Workflow does NOT present the result for the Actor. (It means we could not fetch the result of one "Actor" from kubernetes.) Because the "real world" is so complicated to describe, we want the result of "Actor" do not "pollution" our schedule objects.
@@ -128,7 +145,16 @@ The Actor will do all "dirty" effects, for example: creating Chaos Resource, run
 
 ```go
 type Actor interface {
-  Apply(ctx context.Context) error
+  PlayOn(pg Playground) error
+}
+
+type Playground interface {
+  CreateNetworkChaos(networkChaos chaosmeshv1alph1.NetworkChaos) error
+  DeleteNetworkChaos(namespace, name string) error
+  CreatePodChaos(podChaos chaosmeshv1alph1.PodChaos) error
+  DeletePodChaos(namespace, name string) error
+
+  // Other ad-hoc methods
 }
 ```
 
@@ -164,7 +190,7 @@ func loop(){
 
 ### States for Node
 
-There are 8 phase of one Node:
+There are 8 available phase of one Node:
 
 - Init
 - WaitingForSchedule
@@ -242,7 +268,7 @@ Available phase: Init, Running, Holding, Succeed, Failed.
 | NodeCreated           | Change phase to `Running`, create CRD about chaos by Actor, notify itself with `NodeChaosInjectSucceed` | -                                                                                                | -                                                                                                       | -       | -      |
 | NodeChaosInjected     | -                                                                                                       | Change phase to `Holding`, then delay notify itself with event `NodeHoldingAwake` and `duration` | -                                                                                                       | -       | -      |
 | NodeHoldingAwake      | -                                                                                                       | -                                                                                                | Change to phase `Running` ,remove CRD about chaos by Actor, notify itself with event `NodeChaosCleaned` | -       | -      |
-| NodeChaosCleaned      | Change phase to `Succeed`, notify parent node(if exists) with `ChildNodeSucceed`                        | -                                                                                                | -                                                                                                       | -       | -      |
+| NodeChaosCleaned      | -                                                                                                       | Change phase to `Succeed`, notify parent node(if exists) with `ChildNodeSucceed`                 | -                                                                                                       | -       | -      |
 
 ### States for Workflow
 
@@ -263,6 +289,16 @@ There are 4 phase of one Workflow:
 
 > Question: Should we interpret other node when Workflow fall into **Failed**?
 > I think we should do that.
+
+### Event
+
+> Unimplemented now.
+
+Inspired by kubernetes events, it should emit an event when something happens:
+
+- chaos or other resource created
+- make decision about conditional branches
+- unexpected errors
 
 ### Others
 
@@ -286,15 +322,11 @@ For each Actor, its operation is "instantly", which means one Chaos which contai
 
 ### Suspend
 
-As **Trigger** supporting `Requeue()`, **Suspend** is quite simple, just write the time to wake up into status then requeue could implement operation based on time.
-
-It's also the basement for implementing other types of templates.
+Please checkout the statemachine.
 
 ### Parallel/Serial
 
-Parallel and Serial is implemented by composite pattern, it's implemented in **Scheduler**; When someone asks for `ScheduleNext()`, it will return all templates to execute: it returns only one template with **Serial**, returns all children templates with **Parallel**, evaluates expressions and returns matched templates with **Task**.
-
-Notice here is a field called `deadline` for **Parallel**/**Serial** template; If `deadline` is set, this template will fail if the sub-template is not finished when `deadline` exceeds.
+Please checkout the statemachine.
 
 ### Chaos
 
@@ -306,6 +338,8 @@ Chaos Experiments is implemented by both **Trigger** and **Actor**, every Chaos 
 - another **Actor** runs, delete Chaos CRD
 
 It will also watch on Chaos Object, if Chaos status is not expected, this template will fail.
+
+> Another **Trigger** do the watch things.
 
 ### Task
 
@@ -365,8 +399,8 @@ We want Chaos Mesh Workflow could drive these things at the same time:
 
 ## Unresolved Problems
 
-- Support DAG or not
+- Support DAG or not? No. I think it's not enough necessary.
 - Assertion SDK / WebAPI for Task
-- Event-driven & Webhook
+- Event-driven & Webhook. Yes! I have updated the design.
 - Split controller-manager and workflow-engine as two binary
 - Should `Node` be a standalone CRD? No. Just write the codes at first.
