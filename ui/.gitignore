@@ -27,5 +27,5 @@ package-lock.json
 # eslint
 .eslintcache
 
-# ts-interface-checker
+# ts-interface-builder
 *.type-ti.ts
