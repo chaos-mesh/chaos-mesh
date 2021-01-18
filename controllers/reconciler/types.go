@@ -16,9 +16,9 @@ package reconciler
 import (
 	"context"
 
-	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-
 	ctrl "sigs.k8s.io/controller-runtime"
+
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 )
 
 // InnerReconciler is interface for reconciler

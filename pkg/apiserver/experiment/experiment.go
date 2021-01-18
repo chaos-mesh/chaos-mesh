@@ -334,6 +334,21 @@ func (s *Service) createKernelChaos(exp *core.ExperimentInfo, kubeCli client.Cli
 }
 
 func (s *Service) createStressChaos(exp *core.ExperimentInfo, kubeCli client.Client) error {
+	var stressors *v1alpha1.Stressors
+
+	// Error checking
+	if exp.Target.StressChaos.Stressors.CPUStressor.Workers <= 0 && exp.Target.StressChaos.Stressors.MemoryStressor.Workers > 0 {
+		stressors = &v1alpha1.Stressors{
+			MemoryStressor: exp.Target.StressChaos.Stressors.MemoryStressor,
+		}
+	} else if exp.Target.StressChaos.Stressors.MemoryStressor.Workers <= 0 && exp.Target.StressChaos.Stressors.CPUStressor.Workers > 0 {
+		stressors = &v1alpha1.Stressors{
+			CPUStressor: exp.Target.StressChaos.Stressors.CPUStressor,
+		}
+	} else {
+		stressors = exp.Target.StressChaos.Stressors
+	}
+
 	chaos := &v1alpha1.StressChaos{
 		ObjectMeta: v1.ObjectMeta{
 			Name:        exp.Name,
@@ -345,7 +360,7 @@ func (s *Service) createStressChaos(exp *core.ExperimentInfo, kubeCli client.Cli
 			Selector:          exp.Scope.ParseSelector(),
 			Mode:              v1alpha1.PodMode(exp.Scope.Mode),
 			Value:             exp.Scope.Value,
-			Stressors:         exp.Target.StressChaos.Stressors,
+			Stressors:         stressors,
 			StressngStressors: exp.Target.StressChaos.StressngStressors,
 		},
 	}

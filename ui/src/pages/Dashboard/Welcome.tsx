@@ -58,8 +58,12 @@ const Welcome = () => {
       content: T('dashboard.tutorial.step8'),
     },
     {
-      selector: '.dashboard-tutorial',
+      selector: '.predefined-upload',
       content: T('dashboard.tutorial.step9'),
+    },
+    {
+      selector: '.dashboard-tutorial',
+      content: T('dashboard.tutorial.step10'),
     },
   ].map((d) => ({
     ...d,

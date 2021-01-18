@@ -438,7 +438,7 @@ func (e *eventStore) DeleteByUID(_ context.Context, uid string) error {
 		if err := e.db.Model(core.PodRecord{}).
 			Where(
 				"event_id = ? ",
-					et.ID).Unscoped().Delete(core.PodRecord{}).Error; err != nil {
+				et.ID).Unscoped().Delete(core.PodRecord{}).Error; err != nil {
 			return err
 		}
 	}

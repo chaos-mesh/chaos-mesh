@@ -12,7 +12,8 @@
       "step6": "Or click here to create a new experiment at any time.",
       "step7": "Search provides multiple syntaxes to help you locate experiments or events quickly. You can try it after creating an experiment.",
       "step8": "Here you can browse the respective experiments, events and archives by selecting different namespaces.",
-      "step9": "🎉 Congratulations on completing all the tutorial steps! Click the blank space to exit."
+      "step9": "Predefined can store custom experiments for quick execution in the future.",
+      "step10": "🎉 Congratulations on completing all the tutorial steps! Click the blank space to exit."
     },
     "veteran": "Already a veteran",
     "veteranDesc": "🧨 Start with a new experiment! After it's successfully created, you can return the dashboard to observe its status.",
@@ -87,7 +88,7 @@
     },
     "schedule": {
       "tooltip": "Chaos Mesh use {cronv3} to define the schedule. View its doc for more details.",
-      "immediate": "Run immediately",
+      "continuous": "Run continuously",
       "mustBeScheduled": "The chosen action must be scheduled",
       "cronHelper": "Use {crontabguru} to help generate the cron job and confirm what time it will run",
       "duration": "Duration",

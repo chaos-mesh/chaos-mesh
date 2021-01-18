@@ -34,8 +34,7 @@ CGO    := $(CGOENV) go
 GOTEST := TEST_USE_EXISTING_CLUSTER=false NO_PROXY="${NO_PROXY},testhost" go test
 SHELL    := bash
 
-PACKAGE_LIST := go list ./... | grep -vE "chaos-mesh/test|pkg/ptrace|zz_generated|vendor"
-PACKAGE_DIRECTORIES := $(PACKAGE_LIST) | sed 's|github.com/chaos-mesh/chaos-mesh/||'
+PACKAGE_LIST := echo $$(go list ./... | grep -vE "chaos-mesh/test|pkg/ptrace|zz_generated|vendor") github.com/chaos-mesh/chaos-mesh/api/v1alpha1
 
 # Produce CRDs that work back to Kubernetes 1.11 (no version conversion)
 CRD_OPTIONS ?= "crd:trivialVersions=true,preserveUnknownFields=false"
@@ -213,17 +212,18 @@ ifneq ($(IN_DOCKER),1)
 
 $(2): image-build-env go_build_cache_directory
 	[[ "$(DOCKER_HOST)" == "" ]] || (printf "\
-	FROM ${DOCKER_REGISTRY_PREFIX}pingcap/build-env \n\
+	FROM ${DOCKER_REGISTRY_PREFIX}pingcap/build-env:${IMAGE_TAG} \n\
 	RUN rm -rf /mnt \n\
 	COPY ./ /mnt \n"\
-	> Dockerfile; docker build . -t ${DOCKER_REGISTRY_PREFIX}pingcap/build-env)
+	> Dockerfile; docker build . -t ${DOCKER_REGISTRY_PREFIX}pingcap/build-env:${IMAGE_TAG})
 
 	DOCKER_ID=$$$$(docker run -d \
 		$(BUILD_INDOCKER_ARG) \
-		${DOCKER_REGISTRY_PREFIX}pingcap/build-env \
+		${DOCKER_REGISTRY_PREFIX}pingcap/build-env:${IMAGE_TAG} \
 		sleep infinity); \
 	docker exec --workdir /mnt/ \
-		--env UI=${UI} --env SWAGGER=${SWAGGER}  \
+		--env IMG_LDFLAGS="${LDFLAGS}" \
+		--env UI=${UI} --env SWAGGER=${SWAGGER} \
 		$$$$DOCKER_ID /usr/bin/make $(2); \
 	[[ "$(DOCKER_HOST)" == "" ]] || docker cp $$$$DOCKER_ID:/mnt/$(2) $(2); \
 	docker rm -f $$$$DOCKER_ID
