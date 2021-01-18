@@ -26,7 +26,8 @@ import (
 )
 
 var (
-	log = ctrl.Log.WithName("store/dbstore")
+	sqliteDriver string = "sqlite3"
+	log                 = ctrl.Log.WithName("store/dbstore")
 )
 
 // DB defines a db storage.
@@ -36,10 +37,22 @@ type DB struct {
 
 // NewDBStore returns a new DB
 func NewDBStore(lc fx.Lifecycle, conf *config.ChaosDashboardConfig) (*DB, error) {
-	gormDB, err := gorm.Open(conf.Database.Driver, conf.Database.Datasource)
+	dsn := conf.Database.Datasource
+
+	// fix error `database is locked`, refer to https://github.com/mattn/go-sqlite3/blob/master/README.md#faq
+	if conf.Database.Driver == sqliteDriver {
+		dsn += "?cache=shared"
+	}
+
+	gormDB, err := gorm.Open(conf.Database.Driver, dsn)
 	if err != nil {
 		log.Error(err, "failed to open DB", "driver", conf.Database.Driver, "datasource", conf.Database.Datasource)
 		return nil, err
+	}
+
+	// fix error `database is locked`, refer to https://github.com/mattn/go-sqlite3/blob/master/README.md#faq
+	if conf.Database.Driver == sqliteDriver {
+		gormDB.DB().SetMaxOpenConns(1)
 	}
 
 	db := &DB{
