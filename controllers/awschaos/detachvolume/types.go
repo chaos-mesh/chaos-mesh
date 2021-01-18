@@ -64,10 +64,10 @@ func (e *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.I
 
 	awschaos.Finalizers = []string{AwsFinalizer}
 	_, err = ec2client.DetachVolume(context.TODO(), &ec2.DetachVolumeInput{
-		VolumeId:   &awschaos.Spec.EbsVolume,
-		Device:     &awschaos.Spec.DeviceName,
+		VolumeId:   awschaos.Spec.EbsVolume,
+		Device:     awschaos.Spec.DeviceName,
 		Force:      true,
-		InstanceId: &awschaos.Spec.Ec2Instance,
+		InstanceId: awschaos.Spec.Ec2Instance,
 	})
 
 	if err != nil {
@@ -103,9 +103,9 @@ func (e *endpoint) Recover(ctx context.Context, req ctrl.Request, chaos v1alpha1
 	})
 
 	_, err = ec2client.AttachVolume(context.TODO(), &ec2.AttachVolumeInput{
-		Device:     &awschaos.Spec.DeviceName,
-		InstanceId: &awschaos.Spec.Ec2Instance,
-		VolumeId:   &awschaos.Spec.EbsVolume,
+		Device:     awschaos.Spec.DeviceName,
+		InstanceId: awschaos.Spec.Ec2Instance,
+		VolumeId:   awschaos.Spec.EbsVolume,
 	})
 
 	if err != nil {

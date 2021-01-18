@@ -62,17 +62,17 @@ type AwsChaosSpec struct {
 	AwsRegion string `json:"awsRegion"`
 
 	// Ec2Instance indicates the ID of the ec2 instance.
-	Ec2Instance string `json:"ec2Instance"`
+	Ec2Instance *string `json:"ec2Instance,omitempty"`
 
 	// EbsVolume indicates the ID of the EBS volume.
 	// Needed in detach-volume.
 	// +optional
-	EbsVolume string `json:"volumeID"`
+	EbsVolume *string `json:"volumeID,omitempty"`
 
 	// DeviceName indicates the name of the device.
 	// Needed in detach-volume.
 	// +optional
-	DeviceName string `json:"deviceName"`
+	DeviceName *string `json:"deviceName,omitempty"`
 }
 
 // AwsChaosStatus represents the status of a AwsChaos
