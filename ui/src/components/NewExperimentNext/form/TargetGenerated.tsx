@@ -3,16 +3,16 @@ import { Box, Button, MenuItem } from '@material-ui/core'
 import { Form, Formik, FormikErrors, FormikTouched, getIn } from 'formik'
 import { Kind, Spec } from '../data/target'
 import React, { useEffect, useState } from 'react'
+import { useStoreDispatch, useStoreSelector } from 'store'
 
 import AdvancedOptions from 'components/AdvancedOptions'
 import { ObjectSchema } from 'yup'
 import PublishIcon from '@material-ui/icons/Publish'
-import { RootState } from 'store'
 import Scope from './Scope'
 import T from 'components/T'
 import _snakecase from 'lodash.snakecase'
 import basicData from '../data/basic'
-import { useSelector } from 'react-redux'
+import { clearNetworkTargetPods } from 'slices/experiments'
 
 interface TargetGeneratedProps {
   kind?: Kind | ''
@@ -22,7 +22,8 @@ interface TargetGeneratedProps {
 }
 
 const TargetGenerated: React.FC<TargetGeneratedProps> = ({ kind, data, validationSchema, onSubmit }) => {
-  const { namespaces, target } = useSelector((state: RootState) => state.experiments)
+  const { namespaces, target } = useStoreSelector((state) => state.experiments)
+  const dispatch = useStoreDispatch()
 
   let initialValues = Object.entries(data).reduce((acc, [k, v]) => {
     if (v instanceof Object && v.field) {
@@ -157,11 +158,22 @@ const TargetGenerated: React.FC<TargetGeneratedProps> = ({ kind, data, validatio
           }
         }
 
+        const afterTargetClose = () => {
+          if (getIn(values, 'target_scope')) {
+            setFieldValue('target_scope', undefined)
+            dispatch(clearNetworkTargetPods())
+          }
+        }
+
         return (
           <Form>
             {parseDataToFormFields(errors, touched)}
             {kind === 'NetworkChaos' && (
-              <AdvancedOptions title={T('newE.target.network.target.title')} beforeOpen={beforeTargetOpen}>
+              <AdvancedOptions
+                title={T('newE.target.network.target.title')}
+                beforeOpen={beforeTargetOpen}
+                afterClose={afterTargetClose}
+              >
                 {values.target_scope && (
                   <Scope
                     namespaces={namespaces}
