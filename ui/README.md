@@ -95,11 +95,11 @@ yarn start:default
 
 Then open <http://localhost:3000> to see the preview effect.
 
-If you want to run the dashboard UI and the local server concurrently:
-
-```sh
-yarn start:all
-```
+> If you want to run the dashboard and the local server concurrently:
+>
+> ```sh
+> yarn start:all
+> ```
 
 ### Structure
 
