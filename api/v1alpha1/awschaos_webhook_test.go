@@ -50,19 +50,6 @@ var _ = Describe("awschaos_webhook", func() {
 					expect: "error",
 				},
 				{
-					name: "simple ValidateDelete",
-					chaos: AwsChaos{
-						ObjectMeta: metav1.ObjectMeta{
-							Namespace: metav1.NamespaceDefault,
-							Name:      "foo3",
-						},
-					},
-					execute: func(chaos *AwsChaos) error {
-						return chaos.ValidateDelete()
-					},
-					expect: "",
-				},
-				{
 					name: "only define the Scheduler and execute Ec2Stop",
 					chaos: AwsChaos{
 						ObjectMeta: metav1.ObjectMeta{

@@ -43,6 +43,8 @@ var _ = Describe("AwsChaos", func() {
 
 	Context("Create API", func() {
 		It("should create an object successfully", func() {
+			testInstance := "testInstance"
+			testSecretName := "testSecretName"
 			key = types.NamespacedName{
 				Name:      "foo",
 				Namespace: "default",
@@ -55,6 +57,8 @@ var _ = Describe("AwsChaos", func() {
 				},
 				Spec: AwsChaosSpec{
 					Action: Ec2Stop,
+					Ec2Instance: &testInstance,
+					SecretName:  &testSecretName,
 				},
 			}
 
