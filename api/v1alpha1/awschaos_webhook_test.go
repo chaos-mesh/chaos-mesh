@@ -60,7 +60,7 @@ var _ = Describe("awschaos_webhook", func() {
 					execute: func(chaos *AwsChaos) error {
 						return chaos.ValidateDelete()
 					},
-					expect: "error",
+					expect: "",
 				},
 				{
 					name: "only define the Scheduler and execute Ec2Stop",
