@@ -13,4 +13,9 @@ export const dryEvents = (params?: EventsParams) =>
     params,
   })
 
-export const get = (id: string) => http.get<Event>(`/events/get?id=${id}`)
+export const get = (id: string) =>
+  http.get<Event>('/events/get', {
+    params: {
+      id,
+    },
+  })

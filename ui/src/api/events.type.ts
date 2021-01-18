@@ -1,10 +1,12 @@
+import { ExperimentKind } from '../components/NewExperiment/types'
+
 export interface EventsParams {
   namespace?: string
   limit?: number
 }
 
 export interface EventPod {
-  id: string
+  id: number
   pod_ip: string
   pod_name: string
   namespace: string
@@ -17,9 +19,9 @@ export interface Event {
   experiment_id: uuid
   experiment: string
   namespace: string
-  kind: string
+  kind: ExperimentKind
   message: string
   start_time: string
   finish_time: string
-  pods: EventPod[] | null
+  pods?: EventPod[]
 }
