@@ -39,9 +39,8 @@ func (it *CommonRestClientGetter) ToRESTConfig() (*rest.Config, error) {
 	if err == nil {
 		return inClusterConfig, nil
 	}
-	if envvar := os.Getenv("KUBECONFIG"); len(envvar) > 0 {
-		kubeconfig = envvar
-	} else {
+	kubeconfig = os.Getenv("KUBECONFIG")
+	if len(kubeconfig) == 0 {
 		home, err := os.UserHomeDir()
 		if err != nil {
 			return nil, err
