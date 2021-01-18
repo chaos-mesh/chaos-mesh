@@ -22,9 +22,9 @@ import (
 
 type PodChaosTemplate interface {
 	Template
-	FetchChaosNamePrefix() string
-	FetchPodChaos() chaosmeshv1alph1.PodChaosSpec
-	GetDuration() (time.Duration, error)
+	ChaosNamePrefix() string
+	PodChaosSpec() chaosmeshv1alph1.PodChaosSpec
+	Duration() (time.Duration, error)
 }
 
 func ParsePodChaosTemplate(raw interface{}) (PodChaosTemplate, error) {

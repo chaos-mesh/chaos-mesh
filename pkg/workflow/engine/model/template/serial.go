@@ -18,7 +18,7 @@ import "github.com/chaos-mesh/chaos-mesh/pkg/workflow/engine/errors"
 type SerialTemplate interface {
 	Template
 	// TODO: make it return only template name
-	GetSerialChildrenList() []string
+	SerialChildrenList() []string
 }
 
 func ParseSerialTemplate(raw interface{}) (SerialTemplate, error) {

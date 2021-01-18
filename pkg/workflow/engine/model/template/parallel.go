@@ -15,7 +15,7 @@ package template
 
 type ParallelTemplate interface {
 	Template
-	GetParallelChildrenList() []Template
+	ParallelChildrenList() []Template
 }
 
 func ParseParallelTemplate(raw interface{}) (ParallelTemplate, error) {

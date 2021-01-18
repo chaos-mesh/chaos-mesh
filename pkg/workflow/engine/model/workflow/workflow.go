@@ -19,8 +19,8 @@ import (
 )
 
 type WorkflowSpec interface {
-	GetName() string
-	GetEntry() string
+	Name() string
+	Entry() string
 	FetchTemplateByName(templateName string) (template.Template, error)
 }
 
@@ -35,19 +35,19 @@ const (
 )
 
 type WorkflowStatus interface {
-	// func GetPhase returns current phase
-	GetPhase() WorkflowPhase
-	// func GetNodes returns the flat array of all nodes
-	GetNodes() []node.Node
-	// func GetWorkflowSpecName returns the name of WorkflowSpec
-	GetWorkflowSpecName() string
-	// func GetNodesTree returns the root of the node tree.
+	// func Phase returns current phase
+	Phase() WorkflowPhase
+	// func Nodes returns the flat array of all nodes
+	Nodes() []node.Node
+	// func WorkflowSpecName returns the name of WorkflowSpec
+	WorkflowSpecName() string
+	// func NodesTree returns the root of the node tree.
 	// This tree could present the hierarchy of how nodes execute.
-	GetNodesTree() (node.NodeTreeNode, error)
+	NodesTree() (node.NodeTreeNode, error)
 
-	// func FetchNodesMap
+	// func NodesMap
 	// Key is the name of node
-	FetchNodesMap() map[string]node.Node
+	NodesMap() map[string]node.Node
 
 	FetchNodeByName(nodeName string) (node.Node, error)
 }

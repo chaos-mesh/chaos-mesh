@@ -29,17 +29,17 @@ const (
 )
 
 type Node interface {
-	GetName() string
-	GetNodePhase() NodePhase
-	GetParentNodeName() string
-	GetTemplateName() string
+	Name() string
+	NodePhase() NodePhase
+	ParentNodeName() string
+	TemplateName() string
 }
 
 // FIXME: remove this interface, it's should belongs to node status
 type NodeTreeNode interface {
-	GetName() string
-	GetTemplateName() string
-	GetChildren() NodeTreeChildren
+	Name() string
+	TemplateName() string
+	Children() NodeTreeChildren
 	// Find node by name, might return itself, or find from children nodes recursively
 	FetchNodeByName(nodeName string) (NodeTreeNode, error)
 }

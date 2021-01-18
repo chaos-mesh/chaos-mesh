@@ -35,13 +35,13 @@ func NewSerialScheduler(workflowSpec workflow.WorkflowSpec, nodeStatus node.Node
 
 func (it *serialScheduler) ScheduleNext(ctx context.Context) (nextTemplates []template.Template, parentNodeName string, err error) {
 	op := "serialScheduler.ScheduleNext"
-	parentTemplate, err := it.workflowSpec.FetchTemplateByName(it.nodeStatus.GetTemplateName())
+	parentTemplate, err := it.workflowSpec.FetchTemplateByName(it.nodeStatus.TemplateName())
 	if err != nil {
 		return nil, "", err
 	}
 
-	if parentTemplate.GetTemplateType() != template.Serial {
-		return nil, "", fmt.Errorf("%s is not serail", it.nodeStatus.GetTemplateName())
+	if parentTemplate.TemplateType() != template.Serial {
+		return nil, "", fmt.Errorf("%s is not serail", it.nodeStatus.TemplateName())
 	}
 
 	serialTemplate, err := template.ParseSerialTemplate(parentTemplate)
@@ -49,18 +49,18 @@ func (it *serialScheduler) ScheduleNext(ctx context.Context) (nextTemplates []te
 		return nil, "", err
 	}
 
-	childrenTemplateNames := serialTemplate.GetSerialChildrenList()
+	childrenTemplateNames := serialTemplate.SerialChildrenList()
 
-	if it.treeNode.GetChildren().Length() >= len(childrenTemplateNames) {
+	if it.treeNode.Children().Length() >= len(childrenTemplateNames) {
 		// TODO: unexpected situation, warn log
-		return nil, "", errors.NewNoMoreTemplateInSerialTemplateError(op, it.workflowSpec.GetName(), it.treeNode.GetTemplateName(), it.treeNode.GetName())
+		return nil, "", errors.NewNoMoreTemplateInSerialTemplateError(op, it.workflowSpec.Name(), it.treeNode.TemplateName(), it.treeNode.Name())
 	}
 
-	targetName := childrenTemplateNames[it.treeNode.GetChildren().Length()]
+	targetName := childrenTemplateNames[it.treeNode.Children().Length()]
 	targetTemplate, err := it.workflowSpec.FetchTemplateByName(targetName)
 	if err != nil {
 		return nil, "", err
 	}
 
-	return []template.Template{targetTemplate}, it.nodeStatus.GetName(), nil
+	return []template.Template{targetTemplate}, it.nodeStatus.Name(), nil
 }

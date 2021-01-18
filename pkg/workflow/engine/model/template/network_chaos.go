@@ -22,9 +22,9 @@ import (
 
 type NetworkChaosTemplate interface {
 	Template
-	FetchChaosNamePrefix() string
-	FetchNetworkChaosSpec() chaosmeshv1alph1.NetworkChaosSpec
-	GetDuration() (time.Duration, error)
+	ChaosNamePrefix() string
+	NetworkChaosSpec() chaosmeshv1alph1.NetworkChaosSpec
+	Duration() (time.Duration, error)
 }
 
 func ParseNetworkChaosTemplate(raw interface{}) (NetworkChaosTemplate, error) {

@@ -32,8 +32,8 @@ const (
 )
 
 type Template interface {
-	GetName() string
-	GetTemplateType() TemplateType
+	Name() string
+	TemplateType() TemplateType
 }
 
 // func IsCompositeType. CompositeType means this Template could have children Templates.

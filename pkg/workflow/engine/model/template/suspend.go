@@ -21,7 +21,7 @@ import (
 
 type SuspendTemplate interface {
 	Template
-	GetDuration() (time.Duration, error)
+	Duration() (time.Duration, error)
 }
 
 func ParseSuspendTemplate(raw interface{}) (SuspendTemplate, error) {
