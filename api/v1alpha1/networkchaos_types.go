@@ -14,14 +14,7 @@
 package v1alpha1
 
 import (
-	"errors"
-	"strconv"
-	"strings"
-	"time"
-
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
-	chaosdaemonpb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
 )
 
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
@@ -192,69 +185,10 @@ type DelaySpec struct {
 	Reorder     *ReorderSpec `json:"reorder,omitempty"`
 }
 
-// ToNetem implements Netem interface.
-func (in *DelaySpec) ToNetem() (*chaosdaemonpb.Netem, error) {
-	delayTime, err := time.ParseDuration(in.Latency)
-	if err != nil {
-		return nil, err
-	}
-	jitter, err := time.ParseDuration(in.Jitter)
-	if err != nil {
-		return nil, err
-	}
-
-	corr, err := strconv.ParseFloat(in.Correlation, 32)
-	if err != nil {
-		return nil, err
-	}
-
-	netem := &chaosdaemonpb.Netem{
-		Time:      uint32(delayTime.Nanoseconds() / 1e3),
-		DelayCorr: float32(corr),
-		Jitter:    uint32(jitter.Nanoseconds() / 1e3),
-	}
-
-	if in.Reorder != nil {
-		reorderPercentage, err := strconv.ParseFloat(in.Reorder.Reorder, 32)
-		if err != nil {
-			return nil, err
-		}
-
-		corr, err := strconv.ParseFloat(in.Reorder.Correlation, 32)
-		if err != nil {
-			return nil, err
-		}
-
-		netem.Reorder = float32(reorderPercentage)
-		netem.ReorderCorr = float32(corr)
-		netem.Gap = uint32(in.Reorder.Gap)
-	}
-
-	return netem, nil
-}
-
 // LossSpec defines detail of a loss action
 type LossSpec struct {
 	Loss        string `json:"loss"`
 	Correlation string `json:"correlation"`
-}
-
-// ToNetem implements Netem interface.
-func (in *LossSpec) ToNetem() (*chaosdaemonpb.Netem, error) {
-	lossPercentage, err := strconv.ParseFloat(in.Loss, 32)
-	if err != nil {
-		return nil, err
-	}
-
-	corr, err := strconv.ParseFloat(in.Correlation, 32)
-	if err != nil {
-		return nil, err
-	}
-
-	return &chaosdaemonpb.Netem{
-		Loss:     float32(lossPercentage),
-		LossCorr: float32(corr),
-	}, nil
 }
 
 // DuplicateSpec defines detail of a duplicate action
@@ -263,46 +197,10 @@ type DuplicateSpec struct {
 	Correlation string `json:"correlation"`
 }
 
-// ToNetem implements Netem interface.
-func (in *DuplicateSpec) ToNetem() (*chaosdaemonpb.Netem, error) {
-	duplicatePercentage, err := strconv.ParseFloat(in.Duplicate, 32)
-	if err != nil {
-		return nil, err
-	}
-
-	corr, err := strconv.ParseFloat(in.Correlation, 32)
-	if err != nil {
-		return nil, err
-	}
-
-	return &chaosdaemonpb.Netem{
-		Duplicate:     float32(duplicatePercentage),
-		DuplicateCorr: float32(corr),
-	}, nil
-}
-
 // CorruptSpec defines detail of a corrupt action
 type CorruptSpec struct {
 	Corrupt     string `json:"corrupt"`
 	Correlation string `json:"correlation"`
-}
-
-// ToNetem implements Netem interface.
-func (in *CorruptSpec) ToNetem() (*chaosdaemonpb.Netem, error) {
-	corruptPercentage, err := strconv.ParseFloat(in.Corrupt, 32)
-	if err != nil {
-		return nil, err
-	}
-
-	corr, err := strconv.ParseFloat(in.Correlation, 32)
-	if err != nil {
-		return nil, err
-	}
-
-	return &chaosdaemonpb.Netem{
-		Corrupt:     float32(corruptPercentage),
-		CorruptCorr: float32(corr),
-	}, nil
 }
 
 // BandwidthSpec defines detail of bandwidth limit.
@@ -329,59 +227,6 @@ type BandwidthSpec struct {
 	// +optional
 	// +kubebuilder:validation:Minimum=0
 	Minburst *uint32 `json:"minburst,omitempty"`
-}
-
-// ToTbf converts BandwidthSpec to *chaosdaemonpb.Tbf
-// Bandwidth action use TBF under the hood.
-// TBF stands for Token Bucket Filter, is a classful queueing discipline available
-// for traffic control with the tc command.
-// http://man7.org/linux/man-pages/man8/tc-tbf.8.html
-func (in *BandwidthSpec) ToTbf() (*chaosdaemonpb.Tbf, error) {
-	rate, err := convertUnitToBytes(in.Rate)
-
-	if err != nil {
-		return nil, err
-	}
-
-	tbf := &chaosdaemonpb.Tbf{
-		Rate:   rate,
-		Limit:  in.Limit,
-		Buffer: in.Buffer,
-	}
-
-	if in.Peakrate != nil && in.Minburst != nil {
-		tbf.PeakRate = *in.Peakrate
-		tbf.MinBurst = *in.Minburst
-	}
-
-	return tbf, nil
-}
-
-func convertUnitToBytes(nu string) (uint64, error) {
-	// normalize input
-	s := strings.ToLower(strings.TrimSpace(nu))
-
-	for i, u := range []string{"tbps", "gbps", "mbps", "kbps", "bps"} {
-		if strings.HasSuffix(s, u) {
-			ts := strings.TrimSuffix(s, u)
-			s := strings.TrimSpace(ts)
-
-			n, err := strconv.ParseUint(s, 10, 64)
-
-			if err != nil {
-				return 0, err
-			}
-
-			// convert unit to bytes
-			for j := 4 - i; j > 0; j-- {
-				n = n * 1024
-			}
-
-			return n, nil
-		}
-	}
-
-	return 0, errors.New("invalid unit")
 }
 
 // ReorderSpec defines details of packet reorder.
