@@ -14,8 +14,7 @@
 package cmd
 
 import (
-	"fmt"
-	"os"
+	"log"
 
 	"github.com/spf13/cobra"
 )
@@ -29,7 +28,7 @@ Interacting with chaos mesh
 
   # show debug info
   chaosctl debug networkchaos
-  
+
   # show logs of all chaos-mesh components
   chaosctl logs`,
 }
@@ -37,10 +36,25 @@ Interacting with chaos mesh
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
-	if err := rootCmd.Execute(); err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+	logsCmd, err := NewLogsCmd()
+	if err != nil {
+		printErrorThenQuit(err)
 	}
+	rootCmd.AddCommand(logsCmd)
+
+	debugCommand, err := NewDebugCommand()
+	if err != nil {
+		printErrorThenQuit(err)
+	}
+
+	rootCmd.AddCommand(debugCommand)
+	rootCmd.AddCommand(completionCmd)
+	if err := rootCmd.Execute(); err != nil {
+		printErrorThenQuit(err)
+	}
+}
+func printErrorThenQuit(err error) {
+	log.Fatal(err)
 }
 
 func noCompletions(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
