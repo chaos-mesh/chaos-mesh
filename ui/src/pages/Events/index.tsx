@@ -1,4 +1,4 @@
-import { Box, Grow, Paper, Typography } from '@material-ui/core'
+import { Box, Grow, Typography } from '@material-ui/core'
 import EventsTable, { EventsTableHandles } from 'components/EventsTable'
 import React, { useEffect, useRef, useState } from 'react'
 import { Theme, createStyles, makeStyles } from '@material-ui/core/styles'
@@ -6,6 +6,7 @@ import { Theme, createStyles, makeStyles } from '@material-ui/core/styles'
 import BlurLinearIcon from '@material-ui/icons/BlurLinear'
 import { Event } from 'api/events.type'
 import Loading from 'components-mui/Loading'
+import Paper from 'components-mui/Paper'
 import PaperTop from 'components-mui/PaperTop'
 import { RootState } from 'store'
 import T from 'components/T'
@@ -73,7 +74,7 @@ export default function Events() {
       {events && events.length > 0 && (
         <Grow in={!loading} style={{ transformOrigin: '0 0 0' }}>
           <Box display="flex" flexDirection="column">
-            <Paper className={classes.timelinePaper} variant="outlined">
+            <Paper className={classes.timelinePaper}>
               <PaperTop title={T('common.timeline')} />
               <div ref={chartRef} className={classes.eventsChart} />
             </Paper>
