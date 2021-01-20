@@ -17,7 +17,6 @@ import (
 	"context"
 	"fmt"
 	"github.com/go-logr/logr"
-	"log"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -52,11 +51,11 @@ Examples:
 
   # Print 100 log lines for chaosmesh components in node NODENAME
   chaosctl logs -t 100 -n NODENAME`,
-		Run: func(cmd *cobra.Command, args []string) {
-			if err := o.Run(args); err != nil {
-				log.Fatal(err)
-			}
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return o.Run(args)
 		},
+		SilenceErrors: true,
+		SilenceUsage: true,
 		ValidArgsFunction: noCompletions,
 	}
 
@@ -81,6 +80,7 @@ func (o *logsOptions) Run(args []string) error {
 	defer cancel()
 	c, err := cm.InitClientSet()
 	if err != nil {
+		o.logger.V(4).Info("failed to initialize clientset", "err", err)
 		return err
 	}
 
@@ -93,10 +93,12 @@ func (o *logsOptions) Run(args []string) error {
 			selectorSpec.Nodes = []string{o.node}
 		}
 
+		// TODO: just use kubernetes native label selector
 		components, err := selector.SelectPods(ctx, c.CtrlCli, nil, selectorSpec, config.ControllerCfg.ClusterScoped, config.ControllerCfg.TargetNamespace, config.ControllerCfg.AllowedNamespaces, config.ControllerCfg.IgnoredNamespaces)
 		if err != nil {
 			return fmt.Errorf("failed to SelectPods with: %s", err.Error())
 		}
+		o.logger.V(4).Info("select pods for component", "component", name, "pods", components)
 		for _, comp := range components {
 			cm.PrettyPrint(fmt.Sprintf("[%s]", comp.Name), 0, "Cyan")
 			comLog, err := cm.Log(comp, o.tail, c.KubeCli)
