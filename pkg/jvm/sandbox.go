@@ -53,9 +53,12 @@ func RecoverChaos(host string, port int, body []byte) error {
 func httpPost(url string, body []byte) error {
 	client := &http.Client{}
 	reqBody := bytes.NewBuffer([]byte(body))
-	request, _ := http.NewRequest("POST", url, reqBody)
-	request.Header.Set("Content-type", "application/json")
+	request, err := http.NewRequest("POST", url, reqBody)
+	if err != nil {
+		return err
+	}
 
+	request.Header.Set("Content-type", "application/json")
 	response, err := client.Do(request)
 	if err != nil {
 		return err

@@ -55,6 +55,7 @@ func ToSandboxAction(suid string, chaos *v1alpha1.JVMChaos) ([]byte, error) {
 					if err != nil {
 						return nil, fmt.Errorf("can not parse Spec.Flags.%s's value:%s as boolean", k, v)
 					}
+					// if f is false, should not send key-value to sandbox server.
 					if f {
 						kv[k] = v
 					}
@@ -78,6 +79,7 @@ func ToSandboxAction(suid string, chaos *v1alpha1.JVMChaos) ([]byte, error) {
 					if err != nil {
 						return nil, fmt.Errorf("can not parse Spec.Matchers.%s's value:%s as boolean", k, v)
 					}
+					// if f is false, should not send key-value to sandbox server.
 					if f {
 						kv[k] = v
 					}

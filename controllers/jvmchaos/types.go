@@ -40,6 +40,8 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 )
 
+const sandboxPort = 10086
+
 type endpoint struct {
 	ctx.Context
 }
@@ -107,7 +109,8 @@ func (r *endpoint) applyPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.JV
 	r.Log.Info("Try to apply jvm chaos", "namespace",
 		pod.Namespace, "name", pod.Name)
 
-	err := jvm.ActiveSandbox(pod.Status.PodIP, 10086)
+	// TODO: Custom port may be required
+	err := jvm.ActiveSandbox(pod.Status.PodIP, sandboxPort)
 	if err != nil {
 		return err
 	}
@@ -121,7 +124,7 @@ func (r *endpoint) applyPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.JV
 		return err
 	}
 	// TODO: Custom port may be required
-	err = jvm.InjectChaos(pod.Status.PodIP, 10086, jsonBytes)
+	err = jvm.InjectChaos(pod.Status.PodIP, sandboxPort, jsonBytes)
 	if err != nil {
 		return err
 	}
@@ -207,7 +210,7 @@ func (r *endpoint) recoverPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.
 	jsonBytes, err := jvm.ToSandboxAction(suid, chaos)
 
 	// TODO: Custom port may be required
-	err = jvm.RecoverChaos(pod.Status.PodIP, 10086, jsonBytes)
+	err = jvm.RecoverChaos(pod.Status.PodIP, sandboxPort, jsonBytes)
 	if err != nil {
 		return err
 	}
