@@ -45,7 +45,7 @@ The following content can help you understand how to develop dashboard and its o
 
 #### Global env
 
-If you haven't installed the nodejs environment, checkout [https://nodejs.org/en/download/](https://nodejs.org/en/download/).
+If you haven't installed the nodejs and golang environment, checkout [https://nodejs.org/en/download/](https://nodejs.org/en/download/) and [https://golang.org/](https://golang.org/).
 
 And also, we use [Yarn 1](https://classic.yarnpkg.com/en/) as the dependency management. Maybe we will migrate to Yarn 2 in the future, but not now.
 
@@ -54,37 +54,35 @@ And also, we use [Yarn 1](https://classic.yarnpkg.com/en/) as the dependency man
 If you just cloned a fresh Chaos Mesh repo, into the `ui` folder, run:
 
 ```sh
-yarn
+yarn bootstrap
 ```
 
 This command will install all deps the dashboard needed.
 
 Then, you need to provide an API server as a proxy, it will pass into an env var which named: `REACT_APP_API_URL`. There are three ways to get it:
 
-- **From other deployed Chaos Mesh Dashboard**
+- **From a remote deployed Chaos Mesh Dashboard**
 
-  If you have Chaos Mesh deployed in the cluster, you can use the dashboard service url as the proxy.
+  If you have Chaos Mesh deployed in a remote cluster, you can use the dashboard service URL as the proxy.
 
-  A simple way:
+  Try to access it with `http://NodePort:2333`.
+
+- **From a local deployed Chaos Mesh Dashboard**
+
+  When the cluster is local (E.g., [kind](https://kind.sigs.k8s.io/) or [minikube](https://minikube.sigs.k8s.io/)), you can use [Port Forwarding](https://kubernetes.io/docs/tasks/access-application-cluster/port-forward-access-application-cluster/) to access it:
 
   ```sh
   kubectl port-forward -n chaos-testing svc/chaos-dashboard 2333:2333
   ```
 
-- **From local deployed Chaos Mesh Dashboard**
-
-  Same as above. Only the cluster is local. (E.g., [kind](https://kind.sigs.k8s.io/) or [minikube](https://minikube.sigs.k8s.io/))
-
-- **From local server**
+- **From local dashboard server**
 
   There have two ways to run chaos-dashboard server in your terminal:
 
-  - `go run cmd/chaos-dashboard/main.go`
-  - `SWAGGER=1 make chaos-dashboard && ./bin/chaos-dashboard`
+  - `cd .. && go run cmd/chaos-dashboard/main.go`
+  - `yarn bootstrap && yarn server`
 
   One is real-time, the other needs to be compiled before use. The compiled bundle the extra Swagger API HTML into the binary file.
-
-  For the other usage of `make xxx` that please refer to the [Makefile](https://github.com/chaos-mesh/chaos-mesh/blob/master/Makefile).
 
 #### Start
 
@@ -96,6 +94,12 @@ yarn start:default
 ```
 
 Then open <http://localhost:3000> to see the preview effect.
+
+> If you want to run the dashboard and the local server concurrently:
+>
+> ```sh
+> yarn start:all
+> ```
 
 ### Structure
 
