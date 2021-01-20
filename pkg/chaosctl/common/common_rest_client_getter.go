@@ -34,6 +34,10 @@ func NewCommonRestClientGetter() *CommonRestClientGetter {
 }
 
 func (it *CommonRestClientGetter) ToRESTConfig() (*rest.Config, error) {
+	return loadRestConfig()
+}
+
+func loadRestConfig() (*rest.Config, error) {
 	var kubeconfig string
 	inClusterConfig, err := rest.InClusterConfig()
 	if err == nil {

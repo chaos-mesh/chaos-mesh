@@ -30,7 +30,6 @@ import (
 	"k8s.io/client-go/kubernetes"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/client/config"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	ctrlconfig "github.com/chaos-mesh/chaos-mesh/controllers/config"
@@ -141,11 +140,15 @@ func MarshalChaos(s interface{}) (string, error) {
 
 // InitClientSet inits two different clients that would be used
 func InitClientSet() (*ClientSet, error) {
-	ctrlClient, err := client.New(config.GetConfigOrDie(), client.Options{Scheme: scheme})
+	restconfig, err := loadRestConfig()
+	if err != nil {
+		return nil, err
+	}
+	ctrlClient, err := client.New(restconfig, client.Options{Scheme: scheme})
 	if err != nil {
 		return nil, fmt.Errorf("failed to create client")
 	}
-	kubeClient, err := kubernetes.NewForConfig(config.GetConfigOrDie())
+	kubeClient, err := kubernetes.NewForConfig(restconfig)
 	if err != nil {
 		return nil, fmt.Errorf("error in getting access to K8S: %s", err.Error())
 	}
