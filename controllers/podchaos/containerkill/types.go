@@ -64,6 +64,7 @@ func (r *endpoint) Apply(ctx context.Context, req ctrl.Request, obj v1alpha1.Inn
 		return err
 	}
 
+	allHaveContainer := true
 	g := errgroup.Group{}
 	for podIndex := range pods {
 		pod := &pods[podIndex]
@@ -88,12 +89,17 @@ func (r *endpoint) Apply(ctx context.Context, req ctrl.Request, obj v1alpha1.Inn
 		}
 
 		if haveContainer == false {
+			allHaveContainer = false
 			r.Log.Error(nil, fmt.Sprintf("the pod %s doesn't have container %s", pod.Name, podchaos.Spec.ContainerName))
 		}
 	}
 
 	if err := g.Wait(); err != nil {
 		return err
+	}
+
+	if allHaveContainer == false {
+		return fmt.Errorf("at least one pod contains no designated container")
 	}
 
 	podchaos.Status.Experiment.PodRecords = make([]v1alpha1.PodStatus, 0, len(pods))
@@ -109,7 +115,7 @@ func (r *endpoint) Apply(ctx context.Context, req ctrl.Request, obj v1alpha1.Inn
 
 		podchaos.Status.Experiment.PodRecords = append(podchaos.Status.Experiment.PodRecords, ps)
 	}
-	r.Event(obj, v1.EventTypeNormal, events.ChaosRecovered, "")
+	r.Event(podchaos, v1.EventTypeNormal, events.ChaosRecovered, "")
 	return nil
 }
 
