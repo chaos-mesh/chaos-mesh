@@ -14,9 +14,10 @@
 package cmd
 
 import (
-	"log"
-
+	cm "github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/common"
 	"github.com/spf13/cobra"
+	"log"
+	"os"
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -36,25 +37,32 @@ Interacting with chaos mesh
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
-	logsCmd, err := NewLogsCmd()
+	rootLogger, flushFunc, err := cm.NewStderrLogger()
 	if err != nil {
-		printErrorThenQuit(err)
+		log.Fatal("failed to initialize logger", err)
+	}
+	if flushFunc != nil {
+		defer flushFunc()
+	}
+
+	logsCmd, err := NewLogsCmd(rootLogger.WithName("cmd-logs"))
+	if err != nil {
+		rootLogger.Error(err, "failed to initialize cmd", "cmd", "logs")
+		os.Exit(1)
 	}
 	rootCmd.AddCommand(logsCmd)
 
-	debugCommand, err := NewDebugCommand()
+	debugCommand, err := NewDebugCommand(rootLogger.WithName("cmd-debug"))
 	if err != nil {
-		printErrorThenQuit(err)
+		rootLogger.Error(err, "failed to initialize cmd", "cmd", "debug")
+		os.Exit(1)
 	}
 
 	rootCmd.AddCommand(debugCommand)
 	rootCmd.AddCommand(completionCmd)
 	if err := rootCmd.Execute(); err != nil {
-		printErrorThenQuit(err)
+		rootLogger.Error(err, "failed to execute cmd")
 	}
-}
-func printErrorThenQuit(err error) {
-	log.Fatal(err)
 }
 
 func noCompletions(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {

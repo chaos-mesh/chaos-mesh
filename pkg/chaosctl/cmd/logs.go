@@ -16,6 +16,7 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"github.com/go-logr/logr"
 	"log"
 	"strings"
 
@@ -30,12 +31,15 @@ import (
 )
 
 type logsOptions struct {
-	tail int64
-	node string
+	logger logr.Logger
+	tail   int64
+	node   string
 }
 
-func NewLogsCmd() (*cobra.Command, error) {
-	o := &logsOptions{}
+func NewLogsCmd(logger logr.Logger) (*cobra.Command, error) {
+	o := &logsOptions{
+		logger: logger,
+	}
 
 	logsCmd := &cobra.Command{
 		Use:   `logs [-t LINE]`,

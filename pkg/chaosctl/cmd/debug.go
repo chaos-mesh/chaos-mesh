@@ -16,6 +16,7 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"github.com/go-logr/logr"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -30,6 +31,7 @@ import (
 )
 
 type debugOptions struct {
+	logger    logr.Logger
 	namespace string
 }
 
@@ -41,8 +43,10 @@ const (
 	ioChaos      = "iochaos"
 )
 
-func NewDebugCommand() (*cobra.Command, error) {
-	o := &debugOptions{}
+func NewDebugCommand(logger logr.Logger) (*cobra.Command, error) {
+	o := &debugOptions{
+		logger: logger,
+	}
 
 	debugCmd := &cobra.Command{
 		Use:   `debug (CHAOSTYPE) [-c CHAOSNAME] [-n NAMESPACE]`,
