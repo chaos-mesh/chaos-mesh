@@ -70,7 +70,6 @@ const ExperimentListItem: React.FC<ExperimentListItemProps> = ({
   }
 
   const handleAction = (action: string) => (event: React.MouseEvent<HTMLSpanElement>) => {
-    console.log(action)
     event.stopPropagation()
 
     handleDialogOpen(true)
