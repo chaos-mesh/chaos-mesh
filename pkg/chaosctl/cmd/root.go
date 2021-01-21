@@ -14,10 +14,13 @@
 package cmd
 
 import (
-	cm "github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/common"
-	"github.com/spf13/cobra"
+	"fmt"
 	"log"
 	"os"
+
+	"github.com/spf13/cobra"
+
+	cm "github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/common"
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -44,24 +47,33 @@ func Execute() {
 	if flushFunc != nil {
 		defer flushFunc()
 	}
+	cm.SetupGlobalLogger(rootLogger.WithName("global-logger"))
 
 	logsCmd, err := NewLogsCmd(rootLogger.WithName("cmd-logs"))
 	if err != nil {
-		rootLogger.Error(err, "failed to initialize cmd", "cmd", "logs")
+		rootLogger.Error(err, "failed to initialize cmd",
+			"cmd", "logs",
+			"errorVerbose", fmt.Sprintf("%+v", err),
+		)
 		os.Exit(1)
 	}
 	rootCmd.AddCommand(logsCmd)
 
 	debugCommand, err := NewDebugCommand(rootLogger.WithName("cmd-debug"))
 	if err != nil {
-		rootLogger.Error(err, "failed to initialize cmd", "cmd", "debug")
+		rootLogger.Error(err, "failed to initialize cmd",
+			"cmd", "debug",
+			"errorVerbose", fmt.Sprintf("%+v", err),
+		)
 		os.Exit(1)
 	}
 
 	rootCmd.AddCommand(debugCommand)
 	rootCmd.AddCommand(completionCmd)
 	if err := rootCmd.Execute(); err != nil {
-		rootLogger.Error(err, "failed to execute cmd")
+		rootLogger.Error(err, "failed to execute cmd",
+			"errorVerbose", fmt.Sprintf("%+v", err),
+		)
 	}
 }
 

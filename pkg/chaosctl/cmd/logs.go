@@ -16,8 +16,10 @@ package cmd
 import (
 	"context"
 	"fmt"
-	"github.com/go-logr/logr"
 	"strings"
+
+	"github.com/go-logr/logr"
+	"github.com/pkg/errors"
 
 	"github.com/spf13/cobra"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -54,8 +56,8 @@ Examples:
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return o.Run(args)
 		},
-		SilenceErrors: true,
-		SilenceUsage: true,
+		SilenceErrors:     true,
+		SilenceUsage:      true,
 		ValidArgsFunction: noCompletions,
 	}
 
@@ -96,7 +98,7 @@ func (o *logsOptions) Run(args []string) error {
 		// TODO: just use kubernetes native label selector
 		components, err := selector.SelectPods(ctx, c.CtrlCli, nil, selectorSpec, config.ControllerCfg.ClusterScoped, config.ControllerCfg.TargetNamespace, config.ControllerCfg.AllowedNamespaces, config.ControllerCfg.IgnoredNamespaces)
 		if err != nil {
-			return fmt.Errorf("failed to SelectPods with: %s", err.Error())
+			return errors.Wrapf(err, "failed to SelectPods for component %s", name)
 		}
 		o.logger.V(4).Info("select pods for component", "component", name, "pods", components)
 		for _, comp := range components {

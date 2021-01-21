@@ -192,7 +192,7 @@ func TestGetPods(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			timeBefore := time.Now()
-			pods, daemons, err := GetPods(context.Background(), test.chaosStatus, test.chaosSelector, client)
+			pods, daemons, err := GetPods(context.Background(), test.name, test.chaosStatus, test.chaosSelector, client)
 			if test.wait {
 				g.Expect(time.Now().Add(time.Millisecond * -50).Before(timeBefore)).To(BeTrue())
 			}
