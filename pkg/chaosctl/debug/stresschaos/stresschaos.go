@@ -49,11 +49,9 @@ func Debug(ctx context.Context, chaos runtime.Object, c *cm.ClientSet, result *c
 	for i := range pods {
 		podName := pods[i].Name
 		podResult := cm.PodResult{Name: podName}
-		err := debugEachPod(ctx, pods[i], daemons[i], stressChaos, c, &podResult)
+		_ = debugEachPod(ctx, pods[i], daemons[i], stressChaos, c, &podResult)
 		result.Pods = append(result.Pods, podResult)
-		if err != nil {
-			return fmt.Errorf("for %s: %s", podName, err.Error())
-		}
+		// TODO: V(4) log when err != nil, wait for #1433
 	}
 	return nil
 }
