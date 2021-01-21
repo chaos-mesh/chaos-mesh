@@ -208,7 +208,7 @@ export default function ExperimentDetail() {
         }
 
         if (action === 'pause' || action === 'start') {
-          fetchExperimentDetail()
+          setTimeout(fetchExperimentDetail, 300)
         }
       })
       .catch(console.error)
