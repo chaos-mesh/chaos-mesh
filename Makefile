@@ -237,7 +237,8 @@ ifeq ($(IN_DOCKER),1)
 images/chaos-daemon/bin/pause: hack/pause.c
 	cc ./hack/pause.c -o images/chaos-daemon/bin/pause
 
-images/chaos-mesh/bin/chaosctl: chaosctl
+images/chaos-mesh/bin/chaosctl:
+	$(GO) build -ldflags '$(LDFLAGS)' -o images/chaos-mesh/bin/chaosctl ./cmd/chaosctl/*.go
 endif
 $(eval $(call BUILD_IN_DOCKER_TEMPLATE,chaos-daemon,images/chaos-daemon/bin/pause))
 
