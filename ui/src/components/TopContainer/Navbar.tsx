@@ -57,7 +57,7 @@ const useStyles = makeStyles((theme: Theme) => ({
 }))
 
 function hasLocalBreadcrumb(b: string) {
-  return ['dashboard', 'experiments', 'newExperiment', 'events', 'archives', 'settings', 'swagger'].includes(b)
+  return ['dashboard', 'newExperiment', 'experiments', 'events', 'archives', 'settings', 'swagger'].includes(b)
 }
 
 interface HeaderProps {

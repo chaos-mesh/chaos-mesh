@@ -23,7 +23,8 @@ export interface Experiment {
   namespace: string
   name: string
   created: string
-  status: keyof StateOfExperiments
+  // FIXME: support keyof in ts-interface-builder
+  status: 'Running' | 'Waiting' | 'Paused' | 'Failed' | 'Finished'
   events?: Event[]
 }
 
