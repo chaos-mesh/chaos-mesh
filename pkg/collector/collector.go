@@ -128,7 +128,7 @@ func (r *ChaosCollector) createEvent(req ctrl.Request, kind string, status *v1al
 		StartTime:    &status.Experiment.StartTime.Time,
 		ExperimentID: UID,
 		// TODO: add state for each event
-		Message:      status.FailedMessage,
+		Message: status.FailedMessage,
 	}
 
 	if _, err := r.event.FindByExperimentAndStartTime(
