@@ -1,12 +1,12 @@
 apiVersion: v1
-appVersion: "v1.1.0"
+appVersion: "v1.1.1"
 description: Chaos Mesh® is a cloud-native Chaos Engineering platform that orchestrates chaos on Kubernetes environments.
 home: https://chaos-mesh.org
 icon: https://raw.githubusercontent.com/pingcap/chaos-mesh/master/static/logo.svg
 sources:
   - https://github.com/pingcap/chaos-mesh
 name: chaos-mesh
-version: v0.4.0
+version: v0.4.1
 keywords:
   - chaos-engineering
   - resiliency
