@@ -236,6 +236,8 @@ endef
 ifeq ($(IN_DOCKER),1)
 images/chaos-daemon/bin/pause: hack/pause.c
 	cc ./hack/pause.c -o images/chaos-daemon/bin/pause
+
+images/chaos-mesh/bin/chaosctl: chaosctl
 endif
 $(eval $(call BUILD_IN_DOCKER_TEMPLATE,chaos-daemon,images/chaos-daemon/bin/pause))
 
@@ -247,6 +249,8 @@ $(eval $(call COMPILE_GO_TEMPLATE,images/chaos-dashboard/bin/chaos-dashboard,./c
 
 $(eval $(call BUILD_IN_DOCKER_TEMPLATE,chaos-mesh,images/chaos-mesh/bin/chaos-controller-manager))
 $(eval $(call COMPILE_GO_TEMPLATE,images/chaos-mesh/bin/chaos-controller-manager,./cmd/chaos-controller-manager/main.go,0))
+
+$(eval $(call BUILD_IN_DOCKER_TEMPLATE,chaos-mesh,images/chaos-mesh/bin/chaosctl))
 
 $(eval $(call BUILD_IN_DOCKER_TEMPLATE,chaos-mesh-e2e,test/image/e2e/bin/ginkgo))
 $(eval $(call COMPILE_GO_TEMPLATE,test/image/e2e/bin/ginkgo,github.com/onsi/ginkgo/ginkgo,0))
