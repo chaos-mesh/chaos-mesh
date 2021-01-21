@@ -13,7 +13,9 @@ import React from 'react'
  * @param {React.ReactNode} { children }
  */
 const PaperContainer: React.FC = ({ children }) => (
-  <Paper style={{ maxHeight: 768, overflow: 'scroll' }}>{children}</Paper>
+  <Paper padding={false} style={{ maxHeight: 768, overflow: 'scroll' }}>
+    {children}
+  </Paper>
 )
 
 export default PaperContainer

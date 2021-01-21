@@ -1,7 +1,7 @@
 import 'ace-builds'
-import 'ace-builds/src-noconflict/mode-yaml'
-import 'ace-builds/src-noconflict/theme-tomorrow'
-import 'ace-builds/src-noconflict/theme-tomorrow_night_eighties'
+import 'ace-builds/src-min-noconflict/theme-tomorrow_night_eighties'
+import 'ace-builds/src-min-noconflict/mode-yaml'
+import 'ace-builds/src-min-noconflict/theme-tomorrow'
 
 import { Ace } from 'ace-builds'
 import AceEditor from 'react-ace'
