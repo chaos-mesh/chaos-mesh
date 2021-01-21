@@ -24,15 +24,14 @@ import (
 
 type LoggerFlushFunc func()
 
-func NewStderrLogger() (logr.Logger, LoggerFlushFunc, error) {
+func SetupKlog() error {
+	// setup klog
 	klog.InitFlags(flag.CommandLine)
 	pflag.CommandLine.AddGoFlagSet(flag.CommandLine)
+	return flag.Set("logtostderr", "true")
+}
 
-	err := flag.Set("logtostderr", "true")
-	if err != nil {
-		return nil, nil, err
-	}
-
+func NewStderrLogger() (logr.Logger, LoggerFlushFunc, error) {
 	logger := klogr.New()
 	return logger, klog.Flush, nil
 }

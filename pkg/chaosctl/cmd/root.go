@@ -40,6 +40,10 @@ Interacting with chaos mesh
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
+	err := cm.SetupKlog()
+	if err != nil {
+		log.Fatal("failed to setup klog", err)
+	}
 	rootLogger, flushFunc, err := cm.NewStderrLogger()
 	if err != nil {
 		log.Fatal("failed to initialize logger", err)

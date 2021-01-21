@@ -28,6 +28,9 @@ import (
 )
 
 func TestGetChaosList(t *testing.T) {
+	logger, _, _ := NewStderrLogger()
+	SetupGlobalLogger(logger)
+
 	g := NewWithT(t)
 
 	chaos1 := v1alpha1.NetworkChaos{
@@ -117,6 +120,9 @@ func TestGetChaosList(t *testing.T) {
 }
 
 func TestGetPods(t *testing.T) {
+	logger, _, _ := NewStderrLogger()
+	SetupGlobalLogger(logger)
+
 	g := NewWithT(t)
 
 	_ = v1alpha1.ChaosStatus{
