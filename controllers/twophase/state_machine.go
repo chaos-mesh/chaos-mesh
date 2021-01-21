@@ -76,6 +76,8 @@ func apply(ctx context.Context, m *chaosStateMachine, targetPhase v1alpha1.Exper
 
 		return true, err
 	}
+	// reset failed message
+	status.FailedMessage = emptyString
 	status.Experiment.Phase = targetPhase
 
 	nextStart, nextRecover, err := m.IterateNextTime(startTime, *duration)
