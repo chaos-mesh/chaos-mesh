@@ -94,12 +94,12 @@ func (o *logsOptions) Run(args []string) error {
 			return fmt.Errorf("failed to SelectPods with: %s", err.Error())
 		}
 		for _, comp := range components {
-			cm.PrettyPrint(fmt.Sprintf("[%s]", comp.Name), 0, "Cyan")
+			cm.PrettyPrint(fmt.Sprintf("[%s]", comp.Name), 0, cm.Cyan)
 			comLog, err := cm.Log(comp, o.tail, c.KubeCli)
 			if err != nil {
-				cm.PrettyPrint(err.Error(), 1, "Red")
+				cm.PrettyPrint(err.Error(), 1, cm.Red)
 			} else {
-				cm.PrettyPrint(comLog, 1, "")
+				cm.PrettyPrint(comLog, 1, cm.NoColor)
 			}
 		}
 	}
