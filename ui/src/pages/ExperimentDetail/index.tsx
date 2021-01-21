@@ -91,12 +91,7 @@ export default function ExperimentDetail() {
   const fetchExperimentDetail = () => {
     api.experiments
       .detail(uuid)
-      .then(({ data }) => {
-        // Remove annotations to prevent some automatically inserted data from being retrieved
-        delete data.yaml.metadata.annotations
-
-        setDetail(data)
-      })
+      .then(({ data }) => setDetail(data))
       .catch(console.error)
   }
 
