@@ -78,7 +78,7 @@ const LoadFrom = () => {
       <PaperTop title={T('newE.loadFrom')}>
         <YAML callback={fillExperiment} />
       </PaperTop>
-      <Box p={6} maxHeight={450} style={{ overflowY: 'scroll' }}>
+      <Box p={3} maxHeight={450} style={{ overflowY: 'scroll' }}>
         <RadioGroup value={radio} onChange={onRadioChange}>
           <Box mb={3}>
             <Typography>{T('experiments.title')}</Typography>
