@@ -343,7 +343,7 @@ func Log(pod v1.Pod, tail int64, c *kubernetes.Clientset) (string, error) {
 	req := c.CoreV1().Pods(pod.Namespace).GetLogs(pod.Name, &podLogOpts)
 	podLogs, err := req.Stream()
 	if err != nil {
-		return "", errors.Wrapf(err, "faield to open log stream for pod %s/%s", pod.GetNamespace(), pod.GetName())
+		return "", errors.Wrapf(err, "failed to open log stream for pod %s/%s", pod.GetNamespace(), pod.GetName())
 	}
 	defer podLogs.Close()
 
@@ -371,7 +371,7 @@ func checkConnForCtrlAndDaemon(ctx context.Context, daemons []v1.Pod, c *ClientS
 	}
 	ctrlMgrs, err := selector.SelectPods(ctx, c.CtrlCli, c.CtrlCli, ctrlSelector, ctrlconfig.ControllerCfg.ClusterScoped, ctrlconfig.ControllerCfg.TargetNamespace, ctrlconfig.ControllerCfg.AllowedNamespaces, ctrlconfig.ControllerCfg.IgnoredNamespaces)
 	if err != nil {
-		return errors.Wrapf(err, "faield to select pod for controller-manager")
+		return errors.Wrapf(err, "failed to select pod for controller-manager")
 	}
 	if len(ctrlMgrs) == 0 {
 		return fmt.Errorf("Could not found controller manager")
