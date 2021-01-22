@@ -102,6 +102,10 @@ metadata:
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/component: chaos-dashboard
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+"  "_" }}
+{{- with .Values.dashboard.service.annotations }}
+  annotations:
+{{ toYaml . | indent 4 }}
+{{- end }}
 spec:
   selector:
     app.kubernetes.io/name: {{ template "chaos-mesh.name" . }}
