@@ -16,7 +16,6 @@ package cmd
 import (
 	"context"
 	"fmt"
-	"log"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -42,13 +41,8 @@ const (
 	ioChaos      = "iochaos"
 )
 
-func init() {
+func NewDebugCommand() (*cobra.Command, error) {
 	o := &debugOptions{}
-
-	c, err := cm.InitClientSet()
-	if err != nil {
-		log.Fatal(err)
-	}
 
 	debugCmd := &cobra.Command{
 		Use:   `debug (CHAOSTYPE) [-c CHAOSNAME] [-n NAMESPACE]`,
@@ -70,16 +64,22 @@ Examples:
 		Use:   `networkchaos (CHAOSNAME) [-n NAMESPACE]`,
 		Short: `Print the debug information for certain network chaos`,
 		Long:  `Print the debug information for certain network chaos`,
-		Run: func(cmd *cobra.Command, args []string) {
-			if err := o.Run("networkchaos", args, c); err != nil {
-				log.Fatal(err)
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientset, err := cm.InitClientSet()
+			if err != nil {
+				return err
 			}
+			return o.Run(networkChaos, args, clientset)
 		},
 		ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+			clientset, err := cm.InitClientSet()
+			if err != nil {
+				return nil, cobra.ShellCompDirectiveDefault
+			}
 			if len(args) != 0 {
 				return nil, cobra.ShellCompDirectiveNoFileComp
 			}
-			return listChaos("networkchaos", o.namespace, toComplete, c.CtrlCli)
+			return listChaos(networkChaos, o.namespace, toComplete, clientset.CtrlCli)
 		},
 	}
 
@@ -87,16 +87,22 @@ Examples:
 		Use:   `stresschaos (CHAOSNAME) [-n NAMESPACE]`,
 		Short: `Print the debug information for certain stress chaos`,
 		Long:  `Print the debug information for certain stress chaos`,
-		Run: func(cmd *cobra.Command, args []string) {
-			if err := o.Run("stresschaos", args, c); err != nil {
-				log.Fatal(err)
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientset, err := cm.InitClientSet()
+			if err != nil {
+				return err
 			}
+			return o.Run(stressChaos, args, clientset)
 		},
 		ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+			clientset, err := cm.InitClientSet()
+			if err != nil {
+				return nil, cobra.ShellCompDirectiveDefault
+			}
 			if len(args) != 0 {
 				return nil, cobra.ShellCompDirectiveNoFileComp
 			}
-			return listChaos("stresschaos", o.namespace, toComplete, c.CtrlCli)
+			return listChaos(stressChaos, o.namespace, toComplete, clientset.CtrlCli)
 		},
 	}
 
@@ -104,16 +110,23 @@ Examples:
 		Use:   `iochaos (CHAOSNAME) [-n NAMESPACE]`,
 		Short: `Print the debug information for certain io chaos`,
 		Long:  `Print the debug information for certain io chaos`,
-		Run: func(cmd *cobra.Command, args []string) {
-			if err := o.Run("iochaos", args, c); err != nil {
-				log.Fatal(err)
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientset, err := cm.InitClientSet()
+			if err != nil {
+				return err
 			}
+			return o.Run(ioChaos, args, clientset)
+
 		},
 		ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+			clientset, err := cm.InitClientSet()
+			if err != nil {
+				return nil, cobra.ShellCompDirectiveDefault
+			}
 			if len(args) != 0 {
 				return nil, cobra.ShellCompDirectiveNoFileComp
 			}
-			return listChaos("iochaos", o.namespace, toComplete, c.CtrlCli)
+			return listChaos(ioChaos, o.namespace, toComplete, clientset.CtrlCli)
 		},
 	}
 
@@ -122,14 +135,14 @@ Examples:
 	debugCmd.AddCommand(ioCmd)
 
 	debugCmd.PersistentFlags().StringVarP(&o.namespace, "namespace", "n", "default", "namespace to find chaos")
-	err = debugCmd.RegisterFlagCompletionFunc("namespace", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-		return listNamespace(toComplete, c.KubeCli)
+	err := debugCmd.RegisterFlagCompletionFunc("namespace", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+		clientset, err := cm.InitClientSet()
+		if err != nil {
+			return nil, cobra.ShellCompDirectiveDefault
+		}
+		return listNamespace(toComplete, clientset.KubeCli)
 	})
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	rootCmd.AddCommand(debugCmd)
+	return debugCmd, err
 }
 
 // Run debug

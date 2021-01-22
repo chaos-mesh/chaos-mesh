@@ -34,13 +34,8 @@ type logsOptions struct {
 	node string
 }
 
-func init() {
+func NewLogsCmd() (*cobra.Command, error) {
 	o := &logsOptions{}
-
-	c, err := cm.InitClientSet()
-	if err != nil {
-		log.Fatal(err)
-	}
 
 	logsCmd := &cobra.Command{
 		Use:   `logs [-t LINE]`,
@@ -54,7 +49,7 @@ Examples:
   # Print 100 log lines for chaosmesh components in node NODENAME
   chaosctl logs -t 100 -n NODENAME`,
 		Run: func(cmd *cobra.Command, args []string) {
-			if err := o.Run(args, c); err != nil {
+			if err := o.Run(args); err != nil {
 				log.Fatal(err)
 			}
 		},
@@ -63,20 +58,27 @@ Examples:
 
 	logsCmd.Flags().Int64VarP(&o.tail, "tail", "t", -1, "Number of lines of recent log")
 	logsCmd.Flags().StringVarP(&o.node, "node", "n", "", "Number of lines of recent log")
-	err = logsCmd.RegisterFlagCompletionFunc("node", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-		return listNodes(toComplete, c.KubeCli)
+	err := logsCmd.RegisterFlagCompletionFunc("node", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+		clientset, err := cm.InitClientSet()
+		if err != nil {
+			return nil, cobra.ShellCompDirectiveDefault
+		}
+		return listNodes(toComplete, clientset.KubeCli)
 	})
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
-
-	rootCmd.AddCommand(logsCmd)
+	return logsCmd, nil
 }
 
 // Run logs
-func (o *logsOptions) Run(args []string, c *cm.ClientSet) error {
+func (o *logsOptions) Run(args []string) error {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
+	c, err := cm.InitClientSet()
+	if err != nil {
+		return err
+	}
 
 	componentsNeeded := []string{"controller-manager", "chaos-daemon", "chaos-dashboard"}
 	for _, name := range componentsNeeded {
@@ -92,12 +94,12 @@ func (o *logsOptions) Run(args []string, c *cm.ClientSet) error {
 			return fmt.Errorf("failed to SelectPods with: %s", err.Error())
 		}
 		for _, comp := range components {
-			cm.PrettyPrint(fmt.Sprintf("[%s]", comp.Name), 0, "Cyan")
+			cm.PrettyPrint(fmt.Sprintf("[%s]", comp.Name), 0, cm.Cyan)
 			comLog, err := cm.Log(comp, o.tail, c.KubeCli)
 			if err != nil {
-				cm.PrettyPrint(err.Error(), 1, "Red")
+				cm.PrettyPrint(err.Error(), 1, cm.Red)
 			} else {
-				cm.PrettyPrint(comLog, 1, "")
+				cm.PrettyPrint(comLog, 1, cm.NoColor)
 			}
 		}
 	}

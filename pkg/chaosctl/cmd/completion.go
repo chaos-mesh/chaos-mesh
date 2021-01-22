@@ -82,7 +82,3 @@ PS> ./bin/chaosctl completion powershell > chaosctl.ps1
 		}
 	},
 }
-
-func init() {
-	rootCmd.AddCommand(completionCmd)
-}

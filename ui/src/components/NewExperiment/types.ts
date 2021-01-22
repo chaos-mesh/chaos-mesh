@@ -17,7 +17,7 @@ export interface ExperimentScope {
   phase_selectors: string[]
   mode: string
   value: string
-  pods: Record<string, string[]> | string[]
+  pods: object | string[]
 }
 
 export interface ExperimentTargetNetworkLoss {
@@ -111,16 +111,14 @@ export interface ExperimentTargetStress {
   container_name: string
 }
 
-export const kind = [
-  'PodChaos',
-  'NetworkChaos',
-  'IoChaos',
-  'KernelChaos',
-  'TimeChaos',
-  'StressChaos',
-  'DNSChaos',
-] as const
-export type ExperimentKind = typeof kind[number]
+export type ExperimentKind =
+  | 'PodChaos'
+  | 'NetworkChaos'
+  | 'IoChaos'
+  | 'KernelChaos'
+  | 'TimeChaos'
+  | 'StressChaos'
+  | 'DNSChaos'
 
 export interface ExperimentTarget {
   kind: ExperimentKind
