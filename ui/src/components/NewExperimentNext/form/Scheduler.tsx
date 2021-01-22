@@ -38,7 +38,7 @@ interface SchedulerProps {
 }
 
 const Scheduler: React.FC<SchedulerProps> = ({ errors, touched }) => {
-  const target = useSelector((state: RootState) => state.experiments.target)
+  const { fromExternal, basic, target } = useSelector((state: RootState) => state.experiments)
   const scheduled = target.kind
     ? target.kind === 'PodChaos' && mustBeScheduled.includes(target.pod_chaos.action)
       ? true
@@ -51,6 +51,13 @@ const Scheduler: React.FC<SchedulerProps> = ({ errors, touched }) => {
       setContinuous(false)
     }
   }, [scheduled])
+
+  useEffect(() => {
+    if (fromExternal && basic.scheduler.cron === '' && basic.scheduler.duration === '') {
+      setContinuous(true)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fromExternal])
 
   const handleChecked = (_: React.ChangeEvent<HTMLInputElement>, checked: boolean) => {
     if (scheduled) {
@@ -93,7 +100,7 @@ const Scheduler: React.FC<SchedulerProps> = ({ errors, touched }) => {
         </Typography>
         <Box>
           <FormControlLabel
-            style={{ marginLeft: -4, marginRight: 0 }}
+            style={{ marginRight: 0 }}
             control={
               <Switch name="continuous" color="primary" size="small" checked={continuous} onChange={handleChecked} />
             }
@@ -110,6 +117,7 @@ const Scheduler: React.FC<SchedulerProps> = ({ errors, touched }) => {
       {!continuous && (
         <Box>
           <TextField
+            fast
             id="scheduler.cron"
             name="scheduler.cron"
             label="Cron"
@@ -135,6 +143,7 @@ const Scheduler: React.FC<SchedulerProps> = ({ errors, touched }) => {
 
           {!scheduled && (
             <TextField
+              fast
               id="scheduler.duration"
               name="scheduler.duration"
               label={T('newE.schedule.duration')}

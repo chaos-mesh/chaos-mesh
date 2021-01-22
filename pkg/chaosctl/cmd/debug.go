@@ -74,7 +74,7 @@ Examples:
 			if err != nil {
 				return err
 			}
-			return o.Run("networkchaos", args, clientset)
+			return o.Run(networkChaos, args, clientset)
 		},
 		SilenceErrors: true,
 		SilenceUsage:  true,
@@ -86,7 +86,7 @@ Examples:
 			if len(args) != 0 {
 				return nil, cobra.ShellCompDirectiveNoFileComp
 			}
-			return listChaos("networkchaos", o.namespace, toComplete, clientset.CtrlCli)
+			return listChaos(networkChaos, o.namespace, toComplete, clientset.CtrlCli)
 		},
 	}
 
@@ -99,7 +99,7 @@ Examples:
 			if err != nil {
 				return err
 			}
-			return o.Run("stresschaos", args, clientset)
+			return o.Run(stressChaos, args, clientset)
 		},
 		SilenceErrors: true,
 		SilenceUsage:  true,
@@ -111,7 +111,7 @@ Examples:
 			if len(args) != 0 {
 				return nil, cobra.ShellCompDirectiveNoFileComp
 			}
-			return listChaos("stresschaos", o.namespace, toComplete, clientset.CtrlCli)
+			return listChaos(stressChaos, o.namespace, toComplete, clientset.CtrlCli)
 		},
 	}
 
@@ -124,7 +124,7 @@ Examples:
 			if err != nil {
 				return err
 			}
-			return o.Run("iochaos", args, clientset)
+			return o.Run(ioChaos, args, clientset)
 
 		},
 		SilenceErrors: true,
@@ -137,7 +137,7 @@ Examples:
 			if len(args) != 0 {
 				return nil, cobra.ShellCompDirectiveNoFileComp
 			}
-			return listChaos("iochaos", o.namespace, toComplete, clientset.CtrlCli)
+			return listChaos(ioChaos, o.namespace, toComplete, clientset.CtrlCli)
 		},
 	}
 

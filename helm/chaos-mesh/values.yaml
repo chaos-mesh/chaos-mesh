@@ -137,6 +137,7 @@ dashboard:
   podAnnotations: {}
 
   service:
+    annotations: {}
     type: NodePort
     # clusterIP:
     # nodePort:

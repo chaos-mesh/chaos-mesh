@@ -42,12 +42,22 @@ import (
 	e2econfig "github.com/chaos-mesh/chaos-mesh/test/e2e/config"
 )
 
+type Color string
+
+const (
+	Blue    Color = "Blue"
+	Red     Color = "Red"
+	Green   Color = "Green"
+	Cyan    Color = "Cyan"
+	NoColor Color = ""
+)
+
 var (
-	colorFunc = map[string]func(string, ...interface{}){
-		"Blue":  color.Blue,
-		"Red":   color.Red,
-		"Green": color.Green,
-		"Cyan":  color.Cyan,
+	colorFunc = map[Color]func(string, ...interface{}){
+		Blue:  color.Blue,
+		Red:   color.Red,
+		Green: color.Green,
+		Cyan:  color.Cyan,
 	}
 	scheme = runtime.NewScheme()
 )
@@ -92,13 +102,13 @@ func upperCaseChaos(str string) string {
 }
 
 // PrettyPrint print with tab number and color
-func PrettyPrint(s string, num int, color string) {
+func PrettyPrint(s string, indentLevel int, color Color) {
 	var tabStr string
-	for i := 0; i < num; i++ {
+	for i := 0; i < indentLevel; i++ {
 		tabStr += "\t"
 	}
 	str := fmt.Sprintf("%s%s\n\n", tabStr, regexp.MustCompile("\n").ReplaceAllString(s, "\n"+tabStr))
-	if color != "" {
+	if color != NoColor {
 		if cfunc, ok := colorFunc[color]; !ok {
 			fmt.Printf("COLOR NOT SUPPORTED")
 		} else {
@@ -112,20 +122,20 @@ func PrettyPrint(s string, num int, color string) {
 // PrintResult prints result to users in prettier format
 func PrintResult(result []ChaosResult) {
 	for _, chaos := range result {
-		PrettyPrint("[Chaos]: "+chaos.Name, 0, "Blue")
+		PrettyPrint("[Chaos]: "+chaos.Name, 0, Blue)
 		for _, pod := range chaos.Pods {
-			PrettyPrint("[Pod]: "+pod.Name, 0, "Blue")
+			PrettyPrint("[Pod]: "+pod.Name, 0, Blue)
 			for i, item := range pod.Items {
-				PrettyPrint(fmt.Sprintf("%d. [%s]", i+1, item.Name), 1, "Cyan")
-				PrettyPrint(item.Value, 1, "")
+				PrettyPrint(fmt.Sprintf("%d. [%s]", i+1, item.Name), 1, Cyan)
+				PrettyPrint(item.Value, 1, NoColor)
 				if item.Status == ItemSuccess {
 					if item.SucInfo != "" {
-						PrettyPrint(item.SucInfo, 1, "Green")
+						PrettyPrint(item.SucInfo, 1, Green)
 					} else {
-						PrettyPrint("Execute as expected", 1, "Green")
+						PrettyPrint("Execute as expected", 1, Green)
 					}
 				} else if item.Status == ItemFailure {
-					PrettyPrint(fmt.Sprintf("Failed: %s ", item.ErrInfo), 1, "Red")
+					PrettyPrint(fmt.Sprintf("Failed: %s ", item.ErrInfo), 1, Red)
 				}
 			}
 		}
@@ -159,7 +169,7 @@ func GetPods(ctx context.Context, chaosName string, status v1alpha1.ChaosStatus,
 	// get podName
 	failedMessage := status.FailedMessage
 	if failedMessage != "" {
-		PrettyPrint(fmt.Sprintf("chaos %s failed with: %s", chaosName, failedMessage), 0, "Red")
+		PrettyPrint(fmt.Sprintf("chaos %s failed with: %s", chaosName, failedMessage), 0, Red)
 	}
 
 	phase := status.Experiment.Phase
@@ -384,10 +394,10 @@ func checkConnForCtrlAndDaemon(ctx context.Context, daemons []v1.Pod, c *ClientS
 			return errors.Wrapf(err, "run command %s failed", cmd)
 		}
 		if string(out) == "0" {
-			PrettyPrint(fmt.Sprintf("Connection between Controller-Manager and Daemon %s (ip address: %s) works well", daemon.Name, daemonIP), 0, "Green")
+			PrettyPrint(fmt.Sprintf("Connection between Controller-Manager and Daemon %s (ip address: %s) works well", daemon.Name, daemonIP), 0, Green)
 		} else {
 			PrettyPrint(fmt.Sprintf(`Connection between Controller-Manager and Daemon %s (ip address: %s) is blocked.
-Please check network policy / firewall, or see FAQ on website`, daemon.Name, daemonIP), 0, "Red")
+Please check network policy / firewall, or see FAQ on website`, daemon.Name, daemonIP), 0, Red)
 		}
 
 	}
