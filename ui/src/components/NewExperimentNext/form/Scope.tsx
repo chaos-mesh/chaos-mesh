@@ -1,7 +1,6 @@
 import { AutocompleteMultipleField, SelectField, TextField } from 'components/FormField'
 import { Box, InputAdornment, MenuItem, Typography } from '@material-ui/core'
 import React, { useEffect, useMemo, useRef } from 'react'
-import { RootState, useStoreDispatch } from 'store'
 import { arrToObjBySep, joinObjKVs, toTitleCase } from 'lib/utils'
 import {
   getAnnotations,
@@ -10,11 +9,11 @@ import {
   getNetworkTargetPodsByNamespaces as getNetworkTargetPods,
 } from 'slices/experiments'
 import { getIn, useFormikContext } from 'formik'
+import { useStoreDispatch, useStoreSelector } from 'store'
 
 import AdvancedOptions from 'components/AdvancedOptions'
 import ScopePodsTable from './ScopePodsTable'
 import T from 'components/T'
-import { useSelector } from 'react-redux'
 
 interface ScopeStepProps {
   namespaces: string[]
@@ -40,9 +39,10 @@ const ScopeStep: React.FC<ScopeStepProps> = ({ namespaces, scope = 'scope', pods
     annotation_selectors: currentAnnotations,
   } = getIn(values, scope)
 
-  const experiments = useSelector((state: RootState) => state.experiments)
-  const { labels, annotations } = experiments
-  const pods = scope === 'scope' ? experiments.pods : experiments.networkTargetPods
+  const state = useStoreSelector((state) => state)
+  const { enableKubeSystemNS } = state.settings
+  const { labels, annotations } = state.experiments
+  const pods = scope === 'scope' ? state.experiments.pods : state.experiments.networkTargetPods
   const getPods = scope === 'scope' ? getCommonPods : getNetworkTargetPods
   const dispatch = useStoreDispatch()
 
@@ -120,7 +120,7 @@ const ScopeStep: React.FC<ScopeStepProps> = ({ namespaces, scope = 'scope', pods
             ? getIn(errors, `${scope}.namespace_selectors`)
             : T('common.multiOptions')
         }
-        options={namespaces}
+        options={!enableKubeSystemNS ? namespaces.filter((d) => d !== 'kube-system') : namespaces}
         error={
           getIn(errors, `${scope}.namespace_selectors`) && getIn(touched, `${scope}.namespace_selectors`) ? true : false
         }

@@ -1,5 +1,6 @@
 import { Box, Grid } from '@material-ui/core'
 
+import Experiments from './Experiments'
 import Other from './Other'
 import Paper from 'components-mui/Paper'
 import PaperTop from 'components-mui/PaperTop'
@@ -16,16 +17,21 @@ const Settings = () => {
     <Grid container>
       <Grid item sm={12} md={6}>
         <Paper>
-          <Box mx={3}>
-            {securityMode && (
-              <>
-                <PaperTop title={T('settings.addToken.title')} />
+          {securityMode && (
+            <>
+              <PaperTop title={T('settings.addToken.title')} />
+              <Box mx={3}>
                 <Token />
                 <Box my={6} />
                 <TokensTable />
                 <Box mb={6} />
-              </>
-            )}
+              </Box>
+            </>
+          )}
+
+          <PaperTop title={T('experiments.title')} />
+          <Box mx={3}>
+            <Experiments />
           </Box>
 
           <PaperTop title={T('common.other')} />
