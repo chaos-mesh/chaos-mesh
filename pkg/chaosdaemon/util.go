@@ -84,6 +84,10 @@ func (c DockerClient) GetPidFromContainerID(ctx context.Context, containerID str
 		return 0, err
 	}
 
+	if container.State.Pid == 0 {
+		return 0, fmt.Errorf("container is not running, status: %s", container.State.Status)
+	}
+
 	return uint32(container.State.Pid), nil
 }
 

@@ -31,6 +31,7 @@ const initialState: {
   annotations: Record<string, string[]>
   pods: any[]
   networkTargetPods: any[]
+  fromExternal: boolean
   step1: boolean
   step2: boolean
   kindAction: [Kind | '', string]
@@ -43,6 +44,7 @@ const initialState: {
   pods: [],
   networkTargetPods: [],
   // New Experiment needed
+  fromExternal: false,
   step1: false,
   step2: false,
   kindAction: ['', ''],
@@ -74,7 +76,16 @@ const experimentsSlice = createSlice({
     setBasic(state, action) {
       state.basic = action.payload
     },
+    setExternalExperiment(state, action: PayloadAction<any>) {
+      const { kindAction, target, basic } = action.payload
+
+      state.fromExternal = true
+      state.kindAction = kindAction
+      state.target = target
+      state.basic = basic
+    },
     resetNewExperiment(state) {
+      state.fromExternal = false
       state.step1 = false
       state.step2 = false
       state.kindAction = ['', '']
@@ -108,6 +119,7 @@ export const {
   setKindAction,
   setTarget,
   setBasic,
+  setExternalExperiment,
   resetNewExperiment,
 } = experimentsSlice.actions
 

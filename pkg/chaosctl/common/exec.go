@@ -20,6 +20,8 @@ import (
 	"io/ioutil"
 	"strings"
 
+	"github.com/pkg/errors"
+
 	"google.golang.org/grpc/grpclog"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/client-go/kubernetes"
@@ -59,7 +61,7 @@ func Exec(ctx context.Context, pod v1.Pod, cmd string, c *kubernetes.Clientset) 
 	var stdout, stderr bytes.Buffer
 	exec, err := remotecommand.NewSPDYExecutor(config.GetConfigOrDie(), "POST", req.URL())
 	if err != nil {
-		return "", fmt.Errorf("error in creating NewSPDYExecutor: %s", err.Error())
+		return "", errors.Wrapf(err, "error in creating NewSPDYExecutor for pod %s/%s", pod.GetNamespace(), pod.GetName())
 	}
 	err = exec.Stream(remotecommand.StreamOptions{
 		Stdin:  nil,
@@ -70,7 +72,7 @@ func Exec(ctx context.Context, pod v1.Pod, cmd string, c *kubernetes.Clientset) 
 		if stderr.String() != "" {
 			return "", fmt.Errorf("error: %s\npod: %s\ncommand: %s", strings.TrimSuffix(stderr.String(), "\n"), pod.Name, cmd)
 		}
-		return "", fmt.Errorf("error in streaming remotecommand: %s\npod: %s\ncommand: %s", err.Error(), pod.Name, cmd)
+		return "", errors.Wrapf(err, "error in streaming remotecommand: pod: %s/%s, command: %s", pod.GetNamespace(), pod.Name, cmd)
 	}
 	if stderr.String() != "" {
 		return "", fmt.Errorf("error of command %s: %s", cmd, stderr.String())
