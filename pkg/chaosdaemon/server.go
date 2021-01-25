@@ -16,6 +16,7 @@ package chaosdaemon
 import (
 	"context"
 	"fmt"
+	"github.com/moby/locker"
 	"net"
 
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
@@ -58,6 +59,8 @@ func (c *Config) GrpcAddr() string {
 type DaemonServer struct {
 	crClient                 ContainerRuntimeInfoClient
 	backgroundProcessManager bpm.BackgroundProcessManager
+
+	IPSetLocker *locker.Locker
 }
 
 func newDaemonServer(containerRuntime string) (*DaemonServer, error) {
@@ -67,6 +70,7 @@ func newDaemonServer(containerRuntime string) (*DaemonServer, error) {
 	}
 
 	return &DaemonServer{
+		IPSetLocker: nil,
 		crClient:                 crClient,
 		backgroundProcessManager: bpm.NewBackgroundProcessManager(),
 	}, nil
