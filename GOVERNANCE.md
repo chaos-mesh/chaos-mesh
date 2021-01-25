@@ -67,7 +67,7 @@ If a maintainer is no longer interested or cannot perform the maintainer duties 
 
 # Approving PRs
 
-PRs may be merged only after receiving at least two approvals (LGTMs) from Committers or Maintainers. However, maintainers can sidestep this rule under justifiable circumstances. For example:
+PRs may be merged only after receiving at least two approvals (LGTMs) from Committers or Maintainers. However, Maintainers can sidestep this rule under justifiable circumstances. For example:
 
 - If a CI tool is broken, may override the tool to still submit the change.
 - Minor typos or fixes for broken tests.
@@ -75,7 +75,12 @@ PRs may be merged only after receiving at least two approvals (LGTMs) from Commi
 
 # Decision Making Process
 
-Ideally, all project decisions are resolved by consensus via a PR or GitHub issue. Any of the day-to-day project maintenance can be done by a [lazy consensus model](https://communitymgt.fandom.com/wiki/Lazy_consensus). Community-level decisions must be brought to broader awareness via communications such as community meetings and slack channels.
+Ideally, all project decisions are resolved by consensus via a PR or GitHub issue. Any of the day-to-day project maintenance can be done by a [lazy consensus model](https://communitymgt.fandom.com/wiki/Lazy_consensus). Community-level decisions such as:
+
+- RFC approvals (see below)
+- Modifying GOVERNANCE.md
+
+must be brought to broader awareness via communications such as community meetings and slack channels and supermajority (2/3) approval from Maintainters is required.
 
 In general, we prefer that technical issues and maintainer membership are amicably worked out between the persons involved. If a dispute cannot be decided independently, the maintainers can be called in to resolve the issue by voting. For voting, a specific statement of what is being voted on should be added to the relevant github issue or PR, and a link to that issue or PR added to the maintainers meeting agenda document. Maintainers should indicate their yes/no vote on that issue or PR, and after a suitable period of time, the votes will be tallied and the outcome noted.
 
@@ -83,4 +88,4 @@ Decision making must comply with the [CNCF Code of Conduct](https://github.com/c
 
 ## Proposal process
 
-We use a Request for Comments (RFC) process for any substantial changes to Chaos Mesh. This process involves an upfront design that will provide increased visibility to the community. If you're considering a PR that will bring in a new feature that may affect how Chaos Mesh is implemented, or may be a breaking change, then you should start with a RFC. The process is documented in the [RFC repository](https://github.com/chaos-mesh/rfcs)) and has [a template](https://github.com/chaos-mesh/rfcs/blob/main/template.md) for you to get started. However, it is suggested that you bring this proposal for initial SIG discussions before you submit the RFC, which makes the process more smooth and efficient.
+We use a Request for Comments (RFC) process for any substantial changes to Chaos Mesh. This process involves an upfront design that will provide increased visibility to the community. If you're considering a PR that will bring in a new feature that may affect how Chaos Mesh is implemented, or may be a breaking change, then you should start with a RFC. The process is documented in the [RFC repository](https://github.com/chaos-mesh/rfcs)) and has [a template](https://github.com/chaos-mesh/rfcs/blob/main/template.md) for you to get started.
