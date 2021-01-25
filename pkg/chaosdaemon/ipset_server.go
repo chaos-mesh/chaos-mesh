@@ -48,12 +48,14 @@ func (s *DaemonServer) FlushIPSets(ctx context.Context, req *pb.IPSetsRequest) (
 		// the ipset with the same name should be same for NetworkChaos.
 		// It's a bad solution, only for the users who don't want to upgrade
 		// their linux version to 3.12 :(
+		ipset := ipset
 		s.IPSetLocker.Lock(ipset.Name)
-		defer s.IPSetLocker.Unlock(ipset.Name)
 		err := flushIPSet(ctx, req.EnterNS, pid, ipset)
 		if err != nil {
+			s.IPSetLocker.Unlock(ipset.Name)
 			return nil, err
 		}
+		s.IPSetLocker.Unlock(ipset.Name)
 	}
 
 	return &empty.Empty{}, nil
