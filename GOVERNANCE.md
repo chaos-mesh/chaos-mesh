@@ -30,13 +30,13 @@ Contributors are community members who contribute in concrete ways to the projec
 - Adding features.
 - Answering questions on social platforms such as Twitter, community Slack channel.
 
-Contributors will be added to the [Contributors List](https://github.com/chaos-mesh/chaos-mesh/blob/master/CONTRIBUTORS). For details, see [Contributing to Chaos Mesh](https://github.com/chaos-mesh/chaos-mesh/blob/master/CONTRIBUTING.md). For first time contributors, the community Slack channel is the most appropriate place to ask for help.
+For details, see [Contributing to Chaos Mesh](https://github.com/chaos-mesh/chaos-mesh/blob/master/CONTRIBUTING.md). For first time contributors, the community Slack channel is the most appropriate place to ask for help.
 
 As one gains experience and familiarity with the project and as their commitment to the community increases, they may find themselves being nominated for committership at some stage.
 
 ## Committer
 
-Committers are active community members who have shown that they are committed to the continuous development of the project through ongoing engagement with the community. Committership allows contributors to more easily carry on with their project related activities by giving them direct access to the project’s resources.
+Committers are active community members who have shown that they are committed to the continuous development of the project through ongoing engagement with the community. Committership allows contributors to more easily carry on with their project-related activities by giving them direct access to the project’s resources.
 
 Typically, a potential committer will need to show that they have sufficient understanding of the project, its objectives and its strategy. To become a committer, you are expected to:
 
