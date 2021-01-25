@@ -40,6 +40,16 @@ func (s *DaemonServer) FlushIPSets(ctx context.Context, req *pb.IPSetsRequest) (
 	}
 
 	for _, ipset := range req.Ipsets {
+		// All operations on the ipset with the same name should be serialized,
+		// because ipset is not isolated with nsmaespace in linux < 3.12
+
+		// **Notice**: Serialization should be enough for Chaos Mesh (but no
+		// need to use name to simulate isolation), because the operation on
+		// the ipset with the same name should be same for NetworkChaos.
+		// It's a bad solution, only for the users who don't want to upgrade
+		// their linux version to 3.12 :(
+		s.IPSetLocker.Lock(ipset.Name)
+		defer s.IPSetLocker.Unlock(ipset.Name)
 		err := flushIPSet(ctx, req.EnterNS, pid, ipset)
 		if err != nil {
 			return nil, err
