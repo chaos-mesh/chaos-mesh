@@ -178,6 +178,7 @@
   },
   "common": {
     "other": "其他",
+    "version": "版本",
     "doc": "文档",
     "tutorial": "教程",
     "add": "添加",

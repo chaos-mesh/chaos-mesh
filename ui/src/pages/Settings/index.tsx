@@ -1,4 +1,4 @@
-import { Box, Grid } from '@material-ui/core'
+import { Box, Grid, Typography } from '@material-ui/core'
 
 import Experiments from './Experiments'
 import Other from './Other'
@@ -8,10 +8,14 @@ import React from 'react'
 import T from 'components/T'
 import Token from 'components/Token'
 import TokensTable from './TokensTable'
+import logo from 'images/logo.svg'
+import logoWhite from 'images/logo-white.svg'
 import { useStoreSelector } from 'store'
 
 const Settings = () => {
-  const { securityMode } = useStoreSelector((state) => state.globalStatus)
+  const state = useStoreSelector((state) => state)
+  const { securityMode, version } = state.globalStatus
+  const { theme } = state.settings
 
   return (
     <Grid container>
@@ -37,6 +41,16 @@ const Settings = () => {
           <PaperTop title={T('common.other')} />
           <Box mx={3}>
             <Other />
+          </Box>
+
+          <PaperTop title={T('common.version')} />
+          <Box m={3}>
+            <img style={{ height: 36 }} src={theme === 'light' ? logo : logoWhite} alt="Chaos Mesh" />
+            <Box mt={1.5}>
+              <Typography variant="body2" color="textSecondary">
+                dashboard: {version}
+              </Typography>
+            </Box>
           </Box>
         </Paper>
       </Grid>

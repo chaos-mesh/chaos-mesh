@@ -178,6 +178,7 @@
   },
   "common": {
     "other": "Other",
+    "version": "Version",
     "doc": "Documentation",
     "tutorial": "Tutorial",
     "add": "Add",
