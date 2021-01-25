@@ -48,7 +48,7 @@ const Settings = () => {
             <img style={{ height: 36 }} src={theme === 'light' ? logo : logoWhite} alt="Chaos Mesh" />
             <Box mt={1.5}>
               <Typography variant="body2" color="textSecondary">
-                dashboard: {version}
+                Git Version: {version}
               </Typography>
             </Box>
           </Box>
