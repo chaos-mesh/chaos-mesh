@@ -51,12 +51,9 @@ func Debug(ctx context.Context, chaos runtime.Object, c *cm.ClientSet, result *c
 	for i := range pods {
 		podName := pods[i].Name
 		podResult := cm.PodResult{Name: podName}
-		err := debugEachPod(ctx, pods[i], daemons[i], stressChaos, c, &podResult)
+		_ = debugEachPod(ctx, pods[i], daemons[i], stressChaos, c, &podResult)
 		result.Pods = append(result.Pods, podResult)
-		if err != nil {
-			// TODO: should follow best-effort pattern
-			return errors.Wrap(err, fmt.Sprintf("failed to debug stress chaos for pod %s", podName))
-		}
+		// TODO: V(4) log when err != nil, wait for #1433
 	}
 	return nil
 }
