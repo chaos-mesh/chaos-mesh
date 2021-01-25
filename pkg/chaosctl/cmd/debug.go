@@ -18,6 +18,8 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/go-logr/logr"
+
 	"github.com/spf13/cobra"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
@@ -30,6 +32,7 @@ import (
 )
 
 type debugOptions struct {
+	logger    logr.Logger
 	namespace string
 }
 
@@ -41,8 +44,10 @@ const (
 	ioChaos      = "iochaos"
 )
 
-func NewDebugCommand() (*cobra.Command, error) {
-	o := &debugOptions{}
+func NewDebugCommand(logger logr.Logger) (*cobra.Command, error) {
+	o := &debugOptions{
+		logger: logger,
+	}
 
 	debugCmd := &cobra.Command{
 		Use:   `debug (CHAOSTYPE) [-c CHAOSNAME] [-n NAMESPACE]`,
@@ -71,6 +76,8 @@ Examples:
 			}
 			return o.Run(networkChaos, args, clientset)
 		},
+		SilenceErrors: true,
+		SilenceUsage:  true,
 		ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 			clientset, err := cm.InitClientSet()
 			if err != nil {
@@ -94,6 +101,8 @@ Examples:
 			}
 			return o.Run(stressChaos, args, clientset)
 		},
+		SilenceErrors: true,
+		SilenceUsage:  true,
 		ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 			clientset, err := cm.InitClientSet()
 			if err != nil {
@@ -118,6 +127,8 @@ Examples:
 			return o.Run(ioChaos, args, clientset)
 
 		},
+		SilenceErrors: true,
+		SilenceUsage:  true,
 		ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 			clientset, err := cm.InitClientSet()
 			if err != nil {
@@ -148,7 +159,7 @@ Examples:
 // Run debug
 func (o *debugOptions) Run(chaosType string, args []string, c *cm.ClientSet) error {
 	if len(args) > 1 {
-		return fmt.Errorf("Only one chaos could be specified")
+		return fmt.Errorf("only one chaos could be specified")
 	}
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -160,7 +171,7 @@ func (o *debugOptions) Run(chaosType string, args []string, c *cm.ClientSet) err
 
 	chaosList, chaosNameList, err := cm.GetChaosList(ctx, chaosType, chaosName, o.namespace, c.CtrlCli)
 	if err != nil {
-		return fmt.Errorf(err.Error())
+		return err
 	}
 	var result []cm.ChaosResult
 

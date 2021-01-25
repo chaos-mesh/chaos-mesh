@@ -19,10 +19,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"regexp"
 	"strings"
 	"time"
+
+	"github.com/pkg/errors"
 
 	"github.com/fatih/color"
 	v1 "k8s.io/api/core/v1"
@@ -145,7 +146,7 @@ func PrintResult(result []ChaosResult) {
 func MarshalChaos(s interface{}) (string, error) {
 	b, err := json.MarshalIndent(s, "", "  ")
 	if err != nil {
-		return "", fmt.Errorf("failed to marshal indent: %s", err.Error())
+		return "", errors.Wrapf(err, "failed to marshal indent")
 	}
 	return string(b), nil
 }
@@ -158,17 +159,17 @@ func InitClientSet() (*ClientSet, error) {
 	}
 	kubeClient, err := kubernetes.NewForConfig(config.GetConfigOrDie())
 	if err != nil {
-		return nil, fmt.Errorf("error in getting access to K8S: %s", err.Error())
+		return nil, errors.Wrap(err, "error in getting acess to k8s")
 	}
 	return &ClientSet{ctrlClient, kubeClient}, nil
 }
 
 // GetPods returns pod list and corresponding chaos daemon
-func GetPods(ctx context.Context, status v1alpha1.ChaosStatus, selectorSpec v1alpha1.SelectorSpec, c client.Client) ([]v1.Pod, []v1.Pod, error) {
+func GetPods(ctx context.Context, chaosName string, status v1alpha1.ChaosStatus, selectorSpec v1alpha1.SelectorSpec, c client.Client) ([]v1.Pod, []v1.Pod, error) {
 	// get podName
 	failedMessage := status.FailedMessage
 	if failedMessage != "" {
-		PrettyPrint(fmt.Sprintf("chaos failed with: %s", failedMessage), 0, Red)
+		PrettyPrint(fmt.Sprintf("chaos %s failed with: %s", chaosName, failedMessage), 0, Red)
 	}
 
 	phase := status.Experiment.Phase
@@ -176,18 +177,20 @@ func GetPods(ctx context.Context, status v1alpha1.ChaosStatus, selectorSpec v1al
 
 	if phase == v1alpha1.ExperimentPhaseWaiting {
 		waitTime := nextStart.Sub(time.Now())
-		fmt.Printf("Waiting for chaos to start, in %s\n", waitTime)
+		L().WithName("GetPods").V(1).Info(fmt.Sprintf("Waiting for chaos %s to start, in %s\n", chaosName, waitTime))
 		time.Sleep(waitTime)
 	}
 
 	pods, err := selector.SelectPods(ctx, c, c, selectorSpec, ctrlconfig.ControllerCfg.ClusterScoped, ctrlconfig.ControllerCfg.TargetNamespace, ctrlconfig.ControllerCfg.AllowedNamespaces, ctrlconfig.ControllerCfg.IgnoredNamespaces)
 	if err != nil {
-		return nil, nil, fmt.Errorf("failed to SelectPods with: %s", err.Error())
+		return nil, nil, errors.Wrap(err, "failed to SelectPods")
 	}
+	L().WithName("GetPods").V(4).Info("select pods for chaos", "chaos", chaosName, "pods", pods)
 	if len(pods) == 0 {
-		return nil, nil, fmt.Errorf("no pods found for selector: %s", selectorSpec)
+		return nil, nil, fmt.Errorf("no pods found for chaos %s, selector: %s", chaosName, selectorSpec)
 	}
 
+	// TODO: replace select daemon by
 	var chaosDaemons []v1.Pod
 	// get chaos daemon
 	for _, pod := range pods {
@@ -198,10 +201,10 @@ func GetPods(ctx context.Context, status v1alpha1.ChaosStatus, selectorSpec v1al
 		}
 		daemons, err := selector.SelectPods(ctx, c, nil, daemonSelector, ctrlconfig.ControllerCfg.ClusterScoped, ctrlconfig.ControllerCfg.TargetNamespace, ctrlconfig.ControllerCfg.AllowedNamespaces, ctrlconfig.ControllerCfg.IgnoredNamespaces)
 		if err != nil {
-			return nil, nil, fmt.Errorf("failed to SelectPods with: %s", err.Error())
+			return nil, nil, errors.Wrap(err, fmt.Sprintf("failed to select daemon pod for pod %s", pod.GetName()))
 		}
 		if len(daemons) == 0 {
-			return nil, nil, fmt.Errorf("no daemons found for selector: %s", daemonSelector)
+			return nil, nil, fmt.Errorf("no daemons found for pod %s with selector: %s", pod.GetName(), daemonSelector)
 		}
 		chaosDaemons = append(chaosDaemons, daemons[0])
 	}
@@ -216,7 +219,7 @@ func GetChaosList(ctx context.Context, chaosType string, chaosName string, ns st
 	chaosListInterface := allKinds[chaosType].ChaosList
 
 	if err := c.List(ctx, chaosListInterface, client.InNamespace(ns)); err != nil {
-		return nil, nil, fmt.Errorf("failed to get chaosList: %s", err.Error())
+		return nil, nil, errors.Wrapf(err, "failed to get chaosList with namespace %s", ns)
 	}
 	chaosList := chaosListInterface.ListChaos()
 	if len(chaosList) == 0 {
@@ -250,7 +253,7 @@ func getChaos(ctx context.Context, chaosType string, chaosName string, ns string
 		Name:      chaosName,
 	}
 	if err := c.Get(ctx, objectKey, chaos); err != nil {
-		return nil, fmt.Errorf("failed to get chaos %s: %s", chaosName, err.Error())
+		return nil, errors.Wrapf(err, "failed to get chaos %s", chaosName)
 	}
 	return chaos, nil
 }
@@ -260,7 +263,7 @@ func GetPidFromPS(ctx context.Context, pod v1.Pod, daemon v1.Pod, c *kubernetes.
 	cmd := fmt.Sprintf("ps")
 	out, err := ExecBypass(ctx, pod, daemon, cmd, c)
 	if err != nil {
-		return nil, nil, fmt.Errorf("run command '%s' failed with: %s", cmd, err.Error())
+		return nil, nil, errors.Wrapf(err, "run command %s failed", cmd)
 	}
 	outLines := strings.Split(string(out), "\n")
 	if len(outLines) < 2 {
@@ -296,15 +299,17 @@ func GetPidFromPS(ctx context.Context, pod v1.Pod, daemon v1.Pod, c *kubernetes.
 func GetPidFromPod(ctx context.Context, pod v1.Pod, daemon v1.Pod) (uint32, error) {
 	pfCancel, localPort, err := forwardPorts(ctx, daemon, uint16(ctrlconfig.ControllerCfg.ChaosDaemonPort))
 	if err != nil {
-		return 0, fmt.Errorf("forward ports failed: %s", err.Error())
+		return 0, errors.Wrapf(err, "forward ports for daemon pod %s/%s failed", daemon.Namespace, daemon.Name)
 	}
+	L().WithName("GetPidFromPod").V(4).Info(fmt.Sprintf("port forwarding 127.0.0.1:%d -> pod/%s/%s:%d", localPort, daemon.Namespace, daemon.Name, ctrlconfig.ControllerCfg.ChaosDaemonPort))
+
 	defer func() {
 		pfCancel()
 	}()
 
 	daemonClient, err := daemonClient.NewChaosDaemonClientLocally(int(localPort))
 	if err != nil {
-		return 0, fmt.Errorf("new chaos daemon client failed: %s", err.Error())
+		return 0, errors.Wrapf(err, "failed to create new chaos daemon client with local port %d", localPort)
 	}
 	defer daemonClient.Close()
 
@@ -319,7 +324,7 @@ func GetPidFromPod(ctx context.Context, pod v1.Pod, daemon v1.Pod) (uint32, erro
 		ContainerId: pod.Status.ContainerStatuses[0].ContainerID,
 	})
 	if err != nil {
-		return 0, fmt.Errorf("container get pid failed: %s", err.Error())
+		return 0, errors.Wrapf(err, "failed get pid from pod %s/%s", pod.GetNamespace(), pod.GetName())
 	}
 	return res.Pid, nil
 }
@@ -327,11 +332,11 @@ func GetPidFromPod(ctx context.Context, pod v1.Pod, daemon v1.Pod) (uint32, erro
 func forwardPorts(ctx context.Context, pod v1.Pod, port uint16) (context.CancelFunc, uint16, error) {
 	clientRawConfig, err := e2econfig.LoadClientRawConfig()
 	if err != nil {
-		log.Fatal("failed to load raw config", err.Error())
+		return nil, 0, errors.Wrap(err, "failed to load raw config")
 	}
 	fw, err := portforward.NewPortForwarder(ctx, e2econfig.NewSimpleRESTClientGetter(clientRawConfig), false)
 	if err != nil {
-		log.Fatal("failed to create port forwarder", err.Error())
+		return nil, 0, errors.Wrap(err, "failed to create port forwarder")
 	}
 	_, localPort, pfCancel, err := portforward.ForwardOnePort(fw, pod.Namespace, pod.Name, port)
 	return pfCancel, localPort, err
@@ -348,14 +353,14 @@ func Log(pod v1.Pod, tail int64, c *kubernetes.Clientset) (string, error) {
 	req := c.CoreV1().Pods(pod.Namespace).GetLogs(pod.Name, &podLogOpts)
 	podLogs, err := req.Stream()
 	if err != nil {
-		return "", fmt.Errorf("failed to open stream: %v", err.Error())
+		return "", errors.Wrapf(err, "failed to open log stream for pod %s/%s", pod.GetNamespace(), pod.GetName())
 	}
 	defer podLogs.Close()
 
 	buf := new(bytes.Buffer)
 	_, err = io.Copy(buf, podLogs)
 	if err != nil {
-		return "", fmt.Errorf("failed to copy information from podLogs to buf: %v", err.Error())
+		return "", errors.Wrapf(err, "failed to copy information from podLogs to buf")
 	}
 	return buf.String(), nil
 }
@@ -376,7 +381,7 @@ func checkConnForCtrlAndDaemon(ctx context.Context, daemons []v1.Pod, c *ClientS
 	}
 	ctrlMgrs, err := selector.SelectPods(ctx, c.CtrlCli, c.CtrlCli, ctrlSelector, ctrlconfig.ControllerCfg.ClusterScoped, ctrlconfig.ControllerCfg.TargetNamespace, ctrlconfig.ControllerCfg.AllowedNamespaces, ctrlconfig.ControllerCfg.IgnoredNamespaces)
 	if err != nil {
-		return fmt.Errorf("failed to SelectPods with: %s", err.Error())
+		return errors.Wrapf(err, "failed to select pod for controller-manager")
 	}
 	if len(ctrlMgrs) == 0 {
 		return fmt.Errorf("Could not found controller manager")
@@ -386,7 +391,7 @@ func checkConnForCtrlAndDaemon(ctx context.Context, daemons []v1.Pod, c *ClientS
 		cmd := fmt.Sprintf("ping -c 1 %s > /dev/null; echo $?", daemonIP)
 		out, err := Exec(ctx, ctrlMgrs[0], cmd, c.KubeCli)
 		if err != nil {
-			return fmt.Errorf("run command '%s' failed with: %s", cmd, err.Error())
+			return errors.Wrapf(err, "run command %s failed", cmd)
 		}
 		if string(out) == "0" {
 			PrettyPrint(fmt.Sprintf("Connection between Controller-Manager and Daemon %s (ip address: %s) works well", daemon.Name, daemonIP), 0, Green)
