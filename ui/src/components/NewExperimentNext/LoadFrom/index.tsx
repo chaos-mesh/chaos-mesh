@@ -1,7 +1,6 @@
 import { Box, Divider, FormControlLabel, Radio, RadioGroup, Typography } from '@material-ui/core'
 import React, { useEffect, useState } from 'react'
 import { setAlert, setAlertOpen } from 'slices/globalStatus'
-import { setBasic, setKindAction, setTarget } from 'slices/experiments'
 
 import { Archive } from 'api/archives.type'
 import { Experiment } from 'api/experiments.type'
@@ -13,6 +12,7 @@ import T from 'components/T'
 import YAML from 'components/YAML'
 import _snakecase from 'lodash.snakecase'
 import api from 'api'
+import { setExternalExperiment } from 'slices/experiments'
 import { useIntl } from 'react-intl'
 import { useStoreDispatch } from 'store'
 import { yamlToExperiment } from 'lib/formikhelpers'
@@ -46,9 +46,13 @@ const LoadFrom = () => {
     const y = yamlToExperiment(original)
     const kind = y.target.kind
 
-    dispatch(setKindAction([kind, y.target[_snakecase(kind)].action ?? '']))
-    dispatch(setTarget(y.target))
-    dispatch(setBasic(y.basic))
+    dispatch(
+      setExternalExperiment({
+        kindAction: [kind, y.target[_snakecase(kind)].action ?? ''],
+        target: y.target,
+        basic: y.basic,
+      })
+    )
   }
 
   const onRadioChange = (e: any) => {

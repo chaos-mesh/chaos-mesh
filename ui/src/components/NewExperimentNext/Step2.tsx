@@ -79,7 +79,13 @@ const Step2 = () => {
         )}
       </PaperTop>
       <Box position="relative" p={6} hidden={step2}>
-        <Formik enableReinitialize initialValues={init} validationSchema={schema} onSubmit={handleOnSubmitStep2}>
+        <Formik
+          enableReinitialize
+          initialValues={init}
+          validationSchema={schema}
+          validateOnChange={false}
+          onSubmit={handleOnSubmitStep2}
+        >
           {({ errors, touched }) => (
             <Form>
               <Grid container spacing={9}>
@@ -94,6 +100,7 @@ const Step2 = () => {
                     <Typography>{T('newE.steps.basic')}</Typography>
                   </Box>
                   <TextField
+                    fast
                     id="name"
                     name="name"
                     label={T('newE.basic.name')}
