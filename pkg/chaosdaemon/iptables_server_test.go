@@ -32,7 +32,7 @@ var _ = Describe("iptables server", func() {
 	defer mock.With("MockContainerdClient", &MockClient{})()
 	c, _ := CreateContainerRuntimeInfoClient(containerRuntimeContainerd)
 	m := bpm.NewBackgroundProcessManager()
-	s := &DaemonServer{c, m}
+	s := &DaemonServer{c, m, nil}
 
 	Context("FlushIptables", func() {
 		It("should work", func() {

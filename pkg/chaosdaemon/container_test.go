@@ -30,7 +30,7 @@ var _ = Describe("container kill", func() {
 	defer mock.With("MockContainerdClient", &MockClient{})()
 	c, _ := CreateContainerRuntimeInfoClient(containerRuntimeContainerd)
 	m := bpm.NewBackgroundProcessManager()
-	s := &DaemonServer{c, m}
+	s := &DaemonServer{c, m, nil}
 
 	Context("ContainerKill", func() {
 		It("should work", func() {

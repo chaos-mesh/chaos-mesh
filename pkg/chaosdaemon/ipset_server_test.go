@@ -20,6 +20,8 @@ import (
 	"os"
 	"os/exec"
 
+	"github.com/moby/locker"
+
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
@@ -32,7 +34,7 @@ var _ = Describe("ipset server", func() {
 	defer mock.With("MockContainerdClient", &MockClient{})()
 	c, _ := CreateContainerRuntimeInfoClient(containerRuntimeContainerd)
 	m := bpm.NewBackgroundProcessManager()
-	s := &DaemonServer{c, m}
+	s := &DaemonServer{c, m, locker.New()}
 
 	Context("createIPSet", func() {
 		It("should work", func() {
