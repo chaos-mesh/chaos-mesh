@@ -30,7 +30,7 @@ func commonTcTest(t *testing.T, fpname, errString string, tcFunc func(s *DaemonS
 	defer mock.With("MockContainerdClient", &MockClient{})()
 	c, _ := CreateContainerRuntimeInfoClient(containerRuntimeContainerd)
 	m := bpm.NewBackgroundProcessManager()
-	s := &DaemonServer{c, m}
+	s := &DaemonServer{c, m, nil}
 
 	if errString == "" {
 		defer mock.With(fpname, true)()
