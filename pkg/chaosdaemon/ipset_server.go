@@ -51,11 +51,10 @@ func (s *DaemonServer) FlushIPSets(ctx context.Context, req *pb.IPSetsRequest) (
 		ipset := ipset
 		s.IPSetLocker.Lock(ipset.Name)
 		err := flushIPSet(ctx, req.EnterNS, pid, ipset)
+		s.IPSetLocker.Unlock(ipset.Name)
 		if err != nil {
-			s.IPSetLocker.Unlock(ipset.Name)
 			return nil, err
 		}
-		s.IPSetLocker.Unlock(ipset.Name)
 	}
 
 	return &empty.Empty{}, nil
