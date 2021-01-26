@@ -70,16 +70,13 @@ func newDaemonServer(containerRuntime string) (*DaemonServer, error) {
 		return nil, err
 	}
 
-	return &DaemonServer{
-		IPSetLocker:              locker.New(),
-		crClient:                 crClient,
-		backgroundProcessManager: bpm.NewBackgroundProcessManager(),
-	}, nil
+	return NewDaemonServerWithCRClient(crClient), nil
 }
 
 // NewDaemonServerWithCRClient returns DaemonServer with container runtime client
 func NewDaemonServerWithCRClient(crClient ContainerRuntimeInfoClient) *DaemonServer {
 	return &DaemonServer{
+		IPSetLocker:              locker.New(),
 		crClient:                 crClient,
 		backgroundProcessManager: bpm.NewBackgroundProcessManager(),
 	}
