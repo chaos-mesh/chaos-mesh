@@ -53,8 +53,8 @@ func TestcaseDNSRandom(
 			Namespace: ns,
 		},
 		Spec: v1alpha1.DNSChaosSpec{
-			Action: v1alpha1.RandomAction,
-			Mode:   v1alpha1.AllPodMode,
+			Action:             v1alpha1.RandomAction,
+			Mode:               v1alpha1.AllPodMode,
 			DomainNamePatterns: []string{"not-exist-host.*"},
 			Selector: v1alpha1.SelectorSpec{
 				Namespaces:     []string{ns},
@@ -105,8 +105,8 @@ func TestcaseDNSError(
 			Namespace: ns,
 		},
 		Spec: v1alpha1.DNSChaosSpec{
-			Action: v1alpha1.ErrorAction,
-			Mode:   v1alpha1.AllPodMode,
+			Action:             v1alpha1.ErrorAction,
+			Mode:               v1alpha1.AllPodMode,
 			DomainNamePatterns: []string{"chaos-mesh.org"},
 			Selector: v1alpha1.SelectorSpec{
 				Namespaces:     []string{ns},

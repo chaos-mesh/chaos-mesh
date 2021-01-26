@@ -54,9 +54,9 @@ var _ = Describe("DNSChaos", func() {
 					Namespace: "default",
 				},
 				Spec: DNSChaosSpec{
-					Action: ErrorAction,
-					Mode:   OnePodMode,
-					Scope:  OuterScope,
+					Action:             ErrorAction,
+					Mode:               OnePodMode,
+					DomainNamePatterns: []string{},
 				},
 			}
 

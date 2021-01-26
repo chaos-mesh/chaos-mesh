@@ -31,10 +31,6 @@ const (
 	RandomAction DNSChaosAction = "random"
 )
 
-// DNSChaosScope is the scope which the DNS chaos works.
-// Note: The Scope is deprecated, use DomainNamePatterns instead.
-type DNSChaosScope string
-
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
@@ -82,10 +78,6 @@ type DNSChaosSpec struct {
 
 	// Scheduler defines some schedule rules to control the running time of the chaos experiment about network.
 	Scheduler *SchedulerSpec `json:"scheduler,omitempty"`
-
-	// Action defines the scope which the DNS chaos works.
-	// Note: The Scope is deprecated, use DomainNamePatterns instead.
-	//Scope DNSChaosScope `json:"scope"`
 
 	// Choose which domain names to take effect, support the placeholder ? and wildcard *, or the Specified domain name.
 	// Note:
