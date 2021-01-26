@@ -24,7 +24,7 @@ const YAML: React.FC<YAMLProps> = ({ callback, buttonProps }) => {
     const reader = new FileReader()
     reader.onload = function (e) {
       try {
-        const y = yaml.safeLoad(e.target!.result as string)
+        const y = yaml.load(e.target!.result as string)
         if (process.env.NODE_ENV === 'development') {
           console.debug('Debug yamlToExperiment:', y)
         }

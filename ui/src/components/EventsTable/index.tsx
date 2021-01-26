@@ -252,8 +252,8 @@ const EventsTable: React.ForwardRefRenderFunction<EventsTableHandles, EventsTabl
   }
 
   return (
-    <Box position="relative">
-      <TableContainer component={Paper}>
+    <Box position="relative" minHeight={600}>
+      <TableContainer component={(props) => <Paper {...props} padding={false} />}>
         <Table stickyHeader>
           <EventsTableHead order={order} orderBy={orderBy} onSort={handleSortEvents} detailed={detailed} />
 

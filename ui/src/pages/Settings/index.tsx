@@ -1,6 +1,8 @@
-import { Box, Grid, Paper, Typography } from '@material-ui/core'
+import { Box, Grid } from '@material-ui/core'
 
 import Other from './Other'
+import Paper from 'components-mui/Paper'
+import PaperTop from 'components-mui/PaperTop'
 import React from 'react'
 import T from 'components/T'
 import Token from 'components/Token'
@@ -13,22 +15,21 @@ const Settings = () => {
   return (
     <Grid container>
       <Grid item sm={12} md={6}>
-        <Paper variant="outlined">
-          <Box p={6}>
+        <Paper>
+          <Box mx={3}>
             {securityMode && (
               <>
-                <Typography variant="h6" gutterBottom>
-                  {T('settings.addToken.title')}
-                </Typography>
+                <PaperTop title={T('settings.addToken.title')} />
                 <Token />
                 <Box my={6} />
                 <TokensTable />
                 <Box mb={6} />
               </>
             )}
-            <Typography variant="h6" gutterBottom>
-              {T('common.other')}
-            </Typography>
+          </Box>
+
+          <PaperTop title={T('common.other')} />
+          <Box mx={3}>
             <Other />
           </Box>
         </Paper>

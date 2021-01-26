@@ -4,6 +4,7 @@
   "description": "A Web UI for Chaos Mesh",
   "private": true,
   "dependencies": {
+    "@loadable/component": "^5.14.1",
     "@material-ui/core": "^4.11.2",
     "@material-ui/icons": "^4.11.2",
     "@material-ui/lab": "^4.0.0-alpha.57",
@@ -17,7 +18,7 @@
     "formik": "^2.2.6",
     "idb": "^5.0.8",
     "js-file-download": "^0.4.12",
-    "js-yaml": "^3.14.0",
+    "js-yaml": "^4.0.0",
     "lodash.debounce": "^4.0.8",
     "lodash.get": "^4.4.2",
     "lodash.groupby": "^4.6.0",
@@ -25,7 +26,7 @@
     "react": "^17.0.1",
     "react-ace": "^9.2.1",
     "react-dom": "^17.0.1",
-    "react-intl": "^5.10.11",
+    "react-intl": "^5.10.16",
     "react-redux": "^7.2.2",
     "react-router-dom": "^5.1.2",
     "react-scripts": "4.0.1",
@@ -37,10 +38,15 @@
     "yup": "^0.29.1"
   },
   "scripts": {
+    "bootstrap": "./scripts/bootstrap.sh",
+    "server": "../images/chaos-dashboard/bin/chaos-dashboard",
     "start": "react-scripts start",
     "start:default": "cross-env REACT_APP_API_URL=http://localhost:2333 BROWSER=none react-scripts start",
+    "start:all": "concurrently --raw 'yarn server' 'yarn start:default'",
     "build": "react-scripts build",
+    "analyze": "source-map-explorer 'build/static/js/*.js' --only-mapped",
     "test": "react-scripts test",
+    "test:init": "./scripts/test/interface-builder.sh",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {
@@ -59,13 +65,14 @@
     ]
   },
   "devDependencies": {
-    "@testing-library/jest-dom": "^5.11.4",
-    "@testing-library/react": "^11.1.0",
+    "@testing-library/jest-dom": "^5.11.9",
+    "@testing-library/react": "^11.2.3",
     "@testing-library/user-event": "^12.1.10",
     "@types/d3": "^5.7.2",
     "@types/flat": "^5.0.1",
-    "@types/jest": "^26.0.15",
-    "@types/js-yaml": "^3.12.4",
+    "@types/jest": "^26.0.20",
+    "@types/js-yaml": "^4.0.0",
+    "@types/loadable__component": "^5.13.1",
     "@types/lodash.debounce": "^4.0.6",
     "@types/lodash.get": "^4.4.6",
     "@types/lodash.groupby": "^4.6.6",
@@ -77,14 +84,20 @@
     "@types/react-router-dom": "^5.1.7",
     "@types/reactour": "^1.17.1",
     "@types/yup": "^0.29.11",
+    "axios-mock-adapter": "^1.19.0",
+    "concurrently": "^5.3.0",
     "cross-env": "^7.0.3",
     "http-proxy-middleware": "^1.0.6",
-    "husky": "^4.3.6",
+    "husky": "^4.3.8",
     "import-sort-style-eslint": "^6.0.0",
     "lint-staged": "^10.5.3",
     "prettier": "^2.2.1",
     "prettier-plugin-import-sort": "^0.0.6",
-    "redux-logger": "^3.0.6"
+    "redux-logger": "^3.0.6",
+    "source-map-explorer": "^2.5.2",
+    "ts-interface-builder": "^0.2.3",
+    "ts-interface-checker": "^0.1.13",
+    "tsd": "^0.14.0"
   },
   "lint-staged": {
     "*.(j|t)s?(x)": "prettier --write"
