@@ -1181,16 +1181,7 @@ spec:
             - name: TZ
               value: ${timezone}
           securityContext:
-            capabilities:
-              add:
-                - SYS_PTRACE
-                - NET_ADMIN
-                - MKNOD
-                - SYS_CHROOT
-                - SYS_ADMIN
-                - KILL
-                # CAP_IPC_LOCK is used to lock memory
-                - IPC_LOCK
+              privileged: true
           volumeMounts:
             - name: socket-path
               mountPath: ${mountPath}

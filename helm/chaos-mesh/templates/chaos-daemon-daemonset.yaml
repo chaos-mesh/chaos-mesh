@@ -64,6 +64,9 @@ spec:
               value: {{ .Values.timezone | default "UTC" }}
             {{- end }}
           securityContext:
+            {{- if .Values.chaosDaemon.privileged }}
+              privileged: true
+            {{- else }}
             capabilities:
               add:
                 - SYS_PTRACE
@@ -74,6 +77,7 @@ spec:
                 - KILL
                 # CAP_IPC_LOCK is used to lock memory
                 - IPC_LOCK
+            {{- end }}
           volumeMounts:
             - name: socket-path
               {{- if eq .Values.chaosDaemon.runtime "docker" }}

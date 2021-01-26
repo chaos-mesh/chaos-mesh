@@ -43,6 +43,7 @@ The following tables list the configurable parameters of the Chaos Mesh chart an
 | `chaosDaemon.httpPort` | The port which http server listens on | `31766` |
 | `chaosDaemon.env` | chaosDaemon envs | `{}` |
 | `chaosDaemon.hostNetwork` | running chaosDaemon on host network | `false` |
+| `chaosDaemon.privileged` | Run chaos-daemon container in privileged mode. If it is set to false, chaos-daemon will be run in some specified capabilities. capabilities: SYS_PTRACE, NET_ADMIN, MKNOD, SYS_CHROOT, SYS_ADMIN, KILL, IPC_LOCK | `true` |
 | `chaosDaemon.priorityClassName` | Custom priorityClassName for using pod priorities | `` |
 | `chaosDaemon.podAnnotations` | Pod annotations of chaos-daemon | `{}` |
 | `chaosDaemon.runtime` | Runtime specifies which container runtime to use. Currently we only supports docker and containerd. | `docker` |
