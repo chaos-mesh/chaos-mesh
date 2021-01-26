@@ -55,7 +55,7 @@ func TestcaseDNSRandom(
 		Spec: v1alpha1.DNSChaosSpec{
 			Action: v1alpha1.RandomAction,
 			Mode:   v1alpha1.AllPodMode,
-			Scope:  v1alpha1.AllScope,
+			DomainNamePatterns: []string{"not-exist-host.*"},
 			Selector: v1alpha1.SelectorSpec{
 				Namespaces:     []string{ns},
 				LabelSelectors: map[string]string{"app": "network-peer"},
@@ -107,7 +107,7 @@ func TestcaseDNSError(
 		Spec: v1alpha1.DNSChaosSpec{
 			Action: v1alpha1.ErrorAction,
 			Mode:   v1alpha1.AllPodMode,
-			Scope:  v1alpha1.AllScope,
+			DomainNamePatterns: []string{"chaos-mesh.org"},
 			Selector: v1alpha1.SelectorSpec{
 				Namespaces:     []string{ns},
 				LabelSelectors: map[string]string{"app": "network-peer"},
@@ -121,7 +121,7 @@ func TestcaseDNSError(
 	err = wait.Poll(time.Second, 5*time.Second, func() (done bool, err error) {
 		// get IP of a chaos-mesh.org, because chaos DNS server will return error,
 		// so err should not be nil
-		_, dnsErr := testDNSServer(c, port, "chaos-mesh.org")
+		_, dnsErr := testDNSServer(c, port, "chaos-mes_.org")
 		if dnsErr == nil {
 			return false, nil
 		}
