@@ -54,7 +54,13 @@ spec:
               - random-max-percent
               type: string
             patterns:
-              description: add comment
+              description: "Choose which domain names to take effect, support the
+                placeholder ? and wildcard *, or the Specified domain name. Note:
+                \t\t1. The wildcard * must be at the end of the string. For example,
+                chaos-*.org is invalid.      2. if the patterns is empty, will take
+                effect on all the domain names. For example: \t\tThe value is [\"google.com\",
+                \"github.*\", \"chaos-mes?.org\"], \t\twill take effect on \"google.com\",
+                \"github.com\" and \"chaos-mesh.org\""
               items:
                 type: string
               type: array
@@ -170,7 +176,6 @@ spec:
           required:
           - action
           - mode
-          - patterns
           - selector
           type: object
         status:
