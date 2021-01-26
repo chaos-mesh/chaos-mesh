@@ -32,20 +32,8 @@ const (
 )
 
 // DNSChaosScope is the scope which the DNS chaos works.
+// Note: The Scope is deprecated, use DomainNamePatterns instead.
 type DNSChaosScope string
-
-const (
-	// OuterScope represents DNS chaos only works on the inner host in Kubernetes cluster
-	OuterScope DNSChaosScope = "outer"
-
-	// InnerScope represents DNS chaos only works on the outer host of Kubernetes cluster
-	InnerScope DNSChaosScope = "inner"
-
-	// AllScope represents DNS chaos works on host
-	AllScope DNSChaosScope = "all"
-
-	// TODO: maybe we can support set the RegExp for the host
-)
 
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
@@ -96,10 +84,18 @@ type DNSChaosSpec struct {
 	Scheduler *SchedulerSpec `json:"scheduler,omitempty"`
 
 	// Action defines the scope which the DNS chaos works.
-	// Supported action: outer, inner, all
-	// Default action: outer
-	// +kubebuilder:validation:Enum=outer;inner;all
-	Scope DNSChaosScope `json:"scope"`
+	// Note: The Scope is deprecated, use DomainNamePatterns instead.
+	//Scope DNSChaosScope `json:"scope"`
+
+	// Choose which domain names to take effect, support the placeholder ? and wildcard *, or the Specified domain name.
+	// Note:
+	//		1. The wildcard * must be at the end of the string. For example, chaos-*.org is invalid.
+	//      2. if the patterns is empty, will take effect on all the domain names.
+	// For example:
+	// 		The value is ["google.com", "github.*", "chaos-mes?.org"],
+	// 		will take effect on "google.com", "github.com" and "chaos-mesh.org"
+	// +optional
+	DomainNamePatterns []string `json:"patterns"`
 }
 
 // GetSelector is a getter for Selector (for implementing SelectSpec)

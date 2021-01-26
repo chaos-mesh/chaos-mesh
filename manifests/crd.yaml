@@ -53,6 +53,11 @@ spec:
               - fixed-percent
               - random-max-percent
               type: string
+            patterns:
+              description: add comment
+              items:
+                type: string
+              type: array
             scheduler:
               description: Scheduler defines some schedule rules to control the running
                 time of the chaos experiment about network.
@@ -66,14 +71,6 @@ spec:
               required:
               - cron
               type: object
-            scope:
-              description: 'Action defines the scope which the DNS chaos works. Supported
-                action: outer, inner, all Default action: outer'
-              enum:
-              - outer
-              - inner
-              - all
-              type: string
             selector:
               description: Selector is used to select pods that are used to inject
                 chaos action.
@@ -173,7 +170,7 @@ spec:
           required:
           - action
           - mode
-          - scope
+          - patterns
           - selector
           type: object
         status:
