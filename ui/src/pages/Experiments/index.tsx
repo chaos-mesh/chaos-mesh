@@ -113,7 +113,7 @@ export default function Experiments() {
           })
         )
         dispatch(setAlertOpen(true))
-        fetchExperiments()
+        setTimeout(fetchExperiments, 300)
       })
       .catch(console.error)
   }

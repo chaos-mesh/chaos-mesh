@@ -132,8 +132,9 @@ install: manifests
 
 # Generate manifests e.g. CRD, RBAC etc.
 config: $(GOBIN)/controller-gen
-	$< $(CRD_OPTIONS) rbac:roleName=manager-role webhook paths="./..." output:crd:artifacts:config=config/crd/bases
-	$< $(CRD_OPTIONS) rbac:roleName=manager-role webhook paths="./..." output:crd:artifacts:config=helm/chaos-mesh/crds
+	cd ./api/v1alpha1 ;\
+		$< $(CRD_OPTIONS) rbac:roleName=manager-role paths="./..." output:crd:artifacts:config=../../config/crd/bases ;\
+		$< $(CRD_OPTIONS) rbac:roleName=manager-role paths="./..." output:crd:artifacts:config=../../helm/chaos-mesh/crds ;
 
 # Run go fmt against code
 fmt: groupimports
@@ -333,10 +334,13 @@ chaos-build: bin/chaos-builder
 
 # Generate code
 generate: $(GOBIN)/controller-gen chaos-build
-	$< object:headerFile=./hack/boilerplate/boilerplate.generatego.txt paths="./..."
+	cd ./api/v1alpha1 ;\
+		$< object:headerFile=../../hack/boilerplate/boilerplate.generatego.txt paths="./..." ;
 
 manifests/crd.yaml: config ensure-kustomize
 	$(KUSTOMIZE_BIN) build config/default > manifests/crd.yaml
+
+yaml: manifests/crd.yaml
 
 # Generate Go files from Chaos Mesh proto files.
 ifeq ($(IN_DOCKER),1)

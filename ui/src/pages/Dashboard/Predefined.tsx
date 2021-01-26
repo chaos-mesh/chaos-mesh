@@ -11,13 +11,15 @@ import PaperTop from 'components-mui/PaperTop'
 import Space from 'components-mui/Space'
 import T from 'components/T'
 import YAML from 'components/YAML'
-import YAMLEditor from 'components/YAMLEditor'
 import api from 'api'
 import clsx from 'clsx'
 import { iconByKind } from 'lib/byKind'
+import loadable from '@loadable/component'
 import { makeStyles } from '@material-ui/core/styles'
 import { useIntl } from 'react-intl'
 import yaml from 'js-yaml'
+
+const YAMLEditor = loadable(() => import('components/YAMLEditor'))
 
 const useStyles = makeStyles((theme) => ({
   container: {
@@ -99,7 +101,7 @@ const Predefined = () => {
   const onModalClose = () => seteditorOpen(false)
 
   const handleApplyExperiment = () => {
-    const { basic, target } = yamlToExperiment(yaml.safeLoad(yamlEditor!.getValue()))
+    const { basic, target } = yamlToExperiment(yaml.load(yamlEditor!.getValue()))
     const parsedValues = parseSubmit({
       ...basic,
       target,
@@ -175,7 +177,7 @@ const Predefined = () => {
                     </Button>
                   </Space>
                 </PaperTop>
-                <YAMLEditor theme={theme} data={yaml.safeDump(experiment.yaml)} mountEditor={setYAMLEditor} />
+                <YAMLEditor theme={theme} data={yaml.dump(experiment.yaml)} mountEditor={setYAMLEditor} />
               </>
             )}
           </Paper>
