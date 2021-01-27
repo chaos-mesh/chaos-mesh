@@ -76,7 +76,7 @@ func (e *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.I
 
 	awschaos.Finalizers = []string{AwsFinalizer}
 	_, err = ec2client.StopInstances(context.TODO(), &ec2.StopInstancesInput{
-		InstanceIds: []string{*awschaos.Spec.Ec2Instance},
+		InstanceIds: []string{awschaos.Spec.Ec2Instance},
 	})
 
 	if err != nil {
@@ -124,7 +124,7 @@ func (e *endpoint) Recover(ctx context.Context, req ctrl.Request, chaos v1alpha1
 	ec2client := ec2.NewFromConfig(cfg)
 
 	_, err = ec2client.StartInstances(context.TODO(), &ec2.StartInstancesInput{
-		InstanceIds: []string{*awschaos.Spec.Ec2Instance},
+		InstanceIds: []string{awschaos.Spec.Ec2Instance},
 	})
 
 	if err != nil {

@@ -78,6 +78,7 @@ spec:
           required:
           - action
           - awsRegion
+          - ec2Instance
           type: object
         status:
           description: AwsChaosStatus represents the status of a AwsChaos

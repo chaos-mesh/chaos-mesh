@@ -79,7 +79,7 @@ func (e *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.I
 		VolumeId:   awschaos.Spec.EbsVolume,
 		Device:     awschaos.Spec.DeviceName,
 		Force:      true,
-		InstanceId: awschaos.Spec.Ec2Instance,
+		InstanceId: &awschaos.Spec.Ec2Instance,
 	})
 
 	if err != nil {
@@ -128,7 +128,7 @@ func (e *endpoint) Recover(ctx context.Context, req ctrl.Request, chaos v1alpha1
 
 	_, err = ec2client.AttachVolume(context.TODO(), &ec2.AttachVolumeInput{
 		Device:     awschaos.Spec.DeviceName,
-		InstanceId: awschaos.Spec.Ec2Instance,
+		InstanceId: &awschaos.Spec.Ec2Instance,
 		VolumeId:   awschaos.Spec.EbsVolume,
 	})
 

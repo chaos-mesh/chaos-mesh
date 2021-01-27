@@ -198,11 +198,6 @@ func (in *AwsChaosSpec) DeepCopyInto(out *AwsChaosSpec) {
 		*out = new(string)
 		**out = **in
 	}
-	if in.Ec2Instance != nil {
-		in, out := &in.Ec2Instance, &out.Ec2Instance
-		*out = new(string)
-		**out = **in
-	}
 	if in.EbsVolume != nil {
 		in, out := &in.EbsVolume, &out.EbsVolume
 		*out = new(string)
