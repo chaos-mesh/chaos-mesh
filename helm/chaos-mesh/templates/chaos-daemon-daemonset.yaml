@@ -66,6 +66,9 @@ spec:
           securityContext:
             {{- if .Values.chaosDaemon.privileged }}
             privileged: true
+            capabilities:
+              add:
+                - SYS_PTRACE
             {{- else }}
             capabilities:
               add:
