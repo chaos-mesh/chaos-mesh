@@ -1,13 +1,16 @@
 apiVersion: chaos-mesh.org/v1alpha1
 kind: JVMChaos
 metadata:
-  name: jvm-delay4servlet-example
+  name: jvm-delay4jvm-example
   namespace: app
 spec:
   action: delay
-  target: servlet
+  target: jvm
   flags:
     time: "10000"
+  matchers:
+    classname: "org.chaosmesh.jvm.Application"
+    methodname: "hello"
   mode: one
   selector:
     labelSelectors:

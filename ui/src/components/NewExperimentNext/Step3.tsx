@@ -1,6 +1,6 @@
 import { Box, Button, Typography } from '@material-ui/core'
-import { RootState, useStoreDispatch } from 'store'
 import { setAlert, setAlertOpen } from 'slices/globalStatus'
+import { useStoreDispatch, useStoreSelector } from 'store'
 
 import DoneAllIcon from '@material-ui/icons/DoneAll'
 import Paper from 'components-mui/Paper'
@@ -13,10 +13,11 @@ import { parseSubmit } from 'lib/formikhelpers'
 import { resetNewExperiment } from 'slices/experiments'
 import { useHistory } from 'react-router-dom'
 import { useIntl } from 'react-intl'
-import { useSelector } from 'react-redux'
 
 const Step3 = () => {
-  const { step1, step2, basic, target } = useSelector((state: RootState) => state.experiments)
+  const state = useStoreSelector((state) => state)
+  const { step1, step2, basic, target } = state.experiments
+  const { debugMode } = state.settings
   const dispatch = useStoreDispatch()
 
   const history = useHistory()
@@ -28,25 +29,27 @@ const Step3 = () => {
       target,
     })
 
-    if (process.env.NODE_ENV === 'development') {
+    if (process.env.NODE_ENV === 'development' || debugMode) {
       console.debug('Debug parsedValues:', parsedValues)
     }
 
-    api.experiments
-      .newExperiment(parsedValues)
-      .then(() => {
-        dispatch(
-          setAlert({
-            type: 'success',
-            message: intl.formatMessage({ id: 'common.createSuccessfully' }),
-          })
-        )
-        dispatch(setAlertOpen(true))
-        dispatch(resetNewExperiment())
+    if (!debugMode) {
+      api.experiments
+        .newExperiment(parsedValues)
+        .then(() => {
+          dispatch(
+            setAlert({
+              type: 'success',
+              message: intl.formatMessage({ id: 'common.createSuccessfully' }),
+            })
+          )
+          dispatch(setAlertOpen(true))
+          dispatch(resetNewExperiment())
 
-        history.push('/experiments')
-      })
-      .catch(console.error)
+          history.push('/experiments')
+        })
+        .catch(console.error)
+    }
   }
 
   return (

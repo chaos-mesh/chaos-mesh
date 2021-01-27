@@ -72,6 +72,7 @@ func main() {
 		log.Error(err, "main: invalid ChaosDashboardConfig")
 		os.Exit(1)
 	}
+	dashboardConfig.Version = version.Get().GitVersion
 
 	persistTTLConfigParsed, err := config.ParsePersistTTLConfig(dashboardConfig.PersistTTL)
 	if err != nil {
