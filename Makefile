@@ -299,6 +299,7 @@ $(eval $(call IMAGE_TEMPLATE,e2e-helper,test/cmd/e2e_helper))
 $(eval $(call IMAGE_TEMPLATE,chaos-mesh-protoc,hack/protoc))
 $(eval $(call IMAGE_TEMPLATE,chaos-mesh-e2e,test/image/e2e))
 $(eval $(call IMAGE_TEMPLATE,chaos-kernel,images/chaos-kernel))
+$(eval $(call IMAGE_TEMPLATE,chaos-jvm,images/chaos-jvm))
 
 binary: $(BINARIES)
 

@@ -1,0 +1,32 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: jvmchaos-sidecar-template
+  namespace: chaos-testing
+  labels:
+    app.kubernetes.io/component: template
+data:
+  data: |
+    initContainers:
+      - name: jvmchaos-initcontainer
+        image: 'gallardot/chaos-jvm:latest'
+        command:
+          - cp
+          - '-r'
+          - /bin/sandbox/
+          - /opt/jvm-chaos
+        resources: {}
+        volumeMounts:
+          - name: jvm-chaos-vol
+            mountPath: /opt/jvm-chaos
+        imagePullPolicy: Always
+    env:
+      - name: JAVA_TOOL_OPTIONS
+        value: >-
+          -javaagent:/opt/jvm-chaos/sandbox/lib/sandbox-agent.jar="server.ip=0.0.0.0;server.port=10086;"
+    volumeMounts:
+      - name: jvm-chaos-vol
+        mountPath: /opt/jvm-chaos
+    volumes:
+    - name: jvm-chaos-vol
+      emptyDir: {}

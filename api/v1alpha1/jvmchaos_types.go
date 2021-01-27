@@ -42,14 +42,77 @@ type JVMChaosSpec struct {
 	Scheduler *SchedulerSpec `json:"scheduler,omitempty"`
 
 	// Action defines the specific jvm chaos action.
-	// Supported action: delay, return, script, cfl, oom, ccf, tce, delay4servlet, tce4servlet
-	// +kubebuilder:validation:Enum=delay;return;script;cfl;oom;ccf;tce;delay4servlet;tce4servlet
+	// Supported action: delay;return;script;cfl;oom;ccf;tce;cpf;tde;tpf
+	// +kubebuilder:validation:Enum=delay;return;script;cfl;oom;ccf;tce;cpf;tde;tpf
 	Action JVMChaosAction `json:"action"`
 
 	// JVMParameter represents the detail about jvm chaos action definition
 	// +optional
 	JVMParameter `json:",inline"`
+
+	// Target defines the specific jvm chaos target.
+	// Supported target: servlet;psql;jvm;jedis;http;dubbo;rocketmq;tars;mysql;druid;redisson;rabbitmq;mongodb
+	// +kubebuilder:validation:Enum=servlet;psql;jvm;jedis;http;dubbo;rocketmq;tars;mysql;druid;redisson;rabbitmq;mongodb
+	Target JVMChaosTarget `json:"target"`
 }
+
+// GetSelector is a getter for Selector (for implementing SelectSpec)
+func (in *JVMChaosSpec) GetSelector() SelectorSpec {
+	return in.Selector
+}
+
+// GetMode is a getter for Mode (for implementing SelectSpec)
+func (in *JVMChaosSpec) GetMode() PodMode {
+	return in.Mode
+}
+
+// GetValue is a getter for Value (for implementing SelectSpec)
+func (in *JVMChaosSpec) GetValue() string {
+	return in.Value
+}
+
+type JVMChaosTarget string
+
+const (
+	// SERVLET represents servlet as a target of chaos
+	SERVLET JVMChaosTarget = "servlet"
+
+	// PSQL represents Postgresql JDBC as a target of chaos
+	PSQL JVMChaosTarget = "psql"
+
+	// JVM represents JVM as a target of chaos
+	JVM JVMChaosTarget = "jvm"
+
+	// JEDIS represents jedis (a java redis client) as a target of chaos
+	JEDIS JVMChaosTarget = "jedis"
+
+	// HTTP represents http client as a target of chaos
+	HTTP JVMChaosTarget = "http"
+
+	// DUBBO represents a Dubbo services as a target of chaos
+	DUBBO JVMChaosTarget = "dubbo"
+
+	// ROCKETMQ represents Rocketmq java client as a target of chaos
+	ROCKETMQ JVMChaosTarget = "rocketmq"
+
+	// MYSQL represents Mysql JDBC as a target of chaos
+	MYSQL JVMChaosTarget = "mysql"
+
+	// DRUID represents the Druid database connection pool as a target of chaos
+	DRUID JVMChaosTarget = "druid"
+
+	// TARS represents the Tars service as a target of chaos
+	TARS JVMChaosTarget = "tars"
+
+	// REDISSON represents Redisson (a java redis client) as a target of chaos
+	REDISSON JVMChaosTarget = "redisson"
+
+	// RABBITMQ represents the Rabbitmq java client as a target of chaos
+	RABBITMQ JVMChaosTarget = "rabbitmq"
+
+	// MONGODB represents the Mongodb java client as a target of chaos
+	MONGODB JVMChaosTarget = "mongodb"
+)
 
 // JVMChaosAction represents the chaos action about jvm
 type JVMChaosAction string
@@ -78,203 +141,26 @@ const (
 	// JVMExceptionAction represents the JVM chaos action of throwing custom exceptions
 	JVMExceptionAction JVMChaosAction = "tce"
 
-	// ServletDelayAction represents the JVM chaos action of Servlet response delay
-	ServletDelayAction JVMChaosAction = "delay4servlet"
+	// JVMConnectionPoolFullAction represents the JVM chaos action of Connection Pool Full
+	JVMConnectionPoolFullAction JVMChaosAction = "cpf"
 
-	// ServletExceptionAction represents the JVM chaos action of Servlet throwing custom exceptions
-	ServletExceptionAction JVMChaosAction = "tce4servlet"
+	// JVMThrowDeclaredExceptionAction represents the JVM chaos action of throwing declared exception
+	JVMThrowDeclaredExceptionAction JVMChaosAction = "tde"
+
+	// JVMThreadPoolFullAction represents the JVM chaos action of thread pool full
+	JVMThreadPoolFullAction JVMChaosAction = "tpf"
 )
 
 // JVMParameter represents the detail about jvm chaos action definition
 type JVMParameter struct {
-	// EffectCount represents the number of affect
+
+	// Flags represents the flags of action
 	// +optional
-	EffectCount int `json:"effectcount"`
+	Flags map[string]string `json:"flags,omitempty"`
 
-	// EffectPercent represents the percent of affect
+	// Matchers represents the matching rules for the target
 	// +optional
-	EffectPercent int `json:"effectpercent"`
-
-	// Delay represents the detail about JVM chaos action of invoke delay
-	// +optional
-	Delay *JVMDelaySpec `json:"delay,omitempty"`
-
-	// Return represents the detail about JVM chaos action of return value
-	// +optional
-	Return *JVMReturnSpec `json:"return,omitempty"`
-
-	// Script represents the detail about JVM chaos action of Java or Groovy scripts
-	// +optional
-	Script *JVMScriptSpec `json:"script,omitempty"`
-
-	// CpuFullload represents the detail about JVM chaos action of CPU is full
-	// +optional
-	CpuFullload *JVMCpufullloadSpec `json:"cfl,omitempty"`
-
-	// OOM represents the detail about JVM chaos action of OOM exception
-	// +optional
-	OOM *JVMOOMSpec `json:"oom,omitempty"`
-
-	// Exception represents the detail about JVM chaos action of throwing custom exceptions
-	// +optional
-	Exception *JVMExceptionSpec `json:"tce,omitempty"`
-
-	// Delay4Servlet represents the detail about JVM chaos action of Servlet response delay
-	// +optional
-	Delay4Servlet *ServletDelaySpec `json:"delay4servlet,omitempty"`
-
-	// Exception4Servlet represents the detail about JVM chaos action of Servlet throwing custom exceptions
-	// +optional
-	Exception4Servlet *ServletExceptionSpec `json:"tce4servlet,omitempty"`
-}
-
-// JVMExceptionSpec represents the detail about JVM chaos action of throwing custom exceptions
-type JVMExceptionSpec struct {
-	// JVMCommonParameter represents the common jvm chaos parameter
-	JVMCommonParameter `json:",inline"`
-
-	// Exception represents the Exception class, with the full package name, must inherit from java.lang.Exception or Java.lang.Exception itself
-	Exception string `json:"exception"`
-
-	// Message represents specifies the exception class information.
-	// +optional
-	Message string `json:"message"`
-}
-
-// JVMOOMSpec represents the detail about JVM chaos action of OOM exception
-type JVMOOMSpec struct {
-	// JVMCommonParameter represents the common jvm chaos parameter
-	JVMCommonParameter `json:",inline"`
-
-	// Area represents JVM memory area, currently supported [HEAP, NOHEAP, OFFHEAP], required.
-	// Eden+Old is denoted by HEAP
-	// Metaspace is denoted by NOHEAP
-	// off-heap memory is denoted by OFFHEAP
-	// +kubebuilder:validation:Enum=HEAP;NOHEAP;OFFHEAP
-	Area string `json:"area"`
-
-	// Block represents specifies the size of the object that supports only the HEAP and OFFHEAP areas in MB
-	// +optional
-	Block string `json:"block"`
-
-	// Interval represents unit MS, default interval between 500 OOM exceptions, only in non-violent mode, can slow down the frequency of GC without worrying about the process being unresponsive
-	// +optional
-	Interval int `json:"interval"`
-
-	// WildMode represents default false, whether to turn on wild mode or not.
-	// If it is wild mode, the memory created before will not be released after OOM occurrence, which may cause the application process to be unresponsive
-	// +optional
-	WildMode bool `json:"wildmode"`
-}
-
-// JVMCpufullloadSpec represents the detail about JVM chaos action of CPU is full
-type JVMCpufullloadSpec struct {
-	// JVMCommonParameter represents the common jvm chaos parameter
-	JVMCommonParameter `json:",inline"`
-
-	// CpuCount represents the number of CPU cores to bind to, that is, specify how many cores are full
-	CpuCount int `json:"cpucount"`
-}
-
-// JVMScriptSpec represents the detail about JVM chaos action of Java or Groovy scripts
-type JVMScriptSpec struct {
-	// JVMCommonParameter represents the common jvm chaos parameter
-	JVMCommonParameter `json:",inline"`
-
-	// Content represents the script content is Base64 encoded content.
-	// Note that it cannot be used with file
-	// +optional
-	Content string `json:"content"`
-
-	// File represents script file, absolute path to file
-	// Note that it cannot be used with content
-	// +optional
-	File string `json:"file"`
-
-	// Name represents script name, use for logging
-	// +optional
-	Name string `json:"name"`
-
-	// Type represents script type, java or groovy, default to java
-	// +kubebuilder:validation:Enum=java;groovy;
-	// +optional
-	Type string `json:"type"`
-}
-
-// JVMReturnSpec represents the detail about JVM chaos action of return value
-type JVMReturnSpec struct {
-	// JVMCommonParameter represents the common jvm chaos parameter
-	JVMCommonParameter `json:",inline"`
-
-	// Value represents specifies the return value of a class method, supporting only primitive, null, and String return values. required
-	Value string `json:"value"`
-}
-
-// JVMDelaySpec represents the detail about JVM chaos action of invoke delay
-type JVMDelaySpec struct {
-	// JVMCommonParameter represents the common jvm chaos parameter
-	JVMCommonParameter `json:",inline"`
-
-	// Time represents delay time, in milliseconds, required
-	Time int `json:"time"`
-
-	// Offset represents delay fluctuation time
-	// +optional
-	Offset int `json:"offset"`
-}
-
-// JVMCommonParameter represents the common jvm chaos parameter
-type JVMCommonParameter struct {
-	// Classname represents specify the class name, which must be an implementation class with a full package name, such as com.xxx.xxx.XController. required
-	Classname string `json:"classname"`
-
-	// Methodname represents specify the method name. Note that methods with the same method name will be injected with the same fault. required
-	Methodname string `json:"methodname"`
-
-	// After represents method execution is completed before the injection failure is returned.
-	// +optional
-	After bool `json:"after"`
-}
-
-// ServletExceptionSpec represents the detail about JVM chaos action of Servlet throwing custom exceptions
-type ServletExceptionSpec struct {
-	// ServletCommonParameter represents the common servlet chaos parameter
-	ServletCommonParameter `json:",inline"`
-
-	// Exception represents the Exception class, with the full package name, must inherit from java.lang.Exception or Java.lang.Exception itself
-	Exception string `json:"exception"`
-
-	// Message represents specifies the exception class information.
-	// +optional
-	Message string `json:"message"`
-}
-
-// ServletDelaySpec represents the detail about JVM chaos action of Servlet response delay
-type ServletDelaySpec struct {
-	// ServletCommonParameter represents the common servlet chaos parameter
-	ServletCommonParameter `json:",inline"`
-
-	// Time represents delay time, in milliseconds, required
-	Time int `json:"time"`
-
-	// Offset represents delay fluctuation time
-	// +optional
-	Offset int `json:"offset"`
-}
-
-// ServletCommonParameter represents the common servlet chaos parameter
-type ServletCommonParameter struct {
-	// Method represents HTTP request method, such as GET, POST, DELETE or PUT. Default is GET
-	// +kubebuilder:validation:Enum=GET;POST;PUT;DELETE
-	// +optional
-	Method string `json:"method"`
-
-	// QueryString represents HTTP request query string
-	// +optional
-	QueryString string `json:"querystring"`
-
-	// RequestPath represents HTTP request path. The path should start with /
-	RequestPath string `json:"requestpath"`
+	Matchers map[string]string `json:"matchers,omitempty"`
 }
 
 // JVMChaosStatus defines the observed state of JVMChaos
