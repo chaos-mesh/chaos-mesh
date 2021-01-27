@@ -23,6 +23,8 @@ import (
 	"strings"
 	"time"
 
+	"sigs.k8s.io/controller-runtime/pkg/client/config"
+
 	"github.com/pkg/errors"
 
 	"github.com/fatih/color"
@@ -151,7 +153,7 @@ func MarshalChaos(s interface{}) (string, error) {
 
 // InitClientSet inits two different clients that would be used
 func InitClientSet() (*ClientSet, error) {
-	restconfig, err := loadRestConfig()
+	restconfig, err := config.GetConfig()
 	if err != nil {
 		return nil, err
 	}

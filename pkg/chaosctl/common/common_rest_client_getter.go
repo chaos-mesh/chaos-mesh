@@ -14,12 +14,10 @@
 package common
 
 import (
-	"os"
-	"path/filepath"
+	"sigs.k8s.io/controller-runtime/pkg/client/config"
 
 	"k8s.io/cli-runtime/pkg/genericclioptions"
 	"k8s.io/client-go/rest"
-	"k8s.io/client-go/tools/clientcmd"
 )
 
 // CommonRestClientGetter is used for non-e2e test environment.
@@ -34,22 +32,5 @@ func NewCommonRestClientGetter() *CommonRestClientGetter {
 }
 
 func (it *CommonRestClientGetter) ToRESTConfig() (*rest.Config, error) {
-	return loadRestConfig()
-}
-
-func loadRestConfig() (*rest.Config, error) {
-	var kubeconfig string
-	inClusterConfig, err := rest.InClusterConfig()
-	if err == nil {
-		return inClusterConfig, nil
-	}
-	kubeconfig = os.Getenv("KUBECONFIG")
-	if len(kubeconfig) == 0 {
-		home, err := os.UserHomeDir()
-		if err != nil {
-			return nil, err
-		}
-		kubeconfig = filepath.Join(home, ".kube", "config")
-	}
-	return clientcmd.BuildConfigFromFlags("", kubeconfig)
+	return config.GetConfig()
 }
