@@ -1181,7 +1181,7 @@ spec:
             - name: TZ
               value: ${timezone}
           securityContext:
-              privileged: true
+            privileged: true
           volumeMounts:
             - name: socket-path
               mountPath: ${mountPath}

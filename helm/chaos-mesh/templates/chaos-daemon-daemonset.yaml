@@ -65,7 +65,7 @@ spec:
             {{- end }}
           securityContext:
             {{- if .Values.chaosDaemon.privileged }}
-              privileged: true
+            privileged: true
             {{- else }}
             capabilities:
               add:
