@@ -141,6 +141,14 @@
   },
   "settings": {
     "title": "Settings",
+    "debugMode": {
+      "title": "Debug mode",
+      "choose": "Creating an experiment will not send the real HTTP request, but will print relevant information in the console"
+    },
+    "enableKubeSystemNS": {
+      "title": "Kube System namespace",
+      "choose": "Allow to select the kube-system namespace in the scope when creating the experiment"
+    },
     "theme": {
       "title": "Theme",
       "choose": "Choose theme",
@@ -170,6 +178,7 @@
   },
   "common": {
     "other": "Other",
+    "version": "Version",
     "doc": "Documentation",
     "tutorial": "Tutorial",
     "add": "Add",
