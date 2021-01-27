@@ -1182,6 +1182,9 @@ spec:
               value: ${timezone}
           securityContext:
             privileged: true
+            capabilities:
+              add:
+                - SYS_PTRACE
           volumeMounts:
             - name: socket-path
               mountPath: ${mountPath}
