@@ -52,8 +52,6 @@ const initialState: {
   basic: {},
 }
 
-const namespaceFilters = ['kube-system']
-
 const experimentsSlice = createSlice({
   name: 'experiments',
   initialState,
@@ -95,7 +93,7 @@ const experimentsSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder.addCase(getNamespaces.fulfilled, (state, action) => {
-      state.namespaces = action.payload.filter((d) => !namespaceFilters.includes(d))
+      state.namespaces = action.payload
     })
     builder.addCase(getLabels.fulfilled, (state, action) => {
       state.labels = action.payload

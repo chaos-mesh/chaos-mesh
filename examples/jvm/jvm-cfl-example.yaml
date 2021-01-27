@@ -1,0 +1,15 @@
+apiVersion: chaos-mesh.org/v1alpha1
+kind: JVMChaos
+metadata:
+  name: jvm-cfl-example
+  namespace: app
+spec:
+  action: cfl
+  target: jvm
+  mode: one
+  selector:
+    labelSelectors:
+      app: springboot-jvmchaos-demo
+  duration: "30s"
+  scheduler:
+    cron: "@every 1m"

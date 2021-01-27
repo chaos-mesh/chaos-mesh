@@ -20,6 +20,124 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+const KindAwsChaos = "AwsChaos"
+
+// IsDeleted returns whether this resource has been deleted
+func (in *AwsChaos) IsDeleted() bool {
+	return !in.DeletionTimestamp.IsZero()
+}
+
+// IsPaused returns whether this resource has been paused
+func (in *AwsChaos) IsPaused() bool {
+	if in.Annotations == nil || in.Annotations[PauseAnnotationKey] != "true" {
+		return false
+	}
+	return true
+}
+
+// GetDuration would return the duration for chaos
+func (in *AwsChaos) GetDuration() (*time.Duration, error) {
+	if in.Spec.Duration == nil {
+		return nil, nil
+	}
+	duration, err := time.ParseDuration(*in.Spec.Duration)
+	if err != nil {
+		return nil, err
+	}
+	return &duration, nil
+}
+
+func (in *AwsChaos) GetNextStart() time.Time {
+	if in.Status.Scheduler.NextStart == nil {
+		return time.Time{}
+	}
+	return in.Status.Scheduler.NextStart.Time
+}
+
+func (in *AwsChaos) SetNextStart(t time.Time) {
+	if t.IsZero() {
+		in.Status.Scheduler.NextStart = nil
+		return
+	}
+
+	if in.Status.Scheduler.NextStart == nil {
+		in.Status.Scheduler.NextStart = &metav1.Time{}
+	}
+	in.Status.Scheduler.NextStart.Time = t
+}
+
+func (in *AwsChaos) GetNextRecover() time.Time {
+	if in.Status.Scheduler.NextRecover == nil {
+		return time.Time{}
+	}
+	return in.Status.Scheduler.NextRecover.Time
+}
+
+func (in *AwsChaos) SetNextRecover(t time.Time) {
+	if t.IsZero() {
+		in.Status.Scheduler.NextRecover = nil
+		return
+	}
+
+	if in.Status.Scheduler.NextRecover == nil {
+		in.Status.Scheduler.NextRecover = &metav1.Time{}
+	}
+	in.Status.Scheduler.NextRecover.Time = t
+}
+
+// GetScheduler would return the scheduler for chaos
+func (in *AwsChaos) GetScheduler() *SchedulerSpec {
+	return in.Spec.Scheduler
+}
+
+// GetChaos would return the a record for chaos
+func (in *AwsChaos) GetChaos() *ChaosInstance {
+	instance := &ChaosInstance{
+		Name:      in.Name,
+		Namespace: in.Namespace,
+		Kind:      KindAwsChaos,
+		StartTime: in.CreationTimestamp.Time,
+		Action:    "",
+		Status:    string(in.Status.Experiment.Phase),
+		UID:       string(in.UID),
+	}
+
+	action := reflect.ValueOf(in).Elem().FieldByName("Spec").FieldByName("Action")
+	if action.IsValid() {
+		instance.Action = action.String()
+	}
+	if in.Spec.Duration != nil {
+		instance.Duration = *in.Spec.Duration
+	}
+	if in.DeletionTimestamp != nil {
+		instance.EndTime = in.DeletionTimestamp.Time
+	}
+	return instance
+}
+
+// GetStatus returns the status
+func (in *AwsChaos) GetStatus() *ChaosStatus {
+	return &in.Status.ChaosStatus
+}
+
+// +kubebuilder:object:root=true
+
+// AwsChaosList contains a list of AwsChaos
+type AwsChaosList struct {
+	metav1.TypeMeta `json:",inline"`
+	metav1.ListMeta `json:"metadata,omitempty"`
+	Items           []AwsChaos `json:"items"`
+}
+
+// ListChaos returns a list of chaos
+func (in *AwsChaosList) ListChaos() []*ChaosInstance {
+	res := make([]*ChaosInstance, 0, len(in.Items))
+	for _, item := range in.Items {
+		res = append(res, item.GetChaos())
+	}
+	return res
+}
+
 const KindDNSChaos = "DNSChaos"
 
 // IsDeleted returns whether this resource has been deleted
@@ -1083,6 +1201,12 @@ func (in *TimeChaosList) ListChaos() []*ChaosInstance {
 }
 
 func init() {
+
+	SchemeBuilder.Register(&AwsChaos{}, &AwsChaosList{})
+	all.register(KindAwsChaos, &ChaosKind{
+		Chaos:     &AwsChaos{},
+		ChaosList: &AwsChaosList{},
+	})
 
 	SchemeBuilder.Register(&DNSChaos{}, &DNSChaosList{})
 	all.register(KindDNSChaos, &ChaosKind{

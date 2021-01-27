@@ -5,6 +5,7 @@ const { Config } = createCheckers(CommonTI)
 
 const dummyConfig = {
   security_mode: true,
+  version: 'xxx',
 }
 
 describe('Check common type', () => {

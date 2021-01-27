@@ -4,7 +4,7 @@ import { Redirect, Route, Switch } from 'react-router-dom'
 import { ThemeProvider, makeStyles } from '@material-ui/core/styles'
 import customTheme, { darkTheme as customDarkTheme } from 'theme'
 import { drawerCloseWidth, drawerWidth } from './Sidebar'
-import { setAlertOpen, setNameSpace, setSecurityMode, setTokenName, setTokens } from 'slices/globalStatus'
+import { setAlertOpen, setConfig, setNameSpace, setTokenName, setTokens } from 'slices/globalStatus'
 import { useStoreDispatch, useStoreSelector } from 'store'
 
 import Alert from '@material-ui/lab/Alert'
@@ -98,9 +98,9 @@ const TopContainer = () => {
       .then(({ data }) => {
         if (data.security_mode) {
           setAuth()
-        } else {
-          dispatch(setSecurityMode(false))
         }
+
+        dispatch(setConfig(data))
       })
       .finally(() => setLoading(false))
   }
