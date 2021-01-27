@@ -1,4 +1,4 @@
-import { Box, MenuItem, TextField } from '@material-ui/core'
+import { Box, MenuItem, TextField, Typography } from '@material-ui/core'
 import { RootState, useStoreDispatch } from 'store'
 import { setLang, setTheme } from 'slices/settings'
 
@@ -29,8 +29,12 @@ const Other = () => {
           helperText={T('settings.theme.choose')}
           onChange={handleChangeTheme}
         >
-          <MenuItem value="light">{T(`settings.theme.light`)}</MenuItem>
-          <MenuItem value="dark">{T(`settings.theme.dark`)}</MenuItem>
+          <MenuItem value="light">
+            <Typography variant="body2">{T(`settings.theme.light`)}</Typography>
+          </MenuItem>
+          <MenuItem value="dark">
+            <Typography variant="body2">{T(`settings.theme.dark`)}</Typography>
+          </MenuItem>
         </TextField>
       </Box>
 
@@ -48,7 +52,7 @@ const Other = () => {
         >
           {Object.keys(messages).map((lang) => (
             <MenuItem key={lang} value={lang}>
-              {T(`settings.lang.${lang}`)}
+              <Typography variant="body2">{T(`settings.lang.${lang}`)}</Typography>
             </MenuItem>
           ))}
         </TextField>
