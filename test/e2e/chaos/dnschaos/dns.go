@@ -74,7 +74,7 @@ func TestcaseDNSRandom(
 		err = wait.Poll(time.Second, 5*time.Second, func() (done bool, err error) {
 			// get IP of a non exists host, because chaos DNS server will return a random IP,
 			// so err should be nil
-			_, dnsErr := testDNSServer(c, port, "not-exist-host.abc")
+			_, dnsErr := testDNSServer(c, port, domainName)
 			if dnsErr != nil {
 				return false, nil
 			}
