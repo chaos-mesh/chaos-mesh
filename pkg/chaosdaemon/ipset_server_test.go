@@ -23,16 +23,13 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	"github.com/chaos-mesh/chaos-mesh/pkg/bpm"
 	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
 	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
 )
 
 var _ = Describe("ipset server", func() {
 	defer mock.With("MockContainerdClient", &MockClient{})()
-	c, _ := CreateContainerRuntimeInfoClient(containerRuntimeContainerd)
-	m := bpm.NewBackgroundProcessManager()
-	s := &DaemonServer{c, m}
+	s, _ := newDaemonServer(containerRuntimeContainerd)
 
 	Context("createIPSet", func() {
 		It("should work", func() {

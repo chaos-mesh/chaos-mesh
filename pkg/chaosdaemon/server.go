@@ -18,6 +18,8 @@ import (
 	"fmt"
 	"net"
 
+	"github.com/moby/locker"
+
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	grpc_prometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 	"github.com/prometheus/client_golang/prometheus"
@@ -58,6 +60,8 @@ func (c *Config) GrpcAddr() string {
 type DaemonServer struct {
 	crClient                 ContainerRuntimeInfoClient
 	backgroundProcessManager bpm.BackgroundProcessManager
+
+	IPSetLocker *locker.Locker
 }
 
 func newDaemonServer(containerRuntime string) (*DaemonServer, error) {
@@ -66,15 +70,13 @@ func newDaemonServer(containerRuntime string) (*DaemonServer, error) {
 		return nil, err
 	}
 
-	return &DaemonServer{
-		crClient:                 crClient,
-		backgroundProcessManager: bpm.NewBackgroundProcessManager(),
-	}, nil
+	return NewDaemonServerWithCRClient(crClient), nil
 }
 
 // NewDaemonServerWithCRClient returns DaemonServer with container runtime client
 func NewDaemonServerWithCRClient(crClient ContainerRuntimeInfoClient) *DaemonServer {
 	return &DaemonServer{
+		IPSetLocker:              locker.New(),
 		crClient:                 crClient,
 		backgroundProcessManager: bpm.NewBackgroundProcessManager(),
 	}
