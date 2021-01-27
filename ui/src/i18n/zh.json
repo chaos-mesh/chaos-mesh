@@ -141,6 +141,14 @@
   },
   "settings": {
     "title": "设置",
+    "debugMode": {
+      "title": "调试模式",
+      "choose": "创建实验不会发送真实的 HTTP 请求，而是将相关信息打印在控制台中"
+    },
+    "enableKubeSystemNS": {
+      "title": "Kube System 命名空间",
+      "choose": "创建实验时允许在范围中选择 kube-system 命名空间"
+    },
     "theme": {
       "title": "主题",
       "choose": "选择主题",
@@ -170,6 +178,7 @@
   },
   "common": {
     "other": "其他",
+    "version": "版本",
     "doc": "文档",
     "tutorial": "教程",
     "add": "添加",
