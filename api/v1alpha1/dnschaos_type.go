@@ -81,7 +81,7 @@ type DNSChaosSpec struct {
 
 	// Choose which domain names to take effect, support the placeholder ? and wildcard *, or the Specified domain name.
 	// Note:
-	//		1. The wildcard * must be at the end of the string. For example, chaos-*.org is invalid.
+	//      1. The wildcard * must be at the end of the string. For example, chaos-*.org is invalid.
 	//      2. if the patterns is empty, will take effect on all the domain names.
 	// For example:
 	// 		The value is ["google.com", "github.*", "chaos-mes?.org"],
