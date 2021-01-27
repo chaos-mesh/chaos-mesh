@@ -69,6 +69,7 @@
     "@testing-library/react": "^11.2.3",
     "@testing-library/user-event": "^12.1.10",
     "@types/d3": "^5.7.2",
+    "@types/enzyme": "^3.10.8",
     "@types/flat": "^5.0.1",
     "@types/jest": "^26.0.20",
     "@types/js-yaml": "^4.0.0",
@@ -84,9 +85,11 @@
     "@types/react-router-dom": "^5.1.7",
     "@types/reactour": "^1.17.1",
     "@types/yup": "^0.29.11",
+    "@wojtekmaj/enzyme-adapter-react-17": "^0.4.1",
     "axios-mock-adapter": "^1.19.0",
     "concurrently": "^5.3.0",
     "cross-env": "^7.0.3",
+    "enzyme": "^3.11.0",
     "http-proxy-middleware": "^1.0.6",
     "husky": "^4.3.8",
     "import-sort-style-eslint": "^6.0.0",
@@ -96,8 +99,7 @@
     "redux-logger": "^3.0.6",
     "source-map-explorer": "^2.5.2",
     "ts-interface-builder": "^0.2.3",
-    "ts-interface-checker": "^0.1.13",
-    "tsd": "^0.14.0"
+    "ts-interface-checker": "^0.1.13"
   },
   "lint-staged": {
     "*.(j|t)s?(x)": "prettier --write"

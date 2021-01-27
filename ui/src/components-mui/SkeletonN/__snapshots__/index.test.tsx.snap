@@ -1,0 +1,15 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`<Skeleton /> matches snapshot 1`] = `
+<div>
+  <span
+    class="MuiSkeleton-root MuiSkeleton-text MuiSkeleton-pulse"
+  />
+  <span
+    class="MuiSkeleton-root MuiSkeleton-text MuiSkeleton-pulse"
+  />
+  <span
+    class="MuiSkeleton-root MuiSkeleton-text MuiSkeleton-pulse"
+  />
+</div>
+`;
