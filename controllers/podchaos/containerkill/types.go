@@ -64,18 +64,38 @@ func (r *endpoint) Apply(ctx context.Context, req ctrl.Request, obj v1alpha1.Inn
 		return err
 	}
 
-	allHaveContainer := true
-	g := errgroup.Group{}
+	podsNotHaveContainer := []string{}
 	for podIndex := range pods {
 		pod := &pods[podIndex]
 		haveContainer := false
 
 		for containerIndex := range pod.Status.ContainerStatuses {
 			containerName := pod.Status.ContainerStatuses[containerIndex].Name
+			if containerName == podchaos.Spec.ContainerName {
+				haveContainer = true
+				break
+			}
+		}
+
+		if haveContainer == false {
+			podsNotHaveContainer = append(podsNotHaveContainer, pod.Name)
+			r.Log.Error(nil, fmt.Sprintf("the pod %s doesn't have container %s", pod.Name, podchaos.Spec.ContainerName))
+		}
+	}
+
+	if len(podsNotHaveContainer) != 0 {
+		return fmt.Errorf("the pod %v doesn't have container %s", podsNotHaveContainer, podchaos.Spec.ContainerName)
+	}
+
+	g := errgroup.Group{}
+	for podIndex := range pods {
+		pod := &pods[podIndex]
+
+		for containerIndex := range pod.Status.ContainerStatuses {
+			containerName := pod.Status.ContainerStatuses[containerIndex].Name
 			containerID := pod.Status.ContainerStatuses[containerIndex].ContainerID
 
 			if containerName == podchaos.Spec.ContainerName {
-				haveContainer = true
 				g.Go(func() error {
 					err = r.KillContainer(ctx, pod, containerID)
 					if err != nil {
@@ -87,19 +107,10 @@ func (r *endpoint) Apply(ctx context.Context, req ctrl.Request, obj v1alpha1.Inn
 				})
 			}
 		}
-
-		if haveContainer == false {
-			allHaveContainer = false
-			r.Log.Error(nil, fmt.Sprintf("the pod %s doesn't have container %s", pod.Name, podchaos.Spec.ContainerName))
-		}
 	}
 
 	if err := g.Wait(); err != nil {
 		return err
-	}
-
-	if allHaveContainer == false {
-		return fmt.Errorf("at least one pod contains no designated container")
 	}
 
 	podchaos.Status.Experiment.PodRecords = make([]v1alpha1.PodStatus, 0, len(pods))
