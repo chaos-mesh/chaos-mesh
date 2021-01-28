@@ -1,5 +1,4 @@
 import { Box, Drawer, List, ListItem, ListItemIcon, ListItemText } from '@material-ui/core'
-import { Theme, makeStyles } from '@material-ui/core/styles'
 
 import ArchiveOutlinedIcon from '@material-ui/icons/ArchiveOutlined'
 import DashboardOutlinedIcon from '@material-ui/icons/DashboardOutlined'
@@ -17,11 +16,12 @@ import logo from 'images/logo.svg'
 import logoMini from 'images/logo-mini.svg'
 import logoMiniWhite from 'images/logo-mini-white.svg'
 import logoWhite from 'images/logo-white.svg'
+import { makeStyles } from '@material-ui/core/styles'
 import { useStoreSelector } from 'store'
 
 export const drawerWidth = '14rem'
 export const drawerCloseWidth = '5rem'
-const useStyles = makeStyles((theme: Theme) => {
+const useStyles = makeStyles((theme) => {
   const listItemHover = {
     background: theme.palette.primary.main,
     cursor: 'pointer',

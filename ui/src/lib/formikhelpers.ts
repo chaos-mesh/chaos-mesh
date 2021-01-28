@@ -16,7 +16,7 @@ export function parseSubmit(e: Experiment) {
   // Parse labels, label_selectors, annotations and annotation_selectors to object
   function helper1(selectors: string[], updateVal?: (s: string) => any) {
     return selectors.reduce((acc: Record<string, any>, d) => {
-      const splited = d.replace(/\s/g, '').split(':')
+      const splited = d.replace(/\s/g, '').split(/:(.+)/)
 
       acc[splited[0]] = typeof updateVal === 'function' ? updateVal(splited[1]) : splited[1]
 

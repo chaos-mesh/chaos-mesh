@@ -6,10 +6,20 @@ export const config = () => http.get<Config>('/common/config')
 
 export const chaosAvailableNamespaces = () => http.get<string[]>('/common/chaos-available-namespaces')
 
+type stringStringArrayMap = Record<string, string[]>
+
 export const labels = (podNamespaceList: string[]) =>
-  http.get<Record<string, string[]>>(`/common/labels?podNamespaceList=${podNamespaceList.join(',')}`)
+  http.get<stringStringArrayMap>('/common/labels', {
+    params: {
+      podNamespaceList: podNamespaceList.join(','),
+    },
+  })
 
 export const annotations = (podNamespaceList: string[]) =>
-  http.get<Record<string, string[]>>(`/common/annotations?podNamespaceList=${podNamespaceList.join(',')}`)
+  http.get<stringStringArrayMap>('/common/annotations', {
+    params: {
+      podNamespaceList: podNamespaceList.join(','),
+    },
+  })
 
-export const pods = (data: Partial<Omit<ExperimentScope, 'mode' | 'value'>>) => http.post(`/common/pods`, data)
+export const pods = (data: Partial<Omit<ExperimentScope, 'mode' | 'value'>>) => http.post('/common/pods', data)
