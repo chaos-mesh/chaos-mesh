@@ -17,6 +17,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	"strings"
 
 	"github.com/go-logr/logr"
@@ -31,35 +33,46 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
 )
 
-// Handler applys podiochaos
-type Handler struct {
+// Reconciler applys podiochaos
+type Reconciler struct {
 	client.Client
 	Log logr.Logger
 }
 
-// Apply flushes io configuration on pod
-func (h *Handler) Apply(ctx context.Context, chaos *v1alpha1.PodIoChaos) error {
+// Reconcile flushes io configuration on pod
+func (h *Reconciler) Reconcile(req reconcile.Request) (reconcile.Result, error) {
+	// TODO: set the error information in the chaos status
+	ctx := context.TODO()
+
+	chaos := &v1alpha1.PodIoChaos{}
+	err := h.Client.Get(ctx, req.NamespacedName, chaos)
+	if err != nil {
+		h.Log.Error(err, "fail to find podiochaos")
+		return reconcile.Result{}, nil
+	}
 	h.Log.Info("updating io chaos", "pod", chaos.Namespace+"/"+chaos.Name, "spec", chaos.Spec)
 
 	pod := &v1.Pod{}
 
-	err := h.Client.Get(ctx, types.NamespacedName{
+	err = h.Client.Get(ctx, types.NamespacedName{
 		Name:      chaos.Name,
 		Namespace: chaos.Namespace,
 	}, pod)
 	if err != nil {
 		h.Log.Error(err, "fail to find pod")
-		return err
+		return reconcile.Result{}, nil
 	}
 
 	pbClient, err := chaosDaemonClient.NewChaosDaemonClient(ctx, h, pod, config.ControllerCfg.ChaosDaemonPort)
 	if err != nil {
-		return err
+		return reconcile.Result{}, nil
 	}
 	defer pbClient.Close()
 
 	if len(pod.Status.ContainerStatuses) == 0 {
-		return fmt.Errorf("%s %s can't get the state of container", pod.Namespace, pod.Name)
+		err :=  fmt.Errorf("%s %s can't get the state of container", pod.Namespace, pod.Name)
+		h.Log.Error(err, "")
+		return reconcile.Result{}, nil
 	}
 
 	containerID := pod.Status.ContainerStatuses[0].ContainerID
@@ -73,13 +86,16 @@ func (h *Handler) Apply(ctx context.Context, chaos *v1alpha1.PodIoChaos) error {
 			}
 		}
 		if len(containerID) == 0 {
-			return fmt.Errorf("cannot find container with name %s", *chaos.Spec.Container)
+			err := fmt.Errorf("cannot find container with name %s", *chaos.Spec.Container)
+			h.Log.Error(err, "")
+			return reconcile.Result{}, nil
 		}
 	}
 
 	actions, err := json.Marshal(chaos.Spec.Actions)
 	if err != nil {
-		return err
+		h.Log.Error(err, "fail to marshal actions")
+		return reconcile.Result{}, nil
 	}
 	input := string(actions)
 	h.Log.Info("input with", "config", input)
@@ -94,7 +110,8 @@ func (h *Handler) Apply(ctx context.Context, chaos *v1alpha1.PodIoChaos) error {
 		EnterNS:   true,
 	})
 	if err != nil {
-		return err
+		h.Log.Error(err, "fail to apply iochaos")
+		return reconcile.Result{}, nil
 	}
 
 	chaos.Spec.Pid = res.Instance
@@ -108,5 +125,13 @@ func (h *Handler) Apply(ctx context.Context, chaos *v1alpha1.PodIoChaos) error {
 		},
 	}
 
-	return nil
+	return reconcile.Result{}, nil
+}
+
+func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
+	err := ctrl.NewControllerManagedBy(mgr).
+		For(&v1alpha1.PodIoChaos{}).
+		Complete(r)
+
+	return err
 }

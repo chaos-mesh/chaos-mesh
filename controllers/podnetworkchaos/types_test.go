@@ -92,7 +92,7 @@ func TestHostNetworkOption(t *testing.T) {
 			}
 
 			var r client.Reader
-			h := &Handler{
+			h := &Reconciler{
 				Client:                  fake.NewFakeClientWithScheme(scheme.Scheme, objs...),
 				Reader:                  r,
 				Log:                     zap.New(zap.UseDevMode(true)),

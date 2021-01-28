@@ -16,6 +16,8 @@ package podnetworkchaos
 import (
 	"context"
 	"fmt"
+	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
 	"github.com/pkg/errors"
 
@@ -37,8 +39,8 @@ const (
 	invalidNetemSpecMsg = "invalid spec for netem action, at least one is required from delay, loss, duplicate, corrupt"
 )
 
-// Handler applys podnetworkchaos
-type Handler struct {
+// Reconciler applys podnetworkchaos
+type Reconciler struct {
 	client.Client
 	client.Reader
 	Log                     logr.Logger
@@ -46,47 +48,61 @@ type Handler struct {
 }
 
 // Apply flushes network configuration on pod
-func (h *Handler) Apply(ctx context.Context, chaos *v1alpha1.PodNetworkChaos) error {
+func (h *Reconciler) Reconcile(req reconcile.Request) (reconcile.Result, error) {
+	// TODO: set the error information in the chaos status
+	ctx := context.TODO()
+
+	chaos := &v1alpha1.PodNetworkChaos{}
+	err := h.Client.Get(ctx, req.NamespacedName, chaos)
+	if err != nil {
+		h.Log.Error(err, "fail to find podnetworkchaos")
+		return reconcile.Result{}, nil
+	}
+
 	h.Log.Info("updating network chaos", "pod", chaos.Namespace+"/"+chaos.Name, "spec", chaos.Spec)
 
 	pod := &corev1.Pod{}
 
-	err := h.Client.Get(ctx, types.NamespacedName{
+	err = h.Client.Get(ctx, types.NamespacedName{
 		Name:      chaos.Name,
 		Namespace: chaos.Namespace,
 	}, pod)
 	if err != nil {
 		h.Log.Error(err, "fail to find pod")
-		return err
+		return reconcile.Result{}, nil
 	}
 
 	if !h.AllowHostNetworkTesting {
 		if pod.Spec.HostNetwork {
 			err := errors.Errorf("it's dangerous to inject network chaos on a pod(%s/%s) with `hostNetwork`", pod.Namespace, pod.Name)
-			return err
+			h.Log.Error(err, "fail to inject chaos")
+			return reconcile.Result{}, nil
 		}
 	}
 
 	err = h.SetIPSets(ctx, pod, chaos)
 	if err != nil {
-		return err
+		h.Log.Error(err, "fail to set ipset")
+		return reconcile.Result{}, nil
 	}
 
 	err = h.SetIptables(ctx, pod, chaos)
 	if err != nil {
-		return err
+		h.Log.Error(err, "fail to set iptables")
+		return reconcile.Result{}, nil
 	}
 
 	err = h.SetTcs(ctx, pod, chaos)
 	if err != nil {
-		return err
+		h.Log.Error(err, "fail to set tcs")
+		return reconcile.Result{}, nil
 	}
 
-	return nil
+	return reconcile.Result{}, nil
 }
 
 // SetIPSets sets ipset on pod
-func (h *Handler) SetIPSets(ctx context.Context, pod *corev1.Pod, chaos *v1alpha1.PodNetworkChaos) error {
+func (h *Reconciler) SetIPSets(ctx context.Context, pod *corev1.Pod, chaos *v1alpha1.PodNetworkChaos) error {
 	ipsets := []*pb.IPSet{}
 	for _, ipset := range chaos.Spec.IPSets {
 		ipsets = append(ipsets, &pb.IPSet{
@@ -98,7 +114,7 @@ func (h *Handler) SetIPSets(ctx context.Context, pod *corev1.Pod, chaos *v1alpha
 }
 
 // SetIptables sets iptables on pod
-func (h *Handler) SetIptables(ctx context.Context, pod *corev1.Pod, chaos *v1alpha1.PodNetworkChaos) error {
+func (h *Reconciler) SetIptables(ctx context.Context, pod *corev1.Pod, chaos *v1alpha1.PodNetworkChaos) error {
 	chains := []*pb.Chain{}
 	for _, chain := range chaos.Spec.Iptables {
 		var direction pb.Chain_Direction
@@ -122,7 +138,7 @@ func (h *Handler) SetIptables(ctx context.Context, pod *corev1.Pod, chaos *v1alp
 }
 
 // SetTcs sets traffic control related chaos on pod
-func (h *Handler) SetTcs(ctx context.Context, pod *corev1.Pod, chaos *v1alpha1.PodNetworkChaos) error {
+func (h *Reconciler) SetTcs(ctx context.Context, pod *corev1.Pod, chaos *v1alpha1.PodNetworkChaos) error {
 	tcs := []*pb.Tc{}
 	for _, tc := range chaos.Spec.TrafficControls {
 		if tc.Type == v1alpha1.Bandwidth {
@@ -206,4 +222,12 @@ func mergeNetem(spec v1alpha1.TcParameter) (*pb.Netem, error) {
 		merged = pbutils.MergeNetem(merged, em)
 	}
 	return merged, nil
+}
+
+func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
+	err := ctrl.NewControllerManagedBy(mgr).
+		For(&v1alpha1.PodIoChaos{}).
+		Complete(r)
+
+	return err
 }

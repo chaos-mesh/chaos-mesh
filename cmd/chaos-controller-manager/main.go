@@ -128,27 +128,23 @@ func main() {
 		os.Exit(1)
 	}
 
-	// We only setup webhook for podiochaos, and the logic of applying chaos are in the mutation
-	// webhook, because we need to get the running result synchronously in io chaos reconciler
-	v1alpha1.RegisterPodIoHandler(&podiochaos.Handler{
-		Client: mgr.GetClient(),
-		Log:    ctrl.Log.WithName("handler").WithName("PodIOChaos"),
-	})
-	if err = (&v1alpha1.PodIoChaos{}).SetupWebhookWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create webhook", "webhook", "PodIOChaos")
+	err = (&podiochaos.Reconciler{
+		mgr.GetClient(),
+		ctrl.Log.WithName("controller").WithName("podiochaos"),
+	}).SetupWithManager(mgr)
+	if err != nil {
+		setupLog.Error(err, "fail to setup podiochaos controller")
 		os.Exit(1)
 	}
 
-	// We only setup webhook for podnetworkchaos, and the logic of applying chaos are in the validation
-	// webhook, because we need to get the running result synchronously in network chaos reconciler
-	v1alpha1.RegisterRawPodNetworkHandler(&podnetworkchaos.Handler{
-		Client:                  mgr.GetClient(),
-		Reader:                  mgr.GetAPIReader(),
-		Log:                     ctrl.Log.WithName("handler").WithName("PodNetworkChaos"),
-		AllowHostNetworkTesting: ccfg.ControllerCfg.AllowHostNetworkTesting,
-	})
-	if err = (&v1alpha1.PodNetworkChaos{}).SetupWebhookWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create webhook", "webhook", "PodNetworkChaos")
+	err = (&podnetworkchaos.Reconciler{
+		mgr.GetClient(),
+		mgr.GetAPIReader(),
+		ctrl.Log.WithName("controller").WithName("podnetworkchaos"),
+		ccfg.ControllerCfg.AllowHostNetworkTesting,
+	}).SetupWithManager(mgr)
+	if err != nil {
+		setupLog.Error(err, "fail to setup podnetworkchaos controller")
 		os.Exit(1)
 	}
 
