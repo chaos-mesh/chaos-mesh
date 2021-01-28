@@ -25,7 +25,7 @@ const EventDetail: React.FC<EventDetailProps> = ({ eventID }) => {
   const { lang } = useSelector((state: RootState) => state.settings)
 
   const [loading, setLoading] = useState(false)
-  const [e, setEvent] = useState<Event | undefined>(undefined)
+  const [e, setEvent] = useState<Event>()
 
   const fetchEvent = () => {
     setLoading(true)
@@ -96,7 +96,7 @@ const EventDetail: React.FC<EventDetailProps> = ({ eventID }) => {
                   {e.finish_time ? (
                     format(e.finish_time, lang)
                   ) : (
-                    <RunningLabel>{T('experiments.status.running')}</RunningLabel>
+                    <RunningLabel>{T('experiments.state.running')}</RunningLabel>
                   )}
                 </Typography>
               </TableCell>

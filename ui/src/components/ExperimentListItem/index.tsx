@@ -1,4 +1,4 @@
-import { Box, Collapse, IconButton, Paper, Typography, useMediaQuery, useTheme } from '@material-ui/core'
+import { Box, Collapse, IconButton, Typography, useMediaQuery, useTheme } from '@material-ui/core'
 import React, { useState } from 'react'
 import { Theme, createStyles, makeStyles } from '@material-ui/core/styles'
 
@@ -11,6 +11,7 @@ import ExperimentEventsPreview from 'components/ExperimentEventsPreview'
 import { IntlShape } from 'react-intl'
 import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown'
 import KeyboardArrowUpIcon from '@material-ui/icons/KeyboardArrowUp'
+import Paper from 'components-mui/Paper'
 import PauseCircleOutlineIcon from '@material-ui/icons/PauseCircleOutline'
 import PlayCircleOutlineIcon from '@material-ui/icons/PlayCircleOutline'
 import { RootState } from 'store'
@@ -69,7 +70,6 @@ const ExperimentListItem: React.FC<ExperimentListItemProps> = ({
   }
 
   const handleAction = (action: string) => (event: React.MouseEvent<HTMLSpanElement>) => {
-    console.log(action)
     event.stopPropagation()
 
     handleDialogOpen(true)
@@ -177,7 +177,7 @@ const ExperimentListItem: React.FC<ExperimentListItemProps> = ({
   )
 
   return (
-    <Paper variant="outlined" className={classes.root} onClick={handleJumpTo}>
+    <Paper padding={false} className={classes.root} onClick={handleJumpTo}>
       <Box display="flex" justifyContent="space-between" alignItems="center" p={3}>
         <Box display="flex" alignItems="center" className={classes.marginRight}>
           {!isArchive &&
