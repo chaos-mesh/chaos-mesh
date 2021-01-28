@@ -15,6 +15,7 @@ const initialState: {
   searchModalOpen: boolean
   namespace: string
   securityMode: boolean
+  dnsServerCreate: boolean
   version: string
   tokens: TokenFormValues[]
   tokenName: string
@@ -27,6 +28,7 @@ const initialState: {
   searchModalOpen: false,
   namespace: 'All',
   securityMode: true,
+  dnsServerCreate: false,
   version: '',
   tokens: [],
   tokenName: '',
@@ -54,6 +56,7 @@ const globalStatusSlice = createSlice({
     },
     setConfig(state, action: PayloadAction<Config>) {
       state.securityMode = action.payload.security_mode
+      state.dnsServerCreate = action.payload.dns_server_create
       state.version = action.payload.version
     },
     setTokens(state, action: PayloadAction<TokenFormValues[]>) {
