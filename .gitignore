@@ -1,6 +1,7 @@
 **/bin/*
 !bin/.gitkeep
 
+.vscode/
 .idea/
 *.iml
 *.swp
