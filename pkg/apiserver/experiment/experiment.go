@@ -184,6 +184,7 @@ func (s *Service) createPodChaos(exp *core.ExperimentInfo, kubeCli client.Client
 			Mode:          v1alpha1.PodMode(exp.Scope.Mode),
 			Value:         exp.Scope.Value,
 			ContainerName: exp.Target.PodChaos.ContainerName,
+			GracePeriod:   exp.Target.PodChaos.GracePeriod,
 		},
 	}
 
