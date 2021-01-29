@@ -57,7 +57,6 @@ const globalStatusSlice = createSlice({
     setConfig(state, action: PayloadAction<Config>) {
       state.securityMode = action.payload.security_mode
       state.dnsServerCreate = action.payload.dns_server_create
-      state.version = action.payload.version
     },
     setTokens(state, action: PayloadAction<TokenFormValues[]>) {
       const tokens = action.payload
