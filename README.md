@@ -88,7 +88,7 @@ On the fourth Thursday of every month (unless otherwise specified), the Chaos Me
 **Quick links:**
 
 - [Meeting notes](https://docs.google.com/document/d/1H8IfmhIJiJ1ltg-XLjqR_P_RaMHUGrl1CzvHnKM_9Sc/edit?usp=sharing)
-- [Zoom meeting link](https://pingcap.zoom.com.cn/j/98064001176)
+- [Zoom meeting link](https://zoom.us/j/91354182294)
 
 ### Community blog
 
