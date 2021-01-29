@@ -41,7 +41,21 @@ const (
 	// UserNS  NsType = "user"
 )
 
+var nsArgMap = map[NsType]string{
+	MountNS: "m",
+	// uts namespace is not supported by nsexec yet
+	// UtsNS:   "u",
+	IpcNS: "i",
+	NetNS: "n",
+	PidNS: "p",
+	// user namespace is not supported by nsexec yet
+	// UserNS:  "U",
+}
+
 const (
+	pausePath  = "/usr/local/bin/pause"
+	nsexecPath = "/usr/local/bin/nsexec"
+
 	DefaultProcPrefix = "/proc"
 )
 

@@ -44,7 +44,7 @@ var _ = BeforeSuite(func(done Done) {
 	close(done)
 })
 
-type testEndpoint struct {}
+type testEndpoint struct{}
 
 func (e *testEndpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.InnerObject) error {
 	return nil
