@@ -16,7 +16,6 @@ const initialState: {
   namespace: string
   securityMode: boolean
   dnsServerCreate: boolean
-  version: string
   tokens: TokenFormValues[]
   tokenName: string
 } = {
@@ -29,7 +28,6 @@ const initialState: {
   namespace: 'All',
   securityMode: true,
   dnsServerCreate: false,
-  version: '',
   tokens: [],
   tokenName: '',
 }
