@@ -1,5 +1,6 @@
 import { PayloadAction, createSlice } from '@reduxjs/toolkit'
 
+import { Config } from 'api/common.type'
 import LS from 'lib/localStorage'
 import { TokenFormValues } from 'components/Token'
 
@@ -14,6 +15,7 @@ const initialState: {
   searchModalOpen: boolean
   namespace: string
   securityMode: boolean
+  dnsServerCreate: boolean
   tokens: TokenFormValues[]
   tokenName: string
 } = {
@@ -25,6 +27,7 @@ const initialState: {
   searchModalOpen: false,
   namespace: 'All',
   securityMode: true,
+  dnsServerCreate: false,
   tokens: [],
   tokenName: '',
 }
@@ -49,8 +52,9 @@ const globalStatusSlice = createSlice({
 
       LS.set('global-namespace', ns)
     },
-    setSecurityMode(state, action: PayloadAction<boolean>) {
-      state.securityMode = action.payload
+    setConfig(state, action: PayloadAction<Config>) {
+      state.securityMode = action.payload.security_mode
+      state.dnsServerCreate = action.payload.dns_server_create
     },
     setTokens(state, action: PayloadAction<TokenFormValues[]>) {
       const tokens = action.payload
@@ -74,7 +78,7 @@ export const {
   setAlertOpen,
   setSearchModalOpen,
   setNameSpace,
-  setSecurityMode,
+  setConfig,
   setTokens,
   setTokenName,
 } = globalStatusSlice.actions

@@ -1258,11 +1258,13 @@ spec:
               value: "2333"
             - name: TZ
               value: ${timezone}
-            - name: TARGET_NAMESPACE
-              value: chaos-testing
             - name: CLUSTER_SCOPED
               value: "true"
+            - name: TARGET_NAMESPACE
+              value: chaos-testing
             - name: SECURITY_MODE
+              value: "false"
+            - name: DNS_SERVER_CREATE
               value: "false"
           volumeMounts:
             - name: storage-volume

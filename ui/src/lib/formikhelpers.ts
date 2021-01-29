@@ -156,12 +156,15 @@ export function yamlToExperiment(yamlObj: any): any {
 
   if (kind === 'StressChaos') {
     spec.stressors.cpu = {
-      ...(target.StressChaos.spec!.stressors as any).cpu,
+      workers: 0,
+      load: 0,
+      options: [],
       ...spec.stressors.cpu,
     }
 
     spec.stressors.memory = {
-      ...(target.StressChaos.spec!.stressors as any).memory,
+      workers: 0,
+      options: [],
       ...spec.stressors.memory,
     }
   }
