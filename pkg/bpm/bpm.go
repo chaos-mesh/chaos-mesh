@@ -41,22 +41,7 @@ const (
 	// UserNS  NsType = "user"
 )
 
-var nsArgMap = map[NsType]string{
-	MountNS: "m",
-	// uts namespace is not supported by nsexec yet
-	// UtsNS:   "u",
-	IpcNS: "i",
-	NetNS: "n",
-	PidNS: "p",
-	// user namespace is not supported by nsexec yet
-	// UserNS:  "U",
-}
-
 const (
-	pausePath  = "/usr/local/bin/pause"
-	ignorePath = "/usr/local/bin/ignore"
-	nsexecPath = "/usr/local/bin/nsexec"
-
 	DefaultProcPrefix = "/proc"
 )
 
@@ -103,6 +88,9 @@ func (m *BackgroundProcessManager) StartProcess(cmd *ManagedProcess) error {
 		return err
 	}
 	ct, err := procState.CreateTime()
+	if err != nil {
+		return err
+	}
 
 	pair := ProcessPair{
 		Pid:        pid,

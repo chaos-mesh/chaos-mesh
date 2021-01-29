@@ -208,6 +208,9 @@ func (r *endpoint) recoverPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.
 
 	suid := genSUID(pod, chaos)
 	jsonBytes, err := jvm.ToSandboxAction(suid, chaos)
+	if err != nil {
+		return err
+	}
 
 	// TODO: Custom port may be required
 	err = jvm.RecoverChaos(pod.Status.PodIP, sandboxPort, jsonBytes)

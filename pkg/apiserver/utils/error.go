@@ -86,5 +86,4 @@ func SetErrorForGinCtx(c *gin.Context, err error) {
 	}
 
 	_ = c.Error(ErrInternalServer.WrapWithNoMessage(err))
-	return
 }
