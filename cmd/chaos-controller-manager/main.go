@@ -35,8 +35,8 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/webhook/config/watcher"
 
 	_ "github.com/chaos-mesh/chaos-mesh/controllers/awschaos/detachvolume"
-	_ "github.com/chaos-mesh/chaos-mesh/controllers/awschaos/ec2stop"
 	_ "github.com/chaos-mesh/chaos-mesh/controllers/awschaos/ec2restart"
+	_ "github.com/chaos-mesh/chaos-mesh/controllers/awschaos/ec2stop"
 	_ "github.com/chaos-mesh/chaos-mesh/controllers/dnschaos"
 	_ "github.com/chaos-mesh/chaos-mesh/controllers/httpchaos"
 	_ "github.com/chaos-mesh/chaos-mesh/controllers/iochaos"
