@@ -64,6 +64,8 @@ echo "apply aws chaos to stop the ec2 instance, and the state shoud be stopped"
 cp aws_chaos_template.yaml aws_chaos.yaml
 sed -i "s/instance-id-placeholder/$INSTANCE_ID/g" aws_chaos.yaml
 sed -i "s/endpoint-placeholder/$LOCALSTACK_SERVER/g" aws_chaos.yaml
+cat aws_chaos.yaml
+
 kubectl apply -f aws_secret.yaml
 kubectl apply -f aws_chaos.yaml
 

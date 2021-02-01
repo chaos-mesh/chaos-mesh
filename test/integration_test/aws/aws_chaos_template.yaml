@@ -1,7 +1,7 @@
 apiVersion: chaos-mesh.org/v1alpha1
 kind: AwsChaos
 metadata:
-  name: hello-world
+  name: aws-ec2-stop
   namespace: chaos-testing
 spec:
   action: ec2-stop
@@ -9,6 +9,6 @@ spec:
   awsRegion: "us-east-1"
   ec2Instance: "instance-id-placeholder"
   endpoint: "endpoint-placeholder"
-  duration: "5m"
+  duration: "5s"
   scheduler:
-    cron: "@every 10m"
+    cron: "@every 10s"
