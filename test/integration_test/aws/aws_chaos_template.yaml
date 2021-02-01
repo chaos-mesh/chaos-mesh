@@ -1,0 +1,14 @@
+apiVersion: chaos-mesh.org/v1alpha1
+kind: AwsChaos
+metadata:
+  name: hello-world
+  namespace: chaos-testing
+spec:
+  action: ec2-stop
+  secretName: "cloud-key-secret"
+  awsRegion: "us-east-1"
+  ec2Instance: "instance-id-placeholder"
+  endpoint: "endpoint-placeholder"
+  duration: "5m"
+  scheduler:
+    cron: "@every 10m"

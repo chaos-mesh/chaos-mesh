@@ -53,6 +53,10 @@ spec:
             ec2Instance:
               description: Ec2Instance indicates the ID of the ec2 instance.
               type: string
+            endpoint:
+              description: Endpoint indicates the endpoint of the aws server. Just
+                used it in test now.
+              type: string
             scheduler:
               description: Scheduler defines some schedule rules to control the running
                 time of the chaos experiment about time.
