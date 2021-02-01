@@ -76,7 +76,6 @@ func (r *endpoint) Apply(ctx context.Context, req ctrl.Request, obj v1alpha1.Inn
 			}
 		}
 
-
 		if !haveContainer {
 			podsNotHaveContainer = append(podsNotHaveContainer, pod.Name)
 			r.Log.Error(nil, fmt.Sprintf("the pod %s doesn't have container %s", pod.Name, podchaos.Spec.ContainerName))
