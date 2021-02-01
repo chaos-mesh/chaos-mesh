@@ -13,6 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+set -eu
+
 cur=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 cd $cur
 
@@ -25,6 +27,20 @@ helm upgrade --install localstack localstack-repo/localstack
 NODE_PORT=$(kubectl get --namespace default -o jsonpath="{.spec.ports[0].nodePort}" services localstack)
 NODE_IP=$(kubectl get nodes --namespace default -o jsonpath="{.items[0].status.addresses[0].address}")
 LOCALSTACK_SERVER="http:\/\/$NODE_IP\:$NODE_PORT"
+
+# wait pod status to running
+for ((k=0; k<30; k++)); do
+    kubectl get pods --namespace default > pods.status
+    cat pods.status
+
+    run_num=`grep Running pods.status | wc -l`
+    pod_num=$((`cat pods.status | wc -l` - 1))
+    if [ $run_num == $pod_num ]; then
+        break
+    fi
+
+    sleep 3
+done
 
 kubectl port-forward svc/localstack 4566:4566 &
 
@@ -48,7 +64,7 @@ kubectl apply -f aws_secret.yaml
 kubectl apply -f aws_chaos.yaml
 
 aws --endpoint-url=http://127.0.0.1:4566 ec2 describe-instances --instance-id $INSTANCE_ID > describe_instance.log
-check_contains "stopped" run_instance.log
+check_contains "stopped" describe_instance.log
 
 # clean
 kubectl delete -f aws_chaos.yaml
