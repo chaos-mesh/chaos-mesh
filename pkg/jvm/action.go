@@ -39,7 +39,7 @@ func ToSandboxAction(suid string, chaos *v1alpha1.JVMChaos) ([]byte, error) {
 			chaos.Spec.Target, chaos.Spec.Action)
 	}
 
-	kv := make(map[string]string, 0)
+	kv := make(map[string]string)
 	flags := v1alpha1.JvmSpec[chaos.Spec.Target][chaos.Spec.Action].Flags
 	if flags != nil {
 		for k, v := range chaos.Spec.Flags {
