@@ -34,7 +34,7 @@ spec:
       priorityClassName: {{ .Values.dashboard.priorityClassName}}
       containers:
         - name: chaos-dashboard
-          image: {{ .Values.dashboard.image }}
+          image: {{template "registry-prefix" .}}{{ .Values.dashboard.image }}
           imagePullPolicy: {{ .Values.dashboard.imagePullPolicy | default "IfNotPresent" }}
           resources:
 {{ toYaml .Values.dashboard.resources | indent 12 }}

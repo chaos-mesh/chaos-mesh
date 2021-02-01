@@ -23,6 +23,8 @@ timezone: "UTC"
 # enableProfiling is a flag to enable pprof in controller-manager and chaos-daemon.
 enableProfiling: true
 
+registry: ""
+
 controllerManager:
   hostNetwork: false
   serviceAccount: chaos-controller-manager
