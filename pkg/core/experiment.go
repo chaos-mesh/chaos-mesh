@@ -182,6 +182,7 @@ type SchedulerInfo struct {
 type PodChaosInfo struct {
 	Action        string `json:"action" binding:"oneof='' 'pod-kill' 'pod-failure' 'container-kill'"`
 	ContainerName string `json:"container_name"`
+	GracePeriod   int64  `json:"grace_period"`
 }
 
 // NetworkChaosInfo defines the basic information of network chaos for creating a new NetworkChaos.
