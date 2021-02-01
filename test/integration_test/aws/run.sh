@@ -52,13 +52,12 @@ aws configure set default.output_format text
 echo "run ec2 instance, and the state is pending, will switch to running later"
 aws --endpoint-url=http://127.0.0.1:4566 ec2 run-instances --image-id ami --count 1 --instance-type t2.micro --key-name test > run_instance.log
 check_contains "pending" run_instance.log
+INSTANCE_ID=`cat run_instance.log | grep "InstanceId" | sed 's/.*\"InstanceId\": \"\([0-9,a-z,-]*\)\",/\1/g'`
 
 sleep 2
 
 aws --endpoint-url=http://127.0.0.1:4566 ec2 describe-instances --instance-id $INSTANCE_ID > describe_instance.log
 check_contains "running" describe_instance.log
-
-INSTANCE_ID=`cat run_instance.log | grep "InstanceId" | sed 's/.*\"InstanceId\": \"\([0-9,a-z,-]*\)\",/\1/g'`
 
 echo "apply aws chaos to stop the ec2 instance, and the state shoud be stopped"
 
