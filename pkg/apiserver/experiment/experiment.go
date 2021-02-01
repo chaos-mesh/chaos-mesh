@@ -35,7 +35,6 @@ import (
 
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -172,7 +171,7 @@ func (s *Service) createExperiment(c *gin.Context) {
 
 func (s *Service) createPodChaos(exp *core.ExperimentInfo, kubeCli client.Client) error {
 	chaos := &v1alpha1.PodChaos{
-		ObjectMeta: v1.ObjectMeta{
+		ObjectMeta: metav1.ObjectMeta{
 			Name:        exp.Name,
 			Namespace:   exp.Namespace,
 			Labels:      exp.Labels,
@@ -201,7 +200,7 @@ func (s *Service) createPodChaos(exp *core.ExperimentInfo, kubeCli client.Client
 
 func (s *Service) createNetworkChaos(exp *core.ExperimentInfo, kubeCli client.Client) error {
 	chaos := &v1alpha1.NetworkChaos{
-		ObjectMeta: v1.ObjectMeta{
+		ObjectMeta: metav1.ObjectMeta{
 			Name:        exp.Name,
 			Namespace:   exp.Namespace,
 			Labels:      exp.Labels,
@@ -245,7 +244,7 @@ func (s *Service) createNetworkChaos(exp *core.ExperimentInfo, kubeCli client.Cl
 
 func (s *Service) createIOChaos(exp *core.ExperimentInfo, kubeCli client.Client) error {
 	chaos := &v1alpha1.IoChaos{
-		ObjectMeta: v1.ObjectMeta{
+		ObjectMeta: metav1.ObjectMeta{
 			Name:        exp.Name,
 			Namespace:   exp.Namespace,
 			Labels:      exp.Labels,
@@ -280,7 +279,7 @@ func (s *Service) createIOChaos(exp *core.ExperimentInfo, kubeCli client.Client)
 
 func (s *Service) createTimeChaos(exp *core.ExperimentInfo, kubeCli client.Client) error {
 	chaos := &v1alpha1.TimeChaos{
-		ObjectMeta: v1.ObjectMeta{
+		ObjectMeta: metav1.ObjectMeta{
 			Name:        exp.Name,
 			Namespace:   exp.Namespace,
 			Labels:      exp.Labels,
@@ -309,7 +308,7 @@ func (s *Service) createTimeChaos(exp *core.ExperimentInfo, kubeCli client.Clien
 
 func (s *Service) createKernelChaos(exp *core.ExperimentInfo, kubeCli client.Client) error {
 	chaos := &v1alpha1.KernelChaos{
-		ObjectMeta: v1.ObjectMeta{
+		ObjectMeta: metav1.ObjectMeta{
 			Name:        exp.Name,
 			Namespace:   exp.Namespace,
 			Labels:      exp.Labels,
@@ -351,7 +350,7 @@ func (s *Service) createStressChaos(exp *core.ExperimentInfo, kubeCli client.Cli
 	}
 
 	chaos := &v1alpha1.StressChaos{
-		ObjectMeta: v1.ObjectMeta{
+		ObjectMeta: metav1.ObjectMeta{
 			Name:        exp.Name,
 			Namespace:   exp.Namespace,
 			Labels:      exp.Labels,
@@ -383,7 +382,7 @@ func (s *Service) createStressChaos(exp *core.ExperimentInfo, kubeCli client.Cli
 
 func (s *Service) createDNSChaos(exp *core.ExperimentInfo, kubeCli client.Client) error {
 	chaos := &v1alpha1.DNSChaos{
-		ObjectMeta: v1.ObjectMeta{
+		ObjectMeta: metav1.ObjectMeta{
 			Name:        exp.Name,
 			Namespace:   exp.Namespace,
 			Labels:      exp.Labels,
