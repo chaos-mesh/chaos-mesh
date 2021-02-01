@@ -60,13 +60,13 @@ func Debug(ctx context.Context, chaos runtime.Object, c *cm.ClientSet, result *c
 
 func debugEachPod(ctx context.Context, pod v1.Pod, daemon v1.Pod, chaos *v1alpha1.StressChaos, c *cm.ClientSet, result *cm.PodResult) error {
 	// get process path
-	cmd := fmt.Sprintf("cat /proc/cgroups")
+	cmd := "cat /proc/cgroups"
 	out, err := cm.ExecBypass(ctx, pod, daemon, cmd, c.KubeCli)
 	if err != nil {
 		return errors.Wrap(err, fmt.Sprintf("run command %s failed", cmd))
 	}
 
-	cmd = fmt.Sprintf("ps")
+	cmd = "ps"
 	out, err = cm.ExecBypass(ctx, pod, daemon, cmd, c.KubeCli)
 	if err != nil {
 		return errors.Wrap(err, fmt.Sprintf("run command %s failed", cmd))
@@ -74,10 +74,13 @@ func debugEachPod(ctx context.Context, pod v1.Pod, daemon v1.Pod, chaos *v1alpha
 	result.Items = append(result.Items, cm.ItemResult{Name: "ps", Value: string(out)})
 	stressngLine := regexp.MustCompile("(.*)(stress-ng)").FindStringSubmatch(string(out))
 	if len(stressngLine) == 0 {
-		return fmt.Errorf("Could not find stress-ng, StressChaos failed")
+		return fmt.Errorf("could not find stress-ng, StressChaos failed")
 	}
 
 	pids, commands, err := cm.GetPidFromPS(ctx, pod, daemon, c.KubeCli)
+	if err != nil {
+		return errors.Wrap(err, "get pid from ps failed")
+	}
 
 	for i := range pids {
 		cmd = fmt.Sprintf("cat /proc/%s/cgroup", pids[i])

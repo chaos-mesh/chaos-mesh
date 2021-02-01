@@ -41,7 +41,7 @@ func (s *DaemonServer) FlushIPSets(ctx context.Context, req *pb.IPSetsRequest) (
 
 	for _, ipset := range req.Ipsets {
 		// All operations on the ipset with the same name should be serialized,
-		// because ipset is not isolated with nsmaespace in linux < 3.12
+		// because ipset is not isolated with namespace in linux < 3.12
 
 		// **Notice**: Serialization should be enough for Chaos Mesh (but no
 		// need to use name to simulate isolation), because the operation on

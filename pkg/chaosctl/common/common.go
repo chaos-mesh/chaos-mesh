@@ -108,12 +108,12 @@ func PrettyPrint(s string, indentLevel int, color Color) {
 	str := fmt.Sprintf("%s%s\n\n", tabStr, regexp.MustCompile("\n").ReplaceAllString(s, "\n"+tabStr))
 	if color != NoColor {
 		if cfunc, ok := colorFunc[color]; !ok {
-			fmt.Printf("COLOR NOT SUPPORTED")
+			fmt.Print("COLOR NOT SUPPORTED")
 		} else {
 			cfunc(str)
 		}
 	} else {
-		fmt.Printf(str)
+		fmt.Print(str)
 	}
 }
 
@@ -262,7 +262,7 @@ func getChaos(ctx context.Context, chaosType string, chaosName string, ns string
 
 // GetPidFromPS returns pid-command pairs
 func GetPidFromPS(ctx context.Context, pod v1.Pod, daemon v1.Pod, c *kubernetes.Clientset) ([]string, []string, error) {
-	cmd := fmt.Sprintf("ps")
+	cmd := "ps"
 	out, err := ExecBypass(ctx, pod, daemon, cmd, c)
 	if err != nil {
 		return nil, nil, errors.Wrapf(err, "run command %s failed", cmd)
@@ -282,7 +282,7 @@ func GetPidFromPS(ctx context.Context, pod v1.Pod, daemon v1.Pod, c *kubernetes.
 		}
 	}
 	if pidColumn == 0 && cmdColumn == 0 {
-		return nil, nil, fmt.Errorf("Parsing ps error: could not get PID and COMMAND column")
+		return nil, nil, fmt.Errorf("parsing ps error: could not get PID and COMMAND column")
 	}
 	var pids, commands []string
 	for _, line := range outLines[1:] {
@@ -368,7 +368,7 @@ func Log(pod v1.Pod, tail int64, c *kubernetes.Clientset) (string, error) {
 func CheckFailedMessage(ctx context.Context, failedMessage string, daemons []v1.Pod, c *ClientSet) error {
 	if strings.Contains(failedMessage, "rpc error: code = Unavailable desc = connection error") || strings.Contains(failedMessage, "connect: connection refused") {
 		if err := checkConnForCtrlAndDaemon(ctx, daemons, c); err != nil {
-			return fmt.Errorf("Error occurs when check failed message: %s", err)
+			return fmt.Errorf("error occurs when check failed message: %s", err)
 		}
 	}
 	return nil
@@ -383,7 +383,7 @@ func checkConnForCtrlAndDaemon(ctx context.Context, daemons []v1.Pod, c *ClientS
 		return errors.Wrapf(err, "failed to select pod for controller-manager")
 	}
 	if len(ctrlMgrs) == 0 {
-		return fmt.Errorf("Could not found controller manager")
+		return fmt.Errorf("could not found controller manager")
 	}
 	for _, daemon := range daemons {
 		daemonIP := daemon.Status.PodIP

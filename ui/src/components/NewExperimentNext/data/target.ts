@@ -137,6 +137,12 @@ const data: Record<Kind, Target> = {
         key: 'pod-kill',
         spec: {
           action: 'pod-kill' as any,
+          grace_period: {
+            field: 'number',
+            label: 'Grace Period',
+            value: 0,
+            helperText: 'Optional. Grace period represents the duration in seconds before the pod should be deleted',
+          },
         },
       },
       {
@@ -420,6 +426,9 @@ const data: Record<Kind, Target> = {
 
 export const schema: Partial<Record<Kind, Record<string, Yup.ObjectSchema>>> = {
   PodChaos: {
+    'pod-kill': Yup.object({
+      grace_period: Yup.number().min(0, 'Grace period must be non-negative integer'),
+    }),
     'container-kill': Yup.object({
       container_name: Yup.string().required('The container name is required'),
     }),

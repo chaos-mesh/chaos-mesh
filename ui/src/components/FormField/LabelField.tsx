@@ -46,6 +46,10 @@ const LabelField: React.FC<LabelFieldProps & TextFieldProps> = ({ isKV = false, 
   const processText = () => {
     const t = text.trim()
 
+    if (t === '') {
+      return
+    }
+
     if (isKV && !/^.+:.+$/.test(t)) {
       setError('Invalid key:value format')
 
