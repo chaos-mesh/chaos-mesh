@@ -64,20 +64,20 @@ func (r *endpoint) Apply(ctx context.Context, req ctrl.Request, obj v1alpha1.Inn
 		return err
 	}
 
-	podsNotHaveContainer := []string{}
+	var podsNotHaveContainer []string
 	for podIndex := range pods {
 		pod := &pods[podIndex]
 		haveContainer := false
 
-		for containerIndex := range pod.Status.ContainerStatuses {
-			containerName := pod.Status.ContainerStatuses[containerIndex].Name
-			if containerName == podchaos.Spec.ContainerName {
+		for _, item := range pod.Status.ContainerStatuses {
+			if item.Name == podchaos.Spec.ContainerName {
 				haveContainer = true
 				break
 			}
 		}
 
-		if haveContainer == false {
+
+		if !haveContainer {
 			podsNotHaveContainer = append(podsNotHaveContainer, pod.Name)
 			r.Log.Error(nil, fmt.Sprintf("the pod %s doesn't have container %s", pod.Name, podchaos.Spec.ContainerName))
 		}
