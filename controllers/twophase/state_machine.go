@@ -133,7 +133,7 @@ func resume(ctx context.Context, m *chaosStateMachine, _ v1alpha1.ExperimentPhas
 
 	nextStart := m.Chaos.GetNextStart()
 	nextRecover := m.Chaos.GetNextRecover()
-	lastStart := time.Time{}
+	var lastStart time.Time
 	if status.Experiment.StartTime == nil {
 		// in this condition, the experiment has never executed
 		nextStart = now

@@ -79,7 +79,7 @@ func debugEachPod(ctx context.Context, pod v1.Pod, daemon v1.Pod, chaos *v1alpha
 
 	pids, commands, err := cm.GetPidFromPS(ctx, pod, daemon, c.KubeCli)
 	if err != nil {
-		errors.Wrap(err, "get pid from ps failed")
+		return errors.Wrap(err, "get pid from ps failed")
 	}
 
 	for i := range pids {
