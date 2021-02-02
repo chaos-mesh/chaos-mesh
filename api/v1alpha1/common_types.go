@@ -14,6 +14,7 @@
 package v1alpha1
 
 import (
+	"k8s.io/apimachinery/pkg/types"
 	"time"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -125,6 +126,8 @@ type ChaosStatus struct {
 
 	// Experiment records the last experiment state.
 	Experiment ExperimentStatus `json:"experiment"`
+
+	ActiveJob string `json:"activejob,omitempty"`
 }
 
 func (in *ChaosStatus) GetNextStart() time.Time {
@@ -260,4 +263,27 @@ type ChaosInstance struct {
 type ChaosList interface {
 	runtime.Object
 	ListChaos() []*ChaosInstance
+}
+
+// +kubebuilder:object:generate=false
+
+type Job interface {
+	StatefulObject
+
+	GetName() string
+	SetName(string)
+}
+
+// +kubebuilder:object:generate=false
+
+type CronJob interface {
+	InnerSchedulerObject
+
+	IntoJobWithoutName() Job
+	UpdateJob(j Job) bool
+
+	GetActiveJob() *types.NamespacedName
+	SetActiveJob(*types.NamespacedName)
+
+	GetJobObject() Job
 }

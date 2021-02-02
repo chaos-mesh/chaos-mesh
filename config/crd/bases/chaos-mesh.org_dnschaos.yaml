@@ -182,6 +182,8 @@ spec:
           description: Most recently observed status of the chaos experiment about
             pods
           properties:
+            activejob:
+              type: string
             experiment:
               description: Experiment records the last experiment state.
               properties:

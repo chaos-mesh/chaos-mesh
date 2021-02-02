@@ -21,8 +21,10 @@ import (
 const implImport = `
 import (
 	"reflect"
+	"strings"
 	"time"
 
+	"k8s.io/apimachinery/pkg/types"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 `
@@ -53,6 +55,98 @@ func (in *{{.Type}}) GetDuration() (*time.Duration, error) {
 		return nil, err
 	}
 	return &duration, nil
+}
+
+// GetName would return the name for chaos
+func (in *{{.Type}}) GetName() string {
+	return in.Name
+}
+
+// SetName would set the name for chaos
+func (in *{{.Type}}) SetName(name string) {
+	in.Name = name
+}
+
+// GetActiveJob would return the active job of chaos
+func (in *{{.Type}}) GetActiveJob() *types.NamespacedName {
+	activeJob := in.Status.ActiveJob
+	if len(activeJob) == 0 {
+		return nil
+	}
+
+	parts := strings.Split(activeJob, "/")
+	return &types.NamespacedName {parts[0], parts[1]}
+}
+
+// SetActiveJob would set the active job of chaos
+func (in *{{.Type}}) SetActiveJob(namespacedName *types.NamespacedName)  {
+	if namespacedName == nil {
+		in.Status.ActiveJob = ""
+	} else {
+		in.Status.ActiveJob = namespacedName.String()
+	}
+}
+
+func (in *{{.Type}}) GetJobObject() Job {
+	return &{{.Type}} {}
+}
+
+func (in *{{.Type}}) IntoJobWithoutName() Job {
+	job := in.DeepCopyObject().(*{{.Type}})
+	job.Spec.Scheduler = nil
+	job.Spec.Duration = nil
+	job.ObjectMeta = metav1.ObjectMeta {
+		Namespace: job.Namespace,
+		Name: "",
+		OwnerReferences: []metav1.OwnerReference{
+			{
+				APIVersion: job.APIVersion,
+				Kind: job.Kind,
+				Name: job.Name,
+				UID: job.UID,
+			},
+		},
+	}
+
+	return job
+}
+
+func (in *{{.Type}}) UpdateJob(j Job) bool {
+	chaos := j.(*{{.Type}})
+	newChaos := in.IntoJobWithoutName().(*{{.Type}})
+
+	if reflect.DeepEqual(newChaos.Spec, chaos.Spec) &&
+		reflect.DeepEqual(newChaos.Labels, chaos.Labels) &&
+		reflect.DeepEqual(newChaos.Annotations, chaos.Annotations) &&
+		reflect.DeepEqual(newChaos.OwnerReferences, chaos.OwnerReferences) {
+		return false
+	}
+
+	newChaos.Spec.DeepCopyInto(&chaos.Spec)
+
+	if newChaos.Labels != nil {
+		in, out := &newChaos.Labels, &chaos.Labels
+		*out = make(map[string]string, len(*in))
+		for key, val := range *in {
+			(*out)[key] = val
+		}
+	}
+	if newChaos.Annotations != nil {
+		in, out := &newChaos.Annotations, &chaos.Annotations
+		*out = make(map[string]string, len(*in))
+		for key, val := range *in {
+			(*out)[key] = val
+		}
+	}
+	if newChaos.OwnerReferences != nil {
+		in, out := &newChaos.OwnerReferences, &chaos.OwnerReferences
+		*out = make([]metav1.OwnerReference, len(*in))
+		for i := range *in {
+			(*in)[i].DeepCopyInto(&(*out)[i])
+		}
+	}
+
+	return true
 }
 
 func (in *{{.Type}}) GetNextStart() time.Time {

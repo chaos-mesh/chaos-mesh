@@ -206,6 +206,8 @@ spec:
           type: object
         status:
           properties:
+            activejob:
+              type: string
             experiment:
               description: Experiment records the last experiment state.
               properties:

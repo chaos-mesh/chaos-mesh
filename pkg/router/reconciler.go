@@ -16,21 +16,17 @@ package router
 import (
 	"context"
 	"fmt"
-	"strings"
 
 	"github.com/pkg/errors"
 	v1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/client/apiutil"
-	"sigs.k8s.io/controller-runtime/pkg/event"
-	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/common"
-	"github.com/chaos-mesh/chaos-mesh/controllers/twophase"
+	"github.com/chaos-mesh/chaos-mesh/controllers/cronjob"
 	"github.com/chaos-mesh/chaos-mesh/pkg/events"
 	ctx "github.com/chaos-mesh/chaos-mesh/pkg/router/context"
 	end "github.com/chaos-mesh/chaos-mesh/pkg/router/endpoint"
@@ -99,7 +95,10 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (result ctrl.Result, err error)
 	} else if scheduler != nil {
 		// scheduler != nil && duration != nil
 		// but PodKill is an expection
-		reconciler = twophase.NewReconciler(req, controller, ctx)
+		reconciler = &cronjob.Reconciler{
+			Context: ctx,
+			CronJob: chaos.(v1alpha1.CronJob),
+		}
 	} else {
 		err := errors.Errorf("both scheduler and duration should be nil or not nil")
 		r.Log.Error(err, "fail to construct reconciler", "scheduler", scheduler, "duration", duration)
@@ -137,45 +136,8 @@ func NewReconciler(name string, object runtime.Object, mgr ctrl.Manager, endpoin
 
 // SetupWithManager registers controller to manager
 func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
-	err := ctrl.NewControllerManagedBy(mgr).
-		For(r.Object.DeepCopyObject()).
-		Complete(r)
-
-	if err != nil {
-		return err
-	}
-
-	kind, err := apiutil.GVKForObject(r.Object.DeepCopyObject(), mgr.GetScheme())
-	if err != nil {
-		return err
-	}
-
 	return ctrl.NewControllerManagedBy(mgr).
 		For(r.Object.DeepCopyObject()).
-		Named(strings.ToLower(kind.Kind) + "-scheduler-updater").
-		WithEventFilter(predicate.Funcs{
-			CreateFunc: func(_ event.CreateEvent) bool {
-				return false
-			},
-			DeleteFunc: func(_ event.DeleteEvent) bool {
-				return false
-			},
-			GenericFunc: func(_ event.GenericEvent) bool {
-				return false
-			},
-			UpdateFunc: func(e event.UpdateEvent) bool {
-				old := e.ObjectOld.(v1alpha1.InnerSchedulerObject).GetScheduler()
-				new := e.ObjectNew.(v1alpha1.InnerSchedulerObject).GetScheduler()
-
-				if (old == nil) || (new == nil) {
-					return false
-				}
-
-				return old.Cron != new.Cron
-			},
-		}).
-		Complete(&twophase.SchedulerUpdater{
-			Context: r.Context,
-			Object:  r.Object,
-		})
+		Owns(r.Object.DeepCopyObject()). // Trigger owners reconciler
+		Complete(r)
 }

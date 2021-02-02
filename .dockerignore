@@ -17,3 +17,5 @@ test/image
 !go.sum
 !Makefile
 !scripts
+
+images/**/.dockerbuilt

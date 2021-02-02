@@ -81,6 +81,8 @@ spec:
         status:
           description: AwsChaosStatus represents the status of a AwsChaos
           properties:
+            activejob:
+              type: string
             experiment:
               description: Experiment records the last experiment state.
               properties:
@@ -340,6 +342,8 @@ spec:
           description: Most recently observed status of the chaos experiment about
             pods
           properties:
+            activejob:
+              type: string
             experiment:
               description: Experiment records the last experiment state.
               properties:
@@ -623,6 +627,8 @@ spec:
           type: object
         status:
           properties:
+            activejob:
+              type: string
             experiment:
               description: Experiment records the last experiment state.
               properties:
@@ -977,6 +983,8 @@ spec:
         status:
           description: IoChaosStatus defines the observed state of IoChaos
           properties:
+            activejob:
+              type: string
             experiment:
               description: Experiment records the last experiment state.
               properties:
@@ -1255,6 +1263,8 @@ spec:
         status:
           description: JVMChaosStatus defines the observed state of JVMChaos
           properties:
+            activejob:
+              type: string
             experiment:
               description: Experiment records the last experiment state.
               properties:
@@ -1563,6 +1573,8 @@ spec:
         status:
           description: Most recently observed status of the kernel chaos experiment
           properties:
+            activejob:
+              type: string
             experiment:
               description: Experiment records the last experiment state.
               properties:
@@ -2049,6 +2061,8 @@ spec:
           description: Most recently observed status of the chaos experiment about
             pods
           properties:
+            activejob:
+              type: string
             experiment:
               description: Experiment records the last experiment state.
               properties:
@@ -2316,6 +2330,8 @@ spec:
           description: Most recently observed status of the chaos experiment about
             pods
           properties:
+            activejob:
+              type: string
             experiment:
               description: Experiment records the last experiment state.
               properties:
@@ -2784,6 +2800,8 @@ spec:
           description: Most recently observed status of the chaos experiment about
             pods
           properties:
+            activejob:
+              type: string
             experiment:
               description: Experiment records the last experiment state.
               properties:
@@ -3072,6 +3090,8 @@ spec:
         status:
           description: Most recently observed status of the time chaos experiment
           properties:
+            activejob:
+              type: string
             experiment:
               description: Experiment records the last experiment state.
               properties:
@@ -3348,6 +3368,8 @@ spec:
         status:
           description: Most recently observed status of the time chaos experiment
           properties:
+            activejob:
+              type: string
             experiment:
               description: Experiment records the last experiment state.
               properties:

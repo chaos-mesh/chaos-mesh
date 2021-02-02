@@ -83,17 +83,13 @@ func (in *PodChaos) ValidateScheduler(spec *field.Path) field.ErrorList {
 		allErrs = append(allErrs, ValidateScheduler(in, spec)...)
 	case PodKillAction:
 		// We choose to ignore the Duration property even user define it
-		if in.Spec.Scheduler == nil {
-			allErrs = append(allErrs, field.Invalid(schedulerField, in.Spec.Scheduler, ValidatePodchaosSchedulerError))
-		} else {
+		if in.Spec.Scheduler != nil {
 			_, err := ParseCron(in.Spec.Scheduler.Cron, schedulerField.Child("cron"))
 			allErrs = append(allErrs, err...)
 		}
 	case ContainerKillAction:
 		// We choose to ignore the Duration property even user define it
-		if in.Spec.Scheduler == nil {
-			allErrs = append(allErrs, field.Invalid(schedulerField, in.Spec.Scheduler, ValidatePodchaosSchedulerError))
-		} else {
+		if in.Spec.Scheduler != nil {
 			_, err := ParseCron(in.Spec.Scheduler.Cron, schedulerField.Child("cron"))
 			allErrs = append(allErrs, err...)
 		}

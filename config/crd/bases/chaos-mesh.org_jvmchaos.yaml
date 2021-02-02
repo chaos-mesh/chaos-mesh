@@ -203,6 +203,8 @@ spec:
         status:
           description: JVMChaosStatus defines the observed state of JVMChaos
           properties:
+            activejob:
+              type: string
             experiment:
               description: Experiment records the last experiment state.
               properties:

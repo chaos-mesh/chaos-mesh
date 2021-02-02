@@ -83,6 +83,8 @@ spec:
         status:
           description: AwsChaosStatus represents the status of a AwsChaos
           properties:
+            activejob:
+              type: string
             experiment:
               description: Experiment records the last experiment state.
               properties:
