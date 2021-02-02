@@ -1,4 +1,4 @@
-import { Box, Grid, Grow, Typography } from '@material-ui/core'
+import { Box, Grid, Grow } from '@material-ui/core'
 import React, { useEffect, useState } from 'react'
 
 import { Event } from 'api/events.type'
@@ -12,6 +12,7 @@ import TotalExperiments from './TotalExperiments'
 import TotalState from './TotalState'
 import Welcome from './Welcome'
 import api from 'api'
+import clsx from 'clsx'
 import { makeStyles } from '@material-ui/core/styles'
 
 const useStyles = makeStyles((theme) => ({
@@ -55,14 +56,14 @@ export default function Dashboard() {
             <Paper>
               <PaperTop title={T('dashboard.totalExperiments')} />
 
-              <Box className={classes.totalExperiments} height={300} m={3}>
+              <Box className={clsx(classes.container, classes.totalExperiments)}>
                 <TotalExperiments />
               </Box>
             </Paper>
           </Grid>
 
           <Grid item xs={12} md={12} lg={3}>
-            <Paper style={{ position: 'relative' }}>
+            <Paper>
               <PaperTop title={T('dashboard.totalState')} />
 
               <TotalState className={classes.container} />
@@ -71,7 +72,7 @@ export default function Dashboard() {
 
           <Grid container item xs={12} md={12} lg={9}>
             <Grid item xs={12}>
-              <Paper style={{ position: 'relative' }}>
+              <Paper>
                 <PaperTop title={T('common.timeline')} />
 
                 <Timeline events={events} className={classes.container} />
@@ -81,13 +82,10 @@ export default function Dashboard() {
             <Grid item xs={12}>
               <Box mt={3}>
                 <Paper>
-                  <PaperTop title={T('dashboard.predefined')} />
+                  <PaperTop title={T('dashboard.predefined')} subtitle={T('dashboard.predefinedDesc')} />
 
-                  <Box height={150} mx={3}>
-                    <Typography>{T('dashboard.predefinedDesc')}</Typography>
-                    <Box pt={6}>
-                      <Predefined />
-                    </Box>
+                  <Box m={3}>
+                    <Predefined />
                   </Box>
                 </Paper>
               </Box>
@@ -95,7 +93,7 @@ export default function Dashboard() {
           </Grid>
 
           <Grid item xs={12} md={12} lg={3}>
-            <Paper style={{ position: 'relative', height: '100%' }}>
+            <Paper style={{ height: '100%' }}>
               <PaperTop title={T('dashboard.recent')} />
 
               <Recent events={events.slice(-6)} />

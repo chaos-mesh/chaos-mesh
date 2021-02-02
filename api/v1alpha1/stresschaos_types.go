@@ -119,10 +119,10 @@ type StressInstance struct {
 type Stressors struct {
 	// MemoryStressor stresses virtual memory out
 	// +optional
-	MemoryStressor *MemoryStressor `json:"memory,omitempty"`
+	MemoryStressor *MemoryStressor `json:"memory,omitempty" mapstructure:"memory"`
 	// CPUStressor stresses CPU out
 	// +optional
-	CPUStressor *CPUStressor `json:"cpu,omitempty"`
+	CPUStressor *CPUStressor `json:"cpu,omitempty" mapstructure:"cpu"`
 }
 
 // Normalize the stressors to comply with stress-ng
@@ -161,7 +161,7 @@ type Stressor struct {
 
 // MemoryStressor defines how to stress memory out
 type MemoryStressor struct {
-	Stressor `json:",inline"`
+	Stressor `json:",inline" mapstructure:",squash"`
 
 	// extend stress-ng options
 	// +optional
@@ -170,7 +170,7 @@ type MemoryStressor struct {
 
 // CPUStressor defines how to stress CPU out
 type CPUStressor struct {
-	Stressor `json:",inline"`
+	Stressor `json:",inline" mapstructure:",squash"`
 	// Load specifies P percent loading per CPU worker. 0 is effectively a sleep (no load) and 100
 	// is full loading.
 	// +optional

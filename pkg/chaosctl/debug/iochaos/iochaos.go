@@ -17,6 +17,8 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/pkg/errors"
+
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 
@@ -33,7 +35,7 @@ func Debug(ctx context.Context, chaos runtime.Object, c *cm.ClientSet, result *c
 	chaosStatus := ioChaos.Status.ChaosStatus
 	chaosSelector := ioChaos.Spec.GetSelector()
 
-	pods, daemons, err := cm.GetPods(ctx, chaosStatus, chaosSelector, c.CtrlCli)
+	pods, daemons, err := cm.GetPods(ctx, ioChaos.GetName(), chaosStatus, chaosSelector, c.CtrlCli)
 	if err != nil {
 		return err
 	}
@@ -45,27 +47,25 @@ func Debug(ctx context.Context, chaos runtime.Object, c *cm.ClientSet, result *c
 	for i := range pods {
 		podName := pods[i].Name
 		podResult := cm.PodResult{Name: podName}
-		err := debugEachPod(ctx, pods[i], daemons[i], ioChaos, c, &podResult)
+		_ = debugEachPod(ctx, pods[i], daemons[i], ioChaos, c, &podResult)
 		result.Pods = append(result.Pods, podResult)
-		if err != nil {
-			return fmt.Errorf("for %s: %s", podName, err.Error())
-		}
+		// TODO: V(4) log when err != nil, wait for #1433
 	}
 	return nil
 }
 
 func debugEachPod(ctx context.Context, pod v1.Pod, daemon v1.Pod, chaos *v1alpha1.IoChaos, c *cm.ClientSet, result *cm.PodResult) error {
 	// print out debug info
-	cmd := fmt.Sprintf("cat /proc/mounts")
+	cmd := "cat /proc/mounts"
 	out, err := cm.ExecBypass(ctx, pod, daemon, cmd, c.KubeCli)
 	if err != nil {
-		return fmt.Errorf("run command '%s' failed with: %s", cmd, err.Error())
+		return errors.Wrapf(err, "run command '%s' failed", cmd)
 	}
 	result.Items = append(result.Items, cm.ItemResult{Name: "mount information", Value: string(out)})
 
 	pids, commands, err := cm.GetPidFromPS(ctx, pod, daemon, c.KubeCli)
 	if err != nil {
-		return fmt.Errorf("get pid from ps failed with: %s", err.Error())
+		return errors.Wrapf(err, "get pid for pod %s/%s from ps failed", pod.GetNamespace(), pod.GetName())
 	}
 
 	for i := range pids {

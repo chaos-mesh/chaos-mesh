@@ -81,8 +81,7 @@ func (e *eventStore) List(_ context.Context) ([]*core.Event, error) {
 		if err != nil {
 			return nil, err
 		}
-		var event core.Event
-		event = et
+		var event core.Event = et
 		event.Pods = pods
 		eventList = append(eventList, &event)
 	}
@@ -106,8 +105,7 @@ func (e *eventStore) ListByUID(_ context.Context, uid string) ([]*core.Event, er
 		if err != nil {
 			return nil, err
 		}
-		var event core.Event
-		event = et
+		var event core.Event = et
 		event.Pods = pods
 		eventList = append(eventList, &event)
 	}
@@ -132,8 +130,7 @@ func (e *eventStore) ListByExperiment(_ context.Context, namespace string, exper
 		if err != nil {
 			return nil, err
 		}
-		var event core.Event
-		event = et
+		var event core.Event = et
 		event.Pods = pods
 		eventList = append(eventList, &event)
 	}
@@ -426,6 +423,24 @@ func (e *eventStore) DeleteByFinishTime(_ context.Context, ttl time.Duration) er
 		}
 	}
 	return nil
+}
+
+// DeleteByUID deletes events by the uid of the experiment.
+func (e *eventStore) DeleteByUID(_ context.Context, uid string) error {
+	eventList, err := e.ListByUID(context.Background(), uid)
+	if err != nil {
+		return err
+	}
+	for _, et := range eventList {
+		if err := e.db.Model(core.PodRecord{}).
+			Where(
+				"event_id = ? ",
+				et.ID).Unscoped().Delete(core.PodRecord{}).Error; err != nil {
+			return err
+		}
+	}
+	return e.db.Where("experiment_id = ?", uid).Unscoped().
+		Delete(core.Event{}).Error
 }
 
 func (e *eventStore) getUID(_ context.Context, ns, name string) (string, error) {

@@ -54,7 +54,8 @@ var _ = Describe("JVMChaos", func() {
 					Namespace: "default",
 				},
 				Spec: JVMChaosSpec{
-					Action: ServletDelayAction,
+					Action: JVMDelayAction,
+					Target: SERVLET,
 					Mode:   OnePodMode,
 				},
 			}

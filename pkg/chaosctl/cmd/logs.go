@@ -16,8 +16,10 @@ package cmd
 import (
 	"context"
 	"fmt"
-	"log"
 	"strings"
+
+	"github.com/go-logr/logr"
+	"github.com/pkg/errors"
 
 	"github.com/spf13/cobra"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -30,16 +32,14 @@ import (
 )
 
 type logsOptions struct {
-	tail int64
-	node string
+	logger logr.Logger
+	tail   int64
+	node   string
 }
 
-func init() {
-	o := &logsOptions{}
-
-	c, err := cm.InitClientSet()
-	if err != nil {
-		log.Fatal(err)
+func NewLogsCmd(logger logr.Logger) (*cobra.Command, error) {
+	o := &logsOptions{
+		logger: logger,
 	}
 
 	logsCmd := &cobra.Command{
@@ -53,30 +53,38 @@ Examples:
 
   # Print 100 log lines for chaosmesh components in node NODENAME
   chaosctl logs -t 100 -n NODENAME`,
-		Run: func(cmd *cobra.Command, args []string) {
-			if err := o.Run(args, c); err != nil {
-				log.Fatal(err)
-			}
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return o.Run(args)
 		},
+		SilenceErrors:     true,
+		SilenceUsage:      true,
 		ValidArgsFunction: noCompletions,
 	}
 
 	logsCmd.Flags().Int64VarP(&o.tail, "tail", "t", -1, "Number of lines of recent log")
 	logsCmd.Flags().StringVarP(&o.node, "node", "n", "", "Number of lines of recent log")
-	err = logsCmd.RegisterFlagCompletionFunc("node", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-		return listNodes(toComplete, c.KubeCli)
+	err := logsCmd.RegisterFlagCompletionFunc("node", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+		clientset, err := cm.InitClientSet()
+		if err != nil {
+			return nil, cobra.ShellCompDirectiveDefault
+		}
+		return listNodes(toComplete, clientset.KubeCli)
 	})
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
-
-	rootCmd.AddCommand(logsCmd)
+	return logsCmd, nil
 }
 
 // Run logs
-func (o *logsOptions) Run(args []string, c *cm.ClientSet) error {
+func (o *logsOptions) Run(args []string) error {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
+	c, err := cm.InitClientSet()
+	if err != nil {
+		o.logger.V(4).Info("failed to initialize clientset", "err", err)
+		return err
+	}
 
 	componentsNeeded := []string{"controller-manager", "chaos-daemon", "chaos-dashboard"}
 	for _, name := range componentsNeeded {
@@ -87,17 +95,19 @@ func (o *logsOptions) Run(args []string, c *cm.ClientSet) error {
 			selectorSpec.Nodes = []string{o.node}
 		}
 
+		// TODO: just use kubernetes native label selector
 		components, err := selector.SelectPods(ctx, c.CtrlCli, nil, selectorSpec, config.ControllerCfg.ClusterScoped, config.ControllerCfg.TargetNamespace, config.ControllerCfg.AllowedNamespaces, config.ControllerCfg.IgnoredNamespaces)
 		if err != nil {
-			return fmt.Errorf("failed to SelectPods with: %s", err.Error())
+			return errors.Wrapf(err, "failed to SelectPods for component %s", name)
 		}
+		o.logger.V(4).Info("select pods for component", "component", name, "pods", components)
 		for _, comp := range components {
-			cm.PrettyPrint(fmt.Sprintf("[%s]", comp.Name), 0, "Cyan")
+			cm.PrettyPrint(fmt.Sprintf("[%s]", comp.Name), 0, cm.Cyan)
 			comLog, err := cm.Log(comp, o.tail, c.KubeCli)
 			if err != nil {
-				cm.PrettyPrint(err.Error(), 1, "Red")
+				cm.PrettyPrint(err.Error(), 1, cm.Red)
 			} else {
-				cm.PrettyPrint(comLog, 1, "")
+				cm.PrettyPrint(comLog, 1, cm.NoColor)
 			}
 		}
 	}

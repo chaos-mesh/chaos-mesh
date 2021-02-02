@@ -40,7 +40,9 @@ type ChaosDashboardConfig struct {
 	IgnoredNamespaces string `envconfig:"IGNORED_NAMESPACES" default:"" json:"-"`
 
 	// SecurityMode will use the token login by the user if set to true
-	SecurityMode bool `envconfig:"SECURITY_MODE" default:"true" json:"security_mode"`
+	SecurityMode    bool   `envconfig:"SECURITY_MODE" default:"true" json:"security_mode"`
+	DNSServerCreate bool   `envconfig:"DNS_SERVER_CREATE" default:"false" json:"dns_server_create"`
+	Version         string `json:"version"`
 }
 
 // PersistTTLConfig defines the configuration of ttl

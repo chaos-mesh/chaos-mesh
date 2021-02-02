@@ -159,8 +159,7 @@ var _ = Describe("webhook inject", func() {
 		It("should return nil and false", func() {
 			var pod corev1.Pod
 			var inj config.InjectionConfig
-			var annotations map[string]string
-			annotations = make(map[string]string)
+			annotations := make(map[string]string)
 			_, err := createPatch(&pod, &inj, annotations)
 			Expect(err).To(BeNil())
 		})
@@ -172,8 +171,7 @@ var _ = Describe("webhook inject", func() {
 				{
 					Name: "testContainerName",
 				}}
-			var postStart map[string]config.ExecAction
-			postStart = make(map[string]config.ExecAction)
+			postStart := make(map[string]config.ExecAction)
 			patch := setCommands(target, postStart)
 			Expect(patch).To(BeNil())
 		})
@@ -183,8 +181,7 @@ var _ = Describe("webhook inject", func() {
 				{
 					Name: "testContainerName",
 				}}
-			var postStart map[string]config.ExecAction
-			postStart = make(map[string]config.ExecAction)
+			postStart := make(map[string]config.ExecAction)
 			var ce config.ExecAction = config.ExecAction{
 				Command: []string{"nil"},
 			}

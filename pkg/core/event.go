@@ -62,6 +62,9 @@ type EventStore interface {
 	// DeleteByFinishTime deletes events and podrecords whose time difference is greater than the given time from FinishTime.
 	DeleteByFinishTime(context.Context, time.Duration) error
 
+	// DeleteByUID deletes events list by the UID.
+	DeleteByUID(context.Context, string) error
+
 	// UpdateIncompleteEvents updates the incomplete event by the namespace and name
 	// If chaos is deleted before an event is over, then the incomplete event would be stored in datastore,
 	// which means the event would never save the finish_time.

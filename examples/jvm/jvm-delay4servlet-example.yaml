@@ -2,15 +2,16 @@ apiVersion: chaos-mesh.org/v1alpha1
 kind: JVMChaos
 metadata:
   name: jvm-delay4servlet-example
-  namespace: chaos-testing
+  namespace: app
 spec:
-  action: delay4servlet
-  delay4servlet:
-    requestpath: /
-    time: 10000
+  action: delay
+  target: servlet
+  flags:
+    time: "10000"
   mode: one
   selector:
     labelSelectors:
-      "app": "java-demo"
+      app: springboot-jvmchaos-demo
+  duration: "50s"
   scheduler:
     cron: "@every 1m"

@@ -76,6 +76,8 @@ func apply(ctx context.Context, m *chaosStateMachine, targetPhase v1alpha1.Exper
 
 		return true, err
 	}
+	// reset failed message
+	status.FailedMessage = emptyString
 	status.Experiment.Phase = targetPhase
 
 	nextStart, nextRecover, err := m.IterateNextTime(startTime, *duration)
@@ -131,7 +133,7 @@ func resume(ctx context.Context, m *chaosStateMachine, _ v1alpha1.ExperimentPhas
 
 	nextStart := m.Chaos.GetNextStart()
 	nextRecover := m.Chaos.GetNextRecover()
-	lastStart := time.Time{}
+	var lastStart time.Time
 	if status.Experiment.StartTime == nil {
 		// in this condition, the experiment has never executed
 		nextStart = now
