@@ -18,17 +18,7 @@ set -eu
 cur=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 cd $cur
 
-echo "deploy localstack as mock aws server"
-
-pip install awscli
-helm repo add localstack-repo http://helm.localstack.cloud
-helm upgrade --install localstack localstack-repo/localstack
-
-NODE_PORT=$(kubectl get --namespace default -o jsonpath="{.spec.ports[0].nodePort}" services localstack)
-NODE_IP=$(kubectl get nodes --namespace default -o jsonpath="{.items[0].status.addresses[0].address}")
-LOCALSTACK_SERVER="http:\/\/$NODE_IP\:$NODE_PORT"
-
-# wait pod status to running
+# wait localstash pod status to running
 for ((k=0; k<30; k++)); do
     kubectl get pods --namespace default > pods.status
     cat pods.status
@@ -43,6 +33,10 @@ for ((k=0; k<30; k++)); do
 done
 
 kubectl port-forward svc/localstack 4566:4566 &
+
+NODE_PORT=$(kubectl get --namespace default -o jsonpath="{.spec.ports[0].nodePort}" services localstack)
+NODE_IP=$(kubectl get nodes --namespace default -o jsonpath="{.items[0].status.addresses[0].address}")
+LOCALSTACK_SERVER="http:\/\/$NODE_IP\:$NODE_PORT"
 
 aws configure set aws_access_key_id test
 aws configure set aws_secret_access_key test
