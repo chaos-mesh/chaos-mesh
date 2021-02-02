@@ -164,6 +164,8 @@ echo "***** list events *****"
 echo "all token can list events under namespace busybox"
 REQUEST BUSYBOX_VIEW_TOKEN_LIST[@] "GET" "/api/events?namespace=busybox" "list_event.out" "ci-test"
 
+EVENT_ID=`cat list_event.out | sed 's/.*\"id\":\([0-9]*\).*/\1/g'`
+
 echo "cluster manager and viewer can list events in the cluster"
 REQUEST CLUSTER_VIEW_TOKEN_LIST[@] "GET" "/api/events" "list_event.out" "ci-test"
 
@@ -175,7 +177,7 @@ REQUEST CLUSTER_VIEW_FORBIDDEN_TOKEN_LIST[@] "GET" "/api/events?namespace=defaul
 echo "***** list dry events *****"
 
 echo "all token can list dry events under namespace busybox"
-REQUEST BUSYBOX_VIEW_TOKEN_LIST[@] "GET" "/api/events?namespace=busybox" "list_dry_event.out" "ci-test"
+REQUEST BUSYBOX_VIEW_TOKEN_LIST[@] "GET" "/api/events/dry?namespace=busybox" "list_dry_event.out" "ci-test"
 
 echo "cluster manager and viewer can list dry events in the cluster"
 REQUEST CLUSTER_VIEW_TOKEN_LIST[@] "GET" "/api/events/dry" "list_dry_event.out" "ci-test"
@@ -188,14 +190,14 @@ REQUEST CLUSTER_VIEW_FORBIDDEN_TOKEN_LIST[@] "GET" "/api/events/dry?namespace=de
 echo "***** get event by id *****"
 
 echo "all token can get event under namespace busybox"
-REQUEST BUSYBOX_VIEW_TOKEN_LIST[@] "GET" "/api/events/get?id=1&namespace=busybox" "get_event.out" "experiment_id"
+REQUEST BUSYBOX_VIEW_TOKEN_LIST[@] "GET" "/api/events/get?id=$EVENT_ID&namespace=busybox" "get_event.out" "experiment_id"
 
 echo "cluster manager and viewer can get event in the cluster"
-REQUEST CLUSTER_VIEW_TOKEN_LIST[@] "GET" "/api/events/get?id=1" "get_event.out" "experiment_id"
+REQUEST CLUSTER_VIEW_TOKEN_LIST[@] "GET" "/api/events/get?id=$EVENT_ID" "get_event.out" "experiment_id"
 
 echo "busybox manager and viewer is forbidden to get event in the cluster or other namespace"
-REQUEST CLUSTER_VIEW_FORBIDDEN_TOKEN_LIST[@] "GET" "/api/events/get?id=1" "get_event.out" "can't list"
-REQUEST CLUSTER_VIEW_FORBIDDEN_TOKEN_LIST[@] "GET" "/api/events/get?id=1&namespace=default" "get_event.out" "can't list"
+REQUEST CLUSTER_VIEW_FORBIDDEN_TOKEN_LIST[@] "GET" "/api/events/get?id=$EVENT_ID" "get_event.out" "can't list"
+REQUEST CLUSTER_VIEW_FORBIDDEN_TOKEN_LIST[@] "GET" "/api/events/get?id=$EVENT_ID&namespace=default" "get_event.out" "can't list"
 
 
 echo "***** list archive chaos experiments *****"
