@@ -16,16 +16,18 @@ package cronjob
 import (
 	"context"
 	"fmt"
-	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	ctx "github.com/chaos-mesh/chaos-mesh/pkg/router/context"
+	"math"
+	"time"
+
 	"github.com/pingcap/errors"
 	"github.com/robfig/cron/v3"
 	apiError "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/apiserver/pkg/storage/names"
-	"math"
 	ctrl "sigs.k8s.io/controller-runtime"
-	"time"
+
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	ctx "github.com/chaos-mesh/chaos-mesh/pkg/router/context"
 )
 
 // Reconciler for the twophase reconciler
@@ -87,7 +89,7 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 			r.shouldUpdate = true
 			r.CronJob.SetActiveJob(&types.NamespacedName{
 				Namespace: req.Namespace,
-				Name: name,
+				Name:      name,
 			})
 		} else {
 			r.Log.Info("skip this iteration as the job is still running or the cronjob is paused")
@@ -181,9 +183,9 @@ func (r *Reconciler) syncActiveJob(ctx context.Context) (v1alpha1.Job, error) {
 			r.shouldUpdate = true
 			r.CronJob.SetActiveJob(nil)
 			return nil, nil
-		} else {
-			return nil, err
 		}
+
+		return nil, err
 	}
 
 	// synchronise status from job to the cronjob
@@ -208,7 +210,7 @@ func calcRequeueAfterTime(chaos v1alpha1.InnerSchedulerObject, now time.Time) (t
 
 	var err error
 	if requeueAfter == math.MaxInt64 {
-		err = errors.Errorf("unexpected behavior, now is greater than nextRecover and nextStart", "now", now, "nextRecover", chaos.GetNextRecover(), "nextStart", chaos.GetNextStart())
+		err = errors.Errorf("unexpected behavior, now is greater than nextRecover and nextStart")
 	}
 
 	return requeueAfter, err
