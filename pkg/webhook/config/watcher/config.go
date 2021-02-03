@@ -20,17 +20,17 @@ import (
 // Config is a configuration struct for the Watcher type
 type Config struct {
 	// ClusterScoped means control Chaos Object in cluster level(all namespace);
-	ClusterScoped bool `envconfig:"CLUSTER_SCOPED" default:"true"`
+	ClusterScoped bool `mapstructure:"cluster_scoped" default:"true"`
 	// TemplateNamespace is the namespace which holds the template configmap.
 	// If controller-manager is running with in-cluster mode. If is set to empty string, it will be overwrite to namespace which the pod belongs.
-	TemplateNamespace string `envconfig:"TEMPLATE_NAMESPACE" default:""`
+	TemplateNamespace string `mapstructure:"template_namespace" default:""`
 	// TargetNamespace means configmaps in this namespace will be controlled by this controller.
 	// It SHOULD be the same with TargetNamespace in config.ChaosControllerConfig while clusterScoped is false.
-	TargetNamespace string `envconfig:"TARGET_NAMESPACE" default:""`
+	TargetNamespace string `mapstructure:"target_namespace" default:""`
 	// TemplateLabels is label pairs used to discover common templates in Kubernetes. These should be key1:value[,key2:val2,...]
-	TemplateLabels map[string]string `envconfig:"TEMPLATE_LABELS"`
+	TemplateLabels map[string]string `mapstructure:"template_labels"`
 	// ConfigLabels is label pairs used to discover ConfigMaps in Kubernetes. These should be key1:value[,key2:val2,...]
-	ConfigLabels map[string]string `envconfig:"CONFIGMAP_LABELS"`
+	ConfigLabels map[string]string `mapstructure:"configmap_labels"`
 }
 
 // NewConfig returns a new initialized Config

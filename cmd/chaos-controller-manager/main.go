@@ -24,7 +24,7 @@ import (
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	apiWebhook "github.com/chaos-mesh/chaos-mesh/api/webhook"
-	ccfg "github.com/chaos-mesh/chaos-mesh/controllers/config"
+	ccfg "github.com/chaos-mesh/chaos-mesh/pkg/config"
 	"github.com/chaos-mesh/chaos-mesh/controllers/metrics"
 	"github.com/chaos-mesh/chaos-mesh/controllers/podiochaos"
 	"github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos"

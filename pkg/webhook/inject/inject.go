@@ -25,7 +25,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/selector"
 	"github.com/chaos-mesh/chaos-mesh/pkg/webhook/config"
 
-	ccfg "github.com/chaos-mesh/chaos-mesh/controllers/config"
+	ccfg "github.com/chaos-mesh/chaos-mesh/pkg/config"
 
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"

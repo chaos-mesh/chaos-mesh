@@ -1,0 +1,38 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  namespace: {{ .Release.Namespace }}
+  name: chaos-controller-manager-config
+data:
+  config.yaml: |
+    namespace: {{ .Release.Namespace }}
+
+    chaos_daemon_port: 31767
+
+    allow_host_network_testing: {{ .Values.controllerManager.allowHostNetworkTesting }}
+    target_namespace: {{ .Values.controllerManager.targetNamespace }}
+    cluster_scoped: {{ .Values.clusterScoped }}
+    chaos_daemon_port: !!str {{ .Values.chaosDaemon.grpcPort }}
+    bpfki_port: !!str {{ .Values.bpfki.grpcPort }}
+
+    {{- if .Values.controllerManager.allowedNamespaces }}
+    allowed_namespaces: {{ .Values.controllerManager.allowedNamespaces }}
+    {{- end }}
+    {{- if .Values.controllerManager.ignoredNamespaces }}
+    ignored_namespaces: {{ .Values.controllerManager.ignoredNamespaces }}
+    {{- end }}
+
+    chaos_dns_service_name: {{ .Values.dnsServer.name }}
+    chaos_dns_service_port: !!str {{ .Values.dnsServer.grpcPort }}
+
+    {{- if .Values.enableProfiling }}
+    pprof_addr: ":10081"
+    {{- end }}
+
+    watcher_config:
+      cluster_scoped: {{ .Values.clusterScoped }}
+      template_namespace: {{ .Release.Namespace }}
+      template_labels:
+        "app.kubernetes.io/component": template
+      configmap_labels:
+        "app.kubernetes.io/component": webhook

@@ -44,50 +44,14 @@ spec:
         command:
           - /usr/local/bin/chaos-controller-manager
         env:
-          - name: NAMESPACE
-            valueFrom:
-              fieldRef:
-                fieldPath: metadata.namespace
-          - name: TEMPLATE_NAMESPACE
-            valueFrom:
-              fieldRef:
-                fieldPath: metadata.namespace
-          - name: ALLOW_HOST_NETWORK_TESTING
-            value: "{{ .Values.controllerManager.allowHostNetworkTesting }}"
-          - name: TARGET_NAMESPACE
-            value: {{ .Values.controllerManager.targetNamespace }}
-          - name: CLUSTER_SCOPED
-            value: "{{ .Values.clusterScoped }}"
           - name: TZ
             value: {{ .Values.timezone | default "UTC" }}
-          - name: CHAOS_DAEMON_PORT
-            value: !!str {{ .Values.chaosDaemon.grpcPort }}
-          - name: BPFKI_PORT
-            value: !!str {{ .Values.bpfki.grpcPort }}
-          - name: TEMPLATE_LABELS
-            value: "app.kubernetes.io/component:template"
-          - name: CONFIGMAP_LABELS
-            value: "app.kubernetes.io/component:webhook"
-          {{- if .Values.controllerManager.allowedNamespaces }}
-          - name: ALLOWED_NAMESPACES
-            value: {{ .Values.controllerManager.allowedNamespaces }}
-          {{- end }}
-          {{- if .Values.controllerManager.ignoredNamespaces }}
-          - name: IGNORED_NAMESPACES
-            value: {{ .Values.controllerManager.ignoredNamespaces }}
-          {{- end }}
-          {{- if .Values.enableProfiling }}
-          - name: PPROF_ADDR
-            value: ":10081"
-          {{- end }}
-          - name: CHAOS_DNS_SERVICE_NAME
-            value: {{ .Values.dnsServer.name }}
-          - name: CHAOS_DNS_SERVICE_PORT
-            value: !!str {{ .Values.dnsServer.grpcPort }}
         volumeMounts:
           - name: webhook-certs
             mountPath: /etc/webhook/certs
             readOnly: true
+          - name: config
+            mountPath: /etc/chaos-mesh
         ports:
           - name: webhook
             containerPort: 9443 # Customize containerPort
@@ -98,6 +62,9 @@ spec:
             containerPort: 10081
         {{- end }}
       volumes:
+        - name: config
+          configMap:
+            name: chaos-controller-manager-config
         - name: webhook-certs
           secret:
             secretName: {{ template "chaos-mesh.certs" . }}

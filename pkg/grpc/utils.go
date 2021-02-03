@@ -16,6 +16,7 @@ package grpc
 import (
 	"context"
 	"fmt"
+	"os"
 	"time"
 
 	"github.com/pkg/errors"
@@ -23,8 +24,6 @@ import (
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
-
-	"github.com/chaos-mesh/chaos-mesh/controllers/config"
 
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
@@ -42,7 +41,7 @@ func CreateGrpcConnection(ctx context.Context, c client.Client, pod *v1.Pod, por
 	nodeName := pod.Spec.NodeName
 	log.Info("Creating client to chaos-daemon", "node", nodeName)
 
-	ns := config.ControllerCfg.Namespace
+	ns := os.Getenv("NAMESPACE")
 	var endpoints v1.Endpoints
 	err := c.Get(ctx, types.NamespacedName{
 		Namespace: ns,

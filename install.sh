@@ -938,6 +938,36 @@ data:
   tls.crt: "${TLS_CRT}"
   tls.key: "${TLS_KEY}"
 ---
+# Source: chaos-mesh/templates/controller-manager-configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  namespace: chaos-testing
+  name: chaos-controller-manager-config
+data:
+  config.yaml: |
+    namespace: chaos-testing
+
+    chaos_daemon_port: 31767
+
+    allow_host_network_testing: false
+    target_namespace: chaos-testing
+    cluster_scoped: true
+    chaos_daemon_port: !!str 31767
+    bpfki_port: !!str 50051
+
+    chaos_dns_service_name: chaos-mesh-dns-server
+    chaos_dns_service_port: !!str 9288
+    pprof_addr: ":10081"
+
+    watcher_config:
+      cluster_scoped: true
+      template_namespace: chaos-testing
+      template_labels:
+        "app.kubernetes.io/component": template
+      configmap_labels:
+        "app.kubernetes.io/component": webhook
+---
 # Source: chaos-mesh/templates/controller-manager-rbac.yaml
 # roles
 kind: ClusterRole
@@ -1312,40 +1342,14 @@ spec:
         command:
           - /usr/local/bin/chaos-controller-manager
         env:
-          - name: NAMESPACE
-            valueFrom:
-              fieldRef:
-                fieldPath: metadata.namespace
-          - name: TEMPLATE_NAMESPACE
-            valueFrom:
-              fieldRef:
-                fieldPath: metadata.namespace
-          - name: ALLOW_HOST_NETWORK_TESTING
-            value: "false"
-          - name: TARGET_NAMESPACE
-            value: chaos-testing
-          - name: CLUSTER_SCOPED
-            value: "true"
           - name: TZ
             value: ${timezone}
-          - name: CHAOS_DAEMON_PORT
-            value: !!str 31767
-          - name: BPFKI_PORT
-            value: !!str 50051
-          - name: TEMPLATE_LABELS
-            value: "app.kubernetes.io/component:template"
-          - name: CONFIGMAP_LABELS
-            value: "app.kubernetes.io/component:webhook"
-          - name: PPROF_ADDR
-            value: ":10081"
-          - name: CHAOS_DNS_SERVICE_NAME
-            value: chaos-mesh-dns-server
-          - name: CHAOS_DNS_SERVICE_PORT
-            value: !!str 9288
         volumeMounts:
           - name: webhook-certs
             mountPath: /etc/webhook/certs
             readOnly: true
+          - name: config
+            mountPath: /etc/chaos-mesh
         ports:
           - name: webhook
             containerPort: 9443 # Customize containerPort
@@ -1354,6 +1358,9 @@ spec:
           - name: pprof
             containerPort: 10081
       volumes:
+        - name: config
+          configMap:
+            name: chaos-controller-manager-config
         - name: webhook-certs
           secret:
             secretName: chaos-mesh-webhook-certs

@@ -19,6 +19,7 @@ require (
 	github.com/docker/go-connections v0.4.0 // indirect
 	github.com/docker/go-events v0.0.0-20190806004212-e31b211e4f1c // indirect
 	github.com/fatih/color v1.9.0
+	github.com/fsnotify/fsnotify v1.4.7
 	github.com/ghodss/yaml v1.0.0
 	github.com/gin-contrib/pprof v1.3.0
 	github.com/gin-gonic/gin v1.6.3
@@ -39,6 +40,7 @@ require (
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/lib/pq v1.2.0 // indirect
 	github.com/mattn/go-runewidth v0.0.8 // indirect
+	github.com/mcuadros/go-defaults v1.2.0
 	github.com/mgechev/revive v1.0.2-0.20200225072153-6219ca02fffb
 	github.com/mitchellh/mapstructure v1.3.3
 	github.com/moby/locker v1.0.1
@@ -57,6 +59,7 @@ require (
 	github.com/shurcooL/vfsgen v0.0.0-20181202132449-6a9ea43bcacd
 	github.com/spf13/cobra v1.1.1
 	github.com/spf13/pflag v1.0.5
+	github.com/spf13/viper v1.7.0
 	github.com/stretchr/testify v1.4.0
 	github.com/swaggo/files v0.0.0-20190704085106-630677cd5c14
 	github.com/swaggo/gin-swagger v1.2.0
