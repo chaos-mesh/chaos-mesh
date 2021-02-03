@@ -23,9 +23,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/pkg/errors"
-
 	"github.com/fatih/color"
+	"github.com/pkg/errors"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/kubernetes"
@@ -39,7 +38,6 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
 	"github.com/chaos-mesh/chaos-mesh/pkg/portforward"
 	"github.com/chaos-mesh/chaos-mesh/pkg/selector"
-	e2econfig "github.com/chaos-mesh/chaos-mesh/test/e2e/config"
 )
 
 type Color string
@@ -153,11 +151,15 @@ func MarshalChaos(s interface{}) (string, error) {
 
 // InitClientSet inits two different clients that would be used
 func InitClientSet() (*ClientSet, error) {
-	ctrlClient, err := client.New(config.GetConfigOrDie(), client.Options{Scheme: scheme})
+	restconfig, err := config.GetConfig()
+	if err != nil {
+		return nil, err
+	}
+	ctrlClient, err := client.New(restconfig, client.Options{Scheme: scheme})
 	if err != nil {
 		return nil, fmt.Errorf("failed to create client")
 	}
-	kubeClient, err := kubernetes.NewForConfig(config.GetConfigOrDie())
+	kubeClient, err := kubernetes.NewForConfig(restconfig)
 	if err != nil {
 		return nil, errors.Wrap(err, "error in getting acess to k8s")
 	}
@@ -330,11 +332,8 @@ func GetPidFromPod(ctx context.Context, pod v1.Pod, daemon v1.Pod) (uint32, erro
 }
 
 func forwardPorts(ctx context.Context, pod v1.Pod, port uint16) (context.CancelFunc, uint16, error) {
-	clientRawConfig, err := e2econfig.LoadClientRawConfig()
-	if err != nil {
-		return nil, 0, errors.Wrap(err, "failed to load raw config")
-	}
-	fw, err := portforward.NewPortForwarder(ctx, e2econfig.NewSimpleRESTClientGetter(clientRawConfig), false)
+	commonRestClientGetter := NewCommonRestClientGetter()
+	fw, err := portforward.NewPortForwarder(ctx, commonRestClientGetter, false)
 	if err != nil {
 		return nil, 0, errors.Wrap(err, "failed to create port forwarder")
 	}
