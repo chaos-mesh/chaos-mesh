@@ -15,17 +15,18 @@ package config
 
 import (
 	"fmt"
-	"github.com/fsnotify/fsnotify"
-	"github.com/mcuadros/go-defaults"
-	"github.com/spf13/viper"
 	"os"
 	"regexp"
-	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 	"strings"
 	"sync/atomic"
 	"time"
 	"unsafe"
+
+	"github.com/fsnotify/fsnotify"
+	"github.com/mcuadros/go-defaults"
+	"github.com/spf13/viper"
+	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/webhook/config/watcher"
 )
@@ -50,7 +51,7 @@ type ChaosControllerConfig struct {
 	// IgnoredNamespaces is a regular expression, and the chaos task will be ignored by a matching namespace
 	IgnoredNamespaces string `mapstructure:"ignored_namespaces" default:""`
 	// RPCTimeout is timeout of RPC between controllers and chaos-operator
-	RPCTimeout    time.Duration `mapstructure:"rpc_timeout" default:"1m"`
+	RPCTimeout    time.Duration   `mapstructure:"rpc_timeout" default:"1m"`
 	WatcherConfig *watcher.Config `mapstructure:"watcher_config"`
 	// ClusterScoped means control Chaos Object in cluster level(all namespace),
 	ClusterScoped bool `mapstructure:"cluster_scoped" default:"true"`

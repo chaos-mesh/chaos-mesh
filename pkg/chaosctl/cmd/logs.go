@@ -26,8 +26,8 @@ import (
 	"k8s.io/client-go/kubernetes"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	"github.com/chaos-mesh/chaos-mesh/pkg/config"
 	cm "github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/common"
+	"github.com/chaos-mesh/chaos-mesh/pkg/config"
 	"github.com/chaos-mesh/chaos-mesh/pkg/selector"
 )
 

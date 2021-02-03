@@ -24,10 +24,10 @@ import (
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	apiWebhook "github.com/chaos-mesh/chaos-mesh/api/webhook"
-	ccfg "github.com/chaos-mesh/chaos-mesh/pkg/config"
 	"github.com/chaos-mesh/chaos-mesh/controllers/metrics"
 	"github.com/chaos-mesh/chaos-mesh/controllers/podiochaos"
 	"github.com/chaos-mesh/chaos-mesh/controllers/podnetworkchaos"
+	ccfg "github.com/chaos-mesh/chaos-mesh/pkg/config"
 	grpcUtils "github.com/chaos-mesh/chaos-mesh/pkg/grpc"
 	"github.com/chaos-mesh/chaos-mesh/pkg/router"
 	"github.com/chaos-mesh/chaos-mesh/pkg/version"
