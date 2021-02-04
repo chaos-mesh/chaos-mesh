@@ -275,7 +275,7 @@ func TestcaseNetworkDelay(
 		map[string]string{"app": "network-peer-0"},
 		map[string]string{"partition": "0"}, // 0 -> even its partition (idx % 2)
 		v1alpha1.OnePodMode,
-		v1alpha1.OnePodMode,
+		v1alpha1.AllPodMode,
 		v1alpha1.Both,
 		testDelayTcParam,
 		testDelayDuration,
@@ -286,7 +286,7 @@ func TestcaseNetworkDelay(
 	framework.ExpectNoError(err, "create network chaos error")
 	wait.Poll(time.Second, 15*time.Second, func() (done bool, err error) {
 		result = probeNetworkCondition(c, networkPeers, ports)
-		if len(result[networkConditionBlocked]) != 0 || len(result[networkConditionSlow]) != 3 {
+		if len(result[networkConditionBlocked]) != 0 || len(result[networkConditionSlow]) != 2 {
 			return false, nil
 		}
 		return true, nil
