@@ -28,7 +28,7 @@ rules:
     resources: [ "endpoints" ]
     verbs: [ "get", "list", "watch" ]
   - apiGroups: [ "" ]
-    resources: [ "pods" ]
+    resources: [ "pods", "secrets" ]
     verbs: [ "get", "list", "watch", "delete", "update" ]
   - apiGroups:
       - ""

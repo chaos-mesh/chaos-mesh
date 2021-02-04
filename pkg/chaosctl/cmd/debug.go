@@ -36,8 +36,6 @@ type debugOptions struct {
 	namespace string
 }
 
-type chaosT int
-
 const (
 	networkChaos = "networkchaos"
 	stressChaos  = "stresschaos"

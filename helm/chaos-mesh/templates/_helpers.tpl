@@ -79,3 +79,10 @@ Define the webhook's name
 {{- define "chaos-mesh.webhook" -}}
 {{- printf "admission-webhook.chaos-mesh.org" -}}
 {{- end -}}
+
+{{/*
+Define the prefix of
+*/}}
+{{- define "registry-prefix" -}}
+{{if .Values.registry}}{{.Values.registry}}/{{end}}
+{{- end -}}

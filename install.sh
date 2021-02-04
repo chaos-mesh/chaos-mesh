@@ -953,7 +953,7 @@ rules:
     resources: [ "endpoints" ]
     verbs: [ "get", "list", "watch" ]
   - apiGroups: [ "" ]
-    resources: [ "pods" ]
+    resources: [ "pods", "secrets" ]
     verbs: [ "get", "list", "watch", "delete", "update" ]
   - apiGroups:
       - ""
@@ -1181,16 +1181,10 @@ spec:
             - name: TZ
               value: ${timezone}
           securityContext:
+            privileged: true
             capabilities:
               add:
                 - SYS_PTRACE
-                - NET_ADMIN
-                - MKNOD
-                - SYS_CHROOT
-                - SYS_ADMIN
-                - KILL
-                # CAP_IPC_LOCK is used to lock memory
-                - IPC_LOCK
           volumeMounts:
             - name: socket-path
               mountPath: ${mountPath}
@@ -1258,11 +1252,13 @@ spec:
               value: "2333"
             - name: TZ
               value: ${timezone}
-            - name: TARGET_NAMESPACE
-              value: chaos-testing
             - name: CLUSTER_SCOPED
               value: "true"
+            - name: TARGET_NAMESPACE
+              value: chaos-testing
             - name: SECURITY_MODE
+              value: "false"
+            - name: DNS_SERVER_CREATE
               value: "false"
           volumeMounts:
             - name: storage-volume
@@ -1501,6 +1497,24 @@ webhooks:
       service:
         name: chaos-mesh-controller-manager
         namespace: chaos-testing
+        path: /mutate-chaos-mesh-org-v1alpha1-awschaos
+    failurePolicy: Fail
+    name: mawschaos.kb.io
+    rules:
+      - apiGroups:
+          - chaos-mesh.org
+        apiVersions:
+          - v1alpha1
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - awschaos
+  - clientConfig:
+      caBundle: "${CA_BUNDLE}"
+      service:
+        name: chaos-mesh-controller-manager
+        namespace: chaos-testing
         path: /mutate-chaos-mesh-org-v1alpha1-podiochaos
     failurePolicy: Fail
     name: mpodiochaos.kb.io
@@ -1687,6 +1701,24 @@ webhooks:
           - UPDATE
         resources:
           - stresschaos
+  - clientConfig:
+      caBundle: "${CA_BUNDLE}"
+      service:
+        name: chaos-mesh-controller-manager
+        namespace: chaos-testing
+        path: /validate-chaos-mesh-org-v1alpha1-awschaos
+    failurePolicy: Fail
+    name: vawschaos.kb.io
+    rules:
+      - apiGroups:
+          - chaos-mesh.org
+        apiVersions:
+          - v1alpha1
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - awschaos
   - clientConfig:
       caBundle: "${CA_BUNDLE}"
       service:

@@ -309,7 +309,7 @@ func (c *K8sConfigMapWatcher) GetConfigs() ([]*config.TemplateArgs, error) {
 	if c.metrics != nil {
 		c.metrics.ConfigTemplates.Reset()
 	}
-	configSet := make(map[string]map[string]struct{}, 0)
+	configSet := make(map[string]map[string]struct{})
 	result := make([]*config.TemplateArgs, 0)
 	for _, item := range configList.Items {
 		for _, payload := range item.Data {

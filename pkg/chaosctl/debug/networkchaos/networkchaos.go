@@ -97,7 +97,7 @@ func debugEachPod(ctx context.Context, pod v1.Pod, daemon v1.Pod, chaos *v1alpha
 
 		netemCurrent := regexp.MustCompile("(?:limit 1000)(.*)").FindStringSubmatch(string(out))
 		if len(netemCurrent) == 0 {
-			return fmt.Errorf("No NetworkChaos is applied")
+			return fmt.Errorf("no NetworkChaos is applied")
 		}
 		for i, netem := range strings.Fields(netemCurrent[1]) {
 			itemCurrent := netem
