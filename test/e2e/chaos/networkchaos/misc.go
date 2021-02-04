@@ -175,6 +175,7 @@ func makeNetworkDelayChaos(
 			Duration:    duration,
 			Scheduler:   schedulerSpec,
 			Target:      target,
+			Direction:   direction,
 		},
 	}
 }
