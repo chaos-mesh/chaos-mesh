@@ -128,7 +128,10 @@ func (r *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.I
 			return err
 		}
 	case v1alpha1.Both:
-		err = r.applyTc(ctx, pods, pods, externalCidrs, m, networkchaos)
+		if len(targets) > 0 {
+			targets = pods
+		}
+		err = r.applyTc(ctx, pods, targets, externalCidrs, m, networkchaos)
 		if err != nil {
 			r.Log.Error(err, "failed to apply traffic control", "sources", pods, "targets", pods)
 			return err
