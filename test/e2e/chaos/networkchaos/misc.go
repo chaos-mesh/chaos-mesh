@@ -145,7 +145,7 @@ func makeNetworkPartitionChaos(
 
 func makeNetworkDelayChaos(
 	namespace, name string, fromLabelSelectors, toLabelSelectors map[string]string,
-	fromPodMode, toPodMode v1alpha1.PodMode, tcparam v1alpha1.TcParameter, duration *string,
+	fromPodMode, toPodMode v1alpha1.PodMode, direction v1alpha1.Direction, tcparam v1alpha1.TcParameter, duration *string,
 	schedulerSpec *v1alpha1.SchedulerSpec,
 ) *v1alpha1.NetworkChaos {
 	var target *v1alpha1.Target
