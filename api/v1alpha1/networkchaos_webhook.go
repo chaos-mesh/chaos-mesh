@@ -151,7 +151,7 @@ func (in *NetworkChaos) ValidateTargets(target *field.Path) field.ErrorList {
 	if in.Spec.Direction == From && in.Spec.ExternalTargets == nil && in.Spec.Target == nil {
 		allErrs = append(allErrs,
 			field.Invalid(target.Child("direction"), in.Spec.Direction,
-				fmt.Sprintf("`from` direction cannot be used with empty target and empty ExternalTargets")))
+				fmt.Sprintf("`from` direction cannot be used when targets and external targets are both empty")))
 	}
 
 	// TODO: validate externalTargets are in ip or domain form
