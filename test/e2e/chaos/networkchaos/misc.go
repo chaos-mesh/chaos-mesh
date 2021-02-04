@@ -180,7 +180,7 @@ func makeNetworkDelayChaos(
 	}
 }
 
-func probeNetworkCondition(c http.Client, peers []*corev1.Pod, ports []uint16) map[string][][]int {
+func probeNetworkCondition(c http.Client, peers []*corev1.Pod, ports []uint16, bidirection bool) map[string][][]int {
 	result := make(map[string][][]int)
 
 	testDelay := func(from int, to int) (int64, error) {
@@ -188,7 +188,15 @@ func probeNetworkCondition(c http.Client, peers []*corev1.Pod, ports []uint16) m
 	}
 
 	for source := 0; source < len(peers); source++ {
-		for target := source + 1; target < len(peers); target++ {
+		initialTarget := source + 1
+		if bidirection {
+			initialTarget = 0
+		}
+		for target := initialTarget; target < len(peers); target++ {
+			if target == source {
+				continue
+			}
+
 			connectable := true
 
 			var (
