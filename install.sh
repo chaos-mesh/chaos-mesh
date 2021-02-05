@@ -1255,7 +1255,7 @@ spec:
             - name: CLUSTER_SCOPED
               value: "true"
             - name: TARGET_NAMESPACE
-              value: chaos-testing
+              value: "chaos-testing"
             - name: SECURITY_MODE
               value: "false"
             - name: DNS_SERVER_CREATE
@@ -1323,7 +1323,7 @@ spec:
           - name: ALLOW_HOST_NETWORK_TESTING
             value: "false"
           - name: TARGET_NAMESPACE
-            value: chaos-testing
+            value: "chaos-testing"
           - name: CLUSTER_SCOPED
             value: "true"
           - name: TZ

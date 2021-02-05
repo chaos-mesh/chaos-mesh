@@ -55,7 +55,7 @@ spec:
           - name: ALLOW_HOST_NETWORK_TESTING
             value: "{{ .Values.controllerManager.allowHostNetworkTesting }}"
           - name: TARGET_NAMESPACE
-            value: {{ .Values.controllerManager.targetNamespace }}
+            value: {{ .Values.controllerManager.targetNamespace | quote }}
           - name: CLUSTER_SCOPED
             value: "{{ .Values.clusterScoped }}"
           - name: TZ

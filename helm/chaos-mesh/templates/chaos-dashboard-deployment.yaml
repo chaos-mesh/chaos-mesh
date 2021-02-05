@@ -52,7 +52,7 @@ spec:
             - name: CLUSTER_SCOPED
               value: "{{ .Values.clusterScoped }}"
             - name: TARGET_NAMESPACE
-              value: {{ .Values.controllerManager.targetNamespace }}
+              value: {{ .Values.controllerManager.targetNamespace | quote }}
             {{- if .Values.controllerManager.allowedNamespaces }}
             - name: ALLOWED_NAMESPACES
               value: {{ .Values.controllerManager.allowedNamespaces }}
