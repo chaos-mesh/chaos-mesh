@@ -1011,7 +1011,7 @@ kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: chaos-mesh-chaos-controller-manager-target-namespace
-  namespace: chaos-testing
+  namespace: "chaos-testing"
   labels:
     app.kubernetes.io/name: chaos-mesh
     app.kubernetes.io/instance: chaos-mesh
