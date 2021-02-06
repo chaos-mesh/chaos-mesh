@@ -2,7 +2,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  namespace: {{ .Release.Namespace }}
+  namespace: {{ .Release.Namespace | quote }}
   name: chaos-dashboard
   labels:
     app.kubernetes.io/name: {{ template "chaos-mesh.name" . }}
@@ -52,7 +52,7 @@ spec:
             - name: CLUSTER_SCOPED
               value: "{{ .Values.clusterScoped }}"
             - name: TARGET_NAMESPACE
-              value: {{ .Values.controllerManager.targetNamespace }}
+              value: {{ .Values.controllerManager.targetNamespace | quote }}
             {{- if .Values.controllerManager.allowedNamespaces }}
             - name: ALLOWED_NAMESPACES
               value: {{ .Values.controllerManager.allowedNamespaces }}
@@ -96,7 +96,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  namespace: {{ .Release.Namespace }}
+  namespace: {{ .Release.Namespace | quote }}
   name: {{ template "chaos-dashboard.svc" . }}
   labels:
     app.kubernetes.io/name: {{ template "chaos-mesh.name" . }}
