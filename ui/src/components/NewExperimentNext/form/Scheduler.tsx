@@ -79,12 +79,7 @@ const Scheduler: React.FC<SchedulerProps> = ({ errors, touched }) => {
                   id="newE.schedule.tooltip"
                   values={{
                     cronv3: (
-                      <Link
-                        href="https://pkg.go.dev/github.com/robfig/cron/v3"
-                        target="_blank"
-                        style={{ color: 'white' }}
-                        underline="always"
-                      >
+                      <Link href="https://pkg.go.dev/github.com/robfig/cron/v3" target="_blank">
                         https://pkg.go.dev/github.com/robfig/cron/v3
                       </Link>
                     ),
@@ -92,7 +87,6 @@ const Scheduler: React.FC<SchedulerProps> = ({ errors, touched }) => {
                 />
               </Typography>
             }
-            arrow
             interactive
           >
             <HelpOutlineIcon fontSize="small" />

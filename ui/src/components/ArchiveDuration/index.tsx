@@ -1,6 +1,5 @@
 import {
   Box,
-  Paper,
   Step,
   StepConnector,
   StepIconProps,
@@ -14,11 +13,12 @@ import {
 } from '@material-ui/core'
 
 import Check from '@material-ui/icons/Check'
+import Paper from 'components-mui/Paper'
 import React from 'react'
 import { RootState } from 'store'
 import T from 'components/T'
 import clsx from 'clsx'
-import { format } from 'lib/dayjs'
+import { format } from 'lib/luxon'
 import { useSelector } from 'react-redux'
 
 const QontoConnector = withStyles((theme) => ({
@@ -87,7 +87,7 @@ const ArchiveDuration: React.FC<{ start: string; end: string }> = ({ start, end 
   const steps = [format(start, lang), format(end, lang)]
 
   return (
-    <Paper variant="outlined">
+    <Paper>
       <Box display="flex" flexDirection="column" justifyContent="center" alignItems="center" height="100px" my={6}>
         <Typography variant="overline">{T('newE.schedule.duration')}</Typography>
         <Box width="100%" mt={6}>

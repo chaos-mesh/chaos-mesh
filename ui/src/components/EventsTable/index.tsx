@@ -13,7 +13,7 @@ import {
   TableSortLabel,
 } from '@material-ui/core'
 import React, { useImperativeHandle, useState } from 'react'
-import { dayComparator, format } from 'lib/dayjs'
+import { comparator, format } from 'lib/luxon'
 import { useHistory, useLocation } from 'react-router-dom'
 
 import CloseIcon from '@material-ui/icons/Close'
@@ -44,14 +44,14 @@ const useStyles = makeStyles({
 
 function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
   if (['CreateAt', 'UpdateAt', 'StartTime', 'EndTime'].includes(orderBy as string)) {
-    return dayComparator(a[orderBy] as any, b[orderBy] as any)
+    return comparator(a[orderBy] as any, b[orderBy] as any)
   }
 
-  if (b[orderBy] < a[orderBy]) {
+  if (a[orderBy] > b[orderBy]) {
     return -1
   }
 
-  if (b[orderBy] > a[orderBy]) {
+  if (a[orderBy] < b[orderBy]) {
     return 1
   }
 
