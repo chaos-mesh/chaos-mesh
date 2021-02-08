@@ -94,6 +94,7 @@ export default function gen({
     .scaleLinear()
     .range([margin.left, width - margin.right])
     .domain([halfHourLater.minus({ hours: 1 }), halfHourLater])
+  let newX = x
   const xAxis = d3
     .axisBottom(x)
     .ticks(6)
@@ -238,7 +239,7 @@ export default function gen({
       .selectAll('circle')
       .data(events)
       .join((enter) => {
-        const newCx = (d: Event) => x(DateTime.fromISO(d.start_time))
+        const newCx = (d: Event) => newX(DateTime.fromISO(d.start_time))
 
         return enter
           .append('circle')
@@ -278,7 +279,7 @@ export default function gen({
       .on('mouseleave', () => tooltip.style('opacity', 0).style('z-index', -1))
 
     function zoomed({ transform }: d3.D3ZoomEvent<SVGSVGElement, unknown>) {
-      const newX = transform.rescaleX(x)
+      newX = transform.rescaleX(x)
 
       gXAxis.call(xAxis.scale(newX))
       gXAxis.selectAll('.tick text').call(wrapText, 30)
