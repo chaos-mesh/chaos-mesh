@@ -1,4 +1,4 @@
-import { Box, Button, Grid, Grow, Modal } from '@material-ui/core'
+import { Button, Grid, Grow, Modal } from '@material-ui/core'
 import EventsTable, { EventsTableHandles } from 'components/EventsTable'
 import React, { useEffect, useRef, useState } from 'react'
 import { RootState, useStoreDispatch } from 'store'
@@ -305,7 +305,7 @@ export default function ExperimentDetail() {
                   </Button>
                 </Space>
               </PaperTop>
-              <Box p={3}>{detail && <ExperimentConfiguration experimentDetail={detail} />}</Box>
+              {detail && <ExperimentConfiguration experimentDetail={detail} />}
             </Paper>
           </Grid>
 
