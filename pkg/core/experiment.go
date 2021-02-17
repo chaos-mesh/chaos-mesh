@@ -18,6 +18,8 @@ import (
 	"encoding/json"
 	"time"
 
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 )
 
@@ -109,11 +111,12 @@ type ScopeInfo struct {
 
 // SelectorInfo defines the selector options of the Experiment.
 type SelectorInfo struct {
-	NamespaceSelectors  []string          `json:"namespace_selectors" binding:"NamespaceSelectorsValid"`
-	LabelSelectors      map[string]string `json:"label_selectors" binding:"MapSelectorsValid"`
-	AnnotationSelectors map[string]string `json:"annotation_selectors" binding:"MapSelectorsValid"`
-	FieldSelectors      map[string]string `json:"field_selectors" binding:"MapSelectorsValid"`
-	PhaseSelector       []string          `json:"phase_selectors" binding:"PhaseSelectorsValid"`
+	NamespaceSelectors  []string                          `json:"namespace_selectors" binding:"NamespaceSelectorsValid"`
+	LabelSelectors      map[string]string                 `json:"label_selectors" binding:"MapSelectorsValid"`
+	ExpressionSelectors []metav1.LabelSelectorRequirement `json:"expression_selectors" binding:"RequirementSelectorsValid"`
+	AnnotationSelectors map[string]string                 `json:"annotation_selectors" binding:"MapSelectorsValid"`
+	FieldSelectors      map[string]string                 `json:"field_selectors" binding:"MapSelectorsValid"`
+	PhaseSelector       []string                          `json:"phase_selectors" binding:"PhaseSelectorsValid"`
 
 	// Pods is a map of string keys and a set values that used to select pods.
 	// The key defines the namespace which pods belong,
@@ -124,15 +127,14 @@ type SelectorInfo struct {
 // ParseSelector parses SelectorInfo to v1alpha1.SelectorSpec
 func (s *SelectorInfo) ParseSelector() v1alpha1.SelectorSpec {
 	selector := v1alpha1.SelectorSpec{}
-
-	for _, ns := range s.NamespaceSelectors {
-		selector.Namespaces = append(selector.Namespaces, ns)
-	}
+	selector.Namespaces = append(selector.Namespaces, s.NamespaceSelectors...)
 
 	selector.LabelSelectors = make(map[string]string)
 	for key, val := range s.LabelSelectors {
 		selector.LabelSelectors[key] = val
 	}
+
+	selector.ExpressionSelectors = append(selector.ExpressionSelectors, s.ExpressionSelectors...)
 
 	selector.AnnotationSelectors = make(map[string]string)
 	for key, val := range s.AnnotationSelectors {
@@ -144,9 +146,7 @@ func (s *SelectorInfo) ParseSelector() v1alpha1.SelectorSpec {
 		selector.FieldSelectors[key] = val
 	}
 
-	for _, ph := range s.PhaseSelector {
-		selector.PodPhaseSelectors = append(selector.PodPhaseSelectors, ph)
-	}
+	selector.PodPhaseSelectors = append(selector.PodPhaseSelectors, s.PhaseSelector...)
 
 	if s.Pods != nil {
 		selector.Pods = s.Pods
@@ -177,6 +177,7 @@ type SchedulerInfo struct {
 type PodChaosInfo struct {
 	Action        string `json:"action" binding:"oneof='' 'pod-kill' 'pod-failure' 'container-kill'"`
 	ContainerName string `json:"container_name"`
+	GracePeriod   int64  `json:"grace_period"`
 }
 
 // NetworkChaosInfo defines the basic information of network chaos for creating a new NetworkChaos.
@@ -333,6 +334,26 @@ func (e *Experiment) ParseKernelChaos() (ExperimentYAMLDescription, error) {
 // ParseStressChaos Parse StressChaos JSON string into ExperimentYAMLDescription.
 func (e *Experiment) ParseStressChaos() (ExperimentYAMLDescription, error) {
 	chaos := &v1alpha1.StressChaos{}
+	if err := json.Unmarshal([]byte(e.Experiment), &chaos); err != nil {
+		return ExperimentYAMLDescription{}, err
+	}
+
+	return ExperimentYAMLDescription{
+		APIVersion: chaos.APIVersion,
+		Kind:       chaos.Kind,
+		Metadata: ExperimentYAMLMetadata{
+			Name:        chaos.Name,
+			Namespace:   chaos.Namespace,
+			Labels:      chaos.Labels,
+			Annotations: chaos.Annotations,
+		},
+		Spec: chaos.Spec,
+	}, nil
+}
+
+// ParseDNSChaos Parse DNSChaos JSON string into ExperimentYAMLDescription.
+func (e *Experiment) ParseDNSChaos() (ExperimentYAMLDescription, error) {
+	chaos := &v1alpha1.DNSChaos{}
 	if err := json.Unmarshal([]byte(e.Experiment), &chaos); err != nil {
 		return ExperimentYAMLDescription{}, err
 	}

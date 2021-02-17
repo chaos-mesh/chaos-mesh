@@ -23,3 +23,9 @@ yarn-debug.log*
 yarn-error.log*
 
 package-lock.json
+
+# eslint
+.eslintcache
+
+# ts-interface-builder
+*.type-ti.ts

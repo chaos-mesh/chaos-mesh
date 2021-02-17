@@ -9,7 +9,7 @@ kind: Secret
 apiVersion: v1
 metadata:
   name: {{ template "chaos-mesh.certs" . }}
-  namespace: {{ .Release.Namespace }}
+  namespace: {{ .Release.Namespace | quote }}
   labels:
     app.kubernetes.io/name: {{ template "chaos-mesh.name" . }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
@@ -47,7 +47,7 @@ webhooks:
       {{- end }}
       service:
         name: {{ template "chaos-mesh.svc" . }}
-        namespace: {{ .Release.Namespace }}
+        namespace: {{ .Release.Namespace | quote }}
         path: "/inject-v1-pod"
     rules:
       - operations: [ "CREATE" ]
@@ -67,7 +67,7 @@ webhooks:
       {{- end }}
       service:
         name: {{ template "chaos-mesh.svc" $ }}
-        namespace: {{ $.Release.Namespace }}
+        namespace: {{ $.Release.Namespace | quote }}
         path: /mutate-chaos-mesh-org-v1alpha1-{{ $crd }}
     failurePolicy: Fail
     name: m{{ $crd }}.kb.io
@@ -109,7 +109,7 @@ webhooks:
       {{- end }}
       service:
         name: {{ template "chaos-mesh.svc" $ }}
-        namespace: {{ $.Release.Namespace }}
+        namespace: {{ $.Release.Namespace | quote }}
         path: /validate-chaos-mesh-org-v1alpha1-{{ $crd }}
     failurePolicy: Fail
     name: v{{ $crd }}.kb.io
@@ -132,7 +132,7 @@ apiVersion: cert-manager.io/v1alpha2
 kind: Issuer
 metadata:
   name: chaos-mesh-selfsigned
-  namespace: {{ .Release.Namespace }}
+  namespace: {{ .Release.Namespace | quote }}
 spec:
   selfSigned: {}
 
@@ -141,7 +141,7 @@ apiVersion: cert-manager.io/v1alpha2
 kind: Certificate
 metadata:
   name: chaos-mesh-cert
-  namespace: {{ .Release.Namespace }}
+  namespace: {{ .Release.Namespace | quote }}
 spec:
   duration: 43800h #5year
   dnsNames:

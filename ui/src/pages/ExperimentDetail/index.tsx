@@ -1,4 +1,4 @@
-import { Box, Button, Grid, Grow, Modal, Paper } from '@material-ui/core'
+import { Box, Button, Grid, Grow, Modal } from '@material-ui/core'
 import EventsTable, { EventsTableHandles } from 'components/EventsTable'
 import React, { useEffect, useRef, useState } from 'react'
 import { RootState, useStoreDispatch } from 'store'
@@ -9,29 +9,34 @@ import { useHistory, useParams } from 'react-router-dom'
 import { Ace } from 'ace-builds'
 import Alert from '@material-ui/lab/Alert'
 import ArchiveOutlinedIcon from '@material-ui/icons/ArchiveOutlined'
+import CloudDownloadOutlinedIcon from '@material-ui/icons/CloudDownloadOutlined'
 import ConfirmDialog from 'components-mui/ConfirmDialog'
 import { Event } from 'api/events.type'
 import ExperimentConfiguration from 'components/ExperimentConfiguration'
 import { ExperimentDetail as ExperimentDetailType } from 'api/experiments.type'
 import Loading from 'components-mui/Loading'
 import NoteOutlinedIcon from '@material-ui/icons/NoteOutlined'
+import Paper from 'components-mui/Paper'
 import PaperTop from 'components-mui/PaperTop'
 import PauseCircleOutlineIcon from '@material-ui/icons/PauseCircleOutline'
 import PlayCircleOutlineIcon from '@material-ui/icons/PlayCircleOutline'
+import Space from 'components-mui/Space'
 import T from 'components/T'
-import YAMLEditor from 'components/YAMLEditor'
 import api from 'api'
+import fileDownload from 'js-file-download'
 import genEventsChart from 'lib/d3/eventsChart'
-import { getStateofExperiments } from 'slices/experiments'
+import loadable from '@loadable/component'
 import { useIntl } from 'react-intl'
 import { usePrevious } from 'lib/hooks'
 import { useSelector } from 'react-redux'
 import yaml from 'js-yaml'
 
+const YAMLEditor = loadable(() => import('components/YAMLEditor'))
+
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     eventsChart: {
-      height: 200,
+      height: 150,
       margin: theme.spacing(3),
     },
     eventDetailPaper: {
@@ -80,7 +85,7 @@ export default function ExperimentDetail() {
   const [dialogInfo, setDialogInfo] = useState({
     title: '',
     description: '',
-    action: 'delete',
+    action: 'archive',
   })
 
   const fetchExperimentDetail = () => {
@@ -123,7 +128,6 @@ export default function ExperimentDetail() {
         theme,
       })
     }
-
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [events])
 
@@ -132,17 +136,17 @@ export default function ExperimentDetail() {
 
   const handleAction = (action: string) => () => {
     switch (action) {
-      case 'delete':
+      case 'archive':
         setDialogInfo({
-          title: `${intl.formatMessage({ id: 'archives.single' })} ${detail!.name}?`,
+          title: `${intl.formatMessage({ id: 'archives.single' })} ${detail!.name}`,
           description: intl.formatMessage({ id: 'experiments.deleteDesc' }),
-          action: 'delete',
+          action: 'archive',
         })
 
         break
       case 'pause':
         setDialogInfo({
-          title: `${intl.formatMessage({ id: 'common.pause' })} ${detail!.name}?`,
+          title: `${intl.formatMessage({ id: 'common.pause' })} ${detail!.name}`,
           description: intl.formatMessage({ id: 'experiments.pauseDesc' }),
           action: 'pause',
         })
@@ -150,7 +154,7 @@ export default function ExperimentDetail() {
         break
       case 'start':
         setDialogInfo({
-          title: `${intl.formatMessage({ id: 'common.start' })} ${detail!.name}?`,
+          title: `${intl.formatMessage({ id: 'common.start' })} ${detail!.name}`,
           description: intl.formatMessage({ id: 'experiments.startDesc' }),
           action: 'start',
         })
@@ -167,7 +171,7 @@ export default function ExperimentDetail() {
     let actionFunc: any
 
     switch (action) {
-      case 'delete':
+      case 'archive':
         actionFunc = api.experiments.deleteExperiment
 
         break
@@ -198,21 +202,22 @@ export default function ExperimentDetail() {
           })
         )
         dispatch(setAlertOpen(true))
-        dispatch(getStateofExperiments())
 
-        if (action === 'delete') {
+        if (action === 'archive') {
           history.push('/experiments')
         }
 
         if (action === 'pause' || action === 'start') {
-          fetchExperimentDetail()
+          setTimeout(fetchExperimentDetail, 300)
         }
       })
       .catch(console.error)
   }
 
+  const handleDownloadExperiment = () => fileDownload(yaml.dump(detail!.yaml), `${detail!.name}.yaml`)
+
   const handleUpdateExperiment = () => {
-    const data = yaml.safeLoad(yamlEditor!.getValue())
+    const data = yaml.load(yamlEditor!.getValue())
 
     api.experiments
       .update(data)
@@ -235,39 +240,35 @@ export default function ExperimentDetail() {
       <Grow in={!loading} style={{ transformOrigin: '0 0 0' }}>
         <Grid container spacing={6}>
           <Grid item xs={12}>
-            <Box display="flex">
-              <Box mr={3}>
+            <Space display="flex">
+              <Button
+                variant="outlined"
+                size="small"
+                startIcon={<ArchiveOutlinedIcon />}
+                onClick={handleAction('archive')}
+              >
+                {T('archives.single')}
+              </Button>
+              {detail?.status === 'Paused' ? (
                 <Button
                   variant="outlined"
                   size="small"
-                  startIcon={<ArchiveOutlinedIcon />}
-                  onClick={handleAction('delete')}
+                  startIcon={<PlayCircleOutlineIcon />}
+                  onClick={handleAction('start')}
                 >
-                  {T('archives.single')}
+                  {T('common.start')}
                 </Button>
-              </Box>
-              <Box>
-                {detail?.status === 'Paused' ? (
-                  <Button
-                    variant="outlined"
-                    size="small"
-                    startIcon={<PlayCircleOutlineIcon />}
-                    onClick={handleAction('start')}
-                  >
-                    {T('common.start')}
-                  </Button>
-                ) : (
-                  <Button
-                    variant="outlined"
-                    size="small"
-                    startIcon={<PauseCircleOutlineIcon />}
-                    onClick={handleAction('pause')}
-                  >
-                    {T('common.pause')}
-                  </Button>
-                )}
-              </Box>
-            </Box>
+              ) : (
+                <Button
+                  variant="outlined"
+                  size="small"
+                  startIcon={<PauseCircleOutlineIcon />}
+                  onClick={handleAction('pause')}
+                >
+                  {T('common.pause')}
+                </Button>
+              )}
+            </Space>
           </Grid>
 
           {detail?.failed_message && (
@@ -279,24 +280,34 @@ export default function ExperimentDetail() {
           )}
 
           <Grid item xs={12}>
-            <Paper variant="outlined">
+            <Paper>
               <PaperTop title={T('common.configuration')}>
-                <Button
-                  variant="outlined"
-                  size="small"
-                  color="primary"
-                  startIcon={<NoteOutlinedIcon />}
-                  onClick={onModalOpen}
-                >
-                  {T('common.update')}
-                </Button>
+                <Space>
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    startIcon={<CloudDownloadOutlinedIcon />}
+                    onClick={handleDownloadExperiment}
+                  >
+                    {T('common.download')}
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    color="primary"
+                    startIcon={<NoteOutlinedIcon />}
+                    onClick={onModalOpen}
+                  >
+                    {T('common.update')}
+                  </Button>
+                </Space>
               </PaperTop>
               <Box p={3}>{detail && <ExperimentConfiguration experimentDetail={detail} />}</Box>
             </Paper>
           </Grid>
 
           <Grid item xs={12}>
-            <Paper variant="outlined">
+            <Paper>
               <PaperTop title={T('common.timeline')} />
               <div ref={chartRef} className={classes.eventsChart} />
             </Paper>
@@ -309,18 +320,20 @@ export default function ExperimentDetail() {
       </Grow>
 
       <Modal open={configOpen} onClose={onModalClose}>
-        <Paper className={classes.configPaper}>
-          {detail && (
-            <>
-              <PaperTop title={detail.name}>
-                <Button variant="outlined" color="primary" size="small" onClick={handleUpdateExperiment}>
-                  {T('common.confirm')}
-                </Button>
-              </PaperTop>
-              <YAMLEditor theme={theme} data={yaml.safeDump(detail.yaml)} mountEditor={setYAMLEditor} />
-            </>
-          )}
-        </Paper>
+        <div>
+          <Paper className={classes.configPaper} padding={false}>
+            {detail && configOpen && (
+              <>
+                <PaperTop title={detail.name}>
+                  <Button variant="contained" color="primary" size="small" onClick={handleUpdateExperiment}>
+                    {T('common.confirm')}
+                  </Button>
+                </PaperTop>
+                <YAMLEditor theme={theme} data={yaml.dump(detail.yaml)} mountEditor={setYAMLEditor} />
+              </>
+            )}
+          </Paper>
+        </div>
       </Modal>
 
       <ConfirmDialog

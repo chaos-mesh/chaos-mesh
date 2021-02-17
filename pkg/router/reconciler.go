@@ -31,9 +31,9 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/common"
 	"github.com/chaos-mesh/chaos-mesh/controllers/twophase"
+	"github.com/chaos-mesh/chaos-mesh/pkg/events"
 	ctx "github.com/chaos-mesh/chaos-mesh/pkg/router/context"
 	end "github.com/chaos-mesh/chaos-mesh/pkg/router/endpoint"
-	"github.com/chaos-mesh/chaos-mesh/pkg/utils"
 )
 
 // Reconciler reconciles a chaos resource
@@ -58,13 +58,18 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (result ctrl.Result, err error)
 
 	ctx := r.Context.LogWithValues("reconciler", r.Name, "resource name", req.NamespacedName)
 
-	// TODO: return error if this convertion failed
-	chaos := r.Object.DeepCopyObject().(v1alpha1.InnerSchedulerObject)
+	chaos, ok := r.Object.DeepCopyObject().(v1alpha1.InnerSchedulerObject)
+	if !ok {
+		err := errors.New("object is not InnerSchedulerObject")
+		r.Log.Error(err, "object is not InnerSchedulerObject", "object", r.Object.DeepCopyObject())
+		return ctrl.Result{}, err
+	}
+
 	if err := r.Client.Get(context.Background(), req.NamespacedName, chaos); err != nil {
 		if apierrors.IsNotFound(err) {
 			r.Log.Info("chaos not found")
 		} else {
-			r.Log.Error(err, "unable to get network chaos")
+			r.Log.Error(err, "unable to get chaos")
 		}
 		return ctrl.Result{}, nil
 	}
@@ -104,9 +109,9 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (result ctrl.Result, err error)
 	result, err = reconciler.Reconcile(req)
 	if err != nil {
 		if chaos.IsDeleted() || chaos.IsPaused() {
-			r.Event(chaos, v1.EventTypeWarning, utils.EventChaosRecoverFailed, err.Error())
+			r.Event(chaos, v1.EventTypeWarning, events.ChaosRecoverFailed, err.Error())
 		} else {
-			r.Event(chaos, v1.EventTypeWarning, utils.EventChaosInjectFailed, err.Error())
+			r.Event(chaos, v1.EventTypeWarning, events.ChaosInjectFailed, err.Error())
 		}
 	}
 	return result, nil

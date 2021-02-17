@@ -21,6 +21,7 @@ import (
 
 	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
+	"github.com/robfig/cron/v3"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	ctx "github.com/chaos-mesh/chaos-mesh/pkg/router/context"
@@ -187,4 +188,14 @@ func ifStartAtWaitingPhase(chaos v1alpha1.InnerSchedulerObject, now time.Time, l
 		return v1alpha1.ExperimentPhaseWaiting, nextStart, nil
 	}
 	return "", nil, nil
+}
+
+func nextTime(spec v1alpha1.SchedulerSpec, now time.Time) (*time.Time, error) {
+	scheduler, err := cron.ParseStandard(spec.Cron)
+	if err != nil {
+		return nil, fmt.Errorf("fail to parse runner rule %s, %v", spec.Cron, err)
+	}
+
+	next := scheduler.Next(now)
+	return &next, nil
 }

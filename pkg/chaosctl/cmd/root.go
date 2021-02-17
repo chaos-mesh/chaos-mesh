@@ -15,9 +15,12 @@ package cmd
 
 import (
 	"fmt"
+	"log"
 	"os"
 
 	"github.com/spf13/cobra"
+
+	cm "github.com/chaos-mesh/chaos-mesh/pkg/chaosctl/common"
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -29,17 +32,52 @@ Interacting with chaos mesh
 
   # show debug info
   chaosctl debug networkchaos
-  
-  # show logs of all chaos-mesh componentes
+
+  # show logs of all chaos-mesh components
   chaosctl logs`,
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
-	if err := rootCmd.Execute(); err != nil {
-		fmt.Println(err)
+	err := cm.SetupKlog()
+	if err != nil {
+		log.Fatal("failed to setup klog", err)
+	}
+	rootLogger, flushFunc, err := cm.NewStderrLogger()
+	if err != nil {
+		log.Fatal("failed to initialize logger", err)
+	}
+	if flushFunc != nil {
+		defer flushFunc()
+	}
+	cm.SetupGlobalLogger(rootLogger.WithName("global-logger"))
+
+	logsCmd, err := NewLogsCmd(rootLogger.WithName("cmd-logs"))
+	if err != nil {
+		rootLogger.Error(err, "failed to initialize cmd",
+			"cmd", "logs",
+			"errorVerbose", fmt.Sprintf("%+v", err),
+		)
 		os.Exit(1)
+	}
+	rootCmd.AddCommand(logsCmd)
+
+	debugCommand, err := NewDebugCommand(rootLogger.WithName("cmd-debug"))
+	if err != nil {
+		rootLogger.Error(err, "failed to initialize cmd",
+			"cmd", "debug",
+			"errorVerbose", fmt.Sprintf("%+v", err),
+		)
+		os.Exit(1)
+	}
+
+	rootCmd.AddCommand(debugCommand)
+	rootCmd.AddCommand(completionCmd)
+	if err := rootCmd.Execute(); err != nil {
+		rootLogger.Error(err, "failed to execute cmd",
+			"errorVerbose", fmt.Sprintf("%+v", err),
+		)
 	}
 }
 

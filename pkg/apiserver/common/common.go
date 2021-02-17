@@ -16,21 +16,88 @@ package common
 import (
 	"context"
 	"fmt"
+	"math/rand"
 	"net/http"
 	"sort"
 	"strings"
-
-	"github.com/gin-gonic/gin"
+	"time"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/pkg/apiserver/utils"
 	"github.com/chaos-mesh/chaos-mesh/pkg/clientpool"
 	"github.com/chaos-mesh/chaos-mesh/pkg/config"
 	"github.com/chaos-mesh/chaos-mesh/pkg/core"
-	pkgutils "github.com/chaos-mesh/chaos-mesh/pkg/utils"
+	"github.com/chaos-mesh/chaos-mesh/pkg/selector"
 
+	"github.com/gin-gonic/gin"
 	v1 "k8s.io/api/core/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+)
+
+const (
+	roleManager = "manager"
+	roleViewer  = "viewer"
+
+	serviceAccountTemplate = `kind: ServiceAccount
+apiVersion: v1
+metadata:
+  namespace: %s
+  name: %s
+`
+	roleTemplate = `kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  namespace: %s
+  name: %s
+rules:
+- apiGroups: [""]
+  resources: ["pods", "namespaces"]
+  verbs: ["get", "watch", "list"]
+- apiGroups:
+  - chaos-mesh.org
+  resources: [ "*" ]
+  verbs: [%s]
+`
+	clusterRoleTemplate = `kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: %s
+rules:
+- apiGroups: [""]
+  resources: ["pods", "namespaces"]
+  verbs: ["get", "watch", "list"]
+- apiGroups:
+  - chaos-mesh.org
+  resources: [ "*" ]
+  verbs: [%s]
+`
+	roleBindingTemplate = `apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: %s
+  namespace: %s
+subjects:
+- kind: ServiceAccount
+  name: %s
+  namespace: %s
+roleRef:
+  kind: Role
+  name: %s
+  apiGroup: rbac.authorization.k8s.io
+`
+	clusterRoleBindingTemplate = `apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: %s
+subjects:
+- kind: ServiceAccount
+  name: %s
+  namespace: %s
+roleRef:
+  kind: ClusterRole
+  name: %s
+  apiGroup: rbac.authorization.k8s.io
+`
 )
 
 // Pod defines the basic information of a pod
@@ -70,6 +137,7 @@ func Register(r *gin.RouterGroup, s *Service) {
 	endpoint.GET("/labels", s.getLabels)
 	endpoint.GET("/annotations", s.getAnnotations)
 	endpoint.GET("/config", s.getConfig)
+	endpoint.GET("/rbac-config", s.getRbacConfig)
 }
 
 // @Summary Get pods from Kubernetes cluster.
@@ -94,7 +162,7 @@ func (s *Service) listPods(c *gin.Context) {
 		return
 	}
 	ctx := context.TODO()
-	filteredPods, err := pkgutils.SelectPods(ctx, kubeCli, nil, exp.ParseSelector(), s.conf.ClusterScoped, s.conf.TargetNamespace, s.conf.AllowedNamespaces, s.conf.IgnoredNamespaces)
+	filteredPods, err := selector.SelectPods(ctx, kubeCli, nil, exp.ParseSelector(), s.conf.ClusterScoped, s.conf.TargetNamespace, s.conf.AllowedNamespaces, s.conf.IgnoredNamespaces)
 	if err != nil {
 		c.Status(http.StatusInternalServerError)
 		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
@@ -222,7 +290,7 @@ func (s *Service) getLabels(c *gin.Context) {
 	exp.NamespaceSelectors = nsList
 
 	ctx := context.TODO()
-	filteredPods, err := pkgutils.SelectPods(ctx, kubeCli, nil, exp.ParseSelector(), s.conf.ClusterScoped, s.conf.TargetNamespace, s.conf.AllowedNamespaces, s.conf.IgnoredNamespaces)
+	filteredPods, err := selector.SelectPods(ctx, kubeCli, nil, exp.ParseSelector(), s.conf.ClusterScoped, s.conf.TargetNamespace, s.conf.AllowedNamespaces, s.conf.IgnoredNamespaces)
 	if err != nil {
 		c.Status(http.StatusInternalServerError)
 		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
@@ -274,7 +342,7 @@ func (s *Service) getAnnotations(c *gin.Context) {
 	exp.NamespaceSelectors = nsList
 
 	ctx := context.TODO()
-	filteredPods, err := pkgutils.SelectPods(ctx, kubeCli, nil, exp.ParseSelector(), s.conf.ClusterScoped, s.conf.TargetNamespace, s.conf.AllowedNamespaces, s.conf.IgnoredNamespaces)
+	filteredPods, err := selector.SelectPods(ctx, kubeCli, nil, exp.ParseSelector(), s.conf.ClusterScoped, s.conf.TargetNamespace, s.conf.AllowedNamespaces, s.conf.IgnoredNamespaces)
 	if err != nil {
 		c.Status(http.StatusInternalServerError)
 		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(err))
@@ -308,6 +376,50 @@ func (s *Service) getConfig(c *gin.Context) {
 	c.JSON(http.StatusOK, s.conf)
 }
 
+// @Summary Get the rbac config according to the user's choice.
+// @Description Get the rbac config according to the user's choice.
+// @Tags common
+// @Produce json
+// @Success 200 {object} MapSlice
+// @Router /common/rbac-config [get]
+// @Failure 500 {object} utils.APIError
+func (s *Service) getRbacConfig(c *gin.Context) {
+	namespace := c.Query("namespace")
+	roleType := c.Query("role")
+
+	var serviceAccount, role, roleBinding, verbs string
+	randomStr := randomStringWithCharset(5, charset)
+
+	scope := namespace
+	if len(namespace) == 0 {
+		namespace = "default"
+		scope = "cluster"
+	}
+	if roleType == roleManager {
+		verbs = `"get", "list", "watch", "create", "delete", "patch", "update"`
+	} else {
+		verbs = `"get", "list", "watch"`
+	}
+
+	serviceAccountName := fmt.Sprintf("account-%s-%s-%s", scope, roleType, randomStr)
+	roleName := fmt.Sprintf("role-%s-%s-%s", scope, roleType, randomStr)
+	roleBindingName := fmt.Sprintf("bind-%s-%s-%s", scope, roleType, randomStr)
+
+	serviceAccount = fmt.Sprintf(serviceAccountTemplate, namespace, serviceAccountName)
+	if scope == "cluster" {
+		role = fmt.Sprintf(clusterRoleTemplate, roleName, verbs)
+		roleBinding = fmt.Sprintf(clusterRoleBindingTemplate, roleBindingName, serviceAccountName, namespace, roleName)
+	} else {
+		role = fmt.Sprintf(roleTemplate, namespace, roleName, verbs)
+		roleBinding = fmt.Sprintf(roleBindingTemplate, roleBindingName, namespace, serviceAccountName, namespace, roleName)
+	}
+
+	rbacMap := make(map[string]string)
+	rbacMap[serviceAccountName] = serviceAccount + "\n---\n" + role + "\n---\n" + roleBinding
+
+	c.JSON(http.StatusOK, rbacMap)
+}
+
 // inSlice checks given string in string slice or not.
 func inSlice(v string, sl []string) bool {
 	for _, vv := range sl {
@@ -316,4 +428,15 @@ func inSlice(v string, sl []string) bool {
 		}
 	}
 	return false
+}
+
+const charset = "abcdefghijklmnopqrstuvwxyz"
+
+func randomStringWithCharset(length int, charset string) string {
+	var seededRand = rand.New(rand.NewSource(time.Now().UnixNano()))
+	b := make([]byte, length)
+	for i := range b {
+		b[i] = charset[seededRand.Intn(len(charset))]
+	}
+	return string(b)
 }

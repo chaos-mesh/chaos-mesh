@@ -16,6 +16,8 @@ The following tables list the configurable parameters of the Chaos Mesh chart an
 
 |                 Parameter                  |                                                     Description                                                      |                         Default                         |
 |--------------------------------------------|----------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------|
+| `nameOverride` |  | `` |
+| `fullnameOverride` |  | `` |
 | `clusterScoped`                            | whether chaos-mesh should manage kubernetes cluster wide chaos.Also see rbac.create and controllerManager.serviceAccount | `true` |
 | `rbac.create` |  | `true`                                                |
 | `timezone` | The timezone where controller-manager, chaos-daemon and dashboard uses. For example: `UTC`, `Asia/Shanghai` | `UTC` |
@@ -27,8 +29,6 @@ The following tables list the configurable parameters of the Chaos Mesh chart an
 | `controllerManager.replicaCount` | Replicas for chaos-controller-manager | `1` |
 | `controllerManager.image` | docker image for chaos-controller-manager  | `pingcap/chaos-mesh:latest` |
 | `controllerManager.imagePullPolicy` | Image pull policy | `Always` |
-| `controllerManager.nameOverride` |  |  |
-| `controllerManager.fullnameOverride` |  |  |
 | `controllerManager.service.type` | Kubernetes Service type | `ClusterIP` |
 | `controllerManager.resources` | CPU/Memory resource requests/limits for chaos-controller-manager pod | `requests: { cpu: "250m", memory: "512Mi" }, limits:{ cpu: "500m", memory: "1024Mi" }`   |
 | `controllerManager.nodeSelector` |  Node labels for chaos-controller-manager pod assignment | `{}` |
@@ -43,6 +43,7 @@ The following tables list the configurable parameters of the Chaos Mesh chart an
 | `chaosDaemon.httpPort` | The port which http server listens on | `31766` |
 | `chaosDaemon.env` | chaosDaemon envs | `{}` |
 | `chaosDaemon.hostNetwork` | running chaosDaemon on host network | `false` |
+| `chaosDaemon.privileged` | Run chaos-daemon container in privileged mode. If it is set to false, chaos-daemon will be run in some specified capabilities. capabilities: SYS_PTRACE, NET_ADMIN, MKNOD, SYS_CHROOT, SYS_ADMIN, KILL, IPC_LOCK | `true` |
 | `chaosDaemon.priorityClassName` | Custom priorityClassName for using pod priorities | `` |
 | `chaosDaemon.podAnnotations` | Pod annotations of chaos-daemon | `{}` |
 | `chaosDaemon.runtime` | Runtime specifies which container runtime to use. Currently we only supports docker and containerd. | `docker` |
@@ -70,6 +71,7 @@ The following tables list the configurable parameters of the Chaos Mesh chart an
 | `dashboard.persistentVolume.storageClassName` | Chaos Dashboard data Persistent Volume Storage Class | `standard` |
 | `dashboard.persistentVolume.mountPath` | Chaos Dashboard data Persistent Volume mount root path | `/data` |
 | `dashboard.persistentVolume.subPath` | Subdirectory of  Chaos Dashboard data Persistent Volume to mount | `` |
+| `dashboard.service.annotations` | Service annotations for the dashboard | `{}` |
 | `dashboard.service.type`              | Service type of the service created for exposing the dashboard                             | `NodePort`     |
 | `dashboard.service.clusterIP`         | Set the `clusterIP` of the dashboard service if the type is `ClusterIP` | `nil`           |
 | `dashboard.service.nodePort`          | Set the `nodePort` of the dashboard service if the type is `NodePort`  | `nil`           |

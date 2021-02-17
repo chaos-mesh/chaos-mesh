@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
-  namespace: {{ .Release.Namespace }}
+  namespace: {{ .Release.Namespace | quote }}
   name: chaos-daemon
   labels:
     app.kubernetes.io/name: {{ template "chaos-mesh.name" . }}
@@ -37,7 +37,7 @@ spec:
       priorityClassName: {{ .Values.chaosDaemon.priorityClassName}}
       containers:
         - name: chaos-daemon
-          image: {{ .Values.chaosDaemon.image }}
+          image: {{template "registry-prefix" .}}{{ .Values.chaosDaemon.image }}
           imagePullPolicy: {{ .Values.chaosDaemon.imagePullPolicy | default "IfNotPresent" }}
           {{- if .Values.chaosDaemon.resources }}
           resources:
@@ -64,6 +64,12 @@ spec:
               value: {{ .Values.timezone | default "UTC" }}
             {{- end }}
           securityContext:
+            {{- if .Values.chaosDaemon.privileged }}
+            privileged: true
+            capabilities:
+              add:
+                - SYS_PTRACE
+            {{- else }}
             capabilities:
               add:
                 - SYS_PTRACE
@@ -74,6 +80,7 @@ spec:
                 - KILL
                 # CAP_IPC_LOCK is used to lock memory
                 - IPC_LOCK
+            {{- end }}
           volumeMounts:
             - name: socket-path
               {{- if eq .Values.chaosDaemon.runtime "docker" }}
@@ -89,13 +96,9 @@ spec:
               hostPort: {{ .Values.chaosDaemon.grpcPort }}
             - name: http
               containerPort: {{ .Values.chaosDaemon.httpPort }}
-      {{- with .Values.chaosDaemon.tolerations }}
-      tolerations:
-{{ toYaml . | indent 8 }}
-      {{- end }}
 {{- if .Values.bpfki.create }}
         - name: bpfki
-          image: {{ .Values.bpfki.image }}
+          image: {{template "registry-prefix" .}}{{ .Values.bpfki.image }}
           imagePullPolicy: {{ .Values.bpfki.imagePullPolicy | default "IfNotPresent" }}
           {{- if .Values.bpfki.resources }}
           resources:
@@ -140,3 +143,15 @@ spec:
           hostPath:
             path: /usr/src
 {{- end }}
+      {{- with .Values.chaosDaemon.nodeSelector }}
+      nodeSelector:
+{{ toYaml . | indent 8 }}
+      {{- end }}
+      {{- with .Values.chaosDaemon.affinity }}
+      affinity:
+{{ toYaml . | indent 8 }}
+      {{- end }}
+      {{- with .Values.chaosDaemon.tolerations }}
+      tolerations:
+{{ toYaml . | indent 8 }}
+      {{- end }}

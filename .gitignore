@@ -1,4 +1,7 @@
-bin
+**/bin/*
+!bin/.gitkeep
+
+.vscode/
 .idea/
 *.iml
 *.swp
@@ -33,3 +36,9 @@ test/image/e2e/manifests/
 
 /docs/swagger.*
 /docs/docs.go
+
+/images/*/bin/*
+!/images/*/bin/.gitkeep
+
+.dockerbuilt
+Dockerfile

@@ -38,25 +38,32 @@ interface SchedulerProps {
 }
 
 const Scheduler: React.FC<SchedulerProps> = ({ errors, touched }) => {
-  const target = useSelector((state: RootState) => state.experiments.target)
+  const { fromExternal, basic, target } = useSelector((state: RootState) => state.experiments)
   const scheduled = target.kind
     ? target.kind === 'PodChaos' && mustBeScheduled.includes(target.pod_chaos.action)
       ? true
       : false
     : false
-  const [immediate, setImmediate] = useState(scheduled)
+  const [continuous, setContinuous] = useState(scheduled)
 
   useEffect(() => {
     if (scheduled) {
-      setImmediate(false)
+      setContinuous(false)
     }
   }, [scheduled])
 
+  useEffect(() => {
+    if (fromExternal && basic.scheduler.cron === '' && basic.scheduler.duration === '') {
+      setContinuous(true)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fromExternal])
+
   const handleChecked = (_: React.ChangeEvent<HTMLInputElement>, checked: boolean) => {
     if (scheduled) {
-      setImmediate(false)
+      setContinuous(false)
     } else {
-      setImmediate(checked)
+      setContinuous(checked)
     }
   }
 
@@ -93,11 +100,11 @@ const Scheduler: React.FC<SchedulerProps> = ({ errors, touched }) => {
         </Typography>
         <Box>
           <FormControlLabel
-            style={{ marginLeft: -4, marginRight: 0 }}
+            style={{ marginRight: 0 }}
             control={
-              <Switch name="immediate" color="primary" size="small" checked={immediate} onChange={handleChecked} />
+              <Switch name="continuous" color="primary" size="small" checked={continuous} onChange={handleChecked} />
             }
-            label={T('newE.schedule.immediate')}
+            label={T('newE.schedule.continuous')}
           />
           {scheduled && (
             <Typography variant="subtitle2" color="textSecondary">
@@ -107,9 +114,10 @@ const Scheduler: React.FC<SchedulerProps> = ({ errors, touched }) => {
         </Box>
       </Box>
 
-      {!immediate && (
+      {!continuous && (
         <Box>
           <TextField
+            fast
             id="scheduler.cron"
             name="scheduler.cron"
             label="Cron"
@@ -135,6 +143,7 @@ const Scheduler: React.FC<SchedulerProps> = ({ errors, touched }) => {
 
           {!scheduled && (
             <TextField
+              fast
               id="scheduler.duration"
               name="scheduler.duration"
               label={T('newE.schedule.duration')}

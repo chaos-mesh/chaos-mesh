@@ -65,10 +65,12 @@ func (s *DaemonServer) ExecStressors(ctx context.Context,
 		return nil, err
 	}
 
-	cmd := bpm.DefaultProcessBuilder("stress-ng", strings.Fields(req.Stressors)...).
-		EnablePause().
-		SetNS(pid, bpm.PidNS).
-		Build()
+	processBuilder := bpm.DefaultProcessBuilder("stress-ng", strings.Fields(req.Stressors)...).
+		EnablePause()
+	if req.EnterNS {
+		processBuilder = processBuilder.SetNS(pid, bpm.PidNS)
+	}
+	cmd := processBuilder.Build()
 
 	err = s.backgroundProcessManager.StartProcess(cmd)
 	if err != nil {
@@ -81,6 +83,9 @@ func (s *DaemonServer) ExecStressors(ctx context.Context,
 		return nil, err
 	}
 	ct, err := procState.CreateTime()
+	if err != nil {
+		return nil, err
+	}
 
 	if err = control.Add(cgroups.Process{Pid: cmd.Process.Pid}); err != nil {
 		if kerr := cmd.Process.Kill(); kerr != nil {

@@ -29,7 +29,6 @@ import (
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/bpm"
 	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
-	"github.com/chaos-mesh/chaos-mesh/pkg/utils"
 )
 
 const (
@@ -83,6 +82,10 @@ func (c DockerClient) GetPidFromContainerID(ctx context.Context, containerID str
 	container, err := c.client.ContainerInspect(ctx, id)
 	if err != nil {
 		return 0, err
+	}
+
+	if container.State.Pid == 0 {
+		return 0, fmt.Errorf("container is not running, status: %s", container.State.Status)
 	}
 
 	return uint32(container.State.Pid), nil
@@ -292,7 +295,7 @@ func GetChildProcesses(ppid uint32) ([]uint32, error) {
 		done <- true
 	}()
 
-	processGraph := utils.NewGraph()
+	processGraph := NewGraph()
 	for {
 		select {
 		case pair := <-pairs:

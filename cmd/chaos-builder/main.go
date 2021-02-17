@@ -27,7 +27,7 @@ import (
 )
 
 var (
-	log = zap.Logger(true)
+	log = zap.New(zap.UseDevMode(true))
 )
 
 type metadata struct {
@@ -64,6 +64,9 @@ func main() {
 			return err
 		}
 		if info.IsDir() {
+			return nil
+		}
+		if !strings.HasSuffix(info.Name(), ".go") {
 			return nil
 		}
 
@@ -134,6 +137,4 @@ func init() {
 		os.Exit(1)
 	}
 	fmt.Fprint(file, testCode)
-
-	return
 }

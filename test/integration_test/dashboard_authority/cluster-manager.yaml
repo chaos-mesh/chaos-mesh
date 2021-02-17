@@ -1,0 +1,42 @@
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: cluster-role-test-manager
+rules:
+- apiGroups: [""]
+  resources: ["pods", "namespaces"]
+  verbs: ["get", "watch", "list"]
+- apiGroups:
+  - chaos-mesh.org
+  resources: [ "*" ]
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+
+---
+
+kind: ServiceAccount
+apiVersion: v1
+metadata:
+  name: account-cluster-manager
+  namespace: chaos-testing
+
+---
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: bind-cluster-manager
+subjects:
+- kind: ServiceAccount
+  name: account-cluster-manager
+  namespace: chaos-testing
+roleRef:
+  kind: ClusterRole
+  name: cluster-role-test-manager
+  apiGroup: rbac.authorization.k8s.io

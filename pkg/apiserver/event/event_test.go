@@ -23,6 +23,7 @@ import (
 	"time"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/core"
+	pkgmock "github.com/chaos-mesh/chaos-mesh/pkg/mock"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
@@ -157,6 +158,10 @@ func (m *MockEventService) DeleteByFinishTime(context.Context, time.Duration) er
 	panic("implement me")
 }
 
+func (m *MockEventService) DeleteByUID(context.Context, string) error {
+	panic("implement me")
+}
+
 func (m *MockEventService) UpdateIncompleteEvents(context.Context, string, string) error {
 	panic("implement me")
 }
@@ -169,6 +174,8 @@ func TestEvent(t *testing.T) {
 var _ = Describe("event", func() {
 	var router *gin.Engine
 	BeforeEach(func() {
+		pkgmock.With("MockAuthRequired", true)
+
 		mockes := new(MockEventService)
 
 		s := Service{
@@ -186,6 +193,7 @@ var _ = Describe("event", func() {
 
 	AfterEach(func() {
 		// Add any teardown steps that needs to be executed after each test
+		pkgmock.Reset("MockAuthRequired")
 	})
 
 	Context("ListEvents", func() {

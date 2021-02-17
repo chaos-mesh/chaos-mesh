@@ -1,39 +1,45 @@
-import { Box, Button, Divider, Drawer, List, ListItem, ListItemIcon, ListItemText } from '@material-ui/core'
-import { Theme, createStyles, makeStyles } from '@material-ui/core/styles'
+import { Box, Drawer, List, ListItem, ListItemIcon, ListItemText } from '@material-ui/core'
 
-import AddIcon from '@material-ui/icons/Add'
 import ArchiveOutlinedIcon from '@material-ui/icons/ArchiveOutlined'
-import BlurLinearIcon from '@material-ui/icons/BlurLinear'
-import DescriptionOutlinedIcon from '@material-ui/icons/DescriptionOutlined'
+import DashboardOutlinedIcon from '@material-ui/icons/DashboardOutlined'
 import GitHubIcon from '@material-ui/icons/GitHub'
-import { Link } from 'react-router-dom'
+import HttpOutlinedIcon from '@material-ui/icons/HttpOutlined'
+import MenuBookOutlinedIcon from '@material-ui/icons/MenuBookOutlined'
 import { NavLink } from 'react-router-dom'
 import React from 'react'
-import { RootState } from 'store'
-import SettingsIcon from '@material-ui/icons/Settings'
+import SettingsOutlinedIcon from '@material-ui/icons/SettingsOutlined'
+import StorageOutlinedIcon from '@material-ui/icons/StorageOutlined'
 import T from 'components/T'
-import TuneIcon from '@material-ui/icons/Tune'
-import WebIcon from '@material-ui/icons/Web'
+import TimelineOutlinedIcon from '@material-ui/icons/TimelineOutlined'
 import clsx from 'clsx'
 import logo from 'images/logo.svg'
 import logoMini from 'images/logo-mini.svg'
 import logoMiniWhite from 'images/logo-mini-white.svg'
 import logoWhite from 'images/logo-white.svg'
-import { useSelector } from 'react-redux'
+import { makeStyles } from '@material-ui/core/styles'
+import { useStoreSelector } from 'store'
 
 export const drawerWidth = '14rem'
-export const drawerCloseWidth = '5.25rem'
-const useStyles = makeStyles((theme: Theme) => {
+export const drawerCloseWidth = '5rem'
+const useStyles = makeStyles((theme) => {
   const listItemHover = {
-    color: theme.palette.primary.main,
+    background: theme.palette.primary.main,
+    cursor: 'pointer',
     '& svg': {
-      fill: theme.palette.primary.main,
+      fill: '#fff',
+    },
+    '& .MuiListItemText-primary': {
+      color: '#fff',
     },
   }
 
-  return createStyles({
+  return {
     drawer: {
       width: drawerWidth,
+    },
+    drawerPaperRoot: {
+      background: theme.palette.background.default,
+      border: 'none',
     },
     drawerOpen: {
       width: drawerWidth,
@@ -54,10 +60,11 @@ const useStyles = makeStyles((theme: Theme) => {
       },
     },
     toolbar: {
-      ...theme.mixins.toolbar,
+      minHeight: 56,
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
+      marginTop: theme.spacing(6),
     },
     logo: {
       width: '75%',
@@ -65,33 +72,37 @@ const useStyles = makeStyles((theme: Theme) => {
     logoMini: {
       width: 36,
     },
+    list: {
+      padding: `${theme.spacing(6)} 0`,
+    },
     listItem: {
+      width: `calc(100% - ${theme.spacing(6)})`,
+      height: 48,
+      marginLeft: theme.spacing(3),
+      marginBottom: theme.spacing(3),
+      borderRadius: theme.shape.borderRadius,
+      '&:last-child': {
+        marginBottom: 0,
+      },
       '&:hover': listItemHover,
       '&.active': {
         ...listItemHover,
-        '& .MuiListItemText-primary': {
-          fontWeight: 'bold',
-        },
       },
     },
     listItemIcon: {
-      paddingLeft: theme.spacing(3),
       paddingRight: theme.spacing(9),
     },
-    hidden: {
-      display: 'none',
-    },
-  })
+  }
 })
 
 const listItems = [
-  { icon: <WebIcon />, text: 'overview' },
+  { icon: <DashboardOutlinedIcon />, text: 'dashboard' },
   {
-    icon: <TuneIcon />,
+    icon: <StorageOutlinedIcon />,
     text: 'experiments',
   },
   {
-    icon: <BlurLinearIcon />,
+    icon: <TimelineOutlinedIcon />,
     text: 'events',
   },
   {
@@ -99,7 +110,7 @@ const listItems = [
     text: 'archives',
   },
   {
-    icon: <SettingsIcon />,
+    icon: <SettingsOutlinedIcon />,
     text: 'settings',
   },
 ]
@@ -111,7 +122,7 @@ interface SidebarProps {
 const Sidebar: React.FC<SidebarProps> = ({ open }) => {
   const classes = useStyles()
 
-  const { theme } = useSelector((state: RootState) => state.settings)
+  const { theme } = useStoreSelector((state) => state.settings)
 
   return (
     <Drawer
@@ -120,7 +131,7 @@ const Sidebar: React.FC<SidebarProps> = ({ open }) => {
         [classes.drawerClose]: !open,
       })}
       classes={{
-        paper: clsx({
+        paper: clsx(classes.drawerPaperRoot, {
           [classes.drawerOpen]: open,
           [classes.drawerClose]: !open,
         }),
@@ -133,29 +144,19 @@ const Sidebar: React.FC<SidebarProps> = ({ open }) => {
             <img
               className={open ? classes.logo : classes.logoMini}
               src={open ? (theme === 'light' ? logo : logoWhite) : theme === 'light' ? logoMini : logoMiniWhite}
-              alt="Chaos Mesh Logo"
+              alt="Chaos Mesh"
             />
           </NavLink>
-          <Divider />
 
-          <Box display="flex" justifyContent="center" px={3} py="8px">
-            <Button
-              component={Link}
-              to="/newExperiment"
-              style={{ width: '100%' }}
-              variant="outlined"
-              color="primary"
-              startIcon={open && <AddIcon />}
-            >
-              {open ? T('newE.title') : <AddIcon />}
-            </Button>
-          </Box>
-
-          <Divider />
-
-          <List>
+          <List className={classes.list}>
             {listItems.map(({ icon, text }) => (
-              <ListItem key={text} className={classes.listItem} component={NavLink} to={`/${text}`} button>
+              <ListItem
+                key={text}
+                className={clsx(classes.listItem, `sidebar-${text}`)}
+                component={NavLink}
+                to={`/${text}`}
+                button
+              >
                 <ListItemIcon className={classes.listItemIcon}>{icon}</ListItemIcon>
                 <ListItemText primary={T(`${text}.title`)} />
               </ListItem>
@@ -163,7 +164,14 @@ const Sidebar: React.FC<SidebarProps> = ({ open }) => {
           </List>
         </Box>
 
-        <List>
+        <List className={classes.list}>
+          <ListItem className={classes.listItem} component={NavLink} to="/swagger" button>
+            <ListItemIcon className={classes.listItemIcon}>
+              <HttpOutlinedIcon />
+            </ListItemIcon>
+            <ListItemText primary="Swagger API" />
+          </ListItem>
+
           <ListItem
             className={classes.listItem}
             component="a"
@@ -172,7 +180,7 @@ const Sidebar: React.FC<SidebarProps> = ({ open }) => {
             button
           >
             <ListItemIcon className={classes.listItemIcon}>
-              <DescriptionOutlinedIcon />
+              <MenuBookOutlinedIcon />
             </ListItemIcon>
             <ListItemText primary={T('common.doc')} />
           </ListItem>

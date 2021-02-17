@@ -20,12 +20,12 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/klog"
-	"k8s.io/kubernetes/test/e2e/framework"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 )
@@ -182,30 +182,41 @@ func makeNetworkDelayChaos(
 func probeNetworkCondition(c http.Client, peers []*corev1.Pod, ports []uint16) map[string][][]int {
 	result := make(map[string][][]int)
 
-	testDelay := func(from int, to int) int64 {
-		delay, err := testNetworkDelay(c, ports[from], peers[to].Status.PodIP)
-		framework.ExpectNoError(err, fmt.Sprintf(
-			"send request from %s to %s to test delay failed",
-			peers[from].Name, peers[to].Name,
-		))
-		return delay
+	testDelay := func(from int, to int) (int64, error) {
+		return testNetworkDelay(c, ports[from], peers[to].Status.PodIP)
 	}
 
 	for source := 0; source < len(peers); source++ {
 		for target := source + 1; target < len(peers); target++ {
 			connectable := true
 
-			// case 1-1: source to target blocked?
-			klog.Infof("testing connectivity from %s to %s", peers[source].Name, peers[target].Name)
-			if !couldConnect(c, ports[source], peers[target].Status.PodIP, ports[target]) {
+			var (
+				wg           sync.WaitGroup
+				link1, link2 bool
+			)
+			wg.Add(2)
+			go func() {
+				defer wg.Done()
+				// case 1-1: source to target blocked?
+				klog.Infof("testing connectivity from %s to %s", peers[source].Name, peers[target].Name)
+				link1 = couldConnect(c, ports[source], peers[target].Status.PodIP, ports[target])
+
+			}()
+
+			go func() {
+				defer wg.Done()
+				// case 1-2: target to source blocked?
+				klog.Infof("testing connectivity from %s to %s", peers[target].Name, peers[source].Name)
+				link2 = couldConnect(c, ports[target], peers[source].Status.PodIP, ports[source])
+			}()
+			wg.Wait()
+
+			if !link1 {
 				klog.Infof("%s could not connect to %s", peers[source].Name, peers[target].Name)
 				result[networkConditionBlocked] = append(result[networkConditionBlocked], []int{source, target})
 				connectable = false
 			}
-
-			// case 1-2: target to source blocked?
-			klog.Infof("testing connectivity from %s to %s", peers[target].Name, peers[source].Name)
-			if !couldConnect(c, ports[target], peers[source].Status.PodIP, ports[source]) {
+			if !link2 {
 				klog.Infof("%s could not connect to %s", peers[target].Name, peers[source].Name)
 				result[networkConditionBlocked] = append(result[networkConditionBlocked], []int{target, source})
 				connectable = false
@@ -217,7 +228,12 @@ func probeNetworkCondition(c http.Client, peers []*corev1.Pod, ports []uint16) m
 
 			// case 2: slow network
 			klog.Infof("testing delay from %s to %s", peers[source].Name, peers[target].Name)
-			delay := testDelay(source, target)
+			delay, err := testDelay(source, target)
+			if err != nil {
+				klog.Errorf("error from %d to %d: %v", source, target, err)
+				continue
+			}
+
 			klog.Infof("delay from %d to %d: %d", source, target, delay)
 			if delay > 100*1e6 {
 				klog.Infof("detect slow network from %s to %s", peers[source].Name, peers[target].Name)
@@ -241,7 +257,7 @@ func couldConnect(c http.Client, sourcePort uint16, targetPodIP string, targetPo
 		return false
 	}
 
-	time.Sleep(2 * time.Second)
+	time.Sleep(time.Second)
 
 	data, err := recvUDPPacket(c, targetPort)
 	if err != nil {

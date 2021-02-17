@@ -67,8 +67,6 @@ function e2e::image_load() {
     local images=(
         pingcap/chaos-mesh
         pingcap/chaos-daemon
-        pingcap/chaos-fs
-        pingcap/chaos-scripts
         pingcap/e2e-helper
     )
     if [ "$PROVIDER" == "kind" ]; then
@@ -80,13 +78,15 @@ function e2e::image_load() {
         done
 
         # bypassing docker pull rate limit inner the kind container: kindest/node has no credentials
-        # pingcap/coredns:latest and nginx:latest is required for test
+        # pingcap/coredns:latest, nginx:latest and gcr.io/google-containers/pause:latest is required for test
         # we suppose that you could pull this image on your host docker
-        echo "info: load images pingcap/coredns:latest and nginx:latest"
+        echo "info: load images pingcap/coredns:latest, nginx:latest and gcr.io/google-containers/pause:latest"
         docker pull pingcap/coredns:latest
         docker pull nginx:latest
+        docker pull gcr.io/google-containers/pause:latest
         $KIND_BIN load docker-image --name $CLUSTER pingcap/coredns:latest --nodes $(hack::join ',' ${nodes[@]})
         $KIND_BIN load docker-image --name $CLUSTER nginx:latest --nodes $(hack::join ',' ${nodes[@]})
+        $KIND_BIN load docker-image --name $CLUSTER gcr.io/google-containers/pause:latest --nodes $(hack::join ',' ${nodes[@]})
     fi
 }
 
@@ -100,14 +100,14 @@ function e2e::setup_helm_server() {
     if hack::version_ge $(e2e::get_kube_version) "v1.16.0"; then
         # workaround for https://github.com/helm/helm/issues/6374
         # TODO remove this when we can upgrade to helm 2.15+, see https://github.com/helm/helm/pull/6462
-        $HELM_BIN init --service-account tiller --output yaml \
+        $HELM_BIN init --service-account tiller --stable-repo-url https://charts.helm.sh/stable --output yaml \
             | sed 's@apiVersion: extensions/v1beta1@apiVersion: apps/v1@' \
             | sed 's@  replicas: 1@  replicas: 1\n  selector: {"matchLabels": {"app": "helm", "name": "tiller"}}@' \
             | $KUBECTL_BIN --context $KUBECONTEXT apply -f -
         echo "info: wait for tiller to be ready"
         e2e::__wait_for_deploy kube-system tiller-deploy
     else
-        $HELM_BIN init --service-account=tiller --wait
+        $HELM_BIN init --service-account=tiller --wait --stable-repo-url https://charts.helm.sh/stable
     fi
     $HELM_BIN version
 }
@@ -160,8 +160,6 @@ e2e_args=(
     --daemon-image="${DOCKER_REGISTRY}/pingcap/chaos-daemon"
     --daemon-image-tag="${IMAGE_TAG}"
     --e2e-image="${DOCKER_REGISTRY}/pingcap/e2e-helper:${IMAGE_TAG}"
-    --chaos-fs-image="${DOCKER_REGISTRY}/pingcap/chaos-fs:${IMAGE_TAG}"
-    --chaos-scripts-image="${DOCKER_REGISTRY}/pingcap/chaos-scripts:${IMAGE_TAG}"
     --install-chaos-mesh
 )
 

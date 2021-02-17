@@ -35,10 +35,11 @@ import (
 
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/client/apiutil"
 )
 
 var log = ctrl.Log.WithName("experiment api")
@@ -57,6 +58,7 @@ type Service struct {
 	archive core.ExperimentStore
 	event   core.EventStore
 	conf    *config.ChaosDashboardConfig
+	scheme  *runtime.Scheme
 }
 
 // NewService returns an experiment service instance.
@@ -64,11 +66,13 @@ func NewService(
 	archive core.ExperimentStore,
 	event core.EventStore,
 	conf *config.ChaosDashboardConfig,
+	scheme *runtime.Scheme,
 ) *Service {
 	return &Service{
 		archive: archive,
 		event:   event,
 		conf:    conf,
+		scheme:  scheme,
 	}
 }
 
@@ -167,7 +171,7 @@ func (s *Service) createExperiment(c *gin.Context) {
 
 func (s *Service) createPodChaos(exp *core.ExperimentInfo, kubeCli client.Client) error {
 	chaos := &v1alpha1.PodChaos{
-		ObjectMeta: v1.ObjectMeta{
+		ObjectMeta: metav1.ObjectMeta{
 			Name:        exp.Name,
 			Namespace:   exp.Namespace,
 			Labels:      exp.Labels,
@@ -179,6 +183,7 @@ func (s *Service) createPodChaos(exp *core.ExperimentInfo, kubeCli client.Client
 			Mode:          v1alpha1.PodMode(exp.Scope.Mode),
 			Value:         exp.Scope.Value,
 			ContainerName: exp.Target.PodChaos.ContainerName,
+			GracePeriod:   exp.Target.PodChaos.GracePeriod,
 		},
 	}
 
@@ -195,7 +200,7 @@ func (s *Service) createPodChaos(exp *core.ExperimentInfo, kubeCli client.Client
 
 func (s *Service) createNetworkChaos(exp *core.ExperimentInfo, kubeCli client.Client) error {
 	chaos := &v1alpha1.NetworkChaos{
-		ObjectMeta: v1.ObjectMeta{
+		ObjectMeta: metav1.ObjectMeta{
 			Name:        exp.Name,
 			Namespace:   exp.Namespace,
 			Labels:      exp.Labels,
@@ -239,7 +244,7 @@ func (s *Service) createNetworkChaos(exp *core.ExperimentInfo, kubeCli client.Cl
 
 func (s *Service) createIOChaos(exp *core.ExperimentInfo, kubeCli client.Client) error {
 	chaos := &v1alpha1.IoChaos{
-		ObjectMeta: v1.ObjectMeta{
+		ObjectMeta: metav1.ObjectMeta{
 			Name:        exp.Name,
 			Namespace:   exp.Namespace,
 			Labels:      exp.Labels,
@@ -274,7 +279,7 @@ func (s *Service) createIOChaos(exp *core.ExperimentInfo, kubeCli client.Client)
 
 func (s *Service) createTimeChaos(exp *core.ExperimentInfo, kubeCli client.Client) error {
 	chaos := &v1alpha1.TimeChaos{
-		ObjectMeta: v1.ObjectMeta{
+		ObjectMeta: metav1.ObjectMeta{
 			Name:        exp.Name,
 			Namespace:   exp.Namespace,
 			Labels:      exp.Labels,
@@ -303,7 +308,7 @@ func (s *Service) createTimeChaos(exp *core.ExperimentInfo, kubeCli client.Clien
 
 func (s *Service) createKernelChaos(exp *core.ExperimentInfo, kubeCli client.Client) error {
 	chaos := &v1alpha1.KernelChaos{
-		ObjectMeta: v1.ObjectMeta{
+		ObjectMeta: metav1.ObjectMeta{
 			Name:        exp.Name,
 			Namespace:   exp.Namespace,
 			Labels:      exp.Labels,
@@ -329,8 +334,23 @@ func (s *Service) createKernelChaos(exp *core.ExperimentInfo, kubeCli client.Cli
 }
 
 func (s *Service) createStressChaos(exp *core.ExperimentInfo, kubeCli client.Client) error {
+	var stressors *v1alpha1.Stressors
+
+	// Error checking
+	if exp.Target.StressChaos.Stressors.CPUStressor.Workers <= 0 && exp.Target.StressChaos.Stressors.MemoryStressor.Workers > 0 {
+		stressors = &v1alpha1.Stressors{
+			MemoryStressor: exp.Target.StressChaos.Stressors.MemoryStressor,
+		}
+	} else if exp.Target.StressChaos.Stressors.MemoryStressor.Workers <= 0 && exp.Target.StressChaos.Stressors.CPUStressor.Workers > 0 {
+		stressors = &v1alpha1.Stressors{
+			CPUStressor: exp.Target.StressChaos.Stressors.CPUStressor,
+		}
+	} else {
+		stressors = exp.Target.StressChaos.Stressors
+	}
+
 	chaos := &v1alpha1.StressChaos{
-		ObjectMeta: v1.ObjectMeta{
+		ObjectMeta: metav1.ObjectMeta{
 			Name:        exp.Name,
 			Namespace:   exp.Namespace,
 			Labels:      exp.Labels,
@@ -340,7 +360,7 @@ func (s *Service) createStressChaos(exp *core.ExperimentInfo, kubeCli client.Cli
 			Selector:          exp.Scope.ParseSelector(),
 			Mode:              v1alpha1.PodMode(exp.Scope.Mode),
 			Value:             exp.Scope.Value,
-			Stressors:         exp.Target.StressChaos.Stressors,
+			Stressors:         stressors,
 			StressngStressors: exp.Target.StressChaos.StressngStressors,
 		},
 	}
@@ -362,7 +382,7 @@ func (s *Service) createStressChaos(exp *core.ExperimentInfo, kubeCli client.Cli
 
 func (s *Service) createDNSChaos(exp *core.ExperimentInfo, kubeCli client.Client) error {
 	chaos := &v1alpha1.DNSChaos{
-		ObjectMeta: v1.ObjectMeta{
+		ObjectMeta: metav1.ObjectMeta{
 			Name:        exp.Name,
 			Namespace:   exp.Namespace,
 			Labels:      exp.Labels,
@@ -400,10 +420,15 @@ func (s *Service) getPodChaosDetail(namespace string, name string, kubeCli clien
 		return Detail{}, err
 	}
 
+	gvk, err := apiutil.GVKForObject(chaos, s.scheme)
+	if err != nil {
+		return Detail{}, err
+	}
+
 	return Detail{
 		Experiment: Experiment{
 			Base: Base{
-				Kind:      chaos.Kind,
+				Kind:      gvk.Kind,
 				Namespace: chaos.Namespace,
 				Name:      chaos.Name,
 			},
@@ -413,8 +438,8 @@ func (s *Service) getPodChaosDetail(namespace string, name string, kubeCli clien
 			FailedMessage: chaos.GetStatus().FailedMessage,
 		},
 		YAML: core.ExperimentYAMLDescription{
-			APIVersion: chaos.APIVersion,
-			Kind:       chaos.Kind,
+			APIVersion: gvk.GroupVersion().String(),
+			Kind:       gvk.Kind,
 			Metadata: core.ExperimentYAMLMetadata{
 				Name:        chaos.Name,
 				Namespace:   chaos.Namespace,
@@ -438,10 +463,15 @@ func (s *Service) getIoChaosDetail(namespace string, name string, kubeCli client
 		return Detail{}, err
 	}
 
+	gvk, err := apiutil.GVKForObject(chaos, s.scheme)
+	if err != nil {
+		return Detail{}, err
+	}
+
 	return Detail{
 		Experiment: Experiment{
 			Base: Base{
-				Kind:      chaos.Kind,
+				Kind:      gvk.Kind,
 				Namespace: chaos.Namespace,
 				Name:      chaos.Name,
 			},
@@ -451,8 +481,8 @@ func (s *Service) getIoChaosDetail(namespace string, name string, kubeCli client
 			FailedMessage: chaos.GetStatus().FailedMessage,
 		},
 		YAML: core.ExperimentYAMLDescription{
-			APIVersion: chaos.APIVersion,
-			Kind:       chaos.Kind,
+			APIVersion: gvk.GroupVersion().String(),
+			Kind:       gvk.Kind,
 			Metadata: core.ExperimentYAMLMetadata{
 				Name:        chaos.Name,
 				Namespace:   chaos.Namespace,
@@ -476,10 +506,15 @@ func (s *Service) getNetworkChaosDetail(namespace string, name string, kubeCli c
 		return Detail{}, err
 	}
 
+	gvk, err := apiutil.GVKForObject(chaos, s.scheme)
+	if err != nil {
+		return Detail{}, err
+	}
+
 	return Detail{
 		Experiment: Experiment{
 			Base: Base{
-				Kind:      chaos.Kind,
+				Kind:      gvk.Kind,
 				Namespace: chaos.Namespace,
 				Name:      chaos.Name,
 			},
@@ -489,8 +524,8 @@ func (s *Service) getNetworkChaosDetail(namespace string, name string, kubeCli c
 			FailedMessage: chaos.GetStatus().FailedMessage,
 		},
 		YAML: core.ExperimentYAMLDescription{
-			APIVersion: chaos.APIVersion,
-			Kind:       chaos.Kind,
+			APIVersion: gvk.GroupVersion().String(),
+			Kind:       gvk.Kind,
 			Metadata: core.ExperimentYAMLMetadata{
 				Name:        chaos.Name,
 				Namespace:   chaos.Namespace,
@@ -514,10 +549,15 @@ func (s *Service) getTimeChaosDetail(namespace string, name string, kubeCli clie
 		return Detail{}, err
 	}
 
+	gvk, err := apiutil.GVKForObject(chaos, s.scheme)
+	if err != nil {
+		return Detail{}, err
+	}
+
 	return Detail{
 		Experiment: Experiment{
 			Base: Base{
-				Kind:      chaos.Kind,
+				Kind:      gvk.Kind,
 				Namespace: chaos.Namespace,
 				Name:      chaos.Name,
 			},
@@ -527,8 +567,8 @@ func (s *Service) getTimeChaosDetail(namespace string, name string, kubeCli clie
 			FailedMessage: chaos.GetStatus().FailedMessage,
 		},
 		YAML: core.ExperimentYAMLDescription{
-			APIVersion: chaos.APIVersion,
-			Kind:       chaos.Kind,
+			APIVersion: gvk.GroupVersion().String(),
+			Kind:       gvk.Kind,
 			Metadata: core.ExperimentYAMLMetadata{
 				Name:        chaos.Name,
 				Namespace:   chaos.Namespace,
@@ -552,10 +592,15 @@ func (s *Service) getKernelChaosDetail(namespace string, name string, kubeCli cl
 		return Detail{}, err
 	}
 
+	gvk, err := apiutil.GVKForObject(chaos, s.scheme)
+	if err != nil {
+		return Detail{}, err
+	}
+
 	return Detail{
 		Experiment: Experiment{
 			Base: Base{
-				Kind:      chaos.Kind,
+				Kind:      gvk.Kind,
 				Namespace: chaos.Namespace,
 				Name:      chaos.Name,
 			},
@@ -565,8 +610,8 @@ func (s *Service) getKernelChaosDetail(namespace string, name string, kubeCli cl
 			FailedMessage: chaos.GetStatus().FailedMessage,
 		},
 		YAML: core.ExperimentYAMLDescription{
-			APIVersion: chaos.APIVersion,
-			Kind:       chaos.Kind,
+			APIVersion: gvk.GroupVersion().String(),
+			Kind:       gvk.Kind,
 			Metadata: core.ExperimentYAMLMetadata{
 				Name:        chaos.Name,
 				Namespace:   chaos.Namespace,
@@ -590,10 +635,15 @@ func (s *Service) getStressChaosDetail(namespace string, name string, kubeCli cl
 		return Detail{}, err
 	}
 
+	gvk, err := apiutil.GVKForObject(chaos, s.scheme)
+	if err != nil {
+		return Detail{}, err
+	}
+
 	return Detail{
 		Experiment: Experiment{
 			Base: Base{
-				Kind:      chaos.Kind,
+				Kind:      gvk.Kind,
 				Namespace: chaos.Namespace,
 				Name:      chaos.Name,
 			},
@@ -603,8 +653,8 @@ func (s *Service) getStressChaosDetail(namespace string, name string, kubeCli cl
 			FailedMessage: chaos.GetStatus().FailedMessage,
 		},
 		YAML: core.ExperimentYAMLDescription{
-			APIVersion: chaos.APIVersion,
-			Kind:       chaos.Kind,
+			APIVersion: gvk.GroupVersion().String(),
+			Kind:       gvk.Kind,
 			Metadata: core.ExperimentYAMLMetadata{
 				Name:        chaos.Name,
 				Namespace:   chaos.Namespace,
@@ -628,10 +678,15 @@ func (s *Service) getDNSChaosDetail(namespace string, name string, kubeCli clien
 		return Detail{}, err
 	}
 
+	gvk, err := apiutil.GVKForObject(chaos, s.scheme)
+	if err != nil {
+		return Detail{}, err
+	}
+
 	return Detail{
 		Experiment: Experiment{
 			Base: Base{
-				Kind:      chaos.Kind,
+				Kind:      gvk.Kind,
 				Namespace: chaos.Namespace,
 				Name:      chaos.Name,
 			},
@@ -641,8 +696,8 @@ func (s *Service) getDNSChaosDetail(namespace string, name string, kubeCli clien
 			FailedMessage: chaos.GetStatus().FailedMessage,
 		},
 		YAML: core.ExperimentYAMLDescription{
-			APIVersion: chaos.APIVersion,
-			Kind:       chaos.Kind,
+			APIVersion: gvk.GroupVersion().String(),
+			Kind:       gvk.Kind,
 			Metadata: core.ExperimentYAMLMetadata{
 				Name:        chaos.Name,
 				Namespace:   chaos.Namespace,

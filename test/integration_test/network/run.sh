@@ -36,7 +36,7 @@ done
 echo "****** test delay chaos ******"
 kubectl apply -f ./delay_chaos.yaml
 
-echo "verifaction"
+echo "verification"
 kubectl exec busybox-0 -i -n busybox -- ping -c 10 busybox-1.busybox.busybox.svc > ping.log
 cat ping.log
 
@@ -53,7 +53,7 @@ do
 done
 
 # about half of the latency should be greater than 10ms
-if [[ "$high_latency_num" -lt "4" ]] || [[ "$high_latency_num" -gt "6" ]]; then
+if [[ "$high_latency_num" -lt "3" ]] || [[ "$high_latency_num" -gt "6" ]]; then
     echo "the chaos dosen't work as expect"
     exit 1
 fi

@@ -23,16 +23,13 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	"github.com/chaos-mesh/chaos-mesh/pkg/bpm"
 	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
 	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
 )
 
 var _ = Describe("iptables server", func() {
 	defer mock.With("MockContainerdClient", &MockClient{})()
-	c, _ := CreateContainerRuntimeInfoClient(containerRuntimeContainerd)
-	m := bpm.NewBackgroundProcessManager()
-	s := &DaemonServer{c, m}
+	s, _ := newDaemonServer(containerRuntimeContainerd)
 
 	Context("FlushIptables", func() {
 		It("should work", func() {
@@ -52,6 +49,7 @@ var _ = Describe("iptables server", func() {
 					Ipsets:    []string{},
 				}},
 				ContainerId: "containerd://container-id",
+				EnterNS:     true,
 			})
 			Expect(err).To(BeNil())
 		})
@@ -66,6 +64,7 @@ var _ = Describe("iptables server", func() {
 					Ipsets:    []string{},
 				}},
 				ContainerId: "containerd://container-id",
+				EnterNS:     true,
 			})
 			Expect(err).ToNot(BeNil())
 			Expect(err.Error()).To(Equal(errorStr))
@@ -89,6 +88,7 @@ var _ = Describe("iptables server", func() {
 					Ipsets:    []string{},
 				}},
 				ContainerId: "containerd://container-id",
+				EnterNS:     true,
 			})
 			Expect(err).ToNot(BeNil())
 			Expect(err.Error()).To(Equal("unknown chain direction 233"))
@@ -111,6 +111,7 @@ exit 1
 					Ipsets:    []string{},
 				}},
 				ContainerId: "containerd://container-id",
+				EnterNS:     true,
 			})
 			Expect(err).ToNot(BeNil())
 		})

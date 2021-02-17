@@ -25,11 +25,13 @@ import (
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/config"
+	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/client"
 	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
+	"github.com/chaos-mesh/chaos-mesh/pkg/events"
 	"github.com/chaos-mesh/chaos-mesh/pkg/router"
 	ctx "github.com/chaos-mesh/chaos-mesh/pkg/router/context"
 	end "github.com/chaos-mesh/chaos-mesh/pkg/router/endpoint"
-	"github.com/chaos-mesh/chaos-mesh/pkg/utils"
+	"github.com/chaos-mesh/chaos-mesh/pkg/selector"
 )
 
 const (
@@ -56,23 +58,43 @@ func (r *endpoint) Apply(ctx context.Context, req ctrl.Request, obj v1alpha1.Inn
 		return fmt.Errorf("podchaos[%s/%s] the name of container is empty", podchaos.Namespace, podchaos.Name)
 	}
 
-	pods, err := utils.SelectAndFilterPods(ctx, r.Client, r.Reader, &podchaos.Spec, config.ControllerCfg.ClusterScoped, config.ControllerCfg.TargetNamespace, config.ControllerCfg.AllowedNamespaces, config.ControllerCfg.IgnoredNamespaces)
+	pods, err := selector.SelectAndFilterPods(ctx, r.Client, r.Reader, &podchaos.Spec, config.ControllerCfg.ClusterScoped, config.ControllerCfg.TargetNamespace, config.ControllerCfg.AllowedNamespaces, config.ControllerCfg.IgnoredNamespaces)
 	if err != nil {
 		r.Log.Error(err, "fail to select and filter pods")
 		return err
 	}
 
-	g := errgroup.Group{}
+	var podsNotHaveContainer []string
 	for podIndex := range pods {
 		pod := &pods[podIndex]
 		haveContainer := false
+
+		for _, item := range pod.Status.ContainerStatuses {
+			if item.Name == podchaos.Spec.ContainerName {
+				haveContainer = true
+				break
+			}
+		}
+
+		if !haveContainer {
+			podsNotHaveContainer = append(podsNotHaveContainer, pod.Name)
+			r.Log.Error(nil, fmt.Sprintf("the pod %s doesn't have container %s", pod.Name, podchaos.Spec.ContainerName))
+		}
+	}
+
+	if len(podsNotHaveContainer) != 0 {
+		return fmt.Errorf("the pod %v doesn't have container %s", podsNotHaveContainer, podchaos.Spec.ContainerName)
+	}
+
+	g := errgroup.Group{}
+	for podIndex := range pods {
+		pod := &pods[podIndex]
 
 		for containerIndex := range pod.Status.ContainerStatuses {
 			containerName := pod.Status.ContainerStatuses[containerIndex].Name
 			containerID := pod.Status.ContainerStatuses[containerIndex].ContainerID
 
 			if containerName == podchaos.Spec.ContainerName {
-				haveContainer = true
 				g.Go(func() error {
 					err = r.KillContainer(ctx, pod, containerID)
 					if err != nil {
@@ -83,10 +105,6 @@ func (r *endpoint) Apply(ctx context.Context, req ctrl.Request, obj v1alpha1.Inn
 					return err
 				})
 			}
-		}
-
-		if haveContainer == false {
-			r.Log.Error(nil, fmt.Sprintf("the pod %s doesn't have container %s", pod.Name, podchaos.Spec.ContainerName))
 		}
 	}
 
@@ -107,7 +125,7 @@ func (r *endpoint) Apply(ctx context.Context, req ctrl.Request, obj v1alpha1.Inn
 
 		podchaos.Status.Experiment.PodRecords = append(podchaos.Status.Experiment.PodRecords, ps)
 	}
-	r.Event(obj, v1.EventTypeNormal, utils.EventChaosInjected, "")
+	r.Event(podchaos, v1.EventTypeNormal, events.ChaosRecovered, "")
 	return nil
 }
 
@@ -126,7 +144,7 @@ func (r *endpoint) Object() v1alpha1.InnerObject {
 func (r *endpoint) KillContainer(ctx context.Context, pod *v1.Pod, containerID string) error {
 	r.Log.Info("Try to kill container", "namespace", pod.Namespace, "podName", pod.Name, "containerID", containerID)
 
-	pbClient, err := utils.NewChaosDaemonClient(ctx, r.Client, pod, config.ControllerCfg.ChaosDaemonPort)
+	pbClient, err := client.NewChaosDaemonClient(ctx, r.Client, pod, config.ControllerCfg.ChaosDaemonPort)
 	if err != nil {
 		return err
 	}

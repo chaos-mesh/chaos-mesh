@@ -39,21 +39,22 @@ func TestcasePodFailureOnceThenDelete(ns string, kubeCli kubernetes.Interface, c
 	defer cancel()
 
 	By("preparing experiment pods")
-	nd := fixture.NewTimerDeployment("timer", ns)
+	appName := "timer-pod-failure1"
+	nd := fixture.NewTimerDeployment(appName, ns)
 	_, err := kubeCli.AppsV1().Deployments(ns).Create(nd)
 	framework.ExpectNoError(err, "create timer deployment error")
-	err = util.WaitDeploymentReady("timer", ns, kubeCli)
+	err = util.WaitDeploymentReady(appName, ns, kubeCli)
 	framework.ExpectNoError(err, "wait timer deployment ready error")
 
 	By("create pod failure chaos CRD objects")
 	listOption := metav1.ListOptions{
 		LabelSelector: labels.SelectorFromSet(map[string]string{
-			"app": "timer",
+			"app": appName,
 		}).String(),
 	}
 	podFailureChaos := &v1alpha1.PodChaos{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      "timer-failure",
+			Name:      "timer-failure1",
 			Namespace: ns,
 		},
 		Spec: v1alpha1.PodChaosSpec{
@@ -62,7 +63,7 @@ func TestcasePodFailureOnceThenDelete(ns string, kubeCli kubernetes.Interface, c
 					ns,
 				},
 				LabelSelectors: map[string]string{
-					"app": "timer",
+					"app": appName,
 				},
 			},
 			Action: v1alpha1.PodFailureAction,
@@ -74,7 +75,7 @@ func TestcasePodFailureOnceThenDelete(ns string, kubeCli kubernetes.Interface, c
 	framework.ExpectNoError(err, "create pod failure chaos error")
 
 	By("waiting for assertion some pod fall into failure")
-	err = wait.PollImmediate(5*time.Second, 5*time.Minute, func() (done bool, err error) {
+	err = wait.Poll(5*time.Second, 5*time.Minute, func() (done bool, err error) {
 		pods, err := kubeCli.CoreV1().Pods(ns).List(listOption)
 		if err != nil {
 			return false, nil
@@ -97,7 +98,7 @@ func TestcasePodFailureOnceThenDelete(ns string, kubeCli kubernetes.Interface, c
 	framework.ExpectNoError(err, "failed to delete pod failure chaos")
 
 	By("waiting for assertion recovering")
-	err = wait.PollImmediate(5*time.Second, 1*time.Minute, func() (done bool, err error) {
+	err = wait.Poll(5*time.Second, 2*time.Minute, func() (done bool, err error) {
 		pods, err := kubeCli.CoreV1().Pods(ns).List(listOption)
 		if err != nil {
 			return false, nil
@@ -121,29 +122,30 @@ func TestcasePodFailurePauseThenUnPause(ns string, kubeCli kubernetes.Interface,
 	defer cancel()
 
 	By("preparing experiment pods")
-	nd := fixture.NewTimerDeployment("timer", ns)
+	appName := "timer-pod-failure2"
+	nd := fixture.NewTimerDeployment(appName, ns)
 	_, err := kubeCli.AppsV1().Deployments(ns).Create(nd)
 	framework.ExpectNoError(err, "create timer deployment error")
-	err = util.WaitDeploymentReady("timer", ns, kubeCli)
+	err = util.WaitDeploymentReady(appName, ns, kubeCli)
 	framework.ExpectNoError(err, "wait timer deployment ready error")
 
 	By("create pod failure chaos CRD objects")
 	var pods *corev1.PodList
 	listOption := metav1.ListOptions{
 		LabelSelector: labels.SelectorFromSet(map[string]string{
-			"app": "timer",
+			"app": appName,
 		}).String(),
 	}
 
 	podFailureChaos := &v1alpha1.PodChaos{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      "timer-failure",
+			Name:      "timer-failure2",
 			Namespace: ns,
 		},
 		Spec: v1alpha1.PodChaosSpec{
 			Selector: v1alpha1.SelectorSpec{
 				Namespaces:     []string{ns},
-				LabelSelectors: map[string]string{"app": "timer"},
+				LabelSelectors: map[string]string{"app": appName},
 			},
 			Action:   v1alpha1.PodFailureAction,
 			Mode:     v1alpha1.OnePodMode,
@@ -157,12 +159,12 @@ func TestcasePodFailurePauseThenUnPause(ns string, kubeCli kubernetes.Interface,
 	framework.ExpectNoError(err, "create pod failure chaos error")
 	chaosKey := types.NamespacedName{
 		Namespace: ns,
-		Name:      "timer-failure",
+		Name:      "timer-failure2",
 	}
 
 	By("waiting for assertion some pod fall into failure")
 	// check whether the pod failure chaos succeeded or not
-	err = wait.PollImmediate(5*time.Second, 5*time.Minute, func() (done bool, err error) {
+	err = wait.Poll(5*time.Second, 5*time.Minute, func() (done bool, err error) {
 		pods, err := kubeCli.CoreV1().Pods(ns).List(listOption)
 		if err != nil {
 			return false, nil
@@ -175,6 +177,7 @@ func TestcasePodFailurePauseThenUnPause(ns string, kubeCli kubernetes.Interface,
 		}
 		return false, nil
 	})
+	framework.ExpectNoError(err, "image not update to pause")
 
 	// pause experiment
 	By("pause pod failure chaos")
@@ -193,22 +196,22 @@ func TestcasePodFailurePauseThenUnPause(ns string, kubeCli kubernetes.Interface,
 	})
 	framework.ExpectNoError(err, "check paused chaos failed")
 
-	By("wait for 1 minutes and no pod failure")
+	By("wait for 30 seconds and no pod failure")
 	pods, err = kubeCli.CoreV1().Pods(ns).List(listOption)
 	framework.ExpectNoError(err, "get timer pod error")
-	err = wait.Poll(5*time.Second, 1*time.Minute, func() (done bool, err error) {
+	err = wait.Poll(5*time.Second, 30*time.Second, func() (done bool, err error) {
 		pods, err = kubeCli.CoreV1().Pods(ns).List(listOption)
 		framework.ExpectNoError(err, "get timer pod error")
 		pod := pods.Items[0]
 		for _, c := range pod.Spec.Containers {
 			if c.Image == e2econst.PauseImage {
-				return true, nil
+				return false, nil
 			}
 		}
-		return false, nil
+
+		return true, nil
 	})
-	framework.ExpectError(err, "wait no pod failure failed")
-	framework.ExpectEqual(err.Error(), wait.ErrWaitTimeout.Error())
+	framework.ExpectNoError(err, "check paused chaos failed")
 
 	By("resume paused chaos experiment")
 	err = util.UnPauseChaos(ctx, cli, podFailureChaos)

@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  namespace: {{ .Release.Namespace }}
+  namespace: {{ .Release.Namespace | quote }}
   name: chaos-controller-manager
   labels:
     app.kubernetes.io/name: {{ template "chaos-mesh.name" . }}
@@ -37,7 +37,7 @@ spec:
       priorityClassName: {{ .Values.controllerManager.priorityClassName}}
       containers:
       - name: chaos-mesh
-        image: {{ .Values.controllerManager.image }}
+        image: {{template "registry-prefix" .}}{{ .Values.controllerManager.image }}
         imagePullPolicy: {{ .Values.controllerManager.imagePullPolicy | default "IfNotPresent" }}
         resources:
 {{ toYaml .Values.controllerManager.resources | indent 12 }}
@@ -55,7 +55,7 @@ spec:
           - name: ALLOW_HOST_NETWORK_TESTING
             value: "{{ .Values.controllerManager.allowHostNetworkTesting }}"
           - name: TARGET_NAMESPACE
-            value: {{ .Values.controllerManager.targetNamespace }}
+            value: {{ .Values.controllerManager.targetNamespace | quote }}
           - name: CLUSTER_SCOPED
             value: "{{ .Values.clusterScoped }}"
           - name: TZ

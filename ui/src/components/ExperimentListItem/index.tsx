@@ -1,15 +1,17 @@
-import { Box, Button, Collapse, IconButton, Paper, Typography, useMediaQuery, useTheme } from '@material-ui/core'
+import { Box, Collapse, IconButton, Typography, useMediaQuery, useTheme } from '@material-ui/core'
 import React, { useState } from 'react'
 import { Theme, createStyles, makeStyles } from '@material-ui/core/styles'
 
 import { Archive } from 'api/archives.type'
 import ArchiveOutlinedIcon from '@material-ui/icons/ArchiveOutlined'
+import DeleteOutlinedIcon from '@material-ui/icons/DeleteOutlined'
 import ErrorOutlineIcon from '@material-ui/icons/ErrorOutline'
 import { Experiment } from 'api/experiments.type'
 import ExperimentEventsPreview from 'components/ExperimentEventsPreview'
 import { IntlShape } from 'react-intl'
 import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown'
 import KeyboardArrowUpIcon from '@material-ui/icons/KeyboardArrowUp'
+import Paper from 'components-mui/Paper'
 import PauseCircleOutlineIcon from '@material-ui/icons/PauseCircleOutline'
 import PlayCircleOutlineIcon from '@material-ui/icons/PlayCircleOutline'
 import { RootState } from 'store'
@@ -72,30 +74,39 @@ const ExperimentListItem: React.FC<ExperimentListItemProps> = ({
 
     handleDialogOpen(true)
     switch (action) {
-      case 'delete':
+      case 'archive':
         handleSelect({
           uuid: (e as Experiment).uid,
-          title: `${intl.formatMessage({ id: 'archives.single' })} ${e.name}?`,
+          title: `${intl.formatMessage({ id: 'archives.single' })} ${e.name}`,
           description: intl.formatMessage({ id: 'experiments.deleteDesc' }),
-          action: 'delete',
+          action,
         })
 
         return
       case 'pause':
         handleSelect({
           uuid: (e as Experiment).uid,
-          title: `${intl.formatMessage({ id: 'common.pause' })} ${e.name}?`,
+          title: `${intl.formatMessage({ id: 'common.pause' })} ${e.name}`,
           description: intl.formatMessage({ id: 'experiments.pauseDesc' }),
-          action: 'pause',
+          action,
         })
 
         return
       case 'start':
         handleSelect({
           uuid: (e as Experiment).uid,
-          title: `${intl.formatMessage({ id: 'common.start' })} ${e.name}?`,
+          title: `${intl.formatMessage({ id: 'common.start' })} ${e.name}`,
           description: intl.formatMessage({ id: 'experiments.startDesc' }),
-          action: 'start',
+          action,
+        })
+
+        return
+      case 'delete':
+        handleSelect({
+          uuid: (e as Experiment).uid,
+          title: `${intl.formatMessage({ id: 'common.delete' })} ${e.name}`,
+          description: intl.formatMessage({ id: 'archives.deleteDesc' }),
+          action,
         })
 
         return
@@ -114,7 +125,18 @@ const ExperimentListItem: React.FC<ExperimentListItemProps> = ({
           .locale(lang)
           .fromNow()}
       </Typography>
-      {!isArchive && (
+      {isArchive ? (
+        <IconButton
+          color="primary"
+          title={intl.formatMessage({ id: 'common.delete' })}
+          aria-label={intl.formatMessage({ id: 'common.delete' })}
+          component="span"
+          size="small"
+          onClick={handleAction('delete')}
+        >
+          <DeleteOutlinedIcon />
+        </IconButton>
+      ) : (
         <>
           {(e as Experiment).status === 'Paused' ? (
             <IconButton
@@ -145,20 +167,17 @@ const ExperimentListItem: React.FC<ExperimentListItemProps> = ({
             aria-label={intl.formatMessage({ id: 'archives.single' })}
             component="span"
             size="small"
-            onClick={handleAction('delete')}
+            onClick={handleAction('archive')}
           >
             <ArchiveOutlinedIcon />
           </IconButton>
         </>
       )}
-      <Button variant="outlined" color="primary" size="small">
-        {isArchive ? T('common.report') : T('common.detail')}
-      </Button>
     </Box>
   )
 
   return (
-    <Paper variant="outlined" className={classes.root} onClick={handleJumpTo}>
+    <Paper padding={false} className={classes.root} onClick={handleJumpTo}>
       <Box display="flex" justifyContent="space-between" alignItems="center" p={3}>
         <Box display="flex" alignItems="center" className={classes.marginRight}>
           {!isArchive &&

@@ -46,7 +46,7 @@ var (
 )
 
 // @title Chaos Mesh Dashboard API
-// @version 0.9
+// @version 1.0
 // @description Swagger docs for Chaos Mesh Dashboard. If you encounter any problems with API, please click on the issues link below to report bugs or questions.
 
 // @contact.name Issues
@@ -72,6 +72,7 @@ func main() {
 		log.Error(err, "main: invalid ChaosDashboardConfig")
 		os.Exit(1)
 	}
+	dashboardConfig.Version = version.Get().GitVersion
 
 	persistTTLConfigParsed, err := config.ParsePersistTTLConfig(dashboardConfig.PersistTTL)
 	if err != nil {

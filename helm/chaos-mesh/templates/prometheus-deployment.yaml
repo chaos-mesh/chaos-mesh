@@ -3,7 +3,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  namespace: {{ .Release.Namespace }}
+  namespace: {{ .Release.Namespace | quote }}
   name: chaos-prometheus
   labels:
     app.kubernetes.io/name: {{ template "chaos-mesh.name" . }}
@@ -42,7 +42,7 @@ spec:
               mountPath: /data
       containers:
       - name: prometheus
-        image: {{ .Values.prometheus.image }}
+        image: {{template "registry-prefix" .}}{{ .Values.prometheus.image }}
         imagePullPolicy: {{ .Values.prometheus.imagePullPolicy | default "IfNotPresent" }}
         {{- if .Values.chaosDaemon.resources }}
         resources:
@@ -93,7 +93,7 @@ spec:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  namespace: {{ .Release.Namespace }}
+  namespace: {{ .Release.Namespace | quote }}
   name: prometheus-pvc
 spec:
   {{- if .Values.prometheus.volume.storageClassName }}

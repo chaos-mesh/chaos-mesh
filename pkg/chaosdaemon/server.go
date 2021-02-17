@@ -18,6 +18,8 @@ import (
 	"fmt"
 	"net"
 
+	"github.com/moby/locker"
+
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	grpc_prometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 	"github.com/prometheus/client_golang/prometheus"
@@ -28,7 +30,7 @@ import (
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/bpm"
 	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
-	"github.com/chaos-mesh/chaos-mesh/pkg/utils"
+	grpcUtils "github.com/chaos-mesh/chaos-mesh/pkg/grpc"
 )
 
 var log = ctrl.Log.WithName("chaos-daemon-server")
@@ -58,6 +60,8 @@ func (c *Config) GrpcAddr() string {
 type DaemonServer struct {
 	crClient                 ContainerRuntimeInfoClient
 	backgroundProcessManager bpm.BackgroundProcessManager
+
+	IPSetLocker *locker.Locker
 }
 
 func newDaemonServer(containerRuntime string) (*DaemonServer, error) {
@@ -66,15 +70,13 @@ func newDaemonServer(containerRuntime string) (*DaemonServer, error) {
 		return nil, err
 	}
 
-	return &DaemonServer{
-		crClient:                 crClient,
-		backgroundProcessManager: bpm.NewBackgroundProcessManager(),
-	}, nil
+	return NewDaemonServerWithCRClient(crClient), nil
 }
 
 // NewDaemonServerWithCRClient returns DaemonServer with container runtime client
 func NewDaemonServerWithCRClient(crClient ContainerRuntimeInfoClient) *DaemonServer {
 	return &DaemonServer{
+		IPSetLocker:              locker.New(),
 		crClient:                 crClient,
 		backgroundProcessManager: bpm.NewBackgroundProcessManager(),
 	}
@@ -94,7 +96,7 @@ func newGRPCServer(containerRuntime string, reg prometheus.Registerer) (*grpc.Se
 
 	grpcOpts := []grpc.ServerOption{
 		grpc_middleware.WithUnaryServerChain(
-			utils.TimeoutServerInterceptor,
+			grpcUtils.TimeoutServerInterceptor,
 			grpcMetrics.UnaryServerInterceptor(),
 		),
 	}

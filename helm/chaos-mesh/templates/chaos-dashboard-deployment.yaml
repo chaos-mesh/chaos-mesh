@@ -2,7 +2,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  namespace: {{ .Release.Namespace }}
+  namespace: {{ .Release.Namespace | quote }}
   name: chaos-dashboard
   labels:
     app.kubernetes.io/name: {{ template "chaos-mesh.name" . }}
@@ -34,7 +34,7 @@ spec:
       priorityClassName: {{ .Values.dashboard.priorityClassName}}
       containers:
         - name: chaos-dashboard
-          image: {{ .Values.dashboard.image }}
+          image: {{template "registry-prefix" .}}{{ .Values.dashboard.image }}
           imagePullPolicy: {{ .Values.dashboard.imagePullPolicy | default "IfNotPresent" }}
           resources:
 {{ toYaml .Values.dashboard.resources | indent 12 }}
@@ -49,12 +49,10 @@ spec:
             - name: TZ
               value: {{ .Values.timezone | default "UTC" }}
             {{- end }}
-            - name: TARGET_NAMESPACE
-              value: {{ .Values.controllerManager.targetNamespace }}
             - name: CLUSTER_SCOPED
               value: "{{ .Values.clusterScoped }}"
-            - name: SECURITY_MODE
-              value: "{{ .Values.dashboard.securityMode }}"
+            - name: TARGET_NAMESPACE
+              value: {{ .Values.controllerManager.targetNamespace | quote }}
             {{- if .Values.controllerManager.allowedNamespaces }}
             - name: ALLOWED_NAMESPACES
               value: {{ .Values.controllerManager.allowedNamespaces }}
@@ -63,6 +61,10 @@ spec:
             - name: IGNORED_NAMESPACES
               value: {{ .Values.controllerManager.ignoredNamespaces }}
             {{- end }}
+            - name: SECURITY_MODE
+              value: "{{ .Values.dashboard.securityMode }}"
+            - name: DNS_SERVER_CREATE
+              value: "{{ .Values.dnsServer.create }}"
           volumeMounts:
             - name: storage-volume
               mountPath: {{ .Values.dashboard.persistentVolume.mountPath }}
@@ -94,7 +96,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  namespace: {{ .Release.Namespace }}
+  namespace: {{ .Release.Namespace | quote }}
   name: {{ template "chaos-dashboard.svc" . }}
   labels:
     app.kubernetes.io/name: {{ template "chaos-mesh.name" . }}
@@ -102,6 +104,10 @@ metadata:
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/component: chaos-dashboard
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+"  "_" }}
+{{- with .Values.dashboard.service.annotations }}
+  annotations:
+{{ toYaml . | indent 4 }}
+{{- end }}
 spec:
   selector:
     app.kubernetes.io/name: {{ template "chaos-mesh.name" . }}
