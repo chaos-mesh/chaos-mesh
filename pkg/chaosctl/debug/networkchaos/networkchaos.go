@@ -21,6 +21,8 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/pkg/errors"
+
 	"google.golang.org/grpc/grpclog"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -39,7 +41,7 @@ func Debug(ctx context.Context, chaos runtime.Object, c *cm.ClientSet, result *c
 	chaosStatus := networkChaos.Status.ChaosStatus
 	chaosSelector := networkChaos.Spec.GetSelector()
 
-	pods, daemons, err := cm.GetPods(ctx, chaosStatus, chaosSelector, c.CtrlCli)
+	pods, daemons, err := cm.GetPods(ctx, networkChaos.GetName(), chaosStatus, chaosSelector, c.CtrlCli)
 	if err != nil {
 		return err
 	}
@@ -51,11 +53,9 @@ func Debug(ctx context.Context, chaos runtime.Object, c *cm.ClientSet, result *c
 	for i := range pods {
 		podName := pods[i].Name
 		podResult := cm.PodResult{Name: podName}
-		err := debugEachPod(ctx, pods[i], daemons[i], networkChaos, c, &podResult)
+		_ = debugEachPod(ctx, pods[i], daemons[i], networkChaos, c, &podResult)
 		result.Pods = append(result.Pods, podResult)
-		if err != nil {
-			return fmt.Errorf("for %s: %s", podName, err.Error())
-		}
+		// TODO: V(4) log when err != nil, wait for #1433
 	}
 	return nil
 }
@@ -74,14 +74,14 @@ func debugEachPod(ctx context.Context, pod v1.Pod, daemon v1.Pod, chaos *v1alpha
 	cmd := fmt.Sprintf("/usr/bin/nsenter %s -- ipset list", nsenterPath)
 	out, err := cm.Exec(ctx, daemon, cmd, c.KubeCli)
 	if err != nil {
-		return fmt.Errorf("run command '%s' failed with: %s", cmd, err.Error())
+		return errors.Wrap(err, fmt.Sprintf("run command '%s' failed", cmd))
 	}
 	result.Items = append(result.Items, cm.ItemResult{Name: "ipset list", Value: string(out)})
 
 	cmd = fmt.Sprintf("/usr/bin/nsenter %s -- tc qdisc list", nsenterPath)
 	out, err = cm.Exec(ctx, daemon, cmd, c.KubeCli)
 	if err != nil {
-		return fmt.Errorf("run command '%s' failed with: %s", cmd, err.Error())
+		return errors.Wrap(err, fmt.Sprintf("run command '%s' failed", cmd))
 	}
 	itemResult := cm.ItemResult{Name: "tc qdisc list", Value: string(out)}
 
@@ -97,7 +97,7 @@ func debugEachPod(ctx context.Context, pod v1.Pod, daemon v1.Pod, chaos *v1alpha
 
 		netemCurrent := regexp.MustCompile("(?:limit 1000)(.*)").FindStringSubmatch(string(out))
 		if len(netemCurrent) == 0 {
-			return fmt.Errorf("No NetworkChaos is applied")
+			return fmt.Errorf("no NetworkChaos is applied")
 		}
 		for i, netem := range strings.Fields(netemCurrent[1]) {
 			itemCurrent := netem
@@ -107,11 +107,11 @@ func debugEachPod(ctx context.Context, pod v1.Pod, daemon v1.Pod, chaos *v1alpha
 				// digit could be different, so parse string to float
 				numCurrent, err := strconv.ParseFloat(r.FindString(itemCurrent), 64)
 				if err != nil {
-					return fmt.Errorf("parse itemCurrent failed: %s", err.Error())
+					return errors.Wrap(err, "parse itemCurrent failed")
 				}
 				numExpect, err := strconv.ParseFloat(r.FindString(itemExpect), 64)
 				if err != nil {
-					return fmt.Errorf("parse itemExpect failed: %s", err.Error())
+					return errors.Wrap(err, "parse itemExpect failed")
 				}
 				if numCurrent == numExpect {
 					continue
@@ -135,7 +135,7 @@ func debugEachPod(ctx context.Context, pod v1.Pod, daemon v1.Pod, chaos *v1alpha
 	cmd = fmt.Sprintf("/usr/bin/nsenter %s -- iptables --list", nsenterPath)
 	out, err = cm.Exec(ctx, daemon, cmd, c.KubeCli)
 	if err != nil {
-		return fmt.Errorf("run command '%s' failed with: %s", cmd, err.Error())
+		return errors.Wrap(err, fmt.Sprintf("run command %s failed", cmd))
 	}
 	result.Items = append(result.Items, cm.ItemResult{Name: "iptables list", Value: string(out)})
 
@@ -146,7 +146,7 @@ func debugEachPod(ctx context.Context, pod v1.Pod, daemon v1.Pod, chaos *v1alpha
 	}
 
 	if err = c.CtrlCli.Get(ctx, objectKey, podNetworkChaos); err != nil {
-		return fmt.Errorf("failed to get chaos: %s", err.Error())
+		return errors.Wrap(err, fmt.Sprintf("failed to get network chaos %s/%s", podNetworkChaos.GetNamespace(), podNetworkChaos.GetName()))
 	}
 	output, err := cm.MarshalChaos(podNetworkChaos.Spec)
 	if err != nil {

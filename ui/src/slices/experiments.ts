@@ -16,8 +16,12 @@ export const getAnnotations = createAsyncThunk(
   'common/annotations',
   async (podNamespaceList: string[]) => (await api.common.annotations(podNamespaceList)).data
 )
-export const getPodsByNamespaces = createAsyncThunk(
+export const getCommonPodsByNamespaces = createAsyncThunk(
   'common/pods',
+  async (data: Partial<ExperimentScope>) => (await api.common.pods(data)).data
+)
+export const getNetworkTargetPodsByNamespaces = createAsyncThunk(
+  'network/target/pods',
   async (data: Partial<ExperimentScope>) => (await api.common.pods(data)).data
 )
 
@@ -26,6 +30,8 @@ const initialState: {
   labels: Record<string, string[]>
   annotations: Record<string, string[]>
   pods: any[]
+  networkTargetPods: any[]
+  fromExternal: boolean
   step1: boolean
   step2: boolean
   kindAction: [Kind | '', string]
@@ -36,7 +42,9 @@ const initialState: {
   labels: {},
   annotations: {},
   pods: [],
+  networkTargetPods: [],
   // New Experiment needed
+  fromExternal: false,
   step1: false,
   step2: false,
   kindAction: ['', ''],
@@ -44,12 +52,13 @@ const initialState: {
   basic: {},
 }
 
-const namespaceFilters = ['kube-system']
-
 const experimentsSlice = createSlice({
   name: 'experiments',
   initialState,
   reducers: {
+    clearNetworkTargetPods(state) {
+      state.networkTargetPods = []
+    },
     setStep1(state, action: PayloadAction<boolean>) {
       state.step1 = action.payload
     },
@@ -65,7 +74,16 @@ const experimentsSlice = createSlice({
     setBasic(state, action) {
       state.basic = action.payload
     },
+    setExternalExperiment(state, action: PayloadAction<any>) {
+      const { kindAction, target, basic } = action.payload
+
+      state.fromExternal = true
+      state.kindAction = kindAction
+      state.target = target
+      state.basic = basic
+    },
     resetNewExperiment(state) {
+      state.fromExternal = false
       state.step1 = false
       state.step2 = false
       state.kindAction = ['', '']
@@ -75,7 +93,7 @@ const experimentsSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder.addCase(getNamespaces.fulfilled, (state, action) => {
-      state.namespaces = action.payload.filter((d) => !namespaceFilters.includes(d))
+      state.namespaces = action.payload
     })
     builder.addCase(getLabels.fulfilled, (state, action) => {
       state.labels = action.payload
@@ -83,12 +101,24 @@ const experimentsSlice = createSlice({
     builder.addCase(getAnnotations.fulfilled, (state, action) => {
       state.annotations = action.payload
     })
-    builder.addCase(getPodsByNamespaces.fulfilled, (state, action) => {
+    builder.addCase(getCommonPodsByNamespaces.fulfilled, (state, action) => {
       state.pods = action.payload as any[]
+    })
+    builder.addCase(getNetworkTargetPodsByNamespaces.fulfilled, (state, action) => {
+      state.networkTargetPods = action.payload as any[]
     })
   },
 })
 
-export const { setStep1, setStep2, setKindAction, setTarget, setBasic, resetNewExperiment } = experimentsSlice.actions
+export const {
+  clearNetworkTargetPods,
+  setStep1,
+  setStep2,
+  setKindAction,
+  setTarget,
+  setBasic,
+  setExternalExperiment,
+  resetNewExperiment,
+} = experimentsSlice.actions
 
 export default experimentsSlice.reducer

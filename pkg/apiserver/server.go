@@ -29,8 +29,6 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/config"
 	"github.com/chaos-mesh/chaos-mesh/pkg/swaggerserver"
 	"github.com/chaos-mesh/chaos-mesh/pkg/uiserver"
-
-	ctrl "sigs.k8s.io/controller-runtime"
 )
 
 var (
@@ -43,8 +41,6 @@ var (
 		handlerModule,
 		fx.Invoke(serverRegister),
 	)
-
-	log = ctrl.Log.WithName("apiserver")
 )
 
 func serverRegister(r *gin.Engine, conf *config.ChaosDashboardConfig) {

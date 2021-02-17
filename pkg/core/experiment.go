@@ -127,10 +127,7 @@ type SelectorInfo struct {
 // ParseSelector parses SelectorInfo to v1alpha1.SelectorSpec
 func (s *SelectorInfo) ParseSelector() v1alpha1.SelectorSpec {
 	selector := v1alpha1.SelectorSpec{}
-
-	for _, ns := range s.NamespaceSelectors {
-		selector.Namespaces = append(selector.Namespaces, ns)
-	}
+	selector.Namespaces = append(selector.Namespaces, s.NamespaceSelectors...)
 
 	selector.LabelSelectors = make(map[string]string)
 	for key, val := range s.LabelSelectors {
@@ -149,9 +146,7 @@ func (s *SelectorInfo) ParseSelector() v1alpha1.SelectorSpec {
 		selector.FieldSelectors[key] = val
 	}
 
-	for _, ph := range s.PhaseSelector {
-		selector.PodPhaseSelectors = append(selector.PodPhaseSelectors, ph)
-	}
+	selector.PodPhaseSelectors = append(selector.PodPhaseSelectors, s.PhaseSelector...)
 
 	if s.Pods != nil {
 		selector.Pods = s.Pods
@@ -182,6 +177,7 @@ type SchedulerInfo struct {
 type PodChaosInfo struct {
 	Action        string `json:"action" binding:"oneof='' 'pod-kill' 'pod-failure' 'container-kill'"`
 	ContainerName string `json:"container_name"`
+	GracePeriod   int64  `json:"grace_period"`
 }
 
 // NetworkChaosInfo defines the basic information of network chaos for creating a new NetworkChaos.

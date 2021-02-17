@@ -48,6 +48,7 @@ func WaitProcess(m *BackgroundProcessManager, cmd *ManagedProcess, exceedTime ti
 	procState, err := process.NewProcess(int32(pid))
 	Expect(err).To(BeNil())
 	ct, err := procState.CreateTime()
+	Expect(err).To(BeNil())
 	pair := ProcessPair{
 		Pid:        pid,
 		CreateTime: ct,
@@ -91,7 +92,7 @@ var _ = Describe("background process manager", func() {
 				SetIdentifier(identifier).
 				Build()
 			err = m.StartProcess(cmd2)
-			costedTime := time.Now().Sub(startTime)
+			costedTime := time.Since(startTime)
 			Expect(err).To(BeNil())
 			Expect(costedTime.Seconds()).Should(BeNumerically(">", 1.9))
 
@@ -149,7 +150,7 @@ var _ = Describe("background process manager", func() {
 
 			startTime := time.Now()
 			err = m.StartProcess(cmd2)
-			costedTime := time.Now().Sub(startTime)
+			costedTime := time.Since(startTime)
 			Expect(err).To(BeNil())
 			Expect(costedTime.Seconds()).Should(And(BeNumerically("<", 2), BeNumerically(">", 1)))
 

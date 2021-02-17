@@ -158,6 +158,10 @@ func (m *MockEventService) DeleteByFinishTime(context.Context, time.Duration) er
 	panic("implement me")
 }
 
+func (m *MockEventService) DeleteByUID(context.Context, string) error {
+	panic("implement me")
+}
+
 func (m *MockEventService) UpdateIncompleteEvents(context.Context, string, string) error {
 	panic("implement me")
 }

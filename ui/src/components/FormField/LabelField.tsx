@@ -43,31 +43,39 @@ const LabelField: React.FC<LabelFieldProps & TextFieldProps> = ({ isKV = false, 
     setText(e.target.value)
   }
 
+  const processText = () => {
+    const t = text.trim()
+
+    if (t === '') {
+      return
+    }
+
+    if (isKV && !/^.+:.+$/.test(t)) {
+      setError('Invalid key:value format')
+
+      return
+    }
+
+    const duplicate = labels.some((d) => d === t)
+
+    if (!duplicate) {
+      setLabels(labels.concat([t]))
+
+      if (error) {
+        setError('')
+      }
+    }
+
+    setText('')
+  }
+
   const onKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (error) {
       setError('')
     }
 
     if (e.key === ' ') {
-      const t = text.trim()
-
-      if (isKV && !/^[\w-]+:[\w-]+$/.test(t)) {
-        setError('Invalid key:value format')
-
-        return
-      }
-
-      const duplicate = labels.some((d) => d === t)
-
-      if (!duplicate) {
-        setLabels(labels.concat([t]))
-
-        if (error) {
-          setError('')
-        }
-      }
-
-      setText('')
+      processText()
     }
 
     if (e.key === 'Backspace' && text === '') {
@@ -108,6 +116,7 @@ const LabelField: React.FC<LabelFieldProps & TextFieldProps> = ({ isKV = false, 
             helperText={error !== '' ? error : isKV ? T('common.isKVHelperText') : props.helperText}
             onChange={onInputChange}
             onKeyDown={onKeyDown}
+            onBlur={processText}
             error={error !== ''}
           />
         )}

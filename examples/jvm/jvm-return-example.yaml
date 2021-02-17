@@ -1,0 +1,20 @@
+apiVersion: chaos-mesh.org/v1alpha1
+kind: JVMChaos
+metadata:
+  name: jvm-return-example
+  namespace: app
+spec:
+  action: return
+  target: jvm
+  flags:
+    value: "hello chaos mesh!"
+  matchers:
+    classname: "org.chaosmesh.jvm.Application"
+    methodname: "hello"
+  mode: one
+  selector:
+    labelSelectors:
+      app: springboot-jvmchaos-demo
+  duration: "50s"
+  scheduler:
+    cron: "@every 1m"

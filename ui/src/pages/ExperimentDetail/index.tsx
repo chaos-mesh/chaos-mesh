@@ -22,14 +22,16 @@ import PauseCircleOutlineIcon from '@material-ui/icons/PauseCircleOutline'
 import PlayCircleOutlineIcon from '@material-ui/icons/PlayCircleOutline'
 import Space from 'components-mui/Space'
 import T from 'components/T'
-import YAMLEditor from 'components/YAMLEditor'
 import api from 'api'
 import fileDownload from 'js-file-download'
 import genEventsChart from 'lib/d3/eventsChart'
+import loadable from '@loadable/component'
 import { useIntl } from 'react-intl'
 import { usePrevious } from 'lib/hooks'
 import { useSelector } from 'react-redux'
 import yaml from 'js-yaml'
+
+const YAMLEditor = loadable(() => import('components/YAMLEditor'))
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -206,16 +208,16 @@ export default function ExperimentDetail() {
         }
 
         if (action === 'pause' || action === 'start') {
-          fetchExperimentDetail()
+          setTimeout(fetchExperimentDetail, 300)
         }
       })
       .catch(console.error)
   }
 
-  const handleDownloadExperiment = () => fileDownload(yaml.safeDump(detail!.yaml), `${detail!.name}.yaml`)
+  const handleDownloadExperiment = () => fileDownload(yaml.dump(detail!.yaml), `${detail!.name}.yaml`)
 
   const handleUpdateExperiment = () => {
-    const data = yaml.safeLoad(yamlEditor!.getValue())
+    const data = yaml.load(yamlEditor!.getValue())
 
     api.experiments
       .update(data)
@@ -319,15 +321,15 @@ export default function ExperimentDetail() {
 
       <Modal open={configOpen} onClose={onModalClose}>
         <div>
-          <Paper className={classes.configPaper}>
-            {detail && (
+          <Paper className={classes.configPaper} padding={false}>
+            {detail && configOpen && (
               <>
                 <PaperTop title={detail.name}>
                   <Button variant="contained" color="primary" size="small" onClick={handleUpdateExperiment}>
                     {T('common.confirm')}
                   </Button>
                 </PaperTop>
-                <YAMLEditor theme={theme} data={yaml.safeDump(detail.yaml)} mountEditor={setYAMLEditor} />
+                <YAMLEditor theme={theme} data={yaml.dump(detail.yaml)} mountEditor={setYAMLEditor} />
               </>
             )}
           </Paper>

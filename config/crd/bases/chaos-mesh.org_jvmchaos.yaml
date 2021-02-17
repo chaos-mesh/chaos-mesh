@@ -37,8 +37,7 @@ spec:
           properties:
             action:
               description: 'Action defines the specific jvm chaos action. Supported
-                action: delay, return, script, cfl, oom, ccf, tce, delay4servlet,
-                tce4servlet'
+                action: delay;return;script;cfl;oom;ccf;tce;cpf;tde;tpf'
               enum:
               - delay
               - return
@@ -47,183 +46,27 @@ spec:
               - oom
               - ccf
               - tce
-              - delay4servlet
-              - tce4servlet
+              - cpf
+              - tde
+              - tpf
               type: string
-            cfl:
-              description: CpuFullload represents the detail about JVM chaos action
-                of CPU is full
-              properties:
-                after:
-                  description: After represents method execution is completed before
-                    the injection failure is returned.
-                  type: boolean
-                classname:
-                  description: Classname represents specify the class name, which
-                    must be an implementation class with a full package name, such
-                    as com.xxx.xxx.XController. required
-                  type: string
-                cpucount:
-                  description: CpuCount represents the number of CPU cores to bind
-                    to, that is, specify how many cores are full
-                  type: integer
-                methodname:
-                  description: Methodname represents specify the method name. Note
-                    that methods with the same method name will be injected with the
-                    same fault. required
-                  type: string
-              required:
-              - classname
-              - cpucount
-              - methodname
-              type: object
-            delay:
-              description: Delay represents the detail about JVM chaos action of invoke
-                delay
-              properties:
-                after:
-                  description: After represents method execution is completed before
-                    the injection failure is returned.
-                  type: boolean
-                classname:
-                  description: Classname represents specify the class name, which
-                    must be an implementation class with a full package name, such
-                    as com.xxx.xxx.XController. required
-                  type: string
-                methodname:
-                  description: Methodname represents specify the method name. Note
-                    that methods with the same method name will be injected with the
-                    same fault. required
-                  type: string
-                offset:
-                  description: Offset represents delay fluctuation time
-                  type: integer
-                time:
-                  description: Time represents delay time, in milliseconds, required
-                  type: integer
-              required:
-              - classname
-              - methodname
-              - time
-              type: object
-            delay4servlet:
-              description: Delay4Servlet represents the detail about JVM chaos action
-                of Servlet response delay
-              properties:
-                method:
-                  description: Method represents HTTP request method, such as GET,
-                    POST, DELETE or PUT. Default is GET
-                  enum:
-                  - GET
-                  - POST
-                  - PUT
-                  - DELETE
-                  type: string
-                offset:
-                  description: Offset represents delay fluctuation time
-                  type: integer
-                querystring:
-                  description: QueryString represents HTTP request query string
-                  type: string
-                requestpath:
-                  description: RequestPath represents HTTP request path. The path
-                    should start with /
-                  type: string
-                time:
-                  description: Time represents delay time, in milliseconds, required
-                  type: integer
-              required:
-              - requestpath
-              - time
-              type: object
             duration:
               description: Duration represents the duration of the chaos action
               type: string
-            effectcount:
-              description: EffectCount represents the number of affect
-              type: integer
-            effectpercent:
-              description: EffectPercent represents the percent of affect
-              type: integer
+            flags:
+              additionalProperties:
+                type: string
+              description: Flags represents the flags of action
+              type: object
+            matchers:
+              additionalProperties:
+                type: string
+              description: Matchers represents the matching rules for the target
+              type: object
             mode:
               description: 'Mode defines the mode to run chaos action. Supported mode:
                 one / all / fixed / fixed-percent / random-max-percent'
               type: string
-            oom:
-              description: OOM represents the detail about JVM chaos action of OOM
-                exception
-              properties:
-                after:
-                  description: After represents method execution is completed before
-                    the injection failure is returned.
-                  type: boolean
-                area:
-                  description: Area represents JVM memory area, currently supported
-                    [HEAP, NOHEAP, OFFHEAP], required. Eden+Old is denoted by HEAP
-                    Metaspace is denoted by NOHEAP off-heap memory is denoted by OFFHEAP
-                  enum:
-                  - HEAP
-                  - NOHEAP
-                  - OFFHEAP
-                  type: string
-                block:
-                  description: Block represents specifies the size of the object that
-                    supports only the HEAP and OFFHEAP areas in MB
-                  type: string
-                classname:
-                  description: Classname represents specify the class name, which
-                    must be an implementation class with a full package name, such
-                    as com.xxx.xxx.XController. required
-                  type: string
-                interval:
-                  description: Interval represents unit MS, default interval between
-                    500 OOM exceptions, only in non-violent mode, can slow down the
-                    frequency of GC without worrying about the process being unresponsive
-                  type: integer
-                methodname:
-                  description: Methodname represents specify the method name. Note
-                    that methods with the same method name will be injected with the
-                    same fault. required
-                  type: string
-                wildmode:
-                  description: WildMode represents default false, whether to turn
-                    on wild mode or not. If it is wild mode, the memory created before
-                    will not be released after OOM occurrence, which may cause the
-                    application process to be unresponsive
-                  type: boolean
-              required:
-              - area
-              - classname
-              - methodname
-              type: object
-            return:
-              description: Return represents the detail about JVM chaos action of
-                return value
-              properties:
-                after:
-                  description: After represents method execution is completed before
-                    the injection failure is returned.
-                  type: boolean
-                classname:
-                  description: Classname represents specify the class name, which
-                    must be an implementation class with a full package name, such
-                    as com.xxx.xxx.XController. required
-                  type: string
-                methodname:
-                  description: Methodname represents specify the method name. Note
-                    that methods with the same method name will be injected with the
-                    same fault. required
-                  type: string
-                value:
-                  description: Value represents specifies the return value of a class
-                    method, supporting only primitive, null, and String return values.
-                    required
-                  type: string
-              required:
-              - classname
-              - methodname
-              - value
-              type: object
             scheduler:
               description: Scheduler defines some schedule rules to control the running
                 time of the chaos experiment about time.
@@ -236,46 +79,6 @@ spec:
                   type: string
               required:
               - cron
-              type: object
-            script:
-              description: Script represents the detail about JVM chaos action of
-                Java or Groovy scripts
-              properties:
-                after:
-                  description: After represents method execution is completed before
-                    the injection failure is returned.
-                  type: boolean
-                classname:
-                  description: Classname represents specify the class name, which
-                    must be an implementation class with a full package name, such
-                    as com.xxx.xxx.XController. required
-                  type: string
-                content:
-                  description: Content represents the script content is Base64 encoded
-                    content. Note that it cannot be used with file
-                  type: string
-                file:
-                  description: File represents script file, absolute path to file
-                    Note that it cannot be used with content
-                  type: string
-                methodname:
-                  description: Methodname represents specify the method name. Note
-                    that methods with the same method name will be injected with the
-                    same fault. required
-                  type: string
-                name:
-                  description: Name represents script name, use for logging
-                  type: string
-                type:
-                  description: Type represents script type, java or groovy, default
-                    to java
-                  enum:
-                  - java
-                  - groovy
-                  type: string
-              required:
-              - classname
-              - methodname
               type: object
             selector:
               description: Selector is used to select pods that are used to inject
@@ -365,69 +168,24 @@ spec:
                     belong, and the each values is a set of pod names.
                   type: object
               type: object
-            tce:
-              description: Exception represents the detail about JVM chaos action
-                of throwing custom exceptions
-              properties:
-                after:
-                  description: After represents method execution is completed before
-                    the injection failure is returned.
-                  type: boolean
-                classname:
-                  description: Classname represents specify the class name, which
-                    must be an implementation class with a full package name, such
-                    as com.xxx.xxx.XController. required
-                  type: string
-                exception:
-                  description: Exception represents the Exception class, with the
-                    full package name, must inherit from java.lang.Exception or Java.lang.Exception
-                    itself
-                  type: string
-                message:
-                  description: Message represents specifies the exception class information.
-                  type: string
-                methodname:
-                  description: Methodname represents specify the method name. Note
-                    that methods with the same method name will be injected with the
-                    same fault. required
-                  type: string
-              required:
-              - classname
-              - exception
-              - methodname
-              type: object
-            tce4servlet:
-              description: Exception4Servlet represents the detail about JVM chaos
-                action of Servlet throwing custom exceptions
-              properties:
-                exception:
-                  description: Exception represents the Exception class, with the
-                    full package name, must inherit from java.lang.Exception or Java.lang.Exception
-                    itself
-                  type: string
-                message:
-                  description: Message represents specifies the exception class information.
-                  type: string
-                method:
-                  description: Method represents HTTP request method, such as GET,
-                    POST, DELETE or PUT. Default is GET
-                  enum:
-                  - GET
-                  - POST
-                  - PUT
-                  - DELETE
-                  type: string
-                querystring:
-                  description: QueryString represents HTTP request query string
-                  type: string
-                requestpath:
-                  description: RequestPath represents HTTP request path. The path
-                    should start with /
-                  type: string
-              required:
-              - exception
-              - requestpath
-              type: object
+            target:
+              description: 'Target defines the specific jvm chaos target. Supported
+                target: servlet;psql;jvm;jedis;http;dubbo;rocketmq;tars;mysql;druid;redisson;rabbitmq;mongodb'
+              enum:
+              - servlet
+              - psql
+              - jvm
+              - jedis
+              - http
+              - dubbo
+              - rocketmq
+              - tars
+              - mysql
+              - druid
+              - redisson
+              - rabbitmq
+              - mongodb
+              type: string
             value:
               description: Value is required when the mode is set to `FixedPodMode`
                 / `FixedPercentPodMod` / `RandomMaxPercentPodMod`. If `FixedPodMode`,
@@ -440,6 +198,7 @@ spec:
           - action
           - mode
           - selector
+          - target
           type: object
         status:
           description: JVMChaosStatus defines the observed state of JVMChaos

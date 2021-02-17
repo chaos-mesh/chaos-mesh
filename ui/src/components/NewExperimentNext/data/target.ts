@@ -137,6 +137,12 @@ const data: Record<Kind, Target> = {
         key: 'pod-kill',
         spec: {
           action: 'pod-kill' as any,
+          grace_period: {
+            field: 'number',
+            label: 'Grace Period',
+            value: 0,
+            helperText: 'Optional. Grace period represents the duration in seconds before the pod should be deleted',
+          },
         },
       },
       {
@@ -420,6 +426,9 @@ const data: Record<Kind, Target> = {
 
 export const schema: Partial<Record<Kind, Record<string, Yup.ObjectSchema>>> = {
   PodChaos: {
+    'pod-kill': Yup.object({
+      grace_period: Yup.number().min(0, 'Grace period must be non-negative integer'),
+    }),
     'container-kill': Yup.object({
       container_name: Yup.string().required('The container name is required'),
     }),
@@ -427,30 +436,48 @@ export const schema: Partial<Record<Kind, Record<string, Yup.ObjectSchema>>> = {
   NetworkChaos: {
     partition: Yup.object({
       direction: Yup.string().required('The direction is required'),
+      target_scope: Yup.object({
+        namespace_selectors: Yup.array().min(1, 'The namespace selectors is required'),
+      }),
     }),
     loss: Yup.object({
       loss: Yup.object({
         loss: Yup.string().required('The loss is required'),
+      }),
+      target_scope: Yup.object({
+        namespace_selectors: Yup.array().min(1, 'The namespace selectors is required'),
       }),
     }),
     delay: Yup.object({
       delay: Yup.object({
         latency: Yup.string().required('The latency is required'),
       }),
+      target_scope: Yup.object({
+        namespace_selectors: Yup.array().min(1, 'The namespace selectors is required'),
+      }),
     }),
     duplicate: Yup.object({
       duplicate: Yup.object({
         duplicate: Yup.string().required('The duplicate is required'),
+      }),
+      target_scope: Yup.object({
+        namespace_selectors: Yup.array().min(1, 'The namespace selectors is required'),
       }),
     }),
     corrupt: Yup.object({
       corrupt: Yup.object({
         corrupt: Yup.string().required('The corrupt is required'),
       }),
+      target_scope: Yup.object({
+        namespace_selectors: Yup.array().min(1, 'The namespace selectors is required'),
+      }),
     }),
     bandwidth: Yup.object({
       bandwidth: Yup.object({
         rate: Yup.string().required('The rate of bandwidth is required'),
+      }),
+      target_scope: Yup.object({
+        namespace_selectors: Yup.array().min(1, 'The namespace selectors is required'),
       }),
     }),
   },

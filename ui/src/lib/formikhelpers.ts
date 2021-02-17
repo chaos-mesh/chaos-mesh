@@ -3,7 +3,6 @@ import { CallchainFrame, Experiment, ExperimentScope } from 'components/NewExper
 import _snakecase from 'lodash.snakecase'
 import basic from 'components/NewExperimentNext/data/basic'
 import snakeCaseKeys from 'snakecase-keys'
-import target from 'components/NewExperimentNext/data/target'
 
 export function parseSubmit(e: Experiment) {
   const values: Experiment = JSON.parse(JSON.stringify(e))
@@ -16,7 +15,7 @@ export function parseSubmit(e: Experiment) {
   // Parse labels, label_selectors, annotations and annotation_selectors to object
   function helper1(selectors: string[], updateVal?: (s: string) => any) {
     return selectors.reduce((acc: Record<string, any>, d) => {
-      const splited = d.replace(/\s/g, '').split(':')
+      const splited = d.replace(/\s/g, '').split(/:(.+)/)
 
       acc[splited[0]] = typeof updateVal === 'function' ? updateVal(splited[1]) : splited[1]
 
@@ -156,12 +155,15 @@ export function yamlToExperiment(yamlObj: any): any {
 
   if (kind === 'StressChaos') {
     spec.stressors.cpu = {
-      ...(target.StressChaos.spec!.stressors as any).cpu,
+      workers: 0,
+      load: 0,
+      options: [],
       ...spec.stressors.cpu,
     }
 
     spec.stressors.memory = {
-      ...(target.StressChaos.spec!.stressors as any).memory,
+      workers: 0,
+      options: [],
       ...spec.stressors.memory,
     }
   }
