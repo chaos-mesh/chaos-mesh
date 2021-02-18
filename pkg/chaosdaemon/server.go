@@ -18,9 +18,10 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"fmt"
-	"google.golang.org/grpc/credentials"
 	"io/ioutil"
 	"net"
+
+	"google.golang.org/grpc/credentials"
 
 	"github.com/moby/locker"
 
@@ -55,8 +56,8 @@ type Config struct {
 // TLSConfig contains the config of TLS Server
 type TLSConfig struct {
 	CaCert string
-	Cert string
-	Key string
+	Cert   string
+	Key    string
 }
 
 // Get the http address
@@ -114,7 +115,7 @@ func newGRPCServer(containerRuntime string, reg prometheus.Registerer, tlsConfig
 		),
 	}
 
-	if tlsConfig != (TLSConfig {}) {
+	if tlsConfig != (TLSConfig{}) {
 		caCert, err := ioutil.ReadFile(tlsConfig.CaCert)
 		if err != nil {
 			return nil, err

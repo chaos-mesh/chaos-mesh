@@ -15,10 +15,12 @@ package client
 
 import (
 	"context"
-	"github.com/chaos-mesh/chaos-mesh/controllers/config"
+
 	"github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
+
+	"github.com/chaos-mesh/chaos-mesh/controllers/config"
 
 	"google.golang.org/grpc"
 	v1 "k8s.io/api/core/v1"

@@ -18,9 +18,10 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"fmt"
-	"google.golang.org/grpc/credentials"
 	"io/ioutil"
 	"time"
+
+	"google.golang.org/grpc/credentials"
 
 	"google.golang.org/grpc"
 	v1 "k8s.io/api/core/v1"
