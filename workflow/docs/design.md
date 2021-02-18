@@ -308,7 +308,7 @@ Detail about instating template:
 
 After calling `Scheduler.ScheduleNext()`, it will return
 
-- which template should be instated
+- which template should be instantiated
 - the parent node of template's new node instant
 
 1. update the state of parent node to `WaitingForChild`

@@ -33,7 +33,7 @@ func toJsonOrFallbackToError(origin error) string {
 			)
 		}
 		return fmt.Sprintf(
-			"failed to jsonify erro on type %s, json error, %s; also failed to Unwrap() on it.",
+			"failed to jsonify error on type %s, json error, %s; also failed to Unwrap() on it.",
 			reflect.TypeOf(origin).Name(),
 			err,
 		)
