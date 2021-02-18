@@ -35,16 +35,18 @@ type AwsChaosAction string
 const (
 	// Ec2Stop represents the chaos action of stopping ec2.
 	Ec2Stop AwsChaosAction = "ec2-stop"
+	// Ec2Restart represents the chaos action of restarting ec2.
+	Ec2Restart AwsChaosAction = "ec2-restart"
 	// DetachVolume represents the chaos action of detaching the volume of ec2.
 	DetachVolume AwsChaosAction = "detach-volume"
 )
 
-// AwsChaosSpec is the content of the specification for a AwsChaos
+// AwsChaosSpec is the content of the specification for an AwsChaos
 type AwsChaosSpec struct {
 	// Action defines the specific aws chaos action.
-	// Supported action: ec2-stop / detach-volume
+	// Supported action: ec2-stop / ec2-restart / detach-volume
 	// Default action: ec2-stop
-	// +kubebuilder:validation:Enum=ec2-stop;detach-volume
+	// +kubebuilder:validation:Enum=ec2-stop;ec2-restart;detach-volume
 	Action AwsChaosAction `json:"action"`
 
 	// Duration represents the duration of the chaos action.
@@ -76,7 +78,7 @@ type AwsChaosSpec struct {
 	DeviceName *string `json:"deviceName,omitempty"`
 }
 
-// AwsChaosStatus represents the status of a AwsChaos
+// AwsChaosStatus represents the status of an AwsChaos
 type AwsChaosStatus struct {
 	ChaosStatus `json:",inline"`
 }
