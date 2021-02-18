@@ -29,10 +29,24 @@ func (in *AwsChaos) IsDeleted() bool {
 
 // IsPaused returns whether this resource has been paused
 func (in *AwsChaos) IsPaused() bool {
-	if in.Annotations == nil || in.Annotations[PauseAnnotationKey] != "true" {
+	if in.Annotations == nil || (in.Annotations[PauseAnnotationKey] != "true" && in.Annotations[PauseDurationAnnotationKey] != "") {
 		return false
 	}
 	return true
+}
+
+// GetPause returns the annotation when if chaos is paused
+// return empty when annotations is not set, or pause key is set to empty
+func (in *AwsChaos) GetPause() string {
+	if in.Annotations == nil {
+		return ""
+	}
+	return in.Annotations[PauseDurationAnnotationKey]
+}
+
+// RecoverPause sets the pausetime to empty, to stop pause
+func (in *AwsChaos) RecoverPause() {
+	in.Annotations[PauseDurationAnnotationKey] = ""
 }
 
 // GetDuration would return the duration for chaos
@@ -83,6 +97,25 @@ func (in *AwsChaos) SetNextRecover(t time.Time) {
 		in.Status.Scheduler.NextRecover = &metav1.Time{}
 	}
 	in.Status.Scheduler.NextRecover.Time = t
+}
+
+func (in *AwsChaos) GetAutoResume() time.Time {
+	if in.Status.Scheduler.AutoResume == nil {
+		return time.Time{}
+	}
+	return in.Status.Scheduler.AutoResume.Time
+}
+
+func (in *AwsChaos) SetAutoResume(t time.Time) {
+	if t.IsZero() {
+		in.Status.Scheduler.AutoResume = nil
+		return
+	}
+
+	if in.Status.Scheduler.AutoResume == nil {
+		in.Status.Scheduler.AutoResume = &metav1.Time{}
+	}
+	in.Status.Scheduler.AutoResume.Time = t
 }
 
 // GetScheduler would return the scheduler for chaos

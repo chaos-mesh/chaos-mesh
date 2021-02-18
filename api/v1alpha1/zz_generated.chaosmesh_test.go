@@ -35,13 +35,21 @@ func TestAwsChaosIsDeleted(t *testing.T) {
 
 func TestAwsChaosIsIsPaused(t *testing.T) {
 	g := NewGomegaWithT(t)
+	chaos := &AwsChaos{}
+	err := faker.FakeData(chaos)
+	g.Expect(err).To(BeNil())
+	chaos.IsPaused()
+}
+
+func TestAwsChaosGetPause(t *testing.T) {
+	g := NewGomegaWithT(t)
 
 	chaos := &AwsChaos{}
 	err := faker.FakeData(chaos)
 
 	g.Expect(err).To(BeNil())
 
-	chaos.IsPaused()
+	chaos.GetPause()
 }
 
 func TestAwsChaosGetDuration(t *testing.T) {
