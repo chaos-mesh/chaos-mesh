@@ -26,7 +26,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	ctx "github.com/chaos-mesh/chaos-mesh/pkg/router/context"
 	"github.com/chaos-mesh/chaos-mesh/pkg/router/endpoint"
-	"github.com/chaos-mesh/chaos-mesh/pkg/utils"
+	sch "github.com/chaos-mesh/chaos-mesh/pkg/scheduler"
 
 	ctrl "sigs.k8s.io/controller-runtime"
 )
@@ -174,13 +174,13 @@ func ifStartAtWaitingPhase(chaos v1alpha1.InnerSchedulerObject, now time.Time, l
 		return "", nil, fmt.Errorf("misdefined scheduler")
 	}
 
-	lastStart, err := utils.LastTime(*scheduler, now)
+	lastStart, err := sch.LastTime(*scheduler, now)
 	if err != nil {
 		log.Error(err, "failed to get the last start time")
 		return "", nil, err
 	}
 	if lastStart.Add(*duration).Before(now) {
-		nextStart, err := utils.NextTime(*scheduler, now)
+		nextStart, err := nextTime(*scheduler, now)
 		if err != nil {
 			log.Error(err, "failed to get the next start time")
 			return "", nil, err
