@@ -75,10 +75,17 @@ func (in *AwsChaos) Validate() error {
 // ValidateScheduler validates the scheduler and duration
 func (in *AwsChaos) ValidateScheduler(spec *field.Path) field.ErrorList {
 	allErrs := field.ErrorList{}
+	schedulerField := spec.Child("scheduler")
 
 	switch in.Spec.Action {
 	case Ec2Stop, DetachVolume:
 		allErrs = append(allErrs, ValidateScheduler(in, spec)...)
+	case Ec2Restart:
+		// We choose to ignore the Duration property even user define it
+		if in.Spec.Scheduler != nil {
+			_, err := ParseCron(in.Spec.Scheduler.Cron, schedulerField.Child("cron"))
+			allErrs = append(allErrs, err...)
+		}
 	default:
 		err := fmt.Errorf("awschaos[%s/%s] have unknown action type", in.Namespace, in.Name)
 		log.Error(err, "Wrong AwsChaos Action type")
