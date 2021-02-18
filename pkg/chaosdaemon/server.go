@@ -15,7 +15,11 @@ package chaosdaemon
 
 import (
 	"context"
+	"crypto/tls"
+	"crypto/x509"
 	"fmt"
+	"google.golang.org/grpc/credentials"
+	"io/ioutil"
 	"net"
 
 	"github.com/moby/locker"
@@ -44,6 +48,15 @@ type Config struct {
 	Host      string
 	Runtime   string
 	Profiling bool
+
+	TLSConfig
+}
+
+// TLSConfig contains the config of TLS Server
+type TLSConfig struct {
+	CaCert string
+	Cert string
+	Key string
 }
 
 // Get the http address
@@ -82,7 +95,7 @@ func NewDaemonServerWithCRClient(crClient ContainerRuntimeInfoClient) *DaemonSer
 	}
 }
 
-func newGRPCServer(containerRuntime string, reg prometheus.Registerer) (*grpc.Server, error) {
+func newGRPCServer(containerRuntime string, reg prometheus.Registerer, tlsConfig TLSConfig) (*grpc.Server, error) {
 	ds, err := newDaemonServer(containerRuntime)
 	if err != nil {
 		return nil, err
@@ -99,6 +112,28 @@ func newGRPCServer(containerRuntime string, reg prometheus.Registerer) (*grpc.Se
 			grpcUtils.TimeoutServerInterceptor,
 			grpcMetrics.UnaryServerInterceptor(),
 		),
+	}
+
+	if tlsConfig != (TLSConfig {}) {
+		caCert, err := ioutil.ReadFile(tlsConfig.CaCert)
+		if err != nil {
+			return nil, err
+		}
+		caCertPool := x509.NewCertPool()
+		caCertPool.AppendCertsFromPEM(caCert)
+
+		serverCert, err := tls.LoadX509KeyPair(tlsConfig.Cert, tlsConfig.Key)
+		if err != nil {
+			return nil, err
+		}
+
+		creds := credentials.NewTLS(&tls.Config{
+			Certificates: []tls.Certificate{serverCert},
+			ClientCAs:    caCertPool,
+			ClientAuth:   tls.RequireAndVerifyClientCert,
+		})
+
+		grpcOpts = append(grpcOpts, grpc.Creds(creds))
 	}
 
 	s := grpc.NewServer(grpcOpts...)
@@ -130,7 +165,7 @@ func StartServer(conf *Config, reg RegisterGatherer) error {
 		return err
 	}
 
-	grpcServer, err := newGRPCServer(conf.Runtime, reg)
+	grpcServer, err := newGRPCServer(conf.Runtime, reg, conf.TLSConfig)
 	if err != nil {
 		log.Error(err, "failed to create grpc server")
 		return err

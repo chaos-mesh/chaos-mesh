@@ -21,8 +21,9 @@ spec:
         app.kubernetes.io/name: {{ template "chaos-mesh.name" . }}
         app.kubernetes.io/instance: {{ .Release.Name }}
         app.kubernetes.io/component: chaos-daemon
-    {{- with .Values.chaosDaemon.podAnnotations }}
       annotations:
+        rollme: {{ randAlphaNum 5 | quote }}
+    {{- with .Values.chaosDaemon.podAnnotations }}
 {{ toYaml . | indent 8 }}
     {{- end }}
     spec:
@@ -53,6 +54,14 @@ spec:
             - !!str {{ .Values.chaosDaemon.grpcPort }}
           {{- if .Values.enableProfiling }}
             - --pprof
+          {{- end }}
+          {{- if .Values.dashboard.securityMode }}
+            - --ca
+            - /etc/chao-mesh/ca/ca.crt
+            - --cert
+            - /etc/chaos-daemon/cert/server.crt
+            - --key
+            - /etc/chaos-daemon/cert/server.key
           {{- end }}
           env:
             {{- range $envKey, $envVal := .Values.chaosDaemon.env }}
@@ -90,6 +99,14 @@ spec:
               {{- end }}
             - name: sys-path
               mountPath: /sys
+            {{- if .Values.dashboard.securityMode}}
+            - name: chaos-daemon-cert
+              mountPath: /etc/chaos-daemon/cert
+              readOnly: true
+            - name: chaos-mesh-ca-cert
+              mountPath: /etc/chao-mesh/ca
+              readOnly: true
+            {{- end }}
           ports:
             - name: grpc
               containerPort: {{ .Values.chaosDaemon.grpcPort }}
@@ -132,6 +149,14 @@ spec:
         - name: sys-path
           hostPath:
             path: /sys
+        {{- if .Values.dashboard.securityMode}}
+        - name: chaos-daemon-cert
+          secret:
+            secretName: chaos-daemon-cert
+        - name: chaos-mesh-ca-cert
+          secret:
+            secretName: chaos-mesh-ca-cert
+        {{- end }}
 {{- if .Values.bpfki.create }}
         - name: localtime-path
           hostPath:

@@ -309,7 +309,8 @@ func GetPidFromPod(ctx context.Context, pod v1.Pod, daemon v1.Pod) (uint32, erro
 		pfCancel()
 	}()
 
-	daemonClient, err := daemonClient.NewChaosDaemonClientLocally(int(localPort))
+	// TODO: support specify the cert file or get cert file automatically
+	daemonClient, err := daemonClient.NewChaosDaemonClientLocally(int(localPort), "", "", "")
 	if err != nil {
 		return 0, errors.Wrapf(err, "failed to create new chaos daemon client with local port %d", localPort)
 	}

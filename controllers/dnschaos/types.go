@@ -135,8 +135,7 @@ func (r *endpoint) Recover(ctx context.Context, req ctrl.Request, chaos v1alpha1
 func (r *recoverer) RecoverPod(ctx context.Context, pod *v1.Pod, somechaos v1alpha1.InnerObject) error {
 	r.Log.Info("Try to recover pod", "namespace", pod.Namespace, "name", pod.Name)
 
-	daemonClient, err := client.NewChaosDaemonClient(ctx, r.Client,
-		pod, config.ControllerCfg.ChaosDaemonPort)
+	daemonClient, err := client.NewChaosDaemonClient(ctx, r.Client, pod)
 	if err != nil {
 		r.Log.Error(err, "get chaos daemon client")
 		return err
@@ -193,8 +192,7 @@ func (r *endpoint) applyAllPods(ctx context.Context, pods []v1.Pod, chaos *v1alp
 func (r *endpoint) applyPod(ctx context.Context, pod *v1.Pod, dnsServerIP string) error {
 	r.Log.Info("Try to apply dns chaos", "namespace",
 		pod.Namespace, "name", pod.Name)
-	daemonClient, err := client.NewChaosDaemonClient(ctx, r.Client,
-		pod, config.ControllerCfg.ChaosDaemonPort)
+	daemonClient, err := client.NewChaosDaemonClient(ctx, r.Client, pod)
 	if err != nil {
 		r.Log.Error(err, "get chaos daemon client")
 		return err

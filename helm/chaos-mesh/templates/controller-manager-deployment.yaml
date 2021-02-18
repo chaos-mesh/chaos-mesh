@@ -84,10 +84,26 @@ spec:
             value: {{ .Values.dnsServer.name }}
           - name: CHAOS_DNS_SERVICE_PORT
             value: !!str {{ .Values.dnsServer.grpcPort }}
+          {{- if .Values.dashboard.securityMode}}
+          - name: CHAOS_DAEMON_CLIENT_CERT
+            value: /etc/chaos-daemon/cert/client.crt
+          - name: CHAOS_DAEMON_CLIENT_KEY
+            value: /etc/chaos-daemon/cert/client.key
+          - name: CHAOS_MESH_CA_CERT
+            value: /etc/chao-mesh/ca/ca.crt
+          {{- end }}
         volumeMounts:
           - name: webhook-certs
             mountPath: /etc/webhook/certs
             readOnly: true
+          {{- if .Values.dashboard.securityMode }}
+          - name: chaos-daemon-client-cert
+            mountPath: /etc/chaos-daemon/cert
+            readOnly: true
+          - name: chaos-mesh-ca-cert
+            mountPath: /etc/chao-mesh/ca
+            readOnly: true
+          {{- end }}
         ports:
           - name: webhook
             containerPort: 9443 # Customize containerPort
@@ -101,6 +117,14 @@ spec:
         - name: webhook-certs
           secret:
             secretName: {{ template "chaos-mesh.certs" . }}
+        {{- if .Values.dashboard.securityMode }}
+        - name: chaos-daemon-client-cert
+          secret:
+            secretName: chaos-daemon-client-cert
+        - name: chaos-mesh-ca-cert
+          secret:
+            secretName: chaos-mesh-ca-cert
+        {{- end }}
     {{- with .Values.controllerManager.nodeSelector }}
       nodeSelector:
 {{ toYaml . | indent 8 }}

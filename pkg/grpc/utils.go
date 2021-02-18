@@ -15,18 +15,16 @@ package grpc
 
 import (
 	"context"
+	"crypto/tls"
+	"crypto/x509"
 	"fmt"
+	"google.golang.org/grpc/credentials"
+	"io/ioutil"
 	"time"
 
-	"github.com/pkg/errors"
 	"google.golang.org/grpc"
 	v1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
-
-	"github.com/chaos-mesh/chaos-mesh/controllers/config"
-
-	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 // DefaultRPCTimeout specifies default timeout of RPC between controller and chaos-operator
@@ -37,33 +35,35 @@ var RPCTimeout = DefaultRPCTimeout
 
 var log = ctrl.Log.WithName("util")
 
-// CreateGrpcConnection create a grpc connection with given port
-func CreateGrpcConnection(ctx context.Context, c client.Client, pod *v1.Pod, port int) (*grpc.ClientConn, error) {
-	nodeName := pod.Spec.NodeName
-	log.Info("Creating client to chaos-daemon", "node", nodeName)
-
-	ns := config.ControllerCfg.Namespace
-	var endpoints v1.Endpoints
-	err := c.Get(ctx, types.NamespacedName{
-		Namespace: ns,
-		Name:      "chaos-daemon",
-	}, &endpoints)
-	if err != nil {
-		return nil, err
-	}
-
-	daemonIP := findIPOnEndpoints(&endpoints, nodeName)
-	if len(daemonIP) == 0 {
-		return nil, errors.Errorf("cannot find daemonIP on node %s in related Endpoints %v", nodeName, endpoints)
-	}
-	return CreateGrpcConnectionWithAddress(daemonIP, port)
-}
-
 // CreateGrpcConnectionWithAddress create a grpc connection with given port and address
-func CreateGrpcConnectionWithAddress(address string, port int) (*grpc.ClientConn, error) {
+func CreateGrpcConnectionWithAddress(address string, port int, caCert string, cert string, key string) (*grpc.ClientConn, error) {
+	options := []grpc.DialOption{grpc.WithUnaryInterceptor(TimeoutClientInterceptor)}
+
+	if caCert != "" && cert != "" && key != "" {
+		caCert, err := ioutil.ReadFile(caCert)
+		if err != nil {
+			return nil, err
+		}
+		caCertPool := x509.NewCertPool()
+		caCertPool.AppendCertsFromPEM(caCert)
+
+		clientCert, err := tls.LoadX509KeyPair(cert, key)
+		if err != nil {
+			return nil, err
+		}
+
+		creds := credentials.NewTLS(&tls.Config{
+			Certificates: []tls.Certificate{clientCert},
+			RootCAs:      caCertPool,
+			ServerName:   "chaos-daemon.chaos-mesh.org",
+		})
+		options = append(options, grpc.WithTransportCredentials(creds))
+	} else {
+		options = append(options, grpc.WithInsecure())
+	}
+
 	conn, err := grpc.Dial(fmt.Sprintf("%s:%d", address, port),
-		grpc.WithInsecure(),
-		grpc.WithUnaryInterceptor(TimeoutClientInterceptor))
+		options...)
 	if err != nil {
 		return nil, err
 	}
