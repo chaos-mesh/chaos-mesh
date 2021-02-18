@@ -2,7 +2,7 @@
 
 This file lists the maintainers and committers of the Chaos Mesh project.
 
-In short, maintainers are people who are in charge of the maintenance of the Chaos Mesh project.Committers are active community members who have shown that they are committed to the continuous development of the project through ongoing engagement with the community. For detailed description of the roles, see [Chaos Mesh Governance](https://github.com/chaos-mesh/chaos-mesh/blob/master/GOVERNANCE.md)
+In short, maintainers are people who are in charge of the maintenance of the Chaos Mesh project. Committers are active community members who have shown that they are committed to the continuous development of the project through ongoing engagement with the community. For detailed description of the roles, see [Chaos Mesh Governance](https://github.com/chaos-mesh/chaos-mesh/blob/master/GOVERNANCE.md).
 
 The maintainers of Chaos Mesh, along with their emails, are listed below:
 
@@ -23,11 +23,11 @@ The Committers of Chaos Mesh, along with their emails and focus area, are
 
 | Name                         | Email                    | Org     |
 |------------------------------|--------------------------|---------|
-| Glen Yang ([[G1eny0ung](https://github.com/g1eny0ung))  | yangyue@pingcap.com      | PingCAP |
-| Yihao Fu ([fewdan](https://github.com/fewdan))            | fuyihao@pingcap.com      | PingCAP |
-| Jiaxing Wu ([Colstuwjx](https://github.com/Colstuwjx) )       | wjx_colstu@hotmail.com             |   Kingnet      |
-| Shuyang Wu ([Yiyiyimu](https://github.com/Yiyiyimu) )        | wosoyoung@gmail.com                        |   APISIX      |
-| Shenan Zhang ([Andrewmatilde](https://github.com/Andrewmatilde)) |                          |         |
-| Xiang Wang ([WangXiangUSTC](https://github.com/WangXiangUSTC))   | wangxiang@pingcap.com    | PingCAP |
-| Wenbo Zhang ([ethercflow](https://github.com/ethercflow) )     | zhangwenbo@pingcap.com   | PingCAP |
-| Zhiqiang Zhou ([STRRL](https://github.com/STRRL))        | zhouzhiqiang@pingcap.com | PingCAP |
+| Glen Yang ([[G1eny0ung](https://github.com/g1eny0ung))  | [yangyue@pingcap.com](yangyue@pingcap.com)      | [PingCAP](https://www.pingcap.com/) |
+| Yihao Fu ([fewdan](https://github.com/fewdan))            | [fuyihao@pingcap.com](fuyihao@pingcap.com)      | [PingCAP](https://www.pingcap.com/) |
+| Jiaxing Wu ([Colstuwjx](https://github.com/Colstuwjx) )       | [wjx_colstu@hotmail.com](wjx_colstu@hotmail.com)             |   [Kingnet](www.kingnet.com)      |
+| Shuyang Wu ([Yiyiyimu](https://github.com/Yiyiyimu) )        | [wosoyoung@gmail.com]( wosoyoung@gmail.com)                        |  [APISIX](https://apisix.apache.org/)      |
+| Shenan Zhang ([Andrewmatilde](https://github.com/Andrewmatilde) | [zhangshenan@pingcap.com](zhangshenan@pingcap.com)   | [PingCAP](https://www.pingcap.com/)        |
+| Xiang Wang ([WangXiangUSTC](https://github.com/WangXiangUSTC))   | [wangxiang@pingcap.com](wangxiang@pingcap.com)    | [PingCAP](https://www.pingcap.com/) |
+| Wenbo Zhang ([ethercflow](https://github.com/ethercflow) )     | [zhangwenbo@pingcap.com](zhangwenbo@pingcap.com)   | [PingCAP](https://www.pingcap.com/) |
+| Zhiqiang Zhou ([STRRL](https://github.com/STRRL))        | [zhouzhiqiang@pingcap.com](zhouzhiqiang@pingcap.com) | [PingCAP](https://www.pingcap.com/) 
