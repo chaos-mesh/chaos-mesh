@@ -923,6 +923,21 @@ metadata:
     app.kubernetes.io/instance: chaos-mesh
     app.kubernetes.io/component: controller-manager
 ---
+# Source: chaos-mesh/templates/secrets-configuration.yaml
+kind: Secret
+apiVersion: v1
+metadata:
+  name: chaos-mesh-webhook-certs
+  namespace: "chaos-testing"
+  labels:
+    app.kubernetes.io/name: chaos-mesh
+    app.kubernetes.io/instance: chaos-mesh
+    app.kubernetes.io/component: webhook-secret
+type: Opaque
+data:
+  tls.crt: "${TLS_CRT}"
+  tls.key: "${TLS_KEY}"
+---
 # Source: chaos-mesh/templates/controller-manager-rbac.yaml
 # roles
 kind: ClusterRole
@@ -1346,19 +1361,6 @@ spec:
             secretName: chaos-mesh-webhook-certs
 ---
 # Source: chaos-mesh/templates/secrets-configuration.yaml
-kind: Secret
-apiVersion: v1
-metadata:
-  name: chaos-mesh-webhook-certs
-  namespace: "chaos-testing"
-  labels:
-    app.kubernetes.io/name: chaos-mesh
-    app.kubernetes.io/instance: chaos-mesh
-    app.kubernetes.io/component: webhook-secret
-type: Opaque
-data:
-  tls.crt: "${TLS_CRT}"
-  tls.key: "${TLS_KEY}"
 apiVersion: admissionregistration.k8s.io/v1beta1
 kind: MutatingWebhookConfiguration
 metadata:
