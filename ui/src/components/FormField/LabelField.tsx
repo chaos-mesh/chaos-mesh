@@ -61,10 +61,6 @@ const LabelField: React.FC<LabelFieldProps & TextFieldProps> = ({ isKV = false, 
 
       if (!duplicate) {
         setLabels(labels.concat([t]))
-
-        if (error) {
-          setError('')
-        }
       }
 
       setText('')
