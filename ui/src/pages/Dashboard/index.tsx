@@ -63,7 +63,7 @@ export default function Dashboard() {
           </Grid>
 
           <Grid item xs={12} md={12} lg={3}>
-            <Paper>
+            <Paper style={{ position: 'relative' }}>
               <PaperTop title={T('dashboard.totalState')} />
 
               <TotalState className={classes.container} />
@@ -72,7 +72,7 @@ export default function Dashboard() {
 
           <Grid container item xs={12} md={12} lg={9}>
             <Grid item xs={12}>
-              <Paper>
+              <Paper style={{ position: 'relative' }}>
                 <PaperTop title={T('common.timeline')} />
 
                 <Timeline events={events} className={classes.container} />
@@ -93,7 +93,7 @@ export default function Dashboard() {
           </Grid>
 
           <Grid item xs={12} md={12} lg={3}>
-            <Paper style={{ height: '100%' }}>
+            <Paper style={{ position: 'relative', height: '100%' }}>
               <PaperTop title={T('dashboard.recent')} />
 
               <Recent events={events.slice(-6)} />

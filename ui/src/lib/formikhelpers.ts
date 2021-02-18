@@ -3,7 +3,6 @@ import { CallchainFrame, Experiment, ExperimentScope } from 'components/NewExper
 import _snakecase from 'lodash.snakecase'
 import basic from 'components/NewExperimentNext/data/basic'
 import snakeCaseKeys from 'snakecase-keys'
-import target from 'components/NewExperimentNext/data/target'
 
 export function parseSubmit(e: Experiment) {
   const values: Experiment = JSON.parse(JSON.stringify(e))
