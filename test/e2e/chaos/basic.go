@@ -311,7 +311,7 @@ var _ = ginkgo.Describe("[Basic]", func() {
 		var port uint16
 
 		ginkgo.JustBeforeEach(func() {
-			name := fmt.Sprintf("network-peer")
+			name := "network-peer"
 
 			svc := fixture.NewE2EService(name, ns)
 			_, err = kubeCli.CoreV1().Services(ns).Create(svc)

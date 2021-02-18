@@ -28,10 +28,6 @@ import (
 	daemonClient "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/client"
 )
 
-const (
-	ipsetLen = 27
-)
-
 // BuildIPSet builds an ipset with provided pod ip list
 func BuildIPSet(pods []v1.Pod, externalCidrs []string, networkchaos *v1alpha1.NetworkChaos, namePostFix string, source string) v1alpha1.RawIPSet {
 	name := GenerateIPSetName(networkchaos, namePostFix)

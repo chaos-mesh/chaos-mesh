@@ -23,9 +23,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/pkg/errors"
-
 	"github.com/fatih/color"
+	"github.com/pkg/errors"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/kubernetes"
@@ -39,7 +38,6 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
 	"github.com/chaos-mesh/chaos-mesh/pkg/portforward"
 	"github.com/chaos-mesh/chaos-mesh/pkg/selector"
-	e2econfig "github.com/chaos-mesh/chaos-mesh/test/e2e/config"
 )
 
 type Color string
@@ -110,12 +108,12 @@ func PrettyPrint(s string, indentLevel int, color Color) {
 	str := fmt.Sprintf("%s%s\n\n", tabStr, regexp.MustCompile("\n").ReplaceAllString(s, "\n"+tabStr))
 	if color != NoColor {
 		if cfunc, ok := colorFunc[color]; !ok {
-			fmt.Printf("COLOR NOT SUPPORTED")
+			fmt.Print("COLOR NOT SUPPORTED")
 		} else {
 			cfunc(str)
 		}
 	} else {
-		fmt.Printf(str)
+		fmt.Print(str)
 	}
 }
 
@@ -153,11 +151,15 @@ func MarshalChaos(s interface{}) (string, error) {
 
 // InitClientSet inits two different clients that would be used
 func InitClientSet() (*ClientSet, error) {
-	ctrlClient, err := client.New(config.GetConfigOrDie(), client.Options{Scheme: scheme})
+	restconfig, err := config.GetConfig()
+	if err != nil {
+		return nil, err
+	}
+	ctrlClient, err := client.New(restconfig, client.Options{Scheme: scheme})
 	if err != nil {
 		return nil, fmt.Errorf("failed to create client")
 	}
-	kubeClient, err := kubernetes.NewForConfig(config.GetConfigOrDie())
+	kubeClient, err := kubernetes.NewForConfig(restconfig)
 	if err != nil {
 		return nil, errors.Wrap(err, "error in getting acess to k8s")
 	}
@@ -260,7 +262,7 @@ func getChaos(ctx context.Context, chaosType string, chaosName string, ns string
 
 // GetPidFromPS returns pid-command pairs
 func GetPidFromPS(ctx context.Context, pod v1.Pod, daemon v1.Pod, c *kubernetes.Clientset) ([]string, []string, error) {
-	cmd := fmt.Sprintf("ps")
+	cmd := "ps"
 	out, err := ExecBypass(ctx, pod, daemon, cmd, c)
 	if err != nil {
 		return nil, nil, errors.Wrapf(err, "run command %s failed", cmd)
@@ -280,7 +282,7 @@ func GetPidFromPS(ctx context.Context, pod v1.Pod, daemon v1.Pod, c *kubernetes.
 		}
 	}
 	if pidColumn == 0 && cmdColumn == 0 {
-		return nil, nil, fmt.Errorf("Parsing ps error: could not get PID and COMMAND column")
+		return nil, nil, fmt.Errorf("parsing ps error: could not get PID and COMMAND column")
 	}
 	var pids, commands []string
 	for _, line := range outLines[1:] {
@@ -330,11 +332,8 @@ func GetPidFromPod(ctx context.Context, pod v1.Pod, daemon v1.Pod) (uint32, erro
 }
 
 func forwardPorts(ctx context.Context, pod v1.Pod, port uint16) (context.CancelFunc, uint16, error) {
-	clientRawConfig, err := e2econfig.LoadClientRawConfig()
-	if err != nil {
-		return nil, 0, errors.Wrap(err, "failed to load raw config")
-	}
-	fw, err := portforward.NewPortForwarder(ctx, e2econfig.NewSimpleRESTClientGetter(clientRawConfig), false)
+	commonRestClientGetter := NewCommonRestClientGetter()
+	fw, err := portforward.NewPortForwarder(ctx, commonRestClientGetter, false)
 	if err != nil {
 		return nil, 0, errors.Wrap(err, "failed to create port forwarder")
 	}
@@ -369,7 +368,7 @@ func Log(pod v1.Pod, tail int64, c *kubernetes.Clientset) (string, error) {
 func CheckFailedMessage(ctx context.Context, failedMessage string, daemons []v1.Pod, c *ClientSet) error {
 	if strings.Contains(failedMessage, "rpc error: code = Unavailable desc = connection error") || strings.Contains(failedMessage, "connect: connection refused") {
 		if err := checkConnForCtrlAndDaemon(ctx, daemons, c); err != nil {
-			return fmt.Errorf("Error occurs when check failed message: %s", err)
+			return fmt.Errorf("error occurs when check failed message: %s", err)
 		}
 	}
 	return nil
@@ -384,7 +383,7 @@ func checkConnForCtrlAndDaemon(ctx context.Context, daemons []v1.Pod, c *ClientS
 		return errors.Wrapf(err, "failed to select pod for controller-manager")
 	}
 	if len(ctrlMgrs) == 0 {
-		return fmt.Errorf("Could not found controller manager")
+		return fmt.Errorf("could not found controller manager")
 	}
 	for _, daemon := range daemons {
 		daemonIP := daemon.Status.PodIP

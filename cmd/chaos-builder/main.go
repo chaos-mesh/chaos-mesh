@@ -137,6 +137,4 @@ func init() {
 		os.Exit(1)
 	}
 	fmt.Fprint(file, testCode)
-
-	return
 }

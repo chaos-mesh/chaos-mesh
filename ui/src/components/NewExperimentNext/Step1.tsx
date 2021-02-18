@@ -48,17 +48,23 @@ const useStyles = makeStyles((theme) => {
   }
 })
 
-const submitDirectly = ['pod-failure', 'pod-kill']
+const submitDirectly = ['pod-failure']
 
 const Step1 = () => {
   const theme = useTheme()
   const isDesktopScreen = useMediaQuery(theme.breakpoints.down('md'))
   const classes = useStyles()
 
+  const state = useStoreSelector((state) => state)
+  const { dnsServerCreate } = state.globalStatus
+  let targetDataEntries = Object.entries(targetData) as [Kind, Target][]
+  if (!dnsServerCreate) {
+    targetDataEntries = targetDataEntries.filter((d) => d[0] !== 'DNSChaos')
+  }
   const {
     kindAction: [_kind, _action],
     step1,
-  } = useStoreSelector((state) => state.experiments)
+  } = state.experiments
   const dispatch = useStoreDispatch()
 
   const [kindAction, setKindAction] = useState<[Kind | '', string]>([_kind, _action])
@@ -118,7 +124,7 @@ const Step1 = () => {
       <Box hidden={step1}>
         <Box p={3} overflow="hidden">
           <GridList className={classes.gridList} cols={isDesktopScreen ? 1.5 : 3.5} spacing={9} cellHeight="auto">
-            {(Object.entries(targetData) as [Kind, Target][]).map(([key, t]) => (
+            {targetDataEntries.map(([key, t]) => (
               <GridListTile key={key}>
                 <Card
                   className={clsx(classes.card, kind === key ? classes.cardActive : '')}
