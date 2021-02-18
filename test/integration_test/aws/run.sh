@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Copyright 2020 Chaos Mesh Authors.
+# Copyright 2021 Chaos Mesh Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -20,12 +20,9 @@ cd $cur
 
 # wait localstash pod status to running
 for ((k=0; k<30; k++)); do
-    kubectl get pods --namespace default > pods.status
-    cat pods.status
+    not_run_num=`kubectl get pods -l app.kubernetes.io/name=localstack --no-headers | grep -v Running | wc -l`
 
-    run_num=`grep Running pods.status | wc -l`
-    pod_num=$((`cat pods.status | wc -l` - 1))
-    if [ $run_num == $pod_num ]; then
+    if [ $not_run_num == 0 ]; then
         break
     fi
 
