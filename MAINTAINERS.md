@@ -4,7 +4,7 @@ This file lists the maintainers and committers of the Chaos Mesh project.
 
 In short, maintainers are people who are in charge of the maintenance of the Chaos Mesh project. Committers are active community members who have shown that they are committed to the continuous development of the project through ongoing engagement with the community. For detailed description of the roles, see [Chaos Mesh Governance](https://github.com/chaos-mesh/chaos-mesh/blob/master/GOVERNANCE.md).
 
-The maintainers of Chaos Mesh, along with their emails, are listed below:
+The Maintainers of Chaos Mesh, along with their emails, are listed below:
 
 
 Name | Email | Org
@@ -25,7 +25,7 @@ The Committers of Chaos Mesh, along with their emails and focus area, are
 |------------------------------|--------------------------|---------|
 | Glen Yang ([[G1eny0ung](https://github.com/g1eny0ung))  | [yangyue@pingcap.com](yangyue@pingcap.com)      | [PingCAP](https://www.pingcap.com/) |
 | Yihao Fu ([fewdan](https://github.com/fewdan))            | [fuyihao@pingcap.com](fuyihao@pingcap.com)      | [PingCAP](https://www.pingcap.com/) |
-| Jiaxing Wu ([Colstuwjx](https://github.com/Colstuwjx) )       | [wjx_colstu@hotmail.com](wjx_colstu@hotmail.com)             |   [Kingnet](www.kingnet.com)      |
+| Jiaxing Wu ([Colstuwjx](https://github.com/Colstuwjx) )       | [wjx_colstu@hotmail.com](wjx_colstu@hotmail.com)             |   [Kingnet](www.kingnet.com/)      |
 | Shuyang Wu ([Yiyiyimu](https://github.com/Yiyiyimu) )        | [wosoyoung@gmail.com]( wosoyoung@gmail.com)                        |  [APISIX](https://apisix.apache.org/)      |
 | Shenan Zhang ([Andrewmatilde](https://github.com/Andrewmatilde) | [zhangshenan@pingcap.com](zhangshenan@pingcap.com)   | [PingCAP](https://www.pingcap.com/)        |
 | Xiang Wang ([WangXiangUSTC](https://github.com/WangXiangUSTC))   | [wangxiang@pingcap.com](wangxiang@pingcap.com)    | [PingCAP](https://www.pingcap.com/) |
