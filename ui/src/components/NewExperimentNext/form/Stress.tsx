@@ -34,31 +34,17 @@ const Stress: React.FC<StressProps> = ({ onSubmit }) => {
     <Formik enableReinitialize initialValues={init} onSubmit={onSubmit}>
       <Form>
         <Typography gutterBottom>CPU</Typography>
-        <TextField
-          type="number"
-          id="stressors.cpu.workers"
-          name="stressors.cpu.workers"
-          label="Workers"
-          helperText="CPU workers"
-        />
-        <TextField type="number" id="stressors.cpu.load" name="stressors.cpu.load" label="Load" helperText="CPU load" />
+        <TextField type="number" name="stressors.cpu.workers" label="Workers" helperText="CPU workers" />
+        <TextField type="number" name="stressors.cpu.load" label="Load" helperText="CPU load" />
         <LabelField
-          id="stressors.cpu.options"
           name="stressors.cpu.options"
           label="Options of CPU stressors"
           helperText="Type string and end with a space to generate the stress-ng options"
         />
 
         <Typography gutterBottom>Memory</Typography>
-        <TextField
-          type="number"
-          id="stressors.memory.workers"
-          name="stressors.memory.workers"
-          label="Workers"
-          helperText="Memory workers"
-        />
+        <TextField type="number" name="stressors.memory.workers" label="Workers" helperText="Memory workers" />
         <LabelField
-          id="stressors.memory.options"
           name="stressors.memory.options"
           label="Options of Memory stressors"
           helperText="Type string and end with a space to generate the stress-ng options"
@@ -66,13 +52,11 @@ const Stress: React.FC<StressProps> = ({ onSubmit }) => {
 
         <AdvancedOptions>
           <TextField
-            id="stressng_stressors"
             name="stressng_stressors"
             label="Options of stress-ng"
             helperText="The options of stress-ng, treated as a string"
           />
           <TextField
-            id="container_name"
             name="container_name"
             label="Container Name"
             helperText="Optional. Fill the container name you want to inject stress in"

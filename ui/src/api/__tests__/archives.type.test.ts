@@ -13,7 +13,7 @@ const dummyArchive = {
 }
 
 describe('Check archives type', () => {
-  it('Archive', async () => {
+  it('Archive', () => {
     // Normal
     Archive.check(dummyArchive)
 

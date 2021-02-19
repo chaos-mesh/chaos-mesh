@@ -59,7 +59,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }))
 
-const Predefined = () => {
+const Predefined = React.memo(() => {
   const classes = useStyles()
 
   const intl = useIntl()
@@ -169,7 +169,7 @@ const Predefined = () => {
               <>
                 <PaperTop title={experiment.name}>
                   <Space display="flex">
-                    <Button variant="contained" color="secondary" size="small" onClick={handleDeleteExperiment}>
+                    <Button color="secondary" size="small" onClick={handleDeleteExperiment}>
                       {T('common.delete')}
                     </Button>
                     <Button variant="contained" color="primary" size="small" onClick={handleApplyExperiment}>
@@ -185,6 +185,6 @@ const Predefined = () => {
       </Modal>
     </>
   )
-}
+})
 
 export default Predefined
