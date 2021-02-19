@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "copy-text-to-clipboard": "^3.0.1"
+  }
+}

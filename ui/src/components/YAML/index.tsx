@@ -45,8 +45,6 @@ const YAML: React.FC<YAMLProps> = ({ callback, buttonProps }) => {
             message: e.message,
           })
         )
-      } finally {
-        dispatch(setAlertOpen(true))
       }
     }
     reader.readAsText(f)

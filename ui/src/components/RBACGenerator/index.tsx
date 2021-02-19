@@ -1,15 +1,18 @@
-import { Box, Checkbox, FormControl, FormControlLabel, MenuItem, Typography } from '@material-ui/core'
+import { Box, Button, Checkbox, FormControl, FormControlLabel, MenuItem, Typography } from '@material-ui/core'
 import { Field, Form, Formik } from 'formik'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
+import { useStoreDispatch, useStoreSelector } from 'store'
 
 import { RBACConfigParams } from 'api/common.type'
 import { SelectField } from 'components/FormField'
 import Space from 'components-mui/Space'
 import T from 'components/T'
 import api from 'api'
+import copy from 'copy-text-to-clipboard'
 import { makeStyles } from '@material-ui/core/styles'
+import { setAlert } from 'slices/globalStatus'
 import { toTitleCase } from 'lib/utils'
-import { useStoreSelector } from 'store'
+import { useIntl } from 'react-intl'
 
 const useStyles = makeStyles((theme) => ({
   pre: {
@@ -18,16 +21,26 @@ const useStyles = makeStyles((theme) => ({
     borderRadius: 4,
     whiteSpace: 'pre-wrap',
   },
+  copy: {
+    position: 'absolute',
+    top: theme.spacing(1),
+    right: theme.spacing(1),
+  },
 }))
 
 const RBACGenerator = () => {
   const classes = useStyles()
 
+  const intl = useIntl()
+
   const { namespaces } = useStoreSelector((state) => state.experiments)
+  const dispatch = useStoreDispatch()
 
   const [clustered, setClustered] = useState(false)
   const [rbac, setRBAC] = useState('')
   const [getSecret, setGetSecret] = useState('')
+
+  const containerRef = useRef(null)
 
   const fetchRBACConfig = (values: RBACConfigParams) =>
     api.common.rbacConfig(values).then(({ data }) => {
@@ -50,8 +63,19 @@ const RBACGenerator = () => {
     setClustered(clustered)
   }
 
+  const copyRBAC = () => {
+    copy(rbac, { target: containerRef.current! })
+
+    dispatch(
+      setAlert({
+        type: 'success',
+        message: intl.formatMessage({ id: 'common.copied' }),
+      })
+    )
+  }
+
   return (
-    <div>
+    <div ref={containerRef}>
       <Box mb={3}>
         <Typography variant="body2" color="textSecondary">
           {T('settings.addToken.generatorHelper')}
@@ -61,6 +85,7 @@ const RBACGenerator = () => {
         initialValues={{ namespace: 'default', role: 'viewer', clustered: false }}
         onSubmit={() => {}}
         validate={onValidate}
+        validateOnBlur={false}
       >
         <Form>
           <Box mb={3}>
@@ -105,9 +130,14 @@ const RBACGenerator = () => {
       <Typography variant="body2" color="textSecondary">
         {T('settings.addToken.generatorHelper2')}
       </Typography>
-      <pre className={classes.pre} style={{ height: 750 }}>
-        {rbac}
-      </pre>
+      <Box position="relative">
+        <pre className={classes.pre} style={{ height: 250, overflow: 'auto' }}>
+          {rbac}
+        </pre>
+        <Box className={classes.copy}>
+          <Button onClick={copyRBAC}>{T('common.copy')}</Button>
+        </Box>
+      </Box>
       <Typography variant="body2" color="textSecondary">
         {T('settings.addToken.generatorHelper3')}
       </Typography>

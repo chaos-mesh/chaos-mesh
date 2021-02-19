@@ -121,7 +121,6 @@ const Predefined = React.memo(() => {
             message: intl.formatMessage({ id: 'common.createSuccessfully' }),
           })
         )
-        dispatch(setAlertOpen(true))
       })
       .catch(console.error)
   }
@@ -139,7 +138,6 @@ const Predefined = React.memo(() => {
         message: intl.formatMessage({ id: 'common.deleteSuccessfully' }),
       })
     )
-    dispatch(setAlertOpen(true))
   }
 
   return (

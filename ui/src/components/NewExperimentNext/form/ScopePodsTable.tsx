@@ -49,7 +49,6 @@ const ScopePodsTable: React.FC<ScopePodsTableProps> = ({ scope = 'scope', pods }
           message: 'Please select at least one pod.',
         })
       )
-      dispatch(setAlertOpen(true))
 
       return
     }
