@@ -145,7 +145,7 @@ func makeNetworkPartitionChaos(
 
 func makeNetworkDelayChaos(
 	namespace, name string, fromLabelSelectors, toLabelSelectors map[string]string,
-	fromPodMode, toPodMode v1alpha1.PodMode, tcparam v1alpha1.TcParameter, duration *string,
+	fromPodMode, toPodMode v1alpha1.PodMode, direction v1alpha1.Direction, tcparam v1alpha1.TcParameter, duration *string,
 	schedulerSpec *v1alpha1.SchedulerSpec,
 ) *v1alpha1.NetworkChaos {
 	var target *v1alpha1.Target
@@ -175,11 +175,12 @@ func makeNetworkDelayChaos(
 			Duration:    duration,
 			Scheduler:   schedulerSpec,
 			Target:      target,
+			Direction:   direction,
 		},
 	}
 }
 
-func probeNetworkCondition(c http.Client, peers []*corev1.Pod, ports []uint16) map[string][][]int {
+func probeNetworkCondition(c http.Client, peers []*corev1.Pod, ports []uint16, bidirection bool) map[string][][]int {
 	result := make(map[string][][]int)
 
 	testDelay := func(from int, to int) (int64, error) {
@@ -187,7 +188,15 @@ func probeNetworkCondition(c http.Client, peers []*corev1.Pod, ports []uint16) m
 	}
 
 	for source := 0; source < len(peers); source++ {
-		for target := source + 1; target < len(peers); target++ {
+		initialTarget := source + 1
+		if bidirection {
+			initialTarget = 0
+		}
+		for target := initialTarget; target < len(peers); target++ {
+			if target == source {
+				continue
+			}
+
 			connectable := true
 
 			var (
