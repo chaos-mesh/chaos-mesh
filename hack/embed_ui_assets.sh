@@ -17,6 +17,7 @@
 # before calling this script.
 #
 # Available flags:
+#
 # NO_ASSET_BUILD_TAG=1
 #   No build tags will be included in the generated source code.
 # ASSET_BUILD_TAG=X
@@ -47,6 +48,10 @@ else
 fi
 
 echo "+ Embed UI assets"
+
+# OSX related
+DS_Store=ui/build/.DS_Store
+[ -f $DS_Store ] && rm $DS_Store
 
 go run tools/assets_generate/main.go $BUILD_TAG_PARAMETER
 
