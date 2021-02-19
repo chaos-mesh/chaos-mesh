@@ -20,10 +20,6 @@ jobs:
       - name: Create kind cluster
         uses: helm/kind-action@v1.0.0-rc.1
 
-      - uses: actions/setup-node@v2
-        with:
-          node-version: '12'
-
       - name: Install Chaos Mesh
         run: |
           export CLUSTER="chart-testing"
