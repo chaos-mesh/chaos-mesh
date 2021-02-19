@@ -4,7 +4,7 @@
 kind: ServiceAccount
 apiVersion: v1
 metadata:
-  namespace: {{ .Release.Namespace }}
+  namespace: {{ .Release.Namespace | quote }}
   name: {{ .Values.prometheus.serviceAccount }}
   labels:
     app.kubernetes.io/name: {{ template "chaos-mesh.name" . }}
@@ -41,7 +41,7 @@ metadata:
 subjects:
   - kind: ServiceAccount
     name: {{ .Values.prometheus.serviceAccount }}
-    namespace: {{ .Release.Namespace }}
+    namespace: {{ .Release.Namespace | quote }}
 roleRef:
   kind: ClusterRole
   name: {{ .Release.Name }}-chaos-prometheus

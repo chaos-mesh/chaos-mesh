@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  namespace: {{ .Release.Namespace }}
+  namespace: {{ .Release.Namespace | quote }}
   name: {{ template "chaos-mesh.svc" . }}
   labels:
     app.kubernetes.io/name: {{ template "chaos-mesh.name" . }}
