@@ -3,3 +3,8 @@ export interface Config {
   dns_server_create: boolean
   version: string
 }
+
+export interface RBACConfigParams {
+  namespace: string
+  role: 'manager' | 'viewer'
+}

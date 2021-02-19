@@ -72,7 +72,6 @@ const LoadFrom = () => {
             message: intl.formatMessage({ id: 'common.loadSuccessfully' }),
           })
         )
-        dispatch(setAlertOpen(true))
       })
       .catch(console.error)
   }

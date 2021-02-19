@@ -69,7 +69,6 @@ const Token: React.FC<TokenProps> = ({ onSubmitCallback }) => {
       {({ errors, touched }) => (
         <Form>
           <TextField
-            id="name"
             name="name"
             label={T('settings.addToken.name')}
             validate={validateName}
@@ -77,7 +76,6 @@ const Token: React.FC<TokenProps> = ({ onSubmitCallback }) => {
             error={errors.name && touched.name ? true : false}
           />
           <TextField
-            id="token"
             name="token"
             label={T('settings.addToken.token')}
             multiline

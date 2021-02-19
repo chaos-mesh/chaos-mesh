@@ -201,7 +201,6 @@ export default function ExperimentDetail() {
             message: intl.formatMessage({ id: `common.${action}Successfully` }),
           })
         )
-        dispatch(setAlertOpen(true))
 
         if (action === 'archive') {
           history.push('/experiments')
@@ -229,7 +228,7 @@ export default function ExperimentDetail() {
             message: intl.formatMessage({ id: 'common.updateSuccessfully' }),
           })
         )
-        dispatch(setAlertOpen(true))
+
         fetchExperimentDetail()
       })
       .catch(console.error)

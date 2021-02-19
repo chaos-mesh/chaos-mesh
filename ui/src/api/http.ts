@@ -1,6 +1,6 @@
 import axios, { AxiosError } from 'axios'
-import { setAlert, setAlertOpen } from 'slices/globalStatus'
 
+import { setAlert } from 'slices/globalStatus'
 import store from 'store'
 
 interface ErrorData {
@@ -28,7 +28,7 @@ http.interceptors.response.use(undefined, (error: AxiosError<ErrorData>) => {
               message: 'Please check the validity of the token',
             })
           )
-          store.dispatch(setAlertOpen(true))
+
           break
         }
       // eslint-disable-next-line
@@ -41,7 +41,7 @@ http.interceptors.response.use(undefined, (error: AxiosError<ErrorData>) => {
             message: data.message || 'An unknown error occurred',
           })
         )
-        store.dispatch(setAlertOpen(true))
+
         break
     }
   }

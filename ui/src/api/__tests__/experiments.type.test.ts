@@ -13,7 +13,7 @@ const dummyExperiment = {
 }
 
 describe('Check experiments type', () => {
-  it('Experiment', async () => {
+  it('Experiment', () => {
     // Normal
     Experiment.check(dummyExperiment)
     Experiment.check({ ...dummyExperiment, status: 'Waiting' })
