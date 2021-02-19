@@ -42,13 +42,23 @@ aws configure set default.output_format text
 
 echo "run ec2 instance, and the state is pending, will switch to running later"
 aws --endpoint-url=http://127.0.0.1:4566 ec2 run-instances --image-id ami --count 1 --instance-type t2.micro --key-name test > run_instance.log
-check_contains "pending" run_instance.log
-INSTANCE_ID=`cat run_instance.log | grep "InstanceId" | sed 's/.*\"InstanceId\": \"\([0-9,a-z,-]*\)\",/\1/g' | xargs`
+state=`cat run_instance.log | jq -rM '.Instances[0].State.Name'`
+if [ "$state" != "pending" ]; then
+    cat run_instance.log
+    echo "ec2 instance's state is $state but not pending"
+    exit 1
+fi
+
+INSTANCE_ID=`cat run_instance.log | jq -rM '.Instances[0].InstanceId'`
 
 sleep 2
 
 aws --endpoint-url=http://127.0.0.1:4566 ec2 describe-instances --instance-id $INSTANCE_ID > describe_instance.log
-check_contains "running" describe_instance.log
+state=`cat describe_instance.log | jq -rM '.Reservations[0].Instances[0].State.Name'`
+if [ "$state" != "running" ]; then
+    echo "ec2 instance's state is $state but not running"
+    exit 1
+fi
 
 echo "apply aws chaos to stop the ec2 instance, and the state shoud be stopped"
 
@@ -63,8 +73,14 @@ kubectl apply -f aws_chaos.yaml
 sleep 2
 
 aws --endpoint-url=http://127.0.0.1:4566 ec2 describe-instances --instance-id $INSTANCE_ID > describe_instance.log
-check_contains "stopped" describe_instance.log
+state=`cat describe_instance.log | jq -rM '.Reservations[0].Instances[0].State.Name'`
+if [ "$state" != "stopped" ]; then
+    echo "ec2 instance's state is $state but not stopped"
+    exit 1
+fi
 
 # clean
 kubectl delete -f aws_chaos.yaml
 helm uninstall localstack
+# kill child process
+trap 'kill $(jobs -p)' EXIT
