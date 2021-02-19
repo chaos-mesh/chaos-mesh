@@ -50,11 +50,11 @@ type Config struct {
 	Runtime   string
 	Profiling bool
 
-	TLSConfig
+	tlsConfig
 }
 
-// TLSConfig contains the config of TLS Server
-type TLSConfig struct {
+// tlsConfig contains the config of TLS Server
+type tlsConfig struct {
 	CaCert string
 	Cert   string
 	Key    string
@@ -96,7 +96,7 @@ func NewDaemonServerWithCRClient(crClient ContainerRuntimeInfoClient) *DaemonSer
 	}
 }
 
-func newGRPCServer(containerRuntime string, reg prometheus.Registerer, tlsConfig TLSConfig) (*grpc.Server, error) {
+func newGRPCServer(containerRuntime string, reg prometheus.Registerer, tlsConf tlsConfig) (*grpc.Server, error) {
 	ds, err := newDaemonServer(containerRuntime)
 	if err != nil {
 		return nil, err
@@ -115,15 +115,15 @@ func newGRPCServer(containerRuntime string, reg prometheus.Registerer, tlsConfig
 		),
 	}
 
-	if tlsConfig != (TLSConfig{}) {
-		caCert, err := ioutil.ReadFile(tlsConfig.CaCert)
+	if tlsConf != (tlsConfig{}) {
+		caCert, err := ioutil.ReadFile(tlsConf.CaCert)
 		if err != nil {
 			return nil, err
 		}
 		caCertPool := x509.NewCertPool()
 		caCertPool.AppendCertsFromPEM(caCert)
 
-		serverCert, err := tls.LoadX509KeyPair(tlsConfig.Cert, tlsConfig.Key)
+		serverCert, err := tls.LoadX509KeyPair(tlsConf.Cert, tlsConf.Key)
 		if err != nil {
 			return nil, err
 		}
@@ -166,7 +166,7 @@ func StartServer(conf *Config, reg RegisterGatherer) error {
 		return err
 	}
 
-	grpcServer, err := newGRPCServer(conf.Runtime, reg, conf.TLSConfig)
+	grpcServer, err := newGRPCServer(conf.Runtime, reg, conf.tlsConfig)
 	if err != nil {
 		log.Error(err, "failed to create grpc server")
 		return err
