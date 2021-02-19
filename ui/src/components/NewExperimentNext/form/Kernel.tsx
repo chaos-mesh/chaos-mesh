@@ -83,21 +83,9 @@ const Kernel: React.FC<KernelProps> = ({ onSubmit }) => {
                         Remove
                       </Button>
                     </Box>
-                    <TextField
-                      id={`fail_kern_request.callchain[${i}].funcname`}
-                      name={`fail_kern_request.callchain[${i}].funcname`}
-                      label="funcname"
-                    />
-                    <TextField
-                      id={`fail_kern_request.callchain[${i}].parameters`}
-                      name={`fail_kern_request.callchain[${i}].parameters`}
-                      label="parameters"
-                    />
-                    <TextField
-                      id={`fail_kern_request.callchain[${i}].predicate`}
-                      name={`fail_kern_request.callchain[${i}].predicate`}
-                      label="predicate"
-                    />
+                    <TextField name={`fail_kern_request.callchain[${i}].funcname`} label="funcname" />
+                    <TextField name={`fail_kern_request.callchain[${i}].parameters`} label="parameters" />
+                    <TextField name={`fail_kern_request.callchain[${i}].predicate`} label="predicate" />
                   </Box>
                 ))}
               </Box>
@@ -106,7 +94,6 @@ const Kernel: React.FC<KernelProps> = ({ onSubmit }) => {
               <Divider />
             </Box>
             <SelectField
-              id="fail_kern_request.failtype"
               name="fail_kern_request.failtype"
               label="Failtype"
               helperText="What to fail, can be set to 0 / 1 / 2"
@@ -118,26 +105,19 @@ const Kernel: React.FC<KernelProps> = ({ onSubmit }) => {
               ))}
             </SelectField>
             <LabelField
-              id="fail_kern_request.headers"
               name="fail_kern_request.headers"
               label="Headers"
               helperText="Type string and end with a space to generate the appropriate kernel headers"
             />
             <TextField
               type="number"
-              id="fail_kern_request.probability"
               name="fail_kern_request.probability"
               helperText="The fails with probability"
               InputProps={{
                 endAdornment: <InputAdornment position="end">%</InputAdornment>,
               }}
             />
-            <TextField
-              type="number"
-              id="fail_kern_request.times"
-              name="fail_kern_request.times"
-              helperText="The max times of failures"
-            />
+            <TextField type="number" name="fail_kern_request.times" helperText="The max times of failures" />
 
             <Box mt={6} textAlign="right">
               <Button type="submit" variant="contained" color="primary" startIcon={<PublishIcon />}>

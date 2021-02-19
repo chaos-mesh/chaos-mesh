@@ -112,7 +112,7 @@ export default function Experiments() {
             message: intl.formatMessage({ id: `common.${action}Successfully` }),
           })
         )
-        dispatch(setAlertOpen(true))
+
         setTimeout(fetchExperiments, 300)
       })
       .catch(console.error)

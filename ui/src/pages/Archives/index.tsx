@@ -1,6 +1,5 @@
 import { Box, Grid, Typography } from '@material-ui/core'
 import React, { useEffect, useState } from 'react'
-import { setAlert, setAlertOpen } from 'slices/globalStatus'
 
 import { Archive } from 'api/archives.type'
 import ArchiveOutlinedIcon from '@material-ui/icons/ArchiveOutlined'
@@ -10,6 +9,7 @@ import Loading from 'components-mui/Loading'
 import T from 'components/T'
 import _groupBy from 'lodash.groupby'
 import api from 'api'
+import { setAlert } from 'slices/globalStatus'
 import { useIntl } from 'react-intl'
 import { useStoreDispatch } from 'store'
 
@@ -70,7 +70,7 @@ export default function Archives() {
             message: intl.formatMessage({ id: `common.${action}Successfully` }),
           })
         )
-        dispatch(setAlertOpen(true))
+
         fetchArchives()
       })
       .catch(console.error)
