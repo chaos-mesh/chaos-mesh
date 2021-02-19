@@ -164,7 +164,7 @@ echo "***** list events *****"
 echo "all token can list events under namespace busybox"
 REQUEST BUSYBOX_VIEW_TOKEN_LIST[@] "GET" "/api/events?namespace=busybox" "list_event.out" "ci-test"
 
-EVENT_ID=`cat list_event.out | sed 's/.*\"id\":\([0-9]*\).*/\1/g'`
+EVENT_ID=`cat list_event.out | sed 's/.*\"event_id\":\([0-9]*\),.*/\1/g'`
 
 echo "cluster manager and viewer can list events in the cluster"
 REQUEST CLUSTER_VIEW_TOKEN_LIST[@] "GET" "/api/events" "list_event.out" "ci-test"
