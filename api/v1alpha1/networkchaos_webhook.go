@@ -142,16 +142,22 @@ func (in *NetworkChaos) ValidatePodMode(spec *field.Path) field.ErrorList {
 func (in *NetworkChaos) ValidateTargets(target *field.Path) field.ErrorList {
 	allErrs := field.ErrorList{}
 
-	if in.Spec.Direction == From && in.Spec.ExternalTargets != nil && in.Spec.Action != PartitionAction {
+	if in.Spec.Direction != To && in.Spec.ExternalTargets != nil && in.Spec.Action != PartitionAction {
 		allErrs = append(allErrs,
 			field.Invalid(target.Child("direction"), in.Spec.Direction,
-				fmt.Sprintf("external targets cannot be used with `from` direction in netem action yet")))
+				fmt.Sprintf("external targets cannot be used with `from` and `both` direction in netem action yet")))
 	}
 
-	if in.Spec.Direction == From && in.Spec.ExternalTargets == nil && in.Spec.Target == nil {
-		allErrs = append(allErrs,
-			field.Invalid(target.Child("direction"), in.Spec.Direction,
-				fmt.Sprintf("`from` direction cannot be used when targets and external targets are both empty")))
+	if in.Spec.Direction != To && in.Spec.Target == nil {
+		if in.Spec.Action != PartitionAction {
+			allErrs = append(allErrs,
+				field.Invalid(target.Child("direction"), in.Spec.Direction,
+					fmt.Sprintf("`from` and `both` direction cannot be used when targets is empty in netem action")))
+		} else if in.Spec.ExternalTargets == nil {
+			allErrs = append(allErrs,
+				field.Invalid(target.Child("direction"), in.Spec.Direction,
+					fmt.Sprintf("`from` and `both` direction cannot be used when targets and external targets are both empty")))
+		}
 	}
 
 	// TODO: validate externalTargets are in ip or domain form
