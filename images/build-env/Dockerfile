@@ -15,6 +15,7 @@ RUN apt-get update && apt-get install build-essential curl git pkg-config libfus
 # require nodejs >= 12
 RUN curl -fsSL https://deb.nodesource.com/setup_14.x | bash -
 RUN apt-get install -y nodejs
+RUN npm install yarn -g
 
 RUN if [[ -n "$HTTP_PROXY" ]]; then yarn config set proxy $HTTP_PROXY; fi
 
