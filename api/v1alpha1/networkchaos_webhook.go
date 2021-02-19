@@ -140,13 +140,14 @@ func (in *NetworkChaos) ValidatePodMode(spec *field.Path) field.ErrorList {
 func (in *NetworkChaos) ValidateTargets(target *field.Path) field.ErrorList {
 	allErrs := field.ErrorList{}
 
-	if in.Spec.Direction != To && in.Spec.ExternalTargets != nil && in.Spec.Action != PartitionAction {
+	if (in.Spec.Direction == From || in.Spec.Direction == Both) &&
+		in.Spec.ExternalTargets != nil && in.Spec.Action != PartitionAction {
 		allErrs = append(allErrs,
 			field.Invalid(target.Child("direction"), in.Spec.Direction,
 				fmt.Sprintf("external targets cannot be used with `from` and `both` direction in netem action yet")))
 	}
 
-	if in.Spec.Direction != To && in.Spec.Target == nil {
+	if (in.Spec.Direction == From || in.Spec.Direction == Both) && in.Spec.Target == nil {
 		if in.Spec.Action != PartitionAction {
 			allErrs = append(allErrs,
 				field.Invalid(target.Child("direction"), in.Spec.Direction,
