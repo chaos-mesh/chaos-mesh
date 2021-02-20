@@ -21,15 +21,13 @@ import (
 	"io/ioutil"
 	"net"
 
-	"google.golang.org/grpc/credentials"
-
-	"github.com/moby/locker"
-
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	grpc_prometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
+	"github.com/moby/locker"
 	"github.com/prometheus/client_golang/prometheus"
 	"golang.org/x/sync/errgroup"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/reflection"
 	ctrl "sigs.k8s.io/controller-runtime"
 
