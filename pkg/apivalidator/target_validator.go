@@ -39,7 +39,7 @@ func RequiredFieldEqualValid(fl validator.FieldLevel) bool {
 		paramFieldValue = fl.Parent().FieldByName(paramField)
 	}
 
-	if isEq(paramFieldValue, paramValue) == false {
+	if !isEq(paramFieldValue, paramValue) {
 		return true
 	}
 

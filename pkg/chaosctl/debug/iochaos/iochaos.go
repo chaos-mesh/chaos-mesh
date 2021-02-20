@@ -56,7 +56,7 @@ func Debug(ctx context.Context, chaos runtime.Object, c *cm.ClientSet, result *c
 
 func debugEachPod(ctx context.Context, pod v1.Pod, daemon v1.Pod, chaos *v1alpha1.IoChaos, c *cm.ClientSet, result *cm.PodResult) error {
 	// print out debug info
-	cmd := fmt.Sprintf("cat /proc/mounts")
+	cmd := "cat /proc/mounts"
 	out, err := cm.ExecBypass(ctx, pod, daemon, cmd, c.KubeCli)
 	if err != nil {
 		return errors.Wrapf(err, "run command '%s' failed", cmd)

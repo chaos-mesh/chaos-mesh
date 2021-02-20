@@ -23,6 +23,8 @@ timezone: "UTC"
 # enableProfiling is a flag to enable pprof in controller-manager and chaos-daemon.
 enableProfiling: true
 
+registry: ""
+
 controllerManager:
   hostNetwork: false
   serviceAccount: chaos-controller-manager
@@ -74,6 +76,22 @@ chaosDaemon:
   httpPort: 31766
   env: {}
   hostNetwork: false
+
+  # Run chaos-daemon container in privileged mode. Processes in privileged containers
+  # are essentially equivalent to root on the host.
+  # If it is set to false, the following capabilities will be set. You can grant certain privileges
+  # to a process without granting all the privileges of the root user.
+  ## capabilities:
+  ##   add:
+  ##     - SYS_PTRACE
+  ##     - NET_ADMIN
+  ##     - MKNOD
+  ##     - SYS_CHROOT
+  ##     - SYS_ADMIN
+  ##     - KILL
+  ##     # CAP_IPC_LOCK is used to lock memory
+  ##     - IPC_LOCK
+  privileged: true
 
   priorityClassName: ""
 
@@ -326,6 +344,7 @@ webhook:
     - networkchaos
     - kernelchaos
     - stresschaos
+    - awschaos
     - podiochaos
     - podnetworkchaos
     - dnschaos

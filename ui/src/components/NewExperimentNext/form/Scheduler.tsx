@@ -118,7 +118,6 @@ const Scheduler: React.FC<SchedulerProps> = ({ errors, touched }) => {
         <Box>
           <TextField
             fast
-            id="scheduler.cron"
             name="scheduler.cron"
             label="Cron"
             validate={validateCron}
@@ -144,7 +143,6 @@ const Scheduler: React.FC<SchedulerProps> = ({ errors, touched }) => {
           {!scheduled && (
             <TextField
               fast
-              id="scheduler.duration"
               name="scheduler.duration"
               label={T('newE.schedule.duration')}
               validate={validateDuration}

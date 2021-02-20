@@ -14,39 +14,12 @@
 package chaosdaemon
 
 import (
-	"errors"
 	"testing"
 
 	. "github.com/onsi/gomega"
 
-	"github.com/chaos-mesh/chaos-mesh/pkg/bpm"
 	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
-	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
 )
-
-func commonTcTest(t *testing.T, fpname, errString string, tcFunc func(s *DaemonServer) error) {
-	g := NewWithT(t)
-
-	defer mock.With("MockContainerdClient", &MockClient{})()
-	c, _ := CreateContainerRuntimeInfoClient(containerRuntimeContainerd)
-	m := bpm.NewBackgroundProcessManager()
-	s := &DaemonServer{c, m}
-
-	if errString == "" {
-		defer mock.With(fpname, true)()
-	} else {
-		defer mock.With(fpname, errors.New(errString))()
-	}
-
-	err := tcFunc(s)
-
-	if errString == "" {
-		g.Expect(err).To(BeNil())
-	} else {
-		g.Expect(err).ToNot(BeNil())
-		g.Expect(err.Error()).To(ContainSubstring(errString))
-	}
-}
 
 func Test_generateQdiscArgs(t *testing.T) {
 	g := NewWithT(t)

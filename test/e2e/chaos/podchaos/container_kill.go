@@ -83,12 +83,13 @@ func TestcaseContainerKillOnceThenDelete(ns string, kubeCli kubernetes.Interface
 		}
 		pod := pods.Items[0]
 		for _, cs := range pod.Status.ContainerStatuses {
-			if cs.Name == "nginx" && cs.Ready == false && cs.LastTerminationState.Terminated != nil {
+			if cs.Name == "nginx" && !cs.Ready && cs.LastTerminationState.Terminated != nil {
 				return true, nil
 			}
 		}
 		return false, nil
 	})
+	framework.ExpectNoError(err, "container kill apply failed")
 
 	err = cli.Delete(ctx, containerKillChaos)
 	framework.ExpectNoError(err, "failed to delete container kill chaos")
@@ -109,7 +110,7 @@ func TestcaseContainerKillOnceThenDelete(ns string, kubeCli kubernetes.Interface
 		}
 		pod := pods.Items[0]
 		for _, cs := range pod.Status.ContainerStatuses {
-			if cs.Name == "nginx" && cs.Ready == true && cs.State.Running != nil {
+			if cs.Name == "nginx" && cs.Ready && cs.State.Running != nil {
 				return true, nil
 			}
 		}

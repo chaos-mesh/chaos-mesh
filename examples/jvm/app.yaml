@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: springboot-jvmchaos-demo
+  namespace: app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: springboot-jvmchaos-demo
+  template:
+    metadata:
+      annotations:
+        admission-webhook.chaos-mesh.org/request: jvmchaos-sidecar
+      creationTimestamp: null
+      labels:
+        app: springboot-jvmchaos-demo
+    spec:
+      containers:
+      - image: 'gallardot/chaosmesh-jvmchaos-sample:latest'
+        imagePullPolicy: IfNotPresent
+        name: springboot-jvmchaos-demo
