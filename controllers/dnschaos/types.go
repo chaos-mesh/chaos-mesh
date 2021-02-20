@@ -75,7 +75,7 @@ func (r *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.I
 	}
 	r.Log.Info("Set DNS chaos to DNS service", "ip", service.Spec.ClusterIP)
 
-	err = r.setDNSServerRules(service.Spec.ClusterIP, config.ControllerCfg.DNSServicePort, dnschaos.Name, pods, dnschaos.Spec.Action, dnschaos.Spec.Scope)
+	err = r.setDNSServerRules(service.Spec.ClusterIP, config.ControllerCfg.DNSServicePort, dnschaos.Name, pods, dnschaos.Spec.Action, dnschaos.Spec.DomainNamePatterns)
 	if err != nil {
 		r.Log.Error(err, "fail to set DNS server rules")
 		return err
@@ -220,7 +220,7 @@ func (r *endpoint) applyPod(ctx context.Context, pod *v1.Pod, dnsServerIP string
 	return nil
 }
 
-func (r *endpoint) setDNSServerRules(dnsServerIP string, port int, name string, pods []v1.Pod, action v1alpha1.DNSChaosAction, scope v1alpha1.DNSChaosScope) error {
+func (r *endpoint) setDNSServerRules(dnsServerIP string, port int, name string, pods []v1.Pod, action v1alpha1.DNSChaosAction, patterns []string) error {
 	r.Log.Info("setDNSServerRules", "name", name)
 
 	pbPods := make([]*dnspb.Pod, len(pods))
@@ -239,10 +239,10 @@ func (r *endpoint) setDNSServerRules(dnsServerIP string, port int, name string, 
 
 	c := dnspb.NewDNSClient(conn)
 	request := &dnspb.SetDNSChaosRequest{
-		Name:   name,
-		Action: string(action),
-		Pods:   pbPods,
-		Scope:  string(scope),
+		Name:     name,
+		Action:   string(action),
+		Pods:     pbPods,
+		Patterns: patterns,
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)

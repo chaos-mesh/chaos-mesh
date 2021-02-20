@@ -7,7 +7,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/credentials v0.2.0
 	github.com/aws/aws-sdk-go-v2/service/ec2 v0.31.0
 	github.com/chaos-mesh/chaos-mesh/api/v1alpha1 v0.0.0
-	github.com/chaos-mesh/k8s_dns_chaos v0.0.0-20200922120555-7ced93637075
+	github.com/chaos-mesh/k8s_dns_chaos v0.2.0
 	github.com/containerd/cgroups v0.0.0-20200404012852-53ba5634dc0f
 	github.com/containerd/containerd v1.2.3
 	github.com/containerd/continuity v0.0.0-20200107194136-26c1120b8d41 // indirect
