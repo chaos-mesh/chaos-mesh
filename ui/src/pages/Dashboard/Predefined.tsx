@@ -161,8 +161,8 @@ const Predefined = React.memo(() => {
         ))}
       </Box>
       <Modal open={editorOpen} onClose={onModalClose}>
-        <div className={classes.editorPaperWrapper}>
-          <Paper style={{ height: '100%' }}>
+        <div>
+          <Paper className={classes.editorPaperWrapper} padding={false}>
             {experiment && (
               <>
                 <PaperTop title={experiment.name}>
