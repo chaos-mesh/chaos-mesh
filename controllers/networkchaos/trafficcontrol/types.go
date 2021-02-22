@@ -45,10 +45,8 @@ const (
 	networkChaosSourceMsg = "This is a source pod."
 	networkChaosTargetMsg = "This is a target pod."
 
-	toTargetIPSetPostFix   = ""
-	fromTargetIPSetPostFix = ""
-	bothTargetIPSetPostFix = "tgt"
-	bothSourceIPSetPostFix = "src"
+	targetIPSetPostFix = "tgt"
+	sourceIPSetPostFix = "src"
 )
 
 type endpoint struct {
@@ -121,25 +119,25 @@ func (r *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.I
 
 	switch networkchaos.Spec.Direction {
 	case v1alpha1.To:
-		err = r.applyTc(ctx, sources, targets, externalCidrs, toTargetIPSetPostFix, m, networkchaos)
+		err = r.applyTc(ctx, sources, targets, externalCidrs, targetIPSetPostFix, m, networkchaos)
 		if err != nil {
 			r.Log.Error(err, "failed to apply traffic control", "sources", sources, "targets", targets)
 			return err
 		}
 	case v1alpha1.From:
-		err = r.applyTc(ctx, targets, sources, []string{}, fromTargetIPSetPostFix, m, networkchaos)
+		err = r.applyTc(ctx, targets, sources, []string{}, sourceIPSetPostFix, m, networkchaos)
 		if err != nil {
 			r.Log.Error(err, "failed to apply traffic control", "sources", targets, "targets", sources)
 			return err
 		}
 	case v1alpha1.Both:
-		err = r.applyTc(ctx, sources, targets, externalCidrs, bothTargetIPSetPostFix, m, networkchaos)
+		err = r.applyTc(ctx, sources, targets, externalCidrs, targetIPSetPostFix, m, networkchaos)
 		if err != nil {
 			r.Log.Error(err, "failed to apply traffic control", "sources", sources, "targets", targets)
 			return err
 		}
 
-		err = r.applyTc(ctx, targets, sources, []string{}, bothSourceIPSetPostFix, m, networkchaos)
+		err = r.applyTc(ctx, targets, sources, []string{}, sourceIPSetPostFix, m, networkchaos)
 		if err != nil {
 			r.Log.Error(err, "failed to apply traffic control", "sources", targets, "targets", sources)
 			return err
@@ -301,12 +299,8 @@ func (r *endpoint) applyTc(
 		return nil
 	}
 
-	if len(ipSetPostFix) == 0 {
-		ipSetPostFix = string(tcType[0:5])
-	}
-
 	// create ipset contains all target ips
-	dstIpset := ipset.BuildIPSet(targets, externalTargets, networkchaos, ipSetPostFix, m.Source)
+	dstIpset := ipset.BuildIPSet(targets, externalTargets, networkchaos, string(tcType[0:2])+ipSetPostFix, m.Source)
 	r.Log.Info("apply traffic control with filter", "sources", sources, "ipset", dstIpset)
 
 	for index := range sources {
