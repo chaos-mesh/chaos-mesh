@@ -22,7 +22,9 @@ spec:
         app.kubernetes.io/instance: {{ .Release.Name }}
         app.kubernetes.io/component: chaos-daemon
       annotations:
+        {{- if .Values.dashboard.securityMode }}
         rollme: {{ randAlphaNum 5 | quote }}
+        {{- end }}
     {{- with .Values.chaosDaemon.podAnnotations }}
 {{ toYaml . | indent 8 }}
     {{- end }}
