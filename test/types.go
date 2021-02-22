@@ -74,7 +74,7 @@ func NewDefaultOperatorConfig() OperatorConfig {
 			Runtime:         "containerd",
 			SocketPath:      "/run/containerd/containerd.sock",
 		},
-		DNSImage: "pingcap/coredns:latest",
+		DNSImage: "pingcap/coredns:v0.2.0",
 	}
 }
 

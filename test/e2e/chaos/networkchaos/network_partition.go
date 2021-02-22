@@ -109,7 +109,7 @@ func TestcaseNetworkPartition(
 
 	var result map[string][][]int
 	wait.Poll(time.Second, 15*time.Second, func() (done bool, err error) {
-		result = probeNetworkCondition(c, networkPeers, ports)
+		result = probeNetworkCondition(c, networkPeers, ports, false)
 		if len(result[networkConditionBlocked]) != 0 || len(result[networkConditionSlow]) != 0 {
 			return false, nil
 		}
@@ -141,7 +141,7 @@ func TestcaseNetworkPartition(
 	framework.ExpectNoError(err, "create network chaos error")
 
 	wait.Poll(time.Second, 15*time.Second, func() (done bool, err error) {
-		result = probeNetworkCondition(c, networkPeers, ports)
+		result = probeNetworkCondition(c, networkPeers, ports, false)
 		if len(result[networkConditionBlocked]) != 1 || len(result[networkConditionSlow]) != 0 {
 			return false, nil
 		}
@@ -155,7 +155,7 @@ func TestcaseNetworkPartition(
 	framework.ExpectNoError(err, "delete network chaos error")
 
 	wait.Poll(time.Second, 15*time.Second, func() (done bool, err error) {
-		result = probeNetworkCondition(c, networkPeers, ports)
+		result = probeNetworkCondition(c, networkPeers, ports, false)
 		if len(result[networkConditionBlocked]) != 0 || len(result[networkConditionSlow]) != 0 {
 			return false, nil
 		}
@@ -179,7 +179,7 @@ func TestcaseNetworkPartition(
 	framework.ExpectNoError(err, "create network chaos error")
 
 	wait.Poll(time.Second, 15*time.Second, func() (done bool, err error) {
-		result = probeNetworkCondition(c, networkPeers, ports)
+		result = probeNetworkCondition(c, networkPeers, ports, false)
 		if len(result[networkConditionBlocked]) != 2 || len(result[networkConditionSlow]) != 0 {
 			return false, nil
 		}
@@ -193,7 +193,7 @@ func TestcaseNetworkPartition(
 	framework.ExpectNoError(err, "delete network chaos error")
 
 	wait.Poll(time.Second, 15*time.Second, func() (done bool, err error) {
-		result = probeNetworkCondition(c, networkPeers, ports)
+		result = probeNetworkCondition(c, networkPeers, ports, false)
 		if len(result[networkConditionBlocked]) != 0 || len(result[networkConditionSlow]) != 0 {
 			return false, nil
 		}
@@ -218,7 +218,7 @@ func TestcaseNetworkPartition(
 	framework.ExpectNoError(err, "create network chaos error")
 
 	wait.Poll(time.Second, 15*time.Second, func() (done bool, err error) {
-		result = probeNetworkCondition(c, networkPeers, ports)
+		result = probeNetworkCondition(c, networkPeers, ports, false)
 		if len(result[networkConditionBlocked]) != 1 || len(result[networkConditionSlow]) != 0 {
 			return false, nil
 		}
@@ -232,7 +232,7 @@ func TestcaseNetworkPartition(
 	framework.ExpectNoError(err, "delete network chaos error")
 
 	wait.Poll(time.Second, 15*time.Second, func() (done bool, err error) {
-		result = probeNetworkCondition(c, networkPeers, ports)
+		result = probeNetworkCondition(c, networkPeers, ports, false)
 		if len(result[networkConditionBlocked]) != 0 || len(result[networkConditionSlow]) != 0 {
 			return false, nil
 		}
@@ -257,7 +257,7 @@ func TestcaseNetworkPartition(
 	framework.ExpectNoError(err, "create network chaos error")
 
 	wait.Poll(time.Second, 15*time.Second, func() (done bool, err error) {
-		result = probeNetworkCondition(c, networkPeers, ports)
+		result = probeNetworkCondition(c, networkPeers, ports, false)
 		if len(result[networkConditionBlocked]) != 4 || len(result[networkConditionSlow]) != 0 {
 			return false, nil
 		}
@@ -271,7 +271,7 @@ func TestcaseNetworkPartition(
 	framework.ExpectNoError(err, "delete network chaos error")
 
 	wait.Poll(time.Second, 15*time.Second, func() (done bool, err error) {
-		result = probeNetworkCondition(c, networkPeers, ports)
+		result = probeNetworkCondition(c, networkPeers, ports, false)
 		if len(result[networkConditionBlocked]) != 0 || len(result[networkConditionSlow]) != 0 {
 			return false, nil
 		}
@@ -297,7 +297,7 @@ func TestcaseNetworkPartition(
 	framework.ExpectNoError(err, "create network chaos error")
 
 	wait.Poll(time.Second, 15*time.Second, func() (done bool, err error) {
-		result = probeNetworkCondition(c, networkPeers, ports)
+		result = probeNetworkCondition(c, networkPeers, ports, false)
 		if len(result[networkConditionBlocked]) != 5 || len(result[networkConditionSlow]) != 0 {
 			return false, nil
 		}
@@ -314,7 +314,7 @@ func TestcaseNetworkPartition(
 
 	wait.Poll(time.Second, 15*time.Second, func() (done bool, err error) {
 		klog.Info("retry probeNetworkCondition")
-		result = probeNetworkCondition(c, networkPeers, ports)
+		result = probeNetworkCondition(c, networkPeers, ports, false)
 		if len(result[networkConditionBlocked]) != 0 || len(result[networkConditionSlow]) != 0 {
 			return false, nil
 		}
