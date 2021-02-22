@@ -1159,7 +1159,6 @@ spec:
         app.kubernetes.io/instance: chaos-mesh
         app.kubernetes.io/component: chaos-daemon
       annotations:
-        rollme: "install.sh"
     spec:
       hostNetwork: ${host_network}
       serviceAccount: chaos-daemon
