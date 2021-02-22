@@ -1,10 +1,10 @@
 import { Checkbox, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@material-ui/core'
 import React, { useMemo } from 'react'
 import { getIn, useFormikContext } from 'formik'
-import { setAlert, setAlertOpen } from 'slices/globalStatus'
 
 import PaperContainer from 'components-mui/PaperContainer'
 import T from 'components/T'
+import { setAlert } from 'slices/globalStatus'
 import { useStoreDispatch } from 'store'
 
 interface ScopePodsTableProps {
@@ -49,7 +49,6 @@ const ScopePodsTable: React.FC<ScopePodsTableProps> = ({ scope = 'scope', pods }
           message: 'Please select at least one pod.',
         })
       )
-      dispatch(setAlertOpen(true))
 
       return
     }

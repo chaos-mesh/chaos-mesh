@@ -26,10 +26,10 @@ const useStyles = makeStyles((theme) => {
     background: theme.palette.primary.main,
     cursor: 'pointer',
     '& svg': {
-      fill: '#fff',
+      fill: theme.palette.primary.contrastText,
     },
     '& .MuiListItemText-primary': {
-      color: '#fff',
+      color: theme.palette.primary.contrastText,
     },
   }
 

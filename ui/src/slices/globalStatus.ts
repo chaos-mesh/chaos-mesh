@@ -40,6 +40,7 @@ const globalStatusSlice = createSlice({
   reducers: {
     setAlert(state, action: PayloadAction<Alert>) {
       state.alert = action.payload
+      state.alertOpen = true
     },
     setAlertOpen(state, action: PayloadAction<boolean>) {
       state.alertOpen = action.payload
