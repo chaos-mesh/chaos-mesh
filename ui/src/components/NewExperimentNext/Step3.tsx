@@ -43,7 +43,7 @@ const Step3 = () => {
               message: intl.formatMessage({ id: 'common.createSuccessfully' }),
             })
           )
-          dispatch(setAlertOpen(true))
+
           dispatch(resetNewExperiment())
 
           history.push('/experiments')

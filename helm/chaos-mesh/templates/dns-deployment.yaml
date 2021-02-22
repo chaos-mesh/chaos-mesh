@@ -3,7 +3,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: chaos-dns-server
-  namespace: {{ .Release.Namespace }}
+  namespace: {{ .Release.Namespace | quote }}
   labels:
     app.kubernetes.io/name: {{ template "chaos-mesh.name" . }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
@@ -54,7 +54,7 @@ spec:
       priorityClassName: {{ .Values.dnsServer.priorityClassName}}
       containers:
       - name: chaos-dns-server
-        image: {{ .Values.dnsServer.image }}
+        image: {{template "registry-prefix" .}}{{ .Values.dnsServer.image }}
         imagePullPolicy: {{ .Values.dnsServer.imagePullPolicy | default "IfNotPresent" }}
         resources:
 {{ toYaml .Values.dnsServer.resources | indent 10 }}
@@ -106,4 +106,4 @@ spec:
             items:
             - key: Corefile
               path: Corefile
-{{- end }} 
+{{- end }}

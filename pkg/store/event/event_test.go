@@ -25,7 +25,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/core"
 	"github.com/chaos-mesh/chaos-mesh/pkg/store/dbstore"
 
-	"github.com/DATA-DOG/go-sqlmock"
+	sqlmock "github.com/DATA-DOG/go-sqlmock"
 	"github.com/jinzhu/gorm"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"

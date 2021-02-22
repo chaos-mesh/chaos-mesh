@@ -5,8 +5,11 @@ metadata:
   namespace: chaos-testing
 spec:
   action: random
-  scope: outer
   mode: all
+  patterns:
+    - google.com
+    - chaos-mesh.*
+    - github.?om
   selector:
     namespaces:
       - busybox

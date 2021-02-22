@@ -29,8 +29,6 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/config"
 	"github.com/chaos-mesh/chaos-mesh/pkg/swaggerserver"
 	"github.com/chaos-mesh/chaos-mesh/pkg/uiserver"
-
-	ctrl "sigs.k8s.io/controller-runtime"
 )
 
 var (
@@ -43,8 +41,6 @@ var (
 		handlerModule,
 		fx.Invoke(serverRegister),
 	)
-
-	log = ctrl.Log.WithName("apiserver")
 )
 
 func serverRegister(r *gin.Engine, conf *config.ChaosDashboardConfig) {
@@ -106,7 +102,7 @@ func newDashboardRouter(r *gin.Engine, ui http.FileSystem) {
 		c.FileFromFS(c.Request.URL.Path, ui)
 	}
 
-	r.GET("dashboard/*any", func(c *gin.Context) {
+	r.GET("/dashboard/*any", func(c *gin.Context) {
 		c.FileFromFS("/", ui)
 	})
 	r.GET("/static/*any", renderRequest)

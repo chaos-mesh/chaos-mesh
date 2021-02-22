@@ -81,8 +81,7 @@ func (e *eventStore) List(_ context.Context) ([]*core.Event, error) {
 		if err != nil {
 			return nil, err
 		}
-		var event core.Event
-		event = et
+		var event core.Event = et
 		event.Pods = pods
 		eventList = append(eventList, &event)
 	}
@@ -106,8 +105,7 @@ func (e *eventStore) ListByUID(_ context.Context, uid string) ([]*core.Event, er
 		if err != nil {
 			return nil, err
 		}
-		var event core.Event
-		event = et
+		var event core.Event = et
 		event.Pods = pods
 		eventList = append(eventList, &event)
 	}
@@ -132,8 +130,7 @@ func (e *eventStore) ListByExperiment(_ context.Context, namespace string, exper
 		if err != nil {
 			return nil, err
 		}
-		var event core.Event
-		event = et
+		var event core.Event = et
 		event.Pods = pods
 		eventList = append(eventList, &event)
 	}

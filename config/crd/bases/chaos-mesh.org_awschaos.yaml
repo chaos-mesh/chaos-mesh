@@ -33,13 +33,14 @@ spec:
         metadata:
           type: object
         spec:
-          description: AwsChaosSpec is the content of the specification for a AwsChaos
+          description: AwsChaosSpec is the content of the specification for an AwsChaos
           properties:
             action:
               description: 'Action defines the specific aws chaos action. Supported
-                action: ec2-stop / detach-volume Default action: ec2-stop'
+                action: ec2-stop / ec2-restart / detach-volume Default action: ec2-stop'
               enum:
               - ec2-stop
+              - ec2-restart
               - detach-volume
               type: string
             awsRegion:
@@ -85,7 +86,7 @@ spec:
           - ec2Instance
           type: object
         status:
-          description: AwsChaosStatus represents the status of a AwsChaos
+          description: AwsChaosStatus represents the status of an AwsChaos
           properties:
             experiment:
               description: Experiment records the last experiment state.

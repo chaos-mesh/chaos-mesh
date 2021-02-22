@@ -36,8 +36,6 @@ const (
 
 const emptyString = ""
 
-var log = ctrl.Log.WithName("controller")
-
 // Reconciler for common chaos
 type Reconciler struct {
 	endpoint.Endpoint
