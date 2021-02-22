@@ -36,18 +36,18 @@ var RPCTimeout = DefaultRPCTimeout
 var log = ctrl.Log.WithName("util")
 
 // CreateGrpcConnection create a grpc connection with given port and address
-func CreateGrpcConnection(address string, port int, caCert string, cert string, key string) (*grpc.ClientConn, error) {
+func CreateGrpcConnection(address string, port int, caCertPath string, certPath string, keyPath string) (*grpc.ClientConn, error) {
 	options := []grpc.DialOption{grpc.WithUnaryInterceptor(TimeoutClientInterceptor)}
 
-	if caCert != "" && cert != "" && key != "" {
-		caCert, err := ioutil.ReadFile(caCert)
+	if caCertPath != "" && certPath != "" && keyPath != "" {
+		caCert, err := ioutil.ReadFile(caCertPath)
 		if err != nil {
 			return nil, err
 		}
 		caCertPool := x509.NewCertPool()
 		caCertPool.AppendCertsFromPEM(caCert)
 
-		clientCert, err := tls.LoadX509KeyPair(cert, key)
+		clientCert, err := tls.LoadX509KeyPair(certPath, keyPath)
 		if err != nil {
 			return nil, err
 		}
