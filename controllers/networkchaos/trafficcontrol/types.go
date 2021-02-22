@@ -44,6 +44,11 @@ const (
 	networkTcActionMsg    = "network traffic control action duration %s"
 	networkChaosSourceMsg = "This is a source pod."
 	networkChaosTargetMsg = "This is a target pod."
+
+	toIPSetPostfix         = ""
+	fromIPSetPostfix       = ""
+	bothTargetIPSetPostfix = "tgt"
+	bothSourceIPSetPostfix = "src"
 )
 
 type endpoint struct {
@@ -116,25 +121,25 @@ func (r *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.I
 
 	switch networkchaos.Spec.Direction {
 	case v1alpha1.To:
-		err = r.applyTc(ctx, sources, targets, externalCidrs, m, networkchaos)
+		err = r.applyTc(ctx, sources, targets, externalCidrs, toIPSetPostfix, m, networkchaos)
 		if err != nil {
 			r.Log.Error(err, "failed to apply traffic control", "sources", sources, "targets", targets)
 			return err
 		}
 	case v1alpha1.From:
-		err = r.applyTc(ctx, targets, sources, []string{}, m, networkchaos)
+		err = r.applyTc(ctx, targets, sources, []string{}, fromIPSetPostfix, m, networkchaos)
 		if err != nil {
 			r.Log.Error(err, "failed to apply traffic control", "sources", targets, "targets", sources)
 			return err
 		}
 	case v1alpha1.Both:
-		err = r.applyTc(ctx, sources, targets, externalCidrs, m, networkchaos)
+		err = r.applyTc(ctx, sources, targets, externalCidrs, bothTargetIPSetPostfix, m, networkchaos)
 		if err != nil {
 			r.Log.Error(err, "failed to apply traffic control", "sources", sources, "targets", targets)
 			return err
 		}
 
-		err = r.applyTc(ctx, targets, sources, []string{}, m, networkchaos)
+		err = r.applyTc(ctx, targets, sources, []string{}, bothSourceIPSetPostfix, m, networkchaos)
 		if err != nil {
 			r.Log.Error(err, "failed to apply traffic control", "sources", targets, "targets", sources)
 			return err
@@ -248,7 +253,14 @@ func (r *endpoint) cleanFinalizersAndRecover(ctx context.Context, chaos *v1alpha
 	return result
 }
 
-func (r *endpoint) applyTc(ctx context.Context, sources, targets []v1.Pod, externalTargets []string, m *podnetworkchaosmanager.PodNetworkManager, networkchaos *v1alpha1.NetworkChaos) error {
+func (r *endpoint) applyTc(
+	ctx context.Context,
+	sources, targets []v1.Pod,
+	externalTargets []string,
+	ipSetPostfix string,
+	m *podnetworkchaosmanager.PodNetworkManager,
+	networkchaos *v1alpha1.NetworkChaos,
+) error {
 	for index := range sources {
 		pod := &sources[index]
 
@@ -289,8 +301,12 @@ func (r *endpoint) applyTc(ctx context.Context, sources, targets []v1.Pod, exter
 		return nil
 	}
 
+	if len(ipSetPostfix) == 0 {
+		ipSetPostfix = string(tcType[0:5])
+	}
+
 	// create ipset contains all target ips
-	dstIpset := ipset.BuildIPSet(targets, externalTargets, networkchaos, string(tcType)[0:5], m.Source)
+	dstIpset := ipset.BuildIPSet(targets, externalTargets, networkchaos, ipSetPostfix, m.Source)
 	r.Log.Info("apply traffic control with filter", "sources", sources, "ipset", dstIpset)
 
 	for index := range sources {
