@@ -24,7 +24,6 @@ import (
 	"google.golang.org/grpc/credentials"
 
 	"google.golang.org/grpc"
-	v1 "k8s.io/api/core/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
 )
 
@@ -36,8 +35,8 @@ var RPCTimeout = DefaultRPCTimeout
 
 var log = ctrl.Log.WithName("util")
 
-// CreateGrpcConnectionWithAddress create a grpc connection with given port and address
-func CreateGrpcConnectionWithAddress(address string, port int, caCert string, cert string, key string) (*grpc.ClientConn, error) {
+// CreateGrpcConnection create a grpc connection with given port and address
+func CreateGrpcConnection(address string, port int, caCert string, cert string, key string) (*grpc.ClientConn, error) {
 	options := []grpc.DialOption{grpc.WithUnaryInterceptor(TimeoutClientInterceptor)}
 
 	if caCert != "" && cert != "" && key != "" {
@@ -69,18 +68,6 @@ func CreateGrpcConnectionWithAddress(address string, port int, caCert string, ce
 		return nil, err
 	}
 	return conn, nil
-}
-
-func findIPOnEndpoints(e *v1.Endpoints, nodeName string) string {
-	for _, subset := range e.Subsets {
-		for _, addr := range subset.Addresses {
-			if addr.NodeName != nil && *addr.NodeName == nodeName {
-				return addr.IP
-			}
-		}
-	}
-
-	return ""
 }
 
 // TimeoutClientInterceptor wraps the RPC with a timeout.

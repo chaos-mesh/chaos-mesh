@@ -95,7 +95,7 @@ func NewChaosDaemonClient(ctx context.Context, c client.Client, pod *v1.Pod) (Ch
 		return nil, err
 	}
 
-	cc, err := grpcUtils.CreateGrpcConnectionWithAddress(daemonIP, config.ControllerCfg.ChaosDaemonPort, config.ControllerCfg.TLSConfig.ChaosMeshCACert, config.ControllerCfg.TLSConfig.ChaosDaemonClientCert, config.ControllerCfg.TLSConfig.ChaosDaemonClientKey)
+	cc, err := grpcUtils.CreateGrpcConnection(daemonIP, config.ControllerCfg.ChaosDaemonPort, config.ControllerCfg.TLSConfig.ChaosMeshCACert, config.ControllerCfg.TLSConfig.ChaosDaemonClientCert, config.ControllerCfg.TLSConfig.ChaosDaemonClientKey)
 	if err != nil {
 		return nil, err
 	}
@@ -114,7 +114,7 @@ func NewChaosDaemonClientLocally(port int, caCert string, cert string, key strin
 		return nil, err.(error)
 	}
 
-	cc, err := grpcUtils.CreateGrpcConnectionWithAddress("localhost", port, caCert, cert, key)
+	cc, err := grpcUtils.CreateGrpcConnection("localhost", port, caCert, cert, key)
 	if err != nil {
 		return nil, err
 	}
