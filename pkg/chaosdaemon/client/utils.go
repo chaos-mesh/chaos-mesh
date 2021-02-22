@@ -14,9 +14,10 @@
 package client
 
 import (
-	chaosdaemon "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
 	"google.golang.org/grpc"
 	ctrl "sigs.k8s.io/controller-runtime"
+
+	chaosdaemon "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
 )
 
 var log = ctrl.Log.WithName("chaos-daemon-client-utils")

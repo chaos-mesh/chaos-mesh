@@ -17,8 +17,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/chaos-mesh/chaos-mesh/pkg/controllerutils"
 	"time"
+
+	"github.com/chaos-mesh/chaos-mesh/pkg/controllerutils"
 
 	dnspb "github.com/chaos-mesh/k8s_dns_chaos/pb"
 	"github.com/go-logr/logr"

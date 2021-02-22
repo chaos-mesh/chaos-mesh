@@ -17,8 +17,9 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/chaos-mesh/chaos-mesh/pkg/controllerutils"
 	"strings"
+
+	"github.com/chaos-mesh/chaos-mesh/pkg/controllerutils"
 
 	"github.com/go-logr/logr"
 	v1 "k8s.io/api/core/v1"

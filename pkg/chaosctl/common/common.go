@@ -18,12 +18,13 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	grpcUtils "github.com/chaos-mesh/chaos-mesh/pkg/grpc"
-	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
 	"io"
 	"regexp"
 	"strings"
 	"time"
+
+	grpcUtils "github.com/chaos-mesh/chaos-mesh/pkg/grpc"
+	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
 
 	"github.com/fatih/color"
 	"github.com/pkg/errors"

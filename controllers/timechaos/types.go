@@ -17,8 +17,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/chaos-mesh/chaos-mesh/pkg/controllerutils"
 	"time"
+
+	"github.com/chaos-mesh/chaos-mesh/pkg/controllerutils"
 
 	"github.com/go-logr/logr"
 	"golang.org/x/sync/errgroup"
