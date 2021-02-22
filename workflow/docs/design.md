@@ -211,7 +211,7 @@ There are 8 available phase of one Node:
   - This Node did not create child node yet;
   - Or previous child node just succeed;
 
-**WaitingForChild** is only available on Serial, Parallel and Task, it means at least 1 child node is in **Running** state.
+**WaitingForChild** is only available on Serial, Parallel and Task, it means at least 1 child node is in **Running** or **Holding** state.
 
 **Running** is available on type Chaos, Suspend, Task; It means an **Actor** is doing dirty work for this node. For Chaos, both of "create Chaos CRD resource" and "delete Chaos CRD resource" are presented as **Running**.
 
