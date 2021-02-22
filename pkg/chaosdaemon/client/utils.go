@@ -14,19 +14,9 @@
 package client
 
 import (
-	"context"
-
-	"github.com/pkg/errors"
-	"google.golang.org/grpc"
-	v1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/types"
-	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/client"
-
-	"github.com/chaos-mesh/chaos-mesh/controllers/config"
 	chaosdaemon "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
-	grpcUtils "github.com/chaos-mesh/chaos-mesh/pkg/grpc"
-	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
+	"google.golang.org/grpc"
+	ctrl "sigs.k8s.io/controller-runtime"
 )
 
 var log = ctrl.Log.WithName("chaos-daemon-client-utils")
@@ -47,79 +37,9 @@ func (c *GrpcChaosDaemonClient) Close() error {
 	return c.conn.Close()
 }
 
-func FindDaemonIP(ctx context.Context, c client.Client, pod *v1.Pod) (string, error) {
-	nodeName := pod.Spec.NodeName
-	log.Info("Creating client to chaos-daemon", "node", nodeName)
-
-	ns := config.ControllerCfg.Namespace
-	var endpoints v1.Endpoints
-	err := c.Get(ctx, types.NamespacedName{
-		Namespace: ns,
-		Name:      "chaos-daemon",
-	}, &endpoints)
-	if err != nil {
-		return "", err
-	}
-
-	daemonIP := findIPOnEndpoints(&endpoints, nodeName)
-	if len(daemonIP) == 0 {
-		return "", errors.Errorf("cannot find daemonIP on node %s in related Endpoints %v", nodeName, endpoints)
-	}
-
-	return daemonIP, nil
-}
-
-func findIPOnEndpoints(e *v1.Endpoints, nodeName string) string {
-	for _, subset := range e.Subsets {
-		for _, addr := range subset.Addresses {
-			if addr.NodeName != nil && *addr.NodeName == nodeName {
-				return addr.IP
-			}
-		}
-	}
-
-	return ""
-}
-
-// NewChaosDaemonClient would create ChaosDaemonClient
-func NewChaosDaemonClient(ctx context.Context, c client.Client, pod *v1.Pod) (ChaosDaemonClientInterface, error) {
-	if cli := mock.On("MockChaosDaemonClient"); cli != nil {
-		return cli.(ChaosDaemonClientInterface), nil
-	}
-	if err := mock.On("NewChaosDaemonClientError"); err != nil {
-		return nil, err.(error)
-	}
-
-	daemonIP, err := FindDaemonIP(ctx, c, pod)
-	if err != nil {
-		return nil, err
-	}
-
-	cc, err := grpcUtils.CreateGrpcConnection(daemonIP, config.ControllerCfg.ChaosDaemonPort, config.ControllerCfg.TLSConfig.ChaosMeshCACert, config.ControllerCfg.TLSConfig.ChaosDaemonClientCert, config.ControllerCfg.TLSConfig.ChaosDaemonClientKey)
-	if err != nil {
-		return nil, err
-	}
+func New(conn *grpc.ClientConn) ChaosDaemonClientInterface {
 	return &GrpcChaosDaemonClient{
-		ChaosDaemonClient: chaosdaemon.NewChaosDaemonClient(cc),
-		conn:              cc,
-	}, nil
-}
-
-// NewChaosDaemonClientLocally would create ChaosDaemonClient in localhost
-func NewChaosDaemonClientLocally(port int, caCert string, cert string, key string) (ChaosDaemonClientInterface, error) {
-	if cli := mock.On("MockChaosDaemonClient"); cli != nil {
-		return cli.(ChaosDaemonClientInterface), nil
+		ChaosDaemonClient: chaosdaemon.NewChaosDaemonClient(conn),
+		conn:              conn,
 	}
-	if err := mock.On("NewChaosDaemonClientError"); err != nil {
-		return nil, err.(error)
-	}
-
-	cc, err := grpcUtils.CreateGrpcConnection("localhost", port, caCert, cert, key)
-	if err != nil {
-		return nil, err
-	}
-	return &GrpcChaosDaemonClient{
-		ChaosDaemonClient: chaosdaemon.NewChaosDaemonClient(cc),
-		conn:              cc,
-	}, nil
 }

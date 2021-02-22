@@ -17,6 +17,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/chaos-mesh/chaos-mesh/pkg/controllerutils"
 	"strings"
 	"sync"
 	"time"
@@ -33,7 +34,6 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/config"
 	"github.com/chaos-mesh/chaos-mesh/controllers/recover"
-	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/client"
 	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
 	"github.com/chaos-mesh/chaos-mesh/pkg/events"
 	"github.com/chaos-mesh/chaos-mesh/pkg/finalizer"
@@ -117,7 +117,7 @@ func (r *recoverer) RecoverPod(ctx context.Context, pod *v1.Pod, somechaos v1alp
 	// judged type in `Recover` already so no need to judge again
 	chaos, _ := somechaos.(*v1alpha1.StressChaos)
 	r.Log.Info("Try to recover pod", "namespace", pod.Namespace, "name", pod.Name)
-	daemonClient, err := client.NewChaosDaemonClient(ctx, r.Client, pod)
+	daemonClient, err := controllerutils.NewChaosDaemonClient(ctx, r.Client, pod)
 	if err != nil {
 		return err
 	}
@@ -168,7 +168,7 @@ func (r *endpoint) applyAllPods(ctx context.Context, pods []v1.Pod, chaos *v1alp
 func (r *endpoint) applyPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.StressChaos, instancesLock *sync.RWMutex) error {
 	r.Log.Info("Try to apply stress chaos", "namespace",
 		pod.Namespace, "name", pod.Name)
-	daemonClient, err := client.NewChaosDaemonClient(ctx, r.Client, pod)
+	daemonClient, err := controllerutils.NewChaosDaemonClient(ctx, r.Client, pod)
 	if err != nil {
 		return err
 	}

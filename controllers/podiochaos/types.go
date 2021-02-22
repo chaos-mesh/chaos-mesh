@@ -17,6 +17,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/chaos-mesh/chaos-mesh/pkg/controllerutils"
 	"strings"
 
 	"github.com/go-logr/logr"
@@ -26,7 +27,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	chaosDaemonClient "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/client"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
 )
 
@@ -51,7 +51,7 @@ func (h *Handler) Apply(ctx context.Context, chaos *v1alpha1.PodIoChaos) error {
 		return err
 	}
 
-	pbClient, err := chaosDaemonClient.NewChaosDaemonClient(ctx, h.Client, pod)
+	pbClient, err := controllerutils.NewChaosDaemonClient(ctx, h.Client, pod)
 	if err != nil {
 		return err
 	}
