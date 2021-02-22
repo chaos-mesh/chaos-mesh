@@ -41,11 +41,15 @@ func TestcaseDNSRandom(
 
 	err := util.WaitE2EHelperReady(c, port)
 
+	effectDomainNames := []string{"not-exist-host.abc", "not_exist_host.abc", "not-exist-host.def"}
+
 	framework.ExpectNoError(err, "wait e2e helper ready error")
 
 	// get IP of a non exists host, and will get error
-	_, err = testDNSServer(c, port, "not-exist-host.abc")
-	framework.ExpectError(err, "test DNS server failed")
+	for _, domainName := range effectDomainNames {
+		_, err = testDNSServer(c, port, domainName)
+		framework.ExpectError(err, "test DNS server failed")
+	}
 
 	dnsChaos := &v1alpha1.DNSChaos{
 		ObjectMeta: metav1.ObjectMeta{
@@ -53,9 +57,9 @@ func TestcaseDNSRandom(
 			Namespace: ns,
 		},
 		Spec: v1alpha1.DNSChaosSpec{
-			Action: v1alpha1.RandomAction,
-			Mode:   v1alpha1.AllPodMode,
-			Scope:  v1alpha1.AllScope,
+			Action:             v1alpha1.RandomAction,
+			Mode:               v1alpha1.AllPodMode,
+			DomainNamePatterns: []string{"not-exist-?ost.*", "not_exist?host.abc", "not-exist-host.def"},
 			Selector: v1alpha1.SelectorSpec{
 				Namespaces:     []string{ns},
 				LabelSelectors: map[string]string{"app": "network-peer"},
@@ -66,16 +70,18 @@ func TestcaseDNSRandom(
 	err = cli.Create(ctx, dnsChaos.DeepCopy())
 	framework.ExpectNoError(err, "create dns chaos error")
 
-	err = wait.Poll(time.Second, 5*time.Second, func() (done bool, err error) {
-		// get IP of a non exists host, because chaos DNS server will return a random IP,
-		// so err should be nil
-		_, dnsErr := testDNSServer(c, port, "not-exist-host.abc")
-		if dnsErr != nil {
-			return false, nil
-		}
-		return true, nil
-	})
-	framework.ExpectNoError(err, "test DNS server failed")
+	for _, domainName := range effectDomainNames {
+		err = wait.Poll(time.Second, 5*time.Second, func() (done bool, err error) {
+			// get IP of a non exists host, because chaos DNS server will return a random IP,
+			// so err should be nil
+			_, dnsErr := testDNSServer(c, port, domainName)
+			if dnsErr != nil {
+				return false, nil
+			}
+			return true, nil
+		})
+		framework.ExpectNoError(err, "test DNS server failed")
+	}
 
 	err = cli.Delete(ctx, dnsChaos.DeepCopy())
 	framework.ExpectNoError(err, "failed to delete dns chaos")
@@ -95,9 +101,13 @@ func TestcaseDNSError(
 
 	framework.ExpectNoError(err, "wait e2e helper ready error")
 
+	effectDomainNames := []string{"chaos-mesh.org", "github.com", "163.com"}
+
 	// get IP of chaos-mesh.org, and will get no error
-	_, err = testDNSServer(c, port, "chaos-mesh.org")
-	framework.ExpectNoError(err, "test DNS server failed")
+	for _, domainName := range effectDomainNames {
+		_, err = testDNSServer(c, port, domainName)
+		framework.ExpectNoError(err, "test DNS server failed")
+	}
 
 	dnsChaos := &v1alpha1.DNSChaos{
 		ObjectMeta: metav1.ObjectMeta{
@@ -105,9 +115,9 @@ func TestcaseDNSError(
 			Namespace: ns,
 		},
 		Spec: v1alpha1.DNSChaosSpec{
-			Action: v1alpha1.ErrorAction,
-			Mode:   v1alpha1.AllPodMode,
-			Scope:  v1alpha1.AllScope,
+			Action:             v1alpha1.ErrorAction,
+			Mode:               v1alpha1.AllPodMode,
+			DomainNamePatterns: []string{"chaos-mes?.org", "github.com", "16?.co*"},
 			Selector: v1alpha1.SelectorSpec{
 				Namespaces:     []string{ns},
 				LabelSelectors: map[string]string{"app": "network-peer"},
@@ -118,16 +128,18 @@ func TestcaseDNSError(
 	err = cli.Create(ctx, dnsChaos.DeepCopy())
 	framework.ExpectNoError(err, "create dns chaos error")
 
-	err = wait.Poll(time.Second, 5*time.Second, func() (done bool, err error) {
-		// get IP of a chaos-mesh.org, because chaos DNS server will return error,
-		// so err should not be nil
-		_, dnsErr := testDNSServer(c, port, "chaos-mesh.org")
-		if dnsErr == nil {
-			return false, nil
-		}
-		return true, nil
-	})
-	framework.ExpectNoError(err, "test DNS server failed")
+	for _, domainName := range effectDomainNames {
+		err = wait.Poll(time.Second, 5*time.Second, func() (done bool, err error) {
+			// get IP of a chaos-mesh.org, because chaos DNS server will return error,
+			// so err should not be nil
+			_, dnsErr := testDNSServer(c, port, domainName)
+			if dnsErr == nil {
+				return false, nil
+			}
+			return true, nil
+		})
+		framework.ExpectNoError(err, "test DNS server failed")
+	}
 
 	err = cli.Delete(ctx, dnsChaos.DeepCopy())
 	framework.ExpectNoError(err, "failed to delete dns chaos")

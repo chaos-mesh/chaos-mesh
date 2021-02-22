@@ -254,7 +254,7 @@ dnsServer:
 
   serviceAccount: chaos-dns-server
 
-  image: pingcap/coredns:latest
+  image: pingcap/coredns:v0.2.0
 
   imagePullPolicy: IfNotPresent
 
