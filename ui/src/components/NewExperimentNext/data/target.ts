@@ -30,7 +30,7 @@ const networkCommon: Spec = {
     items: ['', 'from', 'to', 'both'],
     label: 'Direction',
     value: '',
-    helperText: 'Specifies the network direction',
+    helperText: 'Specify the network direction',
   },
   external_targets: {
     field: 'label',
@@ -116,7 +116,7 @@ const dnsCommon: Spec = {
     field: 'label',
     label: 'Patterns',
     value: [],
-    helperText: 'Specifies the DNS patterns. For example, type google.com and then press space to add it.',
+    helperText: 'Specify the DNS patterns. For example, type google.com and then press space to add it.',
   },
 }
 
