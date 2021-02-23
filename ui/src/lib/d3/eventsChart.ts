@@ -1,6 +1,6 @@
 import * as d3 from 'd3'
 
-import day, { format } from 'lib/dayjs'
+import DateTime, { format, now } from 'lib/luxon'
 
 import { Event } from 'api/events.type'
 import { IntlShape } from 'react-intl'
@@ -8,59 +8,68 @@ import { Theme } from 'slices/settings'
 import _debounce from 'lodash.debounce'
 import wrapText from './wrapText'
 
-const margin = {
-  top: 15,
-  right: 15,
-  bottom: 30,
-  left: 15,
-}
-
+/**
+ * The gen function generates the timeline of the events and returns an update function.
+ *
+ * @export
+ * @param {{
+ *   root: HTMLElement
+ *   events: Event[]
+ *   intl: IntlShape
+ *   theme: Theme
+ *   options?: {
+ *     enableLegends?: boolean
+ *     onSelectEvent?: (e: Event) => () => void
+ *   }
+ * }} {
+ *   root,
+ *   events,
+ *   intl,
+ *   theme,
+ *   options = {
+ *     enableLegends: true,
+ *   },
+ * }
+ * @returns {gen~update} - Receive new events and update the chart.
+ */
 export default function gen({
   root,
   events,
-  onSelectEvent,
   intl,
   theme,
+  options = {
+    enableLegends: true,
+  },
 }: {
   root: HTMLElement
   events: Event[]
-  onSelectEvent?: (e: Event) => () => void
   intl: IntlShape
   theme: Theme
+  options?: {
+    enableLegends?: boolean
+    onSelectEvent?: (e: Event) => () => void
+  }
 }) {
+  const { enableLegends, onSelectEvent } = options
+
   let width = root.offsetWidth
   const height = root.offsetHeight
 
-  const svg = d3
-    .select(root)
-    .append('svg')
-    .attr('class', theme === 'light' ? 'chaos-chart' : 'chaos-chart-dark')
-    .attr('width', width)
-    .attr('height', height)
+  const margin = {
+    top: 0,
+    right: enableLegends ? 150 : 0,
+    bottom: 30,
+    left: 0,
+  }
 
-  const halfHourLater = (events.length ? day(events[events.length - 1].start_time) : day()).add(0.5, 'h')
-
-  const x = d3
-    .scaleLinear()
-    .domain([halfHourLater.subtract(1, 'h'), halfHourLater])
-    .range([margin.left, width - margin.right])
-  const xAxis = d3
-    .axisBottom(x)
-    .ticks(6)
-    .tickFormat(d3.timeFormat('%m-%d %H:%M') as (dv: Date | { valueOf(): number }, i: number) => string)
-  const gXAxis = svg
-    .append('g')
-    .attr('class', 'axis')
-    .attr('transform', `translate(0, ${height - margin.bottom})`)
-    .call(xAxis)
-
-  // Wrap long text, also used in zoom() and reGen()
-  svg.selectAll('.tick text').call(wrapText, 30)
+  const halfHourLater = (events.length ? DateTime.fromISO(events[events.length - 1].start_time) : now()).plus({
+    hours: 0.5,
+  })
 
   const colorPalette = d3
     .scaleOrdinal<string, string>()
-    .domain(events.map((d) => d.experiment_id))
     .range(d3.schemeTableau10)
+    .domain(events.map((d) => d.experiment_id))
 
   const allUniqueExperiments = [...new Set(events.map((d) => d.experiment + '/' + d.experiment_id))].map((d) => {
     const [name, uuid] = d.split('/')
@@ -72,31 +81,67 @@ export default function gen({
   })
   const allUniqueUUIDs = allUniqueExperiments.map((d) => d.uuid)
 
+  let zoom: d3.ZoomBehavior<SVGSVGElement, unknown>
+
+  const svg = d3
+    .select(root)
+    .append('svg')
+    .attr('class', `chaos-chart${theme === 'light' ? '' : ' dark'}`)
+    .attr('width', width)
+    .attr('height', height)
+
+  const x = d3
+    .scaleLinear()
+    .range([margin.left, width - margin.right])
+    .domain([halfHourLater.minus({ hours: 1 }), halfHourLater])
+  let newX = x
+  const xAxis = d3
+    .axisBottom(x)
+    .ticks(6)
+    .tickFormat(d3.timeFormat('%m-%d %H:%M') as any)
+  const gXAxis = svg
+    .append('g')
+    .attr('class', 'axis')
+    .attr('transform', `translate(0, ${height - margin.bottom})`)
+    .call(xAxis)
+
+  // Wrap long text, also used in zoomed() and reGen()
+  gXAxis.selectAll('.tick text').call(wrapText, 30)
+
   const y = d3
     .scaleBand()
-    .domain(allUniqueUUIDs)
     .range([0, height - margin.top - margin.bottom])
+    .domain(allUniqueUUIDs)
     .padding(0.5)
-  const yAxis = d3.axisLeft(y).tickFormat('' as any)
-  // gYAxis
+  // gYAxisLeft
   svg
     .append('g')
+    .attr('class', 'axis')
     .attr('transform', `translate(${margin.left}, ${margin.top})`)
-    .call(yAxis)
-    .call((g) => g.select('.domain').remove())
-    .call((g) => g.selectAll('.tick').remove())
-    .call((g) =>
-      g
-        .append('g')
-        .attr('stroke-opacity', 0.5)
-        .selectAll('line')
-        .data(allUniqueUUIDs)
-        .join('line')
-        .attr('y1', (d) => y(d)! + y.bandwidth() / 2)
-        .attr('y2', (d) => y(d)! + y.bandwidth() / 2)
-        .attr('x2', width - margin.right - margin.left)
-        .attr('stroke', colorPalette)
-    )
+    .append('line')
+    .attr('stroke-width', 2)
+    .attr('y1', margin.top)
+    .attr('y2', height - 30)
+  const gYAxisRight = svg
+    .append('g')
+    .attr('class', 'axis')
+    .attr('transform', `translate(${width - margin.right + 0.5}, ${margin.top})`)
+  gYAxisRight
+    .append('line')
+    .attr('y1', margin.top)
+    .attr('y2', height - 30)
+
+  const timelines = svg
+    .append('g')
+    .attr('transform', `translate(${margin.left}, ${margin.top})`)
+    .attr('stroke-opacity', 0.6)
+    .selectAll()
+    .data(allUniqueUUIDs)
+    .join('line')
+    .attr('y1', (d) => y(d)! + y.bandwidth() / 2)
+    .attr('y2', (d) => y(d)! + y.bandwidth() / 2)
+    .attr('x2', width - margin.right - margin.left)
+    .attr('stroke', colorPalette)
 
   // clipX
   svg
@@ -110,163 +155,155 @@ export default function gen({
   const gMain = svg.append('g').attr('clip-path', 'url(#clip-x-axis)')
 
   // legends
-  const legendsRoot = d3.select(document.createElement('div')).attr('class', 'chaos-events-legends')
-  const legends = legendsRoot
-    .selectAll()
-    .data(allUniqueExperiments)
-    .enter()
-    .append('div')
-    .on('click', function (d) {
-      const _events = events.filter((e) => e.experiment_id === d.uuid)
-      const event = _events[_events.length - 1]
-
-      svg
-        .transition()
-        .duration(750)
-        .call(
-          zoom.transform as any,
-          d3.zoomIdentity
-            .translate(width / 2, 0)
-            .scale(2)
-            .translate(-x(day(event.start_time))!, 0)
-        )
-    })
-  legends
-    .append('div')
-    .attr('style', (d) => `width: 14px; height: 14px; background: ${colorPalette(d.uuid)}; border-radius: 50%;`)
-  legends
-    .insert('div')
-    .attr(
-      'style',
-      `margin-left: 8px; color: ${
-        theme === 'light' ? 'rgba(0, 0, 0, 0.54)' : 'rgba(255, 255, 255, 0.7)'
-      }; font-size: 0.75rem; font-weight: bold;`
-    )
-    .text((d) => d.name)
-
-  // event circles
-  const circles = gMain
-    .selectAll()
-    .data(events)
-    .enter()
-    .append('circle')
-    .attr('cx', (d) => x(day(d.start_time))!)
-    .attr('cy', (d) => y(d.experiment_id)! + y.bandwidth() / 2 + margin.top)
-    .attr('r', 4)
-    .attr('fill', (d) => colorPalette(d.experiment_id))
-    .style('cursor', 'pointer')
-
-  const zoom = d3.zoom().scaleExtent([0.1, 5]).on('zoom', zoomed)
-  function zoomed() {
-    const eventTransform = d3.event.transform
-
-    const newX = eventTransform.rescaleX(x)
-
-    gXAxis.call(xAxis.scale(newX))
-    svg.selectAll('.tick text').call(wrapText, 30)
-    circles.attr('cx', (d) => newX(day(d.start_time)))
+  const legendsRoot = d3
+    .select(document.createElement('div'))
+    .attr('class', `chaos-events-legends${theme === 'light' ? '' : ' dark'}`)
+  if (enableLegends) {
+    legends()
   }
-  svg.call(zoom as any)
+  function legends() {
+    const legends = legendsRoot
+      .selectAll()
+      .data(allUniqueExperiments)
+      .enter()
+      .append('div')
+      .on('click', function (_, d) {
+        const _events = events.filter((e) => e.experiment_id === d.uuid)
+        const event = _events[_events.length - 1]
+
+        svg
+          .transition()
+          .duration(750)
+          .call(
+            zoom.transform,
+            d3.zoomIdentity
+              .translate((width - margin.left - margin.right) / 2, 0)
+              .scale(3)
+              .translate(-x(DateTime.fromISO(event.start_time)), 0)
+          )
+      })
+    legends
+      .append('div')
+      .attr('class', 'square')
+      .attr('style', (d) => `background: ${colorPalette(d.uuid)};`)
+    legends
+      .insert('div')
+      .attr('class', 'experiment')
+      .text((d) => d.name)
+  }
 
   const tooltip = d3
     .select(document.createElement('div'))
-    .attr('class', 'chaos-event-tooltip')
-    .call(createTooltip as any)
-
-  function createTooltip(el: d3.Selection<HTMLElement, any, any, any>) {
-    el.style('position', 'absolute')
-      .style('top', 0)
-      .style('left', 0)
-      .style('padding', '0.25rem 0.75rem')
-      .style('background', theme === 'light' ? '#fff' : 'rgba(0, 0, 0, 0.54)')
-      .style('font', '1rem')
-      .style('border', `1px solid ${theme === 'light' ? 'rgba(0, 0, 0, 0.12)' : 'rgba(255, 255, 255, 0.12)'}`)
-      .style('border-radius', '4px')
-      .style('opacity', 0)
-      .style('transition', 'top 0.25s ease, left 0.25s ease')
-      .style('z-index', 999)
-  }
+    .attr('class', `chaos-event-tooltip${theme === 'light' ? '' : ' dark'}`)
 
   function genTooltipContent(d: Event) {
     return `<b>${intl.formatMessage({ id: 'events.event.experiment' })}: ${d.experiment}</b>
             <br />
             <b>
-              ${intl.formatMessage({ id: 'common.status' })}: ${
-      d.finish_time
-        ? intl.formatMessage({ id: 'experiments.state.finished' })
-        : intl.formatMessage({ id: 'experiments.state.running' })
-    }
+              ${intl.formatMessage({ id: 'common.status' })}:
+              ${
+                d.finish_time
+                  ? intl.formatMessage({ id: 'experiments.state.finished' })
+                  : intl.formatMessage({ id: 'experiments.state.running' })
+              }
             </b>
             <br />
             <br />
-            <span style="color: ${theme === 'light' ? 'rgba(0, 0, 0, 0.54)' : '#fff'};">
+            <span class="secondary">
               ${intl.formatMessage({ id: 'events.event.started' })}: ${format(d.start_time)}
             </span>
             <br />
             ${
               d.finish_time
-                ? `<span style="color: ${theme === 'light' ? 'rgba(0, 0, 0, 0.54)' : '#fff'};">${intl.formatMessage({
-                    id: 'events.event.ended',
-                  })}: ${format(d.finish_time)}</span>`
+                ? `
+                  <span class="secondary">
+                    ${intl.formatMessage({ id: 'events.event.ended' })}: ${format(d.finish_time)}
+                  </span>`
                 : ''
-            }
-            `
+            }`
   }
 
-  circles
-    .on('click', function (d) {
-      if (typeof onSelectEvent === 'function') {
-        onSelectEvent(d)()
-      }
-
-      svg
-        .transition()
-        .duration(750)
-        .call(
-          zoom.transform as any,
-          d3.zoomIdentity
-            .translate(width / 2, 0)
-            .scale(2)
-            .translate(-x(day(d.start_time))!, 0)
-        )
-    })
-    .on('mouseover', function (d) {
-      let [x, y] = d3.mouse(this)
-
-      tooltip.html(genTooltipContent(d))
-      const { width } = tooltip.node()!.getBoundingClientRect()
-
-      y += 50
-      if (x > (root.offsetWidth / 3) * 2) {
-        x -= width
-      }
-      if (y > (root.offsetHeight / 3) * 2) {
-        y -= 200
-      }
-
-      tooltip
-        .style('left', x + 'px')
-        .style('top', y + 'px')
-        .style('opacity', 1)
-    })
-    .on('mouseleave', function () {
-      tooltip.style('opacity', 0)
-    })
-
-  function reGen() {
-    const newWidth = root.offsetWidth
-    width = newWidth
-
-    svg.attr('width', width)
-    x.range([margin.left, width - margin.right])
-    gXAxis.call(xAxis)
-    svg.selectAll('.tick text').call(wrapText, 30)
-    circles.attr('x', (d) => x(day(d.start_time))!)
+  if (enableLegends) {
+    root.appendChild(legendsRoot.node()!)
   }
-
-  d3.select(window).on('resize', _debounce(reGen, 250))
-
-  root.appendChild(legendsRoot.node()!)
-  root.appendChild(tooltip.node()!)
   root.style.position = 'relative'
+  root.appendChild(tooltip.node()!)
+
+  /**
+   * Receive new events and update the chart.
+   *
+   * @param {Event[]} events
+   */
+  function update(events: Event[]) {
+    const circles = gMain
+      .selectAll('circle')
+      .data(events)
+      .join((enter) => {
+        const newCx = (d: Event) => newX(DateTime.fromISO(d.start_time))
+
+        return enter
+          .append('circle')
+          .attr('opacity', 0)
+          .attr('cx', (d) => newCx(d) + 30)
+          .call((enter) => enter.transition().duration(750).attr('opacity', 1).attr('cx', newCx))
+      })
+      .attr('cy', (d) => y(d.experiment_id)! + y.bandwidth() / 2 + margin.top)
+      .attr('fill', (d) => colorPalette(d.experiment_id))
+      .attr('r', 4)
+      .style('cursor', 'pointer')
+      .on('click', (_, d) => {
+        if (typeof onSelectEvent === 'function') {
+          onSelectEvent(d)()
+        }
+      })
+      .on('mouseover', function (event, d) {
+        let [x, y] = d3.pointer(event)
+
+        tooltip.html(genTooltipContent(d))
+        const { width } = tooltip.node()!.getBoundingClientRect()
+
+        y += 50
+        if (x > (root.offsetWidth / 3) * 2) {
+          x -= width
+        }
+        if (y > (root.offsetHeight / 3) * 2) {
+          y -= 200
+        }
+
+        tooltip
+          .style('left', x + 'px')
+          .style('top', y + 'px')
+          .style('opacity', 1)
+          .style('z-index', 'unset')
+      })
+      .on('mouseleave', () => tooltip.style('opacity', 0).style('z-index', -1))
+
+    function zoomed({ transform }: d3.D3ZoomEvent<SVGSVGElement, unknown>) {
+      newX = transform.rescaleX(x)
+
+      gXAxis.call(xAxis.scale(newX))
+      gXAxis.selectAll('.tick text').call(wrapText, 30)
+      circles.attr('cx', (d) => newX(DateTime.fromISO(d.start_time))!)
+    }
+
+    zoom = d3.zoom<SVGSVGElement, unknown>().scaleExtent([0.1, 6]).on('zoom', zoomed)
+    svg.call(zoom)
+
+    function reGen() {
+      const newWidth = root.offsetWidth
+      width = newWidth
+
+      svg.attr('width', width).call(zoom.transform, d3.zoomIdentity)
+      gXAxis.call(xAxis.scale(x.range([margin.left, width - margin.right])))
+      gXAxis.selectAll('.tick text').call(wrapText, 30)
+      gYAxisRight.attr('transform', `translate(${width - margin.right + 0.5}, ${margin.top})`)
+      timelines.attr('x2', width - margin.right - margin.left)
+      circles.attr('cx', (d) => x(DateTime.fromISO(d.start_time)))
+    }
+
+    d3.select(window).on('resize', _debounce(reGen, 250))
+  }
+  update(events)
+
+  return update
 }

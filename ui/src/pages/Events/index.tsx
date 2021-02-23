@@ -61,9 +61,12 @@ export default function Events() {
       genEventsChart({
         root: chart,
         events,
-        onSelectEvent: eventsTableRef.current!.onSelectEvent,
         intl,
         theme,
+        options: {
+          enableLegends: true,
+          onSelectEvent: eventsTableRef.current!.onSelectEvent,
+        },
       })
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

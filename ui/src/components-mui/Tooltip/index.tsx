@@ -4,11 +4,9 @@ import { withStyles } from '@material-ui/core/styles'
 const Tooltip = withStyles((theme) => ({
   tooltip: {
     padding: theme.spacing(3),
-    backgroundColor: theme.palette.common.black,
-    color: theme.palette.common.white,
-  },
-  arrow: {
-    color: theme.palette.common.black,
+    backgroundColor: theme.palette.background.default,
+    color: theme.palette.text.primary,
+    border: `1px solid ${theme.palette.divider}`,
   },
 }))(MUITooltip)
 

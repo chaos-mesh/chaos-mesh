@@ -14,7 +14,7 @@ import { ExperimentDetail } from 'api/experiments.type'
 import React from 'react'
 import { RootState } from 'store'
 import T from 'components/T'
-import { format } from 'lib/dayjs'
+import { format } from 'lib/luxon'
 import { useSelector } from 'react-redux'
 
 const TableCell = withStyles({
