@@ -27,23 +27,23 @@ const (
 	starBit = 1 << 63
 )
 
-// LastTime returns the next time this schedule activated, less than or equal with the given time.
+// LastTime returns the last time this schedule activated, less than or equal with the given time.
 func LastTime(spec v1alpha1.SchedulerSpec, now time.Time) (*time.Time, error) {
 	scheduler, err := cron.ParseStandard(spec.Cron)
 	if err != nil {
 		return nil, fmt.Errorf("fail to parse runner rule %s, %v", spec.Cron, err)
 	}
-	var next time.Time
+	var last time.Time
 	if cronSpec, ok := scheduler.(*cron.SpecSchedule); ok {
 		scheduleLast := &cusSchedule{cronSpec}
-		next = scheduleLast.Last(now)
+		last = scheduleLast.Last(now)
 	} else if cronSpec, ok := scheduler.(cron.ConstantDelaySchedule); ok {
 		scheduleLast := &cusConstantDelaySchedule{cronSpec}
-		next = scheduleLast.Last(now)
+		last = scheduleLast.Last(now)
 	} else {
 		return nil, fmt.Errorf("assert cron spec failed")
 	}
-	return &next, nil
+	return &last, nil
 }
 
 type cusConstantDelaySchedule struct {
@@ -67,8 +67,8 @@ func (s *cusSchedule) Last(t time.Time) time.Time {
 	// General approach:
 	// For Month, Day, Hour, Minute, Second:
 	// Check if the time value matches.  If yes, continue to the next field.
-	// If the field doesn't match the schedule, then increment the field until it matches.
-	// While incrementing the field, a wrap-around brings it back to the beginning
+	// If the field doesn't match the schedule, then decrement the field until it matches.
+	// While decrementing the field, a wrap-around brings it back to the beginning
 	// of the field list (since it is necessary to re-verify previous field
 	// values)
 

@@ -276,7 +276,6 @@ func TestcaseTimeSkewStartAtWaitingThenIntoRunning(
 	})
 	framework.ExpectNoError(err, "check chaos in waiting failed")
 
-	framework.ExpectNoError(err, "get timer pod error")
 	err = wait.Poll(5*time.Second, 1*time.Minute, func() (done bool, err error) {
 		podTime, err := getPodTimeNS(c, port)
 		framework.ExpectNoError(err, "failed to get pod time")
