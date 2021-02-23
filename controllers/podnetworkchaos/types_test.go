@@ -18,12 +18,13 @@ import (
 	"strings"
 	"testing"
 
+	"k8s.io/apimachinery/pkg/types"
+
 	. "github.com/onsi/gomega"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/kubernetes/scheme"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
@@ -90,16 +91,22 @@ func TestHostNetworkOption(t *testing.T) {
 				},
 				Spec: v1alpha1.PodNetworkChaosSpec{},
 			}
+			objs = append(objs, chaos)
 
-			var r client.Reader
 			h := &Reconciler{
-				Client:                  fake.NewFakeClientWithScheme(scheme.Scheme, objs...),
-				Reader:                  r,
-				Log:                     zap.New(zap.UseDevMode(true)),
-				AllowHostNetworkTesting: testCase.enableHostNetworkTesting,
+				Client: fake.NewFakeClientWithScheme(scheme.Scheme, objs...),
+				Log:    zap.New(zap.UseDevMode(true)),
 			}
 
-			testCase.errorEvaluation(t, h.Apply(context.TODO(), chaos))
+			ctx, err := h.NewContext(context.Background(), types.NamespacedName{
+				Name:      chaos.Name,
+				Namespace: chaos.Namespace,
+			})
+			if err != nil {
+				t.Errorf("fail to setup context %s", err.Error())
+			}
+
+			testCase.errorEvaluation(t, ctx.SyncNetwork())
 		})
 
 	}

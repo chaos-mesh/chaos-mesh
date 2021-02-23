@@ -59,7 +59,9 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	var err error
 
 	r.Log.Info("Reconciling a common chaos", "name", req.Name, "namespace", req.Namespace)
-	ctx := context.Background()
+	// TODO: make deadline configurable
+	ctx, cancel := context.WithDeadline(context.Background(), time.Now().Add(time.Second*10))
+	defer cancel()
 
 	chaos := r.Object()
 	if err = r.Client.Get(ctx, req.NamespacedName, chaos); err != nil {

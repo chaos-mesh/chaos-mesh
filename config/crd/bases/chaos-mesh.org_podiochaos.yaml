@@ -171,6 +171,17 @@ spec:
           required:
           - volumeMountPath
           type: object
+        status:
+          description: Most recently observed status of the chaos experiment about
+            pods
+          properties:
+            failedMessage:
+              description: FailedMessage describes that the failed reason
+              type: string
+            sync:
+              description: Sync describes whether
+              type: boolean
+          type: object
       type: object
   version: v1alpha1
   versions:

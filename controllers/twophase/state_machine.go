@@ -195,7 +195,6 @@ func (m *chaosStateMachine) Into(ctx context.Context, targetPhase v1alpha1.Exper
 	}
 
 	if updated {
-
 		updateError := m.Update(ctx, m.Chaos)
 		if updateError == nil {
 			return err

@@ -129,8 +129,8 @@ func main() {
 	}
 
 	err = (&podiochaos.Reconciler{
-		mgr.GetClient(),
-		ctrl.Log.WithName("controller").WithName("podiochaos"),
+		Client: mgr.GetClient(),
+		Log:    ctrl.Log.WithName("controller").WithName("podiochaos"),
 	}).SetupWithManager(mgr)
 	if err != nil {
 		setupLog.Error(err, "fail to setup podiochaos controller")
@@ -138,10 +138,8 @@ func main() {
 	}
 
 	err = (&podnetworkchaos.Reconciler{
-		mgr.GetClient(),
-		mgr.GetAPIReader(),
-		ctrl.Log.WithName("controller").WithName("podnetworkchaos"),
-		ccfg.ControllerCfg.AllowHostNetworkTesting,
+		Client: mgr.GetClient(),
+		Log:    ctrl.Log.WithName("controller").WithName("podnetworkchaos"),
 	}).SetupWithManager(mgr)
 	if err != nil {
 		setupLog.Error(err, "fail to setup podnetworkchaos controller")

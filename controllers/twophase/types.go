@@ -53,7 +53,8 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	now := time.Now()
 
 	r.Log.Info("Reconciling a two phase chaos", "name", req.Name, "namespace", req.Namespace, "time", time.Now())
-	ctx, cancel := context.WithCancel(context.Background())
+	// TODO: make deadline configurable
+	ctx, cancel := context.WithDeadline(context.Background(), time.Now().Add(time.Second*10))
 	defer cancel()
 
 	_chaos := r.Object()

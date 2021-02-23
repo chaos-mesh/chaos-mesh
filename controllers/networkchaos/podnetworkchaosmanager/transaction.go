@@ -107,6 +107,8 @@ func (t *PodNetworkTransaction) Append(item interface{}) error {
 
 // Apply runs every step on the chaos
 func (t *PodNetworkTransaction) Apply(chaos *v1alpha1.PodNetworkChaos) error {
+	chaos.Status.Sync = false
+
 	for _, s := range t.Steps {
 		err := s.Apply(chaos)
 		if err != nil {

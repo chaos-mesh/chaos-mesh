@@ -188,6 +188,21 @@ type PodIoChaos struct {
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
 	Spec PodIoChaosSpec `json:"spec,omitempty"`
+
+	// +optional
+	// Most recently observed status of the chaos experiment about pods
+	Status PodIOChaosStatus `json:"status"`
+}
+
+// PodNetworkChaosStatus defines the observed state of PodNetworkChaos
+type PodIOChaosStatus struct {
+	// +optional
+	// Sync describes whether
+	Sync bool `json:"sync,omitempty"`
+
+	// +optional
+	// FailedMessage describes that the failed reason
+	FailedMessage string `json:"failedMessage,omitempty"`
 }
 
 // +kubebuilder:object:root=true

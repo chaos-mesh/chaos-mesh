@@ -128,6 +128,8 @@ func (t *PodIoTransaction) SetContainer(container string) error {
 
 // Apply runs every step on the chaos
 func (t *PodIoTransaction) Apply(chaos *v1alpha1.PodIoChaos) error {
+	chaos.Status.Sync = false
+
 	for _, s := range t.Steps {
 		err := s.Apply(chaos)
 		if err != nil {

@@ -17,6 +17,10 @@ import (
 	"context"
 	"errors"
 
+	"k8s.io/apimachinery/pkg/runtime"
+
+	"github.com/chaos-mesh/chaos-mesh/pkg/internalwatch"
+
 	"github.com/go-logr/logr"
 	"golang.org/x/sync/errgroup"
 	v1 "k8s.io/api/core/v1"
@@ -141,7 +145,23 @@ func (m *PodIoManager) Commit(ctx context.Context) []CommitResponse {
 					return err
 				}
 
-				return m.Client.Update(ctx, chaos)
+				err = m.Client.Update(ctx, chaos)
+				if err != nil {
+					m.Log.Error(err, "fail to update")
+					return err
+				}
+
+				return internalwatch.WaitUntil(ctx, chaos, func(obj runtime.Object) (bool, error) {
+					chaos := obj.(*v1alpha1.PodIoChaos)
+					m.Log.Info("internal watch result", "chaos", chaos)
+					if chaos.Status.Sync {
+						return true, nil
+					} else if len(chaos.Status.FailedMessage) > 0 {
+						return false, errors.New(chaos.Status.FailedMessage)
+					}
+
+					return false, nil
+				})
 			})
 
 			results[i] = CommitResponse{

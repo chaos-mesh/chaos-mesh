@@ -146,7 +146,11 @@ type RawRuleSource struct {
 
 // PodNetworkChaosStatus defines the observed state of PodNetworkChaos
 type PodNetworkChaosStatus struct {
-	ChaosStatus `json:",inline"`
+	// Sync describes whether
+	Sync bool `json:"sync,omitempty"`
+
+	// FailedMessage describes that the failed reason
+	FailedMessage string `json:"failedMessage,omitempty"`
 }
 
 // +kubebuilder:object:root=true
@@ -156,38 +160,6 @@ type PodNetworkChaosList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
 	Items           []PodNetworkChaos `json:"items"`
-}
-
-// GetStatus returns the status of chaos
-func (in *PodNetworkChaos) GetStatus() *ChaosStatus {
-	return &in.Status.ChaosStatus
-}
-
-// GetChaos returns a chaos instance
-func (in *PodNetworkChaos) GetChaos() *ChaosInstance {
-	instance := &ChaosInstance{
-		Name:      in.Name,
-		Namespace: in.Namespace,
-		Kind:      "NetworkChaos",
-		StartTime: in.CreationTimestamp.Time,
-		Status:    string(in.GetStatus().Experiment.Phase),
-	}
-	if in.DeletionTimestamp != nil {
-		instance.EndTime = in.DeletionTimestamp.Time
-	}
-	return instance
-}
-
-// ListChaos returns a list of network chaos
-func (in *PodNetworkChaosList) ListChaos() []*ChaosInstance {
-	if len(in.Items) == 0 {
-		return nil
-	}
-	res := make([]*ChaosInstance, 0, len(in.Items))
-	for _, item := range in.Items {
-		res = append(res, item.GetChaos())
-	}
-	return res
 }
 
 func init() {
