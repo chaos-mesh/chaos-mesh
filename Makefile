@@ -91,7 +91,7 @@ mockgen:
 
 generate-mock: mockgen
 	go generate ./pkg/workflow
-	make check
+	make fmt vet lint
 
 coverage:
 ifeq ("$(CI)", "1")
