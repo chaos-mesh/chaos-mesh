@@ -112,12 +112,11 @@ const ioCommon: Spec = {
 }
 
 const dnsCommon: Spec = {
-  scope: {
-    field: 'select',
-    items: ['', 'outer', 'inner', 'all'],
-    label: 'Scope',
-    value: '',
-    helperText: 'Specifies the dns scope',
+  patterns: {
+    field: 'label',
+    label: 'Patterns',
+    value: [],
+    helperText: 'Specifies the DNS patterns. For example, type google.com and then press space to add it.',
   },
 }
 
@@ -499,10 +498,10 @@ export const schema: Partial<Record<Kind, Record<string, Yup.ObjectSchema>>> = {
   },
   DNSChaos: {
     error: Yup.object({
-      scope: Yup.string().required('The scope is required'),
+      patterns: Yup.array().of(Yup.string()).required('The patterns is required'),
     }),
     random: Yup.object({
-      scope: Yup.string().required('The scope is required'),
+      patterns: Yup.array().of(Yup.string()).required('The patterns is required'),
     }),
   },
 }
