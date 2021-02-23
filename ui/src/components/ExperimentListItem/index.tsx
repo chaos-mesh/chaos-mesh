@@ -4,6 +4,7 @@ import { Theme, createStyles, makeStyles } from '@material-ui/core/styles'
 
 import { Archive } from 'api/archives.type'
 import ArchiveOutlinedIcon from '@material-ui/icons/ArchiveOutlined'
+import DateTime from 'lib/luxon'
 import DeleteOutlinedIcon from '@material-ui/icons/DeleteOutlined'
 import ErrorOutlineIcon from '@material-ui/icons/ErrorOutline'
 import { Experiment } from 'api/experiments.type'
@@ -16,7 +17,6 @@ import PauseCircleOutlineIcon from '@material-ui/icons/PauseCircleOutline'
 import PlayCircleOutlineIcon from '@material-ui/icons/PlayCircleOutline'
 import { RootState } from 'store'
 import T from 'components/T'
-import day from 'lib/dayjs'
 import { useHistory } from 'react-router-dom'
 import { useSelector } from 'react-redux'
 
@@ -121,9 +121,9 @@ const ExperimentListItem: React.FC<ExperimentListItemProps> = ({
     <Box display="flex" justifyContent="flex-end" alignItems="center" className={classes.marginRight}>
       <Typography variant="body2">
         {T('experiments.createdAt')}{' '}
-        {day(isArchive ? (e as Archive).start_time : (e as Experiment).created)
-          .locale(lang)
-          .fromNow()}
+        {DateTime.fromISO(isArchive ? (e as Archive).start_time : (e as Experiment).created, {
+          locale: lang,
+        }).toRelative()}
       </Typography>
       {isArchive ? (
         <IconButton

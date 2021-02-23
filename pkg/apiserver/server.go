@@ -102,7 +102,7 @@ func newDashboardRouter(r *gin.Engine, ui http.FileSystem) {
 		c.FileFromFS(c.Request.URL.Path, ui)
 	}
 
-	r.GET("dashboard/*any", func(c *gin.Context) {
+	r.GET("/dashboard/*any", func(c *gin.Context) {
 		c.FileFromFS("/", ui)
 	})
 	r.GET("/static/*any", renderRequest)

@@ -17,8 +17,8 @@ import { makeStyles } from '@material-ui/core/styles'
 
 const useStyles = makeStyles((theme) => ({
   container: {
+    position: 'relative',
     height: 300,
-    margin: theme.spacing(3),
   },
   totalExperiments: {
     display: 'flex',
@@ -42,7 +42,13 @@ export default function Dashboard() {
       .catch(console.error)
   }
 
-  useEffect(fetchEvents, [])
+  useEffect(() => {
+    fetchEvents()
+
+    const id = setInterval(fetchEvents, 15000)
+
+    return () => clearInterval(id)
+  }, [])
 
   return (
     <>
@@ -75,7 +81,9 @@ export default function Dashboard() {
               <Paper>
                 <PaperTop title={T('common.timeline')} />
 
-                <Timeline events={events} className={classes.container} />
+                <Box m={3}>
+                  <Timeline events={events} className={classes.container} />
+                </Box>
               </Paper>
             </Grid>
 
@@ -93,7 +101,7 @@ export default function Dashboard() {
           </Grid>
 
           <Grid item xs={12} md={12} lg={3}>
-            <Paper style={{ height: '100%' }}>
+            <Paper style={{ position: 'relative', height: '100%' }}>
               <PaperTop title={T('dashboard.recent')} />
 
               <Recent events={events.slice(-6)} />

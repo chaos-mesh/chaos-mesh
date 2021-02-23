@@ -81,10 +81,10 @@ function e2e::image_load() {
         # pingcap/coredns:latest, nginx:latest and gcr.io/google-containers/pause:latest is required for test
         # we suppose that you could pull this image on your host docker
         echo "info: load images pingcap/coredns:latest, nginx:latest and gcr.io/google-containers/pause:latest"
-        docker pull pingcap/coredns:latest
+        docker pull pingcap/coredns:v0.2.0
         docker pull nginx:latest
         docker pull gcr.io/google-containers/pause:latest
-        $KIND_BIN load docker-image --name $CLUSTER pingcap/coredns:latest --nodes $(hack::join ',' ${nodes[@]})
+        $KIND_BIN load docker-image --name $CLUSTER pingcap/coredns:v0.2.0 --nodes $(hack::join ',' ${nodes[@]})
         $KIND_BIN load docker-image --name $CLUSTER nginx:latest --nodes $(hack::join ',' ${nodes[@]})
         $KIND_BIN load docker-image --name $CLUSTER gcr.io/google-containers/pause:latest --nodes $(hack::join ',' ${nodes[@]})
     fi

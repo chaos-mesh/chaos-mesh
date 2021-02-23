@@ -2,7 +2,7 @@
 kind: ConfigMap
 apiVersion: v1
 metadata:
-  namespace: {{ .Release.Namespace }}
+  namespace: {{ .Release.Namespace | quote }}
   name: prometheus-config
   labels:
     app.kubernetes.io/name: {{ template "chaos-mesh.name" . }}

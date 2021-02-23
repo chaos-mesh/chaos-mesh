@@ -13,7 +13,7 @@ import {
   TableSortLabel,
 } from '@material-ui/core'
 import React, { useImperativeHandle, useState } from 'react'
-import { dayComparator, format } from 'lib/dayjs'
+import { comparator, format } from 'lib/luxon'
 import { useHistory, useLocation } from 'react-router-dom'
 
 import CloseIcon from '@material-ui/icons/Close'
@@ -42,16 +42,16 @@ const useStyles = makeStyles({
   },
 })
 
-function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
-  if (['CreateAt', 'UpdateAt', 'StartTime', 'EndTime'].includes(orderBy as string)) {
-    return dayComparator(a[orderBy] as any, b[orderBy] as any)
+function descendingComparator<T extends Record<string, any>>(a: T, b: T, orderBy: string) {
+  if (['StartTime', 'EndTime'].includes(orderBy)) {
+    return comparator(a[orderBy], b[orderBy])
   }
 
-  if (b[orderBy] < a[orderBy]) {
+  if (a[orderBy] > b[orderBy]) {
     return -1
   }
 
-  if (b[orderBy] > a[orderBy]) {
+  if (a[orderBy] < b[orderBy]) {
     return 1
   }
 
@@ -60,17 +60,14 @@ function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
 
 type Order = 'asc' | 'desc'
 
-function getComparator<Key extends keyof any>(
-  order: Order,
-  orderBy: Key
-): (a: { [key in Key]: number | string }, b: { [key in Key]: number | string }) => number {
+function getComparator<T>(order: Order, orderBy: string): (a: T, b: T) => number {
   return order === 'desc'
     ? (a, b) => descendingComparator(a, b, orderBy)
     : (a, b) => -descendingComparator(a, b, orderBy)
 }
 
 function stableSort<T>(data: T[], comparator: (a: T, b: T) => number) {
-  const indexed = data.map((el, index) => [el, index] as [T, number])
+  const indexed: [T, number][] = data.map((el, index) => [el, index])
 
   indexed.sort((a, b) => {
     const order = comparator(a[0], b[0])
@@ -79,7 +76,7 @@ function stableSort<T>(data: T[], comparator: (a: T, b: T) => number) {
       return order
     }
 
-    return a[1] - b[1]
+    return a[1] - b[1] // compare index
   })
 
   return indexed.map((el) => el[0])
