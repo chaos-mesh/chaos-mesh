@@ -297,6 +297,9 @@ var _ = ginkgo.Describe("[Basic]", func() {
 			ginkgo.It("[Schedule]", func() {
 				networkchaostestcases.TestcaseNetworkDelay(ns, cli, networkPeers, ports, c)
 			})
+			ginkgo.It("[PeersCrossoverWithDirectionBoth]", func() {
+				networkchaostestcases.TestcasePeersCrossover(ns, cli, networkPeers, ports, c)
+			})
 		})
 
 		ginkgo.JustAfterEach(func() {
