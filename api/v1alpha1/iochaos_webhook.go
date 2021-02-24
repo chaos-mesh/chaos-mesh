@@ -77,6 +77,7 @@ func (in *IoChaos) Validate() error {
 	allErrs = append(allErrs, in.Spec.validateDelay(specField.Child("delay"))...)
 	allErrs = append(allErrs, in.Spec.validateErrno(specField.Child("errno"))...)
 	allErrs = append(allErrs, in.Spec.validatePercent(specField.Child("percent"))...)
+	allErrs = append(allErrs, in.Spec.validateMistake(specField.Child("mistake"))...)
 
 	if len(allErrs) > 0 {
 		return fmt.Errorf(allErrs.ToAggregate().Error())
@@ -122,6 +123,21 @@ func (in *IoChaosSpec) validatePercent(percentField *field.Path) field.ErrorList
 	if in.Percent > 100 || in.Percent < 0 {
 		allErrs = append(allErrs, field.Invalid(percentField, in.Percent,
 			"percent field should be in 0-100"))
+	}
+
+	return allErrs
+}
+
+func (in *IoChaosSpec) validateMistake(mistakeField *field.Path) field.ErrorList {
+	allErrs := field.ErrorList{}
+	mistake := in.Mistake
+	allErrs = append(allErrs, in.validatePercent(mistakeField.Child("percent"))...)
+	// Useless since they're unsigned values. But keep it here for further tweaks.
+	if mistake.MaxLength < 0 {
+		allErrs = append(allErrs, field.Invalid(mistakeField.Child("maxLength"), mistake.MaxLength, "maxLength should be no less than 0"))
+	}
+	if mistake.MaxOccurrences < 0 {
+		allErrs = append(allErrs, field.Invalid(mistakeField.Child("maxOccurrences"), mistake.MaxOccurrences, "maxOccurrences should be no less than 0"))
 	}
 
 	return allErrs

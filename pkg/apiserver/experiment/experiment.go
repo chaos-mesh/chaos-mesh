@@ -258,6 +258,7 @@ func (s *Service) createIOChaos(exp *core.ExperimentInfo, kubeCli client.Client)
 			Delay:         exp.Target.IOChaos.Delay,
 			Errno:         exp.Target.IOChaos.Errno,
 			Attr:          exp.Target.IOChaos.Attr,
+			Mistake:       exp.Target.IOChaos.Mistake,
 			Path:          exp.Target.IOChaos.Path,
 			Methods:       exp.Target.IOChaos.Methods,
 			Percent:       exp.Target.IOChaos.Percent,

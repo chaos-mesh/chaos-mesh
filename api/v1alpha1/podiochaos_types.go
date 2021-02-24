@@ -58,6 +58,10 @@ type IoChaosAction struct {
 	// +optional
 	*AttrOverrideSpec `json:",inline"`
 
+	// MistakeSpec represents the mistake to inject
+	// +optional
+	*MistakeSpec `json:"mistake,omitempty"`
+
 	// Source represents the source of current rules
 	Source string `json:"source,omitempty"`
 }
@@ -74,6 +78,9 @@ const (
 
 	// IoAttrOverride represents replacing attribution for io operation
 	IoAttrOverride IoChaosType = "attrOverride"
+
+	// IoMistake represents injecting incorrect read or write for io operation
+	IoMistake IoChaosType = "mistake"
 )
 
 // Filter represents a filter of IoChaos action, which will define the
@@ -123,6 +130,24 @@ type AttrOverrideSpec struct {
 	//+optional
 	Rdev *uint32 `json:"rdev,omitempty"`
 }
+
+// MistakeSpec represents one type of mistake
+type MistakeSpec struct {
+	//+optional
+	Filling FillingType `json:"filling,omitempty"`
+	//+optional
+	MaxOccurrences uint64 `json:"maxOccurrences,omitempty"`
+	//+optional
+	MaxLength uint64 `json:"maxLength,omitempty"`
+}
+
+// FillingType represents type of data is filled for incorrectness
+type FillingType string
+
+const (
+	Zero   FillingType = "zero"
+	Random FillingType = "random"
+)
 
 // Timespec represents a time
 type Timespec struct {
