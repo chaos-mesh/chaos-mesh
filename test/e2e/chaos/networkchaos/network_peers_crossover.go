@@ -1,4 +1,4 @@
-// Copyright 2020 Chaos Mesh Authors.
+// Copyright 2021 Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -23,7 +23,6 @@ import (
 	"k8s.io/kubernetes/test/e2e/framework"
 
 	"k8s.io/apimachinery/pkg/util/wait"
-	"k8s.io/utils/pointer"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
@@ -62,23 +61,19 @@ func TestcasePeersCrossover(
 				Jitter:      "0ms",
 			},
 		}
-		testDelayDuration      = pointer.StringPtr("9m")
-		testDelaySchedulerSpec = &v1alpha1.SchedulerSpec{
-			Cron: "@every 10m",
-		}
 	)
 
 	By("injecting network chaos between partition 0 and 1")
 	networkDelay := makeNetworkDelayChaos(
 		ns, "network-chaos-1",
 		map[string]string{"partition": "0"},
-		map[string]string{"partition": "1"}, // no target specified
+		map[string]string{"partition": "1"},
 		v1alpha1.AllPodMode,
 		v1alpha1.AllPodMode,
 		v1alpha1.Both,
 		testDelayTcParam,
-		testDelayDuration,
-		testDelaySchedulerSpec,
+		nil,
+		nil,
 	)
 	// that's important
 	networkDelay.Spec.Direction = v1alpha1.Both
