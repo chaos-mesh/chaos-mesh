@@ -19,6 +19,7 @@ import (
 	"math"
 	"time"
 
+	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
 
 	"github.com/robfig/cron/v3"
@@ -26,6 +27,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	ctx "github.com/chaos-mesh/chaos-mesh/pkg/router/context"
 	"github.com/chaos-mesh/chaos-mesh/pkg/router/endpoint"
+	sch "github.com/chaos-mesh/chaos-mesh/pkg/scheduler"
 
 	ctrl "sigs.k8s.io/controller-runtime"
 )
@@ -74,6 +76,18 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 
 	if chaos.GetNextStart().Before(now) {
 		targetPhase = v1alpha1.ExperimentPhaseRunning
+	}
+
+	// For standard cron(* * * * *), judge the phase when start
+	if chaos.GetNextStart().IsZero() && chaos.GetNextRecover().IsZero() {
+		phase, nextStart, err := ifStartAtWaitingPhase(chaos, now, r.Log)
+		if err != nil {
+			return ctrl.Result{}, err
+		}
+		if phase == v1alpha1.ExperimentPhaseWaiting {
+			targetPhase = phase
+			chaos.SetNextStart(*nextStart)
+		}
 	}
 
 	if chaos.IsPaused() {
@@ -142,6 +156,39 @@ func calcRequeueAfterTime(chaos v1alpha1.InnerSchedulerObject, now time.Time) (t
 	}
 
 	return requeueAfter, err
+}
+
+func ifStartAtWaitingPhase(chaos v1alpha1.InnerSchedulerObject, now time.Time, log logr.Logger) (v1alpha1.ExperimentPhase, *time.Time, error) {
+	duration, err := chaos.GetDuration()
+	if err != nil {
+		log.Error(err, "failed to get chaos duration")
+		return "", nil, err
+	}
+	if duration == nil {
+		zero := 0 * time.Second
+		duration = &zero
+	}
+
+	scheduler := chaos.GetScheduler()
+	if scheduler == nil {
+		log.Info("Scheduler should be defined currently")
+		return "", nil, fmt.Errorf("misdefined scheduler")
+	}
+
+	lastStart, err := sch.LastTime(*scheduler, now)
+	if err != nil {
+		log.Error(err, "failed to get the last start time")
+		return "", nil, err
+	}
+	if lastStart.Add(*duration).Before(now) {
+		nextStart, err := nextTime(*scheduler, now)
+		if err != nil {
+			log.Error(err, "failed to get the next start time")
+			return "", nil, err
+		}
+		return v1alpha1.ExperimentPhaseWaiting, nextStart, nil
+	}
+	return "", nil, nil
 }
 
 func nextTime(spec v1alpha1.SchedulerSpec, now time.Time) (*time.Time, error) {

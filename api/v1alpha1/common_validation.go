@@ -63,21 +63,10 @@ func ValidateScheduler(schedulerObject InnerSchedulerObject, spec *field.Path) f
 func validateSchedulerParams(duration *time.Duration, durationField *field.Path, spec *SchedulerSpec, schedulerField *field.Path) field.ErrorList {
 	allErrs := field.ErrorList{}
 	if duration != nil && spec != nil {
-
 		cronField := schedulerField.Child("cron")
-		scheduler, err := ParseCron(spec.Cron, cronField)
+		_, err := ParseCron(spec.Cron, cronField)
 		if len(err) != 0 {
 			allErrs = append(allErrs, err...)
-		}
-
-		if scheduler != nil {
-			tmpTime := time.Time{}
-			nextTime := scheduler.Next(tmpTime)
-			interval := nextTime.Sub(tmpTime)
-			if *duration >= interval {
-				allErrs = append(allErrs, field.Invalid(cronField, spec.Cron,
-					fmt.Sprintf("the scheduling interval:\"%s\" must be greater than the duration:%s", spec.Cron, *duration)))
-			}
 		}
 	}
 	return allErrs
