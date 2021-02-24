@@ -58,7 +58,7 @@ type Topology struct {
 // TopologyNode defines the basic structure of a node.
 type TopologyNode struct {
 	Type  nodeType  `json:"type"`
-	State nodeState `json:"state"`
+	State nodeState `json:"state,omitempty"`
 }
 
 // Node defines the single step of a workflow.
@@ -151,8 +151,8 @@ const (
 // Detail defines the detail of a workflow.
 type Detail struct {
 	gorm.Model
-	WorkflowID uint       `json:"workflow_id"`
-	Templates  []Template `json:"templates"`
+	WorkflowUID string     `json:"workflow_uid"`
+	Templates   []Template `json:"templates"`
 }
 
 // Template defines a complete structure of a template.
