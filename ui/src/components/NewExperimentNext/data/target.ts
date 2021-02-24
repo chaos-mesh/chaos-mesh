@@ -30,7 +30,7 @@ const networkCommon: Spec = {
     items: ['', 'from', 'to', 'both'],
     label: 'Direction',
     value: '',
-    helperText: 'Specifies the network direction',
+    helperText: 'Specify the network direction',
   },
   external_targets: {
     field: 'label',
@@ -112,12 +112,11 @@ const ioCommon: Spec = {
 }
 
 const dnsCommon: Spec = {
-  scope: {
-    field: 'select',
-    items: ['', 'outer', 'inner', 'all'],
-    label: 'Scope',
-    value: '',
-    helperText: 'Specifies the dns scope',
+  patterns: {
+    field: 'label',
+    label: 'Patterns',
+    value: [],
+    helperText: 'Specify the DNS patterns. For example, type google.com and then press space to add it.',
   },
 }
 
@@ -499,10 +498,10 @@ export const schema: Partial<Record<Kind, Record<string, Yup.ObjectSchema>>> = {
   },
   DNSChaos: {
     error: Yup.object({
-      scope: Yup.string().required('The scope is required'),
+      patterns: Yup.array().of(Yup.string()).required('The patterns is required'),
     }),
     random: Yup.object({
-      scope: Yup.string().required('The scope is required'),
+      patterns: Yup.array().of(Yup.string()).required('The patterns is required'),
     }),
   },
 }
