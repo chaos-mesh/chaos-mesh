@@ -189,7 +189,7 @@ const Step1 = () => {
               <Divider />
             </Box>
             <TargetGenerated
-              // force re-rendered after action changed
+              // Force re-rendered after action changed
               key={kind + action}
               kind={kind}
               data={targetData[kind as Kind].categories!.filter(({ key }) => key === action)[0].spec}

@@ -1,11 +1,11 @@
 import { Box, BoxProps, LinearProgress, Typography } from '@material-ui/core'
 import { Link, LinkProps } from 'react-router-dom'
 
+import DateTime from 'lib/luxon'
 import { Event } from 'api/events.type'
 import NotFound from 'components-mui/NotFound'
 import React from 'react'
 import T from 'components/T'
-import day from 'lib/dayjs'
 import { iconByKind } from 'lib/byKind'
 import { makeStyles } from '@material-ui/core/styles'
 import { useStoreSelector } from 'store'
@@ -54,7 +54,7 @@ const Recent: React.FC<RecentProps> = ({ events }) => {
             />
           </Box>
           <Box display="flex" justifyContent="center" flex={2}>
-            {day(d.start_time).locale(lang).fromNow()}
+            {DateTime.fromISO(d.start_time, { locale: lang }).toRelative()}
           </Box>
         </LinkBox>
       ))}
