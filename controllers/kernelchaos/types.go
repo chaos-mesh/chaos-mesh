@@ -29,8 +29,8 @@ import (
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/config"
-	"github.com/chaos-mesh/chaos-mesh/controllers/utils"
 	"github.com/chaos-mesh/chaos-mesh/controllers/recover"
+	"github.com/chaos-mesh/chaos-mesh/controllers/utils"
 	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
 	pb_ "github.com/chaos-mesh/chaos-mesh/pkg/chaoskernel/pb"
 	"github.com/chaos-mesh/chaos-mesh/pkg/events"
