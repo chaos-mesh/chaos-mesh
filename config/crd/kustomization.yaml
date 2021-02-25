@@ -14,6 +14,7 @@ resources:
 - bases/chaos-mesh.org_dnschaos.yaml
 - bases/chaos-mesh.org_awschaos.yaml
 - bases/chaos-mesh.org_jvmchaos.yaml
+- bases/chaos-mesh.org_gcpchaos.yaml
 # +kubebuilder:scaffold:crdkustomizeresource
 
 patchesStrategicMerge:
