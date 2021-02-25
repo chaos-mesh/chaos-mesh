@@ -21,7 +21,7 @@ type Workflow struct {
 	Entry       string         `json:"entry"` // the entry node name
 	Status      workflowStatus `json:"status"`
 	Topology    Topology       `json:"topology"`
-	CurrentNode Node           `json:"current_node"`
+	CurrentNode []Node         `json:"current_node"`
 }
 
 // workflowState defines the current state of a workflow.
