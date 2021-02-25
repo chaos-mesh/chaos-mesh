@@ -62,5 +62,5 @@ rm ping.log
 rm pods.status
 
 echo "****** finish delay chaos test ******"
-
+kubectl delete -f ./delay_chaos.yaml
 cd -

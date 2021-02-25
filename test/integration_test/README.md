@@ -1,5 +1,27 @@
 ## Integration Test
 
+### Preparation
+
+1. Install Chaos Mesh
+
+You can install Chaos Mesh by commands:
+
+```bash
+hack/local-up-chaos-mesh.sh
+kubectl set env deployment/chaos-dashboard SECURITY_MODE=true -n chaos-testing
+kubectl port-forward -n chaos-testing svc/chaos-dashboard 2333:2333 &
+```
+
+2. Install localstack && aws client(optional)
+
+It is required when run aws test. You can install localstack and aws client by command:
+
+```bash
+helm repo add localstack-repo http://helm.localstack.cloud
+helm upgrade --install localstack localstack-repo/localstack
+pip install awscli
+```
+
 ### Run all tests
 
 Executing command below to run all test cases:
