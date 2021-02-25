@@ -52,6 +52,7 @@ type Topology struct {
 
 // TopologyNode defines the basic structure of a node.
 type TopologyNode struct {
+	Name  string    `json:"name"`
 	Type  nodeType  `json:"type"`
 	State nodeState `json:"state,omitempty"`
 }
@@ -66,12 +67,12 @@ type Node struct {
 
 // NodeSerial defines SerialNode's specific fields.
 type NodeSerial struct {
-	Tasks []Node `json:"tasks"`
+	Tasks []string `json:"tasks"`
 }
 
 // NodeParallel defines ParallelNode's specific fields.
 type NodeParallel struct {
-	Tasks []Node `json:"tasks"`
+	Tasks []string `json:"tasks"`
 }
 
 // nodeType defines the type of a workflow node.
