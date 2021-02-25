@@ -14,13 +14,8 @@
 // Package workflow includes all type definitaions about Workflow.
 package workflow
 
-import (
-	"github.com/jinzhu/gorm"
-)
-
 // Workflow defines the root structure of a workflow.
 type Workflow struct {
-	gorm.Model
 	UID         string         `gorm:"index:uid" json:"uid"`
 	Name        string         `json:"name"`
 	Entry       string         `json:"entry"` // the entry node name
@@ -150,7 +145,6 @@ const (
 
 // Detail defines the detail of a workflow.
 type Detail struct {
-	gorm.Model
 	WorkflowUID string     `json:"workflow_uid"`
 	Templates   []Template `json:"templates"`
 }
