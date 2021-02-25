@@ -20,13 +20,13 @@ import (
 	v1 "k8s.io/api/core/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
+	"github.com/chaos-mesh/chaos-mesh/controllers/utils"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
-	"github.com/chaos-mesh/chaos-mesh/pkg/controllerutils"
 )
 
 // SetTcs makes grpc call to chaosdaemon to flush traffic control rules
 func SetTcs(ctx context.Context, c client.Client, pod *v1.Pod, tcs []*pb.Tc) error {
-	pbClient, err := controllerutils.NewChaosDaemonClient(ctx, c, pod)
+	pbClient, err := utils.NewChaosDaemonClient(ctx, c, pod)
 	if err != nil {
 		return err
 	}

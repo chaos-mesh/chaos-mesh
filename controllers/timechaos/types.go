@@ -29,9 +29,9 @@ import (
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/config"
+	"github.com/chaos-mesh/chaos-mesh/controllers/utils"
 	"github.com/chaos-mesh/chaos-mesh/controllers/recover"
 	chaosdaemon "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
-	"github.com/chaos-mesh/chaos-mesh/pkg/controllerutils"
 	"github.com/chaos-mesh/chaos-mesh/pkg/events"
 	"github.com/chaos-mesh/chaos-mesh/pkg/finalizer"
 	"github.com/chaos-mesh/chaos-mesh/pkg/router"
@@ -118,7 +118,7 @@ func (r *recoverer) RecoverPod(ctx context.Context, pod *v1.Pod, somechaos v1alp
 	chaos, _ := somechaos.(*v1alpha1.TimeChaos)
 	r.Log.Info("Try to recover pod", "namespace", pod.Namespace, "name", pod.Name)
 
-	pbClient, err := controllerutils.NewChaosDaemonClient(ctx, r.Client, pod)
+	pbClient, err := utils.NewChaosDaemonClient(ctx, r.Client, pod)
 	if err != nil {
 		return err
 	}
@@ -191,7 +191,7 @@ func (r *endpoint) applyAllPods(ctx context.Context, pods []v1.Pod, chaos *v1alp
 func (r *endpoint) applyPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.TimeChaos) error {
 	r.Log.Info("Try to shift time on pod", "namespace", pod.Namespace, "name", pod.Name)
 
-	pbClient, err := controllerutils.NewChaosDaemonClient(ctx, r.Client, pod)
+	pbClient, err := utils.NewChaosDaemonClient(ctx, r.Client, pod)
 	if err != nil {
 		return err
 	}

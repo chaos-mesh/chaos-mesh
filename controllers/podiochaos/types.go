@@ -26,8 +26,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"github.com/chaos-mesh/chaos-mesh/controllers/utils"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
-	"github.com/chaos-mesh/chaos-mesh/pkg/controllerutils"
 )
 
 // Handler applys podiochaos
@@ -51,7 +51,7 @@ func (h *Handler) Apply(ctx context.Context, chaos *v1alpha1.PodIoChaos) error {
 		return err
 	}
 
-	pbClient, err := controllerutils.NewChaosDaemonClient(ctx, h.Client, pod)
+	pbClient, err := utils.NewChaosDaemonClient(ctx, h.Client, pod)
 	if err != nil {
 		return err
 	}
