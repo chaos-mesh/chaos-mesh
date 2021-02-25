@@ -19,8 +19,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/chaos-mesh/chaos-mesh/pkg/controllerutils"
-
 	"github.com/go-logr/logr"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -29,6 +27,7 @@ import (
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
+	"github.com/chaos-mesh/chaos-mesh/pkg/controllerutils"
 )
 
 // Handler applys podiochaos

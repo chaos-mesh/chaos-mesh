@@ -18,22 +18,21 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/chaos-mesh/chaos-mesh/pkg/controllerutils"
-
-	"k8s.io/apimachinery/pkg/runtime"
-
 	"github.com/go-logr/logr"
 	"golang.org/x/sync/errgroup"
+	"google.golang.org/grpc"
 	v1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/tools/cache"
 	ctrl "sigs.k8s.io/controller-runtime"
 	kubeclient "sigs.k8s.io/controller-runtime/pkg/client"
 
-	"google.golang.org/grpc"
-
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/config"
 	"github.com/chaos-mesh/chaos-mesh/controllers/recover"
+	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
+	pb_ "github.com/chaos-mesh/chaos-mesh/pkg/chaoskernel/pb"
+	"github.com/chaos-mesh/chaos-mesh/pkg/controllerutils"
 	"github.com/chaos-mesh/chaos-mesh/pkg/events"
 	"github.com/chaos-mesh/chaos-mesh/pkg/finalizer"
 	grpcUtils "github.com/chaos-mesh/chaos-mesh/pkg/grpc"
@@ -41,9 +40,6 @@ import (
 	ctx "github.com/chaos-mesh/chaos-mesh/pkg/router/context"
 	end "github.com/chaos-mesh/chaos-mesh/pkg/router/endpoint"
 	"github.com/chaos-mesh/chaos-mesh/pkg/selector"
-
-	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
-	pb_ "github.com/chaos-mesh/chaos-mesh/pkg/chaoskernel/pb"
 )
 
 const kernelChaosMsg = "kernel is injected with %v"
