@@ -16,12 +16,12 @@ package workflow
 
 // Workflow defines the root structure of a workflow.
 type Workflow struct {
-	UID         string         `gorm:"index:uid" json:"uid"`
+	UID         string         `json:"uid"`
 	Name        string         `json:"name"`
 	Entry       string         `json:"entry"` // the entry node name
 	Status      workflowStatus `json:"status"`
-	CurrentNode TopologyNode   `json:"current_node"`
 	Topology    Topology       `json:"topology"`
+	CurrentNode Node           `json:"current_node"`
 }
 
 // workflowState defines the current state of a workflow.
@@ -47,22 +47,17 @@ const (
 
 // Topology describes the process of a workflow.
 type Topology struct {
-	Nodes []TopologyNode `json:"nodes"`
-}
-
-// TopologyNode defines the basic structure of a node.
-type TopologyNode struct {
-	Name  string    `json:"name"`
-	Type  nodeType  `json:"type"`
-	State nodeState `json:"state,omitempty"`
+	Nodes []Node `json:"nodes"`
 }
 
 // Node defines the single step of a workflow.
 type Node struct {
-	TopologyNode
+	Name     string       `json:"name"`
+	Type     nodeType     `json:"type"`
+	State    nodeState    `json:"state,omitempty"`
 	Serial   NodeSerial   `json:"serial,omitempty"`
 	Parallel NodeParallel `json:"parallel,omitempty"`
-	Template Template     `json:"template"`
+	Template string       `json:"template"`
 }
 
 // NodeSerial defines SerialNode's specific fields.
