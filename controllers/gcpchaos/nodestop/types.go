@@ -16,15 +16,15 @@ package nodestop
 import (
 	"context"
 	"errors"
+	"encoding/base64"
 
-	"fmt"
-
-	//v1 "k8s.io/api/core/v1"
+	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
-	//"k8s.io/apimachinery/pkg/types"
+	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 
 	"google.golang.org/api/compute/v1"
+	"google.golang.org/api/option"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/pkg/router"
@@ -47,16 +47,91 @@ func (e *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.I
 		e.Log.Error(err, "chaos is not AwsChaos", "chaos", chaos)
 		return err
 	}
+	var computeService *compute.Service
+	var err error
+	if gcpchaos.Spec.SecretName != nil {
+		secret := &v1.Secret{}
+		err = e.Client.Get(ctx, types.NamespacedName{
+			Name:      *gcpchaos.Spec.SecretName,
+			Namespace: gcpchaos.Namespace,
+		}, secret)
+		if err != nil {
+			e.Log.Error(err, "fail to get cloud secret")
+			return err
+		}
 
-	fmt.Println(gcpchaos.Spec.Action + "!!!!!!!!!!!!!!!!!!!!!!!!")
-
-	computeService, _ := compute.NewService(ctx)
-	fmt.Print(computeService)
+		decodeBytes, err := base64.StdEncoding.DecodeString(string(secret.Data["service_account"]))
+		if err != nil {
+			e.Log.Error(err, "fail to decode service_account")
+			return err
+		}
+		computeService, err = compute.NewService(ctx, option.WithCredentialsJSON(decodeBytes))
+		if err != nil {
+			e.Log.Error(err, "fail to create the google compute service")
+			return err
+		}
+	} else {
+		computeService, err = compute.NewService(ctx)
+		if err != nil {
+			e.Log.Error(err, "fail to create the google compute service")
+			return err
+		}
+	}
+	gcpchaos.Finalizers = []string{GcpFinalizer}
+	_, err = computeService.Instances.Stop(gcpchaos.Spec.Project, gcpchaos.Spec.Zone, gcpchaos.Spec.Instance).Do()
+	if err != nil {
+		gcpchaos.Finalizers = make([]string, 0)
+		e.Log.Error(err, "fail to stop the instance")
+		return err
+	}
 
 	return nil
 }
 
 func (e *endpoint) Recover(ctx context.Context, req ctrl.Request, chaos v1alpha1.InnerObject) error {
+	gcpchaos, ok := chaos.(*v1alpha1.GcpChaos)
+	if !ok {
+		err := errors.New("chaos is not awschaos")
+		e.Log.Error(err, "chaos is not AwsChaos", "chaos", chaos)
+		return err
+	}
+	var computeService *compute.Service
+	var err error
+	if gcpchaos.Spec.SecretName != nil {
+		secret := &v1.Secret{}
+		err = e.Client.Get(ctx, types.NamespacedName{
+			Name:      *gcpchaos.Spec.SecretName,
+			Namespace: gcpchaos.Namespace,
+		}, secret)
+		if err != nil {
+			e.Log.Error(err, "fail to get cloud secret")
+			return err
+		}
+
+		decodeBytes, err := base64.StdEncoding.DecodeString(string(secret.Data["service_account"]))
+		if err != nil {
+			e.Log.Error(err, "fail to decode service_account")
+			return err
+		}
+		computeService, err = compute.NewService(ctx, option.WithCredentialsJSON(decodeBytes))
+		if err != nil {
+			e.Log.Error(err, "fail to create the google compute service")
+			return err
+		}
+	} else {
+		computeService, err = compute.NewService(ctx)
+		if err != nil {
+			e.Log.Error(err, "fail to create the google compute service")
+			return err
+		}
+	}
+	gcpchaos.Finalizers = make([]string, 0)
+	_, err = computeService.Instances.Start(gcpchaos.Spec.Project, gcpchaos.Spec.Zone, gcpchaos.Spec.Instance).Do()
+	if err != nil {
+		gcpchaos.Finalizers = make([]string, 0)
+		e.Log.Error(err, "fail to stop the instance")
+		return err
+	}
 	return nil
 }
 

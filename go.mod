@@ -72,6 +72,7 @@ require (
 	golang.org/x/time v0.0.0-20191024005414-555d28b269f0
 	golang.org/x/tools v0.0.0-20200309202150-20ab64c0d93f
 	golang.org/x/xerrors v0.0.0-20191204190536-9bdfabe68543
+	google.golang.org/api v0.13.0
 	google.golang.org/grpc v1.27.0
 	honnef.co/go/tools v0.0.1-2020.1.3 // indirect
 	k8s.io/api v0.17.0

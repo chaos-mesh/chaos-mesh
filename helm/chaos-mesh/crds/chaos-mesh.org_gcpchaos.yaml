@@ -45,6 +45,12 @@ spec:
             duration:
               description: Duration represents the duration of the chaos action.
               type: string
+            instance:
+              description: Instance defines the name of the instance
+              type: string
+            project:
+              description: Project defines the name of gcp project.
+              type: string
             scheduler:
               description: Scheduler defines some schedule rules to control the running
                 time of the chaos experiment about time.
@@ -61,8 +67,14 @@ spec:
             secretName:
               description: SecretName defines the name of kubernetes secret.
               type: string
+            zone:
+              description: Zone defines the zone of gcp project.
+              type: string
           required:
           - action
+          - instance
+          - project
+          - zone
           type: object
         status:
           description: GcpChaosStatus represents the status of a GcpChaos

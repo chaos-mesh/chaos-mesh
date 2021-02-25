@@ -56,6 +56,15 @@ type GcpChaosSpec struct {
 	// SecretName defines the name of kubernetes secret.
 	// +optional
 	SecretName *string `json:"secretName,omitempty"`
+
+	// Project defines the name of gcp project.
+	Project string `json:"project"`
+
+	// Zone defines the zone of gcp project.
+	Zone string `json:"zone"`
+
+	// Instance defines the name of the instance
+	Instance string `json:"instance"`
 }
 
 // GcpChaosStatus represents the status of a GcpChaos

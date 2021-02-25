@@ -1166,8 +1166,8 @@ spec:
       priorityClassName: 
       containers:
         - name: chaos-daemon
-          image: ${DOCKER_REGISTRY_PREFIX}/pingcap/chaos-daemon:${VERSION_TAG}
-          imagePullPolicy: IfNotPresent
+          image: localhost:5000/pingcap/chaos-daemon:${VERSION_TAG}
+          imagePullPolicy: Never # IfNotPresent
           command:
             - /usr/local/bin/chaos-daemon
             - --runtime
@@ -1302,8 +1302,8 @@ spec:
       priorityClassName: 
       containers:
       - name: chaos-mesh
-        image: ${DOCKER_REGISTRY_PREFIX}/pingcap/chaos-mesh:${VERSION_TAG}
-        imagePullPolicy: IfNotPresent
+        image: localhost:5000/pingcap/chaos-mesh:${VERSION_TAG}
+        imagePullPolicy: Never # IfNotPresent
         resources:
             limits: {}
             requests:
