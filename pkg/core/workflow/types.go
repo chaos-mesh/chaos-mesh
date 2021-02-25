@@ -66,8 +66,7 @@ type Node struct {
 
 // NodeSerial defines SerialNode's specific fields.
 type NodeSerial struct {
-	Tasks    []Node `json:"tasks"`
-	Circular bool   `json:"circular"`
+	Tasks []Node `json:"tasks"`
 }
 
 // NodeParallel defines ParallelNode's specific fields.
