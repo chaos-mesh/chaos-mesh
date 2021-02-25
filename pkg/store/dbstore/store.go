@@ -18,6 +18,7 @@ import (
 
 	"github.com/jinzhu/gorm"
 	"go.uber.org/fx"
+
 	ctrl "sigs.k8s.io/controller-runtime"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/config"

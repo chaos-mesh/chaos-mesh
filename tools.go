@@ -20,5 +20,6 @@ import (
 	_ "github.com/pingcap/failpoint/failpoint-ctl"
 	_ "github.com/swaggo/swag/cmd/swag"
 	_ "golang.org/x/tools/cmd/goimports"
+
 	_ "sigs.k8s.io/controller-tools/cmd/controller-gen"
 )
