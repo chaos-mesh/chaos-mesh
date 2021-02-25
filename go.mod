@@ -26,7 +26,9 @@ require (
 	github.com/go-logr/zapr v0.1.0
 	github.com/go-playground/validator/v10 v10.3.0
 	github.com/gogo/googleapis v1.3.2 // indirect
-	github.com/golang/protobuf v1.4.3
+	github.com/golang/groupcache v0.0.0-20200121045136-8c9f03a8e57e // indirect
+	github.com/golang/mock v1.4.4 // indirect
+	github.com/golang/protobuf v1.4.2
 	github.com/grpc-ecosystem/go-grpc-middleware v1.2.0
 	github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0
 	github.com/grpc-ecosystem/grpc-gateway v1.14.1 // indirect
@@ -63,13 +65,15 @@ require (
 	github.com/vishvananda/netlink v1.0.0
 	go.uber.org/fx v1.12.0
 	go.uber.org/zap v1.15.0
-	golang.org/x/net v0.0.0-20201209123823-ac852fbbde11
-	golang.org/x/sync v0.0.0-20201207232520-09787c993a3a
+	golang.org/x/lint v0.0.0-20200302205851-738671d3881b // indirect
+	golang.org/x/net v0.0.0-20200320220750-118fecf932d8
+	golang.org/x/sync v0.0.0-20190911185100-cd5d95a43a6e
+	golang.org/x/sys v0.0.0-20200409092240-59c9f1ba88fa // indirect
 	golang.org/x/time v0.0.0-20191024005414-555d28b269f0
-	golang.org/x/tools v0.0.0-20210105154028-b0ab187a4818
-	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1
-	google.golang.org/api v0.40.0
-	google.golang.org/grpc v1.34.0
+	golang.org/x/tools v0.0.0-20200309202150-20ab64c0d93f
+	golang.org/x/xerrors v0.0.0-20191204190536-9bdfabe68543
+	google.golang.org/grpc v1.27.0
+	honnef.co/go/tools v0.0.1-2020.1.3 // indirect
 	k8s.io/api v0.17.0
 	k8s.io/apiextensions-apiserver v0.17.0
 	k8s.io/apimachinery v0.17.0
