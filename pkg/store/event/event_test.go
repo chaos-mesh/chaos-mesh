@@ -22,13 +22,13 @@ import (
 	"testing"
 	"time"
 
-	"github.com/chaos-mesh/chaos-mesh/pkg/core"
-	"github.com/chaos-mesh/chaos-mesh/pkg/store/dbstore"
-
 	sqlmock "github.com/DATA-DOG/go-sqlmock"
 	"github.com/jinzhu/gorm"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+
+	"github.com/chaos-mesh/chaos-mesh/pkg/core"
+	"github.com/chaos-mesh/chaos-mesh/pkg/store/dbstore"
 )
 
 func TestEvent(t *testing.T) {

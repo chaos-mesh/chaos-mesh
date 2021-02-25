@@ -17,11 +17,11 @@ import (
 	"context"
 	"time"
 
-	"github.com/chaos-mesh/chaos-mesh/pkg/core"
-
 	runtimeutil "k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/apimachinery/pkg/util/wait"
 	ctrl "sigs.k8s.io/controller-runtime"
+
+	"github.com/chaos-mesh/chaos-mesh/pkg/core"
 )
 
 var (

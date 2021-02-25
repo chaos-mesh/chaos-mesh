@@ -23,12 +23,10 @@ import (
 	"github.com/docker/docker/api/types"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-
 	"github.com/prometheus/client_golang/prometheus"
+	"sigs.k8s.io/controller-runtime/pkg/envtest"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
-
-	"sigs.k8s.io/controller-runtime/pkg/envtest"
 )
 
 func TestAPIs(t *testing.T) {

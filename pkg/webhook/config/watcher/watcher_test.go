@@ -16,13 +16,11 @@ package watcher
 import (
 	"fmt"
 
-	ctrl "sigs.k8s.io/controller-runtime"
-
-	"k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/rest"
-
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/rest"
+	ctrl "sigs.k8s.io/controller-runtime"
 )
 
 var _ = Describe("webhook config watcher", func() {

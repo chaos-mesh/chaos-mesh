@@ -23,6 +23,7 @@ import (
 	apiextensionsclientset "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
+	_ "k8s.io/client-go/plugin/pkg/client/auth"
 	"k8s.io/klog"
 	aggregatorclientset "k8s.io/kube-aggregator/pkg/client/clientset_generated/clientset"
 	"k8s.io/kubernetes/test/e2e/framework"
@@ -31,10 +32,7 @@ import (
 	utilnet "k8s.io/utils/net"
 
 	"github.com/chaos-mesh/chaos-mesh/test"
-	e2econfig "github.com/chaos-mesh/chaos-mesh/test/e2e/config"
-
-	// ensure auth plugins are loaded
-	_ "k8s.io/client-go/plugin/pkg/client/auth"
+	e2econfig "github.com/chaos-mesh/chaos-mesh/test/e2e/config" // ensure auth plugins are loaded
 )
 
 // This is modified from framework.SetupSuite().

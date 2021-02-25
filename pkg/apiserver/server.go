@@ -17,12 +17,11 @@ import (
 	"fmt"
 	"net/http"
 
-	"go.uber.org/fx"
-
 	"github.com/gin-contrib/pprof"
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-playground/validator/v10"
+	"go.uber.org/fx"
 
 	apiutils "github.com/chaos-mesh/chaos-mesh/pkg/apiserver/utils"
 	"github.com/chaos-mesh/chaos-mesh/pkg/apivalidator"

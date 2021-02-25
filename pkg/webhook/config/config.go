@@ -20,7 +20,6 @@ import (
 	"sync"
 
 	"github.com/ghodss/yaml"
-
 	corev1 "k8s.io/api/core/v1"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"

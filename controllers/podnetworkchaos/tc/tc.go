@@ -21,9 +21,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/chaos-mesh/chaos-mesh/controllers/config"
-	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
-
 	daemonClient "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/client"
+	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
 )
 
 // SetTcs makes grpc call to chaosdaemon to flush traffic control rules

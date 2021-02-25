@@ -22,14 +22,14 @@ import (
 	"testing"
 	"time"
 
-	"github.com/chaos-mesh/chaos-mesh/pkg/core"
-	pkgmock "github.com/chaos-mesh/chaos-mesh/pkg/mock"
-
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/stretchr/testify/mock"
+
+	"github.com/chaos-mesh/chaos-mesh/pkg/core"
+	pkgmock "github.com/chaos-mesh/chaos-mesh/pkg/mock"
 )
 
 // MockEventService is a mock type for event.Service

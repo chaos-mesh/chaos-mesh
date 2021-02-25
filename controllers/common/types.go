@@ -17,14 +17,13 @@ import (
 	"context"
 	"time"
 
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/client-go/util/retry"
+	ctrl "sigs.k8s.io/controller-runtime"
+
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	ctx "github.com/chaos-mesh/chaos-mesh/pkg/router/context"
 	endpoint "github.com/chaos-mesh/chaos-mesh/pkg/router/endpoint"
-
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/client-go/util/retry"
-
-	ctrl "sigs.k8s.io/controller-runtime"
 )
 
 const (

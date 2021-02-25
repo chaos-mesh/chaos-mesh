@@ -20,7 +20,6 @@ import (
 
 	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
-
 	"github.com/spf13/cobra"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"

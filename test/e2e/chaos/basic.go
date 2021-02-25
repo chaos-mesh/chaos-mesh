@@ -33,18 +33,16 @@ import (
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/pkg/portforward"
-	e2econfig "github.com/chaos-mesh/chaos-mesh/test/e2e/config"
-	"github.com/chaos-mesh/chaos-mesh/test/e2e/e2econst"
-	"github.com/chaos-mesh/chaos-mesh/test/e2e/util"
-	"github.com/chaos-mesh/chaos-mesh/test/pkg/fixture"
-
-	// testcases
 	dnschaostestcases "github.com/chaos-mesh/chaos-mesh/test/e2e/chaos/dnschaos"
 	iochaostestcases "github.com/chaos-mesh/chaos-mesh/test/e2e/chaos/iochaos"
 	networkchaostestcases "github.com/chaos-mesh/chaos-mesh/test/e2e/chaos/networkchaos"
 	podchaostestcases "github.com/chaos-mesh/chaos-mesh/test/e2e/chaos/podchaos"
 	sidecartestcases "github.com/chaos-mesh/chaos-mesh/test/e2e/chaos/sidecar"
 	timechaostestcases "github.com/chaos-mesh/chaos-mesh/test/e2e/chaos/timechaos"
+	e2econfig "github.com/chaos-mesh/chaos-mesh/test/e2e/config"
+	"github.com/chaos-mesh/chaos-mesh/test/e2e/e2econst"
+	"github.com/chaos-mesh/chaos-mesh/test/e2e/util"
+	"github.com/chaos-mesh/chaos-mesh/test/pkg/fixture" // testcases
 )
 
 var _ = ginkgo.Describe("[Basic]", func() {

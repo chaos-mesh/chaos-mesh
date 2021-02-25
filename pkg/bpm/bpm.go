@@ -22,7 +22,6 @@ import (
 	"syscall"
 
 	"github.com/shirou/gopsutil/process"
-
 	ctrl "sigs.k8s.io/controller-runtime"
 )
 
