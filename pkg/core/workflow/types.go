@@ -16,12 +16,12 @@ package workflow
 
 // Workflow defines the root structure of a workflow.
 type Workflow struct {
-	UID         string         `json:"uid"`
-	Name        string         `json:"name"`
-	Entry       string         `json:"entry"` // the entry node name
-	Status      workflowStatus `json:"status"`
-	Topology    Topology       `json:"topology"`
-	CurrentNode []Node         `json:"current_node"`
+	UID          string         `json:"uid"`
+	Name         string         `json:"name"`
+	Entry        string         `json:"entry"` // the entry node name
+	Status       workflowStatus `json:"status"`
+	Topology     Topology       `json:"topology"`
+	CurrentNodes []Node         `json:"current_nodes"`
 }
 
 // workflowState defines the current state of a workflow.
