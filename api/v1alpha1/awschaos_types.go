@@ -76,6 +76,10 @@ type AwsChaosSpec struct {
 	// Needed in detach-volume.
 	// +optional
 	DeviceName *string `json:"deviceName,omitempty"`
+
+	// Endpoint indicates the endpoint of the aws server. Just used it in test now.
+	// +optional
+	Endpoint *string `json:"endpoint,omitempty"`
 }
 
 // AwsChaosStatus represents the status of an AwsChaos

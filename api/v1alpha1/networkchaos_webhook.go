@@ -100,7 +100,7 @@ func (in *NetworkChaos) Validate() error {
 	specField := field.NewPath("spec")
 	allErrs := in.ValidateScheduler(specField)
 	allErrs = append(allErrs, in.ValidatePodMode(specField)...)
-	allErrs = append(allErrs, in.ValidateExternalTargets(specField)...)
+	allErrs = append(allErrs, in.ValidateTargets(specField)...)
 
 	if in.Spec.Delay != nil {
 		allErrs = append(allErrs, in.Spec.Delay.validateDelay(specField.Child("delay"))...)
@@ -138,14 +138,27 @@ func (in *NetworkChaos) ValidatePodMode(spec *field.Path) field.ErrorList {
 	return ValidatePodMode(in.Spec.Value, in.Spec.Mode, spec.Child("value"))
 }
 
-// ValidateExternalTargets validates externalTargets must be with `to` direction
-func (in *NetworkChaos) ValidateExternalTargets(target *field.Path) field.ErrorList {
+// ValidateTargets validates externalTargets and Targets
+func (in *NetworkChaos) ValidateTargets(target *field.Path) field.ErrorList {
 	allErrs := field.ErrorList{}
 
-	if in.Spec.ExternalTargets != nil && in.Spec.Direction == From && in.Spec.Action != PartitionAction {
+	if (in.Spec.Direction == From || in.Spec.Direction == Both) &&
+		in.Spec.ExternalTargets != nil && in.Spec.Action != PartitionAction {
 		allErrs = append(allErrs,
 			field.Invalid(target.Child("direction"), in.Spec.Direction,
-				fmt.Sprintf("external targets cannot be used with `from` direction in netem action yet")))
+				fmt.Sprintf("external targets cannot be used with `from` and `both` direction in netem action yet")))
+	}
+
+	if (in.Spec.Direction == From || in.Spec.Direction == Both) && in.Spec.Target == nil {
+		if in.Spec.Action != PartitionAction {
+			allErrs = append(allErrs,
+				field.Invalid(target.Child("direction"), in.Spec.Direction,
+					fmt.Sprintf("`from` and `both` direction cannot be used when targets is empty in netem action")))
+		} else if in.Spec.ExternalTargets == nil {
+			allErrs = append(allErrs,
+				field.Invalid(target.Child("direction"), in.Spec.Direction,
+					fmt.Sprintf("`from` and `both` direction cannot be used when targets and external targets are both empty")))
+		}
 	}
 
 	// TODO: validate externalTargets are in ip or domain form
