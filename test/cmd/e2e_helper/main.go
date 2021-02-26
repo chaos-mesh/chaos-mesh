@@ -14,6 +14,7 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -62,6 +63,7 @@ func newServer(dataDir string) *server {
 	s.mux.HandleFunc("/ping", pong)
 	s.mux.HandleFunc("/time", s.timer)
 	s.mux.HandleFunc("/io", s.ioTest)
+	s.mux.HandleFunc("/mistake", s.mistakeTest)
 	s.mux.HandleFunc("/network/send", s.networkSendTest)
 	s.mux.HandleFunc("/network/recv", s.networkRecvTest)
 	s.mux.HandleFunc("/network/ping", s.networkPingTest)
@@ -94,6 +96,35 @@ func (s *server) setupUDPServer() error {
 // a handler to print out the current time
 func (s *server) timer(w http.ResponseWriter, _ *http.Request) {
 	w.Write([]byte(time.Now().Format(time.RFC3339Nano)))
+}
+
+// a handler to test io chaos
+func (s *server) mistakeTest(w http.ResponseWriter, _ *http.Request) {
+	f, err := ioutil.TempFile(s.dataDir, "e2e-test")
+	if err != nil {
+		w.Write([]byte(fmt.Sprintf("failed to create temp file %v", err)))
+		return
+	}
+	origData := []byte("hello world!!!!!!!!!!!!")
+	if _, err := f.Write(origData); err != nil {
+		w.Write([]byte(fmt.Sprintf("failed to write file %v", err)))
+		return
+	}
+	gotData := []byte{}
+	f.Read(gotData)
+	result := bytes.Equal(origData, gotData)
+	if result {
+		w.Write([]byte("false"))
+		return
+	}
+	for i := 0; i < 10; i++ {
+		tmp := []byte{}
+		if !bytes.Equal(tmp, gotData) {
+			w.Write([]byte("true"))
+			break
+		}
+	}
+	w.Write([]byte("err"))
 }
 
 // a handler to test io chaos
