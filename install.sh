@@ -891,7 +891,6 @@ EOF
 
     TLS_KEY=$(openssl base64 -A -in ${tmpdir}/server.key)
     TLS_CRT=$(openssl base64 -A -in ${tmpdir}/server.crt)
-    CA_CRT=$(cat ${tmpdir}/ca.crt)
     CA_BUNDLE=$(openssl base64 -A -in ${tmpdir}/ca.crt)
 
     # chaos-mesh.yaml start
@@ -936,7 +935,7 @@ metadata:
     app.kubernetes.io/component: webhook-secret
 type: Opaque
 data:
-  ca.crt: "${CA_CRT}"
+  ca.crt: "${CA_BUNDLE}"
   tls.crt: "${TLS_CRT}"
   tls.key: "${TLS_KEY}"
 ---
