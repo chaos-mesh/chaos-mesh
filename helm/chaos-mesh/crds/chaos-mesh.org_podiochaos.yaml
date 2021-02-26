@@ -104,6 +104,20 @@ spec:
                     items:
                       type: string
                     type: array
+                  mistake:
+                    description: MistakeSpec represents the mistake to inject
+                    properties:
+                      filling:
+                        description: FillingType represents type of data is filled
+                          for incorrectness
+                        type: string
+                      maxLength:
+                        format: int64
+                        type: integer
+                      maxOccurrences:
+                        format: int64
+                        type: integer
+                    type: object
                   mtime:
                     description: Timespec represents a time
                     properties:
