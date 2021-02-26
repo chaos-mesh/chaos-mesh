@@ -3,6 +3,7 @@ module github.com/chaos-mesh/chaos-mesh
 require (
 	code.cloudfoundry.org/bytefmt v0.0.0-20200131002437-cf55d5288a48
 	github.com/DATA-DOG/go-sqlmock v1.5.0
+	github.com/aws/aws-sdk-go-v2 v0.31.0
 	github.com/aws/aws-sdk-go-v2/config v0.4.0
 	github.com/aws/aws-sdk-go-v2/credentials v0.2.0
 	github.com/aws/aws-sdk-go-v2/service/ec2 v0.31.0
@@ -71,6 +72,7 @@ require (
 	golang.org/x/sys v0.0.0-20200409092240-59c9f1ba88fa // indirect
 	golang.org/x/time v0.0.0-20191024005414-555d28b269f0
 	golang.org/x/tools v0.0.0-20200309202150-20ab64c0d93f
+	golang.org/x/xerrors v0.0.0-20191204190536-9bdfabe68543
 	google.golang.org/grpc v1.27.0
 	honnef.co/go/tools v0.0.1-2020.1.3 // indirect
 	k8s.io/api v0.17.0

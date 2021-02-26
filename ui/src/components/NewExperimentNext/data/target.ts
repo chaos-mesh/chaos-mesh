@@ -30,7 +30,7 @@ const networkCommon: Spec = {
     items: ['', 'from', 'to', 'both'],
     label: 'Direction',
     value: '',
-    helperText: 'Specifies the network direction',
+    helperText: 'Specify the network direction',
   },
   external_targets: {
     field: 'label',
@@ -112,12 +112,11 @@ const ioCommon: Spec = {
 }
 
 const dnsCommon: Spec = {
-  scope: {
-    field: 'select',
-    items: ['', 'outer', 'inner', 'all'],
-    label: 'Scope',
-    value: '',
-    helperText: 'Specifies the dns scope',
+  patterns: {
+    field: 'label',
+    label: 'Patterns',
+    value: [],
+    helperText: 'Specify the DNS patterns. For example, type google.com and then press space to add it.',
   },
 }
 
@@ -346,6 +345,24 @@ const data: Record<Kind, Target> = {
       },
     ],
   },
+  // Stress Test
+  StressChaos: {
+    spec: {
+      stressors: {
+        cpu: {
+          workers: 0,
+          load: 0,
+          options: [],
+        },
+        memory: {
+          workers: 0,
+          options: [],
+        },
+      },
+      stressng_stressors: '',
+      container_name: '',
+    } as any,
+  },
   // Kernel Fault
   KernelChaos: {
     spec: {
@@ -382,24 +399,6 @@ const data: Record<Kind, Target> = {
           "Optional. Type string and end with a space to generate the container names. If it's empty, all containers will be injected",
       },
     },
-  },
-  // Stress Test
-  StressChaos: {
-    spec: {
-      stressors: {
-        cpu: {
-          workers: 1,
-          load: 0,
-          options: [],
-        },
-        memory: {
-          workers: 1,
-          options: [],
-        },
-      },
-      stressng_stressors: '',
-      container_name: '',
-    } as any,
   },
   // DNS Fault
   DNSChaos: {
@@ -499,10 +498,10 @@ export const schema: Partial<Record<Kind, Record<string, Yup.ObjectSchema>>> = {
   },
   DNSChaos: {
     error: Yup.object({
-      scope: Yup.string().required('The scope is required'),
+      patterns: Yup.array().of(Yup.string()).required('The patterns is required'),
     }),
     random: Yup.object({
-      scope: Yup.string().required('The scope is required'),
+      patterns: Yup.array().of(Yup.string()).required('The patterns is required'),
     }),
   },
 }

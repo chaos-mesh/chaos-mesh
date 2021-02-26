@@ -17,21 +17,26 @@ const Timeline: React.FC<TimelineProps> = ({ events, ...rest }) => {
 
   const { theme } = useStoreSelector((state) => state.settings)
 
-  const chartRef = useRef<HTMLDivElement>(null)
+  const chartRef = useRef<any>(null)
 
   useEffect(() => {
     if (events && events.length) {
       const chart = chartRef.current!
 
-      genEventsChart({
+      if (typeof chart === 'function') {
+        chart(events)
+
+        return
+      }
+
+      chartRef.current = genEventsChart({
         root: chart,
         events,
         intl,
         theme,
       })
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [events])
+  }, [events, intl, theme])
 
   return (
     <div ref={chartRef} {...rest}>

@@ -22,6 +22,7 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 
+	"github.com/aws/aws-sdk-go-v2/aws"
 	awscfg "github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
@@ -51,6 +52,13 @@ func (e *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.I
 	opts := []func(*awscfg.LoadOptions) error{
 		awscfg.WithRegion(awschaos.Spec.AwsRegion),
 	}
+
+	if awschaos.Spec.Endpoint != nil {
+		opts = append(opts, awscfg.WithEndpointResolver(aws.EndpointResolverFunc(func(service, region string) (aws.Endpoint, error) {
+			return aws.Endpoint{URL: *awschaos.Spec.Endpoint, SigningRegion: region}, nil
+		})))
+	}
+
 	if awschaos.Spec.SecretName != nil {
 		secret := &v1.Secret{}
 		err := e.Client.Get(ctx, types.NamespacedName{

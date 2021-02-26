@@ -4,7 +4,7 @@ import { Link, LinkProps } from 'react-router-dom'
 import ListItem, { ListItemProps } from '@material-ui/core/ListItem'
 import React, { ReactNode, useEffect, useMemo, useState } from 'react'
 import { Theme, createStyles, makeStyles, useTheme } from '@material-ui/core/styles'
-import { dayComparator, format } from 'lib/dayjs'
+import { comparator, format } from 'lib/luxon'
 
 import { Archive } from 'api/archives.type'
 import { Event } from 'api/events.type'
@@ -99,7 +99,7 @@ const SearchResultForOneCate = function <T extends 'events' | 'experiments' | 'a
 
   if (category === 'events') {
     ;((result as unknown) as Event[]).sort((a, b) => {
-      return dayComparator(a.start_time, b.start_time)
+      return comparator(a.start_time, b.start_time)
     })
   }
 
@@ -304,8 +304,6 @@ const Search: React.FC = () => {
                     </ul>
                   </Typography>
                 }
-                style={{ verticalAlign: 'sub' }}
-                arrow
                 interactive
               >
                 <HelpOutlineIcon fontSize="small" />
