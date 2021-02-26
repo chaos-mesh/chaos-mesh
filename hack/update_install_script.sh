@@ -24,7 +24,7 @@ helm template chaos-mesh helm/chaos-mesh --namespace=chaos-testing \
 sed -i.bak '/helm/d' $tmp_file
 sed -i.bak '/Helm/d' $tmp_file
 sed -i.bak 's/rollme:.*/rollme: \"install.sh\"/g' $tmp_file
-sed -i.bak 's/ca.crt:.*/ca.crt: \"\$\{CA_BUNDLE\}\"/g' $tmp_file
+sed -i.bak 's/ca.crt:.*/ca.crt: \"\$\{CA_CRT\}\"/g' $tmp_file
 sed -i.bak 's/tls.crt:.*/tls.crt: \"\$\{TLS_CRT\}\"/g' $tmp_file
 sed -i.bak 's/tls.key:.*/tls.key: \"\$\{TLS_KEY\}\"/g' $tmp_file
 sed -i.bak 's/caBundle:.*/caBundle: \"\$\{CA_BUNDLE\}\"/g' $tmp_file
