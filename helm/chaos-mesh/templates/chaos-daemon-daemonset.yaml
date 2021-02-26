@@ -59,11 +59,11 @@ spec:
           {{- end }}
           {{- if .Values.dashboard.securityMode }}
             - --ca
-            - /etc/chao-mesh/ca/ca.crt
+            - /etc/chaos-daemon/cert/ca.crt
             - --cert
-            - /etc/chaos-daemon/cert/server.crt
+            - /etc/chaos-daemon/cert/tls.crt
             - --key
-            - /etc/chaos-daemon/cert/server.key
+            - /etc/chaos-daemon/cert/tls.key
           {{- end }}
           env:
             {{- range $envKey, $envVal := .Values.chaosDaemon.env }}
@@ -104,9 +104,6 @@ spec:
             {{- if .Values.dashboard.securityMode}}
             - name: chaos-daemon-cert
               mountPath: /etc/chaos-daemon/cert
-              readOnly: true
-            - name: chaos-mesh-ca-cert
-              mountPath: /etc/chao-mesh/ca
               readOnly: true
             {{- end }}
           ports:
@@ -154,10 +151,7 @@ spec:
         {{- if .Values.dashboard.securityMode}}
         - name: chaos-daemon-cert
           secret:
-            secretName: chaos-daemon-cert
-        - name: chaos-mesh-ca-cert
-          secret:
-            secretName: chaos-mesh-ca-cert
+            secretName:  {{ template "chaos-mesh.daemon.certs" . }}
         {{- end }}
 {{- if .Values.bpfki.create }}
         - name: localtime-path
