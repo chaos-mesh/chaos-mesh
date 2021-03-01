@@ -11,20 +11,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package template
+package scheduler
 
-import "github.com/chaos-mesh/chaos-mesh/pkg/workflow/engine/errors"
+import (
+	"context"
 
-type SerialTemplate interface {
-	Template
-	// TODO: make it return only template name
-	SerialChildrenList() []string
-}
+	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/model/template"
+)
 
-func ParseSerialTemplate(raw interface{}) (SerialTemplate, error) {
-	op := "template.ParseSerialTemplate"
-	if target, ok := raw.(SerialTemplate); ok {
-		return target, nil
-	}
-	return nil, errors.NewParseSerialTemplateFailedError(op, raw)
+/*  interface Scheduler follows the iterator-pattern, it provides templates which need instantiate. */
+type Scheduler interface {
+	ScheduleNext(ctx context.Context) (nextTemplates []template.Template, parentNodeName string, err error)
 }
