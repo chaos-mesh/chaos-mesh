@@ -76,7 +76,7 @@ func TestcaseIOMistakeDurationForATimeThenRecover(
 		res, err := getPodIoMistake(c, port)
 		// input/output error is errno 5
 		if err != nil {
-			return false, err
+			return false, nil
 		}
 		if err == nil && res {
 			return true, nil
@@ -93,7 +93,7 @@ func TestcaseIOMistakeDurationForATimeThenRecover(
 		res, err := getPodIoMistake(c, port)
 		// input/output error is errno 5
 		if err != nil {
-			return false, err
+			return false, nil
 		}
 		if err == nil && !res {
 			return true, nil
@@ -153,7 +153,7 @@ func TestcaseIOMistakeDurationForATimePauseAndUnPause(
 		res, err := getPodIoMistake(c, port)
 		// input/output error is errno 5
 		if err != nil {
-			return false, err
+			return false, nil
 		}
 		if err == nil && res {
 			return true, nil
@@ -189,7 +189,7 @@ func TestcaseIOMistakeDurationForATimePauseAndUnPause(
 		res, err := getPodIoMistake(c, port)
 		// input/output error is errno 5
 		if err != nil {
-			return false, err
+			return false, nil
 		}
 		if err == nil && !res {
 			return true, nil
@@ -217,7 +217,7 @@ func TestcaseIOMistakeDurationForATimePauseAndUnPause(
 		res, err := getPodIoMistake(c, port)
 		// input/output error is errno 5
 		if err != nil {
-			return false, err
+			return false, nil
 		}
 		if err == nil && res {
 			return true, nil
@@ -279,7 +279,7 @@ func TestcaseIOMistakeWithSpecifiedContainer(
 		res, err := getPodIoMistake(c, port)
 		// input/output error is errno 5
 		if err != nil {
-			return false, err
+			return false, nil
 		}
 		if err == nil && res {
 			return true, nil
@@ -296,7 +296,7 @@ func TestcaseIOMistakeWithSpecifiedContainer(
 		res, err := getPodIoMistake(c, port)
 		// input/output error is errno 5
 		if err != nil {
-			return false, err
+			return false, nil
 		}
 		if err == nil && !res {
 			return true, nil

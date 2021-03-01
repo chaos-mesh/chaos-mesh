@@ -23,6 +23,7 @@ import (
 	"net"
 	"net/http"
 	"os"
+	"path/filepath"
 	"time"
 )
 
@@ -100,28 +101,34 @@ func (s *server) timer(w http.ResponseWriter, _ *http.Request) {
 
 // a handler to test io chaos
 func (s *server) mistakeTest(w http.ResponseWriter, _ *http.Request) {
-	f, err := ioutil.TempFile(s.dataDir, "e2e-test")
-	if err != nil {
-		w.Write([]byte(fmt.Sprintf("failed to create temp file %v", err)))
-		return
-	}
+	path := filepath.Join(s.dataDir, "e2e-test")
 	origData := []byte("hello world!!!!!!!!!!!!")
-	if _, err := f.Write(origData); err != nil {
+
+	err := ioutil.WriteFile(path, origData, 0644)
+	if err != nil {
 		w.Write([]byte(fmt.Sprintf("failed to write file %v", err)))
 		return
 	}
-	gotData := []byte{}
-	f.Read(gotData)
+	gotData, err := ioutil.ReadFile(path)
+	if err != nil {
+		w.Write([]byte(err.Error()))
+		return
+	}
+	fmt.Println(gotData)
 	result := bytes.Equal(origData, gotData)
 	if result {
 		w.Write([]byte("false"))
 		return
 	}
 	for i := 0; i < 10; i++ {
-		tmp := []byte{}
+		tmp, err := ioutil.ReadFile(path)
+		if err != nil {
+			w.Write([]byte(err.Error()))
+		}
+		fmt.Println(tmp)
 		if !bytes.Equal(tmp, gotData) {
 			w.Write([]byte("true"))
-			break
+			return
 		}
 	}
 	w.Write([]byte("err"))
