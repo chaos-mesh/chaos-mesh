@@ -191,6 +191,17 @@ func main() {
 		}},
 	)
 
+	hookServer.Register("/validate-auth", &webhook.Admission{
+		Handler: &apiWebhook.AuthValidator{
+			Client:            mgr.GetClient(),
+			Reader:            mgr.GetAPIReader(),
+			ClusterScoped:     ccfg.ControllerCfg.ClusterScoped,
+			AllowedNamespaces: ccfg.ControllerCfg.AllowedNamespaces,
+			IgnoredNamespaces: ccfg.ControllerCfg.IgnoredNamespaces,
+			TargetNamespace:   ccfg.ControllerCfg.TargetNamespace,
+		}},
+	)
+
 	// +kubebuilder:scaffold:builder
 
 	setupLog.Info("Starting manager")
