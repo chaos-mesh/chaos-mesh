@@ -14,80 +14,14 @@
 package chaosdaemon
 
 import (
-	"context"
 	"fmt"
-	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/crclients/docker"
 	"io/ioutil"
-	"net/http"
 	"os"
 	"strconv"
 	"sync"
 
-	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/crclients/containerd"
-	dockerclient "github.com/docker/docker/client"
-
 	"github.com/chaos-mesh/chaos-mesh/pkg/bpm"
-	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
 )
-
-const (
-	containerRuntimeDocker     = "docker"
-	containerRuntimeContainerd = "containerd"
-
-	// TODO(yeya24): make socket and ns configurable
-	defaultDockerSocket  = "unix:///var/run/docker.sock"
-	defaultContainerdSocket  = "/run/containerd/containerd.sock"
-	containerdDefaultNS      = "k8s.io"
-)
-
-// ContainerRuntimeInfoClient represents a struct which can give you information about container runtime
-type ContainerRuntimeInfoClient interface {
-	GetPidFromContainerID(ctx context.Context, containerID string) (uint32, error)
-	ContainerKillByContainerID(ctx context.Context, containerID string) error
-	FormatContainerID(ctx context.Context, containerID string) (string, error)
-}
-
-
-// newDockerclient returns a dockerclient.NewClient with mock points
-func newDockerClient(host string, version string, client *http.Client, httpHeaders map[string]string) (docker.DockerClientInterface, error) {
-	// Mock point to return error or mock client in unit test
-	if err := mock.On("NewDockerClientError"); err != nil {
-		return nil, err.(error)
-	}
-	if client := mock.On("MockDockerClient"); client != nil {
-		return client.(docker.DockerClientInterface), nil
-	}
-
-	// The real logic
-	return dockerclient.NewClient(host, version, client, httpHeaders)
-}
-
-// CreateContainerRuntimeInfoClient creates a container runtime information client.
-func CreateContainerRuntimeInfoClient(containerRuntime string) (ContainerRuntimeInfoClient, error) {
-	// TODO: support more container runtime
-
-	var cli ContainerRuntimeInfoClient
-	var err error
-	switch containerRuntime {
-	case containerRuntimeDocker:
-		cli, err = docker.New(defaultDockerSocket, "", nil, nil)
-		if err != nil {
-			return nil, err
-		}
-
-	case containerRuntimeContainerd:
-		// TODO(yeya24): add more options?
-		cli, err = containerd.New(defaultContainerdSocket, containerd.WithDefaultNamespace(containerdDefaultNS))
-		if err != nil {
-			return nil, err
-		}
-
-	default:
-		return nil, fmt.Errorf("only docker and containerd is supported, but got %s", containerRuntime)
-	}
-
-	return cli, nil
-}
 // ReadCommName returns the command name of process
 func ReadCommName(pid int) (string, error) {
 	f, err := os.Open(fmt.Sprintf("%s/%d/comm", bpm.DefaultProcPrefix, pid))

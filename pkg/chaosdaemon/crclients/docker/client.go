@@ -91,7 +91,11 @@ func New(host string, version string, client *http.Client, httpHeaders map[strin
 		}, nil
 	}
 
-	c, err := dockerclient.NewClient(host, version, client, httpHeaders)
+	c, err := dockerclient.NewClientWithOpts(
+		dockerclient.WithHost(host),
+		dockerclient.WithVersion(version),
+		dockerclient.WithHTTPClient(client),
+		dockerclient.WithHTTPHeaders(httpHeaders))
 	if err != nil {
 		return nil, err
 	}

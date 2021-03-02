@@ -1,4 +1,4 @@
-// Copyright 2020 Chaos Mesh Authors.
+// Copyright 2021 Chaos Mesh Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -11,16 +11,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package chaosdaemon
+package crclients
 
 import (
 	"errors"
 	"fmt"
-	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/crclients/test"
-
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-
+	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/crclients/test"
 	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
 )
 
