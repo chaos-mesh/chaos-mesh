@@ -30,7 +30,7 @@ const (
 	// TODO(yeya24): make socket and ns configurable
 	defaultDockerSocket     = "unix:///var/run/docker.sock"
 	defaultContainerdSocket = "/run/containerd/containerd.sock"
-	defaultCrioSocket       = "unix:///var/run/crio/crio.sock"
+	defaultCrioSocket       = "/var/run/crio/crio.sock"
 	containerdDefaultNS     = "k8s.io"
 )
 
@@ -53,7 +53,6 @@ func CreateContainerRuntimeInfoClient(containerRuntime string) (ContainerRuntime
 		if err != nil {
 			return nil, err
 		}
-
 	case ContainerRuntimeContainerd:
 		// TODO(yeya24): add more options?
 		cli, err = containerd.New(defaultContainerdSocket, containerd.WithDefaultNamespace(containerdDefaultNS))
@@ -66,7 +65,7 @@ func CreateContainerRuntimeInfoClient(containerRuntime string) (ContainerRuntime
 			return nil, err
 		}
 	default:
-		return nil, fmt.Errorf("only docker and containerd is supported, but got %s", containerRuntime)
+		return nil, fmt.Errorf("only docker/containerd/crio is supported, but got %s", containerRuntime)
 	}
 
 	return cli, nil

@@ -52,7 +52,12 @@ func (c CrioClient) FormatContainerID(ctx context.Context, containerID string) (
 
 // GetPidFromContainerID fetches PID according to container id
 func (c CrioClient) GetPidFromContainerID(ctx context.Context, containerID string) (uint32, error) {
-	req, err := c.getRequest(InspectContainersEndpoint + "/" + containerID)
+	id, err := c.FormatContainerID(ctx, containerID)
+	if err != nil {
+		return 0, err
+	}
+
+	req, err := c.getRequest(InspectContainersEndpoint + "/" + id)
 	if err != nil {
 		return 0, err
 	}
@@ -67,7 +72,7 @@ func (c CrioClient) GetPidFromContainerID(ctx context.Context, containerID strin
 	}
 
 	pid := cInfo["pid"]
-	if pid, ok := pid.(int); ok {
+	if pid, ok := pid.(float64); ok {
 		return uint32(pid), nil
 	}
 
