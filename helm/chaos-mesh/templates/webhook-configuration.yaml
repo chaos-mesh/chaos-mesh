@@ -39,6 +39,7 @@ metadata:
   {{- end }}
 webhooks:
   - name: {{ template "chaos-mesh.webhook" . }}
+    timeoutSeconds: {{ .Values.webhook.timeoutSeconds }}
     clientConfig:
       {{- if $certEnabled }}
       caBundle: Cg==
@@ -71,6 +72,7 @@ webhooks:
         path: /mutate-chaos-mesh-org-v1alpha1-{{ $crd }}
     failurePolicy: Fail
     name: m{{ $crd }}.kb.io
+    timeoutSeconds: {{ .Values.webhook.timeoutSeconds }}
     rules:
       - apiGroups:
           - chaos-mesh.org
@@ -113,6 +115,7 @@ webhooks:
         path: /validate-chaos-mesh-org-v1alpha1-{{ $crd }}
     failurePolicy: Fail
     name: v{{ $crd }}.kb.io
+    timeoutSeconds: {{ .Values.webhook.timeoutSeconds }}
     rules:
       - apiGroups:
           - chaos-mesh.org
