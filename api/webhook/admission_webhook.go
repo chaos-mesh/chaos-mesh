@@ -19,6 +19,8 @@ import (
 	"net/http"
 
 	//corev1 "k8s.io/api/core/v1"
+	authv1 "k8s.io/api/authorization/v1"
+	authorizationv1 "k8s.io/client-go/kubernetes/typed/authorization/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
@@ -66,7 +68,7 @@ func (v *AuthValidator) Handle(ctx context.Context, req admission.Request) admis
 	*/
 	var spec selector.SelectSpec
 	needAuth := true
-	//userName := req.UserInfo.Username
+	username := req.UserInfo.Username
 	chaosKind := req.Kind.Kind
 
 	switch chaosKind {
@@ -145,6 +147,21 @@ func (v *AuthValidator) Handle(ctx context.Context, req admission.Request) admis
 
 	log2.Info("select pods in webhook", "pods", pods)
 
+	namespaceMap := make(map[string]struct{})
+	for _, pod := range pods {
+		namespaceMap[pod.Namespace] = struct{}{}
+	}
+	for namespace := range namespaceMap {
+		allow, err := v.auth(username, namespace)
+		if err != nil {
+			return admission.Errored(http.StatusBadRequest, err)
+		}
+
+		if !allow {
+			return admission.Denied(fmt.Sprintf("%s don't have privileges on namespace %s", username, namespace))
+		}
+	}
+
 	return admission.Allowed("")
 }
 
@@ -155,4 +172,30 @@ func (v *AuthValidator) Handle(ctx context.Context, req admission.Request) admis
 func (v *AuthValidator) InjectDecoder(d *admission.Decoder) error {
 	v.decoder = d
 	return nil
+}
+
+func (v *AuthValidator) auth(username string, namespace string) (bool, error) {
+
+	config := ctrl.GetConfigOrDie()
+	authCli, err := authorizationv1.NewForConfig(config)
+
+	sar := authv1.SubjectAccessReview{
+		Spec: authv1.SubjectAccessReviewSpec{
+			ResourceAttributes: &authv1.ResourceAttributes{
+				Namespace: namespace,
+				Verb:      "create",
+
+				Group:    "chaos-mesh.org",
+				Resource: "*",
+			},
+			User: username,
+		},
+	}
+
+	response, err := authCli.SubjectAccessReviews().Create(&sar)
+	if err != nil {
+		return false, err
+	}
+
+	return response.Status.Allowed, nil
 }
