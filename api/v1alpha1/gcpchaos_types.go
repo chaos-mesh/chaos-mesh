@@ -74,6 +74,11 @@ type GcpChaosSpec struct {
 	// Needed in disk-loss.
 	// +optional
 	DeviceName *string `json:"deviceName,omitempty"`
+
+	// The attached disk info string.
+	// Needed in disk-loss.
+	// +optional
+	AttachedDiskString string `json:"attachedDiskString,omitempty"`
 }
 
 // GcpChaosStatus represents the status of a GcpChaos

@@ -95,6 +95,7 @@ func (e *endpoint) Recover(ctx context.Context, req ctrl.Request, chaos v1alpha1
 		e.Log.Error(err, "chaos is not GcpChaos", "chaos", chaos)
 		return err
 	}
+	gcpchaos.Finalizers = make([]string, 0)
 	var computeService *compute.Service
 	var err error
 	if gcpchaos.Spec.SecretName != nil {
@@ -125,10 +126,8 @@ func (e *endpoint) Recover(ctx context.Context, req ctrl.Request, chaos v1alpha1
 			return err
 		}
 	}
-	gcpchaos.Finalizers = make([]string, 0)
 	_, err = computeService.Instances.Start(gcpchaos.Spec.Project, gcpchaos.Spec.Zone, gcpchaos.Spec.Instance).Do()
 	if err != nil {
-		gcpchaos.Finalizers = make([]string, 0)
 		e.Log.Error(err, "fail to stop the instance")
 		return err
 	}
