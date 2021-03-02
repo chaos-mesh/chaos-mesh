@@ -2,6 +2,7 @@
 {{- $ca := genCA "chaos-mesh-ca" 1825 }}
 {{- $cert := genSignedCert "chaos-mesh-ca" nil $altNames 1825 $ca }}
 {{- $certEnabled := .Values.webhook.certManager.enabled }}
+{{- $timeoutSeconds := .Values.webhook.timeoutSeconds }}
 {{- $crtPEM := .Values.webhook.crtPEM }}
 {{- $keyPEM := .Values.webhook.keyPEM }}
 {{- if not $certEnabled }}
@@ -39,6 +40,7 @@ metadata:
   {{- end }}
 webhooks:
   - name: {{ template "chaos-mesh.webhook" . }}
+    timeoutSeconds: {{ $timeoutSeconds }}
     clientConfig:
       {{- if $certEnabled }}
       caBundle: Cg==
@@ -71,6 +73,7 @@ webhooks:
         path: /mutate-chaos-mesh-org-v1alpha1-{{ $crd }}
     failurePolicy: Fail
     name: m{{ $crd }}.kb.io
+    timeoutSeconds: {{ $timeoutSeconds }}
     rules:
       - apiGroups:
           - chaos-mesh.org
@@ -113,6 +116,7 @@ webhooks:
         path: /validate-chaos-mesh-org-v1alpha1-{{ $crd }}
     failurePolicy: Fail
     name: v{{ $crd }}.kb.io
+    timeoutSeconds: {{ $timeoutSeconds }}
     rules:
       - apiGroups:
           - chaos-mesh.org
