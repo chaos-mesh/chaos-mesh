@@ -14,8 +14,8 @@
 package workflow
 
 import (
-	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/engine/model/node"
-	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/engine/model/template"
+	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/model/node"
+	"github.com/chaos-mesh/chaos-mesh/pkg/workflow/model/template"
 )
 
 type WorkflowSpec interface {
