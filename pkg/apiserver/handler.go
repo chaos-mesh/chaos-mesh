@@ -20,7 +20,6 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/apiserver/common"
 	"github.com/chaos-mesh/chaos-mesh/pkg/apiserver/event"
 	"github.com/chaos-mesh/chaos-mesh/pkg/apiserver/experiment"
-	"github.com/chaos-mesh/chaos-mesh/pkg/apiserver/workflow"
 )
 
 var handlerModule = fx.Options(
@@ -29,13 +28,11 @@ var handlerModule = fx.Options(
 		experiment.NewService,
 		event.NewService,
 		archive.NewService,
-		workflow.NewService,
 	),
 	fx.Invoke(
 		common.Register,
 		experiment.Register,
 		event.Register,
 		archive.Register,
-		workflow.Register,
 	),
 )
