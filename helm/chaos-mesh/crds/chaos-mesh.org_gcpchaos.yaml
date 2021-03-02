@@ -37,10 +37,14 @@ spec:
           properties:
             action:
               description: 'Action defines the specific gcp chaos action. Supported
-                action: node-stop / node-reset Default action: node-stop'
+                action: node-stop / node-reset / disk-loss Default action: node-stop'
               enum:
               - node-stop
               - node-reset
+              - disk-loss
+              type: string
+            deviceName:
+              description: The device name of the disk to detach. Needed in disk-loss.
               type: string
             duration:
               description: Duration represents the duration of the chaos action.

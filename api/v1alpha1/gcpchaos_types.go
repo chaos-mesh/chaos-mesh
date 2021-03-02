@@ -35,14 +35,18 @@ type GcpChaosAction string
 const (
 	// NodeStop represents the chaos action of stopping the node.
 	NodeStop GcpChaosAction = "node-stop"
+	// NodeReset represents the chaos action of resetting the node.
+	NodeReset GcpChaosAction = "node-reset"
+	// DiskLoss represents the chaos action of detaching the disk.
+	DiskLoss GcpChaosAction = "disk-loss"
 )
 
 // GcpChaosSpec is the content of the specification for a GcpChaos
 type GcpChaosSpec struct {
 	// Action defines the specific gcp chaos action.
-	// Supported action: node-stop / node-reset
+	// Supported action: node-stop / node-reset / disk-loss
 	// Default action: node-stop
-	// +kubebuilder:validation:Enum=node-stop;node-reset
+	// +kubebuilder:validation:Enum=node-stop;node-reset;disk-loss
 	Action GcpChaosAction `json:"action"`
 
 	// Duration represents the duration of the chaos action.
@@ -65,6 +69,11 @@ type GcpChaosSpec struct {
 
 	// Instance defines the name of the instance
 	Instance string `json:"instance"`
+
+	// The device name of the disk to detach.
+	// Needed in disk-loss.
+	// +optional
+	DeviceName *string `json:"deviceName,omitempty"`
 }
 
 // GcpChaosStatus represents the status of a GcpChaos

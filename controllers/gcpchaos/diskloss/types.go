@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package nodestop
+package diskloss
 
 import (
 	"context"
@@ -78,10 +78,10 @@ func (e *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.I
 		}
 	}
 	gcpchaos.Finalizers = []string{GcpFinalizer}
-	_, err = computeService.Instances.Stop(gcpchaos.Spec.Project, gcpchaos.Spec.Zone, gcpchaos.Spec.Instance).Do()
+	_, err = computeService.Instances.DetachDisk(gcpchaos.Spec.Project, gcpchaos.Spec.Zone, gcpchaos.Spec.Instance, *gcpchaos.Spec.DeviceName).Do()
 	if err != nil {
 		gcpchaos.Finalizers = make([]string, 0)
-		e.Log.Error(err, "fail to stop the instance")
+		e.Log.Error(err, "fail to detach the disk")
 		return err
 	}
 
@@ -126,10 +126,12 @@ func (e *endpoint) Recover(ctx context.Context, req ctrl.Request, chaos v1alpha1
 		}
 	}
 	gcpchaos.Finalizers = make([]string, 0)
-	_, err = computeService.Instances.Start(gcpchaos.Spec.Project, gcpchaos.Spec.Zone, gcpchaos.Spec.Instance).Do()
+	_, err = computeService.Instances.AttachDisk(gcpchaos.Spec.Project, gcpchaos.Spec.Zone, gcpchaos.Spec.Instance, &compute.AttachedDisk{
+		DeviceName: *gcpchaos.Spec.DeviceName,
+	}).Do()
 	if err != nil {
 		gcpchaos.Finalizers = make([]string, 0)
-		e.Log.Error(err, "fail to stop the instance")
+		e.Log.Error(err, "fail to attach the disk to the instance")
 		return err
 	}
 	return nil
@@ -146,7 +148,7 @@ func init() {
 			return false
 		}
 
-		return chaos.Spec.Action == v1alpha1.NodeStop
+		return chaos.Spec.Action == v1alpha1.DiskLoss
 	}, func(ctx ctx.Context) end.Endpoint {
 		return &endpoint{
 			Context: ctx,

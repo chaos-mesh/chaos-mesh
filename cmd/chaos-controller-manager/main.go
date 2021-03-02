@@ -38,6 +38,8 @@ import (
 	_ "github.com/chaos-mesh/chaos-mesh/controllers/awschaos/ec2restart"
 	_ "github.com/chaos-mesh/chaos-mesh/controllers/awschaos/ec2stop"
 	_ "github.com/chaos-mesh/chaos-mesh/controllers/gcpchaos/nodestop"
+	_ "github.com/chaos-mesh/chaos-mesh/controllers/gcpchaos/nodereset"
+	_ "github.com/chaos-mesh/chaos-mesh/controllers/gcpchaos/diskloss"
 	_ "github.com/chaos-mesh/chaos-mesh/controllers/dnschaos"
 	_ "github.com/chaos-mesh/chaos-mesh/controllers/httpchaos"
 	_ "github.com/chaos-mesh/chaos-mesh/controllers/iochaos"
