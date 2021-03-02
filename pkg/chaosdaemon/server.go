@@ -14,16 +14,12 @@
 package chaosdaemon
 
 import (
-	"context"
 	"fmt"
-	"net"
-
 	"github.com/moby/locker"
 
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	grpc_prometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 	"github.com/prometheus/client_golang/prometheus"
-	"golang.org/x/sync/errgroup"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -108,53 +104,4 @@ func newGRPCServer(containerRuntime string, reg prometheus.Registerer) (*grpc.Se
 	reflection.Register(s)
 
 	return s, nil
-}
-
-// RegisterGatherer combine prometheus.Registerer and prometheus.Gatherer
-type RegisterGatherer interface {
-	prometheus.Registerer
-	prometheus.Gatherer
-}
-
-// StartServer starts chaos-daemon.
-func StartServer(conf *Config, reg RegisterGatherer) error {
-	g := &errgroup.Group{}
-
-	httpBindAddr := conf.HttpAddr()
-	httpServer := newHTTPServerBuilder().Addr(httpBindAddr).Metrics(reg).Profiling(conf.Profiling).Build()
-
-	grpcBindAddr := conf.GrpcAddr()
-	grpcListener, err := net.Listen("tcp", grpcBindAddr)
-	if err != nil {
-		log.Error(err, "failed to listen grpc address", "grpcBindAddr", grpcBindAddr)
-		return err
-	}
-
-	grpcServer, err := newGRPCServer(conf.Runtime, reg)
-	if err != nil {
-		log.Error(err, "failed to create grpc server")
-		return err
-	}
-
-	g.Go(func() error {
-		log.Info("Starting http endpoint", "address", httpBindAddr)
-		if err := httpServer.ListenAndServe(); err != nil {
-			log.Error(err, "failed to start http endpoint")
-			httpServer.Shutdown(context.Background())
-			return err
-		}
-		return nil
-	})
-
-	g.Go(func() error {
-		log.Info("Starting grpc endpoint", "address", grpcBindAddr, "runtime", conf.Runtime)
-		if err := grpcServer.Serve(grpcListener); err != nil {
-			log.Error(err, "failed to start grpc endpoint")
-			grpcServer.Stop()
-			return err
-		}
-		return nil
-	})
-
-	return g.Wait()
 }
