@@ -69,6 +69,7 @@ func (v *AuthValidator) Handle(ctx context.Context, req admission.Request) admis
 	var spec selector.SelectSpec
 	needAuth := true
 	username := req.UserInfo.Username
+	groups := req.UserInfo.Groups
 	chaosKind := req.Kind.Kind
 
 	switch chaosKind {
@@ -152,7 +153,7 @@ func (v *AuthValidator) Handle(ctx context.Context, req admission.Request) admis
 		namespaceMap[pod.Namespace] = struct{}{}
 	}
 	for namespace := range namespaceMap {
-		allow, err := v.auth(username, namespace)
+		allow, err := v.auth(username, groups, namespace)
 		if err != nil {
 			return admission.Errored(http.StatusBadRequest, err)
 		}
@@ -174,7 +175,7 @@ func (v *AuthValidator) InjectDecoder(d *admission.Decoder) error {
 	return nil
 }
 
-func (v *AuthValidator) auth(username string, namespace string) (bool, error) {
+func (v *AuthValidator) auth(username string, groups []string, namespace string) (bool, error) {
 
 	config := ctrl.GetConfigOrDie()
 	authCli, err := authorizationv1.NewForConfig(config)
@@ -189,6 +190,7 @@ func (v *AuthValidator) auth(username string, namespace string) (bool, error) {
 				Resource: "*",
 			},
 			User: username,
+			Groups: groups,
 		},
 	}
 
