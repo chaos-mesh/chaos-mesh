@@ -164,14 +164,10 @@ func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
 				return false
 			},
 			UpdateFunc: func(e event.UpdateEvent) bool {
-				old := e.ObjectOld.(v1alpha1.InnerSchedulerObject).GetScheduler()
-				new := e.ObjectNew.(v1alpha1.InnerSchedulerObject).GetScheduler()
+				old, _ := e.ObjectOld.(v1alpha1.InnerObject).GetSpecAndMetaString()
+				new, _ := e.ObjectOld.(v1alpha1.InnerObject).GetSpecAndMetaString()
 
-				if (old == nil) || (new == nil) {
-					return false
-				}
-
-				return old.Cron != new.Cron
+				return old != new
 			},
 		}).
 		Complete(&twophase.SchedulerUpdater{

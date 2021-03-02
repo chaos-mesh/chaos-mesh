@@ -128,6 +128,31 @@ func (in *{{.Type}}) GetStatus() *ChaosStatus {
 	return &in.Status.ChaosStatus
 }
 
+// GetSpecAndMetaString returns a string including the meta and spec field of this chaos object.
+func (in *{{.Type}}) GetSpecAndMetaString() (string, error) {
+	spec, err := json.Marshal(in.Spec)
+	if err != nil {
+		return "", err
+	}
+
+	anns, err := json.Marshal(in.GetAnnotations())
+	if err != nil {
+		return "", err
+	}
+
+	labels, err := json.Marshal(in.GetLabels())
+	if err != nil {
+		return "", err
+	}
+
+	finalizers, err := json.Marshal(in.GetFinalizers())
+	if err != nil {
+		return "", err
+	}
+
+	return string(spec) + string(anns) + string(labels) + string(finalizers), nil
+}
+
 // +kubebuilder:object:root=true
 
 // {{.Type}}List contains a list of {{.Type}}
