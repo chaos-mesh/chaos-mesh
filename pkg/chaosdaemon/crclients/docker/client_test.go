@@ -17,10 +17,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/crclients/test"
-	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
+
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+
+	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/crclients/test"
+	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
 )
 
 var _ = Describe("docker client", func() {
@@ -52,7 +54,6 @@ var _ = Describe("docker client", func() {
 			Expect(fmt.Sprintf("%s", err)).To(Equal(errorStr))
 		})
 	})
-
 
 	Context("DockerClient ContainerKillByContainerID", func() {
 		It("should work", func() {

@@ -16,18 +16,22 @@ package crclients
 import (
 	"context"
 	"fmt"
+
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/crclients/containerd"
+	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/crclients/crio"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/crclients/docker"
 )
 
 const (
-	containerRuntimeDocker     = "docker"
-	containerRuntimeContainerd = "containerd"
+	ContainerRuntimeDocker     = "docker"
+	ContainerRuntimeContainerd = "containerd"
+	ContainerRuntimeCrio       = "crio"
 
 	// TODO(yeya24): make socket and ns configurable
-	defaultDockerSocket  = "unix:///var/run/docker.sock"
-	defaultContainerdSocket  = "/run/containerd/containerd.sock"
-	containerdDefaultNS      = "k8s.io"
+	defaultDockerSocket     = "unix:///var/run/docker.sock"
+	defaultContainerdSocket = "/run/containerd/containerd.sock"
+	defaultCrioSocket       = "unix:///var/run/crio/crio.sock"
+	containerdDefaultNS     = "k8s.io"
 )
 
 // ContainerRuntimeInfoClient represents a struct which can give you information about container runtime
@@ -44,19 +48,23 @@ func CreateContainerRuntimeInfoClient(containerRuntime string) (ContainerRuntime
 	var cli ContainerRuntimeInfoClient
 	var err error
 	switch containerRuntime {
-	case containerRuntimeDocker:
+	case ContainerRuntimeDocker:
 		cli, err = docker.New(defaultDockerSocket, "", nil, nil)
 		if err != nil {
 			return nil, err
 		}
 
-	case containerRuntimeContainerd:
+	case ContainerRuntimeContainerd:
 		// TODO(yeya24): add more options?
 		cli, err = containerd.New(defaultContainerdSocket, containerd.WithDefaultNamespace(containerdDefaultNS))
 		if err != nil {
 			return nil, err
 		}
-
+	case ContainerRuntimeCrio:
+		cli, err = crio.New(defaultCrioSocket)
+		if err != nil {
+			return nil, err
+		}
 	default:
 		return nil, fmt.Errorf("only docker and containerd is supported, but got %s", containerRuntime)
 	}

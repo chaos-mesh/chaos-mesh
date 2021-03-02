@@ -16,10 +16,12 @@ package docker
 import (
 	"context"
 	"fmt"
-	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
+	"net/http"
+
 	"github.com/docker/docker/api/types"
 	dockerclient "github.com/docker/docker/client"
-	"net/http"
+
+	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
 )
 
 const (
@@ -66,16 +68,13 @@ func (c DockerClient) GetPidFromContainerID(ctx context.Context, containerID str
 	return uint32(container.State.Pid), nil
 }
 
-
 // ContainerKillByContainerID kills container according to container id
 func (c DockerClient) ContainerKillByContainerID(ctx context.Context, containerID string) error {
-	if len(containerID) < len(dockerProtocolPrefix) {
-		return fmt.Errorf("container id %s is not a docker container id", containerID)
+	id, err := c.FormatContainerID(ctx, containerID)
+	if err != nil {
+		return err
 	}
-	if containerID[0:len(dockerProtocolPrefix)] != dockerProtocolPrefix {
-		return fmt.Errorf("expected %s but got %s", dockerProtocolPrefix, containerID[0:len(dockerProtocolPrefix)])
-	}
-	err := c.client.ContainerKill(ctx, containerID[len(dockerProtocolPrefix):], "SIGKILL")
+	err = c.client.ContainerKill(ctx, id, "SIGKILL")
 
 	return err
 }
@@ -100,7 +99,7 @@ func New(host string, version string, client *http.Client, httpHeaders map[strin
 		return nil, err
 	}
 	// The real logic
-	return &DockerClient {
+	return &DockerClient{
 		client: c,
 	}, nil
 }

@@ -16,9 +16,11 @@ package containerd
 import (
 	"context"
 	"fmt"
-	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
-	"github.com/containerd/containerd"
 	"syscall"
+
+	"github.com/containerd/containerd"
+
+	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
 )
 
 const (
@@ -63,16 +65,13 @@ func (c ContainerdClient) GetPidFromContainerID(ctx context.Context, containerID
 	return task.Pid(), nil
 }
 
-
 // ContainerKillByContainerID kills container according to container id
 func (c ContainerdClient) ContainerKillByContainerID(ctx context.Context, containerID string) error {
-	if len(containerID) < len(containerdProtocolPrefix) {
-		return fmt.Errorf("container id %s is not a containerd container id", containerID)
+	containerID, err := c.FormatContainerID(ctx, containerID)
+	if err != nil {
+		return err
 	}
-	if containerID[0:len(containerdProtocolPrefix)] != containerdProtocolPrefix {
-		return fmt.Errorf("expected %s but got %s", containerdProtocolPrefix, containerID[0:len(containerdProtocolPrefix)])
-	}
-	containerID = containerID[len(containerdProtocolPrefix):]
+
 	container, err := c.client.LoadContainer(ctx, containerID)
 	if err != nil {
 		return err
@@ -86,7 +85,6 @@ func (c ContainerdClient) ContainerKillByContainerID(ctx context.Context, contai
 
 	return err
 }
-
 
 func New(address string, opts ...containerd.ClientOpt) (*ContainerdClient, error) {
 	// Mock point to return error in unit test

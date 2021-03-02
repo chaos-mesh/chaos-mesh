@@ -22,6 +22,7 @@ import (
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/bpm"
 )
+
 // ReadCommName returns the command name of process
 func ReadCommName(pid int) (string, error) {
 	f, err := os.Open(fmt.Sprintf("%s/%d/comm", bpm.DefaultProcPrefix, pid))

@@ -15,11 +15,13 @@ package test
 
 import (
 	"context"
-	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
+	"syscall"
+
 	"github.com/containerd/containerd"
 	"github.com/containerd/containerd/cio"
 	"github.com/docker/docker/api/types"
-	"syscall"
+
+	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
 )
 
 type MockClient struct{}

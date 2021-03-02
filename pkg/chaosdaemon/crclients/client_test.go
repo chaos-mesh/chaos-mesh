@@ -16,8 +16,10 @@ package crclients
 import (
 	"errors"
 	"fmt"
+
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/crclients/test"
 	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
 )
@@ -25,18 +27,18 @@ import (
 var _ = Describe("chaosdaemon util", func() {
 	Context("CreateContainerRuntimeInfoClient", func() {
 		It("should work", func() {
-			_, err := CreateContainerRuntimeInfoClient(containerRuntimeDocker)
+			_, err := CreateContainerRuntimeInfoClient(ContainerRuntimeDocker)
 			Expect(err).To(BeNil())
 
 			defer mock.With("MockContainerdClient", &test.MockClient{})()
-			_, err = CreateContainerRuntimeInfoClient(containerRuntimeContainerd)
+			_, err = CreateContainerRuntimeInfoClient(ContainerRuntimeContainerd)
 			Expect(err).To(BeNil())
 		})
 
 		It("should error on newContaineredClient", func() {
 			errorStr := "this is a mocked error"
 			defer mock.With("NewContainerdClientError", errors.New(errorStr))()
-			_, err := CreateContainerRuntimeInfoClient(containerRuntimeContainerd)
+			_, err := CreateContainerRuntimeInfoClient(ContainerRuntimeContainerd)
 			Expect(err).ToNot(BeNil())
 			Expect(fmt.Sprintf("%s", err)).To(Equal(errorStr))
 		})

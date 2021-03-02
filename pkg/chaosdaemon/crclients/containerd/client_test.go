@@ -17,10 +17,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/crclients/test"
-	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
+
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+
+	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/crclients/test"
+	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
 )
 
 var _ = Describe("containerd client", func() {
