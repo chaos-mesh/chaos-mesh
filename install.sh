@@ -1163,7 +1163,7 @@ spec:
       serviceAccount: chaos-daemon
       hostIPC: true
       hostPID: true
-      priorityClassName:
+      priorityClassName: 
       containers:
         - name: chaos-daemon
           image: ${DOCKER_REGISTRY_PREFIX}/pingcap/chaos-daemon:${VERSION_TAG}
@@ -1229,7 +1229,7 @@ spec:
         app.kubernetes.io/component: chaos-dashboard
     spec:
       serviceAccount: chaos-controller-manager
-      priorityClassName:
+      priorityClassName: 
       containers:
         - name: chaos-dashboard
           image: ${DOCKER_REGISTRY_PREFIX}/pingcap/chaos-dashboard:${VERSION_TAG}
@@ -1299,7 +1299,7 @@ spec:
     spec:
       hostNetwork: ${host_network}
       serviceAccount: chaos-controller-manager
-      priorityClassName:
+      priorityClassName: 
       containers:
       - name: chaos-mesh
         image: ${DOCKER_REGISTRY_PREFIX}/pingcap/chaos-mesh:${VERSION_TAG}
