@@ -345,6 +345,24 @@ const data: Record<Kind, Target> = {
       },
     ],
   },
+  // Stress Test
+  StressChaos: {
+    spec: {
+      stressors: {
+        cpu: {
+          workers: 0,
+          load: 0,
+          options: [],
+        },
+        memory: {
+          workers: 0,
+          options: [],
+        },
+      },
+      stressng_stressors: '',
+      container_name: '',
+    } as any,
+  },
   // Kernel Fault
   KernelChaos: {
     spec: {
@@ -381,24 +399,6 @@ const data: Record<Kind, Target> = {
           "Optional. Type string and end with a space to generate the container names. If it's empty, all containers will be injected",
       },
     },
-  },
-  // Stress Test
-  StressChaos: {
-    spec: {
-      stressors: {
-        cpu: {
-          workers: 1,
-          load: 0,
-          options: [],
-        },
-        memory: {
-          workers: 1,
-          options: [],
-        },
-      },
-      stressng_stressors: '',
-      container_name: '',
-    } as any,
   },
   // DNS Fault
   DNSChaos: {

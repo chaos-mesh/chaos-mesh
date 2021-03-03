@@ -3,6 +3,7 @@ module github.com/chaos-mesh/chaos-mesh
 require (
 	code.cloudfoundry.org/bytefmt v0.0.0-20200131002437-cf55d5288a48
 	github.com/DATA-DOG/go-sqlmock v1.5.0
+	github.com/aws/aws-sdk-go-v2 v0.31.0
 	github.com/aws/aws-sdk-go-v2/config v0.4.0
 	github.com/aws/aws-sdk-go-v2/credentials v0.2.0
 	github.com/aws/aws-sdk-go-v2/service/ec2 v0.31.0
@@ -27,7 +28,7 @@ require (
 	github.com/go-playground/validator/v10 v10.3.0
 	github.com/gogo/googleapis v1.3.2 // indirect
 	github.com/golang/groupcache v0.0.0-20200121045136-8c9f03a8e57e // indirect
-	github.com/golang/mock v1.4.4 // indirect
+	github.com/golang/mock v1.5.0
 	github.com/golang/protobuf v1.4.2
 	github.com/grpc-ecosystem/go-grpc-middleware v1.2.0
 	github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0
