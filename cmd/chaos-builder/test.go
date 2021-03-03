@@ -150,12 +150,9 @@ func Test{{.Type}}GetStatus(t *testing.T) {
 
 func Test{{.Type}}GetSpecAndMetaString(t *testing.T) {
 	g := NewGomegaWithT(t)
-
 	chaos := &{{.Type}}{}
 	err := faker.FakeData(chaos)
-
 	g.Expect(err).To(BeNil())
-
 	chaos.GetSpecAndMetaString()
 }
 

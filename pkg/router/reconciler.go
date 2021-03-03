@@ -139,6 +139,27 @@ func NewReconciler(name string, object runtime.Object, mgr ctrl.Manager, endpoin
 func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
 	err := ctrl.NewControllerManagedBy(mgr).
 		For(r.Object.DeepCopyObject()).
+		WithEventFilter(predicate.Funcs{
+			UpdateFunc: func(e event.UpdateEvent) bool {
+				// TODO: update CRD to v1 from v1beta1
+				// The following logic is only supported in v1
+				//
+				// old := e.ObjectOld.(*unstructured.Unstructured).DeepCopy()
+				// new := e.ObjectNew.(*unstructured.Unstructured).DeepCopy()
+				//
+				// delete(old.Object, "status")
+				// delete(new.Object, "status")
+				// old.SetResourceVersion("")
+				// new.SetResourceVersion("")
+				//
+				// return !reflect.DeepEqual(old.Object, new.Object)
+
+				old, _ := e.ObjectOld.(v1alpha1.InnerObject).GetSpecAndMetaString()
+				new, _ := e.ObjectNew.(v1alpha1.InnerObject).GetSpecAndMetaString()
+
+				return old != new
+			},
+		}).
 		Complete(r)
 
 	if err != nil {
@@ -164,10 +185,14 @@ func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
 				return false
 			},
 			UpdateFunc: func(e event.UpdateEvent) bool {
-				old, _ := e.ObjectOld.(v1alpha1.InnerObject).GetSpecAndMetaString()
-				new, _ := e.ObjectOld.(v1alpha1.InnerObject).GetSpecAndMetaString()
+				old := e.ObjectOld.(v1alpha1.InnerSchedulerObject).GetScheduler()
+				new := e.ObjectNew.(v1alpha1.InnerSchedulerObject).GetScheduler()
 
-				return old != new
+				if (old == nil) || (new == nil) {
+					return false
+				}
+
+				return old.Cron != new.Cron
 			},
 		}).
 		Complete(&twophase.SchedulerUpdater{

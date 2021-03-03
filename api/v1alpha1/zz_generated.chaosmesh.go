@@ -14,7 +14,6 @@
 package v1alpha1
 
 import (
-	"encoding/json"
 	"reflect"
 	"time"
 
@@ -127,22 +126,18 @@ func (in *AwsChaos) GetSpecAndMetaString() (string, error) {
 	if err != nil {
 		return "", err
 	}
-
 	anns, err := json.Marshal(in.GetAnnotations())
 	if err != nil {
 		return "", err
 	}
-
 	labels, err := json.Marshal(in.GetLabels())
 	if err != nil {
 		return "", err
 	}
-
 	finalizers, err := json.Marshal(in.GetFinalizers())
 	if err != nil {
 		return "", err
 	}
-
 	return string(spec) + string(anns) + string(labels) + string(finalizers), nil
 }
 
@@ -270,22 +265,18 @@ func (in *DNSChaos) GetSpecAndMetaString() (string, error) {
 	if err != nil {
 		return "", err
 	}
-
 	anns, err := json.Marshal(in.GetAnnotations())
 	if err != nil {
 		return "", err
 	}
-
 	labels, err := json.Marshal(in.GetLabels())
 	if err != nil {
 		return "", err
 	}
-
 	finalizers, err := json.Marshal(in.GetFinalizers())
 	if err != nil {
 		return "", err
 	}
-
 	return string(spec) + string(anns) + string(labels) + string(finalizers), nil
 }
 
@@ -413,22 +404,18 @@ func (in *HTTPChaos) GetSpecAndMetaString() (string, error) {
 	if err != nil {
 		return "", err
 	}
-
 	anns, err := json.Marshal(in.GetAnnotations())
 	if err != nil {
 		return "", err
 	}
-
 	labels, err := json.Marshal(in.GetLabels())
 	if err != nil {
 		return "", err
 	}
-
 	finalizers, err := json.Marshal(in.GetFinalizers())
 	if err != nil {
 		return "", err
 	}
-
 	return string(spec) + string(anns) + string(labels) + string(finalizers), nil
 }
 
@@ -556,22 +543,18 @@ func (in *IoChaos) GetSpecAndMetaString() (string, error) {
 	if err != nil {
 		return "", err
 	}
-
 	anns, err := json.Marshal(in.GetAnnotations())
 	if err != nil {
 		return "", err
 	}
-
 	labels, err := json.Marshal(in.GetLabels())
 	if err != nil {
 		return "", err
 	}
-
 	finalizers, err := json.Marshal(in.GetFinalizers())
 	if err != nil {
 		return "", err
 	}
-
 	return string(spec) + string(anns) + string(labels) + string(finalizers), nil
 }
 
@@ -699,22 +682,18 @@ func (in *JVMChaos) GetSpecAndMetaString() (string, error) {
 	if err != nil {
 		return "", err
 	}
-
 	anns, err := json.Marshal(in.GetAnnotations())
 	if err != nil {
 		return "", err
 	}
-
 	labels, err := json.Marshal(in.GetLabels())
 	if err != nil {
 		return "", err
 	}
-
 	finalizers, err := json.Marshal(in.GetFinalizers())
 	if err != nil {
 		return "", err
 	}
-
 	return string(spec) + string(anns) + string(labels) + string(finalizers), nil
 }
 
@@ -842,22 +821,18 @@ func (in *KernelChaos) GetSpecAndMetaString() (string, error) {
 	if err != nil {
 		return "", err
 	}
-
 	anns, err := json.Marshal(in.GetAnnotations())
 	if err != nil {
 		return "", err
 	}
-
 	labels, err := json.Marshal(in.GetLabels())
 	if err != nil {
 		return "", err
 	}
-
 	finalizers, err := json.Marshal(in.GetFinalizers())
 	if err != nil {
 		return "", err
 	}
-
 	return string(spec) + string(anns) + string(labels) + string(finalizers), nil
 }
 
@@ -985,22 +960,18 @@ func (in *NetworkChaos) GetSpecAndMetaString() (string, error) {
 	if err != nil {
 		return "", err
 	}
-
 	anns, err := json.Marshal(in.GetAnnotations())
 	if err != nil {
 		return "", err
 	}
-
 	labels, err := json.Marshal(in.GetLabels())
 	if err != nil {
 		return "", err
 	}
-
 	finalizers, err := json.Marshal(in.GetFinalizers())
 	if err != nil {
 		return "", err
 	}
-
 	return string(spec) + string(anns) + string(labels) + string(finalizers), nil
 }
 
@@ -1128,22 +1099,18 @@ func (in *PodChaos) GetSpecAndMetaString() (string, error) {
 	if err != nil {
 		return "", err
 	}
-
 	anns, err := json.Marshal(in.GetAnnotations())
 	if err != nil {
 		return "", err
 	}
-
 	labels, err := json.Marshal(in.GetLabels())
 	if err != nil {
 		return "", err
 	}
-
 	finalizers, err := json.Marshal(in.GetFinalizers())
 	if err != nil {
 		return "", err
 	}
-
 	return string(spec) + string(anns) + string(labels) + string(finalizers), nil
 }
 
@@ -1271,22 +1238,18 @@ func (in *StressChaos) GetSpecAndMetaString() (string, error) {
 	if err != nil {
 		return "", err
 	}
-
 	anns, err := json.Marshal(in.GetAnnotations())
 	if err != nil {
 		return "", err
 	}
-
 	labels, err := json.Marshal(in.GetLabels())
 	if err != nil {
 		return "", err
 	}
-
 	finalizers, err := json.Marshal(in.GetFinalizers())
 	if err != nil {
 		return "", err
 	}
-
 	return string(spec) + string(anns) + string(labels) + string(finalizers), nil
 }
 
@@ -1414,22 +1377,18 @@ func (in *TimeChaos) GetSpecAndMetaString() (string, error) {
 	if err != nil {
 		return "", err
 	}
-
 	anns, err := json.Marshal(in.GetAnnotations())
 	if err != nil {
 		return "", err
 	}
-
 	labels, err := json.Marshal(in.GetLabels())
 	if err != nil {
 		return "", err
 	}
-
 	finalizers, err := json.Marshal(in.GetFinalizers())
 	if err != nil {
 		return "", err
 	}
-
 	return string(spec) + string(anns) + string(labels) + string(finalizers), nil
 }
 
