@@ -349,6 +349,7 @@ webhook:
     - kernelchaos
     - stresschaos
     - awschaos
+    - gcpchaos
     - podiochaos
     - podnetworkchaos
     - dnschaos
