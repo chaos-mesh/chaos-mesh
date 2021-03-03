@@ -90,6 +90,11 @@ func (in *StressChaos) ValidateScheduler(spec *field.Path) field.ErrorList {
 	return ValidateScheduler(in, spec)
 }
 
+// SelectSpec returns the selector config for authority validate
+func (in *StressChaos) GetSelectSpec() SelectSpec {
+	return &in.Spec
+}
+
 // Validate validates the scheduler and duration
 func (in *StressChaosSpec) Validate(parent *field.Path) field.ErrorList {
 	errs := field.ErrorList{}

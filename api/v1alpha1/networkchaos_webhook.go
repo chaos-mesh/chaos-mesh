@@ -138,6 +138,11 @@ func (in *NetworkChaos) ValidatePodMode(spec *field.Path) field.ErrorList {
 	return ValidatePodMode(in.Spec.Value, in.Spec.Mode, spec.Child("value"))
 }
 
+// SelectSpec returns the selector config for authority validate
+func (in *NetworkChaos) GetSelectSpec() SelectSpec {
+	return &in.Spec
+}
+
 // ValidateTargets validates externalTargets and Targets
 func (in *NetworkChaos) ValidateTargets(target *field.Path) field.ErrorList {
 	allErrs := field.ErrorList{}

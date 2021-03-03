@@ -29,6 +29,12 @@ const (
 // LabelSelectorRequirements is list of LabelSelectorRequirement
 type LabelSelectorRequirements []metav1.LabelSelectorRequirement
 
+type SelectSpec interface {
+	GetSelector() SelectorSpec
+	GetMode() PodMode
+	GetValue() string
+}
+
 // SelectorSpec defines the some selectors to select objects.
 // If the all selectors are empty, all objects will be used in chaos experiment.
 type SelectorSpec struct {

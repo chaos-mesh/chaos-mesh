@@ -102,6 +102,11 @@ func (in *AwsChaos) ValidatePodMode(spec *field.Path) field.ErrorList {
 	return nil
 }
 
+// SelectSpec returns the selector config for authority validate
+func (in *AwsChaos) GetSelectSpec() SelectSpec {
+	return nil
+}
+
 // validateEbsVolume validates the EbsVolume
 func (in *AwsChaosSpec) validateEbsVolume(containerField *field.Path) field.ErrorList {
 	allErrs := field.ErrorList{}

@@ -73,6 +73,11 @@ func (in *DNSChaos) Validate() error {
 	return nil
 }
 
+// SelectSpec returns the selector config for authority validate
+func (in *DNSChaos) GetSelectSpec() SelectSpec {
+	return &in.Spec
+}
+
 // ValidateScheduler validates the scheduler and duration
 func (in *DNSChaos) ValidateScheduler(spec *field.Path) field.ErrorList {
 	return ValidateScheduler(in, spec)

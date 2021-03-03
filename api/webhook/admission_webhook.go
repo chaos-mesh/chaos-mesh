@@ -17,8 +17,10 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"reflect"
 
 	//corev1 "k8s.io/api/core/v1"
+	admissionv1beta1 "k8s.io/api/admission/v1beta1"
 	authv1 "k8s.io/api/authorization/v1"
 	authorizationv1 "k8s.io/client-go/kubernetes/typed/authorization/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -49,85 +51,41 @@ type AuthValidator struct {
 // AuthValidator admits a pod iff a specific annotation exists.
 func (v *AuthValidator) Handle(ctx context.Context, req admission.Request) admission.Response {
 	log2.Info("Get request from chaos mesh:", "req", req)
-	/*
-		pod := &corev1.Pod{}
 
-		err := v.decoder.Decode(req, pod)
-		if err != nil {
-			return admission.Errored(http.StatusBadRequest, err)
-		}
-
-		key := "example-mutating-admission-webhook"
-		anno, found := pod.Annotations[key]
-		if !found {
-			return admission.Denied(fmt.Sprintf("missing annotation %s", key))
-		}
-		if anno != "foo" {
-			return admission.Denied(fmt.Sprintf("annotation %s did not have value %q", key, "foo"))
-		}
-	*/
-	var spec selector.SelectSpec
 	needAuth := true
 	username := req.UserInfo.Username
 	groups := req.UserInfo.Groups
 	chaosKind := req.Kind.Kind
 
+	var chaos, oldChaos v1alpha1.ChaosValidator
 	switch chaosKind {
 	case v1alpha1.KindPodChaos:
-		chaos := &v1alpha1.PodChaos{}
-		err := v.decoder.Decode(req, chaos)
-		if err != nil {
-			return admission.Errored(http.StatusBadRequest, err)
-		}
-		spec = &chaos.Spec
+		chaos = &v1alpha1.PodChaos{}
+		oldChaos = &v1alpha1.PodChaos{}
 
 	case v1alpha1.KindIoChaos:
-		chaos := &v1alpha1.IoChaos{}
-		err := v.decoder.Decode(req, chaos)
-		if err != nil {
-			return admission.Errored(http.StatusBadRequest, err)
-		}
-		spec = &chaos.Spec
+		chaos = &v1alpha1.IoChaos{}
+		oldChaos = &v1alpha1.IoChaos{}
 
 	case v1alpha1.KindNetworkChaos:
-		chaos := &v1alpha1.NetworkChaos{}
-		err := v.decoder.Decode(req, chaos)
-		if err != nil {
-			return admission.Errored(http.StatusBadRequest, err)
-		}
-		spec = &chaos.Spec
+		chaos = &v1alpha1.NetworkChaos{}
+		oldChaos = &v1alpha1.NetworkChaos{}
 
 	case v1alpha1.KindTimeChaos:
-		chaos := &v1alpha1.TimeChaos{}
-		err := v.decoder.Decode(req, chaos)
-		if err != nil {
-			return admission.Errored(http.StatusBadRequest, err)
-		}
-		spec = &chaos.Spec
+		chaos = &v1alpha1.TimeChaos{}
+		oldChaos = &v1alpha1.TimeChaos{}
 
 	case v1alpha1.KindKernelChaos:
-		chaos := &v1alpha1.KernelChaos{}
-		err := v.decoder.Decode(req, chaos)
-		if err != nil {
-			return admission.Errored(http.StatusBadRequest, err)
-		}
-		spec = &chaos.Spec
+		chaos = &v1alpha1.KernelChaos{}
+		oldChaos = &v1alpha1.KernelChaos{}
 
 	case v1alpha1.KindStressChaos:
-		chaos := &v1alpha1.StressChaos{}
-		err := v.decoder.Decode(req, chaos)
-		if err != nil {
-			return admission.Errored(http.StatusBadRequest, err)
-		}
-		spec = &chaos.Spec
+		chaos = &v1alpha1.StressChaos{}
+		oldChaos = &v1alpha1.StressChaos{}
 
 	case v1alpha1.KindDNSChaos:
-		chaos := &v1alpha1.DNSChaos{}
-		err := v.decoder.Decode(req, chaos)
-		if err != nil {
-			return admission.Errored(http.StatusBadRequest, err)
-		}
-		spec = &chaos.Spec
+		chaos = &v1alpha1.DNSChaos{}
+		oldChaos = &v1alpha1.DNSChaos{}
 
 	case v1alpha1.KindAwsChaos:
 		needAuth = false
@@ -141,7 +99,30 @@ func (v *AuthValidator) Handle(ctx context.Context, req admission.Request) admis
 		return admission.Allowed("")
 	}
 
-	pods, err := selector.SelectAndFilterPods(context.Background(), v.Client, v.Reader, spec, v.ClusterScoped, v.TargetNamespace, v.AllowedNamespaces, v.IgnoredNamespaces)
+	err := v.decoder.Decode(req, chaos)
+	if err != nil {
+		return admission.Errored(http.StatusBadRequest, err)
+	}
+	spec := chaos.GetSelectSpec()
+
+	var oldSpec v1alpha1.SelectSpec
+	if req.Operation == admissionv1beta1.Update {
+
+		err = v.decoder.DecodeRaw(req.OldObject, oldChaos)
+		if err != nil {
+			return admission.Errored(http.StatusBadRequest, err)
+		}
+
+		oldSpec = oldChaos.GetSelectSpec()
+
+		if reflect.DeepEqual(oldSpec.GetSelector(), spec.GetSelector()) {
+			log2.Info("chaos update but select spec not changed")
+			return admission.Allowed("")
+		}
+		log2.Info("chaos update but select spec not changed", "selector", spec.GetSelector())
+	}
+
+	pods, err := selector.SelectPods(context.Background(), v.Client, v.Reader, spec.GetSelector(), v.ClusterScoped, v.TargetNamespace, v.AllowedNamespaces, v.IgnoredNamespaces)
 	if err != nil {
 		return admission.Errored(http.StatusBadRequest, err)
 	}
@@ -185,11 +166,10 @@ func (v *AuthValidator) auth(username string, groups []string, namespace string)
 			ResourceAttributes: &authv1.ResourceAttributes{
 				Namespace: namespace,
 				Verb:      "create",
-
 				Group:    "chaos-mesh.org",
 				Resource: "*",
 			},
-			User: username,
+			User:   username,
 			Groups: groups,
 		},
 	}

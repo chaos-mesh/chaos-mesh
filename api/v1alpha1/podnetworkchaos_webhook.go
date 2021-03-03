@@ -97,3 +97,8 @@ func (in *PodNetworkChaos) ValidateDelete() error {
 
 	return nil
 }
+
+// SelectSpec returns the selector config for authority validate
+func (in *PodNetworkChaos) GetSelectSpec() SelectSpec {
+	return nil
+}
