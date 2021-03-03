@@ -57,7 +57,7 @@ func (c CrioClient) GetPidFromContainerID(ctx context.Context, containerID strin
 		return 0, err
 	}
 
-	req, err := c.getRequest(InspectContainersEndpoint + "/" + id)
+	req, err := c.getRequest(ctx, InspectContainersEndpoint + "/" + id)
 	if err != nil {
 		return 0, err
 	}
@@ -80,9 +80,12 @@ func (c CrioClient) GetPidFromContainerID(ctx context.Context, containerID strin
 }
 
 // ContainerKillByContainerID kills container according to container id
-func (c CrioClient) ContainerKillByContainerID(_ context.Context, _ string) error {
-	// TODO: implement this by killing manually
-	return errors.New("not implemented yet")
+func (c CrioClient) ContainerKillByContainerID(ctx context.Context, containerID string) error {
+	pid ,err := c.GetPidFromContainerID(ctx, containerID)
+	if err != nil {
+		return err
+	}
+	return syscall.Kill(int(pid), syscall.SIGKILL)
 }
 
 func New(socketPath string) (*CrioClient, error) {
@@ -111,7 +114,7 @@ func configureUnixTransport(tr *http.Transport, proto, addr string) error {
 	return nil
 }
 
-func (c *CrioClient) getRequest(path string) (*http.Request, error) {
+func (c *CrioClient) getRequest(ctx context.Context, path string) (*http.Request, error) {
 	req, err := http.NewRequest("GET", path, nil)
 	if err != nil {
 		return nil, err
@@ -121,5 +124,6 @@ func (c *CrioClient) getRequest(path string) (*http.Request, error) {
 	req.Host = "crio"
 	req.URL.Host = c.socketPath
 	req.URL.Scheme = "http"
+	req = req.WithContext(ctx)
 	return req, nil
 }
