@@ -30,7 +30,6 @@ var _ = Describe("gcpchaos_webhook", func() {
 				expect  string
 			}
 			duration := "400s"
-			testDeviceName := "testDeviceName"
 			tcs := []TestCase{
 				{
 					name: "simple ValidateCreate for DiskLoss",
