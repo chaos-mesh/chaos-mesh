@@ -83,6 +83,6 @@ func (in *KernelChaos) ValidatePodMode(spec *field.Path) field.ErrorList {
 }
 
 // SelectSpec returns the selector config for authority validate
-func (in *KernelChaos) GetSelectSpec() SelectSpec {
-	return &in.Spec
+func (in *KernelChaos) GetSelectSpec() []SelectSpec {
+	return []SelectSpec{&in.Spec}
 }

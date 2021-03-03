@@ -52,6 +52,7 @@ import (
 
 	"k8s.io/apimachinery/pkg/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
+	authorizationv1 "k8s.io/client-go/kubernetes/typed/authorization/v1"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/util/workqueue"
@@ -120,6 +121,12 @@ func main() {
 	mgr, err := ctrl.NewManager(cfg, options)
 	if err != nil {
 		setupLog.Error(err, "unable to start manager")
+		os.Exit(1)
+	}
+
+	authCli, err := authorizationv1.NewForConfig(cfg)
+	if err != nil {
+		setupLog.Error(err, "unable to get authorization client")
 		os.Exit(1)
 	}
 
@@ -195,6 +202,7 @@ func main() {
 		Handler: &apiWebhook.AuthValidator{
 			Client:            mgr.GetClient(),
 			Reader:            mgr.GetAPIReader(),
+			AuthCli:           authCli,
 			ClusterScoped:     ccfg.ControllerCfg.ClusterScoped,
 			AllowedNamespaces: ccfg.ControllerCfg.AllowedNamespaces,
 			IgnoredNamespaces: ccfg.ControllerCfg.IgnoredNamespaces,

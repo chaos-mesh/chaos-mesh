@@ -86,8 +86,8 @@ func (in *TimeChaos) ValidatePodMode(spec *field.Path) field.ErrorList {
 }
 
 // SelectSpec returns the selector config for authority validate
-func (in *TimeChaos) GetSelectSpec() SelectSpec {
-	return &in.Spec
+func (in *TimeChaos) GetSelectSpec() []SelectSpec {
+	return []SelectSpec{&in.Spec}
 }
 
 // validateTimeOffset validates the timeOffset

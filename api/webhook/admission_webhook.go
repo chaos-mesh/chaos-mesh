@@ -1,15 +1,15 @@
-/*
-Copyright 2018 The Kubernetes Authors.
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-    http://www.apache.org/licenses/LICENSE-2.0
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// Copyright 2021 Chaos Mesh Authors.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
 package webhook
 
@@ -19,9 +19,9 @@ import (
 	"net/http"
 	"reflect"
 
-	//corev1 "k8s.io/api/core/v1"
 	admissionv1beta1 "k8s.io/api/admission/v1beta1"
 	authv1 "k8s.io/api/authorization/v1"
+	corev1 "k8s.io/api/core/v1"
 	authorizationv1 "k8s.io/client-go/kubernetes/typed/authorization/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -37,8 +37,9 @@ var log2 = ctrl.Log.WithName("validate-webhook")
 
 // AuthValidator validates the authority
 type AuthValidator struct {
-	Client client.Client
-	Reader client.Reader
+	Client  client.Client
+	Reader  client.Reader
+	AuthCli *authorizationv1.AuthorizationV1Client
 
 	decoder *admission.Decoder
 
@@ -58,6 +59,7 @@ func (v *AuthValidator) Handle(ctx context.Context, req admission.Request) admis
 	chaosKind := req.Kind.Kind
 
 	var chaos, oldChaos v1alpha1.ChaosValidator
+
 	switch chaosKind {
 	case v1alpha1.KindPodChaos:
 		chaos = &v1alpha1.PodChaos{}
@@ -87,7 +89,7 @@ func (v *AuthValidator) Handle(ctx context.Context, req admission.Request) admis
 		chaos = &v1alpha1.DNSChaos{}
 		oldChaos = &v1alpha1.DNSChaos{}
 
-	case v1alpha1.KindAwsChaos:
+	case v1alpha1.KindAwsChaos, v1alpha1.KindPodNetworkChaos:
 		needAuth = false
 	default:
 		err := fmt.Errorf("kind %s is not support", chaosKind)
@@ -103,34 +105,50 @@ func (v *AuthValidator) Handle(ctx context.Context, req admission.Request) admis
 	if err != nil {
 		return admission.Errored(http.StatusBadRequest, err)
 	}
-	spec := chaos.GetSelectSpec()
+	specs := chaos.GetSelectSpec()
 
-	var oldSpec v1alpha1.SelectSpec
 	if req.Operation == admissionv1beta1.Update {
+		// when selector is not changed, don't need to validate auth again
 
 		err = v.decoder.DecodeRaw(req.OldObject, oldChaos)
 		if err != nil {
 			return admission.Errored(http.StatusBadRequest, err)
 		}
 
-		oldSpec = oldChaos.GetSelectSpec()
+		oldSpecs := oldChaos.GetSelectSpec()
+		selectSpecChanged := false
+		if len(specs) == len(oldSpecs) {
+			for i, spec := range specs {
+				if !reflect.DeepEqual(oldSpecs[i].GetSelector(), spec.GetSelector()) {
+					log2.Info("chaos update and select spec changed")
+					selectSpecChanged = true
+					break
+				}
+			}
+		}
 
-		if reflect.DeepEqual(oldSpec.GetSelector(), spec.GetSelector()) {
+		if !selectSpecChanged {
 			log2.Info("chaos update but select spec not changed")
 			return admission.Allowed("")
 		}
-		log2.Info("chaos update but select spec not changed", "selector", spec.GetSelector())
 	}
 
-	pods, err := selector.SelectPods(context.Background(), v.Client, v.Reader, spec.GetSelector(), v.ClusterScoped, v.TargetNamespace, v.AllowedNamespaces, v.IgnoredNamespaces)
-	if err != nil {
-		return admission.Errored(http.StatusBadRequest, err)
+	effectPods := make([]corev1.Pod, 0, 2)
+
+	for _, spec := range specs {
+		pods, err := selector.SelectPods(context.Background(), v.Client, v.Reader, spec.GetSelector(), v.ClusterScoped, v.TargetNamespace, v.AllowedNamespaces, v.IgnoredNamespaces)
+		if err != nil {
+			return admission.Errored(http.StatusBadRequest, err)
+		}
+
+		effectPods = append(effectPods, pods...)
+
 	}
 
-	log2.Info("select pods in webhook", "pods", pods)
+	log2.Info("select pods in webhook", "pods", effectPods)
 
 	namespaceMap := make(map[string]struct{})
-	for _, pod := range pods {
+	for _, pod := range effectPods {
 		namespaceMap[pod.Namespace] = struct{}{}
 	}
 	for namespace := range namespaceMap {
@@ -157,24 +175,20 @@ func (v *AuthValidator) InjectDecoder(d *admission.Decoder) error {
 }
 
 func (v *AuthValidator) auth(username string, groups []string, namespace string) (bool, error) {
-
-	config := ctrl.GetConfigOrDie()
-	authCli, err := authorizationv1.NewForConfig(config)
-
 	sar := authv1.SubjectAccessReview{
 		Spec: authv1.SubjectAccessReviewSpec{
 			ResourceAttributes: &authv1.ResourceAttributes{
 				Namespace: namespace,
 				Verb:      "create",
-				Group:    "chaos-mesh.org",
-				Resource: "*",
+				Group:     "chaos-mesh.org",
+				Resource:  "*",
 			},
 			User:   username,
 			Groups: groups,
 		},
 	}
 
-	response, err := authCli.SubjectAccessReviews().Create(&sar)
+	response, err := v.AuthCli.SubjectAccessReviews().Create(&sar)
 	if err != nil {
 		return false, err
 	}

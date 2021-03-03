@@ -95,8 +95,8 @@ func (in *IoChaos) ValidatePodMode(spec *field.Path) field.ErrorList {
 }
 
 // SelectSpec returns the selector config for authority validate
-func (in *IoChaos) GetSelectSpec() SelectSpec {
-	return &in.Spec
+func (in *IoChaos) GetSelectSpec() []SelectSpec {
+	return []SelectSpec{&in.Spec}
 }
 
 func (in *IoChaosSpec) validateDelay(delay *field.Path) field.ErrorList {

@@ -103,7 +103,7 @@ func (in *AwsChaos) ValidatePodMode(spec *field.Path) field.ErrorList {
 }
 
 // SelectSpec returns the selector config for authority validate
-func (in *AwsChaos) GetSelectSpec() SelectSpec {
+func (in *AwsChaos) GetSelectSpec() []SelectSpec {
 	return nil
 }
 

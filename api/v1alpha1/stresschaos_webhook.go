@@ -91,8 +91,8 @@ func (in *StressChaos) ValidateScheduler(spec *field.Path) field.ErrorList {
 }
 
 // SelectSpec returns the selector config for authority validate
-func (in *StressChaos) GetSelectSpec() SelectSpec {
-	return &in.Spec
+func (in *StressChaos) GetSelectSpec() []SelectSpec {
+	return []SelectSpec{&in.Spec}
 }
 
 // Validate validates the scheduler and duration

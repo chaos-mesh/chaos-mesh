@@ -74,8 +74,8 @@ func (in *DNSChaos) Validate() error {
 }
 
 // SelectSpec returns the selector config for authority validate
-func (in *DNSChaos) GetSelectSpec() SelectSpec {
-	return &in.Spec
+func (in *DNSChaos) GetSelectSpec() []SelectSpec {
+	return []SelectSpec{&in.Spec}
 }
 
 // ValidateScheduler validates the scheduler and duration

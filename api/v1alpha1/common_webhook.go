@@ -38,5 +38,6 @@ type ChaosValidator interface {
 	ValidatePodMode(spec *field.Path) field.ErrorList
 
 	// GetSelectSpec returns the selector config for authority validate
-	GetSelectSpec() SelectSpec
+	// Note: network chaos also contains select spec in target, so return array
+	GetSelectSpec() []SelectSpec
 }

@@ -87,8 +87,8 @@ func (in *JVMChaos) ValidatePodMode(spec *field.Path) field.ErrorList {
 }
 
 // SelectSpec returns the selector config for authority validate
-func (in *JVMChaos) GetSelectSpec() SelectSpec {
-	return &in.Spec
+func (in *JVMChaos) GetSelectSpec() []SelectSpec {
+	return []SelectSpec{&in.Spec}
 }
 
 func (in *JVMChaos) validateJvmChaos(spec *field.Path) field.ErrorList {
