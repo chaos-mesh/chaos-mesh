@@ -20,6 +20,7 @@ import (
 
 const implImport = `
 import (
+	"encoding/json"
 	"reflect"
 	"time"
 
