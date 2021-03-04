@@ -21,7 +21,6 @@ import (
 
 	admissionv1beta1 "k8s.io/api/admission/v1beta1"
 	authv1 "k8s.io/api/authorization/v1"
-	corev1 "k8s.io/api/core/v1"
 	authorizationv1 "k8s.io/client-go/kubernetes/typed/authorization/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -133,7 +132,7 @@ func (v *AuthValidator) Handle(ctx context.Context, req admission.Request) admis
 		}
 	}
 
-	effectPods := make([]corev1.Pod, 0, 2)
+	effectNamespaces := make(map[string]struct{})
 
 	for _, spec := range specs {
 		pods, err := selector.SelectPods(context.Background(), v.Client, v.Reader, spec.GetSelector(), v.ClusterScoped, v.TargetNamespace, v.AllowedNamespaces, v.IgnoredNamespaces)
@@ -141,24 +140,26 @@ func (v *AuthValidator) Handle(ctx context.Context, req admission.Request) admis
 			return admission.Errored(http.StatusBadRequest, err)
 		}
 
-		effectPods = append(effectPods, pods...)
+		for _, pod := range pods {
+			effectNamespaces[pod.Namespace] = struct{}{}
+		}
 
+		// may not exist pod under selector namespace, but still need to validate the privileges
+		for _, namespace := range spec.GetSelector().Namespaces {
+			effectNamespaces[namespace] = struct{}{}
+		}
 	}
 
-	log2.Info("select pods in webhook", "pods", effectPods)
+	log2.Info("effectNamespaces", "namespaces", effectNamespaces)
 
-	namespaceMap := make(map[string]struct{})
-	for _, pod := range effectPods {
-		namespaceMap[pod.Namespace] = struct{}{}
-	}
-	for namespace := range namespaceMap {
+	for namespace := range effectNamespaces {
 		allow, err := v.auth(username, groups, namespace)
 		if err != nil {
 			return admission.Errored(http.StatusBadRequest, err)
 		}
 
 		if !allow {
-			return admission.Denied(fmt.Sprintf("%s don't have privileges on namespace %s", username, namespace))
+			return admission.Denied(fmt.Sprintf("%s is forbidden on namespace %s", username, namespace))
 		}
 	}
 

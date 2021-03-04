@@ -163,8 +163,7 @@ webhooks:
         operations:
           - CREATE
           - UPDATE
-        resources:
-          - dnschaos
+        resources: [ "*" ]
 
 {{- if $certEnabled }}
 ---
