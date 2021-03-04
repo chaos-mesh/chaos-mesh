@@ -135,19 +135,11 @@ func (in *{{.Type}}) GetSpecAndMetaString() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	anns, err := json.Marshal(in.GetAnnotations())
-	if err != nil {
-		return "", err
-	}
-	labels, err := json.Marshal(in.GetLabels())
-	if err != nil {
-		return "", err
-	}
-	finalizers, err := json.Marshal(in.GetFinalizers())
-	if err != nil {
-		return "", err
-	}
-	return string(spec) + string(anns) + string(labels) + string(finalizers), nil
+
+	meta := in.ObjectMeta.DeepCopy()
+	meta.SetResourceVersion("")
+
+	return string(spec) + meta.String(), nil
 }
 
 // +kubebuilder:object:root=true
