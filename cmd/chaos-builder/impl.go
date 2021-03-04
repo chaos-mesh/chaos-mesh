@@ -138,6 +138,7 @@ func (in *{{.Type}}) GetSpecAndMetaString() (string, error) {
 
 	meta := in.ObjectMeta.DeepCopy()
 	meta.SetResourceVersion("")
+	meta.SetGeneration(0)
 
 	return string(spec) + meta.String(), nil
 }

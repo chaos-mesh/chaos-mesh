@@ -130,6 +130,7 @@ func (in *AwsChaos) GetSpecAndMetaString() (string, error) {
 
 	meta := in.ObjectMeta.DeepCopy()
 	meta.SetResourceVersion("")
+	meta.SetGeneration(0)
 
 	return string(spec) + meta.String(), nil
 }
@@ -261,6 +262,7 @@ func (in *DNSChaos) GetSpecAndMetaString() (string, error) {
 
 	meta := in.ObjectMeta.DeepCopy()
 	meta.SetResourceVersion("")
+	meta.SetGeneration(0)
 
 	return string(spec) + meta.String(), nil
 }
@@ -392,6 +394,7 @@ func (in *HTTPChaos) GetSpecAndMetaString() (string, error) {
 
 	meta := in.ObjectMeta.DeepCopy()
 	meta.SetResourceVersion("")
+	meta.SetGeneration(0)
 
 	return string(spec) + meta.String(), nil
 }
@@ -523,6 +526,7 @@ func (in *IoChaos) GetSpecAndMetaString() (string, error) {
 
 	meta := in.ObjectMeta.DeepCopy()
 	meta.SetResourceVersion("")
+	meta.SetGeneration(0)
 
 	return string(spec) + meta.String(), nil
 }
@@ -654,6 +658,7 @@ func (in *JVMChaos) GetSpecAndMetaString() (string, error) {
 
 	meta := in.ObjectMeta.DeepCopy()
 	meta.SetResourceVersion("")
+	meta.SetGeneration(0)
 
 	return string(spec) + meta.String(), nil
 }
@@ -785,6 +790,7 @@ func (in *KernelChaos) GetSpecAndMetaString() (string, error) {
 
 	meta := in.ObjectMeta.DeepCopy()
 	meta.SetResourceVersion("")
+	meta.SetGeneration(0)
 
 	return string(spec) + meta.String(), nil
 }
@@ -916,6 +922,7 @@ func (in *NetworkChaos) GetSpecAndMetaString() (string, error) {
 
 	meta := in.ObjectMeta.DeepCopy()
 	meta.SetResourceVersion("")
+	meta.SetGeneration(0)
 
 	return string(spec) + meta.String(), nil
 }
@@ -1047,6 +1054,7 @@ func (in *PodChaos) GetSpecAndMetaString() (string, error) {
 
 	meta := in.ObjectMeta.DeepCopy()
 	meta.SetResourceVersion("")
+	meta.SetGeneration(0)
 
 	return string(spec) + meta.String(), nil
 }
@@ -1178,6 +1186,7 @@ func (in *StressChaos) GetSpecAndMetaString() (string, error) {
 
 	meta := in.ObjectMeta.DeepCopy()
 	meta.SetResourceVersion("")
+	meta.SetGeneration(0)
 
 	return string(spec) + meta.String(), nil
 }
@@ -1309,6 +1318,7 @@ func (in *TimeChaos) GetSpecAndMetaString() (string, error) {
 
 	meta := in.ObjectMeta.DeepCopy()
 	meta.SetResourceVersion("")
+	meta.SetGeneration(0)
 
 	return string(spec) + meta.String(), nil
 }
