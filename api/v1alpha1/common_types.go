@@ -29,6 +29,9 @@ const (
 // LabelSelectorRequirements is list of LabelSelectorRequirement
 type LabelSelectorRequirements []metav1.LabelSelectorRequirement
 
+// +kubebuilder:object:generate=false
+
+// SelectSpec defines a common interface for selector
 type SelectSpec interface {
 	GetSelector() SelectorSpec
 	GetMode() PodMode
