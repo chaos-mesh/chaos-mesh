@@ -30,7 +30,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/selector"
 )
 
-var log2 = ctrl.Log.WithName("validate-webhook")
+var authLog = ctrl.Log.WithName("validate-auth")
 
 // +kubebuilder:webhook:path=/validate-auth,mutating=false,failurePolicy=fail,groups=chaos-mesh.org,resources=*,verbs=create;update,versions=v1alpha1,name=vauth.kb.io
 
@@ -54,7 +54,6 @@ func (v *AuthValidator) Handle(ctx context.Context, req admission.Request) admis
 	if !v.Enable {
 		return admission.Allowed("")
 	}
-	log2.Info("Get request from chaos mesh:", "req", req)
 
 	needAuth := true
 	username := req.UserInfo.Username
@@ -123,7 +122,6 @@ func (v *AuthValidator) Handle(ctx context.Context, req admission.Request) admis
 		if len(specs) == len(oldSpecs) {
 			for i, spec := range specs {
 				if !reflect.DeepEqual(oldSpecs[i].GetSelector(), spec.GetSelector()) {
-					log2.Info("chaos update and select spec changed")
 					selectSpecChanged = true
 					break
 				}
@@ -131,7 +129,7 @@ func (v *AuthValidator) Handle(ctx context.Context, req admission.Request) admis
 		}
 
 		if !selectSpecChanged {
-			log2.Info("chaos update but select spec not changed")
+			authLog.Info("chaos updated but select spec not changed, auth validate passed")
 			return admission.Allowed("")
 		}
 	}
@@ -154,8 +152,6 @@ func (v *AuthValidator) Handle(ctx context.Context, req admission.Request) admis
 		}
 	}
 
-	log2.Info("effectNamespaces", "namespaces", effectNamespaces)
-
 	for namespace := range effectNamespaces {
 		allow, err := v.auth(username, groups, namespace)
 		if err != nil {
@@ -167,6 +163,7 @@ func (v *AuthValidator) Handle(ctx context.Context, req admission.Request) admis
 		}
 	}
 
+	authLog.Info("user have the privileges on all namespace, auth validate passed", "user", username, "groups", groups, "namespaces", effectNamespaces)
 	return admission.Allowed("")
 }
 
