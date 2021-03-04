@@ -1371,6 +1371,7 @@ metadata:
     app.kubernetes.io/component: admission-webhook
 webhooks:
   - name: admission-webhook.chaos-mesh.org
+    timeoutSeconds: 5
     clientConfig:
       caBundle: "${CA_BUNDLE}"
       service:
@@ -1394,6 +1395,7 @@ webhooks:
         path: /mutate-chaos-mesh-org-v1alpha1-podchaos
     failurePolicy: Fail
     name: mpodchaos.kb.io
+    timeoutSeconds: 5
     rules:
       - apiGroups:
           - chaos-mesh.org
@@ -1412,6 +1414,7 @@ webhooks:
         path: /mutate-chaos-mesh-org-v1alpha1-iochaos
     failurePolicy: Fail
     name: miochaos.kb.io
+    timeoutSeconds: 5
     rules:
       - apiGroups:
           - chaos-mesh.org
@@ -1430,6 +1433,7 @@ webhooks:
         path: /mutate-chaos-mesh-org-v1alpha1-timechaos
     failurePolicy: Fail
     name: mtimechaos.kb.io
+    timeoutSeconds: 5
     rules:
       - apiGroups:
           - chaos-mesh.org
@@ -1448,6 +1452,7 @@ webhooks:
         path: /mutate-chaos-mesh-org-v1alpha1-networkchaos
     failurePolicy: Fail
     name: mnetworkchaos.kb.io
+    timeoutSeconds: 5
     rules:
       - apiGroups:
           - chaos-mesh.org
@@ -1466,6 +1471,7 @@ webhooks:
         path: /mutate-chaos-mesh-org-v1alpha1-kernelchaos
     failurePolicy: Fail
     name: mkernelchaos.kb.io
+    timeoutSeconds: 5
     rules:
       - apiGroups:
           - chaos-mesh.org
@@ -1484,6 +1490,7 @@ webhooks:
         path: /mutate-chaos-mesh-org-v1alpha1-stresschaos
     failurePolicy: Fail
     name: mstresschaos.kb.io
+    timeoutSeconds: 5
     rules:
       - apiGroups:
           - chaos-mesh.org
@@ -1502,6 +1509,7 @@ webhooks:
         path: /mutate-chaos-mesh-org-v1alpha1-awschaos
     failurePolicy: Fail
     name: mawschaos.kb.io
+    timeoutSeconds: 5
     rules:
       - apiGroups:
           - chaos-mesh.org
@@ -1520,6 +1528,7 @@ webhooks:
         path: /mutate-chaos-mesh-org-v1alpha1-podiochaos
     failurePolicy: Fail
     name: mpodiochaos.kb.io
+    timeoutSeconds: 5
     rules:
       - apiGroups:
           - chaos-mesh.org
@@ -1538,6 +1547,7 @@ webhooks:
         path: /mutate-chaos-mesh-org-v1alpha1-podnetworkchaos
     failurePolicy: Fail
     name: mpodnetworkchaos.kb.io
+    timeoutSeconds: 5
     rules:
       - apiGroups:
           - chaos-mesh.org
@@ -1556,6 +1566,7 @@ webhooks:
         path: /mutate-chaos-mesh-org-v1alpha1-dnschaos
     failurePolicy: Fail
     name: mdnschaos.kb.io
+    timeoutSeconds: 5
     rules:
       - apiGroups:
           - chaos-mesh.org
@@ -1574,6 +1585,7 @@ webhooks:
         path: /mutate-chaos-mesh-org-v1alpha1-jvmchaos
     failurePolicy: Fail
     name: mjvmchaos.kb.io
+    timeoutSeconds: 5
     rules:
       - apiGroups:
           - chaos-mesh.org
@@ -1603,6 +1615,7 @@ webhooks:
         path: /validate-chaos-mesh-org-v1alpha1-podchaos
     failurePolicy: Fail
     name: vpodchaos.kb.io
+    timeoutSeconds: 5
     rules:
       - apiGroups:
           - chaos-mesh.org
@@ -1621,6 +1634,7 @@ webhooks:
         path: /validate-chaos-mesh-org-v1alpha1-iochaos
     failurePolicy: Fail
     name: viochaos.kb.io
+    timeoutSeconds: 5
     rules:
       - apiGroups:
           - chaos-mesh.org
@@ -1639,6 +1653,7 @@ webhooks:
         path: /validate-chaos-mesh-org-v1alpha1-timechaos
     failurePolicy: Fail
     name: vtimechaos.kb.io
+    timeoutSeconds: 5
     rules:
       - apiGroups:
           - chaos-mesh.org
@@ -1657,6 +1672,7 @@ webhooks:
         path: /validate-chaos-mesh-org-v1alpha1-networkchaos
     failurePolicy: Fail
     name: vnetworkchaos.kb.io
+    timeoutSeconds: 5
     rules:
       - apiGroups:
           - chaos-mesh.org
@@ -1675,6 +1691,7 @@ webhooks:
         path: /validate-chaos-mesh-org-v1alpha1-kernelchaos
     failurePolicy: Fail
     name: vkernelchaos.kb.io
+    timeoutSeconds: 5
     rules:
       - apiGroups:
           - chaos-mesh.org
@@ -1693,6 +1710,7 @@ webhooks:
         path: /validate-chaos-mesh-org-v1alpha1-stresschaos
     failurePolicy: Fail
     name: vstresschaos.kb.io
+    timeoutSeconds: 5
     rules:
       - apiGroups:
           - chaos-mesh.org
@@ -1711,6 +1729,7 @@ webhooks:
         path: /validate-chaos-mesh-org-v1alpha1-awschaos
     failurePolicy: Fail
     name: vawschaos.kb.io
+    timeoutSeconds: 5
     rules:
       - apiGroups:
           - chaos-mesh.org
@@ -1729,6 +1748,7 @@ webhooks:
         path: /validate-chaos-mesh-org-v1alpha1-podnetworkchaos
     failurePolicy: Fail
     name: vpodnetworkchaos.kb.io
+    timeoutSeconds: 5
     rules:
       - apiGroups:
           - chaos-mesh.org
@@ -1747,6 +1767,7 @@ webhooks:
         path: /validate-chaos-mesh-org-v1alpha1-dnschaos
     failurePolicy: Fail
     name: vdnschaos.kb.io
+    timeoutSeconds: 5
     rules:
       - apiGroups:
           - chaos-mesh.org
@@ -1765,6 +1786,7 @@ webhooks:
         path: /validate-chaos-mesh-org-v1alpha1-jvmchaos
     failurePolicy: Fail
     name: vjvmchaos.kb.io
+    timeoutSeconds: 5
     rules:
       - apiGroups:
           - chaos-mesh.org
