@@ -15,6 +15,7 @@ package twophase
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"testing"
 	"time"
@@ -115,6 +116,22 @@ func (in *fakeTwoPhaseChaos) IsDeleted() bool {
 // IsPaused returns whether this resource has been paused
 func (in *fakeTwoPhaseChaos) IsPaused() bool {
 	return false
+}
+
+func (in *fakeTwoPhaseChaos) GetSpecAndMetaString() (string, error) {
+	anns, err := json.Marshal(in.GetAnnotations())
+	if err != nil {
+		return "", err
+	}
+	labels, err := json.Marshal(in.GetLabels())
+	if err != nil {
+		return "", err
+	}
+	finalizers, err := json.Marshal(in.GetFinalizers())
+	if err != nil {
+		return "", err
+	}
+	return string(anns) + string(labels) + string(finalizers), nil
 }
 
 func (r fakeEndpoint) Object() v1alpha1.InnerObject {
