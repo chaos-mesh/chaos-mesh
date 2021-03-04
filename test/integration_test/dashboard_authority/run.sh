@@ -265,5 +265,7 @@ REQUEST CLUSTER_MANAGER_FORBIDDEN_TOKEN_LIST[@] "PUT" "/api/experiments/update" 
 
 REQUEST CLUSTER_MANAGER_TOKEN_LIST[@] "PUT" "/api/experiments/update" "update_exp.out" '"name":"ci-test2"'
 
+# delete experiment
+kubectl delete networkchaos.chaos-mesh.org ci-test2 -n busybox
 
 echo "pass the dashboard authority test!"

@@ -166,7 +166,7 @@ func (v *AuthValidator) Handle(ctx context.Context, req admission.Request) admis
 	return admission.Allowed("")
 }
 
-// PodValidator implements admission.DecoderInjector.
+// AuthValidator implements admission.DecoderInjector.
 // A decoder will be automatically injected.
 
 // InjectDecoder injects the decoder.
