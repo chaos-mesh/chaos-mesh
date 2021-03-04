@@ -932,7 +932,6 @@ func (s *Service) deleteExperiment(c *gin.Context) {
 	if errStr != "" {
 		c.Status(http.StatusInternalServerError)
 		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(fmt.Errorf(errStr)))
-		return
 	} else {
 		c.JSON(http.StatusOK, StatusResponse{Status: "success"})
 	}
