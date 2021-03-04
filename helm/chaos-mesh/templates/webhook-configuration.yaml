@@ -126,8 +126,6 @@ webhooks:
   {{- end }}
   {{- end }}
 
-
-{{- if .Values.dashboard.securityMode }}
 ---
 
 apiVersion: admissionregistration.k8s.io/v1beta1
@@ -166,7 +164,6 @@ webhooks:
           - CREATE
           - UPDATE
         resources: [ "*" ]
-{{- end }}
 
 {{- if $certEnabled }}
 ---

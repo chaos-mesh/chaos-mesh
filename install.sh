@@ -1783,6 +1783,34 @@ webhooks:
           - UPDATE
         resources:
           - jvmchaos
+---
+# Source: chaos-mesh/templates/webhook-configuration.yaml
+apiVersion: admissionregistration.k8s.io/v1beta1
+kind: ValidatingWebhookConfiguration
+metadata:
+  name: validate-admission
+  labels:
+    app.kubernetes.io/name: chaos-mesh
+    app.kubernetes.io/instance: chaos-mesh
+    app.kubernetes.io/component: admission-webhook
+webhooks:
+  - clientConfig:
+      caBundle: "${CA_BUNDLE}"
+      service:
+        name: chaos-mesh-controller-manager
+        namespace: "chaos-testing"
+        path: /validate-auth
+    failurePolicy: Fail
+    name: vauth.kb.io
+    rules:
+      - apiGroups:
+          - chaos-mesh.org
+        apiVersions:
+          - v1alpha1
+        operations:
+          - CREATE
+          - UPDATE
+        resources: [ "*" ]
 EOF
     # chaos-mesh.yaml end
 }

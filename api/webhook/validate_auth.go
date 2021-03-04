@@ -36,6 +36,7 @@ var log2 = ctrl.Log.WithName("validate-webhook")
 
 // AuthValidator validates the authority
 type AuthValidator struct {
+	Enable  bool
 	Client  client.Client
 	Reader  client.Reader
 	AuthCli *authorizationv1.AuthorizationV1Client
@@ -50,6 +51,9 @@ type AuthValidator struct {
 
 // AuthValidator admits a pod iff a specific annotation exists.
 func (v *AuthValidator) Handle(ctx context.Context, req admission.Request) admission.Response {
+	if !v.Enable {
+		return admission.Allowed("")
+	}
 	log2.Info("Get request from chaos mesh:", "req", req)
 
 	needAuth := true
