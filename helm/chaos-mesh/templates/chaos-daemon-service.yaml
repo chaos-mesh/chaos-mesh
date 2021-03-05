@@ -19,3 +19,4 @@ spec:
       protocol: TCP
   selector:
     {{- include "chaos-mesh.selectors" . | indent 4 }}
+    app.kubernetes.io/component: chaos-daemon

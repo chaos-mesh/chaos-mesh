@@ -17,7 +17,7 @@ spec:
   template:
     metadata:
       labels:
-        {{- include "chaos-mesh.labels" . | indent 4 }}
+        {{- include "chaos-mesh.labels" . | indent 8 }}
         app.kubernetes.io/component: prometheus
     {{- with .Values.prometheus.podAnnotations }}
       annotations:
