@@ -851,12 +851,15 @@ spec:
                 to IO operations
               properties:
                 filling:
-                  description: FillingType represents type of data is filled for incorrectness
+                  description: Filling determines what is filled in the miskate data.
                   type: string
                 maxLength:
+                  description: Max length of each wrong data segment
                   format: int64
                   type: integer
                 maxOccurrences:
+                  description: There will be [1, MaxOccurrences] segments of wrong
+                    data. If MaxOccurrences is 0, no mistake will be injected
                   format: int64
                   type: integer
               type: object
@@ -2523,13 +2526,16 @@ spec:
                     description: MistakeSpec represents the mistake to inject
                     properties:
                       filling:
-                        description: FillingType represents type of data is filled
-                          for incorrectness
+                        description: Filling determines what is filled in the miskate
+                          data.
                         type: string
                       maxLength:
+                        description: Max length of each wrong data segment
                         format: int64
                         type: integer
                       maxOccurrences:
+                        description: There will be [1, MaxOccurrences] segments of
+                          wrong data. If MaxOccurrences is 0, no mistake will be injected
                         format: int64
                         type: integer
                     type: object
