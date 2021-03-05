@@ -24,7 +24,7 @@ I think the most advantage is reducing our jobs, we do not need to re-implement 
 
 Argo supports "script", "container" and "resource" workloads, it could integrate with Chaos Mesh to apply/recover chaos experiments. But this way to apply chaos experiments is not declarative anymore, it turns to imperative.
 
-Argo is so powerful and it's impossible to ask users always for following the best practices. Users could write complex scripts for determining the situation, then `kubectl apply` or `kubectl patch` something, once a command make unexpected side-effects, it will let whole system unstable.
+Argo is so powerful and it's impossible to ask users always for following the best practices. Users could write complex scripts for determining the situation, then `kubectl apply` or `kubectl patch` something, once a command make unexpected side-effects, it will let the whole system unstable.
 
 We define the workflow that could describe chaos experiments in the declarative, changing chaos experiments is just like "from expected status A turning into expected status B", users should not considering about "remove some chaos CR object" or "create new chaos CR object". We also allow users (only) to execute their scripts in `Task` node, it will not affect the changing of chaos experiment states.
 
@@ -44,6 +44,6 @@ In other words, we do not use Argo, which does not mean we reject Argo. We are t
 
 ## Other misc
 
-Applications based on kubernetes have an issue: it's nearly not possible to deploy different instances with different versions in one cluster. If Chaos Mesh depend on argo version X, and the user already installed argo version Y, it might be incompatible, there is no way to resolve it.
+Applications based on kubernetes have an issue: it's nearly not possible to deploy different instances with different versions in one cluster. If Chaos Mesh depends on argo version X, and the user already installed argo version Y, it might be incompatible, there is no way to resolve it.
 
-Chaos Mesh have the plans for more situation not only kubernetes, just like CaaS(Chaos engineering as a Service). If one day we need to migrate workflow into a non-kubernetes cluster, I think our own workflow is easier to do.
+Chaos Mesh has the plans for more situation not only kubernetes, just like CaaS(Chaos engineering as a Service). If one day we need to migrate workflow into a non-kubernetes cluster, I think our own workflow is easier to do.
