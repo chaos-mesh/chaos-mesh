@@ -21,10 +21,23 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/webhook/config/watcher"
 )
 
+// TLSConfig defines the configuration for chaos-daemon tls client
+type TLSConfig struct {
+	// ChaosDaemonClientCert is the path of chaos daemon certificate
+	ChaosDaemonClientCert string `envconfig:"CHAOS_DAEMON_CLIENT_CERT" default:""`
+	// ChaosDaemonClientKey is the path of chaos daemon certificate key
+	ChaosDaemonClientKey string `envconfig:"CHAOS_DAEMON_CLIENT_KEY" default:""`
+	// ChaosMeshCACert is the path of chaos mesh ca cert
+	ChaosMeshCACert string `envconfig:"CHAOS_MESH_CA_CERT" default:""`
+}
+
 // ChaosControllerConfig defines the configuration for Chaos Controller
 type ChaosControllerConfig struct {
 	// ChaosDaemonPort is the port which grpc server listens on
 	ChaosDaemonPort int `envconfig:"CHAOS_DAEMON_PORT" default:"31767"`
+
+	TLSConfig
+
 	// BPFKIPort is the port which BFFKI grpc server listens on
 	BPFKIPort int `envconfig:"BPFKI_PORT" default:"50051"`
 	// MetricsAddr is the address the metric endpoint binds to
