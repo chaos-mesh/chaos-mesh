@@ -65,3 +65,35 @@ type ChaosKind struct {
 	Chaos runtime.Object
 	ChaosList
 }
+
+// GetChaosValidator returns chaos object by kind
+func GetChaosValidator(chaosKind string) ChaosValidator {
+	switch chaosKind {
+	case KindPodChaos:
+		return &PodChaos{}
+
+	case KindIoChaos:
+		return &IoChaos{}
+
+	case KindNetworkChaos:
+		return &NetworkChaos{}
+
+	case KindTimeChaos:
+		return &TimeChaos{}
+
+	case KindKernelChaos:
+		return &KernelChaos{}
+
+	case KindStressChaos:
+		return &StressChaos{}
+
+	case KindDNSChaos:
+		return &DNSChaos{}
+
+	case KindAwsChaos:
+		return &AwsChaos{}
+
+	default:
+		return nil
+	}
+}

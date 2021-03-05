@@ -207,7 +207,7 @@ func main() {
 			AllowedNamespaces: ccfg.ControllerCfg.AllowedNamespaces,
 			IgnoredNamespaces: ccfg.ControllerCfg.IgnoredNamespaces,
 			TargetNamespace:   ccfg.ControllerCfg.TargetNamespace,
-			Enable:            ccfg.ControllerCfg.SecurityMode,
+			Enabled:           ccfg.ControllerCfg.SecurityMode,
 		}},
 	)
 

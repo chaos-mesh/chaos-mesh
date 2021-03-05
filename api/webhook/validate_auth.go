@@ -36,7 +36,7 @@ var authLog = ctrl.Log.WithName("validate-auth")
 
 // AuthValidator validates the authority
 type AuthValidator struct {
-	Enable  bool
+	Enabled bool
 	Client  client.Client
 	Reader  client.Reader
 	AuthCli *authorizationv1.AuthorizationV1Client
@@ -51,56 +51,25 @@ type AuthValidator struct {
 
 // AuthValidator admits a pod iff a specific annotation exists.
 func (v *AuthValidator) Handle(ctx context.Context, req admission.Request) admission.Response {
-	if !v.Enable {
+	if !v.Enabled {
 		return admission.Allowed("")
 	}
 
-	needAuth := true
 	username := req.UserInfo.Username
 	groups := req.UserInfo.Groups
 	chaosKind := req.Kind.Kind
 
-	var chaos, oldChaos v1alpha1.ChaosValidator
+	//var chaos v1alpha1.ChaosValidator
 
-	switch chaosKind {
-	case v1alpha1.KindPodChaos:
-		chaos = &v1alpha1.PodChaos{}
-		oldChaos = &v1alpha1.PodChaos{}
-
-	case v1alpha1.KindIoChaos:
-		chaos = &v1alpha1.IoChaos{}
-		oldChaos = &v1alpha1.IoChaos{}
-
-	case v1alpha1.KindNetworkChaos:
-		chaos = &v1alpha1.NetworkChaos{}
-		oldChaos = &v1alpha1.NetworkChaos{}
-
-	case v1alpha1.KindTimeChaos:
-		chaos = &v1alpha1.TimeChaos{}
-		oldChaos = &v1alpha1.TimeChaos{}
-
-	case v1alpha1.KindKernelChaos:
-		chaos = &v1alpha1.KernelChaos{}
-		oldChaos = &v1alpha1.KernelChaos{}
-
-	case v1alpha1.KindStressChaos:
-		chaos = &v1alpha1.StressChaos{}
-		oldChaos = &v1alpha1.StressChaos{}
-
-	case v1alpha1.KindDNSChaos:
-		chaos = &v1alpha1.DNSChaos{}
-		oldChaos = &v1alpha1.DNSChaos{}
-
-	case v1alpha1.KindAwsChaos, v1alpha1.KindPodNetworkChaos:
-		needAuth = false
-	default:
-		err := fmt.Errorf("kind %s is not support", chaosKind)
-
-		return admission.Errored(http.StatusBadRequest, err)
+	if chaosKind == v1alpha1.KindAwsChaos || chaosKind == v1alpha1.KindPodNetworkChaos {
+		return admission.Allowed("")
 	}
 
-	if !needAuth {
-		return admission.Allowed("")
+	chaos := v1alpha1.GetChaosValidator(chaosKind)
+	oldChaos := v1alpha1.GetChaosValidator(chaosKind)
+	if chaos == nil {
+		err := fmt.Errorf("kind %s is not support", chaosKind)
+		return admission.Errored(http.StatusBadRequest, err)
 	}
 
 	err := v.decoder.Decode(req, chaos)
@@ -136,7 +105,7 @@ func (v *AuthValidator) Handle(ctx context.Context, req admission.Request) admis
 		}
 	}
 
-	effectNamespaces := make(map[string]struct{})
+	affectedNamespaces := make(map[string]struct{})
 
 	for _, spec := range specs {
 		pods, err := selector.SelectPods(context.Background(), v.Client, v.Reader, spec.GetSelector(), v.ClusterScoped, v.TargetNamespace, v.AllowedNamespaces, v.IgnoredNamespaces)
@@ -145,16 +114,16 @@ func (v *AuthValidator) Handle(ctx context.Context, req admission.Request) admis
 		}
 
 		for _, pod := range pods {
-			effectNamespaces[pod.Namespace] = struct{}{}
+			affectedNamespaces[pod.Namespace] = struct{}{}
 		}
 
 		// may not exist pod under selector namespace, but still need to validate the privileges
 		for _, namespace := range spec.GetSelector().Namespaces {
-			effectNamespaces[namespace] = struct{}{}
+			affectedNamespaces[namespace] = struct{}{}
 		}
 	}
 
-	for namespace := range effectNamespaces {
+	for namespace := range affectedNamespaces {
 		allow, err := v.auth(username, groups, namespace)
 		if err != nil {
 			return admission.Errored(http.StatusBadRequest, err)
@@ -165,7 +134,7 @@ func (v *AuthValidator) Handle(ctx context.Context, req admission.Request) admis
 		}
 	}
 
-	authLog.Info("user have the privileges on all namespace, auth validate passed", "user", username, "groups", groups, "namespaces", effectNamespaces)
+	authLog.Info("user have the privileges on all namespace, auth validate passed", "user", username, "groups", groups, "namespaces", affectedNamespaces)
 	return admission.Allowed("")
 }
 
