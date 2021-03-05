@@ -126,6 +126,8 @@ func (v *AuthValidator) Handle(ctx context.Context, req admission.Request) admis
 					break
 				}
 			}
+		} else {
+			selectSpecChanged = true
 		}
 
 		if !selectSpecChanged {
