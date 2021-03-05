@@ -18,11 +18,11 @@ import (
 	"errors"
 	"fmt"
 
-	"k8s.io/apimachinery/pkg/runtime"
-
 	"github.com/go-logr/logr"
 	"golang.org/x/sync/errgroup"
+	"google.golang.org/grpc"
 	v1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/tools/cache"
 	ctrl "sigs.k8s.io/controller-runtime"
 	kubeclient "sigs.k8s.io/controller-runtime/pkg/client"
@@ -30,17 +30,16 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/config"
 	"github.com/chaos-mesh/chaos-mesh/controllers/recover"
+	"github.com/chaos-mesh/chaos-mesh/controllers/utils"
+	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
+	pb_ "github.com/chaos-mesh/chaos-mesh/pkg/chaoskernel/pb"
 	"github.com/chaos-mesh/chaos-mesh/pkg/events"
 	"github.com/chaos-mesh/chaos-mesh/pkg/finalizer"
-	"github.com/chaos-mesh/chaos-mesh/pkg/grpc"
+	grpcUtils "github.com/chaos-mesh/chaos-mesh/pkg/grpc"
 	"github.com/chaos-mesh/chaos-mesh/pkg/router"
 	ctx "github.com/chaos-mesh/chaos-mesh/pkg/router/context"
 	end "github.com/chaos-mesh/chaos-mesh/pkg/router/endpoint"
 	"github.com/chaos-mesh/chaos-mesh/pkg/selector"
-
-	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/client"
-	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
-	pb_ "github.com/chaos-mesh/chaos-mesh/pkg/chaoskernel/pb"
 )
 
 const kernelChaosMsg = "kernel is injected with %v"
@@ -118,7 +117,7 @@ func (r *recoverer) RecoverPod(ctx context.Context, pod *v1.Pod, somechaos v1alp
 	chaos, _ := somechaos.(*v1alpha1.KernelChaos)
 	r.Log.Info("try to recover pod", "namespace", pod.Namespace, "name", pod.Name)
 
-	pbClient, err := client.NewChaosDaemonClient(ctx, r.Client, pod, config.ControllerCfg.ChaosDaemonPort)
+	pbClient, err := utils.NewChaosDaemonClient(ctx, r.Client, pod)
 	if err != nil {
 		return err
 	}
@@ -141,7 +140,7 @@ func (r *recoverer) RecoverPod(ctx context.Context, pod *v1.Pod, somechaos v1alp
 	}
 
 	r.Log.Info("Get container pid", "namespace", pod.Namespace, "name", pod.Name)
-	conn, err := grpc.CreateGrpcConnection(ctx, r.Client, pod, config.ControllerCfg.BPFKIPort)
+	conn, err := CreateBPFKIConnection(ctx, r.Client, pod)
 	if err != nil {
 		return err
 	}
@@ -192,7 +191,7 @@ func (r *endpoint) applyAllPods(ctx context.Context, pods []v1.Pod, chaos *v1alp
 func (r *endpoint) applyPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.KernelChaos) error {
 	r.Log.Info("Try to inject kernel on pod", "namespace", pod.Namespace, "name", pod.Name)
 
-	pbClient, err := client.NewChaosDaemonClient(ctx, r.Client, pod, config.ControllerCfg.ChaosDaemonPort)
+	pbClient, err := utils.NewChaosDaemonClient(ctx, r.Client, pod)
 	if err != nil {
 		return err
 	}
@@ -214,7 +213,7 @@ func (r *endpoint) applyPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.Ke
 	}
 
 	r.Log.Info("Get container pid", "namespace", pod.Namespace, "name", pod.Name)
-	conn, err := grpc.CreateGrpcConnection(ctx, r.Client, pod, config.ControllerCfg.BPFKIPort)
+	conn, err := CreateBPFKIConnection(ctx, r.Client, pod)
 	if err != nil {
 		return err
 	}
@@ -240,6 +239,16 @@ func (r *endpoint) applyPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.Ke
 	})
 
 	return err
+}
+
+// CreateBPFKIConnection create a grpc connection with bpfki
+func CreateBPFKIConnection(ctx context.Context, c kubeclient.Client, pod *v1.Pod) (*grpc.ClientConn, error) {
+	daemonIP, err := utils.FindDaemonIP(ctx, c, pod)
+	if err != nil {
+		return nil, err
+	}
+
+	return grpcUtils.CreateGrpcConnection(daemonIP, config.ControllerCfg.BPFKIPort, config.ControllerCfg.TLSConfig.ChaosMeshCACert, config.ControllerCfg.TLSConfig.ChaosDaemonClientCert, config.ControllerCfg.TLSConfig.ChaosDaemonClientKey)
 }
 
 func init() {
