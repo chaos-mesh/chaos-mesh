@@ -15,18 +15,16 @@ package grpc
 
 import (
 	"context"
+	"crypto/tls"
+	"crypto/x509"
 	"fmt"
+	"io/ioutil"
 	"time"
 
-	"github.com/pkg/errors"
+	"google.golang.org/grpc/credentials"
+
 	"google.golang.org/grpc"
-	v1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
-
-	"github.com/chaos-mesh/chaos-mesh/controllers/config"
-
-	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 // DefaultRPCTimeout specifies default timeout of RPC between controller and chaos-operator
@@ -37,49 +35,39 @@ var RPCTimeout = DefaultRPCTimeout
 
 var log = ctrl.Log.WithName("util")
 
-// CreateGrpcConnection create a grpc connection with given port
-func CreateGrpcConnection(ctx context.Context, c client.Client, pod *v1.Pod, port int) (*grpc.ClientConn, error) {
-	nodeName := pod.Spec.NodeName
-	log.Info("Creating client to chaos-daemon", "node", nodeName)
+// CreateGrpcConnection create a grpc connection with given port and address
+func CreateGrpcConnection(address string, port int, caCertPath string, certPath string, keyPath string) (*grpc.ClientConn, error) {
+	options := []grpc.DialOption{grpc.WithUnaryInterceptor(TimeoutClientInterceptor)}
 
-	ns := config.ControllerCfg.Namespace
-	var endpoints v1.Endpoints
-	err := c.Get(ctx, types.NamespacedName{
-		Namespace: ns,
-		Name:      "chaos-daemon",
-	}, &endpoints)
-	if err != nil {
-		return nil, err
+	if caCertPath != "" && certPath != "" && keyPath != "" {
+		caCert, err := ioutil.ReadFile(caCertPath)
+		if err != nil {
+			return nil, err
+		}
+		caCertPool := x509.NewCertPool()
+		caCertPool.AppendCertsFromPEM(caCert)
+
+		clientCert, err := tls.LoadX509KeyPair(certPath, keyPath)
+		if err != nil {
+			return nil, err
+		}
+
+		creds := credentials.NewTLS(&tls.Config{
+			Certificates: []tls.Certificate{clientCert},
+			RootCAs:      caCertPool,
+			ServerName:   "chaos-daemon.chaos-mesh.org",
+		})
+		options = append(options, grpc.WithTransportCredentials(creds))
+	} else {
+		options = append(options, grpc.WithInsecure())
 	}
 
-	daemonIP := findIPOnEndpoints(&endpoints, nodeName)
-	if len(daemonIP) == 0 {
-		return nil, errors.Errorf("cannot find daemonIP on node %s in related Endpoints %v", nodeName, endpoints)
-	}
-	return CreateGrpcConnectionWithAddress(daemonIP, port)
-}
-
-// CreateGrpcConnectionWithAddress create a grpc connection with given port and address
-func CreateGrpcConnectionWithAddress(address string, port int) (*grpc.ClientConn, error) {
 	conn, err := grpc.Dial(fmt.Sprintf("%s:%d", address, port),
-		grpc.WithInsecure(),
-		grpc.WithUnaryInterceptor(TimeoutClientInterceptor))
+		options...)
 	if err != nil {
 		return nil, err
 	}
 	return conn, nil
-}
-
-func findIPOnEndpoints(e *v1.Endpoints, nodeName string) string {
-	for _, subset := range e.Subsets {
-		for _, addr := range subset.Addresses {
-			if addr.NodeName != nil && *addr.NodeName == nodeName {
-				return addr.IP
-			}
-		}
-	}
-
-	return ""
 }
 
 // TimeoutClientInterceptor wraps the RPC with a timeout.

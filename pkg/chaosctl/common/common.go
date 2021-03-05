@@ -23,6 +23,9 @@ import (
 	"strings"
 	"time"
 
+	grpcUtils "github.com/chaos-mesh/chaos-mesh/pkg/grpc"
+	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
+
 	"github.com/fatih/color"
 	"github.com/pkg/errors"
 	v1 "k8s.io/api/core/v1"
@@ -309,7 +312,8 @@ func GetPidFromPod(ctx context.Context, pod v1.Pod, daemon v1.Pod) (uint32, erro
 		pfCancel()
 	}()
 
-	daemonClient, err := daemonClient.NewChaosDaemonClientLocally(int(localPort))
+	// TODO: support specify the cert file or get cert file automatically
+	daemonClient, err := NewChaosDaemonClientLocally(int(localPort), "", "", "")
 	if err != nil {
 		return 0, errors.Wrapf(err, "failed to create new chaos daemon client with local port %d", localPort)
 	}
@@ -401,4 +405,20 @@ Please check network policy / firewall, or see FAQ on website`, daemon.Name, dae
 
 	}
 	return nil
+}
+
+// NewChaosDaemonClientLocally would create ChaosDaemonClient in localhost
+func NewChaosDaemonClientLocally(port int, caCert string, cert string, key string) (daemonClient.ChaosDaemonClientInterface, error) {
+	if cli := mock.On("MockChaosDaemonClient"); cli != nil {
+		return cli.(daemonClient.ChaosDaemonClientInterface), nil
+	}
+	if err := mock.On("NewChaosDaemonClientError"); err != nil {
+		return nil, err.(error)
+	}
+
+	cc, err := grpcUtils.CreateGrpcConnection("localhost", port, caCert, cert, key)
+	if err != nil {
+		return nil, err
+	}
+	return daemonClient.New(cc), nil
 }
