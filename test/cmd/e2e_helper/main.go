@@ -114,7 +114,6 @@ func (s *server) mistakeTest(w http.ResponseWriter, _ *http.Request) {
 		w.Write([]byte(err.Error()))
 		return
 	}
-	fmt.Println(gotData)
 	result := bytes.Equal(origData, gotData)
 	if result {
 		w.Write([]byte("false"))
@@ -125,7 +124,6 @@ func (s *server) mistakeTest(w http.ResponseWriter, _ *http.Request) {
 		if err != nil {
 			w.Write([]byte(err.Error()))
 		}
-		fmt.Println(tmp)
 		if !bytes.Equal(tmp, gotData) {
 			w.Write([]byte("true"))
 			return

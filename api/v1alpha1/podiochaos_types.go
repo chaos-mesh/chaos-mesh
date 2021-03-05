@@ -133,10 +133,15 @@ type AttrOverrideSpec struct {
 
 // MistakeSpec represents one type of mistake
 type MistakeSpec struct {
+	// Filling determines what is filled in the miskate data.
 	//+optional
 	Filling FillingType `json:"filling,omitempty"`
+
+	// There will be [1, MaxOccurrences] segments of wrong data. If MaxOccurrences is 0, no mistake will be injected
 	//+optional
 	MaxOccurrences uint64 `json:"maxOccurrences,omitempty"`
+
+	// Max length of each wrong data segment
 	//+optional
 	MaxLength uint64 `json:"maxLength,omitempty"`
 }
@@ -145,7 +150,10 @@ type MistakeSpec struct {
 type FillingType string
 
 const (
-	Zero   FillingType = "zero"
+	// All zero
+	Zero FillingType = "zero"
+
+	// Random octets
 	Random FillingType = "random"
 )
 

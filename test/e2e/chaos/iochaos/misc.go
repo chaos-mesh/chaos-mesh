@@ -49,7 +49,6 @@ func getPodIODelay(c http.Client, port uint16) (time.Duration, error) {
 
 func getPodIoMistake(c http.Client, port uint16) (bool, error) {
 	resp, err := c.Get(fmt.Sprintf("http://localhost:%d/mistake", port))
-	fmt.Println(resp)
 	if err != nil {
 		return false, err
 	}
@@ -61,7 +60,7 @@ func getPodIoMistake(c http.Client, port uint16) (bool, error) {
 	}
 
 	result := string(out)
-	fmt.Println(result)
+	fmt.Println("e2e server io mistake test response: ", resp, result)
 	if strings.Contains(result, "true") {
 		return true, nil
 	}

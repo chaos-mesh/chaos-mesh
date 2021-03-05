@@ -37,6 +37,7 @@ func TestcaseIOMistakeDurationForATimeThenRecover(
 	port uint16,
 ) {
 	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 	err := util.WaitE2EHelperReady(c, port)
 	framework.ExpectNoError(err, "wait e2e helper ready error")
 
@@ -55,13 +56,12 @@ func TestcaseIOMistakeDurationForATimeThenRecover(
 			VolumePath: "/var/run/data",
 			Path:       "/var/run/data/*",
 			Percent:    100,
-			// errno 5 is EIO -> I/O error
 			Mistake: &v1alpha1.MistakeSpec{
 				MaxOccurrences: 1,
 				MaxLength:      10000,
 				Filling:        v1alpha1.Zero,
 			},
-			// only inject write method
+			// only inject read or write method. Other method may or may not run properly, but is not recommended
 			Methods:  []v1alpha1.IoMethod{v1alpha1.Read, v1alpha1.Write},
 			Duration: pointer.StringPtr("9m"),
 			Scheduler: &v1alpha1.SchedulerSpec{
@@ -101,8 +101,6 @@ func TestcaseIOMistakeDurationForATimeThenRecover(
 		return false, nil
 	})
 	framework.ExpectNoError(err, "fail to recover io chaos")
-
-	cancel()
 }
 
 func TestcaseIOMistakeDurationForATimePauseAndUnPause(
@@ -112,6 +110,7 @@ func TestcaseIOMistakeDurationForATimePauseAndUnPause(
 	port uint16,
 ) {
 	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 	err := util.WaitE2EHelperReady(c, port)
 	framework.ExpectNoError(err, "wait e2e helper ready error")
 
@@ -130,13 +129,12 @@ func TestcaseIOMistakeDurationForATimePauseAndUnPause(
 			VolumePath: "/var/run/data",
 			Path:       "/var/run/data/*",
 			Percent:    100,
-			// errno 5 is EIO -> I/O error
 			Mistake: &v1alpha1.MistakeSpec{
 				MaxOccurrences: 1,
 				MaxLength:      10000,
 				Filling:        v1alpha1.Zero,
 			},
-			// only inject write method
+			// only inject read or write method. Other method may or may not run properly, but is not recommended
 			Methods:  []v1alpha1.IoMethod{v1alpha1.Read, v1alpha1.Write},
 			Duration: pointer.StringPtr("9m"),
 			Scheduler: &v1alpha1.SchedulerSpec{
@@ -228,7 +226,6 @@ func TestcaseIOMistakeDurationForATimePauseAndUnPause(
 
 	// cleanup
 	cli.Delete(ctx, ioChaos)
-	cancel()
 }
 
 func TestcaseIOMistakeWithSpecifiedContainer(
@@ -257,16 +254,15 @@ func TestcaseIOMistakeWithSpecifiedContainer(
 			VolumePath: "/var/run/data",
 			Path:       "/var/run/data/*",
 			Percent:    100,
-			// errno 5 is EIO -> I/O error
 			Mistake: &v1alpha1.MistakeSpec{
 				MaxOccurrences: 1,
 				MaxLength:      10000,
 				Filling:        v1alpha1.Zero,
 			},
-			// only inject write method
 			ContainerName: &containerName,
-			Methods:       []v1alpha1.IoMethod{v1alpha1.Read, v1alpha1.Write},
-			Duration:      pointer.StringPtr("9m"),
+			// only inject read or write method. Other method may or may not run properly, but is not recommended
+			Methods:  []v1alpha1.IoMethod{v1alpha1.Read, v1alpha1.Write},
+			Duration: pointer.StringPtr("9m"),
 			Scheduler: &v1alpha1.SchedulerSpec{
 				Cron: "@every 10m",
 			},
