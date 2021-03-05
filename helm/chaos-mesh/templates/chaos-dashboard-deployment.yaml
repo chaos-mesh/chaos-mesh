@@ -5,23 +5,18 @@ metadata:
   namespace: {{ .Release.Namespace | quote }}
   name: chaos-dashboard
   labels:
-    app.kubernetes.io/name: {{ template "chaos-mesh.name" . }}
-    app.kubernetes.io/managed-by: {{ .Release.Service }}
-    app.kubernetes.io/instance: {{ .Release.Name }}
+    {{- include "chaos-mesh.labels" . | indent 4 }}
     app.kubernetes.io/component: chaos-dashboard
-    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+"  "_" }}
 spec:
   replicas: {{ .Values.dashboard.replicaCount }}
   selector:
     matchLabels:
-      app.kubernetes.io/name: {{ template "chaos-mesh.name" . }}
-      app.kubernetes.io/instance: {{ .Release.Name }}
+      {{- include "chaos-mesh.selectors" . | indent 6 }}
       app.kubernetes.io/component: chaos-dashboard
   template:
     metadata:
       labels:
-        app.kubernetes.io/name: {{ template "chaos-mesh.name" . }}
-        app.kubernetes.io/instance: {{ .Release.Name }}
+        {{- include "chaos-mesh.labels" . | indent 4 }}
         app.kubernetes.io/component: chaos-dashboard
     {{- with .Values.dashboard.podAnnotations }}
       annotations:
@@ -99,19 +94,15 @@ metadata:
   namespace: {{ .Release.Namespace | quote }}
   name: {{ template "chaos-dashboard.svc" . }}
   labels:
-    app.kubernetes.io/name: {{ template "chaos-mesh.name" . }}
-    app.kubernetes.io/managed-by: {{ .Release.Service }}
-    app.kubernetes.io/instance: {{ .Release.Name }}
+    {{- include "chaos-mesh.labels" . | indent 4 }}
     app.kubernetes.io/component: chaos-dashboard
-    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+"  "_" }}
 {{- with .Values.dashboard.service.annotations }}
   annotations:
 {{ toYaml . | indent 4 }}
 {{- end }}
 spec:
   selector:
-    app.kubernetes.io/name: {{ template "chaos-mesh.name" . }}
-    app.kubernetes.io/instance: {{ .Release.Name }}
+    {{- include "chaos-mesh.selectors" . | indent 6 }}
     app.kubernetes.io/component: chaos-dashboard
   type: {{ .Values.dashboard.service.type }}
 {{- if and .Values.dashboard.service.clusterIP (eq .Values.dashboard.service.type "ClusterIP") }}
