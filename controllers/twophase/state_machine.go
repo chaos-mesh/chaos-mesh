@@ -163,9 +163,8 @@ func resume(ctx context.Context, m *chaosStateMachine, _ v1alpha1.ExperimentPhas
 	}()
 
 	counter := 0
-	// nextStart is always after nextRecover
 	for {
-		if nextRecover.After(now) {
+		if nextRecover.After(now) && nextRecover.Before(nextStart) {
 			startTime = lastStart
 
 			return apply(ctx, m, v1alpha1.ExperimentPhaseRunning, startTime)
