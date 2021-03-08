@@ -15,21 +15,23 @@ package chaosdaemon
 
 import (
 	"context"
+	"crypto/tls"
+	"crypto/x509"
 	"fmt"
+	"io/ioutil"
 	"net"
-
-	"golang.org/x/sync/errgroup"
-
-	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/crclients"
-
-	"github.com/moby/locker"
 
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	grpc_prometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
+	"github.com/moby/locker"
 	"github.com/prometheus/client_golang/prometheus"
+	"golang.org/x/sync/errgroup"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/reflection"
 	ctrl "sigs.k8s.io/controller-runtime"
+
+	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/crclients"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/bpm"
 	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
@@ -47,6 +49,15 @@ type Config struct {
 	Host      string
 	Runtime   string
 	Profiling bool
+
+	tlsConfig
+}
+
+// tlsConfig contains the config of TLS Server
+type tlsConfig struct {
+	CaCert string
+	Cert   string
+	Key    string
 }
 
 // Get the http address
@@ -85,7 +96,7 @@ func NewDaemonServerWithCRClient(crClient crclients.ContainerRuntimeInfoClient) 
 	}
 }
 
-func newGRPCServer(containerRuntime string, reg prometheus.Registerer) (*grpc.Server, error) {
+func newGRPCServer(containerRuntime string, reg prometheus.Registerer, tlsConf tlsConfig) (*grpc.Server, error) {
 	ds, err := newDaemonServer(containerRuntime)
 	if err != nil {
 		return nil, err
@@ -102,6 +113,28 @@ func newGRPCServer(containerRuntime string, reg prometheus.Registerer) (*grpc.Se
 			grpcUtils.TimeoutServerInterceptor,
 			grpcMetrics.UnaryServerInterceptor(),
 		),
+	}
+
+	if tlsConf != (tlsConfig{}) {
+		caCert, err := ioutil.ReadFile(tlsConf.CaCert)
+		if err != nil {
+			return nil, err
+		}
+		caCertPool := x509.NewCertPool()
+		caCertPool.AppendCertsFromPEM(caCert)
+
+		serverCert, err := tls.LoadX509KeyPair(tlsConf.Cert, tlsConf.Key)
+		if err != nil {
+			return nil, err
+		}
+
+		creds := credentials.NewTLS(&tls.Config{
+			Certificates: []tls.Certificate{serverCert},
+			ClientCAs:    caCertPool,
+			ClientAuth:   tls.RequireAndVerifyClientCert,
+		})
+
+		grpcOpts = append(grpcOpts, grpc.Creds(creds))
 	}
 
 	s := grpc.NewServer(grpcOpts...)
@@ -133,7 +166,7 @@ func StartServer(conf *Config, reg RegisterGatherer) error {
 		return err
 	}
 
-	grpcServer, err := newGRPCServer(conf.Runtime, reg)
+	grpcServer, err := newGRPCServer(conf.Runtime, reg, conf.tlsConfig)
 	if err != nil {
 		log.Error(err, "failed to create grpc server")
 		return err

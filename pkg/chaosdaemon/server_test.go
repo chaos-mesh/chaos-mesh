@@ -19,9 +19,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/crclients"
-
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/crclients/test"
-
 	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
 )
 
@@ -42,7 +40,7 @@ var _ = Describe("netem server", func() {
 	Context("newGRPCServer", func() {
 		It("should work", func() {
 			defer mock.With("MockContainerdClient", &test.MockClient{})()
-			_, err := newGRPCServer(crclients.ContainerRuntimeContainerd, &MockRegisterer{})
+			_, err := newGRPCServer(crclients.ContainerRuntimeContainerd, &MockRegisterer{}, tlsConfig{})
 			Expect(err).To(BeNil())
 		})
 
@@ -50,7 +48,7 @@ var _ = Describe("netem server", func() {
 			Ω(func() {
 				defer mock.With("MockContainerdClient", &test.MockClient{})()
 				defer mock.With("PanicOnMustRegister", "mock panic")()
-				newGRPCServer(crclients.ContainerRuntimeContainerd, &MockRegisterer{})
+				newGRPCServer(crclients.ContainerRuntimeContainerd, &MockRegisterer{}, tlsConfig{})
 			}).Should(Panic())
 		})
 	})
