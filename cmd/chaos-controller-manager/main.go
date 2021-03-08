@@ -199,8 +199,8 @@ func main() {
 	)
 
 	hookServer.Register("/validate-auth", &webhook.Admission{
-		Handler: NewAuthValidator(ccfg.ControllerCfg.SecurityMode, mgr.GetClient(), mgr.GetAPIReader(), authCli,
-			ccfg.ControllerCfg.ClusterScoped, ccfg.ControllerCfg.AllowedNamespaces, ccfg.ControllerCfg.IgnoredNamespaces, ccfg.ControllerCfg.TargetNamespace),
+		Handler: apiWebhook.NewAuthValidator(ccfg.ControllerCfg.SecurityMode, mgr.GetClient(), mgr.GetAPIReader(), authCli,
+			ccfg.ControllerCfg.ClusterScoped, ccfg.ControllerCfg.TargetNamespace, ccfg.ControllerCfg.AllowedNamespaces, ccfg.ControllerCfg.IgnoredNamespaces),
 	},
 	)
 
