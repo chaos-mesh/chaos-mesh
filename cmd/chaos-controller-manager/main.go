@@ -199,16 +199,9 @@ func main() {
 	)
 
 	hookServer.Register("/validate-auth", &webhook.Admission{
-		Handler: &apiWebhook.AuthValidator{
-			Client:            mgr.GetClient(),
-			Reader:            mgr.GetAPIReader(),
-			AuthCli:           authCli,
-			ClusterScoped:     ccfg.ControllerCfg.ClusterScoped,
-			AllowedNamespaces: ccfg.ControllerCfg.AllowedNamespaces,
-			IgnoredNamespaces: ccfg.ControllerCfg.IgnoredNamespaces,
-			TargetNamespace:   ccfg.ControllerCfg.TargetNamespace,
-			Enabled:           ccfg.ControllerCfg.SecurityMode,
-		}},
+		Handler: NewAuthValidator(ccfg.ControllerCfg.SecurityMode, mgr.GetClient(), mgr.GetAPIReader(), authCli,
+			ccfg.ControllerCfg.ClusterScoped, ccfg.ControllerCfg.AllowedNamespaces, ccfg.ControllerCfg.IgnoredNamespaces, ccfg.ControllerCfg.TargetNamespace),
+	},
 	)
 
 	// +kubebuilder:scaffold:builder

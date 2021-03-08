@@ -36,22 +36,37 @@ var authLog = ctrl.Log.WithName("validate-auth")
 
 // AuthValidator validates the authority
 type AuthValidator struct {
-	Enabled bool
-	Client  client.Client
-	Reader  client.Reader
-	AuthCli *authorizationv1.AuthorizationV1Client
+	enabled bool
+	client  client.Client
+	reader  client.Reader
+	authCli *authorizationv1.AuthorizationV1Client
 
 	decoder *admission.Decoder
 
-	ClusterScoped     bool
-	TargetNamespace   string
-	AllowedNamespaces string
-	IgnoredNamespaces string
+	clusterScoped     bool
+	targetNamespace   string
+	allowedNamespaces string
+	ignoredNamespaces string
+}
+
+// NewAuthValidator returns a new AuthValidator
+func NewAuthValidator(enabled bool, client client.Client, reader client.Reader, authCli *authorizationv1.AuthorizationV1Client,
+	clusterScoped bool, targetNamespace, allowedNamespaces, ignoredNamespaces string) *AuthValidator {
+	return &AuthValidator{
+		enabled:           enabled,
+		client:            client,
+		reader:            reader,
+		authCli:           authCli,
+		clusterScoped:     clusterScoped,
+		targetNamespace:   targetNamespace,
+		allowedNamespaces: allowedNamespaces,
+		ignoredNamespaces: ignoredNamespaces,
+	}
 }
 
 // AuthValidator admits a pod iff a specific annotation exists.
 func (v *AuthValidator) Handle(ctx context.Context, req admission.Request) admission.Response {
-	if !v.Enabled {
+	if !v.enabled {
 		return admission.Allowed("")
 	}
 
@@ -108,7 +123,7 @@ func (v *AuthValidator) Handle(ctx context.Context, req admission.Request) admis
 	affectedNamespaces := make(map[string]struct{})
 
 	for _, spec := range specs {
-		pods, err := selector.SelectPods(context.Background(), v.Client, v.Reader, spec.GetSelector(), v.ClusterScoped, v.TargetNamespace, v.AllowedNamespaces, v.IgnoredNamespaces)
+		pods, err := selector.SelectPods(context.Background(), v.client, v.reader, spec.GetSelector(), v.clusterScoped, v.targetNamespace, v.allowedNamespaces, v.ignoredNamespaces)
 		if err != nil {
 			return admission.Errored(http.StatusBadRequest, err)
 		}
@@ -161,7 +176,7 @@ func (v *AuthValidator) auth(username string, groups []string, namespace string,
 		},
 	}
 
-	response, err := v.AuthCli.SubjectAccessReviews().Create(&sar)
+	response, err := v.authCli.SubjectAccessReviews().Create(&sar)
 	if err != nil {
 		return false, err
 	}
