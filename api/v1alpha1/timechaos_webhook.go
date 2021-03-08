@@ -40,7 +40,7 @@ func (in *TimeChaos) Default() {
 
 // +kubebuilder:webhook:verbs=create;update,path=/validate-chaos-mesh-org-v1alpha1-timechaos,mutating=false,failurePolicy=fail,groups=chaos-mesh.org,resources=timechaos,versions=v1alpha1,name=vtimechaos.kb.io
 
-var _ ChaosValidator = &TimeChaos{}
+var _ webhook.Validator = &TimeChaos{}
 
 // ValidateCreate implements webhook.Validator so a webhook will be registered for the type
 func (in *TimeChaos) ValidateCreate() error {
@@ -65,24 +65,12 @@ func (in *TimeChaos) ValidateDelete() error {
 // Validate validates chaos object
 func (in *TimeChaos) Validate() error {
 	specField := field.NewPath("spec")
-	allErrs := in.ValidateScheduler(specField)
-	allErrs = append(allErrs, in.ValidatePodMode(specField)...)
-	allErrs = append(allErrs, in.Spec.validateTimeOffset(specField.Child("timeOffset"))...)
+	allErrs := in.Spec.validateTimeOffset(specField.Child("timeOffset"))
 
 	if len(allErrs) > 0 {
 		return fmt.Errorf(allErrs.ToAggregate().Error())
 	}
 	return nil
-}
-
-// ValidateScheduler validates the scheduler and duration
-func (in *TimeChaos) ValidateScheduler(spec *field.Path) field.ErrorList {
-	return ValidateScheduler(in, spec)
-}
-
-// ValidatePodMode validates the value with podmode
-func (in *TimeChaos) ValidatePodMode(spec *field.Path) field.ErrorList {
-	return ValidatePodMode(in.Spec.Value, in.Spec.Mode, spec.Child("value"))
 }
 
 // validateTimeOffset validates the timeOffset

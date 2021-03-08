@@ -41,14 +41,8 @@ import (
 
 var log = ctrl.Log.WithName("selector")
 
-type SelectSpec interface {
-	GetSelector() v1alpha1.SelectorSpec
-	GetMode() v1alpha1.PodMode
-	GetValue() string
-}
-
 // SelectAndFilterPods returns the list of pods that filtered by selector and PodMode
-func SelectAndFilterPods(ctx context.Context, c client.Client, r client.Reader, spec SelectSpec, clusterScoped bool, targetNamespace string, allowedNamespaces, ignoredNamespaces string) ([]v1.Pod, error) {
+func SelectAndFilterPods(ctx context.Context, c client.Client, r client.Reader, spec *v1alpha1.PodSelector, clusterScoped bool, targetNamespace string, allowedNamespaces, ignoredNamespaces string) ([]v1.Pod, error) {
 	if pods := mock.On("MockSelectAndFilterPods"); pods != nil {
 		return pods.(func() []v1.Pod)(), nil
 	}
@@ -56,9 +50,9 @@ func SelectAndFilterPods(ctx context.Context, c client.Client, r client.Reader, 
 		return nil, err.(error)
 	}
 
-	selector := spec.GetSelector()
-	mode := spec.GetMode()
-	value := spec.GetValue()
+	selector := spec.Selector
+	mode := spec.Mode
+	value := spec.Value
 
 	pods, err := SelectPods(ctx, c, r, selector, clusterScoped, targetNamespace, allowedNamespaces, ignoredNamespaces)
 	if err != nil {

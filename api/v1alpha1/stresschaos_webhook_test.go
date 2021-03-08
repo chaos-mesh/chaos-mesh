@@ -30,7 +30,7 @@ var _ = Describe("stresschaos_webhook", func() {
 			Expect(stresschaos.Spec.Selector.Namespaces[0]).To(Equal(metav1.NamespaceDefault))
 		})
 	})
-	Context("ChaosValidator of stresschaos", func() {
+	Context("webhook.Validator of stresschaos", func() {
 		It("Validate StressChaos", func() {
 
 			type TestCase struct {

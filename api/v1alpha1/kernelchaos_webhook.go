@@ -14,10 +14,7 @@
 package v1alpha1
 
 import (
-	"fmt"
-
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/util/validation/field"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
 )
@@ -38,7 +35,7 @@ func (in *KernelChaos) Default() {
 
 // +kubebuilder:webhook:verbs=create;update,path=/validate-chaos-mesh-org-v1alpha1-kernelchaos,mutating=false,failurePolicy=fail,groups=chaos-mesh.org,resources=kernelchaos,versions=v1alpha1,name=vkernelchaos.kb.io
 
-var _ ChaosValidator = &KernelChaos{}
+var _ webhook.Validator = &KernelChaos{}
 
 // ValidateCreate implements webhook.Validator so a webhook will be registered for the type
 func (in *KernelChaos) ValidateCreate() error {
@@ -62,22 +59,5 @@ func (in *KernelChaos) ValidateDelete() error {
 
 // Validate validates chaos object
 func (in *KernelChaos) Validate() error {
-	specField := field.NewPath("spec")
-	allErrs := in.ValidateScheduler(specField)
-	allErrs = append(allErrs, in.ValidatePodMode(specField)...)
-
-	if len(allErrs) > 0 {
-		return fmt.Errorf(allErrs.ToAggregate().Error())
-	}
 	return nil
-}
-
-// ValidateScheduler validates the scheduler and duration
-func (in *KernelChaos) ValidateScheduler(spec *field.Path) field.ErrorList {
-	return ValidateScheduler(in, spec)
-}
-
-// ValidatePodMode validates the value with podmode
-func (in *KernelChaos) ValidatePodMode(spec *field.Path) field.ErrorList {
-	return ValidatePodMode(in.Spec.Value, in.Spec.Mode, spec.Child("value"))
 }

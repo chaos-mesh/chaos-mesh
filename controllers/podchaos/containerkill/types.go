@@ -35,7 +35,7 @@ import (
 )
 
 const (
-	containerKillActionMsg = "delete container %s"
+	containerKillActionMsg = "delete container %v"
 )
 
 type endpoint struct {
@@ -53,15 +53,20 @@ func (r *endpoint) Apply(ctx context.Context, req ctrl.Request, obj v1alpha1.Inn
 		return err
 	}
 
-	if podchaos.Spec.ContainerName == "" {
+	if podchaos.Spec.ContainerNames == nil {
 		r.Log.Error(nil, "the name of container is empty", "name", req.Name, "namespace", req.Namespace)
 		return fmt.Errorf("podchaos[%s/%s] the name of container is empty", podchaos.Namespace, podchaos.Name)
 	}
 
-	pods, err := selector.SelectAndFilterPods(ctx, r.Client, r.Reader, &podchaos.Spec, config.ControllerCfg.ClusterScoped, config.ControllerCfg.TargetNamespace, config.ControllerCfg.AllowedNamespaces, config.ControllerCfg.IgnoredNamespaces)
+	pods, err := selector.SelectAndFilterPods(ctx, r.Client, r.Reader, &podchaos.Spec.PodSelector, config.ControllerCfg.ClusterScoped, config.ControllerCfg.TargetNamespace, config.ControllerCfg.AllowedNamespaces, config.ControllerCfg.IgnoredNamespaces)
 	if err != nil {
 		r.Log.Error(err, "fail to select and filter pods")
 		return err
+	}
+
+	containerMap := make(map[string]struct{})
+	for _, container := range podchaos.Spec.ContainerNames {
+		containerMap[container] = struct{}{}
 	}
 
 	var podsNotHaveContainer []string
@@ -70,7 +75,8 @@ func (r *endpoint) Apply(ctx context.Context, req ctrl.Request, obj v1alpha1.Inn
 		haveContainer := false
 
 		for _, item := range pod.Status.ContainerStatuses {
-			if item.Name == podchaos.Spec.ContainerName {
+			_, ok := containerMap[item.Name]
+			if ok {
 				haveContainer = true
 				break
 			}
@@ -78,12 +84,12 @@ func (r *endpoint) Apply(ctx context.Context, req ctrl.Request, obj v1alpha1.Inn
 
 		if !haveContainer {
 			podsNotHaveContainer = append(podsNotHaveContainer, pod.Name)
-			r.Log.Error(nil, fmt.Sprintf("the pod %s doesn't have container %s", pod.Name, podchaos.Spec.ContainerName))
+			r.Log.Error(nil, fmt.Sprintf("the pod %s doesn't have containers %v", pod.Name, podchaos.Spec.ContainerNames))
 		}
 	}
 
 	if len(podsNotHaveContainer) != 0 {
-		return fmt.Errorf("the pod %v doesn't have container %s", podsNotHaveContainer, podchaos.Spec.ContainerName)
+		return fmt.Errorf("the pod %v doesn't have container %v", podsNotHaveContainer, podchaos.Spec.ContainerNames)
 	}
 
 	g := errgroup.Group{}
@@ -94,7 +100,8 @@ func (r *endpoint) Apply(ctx context.Context, req ctrl.Request, obj v1alpha1.Inn
 			containerName := pod.Status.ContainerStatuses[containerIndex].Name
 			containerID := pod.Status.ContainerStatuses[containerIndex].ContainerID
 
-			if containerName == podchaos.Spec.ContainerName {
+			_, ok := containerMap[containerName]
+			if ok {
 				g.Go(func() error {
 					err = r.KillContainer(ctx, pod, containerID)
 					if err != nil {
@@ -120,7 +127,7 @@ func (r *endpoint) Apply(ctx context.Context, req ctrl.Request, obj v1alpha1.Inn
 			HostIP:    pod.Status.HostIP,
 			PodIP:     pod.Status.PodIP,
 			Action:    string(podchaos.Spec.Action),
-			Message:   fmt.Sprintf(containerKillActionMsg, podchaos.Spec.ContainerName),
+			Message:   fmt.Sprintf(containerKillActionMsg, podchaos.Spec.ContainerNames),
 		}
 
 		podchaos.Status.Experiment.PodRecords = append(podchaos.Status.Experiment.PodRecords, ps)

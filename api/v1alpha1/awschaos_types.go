@@ -53,10 +53,6 @@ type AwsChaosSpec struct {
 	// +optional
 	Duration *string `json:"duration,omitempty"`
 
-	// Scheduler defines some schedule rules to control the running time of the chaos experiment about time.
-	// +optional
-	Scheduler *SchedulerSpec `json:"scheduler,omitempty"`
-
 	// SecretName defines the name of kubernetes secret.
 	// +optional
 	SecretName *string `json:"secretName,omitempty"`

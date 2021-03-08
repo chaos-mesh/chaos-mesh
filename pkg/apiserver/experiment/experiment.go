@@ -178,12 +178,14 @@ func (s *Service) createPodChaos(exp *core.ExperimentInfo, kubeCli client.Client
 			Annotations: exp.Annotations,
 		},
 		Spec: v1alpha1.PodChaosSpec{
-			Selector:      exp.Scope.ParseSelector(),
-			Action:        v1alpha1.PodChaosAction(exp.Target.PodChaos.Action),
-			Mode:          v1alpha1.PodMode(exp.Scope.Mode),
-			Value:         exp.Scope.Value,
-			ContainerName: exp.Target.PodChaos.ContainerName,
-			GracePeriod:   exp.Target.PodChaos.GracePeriod,
+			ContainerSelector: v1alpha1.ContainerSelector{
+				Selector:       exp.Scope.ParseSelector(),
+				Mode:           v1alpha1.PodMode(exp.Scope.Mode),
+				Value:          exp.Scope.Value,
+				ContainerNames: exp.Target.PodChaos.ContainerName,
+			},
+			Action:      v1alpha1.PodChaosAction(exp.Target.PodChaos.Action),
+			GracePeriod: exp.Target.PodChaos.GracePeriod,
 		},
 	}
 

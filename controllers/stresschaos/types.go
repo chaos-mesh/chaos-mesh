@@ -17,7 +17,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"strings"
 	"sync"
 	"time"
 
@@ -64,7 +63,7 @@ func (r *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.I
 		return err
 	}
 
-	pods, err := selector.SelectAndFilterPods(ctx, r.Client, r.Reader, &stresschaos.Spec, config.ControllerCfg.ClusterScoped, config.ControllerCfg.TargetNamespace, config.ControllerCfg.AllowedNamespaces, config.ControllerCfg.IgnoredNamespaces)
+	pods, err := selector.SelectAndFilterPods(ctx, r.Client, r.Reader, &stresschaos.Spec.PodSelector, config.ControllerCfg.ClusterScoped, config.ControllerCfg.TargetNamespace, config.ControllerCfg.AllowedNamespaces, config.ControllerCfg.IgnoredNamespaces)
 	if err != nil {
 		r.Log.Error(err, "failed to select and generate pods")
 		return err
@@ -183,21 +182,22 @@ func (r *endpoint) applyPod(ctx context.Context, pod *v1.Pod, chaos *v1alpha1.St
 		return nil
 	}
 
+	// TODO IN THIS PR:
 	if len(pod.Status.ContainerStatuses) == 0 {
 		return fmt.Errorf("%s %s can't get the state of container", pod.Namespace, pod.Name)
 	}
 	target := pod.Status.ContainerStatuses[0].ContainerID
-	if chaos.Spec.ContainerName != nil &&
-		len(strings.TrimSpace(*chaos.Spec.ContainerName)) != 0 {
+	if chaos.Spec.ContainerNames != nil &&
+		len(chaos.Spec.ContainerNames) != 0 {
 		target = ""
 		for _, container := range pod.Status.ContainerStatuses {
-			if container.Name == *chaos.Spec.ContainerName {
+			if container.Name == chaos.Spec.ContainerNames[0] {
 				target = container.ContainerID
 				break
 			}
 		}
 		if len(target) == 0 {
-			return fmt.Errorf("cannot find container with name %s", *chaos.Spec.ContainerName)
+			return fmt.Errorf("cannot find container with name %v", chaos.Spec.ContainerNames)
 		}
 	}
 

@@ -29,6 +29,32 @@ const (
 // LabelSelectorRequirements is list of LabelSelectorRequirement
 type LabelSelectorRequirements []metav1.LabelSelectorRequirement
 
+type PodSelector struct {
+	// Selector is used to select pods that are used to inject chaos action.
+	Selector SelectorSpec `json:"selector"`
+
+	// Mode defines the mode to run chaos action.
+	// Supported mode: one / all / fixed / fixed-percent / random-max-percent
+	// +kubebuilder:validation:Enum=one;all;fixed;fixed-percent;random-max-percent
+	Mode PodMode `json:"mode"`
+
+	// Value is required when the mode is set to `FixedPodMode` / `FixedPercentPodMod` / `RandomMaxPercentPodMod`.
+	// If `FixedPodMode`, provide an integer of pods to do chaos action.
+	// If `FixedPercentPodMod`, provide a number from 0-100 to specify the percent of pods the server can do chaos action.
+	// IF `RandomMaxPercentPodMod`,  provide a number from 0-100 to specify the max percent of pods to do chaos action
+	// +optional
+	Value string `json:"value"`
+}
+
+type ContainerSelector struct {
+	PodSelector
+
+	// ContainerName indicates the name of affected container.
+	// If not set, all containers will be injected
+	// +optional
+	ContainerNames []string `json:"containerNames,omitempty"`
+}
+
 // SelectorSpec defines the some selectors to select objects.
 // If the all selectors are empty, all objects will be used in chaos experiment.
 type SelectorSpec struct {
@@ -78,19 +104,6 @@ type SelectorSpec struct {
 	PodPhaseSelectors []string `json:"podPhaseSelectors,omitempty"`
 }
 
-// SchedulerSpec defines information about schedule of the chaos experiment.
-type SchedulerSpec struct {
-	// Cron defines a cron job rule.
-	//
-	// Some rule examples:
-	// "0 30 * * * *" means to "Every hour on the half hour"
-	// "@hourly"      means to "Every hour"
-	// "@every 1h30m" means to "Every hour thirty"
-	//
-	// More rule info: https://godoc.org/github.com/robfig/cron
-	Cron string `json:"cron"`
-}
-
 // PodMode represents the mode to run pod chaos action.
 type PodMode string
 
@@ -109,77 +122,18 @@ const (
 	RandomMaxPercentPodMode PodMode = "random-max-percent"
 )
 
-// ChaosPhase is the current status of chaos task.
-type ChaosPhase string
-
-const (
-	ChaosPhaseNone     ChaosPhase = ""
-	ChaosPhaseNormal   ChaosPhase = "Normal"
-	ChaosPhaseAbnormal ChaosPhase = "Abnormal"
-)
-
 type ChaosStatus struct {
 	FailedMessage string `json:"failedMessage,omitempty"`
 
-	Scheduler ScheduleStatus `json:"scheduler,omitempty"`
-
 	// Experiment records the last experiment state.
 	Experiment ExperimentStatus `json:"experiment"`
-}
-
-func (in *ChaosStatus) GetNextStart() time.Time {
-	if in.Scheduler.NextStart == nil {
-		return time.Time{}
-	}
-	return in.Scheduler.NextStart.Time
-}
-
-func (in *ChaosStatus) SetNextStart(t time.Time) {
-	if t.IsZero() {
-		in.Scheduler.NextStart = nil
-		return
-	}
-
-	if in.Scheduler.NextStart == nil {
-		in.Scheduler.NextStart = &metav1.Time{}
-	}
-	in.Scheduler.NextStart.Time = t
-}
-
-func (in *ChaosStatus) GetNextRecover() time.Time {
-	if in.Scheduler.NextRecover == nil {
-		return time.Time{}
-	}
-	return in.Scheduler.NextRecover.Time
-}
-
-func (in *ChaosStatus) SetNextRecover(t time.Time) {
-	if t.IsZero() {
-		in.Scheduler.NextRecover = nil
-		return
-	}
-
-	if in.Scheduler.NextRecover == nil {
-		in.Scheduler.NextRecover = &metav1.Time{}
-	}
-	in.Scheduler.NextRecover.Time = t
-}
-
-// ScheduleStatus is the current status of chaos scheduler.
-type ScheduleStatus struct {
-	// Next time when this action will be applied again
-	// +optional
-	NextStart *metav1.Time `json:"nextStart,omitempty"`
-
-	// Next time when this action will be recovered
-	// +optional
-	NextRecover *metav1.Time `json:"nextRecover,omitempty"`
 }
 
 // ExperimentPhase is the current status of chaos experiment.
 type ExperimentPhase string
 
 const (
+	// TODO IN THIS PR: modify ExperimentPhase
 	ExperimentPhaseUninitialized ExperimentPhase = ""
 	ExperimentPhaseRunning       ExperimentPhase = "Running"
 	ExperimentPhaseWaiting       ExperimentPhase = "Waiting"
@@ -203,23 +157,7 @@ type ExperimentStatus struct {
 	PodRecords []PodStatus `json:"podRecords,omitempty"`
 }
 
-var log = ctrl.Log.WithName("validate-webhook")
-
-// +kubebuilder:object:generate=false
-
-// InnerSchedulerObject is the Object for the twophase reconcile
-type InnerSchedulerObject interface {
-	InnerObject
-	GetDuration() (*time.Duration, error)
-
-	GetNextStart() time.Time
-	SetNextStart(time.Time)
-
-	GetNextRecover() time.Time
-	SetNextRecover(time.Time)
-
-	GetScheduler() *SchedulerSpec
-}
+var log = ctrl.Log.WithName("api")
 
 // +kubebuilder:object:generate=false
 

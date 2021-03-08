@@ -47,49 +47,6 @@ func (in *AwsChaos) GetDuration() (*time.Duration, error) {
 	return &duration, nil
 }
 
-func (in *AwsChaos) GetNextStart() time.Time {
-	if in.Status.Scheduler.NextStart == nil {
-		return time.Time{}
-	}
-	return in.Status.Scheduler.NextStart.Time
-}
-
-func (in *AwsChaos) SetNextStart(t time.Time) {
-	if t.IsZero() {
-		in.Status.Scheduler.NextStart = nil
-		return
-	}
-
-	if in.Status.Scheduler.NextStart == nil {
-		in.Status.Scheduler.NextStart = &metav1.Time{}
-	}
-	in.Status.Scheduler.NextStart.Time = t
-}
-
-func (in *AwsChaos) GetNextRecover() time.Time {
-	if in.Status.Scheduler.NextRecover == nil {
-		return time.Time{}
-	}
-	return in.Status.Scheduler.NextRecover.Time
-}
-
-func (in *AwsChaos) SetNextRecover(t time.Time) {
-	if t.IsZero() {
-		in.Status.Scheduler.NextRecover = nil
-		return
-	}
-
-	if in.Status.Scheduler.NextRecover == nil {
-		in.Status.Scheduler.NextRecover = &metav1.Time{}
-	}
-	in.Status.Scheduler.NextRecover.Time = t
-}
-
-// GetScheduler would return the scheduler for chaos
-func (in *AwsChaos) GetScheduler() *SchedulerSpec {
-	return in.Spec.Scheduler
-}
-
 // GetChaos would return the a record for chaos
 func (in *AwsChaos) GetChaos() *ChaosInstance {
 	instance := &ChaosInstance{
@@ -98,7 +55,6 @@ func (in *AwsChaos) GetChaos() *ChaosInstance {
 		Kind:      KindAwsChaos,
 		StartTime: in.CreationTimestamp.Time,
 		Action:    "",
-		Status:    string(in.Status.Experiment.Phase),
 		UID:       string(in.UID),
 	}
 
@@ -165,49 +121,6 @@ func (in *DNSChaos) GetDuration() (*time.Duration, error) {
 	return &duration, nil
 }
 
-func (in *DNSChaos) GetNextStart() time.Time {
-	if in.Status.Scheduler.NextStart == nil {
-		return time.Time{}
-	}
-	return in.Status.Scheduler.NextStart.Time
-}
-
-func (in *DNSChaos) SetNextStart(t time.Time) {
-	if t.IsZero() {
-		in.Status.Scheduler.NextStart = nil
-		return
-	}
-
-	if in.Status.Scheduler.NextStart == nil {
-		in.Status.Scheduler.NextStart = &metav1.Time{}
-	}
-	in.Status.Scheduler.NextStart.Time = t
-}
-
-func (in *DNSChaos) GetNextRecover() time.Time {
-	if in.Status.Scheduler.NextRecover == nil {
-		return time.Time{}
-	}
-	return in.Status.Scheduler.NextRecover.Time
-}
-
-func (in *DNSChaos) SetNextRecover(t time.Time) {
-	if t.IsZero() {
-		in.Status.Scheduler.NextRecover = nil
-		return
-	}
-
-	if in.Status.Scheduler.NextRecover == nil {
-		in.Status.Scheduler.NextRecover = &metav1.Time{}
-	}
-	in.Status.Scheduler.NextRecover.Time = t
-}
-
-// GetScheduler would return the scheduler for chaos
-func (in *DNSChaos) GetScheduler() *SchedulerSpec {
-	return in.Spec.Scheduler
-}
-
 // GetChaos would return the a record for chaos
 func (in *DNSChaos) GetChaos() *ChaosInstance {
 	instance := &ChaosInstance{
@@ -216,7 +129,6 @@ func (in *DNSChaos) GetChaos() *ChaosInstance {
 		Kind:      KindDNSChaos,
 		StartTime: in.CreationTimestamp.Time,
 		Action:    "",
-		Status:    string(in.Status.Experiment.Phase),
 		UID:       string(in.UID),
 	}
 
@@ -283,49 +195,6 @@ func (in *HTTPChaos) GetDuration() (*time.Duration, error) {
 	return &duration, nil
 }
 
-func (in *HTTPChaos) GetNextStart() time.Time {
-	if in.Status.Scheduler.NextStart == nil {
-		return time.Time{}
-	}
-	return in.Status.Scheduler.NextStart.Time
-}
-
-func (in *HTTPChaos) SetNextStart(t time.Time) {
-	if t.IsZero() {
-		in.Status.Scheduler.NextStart = nil
-		return
-	}
-
-	if in.Status.Scheduler.NextStart == nil {
-		in.Status.Scheduler.NextStart = &metav1.Time{}
-	}
-	in.Status.Scheduler.NextStart.Time = t
-}
-
-func (in *HTTPChaos) GetNextRecover() time.Time {
-	if in.Status.Scheduler.NextRecover == nil {
-		return time.Time{}
-	}
-	return in.Status.Scheduler.NextRecover.Time
-}
-
-func (in *HTTPChaos) SetNextRecover(t time.Time) {
-	if t.IsZero() {
-		in.Status.Scheduler.NextRecover = nil
-		return
-	}
-
-	if in.Status.Scheduler.NextRecover == nil {
-		in.Status.Scheduler.NextRecover = &metav1.Time{}
-	}
-	in.Status.Scheduler.NextRecover.Time = t
-}
-
-// GetScheduler would return the scheduler for chaos
-func (in *HTTPChaos) GetScheduler() *SchedulerSpec {
-	return in.Spec.Scheduler
-}
-
 // GetChaos would return the a record for chaos
 func (in *HTTPChaos) GetChaos() *ChaosInstance {
 	instance := &ChaosInstance{
@@ -334,7 +203,6 @@ func (in *HTTPChaos) GetChaos() *ChaosInstance {
 		Kind:      KindHTTPChaos,
 		StartTime: in.CreationTimestamp.Time,
 		Action:    "",
-		Status:    string(in.Status.Experiment.Phase),
 		UID:       string(in.UID),
 	}
 
@@ -401,49 +269,6 @@ func (in *IoChaos) GetDuration() (*time.Duration, error) {
 	return &duration, nil
 }
 
-func (in *IoChaos) GetNextStart() time.Time {
-	if in.Status.Scheduler.NextStart == nil {
-		return time.Time{}
-	}
-	return in.Status.Scheduler.NextStart.Time
-}
-
-func (in *IoChaos) SetNextStart(t time.Time) {
-	if t.IsZero() {
-		in.Status.Scheduler.NextStart = nil
-		return
-	}
-
-	if in.Status.Scheduler.NextStart == nil {
-		in.Status.Scheduler.NextStart = &metav1.Time{}
-	}
-	in.Status.Scheduler.NextStart.Time = t
-}
-
-func (in *IoChaos) GetNextRecover() time.Time {
-	if in.Status.Scheduler.NextRecover == nil {
-		return time.Time{}
-	}
-	return in.Status.Scheduler.NextRecover.Time
-}
-
-func (in *IoChaos) SetNextRecover(t time.Time) {
-	if t.IsZero() {
-		in.Status.Scheduler.NextRecover = nil
-		return
-	}
-
-	if in.Status.Scheduler.NextRecover == nil {
-		in.Status.Scheduler.NextRecover = &metav1.Time{}
-	}
-	in.Status.Scheduler.NextRecover.Time = t
-}
-
-// GetScheduler would return the scheduler for chaos
-func (in *IoChaos) GetScheduler() *SchedulerSpec {
-	return in.Spec.Scheduler
-}
-
 // GetChaos would return the a record for chaos
 func (in *IoChaos) GetChaos() *ChaosInstance {
 	instance := &ChaosInstance{
@@ -452,7 +277,6 @@ func (in *IoChaos) GetChaos() *ChaosInstance {
 		Kind:      KindIoChaos,
 		StartTime: in.CreationTimestamp.Time,
 		Action:    "",
-		Status:    string(in.Status.Experiment.Phase),
 		UID:       string(in.UID),
 	}
 
@@ -519,49 +343,6 @@ func (in *JVMChaos) GetDuration() (*time.Duration, error) {
 	return &duration, nil
 }
 
-func (in *JVMChaos) GetNextStart() time.Time {
-	if in.Status.Scheduler.NextStart == nil {
-		return time.Time{}
-	}
-	return in.Status.Scheduler.NextStart.Time
-}
-
-func (in *JVMChaos) SetNextStart(t time.Time) {
-	if t.IsZero() {
-		in.Status.Scheduler.NextStart = nil
-		return
-	}
-
-	if in.Status.Scheduler.NextStart == nil {
-		in.Status.Scheduler.NextStart = &metav1.Time{}
-	}
-	in.Status.Scheduler.NextStart.Time = t
-}
-
-func (in *JVMChaos) GetNextRecover() time.Time {
-	if in.Status.Scheduler.NextRecover == nil {
-		return time.Time{}
-	}
-	return in.Status.Scheduler.NextRecover.Time
-}
-
-func (in *JVMChaos) SetNextRecover(t time.Time) {
-	if t.IsZero() {
-		in.Status.Scheduler.NextRecover = nil
-		return
-	}
-
-	if in.Status.Scheduler.NextRecover == nil {
-		in.Status.Scheduler.NextRecover = &metav1.Time{}
-	}
-	in.Status.Scheduler.NextRecover.Time = t
-}
-
-// GetScheduler would return the scheduler for chaos
-func (in *JVMChaos) GetScheduler() *SchedulerSpec {
-	return in.Spec.Scheduler
-}
-
 // GetChaos would return the a record for chaos
 func (in *JVMChaos) GetChaos() *ChaosInstance {
 	instance := &ChaosInstance{
@@ -570,7 +351,6 @@ func (in *JVMChaos) GetChaos() *ChaosInstance {
 		Kind:      KindJVMChaos,
 		StartTime: in.CreationTimestamp.Time,
 		Action:    "",
-		Status:    string(in.Status.Experiment.Phase),
 		UID:       string(in.UID),
 	}
 
@@ -637,49 +417,6 @@ func (in *KernelChaos) GetDuration() (*time.Duration, error) {
 	return &duration, nil
 }
 
-func (in *KernelChaos) GetNextStart() time.Time {
-	if in.Status.Scheduler.NextStart == nil {
-		return time.Time{}
-	}
-	return in.Status.Scheduler.NextStart.Time
-}
-
-func (in *KernelChaos) SetNextStart(t time.Time) {
-	if t.IsZero() {
-		in.Status.Scheduler.NextStart = nil
-		return
-	}
-
-	if in.Status.Scheduler.NextStart == nil {
-		in.Status.Scheduler.NextStart = &metav1.Time{}
-	}
-	in.Status.Scheduler.NextStart.Time = t
-}
-
-func (in *KernelChaos) GetNextRecover() time.Time {
-	if in.Status.Scheduler.NextRecover == nil {
-		return time.Time{}
-	}
-	return in.Status.Scheduler.NextRecover.Time
-}
-
-func (in *KernelChaos) SetNextRecover(t time.Time) {
-	if t.IsZero() {
-		in.Status.Scheduler.NextRecover = nil
-		return
-	}
-
-	if in.Status.Scheduler.NextRecover == nil {
-		in.Status.Scheduler.NextRecover = &metav1.Time{}
-	}
-	in.Status.Scheduler.NextRecover.Time = t
-}
-
-// GetScheduler would return the scheduler for chaos
-func (in *KernelChaos) GetScheduler() *SchedulerSpec {
-	return in.Spec.Scheduler
-}
-
 // GetChaos would return the a record for chaos
 func (in *KernelChaos) GetChaos() *ChaosInstance {
 	instance := &ChaosInstance{
@@ -688,7 +425,6 @@ func (in *KernelChaos) GetChaos() *ChaosInstance {
 		Kind:      KindKernelChaos,
 		StartTime: in.CreationTimestamp.Time,
 		Action:    "",
-		Status:    string(in.Status.Experiment.Phase),
 		UID:       string(in.UID),
 	}
 
@@ -755,49 +491,6 @@ func (in *NetworkChaos) GetDuration() (*time.Duration, error) {
 	return &duration, nil
 }
 
-func (in *NetworkChaos) GetNextStart() time.Time {
-	if in.Status.Scheduler.NextStart == nil {
-		return time.Time{}
-	}
-	return in.Status.Scheduler.NextStart.Time
-}
-
-func (in *NetworkChaos) SetNextStart(t time.Time) {
-	if t.IsZero() {
-		in.Status.Scheduler.NextStart = nil
-		return
-	}
-
-	if in.Status.Scheduler.NextStart == nil {
-		in.Status.Scheduler.NextStart = &metav1.Time{}
-	}
-	in.Status.Scheduler.NextStart.Time = t
-}
-
-func (in *NetworkChaos) GetNextRecover() time.Time {
-	if in.Status.Scheduler.NextRecover == nil {
-		return time.Time{}
-	}
-	return in.Status.Scheduler.NextRecover.Time
-}
-
-func (in *NetworkChaos) SetNextRecover(t time.Time) {
-	if t.IsZero() {
-		in.Status.Scheduler.NextRecover = nil
-		return
-	}
-
-	if in.Status.Scheduler.NextRecover == nil {
-		in.Status.Scheduler.NextRecover = &metav1.Time{}
-	}
-	in.Status.Scheduler.NextRecover.Time = t
-}
-
-// GetScheduler would return the scheduler for chaos
-func (in *NetworkChaos) GetScheduler() *SchedulerSpec {
-	return in.Spec.Scheduler
-}
-
 // GetChaos would return the a record for chaos
 func (in *NetworkChaos) GetChaos() *ChaosInstance {
 	instance := &ChaosInstance{
@@ -806,7 +499,6 @@ func (in *NetworkChaos) GetChaos() *ChaosInstance {
 		Kind:      KindNetworkChaos,
 		StartTime: in.CreationTimestamp.Time,
 		Action:    "",
-		Status:    string(in.Status.Experiment.Phase),
 		UID:       string(in.UID),
 	}
 
@@ -873,49 +565,6 @@ func (in *PodChaos) GetDuration() (*time.Duration, error) {
 	return &duration, nil
 }
 
-func (in *PodChaos) GetNextStart() time.Time {
-	if in.Status.Scheduler.NextStart == nil {
-		return time.Time{}
-	}
-	return in.Status.Scheduler.NextStart.Time
-}
-
-func (in *PodChaos) SetNextStart(t time.Time) {
-	if t.IsZero() {
-		in.Status.Scheduler.NextStart = nil
-		return
-	}
-
-	if in.Status.Scheduler.NextStart == nil {
-		in.Status.Scheduler.NextStart = &metav1.Time{}
-	}
-	in.Status.Scheduler.NextStart.Time = t
-}
-
-func (in *PodChaos) GetNextRecover() time.Time {
-	if in.Status.Scheduler.NextRecover == nil {
-		return time.Time{}
-	}
-	return in.Status.Scheduler.NextRecover.Time
-}
-
-func (in *PodChaos) SetNextRecover(t time.Time) {
-	if t.IsZero() {
-		in.Status.Scheduler.NextRecover = nil
-		return
-	}
-
-	if in.Status.Scheduler.NextRecover == nil {
-		in.Status.Scheduler.NextRecover = &metav1.Time{}
-	}
-	in.Status.Scheduler.NextRecover.Time = t
-}
-
-// GetScheduler would return the scheduler for chaos
-func (in *PodChaos) GetScheduler() *SchedulerSpec {
-	return in.Spec.Scheduler
-}
-
 // GetChaos would return the a record for chaos
 func (in *PodChaos) GetChaos() *ChaosInstance {
 	instance := &ChaosInstance{
@@ -924,7 +573,6 @@ func (in *PodChaos) GetChaos() *ChaosInstance {
 		Kind:      KindPodChaos,
 		StartTime: in.CreationTimestamp.Time,
 		Action:    "",
-		Status:    string(in.Status.Experiment.Phase),
 		UID:       string(in.UID),
 	}
 
@@ -991,49 +639,6 @@ func (in *StressChaos) GetDuration() (*time.Duration, error) {
 	return &duration, nil
 }
 
-func (in *StressChaos) GetNextStart() time.Time {
-	if in.Status.Scheduler.NextStart == nil {
-		return time.Time{}
-	}
-	return in.Status.Scheduler.NextStart.Time
-}
-
-func (in *StressChaos) SetNextStart(t time.Time) {
-	if t.IsZero() {
-		in.Status.Scheduler.NextStart = nil
-		return
-	}
-
-	if in.Status.Scheduler.NextStart == nil {
-		in.Status.Scheduler.NextStart = &metav1.Time{}
-	}
-	in.Status.Scheduler.NextStart.Time = t
-}
-
-func (in *StressChaos) GetNextRecover() time.Time {
-	if in.Status.Scheduler.NextRecover == nil {
-		return time.Time{}
-	}
-	return in.Status.Scheduler.NextRecover.Time
-}
-
-func (in *StressChaos) SetNextRecover(t time.Time) {
-	if t.IsZero() {
-		in.Status.Scheduler.NextRecover = nil
-		return
-	}
-
-	if in.Status.Scheduler.NextRecover == nil {
-		in.Status.Scheduler.NextRecover = &metav1.Time{}
-	}
-	in.Status.Scheduler.NextRecover.Time = t
-}
-
-// GetScheduler would return the scheduler for chaos
-func (in *StressChaos) GetScheduler() *SchedulerSpec {
-	return in.Spec.Scheduler
-}
-
 // GetChaos would return the a record for chaos
 func (in *StressChaos) GetChaos() *ChaosInstance {
 	instance := &ChaosInstance{
@@ -1042,7 +647,6 @@ func (in *StressChaos) GetChaos() *ChaosInstance {
 		Kind:      KindStressChaos,
 		StartTime: in.CreationTimestamp.Time,
 		Action:    "",
-		Status:    string(in.Status.Experiment.Phase),
 		UID:       string(in.UID),
 	}
 
@@ -1109,49 +713,6 @@ func (in *TimeChaos) GetDuration() (*time.Duration, error) {
 	return &duration, nil
 }
 
-func (in *TimeChaos) GetNextStart() time.Time {
-	if in.Status.Scheduler.NextStart == nil {
-		return time.Time{}
-	}
-	return in.Status.Scheduler.NextStart.Time
-}
-
-func (in *TimeChaos) SetNextStart(t time.Time) {
-	if t.IsZero() {
-		in.Status.Scheduler.NextStart = nil
-		return
-	}
-
-	if in.Status.Scheduler.NextStart == nil {
-		in.Status.Scheduler.NextStart = &metav1.Time{}
-	}
-	in.Status.Scheduler.NextStart.Time = t
-}
-
-func (in *TimeChaos) GetNextRecover() time.Time {
-	if in.Status.Scheduler.NextRecover == nil {
-		return time.Time{}
-	}
-	return in.Status.Scheduler.NextRecover.Time
-}
-
-func (in *TimeChaos) SetNextRecover(t time.Time) {
-	if t.IsZero() {
-		in.Status.Scheduler.NextRecover = nil
-		return
-	}
-
-	if in.Status.Scheduler.NextRecover == nil {
-		in.Status.Scheduler.NextRecover = &metav1.Time{}
-	}
-	in.Status.Scheduler.NextRecover.Time = t
-}
-
-// GetScheduler would return the scheduler for chaos
-func (in *TimeChaos) GetScheduler() *SchedulerSpec {
-	return in.Spec.Scheduler
-}
-
 // GetChaos would return the a record for chaos
 func (in *TimeChaos) GetChaos() *ChaosInstance {
 	instance := &ChaosInstance{
@@ -1160,7 +721,6 @@ func (in *TimeChaos) GetChaos() *ChaosInstance {
 		Kind:      KindTimeChaos,
 		StartTime: in.CreationTimestamp.Time,
 		Action:    "",
-		Status:    string(in.Status.Experiment.Phase),
 		UID:       string(in.UID),
 	}
 
