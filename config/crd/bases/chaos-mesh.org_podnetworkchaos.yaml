@@ -254,18 +254,6 @@ spec:
               type: object
             failedMessage:
               type: string
-            scheduler:
-              description: ScheduleStatus is the current status of chaos scheduler.
-              properties:
-                nextRecover:
-                  description: Next time when this action will be recovered
-                  format: date-time
-                  type: string
-                nextStart:
-                  description: Next time when this action will be applied again
-                  format: date-time
-                  type: string
-              type: object
           required:
           - experiment
           type: object

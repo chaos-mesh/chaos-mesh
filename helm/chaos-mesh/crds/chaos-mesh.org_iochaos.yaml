@@ -116,6 +116,12 @@ spec:
               description: ContainerName indicates the target container to inject
                 iochaos in
               type: string
+            containerNames:
+              description: ContainerName indicates the name of affected container.
+                If not set, all containers will be injected
+              items:
+                type: string
+              type: array
             delay:
               description: Delay defines the value of I/O chaos action delay. A delay
                 string is a possibly signed sequence of decimal numbers, each with
@@ -158,19 +164,6 @@ spec:
               description: 'Percent defines the percentage of injection errors and
                 provides a number from 0-100. default: 100.'
               type: integer
-            scheduler:
-              description: Scheduler defines some schedule rules to control the running
-                time of the chaos experiment about pods.
-              properties:
-                cron:
-                  description: "Cron defines a cron job rule. \n Some rule examples:
-                    \"0 30 * * * *\" means to \"Every hour on the half hour\" \"@hourly\"
-                    \     means to \"Every hour\" \"@every 1h30m\" means to \"Every
-                    hour thirty\" \n More rule info: https://godoc.org/github.com/robfig/cron"
-                  type: string
-              required:
-              - cron
-              type: object
             selector:
               description: Selector is used to select pods that are used to inject
                 chaos action.
@@ -326,18 +319,6 @@ spec:
               type: object
             failedMessage:
               type: string
-            scheduler:
-              description: ScheduleStatus is the current status of chaos scheduler.
-              properties:
-                nextRecover:
-                  description: Next time when this action will be recovered
-                  format: date-time
-                  type: string
-                nextStart:
-                  description: Next time when this action will be applied again
-                  format: date-time
-                  type: string
-              type: object
           required:
           - experiment
           type: object

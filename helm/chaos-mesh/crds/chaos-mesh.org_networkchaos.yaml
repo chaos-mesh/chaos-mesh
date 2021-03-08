@@ -175,19 +175,6 @@ spec:
               - fixed-percent
               - random-max-percent
               type: string
-            scheduler:
-              description: Scheduler defines some schedule rules to control the running
-                time of the chaos experiment about network.
-              properties:
-                cron:
-                  description: "Cron defines a cron job rule. \n Some rule examples:
-                    \"0 30 * * * *\" means to \"Every hour on the half hour\" \"@hourly\"
-                    \     means to \"Every hour\" \"@every 1h30m\" means to \"Every
-                    hour thirty\" \n More rule info: https://godoc.org/github.com/robfig/cron"
-                  type: string
-              required:
-              - cron
-              type: object
             selector:
               description: Selector is used to select pods that are used to inject
                 chaos action.
@@ -281,17 +268,18 @@ spec:
                 and network partition action
               properties:
                 mode:
-                  description: TargetMode defines the target selector mode
+                  description: 'Mode defines the mode to run chaos action. Supported
+                    mode: one / all / fixed / fixed-percent / random-max-percent'
                   enum:
                   - one
                   - all
                   - fixed
                   - fixed-percent
                   - random-max-percent
-                  - ""
                   type: string
                 selector:
-                  description: TargetSelector defines the target selector
+                  description: Selector is used to select pods that are used to inject
+                    chaos action.
                   properties:
                     annotationSelectors:
                       additionalProperties:
@@ -380,11 +368,11 @@ spec:
                       type: object
                   type: object
                 value:
-                  description: TargetValue is required when the mode is set to `FixedPodMode`
+                  description: Value is required when the mode is set to `FixedPodMode`
                     / `FixedPercentPodMod` / `RandomMaxPercentPodMod`. If `FixedPodMode`,
                     provide an integer of pods to do chaos action. If `FixedPercentPodMod`,
                     provide a number from 0-100 to specify the percent of pods the
-                    server can do chaos action. If `RandomMaxPercentPodMod`,  provide
+                    server can do chaos action. IF `RandomMaxPercentPodMod`,  provide
                     a number from 0-100 to specify the max percent of pods to do chaos
                     action
                   type: string
@@ -397,7 +385,7 @@ spec:
                 / `FixedPercentPodMod` / `RandomMaxPercentPodMod`. If `FixedPodMode`,
                 provide an integer of pods to do chaos action. If `FixedPercentPodMod`,
                 provide a number from 0-100 to specify the percent of pods the server
-                can do chaos action. If `RandomMaxPercentPodMod`,  provide a number
+                can do chaos action. IF `RandomMaxPercentPodMod`,  provide a number
                 from 0-100 to specify the max percent of pods to do chaos action
               type: string
           required:
@@ -456,18 +444,6 @@ spec:
               type: object
             failedMessage:
               type: string
-            scheduler:
-              description: ScheduleStatus is the current status of chaos scheduler.
-              properties:
-                nextRecover:
-                  description: Next time when this action will be recovered
-                  format: date-time
-                  type: string
-                nextStart:
-                  description: Next time when this action will be applied again
-                  format: date-time
-                  type: string
-              type: object
           required:
           - experiment
           type: object

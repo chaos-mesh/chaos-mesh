@@ -43,10 +43,12 @@ spec:
               - pod-failure
               - container-kill
               type: string
-            containerName:
-              description: ContainerName indicates the name of the container. Needed
-                in container-kill.
-              type: string
+            containerNames:
+              description: ContainerName indicates the name of affected container.
+                If not set, all containers will be injected
+              items:
+                type: string
+              type: array
             duration:
               description: Duration represents the duration of the chaos action. It
                 is required when the action is `PodFailureAction`. A duration string
@@ -72,19 +74,6 @@ spec:
               - fixed-percent
               - random-max-percent
               type: string
-            scheduler:
-              description: Scheduler defines some schedule rules to control the running
-                time of the chaos experiment about pods.
-              properties:
-                cron:
-                  description: "Cron defines a cron job rule. \n Some rule examples:
-                    \"0 30 * * * *\" means to \"Every hour on the half hour\" \"@hourly\"
-                    \     means to \"Every hour\" \"@every 1h30m\" means to \"Every
-                    hour thirty\" \n More rule info: https://godoc.org/github.com/robfig/cron"
-                  type: string
-              required:
-              - cron
-              type: object
             selector:
               description: Selector is used to select pods that are used to inject
                 chaos action.
@@ -237,18 +226,6 @@ spec:
               type: object
             failedMessage:
               type: string
-            scheduler:
-              description: ScheduleStatus is the current status of chaos scheduler.
-              properties:
-                nextRecover:
-                  description: Next time when this action will be recovered
-                  format: date-time
-                  type: string
-                nextStart:
-                  description: Next time when this action will be applied again
-                  format: date-time
-                  type: string
-              type: object
           required:
           - experiment
           type: object
