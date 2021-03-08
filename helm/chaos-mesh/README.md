@@ -50,7 +50,7 @@ The following tables list the configurable parameters of the Chaos Mesh chart an
 | `chaosDaemon.socketPath` | Specifies the container runtime socket | `/var/run/docker.sock` |
 | `chaosDaemon.tolerations` | Toleration labels for chaos-daemon pod assignment | `[]` |
 | `chaosDaemon.resources` | CPU/Memory resource requests/limits for chaosDaemon container | `requests: { cpu: "250m", memory: "512Mi" }, limits:{ cpu: "500m", memory: "1024Mi" }`  |
-| customLabels | object | `{}` |  |
+| `customLabels` | Customized labels that will be tagged on all the resources of Chaos Mesh | `{}` |
 | `bpfki.create` | Enable chaos-kernel | `false` |
 | `bpfki.image` | Docker image for chaos-kernel | `pingcap/chaos-kernel:latest` |
 | `bpfki.imagePullPolicy` | Image pull policy | `Always` |
