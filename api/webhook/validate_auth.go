@@ -124,7 +124,7 @@ func (v *AuthValidator) Handle(ctx context.Context, req admission.Request) admis
 	}
 
 	for namespace := range affectedNamespaces {
-		allow, err := v.auth(username, groups, namespace)
+		allow, err := v.auth(username, groups, namespace, chaosKind)
 		if err != nil {
 			return admission.Errored(http.StatusBadRequest, err)
 		}
@@ -147,14 +147,14 @@ func (v *AuthValidator) InjectDecoder(d *admission.Decoder) error {
 	return nil
 }
 
-func (v *AuthValidator) auth(username string, groups []string, namespace string) (bool, error) {
+func (v *AuthValidator) auth(username string, groups []string, namespace string, resource string) (bool, error) {
 	sar := authv1.SubjectAccessReview{
 		Spec: authv1.SubjectAccessReviewSpec{
 			ResourceAttributes: &authv1.ResourceAttributes{
 				Namespace: namespace,
 				Verb:      "create",
 				Group:     "chaos-mesh.org",
-				Resource:  "*",
+				Resource:  resource,
 			},
 			User:   username,
 			Groups: groups,
