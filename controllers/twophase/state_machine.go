@@ -127,8 +127,10 @@ func recover(ctx context.Context, m *chaosStateMachine, targetPhase v1alpha1.Exp
 		status.Experiment.Duration = now.Sub(status.Experiment.StartTime.Time).String()
 	}
 
-	// Reset recover time
-	m.Chaos.SetNextRecover(m.Chaos.GetNextStart().Add(*duration))
+	// If this recover action is not called by pause action, reset recover time
+	if !now.Before(m.Chaos.GetNextRecover()) {
+		m.Chaos.SetNextRecover(m.Chaos.GetNextStart().Add(*duration))
+	}
 
 	return true, nil
 }
