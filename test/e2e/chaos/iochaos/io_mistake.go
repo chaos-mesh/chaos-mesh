@@ -74,7 +74,6 @@ func TestcaseIOMistakeDurationForATimeThenRecover(
 
 	err = wait.PollImmediate(5*time.Second, 1*time.Minute, func() (bool, error) {
 		res, err := getPodIoMistake(c, port)
-		// input/output error is errno 5
 		if err != nil {
 			return false, nil
 		}
@@ -91,7 +90,6 @@ func TestcaseIOMistakeDurationForATimeThenRecover(
 	klog.Infof("success to perform io chaos")
 	err = wait.PollImmediate(5*time.Second, 1*time.Minute, func() (bool, error) {
 		res, err := getPodIoMistake(c, port)
-		// input/output error is errno 5
 		if err != nil {
 			return false, nil
 		}
@@ -149,7 +147,6 @@ func TestcaseIOMistakeDurationForATimePauseAndUnPause(
 
 	err = wait.PollImmediate(5*time.Second, 1*time.Minute, func() (bool, error) {
 		res, err := getPodIoMistake(c, port)
-		// input/output error is errno 5
 		if err != nil {
 			return false, nil
 		}
@@ -185,7 +182,6 @@ func TestcaseIOMistakeDurationForATimePauseAndUnPause(
 	// wait 1 min to check whether io delay still exists
 	err = wait.PollImmediate(5*time.Second, 1*time.Minute, func() (bool, error) {
 		res, err := getPodIoMistake(c, port)
-		// input/output error is errno 5
 		if err != nil {
 			return false, nil
 		}
@@ -213,7 +209,6 @@ func TestcaseIOMistakeDurationForATimePauseAndUnPause(
 
 	err = wait.PollImmediate(5*time.Second, 1*time.Minute, func() (bool, error) {
 		res, err := getPodIoMistake(c, port)
-		// input/output error is errno 5
 		if err != nil {
 			return false, nil
 		}
@@ -273,7 +268,6 @@ func TestcaseIOMistakeWithSpecifiedContainer(
 
 	err = wait.PollImmediate(5*time.Second, 1*time.Minute, func() (bool, error) {
 		res, err := getPodIoMistake(c, port)
-		// input/output error is errno 5
 		if err != nil {
 			return false, nil
 		}
@@ -290,7 +284,6 @@ func TestcaseIOMistakeWithSpecifiedContainer(
 	klog.Infof("success to perform io chaos")
 	err = wait.PollImmediate(5*time.Second, 1*time.Minute, func() (bool, error) {
 		res, err := getPodIoMistake(c, port)
-		// input/output error is errno 5
 		if err != nil {
 			return false, nil
 		}
