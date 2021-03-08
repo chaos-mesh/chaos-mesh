@@ -112,7 +112,7 @@ spec:
                           data.
                         type: string
                       maxLength:
-                        description: Max length of each wrong data segment
+                        description: Max length of each wrong data segment in bytes
                         format: int64
                         type: integer
                       maxOccurrences:
