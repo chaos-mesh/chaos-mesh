@@ -17,12 +17,11 @@ import (
 	"context"
 	"errors"
 
-	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/crclients"
-	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/crclients/test"
-
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
+	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/crclients"
+	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/crclients/test"
 	pb "github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
 	"github.com/chaos-mesh/chaos-mesh/pkg/mock"
 )
