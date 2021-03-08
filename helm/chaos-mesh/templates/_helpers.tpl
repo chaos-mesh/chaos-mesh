@@ -41,7 +41,7 @@ app.kubernetes.io/name: {{ template "chaos-mesh.name" . }}
 app.kubernetes.io/part-of: {{ template "chaos-mesh.name" . }} 
 app.kubernetes.io/version: "{{ .Chart.Version }}"
 {{- if .Values.customLabels }}
-{{ toYaml .Values.customLabels | indent 4 }}
+{{ toYaml .Values.customLabels }}
 {{- end }}
 {{- end }}
 
