@@ -1,5 +1,4 @@
 import { Box, Button, Typography } from '@material-ui/core'
-import { setAlert, setAlertOpen } from 'slices/globalStatus'
 import { useStoreDispatch, useStoreSelector } from 'store'
 
 import DoneAllIcon from '@material-ui/icons/DoneAll'
@@ -11,6 +10,7 @@ import T from 'components/T'
 import api from 'api'
 import { parseSubmit } from 'lib/formikhelpers'
 import { resetNewExperiment } from 'slices/experiments'
+import { setAlert } from 'slices/globalStatus'
 import { useHistory } from 'react-router-dom'
 import { useIntl } from 'react-intl'
 
@@ -43,7 +43,7 @@ const Step3 = () => {
               message: intl.formatMessage({ id: 'common.createSuccessfully' }),
             })
           )
-          dispatch(setAlertOpen(true))
+
           dispatch(resetNewExperiment())
 
           history.push('/experiments')

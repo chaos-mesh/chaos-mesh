@@ -101,7 +101,6 @@ const Step2 = () => {
                   </Box>
                   <TextField
                     fast
-                    id="name"
                     name="name"
                     label={T('newE.basic.name')}
                     helperText={errors.name && touched.name ? errors.name : T('newE.basic.nameHelper')}
@@ -111,7 +110,6 @@ const Step2 = () => {
                   <AdvancedOptions>
                     {namespaces.length && (
                       <SelectField
-                        id="namespace"
                         name="namespace"
                         label={T('newE.basic.namespace')}
                         helperText={T('newE.basic.namespaceHelper')}
@@ -123,8 +121,8 @@ const Step2 = () => {
                         ))}
                       </SelectField>
                     )}
-                    <LabelField id="labels" name="labels" label={T('k8s.labels')} isKV />
-                    <LabelField id="annotations" name="annotations" label={T('k8s.annotations')} isKV />
+                    <LabelField name="labels" label={T('k8s.labels')} isKV />
+                    <LabelField name="annotations" label={T('k8s.annotations')} isKV />
                   </AdvancedOptions>
                   <Box mb={3}>
                     <Divider />

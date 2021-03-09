@@ -1,5 +1,5 @@
-import { Box, Grid, Grow, Paper } from '@material-ui/core'
 import { Event, EventPod } from 'api/events.type'
+import { Grid, Grow } from '@material-ui/core'
 import React, { useEffect, useMemo, useState } from 'react'
 
 import AffectedPods from 'components/AffectedPods'
@@ -9,6 +9,7 @@ import ArchiveNumberOf from 'components/ArchiveNumberOf'
 import EventsTable from 'components/EventsTable'
 import ExperimentConfiguration from 'components/ExperimentConfiguration'
 import Loading from 'components-mui/Loading'
+import Paper from 'components-mui/Paper'
 import PaperTop from 'components-mui/PaperTop'
 import T from 'components/T'
 import api from 'api'
@@ -69,16 +70,14 @@ const ArchiveReport: React.FC = () => {
               </Grid>
 
               <Grid item xs={12}>
-                <Paper variant="outlined">
+                <Paper>
                   <PaperTop title={T('common.configuration')} />
-                  <Box p={3}>
-                    <ExperimentConfiguration experimentDetail={detail} />
-                  </Box>
+                  <ExperimentConfiguration experimentDetail={detail} />
                 </Paper>
               </Grid>
 
               <Grid item xs={12}>
-                <Paper variant="outlined">
+                <Paper>
                   <PaperTop title={T('newE.scope.affectedPods')} />
                   <AffectedPods pods={affectedPods} />
                 </Paper>

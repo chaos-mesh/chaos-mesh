@@ -1,6 +1,5 @@
 import { Box, Grid, Typography } from '@material-ui/core'
 import React, { useEffect, useState } from 'react'
-import { setAlert, setAlertOpen } from 'slices/globalStatus'
 
 import ConfirmDialog from 'components-mui/ConfirmDialog'
 import { Experiment } from 'api/experiments.type'
@@ -10,7 +9,8 @@ import T from 'components/T'
 import TuneIcon from '@material-ui/icons/Tune'
 import _groupBy from 'lodash.groupby'
 import api from 'api'
-import { dayComparator } from 'lib/dayjs'
+import { comparator } from 'lib/luxon'
+import { setAlert } from 'slices/globalStatus'
 import { transByKind } from 'lib/byKind'
 import { useIntl } from 'react-intl'
 import { useStoreDispatch } from 'store'
@@ -52,7 +52,7 @@ export default function Experiments() {
               } else {
                 const events = data
                   .filter((d) => d.experiment_id === e.uid)
-                  .sort((a, b) => dayComparator(a.start_time, b.start_time))
+                  .sort((a, b) => comparator(a.start_time, b.start_time))
 
                 return {
                   ...e,
@@ -112,7 +112,7 @@ export default function Experiments() {
             message: intl.formatMessage({ id: `common.${action}Successfully` }),
           })
         )
-        dispatch(setAlertOpen(true))
+
         setTimeout(fetchExperiments, 300)
       })
       .catch(console.error)

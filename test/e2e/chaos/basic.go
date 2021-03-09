@@ -146,6 +146,10 @@ var _ = ginkgo.Describe("[Basic]", func() {
 			ginkgo.It("[Pause]", func() {
 				timechaostestcases.TestcaseTimeSkewPauseThenUnpause(ns, cli, c, port)
 			})
+
+			ginkgo.It("[StartAtWaiting]", func() {
+				timechaostestcases.TestcaseTimeSkewStartAtWaitingThenIntoRunning(ns, cli, c, port)
+			})
 		})
 	})
 
@@ -296,6 +300,9 @@ var _ = ginkgo.Describe("[Basic]", func() {
 		ginkgo.Context("[Netem]", func() {
 			ginkgo.It("[Schedule]", func() {
 				networkchaostestcases.TestcaseNetworkDelay(ns, cli, networkPeers, ports, c)
+			})
+			ginkgo.It("[PeersCrossoverWithDirectionBoth]", func() {
+				networkchaostestcases.TestcasePeersCrossover(ns, cli, networkPeers, ports, c)
 			})
 		})
 

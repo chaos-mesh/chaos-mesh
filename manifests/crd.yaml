@@ -54,6 +54,10 @@ spec:
             ec2Instance:
               description: Ec2Instance indicates the ID of the ec2 instance.
               type: string
+            endpoint:
+              description: Endpoint indicates the endpoint of the aws server. Just
+                used it in test now.
+              type: string
             scheduler:
               description: Scheduler defines some schedule rules to control the running
                 time of the chaos experiment about time.
@@ -214,6 +218,17 @@ spec:
               - fixed-percent
               - random-max-percent
               type: string
+            patterns:
+              description: "Choose which domain names to take effect, support the
+                placeholder ? and wildcard *, or the Specified domain name. Note:
+                \     1. The wildcard * must be at the end of the string. For example,
+                chaos-*.org is invalid.      2. if the patterns is empty, will take
+                effect on all the domain names. For example: \t\tThe value is [\"google.com\",
+                \"github.*\", \"chaos-mes?.org\"], \t\twill take effect on \"google.com\",
+                \"github.com\" and \"chaos-mesh.org\""
+              items:
+                type: string
+              type: array
             scheduler:
               description: Scheduler defines some schedule rules to control the running
                 time of the chaos experiment about network.
@@ -227,14 +242,6 @@ spec:
               required:
               - cron
               type: object
-            scope:
-              description: 'Action defines the scope which the DNS chaos works. Supported
-                action: outer, inner, all Default action: outer'
-              enum:
-              - outer
-              - inner
-              - all
-              type: string
             selector:
               description: Selector is used to select pods that are used to inject
                 chaos action.
@@ -334,7 +341,6 @@ spec:
           required:
           - action
           - mode
-          - scope
           - selector
           type: object
         status:

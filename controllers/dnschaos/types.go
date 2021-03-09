@@ -32,7 +32,7 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/controllers/config"
 	"github.com/chaos-mesh/chaos-mesh/controllers/recover"
-	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/client"
+	"github.com/chaos-mesh/chaos-mesh/controllers/utils"
 	"github.com/chaos-mesh/chaos-mesh/pkg/chaosdaemon/pb"
 	"github.com/chaos-mesh/chaos-mesh/pkg/events"
 	"github.com/chaos-mesh/chaos-mesh/pkg/finalizer"
@@ -75,7 +75,7 @@ func (r *endpoint) Apply(ctx context.Context, req ctrl.Request, chaos v1alpha1.I
 	}
 	r.Log.Info("Set DNS chaos to DNS service", "ip", service.Spec.ClusterIP)
 
-	err = r.setDNSServerRules(service.Spec.ClusterIP, config.ControllerCfg.DNSServicePort, dnschaos.Name, pods, dnschaos.Spec.Action, dnschaos.Spec.Scope)
+	err = r.setDNSServerRules(service.Spec.ClusterIP, config.ControllerCfg.DNSServicePort, dnschaos.Name, pods, dnschaos.Spec.Action, dnschaos.Spec.DomainNamePatterns)
 	if err != nil {
 		r.Log.Error(err, "fail to set DNS server rules")
 		return err
@@ -135,8 +135,7 @@ func (r *endpoint) Recover(ctx context.Context, req ctrl.Request, chaos v1alpha1
 func (r *recoverer) RecoverPod(ctx context.Context, pod *v1.Pod, somechaos v1alpha1.InnerObject) error {
 	r.Log.Info("Try to recover pod", "namespace", pod.Namespace, "name", pod.Name)
 
-	daemonClient, err := client.NewChaosDaemonClient(ctx, r.Client,
-		pod, config.ControllerCfg.ChaosDaemonPort)
+	daemonClient, err := utils.NewChaosDaemonClient(ctx, r.Client, pod)
 	if err != nil {
 		r.Log.Error(err, "get chaos daemon client")
 		return err
@@ -193,8 +192,7 @@ func (r *endpoint) applyAllPods(ctx context.Context, pods []v1.Pod, chaos *v1alp
 func (r *endpoint) applyPod(ctx context.Context, pod *v1.Pod, dnsServerIP string) error {
 	r.Log.Info("Try to apply dns chaos", "namespace",
 		pod.Namespace, "name", pod.Name)
-	daemonClient, err := client.NewChaosDaemonClient(ctx, r.Client,
-		pod, config.ControllerCfg.ChaosDaemonPort)
+	daemonClient, err := utils.NewChaosDaemonClient(ctx, r.Client, pod)
 	if err != nil {
 		r.Log.Error(err, "get chaos daemon client")
 		return err
@@ -220,7 +218,7 @@ func (r *endpoint) applyPod(ctx context.Context, pod *v1.Pod, dnsServerIP string
 	return nil
 }
 
-func (r *endpoint) setDNSServerRules(dnsServerIP string, port int, name string, pods []v1.Pod, action v1alpha1.DNSChaosAction, scope v1alpha1.DNSChaosScope) error {
+func (r *endpoint) setDNSServerRules(dnsServerIP string, port int, name string, pods []v1.Pod, action v1alpha1.DNSChaosAction, patterns []string) error {
 	r.Log.Info("setDNSServerRules", "name", name)
 
 	pbPods := make([]*dnspb.Pod, len(pods))
@@ -239,10 +237,10 @@ func (r *endpoint) setDNSServerRules(dnsServerIP string, port int, name string, 
 
 	c := dnspb.NewDNSClient(conn)
 	request := &dnspb.SetDNSChaosRequest{
-		Name:   name,
-		Action: string(action),
-		Pods:   pbPods,
-		Scope:  string(scope),
+		Name:     name,
+		Action:   string(action),
+		Pods:     pbPods,
+		Patterns: patterns,
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)

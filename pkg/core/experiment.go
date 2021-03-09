@@ -227,8 +227,8 @@ type StressChaosInfo struct {
 
 // DNSChaosInfo defines the basic information of dns chaos for creating a new DNSChaos.
 type DNSChaosInfo struct {
-	Action string `json:"action" binding:"oneof='error' 'random'"`
-	Scope  string `json:"scope" binding:"oneof='outer' 'inner' 'all'"`
+	Action             string   `json:"action" binding:"oneof='error' 'random'"`
+	DomainNamePatterns []string `json:"patterns"`
 }
 
 // ParsePodChaos Parse PodChaos JSON string into ExperimentYAMLDescription.

@@ -17,7 +17,7 @@ jobs:
           # Must use at least depth 2!
           fetch-depth: 2
 
-      - name: Creating kind cluster 
+      - name: Create kind cluster
         uses: helm/kind-action@v1.0.0-rc.1
 
       - name: Install Chaos Mesh
@@ -27,7 +27,13 @@ jobs:
           kubectl set env deployment/chaos-dashboard SECURITY_MODE=true -n chaos-testing
           sleep 5
           kubectl port-forward -n chaos-testing svc/chaos-dashboard 2333:2333 &
-      
+
+      - name: Install localstack && aws client
+        run: |
+          helm repo add localstack-repo http://helm.localstack.cloud
+          helm upgrade --install localstack localstack-repo/localstack
+          pip install awscli
+
       - name: Run integration test
         run: |
           bash test/integration_test/run.sh

@@ -8,7 +8,7 @@ import { RootState } from 'store'
 import RunningLabel from 'components-mui/RunningLabel'
 import T from 'components/T'
 import api from 'api'
-import { format } from 'lib/dayjs'
+import { format } from 'lib/luxon'
 import { useSelector } from 'react-redux'
 
 const TableCell = withStyles({

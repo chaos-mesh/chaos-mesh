@@ -1,9 +1,8 @@
-import { Box, Button, Grid, Grow, Modal } from '@material-ui/core'
+import { Button, Grid, Grow, Modal } from '@material-ui/core'
 import EventsTable, { EventsTableHandles } from 'components/EventsTable'
 import React, { useEffect, useRef, useState } from 'react'
 import { RootState, useStoreDispatch } from 'store'
 import { Theme, createStyles, makeStyles } from '@material-ui/core/styles'
-import { setAlert, setAlertOpen } from 'slices/globalStatus'
 import { useHistory, useParams } from 'react-router-dom'
 
 import { Ace } from 'ace-builds'
@@ -26,6 +25,7 @@ import api from 'api'
 import fileDownload from 'js-file-download'
 import genEventsChart from 'lib/d3/eventsChart'
 import loadable from '@loadable/component'
+import { setAlert } from 'slices/globalStatus'
 import { useIntl } from 'react-intl'
 import { usePrevious } from 'lib/hooks'
 import { useSelector } from 'react-redux'
@@ -123,9 +123,12 @@ export default function ExperimentDetail() {
       genEventsChart({
         root: chart,
         events,
-        onSelectEvent: eventsTableRef.current!.onSelectEvent,
         intl,
         theme,
+        options: {
+          enableLegends: false,
+          onSelectEvent: eventsTableRef.current!.onSelectEvent,
+        },
       })
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -201,7 +204,6 @@ export default function ExperimentDetail() {
             message: intl.formatMessage({ id: `common.${action}Successfully` }),
           })
         )
-        dispatch(setAlertOpen(true))
 
         if (action === 'archive') {
           history.push('/experiments')
@@ -229,7 +231,7 @@ export default function ExperimentDetail() {
             message: intl.formatMessage({ id: 'common.updateSuccessfully' }),
           })
         )
-        dispatch(setAlertOpen(true))
+
         fetchExperimentDetail()
       })
       .catch(console.error)
@@ -302,7 +304,7 @@ export default function ExperimentDetail() {
                   </Button>
                 </Space>
               </PaperTop>
-              <Box p={3}>{detail && <ExperimentConfiguration experimentDetail={detail} />}</Box>
+              {detail && <ExperimentConfiguration experimentDetail={detail} />}
             </Paper>
           </Grid>
 

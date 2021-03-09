@@ -22,7 +22,7 @@ const PaperTop: React.FC<PaperTopProps> = ({ title, subtitle, children }) => {
   const classes = useStyles()
 
   return (
-    <Box className={classes.root} px={3}>
+    <Box className={classes.root}>
       <Box>
         <Typography component="div" gutterBottom={subtitle ? true : false}>
           {title}

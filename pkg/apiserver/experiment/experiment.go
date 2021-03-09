@@ -389,11 +389,11 @@ func (s *Service) createDNSChaos(exp *core.ExperimentInfo, kubeCli client.Client
 			Annotations: exp.Annotations,
 		},
 		Spec: v1alpha1.DNSChaosSpec{
-			Selector: exp.Scope.ParseSelector(),
-			Mode:     v1alpha1.PodMode(exp.Scope.Mode),
-			Value:    exp.Scope.Value,
-			Action:   v1alpha1.DNSChaosAction(exp.Target.DNSChaos.Action),
-			Scope:    v1alpha1.DNSChaosScope(exp.Target.DNSChaos.Scope),
+			Selector:           exp.Scope.ParseSelector(),
+			Mode:               v1alpha1.PodMode(exp.Scope.Mode),
+			Value:              exp.Scope.Value,
+			Action:             v1alpha1.DNSChaosAction(exp.Target.DNSChaos.Action),
+			DomainNamePatterns: exp.Target.DNSChaos.DomainNamePatterns,
 		},
 	}
 
