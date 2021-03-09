@@ -76,17 +76,3 @@ type PodChaosSpec struct {
 type PodChaosStatus struct {
 	ChaosStatus `json:",inline"`
 }
-
-// PodStatus represents information about the status of a pod in chaos experiment.
-type PodStatus struct {
-	Namespace string `json:"namespace"`
-	Name      string `json:"name"`
-	Action    string `json:"action"`
-	HostIP    string `json:"hostIP"`
-	PodIP     string `json:"podIP"`
-
-	// A brief CamelCase message indicating details about the chaos action.
-	// e.g. "delete this pod" or "pause this pod duration 5m"
-	// +optional
-	Message string `json:"message"`
-}

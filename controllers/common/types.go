@@ -38,16 +38,6 @@ type Reconciler struct {
 	ctx.Context
 }
 
-// NewReconciler would create Reconciler for common chaos
-func NewReconciler(req ctrl.Request, e endpoint.Endpoint, ctx ctx.Context) *Reconciler {
-	ctx.Log = ctx.Log.WithName(req.NamespacedName.String())
-
-	return &Reconciler{
-		Endpoint: e,
-		Context:  ctx,
-	}
-}
-
 // Reconcile the common chaos
 func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	var err error
@@ -67,17 +57,4 @@ func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	}
 
 	return ctrl.Result{}, nil
-}
-
-func updateFailedMessage(
-	ctx context.Context,
-	r *Reconciler,
-	chaos v1alpha1.InnerObject,
-	err string,
-) {
-	status := chaos.GetStatus()
-	status.FailedMessage = err
-	if err := r.Update(ctx, chaos); err != nil {
-		r.Log.Error(err, "unable to update chaos status")
-	}
 }
