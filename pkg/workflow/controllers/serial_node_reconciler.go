@@ -62,8 +62,7 @@ func (it *SerialNodeReconciler) Reconcile(request reconcile.Request) (reconcile.
 	// this node should finished
 	if len(node.Status.FinishedChildren) == node.Status.ExpectedChildren {
 
-		accomplishedCondition := GetCondition(node.Status, v1alpha1.Accomplished)
-		if accomplishedCondition == nil || accomplishedCondition.Status != corev1.ConditionTrue {
+		if !ConditionEqualsTo(node.Status, v1alpha1.Accomplished, corev1.ConditionTrue) {
 			updateError := retry.RetryOnConflict(retry.DefaultRetry, func() error {
 				node := v1alpha1.WorkflowNode{}
 				err := it.kubeClient.Get(ctx, request.NamespacedName, &node)

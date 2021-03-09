@@ -67,6 +67,7 @@ func renderNodesByTemplates(workflow *v1alpha1.Workflow, parent *v1alpha1.Workfl
 				},
 			}
 
+			// if parent is specified, use parent as owner, else use workflow as owner.
 			if parent != nil {
 				renderedNode.OwnerReferences = append(renderedNode.OwnerReferences, metav1.OwnerReference{
 					APIVersion:         parent.APIVersion,

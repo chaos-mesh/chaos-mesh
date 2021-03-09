@@ -82,8 +82,7 @@ func (it *DeadlineReconciler) Reconcile(request reconcile.Request) (reconcile.Re
 			}
 
 			var reason string
-			accomplishedCondition := GetCondition(node.Status, v1alpha1.Accomplished)
-			if accomplishedCondition != nil && accomplishedCondition.Status == corev1.ConditionTrue {
+			if ConditionEqualsTo(node.Status, v1alpha1.Accomplished, corev1.ConditionTrue) {
 				reason = v1alpha1.NodeDeadlineOmitted
 			} else {
 				reason = v1alpha1.NodeDeadlineExceed

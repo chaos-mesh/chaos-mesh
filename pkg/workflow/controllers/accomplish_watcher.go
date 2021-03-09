@@ -48,10 +48,8 @@ func (it *AccomplishWatcher) Reconcile(request reconcile.Request) (reconcile.Res
 		return reconcile.Result{}, client.IgnoreNotFound(err)
 	}
 
-	conditionAccomplished := GetCondition(node.Status, v1alpha1.Accomplished)
-	conditionDeadlineExceed := GetCondition(node.Status, v1alpha1.DeadlineExceed)
-	if (conditionAccomplished != nil && conditionAccomplished.Status == corev1.ConditionTrue) ||
-		(conditionDeadlineExceed != nil && conditionDeadlineExceed.Status == corev1.ConditionTrue) {
+	if ConditionEqualsTo(node.Status, v1alpha1.Accomplished, corev1.ConditionTrue) ||
+		ConditionEqualsTo(node.Status, v1alpha1.DeadlineExceed, corev1.ConditionTrue) {
 		owners := node.OwnerReferences
 		// NOOP
 		if len(owners) == 0 {

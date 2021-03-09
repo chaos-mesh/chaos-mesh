@@ -15,6 +15,7 @@ package controllers
 
 import (
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	corev1 "k8s.io/api/core/v1"
 )
 
 func SetCondition(status *v1alpha1.WorkflowNodeStatus, condition v1alpha1.WorkflowNodeCondition) {
@@ -33,6 +34,14 @@ func GetCondition(status v1alpha1.WorkflowNodeStatus, conditionType v1alpha1.Wor
 		}
 	}
 	return nil
+}
+
+func ConditionEqualsTo(status v1alpha1.WorkflowNodeStatus, conditionType v1alpha1.WorkflowNodeConditionType, expected corev1.ConditionStatus) bool {
+	condition := GetCondition(status, conditionType)
+	if condition == nil {
+		return false
+	}
+	return condition.Status == expected
 }
 
 func filterOutCondition(conditions []v1alpha1.WorkflowNodeCondition, except v1alpha1.WorkflowNodeConditionType) []v1alpha1.WorkflowNodeCondition {
