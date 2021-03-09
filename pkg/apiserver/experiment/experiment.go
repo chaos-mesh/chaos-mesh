@@ -833,15 +833,6 @@ func (s *Service) getExperimentDetail(c *gin.Context) {
 	c.JSON(http.StatusOK, expDetail)
 }
 
-func joinErrString(errStr *string, join string) {
-	if *errStr == "" {
-		*errStr = join
-	} else {
-		newStr := *errStr + "\n" + join
-		*errStr = newStr
-	}
-}
-
 // @Summary Delete the specified chaos experiment.
 // @Description Delete the specified chaos experiment.
 // @Tags experiments
@@ -859,7 +850,7 @@ func (s *Service) deleteExperiment(c *gin.Context) {
 		chaosMeta metav1.Object
 		ok        bool
 		exp       *core.Experiment
-		errStr    string
+		errFlag   bool
 	)
 
 	kubeCli, err := clientpool.ExtractTokenAndGetClient(c.Request.Header)
@@ -871,14 +862,16 @@ func (s *Service) deleteExperiment(c *gin.Context) {
 	uids := c.Param("uid")
 	uidSlice := strings.Split(uids, ",")
 	force := c.DefaultQuery("force", "false")
+	errFlag = false
 
 	for _, uid := range uidSlice {
 		if exp, err = s.archive.FindByUID(context.Background(), uid); err != nil {
 			if gorm.IsRecordNotFoundError(err) {
-				joinErrString(&errStr, fmt.Sprintf("delete experiment uid (%s) error, because the experiment is not found", uid))
+				_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(fmt.Errorf("delete experiment uid (%s) error, because the experiment is not found", uid)))
 			} else {
-				joinErrString(&errStr, fmt.Sprintf("delete experiment uid (%s) error, because %s", uid, err.Error()))
+				_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(fmt.Errorf("delete experiment uid (%s) error, because %s", uid, err.Error())))
 			}
+			errFlag = true
 			continue
 		}
 
@@ -890,21 +883,24 @@ func (s *Service) deleteExperiment(c *gin.Context) {
 		chaosKey := types.NamespacedName{Namespace: ns, Name: name}
 
 		if chaosKind, ok = v1alpha1.AllKinds()[kind]; !ok {
-			joinErrString(&errStr, fmt.Sprintf("delete experiment uid (%s) error, because kind (%s) is not supported", uid, kind))
+			_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(fmt.Errorf("delete experiment uid (%s) error, because kind (%s) is not supported", uid, kind)))
+			errFlag = true
 			continue
 		}
 		if err := kubeCli.Get(ctx, chaosKey, chaosKind.Chaos); err != nil {
 			if apierrors.IsNotFound(err) {
-				joinErrString(&errStr, fmt.Sprintf("delete experiment uid (%s) error, because the chaos is not found", uid))
+				_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(fmt.Errorf("delete experiment uid (%s) error, because the chaos is not found", uid)))
 			} else {
-				joinErrString(&errStr, fmt.Sprintf("delete experiment uid (%s) error, because %s", uid, err.Error()))
+				_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(fmt.Errorf("delete experiment uid (%s) error, because %s", uid, err.Error())))
 			}
+			errFlag = true
 			continue
 		}
 
 		if force == "true" {
 			if chaosMeta, ok = chaosKind.Chaos.(metav1.Object); !ok {
-				joinErrString(&errStr, fmt.Sprintf("delete experiment uid (%s) error, because failed to get chaos meta information", uid))
+				_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(fmt.Errorf("delete experiment uid (%s) error, because failed to get chaos meta information", uid)))
+				errFlag = true
 				continue
 			}
 
@@ -915,23 +911,24 @@ func (s *Service) deleteExperiment(c *gin.Context) {
 			annotations[common.AnnotationCleanFinalizer] = common.AnnotationCleanFinalizerForced
 			chaosMeta.SetAnnotations(annotations)
 			if err := kubeCli.Update(context.Background(), chaosKind.Chaos); err != nil {
-				joinErrString(&errStr, fmt.Sprintf("forced delete experiment uid (%s) error, because update chaos annotation error", uid))
+				_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(fmt.Errorf("forced delete experiment uid (%s) error, because update chaos annotation error", uid)))
+				errFlag = true
 				continue
 			}
 		}
 
 		if err := kubeCli.Delete(ctx, chaosKind.Chaos, &client.DeleteOptions{}); err != nil {
 			if apierrors.IsNotFound(err) {
-				joinErrString(&errStr, fmt.Sprintf("forced delete experiment uid (%s) error, because the chaos is not found", uid))
+				_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(fmt.Errorf("delete experiment uid (%s) error, because the chaos is not found", uid)))
 			} else {
-				joinErrString(&errStr, fmt.Sprintf("delete experiment uid (%s) error, because %s", uid, err.Error()))
+				_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(fmt.Errorf("delete experiment uid (%s) error, because %s", uid, err.Error())))
 			}
+			errFlag = true
 			continue
 		}
 	}
-	if errStr != "" {
+	if errFlag == true {
 		c.Status(http.StatusInternalServerError)
-		_ = c.Error(utils.ErrInternalServer.WrapWithNoMessage(fmt.Errorf(errStr)))
 	} else {
 		c.JSON(http.StatusOK, StatusResponse{Status: "success"})
 	}
