@@ -39,7 +39,7 @@ type StressChaos struct {
 
 // StressChaosSpec defines the desired state of StressChaos
 type StressChaosSpec struct {
-	ContainerSelector `json:",inline"`
+	selector.ContainerSelector `json:",inline"`
 
 	// Stressors defines plenty of stressors supported to stress system components out.
 	// You can use one or more of them to make up various kinds of stresses. At least

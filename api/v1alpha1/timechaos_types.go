@@ -35,7 +35,7 @@ type TimeChaos struct {
 
 // TimeChaosSpec defines the desired state of TimeChaos
 type TimeChaosSpec struct {
-	ContainerSelector `json:",inline"`
+	selector.ContainerSelector `json:",inline"`
 
 	// TimeOffset defines the delta time of injected program. It's a possibly signed sequence of decimal numbers, such as
 	// "300ms", "-1.5h" or "2h45m". Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".

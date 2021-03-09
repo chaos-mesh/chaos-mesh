@@ -14,12 +14,13 @@
 package v1alpha1
 
 import (
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1/selector"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // JVMChaosSpec defines the desired state of JVMChaos
 type JVMChaosSpec struct {
-	ContainerSelector `json:",inline"`
+	selector.ContainerSelector `json:",inline"`
 
 	// Duration represents the duration of the chaos action
 	// +optional

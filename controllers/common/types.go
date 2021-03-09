@@ -15,46 +15,52 @@ package common
 
 import (
 	"context"
-
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	ctx "github.com/chaos-mesh/chaos-mesh/pkg/router/context"
-	endpoint "github.com/chaos-mesh/chaos-mesh/pkg/router/endpoint"
-
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1/selector"
+	"github.com/chaos-mesh/chaos-mesh/controllers/config"
+	"github.com/go-logr/logr"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/client"
+	selectorUtils "github.com/chaos-mesh/chaos-mesh/pkg/selector"
 )
-
-const (
-	// AnnotationCleanFinalizer key
-	AnnotationCleanFinalizer = `chaos-mesh.chaos-mesh.org/cleanFinalizer`
-	// AnnotationCleanFinalizerForced value
-	AnnotationCleanFinalizerForced = `forced`
-)
-
-const emptyString = ""
 
 // Reconciler for common chaos
 type Reconciler struct {
-	endpoint.Endpoint
-	ctx.Context
+	// Object is used to mark the target type of this Reconciler
+	Object v1alpha1.StatefulObject
+
+	// Client is used to operate on the Kubernetes cluster
+	client.Client
+	client.Reader
+
+	Log logr.Logger
 }
 
 // Reconcile the common chaos
 func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
-	var err error
+	obj := r.Object.DeepCopyObject().(v1alpha1.StatefulObject)
 
-	r.Log.Info("Reconciling a common chaos", "name", req.Name, "namespace", req.Namespace)
-	ctx := context.Background()
-
-	chaos := r.Object()
-	if err = r.Client.Get(ctx, req.NamespacedName, chaos); err != nil {
-		r.Log.Error(err, "unable to get chaos")
-		return ctrl.Result{}, err
+	if err := r.Client.Get(context.TODO(), req.NamespacedName, obj); err != nil {
+		if apierrors.IsNotFound(err) {
+			r.Log.Info("chaos not found")
+		} else {
+			r.Log.Error(err, "unable to get chaos")
+		}
+		return ctrl.Result{}, nil
 	}
 
-	if err := r.Update(ctx, chaos); err != nil {
-		r.Log.Error(err, "unable to update chaos status")
-		return ctrl.Result{}, err
-	}
+	status := obj.GetStatus()
+	if status.Experiment.Records == nil {
+		// TODO: get selectors from obj
+		for group, sel := range obj.GetSelectors() {
+			var podSelector *selector.PodSelector
+			var containerNames []string
+			pods, err := selectorUtils.SelectAndFilterPods(context.TODO(), r.Client, r.Reader, podSelector, config.ControllerCfg.ClusterScoped, config.ControllerCfg.TargetNamespace, config.ControllerCfg.AllowedNamespaces, config.ControllerCfg.IgnoredNamespaces)
+			if err != nil {
 
+			}
+		}
+	}
 	return ctrl.Result{}, nil
 }

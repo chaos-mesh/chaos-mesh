@@ -81,7 +81,7 @@ const (
 
 // NetworkChaosSpec defines the desired state of NetworkChaos
 type NetworkChaosSpec struct {
-	PodSelector `json:",inline"`
+	selector.PodSelector `json:",inline"`
 
 	// Action defines the specific network chaos action.
 	// Supported action: partition, netem, delay, loss, duplicate, corrupt
@@ -102,7 +102,7 @@ type NetworkChaosSpec struct {
 
 	// Target represents network target, this applies on netem and network partition action
 	// +optional
-	Target *PodSelector `json:"target,omitempty"`
+	Target *selector.PodSelector `json:"target,omitempty"`
 
 	// ExternalTargets represents network targets outside k8s
 	// +optional

@@ -14,6 +14,7 @@
 package v1alpha1
 
 import (
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1/selector"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -35,7 +36,7 @@ type KernelChaos struct {
 
 // KernelChaosSpec defines the desired state of KernelChaos
 type KernelChaosSpec struct {
-	PodSelector `json:",inline"`
+	selector.PodSelector `json:",inline"`
 
 	// FailKernRequest defines the request of kernel injection
 	FailKernRequest FailKernRequest `json:"failKernRequest"`

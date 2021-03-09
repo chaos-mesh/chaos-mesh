@@ -26,102 +26,6 @@ const (
 	PauseAnnotationKey = "experiment.chaos-mesh.org/pause"
 )
 
-// LabelSelectorRequirements is list of LabelSelectorRequirement
-type LabelSelectorRequirements []metav1.LabelSelectorRequirement
-
-type PodSelector struct {
-	// Selector is used to select pods that are used to inject chaos action.
-	Selector SelectorSpec `json:"selector"`
-
-	// Mode defines the mode to run chaos action.
-	// Supported mode: one / all / fixed / fixed-percent / random-max-percent
-	// +kubebuilder:validation:Enum=one;all;fixed;fixed-percent;random-max-percent
-	Mode PodMode `json:"mode"`
-
-	// Value is required when the mode is set to `FixedPodMode` / `FixedPercentPodMod` / `RandomMaxPercentPodMod`.
-	// If `FixedPodMode`, provide an integer of pods to do chaos action.
-	// If `FixedPercentPodMod`, provide a number from 0-100 to specify the percent of pods the server can do chaos action.
-	// IF `RandomMaxPercentPodMod`,  provide a number from 0-100 to specify the max percent of pods to do chaos action
-	// +optional
-	Value string `json:"value"`
-}
-
-type ContainerSelector struct {
-	PodSelector `json:",inline"`
-
-	// ContainerName indicates the name of affected container.
-	// If not set, all containers will be injected
-	// +optional
-	ContainerNames []string `json:"containerNames,omitempty"`
-}
-
-// SelectorSpec defines the some selectors to select objects.
-// If the all selectors are empty, all objects will be used in chaos experiment.
-type SelectorSpec struct {
-	// Namespaces is a set of namespace to which objects belong.
-	// +optional
-	Namespaces []string `json:"namespaces,omitempty"`
-
-	// Nodes is a set of node name and objects must belong to these nodes.
-	// +optional
-	Nodes []string `json:"nodes,omitempty"`
-
-	// Pods is a map of string keys and a set values that used to select pods.
-	// The key defines the namespace which pods belong,
-	// and the each values is a set of pod names.
-	// +optional
-	Pods map[string][]string `json:"pods,omitempty"`
-
-	// Map of string keys and values that can be used to select nodes.
-	// Selector which must match a node's labels,
-	// and objects must belong to these selected nodes.
-	// +optional
-	NodeSelectors map[string]string `json:"nodeSelectors,omitempty"`
-
-	// Map of string keys and values that can be used to select objects.
-	// A selector based on fields.
-	// +optional
-	FieldSelectors map[string]string `json:"fieldSelectors,omitempty"`
-
-	// Map of string keys and values that can be used to select objects.
-	// A selector based on labels.
-	// +optional
-	LabelSelectors map[string]string `json:"labelSelectors,omitempty"`
-
-	// a slice of label selector expressions that can be used to select objects.
-	// A list of selectors based on set-based label expressions.
-	// +optional
-	ExpressionSelectors LabelSelectorRequirements `json:"expressionSelectors,omitempty"`
-
-	// Map of string keys and values that can be used to select objects.
-	// A selector based on annotations.
-	// +optional
-	AnnotationSelectors map[string]string `json:"annotationSelectors,omitempty"`
-
-	// PodPhaseSelectors is a set of condition of a pod at the current time.
-	// supported value: Pending / Running / Succeeded / Failed / Unknown
-	// +optional
-	PodPhaseSelectors []string `json:"podPhaseSelectors,omitempty"`
-}
-
-// PodMode represents the mode to run pod chaos action.
-type PodMode string
-
-const (
-	// OnePodMode represents that the system will do the chaos action on one pod selected randomly.
-	OnePodMode PodMode = "one"
-	// AllPodMode represents that the system will do the chaos action on all pods
-	// regardless of status (not ready or not running pods includes).
-	// Use this label carefully.
-	AllPodMode PodMode = "all"
-	// FixedPodMode represents that the system will do the chaos action on a specific number of running pods.
-	FixedPodMode PodMode = "fixed"
-	// FixedPercentPodMode to specify a fixed % that can be inject chaos action.
-	FixedPercentPodMode PodMode = "fixed-percent"
-	// RandomMaxPercentPodMode to specify a maximum % that can be inject chaos action.
-	RandomMaxPercentPodMode PodMode = "random-max-percent"
-)
-
 type ChaosStatus struct {
 	FailedMessage string `json:"failedMessage,omitempty"`
 
@@ -142,7 +46,19 @@ const (
 	ExperimentPhaseFinished      ExperimentPhase = "Finished"
 )
 
+type DesiredPhase string
+
+const (
+	// The target of `RunningPhase` is to make all selected targets (container or pod) into "Injected" phase
+	RunningPhase DesiredPhase = "Run"
+	// The target of `StoppedPhase` is to make all selected targets (container or pod) into "NotInjected" phase
+	StoppedPhase DesiredPhase = "Stop"
+)
+
 type ExperimentStatus struct {
+	// +kubebuilder:validation:Enum=Run;Stop
+	DesiredPhase `json:"desiredPhase,omitempty"`
+
 	// +optional
 	Phase ExperimentPhase `json:"phase,omitempty"`
 	// +optional
@@ -154,32 +70,38 @@ type ExperimentStatus struct {
 	// +optional
 	Duration string `json:"duration,omitempty"`
 	// +optional
-	// ContainerRecords are used to track the running status
-	ContainerRecords []ContainerStatus `json:"containerRecords,omitempty"`
+	// Records are used to track the running status
+	Records []TargetStatus `json:"containerRecords,omitempty"`
 }
 
+type TargetPhase string
+
+const (
+	// NotInjected means the target is not injected yet. The controller could call "Inject" on the target
+	NotInjected TargetPhase = "Not Injected"
+	// Injected means the target is injected. It's safe to recover it.
+	Injected TargetPhase = "Injected"
+)
+
 // PodStatus represents information about the status of a pod in chaos experiment.
-type PodStatus struct {
+type TargetStatus struct {
 	Namespace string `json:"namespace"`
 	Name      string `json:"name"`
 	Action    string `json:"action"`
 	HostIP    string `json:"hostIP"`
 	PodIP     string `json:"podIP"`
 
+	// +optional
+	ContainerName string `json:"containerName"`
+
 	// A brief CamelCase message indicating details about the chaos action.
 	// e.g. "delete this pod" or "pause this pod"
 	// +optional
 	Message string `json:"message"`
 
-	Phase string `json:"phase"`
+	Phase TargetPhase `json:"phase"`
+	SelectGroup string `json:"selectGroup"`
 }
-
-type ContainerStatus struct {
-	PodStatus `json:",inline"`
-
-	ContainerName string `json:"containerName"`
-}
-
 
 var log = ctrl.Log.WithName("api")
 

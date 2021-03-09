@@ -49,7 +49,7 @@ type Matcher struct {
 }
 
 type HTTPChaosSpec struct {
-	PodSelector `json:",inline"`
+	selector.PodSelector `json:",inline"`
 
 	// Action defines the specific pod chaos action.
 	// Supported action: delay | abort | mixed

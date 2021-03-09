@@ -48,7 +48,7 @@ const (
 
 // PodChaosSpec defines the attributes that a user creates on a chaos experiment about pods.
 type PodChaosSpec struct {
-	ContainerSelector `json:",inline"`
+	selector.ContainerSelector `json:",inline"`
 
 	// Action defines the specific pod chaos action.
 	// Supported action: pod-kill / pod-failure / container-kill

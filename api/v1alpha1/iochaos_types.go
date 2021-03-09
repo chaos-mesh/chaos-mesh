@@ -14,6 +14,7 @@
 package v1alpha1
 
 import (
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1/selector"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -34,7 +35,7 @@ type IoChaos struct {
 
 // IoChaosSpec defines the desired state of IoChaos
 type IoChaosSpec struct {
-	ContainerSelector `json:",inline"`
+	selector.ContainerSelector `json:",inline"`
 
 	// Action defines the specific pod chaos action.
 	// Supported action: latency / fault / attrOverride
