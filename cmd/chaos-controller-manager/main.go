@@ -20,6 +20,8 @@ import (
 	"os"
 	"time"
 
+	wfcontrollers "github.com/chaos-mesh/chaos-mesh/pkg/workflow/controllers"
+
 	"golang.org/x/time/rate"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
@@ -33,6 +35,12 @@ import (
 	"github.com/chaos-mesh/chaos-mesh/pkg/version"
 	"github.com/chaos-mesh/chaos-mesh/pkg/webhook/config"
 	"github.com/chaos-mesh/chaos-mesh/pkg/webhook/config/watcher"
+
+	"k8s.io/apimachinery/pkg/runtime"
+	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
+	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
+	"k8s.io/client-go/rest"
+	"k8s.io/client-go/util/workqueue"
 
 	_ "github.com/chaos-mesh/chaos-mesh/controllers/awschaos/detachvolume"
 	_ "github.com/chaos-mesh/chaos-mesh/controllers/awschaos/ec2restart"
@@ -49,12 +57,6 @@ import (
 	_ "github.com/chaos-mesh/chaos-mesh/controllers/podchaos/podkill"
 	_ "github.com/chaos-mesh/chaos-mesh/controllers/stresschaos"
 	_ "github.com/chaos-mesh/chaos-mesh/controllers/timechaos"
-
-	"k8s.io/apimachinery/pkg/runtime"
-	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
-	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
-	"k8s.io/client-go/rest"
-	"k8s.io/client-go/util/workqueue"
 
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
@@ -150,6 +152,13 @@ func main() {
 	})
 	if err = (&v1alpha1.PodNetworkChaos{}).SetupWebhookWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create webhook", "webhook", "PodNetworkChaos")
+		os.Exit(1)
+	}
+
+	// workflow stuff
+	err = wfcontrollers.BootstrapWorkflowControllers(mgr, ctrl.Log)
+	if err != nil {
+		setupLog.Error(err, "failed to setup bootstrap controllers")
 		os.Exit(1)
 	}
 
