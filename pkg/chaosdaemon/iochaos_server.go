@@ -14,6 +14,8 @@
 package chaosdaemon
 
 import (
+	"bufio"
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -74,9 +76,11 @@ func (s *DaemonServer) ApplyIoChaos(ctx context.Context, in *pb.ApplyIoChaosRequ
 		processBuilder = processBuilder.SetNS(pid, bpm.MountNS).SetNS(pid, bpm.PidNS)
 	}
 
+	var outBuffer bytes.Buffer
+
 	cmd := processBuilder.Build()
 	cmd.Stdin = strings.NewReader(in.Actions)
-	cmd.Stdout = os.Stdout
+	cmd.Stdout = bufio.NewWriter(&outBuffer)
 	cmd.Stderr = os.Stderr
 
 	err = s.backgroundProcessManager.StartProcess(cmd)
@@ -94,6 +98,20 @@ func (s *DaemonServer) ApplyIoChaos(ctx context.Context, in *pb.ApplyIoChaosRequ
 			log.Error(kerr, "kill toda failed", "request", in)
 		}
 		return nil, err
+	}
+
+	log.Info("Waiting for toda to start")
+
+	for {
+		data, err := outBuffer.ReadString('\n')
+		os.Stdout.Write([]byte(data))
+		if err != nil {
+			log.Error(err, "an error occured during toda startup")
+			return nil, err
+		}
+		if strings.Contains(data, "toda: waiting for signal to exit") {
+			break
+		} // Marking a successful startup
 	}
 
 	return &pb.ApplyIoChaosResponse{
