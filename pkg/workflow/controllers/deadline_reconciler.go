@@ -61,10 +61,18 @@ func (it *DeadlineReconciler) Reconcile(request reconcile.Request) (reconcile.Re
 			if err != nil {
 				return err
 			}
+
+			var reason string
+			if ConditionEqualsTo(node.Status, v1alpha1.CondiitonAccomplished, corev1.ConditionTrue) {
+				reason = v1alpha1.NodeDeadlineOmitted
+			} else {
+				reason = v1alpha1.NodeDeadlineExceed
+			}
+
 			SetCondition(&node.Status, v1alpha1.WorkflowNodeCondition{
-				Type:   v1alpha1.DeadlineExceed,
+				Type:   v1alpha1.ConditionDeadlineExceed,
 				Status: corev1.ConditionTrue,
-				Reason: v1alpha1.NodeDeadlineExceed,
+				Reason: reason,
 			})
 			return it.kubeClient.Update(ctx, &node)
 		})
@@ -80,18 +88,10 @@ func (it *DeadlineReconciler) Reconcile(request reconcile.Request) (reconcile.Re
 			if err != nil {
 				return err
 			}
-
-			var reason string
-			if ConditionEqualsTo(node.Status, v1alpha1.Accomplished, corev1.ConditionTrue) {
-				reason = v1alpha1.NodeDeadlineOmitted
-			} else {
-				reason = v1alpha1.NodeDeadlineExceed
-			}
-
 			SetCondition(&node.Status, v1alpha1.WorkflowNodeCondition{
-				Type:   v1alpha1.DeadlineExceed,
+				Type:   v1alpha1.ConditionDeadlineExceed,
 				Status: corev1.ConditionFalse,
-				Reason: reason,
+				Reason: v1alpha1.NodeDeadlineNotExceed,
 			})
 			return it.kubeClient.Update(ctx, &node)
 		})

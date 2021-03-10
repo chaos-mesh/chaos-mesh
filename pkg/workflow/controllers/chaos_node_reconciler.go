@@ -16,7 +16,8 @@ package controllers
 import (
 	"context"
 	"fmt"
-	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
+	"strings"
+
 	"github.com/go-logr/logr"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -26,7 +27,8 @@ import (
 	"k8s.io/client-go/util/retry"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
-	"strings"
+
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 )
 
 type ChaosNodeReconciler struct {
@@ -48,22 +50,20 @@ func (it *ChaosNodeReconciler) Reconcile(request reconcile.Request) (reconcile.R
 		return reconcile.Result{}, client.IgnoreNotFound(err)
 	}
 
-	if node.Status.ChaosResource != nil {
-		// TODO: check if it exactly exists
-		return reconcile.Result{}, err
+	// TODO: use condition
+	if ConditionEqualsTo(node.Status, v1alpha1.ConditionDeadlineExceed, corev1.ConditionTrue) {
+		return reconcile.Result{}, nil
 	}
 
 	if availableChaos(string(node.Spec.Type)) {
-		if node.Status.ChaosResource == nil {
-			err = it.applyChaos(ctx, node)
-			return reconcile.Result{}, err
-		}
+		err = it.injectChaos(ctx, node)
+		return reconcile.Result{}, err
 	}
 
 	return reconcile.Result{}, nil
 }
 
-func (it *ChaosNodeReconciler) applyChaos(ctx context.Context, node v1alpha1.WorkflowNode) error {
+func (it *ChaosNodeReconciler) injectChaos(ctx context.Context, node v1alpha1.WorkflowNode) error {
 	var chaosObject runtime.Object
 
 	var meta metav1.Object
@@ -132,6 +132,14 @@ func (it *ChaosNodeReconciler) applyChaos(ctx context.Context, node v1alpha1.Wor
 			return client.IgnoreNotFound(err)
 		}
 		node.Status.ChaosResource = &chaosRef
+
+		// TODO: this condition should be set by observation
+		SetCondition(&node.Status, v1alpha1.WorkflowNodeCondition{
+			Type:   v1alpha1.ConditionChaosInjected,
+			Status: corev1.ConditionTrue,
+			Reason: v1alpha1.ChaosCRCreated,
+		})
+
 		return it.kubeClient.Update(ctx, &node)
 
 	})

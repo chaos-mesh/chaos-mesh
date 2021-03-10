@@ -70,8 +70,9 @@ type WorkflowNodeStatus struct {
 type WorkflowNodeConditionType string
 
 const (
-	Accomplished   WorkflowNodeConditionType = "Accomplished"
-	DeadlineExceed WorkflowNodeConditionType = "DeadlineExceed"
+	CondiitonAccomplished   WorkflowNodeConditionType = "Accomplished"
+	ConditionDeadlineExceed WorkflowNodeConditionType = "DeadlineExceed"
+	ConditionChaosInjected  WorkflowNodeConditionType = "ChaosInjected"
 )
 
 type WorkflowNodeCondition struct {

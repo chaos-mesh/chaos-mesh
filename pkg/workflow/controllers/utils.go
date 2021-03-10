@@ -14,8 +14,9 @@
 package controllers
 
 import (
-	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
+
+	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 )
 
 func SetCondition(status *v1alpha1.WorkflowNodeStatus, condition v1alpha1.WorkflowNodeCondition) {

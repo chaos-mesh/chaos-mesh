@@ -26,7 +26,12 @@ import (
 var (
 	isController       = true
 	blockOwnerDeletion = true
+	ApiVersion         = v1alpha1.GroupVersion.String()
+	KindWorkflow       = "Workflow"
+	KindWorkflowNode   = "WorkflowNode"
 )
+
+const LabelControlledBy = "chaos-mesh.org/controlled-by"
 
 // renderNodesByTemplates will render the nodes one by one, will setup owner by given parent. If parent is nil, it will use workflow as its owner.
 func renderNodesByTemplates(workflow *v1alpha1.Workflow, parent *v1alpha1.WorkflowNode, templates ...string) ([]*v1alpha1.WorkflowNode, error) {
@@ -70,22 +75,30 @@ func renderNodesByTemplates(workflow *v1alpha1.Workflow, parent *v1alpha1.Workfl
 			// if parent is specified, use parent as owner, else use workflow as owner.
 			if parent != nil {
 				renderedNode.OwnerReferences = append(renderedNode.OwnerReferences, metav1.OwnerReference{
-					APIVersion:         parent.APIVersion,
-					Kind:               parent.Kind,
+					APIVersion:         ApiVersion,
+					Kind:               KindWorkflowNode,
 					Name:               parent.Name,
 					UID:                parent.UID,
 					Controller:         &isController,
 					BlockOwnerDeletion: &blockOwnerDeletion,
 				})
+				if renderedNode.Labels == nil {
+					renderedNode.Labels = make(map[string]string)
+				}
+				renderedNode.Labels[LabelControlledBy] = parent.Name
 			} else {
 				renderedNode.OwnerReferences = append(renderedNode.OwnerReferences, metav1.OwnerReference{
-					APIVersion:         workflow.APIVersion,
-					Kind:               workflow.Kind,
+					APIVersion:         ApiVersion,
+					Kind:               KindWorkflow,
 					Name:               workflow.Name,
 					UID:                workflow.UID,
 					Controller:         &isController,
 					BlockOwnerDeletion: &blockOwnerDeletion,
 				})
+				if renderedNode.Labels == nil {
+					renderedNode.Labels = make(map[string]string)
+				}
+				renderedNode.Labels[LabelControlledBy] = workflow.Name
 			}
 
 			renderedNode.Finalizers = append(renderedNode.Finalizers, metav1.FinalizerDeleteDependents)
