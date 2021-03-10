@@ -99,4 +99,6 @@ const (
 	NodeDeadlineExceed    string = "NodeDeadlineExceed"
 	NodeDeadlineNotExceed string = "NodeDeadlineNotExceed"
 	NodeDeadlineOmitted   string = "NodeDeadlineOmitted"
+	ChaosCRCreated        string = "ChaosCRCreated"
+	ChaosCRCreateFailed   string = "ChaosCRCreateFailed"
 )

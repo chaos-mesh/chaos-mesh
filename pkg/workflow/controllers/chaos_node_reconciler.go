@@ -49,6 +49,7 @@ func (it *ChaosNodeReconciler) Reconcile(request reconcile.Request) (reconcile.R
 	}
 
 	if node.Status.ChaosResource != nil {
+		// TODO: check if it exactly exists
 		return reconcile.Result{}, err
 	}
 
@@ -107,9 +108,12 @@ func (it *ChaosNodeReconciler) applyChaos(ctx context.Context, node v1alpha1.Wor
 
 	err := it.kubeClient.Create(ctx, chaosObject)
 	if err != nil {
+		it.eventRecorder.Event(&node, corev1.EventTypeWarning, v1alpha1.ChaosCRCreateFailed, "Failed to create chaos CR")
 		it.logger.Error(err, "failed to create chaos")
 		return nil
 	}
+
+	it.eventRecorder.Event(&node, corev1.EventTypeNormal, v1alpha1.ChaosCRCreated, fmt.Sprintf("Chaos CR %s/%s created", meta.GetNamespace(), meta.GetName()))
 
 	group := chaosObject.GetObjectKind().GroupVersionKind().Group
 	chaosRef := corev1.TypedLocalObjectReference{
@@ -135,5 +139,6 @@ func (it *ChaosNodeReconciler) applyChaos(ctx context.Context, node v1alpha1.Wor
 }
 
 func availableChaos(kind string) bool {
+	// TODO: use generated KindMap
 	return strings.Contains(strings.ToLower(kind), "chaos")
 }
