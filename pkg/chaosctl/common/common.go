@@ -186,7 +186,7 @@ func GetPods(ctx context.Context, chaosName string, status v1alpha1.ChaosStatus,
 		time.Sleep(waitTime)
 	}
 
-	pods, err := selector.SelectPods(ctx, c, c, selectorSpec, ctrlconfig.ControllerCfg.ClusterScoped, ctrlconfig.ControllerCfg.TargetNamespace, ctrlconfig.ControllerCfg.AllowedNamespaces, ctrlconfig.ControllerCfg.IgnoredNamespaces)
+	pods, err := selector.SelectPods(ctx, c, c, selectorSpec, ctrlconfig.ControllerCfg.ClusterScoped, ctrlconfig.ControllerCfg.TargetNamespace, ctrlconfig.ControllerCfg.EnableFilterNamespace)
 	if err != nil {
 		return nil, nil, errors.Wrap(err, "failed to SelectPods")
 	}
@@ -204,7 +204,7 @@ func GetPods(ctx context.Context, chaosName string, status v1alpha1.ChaosStatus,
 			Nodes:          []string{nodeName},
 			LabelSelectors: map[string]string{"app.kubernetes.io/component": "chaos-daemon"},
 		}
-		daemons, err := selector.SelectPods(ctx, c, nil, daemonSelector, ctrlconfig.ControllerCfg.ClusterScoped, ctrlconfig.ControllerCfg.TargetNamespace, ctrlconfig.ControllerCfg.AllowedNamespaces, ctrlconfig.ControllerCfg.IgnoredNamespaces)
+		daemons, err := selector.SelectPods(ctx, c, nil, daemonSelector, ctrlconfig.ControllerCfg.ClusterScoped, ctrlconfig.ControllerCfg.TargetNamespace, ctrlconfig.ControllerCfg.EnableFilterNamespace)
 		if err != nil {
 			return nil, nil, errors.Wrap(err, fmt.Sprintf("failed to select daemon pod for pod %s", pod.GetName()))
 		}
