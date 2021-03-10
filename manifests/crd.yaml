@@ -3445,6 +3445,8 @@ spec:
     kind: WorkflowNode
     listKind: WorkflowNodeList
     plural: workflownodes
+    shortNames:
+    - wfn
     singular: workflownode
   preserveUnknownFields: false
   scope: Namespaced
@@ -5400,6 +5402,8 @@ spec:
     kind: Workflow
     listKind: WorkflowList
     plural: workflows
+    shortNames:
+    - wf
     singular: workflow
   preserveUnknownFields: false
   scope: Namespaced
