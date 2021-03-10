@@ -55,8 +55,16 @@ Define the chaos-dashboard svc's name
 {{/*
 Define the secret's name of certs
 */}}
-{{- define "chaos-mesh.certs" -}}
+{{- define "chaos-mesh.webhook.certs" -}}
 {{- printf "chaos-mesh-webhook-certs" -}}
+{{- end -}}
+
+{{- define "chaos-mesh.daemon.certs" -}}
+{{- printf "chaos-mesh-daemon-certs" -}}
+{{- end -}}
+
+{{- define "chaos-mesh.daemon-client.certs" -}}
+{{- printf "chaos-mesh-daemon-client-certs" -}}
 {{- end -}}
 
 {{/*
