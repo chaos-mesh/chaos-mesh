@@ -22,10 +22,10 @@ const validatorTmpl = `
 // GetChaosValidator returns chaos object by kind
 func GetChaosValidator(chaosKind string) ChaosValidator {
 	switch chaosKind {
-	{{range $val := .}}
+{{range $val := .}}
 	case Kind{{$val}}:
 		return &{{$val}}{}
-	{{end}}
+{{end}}
 	default:
 		return nil
 	}
