@@ -1,22 +1,25 @@
-import { Box, Grid, Typography } from '@material-ui/core'
-import React, { useEffect, useState } from 'react'
+import { Box, Button, Grid, Typography } from '@material-ui/core'
+import { useEffect, useState } from 'react'
 
+import AddIcon from '@material-ui/icons/Add'
 import ConfirmDialog from 'components-mui/ConfirmDialog'
 import { Experiment } from 'api/experiments.type'
 import ExperimentListItem from 'components/ExperimentListItem'
 import Loading from 'components-mui/Loading'
+import NotFound from 'components-mui/NotFound'
 import T from 'components/T'
 import TuneIcon from '@material-ui/icons/Tune'
 import _groupBy from 'lodash.groupby'
 import api from 'api'
-import { comparator } from 'lib/luxon'
 import { setAlert } from 'slices/globalStatus'
 import { transByKind } from 'lib/byKind'
+import { useHistory } from 'react-router-dom'
 import { useIntl } from 'react-intl'
 import { useStoreDispatch } from 'store'
 
 export default function Experiments() {
   const intl = useIntl()
+  const history = useHistory()
 
   const dispatch = useStoreDispatch()
 
@@ -40,41 +43,8 @@ export default function Experiments() {
       .finally(() => setLoading(false))
   }
 
-  const fetchEvents = (experiments: Experiment[]) => {
-    api.events
-      .dryEvents()
-      .then(({ data }) => {
-        if (data.length) {
-          setExperiments(
-            experiments.map((e) => {
-              if (e.status === 'Failed') {
-                return { ...e, events: [] }
-              } else {
-                const events = data
-                  .filter((d) => d.experiment_id === e.uid)
-                  .sort((a, b) => comparator(a.start_time, b.start_time))
-
-                return {
-                  ...e,
-                  events: events.length > 0 ? [events[0]] : [],
-                }
-              }
-            })
-          )
-        }
-      })
-      .catch(console.error)
-  }
-
   // Get all experiments after mount
   useEffect(fetchExperiments, [])
-
-  // Refresh every experiments' events after experiments state updated
-  useEffect(() => {
-    if (experiments && experiments.length > 0 && !experiments[0].events) {
-      fetchEvents(experiments)
-    }
-  }, [experiments])
 
   const handleExperiment = (action: string) => () => {
     let actionFunc: any
@@ -120,16 +90,22 @@ export default function Experiments() {
 
   return (
     <>
+      <Box mb={6}>
+        <Button variant="outlined" startIcon={<AddIcon />} onClick={() => history.push('/newExperiment')}>
+          {T('newE.title')}
+        </Button>
+      </Box>
+
       {experiments &&
         experiments.length > 0 &&
         Object.entries(_groupBy(experiments, 'kind'))
           .sort((a, b) => (a[0] > b[0] ? 1 : -1))
           .map(([kind, experimentsByKind]) => (
             <Box key={kind} mb={6}>
-              <Box mb={6}>
-                <Typography variant="button">{transByKind(kind as any)}</Typography>
+              <Box mb={3} ml={1}>
+                <Typography variant="overline">{transByKind(kind as any)}</Typography>
               </Box>
-              <Grid container spacing={3}>
+              <Grid container spacing={6}>
                 {experimentsByKind.length > 0 &&
                   experimentsByKind.map((e) => (
                     <Grid key={e.uid} item xs={12}>
@@ -146,14 +122,12 @@ export default function Experiments() {
           ))}
 
       {!loading && experiments && experiments.length === 0 && (
-        <Box display="flex" flexDirection="column" justifyContent="center" alignItems="center" height="100%">
+        <NotFound textAlign="center">
           <Box mb={3}>
             <TuneIcon fontSize="large" />
           </Box>
-          <Typography variant="h6" align="center">
-            {T('experiments.noExperimentsFound')}
-          </Typography>
-        </Box>
+          <Typography variant="h6">{T('experiments.noExperimentsFound')}</Typography>
+        </NotFound>
       )}
 
       {loading && <Loading />}
