@@ -55,12 +55,13 @@ func (it *SerialNodeReconciler) Reconcile(request reconcile.Request) (reconcile.
 	}
 
 	// un-synced expected children
-	if node.Status.ExpectedChildren != len(node.Spec.Tasks) {
-		node.Status.ExpectedChildren = len(node.Spec.Tasks)
+	if node.Status.ExpectedChildren == nil {
+		expected := len(node.Spec.Tasks)
+		node.Status.ExpectedChildren = &expected
 	}
 
 	// this node should finished
-	if len(node.Status.FinishedChildren) == node.Status.ExpectedChildren {
+	if len(node.Status.FinishedChildren) == *node.Status.ExpectedChildren {
 
 		if !ConditionEqualsTo(node.Status, v1alpha1.Accomplished, corev1.ConditionTrue) {
 			updateError := retry.RetryOnConflict(retry.DefaultRetry, func() error {

@@ -44,7 +44,8 @@ type WorkflowNodeSpec struct {
 type WorkflowNodeStatus struct {
 
 	// ExpectedChildren means the expected children to execute
-	ExpectedChildren int `json:"expected_children"`
+	// +optional
+	ExpectedChildren *int `json:"expected_children,omitempty"`
 
 	// ChaosResource refs to the real chaos CR object.
 	// +optional
@@ -52,7 +53,7 @@ type WorkflowNodeStatus struct {
 
 	// ActiveChildren means the created children node
 	// +optional
-	ActiveChildren []corev1.LocalObjectReference `json:"active_children"`
+	ActiveChildren []corev1.LocalObjectReference `json:"active_children,omitempty"`
 
 	// Children is necessary for representing the order when replicated child template references by parent template.
 	// +optional

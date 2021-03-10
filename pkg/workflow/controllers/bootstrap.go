@@ -74,5 +74,19 @@ func BootstrapWorkflowControllers(mgr manager.Manager, logger logr.Logger) error
 	if err != nil {
 		return err
 	}
+
+	err = ctrl.NewControllerManagedBy(mgr).
+		For(&v1alpha1.WorkflowNode{}).
+		Named("workflow-chaos-node-reconciler").
+		Complete(
+			NewChaosNodeReconciler(
+				mgr.GetClient(),
+				mgr.GetEventRecorderFor("workflow-chaos-node-reconciler"),
+				logger.WithName("workflow-chaos-node-reconciler"),
+			),
+		)
+	if err != nil {
+		return err
+	}
 	return nil
 }

@@ -5371,8 +5371,6 @@ spec:
                     type: string
                 type: object
               type: array
-          required:
-          - expected_children
           type: object
       required:
       - spec

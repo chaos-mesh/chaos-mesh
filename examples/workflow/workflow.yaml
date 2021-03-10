@@ -20,6 +20,7 @@ spec:
       template_type: NetworkChaos
       duration: 10s
       network_chaos:
+        direction: to
         action: delay
         mode: all
         selector:
