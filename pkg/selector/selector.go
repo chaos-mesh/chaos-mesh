@@ -17,11 +17,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/chaos-mesh/chaos-mesh/pkg/namespaceannoationfilter"
 	"math"
 	"math/rand"
 	"strconv"
 	"strings"
+
+	"github.com/chaos-mesh/chaos-mesh/pkg/namespaceannoationfilter"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
 	"github.com/chaos-mesh/chaos-mesh/pkg/label"
@@ -38,7 +39,6 @@ import (
 	"k8s.io/apimachinery/pkg/selection"
 	"k8s.io/apimachinery/pkg/types"
 )
-
 
 var log = ctrl.Log.WithName("selector")
 

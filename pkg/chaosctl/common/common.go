@@ -382,7 +382,7 @@ func checkConnForCtrlAndDaemon(ctx context.Context, daemons []v1.Pod, c *ClientS
 	ctrlSelector := v1alpha1.SelectorSpec{
 		LabelSelectors: map[string]string{"app.kubernetes.io/component": "controller-manager"},
 	}
-	ctrlMgrs, err := selector.SelectPods(ctx, c.CtrlCli, c.CtrlCli, ctrlSelector, ctrlconfig.ControllerCfg.ClusterScoped, ctrlconfig.ControllerCfg.TargetNamespace, ctrlconfig.ControllerCfg.AllowedNamespaces, ctrlconfig.ControllerCfg.IgnoredNamespaces)
+	ctrlMgrs, err := selector.SelectPods(ctx, c.CtrlCli, c.CtrlCli, ctrlSelector, ctrlconfig.ControllerCfg.ClusterScoped, ctrlconfig.ControllerCfg.TargetNamespace, ctrlconfig.ControllerCfg.EnableFilterNamespace)
 	if err != nil {
 		return errors.Wrapf(err, "failed to select pod for controller-manager")
 	}

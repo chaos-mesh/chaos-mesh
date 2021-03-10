@@ -15,8 +15,9 @@ package selector
 
 import (
 	"context"
-	"k8s.io/apimachinery/pkg/runtime"
 	"testing"
+
+	"k8s.io/apimachinery/pkg/runtime"
 
 	. "github.com/onsi/gomega"
 
@@ -150,8 +151,8 @@ func TestSelectPods(t *testing.T) {
 	}
 
 	var (
-		testCfgClusterScoped     = true
-		testCfgTargetNamespace   = ""
+		testCfgClusterScoped         = true
+		testCfgTargetNamespace       = ""
 		testCfgEnableNamespaceFilter = true
 	)
 
@@ -185,36 +186,36 @@ func TestSelectPodWithNamespaceFilter(t *testing.T) {
 
 	objs := append(objectsInNs1, objectsInNs2...)
 	objs = append(objs, namespaces...)
-	c := fake.NewFakeClient(objs... )
+	c := fake.NewFakeClient(objs...)
 
 	type TestCase struct {
-		name         string
-		selector     v1alpha1.SelectorSpec
-		expectedPods []v1.Pod
+		name                  string
+		selector              v1alpha1.SelectorSpec
+		expectedPods          []v1.Pod
 		enableNamespaceFilter bool
 	}
 	tcs := []TestCase{
 		{
 			name: "without namespace filter",
 			selector: v1alpha1.SelectorSpec{
-				Namespaces:     []string{"ns1", "ns2"},
+				Namespaces: []string{"ns1", "ns2"},
 			},
 			enableNamespaceFilter: false,
-			expectedPods: append(podsInNs1, podsInNs2...),
+			expectedPods:          append(podsInNs1, podsInNs2...),
 		},
 		{
 			name: "with namespace filter",
 			selector: v1alpha1.SelectorSpec{
-				Namespaces:     []string{"ns1", "ns2"},
+				Namespaces: []string{"ns1", "ns2"},
 			},
 			enableNamespaceFilter: true,
-			expectedPods: podsInNs2,
+			expectedPods:          podsInNs2,
 		},
 	}
 
 	var (
-		testCfgClusterScoped     = true
-		testCfgTargetNamespace   = ""
+		testCfgClusterScoped   = true
+		testCfgTargetNamespace = ""
 	)
 
 	var r client.Reader

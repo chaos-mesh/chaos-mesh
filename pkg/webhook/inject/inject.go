@@ -17,8 +17,9 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/chaos-mesh/chaos-mesh/pkg/namespaceannoationfilter"
 	"strings"
+
+	"github.com/chaos-mesh/chaos-mesh/pkg/namespaceannoationfilter"
 
 	"github.com/chaos-mesh/chaos-mesh/controllers/metrics"
 	"github.com/chaos-mesh/chaos-mesh/pkg/annotation"
