@@ -17,9 +17,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
-	"reflect"
 
-	admissionv1beta1 "k8s.io/api/admission/v1beta1"
 	authv1 "k8s.io/api/authorization/v1"
 	authorizationv1 "k8s.io/client-go/kubernetes/typed/authorization/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -27,7 +25,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 
 	"github.com/chaos-mesh/chaos-mesh/api/v1alpha1"
-	"github.com/chaos-mesh/chaos-mesh/pkg/selector"
 )
 
 var authLog = ctrl.Log.WithName("validate-auth")
@@ -74,14 +71,11 @@ func (v *AuthValidator) Handle(ctx context.Context, req admission.Request) admis
 	groups := req.UserInfo.Groups
 	chaosKind := req.Kind.Kind
 
-	//var chaos v1alpha1.ChaosValidator
-
 	if chaosKind == v1alpha1.KindAwsChaos || chaosKind == v1alpha1.KindPodNetworkChaos {
 		return admission.Allowed("")
 	}
 
 	chaos := v1alpha1.GetChaosValidator(chaosKind)
-	oldChaos := v1alpha1.GetChaosValidator(chaosKind)
 	if chaos == nil {
 		err := fmt.Errorf("kind %s is not support", chaosKind)
 		return admission.Errored(http.StatusBadRequest, err)
@@ -93,63 +87,48 @@ func (v *AuthValidator) Handle(ctx context.Context, req admission.Request) admis
 	}
 	specs := chaos.GetSelectSpec()
 
-	if req.Operation == admissionv1beta1.Update {
-		// when selector is not changed, don't need to validate auth again
-
-		err = v.decoder.DecodeRaw(req.OldObject, oldChaos)
-		if err != nil {
-			return admission.Errored(http.StatusBadRequest, err)
-		}
-
-		oldSpecs := oldChaos.GetSelectSpec()
-		selectSpecChanged := false
-		if len(specs) == len(oldSpecs) {
-			for i, spec := range specs {
-				if !reflect.DeepEqual(oldSpecs[i].GetSelector(), spec.GetSelector()) {
-					selectSpecChanged = true
-					break
-				}
-			}
-		} else {
-			selectSpecChanged = true
-		}
-
-		if !selectSpecChanged {
-			authLog.Info("chaos updated but select spec not changed, auth validate passed")
-			return admission.Allowed("")
-		}
-	}
-
+	requireClusterPrivileges := false
 	affectedNamespaces := make(map[string]struct{})
 
 	for _, spec := range specs {
-		pods, err := selector.SelectPods(context.Background(), v.client, v.reader, spec.GetSelector(), v.clusterScoped, v.targetNamespace, v.allowedNamespaces, v.ignoredNamespaces)
-		if err != nil {
-			return admission.Errored(http.StatusBadRequest, err)
+		if len(spec.GetSelector().Namespaces) == 0 {
+			requireClusterPrivileges = true
 		}
 
-		for _, pod := range pods {
-			affectedNamespaces[pod.Namespace] = struct{}{}
-		}
-
-		// may not exist pod under selector namespace, but still need to validate the privileges
 		for _, namespace := range spec.GetSelector().Namespaces {
 			affectedNamespaces[namespace] = struct{}{}
 		}
 	}
 
-	for namespace := range affectedNamespaces {
-		allow, err := v.auth(username, groups, namespace, chaosKind)
+	if len(affectedNamespaces) > 1 {
+		requireClusterPrivileges = true
+	}
+
+	if requireClusterPrivileges {
+		allow, err := v.auth(username, groups, "", chaosKind)
 		if err != nil {
 			return admission.Errored(http.StatusBadRequest, err)
 		}
 
 		if !allow {
-			return admission.Denied(fmt.Sprintf("%s is forbidden on namespace %s", username, namespace))
+			return admission.Denied(fmt.Sprintf("%s is forbidden on cluster", username))
 		}
+		authLog.Info("user have the privileges on cluster, auth validate passed", "user", username, "groups", groups, "namespace", affectedNamespaces)
+	} else {
+		for namespace := range affectedNamespaces {
+			allow, err := v.auth(username, groups, namespace, chaosKind)
+			if err != nil {
+				return admission.Errored(http.StatusBadRequest, err)
+			}
+
+			if !allow {
+				return admission.Denied(fmt.Sprintf("%s is forbidden on namespace %s", username, namespace))
+			}
+		}
+
+		authLog.Info("user have the privileges on namespace, auth validate passed", "user", username, "groups", groups, "namespace", affectedNamespaces)
 	}
 
-	authLog.Info("user have the privileges on all namespace, auth validate passed", "user", username, "groups", groups, "namespaces", affectedNamespaces)
 	return admission.Allowed("")
 }
 
