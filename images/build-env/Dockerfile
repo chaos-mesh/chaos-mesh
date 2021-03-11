@@ -19,6 +19,7 @@ RUN echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources
 
 RUN apt-get update && apt-get install yarn -y
 
+ARG TARGET_PLATFORM=amd64
 RUN curl https://dl.google.com/go/go1.14.6.linux-$TARGET_PLATFORM.tar.gz | tar -xz -C /usr/local
 ENV PATH "/usr/local/go/bin:${PATH}"
 ENV GO111MODULE=on
