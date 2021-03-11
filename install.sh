@@ -1259,7 +1259,7 @@ spec:
             - name: TARGET_NAMESPACE
               value: "chaos-testing"
             - name: ENABLE_FILTER_NAMESPACE
-              value: false
+              value: "false"
             - name: SECURITY_MODE
               value: "false"
             - name: DNS_SERVER_CREATE
