@@ -92,18 +92,11 @@ func (v *AuthValidator) Handle(ctx context.Context, req admission.Request) admis
 	affectedNamespaces := make(map[string]struct{})
 
 	for _, spec := range specs {
-		// in fact, this will never happened, will add namespace if it is empty, so len(spec.GetSelector().Namespaces) can not be 0,
-		// but still add judgentment here for safe
-		// https://github.com/chaos-mesh/chaos-mesh/blob/478d00d01bb0f9fb08a1085428a7da8c8f9df4e8/api/v1alpha1/common_webhook.go#L22
-		if len(spec.GetSelector().Namespaces) == 0 || len(spec.GetSelector().Pods) == 0 {
+		if spec.GetSelector().ClusterScoped() {
 			requireClusterPrivileges = true
 		}
 
-		for ns := range spec.GetSelector().Pods {
-			affectedNamespaces[ns] = struct{}{}
-		}
-
-		for _, namespace := range spec.GetSelector().Namespaces {
+		for _, namespace := range spec.GetSelector().AffectedNamespaces() {
 			affectedNamespaces[namespace] = struct{}{}
 		}
 	}
