@@ -71,7 +71,8 @@ func (v *AuthValidator) Handle(ctx context.Context, req admission.Request) admis
 	groups := req.UserInfo.Groups
 	chaosKind := req.Kind.Kind
 
-	if chaosKind == v1alpha1.KindAwsChaos || chaosKind == v1alpha1.KindPodNetworkChaos {
+	// these chaos doesn't contain selector field
+	if chaosKind == v1alpha1.KindAwsChaos || chaosKind == v1alpha1.KindPodNetworkChaos || chaosKind == v1alpha1.KindPodIoChaos {
 		return admission.Allowed("")
 	}
 
